@@ -123,6 +123,11 @@ LINKFLAGS=-L$(LIBDIR)
 # link flags if debugging symbols are to be left
 LINKFLAGS_D=-L$(LIBDIR)
 
+# On certain archs, we can run strip and end up with a smaller binary
+# Note that doing a full strip on a binary will disable incremental linking
+# Some archs support 'strip -x' which removed only the local symbols
+STRIP_DEBUG= true
+
 # Default is to build non-shared (or static) libraries
 C_SHAREDFLAGS =
 CC_SHAREDFLAGS =
