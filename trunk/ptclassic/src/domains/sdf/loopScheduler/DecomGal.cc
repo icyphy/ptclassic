@@ -278,7 +278,7 @@ void DecomClusterBag :: setUpGalaxy() {
 			flag = TRUE;
 			repetitions = refIter / fac;
 		}
-		p->numberTokens = inP->numberTokens * fac;
+		p->setNumXfer(inP->numXfer() * fac);
 
 		// detach the "inp" Port.
 		inP->parent()->removePort(*inP);

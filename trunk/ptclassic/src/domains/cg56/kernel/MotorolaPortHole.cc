@@ -51,14 +51,14 @@ int MultiOutMotorolaPort :: isItOutput() const { return TRUE; }
 int MultiMotorolaPort :: someFunc() { return 1; }
 
 PortHole& MultiInMotorolaPort :: newPort () {
-        LOG_NEW; PortHole& p = *new InMotorolaPort;
-        p.numberTokens = numberTokens;
+        LOG_NEW; InMotorolaPort& p = *new InMotorolaPort;
+	p.setSDFParams(numberTokens,numberTokens-1);
         return installPort(p);
 }
 
 PortHole& MultiOutMotorolaPort :: newPort () {
-	LOG_NEW; OutMotorolaPort* p = new OutMotorolaPort;
-        p->numberTokens = numberTokens;
-	forkProcessing(*p);
-        return installPort(*p);
+	LOG_NEW; OutMotorolaPort& p = *new OutMotorolaPort;
+	p.setSDFParams(numberTokens,numberTokens-1);
+	forkProcessing(p);
+        return installPort(p);
 }

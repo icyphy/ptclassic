@@ -58,7 +58,7 @@ is repeated inline so may not be efficient for large N.
 	setup {
 		n = int(N);
 		if (n == 0)
-			n = input.far()->numberTokens;
+			n = input.far()->numXfer();
 		input.setSDFParams(n,n-1);
 		output.setSDFParams(n,n-1);
 	}

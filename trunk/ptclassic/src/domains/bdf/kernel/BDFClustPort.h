@@ -112,6 +112,8 @@ public:
 	// functions to set and get maximum arc counts for buffer allocation
 	int maxArcCount();
 	void setMaxArcCount(int howMany);
+	// don't like this being public, but...
+	void setNumXfer(int v) { numberTokens = v;}
 private:
 	// the real port
 	DFPortHole& pPort;

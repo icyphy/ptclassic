@@ -153,8 +153,8 @@ int ExpandedGraph::ExpandArc(DataFlowStar* src, PortHole* src_port,
 			     DataFlowStar* dest, PortHole* dest_port)
 {
 	// set up local variables for connection information.
-	int p = src_port->numberTokens;
-	int q = dest_port->numberTokens;
+	int p = src_port->numXfer();
+	int q = dest_port->numXfer();
 	int d = dest_port->geo()->numInit();
 
 	int src_invocation = 1;

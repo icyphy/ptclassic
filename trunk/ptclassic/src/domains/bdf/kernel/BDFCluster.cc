@@ -958,8 +958,9 @@ void BDFCluster::loopBy(int fac) {
 	repetitions *= Fraction(1,fac);
 	BDFClustPortIter nextPort(*this);
 	BDFClustPort* p;
-	while ((p = nextPort++) != 0)
-		p->numberTokens *= fac;
+	while ((p = nextPort++) != 0) {
+		p->setNumXfer(p->numXfer() * fac);
+	}
 }
 
 // unloop a cluster.  Return old loop condition signal.  This undoes the effect
@@ -971,7 +972,7 @@ BDFClustPort* BDFCluster::unloop(int& fac,BDFLoopType& lcond) {
 	BDFClustPortIter nextPort(*this);
 	BDFClustPort* p;
 	while ((p = nextPort++) != 0)
-		p->numberTokens /= fac;
+		p->setNumXfer(p->numXfer() / fac);
 	lcond = pType;
 	pType = DO_ITER;
 	return pCond;

@@ -293,14 +293,14 @@ int MultiOutCGCPort :: isItOutput() const { return TRUE; }
 
 PortHole& MultiInCGCPort :: newPort () {
         LOG_NEW; InCGCPort* p = new InCGCPort;
-        p->numberTokens = numberTokens;
+	p->setSDFParams(numberTokens,numberTokens-1);
 	forkProcessing(*p);
         return installPort(*p);
 }
 
 PortHole& MultiOutCGCPort :: newPort () {
 	LOG_NEW; OutCGCPort* p = new OutCGCPort;
-        p->numberTokens = numberTokens;
+	p->setSDFParams(numberTokens,numberTokens-1);
 	forkProcessing(*p);
         return installPort(*p);
 }
