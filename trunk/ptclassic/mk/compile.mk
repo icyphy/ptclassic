@@ -153,7 +153,7 @@ starhtms: $(STARHTMS)
 sources:	$(PTLANG_IN_OBJ) $(EXTRA_SRCS) $(SRCS) $(HDRS) make.template \
 			 $(STARHTMS)
 
-CRUD=*.o *.so *.sl core *~ *.bak ,* LOG* $(KRUFT) 
+CRUD=*.o *.so *.sl *.obj *.dll *.lib core *~ *.bak ,* LOG* $(KRUFT) 
 clean:
 	rm -f $(CRUD)
 
