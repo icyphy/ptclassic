@@ -21,9 +21,10 @@ include $(CONFIG)
 SDFKERNEL = $(ROOT)/src/domains/sdf/kernel
 EGKERNEL = $(ROOT)/src/domains/sdf/expgraph
 LSKERNEL = $(ROOT)/src/domains/sdf/loopScheduler
+CGKERNEL = $(ROOT)/src/domains/cg/kernel
 
 
-INC =-I$(SDFKERNEL) -I$(KERNDIR) -I$(EGKERNEL) -I$(LSKERNEL)
+INC =-I$(SDFKERNEL) -I$(KERNDIR) -I$(EGKERNEL) -I$(LSKERNEL) -I$(CGKERNEL)
 .SUFFIXES: .cc 
 .cc.o:
 	$(GNU) $(GPPFLAGS) $(INC) -c $<
