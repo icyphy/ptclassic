@@ -53,7 +53,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	if (expired())
 	{
 	    // Output the event which started the timer.
-	    alarm.put(arrivalTime) << Set%0;
+	    alarm.put(arrivalTime) = Set%0;
 	}
     }
 }
