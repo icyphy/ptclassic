@@ -57,7 +57,7 @@ optionStruct optionList[] = {
 void bomb(str)
 char * str;
 {
-    fprintf(stderr, "octmvlib: fatal: %s\n", str);
+    fprintf(stderr, "octfix: fatal: %s\n", str);
 }
 
 /* 
@@ -77,7 +77,7 @@ replaceInstance(newInst, oldInst, force)
 
     octGetFacet(oldInst, &facet);
     if ( octCreate(&facet, newInst) != OCT_OK ) {
-	errRaise( "octmvlib", 1, "New path %s is not valid",
+	errRaise( "octfix", 1, "New path %s is not valid",
 		 newInst->contents.instance.master );
     }
 
@@ -253,8 +253,8 @@ char **argv;
     {
 	octStatus   status = octOpenFacet(&facet);
 	if ( status != OCT_OLD_FACET && status != OCT_INCONSISTENT ) {
-	    errRaise( "octmvlib", 1, "Cannot open %s\n%s\n",
-		     ohFormatName( &facet ), octErrorString);
+	    errRaise( "octfix", 1, "Cannot open %s\n%s\n",
+		     ohFormatName( &facet ), octErrorString());
 	}
     }
 
@@ -308,7 +308,7 @@ char **argv;
 	replaceInstance(&newinstance, &instance, force);
 	subst++;
     }
-    printf( "octmvlib: %d substitutions.\n", subst );
+    printf( "octfix: %d substitutions.\n", subst );
     octFreeGenerator( &gen );
     OH_ASSERT(octCloseFacet(&facet));
     
