@@ -666,7 +666,7 @@ body ::tycho::Edit::constructor {args} {
     contextmenu add {Open documentation} -type cascade -state disabled
 
     # Entries for developer information FIXME
-    contextmenu add {Describe this widget...} -command \
+    contextmenu add {Name this widget...} -command \
 	    "::tycho::post $itk_component(text)"
 
     bind $itk_component(text) <Button-3> {%Q contextmenu post %X %Y}
