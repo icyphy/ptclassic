@@ -57,8 +57,20 @@ const int linkingNotSupported =
 #include <dlfcn.h>
 #include <sys/stat.h>
 #define USE_DLOPEN
-// Use dlsym() to get the address of the constructor functions
-#define USE_DLSYM
+
+// Set up dlopen() calls so that symbols are visible everywhere.  If
+// this is not done, then symbols from one dlopen() will not be
+// visible to subsequent dlopens().  Note that using dlopen() means
+// that link and permlink have the same functionality.
+ #if defined(__sgi)
+#define DLOPEN sgidladd
+#define DLOPEN_FLAGS RTLD_NOW
+#endif // __sgi
+#if defined(SOL2)
+#define DLOPEN dlopen
+#define DLOPEN_FLAGS RTLD_NOW|RTLD_GLOBAL
+#endif // __SOL2
+
 #if defined(__GNUG__)
 #define SHARED_OBJECT_COMMAND "g++ -shared -o"
 #else // __GNUG__
