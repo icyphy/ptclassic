@@ -290,7 +290,6 @@ boolean *result;
     ERR_IF2(GetById(&inst, aTermPtr->contents.term.instanceId) != OCT_OK,
 	octErrorString());
     ERR_IF1(!MyOpenMaster(&master, &inst, "interface", "r"));
-    FreeOctMembers(&inst);
     ERR_IF2(GetByTermName(&master, &fTerm, aTermPtr->contents.term.name)
 	!= OCT_OK, octErrorString());
     FreeOctMembers(&master);
@@ -298,12 +297,14 @@ boolean *result;
 	*result = TRUE;
 	FreeOctMembers(&prop);
 	FreeOctMembers(&fTerm);
+	FreeOctMembers(&inst);
 	return (TRUE);
     }
     if (GetByPropName(&fTerm, &prop, "output") != OCT_NOT_FOUND) {
 	*result = FALSE;
 	FreeOctMembers(&prop);
 	FreeOctMembers(&fTerm);
+	FreeOctMembers(&inst);
 	return (TRUE);
     }
     *result = FALSE;
@@ -311,6 +312,7 @@ boolean *result;
 	inst.contents.instance.name, aTermPtr->contents.term.name);
     ErrAdd(buf);
     EssAddObj(aTermPtr);
+    FreeOctMembers(&inst);
     return (FALSE);
 }
 
