@@ -38,7 +38,8 @@ VPATH =		$(ROOT)/kernel/doc
 CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
-EXTRA_SRCS =
+EXTRA_SRCS = \
+	index.html
 
 MISC_FILES =	codeDoc internals usersGuides
 
