@@ -23,7 +23,7 @@
 #                                               PT_COPYRIGHT_VERSION_2
 #                                               COPYRIGHTENDKEY
 # Makefile for Ptolemy SDF Wildforce kernel
-# @(#)make.template     1.1 06/10/99
+# $Id$
 #
 # If this file's name is "make.template" and there is no makefile in
 # this directory, do
