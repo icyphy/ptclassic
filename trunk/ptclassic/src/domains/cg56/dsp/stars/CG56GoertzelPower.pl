@@ -47,7 +47,7 @@ Prentice-Hall: Englewood Cliffs, NJ, 1989.
 	}
 	go {
 		// Run the Goertzel second-order IIR filter
-		CG56NewGoertzelBase::go();
+		CG56GoertzelBase::go();
 
 		// Compute the (real-valued) power of last (complex) sample
 		addCode(result);
@@ -58,7 +58,7 @@ Prentice-Hall: Englewood Cliffs, NJ, 1989.
 		// oscillator cycles because that's the way it was done in
 		// Gabriel: they simply counted the number of instructions.
 
-		return (3 + CG56NewGoertzelBase::myExecTime());
+		return (3 + CG56GoertzelBase::myExecTime());
 	}
 }
 
