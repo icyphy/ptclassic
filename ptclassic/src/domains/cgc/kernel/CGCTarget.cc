@@ -1,5 +1,5 @@
 static const char file_id[] = "CGCTarget.cc";
-/******************************************************************
+/**********************************************************
 Version identification:
 $Id$
 
@@ -36,6 +36,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #pragma implementation
 #endif
 
+#include <unistd.h>		// Pick up R_OK for SunOS4.1 cfront
 #include "CGCTarget.h"
 #include "CGUtilities.h"
 #include "CGCStar.h"
@@ -451,14 +452,42 @@ int CGCTarget :: codeGenInit() {
 	return FALSE;
     }
 
+/* SunOS4.1.3 cfront can't handle initializing arrays that contain
+   typedefs, the error message is:
+   "sorry, not implemented: general initializer in initializer list"
+   So instead of using COMPLEX, INT and ANYTYPE of type DataType, we
+   converted them to "COMPLEX" etc.
+   This is a terrible bogosity, but no worse than the rest of cfront.
+ */  
+
+struct cnv_tb {
+  /*DataType src, dst;*/
+  const char *src, *dst, *star;
+};
+static struct cnv_tb cnv_table[7] = {
+  {  "COMPLEX", "FIX", 		"CxToFix"	},
+  {  "COMPLEX", "ANYTYPE",	"CxToFloat"	},
+  {  "FIX",     "COMPLEX",	"FixToCx"	},
+  {  "FIX",	  "FIX",		"FixToFix"	},
+  {  "FIX",	  "ANYTYPE",	"FixToFloat"	},
+  {  "ANYTYPE", "COMPLEX",	"FloatToCx"	},
+  {  "ANYTYPE", "FIX",		"FloatToFix"	}
+};
+
+
+
 int CGCTarget::modifyGalaxy()
 {
+
     extern int warnIfNotConnected (Galaxy&);
 
     Galaxy& gal = *galaxy();
     GalStarIter starIter(gal);
     Star* star;
     const char* domain = gal.domain();
+
+    // type conversion table;
+    // procession takes place in chronological order
 
     if (warnIfNotConnected(gal)) return FALSE;
 
@@ -486,29 +515,21 @@ int CGCTarget::modifyGalaxy()
 
 		Star* s = 0;
 
-		// type conversion table;
-		// procession takes place in chronological order
-
-		static struct {
-			DataType src, dst;
-			const char* star;
-		} cnv_table[] = {
-			{  COMPLEX, FIX, 	"CxToFix"	},
-			{  COMPLEX, ANYTYPE,	"CxToFloat"	},
-			{  FIX,	    COMPLEX,	"FixToCx"	},
-			{  FIX,	    FIX,	"FixToFix"	},
-			{  FIX,	    ANYTYPE,	"FixToFloat"	},
-			{  ANYTYPE, COMPLEX,	"FloatToCx"	},
-			{  ANYTYPE, FIX,	"FloatToFix"	}
-		};
-
 		for (int i=0; i < sizeof(cnv_table)/sizeof(*cnv_table); i++) {
+/* SunOS4.1.3 cfront can't handle initializing arrays that contain
+   typedefs (see above)
+ */  
+		    if (((!strcmp(port->type(),cnv_table[i].src)) ||
+			 (!strcmp(cnv_table[i].src,ANYTYPE))) &&
+			((!strcmp(port->type(),cnv_table[i].src)) ||
+			 (!strcmp(cnv_table[i].src,ANYTYPE))) ){
 
+#ifdef NEVER
 		    if (((port->type() == cnv_table[i].src) ||
 				  (cnv_table[i].src == ANYTYPE)) &&
 		        ((port->resolvedType() == cnv_table[i].dst) ||
 				  (cnv_table[i].dst == ANYTYPE))) {
-
+#endif
 			    if (!(s = (Star*)spliceStar(input, cnv_table[i].star, TRUE, domain)))
 				return FALSE;
 			  break;
