@@ -107,7 +107,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	    LOG_NEW; nextnui = new MPHIter(truein);
 	  }
 
-	  PortHole *pi, *po, *pei, *peo, *dest, *source;
+	  PortHole *pi, *po, *pei, *peo, *dest;
 	  GenericPort *sourcegp, *destgp;
 
 	  // Now that we know which substitution block will be used, it
@@ -117,9 +117,10 @@ limitation of liability, and disclaimer of warranty provisions.
 	  // out a cleaner way to support graphical recursion.
 	  if ((peo = (*nextexo)++) &&
 	      (dest = peo->far()) &&
-	      (destgp = findTopGenericPort(dest)) &&
-	      (myblock = destgp->parent()) &&
+	      (myblock = dest->parent()) &&
 	      (myblock->isA("HOFDelayedMap"))) {
+	    destgp = findTopGenericPort(dest);
+	    destgp->parent()->initialize();
 	    ((HOFDelayedMap*)myblock)->substitute();
 	  }
 	  myblock = 0;
@@ -162,40 +163,10 @@ limitation of liability, and disclaimer of warranty provisions.
 
 	  // Disconnect the block that we will not use
 	  while ((peo = (*nextnuo)++) != 0) {
-	    dest = peo->far();
-	    if (dest != 0) {
-	      destgp = findTopGenericPort(dest);
-	      dest->disconnect();
-	      if (!myblock) {
-		myblock = destgp->parent();
-		if (!restrictConnectivity(myblock,this)) return;
-	      } else {
-		if (myblock != destgp->parent()) {
-		  Error::abortRun(*this,
-				  "Sorry, only a single replacement block"
-				  " is supported at this time.");
-		  return;
-		}
-	      }
-	    }
+	    breakConnection(peo);
           }
 	  while ((pei = (*nextnui)++) != 0) {
-	    source = pei->far();
-	    if (source != 0) {
-	      sourcegp = findTopGenericPort(source);
-	      source->disconnect();
-	      if (!myblock) {
-		myblock = sourcegp->parent();
-		if (!restrictConnectivity(myblock,this)) return;
-	      } else {
-		if (myblock != sourcegp->parent()) {
-		  Error::abortRun(*this,
-				  "Sorry, only a single replacement block"
-				  " is supported at this time.");
-		  return;
-		}
-	      }
-	    }
+	    breakConnection(pei);
           }
 
 	  LOG_DEL; delete nextexo;
