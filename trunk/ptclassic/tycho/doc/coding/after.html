@@ -108,7 +108,7 @@ EditDAG widgets do this. The way to do this is to modify the
 <code>insertData</code> method of the widget so that the call to the
 redrawing routine is deferred with <code>whenMapped</code>.
 
-<p>For example, HTML.itcl contains the code:
+<p>For example, <CODE>HTML.itcl</CODE> contains the code:
 
 <pre>
     whenMapped text "::tycho::safeUpdate $this"
