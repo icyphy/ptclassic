@@ -29,16 +29,34 @@ Version identification:
 $Id$
 */
 
+#ifdef __cplusplus
+
+/* Define lsList and RPCSpot data types, respectively */
+#include "list.h"
+#include "rpc.h"
+
 extern int RpcFindName(RPCSpot *spot, lsList cmdList, long userOptionWord);
+extern int EditFormalParams(octObject *galFacetPtr);
+extern int EditParams(RPCSpot *spot, lsList cmdList, long userOptionWord);
+extern int EditPragmas(RPCSpot *spot, lsList cmdList, long userOptionWord);
+extern boolean OpenPaletteInit();
+extern int RpcOpenPalette(RPCSpot *spot, lsList cmdList, long userOptionWord);
+extern int RpcEditComment(RPCSpot *spot, lsList cmdList, long userOptionWord);
+extern int RpcEditDomain(RPCSpot *spot, lsList cmdList, long userOptionWord);
+extern int RpcEditSeed(RPCSpot *spot, lsList cmdList, long userOptionWord);
+extern int RpcEditTarget(RPCSpot *spot, lsList cmdList, long userOptionWord);
+
+#else
+
+extern int RpcFindName();
+extern int EditFormalParams();
 extern int EditParams();
 extern int EditPragmas();
-extern int EditFormalParams();
-extern int RpcOpenPalette();
 extern boolean OpenPaletteInit();
-extern int RpcEditHardware();
-extern int RpcEditDomain();
-extern int RpcEditTarget();
+extern int RpcOpenPalette();
 extern int RpcEditComment();
+extern int RpcEditDomain();
 extern int RpcEditSeed();
-extern int PlotSignal();
-extern int MagDFT();
+extern int RpcEditTarget();
+
+#endif
