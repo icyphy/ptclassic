@@ -90,6 +90,9 @@ class ::tycho::EditSTD {
     # Set the machine type.
     method setMachineType {type}
 
+    # Set the in, out and internal port names.
+    method setPortNames {in out internal}
+
     # Specify whether or not modifications are allowed in the displayed text.
     method setReadOnly {bool}
 
@@ -725,6 +728,15 @@ body ::tycho::EditSTD::setMachineType {type} {
     set machineType $type
 }
 
+#######################################################################
+#### setPortNames
+#
+body ::tycho::EditSTD::setPortNames {in out internal} {
+    set portNames(in)       $in
+    set portNames(out)      $out
+    set portNames(internal) $internal
+}
+
 #####################################################################
 #### setReadOnly
 # Specify whether or not modifications are allowed in the displayed text.
@@ -750,7 +762,7 @@ body ::tycho::EditSTD::setReadOnly {bool} {
 
 #######################################################################
 #### insertData
-# Append the specified data to the existing display.
+# Append the specified data to the existing display$this setMachineType.
 #
 body ::tycho::EditSTD::insertData {data} {
     if [getReadOnly] {bell; return}
@@ -769,10 +781,6 @@ body ::tycho::EditSTD::saveText {} {
     set name [file tail $file]
     set text "### State transition diagram : $name\n"
 
-    # Machine type
-    append text "### Machine type: $machineType\n"
-    append text "set machineType $machineType\n"
-
     # First, save the canvas dimensions
     append text "\n### Canvas widget dimensions\n"
     set height [winfo height $slate]
@@ -780,23 +788,23 @@ body ::tycho::EditSTD::saveText {} {
         # Canvas has not been mapped yet
         set height [cget -canvasheight]
     }
-    append text "\$slate configure -height $height\n"
+    append text "\$this configure -canvasheight $height\n"
     set width [winfo width $slate]
     if {$width == 1} {
         # Canvas has not been mapped yet
         set width [cget -canvaswidth]
     }
-    append text "\$slate configure -width $width\n"
+    append text "\$this configure -canvaswidth $width\n"
+
+    # Machine type
+    append text "### Machine type: $machineType\n"
+    append text "\$this setMachineType $machineType\n"
 
     # Set member variables
     append text "\n### Member variables\n"
     # I/O port names
-    append text "# InPort names\n"
-    append text "set portNames(in) \"$portNames(in)\"\n"
-    append text "# OutPort names\n"
-    append text "set portNames(out) \"$portNames(out)\"\n"
-    append text "# Internal event names\n"
-    append text "set portNames(internal) \"$portNames(internal)\"\n"
+    append text "\$this setPortNames \
+         [list $portNames(in) $portNames(out) $portNames(internal)]\n"
 
     # Step through all the nodes in the canvas.
     append text "\n### Creating the nodes\n"
