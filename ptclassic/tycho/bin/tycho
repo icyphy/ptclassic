@@ -324,7 +324,9 @@ endif # ?selectPtolemy
 # Java
 if (! $?selectPtolemy && $?selectJava && ! $?selectTty) then
 	# We selected java
-
+	
+	# The location where we look for the JDK
+	setenv JAVADEFAULT /opt/jdk1.1.4
 	if ($PTARCH !~ sol?* && $PTARCH !~ hppa*) then
 		echo "Sorry, tycho -java is only support under PTARCH==sol2* and PTARCH==hppa*"
 		exit 42
@@ -351,10 +353,10 @@ if (! $?selectPtolemy && $?selectJava && ! $?selectTty) then
 			endif
 			echo "${0}: CLASSPATH is not set,"
 			echo "  setting it to $CLASSPATH"
-		else if ( -f /opt/jdk1.1.1/lib/classes.zip) then
-			setenv CLASSPATH /opt/jdk1.1.1/lib/classes.zip
+		else if ( -f $JAVADEFAULT/lib/classes.zip) then
+			setenv CLASSPATH $JAVADEFAULT/lib/classes.zip
 			if ( ! $?JAVA_HOME ) then
-				setenv JAVA_HOME /opt/jdk1.1.1
+				setenv JAVA_HOME $JAVADEFAULT
 			endif
 			echo "${0}: CLASSPATH is not set,"
 			echo "  setting it to $CLASSPATH"
@@ -402,7 +404,7 @@ if (! $?selectPtolemy && $?selectJava && ! $?selectTty) then
 	else
 		set javabinary = java
 	endif
-	set prog = ($javabinary -Denv.PTOLEMY=$PTOLEMY -Denv.TYCHO=$TYCHO -classpath ${CLASSPATH}:${TYCHO}/java:${TYCHO}/java/tycho Tycho)
+	set prog = ($javabinary -Denv.PTOLEMY=$PTOLEMY -Denv.TYCHO=$TYCHO -classpath ${CLASSPATH}:${TYCHO}/java:${TYCHO}/java/tycho tycho.Tycho)
 
 	echo "Starting: $prog"
 endif
