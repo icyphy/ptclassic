@@ -60,6 +60,13 @@ public:
 	// We re-do porthole initialization if bufferSize changes
 	PortHole& setSDFParams(unsigned numTokens = 1, unsigned delay=0);
 
+	// Modify simulated counts on geodesics, for scheduling
+	void decCount(int n);
+	void incCount(int n);
+
+	// class identification
+	int isA(const char*) const;
+
 	// Services of PortHole that are often used:
 	// setPort(dataType d);
 	// Particle& operator % (int);
