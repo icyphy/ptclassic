@@ -39,6 +39,7 @@ PL_SRCS= \
  SDFFFTCx.pl \
  SDFFIR.pl \
  SDFFIRCx.pl \
+ SDFFIRFix.pl \
  SDFHilbert.pl \
  SDFIIR.pl \
  SDFLMS.pl \
