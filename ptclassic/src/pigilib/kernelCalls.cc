@@ -390,16 +390,15 @@ KcSetKBDomain(const char* domain) {
 		Error::abortRun("Invalid domain: ", domain);
 		return FALSE;
 	}
-
-	// Note: Changing the galaxy domain fails if the galaxy is
-	// non-empty.
+	// FIXME: this isn't quite right, but can go away when we
+	// complete the job of eliminating current domain.  We avoid
+	// changing the galaxy domain if it is non-empty.
 
 	// equality can be used here because of hashstring call.
-	if (ptcl->currentGalaxy &&
+	if (ptcl->currentGalaxy && ptcl->currentGalaxy->numberBlocks() == 0 &&
 	    ptcl->currentGalaxy->domain() != domain &&
-	    !ptcl->currentGalaxy->setDomain(domain)) {
-	    return FALSE;
-	}
+	    !ptcl->currentGalaxy->setDomain(domain))
+		return FALSE;
 	ptcl->curDomain = domain;
 	return TRUE;
 }
@@ -423,7 +422,7 @@ KcDefgalaxy(const char *galname, const char *domain, const char* innerTarget) {
 	LOG << "\tdomain " << domain << "\n";
 	if (!KcSetKBDomain(domain)) return FALSE;
 	if (innerTarget && strcmp(innerTarget, "<parent>") != 0) {
-		LOG << "target " << innerTarget << "\n";
+		LOG << "\ttarget " << innerTarget << "\n";
 		ptcl->currentTarget = KnownTarget::clone(innerTarget);
 	}
 	else ptcl->currentTarget = 0;
@@ -939,10 +938,10 @@ KcNodeConnect (const char* inst, const char* term, const char* node) {
 }
 
 ///////////////////////////////////////////////////////////////////////
-// Return a list of targets supported by the current domain.
+// Return a list of targets supported by the given domain.
 extern "C" int
-KcDomainTargets(const char** names, int nMax) {
-	return KnownTarget::getList(ptcl->curDomain, names, nMax);
+KcDomainTargets(const char* domain, const char** names, int nMax) {
+	return KnownTarget::getList(domain, names, nMax);
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -956,10 +955,10 @@ KcSetTarget(const char* targetName) {
 }
 
 ///////////////////////////////////////////////////////////////////////
-// Return the default target name for the current domain.
+// Return the default target name for the given domain.
 extern "C" const char*
-KcDefTarget() {
-	return KnownTarget::defaultName(ptcl->curDomain);
+KcDefTarget(const char* domain) {
+	return KnownTarget::defaultName(domain);
 }
 
 ///////////////////////////////////////////////////////////////////////
