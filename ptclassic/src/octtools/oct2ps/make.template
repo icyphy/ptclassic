@@ -68,15 +68,15 @@ oct2ps:	$(OBJS)
 
 DESTBIN = $(BINDIR)/oct2ps
 
-$(DESTBIN):	oct2ps
+$(DESTBIN):	$(ROOT)/octtools/bin.$(ARCH)/oct2ps
 		@echo Installing oct2ps
 		rm -f $(DESTBIN)
 		ln oct2ps $(DESTBIN)
 
-install: makefile $(DESTBIN) $(OCTTOOLS)/lib/oct2ps.pro
+install: makefile $(DESTBIN) $(ROOT)/lib/oct2ps.pro
 	
 	
-$(OCTTOOLS)/lib/oct2ps.pro: oct2ps.pro
+$(ROOT)/lib/oct2ps.pro: $(VPATH)/oct2ps.pro
 	rm -f $@
 	cp $? $@
 
