@@ -28,7 +28,7 @@ if ( ! $?PTARCH ) then
 endif
 
 # These variables are needed by the compiler
-setenv GCC_EXEC_PREFIX $PTOLEMY/gnu/$PTARCH/lib/gcc-lib/$PTARCH/egcs-2.91.57
+setenv GCC_EXEC_PREFIX $PTOLEMY/gnu/$PTARCH/lib/gcc-lib/$PTARCH/2.95.1
 
 # C_INCLUDE_PATH must be set or CGC TclTk demos will fail to compile
 setenv C_INCLUDE_PATH $GCC_EXEC_PREFIX/include
