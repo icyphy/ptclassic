@@ -78,20 +78,25 @@ configbody ::tycho::PreferenceEditor::preferences {
 		"number" -
 		"string" {
 		    line $preference $description \
-			    [::preference get $group $preference]
+			    [::preference current $group $preference]
 		}
 		"choice" {
 		    radio $preference $description \
 			    [::preference cget $group $preference -values] \
-			    [::preference get $group $preference]
+			    [::preference current $group $preference]
 		}
 		"boolean" {
 		    check $preference $description \
-			    [::preference get $group $preference]
+			    [::preference current $group $preference]
+		}
+		"custom" {
+		    mediated $preference $description \
+			    [::preference current $group $preference] \
+			    [::preference cget $group $preference -edit]
 		}
 		default {
 		    line $preference $description \
-			    [::preference get $group $preference]
+			    [::preference current $group $preference]
 		}
 	    }
 	}
@@ -125,7 +130,7 @@ body ::tycho::PreferenceEditor::update {args} {
 	# See if any entries have changed, and if so, update the preference
 	set group $itk_option(-preferences)
 	foreach {tag val} [$this get] {
-	    if { $val != [::preference get $group $tag] } {
+	    if { $val != [::preference current $group $tag] } {
 		::preference assign $group $tag $val
 	    }
 	}
