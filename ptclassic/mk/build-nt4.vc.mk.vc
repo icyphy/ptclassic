@@ -50,6 +50,8 @@ MAKEVCGEN=$(PTOLEMY)\bin\makevcgen
 
 KERNEL_LIB=$(PTOLEMY)\src\kernel\libptolemy.lib
 $(LIBDIR)\libptolemy.lib: $(KERNEL_LIB)
+# Usually libptolemy is static, even on platforms that are dynamically
+# linked, so we pass in PTLIB=
 $(KERNEL_LIB): $(PTOLEMY)\src\kernel\makefile.vc
 	cd $(PTOLEMY)\src\kernel
 	nmake -f makefile.vc install PTLIB=libptolemy.lib
@@ -64,10 +66,21 @@ $(PTMATHEMATICA_LIB): $(KERNEL_LIB)
 	cd $(PTOLEMY)\src\utils\libptmathematica
 	nmake -f makefile.vc install
 
+PTMATLAB_LIB=$(PTOLEMY)\src\utils\libptmatlab\libptmatlab.lib
+$(PTMATLAB_LIB): $(KERNEL_LIB)
+		 cd $(PTOLEMY)\src\utils\libptmatlab
+		 nmake -f makefile.vc install
+
 EXTTOOLS_LIB=$(PTOLEMY)\src\utils\libexttools\libexttools.lib
-$(EXTTOOLS_LIB): $(KERNEL_LIB) $(PTMATHEMATICA_LIB)
+$(EXTTOOLS_LIB): $(KERNEL_LIB) $(PTMATHEMATICA_LIB) $(PTMATLAB_LIB)
 	cd $(PTOLEMY)\src\utils\libexttools
 	nmake -f makefile.vc install
+
+PTDSP_LIB=$(PTOLEMY)\src\utils\libptdsp.lib
+PTDSP_DEP=
+$(PTDSP_LIB): $(PTDSP_DEP)
+	      cd $(PTOLEMY)\src\utils\libptdsp
+	      nmake -f makefile.vc install PTLIB=libptdsp.lib
 
 DE_LIB=$(PTOLEMY)\src\domains\de\kernel\libde.lib
 $(DE_LIB): $(KERNEL_LIB) $(PTCL_DESCRIPTION_LIB)
@@ -89,19 +102,19 @@ SDF_STAR_LIB=$(PTOLEMY)\src\domains\sdf\stars\libsdfstars.lib
 SDF_STAR_DEP=$(SDF_DEP) $(SDF_LIB) $(SDF_LS_LIB)
 $(SDF_STAR_LIB): $(SDF_STAR_DEP)
 	cd $(PTOLEMY)\src\domains\sdf\stars
-	nmake -f makefile.vc
+	nmake -f makefile.vc install
 
 SDF_DSP_STAR_LIB=$(PTOLEMY)\src\domains\sdf\stars\libsdfdspstars.lib
 SDF_DSP_STAR_DEP=$(SDF_DEP) $(SDF_LIB) $(SDF_LS_LIB)
 $(SDF_DSP_STAR_LIB): $(SDF_DSP_STAR_DEP)
 	cd $(PTOLEMY)\src\domains\sdf\dsp\stars
-	nmake -f makefile.vc
+	nmake -f makefile.vc install
 
 SDF_LS_LIB=$(PTOLEMY)\src\domains\sdf\loopScheduler\libLS.lib
 SDF_LS_DEP=$(SDF_DEP) $(SDF_LIB)
 $(SDF_LS_LIB): $(SDF_LS_DEP)
 	cd $(PTOLEMY)\src\domains\sdf\loopScheduler
-	nmake -f makefile.vc
+	nmake -f makefile.vc install
 
 ptcl:$(PTCL_LIB)
 PTCL_LIB=$(PTOLEMY)\src\ptcl\libptcl.lib
@@ -112,7 +125,7 @@ $(PTCL_LIB): $(LIBDIR)\libptolemy.lib $(KERNEL_LIB) $(EXTTOOLS_LIB) $(DE_STAR_LI
 
 
 ptcl.p:$(PTCL_PTINY)
-$(PTCL_PTINY):  $(LIBDIR)\libptolemy.lib $(KERNEL_LIB) $(EXTTOOLS_LIB) $(DE_STAR_LIB) $(SDF_STAR_LIB) $(SDF_DSP_STAR_LIB) $(SDF_LS_LIB)
+$(PTCL_PTINY):  $(LIBDIR)\libptolemy.lib $(KERNEL_LIB) $(EXTTOOLS_LIB) $(DE_STAR_LIB) $(SDF_STAR_LIB) $(SDF_DSP_STAR_LIB) $(SDF_LS_LIB) $(PTDSP_LIB)
 	cd $(PTOLEMY)\src\ptcl
 	touch override.mk.vc
 	nmake -f makefile.vc ptcl.ptiny
