@@ -878,7 +878,8 @@ lsList cmdList;
 	label.type = OCT_LABEL;
 	label.objectId = oct_null_id;
 	label.contents.label.label = "";
-	label.contents.label.textHeight = 100;
+				/*  Was 100, now 40 for ptolemy 1/17/95 */
+	label.contents.label.textHeight = 40;
 	label.contents.label.vertJust = OCT_JUST_CENTER;
 	label.contents.label.horizJust = OCT_JUST_CENTER;
 	label.contents.label.lineJust = OCT_JUST_CENTER;
