@@ -7,12 +7,16 @@ on any number of inputs and outputs.  The output value is always
 zero.  IT IS INTENDED FOR TESTING SCHEDULERS ONLY.
 	}
 	version { $Id$ }
-	author { Edward A. Lee, Dick Stevens, and Christopher Scannell }
+	author { Edward A. Lee, Richard Stevens, and Christopher Scannell }
 	copyright {
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
+
+Richard Stevens and Christopher Scannell are employees of the
+U.S. Government whose contributions to this computer program fall
+within the scope of 17 U.S.C. A7 105 
 	}
 	location { SDF main library }
 	inmulti {
