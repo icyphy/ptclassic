@@ -149,13 +149,13 @@ public:
 			     const char* initDelayValues = 0);
 
 	// return my type
-	DataType type () const { return myType;}
+	inline DataType type () const { return myType;}
 
 	// class identification
 	int isA(const char*) const;
 
-	GenericPort* alias() const { return aliasedTo;}
-	GenericPort* aliasFrom() const { return aliasedFrom;}
+	inline GenericPort* alias() const { return aliasedTo;}
+	inline GenericPort* aliasFrom() const { return aliasedFrom;}
 
 	// Constructor
 	GenericPort ();
@@ -164,14 +164,14 @@ public:
 	~GenericPort();
 	
 	// attributes
-	bitWord attributes() const { return attributeBits;}
+	inline bitWord attributes() const { return attributeBits;}
 
-	bitWord setAttributes(const Attribute& attr) {
+	inline bitWord setAttributes(const Attribute& attr) {
 		return attributeBits = attr.eval(attributeBits);
 	}
 
 	// return typePortPtr
-	GenericPort* typePort() const { return typePortPtr;}
+	inline GenericPort* typePort() const { return typePortPtr;}
 
 	// set up alias pointers in pairs.  Public so that InterpGalaxy
 	// can set aliases.  Use with care, since derived types may
@@ -275,13 +275,13 @@ public:
                           DataType type = FLOAT);       // defaults to FLOAT
  
         // Return the number of physical port currently allocated
-        int numberPorts() const {return ports.size();}
+        inline int numberPorts() const {return ports.size();}
 
         // Add a new physical port to the MultiPortHole list
         /* virtual */ PortHole& newPort();
 
 	// set alias for MultiPortHole
-	void setAlias (MultiPortHole &blockPort) {
+	inline void setAlias (MultiPortHole &blockPort) {
 		GenericPort::setAlias (blockPort);
 	}
 
@@ -305,7 +305,7 @@ protected:
 	const char* newName();
 
 	// add a newly created port to the multiporthole
-	PortHole& installPort(PortHole& p);
+	virtual PortHole& installPort(PortHole& p);
 
 	// set myMultiPortHole to this
 	void letMeKnownToChild(PortHole& p);
@@ -373,13 +373,13 @@ public:
 	virtual void disconnect(int delGeo = 1);
 
 	// Return the porthole we are connected to (see below)
-	PortHole* far() const { return farSidePort;}
+	inline PortHole* far() const { return farSidePort;}
 
         // Print a description of the PortHole
 	/* virtual */ StringList print (int verbose = 0) const;
 
 	// set the alias
-	void setAlias (PortHole& blockPort) {
+	inline void setAlias (PortHole& blockPort) {
 		GenericPort::setAlias (blockPort);
 	}
 
@@ -390,7 +390,7 @@ public:
 	// since we implement clusters that way (disconnected ports
 	// represent the cluster boundary)
 
-	int atBoundary() const {
+	inline int atBoundary() const {
 		return (farSidePort ? (isItInput() == farSidePort->isItInput()) : TRUE);
 	}
 
@@ -413,10 +413,10 @@ public:
 	// portholes have agreed to use.  This will never by ANYTYPE.
 	// The result will be 0 (a null pointer) if type resolution has
 	// not yet been performed.
-	DataType resolvedType () const { return myResolvedType;};
+	inline DataType resolvedType () const { return myResolvedType;};
 
 	// return the number of tokens transferred per execution
-	int numXfer() const { return numberTokens;}
+	inline int numXfer() const { return numberTokens;}
 
 	// return the number of particles on my Geodesic
 	int numTokens() const;
@@ -429,18 +429,18 @@ public:
         const char* initDelayValues() const;
 
 	// return pointer to my Geodesic
-	Geodesic* geo() { return myGeodesic;}
+	inline Geodesic* geo() { return myGeodesic;}
 
 	// function to resolve types.
 	virtual DataType setResolvedType(DataType useType = 0);
 
 	// index value
-	int index() const { return indexValue;}
+	inline int index() const { return indexValue;}
 
 	// return the MultiPortHole that spawned this PortHole, or NULL
 	// if there is no such MultiPortHole.
 
-	MultiPortHole* getMyMultiPortHole() const { return myMultiPortHole; }
+	inline MultiPortHole* getMyMultiPortHole() const { return myMultiPortHole; }
 
 	// adjust the delay on the connection, with initial values
 	virtual void setDelay (int numberDelays, 
@@ -559,8 +559,8 @@ public:
 class PortListIter : private NamedObjListIter {
 public:
 	PortListIter(PortList& plist) : NamedObjListIter (plist) {}
-	PortHole* next() { return (PortHole*)NamedObjListIter::next();}
-	PortHole* operator++(POSTFIX_OP) { return next();}
+	inline PortHole* next() { return (PortHole*)NamedObjListIter::next();}
+	inline PortHole* operator++(POSTFIX_OP) { return next();}
 	NamedObjListIter::reset;
 };
 
@@ -600,12 +600,12 @@ class MPHList : private NamedObjList
 	friend class CMPHListIter;
 public:
         // Add MultiPortHole to list
-        void put(MultiPortHole& p) {NamedObjList::put(p);}
+        inline void put(MultiPortHole& p) {NamedObjList::put(p);}
 	// Find a multiport with the given name and return pointer
-	MultiPortHole* multiPortWithName(const char* name) {
+	inline MultiPortHole* multiPortWithName(const char* name) {
 		return (MultiPortHole*)objWithName(name);
 	}
-	const MultiPortHole* multiPortWithName(const char* name) const {
+	inline const MultiPortHole* multiPortWithName(const char* name) const {
 		return (const MultiPortHole*)objWithName(name);
 	}
 
@@ -632,8 +632,8 @@ public:
 class MPHListIter : private NamedObjListIter {
 public:
 	MPHListIter(MPHList& plist) : NamedObjListIter (plist) {}
-	MultiPortHole* next() { return (MultiPortHole*)NamedObjListIter::next();}
-	MultiPortHole* operator++(POSTFIX_OP) { return next();}
+	inline MultiPortHole* next() { return (MultiPortHole*)NamedObjListIter::next();}
+	inline MultiPortHole* operator++(POSTFIX_OP) { return next();}
 	NamedObjListIter::reset;
 };
 
