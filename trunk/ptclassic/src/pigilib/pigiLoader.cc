@@ -570,10 +570,13 @@ KcLoad (const char* iconNameStr, int permB, const char* linkArgs) {
 	}
 	if (KcIsCompiledInStar(base)) {
 		StringList msg = "star '";
-		msg += base;
-		msg += "' is a compiled-in star of domain ";
-		msg += domain;
-		msg += ".\nCannot dynamically load a compiled-in star class.";
+		msg << base
+		    << "' is a compiled-in star of domain "
+		    << domain
+		    << ".\nCannot dynamically load a compiled-in star class."
+		    << "\nA possible solution is to change the domain of the"
+		    << "\nof the universe to "
+		    << domain;
 		ErrAdd(msg);
 		// restore the original current domain
 		KcSetKBDomain(curdom);
