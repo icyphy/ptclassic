@@ -16,6 +16,25 @@
 #include "copyright.h"				COPYRIGHTENDKEY
 **/
 
+#include "compat.h"
+
+#if defined (PTHPPA)
+#include <values.h>		/* Pickup M_PI for topFmt.c and xfaDraw.c */
+#endif
+
+#if defined(PTHPPA_CFRONT)
+/* sys/types.h pwd.h needs this */
+#define _INCLUDE_POSIX_SOURCE
+#endif
+
+#if defined(PTHPPA_CFRONT)
+/* memCore.c needs sbrk() */
+#include <sys/unistd.h>
+extern void *sbrk(int);
+#else
+extern caddr_t sbrk();
+#endif
+
 #if defined(mips)
 #define __mips__ 1
 #endif
@@ -36,7 +55,9 @@
 /*
  * These appear to be missing on most systems.
  */
+#if !defined(PTHPPA)
 extern int strncasecmp TOP_ARGS((const char *s1, const char *s2, size_t n));
+#endif
 /* Now defined in compat.h */
 /*extern int strcasecmp TOP_ARGS((const char *s1, const char *s2));*/
 
