@@ -75,19 +75,20 @@ DataFlowStar* UniProcessor :: cloneStar(ParNode* n) {
 	}
 		
 	if (!target()->support(org)) {
+		// FIXME: need documentation.  Are we remapping the
+		// star into a different domain here?
+		// FIXME: assumes target()->starType() ends in "Star"
+		// and is preceded by the domain.
+		// This needs to be fixed!
 		const char* foo = target()->starType();
+		// FIXME: assumes 14-letter max starType name!!!
 		char temp[15];
 		strcpy(temp, foo);
 		int len = strlen(foo);
 		temp[len-4] = 0;
-		if (!KnownBlock :: setDomain(temp)) {
-			Error :: abortRun(temp, ": bad domain name");
-			newS = (DataFlowStar*) org->clone();
-		} else {
-			const char* sname = org->className() + 
-				strlen(org->domain());
-			newS = (DataFlowStar*) KnownBlock :: clone(sname);
-		}
+		const char* sname = org->className() + 
+			strlen(org->domain());
+		newS = (DataFlowStar*) KnownBlock :: clone(sname,temp);
 	} else {
 		newS = (DataFlowStar*) org->clone();
 	}
