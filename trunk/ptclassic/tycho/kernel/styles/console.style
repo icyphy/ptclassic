@@ -1,3 +1,4 @@
+# -*- mode: tcl -*-
 #
 # $Id$
 #
@@ -20,6 +21,18 @@ style default \
 	    -label "Color of prompt text"
 
     parameter width 60 \
+	    -type integer \
+	    -label "Default console width"
+
+    parameter height 8 \
+	    -type integer \
+	    -label "Default console height"
+}
+
+style alternate \
+	-label "Alternate"  {
+    
+    parameter width 72 \
 	    -type integer \
 	    -label "Default console width"
 
