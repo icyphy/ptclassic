@@ -91,6 +91,9 @@ class ::tycho::StatusBar {
     ###################################################################
     ####                       private variables                   ####
 
+    # The delay between updates (in psuedo-milliseconds)
+    private variable updateInterval 100
+
     # The current file status setting
     private variable filestatus "readwrite"
 
@@ -301,19 +304,19 @@ body ::tycho::StatusBar::progress {{label {}} {command {}}} {
 		# Redraw the progress bar
 		drawProgress $progress
 		if { $progress < 1.0 } {
-		    after 200 "$this progress"
+		    after $updateInterval "$this progress"
 		}
 	    } else {
 		# FIXME: For now, keep goign even if failed,
 		# because of a bug in RresourceHTTP::progress{}
-		after 200 "$this progress"
+		after $updateInterval "$this progress"
 	    }
 	}
     } else {
 	$itk_component(progressLabel) configure -text $label:
 	set progressCommand $command
 	drawProgress 0
-	after 200 "$this progress"
+	after $updateInterval "$this progress"
     }
 }
 
