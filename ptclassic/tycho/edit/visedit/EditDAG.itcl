@@ -244,6 +244,9 @@ class ::tycho::EditDAG {
     ###################################################################
     ####                   protected variables                     ####
 
+    # The color of the background box
+    protected variable boxcolor
+
     # The default font name
     protected variable defaultfont
 
@@ -374,6 +377,7 @@ body ::tycho::EditDAG::constructor {args} {
     # The following is done once in the constructor because it's fairly
     # expensive.
     set defaultfont [eval ::tycho::font [preference get defaultFont]]
+    set boxcolor   [eval ::tycho::color [preference get nodeBoxColor]]
     set linkcolor   [eval ::tycho::color [preference get linkColor]]
     set linecolor   [eval ::tycho::color [preference get lineColor]]
 
@@ -976,6 +980,10 @@ body ::tycho::EditDAG::drawNode {node xcoord ycoord} {
             [list deleteSubgraph $node] \
             [list deleteSubgraph $node] \
             [list editNode $id]
+
+    $canvas lower [ \
+            eval $canvas create rectangle \
+            [$canvas bbox $id] -fill $boxcolor {-outline {}}] $id
 
     set nametable($id) $node
     if {$cnt(link) != {}} {
