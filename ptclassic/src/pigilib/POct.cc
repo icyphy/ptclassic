@@ -99,7 +99,7 @@ extern void KcSetEventLoop(int on);
 // is at least 15 chars long.
 extern "C" void ptkOctObj2Handle( octObject *objPtr, char *stringValue )
 {
-        sprintf( stringValue, "OctObj%-.8x", (long)objPtr->objectId);
+        sprintf( stringValue, "OctObj%-.8lx", (long)objPtr->objectId);
 }
 
 // Converts a string "handle" into an oct Facet Pointer
@@ -108,7 +108,7 @@ extern "C" void ptkOctObj2Handle( octObject *objPtr, char *stringValue )
 extern "C" int ptkHandle2OctObj( char *stringValue, octObject *objPtr )
 {
         objPtr->objectId = OCT_NULL_ID;
-        sscanf( stringValue, "OctObj%x", &objPtr->objectId);
+        sscanf( stringValue, "OctObj%lx", &objPtr->objectId);
         if (objPtr->objectId == OCT_NULL_ID) {
            return 0;
         } else {
@@ -433,7 +433,7 @@ int POct::ptkGetParams (int aC,char** aV) {
               case OCT_INTEGER:
                 sprintf( tempStr, "INTEGER" );
                 Tcl_AppendElement(interp, tempStr);
-                sprintf(size, "%d", property.contents.prop.value.integer);
+                sprintf(size, "%ld", property.contents.prop.value.integer);
                 Tcl_AppendElement(interp, size);
                 break;
               case OCT_STRING:
