@@ -38,13 +38,15 @@ VPATH = $(ROOT)/src/domains/sr/kernel
 # get configuration info
 CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
-INCL = -I$(KERNDIR)
+## Removed for Tcl
+#INCL = -I$(KERNDIR)
 
 # Library name
 LIB=libsr.$(LIBSUFFIX)
 
 # Header files
-HDRS= SRPortHole.h SRScheduler.h SRStar.h SRNonStrictStar.h SRWormhole.h
+HDRS= SRPortHole.h SRScheduler.h SRStar.h SRNonStrictStar.h SRWormhole.h \
+	SRItclStar.h
 
 # Library sources
 SRCS= $(HDRS:.h=.cc) SRDomain.cc
@@ -56,6 +58,16 @@ all:	makefile $(LIB)
 
 # "make install" puts things in the official place
 install:	makefile $(LIBDIR)/$(LIB)
+
+## Added for Tcl
+# include the X11, tcl headers for C++ as well as C
+INCL =          $(PTCOMPAT_INCSPEC) -I$(KERNDIR) -I$(ROOT)/src/pigilib \
+                        -I$(TCL_INCDIR) -I$(TK_INCDIR) $(X11_INCSPEC)
+
+## Added for Tcl
+# include the headers from the kernel
+C_INCL =        $(PTCOMPAT_INCSPEC) -I$(KERNDIR) -I$(ROOT)/src/pigilib \
+                        -I$(TCL_INCDIR) -I$(TK_INCDIR) $(X11_INCSPEC)
 
 # include common definitions, rules
 include $(ROOT)/mk/common.mk
