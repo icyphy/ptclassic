@@ -59,6 +59,11 @@ executed.
 	    } else {
 		fm = new FileMessage();
 	    }
+	    Envelope pkt(*fm);
+		
+	    // Now send the filename to the output
+	    PortHole* p = nextp++;
+	    (*p)%0 << pkt;
 	}
     }
 }
