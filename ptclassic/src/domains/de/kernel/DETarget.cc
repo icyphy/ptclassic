@@ -52,6 +52,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "DEScheduler.h"
 #include "CQScheduler.h"
 #include "MutableCQScheduler.h"
+#include "DERCScheduler.h"
 #include "GalIter.h"
 
 // Defined in DEDomain.cc
@@ -71,12 +72,19 @@ Target("default-DE", "DEStar", "default DE target", DEdomainName) {
         addState(mutableQ.setState("mutable calendar queue scheduler?", this,
             "NO", "Setting the Mutable CalendarQueue will override the
 	    regular CalendarQueue setting."));
+
+        addState(dercQ.setState("Resource Contention scheduler?", this,
+            "NO", "Setting the Resource Contention scheduler will override the
+	    regular CalendarQueue settings."));
 }
 
 void DETarget :: setup() {
 	DEBaseSched* dSched;
 
-        if (int(mutableQ)) {
+        if(int(dercQ)) {
+                LOG_NEW; dSched = new DERCScheduler;
+        }
+        else if (int(mutableQ)) {
                 LOG_NEW; dSched = new MutableCQScheduler;
         }
         else if (int(calQ)) {
@@ -118,3 +126,12 @@ Block* DETarget :: makeNew() const  {
 }
 
 DETarget :: ~DETarget() { delSched();}
+
+
+
+
+
+
+
+
+
