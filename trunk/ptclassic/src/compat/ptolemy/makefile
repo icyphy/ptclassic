@@ -31,7 +31,7 @@ ROOT = ../../..
 VPATH = $(ROOT)/src/compat/cfront
 
 # get configuration info
-CONFIG=$(ROOT)/mk/config-$(ARCH).mk
+CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
 HDRS = 	compat.h ptarch.h
