@@ -178,8 +178,11 @@ octObject *facetPtr;
 	prop.type = OCT_PROP;
 	prop.contents.prop.name = "delay";
 	if (octGetByName(&net, &prop) == OCT_NOT_FOUND) {
-	    prop.contents.prop.name = "buswidth";
-	    if (octGetByName(&net, &prop) == OCT_NOT_FOUND) continue;
+	    prop.contents.prop.name = "delay2";
+	    if (octGetByName(&net, &prop) == OCT_NOT_FOUND) {
+	        prop.contents.prop.name = "buswidth";
+		if (octGetByName(&net, &prop) == OCT_NOT_FOUND) continue;
+	    }
 	}
 	(void) octDetach(&net, &prop);
     }
@@ -236,8 +239,19 @@ char *propname;
 	return(FALSE);
     }
     /* fill in default values, and get or create the property. */
-    prop.contents.prop.type = OCT_INTEGER;
-    prop.contents.prop.value.integer = 1;
+    if( IsBus(instPtr) ) {
+        prop.contents.prop.type = OCT_INTEGER;
+        prop.contents.prop.value.integer = 1;
+    }
+    else if ( IsDelay(instPtr) ) {
+        prop.contents.prop.type = OCT_STRING;
+        prop.contents.prop.value.string = "1";
+    }
+    else {
+        /* IsDelay2(instPtr) */
+        prop.contents.prop.type = OCT_STRING;
+        prop.contents.prop.value.string = "0";
+    }
     prop.objectId = 0;		/* silence Purify */
     octGetOrCreate (instPtr, &prop);
     ERR_IF2(octAttach(&net, &prop) != OCT_OK, octErrorString());
@@ -261,6 +275,11 @@ octObject *facetPtr;
 	    /* skip */
 	} else if (IsDelay(&inst)) {
 	    if (!ProcessMarker(facetPtr, &inst, "delay")) {
+		octFreeGenerator(&genInst);
+		return FALSE;
+	    }
+	} else if (IsDelay2(&inst)) {
+	    if (!ProcessMarker(facetPtr, &inst, "delay2")) {
 		octFreeGenerator(&genInst);
 		return FALSE;
 	    }
@@ -390,9 +409,9 @@ int *inN, *outN;
 /* 6/14/89
 */
 static boolean
-JoinOrdinary(inTermPtr, outTermPtr, delay, width)
+JoinOrdinary(inTermPtr, outTermPtr, initDelayValues, width)
 octObject *inTermPtr, *outTermPtr;
-char *delay, *width;
+char *initDelayValues, *width;
 {
     octObject inInst, outInst, fTerm;
     boolean inIsConn, outIsConn;
@@ -409,7 +428,7 @@ char *delay, *width;
 	ERR_IF1(!KcConnect(
 	    outInst.contents.instance.name, outTermPtr->contents.term.name, 
 	    inInst.contents.instance.name, inTermPtr->contents.term.name,
-			   delay, width)
+			   initDelayValues, width)
 	);
     } else if (*width) {
 	ErrAdd("Cannot make a bus connection between a galaxy port and its alias");
@@ -481,7 +500,7 @@ octObject *facetPtr;
     octObject net, in[TERMS_MAX], out[TERMS_MAX];
     octGenerator netGen;
     int inN = 0, outN = 0, totalN, i;
-    char delay[BLEN], width[BLEN];
+    char delay[BLEN], initDelayValues[BLEN], width[BLEN];
     char *errMsg = 0;
 
     (void) octInitGenContentsSpecial(facetPtr, OCT_NET_MASK, &netGen);
@@ -494,7 +513,10 @@ octObject *facetPtr;
 	    return FALSE;
 	}
 	totalN = inN + outN;
-	GetStringizedProp(&net, "delay", delay, BLEN);
+	if(GetStringizedProp(&net, "delay", delay, BLEN))
+	    /* old type delay, mark it */
+	    sprintf(initDelayValues, "*%s",delay);
+	else GetStringizedProp(&net, "delay2", initDelayValues, BLEN);
 	GetStringizedProp(&net, "buswidth", width, BLEN);
 
 	if (totalN < 2) {
@@ -510,7 +532,7 @@ octObject *facetPtr;
 	else if (inN == 0 || outN == 0)
 	    errMsg = "ConnectPass: cannot match an input to an output";
 /* We only allow delay on point-to-point connections */
-	else if (*delay && totalN > 2)
+	else if (*initDelayValues && totalN > 2)
 	    errMsg = "ConnectPass: delay not allowed on multi-connections";
 	else if (*width && totalN > 2)
 	    errMsg = "ConnectPass: bus not allowed on multi-connections";
@@ -518,7 +540,7 @@ octObject *facetPtr;
 	    if (*width > 0 &&
 		(!TermIsMulti(&in[0]) || !TermIsMulti(&out[0])))
 		errMsg = "Bus connection only works with multiports";
-	    else if (!JoinOrdinary(&in[0], &out[0], delay, width))
+	    else if (!JoinOrdinary(&in[0], &out[0], initDelayValues, width))
 		errMsg = "";
         }
 /* Handle input multiporthole case.  Eventually this will be handled
