@@ -39,7 +39,7 @@ StringList DEScheduler :: displaySchedule () {
 }
 
 
-extern StringList checkConnect (Galaxy&);
+extern int warnIfNotConnected (Galaxy&);
 
 	////////////////////////////
 	// setup
@@ -58,21 +58,14 @@ int DEScheduler :: setup (Block& b) {
 	processQ.initialize();
 
 	// check connectivity
-	StringList msg = checkConnect (galaxy);
-	if (msg.size() > 0) {
-		errorHandler.error (msg);
-		return FALSE;
-	}
+	if (warnIfNotConnected (galaxy)) return FALSE;
 
 	// Notify each star of the global event queue, and fire source
 	// stars to initialize the global event queue.
 	for (int i = alanShepard.totalSize(galaxy); i>0; i--) {
 		Star& s = alanShepard.nextStar();
 		if (strcmp (s.domain(), DEdomainName) != 0) {
-			StringList msg = s.readFullName();
-			msg += " is not a DE star: domain = ";
-			msg += s.domain();
-			errorHandler.error(msg);
+			Error::abortRun (s, " is not a DE star");
 			return FALSE;
 		}
 		// set up the block's event queue.
@@ -271,4 +264,3 @@ int DEScheduler :: setDepth(DEStar* s) {
 	}
 	return s->depth;
 }
-			
