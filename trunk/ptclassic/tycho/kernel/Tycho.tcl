@@ -339,18 +339,17 @@ if {![info exists tychoConsoleWindow]} {
 }
 set tychoOpenFiles 0
 
-set OBSOLETE {
-    # Source ~/.Tycho/tychorc.tcl if it exists.
-    set tychostartfile [glob -nocomplain [file join $env(HOME) .Tycho tychorc.tcl]]
-    if {$tychostartfile != {} && \
-	    [file exists $tychostartfile] && \
-	    [file readable $tychostartfile]} {
-	if [catch {uplevel #0 {source $tychostartfile}} msg] {
-	    ::tycho::warn "Failure sourcing $tychostartfile.\n$msg"
-	}
+# Source ~/.Tycho/tychorc.tcl if it exists.
+set tychostartfile [glob -nocomplain [file join $env(HOME) .Tycho tychorc.tcl]]
+if {$tychostartfile != {} && \
+	[file exists $tychostartfile] && \
+	[file readable $tychostartfile]} {
+    if [catch {uplevel #0 {source $tychostartfile}} msg] {
+	::tycho::warn "Failure sourcing $tychostartfile.\n$msg"
     }
-    unset tychostartfile
 }
+unset tychostartfile
+
 
 # If tycho was started with -e tclscript, then we open up all the files
 # and then source tclscript
