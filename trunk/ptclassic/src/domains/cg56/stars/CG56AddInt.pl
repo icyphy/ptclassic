@@ -13,6 +13,8 @@ limitation of liability, and disclaimer of warranty provisions.
 	location { CG56 main library }
 	explanation {
 The inputs are added and the result is written on the output.
+The addition wraps up around to mimic the behavior of
+two's complement addition.
 	}
 	inmulti {
 		name {input}
@@ -32,16 +34,14 @@ The inputs are added and the result is written on the output.
 		noInternalState();
 	}
 
-	// We use a1 instead a because we are working with integers
-
 	codeblock(copyInput) {
-	move	$ref(input#1),x0	; just move data from in to out
+	move	$ref(input#1),x0		; just move data from in to out
 	move	x0,$ref(output)
 	}
 
 	codeblock(addStart) {
-	move	$ref(input#1),x0	; 1st input -> x0
-	move	$ref(input#2),a1	; 2nd input -> a1
+	move	$ref(input#1),x0			; x0 = input#1
+	move	$ref(input#2),a0			; a0 = input#2
 	}
 
 	codeblock(add,"int i") {
@@ -49,8 +49,8 @@ The inputs are added and the result is written on the output.
 	}
 
 	codeblock(addEnd) {
-	add	x0,a1
-	move	a1,$ref(output)
+	add	x0,a
+	move	a0,$ref(output)
 	}
 
 	go {
