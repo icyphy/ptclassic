@@ -103,6 +103,10 @@ Block* GalAllBlockIter::next() {
 	return b;
 }
 
+void GalAllBlockIter::remove() {
+    thisLevelIter->remove();
+}
+
 class CIterContext {
 	friend CGalAllBlockIter;
 
@@ -173,6 +177,10 @@ Star* GalStarIter::next() {
 	}
 }
 
+void GalStarIter::remove() {
+    GalAllBlockIter::remove();
+}
+
 CGalStarIter::CGalStarIter(const Galaxy& g) : CGalAllBlockIter(g) {}
 
 // This method returns the next star.
@@ -184,4 +192,12 @@ const Star* CGalStarIter::next() {
 	}
 }
 
+Galaxy* GalGalaxyIter::next() {
+    Block *block;
+    while ((block = GalAllBlockIter::next()) != NULL && block->isItAtomic());
+    return (Galaxy*)block;
+}
 
+void GalGalaxyIter::remove() {
+    GalAllBlockIter::remove();
+}

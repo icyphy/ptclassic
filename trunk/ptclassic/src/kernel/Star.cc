@@ -38,7 +38,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #pragma implementation
 #endif
 
-#include "Cluster.h"
 #include "Target.h"
 #include "Star.h"
 #include "StringList.h"
@@ -51,13 +50,15 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 ********************************************************************/
 
-StringList
-Star :: print(int verbose) const {
+StringList Star::print(int verbose) const {
 	StringList out;
 	return out << "Star: " << fullName() << "\n"
 		   << "Descriptor: " << descriptor() << "\n"
-		   << printPorts ("star",verbose)
-		   << printStates("star",verbose);
+		   << printPorts ("Star",verbose)
+		   << printStates("Star",verbose)
+		   << "_______________________________________"
+		   << "_______________________________________\n\n";
+	
 }
 
 // small virtual functions
@@ -77,14 +78,8 @@ int Star :: run() {
 Star& Star :: asStar () { return *this;}
 const Star& Star :: asStar () const { return *this;}
 
-Cluster* Star::asCluster() { return NULL; }
-const Cluster* Star::asCluster() const { return NULL; }
-
 // Destructor
 Star::~Star() {
-  if (parentCluster()) {
-    parentCluster()->clearMaster();
-  }
 }
 
 // make a duplicate Star.  This will call Block::clone 

@@ -28,7 +28,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 						PT_COPYRIGHT_VERSION_2
 						COPYRIGHTENDKEY
 
- Programmer:  D. G. Messerschmitt, J. Buck
+ Programmer:  D. G. Messerschmitt, J. Buck and Jose Luis Pino
  Date of creation: 7/30/90
 
 These are methods used by classes defined in DataStruct.h that
@@ -42,23 +42,52 @@ inline anyway).
 
 #include "DataStruct.h"
 
+SingleLink::SingleLink(Pointer a,SingleLink* p) {
+    e=a;
+    if (p) {
+	next = p;
+	previous = p->previous;
+	p->previous = this;
+	previous->next = this;
+    }
+    else {
+	previous = this;
+	next = this;
+    }
+}
+
+void SingleLink::remove() {
+    next->previous = previous;
+    previous->next = next;
+}
+
+SingleLink* SequentialList::removeLink(SingleLink& a) {
+    SingleLink* previous = a.previous;
+    if (lastNode == &a) lastNode = a.previous;
+    a.remove();
+    delete &a;
+    dimen--;
+    if (dimen == 0) {
+	lastNode = 0;
+	previous = 0;
+    }
+    return previous;
+}
+
 // constructor with argument
-	// constructor, with argument
 SequentialList :: SequentialList(Pointer a) : dimen(1)
 {
 	LOG_NEW; lastNode= new SingleLink(a,0);
-	lastNode->next=lastNode;
 }
 
 // add at head of list
 void SequentialList :: prepend(Pointer a)
 {
 	if (dimen > 0) {	// List not empty
-		LOG_NEW; lastNode->next = new SingleLink(a,lastNode->next);
+	    LOG_NEW; new SingleLink(a,lastNode->next);
 	}
-	else	{	// List empty
-		LOG_NEW; lastNode = new SingleLink(a,0);
-		lastNode->next = lastNode;
+	else {	               // List empty
+	    LOG_NEW; lastNode = new SingleLink(a,0);
 	}
 	dimen++;
 }
@@ -67,12 +96,10 @@ void SequentialList :: prepend(Pointer a)
 void SequentialList :: append(Pointer a)
 {
 	if (dimen > 0) {	// List not empty
-		LOG_NEW; lastNode->next = new SingleLink(a,lastNode->next);
-		lastNode = lastNode->next;
+	    LOG_NEW; lastNode = new SingleLink(a,lastNode->next);
 	}
-	else {		// List empty
-		LOG_NEW; lastNode = new SingleLink(a,0);
-		lastNode->next = lastNode;
+	else {		        // List empty
+	    LOG_NEW; lastNode = new SingleLink(a,0);
 	}
 	dimen++;
 }
@@ -85,11 +112,8 @@ Pointer SequentialList :: getAndRemove()
 	SingleLink *f = lastNode->next;	// Head of list
 	Pointer r = f->e;
 
-	if (f == lastNode) lastNode = 0; // List now empty
-	else lastNode->next = f->next;
-
-	LOG_DEL; delete f;
-	dimen--;
+	removeLink(*f);
+	
 	return r;
 }
 
@@ -100,20 +124,8 @@ Pointer SequentialList :: getTailAndRemove()
 
         Pointer r = lastNode->e;        // Save contents of tail
 
-        // Traverse list to find next-to-last node
-
-        for( SingleLink*  p = lastNode;  p->next != lastNode;  p = p->next );
-
-        if (p == lastNode) {            // If only one node in list, delete it
-                LOG_DEL;  delete lastNode;
-                lastNode = 0;           // List now empty
-        }
-        else  {                         // Else delete last node
-                p->next = lastNode->next;
-                LOG_DEL;  delete lastNode;
-                lastNode = p;
-        }
-	dimen--;
+	removeLink(*lastNode);
+	
         return r;
 }
 
@@ -165,17 +177,12 @@ int SequentialList::remove (Pointer x) {
 	}
 	// general case
 	SingleLink* f = lastNode->next;
-	SingleLink* g = lastNode;
 	do {
 		if (f->e == x) {
-			g->next = f->next;
-			if (f == lastNode) lastNode = g;
-			LOG_DEL; delete f;
-			dimen--;
-			return 1;
+		    removeLink(*f);
+		    return 1;
 		}
 		f = f->next;
-		g = g->next;
 	} while (f != lastNode->next);
 	return 0;
 }
@@ -189,4 +196,41 @@ int SequentialList::member (Pointer x) const {
 		f = f->next;
 	} while (f != lastNode);
 	return FALSE;
+}
+
+void ListIter::reset() {
+    startAtHead = TRUE;
+}
+
+Pointer ListIter::next() {
+    Pointer p;
+    if (startAtHead) {
+	startAtHead = FALSE;
+	if (list->lastNode) {
+	    ref = list->lastNode->next;
+	    p = ref->e;
+	}
+	else {
+	    ref = 0;
+	    p = 0;
+	}
+    }
+    else
+	p = ref ? (ref = ref->next, ref->e) : 0;
+    if (ref == list->lastNode) ref = 0;
+    return p;
+}
+
+void ListIter::reconnect(const SequentialList& l) {
+    list = &l;
+    reset();
+}
+
+void ListIter::remove() {
+    if (ref) {
+	ref = ((SequentialList*)list)->removeLink(*ref);
+	if (ref == list->lastNode) startAtHead = TRUE;
+    }
+    else if (list->lastNode)
+	((SequentialList*)list)->removeLink(*list->lastNode);
 }

@@ -27,7 +27,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 						PT_COPYRIGHT_VERSION_2
 						COPYRIGHTENDKEY
 
- Programmer:  D. G. Messerschmitt and J. Buck
+ Programmer:  D. G. Messerschmitt, J. Buck and Jose Luis Pino
  Date of creation: 1/17/89
 
 This header file contains basic container class data structures
@@ -51,15 +51,14 @@ deallocating memory for the objects, etc.
 	// class SingleLink
 	//////////////////////////////////////
 
-class SingleLink
-{
-	friend class SequentialList;
-	friend class ListIter;
-
-	SingleLink *next;
-	Pointer e;
-
-	SingleLink(Pointer a, SingleLink* p) {e=a;next=p;}
+class SingleLink {
+friend class SequentialList;
+friend class ListIter;
+protected:
+    SingleLink *next,*previous;
+    Pointer e;
+    inline SingleLink(Pointer,SingleLink*);
+    inline void remove();
 };
 
 class SequentialList
@@ -79,7 +78,7 @@ public:
 	
 	void prepend(Pointer a);	// Add at head of list
 
-	void append(Pointer a);	// Add at tail of list
+	void append(Pointer a);	        // Add at tail of list
 
 	void put(Pointer a) {append(a);} // synonym
 
@@ -107,9 +106,12 @@ public:
 	inline int empty() const { return (lastNode == 0);}
 
 	// is arg a member of the list? (returns TRUE/FALSE)
-	int member(Pointer arg) const;
+	inline int member(Pointer arg) const;
 
 private:
+	// remove a link from the list
+        inline SingleLink* removeLink(SingleLink&);
+
         // Store head of list, so that there is a notion of 
         // first node on the list, lastNode->next is head of list 
         SingleLink *lastNode;
@@ -160,30 +162,28 @@ public:
 class ListIter {
 public:
 	// constructor: attach to a SequentialList
-	ListIter(const SequentialList& l) : list(&l), ref(l.lastNode) {}
+	inline ListIter(const SequentialList& l) : list(&l) { reset(); }
 
 	// reset to the beginning of a list
-	inline void reset() { ref = list->lastNode;}
+        inline void reset();
 
 	// next and operator++ are synonyms.  Return the next element,
 	// return 0 if there are no more.
-	// The compact and hard to read form is chosen so that cfront 2.1
-	// can inline it.
-	inline Pointer next() {
-		Pointer p = ref ? (ref = ref->next, ref->e) : 0;
-		if (ref == list->lastNode) ref = 0;
-		return p;
-	}
-
+        inline Pointer next();
+    
 	inline Pointer operator++ (POSTFIX_OP) { return next();}
 
-// attach the ListIter to a different object
-	void reconnect(const SequentialList& l) {
-		list = &l; ref = l.lastNode;
-	}
+        // attach the ListIter to a different object
+	void reconnect(const SequentialList&);
+
+        // remove the currently pointed to ref and update the
+        // the ref pointer - if next hasn't been called, the lastNode
+        // will be removed
+        inline void remove();
 private:
 	const SequentialList* list;
 	SingleLink *ref;
+	int startAtHead;
 };
 
 	//////////////////////////////////////

@@ -63,8 +63,6 @@ CCS_WITH_H_FILES=\
  ComplexState.cc \
  ComplexSubset.cc \
  PortHole.cc \
- DFClusterBase.cc \
- DFCluster.cc \
  DFPortHole.cc \
  DataFlowStar.cc \
  DataStruct.cc \
@@ -87,6 +85,7 @@ CCS_WITH_H_FILES=\
  GalIter.cc \
  Galaxy.cc \
  Geodesic.cc \
+ GraphUtils.cc \
  HashTable.cc \
  Histogram.cc \
  IntArrayState.cc \

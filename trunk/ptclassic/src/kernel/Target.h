@@ -132,7 +132,9 @@ public:
 	// initialize the target, given a galaxy.
 	virtual void setGalaxy(Galaxy& g); // default: { gal = &g; }
 
-	// set the stopping condition.
+        void clearGalaxy() { gal = 0; }
+
+        // set the stopping condition.
 	virtual void setStopTime(double);
 
 	// reset the stopping condition (why different?)

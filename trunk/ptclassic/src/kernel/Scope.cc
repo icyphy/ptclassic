@@ -89,6 +89,7 @@ Scope* Scope::createScope(Galaxy& galaxyToScope) {
     GalTopBlockIter nextBlock(galaxyToScope);
     Block *block;
     block = nextBlock++;
+    if (!block) return NULL;
     if (block->scope()) {
 	if (block->scope()->parentScope() &&
 	    block->scope()->parentScope() != galaxyToScope.scope())

@@ -38,7 +38,6 @@ Programmer: Jose Luis Pino
 #include "GraphUtils.h"
 #include "InfString.h"
 #include "GalIter.h"
-#include "Cluster.h"
 #include <string.h>
 
 // function to count stars in a galaxy
@@ -53,14 +52,6 @@ Block* BlockParentIter::next() {
     Block* current = nextParent;
     nextParent = nextParent? nextParent->parent() : (Block*) NULL;
     return current;
-}
-
-inline InfString dotName(Block& b) {
-    InfString name;
-    name << b.name() << "_" << b.flags[0];
-    replaceString(name,"=","_");
-    replaceString(name,".","_");
-    return name;
 }
 
 StringList printTopBlockDot(Galaxy& galaxy, const char* depth) {
@@ -103,40 +94,13 @@ StringList printDot(Galaxy& galaxy) {
     return dot;
 }
 
-StringList printClusterDot(Galaxy& galaxy) {
-    numberAllBlocks(galaxy);
-    StringList dot;
-    dot << "digraph " << galaxy.name() << " {\n"
-	<< "  node [shape=record,width=.1,height=.1];\n";
-    ClusterIter nextCluster(galaxy);
-    Cluster* cluster;
-    while ((cluster = nextCluster++) != NULL) {	
-	InfString sourceName;
-	sourceName << dotName(*cluster);
-	if (!cluster->numberBlocks())
-	    dot << "  " << sourceName << ";\n";
- 	SuccessorIter nextSuccessor(*cluster);
-	Block* successor;
-	while ((successor = nextSuccessor++) != NULL)
-	    dot << "  " << sourceName << " -> " << dotName(*successor) <<";\n";
-    }
-    dot << "}\n";
-    return dot;
-}
-	
-void cleanupAfterCluster(Galaxy& g) {
-    GalTopBlockIter nextBlock(g);
-    Block* block;
-	
-    while ((block = nextBlock++) != NULL) {
-	if (! block->isItAtomic() &&
-	    ! block->asGalaxy().numberBlocks()) {
-	    delete block;
-	    nextBlock.remove();
-	}
-	else if (block->parent() != &g)
-	    nextBlock.remove();
-    }
+StringList dotName(Block& b){
+    InfString name;
+    name << b.name() << "_" << b.flags[0];
+    replaceString(name,"=","_");
+    replaceString(name,".","_");
+    StringList out = name;
+    return out;
 }
 
 void replaceString(char* master, const char* match, const char* insert) {

@@ -379,10 +379,8 @@ public:
 	/* virtual */ StringList print (int verbose = 0) const;
 
 	// set the alias
-	inline void setAlias (PortHole& blockPort) {
-		GenericPort::setAlias (blockPort);
-	}
-
+	inline void setAlias (PortHole& blockPort);
+    
 	// class identification
 	int isA(const char*) const;
 
@@ -562,6 +560,7 @@ public:
 	inline PortHole* next() { return (PortHole*)NamedObjListIter::next();}
 	inline PortHole* operator++(POSTFIX_OP) { return next();}
 	NamedObjListIter::reset;
+	NamedObjListIter::remove;
 };
 
 

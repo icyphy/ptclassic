@@ -43,6 +43,7 @@ Methods for class Galaxy
 #include "Block.h"
 #include "Scheduler.h"
 #include "ConstIters.h"
+#include "GraphUtils.h"
 
 // Constructor
 Galaxy :: Galaxy() : myDomain(0) {}
@@ -61,36 +62,54 @@ const char* Galaxy :: className() const {return "Galaxy";}
 // destructor.  Not really do-nothing because members are deleted
 Galaxy :: ~ Galaxy () {}
 
+int Galaxy::flatten(Galaxy* g, int removeFlag) {
+    if (!g && (g = (Galaxy*)parent()) == NULL) return FALSE;
+
+    GalTopBlockIter nextBlock(*this);
+    Block *block;
+    while ((block = nextBlock++) != NULL)
+	g->addBlock(*block,block->name());
+
+    if (removeFlag && parent()) {
+	parent()->asGalaxy().removeBlock(*this);
+	delete this;
+    }
+
+    empty();
+    return TRUE;
+}
+
+void Galaxy::empty() {
+    blocks.initialize();
+    deleteAllGenPorts();
+}    
+
 	////////////////////////////////////
 	// Galaxy::printRecursive()
 	////////////////////////////////////
 
-StringList
-Galaxy :: print (int verbose) const {
-	StringList out;
-	out = "GALAXY: ";
-	out += fullName();
-	out += "\n";
-	out += "Descriptor: ";
-	out += descriptor();
-	out += "\n";
-	const Block* b;
-	CGalTopBlockIter next(*this);
-	if (!verbose) {
-		out += "Contained blocks: ";
-		while ((b = next++) != 0) {
-			out += b->name();
-			out += " ";
-		}
-	}
-	out += printPorts("Galaxy",verbose);
-	out += printStates("Galaxy",verbose);
-	if (verbose) {
-		out += "Contained blocks: ";
-		while ((b = next++) != 0)
-			out += b->print(verbose);
-	}
-	return out;
+StringList Galaxy::print(int verbose) const {
+    StringList out;
+
+    out << "GALAXY: " << fullName() << "\nDescriptor: "
+	<< descriptor() << printPorts("Galaxy",verbose)
+	<< printStates("Galaxy",verbose) << "\nContained blocks: ";
+
+    const Block* b;
+    CGalTopBlockIter next(*this);
+    while ((b = next++) != 0)
+	out << (b->isItAtomic()?
+		(b->isItWormhole()?"Wormhole ":"Star "):"Galaxy ")
+	    << b->name() << '\n';
+
+    out << "_______________________________________"
+	<< "_______________________________________\n\n";
+
+    next.reset();
+    while ((b = next++) != 0)
+	out << b->print(verbose);
+
+    return out;
 }
 
 int Galaxy :: setTarget(Target* t) {

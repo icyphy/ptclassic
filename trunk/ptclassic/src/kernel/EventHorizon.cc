@@ -257,7 +257,7 @@ Geodesic* FromEventHorizon::allocateGeodesic()
     StringList nm;
     nm << "Node_" << asPort()->name();
     const char* dName = isItInput() ? wormhole->insideDomain()
-	: asPort()->parent()->parent()->domain();
+	: asPort()->parent()->domain();
     Domain* d = Domain::named(dName);
     Geodesic* g = NULL;
     if (d != NULL) g = &d->newGeo();

@@ -113,10 +113,17 @@ GalPort :: ~GalPort() {}
 GalMultiPort :: ~GalMultiPort() {}
 
 void GenericPort::setAlias (GenericPort& gp) {
-	aliasedTo = &gp;
-	gp.aliasedFrom = this;
+    // We allow inserting an alias within an existing chain.
+    // For robustness, we must check if gp.aliasedFrom == this
+    // which would create a loop of aliases.  This could happen,
+    // if the user called alias twice.
+    if (gp.aliasedFrom && gp.aliasedFrom != this) {
+	aliasedFrom = gp.aliasedFrom;
+	aliasedFrom->aliasedTo = this;
+    }
+    aliasedTo = &gp;
+    gp.aliasedFrom = this;
 }
-
 
 PortHole& GenericPort :: newConnection () {
 	// first resolve aliases.
@@ -387,6 +394,11 @@ StringList PortHole :: print(int) const {
 	    out << "\tot connected.";
     }
     return out << "\n\n";
+}
+
+// set the alias and fix the far pointers
+void PortHole::setAlias(PortHole& blockPort) {
+    GenericPort::setAlias (blockPort);
 }
 
 // sets the index values of each porthole of each star in the galaxy.
