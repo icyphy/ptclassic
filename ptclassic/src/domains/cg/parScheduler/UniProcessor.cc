@@ -119,7 +119,7 @@ int UniProcessor :: writeGantt(ostream& out, const char* universe, int numProcs,
 			tmpbuf << universe << " " << numProcs << " ";
 			tmpbuf << span << " " << proc_num << " " << starName;
 			tmpbuf << " " << start << " " << fin;
-			writeGanttProc(out, (char *)tmpbuf);
+			GanttChart::writeGanttProc(out, (char *)tmpbuf);
 			start = fin;
 		} else { // Idle node
 			start += obj->getDuration();
