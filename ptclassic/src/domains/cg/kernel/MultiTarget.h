@@ -57,6 +57,9 @@ class MultiTarget : public CGTarget {
 public:
         MultiTarget(const char* name, const char* starclass, const char* desc);
 
+	// type identification
+	/*virtual*/ int isA(const char*) const;
+
 	// Resolve the parameter conflicts based on priorities
 	void initState();
 
@@ -123,17 +126,22 @@ public:
 
         // Do scheduling job for inside galaxy -- to be called by Wormhole
 	// class.
-        virtual void insideSchedule();
+        virtual int insideSchedule(Profile*);
 
         // Download the code for the specified processor.
-        // Argument specifies the profile under the current target.
-        virtual void downLoadCode(int, Profile*);
+        // Argument specifies the profile index, the invocation number,
+	// and profile.
+        virtual int downLoadCode(int, int, Profile*);
 
 	// Add processor code to the multiprocessor target
 	virtual void addProcessorCode(int pid, const char*);
 
 	// return the array of candidate processors.
 	virtual IntArray* candidateProcs(ParProcessors*);
+
+	// determine the processor assignment of the profile manually
+	// and return the profile.
+	virtual Profile* manualSchedule(int);
 
 	// resource management
 	virtual void saveCommPattern();
