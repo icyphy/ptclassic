@@ -9,8 +9,9 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 }
-  derivedfrom {SDFSharedMem}
-  desc {}
+  derivedfrom { SDFSharedMem }
+  desc { Output the value of a floating variable in shared memory. }
+  location { SDF main library }
   output
   {
     name { out }
@@ -34,14 +35,11 @@ limitation of liability, and disclaimer of warranty provisions.
   {
     float val;
 
-    if (!SDFSharedMem::ReadVar(name,val))
+    // method ReadVar() sets the value of val (passed by reference)
+    if ( !SDFSharedMem::ReadVar(name,val) )
     {
       val = float(initial);
     }
     out%0 << val;
-  }
-  wrapup
-  {
-    SDFSharedMem::RemoveVar(name);
   }
 }
