@@ -13,6 +13,7 @@ Version identification:
 *******************************************************************/
 #include "CGUtilities.h"
 #include "Error.h"
+#include "miscFuncs.h"
 #include <sys/param.h>
 #include <ctype.h>
 #include <string.h>
@@ -30,21 +31,28 @@ char* makeLower(const char* name) {
 	return newp;
 }
 
-int rshSystem(const char* hostname,const char* command) {
-	char* host;
-	char* pthost;
-	StringList rshCommand ="";
-	char ptolemyHost[MAXHOSTNAMELEN];	//defined in <sys/param.h>
-	gethostname(ptolemyHost,MAXHOSTNAMELEN);
-	host = makeLower(hostname);
-	pthost = makeLower(ptolemyHost);
-	if(strncmp(host,pthost,strlen(host)) && strcmp(host,"localhost")) {
-		rshCommand = "rsh ";
+int rshSystem(const char* hname,const char* cmd,
+	      const char* dir = NULL) {
+	const char* hostname = savestring(hname);
+	const char* command = savestring(cmd);
+	const char* directory = NULL;
+	if (dir != NULL) directory = savestring(dir);
+	StringList rshCommand = "";
+	if (strcmp(hostname,"localhost") != 0 ) 
+	{
+		rshCommand = "xon ";
 		rshCommand += hostname;
-		rshCommand += " ";
+		rshCommand += " -debug 'export DISPLAY; ";
+	}
+	if (directory != NULL) {
+		rshCommand += "cd ";
+		rshCommand += directory;
+		rshCommand += "; ";
 	}
 	rshCommand += command;
-	LOG_DEL; delete host;
-	LOG_DEL; delete pthost;
+	if (strcmp(hostname,"localhost") != 0 ) rshCommand += "'";
+	LOG_DEL; delete hostname;
+	LOG_DEL; delete command;
+	LOG_DEL; delete directory;
 	return system(rshCommand);
 }

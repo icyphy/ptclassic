@@ -17,7 +17,8 @@ Misc CG routines.
 
 char* makeLower(const char* name);
 
-//run command on hostname.
-int rshSystem(const char* hostname,const char* command);
+//run command on hostname in specified directory.  if directory == NULL
+//then the command will be executed in the home directory
+int rshSystem(const char* hostname,const char* command,const char* directory = NULL);
 
 #endif
