@@ -78,9 +78,8 @@ public:
 	// return my scheduler
 	Scheduler* scheduler() const { return target->scheduler();}
 
-	// print methods
-	StringList printVerbose() const;
-	StringList printRecursive() const;
+	// print method
+	StringList print(int verbose) const { return Wormhole::print(verbose);}
 
 	// clone -- allows interpreter/pigi to make copies
 	Block* clone() const;
