@@ -35,6 +35,9 @@ CC =		gcc
 # Not yet supported on Solaris2 with g++
 #C_SHAREDFLAGS =	-fPIC
 #CC_SHAREDFLAGS =	-fPIC
+# mk/userstars.mk uses these vars
+#USER_C_SHAREDFLAGS =	$(C_SHAREDFLAGS)
+#USER_CC_SHAREDFLAGS =	$(CC_SHAREDFLAGS)
 #LIBSUFFIX =		so
 #endif
 
