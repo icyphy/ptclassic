@@ -32,7 +32,7 @@
 # auto-loading
 # Set up the directories to be searched in order of priority.
 #
-global tychokernel
+global ::tychokernel
 set ::auto_path [linsert $auto_path 0 $tychokernel ]
 
 # Create the tycho namespace
@@ -44,13 +44,14 @@ namespace ::tycho
 # a procedure for a class within namespace ::tycho, for example,
 # the namespace ::tycho is not visible.  Apparently, only the local
 # namespace of the class and the global namespace are visible.
-import add ::tycho
+# import add ::tycho
 
 # Files that we are going to need right away, so there is no
 # point in deferring them to auto-loading.
 uplevel #0 {
     source $tychokernel/Color.tcl
     source $tychokernel/TopLevel.itcl
+    source $tychokernel/TychoWidget.itcl
     source $tychokernel/Dismiss.itcl
     source $tychokernel/DialogWindow.itcl
     source $tychokernel/FontManager.itcl
@@ -62,26 +63,28 @@ uplevel #0 {
 # Register the standard context-sensitive editors
 # Some of these are commented out because they are not ready for release.
 namespace ::tycho {
-    tycho::File::registerEditor {} Edit {Plain text editor}
-    tycho::File::registerEditor {.sched .c .y} EditC {C editor}
-    tycho::File::registerEditor {.C .cc .h .H} EditCpp {C++ editor}
-    tycho::File::registerEditor {} EditHTML {HTML editor}
-    tycho::File::registerEditor {.itcl .itk} EditItcl {Itcl editor}
-    tycho::File::registerEditor .tcl EditTcl {Tcl editor}
-    tycho::File::registerEditor .pl EditPtlang {Ptlang editor}
-    tycho::File::registerEditor {} Console {Tcl console}
+    ::tycho::File::registerEditor {} ::tycho::Edit {Plain text editor}
+    ::tycho::File::registerEditor {.sched .c .y} ::tycho::EditC {C editor}
+    ::tycho::File::registerEditor {.C .cc .h .H} ::tycho::EditCpp {C++ editor}
+    ::tycho::File::registerEditor {} ::tycho::EditHTML {HTML editor}
+    ::tycho::File::registerEditor {.itcl .itk} ::tycho::EditItcl {Itcl editor}
+    ::tycho::File::registerEditor .tcl ::tycho::EditTcl {Tcl editor}
+    ::tycho::File::registerEditor .pl ::tycho::EditPtlang {Ptlang editor}
+    ::tycho::File::registerEditor {} ::tycho::Console {Tcl console}
     if {[uplevel #0 info commands matlab] != {}} {
-	tycho::File::registerEditor {} Matlab {Matlab console}
+	::tycho::File::registerEditor {} ::tycho::Matlab {Matlab console}
     }
     if {[uplevel #0 info commands mathematica] != {}} {
-	tycho::File::registerEditor {} Mathematica {Mathematica console}
+	::tycho::File::registerEditor {} ::tycho::Mathematica \
+		{Mathematica console}
     }
-    tycho::File::registerEditor .html HTML {}
-    # tycho::File::registerEditor {.cir .sp} EditSpice {Spice editor}
-    tycho::File::registerEditor {.mk .template} EditMake {Makefile editor} \
-	    {Makefile makefile GNUmakefile}
-    # tycho::File::registerEditor {.vhdl .VHDL} EditVHDL {VHDL editor}
-    # tycho::File::registerEditor {.fsm} EditFSM {Finite state machine editor}
-    # tycho::File::registerEditor {.std} EditMoore {State transition diagram editor}
-    tycho::File::registerEditor {.idx} IndexBrowser {}
+    ::tycho::File::registerEditor .html ::tycho::HTML {}
+    # ::tycho::File::registerEditor {.cir .sp} ::tycho::EditSpice {Spice editor}
+    ::tycho::File::registerEditor {.mk .template} ::tycho::EditMake \
+	    {Makefile editor} {Makefile makefile GNUmakefile}
+    # ::tycho::File::registerEditor {.vhdl .VHDL} ::tycho::EditVHDL {VHDL editor}
+    # ::tycho::File::registerEditor {.fsm} ::tycho::EditFSM \
+    #   {Finite state machine editor}
+    # ::tycho::File::registerEditor {.std} ::tycho::EditMoore {State transition diagram editor}
+    ::tycho::File::registerEditor {.idx} ::tycho::IndexBrowser {}
 }
