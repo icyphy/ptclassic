@@ -126,6 +126,9 @@ public:
 	// Determine whether we have (or will have, once createChild
 	// operations are complete) a child of the appropriate type.
 	/*virtual*/ int childIsA(const char*) const;
+
+        /*virtual*/ int modifyGalaxy();
+
 protected:
         // This flag keeps track if we have modified the galaxy.  We
         // Should only modify the galaxy ONCE per time the graph is 
