@@ -51,37 +51,37 @@ static void SetVersionInfo (Tcl_Interp *ptkInterp, char *Filename)
 TyConsole::TyConsole(int argc, char **argv) {
 
   // Create an interpreter
-  interp = Tcl_CreateInterp();
-  if (!interp) {
+  tyInterp = Tcl_CreateInterp();
+  if (!tyInterp) {
     fprintf(stderr,"Failed to create Tcl interpreter!\n");
     exit(1);
   }
-  ptcl = new PTcl(interp);
+  ptcl = new PTcl(tyInterp);
 
   // Create the main Tk window
   char *appName = "tycho";
   char *appClass = "Tycho";
 
 #if TK_MAJOR_VERSION <= 4 && TK_MINOR_VERSION < 1
-  ptkw = Tk_CreateMainWindow(interp, NULL, appName, appClass);
+  ptkw = Tk_CreateMainWindow(tyInterp, NULL, appName, appClass);
 #else
-  ptkW = Tk_MainWindow(ptkInterp);
+  ptkW = Tk_MainWindow(tyInterp);
   Tk_SetClass(ptkW, appClass);
   Tk_SetAppName(ptkW, appName);
 #endif /* TK_MAJOR_VERSION <= 4 && TK_MINOR_VERSION < 1 */
   if (!ptkw) {
-    fprintf(stderr,"Failed to create Tk main window: %s\n", interp->result);
+    fprintf(stderr,"Failed to create Tk main window: %s\n", tyInterp->result);
     exit(1);
   }
   // Define Tcl and Tk extensions
-  tytcl = new TyTcl(interp, ptkw);
+  tytcl = new TyTcl(tyInterp, ptkw);
 
   // Command line arguments are made available in the Tcl variables "argc"
   // and "argv".
   InfString argcstring = argc-1;
-  Tcl_SetVar(interp, "argc", (char*)argcstring, TCL_GLOBAL_ONLY);
+  Tcl_SetVar(tyInterp, "argc", (char*)argcstring, TCL_GLOBAL_ONLY);
   char *args = Tcl_Merge(argc-1, argv+1);
-  Tcl_SetVar(interp, "argv", args, TCL_GLOBAL_ONLY);
+  Tcl_SetVar(tyInterp, "argv", args, TCL_GLOBAL_ONLY);
   ckfree(args);
 
   // Set the "tcl_interactive" variable.
@@ -90,19 +90,19 @@ TyConsole::TyConsole(int argc, char **argv) {
     // SimControl::catchInt(); 
     // I removed this to allow for killing of Tycho with ^C. - jking -
   }
-  Tcl_SetVar(interp, "tcl_interactive",
+  Tcl_SetVar(tyInterp, "tcl_interactive",
 	     (tty) ? "1" : "0", TCL_GLOBAL_ONLY);
 
   // our vers of Tk_AppInit
-  if (appInit(interp, ptkw) != TCL_OK) {
+  if (appInit(tyInterp, ptkw) != TCL_OK) {
     fprintf(stderr,
 	"Failed to initialize Tcl, [incr Tcl], and/or Tk: %s\n",
-	interp->result);
+	tyInterp->result);
     tyExit(1);
   }
 
   // Set version/binary info variables
-  SetVersionInfo(interp, argv[0]);
+  SetVersionInfo(tyInterp, argv[0]);
 
   // Load the startup file Tycho.tcl
   char *ty = getenv("TYCHO");
@@ -117,15 +117,15 @@ TyConsole::TyConsole(int argc, char **argv) {
       command << "~ptolemy/tycho/kernel/Tycho.tcl";
     }
   }	
-  if (Tcl_EvalFile(interp, (char*)command) != TCL_OK) {
+  if (Tcl_EvalFile(tyInterp, (char*)command) != TCL_OK) {
     fprintf(stderr,
-	"Unable to load Tycho.tcl startup file: %s\n ", interp->result);
+	"Unable to load Tycho.tcl startup file: %s\n ", tyInterp->result);
     tyExit(1);
   }
 }
 
 TyConsole::~TyConsole() {
-  delete interp;
+  delete tyInterp;
   delete ptcl;
   delete tytcl;
 }
@@ -138,18 +138,18 @@ void TyConsole::tyExit(int code) {
 
   // If ptkVerboseErrors is set, print out errorInfo on the way out
   int ptkVerboseErrors = 0;
-  Tcl_GetBoolean(interp, "ptkVerboseErrors", &ptkVerboseErrors);
+  Tcl_GetBoolean(tyInterp, "ptkVerboseErrors", &ptkVerboseErrors);
   if (ptkVerboseErrors) {
-    fprintf(stderr, "%s\n", Tcl_GetVar(interp, "errorInfo",TCL_GLOBAL_ONLY));
+    fprintf(stderr, "%s\n", Tcl_GetVar(tyInterp, "errorInfo",TCL_GLOBAL_ONLY));
     fflush(stderr);
   }
 
   InfString cmd = "exit ";
   cmd << code;
-  Tcl_Eval(interp, (char*)cmd);
+  Tcl_Eval(tyInterp, (char*)cmd);
   // In case the actual exit is deferred.
   cmd = "update";
-  Tcl_Eval(interp, (char*)cmd);
+  Tcl_Eval(tyInterp, (char*)cmd);
   fprintf(stderr,"Tcl exit command has been redefined, and fails to exit");
   exit(1);
 }
@@ -178,7 +178,7 @@ int TyConsole::appInit(Tcl_Interp *ip, Tk_Window) {
 }
 
 Tcl_Interp* TyConsole::tclInterp() {
-  return interp;
+  return tyInterp;
 }
 
 Tk_Window* TyConsole::tkWindow() {
