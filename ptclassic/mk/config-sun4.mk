@@ -83,3 +83,6 @@ XV_CC =		gcc -traditional
 
 # Matlab architecture
 MATARCH = sun4
+
+# Build gthreads
+INCLUDE_GTHREADS =	yes

@@ -145,3 +145,6 @@ MATARCH = sol2
 
 # Ipus uses templates in a way that is compatible with g++, but not sol2.cfront
 INCLUDE_IPUS_DOMAIN = no
+
+# Build gthreads
+INCLUDE_GTHREADS =	yes
