@@ -97,7 +97,7 @@ int DataFlowStar :: notRunnable () {
 	DFStarPortIter nextp(*this);
 	DFPortHole *p;
 	// Check to see whether the requisite repetitions have been met.
-	if (repetitions.num() <= int(noTimes))
+	if (reps() <= int(noTimes))
 		return 2;
 
 	// Step through all the input ports, checking to see whether
