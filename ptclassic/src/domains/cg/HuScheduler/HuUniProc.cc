@@ -1,4 +1,4 @@
-static const char file_id[] = "QSUniProc.cc";
+static const char file_id[] = "HuUniProc.cc";
 
 /*****************************************************************
 Version identification:
@@ -16,12 +16,12 @@ Date of last revision:
 #pragma implementation
 #endif
 
-#include "QSUniProc.h"
+#include "HuUniProc.h"
 
 // Constuctor.
-QSUniProc :: QSUniProc() : timeFree(0) {}
+HuUniProc :: HuUniProc() : timeFree(0) {}
 
-int QSUniProc :: getNextFiringTime() {
+int HuUniProc :: getNextFiringTime() {
 	// For first call of this method
 	if (lastFiringTime == 0) {
 		ProcessorIter iter(*this);

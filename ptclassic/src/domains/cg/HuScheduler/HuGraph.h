@@ -1,11 +1,11 @@
-#ifndef _QSGraph_h
-#define _QSGraph_h
+#ifndef _HuGraph_h
+#define _HuGraph_h
 #ifdef __GNUG__
 #pragma interface
 #endif
 
 #include "DLGraph.h"
-#include "QSNode.h"
+#include "HuNode.h"
 
 /****************************************************************
 Version identification:
@@ -20,14 +20,14 @@ Date of last revision:
 *****************************************************************/
 
                 //////////////////////
-                //   class QSGraph   //
+                //   class HuGraph   //
                 //////////////////////
 
 // This class stores the precedence graph which is scheduled by
-// Hu's level scheduler.  It consists of QSNodes (derived from ParNodes) 
+// Hu's level scheduler.  It consists of HuNodes (derived from ParNodes) 
 // connected through a subset of the arcs of the ExpandedGraph.
 
-class QSGraph : public DLGraph {
+class HuGraph : public DLGraph {
 
 public:
 	// reset the graph for new schedules.
@@ -36,7 +36,7 @@ public:
 
 	// find a runnable block whose execution time is closest to
 	// the given limit.
-	QSNode* findTinyBlock(int limit);
+	HuNode* findTinyBlock(int limit);
 
 	// return the smallest execution time among the runnable nodes.
 	int smallestExTime();

@@ -1,5 +1,5 @@
-#ifndef _QSNode_h
-#define _QSNode_h
+#ifndef _HuNode_h
+#define _HuNode_h
 #ifdef __GNUG__
 #pragma interface
 #endif
@@ -19,21 +19,21 @@ Date of last revision:
 *****************************************************************/
 
                 //////////////////////
-                //   class QSNode   //
+                //   class HuNode   //
                 //////////////////////
 
 // This class represents a node in the precedence graph.  While
 // it is derived from the expanded graph node, it contains additional
-// data members which are used for Quasi-scheduling.
+// data members which are used for Hu-level scheduling.
 
-class QSNode : public ParNode {
+class HuNode : public ParNode {
 
 public: 
 	// Constructor declaration
-	QSNode(DataFlowStar* Mas, int invoc_no);
+	HuNode(DataFlowStar* Mas, int invoc_no);
 
 	// Constructor used for idle nodes or communication nodes
-	QSNode(int type);
+	HuNode(int type);
 
 	// Indicate that this node has been scheduled.
 	void resetAssignedFlag(int i) { assignedFlag = i; }

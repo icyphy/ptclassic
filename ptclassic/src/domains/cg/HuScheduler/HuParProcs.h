@@ -1,5 +1,5 @@
-#ifndef _QSParProcs_h
-#define _QSParProcs_h
+#ifndef _HuParProcs_h
+#define _HuParProcs_h
 
 #ifdef __GNUG__
 #pragma interface
@@ -18,53 +18,30 @@ Date of last revision:
 *****************************************************************/
 
 #include "NamedObj.h"
-#include "QSUniProc.h"
-#include "QSGraph.h"
+#include "HuUniProc.h"
+#include "HuGraph.h"
 #include "ParProcessors.h"
 
 /////////////////////////
-// class QSParProcs //
+// class HuParProcs //
 /////////////////////////
 
 // A class for managing the parallel processor schedules.
 
-class QSParProcs : public ParProcessors {
-
-private:
-	// global clock
-	int clock;
-
-	// schedule a node into a designated processor
-	void assignNode(QSNode* pd, int leng, int pNum);
-
-	// The program graph to be scheduled
-	QSGraph* myGraph;
-
-	// processors
-	QSUniProc* schedules;
-
-	// advance the global clock, and identify the nodes which become
-	// runnable at that time.
-	void advanceClock(int ix);
-
-	// set the processor index for big blocks.
-	void setIndex(int v);
-
-	// fire a node and add runnable descendants into the list.
-	void fireNode(QSNode*, int);
+class HuParProcs : public ParProcessors {
 
 public:
 	// constructor
-	QSParProcs(int pNum, BaseMultiTarget* t);
+	HuParProcs(int pNum, MultiTarget* t);
 
-	~QSParProcs();
+	~HuParProcs();
 
 	// initialize
-	void initialize(QSGraph*);
+	void initialize(HuGraph*);
 
 	// get the i-th processor. Processors are indexed from 0 to
 	// numProcs-1.
-	QSUniProc* getSchedule(int num) { return &(schedules[pId[num]]); }
+	HuUniProc* getSchedule(int num) { return &(schedules[pId[num]]); }
 
 	UniProcessor* getProc(int num); 
 
@@ -92,9 +69,32 @@ public:
 	//		 increase the scheduler clock to make the first
 	//		 available processor finish the current execution
 	//		 and provide some runnable nodes.
-	void scheduleSmall(QSNode* pd);
-	void scheduleBig(QSNode* node, int opt, IntArray& avail);
+	void scheduleSmall(HuNode* pd);
+	void scheduleBig(HuNode* node, int opt, IntArray& avail);
 	int scheduleIdle();
+
+private:
+	// global clock
+	int clock;
+
+	// schedule a node into a designated processor
+	void assignNode(HuNode* pd, int leng, int pNum);
+
+	// The program graph to be scheduled
+	HuGraph* myGraph;
+
+	// processors
+	HuUniProc* schedules;
+
+	// advance the global clock, and identify the nodes which become
+	// runnable at that time.
+	void advanceClock(int ix);
+
+	// set the processor index for big blocks.
+	void setIndex(int v);
+
+	// fire a node and add runnable descendants into the list.
+	void fireNode(HuNode*, int);
 };
 
 #endif

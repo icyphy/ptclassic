@@ -1,4 +1,4 @@
-static const char file_id[] = "QuasiScheduler.cc";
+static const char file_id[] = "HuScheduler.cc";
 
 /*****************************************************************
 Version identification:
@@ -16,7 +16,7 @@ Date of last revision:
 #pragma implementation
 #endif
 
-#include "QuasiScheduler.h"
+#include "HuScheduler.h"
 #include "CGWormhole.h"
 #include "Error.h"
 
@@ -24,14 +24,14 @@ Date of last revision:
 // setUpProcs
 /////////////////////////////
 
-void QuasiScheduler :: setUpProcs(int num) {
+void HuScheduler :: setUpProcs(int num) {
 	ParScheduler :: setUpProcs(num);
 	LOG_DEL; if (parSched) delete parSched;
-	LOG_NEW; parSched = new QSParProcs(numProcs, mtarget);
+	LOG_NEW; parSched = new HuParProcs(numProcs, mtarget);
 	parProcs = parSched;
 }
 
-QuasiScheduler :: ~QuasiScheduler() {
+HuScheduler :: ~HuScheduler() {
 	LOG_DEL; if (parSched) delete parSched;
 	LOG_DEL; delete myGraph;
 }
@@ -40,10 +40,10 @@ QuasiScheduler :: ~QuasiScheduler() {
 // scheduleIt
 /////////////////////////////
 
-int QuasiScheduler :: scheduleIt()
+int HuScheduler :: scheduleIt()
 {
 	wormFlag = FALSE;
-	parSched->initialize((QSGraph*) myGraph);
+	parSched->initialize((HuGraph*) myGraph);
 
 	// reset the graph for the new parallel schedule
 	myGraph->resetGraph();
@@ -51,8 +51,8 @@ int QuasiScheduler :: scheduleIt()
 	// schedule the runnable nodes until there is no more unscheduled node
 	// or the graph is deadlocked.
 	while (myGraph->numUnschedNodes() > 0) {
-	   QSNode* node;
-	   while ((node = (QSNode*) myGraph->fetchNode()) != 0) {
+	   HuNode* node;
+	   while ((node = (HuNode*) myGraph->fetchNode()) != 0) {
 
 		// read the star
 		CGStar* obj = node->myStar();
@@ -114,7 +114,7 @@ int QuasiScheduler :: scheduleIt()
 // displaySchedule
 /////////////////////////////
 
-StringList QuasiScheduler :: displaySchedule() {
+StringList HuScheduler :: displaySchedule() {
 
 	Galaxy* galaxy = myGraph->myGalaxy();
 
@@ -125,7 +125,7 @@ StringList QuasiScheduler :: displaySchedule() {
 	return out;
 }
 
-int QuasiScheduler :: createSubGals() {
+int HuScheduler :: createSubGals() {
 	if (!wormFlag) return ParScheduler :: createSubGals();
 	else return FALSE;
 }
