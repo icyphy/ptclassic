@@ -52,7 +52,8 @@ ITCL_SRCS = \
 	HTMLExport.itcl \
 	ProfileTcl.itcl 
 
-EXTRA_SRCS =		$(TCL_SRCS) $(ITCL_SRCS)
+EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) \
+	graphics.style
 
 MISC_FILES =		doc img test tclIndex 
 
