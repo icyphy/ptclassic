@@ -143,7 +143,7 @@ ensemble ::tycho::resource {
     }
     # Get the last-modified time
     option mtime {path} {
-	::tycho::resourceClass stat results
+	::tycho::resource stat $path results
 	return $results(mtime)
     }
     # Get a new resource object
@@ -164,8 +164,13 @@ ensemble ::tycho::resource {
 	::tycho::resourceClass $path query readable
     }
     # Test if a resource is remote
-    option remote {path} {
-	::tycho::resourceClass $path query remote
+    option isremote {path} {
+	::tycho::resourceClass $path query isremote
+    }
+    # Get the size
+    option size {path} {
+	::tycho::resource stat $path results
+	return $results(size)
     }
     # Source a file as Tcl, from anywhere on the network.
     option source {path} {
@@ -176,10 +181,13 @@ ensemble ::tycho::resource {
 	delete object $resource
 	return $result
     }
-    # Get the size
-    option size {path} {
-	::tycho::resourceClass $path stat results
-	return $results(size)
+    # Get resource status
+    option stat {path varName} {
+	upvar $varName v
+	# Can't pass the proc name (stat) to resource class
+	# because of the need to do an upvar. Do it the long way.
+	set rclass [::tycho::resourceClass $path]
+	$rclass::stat $path v
     }
     # Test if a resource is writable
     option writable {path} {
