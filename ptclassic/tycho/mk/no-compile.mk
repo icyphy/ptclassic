@@ -117,6 +117,9 @@ itcldocs: $(ITCL_SRCS) $(ROOT)/lib/tydoc/tydoc $(ROOT)/lib/tydoc/DocSys.itcl
 		$(ROOT)/lib/tydoc/tydoc -t "$(TYDOC_DESC)" $(ITCL_SRCS); \
 	fi
 
+$(ROOT)/lib/tydoc/tydoc $(ROOT)/lib/tydoc/DocSys.itcl:
+	cd $(ROOT)/lib/tydoc; $(MAKE) $@
+
 # You probably don't want to add $(SRCS) here, since really $(SRCS)
 # get compiled and have dependencies.  Instead, modify the makefile
 # that includes this one and have it set $(EXTRA_SRCS)
