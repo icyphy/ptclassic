@@ -105,7 +105,8 @@ class ::tycho::EditDAG {
     ####                            options                        ####
 
     # Default font
-    itk_option define -defaultfont defaultFont Font {}
+    itk_option define -defaultfont defaultFont Font \
+	    [eval ::tycho::font [::tycho::preference get fonts graphicsFont]]
 
     # Specify the graph object to display and edit.
     itk_option define -graph graph Graph {}
@@ -274,14 +275,6 @@ class ::tycho::EditDAG {
     private variable taken
 }
 
-#####################################################################
-#### -defaultfont option
-# Redraw when font is changed.
-#
-configbody ::tycho::EditDAG::defaultfont {
-    redrawGraph
-}
-
 #######################################################################
 #### -graph option configuration
 # If an non-empty string is given as the value to this argument, it is
@@ -376,11 +369,18 @@ body ::tycho::EditDAG::constructor {args} {
 
     # Subscribe to the preferences
     preference subscribeoptions $this \
-            -defaultfont graphicsFont \
 	    -spacingx spacingx \
 	    -spacingy spacingy \
 	    -startx startx \
 	    -starty starty
+
+    # Now subscribe to the graphics font. What we are trying to do
+    # here is avoid unnecessary graph redraws. We really have to look
+    # into this issue more and come up with a good solution.
+    # FIXME: this whole thing is very broken.
+    preference subscribe $this graphicsFont \
+	    "$this configure -defaultfont \
+	    \[::tycho::preference get fonts graphicsFont 1\]; $this reload"
 }
 
 
