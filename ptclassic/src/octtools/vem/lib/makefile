@@ -108,7 +108,10 @@ $(OCTTOOLS)/lib/vem/schematic.bm:	$(OCTTOOLS)/lib/vem schematic.bm
 $(OCTTOOLS)/lib/vem/symbolic.bm:	$(OCTTOOLS)/lib/vem symbolic.bm
 	cp symbolic.bm $(OCTTOOLS)/lib/vem/symbolic.bm
 
-$(OCTTOOLS)/lib/vem:;	-mkdir $(OCTTOOLS)/lib/vem
+$(OCTTOOLS)/lib/vem: $(OCTTOOLS)/lib
+	mkdir $(OCTTOOLS)/lib/vem
+$(OCTTOOLS)/lib:
+	mkdir $(OCTTOOLS)/lib
 
 
 # include common definitions, rules
