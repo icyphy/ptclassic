@@ -40,9 +40,9 @@ $(PAPER).ps:	$(PAPER).dvi
 
 $(PAPER).ps.Z:	$(PAPER).ps
 	-rm $(PAPER).ps.Z
-	compress $(PAPER).ps
+	compress -c $(PAPER).ps >$(PAPER).ps.Z
 
 $(PAPER).pdf:	$(PAPER).dvi $(PAPER).ps
-	-acrobat $(PAPER).ps
+	-acrodistill $(PAPER).ps
 
-install: $(PAPER).dvi $(PAPER).ps.Z $(HTMLDIR)/$(PAPER)
+install: $(INSTALL_LIST)
