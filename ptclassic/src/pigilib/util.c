@@ -129,7 +129,7 @@ char *name;
 {
     char *base;
 
-    if ((base = rindex(name, '/')) != NULL) {
+    if ((base = strrchr(name, '/')) != NULL) {
 	return(++base);  /* skip over '/' */
     }
     return(name);
