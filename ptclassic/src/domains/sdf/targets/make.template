@@ -5,7 +5,7 @@
 
 LIBSRCS =	CompiledUniverse.cc CompiledError.cc
 SRCS =	$(LIBSRCS) CompileTarget.cc
-HDRS =	
+HDRS =	CompileTarget.h
  
 # Root of Ptolemy directory
 ROOT=../../../..
