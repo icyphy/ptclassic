@@ -30,12 +30,9 @@
 # 						COPYRIGHTENDKEY
 #######################################################################
 
-# Tycho test bed, see $TYCHO/doc/coding/testing.html for more information.
-
-# Load up the test definitions.
-if {[string compare test [info procs test]] == 1} then { 
-    source [file join $TYCHO kernel test testDefs.tcl]
-} {}
+# Make sure that the required packages are loaded
+package require tycho.util.tytest
+package require tycho.kernel.gui
 
 # Uncomment this to get a full report, or set in your Tcl shell window.
 # set VERBOSE 1
@@ -46,11 +43,11 @@ if {[string compare test [info procs test]] == 1} then {
 # It would be nice if the tests would work in a vanilla itkwish binary.
 # Check for necessary classes and adjust the auto_path accordingly.
 #
-if {[namespace tycho {info classes Class}] == {} } {
-    uplevel #0 {
-	set ::auto_path [linsert $auto_path 0 [file join $TYCHO kernel]] 
-    }
-}
+#if {[namespace tycho {info classes Class}] == {} } {
+#    uplevel #0 {
+#	set ::auto_path [linsert $auto_path 0 [file join $TYCHO kernel]] 
+#    }
+#}
 
 ######################################################################
 #### Create a simple class
