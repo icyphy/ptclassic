@@ -1,4 +1,4 @@
-# Copyright (C) 1990-1995 The Regents of the University of California.
+# Copyright (C) 1990-%Q% The Regents of the University of California.
 #                       All Rights Reserved.
 #		       
 # Author:	T. M. Parks
@@ -51,13 +51,12 @@ else
 endif
 
 ############################################################
-
 # Directories for installing include files and libraries
 # for thread packages.
 THREAD_INCLUDE = $(ROOT)/thread/include.$(PTARCH)
 THREAD_LIB = $(ROOT)/thread/lib.$(PTARCH)
 
-$(THREAD_INCLUDE) $(THREAD_LIB) $(THREAD_INCLUDE)/pthread :
+$(THREAD_INCLUDE) $(THREAD_LIB):
 	mkdir $@
 
 #
@@ -68,79 +67,54 @@ $(THREAD_INCLUDE) $(THREAD_LIB) $(THREAD_INCLUDE)/pthread :
 GT_SRC = $(ROOT)/src/thread/gthreads
 GT_OBJ = $(ROOT)/obj.$(PTARCH)/thread/gthreads
 
-# Include files that need to be installed.
-GT_INCLUDE= $(THREAD_INCLUDE)/pthread.h \
- $(THREAD_INCLUDE)/pthread/config.h \
- $(THREAD_INCLUDE)/pthread/errno.h \
- $(THREAD_INCLUDE)/pthread/limits.h \
- $(THREAD_INCLUDE)/pthread/pthread_asm.h \
- $(THREAD_INCLUDE)/pthread/signal.h \
- $(THREAD_INCLUDE)/pthread/stdtypes.h \
- $(THREAD_INCLUDE)/pthread/unistd.h
-
 # Redefined make variables.
-GT_CFLAGS = 	-DASM_SETJMP -DNOERR_CHECK -DSTACK_CHECK -DC_CONTEXT_SWITCH \
+GT_CFLAGS =	-DASM_SETJMP -DNOERR_CHECK -DSTACK_CHECK -DSIGNAL_STACK \
 		-DSRP -DC_INTERFACE
 GT_COMP_ASM =	$$(CC) $$(INC1) $$(INC2) $$(CFLAGS) -c $$*.S
 
 # Install gthreads library and include files.
-gthreads_install: $(THREAD_LIB) $(THREAD_INCLUDE) $(THREAD_INCLUDE)/pthread \
-	$(THREAD_LIB)/libgthreads.a $(GT_INCLUDE)
+gthreads_install: $(THREAD_LIB) $(THREAD_INCLUDE) gthreads_$(PTARCH)
 
 # Clean up.
 gthreads_clean: $(GT_OBJ)
 	$(MAKE) -C $(GT_OBJ)/src clean;
 
-# Install gthreads include files.
-$(THREAD_INCLUDE)/pthread/config.h:	$(GT_OBJ)/include/pthread/config.h
-	cp $< $@
-
-$(THREAD_INCLUDE)/pthread/%.h: $(GT_SRC)/pthread/%.h
-	cp $< $@
-
-$(THREAD_INCLUDE)/%.h: $(GT_SRC)/include/%.h
-	cp $< $@
-
-# Install gthreads library.
-$(THREAD_LIB)/libgthreads.a: $(GT_OBJ)/lib/libgthreads.a
-	cp $< $@
-
 # Build a shadow tree to hold object files.
 $(GT_OBJ): $(GT_SRC)
-	mkdir $@
+	-mkdir $@
 	lndir ../$< $@
-
-# Build gthreads library.
-$(GT_OBJ)/lib/libgthreads.a: gthreads_$(PTARCH)
+# Oops! There is no default Makefile in the distribution.
+	cd $(GT_OBJ)/src; ln -s Makefile.Solaris Makefile
 
 # Build library for sol2 using Gnu compiler.
 gthreads_sol2: $(GT_OBJ)
 	$(MAKE) -C $(GT_OBJ)/src $(MFLAGS) $(MAKEVARS) \
+		INSTALL_INCLUDE='../../$(THREAD_INCLUDE)' \
+		INSTALL_LIBS='../../$(THREAD_LIB)' \
 		CC=gcc \
 		CFLAGS='$(GT_CFLAGS) -DSOLARIS -DSVR4' \
-		CCFLAGS='$$(CFLAGS)' \
-		CCFLAGS1='$$(CFLAGS)' \
-		CCFLAGS2='$$(CFLAGS)' \
 		COMP_ASM='$(GT_COMP_ASM) -traditional' \
-		all;
+		all install;
 
 # Build library for sol2 using Sun's compiler.
 gthreads_sol2.cfront: $(GT_OBJ)
 	$(MAKE) -C $(GT_OBJ)/src $(MFLAGS) $(MAKEVARS) \
+		INSTALL_INCLUDE='../../$(THREAD_INCLUDE)' \
+		INSTALL_LIBS='../../$(THREAD_LIB)' \
 		CC=cc \
 		CFLAGS='$(GT_CFLAGS) -DSOLARIS -DSVR4' \
-		CCFLAGS='$$(CFLAGS)' \
-		CCFLAGS1='$$(CFLAGS)' \
-		CCFLAGS2='$$(CFLAGS)' \
-		all;
+		CCFLAGS='-xO3 $$(CFLAGS)' \
+		CCFLAGS1='-xO1 $$(CFLAGS)' \
+		CCFLAGS2='-xO2 $$(CFLAGS)' \
+	    COMP_ASM='$$(AS) $$(INC1) $$(INC2) -P $$(CFLAGS) $$*.S -o $$*.o' \
+		all install;
 
 # Build library for sun4 using Gnu compiler.
 gthreads_sun4: $(GT_OBJ)
 	$(MAKE) -C $(GT_OBJ)/src $(MFLAGS) $(MAKEVARS) \
+		INSTALL_INCLUDE='../../$(THREAD_INCLUDE)' \
+		INSTALL_LIBS='../../$(THREAD_LIB)' \
 		CC=gcc \
 		CFLAGS='$(GT_CFLAGS)' \
-		CCFLAGS='$$(CFLAGS)' \
-		CCFLAGS1='$$(CFLAGS)' \
-		CCFLAGS2='$$(CFLAGS)' \
 		COMP_ASM='$(GT_COMP_ASM)' \
-		all;
+		all install;
