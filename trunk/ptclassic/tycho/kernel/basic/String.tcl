@@ -42,6 +42,120 @@ proc ::tycho::capitalize {word} {
 }
 
 ##########################################################################
+#### breakLines
+#
+# Break a string into lines. The first argument is the string to
+# break. Optional arguments are:
+# <dl>
+# <dt><b>-length</b>
+# <dd>The maximum line length. The default is 72.
+#
+# <dt><b>-substring</b>
+# <dd>The substring to match to decide where to break lines.
+# The default is a single space. The substring will be included
+# in the line following the break, except that left-most white-space
+# will be trimmed.
+#
+# <dt><b>-prefix</b>
+# <dd>A prefix to insert at the start of each line. The default is null.
+# 
+# <dt><b>-indentprefix</b>
+# <dd>A string to insert at the second and subsequent lines. The
+# default is a string of eight spaces.
+# 
+# <dt><b>-continuation</b>
+# <dd>A string to append at the end of broken lines. The default
+# is a space followed by a backslash.
+#
+# </dl> 
+#
+proc ::tycho::breakLines {string args} {
+    array set opts {
+        -length 72
+        -substring " "
+        -prefix ""
+        -indentprefix "        "
+        -continuation " \\"
+    }
+    array set opts $args
+    set prefix $opts(-prefix)
+    set indentlength [string length $prefix]
+    set stringlength [expr [string length $string] + $indentlength]
+    set result ""
+    set doneone 0
+    set donereturn 0
+
+    while { $stringlength > $opts(-length) } {
+        set temp [string range $string 0 [expr $opts(-length) - $indentlength]]
+        set index [string first "\n" $temp]
+        if { $index != -1 } {
+           # Got a carriage return
+           if !$doneone {
+               append result $prefix \
+                       [string trimleft [string range $string 0 $index]]
+           } else {
+               if !$donereturn {
+                   append result \
+                           $opts(-continuation) \
+                           "\n"
+               }
+               append result \
+                       $prefix \
+                       [string trimleft [string range $string 0 $index]]
+           }
+           set string [string range $string [expr $index+1] end]
+           incr stringlength -$index
+           incr stringlength -1
+           set donereturn 1
+           continue
+       }
+       set index [string last $opts(-substring) $temp]
+       if { $index != -1 } {
+           # Found a break-point
+           if !$doneone {
+               append result \
+                       $prefix \
+                       [string trimleft \
+                       [string range $string 0 [expr $index-1]] " "]
+               append prefix $opts(-indentprefix)
+               incr indentlength [string length $opts(-indentprefix)]
+               incr stringlength [string length $opts(-indentprefix)]
+               set doneone 1
+           } else {
+               if !$donereturn {
+                   append result \
+                            $opts(-continuation) \
+                            "\n"
+                }
+                append result \
+                        $prefix \
+                        [string trimleft \
+                        [string range $string 0 [expr $index-1]] " "]
+            }
+            set string [string range $string $index end]
+            incr stringlength -$index
+            set donereturn 0
+            continue
+        }
+        # Cannot find a break-point, so exit
+        break
+    }
+    # Deal with the remaining text
+    if !$doneone {
+        append result \
+                $prefix \
+                [string trimleft $string]
+    } else {
+        append result \
+                $opts(-continuation) \
+                "\n" \
+                $prefix \
+                [string trimleft $string]
+    }
+    return $result
+}
+
+##########################################################################
 #### stringSubtract
 #
 # Subtract one string from another. No change if no match.
