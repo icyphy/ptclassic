@@ -1,6 +1,7 @@
 defcorona {
     name { Const }
     domain { ACS }
+    version { $Id$ }
     desc { Generate a constant signal with the value given by the "level" parameter (default 0.0).
     }
     version { @(#)ACSConst.pl	1.1 05/07/98 }
