@@ -19,12 +19,14 @@ Removes Message from NetworkCell in DE domain.
 			Envelope inEnvlp;
 			input.get().getMessage( inEnvlp );
 			TYPE_CHECK( inEnvlp, "NetworkCell" );
-			const NetworkCell* cellPtr = ( const NetworkCell* )
-							inEnvlp.myData();
-			const Message* outMssg = ( const Message* )
-							( cellPtr->data() );
-			Envelope outEnvlp( *outMssg );
-			output.put( arrivalTime ) << outEnvlp;
+
+// Need "writableCopy()" and "writableData()" below because the Envelope
+// constructor below cannot take a const Message as input.
+			NetworkCell* cellPtr = (NetworkCell*)
+					inEnvlp.writableCopy();
+			Message* outMssg = cellPtr->writableData();
+			Envelope outEnvlp(*outMssg);
+			output.put(arrivalTime) << outEnvlp;
 		} // end if
 	} // end go
 } // end defstar
