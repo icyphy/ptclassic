@@ -28,6 +28,12 @@ static char SccsId[]="$Id$";
 #include "port.h"
 #include "internal.h"
 #include "io.h"
+#include "chain.h"
+#include "change_record.h"
+#include "io_procs.h"
+#include "mark.h"
+#include "oct_utils.h"
+#include "ref.h"
 
 /* 
  * This file contains the functions that maintains the attachement 
@@ -310,7 +316,7 @@ generic **cptr_p;
  * The type is neccessary so oct_get_chain can allocate the
  * contained object if it hasn't been created yet.
  */
-
+int
 oct_put_chain(chain)
 struct chain *chain;
 {
@@ -339,6 +345,7 @@ struct chain *chain;
 
 /* read the attachement chains for container from disk and rebuild them  */
 
+int
 oct_get_chain(container, chain_ptr)
 generic *container;
 struct chain **chain_ptr;
