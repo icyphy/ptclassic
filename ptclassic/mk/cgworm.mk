@@ -33,6 +33,10 @@ include $(CONFIG)
 SDFDIR = $(ROOT)/src/domains/sdf/kernel
 CGCDIR = $(ROOT)/src/domains/cgc/rtlib
 INCL = -I$(SDFDIR) -I$(KERNDIR) -I$(CGCDIR) $(WORM_INCL)
+
+#This definition is needed so that make won't complain w/ common.mk
+LIB=dummy
+
 include $(ROOT)/mk/common.mk
 
 GPPFLAGS += $(INC_LINK_FLAGS)
