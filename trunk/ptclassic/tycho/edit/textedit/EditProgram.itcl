@@ -218,27 +218,27 @@ body ::tycho::EditProgram::constructor {args} {
     # the regions defined by the selection.
     menubar addSeparator Format
     
-    menubar add "Comment Out Region" Format -underline 0 \
+    menubar add "Comment Out Region" Format -underline 8 \
 	    -command "$this commentSelection"
     
-    menubar add "Uncomment Region" Format -underline 0 \
+    menubar add "Uncomment Region" Format -underline 1 \
 	    -command "$this uncommentSelection"
     
     menubar addSeparator Format
     
-    menubar add "Recolorize" Format -underline 0 -accelerator "S-C-l" \
+    menubar add "Recolorize" Format -underline 0 -accelerator "C-L" \
 	    -command "$this parseRegion 1.0 end"
     
     menubar add "Indent Line" Format -underline 0 -accelerator "Tab" \
 	    -command "$this indentLine"
 
-    menubar add "Indent Region" Format -underline 1 \
-            -accelerator "Esc C-\\" \
-	    -command "$this busy $this indentSelection"
-    
     menubar add "Tab" Format -underline 0 -accelerator "C-q Tab" \
 	    -command "$this insertString insert {\t}"
 
+    menubar add "Indent Region" Format -underline 2 \
+            -accelerator "M-C-\\" \
+	    -command "$this busy $this indentSelection"
+    
     # The default fill prefix works for Tcl and shell scripts.
     set fillPrefix "#"
     
@@ -253,6 +253,8 @@ body ::tycho::EditProgram::constructor {args} {
     bind $itk_component(text) <Control-L> "$this parseRegion 1.0 end"
     
     # Indent region binding
+    bind $itk_component(text) <Meta-Control-backslash> \
+            "$this busy $this indentSelection"
     bind $itk_component(text) <Escape><Control-backslash> \
             "$this busy $this indentSelection"
 }
