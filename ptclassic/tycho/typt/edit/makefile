@@ -1,8 +1,8 @@
-# Makefile for Ptolemy Retargetting tool
+# Makefile for Tycho/Ptolemy Editors directory
 #
 # @Author: Christopher Hylands
 #
-# @Version: @(#)makefile	1.2 9/9/96
+# @Version: $Id$
 
 # @Copyright (c) 1996 The Regents of the University of California.
 # All rights reserved.
@@ -34,15 +34,14 @@
 ROOT =		../..
 
 # True source directory
-VPATH =		$(ROOT)/lib/retarg
+VPATH =		$(ROOT)/typt/editors
 
 # Get configuration info
 CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
 ITCL_SRCS = \
-	DomainInfo.itcl \
-	RetargEdit.itcl
+	Retarget.itcl
 
 EXTRA_SRCS =	$(TCL_SRCS) $(ITCL_SRCS)
 
@@ -52,7 +51,7 @@ MISC_FILES =	tclIndex doc
 REALCLEAN_STUFF =	tclIndex *.html
 
 # Title for the tydoc index page
-TYDOC_DESC =	Index of classes in tycho/lib/retarg
+TYDOC_DESC =	Index of classes in tycho/typt/editors
 
 DIRS =		test #doc
 
