@@ -12,4 +12,8 @@ CGSTARS= \
  $(CG)/CGSource.o \
  $(CG)/CGThrough.o \
  $(CG)/CGSink.o \
- $(CG)/CGVarTime.o
+ $(CG)/CGVarTime.o \
+ $(CG)/CGSend.o \
+ $(CG)/CGReceive.o \
+ $(CG)/CGSpread.o \
+ $(CG)/CGCollect.o 
