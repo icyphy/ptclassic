@@ -36,7 +36,7 @@ to an ASCII file.
 
 **************************************************************************/
 
-#include <stdlib.h>
+#include <stdio.h>
 #include "type.h"
 #include "miscFuncs.h"
 #include "WriteASCIIFiles.h"
