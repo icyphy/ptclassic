@@ -45,9 +45,7 @@ for a complete explanation of the options.
 	}
 
 	start {
-		graph.initialize(1, (const char*) options,
-				    (const char*) title,
-				    (const char*) saveFile);
+		graph.initialize(this, 1, options, title, saveFile);
 	}
 
 	go {

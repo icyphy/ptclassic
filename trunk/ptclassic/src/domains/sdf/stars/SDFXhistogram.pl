@@ -114,7 +114,7 @@ the input data.
 		exOptions += barWidth;
 
 		XGraph graph;
-		graph.initialize(1, (const char*) exOptions,
+		graph.initialize(this, 1, (const char*) exOptions,
 				    (const char*) title,
 				    (const char*) saveFile);
 
