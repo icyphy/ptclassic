@@ -249,10 +249,15 @@ int ExpandedGraph::SelfLoop(SDFStar& s)
 		// connect successive invocations of the star as a chain of 
 		// precedences.
 
+		EGNode* en = s.myMaster();
+		en->claimSticky();
 		int repNum = s.repetitions;
-		for (int i = 1; i< repNum; i++) 
+		for (int i = 1; i< repNum; i++) {
+			en = en->getNextInvoc();
+			en->claimSticky();
 			if (!connect_invocations(&s,i,&s,i+1,0,0)) 
 				return FALSE;
+		}
     
     		return(TRUE); 
   	}
