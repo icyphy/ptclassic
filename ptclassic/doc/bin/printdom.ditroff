@@ -1,4 +1,4 @@
-#! /bin/csh
+#! /bin/csh -f
 # $Id$
 
 # Print documentation for a Ptolemy domain
@@ -17,6 +17,9 @@
 #	demotitle - The title page for the demo section
 #	demos	  - A directory with demo documentation.
 
+# Index information is appended to the file $HOME/Almagest.index,
+# or to whatever ALAMAGEST_INDEX is set to.
+
 # On interrupt, remove temporary files
 onintr catch
 
@@ -25,6 +28,10 @@ set dirheader = ~ptolemy/doc/headers
 set printcommand = ditroff
 set printoptions = "-me -tbl -eqn -P$PRINTER"
 set contentscmd = ~ptolemy/doc/bin/contents
+
+if (!($?ALMAGEST_INDEX)) then
+	setenv ALMAGEST_INDEX $HOME/Almagest.index
+endif
 
 while ($#argv)
 	switch ($argv[1])
@@ -46,8 +53,8 @@ if ( -d stars ) then
 		cat starstitle >> /tmp/pt$$
 	endif
 	cd stars
-	# print all "ordinary files"
-	cat `find . -type f -print` >> /tmp/pt$$
+	# print all stars
+	cat -s * >> /tmp/pt$$
 	cd ..
 endif
 if ( -d demos ) then
@@ -55,20 +62,20 @@ if ( -d demos ) then
 		cat demotitle >> /tmp/pt$$
 	endif
 	cd demos
-	# print all "ordinary files"
-	cat `find . -type f -print` >> /tmp/pt$$
+	# print all demos
+	cat -s * >> /tmp/pt$$
 	cd ..
 endif
-/bin/rm -rf index
-$printcommand $printoptions /tmp/pt$$ >& index
-chmod g+w index
-$contentscmd index
+
+$printcommand $printoptions /tmp/pt$$ >& /tmp/index$$
+$contentscmd /tmp/index$$
 $printcommand $printoptions $dirheader/shared title
-/bin/rm /tmp/pt$$
+cat /tmp/index$$ >>! $ALMAGEST_INDEX
+/bin/rm /tmp/pt$$ /tmp/index$$
 exit 0
 
 catch:
         # prevent the "no match" error message if there are no temporary files
         set nonomatch
-        /bin/rm /tmp/pt$$
+        /bin/rm /tmp/pt$$ /tmp/index$$
         exit 1
