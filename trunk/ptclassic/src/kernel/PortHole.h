@@ -2,7 +2,6 @@
 #define _connect_h 1
 
 #ifdef __GNUG__
-#pragma once
 #pragma interface
 #endif
 
@@ -184,6 +183,99 @@ inline int hidden(const GenericPort& p) { return p.attributes() & PB_HIDDEN; }
 
 
         //////////////////////////////////////////
+        // class PortList
+        //////////////////////////////////////////
+
+// Used to store a list of PortHoles in a MultiPortHole
+class PortList : public SequentialList
+{
+public:
+
+        // Add PortHole to list
+        void put(PortHole& p);
+};
+
+        //////////////////////////////////////////
+        // class MultiPortHole
+        //////////////////////////////////////////
+                  
+// A MultiPortHole is a collection of an indeterminate number of
+// PortHoles.
+
+class MultiPortHole: public GenericPort
+{
+	friend class MPHIter;
+	friend class CMPHIter;
+public:
+	MultiPortHole();
+
+	void initialize();
+
+	// make a bus connection with another multiporthole
+	void busConnect (MultiPortHole&, int width, int delay = 0);
+
+	// virtual function to identify multi-ness
+	int isItMulti() const; // {return TRUE;}
+
+	// class identification
+	int isA(const char*) const;
+
+        // Every MultiPortHole must be initialized with the setPort function
+        // Arguments are the name and type (see type.h for supported types).
+        MultiPortHole& setPort(const char* portName,
+                          Block* parent,                // parent block pointer
+                          DataType type = FLOAT);       // defaults to FLOAT
+ 
+        // Return the number of physical port currently allocated
+        int numberPorts() const {return ports.size();}
+
+        // Add a new physical port to the MultiPortHole list
+        virtual PortHole& newPort();
+
+	MultiPortHole& realPort() {
+	// my apologies for this horrible cast.  It is safe because
+	// alias for a MultiPortHole is always a MultiPortHole.
+		return *(MultiPortHole *)translateAliases();
+	}
+
+	// set alias for MultiPortHole
+	void setAlias (MultiPortHole &blockPort) {
+		GenericPort::setAlias (blockPort);
+	}
+
+	// Return a new port for connections
+	virtual PortHole& newConnection();
+
+        // Print a description of the MultiPortHole
+	StringList printVerbose () const;
+
+	// function to set Plasma type of subportholes
+	Plasma* setPlasma(Plasma *useType = NULL);
+
+	// destructor
+	~MultiPortHole() { delPorts();}
+protected:                           
+        // List of ports allocated
+        PortList ports;
+
+	// Method for generating names for contained PortHoles
+	const char* newName();
+
+	// add a newly created port to the multiporthole
+	PortHole& installPort(PortHole& p);
+
+	// delete all contained portholes
+	void delPorts();
+
+private:
+	// peer multiporthole in a bus connection
+	MultiPortHole* peerMPH;
+
+	// delay on portholes in a bus connection
+	int busDelay;
+};
+
+        //////////////////////////////////////////
         // class PortHole
         //////////////////////////////////////////
 
@@ -197,7 +289,7 @@ class PortHole : public GenericPort
 	friend setPortIndices(Galaxy&);
 
 	// the following function may set myMultiPortHole
-	friend MultiPortHole::installPort(PortHole&);
+	friend PortHole& MultiPortHole::installPort(PortHole&);
 
 public:
 
@@ -336,19 +428,6 @@ public:
 };
 
         //////////////////////////////////////////
-        // class PortList
-        //////////////////////////////////////////
-
-// Used to store a list of PortHoles in a MultiPortHole
-class PortList : public SequentialList
-{
-public:
-
-        // Add PortHole to list
-        void put(PortHole& p) {SequentialList::put(&p);}
-};
-
-        //////////////////////////////////////////
         // class PortListIter
         //////////////////////////////////////////
 
@@ -361,86 +440,6 @@ public:
 	ListIter::reset;
 };
 
-
-        //////////////////////////////////////////
-        // class MultiPortHole
-        //////////////////////////////////////////
-                  
-// A MultiPortHole is a collection of an indeterminate number of
-// PortHoles.
-
-class MultiPortHole: public GenericPort
-{
-	friend class MPHIter;
-	friend class CMPHIter;
-public:
-	MultiPortHole();
-
-	void initialize();
-
-	// make a bus connection with another multiporthole
-	void busConnect (MultiPortHole&, int width, int delay = 0);
-
-	// virtual function to identify multi-ness
-	int isItMulti() const; // {return TRUE;}
-
-	// class identification
-	int isA(const char*) const;
-
-        // Every MultiPortHole must be initialized with the setPort function
-        // Arguments are the name and type (see type.h for supported types).
-        MultiPortHole& setPort(const char* portName,
-                          Block* parent,                // parent block pointer
-                          DataType type = FLOAT);       // defaults to FLOAT
- 
-        // Return the number of physical port currently allocated
-        int numberPorts() const {return ports.size();}
-
-        // Add a new physical port to the MultiPortHole list
-        virtual PortHole& newPort();
-
-	MultiPortHole& realPort() {
-	// my apologies for this horrible cast.  It is safe because
-	// alias for a MultiPortHole is always a MultiPortHole.
-		return *(MultiPortHole *)translateAliases();
-	}
-
-	// set alias for MultiPortHole
-	void setAlias (MultiPortHole &blockPort) {
-		GenericPort::setAlias (blockPort);
-	}
-
-	// Return a new port for connections
-	virtual PortHole& newConnection();
-
-        // Print a description of the MultiPortHole
-	StringList printVerbose () const;
-
-	// function to set Plasma type of subportholes
-	Plasma* setPlasma(Plasma *useType = NULL);
-
-	// destructor
-	~MultiPortHole() { delPorts();}
-protected:                           
-        // List of ports allocated
-        PortList ports;
-
-	// Method for generating names for contained PortHoles
-	const char* newName();
-
-	// add a newly created port to the multiporthole
-	PortHole& installPort(PortHole& p);
-
-	// delete all contained portholes
-	void delPorts();
-
-private:
-	// peer multiporthole in a bus connection
-	MultiPortHole* peerMPH;
-
-	// delay on portholes in a bus connection
-	int busDelay;
-};
 
         //////////////////////////////////////////
         // class GalMultiPort
