@@ -405,7 +405,7 @@ int PTcl::schedule(int argc,char **) {
 }
 
 // return the stop time of the current run
-int PTcl::stoptime(int argc, char **argv) {
+int PTcl::stoptime(int argc, char ** /*argv*/) {
 	if (argc > 1) return usage("stoptime");
 	sprintf(interp->result, "%g", stopTime);
 	return TCL_OK;
@@ -920,7 +920,7 @@ int PTcl::exit(int argc,char ** argv) {
 }
 
 // Request a halt of a running universe
-int PTcl::halt(int argc,char ** argv) {
+int PTcl::halt(int /*argc*/, char ** /*argv*/) {
 	SimControl::requestHalt();
 	return TCL_OK;
 }
@@ -932,12 +932,12 @@ int PTcl::halt(int argc,char ** argv) {
 // static member -- tells whether monitoring is on or off
 int PTcl::monitor = 0;
 
-int PTcl::monitorOn(int argc,char **argv) {
+int PTcl::monitorOn(int /*argc*/, char ** /*argv*/) {
   monitor = 1;
   return TCL_OK;
 }
 
-int PTcl::monitorOff(int argc,char **argv) {
+int PTcl::monitorOff(int /*argc*/, char ** /*argv*/) {
   monitor = 0;
   return TCL_OK;
 }
