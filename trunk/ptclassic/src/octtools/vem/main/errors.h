@@ -36,11 +36,11 @@
 #include <X11/Xlib.h>
 #include "errtrap.h"
 
-extern void vemFail
+extern int vemFail
   ARGS((char *name, char *filename, int line));
    /* Prints out classic yes, no, abort message */
 
-extern void vemOctFail
+extern int vemOctFail
   ARGS((char *filename, int line));
    /* Prints out oct assertion failure message */
 
