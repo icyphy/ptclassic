@@ -45,7 +45,7 @@ static char SccsId[]="$Id$";
 #include "oct.h"		/* Oct data manager   */
 #include "vemDM.h"		/* High level dialogs */
 #include "display.h"		/* Display handling   */
-#include "mm.h"			/* For mm errors      */
+/*#include "mm.h"*/			/* For mm errors      */
 
 #define Fprintf	(void) fprintf
 
@@ -205,6 +205,7 @@ STR message;			/* Error message     */
 {
     char out_message[MAX_MESSAGE];
 
+#ifdef NEVER	/* Used by mm package, which we do not use anymore */
     /* In the special case of out of memory -- total collapse */
     if ((strcmp(name, MM_PKG_NAME) == 0) && (code == MM_OUT_OF_MEMORY)) {
 	Fprintf(stderr, "\007Fatal error detected in %s:\n\t%s\n", name, message);
@@ -212,6 +213,7 @@ STR message;			/* Error message     */
 	Fprintf(stderr, "Perhaps you don't have enough swap space allocated?\n");
 	exit(1);
     }
+#endif
 
     /* Force end of display sequence (if any) */
     dspEnd();
