@@ -312,6 +312,30 @@ char *masterName;
     return(BaseName(masterName));
 }
 
+/* SetParamProp
+Basis of SetFormalParams, SetSogParams, and SetTargetParams.
+ */
+
+boolean
+SetParamProp(instPtr, pListPtr, propname)
+octObject *instPtr;
+ParamListType *pListPtr;
+char* propname;
+{
+    char *pStr;
+    octObject prop = {OCT_UNDEFINED_OBJECT};
+    octStatus status;
+    pStr = PListToPStr(pListPtr);
+    status = CreateOrModifyPropStr(instPtr, &prop, propname, pStr);
+    free(pStr);
+    if (status != OCT_OK) {
+	return(FALSE);
+    } else {
+	FreeOctMembers(&prop);
+	return(TRUE);
+    }
+}
+
 /* 3/19/89
 Set formal params of a galaxy schematic.
 */
@@ -320,19 +344,7 @@ SetFormalParams(galFacetPtr, pListPtr)
 octObject *galFacetPtr;
 ParamListType *pListPtr;
 {
-    char *pStr;
-    octObject prop = {OCT_UNDEFINED_OBJECT};
-    octStatus status;
-
-    pStr = PListToPStr(pListPtr);
-    status = CreateOrModifyPropStr(galFacetPtr, &prop, "params", pStr);
-    free(pStr);
-    if (status != OCT_OK) {
-	return(FALSE);
-    } else {
-	FreeOctMembers(&prop);
-	return(TRUE);
-    }
+    return SetParamProp(galFacetPtr, pListPtr, "params");
 }
 
 /* 7/26/90 3/19/89 1/31/89
@@ -372,32 +384,12 @@ Outputs:
 Updates:
 1/31/89 = name change
 */
-static boolean
-SetParamProp(instPtr, pListPtr, propname)
-octObject *instPtr;
-ParamListType *pListPtr;
-char* propname;
-{
-    char *pStr;
-    octObject prop = {OCT_UNDEFINED_OBJECT};
-    octStatus status;
-    pStr = PListToPStr(pListPtr);
-    status = CreateOrModifyPropStr(instPtr, &prop, propname, pStr);
-    free(pStr);
-    if (status != OCT_OK) {
-	return(FALSE);
-    } else {
-	FreeOctMembers(&prop);
-	return(TRUE);
-    }
-}
-
 boolean
 SetSogParams(instPtr, pListPtr)
 octObject *instPtr;
 ParamListType *pListPtr;
 {
-	return SetParamProp(instPtr,pListPtr,"params");
+	return SetParamProp(instPtr, pListPtr, "params");
 }
 
 boolean
@@ -405,9 +397,8 @@ SetTargetParams(instPtr, pListPtr)
 octObject *instPtr;
 ParamListType *pListPtr;
 {
-	return SetParamProp(instPtr,pListPtr,"targetparams");
+	return SetParamProp(instPtr, pListPtr, "targetparams");
 }
-
 
 /* 
 Check if star corresponding to instPtr, is known to the kernel and if not,
