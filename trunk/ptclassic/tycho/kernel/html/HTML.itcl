@@ -710,7 +710,21 @@ body ::tycho::HTML::hyperJump {filename {point {}} {push 1}} {
         # if it exists, otherwise display the contents of the directory.
         if [file isdirectory $filename] {
             set newfilename [format "%s/%s" $filename index.html]
-            if ![file exists $newfilename] {
+            if [file exists $newfilename] {
+                set filename $newfilename
+                unset newfilename
+            } else {
+		global ptolemypresent
+		if { $ptolemypresent && \
+                        [file exists [file join \
+                        $filename schematic {contents;}]]} {
+		    # If Ptolemy is present, then open this as a facet
+                    ::pvOpenWindow [::ptkOpenFacet \
+			    $filename schematic contents]
+		    return
+		}
+
+		# Display a listing of the file
                 # For backtracking
                 if $push {
                     pushNextHTMLFile
@@ -728,9 +742,6 @@ body ::tycho::HTML::hyperJump {filename {point {}} {push 1}} {
                 }
 		insertDirectoryContents $filename
 		return
-            } else {
-                set filename $newfilename
-                unset newfilename
             }
         }
 
