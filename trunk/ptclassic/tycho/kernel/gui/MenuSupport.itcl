@@ -280,6 +280,9 @@ body ::tycho::MenuSupport::command {tag inMenu args} {
 body ::tycho::MenuSupport::delete {tag} {
     # Check validity
     if { ! [::info exists parentmenu($tag)] } {
+	# FIXME: Reinstate error when HTML has the
+	# bogus "delete Format" removed
+	return
 	error "Menu $tag does not exist"
     }
 
