@@ -52,4 +52,6 @@ public:
                 scheduler = KnownBlock::newSched();
                 type = KnownBlock::domain();
         }
+
+	Scheduler* mySched() { return scheduler;}
 };
