@@ -34,6 +34,15 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #ifndef _CGCrtlib_h
 #define _CGCrtlib_h
 
+/* In case this is included by a C++ file, make sure that all
+   declarations are in C */
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/* Define the prototype for memset */
+#include <string.h>
+
 /* 
  Definition of single (FIX_WORD) and double (FIX_DWORD) unsigned 
  word types.
@@ -149,6 +158,7 @@ extern int fix_overflow;
 extern int FIX_Assign FIX_PROTO((
     int dst_l, int dst_i, FIX_WORD* dst_r,
     int src_l, int src_i, CONST FIX_WORD* src_r));
+
 extern int FIX_DoubleAssign FIX_PROTO((
     int dst_l, int dst_i, FIX_WORD* dst_r, double value));
 
@@ -156,6 +166,7 @@ extern int FIX_DoubleAssign FIX_PROTO((
 
 extern double FIX_Fix2Double FIX_PROTO((
     int src_l, int src_i, CONST FIX_WORD* src_r));
+
 extern int FIX_Fix2Int FIX_PROTO((
     int src_l, int src_i, CONST FIX_WORD* src_r));
 
@@ -166,16 +177,19 @@ extern int FIX_Add FIX_PROTO((
     int dst_l, int dst_i, FIX_WORD* dst_r,
     int op1_l, int op1_i, CONST FIX_WORD* op1_r,
     int op2_l, int op2_i, CONST FIX_WORD* op2_r));
+
 /* - compute `dst = op1 - op2' */
 extern int FIX_Sub FIX_PROTO((
     int dst_l, int dst_i, FIX_WORD* dst_r,
     int op1_l, int op1_i, CONST FIX_WORD* op1_r,
     int op2_l, int op2_i, CONST FIX_WORD* op2_r));
+
 /* - compute `dst = op1 * op2' */
 extern int FIX_Mul FIX_PROTO((
     int dst_l, int dst_i, FIX_WORD* dst_r,
     int op1_l, int op1_i, CONST FIX_WORD* op1_r,
     int op2_l, int op2_i, CONST FIX_WORD* op2_r));
+
 /* - compute `dst = op1 / op2' */
 extern int FIX_Div FIX_PROTO((
     int dst_l, int dst_i, FIX_WORD* dst_r,
@@ -187,6 +201,7 @@ extern int FIX_MulAdd FIX_PROTO((
     int dst_l, int dst_i, FIX_WORD* dst_r,
     int op1_l, int op1_i, CONST FIX_WORD* op1_r,
     int op2_l, int op2_i, CONST FIX_WORD* op2_r));
+
 /* - ditto, but weight the product by 2^weight before accumulating */
 extern int FIX_MulAddWeighted FIX_PROTO((
     int dst_l, int dst_i, FIX_WORD* dst_r,
@@ -249,6 +264,7 @@ extern void FIX_AssignMaxValue FIX_PROTO((
 /* - return TRUE if src represents the value 0.0 */
 #define FIX_IsZero(src_l,src_i,src_r) \
     pFIX_IsZero(src_r)
+
 /* - set the fix to 0.0 */
 #define FIX_SetToZero(dst_l,dst_i,dst) \
     memset(dst, 0, sizeof(fix))
@@ -273,6 +289,10 @@ extern void pFIX_Complement FIX_PROTO((
 #endif
 #ifndef MAX
 #define MAX(x,y) (((x) > (y)) ? (x) : (y))
+#endif
+
+#ifdef __cplusplus
+}
 #endif
 
 #endif /* _CGCrtlib_h */
