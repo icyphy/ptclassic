@@ -41,11 +41,10 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 
    codeblock (body) {
-	int i;
-	double p,q;
-	for (i = 0; i < $val(numSample); i++) {
-		$ref(output, i).real = FIX_Fix2Double($ref(input, i));
-		$ref(output, i).imag = 0;
+	int i = 0;
+	for (; i < $val(numSample); i++) {
+		$ref(output,i).real = FIX_Fix2Double($ref(input,i));
+		$ref(output,i).imag = 0;
 	}
    }
 	go {
