@@ -128,6 +128,9 @@ test Path-4.1 {Test out relativePath} {
     set r8 [::tycho::relativePath  [file join / a b c d e] [file join / a b ]]
     set r9 [::tycho::relativePath  [file join a b c d e] [file join / a b ]]
     set r10 [::tycho::relativePath  [file join a b ] [file join a b .. c]]
-    list $r1 $r1 $r3 $r4 $r5 $r6 $r7 $r8 $r9 $r10
+    set r11 [::tycho::relativePath  \
+	    /export/watson/watson3/cxh/pt/tycho/typt/editors/doc/codeDoc \
+	    \$TYCHO/editors/visedit/doc/codeDoc/EditForest.html]
+    list $r1 $r1 $r3 $r4 $r5 $r6 $r7 $r8 $r9 $r10 $r11
 } {../../h/i ../../h/i . .. ../a e c/d/e ../../.. /a/b a/b/../c}
 doneTests
