@@ -23,10 +23,8 @@ $Id$
 #include "KnownTarget.h"
 #include <ctype.h>
 
-Sub56Target :: Sub56Target(const char* nam, const char* desc,
-			 unsigned x_addr, unsigned x_len,
-			 unsigned y_addr, unsigned y_len) :
-	CG56Target(nam,desc,x_addr,x_len,y_addr,y_len), uname(0)
+Sub56Target :: Sub56Target(const char* nam, const char* desc) :
+	CG56Target(nam,desc), uname(0)
 {
 	initStates();
 }
@@ -90,8 +88,7 @@ void Sub56Target :: wrapup () {
  	inProgSection = TRUE;
 	StringList map = mem->printMemMap(";","");
 	addCode (map);
-	const char *p = disCode;
-	if (p[0]=='y'||p[0]=='Y') CGTarget::wrapup();
+	if (int(disCode)) CGTarget::wrapup();
 // put the stuff into the files.
 	if (!genFile(myCode, uname, ".asm")) return;
 }
@@ -99,6 +96,6 @@ void Sub56Target :: wrapup () {
 ISA_FUNC(Sub56Target,CG56Target);
 
 //make an instance
-static Sub56Target proto("sub-CG56","generate subroutines pigiInit and pigiMain",0,4096,0,4096);
+static Sub56Target proto("sub-CG56","generate subroutines pigiInit and pigiMain");
 
 static KnownTarget entry(proto, "sub-CG56");

@@ -23,10 +23,8 @@ $Id$
 #include "KnownTarget.h"
 #include <ctype.h>
 
-Sim56Target :: Sim56Target(const char* nam, const char* desc,
-			 unsigned x_addr, unsigned x_len,
-			 unsigned y_addr, unsigned y_len) :
-	CG56Target(nam,desc,x_addr,x_len,y_addr,y_len), uname(0)
+Sim56Target :: Sim56Target(const char* nam, const char* desc) :
+	CG56Target(nam,desc), uname(0)
 {
 	initStates();
 }
@@ -95,7 +93,7 @@ void Sim56Target :: headerCode () {
 	addCode(
 		"	org	p:$48\n"
 		"START\n"
-		"	movep	#0,x:m_bcr\n\n");
+		"	movep	#$0000,x:m_bcr\n\n");
 };
 
 Block* Sim56Target::clone() const {
@@ -120,16 +118,15 @@ void Sim56Target :: wrapup () {
 	inProgSection = TRUE;
 	StringList map = mem->printMemMap(";","");
 	addCode (map);
-	const char *p = disCode;
-	if (p[0]=='y'||p[0]=='Y') CGTarget::wrapup();
+	if (int(disCode))
+		CGTarget::wrapup();
 // put the stuff into the files.
 	if (!genFile(myCode, uname, ".asm")) return;
 	if (!genFile(cmds, uname,".cmd")) return;
 // directive to change to the working directory
 	StringList cd = "cd "; cd += dirFullName; cd += ";";
 // execute the assembler
-	p = simCode;
-	if (p[0]=='y'||p[0]=='Y') {
+	if (int(simCode)) {
 		StringList ass = cd;
 		ass += "asm56000 -A -B -L ";
 		ass += uname;
@@ -167,8 +164,7 @@ void Sim56Target :: wrapup () {
 ISA_FUNC(Sim56Target,CG56Target);
 
 // make an instance
-static Sim56Target proto("sim-CG56","run code on the 56000 simulator",
-0,4096,0,4096);
+static Sim56Target proto("sim-CG56","run code on the 56000 simulator");
 
 static KnownTarget entry(proto, "sim-CG56");
 
