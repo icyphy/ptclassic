@@ -25,6 +25,7 @@ PIGIDIR = $(ROOT)/src/pigilib
 PTKLIB = $(ROOT)/src/ptklib
 INCL = -I$(DEDIR) -I$(KERNDIR) -I$(PIGIDIR) -I$(PTKLIB) \
  -I$(TCL_INCDIR) -I$(TK_INCDIR) $(X11_INCSPEC)
+TCL_SCRIPT_DIR = ../../../sdf/tcltk/stars
 
 # Library name
 LIB=libdetclstars.a
@@ -35,22 +36,21 @@ STARDOCDIR = ../../doc/stars
 # source files for all stars, using preprocessor
 PL_SRCS= \
  DETclScript.pl \
- DETkBarGraph.pl
+ DETkBarGraph.pl \
+ DETkMeter.pl \
+ DETkShowValues.pl \
+ DETkSlider.pl \
+ DETkText.pl
 
 # DELMSTkPlot.pl \
 # DELMSCxTkPlot.pl \
-# DETkMeter.pl \
-# DETclScript.pl \
-# DETkShowValues.pl \
-# DETkSlider.pl \
-# DETkText.pl
 
-# TCL_SRCS= \
-#  tkMeter.tcl \
-#  tkScript.tcl \
-#  tkShowValues.tcl \
-#  tkSlider.tcl \
-#  tkText.tcl
+TCL_SRCS= \
+  $(TCL_SCRIPT_DIR)/tkMeter.tcl \
+  $(TCL_SCRIPT_DIR)/tkScript.tcl \
+  $(TCL_SCRIPT_DIR)/tkShowValues.tcl \
+  $(TCL_SCRIPT_DIR)/tkSlider.tcl \
+  $(TCL_SCRIPT_DIR)/tkText.tcl
 
 # The .cc files
 SRCS=$(PL_SRCS:.pl=.cc)
