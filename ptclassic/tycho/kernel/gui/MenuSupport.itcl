@@ -403,7 +403,7 @@ body ::tycho::MenuSupport::exists {tag} {
 
 #####################################################################
 #### index
-# Given an entry tag, get its Tk index. Thsi method takes into account
+# Given an entry tag, get its Tk index. This method takes into account
 # the value of the -tearoff option of the parent menu, since Tk
 # unhelpfully gives the tearoff itself index 0 if -tearoff is set.
 #
