@@ -19,8 +19,6 @@ $Id$
 #include "StringList.h"
 #include "Connect.h"
 
-#define EGNode EGMaster
-
 class EGGateLink;
 class EGNode;
 class SDFStar;
@@ -180,7 +178,7 @@ public:
 // graph.
 //
 // The following ordering is maintained in precedence lists : entries for the
-// same EGMaster occur together (one after another), and they occur in
+// same EGNode occur together (one after another), and they occur in
 // order of increasing invocation number. Entries for the same invocation 
 // occur in increasing order of the number of delays on the arc.
 //
