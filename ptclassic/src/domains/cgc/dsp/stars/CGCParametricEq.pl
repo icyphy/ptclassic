@@ -75,23 +75,25 @@ and Hipass types.
 	}
 
 	codeblock(setparams) {
-	  static void $starSymbol(setparams)(parametric_t *parametric){
+	  static void $sharedSymbol(CGCParametricEq,setparams)
+	    (parametric_t *parametric, double sampleFreq, double
+	     passFreq, double centerFreq, double bandwidth, double gain) {
 	    double gaintmp, t0, invf1prime;
 
-	    parametric->T = 1/$ref(sampleFreq);
-	    parametric->omegap = 2*PI*$ref(passFreq)*parametric->T;
-	    parametric->omegac = 2*PI*$ref(centerFreq)*parametric->T;
+	    parametric->T = 1/sampleFreq;
+	    parametric->omegap = 2*PI*passFreq*parametric->T;
+	    parametric->omegac = 2*PI*centerFreq*parametric->T;
 	    t0 = log(2)/2;
-	    invf1prime = exp($ref(bandwidth)*t0);
+	    invf1prime = exp(bandwidth*t0);
 	    parametric->omegabw = parametric->omegac*(invf1prime-1/invf1prime);
 
-	    if ($ref(gain)>=0){
+	    if (gain>=0){
 	      parametric->gainflag = 1;
-	      gaintmp=$ref(gain)/20.0;
+	      gaintmp=gain/20.0;
 	    }
 	    else{
 	      parametric->gainflag = 0;
-	      gaintmp=$ref(gain)/-20.0;
+	      gaintmp=gain/-20.0;
 	    }
 	    parametric->lineargain = pow(10.0,gaintmp);
 	  }
@@ -283,8 +285,6 @@ and Hipass types.
 	    int gainflag;
 	  } parametric_t;
 
-
-
 #define PI (M_PI)
 	}
 	codeblock(declarations){
@@ -297,14 +297,14 @@ and Hipass types.
 	  addGlobal(globalDecl, "global");
 	  addGlobal(declarations);
 	  CGCBiquad::initCode();
-	  addProcedure(setparams);
-          addProcedure(constbw, "CGCParametricEq_setparams");
+	  addProcedure(setparams, "CGCParametricEq_setparams");
+          addProcedure(constbw, "CGCParametricEq_constbw");
 	  addProcedure(lowpass, "CGCParametricEq_lowpass");
 	  addProcedure(hipass, "CGCParametricEq_hipass");
 	  addProcedure(bandpass, "CGCParametricEq_bandpass");
 	  addProcedure(setfiltertaps, "CGCParametricEq_setfiltertaps");
 	  addProcedure(selectFilter, "CGCParametricEq_selectFilter");
-	  addCode("$starSymbol(setparams)(&$starSymbol(parametric));");
+	  addCode("$sharedSymbol(CGCParametricEq,setparams)(&$starSymbol(parametric),$ref(sampleFreq), $ref(passFreq), $ref(centerFreq), $ref(bandwidth), $ref(gain));");
 	  if (strcasecmp(filtertype, "LOW") == 0){
 	    addCode("$sharedSymbol(CGCParametricEq,lowpass)(&$starSymbol(parametric),$starSymbol(filtercoeff));");
 	  }
