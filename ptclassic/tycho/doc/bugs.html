@@ -1,10 +1,16 @@
 <!-- $Id$ -->
 <html>
 <head>
-<Title>Current Working Bug List</title>
+<Title>Tycho Bugs</title>
 </head>
 <body bgcolor="lightgoldenrodyellow">
-<h1><a name="bug list">Current Working Bug List</a></h1>
+<h1><a name="bug list">Tycho Bugs</a></h1>
+Other buglists
+<ul>
+<li><a href="tymac.html#macintosh bugs">Tycho/Macintosh bugs</a>
+<li><a href="tynt.html#windows bugs">Tycho/Windows bugs</a>
+</ul>
+Contents:
 <ul>
 <li><a href="#bugs in the kernel">Kernel bugs</a>
 <li><a href="#bugs in text editors">Bugs in text editors</a>
@@ -12,10 +18,19 @@
 </ul>
 <h1><a name="bugs in the kernel">Bugs in the kernel</a></h1>
 
+<h3><a href="$TYCHO/kernel/Displayer.itcl">Displayer</a></h3>
+<ul>
+<li>Key-driven posting of menus does not work.  Displayer needs to
+    bind Alt and F-10 to post the menus.
+    Also, the Edit widget should not mark modified when the Alt key is hit.
+    The menu buttons created in MenuSupport and MenuBar may need to be
+    made global (with an uplevel #0).
+</ul>
+
 <h3><a href="$TYCHO/kernel/Edit.itcl">Edit</a></h3>
 <ul>
 <li>Fill region is much too slow.
-<li>Need multiple undo.
+<li>The undo in the text widgets is only one level deep.
 <li>Meta-f, Meta-d do not skip over white space (a Tk "feature" -- need to
     override it).
 <li>Need quick font-size control in the menus, like in HTML.
@@ -37,13 +52,9 @@ clipboard.
 <li>Spelling checker should ignore single letter words.
 </ul>
 
-<h3><a href="$TYCHO/kernel/Displayer.itcl">Displayer</a></h3>
+<h3><a href="$TYCHO/kernel/File.itcl">File</a></h3>
 <ul>
-<li>Key-driven posting of menus does not work.  Displayer needs to
-    bind Alt and F-10 to post the menus.
-    Also, the Edit widget should not mark modified when the Alt key is hit.
-    The menu buttons created in MenuSupport and MenuBar may need to be
-    made global (with an uplevel #0).
+<li>Crash recovery code only works with Ptolemy binaries.
 </ul>
 
 <h3><a href="$TYCHO/kernel/Glimpse.itcl">Glimpse</a></h3>
@@ -65,6 +76,7 @@ through say the Ptolemy tree can take a very long time.
     a link that references the file open in the other, the other
     one is brought to the font and the one I am looking at doesn't
     change. This isn't what some people would expect.
+<li>    HTTP is not supported, so hyperlinks can only be to local files.
 <li>    There should be a menu entry to hide the toolbar and location.
 <li>    Not all toolbar commands are available from menus.
 <li>    There are no key bindings for toolbar commands.
@@ -82,8 +94,24 @@ through say the Ptolemy tree can take a very long time.
 
 <h3><a href="$TYCHO/kernel/FileBrowser.itcl">FileBrowser</a></h3>
 <ul>
-<li>Name completion does not work through directories.
+
+<li>Name completion does not work through directories, you can only
+complete names of files in the current directory, not names in the sub
+directories.
+
+
 </ul>
+
+<h3><a href="$TYCHO/kernel/RevControlRCS.itcl">RevControlRCS</a></h3>
+<ul>
+
+<li> Unfortunately, if RCS does not necessarily put the version
+control files in the RCS subdirectory.  If the RCS subdirectory does
+not exist, then the directory is not created and the version control
+file is put in the current directory.
+
+</ul>
+
 
 <h3><a href="$TYCHO/kernel/TclShell.itcl">TclShell</a></h3>
 <ul>
