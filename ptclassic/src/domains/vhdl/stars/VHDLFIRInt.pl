@@ -88,12 +88,13 @@ For more information about polyphase filters, see F. J. Harris,
 	go {
 	  StringList out;
 	  int tapSize = taps.size();
+	  /*
 	  // Perform calculation.
 	  for (int i=0; i<int(tapSize); i++) {
 	      if (i%10 == 0) {
 		 if (i!=0) out << ";\n";
 		 out <<  "$ref(signalOut) $assign(signalOut) "
-		     << (i != 0 ? "$ref(signalOut) + " : "")
+		     << (i != 0 ? "$ref(signalOut) + " : "") 
 		     << "$ref(signalIn," << i << ")*$ref(taps," << i << ")";
 	     }
 	      else {
@@ -102,6 +103,30 @@ For more information about polyphase filters, see F. J. Harris,
 	      }
 	  }
 	  out << ";\n";
+	  addCode(out);
+	  out.initialize();
+	  */
+
+	  // Perform calculation.
+	  int j = 0;
+	  for (int i = 0; i < int(tapSize); i++) {
+	      if (i%10 == 0) {
+		j = i;
+		if (i!=0) out << ";\n";
+		StringList condText = "";
+		condText << "$temp(signalOut" << i-10 << ",INTEGER) + ";
+		out <<  "$temp(signalOut" << i << ",INTEGER) := "
+		    << (i != 0 ? (const char*) condText : "") 
+		    << "$ref(signalIn," << i << ")*$ref(taps," << i << ")";
+	      }
+	      else {
+		out << "+ $ref(signalIn," << i << ")*$ref(taps," 
+		    << i << ")";
+	      }
+	  }
+	  out << ";\n";
+	  out << "$ref(signalOut) $assign(signalOut) $temp(signalOut"
+	      << j << ",INTEGER);\n";
 	  addCode(out);
 	  out.initialize();
 	}
