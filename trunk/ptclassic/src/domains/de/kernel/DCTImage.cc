@@ -56,20 +56,21 @@ void DCTImage::init()
 
 
 DCTImage::DCTImage(int a, int b, int c, int d, int e):
-		blocksize(e), BaseImage(a, b, c, d) { init(); }
+		BaseImage(a, b, c, d), blocksize(e)  { init(); }
 
 
 DCTImage::DCTImage(int a, int b, int c, int d):
-		blocksize(d), BaseImage(a, b, c) { init(); }
+		BaseImage(a, b, c), blocksize(d) { init(); }
 
 
 DCTImage::DCTImage(const BaseImage& bi, int a):
-		blocksize(a), BaseImage(bi) { init(); }
+		BaseImage(bi), blocksize(a) { init(); }
 
 
 DCTImage::DCTImage(const DCTImage& di, int a):
+        BaseImage(di),
 	upWidth(di.upWidth), upHeight(di.upHeight),
-  	blocksize(di.blocksize), BaseImage(di)
+  	blocksize(di.blocksize)
 {
 	LOG_NEW; DCTData = new float[size];
 	if (!a) { copy(size, DCTData, di.DCTData); }
