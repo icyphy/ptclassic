@@ -75,6 +75,39 @@ control which of several versions of Tycho you run, if you have more
 than one version installed on your system.
 
 <p>
+
+Tycho includes HTML documentation of the Itcl classes that make up
+Tycho.  To save space, these files are not shipped in the Tycho tar
+file, you must build them after untarring the distribution.
+The way to do this is:
+<PRE>
+cd $TYCHO
+make install &gt;&amp; install.out &amp;
+</PRE>
+
+The <CODE>install</CODE>  makefile rule will update the HTML files in
+<CODE>doc/codeDoc</CODE>, create concept and code indexes and then
+regenerate the HTML documentation using the indexes.  <CODE>make install</CODE>
+usually takes 10-15 minutes to complete.
+
+ <P>The
+<A HREF="../kernel/doc/usersGuides/BuilderDialogHelp.html">BuilderDialog</A>
+is an experimental graphical interface to the build process.  The
+BuilderDialog interface will change over time, but you may find it useful
+for building the html documentation.
+
+ <P>The TclJava interface and the Profile command require compilation
+of C files.  To build these packages, run
+<PRE>
+cd $TYCHO
+make tclexts
+</PRE>
+Note that to build the TclJava, you need to have JDK1.1.1, and to build
+the <CODE>profile</CODE> command, you need to have the Tcl sources.
+ <P>See <A HREF="coding/buildtclexts.html">Building Tcl Extensions</A>
+for more information.
+
+<p>
 <h2><a name="standalone execution">Standalone Execution</a></h2>
 <p>
 To use Tycho standalone (independent of Ptolemy),
