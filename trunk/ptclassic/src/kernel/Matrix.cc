@@ -591,10 +591,10 @@ StringList ComplexMatrix::print() const {
   strm << ")\n";
   for(int row = 0; row < nRows; row++) {
     for(int col = 0; col < nCols; col++) {
-      sprintf(buf,"%22.15g", real((*this)[row][col]));
+      sprintf(buf, "%22.15g", real((*this)[row][col]));
       strm << buf;
       strm << "+";
-      sprintf(buf,"%22.15g", imag((*this)[row][col]));
+      sprintf(buf, "%22.15g", imag((*this)[row][col]));
       strm << buf;
       strm << "j ";
     }
@@ -1046,7 +1046,7 @@ StringList FixMatrix::print() const {
   strm << ")\n";
   for(int row = 0; row < nRows; row++) {
     for(int col = 0; col < nCols; col++) {
-      sprintf(buf,"%22.15g", (double)(*this)[row][col]);
+      sprintf(buf, "%22.15g", double((*this)[row][col]));
       strm << buf;
       strm << " ";
     }
@@ -1386,7 +1386,7 @@ StringList FloatMatrix::print() const {
   strm << ")\n";
   for(int row = 0; row < nRows; row++) {
     for(int col = 0; col < nCols; col++) {
-      sprintf(buf,"%22.15g", (*this)[row][col]);
+      sprintf(buf, "%22.15g", (*this)[row][col]);
       strm << buf;
       strm << " ";
     }
@@ -1727,7 +1727,7 @@ StringList IntMatrix::print() const {
   strm << ")\n";
   for(int row = 0; row < nRows; row++) {
     for(int col = 0; col < nCols; col++) {
-      sprintf(buf,"%11d", (*this)[row][col]);
+      sprintf(buf, "%11d", (*this)[row][col]);
       strm << buf;
       strm << " ";
     }
