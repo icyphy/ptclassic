@@ -82,6 +82,7 @@ PL_SRCS= \
  SDFMultiple.pl \
  SDFMux.pl \
  SDFNumToBus.pl \
+ SDFPcwzLinear.pl \
  SDFPlay.pl \
  SDFPolarToRect.pl \
  SDFPrinter.pl \
