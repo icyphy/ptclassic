@@ -36,7 +36,7 @@ If you are loading Ptolemy from a tape, do the following:
 .ip a.
 cd /tmp
 (or any directory where you have write permission
-and there is plenty, many Mbytes, of free disk space).
+and there is at least 22 Mbytes of free disk space).
 .ip b.
 Load the tape into your drive
 .ip c.
@@ -66,8 +66,9 @@ zcat pt-0.4.src.tar.Z |  ( chdir ~ptolemy/..; tar xf - )
 You must not skip this step.  \*(PT depends on these files being present.
 Note that you may get a few warning messages during this and the following
 step about
-the tar program not being able to create a certain directory.  This
-is expected, so you need not worry. 
+the tar program not being able to create some directories because they
+already exist.  This is expected (the same directory is mentioned in
+several of the tar files), so you need not worry. 
 .ip 3.
 If you are running the DecStation (MIPS) version of \*(PT:
 .br
@@ -75,41 +76,17 @@ zcat pt-0.4.mips.tar.Z |  ( chdir ~ptolemy/..; tar xf - )
 .br
 If you are running the Sun 4 (Sparc, IPC, IPX, etc) version:
 .br
-zcat pt-0.4.mips.tar.Z |  ( chdir ~ptolemy/..; tar xf - )
+zcat pt-0.4.sun4.tar.Z |  ( chdir ~ptolemy/..; tar xf - )
 .br
 (this uncompresses the binaries and creates the executable files.)
-Note that is possible to have more than one binary set installed
-on the same file system as different directories are used for each
+Note that is possible to install both the Sun-4 and the DecStation
+binaries on the same file system as different directories are used for each
 set of binaries.
 .ip 4
 cd "~ptolemy"
 .br
 (change directories to the ptolemy root directory)
 .ip 5.
-Check to make sure that the 
-new ptolemy files take up the approximate disk space listed above.  
-(This is
-important as zcat will not report an "out of disk space" error.)  
-If
-the files check out, you may now remove the 
-ptolemy "tar.Z" files to save
-disk space.
-.ip 6.
-Create a symbolic link so that ``/usr/users/ptolemy'' points to ~ptolemy.
-If this is not possible or desirable, an alternative is to edit
-the following files:
-.sp
-	~ptolemy/src/pigiExample/make.template
-.br
-	~ptolemy/config-g++.mk
-.br
-	~ptolemy/config-cfront.mk
-.sp
-In the first of these, the
-ROOT variable should be changed to point to the actual location of Ptolemy.
-In the second two files, the PTOLEMY_FULL_PATH variable should
-point to the actual location.
-.ip 7.
 Edit ~ptolemy/.rhosts, adding a line for your system
 (This gives pigi permission to create an RPC server process with the
 .i rsh
@@ -130,14 +107,14 @@ In troubleshooting an installation, having the ``ptolemy'' user
 properly configured can be very valuable.
 .pp
 However, we recognize the some sites resist the creation of fictitious
-users. Consequently, Ptolemy can be installed anywhere.
+users.  Consequently, Ptolemy can be installed anywhere.
 If you do this, \fIevery\fR Ptolemy user must set a PTOLEMY
 environment variable to point to the root directory of Ptolemy.
 The installation is the same as above, except that ``~ptolemy''
 is replaced with ``$PTOLEMY''.
 .H2 "Special considerations for installation under Open Windows"
 .pp
-\*(PT was developed using the X11R5 distribution from MIT.  It will
+\*(PT was developed using the X11R4 or X11R5 distributions from MIT.  It will
 run successfully under Open Windows version 2.  There are problems
 with running the graphic interface with Open Windows version 3, however.
 Some users have had no problems at all, but others have 
@@ -147,8 +124,9 @@ problem with the X-server supplied with the Open Windows 3.0, but
 the error is elusive and we have not yet tracked it down.
 .pp
 In order for all utilities included with this distribution to work
-under Open Windows (either version), you must install the Athena
-widgets (the freely redistributable widget set from the X11R4 distribution),
+under Open Windows (either version), you must install the shared libraries
+for the Athena
+widgets (the freely redistributable widget set from the MIT X11 distribution),
 which are provided with this distribution under the ``~ptolemy/athena.sun4'' 
 directory.
 To install them, become root
@@ -160,6 +138,10 @@ you have installed Open Windows in a non-standard place, into ``$OPENWINHOME/lib
 .EQ
 delim $$
 .EN
+If you do not wish to do this, you could leave them in place and have
+every Ptolemy user change their LD_LIBRARY_PATH environment variable
+to search ``~ptolemy/athena.sun4'' before ``/usr/openwin/lib''.  Consult
+the Unix manual entry for the ``ld'' program to learn more about this.
 .pp
 After installation, the ptolemy account will contain several scripts for
 starting up X11R5 (Xrun), Open Windows with
@@ -203,7 +185,9 @@ cd /tmp
 and there is plenty, many Mbytes, of free disk space).
 .ip b.
 If you just installed Ptolemy from tape, and the tape is still
-in the tape drive you may skip the next step (c) and go to step (d).
+in the tape drive you may skip the next step (c) and go to step (d),
+since you will be pointing to the second tar archive on the tape
+already.
 .ip c.
 insert the tape into the tape drive.
 .ip
