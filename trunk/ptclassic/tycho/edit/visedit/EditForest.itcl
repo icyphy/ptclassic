@@ -108,8 +108,6 @@ configbody ::tycho::EditForest::forest {
 #### constructor
 #
 body ::tycho::EditForest::constructor {args} {
-    component graphics interactiveEnable 0
-
     addMenuSeparator Edit
 
     addMenuItem {New Root} Edit -underline 4 -accelerator "R" \
@@ -119,8 +117,6 @@ body ::tycho::EditForest::constructor {args} {
 	    -command "$this component graphics addChild"
 
     eval itk_initialize $args
-
-    component graphics interactiveEnable 1
 }
 
     ###################################################################
