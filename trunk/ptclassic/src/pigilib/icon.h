@@ -52,6 +52,8 @@ extern int RpcMkSchemIcon ARGS((RPCSpot *spot, lsList cmdList,
 				long userOptionWord));
 extern int RpcShowName ARGS((RPCSpot *spot, lsList cmdList,
 			     long userOptionWord));
+extern int RpcTycho ARGS((RPCSpot *spot, lsList cmdList,
+			       long userOptionWord));
 extern int RpcLookInside ARGS((RPCSpot *spot, lsList cmdList,
 			       long userOptionWord));
 extern int IconFileToSourceFile ARGS((char *iconFile, char *sourceFile,
