@@ -122,6 +122,8 @@ struct dLayer {
         (box).upperRight.y = temp;                                      \
     }	 
 
+#define MAXLAYERS 256		/* Maximum number of layers */
+
 #define AUTOMATIC 0
 #define PORTRAIT 1
 #define LANDSCAPE 2
@@ -1383,7 +1385,7 @@ setTechnology(facet, layerTable)
 octObject *facet;
 st_table **layerTable;
 {
-    char layerName[128][128];
+    char layerName[MAXLAYERS][128];
     char row[8][10];
     int i, j, layers, bitmapName;
     struct layerdescription *layerDescription;
@@ -1435,7 +1437,10 @@ st_table **layerTable;
 
     OH_ASSERT_DESCR(octInitGenContents(&techfacet, OCT_LAYER_MASK, &layergen), "can not init the layer gen");
     while (octGenerate(&layergen, &layer) == OCT_OK) {
-
+        if( layers >= MAXLAYERS) {
+         fprintf(stderr,"Warning: oct2ps: Increase MAXLAYERS and recompile\n");
+	 return;
+        }
 	(void) strcpy(layerName[layers], layer.contents.layer.name);
 	
 	tapGetDisplayInfo(&layer, &pri, &ncolors, &fill, &border);
