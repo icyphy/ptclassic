@@ -283,21 +283,21 @@ CodeStream CGCTarget::mainLoopBody() {
     defaultStream = &body;
     int iterations = inWormHole()? -1 : (int)scheduler()->getStopTime();
     beginIteration(iterations,0);
+    body << wormIn;
     body << mainLoop;
+    body << wormOut;
     endIteration(iterations,0);
     defaultStream = &myCode;
     return body;
-}    
- 
+}   
+
 void CGCTarget::mainLoopCode() {
     defaultStream = &mainLoop;
     // It is possible that the star writer has specified items that go
     // in the main loop already to the myCode stream
     if (inWormHole()) allWormInputCode();
-    *defaultStream << wormIn;
     compileRun((SDFScheduler*) scheduler());
-    if (inWormHole()) allWormInputCode();
-    *defaultStream << wormOut;
+    if (inWormHole()) allWormOutputCode();
     defaultStream = &mainClose;
 }
 
