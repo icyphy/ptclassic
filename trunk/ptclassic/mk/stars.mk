@@ -71,7 +71,7 @@ include $(CGC_SRC)/cgcstars.mk			# CGC -> CGCSTARS
 include $(CG56_SRC)/cg56stars.mk		# CG56 -> CG56STARS
 include $(CG56DSP_SRC)/cg56dspstars.mk		# CG56DSP -> CG56DSP_STARS
 include $(CG96_SRC)/cg96stars.mk		# CG96 -> CG96STARS
-include $(CG96_SRC)/cg96dspstars.mk		# CG96DSP -> CG96DSP_STARS
+include $(CG96DSP_SRC)/cg96dspstars.mk		# CG96DSP -> CG96DSP_STARS
 
 # Extra targets
 SDFT = $(OBJDIR)/domains/sdf/targets
