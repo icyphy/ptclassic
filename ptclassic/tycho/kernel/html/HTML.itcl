@@ -143,6 +143,9 @@ class ::tycho::HTML {
     # Open the source file using an HTML editor.
     method openSource {}
 
+    # Print the selection or the entire contents.
+    method print {}
+
     # Raise the HTML browser window and the source window (if any).
     method raiseWindow {}
 
@@ -361,6 +364,9 @@ body ::tycho::HTML::constructor {args} {
     $text configure -insertbackground [$text cget -background]
 
     toolbar entry location Location $file "$this hyperJump"
+
+    # Put some space around the text
+    $text configure -padx 0.25c -pady 0.25c
 }
 
 ###################################################################
@@ -583,6 +589,24 @@ body ::tycho::HTML::openSource {} {
     }
     set obj [::tycho::view EditHTML [list -file $file]]
     set sourcewin $obj
+}
+
+#####################################################################
+#### print
+# Print the selection or, if there is no selection, the entire contents.
+# At the moment, this first warns the user that it is not fully implemented,
+# querying him or her to see whether to proceed.  Then, it
+# queries the user for the print command to use.  A temporary file is
+# created and then deleted to do the printing.  The name of that file
+# will be appended to the end of the command specified by the user before
+# it is invoked.
+#
+body ::tycho::HTML::print {} {
+    if [safeEval ::tycho::askuser {Printing HTML is not fully implemented. \
+            A fairly crude facsimile of the text only will be printed. \
+            Proceed?}] {
+        ::tycho::Edit::print
+    }
 }
 
 #####################################################################
@@ -1051,7 +1075,7 @@ proc HMinit_state {win} {
         fill 0
         list list
         S_adjust_size 0
-        S_tab 1.0
+        S_tab 1.5
         S_unknown \xb7
         S_update 10
         S_symbols O*=+-o\xd7\xb0>:\xb7
