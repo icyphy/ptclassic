@@ -1,0 +1,41 @@
+.<!-- $Id$ -->
+<html>
+<head>
+<title>Pitcl</title>
+</head>
+<body bgcolor="#faf0e6">
+<H1>Pitcl</H1>
+Pitcl is an interface to the Ptolemy kernel that is present in Ptolemy 0.7
+and later.  Pitcl is not backward compatible with ptcl, it is
+intended to replace ptcl.  Pitcl uses Itcl classes, ptcl does not.
+ <P>Below we list different ways of starting Ptolemy, and which interface
+(pitcl or ptcl is present).
+<DL>
+<DT> <CODE>pigi</CODE>, <CODE>ptrim</CODE>, <CODE>ptiny</CODE>,
+<CODE>pigi -ptrim</CODE> etc.
+<DD> If you bring up a Tycho TclShell window by typing a <CODE>y</CODE> in a
+VEM facet, then the TclShell will have a ptcl interpreter behind it.
+
+<DT> <CODE>ptcl</CODE>, <CODE>ptcl.ptrim</CODE>, <CODE>ptcl.ptiny </CODE>
+<DD> Start a ptcl interpreter.
+
+<DT> <CODE>pitcl</CODE>, <CODE>pitcl.ptrim </CODE>, <CODE>pitcl.ptiny</CODE>
+<DD> Start a pitcl interpreter.
+
+<DT> <CODE>tysh</CODE>, <CODE>tysh -ptrim</CODE>, <CODE>tysh -ptiny</CODE>
+<DD> Start a binary that has a pitcl interpreter.
+
+</DL>
+ <P>In Tycho, <CODE>Tycho.tcl</CODE> sets <CODE>::ptolemyfeature(pitcl)</CODE>
+if pitcl is present, and <CODE>::ptolemyfeature(ptcl)</CODE> is set if ptcl is present.
+
+<p>
+<HR>
+Copyright &#169 1997, The Regents of the University of California.
+All rights reserved.
+<br>
+Last updated: $Date$,
+comments to: <author>tycho@eecs.berkeley.edu</author>
+</body>
+</html>
+
