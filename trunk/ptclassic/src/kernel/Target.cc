@@ -95,14 +95,19 @@ void Target::setGalaxy(Galaxy& g) {
 // in the action list.  See InterpUniverse::initTarget and
 // InterpGalaxy::reset for more details
 void Target::requestReset() {
-    //Handle case of being a child target
-    if (parent() && parent()->isA("Target")) 
-	((Target*)parent())->requestReset();
-    //Handle case of being inside a wormhole
-    if (galaxy() && galaxy()->parent() && galaxy()->parent()->isItWormhole() &&
-	galaxy()->parent()->target())
-	galaxy()->parent()->target()->requestReset();
-    resetFlag = 1;
+	// Handle case of being a child target
+	if (parent() && parent()->isA("Target")) {
+		((Target*)parent())->requestReset();
+	}
+
+	// Handle case of being inside a wormhole
+	if (galaxy() && galaxy()->parent() &&
+	    galaxy()->parent()->isItWormhole() &&
+	    galaxy()->parent()->target()) {
+		galaxy()->parent()->target()->requestReset();
+	}
+
+	resetFlag = 1;
 }
 
 int Target::resetRequested() {
@@ -120,13 +125,13 @@ void Target::setup() {
 
 // setup the galaxy, i.e. check star types and set targets pointers
 int Target::galaxySetup() {
-  if (! gal) {
-    Error::abortRun(*this, "Error in Target::setup() -- ",
-		    " no galaxy attached to the target");
-    return FALSE;
-  }
+	if (! gal) {
+		Error::abortRun(*this, "Error in Target::setup() -- ",
+				" no galaxy attached to the target");
+		return FALSE;
+	}
 
-  return gal->setTarget(this);
+	return gal->setTarget(this);
 }
 
 // do I support a given star
