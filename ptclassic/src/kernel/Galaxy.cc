@@ -14,6 +14,7 @@ Methods for class Galaxy
 #include "StringList.h"
 #include "Galaxy.h"
 #include "Block.h"
+#include "Scheduler.h"
 
 // small virtual functions
 
@@ -85,12 +86,13 @@ Galaxy :: printVerbose () const {
 
 // Initialize myself and all sub-blocks.  Note that
 // Block::initialize calls start().
+// Stop the initialization if an error occurs.
 
 void Galaxy :: initialize() {
 	Block::initialize();
 	GalTopBlockIter next(*this);
 	Block* b;
-	while ((b = next++) != 0)
+	while ((b = next++) != 0 && !Scheduler::haltRequested())
 		b->initialize();
 }
 
@@ -104,7 +106,7 @@ void Galaxy :: initState() {
         Block::initState();
 	GalTopBlockIter next(*this);
 	Block* b;
-	while ((b = next++) != 0)
+	while ((b = next++) != 0 && !Scheduler::haltRequested())
 		b->initState();
 }
 
