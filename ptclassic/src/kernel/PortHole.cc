@@ -476,8 +476,8 @@ char*
 MultiPortHole :: newName () {
 	char buf[512];
 	sprintf (buf, "%s#%d", readName(), ports.size());
-// save the string on the heap.  Disadvantage: multiple copies of "input#1"
-	return savestring (buf);
+// save the string on the heap.  hashstring avoids multiple copies of "input#1"
+	return hashstring (buf);
 }
 
 // Add a new PortHole to the MultiPortHole.  install is provided so

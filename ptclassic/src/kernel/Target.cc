@@ -168,7 +168,7 @@ void Target::addChild(Target& newChild) {
 // Create child name.   This is a memory leak!
 	char buf[20];
 	sprintf (buf, "proc%d", nChildren);
-	char* cname = savestring(buf);
+	const char* cname = hashstring(buf);
 	newChild.setNameParent(cname,this);
 
 	newChild.link = 0;

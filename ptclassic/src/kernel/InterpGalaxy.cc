@@ -80,10 +80,10 @@ InterpGalaxy::connect(const char* srcStar,const char* srcPipe,
 	PortHole *dstP = findPortHole (dstStar, dstPipe);
 	if (srcP == NULL || dstP == NULL) return FALSE;
 
-	srcPipe = savestring(srcPipe);
-	srcStar = savestring(srcStar);
-	dstPipe = savestring(dstPipe);
-	dstStar = savestring(dstStar);
+	srcPipe = hashstring(srcPipe);
+	srcStar = hashstring(srcStar);
+	dstPipe = hashstring(dstPipe);
+	dstStar = hashstring(dstStar);
 
 // add the action to the list
 	actionList += "C";
@@ -100,8 +100,8 @@ InterpGalaxy::connect(const char* srcStar,const char* srcPipe,
 // Add a star to the galaxy.
 int
 InterpGalaxy::addStar(const char* starname,const char* starclass) {
-	starname = savestring (starname);
-	starclass = savestring (starclass);
+	starname = hashstring (starname);
+	starclass = hashstring (starclass);
 	Block *src = KnownBlock::clone(starclass);
 	if (src == 0) return FALSE;
 	addBlock(src->setBlock(starname,this));
@@ -117,7 +117,7 @@ int
 InterpGalaxy::delStar(const char* starname) {
 // the following is a severe violation of information hiding, but
 // better this than a core dump
-	if (strncmp (starname, "!af", 3) == 0) {
+	if (strncmp (starname, "auto-fork", 9) == 0) {
 		Error::abortRun (*this, "can't delete autoforks with delStar");
 		return FALSE;
 	}
@@ -145,12 +145,12 @@ InterpGalaxy::delStar(const char* starname) {
 int
 InterpGalaxy::alias(const char* galportname,const char* starname,
 		    const char* portname) {
-	galportname = savestring (galportname);
+	galportname = hashstring (galportname);
 // first get the portname for the contained star
 	GenericPort *ph = findGenericPort (starname, portname);
 	if (ph == NULL) return FALSE;
-	portname = savestring (portname);
-	starname = savestring (starname);
+	portname = hashstring (portname);
+	starname = hashstring (starname);
 // create new galaxy port, add to galaxy, do the alias
 	Plasma* pla = ph->setPlasma();
 	DataType dType = pla ? pla->type() : ph->myType();
@@ -174,7 +174,7 @@ InterpGalaxy::alias(const char* galportname,const char* starname,
 // connections.
 int
 InterpGalaxy::addNode (const char* nodename) {
-	nodename = savestring (nodename);
+	nodename = hashstring (nodename);
 	// get a geodesic appropriate for the current domain, add to list
 	Geodesic& geo = Domain::named(KnownBlock::domain())->newNode();
 	geo.setNameParent (nodename, this);
@@ -214,9 +214,9 @@ InterpGalaxy::nodeConnect (const char* star, const char* port,
 		noInstance (node, readName());
 		return FALSE;
 	}
-	star = savestring (star);
-	port = savestring (port);
-	node = savestring (node);
+	star = hashstring (star);
+	port = hashstring (port);
+	node = hashstring (node);
 	if (ph->isItOutput()) {
 		if (!g->setSourcePort (*ph, delay)) return FALSE;
 	}
@@ -240,8 +240,8 @@ int
 InterpGalaxy::disconnect (const char* star, const char* port) {
 	PortHole* ph = findPortHole (star, port);
 	if (ph == NULL) return FALSE;
-	star = savestring (star);
-	port = savestring (port);
+	star = hashstring (star);
+	port = hashstring (port);
 	ph->disconnect();
 // add to actionList.  Yes, when we clone, clone will connect and
 // then disconnect.
@@ -254,9 +254,9 @@ InterpGalaxy::disconnect (const char* star, const char* port) {
 // add a state to the galaxy.
 int
 InterpGalaxy::addState (const char* statename, const char* stateclass, const char* statevalue) {
-        statename = savestring (statename);
-        stateclass = savestring (stateclass);
-        statevalue = savestring (statevalue);
+        statename = hashstring (statename);
+        stateclass = hashstring (stateclass);
+        statevalue = hashstring (statevalue);
         State *src = KnownState::clone(stateclass);
         if (src == 0) return FALSE;
         Block::addState(src->setState(statename,this,statevalue));
@@ -271,9 +271,9 @@ InterpGalaxy::addState (const char* statename, const char* stateclass, const cha
 // change a value of a state within the galaxy.
 int
 InterpGalaxy::setState (const char* blockname, const char* statename, const char* statevalue) {
-        blockname = savestring (blockname);
-        statename = savestring (statename);
-        statevalue = savestring (statevalue);
+        blockname = hashstring (blockname);
+        statename = hashstring (statename);
+        statevalue = hashstring (statevalue);
 	if(!strcmp(blockname, "this")) {
 		State *src = stateWithName(statename);
 		if (src == 0) return FALSE;
@@ -324,8 +324,8 @@ InterpGalaxy :: numPorts (const char* star, const char* port, int num) {
 	int np = mp->numberPorts ();
 	if (np == num) return TRUE;
 
-	star = savestring (star);
-	port = savestring (port);
+	star = hashstring (star);
+	port = hashstring (port);
 // make the ports (allow case where we've already connected some)
 	for (int i = np; i < num; i++)
 		mp->newPort();
@@ -340,9 +340,10 @@ InterpGalaxy :: numPorts (const char* star, const char* port, int num) {
 // modify the domain within the galaxy (for wormholes)
 int
 InterpGalaxy::setDomain (const char* name) {
+	name = hashstring(name);
 	actionList += "D";
-	actionList += savestring (name);
-	myDomain = savestring (name);
+	actionList += name;
+	myDomain = name;
 	// if we're already in the given domain, do nothing and return true
 	if (strcmp (name, KnownBlock::domain()) == 0) return TRUE;
 	if (numberBlocks() > 0) {
@@ -493,7 +494,7 @@ InterpGalaxy::copy(const InterpGalaxy& g) {
 // class)
 void
 InterpGalaxy::addToKnownList(const char* outerDomain, Target* innerTarget) {
-	const char* myName = savestring(readName());
+	const char* myName = hashstring(readName());
 	setNameParent(myName, parent());
 
 // If there was a domain change, this is a Wormhole.  Make the appropriate

@@ -28,8 +28,8 @@ int AutoForkNode::nF = 0;
 // generate a new name for autofork stars
 const char* AutoForkNode::autoForkName() {
 	char buf[16];
-	sprintf (buf, "!af%d", ++nF);
-	return savestring (buf);
+	sprintf (buf, "auto-fork-%d", ++nF);
+	return hashstring (buf);
 }
 	
 // this type is persistent

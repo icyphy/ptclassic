@@ -45,7 +45,7 @@ const char*
 pathSearch (const char* name, const char* path) {
 // if name has slashes it must be exact
 	if (strchr (name, '/')) {
-		return access(name, 0) == 0 ? savestring(name) : 0;
+		return access(name, 0) == 0 ? hashstring(name) : 0;
 	}
 	char nameBuf[512];
 // build the next candidate name
@@ -54,7 +54,7 @@ pathSearch (const char* name, const char* path) {
 		while (*path && *path != ':') *q++ = *path++;
 		*q++ = '/';
 		strcpy (q, name);
-		if (access (nameBuf, 0) == 0) return savestring(nameBuf);
+		if (access (nameBuf, 0) == 0) return hashstring(nameBuf);
 		if (*path == ':') path++;
 	}
 	return 0;
