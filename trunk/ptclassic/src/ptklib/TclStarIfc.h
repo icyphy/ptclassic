@@ -129,6 +129,9 @@ protected:
 	// when the Tcl file was sourced.
 	int synchronous;
 
+	// A flag specifying that Tk has been loaded into the interpreter
+	int tkExists;
+
 	// A procedure for invoking a Tcl script of the name
 	// "name_starID".
 	// Returns FALSE if an error occurs, TRUE otherwise
