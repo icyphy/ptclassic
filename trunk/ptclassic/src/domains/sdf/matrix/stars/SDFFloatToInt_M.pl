@@ -2,11 +2,11 @@ defstar {
   name { FloatToInt_M }
   domain { SDF }
   desc {
-    Takes an input FloatMatrix and converts it to an IntMatrix.  This
-    is done by using the cast conversion method of the FloatMatrix class.
-    The conversion results in a IntMatrix that has entries which are
-    the int of each corresponding entry of the FloatMatrix.
-    I.e. IntMatrix.entry(i) = int(FloatMatrix.entry(i))
+Take an input FloatMatrix and convert it to an IntMatrix.  This
+is done by using the cast conversion method of the FloatMatrix class.
+The conversion results in a IntMatrix that has entries which are
+the int of each corresponding entry of the FloatMatrix.
+I.e. IntMatrix.entry(i) = int(FloatMatrix.entry(i))
   }
   version { $Id$ }
   author { Mike J. Chen }

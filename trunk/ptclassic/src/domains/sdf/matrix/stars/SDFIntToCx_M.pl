@@ -2,12 +2,12 @@ defstar {
   name { IntToCx_M }
   domain { SDF }
   desc {
-    Takes an input IntMatrix and converts it to an ComplexMatrix.  This
-    is done by using the cast conversion method of the IntMatrix class.
-    The conversion results in a ComplexMatrix that has entries which have
-    real values that are the double of each corresponding entry of the
-    IntMatrix and 0 imaginary values.
-    I.e. ComplexMatrix.entry(i) = double(IntMatrix.entry(i))
+Take an input IntMatrix and convert it to an ComplexMatrix.  This
+is done by using the cast conversion method of the IntMatrix class.
+The conversion results in a ComplexMatrix that has entries which have
+real values that are the double of each corresponding entry of the
+IntMatrix and 0 imaginary values.
+I.e. ComplexMatrix.entry(i) = double(IntMatrix.entry(i))
   }
   version { $Id$ }
   author { Mike J. Chen }

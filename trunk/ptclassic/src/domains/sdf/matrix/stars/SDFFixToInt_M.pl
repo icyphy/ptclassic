@@ -2,11 +2,11 @@ defstar {
   name { FixToInt_M }
   domain { SDF }
   desc {
-    Takes an input FixMatrix and converts it to an IntMatrix.  This
-    is done by using the cast conversion method of the FixMatrix class.
-    The conversion results in a IntMatrix that has entries which are
-    the int of each corresponding entry of the FixMatrix.
-    I.e. IntMatrix.entry(i) = int(FixMatrix.entry(i))
+Takes an input FixMatrix and converts it to an IntMatrix.  This
+is done by using the cast conversion method of the FixMatrix class.
+The conversion results in a IntMatrix that has entries which are
+the integer representation of each corresponding entry of the FixMatrix.
+I.e. IntMatrix.entry(i) = int(FixMatrix.entry(i))
   }
   version { $Id$ }
   author { Mike J. Chen }
