@@ -19,6 +19,7 @@ limitation of liability, and disclaimer of warranty provisions.
 		name { output }
 		type { float }
 	}
+	hinclude { <stdio.h> }
         protected {
 		Fix inFix;
         }

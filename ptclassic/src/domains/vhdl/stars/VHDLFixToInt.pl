@@ -21,6 +21,7 @@ limitation of liability, and disclaimer of warranty provisions.
 		type { int }
 		desc { Output int type }
 	}
+	hinclude { <stdio.h> }
         protected {
 		Fix inFix;
         }
