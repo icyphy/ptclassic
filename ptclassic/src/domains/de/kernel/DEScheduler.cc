@@ -334,7 +334,9 @@ int DEScheduler :: checkLoop(PortHole* p, DEStar* s) {
 			if (fromP->numTokens()) fromP->depth = 0;
 			else if (fromP->far()->isItInput()) {
 			   	fromP->depth = 1;
-				if (!checkLoop(fromP->far(), s)) return FALSE;
+				if(!checkLoop(fromP->far(),
+				   (DEStar*) fromP->far()->parent()))
+					return FALSE;
 			   	fromP->depth = 0;
 			}
 		}
