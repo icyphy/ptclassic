@@ -57,8 +57,11 @@ public:
 		LOG_NEW; return *new CG56toUniversal;
 	}
 
-	// new node (geodesic)
-	Geodesic& newNode() { LOG_NEW; return *new AsmForkNode;}
+	// new geodesic
+	Geodesic& newGeo(int multi) {
+		if (multi) { LOG_NEW; return *new AsmForkNode;}
+		else { LOG_NEW; return *new AsmGeodesic;}
+	}
 
 	// constructor (also allow AnyAsm stars)
 	CG56Domain() : Domain("CG56") {subDomains += "AnyAsm";}
