@@ -30,21 +30,21 @@ This star inverse zig-zag scans a Float Matrix.
     name { ziginv }
     type { "void" }
     access { protected }
-    arglist {	// can't break string across lines in cfront
+    arglist {		// can't break string across lines in cfront compiler
 "(float* imData, const float* fData, const int i, const int j, const int width, const int blockSize)"
     }
     code {
-      int k, l, indx;
-
       // Invert the zigzag.
-      indx = 0;
-      // K is length of current (semi)diagonal; L is iteration on diag.
+      int k = 0, indx = 0;
+
+      // k is length of current (semi)diagonal; l is iteration on diag.
       for(k = 1; k < blockSize; k++) { // Top triangle
+	int l;
 	for(l = 0; l < k; l++) { // down
 	  imData[j + (i+l)*width + (k-l-1)] = fData[indx++];
 	}
-	k++; // NOTE THIS!
-	for(l = 0; l < k; l++) { // back up
+	k++;						// NOTE THIS!
+	for(l = 0; l < k; l++) {			// back up
 	  imData[j + (i+k-l-1)*width + l] = fData[indx++];
 	}
       }
@@ -52,14 +52,15 @@ This star inverse zig-zag scans a Float Matrix.
       // If blockSize an odd number, start with diagonal, else one down.
       if (blockSize % 2) { k = blockSize; }
       else { k = blockSize-1; }
-      
-      for(; k > 1; k--) { // Bottom triangle
+
+      for(; k > 1; k--) {			// Bottom triangle
+	int l;
 	for(l = 0; l < k; l++) { // down
 	  imData[j + (i+blockSize-k+l)*width +
 		 (blockSize-l-1)] = fData[indx++];
 	}
 	k--; // NOTE THIS!
-	for(l = 0; l < k; l++) { // back up
+	for(l = 0; l < k; l++) {		// back up
 	  imData[j + (i+blockSize-l-1)*width +
 		 blockSize-k+l] = fData[indx++];
 	}
@@ -83,50 +84,36 @@ This star inverse zig-zag scans a Float Matrix.
       int height = inImg.numRows();
 
       // Allocate space and go.
-      float* outArr = new float[width*height];
-      float* tmpPtr = new float[width*height];
+      float* outFloatArr = new float[width*height];
+      float* tmpFloatPtr = new float[width*height];
 
       // Copy the data from the inImg.
-      for(int i = 0; i < width*height; i++) {
+      float* tmpPtr = tmpFloatPtr;
+      int numImagePixels = width * height;
+      for(int i = 0; i < numImagePixels; i++) {
 	tmpPtr[i] = inImg.entry(i);
       }
 
+      // Compute the zig-zag inverse
+      float* outArr = outFloatArr;
+      int numBlockPixels = bSize * bSize;
       for(int row = 0; row < height; row += bSize) {
 	for(int col = 0; col < width; col += bSize) {
 	  ziginv(outArr, tmpPtr, row, col, width, bSize);
-	  tmpPtr += bSize*bSize;
+	  tmpPtr += numBlockPixels;
 	}
       }
 
       // Copy the data to the outImg.
-      for(i = 0; i < width*height; i++) {
-	outImg.entry(i) = outArr[i];
+      for(i = 0; i < numImagePixels; i++) {
+	outImg.entry(i) = *outArr++;
       }
 
       // Deallocate memory
-      delete [] tmpPtr;
-      delete [] outArr;
+      delete [] tmpFloatPtr;
+      delete [] outFloatArr;
     }
-  } // end { invZigZag }
-
-
-	method {
-		name { copy }
-		type { void }
-		arglist { "(const int c, float* to, const float* from)" }
-		access { protected }
-		code {
-			for(int i = 0; i < c % 5; i++) { *to++ = *from++; }
-
-			for(i = c % 5; i < c; i += 5) {
-				*to++ = *from++;
-				*to++ = *from++;
-				*to++ = *from++;
-				*to++ = *from++;
-				*to++ = *from++;
-			}
-	}	}
-
+  }
 
   go {
     Envelope inEnvp;
