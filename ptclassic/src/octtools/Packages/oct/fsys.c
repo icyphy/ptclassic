@@ -29,7 +29,7 @@ static char SccsId[]="$Id$";
 #include "utility.h"
 
 /* should go into port.h */
-#if defined(POSIX) || defined(aiws)
+#if defined(POSIX) || defined(aiws) || defined(SYSV)
 #include <unistd.h>
 #else
 #include <sys/file.h>
@@ -803,13 +803,18 @@ char **copy;
     struct desc *desc, *orig = (struct desc *) key;
     char *full_path, *tail;
     char path[1024];
+#ifndef SYSV
     extern char *getwd();
-
+#endif
     if (orig->file_name[0] != PND_CHAR) {
 	char buffer[MAXPATHLEN];
 	int buffer_length;
 #if !defined(MCC_DMS)	
+#ifdef SYSV
+ 	if (getcwd(buffer, MAXPATHLEN) == NIL(char)) {
+#else
 	if (getwd(buffer) == NIL(char)) {
+#endif
 	    (void) sprintf(fsys_error_buf,"Can't determine current directory");
 	    return 0;
 	}
