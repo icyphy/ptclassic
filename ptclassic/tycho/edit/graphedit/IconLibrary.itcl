@@ -199,13 +199,13 @@ body ::tycho::IconIndex::constructor {args} {
     eval configure $args
 
     # The group entity type. Label is for menu display.
-    defineEntityType group -valued 0 -label ""
+    defineEntityType group -valued 0 -ordered 1 -label ""
 
     # The icon entity type. Label is for menu display.
-    defineEntityType icon -valued 1 -label ""
+    defineEntityType icon -valued 1 -ordered 1 -label ""
 
     # The port entity type
-    defineEntityType port -valued 1 -leaf 1
+    defineEntityType port -valued 1 -ordered 1 -leaf 1
 }
 
 ########################################################################
