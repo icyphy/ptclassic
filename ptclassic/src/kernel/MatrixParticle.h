@@ -102,6 +102,9 @@ class MatrixParticle : public Particle {
         // Set the data field to the given SubMatrix
         virtual void initialize(PtMatrix *m, MatrixParticle *p) = 0;
 
+        // Reset the data and parent pointers to NULL
+        virtual Particle& initialize() = 0;
+
         // Create a subMatrix using the data as the parent.  Takes
         // the starting row and col, and the size of the submatrix desired.
         virtual PtMatrix* subMatrix(int startRow, int startCol,
@@ -143,6 +146,7 @@ public:
 	void operator << (const FixMatrix& m);
 	void operator << (const FloatMatrix& m);
 	void operator << (const IntMatrix& m);
+	void operator << (const Envelope&);
 
         void operator << (int i);
 	void operator << (double f);
@@ -197,6 +201,7 @@ class FixMatrixParticle : public MatrixParticle {
 	void operator << (const ComplexMatrix& m);
 	void operator << (const FloatMatrix& m);
 	void operator << (const IntMatrix& m);
+	void operator << (const Envelope&);
 
         void operator << (int i);
 	void operator << (double f);
@@ -250,6 +255,7 @@ public:
 	void operator << (const ComplexMatrix& m);
 	void operator << (const FixMatrix& m);
 	void operator << (const IntMatrix& m);
+	void operator << (const Envelope&);
 
         void operator << (int i);
 	void operator << (double f);
@@ -305,6 +311,7 @@ class IntMatrixParticle : public MatrixParticle {
 	void operator << (const ComplexMatrix& m);
 	void operator << (const FixMatrix& m);
 	void operator << (const FloatMatrix& m);
+	void operator << (const Envelope&);
 
         void operator << (int i);
 	void operator << (double f);
