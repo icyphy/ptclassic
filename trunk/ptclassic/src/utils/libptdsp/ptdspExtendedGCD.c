@@ -44,9 +44,9 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #define intabs(m)               ( ( (m) > 0 ) ? (m) : (-(m)) )
 
-// Greatest common divisor function.  If 2nd arg is negative, result is
-// negative.  Magnitude of result equals gcd(abs(a),abs(b)).
-// these are so simplify is easy to write.
+/* Greatest common divisor function.  If 2nd arg is negative, result is
+   negative.  Magnitude of result equals gcd(abs(a),abs(b)).
+   these are so simplify is easy to write. */
 int gcd(int a, int b) {
   
   int rem, t;
