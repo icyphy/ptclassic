@@ -154,14 +154,15 @@ extern "C" {
 	  name { nameMatlabMatrices }
 	  access { protected }
 	  type { void }
-	  arglist { "(InfString matNames[], int numMatrices, const char *baseName)" }
+	  arglist { "(char *matNames[], int numMatrices, const char *baseName)" }
 	  code {
 		// generate names for Matlab versions of input matrix names
 		for ( int i = 0; i < numMatrices; i++ ) {
+		    StringList newname = baseName;
 		    char numstr[32];
-		    matNames[i] = baseName;
 		    sprintf(numstr, "_%d", i+1);
-		    matNames[i] << numstr;
+		    newname << numstr;
+		    matNames[i] = savestring(newname);
 		}
 	  }
 	}
@@ -170,7 +171,7 @@ extern "C" {
 	  name { buildMatlabCommand }
 	  access { protected }
 	  type { void }
-	  arglist { "(InfString& commandString, InfString matlabInputNames[], int numInputs, const char *matlabFunction, InfString matlabOutputNames[], int numOutputs)" }
+	  arglist { "(InfString& commandString, char *matlabInputNames[], int numInputs, const char *matlabFunction, char *matlabOutputNames[], int numOutputs)" }
 	  code {
 		int length = strlen(matlabFunction);
 
