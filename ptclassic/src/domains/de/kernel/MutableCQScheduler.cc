@@ -122,10 +122,10 @@ int MutableCQScheduler :: run () {
 
 	// if level > stopTime, RETURN...
 	if (level > stopTime)	{
-		eventQ.pushBack(f);		// push back
+		eventQ.pushBackPendingEvent(f);		// push back
 		// set currentTime = next event time.
 		currentTime = stopTime/relTimeScale;
-		stopBeforeDeadFlag = TRUE;  // there is extra events.
+		stopBeforeDeadFlag = TRUE;  // there are extra events.
 		return TRUE;
 	// If the event time is less than the global clock,
 	// it is an error...
@@ -195,7 +195,7 @@ int MutableCQScheduler :: run () {
 		break;
 	    }
 	    if (h->level > level) {
-		eventQ.pushBack(h);
+		eventQ.pushBackPendingEvent(h);
 		break;
 	    }
 	    PortHole* tl = 0;
@@ -225,7 +225,7 @@ int MutableCQScheduler :: run () {
 		} 
 	    } else {
 		// need to put back since we did a get
-		eventQ.pushBack(h);
+		eventQ.pushBackPendingEvent(h);
 		// In the calendar queue, once you get a "bad"
 		// event, you're done, don't need to go through
 		// them all
@@ -282,7 +282,7 @@ int MutableCQScheduler :: fetchEvent(InDEPort* p, double timeVal)
 					eventQ.putFreeLink(h);
 				}
 				else
-					eventQ.pushBack(h);
+					eventQ.pushBackPendingEvent(h);
 				while (store != NULL) {
 				      CqLevelLink *temp = store;
 				      store = (CqLevelLink*)store->next;
