@@ -76,8 +76,8 @@ CGWormStar :: CGWormStar(CGStar* s, int pix, int invoc, int flag):
 			eh->setEventHorizon(out, p->name(), 0, this);
 		}
 		PortHole* newP = eh->asPort();
-		addPort(newP->setPort(p->name(), this, p->resolvedType()));
-		newP->numberTokens = p->numXfer();
+		addPort(newP->setPort(p->name(), this, p->resolvedType(),
+				      p->numXfer()));
 	   }
 	}
 }
