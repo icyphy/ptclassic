@@ -174,6 +174,8 @@ protected:
         const char* hashINTEGER;
         const char* hashINT;
         const char* hashint;
+        const char* hashFLOAT;
+        const char* hashfloat;
         const char* hashREAL;
         const char* hashreal;
         const char* hashCOMPLEX;

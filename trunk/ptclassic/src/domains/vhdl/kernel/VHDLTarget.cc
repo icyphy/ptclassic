@@ -89,6 +89,8 @@ HLLTarget(name, starclass, desc, assocDomain) {
   hashINTEGER = hashstring("INTEGER");
   hashINT = hashstring("INT");
   hashint = hashstring("int");
+  hashFLOAT = hashstring("FLOAT");
+  hashfloat = hashstring("float");
   hashREAL = hashstring("REAL");
   hashreal = hashstring("real");
   hashCOMPLEX = hashstring("COMPLEX");
@@ -678,7 +680,8 @@ const char* VHDLTarget :: sanitizeType(const char* ctyp) {
   const char* type;
   const char* hashtype = hashstring(ctyp);
   
-  if ((hashtype == hashREAL) || (hashtype == hashreal))
+  if ((hashtype == hashFLOAT) || (hashtype == hashfloat) ||
+      (hashtype == hashREAL) || (hashtype == hashreal))
     type = hashREAL;
   else if ((hashtype == hashINTEGER) ||
 	   (hashtype == hashINT) || (hashtype == hashint))
