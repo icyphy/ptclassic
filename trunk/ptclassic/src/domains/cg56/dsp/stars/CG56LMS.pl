@@ -15,6 +15,10 @@ DSP56000 - Least Mean Square Adaptive Filter Star
            the filter output and the error input.
 	}
         
+        output {
+		name { output }
+		type { fix }
+	}
         input  {
                 name { input }
 	        type { fix }
@@ -22,10 +26,6 @@ DSP56000 - Least Mean Square Adaptive Filter Star
         input  {
                 name { error }
 	        type { fix }
-	}
-        output {
-		name { output }
-		type { fix }
 	}
         state  {
                 name { stepSize }
@@ -53,13 +53,14 @@ error samples.
                 type { fixarray }
                 desc { internal }
                 default { "-4.0609e-2 -1.6280e-3 1.7853e-1 3.7665e-1 3.7665e-1 1.7853e-1 -1.6280e-3 -4.0609e-2" }
-                attributes { A_ROM|A_NONCONSTANT|A_XMEM }
+                attributes { A_XMEM }
         }
         state {
                 name { coefLen }
                 type { int }
                 desc { number of coef. }
                 default { 8 }
+                attributes { A_NONSETTABLE|A_NONCONSTANT }
         }        
 
         state {
@@ -67,6 +68,7 @@ error samples.
                 type { int }
                 desc { internal }
                 default { 0 }
+                attributes { A_NONSETTABLE|A_NONCONSTANT }
         }        
     
         state {
@@ -74,6 +76,7 @@ error samples.
                 type { int }
                 desc { internal }
                 default { 0 }
+                attributes { A_NONSETTABLE|A_NONCONSTANT }
         }        
 
         state {
@@ -81,15 +84,23 @@ error samples.
                 type { int }
                 desc { internal }
                 default { 0 }
+                attributes { A_NONSETTABLE|A_NONCONSTANT }
         }            
 
         state {
                 name { delayLine }
-                type { int }
+                type { intarray }
                 desc { internal }
-                default { 1 }
-                attributes { A_NONCONSTANT|A_NONSETTABLE|A_YMEM }
+                default { 0 }
+                attributes {A_CIRC|A_NONCONSTANT|A_NONSETTABLE|A_YMEM|A_NOINIT}
         }
+        state {
+                name { delayLineStart }
+	        type { int }
+                desc { internal }
+                default { 0 }
+                attributes { A_NONCONSTANT|A_NONSETTABLE|A_YMEM|A_NOINIT }
+	}
         state {
                 name { delayLineSize }
                 type { int }
@@ -98,17 +109,17 @@ error samples.
                 attributes { A_NONCONSTANT|A_NONSETTABLE }
         }
 
-        state  {
-                name { runtimeVal }
-                type { int }
-                default { 0 }
-                desc { runtime value }
-                attributes { A_NONCONSTANT|A_NONSETTABLE }
-        }
+//        move    #$addr2(delayLine,coefLen),r3
+
         codeblock(std) {
 	; initialize address registers for coef and delayLine
-        move    #$val(X),r3     	      ; coef
-        move    $ref(delayLine),r5            ; delayLine
+;        move    #$addr(coef),a
+;        move    #$val(X),x0
+;        add     x0,a
+;        move    a1,r3     	      ; coef
+        move    #$val(X),r3
+; insert here
+        move    $ref(delayLineStart),r5            ; delayLine
         move    #$val(Y),m5
                                   ; first adapt coefficients.
                                   ; multiply the error by the stepSize --> x0
@@ -137,7 +148,7 @@ $label(endloop)
         move    b,x:(r3)
 ; move current inputs into delayLine.
         move    #$addr(input),r0
-        move    $ref(delayLine),r5
+        move    $ref(delayLineStart),r5
         }
 
         codeblock(decimationGreaterthanOne) {
@@ -153,8 +164,8 @@ $label(decimationloop)
         }
 
         codeblock(cont1) {
-                                            ; update delayLine pointer.
-        move    r5,$ref(delayLine)          ;oldest sample pointer
+; update delayLine pointer.
+        move    r5,$ref(delayLineStart)          ;oldest sample pointer
                                             ; now compute output.
         lua     (r5)-,r5
         nop
@@ -178,25 +189,38 @@ $label(loop1)
         }
        
         codeblock(makeblock) {
+; delayLine memory
         org     $ref(delayLine)
-        bsc     $val(coefLen),0
+        bsc     $val(delayLineSize),0
         org     p:
         }
-
+      
+        codeblock(delaystart) {
+; pointer to delay line into memory
+        org     $ref(delayLineStart)
+        dc      $addr(delayLine)
+        org     p:
+        }
         start {
+                coefLen=coef.size();
+                delayLineSize=errorDelay-1;
+		delayLineSize=coefLen+decimation*delayLineSize;
+		delayLine.resize(int(delayLineSize));
                 input.setSDFParams(int(decimation),int(decimation)-1);
 
 	        if (decimation <=0)
         	      Error::abortRun(*this, "Decimation must be greater than 0.");
-        // initial tap values.
-//                delayLineSize=decimation*(errorDelay-1)+coefLen;
+
         }
-    
         initCode  {
 	        gencode(makeblock);
-//        	delayLine=&delayLine;
+                gencode(delaystart);
         }
         go { 
+                X=coefLen-1;
+                Y=errorDelay-1;
+                Y=coefLen-1+decimation*Y;
+                
 	        gencode(std);
 	
         	if(coefLen>2) {
