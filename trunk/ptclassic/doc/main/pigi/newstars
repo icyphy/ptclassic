@@ -4,9 +4,8 @@
 Only the most casual user will get by with the stars provided
 in the Ptolemy palettes.
 New stars are defined using the \*(PT preprocessor language,
-which is described in its section in the manual.  This pigi manual
-will not attempt to teach you how to write your own stars; see
-the Almagest section entitled ``The Ptolemy Preprocessor Language.''
+which is described in its section in the manual.  This pigi section
+will not attempt to teach you how to write your own stars.
 .pp
 There are two ways to use your own personal star with Ptolemy:
 use the dynamic linking facility, or build your own version
@@ -22,15 +21,16 @@ star's source file and those that are already present in pigi (you
 can count on all the kernel routines and all the domain-specific
 kernel support routines already being present in pigi).
 .bu
-If the star is a derived star, it may be derived only from a star
-that is statically linked into pigi; you can't load one star and then
-load another star that is derived from the first one.
-.bu
 You may not redefine a statically linked star.  (This restriction
 may be removed in the future).
+.lp
+If you wish to dynamically link a star is derived from another
+dynamically linked star, you must ``permanently'' link the parent star.
+This can be done with the ``Extend:load-star-perm'' command (``K'').
+To do this, place the mouse over an icon representing the parent star,
+and type ``K''.
 .pp
-If these restrictions are too severe, you can make your own private
-version of
+You can make your own private version of
 .i pigiRpc ;
 this is described in a later section.
 .pp
@@ -71,9 +71,7 @@ Pigi will build the object file in the directory ``../obj.\fIarch\fP/stars'',
 where
 .i arch
 is replaced by
-.c sun3 ,
-.c sun4 ,
-.c vax ,
+.c sun4
 or
 .c mips ,
 depending on what
@@ -90,7 +88,7 @@ procedure on its own, running the preprocessor as needed to produce
 the C++ source files, then running the Gnu C++ compiler to create the
 object file.  By default, the C++ compiler will be told to look for
 include files in the kernel directory and the domain-specific kernel
-and star directories; if this is not adequate you need to write a
+and star directories; if this is not adequate, then you need to write a
 makefile.  Once compilation (if any) is complete, the dynamic linker
 is used to load the star into the system.  Compilation errors, if
 any, will appear in a popup window.
@@ -112,12 +110,8 @@ see the section below on editing icons.
 An important note: whenever the definition of a star is changed so that
 the new definition has different I/O ports, the icon must be updated as
 well.  You can do this by calling \fImake-star\fP again to replace
-the old icon with a new one.  It no longer necessary, however, to
-delete and recreate instances when you change the formal parameters
-of a star (this restriction from earlier versions of Ptolemy has been
-removed).
+the old icon with a new one. 
 .pp
 If you modify the code for a dynamically loaded star and wish to load
 the new definition, execute the \fIload-star\fR command while pointing
 to an instance of the star (or type ``L'').
-
