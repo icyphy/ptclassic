@@ -40,7 +40,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #include "SynthTarget.h"
 #include "KnownTarget.h"
-//#include <ostream.h>
+#include "paths.h"
 
 // Constructor.
 SynthTarget :: SynthTarget(const char* name,const char* starclass,
@@ -69,6 +69,7 @@ static KnownTarget entry(proto,"Synth-VHDL");
 void SynthTarget :: writeCode() {
   writeFile(myCode,".vhdl",displayFlag);
 
+  // FIXME: Need to do this inside before code is generated instead.
   // Change all integers to 4-bit types to simplify synthesis.
   StringList command = "";
   command << "cd " << (const char*) destDirectory;
@@ -180,12 +181,13 @@ int SynthTarget :: compileCode() {
 int SynthTarget :: runCode() {
   if (int(analyze)) {
     // Startup Synopsys design_analyzer with the command script file here.
-    StringList daCommand = "";
-    daCommand << "design_analyzer -f " << filePrefix << ".com" << " &";
+    StringList command = "";
+    if (progNotFound("design_analyzer")) return FALSE;
+    command << "design_analyzer -f " << filePrefix << ".com" << " &";
     StringList error = "";
     error << "Could not analyze " << filePrefix << ".vhdl";
-    return (systemCall(daCommand, error, targetHost) == 0);
-  }  
+    if (systemCall(command, error, targetHost)) return FALSE;
+  }
   // Return TRUE indicating success.
   return TRUE;
 }
