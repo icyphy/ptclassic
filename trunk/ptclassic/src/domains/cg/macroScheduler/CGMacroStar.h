@@ -55,7 +55,7 @@ public:
 	void setProp(CGStar* s, int pix, int invoc, int flag);
 
 	// do nothing in the initialize method
-	void initialize();
+	// void initialize();
 
 	// redefine
 	int run();
