@@ -47,5 +47,5 @@ EXTRA_SRCS = 	pkgIndex.tcl
 
 MISC_FILES = 	$(DIRS)
 
-# Include rules for directories that contain only subdirectories.
-include $(ROOT)/mk/tydir.mk
+# Include rules for directories that don't compile
+include $(ROOT)/mk/no-compile.mk
