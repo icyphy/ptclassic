@@ -168,7 +168,9 @@ void CGTarget::setup() {
 
 	// Reset the symbol lists.
 	counter = 0;
+	targetNestedSymbol.setCounter(symbolCounter());
 	targetNestedSymbol.initialize();
+	sharedSymbol.setCounter(symbolCounter());
 	sharedSymbol.initialize();
 
 	// be sure that this routine does not initialize the galaxy if it
