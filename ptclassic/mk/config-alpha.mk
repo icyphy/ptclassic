@@ -69,7 +69,8 @@ OCT_CC =	gcc -fwritable-strings
 
 OPTIMIZER =	-O2
 # Under gcc-2.7.0, you will need -fno-for-scope for GPPFLAGS
-LOCALFLAGS =	-pipe -fno-for-scope
+# -pipe might not work under DEC Alpha 'as'
+LOCALFLAGS =	-fno-for-scope
 WARNINGS =	-Wall -Wcast-qual
 GPPFLAGS =	-g $(MEMLOG) $(WARNINGS) $(OPTIMIZER) $(LOCALFLAGS)
 # If you are not using gcc, then you might have problems with the WARNINGS flag
