@@ -107,7 +107,7 @@ $(PTLANG_IN_OBJ):
 
 # islang binary in the obj directory
 ISLANG_OBJ_DIR=$(PTOLEMY)/obj.$(PTARCH)/domains/ipus/islang
-ISLANG_IN_OBJ=$(PTLANG_OBJ_DIR)/islang
+ISLANG_IN_OBJ=$(ISLANG_OBJ_DIR)/islang
 ISLANG_VPATH=../../../../src/domains/ipus/islang
 
 # Use either the islang binary in the obj directory or just use islang
