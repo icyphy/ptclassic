@@ -1244,7 +1244,7 @@ body ::tycho::AbstractGraph::vertex {vertex args} {
     set _vertices($vertex) ""
 
     # Add vertex and return inverse command
-    _entity vertex {} $vertex $args
+    _entity vertex {} $vertex {} $args
 }
 
 ########################################################################

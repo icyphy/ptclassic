@@ -186,7 +186,7 @@ body ::tycho::IconIndex::exists {name} {
 #
 body ::tycho::IconIndex::group {name args} {
     _verifynot group $name
-    _entity group {} $name $args
+    _entity group {} $name {} $args
     if { [_cget group $name -label] == "" } {
 	_configure group $name [list -label $name]
     }
@@ -247,7 +247,7 @@ body ::tycho::IconIndex::groupdelete {name} {
 #
 body ::tycho::IconIndex::groupin {context name args} {
     _verifynotin group $context $name
-    _entity group $context $name $args
+    _entity group $context $name {} $args
     if { [_cget group $context$_separator$name -label] == "" } {
 	_configure group $context$_separator$name [list -label $name]
     }
@@ -263,7 +263,7 @@ body ::tycho::IconIndex::groupin {context name args} {
 #
 body ::tycho::IconIndex::icon {name value args} {
     _verifynot icon $name
-    _entity icon {} $name [concat [list $value] $args]
+    _entity icon {} $name $value $args
     if { [_cget icon $name -label] == "" } {
 	_configure icon $name [list -label $name]
     }
@@ -324,7 +324,7 @@ body ::tycho::IconIndex::icondelete {name} {
 #
 body ::tycho::IconIndex::iconin {context name value args} {
     _verifynotin icon $context $name
-    _entity icon $context $name [concat [list $value] $args]
+    _entity icon $context $name $value $args
     if { [_cget icon $context$_separator$name -label] == "" } {
 	_configure icon $context$_separator$name [list -label $name]
     }
@@ -339,7 +339,7 @@ body ::tycho::IconIndex::iconin {context name value args} {
 #
 body ::tycho::IconIndex::port {name value args} {
     _verifynot port $name
-    _entity port {} $name [concat [list $value] $args]
+    _entity port {} $name $value $args
 }
 
 ########################################################################
@@ -396,7 +396,7 @@ body ::tycho::IconIndex::portdelete {name} {
 #
 body ::tycho::IconIndex::portin {context name value args} {
     _verifynotin port $context $name
-    _entity port $context $name [concat [list $value] $args]
+    _entity port $context $name $value $args
 }
 
 ########################################################################
