@@ -51,7 +51,7 @@ FILE **fromCommand;			/* pointer to the reading stream */
 int *pid;
 {
 #ifdef unix
-    int forkpid, waitPid;
+    int forkpid, waitPid=0;
     int topipe[2], frompipe[2];
     char buffer[1024];
 #if defined(hpux) || defined(SYSV)
