@@ -345,6 +345,10 @@ body ::tycho::HTML::constructor {args} {
 
     # Disable auto-save.
     configure -save 0
+
+    # Make the insertion cursor invisible.
+    $text configure -insertofftime 0
+    $text configure -insertbackground [$text cget -background]
 }
 
 ###################################################################
@@ -492,6 +496,9 @@ body ::tycho::HTML::hyperJump {filename {point {}} {push 1}} {
 
             configure -directory [file dirname $filename]
             configure -file $filename
+            # Reset the insertion cursor to the origin, or else we will
+            # try to preserve the point in the file.
+            $itk_component(text) mark set insert 1.0
             reload
             if {$point != {}} {
                 after 200 [list $this seeFragment $point]
@@ -600,7 +607,7 @@ body ::tycho::HTML::seeFragment {point} {
         if {[$text compare $sidx >= end]} {
             if {$seecount < 40} {
                 incr seecount
-                after 400 [list $this seeFragment $point]
+                after 400 [code evalIfExists $this seeFragment $point]
                 return
             } {
                 # Give up.  Probably point will never be visible.
@@ -1156,6 +1163,8 @@ proc HMtag_body {win param text} {
         set color [ptkColor $bgcolor grey]
         $win configure -background $color
         set var(bgcolor) $color
+        # Make the insertion cursor invisible
+        $win configure -insertbackground $color
     }
     
     set savetext $text
