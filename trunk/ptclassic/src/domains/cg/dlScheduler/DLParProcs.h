@@ -61,39 +61,59 @@ public:
 
 //////////  main scheduling routine.
 
-	void scheduleSmall(DLNode*);		// atomic node
-	void scheduleBig(DLNode*, int, int, IntArray&); // large node
+	virtual void scheduleSmall(DLNode*);		// atomic node
+	void scheduleBig(DLNode*, int, IntArray&); // large node
+
+	// in case of a wormhole node, we schedule the same profile to
+	// the same processor set for all invocations.
+	// This routine is called for invocationNumber of node is 
+	// greater than 1.
+	void copyBigSchedule(DLNode*, IntArray&); 
 
   	// observe the pattern of processor availability before scheduling
   	// a dynamic construct (or non-atomic node).
 	// First, schedule the communication nodes.
 	// Second, compute the pattern. Return the proposed schedule time.
-  	int determinePPA(DLNode*, IntArray&);
+  	virtual int determinePPA(DLNode*, IntArray&);
 
 protected:
-
 	// The program graph to be scheduled
 	DLGraph* myGraph;
 
 	// processors
 	UniProcessor* schedules;
 
-private:
+	// candidate processors
+	IntArray* candidate;
 
 //////////////////  schedule aids ///////////////////////
 
-	// sortest list of finish times of the ancestors
-	void prepareComm(DLNode*);
+	// Compute the earliest firing time of a node if a dest. proc. is
+	// assumed. The resources are temporarily reserved for this
+	// assignment. 
+	// second argument is the processor id. 
+	// third argument is the time the node can be scheduled.
+	int costAssignedTo(DLNode*, int, int);
 
 	// Fire a node. Check the runnability of descendents.
-	void fireNode(DLNode*);
+	virtual void fireNode(DLNode*);
+
+	// assign a atomic node.
+	// second argument is the processor id. Third, schedule time.
+	void assignNode(DLNode*, int, int);
+
+private:
+//////////////////  schedule aids ///////////////////////
+
+	// sortest list of finish times of the ancestors
+	virtual void prepareComm(DLNode*);
+
+	// schedule IPC
+	virtual void scheduleIPC(int);
 
 	// Emulate IPC for a given destination processor.
 	// Return the completion time.
 	int executeIPC(int);
-
-	// schedule IPC
-	void scheduleIPC(DLNode*, int);
 
 //////////////////  schedule ATOMIC node  ///////////////////////
 
@@ -102,21 +122,11 @@ private:
 	// proposed schedule time as a int pointer argument.
 	int compareCost(DLNode*, int*);
 
-	// Compute the earliest firing time of a node if a dest. proc. is
-	// assumed. The resources are temporarily reserved for this
-	// assignment. 
-	// second argument is the processor id. 
-	int costAssignedTo(DLNode*, int);
-
-	// assign a atomic node.
-	// second argument is the processor id. Third, schedule time.
-	void assignNode(DLNode*, int, int);
-
 //////////////////  schedule LARGE node  ///////////////////////
 
 	// Among candidate processors, choose a processor that can execute
 	// the node earliest.
-	int decideStartingProc(DLNode*, int*);
+	virtual int decideStartingProc(DLNode*, int*);
 };
 
 #endif
