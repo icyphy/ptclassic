@@ -2,10 +2,10 @@ defstar {
 	name { SmithForm }
 	domain { SDF }
 	desc {
-Decomposes an integer matrix S into a Smith form S = U D V, where
-U, D, and V are integer matrices.
+Decomposes an integer matrix $S$ into one of its Smith forms
+$S ~ = ~ U ~ D ~ V$, where $U$, $D$, and $V$ are simpler integer matrices.
 The Smith form decomposition for integer matrices is analogous to
-eigendecomposition for floating-point matrices.
+singular value decomposition for floating-point matrices.
 	}
 	version { $Id$ }
 	author { Brian Evans }
@@ -14,41 +14,41 @@ eigendecomposition for floating-point matrices.
 	explanation {
 .pp
 Smith forms are useful in making non-separable multidimensional 
-operations that rely on integer matrices separable.
+operations that rely on integer matrix parameters separable.
 Examples include multidimensional discrete Fourier transforms 
-on an arbitrary sampling grid (hexagonal, etc.) [1],
+on arbitrary sampling grids (hexagonal, etc.) [1],
 multidimensional non-separable up/downsampling [2], and 
 multidimensional non-uniform filter bank design [3-5].
 .pp
-This function returns the Smith form of an integer matrix S [6].
-The matrix $S$ is factored into three simpler integer matrices such that
-$S = U D V$.
-Here, $D$ is diagonal and $U$ and $V$ have determinant of $+1$ or $-1$
-(and are called regular unimodular).
-Therefore, $|det S| = |det D|$.
+This function returns one of the Smith forms of an integer matrix $S$ 
+by factoring $S$ into three simpler integer matrices such that
+$S ~ = ~ U ~ D ~ V$ [6].
+Here, $D$ is diagonal, and $U$ and $V$ have determinant of $+1$ or $-1$
+(and are called \fIregular unimodular\fR).
+Therefore, $|det ~ S| = |det ~ D|$.
 Note that $S$ is $m$ x $n$, so $U$ is $m$ x $m$, $D$ is $m$ x $n$, and
 $V$ is $n$ x $n$.
 Hence, $U$ and $V$ are always square.
 .pp
 Smith form decompositions are not unique [5-6].
 However, the Smith normal form imposes a canonical structure on $D$
-so that $D$ is unique [6].
+that makes $D$ unique [6].
 The canonical form of $D$ is that each diagonal element is a factor of
-the next diagonal element and the greatest common divisor of two adjacent
-diagonal elements is one.
+the next diagonal element.
 Even in the canonical form, however, the $U$ and $V$ matrices are not unique.
 Note that this routine \fIwas not\fR coded to return the Smith normal form
 (although sometimes this will happen).
-Converting a Smith form to a Smith normal form requires an extra $min(m,n)$
-steps for an $m$ x $n$ matrix [6].
+Converting a Smith form into a Smith normal form requires an extra
+min($m$, $n$) steps for an $m$ x $n$ matrix [6].
 .pp
-Because we have chosen to implement the decomposition using
-integers represented by a computer, the intermediate integer
-computations for either large integer matrices or for matrices
-with large integer entries may exceed the precision of integers
-on a given machine.
-As a consequence, we check the decomposition at the end and flag an
-error if it does not give the original matrix.
+The intermediate integer computations of the decomposition for integer
+matrices of large dimension and for matrices with large integer entries
+may exceed the integer precision of a given machine.
+Because we have chosen to implement the decomposition in the native integer
+format, this routine checks the decomposition at the end and flags an
+error if the quantity $U ~ D ~ V$ does not give the original matrix.
+The Smith form decomposition of integer matrices common in image and
+video processing applications will not exceed integer precision.
 .Ir "Guessoum, A."
 .Ir "Vaidyanathan, P."
 .Ir "Allebach, J."
