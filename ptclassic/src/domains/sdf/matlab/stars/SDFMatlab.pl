@@ -109,7 +109,7 @@ extern "C" {
 	  name { nameMatlabMatrices }
 	  access { protected }
 	  type { void }
-	  arglist { "(InfString matNames[], int numMatrices, char *baseName)" }
+	  arglist { "(InfString matNames[], int numMatrices, const char *baseName)" }
 	  code {
 		// generate names for Matlab versions of input matrix names
 		for ( int i = 0; i < numMatrices; i++ ) {
@@ -125,7 +125,7 @@ extern "C" {
 	  name { buildMatlabCommand }
 	  access { protected }
 	  type { void }
-	  arglist { "(InfString& commandString, InfString matlabInputNames[], int numInputs, char *matlabFunction, InfString matlabOutputNames[], int numOutputs)" }
+	  arglist { "(InfString& commandString, InfString matlabInputNames[], int numInputs, const char *matlabFunction, InfString matlabOutputNames[], int numOutputs)" }
 	  code {
 		// create the command to be sent to the Matlab interpreter
 		commandString = "";
