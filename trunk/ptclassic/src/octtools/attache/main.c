@@ -100,8 +100,6 @@ SIGNAL_FN die()
     while(getchar() != '\n');
     IOinit();
     errRaise(optProgName, 0, "return from interrupt");
+    /* Quiet warnings down */
+    return (SIGNAL_FN)0;
 }
-
-
-
-
