@@ -77,7 +77,7 @@ is 'short'.
     {
 
 	// open input file
-	fd = open(expandPathName(fileName), 0x201, 0x1E4); 
+	fd = open(expandPathName(fileName), 0x201, 0x1A4); 
 	if (fd < 0) {
 		Error::abortRun(*this, "can't open file ", fileName);
 		return;
