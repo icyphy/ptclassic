@@ -128,3 +128,6 @@ XPM_DEFINES =	-DZPIPE $(X11_INCSPEC)
 
 # Matlab architecture
 MATARCH = sol2
+
+# Build gthreads
+INCLUDE_GTHREADS =	yes
