@@ -210,6 +210,7 @@ body ::tycho::HTML::constructor {args} {
     bind $prefix <Control-x><Control-w> { }
 
     $itk_component(text) configure -readonly 1
+    focusin
 }
 
 ###################################################################
