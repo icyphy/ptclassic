@@ -40,7 +40,6 @@ CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
 EXTRA_SRCS =	\
-	ConsoleHelp.html \
 	EditHelp.html \
 	FileBrowserHelp.html \
 	FileHelp.html \
@@ -48,6 +47,7 @@ EXTRA_SRCS =	\
 	HTMLHelp.html \
 	IndexBrowserHelp.html \
 	ListBrowserHelp.html \
+	TclConsoleHelp.html \
 	contents.html
 
 MISC_FILES =
