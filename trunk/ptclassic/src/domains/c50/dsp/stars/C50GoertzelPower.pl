@@ -2,7 +2,7 @@ defstar {
 	name { GoertzelPower }
 	domain { C50 }
 	derived { GoertzelBase }
-	version { @(#)C50GoertzelPower.pl	1.10	3/27/96 }
+	version { $Id$} 
 	desc {
 First-order recursive computation of the power of the kth coefficient of
 an N-point DFT using Goertzel's algorithm.
@@ -10,7 +10,7 @@ This form is used in touchtone decoding.
 	}
 	author { Luis Gutierrez }
 	copyright {
-Copyright (c) 1990-1996 The Regents of the University of California.
+Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
