@@ -409,10 +409,7 @@ body ::tycho::File::constructor {args} {
     set myclass "[info class]"
 
     # Bindings.
-    # Bind C-xC-f so that it opens a browser in the same directory
-    # as the current file.
-    bind $prefix <Control-x><Control-f> \
-	    "$this ::tycho::File::openWinMethod; break"
+    # <Control-x><Control-f> is bound in TopLevel, so don't rebind it here.
     bind $prefix <Control-x><Control-s> "$this save; break"
     bind $prefix <Control-x><Control-v> "$this altFile; break"
     bind $prefix <Control-x><Control-w> "$this saveAs; break"
@@ -693,10 +690,6 @@ body ::tycho::File::openItclHTMLPage {} {
 # The editor is chosen based on the file extension, if the extension
 # is recognized.  Otherwise, the <code>Edit</code> class is used to open an
 # ordinary text editor.
-#
-# The optional argument is the name of the megawidget that this proc
-# is being invoked from.  Usually, openWin is called from a keystroke binding,
-# and the megaWidget argument is %Q.  See TopLevel for an example
 #
 body ::tycho::File::openWinMethod {} {
     ::tycho::Dialog::new FileBrowser [::tycho::autoName .fileBrowser] \
@@ -1124,6 +1117,10 @@ body ::tycho::File::indicateReadOnly {bool} {
 # is recognized.  Otherwise, the <code>Edit</code> class is used to open an
 # ordinary text editor.
 #
+# The optional argument is the name of the megawidget that this proc
+# is being invoked from.  Usually, openWin is called from a keystroke binding,
+# and the megaWidget argument is %Q.  See TopLevel for an example
+#
 body ::tycho::File::openWin {{megawidget {}}} {
     if { $megawidget == {} || [$megawidget isa ::tycho::File] != 1} {
         ::tycho::Dialog::new FileBrowser [::tycho::autoName .fileBrowser] \
@@ -1362,6 +1359,7 @@ body ::tycho::File::initializeMenubar {} {
     $myMenubar addMenu Help -side right -underline 0
 
     # File menu contents
+    # Note that <Control-x><Control-f> is actually bound in TopLevel.
     $myMenubar add {Open...} File -underline 0 \
 	    -accelerator "C-x C-f" \
 	    -command "$this openWinMethod"
