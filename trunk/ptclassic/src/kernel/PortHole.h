@@ -60,6 +60,9 @@ class Geodesic;
 class Plasma;
 class Block;
 class Galaxy;
+class EventHorizon;
+class ToEventHorizon;
+class FromEventHorizon;
 
 	//////////////////////////////////////////
 	// class GenericPort
@@ -251,6 +254,7 @@ public:
 
 	// destructor
 	~MultiPortHole();
+
 protected:                           
         // List of ports allocated
         PortList ports;
@@ -281,6 +285,9 @@ private:
 class PortHole : public GenericPort
 {
 	friend class Geodesic;	// allow Geodesic to access myPlasma
+	friend class EventHorizon;	// access myBuffer
+	friend class ToEventHorizon;	// access getParticle()
+	friend class FromEventHorizon;	// access putParticle()
 
 	// the following function may set indices
 	friend setPortIndices(Galaxy&);
@@ -320,6 +327,12 @@ public:
 
 	// class identification
 	int isA(const char*) const;
+
+	// am I at wormhole boundary?
+	int atBoundary() const { return (isItInput() == far()->isItInput()); }
+
+	// Return me as an eventHorizon
+	virtual EventHorizon* asEH();
 
 	// Can be used for things like inputing and output
 	//  Particles.  These are currently do-nothing functions
