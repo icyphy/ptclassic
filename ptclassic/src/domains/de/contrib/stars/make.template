@@ -22,8 +22,8 @@
 # 
 # 						PT_COPYRIGHT_VERSION_2
 # 						COPYRIGHTENDKEY
-# Makefile for Ptolemy SDF stars contributed by users
-# @(#)make.template	1.24 05/28/97
+# Makefile for Ptolemy DE stars contributed by users
+# $Id$
 #
 # If this file's name is "make.template" and there is no makefile in
 # this directory, do
@@ -33,55 +33,34 @@
 # This will add the dependencies to the makefile.
 
 ROOT = 		../../../../..
-VPATH = 	$(ROOT)/src/domains/sdf/contrib/stars
+VPATH = 	$(ROOT)/src/domains/de/contrib/stars
 
 # get configuration info
 CONFIG =	$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
-# SDFDIR is the directory containing SDF domain support
-SDFDIR = 	$(ROOT)/src/domains/sdf/kernel
-INCL = 		-I$(SDFDIR) \
+# DEDIR is the directory containing DE domain support
+DEDIR = 	$(ROOT)/src/domains/de/kernel
+INCL = 		-I$(DEDIR) \
 		-I$(KERNDIR) \
-		-I$(ROOT)/src/domains/sdf/contrib/kernel \
-		-I$(ROOT)/src/domains/sdf/contrib/stars
+		-I$(ROOT)/src/domains/de/contrib/stars
 
 # Library name
-LIB =		libsdfcontribstars.$(LIBSUFFIX)
+LIB =		libdecontribstars.$(LIBSUFFIX)
 
 # source files for all stars, using preprocessor
 PL_SRCS= \
-SDFPlayAIFF.pl \
-SDFPlayAIFF2.pl \
-SDFReadAIFF.pl \
-SDFBeamAbs.pl \
-SDFBeamXYNorm.pl \
-SDFCIIDGaussian.pl \
-SDFCfft.pl \
-SDFConstCx1ofN.pl \
-SDFErrCnt.pl \
-SDFExpGen.pl \
-SDFLMSArray.pl \
-SDFLMSArrayStO.pl \
-SDFMagSqr.pl \
-SDFPipeOut.pl \
-SDFPnGen.pl \
-SDFPowerEst.pl \
-SDFPowerEstCx.pl \
-SDFQPSK.pl \
-SDFQPSK2.pl \
-SDFRfft.pl \
-SDFRLSArray.pl \
-SDFRLSArrayStO.pl \
-SDFRLSCx.pl \
-SDFRLSCxTO.pl \
-SDFSineGen.pl \
-SDFSrcPosXY.pl \
-SDFTWTA.pl \
-SDFVDecoder.pl \
-SDFVEncoder.pl \
-SDFVariance.pl \
-SDFWirelessChannel.pl
+DECIR_uldl.pl \
+DEMobile_Station.pl \
+DEParallel2Serial.pl \
+DEWeighted_List.pl \
+DEWiNeS_Tcl_Animation.pl \
+DEXYgraph.pl \
+DEXgraph.pl \
+DEcell_list.pl \
+DEpos_generator.pl \
+DEpropag_uldl.pl \
+DErrmanager_uldl.pl
 
 # The .cc files
 SRCS =		$(PL_SRCS:.pl=.cc)
@@ -92,10 +71,10 @@ OBJS =		$(SRCS:.cc=.o)
 # header files for all stars
 HDRS =		$(SRCS:.cc=.h)
 
-STAR_MK =	sdfcontribstars
-DOMAIN =	SDF_CONTRIB
-DOMAIN_2 =	SDF
-MISC_FILES =	README README.notes
+STAR_MK =	decontribstars
+DOMAIN =	DE_CONTRIB
+DOMAIN_2 =	DE
+MISC_FILES =	README
 
 EXTRA_SRCS =	$(STAR_MK).c $(PL_SRCS) $(MISC_FILES) override.mk
 
