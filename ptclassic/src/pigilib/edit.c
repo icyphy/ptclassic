@@ -216,7 +216,7 @@ FIXME: This is so domain specific, that it should appear
 only when the domain is DDF. Maybe in tycho.
 */
 int 
-EditAttributes(spot, cmdList, userOptionWord) /* ARGSUSED */
+EditPragmas(spot, cmdList, userOptionWord) /* ARGSUSED */
 RPCSpot *spot;
 lsList cmdList;
 long userOptionWord;
@@ -225,7 +225,7 @@ long userOptionWord;
     vemStatus status;
     char facetHandle[16], instanceHandle[16];
 
-    ViInit("define-ddf-iteration");
+    ViInit("edit-pragmas");
     ErrClear();
     /* get current facet */
     facet.objectId = spot->facet;
@@ -242,7 +242,11 @@ long userOptionWord;
         ViDone();
     } else if (status != VEM_OK) {
 	/* cursor not over an instance... */
-	strcpy (instanceHandle, "NIL");
+        PrintErr("Cursor must be over an icon instance");
+        ViDone();
+    } else if (IsUniv(&inst) || IsPal(&inst)) {
+        PrintErr("Pragmas can only be set for stars or galaxies");
+        ViDone();
     } else {
 	/* cursor is over some type of instance... */
 	ptkOctObj2Handle(&inst,instanceHandle);
@@ -251,7 +255,7 @@ long userOptionWord;
     TCL_CATCH_ERR( Tcl_VarEval(ptkInterp,"ptkEditParams ",
 			       facetHandle, " ",
 			       instanceHandle, " ",
-			       "Attributes", (char *)NULL) )
+			       "Pragmas", (char *)NULL) )
 
     ViDone();
 }
