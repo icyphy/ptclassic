@@ -88,7 +88,7 @@ can be added.
 		access { protected }
 		type { "unsigned char" }
 		arglist { "(const float inp)"}
-		code { return((unsigned char) (inp + 0.5)); }
+		code { return((unsigned char) (inp + 128.5)); }
 	}
 
 
