@@ -193,8 +193,9 @@ ddsData data;			/* Should be (ddsNumber *)            */
 	} else {
 	    ddsNumber *num = &(item->user_spec);
 	    errRaise(ddsPackageName, DDS_BAD_VALUE,
-		     "Bad values for minimum (%d), maximum(%d), value(%d), or increment(%d) to DDS_NUMBER",
-		     num->minimum, num->maximum, num->value, num->increment);
+		     "Bad values for minimum (%g), maximum(%g), value(%g), or increment(%g) to DDS_NUMBER",
+		     (double) num->minimum, (double) num->maximum,
+		     (double) num->value, (double) num->increment);
 	    /*NOTREACHED*/
 	}
 	return (ddsHandle) item;
