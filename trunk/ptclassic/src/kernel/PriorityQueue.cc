@@ -190,6 +190,20 @@ void PriorityQueue :: initialize()
 	numberNodes = 0;
 }
 
+Pointer PriorityQueue :: getFirstElem()
+{
+	LevelLink *f = lastNode->next;	// Head of list
+
+	if (f == lastNode) lastNode = 0;	// List now empty
+	else {
+		lastNode->next = f->next;
+		f->next->before = lastNode;
+	}
+	numberNodes--;
+	return f->e;
+	putFreeLink(f);
+}
+
 LevelLink* PriorityQueue :: get()
 {
 	LevelLink *f = lastNode->next;	// Head of list
@@ -201,6 +215,38 @@ LevelLink* PriorityQueue :: get()
 	}
 	numberNodes--;
 	return f;
+}
+
+Pointer PriorityQueue :: getLastElem()
+{
+	if (lastNode == lastNode->next) lastNode = 0;	// List now empty
+	else {
+		lastNode->before->next = lastNode->next;
+		lastNode->next->before = lastNode->before;
+	}
+	numberNodes--;
+	LevelLink *f = lastNode;
+	lastNode = f->before;
+	return f->e;
+	putFreeLink(f);
+}
+
+LevelLink* PriorityQueue :: teg()
+{
+	if (lastNode == lastNode->next) lastNode = 0;	// List now empty
+	else {
+		lastNode->before->next = lastNode->next;
+		lastNode->next->before = lastNode->before;
+	}
+	numberNodes--;
+	LevelLink *f = lastNode;
+	lastNode = f->before;
+	return f;
+}
+
+void PriorityQueue :: die(LevelLink* ll)
+{
+	putFreeLink(ll);
 }
 
 void PriorityQueue :: extract(LevelLink* a)

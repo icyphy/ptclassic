@@ -67,9 +67,8 @@ public:
 class PriorityQueue
 {
 	int numberNodes;
-
 	// These are for memory management scheme to minimize the dynamic
-	// memory (de)allocation. FreeLinks are managed in linked-list 
+	// memory (de)allocation. FreeLinks are managed in linked-list
 	// structure.
 	LevelLink* freeLinkHead;
 	int  	   numFreeLinks;		// mainly for debugging.
@@ -91,11 +90,13 @@ public:
 	// Add element to the tail of the queue and sort it by its level (v)
 	// first and its fineLevel (fv) second.
 	// Numerically smaller number represents the higher priority.
+	// (i.e., highest level is at the tail)
 	LevelLink* levelput(Pointer a, float v, float fv = 1.0);
 
 	// Add element to the head of the queue and sort it by its level (v)
 	// first and its fineLevel (fv) second.
 	// Numerically smaller number represents the higher priority.
+	// (i.e., highest level is at the head)
 	LevelLink* leveltup(Pointer a, float v, float fv = 1.0);
 
 	// append the link to the end of the queue (ignore levels).
@@ -107,7 +108,23 @@ public:
 	void pushBack(LevelLink*);
 
 	// Remove and return link from the head of the queue...
+	Pointer getFirstElem();
+
+	// Remove and return link from the head of the queue...
+	// WARNING -- Must call die() after finishing with it.
+	// Use getFirstElem() to get and free in one step.
 	LevelLink* get();
+
+	// Remove and return link from the tail of the queue...
+	Pointer getLastElem();
+
+	// Remove and return link from the tail of the queue...
+	// WARNING -- Must call die() after finishing with it.
+	// Use getLastElem() to get and free in one step.
+	LevelLink* teg();
+
+	// Free a link that has been removed from the queue by get or teg
+	void die(LevelLink*);
 
 	// Return the next node on list, relative to the last reference
 	LevelLink* next();
@@ -137,6 +154,7 @@ public:
 	PriorityQueue(Pointer a, float v, float fv) ;
 	~PriorityQueue();
 };
+
 
 
 // If it ends up with the last link of the queue, it rounds up the head of
