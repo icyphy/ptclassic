@@ -89,27 +89,11 @@
 # evaluated in response to a double click on the node.
 # </dl>
 # <p>
-# FIXME: Check this.  Probably should put in a Displayer, not TopLevel.
-# Here is an example of how to use the EditDAG:
+# Here is an example of the EditDAG:
 # <tcl><pre>
-#     catch {delete object .f}
-#     ::tycho::TopLevel .f
-#     ::tycho::EditDAG .f.f
-#     pack .f.f
-#     .f centerOnScreen
+#     ::tycho::view EditDAG
 # </pre></tcl>
 # <p>
-# The widget has a number of options. The <b>-graph</b> option gives
-# the name of an object of type <code>DirectedAcyclicGraph</code> to
-# display and edit. If it is not given, the widget creates its own
-# object of this type and destroys that object on exiting. The
-# <b>-spacingx</b> and <b>-spacingy</b> options give the horizontal and
-# vertical spacing (as a fraction of a nominal default). The
-# <b>-readonly</b> option disables changes, making the widget a display
-# only. The <b>-startx</b> and <b>-starty</b> options gives the
-# position of the upper left corner of the first node (in pixels,
-# default 10 and 5). This upper left corner will be placed below the
-# title information, if there is any.
 #
 class ::tycho::EditDAG {
     inherit ::tycho::Graphics
@@ -353,9 +337,9 @@ body ::tycho::EditDAG::constructor {args} {
     # Register that if any centered text is added, we should update display.
     dependenceAdd centeredtext node "$this redrawGraph"
 
-    bind $slate <Key-A> {%Q addArc; break}
-    bind $slate <Key-R> {%Q addRoot; break}
-    bind $slate <Key-C> {%Q addChild; break}
+    bind $slate <Key-A> "$this addArc; break"
+    bind $slate <Key-R> "$this addRoot; break"
+    bind $slate <Key-C> "$this addChild; break"
 
     # Bindings for enter and leave
     $slate bind node <Enter> "@scope ::tycho::EditDAG \
@@ -475,7 +459,7 @@ body ::tycho::EditDAG::addChild {} {
     set name [::tycho::autoName .query]
     ::tycho::Query $name -queries {
         {line name {Node name:} {}}
-        {line contents {Contents:} {} 8}
+        {lines contents {Contents:} {} 8}
     } -okcommand "$this modify add \[$name get name\] \[$name get contents\] \
             \{ $parents \}"
     $name centerOnScreen
@@ -489,7 +473,7 @@ body ::tycho::EditDAG::addRoot {} {
     set name [::tycho::autoName .query]
     ::tycho::Query $name -queries {
         {line name {Node name:} {}}
-        {line contents {Contents:} {} 8}
+        {lines contents {Contents:} {} 8}
     } -okcommand "$this modify add \[$name get name\] \[$name get contents\] {}"
     $name centerOnScreen
 }
@@ -588,7 +572,7 @@ body ::tycho::EditDAG::editNode {id} {
     set name [::tycho::autoName .query]
     set queries [list \
             [list line name {Node name:} $node] \
-            [list line contents {Contents:} [$mygraph contents $node] 8]]
+            [list lines contents {Contents:} [$mygraph contents $node] 8]]
     ::tycho::Query $name -queries $queries \
             -okcommand "$this modify setNode [list $node] \
             \[$name get name\] \[$name get contents\]"
