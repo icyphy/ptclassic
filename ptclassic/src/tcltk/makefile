@@ -51,13 +51,16 @@ BINDIR=$(PTOLEMY)/bin.$(PTARCH)
 #TCL_VERSION =		tcl7.3
 #TK_MAJOR_VERSION = 	tk3.6
 #TK_VERSION =		tk3.6p1
+#ITCL_VERSION =		itcl-1.5
 
 TCL_MAJOR_VERSION = 	tcl7.4
 TCL_VERSION =		tcl7.4p1
 TK_MAJOR_VERSION = 	tk4.0
 TK_VERSION =		tk4.0p1
+ITCL_MAJOR_VERSION =	itcl-2.0
+ITCL_VERSION =		itcl-2.0b
 
-ITCL_VERSION =	itcl-1.5
+
 
 
 # Location of the tcl source
@@ -93,9 +96,11 @@ TK_DEST =	$(TCLTK_DEST)/$(TK_VERSION).$(PTARCH)
 TK_INDEPENDENT_DEST =	$(TCLTK_DEST)/$(TK_VERSION)
 
 # Destination of itcl only machine dependent files
-ITCL_DEST =	$(TCLTK_DEST)/itcl.$(PTARCH)
+#ITCL_DEST =	$(TCLTK_DEST)/itcl.$(PTARCH)
+ITCL_DEST =	$(TCLTK_DEST)/$(ITCL_VERSION).$(PTARCH)
 # Destination of the machine independent itcl files
-ITCL_INDEPENDENT_DEST =	$(TCLTK_DEST)/itcl
+#ITCL_INDEPENDENT_DEST =	$(TCLTK_DEST)/itcl
+ITCL_INDEPENDENT_DEST =		$(TCLTK_DEST)/$(ITCL_VERSION)
 
 all: 		configure tcl tk itcl
 configure:	$(TCL_OBJ)/config.status $(TK_OBJ)/config.status \
