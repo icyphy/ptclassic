@@ -16,6 +16,10 @@ $Id$
 #include "edit.h"
 #include "err.h"
 #include "util.h"
+#if defined(PTK)
+#include "ptk.h"  /* Interpreter name, window name, etc.  aok */
+#include "ptkCalls.h"  /* C utilities for using tcl from pigi.  aok */
+#endif
 
 /* The vars below store the state of the last run command for re-runs */
 static int lastIterate;
@@ -48,6 +52,70 @@ int *nPtr;
     return (TRUE);
 }
 
+#if defined(PTKold)
+/* Command used by Tk to get the current number of iterations from
+   deep in the heart of the OCT database */
+int
+GetIterateCmd (dummy, interp, argc, argv)
+    ClientData dummy;                   /* Not used. */
+    Tcl_Interp *interp;                 /* Current interpreter. */
+    int argc;                           /* Number of arguments. */
+    char **argv;                        /* Argument strings. */
+{
+    int oldN;
+    char value[64];
+    octObject facet;
+
+    if (argc != 2) {
+        Tcl_AppendResult(interp, "wrong # args: should be \"", argv[0],
+                " OctObjectHandle\"", (char *) NULL);
+        return TCL_ERROR;
+    }
+
+    ptkHandle2OctObj(argv[1], &facet);
+
+    if (GetIterateProp(&facet, &oldN) == -1) {
+	oldN = 10;
+    }
+
+    sprintf(value, "%d", oldN);
+    Tcl_SetResult (interp, value, TCL_VOLATILE);
+    return TCL_OK;
+
+}
+#endif
+
+#if defined(PTKold)
+/* Command used by Tk to set the current number of iterations from
+   deep in the heart of the OCT database */
+
+int
+SetIterateCmd (dummy, interp, argc, argv)
+    ClientData dummy;                   /* Not used. */
+    Tcl_Interp *interp;                 /* Current interpreter. */
+    int argc;                           /* Number of arguments. */
+    char **argv;                        /* Argument strings. */
+{
+    int IterationNumber;
+    octObject facet;
+
+
+    if (argc != 3) {
+        Tcl_AppendResult(interp, "wrong # args: should be \"", argv[0],
+                " OctObjectHandle IterationValue \"", (char *) NULL);
+        return TCL_ERROR;
+    }
+
+    ptkHandle2OctObj(argv[1], &facet);
+    Tcl_GetInt(interp, argv[2], &IterationNumber);
+
+    SetIterateProp(&facet, IterationNumber);
+    lastIterate = IterationNumber;
+
+    return(TCL_OK);
+}
+#endif
+
 /* Run a facet through a pre-specified number of iterations */
 static boolean
 RunN(facetPtr,N)
@@ -59,7 +127,6 @@ int N;
     ERR_IF1(!KcRun(N));
     return (TRUE);
 }
-    
 
 static boolean
 Run(facetPtr)
@@ -73,6 +140,26 @@ octObject *facetPtr;
     ERR_IF1(!KcRun(n));
     return (TRUE);
 }
+
+
+#if defined(PTK)
+
+static boolean
+ptkRun(facetPtr)
+octObject *facetPtr;
+{
+    int n;
+    char facetHandle[64];
+
+    lastFacet = *facetPtr;
+    ptkOctObj2Handle( facetPtr, facetHandle );
+
+    Tcl_VarEval(ptkInterp,"runwindow ",facetHandle,(char *)NULL);
+
+    return (TRUE);
+}
+
+#endif
 
 int
 RunUniverse(name, iterations)
@@ -141,11 +228,15 @@ long userOptionWord;
         PrintErr("Failed to set default domain.");
         ViDone();
     }
-
+#if defined(PTK)
+     ptkRun(facet);
+#else
     if (!Run(&facet)) {
 	PrintErr(ErrGet());
         ViDone();
     }
+#endif
+
     ViDone();
 }
 
