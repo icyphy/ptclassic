@@ -22,6 +22,13 @@ Routines implementing class Block methods
  
 **************************************************************************/
 
+// constructor
+
+Block :: Block() {}
+
+// alternate constructor
+Block :: Block(const char* n,Block* p,const char* d) : NamedObj(n,p,d) {}
+
 // print all port names in the block, omitting hidden ports
 
 StringList
