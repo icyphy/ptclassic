@@ -65,9 +65,8 @@
 # Processor colors. This needs to be fixed: the colors are ghastly...
 
 set ptkGantt_Parms(colors) \
-	{red steelblue lime green pink green \
-	 yellow orangered blue coral tan khaki magenta mediumaquamarine \
-	 forestgreen sienna}
+	{red steelblue limegreen pink green yellow orangered blue \
+	 coral tan khaki magenta mediumaquamarine forestgreen sienna}
 
 # Layout parameters, in cm
 
@@ -88,9 +87,11 @@ set ptkGantt_Parms(smallFont)  \
 
 # -adobe-courier-medium-r-normal--10-100-75-75-m-60-iso8859-1
 
+# Dummy procedure for exitting Gantt chart
+proc ptkGanttExit {} {
+}
 
-
-
+# Print Gantt chart
 proc ptkGantt_PrintChart { chartName } {
     global env
     set universe [string trimleft $chartName .gantt_]
@@ -808,18 +809,12 @@ proc ptkGantt_Bindings {universe num_procs} {
 proc ptkGanttDisplay { universe {inputFile ""} } {
 
     set ganttChartName .gantt_${universe}
-
     toplevel $ganttChartName
 
-    # wm minsize $ganttChartName 100 50
-    # wm maxsize $ganttChartName 1000 800
-
     # Set a default window size
-
     wm geometry $ganttChartName 840x320
 
     # Here we have the menu bar.
-
     frame $ganttChartName.mbar -relief raised -bd 2
     pack $ganttChartName.mbar -side top -fill x
     menubutton $ganttChartName.mbar.file -text "File" -underline 0 -menu \
@@ -832,14 +827,17 @@ proc ptkGanttDisplay { universe {inputFile ""} } {
     menu $ganttChartName.mbar.file.menu -tearoff 0
     $ganttChartName.mbar.file.menu add command -label "Print Chart..." \
 	    -command "ptkGantt_PrintChart $ganttChartName"
-    $ganttChartName.mbar.file.menu add command -label "Exit" -command \
-	    "ptkClearHighlights; destroy $ganttChartName" -accelerator "Ctrl+d"
-    
+
+    set exitcommand "ptkClearHighlights; destroy $ganttChartName; ptkGanttExit"
+    $ganttChartName.mbar.file.menu add command -label "Exit" \
+	    -command $exitcommand -accelerator "Ctrl+d"
+
     # Here is where we open the file and parse its contents
 
     set EXISTS [file exists $inputFile]
     if { $EXISTS == 0 } {
-	puts "No file name given.  Expecting input from scheduler."
+	ptkMessage "ptkGanttDisplay: No file name given. \
+		    Expecting input from the scheduler."
     } else {
 	set GFILE_ID [open $inputFile r]
 	set proc_num 1
@@ -1287,7 +1285,7 @@ proc foreach* {args} {
     }
 
     if {[llength $args] != 1} {
-	puts "Wrong number of args to foreach*"
+	ptkMessage "error: wrong number of args to foreach*"
 	return
     }
 
