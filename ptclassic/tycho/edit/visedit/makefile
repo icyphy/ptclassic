@@ -54,7 +54,7 @@ ITCL_SRCS = \
 	ProfileTcl.itcl \
 	TCanvas.itcl
 
-EXTRA_SRCS =		$(TCL_SRCS) $(ITCL_SRCS) icons.tim
+EXTRA_SRCS =		$(TCL_SRCS) $(ITCL_SRCS) icons.tim stars.tim
 
 MISC_FILES =		doc img test tclIndex 
 
