@@ -229,8 +229,8 @@ void CompileCGSubsystems::pairSendReceive(DataFlowStar* oldSend,
     StringList send, receive;
     send << "Send_" << link;
     receive << "Receive_" << link;
-    newSend->setName(savestring(send));
-    newReceive->setName(savestring(receive));
+    newSend->setName(hashstring(send));
+    newReceive->setName(hashstring(receive));
     CGSharedBus::pairSendReceive(newSend,newReceive);
 }
 
