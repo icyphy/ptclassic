@@ -6,7 +6,6 @@
 #include "Output.h"
 #include "type.h"
 #include "NamedObj.h"
-#include "Tokenizer.h"
 
 /**************************************************************************
 Version identification:
@@ -26,6 +25,8 @@ $Id$
 
 class Block;
 class State;
+
+class Tokenizer;
 
 class ParseToken {
 public:

@@ -16,8 +16,10 @@ $Id$
 #include <std.h>
 #include <ctype.h>
 #include <string.h>
+#include "Tokenizer.h"
 #include "State.h"
 #include "Block.h"
+#include "miscFuncs.h"
 
 const int TOKSIZE = 80;
 
@@ -30,13 +32,6 @@ const int TOKSIZE = 80;
 // See if character is part of an identifier
 inline unsigned int is_idchar(char c) {
         return isalnum(c) || c == '_';
-}
-
-char*
-savestring (const char* foo) {
-        char* bar = new char[strlen(foo)+1];
-        strcpy (bar, foo);
-        return bar;
 }
 
 // The state tokenizer: return next token
