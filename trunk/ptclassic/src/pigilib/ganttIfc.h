@@ -37,11 +37,13 @@ extern int CreateFrames();
 extern int Frame(char *stars[]);
 extern int ClearFrames();
 extern int DestroyFrames();
-extern void FindAndMarkError(octObject *facetP, char *name);
+/* following is not used */
+/* extern void FindAndMarkError(/* octObject *facetP, char *name */); */
 
-extern boolean FindNameSet(octObject *facetPtr, char *name);
+extern boolean FindNameSet(/* octObject *facetPtr, char *name */);
 /* FIXME:  These functions are not in ganttIfc.h */
 extern void FrameSetFacet();
+
 extern int GanttMan();
 extern void GanttErr();
 
@@ -49,7 +51,6 @@ extern void GanttErr();
 extern boolean GanttRun();  /* FIXME: Not in ganttIfc.h */
 extern boolean GanttInit(); /* FIXME: Not in ganttIfc.h */
 extern void FindClear();
-extern int RpcFindName(RPCSpot *spot, lsList cmdList, long userOptionWord);
 #else
 extern void FrameSetFacet();
 extern int CreateFrames();
@@ -58,7 +59,7 @@ extern int ClearFrames();
 extern int DestroyFrames();
 extern int GanttMan();
 extern void GanttErr();
-extern void FindAndMarkError();
+/* extern void FindAndMarkError(); */
 /* Called by POct */
 extern boolean FindNameSet();
 
@@ -75,4 +76,12 @@ typedef struct RgbValue_s {
     unsigned short green;
     unsigned short blue;
 } RgbValue;
+
+/* Functions added to allow cross compile with ptcl and pigi */
+extern void beginGantt();
+extern void writeGanttLabel();
+extern void writeGanttBindings();
+extern void endGantt();
+extern void writeGanttProc();
+
 #endif /* GANTTIFC_H */
