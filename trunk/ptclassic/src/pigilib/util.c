@@ -415,3 +415,30 @@ octObject *facetPtr;
     }
     return oldDomain;
 }
+
+/* Set the domain to correspond to an instance. */
+
+char *
+setCurDomainInst(instPtr)
+octObject *instPtr;
+{
+    octObject mFacet;
+    char *oldDomain = curDomainName();
+    char domain[64], srcName[512], *fullName;
+    if (IsGal(instPtr) || IsUniv(instPtr) || IsPal(instPtr))
+	    return setCurDomainF(instPtr);
+    if (!MyOpenMaster(&mFacet, instPtr, "interface", "r")) {
+	    PrintErr(ErrGet());
+	    return NULL;
+    }
+    octFullName(&mFacet, &fullName);
+    if (!IconFileToSourceFile(fullName, srcName, domain)) {
+	    PrintErr(ErrGet());
+	    return NULL;
+    }
+    if (!KcSetKBDomain(domain)) {
+	PrintErr("Domain error in instance.");
+	return NULL;
+    }
+    return oldDomain;
+}
