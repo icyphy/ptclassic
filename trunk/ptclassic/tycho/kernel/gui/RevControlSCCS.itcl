@@ -70,6 +70,12 @@ class ::tycho::RevControlSCCS {
     # Check out the file associated with the specified File object.
     proc checkOut {object} {}
 
+    # Check out the previous checked in file, and remove from history
+    proc fixRecent {object version} {}
+
+    # Remove the most recent checked in file.
+    proc removeRecent {object version} {}
+
     # Return 1 if the given file is under revision control, 0 otherwise.
     proc isUnderRevControl {file} {}
 
@@ -86,7 +92,7 @@ class ::tycho::RevControlSCCS {
     protected method updateHistory {}
 
     # View the version control history.
-    method viewHistory {} {} ;#{error "Sorry, not implemented yet"}
+    method viewHistory {} {}
 
 
     ###################################################################
@@ -161,6 +167,41 @@ body ::tycho::RevControlSCCS::checkOut {object} {
 }
 
 #####################################################################
+#### fixRecent
+# Check out the most recent file, then remove it from history
+# 
+body ::tycho::RevControlSCCS::fixRecent {object version} {
+    set file [$object filename]
+    set dir [file dirname $file]
+    set basefile [file tail $file]
+    set olddir [eval pwd]
+
+    cdDir $dir
+    if {[catch {exec sccs fix -r$version $basefile} output]} {
+        ::tycho::inform $output
+    }
+    cd $olddir
+    $object reload
+}
+
+#####################################################################
+#### removeRecent
+# Remove the latest revision control in history
+# 
+body ::tycho::RevControlSCCS::removeRecent {object version} {
+    set file [$object filename]
+    set dir [file dirname $file]
+    set basefile [file tail $file]
+    set olddir [eval pwd]
+
+    cdDir $dir
+    if {[catch {exec sccs rmdel -r$version $basefile} output]} {
+        ::tycho::inform $output
+    }
+    cd $olddir
+    $object reload
+}
+#####################################################################
 #### initializeRevControl
 # Put the file under revision control.
 # 
@@ -223,7 +264,7 @@ body ::tycho::RevControlSCCS::retrieveVersion {version} {
     # Generate a temporary file name that has the same extension as the file
     # we are working on.
     set tmpFile [::tycho::tmpFileName \
-            [file rootname $basefile] [file extension $basefile]].$version
+            [file rootname $basefile].$version- [file extension $basefile]]
 
     # In sccs get, -s means silent, -p means to stdout.
     if [catch {exec sccs get -p -s -r$version $basefile > $tmpFile} output ] {
