@@ -618,7 +618,8 @@ body ::tycho::HTML::forward {} {
 body ::tycho::HTML::help {} {
     global ::TYCHO
     ::tycho::File::openContext \
-	    [::tycho::url join $TYCHO kernel doc usersGuides HTMLHelp.html]
+	    [::tycho::url join $TYCHO kernel html doc usersGuides \
+	    HTMLHelp.html]
 }
 
 #####################################################################
