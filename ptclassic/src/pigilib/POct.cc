@@ -253,14 +253,18 @@ int POct::SetDelayParams( octObject *instPtr, ParamListType *pList) {
 // Deletes all of the elements of the passed pList
 void POct::DeletePList( ParamListType* pList) {
     for (int i=0; i < pList->length; i++) {
-        // free if used because this space was allocated by TCL, a
-        // C language program
-        // free (pList->array[i].name);
-        delete pList->array[i].name;
+	
+	// FIXME: a consistent decision should be made about
+	// whether a ParamListType owns its strings or not,
+	// and if so they should not be "const char *".
+	// Note that it is not legal C++ to delete a "const T *"
+	// pointer, hence the casts.
+
+        delete (char*)(pList->array[i].name);
         pList->array[i].name = NULL;
-        delete pList->array[i].type;
+        delete (char*)(pList->array[i].type);
         pList->array[i].type = NULL;
-        delete pList->array[i].value;
+        delete (char*)(pList->array[i].value);
         pList->array[i].value = NULL;
     }
     delete pList->array;
