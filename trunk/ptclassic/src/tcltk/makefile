@@ -285,7 +285,7 @@ $(TCL8_INDEPENDENT_DEST): $(TCLTK_DEST)
 # TclBlend
 
 TCLBLEND_MAJOR_VERSION = 1.0
-TCLBLEND_MINOR_VERSION = b1up1
+TCLBLEND_MINOR_VERSION = b1up2
 TCLBLEND_VERSION = $(TCLBLEND_MAJOR_VERSION)$(TCLBLEND_MINOR_VERSION)
 
 TCLBLEND_SRC =	$(TCLTK_SRC)/tclBlend$(TCLBLEND_VERSION)/unix
@@ -297,7 +297,7 @@ all_tclblend: config_tclblend tclblend install_tclblend
 config_tclblend: $(TCLBLEND_OBJ)
 	@echo "Configuring tclblend"
 	(cd $(TCLBLEND_OBJ); PWD=$(TCLBLEND_OBJ); export PWD; \
-	$(TCLBLEND_SRC)/configure \
+		$(TCLBLEND_SRC)/configure \
 		--srcdir=$(TCLBLEND_SRC) \
 		--with-tcl=$(TCL8_OBJ) \
 		--prefix=$(TCLBLEND_INDEPENDENT_DEST) \
@@ -313,9 +313,9 @@ install_tclblend:
 test_tclblend:
 	(cd $(TCLBLEND_OBJ); PWD=$(TCLBLEND_OBJ); export PWD; $(MAKE) test)
 
-
 $(TCLBLEND_OBJ): $(TCLTK_OBJ)
 	@if [ ! -d $@ ]; then echo "Making $@"; mkdir $@; fi
+
 
 ######################################################
 # Jacl
