@@ -77,17 +77,14 @@ public:
 protected:
 	virtual int checkBlocks();
 	virtual void initStructures();
+	virtual int isSource(Star& s);
 	void resetFlags();
-private:
+	
+	void reportArcOverflow(PortHole*, int);
+	PortHole* checkInputOverflow(Star&, int);
+
 	// explicit stopping condition
 	int stopTime;
-
-	// check whether a star is runnable. Also enable lazy evaluation.
-	int isRunnable(DataFlowStar&, int enableLazyEvalForDynPorts = TRUE);
-
-	// lazy evaluation
-	int lazyEval(DataFlowStar*);
-	int checkLazyEval(DataFlowStar *);
 
 	// list of source blocks.
 	SequentialList sourceBlocks;
@@ -97,9 +94,6 @@ private:
 
 	// the number of firing all sources so far
 	int numFiring;
-
-	// number of overlapped execution allowed.
-	int numOverlapped;
 
 	// capacity of arc
 	int maxToken;
@@ -112,6 +106,17 @@ private:
 
 	// arc that exceeds the limit.
 	PortHole* overFlowArc;
+
+private:
+	// check whether a star is runnable. Also enable lazy evaluation.
+	virtual int isRunnable(DataFlowStar&, int enableLazyEvalForDynPorts = TRUE);
+
+	// lazy evaluation
+	virtual int lazyEval(DataFlowStar*);
+	virtual int checkLazyEval(DataFlowStar *);
+
+	// number of overlapped execution allowed.
+	int numOverlapped;
 };
 
 #endif

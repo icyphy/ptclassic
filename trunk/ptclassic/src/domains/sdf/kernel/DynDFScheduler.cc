@@ -52,7 +52,7 @@ how many firings of each star constitute one iteration.
 #include <iostream.h>
 
 // default max # of tokens on an arc.
-const int DEFAULT_MAX_TOKEN = 1024;
+const int DEFAULT_MAX_TOKEN = 100000;
 
 static int fireSource(Star&, int);
 
@@ -60,7 +60,7 @@ static int fireSource(Star&, int);
 		Main DDF scheduler routines
 *******************************************************************/
 
-static int isSource(Star& s) {
+int DynDFScheduler :: isSource(Star& s) {
 	BlockPortIter nextp(s);
 	PortHole* p;
 
@@ -167,7 +167,7 @@ void DynDFScheduler::initStructures() {
 	}
 }
 		
-static void reportArcOverflow(PortHole* p, int maxToken) {
+void DynDFScheduler :: reportArcOverflow(PortHole* p, int maxToken) {
 	StringList msg =
 	"Dynamic scheduler error: maximum buffer size exceeded (limit = ";
 	msg << maxToken << ")\n";
@@ -289,7 +289,7 @@ DynDFScheduler :: run () {
 // check arc overflow on input arcs to s.  Return a porthole that has
 // overflowed if one exists.
 
-static PortHole* checkInputOverflow(Star& s, int maxToken) {
+PortHole* DynDFScheduler :: checkInputOverflow(Star& s, int maxToken) {
 
 	BlockPortIter nextp(s);
 	PortHole* p;
@@ -481,7 +481,7 @@ static int fireSource(Star& s, int k) {
 DynDFScheduler::DynDFScheduler () {
 	stopTime = 1;
 	numOverlapped = 1; 
-	schedulePeriod = 10000.0;
+	schedulePeriod = 0.0;
 	maxToken = DEFAULT_MAX_TOKEN;
 	overFlowArc = 0;
 	lazyDepth = 0;
