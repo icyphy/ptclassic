@@ -52,6 +52,7 @@ SIMPLE_TESTS = \
 	testStack.itcl
 
 GRAPHICAL_TESTS = \
+	testBuilderDialog.itcl \
 	testExec.itcl \
 	testRevControl.itcl \
 	testToolBar.itcl \
