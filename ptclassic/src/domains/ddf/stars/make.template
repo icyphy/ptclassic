@@ -29,7 +29,8 @@ DDFDownCounter.pl \
 DDFEndCase.pl \
 DDFLastOfN.pl \
 DDFRepeater.pl \
-DDFSelf.pl
+DDFSelf.pl \
+DDFThresh.pl
 
 LIB =libddfstars.$(LIBSUFFIX)
 
