@@ -101,6 +101,7 @@ first-order feedback coefficient which is a function of k and N }
 	codeblock(decl) {
 		double acc = 0.0;
 		double d1val = $ref(d1);
+		int i;
 	}
 	codeblock(filter) {
 		/* Run all-pole section of Goertzel's algorithm N iterations.
@@ -111,8 +112,8 @@ first-order feedback coefficient which is a function of k and N }
 		   ONLY to pass their values to derived stars */
 		$ref(state1) = 0.0;
 		$ref(state2) = 0.0;
-		for (int i = $val(N)-1; i >= 0; i--) {
-		  acc = $ref(input,i);
+		for (i = $val(N)-1; i >= 0; i--) {
+		  acc = $ref2(input,i);
 		  acc += d1val * $ref(state1);
 		  acc -= $ref(state2);
 		  $ref(state2) = $ref(state1);
