@@ -42,19 +42,19 @@ ENHANCEMENTS, OR MODIFICATIONS.
 // Class identification.
 ISA_FUNC(SRPortHole,PortHole);
 
-// Input/output identification.
+// Identify the port as an input
 int InSRPort::isItInput() const
 {
     return TRUE;
 }
 
-// Input/output identification.
+// Identify the port as an output
 int OutSRPort::isItOutput() const
 {
     return TRUE;
 }
 
-// Input/output identification.
+// Identify the port as an input
 int MultiInSRPort::isItInput() const
 {
     return TRUE;
@@ -80,20 +80,41 @@ PortHole& MultiOutSRPort::newPort()
 	return installPort(p);
 }
 
+// Return TRUE if the particle in the port hole is known present or absent
+//
+// @Description The default behavior is to signal an error--bare
+// SRPortHoles should never be used.
+
 int SRPortHole::known() const {
   Error::abortRun("known() called on class SRPortHole");
   return FALSE;
 }
+
+// Return TRUE if the particle in the port hole is (known as) absent
+//
+// @Description The default behavior is to signal an error--bare
+// SRPortHoles should never be used.
 
 int SRPortHole::absent() const {
   Error::abortRun("absent() called on class SRPortHole");
   return FALSE;
 }
 
+// Return TRUE if this input is (known as) present
+//
+// @Description The default behavior is to signal an error--bare
+// SRPortHoles should never be used.
+
 int SRPortHole::present() const {
   Error::abortRun("present() called on class SRPortHole");
   return FALSE;
 }
+
+// Return the present particle on the port
+//
+// @Description It is an error to call this without knowing
+// SRPortHole::present() is TRUE.  The default behavior is to signal
+// an error--bare SRPortHoles should never be used
 
 Particle & SRPortHole::get() const {
   Error::abortRun("get() called on class SRPortHole");
@@ -101,7 +122,7 @@ Particle & SRPortHole::get() const {
   return *myPlasma->get();  
 }
 
-// Return TRUE if the the output is known
+// Return TRUE if the the output is known present or absent
 int OutSRPort::known() const
 {
   if ( emittedParticle ) {
@@ -135,7 +156,10 @@ int OutSRPort::absent() const
   return FALSE;
 }
 
-// Return TRUE if the far port exists and has an absent particle
+// Return TRUE if the port has an absent particle
+//
+// @Description Return TRUE if the far port exists and has an absent
+// particle.
 int InSRPort::absent() const
 {
   OutSRPort * farPort;
@@ -158,6 +182,11 @@ int OutSRPort::present() const
   return FALSE;
 }
 
+// Return the present particle on the port
+//
+// @Description It is an error to call this without knowing
+// SRPortHole::present() is TRUE.
+
 Particle & OutSRPort::get() const
 {
   if (emittedParticle > (Particle *) 1 ) {
@@ -172,7 +201,11 @@ Particle & OutSRPort::get() const
   return *myPlasma->get();
 }
 
-// Return TRUE if the far port exists and has a present particle
+// Return TRUE if the particle in the port hole is known present
+//
+// @Description Return TRUE if the far port exists and has a present
+// particle.
+
 int InSRPort::present() const
 {
   OutSRPort * farPort;
@@ -184,7 +217,11 @@ int InSRPort::present() const
   return FALSE;
 }
 
-// Return the particle that has been emitted
+// Return the present particle on the port
+//
+// @Description It is an error to call this without knowing
+// SRPortHole::present() is TRUE and the port is connected to an OutSRPort.
+
 Particle & InSRPort::get() const
 {
   OutSRPort * farPort;
@@ -214,7 +251,7 @@ void OutSRPort::makeAbsent()
   emittedParticle = (Particle *) 1; 
 }
 
-// Emit a particle
+// Emit a particle: make it present
 Particle & OutSRPort::emit()
 {
   if ( emittedParticle ) {
@@ -228,6 +265,9 @@ Particle & OutSRPort::emit()
 }
 
 // Destroy the particle in the port, if any, resetting it to "unknown"
+//
+// @Description In general, this should only be done at the beginning
+// of an instant.  Doing so at another time usually violates monotonicity.
 void OutSRPort::clearPort()
 {
   if ( emittedParticle > (Particle *) 1 ) {
