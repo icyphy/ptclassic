@@ -75,12 +75,18 @@ class ::tycho::ProfileTcl {
 #
 body ::tycho::ProfileTcl::constructor {args} {
     global env tycho
-    toolbar button on {Start collecting profiling data} \
-            -text "Start" -command "$this profileStart"
-    toolbar button off {Display profile as a call tree} \
-            -text Display -command "$this busy $this profileDisplay"
-    toolbar button cancel {Cancel profile, discarding collected data} \
-            -text Cancel -command "$this profileCancel"
+    toolbar button on \
+            -text "Start" \
+            -description {Start collecting profiling data} \
+            -command "$this profileStart"
+    toolbar button off \
+            -text Display \
+            -description {Display profile as a call tree} \
+            -command "$this busy $this profileDisplay"
+    toolbar button cancel \
+            -text Cancel \
+            -description {Cancel profile, discarding collected data} \
+            -command "$this profileCancel"
 
     toolbar disable off
     toolbar disable cancel
