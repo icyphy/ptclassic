@@ -34,7 +34,7 @@
 # Based on pp 344-346 of Harrison and McClellan's "Effective Tcl/Tk
 # Programming" book
 
-package provide graphedit 1.0
+package provide tycho.edit.graphedit 1.0
 global env auto_path
 set env(GRAPHEDIT_LIBRARY) [file dirname [info script]]
 if { [lsearch -exact $auto_path $env(GRAPHEDIT_LIBRARY)] == -1 } {
