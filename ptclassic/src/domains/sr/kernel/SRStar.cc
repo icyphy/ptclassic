@@ -47,9 +47,16 @@ const char* SRStar::domain() const
   return SRdomainName;
 }
 
-// Initialize the star for the beginning of an instant:
-//  Clear all the output ports
-//  Reset the hasFired flag
+
+// Prepare the star for a new instant
+//
+// @Description  Clear all the output ports to unknown and reset the
+// hasFired flag.
+//
+// <P> Derived stars may override this to provide different behavior.
+// Schedulers call this exactly once for each star at the beginning of
+// each instant.
+
 void SRStar::initializeInstant()
 {
 
@@ -65,16 +72,24 @@ void SRStar::initializeInstant()
 
 }
 
-// Inter-instant time advancement
-// By default, do nothing
+// Advance a star's state at the end of an instant
+//
+// @Description Default does nothing.  Derived stars should override
+// this with a method that advances a star's state based on its
+// inputs and computed outputs.  Schedulers call this exactly once at
+// the end of each instant for every star.  This may not be called
+// for reactive stars in instants where they have no present inputs.
+
 void SRStar::tick()
 {
 }
 
-// Inter-instant time advacement
-// For this strict star, it calls go() at most once an instant when
-// all its inputs are known, and at least one is present if it's a
-// reactive star
+// Compute the output of the star
+//
+// @Description For this strict star, it calls go() at most once an
+// instant when all its inputs are known, and at least one is present
+// if it's a reactive star.
+
 int SRStar::run()
 {
   if ( !hasFired ) {
@@ -147,7 +162,9 @@ int SRStar::knownOutputs()
 
 }
 
-// Initialize all domain-specific flags
+// Initialize the star in preparation for simulation
+//
+// @Description Calls Star::initialize and resets the isReactive flag
 void SRStar::initialize()
 {
   Star::initialize();

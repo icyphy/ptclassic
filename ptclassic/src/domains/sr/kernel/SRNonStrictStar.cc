@@ -47,8 +47,10 @@ const char * SRNonStrictStar::domain() const
   return SRdomainName;
 }
 
-// Inter-instant time advancement
-// For this non-strict star, just call go()
+// Compute the output of the star
+//
+// @Description For this non-strict star, it always calls go().
+
 int SRNonStrictStar::run()
 {
   go();
