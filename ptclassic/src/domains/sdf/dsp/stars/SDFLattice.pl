@@ -2,8 +2,9 @@ defstar {
 	name {Lattice}
 	domain {SDF}
 	desc {
-An FIR Lattice filter.  The default reflection coefficients form
-the optimal predictor for a particular 4th-order AR random process.
+An FIR Lattice filter.
+The default reflection coefficients form the optimal predictor for
+a particular 4th-order AR random process.
 To read other reflection coefficients from a file, replace the default
 coefficients with "< fileName", preferably specifying a complete path.
 	}
@@ -39,13 +40,17 @@ Since this filter is minimum phase, the transfer function of the lattice
 filter is $H sup -1 (z)$.
 .pp
 Note that the definition of reflection coefficients is not quite universal
-in the literature.  The reflection coefficients in references [2] and [3]
+in the literature.
+The reflection coefficients in references [2] and [3]
 are the negative of the ones used by this star, which
 correspond to the definition in most other texts,
 and to the definition of partial-correlation (PARCOR)
 coefficients in the statistics literature.
 The signs of the coefficients used in this star are appropriate for values
 given by the LevDur and Burg stars.
+.Id "Makhoul, J."
+.Id "Kay, S. M."
+.Id "Haykin, S."
 .UH REFERENCES
 .ip [1]
 J. Makhoul, "Linear Prediction: A Tutorial Review",

@@ -4,8 +4,9 @@ defstar {
 	version {$Id$}
 	desc {
 This star uses Burg's algorithm to estimate the linear predictor coefficients
-of an input random process. These  coefficients are produced both in autoregressive
-form (on the "lp" output) and in lattice filter form (on the "refl" output).
+of an input random process.
+These coefficients are produced both in autoregressive form
+(on the "lp" output) and in lattice filter form (on the "refl" output).
 The "errPower" output is the power of the prediction error as a function
 of the predictor order.
 	}
@@ -24,7 +25,8 @@ limitation of liability, and disclaimer of warranty provisions.
 .Ir "spectral estimation, maximum entropy"
 .Ir "maximum entropy spectral estimation"
 The number of inputs looked at is given by the \fInumInputs\fR parameter
-and the order of the AR model is given by the \fIorder\fR parameter.
+and the order of the autoregressive (AR) model is given by
+the \fIorder\fR parameter.
 .Ir "autoregressive model"
 .Ir "AR model"
 The order specifies how many outputs appear on the \fIlp\fR and
@@ -47,9 +49,13 @@ coefficients in the statistics literature.
 .Ir "PARCOR"
 .pp
 The \fIerrPower\fR output is the power of the prediction error
-as a function of the model order.  There are $order+1$ output samples,
-where the first corresponds to the prediction error of a zero-th
-order predictor.  This is simply an estimate of the input signal power.
+as a function of the model order.
+There are $order+1$ output samples, and the first sample corresponds
+to the prediction error of a zero-th order predictor.
+This is simply an estimate of the input signal power.
+.Id "Makhoul, J."
+.Id "Kay, S. M."
+.Id "Haykin, S."
 .UH References
 .ip [1]
 J. Makhoul, "Linear Prediction: A Tutorial Review",
