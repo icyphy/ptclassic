@@ -419,8 +419,9 @@ IntervalList IntervalList::operator&(const IntervalList& bL) const {
 
 IntervalList::IntervalList(const char* argString) : head(0) {
 	int len = strlen(argString);
-	char buf[len + 1];
+	char *buf = new char[len + 1];
 	strcpy(buf, argString);
 	istrstream strm(buf, len);
 	strm >> *this;
+	delete [] buf;
 }
