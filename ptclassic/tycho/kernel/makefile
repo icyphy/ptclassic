@@ -50,7 +50,6 @@ TCL_SRCS = \
 ITCL_SRCS = \
 	CircularList.itcl \
 	ColorBrowser.itcl \
-	Data.itcl \
 	Dialog.itcl \
 	Displayer.itcl \
 	DirectedAcyclicGraph.itcl \
