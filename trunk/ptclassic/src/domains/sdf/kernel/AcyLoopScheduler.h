@@ -155,11 +155,6 @@ public:
 	// compute optimal loop hierarchy
 	int DPPO();
 
-	// generate top-sort using RPMC
-	int RPMC(AcyCluster* gr);
-
-	// generate top-sort using APGAN
-	int APGAN(Galaxy* gr);
 
 	// A routine called by schedule command in ptcl or display-schedule
 	// in pigi
@@ -167,6 +162,15 @@ public:
 
 	// run method for code-generation targets
 	/* virtual */ void compileRun();
+
+	// Set up and execute everything related to RPMC+DPPO
+	int callRPMC(Galaxy& gal);
+
+	// Set up and execute everything related to APGAN+DPPO
+	int callAPGAN(Galaxy& gal);
+
+	// Check that the topSort array represents a valid topological sort
+	int checkTopsort();
 
 	// Set the buffer sizes after schedule has been computed
 	void fixBufferSizes(int i, int j);
@@ -190,6 +194,12 @@ public:
 	void printStarNumbers();
 
 protected:
+	// generate top-sort using RPMC
+	int RPMC(AcyCluster* gr);
+
+	// generate top-sort using APGAN
+	int APGAN(Galaxy* gr);
+
 	// This one actually does the work for displaySchedule()
 	StringList dispNestedSchedules(int depth, int i, int j, int g);
 
@@ -213,7 +223,7 @@ protected:
 	/* virtual */ void runOnce();
 
 	// Build up the top. sort after APGAN clustering process.
-	int buildAPGANTopsort(AcyCluster* gr, int ti);
+	int buildTopsort(AcyCluster* gr, int ti);
 
 	// create edgelist; called by APGAN
 	void createEdgelist(Galaxy* gr);
