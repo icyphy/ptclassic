@@ -44,7 +44,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 // For the constructors, the HierCluster merge/absorb virtual methods
 // are not user - so we must set the repetitions count
-HierCluster::HierCluster(Star& star):Cluster(s) {
+HierCluster::HierCluster(Star& s):Cluster(s) {
     DataFlowStar& star = (DataFlowStar&)s;
     repetitions = star.reps();
     star.repetitions = 1;
@@ -134,65 +134,65 @@ int HierCluster::adjustRepetitions(int newRepetitionCount) {
     return TRUE;
 }
 
-inline int reps(Block&b) {
-    if (b.isItAtomic())
-	return ((DataFlowStar&)b).reps();
-    else
-	return ((HierCluster&)b).repetitions;
-}
+// inline int reps(Block&b) {
+//     if (b.isItAtomic())
+// 	return ((DataFlowStar&)b).reps();
+//     else
+// 	return ((HierCluster&)b).repetitions;
+// }
 
-enum { VISITED=0, DECENDENTS = 1};
+// enum { VISITED=0, DECENDENTS = 1};
 
-HierCluster* findWellOrderCluster(Galaxy& g) {
-    GalTopBlockIter nextBlock(g);
-    Block* block;
-    while ((block = nextBlock++) != NULL) {
-	// check if the 'block' is in the well-ordered chain:
-	// first -> block -> farBlock -> last and if so
-	// we return cluster the 'block' and 'anotherFarBlock
+// HierCluster* findWellOrderCluster(Galaxy& g) {
+//     GalTopBlockIter nextBlock(g);
+//     Block* block;
+//     while ((block = nextBlock++) != NULL) {
+// 	// check if the 'block' is in the well-ordered chain:
+// 	// first -> block -> farBlock -> last and if so
+// 	// we return cluster the 'block' and 'anotherFarBlock
 
-	// If we have already tested this block, continue
-	if (block->flags[VISITED]) continue;
-	block->flags[VISITED] = TRUE;
+// 	// If we have already tested this block, continue
+// 	if (block->flags[VISITED]) continue;
+// 	block->flags[VISITED] = TRUE;
 
-	BlockPortIter* myNextPort(*block);
-	PortHole* port;
-	Block *first(NULL), *farBlock(NULL), *last(NULL);
-	int continueFlag(FALSE);
+// 	BlockPortIter* myNextPort(*block);
+// 	PortHole* port;
+// 	Block *first(NULL), *farBlock(NULL), *last(NULL);
+// 	int continueFlag(FALSE);
 
-	// FIXME - We should take into account delays and ignore
-	// ports which are connected to geodesics with enough delay
-	while ((port = myNextPort++) != NULL) {
-	    Block* anotherFarBlock = port->far()->parent();
-	    if (port->isItInput()) {
-		if (anotherFarBlock == block) continue;
-		if (first && anotherFarBlock!=first) break;
-		first = anotherFarBlock;
-	    }
-	    else {
-		if (anotherFarBlock == block) continue;
-		if (farBlock && anotherFarBlockfarBlock!=farBlock) break;
-		if (reps(farBlock) != reps(anotherFarBlockfarBlock)) break;
-		farBlock = anotherFarBlock;
-	    }
-	}
+// 	// FIXME - We should take into account delays and ignore
+// 	// ports which are connected to geodesics with enough delay
+// 	while ((port = myNextPort++) != NULL) {
+// 	    Block* anotherFarBlock = port->far()->parent();
+// 	    if (port->isItInput()) {
+// 		if (anotherFarBlock == block) continue;
+// 		if (first && anotherFarBlock!=first) break;
+// 		first = anotherFarBlock;
+// 	    }
+// 	    else {
+// 		if (anotherFarBlock == block) continue;
+// 		if (farBlock && anotherFarBlockfarBlock!=farBlock) break;
+// 		if (reps(farBlock) != reps(anotherFarBlockfarBlock)) break;
+// 		farBlock = anotherFarBlock;
+// 	    }
+// 	}
 
-	// If port is not null we have broken out of the while loop
-	// prematurely which means this block is not on a well-ordered
-	// chain
-	if (port) continue;
+// 	// If port is not null we have broken out of the while loop
+// 	// prematurely which means this block is not on a well-ordered
+// 	// chain
+// 	if (port) continue;
 
-	if (farBlock) {
-	    // Now check the far block decendents
-	    BlockPortIter nextFarBlockPort(*farBlock);
-	    while ((port = nextFarBlockPort++) != NULL) {
-	    }
-	}
-    }
-    return (HierCluster*)NULL;
-}
+// 	if (farBlock) {
+// 	    // Now check the far block decendents
+// 	    BlockPortIter nextFarBlockPort(*farBlock);
+// 	    while ((port = nextFarBlockPort++) != NULL) {
+// 	    }
+// 	}
+//     }
+//     return (HierCluster*)NULL;
+// }
 
-int wellOrderCluster(Galaxy& g) {
-    // We do this so that we only visit each node once
-    resetFlags(g);
-}
+// int wellOrderCluster(Galaxy& g) {
+//     // We do this so that we only visit each node once
+//     resetFlags(g);
+// }
