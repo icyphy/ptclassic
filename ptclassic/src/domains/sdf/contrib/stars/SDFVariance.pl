@@ -50,7 +50,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	  in.setSDFParams( int(block), int(block) - 1);
 	}
 	code {
-	  inline double sqr( double x ) {
+	  inline double mySqr( double x ) {
 	    return x * x;
 	  }
 	}
@@ -62,12 +62,12 @@ limitation of liability, and disclaimer of warranty provisions.
 	      count++;
 	      float input = (float)(in%i);
 	      SumX += input;
-	      SumXsqr += sqr( input );
+	      SumXsqr += mySqr( input );
 	    }
 	  }
 	  if( count ) {
 	    mean%0 << (SumX / count);
-	    variance%0 << ( (SumXsqr/count) - sqr( SumX/count ) );
+	    variance%0 << ( (SumXsqr/count) - mySqr( SumX/count ) );
 	  }
 	  else {
 // have to output something
