@@ -113,7 +113,7 @@ class ::tycho::Shortcuts {
             NextPane     {<Control-Tab> Ctrl+Tab      <Control-x><o> {C-x o}                    <Control-Tab> Ctrl+Tab} \
             NextWindow   {<Control-F6> Ctrl+F6        <Control-x><O> {C-x O}                    <Control-F6> Ctrl+F6} \
             Open         {<Control-o> Ctrl+O          <Control-x><Control-f> {C-x C-f}          <Control-o> Ctrl+O} \
-            OpenLine     {<Control-i> Ctrl+I          <Control-o> C-o                           <Control-i> Ctrl+I} \
+            OpenLine     {<Control-j> Ctrl+J          <Control-o> C-o                           <Control-j> Ctrl+J} \
             OpenSource   {{} {}                       <Control-x><Key-s> {C-x s}                {} {}} \
             Paste        {<Control-v> Ctrl+V          <Control-y> C-y                           <Control-v> Ctrl+V} \
             PrevWindow   {<Control-Shift-F6> Ctrl+Shift+F6 <Control-x><O> {C-x O}               <Control-Shift-F6> Ctrl+Shift+F6} \
@@ -128,8 +128,8 @@ class ::tycho::Shortcuts {
             SelectAll    {<Control-a> Ctrl+A          <Control-slash> {C-/}                     <Control-A> Ctrl+Shift+A} \
             Spelling     {{} {}                       <Meta-dollar> {M-\$}                      {} {}} \
             Spelling2    {{} {}                       <Escape><dollar> {Esc-\$}                 {} {}} \
-            Tab          {<Shift-Tab> Shift+Tab       <Control-q><Tab> {C-q Tab}                <Shift-Tab> Shift+Tab} \
-            ToggleReadOnly {{} {}                       <Control-x><Control-q> {C-x C-q}        {} {}} \
+            Tab          {<Control-i> Ctrl+I          <Control-q><Tab> {C-q Tab}                <Control-i> Ctrl+i} \
+            ToggleReadOnly {{} {}                     <Control-x><Control-q> {C-x C-q}          {} {}} \
             Top          {<Control-Home> {Ctrl+Home}  <Escape><less> {Esc-<}                    <Control-Home> {Ctrl+Home}} \
             Undo         {<Control-z> Ctrl+Z          <Control-x><u> {C-x u}                    <Control-z> Ctrl+Z} \
             UnselectAll  {{} {}                       <Control-backslash> "C-\\"                {} {}} \
