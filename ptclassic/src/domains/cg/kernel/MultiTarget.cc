@@ -135,7 +135,8 @@ int MultiTarget :: createPeekPoke(PortHole& peekPort, PortHole& pokePort,
 
     int numInitDelays;
     Galaxy* parentGal;
-    StringList starName;
+    StringList starName, linkName;
+    linkName << symbol("Link");
     // FIXME - we do not support initial delays on peek/poke arcs
     // The peekPort and pokePort are in a disconnected state here.
     // numInitDelays = peekPort.numInitDelays();
@@ -144,7 +145,7 @@ int MultiTarget :: createPeekPoke(PortHole& peekPort, PortHole& pokePort,
     output->connect(peekPort,numInitDelays);
     parentGal = (Galaxy*) peekPort.parent()->parent();
     starName.initialize();
-    starName << symbol("Peek");
+    starName << "Peek_" << linkName ;
     if (peekPort.parent()->target()) 
 	peek->setTarget(peekPort.parent()->target());
     parentGal->addBlock(*peek,hashstring(starName));
@@ -157,7 +158,7 @@ int MultiTarget :: createPeekPoke(PortHole& peekPort, PortHole& pokePort,
     pokePort.connect(*input,numInitDelays);
     parentGal = (Galaxy*) pokePort.parent()->parent();
     starName.initialize();
-    starName << symbol("Poke");
+    starName << "Poke_" << linkName;
     if (pokePort.parent()->target()) 
 	poke->setTarget(pokePort.parent()->target());
     parentGal->addBlock(*poke,hashstring(starName));
