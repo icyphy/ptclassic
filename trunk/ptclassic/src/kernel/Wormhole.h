@@ -12,6 +12,9 @@
  SCCS Version identification :
  $Id$
 
+ Copyright (c) 1990 The Regents of the University of California.
+                       All Rights Reserved.
+
  Programmer : Soonhoi Ha
  Date of Creation : 3/19/90
  Date of Revision : 5/31/90
