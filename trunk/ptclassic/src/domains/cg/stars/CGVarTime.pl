@@ -18,6 +18,9 @@ from it.
 		desc { runtime for this star }
 	}
 	// make this a pure virtual base class
+	constructor {
+		noInternalState();
+	}
 	pure method { name { go }}
 	// redefine gencode to add star full name
 	method {
