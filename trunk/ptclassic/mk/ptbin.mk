@@ -219,9 +219,9 @@ INSTALL += $(BINDIR)/$(BASENAME) $(BINDIR)/$(BASENAME).ptrim $(BINDIR)/$(BASENAM
 
 .PHONY: $(BASENAME).ptrim $(BASENAME).ptiny \
 	$(BASENAME).ptrim.debug $(BASENAME).ptiny.debug \
-	$(BASENAME).ptrim.purify $(BASENAME).ptiny.purify \
-	$(BASENAME).ptrim.quantify $(BASENAME).ptiny.quantify \
-	$(BASENAME).ptrim.purecov $(BASENAME).ptiny.purecov
+	$(BASENAME).ptrim.debug.purify $(BASENAME).ptiny.debug.purify \
+	$(BASENAME).ptrim.debug.quantify $(BASENAME).ptiny.debug.quantify \
+	$(BASENAME).ptrim.debug.purecov $(BASENAME).ptiny.debug.purecov
 
 # The .ptrim and .ptiny files below should not depend on $(PT_DEPEND), or
 # else we must have all the libs installed to build ptrim and ptiny, even
@@ -249,10 +249,10 @@ $(BASENAME).ptiny.debug:
 $(BASENAME).debug.purify: $(PT_DEPEND)
 	$(MAKE) FULL=1 BASENAME=$(BASENAME) $(BASENAME).debug.purify
 
-$(BASENAME).ptrim.debug.purify: 
+$(BASENAME).ptrim.debug.purify:
 	$(MAKE) PTRIM=1 BASENAME=$(BASENAME) $(BASENAME).ptrim.debug.purify
 
-$(BASENAME).ptiny.debug.purify: 
+$(BASENAME).ptiny.debug.purify:
 	$(MAKE) PTINY=1 BASENAME=$(BASENAME) $(BASENAME).ptiny.debug.purify
 
 
