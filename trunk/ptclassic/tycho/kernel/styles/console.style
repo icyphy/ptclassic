@@ -1,0 +1,29 @@
+#
+# $Id$
+#
+# The "console" master style-sheet
+#
+modelconfigure -label "Console parameters"
+modelconfigure -description {
+    Additional settings for console windows.
+}
+
+style default \
+	-label "Default"  {
+    
+    parameter answerForeground blue \
+	    -type color \
+	    -label "Color of result text"
+
+    parameter promptForeground firebrick \
+	    -type color \
+	    -label "Color of prompt text"
+
+    parameter width 60 \
+	    -type integer \
+	    -label "Default console width"
+
+    parameter height 8 \
+	    -type integer \
+	    -label "Default console height"
+}
