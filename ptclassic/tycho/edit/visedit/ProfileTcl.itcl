@@ -174,10 +174,10 @@ body ::tycho::ProfileTcl::profileDisplay {} {
 # Turn profiling on.
 #
 body ::tycho::ProfileTcl::profileStart {} {
-    profile -commands on
     enableTool off
     enableTool cancel
     disableTool on
+    profile -commands on
 }
 
 #######################################################################
