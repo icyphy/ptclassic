@@ -45,6 +45,12 @@ class ::tycho::GraphEditor {
     #################################################################
     ####                     public methods                      ####
 
+    # Change to a new graph model
+    method _graph {graph}
+
+    # Change to a new layout model
+    method _layout {layout}
+
     # Initialize a new star menu
     method _initmenu {args}
 
@@ -56,9 +62,6 @@ class ::tycho::GraphEditor {
 
     # Delete the selection
     method delete {}
-
-    # Edit parameters of the given vertices
-    method editparameters {args}
 
     # Add a star
     method newstar {libname starname}
@@ -87,8 +90,11 @@ class ::tycho::GraphEditor {
     # Initialize the menu/status/tool bars
     protected method _initializeBars {menubar statusbar toolbar}
 
-    # Configure the popup menu depending on the current context
-    protected method configureContextMenu {}
+    # Configure the global popup menu
+    protected method _configurePopup {}
+
+    # Initialize the global popup menu
+    protected method _initializePopup {}
 
     # Insert the specified data
     protected method insertData {data}
@@ -144,6 +150,24 @@ class ::tycho::GraphEditor {
     # Position used to place new icons
     private variable iconx 50
     private variable icony 50
+
+    # For demos only....
+    method clone {} {
+	set opts {}
+	foreach {opt _ _ _ val} [eval concat [configure]] {
+	    lappend opts $opt $val
+	}
+	set clone [uplevel #0 ::tycho::view [info class] $opts]
+	
+	# Give it the graph and layout models
+	$clone model delete "layout"
+	$clone model add "layout" $_layout
+	$clone model delete "graph"
+	$clone model add "graph" $_graph
+
+	# Make it draw the data
+	$clone layout load
+    }
 }
 
 ########################################################################
@@ -151,27 +175,15 @@ class ::tycho::GraphEditor {
 #
 body ::tycho::GraphEditor::constructor {args} {
 
-    # Create the models. The graph model has a special notify{} method
-    set _graph [uplevel #0 ::tycho::PortedGraph [::tycho::autoName graph]]
-    model add graph $_graph
+    # Create the models. The graph model has special notify{} methods
+    model notify "graph" "$this _graph"
+    model add "graph" \
+	    [uplevel #0 ::tycho::PortedGraph [::tycho::autoName graph]]
     $_graph subscribe data $this "$this notifygraph"
     $_graph subscribe event $this "$this notifygraphevent"
 
     # Evaluate options
     eval itk_initialize $args
-
-    # Create the context-sensitive popup menu
-    contextmenu create $_slate
-
-    # Modify the binding tags of the canvas so that this megawidget
-    # gets events too. This is unfortunate but appears to be necessary
-    set tl [winfo toplevel $itk_component(hull)]
-    set canvas [$_slate component canvas]
-    bindtags $canvas \
-            "$tl $itk_component(hull) $_slate Slate all"
-    
-    # Prevent shadowing of bindings in the Displayer class.
-    bind $_slate <Control-x> {continue}
 
     # Key bindings
     bind $_slate <Meta-Key-z> "$this undo"
@@ -278,6 +290,62 @@ body ::tycho::GraphEditor::constructor {args} {
     # be loaded correctly later
     # FIXME: Is this the right place for this?
     $_graph configure -modelmode "graph"
+
+    # Create and initialize the popup menus for the vertices and
+    # edges
+    popup new "vertex" 
+    popup bind "vertex" "vertex"
+    $vertexcontroller initPopup "vertex"
+
+    popup new "edge"
+    popup bind "edge" "edge"
+    $edgecontroller initPopup "edge"
+}
+
+########################################################################
+#### _graph
+#
+# Change to a new graph model.
+#
+body ::tycho::GraphEditor::_graph {graph} {
+    # Lose interest in the old one first...
+    if { $_graph != "" } {
+        $_graph unsubscribe data $this
+        $_graph unsubscribe event $this
+        # FIXME: decrement reference count?
+    }
+    set _graph $graph
+
+    # Subscribe to the layout
+    if { $graph != "" } {
+        $_graph subscribe data $this "$this notifygraph"
+        $_graph subscribe event $this "$this notifygraphevent"
+    }
+
+    # Tell the controllers
+    if [info exists edgecontroller] {
+	$edgecontroller configure -graph $graph
+    }
+    if [info exists vertexcontroller] {
+	$vertexcontroller configure -graph $graph
+    }
+}
+
+########################################################################
+#### _layout
+#
+# Change to a new layout model.
+#
+body ::tycho::GraphEditor::_layout {layout} {
+    chain $layout
+
+    # Tell the controllers
+    if [info exists edgecontroller] {
+	$edgecontroller configure -layout $layout
+    }
+    if [info exists vertexcontroller] {
+	$vertexcontroller configure -layout $layout
+    }
 }
 
 ########################################################################
@@ -357,29 +425,6 @@ body ::tycho::GraphEditor::delete {} {
     # Compact the history
     $_graph history compact temp current
     $_layout history compact temp current
-}
-
-########################################################################
-#### editparameters
-#
-body ::tycho::GraphEditor::editparameters {args} {
-    # FIXME: The parameter editing window must include the whole
-    # path name of the model
-    foreach v $args {
-        set item [$_graph vertexcget $v -type]
-        regsub -all {\.} $v "_" nm
-        set nm .$nm
-        if { [::info which -command $nm] != "" } {
-            # Already exists
-            wm deiconify $nm
-            raise $nm
-        } else {
-            uplevel #0 [list ::tycho::ParameterEdit $nm \
-                    -command "::tycho::post \[$nm get\]"]
-            $nm edit $starLibrary $item $_graph $v vertex
-            wm deiconify $nm
-        }
-    }
 }
 
 ########################################################################
@@ -531,6 +576,27 @@ body ::tycho::GraphEditor::_initializeBars {menubar statusbar toolbar} {
 }
 
 #####################################################################
+#### _initializePopup
+#
+# Initialize the global context-sensitive menu.
+#
+body ::tycho::GraphEditor::_initializePopup {} {
+    popup add "global" command undo -label Undo -command "$this undo"
+    popup add "global" command redo -label Redo -command "$this redo"
+    
+    chain
+}
+
+#####################################################################
+#### _configurePopup
+#
+# Configure the global context-sensitive menu.
+#
+body ::tycho::GraphEditor::_configurePopup {} {
+    # FIXME: enable/disable undo/redo
+}
+
+#####################################################################
 #### clear
 # Clear the data.
 #
@@ -539,41 +605,6 @@ body ::tycho::GraphEditor::clear {} {
         $_graph notify event clear
     }
     layout clear
-}
-
-#####################################################################
-#### configureContextMenu
-# Configure the popup menu according to context.
-#
-body ::tycho::GraphEditor::configureContextMenu {} {
-    chain
-
-    contextmenu separator sep1
-    contextmenu command undo -label Undo -command "$this undo"
-    contextmenu command redo -label Redo -command "$this redo"
-    contextmenu separator sep2
-
-    # See if we clicked on something that needs to be handled
-    # specially
-    set current [$_slate find withtag current]
-    if { $current != "" && ![$_slate hastag $current #] } {
-        contextmenu command info -label Info... \
-                -command "::tycho::post \[$this iteminfo $current\]"
-        # contextmenu separator sep3
-        
-        if [$_slate hastag $current "edge"] {
-            $edgecontroller contextmenu $current
-        } elseif [$_slate hastag $current "vertex"] {
-            $vertexcontroller contextmenu $current vertex
-        } elseif [$_slate hastag $current "junction"] {
-            $vertexcontroller contextmenu $current junction
-        }
-    } else {
-        # Do the default according to the selection
-        contextmenu command showselection \
-                -label "Show Selection" \
-                -command "::tycho::inform \"[find withtag sel]\""
-    }
 }
 
 #####################################################################
@@ -670,7 +701,7 @@ body ::tycho::GraphEditor::_initializeMenubar {menubar} {
     $menubar command editparameters stars \
             -label "Edit Parameters..." \
             -underline 5 \
-            -command "eval $this editparameters \[$this find withtag sel\]"
+            -command "eval $this editparameters sel"
 
     $menubar separator starsep1 stars
 
@@ -695,13 +726,19 @@ body ::tycho::GraphEditor::_initializeMenubar {menubar} {
 	    -label "Show layout history" \
             -command "set _nm_ \[::tycho::view EditTcl\]; \
         \$_nm_ insertData \[$this model access layout history get\]; \
-        \$_nm markUnmodified"
+        \$_nm_ markUnmodified"
 
     $menubar command showgraphhistory devel \
 	    -label "Show graph history" \
             -command "set _nm_ \[::tycho::view EditTcl\]; \
         \$_nm_ insertData \[$this model access graph history get\]; \
-        \$_nm markUnmodified"
+        \$_nm_ markUnmodified"
+
+    $menubar add separator develsep3 devel
+
+    $menubar command clone devel \
+	    -label "Clone..." \
+            -command "$this clone"
 
     #### FIXME FIXME
     # For now, load a sample library if this class is being
@@ -714,3 +751,4 @@ body ::tycho::GraphEditor::_initializeMenubar {menubar} {
 		-types {star}
     }
 }
+
