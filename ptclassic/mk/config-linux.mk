@@ -143,7 +143,7 @@ else
     OPTIMIZER =	-O3 -fomit-frame-pointer# -pipe
 endif
 
-# -Wsynth was new in g++-2.6.x, but is not in egcs-1.1.1, however 2.5.x does not support it
+# -Wsynth is a g++ flag first introduced in g++-2.6.x., however 2.5.x does not support it
 # Under gxx-2.7.0 -Wcast-qual will drown you with warnings from libg++ includes
 WARNINGS =	-Wall -Wcast-align -Wsynth# -Wcast-qual 
 

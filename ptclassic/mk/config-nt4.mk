@@ -72,7 +72,7 @@ CPLUSPLUS =	g++ -I$(ROOT)/src/compat/cfront -DPT_EGCS
 # USERFLAGS - Ptolemy makefiles should never set this, but the user can set it.
 
 OPTIMIZER =	#-O2
-# -Wsynth was new in g++-2.6.x, but is not in egcs-1.1.1
+# -Wsynth is a g++ flag first introduced in g++-2.6.x.
 # Under gxx-2.7.0 -Wcast-qual will drown you with warnings from libg++ includes
 WARNINGS =	-Wall -Wsynth -Wno-non-virtual-dtor #-Wcast-qual 
 
