@@ -166,8 +166,8 @@ makefile:	make.template $(MDEPS)
 
 makefiles:	makefile
 
-TAGS:		$(SRCS)
-		etags $(SRCS)
+TAGS:		$(HDRS)
+		etags++ -b $(HDRS:%=$(PWD)/%)
 
 # Rule for detecting junk files
 
