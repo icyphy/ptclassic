@@ -10,10 +10,10 @@ ROOT=../../../..
 VPATH=$(ROOT)/src/domains/mtdf/kernel
 
 # get configuration info
-CONFIG=$(ROOT)/config-$(ARCH).mk
+CONFIG=$(ROOT)/mk/config-$(ARCH).mk
 include $(CONFIG)
 
-THREADDIR=$(ROOT)/src/lwp
+THREADDIR=$(ROOT)/src/thread/lwp
 SDFDIR=$(ROOT)/src/domains/sdf/kernel
 
 INCL=-I$(KERNDIR) -I$(THREADDIR) -I$(SDFDIR)
@@ -47,4 +47,4 @@ install:	makefile $(LIBDIR)/$(LIB)
 
 EXTRA_SRCS=
 
-include $(ROOT)/common.mk
+include $(ROOT)/mk/common.mk
