@@ -144,7 +144,8 @@ class ComplexMatrix: public PtMatrix {
 
   // destructive replacement operators 
      // assignment
-  virtual PtMatrix& operator = (const PtMatrix& src);
+  PtMatrix& operator = (const PtMatrix& src);
+  ComplexMatrix& operator = (const ComplexMatrix& src);
   ComplexMatrix& operator = (const Complex& value);          
      // element wise operators
   ComplexMatrix& operator += (const ComplexMatrix& src);
@@ -271,7 +272,8 @@ class FixMatrix: public PtMatrix {
 
   // destructive replacement operators 
      // assignment
-  virtual PtMatrix& operator = (const PtMatrix& src);
+  PtMatrix& operator = (const PtMatrix& src);
+  FixMatrix& operator = (const FixMatrix& src);
   FixMatrix& operator = (const Fix& value);
      // element wise operators
   FixMatrix& operator += (const FixMatrix& src);
@@ -374,7 +376,8 @@ class FloatMatrix: public PtMatrix {
 
   // destructive replacement operators 
      // assignment
-  virtual PtMatrix& operator = (const PtMatrix& src);
+  PtMatrix& operator = (const PtMatrix& src);
+  FloatMatrix& operator = (const FloatMatrix& src);
   FloatMatrix& operator = (double value);
      // element wise operators
   FloatMatrix& operator += (const FloatMatrix& src);
@@ -477,7 +480,8 @@ class IntMatrix: public PtMatrix {
 
   // destructive replacement operators 
      // assignment
-  virtual PtMatrix& operator = (const PtMatrix& src);
+  PtMatrix& operator = (const PtMatrix& src);
+  IntMatrix& operator = (const IntMatrix& src);
   IntMatrix& operator = (int value);
      // element wise operators
   IntMatrix& operator += (const IntMatrix& src);
