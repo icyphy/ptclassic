@@ -83,7 +83,7 @@ ITCL_SRCS = \
 	Index.itcl \
 	IndexBrowser.itcl \
 	Interchange.itcl \
-	KeyedGraph.itcl \
+	KeyedDigraph.itcl \
 	ListBrowser.itcl \
 	MenuBar.itcl \
 	MenuSupport.itcl \
