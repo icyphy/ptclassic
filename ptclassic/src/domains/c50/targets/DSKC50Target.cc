@@ -43,20 +43,21 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 DSKC50Target :: DSKC50Target(const char* nam, const char* desc,
 			     const char* assocDomain) :
-	C50Target(nam,desc),TITarget(nam,desc,"C50Star", assocDomain) {
+C50Target(nam,desc,assocDomain),
+TITarget(nam,desc,"C50Star", assocDomain) {
 	initStates();
 	addStream("shellCmds",&shellCmds);
 }
 
 DSKC50Target::DSKC50Target(const DSKC50Target& arg) :
-	C50Target(arg),TITarget(arg) {
+C50Target(arg),
+TITarget(arg) {
 	initStates();
 	copyStates(arg);
 	addStream("shellCmds",&shellCmds);
 }
 
 void DSKC50Target :: initStates() {
-
 	// ROM tables: Block B1 512 words and User Data (u) 8704 words
 	bMemMap.setInitValue("768-1279");
 	uMemMap.setInitValue("2432-6848");
@@ -101,49 +102,41 @@ int DSKC50Target :: compileCode() {
 	return TRUE;
 }
 
-// generate the .asm file (and optionally display it)
+// generate the C50 assembler .asm file and truncate its lines to 80
+// characters due to limitations in the DSK assembler
 void DSKC50Target :: writeCode() {
+	C50Target :: writeCode();
 
-    C50Target :: writeCode();
-
-  // DSK assembler doesn't seem to like lines longer than 80 characters
-  // so make a new file that's the original file with each line truncated
-  // to 80 characters.
-
+	// DSK assembler doesn't seem to like lines longer than 80 characters
+	// so make a new file that's the original file with each line truncated
+	// to 80 characters.
 	StringList postProcessCmd;
 	postProcessCmd.initialize();
-	postProcessCmd <<"cut -c 1-79 "
-		 <<filePrefix<<".asm > "
-		 <<filePrefix<<"DSK.asm";
-	systemCall(postProcessCmd,"Post-processing of  asm file failed;\n code might still compile");
+	postProcessCmd << "cut -c 1-79 " << filePrefix<< ".asm > "
+		       << filePrefix << "DSK.asm";
+	systemCall(postProcessCmd,
+		   "Post-processing of the C50 assembler file failed,\nbut the code might still compile");
 
-  // Compile the code if requested. Note that even if compilation is not
-  // wanted the user might want to keep *DSK.asm file to use it later so
-  // the compile method should be called but the compilation not executed
-
+	// Compile the code if requested. Note that even if compilation is not
+	// wanted the user might want to keep *DSK.asm file to use it later so
+	// the compile method should be called but the compilation not executed
 }
 
 int DSKC50Target :: runCode() {
 	StringList runCmd;
 	runCmd << "loader " << filePrefix << "DSK.dsk";
-	if ( systemCall(runCmd,
-			"Problems running code onto TMS320C5x",
-			targetHost) != 0 )
-	    return FALSE;
-	return TRUE;
+	return ( systemCall(runCmd,
+			    "Problems running code onto TMS320C5x",
+			    targetHost) == 0 );
 }
 
 void DSKC50Target::frameCode() {
-    TITarget::frameCode();
+	TITarget::frameCode();
 }
 
 ISA_FUNC(DSKC50Target, C50Target);
 
-// make an instance
+// Register an instance
 static DSKC50Target proto("DSKC50", "run code on the DSK TMS320C5x card");
 
 static KnownTarget entry(proto, "DSKC50");
-
-
-
-
