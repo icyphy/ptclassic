@@ -38,7 +38,7 @@
 # simple access to menu, menu entries, and hierarchical menus.
 # It may become obsolete once Tk 4.3 is out.
 # <p>
-# Here is an example (FIXME: This is out of date):
+# Here is an example:
 # <tcl><pre>
 # ::tycho::TopLevel .f
 # ::tycho::MenuBar .f.mb
