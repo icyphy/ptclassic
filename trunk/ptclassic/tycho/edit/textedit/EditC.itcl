@@ -180,14 +180,10 @@ be sure to register your Tcl commands"
 #
 body ::tycho::EditC::compileAndLoad {} {
     global env tycho
-    #saveQuery
-    #set compiler [::tycho::CompileCTcl [::tycho::autoName .editC]]
-    #$compiler configure -view $this
     evaluate
     if {$compiler != {}} {
 	$compiler compileAndLoad [list [filename]]
     }
-    #delete object $compiler
 }
 
 #####################################################################
@@ -210,7 +206,6 @@ body ::tycho::EditC::evaluate {} {
     $compiler configure -view [string trimleft $this ":"]
 
     $compiler compile [list [filename]]
-    #delete object $compiler
 }
 
 #####################################################################
