@@ -35,8 +35,7 @@ public:
 	// constData gives you a pointer you cannot write with;
 	// it works for a const object
 	unsigned const char*	constData() const {
-		if (size == fullSize) return grayData;
-		return 0;
+		return (size == fullSize) ? grayData : 0;
 	}
 
 	void			setSize(int);
