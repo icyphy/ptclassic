@@ -3,12 +3,12 @@ defstar {
 	domain {SDF}
 	desc {
 A block Recursive (Backward) (IIR) Lattice filter.
-The reflection coefficients are updated each time the star fires
+It is identical to the RLattice star, except that
+the reflection coefficients are updated each time the star fires
 by reading the "coefs" input.
 The "order" parameter indicates how many coefficient
 should be read.  The "blockSize" parameter specifies how many
 signalIn samples should be processed for each set of coefficients.
-Otherwise, the star is identical to the RLattice star.
 	}
 	version {$Id$}
 	author { Alan Kamas and Edward Lee }
@@ -67,6 +67,9 @@ Otherwise, the star is identical to the RLattice star.
 			LOG_NEW; reflectionCoefs = new double[M];
 		}
 		for (int i=0; i <= M; i++)  w[i]=0.0 ;
+		signalIn.setSDFParams(int(blockSize), int(blockSize)-1);
+		coefs.setSDFParams(int(order), int(order)-1);
+		signalOut.setSDFParams(int(blockSize), int(blockSize)-1);
 	}
 	go {
 	    // first read in new tap values
@@ -84,7 +87,7 @@ Otherwise, the star is identical to the RLattice star.
 			k = reflectionCoefs[M-i];
 			y[i] = k * w[i] + y[i-1];
 		}
-		signalOut%0 << y[M];
+		signalOut%j << y[M];
 
 		// Backward:  Compute the w's for the next round
 		for (i = 1; i < M ; i++) {
