@@ -267,6 +267,21 @@ proc ::tycho::rm { args } {
     }
 }
 
+##############################################################################
+#### rmLinkIfNotWritable
+# Remove a file if we can't open it for writing.
+# Lots of times a user will have symbolic links to a master tree
+# that they don't have write permission to.  If one of these links is
+# a derived file, such as a documentation file, then the user will
+# not be able to update the documentation file if it is not writable
+# by the user.  The solution is to break the link.
+#
+proc ::tycho::rmLinkIfNotWritable { file } {
+    if {[file exists $file] && ![file writeable $file]} {
+	catch {::tycho::rm -f $file}
+    }
+
+}
 #####################################################################
 #### simplifyPath
 # Given a path and a list of environment variables, try to simplify
