@@ -164,7 +164,7 @@
 #
 # Produce a list that can be used to create a new item from the lib:
 # <pre><tcl>
-#     $lib instantiate {a x}
+#     $lib attributes {a x}
 # </tcl></pre>
 #
 # Create a menubar and add this library to it:
@@ -196,12 +196,24 @@ class ::tycho::Library {
     #################################################################
     ####                     public methods                      ####
 
-    # Instantiate meta-data into an attribute list
-    method instantiate {item}
+    # Get the attributes of an item
+    method attributes {item}
+
+    # Get the attributes with defaults of an item
+    method defaults {item}
+
+    # Instantiate an item into a data model
+    method instantiate {item datamodel args}
 
     # Create a menu with items in this library
     method makemenu \
             {type menubar menuname command {context {}} {prefix {}}}
+
+    #################################################################
+    ####                   protected methods                     ####
+
+    # Instantiate subitems of an item
+    protected method _instantiate {item datamodel itemname}
 }
 
 ########################################################################
@@ -240,18 +252,35 @@ body ::tycho::Library::constructor {args} {
     	:leafonly 1
 }
 
-
+########################################################################
+#### attributes
+#
+# Get the attributes of the item. This method takes the list of attributes
+# of _item_, and the <b>-default</b> attribute of each nested
+# item of type <b>attribute</b>, and returns them in a list. This
+# data is typically used to instantiate a library component into
+# another data model. An error will be raised if _item does not
+# exist. See instantiate{} for a more complex instantation mechanism.
+#
+body ::tycho::Library::attributes {item} {
+    if ![exists $item] {
+	error "unknown item \"$item\""
+    }
+    set result [attrget $item]
+    foreach attr [match attribute $item] {
+	lappend result -$attr [attrget [concat $item $attr] -default]
+    }
+    return $result
+}
 
 ########################################################################
-#### instantiate
+#### defaults
 #
-# Instantiate metadata into an item. This method just takes the
-# <b>-default</b> attribute of each attribute, and produces a list
-# that can be used as the value to give to the add{} method of
-# some other model. An error will be raised if _item does not
-# exist.
+# Get the attributes that have default values and their default value.
+# Each item in the returned list is the name of a nested item of type
+# <b>attribute</b>, and its <b>-default</b> attribute.
 #
-body ::tycho::Library::instantiate {item} {
+body ::tycho::Library::defaults {item} {
     if ![exists $item] {
 	error "unknown item \"$item\""
     }
@@ -263,9 +292,90 @@ body ::tycho::Library::instantiate {item} {
 }
 
 ########################################################################
+#### instantiate
+#
+# Instantiate an item from the library. This method assumes that the
+# _item_ is meta-data -- a description from which an item can be
+# created. It gets the attributes of _item_ using the attributes{} method, 
+# and then adds a new item to _datamodel_. The following optional
+# arguments are accepted:
+#
+# <dl>
+# <dt><b>-itemtype</b> _type_
+# <dd>
+# The type of item to instantiate in the data model. If not
+# given, the instantiated item will have the same type as
+# the metadata item.
+#
+# <dt><b>-itemname</b> _name_
+# <dd>
+# The name of the item to instantiate in the data model. If not
+# given, a name will be generated.
+#
+# <dt><b>-itemcontext</b> _context_
+# <dd>
+# The context within which to generate the new item. If not given,
+# the item will be generated at the top level. Note, however, that
+# <b>-itemname</b> may be a list -- in this case, the full name of
+# the item is the concatenation of <b>-context</b> and <b>-itemname</b>.
+# 
+# <dt><b>-_attribute_</b> _value_
+# <dd>
+# Any other attribute will be added to the attribute list of the
+# created item.
+#
+# </dl>
+#
+# Nested items that are not of type <b>attribute</b> will
+# also be added to the model -- the name and type of each nested item
+# will be the same as in the metadata item.
+# The return value is the name of the top-level item. Each item is added
+# via the publish{} method of the Model class, so that subscribers will
+# be notified of the new data.
+#
+body ::tycho::Library::instantiate {item datamodel args} {
+    if ![exists $item] {
+        error "unknown item \"$item\""
+    }
+    # Extract options
+    array set opts {-itemtype {} -itemname {} -itemcontext {}}
+    array set opts $args
+
+    set itemname $opts(-itemname)
+    unset opts(-itemname)
+
+    set itemtype $opts(-itemtype)
+    unset opts(-itemtype)
+
+    set itemcontext $opts(-itemcontext)
+    unset opts(-itemcontext)
+
+    # Get the full name
+    if { $itemname == "" } {
+        set itemname [::tycho::autoName $itemtype]
+    }
+    set itemname [concat $itemcontext $itemname]
+
+    # Get the item type
+    if { $itemtype == "" } {
+        set itemtype [_type $item]
+    }
+
+    # Add the item
+    eval [list $datamodel publish add $itemtype $itemname] \
+            [attrget $item] [array get opts]
+
+    # Add subitems
+    _instantiate $item $datamodel $itemname
+
+    # Return the new item
+    return $itemname
+}
+
+########################################################################
 #### makemenu
 #
-# Add a menu to a menubar containing items in this library. ONly
+# Add a menu to a menubar containing items in this library. Only
 # items that have a non-null <b>-label</b> attribute will be added.
 # The first argument is the types of item to be added to the menubar.
 # The second argument is the menubar. The third is the name
@@ -304,5 +414,39 @@ body ::tycho::Library::makemenu \
                 }
             }
         }
+    }
+}
+
+###################################################################
+###################################################################
+####                      protected methods                    ####
+
+########################################################################
+#### _instantiate
+#
+# Instantiate subitems of an item. This method performs the instantiation
+# of subitems begun by the instantiate{} method: each subitem in this
+# model of _item_ is added to item _itemname_ of _datamodel_. This
+# method is recursive, so nested subitems will also be instantiated.
+# This method is protected so it cannot be accessed by clients; however,
+# some subclasses may wish to override it in order to handle instantiation
+# of subitems differently or more efficiently. As for instantiate{},
+# each subitem is added via the publish{} method.
+#
+body ::tycho::Library::_instantiate {item datamodel itemname} {
+    # Process each type
+    foreach t [type names] {
+        if { $t == "attribute" } {
+            continue
+        }
+        # Process each subitem
+        foreach i [match $t $item] {
+            # Add the subitem
+            eval [list $datamodel publish add $t [concat $itemname $i]] \
+                    [attributes [concat $item $i]]
+
+	    # Process its subitems
+	    _instantiate [concat $item $i] $datamodel [concat $itemname $i]
+	}
     }
 }
