@@ -44,7 +44,7 @@ class ::tycho::EditStack {
     constructor {args} {}
     destructor {}
 
-    # Open a help window.  This should be redefined in derived classes.
+    # Open a help window.
     method help {}
 
     ###################################################################
@@ -92,7 +92,7 @@ body ::tycho::EditStack::constructor {args} {
 
 ###################################################################
 #### help
-# Open a window with help on the current widget.
+# Open a help window.
 #
 body ::tycho::EditStack::help {} {
     global ::TYCHO

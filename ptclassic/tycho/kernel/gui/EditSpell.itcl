@@ -47,10 +47,18 @@ option add *EditSpell.spellMatchForegroundColor \
 
 ##########################################################################
 #### EditSpell class.
-# Create a dialog box for checking the spelling in an EditText widget.
-# This dialog box should be child window of the EditText widget or its
-# top-level window so that it is removed when the parent is removed.
-# Note that this is a UNIX-specific spell checker.
+# This class provides a dialog box for checking the spelling in a
+# text editor.  Depending on the text editor, a subset of the text might
+# be checked.  For example, for programming language editors, comments are
+# typically spell checked.
+# <p>
+# This dialog box should be child window of the
+# EditText widget or its top-level window so that it is removed when
+# the parent is removed. To do this, just give it a name that is the
+# name of the EditText window (or its top-level parent) with an
+# additional field appended after a period. For example, if the name of
+# the top-level object is ".file0", the search object could be
+# ".file0.search". Note that this is a UNIX-specific spell checker.
 #
 class ::tycho::EditSpell {
     inherit ::tycho::EntryQuery
@@ -60,10 +68,10 @@ class ::tycho::EditSpell {
     #################################################################
     ####                        options                          ####
 
-    # The associated EditText object.
+    # Specify the associated EditText object.
     itk_option define -edittext edittext EditText {}
 
-    # Check spelling, but do not allow changes.
+    # Specify whether changes are allowed in the text being checked.
     itk_option define -nochange nochange NoChange 0
 
     ##################################################################
@@ -84,20 +92,17 @@ class ::tycho::EditSpell {
     # Check the spelling from the beginning.
     method recheck {}
 
-    # Replace the selection with the contents of the entry query.
+    # Replace the selection with a spelling correction.
     method replace {}
 
     ###################################################################
-    ####                      protected variables                  ####
-
-    # Keep common configuration information
-    protected common dictsw 0
+    ####                      private variables                    ####
 
     # Where we are in the search.
-    protected variable upto {}
+    private variable upto {}
 
     # For unique temporary file names
-    protected common count 0
+    private common count 0
 
     ###################################################################
     ####                      private methods                      ####
@@ -201,7 +206,7 @@ body ::tycho::EditSpell::dictionary {} {
 #### learn
 # Add to the personal dictionary the word currently in the misspell window.
 # Then move to the next spelling error. The dictionary file is
-# sorted is sorted while we are at it.
+# sorted while we are at it.
 # 
 body ::tycho::EditSpell::learn {} {
     set changeto [get word]
@@ -300,7 +305,7 @@ body ::tycho::EditSpell::recheck {} {
 
 #####################################################################
 #### replace
-# Replace the selection with the contents of the entry query.
+# Replace the selection with a spelling correction.
 # Then move to the next spelling error.
 # 
 body ::tycho::EditSpell::replace {} {
