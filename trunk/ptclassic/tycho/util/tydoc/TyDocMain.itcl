@@ -1488,7 +1488,10 @@ body ::tycho::HTMLDocSys::generateHTML {verbose debug generateIndex \
 	} else {
             if ![$HTMLDocSys modCheck $filename] {
                 # It doesn't need to be regenerated.
-                continue
+                if !{$generateIndex} {
+                    continue
+                }
+                # But it will be if the index needs to be made.
             }
             if $debug {
                 # Put name only if it _is_ being regenerated.
