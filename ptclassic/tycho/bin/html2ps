@@ -445,7 +445,7 @@ proc html2psProcessArgs {} {
     }
 
     if {$error} {
-	puts "Usage: html2ps [-d] <html file> <outputfile>"
+	puts "Usage: html2ps \[-d\] <html file> <outputfile>"
 	puts " This script uses netscape to convert an html tree to PostScript"
 	puts " or it can generate a Tycho Directed Acyclic Graph (DAG)."
 	puts " If the -d option is present, then a DAG is produced, if the"
