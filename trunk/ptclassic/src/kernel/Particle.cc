@@ -336,7 +336,7 @@ FixParticle :: FixParticle(int len, int intBits) { data = Fix(len, intBits);}
 FixParticle :: FixParticle(double& d) { data = d;}
 FixParticle :: FixParticle(int len, int intBits, double& d)
                                       { data = Fix(len, intBits, d); }
-FixParticle :: FixParticle(FixParticle& x) { data = x.data; }
+FixParticle :: FixParticle(const FixParticle& x) { data = x.data; }
 FixParticle :: FixParticle(int len, int intBits, FixParticle& x)
                                       { data = Fix(len, intBits, x.data); }
 
