@@ -534,9 +534,7 @@ BDFCluster* BDFClusterGal::tryLoopMerge(BDFCluster* a,BDFCluster* b) {
 	return 0;
 }
 
-BDFTopGal::~BDFTopGal() {
-	delete sched;
-}
+BDFTopGal::~BDFTopGal() {}
 
 // return TRUE if this and b have the same loop condition.
 // FIXME: only return true for DO_ITER type loops -- needs
