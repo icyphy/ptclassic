@@ -77,6 +77,10 @@ CFLAGS =	$(OPTIMIZER) $(MEMLOG) $(WARNINGS) \
 # Note that cc uses -Bstatic
 CC_STATIC = 	-static
 
+# -fPIC should not be used for SunOS4.1.3, as Ptolemy under that OS uses
+# ld style incremental linking, not dlopen style linking
+INC_LINK_FLAGS =
+
 # system libraries for linking .o files from C files only
 CSYSLIBS =	-lm
 
