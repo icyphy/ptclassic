@@ -150,10 +150,11 @@ or of the current galaxy, if no argument is given.  The special argument
 "target" will print the target description.
 }
 
-add_to_help reset {} {
-Replaces the universe "main" by an empty universe.  Any defgalaxy definitions
-you have made, or universes with names other than "main", are still remembered.
-Equivalent to "newuniverse main".
+add_to_help reset {?<name>?} {
+Replaces the named universe (or "main" if no name is given) by an empty
+universe.  Any defgalaxy definitions you have made, or universes with
+names other than "main", are still remembered.  Equivalent to
+"newuniverse main".
 }
 
 add_to_help run {?<n>?} {
