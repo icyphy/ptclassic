@@ -3,27 +3,27 @@ defstar {
     domain {SDF}
     desc {
 Generates standard window functions:
-Rectangle, Hanning, Hamming, Blackman, and SteepBlackman.
+Rectangle, Bartlett, Hanning, Hamming, Blackman, and SteepBlackman.
     }
     explanation {
 .lp
 This star produces on its output values that are samples of a standard
-windowing function.  The window function to be sampled is determined by
+windowing function.  The windowing function is determined by
 the \fIname\fR string parameter.  Possible values are: \fBRectangle\fR,
 \fBBartlett\fR, \fBHanning\fR, \fBHamming\fR, \fBBlackman\fR, and
-\fBSteepBlackman\fR.  Upper and lower case characters in the names are
+\fBSteepBlackman\fR.  Upper- and lower-case characters in the names are
 equivalent.
 .lp
 The parameter \fIlength\fR is the length of the window to produce.  Note
-that most windows functions have zero value at the first and last sample.
+that most window functions have a zero value at the first and last sample.
 The parameter \fIperiod\fR specifies the period of the output signal:
 the window will be zero-padded if required.  A \fIperiod\fR of 0
 means a period equal to \fIlength\fR.  A negative period will
 produce only one window, and then outputs zero for all later samples.
-A period of less than window length will be equivalent to a period of
-window length (i.e, period=0).
+A period of less than the window length will be equivalent to a period of
+the window length (i.e., period=0).
 .lp
-One period of samples are produced on every firing.
+One period of samples is produced at each firing of this star.
     }
     version { $Id$ }
     author { Kennard White }
@@ -108,7 +108,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	realLen = int(length);
 	if ( realLen < 4 ) {
-	    /* Dont want to risk divide by zero */
+	    /* Don't want to risk divide by zero */
 	    Error::abortRun(*this, ": Window length too small");
 	    return;
 	}
@@ -181,4 +181,4 @@ limitation of liability, and disclaimer of warranty provisions.
 	if ( int(period) < 0 )
 	    realLen = 0;
     }
-}	
+}
