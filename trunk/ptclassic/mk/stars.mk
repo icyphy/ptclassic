@@ -72,7 +72,7 @@ PARLIBFILES = $(LIBDIR)/libDC.$(LIBSUFFIX) $(LIBDIR)/libHu.$(LIBSUFFIX) \
 	$(LIBDIR)/libcgstars.$(LIBSUFFIX) $(LIBDIR)/libcg.$(LIBSUFFIX)
 
 # Library files reqd by stars.  Note that libptolemy.$(LIBSUFFIX) is not included.
-PTINY_LIBFILES=\
+PTINY_STAR_LIBFILES=\
 $(LIBDIR)/libdestars.$(LIBSUFFIX) $(LIBDIR)/libde.$(LIBSUFFIX) \
 $(LIBDIR)/libsdfdspstars.$(LIBSUFFIX) \
 $(LIBDIR)/libsdfmatrixstars.$(LIBSUFFIX) \
@@ -80,7 +80,7 @@ $(MATLABSTAR_LIBFILE) \
 $(LIBDIR)/libsdfstars.$(LIBSUFFIX) $(LIBDIR)/libLS.$(LIBSUFFIX) \
 $(LIBDIR)/libsdf.$(LIBSUFFIX) \
 
-PTRIM_LIBFILES=\
+PTRIM_STAR_LIBFILES=\
 $(LIBDIR)/libcgcstars.$(LIBSUFFIX) $(LIBDIR)/libcgctcltk.$(LIBSUFFIX) \
 $(LIBDIR)/libcgc.$(LIBSUFFIX) \
 $(LIBDIR)/libcgstars.$(LIBSUFFIX) $(LIBDIR)/libcg.$(LIBSUFFIX) \
