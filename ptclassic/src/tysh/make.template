@@ -56,8 +56,7 @@ PTKDIR = $(ROOT)/src/ptklib
 
 INCL =		-I$(KERNDIR) -I$(PTCL_INCDIR) \
 		-I$(TCL_INCDIR) -I$(TK_INCDIR) $(X11_INCSPEC) -I$(PTKDIR) \
-		-I$(ITCL_INCDIR)
-C_INCL =	-I$(TCL_INCDIR)
+		-I$(ITCL_INCDIR) -I$(TCL_INCDIR) -I$(PTOLEMY)/src/kernel
 
 # Include information on all stars and targets.
 include $(ROOT)/mk/stars.mk
@@ -168,7 +167,7 @@ SRCS = \
   TclStarIfc.cc \
   XYPlot.cc \
   SetSigHandle.cc \
-  SigHandle.c
+  SigHandle.cc
 
 
 # Header files
@@ -184,14 +183,12 @@ HDRS = \
   SetSigHandle.h \
   SigHandle.h 
   
-TMPSRCS=$(SRCS:.cc=.o)
-
 # Used by make checkjunk
 OTHERSRCS = \
   README
 
 # Objects
-OBJS = $(TMPSRCS:.c=.o)
+OBJS = $(SRCS:.cc=.o)
 
 all:	makefile tycho
 
