@@ -35,6 +35,7 @@ PL_SRCS= \
  CGCCxToFloat.pl \
  CGCCxToRect.pl \
  CGCDB.pl \
+ CGCDelay.pl \
  CGCDeMux.pl \
  CGCDistributor.pl \
  CGCDownSample.pl \
