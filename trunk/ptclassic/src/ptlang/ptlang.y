@@ -960,8 +960,13 @@ genDef ()
 	fprintf (fp, "\n#ifdef __GNUG__\n#pragma interface\n#endif\n\n");
 
 /* copyright */
-	if (objCopyright)
+	if (objCopyright) {
+	    if ( strcasecmp(objCopyright,"copyright")==0 ) {
+		fprintf (fp, "/*\n%s\n */\n", objCopyright);
+	    } else {
 		fprintf (fp, "/*\n * copyright (c) %s\n */\n", objCopyright);
+	    }
+	}
 
 /* ID block */
 	if (idBlock)
