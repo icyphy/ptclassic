@@ -30,6 +30,12 @@ a wormhole will be automatically created.
 All domains currently linked to Pigi will be offered as options.
 T}
 .sp 0.5
+edit-architecture	a	T{
+To specify a target architecture for a code generation domain.
+If no target architectures are defined for the current domain, an
+error message will be issued.
+T}
+.sp 0.5
 edit-comment	;	T{
 A comment is simply text associated with an object.
 This command adds or modifies comments.
