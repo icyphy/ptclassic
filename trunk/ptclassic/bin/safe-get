@@ -1,0 +1,31 @@
+#! /bin/csh -f
+# safe-get: arg is the name of the SCCS file
+# always does cd to proper place before doing the get.
+# $Id$
+if ($#argv != 1) then
+	echo Usage: safe-get filename
+	exit 1
+endif
+
+set fullname = $1
+# get is in /usr/sccs on some systems
+if (-r /usr/sccs/get) set path = (/usr/sccs $path)
+
+if (! -r $fullname) then
+	echo safe-get: no such file: $fullname
+	exit 1
+endif
+
+set sccsdir = $fullname:h
+set root = $fullname:t
+
+if ("$sccsdir" == "SCCS") then
+	echo "get SCCS/$root"
+else
+	set dir = $sccsdir:h
+	echo "cd $dir; get SCCS/$root"
+	cd $dir
+endif
+
+get SCCS/$root
+
