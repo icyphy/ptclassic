@@ -1,5 +1,5 @@
-#ifndef _MTDFScheduler_h
-#define _MTDFScheduler_h
+#ifndef _PNScheduler_h
+#define _PNScheduler_h
 
 /* 
 Copyright (c) 1990-1993 The Regents of the University of California.
@@ -34,20 +34,18 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #endif
 
 #include "Scheduler.h"
-#include "MTDFMonitor.h"
+#include "PNMonitor.h"
 
-class MTDFCondition;
+class PNCondition;
 
-class MTDFScheduler : public Scheduler
+class PNScheduler : public Scheduler
 {
-friend class MTDFSourceThread;
-
 public:
     // Constructor.
-    MTDFScheduler();
+    PNScheduler();
 
     // Destructor.
-    ~MTDFScheduler();
+    ~PNScheduler();
 
     // Domain identification.
     /*virtual*/ const char* domain() const;
@@ -81,10 +79,10 @@ protected:
     double stopTime;
 
     // Monitor for guarding the Conditions used by the Scheduler.
-    MTDFMonitor monitor;
+    PNMonitor monitor;
 
     // Condition variable for synchronizing the start of an iteration.
-    MTDFCondition* start;
+    PNCondition* start;
 };
 
 #endif

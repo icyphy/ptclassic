@@ -32,16 +32,16 @@ static const char file_id[] = "$RCSfile$";
 #pragma implementation
 #endif
 
-#include "MTDFScheduler.h"
-#include "MTDFStar.h"
-#include "MTDFThread.h"
-#include "MTDFCondition.h"
+#include "PNScheduler.h"
+#include "DataFlowStar.h"
+#include "PNThread.h"
+#include "PNCondition.h"
 #include "GalIter.h"
 
-extern const char MTDFdomainName[];
+extern const char PNdomainName[];
 
 // Constructor.
-MTDFScheduler::MTDFScheduler() : monitor()
+PNScheduler::PNScheduler() : monitor()
 {
     start = 0;
     schedulePeriod = 1.0;
@@ -50,19 +50,19 @@ MTDFScheduler::MTDFScheduler() : monitor()
 }
 
 // Destructor.
-MTDFScheduler::~MTDFScheduler()
+PNScheduler::~PNScheduler()
 {
     LOG_DEL; delete start;
 }
 
 // Domain identification.
-const char* MTDFScheduler::domain() const
+const char* PNScheduler::domain() const
 {
-    return MTDFdomainName;
+    return PNdomainName;
 }
 
 // Initialization.
-void MTDFScheduler::setup()
+void PNScheduler::setup()
 {
     if (galaxy() == NULL)
     {
@@ -73,19 +73,33 @@ void MTDFScheduler::setup()
     // Any threads from the previous run that blocked on start
     // will be deleted at this point.
     LOG_DEL; delete start;
-    LOG_NEW; start = new MTDFCondition(monitor);
+    LOG_NEW; start = new PNCondition(monitor);
 
-    // Any threads from the previous run that are blocked on notEmpty
-    // will be deleted at this point.
     galaxy()->initialize();
 
-    MTDFThread::setup();
+    // Enable locking on all portholes.
+    GalStarIter starIter(*galaxy());
+    Star* star;
+    while ((star = starIter++) != NULL)
+    {
+        BlockPortIter portIter(*star);
+        PortHole* port;
+        while ((port = portIter++) != NULL)
+        {
+            // Any threads from the previous run that are blocked
+            // will be deleted at this point.
+            port->disableLocking();
+            port->enableLocking(monitor);
+        }
+    }
+
+    PNThread::setup();
     createThreads();
     setCurrentTime(0.0);
 }
 
 // Run (or continue) the simulation.
-int MTDFScheduler::run()
+int PNScheduler::run()
 {
     if (SimControl::haltRequested())
     {
@@ -94,68 +108,68 @@ int MTDFScheduler::run()
     }
 
     // Allow threads to start.
-    MTDFThread::go();
+    PNThread::go();
 
     while((currentTime < stopTime) && !SimControl::haltRequested())
     {
-	MTDFThread::stop();
+	PNThread::stop();
 	// Notify all source threads to start.
 	{
 	    CriticalSection region(start->monitor());
 	    start->notifyAll();
 	}
-	MTDFThread::go();
+	PNThread::go();
 	currentTime += schedulePeriod;
     }
 
     // Prevent threads from running.
-    MTDFThread::stop();
+    PNThread::stop();
 
     return !SimControl::haltRequested();
 }
 
-// Create threads and build ThreadList.
-void MTDFScheduler::createThreads()
+// Create threads (Kahn Processes).
+void PNScheduler::createThreads()
 {
     GalStarIter starIter(*galaxy());
-    MTDFStar* star;
-    MTDFThread* t;
+    DataFlowStar* star;
+    PNThread* t;
 
     // Create Threads for all the Stars.
-    while((star = (MTDFStar*)starIter++) != NULL)
+    while((star = (DataFlowStar*)starIter++) != NULL)
     {
         if (star->isSource())
 	{
-	    LOG_NEW; t = new MTDFSourceThread(*star, *start);
+	    LOG_NEW; t = new SyncDataFlowProcess(*star, *start);
 	}
 	else
 	{
-	    LOG_NEW; t = new MTDFThread(*star);
+	    LOG_NEW; t = new DataFlowProcess(*star);
 	}
     }
 }
 
 // Get the stopping time.
-double MTDFScheduler::getStopTime()
+double PNScheduler::getStopTime()
 {
     return stopTime;
 }
 
 // Set the stopping time.
-void MTDFScheduler::setStopTime(double limit)
+void PNScheduler::setStopTime(double limit)
 {
     stopTime = limit;
 }
 
 // Set the stopping time when inside a Wormhole.
-void MTDFScheduler::resetStopTime(double limit)
+void PNScheduler::resetStopTime(double limit)
 {
     // Allow Scheduler to run for one schedule period.
     stopTime = limit;
     currentTime = stopTime - schedulePeriod;
 }
 
-double MTDFScheduler::delay(double when)
+double PNScheduler::delay(double when)
 {
     return 0.0;
 }
