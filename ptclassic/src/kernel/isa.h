@@ -40,7 +40,9 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #endif
 #endif
 
+#ifndef aix_xlC
 extern "C" int strcmp(const char*,const char*);
+#endif
 
 #define ISA_FUNC(me,parent)\
 int me :: isA (const char* cname) const {\
