@@ -3,7 +3,7 @@
 # Makefile for domain sections
 #
 
-PTOLEMY       = /usr/users/ptolemy
+PTOLEMY       = ../../../..
 PRINTSEC      = $(PTOLEMY)/doc/bin/printsec
 HEADER        = $(PTOLEMY)/doc/headers/together $(PTOLEMY)/doc/headers/sogod
 MAINSEC	      = overall
