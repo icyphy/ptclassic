@@ -307,6 +307,9 @@ protected:
 	// add a newly created port to the multiporthole
 	PortHole& installPort(PortHole& p);
 
+	// set myMultiPortHole to this
+	void letMeKnownToChild(PortHole& p);
+
 	// delete all contained portholes
 	void delPorts();
 
@@ -341,7 +344,7 @@ class PortHole : public GenericPort
 	friend setPortIndices(Galaxy&);
 
 	// the following function may set myMultiPortHole
-	friend PortHole& MultiPortHole::installPort(PortHole&);
+	friend void MultiPortHole::letMeKnownToChild(PortHole&);
 
 public:
 
