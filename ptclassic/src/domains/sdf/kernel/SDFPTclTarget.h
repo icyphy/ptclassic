@@ -102,6 +102,4 @@ private:
     int numIters;
     StarProfiles starProfiles;
 };
-
-extern SDFPTclTarget SDFPTclTargetProto;
 #endif
