@@ -51,7 +51,7 @@ where \fIhalfw\fR is half the bin width.
 	defstate {
 		name {options}
 		type {string}
-		default {"-bb"}
+		default {"-bb =800x400"}
 		desc {Extra Command line options for xgraph.}
 	}
 	protected {
