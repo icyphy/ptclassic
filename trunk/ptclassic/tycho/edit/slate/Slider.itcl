@@ -33,8 +33,10 @@
 # A slider widget. This widget provides an alternative to the
 # Tk <code>scale</code> widget, and is supposed to be reminiscent
 # of a vertical ``slider'' as used in audio equipment. It also
-# provides a good example of how Tycho's <i>Slate</i> widget can
-# be used to (relatively) quickly create new interactive components.
+# provides a good example of how Tycho's
+# <a href="../../../../slate/interactors/doc/codeDoc/Slate.html">
+# <i>Slate</i></a> widget can be used to (relatively) quickly
+# create new interactive components.
 # <p>
 # To create a simple slider:
 # <tcl><pre>
