@@ -78,11 +78,9 @@ CGTarget(nam, startype, desc, assocDomain) {
 
     // Initalization of other data members
     tempBlockList.initialize();
-    ptclTarget = 0;
 }
 
 CGCostTarget::~CGCostTarget() {
-    delete ptclTarget;
 }
 
 Block* CGCostTarget::makeNew() const {
@@ -103,12 +101,13 @@ int CGCostTarget::run() {
     }
 
     // Generate the Ptcl code for the current galaxy
-    convertGalaxyToPtcl(galaxy());
+    if (!convertGalaxyToPtcl(galaxy())) {
+	Error::abortRun("CGCostTarget could not find the SDF-to-PTcl target.");
+	return FALSE;
+    }
 
     // Each star in the galaxy will be extracted to form a test universe,
     // which will be used to generate implementation costs for that star
-    // FIXME: Is calling initializeStarPorts necessary here given that
-    // Ptcl code generation has already been done?
     initializeStarPorts(*galaxy());
     disconnectAllStars(*galaxy());
 
@@ -292,17 +291,15 @@ CGTarget* CGCostTarget::findCodeGenTarget(const char* userTargetName) {
 
 // Write out the equivalent Ptcl code for the galaxy
 int CGCostTarget::convertGalaxyToPtcl(Galaxy* localGalaxy) {
-    if (ptclTarget == 0) {
-	ptclTarget = new SDFPTclTarget("SDFPTclTarget", "PTcl code generator");
-    }
+    SDFPTclTarget* ptclTarget =
+	(SDFPTclTarget*) KnownTarget::find("SDF-to-PTcl");
+    if (ptclTarget == 0) return FALSE;
     ptclTarget->clearGalaxy();
     localGalaxy->setDomain("SDF");
     ptclTarget->setGalaxy(*localGalaxy);
     ptclTarget->setState("loopScheduler(DEF,CLUST,ACYLOOP)", loopingLevel);
-    ptclTarget->initialize();
-    ptclTarget->begin();
-    ptclTarget->run();
-    ptclTarget->wrapup();
+    ptclTarget->setState("directory", destDirectory);
+    ptclTarget->ptclDescription(localGalaxy, TRUE);
     ptclTarget->clearGalaxy();
     return TRUE;
 }
