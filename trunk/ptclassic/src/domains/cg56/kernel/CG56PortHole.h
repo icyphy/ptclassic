@@ -35,7 +35,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #ifdef __GNUG__
 #pragma interface
 #endif
-#include "SDFPortHole.h"
+
 #include "MotorolaPortHole.h"
 #include "MotorolaAttributes.h"
 
