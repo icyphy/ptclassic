@@ -50,12 +50,6 @@ The number of the weights must be equal to the number of the inputs.
 	    }
 	}
 	state {
-	    name { number }
-	    type { int }
-	    default { "10" }
-	    desc { This number control the size of array. }
-	}
-	state {
 	    name { threshold }
 	    type { float }
 	    default { 1.0 }
