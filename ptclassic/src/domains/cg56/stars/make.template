@@ -79,6 +79,7 @@ PL_SRCS= \
  CG56FixToCx.pl \
  CG56FixToInt.pl \
  CG56Gain.pl \
+ CG56GainInt.pl \
  CG56HostAOut.pl \
  CG56HostOut.pl \
  CG56HostSldr.pl \
