@@ -207,6 +207,31 @@ int ArchTarget :: runIt(VHDLStar* s) {
   return status;
 }
 
+// Redefine generateCode() here in order to do iterative code gen and synthesis.
+void ArchTarget::generateCode() {
+	if (haltRequested()) return;
+	if (parent()) setup();
+	if (haltRequested()) return;
+	if(!allocateMemory()) {
+		Error::abortRun(*this,"Memory allocation error");
+		return;
+	}
+	if (haltRequested()) return;
+	generateCodeStreams();
+	if (haltRequested()) return;
+	frameCode();
+	if (haltRequested()) return;
+	if (!parent()) writeCode();
+
+	// Call wrapup to compile, load and run the code.
+	wrapup();
+	frameCode();
+	writeCode();
+
+	// now initialize for the next run
+	procedures.initialize();
+}
+
 // Initial stage of code generation (done first).
 void ArchTarget :: headerCode() {
 }
@@ -829,6 +854,21 @@ void ArchTarget :: trailerCode() {
 }
 
 void ArchTarget :: frameCode() {
+  // Initialization so that this part can be repeated.
+  firegroupList.initialize();
+  
+  mainCompDeclList.initialize();
+  //  entity_arch.initialize();
+  entity_declaration.initialize();
+  architecture_body_opener.initialize();
+  component_declarations.initialize();
+  signal_declarations.initialize();
+  component_mappings.initialize();
+  architecture_body_closer.initialize();
+  configuration_declaration.initialize();
+
+  myCode.initialize();
+
   // Call the method to interactively rework the arch, if
   // it is provided (by derived targets)
   interact();
@@ -865,17 +905,26 @@ void ArchTarget :: frameCode() {
     VHDLFiringListIter nextFiring(masterFiringList);
     VHDLFiring* firing;
     while ((firing = nextFiring++) != 0) {
-      // Add a clock at the right time to latch when the firing is done.
-      StringList clockName = firing->getName();
-      clockName << "_clk";
-      int clockTime = firing->endTime;
-      pulseClock(clockName, clockTime);
+      // Exclude the controller
+      StringList ctlName = hashstring(filePrefix);
+      ctlName << "controller";
+      //      printf("Firing Name:  %s\n", firing->getName());
+      //      printf("strcmp:  %d\n",
+      //	     (strcmp(ctlName, firing->getName())));
 
-      // Add a new clock signal also.
-      VHDLSignal* newSignal = new VHDLSignal;
-      newSignal->setName(clockName);
-      newSignal->setType("BOOLEAN");
-      signalList.put(*newSignal);
+      if (strcmp(ctlName, firing->getName())) {
+	// Add a clock at the right time to latch when the firing is done.
+	StringList clockName = firing->getName();
+	clockName << "_clk";
+	int clockTime = firing->endTime;
+	pulseClock(clockName, clockTime);
+
+	// Add a new clock signal also.
+	VHDLSignal* newSignal = new VHDLSignal;
+	newSignal->setName(clockName);
+	newSignal->setType("BOOLEAN");
+	signalList.put(*newSignal);
+      }
     }
   }
 
@@ -1140,15 +1189,33 @@ void ArchTarget :: frameCode() {
   
   buildEntityDeclaration(level);
   buildArchitectureBodyOpener(level);
+
   component_declarations << addComponentDeclarations(&mainCompDeclList, level);
+  component_declarations << addComponentDeclarations(&sourceCompDeclList, level);
+  component_declarations << addComponentDeclarations(&muxCompDeclList, level);
+  component_declarations << addComponentDeclarations(&regCompDeclList, level);
+
   signal_declarations << addSignalDeclarations(&signalList, level);
+
   component_mappings << addComponentMappings(&mainCompDeclList, level);
+  component_mappings << addComponentMappings(&sourceCompDeclList, level);
+  component_mappings << addComponentMappings(&muxCompDeclList, level);
+  component_mappings << addComponentMappings(&regCompDeclList, level);
+
   buildArchitectureBodyCloser(level);
-  buildConfigurationDeclaration(level);
+
+  //  buildConfigurationDeclaration(level);
+  configuration_declaration << addConfigurationDeclarations(&mainCompDeclList, level);
+  configuration_declaration << addConfigurationDeclarations(&sourceCompDeclList, level);
+  configuration_declaration << addConfigurationDeclarations(&muxCompDeclList, level);
+  configuration_declaration << addConfigurationDeclarations(&regCompDeclList, level);
 
 
   // Combine all sections of code.
   StringList code = headerComment();
+
+  myCode << "\n-- mux_declarations\n";
+  myCode << "\n" << mux_declarations;
 
   if (systemClock()) {
     myCode << clockGenCode();
@@ -1702,8 +1769,8 @@ void ArchTarget :: connectSource(StringList initVal, VHDLSignal* initSignal)
   outPort->connect(initSignal);
   portList->put(*outPort);
 
-  mainCompDeclList.put(label, portList, genList,
-		       name, portList, genList);
+  sourceCompDeclList.put(label, portList, genList,
+			 name, portList, genList);
 }
 
 // Connect a multiplexor between the given input and output signals.
@@ -1787,7 +1854,9 @@ void ArchTarget :: connectMultiplexor(StringList muxName,
   codeList << "end behavior;\n";
   codeList << "\n";
 
-  myCode << codeList;
+  // Putting this in myCode is fatal, when myCode is getting reset.
+  //  myCode << codeList;
+  mux_declarations << codeList;
 
   StringList label = outSignal->name;
   label << "_MUX";
@@ -1831,7 +1900,7 @@ void ArchTarget :: connectMultiplexor(StringList muxName,
   else {
     systemPortList.put("system_clock", "boolean", "IN");
   }
-  mainCompDeclList.put(label, portList, genList,
+  muxCompDeclList.put(label, portList, genList,
 		       name, portList, genList);
 }
 
@@ -1899,8 +1968,8 @@ void ArchTarget :: connectRegister(VHDLSignal* inSignal,
   else {
     systemPortList.put("system_clock", "boolean", "IN");
   }
-  mainCompDeclList.put(label, portList, genList,
-		       name, portList, genList);
+  regCompDeclList.put(label, portList, genList,
+		      name, portList, genList);
 }
 
 // Connect a clock generator driving the given signal.
@@ -2608,6 +2677,7 @@ void ArchTarget :: addCodeStreams() {
   addStream("entity_declaration", &entity_declaration);
   addStream("architecture_body_opener", &architecture_body_opener);
   addStream("component_declarations", &component_declarations);
+  addStream("mux_declarations", &mux_declarations);
   addStream("signal_declarations", &signal_declarations);
   addStream("component_mappings", &component_mappings);
   addStream("architecture_body_closer", &architecture_body_closer);
@@ -2625,6 +2695,7 @@ void ArchTarget :: initCodeStreams() {
   entity_declaration.initialize();
   architecture_body_opener.initialize();
   component_declarations.initialize();
+  mux_declarations.initialize();
   signal_declarations.initialize();
   component_mappings.initialize();
   architecture_body_closer.initialize();
@@ -2641,6 +2712,9 @@ void ArchTarget :: initCodeStreams() {
 void ArchTarget :: initVHDLObjLists() {
   systemPortList.initialize();
   mainCompDeclList.initialize();
+  sourceCompDeclList.initialize();
+  muxCompDeclList.initialize();
+  regCompDeclList.initialize();
   signalList.initialize();
   stateList.initialize();
 

@@ -63,6 +63,9 @@ public:
 	// Main routine.
 	/*virtual*/ int runIt(VHDLStar*);
 
+	// Generate code.
+        /*virtual*/ void generateCode();
+
 	// redefine writeCode: default file is "code.vhd"
 	/*virtual*/ void writeCode();
 
@@ -171,6 +174,7 @@ private:
 	StringList clockList;
 
 	// Relevant code streams.
+	CodeStream mux_declarations;
 	CodeStream component_declarations;
 	CodeStream signal_declarations;
 	CodeStream component_mappings;
@@ -183,6 +187,9 @@ private:
 	// General VHDLObjLists.
 	VHDLPortList systemPortList;
 	VHDLCompDeclList mainCompDeclList;
+	VHDLCompDeclList sourceCompDeclList;
+	VHDLCompDeclList muxCompDeclList;
+	VHDLCompDeclList regCompDeclList;
 	VHDLSignalList signalList;
 	VHDLStateList stateList;
 
