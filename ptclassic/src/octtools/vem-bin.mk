@@ -36,7 +36,7 @@ $(OCTLIBDIR)/$(LIB_INSTALL): $(LIB_INSTALL)
 install: makefile $(OCTLIBDIR)/$(LIB_INSTALL)
 
 
-C_INCL= -I../include -I../bitmaps -I../../include $(X11_INCSPEC)
+C_INCL= -I../include -I../bitmaps -I../../include $(PTCOMPAT_INCSPEC) $(X11_INCSPEC)
 
 lint:	$(LIBCSRCS)
 	lint -u $(C_INCL) $^ > lint
