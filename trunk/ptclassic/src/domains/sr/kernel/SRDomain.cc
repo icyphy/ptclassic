@@ -1,8 +1,5 @@
 static const char file_id[] = "SRDomain.cc";
 /**********************************************************************
-Version identification:
-$Id$
-
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
 
@@ -29,6 +26,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
  Programmer:  J. T. Buck
  Date of creation: 7/2/90
+ Version: $Id$
 
  A device to produce the correct portholes, wormholes, event horizons,
  etc, for the SR domain so the interpreter can generate them dynamically.
@@ -37,6 +35,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #include "Domain.h"
 #include "Target.h"
+#include "Galaxy.h"
 #include "KnownTarget.h"
 #include "SRScheduler.h"
 #include "SRStaticScheduler.h"
@@ -46,6 +45,9 @@ extern const char SRdomainName[] = "SR";
 
 class SRDomain : public Domain {
 public:
+	// constructor
+	SRDomain() : Domain(SRdomainName) {}
+
 	// new wormhole
 	Star& newWorm(Galaxy& innerGal,Target* innerTarget)  {
 		LOG_NEW; return *new SRWormhole(innerGal,innerTarget);
@@ -56,9 +58,6 @@ public:
 
 	// new toUniversal EventHorizon
 	EventHorizon& newTo() { LOG_NEW; return *new SRtoUniversal;}
-
-	// constructor
-	SRDomain() : Domain("SR") {}
 };
 
 // declare a prototype
@@ -68,13 +67,22 @@ static SRDomain proto;
 
 class SRTarget : public Target {
 public:
-	SRTarget() : Target("default-SR","SRStar","default SR target"){}
-	Block* makeNew() const { LOG_NEW; return new SRTarget;}
-	~SRTarget() { delSched();}
+	// Constructor
+	SRTarget() : Target("default-SR", "SRStar", "default SR target"){}
+
+	// Destructor
+	~SRTarget() { delSched(); }
+
+	// Return a copy of itself
+	/*virtual*/ Block* makeNew() const { LOG_NEW; return new SRTarget;}
+
+	// Return the domain of the galaxy if it exists and "SR" otherwise
+	/*virtual*/ const char* domain() {
+		return galaxy() ? galaxy()->domain() : SRdomainName;
+	}
 
 protected:
-	void setup()
-	{
+	void setup() {
 		if (!scheduler()) { LOG_NEW; setSched(new SRScheduler); }
 		Target::setup();
 	}
@@ -87,16 +95,26 @@ static KnownTarget entry(defaultSRtarget,"default-SR");
 
 class SRStaticTarget : public Target {
 public:
-  SRStaticTarget() : Target("static-SR", "SRStar",
-			    "SR target with static scheduling") {}
-  Block* makeNew() const { LOG_NEW; return new SRStaticTarget;}
-  ~SRStaticTarget() { delSched();}
+	// Constructor
+	SRStaticTarget() : Target("static-SR", "SRStar",
+				  "SR target with static scheduling") {}
+
+	// Destructor
+	~SRStaticTarget() { delSched(); }
+
+	// Return a copy of itself
+	Block* makeNew() const { LOG_NEW; return new SRStaticTarget;}
+
+	// Return the domain of the galaxy if it exists and "SR" otherwise
+	/*virtual*/ const char* domain() {
+		return galaxy() ? galaxy()->domain() : SRdomainName;
+	}
   
 protected:
-  void setup() {
-    if (!scheduler()) { LOG_NEW; setSched(new SRStaticScheduler); }
-    Target::setup();
-  }
+	void setup() {
+		if (!scheduler()) { LOG_NEW; setSched(new SRStaticScheduler); }
+		Target::setup();
+	}
 };
 
 static SRStaticTarget staticSRtarget;
