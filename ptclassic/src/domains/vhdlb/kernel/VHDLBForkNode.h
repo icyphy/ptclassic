@@ -46,7 +46,8 @@ public:
 	// constructor: make the VHDLBFork object refer to me.
 	VHDLBForkNode() : af(*this) {}
 	int isItPersistent () const;
-	PortHole* setSourcePort (GenericPort &, int delay = 0);
+	PortHole* setSourcePort (GenericPort &, int numDelays = 0,
+				 const char* initDelayValues = 0);
 	PortHole* setDestPort (GenericPort &);
 
 	// class identification
