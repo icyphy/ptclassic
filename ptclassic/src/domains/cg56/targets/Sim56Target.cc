@@ -40,7 +40,7 @@ void Sim56Target :: initStates() {
 				   "file to plot with xgraph after run"));
 	addState(plotTitle.setState("plotTitle",this,"Simulator output",
 				    "graph title (if any)"));
-	addState(plotOptions.setState("plotOptions",this,"",
+	addState(plotOptions.setState("plotOptions",this,"outfile.sim",
 				      "xgraph options"));
 	runCode.setValue("YES");
 	runCode.setAttributes(A_SETTABLE|A_NONCONSTANT);
@@ -48,12 +48,11 @@ void Sim56Target :: initStates() {
 
 void Sim56Target::initializeCmds() {
 	CG56Target::initializeCmds();
-	assembleCmds += "asm56000 -A -B -L ";
+	assembleCmds += "asm56000 -A -b -l ";
 	assembleCmds += uname;
 	assembleCmds += "\n";
 	miscCmds += "load ";
-	miscCmds += uname;
-	miscCmds += "\n";
+	miscCmds += fileName(uname,".lod\n");
 	downloadCmds += "xterm -e sim56000 ";
 	downloadCmds += fileName(uname,".cmd\n");
 	const char* file = plotFile;
