@@ -30,9 +30,9 @@
 ##########################################################################
 
 # Root of Tycho directory
-ROOT =		../..
+ROOT =		../../..
 # True source directory
-VPATH =		$(ROOT)/kernel/doc
+VPATH =		$(ROOT)/typt/editors/doc
 
 # Get configuration info
 CONFIG =	$(ROOT)/mk/tycho.mk
@@ -40,15 +40,13 @@ include $(CONFIG)
 
 EXTRA_SRCS =
 
-MISC_FILES =	codeDoc internals usersGuides
+MISC_FILES =	codeDoc usersGuides #internals
 
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =
 
 # Sub directories to run make in.
-DIRS =		internals usersGuides
+DIRS =		usersGuides #internals 
 
 # We don't include common.mk since we don't use the compiler here
 include $(ROOT)/mk/no-compile.mk
-
-
