@@ -161,14 +161,14 @@ body ::tycho::UndirectedGraph::disconnect {vertex1 vertex2} {
 # both "directions."
 #
 body ::tycho::UndirectedGraph::edgeconfigure {vertex1 vertex2 args} {
-    eval [list ::tycho::UndirectedGraph::edgeconfigure $vertex1 $vertex2] $args
-    eval [list ::tycho::UndirectedGraph::edgeconfigure $vertex2 $vertex1] $args
+    eval [list chain $vertex1 $vertex2] $args
+    eval [list chain $vertex2 $vertex1] $args
 }
 
 ########################################################################
 #### numberofedges
 #
-# Return the number of edges in the graph. this method overrides the
+# Return the number of edges in the graph. This method overrides the
 # superclass method because edges in the undirected graph are
 # "duplicated".
 #
