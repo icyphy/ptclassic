@@ -124,8 +124,14 @@ class ::tycho::AbstractGraph {
     # The default options of each vertex
     public variable vertexoptions {}
 
+    # The default options of each weld
+    public variable weldoptions {}
+
     ###################################################################
     ####                         public methods                    ####
+
+	# Test if a graph is acyclic
+	method acyclic {}
 
     # Add a vertex with a value and options to the graph
     method add {vertex value args}
@@ -136,23 +142,20 @@ class ::tycho::AbstractGraph {
     # Assign new data to an existing vertex
     method assign {vertex data}
     
-    # Return the value of the specified attribute for the specified vertex.
-    method attribute {attrname vertex}
-
-    # Set the specified attribute for all vertices to the specified value.
-    method attributeInit {attrname {initvalue 0}}
-
-    # Set the specified attribute for the specified vertex to the specified value.
-    method attributeSet {attrname vertex {value 1}}
-
-    # Remove all vertices and edges from the graph
-    method clear {}
+    # Get the children of a vertex
+    method children {vertex}
 
     # Add an edge and options to the graph
     method connect {vertex1 vertex2 args}
 
     # Remove a vertex (but not adjacent edges) from the graph
     method delete {vertex}
+
+    # Perform a depth-first search of the graph
+	method depthFirstSearch {{roots {}}}
+
+	# Perform a depth-sort of the graph
+	method depthSort {{roots {}}}
 
     # Return a description of the graph
     method describe {}
@@ -181,11 +184,8 @@ class ::tycho::AbstractGraph {
     # Get the keys at a vertex
     method keys {vertex}
 
-    # Add one or more edges to the graph
-    method multiconnect {args}
-
-    # Remove one or more edges from the graph
-    method multidisconnect {args}
+    # Get the "leaves" of the graph
+    method leaves {}
 
     # Return the number of edges in the graph
     method numberofedges {}
@@ -193,8 +193,17 @@ class ::tycho::AbstractGraph {
     # Return the number of vertices in the graph
     method numberofvertices {}
 
+    # Get the parents of a vertex
+    method parents {vertex}
+
     # "Repair" a graph by deleting improperly-connected edges
     method repair {}
+
+    # Get the roots of the graph
+    method roots {}
+
+	# Return the topological sort of a graph
+	method topologicalSort {{leaves {}}}
 
     # Test whether a graph is correctly constructed
     method verify {}
@@ -238,24 +247,7 @@ class ::tycho::AbstractGraph {
     #################################################################
     ####                  protected variables                    ####
 
-    # The adjacency "matrix." This represents the topology of
-    # the graph independent of complexities associated with 
-    # hyperedges or keyed connections. It is an array indexed as
-    # "vertex1^vertex2" with value {vertex1 vertex2}. In future,
-    # the representation may change to use parent-child lists
-    # instead of adjacency lists, in which case all subclasses
-    # will have to be modified. The parent-child representation
-    # is more efficient for traversing the graph, but rather more
-    # tedious to maintain in the presence of graph alterations.
-    # <b>Note:</b> Preliminary tests using the depthsort{} method
-    # indicate that the efficiency overhead using this representation
-    # is only about 20%. It may be more critical if we can make
-    # depthSort{} and similar algorithms fully non-recursive.
-    protected variable _adjacency
-    
-    # A general-purpose array for storing structural information.
-    # All subclass methods that add or delete vertices or edges
-    # must do a <code>catch {unset _cache}</code.
+    # The adjacency "matrix." See the comment with adjacencyadd{}.
     protected variable _cache
 
     # The edges of the graph. The format of this structure is
@@ -271,14 +263,30 @@ class ::tycho::AbstractGraph {
     
     # The options of the vertices
     protected variable _vertexoptions
-
-    # The options associated with each weld
-    protected variable _weldoptions
 }
 
     ###################################################################
     ###################################################################
     ####                      public methods                       ####
+
+########################################################################
+#### acyclic
+#
+# Test if a graph is acyclic. This method uses a result computed
+# by the depth-first search routine, so computes the
+# depth-first search as a side-effect if the result hasn't already
+# been computed.
+#
+body ::tycho::AbstractGraph::acyclic {} {
+	if { ! [::info exists _cache(acyclic)] } {
+		# Try with roots first
+		if { [depthFirstSearch] == "" } {
+			# If that fails, do with all vertices
+			depthFirstSearch [array names _vertices]
+		}
+	}
+	return $_cache(acyclic)
+}
 
 ########################################################################
 #### add
@@ -288,6 +296,13 @@ class ::tycho::AbstractGraph {
 # option-value list for the vertex.
 #
 body ::tycho::AbstractGraph::add {vertex value args} {
+	#
+	# The vertex matrices is stored as
+	#
+	#     _vertices:      vertex |-> value
+	#     _vertexoptions: vertex |-> {option value ... }
+	# 
+
     if { [::info exists _vertices($vertex)] } {
 	error "Vertex $vertex already exists in $dataname"
     }
@@ -327,47 +342,6 @@ body ::tycho::AbstractGraph::adjacency {{pattern1 *} {pattern2 *}} {
     return $result
 }
 
-#######################################################################
-#### attribute
-# Return the value of the specified attribute for the specified vertex.
-# It is an error if the attribute has not been set for this vertex.
-# The method <code>attributeInit</code> or <code>attributeSet</code>
-# should be used to set the value of the attribute.
-# Attributes are used by various algorithms that traverse the graph.
-# For example, to keep track of which vertices have beed visited already
-# in some graph traversal algorithm, you could use an attribute with
-# "visited" that takes value 0 or 1.
-#
-body ::tycho::AbstractGraph::attribute {attrname vertex} {
-    return $_cache($attrname,$vertex)
-}
-
-#######################################################################
-#### attributeInit
-# Set the specified attribute for all vertices to the specified value.
-# The attribute name is an arbitrary identifying string, and the value
-# is an arbitrary string.  If the value is not given, it defaults to "0".
-#
-body ::tycho::AbstractGraph::attributeInit {attrname {initvalue 0}} {
-    if [info exists _vertices] {
-        set searchid [array startsearch _vertices]
-        while {[set vertex [array nextelement _vertices $searchid]] != {}} {
-            set _cache($attrname,$vertex) $initvalue
-        }
-        array donesearch _vertices $searchid
-    }
-}
-
-#######################################################################
-#### attributeSet
-# Set the specified attribute for the specified vertex to the specified value.
-# The attribute name and value can be any arbitrary Tcl strings.
-#
-body ::tycho::AbstractGraph::attributeSet {attrname vertex {value 1}} {
-    set _cache($attrname,$vertex) $value
-}
-
-
 ########################################################################
 #### connect
 #
@@ -386,7 +360,7 @@ body ::tycho::AbstractGraph::connect {vertex1 vertex2 args} {
 ########################################################################
 #### assign
 #
-# Assign new data to an existsing vertex. Flag an error if the vertex
+# Assign new data to an existing vertex. Flag an error if the vertex
 # does not exist. Return the inverse command.
 #
 body ::tycho::AbstractGraph::assign {vertex data} {
@@ -396,26 +370,6 @@ body ::tycho::AbstractGraph::assign {vertex data} {
     set inverse [list assign $vertex $_vertices($vertex)]
     set _vertices($vertex) $data
     return $inverse
-}
-
-#######################################################################
-#### clear
-# Remove all nodes from the graph and delete the undo history.
-# This method cannot be undone or redone.
-#
-body ::tycho::AbstractGraph::clear {} {
-    clearHistory
-    # The catch is in case the graph is already clear
-    catch {
-        unset _vertices
-        unset _vertexoptions
-        unset _edges
-	unset _edgeoptions
-	unset _weldoptions
-	unset _cache
-    }
-    # Return null so record{} or publish{} will complain.
-    return ""
 }
 
 ########################################################################
@@ -439,6 +393,165 @@ body ::tycho::AbstractGraph::delete {vertex} {
     catch {unset _cache}
 
     return $inverse
+}
+
+########################################################################
+#### depthFirstSearch
+#
+# Perform a depth-first search of the graph and return the vertices
+# in the order visited. This is a non-recursive implementation, and is
+# adapted from Sedgewick, Chapter 29. The "stack" in this algorithm
+# is a Tcl list, with the "top" of the stack being the _end_ of the list.
+#
+# If there is no argument, then the graph is assumed to a) be directed
+# and b) have at least one root vertex (with no parents). The graph
+# is searched from the root nodes. If an argument is supplied, then
+# it must be a list of nodes from which to start searching. If nothing
+# is known about the structure of the graph, then all vertices should be
+# supplied, since that will guarantee that all vertices are reached.
+#
+# This method can be used to perform naive reachability, by giving
+# a single vertex as argument and examining the result list.
+#
+# As a side-effect, this method sets a flag if a cycle is encountered,
+# which can be read by the acyclic{} method.
+#
+body ::tycho::AbstractGraph::depthFirstSearch {{roots {}}} {
+	# If we already have it, just return it
+	if { [::info exists _cache(depthfirst.[join $roots -])] } {
+		return $_cache(depthfirst.[join $roots -])
+	}
+
+	# The traversal "stack" and result list
+	set stack {}
+	set result {}
+	set acyclic 1
+
+	# Initialize visited flags to 0
+	foreach v [array names _vertices] {
+		set _cache($v.visited) 0
+	}
+
+	# Push start vertices onto the stack
+	if { $roots == "" } {
+		set roots [roots]
+	}
+	foreach root $roots {
+		lappend stack $root
+		set _cache($root.visited) -1
+	}
+
+	# Keep looking until we run out of vertices
+	while { $stack != "" } {
+		# Get first on stack
+		set current [lindex $stack end]
+		set stack [lreplace $stack end end]
+		
+		# Remember it
+		lappend result $current
+
+		# Put each non-visited child onto the stack and mark it
+		foreach child [children $current] {
+			if { $_cache($child.visited) == 0 } {
+				lappend stack $child
+				set _cache($child.visited) 1
+			} elseif { $_cache($child.visited) == 1 } {
+				set acyclic 0
+			}
+		}
+	}
+
+	# Update acyclic flag if all vertices were covered
+	if { [llength $result] == [llength [array name _vertices]] } {
+		set _cache(acyclic) $acyclic
+	}
+
+	# Remember the search in case it's needed later
+	set _cache(depthfirst.[join $roots -]) $result
+	return $result
+}
+
+########################################################################
+#### depthSort
+#
+# Perform a sort of the graph and return the vertices in a list of 
+# lists, where each sublist contains vertices of the corresponding 
+# depth. If the graph contains a cycle, then the sort will be as
+# though an arbitrary edge in each cycle were deleted.
+#
+# If the graph has cycles, the algorithm will still function, returning
+# a sort of a similar acyclic graph (the same graph with cycles
+# broken). If the second argument is supplied, it is a list of starting
+# vertices -- this may be needed for cyclic graphs.
+# 
+body ::tycho::AbstractGraph::depthSort {{roots {}}} {
+	# If we already have it, just return it
+	if { [::info exists _cache(depthsort)] } {
+		return $_cache(depthsort)
+	}
+
+	# The current vertices and  result list
+	if { $roots == {} } {
+		set roots [roots]
+	}
+	set current $roots
+	set _cache(depthsort) {}
+
+	# Initialize visited flags to 0
+	foreach v [array names _vertices] {
+		set _cache($v.visited) [llength [children $v]]
+	}
+	set count [expr [llength [vertices *]] - [llength $current]]
+
+	# Keep looking until we run out of vertices
+	while { 1 } {
+		# The next layer of vertices
+		set next {}
+		
+		# Foreach in the current "layer," add each child that has been
+		# visited by all of its parents.
+		foreach v $current {
+			foreach w [children $v] {
+				incr _cache($w.visited) -1
+				if { ! $_cache($w.visited) } {
+					lappend next $w
+					incr count -1
+				}
+			}
+		}
+
+		# There are no next vertices: either we are done or there is
+		# a cycle
+		if { $next == "" } {
+			if { $count } {
+				# There's a cycle, so choose a child of a vertex
+				# of the current layer, decrement its count (i.e. delete
+				# an edge), and try again
+				# FIXME: Does this really work???
+				set x ""
+				foreach v $current {
+					foreach w [children $v] {
+						if { $_cache($w.visited) > 0 } {
+							set x $w
+							incr _cache($x.visited) -1
+							break
+						}
+					}
+					if { $x != "" } {
+						break
+					}
+				}
+				continue
+			} else {
+				# Done
+				break
+			}
+		}
+
+		# Move on to the next layer
+		lappend _cache(depthsort) $next
+		set current $next
+	}
 }
 
 #######################################################################
@@ -506,7 +619,7 @@ body ::tycho::AbstractGraph::edgeconfigure {vertex1 vertex2 args} {
 #### edgeoptions
 #
 # Return a list containing the options of the edge as a flat
-# option-value list. An error wil result of the edge does
+# option-value list. An error will result if the edge does
 # not exist.
 #
 body ::tycho::AbstractGraph::edgeoptions {vertex1 vertex2} {
@@ -560,69 +673,6 @@ body ::tycho::AbstractGraph::init {description} {
 }
 
 ########################################################################
-#### keys
-#
-# Return a list of keys on a given vertex. (This was named "welds," but
-# since it does return keys (eg "bar") instead of welds (eg "foo.bar")
-# I thought this name would be more accurate.)
-#
-body ::tycho::AbstractGraph::keys {vertex} {
-    set result {}
-    foreach weld [array names _weldoptions $vertex.*] {
-	lappend result [lindex [split $weld "."] 1]
-    }
-    return $result
-}
-
-########################################################################
-#### multiconnect
-#
-# Add one or more new edges to the graph, and return the inverse command.
-# The arguments list is a flat list of source-target pairs; each
-# edge in the list is added to the graph. Edges cannot be given
-# options with this method.
-#
-# Subclasses may choose to override this method if efficiency is
-# a problem. Graphs with complex edge structures may choose to
-# interpret the argument list differently.
-#
-body ::tycho::AbstractGraph::multiconnect {args} {
-    set inverse [list multidisconnect]
-    foreach {vertex1 vertex2} $args {
-	connect $vertex1 $vertex2
-	lappend inverse $vertex1 $vertex2
-    }
-    return $inverse
-}
-
-########################################################################
-#### multidisconnect
-#
-# Remove one or more edges from the graph, and return the inverse command.
-# The arguments list is a flat list of source-target pairs; each
-# edge in the list is removed from the graph. Edges cannot be given
-# options with this method. This method is particular useful when
-# deleting a vertex if you want to delete the edges too; for a digraph,
-# you can write:
-# <pre>
-#    eval $graph multidisconnect [edges $vertex *]
-#    eval $graph multidisconnect [edges * $vertex]
-#    $graph delete $vertex
-# </pre>
-#
-# Subclasses may choose to override this method if efficiency is
-# a problem. Graphs with complex edge structures may choose to
-# interpret the argument list differently.
-#
-body ::tycho::AbstractGraph::multidisconnect {args} {
-    set inverse [list execute]
-    foreach {vertex1 vertex2} $args {
-	lappend inverse [disconnect $vertex1 $vertex2]
-    }
-    return $inverse
-}
-
-########################################################################
 #### numberofedges
 #
 # Return the number of edges in the graph.
@@ -645,7 +695,7 @@ body ::tycho::AbstractGraph::numberofvertices {} {
 #
 # "Repair" a graph by deleting improperly-connected edges. This method
 # provides a default implementation that will remove invalid edges in 
-# properly-written subclasses; however, however,
+# most properly-written subclasses; however,
 # subclasses may choose to override it for efficiency, because it doesn't work
 # with the subclass, or to perform additional repairs. This
 # method should be called after building a graph if it is not certain
@@ -667,15 +717,91 @@ body ::tycho::AbstractGraph::repair {} {
 }
 
 ########################################################################
+#### topologicalSort
+#
+# Perform a topological sort of the graph and return the vertices
+# in the order visited. This method works backwards through the graph starting
+# with the "leaf" nodes. Because this is a non-recursive implementation,
+# we use an explicit "stack" to simulate the recursive call stack. Each
+# vertex on the stack is marked as follows:
+# <ol>
+# <li>0: Not visited yet.
+# <li>1: Visited and placed into the topological sort
+# <li>2: Visited but not yet placed into the topological sort.
+# </ol>
+#
+# A vertex marked 2 is thus on the stack waiting for the "return
+# from the recursive call" to place it into the result.
+#
+# This algorithm is a non-recursive adaptation of the reverse
+# topological sort given in Chapter 32 of Sedgewick. It will work even
+# if the graph is cyclic, although the returned list will then be
+# some "approximation" of a sort -- nonetheless, it might be useful for
+# laying out cyclic graphs.
+# If a second argument is supplied, this algorithm will return the sort
+# of vertices from which vertices in that list can be reached (again,
+# this may be necessary for cyclic graphs).
+#
+body ::tycho::AbstractGraph::topologicalSort {{leaves {}}} {
+	# If we already have it, just return it
+	if { [::info exists _cache(topologicalsort)] } {
+		return $_cache(topologicalsort)
+	}
+
+	# The traversal "stack" and result list
+	set stack {}
+	set _cache(topologicalsort) {}
+
+	# Initialize visited flags to 0
+	foreach v [array names _vertices] {
+		set _cache($v.visited) 0
+	}
+
+	# Push all leaves onto the stack
+	if { $leaves == {} } {
+		set leaves [leaves]
+	}
+	set stack $leaves
+	
+	# Keep looking until we run out of vertices
+	while { $stack != "" } {
+		# Get first on stack
+		set current [lindex $stack end]
+		
+		if { $_cache($current.visited) == 2 } {
+			# We've already done this one and are "returning"
+			set stack [lreplace $stack end end]
+			set _cache($current.visited) 1
+			lappend _cache(topologicalsort) $current
+
+		} elseif { $_cache($current.visited) == 0 }
+			# Leave the current node on the stack before its parents
+			set _cache($current.visited) 2
+
+			# Put each non-visited parent onto the stack and mark it
+			foreach parent [parents $current] {
+				if { ! $_cache($parent.visited) } {
+					lappend stack $parent
+				}
+			}
+		} else {
+			# Just ignore this one, since we got to it through a different path
+			set stack [lreplace $stack end end]
+		}
+	}
+	return $_cache(topologicalsort)
+}
+
+########################################################################
 #### verify
 #
 # Test whether a graph is properly constructed. This method
 # provides a default implementation that tests for invalid edges; however,
-# subclasses may choose for efficiency, because it doesn't work
-# with the subclass, or to perform additional tests.
+# subclasses may choose to override this method for efficiency, because
+# it doesn't work with the subclass, or to perform additional tests.
 #
 body ::tycho::AbstractGraph::verify {} {
-    foreach {src tgt} [edges] {
+    foreach {src tgt} [adjacency] {
 	if { ! [::info exists _vertices($src)] } {
 	    return 0
 	}
@@ -707,8 +833,8 @@ body ::tycho::AbstractGraph::vertexconfigure {vertex args} {
     set inverse [list vertexconfigure $vertex]
     array set temp $_vertexoptions($vertex)
     foreach {option value} $args {
-	lappend inverse $option $temp($option)
-	set temp($option) $value
+		lappend inverse $option $temp($option)
+		set temp($option) $value
     }
     set _vertexoptions($vertex) [array get temp]
     return $inverse
@@ -737,66 +863,9 @@ body ::tycho::AbstractGraph::vertices {{pattern *}} {
     return [array names _vertices $pattern]
 }
 
-########################################################################
-#### weld
-#
-# Attach one or more welds to a vertex. The arguments are a list of
-# keys.
-#
-body ::tycho::AbstractGraph::weld {vertex args} {
-    if { ! [::info exists _vertices($vertex)] } {
-	error "Unknown vertex $vertex in $dataname"
-    }
-
-    foreach key args {
-	set _weldoptions($vertex.$key) $weldoptions
-    }
-}
-
-########################################################################
-#### weldcget
-#
-# Get an option of a weld.  An error will occur if the
-# weld does not exist or the option does not exist for that weld.
-#
-body ::tycho::AbstractGraph::weldcget {weld option} {
-    array set temp $_weldoptions($weld)
-    return $temp($option)
-}
-
-########################################################################
-#### weldconfigure
-#
-# Configure the weld and return the inverse command. The argument list
-# is a flat list of option-value pairs. An error will occur if the
-# weld does not exist.
-#
-body ::tycho::AbstractGraph::weldconfigure {weld args} {
-    set inverse [list weldconfigure $weld]
-    array set temp $_weldoptions($weld)
-    foreach {option value} $args {
-	lappend inverse $option $temp($option)
-	set temp($option) $value
-    }
-    set _weldoptions($weld) [array get temp]
-    return $inverse
-}
-
-########################################################################
-#### weldoptions
-#
-# Return a list containing the options of a weld as a flat
-# option-value list. An error will occur if the weld does not exist.
-#
-body ::tycho::AbstractGraph::weldoptions {weld} {
-    return $_weldoptions($weld)
-}
-
-
 #####################################################################
 #####################################################################
 ####                     protected methods                       ####
-
 
 ########################################################################
 #### deleteedge
@@ -805,6 +874,8 @@ body ::tycho::AbstractGraph::weldoptions {weld} {
 # two end vertices. The default method simply calls disconnect;
 # graphs with complex edge structures will need to override
 # the method to adjust the edge structures.
+#
+# FIXME: What is this used for???
 #
 body ::tycho::AbstractGraph::deleteedge {vertex1 vertex1} {
     disconnect $vertex1 $vertex2
@@ -816,16 +887,30 @@ body ::tycho::AbstractGraph::deleteedge {vertex1 vertex1} {
 # Add an edge to the adjacency matrix. If it already exists,
 # do nothing.
 #
+# This and the associated method adjacencydelete{} build the
+# internal topology of
+# the graph independent of complexities associated with 
+# hyperedges or keyed connections. It is an array indexed as
+# "vertex1^vertex2" with value {vertex1 vertex2}. In future,
+# the representation may change to use parent-child lists
+# instead of adjacency lists, in which case some subclasses
+# will have to be modified. The parent-child representation
+# is more efficient for traversing the graph, but rather more
+# tedious to maintain in the presence of graph alterations.
+# <b>Note:</b> Preliminary tests using the depthsort{} method
+# indicate that the efficiency overhead using this representation
+# is only about 20%. It may be more critical if we can make
+# depthSort{} and similar algorithms fully non-recursive. (Or
+# less, depending on how you look at it...)
+#
 body ::tycho::AbstractGraph::adjacencyadd {vertex1 vertex2} {
+	#
+	# The adjacency matrix is stored as
+	#
+	#     _adjacency: source^target |-> {source target}
+	# 
     set _adjacency($vertex1^$vertex2) [list $vertex1 $vertex2]
 }
-
-# body ::tycho::AbstractGraph::adjacencyadd {vertex1 vertex2} {
-#     if { [lsearch -exact _adjacency($vertex1.children) $vertex2] == -1 } {
-# 	lappend _adjacency($vertex1.children) $vertex2
-# 	lappend _adjacency($vertex1.parents)  $vertex1
-#     }
-# }
 
 ########################################################################
 #### adjacencydelete
@@ -836,13 +921,3 @@ body ::tycho::AbstractGraph::adjacencydelete {vertex1 vertex2} {
     unset _adjacency($vertex1^$vertex2)
 }
 
-# body ::tycho::AbstractGraph::adjacencydelete {vertex1 vertex2} {
-#     set pindex [lsearch -exact _adjacency($vertex1.children) $vertex2]
-#     set cindex [lsearch -exact _adjacency($vertex1.parents)  $vertex1]
-#     if {$pindex >= 0 && $cindex >= 0} {
-#         set _adjacency($vertex1.children) \
-#                 [lreplace _adjacency($vertex1.children) $pindex $pindex]
-#         set _adjacency($vertex1.parents) \
-#                 [lreplace _adjacency($vertex1.parents $cindex $cindex]
-#     }
-# }
