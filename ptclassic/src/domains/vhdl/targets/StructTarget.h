@@ -136,7 +136,7 @@ private:
 
 	// General VHDLObjLists.
 	VHDLPortList systemPortList;
-	VHDLCompDeclList compDeclList;
+	VHDLCompDeclList mainCompDeclList;
 	VHDLSignalList mainSignalList;
 	VHDLCompMapList mainCompMapList;
 	VHDLStateList stateList;
@@ -167,15 +167,8 @@ private:
 	// Assign names for each geodesic according to port connections.
 	void setGeoNames(Galaxy&);
 
-	// Register component declaration.
-	void registerCompDecl(StringList, VHDLPortList*, VHDLGenericList*);
-
 	// Merge the Star's signal list with the Target's signal list.
 	void mergeSignalList(VHDLSignalList*);
-
-	// Register component mapping.
-	void registerCompMap(StringList, StringList, VHDLPortMapList*,
-			     VHDLGenericMapList*);
 
 	// Connect a source of the given value to the given signal.
 	void connectSource(StringList, StringList);
@@ -248,13 +241,13 @@ private:
 	// Generate the architecture_body_opener.
 	void buildArchitectureBodyOpener(int);
 
-	// Add in component declarations here from compDeclList.
+	// Add in component declarations here from mainCompDeclList.
 	void buildComponentDeclarations(int);
 
 	// Generate the architecture_body_closer.
 	void buildArchitectureBodyCloser(int);
 
-	// Add in configuration declaration here from compDeclList.
+	// Add in configuration declaration here from mainCompDeclList.
 	void buildConfigurationDeclaration(int);
 
 	// Generate the register entity and architecture.

@@ -235,7 +235,7 @@ void SimVSSTarget :: frameCode() {
 
   StringList label = galName;
   label << "_proc";
-  registerCompMap(label, galName, &mainPortMapList, &mainGenMapList);
+  topCompMapList.put(label, galName, &mainPortMapList, &mainGenMapList);
 
   top_architecture << addComponentMappings(&topCompMapList);
   top_architecture << "end ";
@@ -363,19 +363,6 @@ int SimVSSTarget :: runCode() {
 
 ISA_FUNC(SimVSSTarget,VHDLTarget);
 
-// Register component mapping.
-void SimVSSTarget :: registerCompMap(StringList name, StringList type,
-				     VHDLPortMapList* portMapList,
-				     VHDLGenericMapList* genMapList) {
-  // Allocate memory for a new VHDLCompMap and put it in the list.
-  VHDLCompMap* newCompMap = new VHDLCompMap;
-  newCompMap->setName(name);
-  newCompMap->type = type;
-  newCompMap->genMapList = genMapList;
-  newCompMap->portMapList = portMapList;
-  topCompMapList.put(*newCompMap);
-}
-
 // Method called by C2V star to place important code into structure.
 void SimVSSTarget :: registerC2V(int pairid, int numxfer, const char* dtype) {
 //  printf("RegisterC2V Method of SimVSSTarget called\n");
@@ -415,7 +402,7 @@ void SimVSSTarget :: registerC2V(int pairid, int numxfer, const char* dtype) {
   portMapList->put("go", goName);
   portMapList->put("data", dataName);
   portMapList->put("done", doneName);
-  registerCompMap(label, name, portMapList, genMapList);
+  topCompMapList.put(label, name, portMapList, genMapList);
 
   // Also add to port list of main.
   mainPortList.put(goName, "OUT", "STD_LOGIC");
@@ -470,7 +457,7 @@ void SimVSSTarget :: registerV2C(int pairid, int numxfer, const char* dtype) {
   portMapList->put("go", goName);
   portMapList->put("data", dataName);
   portMapList->put("done", doneName);
-  registerCompMap(label, name, portMapList, genMapList);
+  topCompMapList.put(label, name, portMapList, genMapList);
 
   // Also add to port list of main.
   mainPortList.put(goName, "OUT", "STD_LOGIC");

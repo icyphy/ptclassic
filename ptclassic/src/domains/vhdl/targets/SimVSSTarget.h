@@ -120,11 +120,6 @@ private:
 	VHDLSignalList topSignalList;
 	VHDLCompMapList topCompMapList;
 
-	// Register component mapping.
-	void registerCompMap(StringList name, StringList type,
-				     VHDLPortMapList* portMapList,
-				     VHDLGenericMapList* genMapList);
-
 	// Method called by C2V star to place important code into structure.
 	void registerC2V(int pairid, int numxfer, const char* dtype);
 

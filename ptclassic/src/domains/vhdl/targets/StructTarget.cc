@@ -417,19 +417,6 @@ int StructTarget :: runCode() {
   return TRUE;
 }
 
-// Register component declaration.
-void StructTarget :: registerCompDecl(StringList name, VHDLPortList* portList,
-				      VHDLGenericList* genList) {
-  if (compDeclList.inList(name)) return;
-  
-  // Allocate memory for a new VHDLCompDecl and put it in the list.
-  VHDLCompDecl* newCompDecl = new VHDLCompDecl;
-  newCompDecl->setName(name);
-  newCompDecl->genList = genList;
-  newCompDecl->portList = portList;
-  compDeclList.put(*newCompDecl);
-}
-
 // Merge the Star's signal list with the Target's signal list.
 void StructTarget :: mergeSignalList(VHDLSignalList* starSignalList) {
   VHDLSignalListIter starSignalNext(*starSignalList);
@@ -444,19 +431,6 @@ void StructTarget :: mergeSignalList(VHDLSignalList* starSignalList) {
       mainSignalList.put(*newSignal);
     }
   }
-}
-
-// Register component mapping.
-void StructTarget :: registerCompMap(StringList name, StringList type,
-				     VHDLPortMapList* portMapList,
-				     VHDLGenericMapList* genMapList) {
-  // Allocate memory for a new VHDLCompMap and put it in the list.
-  VHDLCompMap* newCompMap = new VHDLCompMap;
-  newCompMap->setName(name);
-  newCompMap->type = type;
-  newCompMap->genMapList = genMapList;
-  newCompMap->portMapList = portMapList;
-  mainCompMapList.put(*newCompMap);
 }
 
 // Register the State reference.
@@ -656,7 +630,7 @@ void StructTarget :: connectSource(StringList initVal, StringList initName) {
       
       genMapList->put("value", initVal);
       portMapList->put("output", initName);
-      registerCompMap(label, name, portMapList, genMapList);
+      mainCompMapList.put(label, name, portMapList, genMapList);
 }
 
 // Add a source component declaration.
@@ -675,7 +649,7 @@ void StructTarget :: registerSource(StringList /*type*/) {
   genList->put("value", "INTEGER");
   portList->put("output", "OUT", "INTEGER");
 
-  registerCompDecl(name, portList, genList);
+  mainCompDeclList.put(name, portList, genList);
 }
 
 // Connect a multiplexor between the given input and output signals.
@@ -722,7 +696,7 @@ void StructTarget :: connectMultiplexor(StringList inName, StringList outName,
   ctlerPortList.put("system_clock", "IN", "boolean");
   ctlerPortMapList.put("system_clock", "system_clock");
   systemPortList.put("system_clock", "IN", "boolean");
-  registerCompMap(label, name, portMapList, genMapList);
+  mainCompMapList.put(label, name, portMapList, genMapList);
 }
 
 // Add a multiplexor component declaration.
@@ -743,7 +717,7 @@ void StructTarget :: registerMultiplexor(StringList /*type*/) {
   portList->put("output", "OUT", "INTEGER");
   portList->put("control", "IN", "boolean");
 
-  registerCompDecl(name, portList, genList);
+  mainCompDeclList.put(name, portList, genList);
 }
 
 // Connect a register between the given input and output signals.
@@ -795,7 +769,7 @@ void StructTarget :: connectRegister(StringList inName, StringList outName,
   ctlerPortList.put("system_clock", "IN", "boolean");
   ctlerPortMapList.put("system_clock", "system_clock");
   systemPortList.put("system_clock", "IN", "boolean");
-  registerCompMap(label, name, portMapList, genMapList);
+  mainCompMapList.put(label, name, portMapList, genMapList);
 }
 
 // Add a register component declaration.
@@ -814,7 +788,7 @@ void StructTarget :: registerRegister(StringList /*type*/) {
   portList->put("D", "IN", "INTEGER");
   portList->put("Q", "OUT", "INTEGER");
   portList->put("C", "IN", "boolean");
-  registerCompDecl(name, portList, genList);
+  mainCompDeclList.put(name, portList, genList);
 }
 
 // Register PortHole reference.
@@ -1091,9 +1065,9 @@ void StructTarget :: registerAndMerge(VHDLCluster* cl) {
     }
   }
 
-  registerCompDecl(clName, masterPortList, masterGenericList);
+  mainCompDeclList.put(clName, masterPortList, masterGenericList);
   mergeSignalList(masterSignalList);
-  registerCompMap(clLabel, clName, masterPortMapList, masterGenericMapList);
+  mainCompMapList.put(clLabel, clName, masterPortMapList, masterGenericMapList);
 }
 
 // Generate the entity_declaration.
@@ -1128,9 +1102,9 @@ void StructTarget :: buildArchitectureBodyOpener(int /*level*/) {
 			   << galaxy()->name() << " is\n";
 }
 
-// Add in component declarations here from compDeclList.
+// Add in component declarations here from mainCompDeclList.
 void StructTarget :: buildComponentDeclarations(int level) {
-  VHDLCompDeclListIter nextCompDecl(compDeclList);
+  VHDLCompDeclListIter nextCompDecl(mainCompDeclList);
   VHDLCompDecl* compDecl;
   while ((compDecl = nextCompDecl++) != 0) {
     level++;
@@ -1194,13 +1168,13 @@ void StructTarget :: buildArchitectureBodyCloser(int /*level*/) {
   architecture_body_closer << "end structure;\n";
 }
 
-// Add in configuration declaration here from compDeclList.
+// Add in configuration declaration here from mainCompDeclList.
 void StructTarget :: buildConfigurationDeclaration(int level) {
   configuration_declaration << "configuration " << "parts" << " of "
 			    << galaxy()->name() << " is\n";
   configuration_declaration << "for " << "structure" << "\n";
 
-  VHDLCompDeclListIter nextCompDecl(compDeclList);
+  VHDLCompDeclListIter nextCompDecl(mainCompDeclList);
   VHDLCompDecl* compDecl;
   while ((compDecl = nextCompDecl++) != 0) {
     level++;
@@ -1402,7 +1376,7 @@ void StructTarget :: initCodeStreams() {
 void StructTarget :: initVHDLObjLists() {
   systemPortList.initialize();
   ctlerPortList.initialize();
-  compDeclList.initialize();
+  mainCompDeclList.initialize();
   mainSignalList.initialize();
   mainCompMapList.initialize();
   stateList.initialize();

@@ -61,3 +61,28 @@ VHDLCompDecl* VHDLCompDecl :: newCopy() {
 const char* VHDLCompDecl :: className() const { return "VHDLCompDecl"; }
 
 ISA_FUNC(VHDLCompDecl,VHDLObj);
+
+// Return a pointer to a new copy of the list.
+VHDLCompDeclList* VHDLCompDeclList :: newCopy() {
+  // Put new copy of each entry into the new list.
+  VHDLCompDeclList* newCompDeclList = new VHDLCompDeclList;
+  VHDLCompDeclListIter compDeclNext(*this);
+  VHDLCompDecl* nextCompDecl;
+  // Iterate through this list, and create new copies of each entry.
+  while ((nextCompDecl = compDeclNext++) != 0) {
+    VHDLCompDecl* newCompDecl = nextCompDecl->newCopy();
+    newCompDeclList->put(*newCompDecl);
+  }
+
+  return newCompDeclList;
+}
+
+// Allocate memory for a new VHDLCompDecl and put it in the list.
+void VHDLCompDeclList :: put(StringList name, VHDLPortList* portList,
+			     VHDLGenericList* genList) {
+  VHDLCompDecl* newCompDecl = new VHDLCompDecl;
+  newCompDecl->setName(name);
+  newCompDecl->genList = genList;
+  newCompDecl->portList = portList;
+  this->put(*newCompDecl);
+}
