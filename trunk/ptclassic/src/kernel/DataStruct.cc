@@ -16,10 +16,11 @@ inline anyway).
 **************************************************************************/
 
 #include "DataStruct.h"
+#include <assert.h>
 
 void SingleLinkList :: insert(Pointer a)
 {
-	if (lastNode) {	// List not empty
+	if (!empty()) {	// List not empty
 		LOG_NEW; lastNode->next = new SingleLink(a,lastNode->next);
 	}
 	else	{	// List empty
@@ -30,7 +31,7 @@ void SingleLinkList :: insert(Pointer a)
 
 void SingleLinkList :: append(Pointer a)
 {
-	if (lastNode) {	// List not empty
+	if (!empty()) {	// List not empty
 		LOG_NEW; lastNode = lastNode->next = new SingleLink(a,lastNode->next);
 	}
 	else {		// List empty
@@ -41,6 +42,9 @@ void SingleLinkList :: append(Pointer a)
 
 Pointer SingleLinkList :: getAndRemove()
 {
+	// list must not be empty.
+	assert (!empty());
+
 	SingleLink *f = lastNode->next;	// Head of list
 	Pointer r = f->e;
 
@@ -51,8 +55,33 @@ Pointer SingleLinkList :: getAndRemove()
 	return r;
 }
 
+Pointer SingleLinkList :: getTailAndRemove()
+{
+        // Note:  as in getAndRemove(), it is assumed that list is not empty
+	assert (!empty());
+
+        Pointer r = lastNode->e;        // Save contents of tail
+
+        // Traverse list to find next-to-last node
+
+        for( SingleLink*  p = lastNode;  p->next != lastNode;  p = p->next );
+
+        if (p == lastNode) {            // If only one node in list, delete it
+                LOG_DEL;  delete lastNode;
+                lastNode = 0;           // List now empty
+        }
+        else  {                         // Else delete last node
+                p->next = lastNode->next;
+                LOG_DEL;  delete lastNode;
+                lastNode = p;
+        }
+        return r;
+}
+
+
 Pointer SingleLinkList :: elem(int i) const
 {
+	if (empty()) return 0;
 	SingleLink *f = lastNode->next;	// Head of list
 	for( int t = i; t > 0; t-- )
 		f = f->next;
@@ -61,7 +90,7 @@ Pointer SingleLinkList :: elem(int i) const
 
 void SingleLinkList :: initialize()
 {
-	if (lastNode == 0) return;	// List already empty
+	if (empty()) return;	// List already empty
 
 	// Point to the first element in the list
 	SingleLink *l = lastNode->next;
@@ -84,7 +113,7 @@ void SingleLinkList :: initialize()
 // the argument, removing it if found.
 int SingleLinkList::remove (Pointer x) {
 	// case of empty list
-	if (!lastNode) return 0;
+	if (empty()) return 0;
 	// case of 1-element list
 	if (lastNode->next == lastNode) {
 		if (lastNode->e != x) return 0;
@@ -107,6 +136,17 @@ int SingleLinkList::remove (Pointer x) {
 		g = g->next;
 	} while (f != lastNode->next);
 	return 0;
+}
+
+// This function returns true if the argument is found in the list.
+int SingleLinkList::member (Pointer x) const {
+	if (empty()) return 0;
+	SingleLink* f = lastNode;
+	do {
+		if (f->e == x) return TRUE;
+		f = f->next;
+	} while (f != lastNode);
+	return FALSE;
 }
 
 Pointer ListIter::next() {
