@@ -196,46 +196,40 @@ int dst_i;
 FIX_WORD *dst_r;
 double value;
 {
-    int nwords, overflow;
-    FIX_WORD *tp;
-
     double word_scale = (double) (1L << FIX_BITS_PER_WORD);
+    int overflow;
     int sign = (value < 0);
+    if (sign) value = -value;
 
-    /* extract an extra bit for rounding */
-    nwords = FIX_Words(dst_l+1);
-
-    if (sign != 0)
-	 value = -value;
-
-    /* rescale + add correcting value for rounding */
+    /* rescale and add correcting value for rounding */
     value = pFIX_TwoRaisedTo(FIX_BITS_PER_WORD-dst_i) * value +
 	    pFIX_TwoRaisedTo(FIX_BITS_PER_WORD-dst_l-1);
 
-    /* check for overflows */
-    if ((overflow = (value >= word_scale/2))) {
-
-	/* set dst to maximum value */
-	FIX_AssignMaxValue(dst_l,dst_i,dst_r, sign);
-	return fix_overflow = 1;
-
-    } else {  /* set dst from value */
-
+    /* check for overflow */
+    /* if overflow, set destination dst_r to maximum value */
+    /* otherwise, set destination dst_r from the passed value */
+    overflow = (value >= word_scale/2);
+    if (overflow) {
+	FIX_AssignMaxValue(dst_l, dst_i, dst_r, sign);
+	fix_overflow = 1;
+    }
+    else {
+	/* FIXME: extract an extra bit for rounding */
+	int nwords = FIX_Words(dst_l + 1);
 	/* mask for rounding */
 	FIX_WORD mask = 1 << (FIX_BITS_PER_WORD - (dst_l % FIX_BITS_PER_WORD));
+	FIX_WORD *tp = dst_r;
 
-	for (tp=dst_r; nwords--; tp++) {
+	while (nwords--) {
 	    *tp = (FIX_WORD)value;
 	    value = (value - *tp) * word_scale;
+	    tp++;
 	}
-
 	tp[-1] &= ~(mask-1);
 
-	if (sign)
-	    pFIX_Complement(dst_r,dst_r);
-
-	return 0;
+	if (sign) pFIX_Complement(dst_r, dst_r);
     }
+    return overflow;
 }
 
 /*
@@ -251,22 +245,21 @@ FIX_WORD *dst_r;
 int sign;
 {
     if (sign) {			/* assign (negative) minimum value */
-	int numZeroWords = FIX_WORDS_PER_FIX;
+	int numZeroWords = FIX_WORDS_PER_FIX - 1;
 	*dst_r++ = (FIX_WORD) (1 << (FIX_BITS_PER_WORD-1));
-	while (--numZeroWords) *dst_r++ = (FIX_WORD) 0;
+	while (numZeroWords-- > 0) *dst_r++ = (FIX_WORD) 0;
     } 
     else {			/* assign (positive) maxmimum value */
 	int andMask = 0;
 	int numNonZeroWords = FIX_Words(dst_l);
-	int numZeroWords = 0;
 	int shift = dst_l % FIX_BITS_PER_WORD;
+	int numZeroWords = 0;
 	if ( shift > 0 ) andMask = ~(FIX_MAX_UNSIGNED >> (shift-1));
+	numZeroWords = FIX_WORDS_PER_FIX - numNonZeroWords;
 
 	*dst_r++ = FIX_MAX_UNSIGNED;
 	while (--numNonZeroWords > 0) *dst_r++ = (FIX_WORD) ~0;
 	if (andMask) dst_r[-1] &= andMask;
-
-	numZeroWords = FIX_WORDS_PER_FIX - numNonZeroWords;
 	while (numZeroWords-- > 0) *dst_r++ = (FIX_WORD) 0;
     }
 }
@@ -280,8 +273,29 @@ CONST FIX_WORD *src_r;
     double retval = 0.0;
     int sign = FIX_Sign(src_r);
 
-    if (src_l > (2 * FIX_BITS_PER_WORD)) {
-
+    if (src_l <= FIX_BITS_PER_WORD) {
+	if (sign) {
+	    retval = -pFIX_TwoRaisedTo(src_i - FIX_BITS_PER_WORD) *
+		      (1 + (FIX_WORD) ~(*src_r));
+	}
+	else {
+	    retval = pFIX_TwoRaisedTo(src_i - FIX_BITS_PER_WORD) *
+		     ((FIX_WORD) (*src_r));
+	}
+    }
+    else if (src_l <= (2 * FIX_BITS_PER_WORD)) {
+	if (sign) {
+	    retval = -pFIX_TwoRaisedTo(src_i-2*FIX_BITS_PER_WORD) *
+		     (((FIX_DWORD)~src_r[0] << FIX_BITS_PER_WORD) +
+		      (FIX_WORD)~src_r[1] +1);
+	}
+	else {
+	    retval = pFIX_TwoRaisedTo(src_i-2*FIX_BITS_PER_WORD) *
+		     (((FIX_DWORD) src_r[0] << FIX_BITS_PER_WORD) +
+		      (FIX_WORD) src_r[1]);
+	}
+    }
+    else {
 	fix t;
 	double d = 0.0;
 	CONST FIX_WORD *tp;
@@ -301,19 +315,9 @@ CONST FIX_WORD *src_r;
 	    d = d * word_scale + *tp++;
 	}
 
-	d *= pFIX_TwoRaisedTo(src_i-nwords*FIX_BITS_PER_WORD);
+	d *= pFIX_TwoRaisedTo(src_i - nwords*FIX_BITS_PER_WORD);
 
 	retval = sign ? -d : d;
-
-    }
-    else {			/* optimization for short word lengths */
-
-	if (sign) 
-	    retval = -pFIX_TwoRaisedTo(src_i-2*FIX_BITS_PER_WORD) *
-	    	 (((FIX_DWORD)~src_r[0] << FIX_BITS_PER_WORD) + (FIX_WORD)~src_r[1] +1);
-	else
-	    retval = pFIX_TwoRaisedTo(src_i-2*FIX_BITS_PER_WORD) *
-	    	 (((FIX_DWORD) src_r[0] << FIX_BITS_PER_WORD) + (FIX_WORD) src_r[1]);
     }
     return retval;
 }
