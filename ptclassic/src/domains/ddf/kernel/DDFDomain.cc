@@ -59,8 +59,11 @@ public:
 	// new Geodesic (Node)
 	Geodesic& newNode() { LOG_NEW; return *new AutoForkNode;}
 
-	// make all galaxy as wormholes
-	int isGalWorm()	{return TRUE;}
+	// Make all galaxies wormholes.
+	// This is removed for now.  It is needed for restructuring,
+	// but restructuring is not working properly, and neither are
+	// wormholes with arbitrary DDF properties on their boundaries.
+	// int isGalWorm() {return TRUE;}
 
 	// constructor: permit BDF and SDF as subdomains.
 	DDFDomain() : Domain("DDF") {
