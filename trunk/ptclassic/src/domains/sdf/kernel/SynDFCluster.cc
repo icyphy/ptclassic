@@ -212,7 +212,7 @@ int SynDFCluster::merge(Cluster& c, int removeFlag)
 }
 
 // constructor
-SynDFCluster :: SynDFCluster() : loopFac(0), tnob(-1) , Cluster() {}
+SynDFCluster :: SynDFCluster() : Cluster(), loopFac(0), tnob(-1) {}
 
 // Return the number of input ports *this has.
 int SynDFCluster :: numInputs()
