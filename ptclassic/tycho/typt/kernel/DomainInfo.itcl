@@ -86,7 +86,7 @@ class ::tycho::DomainInfo {
     ####                      public procs                         ####
 
     # Return a list of all the domains
-    public proc domains {} {return [split [::pitcl::domains]]}
+    public proc domains {} {return [split [::pitcl::knownDomains]]}
 
     # Compare two domainInfo objects
     public proc diffDomains {domainA domainB}
@@ -120,10 +120,10 @@ class ::tycho::DomainInfo {
 #
 body ::tycho::DomainInfo::constructor {args} {
     set domainName [lindex $args 0]
-    ::pitcl::domain $domainName
+    ::pitcl::setDomain $domainName
 
     # Cycle through the list of all stars and fill the array
-    foreach star [::pitcl::knownlist] {
+    foreach star [::pitcl::knownBlocks] {
         set stars($star) [starInfo $star]
     }
 }
