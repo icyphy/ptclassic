@@ -625,14 +625,13 @@ The complicated situation arises when there are additional
 simultaneous events on other input arcs.  How can we order them?
 This illustrates the
 potential non-determinism of the DE domain.  Some DE stars
-would want to precess all simultaneous events on an arc before
+would want to process all simultaneous events on an arc before
 the events on the other arcs.  The \fIgetSimulEvent()\fR method
 can be used as the following example.
 .(c
 DEUDCounter :: go {
 	...
 	while (countUp.dataNew) {
-		countUp.dataNew = FALSE;
 		content++;
 		countUp.getSimulEvent();
 	}
@@ -642,12 +641,13 @@ DEUDCounter :: go {
 .IE "getSimulEvent(), de"
 The \fIgetSimulEvent()\fR method examines the global event queue
 to fetch a simultaneous event to the porthole if any and set the
-\fIdataNew\fR flag.  Without fetching the event, we can just
+\fIdataNew\fR flag.  Otherwise, it just resets the flag. 
+Without fetching the event, we can just
 examine whether there are any simultaneous events for an input
-porthole by calling "existSimulEvents()" method.  This method
-is very cheap and returns "TRUE" if there any simultaneous events
+porthole by calling "numSimulEvents()" method.  This method
+is very cheap and returns the number of the simultaneous events
 for the porthole.
-.IE "existSimulEvents(), de"
+.IE "numSimulEvents(), de"
 .pp
 Although we have tried to give comprehensive instructions
 for designing a DE star, a good starting point is to
