@@ -115,8 +115,8 @@ body ::tycho::WelcomeMessage::constructor {args} {
 	    {limitation of liability,<br>} \
 	    {and disclaimer of warranty provisions</a>}
 
-    append html "<h1><a href=$TYCHO/doc/introduction.html>" \
-	    {Introduction to Tycho</a></h1>}
+    append html "<h1><a href=$TYCHO/doc/index.html>" \
+	    {Tycho Documentation</a></h1>}
 
     configure -size 0
     configure -textwidth 60
