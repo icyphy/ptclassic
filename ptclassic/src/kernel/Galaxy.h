@@ -74,12 +74,12 @@ protected:
 			// int numberDelays, Particle& delayValue);
 
 	// Connect a Galaxy PortHole to a PortHole of a sub-block
-	alias(PortHole& galPort, PortHole& blockPort) {
+	void alias(PortHole& galPort, PortHole& blockPort) {
 		galPort.setAlias(blockPort);
 	}
 
 	// Overload to alias MultiPortHoles
-	alias(MultiPortHole& galPort, MultiPortHole& blockPort) {
+	void alias(MultiPortHole& galPort, MultiPortHole& blockPort) {
 		galPort.setAlias(blockPort);
 	}
 
@@ -102,7 +102,7 @@ public:
 	void initialize();
 
         // Define States of component Blocks by States of this Block
-        stateAlias(Block& b, char* stateName, char* expression)  {
+        void stateAlias(Block& b, char* stateName, char* expression)  {
                 b.stateWithName(stateName)->setValue(expression);
         }
 
@@ -131,7 +131,8 @@ public:
 	virtual int isItAtomic () const; // {return FALSE;}
 
 	// Return myself as a Galaxy.  Overrides Block::asGalaxy.
-	Galaxy& asGalaxy() const; // { return *this;}
+	Galaxy& asGalaxy(); // { return *this;}
+	const Galaxy& asGalaxy() const; // { return *this;}
 
 	// return my domain
 	const char* domain () const;
@@ -146,6 +147,6 @@ public:
 	GalTopBlockIter(const Galaxy& g) : ListIter(g.blocks) {}
 	Block* next() { return (Block*)ListIter::next();}
 	Block* operator++() { return next();}
-	ListIter::reset();
+	ListIter::reset;
 };
 #endif
