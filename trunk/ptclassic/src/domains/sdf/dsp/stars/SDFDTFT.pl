@@ -31,7 +31,7 @@ be taken at uniform intervals.
 Note that $omega ~=~ 2 pi / T$ is
 the sampling frequency.
 	}
-	seealso { ComplexFFT }
+	seealso { FFTCx }
 	input {
 		name {signal}
 		type {complex}

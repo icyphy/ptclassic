@@ -1,5 +1,5 @@
 defstar {
-	name {ComplexFIR}
+	name {FIRCx}
 	domain {SDF}
 	desc {
 A complex Finite Impulse Response (FIR) filter.
@@ -69,7 +69,7 @@ For more information about polyphase filters, see F. J. Harris,
 "Multirate FIR Filters for Interpolating and Desampling", in
 \fIHandbook of Digital Signal Processing\fR, Academic Press, 1987.
 	}
-	seealso { FIR, BiQuad, UpSample, DownSample, analytic }
+	seealso { FIR, Biquad, UpSample, DownSample, analytic }
 	input {
 		name {signalIn}
 		type {complex}

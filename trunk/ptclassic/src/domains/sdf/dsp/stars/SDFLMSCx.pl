@@ -1,7 +1,7 @@
 defstar {
-	name { CxLMS }
+	name { LMSCx }
 	domain { SDF }
-	derivedFrom { ComplexFIR }
+	derivedFrom { FIRCx }
 	desc {
 Complex adaptive filter using LMS adaptation algorithm.
 Initial coefficients are in the "taps" state variable.
@@ -38,7 +38,7 @@ If the \fIsaveTapsFile\fR string is non-null, a file will
 be created by the name given by that string, and the final tap values
 will be stored there after the run has completed.
 	}
-	seealso {ComplexFIR, LMS, adaptFilter}
+	seealso {FIRCx, LMS, adaptFilter}
 	input {
 		name { error }
 		type { complex }
@@ -72,7 +72,7 @@ will be stored there after the run has completed.
 		// force interpolation to 1
 		interpolation = 1;
 		// Next run the ComplexFIR start routine
-		SDFComplexFIR :: setup();
+		SDFFIRCx :: setup();
 
 		// Then reset the signalIn number of samples in the past
 		// to account for the error delay.
@@ -91,7 +91,7 @@ will be stored there after the run has completed.
 		}
 		
 		// Then run FIR filter
-		SDFComplexFIR :: go();
+		SDFFIRCx :: go();
 	}
 	wrapup {
 		const char* sf = saveTapsFile;

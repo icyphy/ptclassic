@@ -1,7 +1,7 @@
 defstar {
-	name { CxLMSPlot }
+	name { LMSPlotCx }
 	domain { SDF }
-	derivedFrom { CxLMS }
+	derivedFrom { LMSCx }
 	desc {
 Complex adaptive filter using LMS adaptation algorithm.  In addition,
 the tap coefficients are plotted using the xgraph program, with a
@@ -14,7 +14,7 @@ plotted as it adapts.
 	copyright { 1991 The Regents of the University of California }
 	location { SDF dsp library }
 	explanation {
-This star is exactly like the CxLMS star, except that, in addition,
+This star is exactly like the LMSCx star, except that, in addition,
 it makes a plot of the tap coefficients, one plot for the magnitude,
 one for the phase.  It can produce two types of plots: a plot
 of the final tap values or a plot that traces the
@@ -33,7 +33,7 @@ values on the command line when the magnitudes are plotted, and
 .lp
 If \fItrace\fP is YES, there may not be more than 64 taps in the filter.
 	}
-	seealso {CxLMS, Xgraph, XMgraph}
+	seealso {LMSCx, Xgraph, XMgraph}
 	hinclude { "Display.h" }
 	state {
 		name { graphOptsMag }
@@ -82,7 +82,7 @@ If \fItrace\fP is YES, there may not be more than 64 taps in the filter.
 		LOG_DEL; delete outPhase;
 	}		
 	setup {
-		SDFCxLMS::setup();
+		SDFLMSCx::setup();
 		LOG_DEL; delete prevPhase;
 		LOG_DEL; delete outPhase;
 		int nPlots = 1;
@@ -107,7 +107,7 @@ If \fItrace\fP is YES, there may not be more than 64 taps in the filter.
 	}
 
         go {
-		SDFCxLMS::go();
+		SDFLMSCx::go();
 		if (int(trace)) {
 			for (int i = 0; i < taps.size(); i++) {
 				double mag = abs(taps[i]);
@@ -128,7 +128,7 @@ If \fItrace\fP is YES, there may not be more than 64 taps in the filter.
 	}
 
 	wrapup {
-		// don't call SDFCxLMS::wrapup: no final file to write.
+		// don't call SDFLMSCx::wrapup: no final file to write.
 		if (!int(trace)) {
 			// plot final taps
 			for (int i = 0; i < taps.size(); i++) {
