@@ -34,30 +34,6 @@ class BooleanMatrix;
 
 class ReachabilityMatrix {
 
-private : 
-
-	// the number of rows and columns in the matrix
-	int dim;
-
-	// the reachability matrix
-	BooleanMatrix *matrix; 
-
-	// the last index allocated to a node 
-	int current_index;
-
-	// connect two nodes, the connection goes from parent to child
-	inline void connect(LSNode *parent, LSNode *child);
-
-	// add the set of nodes reachable by the child to
-	// the set of nodes reachable by the parent
-	void addPaths(int parentindex, int childindex);
-
-	// Set up the reachability matrix for the graph "g".
-	void initialize(LSGraph&);  
-
-	// set up the connections for node "p"
-	void initialize(LSNode*);
-
 public :
 	// Constructor to create the Reachability Matrix for an expanded graph.
 	ReachabilityMatrix(LSGraph&);
@@ -80,6 +56,29 @@ public :
 	// allocate an index into the reachability matrix
 	// Return -1 if we're out of indeces.
 	int allocateIndex();
+
+private : 
+	// the number of rows and columns in the matrix
+	int dim;
+
+	// the reachability matrix
+	BooleanMatrix *matrix; 
+
+	// the last index allocated to a node 
+	int current_index;
+
+	// connect two nodes, the connection goes from parent to child
+	inline void connect(LSNode *parent, LSNode *child);
+
+	// add the set of nodes reachable by the child to
+	// the set of nodes reachable by the parent
+	void addPaths(int parentindex, int childindex);
+
+	// Set up the reachability matrix for the graph "g".
+	void initialize(LSGraph&);  
+
+	// set up the connections for node "p"
+	void initialize(LSNode*);
 };
 
 #endif

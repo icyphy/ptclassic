@@ -29,18 +29,6 @@ typedef unsigned long BoolWord;
 // class BooleanMatrix  //
 //////////////////////////
 class BooleanMatrix {
-private:
-	// The array which stores the boolean matrix.
-	BoolWord **data;
-
-	// Number of rows in the matrix.
-	int nRows;
-
-	// Number of columns in the matrix.
-	int nCols;
-
-	// Number of chars for the column entries
-	int nColWords;
 public:
 	// Constructor with number of rows and columns as the
 	// first and second argument respectively. 
@@ -75,8 +63,20 @@ public:
 	// Initialize the matrix to contain all zeros.
 	void clear();
 
-	// Destructor
 	~BooleanMatrix();
+
+private:
+	// The array which stores the boolean matrix.
+	BoolWord **data;
+
+	// Number of rows in the matrix.
+	int nRows;
+
+	// Number of columns in the matrix.
+	int nCols;
+
+	// Number of chars for the column entries
+	int nColWords;
 };
 
 #endif
