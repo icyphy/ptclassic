@@ -136,6 +136,9 @@ class ::tycho::HTML {
     # Execute Tcl code embedded in the HTML.
     method execTcl {x y}
 
+    # Go forward to a previously-seen view.
+    method forward {}
+
     # Open a help window.
     method help {}
 
@@ -214,6 +217,9 @@ class ::tycho::HTML {
     ###################################################################
     ####                      private methods                      ####
 
+    # Push a new file onto the stack.
+    private method pushNextHTMLFile {}
+
     # Return 1 if the sourcewin window is a valid source window.
     private method sourcewinIsMine {}
 
@@ -232,8 +238,11 @@ class ::tycho::HTML {
     # Keep track of the current source window for the current file.
     private variable sourcewin {}
 
-    # Store the name of our stack object
+    # The "stack" of traversed files. This is really just a Tcl list.
     private variable stack {}
+
+    # The current position in the "stack"
+    private variable stackpos 0
 
     # The name of the global array used to store the state of the window.
     private variable stateArrayName {}
@@ -358,11 +367,13 @@ body ::tycho::HTML::constructor {args} {
     set viewType "html"
 
     # Add buttons to the toolbar, if it exists.
-    # FIXME: need a forward command.
     # FIXME: should the user be allowed to change the home window?
     
-    toolbar button back {Go back to the previously viewed page} \
-            -text Back -command "$this back"
+    toolbar button back {Go back to the previously-viewed page} \
+            -text Back -command "$this back" -state disabled
+    
+    toolbar button forward {Go forward to the next previously-viewed page} \
+            -text Forward -command "$this forward" -state disabled
     
     global ::TYCHO
     
@@ -487,9 +498,6 @@ body ::tycho::HTML::constructor {args} {
     configure -readonly 1
     focusin
 
-    # Create a stack to store where we've been.
-    set stack [::tycho::Stack #auto]
-
     # Add myself to the list of open files. 
     windowMenuAddAll $file
 
@@ -517,9 +525,6 @@ body ::tycho::HTML::destructor {} {
 	after idle "$sourcewin windowMenuAddAll $file"
     }
     catch {unset sizeName($this)}
-    if {[info exists stack] && [info objects $stack] != {}} {
-	delete object $stack
-    }
 }
 
     ###################################################################
@@ -556,8 +561,30 @@ body ::tycho::HTML::appletViewer {} {
 # Go back to the previous view, popping it off the stack.
 #
 body ::tycho::HTML::back {} {
-    set ref [$stack pop]
-    if {$ref == {}} {return}
+    # If there's nowhere to go...
+    if { $stackpos <= 0 } {
+	return
+    }
+    # Update the current file with the current position
+    if { [llength $stack] > $stackpos } {
+        set stack [lreplace $stack $stackpos $stackpos \
+                [list $file [currentPoint]]]
+    } else {
+        lappend stack [list $file [currentPoint]]
+    }
+
+    # Move back one position
+    incr stackpos -1
+    set ref [lindex $stack $stackpos]
+
+    # Disable the back button if there are no more to go
+    # forwards to. Enable the forward button.
+    if { $stackpos <= 0 } {
+        toolbar disable back
+    }
+    toolbar enable forward
+
+    # Jump to the file
     set filename [lindex $ref 0]
     set point [lindex $ref 1]
     # Use the optional third argument to avoid being recorded for
@@ -598,6 +625,37 @@ body ::tycho::HTML::execTcl {x y} {
     }
 }
 
+#####################################################################
+#### forward
+# Go forward to a previously seen and backed-over view.
+#
+body ::tycho::HTML::forward {} {
+    # Is there a window to move to?
+    if { $stackpos >= [expr [llength $stack] - 1] } {
+	return
+    }
+    # Update the current position
+    set stack [lreplace $stack $stackpos $stackpos [list $file [currentPoint]]]
+
+    # Move forwards
+    incr stackpos
+    set ref [lindex $stack $stackpos]
+
+    # Disable the forward button if there are no more to go
+    # forwards to. Enable the back button.
+    if { $stackpos >= [expr [llength $stack] - 1] } {
+        toolbar disable forward
+    }
+    toolbar enable back
+
+    # Jump to the file
+    set filename [lindex $ref 0]
+    set point [lindex $ref 1]
+    # Use the optional third argument to avoid being recorded for
+    # backtracking.
+    hyperJump $filename $point 0
+}
+
 #########################################################################
 #### help
 # Open a help window.
@@ -635,7 +693,6 @@ body ::tycho::HTML::help {} {
 #
 body ::tycho::HTML::hyperJump {filename {point {}} {push 1}} {
     if {$filename != {}} {
-
 	# Use isRelative, not 'file pathtype' so that we handle paths
 	# that start with ~ and $.
 	if [::tycho::isRelative $filename] {
@@ -644,13 +701,13 @@ body ::tycho::HTML::hyperJump {filename {point {}} {push 1}} {
         set filename [::tycho::expandPath $filename]
 
         # If the file is a directory, open "index.html" in that directory,
-        # if it exist, otherwise display the contents of the directory.
+        # if it exists, otherwise display the contents of the directory.
         if [file isdirectory $filename] {
             set newfilename [format "%s/%s" $filename index.html]
             if ![file exists $newfilename] {
                 # For backtracking
                 if $push {
-                    $stack push [list $file [currentPoint]]
+                    pushNextHTMLFile
                 }
                 configure -directory [file dirname $filename]
                 configure -file $filename
@@ -703,7 +760,7 @@ body ::tycho::HTML::hyperJump {filename {point {}} {push 1}} {
 
             # For backtracking
             if $push {
-                $stack push [list $file [currentPoint]]
+                pushNextHTMLFile
             }
 
             configure -directory [file dirname $filename]
@@ -731,7 +788,7 @@ body ::tycho::HTML::hyperJump {filename {point {}} {push 1}} {
     } {
         # For backtracking
         if $push {
-            $stack push [list {} [currentPoint]]
+            pushNextHTMLFile
         }
     }
 
@@ -907,6 +964,12 @@ body ::tycho::HTML::reload {} {
 # temporarily.  Notice that this will not be visible if the "range" form
 # is used and the two indices are equal.  As a side effect, the selection
 # (if there is one) is cleared.
+#
+# Note that when moving from one point to another in the same HTML
+# file, this method may sometimes appear not to do anything. This
+# is because the method only makes the point visible, rather than
+# moving it to the top of the window as, say, Netscape does. This
+# should perhaps be altered.
 #
 body ::tycho::HTML::seeFragment {point} {
     set text $itk_component(text)
@@ -1134,6 +1197,28 @@ body ::tycho::HTML::configureContextMenu {} {
 #########################################################################
 #########################################################################
 ####                     private methods                             ####
+
+#####################################################################
+#### pushNextHTMLFile
+# Return 1 if the sourcewin window is the source window for the
+# currently open HTML text. Otherwise, return 0.
+#
+body ::tycho::HTML::pushNextHTMLFile {} {
+    # Clear windows from this one ahea
+    if { [llength $stack] > [expr $stackpos + 1] } {
+        set stack [lreplace $stack $stackpos end]
+    }
+
+    # Set this one again, updating with the current point
+    lappend stack [list $file [currentPoint]]
+
+    # Move the stack pointer up
+    incr stackpos
+
+    # Disable the "forward" button, enable the "back" button
+    toolbar disable forward
+    toolbar enable back
+}
 
 #####################################################################
 #### sourcewinIsMine
