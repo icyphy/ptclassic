@@ -46,22 +46,27 @@ Updates: 4/14/89 to PStrToPList()
 #include "err.h"
 #include "paramStructs.h"
 
-
 /* FreeFlatPList 10/26/95 BLE */
 void
 FreeFlatPList(pListPtr)
 ParamListType *pListPtr;
 {
     if (pListPtr) {
-	if (pListPtr->array) {
+        if (pListPtr->array) {
+            // Note that we can't necessarily free the array[i].name
+            // array[i].type, array[i].value strings, since
+	    // routines in compile.c and octIfc.c do not create
+	    // new copies of the name and value fields, but instead
+	    // are indices into a single string.
+	    // See also the comment at the top of  POct::DeletePList().
 	    free(pListPtr->array);
+	    pListPtr->length = 0;
 	    pListPtr->array = 0;
-	}
+        }
 	if (pListPtr->dynamic_memory) {
 	    free(pListPtr->dynamic_memory);
 	    pListPtr->dynamic_memory = 0;
 	}
-	pListPtr->length = 0;
     }
 }
 
@@ -175,8 +180,7 @@ ParamListType *pListPtr;
     if (err) {
 	ErrAdd("PStrToPList: format error in param from facet");
 	free(copy);
-	free(pListPtr->array);
-	pListPtr->array = 0;
+	FreeFlatPList(pListPtr);
 	return(FALSE);
     }
     pListPtr->length = param_n;

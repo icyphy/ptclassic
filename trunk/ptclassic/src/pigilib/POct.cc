@@ -280,7 +280,7 @@ void POct::DeletePList(ParamListType* pListp) {
 	FreeFlatPList(pListp);
     }
     else if ( pListp ) {
-	if ( pListp->array ) {
+        if ( pListp->array ) {
 	    for (int i = 0; i < pListp->length; i++) {
 		// strings created by savestring, which uses the new operator
 		delete [] pListp->array[i].name;
@@ -290,11 +290,8 @@ void POct::DeletePList(ParamListType* pListp) {
 		delete [] pListp->array[i].value;
 		pListp->array[i].value = 0;
     	    }
-    	    delete [] pListp->array;
-	    pListp->array = 0;
+	    FreeFlatPList(pListp);
 	}
-	pListp->length = 0;
-	pListp->dynamic_memory = 0;
     }
 }
 
@@ -331,7 +328,11 @@ int POct::MakePList(char* parameterList, ParamListType* pListp) {
     }
 
     pListp->length = aC;
-    pListp->array = new ParamType[aC];
+    // Don't use new to create pListp->array, use calloc so that we
+    // can easily free this from within C.
+    // See FreeFlatPList(pListPtr) in paramStructs.c should be called
+    // to free pListp->array.
+    pListp->array = (ParamType *) calloc(aC, sizeof(ParamType));
 
     int ErrorFound = FALSE;
     for (int i = 0; i < pListp->length; i++) {
@@ -353,9 +354,9 @@ int POct::MakePList(char* parameterList, ParamListType* pListp) {
            pElement->type = NULL;
            pElement->value = NULL;
         } else {
-           pElement->name = savestring(Element_aV[0]);
-           pElement->type = savestring(Element_aV[1]);
-           pElement->value = savestring(Element_aV[2]);
+	   pElement->name = savestring(Element_aV[0]);
+	   pElement->type = savestring(Element_aV[1]);
+	   pElement->value = savestring(Element_aV[2]);
         }
 
         // Free the memory used by Element_aV as it is no longer needed
