@@ -74,4 +74,67 @@ private:
 	const char* myDescriptor;
 };
 
+class NamedObjList : private SequentialList
+{
+	friend class NamedObjListIter;
+	friend class CNamedObjListIter;
+public:
+	// Add object to list
+	void put(NamedObj& s) {SequentialList::put(&s);}
+
+	// export size and initialize functions
+	SequentialList::size;
+	SequentialList::initialize;
+
+	// find the object with the given name and return pointer
+	// const and non-const forms.
+	// The rule is that you need a non-const list to get a
+	// non-const pointer.
+
+	const NamedObj* objWithName(const char* name) const {
+		return findObj(name);
+	}
+
+	NamedObj* objWithName(const char* name) {
+		return findObj(name);
+	}
+
+	// Apply initialize fn to all elements
+	void initElements();
+
+	// ptr to first obj on list (const method)
+	NamedObj* head() const {return (NamedObj*)SequentialList::head();}
+
+	// remove obj from list.  Note: obj is not deleted
+	int remove(NamedObj* o) { return SequentialList::remove(o);}
+
+	// delete all elements from the list.  WARNING: assumes that the
+	// elements are on the heap!
+	void deleteAll();
+private:
+	// publicly, we enforce the rule that you can only get const
+	// pointers from a const list.  However, findObj can get non
+	// const pointers from a const list; it implements the guts
+	// of both objWithName methods.
+	NamedObj* findObj(const char* name) const;
+};
+
+// an iterator for NamedObjList
+class NamedObjListIter : private ListIter {
+public:
+	NamedObjListIter(NamedObjList& sl) : ListIter (sl) {}
+	NamedObj* next() { return (NamedObj*)ListIter::next();}
+	NamedObj* operator++() { return next();}
+	ListIter::reset;
+};
+
+// an iterator for NamedObjList, const form
+class CNamedObjListIter : private ListIter {
+public:
+	CNamedObjListIter(const NamedObjList& sl) : ListIter (sl) {}
+	const NamedObj* next() { return (const NamedObj*)ListIter::next();}
+	const NamedObj* operator++() { return next();}
+	ListIter::reset;
+};
+
 #endif

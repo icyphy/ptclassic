@@ -126,24 +126,6 @@ void Galaxy :: 	initStateSubblocks() {
 }
 
         ////////////////////////////////////
-        // Block* blockWithName()
-        ////////////////////////////////////
-
-// return ptr to sub-block with given name, NULL if not found
-Block *
-Galaxy::blockWithName(const char* name) {
-	Block* b;
-	GalTopBlockIter next(*this);
-	while ((b = next++) != 0) {
-		if (strcmp(name,b->name()) == 0)
-			return b;
-	}
-	// not found
-	return 0;
-}
-
-
-        ////////////////////////////////////
         // const char* domain()
         ////////////////////////////////////
 
@@ -154,7 +136,7 @@ Galaxy::domain() const {
 	if (myDomain) return myDomain;
 	if (numberBlocks() == 0)
 		return "UNKNOWN";
-	else return blocks.head().domain();
+	else return blocks.head()->domain();
 }
 
 // isa

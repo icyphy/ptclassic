@@ -204,7 +204,7 @@ const State* State :: lookup (const char* name, Block* blockIAmIn) {
 
 // put info.
 StringList
-State::printVerbose() const {
+State::print(int) const {
 	StringList  out;
 	return out << fullName() << " type: " << type()
 		   << "\n initial value: " << myInitValue
@@ -221,28 +221,6 @@ State::setCurrentValue(const char* newval) {
 }
 
 // methods for class StateList
-
-// initialize elements
-void StateList::initElements() {
-	State *p;
-	StateListIter next(*this);
-	for(int i=size(); i>0; i--)  {
-		p  = next++;
-		p->initialize();
-	};
-};
-
-// Find a state with the given name and return pointer
-State* StateList::stateWithName(const char* name) {
-	State *sp;
-	StateListIter next(*this);
-	for (int i =  size(); i>0;i--) {
-		sp = next++;
-		if (strcmp(name,sp->name()) == 0)
-			return  sp;
-	}
-	return NULL;
-}
 
 // complain of parse error
 void State::parseError (const char* text, const char* text2) {

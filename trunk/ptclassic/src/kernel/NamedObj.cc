@@ -52,3 +52,40 @@ StringList NamedObj :: print(int) const
 // empty destructor.
 NamedObj::~NamedObj() {}
 
+// NamedObjList methods
+
+// Find a NamedObj with the given name and return pointer
+// This is the guts for both forms of objWithName.
+// ListIter is used to bypass the const restrictions we impose.
+
+NamedObj* NamedObjList::findObj(const char* name) const {
+	NamedObj *obj;
+	ListIter next(*this);
+	while ((obj = (NamedObj*)next++) != 0) {
+		if (strcmp(name,obj->name()) == 0)
+			return obj;
+	}
+	return 0;
+}
+
+// Apply initialize() to all elements
+
+void NamedObjList::initElements() {
+	NamedObj *p;
+	NamedObjListIter next(*this);
+	for(int i=size(); i>0; i--)  {
+		p  = next++;
+		p->initialize();
+	};
+};
+
+// Delete all elements.  WARNING: elements assumed to be on the heap.
+
+void NamedObjList::deleteAll() {
+	NamedObj *p;
+	NamedObjListIter next(*this);
+	while ((p = next++) != 0) {
+		LOG_DEL; delete p;
+	}
+	initialize();
+}

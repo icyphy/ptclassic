@@ -180,12 +180,24 @@ inline int hidden(const GenericPort& p) { return p.attributes() & PB_HIDDEN; }
         //////////////////////////////////////////
 
 // Used to store a list of PortHoles in a MultiPortHole
-class PortList : public SequentialList
+class PortList : private NamedObjList
 {
+	friend class PortListIter;
+	friend class CPortListIter;
 public:
-
         // Add PortHole to list
-        void put(PortHole& p);
+        inline void put(PortHole& p);
+
+	// Find a port with the given name and return pointer
+	inline PortHole* portWithName(const char* name);
+	inline const PortHole* portWithName(const char* name) const;
+
+	// Remove a port
+	inline int remove(PortHole* p);
+
+	NamedObjList::size;
+	NamedObjList::initElements;
+	NamedObjList::deleteAll;
 };
 
         //////////////////////////////////////////
@@ -431,6 +443,21 @@ private:
 	MultiPortHole* myMultiPortHole;
 };
 
+// PortList methods.  They are here because they cannot appear until
+// class PortHole is declared.
+
+inline void PortList::put(PortHole& p) {NamedObjList::put(p);}
+
+inline 	const PortHole* PortList::portWithName(const char* name) const {
+	return (const PortHole*)objWithName(name);
+}
+
+inline 	PortHole* PortList::portWithName(const char* name) {
+	return (PortHole*)objWithName(name);
+}
+
+inline int PortList::remove(PortHole* p) { return NamedObjList::remove(p);}
+
 // The following generic type is good enough to use in galaxies.
 // It always has an alias.
 // The "isIt" functions work by asking the alias.
@@ -453,12 +480,12 @@ public:
         //////////////////////////////////////////
 
 // An iterator for PortLists, non-const version
-class PortListIter : private ListIter {
+class PortListIter : private NamedObjListIter {
 public:
-	PortListIter(PortList& plist) : ListIter (plist) {}
-	PortHole* next() { return (PortHole*)ListIter::next();}
+	PortListIter(PortList& plist) : NamedObjListIter (plist) {}
+	PortHole* next() { return (PortHole*)NamedObjListIter::next();}
 	PortHole* operator++() { return next();}
-	ListIter::reset;
+	NamedObjListIter::reset;
 };
 
 
@@ -491,11 +518,24 @@ public:
         //////////////////////////////////////////
 
 // Used to store a list of MultiPortHoles
-class MPHList : public SequentialList
+class MPHList : private NamedObjList
 {
+	friend class MPHListIter;
+	friend class CMPHListIter;
 public:
         // Add MultiPortHole to list
-        void put(MultiPortHole& p) {SequentialList::put(&p);}
+        void put(MultiPortHole& p) {NamedObjList::put(p);}
+	// Find a multiport with the given name and return pointer
+	const MultiPortHole* multiPortWithName(const char* name) const {
+		return (const MultiPortHole*)objWithName(name);
+	}
+	MultiPortHole* multiPortWithName(const char* name) {
+		return (MultiPortHole*)objWithName(name);
+	}
+
+	NamedObjList::size;
+	NamedObjList::initElements;
+	NamedObjList::deleteAll;
 };
 
         //////////////////////////////////////////
@@ -506,6 +546,19 @@ public:
 class MPHIter : public PortListIter {
 public:
 	MPHIter(MultiPortHole& mph) : PortListIter (mph.ports) {}
+};
+
+        //////////////////////////////////////////
+        // class MPHListIter
+        //////////////////////////////////////////
+
+// An iterator for MPHLists, non-const version
+class MPHListIter : private NamedObjListIter {
+public:
+	MPHListIter(MPHList& plist) : NamedObjListIter (plist) {}
+	MultiPortHole* next() { return (MultiPortHole*)NamedObjListIter::next();}
+	MultiPortHole* operator++() { return next();}
+	NamedObjListIter::reset;
 };
 
 #endif

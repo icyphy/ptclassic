@@ -38,12 +38,15 @@ public:
 	}
 };
 
-class SimActionList : public SequentialList {
+class SimActionList : private SequentialList {
+	friend class SimActionListIter;
 public:
 	SimActionList();
 	~SimActionList();
 	void put(SimAction* a) { SequentialList::put(a);}
 	SimAction* head() const { return (SimAction*)SequentialList::head();}
+	int member(SimAction* a) { return SequentialList::member(a);}
+	int remove(SimAction* a) { return SequentialList::remove(a);}
 };
 
 class SimActionListIter : private ListIter {

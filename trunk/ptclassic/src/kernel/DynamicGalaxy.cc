@@ -21,32 +21,12 @@ $Id$
 // in other contexts)
 
 void DynamicGalaxy :: zero () {
-
 	// delete component blocks
-        GalTopBlockIter nextb(*this);
-        for (int i = numberBlocks(); i > 0; i--) {
-                LOG_DEL; delete nextb++;
-        }
-	// delete multiports: must come before ports because the
-	// sub-ports remove themselves from the galaxy's list.
-	BlockMPHIter nextm(*this);
-	for (i = numberMPHs(); i > 0; i--) {
-		LOG_DEL; delete nextm++;
-	}
-        // delete ports
-        BlockPortIter nextp(*this);
-        for (i = numberPorts(); i > 0; i--) {
-		PortHole* p = nextp++;
-		// remove parent so it won't try to remove itself.
-		p->setPort("",0);
-		LOG_DEL; delete p;
-        }
-
-        // delete states
-        BlockStateIter nexts(*this);
-        for (i = numberStates(); i > 0; i--) {
-                LOG_DEL; delete nexts++;
-        }
+	deleteAllBlocks();
+	// delete component ports and multiports.
+	deleteAllGenPorts();
+	// delete states.
+	deleteAllStates();
 }
 
 // isa

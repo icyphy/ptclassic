@@ -420,7 +420,7 @@ InterpGalaxy::setDomain (const char* name) {
 	name = hashstring(name);
 	actionList += "D";
 	actionList += name;
-	myDomain = name;
+	Galaxy::setDomain(name);
 	// if we're already in the given domain, do nothing and return true
 	if (strcmp (name, KnownBlock::domain()) == 0) return TRUE;
 	if (numberBlocks() > 0) {
@@ -643,7 +643,7 @@ Block* InterpGalaxy::blockWithDottedName (const char* dotname) {
 
 void InterpGalaxy :: zero () {
 	// remove nodes
-	nodes.initialize();
+	nodes.deleteAll();
 	// remove other stuff
 	DynamicGalaxy :: zero();
 	// Clear action list
@@ -721,31 +721,14 @@ InterpGalaxy::initialize () {
 	initSubblocks();
 }
 
-
-// function to find Node with given name, or NULL if no match
-Geodesic*
-NodeList::nodeWithName (const char* ident) {
-	Geodesic *g;
-	NodeListIter next(*this);
-	while ((g = next++) != 0) {
-		if (strcmp(ident, g->name()) == 0)
-			return g;
-	}
-	return NULL;
-}
-
+// NodeList methods.  These could be inline except that that would
+// require earlier inclusion of Geodesic.
 void NodeList::put(Geodesic& g) {
-	SequentialList::put(&g);
+	NamedObjList::put(g);
 }
 
-// function to initialize NodeList
-void NodeList::initialize () {
-	// delete permanent nodes
-	NodeListIter nextn(*this);
-	for (int i = size(); i > 0; i--) {
-		LOG_DEL; delete nextn++;
-	}
-	SequentialList::initialize();
+int NodeList::remove(Geodesic* g) {
+	return NamedObjList::remove(g);
 }
 
 // isa

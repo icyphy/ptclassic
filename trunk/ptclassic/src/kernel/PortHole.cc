@@ -331,12 +331,7 @@ MultiPortHole :: ~MultiPortHole() { delPorts();}
 // delete and reinitialize the porthole list.  Any bus connection is
 // broken as well.
 void MultiPortHole :: delPorts () {
-	MPHIter next(*this);
-	PortHole* p;
-	while ((p = next++) != 0) {
-		LOG_DEL; delete p;
-	}
-	ports.initialize();
+	ports.deleteAll();
 	if (peerMPH) {
 		peerMPH->peerMPH = 0;
 		peerMPH = 0;
@@ -686,11 +681,6 @@ void PortHole :: putParticle()
 		// Put it my buffer, replacing the used-up particle.
 		*p = myPlasma->get();
 	}
-}
-
-// PortList function
-void PortList::put(PortHole& p) {
-	SequentialList::put(&p);
 }
 
 // isa functions
