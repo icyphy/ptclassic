@@ -99,6 +99,9 @@ static char SccsId[]="$Id$";
 #include <X11/Xaw/Simple.h>	/* For XtNcursor             */
 #include "ts.h"			/* For console window        */
 
+#include "vemMain.h"		/* Declarations for some functions
+				   exported from this file */
+
 /* Maximum number of points in one argument */
 #define MAXINPUTPNTS	20
 
