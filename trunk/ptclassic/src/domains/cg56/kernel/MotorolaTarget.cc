@@ -216,7 +216,7 @@ const char* end, const char* cont) {
 
 // Determine whether or not the star firing can be implemented with
 // static code which could be enclosed in a loop or subroutine.
-int staticCode(CGStar& star) {
+static int staticCode(CGStar& star) {
     BlockPortIter nextPort(star);
     CGPortHole* port;
 
