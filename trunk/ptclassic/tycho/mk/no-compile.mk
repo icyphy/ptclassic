@@ -73,7 +73,7 @@ sccsinfo:
 		    if [ -w $$x ] ; then \
 			( cd $$x ; \
 			echo making $@ in $$x ; \
-			@sccs check || true ; \
+			sccs check || true ; \
 			) \
 		    fi ; \
 		done ; \
