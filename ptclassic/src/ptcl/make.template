@@ -57,11 +57,11 @@ all:	makefile ptcl
 
 ptcl:		$(OBJS) $(LIBFILES) $(ALLSTARS) $(ALLTARGETS)
 		rm -f ptcl
-		$(LINKER) $(LINKFLAGS) $(PTCL_MODS) -o ptcl
+		 $(PURELINK) $(LINKER) $(LINKFLAGS) $(PTCL_MODS) -o ptcl
 
 ptcl.debug:	$(OBJS) $(LIBFILES) $(ALLSTARS) $(ALLTARGETS)
 		rm -f ptcl.debug
-		$(LINKER) $(LINKFLAGS_D) $(PTCL_MODS) -o ptcl.debug
+		 $(PURELINK) $(LINKER) $(LINKFLAGS_D) $(PTCL_MODS) -o ptcl.debug
 
 
 
