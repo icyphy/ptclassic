@@ -23,7 +23,7 @@ Usually this is not the case!
   defstate {
     name { rowsCols }
     type { int }
-    default { 8 }
+    default { 2 }
     desc { The number of rows and columns of the input square matrix. }
   }
   ccinclude { "Matrix.h" }
@@ -32,16 +32,24 @@ Usually this is not the case!
     (input%0).getMessage(pkt);
     const IntMatrix& matrix = *(const IntMatrix *)pkt.myData();
 
-    if((matrix.numRows() != int(rowsCols)) ||
-       (matrix.numCols() != int(rowsCols))) {
-      Error::abortRun(*this,"Dimension size of IntMatrix input does ",
-                            "not match the given state parameters.");
-      return;
+    // check for "null" matrix inputs, caused by delays
+    if(pkt.empty()) {
+      // if input is empty, return a zero matrix with the given dimensions
+      IntMatrix& result = *(new IntMatrix(int(rowsCols),int(rowsCols)));
+      result = 0;
+      output%0 << result;
     }
-    IntMatrix *result = new IntMatrix(int(rowsCols),int(rowsCols));
-    *result = !matrix;        // invert the matrix
-
-    output%0 << *result;
+    else {
+      if((matrix.numRows() != int(rowsCols)) ||
+         (matrix.numCols() != int(rowsCols))) {
+        Error::abortRun(*this,"Dimension size of IntMatrix input does ",
+                              "not match the given state parameters.");
+        return;
+      }
+      IntMatrix& result = *(new IntMatrix(int(rowsCols),int(rowsCols)));
+      result = !matrix;        // invert the matrix
+      output%0 << result;
+    }
   }
 }
 

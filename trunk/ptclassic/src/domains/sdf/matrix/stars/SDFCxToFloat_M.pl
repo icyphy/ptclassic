@@ -27,9 +27,18 @@ i.e. FloatMatrix.entry(i) = abs(ComplexMatrix.entry(i)).
     (input%0).getMessage(inpkt);
     const ComplexMatrix& matrix = *(const ComplexMatrix *)inpkt.myData();
 
-    // do conversion using copy constructor
-    FloatMatrix& result = *(new FloatMatrix(FloatMatrix(matrix)));
-    output%0 << result;
+    // check for "null" matrix inputs, caused by delays
+    if(inpkt.empty()) {
+      // input empty, just send it back out
+      output%0 << inpkt;
+    }
+    else {
+      // valid input matrix
+
+      // do conversion using copy constructor
+      FloatMatrix& result = *(new FloatMatrix(FloatMatrix(matrix)));
+      output%0 << result;
+    }
   }
 }
 

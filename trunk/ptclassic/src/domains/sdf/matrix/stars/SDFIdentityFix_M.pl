@@ -1,11 +1,7 @@
 defstar {
   name { IdentityFix_M }
   domain { SDF }
-  desc {
-Make and identity matrix of the given size.  An indentity matrix is square
-with all diagonal entries equal to 1 and the rest equal to 0.
-The output matrix has dimensions (rowsCols,rowsCols).
-  }
+  desc { Output a fix-point identity matrix. }
   version { $Id$ }
   author { Mike J. Chen }
   copyright { 1993 The Regents of the University of California }
@@ -17,14 +13,31 @@ The output matrix has dimensions (rowsCols,rowsCols).
   defstate {
     name { rowsCols }
     type { int }
-    default { 8 }
-    desc { Number of rows/columns of the output square matrix. }
+    default { 2 }
+    desc { Number of rows and columns of the output square matrix. }
   }
-
+  defstate {
+        name { FixPrecision }
+        type { string }
+        default { "8.14" }
+        desc {
+Precision of all entries in the matrix.
+        }
+  }
   ccinclude { "Matrix.h" }
+  protected {
+        const char* precision;
+        int length, intbits;
+  }
   go {
-    FixMatrix *result = new FixMatrix(int(rowsCols),int(rowsCols));
-    result->identity();
-    output%0 << *result;
+    // parse precision value
+    precision = FixPrecision;
+    length = Fix::get_length(precision);
+    intbits = Fix::get_intBits(precision);
+
+    FixMatrix& result = *(new FixMatrix(int(rowsCols),int(rowsCols),
+                                        length, intbits));
+    result.identity();
+    output%0 << result;
   }
 }

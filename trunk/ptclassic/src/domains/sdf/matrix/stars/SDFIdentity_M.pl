@@ -13,14 +13,13 @@ defstar {
   defstate {
     name { rowsCols }
     type { int }
-    default { 8 }
+    default { 2 }
     desc { Number of rows and columns of the output square matrix. }
   }
-
   ccinclude { "Matrix.h" }
   go {
-    FloatMatrix *result = new FloatMatrix(int(rowsCols),int(rowsCols));
-    result->identity();
-    output%0 << *result;
+    FloatMatrix& result = *(new FloatMatrix(int(rowsCols),int(rowsCols)));
+    result.identity();
+    output%0 << result;
   }
 }

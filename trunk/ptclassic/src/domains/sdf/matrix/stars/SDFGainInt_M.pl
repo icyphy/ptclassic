@@ -27,10 +27,19 @@ defstar {
     (input%0).getMessage(inpkt);
     const IntMatrix& matrix = *(const IntMatrix *)inpkt.myData();
 
-    // do scalar * matrix
-    IntMatrix *result = new IntMatrix(matrix.numRows(),matrix.numCols());
-    *result = int(gain) * matrix;
-    output%0 << *result;
+    // check for "null" matrix inputs, caused by delays
+    if(inpkt.empty()) {
+      // input empty, just send it back out
+      output%0 << inpkt;
+    }
+    else {
+      // valid input matrix
+
+      // do scalar * matrix
+      IntMatrix& result = *(new IntMatrix(matrix.numRows(),matrix.numCols()));
+      result = int(gain) * matrix;
+      output%0 << result;
+    }
   }
 }
 

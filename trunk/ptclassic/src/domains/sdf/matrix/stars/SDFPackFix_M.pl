@@ -38,8 +38,8 @@ first N particles.
   }
   go {
     // collect inputs and put into the matrix
-    FixMatrix *matrix = new FixMatrix(int(numRows),int(numCols),input);
-    output%0 << *matrix;
+    FixMatrix& matrix = *(new FixMatrix(int(numRows),int(numCols),input));
+    output%0 << matrix;
   }
 }
 

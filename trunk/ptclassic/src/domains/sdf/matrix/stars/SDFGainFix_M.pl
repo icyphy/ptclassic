@@ -81,22 +81,31 @@ parameter.  The keywords for overflow handling methods are :
     (input%0).getMessage(inpkt);
     const FixMatrix& matrix = *(const FixMatrix *)inpkt.myData();
 
-    FixMatrix *result = new FixMatrix(matrix.numRows(),matrix.numCols(),
-                                      out_len, out_IntBits);
-
-    Fix fixIn;
-
-    // do scalar * matrix
-    for(int i = 0; i < (matrix.numRows() * matrix.numCols()); i++) {
-      if(int(UseArrivingPrecision))
-        fixIn = matrix.entry(i);
-      else
-        fixIn = Fix(in_len, in_IntBits, matrix.entry(i));
-      result->entry(i).set_ovflow(OV);
-      result->entry(i) = fixIn * Fix(gain);
+    // check for "null" matrix inputs, caused by delays
+    if(inpkt.empty()) {
+      // input empty, just send it back out
+      output%0 << inpkt;
     }
+    else {
+      // valid input matrix
 
-    output%0 << *result;
+      FixMatrix& result = *(new FixMatrix(matrix.numRows(),matrix.numCols(),
+                                          out_len, out_IntBits));
+
+      Fix fixIn;
+
+      // do scalar * matrix
+      for(int i = 0; i < (matrix.numRows() * matrix.numCols()); i++) {
+        if(int(UseArrivingPrecision))
+          fixIn = matrix.entry(i);
+        else
+          fixIn = Fix(in_len, in_IntBits, matrix.entry(i));
+        result.entry(i).set_ovflow(OV);
+        result.entry(i) = fixIn * Fix(gain);
+      }
+
+      output%0 << result;
+    }
   }
 }
 

@@ -113,10 +113,21 @@ vol. 28, no. 2, pp. 574-587, April 1992.
     // load matrix of right singular vectors of the noise subspace
     Envelope inputPkt;
     (rsvec%0).getMessage(inputPkt);
-    const FloatMatrix& V = *(const FloatMatrix *)inputPkt.myData();
-    for(int row = 0; row < nrows; row++)
-      for(int col = 0; col < numNoise; col++)
-        (*Vn)[row][col] = V[row][col+(2*int(numSignals))];
+
+    // check for empty input
+    if(inputPkt.empty()) {
+      FloatMatrix V(int(numRows),int(numCols));
+      V = 0.0;
+      for(int row = 0; row < nrows; row++)
+        for(int col = 0; col < numNoise; col++)
+          (*Vn)[row][col] = V[row][col+(2*int(numSignals))];
+    }
+    else {
+      const FloatMatrix& V = *(const FloatMatrix *)inputPkt.myData();
+      for(int row = 0; row < nrows; row++)
+        for(int col = 0; col < numNoise; col++)
+          (*Vn)[row][col] = V[row][col+(2*int(numSignals))];
+    }
       
     // compute VnVnt = Vn * transpose(Vn)
     *VnVnt = (*Vn) * (~(*Vn));
