@@ -40,13 +40,15 @@
 # URL-style name. Return the mode if successful, or null
 # if there was no header or it was malformed.
 #
-proc ::tycho::readFileHeader {filename var} {
-    upvar $var v
-	
+proc ::tycho::readFileHeader {filename {var {}}} {
+    if { $var != "" } {
+        upvar $var v
+    }
+
     set fo [::tycho::resource new $filename]
     $fo open
     set string [$fo gets]
-    while { $string != "" } {
+    while { ![$fo eof] && $string == "" } {
 	set string [$fo gets]
     }
     $fo close
