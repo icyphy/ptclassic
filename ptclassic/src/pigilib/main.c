@@ -90,6 +90,7 @@ RPCFunction CommandArray[] = {
     {RpcMkSchemIcon, "Extend", "make-schem-icon","@",0},
     {RpcMkStar, "Extend", "make-star","*",0},
     {RpcLoadStar, "Extend", "load-star", "L", 0},
+    {RpcLoadStarPerm, "Extend", "load-star-perm", "K", 0},
     {ERFilterDesign, "Filter", " equirriple FIR", "<", 0},
     {WFilterDesign, "Filter", " window FIR", ">", 0},
     {RpcPlotSignal, "Utilities", "plot signal", "~", 0},

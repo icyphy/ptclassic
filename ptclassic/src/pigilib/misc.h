@@ -9,6 +9,7 @@ extern int PrintFacet();
 extern int RpcOpenFacet();
 extern int RpcPlot();
 extern int RpcLoadStar();
+extern int RpcLoadStarPerm();
 extern int RpcCompileStar();
 extern int ERFilterDesign();
 extern int WFilterDesign();

@@ -291,16 +291,28 @@ octId facetId;
 }
 
 /* Load the star pointed to */
-int 
-RpcLoadStar(spot, cmdList, userOptionWord) /* ARGSUSED */
-RPCSpot *spot;
-lsList cmdList;
-long userOptionWord;
+static int 
+DoRpcLoadStar(spot, cmdList, permB) /* ARGSUSED */
+RPCSpot	*spot;
+lsList	cmdList;
+int	permB;
 {
-    octObject inst;
-    vemStatus status;
+    char	linkArgs[1024];
+    octObject	inst;
+    vemStatus	status;
+    RPCArg	*theArg;
 
     ViInit("load-star");
+
+
+
+    /* see if any arguments were given */
+    linkArgs[0] = '\0';
+    if ( (lsLastItem(cmdList, (lsGeneric *) &theArg, LS_NH) == VEM_OK)
+      && (theArg->argType == VEM_TEXT_ARG) ) {
+	strcpy( linkArgs, theArg->argData.string);
+    }
+
     /* set the current domain */
     if (!setCurDomainS(spot)) {
         PrintErr("Invalid domain found");
@@ -323,8 +335,28 @@ long userOptionWord;
 	    PrintErr("Cannot re-load a compiled-in star class");
 	    ViDone();
         }
-	if (!LoadTheStar(&inst))
+	if (!LoadTheStar(&inst, permB, linkArgs))
 		PrintErr(ErrGet());
 	ViDone();
     }
+}
+
+
+/* Load the star pointed to */
+int 
+RpcLoadStar(spot, cmdList, userOptionWord) /* ARGSUSED */
+RPCSpot *spot;
+lsList cmdList;
+long userOptionWord;
+{
+    return DoRpcLoadStar(spot, cmdList, FALSE);
+}
+
+int 
+RpcLoadStarPerm(spot, cmdList, userOptionWord) /* ARGSUSED */
+RPCSpot *spot;
+lsList cmdList;
+long userOptionWord;
+{
+    return DoRpcLoadStar(spot, cmdList, TRUE);
 }

@@ -185,21 +185,28 @@ KcLoadInit (const char* argv0) {
 	Linker::init (argv0);
 	// look for a file specifying modules to be permanently linked in
 	// this relies on pigiRpc starting in the home directory.
+#ifdef notdef
+// This may or may not be safe for now...
 	ifstream lstream(".pigilink");
 	if (lstream) {
 		char buf[1010];
 		lstream.getline(buf, 999);
 		Linker::multiLink(buf, 1);
 	}
+#endif
 }
 
 // Load an object file (local only)
 static int
-linkObject (const char* ofile) {
-	char buf[512];
-	sprintf (buf, "link %s\n", ofile);
+linkObject (const char* ofile, int permB, const char *linkArgs) {
+	char buf[2048];	/* XXX: this is gross */
+	sprintf (buf, "%s %s %s\n", permB ? "permlink" : "link",
+	  ofile ? ofile : "", linkArgs ? linkArgs : "");
 	KcLog (buf);
-	return Linker::linkObj (ofile);
+
+	sprintf( buf, "%s%s%s", ofile ? ofile : "", ofile ? " " : "",
+	  linkArgs ? linkArgs : "");
+	return Linker::multiLink(buf, permB);
 }
 
 // tables for suffixes and preprocessors
@@ -214,7 +221,7 @@ static const char *preprocProg[] = { "", "ptlang", "pepp" };
 // srcDir = star source directory
 static int
 compileAndLink (const char* name, const char* idomain, const char* srcDir,
-		  int preproc) {
+		  int preproc, int permB, const char* linkArgs) {
 	srcDir = expandPathName (srcDir);
 	char* objDir = genObjDir (srcDir);
 	char plName[512], oName[512], ccName[512], cmd[512];
@@ -244,13 +251,13 @@ compileAndLink (const char* name, const char* idomain, const char* srcDir,
 			return FALSE;
 		}
 		unlink(tmpFileName);
-		return linkObject (oName);
+		return linkObject (oName, permB, linkArgs);
 	}
 // No makefile.  If object is younger than source, assume it's good.
 // It also must be younger than the Ptolemy image.
 	if (exists (oName) && isYounger (oName, sourceFile) &&
 	    isYounger (oName, Linker::imageFileName()))
-		return linkObject (oName);
+		return linkObject (oName, permB, linkArgs);
 // Preprocess if need be.
 	if (preproc && (!exists (ccName) || isYounger (plName, ccName))) {
 		sprintf (cmd, "cd %s; %s %s%s.%s >& %s",
@@ -275,7 +282,7 @@ compileAndLink (const char* name, const char* idomain, const char* srcDir,
 // now compile.
 	if (!compile (name, idomain, srcDir, objDir)) return FALSE;
 // finally incremental link.
-	return linkObject (oName);
+	return linkObject (oName, permB, linkArgs);
 }
 
 // This function searches for a source file, first looking for preprocessor
@@ -301,7 +308,8 @@ FindStarSourceFile(const char* dir,const char* dom,const char* base,
 // or a .cc file (or other preprocessor file) and does what's needed.
 
 extern "C" int
-KcCompileAndLink (const char* name, const char* idomain, const char* srcDir) {
+KcCompileAndLink (const char* name, const char* idomain, const char* srcDir,
+  int permB, const char* linkArgs) {
 	if (!Linker::enabled()) {
 		ErrAdd ("Loader disabled");
 		return FALSE;
@@ -317,7 +325,7 @@ KcCompileAndLink (const char* name, const char* idomain, const char* srcDir) {
 		ErrAdd (msg);
 		return FALSE;
 	}
-	return compileAndLink (name, idomain, srcDir, preproc);
+	return compileAndLink (name, idomain, srcDir, preproc, permB, linkArgs);
 }
 
 
@@ -327,7 +335,7 @@ KcCompileAndLink (const char* name, const char* idomain, const char* srcDir) {
 
 
 extern "C" int
-KcLoad (const char* iconName) {
+KcLoad (const char* iconName, int permB, const char* linkArgs) {
 	if (!Linker::enabled()) {
 		ErrAdd ("Loader disabled");
 		return FALSE;
@@ -384,7 +392,7 @@ KcLoad (const char* iconName) {
 			return FALSE;
 		}
 	}
-	if (!compileAndLink (base, domain, dir, preproc))
+	if (!compileAndLink (base, domain, dir, preproc, permB, linkArgs))
 		return FALSE;
 	int status = KcIsKnown(base);
 	if (!status)
