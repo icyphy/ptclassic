@@ -456,8 +456,9 @@ ParamListType *pList;
     return 0;
 }
 
-/* merge a set of instance parameters (2nd arg) with a set of default
- * parameters.    return the "official" ones in the 1st argument (default
+/*
+ * merge a set of instance parameters (2nd arg) with a set of default
+ * parameters.  return the "official" ones in the 1st argument (default
  * parameters).
  */
 void
@@ -468,8 +469,11 @@ ParamListType *pListDef, *pListInst;
     ParamType* match;
     ParamType* curr = pListDef->array;
     for (i = 0; i < pListDef->length; i++) {
-	match = findParam (curr->name, pListInst);
-	if (match) curr->value = match->value;
+	match = findParam(curr->name, pListInst);
+	if (match) {
+	    if (curr->value) free(curr->value);
+	    curr->value = DupString(match->value);
+	}
 	curr++;
     }
     return;
@@ -495,7 +499,7 @@ ParamListType *pListPtr;
     /* Don't free prop with FreeOctMembers: contents.prop.name is static */
     prop.contents.prop.name = "params";
 
-    /* If no parameters: use default list */
+    /* If no parameters, return default list; otherwise, merge parameters */
     if (octGetByName(instPtr, &prop) == OCT_NOT_FOUND) {
 	ERR_IF1(!SetSogParams(instPtr, pListPtr));
 	return(TRUE);
@@ -504,10 +508,12 @@ ParamListType *pListPtr;
 	free(prop.contents.prop.value.string);
 	return(FALSE);
     }
-    free(prop.contents.prop.value.string);
-
-    /* Do not free tempList: its pointers will be copied to pListPtr */
     MergeParams(pListPtr, &tempList);
+
+    /* Free memory */
+    free(prop.contents.prop.value.string);	/* allocated by octGetByName */
+    free(tempList.array->name);			/* allocated by PStrToPList */
+    free(tempList.array);
 
     return(TRUE);
 }
@@ -535,7 +541,7 @@ ParamListType *pListPtr;
     /* Don't free prop with FreeOctMembers: contents.prop.name is static */
     prop.contents.prop.name = "targetparams";
 
-    /* If no parameters, return default list */
+    /* If no parameters, return default list; otherwise, merge parameters */
     if (octGetByName(facetPtr, &prop) == OCT_NOT_FOUND) {
 	return(TRUE);
     }
@@ -543,10 +549,12 @@ ParamListType *pListPtr;
 	free(prop.contents.prop.value.string);
 	return(FALSE);
     }
-    free(prop.contents.prop.value.string);
-
-    /* Do not free tempList: its pointers will be copied to pListPtr */
     MergeParams(pListPtr, &tempList);
+
+    /* Free memory */
+    free(prop.contents.prop.value.string);	/* allocated by octGetByName */
+    free(tempList.array->name);			/* allocated by PStrToPList */
+    free(tempList.array);
 
     return(TRUE);
 }
