@@ -58,6 +58,7 @@ class Block;
 class StringList;
 class InfString;
 class GenericPort;
+class PortHole;
 
 /////////////////////////////////////////////////////////////////////
 //// IUList
@@ -209,7 +210,8 @@ public:
     int abort(int argc,char** argv);
     int addBlock(int argc,char** argv);
     int addUniverse(int argc,char** argv);
-    int alias(int argc,char** argv);
+    int aliasDown(int argc,char** argv);
+    int aliasUp(int argc,char** argv);
     int animation(int argc,char** argv);
     int blocks(int argc,char** argv);
     int cancelAction(int argc,char** argv);
@@ -223,6 +225,7 @@ public:
     int domain(int argc,char** argv);
     int domains(int argc,char** argv);
     int exit(int argc,char** argv);
+    int galaxyPort(int argc,char** argv);
     int getAnnotation(int argc,char** argv);
     int getClassName(int argc,char** argv);
     int getDescriptor(int argc,char** argv);
@@ -248,9 +251,9 @@ public:
     int newstate(int argc,char** argv);
     int node(int argc,char** argv);
     int nodeconnect(int argc,char** argv);
-    int numports(int argc,char** argv);
     int pragma(int argc,char** argv);
     int pragmaDefaults(int argc,char** argv);
+    int print(int argc,char** argv);
     int ports(int argc,char** argv);
     int remove(int argc,char** argv);
     int renameuniv(int argc,char** argv);
@@ -314,7 +317,7 @@ protected:
     InterpGalaxy* getParentGalaxy(const char*);
     
     // Return a pointer to a port with the given name.
-    GenericPort* getPort(const char*, int);
+    GenericPort* getPort(const char*);
     
     // Add this object to the table of PTcl objects.
     void makeEntry();
@@ -344,6 +347,9 @@ private:
 
     // Function to check error/abort status.
     int checkErrorAbort();
+
+    // Add to the Tcl result a list of ports connected to the given port.
+    int getFarPorts(PortHole*, int);
     
     // Recursively descend within the galaxy to get a block with dotted name.
     const Block* getSubBlock(const char*, const Block*);
