@@ -45,7 +45,7 @@ protected:
 public:
 	DDFTarget();
 	Block* makeNew() const;
-	void start();
+	void setup();
 	~DDFTarget();
 };
 #endif
