@@ -43,6 +43,7 @@ special routines to generate the sub universes.
 #include "SDFPortHole.h"
 #include "Geodesic.h"
 #include "ConstIters.h"
+#include "CGWormStar.h"
 
 static void copyActualStates(const Block& src, Block& dest) {
 	CBlockStateIter nexts(src);
@@ -54,9 +55,24 @@ static void copyActualStates(const Block& src, Block& dest) {
 			hashstring(srcStatePtr->currentValue()));
 }
 
+PortHole* clonedPort(DataFlowStar* s, PortHole* p) {
+	ParNode* n = (ParNode*) s->myMaster();
+	DataFlowStar* copyS = n->getCopyStar();
+	return copyS->portWithName(p->name());
+}
+
 // clone a star
-DataFlowStar* cloneStar(DataFlowStar* org) {
-	DataFlowStar* newS = (DataFlowStar*) org->clone();
+DataFlowStar* UniProcessor :: cloneStar(ParNode* n) {
+	DataFlowStar* org = n->myMaster();
+	DataFlowStar* newS;
+	if (org->isItWormhole()) {
+		int ix = n->profile()->profileIx(n->invocationNumber(),myId());
+		LOG_NEW; newS =  new CGWormStar((CGStar*) org, ix,
+				n->invocationNumber(), 1);
+		return newS;
+	}
+		
+	newS = (DataFlowStar*) org->clone();
 	copyActualStates(*org, *newS);
 	if (org->numberMPHs() <= 0) return newS;
 	
@@ -71,11 +87,6 @@ DataFlowStar* cloneStar(DataFlowStar* org) {
 	return newS;
 }
 
-PortHole* clonedPort(DataFlowStar* s, PortHole* p) {
-	ParNode* n = (ParNode*) s->myMaster();
-	DataFlowStar* copyS = n->getCopyStar();
-	return copyS->portWithName(p->name());
-}
 
 			//////////////////////
 			// sub-Galaxy creation
@@ -100,7 +111,7 @@ void UniProcessor :: createSubGal() {
 	ProcessorIter pIter(*this);
 	ParNode* n;
 	while ((n = pIter.nextNode()) != 0) {
-		if (n->getType()) continue;
+		if (n->getType() || (n->getProcId() != myId())) continue;
 
 		// for each node assigned to the processor
 		// we deal with the node of the smallest invocation first.
@@ -115,7 +126,9 @@ void UniProcessor :: createSubGal() {
 		while (smallest && (smallest->getProcId() != myId()))
 			smallest = (ParNode*) smallest->getNextInvoc();
 
-		DataFlowStar* copyS = cloneStar(org);
+		DataFlowStar* copyS = cloneStar(n);
+		if (SimControl::haltRequested()) return;
+
 		copyS->setTarget(targetPtr);
 
 		ParNode* prevN = 0;
