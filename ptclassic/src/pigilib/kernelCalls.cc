@@ -288,11 +288,11 @@ KcDomainOf(char* name) {
 
 // Delete the universe and make another
 extern "C" void
-KcClearUniverse(const char* name) {
+KcNewUniverse(const char* name, const char* domain) {
 	// ptcl function replaces old Kernel Calls code:
-	ptcl -> resetUniverse();
+	ptcl -> newUniv( name, domain );
 	LOG << "reset\n";
-	LOG << "# Creating universe '" << name << "'\n";
+	LOG << "# Creating new universe '" << name << "'\n";
 	logDomain();
 }
 
