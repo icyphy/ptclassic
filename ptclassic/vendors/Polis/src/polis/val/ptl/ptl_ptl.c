@@ -264,8 +264,8 @@ char* option;
   fprintf( fp, "    int priority;\n");
   fprintf( fp, "    int resourceId;\n");
   fprintf( fp, "    int needResource;\n");
-  fprintf( fp, "    char resource[1024];\n");
-  fprintf( fp, "    Resource* resourcePointer;\n"); 
+/*  fprintf( fp, "    char resource[1024];\n"); 
+  fprintf( fp, "    Resource* resourcePointer;\n"); */
   fprintf( fp, "    // Pointers to the event queues of the PolisScheduler controlling the simulation;\n");
   fprintf( fp, "    PolisEventQ* waitingQ;\n");
   fprintf( fp, "    PolisEventQ* interruptQ;\n");
