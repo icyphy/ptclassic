@@ -22,6 +22,10 @@ if ( ! $?USER ) then
     setenv USER $LOGNAME
 endif
 
+if ( ! $?LD_LIBRARY_PATH ) then
+    setenv LD_LIBRARY_PATH ${PTOLEMY}/lib.${PTARCH}:/usr/lib:${PTX11DIR}/lib
+endif
+
 # FIXME: Hardwired in tk4.0
 # See also $PTOLEMY/src/tycho/kernel/make.template
 #	   $PTOLEMY/tycho/kernel/Lib.tcl
