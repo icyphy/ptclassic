@@ -162,11 +162,6 @@ body ::tycho::EditSTD::constructor {args} {
     # configuration options, assuming there are options specified.
     eval itk_initialize $args 
 
-    # Need to load the startup file here again, otherwise
-    # the member variables of this derived class will be lost,
-    # such as portNames(in), portNames(out) and portNames(internal).
-    $this reload
-
     # If no machine type is specified yet, initialize it.
     if {![info exists machineType]} {
 	set w $prefix.editMachineType
