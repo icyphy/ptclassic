@@ -56,6 +56,10 @@ int rcpWriteFile(const char* hname, const char* dir, const char* file,
 int rcpCopyFile(const char* hname, const char* dir, const char* filePath,
 	int deleteOld = TRUE, const char* newFileName = NULL);
 
+// Copy several files to a specified directory on a given host.
+int rcpCopyMultipleFiles(const char* hname, const char* dir,
+	const char* fileList, int deleteOld = TRUE);
+
 // Returns TRUE if hname is the machine Ptolemy is running on.
 int onHostMachine(const char* hname);
 
