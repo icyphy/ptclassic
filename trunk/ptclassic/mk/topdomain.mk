@@ -88,8 +88,32 @@ depend:
 	done
 
 doc/stars/starHTML.idx: $(wildcard doc/stars/*.htm)
-	@echo "Updating starHTML.idx:"
+	@echo "Updating $@"
 	rm -f $@
 	(cd doc/stars; \
-	echo "set TYCHO $(PTOLEMY)/tycho; source $(PTOLEMY)/tycho/lib/idx/tychoMakeIndex.tcl; ptolemyStarHTMLIndex" | itclsh)
+	echo "set TYCHO $(PTOLEMY)/tycho; \
+		source $(PTOLEMY)/tycho/lib/idx/tychoMakeIndex.tcl; \
+		ptolemyStarHTMLIndex \
+		\"\{General Ptolemy $(notdir $(ME)) stars\}\"" | itclsh)
+
+
+STARIDXFILES := $(foreach file,$(SUBDOMAINDIRS),$(file)/doc/stars/starHTML.idx)
+
+starHTML.idx: doc/stars/starHTML.idx
+	@for x in $(SUBDOMAINDIRS); do \
+	    if [ -w $$x/ ] ; then \
+		( cd $$x ; \
+		  echo making $@ in domains/$$x ; \
+		  $(MAKE) -f make.template $(MFLAGS) $(MAKEVARS) \
+			VPATH=../../../src/domains/$$x doc/stars/starHTML.idx ; \
+		) \
+	    fi ; \
+	done
+	@echo "Updating $@:"
+	rm -f $@
+	echo "set TYCHO $(PTOLEMY)/tycho; \
+		source $(PTOLEMY)/tycho/lib/idx/tychoMakeIndex.tcl; \
+		tychoMergeIndices \"All Ptolemy $(ME) stars\" \
+			$@ $(STARIDXFILES) \
+			doc/stars/starHTML.idx" | itclsh
 
