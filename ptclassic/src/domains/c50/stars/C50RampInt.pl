@@ -32,7 +32,7 @@ integer if \fIsaturation\fR is "YES".
 		type { int }
 		default { 0 }
 		desc { initial value output by RampInt }
-		attributes{ A_UMEM|A_CONSTANT }
+		attributes{ A_SETTABLE }
 	}
 	state {
 		name { saturation }
@@ -45,7 +45,7 @@ integer if \fIsaturation\fR is "YES".
 		type { int }
 		default { 0 }
 		desc { internal accumulator }
-		attributes { A_NONSETTABLE|U_YMEM|A_NONCONSTANT }
+		attributes { A_NONSETTABLE|A_UMEM|A_NONCONSTANT }
 	}
 	setup {
 		sum = int(value);
@@ -54,7 +54,7 @@ integer if \fIsaturation\fR is "YES".
 		if (int(saturation)) {
 			addCode(saturate);
 		}
-		addCode(accumulate)
+		addCode(accumulate);
 	}
 
 	codeblock(saturate){
@@ -76,3 +76,10 @@ integer if \fIsaturation\fR is "YES".
 		return 8;
 	}
 }
+
+
+
+
+
+
+
