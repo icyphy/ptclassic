@@ -8,7 +8,7 @@
 Version identification:
 $Id$
 
-Copyright (c) 1990-1994 The Regents of the University of California.
+Copyright (c) 1991-1994 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -17,10 +17,10 @@ software and its documentation for any purpose, provided that the above
 copyright notice and the following two paragraphs appear in all copies
 of this software.
 
-IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY 
-FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES 
-ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF 
-THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF 
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
 SUCH DAMAGE.
 
 THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
@@ -29,7 +29,7 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
 PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
 CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
-							COPYRIGHTENDKEY
+                                                        COPYRIGHTENDKEY
 
  Programmer:  Mike J. Chen
  Date of creation: 9/27/93
@@ -290,8 +290,8 @@ class FixMatrix: public Matrix {
   friend FixMatrix operator + (const Fix&, const FixMatrix&);
   friend FixMatrix operator + (const FixMatrix&, const Fix&);
   friend FixMatrix operator - (const FixMatrix&, const FixMatrix&);
-  friend FixMatrix operator - (Fix, const FixMatrix&);
-  friend FixMatrix operator - (const FixMatrix&, Fix);
+  friend FixMatrix operator - (const Fix&, const FixMatrix&);
+  friend FixMatrix operator - (const FixMatrix&, const Fix&);
   friend FixMatrix operator * (const FixMatrix&, const FixMatrix&);
   friend FixMatrix operator * (const Fix&, const FixMatrix&);
   friend FixMatrix operator * (const FixMatrix&, const Fix&);
@@ -539,19 +539,6 @@ class MatrixEnvParticle : public Particle {
   void accessMessage (Envelope& p) const;
   /*virtual*/ Particle& initialize();
 
-  // These assignments return an error
-  void operator << (const Complex& c);
-  void operator << (double d);
-  void operator << (const Fix& c);
-  void operator << (float f);
-  void operator << (int i);
-
-  // These return an error.  Should be redefined by derived classes as needed.
-  virtual void operator << (ComplexMatrix& m);
-  virtual void operator << (FixMatrix& m);
-  virtual void operator << (FloatMatrix& m);
-  virtual void operator << (IntMatrix& m);
-
   // compare particles
   int operator == (const Particle&);
  protected:
@@ -568,9 +555,24 @@ class ComplexMatrixEnvParticle : public MatrixEnvParticle {
   ComplexMatrixEnvParticle(const Envelope& p);
   ComplexMatrixEnvParticle();
 
+  // Initialize a given ParticleStack with the values in the delay string,
+  // obtaining other Particles from the given Plasma.  Returns the
+  // number of total Particles initialized, including this one.
+  /*virtual*/ int initParticleStack(Block* parent, ParticleStack& pstack,
+                                    Plasma* myPlasma, const char* delay = 0);
+
   // load with data
-  void operator << (ComplexMatrix& m);
-  void operator << (const Envelope& p);
+  // These assignments return an error
+  virtual void operator << (int i);
+  virtual void operator << (double d);
+  virtual void operator << (const Complex& c);
+  virtual void operator << (const Fix& c);
+  virtual void operator << (FixMatrix& m);
+  virtual void operator << (FloatMatrix& m);
+  virtual void operator << (IntMatrix& m);
+
+  virtual void operator << (ComplexMatrix& m);
+  virtual void operator << (const Envelope& p);
 
   // particle copy
   Particle& operator = (const Particle& p);
@@ -592,9 +594,24 @@ class FixMatrixEnvParticle : public MatrixEnvParticle {
   FixMatrixEnvParticle(const Envelope& p);
   FixMatrixEnvParticle();
 
+  // Initialize a given ParticleStack with the values in the delay string,
+  // obtaining other Particles from the given Pplasma.  Returns then
+  // number of total Particles initialized, including this one.
+  /*virtual*/ int initParticleStack(Block* parent, ParticleStack& pstack,
+                                    Plasma* myPlasma, const char* delay = 0);
+
   // load with data
-  void operator << (FixMatrix& m);
-  void operator << (const Envelope& p);
+  // These assignments return an error
+  virtual void operator << (int i);
+  virtual void operator << (double d);
+  virtual void operator << (const Complex& c);
+  virtual void operator << (const Fix& c);
+  virtual void operator << (ComplexMatrix& m);
+  virtual void operator << (FloatMatrix& m);
+  virtual void operator << (IntMatrix& m);
+
+  virtual void operator << (FixMatrix& m);
+  virtual void operator << (const Envelope& p);
 
   // particle copy
   Particle& operator = (const Particle& p);
@@ -617,9 +634,25 @@ class FloatMatrixEnvParticle : public MatrixEnvParticle {
   FloatMatrixEnvParticle(const Envelope& p);
   FloatMatrixEnvParticle();
 
+  // Initialize a given ParticleStack with the values in the delay string,
+  // obtaining other Particles from the given Plasma.  Returns the
+  // number of total Particles initialized, including this one.
+  /*virtual*/ int initParticleStack(Block* parent, ParticleStack& pstack,
+                                    Plasma* myPlasma, const char* delay = 0);
+                                    
+
   // load with data
-  void operator << (FloatMatrix& m);
-  void operator << (const Envelope& p);
+  // These assignments return an error
+  virtual void operator << (int i);
+  virtual void operator << (double d);
+  virtual void operator << (const Complex& c);
+  virtual void operator << (const Fix& c);
+  virtual void operator << (ComplexMatrix& m);
+  virtual void operator << (FixMatrix& m);
+  virtual void operator << (IntMatrix& m);
+
+  virtual void operator << (FloatMatrix& m);
+  virtual void operator << (const Envelope& p);
 
   // particle copy
   Particle& operator = (const Particle& p);
@@ -641,9 +674,25 @@ class IntMatrixEnvParticle : public MatrixEnvParticle {
   IntMatrixEnvParticle(const Envelope& p);
   IntMatrixEnvParticle();
 
+  // Initialize a given ParticleStack with the values in the delay string,
+  // obtaining other Particles from the given Plasma.  Returns the
+  // number of total Particles initialized, including this one.
+  /*virtual*/ int initParticleStack(Block* parent, ParticleStack& pstack,
+                                    Plasma* myPlasma, const char* delay = 0);
+                                    
+
   // load with data
-  void operator << (IntMatrix& m);
-  void operator << (const Envelope& p);
+  // These assignments return an error
+  virtual void operator << (int i);
+  virtual void operator << (double d);
+  virtual void operator << (const Complex& c);
+  virtual void operator << (const Fix& c);
+  virtual void operator << (ComplexMatrix& m);
+  virtual void operator << (FixMatrix& m);
+  virtual void operator << (FloatMatrix& m);
+
+  virtual void operator << (IntMatrix& m);
+  virtual void operator << (const Envelope& p);
 
   // particle copy
   Particle& operator = (const Particle& p);

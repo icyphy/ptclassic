@@ -12,10 +12,10 @@ software and its documentation for any purpose, provided that the above
 copyright notice and the following two paragraphs appear in all copies
 of this software.
 
-IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY 
-FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES 
-ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF 
-THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF 
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
 SUCH DAMAGE.
 
 THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
@@ -24,7 +24,7 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
 PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
 CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
-							COPYRIGHTENDKEY
+                                                        COPYRIGHTENDKEY
 
  Programmer:  Mike J. Chen
  Date of creation: 9/27/93
@@ -2009,21 +2009,6 @@ void MatrixEnvParticle::getMessage (Envelope& p) {
 
 Particle& MatrixEnvParticle::initialize() { data = dummy; return *this;}
 
-void MatrixEnvParticle::operator << (const Complex& c) { 
-  errorAssign("Complex"); }
-void MatrixEnvParticle::operator << (double d) { errorAssign("double"); }
-void MatrixEnvParticle::operator << (const Fix& c) { errorAssign("Fix"); }
-void MatrixEnvParticle::operator << (float f) { errorAssign("float"); }
-void MatrixEnvParticle::operator << (int i) { errorAssign("int"); }
-void MatrixEnvParticle::operator << (ComplexMatrix& m) {
-  errorAssign("ComplexMatrix"); }
-void MatrixEnvParticle::operator << (FixMatrix& m) { 
-  errorAssign("FixMatrix"); }
-void MatrixEnvParticle::operator << (FloatMatrix& m) { 
-  errorAssign("FloatMatrix"); }
-void MatrixEnvParticle::operator << (IntMatrix& m) { 
-  errorAssign("IntMatrix"); }
-
 // particle compare: considered equal if Matrix addresses are the same.
 int MatrixEnvParticle :: operator == (const Particle& p) {
   if (!typesEqual(p)) return 0;
@@ -2047,8 +2032,68 @@ ComplexMatrixEnvParticle::ComplexMatrixEnvParticle() {}
 
 DataType ComplexMatrixEnvParticle::type() const { return COMPLEX_MATRIX_ENV;}
 
+// Initialize a given ParticleStack with the values in delay,
+// obtaining other particles from the given plasma.  Returns
+// the number of toal particles initialized, including this one.
+// Assumes that the delay string is in the following format:
+// "nrows ncols (A[0][0].real,A[0][0].imag) (A[0][1].real,A[0][1].imag), ... A[0][ncols-1] A[1][0] ... (A[nrows][ncols].real,A[nrows][ncols].imag)"
+int ComplexMatrixEnvParticle::initParticleStack(Block* parent,
+                                                ParticleStack& pstack,
+                                                Plasma* myPlasma,
+                                                const char* delay)  {
+  ComplexArrayState initDelays;
+  initDelays.setState("initDelays",parent,delay);
+  initDelays.initialize();
+  if(initDelays.size() < 3) {
+    Error::abortRun("improper initial values for delay on ComplexMatrix arc");
+    return 0;
+  }
+  int numRows = int(initDelays[0].real());
+  int numCols = int(initDelays[1].real());
+  int matrixSize = numRows * numCols;
+
+  // the number of complete Matricies that we have initial values for
+  int numInitialParticles = (initDelays.size() - 2) / matrixSize;
+
+  if(numInitialParticles < 1) {
+    Error::abortRun("not enough initial values for delay on ComplexMatrix arc");
+    return 0;
+  }
+
+  // create a new matrix for this particle
+  ComplexMatrix *matrix = new ComplexMatrix(numRows,numCols);
+  for(int k = 0; k < matrixSize; k++)
+    matrix->entry(k) = initDelays[k + 2];
+  Envelope p(*matrix);
+  data = p;
+
+  // create new matricies, initialize them, stuff them into Envelopes, put
+  // the envelopes into MatrixEnvParticles obtained from the plasma
+  for(int i = 1; i < numInitialParticles; i++) {
+    ComplexMatrix *matrix = new ComplexMatrix(numRows,numCols);
+    for(int k = 0; k < matrixSize; k++)
+      matrix->entry(k) = initDelays[i * matrixSize + k + 2];
+    Particle* p = myPlasma->get();
+    *p << *matrix;
+    pstack.putTail(p);
+  }
+  return numInitialParticles;
+}
+
 // load with data -- function errorAssign prints an
 // error and calls Error::abortRun().
+
+void ComplexMatrixEnvParticle::operator << (const Complex&) { 
+  errorAssign("Complex"); }
+void ComplexMatrixEnvParticle::operator << (double) { errorAssign("double"); }
+void ComplexMatrixEnvParticle::operator << (const Fix&) { errorAssign("Fix"); }
+void ComplexMatrixEnvParticle::operator << (int) { errorAssign("int"); }
+void ComplexMatrixEnvParticle::operator << (FixMatrix&) { 
+  errorAssign("FixMatrix"); }
+void ComplexMatrixEnvParticle::operator << (FloatMatrix&) { 
+  errorAssign("FloatMatrix"); }
+void ComplexMatrixEnvParticle::operator << (IntMatrix&) { 
+  errorAssign("IntMatrix"); }
 
 void ComplexMatrixEnvParticle::operator << (const Envelope& p) { 
   if(!p.typeCheck("ComplexMatrix") && !p.empty())
@@ -2112,8 +2157,68 @@ FixMatrixEnvParticle::FixMatrixEnvParticle() {}
 
 DataType FixMatrixEnvParticle::type() const { return FIX_MATRIX_ENV;}
 
+// Initialize a given ParticleStack with the values in delay,
+// obtaining other particles from the given plasma.  Returns
+// the number of toal particles initialized, including this one.
+// Assumes that the delay string is in the following format:
+// "nrows ncols A[0][0] A[0][1] ... A[0][ncols-1] A[1][0] ... A[nrows][ncols]"
+int FixMatrixEnvParticle::initParticleStack(Block* parent,
+                                            ParticleStack& pstack,
+                                            Plasma* myPlasma, 
+                                            const char* delay) {
+  FixArrayState initDelays;
+  initDelays.setState("initDelays",parent,delay);
+  initDelays.initialize();
+  if(initDelays.size() < 3) {
+    Error::abortRun("improper initial values for delay on FixMatrix arc");
+    return 0;
+  }
+  int numRows = int(initDelays[0]);
+  int numCols = int(initDelays[1]);
+  int matrixSize = numRows * numCols;
+
+  // the number of complete Matricies that we have initial values for
+  int numInitialParticles = (initDelays.size() - 2) / matrixSize;
+
+  if(numInitialParticles < 1) {
+    Error::abortRun("not enough initial values for delay on FixMatrix arc");
+    return 0;
+  }
+
+  // create a new matrix for this particle
+  FixMatrix *matrix = new FixMatrix(numRows,numCols);
+  for(int k = 0; k < matrixSize; k++)
+    matrix->entry(k) = initDelays[k + 2];
+  Envelope p(*matrix);
+  data = p;
+
+  // create new matricies, initialize them, stuff them into Envelopes, put
+  // the envelopes into MatrixEnvParticles obtained from the plasma
+  for(int i = 1; i < numInitialParticles; i++) {
+    FixMatrix *matrix = new FixMatrix(numRows,numCols);
+    for(int k = 0; k < matrixSize; k++)
+      matrix->entry(k) = initDelays[i * matrixSize + k + 2];
+    Particle* p = myPlasma->get();
+    *p << *matrix;
+    pstack.putTail(p);
+  }
+  return numInitialParticles;
+}
+
 // load with data -- function errorAssign prints an
 // error and calls Error::abortRun().
+
+void FixMatrixEnvParticle::operator << (const Complex&) { 
+  errorAssign("Complex"); }
+void FixMatrixEnvParticle::operator << (double) { errorAssign("double"); }
+void FixMatrixEnvParticle::operator << (const Fix&) { errorAssign("Fix"); }
+void FixMatrixEnvParticle::operator << (int) { errorAssign("int"); }
+void FixMatrixEnvParticle::operator << (ComplexMatrix&) {
+  errorAssign("ComplexMatrix"); }
+void FixMatrixEnvParticle::operator << (FloatMatrix&) { 
+  errorAssign("FloatMatrix"); }
+void FixMatrixEnvParticle::operator << (IntMatrix&) { 
+  errorAssign("IntMatrix"); }
 
 void FixMatrixEnvParticle::operator << (const Envelope& p) { 
   if(!p.typeCheck("FixMatrix") && !p.empty())
@@ -2177,8 +2282,69 @@ FloatMatrixEnvParticle::FloatMatrixEnvParticle() {}
 
 DataType FloatMatrixEnvParticle::type() const { return FLOAT_MATRIX_ENV;}
 
+// Initialize a given ParticleStack with the values in delay,
+// obtaining other particles from the given plasma.  Returns
+// the number of toal particles initialized, including this one.
+// Assumes that the delay string is in the following format:
+// "nrows ncols A[0][0] A[0][1] ... A[0][ncols-1] A[1][0] ... A[nrows][ncols]"
+int FloatMatrixEnvParticle::initParticleStack(Block* parent,
+                                              ParticleStack& pstack,
+                                              Plasma* myPlasma, 
+                                              const char* delay) {
+                                              
+  FloatArrayState initDelays;
+  initDelays.setState("initDelays",parent,delay);
+  initDelays.initialize();
+  if(initDelays.size() < 3) {
+    Error::abortRun("improper initial values for delay on FloatMatrix arc");
+    return 0;
+  }
+  int numRows = int(initDelays[0]);
+  int numCols = int(initDelays[1]);
+  int matrixSize = numRows * numCols;
+
+  // the number of complete Matricies that we have initial values for
+  int numInitialParticles = (initDelays.size() - 2) / matrixSize;
+
+  if(numInitialParticles < 1) {
+    Error::abortRun("not enough initial values for delay on FloatMatrix arc");
+    return 0;
+  }
+
+  // create a new matrix for this particle
+  FloatMatrix *matrix = new FloatMatrix(numRows,numCols);
+  for(int k = 0; k < matrixSize; k++)
+    matrix->entry(k) = initDelays[k + 2];
+  Envelope p(*matrix);
+  data = p;
+
+  // create new matricies, initialize them, stuff them into Envelopes, put
+  // the envelopes into MatrixEnvParticles obtained from the plasma
+  for(int i = 1; i < numInitialParticles; i++) {
+    FloatMatrix *matrix = new FloatMatrix(numRows,numCols);
+    for(int k = 0; k < matrixSize; k++)
+      matrix->entry(k) = initDelays[i * matrixSize + k + 2];
+    Particle* p = myPlasma->get();
+    *p << *matrix;
+    pstack.putTail(p);
+  }
+  return numInitialParticles;
+}
+
 // load with data -- function errorAssign prints an
 // error and calls Error::abortRun().
+
+void FloatMatrixEnvParticle::operator << (const Complex&) { 
+  errorAssign("Complex"); }
+void FloatMatrixEnvParticle::operator << (double) { errorAssign("double"); }
+void FloatMatrixEnvParticle::operator << (const Fix&) { errorAssign("Fix"); }
+void FloatMatrixEnvParticle::operator << (int) { errorAssign("int"); }
+void FloatMatrixEnvParticle::operator << (ComplexMatrix&) {
+  errorAssign("ComplexMatrix"); }
+void FloatMatrixEnvParticle::operator << (FixMatrix&) { 
+  errorAssign("FixMatrix"); }
+void FloatMatrixEnvParticle::operator << (IntMatrix&) { 
+  errorAssign("IntMatrix"); }
 
 void FloatMatrixEnvParticle::operator << (const Envelope& p) { 
   if(!p.typeCheck("FloatMatrix") && !p.empty())
@@ -2242,8 +2408,68 @@ IntMatrixEnvParticle::IntMatrixEnvParticle() {}
 
 DataType IntMatrixEnvParticle::type() const { return INT_MATRIX_ENV;}
 
+// Initialize a given ParticleStack with the values in delay,
+// obtaining other particles from the given plasma.  Returns
+// the number of toal particles initialized, including this one.
+// Assumes that the delay string is in the following format:
+// "nrows ncols A[0][0] A[0][1] ... A[0][ncols-1] A[1][0] ... A[nrows][ncols]"
+int IntMatrixEnvParticle::initParticleStack(Block* parent,
+                                            ParticleStack& pstack,
+                                            Plasma* myPlasma, 
+                                            const char* delay) {
+  IntArrayState initDelays;
+  initDelays.setState("initDelays",parent,delay);
+  initDelays.initialize();
+  if(initDelays.size() < 3) {
+    Error::abortRun("improper initial values for delay on IntMatrix arc");
+    return 0;
+  }
+  int numRows = initDelays[0];
+  int numCols = initDelays[1];
+  int matrixSize = numRows * numCols;
+
+  // the number of complete Matricies that we have initial values for
+  int numInitialParticles = (initDelays.size() - 2) / matrixSize;
+
+  if(numInitialParticles < 1) {
+    Error::abortRun("not enough initial values for delay on IntMatrix arc");
+    return 0;
+  }
+
+  // create a new matrix for this particle
+  IntMatrix *matrix = new IntMatrix(numRows,numCols);
+  for(int k = 0; k < matrixSize; k++)
+    matrix->entry(k) = initDelays[k + 2];
+  Envelope p(*matrix);
+  data = p;
+
+  // create new matricies, initialize them, stuff them into Envelopes, put
+  // the envelopes into MatrixEnvParticles obtained from the plasma
+  for(int i = 1; i < numInitialParticles; i++) {
+    IntMatrix *matrix = new IntMatrix(numRows,numCols);
+    for(int k = 0; k < matrixSize; k++)
+      matrix->entry(k) = initDelays[i * matrixSize + k + 2];
+    Particle* p = myPlasma->get();
+    *p << *matrix;
+    pstack.putTail(p);
+  }
+  return numInitialParticles;
+}
+
 // load with data -- function errorAssign prints an
 // error and calls Error::abortRun().
+
+void IntMatrixEnvParticle::operator << (const Complex&) { 
+  errorAssign("Complex"); }
+void IntMatrixEnvParticle::operator << (double) { errorAssign("double"); }
+void IntMatrixEnvParticle::operator << (const Fix&) { errorAssign("Fix"); }
+void IntMatrixEnvParticle::operator << (int) { errorAssign("int"); }
+void IntMatrixEnvParticle::operator << (ComplexMatrix&) {
+  errorAssign("ComplexMatrix"); }
+void IntMatrixEnvParticle::operator << (FixMatrix&) { 
+  errorAssign("FixMatrix"); }
+void IntMatrixEnvParticle::operator << (FloatMatrix&) { 
+  errorAssign("FloatMatrix"); }
 
 void IntMatrixEnvParticle::operator << (const Envelope& p) { 
   if(!p.typeCheck("IntMatrix") && !p.empty())
