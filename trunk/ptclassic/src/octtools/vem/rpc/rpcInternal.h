@@ -65,7 +65,7 @@
  * Rick L Spickelmier, 11/12/86, last modified 3/2/87
  *
  */
-
+#include "ansi.h"
 /*
  * important top level defines
  *
@@ -78,6 +78,9 @@
 /* can not use fread in NOWAIT mode */
 #ifdef SERVER  
 #ifdef NOWAIT
+int RPCfread
+	ARGS((register char *ptr, int size, int count, FILE *stream));
+
 #define fread	RPCfread
 #endif /* NOWAIT */
 #endif /* SERVER */
@@ -437,5 +440,13 @@ extern rpcInternalStatus        RPCSendRealArray();
 
 extern rpcStatus                RPCSendVemArgs();
 
+extern rpcInternalStatus	RPCSendFacetInfo
+	ARGS((struct octFacetInfo *info, STREAM stream));
+extern rpcInternalStatus	RPCSendRegionGenerator
+	ARGS((regGenerator *generator, STREAM stream));
+extern rpcInternalStatus        RPCReceiveRegionGenerator
+	ARGS((regGenerator *generator, STREAM stream));
+extern rpcInternalStatus	RPCReceiveSpot
+	ARGS((RPCSpot *spot, STREAM stream));
 
 #endif /* RPCINTERNAL_H */
