@@ -166,7 +166,7 @@ body ::tycho::LabelledOval::construct {id canvas slate tags x0 y0 x1 y1 args} {
     # Create the primary component. This is the displayed oval.
     set primary($id) [$canvas create oval $x0 $y0 $x1 $y1 \
 	    -fill $_fill($id) -outline $_outline($id) \
-	    -tags $tags]
+	    -width $_width($id) -tags $tags]
 
     # Create the text label
     set textitem($id) [$canvas create text \
