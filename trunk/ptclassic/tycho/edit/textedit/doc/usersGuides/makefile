@@ -57,7 +57,17 @@ REALCLEAN_STUFF =
 DIRS =
 
 EXTRA_SRCS =	\
+	EditCHelp.html \
+	EditCppHelp.html \
 	EditHTMLHelp.html \
+	EditItclHelp.html \
+	EditMakeHelp.html \
+	EditProgramHelp.html \
+	EditPtlangHelp.html \
+	EditSpiceHelp.html \
+	EditTclHelp.html \
+	EditVHDLHelp.html \
+	MathematicaHelp.html \
 	MatlabHelp.html
 
 # We don't include common.mk since we don't use the compiler here
