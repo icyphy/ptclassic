@@ -51,11 +51,15 @@ YES, TRUE, or a non-zero integer enables compression.
 		default{255}
 		desc{mu parameter, a positive integer}
 	}
-	
-	private {
-		double	denom;
-	}
 
+	defstate{
+		name{denom}
+		type{float}
+		default{"1.0"}
+		desc{denominator of the mu-law definition}
+		attributes { A_NONCONSTANT|A_SETTABLE }
+	}
+	
 	ccinclude { <math.h> }
 
 	setup {
@@ -74,7 +78,7 @@ YES, TRUE, or a non-zero integer enables compression.
 		if (int(compress)) {
 			if (comp_value < 0) comp_value = -comp_value;
 			double numer = log(1.0 + int(mu) * comp_value);
-			comp_value = numer / denom;	
+			comp_value = numer / double(denom);	
 		}
 
 		output%0 << comp_value;
