@@ -65,14 +65,11 @@ CHDRS	      = compile.h \
 		palette.h \
 		paramStructs.h \
 		pigiLoader.h \
-		poct.h \
-		ptcl.h \
 		pthreadsCompat.h \
 		ptkNet.h \
 		ptkRegisterCmds.h \
 		ptkTclIfc.h \
 		ptkTkSetup.h \
-		pvem.h \
 		sol2compat.h \
 		util.h \
 		utilities.h \
