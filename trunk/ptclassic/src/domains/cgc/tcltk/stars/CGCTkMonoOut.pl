@@ -45,7 +45,7 @@ limitation of liability, and disclaimer of warranty provisions.
     codeblock (tychoSetup) {
       /* Call tycho to connect a control to the volume parameter */
       {
-	connectControl(moduleName, $val(starName), volume,
+	connectControl(moduleName, "$val(starName)", "volume",
 		$starSymbol(setVolume));
       }
     }
@@ -68,7 +68,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	    $sharedSymbol(CGCAudioBase, audio_gain)
 	      ($starSymbol(file), $ref(volume), 0);
 
-	    sprintf(buf, "%f", $ref(volume));
+            printf(buf, "%f", $ref(volume));
 	    displaySliderValue(".high", "$starSymbol(scale1)", buf);
 
             return TCL_OK;
