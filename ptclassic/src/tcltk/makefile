@@ -451,5 +451,5 @@ $(ITCL_SHARED_DEST_LIB)/libitk.so: $(ITCL_SHARED_OBJ)/itk/libitk.so
 	mv $(ITCL_DEST_LIB)/libitk.so.2 $(ITCL_SHARED_DEST_LIB)/libitk.so
 
 
-clean_shared_itcl:
+clean_itcl_shared:
 	(cd $(ITCL_SHARED_OBJ); $(MAKE) clean)
