@@ -46,6 +46,7 @@ VPATH =		$(ROOT)/src/tycho/tysh
 CONFIG =	$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
+
 -include override.mk
 
 # Directory containing utilities for BarGraph and XYPlot
@@ -113,6 +114,10 @@ ifndef PIGI
 	BASENAME =	tysh
 	PIGI =		tysh
 endif
+endif
+
+ifndef VERSION
+	VERSION =	0.01devel.$(BASENAME)_Ptolemy0.6.1devel
 endif
 
 TK = 		1
