@@ -24,7 +24,7 @@ $Id$
 #include "SDFConnect.h"
 #include "Particle.h"
 
-class EGMaster;
+class EGNode;
 
 	////////////////////////////////////
 	// class DataFlowStar
@@ -46,7 +46,7 @@ class SDFStar : public DataFlowStar  {
 private:
         // pointer to master of instances for an expanded graph
 	// TEMPORARY: these kinds of things don't belong here.
-        EGMaster *master;
+        EGNode *master;
 
 protected:
 	// During scheduling, the scheduler must keep track of how
@@ -62,10 +62,10 @@ public:
 	}
 
 	// my expanded graph master (temporary)
-	EGMaster *myMaster() { return master;}
+	EGNode *myMaster() { return master;}
 
         // set the expanded graph master
-        void setMaster(EGMaster *m) {master = m;}
+        void setMaster(EGNode *m) {master = m;}
 
 	// my domain
 	const char* domain() const;
