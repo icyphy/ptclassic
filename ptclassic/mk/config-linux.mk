@@ -137,7 +137,8 @@ BISONFLEXLIB =	-fl
 #	Don't use -m486, it's the default, except for those with the
 #	Pentium optimized compiler; for them -m486 makes things worse.
 #OPTIMIZER =	-g #-m486 -pipe
-OPTIMIZER =	-O3 -fomit-frame-pointer -malign-loops=4 -malign-jumps=4 -malign-functions=4 #-m486 -pipe
+OPTIMIZER =	-g -O3 #-fomit-frame-pointer -malign-loops=4 -malign-jumps=4 -malign-functions=4 #-m486 -pipe
+
 # -Wsynth is new in g++-2.6.x, however 2.5.x does not support it
 # Under gxx-2.7.0 -Wcast-qual will drown you with warnings from libg++ includes
 WARNINGS =	-Wall -Wcast-align -Wsynth # -Wcast-qual 
