@@ -21,8 +21,8 @@ set freq1 { 697 697 697 770 770 770 852 852 852 941 941 941 }
 
 set freq2 { 1209 1336 1477 1209 1336 1477 1209 1336 1477 1209 1336 1477 }
 
-frame $s.f -bd 10
-canvas $s.f.pad -relief raised -bd 5 -bg AntiqueWhite3 \
+frame $s.f -bd 10 -bg LightGray
+canvas $s.f.pad -relief raised -bd 5 -bg CadetBlue3 \
 	-height 5.75c -width 4.5c
 pack append $s.f $s.f.pad top
 
@@ -38,13 +38,13 @@ for {set row 0} {$row < 4} {incr row} {
 	set y2 [expr 1.5+1.25*$row]
 	set keyid [$c create rect ${x1}c ${y1}c ${x2}c ${y2}c \
 		       -outline white \
-		       -fill firebrick4 ]
+		       -fill red3 ]
 
 	set keyind [expr $keynum-1] 
 	$c bind $keyid <ButtonPress-1> \
-	    "${uniqueSymbol}setOutputs 1.0 [lindex $freq1 $keyind] [lindex $freq2 $keyind]; $c itemconfigure $keyid -fill firebrick2"
+	    "${uniqueSymbol}setOutputs 1.0 [lindex $freq1 $keyind] [lindex $freq2 $keyind]; $c itemconfigure $keyid -fill salmon"
 	$c bind $keyid <ButtonRelease-1> \
-	    "${uniqueSymbol}setOutputs 0.0 0.0 0.0; $c itemconfigure $keyid -fill firebrick4"
+	    "${uniqueSymbol}setOutputs 0.0 0.0 0.0; $c itemconfigure $keyid -fill red3"
 
 	set keytext $keynum
 	if {$keynum == 10} {set keytext * }
@@ -57,9 +57,9 @@ for {set row 0} {$row < 4} {incr row} {
 	    -font -Adobe-times-medium-r-normal--*-180* ]
 
 	$c bind $textid <ButtonPress-1> \
-	    "${uniqueSymbol}setOutputs 1.0 [lindex $freq1 $keyind] [lindex $freq2 $keyind]; $c itemconfigure $keyid -fill firebrick2"
+	    "${uniqueSymbol}setOutputs 1.0 [lindex $freq1 $keyind] [lindex $freq2 $keyind]; $c itemconfigure $keyid -fill salmon"
 	$c bind $textid <ButtonRelease-1> \
-	    "${uniqueSymbol}setOutputs 0.0 0.0 0.0; $c itemconfigure $keyid -fill firebrick4"
+	    "${uniqueSymbol}setOutputs 0.0 0.0 0.0; $c itemconfigure $keyid -fill red3"
 
 	set keynum [expr $keynum+1.0]
     }
