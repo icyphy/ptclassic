@@ -103,7 +103,7 @@ y.tab.o: spin.y
 	cd $(VPATH); $(YACC) $^
 	rm -f $@
 	$(CPLUSPLUS) $(CC_SHAREDFLAGS) $(GPPFLAGS) \
-		-I$(VPATH) $(INCL) -c y.tab.c -o y.tab.o
+		-I$(VPATH) $(INCL) -c $(VPATH)/y.tab.c -o y.tab.o
 	#yacc -v -d $(ROOT)/src/domains/de/sip/kernel/spin.y
 	#cp y.tab.h $(ROOT)/src/domains/de/sip/kernel/y.tab.h
 	#$(CPLUSPLUS) $(CC_SHAREDFLAGS) $(GPPFLAGS) \
