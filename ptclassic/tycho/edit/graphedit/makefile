@@ -43,6 +43,8 @@ include $(CONFIG)
 TCL_SRCS =
   
 ITCL_SRCS =  \
+	AbstractGraph.itcl \
+	Digraph.itcl \
 	DFGEdgeController.itcl \
 	DFGEditor.itcl \
 	DFGVertexController.itcl \
@@ -50,14 +52,19 @@ ITCL_SRCS =  \
 	IconPalette.itcl \
 	Junction.itcl \
 	Layout.itcl \
+	Library.itcl \
 	Net.itcl \
+	PortedGraph.itcl \
 	SlateView.itcl \
 	StarLibrary.itcl \
 	ViewController.itcl
 
 EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) \
-	pkgIndex.tcl \
-	graphedit.tcl
+	icons.tim \
+	stars.tim \
+	graphedit.tcl \
+	README.txt \
+	pkgIndex.tcl
 
 MISC_FILES =		doc test tclIndex icons.tim stars.tim
 
