@@ -30,6 +30,9 @@ clean:
 
 sources:	ptlang.y
 
+depend:
+	echo no dependencies to make in this directory
+
 # Rule for making .o file from .c file (the Gnu-make default rule breaks
 # on Vaxes running older versions of Ultrix)
 .c.o:
