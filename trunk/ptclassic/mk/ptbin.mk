@@ -26,7 +26,7 @@
 # 						PT_COPYRIGHT_VERSION_2
 # 						COPYRIGHTENDKEY
 #		       
-# Programmer:  Christopher Hylands, Jose Luis Pino
+# Programmers:  Christopher Hylands, Jose Luis Pino
 # Based on pigiRpc/makefile, originally by Joe Buck,
 #  with modifications from just about everyone on the Ptolemy Team.
 #
@@ -35,10 +35,15 @@
 # makefiles.  Currently, ptcl, pigiRpc and tycho use this file
 
 # Todo:
-# Check out with compile-sdf
-# Build Shared itcl libraries
-# Test out pigiRpc.cp
-# Make a non-shared library
+#   Check out with compile-sdf
+#   Build Shared itcl libraries
+#   Test out pigiRpc.cp
+#   Make a non-shared library
+#
+# Bugs:
+#   version.*.c is not regenerated each time, so the build time is not updated
+#   version.*.c does not contain a description of the binary.
+#   make realclean fails in ptcl and tycho because $(PIGI) is not defined
 
 # To create a custom executable, you should define a file named override.mk
 # in your $(ROOT)/obj.$(PTARCH)/$(PIGI) directory. You should also have a 
