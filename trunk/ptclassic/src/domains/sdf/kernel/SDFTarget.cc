@@ -134,3 +134,27 @@ void SDFTarget::setup() {
 		o << scheduler()->displaySchedule() << "\n";
 	}
 }
+
+
+//This function is to be called only from a wormhole, and would return TRUE 
+//only if the wormhole has no inputs in which case it should trigger itself
+int SDFTarget :: selfFiringRequested(){
+if (noOfInputs() == 0) return TRUE;
+else return FALSE; 
+} 
+
+// Determines the total no. of input that this SDFWormhole has
+int SDFTarget :: noOfInputs(){
+BlockPortIter nextp(*this);
+        PortHole* p;
+        int nInP = 0;
+        while ((p = nextp++) != 0)
+                if (p->isItInput()) nInP++;
+	return nInP;
+}
+
+//Determines the next-self-firing-time of the wormhole that has to be triggered
+//by itself, as it doesn't have any inputs to trigger it off
+double SDFTarget :: nextFiringTime(){
+return ((scheduler()->now()) + (double)schedulePeriod);
+}
