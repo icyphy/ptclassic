@@ -18,9 +18,20 @@ foreach x (domains interp kernel pigiRpc tests preproc)
 	cd ..
 end
 
-mkdir xgraph
-cd xgraph
-ln -s ../../src/xgraph/Makefile .
+foreach x (xgraph filters)
+	mkdir $x
+	cd $x
+	ln -s ../../src/$x/Makefile .
+	cd ..
+end
+
+cd filters
+foreach x (optfir wfir)
+	mkdir $x
+	cd $x
+	ln -s ../../src/$x/Makefile .
+	cd ..
+end
 cd ..
 
 cd domains
