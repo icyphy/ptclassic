@@ -20,6 +20,7 @@ $Id$
 #include "main.h"
 
 #define dmWidth 80  /* dialog entry width */
+#define EDIT_ICON_SNAP 5 /* snap size of vem window for edit-icon */
 
 
 /*  5/9/90
@@ -413,6 +414,8 @@ long userOptionWord;
     octObject mFacet, inst;
     vemStatus status;
     char *fullName;
+    Window iconWindow; /* the vem window to edit icon in */
+    wnOpts options; /* need this to set snap size of iconWindow */
 
     ViInit("edit-icon");
     ErrClear();
@@ -428,6 +431,10 @@ long userOptionWord;
 	PrintErr(ErrGet());
 	ViDone();
     }
-    vemOpenWindow(&mFacet, NULL);
+    iconWindow = vemOpenWindow(&mFacet, NULL);
+    /* When editing icon it's convenient to have a smaller snap size */
+    vemWnGetOptions(iconWindow, &options);
+    options.snap = EDIT_ICON_SNAP;
+    vemWnSetOptions(iconWindow, &options);
     ViDone();
 }
