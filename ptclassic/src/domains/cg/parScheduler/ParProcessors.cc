@@ -454,6 +454,7 @@ void ParProcessors :: createSubGals() {
 	// create sub-Universes
 	for (i = 0; i < numProcs; i++) {
 		getProc(i)->createSubGal();
+		if (SimControl::haltRequested()) return;
 	}
 }
 
