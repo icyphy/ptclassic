@@ -1,29 +1,19 @@
-ident {
-/**************************************************************************
-Version identification:
-$Id$
-
- Copyright (c) 1990 The Regents of the University of California.
-                       All Rights Reserved.
-
- Programmer:  D. G. Messerschmitt
- Date of creation: 1/16/90
- Revisions:  Redone to support ANYTYPE, J. Buck
-	Added StringState -- file Name, D.Messerschmitt
- Converted to use preprocessor, 10/3/90 JTB
-
- Printer prints out its input, which may be any supported type.
- There may be multiple inputs: all inputs are printed together on
- the same line.
-
-**************************************************************************/
-}
 defstar {
 	name { Printer }
 	domain { SDF }
-	desc {	"Prints out one sample from each input port per line\n"
-		"If 'fileName' is not equal to 'cout' (the default), it\n"
-		"specifies the filename to print to."
+	desc {
+Prints out one sample from each input port per line
+If "fileName" is not equal to "cout" (the default), it
+specifies the filename to write to.
+	}
+	version {$Revision$ $Date$}
+	author { D. G. Messerschmitt and J. Buck }
+	copyright { 1991 The Regents of the University of California }
+	location { SDF main library }
+	explanation {
+This star prints its input, which may be any supported type.
+There may be multiple inputs: all inputs are printed together on
+the same line, separated by tabs.
 	}
 	inmulti {
 		name { input }
@@ -33,7 +23,7 @@ defstar {
 		name { fileName }
 		type { string }
 		default { "cout" }
-		desc { "filename for output" }
+		desc { Filename for output. }
 	}
 	protected {
 		UserOutput output;

@@ -1,32 +1,34 @@
-ident {
-/**************************************************************************
-Version identification:
-$Id$
-
- Copyright (c) 1990 The Regents of the University of California.
-                       All Rights Reserved.
-
- Programmer:  J. T. Buck
- Date of creation: 8/3/90
- Converted to use preprocessor, 9/26/90
-
-Methods for ComplexFFT: Compute the FFT of the input.
-
-Bugs: the routine currently used (from Gabriel) recomputes trig
-functions for each term, instead of using a table.  We should have
-ComplexFFT::start() compute a table of appropriate size and save
-time.
-
-**************************************************************************/
-}
 defstar {
 	name {ComplexFFT}
 	domain {SDF}
 	desc {
-	"Complex Fast Fourier transform.\n"
-	"'order' (default 8) is the log, base 2, of the transform size.\n"
-	"'size' (default 256) is the number of samples read (<= 2^order).\n"
-	"'direction' (default 1) is 1 for forward, -1 for inverse FFT."
+Complex Fast Fourier transform.
+Parameter "order" (default 8) is the log, base 2, of the transform size.
+Parameter "size" (default 256) is the number of samples read (<= 2^order).
+Parameter "direction" (default 1) is 1 for forward, -1 for inverse FFT.
+	}
+	version {$Revision$ $Date$}
+	author { J. T. Buck }
+	copyright { 1991 The Regents of the University of California }
+	location { SDF dsp library }
+	explanation {
+A number of input samples given by the parameter \fIsize\fR will
+be consumed at the input, zero-padded if necessary to make $2 sup order$
+samples, and transformed using a fast Fourier transform algorithm.
+If \fIdirection\fR is 1, then the forward Fourier transform is computed.
+If \fIdirection\fR is -1, then the inverse Fourier transform is computed.
+.lp
+Note a single firing of this star consumes \fIsize\fR inputs
+and produces $2 sup order$ outputs.
+This must be taken into account when determining for how many iterations
+to run a universe.
+For example, to compute just one FFT, only one iteration should be run.
+.lp
+\fBBugs\fR: the routine currently used (from Gabriel) recomputes trig
+functions for each term, instead of using a table.  Instead,
+ComplexFFT::start() should compute a table of appropriate size to save
+time.  This has no effect, obviously, if only one transform
+is performed.
 	}
 	input {
 		name {input}
@@ -40,19 +42,19 @@ defstar {
 		name {order}
 		type {int}
 		default {8}
-		desc {""}
+		desc {Log base 2 of the transform size.}
 	}
 	defstate {
 		name {size}
 		type {int}
 		default {256}
-		desc {""}
+		desc {Number of input samples to read.}
 	}
 	defstate {
 		name {direction}
 		type {int}
 		default {1}
-		desc {""}
+		desc { = 1 for forward, = -1 for inverse. }
 	}
 	protected {
 		float* data;

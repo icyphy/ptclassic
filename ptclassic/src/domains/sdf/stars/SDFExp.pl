@@ -1,23 +1,14 @@
-ident {
-/**************************************************************************
-Version identification:
-$Id$
-
- Copyright (c) 1990 The Regents of the University of California.
-                       All Rights Reserved.
-
- Programmer:  J. T. Buck
- Date of creation: 10/8/90
-
- Output is exp of input.
- Overflow should be handled better.
-
-**************************************************************************/
-}
 defstar {
 	name { Exp }
 	domain { SDF } 
-	desc { 	"Outputs exp of input" }
+	desc { 	Outputs the exponential function of the input. }
+	version {$Revision$ $Date$}
+	author { J. T. Buck }
+	copyright { 1991 The Regents of the University of California }
+	location { SDF main library }
+	explanation {
+\fBBugs:\fR Overflow is not handled well.
+	}
 	input {
 		name { input }
 		type { float }

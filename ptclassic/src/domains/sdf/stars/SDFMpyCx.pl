@@ -1,26 +1,11 @@
-ident {
-/**************************************************************************
-Version identification:
-$Id$
-
- Copyright (c) 1990 The Regents of the University of California.
-                       All Rights Reserved.
-
- Programmer:  J. T. Buck
- Date of creation: 5/29/90
- Converted to use preprocessor, 9/26/90 
-
- Computes complex product of n inputs.
-
-**************************************************************************/
-}
-
 defstar {
 	name {ComplexProduct}
 	domain {SDF}
-	desc {
-		"Output the product of the inputs, as a complex value"
-	}
+	desc { Output the product of the inputs, as a complex value.  }
+	version {$Revision$ $Date$}
+	author { J. T. Buck }
+	copyright { 1991 The Regents of the University of California }
+	location { SDF main library }
 	inmulti {
 		name {input}
 		type {complex}

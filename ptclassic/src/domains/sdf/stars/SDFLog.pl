@@ -1,23 +1,15 @@
-ident {
-/**************************************************************************
-Version identification:
-$Id$
-
- Copyright (c) 1990 The Regents of the University of California.
-                       All Rights Reserved.
-
- Programmer:  J. T. Buck
- Date of creation: 10/8/90
-
- Output is natural log of input.  We abort the run on zero or negative input.
-
-**************************************************************************/
-}
-
 defstar {
 	name { Log }
 	domain { SDF } 
-	desc { 	"Outputs natural log of input" }
+	desc { Outputs natural log of input. }
+	version {$Revision$ $Date$}
+	author { J. T. Buck }
+	copyright { 1991 The Regents of the University of California }
+	location { SDF main library }
+	explanation {
+Outputs natural log of input.
+If the input is zero or negative, the run is aborted.
+	}
 	input {
 		name { input }
 		type { float }

@@ -1,26 +1,16 @@
-ident {
-/**************************************************************************
-Version identification:
-$Id$
-
- Copyright (c) 1990 The Regents of the University of California.
-                       All Rights Reserved.
-
- Programmer:  J. T. Buck
- Date of creation: 8/17/90
- Converted to use preprocessor, 10/3/90
-
- Distributor takes one input stream and splits it up into n output
- streams (n may be any number).  It consumes n particles and produces
- 1 particle on each of the n outputs.
-
-**************************************************************************/
-}
-
 defstar {
 	name { Distributor }
 	domain { SDF }
-	desc {}
+	version {$Revision$ $Date$}
+	desc {
+Takes one input stream and synchronously splits it into n output streams.
+	}
+	author { J. T. Buck }
+	copyright { 1991 The Regents of the University of California }
+	location { SDF main library }
+	explanation {
+This star consumes enough inputs to produce one sample on each output.
+	}
 	input {
 		name { input }
 		type { ANYTYPE }

@@ -1,11 +1,16 @@
 ident {
-/**************************************************************************
-Version identification:
-$Id$
-
- Programmer:  E. A. Lee
- Date of creation: 10/28/90
-
+#define MAXORDER 256
+}
+defstar {
+	name {LevDur}
+	domain {SDF}
+	desc { Levinson-Durbin algorithm. }
+	version {$Revision$ $Date$}
+	author { E. A. Lee }
+	copyright { 1991 The Regents of the University of California }
+	location { SDF dsp library }
+	explanation {
+.pp
 This star takes inputs from the
 .c Autocor
 star and uses the Levinson-Durbin
@@ -57,47 +62,33 @@ Prentice-Hall, Englewood Cliffs, NJ, 1988.
 .ip [3]
 S. Haykin, \fIModern Filters\fR, MacMillan Publishing Company,
 New York, 1989.
-
-
-SEE ALSO
-Autocor,
-BlockFIR,
-linearPrediction.
-
-
-**************************************************************************/
-
-#define MAXORDER 256
-}
-defstar {
-	name {LevDur}
-	domain {SDF}
-	desc { "Levinson-Durbin algorithm" }
+	}
+	seealso { Autocor, BlockFIR, linearPrediction }
 	input {
 		name {autocor}
 		type {float}
-		// desc { "Autocorrelation estimate" }
+		desc { Autocorrelation estimate }
 	}
 	output {
 		name {lp}
 		type {float}
-		// desc { "FIR linear predictor coefficients output" }
+		desc { FIR linear predictor coefficients output. }
 	}
 	output {
 		name {refl}
 		type {float}
-		// desc { "Lattice predictor coefficients output" }
+		desc { Lattice predictor coefficients output. }
 	}
 	output {
 		name {errPower}
 		type {float}
-		// desc { "Prediction error power" }
+		desc { Prediction error power. }
 	}
 	defstate {
 		name {order}
 		type {int}
 		default {8}
-		desc {"The order of the recursion"}
+		desc {The order of the recursion.}
 	}
 	start {
 		if (int(order) > MAXORDER) {

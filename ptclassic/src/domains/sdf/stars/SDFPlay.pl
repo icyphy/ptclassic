@@ -1,38 +1,29 @@
-ident {
-/**************************************************************************
-Version identification:
-$Id$
-
- Copyright (c) 1990 The Regents of the University of California.
-                       All Rights Reserved.
-
- Programmer:  J. T. Buck
- Date of creation: 10/8/90
-
- Generate a file for the SparcStation speaker and play it.  The "play"
- program must be on the user's path.		'
-
- This star may be used on a different device provided that a "play"
- program is written with the following specifications:
- 
- When invoked as "play filename", where filename is a sequence of
- bytes representing mu-law PCM samples, the program should play
- the file at 8000 samples per second.  Perhaps later this rate can
- be a parameter.
-
-**************************************************************************/
-}
-
 defstar {
 	name { Play }
 	domain { SDF }
-	desc {	"Play an input stream on the SparcStation speaker.  The\n"
-		"'gain' state (default 1.0) multiplies the input stream\n"
-		"before it is mu-law compressed and written.\n"
-		"The file is played at 8000 samples/second (sorry, fixed)\n"
-		"When the wrapup method is called, a file of 8-bit mu-law\n"
-		"samples is handed to a program named 'play' which plays\n"
-		"the file."
+	desc {
+Play an input stream on the SparcStation speaker.  The
+"gain" state (default 1.0) multiplies the input stream
+before it is mu-law compressed and written.
+The file is played at 8000 samples/second (sorry, fixed).
+When the wrapup method is called, a file of 8-bit mu-law
+samples is handed to a program named "play" which plays
+the file.
+	}
+	version {$Revision$ $Date$}
+	author { J. T. Buck }
+	copyright { 1991 The Regents of the University of California }
+	location { SDF main library }
+	explanation {
+Generate a file for the SparcStation speaker and play it.  The "play"
+program must be on the user's path.
+This star may be used on a different device provided that a "play"
+program is written with the following specifications:
+.lp
+When invoked as "play filename", where filename is a sequence of
+bytes representing mu-law PCM samples, the program should play
+the file at 8000 samples per second.  Perhaps later this rate can
+be a parameter.
 	}
 	input {
 		name { input }
@@ -42,13 +33,13 @@ defstar {
 		name { gain }
 		type { float }
 		default { "1.0" }
-		desc { "gain factor" }
+		desc { Output gain. }
 	}
 	defstate {
 		name {saveFile}
 		type {string}
 		default {""}
-		desc {"file to save xgraph input"}
+		desc {File to save the output mu-law samples.}
 	}
 	protected {
 		FILE *strm;

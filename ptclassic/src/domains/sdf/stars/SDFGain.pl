@@ -1,14 +1,11 @@
-ident {
-// A variable gain star.
-// J. Buck
-// $Id$
-// Copyright (c) 1990 The Regents of the University of California.
-//			All Rights Reserved.
-}
 defstar {
 	name { FloatGain }
 	domain { SDF }
-	desc { "Amplifier: output is input times gain (default 1.0)" }
+	desc { Amplifier: output is input times "gain" (default 1.0). }
+	version {$Revision$ $Date$}
+	author { J. T. Buck }
+	copyright { 1991 The Regents of the University of California }
+	location { SDF main library }
 	input {
 		name { input }
 		type { float }
@@ -21,7 +18,7 @@ defstar {
 		name { gain }
 		type { float }
 		default { "1.0" }
-		desc { "gain of the star" }
+		desc { Gain of the star. }
 	}
 	go {
 		output%0 << double(gain) * (float)(input%0);

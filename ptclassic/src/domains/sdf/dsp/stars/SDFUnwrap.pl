@@ -1,30 +1,16 @@
-ident {
-/**************************************************************************
-Version identification:
-$Id$
-
- Copyright (c) 1990 The Regents of the University of California.
-                       All Rights Reserved.
-
- Programmer:  J. T. Buck
-
- A very crude phase unwrapper.  It basically assumes that the phase
- never changes by more than PI in one iteration, and that we "catch"
- all phase transitions.  We also assume that the input is in the [-PI,PI]
- range.
-
-**************************************************************************/
-}
-
 defstar {
 	name { Unwrap }
 	domain { SDF }
 	desc {
-	"A very crude phase unwrapper.  It basically assumes that the phase\n"
-	"never changes by more than PI in one iteration, and that we 'catch'\n"
-	"all phase transitions.  We also assume that the input is in the\n"
-	"[-PI,PI]  range."
+A very crude phase unwrapper.  It basically assumes that the phase
+never changes by more than PI in one iteration, and that we "catch"
+all phase transitions.  It also assumes that the input is in the
+[-PI,PI]  range.
 	}
+	version {$Revision$ $Date$}
+	author { J. T. Buck }
+	copyright { 1991 The Regents of the University of California }
+	location { SDF main library }
 	input {
 		name {input}
 		type {float}
@@ -37,14 +23,14 @@ defstar {
 		name { outPhase }
 		type { float }
 		default { "0.0" }
-		desc { "current phase of the star" }
+		desc {  Current phase of the star. }
 		attributes { A_SETTABLE|A_NONCONSTANT }
 	}
 	state {
 		name { prevPhase }
 		type { float }
 		default { "0.0" }
-		desc { "previous phase input value" }
+		desc { Previous phase input value. }
 		attributes { A_SETTABLE|A_NONCONSTANT }
 	}
 	go {

@@ -1,19 +1,11 @@
-ident {
-// Output = pos input minus all neg inputs
-// Version identification:
-// $Id$
-
-// Copyright (c) 1990 The Regents of the University of California.
-//                       All Rights Reserved.
-
-// Programmer: E. A. Lee
-// Date of creation: 9/19/90
-// Converted to use preprocessor: 10/3/90 by JTB
-}
 defstar {
 	name { FloatDiff }
 	domain { SDF }
-	desc { "Output the pos input minus all neg inputs" }
+	desc { Output the "pos" input minus all "neg" inputs. }
+	version {$Revision$ $Date$}
+	author { E. A. Lee }
+	copyright { 1991 The Regents of the University of California }
+	location { SDF main library }
 	input {
 		name { pos }
 		type { float }

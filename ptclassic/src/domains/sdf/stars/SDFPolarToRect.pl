@@ -1,25 +1,11 @@
-ident {
-/**************************************************************************
-Version identification:
-$Id$
-
- Copyright (c) 1990 The Regents of the University of California.
-                       All Rights Reserved.
-
- Programmer:  E. A. Lee
- Date of creation: 9/16/90
- Converted to use preprocessor, 10/3/90, JTB
-
-Convert magnitude and phase to rectangular form
-
-**************************************************************************/
-}
 defstar {
 	name { PolarRect }
 	domain { SDF }
-	desc {
-		"Convert magnitude and phase to rectangular form"
-	}
+	desc { Convert magnitude and phase to rectangular form. }
+	version {$Revision$ $Date$}
+	author { E. A. Lee }
+	copyright { 1991 The Regents of the University of California }
+	location { SDF main library }
 	input {
 		name { magnitude }
 		type { float }

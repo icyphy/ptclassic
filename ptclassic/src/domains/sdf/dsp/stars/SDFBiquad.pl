@@ -1,27 +1,26 @@
-ident {
-/************************************************************************
-Version identification:
-$Id$
-
-Copyright (c) 1990 The Regents of the University of California.
-			All Rights Reserved.
-
-Programmer: J. T. Buck
-Date of creation: 7/23/90
-
-This star is a two-pole, two-zero IIR filter (a biquad).
-
-************************************************************************/
-}
-
 defstar {
 	name {BiQuad}
 	domain {SDF}
+	version {$Revision$ $Date$}
 	desc {
-		"Second order IIR filter\n"
-		"Default is Butterworth with cutoff 0.1 times sample freq.\n"
-		"Transfer function is (n0+n1*z1+n2*z2)/(1+d1*z1+d2*z2)\n"
-		"where z1 = {z sup -1}, z2 = {z sup -2}."
+A two-pole, two-zero IIR filter (a biquad).
+The default is a Butterworth filter with a cutoff 0.1 times sample freq.
+The transfer function is (n0+n1*z1+n2*z2)/(1+d1*z1+d2*z2)
+where z1 = {z sup -1}, z2 = {z sup -2}.
+	}
+	author { J. T. Buck }
+	copyright { 1991 The Regents of the University of California }
+	location { SDF main library }
+	explanation {
+.lp
+This two-pole, two-zero IIR filter has a transfer function of
+.EQ
+{n sub 0 ~+~ n sub 1 z sup -1 ~+~ n sub 2 z sup -2} over
+{1 ~+~ d sub 1 z sup -1 ~+~ d sub 2 z sup -2} ~.
+.EN
+The default is a Butterworth filter with a cutoff 0.1 times sample freq.
+.lp
+\fBThis star will eventually be replaced by a general IIR star.\fR
 	}
 	input {
 		name{input}
@@ -60,14 +59,14 @@ defstar {
 		name {state1}
 		type { float }
 		default { "0.0" }
-		desc { "state1 (internal)"}
+		desc { internal state. }
 		attributes { A_NONCONSTANT|A_NONSETTABLE }
 	}
 	defstate {
 		name {state2}
 		type { float }
 		default { "0.0" }
-		desc {"state2 (internal)"}
+		desc {internal state. }
 		attributes { A_NONCONSTANT|A_NONSETTABLE }
 	}
 	go {

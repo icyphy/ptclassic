@@ -1,29 +1,16 @@
-ident {
-/************************************************************************
-Version identification:
-$Id$
-
-Copyright (c) 1990 The Regents of the University of California.
-                        All Rights Reserved.
-
-Programmer:  J. Buck
-Date of creation: 6/4/90
-Modified to use preprocessor: 10/3/90, by J. Buck
-
-UpSample interpolates its input.  It is a port of the Gabriel upsample
-star.
-
-************************************************************************/
-}
 defstar {
 	name {UpSample}
 	domain {SDF}
 	desc { 
-		"Upsample by a factor (2), filling with fill (0.0).\n"
-		"The phase tells where to put the sample in an output block.\n"
-		"The default is to output it first (phase = 0).\n"
-		"The maximum phase is factor - 1."
+Upsample by a factor (default 2), filling with fill (default 0.0).
+The "phase" tells where to put the sample in an output block.
+The default is to output it first (phase = 0).
+The maximum phase is "factor" - 1.
 	}
+	version {$Revision$ $Date$}
+	author { J. T. Buck }
+	copyright { 1991 The Regents of the University of California }
+	location { SDF main library }
 	input {
 		name{input}
 		type{ANYTYPE}
@@ -36,19 +23,19 @@ defstar {
 		name {factor}
 		type {int}
 		default {2}
-		desc { "Upsample factor" }
+		desc { Number of samples produced. }
 	}
 	defstate {
 		name {phase}
 		type {int}
 		default {0}
-		desc { "Upsample phase" }
+		desc { Where to put the input in the output block. }
 	}
 	defstate {
 		name {fill}
 		type {float}
 		default {0.0}
-		desc { "fill value" }
+		desc { Value to fill the output block. }
 	}
 	start {
 		output.setSDFParams(int(factor),int(factor)-1);

@@ -1,26 +1,18 @@
-ident {
-/************************************************************************
-Version identification:
-$Id$
-
-Copyright (c) 1990 The Regents of the University of California.
-			All Rights Reserved.
-
-Programmer: J. T. Buck
-Date of creation: 8/3/90
-Converted to use preprocessor, 9/26/90
-
-DB star: output the dB value of the input, with a minimum.
-
-************************************************************************/
-}
-
 defstar {
 	name {DB}
 	domain {SDF}
 	desc {
-		"Converts input to dB.  Zero and negative values are\n"
-		"converted to 'min' (default -100)"
+Converts input to dB.  Zero and negative values are
+converted to 'min' (default -100).
+	}
+	version {$Revision$ $Date$}
+	author { J. T. Buck }
+	copyright { 1991 The Regents of the University of California }
+	location { SDF main library }
+	explanation {
+For inputs that are greater than zero, the output either
+$20 log sub 10 (input)$ or \fImin\fR, whichever is larger.
+For inputs that are zero or negative, the output is \fImin\fR.
 	}
 	input {
 		name{input}
@@ -34,7 +26,7 @@ defstar {
 		name{min}
 		type{float}
 		default{"-100"}
-		desc{"Minimum output value"}
+		desc{Minimum output value.}
 	}
 	go {
 		float f = input%0;
