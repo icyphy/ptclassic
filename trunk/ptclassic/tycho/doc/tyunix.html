@@ -1,4 +1,4 @@
-<!-- $Id$ -->
+.<!-- $Id$ -->
 <html>
 <head>
 <title>Tycho under Unix</title>
@@ -26,7 +26,7 @@
 Tycho is designed to be used as a stand-alone program or in
 conjunction with the Ptolemy system.  The Ptolemy system is a
 heterogeneous design environment developed at U.C. Berkeley.  We do
-most of our development under Solaris 2.5, so Tycho will probably work
+most of our development under Solaris 2.5.1, so Tycho will probably work
 best under that operating system.
 
 
@@ -38,9 +38,8 @@ HREF="http://ptolemy.eecs.berkeley.edu/tycho/Tycho.html"><CODE>http://ptolemy.ee
 has a link to the download page that contains Tycho sources and Itcl
 binaries for certain Unix platforms.
 
- <p>Tycho0.1.1 will not work with Itcl2.0, which is the version
-shipped with Ptolemy0.6.  To use Tycho0.1.1, you must have Itcl2.1 or
-Itcl2.2 installed.
+<p>Tycho0.2 will not work with versions of Itcl earlier than Itcl2.2,
+which is the version shipped with Ptolemy0.7.
 
  <P>To check the version number of Tycho, look at the startup screen
 that has the 'Mr. Tycho' bitmap.  The startup screen can be brought up by 
@@ -64,7 +63,7 @@ directory for Tycho.
  <P>For example, if Tycho is installed in
 <CODE>/usr/tools/tycho</CODE> and Itcl is installed in
 <CODE>/usr/tools/itcl/bin</CODE>, then you could put the following
-lines in your <CODE>.cshrc</CODE> file (assuming you use csh):
+lines in your <CODE>.cshrc</CODE> file (assuming you use <CODE>csh</CODE>):
 
 <pre>
     set path = (/usr/tools/tycho/bin /usr/tools/itcl/bin $path)
