@@ -3,18 +3,26 @@
 .pp
 The user has several options for printing graphs and schematics
 developed under \*(PT.
+.IE hardcopy
+The first option generates a postscript description and routes it
+.IE postscript
+to a printer. The second uses the screen capture capability
+of the X window system.
 .H2 "Printing Oct Facets"
 .pp
 A block diagram under pigi is stored as an Oct facet.
 To print it to a postscript printer,
 simply place the mouse anywhere in the facet and
+.IE "printing facets"
 invoke the "print facet" command from the "Other" pigi menu.
 You must have the environment variable PRINTER set to point to
-a valid postscript printer. You can do this, for example, with the command:
+a valid postscript printer. You can do this, for example, by executing
+the following command in any terminal window:
 .(c
 	setenv PRINTER \fIprintername\fP
 .)c
-A dialog box appears into which options may be entered.
+Upon running the print facet command under pigi,
+a dialog box appears into which options may be entered.
 The following options may prove useful:
 .TS
 l lw(5i).
@@ -65,3 +73,55 @@ T}
 Change the font and size (defaults to Times-Bold/7).
 T}
 .TE
+.H2 "Capturing a Screen Image"
+.pp
+Under the X window system and compatible systems
+there are facilities for capturing screen images.
+.IE "screen dumps"
+.IE "printing the screen"
+These can be used directly with \*(PT.
+However, when a color workstation is used, and the image is ultimately
+going to be printed without color, the effect may not be desirable.
+For this reason, a facility is provided to run pigi without color
+on a color workstation.  The screen images will be made with dark colors on
+a white background, and will print well when converted to black and white.
+To run pigi in this mode, simply do the following:
+.(c
+setenv PIGIBW
+pigi
+.)c
+The first command sets an environment variable which tells pigi
+to run in its colorless mode.
+.IE "PIGIBW"
+The second command simply runs pigi.
+Now, the screen capture command can be used effectively.
+For example, under X11R4, the following command will print a window on a
+postscript printer:
+.(c
+xwd | xpr -width 4 -portrait -device ps -gray 4 | lpr
+.)c
+.IE xwd
+.IE xpr
+.IE postscript
+Other alternatives include a program called xgrabsc,
+.IE xgrabsc
+and the document processing system FrameMaker, which can capture
+a region of the screen and import it into a document.
+.IE FrameMaker
+The FrameMaker utility "fmcolor" can be used to reduce the color window
+dump to a black and white window dump.  This will save space and avoid
+any dithered imitations of color.
+A useful hint when using such a document editor is to turn off the
+lables in pigi before capturing the image, and then to use the document
+editor itself to annotate the image.  The fonts then will be printer fonts
+rather than screen fonts.  To turn of the labels, execute the Vem
+command "layer-display" under the Vem "Options" menu.
+You may want to turn off both labels and colors used for annotations,
+such as "whiteSolid".
+.pp
+To restore color, simply exit pigi, and unset the environment variable:
+.(c
+unsetenv PIGIBW
+.)c
+Next time you run pigi, it will have whatever colors you originally
+specified in your X resources file, or if none, the default colors.
