@@ -60,7 +60,7 @@ public:
 	Runnable(const char* targetname, const char* dom, Galaxy* g);
 
 	// initialize and/or generate schedule
-	void initTarget() {
+	virtual void initTarget() {
 		target->setGalaxy(*galP);
 		target->initialize();
 	}
@@ -99,6 +99,9 @@ public:
 	// constructor
 	Universe(Target* s,const char* typeDesc) :
 		Runnable(s,typeDesc,this) {}
+
+	// The following is redefined to invoke the begin methods.
+	void initTarget();
 
 	// return my scheduler
 	Scheduler* scheduler() const { return target->scheduler();}

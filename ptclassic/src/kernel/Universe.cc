@@ -74,5 +74,13 @@ void Runnable :: setStopTime (double stamp) {
 	target->setStopTime(stamp) ;
 }
 
+// Modify initTarget to invoke begin methods
+void Universe :: initTarget() {
+	// The following invokes the scheduler
+	Runnable::initTarget();
+	// The following invokes the begin methods of the stars
+	target->begin();
+}
+
 // isa
 ISA_FUNC(Universe,Galaxy);
