@@ -29,6 +29,7 @@ deallocating memory for the objects, etc.
 class SingleLink
 {
 	friend class SingleLinkList;
+	friend class ListIter;
 
 	SingleLink *next;
 	Pointer e;
@@ -48,7 +49,6 @@ public:
 	{
 		lastNode= new SingleLink(a,0);
 		lastNode->next=lastNode;
-		lastReference = lastNode;
 	}
 
 	void insert(Pointer a);	// Add at head of list
@@ -59,29 +59,16 @@ public:
 	{
 		return lastNode->next->e;
 	}
-	Pointer next()		// Return next node on list, relative to
-				// last reference
-	{
-		lastReference = lastReference->next;
-		return lastReference->e;
-	}
 	Pointer elem(int) const;// Return arbitary node of list
 	void initialize();	// Remove all links
 
-        // Reset the last reference pointer so that accesses start
-        // at the head of the list
-        void reset() { lastReference = lastNode; }
-
-private:
+protected:
 
         // Store head of list, so that there is a notion of 
         // first node on the list, lastNode->next is head of list 
         SingleLink *lastNode;
- 
-        // Store last access to the list, so we can sequentially 
-        // access the list
-        SingleLink *lastReference;
 };
+
 
 	/////////////////////////////////////
 	// class Vector
@@ -166,6 +153,7 @@ to access the next element of the list
 
 class SequentialList : SingleLinkList
 {
+	friend class ListIter;
 public:
 	// Add element to the end of the list
         void put(Pointer p) {append(p); ++dimen;}
@@ -185,12 +173,6 @@ public:
 		dimen -= i;
 		return i;
 	}
-	// Return next element on the list
-	SingleLinkList::next;
-
-	// Reset, so that the next access will be the
-	// first element that was added to the list
-	SingleLinkList::reset;
 
 	// Clear the data structure
 	void initialize() {SingleLinkList::initialize(); dimen=0;}
@@ -201,6 +183,32 @@ public:
 	~SequentialList() {}
 private:
 	int dimen;	// Size of list
+};
+
+	///////////////////////////////////
+	// class ListIter
+	///////////////////////////////////
+
+class ListIter {
+public:
+	ListIter(const SequentialList& l) : list(&l), ref(l.lastNode) {}
+	reset() { ref = list->lastNode;}
+	Pointer next() {
+		if (!ref) return 0;
+		ref = ref->next;
+		Pointer p = ref->e;
+		if (ref == list->lastNode) ref = 0;
+		return p;
+	}
+	Pointer operator++ () { return next();}
+protected:
+// attach the ListIter to a different object
+	void reconnect(const SequentialList& l) {
+		list = &l; ref = l.lastNode;
+	}
+private:
+	const SequentialList* list;
+	SingleLink *ref;
 };
 
 	//////////////////////////////////////
