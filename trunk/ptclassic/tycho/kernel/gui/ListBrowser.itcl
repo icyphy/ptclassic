@@ -135,8 +135,7 @@ class ::tycho::ListBrowser {
     ####                   protected variables                    ####
     
     # True if completion is case sensitive.
-    protected variable caseSensitiveCompletion \
-            [::tycho::preference get dialogs caseSensitiveCompletion]
+    protected variable caseSensitiveCompletion 0
 
     ##################################################################
     ####                   private variables                      ####
@@ -250,6 +249,11 @@ body ::tycho::ListBrowser::constructor {args} {
 	bind $itk_component(hull) <KP_Down> {%Q scroll 1 selection}
 	bind $itk_component(hull) <KP_Home> {%Q goto 0}
     }
+
+    # Get preferences. No real need to subscribe for dialogs.
+    set caseSensitiveCompletion \
+            [::tycho::preference get dialogs caseSensitiveCompletion]
+
     # Process any unevaluated arguments.
     eval itk_initialize $args
 
