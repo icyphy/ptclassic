@@ -53,7 +53,7 @@ command, however, the current
 is the one being defined, not the
 .c mainGalaxy .
 .pp
-This description of commands is current for version 1.22 of
+This description of commands is current for version 1.31 of
 the interpreter \(em commands are being added all the time.
 .H2 "Commands for Defining the Simulation"
 .pp
@@ -67,8 +67,9 @@ and connections among them.
 .pp
 \*(PT supports multiple simulation domains, and so does the \*(PT
 interpreter.  Before creating a simulation environment and running
-it, it is necessary to establish the domain.  Currently, two domains
-are supported: synchronous data flow (SDF) and discrete event (DE).
+it, it is necessary to establish the domain.  Currently, three domains
+are supported: synchronous data flow (SDF), discrete event (DE), and
+dynamic data flow (DDF).
 The interpreter has a
 .i "current domain" ;
 this is initially
@@ -79,7 +80,8 @@ The command
 .)c
 changes the current domain; it is only legal when the current galaxy
 is empty.  The argument must be the name of a known domain (currently
-.c SDF
+.c SDF ,
+.c DDF ,
 or
 .c DE ).
 The command
@@ -364,6 +366,20 @@ An example of the use of
 is given in the section describing
 .c defgalaxy
 below.
+.H3 "Initializing all states"
+.pp
+The
+.c initstate
+command (which takes no arguments) causes all states in the universe
+to be initialized (all the initial-value strings are parsed and interpreted).
+Note that this action is automatically taken whenever a universe is
+run or a schedule is generated; the only reason this command is provided
+is so that the user can check on the effect of provided state values
+with the
+.c show
+or
+.c dump
+commands.
 .H3 "Setting a Descriptor
 .pp
 Every block in \*(PT has a
@@ -399,7 +415,6 @@ it causes a number of
 .c PortHole s
 to be created within the
 .c MultiPortHole .
-We suggest that beginning users avoid this command.
 The syntax is
 .(c
 (numports \fIstar\fP \fIportname\fP \fIn\fP)
