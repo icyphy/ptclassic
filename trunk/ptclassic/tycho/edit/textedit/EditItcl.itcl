@@ -349,9 +349,10 @@ body ::tycho::EditItcl::gendoc {} {
 	    # To generate index.html, we should pass all the .itcl files 
 	    # in the current directory to generateHTML
 	    set verbose 0
+	    set debug 0
 	    set generateIndex 0
 	    ::tycho::HTMLDocSys::generateHTML \
-		    $verbose $generateIndex {An Itcl Class} $tail
+		    $verbose $debug $generateIndex {An Itcl Class} $tail
             cd $savedir
         } {
             ::tycho::warn "The documentation file is out of date, \
