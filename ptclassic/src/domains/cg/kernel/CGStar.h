@@ -17,8 +17,7 @@ $Id$
 #include "Particle.h"
 #include "DataStruct.h"
 #include "Code.h"
-#include "CGTarget.h"
-
+#include "CGSymbol.h"
 
 	////////////////////////////////////
 	// class CGCodeBlock
@@ -27,6 +26,7 @@ $Id$
 // In this generic architecture, a code block is identical to the base class
 #define CGCodeBlock CodeBlock
 
+class CGTarget;
 class CGWormhole;
 
 	////////////////////////////////////
@@ -58,7 +58,7 @@ public:
         // Return NULL if not.
         virtual CGWormhole* myWormhole();
 
-        // max {cost of communication with its anscestros}
+        // max {cost of communication with its ancestors}
         int maxComm();
 
 	Symbol codeblockSymbol;
