@@ -1,7 +1,14 @@
 defstar {
 	name {FlipFlopD}
 	domain {DE}
+	version { $Id$ }
 	author { John S. Davis, II }
+	copyright {
+Copyright (c) 1997 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
 	location { DE main library }
 	desc { D Flip Flop Synchronous Sequential Circuit Component }
 	input {
