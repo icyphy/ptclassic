@@ -331,8 +331,10 @@ int SetTimesCmd(ClientData clientData,
       return error;
     }
   }
+  /*
   printf("Setting timing for %s to %d, %d, %d\n",
 	 firingName, startTime, endTime, latency);
+	 */
 
   VHDLFiring* firing = new VHDLFiring;
   firing = ourFiringList->vhdlFiringWithName(firingName);
