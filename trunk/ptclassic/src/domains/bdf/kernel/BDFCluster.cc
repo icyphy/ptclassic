@@ -181,13 +181,11 @@ int BDFClusterGal::cluster() {
 	}
 //	if (!urate)
 //		Error::warn("clustering algorithm did not achieve uniform rate");
-#if 0
 	if (change) {
 		if (logstrm)
 			*logstrm << "Looking for parallel loops\n";
 		parallelLoopMergePass();
 	}
-#endif
 	return change;
 }
 
@@ -307,6 +305,7 @@ BDFCluster* BDFClusterGal::tryLoopMerge(BDFCluster* a,BDFCluster* b) {
 
 	// A necessary condition is that all external arcs be
 	// conditional on the same (or equivalent) signal.
+	// They must also be conditional "in the same way".
 	// Even so, we may not want to do it; creating "if" arcs
 	// may be better.
 
@@ -332,16 +331,17 @@ BDFCluster* BDFClusterGal::tryLoopMerge(BDFCluster* a,BDFCluster* b) {
 		}
 		if (p->numIO() != pFar->numIO()) rateChange = TRUE;
 	}
-	if (rateChange) {
+	if (cond && rateChange) {
+		// arrange so a is the source of cond.
+		if (cond->parentClust() == b) {
+			BDFCluster* t = a; a = b; b = t;
+		}
 		if (logstrm)
 			*logstrm << a->name() << " and " << b->name()
 				 << ": doing loop merge, result:\n";
 		cond = cond->inPtr();
-		// hack!
-		allowBury = TRUE;
-		BDFCluster * c = merge(a,b);
-		allowBury = FALSE;
-		c->makeWhile(cond,desrel);
+		LOG_NEW; BDFCluster *c = new BDFWhileLoop(desrel,cond,a,b);
+		addBlock(c->setBlock(genBagName(),this));
 		if (logstrm) *logstrm << *c << "\n";
 		return c;
 	}
@@ -350,41 +350,29 @@ BDFCluster* BDFClusterGal::tryLoopMerge(BDFCluster* a,BDFCluster* b) {
 	return 0;
 }
 
-
-// make a cluster into a while loop.  Warning: the assumption is that
-// all external arcs are conditioned on cond; perhaps this should
-// be checked.
-
-void BDFCluster::makeWhile(BDFClustPort* cond,BDFRelation rel) {
-	// now de-conditionalize all c arcs.
-	BDFClustPortIter nextarc(*this);
-	BDFClustPort *p;
-	while ((p = nextarc++) != 0) {
-		p->setRelation(BDF_NONE);
-	}
-	// now make c a dowhile.
-	pCond = cond;
-	pType = (rel == BDF_TRUE) ? DO_UNTILTRUE : DO_UNTILFALSE;
-}
-
-// array of "reversals" for the loop types.
-static BDFLoopType revType[] = {
-	DO_ITER, DO_IFFALSE, DO_IFTRUE, DO_UNTILFALSE, DO_UNTILTRUE
-};
-
 // return TRUE if this and b have the same loop condition.
-
+// TEMPORARY: only return true for DO_ITER type loops -- needs
+// work for other types.
 int BDFCluster::sameLoopCondition(const BDFCluster& b) const
 {
-	BDFRelation desrel;
 	if (pType == DO_ITER)
 		return b.pType == DO_ITER && pLoop == b.pLoop;
+#if 0
+	BDFRelation desrel;
+	// array of "reversals" for the loop types.
+	static BDFLoopType revType[] = {
+		DO_ITER, DO_IFFALSE, DO_IFTRUE, DO_UNTILFALSE, DO_UNTILTRUE
+	};
+
 	if (b.pType == DO_ITER)
 		return FALSE;
 	if (pType == b.pType) desrel = BDF_SAME;
 	else if (revType[pType] == b.pType) desrel = BDF_COMPLEMENT;
 	else return FALSE;
 	return sameSignal(pCond,b.pCond) == desrel;
+#else
+	else return FALSE;
+#endif
 }
 
 int BDFClusterGal::parallelLoopMergePass() {
@@ -883,6 +871,8 @@ void BDFCluster::reloop(int fac, BDFLoopType lcond,BDFClustPort* pcond) {
 
 // generate a name for a new bag
 const char* BDFClusterGal::genBagName() {
+	BDFClusterGal* pgal = parentGal();
+	if (pgal) return pgal->genBagName();
 	char buf[20];
 	sprintf (buf, "bag%d", bagNumber++);
 	return hashstring(buf);
@@ -952,8 +942,11 @@ void BDFClusterBag :: createScheduler() {
 void BDFClusterBag :: createInnerGal() {
 	LOG_DEL; delete gal;
 	LOG_NEW; gal = new BDFClusterGal;
-	if (parent())
-		gal->dupStream((BDFClusterGal*)parent());
+	if (parent()) {
+		BDFClusterGal* pgal = (BDFClusterGal*)parent();
+		gal->dupStream(pgal);
+		gal->setNameParent(name(),pgal);
+	}
 }
 
 // test to see whether we should turn a connection into a self loop after
@@ -1668,21 +1661,97 @@ int BDFCluster::dataIndependent() {
 	return TRUE;
 }
 
-void gd(Geodesic* g) {
-	if (g) {
-		cerr << "src: " << g->sourcePort()->fullName() << "\n"
-		     << "dst: " << g->destPort()->fullName() << ", "
-		     << g->size() << " tokens\n";
+// actions for BDFWhileLoop.
+
+ostream& BDFWhileLoop::printOn(ostream& o) {
+	printBrief(o);
+	o << "= { ";
+	a->printBrief(o);
+	if (b) {
+		o << ", ";
+		b->printBrief(o);
 	}
-	else cerr << "NIL\n";
+	if (numberPorts() == 0) return o << " }\n";
+	o << " }\nports:\t";
+	return printPorts(o);
 }
 
-void cd(BDFCluster* c) {
-	if (c) c->printOn(cerr);
-	else cerr << "NIL\n";
+void BDFWhileLoop::runInner() {
+	int tokval;
+	// do-while stops when a token has the same value as endMark.
+	int endMark = (pType == DO_UNTILTRUE);
+	Geodesic* condGeo = pCond->geo();
+	for (int i = 0; i < loop(); i++) {
+		do {
+			if (!a->run()) return;
+			// get last token produced by control port.
+			tokval = *(condGeo->tail());
+			tokval = (tokval != 0);	// 0 or 1.
+			if (b && !b->run()) return;
+		} while (tokval != endMark);
+	}
 }
 
-void cpd(BDFClustPort* cp) {
-	if (cp) cerr << *cp;
-	else cerr << "NIL\n";
+StringList BDFWhileLoop::displaySchedule(int depth) {
+	int close = 0;
+	StringList sch;
+	if (loop() > 1) {
+		sch << tab(depth) << loop() << "*{\n";
+		close = 1;
+	}
+	depth += close;
+	sch << tab(depth) << do_conds[pType] << pCond->name() << ") {\n";
+	depth += 1;
+	sch << a->displaySchedule(depth);
+	if (b) {
+		sch << tab(depth) << "<save token>\n";
+		sch << b->displaySchedule(depth);
+	}
+	depth -= 1;
+	sch << tab(depth) << "}\n";
+	if (close) {
+		depth--;
+		sch << tab(depth) << "}\n";
+	}
+	return sch;
+}
+
+void BDFWhileLoop::genCode(Target&, int) {
+	Error::abortRun(*this," genCode not yet implemented");
+}
+
+// Build a BDFWhileLoop.  It has one or two member clusters, which
+// are pulled out of the parent galaxy.
+
+BDFWhileLoop::BDFWhileLoop(BDFRelation t, BDFClustPort* cond,
+			   BDFCluster* first,BDFCluster* second=0)
+: a(first), b(second) {
+	pType = (t == BDF_TRUE ? DO_UNTILTRUE : DO_UNTILFALSE);
+	pCond = cond;
+	a->parent()->asGalaxy().removeBlock(*a);
+	if (b) {
+		b->parent()->asGalaxy().removeBlock(*b);
+		fixArcs(a,b);
+		fixArcs(b,a);
+	}
+	else fixArcs(a,0);
+}
+
+void BDFWhileLoop::fixArcs(BDFCluster* x,BDFCluster* y) {
+	BDFClustPortIter next(*x);
+	BDFClustPort* cp;
+	while ((cp = next++) != 0) {
+		BDFClustPort* pFar = cp->far();
+		if (pFar == 0) continue;
+		BDFCluster* peer = pFar->parentClust();
+		if (peer != x && peer != y) {
+			// create an external port
+			LOG_NEW; BDFClustPort *np =
+				new BDFClustPort(*cp,this,BCP_BAG);
+			cp->makeExternLink(np);
+			addPort(*np);
+			// make the external port unconditional
+			np->setRelation(BDF_NONE);
+		}
+	}
 }

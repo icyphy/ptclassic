@@ -97,6 +97,8 @@ public:
 	// galaxy
 	void dupStream(BDFClusterGal *pgal) { logstrm = pgal->logstrm;}
 
+	// parent is also a BDFClusterGal
+	BDFClusterGal* parentGal() { return (BDFClusterGal*)parent();}
 protected:
 	ostream* logstrm;	// for logging errors
 
@@ -207,9 +209,6 @@ public:
 	// only on the given condition.
 	void ifIze(BDFClustPort* condition,BDFRelation rel,ostream*);
 
-	// convert the cluster into a do-while loop.
-	void makeWhile(BDFClustPort* condition,BDFRelation rel);
-
 	// undo looping of a cluster, changing repetitions, token numbers
 	BDFClustPort* unloop(int& reps,BDFLoopType& lcond);
 
@@ -236,13 +235,6 @@ public:
 
 	// inside-run of cluster
 	virtual void runInner() = 0;
-
-	// return true if condition is satisfied and cluster should
-	// continue executing -- this is for simulation runs.
-	// pre is TRUE if the call is before any execution.
-	// pre is FALSE if the call is after execution and we are
-	// seeing if where are in a do-while loop that should continue.
-	int condSatisfied(int pre);
 
 	// return the schedule
 	virtual StringList displaySchedule(int depth) = 0;
@@ -373,6 +365,34 @@ protected:
 	int exCount;
 private:
 	int owner;
+};
+
+// a BDFWhileLoop is a cluster that represents data-dependent iteration.
+// It contains either one or two subclusters.  The execution of the cluster
+// always looks like the C pseudocode
+//	boolean dummy;
+//	do {
+//		execute cluster A;
+//		dummy = token from (some output port of A);
+//		execute cluster B; // if there is no B, ignore this line
+//	} while (dummy has the correct value);
+// pCond has the conditional port, and the code is DO_UNTILTRUE or
+// DO_UNTILFALSE.
+
+class BDFWhileLoop : public BDFCluster {
+public:
+	BDFWhileLoop(BDFRelation t, BDFClustPort* cond,
+		     BDFCluster* first,BDFCluster* second=0);
+	// overrides of virtual functions
+	ostream& printOn(ostream&);
+	void runInner();
+	StringList displaySchedule(int depth);
+	void genCode(Target&, int depth);
+private:
+	// fix arcs of member clusters.
+	void fixArcs(BDFCluster*,BDFCluster*);
+	BDFCluster* a;		// source of boolean
+	BDFCluster* b;		// sink of boolean, or null
 };
 
 class BDFClustSched : public BDFScheduler {
