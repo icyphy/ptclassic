@@ -336,7 +336,7 @@ int count;			/* Number of items to attach   */
 }
 
 
-phyTermCmd(spot, cmdList)
+vemStatus phyTermCmd(spot, cmdList)
 vemPoint *spot;			/* Where command was issued */
 lsList cmdList;			/* List of arguments        */
 /*
