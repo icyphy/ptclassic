@@ -537,7 +537,7 @@ register kd_box size;		/* Returned size     */
  */
 {
     static struct octBox bb;
-    register flag;
+    register int flag;
 
     if (!octIdIsNull(obj->objectId)) {
 	if (obj->type != OCT_TERM) {
