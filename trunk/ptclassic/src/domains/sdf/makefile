@@ -46,7 +46,8 @@ DIRS = kernel stars loopScheduler targets $(SUBDOMAINDIRS)
 ifneq ("$(findstring sol2,$(PTARCH))","")
 ifneq ("$(findstring cfront,$(PTARCH))","")
 ifdef VSDKHOME
-DIRS += vis
+	DIRS += vis
+	SUBDOMAINDIRS += vis
 endif
 endif
 endif
