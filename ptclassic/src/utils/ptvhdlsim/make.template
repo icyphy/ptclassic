@@ -51,7 +51,8 @@ OBJS = 	V2Cinteger.o C2Vinteger.o V2Creal.o C2Vreal.o
 LIB = foo
 
 # .cli* files seem to be some sort of cache for the cli program
-KRUFT = 	.cli* *.mra *.sim *.a ptvhdlsim vhdlsim
+KRUFT = 	.cli* *.mra *.sim *.a ptvhdlsim vhdlsim \
+		v2cinteger c2vinteger v2creal c2vreal
 
 
 # If the SYNOPSYS shell environment variable is defined, then build
@@ -75,18 +76,22 @@ v2cinteger: V2Cinteger.c ./CLISocket.h
 	@if [ ! -f $(notdir $<) ]; then echo "ln -s $< ."; ln -s $< .; fi
 	@if [ ! -f CLISocket.h ]; then ln -s $(VPATH)/CLISocket.h .; fi
 	cli -nc -add -cv V2Cinteger V2Cinteger
-c2vinteger: C2Vinteger.c
+	touch v2cinteger
+c2vinteger: C2Vinteger.c ./CLISocket.h
 	@if [ ! -f $(notdir $<) ]; then echo "ln -s $< ."; ln -s $< .; fi
 	@if [ ! -f CLISocket.h ]; then ln -s $(VPATH)/CLISocket.h .; fi
 	cli -nc -add -cv C2Vinteger C2Vinteger
-v2creal: V2Creal.c
+	touch c2vinteger
+v2creal: V2Creal.c ./CLISocket.h
 	@if [ ! -f $(notdir $<) ]; then echo "ln -s $< ."; ln -s $< .; fi
 	@if [ ! -f CLISocket.h ]; then ln -s $(VPATH)/CLISocket.h .; fi
 	cli -nc -add -cv V2Creal V2Creal
-c2vreal: C2Vreal.c
+	touch v2creal
+c2vreal: C2Vreal.c ./CLISocket.h
 	@if [ ! -f $(notdir $<) ]; then echo "ln -s $< ."; ln -s $< .; fi
 	@if [ ! -f CLISocket.h ]; then ln -s $(VPATH)/CLISocket.h .; fi
 	cli -nc -add -cv C2Vreal C2Vreal
+	touch c2vreal
 
 C2VINTEGER.sim: C2Vinteger.vhdl
 	@if [ ! -f $(notdir $<) ]; then echo "ln -s $< ."; ln -s $< .; fi
