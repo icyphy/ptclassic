@@ -89,7 +89,7 @@ global tycholib
 set tycholib $tycho/lib
 
 global tychoslate
-set tycholib $tycho/slate
+set tychoslate $tycho/slate
 
 global tychoeditors
 set tychoeditors $tycho/editors
