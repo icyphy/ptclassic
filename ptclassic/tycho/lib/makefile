@@ -29,7 +29,7 @@
 # 						COPYRIGHTENDKEY
 ##########################################################################
 
-DIRS = html_library idx iwidgets windows
+DIRS = html_library idx windows
 
 # Root of Tycho directory
 ROOT =		..
