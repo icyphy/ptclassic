@@ -300,7 +300,7 @@ ifdef PN
 	CUSTOM_DIRS += $(PNDIR)/kernel $(PNDIR)/stars 
 	SDFLIB = 1
 	PALETTES += PTOLEMY/src/domains/pn/icons/pn.pal
-        # PN is only supported under Sun and Solaris operating systems,
+	# PN is only supported under Sun and Solaris operating systems,
 	# matched by patterns sun% and sol%
 	ifneq ("$(filter sun% sol%,$(PTARCH))","")
 		STARS += $(LIBDIR)/pnstars.o
@@ -370,20 +370,21 @@ endif
 
 # Networks Of Workstations Active Messages
 ifdef NOWAM
-     # NOWam only supported under sol2 and sol2.cfront, matched by pattern sol%
-     ifneq ("$(filter sol%,$(PTARCH))","")
-	CUSTOM_DIRS += $(ROOT)/src/domains/cgc/targets/NOWam/NOWam \
-		$(ROOT)/src/domains/cgc/targets/NOWam/libudpam
-	CGC = 1
-	ifeq ($(USE_SHARED_LIBS),yes) 
-		LIBS += -lNOWam
-		LIBFILES += $(LIBDIR)/libNOWam.$(LIBSUFFIX)
-	else
-		TARGETS += $(CGCT)/NOWam/NOWam/CGCNOWamRecv.o \
-			$(CGCT)/NOWam/NOWam/CGCNOWamSend.o \
-			$(CGCT)/NOWam/NOWam/CGCNOWamTarget.o
+	# NOWam only supported under the Solaris operating system,
+	# matched by pattern sol%
+	ifneq ("$(filter sol%,$(PTARCH))","")
+		CUSTOM_DIRS += $(ROOT)/src/domains/cgc/targets/NOWam/NOWam \
+			$(ROOT)/src/domains/cgc/targets/NOWam/libudpam
+		CGC = 1
+		ifeq ($(USE_SHARED_LIBS),yes) 
+			LIBS += -lNOWam
+			LIBFILES += $(LIBDIR)/libNOWam.$(LIBSUFFIX)
+		else
+			TARGETS += $(CGCT)/NOWam/NOWam/CGCNOWamRecv.o \
+				$(CGCT)/NOWam/NOWam/CGCNOWamSend.o \
+				$(CGCT)/NOWam/NOWam/CGCNOWamTarget.o
+		endif
 	endif
-     endif #sol2 and sol2.cfront
 endif
 
 
