@@ -80,14 +80,17 @@ the OverflowHandler will be called.
 		// (if it exists) and then compute the product
 		p = nexti++;
 		if ( p != 0 ) {
-	          fixIn = (const Fix&)((*p)%0);
+		  // We use a temporary variable to avoid gcc2.7.2/2.8 problems
+		  Fix tmpproduct = (*p)%0;
+	          fixIn = tmpproduct;
 	          product = fixIn;
 		  checkOverflow(product);
 	          while ((p = nexti++) != 0) {
+	            Fix tmpproduct2 = (*p)%0;	
 		    if ( int(ArrivingPrecision) )
-		      product *= (const Fix&)((*p)%0);
+		      product *= tmpproduct2;
 		    else {
-	              fixIn = (const Fix&)((*p)%0);
+	              fixIn = tmpproduct2;
 		      product *= fixIn;
 		    }
 		    checkOverflow(product);
