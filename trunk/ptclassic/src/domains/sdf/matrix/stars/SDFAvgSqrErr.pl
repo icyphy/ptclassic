@@ -54,7 +54,8 @@ limitation of liability, and disclaimer of warranty provisions.
     FloatMatrix& tempmatrix = *(new FloatMatrix(int(numRows), int(numCols)));
     double sqrErr = 0.0;
     int maxi = int(numRows) * int(numCols);
-    for (int i = 0; i < int(numInputs); i++) {
+    int i;
+    for (i = 0; i < int(numInputs); i++) {
       // get input
       (input1%(int(numInputs)-1-i)).getMessage(inpkt1);
       (input2%(int(numInputs)-1-i)).getMessage(inpkt2);
@@ -89,19 +90,19 @@ limitation of liability, and disclaimer of warranty provisions.
       // If at least one matrix is not empty, then adjust squared error
       if ( !empty1 || !empty2 ) {
         if ( empty1 && !empty2 ) {
-          for (int i = 0; i < maxi; i++) {
+          for (i = 0; i < maxi; i++) {
 	    sqrErr += matrix2.entry(i) * matrix2.entry(i);
 	  }
         }
         else if ( !empty1 && empty2 ) {
-          for (int i=0; i < maxi; i++) {
+          for (i = 0; i < maxi; i++) {
 	    sqrErr += matrix1.entry(i) * matrix1.entry(i);
 	  }
         }
         else {
           tempmatrix = matrix1;
 	  tempmatrix -= matrix2;
-          for (int i = 0; i < maxi; i++) {
+          for (i = 0; i < maxi; i++) {
 	    sqrErr += tempmatrix.entry(i) * tempmatrix.entry(i);
 	  }
         }
