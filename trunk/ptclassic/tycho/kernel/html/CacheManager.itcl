@@ -59,7 +59,77 @@ ensemble ::tycho::cache {
 
 #######################################################################
 #### CacheManager
+# This class will keep an association between an URL and the
+# cache file name. It keeps the following information in the
+# index file: URL name, content type, size, and date.
+# This class is smart enough to keep concurrency between the
+# index file and the actual cache directory (ie. if a file exists
+# in the cache directory but not in index file, or if a file exists
+# in the index file but not in the cache directory).
+# <br>
+# <br><b>Here is a mini-tutorial on using this class. Note that
+# <tt>ensemble ::tycho::cache (method_name)</tt> is used as a 
+# typing shortcut to <tt>::tycho::CacheManager::(method_name).</tt>
+# <br>
 #
+# <b>1:Initialize index.db and the cache directory:</b><br>
+# <tcl><tt> ::tycho::cache initialize</tt></tcl>
+# <br>
+#
+# <b>2:Get a cache file name to write to:</b><br>
+# <tcl><pre> set url "vrml://ptolemy/cool_file.vrml"
+# set cachefile [::tycho::cache tmpCacheName $url]</pre></tcl>
+# <br>
+#
+# <b>3:Assume we got the remote file attributes and the content.
+# Write to the cache file</b><br>
+# <tcl><pre> set date {Monday 1-2-3}
+# set size 12345
+# set contenttype "vrml/slow"
+# set cacheid [::open $cachefile w+]
+# foreach i {This is a test} {
+#   ::puts $cacheid $i
+# }
+# ::close $cacheid</pre></tcl>
+# <br>
+# 
+# <b>4:Now update in the index database</b><br>
+# <tcl><pre> ::tycho::cache update $url &#92
+#       $date $size $contenttype $cachefile
+# unset date size contenttype cachefile</pre></tcl>
+# <br>
+#
+# <b>5:Retrieve information from the database
+# <tcl><pre> set exists [::tycho::cache exists $url]
+# set date [::tycho::cache getdate $url]
+# set contenttype [::tycho::cache getcontenttype $url]
+# set cachefile [::tycho::cache getcachefile $url]
+# set size [::tycho::cache getsize $url]
+# ::tycho::inform "$exists\n$date\n$contenttype\n$cachefile\n$size"
+# </pre></tcl>
+# <br>
+#
+# <b>6:Check whether a current URL is the same as the one on cache:</b><br>
+# <tcl><tt> ::tycho::cache same $url $date $size $contenttype</tt></tcl><br>
+# or<br>
+# <tcl><tt> ::tycho::cache same $url $date 54321 $contenttype</tt></tcl><br>
+# <br>
+#
+# <b>7:Delete the cache file from the cache directory<b><br>
+# <tcl><tt> ::file delete $cachefile</tt></tcl>
+# <br>
+#
+# Note that you can call <tt>::tycho::cache update ...</tt> as many
+# times as you want, even if the URL or file name repeats (Cache Manager
+# will always keep the last update). The following is a chart of
+# the types of operations that the methods deal with:<br><br>
+# <pre>
+# method name  compact index.db  sync memory  sync cache dir  time
+# -----------  ----------------  -----------  --------------  ----
+# initialize   yes               yes          yes             O(2n)
+# exists       no                yes          yes             O(1)
+# update       no (appends)      yes          yes             O(1)
+# others...    no                no           no              O(1)
 #
 class ::tycho::CacheManager {
     inherit ::tycho::Uninstantiable
@@ -163,8 +233,17 @@ body ::tycho::CacheManager::destructor {} {
 # If the cache exists in database (index.db), and exists physically,
 # return true. 
 body ::tycho::CacheManager::exists {url} {
-    return [expr [::info exists _URL($url)] && \
+    set returnstatus \
+            [expr [::info exists _URL($url)] && \
             [::file exists [::tycho::cache getcachefile $url]]]
+
+    # It is possible that the cache file has been deleted while
+    # running Tycho. So we need to manually delete it in memory.
+    if {$returnstatus==0} {
+        catch {unset _URL($url)}
+    }
+
+    return $returnstatus
 }
 
 #####################################################################
@@ -292,7 +371,12 @@ body ::tycho::CacheManager::remap {url file} {
 
 #####################################################################
 #### same
-# True if url still has the same information
+# True if url still has the same information. Note that
+# if one of the arguments is empty, then same will always
+# return 0. This is useful in dynamic HTTP files where the
+# header of HTTP will always return NULL to indicate that it
+# changes dynamically.
+#
 body ::tycho::CacheManager::same {url date size contenttype} {
     # If a field is empty, then the file cannot be cached! Must
     # update frequently.
@@ -350,5 +434,4 @@ body ::tycho::CacheManager::debugprint {} {
     }
 }
 
-catch {::tycho::ResourceHTTP::initialize}
 ::tycho::CacheManager::initialize
