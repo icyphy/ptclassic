@@ -47,7 +47,7 @@ public:
     
     // Add dummy CGC stars - set StringArrayState childType based on
     // wormholes.
-    /*virtual*/ void setup();
+    /*virtual*/ int modifyGalaxy();
     /*virtual*/ int isA(const char*) const;
     /*virtual*/ Block* makeNew() const {
 	 return new CGWormTarget(name(),starType(),descriptor());
