@@ -87,6 +87,7 @@ CCS_WITH_H_FILES=\
 LIBCCSRCS=$(CCS_WITH_H_FILES) \
  checkConnect.cc \
  expandPath.cc \
+ RanGen.cc \
  hashstring.cc
 
 # .c sources used in the library.
