@@ -46,7 +46,8 @@ include $(CONFIG)
 
 EXTRA_SRCS = CLISocket.c CLISocket.h \
 	V2Cinteger.c C2Vinteger.c V2Creal.c C2Vreal.c \
-	V2Cinteger.vhdl C2Vinteger.vhdl V2Creal.vhdl C2Vreal.vhdl
+	V2Cinteger.vhdl C2Vinteger.vhdl V2Creal.vhdl C2Vreal.vhdl \
+	synopsys_vss.setup
 
 OBJS = 	V2Cinteger.o C2Vinteger.o V2Creal.o C2Vreal.o
 
@@ -101,6 +102,11 @@ c2vreal: C2Vreal.c ./CLISocket.h
 		-cvl C2Vreal C2Vreal PTVHDLSIM
 	touch c2vreal
 
+setup: synopsys_vss.setup
+	@if [ ! -f $(notdir $<) ]; then echo "ln -s $< ."; ln -s $< .; fi
+	rm -f .synopsys_vss.setup
+	ln -s $< .synopsys_vss.setup
+
 C2VINTEGER.sim: C2Vinteger.vhdl
 	@if [ ! -f $(notdir $<) ]; then echo "ln -s $< ."; ln -s $< .; fi
 	vhdlan -nc -w PTVHDLSIM $<
@@ -120,8 +126,9 @@ libsynsock.a: CLISocket.o
 	touch $(OBJS)
 
 # Build the new simulator with our extra CLI modules linked in
-vhdlsim: v2cinteger c2vinteger v2creal c2vreal V2CINTEGER.sim C2VINTEGER.sim \
-		V2CREAL.sim C2VREAL.sim CLISocket.o libsynsock.a
+vhdlsim: v2cinteger c2vinteger v2creal c2vreal setup \
+		V2CINTEGER.sim C2VINTEGER.sim V2CREAL.sim C2VREAL.sim \
+		CLISocket.o libsynsock.a
 	cli -nc -s -build -ldflags "-L/opt/SUNWspro/SC2.0.1 -L./" \
 		-libs "-lsynsock"
 
