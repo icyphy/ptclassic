@@ -66,7 +66,23 @@ int DEScheduler :: setup (Block& b) {
 		DEStar* p = (DEStar*) &s;
 		p->eventQ = &eventQ;
 
+		// reset data members
+		p->arrivalTime = 0.0;
+		p->completionTime = 0.0;
+
+		// detect if any porthole is not connected.
+		
+		for (int j = s.numberPorts(); j > 0; j--) {
+			PortHole& port = s.nextPort();
+			if (port.far() == NULL) {
+				StringList msg = port.readFullName();
+				msg += " is not Connected!";
+				errorHandler.error(msg);
+				return FALSE;
+			}
+		}
 	}
+
 	galaxy.initialize();
 	return TRUE;
 }
