@@ -43,9 +43,9 @@ all:
 
 install: $(BINDIR)/pxgraph $(BINDIR)/pxgraph.x11
 
-$(BINDIR)/pxgraph: $(ROOT)/tycho/java/pt/plot/pxgraph
+$(BINDIR)/pxgraph: $(ROOT)/tycho/java/ptolemy/plot/pxgraph
 	rm -f $@
-	(cd $(BINDIR); ln -s ../tycho/java/pt/plot/pxgraph .)
+	(cd $(BINDIR); ln -s ../tycho/java/ptolemy/plot/pxgraph .)
 
 FORCE:
 $(BINDIR)/pxgraph.x11: FORCE
