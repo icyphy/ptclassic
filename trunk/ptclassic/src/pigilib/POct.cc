@@ -765,8 +765,8 @@ int POct::ptkSetStringProp (int aC,char** aV) {
 //
 // Written by Alan Kamas  1/94
 //
-int POct::ptkGetMkSchemIcon (int aC,char** aV) {
-
+int POct::ptkGetMkSchemIcon (int aC, char** /*aV*/)
+{
     if (aC != 1) return  usage ("ptkGetMkSchemIcon");
 
     // FIXME:  Add following line back for MkSchemIcon state
@@ -837,7 +837,8 @@ int POct::ptkSetMkSchemIcon (int aC,char** aV) {
 // Written by Alan Kamas  1/94
 // based on code by Edwin Goei
 // 
-int POct::ptkGetMkStar (int aC,char** aV) {
+int POct::ptkGetMkStar (int aC, char** /*aV*/)
+{
 
     char buf[64];
     struct passwd *pwent;
@@ -917,7 +918,7 @@ int POct::ptkSetMkStar (int aC,char** aV) {
 // 
 // FIXME: Ideally, GetSeed and SetSeed should be PTcl funtions
 //        There is already a "seed" command there.
-int POct::ptkGetSeed (int aC,char** aV) {
+int POct::ptkGetSeed (int aC,char** /*aV*/) {
 
     StringList buf;
 

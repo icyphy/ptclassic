@@ -38,30 +38,30 @@ ENHANCEMENTS, OR MODIFICATIONS.
 /* needed to avoid interp calls in cg domain */
 
 void
-GanttChart::beginGantt(ostream& out, char *argstring) {
+GanttChart::beginGantt(ostream& /*out*/, char *argstring) {
 
 	Tcl_Eval(PTcl::activeInterp, argstring);
 
 }
 
 void
-GanttChart::writeGanttLabel(ostream& out, char *argstring) {
+GanttChart::writeGanttLabel(ostream& /*out*/, char *argstring) {
 
 	Tcl_Eval(PTcl::activeInterp, argstring);
 }
 
 void
-GanttChart::writeGanttBindings(ostream& out, char *argstring) {
+GanttChart::writeGanttBindings(ostream& /*out*/, char *argstring) {
 
 	Tcl_Eval(PTcl::activeInterp, argstring);
 }
 
 void
-GanttChart::endGantt(ostream& out) {
+GanttChart::endGantt(ostream& /*out*/) {
 }
 
 void
-GanttChart::writeGanttProc(ostream& out, char *argstring) {
+GanttChart::writeGanttProc(ostream& /*out*/, char *argstring) {
   
   	Tcl_Eval(PTcl::activeInterp, argstring);
 }

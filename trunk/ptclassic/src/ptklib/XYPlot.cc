@@ -79,7 +79,7 @@ int XYPlot::windowExists () {
 	return (Tk_NameToWindow(ptkInterp,(char*)winName,ptkW) != 0);
 }
 
-int XYPlot::setup (Block* star,         // The star I am in
+int XYPlot::setup (Block* /*star*/,         // The star I am in
 		   char*  desc,		// Label for the bar chart
 		   int    persistence,	// The number of data points to retain
 		   int    refresh, 	// The number of data points between refreshes
