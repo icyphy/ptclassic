@@ -5,7 +5,7 @@ $Id$
  Copyright (c) 1992 The Regents of the University of California.
                        All Rights Reserved.
 
- Programmer: J. Pino, J. Buck
+ Programmer: J. Pino, J. Buck, T. M. Parks
 
  SymbolList stuff.
 
@@ -20,38 +20,25 @@ $Id$
 #include "NamedList.h"
 #include "StringList.h"
 
+const char defaultSepChar = '_';
+
 // All SymbolList classes must be derived from BaseSymbolList.  This
 // class contains the count numSymbols that makes each symbol unique.
 class BaseSymbolList : private NamedList
 {
 public:
-	BaseSymbolList(char sep='_') : separator(sep) {}
+	BaseSymbolList(char sep=defaultSepChar, int* count=NULL)
+	    : separator(sep), counter(count) {}
 
-	~BaseSymbolList()
-	{
-	    deleteSymbols();
-	}
+	~BaseSymbolList() { deleteSymbols(); }
 
-	void setSeparator(char sep= '_')
-	{
-	    separator = sep;
-	}
+	void setSeparator(char sep) { separator = sep; }
+	void setCounter(int *count) { counter = count; }
 
-    	void initialize()
-	{
-	    deleteSymbols();
-	    NamedList::initialize();
-	}
-
-    	static void reset()
-	{
-	    numSymbols = 0;
-	}
+    	void initialize() { deleteSymbols(); NamedList::initialize(); }
 
 	const char* get(const char* name = NULL) const
-	{
-	    return (const char*)NamedList::get(name);
-	}
+	{ return (const char*)NamedList::get(name); }
 
 	const char* prepend(const char* name);
 	const char* append(const char* name);
@@ -61,23 +48,26 @@ private:
 	StringList symbol(const char*);
 
 	void deleteSymbols();
-    	static int numSymbols;
+    	int* counter;
     	char separator;
 };
 
 class SymbolList : private BaseSymbolList {
 public:
-	SymbolList(char sep='_') : BaseSymbolList(sep) {}
+	SymbolList(char sep=defaultSepChar, int *count=NULL)
+	    : BaseSymbolList(sep, count) {}
 	~SymbolList() {}
 	const char* lookup(const char* name);
 	BaseSymbolList::setSeparator;
+	BaseSymbolList::setCounter;
 	BaseSymbolList::initialize;
 };
 
 // Class for unique nested symbol generation.
 class SymbolStack : private BaseSymbolList {
 public:
-	SymbolStack(char sep='_') : BaseSymbolList(sep) {}
+	SymbolStack(char sep=defaultSepChar, int *count=NULL)
+	    : BaseSymbolList(sep, count) {}
 	~SymbolStack() {}
 
 	const char* push(const char* tag="L")
@@ -88,43 +78,31 @@ public:
 	StringList pop();
 	BaseSymbolList::get;
 	BaseSymbolList::setSeparator;
+	BaseSymbolList::setCounter;
 	BaseSymbolList::initialize;
 };
 
 // For temporary backward compatibility.
 typedef SymbolStack NestedSymbolList;
 
-class SymbolListList : private NamedList {
+// Class for generation of unique symbols with named scope.
+class ScopedSymbolList : private NamedList
+{
 public:
-	SymbolListList() {}
-	~SymbolListList() {}
+    ScopedSymbolList(char sep=defaultSepChar, int *count=NULL)
+	: separator(sep), counter(count) {}
+    ~ScopedSymbolList() { deleteSymbolLists(); }
 
-        // put a new SymbolList called name to the list.
-	// Return FALSE if a different SymbolList with the same name
-	// is already in the list.
-        int append(SymbolList* list, const char* name)
-	{ 
-	    return NamedList::append(list, name);
-        }
-         
-	// For temporary backward compatibility.
-	int add(const char* name, SymbolList* list)
-	{
-	    return append(list, name);
-	}
+    void setSeparator(char);
+    void setCounter(int*);
 
-        // return the pointer for the object of the specified name.  if the
-        // SymbolList does not exist, return NULL
-        SymbolList* get(const char* name) const
-	{
-	    return (SymbolList*)NamedList::get(name);
-        }
-         
-        // remove a SymbolList from the list.  if the StringList
-        // does not exist, return FALSE.
-	int remove(const char* name)
-	{
-            return NamedList::remove(name);
-	}
+    void initialize() { deleteSymbolLists(); NamedList::initialize(); }
+
+    const char* lookup(const char* scope, const char* name);
+
+private:
+    void deleteSymbolLists();
+    int *counter;
+    char separator;
 };
 #endif
