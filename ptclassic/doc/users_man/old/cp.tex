@@ -65,6 +65,8 @@ The blocks execute one at a time until the execution is either blocked
 or suspended.  While blocks are executing, the scheduler sleeps and the
 global clock doesn't advance.  Hence, all the execution of blocks is
 considered to happen instantaneously.  \cindex{instantaneous execution}
+A block must be explicitly suspended in order to model execution delay
+and to allow the global clock to advance.
 When there are no more runnable processes, the scheduler wakes up and
 regains the CPU.  It fetches the
 next earliest suspended process from the waiting list and advances the
