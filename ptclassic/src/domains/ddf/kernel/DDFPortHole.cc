@@ -1,3 +1,4 @@
+static const char file_id[] = "DDFConnect.cc";
 #ifdef __GNUG__
 #pragma implementation
 #endif
@@ -119,14 +120,14 @@ MultiPortHole& MultiDDFPort :: setPort (const char* s,
 }
 
 PortHole& MultiInDDFPort :: newPort () {
-	PortHole& p = *new InDDFPort;
+	LOG_NEW; PortHole& p = *new InDDFPort;
 	p.numberTokens = numberTokens;
 	return installPort(p);
 }
  
  
 PortHole& MultiOutDDFPort :: newPort () {
-	PortHole& p = *new OutDDFPort;
+	LOG_NEW; PortHole& p = *new OutDDFPort;
 	p.numberTokens = numberTokens;
 	return installPort(p);
 }
