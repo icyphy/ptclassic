@@ -217,8 +217,8 @@ void CGCTychoTarget :: frameCode() {
 
   StringList initProcedure = "static int ";
   initProcedure << buffer << "_Init"
-    <<"(Tcl_Interp *interp) {
-      /* Adds a single interface command */\n"
+    <<"(Tcl_Interp *interp) {\n"
+        << "/* Adds a single interface command */\n"
         <<"Tcl_CreateCommand(interp, "
 	<<"\""
 	<< galaxy()->name()
