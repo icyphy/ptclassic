@@ -103,6 +103,11 @@ CFLAGS =	$(OPTIMIZER) $(MEMLOG) $(WARNINGS) \
 
 # CC does not recognize the "-M" option.
 # "makedepend" is part of X11
+# Note that makedepend does not produce dependencies as GNU g++ -M, so 
+# you will probably want to run 'make depend' from an PTARCH that uses
+# g++ -M instead of makedepend.  One way to do this would be to do:
+# (Assuming you have g++ installed)
+# 	cd $PTOLEMY; make PTARCH=sol2 depend
 DEPEND =	makedepend
 # common.mk looks for USE_MAKEDEPEND
 USE_MAKEDEPEND =	yes
