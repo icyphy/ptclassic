@@ -34,25 +34,25 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 ***********************************************************************/
 static const char file_id[] = "FSMTarget.cc";
+
 #ifdef __GNUG__
 #pragma implementation
 #endif
 
+#include "Galaxy.h"
 #include "FSMTarget.h"
 #include "FSMScheduler.h"
 
 FSMTarget::FSMTarget() :
-Target("default-FSM","FSMStar","default FSM target")
+Target("default-FSM", "FSMStar", "default FSM target")
 {
-  addState(inputNameMap.setState("inputNameMap",this,"",
-	   "Assign the name for each PortHole in the input MultiPortHole.
-            Each name should be embraced in a pair of double quotes."));
-  addState(outputNameMap.setState("outputNameMap",this,"",
-	   "Assign the name for each PortHole in the output MultiPortHole.
-            Each name should be embraced in a pair of double quotes."));
-  addState(machineType.setState("machineType",this,"Moore",
+  addState(inputNameMap.setState("inputNameMap", this, "",
+	   "Assign the name for each PortHole in the input MultiPortHole. Each name should be embraced in a pair of double quotes."));
+  addState(outputNameMap.setState("outputNameMap", this, "",
+	   "Assign the name for each PortHole in the output MultiPortHole. Each name should be embraced in a pair of double quotes."));
+  addState(machineType.setState("machineType", this, "Moore",
 	   "Moore or Mealy machine."));
-  addState(schedulePeriod.setState("schedulePeriod",this,"0.0",
+  addState(schedulePeriod.setState("schedulePeriod", this, "0.0",
 	   "schedulePeriod for interface with a timed domain."));
 }
 
@@ -63,8 +63,7 @@ Block* FSMTarget::makeNew() const {
 FSMTarget::~FSMTarget() { delSched(); }
 
 void FSMTarget::setup() {
-  FSMScheduler *fsmSched;
-  fsmSched = new FSMScheduler;
+  FSMScheduler* fsmSched = new FSMScheduler;
 
   // setSched deletes the old scheduler.
   setSched(fsmSched);
@@ -79,4 +78,8 @@ void FSMTarget::setup() {
 
   Target::setup();
   if (Scheduler::haltRequested()) return;
+}
+
+const char* FSMTarget::domain() {
+  return galaxy() ? galaxy()->domain() : "FSM";
 }
