@@ -58,7 +58,7 @@ int Sim56Target :: setup (Galaxy& g) {
 void Sim56Target :: headerCode () {
 	CG56Target :: headerCode();
 	addCode(
-		"label	org	p:$48\n"
+		"	org	p:$48\n"
 		"START\n"
 		"	movep	#$0000,x:m_bcr\n\n");
 };
