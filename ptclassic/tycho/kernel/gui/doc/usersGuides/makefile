@@ -54,6 +54,7 @@ EXTRA_SRCS =	\
 	LoaderHelp.html \
 	TclShellHelp.html \
 	PreferencesHelp.html \
+	RevControlHelp.html \
 	index.html
 
 MISC_FILES =
