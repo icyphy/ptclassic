@@ -263,6 +263,9 @@ protected:
     virtual void mainLoopCode();
     virtual void trailerCode();
 
+    // Optionally writes the schedule to a file
+    /*virtual*/ int schedulerSetup();
+
     // Symbols which are nested, such as for loops
     SymbolStack targetNestedSymbol;
 
@@ -288,6 +291,7 @@ protected:
     IntState compileFlag;
     IntState loadFlag;
     IntState runFlag;
+    IntState writeScheduleFlag;
 
     char *schedFileName;
 
