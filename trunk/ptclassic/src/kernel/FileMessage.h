@@ -84,7 +84,7 @@ class FileMessage : public Message {
     /* virtual */ StringList print() const;
 
     // With non-zero argument, remove the file when the message is deleted.
-    void setTransient(int transient) { transientFile = transient; }
+    void setTransient(int transient) { transientFileFlag = transient; }
 
     /////////////////////////////////////////////////////////////////////
     //                        protected variables                      //
@@ -96,8 +96,8 @@ class FileMessage : public Message {
     //                        protected variables                      //
 
  private:
-    int dynamicFilename;
-    int transientFile;
+    char* dynamicFilename;
+    int transientFileFlag;
 };
 
 #endif
