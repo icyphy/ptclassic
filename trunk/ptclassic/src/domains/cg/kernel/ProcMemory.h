@@ -101,7 +101,7 @@ class MemoryList {
 public:
 	// Constructor with starting address and length of memory.
 	MemoryList(unsigned addr,unsigned len) : min(addr), max(addr+len-1) {
-		l = new MemInterval(addr,len);
+		INC_LOG_NEW; l = new MemInterval(addr,len);
 	}
 
 	// allocate using first-fit
