@@ -48,11 +48,8 @@ ITCL_SRCS = \
 	EditForest.itcl \
 	EditPalette.itcl \
 	EditSTD.itcl \
-	GanttView.itcl \
-	GanttDF.itcl \
 	Graphics.itcl \
-	ProfileTcl.itcl \
-	SlateView.itcl 
+	ProfileTcl.itcl
 
 EXTRA_SRCS =		$(TCL_SRCS) $(ITCL_SRCS)
 
