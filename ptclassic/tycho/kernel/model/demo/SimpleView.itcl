@@ -33,10 +33,10 @@
 #
 # SimpleView is a view that illustrates the model-view architecture.
 # It is a display of the contents of an instance of the
-# <a href="SimpleModel.html">SimpleModel</a> class.
-#
-# Here are some examples illustrating the model-view architecture.
-# Firstly, create the model and give it some data:
+# <a href="SimpleModel.html">SimpleModel</a> class. Following
+# are some examples illustrating the use of this class: the
+# stand-alone script <b>simpleview</b> essentially replicates
+# this example. Firstly, create the model and give it some data:
 # <pre><tcl>
 #     catch {delete object $model}
 #     set model [::tycho::SimpleModel #auto]
@@ -79,13 +79,12 @@
 #
 # Now, subscribe each view to the model. The view is subscribed
 # to "data" with the tag <b>all</b> to indicate that the view
-# is to be notified whenever any data changes. Normally,
-# this would be done in the view, but we have taken the
-# code out for the sake of this example:
-# <pre><tcl>
+# is to be notified whenever any data changes. This code
+# is not executable, as these models execute in their constructors.
+# <pre>
 #     $model subscribe data $view1
 #     $model subscribe data $view2
-# </tcl></pre>
+# </pre>
 #
 # Now, any changes made to the model via the <b>publish</b> command
 # will be reflected in both views. For example, change the <b>-phone</b>
@@ -320,9 +319,12 @@ body ::tycho::SimpleView::redo {} {
 # Initialize the display from a model.
 #
 body ::tycho::SimpleView::_initialize {} {
+    # Get the data and display it
     foreach n [$model match item] {
         _additem $n
     }
+    # Subscribe to further changes
+    $model subscribe data $this
 }
 
 ########################################################################
