@@ -75,6 +75,14 @@ The parameter \fIphase\fR is in degrees (e.g., cos() would use phase=90).
         move    y:(r1),b	; read the table
         move    b1,$ref(output)
 	}
+	code {
+		// fn to round to nearest int.  Done this way because
+		// truncation of negative values to integers is machine
+		// dependent in C/C++.
+		inline int round(double x) {
+			return (x >= 0) ? int(x+0.5) : -int(0.5-x);
+		}
+	}
 	setup {
 		double ph = double(phase);
 		if ( ph < 0 ) {
@@ -84,7 +92,7 @@ The parameter \fIphase\fR is in degrees (e.g., cos() would use phase=90).
 			int n = (int) floor(ph / 360.0);
 			ph -= 360.0 * n;
 		}
-		phaseOffset = (int) rint(ph/360.0*256.0);
+		phaseOffset = round(ph/360.0*256.0);
 	}
 	go {
 		addCode(cbPrepare);
