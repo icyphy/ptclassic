@@ -1,3 +1,4 @@
+static const char file_id[] = "Linker.cc";
 /**************************************************************************
 Version identification:
 $Id$
@@ -113,7 +114,7 @@ int Linker::linkObj (const char* objName) {
 	int pagsiz = getpagesize();
 
 	if (size < pagsiz) size = pagsiz;
-	void* codeBlock = new char[size+pagsiz];
+	LOG_NEW; void* codeBlock = new char[size+pagsiz];
 	size_t init_fn = (size_t) codeBlock;
 
 // round up to be on a page boundary
@@ -138,14 +139,14 @@ int Linker::linkObj (const char* objName) {
 
 	if (system (cmd)) {
 		Error::abortRun("Error in linking file");
-		delete codeBlock;
+		LOG_DEL; delete codeBlock;
 		unlink (tname);
 		return FALSE;
 	}
 	else {
 		// clean up
 		unlink (headerName);
-		delete (char*)headerName;
+		LOG_DEL; delete (char*)headerName;
 	}
 	fd = open (tname, 2, 0);
 // unix lets us do this: the file actually disappears when closed.
@@ -155,7 +156,7 @@ int Linker::linkObj (const char* objName) {
 	if (fd < 0 || read (fd, (char*) &h1, sizeof h1) <= 0 ||
 	    read (fd, (char*) &h2, sizeof h2) <= 0) {
 		Error::abortRun("Can't read header from incremental link output");
-		delete codeBlock;
+		LOG_DEL; delete codeBlock;
 		close (fd);
 		return FALSE;
 	}
@@ -164,7 +165,7 @@ int Linker::linkObj (const char* objName) {
 #else
 	if (fd < 0 || read (fd, (char*) &header, sizeof(header)) <= 0) {
 		Error::abortRun("Can't read header from incremental link output");
-		delete codeBlock;
+		LOG_DEL; delete codeBlock;
 		close (fd);
 		return FALSE;
 	}
@@ -186,7 +187,7 @@ int Linker::linkObj (const char* objName) {
 // makeExecutable is a do-nothing on many systems.
 	if (makeExecutable(size,pagsiz,init_fn) != 0) {
 		Error::error ("Linker: Can't make code executable");
-		delete codeBlock;
+		LOG_DEL; delete codeBlock;
 		return FALSE;
 	}
 // get the first word, use it as a function pointer and call it.
@@ -234,10 +235,10 @@ Linker::genHeader (const char* objName) {
 // Open a pipe to "nm" to get symbol information
 	char command[256];
 	char* sym = 0;
-	sprintf (command, "nm -g %s", objName);
+	sprintf (command, "/bin/nm -g %s", objName);
 	FILE* fd = popen (command, "r");
 	if (fd == 0) {
-		Error::abortRun("Linker: can't exec 'nm' command");
+		Error::abortRun("Linker: can't exec '/bin/nm' command");
 		return 0;
 	}
 // read the output from nm, searching for GLOBAL
