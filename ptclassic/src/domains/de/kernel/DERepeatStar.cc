@@ -72,8 +72,7 @@ int DERepeatStar :: canGetFired() {
 
 // start method for DERepeatStar
 
-void DERepeatStar :: initialize() {
-	DEStar :: initialize();
+void DERepeatStar :: begin() {
 	feedbackOut.put(completionTime) << 0.0;
 }
 

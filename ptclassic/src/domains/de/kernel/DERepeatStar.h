@@ -57,7 +57,7 @@ protected:
 public:
 	// initialization: generate the first event.
 	// completionTime should be setup beforehand.
-	void initialize();
+	void begin();
 
 	// constructor
 	DERepeatStar();
