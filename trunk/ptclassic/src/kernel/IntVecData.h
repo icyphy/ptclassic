@@ -20,19 +20,15 @@ class IntVecData : public PacketData {
 private:
 	int len;
 
-	init(int l,int *srcData) {
-		len = l;
-		data = new int[l];
-		for (int i = 0; i < l; i++)
-			data[i] = *srcData++;
-	}
+	void init(int l,const int *srcData);
 
 public:
 	// the pointer is public for simplicity
 	int *data;
 
 	int length() const { return len;}
-	const char* dataType() const { return "IntVecData";}
+	const char* dataType() const;
+	int isA(const char*) const;
 
 	// constructor: makes an uninitialized array
 	IntVecData(int l) : len(l) {
@@ -46,11 +42,12 @@ public:
 	IntVecData(const IntVecData& src) { init(src.len,src.data);}
 
 	// clone
-	PacketData* clone() const { return new IntVecData(*this);}
+	PacketData* clone() const;
+
+	// print
+	StringList print() const;
 
 	// destructor
-	~IntVecData() {
-		delete data;
-	}
+	~IntVecData();
 };
 #endif
