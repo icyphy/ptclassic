@@ -62,23 +62,6 @@ public:
 	int run();
 	void wrapup();
 
-/* marked for del.
-	void beginIteration(int repetitions, int depth);
-
-	// Method available to stars to add to lines that are
-	// put at the beginning of the code file.
-	void addInclude(const char* inc);
-
-	// Method available to stars to add to static declarations.
-	void addGlobal(const char* decl);
-
-	// Method available to stars to add to main initialization.
-	void addMainInit(const char* decl);
-*/
-
-	// name the offset of portholes
-	StringList offsetName(VHDLBPortHole*);
-
 	// make public this method
 	StringList correctName(NamedObj& p) {return  sanitizedFullName(p); }
 
