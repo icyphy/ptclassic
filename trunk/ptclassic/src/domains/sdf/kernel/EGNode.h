@@ -51,12 +51,13 @@ private:
 public:
 
   	// constructor with origin and invocation number arguments
-  	EGNode(SDFStar*, int);
+  	EGNode(SDFStar*, int n = 1);
 
 	// destructor
-	virtual ~EGNode() {}
-	void	deleteInvocChain() { if (next) next->deleteInvocChain();
-				    INC_LOG_DEL; delete this; }
+	virtual ~EGNode();
+
+	// WARNING! does "delete this"!!!! (questionable practice?)
+	void	deleteInvocChain();
 
 	// print me
 	StringList printMe();
@@ -104,7 +105,7 @@ public:
 	int alreadyVisited() { return visited; }
 
 	// get the execution time of the invocation
-	int myExecTime() { return myMaster()->myExecTime(); };
+	int myExecTime() { return myMaster()->myExecTime(); }
 };
 
 ////////////////////////////
