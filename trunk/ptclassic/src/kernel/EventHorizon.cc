@@ -4,6 +4,8 @@
 #include "Output.h"
 #include "Wormhole.h"
 #include "Particle.h"
+#include "Plasma.h"
+#include "CircularBuffer.h"
  
 /**************************************************************************
 Version identification:
@@ -86,7 +88,7 @@ int EventHorizon :: isItOutput() {
 void ToEventHorizon :: getData()
 {
 	// check whether data exists or not
-	if (myGeodesic->size() >= numberTokens) {
+	if (numTokens() >= numberTokens) {
 		getParticle();
 		dataNew = TRUE;
 	} else {
