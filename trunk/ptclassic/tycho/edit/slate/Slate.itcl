@@ -335,7 +335,7 @@ body ::tycho::Slate::constructor {args} {
 #######################################################################
 #### addtag
 #
-# Add a tag to specified pictures. Uses find to get all relevent
+# Add a tag to specified pictures. Uses find{} to get all relevent
 # pictures and items, and then tags them; optimized for some
 # special cases.
 #
@@ -361,7 +361,7 @@ body ::tycho::Slate::addtag {add mode args} {
 		    lappend tagged($add) $tag
 		}
 	    } else {
-		# Oo, it really is a tag..
+		# It really is a tag..
 		$canvas addtag $add withtag $tag
 		if { [::info exists tagged($tag)] } {
 		    if { ! [::info exists tagged($add)] } {
@@ -527,17 +527,48 @@ body ::tycho::Slate::delete {args} {
 # duplicated later in various forms. <i>Do not make any assumptions
 # about the contents of the string returned by this method.</i>
 #
+# Note: If saving the description for later recreation, you may also need
+# to save other information about the picture, such as its type
+# or whether it has certain tags that affect how you will recreate it.
+#
 # describe{} accepts the following optional arguments:
 # <ul>
 # <li>*-hierarchical*: Return a description of all child pictures as well.
 # <li>*-constraints*: Include all constraints in the description.
 # </ul>
 #
+# FIXME: -hierarchical and -constraints options do nothing.
+#
 body ::tycho::Slate::describe {id args} {
+    # Create a "lambda" script with slate as argument
     set description {lambda slate -> $slate create}
+
+    # Item type
     lappend description [$this type $id]
+
+    # Coordinates
     set description [concat $description [$this coords $id]]
 
+    # Add options only if they differ from the default. The -tags
+    # options is treated specially, to filter out hierarchy tags.
+    foreach {option x y default value} \
+	    [eval concat [$this itemconfigure $id]] {
+	if { $option == "-tags" } {
+	    set tags {}
+	    foreach tag $value {
+		if { ! [string match {[!_]*} $tag] } {
+		    lappend tags $tag
+		}
+	    }
+	    if { $tags != "" } {
+		lappend description -tags $tags
+	    }
+	} elseif { $default != $value } {
+	    lappend description $option $value
+	}
+    }
+
+    # Return 
     return $description
 }
 
@@ -1036,7 +1067,64 @@ body ::tycho::Slate::raise {id {aboveThis {}}} {
 }
 
 #######################################################################
+#### recreate
+#
+# Re-create a picture from a description returned by describe{}.
+# By default, the picture will be created in exactly the same
+# position as when describe was called, and without any hierarchy.
+# A number of options can modify this behavior (these options do not
+# have to be used, but are really just short-cuts to save other calls:
+# <ul>
+# <li>*-place* _aspect_ _x y_: Place the given _aspect_ at (_x_,_y_).
+# <li>*-in* _id_: Make the picture a child of the picture _id.
+# <li>*-coords* _x0 y0_ ...: Use these coordinates instead of the ones
+# given by the description.
+# </ul>
+#
+# *-place* and *-coords* are mutually exclusive.
+#
+# FIXME: -place is not implemented yet.
+#
+body ::tycho::Slate::recreate {description args} {
+    # What we'll do is just create the item in the default mode,
+    # and then move or tag it there are options for doing so.
+    # This could be made a fair bit more efficient by modifying the
+    # description string _before_ applying it
+    set id [apply $description $this]
+
+    # -place option
+    set place [readoption place args]
+    if { $place != "" } {
+	set aspect [lindex $place 0]
+	set x [lindex $place 1]
+	set y [lindex $place 2]
+	
+	puts "recreate -place $aspect $x $y not supported yet"
+
+	# $this moveTo $id $aspect $x $y
+    }
+
+    # -coords option
+    set coords [readoption coords args]
+    if { $coords != "" } {
+	eval $this coords $id $coords
+    }
+
+    # -in option
+    set in [readopt in args]
+    if { $in != "" } {
+	$this itemconfigure $id \
+		-tags [lunion [$this gettags $id] [$this gettags $in]]
+    }
+
+    return $id
+}
+
+
+#######################################################################
 #### region
+#
+# FIXME: Not working yet.
 #
 body ::tycho::Slate::region {id args} {
     # If there are no arguments, just read the region.
