@@ -1,6 +1,6 @@
 # Configuration makefile for Sun-4 running Cfront.
 # $Id$
-# Copyright (c) 1991 The Regents of the University of California.
+# Copyright (c) 1991,1994 The Regents of the University of California.
 #                       All Rights Reserved.
 #		       
 # Programmer:  J. T. Buck
@@ -8,6 +8,7 @@
 # This config file suffices to compile Ptolemy under cfront version
 # 2.1 on the Sun-4, and should be close to what is needed on other
 # platforms.
+include $(ROOT)/mk/config-default.mk
 
 # C++ compiler to use.
 CPLUSPLUS = CC -I$(ROOT)/src/compat/cfront
@@ -36,5 +37,7 @@ LINKFLAGS=-L$(LIBDIR)
 # link flags if debugging symbols are to be left
 LINKFLAGS_D=-L$(LIBDIR)
 
-X11_INCSPEC=
-X11_LIBSPEC= -lX11
+X11_INCSPEC = -I/usr/X11/include
+X11_LIBSPEC = -lX11
+
+S56DIR= $(ROOT)/vendors/s56dsp
