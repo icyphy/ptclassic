@@ -50,7 +50,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "MatlabIfc.h"
 #include "MatlabIfcFuns.h"
 
-#define MATLAB_BUFFER_LEN        4096
+#define MATLAB_BUFFER_LEN        8192
 
 // counts how many instances of this class have been created
 static int matlabStarsCount = 0;
