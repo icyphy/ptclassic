@@ -76,6 +76,9 @@ bootstrap_clean: clean_gnu clean_tcltk clean_octtools clean_xv clean
 # If you already have gcc, you will need to change this variable, or
 # building gcc/main.c may fail
 #GNU_BUILD_CC=/usr/tools/gnu/bin/gcc
+# Use for NetBSD-1.0
+# GNU_BUILD_CC=/usr/bin/gcc
+
 GNU_BUILD_CC=cc
 
 # Special CC for irix5.  If you are using gcc to recompile, use this:
