@@ -76,6 +76,7 @@ PL_SRCS= \
  CG56Quant.pl \
  CG56QuantBitsInt.pl \
  CG56QuantBitsLin.pl \
+ CG56QuantRange.pl \
  CG56Ramp.pl \
  CG56ReadFile.pl \
  CG56ReadFileInt.pl \
