@@ -141,7 +141,7 @@ class ::tycho::TclShell {
     method search {}
 
     # Go to the specified point in the console.
-    method seePoint {point}
+    method seeFragment {point}
 
     # Insert text from the selection and possibly execute a command.
     method stuff {}
@@ -683,7 +683,7 @@ body ::tycho::TclShell::search {} {
 }
 
 #####################################################################
-#### seePoint
+#### seeFragment
 # Go to the specified point in the console, adjusting the view to see
 # the point. The point can be specified in any of three ways:
 # <pre>
@@ -700,8 +700,8 @@ body ::tycho::TclShell::search {} {
 # is used and the two indices are equal.  As a side effect, the selection
 # (if there is one) is cleared.
 #
-body ::tycho::TclShell::seePoint {point} {
-    Edit::seePoint $point
+body ::tycho::TclShell::seeFragment {point} {
+    Edit::seeFragment $point
     after 200 "$this adjustInsertionCursor"
 }
 

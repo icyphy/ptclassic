@@ -144,7 +144,7 @@ class ::tycho::HTML {
     method raiseWindow {}
 
     # Go to the specified hypertext reference, line, or range.
-    method seePoint {point}
+    method seeFragment {point}
 
     # Indicate whether rendering is currently in progress.
     method setRendering {val} {set isrendering $val}
@@ -435,7 +435,7 @@ body ::tycho::HTML::help {} {
 # <code>::tycho::expandPath</code> and open the resulting file with
 # <code>::tycho::File::openContext</code>, which will choose an editor
 # based on the filename extension. Finally, invoke
-# <code>seePoint</code> to view the specified point within the file.
+# <code>seeFragment</code> to view the specified point within the file.
 # The format for the <i>point</i> argument depends on the type of file
 # being opened. For HTML files, it will normally be the name of an
 # anchor in the file or specified "yview" location within the file. For
@@ -482,7 +482,7 @@ body ::tycho::HTML::hyperJump {filename {point {}} {push 1}} {
             configure -directory [file dirname $filename]
             configure -file $filename
             if {$point != {}} {
-                after 200 [list $this seePoint $point]
+                after 200 [list $this seeFragment $point]
             }
             configure -readonly 1
             return
@@ -545,9 +545,9 @@ body ::tycho::HTML::raiseWindow {} {
 }
 
 #####################################################################
-#### seePoint
+#### seeFragment
 # Goto the specified hypertext reference, line number, or range.
-# The <i>point</i> can take any of three forms:
+# The <i>point</i> argument can take any of three forms:
 # <pre>
 #    {line <i>linenumber</i>}
 #    {range <i>startindex endindex</i>}
@@ -562,7 +562,7 @@ body ::tycho::HTML::raiseWindow {} {
 # is used and the two indices are equal.  As a side effect, the selection
 # (if there is one) is cleared.
 #
-body ::tycho::HTML::seePoint {point} {
+body ::tycho::HTML::seeFragment {point} {
     set text $itk_component(text)
     if {[llength $point] == 2 && [lindex $point 0] == {line}} {
         # First form: A line number.

@@ -45,7 +45,7 @@
 # <li> The name of a file to jump to when the user clicks on the item.
 # <li> The point within the file to jump to.
 # </ul>
-# The third item has any syntax supported by the <code>seePoint</code>
+# The third item has any syntax supported by the <code>seeFragment</code>
 # method of the target editor.  It may be a null string, {}, in which case
 # the file is simply opened.
 # In an HTML file, it can be the name associated with any named anchor.
@@ -89,7 +89,7 @@ class ::tycho::IndexBrowser {
     ##################################################################
     ####                     public methods                       ####
 
-    # Return the current point in a form usable by seePoint.
+    # Return the current point in a form usable by seeFragment.
     method currentPoint {}
 
     # Open a help window.
@@ -99,7 +99,7 @@ class ::tycho::IndexBrowser {
     method hyperJump {filename {point {}}}
 
     # Find a match in the list, and open that entry.
-    method seePoint {point}
+    method seeFragment {point}
 
     ##################################################################
     ####                   protected methods                      ####
@@ -192,7 +192,7 @@ body ::tycho::IndexBrowser::help {} {
 # Then, expand the filename using <code>::tycho::expandPath</code> and
 # open the resulting file with <code>::tycho::File::openContext</code>,
 # which will choose an editor based on the filename extension. Finally,
-# invoke <code>seePoint</code> to view the specified point within the
+# invoke <code>seeFragment</code> to view the specified point within the
 # file. The format for the <i>point</i> argument depends on the type of
 # file being opened. For HTML files, it will normally be the name of an
 # anchor in the file. For text files, it will normally be either "{line
@@ -209,13 +209,13 @@ body ::tycho::IndexBrowser::hyperJump {filename {point {}}} {
 }
 
 #####################################################################
-#### seePoint
+#### seeFragment
 # If a hyperjump is taken into an index file, and a point is specified,
 # then the index is searched for a matching entry.  If a single matching
 # entry is found, then the link is followed for that entry.  Otherwise,
 # the index is displayed with all matching entries shown.
 #
-body ::tycho::IndexBrowser::seePoint {point} {
+body ::tycho::IndexBrowser::seeFragment {point} {
     insert entry $point
     set match [complete 1]
     if {$match == 1} {

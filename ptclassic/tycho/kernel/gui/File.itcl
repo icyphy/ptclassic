@@ -76,10 +76,10 @@ catch {delete class ::tycho::File}
 # <li> <code>saveText</code>.
 # </ul>
 # In order to support hypertext jumps into particular points in the
-# display, the derived class may also redefine <code>seePoint</code>,
+# display, the derived class may also redefine <code>seeFragment</code>,
 # and <code>currentPoint</code>. These two should always be redefined
 # as a pair, since <code>currentPoint</code> is assumed to return a
-# syntax understood by <code>seePoint</code>. Derived classes may wish
+# syntax understood by <code>seeFragment</code>. Derived classes may wish
 # to redefine <code>indicateReadOnly</code>, for example to disable menu
 # entries. Finally, most derived classes will want to redefine
 # <code>focusin</code> to give the focus to a key widget.
@@ -665,14 +665,14 @@ body ::tycho::File::help {} {
 #####################################################################
 #### hyperJump
 # Open a file and go to its internal point identified by name. If the
-# filename is the empty string, just call <code>seePoint</code>,
+# filename is the empty string, just call <code>seeFragment</code>,
 # passing it the second argument. If the filename is relative (does not
 # begin with "/", "~", or "$"), then prepend the directory of the file
 # currently being edited or viewed. Then, expand the filename using
 # <code>::tycho::expandPath</code> and open the resulting file with
 # <code>::tycho::File::openContext</code>, which will choose an editor
 # based on the filename extension. Finally, invoke
-# <code>seePoint</code> to view the specified point within the file.
+# <code>seeFragment</code> to view the specified point within the file.
 # The format for the <i>point</i> argument depends on the type of file
 # being opened. For HTML files, it will normally be the name of an
 # anchor in the file. For text files, it will normally be either "{line
@@ -797,7 +797,7 @@ body ::tycho::File::reload {} {
             set data [read $fd]
             close $fd
             insertData $data
-            seePoint $point
+            seeFragment $point
             markUnmodified
             if {[file writable $file]} {
 		configure -readonly 0
