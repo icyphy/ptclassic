@@ -147,7 +147,9 @@ if ( ! $?TYCHO ) then
 	if ( $?PTOLEMY ) then
 		setenv TYCHO "$PTOLEMY/tycho"
 	else
-		setenv TYCHO ~ptolemy/tycho
+		# Wrap this in quotes so if ~ptolemy does not exist, we don't
+		# get an 'Unknown user: ptolemy' message
+		setenv TYCHO "~ptolemy/tycho"
 		if ( -d "$TYCHO" ) then
 			echo 'Neither $TYCHO or $PTOLEMY set, so we are setting TYCHO to ~ptolemy/tycho'
 		else
@@ -239,7 +241,9 @@ endif
 # Ptolemy, no Java
 if ( $?selectPtolemy && ! $?selectJava && ! $?selectTty) then
 	# We selected Ptolemy
-	if ( ! $?PTOLEMY ) setenv PTOLEMY ~ptolemy
+	if ( ! $?PTOLEMY ) then
+		setenv PTOLEMY ~ptolemy
+	endif
 
 	if ( ! -r "$PTOLEMY/bin/ptsetup.csh" ) then
 		echo "Can't find $PTOLEMY/bin/ptsetup.csh"
