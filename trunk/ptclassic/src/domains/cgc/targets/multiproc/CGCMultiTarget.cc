@@ -52,7 +52,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include <netdb.h>			// for struct hostent
 
 extern "C" {
-	#include <netinet/in.h>			// for struct in_addr
+#include <netinet/in.h>			// for struct in_addr
 	char* inet_ntoa(struct in_addr);
 }
 
@@ -92,12 +92,12 @@ Target* CGCMultiTarget :: createChild() {
 }
 
 // -----------------------------------------------------------------------------
-DataFlowStar* CGCMultiTarget :: createSend(int from, int to, int num) {
+DataFlowStar* CGCMultiTarget :: createSend(int, int, int) {
 	LOG_NEW; CGCUnixSend* s = new CGCUnixSend;
 	return s;
 }
 
-DataFlowStar* CGCMultiTarget :: createReceive(int from, int to, int num) {
+DataFlowStar* CGCMultiTarget :: createReceive(int, int, int) {
 	LOG_NEW; CGCUnixReceive* r =  new CGCUnixReceive;
 	return r;
 }
