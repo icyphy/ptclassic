@@ -69,7 +69,7 @@ static vemStatus revInsts();
  */
 
 /*ARGSUSED*/
-delOneItemCmd(spot, cmdList)
+vemStatus delOneItemCmd(spot, cmdList)
 vemPoint *spot;
 lsList cmdList;
 /*
@@ -134,7 +134,7 @@ lsList cmdList;
 }
 
 /*ARGSUSED*/
-delOneArgCmd(spot, cmdList)
+vemStatus delOneArgCmd(spot, cmdList)
 vemPoint *spot;
 lsList cmdList;
 /*
@@ -753,10 +753,10 @@ vemPoint *spot;			/* Where command was issued */
     } else {
 	dfGetInt("lambda", &unitsPerLambda);
     }
-    sprintf(errMsgArea, "(%d, %d) lambda, (%d, %d) oct units\n",
-	    thePoint.x / unitsPerLambda,
-	    thePoint.y / unitsPerLambda,
-	    spotPoint.x, spotPoint.y);
+    sprintf(errMsgArea, "(%ld, %ld) lambda, (%ld, %ld) oct units\n",
+	    (long)(thePoint.x / unitsPerLambda),
+	    (long)(thePoint.y / unitsPerLambda),
+	    (long)spotPoint.x, (long)spotPoint.y);
     vemMessage(errMsgArea, MSG_NOLOG|MSG_DISP);
 }
 
@@ -832,7 +832,7 @@ lsList cmdList;			/* List of arguments        */
 
 
 /*ARGSUSED*/
-saveCmd(spot, cmdList)
+vemStatus saveCmd(spot, cmdList)
 vemPoint *spot;			/* Where command was issued */
 lsList cmdList;			/* List of arguments        */
 /*
@@ -855,7 +855,7 @@ lsList cmdList;			/* List of arguments        */
 }
 
 /*ARGSUSED*/
-writeCmd(spot, cmdList)
+vemStatus writeCmd(spot, cmdList)
 vemPoint *spot;			/* Where command was issued */
 lsList cmdList;			/* List of arguments        */
 /*
@@ -901,7 +901,7 @@ lsList cmdList;			/* List of arguments        */
 }
 
 /*ARGSUSED*/
-saveAllCmd(spot, cmdList)
+vemStatus saveAllCmd(spot, cmdList)
 vemPoint *spot;			/* Where command was issued */
 lsList cmdList;			/* List of arguments        */
 /*
@@ -988,7 +988,7 @@ octObject *theFacet;		/* Facet for re-reading */
 }
 
 /*ARGSUSED*/
-revertCmd(spot, cmdList)
+vemStatus revertCmd(spot, cmdList)
 vemPoint *spot;			/* Where command was issued */
 lsList cmdList;			/* List of arguments        */
 /*
@@ -999,7 +999,8 @@ lsList cmdList;			/* List of arguments        */
     vemStatus ret;
     int proceed;
 
-    if (ret = revertParse(spot, cmdList, &theFacet, &interFacet) == VEM_OK) {
+    if ( (ret =
+	  revertParse(spot, cmdList, &theFacet, &interFacet)) == VEM_OK) {
 	/* Ask for confirmation */
 	proceed = revertConf(&theFacet);
 	if (proceed) {
@@ -1015,6 +1016,7 @@ lsList cmdList;			/* List of arguments        */
 
 
 /*ARGSUSED*/
+vemStatus
 revertNoConf(spot, cmdList)
 vemPoint *spot;			/* Where command was issued */
 lsList cmdList;			/* List of arguments        */
@@ -1026,7 +1028,8 @@ lsList cmdList;			/* List of arguments        */
     octObject theFacet, interFacet;
     vemStatus ret;
 
-    if (ret = revertParse(spot, cmdList, &theFacet, &interFacet) == VEM_OK) {
+    if ( (ret = revertParse(spot, cmdList, &theFacet, &interFacet))
+	== VEM_OK) {
 	if ((ret = doRevert(&theFacet)) == VEM_OK) {
 	    if (interFacet.objectId != oct_null_id) {
 		ret = doRevert(&interFacet);
@@ -1264,7 +1267,7 @@ st_table *tbl;			/* Table of re-read facets       */
 }
 
 
-
+vemStatus
 replWinCmd(spot, cmdList)
 vemPoint *spot;			/* Where command was issued */
 lsList cmdList;			/* List of arguments        */
@@ -1365,8 +1368,11 @@ lsList cmdList;			/* List of arguments        */
     } else {
 	sprintf(winName, " %s:%s ",
 		theFacet.contents.facet.cell,
-		theFacet.contents.facet.view,
-		theFacet.contents.facet.facet);
+		theFacet.contents.facet.view);
+	  /* FIXME:  The sprintf() above used to have
+	   * 'theFacet.contents.facet.facet' as the last arg, but it
+	   * was unused by the format
+           */
     }
     XStoreName(xv_disp(), spot->theWin, winName);
     wnQWindow(spot->theWin);
@@ -1385,6 +1391,7 @@ Window win;
     return VEM_OK;
 }
 
+vemStatus
 killBufCmd(spot, cmdList)
 vemPoint *spot;			/* Where command was issued */
 lsList cmdList;			/* List of arguments        */
@@ -1449,6 +1456,7 @@ lsList cmdList;			/* List of arguments        */
 
 
 /*ARGSUSED*/
+vemStatus
 expandCmd(spot, cmdList)
 vemPoint *spot;			/* Where command was issued */
 lsList cmdList;			/* List of arguments        */
@@ -1473,6 +1481,7 @@ lsList cmdList;			/* List of arguments        */
 
 
 /*ARGSUSED*/
+vemStatus
 fullCmd(spot, cmdList)
 vemPoint *spot;			/* Where command was issued */
 lsList cmdList;			/* List of arguments        */
@@ -1510,7 +1519,7 @@ lsList cmdList;			/* List of arguments        */
 }
 
 
-
+vemStatus
 altCmd(spot, cmdList)
 vemPoint *spot;			/* Where command was issued */
 lsList cmdList;			/* List of arguments        */
@@ -1581,6 +1590,7 @@ lsList cmdList;			/* List of arguments        */
 		     
 
 
+vemStatus
 swapCmd(spot, cmdList)
 vemPoint *spot;			/* Where command was issued */
 lsList cmdList;			/* List of arguments        */
@@ -2003,6 +2013,7 @@ lsList cmdList;			/* List of arguments        */
 }
 
 /*ARGSUSED*/
+vemStatus
 recoverCmd(spot, cmdList)
 vemPoint *spot;			/* Where command was issued */
 lsList cmdList;			/* List of arguments        */
@@ -2019,7 +2030,6 @@ lsList cmdList;			/* List of arguments        */
     char *versions[BUF_MAX_ALTERNATES];
     dmWhichItem items[BUF_MAX_ALTERNATES];
     int num, i, select = 0;
-    char title[VEMMAXSTR];
     static char *help_text =
 "There are some alternate versions of the cell that are more recent\n\
 then the current version of the cell.  This command replaces the contents\n\
