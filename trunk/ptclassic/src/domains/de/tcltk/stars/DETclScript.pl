@@ -82,6 +82,7 @@ delim $$
 .EN
 	}
 	hinclude { "TclStarIfc.h" }
+	ccinclude { "ptk.h" }
 	outmulti {
 		name {output}
 		type {float}
@@ -102,11 +103,6 @@ delim $$
 		// Standardized interface to Tcl
 		TclStarIfc tcl;
 	}
-	code {
-	extern "C" {
-        	#include "ptk.h"
-	}
-    	}
 	setup {
 		tcl.setup( this,
 			   input.numberPorts(),

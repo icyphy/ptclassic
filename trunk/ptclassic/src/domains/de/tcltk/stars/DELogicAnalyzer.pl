@@ -59,7 +59,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	    MPHIter next(input);
 	    PortHole* port;
 	    while ((port = next++) != 0) {
-                GenericPort& p = port->far().realPort();
+                GenericPort& p = port->far()->realPort();
 		names << p.fullName() << " ";
             }
 	    PlotLabels.setCurrentValue(names);
