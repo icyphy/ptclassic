@@ -97,12 +97,6 @@ long userOptionWord;
 	PrintErr(octErrorString());
     	ViDone();
     }
-/* set current domain.  This will change to use the domain of the star */
-    if(setCurDomainF(&facet) == NULL) {
-        PrintErr("Domain error in facet.");
-        ViDone();
-    }
-
     /* get name of instance under cursor */
     status = vuFindSpot(spot, &inst, OCT_INSTANCE_MASK);
     if (status == VEM_NOSELECT) {
@@ -121,6 +115,10 @@ long userOptionWord;
 	/* delay or palette inst is under cursor */
 	PrintErr("Cursor must be over a star");
     } else if (IsStar(&inst)) {
+	if(setCurDomainInst(&inst) == NULL) {
+	    PrintErr("Domain error in instance.");
+	    ViDone();
+	}
 	    /* autoload the star if necessary */
 	if (!AutoLoadCk(&inst) ||
 	    !KcProfile(AkoName(inst.contents.instance.master))) {
