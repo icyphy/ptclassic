@@ -246,7 +246,7 @@ protected:
         void put(Pointer p) {append(p); ++dimen;}
 
 	// Return number of elements on the list
-	int size() {return dimen;}
+	int size() const {return dimen;}
 
 	// Return next element on the list
 	Pointer next() {return SingleLinkList::next();}
@@ -293,7 +293,7 @@ protected:
 	// Clear the data structure
 	void initialize() {SingleLinkList::initialize(); dimen=0;}
 
-	int size() {return dimen;}
+	int size() const {return dimen;}
 
 	Stack() {dimen=0;}
 private:

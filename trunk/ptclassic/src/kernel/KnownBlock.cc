@@ -21,7 +21,7 @@ extern Error errorHandler;
 
 BlockList *KnownBlock::allstars;	// define the static member
 
-KnownBlock::KnownBlock (Block &block, char *name) {
+KnownBlock::KnownBlock (Block &block, const char* name) {
 	static int n_known = 0;
 
 // on the first call, create the known block list.
@@ -37,7 +37,7 @@ KnownBlock::KnownBlock (Block &block, char *name) {
 // type, by asking the matching block on the list to clone itself.
 
 Block *
-KnownBlock::clone(char *type) {
+KnownBlock::clone(const char* type) {
 	Block *p = allstars->blockWithName(type);
 	if (p) return p->clone();
 // If we get here, we don't know the block.  Report error, return NULL.

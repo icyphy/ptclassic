@@ -38,11 +38,11 @@ class KnownBlock {
 public:
 // The constructor takes a block and a name, and adds a corresponding
 // entry to the known list.
-	KnownBlock (Block &block, char *name);
+	KnownBlock (Block &block, const char* name);
 
 // The clone method takes a string, finds the appropriate block in
 // allstars, and returns a clone of that block.
-	static Block *clone (char *name);
+	static Block *clone (const char* name);
 
 // method for printing all known blocks.  Maybe should use StringList
 // and return a char* instead.
