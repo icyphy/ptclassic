@@ -30,11 +30,6 @@
 # 						COPYRIGHTENDKEY
 ##########################################################################
 
-# FIXME: this will go
-package ifneeded tycho.kernel 2.0 \
-	[list source [file join $dir kernel.tcl]]
-
-
 # This is not really a package, but a collection of packages
 # Look for packages inside this package.
 #
