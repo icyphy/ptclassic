@@ -34,6 +34,10 @@ ENHANCEMENTS, OR MODIFICATIONS.
  XHistogram uses Histogram and the XGraph class to display histograms.
 
 **************************************************************************/
+#ifdef __GNUG__
+#pragma interface
+#endif
+
 #include "Histogram.h"
 #include "Display.h"
 #include <minmax.h>
