@@ -56,15 +56,15 @@ public:
     // should only be called in Block::~Block
     void remove(Block& b);
 
-    // return the fullName using the scoping hierarchy
-    Galaxy::fullName;
-    
     // return the name of just this galaxy
     Galaxy::name;
 
-    // lookup a state
+    // lookup a state using the scoping hierarchy
     State* lookup(const char*);
-    
+
+    // return the fullName using the scoping hierarchy
+    /*virtual*/ StringList fullName() const;
+        
 protected:
     Scope(Galaxy&);
     ~Scope();

@@ -109,6 +109,10 @@ public:
 	// and false otherwise.
 	virtual int isItWormhole () const; // {return FALSE;}
 
+	// Method to true "false" if the block is a Cluster
+        // and false otherwise.
+        virtual int isItCluster () const; // {return FALSE;}
+
 	// virtual method to make a new object of the same type.
 	// Stars and galaxies should redefine it as, say
 	//

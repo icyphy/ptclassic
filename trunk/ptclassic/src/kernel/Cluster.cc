@@ -29,6 +29,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 						COPYRIGHTENDKEY
 
  Programmers: J. L. Pino
+ Added some stuff by P. K. Murthy (May 1996)
  Date of creation: 11/9/95
 
 
@@ -93,6 +94,7 @@ ClusterPort::ClusterPort(GenericPort&p):GalPort(p) {
  **********************************************************************/
 const char* Cluster::className() const {return "Cluster";}
 ISA_FUNC(Cluster,Galaxy);
+int Cluster::isItCluster () const { return TRUE;}
 
 /**********************************************************************
 		      Create and add a new port
@@ -105,8 +107,43 @@ ClusterPort* Cluster::addNewPort(PortHole& p) {
 }
 
 /**********************************************************************
-		    Cluster Absorb & Merge Methods
+		    Cluster Group, Absorb, & Merge Methods
  **********************************************************************/
+
+// Group: This creates a new cluster that contains the two argument clusters
+// 			as its clusters.
+//
+// Absorb: This absorbs the argument cluster into itself, increasing the
+// 			the number of clusters inside itself by 1.
+//
+// Merge: This merges the clusters inside the argument cluster into itself,
+// 			increasing the number of clusters inside itself by the number 
+//			of clusters inside of the argument cluster.
+
+Cluster* Cluster::group(Cluster& c, Cluster& b, int removeFlag)
+{
+	// first make sure that c and b both have the same parent: me
+	if (c.parent() != this || b.parent() != this) {
+		StringList message;
+		message << "Can't group " << c.name() << " and " << b.name()
+		<< " because the clusters don't have the same parent.";
+		Error::abortRun(*this,message);
+		return 0;
+	}
+	Cluster* newC = (Cluster*)makeNew();
+	newC->setName(c.name());
+	addBlock(*newC, newC->name());
+	if (!newC->absorb(c,removeFlag) || !newC->absorb(b,removeFlag)) {
+		asGalaxy().removeBlock(*newC);
+		StringList message;
+		message << "Failed to absorb c into newly created empty cluster"
+		<< "or failed to absorb b into newly created empty cluster";
+		Error::abortRun(*this,message);
+		return 0;
+	}
+	return newC;
+}
+
 int Cluster::absorb(Cluster& cluster, int removeFlag) {
     makeNonAtomic();
     Block* clusterParent =  cluster.parent();
