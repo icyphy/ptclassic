@@ -49,7 +49,7 @@ static const char file_id[] = "MatlabTcl.cc";
 #include "MatlabTcl.h"
 
 #define MATLABTCL_CHECK_MATLAB() \
-	if (! init()) return error("Could not start matlab")
+	if (! init()) return error("Could not start MATLAB")
 
 // constructor
 MatlabTcl::MatlabTcl() {
@@ -94,7 +94,7 @@ void MatlabTcl::sethandle() {
 
 // start a Matlab process if one is not running already
 int MatlabTcl::init() {
-    if ( matlabInterface == 0 ) {
+    if (matlabInterface == 0) {
 	matlabInterface = new MatlabIfc;
     }
     if (! matlabInterface->MatlabIsRunning()) {
@@ -110,22 +110,22 @@ int MatlabTcl::evaluate(char* command, int outputBufferFlag) {
     sethandle();
     matlabInterface->AttachMatlabFigureIds();
     int merror = matlabInterface->EvaluateOneCommand(command);
-    if ( outputBufferFlag || merror ) {
+    if (outputBufferFlag || merror) {
 	Tcl_AppendResult(tclinterp, matlabInterface->GetOutputBuffer(), 0);
     }
-    if ( merror ) return TCL_ERROR;
+    if (merror) return TCL_ERROR;
     return TCL_OK;
 }
 
 // evaluate the Tcl command "matlab"
 int MatlabTcl::matlab(int argc, char** argv) {
 
-    if ( tclinterp == 0 ) {
+    if (tclinterp == 0) {
 	Error::error("Tcl interpreter not initialized");
 	return TCL_ERROR;
     }
 
-    if ( argc == 1 ) {
+    if (argc == 1) {
         return error("wrong # args in \"matlab\" command");
     }
 
@@ -226,7 +226,7 @@ int MatlabTcl::get(int argc, char** argv) {
 	free(realList);
 	matlabInterface->FreeStringArray(realStrings, numelements);
 	delete [] realStrings;
-	if ( imagStrings ) {
+	if (imagStrings) {
 	    char* imagList = Tcl_Merge(numelements, imagStrings);
 	    Tcl_AppendElement(tclinterp, imagList);
 	    free(imagList);
@@ -341,6 +341,6 @@ int MatlabTcl::unset(int argc, char** argv) {
     if (argc != 3) return usage("matlab unset <matrix_name>");
     MATLABTCL_CHECK_MATLAB();
     int merror = matlabInterface->UnsetMatlabVariable(argv[2]);
-    if ( merror ) return TCL_ERROR;
+    if (merror) return TCL_ERROR;
     return TCL_OK;
 }
