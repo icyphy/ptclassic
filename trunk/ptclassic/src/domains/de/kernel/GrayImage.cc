@@ -55,7 +55,7 @@ unsigned char* GrayImage::retData()
 } // end GrayImage::retData()
 
 
-BaseImage* GrayImage::fragment(int cellSz, int Num)
+BaseImage* GrayImage::fragment(int cellSz, int Num) const
 {
 	if (Num*cellSz > size) return ((BaseImage*) NULL);
 

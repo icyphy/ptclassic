@@ -55,12 +55,12 @@ MVImage::~MVImage()
 }
 
 
-BaseImage* MVImage::fragment(int cellSz, int Num)
+BaseImage* MVImage::fragment(int cellSz, int Num) const
 {
 	int arrSz = cellSz / 2; // Since we have 2 buffers (horiz and vert)
 
 	if ((Num == 0) && (size == 0)) {
-		return ((BaseImage*) this); // NULL MV field.
+		return ((BaseImage*) clone()); // NULL MV field.
 	}
 	if (Num*arrSz > size) { return ((BaseImage*) NULL); }
 

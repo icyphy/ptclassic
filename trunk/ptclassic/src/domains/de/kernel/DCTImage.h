@@ -36,7 +36,7 @@ public:
 	DCTImage(const BaseImage&, int = 8); // copy params, int = blocksize
 	virtual ~DCTImage();
 
-	virtual	BaseImage*	fragment(int, int);
+	virtual	BaseImage*	fragment(int, int) const;
 	virtual	void		assemble(const BaseImage*);
 	float*				retData();
 

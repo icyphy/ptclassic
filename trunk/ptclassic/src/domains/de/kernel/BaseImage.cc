@@ -6,13 +6,13 @@
 
 #include "BaseImage.h"
 
-BaseImage* BaseImage::fragment(int, int) { return 0;}
+BaseImage* BaseImage::fragment(int, int) const { return 0;}
 void BaseImage::assemble(const BaseImage*) {}
 const char* BaseImage::dataType() const { return "BaseImage";}
 PacketData* BaseImage::clone() const { return new BaseImage(*this); }
 PacketData* BaseImage::clone(int a) const { return new BaseImage(*this,a);}
 
-void BaseImage::copy(int len, float* into, const float* from)
+void BaseImage::copy(int len, float* into, const float* from) const
 {
 	for(int travel = 0; travel < len%5; travel++) {
 		into[travel] = from[travel];
@@ -28,7 +28,7 @@ void BaseImage::copy(int len, float* into, const float* from)
 
 
 void BaseImage::copy(int len, unsigned char* into,
-		const unsigned char* from)
+		const unsigned char* from) const
 {
 	for(int travel = 0; travel < len%5; travel++) {
 		into[travel] = from[travel];

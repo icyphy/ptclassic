@@ -44,7 +44,7 @@ public:
 	MVImage(const MVImage&, int = 0);   // copy params, maybe data
 	virtual ~MVImage();
 
-	virtual	BaseImage*	fragment(int, int);
+	virtual	BaseImage*	fragment(int, int) const;
 	virtual	void		assemble(const BaseImage*);
 
 	inline	char*	retHorz() { return horzData; }

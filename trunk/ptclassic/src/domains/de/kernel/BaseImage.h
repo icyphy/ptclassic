@@ -62,8 +62,8 @@ protected:
 	int width, height;
 	int startPos, size, fullSize;
 	int frameId;
-	void copy(int, float*, const float*);
-	void copy(int, unsigned char*, const unsigned char*);
+	void copy(int, float*, const float*) const;
+	void copy(int, unsigned char*, const unsigned char*) const;
 
 public:
 	BaseImage(int a, int b, int c, int d):
@@ -100,7 +100,7 @@ public:
 	inline int operator>=(const BaseImage& a) const
 			{ return ((*this > a) || (*this == a)); }
 
-	virtual BaseImage* fragment(int, int);
+	virtual BaseImage* fragment(int, int) const;
 	virtual void assemble(const BaseImage*);
 
 // PacketData-like stuff
