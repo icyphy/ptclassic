@@ -298,7 +298,7 @@ body ::tycho::TWidget::hyperJump {file {point {}}} {
         if {$point != {}} {
             # The seeFragment call is postponed to give time for the widget
             # to be created. The catch is in case it is immediately deleted.
-            after 200 [list catch [list $obj seeFragment $point]]
+            after 1000 [list catch [list $obj seeFragment $point]]
         }
     } {
         seeFragment $point
