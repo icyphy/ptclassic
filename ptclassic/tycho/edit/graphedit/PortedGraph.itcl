@@ -35,11 +35,31 @@
 # The _PortedDigraph_ model is a directed graph with the
 # notion of "ports" at each vertex. Edges between vertices must
 # connect to a port of a vertex rather than just the vertex.
-# Keys are implemented as an entity nested within
+# Ports are implemented as an entity nested within
 # vertices, and can therefore be configured with attributes.
 # The most obvious application of this kind of graph is dataflow
 # graphs, in which each edge from a vertex must be uniquely identified.
-# Note, however, that ports are not constrained to be "inputs" or "outputs".
+#
+# _PortedDigraph_ adds the following types to those inherited
+# from _AbstractGraph_:
+# <dl>
+# <dt><b>edge</b> _name_
+# <dd>
+# An edge between two ports. The name of an edge is formed from the
+# vertices and ports it connects:
+# <b>edge:</b>_v1_<b>.</b>_p1_<b>^</b>_v2_<b>.</b>_p2_, where _v1_ and _p1_
+# are the source vertex and port, and _v2_ and _p2_ are the target
+# vertex and port. The external (TIM) format is a little friendlier,
+# and represents an edge as <b>edge</b> _v1_ _p1_ _v2_ _p2_.
+# Edges have no default attributes.
+#
+# <dt><b>port</b> _name_
+# <dd>
+# A port of a vertex. Ports are used to connect edges, but can also
+# be given attributes of their own. Ports are usefully only
+# contained with a vertex.
+#
+# </dl>
 #
 # Here are some examples of creating and accessing a ported digraph.
 # The graph looks like this:
@@ -95,13 +115,13 @@
 #
 # Delete an edge:
 # <pre><tcl>
-#     $graph edgedelete b out d in
+#     $graph delete edge:b.out^d.in
 #     $graph describe
 # </tcl></pre>
 #
 # Delete a vertex but not edges connected to it, and record the deletion:
 # <pre><tcl>
-#     $graph record vertexdelete c
+#     $graph record delete vertex:c
 #     $graph describe
 # </tcl></pre>
 #
@@ -113,7 +133,7 @@
 #
 # Delete a vertex and all edges connected to it, recording it:
 # <pre><tcl>
-#     $graph record delete* c
+#     $graph record remove c
 #     $graph describe
 # </tcl></pre>
 #
@@ -132,39 +152,14 @@ class ::tycho::PortedDigraph {
     #################################################################
     ####                     public methods                      ####
 
-
-    # Remove a vertex _and_ adjacent edges from the graph
-    method delete* {vertex}
-
-    # Add an edge and attributes to the graph
-    method edge {vertex1 port1 vertex2 port2 args}
-
-    # Get an attribute or attributes of an edge
-    method edgecget {vertex1 port1 vertex2 port2 {attribute {}}}
-
-    # Configure the edge with one or more attributes
-    method edgeconfigure {vertex1 port1 vertex2 port2 args}
-
-    # Remove an edge from the graph
-    method edgedelete {vertex1 port1 vertex2 port2}
-
     # Return edges matching a vertex and port patterns
-    method edges {{vertex1 *} {port1 *} {vertex2 *} {port2 *}}
-
-    # Add a port to a vertex
-    method port {vertex port args}
-
-    # Get an attribute or attributes of a port
-    method portcget {vertex port {attribute {}}}
-
-    # Configure the port with one or more attributes
-    method portconfigure {vertex port args}
-
-    # Remove a port from the graph
-    method portdelete {vertex port}
+    method edges {{v1 *} {p1 *} {v2 *} {p2 *}}
 
     # Return ports of a vertex that match a pattern
     method ports {vertex {port *}}
+
+    # Remove a vertex _and_ adjacent edges from the graph
+    method remove {vertex}
 
     # "Repair" a graph by deleting improperly-connected edges
     method repair {}
@@ -184,8 +179,11 @@ class ::tycho::PortedDigraph {
     #################################################################
     ####                   protected methods                     ####
 
-    # Return a description of a single item
-    protected method _describeitem {name {prefix {}}}
+    # Add an edge
+    protected method _addedge {v1 p1 v2 p2 args}
+
+    # Return a description of an edge
+    protected method _describeedge {name {prefix {}}}
 
     # Update the cache
     protected method _updatecache
@@ -213,136 +211,20 @@ body ::tycho::PortedDigraph::constructor {args} {
 }
 
 ########################################################################
-#### delete*
-#
-# Delete a vertex and all connected edges from the graph, and
-# return the undo command.
-#
-body ::tycho::PortedDigraph::delete* {vertex} {
-    if ![exists vertex:$vertex] {
-        error "Unknown vertex: \"$vertex\""
-    }
-
-    # Start undo command
-    set undo [list sequence]
-
-    # Delete outward edges
-    foreach {v1 k1 v2 k2} [edges $vertex * * *] {
-	lappend undo [edgedelete $v1 $k1 $v2 $k2]
-    }
-    # Delete inward edges
-    foreach {v1 k1 v2 k2} [edges * * $vertex *] {
-	lappend undo [edgedelete $v1 $k1 $v2 $k2]
-    }
-    # Delete the vertex. (NB: This must follow the edge deletion.)
-    lappend undo [vertexdelete $vertex]
-
-    # Return the undo command
-    return $undo
-}
-
-########################################################################
-#### edge
-#
-# Add a new edge to the graph, and return the undo command.
-#
-body ::tycho::PortedDigraph::edge {vertex1 port1 vertex2 port2 args} {
-    # Add the edge to the model. We encode the vertex name into the
-    # edge names to make it possible to implement methods like
-    # edges{} using pattern-matching.
-    eval add edge:$vertex1.$port1^$vertex2.$port2 $args
-}
-
-########################################################################
-#### edgecget
-#
-# Get an attribute of an edge. An error will occur if the edge does not
-# exist or the attribute does not exist.
-#
-body ::tycho::PortedDigraph::edgecget {vertex1 port1 vertex2 port2 {attribute {}}} {
-    itemcget edge:$vertex1.$port1^$vertex2.$port2 $attribute
-}
-
-########################################################################
-#### edgeconfigure
-#
-# Configure the edge and return the undo command. The argument list
-# is a flat list of attribute-value pairs.
-#
-body ::tycho::PortedDigraph::edgeconfigure {vertex1 port1 vertex2 port2 args} {
-    eval itemconfigure edge:$vertex1.$port1^$vertex2.$port2 $args
-}
-
-########################################################################
-#### edgedelete
-#
-# Remove an edge from the graph, and return the undo command.
-#
-body ::tycho::PortedDigraph::edgedelete {vertex1 port1 vertex2 port2} {
-    delete edge:$vertex1.$port1^$vertex2.$port2
-}
-
-########################################################################
 #### edges
 #
 # Return a list containing the edges of the graph that match the
-# given patterns. The result is a flat list containing the source
-# vertex, source port, target vertexm and target port. If no arguments
-# are supplied, return all edges.
+# given patterns, where _v1_ and _p1_ are the source vertex and port,
+# and _v2_ and _p2_ are the target vertex and port. The returned list
+# alternates source and target vertex and port names (note: not item
+# names such as <code>edge:a.out^b.in</code>).
 #
-body ::tycho::PortedDigraph::edges {{vertex1 *} {port1 *} {vertex2 *} {port2 *}} {
-    # Only use the cached data if the cache is valid
-    if [cache valid] {
-        eval concat [array names _edges [list $vertex1 $port1 $vertex 2 $port2]]
-    } else {
-        set result {}
-        foreach edge [names edge:$vertex1.$port1^$vertex2.$port2] {
-            eval lappend result [lreplace [split $edge :.^] 0 0]
-        }
-        return $result
+body ::tycho::PortedDigraph::edges {{v1 *} {p1 *} {v2 *} {p2 *}} {
+    set result {}
+    foreach edge [names edge:$v1.$p1^$v2.$p2] {
+        eval lappend result [lrange [split $edge :^.] 1 4]
     }
-}
-
-########################################################################
-#### port
-#
-# Add a port to a vertex.
-# Additional arguments are a flat attribute-value list for the
-# parameter. Flag an error if the port already exists. Return
-# the undo command.
-#
-body ::tycho::PortedDigraph::port {vertex port args} {
-    eval add [list "vertex:$vertex port:$port"] $args
-}
-
-########################################################################
-#### portcget
-#
-# Get an attribute of a port. An error will occur if the port does not
-# exist or the attribute does not exist.
-#
-body ::tycho::PortedDigraph::portcget {vertex port {attribute {}}} {
-    itemcget [list vertex:$vertex port:$port] $attribute
-}
-
-########################################################################
-#### portconfigure
-#
-# Configure the port and return the undo command. The argument list
-# is a flat list of attribute-value pairs.
-#
-body ::tycho::PortedDigraph::portconfigure {vertex port args} {
-    eval itemconfigure [list "vertex:$vertex port:$port"] $args
-}
-
-########################################################################
-#### portdelete
-#
-# Remove a port from the graph, and return the undo command.
-# Note that connected edges will not be deleted.
-#
-body ::tycho::PortedDigraph::portdelete {vertex port} {
-    delete [list vertex:$vertex port:$port]
+    return $result
 }
 
 ########################################################################
@@ -350,7 +232,8 @@ body ::tycho::PortedDigraph::portdelete {vertex port} {
 #
 # Return a list of ports of the given vertex. If the second argument
 # is given, it is a glob-style pattern to be used to match against
-# port names.
+# port names. The result is a list of port names, relative to the
+# vertex name and without the "port:" qualification
 #
 body ::tycho::PortedDigraph::ports {vertex {pattern *}} {
     set result {}
@@ -361,38 +244,67 @@ body ::tycho::PortedDigraph::ports {vertex {pattern *}} {
 }
 
 ########################################################################
+#### remove
+#
+# Delete a vertex and all connected edges from the graph, recording
+# commands if the recording flag is set.
+#
+body ::tycho::PortedDigraph::remove {vertex} {
+    if ![exists vertex:$vertex] {
+        error "Unknown vertex: \"$vertex\""
+    }
+    # Mark the history
+    mark set temp
+
+    # Delete outward edges
+    foreach edge [names edge:$vertex.*^*.*] {
+        delete $edge
+    }
+    # Delete inward edges
+    foreach edge [names edge:*.*^$vertex.*] {
+        delete $edge
+    }
+    # Delete the vertex
+    delete vertex:$vertex
+
+    # Compact the history
+    if $recording {
+        history compact temp current
+    }
+}
+
+########################################################################
 #### repair
 #
 # "Repair" a graph by deleting improperly-connected edges.
-# This method cannot be recorded or published.
+# Append to the history if recording.
 #
 body ::tycho::PortedDigraph::repair {} {
+    mark set temp
     foreach edge [names edge:*] {
         foreach {_ v1 p1 v2 p2} [split $edge :.^] {}
-        if { ![exists [list vertex:$v1 port:$p1]] \
-                || ![exists [list vertex:$v2 port:$p2]] } {
+        if { ![exists "vertex:$v1 port:$p1"] \
+                || ![exists "vertex:$v2 port:$p2"] } {
             # Delete a disconnected edge
-            edgedelete $v1 $p1 $v2 $p2
+            delete edge:$v1.$p1^$v2.$p2
         }
     }
-    # Return null so record{} or publish{} will complain.
-    return ""
+    if $recording {
+        history compact temp current
+    }
 }
 
 ########################################################################
 #### subgraphEdges
 #
-# Return the edges within a sub-graph. The arguments are the vertices
-# of the subgraph. The returned list of edges are source-target quads
-# (not a flat list as in some other methods). This is to make graph
-# editors more generic.
+# Return the edges within the sub-graph given by the arguments. Each
+# argument is the short name of a vertex.
 #
 body ::tycho::PortedDigraph::subgraphEdges {args} {
-    _update
     set result {}
     foreach u $args {
         foreach v $args {
-            eval lappend result [array names _edges [list $u * $v *]]
+            eval lappend result [names edge:$u.*^$v.*]
         }
     }
     return $result
@@ -401,16 +313,14 @@ body ::tycho::PortedDigraph::subgraphEdges {args} {
 ########################################################################
 #### subgraphInputs
 #
-# Return the input edges to a sub-graph. The arguments are the vertices
-# of the subgraph. The returned list of edges are source-target quads
-# (not a flat list as in some other methods). This is to make graph
-# editors more generic.
+# Return the input edges to a sub-graph. Each
+# argument is the short name of a vertex.
 #
 body ::tycho::PortedDigraph::subgraphInputs {args} {
     set result {}
     foreach v $args {
-        foreach edge [array names _edges [list * * $v *]] {
-            if { [lsearch -exact $args [lindex $edge 0]] < 0 } {
+        foreach edge [names edge:*.*^$v.*] {
+            if { [lsearch -exact $args [lindex [split $edge :.^] 1]] < 0 } {
                 lappend result $edge
             }
         }
@@ -421,16 +331,14 @@ body ::tycho::PortedDigraph::subgraphInputs {args} {
 ########################################################################
 #### subgraphOutputs
 #
-# Return the output edges from a sub-graph. The arguments are the vertices
-# of the subgraph. The returned list of edges are source-target quads
-# (not a flat list as in some other methods). This is to make graph
-# editors more generic.
+# Return the output edges from a sub-graph. Each
+# argument is the short name of a vertex.
 #
 body ::tycho::PortedDigraph::subgraphOutputs {args} {
     set result {}
     foreach v $args {
-        foreach edge [array names _edges [list $v * * *]] {
-            if { [lsearch -exact $args [lindex $edge 2]] < 0 } {
+        foreach edge [names edge:$v.*^*.*] {
+            if { [lsearch -exact $args [lindex [split $edge :.^] 3]] < 0 } {
                 lappend result $edge
             }
         }
@@ -460,69 +368,49 @@ body ::tycho::PortedDigraph::verify {} {
 ####                     protected methods                       ####
 
 ########################################################################
-#### _describeitem
+#### _addedge
 #
-# Return a string describing an item. this method overrides
-# the default method because edges have a different format
-# from the default.
+# Add an edge.
 #
-body ::tycho::PortedDigraph::_describeitem {name {prefix {}}} {
-    regexp {(.+):(.+)} [lindex $name end] _ type tail
+body ::tycho::PortedDigraph::_addedge {v1 p1 v2 p2 args} {
+    eval add edge:$v1.$p1^$v2.$p2 $args
+}
 
-    if { $type == "edge" } {
-        # Start string with type
-        set string $prefix
-        append string "edge"
-
-        # Append the two vertices and ports
-        eval lappend string [split $tail ^.]
-
-	# Append data that differs from the default
-	array set dflt [type defaults edge]
-	foreach {attr val} [itemcget edge:$tail] {
-	    if { ! [::info exists dflt($attr)] || $dflt($attr) != $val } {
-		lappend string $attr $val
-	    }
-	}
-        append string \n
-    } else {
-        chain $name $prefix
-    }
+########################################################################
+#### _describeedge
+#
+# Return a string describing an edge.
+#
+body ::tycho::PortedDigraph::_describeedge {name {prefix {}}} {
+    return "${prefix}edge [lrange [split $name :^.] 1 4] [assign $name]\n"
 }
 
 ########################################################################
 #### _updatecache
 #
 # Clear the cache and build updated versions of the _parents,
-# _children, _edges and _vertices arrays.
+# _children and _vertices arrays.
 #
 body ::tycho::PortedDigraph::_updatecache {} {
-    # Clear all cached data
-    cache delete
+    # Do superclass first
+    chain
 
-    # Clear locally-cached data
-    catch {unset _edges}
-    catch {unset _parents}
-    catch {unset _children}
-    catch {unset _vertices}
+    # Regenerate parent-children. Use arrays to prevent duplicates.
+    foreach edge [names edge:*] {
+        set splat [split $edge :.^]
+        set src [lindex $splat 1]
+        set tgt [lindex $splat 3]
 
+        set parents$src($tgt) 0
+        set children$tgt($src) 0
+    }
     # Regenerate vertex list
     foreach vertex [names vertex:*] {
-        set vertex [lindex [split $vertex :] 1]
-        lappend _vertices $vertex
-        set _parents($vertex) {}
-        set _children($vertex) {}
+        set v [lindex [split $vertex :] 1]
+        lappend _vertices $v
+        set _parents($v) [array get parents$v]
+        set _children($v) [array get children$v]
     }
-    foreach edge [names edge:*] {
-        foreach {_ src p1 tgt p2} [split $edge :.^] {}
-
-        # Regenerate parent-child lists
-        lappend _children($src) $tgt
-        lappend _parents($tgt) $src
-
-        # Regenerate edge array
-        set _edges([list $src $p1 $tgt $p2]) 1
-    }
-    # Chain to validate cache
-    chain
+    # Validate cache
+    cache validate
 }

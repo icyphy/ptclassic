@@ -36,6 +36,21 @@
 # _AbstractGraph_ superclass with concrete methods for a number
 # of common algorithms on directed graphs.
 #
+# _Digraph_ adds the following types to those inherited
+# from _AbstractGraph_:
+# <dl>
+# <dt><b>edge</b> _name_
+# <dd>
+# An edge between two ports. The name of an edge is formed from the
+# vertices it connects:
+# <b>edge:</b>_v1_<b>^</b>_v2_, where _v1_ and _v2_
+# are the source and target vertices. The external (TIM) format is
+# a little friendlier,
+# and represents an edge as <b>edge</b> _v1_ _v2_.
+# Edges have no default attributes.
+#
+# </dl>
+#
 # When constructed,  edges do not require that vertices
 # already exist, as this can occur when graphs are automatically
 # generated; once all vertices and edges have been added, the graph
@@ -115,23 +130,11 @@ class ::tycho::Digraph {
     #################################################################
     ####                     public methods                      ####
 
-    # Remove a vertex _and_ adjacent edges from the graph
-    method delete* {vertex}
-
-    # Add an edge and attributes to the graph
-    method edge {vertex1 vertex2 args}
-
-    # Get an attribute or attributes of an edge
-    method edgecget {vertex1 vertex2 {attribute {}}}
-
-    # Configure the edge with one or more attributes
-    method edgeconfigure {vertex1 vertex2 args}
-
-    # Remove an edge from the graph
-    method edgedelete {vertex1 vertex2}
-
     # Return edges matching a pair of connection patterns
     method edges {{pattern1 *} {pattern2 *}}
+
+    # Remove a vertex _and_ adjacent edges from the graph
+    method remove {vertex}
 
     # "Repair" a graph by deleting improperly-connected edges
     method repair {}
@@ -151,8 +154,11 @@ class ::tycho::Digraph {
     #################################################################
     ####                   protected methods                     ####
 
-    # Return a description of a single item
-    protected method _describeitem {name {prefix {}}}
+    # Add an edge
+    protected method _addedge {vertex1 vertex2 args}
+
+    # Return a description of an edge
+    protected method _describeedge {name {prefix {}}}
 
     # Update the cache
     protected method _updatecache
@@ -172,117 +178,29 @@ body ::tycho::Digraph::constructor {args} {
 }
 
 ########################################################################
-#### delete*
-#
-# Delete a vertex and all connected edges from the graph, and
-# return the undo command.
-#
-body ::tycho::Digraph::delete* {vertex} {
-    if ![exists vertex:$vertex] {
-        error "Unknown vertex: \"$vertex\""
-    }
-
-    # Start undo command
-    set undo [list sequence]
-
-    # Delete outward edges
-    foreach {src tgt} [edges $vertex *] {
-	lappend undo [edgedelete $src $tgt]
-    }
-    # Delete inward edges
-    foreach {src tgt} [edges * $vertex] {
-	lappend undo [edgedelete $src $tgt]
-    }
-    # Delete the vertex. (NB: This must follow the edge deletion.)
-    lappend undo [vertexdelete $vertex]
-
-    # Return the undo command
-    return $undo
-}
-
-########################################################################
-#### edge
-#
-# Add a new edge to the graph, and return the undo command.
-# By default, this method just adds a link between the
-# two named edges.  Flag an error if the edge
-# already exists, but not if any of the connected vertices do not exist.
-#
-body ::tycho::Digraph::edge {vertex1 vertex2 args} {
-    # Add the edge to the model. We encode the vertex name into the
-    # edge names to make it possible to implement methods like
-    # edges{} using pattern-matching.
-    eval add edge:$vertex1^$vertex2 $args
-}
-
-########################################################################
-#### edgecget
-#
-# Get an attribute of an edge. An error will occur if the edge does not
-# exist or the attribute does not exist.
-#
-body ::tycho::Digraph::edgecget {vertex1 vertex2 {attribute {}}} {
-     eval itemcget edge:$vertex1^$vertex2
-}
-
-########################################################################
-#### edgeconfigure
-#
-# Configure the edge and return the undo command. An error will
-# occur if the edge does not exist. The argument list
-# is a flat list of attribute-value pairs.
-#
-body ::tycho::Digraph::edgeconfigure {vertex1 vertex2 args} {
-    eval itemconfigure edge:$vertex1^$vertex2 $args
-}
-
-########################################################################
-#### edgedelete
-#
-# Remove an edge from the graph, and return the undo command. This
-# default method works for simple directed graphs.
-#
-body ::tycho::Digraph::edgedelete {vertex1 vertex2} {
-    delete edge:$vertex1^$vertex2
-}
-
-########################################################################
 #### edges
 #
-# Return a list containing the edges of the graph with source and target
-# vertex names that match the given patterns. The result is a flat list
-# of source-target pairs. If no arguments are supplied, return all edges.
-# To test for the presence of a single edge, provide its source and 
-# target vertices as the arguments and compare the result with the empty
-# list.
+# Return a list containing the edges of the graph that match the
+# given patterns, where _vertex1_ and _vertex2 are the source and
+# target vertices. The returned list alternates source and target
+# vertex names (note: not item names such as <code>edge:a^b</code>).
 #
-body ::tycho::Digraph::edges {{pattern1 *} {pattern2 *}} {
-    # Only use the cached data if the cache is valid
-    if [cache valid] {
-        eval concat [array names _edges [list $pattern1 $pattern2]]
-    } else {
-        set result {}
-        foreach edge [names edge:$pattern1^$pattern2] {
-            eval lappend result [lreplace [split $edge :^] 0 0]
-        }
-        return $result
+body ::tycho::Digraph::edges {{vertex1 *} {vertex2 *}} {
+    set result {}
+    foreach edge [names edge:$vertex1^$vertex2] {
+        eval lappend result [lrange [split $edge :^] 1 2]
     }
+    return $result
 }
 
 ########################################################################
 #### repair
 #
-# "Repair" a graph by deleting improperly-connected edges. This method
-# provides a default implementation that will remove invalid edges in 
-# most properly-written subclasses; however, subclasses may
-# choose to override it for efficiency, because it doesn't work
-# with the subclass, or to perform additional repairs. This
-# method should be called after building a graph if it is not certain
-# that the graph is correctly constructed.
-# This method cannot be recorded or published.
+# "Repair" a graph by deleting improperly-connected edges.
+# Append to the history if recording.
 #
 body ::tycho::Digraph::repair {} {
-    # Do not use cached data
+    mark set temp
     foreach edge [names edge:*] {
         set splat [split $edge :^]
         set src [lindex $splat 1]
@@ -290,27 +208,55 @@ body ::tycho::Digraph::repair {} {
 
         if { ![exists vertex:$src] || ![exists vertex:$tgt] } {
             # Delete a disconnected edge
-            edgedelete $src $tgt
+            delete edge:$src^$tgt
         }
     }
-    # Return null so record{} or publish{} will complain.
-    return ""
+    if $recording {
+        history compact temp current
+    }
+}
+
+########################################################################
+#### remove
+#
+# Delete a vertex and all connected edges from the graph, recording
+# commands if the recording flag is set.
+#
+body ::tycho::Digraph::remove {vertex} {
+    if ![exists vertex:$vertex] {
+        error "Unknown vertex: \"$vertex\""
+    }
+    # Mark the history
+	mark set temp
+
+    # Delete outward edges
+    foreach edge [names edge:$vertex^*] {
+        delete $edge
+    }
+    # Delete inward edges
+    foreach edge [names edge:*^$vertex] {
+        delete $edge
+    }
+    # Delete the vertex
+    delete vertex:$vertex
+
+    # Compact the history
+    if $recording {
+        history compact temp current
+    }
 }
 
 ########################################################################
 #### subgraphEdges
 #
-# Return the edges within a sub-graph. The arguments are the vertices
-# of the subgraph. The returned list of edges are source-target pairs
-# (not a flat list as in some other methods). This is to make graph
-# editors more generic.
+# Return the edges within the sub-graph given by the arguments. Each
+# argument is the short name of a vertex.
 #
 body ::tycho::Digraph::subgraphEdges {args} {
-    _update
     set result {}
     foreach u $args {
         foreach v $args {
-            eval lappend result [array names _edges [list $u $v]]
+            eval lappend result [names edge:$u^$v] 
         }
     }
     return $result
@@ -319,17 +265,14 @@ body ::tycho::Digraph::subgraphEdges {args} {
 ########################################################################
 #### subgraphInputs
 #
-# Return the input edges to a sub-graph. The arguments are the vertices
-# of the subgraph. The returned list of edges are source-target pairs
-# (not a flat list as in some other methods). This is to make graph
-# editors more generic.
+# Return the input edges to a sub-graph. Each
+# argument is the short name of a vertex.
 #
 body ::tycho::Digraph::subgraphInputs {args} {
-	_update
     set result {}
     foreach v $args {
-        foreach edge [array names _edges [list * $v]] {
-            if { [lsearch -exact $args [lindex $edge 0]] < 0 } {
+        foreach edge [names edge:*^$v] {
+            if { [lsearch -exact $args [lindex [split $edge :^] 1]] < 0 } {
                 lappend result $edge
             }
         }
@@ -340,17 +283,15 @@ body ::tycho::Digraph::subgraphInputs {args} {
 ########################################################################
 #### subgraphOutputs
 #
-# Return the output edges from a sub-graph. The arguments are the vertices
-# of the subgraph. The returned list of edges are source-target pairs
-# (not a flat list as in some other methods). This is to make graph
-# editors more generic.
+# Return the output edges from a sub-graph. Each
+# argument is the short name of a vertex.
 #
 body ::tycho::Digraph::subgraphOutputs {args} {
     _update
     set result {}
     foreach v $args {
-        foreach edge [array names _edges [list $v *]] {
-            if { [lsearch -exact $args [lindex $edge 1]] < 0 } {
+        foreach edge [names edge:$v^*] {
+            if { [lsearch -exact $args [lindex [split $edge :^] 2]] < 0 } {
                 lappend result $edge
             }
         }
@@ -384,34 +325,21 @@ body ::tycho::Digraph::verify {} {
 ####                     protected methods                       ####
 
 ########################################################################
-#### _describeitem
+#### _addedge
 #
-# Return a string describing an item. this method overrides
-# the default method because edges have a different format
-# from the default.
+# Add an edge.
 #
-body ::tycho::Digraph::_describeitem {name {prefix {}}} {
-    regexp {(.+):(.+)} [lindex $name end] _ type tail
+body ::tycho::Digraph::_addedge {vertex1 vertex2 args} {
+    eval add edge:$vertex1^$vertex2 $args
+}
 
-    if { $type == "edge" } {
-        # Start string with type
-        set string $prefix
-        append string "edge"
-
-        # Append the two vertices
-        eval lappend string [split $tail ^]
-
-	# Append data that differs from the default
-	array set dflt [type defaults edge]
-	foreach {attr val} [itemcget edge:$tail] {
-	    if { ! [::info exists dflt($attr)] || $dflt($attr) != $val } {
-		lappend string $attr $val
-	    }
-	}
-        append string \n
-    } else {
-        chain $name $prefix
-    }
+########################################################################
+#### _describeedge
+#
+# Return a string describing an edge.
+#
+body ::tycho::Digraph::_describeedge {name {prefix {}}} {
+    return "${prefix}edge [lrange [split $name :^] 1 2] [assign $name]\n"
 }
 
 ########################################################################
@@ -421,14 +349,8 @@ body ::tycho::Digraph::_describeitem {name {prefix {}}} {
 # _children, _edges and _vertices arrays.
 #
 body ::tycho::Digraph::_updatecache {} {
-    # Clear all cached data
-    cache delete
-
-    # Clear locally-cached data
-    catch {unset _edges}
-    catch {unset _parents}
-    catch {unset _children}
-    catch {unset _vertices}
+    # Do superclass first
+    chain
 
     # Regenerate vertex list
     foreach vertex [names vertex:*] {
@@ -437,18 +359,15 @@ body ::tycho::Digraph::_updatecache {} {
         set _parents($vertex) {}
         set _children($vertex) {}
     }
+    # Regenerate parent-children
     foreach edge [names edge:*] {
         set splat [split $edge :^]
         set src [lindex $splat 1]
         set tgt [lindex $splat 2]
 
-        # Regenerate parent-child lists
         lappend _children($src) $tgt
         lappend _parents($tgt) $src
-
-        # Regenerate edge array
-        set _edges([list $src $tgt]) 1
     }
-    # Chain to validate cache
-    chain
+    # Validate cache
+    cache validate
 }
