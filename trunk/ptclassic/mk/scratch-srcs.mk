@@ -92,6 +92,10 @@ gnu_clean:
 hpgnu_all: stats  $(OBJARCH)/gnu
 	(cd $(PTOLEMY)/src/gnu; $(MAKE) $(MFLAGS) ARCH=$(ARCH) PTOLEMY=$(PTOLEMY) GNU_DEST=$(GNU_DEST) hp_all)
 
+# For irix5
+irix5gnu_all: stats  $(OBJARCH)/gnu
+	(cd $(PTOLEMY)/src/gnu; $(MAKE) $(MFLAGS) ARCH=$(ARCH) PTOLEMY=$(PTOLEMY) GNU_DEST=$(GNU_DEST) irix5_all)
+
 	
 #
 # Build and install tcl tools
@@ -139,11 +143,7 @@ xv_configure: $(OBJARCH)/xv \
 	# xmkmf causes problems under solaris2 with gcc, so we don't use it
 	(cd $(OBJARCH)/xv; $(XMKMF) )
 
-$(OBJARCH)/xv:
-	if [ ! -d $(OBJARCH) ]; then \
-		echo "Making $(OBJARCH)"; \
-		mkdir $(OBJARCH); \
-	fi
+$(OBJARCH)/xv: $(OBJARCH)
 	mkdir $(OBJARCH)/xv
 
 $(OBJARCH)/xv/Imakefile:
