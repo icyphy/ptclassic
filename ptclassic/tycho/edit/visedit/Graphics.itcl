@@ -1142,7 +1142,7 @@ body ::tycho::Graphics::help {} {
     global ::TYCHO
     ::tycho::File::openContext \
         [file join $TYCHO edit visedit doc usersGuides \
-	    EditGraphicsHelp.html] html
+	    GraphicsHelp.html] html
 }
 
 #######################################################################
