@@ -55,7 +55,7 @@ class Scheduler;
  **********************************************************************/
 class ClusterPort : public GalPort {
 public:
-    ClusterPort(GenericPort&);
+    ClusterPort(PortHole&);
     ~ClusterPort();
     
     // Called after the galaxy is first converted to a clustering
@@ -86,7 +86,7 @@ public:
 			   Make new methods
      ******************************************************************/
     /*virtual*/ Block* makeNew() const { return new Cluster; }
-    inline virtual ClusterPort* makeNewPort(GenericPort& p) {
+    inline virtual ClusterPort* makeNewPort(PortHole& p) {
 	return new ClusterPort(p);
     }
     // Calls makeNewPort and adds it to this cluster
