@@ -29,6 +29,7 @@ DE =$(OBJDIR)/domains/de/stars
 Thor=$(OBJDIR)/domains/thor/stars
 CG=$(OBJDIR)/domains/cg/stars
 CGDDF=$(OBJDIR)/domains/cg-ddf/stars
+CGC=$(OBJDIR)/domains/cgc/stars
 CG56=$(OBJDIR)/domains/cg56/stars
 CG56DSP=$(OBJDIR)/domains/cg56/dsp/stars
 CG96=$(OBJDIR)/domains/cg96/stars
@@ -44,6 +45,7 @@ DE_SRC =$(ROOT)/src/domains/de/stars
 Thor_SRC=$(ROOT)/src/domains/thor/stars
 CG_SRC=$(ROOT)/src/domains/cg/stars
 CGDDF_SRC=$(ROOT)/src/domains/cg-ddf/stars
+CGC_SRC=$(ROOT)/src/domains/cgc/stars
 CG56_SRC=$(ROOT)/src/domains/cg56/stars
 CG56DSP_SRC=$(ROOT)/src/domains/cg56/dsp/stars
 CG96_SRC=$(ROOT)/src/domains/cg96/stars
@@ -63,6 +65,7 @@ include $(DDF_SRC)/ddfstars.mk			# DDF -> DDFSTARS
 include $(Thor_SRC)/thorstars.mk		# Thor -> ThorSTARS
 include $(CG_SRC)/cgstars.mk			# CG -> CGSTARS
 include $(CGDDF_SRC)/cgddfstars.mk		# CGDDF -> CGDDFSTARS
+include $(CGC_SRC)/cgcstars.mk			# CGC -> CGCSTARS
 include $(CG56_SRC)/cg56stars.mk		# CG56 -> CG56STARS
 include $(CG56DSP_SRC)/cg56dspstars.mk		# CG56DSP -> CG56STARS
 include $(CG96_SRC)/cg96stars.mk		# CG96 -> CG96STARS
@@ -70,12 +73,15 @@ include $(CG96_SRC)/cg96stars.mk		# CG96 -> CG96STARS
 # Extra targets
 SDFT = $(OBJDIR)/domains/sdf/targets
 CGT = $(OBJDIR)/domains/cg/targets
+CGCT = $(OBJDIR)/domains/cgc/targets
 CG56T = $(OBJDIR)/domains/cg56/targets
 CG96T = $(OBJDIR)/domains/cg96/targets
 
-CGTARGETS =	$(OBJDIR)/domains/sdf/loopScheduler/LoopTarget.o \
-		$(CGT)/CGMultiTarget.o $(CGT)/CGSharedBus.o \
+SDFTARGETS =	$(OBJDIR)/domains/sdf/loopScheduler/LoopTarget.o 
+CGTARGETS =	$(CGT)/CGMultiTarget.o $(CGT)/CGSharedBus.o \
 		$(SDFT)/CompileTarget.o 
+CGCTARGETS =	$(CGCT)/CGCUnixSend.o $(CGCT)/CGCUnixReceive.o \
+		$(CGCT)/CGCMultiTarget.o
 CG56TARGETS =	$(CG56T)/Sim56Target.o $(CG56T)/S56XTarget.o \
 		$(CG56T)/Sub56Target.o
 CG96TARGETS =	$(CG96T)/Sim96Target.o
