@@ -178,17 +178,27 @@ class Star;
 class Galaxy;
 
 // Error-catchers; these should be redefined.
-
-Star&
-Block::asStar () const {
-	Error::error (readFullName(), " is not a Star!");
+// return types are dummies to shut up compiler warnings.
+static void* bomb(const Block* b, const char* type) {
+	Error::error (*b, "is not a", type);
 	exit (1);
+	return 0;
 }
 
-Galaxy&
-Block::asGalaxy () const {
-	Error::error (readFullName(), " is not a Galaxy!");
-	exit (1);
+const Star& Block::asStar () const {
+	return *(const Star*)bomb(this, "Star");
+}
+
+Star& Block::asStar () {
+	return *(Star*)bomb(this, "Star");
+}
+
+const Galaxy& Block::asGalaxy () const {
+	return *(const Galaxy*)bomb(this, "Galaxy");
+}
+
+Galaxy& Block::asGalaxy() {
+	return *(Galaxy*)bomb(this, "Galaxy");
 }
 
 // small virtual functions
