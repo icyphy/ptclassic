@@ -39,6 +39,10 @@ CPLUSPLUS = g++
 # OCT_CC is used in src/octtools/vem-{lib,bin}.mk
 OCT_CC =	gcc -fwritable-strings
 
+# So we can check if we are using g++ in a makefile.
+# $CPLUSPLUS might be something like g++-2.7.2, which makes it hard to check
+USE_GPLUSPLUS = yes
+
 # Compiler flags
 # -Wsynth is new in g++-2.6.x
 # Under gcc-2.7.0, you will need to add -fno-for-scope to GPPFLAGS
