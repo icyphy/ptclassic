@@ -59,6 +59,7 @@ PL_SRCS= \
  CG56IntMult.pl \
  CG56IntProduct.pl \
  CG56IntQuantizer.pl \
+ CG56IntWriteFile.pl \
  CG56Limit.pl \
  CG56LinToCirc.pl \
  CG56LMS.pl \
@@ -88,8 +89,8 @@ PL_SRCS= \
  CG56VarQuasar.pl \
  CG56WasteCycles.pl \
  CG56WaveForm.pl \
- CG56WriteFile.pl \
- CG56WriteFileInt.pl 
+ CG56WriteFile.pl 
+
 
 
 # The .cc files

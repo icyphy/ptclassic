@@ -41,6 +41,7 @@ CG56STARS = \
  $(CG56)/CG56IntMult.o \
  $(CG56)/CG56IntProduct.o \
  $(CG56)/CG56IntQuantizer.o \
+ $(CG56)/CG56IntWriteFile.o \
  $(CG56)/CG56Limit.o \
  $(CG56)/CG56LinToCirc.o \
  $(CG56)/CG56LMS.o \
@@ -70,6 +71,6 @@ CG56STARS = \
  $(CG56)/CG56VarQuasar.o \
  $(CG56)/CG56WasteCycles.o \
  $(CG56)/CG56WaveForm.o \
- $(CG56)/CG56WriteFile.o \
- $(CG56)/CG56WriteFileInt.o 
+ $(CG56)/CG56WriteFile.o 
+
 
