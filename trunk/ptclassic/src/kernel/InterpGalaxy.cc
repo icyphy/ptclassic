@@ -274,7 +274,7 @@ InterpGalaxy::clone() {
 			c = actionList.next();
 
 			gal->numPorts (a, b, atoi (c));
-			nacts -= 3;
+			nacts -= 4;
 			break;
 
 		default:
