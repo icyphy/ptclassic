@@ -52,7 +52,7 @@ pack append $s $s.f top
 
 proc ${uniqueSymbol}setOut {value} {
 	global uniqueSymbol
-	${uniqueSymbol}setOutputs [expr $value/20.0]
+	${uniqueSymbol}setOutputs [expr {$value/20.0}]
 }
 
 # Initialize the output
