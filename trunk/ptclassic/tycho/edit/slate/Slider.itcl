@@ -73,16 +73,22 @@ class ::tycho::Slider {
     #
     # The slider's label -- appears underneath it.
     #
-    itk_option define -label label Label "" {
+    # FIXME: Can't have an empty label
+    #
+    itk_option define -label label Label "." {
 	if { $initialized } {
-	    $labellabel configure -text $itk_option(-label)
+	    $itk_component(slate) itemconfigure $labellabel \
+		    -text $itk_option(-label)
+
+#	    $labellabel configure -text $itk_option(-label)
 
 	#
 	# Set the height of the slate
 	#
 	$itk_component(slate) configure -width $itk_option(-totalwidth) \
 		-height [expr \
-		  [lindex [$labellabel query bbox] 3] + $interspace]
+		  [lindex [$itk_component(slate) bbox $labellabel] 3] \
+		    + $interspace]
 	}
     }
 
@@ -211,6 +217,7 @@ class ::tycho::Slider {
     # Hacky variable to prevent errors in initialization
     #
     private variable initialized 0
+
 }
 
 
@@ -229,6 +236,7 @@ body ::tycho::Slider::constructor {args} {
 		-borderwidth
     }
     pack $itk_component(slate)
+
 
     #
     # Create the interactors
@@ -275,10 +283,10 @@ body ::tycho::Slider::redraw {} {
     # FIXME: Should resize/move existing components (if they exist)!
     #
     if { [info exists trough] } {
-	delete object $trough
-	delete object $bar
-	delete object $labellabel
-	delete object $valuelabel
+	$itk_component(slate) delete $trough
+	$itk_component(slate) delete $bar
+	$itk_component(slate) delete $labellabel
+	$itk_component(slate) delete $valuelabel
     }
 
     #
@@ -297,13 +305,6 @@ body ::tycho::Slider::redraw {} {
     ::set slidertop    [expr $troughtop + $protrudeby + $barheight/2]
     ::set sliderbottom [expr $slidertop + $itk_option(-length)]
     ::set troughbottom [expr $sliderbottom + $protrudeby + $barheight/2]
-
-    #
-    # Create the value display.
-    #
-    ::set valuelabel [$itk_component(slate) create Text \
-	    $xcenter $textbase \
-	    -text $itk_option(-from) -anchor s -fill blue]
 
     #
     # Create the slider objects
@@ -326,17 +327,26 @@ body ::tycho::Slider::redraw {} {
 	    -borderwidth 3]
 
     #
+    # Create the value display.
+    #
+    ::set valuelabel [$itk_component(slate) create text \
+	    $xcenter $textbase \
+	    -text $itk_option(-from) -anchor s -fill blue]
+
+    #
     # Create the label underneath the sliders
     #
-    ::set labellabel [$itk_component(slate) create Text \
+    ::set labellabel [$itk_component(slate) create text \
 	    $xcenter [expr $troughbottom + $interspace] \
 	    -text $itk_option(-label) -anchor n -justify center]
+
 
     #
     # Set the height of the slate
     #
     $itk_component(slate) configure -width $itk_option(-totalwidth) \
-	    -height [expr [lindex [$labellabel query bbox] 3] + $interspace]
+	    -height [expr [lindex [$itk_component(slate) bbox $labellabel] 3] \
+	       + $interspace]
 
     #
     # Set the interactors up and bind to the slider bar
@@ -398,7 +408,7 @@ configbody ::tycho::Slider::resolution {
 	    #
 	    # Update the label
 	    #
-	    $valuelabel configure \
+	    $itk_component(slate) itemconfigure $valuelabel \
 		    -text [format %.$itk_option(-digits)f $value]
 
 	    #
@@ -454,7 +464,8 @@ body ::tycho::Slider::set {x} {
     #
     # Update the label
     #
-    $valuelabel configure -text [format %.$itk_option(-digits)f $x]
+    $itk_component(slate) itemconfigure $valuelabel \
+	    -text [format %.$itk_option(-digits)f $x]
 
     #
     # Call the command prefix
@@ -494,7 +505,8 @@ body ::tycho::Slider::updatevalue {} {
     #
     # Update the label
     #
-    $valuelabel configure -text [format %.$itk_option(-digits)f $value]
+    $itk_component(slate) itemconfigure $valuelabel \
+	    -text [format %.$itk_option(-digits)f $value]
 
     #
     # Call the command prefix
