@@ -40,9 +40,10 @@ CC =		gcc
 
 OPTIMIZER =	-O2
 WARNINGS =	-Wall -Wcast-qual
-GPPFLAGS =	-g $(MEMLOG) $(WARNINGS) $(OPTIMIZER)
+MULTITHREAD =	-D_REENTRANT
+GPPFLAGS =	-g $(MEMLOG) $(WARNINGS) $(OPTIMIZER) $(MULTITHREAD)
 # If you are not using gcc, then you might have problems with the WARNINGS flag
-CFLAGS =	-g $(MEMLOG) $(WARNINGS) $(OPTIMIZER)
+CFLAGS =	-g $(MEMLOG) $(WARNINGS) $(OPTIMIZER) $(MULTITHREAD)
 
 #
 # Variables for the linker
