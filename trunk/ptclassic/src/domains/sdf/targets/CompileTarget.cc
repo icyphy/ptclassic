@@ -156,6 +156,7 @@ void CompileTarget::wrapup() {
     pt_ofstream codeFile(codeFileName);
     if (!codeFile) return;
     codeFile << myCode;
+    codeFile.flush();
 
     // Invoke the compiler
     StringList cmd;
