@@ -137,12 +137,23 @@ public:
 		alias = NULL;
 		return *this;
 	}
+
+	// set up a port for determining the type of ANYTYPE connections
+	void inheritTypeFrom(GenericPort& p) { typePort = &p;}
+
+	// function to initialize PortHole Plasmas
+	virtual Plasma* setPlasma() { return 0;}
+
 protected:
 	// datatype of particles in this porthole
 	dataType type;
 
 	// PortHole this is aliased to
 	GenericPort* alias;
+
+	// PortHole to inherit type from for ANYTYPE connections
+	GenericPort* typePort;
+
 };
 
 	
@@ -154,6 +165,7 @@ protected:
 //  for all PortHoles
 class PortHole : public GenericPort
 {
+	friend class Geodesic;	// allow Geodesic to access myPlasma
 public:
 
         // Every PortHole must be initialized with the setPort function
@@ -204,20 +216,28 @@ public:
 	// Maintain pointer to Geodesic connected to this PortHole
 	Geodesic* myGeodesic;
 
-	// Maintain pointer to the Plasma where we get
-	//  our Particles or replace unused Particles
-	Plasma* myPlasma;
-
 	// Allocate a return a Geodesic compatible with this
 	// type of PortHole
 	virtual Geodesic* allocateGeodesic();
 
+	// initialize the Plasma
+	Plasma* setPlasma();
+
 protected:
+	// Maintain pointer to the Plasma where we get
+	//  our Particles or replace unused Particles
+	Plasma* myPlasma;
+
 	// Buffer where the Particle*'s are stored
 	CircularBuffer* myBuffer;
 
+	// size of buffer to allocate
+	int bufferSize;
+
+private:
 	// Allocate new buffer
-	void allocateBuffer(int size);
+	void allocateBuffer();
+
 };
 
         //////////////////////////////////////////
@@ -225,26 +245,12 @@ protected:
         //////////////////////////////////////////
 
 // Used to store a list of PortHoles in a MultiPortHole
-class PortList : SequentialList
+class PortList : public SequentialList
 {
-        friend class Block;
-        friend class MultiPortHole;
-
-	void initialize() {SequentialList::initialize();}
-
-        // Return size of list
-        int size() const {return SequentialList::size();}
-
-	// Reset the list to beginning
-	void reset() {SequentialList::reset();}
-
+public:
         // Return next PortHole on list
         PortHole& operator ++ () {return *(PortHole*)next();}
 
-// Make the following public or a rather large number of MultiPortHoles
-// have to be made friends.  This is due to another c++ "feature" that
-// derived classes do not inherit friendships.
-public:           
         // Add PortHole to list
         void put(PortHole& p) {SequentialList::put(&p);}
 };
@@ -302,9 +308,30 @@ public:
         // Print a description of the MultiPortHole
         virtual operator StringList ();
 
+	// function to set Plasma type of subportholes
+	Plasma* setPlasma();
+
 protected:                           
         // List of ports allocated
         PortList ports;
+
+	// Method for generating names for contained PortHoles
+	char* newName();
+};
+
+        //////////////////////////////////////////
+        // class MPHList
+        //////////////////////////////////////////
+
+// Used to store a list of MultiPortHoles
+class MPHList : public SequentialList
+{
+public:
+	// Return next MultiPortHole on list
+        MultiPortHole& operator ++ () {return *(MultiPortHole*)next();}
+
+        // Add MultiPortHole to list
+        void put(MultiPortHole& p) {SequentialList::put(&p);}
 };
 
 /*****************************************************************
