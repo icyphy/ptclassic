@@ -44,11 +44,10 @@ VPATH         = $(ROOT)/src/ptklib
 CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
-HDRS	      = ptkBarGraph.h ptkPlot.h ptkPlot_defs.h \
+HDRS	      = ptkBarGraph.h ptkPlot.h ptkPlot_defs.h ptkTclCommands.h \
 		BarGraph.h TclStarIfc.h XYPlot.h \
 
 LIBCSRCS      = ptkBarGraph.c ptkPlot.c ptkGlobals.c
-
 
 LIBCPPSRCS    = BarGraph.cc TclStarIfc.cc XYPlot.cc ptkRunEvents.cc 
 
