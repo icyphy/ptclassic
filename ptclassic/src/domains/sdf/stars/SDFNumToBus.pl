@@ -30,11 +30,11 @@ limitation of liability, and disclaimer of warranty provisions.
                 binary = 0;
         }
         destructor {
-                LOG_DEL; delete binary;
+                LOG_DEL; delete [] binary;
         }
         setup {
                 bits = output.numberPorts();
-                LOG_DEL; delete binary;
+                LOG_DEL; delete [] binary;
                 LOG_NEW; binary = new int[bits];
         }
 	go {
