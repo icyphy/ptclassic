@@ -17,6 +17,7 @@ $Id$
 
 extern const Attribute A_ROM(AB_MEMORY|AB_CONST,0);
 extern const Attribute A_RAM(AB_MEMORY,AB_CONST);
+extern const Attribute A_MEMORY(AB_MEMORY,0);
 extern const Attribute A_CIRC(AB_CIRC,0);
 extern const Attribute A_NOINIT(AB_NOINIT,0);
 extern const Attribute A_REVERSE(AB_REVERSE,0);
