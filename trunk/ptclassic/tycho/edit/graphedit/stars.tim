@@ -1,7 +1,7 @@
 # -*- mode: tcl -*-
 # -*- class: ::tycho::StarLibrary -*-
 #
-# $Id$ G%
+# $Id$
 # Test star library
 
 group sdf -label {SDF Stars} {
@@ -16,11 +16,11 @@ group sdf -label {SDF Stars} {
             -label {Printer} \
             -icon {editors/graphedit/icons.tim#sdf.printer} {
         attribute fileName -default "<stdout>" -label fileName
-        port in -composite 0 -datatype float
+        port in -composite 0 -datatype float -composite 1
     }
     star xgraph \
             -label {Xgraph} {
-        port in -composite 0 -datatype float
+        port in -composite 0 -datatype float -composite 1
     }
 }
 
@@ -95,7 +95,7 @@ group miscellaneous -label {Miscellaneous Icons} {
 group test -label {Test Icons} {
     star simple \
             -label {A Simple Icon} \
-            -icon {editors/graphedit/icons.tim#miscellaneous.baz} {
+            -icon {editors/graphedit/icons.tim#test.simple} {
         port out
     }
 }

@@ -77,23 +77,20 @@ class ::tycho::Layout {
     #################################################################
     ####                     public methods                      ####
     
-    # Assign the values an item 
-    method assign {item value}
-    
-    # Add an item 
-    method add {type item args}
-    
+    # Add a new item
+    method add {type name args}
+
+    # Get an attribute or attributes of an item
+    method attrget {name {attr {}}}
+
+    # Set attributes of an item
+    method attrset {name args}
+
     # Get or set the coordinates of an item
     method coords {item args}
-    
+
     # Forward a query to a subscriber view
     method forward {method name args}
-    
-    # Get an attribute of an item
-    method itemcget {item args}
-    
-    # Configure an item
-    method itemconfigure {item args}
     
     # Move an item
     method move {tag x y}
@@ -161,28 +158,7 @@ body ::tycho::Layout::constructor {args} {
     type define item
 }
 
-########################################################################
-#### assign
-#
-# Assign an attribute list to an item. This method overrides
-# the inherited method to deal with the <b>-slatetype</b> and
-# <b>-coords</b> attributes.
-#
-body ::tycho::Layout::assign {item value} {
-    array set opts $value
-    if ![info exists opts(-slatetype)] {
-        error "attribute \"-slatetype\" must be supplied"
-    }
-    if { $opts(-slatetype) != [itemcget $item -slatetype] } {
-        error "attribute \"-slatetype\" cannot be changed"
-    }
-    if ![info exists opts(-coords)] {
-        error "attribute \"-coords\" must be supplied"
-    }
-    chain $item $value
-}
-
-########################################################################
+#########################################################################
 #### add
 #
 # Add an item. This method overrides the inherited method to deal
@@ -200,6 +176,38 @@ body ::tycho::Layout::add {type item args} {
 }
 
 ########################################################################
+#### attrget
+#
+# Get an attribute or attributes of an item. This method overrides
+# the inherited method to deal with the coordinates.
+#
+body ::tycho::Layout::attrget {item {attribute {}}} {
+    # Update coordinates
+    if { [::info exists _dirty($item)] && $_views != "" } {
+        attrset $item -coords [[lindex $_views 0] coords $item]
+        # unset _dirty($item)
+    }
+    chain $item $attribute
+}
+
+########################################################################
+#### attrset
+#
+# Configure an attribute or attributes of an item. This method overrides
+# the inherited method to deal with the <b>-slatetype</b> and
+# <b>-coords</b> attributes.
+#
+body ::tycho::Layout::attrset {item args} {
+    if { [lsearch -exact $args -slatetype] != -1 } {
+        error "Attribute \"-slatetype\" is read-only"
+    }
+    if { [lsearch -exact $args -coords] != -1 } {
+        catch {unset _dirty($item)}
+    }
+    eval chain $item $args
+}
+
+########################################################################
 #### coords
 #
 # With no arguments, get the coordinates of an item, with arguments,
@@ -207,14 +215,15 @@ body ::tycho::Layout::add {type item args} {
 #
 body ::tycho::Layout::coords {item args} {
     if { $args == "" } {
-        itemcget $item -coords
+        attrget $item -coords
     } else {
         if $recording {
             history append \
                     "coords $item $args" \
-                    "coords $item [itemcget $item -coords]"
+                    "coords $item [attrget $item -coords]"
         }
-        norecord itemconfigure $item -coords $args
+        # norecord attrset $item -coords $args
+        attrset $item -coords $args
     }
 }
 
@@ -234,39 +243,6 @@ body ::tycho::Layout::forward {method name args} {
     set id [$view slateid $name]
     set slate [$view component slate]
     eval $slate $method $id $args
-}
-
-########################################################################
-#### itemcget
-#
-# Get an attribute or attributes of an item. This method overrides
-# the inherited method to deal with the <b>-slatetype</b> and
-# <b>-coords</b> attributes.
-#
-body ::tycho::Layout::itemcget {item {attribute {}}} {
-    # Update coordinates
-    if { [::info exists _dirty($item)] && $_views != "" } {
-        itemconfigure $item -coords [[lindex $_views 0] coords $item]
-        unset _dirty($item)
-    }
-    chain $item $attribute
-}
-
-########################################################################
-#### itemconfigure
-#
-# Configure an attribute or attributes of an item. This method overrides
-# the inherited method to deal with the <b>-slatetype</b> and
-# <b>-coords</b> attributes.
-#
-body ::tycho::Layout::itemconfigure {item args} {
-    if { [lsearch -exact -- $args -slatetype] != -1 } {
-        error "Attribute \"-slatetype\" is read-only"
-    }
-    if { [lsearch -exact -- $args -coords] != -1 } {
-        catch {unset _dirty($item)}
-    }
-    eval chain $item $args	
 }
 
 ########################################################################

@@ -48,20 +48,23 @@ class ::tycho::DFGMover {
     #################################################################
     ####                     public methods                      ####
 
+    # Get the follower
+    method _follower {} {return $_follower}
+
     # Process a click event
-    method click {id x y}
+    method click {tag x y args}
 
     # Process a motion event
-    method drag {id x y}
+    method drag {tag x y}
 
     # Process a release event
-    method release {args}
+    method release {tag}
 
     #################################################################
     ####                  protected methods                      ####
 
     # Reset all variables
-    protected method _cleanup {x y}
+    protected method _cleanup {}
 
     #################################################################
     ####                 protected variables                     ####
@@ -88,12 +91,12 @@ class ::tycho::DFGMover {
 #
 body ::tycho::DFGMover::constructor {args} {
     # Evaluate options
-    eval itk_initialize $args
+    eval configure $args
 
     set _follower [$slate interactor Follower]
 
     # Make the follower send moves here
-    $follower configure \
+    $_follower configure \
             -clickprefix "$this click" \
             -dragprefix "$this drag" \
             -releaseprefix "$this release"
@@ -109,9 +112,9 @@ body ::tycho::DFGMover::constructor {args} {
 # that have one end connected to one of these vertices and
 # remember who they are.
 #
-body ::tycho::DFGEditor::click {tag x y args} {
+body ::tycho::DFGMover::click {tag x y args} {
     # Get the vertices, and start a move sequence on them
-    set vertices [find withtag $tag]
+    set vertices [$slateview find withtag $tag]
 
     # Get the item name or the same tag
     set name [itemname $tag]
@@ -144,7 +147,7 @@ body ::tycho::DFGEditor::click {tag x y args} {
 # Continue a move interaction on vertices. The
 # vertices and edges are moved and reshaped as appropriate.
 #
-body ::tycho::DFGEditor::drag {tag x y} {
+body ::tycho::DFGMover::drag {tag x y} {
     # Move the vertices and fully-connected edges
     $layout publish movedrag $_movetag $x $y
     if { $_moveedges != "" } {
@@ -165,7 +168,7 @@ body ::tycho::DFGEditor::drag {tag x y} {
 # Terminate a move interaction on vertices and add an undo and
 # redo command to the history of the layout model.
 #
-body ::tycho::DFGEditor::release {tag} {
+body ::tycho::DFGMover::release {tag} {
     # Mark the history
     $layout mark set vertex
 
@@ -203,12 +206,5 @@ body ::tycho::DFGEditor::release {tag} {
 #### _cleanup
 #
 body ::tycho::DFGMover::_cleanup {} {
-	set _edgename ""
-	set _edgeitem ""
-	set _fromterm ""
-	set _grapple ""
-	set _mode "idle"
-	set _moving 0
-	set _totags {}
-	set _toterm ""
+    ;
 }

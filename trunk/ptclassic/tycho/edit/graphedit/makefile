@@ -43,11 +43,15 @@ include $(CONFIG)
 TCL_SRCS = 
   
 ITCL_SRCS =  \
-	EditDFG.itcl \
-	Layout.itcl \
+	DFGConnector.itcl \
+	DFGEditor.itcl \
+	DFGMover.itcl \
 	IconLibrary.itcl \
+	Junction.itcl \
+	Layout.itcl \
 	SlateView.itcl \
-	StarLibrary.itcl
+	StarLibrary.itcl \
+	ViewController.itcl
 
 EXTRA_SRCS =		$(TCL_SRCS) $(ITCL_SRCS)
 

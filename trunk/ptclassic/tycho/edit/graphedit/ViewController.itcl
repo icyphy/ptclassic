@@ -45,22 +45,22 @@ class ::tycho::ViewController {
     ####                        options                          ####
 
     # The semantic model
-    protected variable graph
+    public variable graph
 
     # The layout model
-    protected variable layout
+    public variable layout
 
-	# The slate I control
-	public variable slate
+    # The slate I control
+    public variable slate
 	
-	# The slateview I am a controller of
-	public variable slateview
+    # The slateview I am a controller of
+    public variable slateview
 
     #################################################################
     ####                     public methods                      ####
-
-	# Get or set an interactor by name
-	method interactor {name object}
+    
+    # Get or set an interactor by name
+    method interactor {name object}
 
     # Get or change the name of an item given its slate id
     method itemname {slateid {newname {}}}
@@ -74,7 +74,7 @@ class ::tycho::ViewController {
 #
 body ::tycho::ViewController::constructor {args} {
     # Evaluate options
-    eval itk_initialize $args
+    eval configure $args
 }
 
 #########################################################################
@@ -83,11 +83,11 @@ body ::tycho::ViewController::constructor {args} {
 # Get or set an interactor by name.
 #
 body ::tycho::ViewController::interactor {name {object {}}} {
-	if { $object != "" } {
-		set _$name $object
-	} else {
-		set _$name
-	}
+    if { $object != "" } {
+        @scope [info class] set _$name $object
+    } else {
+        @scope [info class] set _$name
+    }
 }
 
 #########################################################################
