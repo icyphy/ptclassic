@@ -52,6 +52,7 @@ char *atr_pkg_name = "atr";
 
 #define MAXINTENSITY	65535
 
+
 /*
  * The global context used for all display primitives is exported
  * to the world in this module.  AGC stands for Attribute Graphics Context.
@@ -180,6 +181,39 @@ static lsList BMResources;	/* Containts pointers to atrBitmap */
 static lsList BMActive;		/* List of active bitmaps          */
 
 
+/* Print out information about the current visual */
+void atr_print_visual(char * description, Visual *vis)
+{
+    vemMsg(MSG_L,"atr_print_visual: %s: 0x%lx: visualid=%ld class=%d \n\tred_mask=%lx green_mask=%lx blue_mask=%lx \n\tbits_per_rgb=%d map_entries=%d ",
+            description, (long)vis, vis->visualid, vis->class,
+            vis->red_mask, vis->green_mask, vis->blue_mask,
+            vis->bits_per_rgb, vis->map_entries);
+    switch (vis->class) {
+    case PseudoColor:
+        vemMsg(MSG_L,"PseudoColor\n");
+        break;
+    case DirectColor:
+        vemMsg(MSG_L,"DirectColor");
+        break;
+    case StaticColor:
+        vemMsg(MSG_L,"StaticColor");
+        break;
+    case TrueColor:
+        vemMsg(MSG_L,"TrueColor\n");
+        break;
+    case GrayScale:
+        vemMsg(MSG_L,"GrayScale\n");
+        break;
+    case StaticGray:
+        vemMsg(MSG_L,"StaticGray\n");
+        break;
+    default:
+        vemMsg(MSG_L,"UNKNOWN_VisualType\n");
+        break;
+    }
+}
+
+
 int atrInit(disp, planes, colors)
 Display *disp;			/* Display connection           */
 unsigned int planes, colors;	/* Initial color allocation     */
@@ -197,6 +231,7 @@ unsigned int planes, colors;	/* Initial color allocation     */
     /* Not sure this will work on B/W displays */
     _AGC.disp = disp;
     atr_vis = DefaultVisual(disp, DefaultScreen(disp));
+    atr_print_visual("atrInit: DefaultVisual", atr_vis);
     atr_cmap = DefaultColormap(disp, DefaultScreen(disp));
     atr_depth = DefaultDepth(disp, DefaultScreen(disp));
     if (full_alloc(disp, atr_cmap, planes, colors)) {
@@ -207,6 +242,7 @@ unsigned int planes, colors;	/* Initial color allocation     */
 	/* Attempt to find another suitable visual */
 	find_visual(disp, &info);
 	atr_vis = info.visual;
+        atr_print_visual("atrInit: Failed to allocate colors for default visual, now trying", atr_vis);
 	atr_cmap = XCreateColormap(disp,
 				   RootWindow(disp, info.screen),
 				   info.visual, AllocNone);
@@ -215,6 +251,21 @@ unsigned int planes, colors;	/* Initial color allocation     */
 	if (full_alloc(disp, atr_cmap, planes, colors)) {
 	    vemMsg(MSG_L, "Full color in alternate map: %d planes, %d colors.\n",
 		   max_planes, max_colors);
+            fprintf(stderr, "Warning: vem had problems allocating colors "
+                    "from the default visual,\n  "
+                    "so it chose an alternative visual.\n  "
+                    "If you are using the Hummingbird X server,\n  "
+                    "the colors of the vem windows may be incorrect.\n  "
+                    "(The most common problem is that the background "
+                    "of the facets is black).\n  "
+                    "If this is the case, bring up the Exceed configure "
+                    "tool,\n  then select the 'Performance' window "
+                    "and set the following:\n  "
+                    "  Maximum Backing Store When Mapped or Always\n  "
+                    "  Default Backing Store When Mapped\n  "
+                    "  Minimum Backing Store When Mapped\n  "
+                    "If you still have problems,\n  try setting the number "
+                    "of colors of your display to 256.\n");
 	    col_state = IS_HICOL;
 	} else {
 	    /* Destroy alternate colormap */
