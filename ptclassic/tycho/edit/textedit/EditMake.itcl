@@ -32,13 +32,6 @@
 #### FIXME: Known bugs:
 # Multi-line rules are not consistently parsed correctly.
 
-#######################################################################
-#### options
-#
-preference add textedit make.includeColor  [ptkColor blue black]
-preference add textedit make.variableColor [ptkColor DeepPink black]
-preference add textedit make.ruleColor     [ptkColor forestGreen black]
-preference add textedit make.refvarColor   [ptkColor purple black]
 
 #######################################################################
 #### EditMake
@@ -82,7 +75,7 @@ body ::tycho::EditMake::constructor {args} {
 body ::tycho::EditMake::help {} {
     global ::TYCHO
     ::tycho::File::openContext \
-        [file join $TYCHO editors textedit doc usersGuides \
+        [file join $TYCHO editors makeedit doc usersGuides \
 	    EditMakeHelp.html]
 }
 
@@ -169,13 +162,13 @@ body ::tycho::EditMake::parseNow {start stop} {
     
     # Set the visual characteristics of the tagged text
     $text tag configure rule -foreground \
-	    [preference get textedit make.ruleColor]
+	    [preference get makeedit ruleColor]
     $text tag configure include -foreground \
-	    [preference get textedit make.includeColor]
+	    [preference get makeedit includeColor]
     $text tag configure variable -foreground \
-	    [preference get textedit make.variableColor]
+	    [preference get makeedit variableColor]
     $text tag configure refvar -foreground \
-	    [preference get textedit make.refvarColor]
+	    [preference get makeedit refvarColor]
 
     $text tag lower rule comment
     $text tag lower include comment

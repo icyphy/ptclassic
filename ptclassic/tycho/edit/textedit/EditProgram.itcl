@@ -52,23 +52,6 @@
 #   Note the extra close brace at the end of the third line.
 # 
 
-#######################################################################
-#### options
-# EditProgram adds a number of options to the "textedit" preference
-# set, mainly for colors used to highlight common programming
-# language constructs. Other colors
-# that work reasonably well are: forestGreen, chocolate3, DarkOrange,
-# coral, OrangeRed, DeepPink, maroon, magenta, and DarkOrchid.
-preference add textedit commentColor [ptkColor firebrick black]
-preference add textedit keywordColor [ptkColor blue black]
-preference add textedit fixmeColor [ptkColor red black]
-preference add textedit stringColor [ptkColor gray50 black]
-
-preference add textedit procColor [ptkColor blue black]
-preference add textedit classColor [ptkColor blue black]
-preference add textedit methodColor [ptkColor purple black]
-preference add textedit variableColor [ptkColor forestGreen black]
-preference add textedit optionColor [ptkColor DeepPink black]
 
 #######################################################################
 #### EditProgram

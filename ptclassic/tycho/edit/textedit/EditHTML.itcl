@@ -30,15 +30,6 @@
 # 						COPYRIGHTENDKEY
 #######################################################################
 
-#######################################################################
-#### options
-# Define colors for the HTML context-sensitive editor. The HTML
-# editor uses its own preference set.
-#
-preference add textedit html.commandColor [ptkColor maroon black]
-preference add textedit html.pointerColor [ptkColor blue black]
-preference add textedit html.destColor    [ptkColor forestGreen black]
-
 
 #######################################################################
 #### EditHTML
@@ -197,7 +188,7 @@ body ::tycho::EditHTML::evaluate {} {
 body ::tycho::EditHTML::help {} {
     global ::TYCHO
     ::tycho::File::openContext \
-	    [file join $TYCHO editors textedit doc usersGuides \
+	    [file join $TYCHO editors htmledit doc usersGuides \
 	    EditHTMLHelp.html]
 }
 
@@ -250,7 +241,7 @@ body ::tycho::EditHTML::parseNow {start stop} {
     
     # Set the visual characteristics of the tagged commands
     $text tag configure command -foreground \
-	    [preference get textedit html.commandColor]
+	    [preference get htmledit html.commandColor]
 
     # Scan the text for hypertext pointers.
     set upto $start
@@ -266,7 +257,7 @@ body ::tycho::EditHTML::parseNow {start stop} {
     
     # Set the visual characteristics of the tagged commands
     $text tag configure pointer -foreground \
-	    [preference get textedit html.pointerColor]
+	    [preference get htmledit html.pointerColor]
 
     # for testing
     # $text tag configure text -foreground red
@@ -287,7 +278,7 @@ body ::tycho::EditHTML::parseNow {start stop} {
     
     # Set the visual characteristics of the tagged commands
     $text tag configure dest -foreground \
-	    [preference get textedit html.destColor]
+	    [preference get htmledit html.destColor]
 }
 
 #####################################################################
@@ -338,7 +329,7 @@ body ::tycho::EditHTML::fixLink {link start end err} {
     # as normal.
     $itk_component(text) tag raise sel badlink
     $itk_component(text) tag configure badlink \
-	    -background [preference get textedit html.targetColor]
+	    -background [preference get htmledit html.targetColor]
 
     set replacement [::tycho::DialogWindow::newModal EntryQuery \
 	    [::tycho::autoName .entry] \
