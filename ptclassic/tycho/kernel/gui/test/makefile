@@ -60,6 +60,7 @@ SIMPLE_TESTS = \
 	testURLPath.itcl
 
 GRAPHICAL_TESTS = \
+	testBuilderDialog.itcl \
 	testExec.itcl \
 	testIndexBrowser.itcl \
 	testMenuSupport.itcl \
@@ -82,7 +83,9 @@ ITCL_SRCS =	\
 	alltests.itcl all.itcl
 
 EXTRA_SRCS =	$(TCL_SRCS) $(ITCL_SRCS) \
-	chktycho dltest.html
+	chktycho \
+	dltest.html \
+	IndexBrowser.idx 
 
 # Files or directories that are present, but that 'make checkjunk' 
 # should not complain about
