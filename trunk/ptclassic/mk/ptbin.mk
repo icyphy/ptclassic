@@ -62,6 +62,11 @@ endif
 endif
 
 ifdef PTCL
+# To build ptcl with Tk, create the following 
+# $PTOLEMY/obj.$PTARCH/ptcl/override.mk file
+#   GPP_FLAGS += -DPT_PTCL_WITH_TK
+#   PTCL_WITH_TK = 1
+#   TK = 1
 ifndef PTCL_WITH_TK
 	TK =
 endif
