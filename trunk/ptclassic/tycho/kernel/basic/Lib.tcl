@@ -158,7 +158,7 @@
 ::tycho::register extensions "indexbrowser" .idx
 
 ########### special viewing modes
-::tycho::register extensions "idoc" .idoc
+# ::tycho::register extensions "idoc" .idoc
 ::tycho::register extensions "itclclass" .itclclass
 ::tycho::register extensions "javaclass" .javaclass
 
@@ -390,12 +390,12 @@ if {$tcl_platform(platform) != "macintosh"} {
 ########### Compound viewers (alphabetical)
 
 # Cliff's IDoc viewer (still under construction)
-::tycho::register mode "idoc" \
-	-command {::tycho::view IDoc -file {%s}} \
-	-viewclass ::tycho::IDoc \
-	-label {IDoc Viewer}  \
-	-category "html" \
-	-underline 0
+#::tycho::register mode "idoc" \
+#	-command {::tycho::view IDoc -file {%s}} \
+#	-viewclass ::tycho::IDoc \
+#	-label {IDoc Viewer}  \
+#	-category "html" \
+#	-underline 0
 
 ::tycho::register mode "itclclass" \
 	-command {::tycho::view ItclViewer -file {%s}} \
