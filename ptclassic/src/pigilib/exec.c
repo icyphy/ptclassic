@@ -46,7 +46,6 @@ $Id$
 #include "handle.h"
 
 /* The vars below store the state of the last run command for re-runs */
-static int lastIterate;
 octObject lastFacet = {OCT_UNDEFINED_OBJECT};
 
 /* Run a universe given only the full name of the facet.
@@ -56,7 +55,6 @@ RunUniverse(name)
 char* name;
 {
 	octObject facet;
-	int editStatus;
         char facetHandle[16];
 
 	ViInit(name);
@@ -96,7 +94,6 @@ ptkRun(facetPtr,now)
 octObject *facetPtr;
 boolean now;
 {
-    int n;
     char* name;
     char octHandle[16];
 
