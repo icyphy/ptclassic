@@ -41,7 +41,7 @@ output integer will always be non-negative.
     setup {
 	if (int(nBits) > sizeof(int)*8) {
 	    StringList message = "nBits needs to be less than";
-	    message << sizeof(int)*8;
+	    message << (unsigned int)(sizeof(int)*8);
 	    Error::abortRun(*this,message);
 	    return;
 	}
