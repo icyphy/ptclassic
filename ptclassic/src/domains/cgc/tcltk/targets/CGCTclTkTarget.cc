@@ -61,7 +61,7 @@ CGCTclTkTarget::CGCTclTkTarget(const char* name,const char* starclass,
 		  "-L$PTOLEMY/lib.$ARCH "
 		  "-L$PTOLEMY/tcltk/tk.$ARCH/lib "
 		  "-L/usr/X11/lib "
-		  "-ltk -ltcl -lptk -lX11 -lm";
+		  "-ltk -ltcl -lptk -lX11 -lsocket -lnsl -lm";
 	linkOptions.setInitValue(hashstring(linkOpts));
 	loopingLevel.setInitValue("1");
 	addStream("mainLoopInit", &mainLoopInit);
@@ -132,8 +132,8 @@ CodeStream CGCTclTkTarget::mainLoopBody() {
     body << "{\n\tint " << iterator<< ";\n"
 	 << iterator << "=0;\n"
 	 << "while (" << iterator << "++ != numIterations) {\n"
-	 << mainLoopInit << mainLoop <<  mainLoopTerm
-	 << "}} /* MAIN LOOP END */\n";
+	 << mainLoopInit << mainLoop << "}} /* MAIN LOOP END */\n"
+	 <<  mainLoopTerm;
 
     defaultStream = &myCode;
     return body;
