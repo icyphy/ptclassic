@@ -39,7 +39,13 @@ VPATH =		$(ROOT)/typt/editors/test
 CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
-ITCL_SRCS =	RetargetTest.itcl
+SIMPLE_TESTS =
+GRAPHICAL_TESTS = \
+	testRetarget.itcl
+
+ITCL_SRCS = \
+	$(SIMPLE_TESTS) $(GRAPHICAL_TESTS) \
+	alltests.itcl all.itcl
 
 EXTRA_SRCS =	$(ITCL_SRCS)
 
@@ -48,8 +54,16 @@ MISC_FILES =
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =
 
-tests:: $(ITCL_SRCS)
-	tycho -pigi -e RetargetTest.itcl
+tests:: test_graphics
+
+# These tests do not require a graphics terminal
+test_simple: $(TCL_SRCS) $(ITCL_SRCS)
+	echo "foreach i [list $(SIMPLE_TESTS)] {puts \$$i; source \$$i}" | \
+		$(ITCLSH)
+
+# These tests require a graphics terminal
+test_graphics: alltests.itcl all.itcl $(TCL_SRCS) $(ITCL_SRCS)
+	tycho -ptiny -noconsole -e alltests.itcl
 
 # We don't include common.mk since we don't use the compiler here
 include $(ROOT)/mk/no-compile.mk
