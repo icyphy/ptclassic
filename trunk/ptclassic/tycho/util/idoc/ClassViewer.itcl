@@ -114,12 +114,18 @@ class ::tycho::IDoc {
 
     # The default body font -- an X font which should be made symbolic in Tk 8.0
     itk_option define -bodyfont bodyFont Font [::tycho::font Hevetica 12 Bold]
+    
+    # The height of the entire compound widget.
+    itk_option define -height height Height "20 c"
+    
+    # The width of the entire compound widget.
+    itk_option define -width width Width "30 c"
 
     # The relative width of the contents widget compared to the entire window.
-    itk_option define -relwidth relWidth RelWidth 0.4
+    itk_option define -relwidth relWidth RelWidth 0.2
 
     # The relative height of the top HTML widget. (The bottom is 1-relheight). 
-    itk_option define -relheight relHeight RelHeight 0.5
+    itk_option define -relheight relHeight RelHeight 0.6
 
     constructor {args} {}
     destructor {}
@@ -150,6 +156,9 @@ class ::tycho::IDoc {
    
     # Internal contents widget
     protected variable myContents
+
+    # My displayer window
+    protected variable myDisplayer
 
     # Internal HTML widget for class-wide documentation
     protected variable myHtmlTop
@@ -226,6 +235,22 @@ configbody ::tycho::IDoc::bodyfont {
 }
 
 #########################################################################
+#### -height configuration
+# Height of the compound widget must be passed to the displayer.
+#
+configbody ::tycho::IDoc::height {
+    $myDisplayer config -height $itk_option(-height)
+}
+
+#########################################################################
+#### -width configuration
+# Width of the compound widget must be passed to the displayer.
+#
+configbody ::tycho::IDoc::width {
+    $myDisplayer config -width $itk_option(-width)
+}
+
+#########################################################################
 #### -relheight configuration
 # Reset the placement of widgets to reflect the new relative height
 # priorities.
@@ -284,8 +309,7 @@ body ::tycho::IDoc::constructor {args} {
     itk_component add html1 {
         ::tycho::HTML $itk_interior.html1
     } {
-        rename -textwidth -htmlwidth htmlWidth HtmlWidth
-        rename -textheight -topheight topHeight TopHeight
+        keep -background -cursor
     }
 
     set myHtmlTop $itk_component(html1)
@@ -293,8 +317,7 @@ body ::tycho::IDoc::constructor {args} {
     itk_component add html2 {
         ::tycho::HTML $itk_interior.html2
     } {
-        rename -textwidth -htmlwidth htmlWidth HtmlWidth
-        rename -textheight -bottomheight bottomHeight BottomHeight
+        keep -background -cursor
     }
 
     set myHtmlBottom $itk_component(html2)
@@ -302,8 +325,7 @@ body ::tycho::IDoc::constructor {args} {
     itk_component add contents {
         ::tycho::MultiPanel $itk_interior.contents
     } {
-       keep -height
-       rename -width -contentswidth contentsWidth ContentsWidth
+       keep -background -cursor
     }
 
     set myContents $itk_component(contents)
@@ -356,17 +378,19 @@ body ::tycho::IDoc::constructor {args} {
         $myMenubar delete "Revision Control..."
     }
 
+    set myDisplayer [[$this displayer] windowName]
+
     eval itk_initialize $args
 
     # Subscribe to the preference set
     preference subscribeoptions $this \
             -headfont displayFont \
-            -bodyfont entryFont \
-            -height textHeight \
-            -htmlwidth textWidth
+            -bodyfont entryFont
 
     # Configure the handles
     setupHandles
+
+    pack propagate $myDisplayer 0
 
     # Something annoying inherited insists on creating this thing
     pack forget $itk_interior.childsite
