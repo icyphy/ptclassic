@@ -76,7 +76,7 @@ static void outMsg(cc* obj, int warn, cc* m1, cc* m2, cc* m3) {
 	else
 		sprintf (buf, "%s%s%s%s", status, m1, m2, m3);
 	PrintErr (buf);
-	LOG_NEW; delete buf;
+	LOG_NEW; delete [] buf;
 }
 
 void
@@ -136,7 +136,7 @@ static void info(cc* obj, cc* m1, cc* m2, cc* m3) {
 	if (ViGetErrWindows())
 		win_msg (buf);
 	else PrintCon (buf);
-	LOG_DEL; delete buf;
+	LOG_DEL; delete [] buf;
 }
 
 void
