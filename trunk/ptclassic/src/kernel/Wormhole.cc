@@ -56,7 +56,7 @@ Wormhole::Wormhole(Star& s,Galaxy& g,Target* innerTarget) : selfStar(s),
 }
 
 // function to form the name for the inner event horizon
-static const char* ghostName(const PortHole& galp) {
+const char* ghostName(const GenericPort& galp) {
 	const char* gname = galp.readName();
 	char* n = new char[strlen(gname)+7];
 	strcpy (n, gname);
@@ -107,6 +107,15 @@ void Wormhole :: buildEventHorizons () {
 			realGalp.connect(to,0);
 		}
 	}
+// Take care of galaxy multi porthole
+	BlockMPHIter mpi(gal);
+	MultiPortHole* mp;
+	while ((mp = mpi++) != 0) {
+		WormMultiPort* wp = new WormMultiPort(this, *mp);
+		wp->setPort(mp->readName(), &selfStar, mp->myType());
+		selfStar.addPort(*wp);
+	}
+
 	dynamicHorizons = TRUE;
 	return;
 }

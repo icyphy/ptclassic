@@ -56,6 +56,9 @@ public:
 		     Runnable :: run(); 
 		     sumUp();}
 
+	// return the inside Domain
+	const char* insideDomain() const { return gal.domain(); }
+
 	// redefine setStopTime()
 	void setStopTime(float stamp);
 
