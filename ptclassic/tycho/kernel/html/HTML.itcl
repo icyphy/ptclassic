@@ -70,7 +70,8 @@ if {[info commands HMinit_win] == {}} {
 	# Make format adjustments -- better than the default
 	set HMtag_map(h2) {size 20 weight bold}
 	set HMtag_map(h3) {size 20 style i}
-	set HMtag_map(h5) {size 16 weight bold}
+	set HMtag_map(h4) {size 16 weight bold}
+	set HMtag_map(h5) {size 16 style i}
 
         set HMinitialtag_map $HMtag_map(hmstart)
         unset HMtag_map(hmstart)
@@ -424,7 +425,12 @@ body ::tycho::HTML::clear {} {
 body ::tycho::HTML::execTcl {} {
     set cmd [getTaggedText tcl]
     if {$cmd != {}} {
-	uplevel #0 $cmd
+	set result [uplevel #0 $cmd]
+        if {$result != {}} {
+            safeEval ::tycho::inform "Returned:\n$result"
+        } {
+            putStatus "null string returned"
+        }
     }
 }
 
@@ -848,7 +854,7 @@ array set HMinsert_space_map {
 	h1	2	/h1	2
 	h2	2	/h2	2
 	h3	2	/h3	2
-	h4	1	/h4	1
+	h4	2	/h4	2
 	h5	1	/h5	1
 	h6	1	/h6	1
 	li   1
