@@ -48,12 +48,10 @@ The FontDialog just given returns the selected font when the user
 presses OK, or the name of the initial font if the used presses
 Cancel. This can be used to set fonts in any Tycho text
 widget.  For example, the following code will query the
-user for a font selection, and then post the font name in a new window
-when the user clicks the OK button:
+user for a font selection:
 
 <tcl><pre>
-set font [::tycho::queryfont Lucida 14 BoldItalic]
-::tycho::post $font
+::tycho::queryfont Lucida 14 BoldItalic
 </pre></tcl>
 
  <P>The FontDialog class returns only a symbolic representation of the
@@ -62,7 +60,7 @@ font. To convert this into a system-dependent font, use the
 
 <tcl><pre>
 set font [::tycho::queryfont Screen 14]
-::tycho::post [eval ::tycho::font $font]
+eval ::tycho::font $font
 </pre></tcl>
 
 The font manager goes to some lengths to find a reasonable alternative
@@ -83,16 +81,15 @@ detailed control over fonts. Firstly, <code>::tycho::font</code> can
 "shift" up or down by some number of sizes:
 
 <tcl><pre>
-::tycho::post [eval ::tycho::font $font -2]
+::tycho::font Screen 12 roman -2
 </pre></tcl>
 
-
 The posted font name is a font that is two sizes smaller than
-the font you selected in the previous dialog box. To access this
+the font given to the procedure. To access this
 facility directly, use <code>::tycho::FontManager::size</code>:
 
 <tcl><pre>
-::tycho::post [::tycho::FontManager::size 11 +1]
+::FontManager::size 11 +1
 </pre></tcl>
 
 Since 11 is not a valid font size, this procedure rounds it
@@ -107,7 +104,7 @@ To find out the families in a particular type, use
 <code>::tycho::FontManager::family</code>:
 
 <tcl><pre>
-::tycho::post [::tycho::FontManager::family serif]
+::tycho::FontManager::family serif
 </pre></tcl>
 
 You can supply these types as arguments to <code>::tycho::queryfont</code>
@@ -117,7 +114,7 @@ tycho has changed the font manager settings, this window will
 display the system-dependent name for 14-point Courier:
 
 <tcl><pre>
-::tycho::post [::tycho::font constant-width 14]
+::tycho::font constant-width 14
 </pre></tcl>
 
 
