@@ -40,6 +40,9 @@
 #define NSEE 30
 #define NSTR 20
 
+/* chars allowed in "identifier" */
+#define IDENTCHAR(c) (isalnum(c) || c == '.' || c == '_')
+
 char yytext[BIGBUFSIZE];	/* lexical analysis buffer */
 int yyline = 1;			/* current input line */
 int bodyMode = 0;		/* special lexan mode flag to read bodies  */
@@ -199,6 +202,15 @@ typedef char * STRINGVAL;
 %token VERSION AUTHOR COPYRIGHT EXPLANATION SEEALSO LOCATION CODEBLOCK
 %token EXECTIME PURE INLINE HEADER INITCODE
 %%
+/* production to report better about garbage at end */
+full_file:
+	file
+|	file '}'	{ yyerror("Too many closing curly braces");
+			  exit(1);
+			}
+|	file ident			{ mismatch($2);}
+;
+
 /* a file consists of a series of definitions. */
 file:
 	/* nothing */
@@ -1259,11 +1271,14 @@ yylex () {
 	    while (c != NEWLINE) {
 		*p++ = c;
 		switch (c) {
+			/* one backslash in input becomes two in output */
 		  case ESC:
-		    c = getc(yyin);
 		    *p++ = c;
 		    break;
 		  case QUOTE:
+		    /* quote in input is escaped */
+		    p[-1] = ESC;
+		    *p++ = c;
 		    inQuote = !inQuote;
 		    break;
 		  case EOF:
@@ -1302,6 +1317,9 @@ yylex () {
 	if (bodyMode) {
 		int brace = 1;
 		int inQuote = 0;
+		int inComment = 0;
+		int startLine = yyline;
+		int startQLine = yyline;
 /* if !docMode, put a "#line" directive in the token */
 		if (!docMode) {
 		   sprintf (yytext, "# line %d \"%s\"\n", yyline, inputFile);
@@ -1312,17 +1330,35 @@ yylex () {
 			*p++ = c;
 			switch (c) {
 			case ESC:
-				c = getc(yyin);
+				input();
 				*p++ = c;
 				break;
 			case QUOTE:
-				inQuote = !inQuote;
+				if (!inComment) {
+					inQuote = !inQuote;
+					startQLine = yyline;
+				}
 				break;
 			case EOF:
-				yyerror ("Unexpected EOF in body!");
+				sprintf (yytext,
+			"Unterminated %s at EOF: it began on line %d",
+			inQuote ? "string" : "code block",
+			inQuote ? startQLine : startLine);
+				yyerror (yytext);;
 				exit (1);
+			case '/':
+				c = getc(yyin);
+				if (c == '/') {
+					inComment = 1;
+					*p++ = c;
+				}
+				else ungetc(c,yyin);
+				break;
+			case NEWLINE:
+				inComment = 0;
+				break;
 			default:
-				if (!inQuote) {
+				if (!inQuote && !inComment) {
 				   if (c == '{') brace++;
 				   else if (c == '}') brace--;
 				}
@@ -1353,7 +1389,7 @@ yylex () {
 			*p++ = c;
 			switch (c) {
 			case ESC:
-				c = getc(yyin);
+				input();
 				*p++ = c;
 				break;
 			case QUOTE:
@@ -1464,14 +1500,7 @@ yylex () {
 		yylval = save(yytext);
 		return STRING;
 	}
-/* Change proposed by Egbert Ammicht to make Ptlang combatible with RCS */
-#if NO_UNDERSCORE_IN_IDENTIFIER
-#define IDENTCHAR(c) (isalnum(c) || c == '.')
-#else
-#define IDENTCHAR(c) (isalnum(c) || c == '.' || c == '_')
-#endif
         else if (! IDENTCHAR(c) ) {
-/* end change */
 		yytext[0] = c;
 		yytext[1] = 0;
 		c = 0;
@@ -1481,9 +1510,7 @@ yylex () {
 	else do {
 		*p++ = c;
 		input();
-/* Change proposed by Egbert Ammicht to make Ptlang combatible with RCS */
         } while ( IDENTCHAR(c) );
-/* end change */
 	*p = 0;
 	yylval = save(yytext);
 	if ((key = lookup (yytext)) != 0) {
@@ -1594,6 +1621,9 @@ char *x, *y;
 yyerror(s)
 char *s;
 {
+	/* ugly: figure out if yacc is reporting syntax error at EOF */
+	if (strcmp(s, "syntax error") == 0 && yychar == 0)
+		s = "Unexpected EOF (mismatched curly braces?)";
 	fprintf (stderr, "\"%s\", line %d: %s\n", inputFile, yyline, s);
 	nerrs++;
 	return;
@@ -1606,3 +1636,9 @@ char *s;
 	return;
 }
 
+mismatch(s)
+char *s;
+{
+	yyerr2 ("Extra token appears after valid input: ", s);
+	exit (1);
+}
