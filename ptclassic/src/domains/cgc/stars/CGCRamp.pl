@@ -28,7 +28,7 @@ with step size "step" (default 1).
 	}
 	go { gencode(std); }
 	codeblock (std) {
-		$ref(output) = $ref(value);
-		$ref(value) += $val(step);
+	$ref(output) = $ref(value);
+	$ref(value) += $val(step);
 	}
 }
