@@ -105,9 +105,6 @@ PURIFY =	purelink $(COLLECTOR) purify
 QUANTIFY =	purelink $(COLLECTOR) quantify
 PURECOV = 	purecov $(COLLECTOR)
 
-# S56 directory is only used on sun4.
-S56DIR =
-
 #
 # Variables for miscellaneous programs
 #
