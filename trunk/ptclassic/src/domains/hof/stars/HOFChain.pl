@@ -17,9 +17,9 @@ This is implemented by replacing the
 .c Chain
 star with instances of the named blocks at setup time.
 The replacement block(s) are connected as specified by
-\fIinput_map\fR, \fIinternal_map\fR, and \fIoutput_map\fR.
-Their parameters are determined by \fIparameter_map\fR.
-If \fIpipeline\fR is YES then a unit delay is put on all internal connections.
+<i>input_map</i>, <i>internal_map</i>, and <i>output_map</i>.
+Their parameters are determined by <i>parameter_map</i>.
+If <i>pipeline</i> is YES then a unit delay is put on all internal connections.
 	}
 	htmldoc {
 This star is a higher-order function mechanism.

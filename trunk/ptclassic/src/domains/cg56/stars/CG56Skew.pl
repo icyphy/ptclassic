@@ -14,8 +14,8 @@ limitation of liability, and disclaimer of warranty provisions.
 	htmldoc {
 The <i>error</i></b> input is accumulated.
 Normally the constant 0.0 is output.
-However, when overflow occurs, <i>overVal\fP is output, 
-and when underflow occurs, <i>underVal\fP is output.
+However, when overflow occurs, <i>overVal</i> is output, 
+and when underflow occurs, <i>underVal</i> is output.
     }
     seealso {SSISkew}
     input {

@@ -13,8 +13,8 @@ limitation of liability, and disclaimer of warranty provisions.
 	location { C50 main library }
 	htmldoc {
 <a name="multiplication with shifting"></a>
-Multiply inputs <i>factor1\fP and <i>factor2\fP together, and shift the
-result left by <i>shift\fP bits.  The <i>shift\fP input must be zero
+Multiply inputs <i>factor1</i> and <i>factor2</i> together, and shift the
+result left by <i>shift</i> bits.  The <i>shift</i> input must be zero
 or positive; right (negative) shifts are not supported.
 	}
 	input {

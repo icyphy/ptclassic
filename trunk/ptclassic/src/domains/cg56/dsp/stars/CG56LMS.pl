@@ -18,24 +18,24 @@ This star implements an adaptive filter using the LMS algorithm.
 The initial coefficients determine the order of the filter.
 The default coefficients specify
 an eighth order, equiripple, linear-phase, lowpass filter,
-the same as the default coefficients of the <i>FIR\fP star.
+the same as the default coefficients of the <i>FIR</i> star.
 <p>
-The <i>stepSize\fP parameter specifies the rate of adaptation.
+The <i>stepSize</i> parameter specifies the rate of adaptation.
 <p>
-The <i>errorDelay\fP parameter specifies the relative delay between the output
+The <i>errorDelay</i> parameter specifies the relative delay between the output
 samples and the input error samples.  There must be at least
 a delay of one (you must add the delay in your system) because
 the path from the output to the error forms a closed feedback loop.
 You can insert more delays if you wish (you may have to decrease
-<i>stepSize\fP to keep the algorithm stable), but be sure to
-adjust the <i>errorDelay\fP parameter accordingly.
+<i>stepSize</i> to keep the algorithm stable), but be sure to
+adjust the <i>errorDelay</i> parameter accordingly.
 <p>
-The <i>decimation\fP parameter specifies how many input samples should be
+The <i>decimation</i> parameter specifies how many input samples should be
 consumed before firing the star.  For example, to downsample
 by a factor of two, the user could simply follow the LMS filter by
 a downsample star, which would be set to discard every second input.
 But it is inefficient for the LMS filter to compute these samples,
-only to have them discarded.  Setting the <i>decimation\fP parameter to 2
+only to have them discarded.  Setting the <i>decimation</i> parameter to 2
 in the LMS filter is exactly equivalent,
 except that the discarded samples are not computed.
 Interpolation is not supported.

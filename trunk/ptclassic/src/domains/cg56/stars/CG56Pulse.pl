@@ -15,7 +15,7 @@ limitation of liability, and disclaimer of warranty provisions.
 <a name="pulse generator"></a>
 A variable length pulse generator.
 A pulse begins when a non-zero trigger is received.
-The pulse duration varies between 1 and <i>maxDuration\fP
+The pulse duration varies between 1 and <i>maxDuration</i>
 as the control varies between -1.0 and 1.0.
 	}
 
