@@ -48,19 +48,19 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 /**Function*******************************************************************
   Synopsis    [ Find nearest neighbor in codebook and return squared error ]
-  Description [ 
-Find the index of nearest neighbor in the codebook for the training
-vector, and find the squared error (squared distance) between the
-training vector and its nearest neighbor.
-
-Let X=input vector and Yi=i_th codeword.  Find the nearest neighbor
-codeword Yi to maximize X'*Yi-Ai (' means transpose ), where
-Ai=||Yi||^2/2 and should have already been stored in the array
-halfCodewordPower[numCodewords]. 
-]
+  Description [ Find the index of nearest neighbor in the codebook for
+                the training vector, and find the squared error (squared 
+		distance) between the training vector and its nearest 
+		neighbor. ]
    SideEffects []
 ******************************************************************************/
 
+/*
+  Let X=input vector and Yi=i_th codeword.  Find the nearest neighbor
+  codeword Yi to maximize X'*Yi-Ai (' means transpose ), where
+  Ai=||Yi||^2/2 and should have already been stored in the array
+  halfCodewordPower[numCodewords]. 
+*/
 void 
 Ptdsp_NearestNeighbor(int* theindex, double* thedistance,
 		      const double* trnVector, const double* codebook,
