@@ -26,6 +26,10 @@ class UserOutput;
 class CGTarget : public Target {
 protected:
 	StringList myCode;
+
+	// The following utilities are used by many types of code generators
+	// Return a list of spaces for indenting
+	StringList indent(int depth);
 public:
 	CGTarget(const char* name, const char* starclass, const char* desc);
 	void initialize();
@@ -35,6 +39,9 @@ public:
 	void addCode(const char*);
 	virtual void headerCode();
 	virtual void writeCode(UserOutput&);
+	int isA(const char*) const;
+
+	// destructor
 	~CGTarget();
 };
 #endif

@@ -20,6 +20,17 @@ $Id$
 #include "UserOutput.h"
 #include "SDFScheduler.h"
 
+// Return a formatted for loop with a unique index counter
+StringList CGTarget::indent(int depth) {
+	StringList out;
+	out = "";
+	for(int i=0; i<depth; i++) {
+		out += "    ";
+	}
+	return out;
+}
+
+
 // constructor
 CGTarget::CGTarget(const char* name,const char* starclass,
 		   const char* desc) : Target(name,starclass,desc) {}
@@ -30,7 +41,7 @@ void CGTarget :: initialize() {
 }
 
 void CGTarget :: start() {
-	if (!sched && !parent()) sched = new SDFScheduler;
+	if (!mySched() && !parent()) setSched (new SDFScheduler);
 	headerCode();
 }
 
@@ -59,4 +70,6 @@ void CGTarget :: writeCode(UserOutput& o) {
 	o.flush();
 }
 
-CGTarget :: ~CGTarget() { delete sched;}
+ISA_FUNC(CGTarget,Target);
+
+CGTarget :: ~CGTarget() { delSched();}
