@@ -25,13 +25,13 @@ limitation of liability, and disclaimer of warranty provisions.
 <a name="LMS adaptive filter, complex"></a>
 <a name="filter, LMS adaptive, complex"></a>
 <p>
-<i>GraphTitleMag\fP is used for the title of the magnitude plot;
-<i>GraphTitlePhase\fP is used for the title of the phase plot;
-<i>GraphOptsMag\fP is handed to the xgraph program as option
+<i>GraphTitleMag</i> is used for the title of the magnitude plot;
+<i>GraphTitlePhase</i> is used for the title of the phase plot;
+<i>GraphOptsMag</i> is handed to the xgraph program as option
 values on the command line when the magnitudes are plotted, and
-<i>GraphOptsPhase\fP serves the same function for the phase.
+<i>GraphOptsPhase</i> serves the same function for the phase.
 <p>
-If <i>trace\fP is "YES", there may not be more than 64 taps in the filter.
+If <i>trace</i> is "YES", there may not be more than 64 taps in the filter.
 	}
 	seealso {LMSCx, XMgraph, LMSPlot, LMSTkPlot, LMSTkPlot }
 	hinclude { "Display.h" }
