@@ -22,6 +22,8 @@ $Id$
 #define DM_WIDTH 80  /* dialog entry width */
 #define EDIT_ICON_SNAP 5 /* snap size of vem window for edit-icon */
 
+char* callParseClass();
+char* KcDomainOf();
 
 /*  5/9/90
 Takes the code directory of a star and returns it's icon directory.
@@ -134,9 +136,13 @@ static char *q1 = "Cannot find star definition.  Define a new star?";
 	return FALSE;
     }
     if (!KcIsKnown(name)) {
-/* if we don't know about the star we try to load it */
+
+/* if we don't know about the star we try to load it.  Get the
+ * corresponding class name.
+ */
+	char * base = callParseClass(name);
 	PrintDebug("Star not known, trying to load it");
-	if (!KcCompileAndLink (name, domain, dir)) return FALSE;
+	if (!KcCompileAndLink (base, domain, dir)) return FALSE;
 	PrintDebug("Load complete");
 	if (!KcIsKnown(name)) {
 	    ErrAdd("Load completed, but star is still undefined?!?");
@@ -378,9 +384,6 @@ static dmTextItem item = {"Palette", 1, DM_WIDTH, "./user.pal", NULL};
     }
     ViDone();
 }
-
-char* callParseClass();
-char* KcDomainOf();
 
 int 
 RpcLookInside(spot, cmdList, userOptionWord)
