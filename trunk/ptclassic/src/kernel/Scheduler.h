@@ -68,6 +68,8 @@ public:
 
 	virtual void setup() = 0;
 
+	virtual void begin();
+
 	// run runs the simulation.
 	virtual int run() = 0;
 
