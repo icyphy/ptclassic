@@ -39,7 +39,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #endif
 
 #include "VHDLObj.h"
-#include "VHDLFiring.h"
 
 class VHDLDependency : public VHDLObj
 {
@@ -51,9 +50,9 @@ class VHDLDependency : public VHDLObj
   ~VHDLDependency();
 
   // Source of dependency.
-  VHDLFiring* source;
+  VHDLObj* source;
   // Sink of dependency.
-  VHDLFiring* sink;
+  VHDLObj* sink;
 
   // Class Idenitification.
   /* virtual */ int isA(const char*) const;
