@@ -30,6 +30,7 @@
 #include <X11/Xlib.h>
 #include <X11/Xutil.h> 
 #include <X11/cursorfont.h>
+#include <X11/Xresource.h>	/* Pick up XrmUniqueQuark() */
 #include "xpa.h"
 #else
 #include <X/Xlib.h>
@@ -92,7 +93,7 @@
  * Reads a color default - uses char *value, int temp, and char *progname
  */
 #define RDCLR(name, pix) \
-	if (value = XGETDEFAULT(display,progname, (name))) \
+	if ((value = XGETDEFAULT(display,progname, (name))) ) \
         if ((temp = xgiGetColor(display,value)) != XGI_NOCOLOR) (pix) = temp
 
 /***********************************************************************
@@ -100,7 +101,7 @@
  * Reads an integer default - uses char *value, and char *progname
  */
 #define RDINT(name, newval) \
-	if (value = XGETDEFAULT(display,progname, (name))) \
+	if ( (value = XGETDEFAULT(display,progname, (name))) ) \
 		newval = atoi(value)
 
 /**********************************************************************
@@ -109,8 +110,8 @@
  */
 #ifdef X11
 #define RDFNT(name, fnt) \
-	if (value = XGETDEFAULT(display,progname, name)) \
-		if (tempFont = XLOADQUERYFONT(display,value)) \
+	if ( (value = XGETDEFAULT(display,progname, name)) ) \
+		if ( (tempFont = XLOADQUERYFONT(display,value)) ) \
 			(fnt) = tempFont
 #else
 #define RDFNT(name, fnt) \
