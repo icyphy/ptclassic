@@ -53,6 +53,17 @@ limitation of liability, and disclaimer of warranty provisions.
     }
 
     output {
+	name { pitchBend }
+	type { int }
+	desc { Pitch bend value, 8192 is neutral }
+    }
+    output {
+	name { pitchChannel }
+	type { int }
+	desc { Channel of the Pitch Bend command (0-15) }
+    }
+
+    output {
 	name { reset }
 	type { int }
 	desc { Present when the system reset (FF) command arrives }
@@ -222,6 +233,21 @@ limitation of liability, and disclaimer of warranty provisions.
 
 	      break;
 
+	    case ChannelPitchwheel:
+
+	      if ( byte == 0 ) {
+		// Remember the least significant seven bits
+		lastPitch = inVal;
+		nextByteNum = 1;
+	      } else {
+		// This byte is the most significant -- emit everything
+		pitchBend.emit() << ((int(inVal) << 7) | lastPitch);
+		pitchChannel.emit() << int(status & 0xf);
+		nextByteNum = 0;
+	      }
+
+	      break;
+
 	    default:
 	      break;
 	    }
@@ -235,6 +261,8 @@ limitation of liability, and disclaimer of warranty provisions.
       if ( !offPitch.known() )		{ offPitch.makeAbsent(); }
       if ( !offVelocity.known() )	{ offVelocity.makeAbsent(); }
       if ( !offChannel.known() )	{ offChannel.makeAbsent(); }
+      if ( !pitchBend.known() )		{ pitchBend.makeAbsent(); }
+      if ( !pitchChannel.known() )	{ pitchChannel.makeAbsent(); }
       if ( !reset.known() )		{ reset.makeAbsent(); }
 
     }
