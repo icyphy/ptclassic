@@ -43,7 +43,8 @@ EXTRA_SRCS =	\
 	EditForestHelp.html \
 	GraphicsHelp.html \
 	ProfileTclHelp.html \
-	index.html
+	index.html \
+	tclXProfile.c.patch
 
 MISC_FILES =
 
