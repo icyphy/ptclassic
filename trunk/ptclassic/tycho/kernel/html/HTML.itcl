@@ -48,6 +48,13 @@ class ::tycho::HTML {
     destructor {}
 
     ###################################################################
+    ####                       options                             ####
+
+    #### -sizeadjustment option
+    # Offset from 14 points for the font sizes.
+    itk_option define -sizeadjustment sizeAdjustment SizeAdjustment 2
+
+    ###################################################################
     ####                       public methods                      ####
 
     #### openSource
@@ -84,12 +91,26 @@ class ::tycho::HTML {
     #########################################################################
     ####              private methods and variables                      ####
 
+    # Keep track of the requested size adjustment.
+    private common sizeName
+
     # Keep track of the current source window for the current file.
     private variable sourcewin
 
     #### sourcewinIsMine
     # Return 1 if the sourcewin window is a valid source window.
     private method sourcewinIsMine {}
+}
+
+#########################################################################
+#### -sizeadjustment configuration
+# The size of normal text will be 14 points plus the size adjustment
+# set with this option.  Note that this does not affect the selected
+# size name in the Format menu.
+#
+configbody ::tycho::HTML::sizeadjustment {
+    HMset_state [$itk_component(text) textWinName] \
+	    -size $itk_option(-sizeadjustment)
 }
 
 ###################################################################
@@ -129,21 +150,36 @@ body ::tycho::HTML::constructor {args} {
     }
     pack $itk_component(back) -side left
 
-    # FIXME: Temporary for demos.
-    itk_component add big {
-	button $itk_component(acc).big \
-		-text Big \
-		-command \
-		"HMset_state [$itk_component(text) textWinName] -size 12; \
-		$itk_component(text) render"
+    itk_component add formatMenuButton {
+	menubutton $itk_component(menuFrame).format \
+		-text Format \
+		-underline 1 \
+		-menu $itk_component(menuFrame).format.menu
     } {
-	keep -background -font -activebackground -cursor \
-		-highlightthickness -activeforeground \
-		-foreground -highlightcolor -highlightbackground
+	keep -font -activebackground -cursor -activeforeground \
+		-background -foreground -highlightbackground \
+		-highlightcolor
     }
-    pack $itk_component(big) -side left
+
+    pack $itk_component(formatMenuButton) -side left
+
+    itk_component add formatMenu {
+	menu $itk_component(formatMenuButton).menu
+    } {
+	keep -font -activebackground -cursor -activeforeground \
+		-background -foreground
+    }
 
     eval itk_initialize $args
+
+    foreach size {{tiny -2} {small 0} {medium 2} {large 4} {huge 8}} {
+	$itk_component(formatMenu) add radio \
+		-label [lindex $size 0] \
+		-variable [scope sizeName($this)] \
+		-command "$this configure -sizeadjustment [lindex $size 1]; \
+		$itk_component(text) render"
+    }
+    set sizeName($this) medium
 
     # Modify the menu commands appropriately.
     $itk_component(fileMenu) entryconfigure 2 \
@@ -171,6 +207,7 @@ body ::tycho::HTML::destructor {} {
 	windowMenuAddAll $sourcewin $file
 	set filesOpen($file) $sourcewin
     }
+    catch {unset sizeName($this)}
 }
 
     ###################################################################

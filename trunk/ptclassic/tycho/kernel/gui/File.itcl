@@ -417,29 +417,23 @@ body ::tycho::File::constructor {args} {
     }
     
     $itk_component(fileMenu) add command \
-	    -label Open\
+	    -label {Open...} \
 	    -underline 0 \
 	    -accelerator "C-x C-f" \
 	    -command "File::openWin"
     
     $itk_component(fileMenu) add command \
-	    -label "Alt File"\
+	    -label "Switch File..."\
 	    -underline 4 \
 	    -accelerator "C-x C-v" \
 	    -command "$this altFile"
     
     $itk_component(fileMenu) add command \
-	    -label {Insert}\
+	    -label {Insert...}\
 	    -underline 0 \
 	    -accelerator "C-x i" \
 	    -command "$this insertFile"
     
-    $itk_component(fileMenu) add command \
-	    -label "Revision Control " \
-	    -underline 0 \
-	    -accelerator "C-x v" \
-	    -command "$this nextRevAction"
-
     $itk_component(fileMenu) add command \
 	    -label Save \
 	    -underline 0 \
@@ -447,13 +441,13 @@ body ::tycho::File::constructor {args} {
 	    -command "$this save"
     
     $itk_component(fileMenu) add command \
-	    -label SaveAs \
+	    -label {SaveAs...} \
 	    -underline 4 \
 	    -accelerator "C-x C-w" \
 	    -command "$this saveAs"
     
     $itk_component(fileMenu) add command \
-	    -label Print \
+	    -label {Print...} \
 	    -underline 0 \
 	    -accelerator "C-x p" \
 	    -command "$this print"
@@ -469,6 +463,12 @@ body ::tycho::File::constructor {args} {
 	    -underline 1 \
 	    -command "$this reload"
     
+    $itk_component(fileMenu) add command \
+	    -label "Revision Control..." \
+	    -underline 0 \
+	    -accelerator "C-x v" \
+	    -command "$this nextRevAction"
+
     $itk_component(fileMenu) add separator
     
     $itk_component(fileMenu) add command \
