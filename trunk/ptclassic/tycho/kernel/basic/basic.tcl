@@ -46,8 +46,11 @@ if { [lsearch -exact $auto_path $env(BASIC_LIBRARY)] == -1 } {
 # tycho. Set up some "basic" stuff:
 
 # Set global variables used by Tycho packages
-set TYCHO $env(TYCHO)
-set tycho $env(TYCHO)
+# FIXME: why is this here?
+if [info exists env(TYCHO) {
+    set TYCHO $env(TYCHO)
+    set tycho $env(TYCHO)
+}
 
 # Create the ::tycho namespace
 namespaceEval ::tycho
