@@ -30,23 +30,23 @@ This star is similar to the Mpy star.
 	}
 
 	codeblock (copyInput) {
-	move	$ref(input#1),x0	; just move data from in to out
+	move	$ref(input#1),x0		; just copy input to output
 	move	x0,$ref(output)
 	}
 
 	codeblock (multiplyStart) {
-	move	$ref(input#1),x0	 ; 1st input -> x0
-        move	$ref(input#2),y0         ; 2nd input -> y0
+	move	$ref(input#1),x0			; 1st input -> x0
+        move	$ref(input#2),y0			; 2nd input -> y0
 	}
 
         codeblock(multiply,"int i") {
         mpy     x0,y0,a     $ref(input#@i),x0	; a = x0 * y0, get next input
-	move    a1,y0		; y0 = integer result in accumulator
+	move    a1,y0			; y0 = integer result in accumulator
         }
 
 	codeblock (multiplyEnd) {
-	mpy	x0,y0,a		; a = x0 * y0
-	move	a1,$ref(output)	; return the integer result
+	mpy	x0,y0,a			; a = x0 * y0
+	move	a1,$ref(output)			; return the integer result
 	}
 
 	go {
