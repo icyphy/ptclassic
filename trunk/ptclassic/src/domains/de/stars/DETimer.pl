@@ -3,10 +3,11 @@ defstar
     name { Timer }
     domain { DE }
     descriptor {
-Upon receiving a trigger input, output the
-elapsed time in seconds since the last reset input,
+Upon receiving a "trigger" input, output the elapsed real time
+in seconds, divided by "timeScale", since the last reset input,
 or since the start of the simulation if no reset has
-been received.  The time in seconds is related to the
+been received.  The time stamp on the output is the same as
+that of the "trigger" input. The time in seconds is related to the
 scheduler time through the scaling factor "timeScale".
     }
     version { $Id$ }
