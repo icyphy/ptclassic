@@ -185,9 +185,11 @@ int recursiveModifyGalaxy(Galaxy& gal) {
 	    Target* innerTarget = s->asWormhole()->myTarget();
 	    if (!innerTarget->isA("CGTarget")) continue;
 	    CGTarget* cgTarget = (CGTarget*) innerTarget;
- 	    if(!cgTarget->modifyGalaxy()) return FALSE;
-	    if (!recursiveModifyGalaxy(s->asWormhole()->insideGalaxy()))
-		return FALSE;
+	    Galaxy& innerGalaxy = s->asWormhole()->insideGalaxy();
+	    cgTarget->setGalaxy(innerGalaxy);
+	    if (!cgTarget->modifyGalaxy()) return FALSE;
+ 	    cgTarget->clearGalaxy();
+	    if (!recursiveModifyGalaxy(innerGalaxy)) return FALSE;
 	}
     }
     return TRUE;
@@ -217,7 +219,7 @@ int CGMultiTarget::modifyGalaxy() {
 	}
     }
     delete &dummyStar;
-    return TRUE;
+    return recursiveModifyGalaxy(*galaxy());
 }
 
 inline int hierSchedulerTest(const char* c) {
