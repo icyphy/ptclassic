@@ -676,8 +676,6 @@ void SDFClusterBag::absorb(SDFCluster* c,SDFClusterGal* par) {
 			cp->initGeo();
 		}
 		else {
-			// add a new connection to the outside for this guy
-			// FIXME: Memory leak
 			SDFClustPort *np = new SDFClustPort(*cp,this,1);
 			cp->makeExternLink(np);
 			addPort(*np);
@@ -778,6 +776,7 @@ SDFClusterBag::merge(SDFClusterBag* b,SDFClusterGal* par) {
 	while ((p = nextP++) != 0) {
 		p->setNameParent(p->name(),this);
 		addPort(*p);
+		nextP.remove();
 	}
 	// get rid of b
 	par->removeBlock(*b);	// remove b from parent galaxy
@@ -910,6 +909,7 @@ SDFClusterBag::~SDFClusterBag() {
 	if (gal && !owner) gal->orphanBlocks();
 	delete gal;
 	delete sched;
+	deleteAllGenPorts();
 }
 
 // find an attractive and compatible neighbor.
