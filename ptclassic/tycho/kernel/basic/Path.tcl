@@ -323,7 +323,7 @@ proc ::tycho::pathSeparator {} {
             return {;}
         }
         default {error "Don't know the path separator on \
-                $tcl_platform(platform) yet.}
+                $tcl_platform(platform) yet."}
     }
 }
 
