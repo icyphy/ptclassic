@@ -75,7 +75,7 @@ public:
 
 private:
 	// Remove an element from the list
-	void remove( Link * obj ); 
+	CqLevelLink * remove( Link * obj ); 
 
 	// The Event Queue owned by this PendingEventList
 	MutableCQEventQueue *myQueue;
