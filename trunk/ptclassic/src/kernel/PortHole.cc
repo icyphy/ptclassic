@@ -2,6 +2,7 @@
 #include "Block.h"
 #include "StringList.h"
 #include "Output.h"
+#include "Particle.h"
  
 /**************************************************************************
 Version identification:
@@ -19,7 +20,6 @@ Code for functions declared in Connect.h
 **************************************************************************/
 
 extern Error errorHandler;
-extern PlasmaList plasmaList;
 
 // Methods for CircularBuffer
 
@@ -117,6 +117,25 @@ void GenericPort :: connect(GenericPort& destination,int numberDelays)
 	return;
 }
 
+// This is not a GenericPort method because the concept of disconnecting
+// a multiporthole is ambiguous.  Since fancier geodesics work differently,
+// this is virtual -- redefined for some domains.
+void PortHole :: disconnect() {
+	if (!farSidePort) return;
+	// free up geodesic
+	farSidePort->myGeodesic = 0;
+	delete myGeodesic;
+	myGeodesic = 0;
+	farSidePort = 0;
+	return;
+}
+
+// Porthole destructor.
+PortHole :: ~PortHole() {
+	disconnect();
+	delete myBuffer;
+}
+
 // small virtual functions for PortHole, InPortHole, OutPortHole
 
 int InPortHole :: isItInput() { return TRUE;}
@@ -154,7 +173,7 @@ PortHole& PortHole :: setPort(const char* s,
 	numberTokens = 1;
 	bufferSize = numberTokens;
 	if (t != ANYTYPE)
-		myPlasma = plasmaList.getPlasma(t);
+		myPlasma = Plasma::getPlasma(t);
         return *this;
 }
 
@@ -379,8 +398,8 @@ void Geodesic :: initialize()
 	// and put them in Plasma
 	for(int i=size(); i>0; i--) {
 		Particle* p = get();
-		destinationPort->myPlasma->put(p);
-		}
+		p->die();
+	}
 
 	// Initialize the buffer to the number of Particles
 	// specified in the connection; note that these Particles
