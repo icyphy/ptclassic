@@ -79,12 +79,12 @@ periodically repeated, or the file contents can be padded with zeros.
 					return;
 				}
 				input.get(ch);
-				x = Ptdsp_MuLaw8ToLinear16(ch);
+				x = Ptdsp_PCMMuLawToLinear(ch);
 			}
 		}
 		else if (input) {		// get next value
 			input.get(ch);
-			x = Ptdsp_MuLaw8ToLinear16(ch);
+			x = Ptdsp_PCMMuLawToLinear(ch);
 		}
 		else {
 			Error::abortRun(*this, "error in input file");
