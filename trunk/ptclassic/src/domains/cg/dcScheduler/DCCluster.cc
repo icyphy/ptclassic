@@ -78,7 +78,7 @@ void Cluster :: addArc(Cluster* adj, int numSample) {
 		carc->addSamples(numSample);
 	} else {
 		LOG_NEW; carc = new ClustArc(adj, numSample);
-		InOutArcs.insert(carc);
+		InOutArcs.tup(carc);
 	}
 }
 
@@ -145,7 +145,7 @@ void Cluster::fixArcs(Cluster *c1, Cluster *c2) {
 	while ((arc = iter++) != 0) {
 		if ((cl = arc->getNeighbor()) != c2) {
 			if (!InOutArcs.contain(c1))
-				InOutArcs.append(arc);
+				InOutArcs.put(arc);
 
 			// Change other guys to show this cluster
 			cl->InOutArcs.changeArc(c1, this);
