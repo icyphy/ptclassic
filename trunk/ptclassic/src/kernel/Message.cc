@@ -172,6 +172,11 @@ MessageParticle::operator Complex () const {
 	return data.asComplex();
 }
 
+MessageParticle::operator Fix () const {
+	return data.asFix();
+}
+
+
 StringList MessageParticle::print() const {
 	return data.print();
 }
@@ -195,6 +200,7 @@ void MessageParticle::initialize() { data = dummy;}
 void MessageParticle::operator << (int) { errorAssign("int");}
 void MessageParticle::operator << (double) { errorAssign("double");}
 void MessageParticle::operator << (const Complex&) { errorAssign("complex");}
+void MessageParticle::operator << (const Fix&) { errorAssign("fix");}
 
 // only loader that works.
 void MessageParticle::operator << (const Envelope& p) { data = p;}
