@@ -82,15 +82,18 @@ proc ptkHasRun { name } {
 proc ptkRunControl { name octHandle } {
     global ptkRunFlag ptkDebug ptkRunEventLoop ptkControlPanel ptkOctHandles \
 	ptkScriptOn
+
+    set ptkControlPanel .run_$octHandle
+    if {[info exists ptkRunFlag($name)] && [winfo exists $ptkControlPanel]} {
+	raise $ptkControlPanel
+	return
+    }
+
     set ptkDebug($name) 0
     set ptkRunEventLoop($name) 1
     set ptkScriptOn($name) 0
     set ptkOctHandles($name) $octHandle
-    set ptkControlPanel .run_$octHandle
     
-    if {[info exists ptkRunFlag($name)] && [winfo exists $ptkControlPanel]} {
-	    raise $ptkControlPanel
-    }
     # Mark an open window, but with no run yet.
     set ptkRunFlag($name) IDLE
 
@@ -460,7 +463,12 @@ proc ptkPrintStarName { star } {
 # Procedure to delete a control window
 #
 proc ptkRunControlDel { name window octHandle defNumIter} {
-    global ptkRunFlag ptkDebug ptkScriptOn
+    global ptkDebug ptkOctHandles ptkRunEventLoop ptkRunFlag ptkScriptOn
+
+    if {![info exists ptkRunFlag($name)]} {
+	# Assume the window has been deleted already and ignore command
+	return
+    }
 
     # Remember for next time whether the control panel is set
     # for scripted runs or simple runs.
@@ -472,10 +480,6 @@ proc ptkRunControlDel { name window octHandle defNumIter} {
 	ptkSetOrClearDebug $name $octHandle
     }
 
-    if {![info exists ptkRunFlag($name)]} {
-	# Assume the window has been deleted already and ignore command
-	return
-    }
     if [regexp {^ACTIVE$|^PAUSED$} $ptkRunFlag($name)] {
 	ptkStop $name 
 	update
@@ -485,8 +489,11 @@ proc ptkRunControlDel { name window octHandle defNumIter} {
 	after 200 ptkRunControlDel $name $window $octHandle $defNumIter
 	return
     }
-    catch {unset ptkRunFlag($name)}
+    catch {unset ptkDebug($name)}
     catch {unset ptkOctHandles($name)}
+    catch {unset ptkRunEventLoop($name)}
+    catch {unset ptkRunFlag($name)}
+    catch {unset ptkScriptOn($name)}
     # update the oct facet only if the number of iterations has changed.
     if {$defNumIter != [$window.iter.entry get]} {
          ptkSetRunLength $octHandle [$window.iter.entry get]
