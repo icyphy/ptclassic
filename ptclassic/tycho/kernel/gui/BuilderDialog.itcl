@@ -75,7 +75,8 @@ body ::tycho::BuilderDialog::constructor {args} {
     configure -text "Tycho Build Manager" \
             -title "Tycho Build Manager"
     radio builderchoice {Build Operation: } \
-            { {Full (10 Minutes)}\
+            { {Full (10 Minutes)} \
+	    {Glimpse Only} \
 	    {Itcl HTML Only (4 Minutes)} \
             {Indices Only} \
             {Class Diagram Only} \
@@ -105,9 +106,12 @@ body ::tycho::BuilderDialog::constructor {args} {
 body ::tycho::BuilderDialog::_runBuilder {} {
     switch [get builderchoice] {
 	{Full (10 Minutes)} { ::tycho::Builder::build }
+	{Glimpse Only} { ::tycho::Builder::glimpse }
 	{Itcl HTML Only (4 Minutes)} { ::tycho::Builder::itcldocs }
 	{Indices Only} { ::tycho::Builder::indices }
 	{Class Diagram Only} { ::tycho::Builder::classDiagram }
+        default {error "Internal Error: ::tycho::BuilderDialog::_runBuilder \
+                got `[get builderchoice]', don't know what to do."}
     }
 }
 
