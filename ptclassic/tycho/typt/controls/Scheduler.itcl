@@ -49,7 +49,7 @@
 #
 # The scheduler requires that a task be broken into setup, execute,
 # and wrapup scripts. The first and last can be null, but the second
-# can't. Provided the <a href="../../../src/tytimer/index.html">tyTimer
+# can't. Provided the <a href="../../../../src/tytimer/index.html">tyTimer
 # package</a> has been loaded, the script can use ::tycho::timer to
 # see if it has used up enough time yet. If the script is directly
 # calling a function in a C module, the C code can use Ty_StartTimer
@@ -69,7 +69,7 @@
 #
 # The following example illustrate the schedule in action. For a slightly
 # more complete example, see below. First, we need to load a package
-# that contains a <a href="../../../src/tytest/index.html">Tycho
+# that contains a <a href="../../../../src/tytest/index.html">Tycho
 # task written in C</a>:
 # <tcl quiet><pre>
 #   ::tycho::loadIfNotPresent ::tycho::timer tytimer
@@ -102,7 +102,7 @@
 # </pre></tcl>
 #
 # Running a C task is very similar. In general, a
-# <a href="../../../src/tytest/tyTimerTest.c">C task will be
+# <a href="../../../../src/tytest/tyTimerTest.c">C task will be
 # implemented as a loadable package</a>, and will have single Tcl interface
 # procedure in the tycho namespace. The first argument to the
 # procedure is one of "setup," "execute," or "wrapup," and the C
@@ -138,9 +138,9 @@
 # </pre></tcl>
 #
 # For a more complete example, see the
-# <a href="../../../src/tytest/index.html">Tycho package test package</a>.
+# <a href="../../../../src/tytest/index.html">Tycho package test package</a>.
 # For more information on the timer support functions, see the
-# <a href="../../../src/tytimer/index.html">tyTimer
+# <a href="../../../../src/tytimer/index.html">tyTimer
 # package</a>.
 #
 class ::tycho::Scheduler {
@@ -295,7 +295,7 @@ body ::tycho::Scheduler::resume {task} {
 # are Tcl scripts that are evaluated to initialize, execute for
 # one timeslice, and to terminate the task. The execute script is
 # obliged to return after the timer period set by the
-# <a href="../../../src/tytimer/index.html">tyTimer</a> package,
+# <a href="../../../../src/tytimer/index.html">tyTimer</a> package,
 # either by calling <code>::tycho::timer elapsed</code> if written
 # in Tcl) or <code>Ty_TimerElapsed</code> if written in C. (The _exact_
 # period of time before it returns is not critical, but it should return
