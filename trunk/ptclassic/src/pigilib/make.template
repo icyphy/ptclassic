@@ -145,11 +145,11 @@ PTKDIR = $(ROOT)/src/ptklib
 # Note that some X11 installs have bogus (old versions) of the tcl/tk
 # headers, thus we must search the tcl/tk includes before the X11 includes
 INCL= -I$(KERNDIR) $(PTCOMPAT_INCSPEC) -I$(PTCL_INCDIR) -I$(OCTTOOLS)/include \
- -I$(TCL_INCDIR) -I$(TK_INCDIR) $(X11_INCSPEC) -I$(PTCLHDRS) -I$(PTKDIR)
+ -I$(TCL_INCDIR) -I$(TK_INCDIR) -I$(PTCLHDRS) -I$(PTKDIR) $(X11_INCSPEC)
 
 C_INCL=-I$(OCTTOOLS)/include -I$(PTCL_INCDIR) \
 	-I$(ITCL_INCDIR) -I$(ITK_INCDIR) -I$(TCL_INCDIR) -I$(TK_INCDIR) \
-	$(PTCOMPAT_INCSPEC) $(X11_INCSPEC) -I$(PTKDIR)
+	$(PTCOMPAT_INCSPEC)  -I$(PTKDIR) $(X11_INCSPEC)
 
 lint:	$(LIBCSRCS)
 	lint -u $(INCL) $^ > lint
