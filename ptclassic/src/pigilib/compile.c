@@ -458,7 +458,7 @@ octObject *facetPtr;
 	    ERR_IF1(!JoinWithFork(in,out,inN));
 	}
 	else {
-	    ErrAdd("ConnectPass: multiple inputs and outputs");
+	    ErrAdd("ConnectPass: multiple inputs and outputs on one net");
 	    EssAddObj(&net);
 	    return (FALSE);
 	}
