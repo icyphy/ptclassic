@@ -23,7 +23,8 @@ Produce code for inter-process communication (receive-side).
 		name {output}
 		type {FLOAT}
 	}
-
+        ccinclude { "StringList.h" }
+ 
 	state {
 		name { numData }
 		type { int }
@@ -38,6 +39,21 @@ Produce code for inter-process communication (receive-side).
 		desc { Name of receiver's IPC handler function. }
 		attributes { A_NONSETTABLE }
 	}
+        state {
+                name { nodeIPs }
+                type { intarray }
+                default { "0 1 2 3" }
+                desc { IP addresses of nodes in program. }
+                attributes { A_NONSETTABLE }
+        }
+        state {
+                name { numNodes }
+                type { int }
+                default { 0 }
+                desc { Number of nodes in program. }
+                attributes { A_NONSETTABLE }
+        }
+
 	setup {
 		numData = output.numXfer();
 	}
@@ -50,11 +66,65 @@ Produce code for inter-process communication (receive-side).
 #endif
 	}
 	codeblock (ipcHandler) {
-void $val(IPCHandlerName)(int src, double arg, int dum1, int dum2)
+void $val(IPCHandlerName)(void *source_token, int d1, int d2, int d3, int d4)
 {
-        $starSymbol(RecvData) = arg;
+        $starSymbol(RecvData) = d1;
 }
 	}
+        codeblock (replyHandler) {
+void reply_handler(void *source_token, int d1, int d2, int d3, int d4)
+{
+}
+        }
+        codeblock (errorHandler) {
+void error_handler(int status, op_t opcode, void *argblock)
+{
+        switch (opcode) {
+                case EBADARGS:
+                        fprintf(stderr,"Bad Args:");
+                        fflush(stderr);
+                        break;
+                case EBADENTRY:
+                        fprintf(stderr,"Bad Entry:");
+                        fflush(stderr);
+                        break;
+                case EBADTAG:
+                        fprintf(stderr,"Bad Tag:");
+                        fflush(stderr);
+                        break;
+                case EBADHANDLER:
+                        fprintf(stderr,"Bad Handler:");
+                        fflush(stderr);
+                        break;
+                case EBADSEGOFF:
+                        fprintf(stderr,"Bad Seg offset:");
+                        fflush(stderr);
+                        break;
+                case EBADLENGTH:
+                        fprintf(stderr,"Bad Length:");
+                        fflush(stderr);
+                        break;
+                case EBADENDPOINT:
+                        fprintf(stderr,"Bad Endpoint:");
+                        fflush(stderr);
+                        break;
+                case ECONGESTION:
+                        fprintf(stderr,"Congestion:");
+                        fflush(stderr);
+                        break;
+                case EUNREACHABLE:
+                        fprintf(stderr,"Unreachable:");
+                        fflush(stderr);
+                        break;
+        }
+}
+        }
+        codeblock (amdecls) {
+ea_t endpoint;
+eb_t bundle;
+en_t global;
+int $starSymbol(i);
+        }
 	codeblock (timedecls) {
 #ifdef TIME_INFO
 int fd;
@@ -71,6 +141,50 @@ prusage_t $starSymbol(beginRecv);
 prusage_t $starSymbol(endRecv);
 #endif
 	}
+        codeblock (aminit) {
+AM_Init();
+if (AM_AllocateBundle(AM_PAR, &bundle) != AM_OK) {
+        fprintf(stderr, "error: AM_AllocateBundle failed\n");
+        exit(1);
+}
+if (AM_AllocateKnownEndpoint(bundle, &endpoint, HARDPORT) != AM_OK) {
+        fprintf(stderr, "error: AM_AllocateKnownEndpoint failed\n");
+        exit(1);
+}
+ 
+if (AM_SetTag(endpoint, 1234) != AM_OK) {
+        fprintf(stderr, "error: AM_SetTag failed\n");
+        exit(1);
+}
+if (AM_SetHandler(endpoint, 0, error_handler) != AM_OK) {
+        fprintf(stderr, "error: AM_SetHandler failed\n");
+        exit(1);
+}
+if (AM_SetHandler(endpoint, 1, reply_handler) != AM_OK) {
+        fprintf(stderr, "error: AM_SetHandler failed\n");
+        exit(1);
+}
+if (AM_SetHandler(endpoint, 2, request_handler) != AM_OK) {
+        fprintf(stderr, "error: AM_SetHandler failed\n");
+        exit(1);
+}
+ 
+if (AM_SetEventMask(bundle, AM_EMPTYTONOT ) != AM_OK) {
+        fprintf(stderr, "error: AM_SetEventMask error\n");
+        exit(1);
+}
+ 
+for ($starSymbol(i) = 0; $starSymbol(i) < $val(numNodes); $starSymbol(i)++) {
+        global.ip_addr = $ref(nodeIPs, $starSymbol(i));
+        global.port = HARDPORT;
+        if (AM_Map(endpoint, $starSymbol(i), global, 1234) != AM_OK) {
+                fprintf(stderr, "AM_Map error\n");
+                fflush(stderr);
+                exit(-1);
+        }
+}
+ 
+        }
 	codeblock (timeinit) {
 #ifdef TIME_INFO
 timeRun = 0.0;
@@ -96,14 +210,17 @@ else if (ioctl(fd, PIOCUSAGE, &beginRun) == -1)
 	initCode {
 		addGlobal("double $starSymbol(RecvData);\n");
 		addInclude("<stdio.h>");
+		addInclude("<stdlib.h>");
+		addInclude("<udpam.h>");
 		addInclude("<am.h>");
 		addCode(timeincludes, "include", "timeIncludes");
+                addCode(amdecls, "mainInit", "amDecls");
 		addCode(timedecls, "mainDecls", "timeDecls");
 		addCode(stardecls, "mainDecls");
                 addCode(timeinit, "mainInit", "timeInit");
                 addCode(starinit, "mainInit");
 		addCode(openfd, "mainInit", "openFd");
-		addCode("am_enable();\n", "mainInit", "amEnable");
+                addCode(aminit, "mainInit", "amInit");
 	}
 		
 	codeblock (block) {
@@ -121,7 +238,7 @@ else if (ioctl(fd, PIOCUSAGE, &beginRun) == -1)
 
 	for (i = 0; i < $val(numData); i++) {
 		while ($starSymbol(RecvData) == -0.001) {
-			am_poll();
+			AM_Poll();
 		}
 		pos = $val(numData) - 1 + i;
 		$ref(output,pos) = $starSymbol(RecvData);
@@ -146,6 +263,8 @@ else if (ioctl(fd, PIOCUSAGE, &beginRun) == -1)
 
 	go {
 		addProcedure(ipcHandler, IPCHandlerName);
+                addProcedure(replyHandler, "ReplyHandler");
+                addProcedure(errorHandler, "ErrorHandler");
 		addCode(block);
 	}
 	codeblock (runtime) {
