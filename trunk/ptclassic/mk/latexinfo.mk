@@ -22,24 +22,16 @@ INFO_CLEAN= $*.cp $*.pg $*.fn $*.vr $*.tp $*.ky \
 	$*.cps $*.pgs $*.fns $*.vrs $*.tps $*.kys \
 	$*.tex~ $*.info~
 
-# Update all nodes and menus in a file.
-%.update:	%.tex
-	$(EMACS) -batch $(INFO) $< \
-		-f latexinfo-every-node-update \
-		-f latexinfo-all-menus-update \
-		-f save-buffer -kill
-
-# Update all nodes and menus in a master file and all included files.
-%.master:	%.tex
-	$(EMACS) -batch $(INFO) $< \
-		-f disable-read-only \
-		-f latexinfo-update-everything \
-		-f save-buffer -kill
+# Convert from TeXinfo to LaTeXinfo.
+# This is done in interactive mode.
+%.convert:	%.tex
+	$(EMACS) $(INFO) -l t2latexinfo $<
 
 # Update all nodes and menus in a master file and all included files,
 # then generate an info file from the LaTeXinfo source.
 %.info:		%.tex
 	$(EMACS) -batch $(INFO) -f disable-read-only $< \
+		-f latexinfo-build-buffer \
 		-f latexinfo-update-everything \
 		-f latexinfo-format-buffer \
 		-f save-buffer -kill
