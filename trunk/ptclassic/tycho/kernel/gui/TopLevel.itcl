@@ -1030,8 +1030,10 @@ body ::tycho::TopLevel::_notifymapped {component} {
         foreach {scope cmd} $_whenMapped($component) {
             @scope $scope $cmd
         }
-        unset _whenMapped($component)
-        bind $w <Map> {}
+        catch {unset _whenMapped($component)}
+        if { [::info which -command $w] != "" } {
+            bind $w <Map> {}
+        }
     }
 }
 

@@ -646,12 +646,14 @@ body ::tycho::TWidget::_notifymapped {component} {
     if ![winfo ismapped $w] {
         # Not mapped: return
         return
-    } else {
+    } elseif [::info exists _whenMapped($component)] {
         # Mapped: evaluate commands and then remove the binding
         foreach {scope cmd} $_whenMapped($component) {
             @scope $scope $cmd
         }
         unset _whenMapped($component)
-        bind $w <Map> {}
+        if { [::info which -command $w] != "" } {
+            bind $w <Map> {}
+        }
     }
 }
