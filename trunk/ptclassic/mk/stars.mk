@@ -439,6 +439,14 @@ ifdef DE
 		LIBS += -ldetclstars
 		LIBFILES += $(LIBDIR)/libdetclstars.$(LIBSUFFIX)
 	endif
+	# Contributed stars by third-party users
+	ifdef DECONTRIB
+		CUSTOM_DIRS += $(DEDIR)/contrib/kernel $(DEDIR)/contrib/stars
+		STARS += $(LIBDIR)/decontribstars.o
+		LIBS += -ldecontribstars -ldecontrib 
+		LIBFILES += $(LIBDIR)/libdecontribstars.$(LIBSUFFIX) \
+			$(LIBDIR)/libdecontrib.$(LIBSUFFIX)
+	endif
 	# kernel and stars
 	CUSTOM_DIRS += $(DEDIR)/stars $(DEDIR)/kernel 
 	STARS += $(LIBDIR)/destars.o
@@ -602,6 +610,11 @@ ifdef CG
 		$(LIBDIR)/libcg.$(LIBSUFFIX)
 	# dependencies
 	SDFLIB = 1
+endif
+
+ifdef DEFULL
+	DE = 1
+	DECONTRIB = 1
 endif
 
 ifdef FSM
