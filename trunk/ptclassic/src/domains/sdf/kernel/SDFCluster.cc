@@ -285,11 +285,13 @@ int SDFClusterGal::parallelLoopMergePass() {
 	SDFClusterGalIter nextClust(*this);
 	int changes = FALSE;
 	SDFCluster *c;
-// step 1: apply recursively to each cluster
+
+	// step 1: apply recursively to each cluster
 	while ((c = nextClust++) != 0)
 		changes |= c->internalClustering();
 	nextClust.reset();
-// step 2: apply at top level.
+
+	// step 2: apply at top level.
 
 	// falseHitList is a list of clusters not to try again.
 	SequentialList falseHitList;
@@ -382,8 +384,9 @@ static ostream& operator<<(ostream& o, SDFClustPort& p);
 // completed for efficiency (since searching for indirect paths is expensive)
 
 int SDFClusterGal :: markFeedForwardDelayArcs() {
-	if (logstrm)
+	if (logstrm) {
 		*logstrm << "starting markFeedForwardDelayArcs()\n";
+	}
 	if (numberClusts() <= 1) return FALSE;
 	int changes = FALSE;
 	SDFClusterGalIter nextClust(*this);
@@ -471,7 +474,6 @@ int SDFClusterGal::tryTreeLoop() {
 		return FALSE;
 	}
 	// we loop all the clusters so that the resulting repetitions is 1.
-	// 
 	if (logstrm)
 		*logstrm << "Doing TreeLoop\n";
 	SDFClusterGalIter nextClust(*this);
@@ -544,9 +546,10 @@ static ostream& operator<<(ostream& o, SDFClustPort& p) {
 		o << "=>";
 	else
 		o << "<=";
-	if (pFar==0) {
+	if (pFar == 0) {
 		o << "0";
-	} else {
+	}
+	else {
 		o << pFar->parent()->name() << "." << pFar->name();
 		// we prob. wont have a geodisic unless we have a far side
 		if (p.numTokens() > 0) o << "[" << p.numTokens() << "]";
@@ -666,12 +669,14 @@ void SDFClusterBag::absorb(SDFCluster* c,SDFClusterGal* par) {
 		createInnerGal();
 		repetitions = c->repetitions;
 	}
-// move c from its current galaxy to my galaxy.
+
+	// move c from its current galaxy to my galaxy.
 	par->removeBlock(*c);
 	gal->addBlock(*c,c->name());
-// adjust the bag porthole list.  Some of c's ports will now become
-// external ports of the cluster, while some external ports of the
-// cluster that connnect to c will disappear.
+
+	// adjust the bag porthole list.  Some of c's ports will now become
+	// external ports of the cluster, while some external ports of the
+	// cluster that connnect to c will disappear.
 	SDFClustPortIter next(*c);
 	SDFClustPort* cp;
 	while ((cp = next++) != 0) {
@@ -779,6 +784,7 @@ SDFClusterBag::merge(SDFClusterBag* b,SDFClusterGal* par) {
 		near->connect(*far, numDelays);
 		near->initGeo();
 	}
+
 	// now we simply combine the remaining bagports and clusters into this.
 	SDFClusterBagIter nextC(*b);
 	SDFCluster* c;
@@ -791,6 +797,7 @@ SDFClusterBag::merge(SDFClusterBag* b,SDFClusterGal* par) {
 		addPort(*p);
 		nextP.remove();
 	}
+
 	// get rid of b
 	par->removeBlock(*b);	// remove b from parent galaxy
 	b->gal->orphanBlocks();	// b's galaxy's blocks no longer owned by b
@@ -842,8 +849,7 @@ void SDFClustPort::setMaxArcCount(int n) {
 	else Error::abortRun(*this, "can't find inner geodesic");
 }
 
-// propagate buffer sizes downward to set sizes of cluster-boundary
-// buffers.
+// propagate buffer sizes downward to set sizes of cluster-boundary buffers.
 void SDFClusterBag::fixBufferSizes(int nReps) {
 	// account for looping of this cluster
 	nReps *= loop();
@@ -1116,9 +1122,11 @@ SDFClustPort* SDFClustPort :: realFarPort(SDFCluster* outsideCluster) {
 SDFClustSched::~SDFClustSched() { LOG_DEL; delete cgal;}
 
 static const char nonUniformMessage[] =
-"The loop scheduler could not completely cluster the topology.\n"
-"The generated schedule is valid, but may be substantially longer than\n"
-"expected (with negative consequences if used in code generation).  Sorry.";
+"The loop scheduler could not completely cluster the topology. "
+"The generated schedule is valid, but may be substantially longer than "
+"expected.  A longer schedule means that run times will be slower and "
+"generated code will be larger than necessary. "
+"You might obtain better results by using a different loop scheduler.";
 
 // compute the schedule!
 int SDFClustSched::computeSchedule (Galaxy& g) {
@@ -1138,12 +1146,14 @@ int SDFClustSched::computeSchedule (Galaxy& g) {
 	cgal = new SDFClusterGal(g,logstrm);
 	cgal->cluster();
 	if (!cgal->uniformRate()) {
-		Error::warn(nonUniformMessage);
+		Error::warn("SDF Cluster Scheduler:", nonUniformMessage);
 	}
-// recompute repetitions on top-level clusters
+
+	// recompute repetitions on top-level clusters
 	setGalaxy(*cgal);
 	repetitions();
-// generate schedule
+
+	// generate schedule
 	if (SDFScheduler::computeSchedule(*cgal)) {
 		if (logstrm)
 			*logstrm << "Generate subschedules, propagate buffer sizes\n";
