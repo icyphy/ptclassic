@@ -500,8 +500,6 @@ int CGCTarget::modifyGalaxy()
 	    // Splice in type conversion stars.
 	    if (needsSpliceStar(port))
 	    {
-		PortHole* input = port->far();	// destination input PortHole
-
 		// Avoid re-initializing the Galaxy, which will break
 		// things if this is a child in a MultiTarget. (Why? See
 		// comments for CGTarget::setup() method.)  Initialize it
@@ -515,9 +513,12 @@ int CGCTarget::modifyGalaxy()
 
 		Star* s = 0;
 
+		PortHole* input = port->far();	// destination input PortHole
+
 		for (int i=0; i < sizeof(cnv_table)/sizeof(*cnv_table); i++) {
-/* SunOS4.1.3 cfront can't handle initializing arrays that contain
-   typedefs (see above)
+/*
+ * SunOS4.1.3 cfront can't handle initializing arrays that contain
+ * typedefs (see above)
  */  
 		    if (((!strcmp(port->type(),cnv_table[i].src)) ||
 			 (!strcmp(cnv_table[i].src,ANYTYPE))) &&
