@@ -252,6 +252,8 @@ fixlinks:
 	-(cd $(ITCL_DEST)/bin; \
 		ln -s itclsh$(ITCL_MAJOR_VERSION_NUMBER) itclsh)
 	-(cd $(ITCL_DEST)/bin; \
+		ln -s tclsh$(ITCL_TCL_MAJOR_VERSION_NUMBER) tclsh)
+	-(cd $(ITCL_DEST)/bin; \
 		ln -s tclsh$(ITCL_TCL_MAJOR_VERSION_NUMBER) \
 			tclsh$(ITCL_WINDOWS_TCL_MAJOR_VERSION_NUMBER))
 	-(cd $(ITCL_DEST)/bin; \
