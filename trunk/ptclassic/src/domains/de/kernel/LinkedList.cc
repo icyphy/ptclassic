@@ -69,7 +69,7 @@ void Link::remove() {
     previous->next = next;
 }
 
-void LinkedList::remove( Link * a ) {
+void LinkedList::directRemove( Link * a ) {
     Link* previous = a->previous;
     if( lastNode == a ) {
 	 lastNode = a->previous;
