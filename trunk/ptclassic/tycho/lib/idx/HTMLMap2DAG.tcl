@@ -72,7 +72,7 @@ proc HTMLMap2DAG {mapfile} {
         }
     }
     close $mapfd
-    ::tycho::view EditForest [list -graph $web]
+    ::tycho::view EditForest -graph $web
 
     
 }
