@@ -60,6 +60,9 @@ void InDEPort :: grabData ()
 
 Particle& OutDEPort :: put(float stamp)
 {
+// if there is a new Particle, send it
+	if (dataNew) sendData();
+
 // Return a current Particle 
 	dataNew = TRUE;
 	timeStamp = stamp;
@@ -68,8 +71,6 @@ Particle& OutDEPort :: put(float stamp)
 
 void OutDEPort :: sendData ()
 {
-// Two options are possible. (1) Scheduler calls it, or (2) user calls
-// it in go() definition. I choose (1) since it is parallel with SDF case.
 // It sends a data to the output Geodesic, and generates an event into the Q
 // inside the DE system. At the DEin##_WormHole boundary, no event is signaled.
    if (dataNew) {
