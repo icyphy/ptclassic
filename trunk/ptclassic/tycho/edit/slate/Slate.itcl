@@ -443,7 +443,10 @@ body ::tycho::Slate::highlight {tag args} {
 		[list ::info exists methodtable(highlight)]] } {
 	    return [@scope ::tycho::$itemClass($tag) \
 		    [list eval \[set methodtable(highlight)\] \
-		    $tag $canvas $this]]
+		    $tag $canvas $this \
+		    [list -width $itk_option(-highlightwidth) \
+		    -outline $itk_option(-highlightcolor) \
+		    -tags [concat "highlight" "highlight.$tag" $args]]]]
     	}
     } elseif { ! [string match {[_0-9]*} $tag] } {
     	# It's a tag, so do for each item
