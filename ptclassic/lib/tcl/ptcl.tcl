@@ -18,7 +18,8 @@ proc ptcl_init_env {} {
 	set env(PTOLEMY) [glob ~ptolemy]
     }
     if { ![info exist env(TCL_LIBRARY)] } {
-	set env(TCL_LIBRARY) $env(PTOLEMY)/tcl/tcl[info tclversion]/lib
+	#set env(TCL_LIBRARY) $env(PTOLEMY)/tcl/tcl[info tclversion]/lib
+	set env(TCL_LIBRARY) $env(PTOLEMY)/tcltk/tcl/lib
     }
     uplevel #0 source [info library]/init.tcl
 
