@@ -48,6 +48,11 @@ case "${UNAME_MACHINE}:${UNAME_SYSTEM}:${UNAME_RELEASE}:${UNAME_VERSION}" in
  	echo aix
     exit 0 ;;
 
+    alpha:OSF1:V4.*:*)
+	# DEC Alpha support in Ptolemy might not be complete
+	echo alpha4
+    exit 0 ;;
+
     alpha:OSF1:*:*)
 	# DEC Alpha  support in Ptolemy might not be complete
 	echo alpha
