@@ -87,13 +87,13 @@ class ::tycho::Retarget {
     ####                         protected methods                 ####
 
     # Initialize the menu/status/tool bars
-    protected method initialize {{menubar {}} {statusbar {}} {toolbar {}}}
+    protected method _initializeBars {{menubar {}} {statusbar {}} {toolbar {}}}
 
     ###################################################################
     ####                         private methods                   ####
 
     # Initialize the tool bar.
-    private method initializeToolbar {toolbar}
+    private method _initializeToolbar {toolbar}
 
     # Initialize the counters at the bottom of the window
     private method modifyAfterDomainChange { {universeName {}} \
@@ -397,7 +397,7 @@ body ::tycho::Retarget::printStars { starName relation domainA domainB} {
 ####                    protected methods                       ####
 
 #####################################################################
-#### initialize
+#### _initializeBars
 # Initialize the menu, status, and toolbars associated with this widget.
 # The root (view) class sets up the menubar methods in it's initialize
 # via the chain command, which should always be the first command in
@@ -406,14 +406,14 @@ body ::tycho::Retarget::printStars { starName relation domainA domainB} {
 # This method is called by it's displayer when attachView is called (usually
 # in ::tycho::view
 #
-body ::tycho::Retarget::initialize \
+body ::tycho::Retarget::_initializeBars \
         {{menubar {}} {statusbar {}} {toolbar {}}} {
     chain $menubar $statusbar $toolbar
 
     if {$toolbar != {}} {
         # We have to qualify the call to this supposed-ly private
         # method because Itcl (2.2) has virtual private methods!
-        ::tycho::Retarget::initializeToolbar $toolbar
+        ::tycho::Retarget::_initializeToolbar $toolbar
     }
 }
 
@@ -422,24 +422,28 @@ body ::tycho::Retarget::initialize \
     ####                      private methods                      ####
 
 #####################################################################
-#### initializeToolbar
+#### _initializeToolbar
 # Initialize the tool bar.  Adds entries specific to this class.
 #
-body ::tycho::Retarget::initializeToolbar {toolbar} {
+body ::tycho::Retarget::_initializeToolbar {toolbar} {
     $toolbar button newDomains \
             -text {Compare Domains} \
+            -underline 0 \
             -description {Compare Domains} \
 	    -command "$this busy $this compareDomains"
     $toolbar button domainAButton \
             -text "Change Domain A: $domainA" \
+            -underline 0 \
             -description "Change DomainA: $domainA" \
 	    -command "$this changeDomainA"
     $toolbar button domainBButton \
             -text "Change Domain B: $domainB" \
+            -underline 0 \
             -description "Change Domain B: $domainB" \
 	    -command "$this changeDomainB"
     $toolbar button checkUniverse \
             -text {Check Universe} \
+            -underline 0 \
 	    -description {Check Universe} \
 	    -command "$this checkUniverse"
 }
