@@ -92,13 +92,13 @@ class ::tycho::Rectangle {
     proc _reshapeclick {id canvas slate x y args}
 
     # Continue a reshape interaction sequence
-    proc _reshapedrag {id canvas slate x y}
+    proc _reshapedrag {id canvas slate x y args}
 
     # Terminate a reshape interaction sequence
-    proc _reshaperelease {id canvas slate x y}
+    proc _reshaperelease {id canvas slate x y args}
 
-    # Get one or more aspects of a rectangle
-    proc aspect {x0 y0 x1 y1 args}
+    # Get an aspect of a rectangle
+    proc aspect {x0 y0 x1 y1 aspect}
 
     # Test if the first rectangle is inside the second.
     proc inside {x0 y0 x1 y1 a0 b0 a1 b1}
@@ -149,8 +149,22 @@ class ::tycho::Rectangle {
 	e.n 0 e.ne 0 e.se 0 e.s 0 e.c 0
 	w.n 0 w.ne 0 w.se 0 w.s 0 w.c 0
     }
-}
 
+    # The expressions used to get aspects
+    private common aspectExpr
+    array set aspectExpr {
+	n {list [expr ($x0+$x1) / 2] $y0}
+	s {list [expr ($x0+$x1) / 2] $y1}
+	e {list $x1 [expr ($y0+$y1) / 2]}
+	w {list $x0 [expr ($y0+$y1) / 2]}
+	nw {list $x0 $y0}
+	ne {list $x1 $y0}
+	sw {list $x0 $y1}
+	se {list $x1 $y1}
+	c {list [expr ($x0+$x1) / 2] [expr ($y0+$y1) / 2]}
+	center {list [expr ($x0+$x1) / 2] [expr ($y0+$y1) / 2]}
+    }
+}
 
 #######################################################################
 #### _aspect aspect
@@ -162,7 +176,12 @@ body ::tycho::Rectangle::_aspect {id canvas slate x y args} {
     if { $opts(-aspects) == "" } {
 	return {c n s e w ne nw se sw}
     } else {
-	return [eval aspect [$slate region $id] $opts(-aspects)]
+	set region [$slate region $id]
+	set result {}
+	foreach a $opts(-aspects) {
+	    eval lappend result [eval aspect $region $a]
+	}
+	return $result
     }
 }
 
@@ -338,7 +357,7 @@ body ::tycho::Rectangle::_reshapeclick {id canvas slate x y args} {
 #######################################################################
 #### _reshapedrag
 #
-body ::tycho::Rectangle::_reshapedrag {id canvas slate x y} {
+body ::tycho::Rectangle::_reshapedrag {id canvas slate x y args} {
     set unique $id.[$slate uniqueid]
 
     # Get delta coordinates
@@ -367,7 +386,7 @@ body ::tycho::Rectangle::_reshapedrag {id canvas slate x y} {
 #######################################################################
 #### _reshaperelease
 #
-body ::tycho::Rectangle::_reshaperelease {id canvas slate x y} {
+body ::tycho::Rectangle::_reshaperelease {id canvas slate x y args} {
 	set unique $id.[$slate uniqueid]
 
     # If there's a ghost, reshape the item to its shape
@@ -392,44 +411,11 @@ body ::tycho::Rectangle::_reshaperelease {id canvas slate x y} {
 ##########################################################################
 #### aspect
 #
-# Return one or more aspects of a rectangle. Valid aspects are any
+# Return an aspect of a rectangle. Valid aspects are any
 # of the eight compass points and "c" or "center."
 #
-body ::tycho::Rectangle::aspect {x0 y0 x1 y1 args} {
-    set result {}
-    foreach aspect $args {
-	switch -exact $aspect {
-	    "n" {
-		lappend result [expr ($x0+$x1) / 2] $y0
-	    }
-	    "s" {
-		lappend result [expr ($x0+$x1) / 2] $y1
-	    }
-	    "e" {
-		lappend result $x1 [expr ($y0+$y1) / 2]
-	    }
-	    "w" {
-		lappend result $x0 [expr ($y0+$y1) / 2]
-	    }
-	    "nw" {
-		lappend result $x0 $y0
-	    }
-	    "ne" {
-		lappend result $x1 $y0
-	    }
-	    "sw" {
-		lappend result $x0 $y1
-	    }
-	    "se" {
-		lappend result $x1 $y1
-	    }
-	    "c" -
-	    "center" {
-		lappend result [expr ($x0+$x1) / 2] [expr ($y0+$y1) / 2]
-	    }
-	}
-    }
-    return $result
+body ::tycho::Rectangle::aspect {x0 y0 x1 y1 aspect} {
+    eval $aspectExpr($aspect)
 }
 
 ##########################################################################
