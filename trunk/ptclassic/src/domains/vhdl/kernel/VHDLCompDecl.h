@@ -94,6 +94,11 @@ class VHDLCompDeclList : public VHDLObjList
     return (const VHDLCompDecl*) vhdlObjWithName(name);
   }
 
+  // Return a pointer to a new copy of the list.
+  VHDLCompDeclList* newCopy();
+
+  // Allocate memory for a new VHDLCompDecl and put it in the list.
+  void put(StringList, VHDLPortList*, VHDLGenericList*);
 };
 
 class VHDLCompDeclListIter : public VHDLObjListIter {
