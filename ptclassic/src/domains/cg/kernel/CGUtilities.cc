@@ -1,7 +1,7 @@
 static const char file_id[] = "CGUtilities.cc";
 /******************************************************************
 Version identification:
-@(#)CGDisplay.cc	1.3	7/14/92
+$Id$
 
  Copyright (c) 1992 The Regents of the University of California.
                        All Rights Reserved.
