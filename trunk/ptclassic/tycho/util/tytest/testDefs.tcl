@@ -188,7 +188,7 @@ proc doneTests {args} {
 	    "Total: [expr $PASSED + $FAILED] (Passed: $PASSED Failed: $FAILED)"
     flush stderr
     update
-    #after [expr {2 * $duration}] ::tclexit
+    after [expr {2 * $duration}] ::tclexit
 }
 
  
