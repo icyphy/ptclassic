@@ -342,11 +342,12 @@ proc ptkSetOrClearDebug { name octHandle } {
 	        $w.debug.left {left frame w} \
 	        $w.debug.anim {left fill expand}
 	}
-	# Animation is off by default
+	# Animation and timing is off by default
 	# Note that since pre and post actions are global, there is no point
 	# in associating the universe name with the Animation flags.
 	ptkGrAnimation 0
 	ptkTxAnimation 0
+	set ptkTimeFlag 0
 	ptkUpdateCount $name $octHandle
     } {
 	# Turning debug off.  Turn off animation first.
