@@ -4,8 +4,8 @@
 #
 # The "stacktrace" master style-sheet
 #
-modelconfigure -label "Stack trace colors"
-modelconfigure -description {
+configure -title "Stack trace colors"
+configure -description {
     Additional color settings for stack trace windows.
 }
 

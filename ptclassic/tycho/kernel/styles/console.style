@@ -4,8 +4,8 @@
 #
 # The "console" master style-sheet
 #
-modelconfigure -label "Console parameters"
-modelconfigure -description {
+configure -title "Console parameters"
+configure -description {
     Additional settings for console windows.
 }
 

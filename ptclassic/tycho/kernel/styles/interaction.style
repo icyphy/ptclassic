@@ -4,8 +4,8 @@
 #
 # The "interaction" master style-sheet
 #
-modelconfigure -label "Interaction"
-modelconfigure -description {
+configure -title "Interaction"
+configure -description {
 	This style contains settings for key user-interaction
 	parameters.
 }
