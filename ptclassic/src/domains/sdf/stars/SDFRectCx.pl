@@ -2,9 +2,14 @@ defstar {
 	name { RectCx }
 	domain { SDF }
 	desc {
-Generate a rectangular pulse of height "height" (default 1.0).
-and width "width" (default 8).  If "period" is greater than zero,
-then the pulse is repeated with the given period.
+Generate a rectangular pulse of width "width" (default 240).  If
+"period" is greater than zero, then the pulse is repeated with the
+given period.  The height of the pulse is a complex quantity.
+The magnitude of the height, which is a function of the square root
+of the noise power "SqrPthn" and the signal-to-noise ratio "SNRn",
+is equal to SqrPthn * 10^(SNRn/20).  The phase of the height is
+equal to Pi ( 2 Fpor (count - sdelay) / Fsimu - bandwidth (count - sdelay)^2 /
+(Te Fsimu^2) + 4 dopplercount Fe Tp vn / c ).
 	}
 	version { $Id$ }
 	author { Karim-Patrick Khiar }
@@ -16,13 +21,40 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	explanation {
 This pulse generator is similiar to the \fIRect\fR star, except
-that it is complex-valued and supports several addition options
-for Doppler effects.
-}
+that it is complex-valued and supports several additional options
+for Doppler effects.  This star was initially intended for radar
+simulations.
+	}
 	location { SDF main library }
 	output {
 		name { output }
 		type { complex }
+	}
+        defstate {
+		name { height }
+		type { complex }
+		default { "(1.0,0.0)" }
+		desc { Heigth of the rectangular pulse. }
+		attributes { A_SETTABLE|A_NONCONSTANT }
+	}
+        defstate {
+		name { width }
+		type { int }
+		default { 240 }
+		desc { Width of the rectangular pulse. }
+	}
+	defstate {
+		name { period }
+		type { int }
+		default { 1024 }
+		desc { If greater than zero, the period of the pulse stream. }
+	}
+	defstate {
+		name { count }
+		type { int }
+		default { 0 }
+		desc { Internal state }
+		attributes { A_SETTABLE|A_NONCONSTANT }
 	}
 	defstate {
 		name { bandwidth }
@@ -90,30 +122,11 @@ for Doppler effects.
 		default { 1.0 }
 		desc { Square root of Noise power. }
 	}
-        defstate {
-		name { width }
-		type { int }
-		default { 240 }
-		desc { Width of the rectangular pulse. }
-	}
-	defstate {
-		name { period }
-		type { int }
-		default { 1024 }
-		desc { If greater than zero, the period of the pulse stream. }
-	}
 	defstate {
 		name { sdelay }
 		type { float }
 		default { 0 }
 		desc { Delay for the target. }
-	}
-	defstate {
-		name { count }
-		type { int }
-		default { 0 }
-		desc { Internal state }
-		attributes { A_SETTABLE|A_NONCONSTANT }
 	}
 	defstate {
 		name { dopplercount }
@@ -126,33 +139,37 @@ for Doppler effects.
 	setup {
 		count = 0;
 		dopplercount = 0;
+
+		double real = 0.0, imag = 0.0;
+		double k_minus_kd = int(count) - double(sdelay);
+
+		// Definition arg1= B.(k-kd)^2/(Te.Fsimu^2)
+		double arg1 = k_minus_kd * k_minus_kd;
+		arg1 *= double(bandwidth);
+		arg1 /= double(Te) * double(Fsimu) * double(Fsimu);
+
+		// Definition arg2 = 2.fpor.(k-kd)
+	        double arg2 = 2.0 * double(Fpor) * k_minus_kd / double(Fsimu);
+
+		// Definition doppler effect doparg
+		double doparg = 4.0 * double(vn) * double(Fe) * double(Tp);
+		doparg *= double(dopplercount)/double(c);
+
+	        double arg = M_PI * (arg1 + arg2 + doparg) ;
+		double amp = double(SqrPthn) * pow(10.0,(double(SNRn)/20.0));
+
+	        real = amp * cos(arg);
+	        imag = amp * sin(arg);
+		height = Complex(real,imag);
 	}
 	go {
-		double real = 0.0, imag = 0.0;
+		Complex pulseHeight(0.0,0.0);
 
 		if ( int(count) < int(width) ) {
-		  double k_minus_kd = int(count) - double(sdelay);
-
-		  // Definition arg1= B.(k-kd)^2/(Te.Fsimu^2)
-		  double arg1 = k_minus_kd * k_minus_kd;
-		  arg1 *= double(bandwidth);
-		  arg1 /= double(Te) * double(Fsimu) * double(Fsimu);
-
-		  // Definition arg2 = 2.fpor.(k-kd)
-	          double arg2 = 2.0 * double(Fpor) * k_minus_kd / double(Fsimu);
-
-		  // Definition doppler effect doparg
-		  double doparg = 4.0 * double(vn) * double(Fe) * double(Tp);
-		  doparg *= double(dopplercount)/double(c);
-
-	          double arg = M_PI * (arg1 + arg2 + doparg) ;
-		  double amp = double(SqrPthn) * pow(10.0,(double(SNRn)/20.0));
-
-	          real = amp * cos(arg);
-	          imag = amp * sin(arg);
+		  pulseHeight = Complex(height);
 		}
 
-		output%0 << Complex(real, imag);
+		output%0 << pulseHeight;
 
 		count = int(count) + 1;
 		if ( int(period) > 0 && int(count) >= int(period) ) {
