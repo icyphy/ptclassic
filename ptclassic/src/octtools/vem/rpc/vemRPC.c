@@ -558,7 +558,7 @@ vemStatus rpcSignalCmd(spot, cmdList)
     int appNum;			/* Application number (internal index for vem) */
     Pointer pointer;
     /* HP-UX does not support siglist */
-#if !defined(hpux) && !defined(SYSV)
+#if !defined(hpux) && !defined(SYSV) && !defined(linux)
     extern char *sys_siglist[];
 #endif
 
