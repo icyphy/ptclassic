@@ -240,12 +240,6 @@ class ::tycho::Displayer {
     method showView {view args}
     
     #################################################################
-    ####                   public procedures                     ####
-
-    # Set or report whether C-x C-c is bound in future instances to exit.
-    proc normalExit {{enable {}}} {}
-
-    #################################################################
     ####                   protected methods                     ####
 
     # Update the -master configuration option
@@ -262,9 +256,6 @@ class ::tycho::Displayer {
 
     # The name of the current view, if there is one.
     protected variable currentView {}
-
-    # If 1, C-x C-c will be bound in future instances to exit the program.
-    protected common normalexit 1
 
     # An array mapping view window paths to the bars (status, menu, and tool)
     # they've requested. For example _usedbars(.x.v) will hold {1 default 0}
@@ -310,27 +301,14 @@ body ::tycho::Displayer::constructor {args} {
     # This is needed for the window manager ops to work correctly.
     itk_option add hull.width hull.height
 
-    # Fashioned after emacs bindings, the following bindings control
-    # placement and size on the screen.
-    bind $prefix {<Control-x><Key 1>} "$this fullScreen; break"
-    # FIXME: Doesn't quite work yet.  Window manager bugs?
-    bind $prefix {<Control-x><Key 2>} "$this halfHeight; break"
-    bind $prefix {<Control-x><Key 6>} "$this originalSize; break"
+    # Full screen
+    bind $prefix <<Maximize>> "$this fullScreen; break"
+    bind $prefix <<HalfHeight>> "$this halfHeight; break"
+    bind $prefix <<Restore>> "$this originalSize; break"
 
-    # Again following emacs convention, the following will exit the
-    # program if in normal exit mode.
-    # NOTE: This should probably be promoted to TopLevel, along with
-    # normalexit.
-    if {$normalexit == 1} {
-	bind $prefix <Control-x><Control-c> {::tycho::TopLevel::exitProgram}
-    } else {
-	bind $prefix <Control-x><Control-c> {}
-    }
-
-    # And yet again following emacs convention, the following will
     # cycle the focus through the attached views and the minibuffer 
     # (if there is one).
-    bind $prefix <Control-x><o> "$this nextView; break"
+    bind $prefix <<NextPane>> "$this nextView; break"
 
     # Setup a frame for the menu bar
     itk_component add menuFrame {
@@ -374,7 +352,7 @@ body ::tycho::Displayer::constructor {args} {
     itk_component add status {
  	uplevel #0 ::tycho::StatusBar $itk_component(statusFrame).status \
 		-closetext $closetxt \
-                -closecommand [list "$this nextWindow; delete object $this"]
+                -closecommand [list "$this prevWindow; delete object $this"]
     } {
 	keep -background -font -activebackground -cursor \
 		-highlightthickness -activeforeground \
@@ -503,7 +481,7 @@ body ::tycho::Displayer::attachView {view args} {
             uplevel #0 ::tycho::StatusBar \
                     $itk_component(statusFrame).status$tag \
                     -closetext $closetxt \
-                    -closecommand [list "$this nextWindow; delete object $this"]
+                    -closecommand [list "$this prevWindow; delete object $this"]
         } {
             keep -background -font -activebackground -cursor \
                     -highlightthickness -activeforeground \
@@ -621,6 +599,8 @@ body ::tycho::Displayer::fullScreen {} {
     }
     wm geometry $prefix "${width}x$height+0+0"
     wm deiconify $prefix
+    raiseWindow
+    focusin
 }
 
 ###################################################################
@@ -630,9 +610,9 @@ body ::tycho::Displayer::fullScreen {} {
 # of times (including zero), the window is put at the top of the
 # screen. If this function has been invoked an odd number of times, it
 # is put at the bottom of the screen.
-# NOTE: This does not currently work properly, at least under fvwm,
+# NOTE: This does not currently work properly
 # because the inside text window, for some reason, is the one that
-# gets the half height size.
+# gets the half height size.  A fudge factor is used to try to correct.
 #
 body ::tycho::Displayer::halfHeight {} {
     wm withdraw $prefix
@@ -645,7 +625,8 @@ body ::tycho::Displayer::halfHeight {} {
         set widthInc [lindex $grid 2]
         set heightInc [lindex $grid 3]
         set width [expr int($width/$widthInc.0)]
-        set height [expr int($height/(2.0*$heightInc))]
+        # Following should be 2.0 not 2.6.  Fudge factor.
+        set height [expr int($height/(2.6*$heightInc))]
     }
     wm geometry $prefix "${width}x$height+0${vertpos}0"
     if {$vertpos == {+}} {set vertpos {-}} {set vertpos {+}}
@@ -910,26 +891,6 @@ body ::tycho::Displayer::showView {view args} {
     # needed because showView is called after the constructor returns.
     # after idle [code [winfo command $view] focusin]
     [winfo command $view] focusin
-}
-
-###################################################################
-###################################################################
-####                      public procedures                    ####
-
-###################################################################
-#### normalExit
-# If the argument is 1, then for all instances of Displayer or derived
-# classes created henceforth, bind C-x C-c to exit the program.
-# If the argument is 0, then make no such binding.  If the argument
-# is absent, then report whether such a binding has been set.
-# This procedure is provided for the benefit of other applications
-# that might be using Tycho, but which have their own method for exiting.
-#
-body ::tycho::Displayer::normalExit {{enable {}}} {
-    if {$enable != {}} {
-        set normalexit $enable
-    }
-    return $normalexit
 }
 
 #################################################################
