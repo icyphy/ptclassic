@@ -79,8 +79,9 @@ proc ptkHasRun { name } {
 # Procedure to run a universe.
 #
 proc ptkRunControl { name octHandle } {
-    global ptkRunFlag ptkDebug ptkControlPanel ptkOctHandles
+    global ptkRunFlag ptkDebug ptkRunEventLoop ptkControlPanel ptkOctHandles
     set ptkDebug($name) 0
+    set ptkRunEventLoop($name) 1
     set ptkOctHandles($name) $octHandle
     set ptkControlPanel .run_$octHandle
     
@@ -110,10 +111,14 @@ proc ptkRunControl { name octHandle } {
 	checkbutton $ptkControlPanel.iter.debug -text "Debug" \
 	    -variable ptkDebug($name) -relief flat \
 	    -command "ptkSetOrClearDebug $name $octHandle"
+	checkbutton $ptkControlPanel.iter.event -text "Interactive" \
+	    -variable ptkRunEventLoop($name) -relief flat \
+	    -command "ptkSetRunInteractivity $name $octHandle"
 	pack append $ptkControlPanel.iter \
 	    $ptkControlPanel.iter.label left \
 	    $ptkControlPanel.iter.entry left \
-	    $ptkControlPanel.iter.debug {right padx 20}
+	    $ptkControlPanel.iter.debug {right padx 20} \
+	    $ptkControlPanel.iter.event {right padx 20} 
 
     # The following empty frames are created so that they are available
     # to stars to insert custom controls into the control panel.
@@ -190,6 +195,43 @@ proc ptkRunControl { name octHandle } {
     bind $ptkControlPanel <Escape> "ptkStop $name"
     bind $ptkControlPanel <Control-d> \
 	"ptkRunControlDel $name $ptkControlPanel $octHandle $defNumIter"
+}
+
+
+#######################################################################
+# Procedure to turn on or off the event loop during a run
+#
+proc ptkSetRunInteractivity { name octHandle } {
+    global ptkDebug ptkRunEventLoop ptkRunFlag
+    set Panelwindow .run_$octHandle
+    if {$ptkRunEventLoop($name)} {
+	# TkEventLoop is active during a run
+	# If the run is in progress, turn event loop on
+	if {$ptkRunFlag($name)=={ACTIVE}||$ptkRunFlag($name)=={PAUSED}} {
+	    ptkSetEventLoop on
+	}
+	# Return pause and run to active states
+        if {[winfo exists $Panelwindow]} {
+	    $Panelwindow.panel.pause configure -state normal
+	    $Panelwindow.panel.stop configure -state normal
+	}
+	# Debug is now allowed
+	ptkSetOrClearDebug $name $octHandle
+    } {
+	# Turn off debug mode
+	set ptkDebug($name) 0
+	# Close down debug window
+	ptkSetOrClearDebug $name $octHandle
+	# If the run is in progress, turn off the event loop
+	if {$ptkRunFlag($name)=={ACTIVE} || $ptkRunFlag($name)=={PAUSED} } {
+	    ptkSetEventLoop off
+	}
+	# mark the pause and stop buttons inactive
+        if {[winfo exists $Panelwindow]} {
+	    $Panelwindow.panel.pause configure -state disabled
+	    $Panelwindow.panel.stop configure -state disabled
+	}
+    }
 }
 
 #######################################################################
@@ -481,7 +523,7 @@ proc ptkStepTrap { name octHandle star } {
 #######################################################################
 #procedure to go
 proc ptkGo {name octHandle} {
-    global ptkRunFlag
+    global ptkRunFlag ptkRunEventLoop
     # For now, we allow only one run at a time.
     set univ [curuniverse]
     if {[info exists ptkRunFlag($univ)] && \
@@ -492,6 +534,8 @@ proc ptkGo {name octHandle} {
     }
     global ptkControlPanel
     set ptkControlPanel .run_$octHandle
+    # Turn the event loop on (or off) for this run 
+    ptkSetEventLoop $ptkRunEventLoop($name)
     after 200 ptkUpdateCount $name $octHandle
     catch {$ptkControlPanel.panel.gofr.go configure -relief sunken}
     catch {$ptkControlPanel.panel.pause configure -relief raised}
