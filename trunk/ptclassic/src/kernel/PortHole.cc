@@ -196,11 +196,13 @@ PortHole :: setPlasma () {
 	// zeroth case: disconnected porthole.  Return what I am.
 	if (far() == NULL) return myPlasma;
 	// first case: my type is known, and I'm an input.  Leave alone.
-	if (myPlasma && (isItInput() || (isItInput() == far()->isItInput()))) 
+	if (myPlasma && (isItInput()))
 		return myPlasma;
 	// second case: I've been told where to look for the type
 	if (typePort)
 		myPlasma = typePort->setPlasma();
+	if (myPlasma && (isItInput() == far()->isItInput()))
+		return myPlasma;
 	// third case: I'm an input porthole, use type of connected
 	// output porthole.
 	// fourth case: I'm an output, and the connected input
@@ -241,8 +243,9 @@ void PortHole :: initialize()
 		// restart they do not contain old data
 		((Particle*)*p)->initialize();
 		}
-	// If this is an output PortHole, initialize myGeodesic
-	if( isItOutput() && myGeodesic) myGeodesic->initialize();
+	// If this is an output PortHole or EventHorizon, initialize myGeodesic
+	if( (isItOutput() || isItInput() == far()->isItInput()) && myGeodesic) 
+		myGeodesic->initialize();
 }
 
 void PortHole :: setMaxDelay(int delay)
