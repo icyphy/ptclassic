@@ -120,12 +120,17 @@ public:
 		numItersSoFar = 0;
 		numIters = 1;
 		invalid = 1;
+		schedulePeriod = 10000.0;
 	}
 
 	// setStopTime, for compatibility with DE scheduler.
 	// for now, we assume each schedule interation takes 1.0
 	// time units.  (Argh).  Deal with roundoff problems.
 	void setStopTime (float limit) { numIters = int(limit + 0.001);}
+	void resetStopTime () { numIters = 1; numItersSoFar = 0;}
+
+	// scheduler Period : used when interfaced with timed domain.
+	float schedulePeriod;
 
 private:
 	// This is a kludge to help integrate SDFScheduler and
