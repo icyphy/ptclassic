@@ -8,7 +8,7 @@ A sinusoidal test signal is sent over a telephone channel simulation.
 .EQ
 delim off
 .EN
-.LO "$PTOLEMY/src/domains/sdf/demo"
+.LO "~ptolemy/src/domains/sdf/demo"
 .EQ
 delim $$
 .EN
