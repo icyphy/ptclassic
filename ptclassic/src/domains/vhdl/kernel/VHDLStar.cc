@@ -254,9 +254,12 @@ StringList VHDLStar :: expandRef(const char* name, const char* offset) {
       // Generate constant for index from string.
       // Must first convert offset from char* to int.
       offsetInt = 0;
+/*
       for (int i=0; offset[i]>='0' && offset[i]<='9'; i++) {
 	offsetInt = 10*offsetInt + (offset[i]-'0');
       }
+      */
+      sscanf(offset, "%d", &offsetInt);
     }
     tokenNum = port->getOffset() - offsetInt;
     if (tokenNum >= 0) {
