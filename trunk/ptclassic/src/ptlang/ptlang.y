@@ -49,6 +49,7 @@ int bodyMode = 0;		/* special lexan mode flag to read bodies  */
 int docMode = 0;		/* flag document bodies  */
 int descMode = 0;		/* flag descriptor bodies  */
 int codeMode = 0;		/* flag code block bodies  */
+int codeModeBraceCount;		/* brace count in codeMode */
 FILE* yyin;			/* stream to read from */
 
 char* progName = "ptlang";	/* program name */
@@ -398,6 +399,7 @@ staritem:
 					  strcpy(b,blockID);
 					  blockNames[numBlocks]=b;
 					  codeMode = 1;
+					  codeModeBraceCount = 1;
 					}
 		lines '}'		{ char* b = save(codeBlock);
 					  codeBlocks[numBlocks++]=b;
@@ -1259,7 +1261,6 @@ yylex () {
  * that closing '}' is returned.  Anything else on the line is lost.
  */
 	if (codeMode) {
-	    int brace = 1;
 	    int inQuote = 0;
 	    /* eat spaces until a newline */
 	    while (!c || (isspace(c) && c != NEWLINE))
@@ -1286,10 +1287,10 @@ yylex () {
 		    exit (1);
 		  default:
 		    if (!inQuote) {
-			if (c == '{') brace++;
+			if (c == '{') codeModeBraceCount++;
 			else if (c == '}') {
-			    brace--;
-			    if (brace == 0) {
+			    codeModeBraceCount--;
+			    if (codeModeBraceCount == 0) {
 				/* output doesn't include the '}' */
 				p[0] = 0;
 				c = 0;
