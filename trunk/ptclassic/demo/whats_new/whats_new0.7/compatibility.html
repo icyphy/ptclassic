@@ -34,19 +34,12 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 <DT> Recompilation will be necessary.
 <DD> As always, if you upgrade from 0.6 to 0.7, you will need to recompile
-any user designed stars.
+	any user designed stars.
 
 <DT> Type system changes
 <DD> The type system has been changed.  Some Code Generation universes may
-need explicit conversion stars to properly compile.
-<A HREF="typesys.html">Further Documentation</A>
-
-<DT> Certain HOF stars have been removed
-<DD> The type system changes mean that certain Higher Order Function stars have been removed.  The stars that have been removed are:
-<CODE>HOFDelayedMap</CODE>
-<CODE>HOFSrc</CODE><I>xxx</I> and <CODE>HOFSrcGr</CODE><I>xxx</I>
-(where <I>xxx</I> is a type, such as <CODE>Int</CODE>)
-If you have universes that were using the old stars, then you can update the universes with <CODE>masters</CODE> or <CODE>ptfixtree</CODE>.
+	need explicit conversion stars to properly compile.
+	<A HREF="typesys.html">Further Documentation</A>
 
 <DT> <CODE>htmldoc</CODE> is a new keyword that has been added to
 <CODE>ptlang</CODE>.
@@ -55,6 +48,23 @@ If you have universes that were using the old stars, then you can update the uni
 	<CODE>stars/</CODE> directory.  In releases earlier than
 	Ptolemy0.7, the troff output was generated in
 	 <CODE>stars/../doc/stars</CODE>
+
+<DT> Certain HOF stars have been removed
+<DD> Revisions in the HOF domain make the following star types no longer
+	necessary:
+	<UL>
+	<LI> <CODE>HOFDelayedMap</CODE> is replaced by <CODE>HOFMap</CODE>.
+	
+	<LI> <CODE>HOFSrc</CODE><I>xxx</I> and
+	<CODE>HOFSrcGr</CODE><I>xxx</I> (where <I>xxx</I> is a type,
+	such as <CODE>Int</CODE>).  All these variants are replaced by
+	the generic <CODE>HOFSrc</CODE> and <CODE>HOFSrcGr</CODE>.
+	
+	</UL>
+	
+	If you have universes that were using the old stars, you will
+	need to use <CODE>masters</CODE> or <CODE>ptfixtree</CODE> to
+	update their references.
 
 <DT> Certain CGC DSP stars have been moved.
 <DD> To support retargeting demonstrations and galaxies from SDF to CGC, 
@@ -79,9 +89,9 @@ If you have universes that were using the old stars, then you can update the uni
 
 <DT> CGC stars that have been removed
 <DD> <CODE>CGCPCM</CODE>, <CODE>CGCPCMread</CODE>, <CODE>CGCPCMwrite</CODE>,
-<CODE>CGCSunSound</CODE>, <CODE>CGCTkSunSound</CODE>
-Also, <CODE>SDFReadPCM</CODE> was removed and replaced with
-<CODE>SDFPCMReadInt</CODE>
+	<CODE>CGCSunSound</CODE>, <CODE>CGCTkSunSound</CODE>
+	Also, <CODE>SDFReadPCM</CODE> was removed and replaced with
+	<CODE>SDFPCMReadInt</CODE>
 
 <DT> The <CODE>cgc/targets/main</CODE> directory has been split.
 <DD> To separate the uniprocessor and multiprocessor CGC targets,
@@ -92,9 +102,8 @@ Also, <CODE>SDFReadPCM</CODE> was removed and replaced with
 <DT> CG56 stars that have been removed
 <DD> <CODE>CG56Cut</CODE>, <CODE>CG56Pad</CODE>
 
-
 <DT> Structure of directories under <CODE>PTOLEMY_SYSTEMS</CODE>
-has been changed.
+	has been changed.
 <DD> To support portability between operating systems, Brian Evans changed the
 	destination directory in the Ptolemy targets and demonstrations to
 	<code>$HOME/PTOLEMY_SYSTEMS/<em>domain</em></code>.
@@ -105,12 +114,6 @@ has been changed.
 	the HOME environment variable but do not always support ~.
 	Also, it is possible to define environment variables on Macs and PCs.
 
-
-<DT> <CODE>BDFTrue</CODE> renamed to <CODE>BDFCondGate</CODE>
-<DD> Brian Evans renamed the <CODE>BDFTrue</CODE> star to
-	<CODE>BDFCondGate</CODE>.
-
-
 <DT> Certain audio stars have been removed.
 <DD> Sunil Bhave removed the old PCMread/write and 
 	SunSound stars from ptdesign. Instead you can use the new
@@ -119,30 +122,47 @@ has been changed.
         In Ptolemy 0.7, the mu law conversion tables are in the 
 	<CODE>libptdsp</CODE> library.  If you use
 
-<DT> A bug in float-to-int particle conversion was fixed by Tom Lane
-<DD> The bug was that documentation said that float-to-int particle conversion
-rounded floats to the nearest int.  In fact, the code was using 
-the <CODE>int()</CODE> cast operator to truncate toward 0 for positive
-values, and to truncate in a machine dependent way for negative values.
- <br>The fix was to modify the code so that floats are rounded to 
-the nearest integer.
- <br> We noticed that the DE basic switch demo was
-failing with a message like:
-<PRE>
-Error: switch.Case.output=21: The control value 2 is not in the
-		range [0,1] 
-</PRE>
-Tom Lane's diagnosis was that the last few ramp outputs were rounding
-to 2 instead of truncating to 1, so his fix was to change the lower
-Ramp star from 0.1 to 0.5.
+<DT> <CODE>BDFTrue</CODE> renamed to <CODE>BDFCondGate</CODE>
+<DD> Brian Evans renamed the <CODE>BDFTrue</CODE> star to
+	<CODE>BDFCondGate</CODE>.
 
-<DT> <CODE>DERepeatStar</CODE>
- <DD>DERepeatStar has been revised to use a delay marker rather than
-setting nonstandard porthole priorities on its feedback arc.  In most
-cases this will give better behavior.  Derived stars that set
-delayType or contain triggers() directives may need to be revised.
-DERepeatStar can also pass a numeric value in each feedback event.
-See section 11.2.6 of the Programmer's Manual for details.
+<DT> Float-to-int particle conversion now works as documented
+
+<DD> The Almagest said that float-to-int particle conversion rounded floats
+	to the nearest int.  In fact, the code was using the
+	<CODE>int()</CODE> cast operator, which truncates toward 0 for
+	positive values, and truncates in a machine dependent way for
+	negative values.
+	
+	<br>Now, floats are rounded to the nearest integer as
+	specified, both in implicit particle conversions and in
+	FloatToInt stars.
+	
+	<br>This may break a few existing schematics that depend on
+	the old behavior.
+	For example, we noticed that the DE basic switch demo was
+	failing with a message like:
+	<PRE>
+Error: switch.Case.output=21: The control value 2 is not in the range [0,1] 
+	</PRE>
+	
+	The demo had been generating fractional values in the range 0
+	to 1.9, which were truncated to the 0 or 1 expected by the
+	Case star.  With rounding, the last few values converted to 2
+	instead.  We changed the demo to generate fractional values
+	running from 0 to 1, which round to the required control
+	values.
+
+<DT> <CODE>DERepeatStar</CODE> improvements
+	
+<DD>DERepeatStar has been revised to use a delay marker rather than
+	setting nonstandard porthole priorities on its feedback arc.
+	In most cases this will give better behavior for derived stars
+	that have regular input ports in addition to the feedback arc.
+	Derived stars that set delayType or contain triggers()
+	directives may need to be revised.  Also, DERepeatStar can now
+	pass a numeric value in each feedback event.  See section
+	11.2.6 of the Programmer's Manual for details.
 
 </DL>
 
