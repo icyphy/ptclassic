@@ -41,6 +41,11 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 // Constructors.
 VHDLToken :: VHDLToken() {
+  arc = NULL;
+  tokenNumber = 0;
+  sourceFiring = NULL;
+  destFirings = new VHDLFiringList;
+  clockName = "UNINITIALIZED";
   VHDLTypedObj::initialize();
 }
 
@@ -50,7 +55,7 @@ VHDLToken :: ~VHDLToken() {}
 // Return a pointer to a new copy of the VHDLToken.
 VHDLToken* VHDLToken :: newCopy() {
   VHDLToken* newToken = new VHDLToken(name, type, arc, tokenNumber,
-				      sourceFiring, destFirings);
+				      sourceFiring, destFirings, clockName);
   return newToken;
 }
 
