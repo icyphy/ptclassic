@@ -561,7 +561,7 @@ vemStatus rpcSignalCmd(spot, cmdList)
     int appNum;			/* Application number (internal index for vem) */
     Pointer pointer;
     /* HP-UX does not support siglist */
-#if !defined(hpux) && !defined(SYSV) && !defined(linux)
+#if ! defined(NO_SYS_SIGLIST)	/* NO_SYS_SIGLIST should be in compat.h */
     extern char *sys_siglist[];
 #endif
 
@@ -621,7 +621,7 @@ vemStatus rpcSignalCmd(spot, cmdList)
 	return VEM_CORRUPT;
     }
     if ( app->user == NIL(char) && !strcmp(app->host, localhost )) {
-#if defined(hpux) || defined(SYSV)
+#if defined(NO_SYS_SIGLIST)
 	sprintf( buf, "Signal %d to RPC app. (direct)...\n", signal_number);
 #else
 	sprintf( buf, "Signal %d(%s) to RPC app. (direct)...\n", signal_number,
@@ -644,7 +644,7 @@ vemStatus rpcSignalCmd(spot, cmdList)
 		app->host, remoteUser,
 		signal_number, (long)app->pid );
     
-#if defined(hpux) || defined(SYSV)
+#if defined(NO_SYS_SIGLIST)
 	sprintf(buf, "Signal %d to RPC app. (via rsh)...\n", signal_number);
 #else
 	sprintf(buf, "Signal %d(%s) to RPC app. (via rsh)...\n", signal_number,
