@@ -30,7 +30,8 @@ PL_SRCS = \
 
 PLSRC = $(PL_SRCS:.pl=.cc)
 
-SRCS=CGCMultiTarget.cc CGCBDFTarget.cc $(PLSRC) 
+SRCS = CGCMultiTarget.cc CGCBDFTarget.cc CGCDDFTarget.cc CGCDDFTarget.h \
+	$(PLSRC) 
 EXTRA_SRCS = $(PL_SRCS)
 
 HDRS=$(SRCS:.cc=.h)
