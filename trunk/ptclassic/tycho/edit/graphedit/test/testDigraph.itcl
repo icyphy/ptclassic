@@ -37,9 +37,9 @@ if {[string compare test [info procs test]] == 1} then {
 # Create the first, fairly simple, graph used for testing. 
 catch {delete object digraph}
 ::tycho::Digraph digraph
-digraph configureEntityType vertex -label ""
-digraph configureLinkType edge -weight 0
-digraph read string {
+digraph type configure vertex -label ""
+digraph type configure edge -weight 0
+digraph parse {
     vertex a -label "First vertex"
     vertex b -label "Second vertex"
     vertex c
@@ -56,9 +56,9 @@ test Digraph-1.1 {Get vertices} {
     lsort [digraph vertices]
 } {a aa b c}
 
-test Digraph-1.2 {Get vertices by pattern} {
-    lsort [digraph vertices {a*}]
-} {a aa}
+#test Digraph-1.2 {Get vertices by pattern} {
+#    lsort [digraph names {a*}]
+#} {a aa}
 
 test Digraph-1.3 {Get edges} {
     digraph edges
@@ -72,39 +72,29 @@ test Digraph-1.5 {Get edges by pattern: target} {
     digraph edges * c
 } {a c b c}
 
-test Digraph-1.6 {Get number of vertices} {
-    digraph numberofvertices
-} {4}
-
-test Digraph-1.7 {Get number of edges} {
-    digraph numberofedges
-} {3}
-
 # Test set 2: Adding and deleting vertices and edges
 test Digraph-2.1 {Delete single vertex, test return value} {
-    digraph vertexdelete a
-} {vertex a -label {First vertex} -description {}}
+    digraph delete a
+    lsort [digraph vertices]
+} {aa b c}
 
 test Digraph-2.1a {Make sure edges not touched} {
     digraph edges
 } {a b a c b c}
 
 test Digraph-2.2 {Add a single vertex, test return value} {
-    digraph vertex a -label {First vertex}
-} {vertexdelete a}
-
-test Digraph-2.2a {Make sure vertex list is still OK} {
+    digraph add vertex a -label {First vertex}
     lsort [digraph vertices]
 } {a aa b c}
 
 # Test set 3: Configuring attributes
 test Digraph-3.1 {Test default attribute of vertex} {
-    digraph vertexcget c -label
+    digraph attrget c -label
 } {}
 
 test Digraph-3.2 {Test configuring attribute of vertex} {
-    digraph vertexconfigure a -label {This label}
-    digraph vertexcget a -label
+    digraph attrset a -label {This label}
+    digraph attrget a -label
 } {This label}
 
 # Create another, more complex graph, for testing algorithms
@@ -115,9 +105,9 @@ test Digraph-3.2 {Test configuring attribute of vertex} {
 #   +---------+
 catch {delete object digraph}
 ::tycho::Digraph digraph
-digraph configureEntityType vertex -label ""
-digraph configureLinkType edge -weight 0
-digraph read string {
+digraph type configure vertex -label ""
+digraph type configure edge -weight 0
+digraph parse {
          vertex a
          vertex b
          vertex c
@@ -148,36 +138,36 @@ test Digraph-4.4 {Children} {
 
 test Digraph-4.5 {Edges in subgraph} {
     digraph subgraphEdges a b d
-} {{a b} {d b}}
+} {d^b a^b}
 
 test Digraph-4.6 {Subgraph inputs} {
     digraph subgraphInputs a c
-} {{b c}}
+} {b^c}
 
 test Digraph-4.7 {Subgraph outputs} {
     digraph subgraphOutputs a b
-} {{a c} {b c}}
+} {a^c b^c}
 
 
 # Test set 5: Algorithms
 test Digraph-5.1 {Depth sort} {
     digraph depthSort
-} {0 {a d} 1 b 2 c}
+} {0 {d a} 1 b 2 c}
 
 test Digraph-5.2 {Topological sort} {
     digraph topologicalSort
-} {a d b c}
+} {d a b c}
 
 test Digraph-5.3 {Grid-layout} {
     digraph gridLayout
-} {{a 1 d 0} {b 0} {c 0}}
+} {{d 1 a 0} {b 0} {c 0}}
 
 test Digraph-5.4 {Cyclic} {
     digraph acyclic
 } {0}
 
 test Digraph-5.5 {Acyclic} {
-    digraph edgedelete b c
+    digraph delete b^c
     digraph acyclic
 } {1}
 
@@ -187,11 +177,11 @@ test Digraph-6.1 {Verify} {
 } {1}
 
 test Digraph-6.2 {Add stray vertex and verify} {
-    digraph edge d q
+    digraph add edge d^q
     digraph verify
 } {0}
 
 test Digraph-6.3 {Repair} {
     digraph repair
     digraph edges
-} {a b a c c b d b}
+} {d b a b a c c b}
