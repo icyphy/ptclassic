@@ -35,13 +35,13 @@ Header for error handing routines.
 	return(FALSE); \
     }
 
-#define ERR_IF2(cond, msg) \
+#define ERR_IF2(cond,msg) \
     if (cond) { \
 	ErrAdd(msg); \
 	return(FALSE); \
     }
 
-#define ERR_IF3(cond, msg, retVal) \
+#define ERR_IF3(cond,msg,retVal) \
     if (cond) { \
 	ErrAdd(msg); \
 	return(retVal); \
