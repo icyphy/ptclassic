@@ -100,14 +100,25 @@ input, with the labels separated by spaces.
 	default { "5" }
 	desc { Height of each plot in centimeters }
     }
-    // The following must be "begin" not "setup" so that the number
-    // of portholes has been fixed (in case there is a HOF star on the input).
-    begin {
-        int i; 
+    setup {
 	if (output.numberPorts() > 0) {
 	    Error::abortRun(*this, "Outputs are not supported");
 	    return;
 	}
+        for (int i = 0; i < style.size(); i++ ) {
+            if (strcmp(style[i],"hold") &&
+                strcmp(style[i],"dot")  &&
+                strcmp(style[i],"connect")) {
+                Error::abortRun(*this,
+				"style must be one of hold, dot, or connect");
+                return;
+            }
+        }
+    }
+    // The following must be "begin" not "setup" so that the number
+    // of portholes has been fixed (in case there is a HOF star on the input).
+    begin {
+        int i; 
 	tcl_file = "$PTOLEMY/src/domains/de/tcltk/stars/tkStripChart.tcl";
 
 	if (signalLabels.size() < 1 ||
@@ -122,17 +133,9 @@ input, with the labels separated by spaces.
             }
 	    signalLabels.setCurrentValue(names);
 	} else if (signalLabels.size() != input.numberPorts()) {
-	    Error::abortRun(*this,"Number of signalLabels is not equal to the number of input ports");
+	    Error::abortRun(*this, "Number of signalLabels is not equal to the number of input ports");
 	    return;
 	}
-        for (i = 0 ; i < style.size() ; i++ ) {
-            if (strcmp(style[i],"hold") &&
-                strcmp(style[i],"dot")  &&
-                strcmp(style[i],"connect")) {
-                Error::abortRun(*this,"style must be one of hold, dot, or connect");
-                return;
-            }
-        }
 	if (style.size() != input.numberPorts()) {
 	    if (style.size() != 1) {
 		Error::abortRun(*this,"Number of styles is not equal to the number of input ports");
@@ -166,8 +169,3 @@ input, with the labels separated by spaces.
 	tcl_file.clearAttributes(A_SETTABLE);
     }
 }
-
-
-
-
-

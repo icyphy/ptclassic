@@ -83,13 +83,15 @@ in cm.
 		default { "1" }
 		desc { Height of each plot in centimeters }
 	}
-    // The following must be "begin" not "setup" so that the number
-    // of portholes has been fixed (in case there is a HOF star on the input).
-    begin {
+    setup {
 	if (output.numberPorts() > 0) {
 	    Error::abortRun(*this, "Outputs are not supported");
 	    return;
 	}
+    }
+    // The following must be "begin" not "setup" so that the number
+    // of portholes has been fixed (in case there is a HOF star on the input).
+    begin {
 	tcl_file = "$PTOLEMY/src/domains/de/tcltk/stars/tkLogicAnalyzer.itcl";
 
 	if (signalLabels.size() < 1 ||

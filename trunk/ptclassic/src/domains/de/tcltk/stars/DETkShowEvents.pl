@@ -52,9 +52,11 @@ limitation of liability, and disclaimer of warranty provisions.
 	  Error::abortRun(*this, "Need as many identifiers as inputs");
 	  return;
 	}
+    }
+    begin {
         tcl_file = "$PTOLEMY/src/domains/de/tcltk/stars/tkShowEvents.tcl";
 
-        DETclScript::setup();
+        DETclScript::begin();
     }
     constructor {
         output.setAttributes(P_HIDDEN);

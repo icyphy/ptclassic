@@ -52,10 +52,10 @@ These points occupy two positions in the buffer, and hence take two slots of per
 	  xRange.setInitValue("0 100");
 	  style.setInitValue("connect");
 	  X.setAttributes(P_HIDDEN);
-	  prevValue = NULL;
-	  prevTime = NULL;
-	  prevXpos = NULL;
-	  prevValueSet = NULL;
+	  prevValue = 0;
+	  prevTime = 0;
+	  prevXpos = 0;
+	  prevValueSet = 0;
 	}
         begin {
 	  delete [] prevValue;
