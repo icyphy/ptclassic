@@ -36,7 +36,7 @@ as a parameter).
 	if(in<0){
 	  binary[bits-1]=1;
 	// in = in + 2^bits
-	  in= 128 + in;
+	  in= ( 2 << (bits-1) ) + in;
 		while (i< (bits-1)) {
  	     		binary[i++] = in & 0x1;
 			in = in >> 1;
