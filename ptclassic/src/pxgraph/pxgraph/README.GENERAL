@@ -1,3 +1,7 @@
+$Id$
+**************************************
+This file is obsolete, see README.html
+**************************************
 
 This directory contains source for the X11 version of xgraph,  a
 two-dimensional data plotting program.  Those familar with the X10
