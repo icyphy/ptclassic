@@ -5,10 +5,12 @@ defstar {
     author	{ Mike J. Chen }
     location    { SDF matrix library }
     descriptor	{
-Generate a fixed-point data matrix X from a stream of input particles.
+Generate a fix-point data matrix X, with dimensions (numRows,numCols),
+from a stream of numRows + numCols - 1 input particles.
 The data matrix is a Toeplitz matrix such that the first row is
-[ x(M-1) x(M-2) ... x(0) ], the second row is [ x(M) x(M-1) x(M-2) ... x(2) ],
-and so forth until the last row, which is [ x(N-1) x(N-2) ... x(N-M) ].
+[ x(M-1) x(M-2) ... x(0) ], the second row is [ x(M) x(M-1) x(M-2) ... x(1) ],
+and so forth until the last row, which is [ x(N-1) x(N-2) ... x(N-M) ], where
+numRows = N-M+1 and numCols = M.
 This is the form of the matrix that is required by the SVD_M star,
 among others.
     } 
