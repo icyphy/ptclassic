@@ -37,6 +37,11 @@ ENHANCEMENTS, OR MODIFICATIONS.
  Declaration for DDFTarget, the default target to be used in the DDF
  domain.
 
+ If restructure is 1, auto-wormholization is performed.
+ This is an experimental facility that automatically creates SDF wormholes
+ for subsystems that consist entirely of SDF stars.  It is disabled by
+ default.
+
 ***********************************************************************/
 #ifdef __GNUG__
 #pragma implementation
@@ -44,11 +49,15 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #include "DDFTarget.h"
 #include "DDFScheduler.h"
+#include "DDFClustSched.h"
 
 DDFTarget::DDFTarget() :
 Target("default-DDF","DataFlowStar","default DDF target")
 {
-	LOG_NEW; setSched(new DDFScheduler);
+	addState(logFile.setState("logFile",this,"",
+		"Log file to write to (none if empty)"));
+	addState(restructure.setState("restructure",this,"NO",
+		"perform auto-wormholization?"));
 	addState(maxBufferSize.setState("maxBufferSize",this,"1024",
 	    "capacity of an arc. For the runtime detection of unbounded arc."));
 	addState(numOverlapped.setState("numOverlapped",this,"1",
@@ -62,8 +71,15 @@ Block* DDFTarget::makeNew() const {
 }
 
 void DDFTarget::setup() {
+	DDFScheduler* s;
+	if (int(restructure)) {
+		LOG_NEW; s = new DDFClustSched(logFile);
+	} else {
+		LOG_NEW; s = new DDFScheduler;
+	}
+	setSched(s);
+
 	// set up the parameters for the DDF scheduler
-	DDFScheduler* s = (DDFScheduler*) scheduler();
 	s->setParams(numOverlapped,schedulePeriod,maxBufferSize);
 	Target :: setup();
 }

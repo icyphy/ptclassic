@@ -32,8 +32,13 @@ ENHANCEMENTS, OR MODIFICATIONS.
  The authors gratefully acknowledge the contributions of Richard Stevens
  Date of creation (simpler version): 7/20/94
 
- Declaration for CDFTarget, the default target to be used in the CDF
+ Declaration for DDF Target, the default target to be used in the DDF
  domain. 
+
+ If restructure is 1, auto-wormholization is performed.
+ This is an experimental facility that automatically creates SDF wormholes
+ for subsystems that consist entirely of SDF stars.  It is disabled by
+ default.
 
 ***********************************************************************/
 #ifndef _DDFTarget_h
@@ -62,6 +67,13 @@ protected:
 
 	// schedulePeriod for interface with a timed domain.
 	FloatState schedulePeriod;
+
+	// Specify whether or not to use the experimental automatic
+	// restructuring of DDF systems.  This facility identifies
+	// SDF subsystems and creates SDF wormholes for them.
+	IntState restructure;
+
+	StringState logFile;
 
 public:
 	DDFTarget();
