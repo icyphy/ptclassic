@@ -60,7 +60,6 @@ void BaseMultiTarget :: downLoadCode(int, Profile*) {}
 void BaseMultiTarget :: saveCommPattern() {}
 void BaseMultiTarget :: restoreCommPattern() {}
 void BaseMultiTarget :: clearCommPattern() {}
-ParNode* BaseMultiTarget :: backComm(ParNode*) { return 0;}
 
 // By default, assume zero communication time.
 int BaseMultiTarget :: scheduleComm(ParNode*,int when) { return when; }

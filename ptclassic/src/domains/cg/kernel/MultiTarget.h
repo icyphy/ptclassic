@@ -93,10 +93,6 @@ public:
 	// schedule communication link.
 	virtual int scheduleComm(ParNode*, int);
 
-	// find out a communication node which is scheduled right ahead of
-	// the given communication node.
-        virtual ParNode* backComm(ParNode*);
-
 protected:
 	IntState nprocs;
 	IntState inheritProcessors;
