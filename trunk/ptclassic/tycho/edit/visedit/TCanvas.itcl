@@ -368,10 +368,10 @@ body ::tycho::TCanvas::exportGif {filename} {
     # NOTE: -transparent color option should be added for the background.
     if [catch { ::tycho::tyexec xwdtopnm $fn1 | ppmtogif -interlace > \
             $filename 2> /dev/null} msg] {
-        ::tycho::rm $fn1
+        file delete $fn1
         error $msg
     }
-    ::tycho::rm $fn1
+    file delete $fn1
     # For some reason, the above leaves a non-readable file.    
     # chmod might not be present, but if this fails, we should not die
     catch {exec chmod +r $filename}
@@ -486,7 +486,7 @@ body ::tycho::TCanvas::print {} {
         set tmpFile [::tycho::tmpFileName typr .eps]
         exportEps $tmpFile $printOrient $printColor $printWidth
         eval ::tycho::tyexec $printCmd $tmpFile
-        ::tycho::rm $tmpFile
+        file delete $tmpFile
     }
 }
 

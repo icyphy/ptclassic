@@ -148,7 +148,7 @@ body ::tycho::EditPtlang::constructor {args} {
 #
 body ::tycho::EditPtlang::gendocBuffer {} {
     return [::tycho::EditProgram::gendocBufferInternal {set docfile $root.htm} \
-            { ::tycho::rm -f "$root.h" "$root.cc" "$root.htm" "$root.t"; \
+            {file delete -force "$root.h" "$root.cc" "$root.htm" "$root.t"; \
             exec ptlang $tail}] 
 
 }
@@ -214,7 +214,7 @@ body ::tycho::EditPtlang::parseNow {start stop} {
 body ::tycho::EditPtlang::gendoc {filename} {
     return [::tycho::EditProgram::gendocFileInternal $filename \
             {set docfile $root.htm} \
-            { ::tycho::rm -f "$root.h" "$root.cc" "$root.htm" "$root.t"; \
+            { file delete -force "$root.h" "$root.cc" "$root.htm" "$root.t"; \
             exec ptlang $tail}] 
             
 }

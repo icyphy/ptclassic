@@ -263,7 +263,7 @@ body ::tycho::Glimpse::updateGlimpseIndex {} {
 #
 body ::tycho::Glimpse::updateTychoDatabase {} {
     global TYCHO
-    ::tycho::rm -f [file join $TYCHO .glimpse_index]  \
+    file delete -force [file join $TYCHO .glimpse_index]  \
             [file join $TYCHO .glimpse_partitions] \
             [file join $TYCHO .glimpse_messages] \
             [file join $TYCHO .glimpse_statistics] \
