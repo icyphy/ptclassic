@@ -1,0 +1,157 @@
+.\" $Id$
+.H1 "Other Basic Information"
+.pp
+In this section we cover additional information which may be useful.
+More advanced topics will be covered in following sections.
+.H2 "Moving objects"
+.pp
+.IE "moving objects"
+Sometimes you may want to move objects around within your schematic.
+Use the VEM command \fIdrag-instance\fP to do this.
+Avoid the \fImove-instance\fP command because it can cause
+problems with instances that have actual parameters.  You can
+move objects as follows:
+.BU
+Select the objects that you want to move.
+.BU
+Using the right mouse button, drag the objects to the desired
+location.
+.BU
+Execute \fIdrag-instance\fP, capital ``M''.
+.IE drag-instance
+.H2 "Auto-forking"
+.pp
+.IE auto-forks
+The most often used domain in
+Ptolemy uses synchronous data flow graphs to represent algorithms.  The
+instances in Pigi schematics correspond to nodes in a data flow graph,
+while the connecting wires correspond to the arcs.  Each arc is
+connected to exactly one input and one output.  In order to connect the
+same output to two or more different inputs, a fork star is used.  A
+fork star takes a sample from its input and duplicates it on all its
+outputs.  In a schematic, whenever a net connects a single output to
+two or more inputs, Pigi will insert a fork star into the system
+automatically.  This is called \fBauto-forking\fP.  There is
+one restriction: auto-forking nets cannot contain any delays.  If
+you want to use a delay there, you must use an explicit fork;
+see the section on delays, below.
+.H2 "Using delays"
+.pp
+.IE delays
+In the SDF and DDF domains, delays can be placed on data flow arcs.
+A delay in these domains is not a star, but rather is a property
+of the arc connecting two stars.
+To use these delays in
+Pigi, the user places a delay icon on top of the wire connecting two
+instances.
+The delay icon is a green diamond in the SDF palette.
+You can specify the number of delays by executing
+\fIedit-params\fP with the cursor on top of the delay icon.
+.H2 "Dealing with errors"
+.pp
+IE errors
+Ptolemy is composed of several components of which Pigi is one.  When
+errors occur, it helps to know which component detected the error so
+that it can be corrected.
+.pp
+There are three main components involved in processing a schematic:
+VEM, Pigi, and the Ptolemy kernel.  Each component corresponds to one
+phase of processing:
+.ip \fBVEM\fP 1.5i
+.IE VEM
+Handles schematic entry and maintains net list information
+for the design.  VEM also handles all accesses to Oct.
+.ip \fBPigi\fP 1.5i
+Translates schematic information that VEM produces
+into the textual language which the Ptolemy kernel expects.
+.ip "\fBPtolemy kernel\fP" 1.5i
+.IE kernel
+Handles the execution
+of the design.
+.pp
+Errors can occur in any of these phases.  When correcting errors,
+it helps to know in which phase the error occurs.
+.pp
+When errors occur in VEM, VEM prints the error in the console window.
+For example, if you enter a point argument and execute \fIcreate\fP
+when the cursor is not over an instance, then VEM displays the message
+``Cannot place contact''.  Usually, VEM errors are easy to fix.  In
+this case, VEM expects the user to specify the instance to be created.
+.pp
+Pigi errors can occur when any of the Pigi commands are invoked.  When
+errors occur during compilation, Pigi usually highlights in red the
+object in the schematic associated with the error.  When this happens,
+you can execute the \fIclear-marks\fP command to clear the
+.IE clear-marks
+highlighting.  If such an error occurs and the reason for the error is
+not obvious, try deleting the indicated objects and redrawing them.
+.pp
+.H2 "Copying and moving designs"
+.pp
+.IE "copying facets"
+.IE "moving facets"
+In one of our examples, we used ``cp -r'' to make a copy of a facet.
+In general, however, copying entire designs this way does not work.
+For it to work in the general case, you must also change some data in
+the facets that you copy.  There is a program which is part of the
+Octtools distribution, called ``octmvlib'', that you can use to do
+this.  The procedure, however, requires you to be Oct knowledgeable and
+can sometimes be tricky.  Refer to the Octtools manual for detailed
+information on ``octmvlib'' [3].
+However, some simple examples will cover most cases.
+.H3 "Moving palettes, stars, galaxies, and universes"
+.pp
+Palettes, star icons, galaxies, and universes are stored as Oct facets.
+Special care is required when moving or copying Oct facets.
+First, as emphasized before, every Oct facet is stored as
+a directory tree, so a copy should use "cp -r".
+Next, keep in mind that there may be pointers to the moved
+object in other facets.  If you know where all these pointers
+might be, then moving facets is easy.  If you do not know where
+all the pointers are, then your only practical choice is to leave
+a symbolic link in place of the old location pointing to the new.
+.H3 "Moving stars"
+.pp
+Suppose you have developed a fantastic new star called alphaCentaur,
+and you wish to install it in a palette that is available for
+general use.  Since you have developed the star, you know
+where it is used.  The star icon itself is stored in two facets:
+.(c
+	alphaCentaur/schematic/contents;
+	alphaCentaur/schematic/interface;
+.)c
+First move the source code:
+.(c
+	mv alphaCentaur.cc destinationDirectory
+	mv alphaCentaur.h destinationDirectory
+.)c
+Then edit the makefile.template in that directory to reflect
+the new star.
+Then move the icon:
+.(c
+	mv alphaCentaur destinationDirectory
+.)c
+This moves the entire directory tree.
+Now is where things start to get a little tricky.
+You must change all references to the icon so that they
+reflect the new location.  Suppose you have a test universe
+called alphaTest that also contains a galaxy called alphaGalaxy.
+If both of these contain instances of alphaCentaur, then both
+must be modified.  They are modified as follows:
+.(c
+	octmvlib -O "oldpath" -N "newpath" alphaTest:schematic
+	octmvlib -O "oldpath" -N "newpath" alphaGalaxy:schematic
+.)c
+The utility octmvlib simply replaces the oldpath
+(something like "~fred/ptolemyWork/newstars") with the new path
+(something like "~ptolemy/src/domains/sdf/icons").
+This utility should be in your path, if you followed the setup instructions.
+If it is not, then your site does not have a full installation
+of Berkeley CAD framework.
+.pp
+Next, use octmvlib the same way
+to modify any palettes that reference the icon.
+For instance, you "user" palette is a likely candidate.
+If you miss a reference, Oct will issue an error message when it tries
+to open the offending palette.  
+This is a good time to run octmvlib.

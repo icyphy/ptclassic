@@ -1,0 +1,189 @@
+.\" $Id$
+.H1 "Using Galaxies"
+.pp
+.IE galaxies
+In this section we will explain how to create galaxies.  Galaxies allow
+you to partition your design into more manageable pieces and to re-use
+designs as components in other designs.
+.H2 "Creating a Galaxy"
+.pp
+Let's use the schematic we created in the last example to make a sine wave
+generator galaxy.
+.BU
+Instead of modifying our previous example, we will make a copy
+of it.
+If your ``example'' directory, type:
+.(c
+cp -r wave singen
+.)c
+The recursive copy, ``cp -r'', is necessary because Oct stores
+data using a hierarchical directory structure.
+Of course,
+if the
+facet singen exists already, you must remove it with ``rm -r''
+first before copying.
+.BU
+Start Pigi.
+.BU
+Use \fIopen-palette\fP (or ``O'') to open the
+``~ptolemy/lib/technology/ptolemy/system'' palette.
+The system palette contains input and output ports which can be instantiated
+into schematics just like stars.
+.BU
+In the ``singen:schematic'' window, delete the Xgraph star and
+the wire attached to it.
+The easiest way to do this is draw a box (click-drag) around the
+star and its input wire, press ``s'' to select these objects,
+and then press ``D'' to delete them.
+.BU
+Place an output port where the Xgraph star used to be and connect
+it to the output of the Sin star.
+The output port is the one with an arrowhead.
+.BU
+Name the output port ``out'':
+.LE
+Position the cursor over the new output port.
+.LE
+Type ``out'' as a text argument, including quotes.
+.LE
+Type ``c'' for \fIcreate\fP.
+Again, note that the \fIcreate\fP command has a different action
+than before.  It names output terminals when given a text argument.
+.BU
+We now have a galaxy.  The fact that a schematic has input
+or output ports distinguishes it as a galaxy.
+.H2 "Using a galaxy"
+.pp
+We have just created a galaxy that we would like to use in another
+design.  In order to do this, we need to create an icon for this galaxy
+which we will then instantiate in our other design.
+.BU
+Create an icon:
+.LE
+Place cursor in ``singen:schematic'' window.
+.LE
+Execute \fImake-schem-icon\fP in the Pigi ``Extend'' menu.
+.LE
+Fill in the dialog box as follows:
+.(c
+Palette name:  ./user
+.)c
+.LE
+Click ``OK'' and wait until \fImake-schem-icon\fP is done.
+.BU
+Open the palette called ``user'' using \fIopen-palette\fP.  The
+newly created galaxy icon should appear in this palette along with
+a bright yellow dot called a \fBcursor\fP.  A \fBcursor\fP
+distinguishes a palette from other types of facets and it determines
+where the next icon will be placed.
+.BU
+At this point, we have an icon for our sine wave generator
+galaxy.  The icon for this galaxy is stored in an interface facet
+called ``singen:schematic:interface''.  It is this icon facet
+which is instantiated in the ``user'' palette.  We can now
+use our sine generator galaxy simply by instantiating our
+icon into another schematic.
+.BU
+Use \fIopen-facet\fP to create a new facet with the cell
+name ``modulation''.
+.BU
+In the ``modulation:schematic'' window, create a universe which
+takes two ``singen'' galaxies, multiplies their outputs together,
+and then outputs the result using ``Xgraph''.
+Unless the ``sdf'' palette is already open, you'll probably
+need to open it to create instances of the ``Xgraph'' and
+``FloatProduct'' stars.
+.BU
+Now run the universe with an iteration of 100.  The output
+should appear as a squared sine wave, which is just an inverted
+sine wave of twice the frequency shifted up by 1/2.
+.pp
+So far, we have created a galaxy and used it in another
+universe.  But, we could also have used our galaxy within another
+galaxy.  In this way, large systems can be broken up into smaller
+more manageable pieces.
+.H2 "Galaxy Parameters"
+.pp
+.IE "galaxy parameters"
+One of the problems with the ``singen'' galaxy that we just created
+is that it generates sine waves with a fixed frequency.  We would
+like to make the frequency of the generator parameterizable.  That
+way, we could set the two ``singen'' galaxies in our ``modulation''
+universe to two different frequencies.
+.pp
+To make a galaxy parameterizable, we create \fBformal parameters\fP
+in the galaxy and then link the formal parameters to the
+\fBactual parameters\fP of the instances contained in the galaxy.  The terms,
+formal and actual parameters, are analogous to formal and actual
+parameters in any procedural programming language.  An example
+will make this clear.
+.BU
+Create formal parameters:
+.LE
+Place the cursor in the ``singen:schematic'' window but away
+from any instance,
+i.e., in the grey background of the facet.
+.LE
+Execute ``edit-params'' and fill in the dialog as follows:
+.(c
+New name:  freq
+New value:  0.0628
+.)c
+Then click on ``OK''.
+.LE
+We just created a new formal parameter called ``freq'' with a
+default value of ``0.0628''.  Additional parameters may be added or
+old ones changed simply by invoking ``edit-params'' again.  Notice
+that the action of ``edit-params'' changes depending on where the
+cursor is.  If the cursor is over an instance, it edits the actual
+parameters of that instance.  If no instance is under the cursor,
+it edits formal parameters.
+.BU
+Link formal parameters to actual parameters:
+.LE
+Place the cursor over the ramp icon in ``singen:schematic''.
+.LE
+Execute \fIedit-params\fP and fill in the dialog as follows:
+.(c
+start:  0.0
+increment:  freq
+.)c
+This allows the ``freq'' parameter of a singen instance to control
+the increment of the internal ramp star, thus controlling the
+output frequency.
+.BU
+Re-instantiate the ``singen'' icons:
+.LE
+Go back to ``modulation:schematic'' and delete all instances of
+``singen''.
+.LE
+Delete all wires that were connected to a ``singen'' instance.
+.LE
+Create new instances of ``singen'' to replace the ones we
+just deleted and replace all wiring.
+.LE
+It is necessary to re-instantiate a galaxy whenever the
+terminals or formal parameters of a galaxy change in order to
+be sure that consistency is maintained.
+.BU
+Change the frequency of one of the ``singen'' instances to
+``0.628'' by using \fIedit-params\fP.  This ``singen'' will be
+ten times the frequency of the other.
+.BU
+Run the universe with an iteration of 100.  The output should
+show the product of two sine waves with different frequencies.
+Don't forget to save the facets we just created.
+.BU
+This is a good place to try out your own examples.  In general,
+when you create new galaxies and universes that depend on each
+other, it is a good idea to keep them together in one directory.
+For example, all of the facets we have created so far are in the
+``example'' directory.
+.pp
+An important note: whenever the contents of a galaxy are changed so that
+the new definition has different I/O ports, the icon must be updated as
+well.  You can do this by calling \fImake-schem-icon\fP again to replace
+the old icon with a new one.  Furthermore, whenever you update the
+formal parameters of a galaxy or create a new icon for a galaxy, you
+must also re-instantiate the icon in all facets that refer to it.  This
+insures that data will be consistent.

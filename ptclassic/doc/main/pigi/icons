@@ -1,0 +1,174 @@
+.\" $Id$
+.H1 "Editing Icons"
+.pp
+Pigi automatically generates icons for stars and galaxies, respectively,
+when you invoke the make-star or
+make-schem-icon command from the Extend menu.
+Pigi puts the new icon in a user-specified palette,
+which by default is user.pal in the directory in which you
+started Pigi.
+More or less any Vem manipulations can be performed on this icon,
+but some guidelines should be followed.
+These icons
+have a generic symbol.  To change it,
+place the cursor over the icon and execute the
+\fIedit-icon\fP command in the Pigi menu.\**
+.IE edit-icon
+.(f
+You must have write
+permission on the facet to change the icon.
+.)f
+A new window containing
+the icon facet will appear.
+.pp
+Remember that icons are stored in interface facets and that the icons
+which appear in contents facets are really instances of icons.  These
+instances merely refer to the actual icon facet.  The \fIedit-icon\fP
+command opens a window into the actual icon.  Any changes made in this
+window will affect the appearance of all instances referring to the
+icon.
+.pp
+Recall also that icon facets store a different kind of data from other
+facets.  Icon facets contain information that tells VEM how to draw
+objects.  Hence, a different set of commands must be used to edit
+icons.  Whenever you edit an icon, VEM switches to a different mode
+called ``physical editing style''.  In this mode, we create objects
+such as lines, boxes, and polygons.  This is in contrast to ``schematic
+editing style'' which we used before to create instances and connect
+them together with wires.
+.pp
+A list of useful physical editing style commands and their
+key bindings are given in appendix B.
+.pp
+The commands that create geometry expect a layer argument.  The layer
+an object is attached to determines its color and its fill.  To specify
+a layer, place the cursor over an object attached to the desired layer
+before executing a command.  You can open a palette of layers with the
+\fIpalette\fP command.
+.pp
+Physical editing style also shares many commands with schematic editing
+style.  For example, \fIselect-objects\fP is active in both modes.
+.pp
+A few simple notes will greatly help.
+First note that when the icon window is opened, the snap
+is the same as for schematic icons, normally 25 units.
+This is far too coarse for most editing functions.
+The VEM Options:window-options command allows you to change this.
+A reasonable compromise is 5 units, unless you are going to
+try to create a very elaborate icon, in which case 1 unit is
+probably what you want.
+.pp
+Note that when editing an icon, the Vem menu is different than
+when you are editing a schematic.  This is because you are working
+with the physical view of a facet.  You can explore most of the Vem
+commands in the Edit and Selection Vem menus.
+We do not recommend, however, using the create-terminal command.
+Pigi should have already created all the terminals you will need.
+Most icons can be created
+by experimenting with the following operations:
+.ip 1)
+Select the default symbol (a star, galaxy, or cluster of galaxies),
+by drawing a box (drag the left mouse button)
+and typing ``s'' (or using Selection:select-objects in the
+menu).  You can unselect with ``u'' or CNTR-u.
+An alternative selection method is to place a point and type ``s''.
+This usually provokes a dialog box to resolve ambiguities.
+Delete whatever parts of the icon you don't want using ``D'' or
+Selection:delete-objects.  WARNING: Do not delete terminals!
+If you accidentally delete a terminal, the easiest action is
+begin again from scratch, asking Pigi to create a new icon.
+.ip 2)
+Bring up the Vem color palette by typing ``P'' (or System:palette in
+the menu).
+.ip 3)
+Draw a line by clicking the left button
+to place a point, and pushing and dragging
+the mouse button from the same point.  Then move the mouse to desired
+color in the palette and type ``c'' (or Edit:create-geometry from the menu).
+A line may consist of multiple line segments by just repeatedly pushing
+and dragging the mouse button.
+.ip 4)
+To create filled polygons, place points at the vertices,
+then type ``c'' on the appropriate solid color in the palette.
+.ip 5)
+To create a circle, place a point at the center, a point on
+periphery, and type ``C'' on the appropriate color.
+To create a filled circle, use a line segment instead of a pair
+of points.
+.ip 6)
+Objects can be moved by selecting them, dragging the mouse
+(using the right button)
+to produce an image of the object in the desired place, and typing ``m''.
+.ip 7)
+You may change (or delete) the label that Pigi automatically
+puts at the bottom of the icon.  To change it, select it and type ``E''
+(Edit:edit-label in the menu).  The resulting dialog box is self
+explanatory.  The standard Emacs-like editing commands apply.
+.ip 8)
+BE SURE TO SAVE YOUR ICON.  This can be done by typing ``S''
+(System:save-window in the Vem menu).  You can close your window
+with CNTR-d.  Note that Vem buffers the data in the window.
+You can close it and reopen it without saving it, as long
+as the session has not been interrupted.
+.pp
+By convention, the data types supported by a terminal are indicated
+by the color of the stem that connects the terminal to the body
+of the icon.  The following colors are currently in use:
+.nf
+.sp
+	ANYTYPE: black
+	FLOAT: blue
+	INT: yellow
+	COMPLEX: white
+.sp
+.fi
+The color is not currently set automatically by the icon generator,
+so to stick with this convention, you have to change the color
+manually.  To do this, select the stem, type ``"xxxxOutline"'',
+where xxxx is replaced by the color name (the quotes are necessary),
+and then type the single character ``l'' (or Edit:change-layer in the menu).
+Again, be sure to save the window.
+.pp
+One final editing operation is a little trickier: moving terminals.
+Pigi places terminals rather arbitrarily, since it knows nothing
+of their function.  You may wish to have a smaller icon
+than the default, in which case you have to move the input
+terminals closer to the output terminals.
+Or may wish to change the order of the terminals,
+or you may to have terminals on the top or bottom of the icon rather
+than right or left.  All of these can be done, but the
+following cautions must be observed:
+.ip 1)
+Do not move terminals of icons that have already been used
+in applications.  Unfortunately, if you do this, the block will
+become disconnected in all applications where it is used.
+If you are tempted to move terminals in a commonly used block,
+consider the tedium of finding all applications (belonging
+to all users) and reconnecting the block.
+ONLY MOVE TERMINALS ON BRAND NEW ICONS.
+.ip 2)
+You must respect the default snap of 25, and move terminals
+to a point that falls on a multiple of 25 units.
+Otherwise, connecting to the terminal will be very difficult.
+Normally, when the icon window opens, the grid lines are 10 units
+apart.  So you can place terminals any multiple of 2.5 grid lines
+away from the center.
+.ip 3)
+To orient terminals so they are aiming up or down, select
+the terminal, type ``t'' (or Selection:transform in the menu),
+then type ``m'' to move it.  Repeatedly typing ``t'' will continue
+to transform the terminal.
+.pp
+A little more detail on the Oct internals may be useful.
+For make-schem-icon, if the schematic is called xxx,
+then the icon itself is stored in xxx/schematic/interface;.
+The semicolon is part of the filename (this creates some
+interesting challenges when manipulating this file in Unix,
+since Unix interprets the semicolon as a command delimiter).
+The standard stars that are normally part of the Ptolemy distribution
+are stored in ~ptolemy/src/domains/xxx, where xxx is the domain
+name such as ``sdf'' or ``de''.
+The icons for the stars are stored in a subdirectory called icons,
+and the icons for demo systems in a subdirectory called demo.
+These are all accessible through the init.pal palette in ~ptolemy/demo.
+Refer to the Oct and Vem manuals for more information [2].
