@@ -76,7 +76,7 @@ MACH=`$(GNU_SRC)/gcc/config.guess`
 # hurt, either
 configure: $(GNU_OBJ)
 	(cd $(GNU_OBJ); \
-	$(GNU_SRC)/configure $(MACH) -v --srcdir=$(GNU_SRC) \
+	$(GNU_SRC)/configure $(MACH) --srcdir=$(GNU_SRC) \
 		--prefix=$(GNU_PREFIX) --exec-prefix=$(GNU_EXEC_PREFIX) )
 	-(cd $(GNU_OBJ)/make; ln -s $(GNU_SRC)/make/*.c .)
 	-(cd $(GNU_OBJ)/make/glob; ln -s $(GNU_SRC)/make/glob/*.h .)
@@ -129,7 +129,7 @@ hp_all: hp_gas_configure hp_gas_bin hp_gas_install hp_configure \
 
 hp_gas_configure: $(GNU_OBJ) $(GNU_OBJ)/hp
 	(cd $(GNU_OBJ)/hp; \
-	$(HP_GAS_SRC)/configure $(MACH) -v --srcdir=$(HP_GAS_SRC) \
+	$(HP_GAS_SRC)/configure $(MACH) --srcdir=$(HP_GAS_SRC) \
 		--prefix=$(GNU_PREFIX) --exec-prefix=$(GNU_EXEC_PREFIX) )
 	-(cd $(GNU_OBJ)/hp/gas; ln -s $(HP_GAS_SRC)/gas/*.c .)
 	-(cd $(GNU_OBJ)/hp/gas; ln -s $(HP_GAS_SRC)/gas/*.h .)
@@ -158,11 +158,11 @@ hp_configure: $(GNU_OBJ)
 	@echo "Configure everything, then go back and reconfigure gcc"
 	@echo "The top level configure does not pass things down properly"
 	(cd $(GNU_OBJ); \
-	$(GNU_SRC)/configure hppa1.1-hp-hpux -v --srcdir=$(GNU_SRC) \
+	$(GNU_SRC)/configure hppa1.1-hp-hpux --srcdir=$(GNU_SRC) \
 		--prefix=$(GNU_PREFIX) --exec-prefix=$(GNU_EXEC_PREFIX) --gas)
 	@echo "Now reconfigure gcc with -gas"
 	(cd $(GNU_OBJ)/gcc; \
-	$(GNU_SRC)/gcc/configure hppa1.1-hp-hpux -v --srcdir=$(GNU_SRC)/gcc \
+	$(GNU_SRC)/gcc/configure hppa1.1-hp-hpux --srcdir=$(GNU_SRC)/gcc \
 		--prefix=$(GNU_PREFIX) --exec-prefix=$(GNU_EXEC_PREFIX) --gas)
 	@echo "Make links for the source files.  Some makes are not smart"
 	@echo " enough to handle vpath"
@@ -180,7 +180,7 @@ hp_gas_pregcc_install:
 	(cd $(GNU_OBJ)/gcc; $(MAKE)  install-dir)
 	-ln -s $(GNU_EXEC_PREFIX)/bin/as  $(GNU_EXEC_PREFIX)/lib/gcc-lib/$(MACH)/$(GCC_VERSION)/as
 
-	
+
 # In gcc-2.5.8, collect2 is not automagically installed.  The symptom
 # of this is that ptcl says that there is no SDF domain, and that perhaps
 # constructors are not being called
