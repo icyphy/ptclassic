@@ -54,13 +54,6 @@ protected:
 	// delete all the "children" (for when they are created dynamically)
 	void deleteChildren();
 
-// method for copying states during cloning.  It is designed for use
-// by clone methods, and it assumes that the src argument has the same
-// state list as me.  The idea is to write clone methods as
-
-// MyTarget::clone() const { return (new MyTarget)->copyStates(*this);}
-	Target& copyStates(const Target&);
-
 	// Method returns a directory name for writing.
 	// If the directory does not exist, it attempts create it.
 	// Always returns a pointer to a string in new memory, or 0
@@ -96,9 +89,6 @@ public:
 	// always safe.  Redefine clone(), not cloneTarget!
 
 	Target* cloneTarget() const { return (Target*)clone();}
-
-	// IMPORTANT: when redefining clone() for a target with states,
-	// use copyStates as shown above.
 
 	// send a string to the Target
 	virtual void addCode (const char* code);

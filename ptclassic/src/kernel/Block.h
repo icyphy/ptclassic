@@ -87,6 +87,13 @@ public:
 
 	virtual Block* clone () const;
 
+	// method for copying states during cloning.  It is designed for use
+	// by clone methods, and it assumes that the src argument has the same
+	// state list as me.  
+	// This method will be protected after ptlang add this method when
+	// cloning a star.
+        Block& copyStates(const Block&);
+
 	// Method to print out a description of the block
 	// Note that this function flattens the profile of a galaxy,
 	// which may not always be wanted.  It produces a great deal

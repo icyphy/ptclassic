@@ -149,6 +149,16 @@ Block* Block::clone() const {
 	return 0;
 }
 
+Block& Block::copyStates(const Block& src) {
+	CBlockStateIter nexts(src);
+	BlockStateIter nextd(*this);
+	const State* srcStatePtr;
+	State *destStatePtr;
+	while ((srcStatePtr = nexts++) != 0 && (destStatePtr = nextd++) != 0)
+		destStatePtr->setValue(srcStatePtr->getInitValue());
+	return *this;
+}
+
 // This one matters only for galaxies... try the plasma type first;
 // if not set, use the defined type.
 
