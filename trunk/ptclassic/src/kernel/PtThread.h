@@ -49,9 +49,6 @@ public:
     // Register a thread.
     void add(PtThread*);
 
-    // Allow all threads to run.
-    virtual void run() = 0;
-
     // Delete (and terminate) all threads.
     virtual ~ThreadList();
 };
@@ -77,6 +74,9 @@ public:
 
     // Terminate the thread.
     virtual void terminate() = 0;
+
+    // Run all threads.  Do nothing in base class.
+    static void runAll() {};
 
 protected:
     // Main function of the thread.
