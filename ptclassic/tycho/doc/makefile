@@ -45,7 +45,6 @@ EXTRA_SRCS =	abbreviations.html \
 		bugs.html \
 		bugs0.1.html \
 		bugs0.1.1.html \
-		bugs0.1.2.html \
 		documentation.html \
 		index.html \
 		introduction.html \
@@ -55,7 +54,6 @@ EXTRA_SRCS =	abbreviations.html \
 		releasenotes.html \
 		releasenotes0.1.html \
 		releasenotes0.1.1.html \
-		releasenotes0.1.2.html \
 		running.html \
 		sponsors.html \
 		troubleshooting.html
