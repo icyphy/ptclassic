@@ -73,7 +73,6 @@ body ::tycho::Stack::pop {} {
     if {[llength $data] > 0} {
 	set retval [lindex $data 0]
 	set data [lreplace $data 0 0]
-puts "$this: popping $retval"
 	return $retval
     } {
 	return {}
@@ -86,5 +85,4 @@ puts "$this: popping $retval"
 #
 body ::tycho::Stack::push {value} {
     set data [linsert $data 0 $value]
-puts "$this: pushing $value"
 }
