@@ -47,7 +47,7 @@ proc _initialize {} {
 test Exec-1.1 {run make} {
     _initialize
     
-    .exec execProcess {make test_exec_msg} [file join $TYCHO kernel test]
+    .exec execProcess {make test_exec_msg} [file join $TYCHO kernel gui test]
 
     # Wait for return
     set status [.exec getStatusWait]
@@ -59,7 +59,7 @@ test Exec-1.1 {run make} {
     set removemake "make\[^\n\]*\n"
     regsub -all $removemake $results {} newresults
 
-    list $status $newresults $history 
+    list $status $newresults
 } {normal {
 This message is used to test the Exec class
 
