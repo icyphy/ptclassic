@@ -28,6 +28,18 @@ ENHANCEMENTS, OR MODIFICATIONS.
 						COPYRIGHTENDKEY
 */
 
+#include "tcl.h"
+
+/*
+ * The following variable is a special hack that is needed in order for
+ * Sun shared libraries to be used for Tcl.
+ */
+
+/*
+extern int matherr();
+int *tclDummyMathPtr = (int *) matherr;
+ */
+
 /*
  *----------------------------------------------------------------------
  *
@@ -46,10 +58,14 @@ ENHANCEMENTS, OR MODIFICATIONS.
  *
  *----------------------------------------------------------------------
  */
-#include "tcl.h"
 
 int
 Tcl_AppInit(Tcl_Interp *interp) {
+
+    if (Tcl_Init(interp) == TCL_ERROR) {
+	return TCL_ERROR;
+    }
+
     /*
      * Call the init procedures for included packages.  Each call should
      * look like this:
@@ -60,10 +76,6 @@ Tcl_AppInit(Tcl_Interp *interp) {
      *
      * where "Mod" is the name of the module.
      */
-
-    if (Tcl_Init(interp) == TCL_ERROR) {
-	return TCL_ERROR;
-    }
 
     /*
      * Call Tcl_CreateCommand for application-specific commands, if
@@ -77,6 +89,6 @@ Tcl_AppInit(Tcl_Interp *interp) {
      * then no user-specific startup file will be run under any conditions.
      */
 
-    tcl_RcFileName = "~/.ptclrc";
+    Tcl_SetVar(interp, "tcl_rcFileName", "~/.ptclrc", TCL_GLOBAL_ONLY);
     return TCL_OK;
 }
