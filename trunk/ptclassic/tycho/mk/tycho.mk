@@ -45,6 +45,9 @@ JAVAHOME = 	/opt/jdk1.1.5
 # JAVAHTMLDIR = 	/opt/SUNWjws/JWS/lib/html/java/api
 JAVAHTMLDIR = 	$(JAVAHOME)/docs/api
 
+# The home of the Java Foundation Classes (JFC) aka Swing
+JFCHOME = 	/opt/swing
+
 # The variables below are for the SunTest JavaScope code coverage tool
 # See http://www.suntest.com/JavaScope
 # The 'jsinstr' command, which instruments Java code.
