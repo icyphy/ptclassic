@@ -869,7 +869,7 @@ endif
 ifdef PTDSPLIB
 	CUSTOM_DIRS += $(CROOT)/src/utils/libptdsp
 	LIBS += -lptdsp
-	LIBFILES += $(LIBDIR)/libptdsp.a
+	LIBFILES += $(LIBDIR)/libptdsp.$(LIBSUFFIX)
 endif
 
 # External interface support - we need to expand libexttools, because it
