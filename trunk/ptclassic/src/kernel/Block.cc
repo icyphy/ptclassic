@@ -137,11 +137,11 @@ Block::portNames (const char** names, const char** types,
 	if (n > nMax) n = nMax;
 	CBlockPortIter next(*this);
 	for (int i = n; i>0; i--) {
-		const PortHole& p = *next++;
-		if (hidden(p)) continue;
-		*names++ = p.readName();
-		*types++ = p.myType();
-		*io++ = p.isItOutput();
+		const PortHole* p = next++;
+		if (hidden(*p)) continue;
+		*names++ = p->readName();
+		*types++ = p->myType();
+		*io++ = p->isItOutput();
 		count++;
 	}
 	return count;
@@ -156,11 +156,11 @@ Block::multiPortNames (const char** names, const char** types,
 	if (n > nMax) n = nMax;
 	CBlockMPHIter next(*this);
 	for (int i = n; i>0; i--) {
-		const MultiPortHole& p = *next++;
-		if (hidden(p)) continue;
-		*names++ = p.readName();
-		*types++ = p.myType();
-		*io++ = p.isItOutput();
+		const MultiPortHole* p = next++;
+		if (hidden(*p)) continue;
+		*names++ = p->readName();
+		*types++ = p->myType();
+		*io++ = p->isItOutput();
 		count++;
 	}
 	return count;
