@@ -36,10 +36,10 @@ ENHANCEMENTS, OR MODIFICATIONS.
  Declaration for DDFTarget, the default target to be used in the DDF
  domain.
 
- If restructure is 1, auto-wormholization is performed.
- This is an experimental facility that automatically creates SDF wormholes
- for subsystems that consist entirely of SDF stars.  It is disabled by
- default.
+ If useOldScheduler is non-zero, then the DDF scheduler from the 0.5.2 release
+ is used.  Otherwise, if restructure is non-zero, SDF stars are clustered
+ and scheduled ahead of time.  Otherwise, the DDFSimpleSched is used.
+ The latter is the default.
 
 ***********************************************************************/
 #ifdef __GNUG__
@@ -49,20 +49,27 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "DDFTarget.h"
 #include "DDFScheduler.h"
 #include "DDFClustSched.h"
+#include "DDFSimpleSched.h"
+#include "InfString.h"
 
 DDFTarget::DDFTarget() :
 Target("default-DDF","DataFlowStar","default DDF target")
 {
-	addState(logFile.setState("logFile",this,"",
-		"Log file to write to (none if empty)"));
-	addState(restructure.setState("restructure",this,"NO",
-		"perform auto-wormholization?"));
 	addState(maxBufferSize.setState("maxBufferSize",this,"1024",
 	    "capacity of an arc. For the runtime detection of unbounded arc."));
+	addState(schedulePeriod.setState("schedulePeriod",this,"0.0",
+	    "Time of one iteration, for interface with a timed domains."));
+	addState(runUntilDeadlock.setState("runUntilDeadlock",this,"NO",
+	    "In each iteration, run until the system deadlocks."));
+	addState(restructure.setState("restructure",this,"NO",
+	    "Cluster SDF actors and pre-schedule (experimental!)"));
+	addState(useOldScheduler.setState("useOldScheduler",this,"NO",
+	    "Use the DDF scheduler from the 0.5.2 release of Ptolemy."));
 	addState(numOverlapped.setState("numOverlapped",this,"1",
-	    "number of iteration cycles to be overlapped for execution."));
-	addState(schedulePeriod.setState("schedulePeriod",this,"10000.0",
-		"schedulePeriod for interface with a timed domains."));
+	    "Number of iteration cycles to be overlapped (used by old scheduler only)"));
+	addState(logFile.setState("logFile",this,"",
+            "Log file to write to (none if empty). Used only by the restructuring scheduler."));
+	LOG_NEW; firings = new TextTable;
 }
 
 Block* DDFTarget::makeNew() const {
@@ -71,10 +78,18 @@ Block* DDFTarget::makeNew() const {
 
 void DDFTarget::setup() {
 	DDFScheduler* s;
-	if (int(restructure)) {
-		LOG_NEW; s = new DDFClustSched(logFile);
+	if (int(useOldScheduler)) {
+	  LOG_NEW; s = new DDFScheduler;
 	} else {
-		LOG_NEW; s = new DDFScheduler;
+	  if (int(restructure)) {
+	    LOG_NEW; DDFClustSched* cs = new DDFClustSched(logFile);
+	    cs->deadlockIteration(int(runUntilDeadlock));
+	    s = cs;
+	  } else {
+	    LOG_NEW; DDFSimpleSched* ss = new DDFSimpleSched();
+	    ss->deadlockIteration(int(runUntilDeadlock));
+	    s = ss;
+	  }
 	}
 	setSched(s);
 
@@ -85,10 +100,31 @@ void DDFTarget::setup() {
 
 DDFTarget::~DDFTarget() { 
 	delSched();
+	LOG_DEL; delete firings;
 }
 
-StringList DDFTarget::hint (const char* blockname) {
-    const char* value = firings.lookup(blockname);
+// Redefine Block::clone method to copy the firings table.
+Block* DDFTarget::clone() const {
+    // Create a new DDFTarget object using the Block clone method
+    // (which in turn uses makeNew(), defined above).
+    DDFTarget* t = (DDFTarget*)Block::clone();
+
+    // Copy the contents of the firings table.
+    t->setFirings(*firings);
+
+    return (Block*) t;
+}
+
+void DDFTarget::setFirings(TextTable& tbl) {
+    LOG_DEL; delete firings;
+    LOG_NEW; firings = new TextTable(tbl);
+}
+
+StringList DDFTarget::pragma (const char* parentname,
+			      const char* blockname) const {
+    InfString compoundname;
+    compoundname << parentname << "." << blockname;
+    const char* value = firings->lookup(compoundname);
     if (value) {
 	StringList ret = "firingsPerIteration ";
 	ret += value;
@@ -98,22 +134,29 @@ StringList DDFTarget::hint (const char* blockname) {
     }
 }
 
-StringList DDFTarget::hint (const char* blockname, const char* hintname) {
+StringList DDFTarget::pragma (const char* parentname,
+			      const char* blockname,
+			      const char* pragmaname) const {
   const char* c;
-  if (strcmp(hintname,"firingsPerIteration") != 0 ||
-      !(c = firings.lookup(blockname))) {
+  InfString compoundname;
+  compoundname << parentname << "." << blockname;
+  if (strcmp(pragmaname,"firingsPerIteration") != 0 ||
+      !(c = firings->lookup(compoundname))) {
     c = "";
   }
   return c;
 }
 
-StringList DDFTarget::hint (const char* blockname,
-			    const char* hintname,
-			    const char* value) {
-    if (strcmp(hintname,"firingsPerIteration") == 0) {
-	firings.insert(blockname, value);
-    }
-    return "";
+StringList DDFTarget::pragma (const char* parentname,
+			      const char* blockname,
+			      const char* pragmaname,
+			      const char* value) {
+  InfString compoundname;
+  compoundname << parentname << "." << blockname;
+  if (strcmp(pragmaname,"firingsPerIteration") == 0) {
+    firings->insert(compoundname, value);
+  }
+  return "";
 }
 
 const char* DDFTarget::className() const { return "DDFTarget";}
