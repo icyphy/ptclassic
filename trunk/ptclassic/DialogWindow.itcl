@@ -426,6 +426,7 @@ body ::tycho::DialogWindow::new {class instance args} {
     uplevel #0 ::tycho::$class $instance $args
     $instance centerOnScreen
     $instance freezeWindowSize
+    update
 #    $instance focusin
     if [info exists commandResult($instance)] {
 	unset commandResult($instance)
@@ -472,10 +473,16 @@ body ::tycho::DialogWindow::newModal {class instance args} {
     }
     $instance centerOnScreen
     $instance freezeWindowSize
-    $instance focusin
+    update
     # Do not continue in this thread until the window is dismissed.
-    grab set $instance
-    tkwait window $instance
+    if [winfo exists $instance] {
+	grab set $instance
+	# FIXME: We would like to wait here for the window to be deleted,
+	# but this causes the X server to hang when tycho runs under
+	# Ptolemy.  Apparently, it interferes with the Rpc connection
+	# to vem.  Why?  Should we implement our own version of tkwait?
+	# tkwait window $instance
+    }
     set returnVal $commandResult($instance)
     unset commandResult($instance)
     return $returnVal
