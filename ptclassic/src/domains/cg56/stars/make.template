@@ -27,9 +27,11 @@ PL_SRCS= \
  CG56Abs.pl \
  CG56ACos.pl \
  CG56Add.pl \
+ CG56Allpass.pl \
  CG56ASin.pl \
  CG56BiQuad.pl \
  CG56BlackHole.pl \
+ CG56Comb.pl \
  CG56Commutator.pl \
  CG56Cos.pl \
  CG56DC.pl \
@@ -55,6 +57,7 @@ PL_SRCS= \
  CG56Peak.pl \
  CG56Pickmin.pl \
  CG56PickminVal.pl \
+ CG56Pulse.pl \
  CG56Quantizer.pl \
  CG56QuantizerInt.pl \
  CG56Quasar.pl \
