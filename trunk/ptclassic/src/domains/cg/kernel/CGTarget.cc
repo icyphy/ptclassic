@@ -354,6 +354,18 @@ void CGTarget :: writeFiring(Star& s,int) { // depth parameter ignored
 	s.run();
 }
 
+// generate loop initialization/end code.  Star is assumed to be a
+// DataFlowStar.
+void CGTarget :: genLoopInit(Star& s, int reps) {
+	DataFlowStar* ds = (DataFlowStar*)&s;
+	ds->beginLoop(reps);
+}
+
+void CGTarget :: genLoopEnd(Star& s) {
+	DataFlowStar* ds = (DataFlowStar*)&s;
+	ds->endLoop();
+}
+
 void CGTarget :: wrapup() {
 	display(myCode);
 }

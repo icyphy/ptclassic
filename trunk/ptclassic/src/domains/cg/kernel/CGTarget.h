@@ -114,7 +114,9 @@ public:
     // user name, target type.  This function uses the comment function.
     // Begin, end & continue are the same as the argument used in comment().
     // If headerComment begin==NULL, call comment(msg) w/o additional args.
-virtual StringList headerComment(const char* begin=NULL,const char* end="",const char*cont=NULL);
+    virtual StringList headerComment(const char* begin=NULL,
+				     const char* end="",
+				     const char* cont=NULL);
 
     // generate code for a firing.  The definition here simply
     // fires the star
@@ -123,6 +125,10 @@ virtual StringList headerComment(const char* begin=NULL,const char* end="",const
     // dummy beginIteration and endIteration
     /* virtual */ void beginIteration(int,int);
     /* virtual */ void endIteration(int,int);
+
+    // functions to call loop initialization code for stars.
+    /* virtual */ void genLoopInit(Star& s, int reps);
+    /* virtual */ void genLoopEnd(Star& s);
 
     // system call in destination directory.  If error is specified
     // & the system call is unsuccessful display the error message.
