@@ -6,25 +6,21 @@ defstar {
 	copyright	{ 1991 The Regents of the University of California }
 	location	{ SDF image library }
 	desc {
-Accept a GrayImage and run-length encode it.  All values less than
+Accept a GrayImage and run-length encode it. All values less than
 'thresh' are set to 0, to help improve compression.
 
 Runlengths are coded with a start symbol of '0' and then a run-length
-between 1 and 255.  Runs longer than 255 must be coded in separate
+between 1 and 255. Runs longer than 255 must be coded in separate
 pieces.
 	}
 
 	hinclude { "GrayImage.h", "Error.h" }
 
 // INPUT AND STATES.
-	input {
-		name { input }
-		type { packet }
-	}
-	output {
-		name { outData }
-		type { packet }
-	}
+	input { name { input } type { packet } }
+	output { name { outData } type { packet } }
+	output { name { compression } type { float } }
+
 	defstate {
 		name	{ Thresh }
 		type	{ int }
@@ -93,8 +89,6 @@ pieces.
 		Packet inPkt;
 		(input%0).getPacket(inPkt);
 		TYPE_CHECK(inPkt, "GrayImage");
-
-// Do processing and send out.
 		GrayImage* inImage = (GrayImage*) inPkt.writableCopy();
 		if (inImage->fragmented() || inImage->processed()) {
 			delete inImage;
@@ -102,7 +96,13 @@ pieces.
 					"Need unfragmented and unprocessed input image.");
 			return;
 		}
+
+// Do processing and send out.
 		doRunLen(inImage);
+		const float comprRatio = inImage->retFullSize() /
+				(inImage->retWidth() * inImage->retHeight());
+		compression%0 << comprRatio;
+
 		Packet outPkt(*inImage);
 		outData%0 << outPkt;
 	}
