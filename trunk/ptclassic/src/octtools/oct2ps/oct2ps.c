@@ -677,8 +677,9 @@ struct octLabel *oneLabel;
 
     printf("%%\n");
     printf("gsave\n");
+    /* the font is scaled down slightly here */
     printf("/Helvetica findfont %d scalefont setfont\n", 
-	oneLabel->textHeight);
+	irint(0.8*oneLabel->textHeight));
 
     printf("/maxwidth 0 def\n");
     for (idx = 0;  idx < daLen(lblInfo);  idx++) {
