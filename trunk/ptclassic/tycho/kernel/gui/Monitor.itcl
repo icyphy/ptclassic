@@ -52,7 +52,6 @@
 #     set win [::tycho::autoName .execExample]
 #     ::tycho::Monitor $win &#92
 #        -command {ls -al} -autostart 1 -autodestroy 1
-#     $win centerOnScreen
 # </pre></tcl>
 # If the make in the above example had returned an error, then the window
 # would not have been destroyed.
@@ -65,7 +64,6 @@
 # <tcl><pre>
 #   set win [::tycho::autoName .execExample]
 #   ::tycho::Monitor $win -command {ls -al} -autostart 1 -autodestroy 0
-#   $win centerOnScreen
 # </pre></tcl>
 #
 # The next set of examples show how to read in the input, parse, 
@@ -91,6 +89,7 @@
 # </pre></tcl>
 class ::tycho::Monitor {
     inherit ::tycho::Query ::tycho::Exec
+
     ###################################################################
     ####                            options                        ####
 
@@ -99,6 +98,9 @@ class ::tycho::Monitor {
 
     # If non-zero, start the subprocess automatically
     itk_option define -autostart autostart Autostart 0
+
+    # If modal, then just keep waiting
+    itk_option define -modal modal Modal 0
 
     # Command to be executed.
     itk_option define -command command Command "make"
@@ -112,6 +114,8 @@ class ::tycho::Monitor {
 
     ###################################################################
     ####                      public methods                       ####
+    
+    # similar to execProcess, except execute in the monitor.
     public method execProcessInMonitor {} {}
 
     # We want to make sure that only private function can write
@@ -133,8 +137,16 @@ class ::tycho::Monitor {
     ###################################################################
     ####                            public variables               ####
 
+    # Count the number of errors in this execution
     public variable errorCount 0
+
+    # Remember where the errors are located
     public variable errorList {}
+
+    ###################################################################
+    ####                           private variables               ####
+
+    # Variable to keep track so that the same error line isn't highlighted.
     private variable previousErrorLine -1
 }
 
@@ -161,6 +173,13 @@ configbody ::tycho::Monitor::autostart {
     } else {
         insert autoStart 1
     }
+}
+
+#######################################################################
+#### -modal configuration
+#
+configbody ::tycho::Monitor::modal {
+    # Current, nothing is done, this should be done outside the Monitor class.
 }
 
 #######################################################################
@@ -195,10 +214,6 @@ body ::tycho::Monitor::constructor {args} {
             {line dirToExecFrom {Directory to Exec from:} {}} \
             {check autoDestroy {Close window automatically:} 0} \
             {check autoStart {Start execution automatically:} 0}]
-    #{radio autoDestroy {Close window automatically:} {Yes No} No}\
-            #"radio autoStart {Start execution automatically:} {Yes No} No \
-            #-command \"$this saveSetting\""
-
 
     eval itk_initialize $args
 
@@ -266,6 +281,7 @@ body ::tycho::Monitor::constructor {args} {
     # If autostart is not equal to zero, then start the subprocess
     # This should be at the end of the constructor
     if {$itk_option(-autostart) == 1} {
+        $this centerOnScreen
         $this execProcessInMonitor
     }
 
@@ -294,6 +310,17 @@ body ::tycho::Monitor::destructor {} {
     catch {unset ::tycho::Monitor::$statusVariableName}
 }
 
+
+    ##################################################################
+    ##################################################################
+    ####                     public methods                       ####
+
+#######################################################################
+#### saveSetting
+# Called by each button binding. However, this should not be in the
+# preference, but rather, by the invocation of the constructor of Monitor.
+# This method currently does not do anything.
+#
 body ::tycho::Monitor::saveSetting {} {
     # Don't move it to preference.
 }
@@ -317,7 +344,7 @@ body ::tycho::Monitor::jumpNextError {} {
         jumpToLine $monitorLine $editorLine $fname
         incr errorCount
     } else {
-        error "No more error!"
+        tycho::inform "No more errors!"
     }
 }
 
@@ -335,19 +362,25 @@ body ::tycho::Monitor::jumpToLine {monitorLine editorLine fname} {
     set editorName [::tycho::File::openContext $fileToOpen]
     set editorName [string trim $editorName :]
 
-    # Jump to the line in editor
-    $editorName seeFragment "line $editorLine"
-
     # Jump to the line in the compile/exec widget
     set history $itk_component(history)
     if {[winfo exists $history]} {
         $history seeFragment "line $monitorLine"
     }
+
+    # Jump to the line in editor
+    $editorName seeFragment "line $editorLine"
 }
 
 
 #######################################################################
 #### insertLine
+# In the constructor, doEachLine is set as "$this insertLine $line" so that
+# during each input, this method will be called. This method is responsible
+# for updating the history.text widget interactively, as well as colorization
+# of the error and warning messages. Later on, this functionaility will
+# be moved to MonitorC and MonitorJava to handle different coloring and
+# interaction.
 #
 body ::tycho::Monitor::insertLine {line} {
     set text $itk_component(history).text
@@ -356,10 +389,12 @@ body ::tycho::Monitor::insertLine {line} {
     # Need to lock up the output of the executable
     $itk_component(history) configure -readonly 0
     # Just insert a regular line
-    #$itk_component(history) insertData "$line"
-    $text insert insert $line
+    $itk_component(history) insertData "$line"
+    #$text insert insert $line
+    $itk_component(history) center
+    $itk_component(history) configure -readonly 1
 
-    # Now, if we have to, modify the line.
+    # Now, if we have to, modify the line (ie. change color, etc)
     if {[regexp {([^:]+):([0-9]+): (.+)} $line tmp fname editorLine msg] \
             && $previousErrorLine!=$editorLine} {
         set previousErrorLine $editorLine
@@ -383,14 +418,13 @@ body ::tycho::Monitor::insertLine {line} {
                 "$this jumpToLine $monitorLine $editorLine $fname;\
                 $this setErrorCount $errorCount"
     }
-
-
-    $itk_component(history) center
-    $itk_component(history) configure -readonly 1
 }
 
 #######################################################################
 #### setErrorCount
+# This method is called by each click on the error/warning lines, so
+# that when NextError button is pressed, it'll know exactly where to
+# jump to.
 #
 body ::tycho::Monitor::setErrorCount {count} {
     set errorCount $count
@@ -399,13 +433,11 @@ body ::tycho::Monitor::setErrorCount {count} {
 
 #######################################################################
 #### execProcessInMonitor
+# This simply calls the non-graphical Exec's execProcess. Also, it
+# reads the autoDestroy flag and determins whether this widget should
+# automatically exit upon successful execution.
 #
 body ::tycho::Monitor::execProcessInMonitor {} {
-    # Initially we don't have error
-    set errorCount 0
-    set errorList {}
-    set previousErrorLine -1
-
     # Clear both history logs before executing
     $itk_component(history) configure -readonly 0
     $itk_component(history) clear
@@ -421,10 +453,18 @@ body ::tycho::Monitor::execProcessInMonitor {} {
 	    # Wrap this in a catch in case we already destroyed the
 	    # parent window, which will cause this window to be destroyed.
 	    # see tycho/editors/textedit/test/testEditC.itcl
-            after 2000 "catch {delete object $this}"
+            after 2500 "catch {delete object $this}"
         } else {
             insertLine "<<NOTE: exit status is [$this getStatusWait],\
                     will not autodestroy.>>"
         }
     }
+    # Make sure everything's done, then reset the error count
+    $this getStatusWait
+    set errorCount 0
 }
+
+    ##################################################################
+    ##################################################################
+    ####                   protected methods                      ####
+
