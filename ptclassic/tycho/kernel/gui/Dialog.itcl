@@ -400,16 +400,25 @@ body ::tycho::Dialog::wait {instance {autoraise 1}} {
         # This is very evil, but if we are running the test suite
         # then we need to return a value here, so that we can
 	# make the tests press buttons and stuff
-        global TY_TESTING TY_TEST_SCRIPT
+        global TY_TESTING TY_TEST_SCRIPT TY_TEST_SERIES
 	if { [info exists TY_TESTING] && $TY_TESTING == 1 } {
-            if { [info exists TY_TEST_SCRIPT] } {
+            if [::info exists TY_TEST_SCRIPT] {
                 regsub -all %0 $TY_TEST_SCRIPT $instance temp_script
+		after 1000
+                uplevel #0 $temp_script
+            } elseif [::info exists TY_TEST_SERIES] {
+                set temp_script [lindex $TY_TEST_SERIES 0]
+                set TY_TEST_SERIES [lreplace $TY_TEST_SERIES 0 0]
+                if { $TY_TEST_SERIES == "" } {
+                    unset TY_TEST_SERIES
+                }
+                regsub -all %0 $temp_script $instance temp_script
 		after 1000
                 uplevel #0 $temp_script
             } else {
                 return $instance
             }
-	} else {
+        } else {
 	    # Normally, wait for the window to be deleted
 	    # and then return.
 	    tkwait window $instance
