@@ -107,7 +107,7 @@ You can also create instances of it directly.
 The actions taken in response to the <CODE>OK</CODE> and
 <CODE>Cancel</CODE> buttons are given by the 
 <a name="okcommand option"><CODE>-okcommand</CODE></a> and 
-<a name="cancelcommand option"><CODE>-cancelcommand</CODE></a> options.
+<a name="cancelcommand option "><CODE>-cancelcommand</CODE></a> options.
 By default, both buttons destroy the object.  In addition, if you use
 the class as a modal dialog using <code>wait</code>, then the <CODE>OK</CODE>
 button returns the user responses as a list and the <CODE>Cancel</CODE> button
@@ -196,7 +196,7 @@ In simple queries, the <CODE>Tab</CODE> key moves the focus
 from one query entry to the next.
 When there are multi-line queries in a <code>Query</code> object,
 then instead of <CODE>Tab</CODE>, <CODE>C-Tab</CODE> moves the insertion
-cursor from query to query.  Within a radio button, either <CODE></CODE> or
+cursor from query to query.  Within a radio button, 
 <CODE>C-Tab</CODE> moves the focus
 from button to button.  The <CODE>Space</CODE> key selects the current button.
 <p>
@@ -246,7 +246,7 @@ method:
 <li> <CODE>line <I>tag label default</I></CODE>
 <li> <CODE>lines <I>tag label default height</I></CODE>
 <li> <CODE>radio <I>tag label possibilities default</I></CODE>
-<li> <CODE>mediated <CODE>tag label default command</CODE></CODE>
+<li> <CODE>mediated <I>tag label default command</I></CODE>
 </menu>
 In addition, all except <CODE>choice</CODE> can accept any number of
 additional arguments. These arguments are passed to the widget that
