@@ -42,6 +42,7 @@ include $(CONFIG)
 EXTRA_SRCS =	\
 	ColorBrowserHelp.html \
 	EditHelp.html \
+	ExecHelp.html \
 	FileBrowserHelp.html \
 	FileHelp.html \
 	FontDialogHelp.html \
