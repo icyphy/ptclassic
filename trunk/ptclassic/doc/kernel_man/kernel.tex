@@ -6533,19 +6533,16 @@ These classes provide simple means of interacting with the operating
 system's clock -- sleeping until a specified time, timing events, etc.
 They may be replaced with something more general.
 
-class TimeVal represents a time interval to microsecond precision.
-There are three constructors:
+Class TimeVal represents a time interval to microsecond precision.
+There are two constructors:
 
 \begin{example}
 TimeVal();
-TimeVal(long \var{sec}, long \var{usec});
-TimeVal(double \var{length});
+TimeVal(double \var{seconds});
 \end{example}
 
-The first represents a time interval of zero.  The second represents a
-time interval with the specified number of seconds and microseconds.
-In the third case, the \var{length} argument is rounded to the nearest
-multiple of one millionth.
+The first represents a time interval of zero.  In the second case, the
+\var{seconds} argument is rounded to the nearest microsecond.
 
 These classes rely on features found in BSD-based Unix systems and newer
 System V Unix systems.  Older System V systems tend not to provide the
@@ -6566,7 +6563,14 @@ TimeVal& operator -=(const TimeVal& \var{arg});
 
 These operators do simple addition and subtraction of TimeVals.
 
-class Clock provides a simple interface to the system clock for
+\begin{example}
+int operator >(const TimeVal& \var{arg}) const;
+int operator <(const TimeVal& \var{arg}) const;
+\end{example}
+
+These operators do simple comparisons of TimeVals.
+
+Class Clock provides a simple interface to the system clock for
 measurement of actual elapsed time.  It has an internal TimeVal
 field that represents the starting time of a time interval.
 
