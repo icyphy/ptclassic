@@ -26,9 +26,7 @@ $Id$
 #include "StringList.h"
 #include "Interpreter.h"
 #include <ctype.h>
-#ifndef O_RDONLY
-#define O_RDONLY 0
-#endif
+#include "streamCompat.h"
 
 // choose compiler to use
 #ifdef __GNUG__
@@ -140,9 +138,9 @@ static int compile (const char* name, const char* idomain, const char* srcDir,
 {
 	char domain[32], cmd[512];
 	strcpyLC (domain, idomain);
-	sprintf (cmd, "cd %s; %s %s -c -I %s/src/domains/%s/kernel "
-		 "-I %s/src/domains/%s/stars -I %s/src/kernel "
-		 "-I %s %s/%s%s.cc >& %s", objDir, CPLUSPLUS,
+	sprintf (cmd, "cd %s; %s %s -c -I%s/src/domains/%s/kernel "
+		 "-I%s/src/domains/%s/stars -I%s/src/kernel "
+		 "-I%s %s/%s%s.cc >& %s", objDir, CPLUSPLUS,
 		 EXTRAOPTS, ptolemyRoot, domain,
 		 ptolemyRoot, domain, ptolemyRoot,
 		 srcDir, srcDir, idomain, name, tmpFileName);
@@ -177,7 +175,8 @@ static char* genObjDir (const char* src) {
 extern "C" void
 KcLoadInit (const char* argv0) {
 	ptolemyRoot = getenv ("PTOLEMY");
-	if (ptolemyRoot == 0) ptolemyRoot = "~ptolemy";
+	if (ptolemyRoot == 0)
+		ptolemyRoot = hashstring(expandPathName("~ptolemy"));
 	tmpFileName = tempFileName();
 	Linker::init (argv0);
 }
