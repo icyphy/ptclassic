@@ -168,7 +168,8 @@ POct::POct(Tcl_Interp* i)
         OldRandomSeed = 1;   
 	// for ptkSetMkStar
 	MkStarName = "";
-	MkStarDomain = DEFAULT_DOMAIN;
+	// g++-2.6.1 requires the (char *) in the next line
+	MkStarDomain = (char *)DEFAULT_DOMAIN;
 	MkStarDir = "NIL";
 	MkStarPalette = "./user.pal";
         // FIXME:  Add following line back for MkSchemIcon state
