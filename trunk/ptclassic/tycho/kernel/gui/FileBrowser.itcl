@@ -245,7 +245,7 @@ body ::tycho::FileBrowser::help {} {
 body ::tycho::FileBrowser::mkdir {} {
     set dirname [safeEval ::tycho::queryinfo "Directory name" "$localCWD/" 80]
     if {$dirname != {}} {
-	::tycho::mkdir $dirname
+	file mkdir $dirname
 	processItem $dirname
     }
 }
