@@ -32,6 +32,8 @@ PL_SRCS = \
 PLSRC = $(PL_SRCS:.pl=.cc)
 
 SRCS=CGCMultiTarget.cc CGCDDFTarget.cc CGCBDFTarget.cc $(PLSRC) 
+EXTRA_SRCS = $(PL_SRCS)
+
 HDRS=$(SRCS:.cc=.h)
 
 OBJS = $(SRCS:.cc=.o)
