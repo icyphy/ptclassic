@@ -63,6 +63,12 @@ defined below, and are also declared in ptkImage.h.
 /* We must include ptkImage.h last because it pulls in ptk.h.  See ptk.h. */
 #include "ptkImage.h"
 
+/* FIXME: Define the number of bits per byte */
+/* NBBY defined in <sys/param.h> for Solaris/HP and <sys/types.h> for Sun OS */
+#ifndef NBBY
+#define NBBY 8
+#endif
+
 #if (TK_MAJOR_VERSION == 4 && TK_MINOR_VERSION >= 1) || TK_MAJOR_VERSION > 4
 
 /* From Tk's generic/tkInt.h */
