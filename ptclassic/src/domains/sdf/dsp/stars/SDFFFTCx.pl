@@ -131,10 +131,6 @@ static void fft_rif(double *data, int nn, int isign)
 	}
 }
 
-	const int defSize = 256;
-	const char defOrder[] = "8";
-	const char defSizeStr[] = "256";
-
 	}	// end of code block for inclusion in .cc file
 
 	constructor {
