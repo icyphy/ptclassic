@@ -42,7 +42,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "TITarget.h"
 
 DSKC50Target :: DSKC50Target(const char* nam, const char* desc) :
-	C50Target(nam,desc),TITarget(nam,desc,"C50Star") {
+	C50Target(nam,desc),TITarget(nam,desc,"C50Star","C50") {
 	initStates();
 	addStream("shellCmds",&shellCmds);
 }
