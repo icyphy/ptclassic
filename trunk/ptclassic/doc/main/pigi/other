@@ -470,15 +470,14 @@ called alphaTest that also contains a galaxy called alphaGalaxy.
 If both of these contain instances of alphaCentaur, then both
 must be modified.  They are modified as follows:
 .(c
-	octmvlib -O \fIoldpath\fP -N \fInewpath\fP alphaTest:schematic
-	octmvlib -O \fIoldpath\fP -N \fInewpath\fP alphaGalaxy:schematic
+	octmvlib -O "\fIoldpath\fP" -N "\fInewpath\fP" alphaTest:schematic
+	octmvlib -O "\fIoldpath\fP" -N "\fInewpath\fP" alphaGalaxy:schematic
 .)c
 The utility octmvlib simply replaces the oldpath
-(something like ``~fred/ptolemyWork/newstars'') with the new path
-(something like ``~ptolemy/src/domains/sdf/icons'').
-This utility should be in your path, if you followed the setup instructions.
-If it is not, then your site does not have a full installation
-of the Berkeley CAD framework.
+(something like "~fred/ptolemyWork/newstars") with the new path
+(something like "~ptolemy/src/domains/sdf/icons").
+The quotation marks are required.
+The octmvlib utility should be in your path, if you followed the setup instructions.
 .pp
 Next, use octmvlib the same way
 to modify any palettes that reference the icon.
