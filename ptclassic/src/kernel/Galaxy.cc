@@ -19,7 +19,7 @@ $Id$
 
 	5/29/90 - J. Buck
 	Change operator StringList to printVerbose.  Galaxy::connect
-	is gone; it's now done by GenericPort class instead.
+	is gone; it is now done by GenericPort class instead.
 
 Methods for class Galaxy
 ***************************************************************************/
@@ -77,21 +77,37 @@ Galaxy :: printVerbose () {
 	return out;
 }
 
+
+        ////////////////////////////////////
+        // initialize()
+        ////////////////////////////////////
+
+// Initialize myself and all sub-blocks.  Note that
+// Block::initialize calls start().
+
+void Galaxy :: initialize() {
+	Block::initialize();
+	for(int i=blocks.size(); i>0; i--)
+		blocks++.initialize();
+}
+
         ////////////////////////////////////
         // initState()
         ////////////////////////////////////
 
+// like initialize but for states only.
+
 void Galaxy :: initState() {
         Block::initState();
-        for(int i=blocks.size(); i>0; i--) {
-                Block& b = blocks++;
-                b.initState();}
+        for(int i=blocks.size(); i>0; i--)
+		blocks++.initState();
 }
 
         ////////////////////////////////////
         // Block* blockWithName()
         ////////////////////////////////////
 
+// return ptr to sub-block with given name, NULL if not found
 Block *
 BlockList::blockWithName (const char* ident) {
 	Block *p;
