@@ -737,6 +737,10 @@ proc ptkGantt_MakeLabel {universe period min prcent opt {runtime 0}} {
     set prcent [format %.5f $prcent]
     set opt [format %.5f $opt]
     $chart.label configure \
+	    -text [format "Period = %d, busy time = %.2f%%" \
+	    $period $prcent]
+
+#    $chart.label configure \
 	    -text [format "Period = %d (vs. PtlgMin %d), busy time =\
 	    %.2f%% (vs. max %.2f%%)" \
 	    $period $min $prcent $opt]
