@@ -15,6 +15,7 @@ Programmer: E. Goei, J. Buck
 #include "StringList.h"
 #include "miscFuncs.h"
 #include "Domain.h"
+#include "Architecture.h"
 
 static InterpUniverse *universe = NULL;  // Universe to execute
 static InterpGalaxy *currentGalaxy = NULL;  // current galaxy to make things in
@@ -538,4 +539,26 @@ KcNodeConnect (const char* inst, const char* term, const char* node) {
  	LOG << "\t(nodeconnect (" << inst << " \"" << term << "\") " <<
 		node << ")\n";
 	return currentGalaxy->nodeConnect(inst, term, node);
+}
+
+/* 1/28/91, by eal
+Return the number of architectures supported by a domain
+*/
+extern "C" int
+numberOfArchs(char* domainName, int indices[]) {
+	int count = 0;
+	for(int i = 0; i < Architecture::numberOfArchs(); i++) {
+	    if((Architecture::nthArch(i))->scheduler->
+			isDomainSupported(domainName))
+		indices[count++]=i;
+	}
+	return count;
+}
+
+/* 1/28/91, by eal
+Return the name of the nth architecture in the list of known architectures
+*/
+extern "C" char*
+nthArchName(int n) {
+        return (char*) Architecture::nthArchName(n);
 }
