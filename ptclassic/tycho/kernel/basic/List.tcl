@@ -38,178 +38,35 @@
 # Common list utility functions.
 #
 # Many of these are modelled after functions found in functional
-# languages.
-#
+# languages. There are a bunch of general utility functions, such
+# as chopping lists up and combining in various ways, functions
+# for set manipulation, and "higher-order" functions.  The
+# script argument to the higher-order functions is a
+# specially-constructed script as described for the apply{}
+# proc -- I refer to these as "function-scripts."
 
 
-## lhead list
-#
-# Return the first item in the list, or the item itself if it is not a 
-# list.
-# 
-# Return: Return the first item in the list, or the item itself if it is not a 
-# list.
-#
-proc lhead {list} {
-    return [lindex $list 0]
-}
 
 
-## ltail list
+## lchop list n
 #
-# Return a list composed of all elements in the supplied list, except the 
-# first item. 
-# 
-# Return: Return a list composed of all elements in the supplied list, 
-# except the first item.       
+# Split a list into a list of sub-lists, each sub-list containing
+# _n_ consecutive elements of the input list. If the length of
+# the list is not evenly divded by _n_, then the final incomplete
+# sublist is discarded. For example,
 #
-# Note: ltail{} requires that the list contain at least one
-# element. Use lnull{} to check this before calling if you're
-# not sure that this is the case. _This is a deliberate choice,
-# not a bug_.
+#     lchop {1 2 3 4 5 6 7} 3
 #
-proc ltail {list} {
-    return [lreplace $list 0 0]
-}
-
-
-## llast, linit list
+# returns {{1 2 3} {4 5 6}}.
 #
-# Take the last element of a list, end everything but the last
-# element.
-#
-# Note: linit{} requires that the list contain at least one
-# element. Use lnull{} to check this before calling if you're
-# not sure that this is the case. _This is a deliberate choice,
-# not a bug._
-#
-proc llast {list} {
-    return [lindex $list end]
-}
-
-proc linit {list} {
-    return [lreplace $list end end]
-}
-
-
-## lnull list
-#
-# Test for a null list (or element). Written the way it is
-# because a) `==' cannot be used if the list starts with a number and b
-# llength is not so good because it traverses the whole list.
-#
-# The second case checks for the list being null but indicated
-# by empty braces. I'm confused as to why I need this...
-#
-proc lnull {list} {
-    return [expr (! [string match "?*" $list]) \
-	         || [string match "{}" $list]]
-}
-
-
-## lequal list1 list2
-#
-# Test if two lists are equal. This tests individual elements
-# of the list, rather than just testing the two strings representing
-# the lists. To see what I mean, note that
-#
-#     puts [expr {{1 2} == { 1 2}}]
-#
-# returns 0, whereas
-#
-#     lequal {1 2} { 1 2}
-#
-# returns 1.
-#
-proc lequal {list1 list2} {
-    if { [llength $list1] != [llength $list2] } {
-	return 0
-    }
-
-    set i 0
-    foreach x $list1 {
-	if { $x != [lindex $list2 $i] } {
-	    return 0
-	}
-
-	incr i
-    }
-    return 1
-}
-
-
-## ltake, ldrop list n
-#
-# Take or drop list elements.
-#
-proc ltake {list n} {
-    return [lrange $list 0 [expr $n - 1]]
-}
-
-proc ldrop {list n} {
-    return [lrange $list $n end]
-}
-
-
-## lsplit list n
-#
-# Split a list at the specified index. This is equivalent to
-# performing a take{} and a drop{}. For example,
-#
-#     lsplit {1 2 3 4} 2
-#
-# returns {{1 2} {3 4}}.
-#
-# Note: You cannot reliably use lsplit{} to split a list into
-# its head and tail. *lsplit {1 2 3 4} 1* works, because the
-# elements are not lists, but *lsplit {{1 2} {3 4}} 1* is not
-# the same as *[list [lhead $l] [ltail $l]]* where
-# l = {{1 2} {3 4}}. Use behead{}.
-#
-proc lsplit {list n} {
-    if { $n <= 0 } {
-	return [list {} $list]
-    } else {
-	incr n -1
-	return [list \
-		[lrange $list 0 $n] \
-		[lreplace $list 0 $n]]
-    }
-}
-
-
-## lreverse list
-#
-# Reverse a list.
-#
-proc lreverse {list} {
+proc lchop {list n} {
     set result {}
-    foreach i $list {
-	set result [concat [list $i] $result]
+
+    while { [llength $list] >= $n } {
+	lappend result [ltake $list $n]
+	set list [ldrop $list $n]
     }
     return $result
-}
-
-
-## ldropUntil list item
-#
-# Drop list elements until the given value, _item_ is found. The
-# returned list starts with _item_. For example,
-#
-#    ldropUntil {1 2 3 4} 3
-#
-# returns {3 4}. If the item is not in the list, the empty
-# list is returned.
-#
-proc ldropUntil {list item} {
-    set index [lsearch -exact $list $item]
-    if { $index == -1 } {
-	return {}
-    } elseif { $index == 0 } {
-	return $list
-    } else {
-	return [lrange $list $index end]
-    }
 }
 
 
@@ -224,6 +81,39 @@ proc lcopy {n item} {
 	incr n -1
     }
     return $result
+}
+
+
+## ldelete list item
+#
+# Remove an item from a list
+#
+proc ldelete {list item} {
+    set i [lsearch -exact $list $item]
+
+    if { $i != -1 } {
+	return [lreplace $list $i $i]
+    }
+
+    return $list
+}
+
+
+## ldisjoint l1 l2
+#
+# Return true if l1 and l2 are disjoint -- that is, their
+# intersection is null.
+#
+proc ldisjoint {l1 l2} {
+    set result {}
+
+    foreach i $l1 {
+	if {[lsearch -exact $l2 $i] != -1} {
+	    return 0
+	}
+    }
+
+    return 1
 }
 
 
@@ -267,127 +157,198 @@ proc ldistr {list item} {
 }
 
 
-## lchop list n
+## ldrop list n
 #
-# Split a list into a list of sub-lists, each sub-list containing
-# _n_ consecutive elements of the input list. If the length of
-# the list is not evenly divded by _n_, then the final incomplete
-# sublist is discarded. For example,
+# Drop _n_ list elements.
 #
-#     lchop {1 2 3 4 5 6 7} 3
-#
-# returns {{1 2 3} {4 5 6}}.
-#
-proc lchop {list n} {
-    set result {}
-
-    while { [llength $list] >= $n } {
-	lappend result [ltake $list $n]
-	set list [ldrop $list $n]
-    }
-    return $result
+proc ldrop {list n} {
+    return [lrange $list $n end]
 }
 
 
-## lpairs list
+## ldropUntil list item
 #
-# Split a list into a list of pairs, each pair containing two
-# consecutive elements of the input list. If the list contains
-# an odd number of elements, the last element is discarded.
-# For example,
+# Drop list elements until the given value, _item_ is found. The
+# returned list starts with _item_. For example,
 #
-#     lpairs {1 2 3 4 5 6 7}
+#    ldropUntil {1 2 3 4} 3
 #
-# returns {{1 2} {3 4} {5 6}}.
+# returns {3 4}. If the item is not in the list, the empty
+# list is returned.
 #
-# The test for odd-length list is an optimization: it allows the
-# loop body to be coded in a slightly faster manner.
-#
-proc lpairs {list} {
-    if { [expr [llength $list]] % 2 != 0 } {
-	set list [lreplace $list end end]
+proc ldropUntil {list item} {
+    set index [lsearch -exact $list $item]
+    if { $index == -1 } {
+	return {}
+    } elseif { $index == 0 } {
+	return $list
+    } else {
+	return [lrange $list $index end]
     }
-
-    set result {}
-    while { $list != "" } {
-	lappend result [list [lindex $list 0] [lindex $list 1]]
-	set list [lreplace $list 0 1]
-    }
-    return $result
 }
 
 
-## zip list list [{list}]
+## lequal list1 list2
 #
-# ``Zip'' two or more lists into a list of sub-lists. If the lists
-# are not all the same length, then the returned list is only as
-# long as the shortest list. For example,
+# Test if two lists are equal. This tests individual elements
+# of the list, rather than just testing the two strings representing
+# the lists. To see what I mean, note that
 #
-#     zip {1 2 3 4} {5 6 7}
+#     puts [expr {{1 2} == { 1 2}}]
 #
-# returns {{1 5} {2 6} {3 7}}.
+# returns 0, whereas
 #
-# Note that zip is almost its own inverse:
+#     lequal {1 2} { 1 2}
 #
-#     zip {1 5} {2 6} {3 7}
+# returns 1.
 #
-# returns {{1 2 3} {5 6 7}}. Use ltranspose{} for proper inverses.
-#
-proc zip {l1 l2 args} {
-
-    set result {}
-    while { $l1 != "" && $l2 != "" } {
-	lappend result [list [lindex $l1 0] [lindex $l2 0]]
-	
-	set l1 [lreplace $l1 0 0]
-	set l2 [lreplace $l2 0 0]
+proc lequal {list1 list2} {
+    if { [llength $list1] != [llength $list2] } {
+	return 0
     }
 
-    while { $args != "" } {
-	behead list args
-
-	set temp {}
-	while { $result != "" && $list != "" } {
-	    lappend temp [concat [lindex $result 0] [list [lindex $list 0]]]
-
-	    set result [lreplace $result 0 0]
-	    set list   [lreplace $list   0 0]
+    set i 0
+    foreach x $list1 {
+	if { $x != [lindex $list2 $i] } {
+	    return 0
 	}
-	set result $temp
+
+	incr i
+    }
+    return 1
+}
+
+
+## lfoldl init list script
+#
+# Fold a list from left to right.
+#
+proc lfoldl {init list script} {
+    set result $init
+    foreach x $list {
+	set result [uplevel apply [list $script] [list $result] [list $x]]
     }
     return $result
 }
 
 
-## ltranspose listlist
+## lfoldr init list script
 #
-# Transpose a list of lists. If each sub-list is not the same length,
-# then the result list is only as long as the shortest sub-list.
+# Fold a list from right to left.
 #
-#     ltranspose {{1 2 3 4} {5 6 7}}
-#
-# returns {{1 5} {2 6} {3 7}}.
-#
-# Caveats: this procedure may behave a little strangely if
-# given a list with only one sub-list, or a list with no
-# sub-lists (as in {{1 2 3}} or {1 2 3}).
-#
-proc ltranspose {listlist} {
-
-    set result [lcopy [llength [lindex $listlist 0]] {}]
-
-    while { $listlist != "" } {
-	behead list listlist
-
-	set temp {}
-	while { $result != "" && $list != "" } {
-	    lappend temp [concat [lindex $result 0] [list [lindex $list 0]]]
-
-	    set result [lreplace $result 0 0]
-	    set list   [lreplace $list   0 0]
-	}
-	set result $temp
+proc lfoldr {init list script} {
+    set result $init
+    foreach x [lreverse $list] {
+	set result [uplevel apply [list $script] [list $result] [list $x]]
     }
+    return $result
+}
+
+
+## lhead list
+#
+# Return the first item in the list, or the item itself if it is not a 
+# list.
+# 
+# Return: Return the first item in the list, or the item itself if it is not a 
+# list.
+#
+proc lhead {list} {
+    return [lindex $list 0]
+}
+
+
+## linit list
+#
+# Take everything but the last element of a list.
+# Note: linit{} requires that the list contain at least one
+# element. Use lnull{} to check this before calling if you're
+# not sure that this is the case. _This is a deliberate choice,
+# not a bug._
+#
+proc linit {list} {
+    return [lreplace $list end end]
+}
+
+
+## lintersection l1 l2
+#
+# Return the intersection of two lists.
+#
+proc lintersection {l1 l2} {
+    set result {}
+
+    foreach i $l1 {
+	if {[lsearch -exact $l2 $i] != -1} {
+	    lappend result $i
+	}
+    }
+
+    return $result
+}
+
+
+## llast list
+#
+# Take the last element of a list.
+#
+proc llast {list} {
+    return [lindex $list end]
+}
+
+
+## lmap
+#
+# Apply a function-script to every element of a list. The function-
+# script is evaluated in the caller's context, so "free" variables
+# are evaluated correctly.
+#
+proc lmap {list script} {
+    set result {}
+
+    foreach x $list {
+	lappend result [uplevel apply [list $script] [list $x]]
+    }
+    return $result
+}
+
+
+## lmap*
+#
+# Apply a function-script to every element of a list. The function-
+# script is evaluated in the caller's context, so "free" variables
+# are evaluated correctly.
+#
+# This code is a nigh-mare, and there _must_ be a simpler way
+# of doing it. Tcl's schizophrenic treatment of lists, strings,
+# and commands has almost made ME schizoid, so let's just be
+# glad the damn thing works! (If you know a better way, please
+# tell me!)
+#
+proc lmap* {args} {
+    set result {}
+    set script [lindex $args end]
+
+    # Create the script to execute. For, say, two arg lists,
+    # {1 2 3} and {4 5 6}, it will look (sort of) like this:
+    #
+    # foreach _0 {1 2 3} _1 {4 5 6} {
+    #     lappend result [uplevel apply [list $script] $_0 $_1]
+    # }
+    set counts [interval 0 [expr [llength $args] - 2]]
+    set runthis {foreach}
+    foreach c $counts {
+	lappend runthis _$c [lindex $args $c]
+    }
+    set runthismore [list eval uplevel apply [list [list $script]]]
+    foreach c $counts {
+	lappend runthismore "\[set _$c\]"
+    }
+    set runthismore [concat lappend result "\[$runthismore\]"]
+    lappend runthis $runthismore
+
+    # Now run it, and return the result
+    eval $runthis
     return $result
 }
 
@@ -401,28 +362,34 @@ proc lmember {list item} {
 }
 
 
-## ldelete list item
+## lnub list
 #
-# Remove an item from a list
+# Remove duplicates from a list
 #
-proc ldelete {list item} {
-    set i [lsearch -exact $list $item]
-
-    if { $i != -1 } {
-	return [lreplace $list $i $i]
+proc lnub {list} {
+    set result {}
+    foreach i $list {
+	if { [lsearch -exact $result $i] == -1 } {
+	    lappend result $i
+	}
     }
-
-    return $list
+    return $result
 }
 
 
-##########################################################################
+## lnull list
 #
-# Sorting and set-related functions.
+# Test for a null list (or element). Written the way it is
+# because a) `==' cannot be used if the list starts with a number and b
+# llength is not so good because it traverses the whole list.
 #
-# These functions are more complex list operations, such as functions
-# to sort lists, and functions for using lists as sets.
+# The second case checks for the list being null but indicated
+# by empty braces. I'm confused as to why I need this...
 #
+proc lnull {list} {
+    return [expr (! [string match "?*" $list]) \
+	         || [string match "{}" $list]]
+}
 
 
 ## lorder list order
@@ -434,10 +401,6 @@ proc ldelete {list item} {
 #
 # returns {2 5 6 8}.
 #
-proc lorder_cp {a b} {
-    return [expr [lindex $a 0] - [lindex $b 0]]
-}
-
 proc lorder {list order} {
     set nlist {}
 
@@ -458,23 +421,180 @@ proc lorder {list order} {
     return $list
 }
 
+## lorder_cp
+#
+# Utility function used by lorder
+#
+proc lorder_cp {a b} {
+    return [expr [lindex $a 0] - [lindex $b 0]]
+}
 
-## lnub list
+
+## lpairs list
 #
-# Remove duplicates from a list
+# Split a list into a list of pairs, each pair containing two
+# consecutive elements of the input list. If the list contains
+# an odd number of elements, the last element is discarded.
+# For example,
 #
-proc lnub {list} {
+#     lpairs {1 2 3 4 5 6 7}
+#
+# returns {{1 2} {3 4} {5 6}}.
+#
+# The test for odd-length list ensures that a final odd element
+# is not included in the result.
+#
+proc lpairs {list} {
+    if { [expr [llength $list]] % 2 != 0 } {
+	set list [lreplace $list end end]
+    }
+
     set result {}
-    foreach i $list {
-	if { [lsearch -exact $result $i] == -1 } {
-	    lappend result $i
+    foreach {a b} $list {
+	lappend result [list $a $b]
+    }
+    return $result
+}
+    
+
+## lreduce
+#
+# Reduce or ``fold'' a list into a single value. The list must
+# contain at least one element.
+#
+proc lreduce {list script} {
+    set result [lhead $list]
+    set list   [ltail $list]
+
+    while { ! [lnull $list] } {
+	set result [uplevel apply [list $script] [list $result] \
+		[list [list [lhead $list]]]]
+	set list [ltail $list]
+    }
+    return $result
+}
+
+
+## lreject
+#
+# Filter a list based on a predicate. The output list contains
+# elements of the input list for which the predicate fails.
+#
+proc lreject {list script} {
+    set result {}
+
+    foreach x $list {
+	if { ! [uplevel apply [list $script] [list $x]] } {
+	    lappend result $x
 	}
     }
     return $result
 }
 
 
-## subsets list
+## lreverse list
+#
+# Reverse a list.
+#
+proc lreverse {list} {
+    set result {}
+    foreach i $list {
+	set result [concat [list $i] $result]
+    }
+    return $result
+}
+
+
+## lscanl init list script
+#
+# Scan across a list from left to right, producing accumulated results.
+#
+proc lscanl {init list script} {
+    set result [list $init]
+    foreach x $list {
+	set init [uplevel apply [list $script] [list $init] [list $x]]
+	lappend result $init
+    }
+    return $result
+}
+
+
+## lscanr init list script
+#
+# Scan across a list from right to left.
+#
+proc lscanr {init list script} {
+    set result [list $init]
+    foreach x [lreverse $list] {
+	set init [uplevel apply [list $script] [list $init] [list $x]]
+	lappend result $init
+    }
+    return [lreverse $result]
+}
+
+
+## lselect
+#
+# Filter a list based on a predicate. The output list contains
+# elements of the input list for which the predicate is satisfied.
+#
+proc lselect {list script} {
+    set result {}
+    
+    foreach x $list {
+	if { [uplevel apply [list $script] [list $x]] } {
+	    lappend result $x
+	}
+    }
+    return $result
+}
+
+
+## lsplit list n
+#
+# Split a list at the specified index. This is equivalent to
+# performing a take{} and a drop{}. For example,
+#
+#     lsplit {1 2 3 4} 2
+#
+# returns {{1 2} {3 4}}.
+#
+# Note: You cannot reliably use lsplit{} to split a list into
+# its head and tail. *lsplit {1 2 3 4} 1* works, because the
+# elements are not lists, but *lsplit {{1 2} {3 4}} 1* is not
+# the same as *[list [lhead $l] [ltail $l]]* where
+# l = {{1 2} {3 4}}. Use behead{}.
+#
+proc lsplit {list n} {
+    if { $n <= 0 } {
+	return [list {} $list]
+    } else {
+	incr n -1
+	return [list \
+		[lrange $list 0 $n] \
+		[lreplace $list 0 $n]]
+    }
+}
+
+
+## lsubset l1 l2
+#
+# Return true if l1 is a subset of l2.
+#
+proc lsubset {l1 l2} {
+    set result {}
+
+    foreach i $l1 {
+	if {[lsearch -exact $l2 $i] == -1} {
+	    return 0
+	}
+    }
+
+    return 1
+}
+
+
+## lsubsets list
 #
 # Generate all non-empty subsets of a list. Subsets are not in
 # any kind of order. For example,
@@ -519,7 +639,7 @@ proc lsubst {list item value} {
 }
 
 
-## lsubtract l2
+## lsubtract l1 l2
 #
 # Return the difference of two lists: l1 - l2
 #
@@ -540,6 +660,71 @@ proc lsubtract {l1 l2} {
 }
 
 
+## ltail list
+#
+# Return a list composed of all elements in the supplied list, except the 
+# first item. 
+# 
+# Return: Return a list composed of all elements in the supplied list, 
+# except the first item.       
+#
+# Note: ltail{} requires that the list contain at least one
+# element. Use lnull{} to check this before calling if you're
+# not sure that this is the case. _This is a deliberate choice,
+# not a bug_.
+#
+proc ltail {list} {
+    return [lreplace $list 0 0]
+}
+
+
+## ltake list n
+#
+# Take _n_ list elements.
+#
+proc ltake {list n} {
+    return [lrange $list 0 [expr $n - 1]]
+}
+
+
+## ltranspose listlist
+#
+# Transpose a list of lists. All sub-lists must be the same length.
+#
+#     ltranspose {{1 2 3} {5 6 7}}
+#
+# returns {{1 5} {2 6} {3 7}}.
+#
+# Caveats: this procedure may behave a little strangely if
+# given a list with only one sub-list, or a list with no
+# sub-lists (as in {{1 2 3}} or {1 2 3}).
+#
+proc ltranspose {listlist} {
+    set result {}
+
+    # Create the script to execute. For, say, the list
+    # {{1 2 3} {4 5 6}}, it will look (sort of) like this:
+    #
+    # foreach _0 {1 2 3} _1 {4 5 6} {
+    #     lappend result [list $_0 $_1]
+    # }
+    set counts [interval 0 [expr [llength $listlist] - 1]]
+    set runthis {foreach}
+    foreach c $counts {
+	lappend runthis _$c [lindex $listlist $c]
+    }
+    set runthismore [list eval list]
+    foreach c $counts {
+	lappend runthismore "\[set _$c\]"
+    }
+    set runthismore [concat lappend result "\[$runthismore\]"]
+    lappend runthis $runthismore
+
+    # Now run it, and return the result
+    eval $runthis
+    return $result
+}
+
 
 ## lunion l1 l2
 #
@@ -548,259 +733,6 @@ proc lsubtract {l1 l2} {
 #
 proc lunion {l1 l2} {
     return [lnub [concat $l1 $l2]]
-}
-
-
-## lintersection l1 l2
-#
-# Return the intersection of two lists.
-#
-proc lintersection {l1 l2} {
-    set result {}
-
-    foreach i $l1 {
-	if {[lsearch -exact $l2 $i] != -1} {
-	    lappend result $i
-	}
-    }
-
-    return $result
-}
-
-
-## lsubset l1 l2
-#
-# Return true if l1 is a subset of l2.
-#
-proc lsubset {l1 l2} {
-    set result {}
-
-    foreach i $l1 {
-	if {[lsearch -exact $l2 $i] == -1} {
-	    return 0
-	}
-    }
-
-    return 1
-}
-
-
-## ldisjoint l1 l2
-#
-# Return true if l1 and l2 are disjoint -- that is, their
-# intersection is null.
-#
-proc ldisjoint {l1 l2} {
-    set result {}
-
-    foreach i $l1 {
-	if {[lsearch -exact $l2 $i] != -1} {
-	    return 0
-	}
-    }
-
-    return 1
-}
-
-
-
-
-##########################################################################
-#
-# Association list functions.
-#
-# An association list is normally (in say Lisp and functional languages)
-# as a list of pairs. Because this is Tcl, however, I'm implementing
-# them as a list of lists, where the first element of each list is
-# the element name and the rest of them are the element value. (In
-# other words, if there is more than one, the value is a list.)
-#
-
-
-## assocSplit
-#
-# ``Unzip'' a list of lists into an association list. This is used to
-# make association lists. For example,
-#
-#     assocSplit {{a 1} {b 2 3}}
-#
-# returns {{a 1} {b {2 3}}. Note that if the list is already an
-# association list, this function has no effect.
-#
-proc assocSplit {list} {
-    apply sublist $list {
-	behead item sublist
-	list $item $sublist
-    }
-}
-
-
-## assocAppend listname name value
-#
-# Add a new value to the association list. This is a ``destructive''
-# update, like lappend. This function is straightforward, and this
-# and the other assocation list functions guarantee that
-#
-#     lappend list {fred 42}
-#
-# will have the same effect as
-#
-#     assocAppend list fred 42
-#
-proc assocAppend {list name value} {
-    upvar $list l
-    lappend l [list $name $value]
-}
-
-
-## assocReplace listname name value
-#
-# Replace a value in an association list. This is a ``destructive''
-# update. If no value with the given name exists, then it is added.
-#
-proc assocReplace {list name value} {
-    upvar $list l
-
-    if { $l != "" } {
-	assign names values [ltranspose $l]
-	set index [lsearch -exact $names $name]
-	if { $index != -1 } {
-	    set l [lreplace $l $index $index [list $name $value]]
-	} else {
-	    lappend l [list $name $value]
-	}
-    } else {
-	lappend l [list $name $value]
-    }
-}
-
-
-## assocRemove listname name
-#
-# Remove the value with the specified name from the association
-# list. This is a destructive delete: that is, the list is modified
-# ``in place.''
-#
-# (Is it such a good idea to do a destructive delete?)
-#
-proc assocRemove {listname name} {
-    upvar $listname l
-
-    assign names values [ltranspose $l]
-    set index [lsearch -exact $names $name]
-    if { $index != -1 } {
-	set l [lreplace $l $index $index]
-    }
-}
-
-
-## assocLookup list name
-#
-# Return the value associated with the given name. Returns the
-# null string if there is none.
-#
-# Note: Unlike assocAppend{} and assocRemove{}, assocLookup{} expects
-# the list itself as an argument, not its name.
-#
-# Known bugs: Well, not really a bug, but the fact that this function
-# expects a list value whereas all the other association list functions
-# expect a list name is confusing. But then again, this kind of
-# inconsistency is nothing new to Tcl ...
-#
-proc assocLookup {list name} {
-    assign names values [ltranspose $list]
-    set index [lsearch -exact $names $name]
-    if { $index != -1 } {
-	return [lindex $values $index]
-    } else {
-	return ""
-    }
-}
-
-
-
-##########################################################################
-#
-# ``Higher-order'' functions on lists.
-#
-# A miscelleous set of functions that sort-of mimics some of the common
-# higher-order functions found in functional languages.
-#
-# The ``function'' arguments to these functions can either be an
-# itcl command name, or a string of the command name and an initial
-# set of arguments.
-#
-# In all of these, the list argument comes _list_, rather than first
-# as is common in itcl procs. This is because it's less confusing
-# when writing command prefixes: because the list element comes at the
-# end of the string, it's better that the list in the call to the
-# higher-order function come at the end of the argument list.
-#
-#
-
-
-## lmap
-#
-# Apply a function to every element of a list
-#
-proc lmap {cmd list} {
-    set result {}
-
-    foreach x $list {
-	lappend result [eval $cmd [list $x]]
-    }
-    return $result
-}
-
-
-## lselect
-#
-# Filter a list based on a predicate. The output list contains
-# elements of the input list for which the predicate is satisfied.
-#
-proc lselect {cmd list} {
-    set result {}
-    
-    foreach x $list {
-	if { [eval $cmd [list $x]] } {
-	    lappend result $x
-	}
-    }
-    return $result
-}
-
-
-## lreject
-#
-# Filter a list based on a predicate. The output list contains
-# elements of the input list for which the predicate fails.
-#
-proc lreject {cmd list} {
-    set result {}
-
-    foreach x $list {
-	if { ! [eval $cmd [list $x]] } {
-	    lappend result $x
-	}
-    }
-    return $result
-}
-
-
-## lreduce cmd list
-#
-# Reduce or ``fold'' a list into a single value. The list must
-# contain at least one element.
-#
-proc lreduce {cmd list} {
-    set result [lhead $list]
-    set list   [ltail $list]
-
-    while { ! [lnull $list] } {
-	set result [eval $cmd $result [list [lhead $list]]]
-	set list   [ltail $list]
-    }
-    return $result
 }
 
 
