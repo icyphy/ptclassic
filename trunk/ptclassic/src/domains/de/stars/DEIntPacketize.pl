@@ -13,8 +13,8 @@ limitation of liability, and disclaimer of warranty provisions.
 	desc {
 Convert integer input data into a stream of packets.  A packet is produced
 when either an input appears on the demand input or when "maxLength" data
-values have arrived.  Note that a null packet is produced if a demand
-signal arrives and there is no data.
+values have arrived.  Note that this star produces a null packet
+if it receives a demand signal and there is no data.
 	}
 	ccinclude { "IntVecData.h" }
 	input {
@@ -33,7 +33,7 @@ signal arrives and there is no data.
 		name { maxLength }
 		type { int }
 		default { 50 }
-		desc { Maximum packet length }
+		desc { Maximum packet length. }
 	}
 	protected {
 		int *saveData;
@@ -54,8 +54,8 @@ signal arrives and there is no data.
 			saveData[idx++] = data.get();
 		if (demand.dataNew || idx == int(maxLength)) {
 			demand.dataNew = FALSE;
-			// create a IntVecData and imbed it in an Envelope.
-			LOG_NEW; IntVecData *p = new IntVecData(idx,saveData);
+			// create a IntVecData and embed it in an Envelope.
+			LOG_NEW; IntVecData *p = new IntVecData(idx, saveData);
 			Envelope env(*p);
 			// copy the Envelope to the output
 			output.put(arrivalTime) << env;

@@ -12,11 +12,11 @@ limitation of liability, and disclaimer of warranty provisions.
 	location { DE main palette }
 
 	desc {
-This star inputs a stream of SeqATMCell objects.  All the
-information bits in objects received with correct sequence
+This star inputs a stream of SeqATMCell objects.  All of the
+information bits in the objects received with correct sequence
 numbers are sent to 'output'.
 
-If a missing SeqATMCell object is detected, this star sends the most
+If a missing SeqATMCell object is detected, then this star sends the most
 recent 8 * 'tempSize' received bits to the 'temp' output, and the
 most recent (8 * 'searchWindowSize' + 'numInfoBits') received bits
 to the 'window' output.
@@ -32,12 +32,12 @@ voice-packet interpolation technique for PCM encoded
 data.  On its \fIinput\fR port, this star reads in
 .c SeqATMCell
 types which have a field containing a packet sequence
-number.  The sequence number is read and it is determined
+number.  The sequence number is read and the star determines
 whether or not a packet has been dropped during network
 transmission.  If the missing packet is one of the
 first five
 .c SeqATMCell
-s to be sent over the network, this star will substitutue
+s to be sent over the network, then this star will substitutue
 all zero bits for the bits which were lost during
 transmission.  These bits are sent through the \fIoutput\fR
 port.  If the dropped packet was not one of the first
@@ -53,22 +53,22 @@ numbered seven immediately following a
 numbered five.  This star will then output a string
 of bits on its \fItemp\fR port of size \fItempSize\fR
 * 8.  These bits describe the first \fItempSize\fR
-samples immediately preceeding the missing packet.  Likewise,
+samples immediately preceding the missing packet.  Likewise,
 \fIsearchWindowSize\fR * 8 + \fInumInfoBits\fR bits
 are sent through the \fIwindow\fR port.  These bits describe
 the
 .c SeqATMCell
-immediately preceeding the lost packet as well as the
-previous \fIsearchWindowSize\fR samples before that.
-In this example of a missing sixth packet, this means
+immediately preceding the lost packet as well as the
+previous \fIsearchWindowSize\fR samples before the lost packet.
+In this context of this example of a missing sixth packet, this means
 that the \fItemp\fR bits will come from the end of
 packet five and the \fIwindow\fR bits will include
 all of packets 5, 4, 3, 2, and a portion of the
-end of packet 1 (Note restriction on \fIsearchWindowSize\fR).
+end of packet 1 (note the restriction on \fIsearchWindowSize\fR).
 These bits are converted to samples in an SDF domain
-wormhole and a cross correlation is performed between the
-\fItemp\fR and the \fIwindow\fR determining the best
-match i.e., largest cross correlation value.  This SDF
+wormhole and a cross-correlation is performed between the
+\fItemp\fR and the \fIwindow\fR to determine the best
+match, i.e., the one with largest cross-correlation value.  This SDF
 galaxy will take the \fInumInfoBits\fR / 8 samples
 from the \fIwindow\fR samples following the \fIwindow\fR's
 best match with the \fItemp\fR samples. These samples
