@@ -56,6 +56,9 @@ class VHDLSignal : public VHDLTypedObj
 
   // Pointer to source VHDLPort.
   VHDLPort* source;
+  // For muxs: integer control value associated
+  // with this signal being selected.
+  int controlValue;
 
   // Class Idenitification.
   /* virtual */ int isA(const char*) const;
@@ -67,6 +70,9 @@ class VHDLSignal : public VHDLTypedObj
   void setSource(VHDLPort* newSource) { source = newSource; }
   VHDLPort* getSource() { return source; }
   void disconnect() { source = NULL; }
+  void setControlValue(int newControlValue)
+    { controlValue = newControlValue; }
+  int getControlValue() { return controlValue; }
 
  protected:
  private:
