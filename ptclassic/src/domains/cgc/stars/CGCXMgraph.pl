@@ -41,7 +41,7 @@ for a complete explanation of the options.
 	defstate {
 		name {options}
 		type {string}
-		default {""}
+		default {"-bb -tk =800x400"}
 		desc {Command line options for the pxgraph program.}
 	}
 	defstate {
