@@ -1,5 +1,5 @@
 defstar {
-  name		{ DisplayImage2 }
+  name		{ ShowImg2 }
   domain	{ MDSDF }
   version	{ $Id$ }
   author	{ J. Buck & Paul Haskell, modified for MDSDF by Mike J. Chen }
@@ -149,4 +149,4 @@ complete filename of the displayed image.
     delete image;
     delete frameId;
   } // end go{}
-} // end defstar { DisplayImage2 }
+} // end defstar { ShowImg2 }
