@@ -46,24 +46,34 @@ Kluwer Academic Publishers, Norwood, MA, 1996
 #include "AcyCluster.h"
 #include <limits.h>
 
-// following are for Blocks
-// NODE_NUM holds the number of the node produced by numberBlocks().
-#define NODE_NUM flags[0]
+#define NODE_NUM_FLAG_LOC 0
+#define TMP_PARTITION_FLAG_LOC 1
+#define PARTITION_FLAG_LOC 2
+
+// The following macros are used for Blocks
+
+// PARTITION is used to hold TMP_PARTITION from the best cut
+#define PARTITION(pp) ((pp)->flags[PARTITION_FLAG_LOC])
+
 // TMP_PARTITION is boolean valued and is used to mark nodes as being
 // either on the left or right side of the cut.  Since many cuts are
 // examined, this flag will be re-marked for each cut
-#define TMP_PARTITION flags[1]
-// PARTITION is used to hold TMP_PARTITION from the best cut
-#define PARTITION flags[2]
-#define TMP_PARTITION_FLAG 1
-#define PARTITION_FLAG 2
+#define TMP_PARTITION(pp) ((pp)->flags[TMP_PARTITION_FLAG_LOC])
 
-// following are for PortHole
-#define WEIGHT flags[0]
-#define DELAY_TAG flags[1]
+// NODE_NUM holds the number of the node produced by numberBlocks().
+#define NODE_NUM(pp) ((pp)->flags[NODE_NUM_FLAG_LOC])
 
 
-#define DELAY_TAG_FLAG 1
+
+ 
+// Following macros are for PortHole
+#define WEIGHT_FLAG_LOC 0
+#define DELAY_TAG_FLAG_LOC 1
+
+#define WEIGHT(ph) ((ph)->flags[WEIGHT_FLAG_LOC])
+#define DELAY_TAG(ph) ((ph)->flags[DELAY_TAG_FLAG_LOC])
+
+
 
 // TNSE = total number of samples exchanged in a complete period of an
 // SDF schedule.
@@ -88,8 +98,8 @@ void AcyCluster::weightArcs()
 	    // hence, skip this arc.
 	    if (!outArc->far()) continue;
 	    cost = computeTNSE(c,(SynDFCluster*)outArc->far()->parent(),outArc);
-	    outArc->WEIGHT = cost;
-	    outArc->far()->WEIGHT = cost;
+	    WEIGHT(outArc) = cost;
+	    WEIGHT(outArc->far()) = cost;
 	}
     }
 }
@@ -118,9 +128,9 @@ void AcyCluster::tagDelayArcs()
 	    if (!outArc->far()) continue;
 	    // determine if the arc has enough delays.
 	    // 2* because WEIGHT has delays as cost already.
-	    if (2*outArc->numInitDelays() >= outArc->WEIGHT) {
-		outArc->DELAY_TAG = 1;
-		outArc->far()->DELAY_TAG = 1;
+	    if (2*outArc->numInitDelays() >= WEIGHT(outArc)) {
+		DELAY_TAG(outArc) = 1;
+		DELAY_TAG(outArc->far()) = 1;
 	    }
 	}
     }
@@ -147,17 +157,17 @@ int AcyCluster::markSuccessors(AcyCluster* c)
     SynDFClusterPort* out;
     AcyCluster* nc=0;
     SynDFClusterOutputIter nextO(*c);
-    c->TMP_PARTITION = 2;
+    TMP_PARTITION(c) = 2;
     // Below, we find those successors whose delay_tag_flag is 0
     // meaning that the arc to the successor does not have enough delays
     // to ignore as a precedence arc.
-    while ((out = nextO.next(DELAY_TAG_FLAG,0)) != NULL) {
+    while ((out = nextO.next(DELAY_TAG_FLAG_LOC,0)) != NULL) {
 	// It should be the case that if out->far() is defined, then
 	// so is out->far->parent(); the test below is conservative.
 	// If out->far() is 0, then we are going across the cluster
 	// boundary and hence we do nothing.
 	if ( out->far() && (nc = (AcyCluster*)out->far()->parent()) != NULL) {
-	    if (nc->TMP_PARTITION == 2) {
+	    if (TMP_PARTITION(nc) == 2) {
 		StringList message;
 		message << "Cluster presented to AcyCluster::markSuccessors"
 			<< "appears to be cyclic.  This could be due to an"
@@ -165,10 +175,10 @@ int AcyCluster::markSuccessors(AcyCluster* c)
 		Error::abortRun(message);
 		return 0;
 	    }
-	    if (nc->TMP_PARTITION == 0) numSucc += markSuccessors(nc);
+	    if (TMP_PARTITION(nc) == 0) numSucc += markSuccessors(nc);
 	}
     }
-    c->TMP_PARTITION = 1;
+    TMP_PARTITION(c) = 1;
     return numSucc;
 }
 
@@ -183,14 +193,14 @@ int AcyCluster::markPredecessors(AcyCluster* c)
     SynDFClusterPort* inp;
     AcyCluster* pc=0;
     SynDFClusterInputIter nextI(*c);
-    c->TMP_PARTITION = 2;
-    while ((inp = nextI.next(DELAY_TAG_FLAG,0)) != NULL) {
+    TMP_PARTITION(c) = 2;
+    while ((inp = nextI.next(DELAY_TAG_FLAG_LOC,0)) != NULL) {
 	// It should be the case that if out->far() is defined, then
 	// so is out->far->parent(); the test below is conservative.
 	// If out->far() is 0, then we are going across the cluster
 	// boundary and hence we do nothing.
 	if (inp->far() && (pc = (AcyCluster*)inp->far()->parent()) != NULL) {
-	    if (pc->TMP_PARTITION == 2) {
+	    if (TMP_PARTITION(pc) == 2) {
 		StringList message;
 		message << "Cluster presented to AcyCluster::markPredecessors"
 			<< "appears to be cyclic.  This could be due to an"
@@ -198,10 +208,10 @@ int AcyCluster::markPredecessors(AcyCluster* c)
 		Error::abortRun(message);
 		return 0;
 	    }
-	    if (pc->TMP_PARTITION == 1) numPred += markPredecessors(pc);
+	    if (TMP_PARTITION(pc) == 1) numPred += markPredecessors(pc);
 	}
     }
-    c->TMP_PARTITION = 0;
+    TMP_PARTITION(c) = 0;
     return numPred;
 }
 
@@ -239,13 +249,13 @@ int AcyCluster::computeCutCost(int flag_loc, int leftFlagValue)
 		// arc->far() == 0 ==> arc going across parent cluster boundary
 		if (!arc->far()) continue;
 		if (arc->far()->parent()->flags[flag_loc] != leftFlagValue) {
-		    cutVal += arc->WEIGHT;
+		    cutVal += WEIGHT(arc);
 		}
 	    }
 	    // Also check if there are reverse arcs, and add the delay
 	    // values to the cut value
 	    SynDFClusterInputIter inpArc(*c);
-	    while ((arc=inpArc.next(DELAY_TAG_FLAG,1)) != NULL) {
+	    while ((arc=inpArc.next(DELAY_TAG_FLAG_LOC,1)) != NULL) {
 		if (!arc->far()) continue;
 		if (arc->far()->parent()->flags[flag_loc] != leftFlagValue) {
 		    cutVal += arc->numInitDelays();
@@ -284,21 +294,21 @@ void AcyCluster::findIndepBndryNodes(int type, Cluster* c, SequentialList& indep
     ClusterIter nextTmp(*this);
     if (type == 0) {
 	while ((tmp = nextTmp++) != NULL) {
-	    if (!tmp->TMP_PARTITION) {
+	    if (!TMP_PARTITION(tmp)) {
 		// tmp is not a successor of c
 		// Check if all of tmp's successors are successors of c
 		ClusterOutputIter nextO(*tmp);
 		flag=1;
-		while ((arc = nextO.next(DELAY_TAG_FLAG,0)) != NULL && flag) {
+		while ((arc = nextO.next(DELAY_TAG_FLAG_LOC,0)) != NULL && flag) {
 		    if (!arc->far()) continue;
-		    if (!arc->far()->parent()->TMP_PARTITION) flag = 0;
+		    if (!TMP_PARTITION(arc->far()->parent())) flag = 0;
 		}
 		if (flag) {
 		    // tmp is a boundary node; now check if it is a predecessor
 		    // of c
 		    ClusterInputIter nextI(*c);
 		    flag2 = 1;
-		    while ((arc=nextI.next(DELAY_TAG_FLAG,0))!=NULL && flag2) {
+		    while ((arc=nextI.next(DELAY_TAG_FLAG_LOC,0))!=NULL && flag2) {
 			// If arc does not have a farSidePort, then it means
 			// that it is connecting across this cluster's boundary.
 			// Hence we can skip it.
@@ -311,23 +321,23 @@ void AcyCluster::findIndepBndryNodes(int type, Cluster* c, SequentialList& indep
 	}
     } else {
 	while ((tmp = nextTmp++) != NULL) {
-	    if (tmp->TMP_PARTITION) {
+	    if (TMP_PARTITION(tmp)) {
 		// tmp is not a predecessor of c
 		// Check if all of tmp's predecessors are predecessors of c
 		// Use arc iterators to get predecessors connected through
 		// non-delay-tagged arcs
 		ClusterInputIter nextI(*tmp);
 		flag=1;
-		while ((arc = nextI.next(DELAY_TAG_FLAG,0)) != NULL && flag) {
+		while ((arc = nextI.next(DELAY_TAG_FLAG_LOC,0)) != NULL && flag) {
 		    if (!arc->far()) continue;
-		    if (arc->far()->parent()->TMP_PARTITION) flag = 0;
+		    if (TMP_PARTITION(arc->far()->parent())) flag = 0;
 		}
 		if (flag) {
 		    // tmp is a boundary node; now check if it is a successor
 		    // of c
 		    ClusterOutputIter nextO(*c);
 		    flag2 = 1;
-		    while ((arc=nextO.next(DELAY_TAG_FLAG,0))!=NULL && flag2) {
+		    while ((arc=nextO.next(DELAY_TAG_FLAG_LOC,0))!=NULL && flag2) {
 			// If arc does not have a farSidePort, then the
 			// connection is going across this Cluster boundary.
 			// Hence, we can skip it.
@@ -411,7 +421,7 @@ int AcyCluster::legalCutIntoBddSets(int K)
 
 	// reset the flag flags[1] to 0 for all blocks inside us.
 	
-	resetFlags(*this,1,0);
+	resetFlags(*this,TMP_PARTITION_FLAG_LOC,0);
 	numSucc = markSuccessors(c);
 	if (!numSucc) return -1;
 
@@ -431,7 +441,7 @@ int AcyCluster::legalCutIntoBddSets(int K)
 	// with higher costs.
 
 	if (numSucc > K) continue;
-	cutVal = computeCutCost(TMP_PARTITION_FLAG,0);
+	cutVal = computeCutCost(TMP_PARTITION_FLAG_LOC,0);
 
 	// Apply optimization step here.
 	// Nodes that are moved across will have their TMP_PARTITION flag
@@ -461,7 +471,7 @@ int AcyCluster::legalCutIntoBddSets(int K)
 	    Dtmp = costOfMovingAcross(tmp,1);
 	    if (Dtmp<0 && numSucc < K) {
 		cutVal += Dtmp;
-		tmp->TMP_PARTITION = 1;
+		TMP_PARTITION(tmp) = 1;
 		numSucc += tmp->totalNumberOfBlocks();
 	    }
 	}
@@ -489,15 +499,16 @@ int AcyCluster::legalCutIntoBddSets(int K)
 	// The code here is symmetric to the code for successors;
 	// extensive comments can be found there.
 
-	resetFlags(*this,1,1);
+	resetFlags(*this,TMP_PARTITION_FLAG_LOC,1);
 	numPred = markPredecessors(c);
 	if (!numPred) return -1;
 
 	if (numPred > K) continue;
-	cutVal = computeCutCost(TMP_PARTITION_FLAG,0);
+	cutVal = computeCutCost(TMP_PARTITION_FLAG_LOC,0);
 	
 	SequentialList indepBndryNodes;
-	findIndepBndryNodes(1,c, indepBndryNodes);
+	findIndepBndryNodes(1, c, indepBndryNodes);
+
 	// Now we have all the boundary, independent nodes.  Determine
 	// whether we can move any across and lower the cut value.
 	// We do this by computing D(a) = I(a) - E(a) where I(a) is the
@@ -511,7 +522,7 @@ int AcyCluster::legalCutIntoBddSets(int K)
 	    Dtmp = costOfMovingAcross(tmp,-1);
 	    if (Dtmp<0 && numPred < K) {
 		cutVal += Dtmp;
-		tmp->TMP_PARTITION = 0;
+		TMP_PARTITION(tmp) = 0;
 		numPred += tmp->totalNumberOfBlocks();
 	    }
 	}
@@ -576,8 +587,8 @@ int AcyCluster::costOfMovingAcross(Cluster* bndryNode, int direction)
     ClusterInputIter nextI(*bndryNode);
     while ((arc=nextO++) != NULL) {
 	if (!arc->far()) continue;
-	if (arc->far()->parent()->TMP_PARTITION) {
-	    Atmp += arc->WEIGHT;
+	if (TMP_PARTITION(arc->far()->parent())) {
+	    Atmp += WEIGHT(arc);
 	} else {
 	    // It is a predecessor meaning that the reverse
 	    // arc has enough delays on it (since only arcs with
@@ -588,7 +599,7 @@ int AcyCluster::costOfMovingAcross(Cluster* bndryNode, int direction)
     }
     while ((arc=nextI++) !=NULL ) {
 	if (!arc->far()) continue;
-	if (arc->far()->parent()->TMP_PARTITION) {
+	if (TMP_PARTITION(arc->far()->parent())) {
 	    // Not a predecessor meaning that the arc must have enough
 	    // delays (since tmp is a boundary node and if it has
 	    // an incoming arc from a node that is not a predecessor
@@ -597,7 +608,7 @@ int AcyCluster::costOfMovingAcross(Cluster* bndryNode, int direction)
 	    Atmp += arc->numInitDelays();
 	} else {
 	    // It is a predecessor meaning that the arc is external
-	    Btmp += arc->WEIGHT;
+	    Btmp += WEIGHT(arc);
 	}
     }
     if (direction == 1) {
@@ -617,7 +628,7 @@ Uses the following numbering scheme
 to indicate the partition.  Nodes on the left side of the
 cut get the value of their parent while the nodes on the
 right side of the cut get the value of parent (that is,
-<code>this->PARTITION</code>) plus the number of
+<code>PARTITION(this)</code>) plus the number of
 nodes on the left hand side.  This is to make it easy to deduce the
 ordering if this function is called recursively many times.
 <code>numOnLeftSide</code> is the number of nodes on the left side of the cut.
@@ -630,8 +641,10 @@ void AcyCluster::updateBestCut(int numOnLeftSide)
     Cluster* tmp;
     ClusterIter nextTmp(*this);
     while((tmp = nextTmp++) !=NULL) {
-	tmp->PARTITION=PARTITION*(!tmp->TMP_PARTITION)+
-	(PARTITION + numOnLeftSide)*(tmp->TMP_PARTITION);
+	PARTITION(tmp) = TMP_PARTITION(tmp);
+
+//	PARTITION(tmp) = PARTITION(this) * ( !TMP_PARTITION(tmp) ) +
+//	(PARTITION(this) + numOnLeftSide) * (TMP_PARTITION(tmp));
     }
 }
 
@@ -662,11 +675,12 @@ int AcyCluster::checkLegalCut(int cutValue, int bdd)
     SynDFClusterPort* arc;
     // Recall that nodes on the left side of the cut get the value of the
     // parent.
-    int leftFlag = PARTITION;
+    //int leftFlag = PARTITION(this);
+    int leftFlag = 0;
     AcyClusterIter nextClust(*this);
     // Check that sets are bounded
-    while ((c=nextClust++) != NULL) {
-	if (c->PARTITION != leftFlag) K += c->totalNumberOfBlocks();
+    while ((c = nextClust++) != NULL) {
+	if (PARTITION(c) != leftFlag) K += c->totalNumberOfBlocks();
     }
     if (K > bdd || totalNumberOfBlocks()-K > bdd) {
 	Error::warn("Cut does not respect the bound");
@@ -674,12 +688,12 @@ int AcyCluster::checkLegalCut(int cutValue, int bdd)
     }
     // Check that cut is legal
     nextClust.reset();
-    while ((c=nextClust++) != NULL) {
-	if (c->PARTITION != leftFlag) {
+    while ((c = nextClust++) != NULL) {
+	if (PARTITION(c) != leftFlag) {
 	    SynDFClusterOutputIter nextO(*c);
-	    while ((arc=nextO.next(DELAY_TAG_FLAG,0)) != NULL) {
+	    while ((arc=nextO.next(DELAY_TAG_FLAG_LOC,0)) != NULL) {
 		if (!arc->far()) continue;
-		if (arc->far()->parent()->PARTITION == leftFlag) {
+		if (PARTITION(arc->far()->parent()) == leftFlag) {
 		    // We abort since if legality is violated
 		    // then schedule might not be valid.
 		    // This means that legalCutIntoBddSets has not
@@ -690,9 +704,11 @@ int AcyCluster::checkLegalCut(int cutValue, int bdd)
 	    }
 	}
     }
+
     // Check that the cut value claimed by heuristic jives with actual cut
     // value induced by the partition
-    if (cutValue != computeCutCost(PARTITION_FLAG,leftFlag)) {
+
+    if (cutValue != computeCutCost(PARTITION_FLAG_LOC, leftFlag)) {
    	Error::warn("Cut value computed by heuristic does not agree with check");
 	check = FALSE;
     }
