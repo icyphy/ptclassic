@@ -20,7 +20,7 @@ output.
 	ccinclude { "NetworkCell.h" }
 
 	constructor {
-		priority.before(input);
+		input.before(priority);
 		priority.triggers();
 		input.triggers(output);
 		input.triggers(discard);
