@@ -333,7 +333,7 @@ body ::tycho::DataModel::add {name args} {
     }
 
     # Extract type and tail
-    regexp {(.+):(.+)} [lindex $name end] _ type tail
+    regexp {([^:]+):(.+)} [lindex $name end] _ type tail
     set context [lreplace $name end end]
 
     # Extract contents
@@ -438,7 +438,7 @@ body ::tycho::DataModel::clear {} {
 #
 body ::tycho::DataModel::delete {name} {
     _verify $name
-    regexp {(.+):(.+)} [lindex $name end] _ type tail
+    regexp {([^:]+):(.+)} [lindex $name end] _ type tail
     set context [lreplace $name end end]
 
     # Invalidate cache
@@ -542,7 +542,7 @@ body ::tycho::DataModel::itemcget {name attribute} {
     _verify $name
 
     # Merge with defaults
-    regexp {(.+):} [lindex $name end] _ type
+    regexp {^[^:]+} [lindex $name end] type
     array set data $_defaults($type)
     array set data [@scope $scope set [set _dataname]($name)]
 
@@ -568,7 +568,7 @@ body ::tycho::DataModel::itemconfigure {name args} {
 
    if { $args == "" } {
         # Return attributes including defaults
-        regexp {(.+):} [lindex $name end] _ type
+        regexp {^[^:]+} [lindex $name end] type
         array set attrs $_defaults($type)
         array set attrs [@scope $scope set [set _dataname]($name)]
         array get attrs
@@ -1020,7 +1020,7 @@ body ::tycho::DataModel::type {mode {type {}} args} {
 # in the TIM format. _prefix_, if supplied, is prepended to each line.
 #
 body ::tycho::DataModel::_describe {name {prefix {}}} {
-    regexp {(.+):(.+)} [lindex $name end] _ type tail
+    regexp {([^:]+):(.+)} [lindex $name end] _ type tail
 
     # If override is on for this type, call its method
     if $_override($type) {
