@@ -29,9 +29,16 @@ class State;
 
 class Tokenizer;
 
+const int T_EOF = 257;
+const int T_ERROR = 258;
+const int T_Float = 259;
+const int T_Int = 260;
+const int T_ID = 261;
+const int T_STRING = 262;
+
 class ParseToken {
 public:
-	char* tok;
+	int tok;
 	union {
 		char cval;
 		const char *sval;
@@ -40,6 +47,7 @@ public:
 		Complex* Complexval;
 		State*  s;
 	}; 
+	ParseToken () { tok = 0; intval = 0;}
 };
 
 ////////////////////////////////////////////
@@ -88,15 +96,6 @@ public:
 	// (inherits from NamedObj)
 	// virtual void initialize(){};
 
-	// get Token  from  string 
-	ParseToken getParseToken(Tokenizer&, Block*, char*);
-
-	// get Token  from  string 
-	ParseToken getParseToken(Tokenizer&, Block*);
-
-	// lookup state from name
-	State* lookup(char*, Block*);	
-
         // return the current value as a string.  Here we just give
         // back initValue
 	virtual StringList currentValue();
@@ -110,6 +109,19 @@ public:
 protected:
 	// string used to set initial value by initialize()
 	const char* initValue;
+
+	// get Token  from  string 
+	ParseToken getParseToken(Tokenizer&, int = T_Float);
+
+	// lookup state from name
+	State* lookup(char*, Block*);	
+
+	// complain of parse error
+	void parseError (const char*, const char* = "");
+
+	// pushback token, for use in parsing
+	static ParseToken pushback;
+
 };
 
 ///////////////////////////////////////////
