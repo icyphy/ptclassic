@@ -42,19 +42,59 @@
 # FIXME: add correct handling of return in foreach* etc
 #
  
+## assign {varnames}+ list
 #
-# assign
+# Assign elements of a list to multiple variables. If the number
+# of variable names is less then the length of the list, then
+# later elements pf the list are just ignored. Of the number of
+# variable names is more than the length of the list, then only
+# as many variables as there list elements are set. (Actually, I
+# wonder if this shouldn't flag an error: is there any reason why
+# one would ever want to do this?)
 #
-# Assign elements of a list to multiple variables. Doesn't
-# care if the list is longer than the number of variables, ot
-# the list is too short. (Should probably at least put an assertion
-# in here...)
+# -- varnames: One or more names of variables.
+# -- list: The list containing values to assign to the variables.
 #
 proc assign {args} {
     foreach* var [linit $args] val [llast $args] {
 	upvar $var v
 	set v $val
     }
+}
+
+
+## behead varname listname
+#
+# Assign the first element of a list to the specified variable,
+# and remove the head from that list. Note that the list is
+# passed by _name_, so that it is destructively altered in place.
+# For example, suppose that fred equal {1 2 3 4}. Then
+#
+#     behead x fred
+#
+# (NB, no $ in front of _fred_) sets _x_ to 1, and _fred_ to {2 3 4}.
+# This is particularly useful for extracting optional arguments, 
+# as in:
+#
+#     if { $args != "" } {
+#         behead thing args
+#     }
+#     if { $args != "" } {
+#         behead thang args
+#     }
+#     process thing thang
+#
+# -- varname: The name of the variable to assign the head of the
+#    list to.
+#
+# -- list: The _name_ of the list to modify.
+#
+proc behead {varname listname} {
+    upvar $varname  v
+    upvar $listname l
+
+    set v [lhead $l]
+    set l [ltail $l]
 }
 
 
@@ -313,18 +353,20 @@ proc makeopt {option} {
 #       }
 #   }
 #
-proc setquery {name arg args} {
-    upvar $name v
-
-    if { $arg == "" } {
-	return $v
-    } else {
-	set v $arg
-	if { $args != "" } {
-	    uplevel [lindex $args 0]
-	}
-    }
-}
+# WARNING: This function is probably bogus. DO NOT USE.
+#
+#proc setquery {name arg args} {
+#    upvar $name v
+#
+#    if { $arg == "" } {
+#	return $v
+#    } else {
+#	set v $arg
+#	if { $args != "" } {
+#	    uplevel [lindex $args 0]
+#	}
+#    }
+#}
 
 
 #
@@ -475,6 +517,8 @@ proc foreachpair {x y l body} {
 #       if {$x > 2} {expr $x} else {expr $x * $x}
 #    }
 #
+# See also: lmap
+#
 proc apply {v l body} {
 
     set result ""
@@ -493,6 +537,8 @@ proc apply {v l body} {
 #
 # Similar to apply{}, but returns a list containing the elements
 # of the list for which the body evaluates to non-zero.
+#
+# See also: lselect, lreject
 #
 proc filter {v l body} {
 
