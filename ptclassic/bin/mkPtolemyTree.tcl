@@ -119,6 +119,8 @@ OCT=1
 ROOT=$root
 CROOT=$croot
 PTARCH=$ptarch
+# Include config-\$PTARCH.mk so that we get platform/domain inter dependencies
+include $root/mk/config-\$(PTARCH).mk
 include $override
 include $root/mk/stars.mk
 
@@ -175,6 +177,9 @@ TREE:
 	}
 	processDirectory $dir $croot $root
     }
+
+    exec rm -f $croot/obj.$ptarch/makefile
+    exec ln -s $root/src/makefile $croot/obj.$ptarch/makefile
 
     exec rm -f $croot/MAKEARCH
     exec cp $root/MAKEARCH $croot/MAKEARCH
