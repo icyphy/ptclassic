@@ -98,10 +98,37 @@ proc ltake {list n} {
 }
 
 proc ldrop {list n} {
-    if { $n == 0 } {
+    if { $n <= 0 } {
 	return $list
     } else {
 	return [lreplace $list 0 [expr $n-1]]
+    }
+}
+
+
+## lsplit list n
+#
+# Split a list at the specified index. This is equivalent to
+# performing a take{} and a drop{}. For example,
+#
+#     lsplit {1 2 3 4} 2
+#
+# returns {{1 2} {3 4}}.
+#
+# Note: You cannot reliably use lsplit{} to split a list into
+# its head and tail. *lsplit {1 2 3 4} 1* works, because the
+# elements are not lists, but *lsplit {{1 2} {3 4}} 1* is not
+# the same as *[list [lhead $l] [ltail $l]]* where
+# l = {{1 2} {3 4}}.
+#
+proc lsplit {list n} {
+    if { $n <= 0 } {
+	return [list {} $list]
+    } else {
+	incr n -1
+	return [list \
+		[lrange $list 0 $n] \
+		[lreplace $list 0 $n]]
     }
 }
 
