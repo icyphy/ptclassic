@@ -176,3 +176,9 @@ XV_INSTALL=install
 # Directory for general compatiblity include files.  Mainly function
 # declarations to quiet gcc -Wall down
 PTCOMPAT_INCSPEC =	-I$(ROOT)/src/compat/ptolemy
+
+# stars.mk uses this to decide whether to include the Ipus stars
+INCLUDE_IPUS_DOMAIN = yes
+
+# stars.mk uses this to decide whether to include the Ipus stars
+INCLUDE_PN_DOMAIN = yes
