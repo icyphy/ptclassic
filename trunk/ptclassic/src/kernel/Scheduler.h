@@ -35,7 +35,8 @@ public:
 	virtual int setup(Block& galaxy) = 0;
 	virtual int run(Block& galaxy) = 0;
 	virtual int wrapup(Block& galaxy) = 0;
-
+	virtual void setStopTime(float limit) = 0;
+	virtual StringList displaySchedule() { return "not implemented";}
 protected:
 	// The following member is used to visit all atomic blocks
 	// (stars and wormholes) in the galaxy exacly once each
