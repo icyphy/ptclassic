@@ -51,7 +51,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	  StringList out;
 	  out << "$ref(output, 0) $assign(output) ";
 	  out << "$ref(input, " << - int(phase) << ")";
+	  out << ";\n";
 	  addCode(out);
 	}
 }
-
