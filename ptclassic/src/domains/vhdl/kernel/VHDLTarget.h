@@ -52,16 +52,17 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "IntArrayState.h"
 #include "ComplexArrayState.h"
 
+// Defined in VHDLDomain.cc
+extern const char VHDLdomainName[];
+
 class VHDLTarget : public HLLTarget {
 public:
 	// Constructor
-	VHDLTarget(const char* name, const char* starclass, const char* desc);
+	VHDLTarget(const char* name, const char* starclass,
+		   const char* desc, const char* assocDomain = VHDLdomainName);
 
-	// Return a copu of itself
+	// Return a copy of itself
 	/*virtual*/ Block* makeNew() const;
-
-	// Return the domain of the galaxy if it exists and "VHDL" otherwise
-	/*virtual*/ const char* domain();
 
 	// Class identification.
 	/*virtual*/ int isA(const char*) const;

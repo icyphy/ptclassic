@@ -63,16 +63,11 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "StringList.h"
 #include "checkConnect.h"
 
-// Defined in VHDLBDomain.cc
-extern const char VHDLBdomainName[];
-
 // constructor
-VHDLBTarget::VHDLBTarget(const char* name,const char* starclass,
-			 const char* desc) : HLLTarget(name,starclass,desc) 
+VHDLBTarget::VHDLBTarget(const char* name, const char* starclass,
+			 const char* desc, const char* assocDomain) :
+HLLTarget(name, starclass, desc, assocDomain) 
 {
-  // Set the destination directory.
-  destDirName = destDirectoryName(VHDLBdomainName);
-  destDirectory.setInitValue(destDirName);
 }
 
 // sectionComment
@@ -626,7 +621,7 @@ void VHDLBTarget :: wrapup () {
 
 // copy constructor
 VHDLBTarget :: VHDLBTarget (const VHDLBTarget& src) :
-HLLTarget(src.name(), "VHDLBStar", src.descriptor())
+HLLTarget(src.name(), "VHDLBStar", src.descriptor(), src.getAssociatedDomain())
 { }
 
 // clone:  makeNew
@@ -743,8 +738,4 @@ StringList VHDLBTarget :: direction (const GenericPort* port) {
     direct = "inout";
   }
   return direct;
-}
-
-const char* VHDLBTarget::domain() {
-  return galaxy() ? galaxy()->domain() : VHDLBdomainName;
 }

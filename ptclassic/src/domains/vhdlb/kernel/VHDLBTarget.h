@@ -50,21 +50,22 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "DynamicGalaxy.h"
 #include "NamedObj.h"
 
+// Defined in VHDLBDomain.cc
+extern const char VHDLBdomainName[];
+
 class VHDLBPortHole;
 
 class VHDLBTarget : public HLLTarget {
 public:
 	// constructor
-	VHDLBTarget(const char* name, const char* starclass, const char* desc);
+	VHDLBTarget(const char* name, const char* starclass, const char* desc,
+		    const char* assocDomain = VHDLBdomainName);
 
 	// copy constructor
 	VHDLBTarget(const VHDLBTarget&);
 
 	// return a new copy of itself
 	/*virtual*/ Block* makeNew() const;
-
-	// return the domain of the galaxy if it exists or "VHDLB" otherwise
-	/*virtual*/ const char* domain();
 
 	void headerCode();
 	virtual void setup();
