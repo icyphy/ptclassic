@@ -13,7 +13,7 @@
 
 typedef char Engine;
 
-Engine *engOpenPtError()
+inline Engine *engOpenPtError()
 {
 	Error::abortRun( "The external interface to Matlab has not been ",
 			 "compiled into Ptolemy." );
