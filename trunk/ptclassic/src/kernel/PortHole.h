@@ -85,7 +85,7 @@ public:
         Pointer* previous(int);
  
         // Size of the buffer
-        int size() {return dimen;}
+        int size() const {return dimen;}
  
 private:
         // Number of Pointers on the buffer
@@ -119,7 +119,7 @@ public:
         virtual int isItOutput () {return FALSE; }
 
 	// print info on the PortHole
-	virtual operator char* ();
+	virtual operator StringList ();
 
 	// no initialize function here
 	virtual void initialize () {}
@@ -137,7 +137,7 @@ public:
 		else return alias->realPort();
 	}
 
-	GenericPort& setPort(char* portName, Block* blk, dataType typ=FLOAT) {
+	GenericPort& setPort(const char* portName, Block* blk, dataType typ=FLOAT) {
 		setNameParent (portName, blk);
 		type = typ;
 		alias = NULL;
@@ -158,7 +158,7 @@ protected:
 
 // Contains all the facilities of all PortHoles; base class
 //  for all PortHoles
-class PortHole : GenericPort
+class PortHole : public GenericPort
 {
 public:
 
@@ -166,7 +166,7 @@ public:
         // This is not done in the constructor because c++ does not
         // allow us to initialize member classes.
         // Arguments are the name and type (see type.h for supported types).
-        PortHole& setPort(char* portName,
+        PortHole& setPort(const char* portName,
                           Block* parent,                // parent block pointer
                           dataType type = FLOAT);       // defaults to FLOAT
 
@@ -181,7 +181,7 @@ public:
         PortHole* farSidePort;
 
         // Print a description of the PortHole
-        virtual operator char* ();
+        virtual operator StringList ();
 
 	// set the alias
 	setAlias (PortHole& blockPort) { alias = &blockPort; }
@@ -239,7 +239,7 @@ class PortList : SequentialList
 	void initialize() {SequentialList::initialize();}
 
         // Return size of list
-        int size() {return SequentialList::size();}
+        int size() const {return SequentialList::size();}
 
 	// Reset the list to beginning
 	void reset() {SequentialList::reset();}
@@ -274,7 +274,7 @@ public:
  
         // Every MultiPortHole must be initialized with the setPort function
         // Arguments are the name and type (see type.h for supported types).
-        MultiPortHole& setPort(char* portName,
+        MultiPortHole& setPort(const char* portName,
                           Block* parent,                // parent block pointer
                           dataType type = FLOAT);       // defaults to FLOAT
  
@@ -306,7 +306,7 @@ public:
 	operator PortHole (){ return newConnection();}
 
         // Print a description of the MultiPortHole
-        virtual operator char* ();
+        virtual operator StringList ();
 
 protected:                           
         // List of ports allocated
@@ -341,7 +341,7 @@ class SDFPortHole : public PortHole
 public:
         // The setPort function is redefined to take one more optional
         // argument, the number of Particles consumed/generated
-        PortHole& setPort(char* portName,
+        PortHole& setPort(const char* portName,
                           Block* parent,
                           dataType type = FLOAT,
 			  // Number Particles consumed/generated
@@ -409,7 +409,7 @@ public:
  
         // The setPort function is redefined to take one more optional
         // argument, the number of Particles produced
-        MultiPortHole& setPort(char* portName,
+        MultiPortHole& setPort(const char* portName,
                           Block* parent,
                           dataType type = FLOAT,        // defaults to FLOAT
                           unsigned numTokens = 1);      // defaults to 1
