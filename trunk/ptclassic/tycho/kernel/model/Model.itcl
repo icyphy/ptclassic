@@ -180,6 +180,9 @@ class ::tycho::Model {
     # The array of event subscribers
     private variable _eventsubs
     
+    # The array of notifier subscribers
+    private variable _notifysubs
+    
     # The array of redo commands
     private variable _redo
 
@@ -602,7 +605,12 @@ body ::tycho::Model::notify {mode args} {
         }
         # Execute the command
         uplevel \#0 $cmd $args
-	}
+    }
+    # Process the notifier subscriptions
+    foreach {key cmd} [array get _notifysubs] {
+        # Execute the command
+        uplevel \#0 $cmd $args
+    }
 }
 
 ########################################################################
@@ -711,14 +719,13 @@ body ::tycho::Model::redo {{distance 1}} {
 ########################################################################
 #### subscribe
 #
-# Subscribe to this model. This command has two forms, depending
-# on the value of the _mode_ argument. The _subscriber_ is
-# the name of the subscriber -- usually but not always a widget. If
-# _subscriber_ is an object or Tk window, then it is converted 
-# into its access command (for example, <code>.foo</code> will be
-# converted into <code>::.foo</code>. If it is not, then the given
-# string will be used as-is -- this string is arbitrary, but care
-# should be taken to avoid clashing with object or widget names.
+# Subscribe to this model. This command has several forms, depending
+# on the value of the _mode_ argument. Many of these forms tak
+# a _subscriber argument -- this must be an Itcl object or
+# widget that is visible from this scope, or an error will be
+# raised. (If this error does occur, it may because the widget
+# or object needed to be created with an <code>uplevel #0</code>.)
+# The command has these forms:
 #
 # <dl>
 # <dt><b>data</b> _subscriber_ ?_command_?
@@ -740,6 +747,18 @@ body ::tycho::Model::redo {{distance 1}} {
 # will take place by calling the subscriber's <b>notify</b> method --
 # this can be overridden by supplying the _command_ argument.
 #
+# <dt><b>notify</b> _key_ _command_
+# <dd>
+# Subscribe a notification script to both data and events.
+# The "key" is an arbitrary string that can be used to unsubscribe
+# later, and should be set to something meaningful to the
+# caller. When the model changes, _command_ has the change
+# data (as for the <b>data</b> and <b>event</b> modes) appended
+# to it, and the result is evaluated in the global scope.
+# This mechanism is provided for those situations in which there
+# is no subscriber object, but some procedure needs to be called
+# in response to changes in the model.
+#
 # <dt><b>info</b> ?_subscriber_?
 # <dd>
 # Return a string that prints information on subscribers. This
@@ -750,10 +769,21 @@ body ::tycho::Model::redo {{distance 1}} {
 # </dl>
 #
 body ::tycho::Model::subscribe {mode {subscriber {}} {command {}}} {
-    # Get subscriber command
+    # Process the "notify" case specially
+    if { $mode == "notify" } {
+        if { $subscriber == "" || $command == "" } {
+            error "wrong nr args to subscribe notify"
+        }
+        set _notifysubs($subscriber) $command
+        return
+    }
+
+    # Check for valid subscriber
     set s [::info which -command $subscriber]
     if { $s != "" } {
         set subscriber $s
+    } else {
+        error "Subscriber \"$subscriber\" does not exist or is not in scope"
     }
     # Generate default notification command
     if { $command == "" } {
@@ -854,11 +884,15 @@ body ::tycho::Model::undo {{distance 1}} {
 # <dd>
 # Unsubscribe from events on the model.
 #
+# <dt><b>notify</b> _key_
+# <dd>
+# Unsubscribe from data and events by key.
+#
 # </dl>
 #
 body ::tycho::Model::unsubscribe {mode subscriber} {
-    if ![regexp {^(data|event)$} $mode] {
-	error "bad option \"$mode\": should be data or event"
+    if ![regexp {^(data|event|notify)$} $mode] {
+	error "bad option \"$mode\": should be data, event, or notify"
     }
     
     # Get subscriber command if it exists
@@ -867,8 +901,14 @@ body ::tycho::Model::unsubscribe {mode subscriber} {
         set subscriber $s
     }
     # Unsubscribe it
-    if [::info exists _[set mode]subs($subscriber)] {
-        unset _[set mode]subs($subscriber)
+    if { $mode == "notify" } {
+        if [::info exists _notifysubs($subscriber)] {
+            unset _notifysubs($subscriber)
+        }
+    } else {
+        if [::info exists _[set mode]subs($subscriber)] {
+            unset _[set mode]subs($subscriber)
+        }
     }
 }
 
