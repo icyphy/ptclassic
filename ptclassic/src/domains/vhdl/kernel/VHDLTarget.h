@@ -109,7 +109,7 @@ public:
 	virtual void registerState(State*, const char*, int=-1, int=-1);
 
 	// Register PortHole reference.
-	virtual void registerPortHole(VHDLPortHole*, int=-1,
+	virtual void registerPortHole(VHDLPortHole*, const char*, int=-1,
 				      const char* ="");
 
 	// Return the assignment operators for States and PortHoles.

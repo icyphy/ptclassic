@@ -68,6 +68,11 @@ HLLTarget(name, starclass, desc) {
   // Make states defined in CGTarget settable.
   displayFlag.setAttributes(A_SETTABLE);
 
+  // Set the default to display the code.
+  displayFlag.setInitValue("YES");
+  // Set the default to not use loop scheduling.
+  loopingLevel.setInitValue("0");
+  
   // Initialize type conversion table
   typeConversionTable = vhdlCnvTable;
   typeConversionTableRows = 7;
@@ -595,8 +600,6 @@ void VHDLTarget :: registerState(State* state, const char* varName,
     initVal = state->currentValue();
   }
 
-//  ref << "_" << thisFiring;
-
   if (firingVariableList.inList(ref)) return;
   
   // Allocate memory for a new VHDLVariable and put it in the list.
@@ -608,8 +611,10 @@ void VHDLTarget :: registerState(State* state, const char* varName,
 }
 
 // Register PortHole reference.
-void VHDLTarget :: registerPortHole(VHDLPortHole* port, int tokenNum/*=-1*/,
+void VHDLTarget :: registerPortHole(VHDLPortHole* port, const char* varName,
+				    int tokenNum/*=-1*/,
 				    const char* part/*=""*/) {
+  StringList ref = varName;
   // The registry keeps track of all refed arcs, and their min/max R/W offsets.
   registerArcRef(port, tokenNum);
 
@@ -620,13 +625,15 @@ void VHDLTarget :: registerPortHole(VHDLPortHole* port, int tokenNum/*=-1*/,
 
 // Continue to do normal signal naming and portmapping.
 
+/*
   StringList ref = port->getGeoName();
   if (tokenNum >= 0) {
     ref << "_" << tokenNum;
   }
-  else { /* (tokenNum < 0) */
+  else { // (tokenNum < 0)
     ref << "_N" << (-tokenNum);
   }
+  */
   ref << part;
   
   //FIXME: May want to do something different if it's a wormhole port.
@@ -638,7 +645,6 @@ void VHDLTarget :: registerPortHole(VHDLPortHole* port, int tokenNum/*=-1*/,
   VHDLVariable* newvar = new VHDLVariable;
   newvar->name = ref;
   newvar->type = port->dataType();
-//  newvar->initVal = "0.0";
   if (!strcmp(newvar->type,"INTEGER")) {
     newvar->initVal = "0";
   }
