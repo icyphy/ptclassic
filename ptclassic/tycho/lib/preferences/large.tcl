@@ -4,6 +4,7 @@
 
 preference assign fonts textFont  {Screen 14}
 preference assign fonts entryFont {Screen 14}
+preference assign fonts menuFont  {Helvetica 12 bold}
 
 preference assign layout textWidth 72
 preference assign layout textHeight 40
