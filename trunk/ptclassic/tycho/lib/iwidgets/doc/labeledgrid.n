@@ -1,4 +1,4 @@
-.so man.macros
+M.so man.macros
 .HS iwidgets::Labeledgrid iwid
 .BS
 .SH NAME
@@ -11,27 +11,10 @@ itk::Widget <- iwidgets::Labeledgrid
 .LP
 .nf
 .ta 4c 8c 12c
-_STANDARD_OPTIONS_
+-background -font
 .fi
 .LP
 See the "options" manual entry for details on the standard options.
-.SH "ASSOCIATED OPTIONS"
-.LP
-.nf
-.ta 4c 8c 12c
-_ASSOCIATED_OPTIONS_
-.fi
-.LP
-See the "_ASSOCIATED_WIDGET_" widget manual entry for details on the above
-associated options.
-.SH "INHERITED OPTIONS"
-.LP
-.nf
-.ta 4c 8c 12c
-_INHERITED_OPTIONS_
-.fi
-.LP
-See the "_INHERITED_WIDGET_" class manual entry for details on the inherited options.
 .SH "WIDGET-SPECIFIC OPTIONS"
 .LP
 
@@ -68,30 +51,17 @@ to the grid, not of items already added.
 .LP
  
 .nf
-Name:	\fBentryBackground\fR
-Class:	\fBBackground\fR
-Command-Line Switch:	\fB-entrybackground\fR
-.fi
-.IP
-_OPTION_DESCRIPTION_
-.LP
- 
-.nf
-Name:	\fBfont\fR
-Class:	\fBFont\fR
-Command-Line Switch:	\fB-font\fR
-.fi
-.IP
-_OPTION_DESCRIPTION_
-.LP
- 
 .nf
 Name:	\fBlabelAnchor\fR
 Class:	\fBAnchor\fR
 Command-Line Switch:	\fB-labelanchor\fR
 .fi
 .IP
-_OPTION_DESCRIPTION_
+The default anchoring of the text labels in the \fBsimple\fR
+style. The value of this option is passed directly to the
+\fB-sticky\fR option of the Tk \fBgrid\fR command. It can be
+overridden for individual widgets and labels by calling the \fBgrid
+configure\fR command with the Tk widget path as argument.
 .LP
  
 .nf
@@ -120,9 +90,11 @@ Command-Line Switch:	\fB-padx\fR
 .IP
 The horizontal padding to use when gridding widgets. Widgets
 are gridded with the \fB-padx\fR option to the Tk \fBgrid\fR command
-set to this value.
+set to this value. This option is read only when items are
+first added to the grid, and will thus not affect items
+already added.
 .LP
- 
+
 .nf
 Name:	\fBpadY\fR
 Class:	\fBPadY\fR
@@ -161,7 +133,7 @@ achieved even between logical groups. Groups can be contained within
 other groups, to arbitrary depth, and the widget as a whole is best
 thought of as the top-level group. Each group and widget has
 its own label and border, as selected by the display style of
-that group or widget (see \fIDisplay styles\fR below).
+that group or widget (see \fIDISPLAY STYLES\fR below).
 .PP
 A group has a number of options that control layout (at the top
 level, they are specified by options to the widget, at lower levels,
@@ -205,11 +177,13 @@ A Tk checkbutton. Checkbuttons can usefully be placed into groups,
 as well as being labeled individually.
 .TP
 \fBradiobutton\fR
-A Tk radiobutton. Radiobuttons are usually used only within
+A Tk radiobutton. Radiobuttons are usually used within
 a shared item group.
 .TP
+\fBoptionmenu\fR
+An Iwidgets optionmenu.
+.TP
 \fBtext\fR
-
 A Tk text widget.
 .TP
 \fB\fItype\fR\fR
@@ -241,7 +215,7 @@ will be passed to the \fBgrid configure\fR command. The default is
 the \fB-sticky\fR option specified for its type.
 .TP
 \fB-style\fR \fIstring\fR
- The display style of the item. See \fIDisplay styles\fR
+ The display style of the item. See \fIDISPLAY STYLES\fR
 below. The default value is the \fB-childstyle\fR option of
 the item's parent.
 
@@ -251,8 +225,8 @@ the item's parent.
 A new group of items is added to Labeledgrid with the \fBgroup\fR method.
 Groups accept many of the same options as regular items, and can
 have labels and bounding boxes. Items within a group have hierarchical
-tags; for example, the item <code>foo.bar</code> is within the group
-<code>foo</code>. Groups accept the following options:
+tags; for example, the item \fBfoo.bar\fR is within the group
+\fBfoo\fR. Groups accept the following options:
 .TP
 \fB-childcolumnspan\fR \fIint\fR
  The default value of the \fB-columnspan\fR option of the
@@ -307,7 +281,7 @@ If zero, the group expands until the next sibling item
 is added. The default is one.
 .TP
 \fB-style\fR \fIstring\fR
- The display style of the group. See \fIDisplay styles\fR
+ The display style of the group. See \fIDISPLAY STYLES\fR
 below. The default value is the \fB-childstyle\fR option of
 the group's parent.
 
@@ -323,31 +297,31 @@ to perform operations on items of the new type. These options are:
 .TP
 \fB-assign\fR
  The script to assign a value to an item. If null, an attempt to assign
-a value will raise an error. The default is <code>{set %v %a}</code>.
+a value will raise an error. The default is \fB{set %v %a}\fR.
 .TP
 \fB-create\fR
  The script to create an item. An error will be raised if this
 option is not specified.
 .TP
 \fB-delete\fR
- The script to delete an item. The default is <code>{destroy %w}</code>.
+ The script to delete an item. The default is \fB{destroy %w}\fR.
 If null, an error will be raised on an attempt to delete that type.
 .TP
 \fB-disable\fR
  Disable user input to the item. If null, the type cannot be disabled.
-The default is <code>{%w configure -state disabled}</code>.
+The default is \fB{%w configure -state disabled}\fR.
 .TP
 \fB-enable\fR
  Enable user input to the item. If null, the widget cannot be enabled.
-The default is <code>{%w configure -state normal}</code>.
+The default is \fB{%w configure -state normal}\fR.
 .TP
 \fB-get\fR
  Get the item's value. If null, the item will not appear in the
-results of any value-getting methods. The default is <code>{set %v}</code>.
+results of any value-getting methods. The default is \fB{set %v}\fR.
 .TP
 \fB-options\fR
  A string passed as the second argument to \fBitk_component add\fR
-when the widget is created. The default is <code>{usual}</code>.
+when the widget is created. The default is \fB{usual}\fR.
 .TP
 \fB-sticky\fR
  The default "stickiness" of widget of thos type.
@@ -355,13 +329,18 @@ when the widget is created. The default is <code>{usual}</code>.
 .PP
 Before evaluating a script, Labeledgrid performs the following
 substitutions:
-<ul>
-<li><code>%a</code> is substituted with additional arguments.
-<li><code>%t</code> is substituted with the item tag.
-<li><code>%v</code> is substituted with the control variable.
-<li><code>%w</code> is substituted with the widget path.
-<li><code>%Q</code> is substituted with the Labeledgrid widget.
-</ul>
+.IP
+\fB%a\fR is substituted with additional arguments.
+.IP
+\fB%x\fR is substituted with the assigned value (assign only).
+.IP
+\fB%t\fR is substituted with the item tag.
+.IP
+\fB%v\fR is substituted with the control variable.
+.IP
+\fB%w\fR is substituted with the widget path.
+.IP
+\fB%Q\fR is substituted with the Labeledgrid widget.
 
 .SH "DISPLAY STYLES"
 
@@ -427,7 +406,7 @@ example) as a border in another part of the layout.
 
 .SH "METHODS"
 
-The \fBiwidgets::Labeledgrid\fR command creates a new Tcl command whose
+The \fBiwidgets::labeledgrid\fR command creates a new Tcl command whose
 name is \fIpathName\fR.  This
 command may be used to invoke various
 operations on the widget.  It has the following general form:
@@ -437,45 +416,48 @@ operations on the widget.  It has the following general form:
 \fIOption\fR and the \fIarg\fRs
 determine the exact behavior of the command.  The following
 commands are possible for iwidgets::Labeledgrid widgets:
-.SH "ASSOCIATED METHODS"
-.LP
-.nf
-.ta 4c 8c 12c
-_ASSOCIATED_METHODS_
-.fi
-.LP
-See the "_ASSOCIATED_WIDGET_" manual entry for details on the standard methods.
+.SH "ASSOCIATED PROCEDURE"
+.TP
+\fBiwidgets::Labeledgrid::newtype\fR \fItype\fR ?\fIoption value ...\fR?
+
+Add a new item type to the Labeledgrid class. The first argument is
+the item type that will be passed to the \fBadd\fR method.  It is
+usually the same as the widget command, but there is no need for it to
+be. Following arguments are an option-value list, where legal options
+are as described in the section \fIADDING NEW TYPES\fR above.
+This procedures raises an error if the _type_ already exists, or if an
+invalid option is specified.
+
 .SH "WIDGET-SPECIFIC METHODS"
 
 .TP
-\fIpathName\fR \fBadd\fR \fItype tag\fR ?option value ...\fR?
+\fIpathName\fR \fBadd\fR \fItype tag\fR ?\fIoption value ...\fR?
 
-Add a new item to the grid. The first argument is type of
-widget to create. This is followed by the \fItag\fR
-that will be used to reference the widget, then an option-value
-list. The options can be any that are valid for the widget type
-\fItype\fR, plus options that specify labeling and positioning
-information, as described in the section \fIItem Types\fR
-above. For each item, a variable is created that can be used to
-hold its value, which can be accessed within control scripts
-as <code>%v</code>.
+Add a new item to the grid. The first argument is type of widget to
+create. This is followed by the \fItag\fR that will be used to
+reference the widget, then an option-value list. The options can be
+any that are valid for the widget type \fItype\fR, plus options that
+specify labeling and positioning information, as described in the
+section \fIItem Types\fR above. For each item, a variable is created
+that can be used to hold its value, which can be accessed within
+control scripts as \fB%v\fR.
 .TP
 \fIpathName\fR \fBassign\fR \fItag value\fR
  
 Assign a value to an item. If the item is a group with a shared
-variable, the value is be assigned to the shared variable. If
-the group is not shared, the value must be a list of name-value
-pairs, where each name is relative to \fItag\fR. Each group member that
+variable, the value is be assigned to the shared variable. If the
+group is not shared, the value must be a list of name-value pairs,
+where each name is relative to \fItag\fR. Each group member that
 appears in the list is assigned the corresponding value. If assignment
-is supported for the item's type, assign \fIvalue\fR to the item; if 
+is supported for the item's type, assign \fIvalue\fR to the item; if
 assignment is not supported, raise an error. Raise an error if
 \fItag\fR does not exist.
 .TP
 \fIpathName\fR \fBdelete\fR \fItag\fR
 
-Delete an item. If the item is a group, all members of the group
-will also be deleted. Raise an error if \fItag\fR does not exist,
-or if deletion is not supported for its type.
+Delete an item. If the item is a group, all members of the group will
+also be deleted. Raise an error if \fItag\fR does not exist, or if
+deletion is not supported for its type.
 .TP
 \fIpathName\fR \fBdisable\fR \fItag\fR
 
@@ -495,29 +477,31 @@ zero.
 \fIpathName\fR \fBget\fR ?\fItag\fR?
 
 Get the value of one or more items. If \fItag\fR is a widget, return
-that item's value, or null if getting the value is not supported
-for the item's type. If \fItag\fR is a group with a shared variable,
-return the value of the shared variable. If \fItag\fR is any other group,
-return a name-value list of its members, where each name is relative
-to \fItag\fR. If \fItag\fR is not supplied, return a name-value list of
-all top-level items. Raise an error if \fItag\fR is supplied but is not
-an item.
+that item's value, or null if getting the value is not supported for
+the item's type. If \fItag\fR is a group with a shared variable,
+return the value of the shared variable. If \fItag\fR is any other
+group, return a name-value list of its members, where each name is
+relative to \fItag\fR. If \fItag\fR is not supplied, return a
+name-value list of all top-level items. Raise an error if \fItag\fR is
+supplied but is not an item.
 .TP
 \fIpathName\fR \fBgroup\fR \fItag\fR ?\fIoption value\fR?
 
 Add a group. Options are as described in \fIItem Groups\fR above.
 Raise an error if an item with that tag already exists.
 .TP
-\fIpathName\fR \fBhskip\fR ?\fItag\fR? ?\fIoption value\fR?
+\fIpathName\fR \fBhskip\fR ?\fIgroup\fR? ?\fIoption value\fR?
 
-Skip a column. \fItag\fR is recorded as being at the location if _tag has
-not already been recorded. The tag also indicates the group within which
-to skip, if not at the top level. Any options supported by the Tk
-\fBgrid columnconfigure\fR command are supported -- that is,
-\fB-minsize\fR, \fBpad\fR, and \fB-weight\fR. Note that these
-options affect the grid used by all items. If the skip takes the
-current column counter past the end of the group, call \fBvskip\fR
-to move to the next row.
+Skip a column. If \fIgroup\fR is supplied, it is the name of the group
+within which to skip; if it is not supplied, the skip takes place at
+the top level. The current row counter is incremented by one; if this
+takes the counter past the end of the group, \fBvskip\fR is called to
+move to the next row. Following arguments are an option-value list:
+these can be any options supported by the Tk \fBgrid
+columnconfigure\fR command are supported -- that is, \fB-minsize\fR,
+\fBpad\fR, and \fB-weight\fR. The options will be applied to the
+current column before the skip. Note that these options will affect
+the grid used by all items, not just the grid with the given group.
 .TP
 \fIpathName\fR \fBitemcget\fR \fItag option\fR
 
@@ -542,28 +526,67 @@ options cannot be specified. For widgets, these are \fB-columnspan\fR,
 \fB-childcolumnspan\fR options affect only subsequently-created
 items.
 .TP
-\fIpathName\fR \fBvskip\fR ?\fItag\fR? ?\fIoption value...\fR?
-Skip a row. \fItag\fR is recorded as being at the location if _tag has
-not already been recorded. The tag also indicates the group within which
-to skip, if not at the top level. Any options supported by the Tk
-\fBgrid rowconfigure\fR command are supported -- that is,
-\fB-minsize\fR, \fBpad\fR, and \fB-weight\fR. The current row
-counter is incremented by the row span of the item in the current row
-with the largest row span, and the current column counter reset
-to the start column of the group.
+\fIpathName\fR \fBnames\fR ?\fIgroup\fR?
+
+Get a list of names in a group. If \fIgroup\fR is supplied, it must be
+a non-shared group, and this method will return the names within that
+group.  If \fIgroup\fR is not suppled, return the names at the top
+level.  Raise an error if \fIgroup\fR is unknown or is not an unshared
+group.
+.TP
+\fIpathName\fR \fBvskip\fR ?\fIgroup\fR? ?\fIoption value...\fR?
+
+Skip a row. If \fIgroup\fR is supplied, it is the name of the group
+within which to skip; if not supplied, the skip is at the top
+level. The current row counter is incremented by the row span of the
+item in the current row with the largest row span, and the current
+column counter is reset to the start column of the group.  Following
+arguments are an option-value list.  Legal options options are those
+supported by the Tk \fBgrid rowconfigure\fR command are supported --
+that is, \fB-minsize\fR, \fBpad\fR, and \fB-weight\fR. These will
+applied to the current row before skipping. Note that these options
+will affect the grid used by all items, not just the grid with the
+given group.
 
 .SH "COMPONENTS"
+\fILabeledgrid\fR dynamically creates components as widgets and
+groups are added to the grid.
 .LP
 .nf
-Name:   \fB_COMPONENT_NAME_\fR
-Class:  \fB_COMPONENT_CLASS_\fR
+Name:	\fItag\fR
+Class:	\fIwidgetclass\fR
 .fi
 .IP
-_COMPONENT_DESCRIPTION_
-
-See the "_COMPONENT_TYPE_" widget manual entry for details on the
-_COMPONENT_NAME_ component item.
+A widget. The \fItag\fR item is the tag passed to the \fBadd\fR method
+when the widget was created. Note that if \fItag\fR is a group, there
+will be component named \fItag\fR.
+.LP
+.nf
+Name:	\fItag\fR\fBframe\fR
+Class:	\fBFrame\fR
 .fi
+.IP
+A frame that is used in the \fBseparated\fR and \fBboxed\fR display
+styles to contain the border and label.
+.LP
+.nf
+Name:	\fItag\fR\fBlabel\fR
+Class:	\fBLabel\fR
+.fi
+.IP
+The label of a widget or group, created in the \fBsimple\fR,
+\fBseparated\fR and \fBboxed\fR display styles. See the "label" widget
+manual entry for details.
+.LP
+.nf
+Name:	\fItag\fR\fBborder\fR
+Class:	\fBFrame\fR
+.fi
+.IP
+A border in the \fBseparated\fR and \fBboxed\fR display styles. This
+is a Tk frame -- see the "label" widget manual entry for details.
+.fi
+
 .SH EXAMPLE
 .DS
 _EXAMPLE_CODE_
