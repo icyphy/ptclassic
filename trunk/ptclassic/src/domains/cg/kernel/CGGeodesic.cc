@@ -107,21 +107,26 @@ int CGGeodesic :: minNeeded() const
 	const CGPortHole* dest = (const CGPortHole*)destinationPort;
 	int nOld = 0;
 	int type = forkType();
+	int maxN = maxNumParticles();
+	int bufsize;
 	if ((type & F_SRC) != 0) {
 		// consider past sample access.
 		CGPortHole* dPort = (CGPortHole*)destinationPort;
 		ListIter next(dPort->forkDests);
 		CGPortHole* p;
 		while ((p = (CGPortHole*)next++) != 0) {
-			int temp = p->maxDelay() + 1 - p->numXfer() + 
-				p->numInitDelays();
-			if (temp > nOld) nOld = temp;
+			CGGeodesic* g = (CGGeodesic*) p->geo();
+			int temp = g->minNeeded();
+	//		int temp = p->maxDelay() + 1 - p->numXfer() + 
+	//			p->numInitDelays();
+			if (temp > maxN) maxN = temp;
 		}
+		bufsize = maxN;
 	} else {
 		nOld = max(dest->maxDelay() + 1 - dest->numXfer(),0);
+		bufsize = maxN+nOld;
 	}
-		
-	return maxNumParticles() + nOld;
+	return bufsize;
 }
 
 // recursive function to compute buffer and forkbuf sizes.  Note that
