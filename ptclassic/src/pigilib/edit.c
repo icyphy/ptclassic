@@ -314,9 +314,9 @@ long userOptionWord;
     ptkOctObj2Handle(&obj,facetHandle);
 
     TCL_CATCH_ERR( Tcl_VarEval(ptkInterp,"ptkEditText ",
-		   " \"Edit Comment\" ",
-                   " \"ptkSetStringProp ", facetHandle, " comment %s \" ",
-                   " [ptkGetStringProp ", facetHandle, " comment]",
+		   "\"Edit Comment\" ",
+                   "\"ptkSetStringProp ", facetHandle, " comment %s\" ",
+                   "[ptkGetStringProp ", facetHandle, " comment]",
                    (char *)NULL) )
 
     ViDone();
