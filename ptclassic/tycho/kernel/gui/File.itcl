@@ -1284,12 +1284,13 @@ body ::tycho::File::openContext {filename} {
     } {
 	#check for existing autosave files
 	set filename [checkForAutoSaveFiles $filename]
-        if {![file exists $filename]} {
-            if {![::tycho::askuser \
-                    "File $filename does not exist.  Open a blank editor?"]} {
-                return {}
-            }
-        }
+        # John Reekie does not like this dialog:
+        # if {![file exists $filename]} {
+        #    if {![::tycho::askuser \
+        #           "File $filename does not exist.  Open a blank editor?"]} {
+        #       return {}
+        #   }
+        # }
 	set ext [file extension $filename]
 	set base [file tail $filename]
 	if {[info exists editors] && [info exists editors($ext)]} {
