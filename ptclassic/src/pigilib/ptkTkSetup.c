@@ -142,7 +142,7 @@ ptkTkSetup(funcArray, size)
 	PrintErr(ErrGet());
         exit(1);
     }
-#endif 
+#endif /* TK_MAJOR_VERSION <= 4 && TK_MINOR_VERSION < 1 */
 
     /* no argc&argv to transfer */
     Tcl_SetVar(ptkInterp, "argv0", "pigi", TCL_GLOBAL_ONLY);
@@ -154,9 +154,19 @@ ptkTkSetup(funcArray, size)
 	PrintErr(ptkInterp->result);
 	exit(1);
     }
-
+			 
+#if TK_MAJOR_VERSION >= 4 && TK_MINOR_VERSION >= 1
+    ptkW = Tk_MainWindow(ptkInterp);
+    Tk_SetClass(ptkW, appClass);
+    Tk_SetAppName(ptkW, appName);
+    Tcl_CreateFileHandler(Tcl_GetFile((ClientData)
+				      ((int)fileno(RPCReceiveStream)),
+				      TCL_UNIX_FD),
+			  TCL_READABLE, ptkRPCFileProc, (ClientData) &RPCdata);
+#else
     Tk_CreateFileHandler(fileno(RPCReceiveStream), TK_READABLE,
     			 ptkRPCFileProc, (ClientData) &RPCdata);
+#endif /* TK_MAJOR_VERSION <= 4 && TK_MINOR_VERSION < 1 */
 
     pt = getenv("PTOLEMY");
     sprintf(buf, "%s/lib/tcl/pigilib.tcl", pt ? pt : "~ptolemy");
