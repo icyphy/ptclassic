@@ -133,7 +133,6 @@ InterpGalaxy::addState (const char* statename, const char* stateclass, const cha
         State *src = KnownState::clone(stateclass);
         if (src == 0) return FALSE;
         addState(src->setState(statename,this,statevalue));
-        initState();
 //add action to list
         actionList += "T";
         actionList += statename;
@@ -151,15 +150,19 @@ InterpGalaxy::setState (const char* blockname, const char* statename, const char
 		State *src = stateWithName(statename);
 		if (src == 0) return FALSE;
 		setState(statename,statevalue);
-		initState();
 	}
 	else {
 		Block* blk = blockWithName(blockname);
-		if (blk ==  0) return;	
+		if (blk ==  0) {
+			noInstance (blockname, readName());
+			return FALSE;
+		}
 		State *src = blk->stateWithName(statename);
-		if(src == 0) return;
+		if(src == 0) {
+			noInstance (statename, blockname);
+			return FALSE;
+		}
 		blk->setState(statename,statevalue);
-		initState();
 	}
 //add action to list
         actionList += "R";
@@ -343,4 +346,17 @@ Block* InterpGalaxy::blockWithDottedName (const char* dotname) {
 	Block* b = blockWithName (buf);
 	if (b->isItAtomic()) return NULL;
 	return ((InterpGalaxy&)b->asGalaxy()).blockWithDottedName (p + 1);
+}
+
+// Destructor -- we have to wipe out all the manually added things.
+// We don't need to do this for compiled Galaxys because the blocks,
+// ports, and states are members.
+
+InterpGalaxy :: ~InterpGalaxy () {
+	for (int i = numberBlocks(); i > 0; i--)
+		delete &nextBlock();
+	for (i = numberPorts(); i > 0; i--)
+		delete &nextPort();
+	for (i = numberStates(); i > 0; i--)
+		delete &nextState();
 }
