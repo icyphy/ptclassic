@@ -2,7 +2,7 @@
 Version identification:
 $Id$
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -47,18 +47,16 @@ static const char file_id[] = "FSMTarget.cc";
 FSMTarget::FSMTarget() :
 Target("default-FSM", "FSMStar", "default FSM target")
 {
-  addState(inputNameMap.setState("inputNameMap", this, "",
-	   "Assign the name for each PortHole in the input MultiPortHole. Each name should be embraced in a pair of double quotes."));
-  addState(outputNameMap.setState("outputNameMap", this, "",
-	   "Assign the name for each PortHole in the output MultiPortHole. Each name should be embraced in a pair of double quotes."));
-  addState(internalNameMap.setState("internalNameMap", this, "",
-	   "Assign the name for each internal event. Each name should be embraced in a pair of double quotes."));
-  addState(machineType.setState("machineType", this, "Pure",
-	   "Choices: Pure, Valued."));
+  addState(intlEventNames.setState("intlEventNames", this, "",
+	   "Assign the name for each internal event. Each name should be sparated by at least one space."));
+  addState(intlEventTypes.setState("intlEventTypes", this, "",
+	   "Assign the type for each internal event. Each type should be sparated by at least one space."));
+
   addState(evaluationType.setState("evaluationType", this, "Strict",
 	   "Specify how this FSM will be evaluated: Strict or NonStrict."));
   addState(oneWriterType.setState("oneWriterType", this, "Compile",
 	   "Specify when to do the one-writer rule checking."));
+
   addState(schedulePeriod.setState("schedulePeriod", this, "0.0",
 	   "schedulePeriod for interface with a timed domain."));
 }
@@ -72,30 +70,34 @@ FSMTarget::~FSMTarget() { delSched(); }
 void FSMTarget::setup() {
   FSMScheduler* fsmSched;
   InfString buf = (const char*)evaluationType;
-  buf << (const char*)machineType;
-  if (!strcmp(buf,"StrictPure")) {
-    fsmSched = new SPureSched;
+  if (!strcmp(buf,"Strict")) {
+      fsmSched = new StrictSched;
   } else {
       Error::abortRun("FSMTarget: ", 
-		      "Unregconized machine type!");
+		      "Unregconized evaluation type!");
       return; 
   }
 
   // setSched deletes the old scheduler.
   setSched(fsmSched);
 
-  delete [] fsmSched->inputNameMap;
-  fsmSched->inputNameMap = savestring(inputNameMap);
-  delete [] fsmSched->outputNameMap;
-  fsmSched->outputNameMap = savestring(outputNameMap);
-  delete [] fsmSched->internalNameMap;
-  fsmSched->internalNameMap = savestring(internalNameMap);
-  delete [] fsmSched->machineType;
-  fsmSched->machineType = savestring(machineType);
-  delete [] fsmSched->evaluationType;
-  fsmSched->evaluationType = savestring(evaluationType);
-  delete [] fsmSched->oneWriterType;
-  fsmSched->oneWriterType = savestring(oneWriterType);
+  if (intlEventNames.size() != intlEventTypes.size() ) {
+      Error::abortRun("FSMTarget: ",
+		      "The number of names is not matched",
+		      "the number of types for internal events");
+  }
+  
+  fsmSched->intlEventNames.initialize();
+  for (int i=0; i<intlEventNames.size(); i++)
+      fsmSched->intlEventNames << intlEventNames[i];
+
+  fsmSched->intlEventTypes.initialize();
+  for (int i=0; i<intlEventTypes.size(); i++)
+      fsmSched->intlEventTypes << intlEventTypes[i];
+
+  fsmSched->evaluationType = evaluationType;
+  fsmSched->oneWriterType = oneWriterType;
+
 //	fsmSched->schedulePeriod = schedulePeriod;
 
   if (galaxy()) fsmSched->setGalaxy(*galaxy());

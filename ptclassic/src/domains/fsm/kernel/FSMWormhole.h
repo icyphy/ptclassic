@@ -1,7 +1,7 @@
 #ifndef _FSMWormhole_h
 #define _FSMWormhole_h
 
-/*  Version $Id$
+/*  $Id$
 
 @Copyright (c) 1996-%Q% The Regents of the University of California.
 All rights reserved.
@@ -105,8 +105,6 @@ public:
 
     /*virtual*/ Geodesic* allocateGeodesic()
     { return ToEventHorizon::allocateGeodesic(); }
-
-    const char* ghostDomain;
 };
 
 class FSMfromUniversal : public FromEventHorizon, public OutFSMPort {
@@ -127,8 +125,6 @@ public:
 
     /*virtual*/ Geodesic* allocateGeodesic()
     { return FromEventHorizon::allocateGeodesic(); }
-
-    const char* ghostDomain;
 };
 
 #endif

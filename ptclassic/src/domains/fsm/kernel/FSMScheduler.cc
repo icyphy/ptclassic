@@ -49,23 +49,10 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 FSMScheduler::FSMScheduler() {
     currentTime = 0;
-
-    inputNameMap = NULL;
-    outputNameMap = NULL;
-    internalNameMap = NULL;
-    machineType = NULL;
-    evaluationType = NULL;
-    oneWriterType = NULL;
 }
 
 // Destructor.
 FSMScheduler::~FSMScheduler() {
-    delete [] inputNameMap;
-    delete [] outputNameMap;
-    delete [] internalNameMap;
-    delete [] machineType;
-    delete [] evaluationType;
-    delete [] oneWriterType;
 }
 
 // Set the stopping time.
@@ -92,7 +79,6 @@ int FSMScheduler::checkStars() {
       if (bl->isA("FSMStateStar")) {
           InfString buf = "FSM";
 	  buf << evaluationType;
-	  buf << machineType;
 	  if ( !bl->isA(buf) ) {
 	    Error::abortRun("FSMScheduler: \"", bl->name(),
                             "\" does not belong to this type of machine.");
@@ -143,131 +129,73 @@ void FSMScheduler::setup() {
 
     if (warnIfNotConnected(*galaxy())) return;
 
-    // Create the Tcl interpreter for evaluting the conditions in each state.
     // "myInterp" will be passed to each state, so it should be created
     // before galaxy()->initialize()
-    if (!(myInterp = Tcl_CreateInterp())) {
-      Error::abortRun("FSMScheduler:"," Couldn't create a Tcl interpreter!");
-      return; 
-    }
-
-    // Setup inputs, outputs and internal events. These information will
-    // be used in each state setup method, so it should be before 
-    // galaxy()->initialize().
-    if (!setupIO())  return;
+    if (!setupTclInterp()) return;
 
     galaxy()->initialize();
 
     // After galaxy()->initialize(), check all stars.
     if (!checkStars()) return;
 
-    // After checkStars(), myInPorts/myOutPorts are setup.
-    // Now get the outer domain.
-    if (myInPorts != NULL) {
-      MPHIter nexti(*(myInPorts));
-      PortHole *p = nexti++;
-      outerDomain = p->far()->parent()->domain();
-      if (!outerDomain) return;
-//printf("Galaxy = %s, outer domain = %s\n",galaxy()->name(),outerDomain);
-    }
-
     // Set current state to be the initial state.
     curState = initialState;
     curEntryType = 1;
+
+    // Set the outerDomain.
+    BlockPortIter next(*galaxy());
+    PortHole* p = next++;
+    if (p == NULL) {
+      Error::abortRun("FSMScheduler:"," No input/output port connected to",
+		      "outer doamin!?");
+      return; 
+    }
+    // p->parent() points to FSM galaxy;
+    // p->parent()->parent() points to Wormhole containning the FSM galaxy.
+    outerDomain = p->parent()->parent()->domain();
+    if (!outerDomain) return;
+// printf("Galaxy = %s, outer domain = %s\n",galaxy()->name(),outerDomain);
 }
 
-// Setup I/O mechanism.
-int FSMScheduler::setupIO() {
-
-    //---- Setup input/output ports. ----
-    myInPorts = NULL;
-    myOutPorts = NULL;
-
-    InfString dataInNm = "FSMDataIn";
-    InfString dataOutNm = "FSMDataOut";
-    if (!strcmp(machineType,"Pure")) {
-      dataInNm  << "Int";
-      dataOutNm << "Int";
-    }
-    GalTopBlockIter next(*galaxy());
-    Block *bl;
-    while ((bl = next++) != 0) {      
-	if (bl->isA(dataInNm)) {
-	  bl->initialize();
-	  myInPorts = bl->multiPortWithName("input");
-	}
-	else if (bl->isA(dataOutNm)) {
-	  bl->initialize();
-	  myOutPorts = bl->multiPortWithName("output");
-	}
+// (1) Create a Tcl interpreter 
+// (2) Register inputs, outputs, internal events in the Tcl interp
+int FSMScheduler::setupTclInterp() {
+    // Create the Tcl interpreter for evaluting the conditions in each state.
+    if (!(myInterp = Tcl_CreateInterp())) {
+      Error::abortRun("FSMScheduler:"," Couldn't create a Tcl interpreter!");
+      return FALSE; 
     }
 
-    if (myInPorts == NULL) {
-      Error::abortRun("FSMScheduler:", " No data input star.");
-      return FALSE;  
-    } else if (myOutPorts == NULL) {
-      Error::abortRun("FSMScheduler:", " No data output star.");
-      return FALSE;
-    }
-
-    // Setup the name of each PortHole in the input/output MultiPortHole.
-    if (!setupNameMap(*myInPorts,inputNameMap))    return FALSE;
-    if (!setupNameMap(*myOutPorts,outputNameMap))  return FALSE;
-
-    //---- Setup internal events. ----
-    // Parse the names specified in "internalNameMap", and store 
-    // all parsed names in a StringList "internalEventNm".
-    int numNm = 0;
-    char** tmpNmList = strParser(internalNameMap, numNm, "double-quote");
-    if (!tmpNmList)  return FALSE;
-
-    for (int i=0; i<numNm; i++) {
-      internalEventNm << tmpNmList[i];
-      
-      // Register internal event name into Tcl.
-      Tcl_SetVar(myInterp,tmpNmList[i],"0",TCL_GLOBAL_ONLY);
-    }
-
-    delete [] tmpNmList;
-
-    //---- Setup all input/ output buffers. ----
-    if (!setupIOBuf()) return FALSE;
-    
-    return TRUE;
-}
-
-int FSMScheduler::setupIOBuf() {
-    Error::abortRun("FSMScheduler: Input/output buffers depend on the ",
-                    "type of the machine. Should be setup in derived class.");
-    return FALSE;
-}
-
-// Set each PortHole of a MultiPortHole with a name.
-int FSMScheduler::setupNameMap(MultiPortHole& mph, const char* Name_Map) {
-    int nNames = 0;
-    char **parsedName = strParser(Name_Map,nNames,"double-quote"); 
-    if (!parsedName)  return FALSE;
-
-    if (nNames != mph.numberPorts()) {
-      delete [] parsedName;
-
-      InfString buf = "FSMScheduler: The number of specified ";
-      buf << mph.isItInput() ? "input" : "output";
-      buf << " names don't match the number of PortHoles in the ";
-      buf << "MultiPortHole.";
-      Error::abortRun(buf);
-      return FALSE;
-    }
-
-    MPHIter nextp(mph);
+    // Register inputs and outputs in the Tcl interp
     PortHole* p;
-    int indx = 0;
-    while ( (p = nextp++) != NULL ) {
-      p->setName((const char*)parsedName[indx]);
-      indx++;
+    BlockPortIter next(*galaxy());
+    while ((p = next++) != NULL) {
+      // First, set real port's name to be consistent with galaxy port's name.
+      p->alias()->setName(p->name());
+
+      // Register inputs and outputs in the Tcl interp.
+      // For each PortHole name, we create two variable,
+      // "name(s)" and "name(v)".
+      // "name(s)"/"name(v)" is used to keep the status/value respectively. 
+      InfString buf = p->name();
+      buf << "(s)";
+      Tcl_SetVar(myInterp,buf,"0",TCL_GLOBAL_ONLY);
+      buf = p->name();
+      buf << "(v)";
+      Tcl_SetVar(myInterp,buf,"0",TCL_GLOBAL_ONLY);
     }
 
-    delete [] parsedName;
+    // Register internal events in the Tcl interp
+    StringListIter nextName(intlEventNames);
+    const char* name;
+    while ((name = nextName++) != NULL) {
+      InfString buf = name;
+      buf << "(s)";
+      Tcl_SetVar(myInterp,buf,"0",TCL_GLOBAL_ONLY);
+      buf = name;
+      buf << "(v)";
+      Tcl_SetVar(myInterp,buf,"0",TCL_GLOBAL_ONLY);
+    }
 
     return TRUE;
 }
@@ -278,82 +206,49 @@ ISA_FUNC(FSMScheduler,Scheduler);
 
 
 	//////////////////////////////////////////
-	// Methods for SPureSched
+	// Methods for StrictSched
 	//////////////////////////////////////////
 
-SPureSched::SPureSched() {
-    myAllInBuf = NULL;
-    myAllOutBuf = NULL;
+StrictSched::StrictSched() {
 }
 
 // Destructor.
-SPureSched::~SPureSched() {
-    delete [] myAllInBuf;
-    delete [] myAllOutBuf;
+StrictSched::~StrictSched() {
 }
 
-void SPureSched::clearOutput(int value) {
-    int indx;
-    // Clear output buffers corresponding to the internal events.
-    for (indx=0; indx<internalEventNm.numPieces(); indx++)
-      myAllOutBuf[indx] = value;
-
-    // For output portholes.
+int StrictSched::receiveData() {
     PortHole* p;
-    MPHIter nexto(*(myOutPorts));
-    while ((p = nexto++) != 0) {
-      // Get and initialize enough Particles in PortHole.
-      p->receiveData();
+    BlockPortIter next(*galaxy());
+    while ((p = next++) != NULL)
+      if (p->isItInput()) {
+	// For input port, update the data in Tcl interp.
 
-      // Clear output buffers corresponding to the output ports.
-      myAllOutBuf[indx] = value;
+	// Set p point to its real port.
+	p = (PortHole *)p->alias();
 
-      indx++;
-    } 
-}
-
-void SPureSched::receiveData() {
-    int indx;
-    // Internal events are fed back from previous iteration.
-    for (indx=0; indx<internalEventNm.numPieces(); indx++)
-      myAllInBuf[indx] = myAllOutBuf[indx];
-
-    // Grab data for input portholes.
-    PortHole* p;
-    MPHIter nexti(*(myInPorts));
-    while ((p = nexti++) != 0) {
-      // Get input data.
-      if (!p->geo()->size()) {
-	// There is no token: The only possibility is that there is
-	// no event from outer DE domain, then it is considered absent.
-	(*p)%0 << 0;
+	// Register new input from PortHole to Tcl Interp.
+	if (!port2interp(p, myInterp, outerDomain)) return FALSE;
 
       } else {
-	// There exist tokens: Then grab data from Geodesic to PortHole.
-	p->receiveData(); 
+	// For output port, clear the data in Tcl interp.
+	
+	// Set p point to its real port.
+	p = (PortHole *)p->alias();
 
-	// Clear those Particles that is still in Geodesic.
-	while (p->geo()->size()) {
-	  Particle* pp = p->geo()->get();
-	  pp->die();
-	}
-
-	if (!strcmp(outerDomain,"DE")) {
-	  // If outer domain is DE, it is considered present as long as
-	  // there is a token, and we don't care about its value.
-	  (*p)%0 << 1;
-	}
+	// Set both status and value to 0 in Tcl interp.
+	InfString buf = p->name();
+	buf << "(s)";
+	Tcl_SetVar(myInterp,buf,"0",TCL_GLOBAL_ONLY);
+	buf = p->name();
+	buf << "(v)";
+	Tcl_SetVar(myInterp,buf,"0",TCL_GLOBAL_ONLY);
       }
-
-      // Then put the data into input buffers.
-      myAllInBuf[indx] = int((*p)%0);
-
-      indx++;
-    }
+        
+    return TRUE;
 }
 
 // Run (or continue) the simulation.
-int SPureSched::run() {
+int StrictSched::run() {
     if (SimControl::haltRequested() || !galaxy()) {
 	Error::abortRun("FSMScheduler has no galaxy to run");
 	return FALSE;
@@ -363,37 +258,34 @@ int SPureSched::run() {
     if (!SimControl::doPreActions(curState)) return FALSE;
 
     // Grab input data and get internal events.
-    receiveData();
-    // Clear output buffers.
-    clearOutput(0);
-    
-    int condNum;
+    if (!receiveData()) return FALSE;
+
+    int transNum;
     // Find the next state by examining the preemptive arcs.
-    if (!(nextState = curState->nextState(condNum,1)))  return FALSE;
-    if (condNum == -1) {
+    if (!(nextState = curState->nextState(transNum,1)))    return FALSE;
+    if (transNum == -1) {
       // If not found, then execute the slave process if it exists.
-      if (!curState->execSlave(curEntryType)) return FALSE;
+      if (!curState->execSlave(curEntryType))    return FALSE;
 
       // Find the next state by examining the NOT preemptive arcs.
-      if (!(nextState = curState->nextState(condNum,0)))  return FALSE;
-      if (condNum == -1) {
-	InfString buf = "FSMScheduler: No transition is triggered ";
-	buf << "at state \"";
-	buf << curState->name();
-	buf << "\".";
-	Error::abortRun(buf);
-	return FALSE;
-      }
+      if (!(nextState = curState->nextState(transNum,0)))  return FALSE;
     }
-    // Do the action for the next transition corresponding to "actNum".
-    if (!curState->execAction(condNum))      return FALSE;
+    // Do the action for the next transition corresponding to "transNum".
+    if (!curState->execAction(transNum))    return FALSE;
 
     // Send output data.
-    sendData();
+    if (!sendData())    return FALSE;
 
-    // Update the entry type of last transition.
-    if ( (curEntryType = curState->getEntryType(condNum)) == -1 )
-      return FALSE;
+    if (transNum == -1) {
+      // If implicit transition is triggered,
+      // entry type would be always 0 (history entry).
+      curEntryType = 0;
+    } else {
+      // If explicit transition is triggered,
+      // update the entry type to depend on that transition.
+      if ((curEntryType = curState->getEntryType(transNum)) == -1)
+	return FALSE;
+    }
 
     // Set the next state to be current state for next iteration.
     curState = nextState;
@@ -404,45 +296,43 @@ int SPureSched::run() {
     return !SimControl::haltRequested();
 }
 
-void SPureSched::sendData() {
-    // For output portholes.
-    int indx = internalEventNm.numPieces();
+int StrictSched::sendData() {
     PortHole* p;
-    MPHIter nexto(*(myOutPorts));
-    while ((p = nexto++) != 0) {
-      // Put data from buffers to PortHole.
-      (*p)%0 << myAllOutBuf[indx];
+    BlockPortIter next(*galaxy());
+    while ((p = next++) != NULL)
+      if (p->isItOutput()) {
+	// Set p point to its real port.
+	p = (PortHole *)p->alias();
 
-      // Send data to Geodesic from PortHole.
-      p->sendData();
+	// Send output from Tcl Interp to PortHole.
+	if (!interp2port(myInterp, p, outerDomain)) return FALSE; 
 
-      indx++;
-    }
+      } // end of if (p->isItOutput())
+
+  return TRUE;
 }
 
-// Setup input/output/internal event buffers.
-int SPureSched::setupIOBuf() {
-    int i;
-    int numAllInputs = internalEventNm.numPieces()+myInPorts->numberPorts();
-    delete [] myAllInBuf;
-    myAllInBuf = new int[numAllInputs];
-    for (i=0; i<numAllInputs; i++) {
-      myAllInBuf[i] = 0;
+void StrictSched::printTclVar() {
+    PortHole* p;
+    BlockPortIter next(*galaxy());
+    while ((p = next++) != NULL) {
+      p = (PortHole *)p->alias();
+      if (p->isItInput()) {
+	printf("input port name = %s\n",p->name());
+      } else {
+	printf("output port name = %s\n",p->name());
+      }
 
-      InfString buf = "input(";
-      buf << i;
-      buf << ")";
-      Tcl_LinkVar(myInterp, buf, (char *)&(myAllInBuf[i]),TCL_LINK_INT);
+      InfString buf = p->name();
+      buf << "(s)";
+      InfString statusStr = Tcl_GetVar(myInterp,buf,TCL_GLOBAL_ONLY);
+      buf = p->name();
+      buf << "(v)";
+      InfString valueStr = Tcl_GetVar(myInterp,buf,TCL_GLOBAL_ONLY);
+      printf("statusStr = %s, valueStr = %s\n",
+	     (char*)statusStr,(char*)valueStr);
     }
-
-    int numAllOutputs = internalEventNm.numPieces()+myOutPorts->numberPorts();
-    delete [] myAllOutBuf;
-    myAllOutBuf = new int[numAllOutputs];
-    for (i=0; i<numAllOutputs; i++)
-      myAllOutBuf[i] = 0;
-
-    return TRUE;
 }
 
 // isA
-ISA_FUNC(SPureSched,FSMScheduler);
+ISA_FUNC(StrictSched,FSMScheduler);

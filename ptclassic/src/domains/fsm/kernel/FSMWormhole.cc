@@ -114,14 +114,6 @@ void FSMtoUniversal :: receiveData ()
 	timeMark = sched->now();
     }
 
-    if (!strcmp(ghostDomain,"DE")) {
-	if (int((*this)%0) == 0) {
-	    // In pure FSM, 0 means absent, 
-	    // so we shouldn't send event to DE.
-	    tokenNew = FALSE;
-	}
-    }
-
     // transfer Data
     transferData();
 }
@@ -129,16 +121,6 @@ void FSMtoUniversal :: receiveData ()
 void FSMtoUniversal :: initialize() {
     InFSMPort :: initialize();
     ToEventHorizon :: initialize();
-    if (FSMtoUniversal::isItInput()) {
-      // When FSM is an outer domain. Use the connection topology to find
-      // out the inside domain because innerSched() is not setup yet.
-      // (Scheduler is allocated in Target::setup())
-      ghostDomain = asEH()->ghostAsPort()->far()->parent()->domain();
-
-    } else {
-      // When FSM is an inner domain.
-      ghostDomain = outerSched()->domain();
-    }
 }
 
 int FSMtoUniversal :: isItInput() const { return EventHorizon :: isItInput(); }
@@ -156,51 +138,17 @@ void FSMfromUniversal :: sendData () {
     // 1. transfer data from the other side of the event horizon
     transferData();
 
-    if (FSMfromUniversal::isItOutput()) {
-      // When FSM is an outer domain.
-      if (!tokenNew) {
-	// If there is no token: The only possibility is that there is 
-	// no event from inner DE domain, then it is considered absent.
-	(*this)%0 << 0;
-	tokenNew = TRUE;
-
-      } else {
-	// There exist tokens.
-	if (!strcmp(ghostDomain,"DE")) {
-	  // If inner domain is DE, it is considered present as long as
-	  // there is a token, and we don't care about its value.
-	  (*this)%0 << 1;
-	}	
-      }
-    }
-
-    // Note: When FSM is an inner domain, if ghost domain is DE, this method
-    // won't even have the chance to be invoked when there is no event in the
-    // ghost DE port. Hence, the translation of signals for this case is 
-    // handled by FSMScheduler::run() instead of here.
-
     if (tokenNew) {
       // 2. put data to the FSM geodesic
       putData();
     } else {
-      Error::abortRun(*this,"Internal error: Should not happen this way!");
-      return;
+      // No token from the other domain is OK for FSM
     }
 }
 
 void FSMfromUniversal :: initialize() {
     OutFSMPort :: initialize();
     FromEventHorizon :: initialize();
-    if (FSMfromUniversal::isItOutput()) {
-      // When FSM is an outer domain. Use the connection topology to find
-      // out the inside domain because innerSched() is not setup yet.
-      // (Scheduler is allocated in Target::setup())
-      ghostDomain = asEH()->ghostAsPort()->far()->parent()->domain();
-
-    } else {
-      // When FSM is an inner domain.
-      ghostDomain  = outerSched()->domain();
-    }
 }
 
 int FSMfromUniversal :: isItInput() const {return EventHorizon::isItInput();}

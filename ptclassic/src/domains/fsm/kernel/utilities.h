@@ -42,6 +42,11 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #pragma interface
 #endif
 
+extern int port2interp(PortHole* port,Tcl_Interp* myInterp,
+		       const char* ghostDomain);
+extern int interp2port(Tcl_Interp* myInterp,PortHole* port,
+		       const char* ghostDomain);
+
 extern char** strParser(const char* strings,int& numStr,const char* type);
 
 #endif

@@ -61,8 +61,10 @@ FSMStateStar::FSMStateStar ()
 
     addState(isInitState.setState("isInitState",this,"FALSE","Is this an initial state?"));
 
-    addState(conditions.setState("conditions",this,"","The conditions to determine the next transition state. Each condition must be surrounded by a pair of dcurly-braces."));
-    addState(actions.setState("actions",this,"","The actions to specify the indices of outputs for all possible next transitions (outgoing arcs). Each set of output indices for one transition must be surrounded by a pair of curly-braces."));
+    addState(events.setState("events",this,"","The events to trigger the next transition state. Each event must be surrounded by a pair of curly-braces."));
+    addState(conditions.setState("conditions",this,"","The conditions to determine the next transition state. Each condition must be surrounded by a pair of curly-braces."));
+    addState(actEvents.setState("actEvents",this,"","The sets of output events to be emitted for all possible next transitions (outgoing arcs). Each set of output events for one transition must be surrounded by a pair of curly-braces, and each event in that set must be surrounded by a pair of double-quotes"));
+    addState(actExprs.setState("actExprs",this,"","The sets of expressions to be evaluated corresponding to the sets of output events to be emitted for all possible next transitions (outgoing arcs). Each set of expressions for one transition must be surrounded by a pair of curly-braces, and each expression in that set must be surrounded by a pair of double-quotes"));
 
     addState(entryType.setState("entryType",this,"","Specify the entry type for each possible transition out of this state. Available choices are 0 (History) or 1 (Initial). Note that the # of specified types should be equal to the # of outgoing arcs."));
     addState(preemptive.setState("preemptive",this,"","Specify that each possible transition is preemptive or not. Note that the # of YES/NO should be equal to the # of outgoing arcs."));
@@ -70,54 +72,28 @@ FSMStateStar::FSMStateStar ()
     addState(slaveNm.setState("slaveNm",this,"","The file name of an Galaxy to be the slave process."));
     addState(where_is_defined.setState("where_is_defined",this,"","The path name of the Galaxy of the slave process."));
 
-    parsedCond = NULL;
-    parsedAct = NULL;
-    slave = NULL;
+    parsedEvents = NULL;
+    parsedConditions = NULL;
+    parsedActEvents = NULL;
+    parsedActExprs = NULL;
 }
 
 FSMStateStar::~FSMStateStar() {
-    delete [] parsedCond;
-    delete [] parsedAct;
-    delete slave;
+    delete [] parsedEvents;
+    delete [] parsedConditions;
 }
 
 void FSMStateStar::begin() {
     if (slave != NULL) {
       // Run the XXXWormhole::begin(), this eventually will invoke 
       // the begin method of each Star in the Galaxy.
-      slave->worm->begin();  
+      slave->begin();  
     }
 }
 
-int FSMStateStar::compOneWriterCk() {
-    int l;
-    for (int i=0; i<numConds; i++)
-        if (!preemptive[i])
-        for (int j=0; j<parsedAct[i].size(); j++)
-	    for (int k=0; k<slave->outNmList.numPieces(); k++)
-		if (parsedAct[i][j] == slave->outGeoIndx[k]) {
-		    InfString buf = "The output \"";
-		    StringListIter nextNm(slave->outNmList);
-		    const char* str = NULL;
-		    for (l=0; l<=k; l++)   str = nextNm++;
-		    buf << str;
-		    buf << "\" in the action of the non-preemptive ";
-		    buf << "transtion from state \"";
-		    buf << this->name();
-		    buf << "\" to state \"";
-		    MPHIter nextp(stateOut);
-		    PortHole* p = NULL;
-		    for (l=0; l<=i; l++)   p = nextp++;
-		    str = p->far()->parent()->name();
-		    buf << str;
-		    buf << "\" conflicts with the output of ";
-		    buf << "the internal machine.";
-		    Error::abortRun(*this,buf);
-		    return FALSE;
-		}
-
+int FSMStateStar::oneWriterCk() {
     return TRUE;
-}  // end of compOneWriterCk()
+}  // end of oneWriterCk()
 
 Star* FSMStateStar::createWormhole(const char *galname,
 				   const char* where_defined) {
@@ -212,48 +188,35 @@ int FSMStateStar::getEntryType (int transNum) {
     return entryType[transNum];
 }
 
-int FSMStateStar::ioNmLists(StringList& inNmList, StringList& outNmList, Star* worm) {
-    // Find the input/output port names of the worm, 
-    // and put them into inNmList/outNmList.
-    
-    // Check the PortHoles in the worm.
-    BlockPortIter nextp(*worm);
-    PortHole* p;
-    while ((p = nextp++) != 0) {
-      if (p->isItInput())  inNmList << p->name();
-      else  outNmList << p->name();
-    }
-
-     // Check the MultiPortHoles in the worm.
-    BlockMPHIter nextmp(*worm);
-    MultiPortHole* mp;
-    while ((mp = nextmp++) != 0) {
-      if (mp->isItInput())   inNmList << mp->name();
-      else  outNmList << mp->name();
-    }
-
-    return TRUE;
-}
-
-// Find the next state that meets the condition depending
-// on preemptive or not.
-// Return (1) "condNum", condition #, which is TRUE at this transition,
+// Find the next state that meets the triggering event and condition
+// depending on preemptive or not.
+// Return (1) "transNum", # for the transition that is triggered.
 // and (2) the corresponding connected state.
-// If no condition is TRUE, return (1) condNum = -1 and (2) "this" state.
-FSMStateStar * FSMStateStar::nextState (int& condNum, int preemption) {
+// If no transition is triggered, return (1) transNum = -1
+// and (2) "this" state.
+FSMStateStar * FSMStateStar::nextState (int& transNum, int preemption) {
       InfString buf;
-      int* result = new int[numConds];
+      int* result = new int[numTrans];
       int checkResult = 0;
-      int i; 
+      int indx; 
 
-      for (i = 0; i < numConds; i++) {
-	if (preemptive[i] == preemption) {
-	  // If the preemptiveness of the i'th arc is equal to "preemption",
-	  // then evaluate the corresponding condition. 
-	  buf = parsedCond[i];
-	  if(Tcl_ExprBoolean(myInterp, (char*)buf, &(result[i])) != TCL_OK) {
-	    buf = "Cannot evaluate the condition #";
-	    buf << i;
+      for (indx = 0; indx < numTrans; indx++) {
+	if (preemptive[indx] != preemption) {
+	  // No need to evaluate transition with unmatched preemptiveness.
+	  result[indx] = 0;
+
+	} else {
+	  // If the preemptiveness of the indx'th arc is equal to "preemption",
+	  // then evaluate the corresponding triggering event and condition. 
+	  
+	  // Evaluate triggering event.
+	  buf = parsedEvents[indx];
+	  if ( !strcmp(buf,"") ) {
+	    result[indx] = 1;
+	  } else if (Tcl_ExprBoolean(myInterp, (char*)buf, &(result[indx]))
+		     != TCL_OK) {
+	    buf = "Cannot evaluate the triggering event #";
+	    buf << indx;
 	    buf << " in ";
 	    buf << this->name();
 	    buf << ". The error message in Tcl : ";
@@ -262,24 +225,44 @@ FSMStateStar * FSMStateStar::nextState (int& condNum, int preemption) {
 	    delete [] result;
 	    return NULL;
 	  }
-	  if (result[i] == 1) checkResult++;
+	  
+	  if (result[indx] == 1) {
+	    // If evaluation of triggering event is TRUE,
+	    // then evaluate triggering condition.
+	    buf = parsedConditions[indx];
+	    if ( !strcmp(buf,"") ) {
+	      result[indx] = 1;
+	    } else if (Tcl_ExprBoolean(myInterp, (char*)buf, &(result[indx]))
+		       != TCL_OK) {
+	      buf = "Cannot evaluate the triggering condition #";
+	      buf << indx;
+	      buf << " in ";
+	      buf << this->name();
+	      buf << ". The error message in Tcl : ";
+	      buf << myInterp->result;
+	      Error::abortRun(*this,(char*)buf);
+	      delete [] result;
+	      return NULL;
+	    }
+	    // When both triggering event and condition are TRUE,
+	    // the transition is supposed to be triggered.
+	    if (result[indx] == 1) checkResult++;
+	  }
 
-	} else {
-	  result[i] = 0;
-	}
-      }
+	} // end of else of if (preemptive[indx] != preemption) 
+      }   // end of for (indx = 0; indx < numTrans; indx++)
 
       if (checkResult == 1) {
 	// The next state is found.
 	
 	// Find the index # corresponding to the next state.
-	condNum = 0;
-	while (result[condNum] != 1) condNum++;
+	transNum = 0;
+	while (result[transNum] != 1) transNum++;
 
 	// Return the next state.
 	MPHIter nextp(stateOut);
 	PortHole* oport = 0;
-	for (i=0; i<=condNum; i++)  {
+	for (indx=0; indx<=transNum; indx++)  {
 	  oport=nextp++;
 	}
 	
@@ -288,21 +271,20 @@ FSMStateStar * FSMStateStar::nextState (int& condNum, int preemption) {
 
       } else if (checkResult == 0) {
 
-	// No condition satisfy. Remain current state.
-	// ??Or issue error?
-	condNum = -1;
+	// No transition is triggered. Remain current state.
+	transNum = -1;
 	delete [] result;
 	return this;
       }  
 
       // checkResult > 1, this means "Transition Conflict".
-      buf = "Transition conflict. Conditions ";
-      for (i = 0; i < numConds; i++) {
-	if (result[i] == 1) {
-	  buf << i << ", ";
+      buf = "Transition conflict: Transitions ";
+      for (indx = 0; indx < numTrans; indx++) {
+	if (result[indx] == 1) {
+	  buf << indx << ", ";
 	}
       }
-      buf << "are all satisfied at the same time.";
+      buf << "are all triggered at this time.";
       Error::abortRun(*this, (char*)buf);
       delete [] result;
       return NULL;
@@ -390,188 +372,251 @@ void FSMStateStar::setup() {
 
     FSMScheduler *sched = (FSMScheduler *)scheduler();
 
-    // Setup some pointers to the copies of its master FSM.
-    oneWriterType = sched->oneWriterType;
-    internalEventNm = sched->getInternalEventNm();
+    // Setup pointers to the copies of its master FSM.
     if ( (myInterp = sched->interp()) == NULL ) {
-      Error::abortRun(*this,"Master FSMScheduler does not have a ",
+      Error::abortRun(*this,"FSMScheduler does not have a ",
 		      "Tcl interpreter!");
       return; 
     }
 
+    // Parse the events.
+    delete [] parsedEvents;
+    if (!(parsedEvents = strParser(events, numTrans, "curly-brace")))
+      return;
+    if (numTrans != stateOut.numberPorts()) {
+      Error::abortRun(*this, "The number of specified triggering events ",
+		      "doesn't match the number of possible ",
+		      "next transitions.");
+      return;
+    }
+
     // Parse the conditions.
-    delete [] parsedCond;
-    if (!(parsedCond = strParser(conditions, numConds, "curly-brace")))
+    delete [] parsedConditions;
+    if (!(parsedConditions = strParser(conditions, numTrans, "curly-brace")))
       return;
-    if (numConds != stateOut.numberPorts()) {
-      Error::abortRun(*this, "The number of specified conditions ",
+    if (numTrans != stateOut.numberPorts()) {
+      Error::abortRun(*this, "The number of specified triggering conditions ",
 		      "doesn't match the number of possible ",
 		      "next transitions.");
       return;
     }
 
-    // Parse the actions.
-    int numStrs = 0;
-    char** tmpParsedAct = strParser(actions,numStrs,"curly-brace");
-    if (!tmpParsedAct) return;
-    if (numStrs != stateOut.numberPorts()) {
-      Error::abortRun(*this,"The number of specified actions ",
-		      "doesn't match the number of possible ",
+    char** strings;
+    char** subStrings;
+    int numSubStrings;
+    int i,j;
+    // Parse the action events.
+    if (!(strings = strParser(actEvents, numTrans, "curly-brace")))
+      return;
+    if (numTrans != stateOut.numberPorts()) {
+      Error::abortRun(*this, "The number of sets of triggered action ",
+		      "events doesn't match the number of possible ",
 		      "next transitions.");
+      delete [] strings;
       return;
     }
-
-    delete [] parsedAct;
-    parsedAct = new IntArrayState[numStrs];
-    for (int indx=0; indx<numStrs; indx++) {
-      if (!strcmp(tmpParsedAct[indx],"-")) {
-	// No output for this transition.
-	parsedAct[indx].setState("actOfTrans",this,"");
-	parsedAct[indx].initialize();
-      } else {
-	parsedAct[indx].setState("actOfTrans",this,tmpParsedAct[indx]);
-	parsedAct[indx].initialize();
+    parsedActEvents = new InfString[numTrans];
+    for (i=0; i<numTrans; i++) {
+      parsedActEvents[i].initialize();
+      if (strcmp(strings[i],"")) {
+	// if string[i] is not empty, i.e. action is specified.
+	if (!(subStrings = 
+	      strParser(strings[i], numSubStrings, "double-quote")))
+	  return;
+	for (j=0; j<numSubStrings; j++) {
+	  parsedActEvents[i] << subStrings[j];
+	}
+	delete [] subStrings;
       }
     }
-    delete [] tmpParsedAct;
+    delete [] strings;
+
+    // Parse the action expressions.
+    if (!(strings = strParser(actExprs, numTrans, "curly-brace")))
+      return;
+    if (numTrans != stateOut.numberPorts()) {
+      Error::abortRun(*this, "The number of sets of triggered action ",
+		      "expressions doesn't match the number of possible ",
+		      "next transitions.");
+      delete [] strings;
+      return;
+    }
+    parsedActExprs = new InfString[numTrans];
+    for (i=0; i<numTrans; i++) {
+      parsedActExprs[i].initialize();
+      if (strcmp(strings[i],"")) {
+	// if string[i] is not empty, i.e. action is specified.
+	if (!(subStrings = 
+	      strParser(strings[i], numSubStrings, "double-quote")))
+	  return;
+	for (j=0; j<numSubStrings; j++) {
+	  parsedActExprs[i] << subStrings[j];
+	}
+	delete [] subStrings;
+      }
+    }
+    delete [] strings;
 
     if (!strcmp(slaveNm,"")) {
-      delete slave;
       slave = NULL;
     } else {
       // When slaveNm is specified, i.e. != "", 
-      // then build up the slave process.
-      delete slave;
-      slave = new SlaveProcess;
-
+      // then build up the slave wormhole.
       const char* galname = (const char*)slaveNm;
       const char* where_defined = (const char*)where_is_defined;
-      if (!(slave->worm = createWormhole(galname,where_defined))) {
-	return;
-      }
-
-      if ( !ioNmLists(slave->inNmList, slave->outNmList, slave->worm) )
+      if (!(slave = createWormhole(galname,where_defined)))
 	return;
 
-      slave->inGeoIndx = new int[slave->inNmList.numPieces()];
-      if ( !(slave->inGeo =
-	     setupGeodesic(slave->inGeoIndx, sched->inPorts(),
-			   slave->worm, slave->inNmList)) )
+      // Set up Geodesic for the slave wormhole.
+      if ( !(setupGeodesic(slave,slave->parent())) )
 	return;
 
-      slave->outGeoIndx = new int[slave->outNmList.numPieces()];
-      if ( !(slave->outGeo = 
-	     setupGeodesic(slave->outGeoIndx, sched->outPorts(),
-			   slave->worm, slave->outNmList)) )
-	return;
+      slave->initialize();
 
-      slave->worm->initialize();
-
-      // After the slave process is setup, if oneWriterType of the master FSM
-      // is "Compile", then check the one-writer rule here.
-      if (!strcmp(oneWriterType,"Compile")) {
-	if (!compOneWriterCk()) return;
-      }
+      slaveInnerDomain = slave->scheduler()->domain();
 
     } // end of if (strcmp(slaveNm,""))
 
 } // end of setup()  
 
-Geodesic** FSMStateStar::setupGeodesic (int* indxArray, MultiPortHole* mph, Star* worm, StringList& pNmList) {
-      // Input: MultiPortHole* mph, Star* worm, StringList& pNmList.
-      // Output: Geodesic**, int* indxArray.
-      // Set up the Geodesics for the portholes of the worm with the names 
-      // in the pNmList. In addition, it collects all the corresponding 
-      // input/output index # in (mph + internal events) and puts them 
-      // into indxArray.
-      
-      Geodesic** myGeoArray = new Geodesic*[pNmList.numPieces()];
-
-      int indxOfIO = 0;
-      int indxOfArray = 0;
-      StringListIter nextpNm(pNmList);
-      const char* pNm;
-      MPHIter nextp(*mph);
-      PortHole* p;
-      StringListIter nextiNm(*internalEventNm);
-      const char* iNm;
-      while ((pNm = nextpNm++) != 0) {
-	// Note: I/O buffers starts with internal event first.
-	indxOfIO = internalEventNm->numPieces();
-
-	nextp.reset();
-	while ((p = nextp++) != 0) {
-	  if (!strcmp(p->name(),pNm))  break;
-	  indxOfIO++;
+int FSMStateStar::setupGeodesic (Star* worm, Block* parent) {
+    PortHole* wp;
+    PortHole* pp;
+    BlockPortIter next(*worm);
+    while ((wp = next++) != NULL) {
+      // Seems that "portWithName" will automatically find real port in parent.
+      pp = parent->portWithName(wp->name());
+      if (pp != NULL) {
+	// When a port with the same name found in the FSM galaxy,
+	// (1) check whether they both are input or output.
+	if (pp->isItInput() != wp->isItInput()) {
+	  InfString buf = "The porthole with name ";
+	  buf << pp->name();
+	  buf << " is ";
+	  buf << pp->isItInput()?"input":"output";
+	  buf << " for FSM galaxy ";
+	  buf << parent->name();
+	  buf << " but ";
+	  buf << wp->isItInput()?"input":"output";
+	  buf << " for wormhole in state ";
+	  buf << this->name();
+	  buf << ".";
+	  Error::abortRun(*this,buf);
+	  return FALSE;
 	}
-	if (p != 0) {
-	  // The name is found as an PortHole in outer MultiPortHole.
-	  indxArray[indxOfArray] = indxOfIO;
+	// (2) check whether they both have the same data types.
+	if ( strcmp(pp->type(), wp->type()) ) {
+	  // When they are NOT the same:
+	  if (!strcmp(wp->type(),"ANYTYPE")) {
+	    // If wp of the Wormhole is ANYTYPE, force it have same
+	    // type as pp of the FSM galaxy.
+	    wp->setPort(wp->name(), wp->parent(), pp->type());
 
-	} else {
-	  // Try to find the name in the list of internal events.
-	  indxOfIO = 0;
-	  nextiNm.reset();
-	  while ((iNm = nextiNm++) != 0) {
-	    if (!strcmp(iNm,pNm))  break;
-	    indxOfIO++;
-	  }
-	  if (iNm != 0) {
-	    // The name is found in the internal event list.
-	    indxArray[indxOfArray] = indxOfIO;
 	  } else {
-	    Error::abortRun(*this, "There does not exist a matched I/O port ",
-		  "or internal event in this FSM corresponding to the name: ",
-		  pNm);
-	    delete [] myGeoArray;
-	    return NULL;
-	  }
-	}
-
-        PortHole* wp = worm->portWithName(pNm);
-	if (!wp) {
-	  Error::abortRun(*this, "There is no PortHole named \"",pNm,
-			  "\" in the wormhole.");
-	  return NULL;
-	}
-	// Create a geodesic to send data to the wormhole.
-	Geodesic* geo = wp->allocateGeodesic();
-	if (!geo) {
-	  Error::abortRun(*this, "Failed to allocate geodesic for ",
-			  "the porthole named ", pNm);
-	  delete [] myGeoArray;
-	  return NULL;
-	}
-
-	if (mph->isItInput()) {
-	  // Dummy output port used to fool the geodesic into thinking it
-	  // is fully connected, i.e. dummyPort -- Geodesic --> wp.
-	  OutFSMPort* dummyPort = new OutFSMPort;
-	  dummyPort->setPort("dummyOutPort",(Block*)0,mph->type());
-
-	  geo->setSourcePort(*dummyPort, 0, "");
-	  geo->setDestPort(*wp);
-	  geo->initialize();
-	}
-	else {
-	  // Dummy input port used to fool the geodesic into thinking it
-	  // is fully connected, i.e. wp -- Geodesic --> dummyPort.
-	  InFSMPort* dummyPort = new InFSMPort;
-	  dummyPort->setPort("dummyInPort",(Block*)0,mph->type());
-
-	  geo->setSourcePort(*wp,0,"");
-	  geo->setDestPort(*dummyPort);
-	  geo->initialize();
+	    // Otherwise, consider it as an error.
+	    InfString buf = "The porthole with name ";
+	    buf << pp->name();
+	    buf << " is ";
+	    buf << pp->type();
+	    buf << " for FSM galaxy ";
+	    buf << parent->name();
+	    buf << " but ";
+	    buf << wp->type();
+	    buf << " for wormhole in state ";
+	    buf << this->name();
+	    buf << ".";
+	    Error::abortRun(*this,buf);
+	    return FALSE;
+	  } 
 	}
 	
-	myGeoArray[indxOfArray] = geo;
-	indxOfArray++;
-      }   // end of while ((pNm = nextpNm++) != 0) 
+      } else {
+	// When NO port with the same name found in the FSM galaxy,
+	// check whether it is an internal event.
+	FSMScheduler *sched = (FSMScheduler *)scheduler();
+	StringListIter nextName(sched->intlEventNames);
+	const char* name;
+	while ((name = nextName++) != NULL) {
+	  if (!strcmp(name,wp->name()))    break;
+	}
+	if (name == NULL) {
+	  Error::abortRun(*this, "NO matched I/O port or internal event ",
+			  "in FSM galaxy corresponding to the name: ",
+			  wp->name());
+	  return FALSE;
+	}
+      }
 
-      return myGeoArray;
+      // Create a geodesic to receive/send data from/to the wormhole.
+      Geodesic* geo = wp->allocateGeodesic();
+      if (!geo) {
+	Error::abortRun(*this, "Failed to allocate geodesic for ",
+			"the porthole named ", wp->name());
+	return FALSE;
+      }
+
+      if (wp->isItInput()) {
+	// Dummy output port used to fool the geodesic into thinking it
+	// is fully connected, i.e. dummyPort -- Geodesic --> wp.
+	OutFSMPort* dummyPort = new OutFSMPort;
+	dummyPort->setPort("dummyOutPort",(Block*)0,wp->type());
+	
+	geo->setSourcePort(*dummyPort, 0, "");
+	geo->setDestPort(*wp);
+	geo->initialize();
+      }
+      else {
+	// Dummy input port used to fool the geodesic into thinking it
+	// is fully connected, i.e. wp -- Geodesic --> dummyPort.
+	InFSMPort* dummyPort = new InFSMPort;
+	dummyPort->setPort("dummyInPort",(Block*)0,wp->type());
+	
+	geo->setSourcePort(*wp,0,"");
+	geo->setDestPort(*dummyPort);
+	geo->initialize();
+      }
+
+    }   // while ((wp = next++) != NULL)
+
+    return TRUE;
 }
 
 void FSMStateStar::wrapup() {
     if (slave != NULL)
-      slave->worm->wrapup();
+      slave->wrapup();
+}
+
+void FSMStateStar::printInfo() {
+    printf("**** In state %s ****\n",this->name());
+    if (slave != NULL)    printf("slaveInnerDomain = %s\n",slaveInnerDomain);
+    int indx;
+    for (indx=0; indx<numTrans; indx++) {
+        printf("event[%d] = %s\n",indx, parsedEvents[indx]);
+    }
+    for (indx=0; indx<numTrans; indx++) {
+        printf("condition[%d] = %s\n",indx, parsedConditions[indx]);
+    }
+
+    for (indx=0; indx<numTrans; indx++) {
+        printf("parsedActEvents[%d] =",indx);
+	StringListIter nextEvent(parsedActEvents[indx]);
+	const char* event;
+	while ((event = nextEvent++) != NULL) {
+	  printf(" %s",event);
+	}
+	printf("\n");
+
+	printf("parsedActExprs[%d] =",indx);
+	StringListIter nextExpr(parsedActExprs[indx]);
+	const char* expr;
+	while ((expr = nextExpr++) != NULL) {
+	  if (strcmp(expr,"")) {
+	    printf(" %s",expr);
+	  } else {
+	    printf(" ~");
+	  }
+	}
+	printf("\n");
+    }
+
 }
