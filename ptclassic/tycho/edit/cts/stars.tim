@@ -9,32 +9,32 @@ group source -label {Source Stars} {
             -class {Ramp} \
             -label {Ramp} \
             -icon {edit/cts/icons.tim#source.ramp} {
-        attribute InitValue -default 0.0 -type number -label step
-        attribute Slope -default 1.0 -type number -label value
+        attribute initialValue -default 0.0 -type number -label step
+        attribute slope -default 1.0 -type number -label value
         port output -datatype float
     }
     star const \
             -class {Const} \
             -label {Const} \
             -icon {edit/cts/icons.tim#source.const} {
-        attribute Value -default 1.0 -type number -label Value
+        attribute value -default 1.0 -type number -label Value
         port output -datatype float
     }
     star impulse \
             -class {Impulse} \
             -label {Impulse} \
             -icon {edit/cts/icons.tim#source.impulse} {
-        attribute Amplitude -default 1.0 -type number -label Amplitude
-        attribute AtTime -default 0.0 -type number -label "At Time"
+        attribute amplitude -default 1.0 -type number -label Amplitude
+        attribute atTime -default 0.0 -type number -label "At Time"
         port output -datatype float
     }
     star squarewave \
             -class {SquareWave} \
             -label {SquareWave} \
             -icon {edit/cts/icons.tim#source.squarewave} {
-        attribute MaxValue -default 1.0 -type number -label "Maximum Value"
-        attribute MinValue -default -1.0 -type number -label "Minimum Value"
-        attribute Frequency -default 1.0 -type number -label Frequency
+        attribute maxValue -default 1.0 -type number -label "Maximum Value"
+        attribute minValue -default -1.0 -type number -label "Minimum Value"
+        attribute frequency -default 1.0 -type number -label Frequency
         port output -datatype float
     }
     
@@ -53,10 +53,10 @@ group sink -label {Sink Stars} {
 
 group dynamic -label {Dynamic Stars} {
     star integral \
-            -class {IntegraRK4} \
+            -class {Integrator} \
             -label {Integrator} \
             -icon {edit/cts/icons.tim#dynamic.integral} {
-        attribute InitState -default "0.0" -label "Initial State" -type number
+        attribute initialState -default "0.0" -label "Initial State" -type number
         port input -datatype float
         port output -datatype float
     }
@@ -93,7 +93,7 @@ group arithmetic -label {Basic Arithmetic} {
             -class {Gain} \
             -label Gain_Left \
             -icon {edit/cts/icons.tim#arithmetic.gain_left} {
-        attribute Gain -default "1.0" -type number -label Gain
+        attribute gain -default "1.0" -type number -label Gain
         port input -composite 0
         port output -composite 0
     }
@@ -101,7 +101,7 @@ group arithmetic -label {Basic Arithmetic} {
             -class {Gain} \
             -label Gain_Right \
             -icon {edit/cts/icons.tim#arithmetic.gain_right} {
-        attribute Gain -default "1.0" -type number -label Gain
+        attribute gain -default "1.0" -type number -label Gain
         port input -composite 0
         port output -composite 0
     }
