@@ -14,6 +14,8 @@ $Id$
 ***********************************************************************/
 
 #include "Domain.h"
+#include "Target.h"
+#include "KnownTarget.h"
 #include "DDFScheduler.h"
 #include "DDFWormhole.h"
 #include "DDFConnect.h"
@@ -24,12 +26,9 @@ extern const char DDFdomainName[] = "DDF";
 
 class DDFDomain : public Domain {
 public:
-	// new scheduler
-	Scheduler& newSched() { return *new DDFScheduler;}
-
 	// new wormhole
-	Star& newWorm(Galaxy& innerGal)  {
-		return *new DDFWormhole(innerGal);
+	Star& newWorm(Galaxy& innerGal,Target* innerTarget)  {
+		return *new DDFWormhole(innerGal,innerTarget);
 	}
 
 	// new input porthole
@@ -56,3 +55,21 @@ public:
 
 // declare a prototype
 static DDFDomain proto;
+
+// declare the default Target object
+
+class DDFTarget : public Target {
+public:
+	DDFTarget() : Target("default-DDF", "DataFlowStar", 0,
+			     "default DDF target") {
+		sched = new DDFScheduler;
+	}
+	Block* clone() const;
+};
+
+Block* DDFTarget::clone() const {
+	return new DDFTarget;
+}
+
+static DDFTarget defaultDDFtarget;
+static KnownTarget entry(defaultDDFtarget,"default-DDF");
