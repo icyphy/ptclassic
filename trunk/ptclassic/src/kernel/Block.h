@@ -176,6 +176,9 @@ public:
         // Initialize the PortHoles
         virtual void initPorts();
 
+	// Reset the buffers in the PortHoles
+	virtual void resetPortBuffers();
+
         // Return number of states 
         inline int numberStates() const {return states.size();}
 
