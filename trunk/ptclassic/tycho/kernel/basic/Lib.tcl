@@ -103,7 +103,7 @@ namespace ::tycho {
     #       {Finite state machine editor}
 
     ::tycho::File::registerExtensions {.dfg} \
-            {::tycho::view EditGraph -file {%s}} \
+            {::tycho::editgraph {%s}} \
             {Graph Editor} "graphics"
 
     if !$ptolemyfeature(octtools) {
