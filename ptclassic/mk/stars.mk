@@ -130,7 +130,7 @@ endif
 
 ifdef CG56
 	CUSTOM_DIRS += $(CG56DIR)/kernel $(CG56DIR)/stars \
-		$(CG56T) $(CG56DIR)/dsp/stars
+		$(CG56DIR)/targets $(CG56DIR)/dsp/stars
 	# must bring in the parallel schedulers for multi-cg56 targets
 	CGFULL = 1
 	PALETTES += PTOLEMY/src/domains/cg56/icons/main.pal
@@ -168,7 +168,7 @@ endif
 
 ifdef C50
 	CUSTOM_DIRS += $(C50DIR)/kernel $(C50DIR)/stars \
-		$(C50T) $(C50DIR)/dsp/stars
+		$(C50DIR)/targets $(C50DIR)/dsp/stars
 	# must bring in the parallel schedulers for multi-c50 targets
 	# CGFULL = 1
 	CG = 1
@@ -231,7 +231,7 @@ ifdef DDF
 endif
 
 ifdef VHDL
-	CUSTOM_DIRS += $(VHDLDIR)/kernel $(VHDLDIR)/stars  $(VHDLT)
+	CUSTOM_DIRS += $(VHDLDIR)/kernel $(VHDLDIR)/stars  $(VHDLDIR)/targets
 	CG = 1
 	SDFLIB = 1
 	CGCLIB = 1
@@ -356,8 +356,8 @@ ifdef NOWAM
 	# NOWam only supported under the Solaris operating system,
 	# matched by pattern sol%
 	ifneq ("$(filter sol%,$(PTARCH))","")
-		CUSTOM_DIRS += $(CGCT)/NOWam/NOWam \
-			$(CGCT)/NOWam/libudpam
+		CUSTOM_DIRS += $(CGCDIR)/targets/NOWam/NOWam \
+			$(CGCDIR)/targets/NOWam/libudpam
 		CGC = 1
 		CGPAR = 1
 		ifeq ($(USE_SHARED_LIBS),yes) 
@@ -385,7 +385,7 @@ ifdef CGC
 	SDFLIB = 1
 	BDFLIB = 1
 	# Uniprocessor targets are included by default
-	CUSTOM_DIRS += $(CGCT)/uniprocessor
+	CUSTOM_DIRS += $(CGCDIR)/targets/uniprocessor
 	ifeq ($(USE_SHARED_LIBS),yes) 
 		LIBS += -lcgctargets
 		LIBFILES += $(LIBDIR)/libcgctargets.$(LIBSUFFIX)
@@ -398,7 +398,7 @@ ifdef CGC
 	endif
 	# Multiprocessor targets are included if CGPAR is defined
 	ifdef CGPAR
-		CUSTOM_DIRS += $(CGCT)/multiprocessor
+		CUSTOM_DIRS += $(CGCDIR)/targets/multiprocessor
 		ifeq ($(USE_SHARED_LIBS),yes) 
 			LIBS += -lcgcmultitargets
 			LIBFILES += $(LIBDIR)/libcgcmultitargets.$(LIBSUFFIX)
@@ -445,7 +445,7 @@ ifdef BDF
 endif
 
 ifdef CG
-	CUSTOM_DIRS += $(CGDIR)/kernel $(CGT) $(CGDIR)/stars
+	CUSTOM_DIRS += $(CGDIR)/kernel $(CGDIR)/targets $(CGDIR)/stars
 	PALETTES += PTOLEMY/src/domains/cg/icons/cg.pal
 	ifdef CGPAR
 		CUSTOM_DIRS += $(CGDIR)/HuScheduler $(CGDIR)/ddfScheduler \
@@ -551,9 +551,9 @@ ifdef SDF
 	CUSTOM_DIRS += $(SDFDIR)/stars
 	STARS += $(LIBDIR)/sdfstars.o 
 	ifdef CG
-		# The only thing in sdf/targets also depends on 
-		# cg... should this be in the cg directory
-		CUSTOM_DIRS += $(SDFT)
+		# FIXME: The only thing in sdf/targets also depends on 
+		# cg... should this be in the cg directory?
+		CUSTOM_DIRS += $(SDFDIR)/targets
 		TARGETS += $(SDFT)/CompileTarget.o
 	endif
 	LIBS += -lsdfstars
