@@ -266,7 +266,7 @@ package require tycho.edit.visedit
 ###package require tycho.edit.graphedit
 
 # For now, check for the existence of these new packages
-if [file exists [file join $TYCHO edit ptII]] {
+if {[file exists [file join $TYCHO edit ptII]] && [info exist env(PTII)] } {
     package require tycho.edit.ptII
 }
 
