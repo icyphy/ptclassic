@@ -7,6 +7,7 @@ defstar {
 	copyright { 1992 The Regents of the University of California }
 	location { CG56 demo library }
         explanation {
+.Id "pulse generator"
 A variable length pulse generator.
 A pulse begins when a non-zero trigger is received.
 The pulse duration varies between 1 and \fImaxDuration\fP

@@ -9,6 +9,9 @@ with step size "step" (default 0.001).
 	author { Chih-Tsung Huang }
 	copyright { 1992 The Regents of the University of California }
 	location { CG56 main library }
+	explanation {
+.Id "ramp generator"
+	}
 	output {
 		name { output }
 		type { fix }
