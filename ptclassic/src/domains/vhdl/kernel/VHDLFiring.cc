@@ -54,6 +54,7 @@ VHDLFiring :: VHDLFiring() {
   decls = "";
   noSensitivities = 0;
   noOutclocking = 0;
+  groupNum = 999;
   VHDLObj::initialize();
 }
 
