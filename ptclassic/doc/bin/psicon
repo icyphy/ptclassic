@@ -12,5 +12,5 @@ if (!($?OCTTOOLS)) then
 	setenv OCTTOOLS $PTOLEMY
 endif
 
-set path = ( ~ptolemy/octtools/bin.$ARCH $path )
-oct2ps -p -=T ~ptolemy/lib/bw_patterns -f interface $*\:schematic:interface
+set path = ( $PTOLEMY/octtools/bin.$ARCH $path )
+oct2ps -p -=T $PTOLEMY/lib/bw_patterns -f interface $*\:schematic:interface
