@@ -38,10 +38,11 @@ ENHANCEMENTS, OR MODIFICATIONS.
    
 /* Standard includes */
 #include <stdio.h>
-#include <itcl.h>
+
+#include "itcl.h"
 #ifdef ITCL_VERSION
 /* ITCL2.0 or better */
-#include <itk.h>
+#include "itk.h"
 #endif
 
 #include "local.h"			/* include "ansi.h" and "compat.h" */
