@@ -56,13 +56,20 @@ variant:
 Glancing at this, it is easy to miss the <CODE>-accelerator</CODE>
 option.
 
- <P>If you have a long <CODE>puts</CODE> statement, you can use
+ <P>If you have a long <CODE>puts</CODE> statement, In Itcl, you can use
 backslashes to make the text more readable.  Note that each backslash
 introduces a space in the output.
 <pre>
         puts "This is a long line&#92
              that extends over a few\n&#92
              lines"
+</pre>
+
+In Java, you can often use the <CODE>+</CODE> operator to concatenate
+<CODE>Strings</CODE> together:
+<pre>
+	return "This is a really " +
+	       "long string";
 </pre>
 
 
@@ -109,6 +116,12 @@ Classname [::tycho::autoName .classname] ?options?
 The <CODE>autoName</CODE> procedure is defined in Tycho and returns a
 class name that is constructed by appending to the single argument an
 underscore and an integer that ensures that the name will be unique.
+
+ <P>Methods and variables that are <CODE>protected</CODE> should have
+a leading underscore "<CODE>_</CODE>".  Methods and variables that are
+<CODE>private</CODE> should have two leading underscores
+"<CODE>__</CODE>" (i.e. <CODE>_ProtectedMethod()</CODE>, 
+<CODE>__PrivateMethod()</CODE>.
 
 <h2><a name="global variables">Global Variables</a></h2>
 
