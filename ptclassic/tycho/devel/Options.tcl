@@ -1,4 +1,4 @@
-# sets the default Options for widgets and windows used by Tycho
+# sets the default Options for widgets and windows used by Ptolemy.
 #
 # Authors: Edward Lee
 # Version: $Id$
