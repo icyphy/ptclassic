@@ -98,7 +98,10 @@ HLLTarget(name, starclass, desc, assocDomain) {
   // Initialize hashstrings for quick comparison.
   hashINTEGER = hashstring("INTEGER");
   hashINT = hashstring("INT");
+  hashinteger = hashstring("integer");
   hashint = hashstring("int");
+  hashFIX = hashstring("FIX");
+  hashfix = hashstring("fix");
   hashFLOAT = hashstring("FLOAT");
   hashfloat = hashstring("float");
   hashREAL = hashstring("REAL");
@@ -615,6 +618,15 @@ void VHDLTarget :: registerState(State* state, const char* varName,
   variableList.put(*newvar);
 }
 
+// Helper function for powers of two.
+static int twoToThe(int nbits) {
+  int result = 1;
+  for (int i = 0 ; i < nbits ; i++) {
+    result *= 2;
+  }
+  return result;
+}
+
 // Register PortHole reference.
 void VHDLTarget :: registerPortHole(VHDLPortHole* port, const char* varName,
 				    int /*firing*/,
@@ -640,11 +652,21 @@ void VHDLTarget :: registerPortHole(VHDLPortHole* port, const char* varName,
   VHDLVariable* newvar = new VHDLVariable;
   newvar->setName(ref);
   newvar->type = port->dataType();
-  if (hashstring(newvar->type) == hashINTEGER) {
+  if ((hashstring(newvar->type) == hashINTEGER) ||
+      (hashstring(newvar->type) == hashFIX)) {
     newvar->initVal = "0";
   }
   else {
     newvar->initVal = "0.0";
+  }
+  if ((hashstring(newvar->type) == hashFIX)) {
+    int intBits = port->getPrecision().intb();
+    int fracBits = port->getPrecision().fracb();
+    int lowerBound = -(twoToThe(intBits + fracBits - 1));
+    int upperBound = twoToThe(intBits + fracBits - 1) - 1;
+    StringList rangeType = "INTEGER RANGE ";
+    rangeType << lowerBound << " to " << upperBound;
+    newvar->type = rangeType;
   }
   variableList.put(*newvar);
 }
@@ -705,8 +727,10 @@ const char* VHDLTarget :: sanitizeType(const char* ctyp) {
   if ((hashtype == hashFLOAT) || (hashtype == hashfloat) ||
       (hashtype == hashREAL) || (hashtype == hashreal))
     type = hashREAL;
-  else if ((hashtype == hashINTEGER) ||
+  else if ((hashtype == hashINTEGER) || (hashtype == hashinteger) ||
 	   (hashtype == hashINT) || (hashtype == hashint))
+    type = hashINTEGER;
+  else if ((hashtype == hashFIX) || (hashtype == hashfix))
     type = hashINTEGER;
   else if ((hashtype == hashCOMPLEX) || (hashtype == hashcomplex))
     type = hashREAL;
