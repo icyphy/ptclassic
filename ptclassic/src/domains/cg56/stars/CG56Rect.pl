@@ -12,25 +12,25 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CG56 main library }
 	output {
-		name {output}
-		type {fix}
+		name { output }
+		type { fix }
 	}
 	state {
-		name {height}
-		type {fix}
+		name { height }
+		type { fix }
 		desc { height of rectangular pulse }
 		default { ONE }
 		attributes { A_YMEM }
 	}
 	state {
-		name {width}
-		type {int}
+		name { width }
+		type { int }
 		desc { width of rectangular pulse }
 		default { 1 }
 	}
 	state {
-		name {period}
-		type {int}
+		name { period }
+		type { int }
 		desc { period of pulse }
 		default { 10 }
 	}
@@ -39,28 +39,31 @@ limitation of liability, and disclaimer of warranty provisions.
 		type { int }
 		desc { internal counting state }
 		default { 0 }
+		attributes { A_YMEM|A_NONCONSTANT|A_NONSETTABLE }
 	}
 
 	codeblock(sendOutput) {
 ; Register usage:
-; x0 = 1
-; x1 = width
-; y0 = period
+; x0 = 0
+; x1 = count
 ; y1 = height
 ; a = output value
-; b = count
-	clr	a	move	$ref(count),b	; a = 0, b = count
-	move	#$val(width),x1			; x1 = width
-	move	$ref(height),y1			; y1 = height
-	cmp	x1,b	#1,x0		; if (width > count)
+; b = width
+	clr	a	$ref(count),x1		; a = 0, x1 = count
+	move	#$val(width),b1			; b = width
+	move	a,x0	$ref(height),y1		; x0 = 0, y1 = height
+	cmp	x1,b	#1,b1		; if (count < width)
 	tgt	y1,a			; then a = height
 	move	a,$ref(output)			; output = a
 	}
 
 	codeblock(updateCounter) {
-	add	x0,b	$ref(period),y0		; b++, y0 = period
-	cmp	y0,b	#0,a		; if (period <= count)
-	tle	a,b
+; a = period
+; b = updated count
+	add	x1,b			; b = count + 1
+	move	#$val(period),a1		; a = period
+	cmp	a,b			; if (period <= count)
+	tge	x0,b			; then b = 0
 	move	b,$ref(count)			; count = b
 	}
 
@@ -84,6 +87,6 @@ limitation of liability, and disclaimer of warranty provisions.
 		addCode(updateCounter);
 	}
 	execTime {
-		return 10;
+		return 11;
 	}
 }
