@@ -3,7 +3,7 @@ static const char file_id[] = "VHDLWormhole.cc";
 Version identification:
 $Id$
 
-Copyright (c) 1990-1994 The Regents of the University of California.
+Copyright (c) 1990-$Id$ The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -45,27 +45,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 ********************************************************************/
 
-/*
-void VHDLWormhole :: setup() {
-//	profile = myProfile;
-
-//	// get the number of processors.
-//	setOuterTarget(target());
-
-	// main setup routine.
-	CGWormBase :: setup();
-}
-
-void VHDLWormhole :: go() {
-}
-*/
-
-// CGWormBase* VHDLWormhole :: myWormhole() { return selfWorm; }
-
-//Profile* VHDLWormhole :: getProfile(int pNum) {
-//	return CGWormBase :: getProfile(pNum);
-//}
-
 // Constructor
 VHDLWormhole :: VHDLWormhole(Galaxy& g, Target* t) : CGWormBase(*this,g,t)
 	{ buildEventHorizons(); }
@@ -73,6 +52,8 @@ VHDLWormhole :: VHDLWormhole(Galaxy& g, Target* t) : CGWormBase(*this,g,t)
 VHDLWormhole :: ~VHDLWormhole() {
 	freeContents();
 }
+
+Wormhole* VHDLWormhole :: asWormhole() { return this; }
 
 // cloner -- clone the inside and make a new wormhole from that.
 Block* VHDLWormhole :: clone() const {

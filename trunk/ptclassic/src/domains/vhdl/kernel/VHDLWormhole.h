@@ -13,7 +13,7 @@
 SCCS Version identification :
 $Id$
 
-Copyright (c) 1990-1994 The Regents of the University of California.
+Copyright (c) 1990-$Id$  The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -47,10 +47,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 class VHDLWormhole : public CGWormBase, public VHDLStar {
 
 public:
-//	void setup();
-//	void go();
-//	void wrapup() { /* target->wrapup(); */ }
-
 	// Constructor
 	VHDLWormhole(Galaxy& g, Target* t = 0);
 	~VHDLWormhole();
@@ -81,14 +77,12 @@ public:
 	// state initialize
 	void initState() { gal.initState() ;}
 
-	// return myself
-//	CGWormBase* myWormhole();
-
 	// FIXME: what should this do?
 	double getStopTime() { return 0.0;}
 
-//	// Redefine: return the profile when "pNum" processors are assigned.
-//	Profile* getProfile(int pNum);
+	// return myself as a wormhole
+	/*virtual*/ Wormhole* asWormhole();
+
 };
 
         //////////////////////////////////////////

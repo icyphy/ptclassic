@@ -3,7 +3,7 @@ static const char file_id[] = "VHDLDomain.cc";
 Version identification:
 $Id$
 
-Copyright (c) 1990-1994 The Regents of the University of California.
+Copyright (c) 1990-$Id$ The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -44,10 +44,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 extern const char VHDLdomainName[] = "VHDL";
 
 class VHDLDomain : public Domain {
-public:
-        // no XXXinVHDL wormholes yet, so no newWorm,
-  	// error check in Domain.cc
-
+public:    
 	// new fromUniversal EventHorizon
 	EventHorizon& newFrom() {
 		LOG_NEW; 
@@ -67,8 +64,12 @@ public:
 	}
 
 	// constructor
-	VHDLDomain() : Domain("VHDL") {}
+	VHDLDomain() : Domain("VHDL") {subDomains += "AnyCG";}
 
+ 	Star& newWorm(Galaxy& innerGal,Target* innerTarget) {
+		return *new VHDLWormhole(innerGal,innerTarget);
+	}
+   
 	// require VHDLTarget
 	const char* requiredTarget() { return "VHDLTarget";}
 };
