@@ -41,6 +41,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 // Constructors.
 VHDLSignal :: VHDLSignal() {
+  setSource(NULL);
+
   VHDLObj::initialize();
 }
 
