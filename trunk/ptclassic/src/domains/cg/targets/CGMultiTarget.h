@@ -165,17 +165,8 @@ protected:
 
 	// Redefine for sending and receiving data to a target when run
 	// inside of a wormhole.
-	int sendWormData();
-	int receiveWormData();
-
-	// These are needed by the silly "hiding rule", which is not
-	// enforced by g++.
-
-	int sendWormData(PortHole& p) { return MultiTarget::sendWormData(p);}
-	
-	int receiveWormData(PortHole& p) {
-		return MultiTarget::receiveWormData(p);
-	}
+	/* virtual */ int allSendWormData();
+	/* virtual */ int allReceiveWormData();
 
 	// update the reachability matrix for communication amortization.
 	// This method is supposed to be called in createSend() method.
