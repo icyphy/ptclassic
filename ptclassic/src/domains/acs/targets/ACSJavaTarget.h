@@ -32,11 +32,24 @@ ENHANCEMENTS, OR MODIFICATIONS.
  Version: $Id$
 
 ***********************************************************************/
+#ifdef __GNUG__
+#pragma interface
+#endif
 
 #include "ACSCGTarget.h"
 
 class ACSJavaTarget : public ACSCGTarget {
 public:
+    ACSJavaTarget(const char* name, const char* starclass, const char* desc,
+            const char* assocDomain = ACSdomainName);
+    /* virtual */ Block* makeNew() const;
+    
+    // Class identification.
+    /*virtual*/ int isA(const char*) const;
+
+protected:
+    //FIXME: skeletonMakefile is for testing only, it should be trashed.
+    StringState skeletonMakefile;
 };
 
 #endif //_ACSJavaTarget_h
