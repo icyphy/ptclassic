@@ -1158,6 +1158,10 @@ body ::tycho::File::openContext {filename {mode {}}} {
 	set mode [::tycho::readFileHeader $filename junk]
 	if { $mode == "" } {
 	    set mode [::tycho::registry filemode $filename]
+            # Finally, if there's no registered mode, use "text"
+            if { $mode == "" } {
+                set mode "text"
+            }
 	}
     }
 
