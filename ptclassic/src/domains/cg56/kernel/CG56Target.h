@@ -34,6 +34,8 @@ public:
 	CG56Target (const char* nam, const char* desc,
 		    unsigned x_addr, unsigned x_len,
 		    unsigned y_addr, unsigned y_len);
+	// copy constructor
+	CG56Target(const CG56Target&);
 	Block* clone() const;
 	void headerCode();
 	void wrapup();
@@ -46,9 +48,9 @@ protected:
 	void writeInt(int);
 	void writeFix(double);
 	void writeFloat(double);
+	int inProgSection;
 private:
 	unsigned xa, xl, ya, yl;
-	int inProgSection;
 };
 
 #endif
