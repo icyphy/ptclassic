@@ -19,8 +19,9 @@ defstar {
                 type {int}
                 default {"YES"}
                 desc { 
-Use the arriving particles as they are if YES.  Cast them to the
-precision specified by the parameter "InputPrecision" otherwise. } 
+Flag that indicates whether or not to keep the precision of the arriving
+particles as is:  YES keeps the same precision, and NO casts them to the
+precision specified by the parameter "InputPrecision". } 
         }
         defstate {
                 name { InputPrecision }
@@ -43,8 +44,8 @@ the result of the sum of the inputs.}
                 type { string }
                 default { "saturate" }
                 desc { 
-Set the overflow characteristic for the output.  If the result
-of the sum can not be fit into the precision of the output, overflow 
+Overflow characteristic for the output.  If the result
+of the sum cannot be fit into the precision of the output, overflow 
 occurs and the overflow is taken care of by the method specified by this 
 parameter.  The keywords for overflow handling methods are : 
 "saturate"(default), "zero_saturate", "wrapped", "warning". }     
