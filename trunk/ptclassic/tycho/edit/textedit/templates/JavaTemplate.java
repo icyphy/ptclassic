@@ -1,6 +1,6 @@
 /* One line description of file.
 
- Copyright (c) 1998 The Regents of the University of California.
+ Copyright (c) 1999 The Regents of the University of California.
  All rights reserved.
  Permission is hereby granted, without written agreement and without
  license or royalty fees, to use, copy, modify, and distribute this
@@ -23,9 +23,8 @@
  
                                         PT_COPYRIGHT_VERSION_2
                                         COPYRIGHTENDKEY
-@ProposedRating Green (yourname@eecs.berkeley.edu)
-@AcceptedRating Green (reviewmoderator@eecs.berkeley.edu)
-
+@ProposedRating Red (yourname@eecs.berkeley.edu)
+@AcceptedRating Red (reviewmoderator@eecs.berkeley.edu)
 */
 
 package MyPackageName;
@@ -34,8 +33,8 @@ package MyPackageName;
 //// ClassName
 /** 
 Description of the class
-@author youname
-@version $Id$
+@author yourname
+@version $Id$
 @see classname
 @see full-classname
 */
@@ -65,8 +64,8 @@ public class ClassName {
     }
 
 
-    ////////////////////////////////////////////////////////////////////////
-    ////                         protected methods                      ////
+    ///////////////////////////////////////////////////////////////////
+    ////                         protected methods                 ////
 
     /** Description
      * @see full-classname#method-name()
