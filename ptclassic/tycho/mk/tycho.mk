@@ -85,6 +85,11 @@ JAR =		$(JAVAHOME)/bin/jar
 # The 'java' interpreter
 JAVA =		$(JAVAHOME)/bin/java
 
+# JavaCC is the Java Compiler Compiler which is used by pt.data.parser
+JAVACCDIR =	$(PTOLEMY)/vendors/sun/JavaCC
+JJTREE =	$(JAVACCDIR)/bin/jjtree
+JAVACC =	$(JAVACCDIR)/bin/javacc
+
 # Script to run tclBlend
 JTCLSH =	jtclsh
 
