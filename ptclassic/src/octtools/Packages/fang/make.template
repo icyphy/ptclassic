@@ -80,6 +80,8 @@ LIB = 		libfang.$(LIBSUFFIX)
 
 EXPHDR =	fang.h
 
+MISC_FILES =	fang.doc
+
 # common makefile file for vem libraries
 VEMLIBCONFIG=../../vem-lib.mk
 include $(VEMLIBCONFIG)
