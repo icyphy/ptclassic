@@ -51,13 +51,17 @@ Some refinement by Brian Evans.
 // Maximum path name length in characters
 #define MAX_PATH_LENGTH  512
 
-// Sub-directory of $PTOLEMY that contains the itcl binary plus binary
-// file name, e.g., "bin.sol2/itkwish"
-// ANSI C will concatenate adjacent strings
-#define SH_ITCLTK_PROG ("/bin." PTARCH "/itkwish")
+// Define the name of the [incr tk] program: either itcl_wish or itkwish
+#define SH_ITCLTK_PROG "itkwish"
 
-// Sub-directory of $PTOLEMY that contains itcl file to source plus file name
-#define SH_ITCLTK_FILE "/tycho/kernel/TyCoreRelease.itcl"
+// Sub-directory of $PTOLEMY that contains the itcl binary plus binary
+// file name, e.g., "/bin.sol2/itkwish"
+// ANSI C and C++ will concatenate adjacent strings into a single string
+#define SH_ITCLTK_SUB_PATH ("/bin." PTARCH "/" SH_ITCLTK_PROG)
+
+// Sub-directory of $PTOLEMY that contains itcl files to source plus file names
+#define SH_ITCLTK_DEBUG_SCRIPT "/tycho/kernel/TyCoreDebug.itcl"
+#define SH_ITCLTK_RELEASE_SCRIPT "/tycho/kernel/TyCoreRelease.itcl"
 
 // Used so we can call the Tcl procedure emergencySave
 extern Tcl_Interp *ptkInterp;
@@ -143,11 +147,11 @@ void signalHandlerRelease(void)
 	DoTychoSave();
     }
 
-    // Use execle to execute the Unix command "$path $file -name Tycho" where
+    // Use execle to execute the Unix command "$path $script -name Tycho" where
     //   path = $PTOLEMY/bin.$PTARCH/itkwish
-    //   file = $PTOLEMY/tycho/kernel/TyCoreRelease.itcl
+    //   script = $PTOLEMY/tycho/kernel/TyCoreRelease.itcl
     // Cannot use dynamic memory
-    static char path[MAX_PATH_LENGTH], file[MAX_PATH_LENGTH];
+    static char path[MAX_PATH_LENGTH], script[MAX_PATH_LENGTH];
 
     // 1. Find the value of the PTOLEMY environment variable
     const char *ptolemy = getenv("PTOLEMY");
@@ -155,16 +159,16 @@ void signalHandlerRelease(void)
 
     // 2. Make sure that path and file names will not overflow static buffer
     unsigned int pstrlen = strlen(ptolemy);
-    if ( ( sizeof(SH_ITCLTK_PROG) + pstrlen >= MAX_PATH_LENGTH ) ||
-         ( sizeof(SH_ITCLTK_FILE) + pstrlen >= MAX_PATH_LENGTH ) ) {
+    if ( ( sizeof(SH_ITCLTK_SUB_PATH) + pstrlen >= MAX_PATH_LENGTH ) ||
+         ( sizeof(SH_ITCLTK_RELEASE_SCRIPT) + pstrlen >= MAX_PATH_LENGTH ) ) {
       abortHandling();
     }
 
-    // 3. Define the path of itcl_wish and itcl file name to source
+    // 3. Define the path of [incr tk] and tcltk script to source
     strcpy(path, ptolemy);
-    strcat(path, SH_ITCLTK_PROG);
-    strcpy(file, ptolemy);
-    strcat(file, SH_ITCLTK_FILE);
+    strcat(path, SH_ITCLTK_SUB_PATH);
+    strcpy(script, ptolemy);
+    strcat(script, SH_ITCLTK_RELEASE_SCRIPT);
 
     switch(fork()) 
     {
@@ -173,7 +177,7 @@ void signalHandlerRelease(void)
 
 	case 0:			// fork() return value for child. 
 	    sleep(1);		// Allow time for core file to be generated.   
-	    execle(path, "itcl_wish", file, "-name", "Tycho", (char *)0, \
+	    execle(path, SH_ITCLTK_PROG, script, "-name", "Tycho", (char *)0,
 		   environ);
 	    abortHandling();	// If you make it this far something went wrong
     }
@@ -200,11 +204,11 @@ void signalHandlerDebug(int signo)
 	DoTychoSave();
     }
 
-    // Use execle to execute the Unix command "$path $file -name Tycho" where
+    // Use execle to execute the Unix command "$path $script -name Tycho" where
     //   path = $PTOLEMY/bin.$PTARCH/itkwish
-    //   file = $PTOLEMY/tycho/kernel/TyCoreRelease.itcl
+    //   script = $PTOLEMY/tycho/kernel/TyCoreDebug.itcl
     // Cannot use dynamic memory
-    static char path[MAX_PATH_LENGTH], file[MAX_PATH_LENGTH];
+    static char path[MAX_PATH_LENGTH], script[MAX_PATH_LENGTH];
 
     // 1. Find the value of the PTOLEMY environment variable
     const char *ptolemy = getenv("PTOLEMY");
@@ -212,16 +216,16 @@ void signalHandlerDebug(int signo)
 
     // 2. Make sure that path and file names will not overflow static buffer
     unsigned int pstrlen = strlen(ptolemy);
-    if ( ( sizeof(SH_ITCLTK_PROG) + pstrlen >= MAX_PATH_LENGTH ) ||
-         ( sizeof(SH_ITCLTK_FILE) + pstrlen >= MAX_PATH_LENGTH ) ) {
+    if ( ( sizeof(SH_ITCLTK_SUB_PATH) + pstrlen >= MAX_PATH_LENGTH ) ||
+         ( sizeof(SH_ITCLTK_DEBUG_SCRIPT) + pstrlen >= MAX_PATH_LENGTH ) ) {
       abortHandling();
     }
 
     // 3. Define the path of itcl_wish and itcl file name to source
     strcpy(path, ptolemy);
-    strcat(path, SH_ITCLTK_PROG);
-    strcpy(file, ptolemy);
-    strcat(file, SH_ITCLTK_FILE);
+    strcat(path, SH_ITCLTK_SUB_PATH);
+    strcpy(script, ptolemy);
+    strcat(script, SH_ITCLTK_DEBUG_SCRIPT);
 
     switch(fork()) 
     {
@@ -230,7 +234,7 @@ void signalHandlerDebug(int signo)
       
 	case 0:			// fork() return value for child. 
 	    sleep(1);		// Allow core file to be generated.  
-	    execle(path, "itcl_wish", file, "-name", "Tycho", (char *)0, \
+	    execle(path, SH_ITCLTK_PROG, script, "-name", "Tycho", (char *)0,
 		   environ);
 	    abortHandling();	// If you make it this far something went wrong
     }
