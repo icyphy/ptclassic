@@ -60,7 +60,7 @@ unsigned char quant (double inval) {
   Synopsis    [ Converts a RGB format image to YUV format ]
   Description [ Read three double arrays that describe a color image
                 in Red-Green-Blue (RGB) format stores the output in
-		three double arrats that describe that image in YUV
+		three double arrays that describe that image in YUV
 		format. No downsampling is performed on the U and V
 		signals.]
   SideEffects []
