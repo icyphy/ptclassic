@@ -12,7 +12,7 @@
 # SRCS
 # OBJS
 # LIB
-# DOMAIN, DOMAIN_2
+# DOMAIN, DOMAIN_2, DOMAIN_3
 # STAR_MK	Specifies the name of the star-reference file to build;
 #		both a C-verion (e.g., cgcstars.c) using genStarTable and
 #		a makefile version (e.g., cgcstars.mk) using genStarList 
@@ -108,12 +108,12 @@ $(LIBDIR)/$(LIB):	$(LIB)
 # Rule for making a star list for inclusion by make
 $(STAR_MK).mk:	make.template
 		rm -f $(STAR_MK).mk
-		genStarList $(DOMAIN) $(DOMAIN_2) > $(STAR_MK).mk
+		genStarList $(DOMAIN) $(DOMAIN_2) $(DOMAIN_3)> $(STAR_MK).mk
 
 # Rule for making a star list module for pulling stars out of libraries
 $(STAR_MK).c:	make.template
 		rm -f $(STAR_MK).c
-		cd $(VPATH); genStarTable $(GENSTARVARS) $(DOMAIN) $(DOMAIN_2) > $(STAR_MK).c
+		cd $(VPATH); genStarTable $(GENSTARVARS) $(DOMAIN) $(DOMAIN_2) $(DOMAIN_3) > $(STAR_MK).c
 
 $(STAR_MK).o:	$(STAR_MK).c
 
