@@ -99,23 +99,12 @@ public:
 	// a new Port.
 	virtual PortHole& newConnection();
 
-	// Translate aliases, if any.
-	GenericPort& translateAliases() {
-		GenericPort* p = this;
-		while (p->aliasedTo) p = p->aliasedTo;
-		return *p;
-	}
-
 	GenericPort& realPort() {
-		return translateAliases();
+		return *translateAliases();
 	}
 
 	// this one permits use in const expressions
-	const GenericPort& realPort() const {
-		const GenericPort* p = this;
-		while (p->aliasedTo) p = p->aliasedTo;
-		return *p;
-	}
+	const GenericPort& realPort() const;
 
 	GenericPort& setPort(const char* portName, Block* blk, DataType typ=FLOAT) {
 		setNameParent (portName, blk);
@@ -142,8 +131,7 @@ public:
 	GenericPort* alias() const { return aliasedTo;}
 
 	// Constructor
-	GenericPort () : type(ANYTYPE),aliasedTo(0),typePortPtr(0),
-	aliasedFrom(0), attributeBits(0) {}
+	GenericPort ();
 
 	// Destructor
 	~GenericPort();
@@ -166,6 +154,9 @@ protected:
 		gp.aliasedFrom = this;
 	}
 
+	// Translate aliases, if any.
+	GenericPort* translateAliases();
+
 	// datatype of particles in this porthole
 	DataType type;
 
@@ -185,7 +176,7 @@ private:
 };
 
 // predicate for a hidden porthole (or multiporthole)
-inline int hidden(GenericPort& p) { return p.attributes() & PB_HIDDEN; }
+inline int hidden(const GenericPort& p) { return p.attributes() & PB_HIDDEN; }
 
 
         //////////////////////////////////////////
@@ -263,9 +254,8 @@ public:
 	// initialize the Plasma
 	Plasma* setPlasma(Plasma *useType = NULL);
 
-	// Constructor: just worry about pointers here
-	PortHole () : myGeodesic(0), farSidePort(0), myPlasma(0),
-		      myBuffer(0) {}
+	// Constructor
+	PortHole ();
 	
 	// Destructor
 	~PortHole ();
@@ -316,7 +306,7 @@ private:
 
 class GalPort : public PortHole {
 public:
-	GalPort(GenericPort& a) { GenericPort::setAlias(a);}
+	GalPort(GenericPort& a);
 	int isItInput() const;
 	int isItOutput() const;
 };
@@ -383,7 +373,7 @@ public:
 	MultiPortHole& realPort() {
 	// my apologies for this horrible cast.  It is safe because
 	// alias for a MultiPortHole is always a MultiPortHole.
-		return *(MultiPortHole *)&translateAliases();
+		return *(MultiPortHole *)translateAliases();
 	}
 
 	// set alias for MultiPortHole
@@ -393,9 +383,6 @@ public:
 
 	// Return a new port for connections
 	virtual PortHole& newConnection();
-
-	// Also use this in casting to PortHole.  (Is this what we want?)
-	operator PortHole (){ return newConnection();}
 
         // Print a description of the MultiPortHole
 	StringList printVerbose () const;
@@ -423,7 +410,7 @@ protected:
 class GalMultiPort : public MultiPortHole {
 public:
 	// a GalMultiPort always has an alias
-	GalMultiPort(GenericPort& a) { GenericPort::setAlias(a);}
+	GalMultiPort(GenericPort& a);
 
 	// queries pass through to the inside
 	int isItInput() const;
