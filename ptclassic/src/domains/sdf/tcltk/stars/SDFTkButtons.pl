@@ -6,8 +6,8 @@ defstar {
 This star outputs the value 0.0 on all outputs unless the correspoding
 button is pushed.  When the button is pushed, the output takes the value
 given by the parameter "value".  If "synchronous" is YES, then outputs
-are produced only when some button is pushed.  I.e., the star waits for
-a button to be pushed before its go method returns.
+are produced only when some button is pushed.  That is, the star waits
+for a button to be pushed before its go method returns.
 If "allow_simultaneous_events" is yes, then buttons pushed are registered
 only when the button labeled "PUSH TO PRODUCE OUTPUTS" is pushed.
 Note that if "synchronous" is NO, this star is nondeterminate.
