@@ -601,13 +601,6 @@ Block* CGTarget::spliceStar(PortHole* p, const char* name,
 		return 0;
 	}
 
-	// connect up the new star
-	pfar->connect(*ip,delayBefore ? ndelay : 0);
-	op->connect(*p,delayBefore ? 0 : ndelay);
-
-	// save in the list of spliced stars
-	spliceList.put(newb);
-
 	// initialize the new star.  Name it and add it to the galaxy.
 	// using size of splice list in name forces unique names.
 	StringList newname("splice-");
@@ -617,6 +610,14 @@ Block* CGTarget::spliceStar(PortHole* p, const char* name,
 
 	// check errors in initialization
 	if (Scheduler::haltRequested()) return 0;
+
+	// connect up the new star
+	pfar->connect(*ip,delayBefore ? ndelay : 0);
+	op->connect(*p,delayBefore ? 0 : ndelay);
+
+	// save in the list of spliced stars
+	spliceList.put(newb);
+
 	return newb;
 }
 
