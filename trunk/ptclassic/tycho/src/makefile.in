@@ -52,7 +52,7 @@ CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
 # Files that are under version control
-EXTRA_SRCS =	configure.in makefile.in
+EXTRA_SRCS =	configure.in makefile.in index.html
 
 # `make realclean` removes these files
 REALCLEAN_STUFF = tcl.mk makefile
