@@ -223,7 +223,7 @@ class ::tycho::File {
     method filename {} {return $file}
 
     # Return 1 if the data is read-only, 0 otherwise.
-    method getReadonly {} 
+    method getReadOnly {} 
 
     # Open a help window.  Redefine in derived classes.
     method help {}
@@ -701,10 +701,10 @@ body ::tycho::File::evaluate {} {
 }
 
 #####################################################################
-#### getReadonly
+#### getReadOnly
 # Return 1 if the data is read-only, 0 otherwise.
 #
-body ::tycho::File::getReadonly {} {
+body ::tycho::File::getReadOnly {} {
     return $itk_option(-readonly)
 }
 
