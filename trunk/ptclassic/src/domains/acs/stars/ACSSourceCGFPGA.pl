@@ -6,7 +6,7 @@ defcore {
 	desc {
 	    Generic code generator source star.
 	}
-	version {$Id$}
+	version {@(#)ACSSourceCGFPGA.pl	1.2 09/08/99}
 	author { K. Smith }
 	copyright {
 Copyright (c) 1998-1999 Sanders, a Lockheed Martin Company
@@ -37,23 +37,16 @@ limitation of liability, and disclaimer of warranty provisions.
 	    default {"None"}
 	}
 	defstate {
-	    name {address}
+	    name {address_start}
 	    type {int}
 	    desc {address for source variable}
 	    default {"-1"}
 	}
 	defstate {
-	    name {row_size}
+	    name {address_step}
 	    type {int}
-	    desc {row size of source variable}
-	    default {1}
-	}
-	defstate {
-	    name {column_size}
-	    type {int}
-	    desc {column size of source variable}
-	    default {1}
-	    attributes {A_CONSTANT|A_NONSETTABLE}
+	    desc {skip amount between addresses}
+	    default {"1"}
 	}
 	defstate {
 	    name {Domain}
@@ -61,11 +54,18 @@ limitation of liability, and disclaimer of warranty provisions.
 	    desc {Where does this function reside (HW/SW)}
 	    default{"HW"}
 	}
+        defstate {
+	    name {Device_Number}
+	    type {int}
+	    desc {Which device (e.g. fpga, mem)  will this smart generator build for (if applicable)}
+	    default{0}
+	    attributes {A_NONCONSTANT|A_SETTABLE}
+	}
 	defstate {
-	    name {Technology}
-	    type {string}
-	    desc {What is this function to be implemented on (e.g., C30, 4025mq240-4)}
-	    default{""}
+	    name {Device_Lock}
+	    type {int}
+	    default {"NO"}
+	    desc {Flag that indicates that this function must be mapped to the specified Device_Number}
 	}
         defstate {
 	    name {Language}

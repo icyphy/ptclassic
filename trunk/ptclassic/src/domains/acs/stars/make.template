@@ -23,7 +23,7 @@
 # 						PT_COPYRIGHT_VERSION_2
 # 						COPYRIGHTENDKEY
 # Makefile for Ptolemy ACS stars
-# $Id$
+# @(#)make.template	1.13 09/08/99
 #
 # If this file's name is "make.template" and there is no makefile in
 # this directory, do
@@ -52,6 +52,7 @@ PTLIB=libacsstars.$(LIBSUFFIX)
 # source files for all stars, using preprocessor
 # base classes/stars go in the front of the list
 PL_SRCS= \
+  ACS16FFT.pl ACS16FFTCGFPGA.pl ACS16FFTFixSim.pl \
   ACSAbs.pl ACSAbsCGFPGA.pl ACSAbsFPCGC.pl ACSAbsFPSim.pl ACSAbsFixSim.pl \
   ACSAdd.pl ACSAddCGFPGA.pl ACSAddFPCGC.pl ACSAddFPSim.pl ACSAddFixSim.pl \
   ACSBuffer.pl ACSBufferCGFPGA.pl \
@@ -67,11 +68,13 @@ PL_SRCS= \
   ACSImpulse.pl ACSImpulseCGFPGA.pl ACSImpulseFPCGC.pl ACSImpulseFPSim.pl ACSImpulseFixSim.pl \
   ACSIntegrator.pl ACSIntegratorCGFPGA.pl ACSIntegratorFPCGC.pl ACSIntegratorFPSim.pl ACSIntegratorFixSim.pl \
   ACSIntGain.pl ACSIntGainCGFPGA.pl ACSIntGainFPCGC.pl ACSIntGainFPSim.pl ACSIntGainFixSim.pl \
+  ACSIoPort.pl ACSIoPortCGFPGA.pl \
   ACSMpy.pl ACSMpyCGFPGA.pl ACSMpyFPCGC.pl ACSMpyFPSim.pl ACSMpyFixSim.pl \
   ACSMux.pl ACSMuxCGFPGA.pl ACSMuxFPCGC.pl ACSMuxFPSim.pl ACSMuxFixSim.pl \
   ACSNL.pl ACSNLFPCGC.pl ACSNLFPSim.pl ACSNLFixSim.pl \
   ACSNonBiMem.pl ACSNonBiMemCGFPGA.pl \
   ACSNop.pl ACSNopFPCGC.pl ACSNopFPSim.pl ACSNopFixSim.pl \
+  ACSPackBits.pl ACSPackBitsCGFPGA.pl ACSPackBitsFixSim.pl \
   ACSPolarToRect.pl ACSPolarToRectFPCGC.pl ACSPolarToRectFPSim.pl ACSPolarToRectFixSim.pl \
   ACSPrinter.pl ACSPrinterCGFPGA.pl ACSPrinterFPCGC.pl ACSPrinterFPSim.pl ACSPrinterFixSim.pl \
   ACSRamDelay.pl ACSRamDelayCGFPGA.pl ACSRamDelayFPCGC.pl ACSRamDelayFPSim.pl ACSRamDelayFixSim.pl \
@@ -79,10 +82,11 @@ PL_SRCS= \
   ACSShift.pl ACSShiftCGFPGA.pl ACSShiftFPSim.pl ACSShiftFixSim.pl \
   ACSSin.pl ACSSinCGFPGA.pl ACSSinFPCGC.pl ACSSinFPSim.pl ACSSinFixSim.pl \
   ACSSink.pl ACSSinkCGFPGA.pl ACSSinkFPCGC.pl ACSSinkFPSim.pl ACSSinkFixSim.pl \
-  ACSSource.pl ACSSourceCGFPGA.pl ACSSourceFPSim.pl  ACSSourceFPCGC.pl ACSSourceFixSim.pl \
+  ACSSource.pl ACSSourceCGFPGA.pl ACSSourceFPCGC.pl ACSSourceFPSim.pl ACSSourceFixSim.pl \
   ACSSqrt.pl ACSSqrtCGFPGA.pl ACSSqrtFPCGC.pl ACSSqrtFPSim.pl ACSSqrtFixSim.pl \
   ACSSub.pl ACSSubCGFPGA.pl ACSSubFPCGC.pl ACSSubFPSim.pl ACSSubFixSim.pl \
   ACSUniSeq.pl ACSUniSeqCGFPGA.pl \
+  ACSUnPackBits.pl ACSUnPackBitsCGFPGA.pl ACSUnPackBitsFixSim.pl \
   ACSXMGraph.pl ACSXMGraphCGFPGA.pl ACSXMGraphFPCGC.pl ACSXMGraphFPSim.pl ACSXMGraphFixSim.pl \
   ACSXYgraph.pl ACSXYgraphCGFPGA.pl ACSXYgraphFPCGC.pl ACSXYgraphFPSim.pl ACSXYgraphFixSim.pl 
 

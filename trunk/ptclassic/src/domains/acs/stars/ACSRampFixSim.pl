@@ -6,7 +6,7 @@ defcore {
     desc { Generate a ramp signal, starting at "value" (default 0) and
 incrementing by step size "step" (default 1) on each firing.
     }
-    version { $Id$}
+    version { @(#)ACSRampFixSim.pl	1.6 09/08/99}
     author { James Lundblad }
     copyright {
 Copyright (c) 1998 The Regents of the University of California.
@@ -16,14 +16,22 @@ limitation of liability, and disclaimer of warranty provisions.
     }
     location { ACS main library }
     defstate {
-      name { OutputPrecision }
-      type { precision }
-      default { 2.14 }
-      desc {
-Precision of the output in bits and precision of the accumulation.
-When the value of the accumulation extends outside of the precision,
-the OverflowHandler will be called.
-  }
+	name { OutputPrecision }
+	type { precision }
+	default { 2.14 }
+	desc {
+	    Precision of the output in bits and precision of the accumulation.
+		When the value of the accumulation extends outside of the precision,
+		the OverflowHandler will be called.
+		}
+    }
+    defstate {
+	name { LockOutput }
+	type {int}
+	default {"NO"}
+	desc { 
+	    Flag that indicates that the specified output precision should be used 
+		rather than modified by wordlength analysis in the FPGA domain }
     }
     protected {
       Fix t;
