@@ -28,7 +28,6 @@ The multiprocessor scheduling routines.
 #include "StringList.h"
 #include "BaseMultiTarget.h"
 
-class UserOutput;
 
 		//////////////////////////////
 		//  class DeclustScheduler  //
