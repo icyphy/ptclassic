@@ -28,7 +28,7 @@
 CVSROOT/.* mailx -s \"%s\" root@gigasource.eecs.berkeley.edu
 
 collabrador/.* mailx -s \"%s\" collabrador-cvs@gigascale.org
-diva/.* mailx -s \"%s\" diva-cvs@gigascale.org
+/home/cvs/diva/.* mailx -s \"%s\" diva-cvs@gigascale.org
 diva-binaries/.* mailx -s \"%s\" diva-cvs@gigascale.org
 #mescal/.* mailx -s \"%s\" mescal-cvs@gigascale.org
 mica/.* mailx -s \"%s\" mica-cvs@gigascale.org
