@@ -10,7 +10,11 @@
 % Use PostScript fonts.
 %
 \input{times.sty}
-\def\@mtt{pcrb at 11pt} % bold and smaller
+
+%
+% Make typewriter font bold and smaller.
+%
+\@getfont\ptt\ttfam\@xiipt{pcrb at 11pt}
 
 %
 % Add a bold sans-serif font.
@@ -42,7 +46,7 @@
 %
 \newcounter{volume}
 \setcounter{volume}{1}
-\def\ps@headings{\let\@mkboth\markboth
+\def\ps@headings{\let\@mkboth\@gobbletwo
     \def\@oddfoot{\footnotesize \sf Ptolemy \hfill Last updated: \@date}
     \def\@evenfoot{\footnotesize \sf UC Berkeley \hfill Department of EECS}
     \def\@oddhead{\footnotesize \sf \leftmark \hfill \thepage}
@@ -50,12 +54,12 @@
     \def\leftmark{The Almagest}
     \def\chaptermark##1{\markright{##1}}
     \def\sectionmark##1{} }
+\pagestyle{headings}
+
 %
 % Redefine the "plain" page style to be the same as "empty".
 %
 \let\ps@plain\ps@empty
-
-\pagestyle{headings}
 
 %
 % Use chapter number in page numbers.
@@ -96,9 +100,9 @@
 \renewenvironment{description}%
 {\begin{list}{}{%
     \setlength{\leftmargin}{2in}%
-    \setlength{\labelsep}{0.5in}%
+    \setlength{\labelsep}{0.25in}%
     \setlength{\labelwidth}{1.5in}%
-    \renewcommand{\makelabel}[1]{\descriptionlabel{##1}}}}%
+    \renewcommand{\makelabel}[1]{\bf ##1 \hfill}}}%
 {\end{list}}
 
 %
@@ -110,4 +114,3 @@
 % Restrict placement of figures.
 %
 \renewcommand{\floatpagefraction}{1.1}
-\renewcommand{\textfraction}{0.25}
