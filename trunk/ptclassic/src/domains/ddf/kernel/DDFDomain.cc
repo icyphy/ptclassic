@@ -40,7 +40,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "DDFTarget.h"
 #include "KnownTarget.h"
 #include "DDFScheduler.h"
-#include "SDFWormhole.h"
+#include "DDFWormhole.h"
 #include "AutoForkNode.h"
 
 extern const char DDFdomainName[] = "DDF";
@@ -49,14 +49,14 @@ class DDFDomain : public Domain {
 public:
 	// new wormhole
 	Star& newWorm(Galaxy& innerGal,Target* innerTarget)  {
-		LOG_NEW; return *new SDFWormhole(innerGal,innerTarget);
+		LOG_NEW; return *new DDFWormhole(innerGal,innerTarget);
 	}
 
 	// new fromUniversal EventHorizon
-	EventHorizon& newFrom() { LOG_NEW; return *new SDFfromUniversal;}
+	EventHorizon& newFrom() { LOG_NEW; return *new DDFfromUniversal;}
 
 	// new toUniversal EventHorizon
-	EventHorizon& newTo() { LOG_NEW; return *new SDFtoUniversal;}
+	EventHorizon& newTo() { LOG_NEW; return *new DDFtoUniversal;}
 
 	// constructor: permit BDF and SDF as subdomains.
 	DDFDomain() : Domain("DDF") {
