@@ -38,4 +38,6 @@ CC_STATIC = -Wl,-a,archive
 XV_RAND= RAND="-DNO_RANDOM -Drandom=rand"
 XV_INSTALL=bsdinst
 
-FLUSH_CACHE = $(LIBDIR)/flush_cache.o
+# Used to flush the cache on the hppa.  (source is in the kernel/ directory)
+FLUSH_CACHE = flush_cache.o
+LIB_FLUSH_CACHE = $(LIBDIR)/flush_cache.o
