@@ -88,7 +88,7 @@ class iwidgets::Notebook {
     public method next { } 
     public method pageconfigure { index args } 
     public method pagecget { index option }
-    public method select { 
+    public method select { index }
     public method view { args } 
     
     private method _scrollCommand { } 
@@ -175,7 +175,7 @@ body iwidgets::Notebook::add { args } {
     # add a Page component
     set pathName $itk_component(cs).page$_uniqueID
     itk_component add page$_uniqueID {
-        eval Page $pathName $args
+	eval Page $pathName $args
     }
     incr _uniqueID
     lappend _pages $pathName
@@ -196,26 +196,26 @@ body iwidgets::Notebook::add { args } {
 # ------------------------------------------------------------------
 body iwidgets::Notebook::childsite {{index {}}} {
     if { $index == "" } {
-        # ... called with no argument, return a list of childsites
-        set csList {}
-        foreach pathName $_pages { 
-            lappend csList [eval $pathName childsite]
-        }
-        return $csList
+	# ... called with no argument, return a list of childsites
+	set csList {}
+	foreach pathName $_pages { 
+	    lappend csList [eval $pathName childsite]
+	}
+	return $csList
 
     } else {
-        # ... otherwise, return child site for the index given
-        # empty notebook
-        if { $_pages == {} } {
-            error "can't get childsite,\
-                    no pages in the notebook \"$itk_component(hull)\""
-        }
-	    
-        set index [_index $index]
-        set pathName [lindex $_pages $index]
-	    
-        set cs [eval $pathName childsite]
-        return $cs
+	# ... otherwise, return child site for the index given
+	# empty notebook
+	if { $_pages == {} } {
+	    error "can't get childsite,\
+		    no pages in the notebook \"$itk_component(hull)\""
+	}
+	
+	set index [_index $index]
+	set pathName [lindex $_pages $index]
+	
+	set cs [eval $pathName childsite]
+	return $cs
     }
 }
 
@@ -233,13 +233,13 @@ body iwidgets::Notebook::delete { index1 {index2 {}} } {
     
     set fromPage [_index $index1]	    
     if { $index2 == "" } {
-        set toPage $fromPage
+	set toPage $fromPage
     } else {
-        set toPage [_index $index2]
+	set toPage [_index $index2]
     }
     if { $fromPage > $toPage } {
-        error "bad Notebook page index1 in delete \
-                method: \"$index1\" is greater than \"$index2\""
+	error "bad Notebook page index1 in delete \
+		method: \"$index1\" is greater than \"$index2\""
     }
     _deletePages $fromPage $toPage
 }
@@ -253,28 +253,28 @@ body iwidgets::Notebook::delete { index1 {index2 {}} } {
 # ------------------------------------------------------------------
 body iwidgets::Notebook::index { index } {
     if { $index == "end" } {
-        set index [expr [llength $_pages] -1]
+	set index [expr [llength $_pages] -1]
 
     } elseif { $index == "select" } {
-        set index $_currPage
+	set index $_currPage
 
     } elseif [regexp {^[0-9]+$} $index] {
-        # Positive integer
-        if { $index >= [llength $_pages] } {
-            set index -1
-        }
+	# Positive integer
+	if { $index >= [llength $_pages] } {
+	    set index -1
+	}
     } else {
-        # Match the pattern against each label
-        set pattern $index
-        set index -1
-        set i 0
-        foreach pathName $_pages {
-            if [string match $pattern [$pathName cget -label]] {
-                set index $i
-                break
-            }
-            incr i
-        }
+	# Match the pattern against each label
+	set pattern $index
+	set index -1
+	set i 0
+	foreach pathName $_pages {
+	    if [string match $pattern [$pathName cget -label]] {
+		set index $i
+		break
+	    }
+	    incr i
+	}
     }
     return $index
 }
@@ -291,12 +291,12 @@ body iwidgets::Notebook::insert { index args } {
     # prob missing value for last item in args list. Signal error.
     set len [llength $args]
     if { [llength $args] & 1 } {
-        error "value for \"[lindex $args [expr $len - 1]]\" missing"
+	error "value for \"[lindex $args [expr $len - 1]]\" missing"
     }
     
     # ... Error: catch notebook empty
     if { $_pages == {} } {
-        error "can't insert page, no pages in the notebook\
+	error "can't insert page, no pages in the notebook\
 		\"$itk_component(hull)\""
     }
     
@@ -307,7 +307,7 @@ body iwidgets::Notebook::insert { index args } {
     # create the new page and get its path name...
     set pathName $itk_component(cs).page$_uniqueID
     itk_component add page$_uniqueID {
-        eval Page $pathName $args
+	eval Page $pathName $args
     }
     incr _uniqueID
 
@@ -382,7 +382,7 @@ body iwidgets::Notebook::next { } {
 # ------------------------------------------------------------------
 body iwidgets::Notebook::pageconfigure { index args } {
     set page [_index $index]
-        
+    
     # Configure the page component
     set pathName [lindex $_pages $page]
     return [eval $pathName configure $args]
@@ -402,7 +402,7 @@ body iwidgets::Notebook::pagecget { index option } {
     set pathName [lindex $_pages $page]
     return [$pathName cget $option]
 }
- 
+
 # ------------------------------------------------------------------
 # METHOD: select <index>
 #
@@ -553,8 +553,8 @@ body iwidgets::Notebook::view { args } {
 body iwidgets::Notebook::_index { index } {
     set i [index $index]
     if { $i < 0 } {
-        error "bad Notebook page index \"$index\":\
-                should be between 0 and [expr [llength $_pages] - 1]"
+	error "bad Notebook page index \"$index\":\
+		should be between 0 and [expr [llength $_pages] - 1]"
     }
     return $i
 }
@@ -571,7 +571,7 @@ body iwidgets::Notebook::_index { index } {
 # ------------------------------------------------------------------
 body iwidgets::Notebook::_scrollCommand { } {
     if { $itk_option(-scrollcommand) != {} } {
-        if  { $_currPage != -1 }  {
+	if  { $_currPage != -1 }  {
 	    set relTop [expr ($_currPage*1.0) / [llength $_pages]]
 	    set relBottom [expr (($_currPage+1)*1.0) / [llength $_pages]]
 	    set scrollCommand "$itk_option(-scrollcommand) $relTop $relBottom"
