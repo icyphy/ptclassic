@@ -85,13 +85,16 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #define	__host_mips   host_mips
 #endif
 
+/* This should be outside of the below ifdef, and must be before any include.
+* I removed _BSD_SOURCE and _POSIX_SOURCE because they are redundant, since
+* defining _GNU_SOURCE turns on everything
+*/
 #ifdef linux
+#ifndef __linux
 #define __linux		linux
-#define _POSIX_SOURCE
-#define _GNU_SOURCE
-#define _BSD_SOURCE
 #endif
-
+#define _GNU_SOURCE
+#endif
 
 #if defined(aix) || defined(_AIX)
 #define __aix		aix
@@ -222,7 +225,10 @@ typedef int int16;
 #endif
 
 #ifdef linux
+#include <features.h>		/* for __GLIBC__ */
+#if (__GLIBC__ < 2)
 #include <ansidecl.h>
+#endif
 #include <unistd.h>
 #endif
 
