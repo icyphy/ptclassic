@@ -1,23 +1,43 @@
 // $Id$
 // Joseph T. Buck
-// Created 6/6/90
-//
-// This is a mechanism to allow the same interpreter code to support
-// multiple schedulers; only the methods for this class need to be
-// changed.
+// Created 6/29/90
 
-// Eventually, this class will allow the scheduler to support multiple
-// domains at once, which is why these are functions instead of data
-// members.
+// The Domain class.  We declare one instance of each derived domain.
+// This class provides a way to get the proper types of various objects
+// for a domain, and allows Wormholes to be automatically generated.
 
+#ifndef _Domain_h
+#define _Domain_h 1
 class Scheduler;
+class Block;
+class Star;
+class Galaxy;
+class PortHole;
+class EventHorizon;
+
+const int NUMDOMAINS = 10;	// maximum # of domains
 
 class Domain {
 public:
-	static int set(const char*);
-	static Scheduler* newSched();
-	static const char* universeType();
-	static const char* domainName();
+	Domain (const char* domname) {
+		index = numDomains++;
+		allDomains[index] = this;
+		name = domname;
+	}
+	virtual Scheduler& newSched() = 0;
+	virtual Star& newWorm(Galaxy& innerGal) = 0;
+	virtual PortHole& newInPort() = 0;
+	virtual PortHole& newOutPort() = 0;
+	virtual EventHorizon& newFrom() = 0;
+	virtual EventHorizon& newTo() = 0;
+	const char* domainName() { return name;}
+	static Domain* named(const char* name);
+	static Domain* domainOf(Block&);
+private:
+	static int numDomains;
+	static Domain* allDomains[NUMDOMAINS];
+
+	int index;
+	const char* name;
 };
-
-
+#endif
