@@ -135,7 +135,7 @@ proc ::tycho::unsubscribeTkPalette {} {
 #
 # A utility procedure to set the Tk palette to either the old
 # bisque color-scheme or the grey color scheme. To make this
-# run at a reasonable spped, it disables the color subscriptions
+# run at a reasonable speed, it disables the color subscriptions
 # first, resets the palette, change the preferences, and then
 # reenables the subscription.
 #
