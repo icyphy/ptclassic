@@ -31,9 +31,6 @@ public:
 	// resource management
 	int scheduleComm(ParNode*,int);
 
-	// redefine
-	ParNode* backComm(ParNode*);
-
 	Block* clone() const;
 
 protected:

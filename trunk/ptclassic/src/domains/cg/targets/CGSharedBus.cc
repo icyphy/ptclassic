@@ -62,28 +62,6 @@ int CGSharedBus::scheduleComm(ParNode *cNode, int when) {
 // 	and one unused processor. (to reduce scheduling time)
 // Same as default method defined in CGQuasiTarget.cc
 
-			//////////////////
-			///  backComm  ///
-			//////////////////
-// Checks the bus to see if a communication node is scheduled directly
-//      in front of cNode.  If yes, it returns a pointer to the node;
-//      if there is a gap, it returns zero.
-ParNode* CGSharedBus::backComm(ParNode *cNode) {
-	// The time cNode starts execution
-	int cNodestart = cNode->getScheduledTime(); 
-
-	ProcessorIter iter(bestBus);
-	NodeSchedule* ns;
-	ParNode* n;
-	while ((ns = (NodeSchedule*)iter++) != 0) {
-		n = ns->getNode();	
-		if (n->getFinishTime() == cNodestart) {
-			break;
-		}
-	}
-	return n;
-}
-
 Block* CGSharedBus::clone() const {
 	LOG_NEW; CGSharedBus *t = 
 		new CGSharedBus(readName(),starType(),readDescriptor());
