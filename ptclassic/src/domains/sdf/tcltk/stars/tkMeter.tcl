@@ -47,7 +47,8 @@ if {![winfo exists $s]} {
     pack append $s $s.msg {top expand} $s.f top
 
     if {!$putInCntrPan} {
-        button $s.ok -text "DISMISS" -command "destroy $s"
+        button $s.ok -text "DISMISS" -command \
+	    "ptkStop [curuniverse]; destroy $s"
         pack append $s $s.ok {top fillx}
     }
 
