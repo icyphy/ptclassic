@@ -16,7 +16,7 @@ Date of last revision: 5/92
 
 #include "DCNode.h"
 #include "DCGraph.h"
-#include "Cluster.h"
+#include "DCCluster.h"
 #include "Error.h"
 
                         ///////////////////////

@@ -7,7 +7,7 @@
 #include "ParGraph.h"
 #include "DCNode.h"
 #include "DCArcList.h"
-#include "ClusterList.h"
+#include "DCClusterList.h"
 
 /****************************************************************
 Version identification:
@@ -41,6 +41,53 @@ class ostream;
 // for more information concerning these equivalence transformations.
 
 class DCGraph : public ParGraph {
+public:
+	// Nodes with more than one descendant
+	DCNodeList BranchNodes;
+
+	// Nodes with more than one ancestor
+	DCNodeList MergeNodes;
+
+	~DCGraph() {}
+
+	// generate the name of the clusters
+	// If type = 0, elementary cluster, otherwise, macro cluster.
+	const char* genDCClustName(int type);
+
+	// Display the graph
+	StringList display();
+	
+	// find out the first merge node in intersection of TClosures
+	DCNode* intersectNode(DCNode*, DCNode*, int);
+
+	// trace arcs between two nodes.
+	DCArcList* traceArcPath(DCNode* branch, DCNode* S, DCNode* D, int dir);
+
+	// add a cutArc
+	void addCutArc(DCArc* arc)  
+		{ if (cutArcs.member(arc) == 0) cutArcs.append(arc); }
+
+	// form an elementary clusters
+	void formElemDCClusters(DCClusterList&);
+
+	// compute the score for clusters.
+	// score of a cluster = (#samples passed offproc) = (#samples passed
+	// onproc).
+	void computeScore();
+
+	// find the processors that clust communicates with
+	void commProcs(DCCluster* clust, int* procs);
+
+	// save scheduling information of the nodes
+	void copyInfo();
+
+protected:
+	// redefine these virtual allocators to allocate DCNodes
+	EGNode* newNode(DataFlowStar*, int);
+
+	// Initialize the graph.  Returns TRUE if okay, else returns FALSE.
+	int initializeGraph();
+
 private:
 	// A list of all the DCNodes sorted largest StaticLevel first
 	DCNodeList sortedNodes;
@@ -71,60 +118,12 @@ private:
 	void sortDCNodes();
 
 	// add a node into a given cluster
-	void addToCluster(DCNode*, DCNodeList*);
+	void addToDCCluster(DCNode*, DCNodeList*);
 
 	// set inter cluster arcs
 	void setInterclusterArcs();
 
 	int clustNumber;
-
-protected:
-	// redefine these virtual allocators to allocate DCNodes
-	EGNode* newNode(DataFlowStar*, int);
-
-	// Initialize the graph.  Returns TRUE if okay, else returns FALSE.
-	int initializeGraph();
-
-public:
-	// Nodes with more than one descendant
-	DCNodeList BranchNodes;
-
-	// Nodes with more than one ancestor
-	DCNodeList MergeNodes;
-
-	// Destructor
-	~DCGraph() {}
-
-	// generate the name of the clusters
-	// If type = 0, elementary cluster, otherwise, macro cluster.
-	const char* genClustName(int type);
-
-	// Display the graph
-	StringList display();
-	
-	// find out the first merge node in intersection of TClosures
-	DCNode* intersectNode(DCNode*, DCNode*, int);
-
-	// trace arcs between two nodes.
-	DCArcList* traceArcPath(DCNode* branch, DCNode* S, DCNode* D, int dir);
-
-	// add a cutArc
-	void addCutArc(DCArc* arc)  
-		{ if (cutArcs.member(arc) == 0) cutArcs.append(arc); }
-
-	// form an elementary clusters
-	void formElemClusters(ClusterList&);
-
-	// compute the score for clusters.
-	// score of a cluster = (#samples passed offproc) = (#samples passed
-	// onproc).
-	void computeScore();
-
-	// find the processors that clust communicates with
-	void commProcs(Cluster* clust, int* procs);
-
-	// save scheduling information of the nodes
-	void copyInfo();
 };
 
 class DCIter : public EGIter {

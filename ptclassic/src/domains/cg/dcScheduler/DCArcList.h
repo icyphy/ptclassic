@@ -71,10 +71,9 @@ class DCArcList : public SequentialList
 {
 
 public:
-
 	DCArcList() {initialize();}
-
 	DCArcList(DCArcList &arclist);
+	~DCArcList();
 
 	// Return the DCArc at the front of the list
 	DCArc *head() {return (DCArc*)SequentialList::head();}
@@ -105,15 +104,11 @@ public:
 
 	// The number of DCArcs in the list
 	int mySize() {return size(); } 
-
-	// Destructor
-	~DCArcList();
 };
 
 class DCArcIter : private ListIter
 {
 public:
-	// Constructor
 	DCArcIter(const DCArcList& list) : ListIter(list) {}
 
 	// Get the next DCArc in the list
@@ -125,7 +120,6 @@ public:
 
 	// connect this iterator to another nodelist
 	void reconnect(DCArcList& list) {ListIter::reconnect(list);}
-
 };
 
 #endif
