@@ -235,7 +235,6 @@ body ::tycho::EditDiff::test {} {
     return
 
 
-    puts "Now entering test..."
     # Create an exec instance
     if {[info object $execDiff ]==""} {
         # Doesn't exist yet, create one
@@ -248,14 +247,9 @@ body ::tycho::EditDiff::test {} {
     $execDiff getStatusWait
     set diffResult [$execDiff getHistory]
     set diffResult [split $diffResult \n]
-    puts "There are [llength $diffResult] lines"
 
     # Reset the line to read from beginning
     set diffResultLineCount 0
-
-    while {[set tmp [diffReport]]!="done"} {
-        puts "Current line is $tmp"
-    }
 }
 
 
