@@ -4,7 +4,7 @@
 Version identification:
 $Id$
 
-Copyright (c) 1990-1996 The Regents of the University of California.
+Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -60,10 +60,8 @@ public:
 
 protected:
 	// States.
-	IntState analyze;
 	IntState elaborate;
 	IntState compile;
-	IntState report;
 	
 	// Return the condition indicating if system clock generator is needed.
 	// For synthesis, we don't want a system clock.
