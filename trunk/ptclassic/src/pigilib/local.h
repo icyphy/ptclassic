@@ -66,11 +66,11 @@ extern RAW_PTR malloc ARGS((size_t));
 /* HPUX10.20 will fail if the line below is defined, however HPUX9.x
  does not have getwd(). */
 #define getwd(foo) getcwd(foo,MAXPATHLEN-1)
-#else /* PTHPPA */
+#else /* PTHPPA && ! PTHPUX10 */
 #if !defined(PTALPHA) && !defined(PTLINUX) && !defined(PTIRIX5) && !defined(PTHPPA)
 extern char *getwd ARGS((char *));
 #endif /* PTALPHA ... */
-#endif /* PTHPPA */
+#endif /* PTHPPA && ! PTHPUX10 */
   
 /* buffer length for messages */
 #define MSG_BUF_MAX 512
