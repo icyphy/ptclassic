@@ -154,11 +154,11 @@ symCopyItemFunc *ci;		/* Copy callback         */
  * Endpoint connectors are added to these paths.
  */
 {
-    octGenerator gen, term_gen;
-    octObject path, term;
+    octGenerator gen;
+    octObject path;
     struct octPoint pnts[2];
     segTermInfo info[2];
-    int count, i;
+    int count;
     int32 np = 2;
 
     SYMCK(octInitGenContents(cut_set, OCT_PATH_MASK, &gen));
@@ -635,7 +635,7 @@ octObject *net;			/* Net to rename */
 	/*NOTREACHED*/
     }
     octExternalId(net, &xid);
-    (void) sprintf(new_name, "%s_%d", net->contents.net.name, xid);
+    (void) sprintf(new_name, "%s_%ld", net->contents.net.name, (long)xid);
     net->contents.net.name = new_name;
     SYMCK(octModify(net));
 }
