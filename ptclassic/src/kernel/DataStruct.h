@@ -58,12 +58,19 @@ public:
 	void append(Pointer a);	// Add at tail of list
 	int remove(Pointer a);	// remove ptr: return TRUE if removed
 	Pointer getAndRemove();	// Return and remove head of list
-	Pointer getNotRemove()  // Return head, do not remove
+        Pointer getTailAndRemove();     // Return and remove tail of list
+	Pointer getNotRemove() const  // Return head, do not remove
 	{
-		return lastNode->next->e;
+		return lastNode ? lastNode->next->e : 0;
 	}
 	Pointer elem(int) const;// Return arbitary node of list
 	void initialize();	// Remove all links
+
+	// predicates
+	// is list empty?
+	int empty() const { return (lastNode == 0);}
+	// is arg a member of the list? (returns TRUE/FALSE)
+	int member(Pointer arg) const;
 
 protected:
 
@@ -120,7 +127,8 @@ inline Pointer Vector :: elem (int i)
 	/////////////////////////////////
 
 /*
-Class implements a queue or first-in first-out buffer
+Class implements a queue, which may be used to implement FIFO or LIFO or a
+mixture -- using putTail (or put), putHead, getTail, and getHead (or get).
 */
 
 class Queue : private SingleLinkList
@@ -129,9 +137,13 @@ class Queue : private SingleLinkList
 public:
 	// Add element to the queue
         void put(Pointer p) {++numberNodes; SingleLinkList::append(p);}
+	void putTail(Pointer p) {put(p);}
+	void putHead(Pointer p) {++numberNodes; insert(p);}
 
 	// Remove and return element from end of the queue
         Pointer get() {--numberNodes; return getAndRemove();}
+	Pointer getHead() {return get();}
+	Pointer getTail() {--numberNodes; return getTailAndRemove();}
 
 	// Return number of elements currently in queue
 	int length() const {return numberNodes;}
@@ -174,7 +186,7 @@ public:
 	int size() const {return dimen;}
 
 	// Return head of list
-	Pointer head() const { return elem(0);}
+	Pointer head() const { return getNotRemove();}
 
 	// Remove an object from the list
 	int remove(Pointer p) {
@@ -185,6 +197,9 @@ public:
 
 	// Clear the data structure
 	void initialize() {SingleLinkList::initialize(); dimen=0;}
+
+	// make baseclass function accessible.
+	SingleLinkList::member;
 
 	SequentialList() {dimen=0;}
 
@@ -239,7 +254,7 @@ public:
 	Pointer popTop() {--dimen; return getAndRemove();}
 
 	// Access but do not remove element from top of stack
-	Pointer accessTop() {return getNotRemove();}
+	Pointer accessTop() const {return getNotRemove();}
 
 	// Clear the data structure
 	void initialize() {SingleLinkList::initialize(); dimen=0;}
