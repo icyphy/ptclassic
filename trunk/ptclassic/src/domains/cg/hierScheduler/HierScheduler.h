@@ -37,6 +37,7 @@ Programmer: Jose Luis Pino
 *****************************************************************/
 
 #include "ParScheduler.h"
+#include "DynamicGalaxy.h"
 
 class HierScheduler : public ParScheduler {
 public:
@@ -51,9 +52,9 @@ public:
     
     /*virtual*/ int run();
 
-    /*virtual*/ void setUpProcs(int num) { topScheduler.setUpProcs(num); }
+    /*virtual*/ ParProcessors* setUpProcs(int);
 
-    /*virtual*/ void setStopTime(double limit);
+    /*virtual*/ void setStopTime(double);
     
     /*virtual*/ double getStopTime();
 
@@ -64,6 +65,7 @@ public:
     /*virtual*/ int dagNodes() const;
 
 private:
+    DynamicGalaxy wormholes;
     ParScheduler& topScheduler;
     int sdfStars;
 };
