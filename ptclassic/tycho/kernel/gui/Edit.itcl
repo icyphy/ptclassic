@@ -1909,11 +1909,12 @@ body ::tycho::Edit::configurePopup {} {
 	foreach entry $index {
 	    set desc [lindex $entry 0]
 	    set link [lindex $entry 1]
+	    set point [lindex $entry 2]
 	    if { [string match [lindex $desc 0] $selection] } {
 		# Add the doc link
 		contextmenu add "HTML: [lrange $desc 1 end]" \
 			{Open documentation} \
-			-command "::tycho::File::openContext $link"
+			-command "$this hyperJump $link \"$point\""
 
 		# Add a source link
 		set link [file split $link]
@@ -1921,9 +1922,10 @@ body ::tycho::Edit::configurePopup {} {
 		set file [join [concat \
 			[linit [split [lindex $link end] .]] "itcl"] .]
 		set link [eval file join $path $file]
+		# FIXME: Give this a point at which to open
 		contextmenu add "Source: [lrange $desc 1 end]" \
 			{Open source} \
-			-command "::tycho::File::openContext $link"
+			-command "$this hyperJump $link"
 
 		set linksfound 1
 	    }
