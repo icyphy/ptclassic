@@ -195,7 +195,7 @@ cd ../..
 # everything must have two slashs (be three levels down)
 
 foreach x ( cg56/dsp/stars cg96/dsp/stars \
-	sdf/atm/kernel sdf/atm/stars sdf/contrib/stars \
+	sdf/atm/kernel sdf/atm/stars sdf/contrib/kernel sdf/contrib/stars \
 	sdf/dsp/stars sdf/image/kernel sdf/image/stars sdf/tcltk/stars \
 	sdf/matrix/stars sdf/matlab/stars sdf/nomatlab/stars \
 	mdsdf/tcltk/stars \
