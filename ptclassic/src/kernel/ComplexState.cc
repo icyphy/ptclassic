@@ -65,14 +65,14 @@ void ComplexState  :: initialize() {
 ParseToken ComplexState :: evalExpression(Tokenizer& lexer, Block*  blockIAmIn) {
 	
 	double signflag = 1;
-        ParseToken t = getParseToken(lexer, blockIAmIn);
+        ParseToken t = getParseToken(lexer, blockIAmIn, "FLOAT");
 
 	if(!strcmp(t.tok,"EOF")) return t;
 	if(!strcmp(t.tok,"OP"))
 	{
 	if(t.cval == '-')
 		{signflag = -1;
-		t = getParseToken(lexer, blockIAmIn);
+		t = getParseToken(lexer, blockIAmIn, "FLOAT");
 		if(!strcmp(t.tok,"NULL")) {t.tok = "ERROR"; return t;}	
 		}
         }

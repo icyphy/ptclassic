@@ -34,9 +34,14 @@ inline unsigned int is_idchar(char c) {
         return isalnum(c) || c == '_';
 }
 
-// The state tokenizer: return next token
+// The state tokenizer without type specification
 ParseToken
 State :: getParseToken(Tokenizer& lexer, Block* blockIAmIn) {
+	return getParseToken(lexer, blockIAmIn, "NONE");	};
+
+// The state tokenizer: return next token
+ParseToken
+State :: getParseToken(Tokenizer& lexer, Block* blockIAmIn, char* stateType) {
         char token[TOKSIZE];
 	ParseToken t;
 
@@ -60,6 +65,12 @@ State :: getParseToken(Tokenizer& lexer, Block* blockIAmIn) {
 		return t;
 	}
 
+	if(*token == '[' || *token == ']') {
+		t.tok = "REPEATER";
+		t.cval = (char)*token;
+		return t;
+	}
+
         if (*token == '+' || *token == '-' || *token == '*' ||  *token == '/'
 	|| *token == '(' || *token == ')') {
                 t.tok = "OP";
@@ -68,7 +79,7 @@ State :: getParseToken(Tokenizer& lexer, Block* blockIAmIn) {
 	}
 
         if (isdigit(*token) || *token == '.' )  {
-                if (index (token, '.')) {
+		if (!strcmp(stateType,"FLOAT")) {
                         t.tok = "FLOAT";
                         t.doubleval = atof(token);
 			return t;
