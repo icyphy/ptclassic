@@ -5,7 +5,7 @@
 #ifndef Decoder_h
 #define Decoder_h
 
-inline float sqr( float x ) {
+inline double sqr( double x ) {
   return x * x;
 }
 
@@ -17,7 +17,7 @@ class Decoder {
 
 private:
 
-  float Gain;
+  double Gain;
 
   // Xsymbol gives the xmit symbols for each branch
   // into each state.  The first index is the branch
@@ -27,7 +27,7 @@ private:
   // Predecessor state table
   int PrevState[ 2 ][ 64 ];
 
-  float BM (int xsym, int I, int Q);
+  double BM (int xsym, int I, int Q);
 
   // This is the path memory
   int Path[ 64 ][ 64 ];
@@ -36,17 +36,17 @@ private:
   int PathIndex;
 
   // This is the state metric memory.  We ping-pong between 2
-  float StateMetric[ 2 ][ 64 ];
+  double StateMetric[ 2 ][ 64 ];
 
   // This index is the current write position for the state metrics
   int StateMetricIndex;
 
   // That's right folks.  *Squared* distance.  RTFM.
-  float sqdist( float xmit, float rcv ) {
+  double sqdist( double xmit, double rcv ) {
     return sqr( xmit - rcv );
   }
 
-  float XmitMap( int val ) {
+  double XmitMap( int val ) {
     return ( val == 0 ) ? 1 : -1;
   }
 
@@ -68,11 +68,11 @@ private:
 
 public:
 
-  Decoder (float g) : Gain (g) { Reset(); }
+  Decoder (double g) : Gain (g) { Reset(); }
 
   int operator() ( int I, int Q );
 
-  void SetGain (float g) { Gain = g; }
+  void SetGain (double g) { Gain = g; }
 
   void Reset();
   
