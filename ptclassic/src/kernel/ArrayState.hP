@@ -63,6 +63,9 @@ public:
         // the value as a string
         StringList currentValue() const;
 
+	// extend/truncate the array size
+	void resize(int);
+
 	// Parse initValue to set Value
 	void initialize();
 
