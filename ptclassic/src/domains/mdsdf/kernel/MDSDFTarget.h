@@ -47,16 +47,24 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "FloatState.h"
 
 class MDSDFTarget : public Target {
+public:
+	// constructor
+	MDSDFTarget();
+
+	// destructor
+	~MDSDFTarget();
+
+	void setup();
+
+	/*virtual*/ Block* makeNew() const;
+
+	// return the domain of the galaxy if it exists or "MDSDF" otherwise
+	/*virtual*/ const char* domain();
+
 protected:
 	StringState logFile;
 
 	// schedulePeriod for interface with a timed domain.
 	FloatState schedulePeriod;
-
-public:
-	MDSDFTarget();
-	void setup();
-	Block* makeNew() const;
-	~MDSDFTarget();
 };
 #endif

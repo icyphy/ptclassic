@@ -39,6 +39,7 @@ static const char file_id[] = "MDSDFTarget.cc";
 #pragma implementation
 #endif
 
+#include "Galaxy.h"
 #include "MDSDFTarget.h"
 #include "MDSDFScheduler.h"
 #include "pt_fstream.h"
@@ -76,4 +77,8 @@ void MDSDFTarget::setup() {
 	if (o) {
 		o << scheduler()->displaySchedule();
 	}
+}
+
+const char* MDSDFTarget::domain() {
+	return galaxy() ? galaxy()->domain() : "MDSDF";
 }
