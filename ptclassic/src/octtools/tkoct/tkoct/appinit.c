@@ -28,6 +28,11 @@ ENHANCEMENTS, OR MODIFICATIONS.
  Programmer: Kennard White
 
 ********************************************************************/
+
+/* Parts of this file are from tcl4.0, so:
+ * Copyright (c) 1994-1995 Sun Microsystems, Inc.
+ */
+
 #ifndef lint
 static char SccsId[] = "@(#)appinit.c	1.4 11/11/94";
 #endif /* not lint */
@@ -43,6 +48,14 @@ static char SccsId[] = "@(#)appinit.c	1.4 11/11/94";
 
 #include "oct.h"
 #include "toct.h"
+
+/*
+ * The following variable is a special hack that is needed in order for
+ * Sun shared libraries to be used for Tcl.
+ */
+
+extern int matherr();
+int *tclDummyMathPtr = (int *) matherr;
 
 /* Simple routine to return the full path name of the initialization file
  */
@@ -67,7 +80,33 @@ char *filename;
 
 extern int main();
 int *tclDummyMainPtr = (int *) main;
-
+/*
+ *----------------------------------------------------------------------
+ *
+ * main --
+ *
+ *	This is the main program for the application.
+ *
+ * Results:
+ *	None: Tcl_Main never returns here, so this procedure never
+ *	returns either.
+ *
+ * Side effects:
+ *	Whatever the application does.
+ *
+ *----------------------------------------------------------------------
+ */
+
+int
+main(argc, argv)
+    int argc;			/* Number of command-line arguments. */
+    char **argv;		/* Values of command-line arguments. */
+{
+    Tcl_Main(argc, argv, Tcl_AppInit);
+    return 0;			/* Needed only to prevent compiler warning. */
+}
+
+
 /*
  *----------------------------------------------------------------------
  *
