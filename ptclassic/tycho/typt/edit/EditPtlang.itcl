@@ -48,7 +48,7 @@ class ::tycho::EditPtlang {
     ###################################################################
     ####                            options                        ####
 
-    itk_option define -star star Star {SDF Fork}
+    itk_option define -star star Star {}
 
     ###################################################################
     ####                         public methods                    ####
@@ -75,11 +75,28 @@ class ::tycho::EditPtlang {
 configbody ::tycho::EditPtlang::star {
     global PTOLEMY
     set domainStarList $itk_option(-star)
-    set domain [lindex $domainStarList 0]
-    set star [lindex $domainStarList 1]
-    set file [file join $PTOLEMY src domains [string tolower $domain] \
-            stars $domain$star.pl]
-    configure -file $file
+    if {$domainStarList != {} } {
+        set domain [lindex $domainStarList 0]
+        set star [lindex $domainStarList 1]
+        set file [file join $PTOLEMY src domains [string tolower $domain] \
+                stars $domain$star.pl]
+        puts $file
+        if [file exists $file] {
+            configure -file $file
+        } else {
+            # Ok, the star was not in domain/stars, so look elsewhere
+            set file [ glob -nocomplain \
+                    [file join $PTOLEMY src domains [string tolower $domain] \
+                    * stars $domain$star.pl ]]
+            puts $file
+            switch [llength $file] {
+                0 {error "Could not find a source file for $star in $domain"}
+                1 {configure -file $file} 
+                default {error "More than one possibility for $star in $domain\n
+                $possibleFile"}
+            }
+        }
+    }
 }
 
 ###################################################################
