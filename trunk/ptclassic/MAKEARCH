@@ -182,6 +182,7 @@ foreach x (cg/targets sdf/image sdf/targets \
 	sdf/atm sdf/contrib sdf/dsp sdf/dfm sdf/image \
 	sdf/matrix sdf/matlab sdf/vis \
 	cgc/dsp cgc/rtlib \
+	acs/targets \
 	vhdl/targets vhdl/tcltk \
 	mdsdf/tcltk de/atm de/contrib de/java cg/hierScheduler $EXPEXTRAS )
 	optmkdir $x
