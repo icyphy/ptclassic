@@ -57,7 +57,7 @@
 # following those three are arguments that would be passed to 
 # methods if these classes implemented objects in the normal way.
 #
-# <a href="../internals/howtoread>Reading <i>Picture</i> documentation</a>.
+# <a href="../internals/howtoread.html">Reading <i>Picture</i> documentation</a>.
 #
 class ::tycho::Picture {
     inherit ::tycho::Uninstantiable

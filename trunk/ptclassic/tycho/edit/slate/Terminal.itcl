@@ -41,7 +41,7 @@ namespace ::tycho {
 # A "terminal" for making connections to dataflow nodes and
 # such. This kind of terminal is based on arrowed lines.
 #
-# <a href="../internals/howtoread>Reading <i>Picture</i> documentation</a>.
+# <a href="../internals/howtoread.html">Reading <i>Picture</i> documentation</a>.
 #
 # <b>Note</b>: This is an experimental class.
 #
