@@ -14,7 +14,7 @@ We make no attempt to be heroic and handle all cases as was done with Gabriel.
 The only special case is for gain 1.
 	}
 	execTime {
-		return double(gain) == 1.0 ? 2 : 5;
+		return double(gain) == double(ONE) ? 2 : 5;
 	}
 	input {
 		name {input}

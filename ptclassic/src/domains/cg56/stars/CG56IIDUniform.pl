@@ -45,7 +45,7 @@ done with g++ (type "long long"), but it isn't portable.
 	}
 	go {
 		gencode(random);
-		if (double(range) < 1.0) gencode(rangeScale);
+		if (double(range) < double(ONE)) gencode(rangeScale);
 		else gencode (range1);
 	}
 	execTime {
