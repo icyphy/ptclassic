@@ -434,9 +434,10 @@ DelayedMap(clientData)
  *----------------------------------------------------------------------
  */
 
+/* Removed due to Ultrix incompatibility
 void perror(s)
 char *s;
 {
     errorReport(s);
 }
-
+*/
