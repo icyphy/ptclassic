@@ -48,7 +48,7 @@ CompileFacet is called.  xfered never gets re-initialized.
 
 /* Includes */
 
-#include "local.h"
+#include "local.h"		/* include "ansi.h" and "compat.h" */
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
@@ -830,8 +830,6 @@ octObject *facetPtr;
     octMarkTemporary(&cl);
     return (TRUE);
 }
-
-extern char* curDomainName();
 
 /* compile a galaxy instance in context.  If the instance is in a facet,
    this works like CompileGalStandalone.  Used in Profile.

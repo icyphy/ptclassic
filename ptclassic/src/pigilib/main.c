@@ -31,10 +31,9 @@ Initialization code for pigiRpc.
 */
 
 /* Includes */
-#include "local.h"
+#include "local.h"			/* include "ansi.h" and "compat.h" */
 #include <stdio.h>
 #include <stdlib.h>
-#include "compat.h"
 
 /* Include sol2compat.h, oct.h, list.h, and rpc.h */
 /* Defines boolean, octObject, lsList, and RPC data structures, respectively */

@@ -32,6 +32,8 @@ $Id$
 
 /* Includes */
 
+#include "local.h"			/* include "ansi.h" and "compat.h" */
+
 /* Include sol2compat.h, oct.h, list.h, and rpc.h */
 /* Defines boolean, octObject, lsList, and RPC data structures, respectively */
 #include "utilities.h"

@@ -32,7 +32,7 @@ $Id$
 
 /* Includes */
 
-#include "local.h"
+#include "local.h"			/* include "ansi.h" and "compat.h" */
 #include <stdio.h>
 #include <string.h>
 
