@@ -41,7 +41,7 @@ and new processes do not examine the .login file.
 .pp
 The ~ptolemy/.cshrc file defines the path variable to include the appropriate
 bin directories to run ptolemy.
-.IE .cshrc
+.IE "cshrc file"
 The pertinent lines read:
 .EQ
 delim off
@@ -92,7 +92,7 @@ Resources are explained below.
 .H3 "Starting X"
 .pp
 At the end of the file ~ptolemy/.login you will find the lines:
-.IE .login
+.IE "login file"
 .(c
 echo "To prevent X windows from coming up, type ^c now"
 sleep 5
@@ -105,7 +105,7 @@ Some windows will open, together with an icon manager at the right
 of the screen.
 The number, size and location of the windows that are opened
 are specified in the ~ptolemy/.xinit file, which reads:
-.IE .xinit
+.IE "xinit file"
 .(c
 #! /bin/csh -f
 xrdb ~/.Xresources
