@@ -176,7 +176,7 @@ fi
 # User specified location of the Java Development Kit (JDK)
 #
 AC_ARG_WITH(java, [  --with-java=DIR          use Java binaries from DIR],
-        JAVAHOME=$withval, JAVAHOME=`cd /opt/SUNWjws/JDK; pwd`)
+        JAVAHOME=$withval, JAVAHOME=`cd /opt/jdk1.1; pwd`)
 
 #
 # If the user called configure with -without-java, then we don't
