@@ -266,9 +266,8 @@ body ::tycho::Lattice::projection {name dimensions args} {
 	}
     }
 
-    # Create the projection and remember the inverse command
-    set inverse [_entity projection {} $name \
-            [concat [list $dimensions] $args]]
+    # Create the projection and return the inverse command
+    _entity projection {} $name $dimensions $args
 }
 
 ########################################################################
