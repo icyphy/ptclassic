@@ -1,8 +1,8 @@
 /**************************************************************************
 Version identification:
-@(#)CGCrtlib.h	1.1 24/10/94
+$Id$
 
-Copyright (c) 1990-1994 The Regents of the University of California.
+Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -65,7 +65,7 @@ typedef FIX_WORD fix[FIX_WORDS_PER_FIX];
 typedef struct { int len,intb; } fix_prec;
 
 #ifdef __cplusplus
-#define EXIT_CGC(a) {if (a) Error::abortRun(*this,a); else SimControl::requestHalt(); return;}
+#define EXIT_CGC(a) {if (a) Error::abortRun(a); else SimControl::requestHalt(); return;}
 #else
 #define EXIT_CGC(a) {if (a) fprintf(stderr,"%s\n",a); exit(1);}
 #endif
