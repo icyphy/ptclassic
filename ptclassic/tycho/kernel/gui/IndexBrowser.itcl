@@ -367,7 +367,7 @@ body ::tycho::IndexBrowser::hyperJump {filename {point {}}} {
 #
 body ::tycho::IndexBrowser::seeFragment {point} {
     insert entry $point
-    set match [complete 1]
+    set match [complete]
     if {$match == 1} {
         ok
     } elseif {$match == 0} {
