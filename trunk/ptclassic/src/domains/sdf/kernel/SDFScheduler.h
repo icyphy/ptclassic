@@ -152,6 +152,11 @@ public:
 	// Generate code using the Target to produce the right language
 	void compileRun();
 
+        // set the repetitions property of each atomic block
+        // in the galaxy, and recursively call the repetitions
+        // function for each non-atomic block in the galaxy.
+        virtual int repetitions ();
+
 protected:
 	// Flag for errors detected while computing the schedule
 	int invalid;
@@ -168,11 +173,6 @@ protected:
 
         // Check that all stars belong to the right domain.
         virtual int checkStars();
-
-        // set the repetitions property of each atomic block
-        // in the galaxy, and recursively call the repetitions
-        // function for each non-atomic block in the galaxy.
-        virtual int repetitions ();
 
         // Schedule the synchronous data flow graph.
         virtual int computeSchedule(Galaxy& g);
