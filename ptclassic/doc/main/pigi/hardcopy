@@ -1,0 +1,67 @@
+.\" $Id$
+.H1 "Hardcopy"
+.pp
+The user has several options for printing graphs and schematics
+developed under \*(PT.
+.H2 "Printing Oct Facets"
+.pp
+A block diagram under pigi is stored as an Oct facet.
+To print it to a postscript printer,
+simply place the mouse anywhere in the facet and
+invoke the "print facet" command from the "Other" pigi menu.
+You must have the environment variable PRINTER set to point to
+a valid postscript printer. You can do this, for example, with the command:
+.(c
+	setenv PRINTER \fIprintername\fP
+.)c
+A dialog box appears into which options may be entered.
+The following options may prove useful:
+.TS
+l lw(5i).
+-p     T{
+Print in portrait mode, scaling to fit on the page or in the box
+defined by the -b option.
+T}
+-l	T{
+Print in landscape mode, scaling to fit on the page or in the
+box defined by the -b option.
+T}
+-a	T{
+Choose -l or -p, which ever gives the biggest plot (default).
+T}
+-b	T{
+Give width and height to fit the plot in (in inches, defaults to the
+full page).  For example, to get an image within a square five
+inches on a side, use "-b 5x5".
+T}
+-s	T{
+Multiply the scale determined by -a, -l, or -p by `scale'
+(defaults to 1.0).
+T}
+-o	T{
+Additional offset (in inches).
+T}
+-x	T{
+Print labels.
+T}
+-X	T{
+Used with `-x', only draw labels that fit in the bounding box
+of the label.
+T}
+-A	T{
+Do not print anything that is smaller then `abs' points (there
+are 72 points per inch)
+T}
+-C	T{
+Generate code for color postscript printers.
+T}
+-n	T{
+Print the names of the terminals on icons.
+T}
+-P	T{
+Replace the standard PostScript prologue file with `prologue'.
+T}
+-F	T{
+Change the font and size (defaults to Times-Bold/7).
+T}
+.TE
