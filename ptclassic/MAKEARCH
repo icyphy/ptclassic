@@ -84,7 +84,7 @@ end
 # everything must have one slash (be two levels down)
 
 foreach x (thor/pepp cg/targets sdf/image sdf/targets \
-	sdf/loopScheduler cg/parScheduler thor/analyzerX11 \
+	sdf/loopScheduler sdf/tcltk cg/parScheduler thor/analyzerX11 \
 	cg/dlScheduler cg/HuScheduler cg/dcScheduler cgc/targets cgc/tcltk \
 	cg56/dsp cg96/dsp sdf/dsp sdf/image $EXPEXTRAS )
 	optmkdir $x
@@ -103,7 +103,8 @@ cd ../..
 # everything must have two slashs (be three levels down)
 
 foreach x ( cg56/dsp/stars cg96/dsp/stars sdf/dsp/stars sdf/image/kernel \
-	sdf/image/stars cgc/targets/cm5 cgc/tcltk/stars cgc/tcltk/targets )
+	sdf/image/stars sdf/tcltk/stars cgc/targets/cm5 cgc/tcltk/stars \
+	cgc/tcltk/targets )
 	optmkdir $x
 	cd $x
 	optlink ../../../../../src/domains/$x make.template
