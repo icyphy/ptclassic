@@ -250,7 +250,7 @@ body ::tycho::Builder::itcldocs {} {
 	set title "Index of classes in $itcldir"
 	set retval [::tycho::HTMLDocSys::generateHTML $verbose $debug \
 		$generateIndex $title \
-		[glob -nocomplain *.itcl *.tcl]
+		[glob -nocomplain *.itcl *.tcl]]
 	if {$retval != ""} {
 	    puts $retval
 	}
