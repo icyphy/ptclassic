@@ -49,7 +49,7 @@ ITCL_SRCS = \
 
 EXTRA_SRCS =	$(TCL_SRCS) $(ITCL_SRCS)
 
-MISC_FILES =
+MISC_FILES = \
 	makefile
 
 # If we get some SIMPLE_TESTS, then add $(SIMPLE_TESTS)
