@@ -127,13 +127,13 @@ body ::tycho::EditSpell::constructor {args} {
 
     $itk_component(bbox) buttonconfigure ok \
 	    -text {Next <Ret>} \
-	    -command "$this busy next"
+	    -command "$this next"
 
     addButton clear -text {Clear Marks} \
 	    -command "$this clearSpellMatch"
 
     addButton recheck -text {Recheck} \
-	    -command "$this busy recheck"
+	    -command "$this recheck"
 
     if {$itk_option(-nochange) == 0} {
 	addButton replace -text {Change <M-Ret>} \
@@ -248,7 +248,7 @@ body ::tycho::EditSpell::next {} {
 body ::tycho::EditSpell::recheck {} {
     set tw $itk_option(-edit)
 
-    set filename [::tycho::tmpFilename tychoSpell]
+    set filename [::tycho::tmpFileName tychoSpell]
     if {![$tw busy writeSpellText $filename]} {return}
     set errs [exec spell $filename]
     set dict [readDictionary]
