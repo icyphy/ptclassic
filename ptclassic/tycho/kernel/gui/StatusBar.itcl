@@ -129,6 +129,9 @@ class ::tycho::StatusBar {
     # Draw the progress bar
     private method _drawprogress {progress {color blue}}
 
+    # Insert text into the entry widget and adjust the view
+    private method _entryinsert {args}
+    
     # Set the label text
     # FIXME: public because Edit uses it...
     method _label {label}
@@ -356,8 +359,7 @@ body ::tycho::StatusBar::_complete {filename caseSens {down 1}} {
             set _completedata(lastEntry) "$completion"
 
             # Insert completion
-            $entryWidget delete 0 end
-            $entryWidget insert 0 $completion
+            _entryinsert $completion
             _label "Open File: ([expr $num+1]/$length)"
         } elseif {$length == 1} {
             # Open if length == 1 unless directory
@@ -387,8 +389,7 @@ body ::tycho::StatusBar::_complete {filename caseSens {down 1}} {
     if {[regexp "[::tycho::directorySeparator]\[.\]\$" $filename]} {
         if {[glob -nocomplain -- $filename.*] != {}} {
             # Insert completion
-            $entryWidget delete 0 end
-            $entryWidget insert 0 $filename.
+            _entryinsert $filename.
             return
         }
     }
@@ -426,8 +427,7 @@ body ::tycho::StatusBar::_complete {filename caseSens {down 1}} {
         }
 
         # Insert completion
-        $entryWidget delete 0 end
-        $entryWidget insert 0 $completion
+        _entryinsert $completion
 
         # Save _completedata
         set _completedata(lastEntry) "$completion"
@@ -452,8 +452,7 @@ body ::tycho::StatusBar::_complete {filename caseSens {down 1}} {
         }                               
 
         # Insert completion
-        $entryWidget delete 0 end
-        $entryWidget insert 0 $completion
+        _entryinsert $completion
         
         # If it's valid, this is the first completion
         if {[file exists $completion]} {
@@ -602,8 +601,7 @@ body ::tycho::StatusBar::entry {label args} {
     $itk_component(message) configure -text $label
 
     # Configure the entry widget
-    $itk_component(feedback) delete 0 end
-    $itk_component(feedback) insert 0 $opts(-default)
+    _entryinsert $opts(-default)
     if { $opts(-command) != "" } {
         bind $itk_component(feedback) <Return> \
                 [list $this _entrycommand $opts(-command)]
@@ -822,6 +820,24 @@ body ::tycho::StatusBar::_drawprogress {progress {color blue}} {
     $itk_component(feedback) coords foo 0 0 $width $height
     # Update the color too in case it changed
     $itk_component(feedback) itemconfigure foo -fill $color
+}
+
+#######################################################################
+#### _entryinsert
+#
+# Insert text into the entry widget and view the cursor. Does nothing
+# if not in entry mode.
+#
+body ::tycho::StatusBar::_entryinsert {text} {
+    if { $_mode != "entry" } {
+        return
+    }
+    $itk_component(feedback) delete 0 end
+    $itk_component(feedback) insert 0 $text
+
+    # Call Tk proc to view the insertion cursor. These procs
+    # are undocumented, but this saves me writing it... 
+    tkEntrySeeInsert $itk_component(feedback)
 }
 
 #######################################################################
