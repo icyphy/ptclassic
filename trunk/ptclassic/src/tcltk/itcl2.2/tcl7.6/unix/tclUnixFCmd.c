@@ -274,7 +274,8 @@ TclpCopyFile(src, dst)
 #ifdef __CYGWIN32__
 #define NO_MKFIFO
 #endif
-#if NO_MKFIFO
+
+#ifdef NO_MKFIFO
 	    fprintf(stderr, "tclUnixFCmd.c: Sorry, mkfifo not yet implemented");
 	    return TCL_ERROR;
 #else
