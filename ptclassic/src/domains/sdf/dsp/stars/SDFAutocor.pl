@@ -39,7 +39,7 @@ autocorrelation estimate may have negative components.
 defstar {
 	name { Autocor }
 	domain { SDF }
-	desc { "Estimates an autocorrelation." }
+	desc { "Estimates an autocorrelation by averaging input samples." }
 	input {
 		name { input }
 		type { float }
@@ -63,8 +63,8 @@ defstar {
 	defstate {
 		name {unbiased}
 		type {int}
-		default {"0"}
-		desc {"If non-zero, the estimate will be unbiased"}
+		default {"YES"}
+		desc {"If YES, the estimate will be unbiased"}
 	}
 	start {
 	    if ( int(noInputsToAvg) <= int(noLags)) {
