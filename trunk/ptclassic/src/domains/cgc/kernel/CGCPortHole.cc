@@ -46,6 +46,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "Error.h"
 #include "SimControl.h"
 
+extern const bitWord PB_GLOBAL = 0x20;
 extern const Attribute P_GLOBAL = {PB_GLOBAL,0};
 extern const Attribute P_LOCAL = {0,PB_GLOBAL};
 

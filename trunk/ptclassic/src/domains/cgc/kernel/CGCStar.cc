@@ -58,6 +58,10 @@ const char* CGCStar :: domain () const { return CGCdomainName;}
 // isA
 ISA_FUNC(CGCStar, CGStar);
 
+const bitWord AB_VARPREC = 0x40;
+const Attribute ANY = {0,0};
+const Attribute A_VARPREC = {AB_VARPREC,0};
+const Attribute A_CONSTPREC = {0,AB_VARPREC};
 
 // This function checks whether "state" is to be set from a command-line
 // argument. If it is, returns the name to be specified on the command-
