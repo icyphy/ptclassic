@@ -408,9 +408,16 @@ octObject *facetPtr;
         }
 /* Handle input multiporthole case.  Eventually this will be handled
  * in the kernel (we will eliminate this else clause. */
-	else if (inN == 1 && outN > 1 && TermIsMulti(&in[0])) {
-	    for (i = 0; i < outN; i++) {
-		ERR_IF1 (!JoinOrdinary(&in[0], &out[i], 0));
+	else if (inN == 1 && outN > 1) {
+	    if (TermIsMulti(&in[0])) {
+		for (i = 0; i < outN; i++) {
+		    ERR_IF1 (!JoinOrdinary(&in[0], &out[i], 0));
+	        }
+	    }
+	    else {
+		ErrAdd("can't connect multiple outputs to ordinary input");
+		EssAddObj(&net);
+		return (FALSE);
 	    }
 	}
 /* All other cases are handled by the kernel, including autofork */
