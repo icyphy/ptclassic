@@ -126,7 +126,7 @@ proc ::tycho::slate {pathName args} {
 # backwards compatibility.
 #
 class ::tycho::Slate {
-    inherit itk::Widget
+    inherit ::tycho::TWidget
 
     constructor {args} {}
     destructor {}
