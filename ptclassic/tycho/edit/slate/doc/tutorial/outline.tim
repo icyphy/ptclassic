@@ -1,0 +1,58 @@
+# Outline model for the slate tutorial. This file
+# is read by Tycho to update the HTML doc structure.
+
+configure -inline 0
+configure -imagedir "../img"
+configure -images {BTN_Top.gif BTN_Prev.gif BTN_Section.gif BTN_Next.gif}
+configure -bgcolor #faf0e6
+configure -title {The Slate Tutorial}
+
+# The document template places the navigation links at the
+# bottom of the page
+configure -template {
+<!-- $Id$ -->
+<html>
+<head>
+<title></title>
+</head>
+<div class="body">
+<blockquote>
+<body>
+
+<h1></h1>
+
+<center>
+<div class="navigation">
+</div class="navigation">
+</center>
+
+</body>
+</blockquote>
+</div>
+</html>
+}
+
+# The header contains the link to the style sheet for this document
+configure -header {
+  <!-- <LINK href="style.css" rel="stylesheet" type="text/css"> -->
+}
+
+# The footer contains ...
+configure -footer {
+<p>
+<HR>
+Copyright 1996-%Q%, The Regents of the University of California.
+All rights reserved.
+<br>
+Last updated: $Date$,
+comments to: <author>johnr@eecs.berkeley.edu</author>
+}
+
+section drawing -inline 0 -title "Introduction"
+section complex -inline 0 -title "Complex items"
+section tagging -inline 0 -title "Tagging"
+section binding -inline 0 -title "Binding"
+section interactors -inline 0 -title "Interactors"
+section features -inline 0 -title "Features"
+section custom -inline 0 -title "User-defined item types"
+section widgets -inline 0 -title "Creating custom widgets"
