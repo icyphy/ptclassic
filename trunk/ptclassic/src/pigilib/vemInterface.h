@@ -58,6 +58,8 @@ extern char *ViGetName();
 extern boolean ViKillBuf ARGS((octObject *facetPtr));
 extern vemStatus dmMultiTextTrim ARGS((char *name, int nItems,
 				       dmTextItem items[]));
+extern boolean VemLock();
+extern void VemUnlock();
 
 #define ViDone()	ViTerm(); vemPrompt(); return (RPC_OK)
 

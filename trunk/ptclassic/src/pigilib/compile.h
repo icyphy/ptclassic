@@ -47,7 +47,6 @@ extern boolean EssAddObj ARGS((octObject *obj));
 extern boolean CompileGalInst ARGS((octObject *galInstPtr,
 				    octObject *parentFacetPtr));
 extern boolean CompileGalStandalone ARGS((octObject *galFacetPtr));
-extern boolean CompileGal ARGS((octObject *galFacetPtr));
 extern boolean CompileFacet ARGS((octObject *facetPtr));
 extern int RpcCompileFacet ARGS((RPCSpot *spot, lsList cmdList,
 				long userOptionWord));

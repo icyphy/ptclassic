@@ -92,6 +92,24 @@ extern rpcInternalStatus RPCReceiveFunctionToken
 extern rpcStatus RPCApplicationFunctionComplete();
 #endif
 
+/*
+ * Special status for RPC_LOCK_RESPONSE_FUNCTION:
+ * when we receive that function code,
+ * LockResponseReceived is incremented and
+ * LockResponseState is set to the lock state.
+ * See vemInterface.c for more info.
+ */
+
+long LockResponseReceived = 0;
+long LockResponseState = 0;
+
+/*
+ * Special link to vemInterface.c --- this is deliberately not visible
+ * in vemInterface.h
+ */
+extern void VemFinishLock();
+
+
 /* ptk code change
    huge block of functions removed 
 */
@@ -168,6 +186,12 @@ loop:
                 if (RPCReceiveLong(&id, RPCReceiveStream) != RPC_OK) {
                     return RPC_ERROR;
                 }
+
+		/* if a lock handshake is in progress, must finish it
+		 * before calling the demon function -- see vemInterface.c
+		 */
+		VemFinishLock();
+
                 /* see if a demon has really been registered on the change list */
 /* fprintf(stderr, "client here: just received a demon request\n"); */
                 if (st_lookup(RPCDemonTable, (char *) id, (char**)&ptr)) {
@@ -190,7 +214,15 @@ fprintf(stderr, "client here: could not find the demon\n");
                     return RPC_ERROR;
                 }
 /* fprintf(stderr, "client here: sent application complete message\n"); */
-            } else if (functionNumber <= size) {
+	    } else if (functionNumber == RPC_LOCK_RESPONSE_FUNCTION) {
+		/* special case lock response */
+		long lState;
+                if (RPCReceiveLong(&lState, RPCReceiveStream) != RPC_OK) {
+                    return RPC_ERROR;
+                }
+		LockResponseReceived++;
+		LockResponseState = lState;
+            } else if (functionNumber >= 0 && functionNumber < size) {
 
                 /* user RPC functions */
 		/* FIXME: Memory Leak: should deallocate argList somewhere */
@@ -201,6 +233,11 @@ fprintf(stderr, "client here: could not find the demon\n");
                                    "RPC Error: getting args\n");
                     return RPC_ERROR;
                 }
+
+		/* if a lock handshake is in progress, must finish it
+		 * before calling the user function -- see vemInterface.c
+		 */
+		VemFinishLock();
 
                 /* call the user function */
                 if ((*funcArray[functionNumber].function)(&spot, argList,
@@ -214,7 +251,8 @@ fprintf(stderr, "client here: could not find the demon\n");
                     return RPC_ERROR;
                 }
             } else {
-                (void) fprintf(stderr, "RPC Error: bad function number\n");
+                (void) fprintf(stderr, "RPC Error: bad function number %ld\n",
+			       functionNumber);
                 return RPC_ERROR;
             }
 #ifndef PTKCODE

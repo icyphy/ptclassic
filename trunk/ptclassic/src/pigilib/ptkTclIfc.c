@@ -45,6 +45,7 @@ They are registered with Tcl calling registerTclFns().
 #include "ganttIfc.h"
 #include "handle.h"
 #include "octIfc.h"
+#include "vemInterface.h"
 
 /*******************************************************************
  * Command to highlight an object given its name. Call as
@@ -78,7 +79,10 @@ ptkHighlight(dummy, interp, argc, argv)
 	strcpy(interp->result,"no such star: argv[1]");
 	return TCL_ERROR;    
     }
-    FrameStarCall(name, color, 1);
+    if (VemLock()) {
+	FrameStarCall(name, color, 1);
+	VemUnlock();
+    }
     return TCL_OK;
 }
 
@@ -93,7 +97,10 @@ ptkClearHighlights(dummy, interp, argc, argv)
     int argc;                           /* Number of arguments. */
     char **argv;                        /* Argument strings. */
 {
-    FindClear();
+    if (VemLock()) {
+	FindClear();
+	VemUnlock();
+    }
     return TCL_OK;
 }
 
@@ -121,16 +128,22 @@ ptkSetHighlightFacet(dummy, interp, argc, argv)
         return TCL_ERROR;
     }
 
-    if (ptkHandle2OctObj(argv[1], &facet)) {
-	if (lastFacet.objectId != facet.objectId) FreeOctMembers(&lastFacet);
-	lastFacet = facet;		/* do not free facet */
-	return TCL_OK;
+    if (VemLock()) {
+	if (ptkHandle2OctObj(argv[1], &facet)) {
+	    if (lastFacet.objectId != facet.objectId)
+		FreeOctMembers(&lastFacet);
+	    lastFacet = facet;		/* do not free facet */
+	} else {
+	  VemUnlock();
+	  Tcl_SetResult(interp,
+			"Failed to find oct object corresponding to handle",
+			TCL_STATIC);
+	  return TCL_ERROR;
+	}
+	VemUnlock();
     }
-    else {
-	strcpy(interp->result,
-	    "Failed to find oct object corresponding to handle");
-	return TCL_ERROR;
-    }
+
+    return TCL_OK;
 }
 
 /*******************************************************************
