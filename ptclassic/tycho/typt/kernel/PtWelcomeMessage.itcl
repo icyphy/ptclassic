@@ -4,7 +4,7 @@
 #
 # @Version: $Id$
 #
-# @Copyright (c) 1995-%Q% The Regents of the University of California.
+# @Copyright (c) -%Q% The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -107,7 +107,7 @@ body ::tycho::PtWelcomeMessage::constructor {args} {
 		$itk_option(-executable)
     }
     append html "<p>" \
-	    "Copyright \251 1995-%Q%, " \
+	    "Copyright \251 -%Q%, " \
 	    {Regents of the University of California<br>} \
 	    {- All rights reserved -<br>} \
 	    "<a href=$TYCHO/copyright>See the copyright notice, " \
