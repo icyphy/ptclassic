@@ -4,9 +4,15 @@
 # Command uses printer defined by environmental variable $PRINTER
 # User .cshrc file must contain "setenv PRINTER whatever"
 
-# The argument(s) are the files to be printed.
+# The argument(s) are the files to be printed (unless they begin with "-").
 # An implicit header file, $PTOLEMY/doc/headers/shared, is prepended.
+# The optional argument is the directory of the domain documentation
 
+# The -index option generates an index only, printing nothing.
+# The -preview option causes the domain to previewed via xditview
+# (or nroff, if no DISPLAY is set) instead of being printed.
+# The -H option means the following option is a file in the
+# $PTOLEMY/doc/headers directory.
 # Index information is appended to the file $HOME/Almagest.index,
 # or to whatever ALAMAGEST_INDEX is set to.
 
@@ -26,6 +32,11 @@ set printcommand = ditroff
 set printoptions = "-me -tbl -eqn -P$PRINTER"
 set contentscmd = $PTOLEMY/doc/bin/contents
 set files = ""
+set previewcommand = "xditview -"
+
+# Variables
+set indexonly = 0
+set preview = 0
 
 if (!($?ALMAGEST_INDEX)) then
 	setenv ALMAGEST_INDEX $HOME/Almagest.index
@@ -36,6 +47,19 @@ umask 2
 
 while ($#argv)
 	switch ($argv[1])
+		case -index:
+			set indexonly = 1
+			shift
+			breaksw
+		case -preview:
+			set preview = 1
+			shift
+			breaksw
+		case -H:
+			shift
+			set files = ($files $dirheader/$argv[1])
+			shift
+			breaksw
 		case -*:
 			set printoptions = ($printoptions $argv[1])
 			shift
@@ -49,9 +73,28 @@ end
 
 soelim $dirheader/shared $files > /tmp/pt$$
 $printcommand $printoptions /tmp/pt$$ >& /tmp/index$$
-$contentscmd /tmp/index$$
+if ($indexonly) then
+	# if only generating index, add -t option and throw away the output
+	($printcommand $printoptions -t /tmp/pt$$ > /dev/null) >& /tmp/index$$
+else if ($preview) then
+	# if previewing, use either X windows or nroff
+	if ($?DISPLAY) then
+		$printcommand $printoptions -t /tmp/pt$$ | $previewcommand
+	else
+		(eqn /tmp/pt$$ | tbl | nroff -me > /tmp/ptnr$$) >& /dev/null
+		more /tmp/ptnr$$
+	endif
+else
+	# otherwise just print it out
+	$printcommand $printoptions /tmp/pt$$ >& /tmp/index$$
+	$contentscmd /tmp/index$$
+	$printcommand $printoptions $dirheader/shared title
+else
+endif
+
 cat /tmp/index$$ >>! $ALMAGEST_INDEX
 /bin/rm /tmp/pt$$ /tmp/index$$
+
 exit 0
 
 catch:
