@@ -64,7 +64,7 @@ complete filename of the displayed image.
 		int width  = matrix.numCols();
 
 		// Create an array to read into image data.
-		unsigned char* data = (unsigned char*) new char[height*width];
+		unsigned char* data = new unsigned char[height*width];
 
 		for (int i=0; i<height*width ; i++) {
 			if (matrix.entry(i) < 0)
@@ -79,7 +79,7 @@ complete filename of the displayed image.
 		int del = !((saveMe[0] == 'y') || (saveMe[0] == 'Y'));
 
 		const char* iname = imageName;
-		char *nm;
+		char* nm = 0;
 		if (iname && iname[0]) {
 		  nm = expandPathName(iname);
 		}
