@@ -514,6 +514,20 @@ body ::tycho::HTML::hyperJump {filename {point {}} {push 1}} {
         }
         set filename [::tycho::expandPath $filename]
 
+        # If the file is a directory, open "index.html" in that directory,
+        # if it exists. Else continue.
+        if [file isdirectory $filename] {
+            set newfilename [format "%s/%s" $filename index.html]
+            if ![file exists $newfilename] {
+                ::tycho::warn "Location is a directory:\n$filename"
+                return
+            } else {
+                set filename $newfilename
+                unset newfilename
+            }
+        }
+
+
         # If the filename has the ".html", ".htm", or ".htl" extension, open it
         # in this window (unless it is already open in another window or
         # we are not inside a Displayer).
