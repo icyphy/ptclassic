@@ -8,7 +8,19 @@ defstar {
 	copyright { 1992 The Regents of the University of California }
 	location { CG56 library }
 	explanation {
-Output data from DSP to host via host port.
+Output data from DSP to host via host port synchronously.
+.SH IMPLEMENTATION
+We distiguish between single word transfers and multiword transfers.
+The single word case is much simple in that we can use $ref() to
+access the value.  The multiword case requires a loop.  Currently
+we distinguish the two cases by samplesConsumed, but I think it should
+be samplesOuput.
+.LP
+In blocking mode we wait until the host is ready to read our samples.
+In non-blocking mode, we completely skip the transfer if the host
+is not ready.
+.LP
+This implementation currently uses the "unsafe" START/STOP DMA.
 	}
 	input	{
 		name { input }
