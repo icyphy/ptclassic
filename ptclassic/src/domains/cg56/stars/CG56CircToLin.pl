@@ -68,7 +68,10 @@ is repeated inline so may not be efficient for large N.
 		addCode(setupC);
 		for (int j = 0; j < n; j++) {
 			i = j;
-			addCode(one);
+			if (input.resolvedType() == COMPLEX)
+				addCode(oneComplex);
+			else
+				addCode(oneReal);
 		}
 		addCode(restore);
 	}
@@ -88,9 +91,13 @@ is repeated inline so may not be efficient for large N.
 	move	#$size(input)-1,m0
 	nop			; can't read from circbuf right away
 	}
-	codeblock(one) {
+	codeblock(oneReal) {
 	move	x:(r0)+,x0
-	move	x0,$ref2(output,i)
+	move	x0,$ref(output,i)
+	}
+	codeblock(oneComplex) {
+	move	L:(r0)+,a
+	move	a,L:$addr(output,i)
 	}
 	codeblock(restore) {
 	move	r0,$ref(ptr)
