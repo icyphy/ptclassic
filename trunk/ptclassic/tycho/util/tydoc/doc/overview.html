@@ -40,8 +40,8 @@ different Itcl <I>constructs</I>. An Itcl construct is a part of the
 language like a class or method declaration.
 
 <P> To produce output in different formats, we have all of the format
-specific information a child class.  Currently, we only generate HTML
-output, but it could be possible to write a Itcl pretty printer that would
+specific information in a child class.  Currently, we only generate HTML
+output, but it could be possible to write an Itcl pretty printer that would
 read in Itcl and output a cleaned up version.
 
 <HR>
@@ -104,10 +104,11 @@ will be converted into
 	convention&lt;/i&gt;!
 </PRE>
 Which is rendered as
-<BLOCKQUOTE>
+<p>
+<dl>
     <i>I</i> think this is a <i>perfectly reasonable
 	convention</i>!
-</BLOCKQUOTE>
+</dl>
 
 
 <li> Two kinds of formatting are used to generate constant-width
@@ -121,14 +122,15 @@ text can be only a single word:
 will be converted into 
 
 <PRE>
-    The method &lt;code&gt;fred&lt;code&gt; uses the global
+    The method &lt;code&gt;fred&lt;/code&gt; uses the global
     variable &lt;code&gt;rightSaid&lt;/code&gt;.
 </PRE>
 Which is rendered as
-<BLOCKQUOTE>
+<P>
+<DL>
     The method <code>fred</code> uses the global
     variable <code>rightSaid</code>.
-</BLOCKQUOTE>
+</DL>
 
 <li> If a comment doesn't end with a period, question mark,
 or exclamation mark, then one is put in for you. This is useful
