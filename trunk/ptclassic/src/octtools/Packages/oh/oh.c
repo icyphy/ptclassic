@@ -412,7 +412,7 @@ octObject *object;
 		}
 		break;
 	    case OCT_INTEGER:
-		(void)sprintf(s[count], "%s=%d",ohGetName(object),object->contents.prop.value.integer); break;
+		(void)sprintf(s[count], "%s=%ld",ohGetName(object),object->contents.prop.value.integer); break;
 	    default:
 		(void) sprintf(s[count], "%s %s", ohTypeName(object), ohGetName(object));
 		break;
