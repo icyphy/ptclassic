@@ -211,7 +211,7 @@ PortHole :: setPlasma () {
 
 // Function to get plasma type for a MultiPortHole.
 // The algorithm is to use the type of the first contained PortHole
-// if typePort is null.  This means that, for an adder star, say,
+// if typePort is null.  This means that, for an ANYTYPE adder star, say,
 // the type of the output will be the type of the first input, which
 // may not be what is desired.
 Plasma*
@@ -259,6 +259,7 @@ Particle& PortHole ::  operator % (int delay)
 			);
         return *(Particle*)*p;
 }
+
 MultiPortHole& MultiPortHole :: setPort(const char* s,
                               Block* parent,
                               dataType t = FLOAT) {
@@ -294,6 +295,23 @@ PortHole& MultiPortHole :: newPort() {
         return *newport;
 }
 
+// Return a PortHole for a new connection.  We return the first available
+// unconnected PortHole.  If there are none, we make a new one.
+
+PortHole& MultiPortHole :: newConnection() {
+	// resolve aliases
+	if (alias) return realPort().newConnection();
+
+	// find an unconnected porthole
+	ports.reset();
+	for (int i = ports.size(); i > 0; i--) {
+		PortHole& p = ports++;
+		if (p.far() == NULL) return p;
+	}
+
+	// no disconnected ports, make a new one.
+	return newPort();
+}
 
 Particle* Geodesic::get()
 {
