@@ -38,7 +38,7 @@ const char* Scheduler::domain() const {
 // Interrupt handling stuff.  Currently, all interrupts that we catch
 // are handled the same way.
 
-void Scheduler::intCatcher() {
+void Scheduler::intCatcher(int) {
 	interrupt = TRUE;
 	return;
 }
@@ -52,7 +52,7 @@ void Scheduler::catchInt(int signo, int always) {
 		if (tmp == SignalIgnore) return;
 	}
 	interrupt = FALSE;
-	signal(signo, Scheduler::intCatcher);
+	signal(signo, (SignalHandler)Scheduler::intCatcher);
 }
 
 void Scheduler::reportInterrupt() {
