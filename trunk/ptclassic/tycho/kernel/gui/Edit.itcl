@@ -37,16 +37,8 @@
 #######################################################################
 # options
 #
-# base command.
-option add *Edit.revcom sccs widgetDefault
-# check in command. (ci for RCS)
-option add *Edit.cicom delget widgetDefault
-# check out command. (co for RCS)
-option add *Edit.cocom edit widgetDefault
-# revision control directory name. (RCS for RCS)
-option add *Edit.revdir SCCS widgetDefault
-# command to place current file under rev control. (??? for RCS)
-option add *Edit.createcom create widgetDefault
+# Class to use for revision control.
+option add *Edit.revclass "::tycho::RevControlSCCS" widgetDefault
 
 #######################################################################
 #### Edit
@@ -76,7 +68,11 @@ class ::tycho::Edit {
     # Call this to give the text subwindow the focus.
     method focusin {}
 
-   #### help
+    #### getModified
+    # Return $modified.
+    method getModified {}
+
+    #### help
     # Open a help window.  This should be redefined in derived classes.
     method help {}
 
@@ -301,6 +297,11 @@ body ::tycho::Edit::altFile {} {
 	    $this save 
 	}
     }
+    set topwin [winfo toplevel $itk_component(hull)]
+    # unmap the revcontrol window.
+    if {[winfo exists $topwin.revcontrol]} {
+	wm withdraw $topwin.revcontrol
+    }
     set prevfile $itk_option(-file)
     set filename [DialogWindow::newModal FileBrowser [autoName .fileBrowser] \
 	    -text "Alternate file to load:"]
@@ -319,6 +320,13 @@ body ::tycho::Edit::altFile {} {
 #
 body ::tycho::Edit::focusin {} {
     focus [$itk_component(text) textWinName]
+}
+
+###################################################################
+#### getModified
+#
+body ::tycho::Edit::getModified {} {
+    return $modified
 }
 
 ###################################################################
@@ -381,69 +389,34 @@ body ::tycho::Edit::loadFile {loadfile} {
 # not exist then create it if we can.
 #
 body ::tycho::Edit::nextRevAction {} {
+    set revclass [::tycho::Edit::getOption revclass]
     set currentfile [$this filename]
-    if {$currentfile == "NoName"} {
-	# The contents of this editor does not currently have a name.
-	tycho::inform "You must name the file before attempting any\
-		revision actions."
-	return 
-    }
-    if {$modified} {
-	if [askuser "Do you want modifications saved before checking\
-		in the file?"] {
-	    # update changes since last save, so they will appear in delta
-	    $this save 
+    set topwin [winfo toplevel $itk_component(hull)]
+    if [winfo exists $topwin.revcontrol] {
+	wm deiconify $topwin.revcontrol
+	raise $topwin.revcontrol
+	$topwin.revcontrol configure -file $currentfile
+	$topwin.revcontrol focusin
+    } {
+	if {$topwin != "" &&  \
+		[uplevel #0 info objects $topwin] != "" && \
+		[$topwin isa ::tycho::Edit]} {
+	    set currentTitle $currentfile
+	} {
+	    set currentTitle "Next Revision Action Window"
 	}
+
+	uplevel #0 "
+	    $revclass $topwin.revcontrol \
+		    -text {Select desired revision control command} \
+		    -object $this \
+		    -textobject $itk_component(text) \
+		    -file $currentfile \
+		    -geometry +0+0 \
+		    -before $itk_component(hull) \
+		    -title $currentTitle "
+	    wm deiconify $topwin.revcontrol
     }
-    set dir [file dirname $currentfile]
-    set revdir [::tycho::Edit::getOption revdir]	    
-    if {![file exists $revdir]} {
-	if {![file writable $dir]} {
-	    tycho::inform "The necessary revision control directory doesn't\
-		    exist, and you do not have write permission to be able\
-		    to create it."
-	    return 
-	}   
-	exec mkdir $revdir
-    }
-    # NOTE: the following check is specific to sccs.
-    set revcom [::tycho::Edit::getOption revcom]
-    set basefile [file tail $currentfile]
-    if {![file exists [format "%s/s.%s" $revdir $basefile]] && \
-	    [file exists [format "%s/p.%s" $revdir $basefile]]} { 
-	# File is not currently under revision control.
-	if {![askuser "This file is not currently under revision\
-		control, do you want it to be placed under revision\
-		control?"]} {
-	    return
-	} else {
-	    set createcom [::tycho::Edit::getOption createcom]
-	    catch {exec $revcom $createcom $currentfile} output
-	    if {![regexp "^\[1-9\]+.\[0-9\]+" $output]} {
-		tycho::inform "Unable to place the file under revision\
-			control."
-		return 
-	    }   
-	    $this reload 0	    
-	    return
-	}	    
-    }
-    if {[$itk_component(hull) cget -readonly] != 0} {
-	# check out the file 
-	set cocom [::tycho::Edit::getOption cocom]
-	catch {exec $revcom $cocom $currentfile} output
-    } else {
-	#check in the file
-	set comments [::tycho::queryinfo "Enter comments:" "" 60]
-	# FIXME: this is a bogus solution to the problem of getting 
-	# a comment into sccs delget.
-	exec echo $comments > #tycho#temp
-	set cicom [::tycho::Edit::getOption cicom]
-	catch {exec $revcom $cicom $currentfile < #tycho#temp} output
-	exec rm -f #tycho#temp
-    }
-    # Load the new file.
-    $this reload 0
 }
 
 ###################################################################
