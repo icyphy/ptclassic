@@ -668,6 +668,7 @@ bool sdf_flag;
     {
     	GenFunctions(pl_flag,bittrue);  /*  Process all hierarchy  */
 	fprintf(CFD,"} // end code \n");
+	GenPtMethod();
 	GenPtSetup(bittrue,pl_flag);
 	GenPtGo(bittrue,tmp_thor);
 	fprintf(CFD,"} // end defstar \n");
@@ -1386,6 +1387,25 @@ bool pl_flag;
     fprintf(CFD, "}\n\n");
 }
 
+GenPtMethod()
+{
+/* generate the code for the method to access the fractional bits */
+fprintf(CFD,"\n\tmethod {\n");
+fprintf(CFD,"\t\tname { fractBits } \n");
+fprintf(CFD,"\t\ttype { int } \n");
+fprintf(CFD,"\t\taccess { protected } \n");
+fprintf(CFD,"\t\targlist { \"(const char* p)\" } \n");
+fprintf(CFD,"\t\tcode {\n");
+fprintf(CFD,"\t\t\t// compute fractional bits \n");
+fprintf(CFD,"\t\t\tchar rdigits[6]; int ct=0; \n");
+fprintf(CFD,"\t\t\twhile (*(p++) != '.'); \n");
+fprintf(CFD,"\t\t\twhile (*p != 0) rdigits[ct++] = *(p++); \n");
+fprintf(CFD,"\t\t\tint fl = atoi(rdigits); \n");
+fprintf(CFD,"\t\t\treturn fl; \n");
+fprintf(CFD,"\t\t} // code \n");
+fprintf(CFD,"\t} // method \n");
+}
+
 GenPtSetup(bittrue,pl_flag)
 bool bittrue;
 bool pl_flag;
@@ -1404,7 +1424,7 @@ bool pl_flag;
    if(fp == NULL) { fprintf(stderr,"output file not found.\n"); exit(-1); }
 
 
-    fprintf(CFD, "\tsetup { \n");
+    fprintf(CFD, "\tsetup {\n");
     fprintf(CFD, "\t\tInitFixedLeafs ();");
     fprintf(CFD, "/*  Initializing Fixed quantities */\n");
 /* read constant inputs - into array */
@@ -1432,9 +1452,9 @@ else
 {
    	fprintf (CFD, "\t// Fixed Point variables for port %s \n",portName);
 	fprintf(CFD,"\t\t%s_P = %sPrecision;\n",portName,portName);
-    	fprintf(CFD,"\t\t%s_IntBits = Fix::get_intBits (%s_P);\n",portName,portName);
-    	fprintf(CFD,"\t\t%s_Len = Fix::get_length (%s_P);\n",portName,portName);
-    	fprintf(CFD,"\t\t%s_FracBits = %s_Len - %s_IntBits;\n",portName,portName,portName);
+    	fprintf(CFD,"\t\t%s_IntBits = atoi(%s_P);\n",portName,portName);
+    	fprintf(CFD,"\t\t%s_FracBits = fractBits(%s_P);\n",portName,portName);
+    	fprintf(CFD,"\t\t%s_Len = %s_IntBits + %s_FracBits;\n",portName,portName,portName);
 }
 }
 	if( (strcmp(typ,"fixArray")==0) && arrSz >1)
@@ -1459,9 +1479,10 @@ else
 {
    	fprintf (CFD, "\t// Fixed Point variables for port %s \n",portName);
 	fprintf(CFD,"\t\t%s_P = %sPrecision;\n",portName,portName);
-    	fprintf(CFD,"\t\t%s_IntBits = Fix::get_intBits (%s_P);\n",portName,portName);
-    	fprintf(CFD,"\t\t%s_Len = Fix::get_length (%s_P);\n",portName,portName);
-    	fprintf(CFD,"\t\t%s_FracBits = %s_Len - %s_IntBits;\n",portName,portName,portName);
+
+    	fprintf(CFD,"\t\t%s_IntBits = atoi(%s_P);\n",portName,portName);
+    	fprintf(CFD,"\t\t%s_FracBits = fractBits(%s_P);\n",portName,portName);
+    	fprintf(CFD,"\t\t%s_Len = %s_IntBits + %s_FracBits;\n",portName,portName,portName);
 }
 }
 	if( (strcmp(typ,"fixArray")==0) && (arrSz >1))
