@@ -169,7 +169,9 @@ octObject *inst;		/* Newly created instance */
     octObject dest_obj;
     regObjGen gen;
     struct octBox bb;
+#ifdef OLD_CODE
     char warning[1024];
+#endif
     (void) vemExpert( 0 );
 
     /* Check for things under instance */
