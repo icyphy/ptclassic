@@ -26,6 +26,7 @@ PL_SRCS= \
  CGCAdd.pl \
  CGCBitsToInt.pl \
  CGCBlackHole.pl \
+ CGCBusFork.pl \
  CGCCollect.pl  \
  CGCCommutator.pl \
  CGCConst.pl \
