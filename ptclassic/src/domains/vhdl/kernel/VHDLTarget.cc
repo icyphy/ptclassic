@@ -83,7 +83,7 @@ HLLTarget(name, starclass, desc) {
   displayFlag.setAttributes(A_SETTABLE);
 
   // Set the destination directory.
-  StringList destDirName = destDirectoryName(VHDLdomainName);
+  destDirName = destDirectoryName(VHDLdomainName);
   destDirectory.setInitValue(destDirName);
 
   // Set the default to display the code.

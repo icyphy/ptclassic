@@ -88,7 +88,7 @@ void CG56Target::initDataMembers() {
     assemblerOptions = "-A -B -L -Oso";
 
     // Set the pathname of the directory to hold generated code
-    StringList destDirName = destDirectoryName(CG56domainName);
+    destDirName = destDirectoryName(CG56domainName);
     destDirectory.setInitValue(destDirName);
 }
 

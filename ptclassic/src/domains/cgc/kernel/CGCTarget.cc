@@ -108,7 +108,7 @@ CGCTarget::CGCTarget(const char* name,const char* starclass,
         	"standard I/O resource"));
 	initCodeStrings();
 
-	StringList destDirName = destDirectoryName(CGCdomainName);
+	destDirName = destDirectoryName(CGCdomainName);
 	destDirectory.setInitValue(destDirName);
 
 	targetHost.setAttributes(A_SETTABLE);

@@ -71,7 +71,7 @@ VHDLBTarget::VHDLBTarget(const char* name,const char* starclass,
 			 const char* desc) : HLLTarget(name,starclass,desc) 
 {
   // Set the destination directory.
-  StringList destDirName = destDirectoryName(VHDLBdomainName);
+  destDirName = destDirectoryName(VHDLBdomainName);
   destDirectory.setInitValue(destDirName);
 }
 

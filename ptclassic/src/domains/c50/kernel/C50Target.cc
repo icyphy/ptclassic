@@ -59,7 +59,7 @@ TITarget(src.name(),src.descriptor(),"C50Star") {
 }
 
 void C50Target :: initDataMembers() {
-	StringList destDirName = destDirectoryName(C50domainName);
+	destDirName = destDirectoryName(C50domainName);
 	destDirectory.setInitValue(destDirName);
 }
 
