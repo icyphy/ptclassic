@@ -42,6 +42,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "CalendarQueue.h"
 
 
+
 	////////////////////////////
 	// CQScheduler
 	////////////////////////////
@@ -59,6 +60,9 @@ public:
 	// Here, EventQueue inherits from CalendarQueue
 	// rather than PriorityQueue
 	CQEventQueue eventQ;
+
+	// Resort events according to new fine levels. 
+	void resortEvents();
 
 	// Set up the stopping condition.
 	void setStopTime(double limit) {stopTime = limit ;}
