@@ -596,9 +596,9 @@ void MatlabIfc :: NameMatlabMatrix(Matrix* matrixPtr, const char *name) {
     mxSetName(matrixPtr, name);
 }
 
-Matrix* MatlabIfc :: CreateMatlabMatrix(const char* name,
-					int numrows, int numcols,
-					Real* realPart, Real* imagPart) {
+Matrix* MatlabIfc :: SetVariable(const char* name,
+				 int numrows, int numcols,
+				 Real* realPart, Real* imagPart) {
     int realOrComplex = (imagPart) ? MXCOMPLEX : MXREAL;
     Matrix* newMatlabMatrixPtr = mxCreateFull(numrows, numcols, realOrComplex);
 
@@ -631,10 +631,10 @@ Matrix* MatlabIfc :: CreateMatlabMatrix(const char* name,
     return newMatlabMatrixPtr;
 }
 
-Matrix* MatlabIfc :: CreateMatlabMatrix(const char* name,
-					int numrows, int numcols,
-					const char** realPartStrings,
-					const char** imagPartStrings) {
+Matrix* MatlabIfc :: SetVariable(const char* name,
+				 int numrows, int numcols,
+				 const char** realPartStrings,
+				 const char** imagPartStrings) {
     int realOrComplex = (imagPartStrings) ? MXCOMPLEX : MXREAL;
     Matrix* newMatlabMatrixPtr = mxCreateFull(numrows, numcols, realOrComplex);
 
@@ -667,9 +667,9 @@ Matrix* MatlabIfc :: CreateMatlabMatrix(const char* name,
     return newMatlabMatrixPtr;
 }
 
-Matrix* MatlabIfc :: FetchMatlabMatrix(char* name,
-				       int* numrows, int* numcols,
-				       Real** realPart, Real** imagPart) {
+Matrix* MatlabIfc :: GetVariable(char* name,
+				 int* numrows, int* numcols,
+				 Real** realPart, Real** imagPart) {
     Matrix* matlabMatrix = MatlabEngineGetMatrix(name);
 
     if ( matlabMatrix ) {
@@ -688,10 +688,10 @@ Matrix* MatlabIfc :: FetchMatlabMatrix(char* name,
     return matlabMatrix;
 }
 
-Matrix* MatlabIfc :: FetchMatlabMatrix(char* name,
-				       int* numrows, int* numcols,
-				       char** realPartStrings,
-				       char** imagPartStrings) {
+Matrix* MatlabIfc :: GetVariable(char* name,
+				 int* numrows, int* numcols,
+				 char** realPartStrings,
+				 char** imagPartStrings) {
 
     Matrix* matlabMatrix = MatlabEngineGetMatrix(name);
 
