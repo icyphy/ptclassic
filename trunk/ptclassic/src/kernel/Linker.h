@@ -79,7 +79,8 @@ public:
 	static void setDefaultOpts(const char* newValue);
 private:
 	// invoke global constructors in the object file
-	static int invokeConstructors(const char* objName);
+	static int invokeConstructors(const char* objName,
+                                      void * dlhandle = (void *)NULL );
 
 	// read the object file into memory (at availMem)
 	static size_t readInObj(const char* objName);
