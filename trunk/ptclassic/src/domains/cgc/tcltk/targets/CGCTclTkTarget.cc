@@ -45,7 +45,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 CGCTclTkTarget::CGCTclTkTarget(const char* name,const char* starclass,
                    const char* desc) : CGCTarget(name,starclass,desc) {
 	funcName.setInitValue("go");
-        doCompile.setInitValue("YES");
 	compileOptions.setInitValue(
 		  "-I$PTOLEMY/tcl/tk3.1/src -I$PTOLEMY/tcl/tcl6.6/src "
 		  "-I$PTOLEMY/src/domains/cgc/tcltk/lib");
