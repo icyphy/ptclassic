@@ -117,7 +117,7 @@ body ::tycho::RevControlSCCS::checkIn {} {
     if {$file == {}} {
 	error "Revision control: no file specified"
     }
-    if [$object getModified] {
+    if [$object isModified] {
 	if [askuser "Save modifications before checking in?"] {
 	    $object save 
 	}
