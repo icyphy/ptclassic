@@ -76,7 +76,7 @@ class ::tycho::Compile {
     protected method checkSourceFiles {}
 
     # Compile the file.
-    protected method compileFiles {}
+    method compileFiles {}
 
     # Parse the error message, determine action (language dependent)
     # This is always called by compileFiles. It's generic here
@@ -117,6 +117,9 @@ class ::tycho::Compile {
 
     # Name of the makefile to use.
     protected variable makefile makefile
+
+    # Name of the Exec widget used to compile
+    protected variable compileWidget {}
 }
 
 #######################################################################
@@ -219,14 +222,30 @@ body ::tycho::Compile::checkSourceFiles {} {
 # Compile the files
 #
 body ::tycho::Compile::compileFiles {} {
+    # FIXME: compileString should be a preference.
+    # FIXME: dirname should be a preference.
+    set compileString "make -f $makefile"
+    
     putStatus "About to make shared object, when complete, be sure to \
-	    close the Exec window to continue."
-    set results [::tycho::execModal "make -f $makefile" $dirname]
+            close the Exec window to continue."
+
+    # Compile.  If we already have a compileWidget, reuse it. 
+    if {$compileWidget == {}} {
+        #set compileWidget [$this cget -view].compile
+        #::tycho::Monitor $compileWidget
+        #set retList [::tycho::execModal $compileString $dirname $compileWidget]
+        set retList [::tycho::execModal $compileString $dirname]
+    } else {
+        set retList [::tycho::execModal {} {} $compileWidget]
+    }
+    set compileWidget [lindex $retList 1]
+    # Make sure we parse the output of the compiler (ie. esp. error msg)
+    puts "postWidget = $compileWidget"
+
+    # Parse the error messages
+    parseError $retList
     putStatus ""
-
-    parseError $results
-
-    return $results
+    return $retList
 }
 
 #######################################################################
