@@ -54,6 +54,18 @@ class ::tycho::ResourceFTP {
     # Close the resource. Calls ftpget to send out the message.
     method close {}
 
+    proc debug {} {
+        foreach i [array names _forward] {
+            ::puts "_forward($i) == $_forward($i)"
+        }
+        foreach i [array names _exists] {
+            ::puts "_exists($i) == $_exists($i)"
+        }
+        foreach i [array names _stat] {
+            ::puts "_stat($i) == $_stat($i)"
+        }
+    }
+
     # Return the eof of file status
     method eof {}
 
@@ -122,7 +134,7 @@ class ::tycho::ResourceFTP {
     protected method debugputs {string}
 
     # 1) Initiate a connection on the FTP server. Called by open.
-    protected method ftpget {{url {}}}
+    method ftpget {{url {}}}
 
     # 2) Protocol handler for ftp server. Called by ftpget. 
     protected method ftphandler {}
@@ -192,7 +204,7 @@ class ::tycho::ResourceFTP {
     protected variable ftpsize 0
 
     # Transfer could be either "file" or "directory" (distince FTP commands).
-    protected variable ftptype "directory"
+    protected variable ftptype "file"
 
     # Attribute of the current connection (FTP client). Attributes
     # are set after "fconfigure _socketid -sockname", which returns:<br>
@@ -212,7 +224,13 @@ class ::tycho::ResourceFTP {
     private variable debug 1
 
     # Cache file name
-    private variable filename
+    private variable cachefilename
+
+    # Cache file id
+    private variable cachefileid
+
+    # Cache buffer (so we don't have to re-read it again during dir parse)
+    private variable cachefilebuffer
 
     # True if the file is open
     private variable fileIsOpen 0
@@ -269,7 +287,7 @@ body ::tycho::ResourceFTP::eof {} {
 # <tt>ftp://ptolemy/pub   -->   ftp://ptolemy/pub/</tt>
 #
 body ::tycho::ResourceFTP::forward {url} {
-    while { [::info exists _forward($url)] } {
+    while {[::info exists _forward($url)] && $_forward($url)!=$url} {
 	set url $_forward($url)
     }
     return $url
@@ -322,7 +340,7 @@ body ::tycho::ResourceFTP::puts {string} {
 #### Return a string containing the data in a streamable resource 
 body ::tycho::ResourceFTP::read {} {
     if {!$fileIsOpen} {
-	openerror "File \"$this\" is not open (read)"
+	error "File \"$this\" is not open (read)"
     }
     ::puts "EXISTS [info exists fileid]"
     ::read $fileid
@@ -385,7 +403,7 @@ body ::tycho::ResourceFTP::dirlist {url} {
     set buffer {}
     while {![::eof $fd]} {
         ::gets $fd line
-        if {$line!={}} {
+        if {[lindex $line 8]!={}} {
             if {[lindex $line 8]!={}} {
                 append buffer "[::tycho::url join $url [lindex $line 8]]"
                 #"[forward [::tycho::url join $url [lindex $line 8]]] "
@@ -521,35 +539,43 @@ body ::tycho::ResourceFTP::debugputs {string} {
 # Opening a ftp connection, and set the fileevent.
 #
 body ::tycho::ResourceFTP::ftpget {{url {}}} {
-    # Parse URL into hostname, port, and path
-    if {$url!={}} {set currentURL $url}
-
     ftpstatus "getting"
 
-    # Setup destination according to url:
-    #       server             path        file
-    #       v                  v           v
-    # ftp://www.servername.com/path1/path2/file.tar.gz
-    set ftppath   [::tycho::url path $currentURL]
-    set ftpfile   [::tycho::url tail $currentURL]
-    set ftpserver [::tycho::url server $currentURL]
-    set ftpport   [lindex [split $ftpserver :] 1]
-    set ftpserver [lindex [split $ftpserver :] 0]
-    if {$ftpport=={}} {set ftpport 21}
+    # do not change currentURL, since it is used for tkwait
+    if {$url!={}} {
+        set currentURL [forward $url]
+        set tmpURL [forward $url]
+    } else {
+        set tmpURL [forward $currentURL]
+    }        
+
+    set ftppath [::tycho::url path $tmpURL]
     # The following is needed because path returns the following:
     #   tycho::url path ftp://server.com/p1/p2/file1 == p1/p2/file1
     #
     # The correct path is:
     #   tycho::url path ftp://server.com/p1/p2/file1 == p1/p2/
-    regsub [::tycho::url tail $currentURL] $ftppath {} ftppath
-
+    #
     # If trailing char is /, then it is a directory. Else, probably file.
-    if [regexp {^.*/$} $currentURL] {
+    if [regexp {^.*/$} $ftppath] {
         set ftptype "directory"
+        set ftpfile ""
     } else {
+        set ftpfile   [::tycho::url tail $tmpURL]
+        regsub [::tycho::url tail $tmpURL] $ftppath {} ftppath
         set ftptype "file"
     }
-    debugputs "$ftpserver:$ftpport   path:$ftppath   file:$ftpfile"
+
+    # Setup destination according to url:
+    #       server             path        file
+    #       v                  v           v
+    # ftp://www.servername.com/path1/path2/file.tar.gz
+    set ftpserver [::tycho::url server $tmpURL]
+    set ftpport   [lindex [split $ftpserver :] 1]
+    set ftpserver [lindex [split $ftpserver :] 0]
+    if {$ftpport=={}} {set ftpport 21}
+
+    debugputs "$ftpserver:$ftpport path:$ftppath file:$ftpfile type:$ftptype"
 
     # Connect to server
     if {[catch {socket -async $ftpserver $ftpport} _socketid]} {
@@ -559,10 +585,12 @@ body ::tycho::ResourceFTP::ftpget {{url {}}} {
     }
 
     # Connected, now write everything to cache file
-    set filename [::tycho::cache tmpCacheName $currentURL]
-    set fileid [::open $filename "w+"]
-    ::fconfigure $fileid -translation lf
-    debugputs "Cache file $filename on $fileid"
+    set ftpsize {}
+    set cachefilename [::tycho::cache tmpCacheName $tmpURL]
+    set cachefileid [::open $cachefilename "w+"]
+    set cachefilebuffer {}
+    ::fconfigure $cachefileid -translation auto
+    debugputs "Cache file $cachefilename on $cachefileid"
 
     # Set my port information
     set tmpinfo [fconfigure $_socketid -sockname]
@@ -574,10 +602,10 @@ body ::tycho::ResourceFTP::ftpget {{url {}}} {
 
     # Set up the file events for incoming data
     ::fileevent $_socketid w {}
-    ::fileevent $_socketid readable \
+    ::fileevent $_socketid r \
             [list @scope ::tycho::ResourceFTP [list $this ftphandler]]
     #"[list catch [list @scope ::tycho::ResourceFTP [list $this ftphandler]]]"
-    ::fconfigure $_socketid -blocking no -translation lf
+    ::fconfigure $_socketid -blocking no -translation auto
 }
 
 #########################################################################
@@ -591,13 +619,14 @@ body ::tycho::ResourceFTP::ftpget {{url {}}} {
 #
 # </pre>
 body ::tycho::ResourceFTP::ftphandler {} {
-    if {[::eof $_socketid] && $state!="DISCONNECTED"} {
-        ftpabort "FTP handshaking failed"
-        return
-    }
     # Line will contain the status
     ::gets $_socketid line
-    debugputs "$state> $line"
+    debugputs "$state> $line ($_socketid)"
+
+    if {$state=="DISCONNECTED"} {
+        ftpabort "FTP handshaking failed, trying to write $line ($_socketid)"
+        return
+    }
 
     # This returns the status number. 200-299 is okay (just like HTTP)
     # Need to use regexp instead of lindex because some servers return
@@ -614,7 +643,6 @@ body ::tycho::ResourceFTP::ftphandler {} {
                 set state PASS
                 after $timeout "eval $this ftptimeout $state"
             }
-            set progress 0.1
         }
 
         PASS {
@@ -639,12 +667,13 @@ body ::tycho::ResourceFTP::ftphandler {} {
             # 257 "/" is current directory.
             if [regexp -nocase {^25[0-9] .*} $line] {
                 set cmd "PASV"
-                set state SIZE
+                set state PORT
                 after $timeout "eval $this ftptimeout $state"
             }
         }
 
         SIZE {
+            # NOTE: THIS IS NOT BEING USED!!!!
             # 227 Entering Passive Mode (128,32,240,78,165,11)
             if [regexp -nocase {^22[0-9] .*} $line] {
                 set cmd "SIZE [::tycho::url join $ftppath $ftpfile]"
@@ -711,14 +740,17 @@ body ::tycho::ResourceFTP::ftphandler {} {
                 # Successful, just wait for ready string
                 set state TRANSFER2
                 # DO NOT SET A TIMEOUT!
-            } else {
+            } elseif [regexp -nocase {^5[0-9][0-9] .*} $line] {
                 # This is probably a directory then. Take a guess...
-                set _forward($currentURL) "$currentURL/"
+                set _forward([string trim $currentURL /]) \
+                        "[string trim $currentURL /]/"
                 set ftptype "directory"
                 set status 150          ;# Error shouldn't fault
                 set cmd "CWD [::tycho::url join $ftppath $ftpfile]"
                 set state LIST
                 after $timeout "eval $this ftptimeout $state"
+            } else {
+                ftpabort  "Error in file RETR/LIST"
             }
         }
 
@@ -745,24 +777,26 @@ body ::tycho::ResourceFTP::ftphandler {} {
                 # Just wait until end of dataport transfer
                 set state TRANSFER2
                 # DO NOT SET A TIME OUT! File transfer could take a while.
+                # after $timeout "eval $this ftptimeout $state"
             }
         }
         TRANSFER2 {
             # 226 ASCII Transfer complete.
+            # 425 Can't build data connection
             if [regexp -nocase {^22[0-9] .*} $line] {
                 set cmd "QUIT"
                 set state QUIT
                 after $timeout "eval $this ftptimeout $state"
             }
         }
-        
-        
+
         QUIT {
             # 221 Goodbye.
             if [regexp -nocase {^22[0-9] .*} $line] {
                 set state DISCONNECTED
                 # DO NOT SET A TIME OUT!
                 catch {::close $_socketid}
+                return
             }
         }
         
@@ -770,7 +804,7 @@ body ::tycho::ResourceFTP::ftphandler {} {
 
     # The following is required because Tcl will buffer all output
     if {$cmd!={}} {
-        debugputs "$state> $cmd"
+        debugputs "$state> $cmd ($_socketid)"
         ::puts $_socketid $cmd
         ::flush $_socketid
     }
@@ -812,7 +846,7 @@ body ::tycho::ResourceFTP::ftpdataportopen {} {
         } _datafd]} {
             debugputs "SUCCESS: ($_datafd), [fconfigure $_datafd -sockname]"
             fconfigure $_datafd -blocking no
-            return $_datafd
+            return $_dataport
         }
         incr n -1
         # Increase the port amount more will increase the probability
@@ -827,16 +861,15 @@ body ::tycho::ResourceFTP::ftpdataportopen {} {
 # When a connection is first made, this method is called. This method
 # three arguments passed automatically with the line "socket -server <meth>".
 # 
-# They are fd, location, and port (originator's port)
+# The arguments are fd, location, and port (originator's port)
 body ::tycho::ResourceFTP::ftpdataportinit {fd location port} {
-    debugputs "OKAY ($_datafd) GOT ($fd) $location $port"
+    debugputs "Initializing ($_datafd) GOT ($fd) $location $port"
 
-    fconfigure $fd -blocking no -translation crlf
-    fileevent $fd writable {}
-    fileevent $fd readable \
+    fileevent $fd w {}
+    fileevent $fd r \
             "@scope ::tycho::ResourceFTP $this ftpdataport $fd"
-    # Close off client's initial socket connection.
-    catch {::close $_datafd}
+    # "testa $fd"
+    fconfigure $fd -blocking no -translation auto
 }
 
 #########################################################################
@@ -845,19 +878,23 @@ body ::tycho::ResourceFTP::ftpdataportinit {fd location port} {
 #
 body ::tycho::ResourceFTP::ftpdataport {fd} {
     if [::eof $fd] {
-        ftpdone $fd
+        catch {::close $cachefileid}
+        catch {::close $_socketid}
+        catch {::close $fd}
+        $this ftpdone $fd
         return
     }
-    if {$ftptype=="directory"} {
-        ::gets $fd line
-        ::puts $fileid $line
-    } else {
-        # Binary transaction.
-        # In Tcl8, this should be called fcopy.
-        catch {unsupported0 $fd $fileid} readsize
-        ::seek $fileid -$readsize end
-        set line [::read -nonewline $fileid]
-    }
+    #if {$ftptype=="directory"} {}
+    ::gets $fd line
+    ::puts $cachefileid $line
+    lappend cachefilebuffer $line
+    ::puts "TRANSFER1< $line"
+
+    # Binary transaction.
+    # In Tcl8, this should be called fcopy.
+    #catch {unsupported0 $fd $cachefileid} readsize
+    #::seek $cachefileid -$readsize end
+    #set line [::read -nonewline $cachefileid]
 }
 
 #########################################################################
@@ -865,36 +902,29 @@ body ::tycho::ResourceFTP::ftpdataport {fd} {
 # Clean up after getting the FTPed file. $fd is the id of the data port.
 #
 body ::tycho::ResourceFTP::ftpdone {fd} {
-    debugputs "--->EOF"
+    debugputs "TRANSFER1> EOF"
 
     catch {::close $fd}
-    catch {::close $_socketid}
-    catch {::close $fileid}
+    catch {::close $_datafd}
+    catch {::close $cachefileid}
     set fd -1
-    set _sockid ""
-    set fileid ""
+    set _datafd -1
+    set _socketid -1
+    set cachefileid -1
     set state DISCONNECTED
 
-    set tmpURL [forward $currentURL]
-    set _exists($tmpURL) 1
-    set _stat($tmpURL) \
-            [list type $ftptype mtime 0 size $ftpsize url [forward $tmpURL]]
-    debugputs "_stat($tmpURL) = $_stat($tmpURL)"
-    ::tycho::cache update \
-            $tmpURL \
-            {} \
-            $ftpsize \
-            $ftptype \
-            $filename
+    set tmpURL $currentURL
 
+    # Determine the right forward and exists flag depending on file or dir
     if {$ftptype=="file"} {
-        # Do cache update here -----
-        set _exists([string trimright $tmpURL /]/) 0
-        debugputs "url: $tmpURL ($ftptype) ($ftpsize bytes)"
-        debugputs "cache file: $filename"
-    } elseif {$ftptype=="directory"} {
+        # Setup basic relationship
+        set _forward([string trimright $tmpURL /]/) [string trimright $tmpURL /]
         set _exists([string trimright $tmpURL /]) 1
-        set _forward([string trimright $tmpURL /]) $tmpURL
+        set _exists([string trimright $tmpURL /]/) 0
+    } elseif {$ftptype=="directory"} {
+        # Setup basic relationship
+        set _forward([string trimright $tmpURL /]) [string trimright $tmpURL /]/
+        set _exists([string trimright $tmpURL /]/) 1
         # Need to parse the contents of the listing
         # dr-xr-xr-x   2 root     other        512 Jun  5  1995 dev
         # dr-xr-xr-x   2 root     other        512 Jun  5  1995 etc
@@ -902,13 +932,7 @@ body ::tycho::ResourceFTP::ftpdone {fd} {
         # drwxrws--x   2 4035     244          512 May  9 05:22 private
         # drwxr-xr-x   6 root     root         512 Aug 14  1996 pub
         # drwxr-xr-x   4 root     other        512 Jun  5  1995 usr
-
-        # Open the cache file to retrieve content
-        set cachefd [::open $filename]
-
-        while {![::eof $cachefd]} {
-            ::gets $cachefd line
-
+        foreach line $cachefilebuffer {
             if {[lindex $line 8]!={}} {
                 set fname [::tycho::url join $tmpURL [lindex $line 8]]
                 set permission [lindex $line 0]
@@ -925,7 +949,6 @@ body ::tycho::ResourceFTP::ftpdone {fd} {
                     set ftype "unknown"
                 }
                 set _exists($fname) 1
- 
                 set _stat($fname) [list \
                         type $ftype \
                         mtime 0 \
@@ -933,8 +956,24 @@ body ::tycho::ResourceFTP::ftpdone {fd} {
                         url [forward $fname]]
             }
         }
-        ::close $cachefd
     }
+
+    set tmpURL [forward $tmpURL]
+    set _exists($tmpURL) 1
+    set _stat($tmpURL) \
+            [list type $ftptype mtime 0 size $ftpsize url $tmpURL]
+
+    debugputs "_stat($tmpURL) = $_stat($tmpURL)"
+    debugputs "origurl:$currentURL url:$tmpURL type:$ftptype size:$ftpsize"
+    debugputs "cache file: $cachefilename"
+
+    # Do cache update here:
+    ::tycho::cache update \
+            $tmpURL \
+            {} \
+            $ftpsize \
+            $ftptype \
+            $cachefilename
 
     ftpstatus "done"
 }
@@ -987,19 +1026,19 @@ body ::tycho::ResourceFTP::ftptimeout {oldstate} {
 # When the protocol fails, output an error message, and close socket
 #
 body ::tycho::ResourceFTP::ftpabort {message} {
+    catch {::close $_datafd}
     catch {::close $_socketid}
-    catch {::close $fileid}
-    catch {unset _forward([string trimright $currentURL /])}
-    catch {unset _forward([string trimright $currentURL /]/)}
-    set _sockid ""
-    set fileid ""
+    catch {::close $cachefileid}
+    #catch {unset _forward([string trimright $currentURL /])}
+    #catch {unset _forward([string trimright $currentURL /]/)}
+    set _socketid -1
+    set cachefileid -1
     set state DISCONNECTED
     set status 500
     set fileIsOpen 0
 
     # If we're not executing proc exists, then output error.
     if {$_exists($currentURL)!=-1} {error $message}
-    set _exists([string trimright $currentURL /]) 0
-    set _exists([string trimright $currentURL /]/) 0
+    set _exists($currentURL) 0
     ftpstatus "done"
 }
