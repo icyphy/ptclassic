@@ -42,6 +42,8 @@ As an alternative, the system manager may have set up the file
 ``equivalent''.  If so, you need not bother with .rhosts.
 .H2 "Environment Variables"
 .Ir "environment variables"
+.lp
+.b path
 .pp
 The most basic requirement
 is that \*(PT executables be in your path.
@@ -64,6 +66,7 @@ if (! $?ARCH) setenv ARCH `/bin/arch`
 set path = ( . ~ptolemy/bin ~ptolemy/bin.$ARCH ~ptolemy/octtools/bin ... )
 .)c
 .br
+.Ir ARCH
 The first of these lines sets your environment variable
 .c ARCH
 to the name of the type of machine you are running (e.g. sun3,
@@ -72,7 +75,11 @@ The second puts the \*(PT and Oct bin directories into your path.
 If you add these lines to a previously existing .cshrc file,
 be sure to put  these lines at the end of the file, after
 any other directives that set the path variable.
+.sp
+.lp
+.b PRINTER
 .pp
+.Ir PRINTER
 If you plan to print out any \*(PT documents, you will need to set
 the PRINTER environment variable.  In ~ptolemy/.cshrc the pertinent
 line reads:
@@ -82,6 +89,9 @@ setenv PRINTER lw
 You should replace
 .c "lw"
 with whatever printer name you are using.
+.sp
+.lp
+.b PIGIBW
 .pp
 If you are using a black and white monitor, you should set the PIGIBW
 .Ir "monochrome monitors"
@@ -95,6 +105,31 @@ With the
 PIGIBW environment variable set, the colors used in the graphical
 interface will be remapped
 to be readable on a monochrome monitor.
+.sp
+.lp
+.b PT_DISPLAY
+.Ir PT_DISPLAY
+.Ir editor
+.Ir text editor
+.pp
+The environment variable, PT_DISPLAY, determines how files will be
+diplayed to the user.  The value of this variable is a printf format string with one %s in it.
+That %s is replaced with the file to be viewed, for look-inside commands
+and to view generated code.  The default value is "xedit %s".
+.Ir edit
+.pp
+If the default choice of the xedit editor is not desired, then the
+PT_DISPLAY variable should be set before pigi is started.  For example,
+to use PT_DISPLAY to view files in a new xterm window with the vi editor,
+do
+.Ir vi
+.(c
+setenv PT_DISPLAY "xterm -e vi %s"
+.)c
+before starting pigi.
+.sp
+.lp
+.b PIGIRPC
 .pp
 If, for some reason, you wish to use an alternate version of the
 .i pigiRpc
