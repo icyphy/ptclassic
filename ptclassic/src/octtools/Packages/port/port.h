@@ -495,7 +495,7 @@ extern VOID_HACK sleep();
    message was: warning: cast discards `const' from pointer target type
  */
 #define XTSTRINGDEFINES
-extern int putenv(char *);	/* masters/masters.c uses system() */
+
 extern void qsort
 	ARGS((void *, size_t, size_t, int (*)(CONST void *, CONST void *)));
 extern int system(CONST char *);
