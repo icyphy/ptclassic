@@ -110,4 +110,5 @@ LIB_FLUSH_CACHE = $(LIBDIR)/flush_cache.o
 # If you are trying out the shl_load feature uncomment the lines below.
 #USER_CC_SHAREDFLAGS =		-fPIC
 #USER_C_SHAREDFLAGS =		-fPIC
+#SYSLIBS =			-lg++ -lm -ldld
 
