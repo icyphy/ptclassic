@@ -30,7 +30,31 @@
 #######################################################################
 #### AsPoint
 #
-# A shape for items with a single pair of coordinates.
+# The shape of items with a single pair of coordinates. Items with
+# this shape include <I>text</I>, <I>bitmap</I>, <I>image</I>,
+# and <I>Axis</I>..
+#
+#  <P><b>Primitive aspects</b>
+#
+# <ul>
+# <li><B>origin</B>: The coordinates of the item.
+# </ul>
+#
+# <p><b>Derived aspects</b>
+#
+# <P>None.
+#
+# <p><b>Bugs</b>: (none) 
+#
+# <p><b>Enhancements</b>: (none)
+#
+# <p><b>Links</b>
+# 
+# <ul>
+# <li><a href="../internals/shapes.html">Shape classes</a>.
+# </ul>
+#
+
 #
 class ::tycho::AsPoint {
     inherit ::tycho::Shape

@@ -30,11 +30,52 @@
 #######################################################################
 #### Stepper
 #
-# An interactor that implements quantized moving behavior. In its default
+# An interactor that quantized the mouse movement. In its default
 # mode of operation, the interactor quantizes movement to the option
 # *-stepsize*. Setting the *-gridded* option to true will, however,
 # cause movement to be quantized such that the _cursor position_
 # is a multiple of the step size.
+#
+# <p><b>Options</b>
+#
+# <dl>
+# <dt><dd>
+# <dl>
+# <dt><b>-activatecommand</b>
+# <dd>See <a href="Interactor.html">Interactor</a>.
+#
+# <dt><b>-deactivatecommand</b>
+# <dd>See <a href="Interactor.html">Interactor</a>.
+#
+# <dt><b>-dragcommand</b>
+# <dd>See <a href="Interactor.html">Interactor</a>.
+#
+# <dt><b>-gridded</b>
+# <dd>If true, the cursor movement is quantized to a
+# grid with size given by the <code>-stepsize</code> option. For
+# example, suppose <code>-stepsize</code> were 10 and the start position
+# of the cursor was (15,15).  In gridded mode, the interactor would move
+# the cursor to say (20,20) and then (30,20), while in non-gridded mode
+# (the default), the interactor would move it to say (25,25) and then
+# (35,25).
+#
+# <dt><b>-stepsize</b>
+# <dd>The quantization step size. The default is 12.
+#
+# </dl></dl>
+#
+# <p><b>Bugs</b> The gridded mode may not work correctly in the
+# presence of scrollbars.
+#
+# <p><b>Enhancements</b> (none)
+#
+# <p><b>Links</b>
+# 
+# <ul>
+# <li><a href="../internals/interacting.html">How interactors work</a>.
+# <li><a href="../internals/interactors.html">Interactor classes</a>.
+# <li><a href="Bounder.html">Bounder</a>
+# </ul>
 #
 class ::tycho::Stepper {
     inherit ::tycho::Follower

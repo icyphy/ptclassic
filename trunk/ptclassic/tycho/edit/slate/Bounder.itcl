@@ -33,13 +33,62 @@
 # An interactor that keeps the target object within a given region.
 # The region can either be specified by an option, by the target
 # picture, or defaults to the size of the slate. The *-constrain*
-# option that restricts movement along certain axes:
+# option that restricts movement along certain axes.
+#
+# Note that the bounds enforced by this interactor apply to the target 
+# item, not to the cursor. That is, the interactor keeps the target 
+# within the specified region, which usually means that the cursor is
+# restricted to any even smaller region. If the target item is outside 
+# the bounds when the interactor is activated, the first movement will 
+# move it inside the bounds.
+#
+# <p><b>Options</b>
+#
+# <dl>
+# <dt><dd>
+# <dl>
+# <dt><b>-activatecommand</b>
+# <dd>See <a href="Interactor.html">Interactor</a>.
+#
+# <dt><b>-deactivatecommand</b>
+# <dd>See <a href="Interactor.html">Interactor</a>.
+#
+# <dt><b>-dragcommand</b>
+# <dd>See <a href="Interactor.html">Interactor</a>.
+#
+# <dt><b>-bounds</b>
+# <dd>A four-list giving the rectangular coordinates in 
+# which to keep the target item.  If it is the empty list, then the 
+# Bounder keeps the target item within the coordinates of the slate.  By 
+# default, it is the empty list.  (Note that bounds do not have to be 
+# constant: the <code>-activatemandcommand</code> script can be used to 
+# dynamically choose the bounds.)
+#
+# <dt><b>-constrain</b>
+# <dd> This option further restricts
+# movement along certain axes. The default is "none." It can
+# have the following values:
 # <ul>
 # <li><b>none</b>: Move anywhere within the bounds
 # <li><b>x</b>: Move only along the horizontal axis
 # <li><b>y</b>: Move only along the horizontal axis
 # <li><b>positive</b>: Move only along the positive diagonal axis
 # <li><b>negative</b>: Move only along the negative diagonal axis
+# </ul>
+#
+# </dl></dl>
+#
+# <p><b>Bugs</b> This interactor may not work correctly in the
+# presence of scrollbars.
+#
+# <p><b>Enhancements</b> (none)
+#
+# <p><b>Links</b>
+# 
+# <ul>
+# <li><a href="../internals/interacting.html">How interactors work</a>.
+# <li><a href="../internals/interactors.html">Interactor classes</a>.
+# <li><a href="Stepper.html">Stepper</a>
 # </ul>
 #
 class ::tycho::Bounder {

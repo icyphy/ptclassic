@@ -41,6 +41,58 @@
 # interactor should perhaps have another option that controls whether
 # this happens or not.
 #
+# <p><b>Options</b>
+#
+# <dl>
+# <dt><dd>
+# <dl>
+# <dt><b>-activatecommand</b>
+# <dd>See <a href="Interactor.html">Interactor</a>.
+#
+# <dt><b>-command</b>
+# <dd>The script that is executed repeatedly as long as the
+# mouse button is held down.
+#
+# <dt><b>-deactivatecommand</b>
+# <dd>See <a href="Interactor.html">Interactor</a>.
+#
+# <dt><b>-delay</b>
+# <dd>The time delay between the first and second clicks.
+#
+# <dt><b>-dragcommand</b>
+# <dd>See <a href="Interactor.html">Interactor</a>.
+#
+# <dt><b>-interval</b>
+# <dd>The time interval between executions of the script.
+#
+# </dl></dl>
+#
+# <p><b>Bugs</b>
+#
+# The bindings used by this editor will interfere with
+# bindings to the Slate if they overlap.
+#
+# <p><b>Enhancements</b>
+#
+# <ol>
+# <li>This interactor should probably be renamed
+# <i>LineEditor</i>.
+# <li>Double-click and dragging does not quite work: 
+# the selection moves from the start of the first selected word, not 
+# from the farthest end.
+# <li>The up and down cursors should be made to 
+# work in multi-line items.
+# <li>The cursor should change to the insertion cursor while
+# over an item being edited.
+# </ol>
+#
+# <p><b>Links</b>
+# 
+# <ul>
+# <li><a href="../internals/interacting.html">How interactors work</a>.
+# <li><a href="../internals/interactors.html">Interactor classes</a>.
+# </ul>
+#
 class ::tycho::Repeater {
     inherit ::tycho::Interactor
 

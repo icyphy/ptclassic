@@ -30,7 +30,31 @@
 #######################################################################
 #### AsPolygon
 #
-# A shape for polygons.
+# The shape of polygons. Items with
+# this shape include <I>polygon</I> and <I>Solid</I>.
+#
+#  <P><b>Primitive aspects</b>
+#
+# <ul>
+# <li><B>vertex-</B><I>n</I>: The <I>n</I>'th vertex of the polygon.
+# </ul>
+#
+# <p><b>Derived aspects</b>
+#
+# <ul>
+# <li><B>c</B> or <B>center</B>: The center of the polygon.
+# <li><B>edges</B>: The number of edges in the polygon.
+# </ul>
+#
+# <p><b>Bugs</b>: Does not work at all.
+#
+# <p><b>Enhancements</b>: (none)
+#
+# <p><b>Links</b>
+# 
+# <ul>
+# <li><a href="../internals/shapes.html">Shape classes</a>.
+# </ul>
 #
 class ::tycho::AsPolygon {
     inherit ::tycho::Shape

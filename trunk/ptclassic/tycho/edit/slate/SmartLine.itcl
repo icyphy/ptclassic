@@ -61,13 +61,86 @@ namespace ::tycho {
 # state 0, and may pass through several states before settling on an
 # acceptable line shape.
 #
-# <a href="../internals/east.fsm>State machine for the _East_ line</a>.
+# <p><b>Options</b>:
 #
-# <a href="../internals/west.fsm>State machine for the _West_ line</a>.
+# <dl>
+# <dt><dd>
+# <dl>
+# <dt><b>-alpha</b>
+# <dd>The minimum distance from an end-point of a line
+# to the first vertex.
 #
-# <a href="../internals/south.fsm>State machine for the _South_ line</a>.
+# <dt><b>-arrow</b>
+# <dd>The location of the arrow-head on the line: can be
+# one of <i>none</i>, <i>first</i>, <i>last</i>, or <i>both</i>. 
+# <i>none</i> by default.
 #
-# <a href="../internals/howtoread.html>Reading <i>Picture</i> documentation</a>.
+# <dt><b>-beta</b>
+# <dd>The preferred distance between vertices that "wrap" back
+# in the opposite direction.
+#
+# <dt><b>-end</b>
+# <dd>The direction of the line end-point. Can be one of the
+# four major compass points: <i>n</i>, <i>s</i>, <i>e</i>, or <i>w</i>. It is
+# <i>e</i> by default.
+#
+# <dt><b>-fill</b>
+# <dd>The color of the line. Black by default.
+#
+# <dt><b>-smooth</b>
+# <dd>The flag controlling whether the line is
+# drawn with curves instead of straight segments. Off by default.
+#
+# <dt><b>-start</b>
+# <dd>The direction of the line start-point. Can be one of the
+# four major compass points: <i>n</i>, <i>s</i>, <i>e</i>, or <i>w</i>. It is
+# <i>e</i> by default.
+#
+# </dl></dl>
+#
+# <b>Bugs</b>: (none)
+# 
+# <b>Enhancements</b>
+#
+# SmartLine needs to support "manual" 
+# dragging of line segments and vertices.
+#
+#  <P><b>Example</b>
+#
+#  <P>Create a smart line and an object for moving it around:
+# <tcl quiet><pre>
+#   source $tycho/editors/slate/doc/internals/newslate.itcl
+#   set l [$slate create SmartLine 150 120 200 200 -arrow last]
+#   set d [$slate create Solid 200 200 210 190 220 200 210 210 &#92
+#   		-color green -tags moveable]
+#   $slate constraint $d "move" {lambda id x y -> &#92
+# 		$slate reshape $l $x $y "end"}
+# </pre></tcl>
+#
+# Move the diamond around to see the different line shapes.
+# Change the direction of the end of the line: "w":
+# <tcl quiet><pre>
+#   eval $slate reshapeto $l [$slate aspect $d vertex-2] end
+#   $slate itemconfigure $l -end w
+# </pre></tcl>
+#
+# Change the direction of the end of the line: "s":
+# <tcl quiet><pre>
+#   eval $slate reshapeto $l [$slate aspect $d vertex-1] end
+#   $slate itemconfigure $l -end s
+# </pre></tcl>
+#
+# Change the direction of the end of the line: "n":
+# <tcl quiet><pre>
+#   eval $slate reshapeto $l [$slate aspect $d vertex-3] end
+#   $slate itemconfigure $l -end n
+# </pre></tcl>
+#
+# Change the direction of the end of the line: "e":
+# <tcl quiet><pre>
+#   eval $slate reshapeto $l [$slate aspect $d vertex-0] end
+#   $slate itemconfigure $l -end e
+# </pre></tcl>
 #
 class ::tycho::SmartLine {
     inherit ::tycho::Picture
@@ -93,8 +166,8 @@ class ::tycho::SmartLine {
     # The color of the line
     common _fill
 
-    # Enable "smoothing"
-    common _smoothing
+    # Enable "smooth"
+    common _smooth
 
     # The direction of the start of the line
     common _start
@@ -117,8 +190,8 @@ class ::tycho::SmartLine {
     # Update the *-fill* option
     proc _fill {id canvas slate fill}
 
-    # Update the *-smoothing* option
-    proc _smoothing {id canvas slate smoothing}
+    # Update the *-smooth* option
+    proc _smooth {id canvas slate smooth}
 
     # Update the *-start* option
     proc _start {id canvas slate start}
@@ -370,7 +443,7 @@ class ::tycho::SmartLine {
     set methodtable(_beta)	::tycho::SmartLine::_beta
     set methodtable(_end)	::tycho::SmartLine::_end
     set methodtable(_fill)      ::tycho::SmartLine::_fill
-    set methodtable(_smoothing)	::tycho::SmartLine::_smoothing
+    set methodtable(_smooth)	::tycho::SmartLine::_smooth
     set methodtable(_start)	::tycho::SmartLine::_start
 
     set methodtable(construct)  ::tycho::SmartLine::construct
@@ -384,7 +457,7 @@ class ::tycho::SmartLine {
     set optiondefault(-beta)	  30
     set optiondefault(-end)	  "e"
     set optiondefault(-fill)	  black
-    set optiondefault(-smoothing) off
+    set optiondefault(-smooth) off
     set optiondefault(-start) 	  "e"
 }
 
@@ -418,6 +491,7 @@ body ::tycho::SmartLine::_beta {id canvas slate beta} {
 #
 body ::tycho::SmartLine::_end {id canvas slate end} {
     set _end($id) $end
+    set state($id) 0
     redraw $id $canvas $slate
 }
 
@@ -430,11 +504,11 @@ body ::tycho::SmartLine::_fill {id canvas slate fill} {
 }
 
 ##########################################################################
-## -smoothing option configuration
+## -smooth option configuration
 #
-body ::tycho::SmartLine::_smoothing {id canvas slate smoothing} {
-    set _smoothing($id) $smoothing
-    $canvas itemconfigure $segments($id) -smoothing $smoothing
+body ::tycho::SmartLine::_smooth {id canvas slate smooth} {
+    set _smooth($id) $smooth
+    $canvas itemconfigure $segments($id) -smooth $smooth
 }
 
 ##########################################################################
@@ -442,6 +516,7 @@ body ::tycho::SmartLine::_smoothing {id canvas slate smoothing} {
 #
 body ::tycho::SmartLine::_start {id canvas slate start} {
     set _start($id) $start
+    set state($id) 0
     redraw $id $canvas $slate
 }
 

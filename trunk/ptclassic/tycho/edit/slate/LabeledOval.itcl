@@ -38,9 +38,56 @@ namespace ::tycho {
 ##########################################################################
 ## LabelledOval
 #
-# An oval with a label in it, and optional graphics.
+# <i>LabelledOval</i> is an oval with a text label and graphics.
+# In all other respects, it can be treated like any other oval item.
 #
-# <a href="../internals/howtoread.html">Reading <i>Picture</i> documentation</a>.
+# <p><b>Options</b>
+#
+# <dl>
+# <dt><dd>
+# <dl>
+#
+# <dt><b>-anchor</b>
+# <dd>See <a href="LabelledItem.html">LabelledItem</a>.
+#
+# <dt><b>-fill</b>
+# <dd>The color with which the oval is filled. By default, 
+# it is "", which means that the oval is not filled.
+#
+# <dt><b>-graphics</b>
+# <dd>See <a href="LabelledItem.html">LabelledItem</a>.
+#
+# <dt><b>-outline</b>.
+# <dd>The color of the outline of the oval. If "", 
+# the oval has no outline. By default, it is black.
+#
+# <dt><b>-text</b>
+# <dd>See <a href="LabelledItem.html">LabelledItem</a>.
+#
+# <dt><b>-width</b>
+# <dd>The width of the outline of the oval, in pixels. By 
+# default, it is one.
+#
+# </dl></dl>
+#
+# <p><b>Bugs</b>: (none)
+#
+# <p><b>Example</b>: Create a labelled oval:
+# <tcl quiet><pre>
+#   source $tycho/editors/slate/doc/internals/newslate.itcl
+#   $slate create LabelledOval 40 40 100 80 -fill white -outline blue &#92
+# 		-width 4 -text Foo -tags moveable
+# </pre></tcl>
+#
+# <p><b>Enhancements</b>: (none)
+#
+# <p><b>Links</b>
+# 
+# <ul>
+# <li><a href="../internals/howtoread.html">Reading <i>ComplexItem</i>
+# documentation</a>.
+# <li><a href="../internals/items.html">Complex item classes</a>.
+# </ul>
 #
 class ::tycho::LabelledOval {
     inherit ::tycho::LabelledItem
