@@ -48,7 +48,6 @@ EXTRA_SRCS =	\
 	FileHelp.html \
 	FontDialogHelp.html \
 	GlimpseHelp.html \
-	HTMLHelp.html \
 	IndexBrowserHelp.html \
 	ListBrowserHelp.html \
 	TclShellHelp.html \
