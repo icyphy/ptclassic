@@ -58,7 +58,7 @@ const char* XXXScheduler::domain() const
 void XXXScheduler::setup()
 {
     if (!galaxy()) {
-	Error::abortRun(domain(), "Scheduler has no galaxy.");
+	Error::abortRun(domain(), " scheduler has no galaxy.");
 	return;
     }
 
@@ -71,7 +71,7 @@ void XXXScheduler::setup()
 int XXXScheduler::run()
 {
     if (!galaxy()) {
-	Error::abortRun("No galaxy to run");
+	Error::abortRun(domain(), " domain has no galaxy to run");
 	return FALSE;
     }
 
