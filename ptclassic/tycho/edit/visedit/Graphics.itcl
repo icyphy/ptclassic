@@ -442,29 +442,29 @@ body ::tycho::Graphics::constructor {args} {
 
     menubar addMenu Edit -before Window -underline 0
 
-    menubar add {Undo} Edit -underline 0 -accelerator "M-z" \
+    menubar add {Undo} Edit -underline 0 -accelerator "z" \
 	    -command "$this undo"
 
-    menubar add {Redo} Edit -underline 0 -accelerator "M-d" \
+    menubar add {Redo} Edit -underline 0 -accelerator "d" \
 	    -command "$this redo"
 
     menubar addSeparator Edit
 
-    menubar add Cut Edit -underline 0 -accelerator "M-x" \
+    menubar add Cut Edit -underline 0 -accelerator "x" \
 	    -command "$this modify cut"
     
-    menubar add Copy Edit -underline 1 -accelerator "M-c" \
+    menubar add Copy Edit -underline 1 -accelerator "c" \
 	    -command "$this copy"
     
-    menubar add Paste Edit -underline 0 -accelerator "M-v" \
+    menubar add Paste Edit -underline 0 -accelerator "v" \
 	    -command "$this modify paste"
     
     menubar addSeparator Edit
 
-    menubar add {Title...} Edit -underline 0 -accelerator "M-T" \
+    menubar add {Title...} Edit -underline 0 -accelerator "T" \
             -command "$this titleAdd"
 
-    menubar add {Edit Item} Edit -underline 0 -accelerator "M-e" \
+    menubar add {Edit Item} Edit -underline 0 -accelerator "e" \
 	    -command "$this edit"
 
     menubar addMenu Format -underline 1
@@ -485,41 +485,59 @@ body ::tycho::Graphics::constructor {args} {
 	    -canvaswidth  canvasWidth \
 	    -canvascolor  canvasColor
 
-    # Prevent shadowing of bindings in the File class.
-    bind $slate <Control-x> { }
-    bind $slate <Control-x><Control-w> { }
-    bind $slate <Control-x><v> { }
-    bind $slate <Control-x><i> { }
-    bind $slate <Control-x><p> { }
-    bind $slate <Control-x><k> { }
+    # Prevent shadowing of bindings in the Displayer class.
+    bind $slate <Control-x> {continue}
+    bind $slate <Control-x><0> {continue}
+    bind $slate <Control-x><k> {continue}
+    bind $slate <Control-x><o> {continue}
+    
+    bind $slate <Control-x><Control-c> {continue}
+    bind $slate <Control-x><Control-f> {continue}
+    bind $slate <Control-x><Control-r> {continue}
+    bind $slate <Control-x><Control-s> {continue}
+    bind $slate <Control-x><Control-w> {continue}
+    bind $slate <Control-x><Control-v> {continue}
+
+    # Repeat bindings for the File parent class because there seems to
+    # be no way for the slate to pass events to its containing megawidget.
+    bind $slate <Control-x><Control-f> \
+	    "$this ::tycho::File::openWinMethod; break"
+    bind $slate <Control-x><Control-s> "$this save; break"
+    bind $slate <Control-x><Control-v> "$this altFile; break"
+    bind $slate <Control-x><Control-w> "$this saveAs; break"
+    bind $slate <Control-x><Key-i> "$this insertFile; break"
+    bind $slate <Control-x><Key-p> "$this print; break"
+    bind $slate <Control-x><Control-r> "$this evaluate; break"
+    bind $slate <Control-x><Control-q> "$this toggleReadOnly; break"
+    bind $slate <Control-x><v> "$this revisionControl; break"
 
     # Simpler bindings provided because this is not a text editor.
     # These are fashioned after the Macintosh commands
-    bind $slate <Meta-z> "$this undo; break"
-    bind $slate <Meta-d> "$this redo; break"
-    bind $slate <Meta-x> "$this modify cut; break"
-    bind $slate <Meta-c> "$this copy; break"
-    bind $slate <Meta-v> "$this modify paste; break"
-    bind $slate <Meta-e> "$this edit; break"
+    bind $slate <z> "$this undo; break"
+    bind $slate <d> "$this redo; break"
+    bind $slate <x> "$this modify cut; break"
+    bind $slate <c> "$this copy; break"
+    bind $slate <v> "$this modify paste; break"
+    bind $slate <e> "$this edit; break"
 
     # Specialized bindings.
-    bind $slate <Meta-T> "$this titleAdd; break"
+    bind $slate <T> "$this titleAdd; break"
 
     # Bindings provided for compatibility with emacs conventions.
     # These must be specified after the simpler bindings above.
-    # FIXME: How can we recover these?
-    # bind $slate <Meta-x> { }
-    # bind $slate <Control-x><u> "$this undo; break"
-    # bind $slate <Control-w> "$this modify cut; break"
-    # bind $slate <Meta-w> "$this copy; break"
-    # bind $slate <Control-y> "$this modify paste; break"
+    bind $slate <Meta-x> {continue}
+    bind $slate <Control-x><u> "$this undo; break"
+    bind $slate <Control-w> "$this modify cut; break"
+    bind $slate <Meta-w> "$this copy; break"
+    bind $slate <Control-y> "$this modify paste; break"
 
     # Bind configure events to update the display.
     # Interactivity is enabled only after the first configure event.
     bind $itk_component(bottom) <Configure> \
             "$this updateScrollbars; $this dependenceUpdate resize"
-    # FIXME:
-    #            $this interactiveEnable 1
+
+    # Defer until after constructors in derived classes have completed.
+    after idle "$this interactiveEnable 1"
 
     # Create the selector. Shift-click toggles selected items.
     set selector [$slate interact create Selector \
@@ -842,7 +860,7 @@ body ::tycho::Graphics::delete {args} {
 #
 body ::tycho::Graphics::dependenceAdd {parenttag childtag {update {}}} {
     if {$dependenceGraph == {}} {
-        set dependenceGraph [::tycho::DirectedAcyclicGraph #auto]
+        set dependenceGraph [uplevel #0 ::tycho::DirectedAcyclicGraph #auto]
     }
     if {![$dependenceGraph exists $parenttag]} {
         # Add a new root to the graph
@@ -1148,8 +1166,6 @@ body ::tycho::Graphics::exportXwd {filename} {
 # Put the focus in the canvas.
 #
 body ::tycho::Graphics::focusin {} {
-    # FIXME: The following does not work.  Slate gets the focus, but
-    # not the canvas.
     focus [$slate component canvas]
     displayer setCurrentView $viewName
 }
@@ -1247,7 +1263,7 @@ body ::tycho::Graphics::redo {} {
         eval $this $cmd
     }
     set redoCommands {}
-    catch {$itk_option(-top) disableMenuItem Redo}
+    menubar disable Redo
     markModified
 }
 
@@ -1362,13 +1378,10 @@ body ::tycho::Graphics::titleAdd {{newcategory 0}} {
             }
         }
         if {$categories != {}} {
-            # The "catch" is in case the object is deleted before the dialog
-            # is dismissed.
             ::tycho::Query $name -queries \
                     [list [list line title {Text:} {}]] \
-                    -okcommand [list catch \
-                    "$this modify \
-                    titleSet \[$name get category\] \[$name get title\]"]
+                    -okcommand "::tycho::TWidget::evalIfExists $this modify \
+                    titleSet \[$name get category\] \[$name get title\]"
             $name radio category {} $categories [lindex $categories 0]
             $name addButton new -text "New Title Item" -command \
                     "$this titleAdd 1; destroy $name"
@@ -1431,7 +1444,6 @@ body ::tycho::Graphics::undo {} {
     # Step through the undo commands.
     foreach cmd $undoCommands {
         if [catch {
-            # NOTE: Why is $this needed?  Itcl bug?
             eval $this $cmd
         } msg] {
             set undoing 0
@@ -1442,7 +1454,7 @@ body ::tycho::Graphics::undo {} {
     }
     set undoing 0
     set undoCommands {}
-    catch {$itk_option(-top) disableMenuItem Undo}
+    menubar disable Undo
     markModified
 }
 
@@ -1457,10 +1469,10 @@ body ::tycho::Graphics::undo {} {
 body ::tycho::Graphics::undoAppend {command} {
     if !$interactiveEnabled {return}
     if $undoing {
-        catch {$itk_option(-top) enableMenuItem Redo}
+        menubar enable Redo
         lappend redoCommands $command
     } {
-        catch {$itk_option(-top) enableMenuItem Undo}
+        menubar enable Undo
         lappend undoCommands $command
     }
 }
@@ -1474,14 +1486,10 @@ body ::tycho::Graphics::undoAppend {command} {
 body ::tycho::Graphics::undoBoundary {} {
     if !$interactiveEnabled {return}
     if $undoing {
-        if {$itk_option(-top) != {}} {
-            catch {$itk_option(-top) disableMenuItem Redo}
-        }
+        menubar disable Redo
         set redoCommands {}
     } {
-        if {$itk_option(-top) != {}} {
-            catch {$itk_option(-top) disableMenuItem Undo}
-        }
+        menubar disable Undo
         set undoCommands {}
     }
 }
@@ -1497,10 +1505,10 @@ body ::tycho::Graphics::undoBoundary {} {
 body ::tycho::Graphics::undoPrepend {command} {
     if !$interactiveEnabled {return}
     if $undoing {
-        catch {$itk_option(-top) enableMenuItem Redo}
+        menubar enable Redo
         set redoCommands [concat [list $command] $redoCommands]
     } {
-        catch {$itk_option(-top) enableMenuItem Undo}
+        menubar enable Undo
         set undoCommands [concat [list $command] $undoCommands]
     }
 }
