@@ -36,14 +36,14 @@ LIB=libddf.a
 # Library sources
 SRCS= \
  DDFConnect.cc DDFScheduler.cc DDFStar.cc DDFWormhole.cc DDFWormConnect.cc \
- DDFDomain.cc DDFAutoWorm.cc 
+ DDFDomain.cc DDFAutoWorm.cc DynamicGalaxy.cc
 
 # Header files
-HDRS= DDFConnect.h DDFScheduler.h DDFStar.h DDFUniverse.h DDFWormhole.h DDFWormConnect.h 
+HDRS= DDFConnect.h DDFScheduler.h DDFStar.h DynamicGalaxy.h DDFWormhole.h DDFWormConnect.h 
 
 # Library objects
 OBJS= DDFConnect.o DDFScheduler.o DDFStar.o DDFWormhole.o DDFWormConnect.o \
- DDFDomain.o  DDFAutoWorm.o 
+ DDFDomain.o  DDFAutoWorm.o DynamicGalaxy.o
 
 all:	makefile $(LIB)
 
