@@ -202,6 +202,10 @@ class ::tycho::File {
     # Call the saveCrash method for all File objects.
     proc emergencySave {} {}
 
+    # Is the file already open? if YES, then return the window name,
+    # if NO, then return 0.
+    proc isFileOpen {filename} {}
+
     # Open a file browser, and then open an editor for the file.
     proc openWin {{megawidget {}}} {}
 
@@ -223,9 +227,8 @@ class ::tycho::File {
     # Return the registered viewing commands for a file or directory name.
     proc registeredCommands {name} {}
 
-    # Is the file already open? if YES, then return the window name,
-    # if NO, then return 0.
-    proc isFileOpen {filename} {}
+    # Get the window name by the rootname of a file.
+    proc winGetByRootName {rootname}
 	
     ##########################################################################
     ####                  protected methods                               ####
@@ -1111,6 +1114,21 @@ body ::tycho::File::indicateReadOnly {bool} {
 }
 
 #####################################################################
+#### isFileOpen
+# Check if the file is already open, if YES, then return the window name,
+# if NO, then return empty string.
+#
+body ::tycho::File::isFileOpen {filename} {
+    set filename [::tycho::expandPath $filename]
+    if {[info exists filesOpen($filename)]} {
+	set winName $filesOpen($filename)
+    } else {
+	set winName ""
+    }
+    return $winName
+}
+
+#####################################################################
 #### openWin
 # Open a file browser, and then open an editor for the file.
 # The editor is chosen based on the file extension, if the extension
@@ -1328,18 +1346,20 @@ body ::tycho::File::registeredCommands {name} {
 }
 
 #####################################################################
-#### isFileOpen
-# Check if the file is already open, if YES, then return the window name,
-# if NO, then return empty string.
+#### winGetByRootName
+# Check if there is a file with the same root name (without directory path)
+# as "rootname". If YES, then return the window name,
+# otherwise, return an empty string.
 #
-body ::tycho::File::isFileOpen {filename} {
-    set filename [::tycho::expandPath $filename]
-    if {[info exists filesOpen($filename)]} {
-	set winName $filesOpen($filename)
-    } else {
-	set winName ""
+body ::tycho::File::winGetByRootName {rootname} {
+    set arrayNm [array names filesOpen]
+    foreach filename $arrayNm {
+        set name [file rootname [file tail $filename]]
+        if {$name == $rootname} {
+            return $filesOpen($filename)
+        }
     }
-    return $winName
+    return ""
 }
 
 #########################################################################
