@@ -84,11 +84,6 @@ test: $(TESTBINARY)
 testicon: $(TESTBINARY)
 	$(TESTBINARY) -f interface $(PTOLEMY)/src/domains/sdf/icons/sources.pal:schematic > /tmp/i.tim
 
-$(BINARY): $(OBJS)
-	$(CLINKER) $(LINKFLAGS) $(OBJS) \
-		-o $@ \
-		$(LIBS) $(CSYSLIBS) 
-
 DEST = $(OCTTOOLS)/bin.$(PTARCH)/$(BINARY)
 
 $(DEST): $(BINARY)
