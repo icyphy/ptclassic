@@ -65,7 +65,7 @@ itk::usual Labeledgrid {
 }
 
 # ------------------------------------------------------------------
-##                            QUERY
+##                            LABELEDGRID
 # ------------------------------------------------------------------
 #
 # The Labeledgrid class implements a grid of labeled widgets. It is
@@ -102,7 +102,7 @@ class iwidgets::Labeledgrid {
     itk_option define -entrybackground entryBackground Background grey90
 
     itk_option define -font font Font \
-            "-Adobe-Helvetica-Medium-R-Normal--*-120-*-*-*-*-*-*"
+            "-Adobe-Helvetica-Bold-R-Normal--*-120-*-*-*-*-*-*"
     itk_option define -labelfont labelFont Font  \
             "-Adobe-Helvetica-Bold-R-Normal--*-120-*-*-*-*-*-*"
     itk_option define -labelforeground labelForeground Foreground black
@@ -125,19 +125,21 @@ class iwidgets::Labeledgrid {
     method group   {id args}
     method hskip   {{group {}} args}
     method names   {{group {}}}
+    method type    {id}
     method vskip   {{group {}} args}
     
     proc newtype {type args} {}   ;# add a new type
     
-    private method _do   {cmdtype id args}
     private method _drawitem \
             {id parent style label colspan rowspan {path {}} {sticky {}}}
-    private method _text {path value args}
+    private method _do   {cmdtype id args}
+    private method _text {pathdelete  args}
+    private method _optionmenu {id path var args}
 
     # Unique counters
     private common widgetCounter 0   ;# counter to generate unique numbers
-    private variable itemCounter 0   ;# Counter to generate widget paths
-    private variable unique          ;# unique for each widget
+    protected variable itemCounter 0   ;# Counter to generate widget paths
+    protected variable unique          ;# unique for each widget
 
     # Gridding variables: one entry per group, indexed by id
     private variable _firstcol      ;# first item column w/o borders
@@ -149,17 +151,17 @@ class iwidgets::Labeledgrid {
     private variable _childstyle    ;# default style of child widgets
 
     # Item information, one per item
-    private variable _type          ;# the type of each item
-    private variable _children      ;# the children of each group
+    protected variable _type          ;# the type of each item
+    protected variable _children      ;# the children of each group
 
-	# Script for operating on widgets
-    private common _assign     ;# assign to a widget
-    private common _create     ;# create a new widget
-    private common _disable    ;# disable a widget
-    private common _enable     ;# enable a widget
-    private common _get        ;# get a widget's value
-    private common _sticky     ;# options for stickiness of each type
-    private common _options    ;# options for itk_component add
+    # Script for operating on widgets
+    protected common _assign     ;# assign to a widget
+    protected common _create     ;# create a new widget
+    protected common _disable    ;# disable a widget
+    protected common _enable     ;# enable a widget
+    protected common _get        ;# get a widget's value
+    protected common _sticky     ;# options for stickiness of each type
+    protected common _options    ;# options for itk_component add
 
     # Default type options
     private common _defaulttypeoptions {
@@ -171,9 +173,6 @@ class iwidgets::Labeledgrid {
 	-get      {set %v}
 	-sticky   "ew"
 	-options  {usual}
-    }
-    method debug {args} {
-	eval $args
     }
 }
 
@@ -361,7 +360,7 @@ body iwidgets::Labeledgrid::add {type id args} {
             opts(-style)
     set args [array get opts]
 
-	# Use the shared variable if there is one, otherwise a local one
+    # Use the shared variable if there is one, otherwise a local one
     if ![::info exists [scope $par$unique]] {
 	set var [scope $id$unique]
     } else {
@@ -373,7 +372,7 @@ body iwidgets::Labeledgrid::add {type id args} {
 
     # Set its initial value if not in a shared group and the value is supplied
     if { ![::info exists [scope $par$unique]] && $value != "" } {
-	eval $_assign($type)
+        eval $_assign($type)
     }
     # Draw the item according to its style
     _drawitem $id $par $style $label \
@@ -388,12 +387,12 @@ body iwidgets::Labeledgrid::add {type id args} {
 # _id_ is not supplied, set top-level items.
 # ------------------------------------------------------------------
 body iwidgets::Labeledgrid::assign {id args} {
-	if { $args == "" } {
-		set value $id
-		set id {}
-	} else {
-		set value [lindex $args 0]
-	}
+    if { $args == "" } {
+        set value $id
+        set id {}
+    } else {
+        set value [lindex $args 0]
+    }
     if ![::info exists _type($id)] {
 	error "Unknown id: \"$id\""
     }
@@ -445,15 +444,15 @@ body iwidgets::Labeledgrid::delete {id} {
     
     # Clean up internal data
     if { $_type($id) == "group" } {
-	    unset _firstcol($id)
-    	unset _lastcol($id)
-    	unset _currow($id)
-    	unset _curcol($id)
-	    unset _childspan($id)
+        unset _firstcol($id)
+        unset _lastcol($id)
+        unset _currow($id)
+        unset _curcol($id)
+        unset _childspan($id)
     }
     unset _columnspan($id)
     unset _rowspan($id)
-
+    
     if [regexp {^((([^\.]+).)*)[^\.]+$} $id _ _ par] {
         set t [lsearch -exact $_children($par) $id]
         set _children($par) [lreplace $_children($par) $t $t]
@@ -470,13 +469,13 @@ body iwidgets::Labeledgrid::disable {{id {}}} {
 	error "Unknown id: \"$id\""
     }
     if [::info exists itk_component(${id}label)] {
-    	$itk_component(${id}label) configure \
-		-foreground $itk_option(-disabledforeground)
-   	}
+        $itk_component(${id}label) configure \
+                -foreground $itk_option(-disabledforeground)
+    }
     if { $_type($id) == "group" } {
-	foreach t $_children($id) {
-	    disable $t
-	}
+        foreach t $_children($id) {
+            disable $t
+        }
     } else {
 	_do disable $id
     }
@@ -562,7 +561,6 @@ body iwidgets::Labeledgrid::group {id args} {
     # Remember key parameters
     set _type($id) group
     lappend _children($par) $id
-    set path $itk_interior._[incr itemCounter]
 
     # Extract options
     array set opts [list \
@@ -637,6 +635,19 @@ body iwidgets::Labeledgrid::names {{group {}}} {
 }
 
 # ------------------------------------------------------------------
+## METHOD: type id
+#
+# Return the type of an item.
+# Raise an error if _id_ is unknown.
+# ------------------------------------------------------------------
+body iwidgets::Labeledgrid::type {id} {
+    if ![::info exists _type($id)] {
+	error "Unknown id: \"$id\""
+    }
+    return $_type($id)
+}
+
+# ------------------------------------------------------------------
 ## METHOD: vskip ?group? ?option value... ?
 #
 # Skip a row. If _group_ is supplied, then this is the group to
@@ -662,6 +673,26 @@ body iwidgets::Labeledgrid::vskip {{group {}} args} {
 # ------------------------------------------------------------------
 
 # ------------------------------------------------------------------
+## METHOD: _do mode id ?value?
+#
+# Evaluate a command to evaluate on an item. The _cmdtype_ argument
+# selects the command type.
+# ------------------------------------------------------------------
+body iwidgets::Labeledgrid::_do {cmdtype id {value {}}} {
+    set command [set _[set cmdtype]($_type($id))]
+
+    regexp {^((.*)\.)?[^\.]+$} $id _ _ par
+    if [::info exists [scope $par$unique]] {
+        set var [scope $par$unique]
+    } else {
+        set var [scope $id$unique]
+    }
+    set path $itk_component($id)
+    
+    eval [set _[set cmdtype]($_type($id))]
+}
+
+# ------------------------------------------------------------------
 ## METHOD: _drawitem id parent style label colspan rowspan ?path? ?sticky?
 #
 # Draw an item and update the grid parameters accordingly. Input:
@@ -685,6 +716,16 @@ body iwidgets::Labeledgrid::_drawitem {id parent style label \
     set col $_curcol($parent)
     set row $_currow($parent)
 
+    # Option propagation for labels depends on whether it's at the top-level
+    if { $parent == "" } {
+        set labeloptions {
+            keep -background -cursor
+            rename -font -labelfont labelFont Font
+            rename -foreground -labelforeground labelForeground Foreground
+        }
+    } else {
+        set labeloptions {usual}
+    }
     switch -exact $style {
 	"plain" {
 	    set rowdelta 0
@@ -694,12 +735,9 @@ body iwidgets::Labeledgrid::_drawitem {id parent style label \
 	    # Label
 	    itk_component add ${id}label {
 		label $itk_interior._[incr itemCounter] -text $label
-	    } {
-		keep -background -cursor
-		rename -font -labelfont labelFont Font
-		rename -foreground -labelforeground labelForeground Foreground
-	    }
-	    grid $itk_component(${id}label) \
+	    } $labeloptions
+
+            grid $itk_component(${id}label) \
 		    -row $row \
 		    -column $col \
 		    -sticky $itk_option(-labelanchor)
@@ -722,11 +760,8 @@ body iwidgets::Labeledgrid::_drawitem {id parent style label \
             # Create the label and grid it.
             itk_component add ${id}label {
                 label $itk_interior._[incr itemCounter] -text $label
-            } {
-		keep -background -cursor
-		rename -font -labelfont labelFont Font
-		rename -foreground -labelforeground labelForeground Foreground
-	    }
+            } $labeloptions
+
 	    grid $itk_component(${id}label) \
 		    -row $row -column $col -sticky sw -pady 9
 
@@ -777,11 +812,8 @@ body iwidgets::Labeledgrid::_drawitem {id parent style label \
 	    # Create the label and place it. -labelanchor is ignored.
 	    itk_component add ${id}label {
 		label $itk_interior._[incr itemCounter] -text $label
-	    } {
-		keep -background -cursor
-		rename -font -labelfont labelFont Font
-		rename -foreground -labelforeground labelForeground Foreground
-	    }
+	    } $labeloptions
+
 	    place $itk_component(${id}label) -x 12 -y 12 -anchor w \
 		    -in $itk_component(${id}frame)
 	    
@@ -795,7 +827,7 @@ body iwidgets::Labeledgrid::_drawitem {id parent style label \
 	    error "Unknown style: \"$style\""
 	}
     }
-    # By the time we get here, col and row and the grid location to place
+    # By the time we get here, col and row are the grid location to place
     # the item into
     if { $path != "" } {
 	# Grid the widget and raise it so it shows
@@ -815,7 +847,7 @@ body iwidgets::Labeledgrid::_drawitem {id parent style label \
 	set _lastcol($id) [expr $col+$colspan]
     }
     # Adjust counters. rowdelta is the number of additional rows
-    # used by labeled and borders. coldelta is the number of additional
+    # used by labels and borders. coldelta is the number of additional
     # columns on the right side of the item used for labels and borders.
     incr rowspan $rowdelta
     if { $rowspan > $_height($parent) } {
@@ -834,23 +866,49 @@ body iwidgets::Labeledgrid::_drawitem {id parent style label \
 }
 
 # ------------------------------------------------------------------
-## METHOD: _do mode id ?value?
+## METHOD: _optionmenu path args
 #
-# Evaluate a command to evaluate on an item. The _cmdtype_ argument
-# selects the command type.
+# Helper method to create an option menu. We don't use an iwidgets
+# optionmenu here because it doesn't support tab traversal.
 # ------------------------------------------------------------------
-body iwidgets::Labeledgrid::_do {cmdtype id {value {}}} {
-    set command [set _[set cmdtype]($_type($id))]
+body iwidgets::Labeledgrid::_optionmenu {id path var args} {
+puts [list $id $path $var $args]
+    # Extract arguments
+    array set opts {-entries {} -command {}}
+    array set opts $args
+    set entries $opts(-entries)
+    set command $opts(-command)
+    unset opts(-entries)
+    unset opts(-command)
+    set args [array get opts]
 
-    regexp {^((.*)\.)?[^\.]+$} $id _ _ par
-    if [::info exists [scope $par$unique]] {
-        set var [scope $par$unique]
-    } else {
-        set var [scope $id$unique]
+    # Create the menu button
+    eval [list menubutton $path \
+            -indicatoron 1 \
+            -menu $path.menu \
+            -textvariable $var \
+            -relief raised -bd 2 -highlightthickness 2 \
+            -anchor c \
+            -takefocus 1] \
+            $args
+
+    # Create the popup menu
+    itk_component add $id.menu {
+	menu $path.menu -tearoff 0
     }
-    set path $itk_component($id)
-    
-    eval [set _[set cmdtype]($_type($id))]
+
+    # Initialize the menu
+    foreach e $entries {
+        # If -command is supplied, append it to the command to
+        # update the button
+        if { $command != "" } {
+            $path.menu add command \
+                    -label $e \
+                    -command "[list set $var $e]; $command"
+        } else {
+            $path.menu add command -label $e -command [list set $var $e]
+        }
+    }
 }
 
 # ------------------------------------------------------------------
@@ -953,8 +1011,7 @@ Labeledgrid::newtype labeledgrid \
 }
 
 Labeledgrid::newtype optionmenu \
-        -create {eval ::iwidgets::optionmenu %w %a} \
-        -assign {%w select %x}
+        -create {eval _optionmenu %t %w {%v} %a}
 
 Labeledgrid::newtype radiobutton \
         -create {eval ::radiobutton %w -variable {%v} %a} \
