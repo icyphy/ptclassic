@@ -49,9 +49,47 @@ which will compile the file.
 checked to see if the <code>.java</code> file extends
 <code>Applet</code>, but that is more work.
 </MENU>
-<P>The Tycho <CODE>classPath</CODE> preference is used to set the
-<CODE>CLASSPATH</CODE> environment variable before the various Java tools
-are run.
+ <H2>CLASSPATH</H2>
+
+The <code>CLASSPATH</code> environment variable controls where the
+Java tools such as <code>javac</code>, <code>java</code>, and
+<code>appletviewer</code>.  <code>javac</code> and <code>java</code>
+take a <code>-classpath</code> option, <code>appletviewer</code> does
+not.
+
+<p>If <A NAME="useEnvClassPath
+preference"><code>useEnvClassPath</code>preference</A> is true, then
+the <code>CLASSPATH</code> is read from the environment
+<code>$env(CLASSPATH)</code> and passed to <code>java</code> or
+<code>javac</code>
+
+<p>If the <code>useEnvClassPath</code> preference is false, then Tycho
+reads the <code>classPath</code> preference and sets the
+<code>CLASSPATH</code> environment variable before calling the java
+tools.  The <code>useEnvClassPath</code> and <code>classpath</code>
+preferences are set in the miscellaneous preferences.
+
+<P>The Tycho <A NAME="classPath preference"><CODE>classPath</CODE> preference</A>
+is used to set the
+<CODE>CLASSPATH</CODE> environment variable before the various Java
+tools are run.
+
+ <P>For more information about <CODE>CLASSPATH</CODE>, see the
+<A HREF="../../../../java/tycho/doc/internals/tcljava.html#CLASSPATH">TclJava</A>
+documentation.
+
+ <P>The <A NAME="javaHome preference"><CODE>javaHome</CODE> preference</A>
+refers to the directory that contains the Java Development Kit (JDK).
+The initial default of the <CODE>javaHome</CODE> preference is taken
+from the value of the <CODE>JAVA_HOME</CODE> environment variable.
+
+ <P>The <CODE>javaHome</CODE> preference is used to find the JDK HTML
+documentation for the built in Java classes.  The JDK HTML
+documentation should be in the <CODE>api</CODE> subdirectory of the
+JDK.  The location of the JDK HTML documentation is used to fix
+<CODE>javadoc</CODE> hyperlinks.
+
+
 <H3>Evaluating a Java Application</H3>
 <A
 HREF="../../test/DrawTest.java"><CODE>$TYCHO/editors/textedit/test/DrawTest.java</CODE></A>
