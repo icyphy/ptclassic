@@ -100,8 +100,8 @@ PL_SRCS= \
  SDFLimit.pl \
  SDFLog.pl \
  SDFMedianImage.pl \
- SDFmotionCmp.pl \
- SDFmotionCmpInv.pl \
+ SDFMotionCmp.pl \
+ SDFMotionCmpInv.pl \
  SDFMux.pl \
  SDFNewQuant.pl \
  SDFNumToBus.pl \
