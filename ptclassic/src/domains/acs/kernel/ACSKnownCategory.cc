@@ -70,7 +70,7 @@ void ACSKnownCategory::addEntry( ACSCore& core ) {
 }
 
 // Get the whole category list.
-const StringList ACSKnownCategory::getCategories() {
+StringList ACSKnownCategory::getCategories() {
 	static StringList categories;
 	ListIter next(*allCategories);
 	ACSCore* ptr;
