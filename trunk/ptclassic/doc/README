@@ -42,3 +42,8 @@ To print an updated index after printing a new subsection
 To print only a domain-specific document, for example sdf,
 	% cd ~ptolemy/src/domains/sdf/doc
 	% make print
+
+To preview a section, change to its directory and type "make preview".
+
+A separate manual that describes the kernel at a programmer's level is
+in the subdirectory kernelManual.
