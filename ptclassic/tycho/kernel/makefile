@@ -99,6 +99,7 @@ ITCL_SRCS = \
 	RevControl.itcl \
 	RevControlSCCS.itcl \
 	RevControlRCS.itcl \
+	Schedule.itcl \
 	Scheduler.itcl \
 	Stack.itcl \
 	StatusBar.itcl \
