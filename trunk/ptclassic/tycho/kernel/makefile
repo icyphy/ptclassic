@@ -49,6 +49,7 @@ TCL_SRCS = \
 	tychoMakeClassDAG.tcl
 
 ITCL_SRCS = \
+	ButtonBox.itcl \
 	CircularList.itcl \
 	ColorBrowser.itcl \
 	Dialog.itcl \
