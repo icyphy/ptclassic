@@ -603,6 +603,14 @@ body ::tycho::File::evaluate {} {
     }
 }
 
+#####################################################################
+#### getReadonly
+# Return the value of the readonly option.
+#
+body ::tycho::File::getReadonly {} {
+    return $itk_option(-readonly)
+}
+
 #########################################################################
 #### help
 # Open a window with help on the current widget.
