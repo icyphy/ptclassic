@@ -149,7 +149,7 @@ body ::tycho::TWidget::destructor {} {
         ::tycho::silentError
     }
     # Unsubscribe from all preferences
-    preference unsubscribe $this
+    preference unsubscribeoptions $this
 }
 
 

@@ -277,10 +277,10 @@ body ::tycho::HTML::constructor {args} {
     set stateArrayName HM$text
 
     eval itk_initialize $args
-    eval preference exclude $this $args
+    eval preference excludeoptions $this $args
 
     # Subscribe to the preference set
-    preference subscribe $this \
+    preference subscribeoptions $this \
 	    -textfont textFont \
 	    -textforeground textForeground \
 	    -textbackground textBackground \

@@ -218,10 +218,10 @@ body ::tycho::TclShell::constructor {args} {
     $itk_component(text) mark set promptEnd end
 
     eval itk_initialize $args
-    eval preference exclude $this $args
+    eval preference excludeoptions $this $args
 
     # Subscribe to the preference set
-    preference subscribe $this \
+    preference subscribeoptions $this \
 	    -answerforeground answerForeground \
 	    -promptforeground promptForeground
 

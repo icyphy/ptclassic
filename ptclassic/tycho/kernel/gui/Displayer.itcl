@@ -298,8 +298,8 @@ body ::tycho::Displayer::constructor {args} {
     pack $itk_component(status) -fill x -expand 0 -side bottom
     
     eval itk_initialize $args
-    eval preference exclude $this $args
-    preference subscribe $this \
+    eval preference excludeoptions $this $args
+    preference subscribeoptions $this \
 	    -font menuFont \
 	    -buttonpadx buttonPadX \
 	    -buttonpady buttonPadY \

@@ -128,7 +128,7 @@ configbody ::tycho::PreferenceEditor::preferences {
 	}
 
 	# Subscribe to the preference so undo and redo update the display
-	::tycho::preference subscribe $this $group $preference \
+	::tycho::preference subscribe $group $this $preference \
 		"$this clear $preference; $this insert $preference \
 		\[::tycho::preference get $group $preference\]"
     }
@@ -195,7 +195,7 @@ body ::tycho::PreferenceEditor::constructor {args} {
 # Unsubscribe from preferences and delete sub-editors
 #
 body ::tycho::PreferenceEditor::destructor {} {
-    ::tycho::preference unsubscribe $this
+    ::tycho::preference unsubscribe $itk_option(-preferences) $this
     foreach e $editors {
 	catch {delete object $e}
     }
@@ -229,7 +229,7 @@ body ::tycho::PreferenceEditor::editcolor {preference description current} {
 	    -command "$this updatecolor $preference $dialog"
 
     # Subscribe to the preference so undo and redo update the dialog
-    ::tycho::preference subscribe $dialog $group $preference \
+    ::tycho::preference subscribe $group $dialog $preference \
 	    "$this updatecolordialog $preference $dialog"
 
     # We have to modify the buttons to update the color
@@ -280,7 +280,7 @@ body ::tycho::PreferenceEditor::editfont {preference description current} {
     after idle [list catch [list $dialog freeze]]
 
     # Subscribe to the preference so undo and redo update the dialog
-    ::tycho::preference subscribe $dialog $group $preference \
+    ::tycho::preference subscribe $group $dialog $preference \
 	    "$this updatefontdialog $preference $dialog"
 
     # We have to modify the buttons to update the font

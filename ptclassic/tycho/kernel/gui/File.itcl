@@ -444,31 +444,31 @@ body ::tycho::File::constructor {args} {
                 -accelerator "C-x C-f" \
                 -command "$this openWinMethod"
         
-        $myMenubar add "Switch File..." File -underline 4 \
+        $myMenubar command "Switch File..." File -underline 4 \
                 -accelerator "C-x C-v" -command "$this altFile"
         
-        $myMenubar add {Insert...} File -underline 0 \
+        $myMenubar command {Insert...} File -underline 0 \
                 -accelerator "C-x i" -command "$this insertFile"
         
-        $myMenubar add Save File -underline 0 -accelerator "C-x C-s" \
+        $myMenubar command Save File -underline 0 -accelerator "C-x C-s" \
                 -command "$this save"
         
-        $myMenubar add {SaveAs...} File -underline 4 \
+        $myMenubar command {SaveAs...} File -underline 4 \
                 -accelerator "C-x C-w" -command "$this saveAs"
         
-        $myMenubar add {Print...} File -underline 0 \
+        $myMenubar command {Print...} File -underline 0 \
                 -accelerator "C-x p" -command "$this print"
         
-        $myMenubar add Evaluate File -underline 0 \
+        $myMenubar command Evaluate File -underline 0 \
                 -accelerator "C-x C-r" -command "$this evaluate"
         
-        $myMenubar add Reload File -underline 0 \
+        $myMenubar command Reload File -underline 0 \
                 -command "$this reload"
         
-        $myMenubar add "Toggle Read-Only" File -underline 0 \
+        $myMenubar command "Toggle Read-Only" File -underline 0 \
                 -accelerator "C-x C-q" -command "$this toggleReadOnly"
 
-        $myMenubar add "Revision Control..." File -underline 2 \
+        $myMenubar command "Revision Control..." File -underline 2 \
                 -accelerator "C-x v" -command "$this revisionControl"
 
 	# Windows might have a chmod and RCS.
@@ -479,11 +479,11 @@ body ::tycho::File::constructor {args} {
 
         $myMenubar addSeparator File
         
-        $myMenubar add Close File -underline 0 -accelerator "C-x k" \
+        $myMenubar command Close File -underline 0 -accelerator "C-x k" \
                 -command "$this displayer destroyView $viewName"
         
         if {[::tycho::Displayer::normalExit] == 1} {
-            $myMenubar add Quit File -underline 0 \
+            $myMenubar command Quit File -underline 0 \
                     -accelerator "C-x C-c" \
                     -command "::tycho::TopLevel::exitProgram"
         }
@@ -504,17 +504,17 @@ body ::tycho::File::constructor {args} {
 	    # Add to a menu
 	    switch -exact $class {
 		"text" {
-		    $myMenubar add $desc {Text editors} -command $command
+		    $myMenubar command $desc {Text editors} -command $command
 		}
 		"graphics" {
-		    $myMenubar add $desc {Graphics editors} -command $command
+		    $myMenubar command $desc {Graphics editors} -command $command
 		}
 		"tools" {
-		    $myMenubar add $desc {Tools} -command $command
+		    $myMenubar command $desc {Tools} -command $command
 		}
 		default {
 		    # Add to the end of the main menu
-		    $myMenubar add $desc Window -command $command
+		    $myMenubar command $desc Window -command $command
 		}
 	    }
         }
@@ -539,48 +539,48 @@ body ::tycho::File::constructor {args} {
         
         # Help menu contents
         
-        $myMenubar add "About Tycho" Help -underline 0 -command \
+        $myMenubar command "About Tycho" Help -underline 0 -command \
                 {::tycho::welcomeMessage $TychoBinaryInfo $TychoVersionInfo}
         
 	global ::TYCHO
-        $myMenubar add "Tycho Home Page" Help -underline 0 -command \
+        $myMenubar command "Tycho Home Page" Help -underline 0 -command \
                 {::tycho::File::openContext \
 		[file join $TYCHO doc index.html]}
 
-        $myMenubar add "Guide to $myclass widget" Help -underline 0 \
+        $myMenubar command "Guide to $myclass widget" Help -underline 0 \
                 -command "$this help"
         
-        $myMenubar add "Concept Index..." Help -underline 8 \
+        $myMenubar command "Concept Index..." Help -underline 8 \
                 -command {::tycho::File::openContext \
 		[file join \$TYCHO lib idx tycho.idx]}
         
         set nm [::tycho::autoName .index]
-        $myMenubar add "Code Index..." Help -underline 0 \
+        $myMenubar command "Code Index..." Help -underline 0 \
                 -command "::tycho::IndexBrowser $nm \
                 -file [file join \$TYCHO lib idx codeDoc.idx] \
                 -width 80; $nm centerOnScreen"
         
-        $myMenubar add "Class Diagram" Help -underline 6 -command \
+        $myMenubar command "Class Diagram" Help -underline 6 -command \
                 {::tycho::File::openContext \
 		[file join \$TYCHO doc tychoClasses.dag]}
 
-	$myMenubar add "Itcl man pages" Help -underline 0 \
+	$myMenubar command "Itcl man pages" Help -underline 0 \
 	        -command "$this ::tycho::File::openItclHTMLPage"
 
 	# Add the Preferences menu. This is probably the wrong place
 	# for it, but it will do until we figure out a good menu to
 	# put it in that doesn't keep disappearing...
-        $myMenubar add "Preferences..." Help -underline 0 \
+        $myMenubar command "Preferences..." Help -underline 0 \
 		-command { ::tycho::preferencedialog }
     }
 
     # The following initialize options and then invoke any
     # configuration options, assuming there are options specified.
     eval itk_initialize $args
-    eval preference exclude $this $args
+    eval preference excludeoptions $this $args
 
     # Subscribe to the preference set
-    preference subscribe $this \
+    preference subscribeoptions $this \
 	    -autosaveinterval autoSaveInterval \
 	    -itclhtmlpage itclHTMLPage
 
@@ -1137,28 +1137,28 @@ body ::tycho::File::windowMenuAppend {obj label {type {}}} {
     if {$label != {NoName} && $label != {}} {
 	switch -exact $type {
 	    "text" {
-		menubar add $label {Open text editors} \
+		menubar command $label {Open text editors} \
 			-command "$obj raiseWindow"
 		menubar enable {Open text editors}
 	    }
 	    "html" {
-		menubar add $label {Open HTML viewers} \
+		menubar command $label {Open HTML viewers} \
 			-command "$obj raiseWindow"
 		menubar enable {Open HTML viewers}
 	    }
 	    "graphics" {
-		menubar add $label {Open graphics editors} \
+		menubar command $label {Open graphics editors} \
 			-command "$obj raiseWindow"
 		menubar enable {Open graphics editors}
 	    }
 	    "tools" {
-		menubar add $label {Open tools} \
+		menubar command $label {Open tools} \
 			-command "$obj raiseWindow"
 		menubar enable {Open tools}
 	    }
 	    default {
 		# Add to the end of the main menu
-		menubar add $label Window -command "$obj raiseWindow"
+		menubar command $label Window -command "$obj raiseWindow"
 	    }
 	}
     }
