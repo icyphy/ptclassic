@@ -429,12 +429,13 @@ body ::tycho::PtSchematic::construct {simulation graph layout name \
 
 	    set a [lindex [split $port "."] 0]
 	    set p [lindex [split $port "."] 1]
-	    #if { [regexp {(.*)-([0-9]*)} $p _ stem index] } {
+	# if { [regexp {(.*)-([0-9]*)} $p _ stem index] } {
 	#	puts "Linking $name $a $stem"
 	#	$simulation link $name $a $stem
 	#    } else {
 		$simulation link $name $a $p
 	#    }
+
 	}
 
 	# Process layout
