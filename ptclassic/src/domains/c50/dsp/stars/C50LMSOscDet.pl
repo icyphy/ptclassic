@@ -74,6 +74,24 @@ of the LMS star upon which this star derived.
 	}
 
 
+	// If input is 0 then the error output will be 0 so
+	// to prevent false detections this star will set
+	// the value of tap to 0.70710 when the power level
+	// drops below the "powerThreshold" value.  Doing this
+	// will produce a cos value which corresponds to an invalid
+	// DTMF tone.
+	input {
+		name { powerLevel }
+		type { fix }
+	}
+
+
+	state {
+		name { powerThreshold }
+		type { fix }
+		default { 0.0 }
+	}
+
 	// Since we're not derived from C50LMS, declare an error port
         input {
 		name { error }
@@ -184,6 +202,8 @@ Pointer to next element to be stored in delayBuf. Needed only in delay > 1
 		int delayMask;
 		// parameter to keep track of exec time
 		int time;
+		// power threshold parameter as integet
+		int thresholdAsInt;
 	}
 
 	setup {
@@ -223,6 +243,14 @@ Pointer to next element to be stored in delayBuf. Needed only in delay > 1
 		} else {
 			intMu = int(32768*(2+temp) + 0.5);
 		}
+		
+		temp = powerThreshold.asDouble();
+	
+		if (temp >= 0) {
+			thresholdAsInt = int(32768*temp + 0.5);
+		} else {
+			thresholdAsInt = int(32768*(2+temp) + 0.5);
+		}
 
 	}
 
@@ -232,12 +260,17 @@ Pointer to next element to be stored in delayBuf. Needed only in delay > 1
 	.text
 	}
 
-	codeblock(initialCode) {
+	codeblock(initialCode,"") {
+	lar	ar5,#$addr(powerLevel)
 	lar	ar4,#$addr(signalOut)
+	lar	ar1,#$addr(lmsOldSamples,1)
+	lar	ar2,#$addr(cosOmega)
 	lar	ar3,#$addr(tap)
-	lar	ar1,#$addr(lmsOldSamples,1) ; ar1-> x[n-2]
-	lar	ar2,#$addr(cosOmega)	; ar2->cosOmega
-	mar	*,ar1
+	mar	*,ar5
+	lacc	*,0,ar3			; accL = powerLevel
+	sub	#@(thresholdAsInt),0	; accL = powerLevel - powerThreshold
+	bcndd	$starSymbol(skip),leq
+	lacc	#42366,15
 	}
 
 // this star is generally used with the diamond shaped delay symbol
@@ -247,6 +280,7 @@ Pointer to next element to be stored in delayBuf. Needed only in delay > 1
 //concerned.  For larger values of delays additional code is requird.
 
 	codeblock(delayOne){
+	mar	*,ar1
 	lmmr	treg0,#$addr(error)	; treg0 = error
 	}
 
@@ -268,11 +302,12 @@ Pointer to next element to be stored in delayBuf. Needed only in delay > 1
 	
 	codeblock(finalCode,""){
 	mpy	#@intMu		; p = 0.5*error*Mu
-	ltp	*,ar2		; acc = 0.5*error*Mu, treg0 = x[n-2]
+	ltp	*,ar2		; acc = 0.5*error*Mu
 	sach	*,3		; cosOmega = 4*error*Mu
 	mpy	*,ar3		; p = 2*error*Mu*x[n-1]
 	lacc	*,15		; acc = 0.5*tap
 	spac			; acc = 0.5(tap-4*error*Mu*x[n-1])
+$starSymbol(skip):
 	sach	*,1,ar2		; tap = tap -4*error*Mu*x[n-1]
 	neg			; acc = -acc
 	sach	*,1,ar1		; cosOmega = -(tap)
@@ -292,7 +327,7 @@ Pointer to next element to be stored in delayBuf. Needed only in delay > 1
 
 		// Update second tap and compute the output
 
-		addCode(initialCode);
+		addCode(initialCode());
 		if (int(errorDelay) > 1) addCode(delayStd());
 		else addCode(delayOne);
 		addCode(finalCode());
