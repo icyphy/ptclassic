@@ -1,6 +1,7 @@
 defstar {
         name { SubFix }
         domain { SDF }
+	derivedFrom { SDFFix }
         desc {
 Output as a fixed-point number the "pos" input minus all "neg" inputs.
 	}
@@ -58,20 +59,6 @@ When the value of the accumulation extends outside of the precision,
 the OverflowHandler will be called.
 		}
         }
-        defstate {
-                name { OverflowHandler }
-                type { string }
-                default { "saturate" }
-                desc {
-Overflow characteristic for the output.
-If the result of the sum cannot be fit into the precision of the output,
-then overflow occurs and the overflow is taken care of by the method
-specified by this parameter.
-The keywords for overflow handling methods are:
-"saturate" (the default), "zero_saturate", "wrapped", and "warning".
-The "warning" option will generate a warning message whenever overflow occurs.
-		}
-        }
         protected {
 		Fix fixIn, diff;
         }
@@ -81,6 +68,8 @@ The "warning" option will generate a warning message whenever overflow occurs.
 
                 diff = Fix( ((const char *) OutputPrecision) );
                 diff.set_ovflow( ((const char *) OverflowHandler) );
+		if ( diff.invalid() )
+		   Error::abortRun( *this, "Invalid overflow handler" );
         }
         go {
                 MPHIter nexti(neg);
@@ -88,8 +77,10 @@ The "warning" option will generate a warning message whenever overflow occurs.
 
                 if ( int(ArrivingPrecision) ) {
 		  diff = Fix(pos%0);
-                  while ((p = nexti++) != 0)
+                  while ((p = nexti++) != 0) {
                     diff -= Fix((*p)%0);
+		    checkOverflow(diff);
+		  }
 		}
 		else {
 		  fixIn = Fix(pos%0);
@@ -97,8 +88,11 @@ The "warning" option will generate a warning message whenever overflow occurs.
                   while ((p = nexti++) != 0) {
 		    fixIn = Fix((*p)%0);
                     diff -= fixIn;
+		    checkOverflow(diff);
 		  }
 		}
                 output%0 << diff;
         }
+        // a wrap-up method is inherited from SDFFix
+        // if you defined your own, you should call SDFFix::wrapup()
 }

@@ -1,6 +1,7 @@
 defstar {
 	name { CxToFix }
 	domain { SDF }
+	derivedFrom { SDFFix }
 	version { $Id$ }
 	author { Mike J. Chen }
 	copyright {
@@ -32,20 +33,6 @@ If the value of the double cannot be represented by the number of bits
 specified in the precision parameter, then a error message is given.
 		}
 	}
-        defstate {
-                name { OverflowHandler }
-                type { string }
-                default { "saturate" }
-                desc {
-Overflow characteristic for the output.
-If the result of the sum cannot be fit into the precision of the output,
-then overflow occurs and the overflow is taken care of by the method
-specified by this parameter.
-The keywords for overflow handling methods are:
-"saturate" (the default), "zero_saturate", "wrapped", and "warning".
-The "warning" option will generate a warning message whenever overflow occurs.
-		}
-        }
 	defstate {
 		name { masking }
 		type { string }
@@ -63,6 +50,8 @@ The keywords are: "truncate" (the default) and "round".
 	setup {
 		out = Fix( ((const char *) OutputPrecision) );
 		out.set_ovflow( ((const char *) OverflowHandler) );
+		if ( out.invalid() )
+		  Error::abortRun( *this, "Invalid overflow handler" );
 
 		const char* Masking = masking;
 		if ( strcasecmp(Masking, "truncate") == 0 )
@@ -74,6 +63,9 @@ The keywords are: "truncate" (the default) and "round".
 	}
 	go {
 		out = (double) (input%0);
+		checkOverflow(out);
 		output%0 << out;
 	}
+        // a wrap-up method is inherited from SDFFix
+        // if you defined your own, you should call SDFFix::wrapup()
 }

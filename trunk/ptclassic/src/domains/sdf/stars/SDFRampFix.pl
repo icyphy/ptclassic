@@ -1,6 +1,7 @@
 defstar {
 	name { RampFix }
 	domain { SDF }
+	derivedFrom { SDFFix }
 	desc {
 Generate a fixed-point ramp signal, starting at "value" (default 0.0)
 with step size "step" (default 1.0).
@@ -62,31 +63,22 @@ During simulation, this parameter holds the current value output by the ramp.
 		}
 		attributes { A_SETTABLE|A_NONCONSTANT }
 	}
-        defstate {
-                name { OverflowHandler }
-                type { string }
-                default { "saturate" }
-                desc {
-Overflow characteristic for the output.
-If the result of the sum cannot be fit into the precision of the output,
-then overflow occurs and the overflow is taken care of by the method
-specified by this parameter.
-The keywords for overflow handling methods are:
-"saturate" (the default), "zero_saturate", "wrapped", and "warning".
-The "warning" option will generate a warning message whenever overflow occurs.
-		}
-        }
         protected {
 		Fix t;
         }
         setup {
 		t = Fix( ((const char *) OutputPrecision) );
                 t.set_ovflow( ((const char *) OverflowHandler) );
+		if ( t.invalid() )
+		   Error::abortRun( *this, "Invalid overflow handler" );
         }
 	go {
 		t = Fix(value);
                 output%0 << t;
                 t += step;
+		checkOverflow(t);
                 value = t;
 	}
+        // a wrap-up method is inherited from SDFFix
+        // if you defined your own, you should call SDFFix::wrapup()
 }

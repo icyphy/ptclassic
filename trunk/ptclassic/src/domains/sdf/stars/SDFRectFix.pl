@@ -1,6 +1,7 @@
 defstar {
 	name { RectFix }
 	domain { SDF }
+	derivedFrom { SDFFix }
 	desc {
 Generate a fixed-point rectangular pulse of height "height" 
 (default 1.0) and width "width" (default 8).
@@ -64,32 +65,25 @@ If the value cannot be represented by this precision, then
 the OverflowHandler will be called.
                 }
         }
-        defstate {
-                name { OverflowHandler }
-                type { string }
-                default { "saturate" }
-                desc {
-Overflow characteristic for the output.
-If the result of the sum cannot be fit into the precision of the output,
-then overflow occurs and the overflow is taken care of by the method
-specified by this parameter.
-The keywords for overflow handling methods are:
-"saturate" (the default), "zero_saturate", "wrapped", and "warning".
-The "warning" option will generate a warning message whenever overflow occurs.
-		}
-        }
 	protected {
 		Fix out;
 	}
         setup {
                 out = Fix( ((const char *) OutputPrecision) );
 		out.set_ovflow( ((const char *) OverflowHandler) );
+		if ( out.invalid() )
+		   Error::abortRun( *this, "Invalid overflow handler" );
         }
 	go {
 		out = 0.0;
-		if ( int(count) < int(width) ) out = Fix(height);
+		if ( int(count) < int(width) ) {
+		  out = Fix(height);
+		  checkOverflow(out);
+		}
 		output%0 << out;
 		count = int(count) + 1;
 		if ( int(period) > 0 && int(count) >= int(period) ) count = 0;
 	}
+        // a wrap-up method is inherited from SDFFix
+        // if you defined your own, you should call SDFFix::wrapup()
 }
