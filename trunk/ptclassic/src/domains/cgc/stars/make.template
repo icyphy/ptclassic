@@ -37,6 +37,7 @@ PL_SRCS= \
  CGCFIR.pl \
  CGCFork.pl \
  CGCGain.pl \
+ CGCIntegrator.pl \
  CGCIIDUniform.pl \
  CGCLMS.pl \
  CGCLog.pl \
@@ -46,6 +47,7 @@ PL_SRCS= \
  CGCPCMwrite.pl \
  CGCPolarToRect.pl \
  CGCPrinter.pl \
+ CGCQuant.pl \
  CGCRamp.pl \
  CGCReciprocal.pl \
  CGCRectToCx.pl \
