@@ -362,7 +362,7 @@ $label(fullLoop)
 	            else
 		            b=5+tapsNum;
                 }
-	        else if (taps==decimation+1) {
+	        else if (tapsNum==decimation+1) {
 	            if (decimation==1)
 		            b=4;
 	            else
