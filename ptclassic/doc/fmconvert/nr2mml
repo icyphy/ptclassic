@@ -12,7 +12,8 @@
 # Usage:
 #         Cat sect.* files to xxxx.mm.
 #         Run nr2mml xxxx.mm.
-#         Create a new maker file (e.g. using ~FRAME/TEMPLATES/printpaper)
+#         Create a new maker file
+#		(e.g. using $PTOLEMY/doc/users_man/pigi.doc)
 #         Import xxxx.mml.
 #
 # Copyright (c) 1993 The Regents of the University of California.
