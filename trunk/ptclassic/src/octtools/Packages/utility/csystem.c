@@ -31,7 +31,15 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "copyright.h"
 #include "port.h"
 #include <sys/wait.h>
+#include <unistd.h>
 #include "utility.h"
+
+#ifdef PTNT
+#define CSYSTEM_SHELL "/bin/bash.exe"
+#else
+#define CSYSTEM_SHELL "/bin/csh"
+#endif
+
 
 int
 util_csystem(s)
@@ -45,11 +53,17 @@ const char *s;
 #endif
     int pid, w, retval;
 
+    if (access(CSYSTEM_SHELL, X_OK) != 0) {
+         fprintf(stderr, "%s not found or not executable.\n", CSYSTEM_SHELL);
+         return -1;
+    }
+
+
     if ((pid = vfork()) == 0) {
 #ifdef PTNT
-	(void) execl("/bin/bash", "bash", "-c", s, 0);
+	(void) execl(CSYSTEM_SHELL, "bash", "-c", s, 0);
 #else
-	(void) execl("/bin/csh", "csh", "-f", "-c", s, 0);
+	(void) execl(CSYSTEM_SHELL, "csh", "-f", "-c", s, 0);
 #endif
 	(void) _exit(127);
     }
