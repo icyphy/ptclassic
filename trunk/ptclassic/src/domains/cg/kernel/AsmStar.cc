@@ -6,7 +6,7 @@ $Id$
  Copyright (c) 1991 The Regents of the University of California.
                        All Rights Reserved.
 
- Programmer: J. Buck, J. Pino
+ Programmer: J. Buck, J. Pino, T. M. Parks
 
  This is the baseclass for stars that generate assembly language code.  
 
@@ -30,27 +30,6 @@ extern const Attribute A_REVERSE = {AB_REVERSE,0};
 extern const Attribute A_CONSEC = {AB_CONSEC,0};
 extern const Attribute A_SYMMETRIC = {AB_SYMMETRIC,0};
 
-// lookup location for a symbol (a porthole or state) in a
-// codeblock.
-StringList
-AsmStar::lookupAddress(const char* name) {
-	unsigned a;
-	StringList s;
-	AsmPortHole* p = asmPortWithName(name);
-	if (p) s = p->location();
-	// see if it's a state
-	else if (lookupEntry(name,a)) {
-	    s = a;
-	} else {
-	    if (stateWithName(name))
-		Error::abortRun(*this," state ",name,
-			" does not have a memory address");
-	    else Error::abortRun(*this,name," is not defined");
-	    s = "";
-	}
-	return s;
-}
-
 void AsmStar::genInterruptCode(CodeBlock& cb) {
 	AsmTarget* asmTargetPtr = (AsmTarget*)targetPtr;
 	asmTargetPtr->saveProgramCounter();
@@ -58,132 +37,142 @@ void AsmStar::genInterruptCode(CodeBlock& cb) {
 	asmTargetPtr->restoreProgramCounter();
 	asmTargetPtr->interruptFlag = TRUE;
 }
-	
-unsigned
-AsmStar::addrWithOffset (const char* name, const char* offset) {
-	int off;
-	AsmPortHole* p = asmPortWithName(name);
-	if (!p) {
-		codeblockError(name, " is not a porthole name");
-		return 0;
-	}
-	if (isdigit(*offset)) off = atoi(offset);
-	else {
-		State* s = stateWithName(offset);
-		if (!s || !s->isA("IntState")) {
-			codeblockError(offset, " is not the name of an IntState");
-			return 0;
-		}
-		IntState* is = (IntState*)s;
-		off = *is;
-	}
-	// compute offset within buffer, circularly
-	off += p->bufPos();
-	int sz = p->bufSize();
-	while (off >= sz) off -= sz;
-	while (off < 0) off += sz;
-	// add the base
-	off += p->baseAddr();
-	return off;
+
+// State or PortHole reference.
+StringList AsmStar::expandRef(const char* name)
+{
+    return expandRef(name, "0");
 }
 
-// lookup size (of buffer or state) for symbol in a codeblock
-int
-AsmStar::lookupSize(const char* name) {
-	AsmPortHole* p = asmPortWithName(name);
-	if (p) return p->bufSize();
-	State* s = stateWithName(name);
-	if (s) return s->size();
-	codeblockError(name, " is not defined");
-	return 0;
+// State or PortHole reference with offset.
+StringList AsmStar::expandRef(const char* name, const char* offset)
+{
+    StringList ref;
+    ref << lookupMem(name) << ':' << lookupAddress(name, offset);
+    return ref;
+}
+
+// lookup location for a symbol (a porthole or state) in a
+// codeblock.
+StringList AsmStar::lookupAddress(const char* name)
+{
+    return lookupAddress(name, "0");
+}
+
+// State or PortHole address with offset.
+// Return empty StringList on error.
+StringList AsmStar::lookupAddress(const char* name, const char* offset)
+{
+    StringList addr;
+    State* state;
+    AsmPortHole* port;
+    StringList stateVal;
+    StringList portName = expandPortName(name);
+
+    if ((state = stateWithName(offset)) != NULL)
+    {
+        // Note: currently only the value of a State can be used as an offset
+        if (state->isA("IntState"))
+        {
+            stateVal = expandVal(offset);
+            offset = stateVal;
+        }
+        else
+        {
+            codeblockError(offset, " is not an IntState");
+            addr.initialize();
+            return addr;
+        }
+    }
+
+    int off = atoi(offset);
+
+    if ((state = stateWithName(name)) != NULL)
+    {
+	int a;
+	if (lookupEntry(name, a) != NULL)
+	{
+	    a += off;
+	    addr = a;
+	}
+	else
+	{
+	    codeblockError(name, " does not have a memory address");
+	    addr.initialize();
+	}
+    }
+    else if (port = (AsmPortHole*)genPortWithName(portName))
+    {
+	// compute offset within buffer, circularly
+	off += port->bufPos();
+	off %= port->bufSize();
+
+	int a = port->baseAddr() + off;
+	addr = a;
+    }
+    else
+    {
+	codeblockError(name, " is not defined as a state or port");
+	addr.initialize();
+    }
+
+    return addr;
 }
 
 // lookup memory for a symbol (a porthole or state) in a
 // codeblock.
-StringList
-AsmStar::lookupMem(const char* name) {
-	unsigned a;
-	StringList s;
+StringList AsmStar::lookupMem(const char* name)
+{
+    StringList mem;
+    AsmPortHole* port;
+    StringList portName = expandPortName(name);
+
+    if (stateWithName(name) != NULL)
+    {
+	int a = 0;
 	ProcMemory* m;
-	AsmPortHole* p = asmPortWithName(name);
-	if (p && p->memory()) s = p->memory()->readName();
-	// see if it's a state
-	else if (m = lookupEntry(name,a)) {
-	    s = m->readName();
-	} else {
-	    if (stateWithName(name))
-		    codeblockError(name, " is not assigned to memory");
-	    else codeblockError(name, " is not defined");
-	    s = "ERROR";
+	if ((m = lookupEntry(name, a)) != NULL)
+	{
+	    mem = m->readName();
 	}
-	return s;
+	else
+	{
+	    codeblockError(name, " is not assigned to memory");
+	    mem.initialize();
+	}
+    }
+    else if ((port = (AsmPortHole*)genPortWithName(portName)) != NULL)
+    {
+	if (port->memory() != NULL)
+	    mem = port->memory()->readName();
+	else
+	{
+	    codeblockError(name, " is not assigned to memory");
+	    mem.initialize();
+	}
+    }
+    else
+    {
+	codeblockError(name, " is not defined as a state or port");
+	mem.initialize();
+    }
+    return mem;
 }
 
-// lookup value for a state
-StringList
-AsmStar::lookupVal(const char* name) {
-	State* s;
-	if ((s = stateWithName(name)) != 0) {
-		StringList v = s->currentValue();
-		return v;
-	}
-	codeblockError(name, " is not defined as a state");
-	return "ERROR";
-}
-
-// the following function is provided by the SunOS and Ultrix
-// libs; don't know how generally it is available.
-extern "C" int strcasecmp(const char* s1, const char* s2);
-
-// handle functions
-StringList
-AsmStar::processMacro(const char* func, const char* id, const char* arg2) {
+// Expand Macros.
+StringList AsmStar::expandMacro(const char* func, const StringList& argList)
+{
+	StringListIter arg(argList);
 	StringList s;
-	if (strcasecmp(func,"ref2") == 0) {
-		if (*arg2 == 0) codeblockError("two arguments needed for ref2");
-		else {
-			s = lookupMem(id);
-			s += ":";
-			s += addrWithOffset(id, arg2);
-		}
-	}
-	else if (strcasecmp(func,"addr2") == 0) {
-		if (*arg2 == 0)
-			codeblockError("two arguments needed for addr2");
-		else s = addrWithOffset(id, arg2);
-	}
-	// if more two-arg funcs are added, put them before here!
-	else if (*arg2 != 0) {
-		codeblockError(func, " is not a 2-argument macro");
-	}
-	else if (strcasecmp(func,"addr") == 0) {
-		s = lookupAddress(id);
-	} else if (strcasecmp(func, "ref") == 0) {
-		s = lookupMem(id);
-		s += ":";
-		s += lookupAddress(id);
-	} else if (strcasecmp(func, "val") == 0) {
-		s = lookupVal(id);
-	} else if (strcasecmp(func, "mem") == 0) {
-		s = lookupMem(id);
-	} else if (strcasecmp(func, "fullname") == 0) {
-		s = readFullName();
-	} else if (strcasecmp(func, "starname") == 0) {
-		s = readName();
-	} else if ((strcasecmp(func, "label") == 0) ||
-		   (strcasecmp(func, "codeblockSymbol") == 0)) {
-		s = codeblockSymbol.lookup(id);
-	} else if (strcasecmp(func, "starSymbol") == 0) {
-		s = starSymbol.lookup(id);
-	} else if (strcasecmp(func, "size") == 0) {
-		s = lookupSize(id);
-	} else {
-		s = "ERROR: UNKNOWN MACRO ";
-		s += func;
-		s += "(";
-		s += id;
-		s += ")";
-	}
+
+	if (matchMacro(func, argList, "addr2", 2)) s = lookupAddress(arg++, arg++);
+	else if (matchMacro(func, argList, "addr", 2)) s = lookupAddress(arg++, arg++);
+	else if (matchMacro(func, argList, "addr", 1)) s = lookupAddress(arg++);
+	else if (matchMacro(func, argList, "mem", 1)) s = lookupMem(arg++);
+	else if (matchMacro(func, argList, "fullname", 0)) s = readFullName();
+	else if (matchMacro(func, argList, "starname", 0)) s = readName();
+	else s = CGStar::expandMacro(func, argList);
+
 	return s;
 }
 

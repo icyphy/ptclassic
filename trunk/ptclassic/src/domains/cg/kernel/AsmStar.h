@@ -7,7 +7,7 @@ $Id$
  Copyright (c) 1991 The Regents of the University of California.
                        All Rights Reserved.
 
- Programmer: J. Buck & J. Pino
+ Programmer: J. Buck, J. Pino, T. M. Parks
 
  This is the baseclass for stars that generate assembly language code.  
 
@@ -83,9 +83,11 @@ protected:
 	// Save PC, gencode, Restore PC & set interruptFlag=TRUE.
 	void genInterruptCode(CodeBlock& block);
 
-	// Look up the value of state and return it as a StringList.
-	// A zero-length StringList is returned if there is no such State.
-	StringList lookupVal(const char* name);
+	// State or PortHole reference.
+	virtual StringList expandRef(const char*);
+
+	// State or PortHole reference with offset.
+	virtual StringList expandRef(const char* name, const char* offset);
 
 	// Look up the address of porthole or state with an offset for
 	// the current access.
@@ -94,31 +96,33 @@ protected:
 	// Look up the memory of porthole or state.
 	StringList lookupMem(const char* name);
 
-	// Look up the size of a porthole or state
-	int lookupSize(const char* name);
-
 	// compute the address, plus an offset, with buffer wraparound
 	// for accessing an element in a porthole buffer.
-	unsigned addrWithOffset(const char*, const char*);
+	StringList lookupAddress(const char* name, const char* offset);
 
-	// Process the macros that are defined for this star.
-	// These are found by gencode.  In this class, the following
-	// functions are handled:
-	//	$addr(name)	Address in memory
-	//	$addr2(name,o)	Address in memory with an offset o
-	//	$mem(name)	Name of the memory containing variable "name"
-	//	$val(name)	Value of state "name"
-	//	$ref(name)	$mem(name):$addr(name)
-	//	$ref2(name,o)	$mem(name):(address with offset)
-	// 	$label(name)	unique label for (codeblock,name) pair.
-	//			If the label does not exist, a new, unique
-	//			label is created.
-	//	$fullname()	Name of the star
-	//	$size(name)	Size of memory allocated to "name"
-	// The number, names, and meaning of
-	// these functions can be easily redefined in derived classes.
-	StringList processMacro(const char* func, const char* id,
-					const char* arg2);
+        /* Expand macros that are defined for this star.
+           The following macros are recognized:
+
+		$addr(name)		Address in memory.
+		$addr(name,offset)	Address in memory with offset.
+		$mem(name)		Memory space.
+		$fullname()		Name of the star.
+		$starname()		Abbreviated name of the star.
+
+	   The follwing macros are also recognized:
+
+		$val(name)              Value of a state.
+		$size(name)             Size of a state or port.
+		$ref(name)              Reference to a state or port.
+		$ref(name,offset)       Reference with offset.
+		$label(name)            Unique label for codeblock.
+		$codeblockSymbol(name)  Another name for label.
+		$starSymbol(name)       Unique label for star.
+
+           The number, names, and meaning of
+           these functions can be easily redefined in derived classes.
+        */
+	virtual StringList expandMacro(const char* func, const StringList& argList);
 
 	// Reset the state entry list.
 	void zapStateEntries();
