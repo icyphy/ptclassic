@@ -38,7 +38,15 @@ limitation of liability, and disclaimer of warranty provisions.
 	  default { "32767.0" }
 	  desc { Filter tap scale }
 	  attributes { A_CONSTANT|A_SETTABLE }
-	}	
+	}
+	defstate {
+          name {scalefactor}
+          type {int}
+          default {"0"}
+          desc { 2^scalefactor is used to scale down the magnitude
+                   of the numerator coefficients between 0 and 1. }
+          attributes{ A_CONSTANT|A_SETTABLE }
+        }
 	code {
 #define NumIn (1)
 #define	NumPack (4)
@@ -49,12 +57,13 @@ limitation of liability, and disclaimer of warranty provisions.
 	  int taplength,tappadlength,maxpast;
 	  double *accumpair;
 	  float *result;
-	  short *shift_taparray;
+	  short *shift_taparray,scaledown;
 	}
 	constructor {
-	  accumpair = 0;
-	  result = 0;
-	  shift_taparray = 0;
+	  accumpair=0;
+	  result=0;
+	  scaledown=0;
+	  shift_taparray=0;
 	}
 	destructor {
 	  free(accumpair);
@@ -77,7 +86,6 @@ limitation of liability, and disclaimer of warranty provisions.
 	  signalIn.setSDFParams(NumIn,maxpast-1);
 	}
 	begin {
-	  double intmp;
 	  int taprowindex, tapcolindex;
 	  short *indexcount;
 
@@ -92,6 +100,8 @@ limitation of liability, and disclaimer of warranty provisions.
 	  shift_taparray = (short *)
 	    memalign(sizeof(double),sizeof(short)*NumPack*tappadlength);
 
+          scaledown = (short) 1 << scalefactor;
+
 	  // initialize shifted taparrays to zero
 	       indexcount = shift_taparray;
 	  for(taprowindex=0;taprowindex<NumPack;taprowindex++){
@@ -105,16 +115,8 @@ limitation of liability, and disclaimer of warranty provisions.
 		 indexcount = shift_taparray + (tappadlength+1)*taprowindex;
 		 for(tapcolindex=0;tapcolindex<taplength;tapcolindex++){
 		   // scale taps, check under/overflow, and cast to short 
-			intmp = scale*taps[tapcolindex];
-		   if (intmp <= (double)(LowerBound)){
-		     *indexcount++ = (short)(LowerBound);
-		   }
-		   else if (intmp >= (double)(UpperBound)){
-		     *indexcount++ = (short)(UpperBound);
-		   }
-		   else{ 
-		     *indexcount++ = (short)(intmp);
-		   }
+		     *indexcount++ =
+			(short)(scale/scaledown*taps[tapcolindex]);
 		 }
 	       }
 	}
@@ -126,7 +128,7 @@ limitation of liability, and disclaimer of warranty provisions.
           float tappairhi,tappairlo,splithi,splitlo;
 	  int outerloop,innerloop,numloop,genindex;
 
-	  vis_write_gsr(8);	  
+	  vis_write_gsr((scalefactor+1)<<3);	  
 	  
 	  // loop once for each set of filter taps
 	       if (taplength == 0)
