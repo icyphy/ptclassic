@@ -41,9 +41,12 @@ small, this filter gives an estimate of the strongest sinusoidal component:
 <pre>
 a<sub>1</sub> = cos(omega)
 </pre>
+In this implementation the taps of the filter are scaled by 1/2 because
+the Motorola 56000 is a fixed point processor and thus the values for the
+taps must be in the range [-1,1).
 This filter outputs the current value of <i>a <sub></i>1<i></sub></i> on the <i>cosOmega</i>
 output port.  The initial value is <i>a <sub></i>1<i></sub> </i>=<i> </i>1, that is, zero frequency,
-so the initial value of the second tap is -2.
+so the initial value of the second tap is -1(because of the 1/2 scaling).
 <p>
 For more information on the LMS filter implementation, see the description
 of the LMS star upon which this star derived.
@@ -121,6 +124,7 @@ The initial guess at the angle being estimated in radians.
 		// decimation is not supported
 		decimation.clearAttributes(A_SETTABLE);
 		decimationPhase.clearAttributes(A_SETTABLE);
+		interpolation.clearAttributes(A_SETTABLE);
 	}
 
         method {
@@ -150,6 +154,7 @@ The initial guess at the angle being estimated in radians.
 	
 		// we don't support decimation: make sure that it's 1
 		decimation = 1;
+		decimationPhase = 0;
 
 		// initialize the taps of the three-tap LMS FIR filter
 		taps.resize(3);
@@ -179,11 +184,11 @@ The initial guess at the angle being estimated in radians.
 
 	codeblock(oscDetCode,"int index, int bufferSize") {
 ; Compute update of the middle tap, tap[1], according to
-; tap[1] = taps[1] - 4 * mu * e * xnMinus1;
+; tap[1] = taps[1] - 2 * mu * e * xnMinus1;
 ; Update the estimate of cos(w) = -tap[1]
 ;
 ; Register usage:
-; x0 = x[n + (@index + 1)] = input signal delayed by @index sample(s)
+; x0 = x[n + (@index + 1)] = input signal delayed by (@index+1) sample(s)
 ; x = e[n - 1] = error signal delayed by one sample
 ; y0 = mu = LMS step size
 ; y1 = -mu e[n - 1] x[n + (@index + 1)]
@@ -200,10 +205,10 @@ The initial guess at the angle being estimated in radians.
 	move	a,y0					; x0 = tap value to update
 	mpy	-y0,x0,a	$ref(taps,1),b	 
 ; a = -mu e[n-@index] x[n-@index]
-	asl	a		r0,$ref(nextInput)	
+        move    r0,$ref(nextInput)	
 ; a = -2 mu e[n-@index] x[n-@index]
 	addl	b,a				
-; a = tap - 4 mu e[n-@index] x[n-@index]
+; a = tap - 2 mu e[n-@index] x[n-@index]
 	rnd	a
 ; round here to decrease effects of rounding.
 	move	a,$ref(taps,1)				; save updated tap
@@ -218,7 +223,7 @@ The initial guess at the angle being estimated in radians.
 		// 1. Since we don't support decimation,
 		//    index = int(errorDelay) + 1, a constant
 		int index = -(int(errorDelay)*int(decimation) + 
-			    int(decimationPhase) + 2);
+			    int(decimationPhase) + 1);
 
 		// 2. Update the middle tap and compute the estimate
 		//    of cos(w) = -tap/2

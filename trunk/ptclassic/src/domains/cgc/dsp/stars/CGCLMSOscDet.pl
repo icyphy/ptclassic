@@ -43,7 +43,7 @@ a<sub>1</sub> = cos(omega)
 <p>
 In this implementation the taps are scaled by 1/2 to make the
 star behave like the CG56 version.  Thus the output of the filter is also
-scaled by 1/2.  To compensate for this scaling <i>mu</i> is multiplied by 2. 
+scaled by 1/2. 
 This filter outputs the current value of <i>a</i><sub>1</sub> on the <i>cosOmega</i>
 output port.  The initial value is <i>a</i><sub>1</sub> = 1, that is, zero frequency,
 so the initial value of the second tap is -1(because of the 1/2 scaling).
@@ -94,13 +94,13 @@ The initial guess at the angle being estimated in radians.
 
 	codeblock(updateSecondTap,"int index") {
 	/* 1. Update the second tap = -a1[k]
-	      update:        a1[k] = a1[k]  + 4 mu e[n] x[n-1]
-	      second tap:   -a1[k] = -a1[k] - 4 mu e[n] x[n-1]
-	      new tap:      newtap = newtap - 4 mu e[n] x[n-1]   */
+	      update:        a1[k] = a1[k]  + 2 mu e[n] x[n-1]
+	      second tap:   -a1[k] = -a1[k] - 2 mu e[n] x[n-1]
+	      new tap:      newtap = newtap - 2 mu e[n] x[n-1]   */
 	double mu = $val(stepSize);
 	double e = $ref(error);
 	double xnMinus1 = $ref(signalIn,@index);
-	double newSecondTap = $ref(taps,1) - 4 * mu * e * xnMinus1;
+	double newSecondTap = $ref(taps,1) - 2 * mu * e * xnMinus1;
 	$ref(taps,1) = newSecondTap;
 	}
 
@@ -120,7 +120,10 @@ The initial guess at the angle being estimated in radians.
 		addCode(outputSecondTap);
 
 		// 3. Run the FIR filter
+		@/* run FIR FILTER */
+		@{
 		CGCFIR :: go();
+		@}
 	}
 	// Inherit the wrapup method
 }
