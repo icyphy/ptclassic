@@ -32,6 +32,9 @@ GNUINCLUDE = /usr/gnu/lib/g++-include
 
 # source files for all stars, using preprocessor
 SRCS= \
+ CGRateChange.pl \
+ CGMultiIn.pl \
+ CGMultiOut.pl \
  CGSource.pl \
  CGThrough.pl \
  CGSink.pl
