@@ -27,6 +27,7 @@
 #
 #
 
+
 proc goTcl_$starID {starID} {
 	global ptkControlPanel $starID
 	set inputList [grabInputs_$starID]
@@ -37,7 +38,44 @@ proc goTcl_$starID {starID} {
 	}
 
 	if { [expr [set ${starID}(condition)] ] } {
-#	 	ptkHighlight [$starID]
+		# Highlight myself
+	 	ptkHighlight [set ${starID}(fullName)] 
+		# Put explanation in the control window
+		set s $ptkControlPanel
+		set s.brpt $s.breakpoint_$starID
+		if { ! [winfo exists $s.brpt] } {
+		    # make overall, text, and entry frames
+		    frame $s.brpt
+		    frame $s.brpt.e
+		    label $s.brpt.m1 -text \
+"Break Point:"  
+		    label $s.brpt.m2 -anchor w -text \
+"The highlighted star has hit a conditional breakpoint."  
+		    label $s.brpt.m3 -anchor w -text \
+"You may optionally change the condition by editing the" 
+		    label $s.brpt.m4 -anchor w -text \
+"line below and pressing return."
+		    label $s.brpt.m5 -anchor w -text \
+"To clear this breakpoint change the condition to 0 (zero)"  
+		    label $s.brpt.m6 -anchor w -text \
+"Press the GO button to continue."
+		    ptkMakeEntry $s.brpt.e cond Condition \
+                                 "[set ${starID}(condition)]" \
+"$ptkControlPanel.panel.gofr.go invoke; set ${starID}(condition) "
+		    pack append $s.brpt $s.brpt.m1 {fillx top} \
+		                        $s.brpt.m2 {fillx top} \
+		                        $s.brpt.m3 {fillx top} \
+		                        $s.brpt.m4 {fillx top} \
+		                        $s.brpt.m5 {fillx top} \
+		                        $s.brpt.m6 {fillx top} \
+		    			$s.brpt.e {bottom} 
+		    pack after $s.low $s.brpt {top frame s}
+		    # make sure messages are displayed before the pause
+		    update
+		}
 		$ptkControlPanel.panel.pause invoke 
+		ptkClearHighlights
+                catch {pack unpack $s.brpt}
+		catch {destroy $s.brpt}
 	}
 }
