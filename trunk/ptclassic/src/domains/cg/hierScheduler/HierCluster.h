@@ -61,8 +61,6 @@ private:
     int adjustRepetitions(int /*newRepetitionCount*/);
 };
 
-int wellOrderCluster(Galaxy&);
-
 #endif
 
 
