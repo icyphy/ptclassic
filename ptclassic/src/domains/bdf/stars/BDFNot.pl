@@ -28,7 +28,6 @@ signals.
 		output.setBDFParams (1, input, BDF_COMPLEMENT);
 	}
 	go {
-		output%0 << !int(input%0);
+                output%0 << int(!int(input%0));
 	}
 }
-
