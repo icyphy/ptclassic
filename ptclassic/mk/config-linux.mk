@@ -1,4 +1,4 @@
-# Copyright (c) 1994-$Date$ The Regents of the University of California.
+# Copyright (c) 1994-%Q% The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -25,7 +25,7 @@
 #
 # Config file to build on Linux
 #
-# @(#)config-linux.mk	1.39 06/08/98
+# $Id$
 
 # Author:  Alberto Vignani, FIAT Research Center, TORINO
 # Modified by: 	Neal Becker (neal@ctd.comsat.com)
