@@ -2,8 +2,9 @@ defstar {
 	name {Sgn}
 	domain {SDF}
 	desc {
-This star computes the signum of its input.  The output is +- 1.
-Note that 0.0 maps into 1.
+This star computes the signum of its input.
+The output is +/- 1.
+Note that 0.0 maps to 1.
 	}
 	version {$Id$}
 	author { E. A. Lee }

@@ -5,7 +5,8 @@ defstar {
     desc {
 Display the values of the inputs in a separate window,
 keeping a specified number of past values in view.
-The print method of the input particles is used, so any datatype can be handled.
+The print method of the input particles is used, so any data
+type can be handled.
     }
     version { $Id$ }
     author { E. A. Lee }

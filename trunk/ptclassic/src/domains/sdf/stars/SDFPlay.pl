@@ -2,14 +2,14 @@ defstar {
 	name { Play }
 	domain { SDF }
 	desc {
-Play an input stream on the SparcStation speaker.  The
-"gain" state (default 1.0) multiplies the input stream
+Play an input stream on the SparcStation speaker.
+The "gain" state (default 1.0) multiplies the input stream
 before it is mu-law compressed and written.
 The inputs should be in the range of -32000.0 to 32000.0.
-The file is played at about 8000 samples/second (sorry, fixed).
+The file is played at a fixed sampling rate of 8000 samples/second.
 When the wrapup method is called, a file of 8-bit mu-law
-samples is handed to a program named "play" which plays
-the file.  The "play" program must be in your path.
+samples is handed to a program named "play" which plays the file.
+The "play" program must be in your path.
 	}
 	version {$Id$}
 	author { J. T. Buck }

@@ -1,7 +1,7 @@
 defstar {
 	name {Sin}
 	domain {SDF}
-	desc { This star computes the sine of its input, assumed to be an angle in radians.  }
+	desc { This star computes the sine of its input, which is assumed to be an angle in radians.  }
 	version {$Id$}
 	author { J. T. Buck }
 	copyright {
@@ -24,5 +24,3 @@ limitation of liability, and disclaimer of warranty provisions.
 		output%0 << sin (double(input%0));
 	}
 }
-
-		
