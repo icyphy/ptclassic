@@ -82,6 +82,9 @@ protected:
     // determines if this is a Fixed-point simulation.
     virtual int isFixedPoint() { return (ACSKnownCategory::find(coreCategory))->isFixedPoint(); }
 
+    // determine if this is a simulation run or code-generation.
+    virtual int isCG() { return (ACSKnownCategory::find(coreCategory))->isCG(); }
+
 };
 
 #endif //_ACSTarget_h
