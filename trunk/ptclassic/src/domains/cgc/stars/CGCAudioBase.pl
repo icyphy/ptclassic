@@ -37,7 +37,6 @@ limitation of liability, and disclaimer of warranty provisions.
 
     codeblock (declarations) {
 	int $starSymbol(file);
-	unsigned char $starSymbol(buf)[$val(blockSize)];
     }
 
     codeblock (noOpen) {
