@@ -78,5 +78,5 @@ Burg,
 LevDur,
 levinsonDurbin,
 LMS,
-sinInNoise.
+powerSpectrum.
 .ES
