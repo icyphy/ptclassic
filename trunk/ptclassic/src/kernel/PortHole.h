@@ -149,8 +149,11 @@ public:
 	// Initialize when starting a simulation
 	void initialize();
 
-	// Remove a connection
-	virtual void disconnect();
+	// Remove a connection, and optionally attempt to delete
+	// the geodesic.  Arg is set to zero only when called from
+	// the geodesic's destructor.  We do not delete "persistent"
+	// geodesics.
+	virtual void disconnect(int delGeo = 1);
 
 	// Return the porthole we are connected to (see below)
 	PortHole* far() const { return farSidePort;}
