@@ -102,8 +102,11 @@ parameter.  The keywords for overflow handling methods are :
       for(int i = 0; i < (matrix.numRows() * matrix.numCols()); i++) {
         if(int(UseArrivingPrecision))
           fixIn = matrix.entry(i);
-        else
-          fixIn = (const Fix&) Fix(in_len, in_IntBits, matrix.entry(i));
+        else {
+	  // Use a temporary variable to avoid gcc2.7.2/2.8 problems
+	  Fix tmp = Fix(in_len, in_IntBits, matrix.entry(i));
+          fixIn = tmp;
+	}
         result.entry(i).set_ovflow(OV);
         result.entry(i) = fixIn * (const Fix&)(gain%0);
       }
