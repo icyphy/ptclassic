@@ -221,6 +221,11 @@ int TclStarIfc::setup (Block* star,
 			synchronous = 0;
 	else synchronous = 1;
 
+	// Determine whether Tk has been loaded into the system
+	// (if so, then its event loop will need to be updated).
+	Tcl_GlobalEval( ptkInterp, "info exists tk_library" );
+	if (*(ptkInterp->result)=='1') tkExists = 1 ; else tkExists = 0;
+
 	return TRUE;
 }
 
@@ -253,6 +258,11 @@ int TclStarIfc::callTclProc(const char* name) {
 }
 
 int TclStarIfc::go () {
+
+    // If the tk library is part of the interp, update the graphics
+    if (tkExists) Tcl_Eval( ptkInterp, "update");
+
+    // If the there exists a "goTcl" procedure, call it
     if(synchronous) return callTclProc("goTcl");
     else return TRUE;
 }
