@@ -138,3 +138,33 @@ install_gthreads:
 
 clean_gthreads:
 	cd obj.$(PTARCH)/thread; $(MAKE) $(MFLAGS) gthreads_clean
+
+############################################################################
+# Things to do everynight
+#
+nightly: glimpse public_html/star-demo-index
+
+# Glimpse is a tool that prepares an index of a directory tree.
+# glimpse is not included with Tycho, see http://glimpse.cs.arizona.edu
+GLIMPSEINDEX =	/usr/sww/bin/glimpseindex
+glimpse: src/.glimpse_exclude
+	@echo "Saving .glimpse_exclude, removing the .glimpse* files"
+	rm -f src/glimpse_exclude
+	cp src/.glimpse_exclude src/glimpse_exclude
+	rm -f src/.glimpse*
+	cp  src/glimpse_exclude src/.glimpse_exclude
+	$(GLIMPSEINDEX) -H "$(PTOLEMY)/src" "$(PTOLEMY)/src" "$(PTOLEMY)/lib.tcl" "$(PTOLEMY)/tycho"; \
+	chmod a+r src/.glimpse_*; \
+	rm -f src/glimpse_exclude
+
+public_html/star-demo-index: MYFORCE
+	@if [ ! -d public_html ]; then mkdir public_html; fi
+	@if [ -w public_html/star-demo-index ]; then \
+		echo "Building starindex"; \
+		(cd src/domains; $(MAKE) starindex); \
+	else \
+		echo "You don't have write permission in public_html/star-demo-index"; \
+		echo " so we are not building star-demo-index"; \
+	fi
+
+MYFORCE:
