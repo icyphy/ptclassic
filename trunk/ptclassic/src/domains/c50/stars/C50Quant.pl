@@ -15,13 +15,13 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { C50 main library }
 	htmldoc {
-The star quantizes the input to one of <i>N+</i>1 possible output levels
+The star quantizes the input to one of <i>N&#43</i>1 possible output levels
 using <i>N</i> thresholds.
 For an input less than or equal to the <i>N</i>th threshold,
 but larger than all previous thresholds,
 the output will be the <i>N</i>th level.
 If the input is greater than all thresholds,
-the output is the (<i>N+</i>1)th level.
+the output is the (<i>N&#43</i>1)th level.
 The <i>levels</i> parameter must be one greater than the number
 of <i>thresholds</i>.
 	}

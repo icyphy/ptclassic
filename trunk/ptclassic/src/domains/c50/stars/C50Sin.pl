@@ -16,10 +16,11 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { C50 main library }
 	htmldoc {
+<a name="sin"> </a>
 This star computes the sine of the input, which must be in the range
-[-1.0, 1.0).  The output equals sin(<i> pi cdot </i><i>in</i><i>+<i>phase</i></i>),
-so the input range is effectively (-<i> pi</i>, <i>pi </i>).  The output is in
-the range (-1.0, 1.0).  The parameter <i>phase</i> is in degrees
+[-1.0, 1.0).  The output equals sin(<i>pi</i> &#183 <i>in</i> &#43 <i>phase</i>),
+so the input range is effectively [-<i> pi</i>, <i>pi </i>).  The output is in
+the range [-1.0, 1.0).  The parameter <i>phase</i> is in degrees
 (e.g., cosine would use a phase of 90).
 	}
 	input {

@@ -14,23 +14,24 @@ limitation of liability, and disclaimer of warranty provisions.
 	htmldoc {
 Second order IIR filter (Biquad).  This biquad is tailored to use the
 coefficients from the DSPlay filter design tool.
-If DSPlay gives the coefficients: A B C D E then define the parameters
+If DSPlay gives the coefficients: A, B, C, D and E then define the parameters
 as follows:
 <p>
 <ul>
 <li> a = A
 <li> b = B
 <li> c = C
-<li> d = -(D+1)
+<li> d = -(D &#43 1)
 <li> e = -E
 </ul>
 <p>
 <p>
-This only works if a, b, c, d, and e are in the range (-1,+1).
+This only works if a, b, c, d, and e are in the range (-1,&#43<sub></sub>1).
 The transfer function realized by the filter is:
 <pre>
-H(z) ~ = ~ { { a ~ + ~ b z sup { -1 } ~ + ~ c z sup { - 2 } } over
-{ 1 ~ - ~ (d ~ + ~ 1) z sup { - 1 } ~ - ~ e z sup { -2 } }  }
+a &#43 b&#183z<sup>-1</sup> &#43 c&#183z<sup>-2</sup>
+-----------------------
+1 - (d &#43 1)&#183z<sup>- 1</sup> - e&#183z<sup>-2</sup>
 </pre>
 <p>
 The default coefficients implement a low pass filter.
