@@ -146,16 +146,11 @@ tclexts: config_tclexts all_tclexts install_tclexts
 # If you add an Tcl extension, add the makefile.in to the list of dependencies
 # so that it will be retrieved when others do 'make sources'.
 config_tclexts: obj.$(PTARCH) src/configure mk/tcl.mk.in mk/java.mk.in \
-		src/makefile.in src/profile/makefile.in \
-		src/tyjava/makefile.in src/tyjava/eprintf/makefile.in \
-		src/tyjava/tcljava/makefile.in \
-		src/tksteal/makefile.in \
+		src/makefile.in \
 		src/tytimer/makefile.in \
 		src/tytest/makefile.in \
 		src/tycgc/makefile.in
 	(cd obj.$(PTARCH); ../src/configure --srcdir ../src $(CONFIGURE_ARGS))
-	(cd obj.$(PTARCH)/tyjava/tcljava; rm -f tcl; \
-		ln -s ../../../src/tyjava/tcljava/tcl .)
 
 # The autoconf script is not shipped with Tycho, but src/configure
 # _is_ shipped, so this rule is not usually needed.
