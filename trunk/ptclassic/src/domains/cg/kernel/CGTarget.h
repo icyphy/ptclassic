@@ -96,7 +96,8 @@ virtual StringList headerComment(const char* begin=NULL,const char* end="",const
 
     // system call in destination directory.  If error is specified
     // & the system call is unsuccessful display the error message.
-    virtual int systemCall(const char*,const char* error=NULL);
+    virtual int systemCall(const char*cmd,const char* error=NULL,
+	const char* host="localhost");
 
     // Copy an SDF schedule from the multiprocessor schedule, instead
     // of performing an SDF scheduler for a uni-processor target
