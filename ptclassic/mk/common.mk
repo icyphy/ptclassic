@@ -8,7 +8,7 @@
 # Written by: J. Buck
 #
 # This file should be included AFTER other symbols are defined,
-# particularly SRCS, OBJS, and LIB.
+# particularly SRCS, OBJS, LIB, DOMAIN, STAR_MK.
 
 whatToBuild:	all
 
@@ -45,6 +45,10 @@ $(LIB):	$(OBJS)
 $(LIBDIR)/$(LIB):	$(LIB)
 		rm -f $(LIBDIR)/$(LIB)
 		ln $(LIB) $(LIBDIR)
+
+$(STAR_MK).mk:	make.template
+		rm -f $(STAR_MK).mk
+		genStarList $(DOMAIN) > $(STAR_MK).mk
 
 # "make sources" will do SCCS get on anything where SCCS file is newer.
 sources:	$(EXTRA_SRCS) $(SRCS) $(HDRS) make.template
