@@ -98,6 +98,7 @@ int rshSystem(const char* hname, const char* cmd, const char* dir) {
 	rshCommand << preCmd << "xon " << hname << " -debug sh" << postCmd;
     }
     cout << "rshCommand: " << rshCommand << "\n";
+    cout.flush();
     return system(rshCommand);
 }
 
@@ -123,6 +124,7 @@ int rcpWriteFile(const char* hname, const char* dir, const char* file,
     if (rshSystem(hname,mkdir)) return FALSE;
 
     cout << "rcpWriteFile: writing file " << file << "\n";
+    cout.flush();
 
 //  write file to local machine 
     pt_ofstream o(tmpFile ? tmpFile : fileName);
