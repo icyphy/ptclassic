@@ -62,6 +62,11 @@ public:
 	// return the inside Domain
 	const char* insideDomain() const { return gal.domain(); }
 
+	// return the scheduler of the outer domain.
+	// Note thar the scheduler of the inner domain can be get
+	// by scheduler() method of derived wormhole classes.
+	Scheduler* outerSched();
+
 	// redefine setStopTime()
 	void setStopTime(double stamp);
 
