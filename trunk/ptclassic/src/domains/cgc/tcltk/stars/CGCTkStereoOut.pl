@@ -83,9 +83,6 @@ limitation of liability, and disclaimer of warranty provisions.
 	    sprintf(buf, "%d", $ref(volume));
 	    displaySliderValue(".high", "$starSymbol(scale1)", buf);
 
-	    /* Hack stuff */
-	    printf("$val(starName)::volume changed to %d\n", $ref(volume));
-
             return TCL_OK;
         }
     }
@@ -111,9 +108,6 @@ limitation of liability, and disclaimer of warranty provisions.
 
 	    sprintf(buf, "%d", $ref(balance));
 	    displaySliderValue(".low", "$starSymbol(scale2)", buf);
-
-	    /* Hack stuff */
-	    printf("$val(starName)::balance changed to %d\n", $ref(balance));
 
             return TCL_OK;
         }
