@@ -31,6 +31,7 @@ EXTRA_SRCS=$(STAR_MK).mk $(STAR_MK).c $(PL_SRCS)
 PL_SRCS= \
  AnyAsmBlackHole.pl \
  AnyAsmFork.pl \
+ AnyAsmGround.pl \
  CGRateChange.pl \
  CGMultiIn.pl \
  CGMultiInOut.pl \
