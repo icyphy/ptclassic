@@ -15,7 +15,7 @@ const int MAXLEN = 20000;
 Version identification:
 $Id$
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1995 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -125,20 +125,26 @@ void FixArrayState  :: initialize() {
 		while (lexer >> token, *token) {
 			token_list.prepend(savestring(token));
 
-			if (!strcmp(token, ","))  need_precision = 1;
+			if (!strcmp(token, ",")) need_precision = 1;
 		}	
-		// need matching parenth at end of expression
-		if (!!strcmp((char*)token_list.head(), ")"))
-			need_precision = 0;
 
 		ListIter titer(token_list);
 		char* tp;
-		int cnt = 0, size = token_list.size();
+		int cnt = 0;
 
+		// skip the first parenth of the initialization list
+		// (value,precision) value --> value,precision) value
+		// in order to discriminate from (expression) for the
+		// the parser below.
+		int rightParen = 0, comma = 0;
 		while (cnt++, tp = (char*)titer++) {
-			// skip first parenth before the value string
-			if (!need_precision || (cnt != size))
+			if (!comma || *tp != '(' || rightParen != 1)
 				lexer.pushBack(tp);
+			else comma = 0;
+			
+			if (rightParen && *tp == ',') comma = 1;
+			else if (*tp == ')') rightParen++;
+			else if (*tp == '(') rightParen--;
 
 			LOG_DEL; delete [] tp;
 		}
@@ -183,10 +189,13 @@ void FixArrayState  :: initialize() {
                         if (t.tok == T_Float) {
                                 buf[i++] = t.doubleval;
                                 t = getParseToken(lexer);
-                                if (t.tok != ')') {
-                                        parseError ("expected ')'");
+                                if (t.tok != ',' && t.tok != ')') {
+                                        parseError ("expected ',' or ')'");
                                         err = 1;
                                 }
+				else if (t.tok == ',' ) {
+					lexer.pushBack(",");
+				}
                         }
                         else {
                                 parseError ("syntax error after '('");
@@ -234,11 +243,9 @@ void FixArrayState  :: initialize() {
 					break;
 #else
 				else {
+				  // just to skip ')'	
 				  t = getParseToken(lexer);
-				  if (t.tok == ')') {
-				    t = getParseToken(lexer);
-				    if( t.tok == T_EOF) break;
-				  }
+				  break;
 				}
 #endif
 			}
