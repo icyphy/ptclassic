@@ -506,7 +506,7 @@ body ::tycho::EditItcl::initializeMenubar {menubar} {
     $menubar add separator specialsep2 special
     
     $menubar command generatedoc special \
-	    -label "Generate HTML Documentation" -underline 0 \
+	    -label "Generate HTML Documentation" -underline 9 \
             -command "$this gendocBuffer"
         
     $menubar command generateidoc special \
@@ -514,7 +514,7 @@ body ::tycho::EditItcl::initializeMenubar {menubar} {
             -command "$this genidocBuffer"
 
     $menubar command generateclassdiagram special \
-	    -label "Generate class diagram" -underline 9  \
+	    -label "Generate Class Diagram" -underline 9  \
             -command "::tycho::view ItclClassList \
             -file [file join [file dirname [$this filename]] classList.icl] \
             -toolbar 1"
