@@ -46,6 +46,7 @@ EXTRA_SRCS =	abbreviations.html \
 		bugs0.1.html \
 		bugs0.1.1.html \
 		documentation.html \
+		help.html \
 		index.html \
 		introduction.html \
 		overview.html \
