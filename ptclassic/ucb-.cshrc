@@ -37,6 +37,12 @@ if ( "$PTARCH" =~ sol?* ) then
                 $SYNOPSYS/$SIM_ARCH/sim/bin \
                 $SYNOPSYS/$SIM_ARCH/sge/bin )
 
+	# These are for accessing online documentation
+	# through "iview" and SOLV-IT On-Line through "sos".
+	set path = ( $path \
+		$SYNOPSYS/worldview/bin \
+                $SYNOPSYS/sos/bin )
+
 	# Needed for Synopsys to find libCLI.so
 	setenv LD_LIBRARY_PATH \
 		${LD_LIBRARY_PATH}:${SYNOPSYS}/${SIM_ARCH}/sim/lib
@@ -72,10 +78,16 @@ setenv PRINTER sp524
 
 # For FrameMaker
 setenv FMHOME /opt/frame-5.1
-setenv FM_FLS_HOST dewitt.eecs.berkeley.edu
+setenv FM_FLS_HOST brahe.eecs.berkeley.edu
 set path = ($path $FMHOME/bin /usr/sww/urt/bin)
+
+# For Quadralay, which converts frame files to html
+setenv QUADRALAYHOME /usr/tools/tools2/www/quadralay
+set path = ($path $QUADRALAYHOME/bin)
 
 # Needed for s56x demos
 setenv S56DSP /users/ptdesign/vendors/s56dsp
 setenv QCKMON qckMon5
 setenv LD_LIBRARY_PATH ${LD_LIBRARY_PATH}:${S56DSP}/lib
+setenv VSDKHOME /opt/SUNWvsdk
+setenv INCASHOME /opt/SUNWincas
