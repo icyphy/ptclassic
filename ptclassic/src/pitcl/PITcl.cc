@@ -94,6 +94,8 @@ void PTcl::removeEntry() {
 PTcl::PTcl(Tcl_Interp* i) : interp(i), universe(0), currentGalaxy(0),
 currentTarget(0), definingGal(0)
 {
+	// perhaps default domain should be obtained some other way.
+	curDomain = KnownBlock::defaultDomain();
 	newUniverse();
 	if (!interp) {
 		interp = Tcl_CreateInterp();
@@ -116,7 +118,7 @@ PTcl::~PTcl() {
 
 // Attach the PTcl to a new universe
 void PTcl::newUniverse () {
-	LOG_NEW; universe = new InterpUniverse;
+	LOG_NEW; universe = new InterpUniverse("main", curDomain);
 	currentGalaxy = universe;
 }
 
@@ -165,7 +167,7 @@ const Block* PTcl::getBlock(const char* name) {
 	if (strcmp(name,"target") == 0)
 		return definingGal ? currentTarget : universe->myTarget();
 	const Block* b = currentGalaxy->blockWithDottedName(name);
-	if (!b) b = KnownBlock::find(name);
+	if (!b) b = KnownBlock::find(name, curDomain);
 	if (!b) b = KnownTarget::find(name);
 	if (!b) {
 		strcpy(interp->result,"No such block: ");
@@ -329,9 +331,9 @@ int PTcl::defgalaxy(int argc,char ** argv) {
 		return TCL_ERROR;
 	}
 	const char* galname = hashstring(argv[1]);
-	const char* outerDomain = KnownBlock::domain();
+	const char* outerDomain = curDomain;
 	definingGal = TRUE;	// prevent recursive defgalaxy
-	LOG_NEW; currentGalaxy = new InterpGalaxy(galname);
+	LOG_NEW; currentGalaxy = new InterpGalaxy(galname,curDomain);
 	currentGalaxy->setBlock (galname, universe);
 	currentTarget = 0;
 	if (Tcl_Eval(interp, argv[2], 0, 0) != TCL_OK) {
@@ -436,9 +438,11 @@ int PTcl::animation (int argc,char** argv) {
 // knownlist shows the available blocks in the current domain, or (if an
 // argument is given) the supplied domain.
 int PTcl::knownlist (int argc,char** argv) {
-	if (argc > 3)
+	if (argc > 2)
 		return usage ("knownlist [<domain>]");
-	KnownBlockIter nextB(argv[1]);
+	const char* dom = curDomain;
+	if (argc == 2) dom = argv[1];
+	KnownBlockIter nextB(dom);
 	const Block* b;
 	while ((b = nextB++) != 0)
 		addResult(b->name());
@@ -473,11 +477,12 @@ int PTcl::domain(int argc,char ** argv) {
 	if (argc > 2)
 		return usage ("domain [newdomain]");
 	if (argc == 1) {
-		strcpy(interp->result,KnownBlock::domain());
+		strcpy(interp->result,curDomain);
 		return TCL_OK;
 	}
 	if (! currentGalaxy->setDomain (argv[1]))
 		return TCL_ERROR;
+	curDomain = currentGalaxy->domain();
 	if (!definingGal) universe->newTarget ();
 	return TCL_OK;
 }
@@ -510,10 +515,10 @@ int PTcl::targets(int argc,char** argv) {
 	if (argc > 2) return usage("targets [<domain>]");
 	const char* domain;
 	if (argc == 2) domain = argv[1];
-	else domain = KnownBlock::domain();
+	else domain = curDomain;
 	const int MAX_NAMES = 40;
 	const char *names[MAX_NAMES];
-	int n = KnownTarget::getList (KnownBlock::domain(), names, MAX_NAMES);
+	int n = KnownTarget::getList (curDomain, names, MAX_NAMES);
 	for (int i = 0; i < n; i++)
 		addResult(names[i]);
 	return TCL_OK;
