@@ -31,13 +31,6 @@ Produce code for inter-process communication (receive-side).
 		desc { number of tokens to be transferred }
 		attributes { A_NONSETTABLE }
 	}
-	state {
-		name { IPCHandlerName }
-		type { STRING }
-		default { "IPCHandler" }
-		desc { Name of receiver's IPC handler function. }
-		attributes { A_NONSETTABLE }
-	}
         state {
                 name { nodeIPs }
                 type { intarray }
@@ -50,6 +43,13 @@ Produce code for inter-process communication (receive-side).
                 type { int }
                 default { 0 }
                 desc { Number of nodes in program. }
+                attributes { A_NONSETTABLE }
+        }
+        state {
+                name { pairNumber }
+                type { int }
+                default { 0 }
+                desc { Send Receive pair number for unique IP port. }
                 attributes { A_NONSETTABLE }
         }
 
@@ -65,16 +65,11 @@ Produce code for inter-process communication (receive-side).
 #endif
 	}
 	codeblock (ipcHandler) {
-void $val(IPCHandlerName)(void *source_token, int d1, int d2, int d3, int d4)
+void $starSymbol(ipc_handler)(void *source_token, int d1, int d2, int d3, int d4)
 {
         $starSymbol(RecvData) = d1;
 }
 	}
-        codeblock (replyHandler) {
-void reply_handler(void *source_token, int d1, int d2, int d3, int d4)
-{
-}
-        }
         codeblock (errorHandler) {
 void error_handler(int status, op_t opcode, void *argblock)
 {
@@ -119,10 +114,8 @@ void error_handler(int status, op_t opcode, void *argblock)
 }
         }
         codeblock (amdecls) {
-ea_t endpoint;
 eb_t bundle;
 en_t global;
-int $starSymbol(i);
         }
 	codeblock (timedecls) {
 #ifdef TIME_INFO
@@ -139,6 +132,8 @@ double $starSymbol(timeRecv);
 prusage_t $starSymbol(beginRecv);
 prusage_t $starSymbol(endRecv);
 #endif
+int $starSymbol(i);
+ea_t $starSymbol(endpoint);
 	}
         codeblock (aminit) {
 AM_Init();
@@ -146,43 +141,10 @@ if (AM_AllocateBundle(AM_PAR, &bundle) != AM_OK) {
         fprintf(stderr, "error: AM_AllocateBundle failed\n");
         exit(1);
 }
-if (AM_AllocateKnownEndpoint(bundle, &endpoint, HARDPORT) != AM_OK) {
-        fprintf(stderr, "error: AM_AllocateKnownEndpoint failed\n");
-        exit(1);
-}
- 
-if (AM_SetTag(endpoint, 1234) != AM_OK) {
-        fprintf(stderr, "error: AM_SetTag failed\n");
-        exit(1);
-}
-if (AM_SetHandler(endpoint, 0, error_handler) != AM_OK) {
-        fprintf(stderr, "error: AM_SetHandler failed\n");
-        exit(1);
-}
-if (AM_SetHandler(endpoint, 1, reply_handler) != AM_OK) {
-        fprintf(stderr, "error: AM_SetHandler failed\n");
-        exit(1);
-}
-if (AM_SetHandler(endpoint, 2, request_handler) != AM_OK) {
-        fprintf(stderr, "error: AM_SetHandler failed\n");
-        exit(1);
-}
- 
 if (AM_SetEventMask(bundle, AM_EMPTYTONOT ) != AM_OK) {
         fprintf(stderr, "error: AM_SetEventMask error\n");
         exit(1);
 }
- 
-for ($starSymbol(i) = 0; $starSymbol(i) < $val(numNodes); $starSymbol(i)++) {
-        global.ip_addr = $ref(nodeIPs, $starSymbol(i));
-        global.port = HARDPORT;
-        if (AM_Map(endpoint, $starSymbol(i), global, 1234) != AM_OK) {
-                fprintf(stderr, "AM_Map error\n");
-                fflush(stderr);
-                exit(-1);
-        }
-}
- 
         }
 	codeblock (timeinit) {
 #ifdef TIME_INFO
@@ -194,6 +156,33 @@ timeRun = 0.0;
 $starSymbol(timeRecv) = 0.0;
 $starSymbol(RecvData) = -0.001;
 #endif
+if (AM_AllocateKnownEndpoint(bundle, &$starSymbol(endpoint), HARDPORT + $val(pairNumber)) != AM_OK) {
+        fprintf(stderr, "error: AM_AllocateKnownEndpoint failed\n");
+        exit(1);
+}
+ 
+if (AM_SetTag($starSymbol(endpoint), 1234) != AM_OK) {
+        fprintf(stderr, "error: AM_SetTag failed\n");
+        exit(1);
+}
+if (AM_SetHandler($starSymbol(endpoint), 0, error_handler) != AM_OK) {
+        fprintf(stderr, "error: AM_SetHandler failed\n");
+        exit(1);
+}
+if (AM_SetHandler($starSymbol(endpoint), 2, $starSymbol(ipc_handler)) != AM_OK) {
+        fprintf(stderr, "error: AM_SetHandler failed\n");
+        exit(1);
+}
+
+for ($starSymbol(i) = 0; $starSymbol(i) < $val(numNodes); $starSymbol(i)++) {
+        global.ip_addr = $ref(nodeIPs, $starSymbol(i));
+        global.port = HARDPORT + $val(pairNumber);
+        if (AM_Map($starSymbol(endpoint), $starSymbol(i), global, 1234) != AM_OK) {
+                fprintf(stderr, "AM_Map error\n");
+                fflush(stderr);
+                exit(-1);
+        }
+}
 	}
 	codeblock (openfd) {
 #ifdef TIME_INFO
@@ -212,6 +201,10 @@ else if (ioctl(fd, PIOCUSAGE, &beginRun) == -1)
 		addInclude("<stdlib.h>");
 		addInclude("<udpam.h>");
 		addInclude("<am.h>");
+		addCompileOption(
+			"-I$(PTOLEMY)/src/domains/cgc/targets/NOWam/libudpam");
+                addLinkOption("-L$(PTOLEMY)/lib.$(PTARCH) -ludpam");
+
 		addCode(timeincludes, "include", "timeIncludes");
                 addCode(amdecls, "mainInit", "amDecls");
 		addCode(timedecls, "mainDecls", "timeDecls");
@@ -261,7 +254,7 @@ else if (ioctl(fd, PIOCUSAGE, &beginRun) == -1)
 	}
 
 	go {
-		addProcedure(ipcHandler, IPCHandlerName);
+		addProcedure(ipcHandler);
                 addProcedure(replyHandler, "ReplyHandler");
                 addProcedure(errorHandler, "ErrorHandler");
 		addCode(block);
