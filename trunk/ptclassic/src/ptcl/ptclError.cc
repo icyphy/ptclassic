@@ -16,7 +16,7 @@ Tcl interpreter.
 
 *******************************************************************/
 #include "Error.h"
-#include "Scheduler.h"
+#include "SimControl.h"
 #include "NamedObj.h"
 #include <stream.h>
 #include <stdio.h>
@@ -60,6 +60,8 @@ Error :: error (const NamedObj& o, cc* m1, cc* m2, cc* m3) {
 		Error::message(o,m1,m2,m3);
 		return;
 	}
+	if (!m2) m2 = "";
+	if (!m3) m3 = "";
 	StringList s = o.readFullName();
 	const char* name = s;
 	int l = strlen(name) + strlen(m1) + strlen(m2) + strlen(m3) + 10;
@@ -91,13 +93,13 @@ Error :: message (const NamedObj& o, cc* m1, cc* m2, cc* m3) {
 void
 Error :: abortRun (cc *m1, cc* m2, cc* m3) {
 	error (m1, m2, m3);
-	Scheduler::requestHalt();
+	SimControl::requestHalt();
 }
 
 void
 Error :: abortRun (const NamedObj& o, cc* m1, cc* m2, cc* m3) {
 	error (o, m1, m2, m3);
-	Scheduler::requestHalt();
+	SimControl::requestHalt();
 }
 
 // marking is not supported in this implementation
