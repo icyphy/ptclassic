@@ -1,5 +1,5 @@
 #ifndef lint
-static char SccsId[]="@(#)avl.c	1.1 12/15/93";
+static char SccsId[]="$Id$";
 #endif /*lint*/
 /* Copyright (c) 1990-1993 The Regents of the University of California.
  * All rights reserved.
@@ -49,7 +49,7 @@ static char SccsId[]="@(#)avl.c	1.1 12/15/93";
 static avl_node *new_node();
 static avl_node *find_rightmost();
 static void do_rebalance(); 
-static int avl_gen_forward();
+
 
 avl_tree *
 avl_init_table(compar)
@@ -66,6 +66,7 @@ int (*compar)();
 
 
 
+int
 avl_lookup(tree, key, value_p)
 avl_tree *tree;
 register char *key;
@@ -87,6 +88,7 @@ char **value_p;
     return 0;
 }
 
+int
 avl_first(tree, key_p, value_p)
 avl_tree *tree;
 char **key_p;
@@ -107,6 +109,7 @@ char **value_p;
 }
 
 
+int
 avl_last(tree, key_p, value_p)
 avl_tree *tree;
 char **key_p;
@@ -126,6 +129,7 @@ char **value_p;
     }
 }
 
+int
 avl_insert(tree, key, value)
 avl_tree *tree;
 char *key;
@@ -157,7 +161,7 @@ char *value;
 }
 
 
-
+int
 avl_find_or_add(tree, key, slot_p)
 avl_tree *tree;
 char *key;
@@ -191,6 +195,7 @@ char ***slot_p;
     return 0;			/* not already in tree */
 }
 
+int
 avl_delete(tree, key_p, value_p)
 avl_tree *tree;
 char **key_p;
@@ -287,6 +292,7 @@ int dir;
 }
 
 
+int
 avl_gen(gen, key_p, value_p)
 avl_generator *gen;
 char **key_p;
@@ -530,28 +536,28 @@ int *error;
     bal = r_height - l_height;
     
     if (comp_height != node->height) {
-	(void) printf("Bad height for 0x%08x: computed=%d stored=%d\n",
-	    node, comp_height, node->height);
+	(void) printf("Bad height for 0x%08lx: computed=%d stored=%d\n",
+	    (unsigned long)node, comp_height, node->height);
 	++*error;
     }
 
     if (bal > 1 || bal < -1) {
-	(void) printf("Out of balance at node 0x%08x, balance = %d\n", 
-	    node, bal);
+	(void) printf("Out of balance at node 0x%08lx, balance = %d\n", 
+	    (unsigned long)node, bal);
 	++*error;
     }
 
     if (node->left != NIL(avl_node) && 
 		    (*compar)(node->left->key, node->key) > 0) {
-	(void) printf("Bad ordering between 0x%08x and 0x%08x", 
-	    node, node->left);
+	(void) printf("Bad ordering between 0x%08lx and 0x%08lx", 
+	    (unsigned long)node, (unsigned long)node->left);
 	++*error;
     }
     
     if (node->right != NIL(avl_node) && 
 		    (*compar)(node->key, node->right->key) > 0) {
-	(void) printf("Bad ordering between 0x%08x and 0x%08x", 
-	    node, node->right);
+	(void) printf("Bad ordering between 0x%08lx and 0x%08lx", 
+	    (unsigned long)node, (unsigned long)node->right);
 	++*error;
     }
 
