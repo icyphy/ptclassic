@@ -57,7 +57,7 @@ public:
 
     /* virtual */ int run() { if ( isCG() ) return(HLLTarget::run()); else return(Target::run()); }   // FIXME
 
-    ACSTarget :: ~ACSTarget();
+    ~ACSTarget();
     // Class identification.
     /*virtual*/ int isA(const char*) const;
 
