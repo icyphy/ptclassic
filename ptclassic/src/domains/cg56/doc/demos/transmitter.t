@@ -1,5 +1,5 @@
 .\" $Id$
-.NA Transmitter
+.NA transmitter
 .SD
 A simple 4-level PAM transmitter.
 .DE
@@ -8,7 +8,8 @@ A simple 4-level PAM transmitter.
 .LO "~ptolemy/src/domains/cg56/demo/sim"
 .LD
 .pp
-.Id "4-level PAM transmitter"
+.Ir "PAM transmitter, 4 level"
+.Ir "modulation, pulse amplitude"
 This system uses a raised cosine to turn a random noise source
 into a sequence of random symbols which is used  to generate
 the four level line signal.

@@ -1,5 +1,5 @@
 .\" $Id$
-.NA lms adaptive signal
+.NA lms
 .SD
 A universe showing the LMS adaptive filter.
 .DE
@@ -17,6 +17,6 @@ displayed.
 .PP
 The "56sim" version of the demo simulates the universe.
 The "s56x" version of the demo actually runs the code on
-the S56X Sbus DSP board, and uses the "hread" program to
+the S-56X SBus DSP board, and uses the "hread" program to
 get the error signal from the DSP.
 .ES

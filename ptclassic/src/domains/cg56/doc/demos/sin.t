@@ -1,5 +1,5 @@
 o.\" $Id$
-.NA sine wave generator
+.NA sine
 .SD
 A sine wave generator using the double integrator method.
 .DE
@@ -10,6 +10,6 @@ A sine wave generator using the double integrator method.
 .LD
 .pp
 .Id "sine generator"
-This system uses the double integrator method to generate a sine wave.
-in the s56x demo sinToHost, a tune is used to generate the sin wave.
+This system uses a double integrator method to generate a sine wave.
+in the s56x demo sinToHost, a Tone star is used to generate the sin wave.
 .ES
