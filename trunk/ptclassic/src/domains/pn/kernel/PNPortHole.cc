@@ -96,7 +96,7 @@ int MultiInPNPort::isItInput() const
 // Add a new physical port to the MultiPortHole list.
 PortHole& MultiInPNPort::newPort()
 {
-    LOG_NEW; PortHole& p = *new InPNPort;
+    LOG_NEW; InPNPort& p = *new InPNPort;
     Attribute a = {attributes(), 0};
     p.setAttributes(a);
     return installPort(p);
@@ -111,7 +111,7 @@ int MultiOutPNPort::isItOutput() const
 // Add a new physical port to the MultiPortHole list.
 PortHole& MultiOutPNPort::newPort()
 {
-    LOG_NEW; PortHole& p = *new OutPNPort;
+    LOG_NEW; OutPNPort& p = *new OutPNPort;
     Attribute a = {attributes(), 0};
     p.setAttributes(a);
     return installPort(p);
