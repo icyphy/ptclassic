@@ -16,6 +16,9 @@ Programmer: E. Goei, J. Buck
 #include "miscFuncs.h"
 #include "Domain.h"
 #include "Architecture.h"
+#include <ACG.h>
+
+extern ACG* gen;
 
 static InterpUniverse *universe = NULL;  // Universe to execute
 static InterpGalaxy *currentGalaxy = NULL;  // current galaxy to make things in
@@ -235,6 +238,14 @@ KcRun(int n) {
 	universe->run();
 	universe->endSimulation();
 	return TRUE;
+}
+
+// Set the seed for the random number generation.
+extern "C" void
+KcEditSeed(int n) {
+ 	LOG << "(seed " << n << ")\n";
+	if (gen) delete gen;
+	gen = new ACG(n);
 }
 
 /* 5/17/90
