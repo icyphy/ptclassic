@@ -398,7 +398,7 @@ vemOneArg *arg;
 
 
 /*ARGSUSED*/
-selTransCmd(spot, cmdList)
+vemStatus selTransCmd(spot, cmdList)
 vemPoint *spot;
 lsList cmdList;
 /*
