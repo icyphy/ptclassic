@@ -1435,6 +1435,7 @@ int AM_Poll(eb_t bundle)
   UDPAM_Buf           *buf;
   char                packet[MAX_PACKET_SIZE];
 
+  UDPAM_GetXferReply4_Pkt *packetPtr4;
  if (initialized == FALSE)
     return(AM_ERR_NOT_INIT);   
   timeout.tv_sec = timeout.tv_usec = 0;
@@ -2161,14 +2162,28 @@ int AM_Poll(eb_t bundle)
 	    UnlockEP(endpoint);
 	  }
 	  else { 
-	    memcpy(endpoint->start_addr + packetPtr->dest_offset, 
+	    /* This nasty cast is necessary under Solaris2.5 cc 4.0,
+	       or we get: 
+	        cannot do pointer arithmetic on operand of unknown size 
+             */
+	    /*memcpy(endpoint->start_addr + packetPtr->dest_offset, 
+		   packetPtr->data, packetPtr->nbytes);
+		   */
+	    memcpy((void *)((int)endpoint->start_addr +
+			    packetPtr->dest_offset),
 		   packetPtr->data, packetPtr->nbytes);
 	    endpoint->translation_table[sourceEndpoint].wsize++;
 	    RemoveTimeout(endpoint, &(endpoint->txpool[packetPtr->buf_id]));
 	    Enqueue(endpoint, &(endpoint->txpool[packetPtr->buf_id])); 
+	    /* This nasty cast is necessary under Solaris2.5 cc 4.0,
+	       or we get: 
+	       cannot do pointer arithmetic on operand of unknown size 
+             */
 	    ((HandlerGet4)(endpoint->handler_table[packetPtr->handler]))(
-                           (void *)&token, endpoint->start_addr + 
-			    packetPtr->dest_offset, packetPtr->nbytes,
+                            (void *)&token,
+			    (void *) ((int)endpoint->start_addr + 
+				      packetPtr->dest_offset),
+                            packetPtr->nbytes,
                             packetPtr->arg0, packetPtr->arg1, packetPtr->arg2, 
 			    packetPtr->arg3);
 	    ReplyACK(endpoint->socket, sender, packetPtr->buf_id, 
@@ -2194,7 +2209,15 @@ int AM_Poll(eb_t bundle)
 	    UnlockEP(endpoint);
 	  }
 	  else { 
-	    memcpy(endpoint->start_addr + packetPtr->dest_offset, 
+	    /* This nasty cast is necessary under Solaris2.5 cc 4.0,
+	       or we get: 
+	        cannot do pointer arithmetic on operand of unknown size 
+             */
+	    /* memcpy(endpoint->start_addr + packetPtr->dest_offset, 
+		   packetPtr->data, packetPtr->nbytes);
+		   */
+	    memcpy((void *)((int)endpoint->start_addr +
+			    packetPtr->dest_offset),
 		   packetPtr->data, packetPtr->nbytes);
 	    endpoint->translation_table[sourceEndpoint].wsize++;
 	    RemoveTimeout(endpoint, &(endpoint->txpool[packetPtr->buf_id]));
