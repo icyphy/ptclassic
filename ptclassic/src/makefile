@@ -11,7 +11,7 @@
 # way a separate directory containing, say, Sun-3 and Sun-4 objects can be
 # maintained.
 
-DIRS = kernel preproc domains interp pigilib libgantt pigiRpc xgraph filters
+DIRS = kernel preproc domains interp ptcl pigilib libgantt pigiRpc xgraph filters
 
 # directories with a make.template
 MTDIRS = kernel pigilib libgantt xgraph
