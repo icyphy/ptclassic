@@ -20,6 +20,18 @@ if ( ! $?USER ) then
     setenv USER $LOGNAME
 endif
 
+if ( ! $?PTX11DIR ) then
+    switch ($PTARCH)
+	case sol2:
+	case sol2.cfront:
+	    setenv PTX11DIR /usr/openwin
+	    breaksw
+	case *:
+	    setenv PTX11DIR /usr/X11
+	    breaksw
+    endsw
+endif
+
 if ( ! $?LD_LIBRARY_PATH ) then
     setenv LD_LIBRARY_PATH ${PTOLEMY}/lib.${PTARCH}:/usr/lib:${PTX11DIR}/lib
 endif
