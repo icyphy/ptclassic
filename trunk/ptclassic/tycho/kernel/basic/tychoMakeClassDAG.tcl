@@ -219,6 +219,8 @@ proc tychoStandardDAG {} {
     set olddir [pwd]
     cd $TYCHO
 
+    # If you update this list, update
+    # $TYCHO/editors/textedit/ItclClassList.itcl too.
     set dirs [list \
             kernel \
             [file join editors textedit] \
