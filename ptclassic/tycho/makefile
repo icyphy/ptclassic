@@ -89,4 +89,8 @@ indices:
 
 # This rule should contains things that might take a little while
 # to run, so it is run nightly
-nightly: itcldocs indices
+nightly: sources doc/tychoClasses.dag itcldocs indices 
+
+FORCE: 
+doc/tychoClasses.dag: FORCE
+	(cd doc; $(MAKE) tychoClasses.dag)
