@@ -3,7 +3,7 @@
 <head>
 <title>Scope in Itcl</title>
 </head>
-<body bgcolor=#faf0e6>
+<body bgcolor="#faf0e6">
 <h1><a name="scope in Itcl">Scope in Itcl</a></h1>
 <ol>
 <li><a href="#scoping problems">Scoping problems</a>
@@ -54,7 +54,7 @@ namespace foo {
       ::tycho::inform "after context: [info context]"
    }
 }
-</tcl></pre>
+</pre></tcl>
 Above, we find that the context inside the namespace is
 reported as "::foo", but in the "after" command, it is reported
 as an empty string, meaning the global context.
@@ -69,7 +69,7 @@ namespace foo {
    }
    pack .x.b
 }
-</tcl></pre>
+</pre></tcl> 
 Again, the button command executes at the global scope.
 Thus, the challenge when building Itcl objects within namespaces
 is to be sure that commands that will execute at global scope can
@@ -108,7 +108,7 @@ namespace foo {
    }
    bar .y   
 }
-</tcl></pre>
+</pre></tcl>
 Here, we define a class "bar" inside namespace "foo" derived from
 an Itk top-level window class.  In the constructor, we pack
 into the window a canvas widget.
@@ -159,7 +159,7 @@ namespace foo {
    }
    bar y
 }
-</tcl></pre>
+</pre></tcl>
 The value of the variable "this" is reported as "::foo::y", which is the
 fully qualified command name associated with the object "y".
 The context inside the constructor is "::foo::bar", a namespace
@@ -195,7 +195,7 @@ namespace foo {
    ::tycho::inform [info which x]
    after idle [info which x]
 }
-</tcl></pre>
+</pre></tcl>
 The first line defines a procedure "x", the second informs
 us of its fully qualified name "::foo::x", and the third executes the fully
 qualified name as a command at the global scope.
@@ -205,7 +205,7 @@ namespace foo {
    proc x {} {::tycho::inform {works}}
    after idle "x"
 }
-</tcl></pre>
+</pre></tcl>
 The same principle can be used in class definitions.
 Consider the following:
 <tcl><pre>
@@ -220,7 +220,7 @@ namespace foo {
    }
    bar y
 }
-</tcl></pre>
+</pre></tcl>
 Notice that "z" here is a procedure, not a method.
 A procedure does not need an instance of an object to be invoked.
 Indeed, the command that we schedule using "after" is "::foo::bar::z",
@@ -239,7 +239,7 @@ namespace foo {
    ::tycho::inform [code x]
    after idle [code x]
 }
-</tcl></pre>
+</pre></tcl>
 In this case, the "[code x]" directive returns the list
 "@scope ::foo x", which can be executed as a command at the global
 scope.  It can also be used in class definitions.
@@ -256,7 +256,7 @@ namespace foo {
    }
    bar y
 }
-</tcl></pre>
+</pre></tcl>
 The command that is scheduled by "after" is
 "@scope ::foo::bar z".
 <p>
@@ -267,3 +267,5 @@ All rights reserved.
 <br>
 Last updated: %D%,
 comments to: <author>eal@eecs.berkeley.edu</author>
+</body>
+</html>
