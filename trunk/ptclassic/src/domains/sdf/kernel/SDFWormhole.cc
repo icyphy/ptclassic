@@ -1,3 +1,4 @@
+static const char file_id[] = "SDFWormhole.cc";
 /******************************************************************
 Version identification:
  $Id$
@@ -76,6 +77,6 @@ StringList SDFWormhole :: printRecursive() const {
 
 // cloner -- clone the inside and make a new wormhole from that.
 Block* SDFWormhole :: clone() const {
-	return new SDFWormhole(gal.clone()->asGalaxy(),target->cloneTarget());
+LOG_NEW; return new SDFWormhole(gal.clone()->asGalaxy(),target->cloneTarget());
 }
 
