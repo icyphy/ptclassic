@@ -125,6 +125,8 @@ proc ptkGantt_Zoom { universe num_procs period dir } {
     $chartName.chart.graph configure -scrollregion \
 	    "0 0 ${new_width}c ${num_procs}i"
     $chartName.chart.ruler configure -scrollregion "0 0 ${new_width}c 1.5c"
+    $chartName.chart.graph configure -width ${new_width}c
+    $chartName.chart.ruler configure -width ${new_width}c
 
     foreach box [$chartName.chart.graph find withtag box] {
 	set star_name [string range [lindex [$chartName.chart.graph gettags \
@@ -436,7 +438,7 @@ proc ptkGanttDisplay { universe {inputFile ""} } {
     $ganttChartName.mbar.file.menu add command -label "Print Chart..." \
 	    -command "ptkGantt_PrintChart $ganttChartName"
     $ganttChartName.mbar.file.menu add command -label "Exit" -command \
-	    "ptkClearHightlights; destroy $ganttChartName" -accelerator "Ctrl+d"
+	    "ptkClearHighlights; destroy $ganttChartName" -accelerator "Ctrl+d"
     
     # Here is where we open the file and parse its contents
 
