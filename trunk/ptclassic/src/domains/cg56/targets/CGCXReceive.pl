@@ -21,7 +21,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	type {ANYTYPE}
 }
 
-codeblock(receiveData,"int pairNumber, int numXfer, int semaphorePtr, int bufferPtr, const char* command") {
+codeblock(receiveData,"const char* command, int numXfer") {
 	int i, semaphoreMask = 1<<@(pairNumber%24);
 	/* wait for dsp buffer to be full */
 	while ( ~s56xSemaphores[@(pairNumber/24)] & semaphoreMask );
@@ -45,9 +45,9 @@ go {
 	const char* intReceive = "$ref(output,i) = value";
 	const char* fixReceive = "$ref(output,i) = (double)value/(1<<23)";
 	if (strcmp(output.resolvedType(),INT)==0) 
-	    addCode(receiveData(pairNumber,output.numXfer(),semaphorePtr,bufferPtr,intReceive));
+	    addCode(receiveData(intReceive,output.numXfer()));
 	else
-	    addCode(receiveData(pairNumber,output.numXfer(),semaphorePtr,bufferPtr,fixReceive));
+	    addCode(receiveData(fixReceive,output.numXfer()));
 }
 
 }
