@@ -8,18 +8,22 @@ A universe that upsamples a signal by a ratio of 5/2.
 .LO "~ptolemy/src/domains/sdf/demo"
 .LD
 This universe generates a sine wave using the
-.c FloatRamp
-and
-.c Sin
-stars and feeds it into an
+.c singen
+galaxy and feeds it into an
 .c FIR
 star with parameters set to upsample
-by a ratio of 5/2.
+by a ratio of 5/2 (the lower path).
 .Ie FIR
 .Ie "multirate signal processing"
 .Ie "sample rate conversion"
 The FIR star internally uses a polyphase
 filter structure for efficient computation.
+Along the upper path, a functionally equivalent, but
+less efficient implementation uses
+.c UpSample
+and
+.c DownSample
+stars.
 Because of properties of synchronous dataflow scheduling, when you
 run this universe for 25 iterations, you get 50 samples of the input
 signal and 125 samples (5/2 times as many) of the output signal.
