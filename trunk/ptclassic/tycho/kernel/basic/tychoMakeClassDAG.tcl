@@ -32,8 +32,6 @@
 # Pick up ::tycho::expandPath
 source $TYCHO/kernel/Path.tcl
 
-# FIXME: This is a temporary hack.  tydoc should generate this info.
-
 #### tychoMkClassGraph
 # Make a class graph of the type displayed by the Tycho EditDAG class.
 # The first argument is the name of the graph. The second argument is
@@ -44,6 +42,8 @@ source $TYCHO/kernel/Path.tcl
 # variable like TYCHO) so that the resulting hyperlinks work from any
 # directory. To create a graph for the entire Tycho tree, use the
 # procedure <code>tychoStandardClasses</code>.
+#
+# We could have tydoc generate this information, but it would be much slower.
 #
 proc tychoMkClassGraph {name filename args} {
     set entries {}
@@ -63,8 +63,7 @@ proc tychoMkClassGraph {name filename args} {
 	close $fd
 
 	set classexp "\n\[ \t\]*class\[ \t\]+(\[^\{ \t\n\]*)"
-	set inheritexp "\n\[ \t\]*inherit\[ \t\]+(\[^ \t\n\]*)"
-	set multiinheritexp "\n\[ \t\]*inherit\[ \t\]+(\[^ \t\n\]*)\[ \t\]+(\[^ \t\n\]+)"
+	set inheritexp "\n\[ \t\]*inherit\[ \t\]+(\[^\n\]*)"
 
         set nm {}
 	set classEnd 0
@@ -87,12 +86,13 @@ proc tychoMkClassGraph {name filename args} {
             set classfile($nm) $file
 
 	    #puts "$nm $classStartIndices $classEnd\
-	    #    [string range $contents $classEnd [expr {$classEnd+20}]]"
+	    #    [string range $contents $classEnd [expr {$classEnd+40}]]"
 
 	    # Look for inheritance only if a class definition was found.
 	    if {$nm != {}} {
 		if {[regexp -indices $inheritexp \
-			$contents matchvar inheritIndices] != 0} {
+			[string range $contents $classEnd end] \
+			matchvar inheritIndices] != 0} {
 		    # Check for the case where we have multiple classes
 		    # in a file, but the first class has no parents.
 		    # If the indices of the inherits clause are greater
@@ -105,6 +105,7 @@ proc tychoMkClassGraph {name filename args} {
 			    classStartIndices tnm] != 0 } {
 			if {[lindex $classEnd 0] < \
 				[lindex $inheritIndices 0]} {
+			    #puts "continuing: $nm $classEnd"
 			    set parent($nm) {}
 			    continue
 			}
@@ -112,20 +113,24 @@ proc tychoMkClassGraph {name filename args} {
 
 		    # FIXME: it is just easier to get the name by running
 		    # regexp again.
-		    regexp $inheritexp $contents matchvar pnm
+		    regexp $inheritexp \
+			[string range $contents $classEnd end] \
+			matchvar pnm
 		    if {$nm == $pnm} {
-			error "In $file, $nm cannot be its own parent"
+			#puts "In $file, $nm cannot be its own parent"
+			set parent($nm) {}
+
 		    } else {
-			set parent($nm) $pnm
+			#puts "nm=$nm, pnm=$pnm"
+			set parent($nm) {}
+			set parentList [split $pnm]
+			foreach parentElement $parentList {
+			    if {$parentElement != {}} {
+				lappend parent($nm) $parentElement
+			    }
+			}
 		    }
-		    if {[regexp $multiinheritexp $contents matchvar pnm] != 0} {
-			set retval "$retval\nWarning: \
-				$classfile($nm)\nhas multiple\
-				inheritance, which\
-				cannot currently\ be displayed by\
-				Tycho. Only the\ninheritance link from the\
-				child to the\nfirst parent will be shown."
-		    }
+
 		} {
 		    set parent($nm) {}
 		}
