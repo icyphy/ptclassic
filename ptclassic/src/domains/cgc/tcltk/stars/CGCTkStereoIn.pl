@@ -53,7 +53,6 @@ limitation of liability, and disclaimer of warranty provisions.
             int argc;                           /* Number of arguments. */
             char **argv;                        /* Argument strings. */
         {
-	    audio_info_t info;
 	    static char buf[20];
 	    int position;
             if(sscanf(argv[1], "%d", &position) != 1) {
@@ -62,10 +61,9 @@ limitation of liability, and disclaimer of warranty provisions.
             }
 	    /* conveying the value changes of record volume to audio device */
 	    $ref(volume) = (int) position/10;
-	    AUDIO_INITINFO(&info);
-	    ioctl($starSymbol(file), AUDIO_GETINFO, (caddr_t)(&info));
-	    info.record.gain = AUDIO_MAX_GAIN*$ref(volume)/10;
-	    ioctl($starSymbol(file), AUDIO_SETINFO, (caddr_t)(&info));
+	    $sharedSymbol(CGCStereoBase,set_parameters)
+	      ($starSymbol(file), "$val(inputPort)", $ref(volume),
+	       $ref(balance), 1);
 
 	    sprintf(buf, "%d", $ref(volume));
 	    displaySliderValue(".high", "$starSymbol(scale1)", buf);
