@@ -195,10 +195,4 @@ private:
 
 };
 
-inline int operator ==(bitWord b, Attribute a)
-{
-    return b == a.eval(b);
-}
-
-
 #endif // _ACSCGCore_h

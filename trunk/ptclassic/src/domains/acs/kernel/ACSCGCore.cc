@@ -48,6 +48,15 @@ The ACS CG Core class provides a base class for all derived CG Core category cla
 
 // int isCmdArg (const State*);  // FIXME: should probably be a member function.
 
+// This must be static because CGCStar.cc includes a similar definition,
+// and statically linked binaries will fail if there are duplicate symbols
+// with the same names
+static inline int operator ==(bitWord b, Attribute a)
+{
+    return b == a.eval(b);
+}
+
+
 void ACSCGCore::addSpliceStar(ACSStar* s, int atEnd) {
     if (spliceClust.member(s)) return;
     if (atEnd) spliceClust.append(s);
