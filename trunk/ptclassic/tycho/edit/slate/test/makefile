@@ -69,6 +69,7 @@ GRAPHICAL_TESTS = \
 	testRectangle.itcl \
 	testLine.itcl \
 	testFrame.itcl \
+	testLabeledFrame.itcl \
 	testTute.itcl
 
 # make checkjunk should not complain about the OLD directory
