@@ -54,7 +54,7 @@ ITCL_SRCS =
 
 EXTRA_SRCS =		$(TCL_SRCS) $(ITCL_SRCS)
 
-MISC_FILES =
+MISC_FILES =	README html license.terms sample.tcl 
 
 REALCLEAN_STUFF =
 
