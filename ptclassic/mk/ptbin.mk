@@ -89,6 +89,8 @@ ifdef FULL
 	SDFFULL =	1
 	VHDL =		1
 	VHDLB =		1
+	FSM = 		1
+
 endif
 
 ifdef PTINY
