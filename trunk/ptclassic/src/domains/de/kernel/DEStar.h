@@ -13,6 +13,10 @@ $Id$
 *******************************************************************/
 #ifndef _DEStar_h
 #define _DEStar_h 1
+#ifdef __GNUG__
+#pragma once
+#pragma interface
+#endif
 
 #include "type.h"
 #include "DEConnect.h"

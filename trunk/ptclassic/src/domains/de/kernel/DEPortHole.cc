@@ -1,14 +1,3 @@
-#include "DEConnect.h"
-#include "DEScheduler.h"
-#include "Block.h"
-#include "Plasma.h"
-#include "StringList.h"
-#include "Output.h"
-#include "DEStar.h"
-#include "PriorityQueue.h"
-#include "DEWormConnect.h"
-#include "CircularBuffer.h"
- 
 /**************************************************************************
 Version identification:
 $Id$
@@ -25,6 +14,21 @@ Code for functions declared in DEConnect.h
 
 **************************************************************************/
 
+#ifdef __GNUG__
+#pragma implementation
+#endif
+
+#include "DEConnect.h"
+#include "DEScheduler.h"
+#include "Block.h"
+#include "Plasma.h"
+#include "StringList.h"
+#include "Output.h"
+#include "DEStar.h"
+#include "PriorityQueue.h"
+#include "DEWormConnect.h"
+#include "CircularBuffer.h"
+ 
 /**********************************************************
 
  Member functions for DEPortHoles..

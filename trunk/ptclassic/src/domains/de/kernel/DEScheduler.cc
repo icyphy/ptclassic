@@ -1,11 +1,3 @@
-#include "type.h"
-#include "DEScheduler.h"
-#include "Output.h"
-#include "StringList.h"
-#include "FloatState.h"
-#include "GalIter.h"
-#include "DEWormConnect.h"
-
 /**************************************************************************
 Version identification:
 $Id$
@@ -22,6 +14,18 @@ $Id$
 These are the methods for the discrete event scheduler.
 
 **************************************************************************/
+
+#ifdef __GNUG__
+#pragma implementation
+#endif
+
+#include "type.h"
+#include "DEScheduler.h"
+#include "Output.h"
+#include "StringList.h"
+#include "FloatState.h"
+#include "GalIter.h"
+#include "DEWormConnect.h"
 
 extern const char DEdomainName[];
 

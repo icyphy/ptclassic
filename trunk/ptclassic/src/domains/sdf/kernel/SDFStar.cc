@@ -11,6 +11,10 @@ $Id$
 
 *******************************************************************/
 
+#ifdef __GNUG__
+#pragma implementation
+#endif
+
 #include "SDFStar.h"
 #include "SDFConnect.h"
 

@@ -13,6 +13,11 @@ This file contains definitions of SDF-specific PortHole classes.
 ******************************************************************/
 #ifndef _SDFConnect_h
 #define _SDFConnect_h 1
+#ifdef __GNUG__
+#pragma once
+#pragma interface
+#endif
+
 #include "Connect.h"
 
 /*****************************************************************

@@ -1,13 +1,3 @@
-#ifndef _DEconnect_h
-#define _DEconnect_h 1
-
-#include "NamedObj.h"
-#include "DataStruct.h"
-#include "dataType.h"
-#include "type.h"
-#include "Connect.h"
-#include "PriorityQueue.h"
-
 /**************************************************************************
 Version identification:
 $Id$
@@ -26,6 +16,20 @@ Two DE-specific struct/classes are defined.
 	EventQueue : derived from PriorityQueue.
 
 ******************************************************************/
+
+#ifndef _DEconnect_h
+#define _DEconnect_h 1
+#ifdef __GNUG__
+#pragma once
+#pragma interface
+#endif
+
+#include "NamedObj.h"
+#include "DataStruct.h"
+#include "dataType.h"
+#include "type.h"
+#include "Connect.h"
+#include "PriorityQueue.h"
 
 class Particle;
 
