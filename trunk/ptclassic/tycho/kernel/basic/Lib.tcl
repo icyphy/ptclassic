@@ -56,6 +56,69 @@
 	-label "Java-Based Interface to WELD"
 
 
+### USER PROFILE
+::tycho::register profile ~/.Tycho/profile
+
+### STYLESHEETS
+::tycho::register stylesheet "colors" \
+	{$TYCHO/kernel/styles/colors.style} \
+	{~/.Tycho/styles/colors.style}
+
+::tycho::register stylesheet "console" \
+	{$TYCHO/kernel/styles/console.style} \
+	{~/.Tycho/styles/console.style}
+
+::tycho::register stylesheet "fonts" \
+	{$TYCHO/kernel/styles/fonts.style} \
+	{~/.Tycho/styles/fonts.style}
+
+::tycho::register stylesheet "interaction" \
+	{$TYCHO/kernel/styles/interaction.style} \
+	{~/.Tycho/styles/interaction.style}
+
+::tycho::register stylesheet "java" \
+	{$TYCHO/kernel/styles/java.style} \
+	{~/.Tycho/styles/java.style}
+
+::tycho::register stylesheet "layout" \
+	{$TYCHO/kernel/styles/layout.style} \
+	{~/.Tycho/styles/layout.style}
+
+::tycho::register stylesheet "stacktrace" \
+	{$TYCHO/kernel/styles/stacktrace.style} \
+	{~/.Tycho/styles/stacktrace.style}
+
+::tycho::register stylesheet "system" \
+	{$TYCHO/kernel/styles/system.style} \
+	{~/.Tycho/styles/system.style}
+
+::tycho::register stylesheet "text" \
+	{$TYCHO/kernel/styles/text.style} \
+	{~/.Tycho/styles/text.style}
+
+
+::tycho::register stylesheet "editcolors" \
+	{$TYCHO/editors/textedit/editcolors.style} \
+	{~/.Tycho/styles/editcolors.style}
+
+::tycho::register stylesheet "edithtml" \
+	{$TYCHO/editors/textedit/edithtml.style} \
+	{~/.Tycho/styles/edithtml.style}
+
+::tycho::register stylesheet "makefile" \
+	{$TYCHO/editors/textedit/makefile.style} \
+	{~/.Tycho/styles/makefile.style}
+
+::tycho::register stylesheet "graphics" \
+	{$TYCHO/editors/visedit/graphics.style} \
+	{~/.Tycho/styles/graphics.style}
+
+
+::tycho::register stylesheet "tydoc" \
+	{$TYCHO/lib/tydoc/tydoc.style} \
+	{~/.Tycho/styles/tydoc.style}
+
+
 ### CATEGORIES
 ::tycho::register category new "text" -label "Text Editors" -underline 0
 ::tycho::register category new "html" -label "HTML Viewers" -underline 0
@@ -469,9 +532,9 @@ if { $ptolemyfeature(ptolemy)} {
 
 # The Preferences menu
 ::tycho::register help preferences \
-	-label "Preferences..." \
+	-label "Style Preferences..." \
 	-underline 0 \
-	-command { ::tycho::preferencedialog }
+	-command { ::tycho::stylechooser }
 
 # Ptolemy-only help entries
 if $ptolemyfeature(ptolemy) {
