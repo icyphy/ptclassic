@@ -28,10 +28,10 @@ GNUINCLUDE = /usr/gnu/lib/g++-include
 	$(GNU) $(GPPFLAGS) -I$(DDFDIR) -I$(KERNDIR) -I$(VPATH) -c  $<
 
 .pl.cc:
-	cd $(VPATH); ptlang $<
+	cd $(VPATH); ptlang $< ; mv *.t ../doc/stars
 
 .pl.h:
-	cd $(VPATH); ptlang $<
+	cd $(VPATH); ptlang $< ; mv *.t ../doc/stars
 
 
 SRCS=DDFDownCounter.pl DDFLastOfN.pl DDFRepeater.pl DDFSelect.pl DDFSelf.pl \
