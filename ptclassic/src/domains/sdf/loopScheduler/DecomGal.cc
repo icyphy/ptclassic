@@ -178,7 +178,7 @@ void DecomGal :: makeCluster(SequentialList* nlist) {
 	ListIter nodes(*nlist);
 	SDFCluster* c;
 	while ((c = (SDFCluster*) nodes++) != 0) {
-		if ((bag = (DecomClusterBag*) c->asBag())) break;
+		if ((bag = (DecomClusterBag*) c->asSpecialBag())) break;
 	}
 	if (!bag) {
 		LOG_NEW; bag = new DecomClusterBag;  
@@ -187,7 +187,7 @@ void DecomGal :: makeCluster(SequentialList* nlist) {
 
 	nodes.reset();
 	while ((c = (SDFCluster*) nodes++) != 0) {
-		if (c->asBag()) {
+		if (c->asSpecialBag()) {
 			if (c != bag) bag->merge((SDFClusterBag*)c, this);
 		} else {
 			bag->absorb(c,this);
@@ -206,7 +206,7 @@ void DecomGal :: setUpClusters() {
 
 	// setup them
 	while ((c = nextC++) != 0) {
-		DecomClusterBag* tBag = (DecomClusterBag*) c->asBag();
+		DecomClusterBag* tBag = (DecomClusterBag*) c->asSpecialBag();
 		if (tBag) {
 			tBag->createGalaxy(logstrm);
 			tBag->setUpGalaxy();
@@ -229,14 +229,9 @@ void DecomClusterBag :: setUpGalaxy() {
 	SDFCluster* c;
 
 	while ((c = nextC++) != 0) {
-		// if atomic cluster.
-		if (!c->asBag()) {
-			gal->removeBlock(*c);
-			nextC.reset();
-			cgal->addBlock(*c, c->name());
-		} else {
-			Error :: abortRun("next ClusterBag is prohibited.");
-		}
+		gal->removeBlock(*c);
+		nextC.reset();
+		cgal->addBlock(*c, c->name());
 	}
 
 	// reference to compute the repetition property.
