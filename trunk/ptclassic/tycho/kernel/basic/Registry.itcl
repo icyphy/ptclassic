@@ -337,9 +337,6 @@ ensemble ::tycho::registry {
     option modeexists {mode} {
         @scope ::tycho::Registry ::info exists _modes($mode)
     }
-    option modes {} {
-        @scope ::tycho::Registry array names _modes
-    }
     option protocolcget {protocol prop} {
 	if ![@scope ::tycho::Registry ::info exists _protocols($protocol)] {
 	    error "Unregistered protocol \"$protocol\""
@@ -554,7 +551,7 @@ body ::tycho::Registry::deregisterWindow {tag {window *}} {
 	# Remove from all registered menu bars
 	foreach mb [array names _menubars] {
 	    # Make sure the menu bar still exists and has a window menu
-	    if { [::info which -command $mb] == "" || ![$mb exists window]} {
+	    if { [::infoWhichCommand $mb] == "" || ![$mb exists window]} {
 		unset _menubars($mb)
 		continue
 	    }
@@ -674,7 +671,7 @@ body ::tycho::Registry::raiseWindow {tag window} {
     set w [string trimleft $window :]
 
     # Check for existence
-    if { [::info which -command $w] == "" } {
+    if { [::infoWhichCommand $w] == "" } {
 	# Oops... removing the offending window
 	::tycho::Registry::deregisterWindow $tag $window
     } else {
@@ -1106,7 +1103,7 @@ body ::tycho::Registry::registerWindow {tag window args} {
 	# Add to the Window menu of all registered menu bars
 	foreach mb [array names _menubars] {
 	    # Check for existence
-	    if { [::info which -command $mb] == "" } {
+	    if { [::infoWhichCommand $mb] == "" } {
 		unset _menubars($mb)
 		continue
 	    }

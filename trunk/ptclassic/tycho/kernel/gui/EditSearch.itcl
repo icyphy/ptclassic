@@ -116,7 +116,7 @@ configbody ::tycho::EditSearch::backwards {
 # 
 configbody ::tycho::EditSearch::edit {
     if {$itk_option(-edit) == {} || \
-	    [::info objects $itk_option(-edit)] == {} || \
+	    [infoObjects $itk_option(-edit)] == {} || \
 	    ![$itk_option(-edit) isa ::tycho::Edit]} {
 	error "EditSearch::find: Invalid -edit option: \
 		$itk_option(-edit)"

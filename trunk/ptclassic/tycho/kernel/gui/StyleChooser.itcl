@@ -36,7 +36,7 @@
 # is one, bring it to the top.
 #
 proc ::tycho::stylechooser {} {
-    if { [::info which -command .styles] != "" } {
+    if { [::infoWhichCommand .styles] != "" } {
 	raise .styles
     } else {
 	uplevel #0 [list ::tycho::StyleChooser .styles \
@@ -171,7 +171,7 @@ body ::tycho::StyleChooser::_changestyle {stylesheet} {
     foreach {subscriber oldstyle} [::tycho::stylesheet style $stylesheet] {
 
         # Avoid non-existent subscribers
-        if { [::info which -command $subscriber] == "" } {
+        if { [::infoWhichCommand $subscriber] == "" } {
             continue
         }
         # Get the style -- note that it won't necesserily change,
@@ -276,7 +276,7 @@ body ::tycho::StyleChooser::_displaystyles {{mode {}}} {
 body ::tycho::StyleChooser::_raise {visibility} {
     if { $visibility == "VisibilityUnobscured" } {
         foreach sheet [::tycho::stylesheet stylesheets] {
-            if { [info which -command .styles.$sheet] != "" } {
+            if { [infoWhichCommand .styles.$sheet] != "" } {
                 lower .styles.$sheet .styles
             }
         }

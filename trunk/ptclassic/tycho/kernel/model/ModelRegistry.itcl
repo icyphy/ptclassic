@@ -132,7 +132,7 @@ class ::tycho::ModelRegistry {
 
     # Get access to the unique instance
     proc instance {} {
-        if { [info which ::tycho::modelRegistry] == "" } {
+        if { [infoWhich ::tycho::modelRegistry] == "" } {
             uplevel #0 ::tycho::ModelRegistry ::tycho::modelRegistry
         }
         return ::tycho::modelRegistry
@@ -245,7 +245,7 @@ body ::tycho::ModelRegistry::load {path args} {
     if { [attrget $path -object] == "" } {
         # Create the model
         set cls [attrget $path -class]
-        set nm [::tycho::autoName [string tolower [info namespace tail $cls]]]
+        set nm [::tycho::autoName [string tolower [namespaceTail $cls]]]
         set model [uplevel #0 $cls $nm]
  
         puts "Loading $cls $nm"

@@ -65,3 +65,126 @@ proc winfoMegawidget {w} {
 	winfo megawidget $w
     }
 }
+
+##########################################################################
+#### namespaceTail
+# 
+# Use this instead of "namespace tail" or "info namespace tail"
+#
+proc namespaceTail {n} {
+    global tcl_version
+    if { $tcl_version >= 8.0 && ${itcl::version} >= 3.0 } {
+	return [namespace tail $n]
+    } else {
+	return [info namespace tail $n]
+    }
+}
+
+##########################################################################
+#### namespaceChildren
+# 
+# Use this instead of "info namespace children"
+#
+proc namespaceChildren {n} {
+    global tcl_version
+    if { $tcl_version >= 8.0 && ${itcl::version} >= 3.0 } {
+	return [namespace children $n]
+    } else {
+	return [info namespace children $n]
+    }
+}
+
+##########################################################################
+#### namespaceQualifiers
+# 
+# Use this instead of "info namespace qualifiers"
+#
+proc namespaceQualifiers {n} {
+    global tcl_version
+    if { $tcl_version >= 8.0 && ${itcl::version} >= 3.0 } {
+	return [namespace qualifiers $n]
+    } else {
+	return [info namespace qualifiers $n]
+    }
+}
+
+##########################################################################
+#### @scope
+# 
+# Defined for Itcl version 3.0, since it disappeared. Sheesh...
+#
+if { ${itcl::version} >= 3.0 } {
+    proc @scope {ns args} {
+	uplevel namespace inscope $ns $args
+    }
+}
+
+##########################################################################
+#### infoClasses
+# 
+# Use this instead of "info classes"
+#
+proc infoClasses {{c {}}} {
+    global tcl_version
+    if { $tcl_version >= 8.0 && ${itcl::version} >= 3.0 } {
+	uplevel ::itcl::find classes $c
+    } else {
+	uplevel info classes $c
+    }
+}
+
+##########################################################################
+#### infoObjects
+# 
+# Use this instead of "info objects"
+#
+proc infoObjects {{o {}}} {
+    global tcl_version
+    if { $tcl_version >= 8.0 && ${itcl::version} >= 3.0 } {
+	uplevel ::itcl::find objects $c
+    } else {
+	uplevel info objects $c
+    }
+}
+
+##########################################################################
+#### infoWhichCommand
+# 
+# Use this instead of "info which -command foo" or "info commands foo."
+#
+proc infoWhichCommand {c} {
+    global tcl_version
+    if { $tcl_version >= 8.0 && ${itcl::version} >= 3.0 } {
+	uplevel info commands $c
+    } else {
+	uplevel info which -command $c
+    }
+}
+
+##########################################################################
+#### infoWhich
+# 
+# Use this instead of "info which foo" or "info commands foo."
+#
+proc infoWhich {c} {
+    global tcl_version
+    if { $tcl_version >= 8.0 && ${itcl::version} >= 3.0 } {
+	uplevel info commands $c
+    } else {
+	uplevel info which $c
+    }
+}
+
+##########################################################################
+#### infoContext
+# 
+# Use this instead of "info context" or "namespace current"
+#
+proc infoContext {} {
+    global tcl_version
+    if { $tcl_version >= 8.0 && ${itcl::version} >= 3.0 } {
+	uplevel namespace current
+    } else {
+	uplevel info context
+    }
+}

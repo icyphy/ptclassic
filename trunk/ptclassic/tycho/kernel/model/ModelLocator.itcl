@@ -151,7 +151,7 @@ class ::tycho::ModelLocator {
 
     # Get access to the unique instance
     proc instance {} {
-        if { [info which ::tycho::modelLocator] == "" } {
+        if { [infoWhich ::tycho::modelLocator] == "" } {
             uplevel #0 ::tycho::ModelLocator ::tycho::modelLocator
         }
         return ::tycho::modelLocator
@@ -267,7 +267,7 @@ body ::tycho::ModelLocator::load {proxy} {
 
     # Create the model
     set cls [attrget $proxy -class]
-    set nm [::tycho::autoName [string tolower [info namespace tail $cls]]]
+    set nm [::tycho::autoName [string tolower [namespaceTail $cls]]]
     set model [uplevel #0 $cls $nm]
  
     puts "Loading $cls $nm"

@@ -155,7 +155,7 @@ proc ::tycho::view {view args} {
         update idletasks
 
         # Make sure the window still exists, and abort if not
-        if { [info which -command $wname] == "" } {
+        if { [infoWhichCommand $wname] == "" } {
             ::tycho::silentError
         } else {
             wm deiconify $wname
@@ -418,7 +418,7 @@ body ::tycho::Displayer::destructor {} {
 # view is not displayed -- call <code>showView</code> to do this.
 #
 body ::tycho::Displayer::attachView {view args} {
-    set view [::info namespace tail $view]
+    set view [namespaceTail $view]
 
     if [::info exists _viewtag($view)] {
 	error "View $view already exists in Displayer $this"
@@ -511,7 +511,7 @@ body ::tycho::Displayer::attachView {view args} {
 # more attached views, display the default menubar and status bar.
 #
 body ::tycho::Displayer::destroyView {view} {
-    set view [::info namespace tail $view]
+    set view [namespaceTail $view]
     verifyView $view detachView
 
     # Destroy the view. Before doing so, check that the view
@@ -521,7 +521,7 @@ body ::tycho::Displayer::destroyView {view} {
     # execution will jump back up to the top level and none
     # of the following code will be executed.
     set tag $_viewtag($view)
-    if { [::info which -command $view] != "" } {
+    if { [::infoWhichCommand $view] != "" } {
 	# FIXME: Itcl 3.0
 	global tcl_version
 	if { $tcl_version >= 8.0 } {
@@ -636,7 +636,7 @@ body ::tycho::Displayer::halfHeight {} {
 # If the view is not in the display, do nothing.
 #
 body ::tycho::Displayer::hideView {view} {
-    set view [::info namespace tail $view]
+    set view [namespaceTail $view]
     if { ! [info exists _viewtag($view)] || ! $_showing($view) } {
         return
     }
@@ -744,7 +744,7 @@ body ::tycho::Displayer::saveCrash {} {
 # currentView.
 # 
 body ::tycho::Displayer::setCurrentView {view} {
-    set view [::info namespace tail $view]
+    set view [namespaceTail $view]
 
     # Only pack new menubar and status bar if different from previous
     if {$view != $currentView} {
@@ -832,7 +832,7 @@ body ::tycho::Displayer::setCurrentView {view} {
 body ::tycho::Displayer::setEmptyView {} {
     # Unpack existing components. Be sure to catch the case in which
     # the current view has already been deleted.
-    if { $currentView == "" || [info which -command $currentView] == "" } {
+    if { $currentView == "" || [infoWhichCommand $currentView] == "" } {
 	set tag ""
     } else {
 	# FIXME: this doesn't work for tcl++. For now, insert this
@@ -877,12 +877,12 @@ body ::tycho::Displayer::setEmptyView {} {
 # pack command, and override the default options.
 #
 body ::tycho::Displayer::showView {view args} {
-    set view [::info namespace tail $view]
+    set view [namespaceTail $view]
     verifyView $view showView
 
     # If view is already visible, give it the focus and return.
     if $_showing($view) {
-	if { [::info which -command $view] != "" } {
+	if { [::infoWhichCommand $view] != "" } {
 	    # FIXME: Itcl 3.0
 	    global tcl_version
 	    if { $tcl_version >= 8.0 } {

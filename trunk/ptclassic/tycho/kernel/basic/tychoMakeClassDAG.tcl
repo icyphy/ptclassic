@@ -90,7 +90,7 @@ proc tychoMkClassGraph {title filename args} {
 		    $classEnd}]
             set classfile($nm) $file
 	    set htmlfile($nm) [file join [file dirname $file] \
-		    doc codeDoc [info namespace tail $nm].html]
+		    doc codeDoc [namespaceTail $nm].html]
 	    #puts "$nm $classStartIndices $classEnd \
 	    #    [string range $contents $classEnd [expr {$classEnd+40}]]"
 

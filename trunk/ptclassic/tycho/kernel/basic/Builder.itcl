@@ -357,12 +357,12 @@ body ::tycho::Builder::sources {} {
 body ::tycho::Builder::filesLoaded { {namespace ::tycho} } {
     global auto_path
     set filelist {}
-    set loadedclasslist [info namespace children $namespace]
+    set loadedclasslist [namespaceChildren $namespace]
     foreach loadedclass $loadedclasslist {
 	foreach dir $auto_path {
 	    foreach file [glob -nocomplain [file join $dir *]] {
 		if {[file rootname $dir] \
-			== [info namespace tail $loadedclass]} {
+			== [namespaceTail $loadedclass]} {
 		    lappend filelist $file
 		}
 	    }

@@ -282,7 +282,7 @@ class ::tycho::File {
     method saveCrash {}
 
     # If the file is modified, then ask the user if they want to save it
-    method saveQuery {useSaveAs}
+    method saveQuery {{useSaveAs 0}}
 
     # Toggle the read-only status of a file (maybe invoking revision control).
     method toggleReadOnly {}
@@ -1032,7 +1032,7 @@ body ::tycho::File::saveCrash {} {
 # the calling stack all the way to the top-level.  This has the effect
 # of cancelling the entire operation.
 #
-body ::tycho::File::saveQuery { {useSaveAs 0}} {
+body ::tycho::File::saveQuery {{useSaveAs 0}} {
     if {$modified == 1 && $itk_option(-save)} {
 	set title [::tycho::url tail $completeFilePath]
         set nm [::tycho::autoName .filedestr]

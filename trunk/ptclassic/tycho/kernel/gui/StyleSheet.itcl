@@ -475,7 +475,7 @@ body ::tycho::StyleSheet::_updateoptions {command args} {
     # configure{} method.
     foreach {widget option _} [eval concat \
             [array names _widgetoptions [list * * $param]]] {
-        if { [info which -command $widget] == "" } {
+        if { [infoWhichCommand $widget] == "" } {
             catch {unset _widgetstyle($widget)}
             unset _widgetoptions([list $widget $option $param])
             continue
@@ -526,7 +526,7 @@ body ::tycho::StyleSheet::dfltcget {name attribute} {
 #
 body ::tycho::StyleSheet::namebysubscriber {subscriber param} {
     # Get subscriber command
-    set s [::info which -command $subscriber]
+    set s [::infoWhichCommand $subscriber]
     if { $s != "" } {
         set subscriber $s
     }
@@ -561,7 +561,7 @@ body ::tycho::StyleSheet::style {stylesheet {subscriber {}} {style {}}} {
 	# Get all subscribers and styles
 	array get _widgetstyle
     } else {
-	set s [::info which -command $subscriber]
+	set s [::infoWhichCommand $subscriber]
 	if { $s != "" } {
 	    set subscriber $s
 	}
@@ -645,7 +645,7 @@ body ::tycho::StyleSheet::style {stylesheet {subscriber {}} {style {}}} {
 #
 body ::tycho::StyleSheet::subscribe {mode {subscriber {}} args} {
     # Get subscriber command if it exists
-    set s [::info which -command $subscriber]
+    set s [::infoWhichCommand $subscriber]
     if { $s != "" } {
 	set subscriber $s
     }
@@ -722,7 +722,7 @@ body ::tycho::StyleSheet::unsubscribe {mode subscriber args} {
     switch -exact $mode {
         "options" {
             # Get subscriber command if it exists
-            set s [::info which -command $subscriber]
+            set s [::infoWhichCommand $subscriber]
             if { $s != "" } {
                 set subscriber $s
             }
@@ -810,7 +810,7 @@ body ::tycho::StyleSheet::load {stylesheet} {
 	set model [::tycho::StyleSheet [::tycho::autoName stylesheet] \
 		-modelname $stylesheet \
 		-filename $userfile \
-		-master [info which -command $master]]
+		-master [infoWhichCommand $master]]
 	set _stylemodel($stylesheet) $model
 	
 	# If the user file exists, load it

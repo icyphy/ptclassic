@@ -37,7 +37,7 @@
 # Complain about an abstract method being called.
 #
 proc ::tycho::abstractMethod {method} {
-    error "Method $method of class [uplevel {info context}] is abstract."
+    error "Method $method of class [uplevel {infoContext}] is abstract."
 }
 
 ##########################################################################
@@ -46,7 +46,7 @@ proc ::tycho::abstractMethod {method} {
 # Complain about an abstract procedure being called.
 #
 proc ::tycho::abstractProc {proc} {
-    error "Procedure $proc of class [uplevel {info context}] is abstract."
+    error "Procedure $proc of class [uplevel {infoContext}] is abstract."
 }
 
 ##########################################################################

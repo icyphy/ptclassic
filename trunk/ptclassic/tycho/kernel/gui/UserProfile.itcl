@@ -146,9 +146,9 @@ class ::tycho::UserProfile {
 
     # Get the unique instance
     proc instance {} {
-        if { [info which ::tycho::userProfile] == "" } {
-            uplevel #0 ::tycho::UserProfile ::tycho::userProfile
-        }
+	if { [infoWhich ::tycho::userProfile] == "" } {
+	    uplevel #0 ::tycho::UserProfile ::tycho::userProfile
+	}
         return ::tycho::userProfile
     }
 
@@ -204,7 +204,7 @@ body ::tycho::UserProfile::getstyle {stylesheet {widget {}}} {
     if { $widget != "" } {
         # See if the widget's class matches anything, going up the hierarchy
         foreach class [$widget info heritage] {
-            set class [info which -command $class]
+            set class [infoWhichCommand $class]
             if [exists $class -$stylesheet] {
                 return [attrget $class -$stylesheet]
             }

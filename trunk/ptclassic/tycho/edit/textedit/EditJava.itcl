@@ -301,7 +301,7 @@ body ::tycho::EditJava::gendocBuffer {} {
 body ::tycho::EditJava::genidocBuffer {} {
     return [ ::tycho::EditProgram::gendocBufferInternal \
         [list set docfile [file join doc codeDoc \
-                [info namespace tail [getClassName]].idoc]] \
+                [namespaceTail [getClassName]].idoc]] \
     {
         set debug 0
         set generateIndex 0

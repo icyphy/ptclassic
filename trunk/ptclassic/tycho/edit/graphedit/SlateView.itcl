@@ -698,7 +698,7 @@ body ::tycho::SlateView::library {mode args} {
 # Add a model to the list of known models. Note that _object_
 # must be a globally-accessible object. To ensure this, clients
 # must either create the model using <b>uplevel #0</b>, or
-# use <b>info which -command _object_</b> before calling this
+# use <b>infoWhichCommand _object_</b> before calling this
 # method.
 #
 # <dt><b>delete</b> _name_
@@ -735,7 +735,7 @@ body ::tycho::SlateView::model {mode args} {
             # Extract args
             set name [lindex $args 0]
             set object [lindex $args 1]
-            if { [::info which -command $object] == "" } {
+            if { [infoWhichCommand $object] == "" } {
                 error "Model $name ($object) is not accessible in this scope"
             }
             if [::info exists _model($name)] {
@@ -927,7 +927,7 @@ body ::tycho::SlateView::popup {mode name args} {
 	    }
 	    set tagorid [slateid $slatetag]
 	    $_slate bind $tagorid <Button-3> \
-		    [list @scope [info context] $this _showpopup \
+		    [list @scope [infoContext] $this _showpopup \
 		    %X %Y $_contextmenus($name) $command $predicate]
         }
         "clear" {
