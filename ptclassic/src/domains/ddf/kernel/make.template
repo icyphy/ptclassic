@@ -37,14 +37,17 @@ LIB=libddf.a
 # Library sources
 SRCS= \
  DDFConnect.cc DDFScheduler.cc DDFStar.cc DDFWormhole.cc DDFWormConnect.cc \
- DDFDomain.cc
+ DDFDomain.cc \
+ CaseScheduler.cc ForScheduler.cc DoWhileScheduler.cc RecurScheduler.cc
 
 # Header files
 HDRS= DDFConnect.h DDFScheduler.h DDFStar.h DDFUniverse.h DDFWormhole.h DDFWormConnect.h \
+ CaseScheduler.h ForScheduler.h DoWhileScheduler.h RecurScheduler.h
 
 # Library objects
 OBJS= DDFConnect.o DDFScheduler.o DDFStar.o DDFWormhole.o DDFWormConnect.o \
- DDFDomain.o
+ DDFDomain.o \
+ CaseScheduler.o ForScheduler.o DoWhileScheduler.o RecurScheduler.o
 
 all:	makefile $(LIB)
 
