@@ -28,8 +28,12 @@ ENHANCEMENTS, OR MODIFICATIONS.
 // but written from scratch.
 // $Id$
 
+// checking _Complex_h is a hack allowing to use Complex.h from libg++
+// when included before ComplexSubset.h and vice versa
+#ifndef _Complex_h
 #ifndef _ComplexSubset_h
 #define _ComplexSubset_h 1
+#define _Complex_h
 #ifdef __GNUG__
 #pragma interface
 #endif
@@ -166,4 +170,5 @@ Complex pow(double base, const Complex& expon);
 class ostream;
 
 ostream& operator<<(ostream&, const Complex&);
-#endif
+#endif //_ComplexSubset_h
+#endif //_Complex_h
