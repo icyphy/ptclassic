@@ -92,13 +92,16 @@ public:
 // about an action that has been registered via Tcl.
 class TclAction {
 public:
-	char* name;
-	SimAction *action;
-	char* tclCommand;
+	// Constructor.  It was added to silence compiler warnings.
+	TclAction() {}
 
 	// Destructor cancels the action and
 	// frees the memory associated with the above pointers.
 	~TclAction();
+
+	char* name;
+	SimAction *action;
+	char* tclCommand;
 };
 
 // TclActionList is a list of pre or post actions that have been
