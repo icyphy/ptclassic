@@ -316,6 +316,14 @@
 
 ########### tools (alphabetical)
 
+# Color picker -- needs refinement
+::tycho::register mode "colorpicker" \
+	-command {::tycho::pickcolor} \
+	-viewclass ::tycho::ColorPicker \
+	-label {Color Picker}  \
+	-category "tool" \
+	-underline 0
+
 # "Diff" viewer -- will not run on the Macintosh
 if {$tcl_platform(platform) != "macintosh"} {
     ::tycho::register mode "diffviewer" \
