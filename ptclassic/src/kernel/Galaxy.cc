@@ -71,17 +71,19 @@ int Galaxy::flatten(Galaxy* g, int removeFlag) {
     while ((block = nextBlock++) != NULL)
 	g->addBlock(*block,block->name());
 
-    if (removeFlag && parent()) {
-	parent()->asGalaxy().removeBlock(*this);
-	delete this;
-    }
-
-    Geodesic* nodeToMove;
     NodeListIter nextNodeToMove(nodes);
+    Geodesic* nodeToMove;
     while ((nodeToMove = nextNodeToMove++) != NULL)
 	g->nodes.put(*nodeToMove);
+
     nodes.initialize();
     empty();
+
+    if (removeFlag && parent()) {
+	parent()->asGalaxy().removeBlock(*this);
+	delete this;		// must be LAST thing done here
+    }
+
     return TRUE;
 }
 
