@@ -70,7 +70,7 @@
 # <ul>
 # <li><b>none</b>: Move anywhere within the bounds
 # <li><b>x</b>: Move only along the horizontal axis
-# <li><b>y</b>: Move only along the horizontal axis
+# <li><b>y</b>: Move only along the vertical axis
 # <li><b>positive</b>: Move only along the positive diagonal axis
 # <li><b>negative</b>: Move only along the negative diagonal axis
 # </ul>
