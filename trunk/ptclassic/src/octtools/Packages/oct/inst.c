@@ -40,6 +40,21 @@ static char SccsId[]="$Id$";
 #include "internal.h"
 #include "io.h"
 #include "tr.h"
+#include "attach.h"
+#include "bb.h"
+#include "chain.h"
+#include "change_record.h"
+#include "create.h"
+#include "get.h"
+#include "inst.h"
+#include "io_procs.h"
+#include "master.h"
+#include "oct_utils.h"
+#include "term.h"
+
+/* Forward references (should be static?) */
+octStatus oct_compute_instance_bb
+	ARGS((struct instance  *inst));
 
 static int instance_write_fields();
 static int instance_read_fields();
@@ -55,6 +70,7 @@ static int instance_bb();
 extern struct object_desc oct_default_desc;
 static struct object_desc *super = &oct_default_desc;
 
+void
 oct_instance_desc_set(object_desc)
 struct object_desc *object_desc;
 {
@@ -157,7 +173,6 @@ int32 old_xid, old_id;
 {
     struct octInstance *user_instance = &instance->contents.instance;
     struct facet *instance_desc;
-    struct term *ptr;
     struct instance *new;
     struct master *master;
     octStatus retval;
@@ -363,8 +378,6 @@ generic *iptr;
 int by_user;
 {
     struct instance *instance = (struct instance *) iptr;
-    octStatus retval;
-    struct chain *ptr, *next;
     struct octBox bbox;
 
     if (by_user) {
@@ -504,7 +517,7 @@ struct instance  *inst;
     return OCT_OK;
 }
     
-static
+static int
 instance_free_fields(iptr)
 generic *iptr;
 {
@@ -513,6 +526,7 @@ generic *iptr;
     if (instance->name != NIL(char)) {
 	oct_str_free(instance->name);
     }
+    return 1;
 }
 
 
@@ -710,6 +724,7 @@ struct term *term;
  * called when a formal terminal in the master has been deleted.
  */
 
+int
 oct_delete_actual(inst, term)
 struct instance *inst;
 struct term *term;
@@ -734,6 +749,7 @@ struct term *term;
  * master has changed since the instance has last been read in.
  */
 
+int
 oct_update_terminals(master, inst)
 struct facet *master;
 struct instance *inst;
