@@ -3,8 +3,9 @@
 #				All Rights Reserved.
 # For creating an SDF loop scheduler.
 
-SOURCES =	LSNode.cc LSMaster.cc LSGraph.cc LoopScheduler.cc \
+LIBSOURCES =	LSNode.cc LSMaster.cc LSGraph.cc LoopScheduler.cc \
 		MergeList.cc 
+SOURCES =	$(LIBSOURCES) LoopTarget.cc
 HEADERS =	LSNode.h LSMaster.h LSGraph.h \
 		LoopScheduler.h MergeList.h 
  
@@ -21,7 +22,6 @@ DESTDIR=$(ROOT)/lib.$(ARCH)
 
 GPPFLAGS = -g
 GNU = g++
-GNUINCLUDE = /usr/gnu/lib/g++-include
 INC =-I$(SDFKERNEL) -I$(KERNEL) -I$(EGKERNEL) -I$(LSKERNEL)
 .SUFFIXES: .cc 
 .cc.o:
@@ -30,15 +30,15 @@ INC =-I$(SDFKERNEL) -I$(KERNEL) -I$(EGKERNEL) -I$(LSKERNEL)
 OBJS = $(SOURCES:.cc=.o)
 LIB = libLS.a
 
-all:	makefile $(LIB)
+all:	makefile $(OBJS) $(LIB) 
 
-$(LIB):	makefile $(SOURCES) $(HEADERS) $(OBJS)
+$(LIB):	makefile $(LIBOBJS)
 	rm -f $(LIB)
-	ar cq $(LIB) $(OBJS) 
+	ar cq $(LIB) $(LIBOBJS) 
 	ranlib $(LIB)
 
 # "make install" puts things in the official place
-install:	makefile $(DESTDIR)/$(LIB)
+install:	all $(DESTDIR)/$(LIB)
 
 $(DESTDIR)/$(LIB):	$(LIB)
 		rm -f $(DESTDIR)/$(LIB)
