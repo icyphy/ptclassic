@@ -37,6 +37,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "ACSCore.h"
 #include "ACSCorona.h"
 
+// dummy corona for default constructor.
 ACSCorona	ACSCore::dummy;
 
 // constructor takes a reference to a Corona

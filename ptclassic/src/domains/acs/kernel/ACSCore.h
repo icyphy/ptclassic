@@ -79,10 +79,13 @@ public:
 		ACSStar::addState(s);
 	}
 
+	// virtual identification for Fixed-Point cores used
+	// by Target to determine if Plasma substitution is necessary.
 	virtual int isFixedPoint() const { return FALSE; }
 
 protected:
 
+	// dummy corona for virtual getCorona()
 	static ACSCorona dummy;
 
 	// returns reference to the core's corona
@@ -92,6 +95,8 @@ protected:
 	const char *category;
 
 	// Corona interfaces core to galaxy, contains ports, parameters.
+	// Corona is now defined in the derrived cores as a reference to
+	// the derrived Corona class.
        	// ACSCorona & corona;
 
 };
