@@ -32,7 +32,7 @@ write the result to 'output'.
 		// mvImage is of incorrect type.
 		name { otherInputs }
 		type { "int" }
-		arglist { "(const GrayImage** pi, const MVImage** mi, \
+		arglist { "(const GrayImage** pi, const MVImage** mi, 
 					Packet& pPkt, Packet& mPkt)" }
 		access { private }
 		code {
@@ -56,9 +56,9 @@ write the result to 'output'.
 		name { doInvMC }
 		type { "void" }
 		access { private }
-		arglist { "(unsigned char* out, unsigned const char* prev, \
-				unsigned const char* diff, const char* horz, \
-				const char* vert, const int width, \
+		arglist { "(unsigned char* out, unsigned const char* prev, 
+				unsigned const char* diff, const char* horz, 
+				const char* vert, const int width, 
 				const int height, const int blocksize)" }
 		code {
 			int ii, jj;
@@ -79,7 +79,7 @@ write the result to 'output'.
 	method {
 		name { BlockIsLost }
 		access { private }
-		arglist{ "(unsigned const char* ptr, const int ii, \
+		arglist{ "(unsigned const char* ptr, const int ii, 
 				const int jj, const int blocksize, const int width)" }
 		type { "int" }
 		code {
@@ -98,9 +98,9 @@ write the result to 'output'.
 		name { DoOneBlock }
 		type { "void" }
 		access { protected }
-		arglist { "(unsigned char* out, unsigned const char* prev, \
-				unsigned const char* diff, const char horz, \
-				const char vert, const int ii, const int jj, \
+		arglist { "(unsigned char* out, unsigned const char* prev, 
+				unsigned const char* diff, const char horz, 
+				const char vert, const int ii, const int jj, 
 				const int blocksize, const int width)" }
 		code {
 			int i, j, index, mcindex;
@@ -120,8 +120,8 @@ write the result to 'output'.
 		name { DoLostBlock }
 		type { "void" }
 		access { protected }
-		arglist { "(unsigned char* out, unsigned const char* prev, \
-				const char horz, const char vert, const int ii, \
+		arglist { "(unsigned char* out, unsigned const char* prev, 
+				const char horz, const char vert, const int ii, 
 				const int jj, const int blocksize, const int width)" }
 		code {
 			int i, j, index, mcindex;
@@ -155,7 +155,7 @@ write the result to 'output'.
 		name { sizesMatch }
 		type { "int" }
 		access { private }
-		arglist { "(const GrayImage* im1, const GrayImage* im2, \
+		arglist { "(const GrayImage* im1, const GrayImage* im2, 
 				const MVImage* imm)" }
 		code {
 			int w = im1->retWidth();
@@ -182,7 +182,7 @@ write the result to 'output'.
 
 // Handle resynchronization inputs.
 		if (!otherInputs(&pastImg, &mvImg, pastPkt, mvPkt)) {
-			Packet out(*diffImg); output%0 << out;
+			output%0 << difPkt;
 			return;
 		}
 

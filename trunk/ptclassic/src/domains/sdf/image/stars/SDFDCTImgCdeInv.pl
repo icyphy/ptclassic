@@ -31,7 +31,7 @@ This one works on DCTImages, not GrayImages.
 //// CODE
 	hinclude { "DCTImage.h", "Error.h" }
 
-	protected {
+	code {
 // Numbers unlikely to come from a DCT...
 		const float StartOfBlock = 524288.0;
 		const float StartOfRun = 1048576.0;
@@ -145,7 +145,7 @@ This one works on DCTImages, not GrayImages.
 			return;
 		}
 		if (hiImage->fragmented() || (hiImage->retFullSize() !=
-				HiPri * (hiImage->fullWidth() * hiImage->fullHeight()) /
+				int(HiPri) * (hiImage->fullWidth() * hiImage->fullHeight()) /
 				(hiImage->retBS() * hiImage->retBS()))) {
 			delete hiImage;
 			Error::abortRun(*this, "Hi-pri image wrong size.");

@@ -20,7 +20,7 @@ This star inverse zig-zag scans a DCTImage.
 		name { ziginv }
 		type { "void" }
 		access { private }
-		arglist { "(float* imData, const float* fData, const int i, \
+		arglist { "(float* imData, const float* fData, const int i,
 				const int j, const int width, const int blockSize)" }
 		code {
 			int k, l, indx;

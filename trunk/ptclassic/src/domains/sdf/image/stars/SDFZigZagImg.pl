@@ -20,7 +20,7 @@ This is useful before quantization.
 		name { zigzag }
 		type { "void" }
 		access { protected }
-		arglist { "(float* fData, const float* imData, const int i, \
+		arglist { "(float* fData, const float* imData, const int i,
 				const int j, const int width, const int blockSize)" }
 		code {
 			int k, l, indx;

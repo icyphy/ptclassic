@@ -19,7 +19,7 @@ complete filename of the displayed image.
 	}
 
 	ccinclude {
-		"GrayImage.h" , <std.h> , <stdio.h>, "UserOutput.h", "Error.h"
+		"GrayImage.h" , <std.h> , <stdio.h>, "Error.h"
 	}
 
 // INPUT AND STATES.

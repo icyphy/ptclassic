@@ -18,7 +18,7 @@ before edge detection. It removes inter-field flicker quite well
 when displaying single frames from a moving sequence.
 	}
 
-	ccinclude { "GrayImage.h", "UserOutput.h", <std.h> }
+	ccinclude { "GrayImage.h", <std.h> }
 
 // INPUT AND STATES.
 	input {

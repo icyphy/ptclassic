@@ -40,7 +40,7 @@ all phase transitions.  It also assumes that the input is in the
 		if (phaseChange < -M_PI) phaseChange += 2*M_PI;
 		if (phaseChange > M_PI) phaseChange -= 2*M_PI;
 		outPhase = double(outPhase) + phaseChange;
-		output%0 << outPhase;
+		output%0 << double(outPhase);
 		prevPhase = newPhase;
 	}
 }

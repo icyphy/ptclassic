@@ -40,11 +40,12 @@ can be added or reduced-search motion compensation can be performed.
 	virtual method {
 		name { doSyncImage }
 		access { protected }
-		arglist { "(const GrayImage* inp)" }
+		arglist { "(Packet & pkt)" }
+// pkt is a packet holding the image to send on diffOut
 		type { "void" }
 		code {
 			LOG_NEW; MVImage* mv = new MVImage;
-			Packet pkt(*inp), empty(*mv);
+			Packet empty(*mv);
 			diffOut%0 << pkt;
 			mvOut%0 << empty;
 	}	}
@@ -53,8 +54,8 @@ can be added or reduced-search motion compensation can be performed.
 		name { doMC }
 		type { "void" }
 		access { private }
-		arglist { "(unsigned char* diff, unsigned const char* cur, \
-				unsigned const char* prev, char* horz, char* vert, \
+		arglist { "(unsigned char* diff, unsigned const char* cur, 
+				unsigned const char* prev, char* horz, char* vert, 
 				const int width, const int height)" }
 		code {
 			int ii, jj, xvec, yvec;
@@ -98,8 +99,8 @@ can be added or reduced-search motion compensation can be performed.
 	virtual method {
 		name { FindMatch }
 		type { "void" }
-		arglist { "(unsigned const char* cur, \
-				unsigned const char* prev, const int ii, const int jj, \
+		arglist { "(unsigned const char* cur, 
+				unsigned const char* prev, const int ii, const int jj, 
 				int& xvec, int& yvec, const int width)" }
 		access { protected }
 		code {
@@ -139,9 +140,9 @@ can be added or reduced-search motion compensation can be performed.
 		name { DoOneBlock }
 		access { protected }
 		type { "void" }
-		arglist { "(char& horz, char& vert, unsigned char* diff, \
-				unsigned const char* cur, unsigned const char* prev, \
-				const int ii, const int jj, const int xvec, \
+		arglist { "(char& horz, char& vert, unsigned char* diff, 
+				unsigned const char* cur, unsigned const char* prev, 
+				const int ii, const int jj, const int xvec, 
 				const int yvec, const int width)" }
 		code { // Set diff frame and mvects.
 			int i, j, tmp1, tmp2;
@@ -201,7 +202,7 @@ can be added or reduced-search motion compensation can be performed.
 
 // Initialize if this is the first input image.
 		if (!pastPkt.typeCheck("GrayImage")) {
-			doSyncImage(inImage);
+			doSyncImage(curPkt);
 			return;
 		}
 

@@ -19,7 +19,7 @@ The image frame number is appended to the root filename to form the
 complete filename of the displayed images.
 	}
 
-	ccinclude { "GrayImage.h" , <std.h> , <stdio.h>, "UserOutput.h" }
+	ccinclude { "GrayImage.h" , <std.h> , <stdio.h> }
 
 // INPUT AND STATES.
 
@@ -33,13 +33,15 @@ complete filename of the displayed images.
 	}
 	defstate {
 		name { Save }
-		type { string }
-		default { "n" }
-		desc { If 'y' or 'Y', then save the file }
+		type { int }
+		default { "NO" }
+		desc { If true (YES), then save the file }
 	}
 
-	protected {
+	header {
 		const int LINELEN = 100;
+	}
+	protected {
 		char allFileNames[40*LINELEN], rootName[LINELEN],
 				temp1[LINELEN];
 	}
@@ -47,7 +49,7 @@ complete filename of the displayed images.
 	start {
 		allFileNames[0] = '\000';
 
-		char* t = ImageName;
+		const char* t = ImageName;
 		if (t && t[0]) { strcpy(rootName, ImageName); }
 		else { strcpy(rootName, tempFileName()); }
 		strcpy(temp1, tempFileName());
@@ -61,9 +63,7 @@ complete filename of the displayed images.
 		code {
 			LOG_NEW; char* cmd = new char[20 + strlen(allFileNames)];
 			sprintf(cmd, "rm -f %s", temp1); system(cmd);
-			char* u = Save;
-			if ((allFileNames[0]) &&
-					(!u || ((u[0] != 'y') && (u[0] != 'Y')))) {
+			if ((allFileNames[0]) && int(Save)) {
 				sprintf(cmd, "rm -f %s", allFileNames);
 				system(cmd);
 			}
@@ -105,7 +105,7 @@ complete filename of the displayed images.
 			return;
 		}
 
-		fwrite(imD->constData(), sizeof(unsigned char),
+		fwrite((const char*)imD->constData(), sizeof(unsigned char),
 			(unsigned) imD->retWidth() * imD->retHeight(), fptr);
 		fclose(fptr);
 
