@@ -51,6 +51,9 @@ public:
   // Return TRUE if the particle in the port hole is known (present or absent)
   virtual int known() const;
 
+  // Return TRUE if the particle in the port hole is (known as) absent
+  virtual int absent() const;
+
   // Return TRUE if this input is (known as) present
   virtual int present() const;
 
@@ -71,6 +74,7 @@ public:
 
 
   /*virtual*/ int known() const;
+  /*virtual*/ int absent() const;
   /*virtual*/ int present() const;
   
 };
@@ -98,12 +102,13 @@ public:
   virtual int isItOutput() const;
 
   // Make the particle known absent
-  void absent();
+  void makeAbsent();
 
   // Emit a particle
   Particle & emit();
 
   /*virtual*/ int known() const;
+  /*virtual*/ int absent() const;
   /*virtual*/ int present() const;
 
   void initialize();

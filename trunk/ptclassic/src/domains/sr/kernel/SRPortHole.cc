@@ -85,6 +85,11 @@ int SRPortHole::known() const {
   return FALSE;
 }
 
+int SRPortHole::absent() const {
+  Error::abortRun("absent() called on class SRPortHole");
+  return FALSE;
+}
+
 int SRPortHole::present() const {
   Error::abortRun("present() called on class SRPortHole");
   return FALSE;
@@ -107,6 +112,30 @@ int InSRPort::known() const
 
   if ( (farPort = (OutSRPort *) far()) != (OutSRPort *) 0 ) {
     return farPort->known();
+  }
+
+  return FALSE;
+}
+
+
+// Return TRUE if the particle is known absent
+int OutSRPort::absent() const
+{
+
+  if ( emittedParticle == (Particle *) 1 ) {
+    return TRUE;
+  }
+
+  return FALSE;
+}
+
+// Return TRUE if the far port exists and has an absent particle
+int InSRPort::absent() const
+{
+  OutSRPort * farPort;
+
+  if ( (farPort = (OutSRPort *) far()) != (OutSRPort *) 0 ) {
+    return farPort->absent();
   }
 
   return FALSE;
@@ -159,7 +188,7 @@ Particle & InSRPort::get() const
 }
 
 // Make the particle absent
-void OutSRPort::absent()
+void OutSRPort::makeAbsent()
 {
   if ( emittedParticle ) {
     Error::error("Repeated emission on port ", name() );
