@@ -822,6 +822,7 @@ ifdef SDF
 		CUSTOM_DIRS += $(SDFDIR)/wildforce/stars
 		STARS += $(LIBDIR)/sdfwildforce.o
 		LIBS += -lsdfwildforcestars $(WILDFORCE_LIBSPEC)
+		LIBFILES += $(LIBDIR)/libsdfwildforcestars.$(LIBSUFFIX)
 	endif
 	ifdef CG
 		# FIXME: The only thing in sdf/targets also depends on 
