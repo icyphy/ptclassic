@@ -113,11 +113,12 @@ non-zero integer (not necessarily 1).
 	codeblock(prepareAndLoop) {
 	move	#<$addr(input#1)+1,r0		; r0 = input block address + 1
 	clr	b	$ref(input#1),a		; a = input#1
-	tst	a	x:(r0)+,b	b,y0	; y0 = FALSE
+	move    b,y0				; y0 = FALSE
+	tst	a	x:(r0)+,b
 	}
 
 	codeblock(logicAndOpAndLoad,"int numinputs") {
-	do	#@numinputs-2,$label(AndLoop)
+	do	#@numinputs-1,$label(AndLoop)
 	teq	y0,a			; if previous = 0, then a = FALSE
 	tst	b	x:(r0)+,b	; test previous and load next input
 $label(AndLoop)
