@@ -225,7 +225,7 @@ class ::tycho::Slate {
     }
 
     # Return the picture type
-    method type {id}
+    method type {id args}
 
     # Set the horizontal view for scrolling
     method xview {args}
@@ -1185,11 +1185,21 @@ body ::tycho::Slate::scale {id xOrigin yOrigin xScale yScale} {
 #######################################################################
 #### type
 #
-body ::tycho::Slate::type {id} {
+# Return the type of a picture. Note that types are case-sensitive.
+#
+# With the *-shape* option, return the "shape" of the picture. The
+# value returned is a subset of the types.
+#
+body ::tycho::Slate::type {id args} {
     if { [string match {[0-9]*} $id] } {
 	$canvas type $id
     } else {
-	return $picttype($id)
+	getflag shape args
+	if { $shape } {
+	    return [@scope ::tycho::$picttype($id) [list set shape]]
+	} else {
+	    return $picttype($id)
+	}
     }
 }
 
@@ -1207,16 +1217,6 @@ body ::tycho::Slate::yview {args} {
     eval $canvas yview $args
 }
 
-#######################################################################
-#### type
-#
-body ::tycho::Slate::type {id} {
-    if { [string match {[0-9]*} $id] } {
-	$canvas type $id
-    } else {
-	return $picttype($id)
-    }
-}
 
 
 #######################################################################
