@@ -176,13 +176,13 @@ public:
     void receiveMessage(int *VCI) {
           data[4] = 031;
           data[5] = 031;
-          data[6] = char((*VCI)&0377);	
+          data[6] = (char)((*VCI)&0377);	
     }
 
     void calltermMessage(int *VCI) {
           data[4] = 041;
           data[5] = 041;
-          data[6] = char((*VCI)&0377);	
+          data[6] = (char)((*VCI)&0377);	
     }
 
     void stopMessage() {
@@ -205,7 +205,7 @@ public:
     void callDurMessage(int *duration) {
           data[4] = 013;
           data[5] = 013;
-          data[6] = char((*duration)&0377);	
+          data[6] = (char)((*duration)&0377);	
     }
 
     // control messages with two pieces of data to put in
@@ -213,65 +213,65 @@ public:
     void requestMessage(int *VCI1,int *VCI2) {
           data[4] = 023;
           data[5] = 023;
-          data[6] = char((*VCI1)&0377);
-          data[7] = char((*VCI2)&0377);
+          data[6] = (char)((*VCI1)&0377);
+          data[7] = (char)((*VCI2)&0377);
     }
 
     void sendDataMessage(int *duration,int *VCI) {
           data[4] = 033;
           data[5] = 033;
-          data[6] = char((*duration)&0377);
-          data[7] = char((*VCI)&0377);
+          data[6] = (char)((*duration)&0377);
+          data[7] = (char)((*VCI)&0377);
     }
 
     void inquireMessage(int *switchnum,int *VPI) {
           data[4] = 017;
           data[5] = 017;
-          data[6] = char((*switchnum)&0377);
-          data[7] = char((*VPI)&0377);
+          data[6] = (char)((*switchnum)&0377);
+          data[7] = (char)((*VPI)&0377);
     }
 
     void upDateMessage(int *switchnum,int *VPI) {
           data[4] = 027;
           data[5] = 027;
-          data[6] = char((*switchnum)&0377);
-          data[7] = char((*VPI)&0377);
+          data[6] = (char)((*switchnum)&0377);
+          data[7] = (char)((*VPI)&0377);
     }
 
     void downDateMessage(int *switchnum,int *VPI) {
           data[4] = 037;
           data[5] = 037;
-          data[6] = char((*switchnum)&0377);
-          data[7] = char((*VPI)&0377);
+          data[6] = (char)((*switchnum)&0377);
+          data[7] = (char)((*VPI)&0377);
     }
 
     void sotMessage(int* IVCI, int* OVCI) {
           data[4] = 057;
           data[5] = 057;
-          data[2] = char((*IVCI)&0377);
-          data[3] = char((*OVCI)&0377);
+          data[2] = (char)((*IVCI)&0377);
+          data[3] = (char)((*OVCI)&0377);
     }
 
     void eotMessage(int* IVCI, int* OVCI) {
           data[4] = 022;
           data[5] = 022;
-          data[2] = char((*IVCI)&0377);
-          data[3] = char((*OVCI)&0377);
+          data[2] = (char)((*IVCI)&0377);
+          data[3] = (char)((*OVCI)&0377);
     }
 
     void transmitMessage(int *IVCI, int *OVCI, int *VPI) {
           data[4] = 047;
           data[5] = 047;
-          data[6] = char((*IVCI)&0377);
-          data[7] = char((*OVCI)&0377);
-          data[8] = char((*VPI)&0377);
+          data[6] = (char)((*IVCI)&0377);
+          data[7] = (char)((*OVCI)&0377);
+          data[8] = (char)((*VPI)&0377);
     }
 
     void srtuMessage(int *IVCI,int *OVCI,int *SCPE,int *DCPE) {
-          data[0] = char((*IVCI)&0377);
-          data[1] = char((*OVCI)&0377);
-          data[2] = char((*SCPE)&0377);
-          data[3] = char((*DCPE)&0377);
+          data[0] = (char)((*IVCI)&0377);
+          data[1] = (char)((*OVCI)&0377);
+          data[2] = (char)((*SCPE)&0377);
+          data[3] = (char)((*DCPE)&0377);
     }
 
     int nulltestMessage() const {
