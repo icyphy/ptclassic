@@ -56,9 +56,12 @@ endif
 
 diff:
 	diff -r $(TST_DOMAIN)/results .
+
+# Copy the results of the tests into the results dir for regression testing
 updateresults: $(TST_DOMAIN)/results
-	rm $(TST_DOMAIN)/results/*
+	rm -f $(TST_DOMAIN)/results/*
 	mv *.pt *.pt.* *.pout xv* $(TST_DOMAIN)/results
+
 $(TST_DOMAIN)/results:
 	mkdir $@
 clean:
