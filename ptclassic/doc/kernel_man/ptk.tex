@@ -1,0 +1,41 @@
+\documentstyle[latexinfo]{book}
+%
+% Format the kernel manual as a book or an info file.
+%
+% Adjust margins to fit more on a page.
+%
+\setlength{\textwidth}{6in}
+\setlength{\oddsidemargin}{0.5in}
+\setlength{\evensidemargin}{0in}
+\addtolength{\textheight}{\topmargin}
+\setlength{\topmargin}{0in}
+\begin{document}
+
+\comment version $Id$ $Revision$
+\setfilename{ptk.info}
+
+\begin{iftex}
+
+\input{title}
+\maketitle
+
+\clearpage
+\pagestyle{empty}
+\vspace*{\fill}
+
+\input{copyright}
+
+\clearpage
+\pagestyle{plain}
+\pagenumbering{roman}
+\tableofcontents
+
+\clearpage
+\pagestyle{headings}
+\pagenumbering{arabic}
+
+\end{iftex}
+
+\include{kernel}
+
+\end{document}
