@@ -57,6 +57,14 @@ sources depend TAGS: obj.$(PTARCH)
 obj.$(PTARCH) obj.$(PTARCH)/octtools: MAKEARCH
 	sh MAKEARCH
 
+# This rule builds and installs everything but the xv and the gnu tools.
+# tcltk, octtools, and gthreads source are distributed
+# as a separate tar file.
+ntbuild: obj.$(PTARCH) install_tcltk install_octtools 
+	install_gthreads install
+
+ntbuild_clean: clean_tcltk clean_octtools clean_gthreads clean
+
 # This rule builds and installs everything but the gnu tools.
 # tcltk, octtools, and gthreads source are distributed
 # as a separate tar file.
