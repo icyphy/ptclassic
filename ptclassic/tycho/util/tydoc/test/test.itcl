@@ -202,7 +202,8 @@ proc testHTMLDocSysKernelFiles {} {
 
 
 
-source ../DocSys.itcl
+source ../TyDoc.itcl
+source ../../../kernel/Path.tcl
 
 # Run the doc system on this file
 testHTMLDocSysThisFile
