@@ -408,8 +408,9 @@ ComplexMatrix ComplexMatrix::inverse() const {
   Complex temp;
 
   // set result to be the identity matrix
-  for(int row = 0; row < nRows; row++)
-    for(int col = 0; col < nRows; col++)
+  int row, col;
+  for(row = 0; row < nRows; row++)
+    for(col = 0; col < nRows; col++)
       if(col == row) result[row][col] = 1;
       else result[row][col] = 0;
 
@@ -554,7 +555,7 @@ StringList FixMatrix::print() const {
   out += ")\n";
   for(int row = 0; row < nRows; row++) {
     for(int col = 0; col < nCols; col++) {
-      out += (*this)[row][col];
+      out += (double)(*this)[row][col];
       out += " ";
     }
     out += "\n";
@@ -667,8 +668,9 @@ FixMatrix FixMatrix::inverse() const {
   Fix temp;
 
   // set result to be the identity matrix
-  for(int row = 0; row < nRows; row++)
-    for(int col = 0; col < nRows; col++)
+  int row, col;
+  for(row = 0; row < nRows; row++)
+    for(col = 0; col < nRows; col++)
       if(col == row) result[row][col] = Fix(double(1)); // make a one
       else result[row][col] = Fix(double(0));          // make a zero
 
@@ -927,8 +929,9 @@ FloatMatrix FloatMatrix::inverse() const {
   double temp;
 
   // set result to be the identity matrix
-  for(int row = 0; row < nRows; row++)
-    for(int col = 0; col < nRows; col++)
+  int row, col;
+  for(row = 0; row < nRows; row++)
+    for(col = 0; col < nRows; col++)
       if(col == row) result[row][col] = 1;
       else result[row][col] = 0;
 
@@ -1186,8 +1189,9 @@ IntMatrix IntMatrix::inverse() const {
   int temp;
 
   // set result to be the identity matrix
-  for(int row = 0; row < nRows; row++)
-    for(int col = 0; col < nRows; col++)
+  int row, col;
+  for(row = 0; row < nRows; row++)
+    for(col = 0; col < nRows; col++)
       if(col == row) result[row][col] = 1;
       else result[row][col] = 0;
 
