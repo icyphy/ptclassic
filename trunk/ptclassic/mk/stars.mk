@@ -307,9 +307,9 @@ ifdef PN
 	CUSTOM_DIRS += $(PNDIR)/kernel $(PNDIR)/stars 
 	SDFLIB = 1
 	PALETTES += PTOLEMY/src/domains/pn/icons/pn.pal
-	# PN is only supported under Sun and Solaris operating systems,
+	# PN is only supported under Sun, Solaris and HP operating systems,
 	# matched by patterns sun% and sol%
-	ifneq ("$(filter sun% sol%,$(PTARCH))","")
+	ifneq ("$(filter sun% sol% hppa% ,$(PTARCH))","")
 		STARS += $(LIBDIR)/pnstars.o
 		LIBS += -lpnstars -lpn
 		LIBFILES += $(LIBDIR)/libpnstars.$(LIBSUFFIX) \
