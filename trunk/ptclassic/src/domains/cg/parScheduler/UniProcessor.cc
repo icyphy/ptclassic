@@ -47,43 +47,35 @@ Date of last revision:
 
 StringList UniProcessor :: display(int makespan)
 {
-	StringList out;
-	sumIdle = makespan - availTime;
-	int form = 0;
+    StringList schedule;
+    sumIdle = makespan - availTime;
 
-	// iterator for the scheduled node
-	ProcessorIter schedIter(*this);
-	NodeSchedule* obj;
+    // iterator for the scheduled node
+    ProcessorIter schedIter(*this);
+    NodeSchedule* obj;
 
-	while((obj = schedIter++) != 0) {
-		ParNode* node = (ParNode*) obj->getNode();
-		if (obj->isIdleTime()) {	// idle node
-			out += "idle (";
-			sumIdle += obj->getDuration();
-		} else {
-			if (node->myStar())
-				out += node->readRealName();
-			else if (node->getType() == -1)
-				out += "send";
-			else
-				out += "recv";
-			out += " (";
-		}
-		out += obj->getDuration();
-		out += ")\t";
-		if (form >= 2) {
-			out += "\n";
-			form = 0;
-		}
-		form++;
+    while((obj = schedIter++) != 0) {
+	ParNode* node = (ParNode*) obj->getNode();
+	if (obj->isIdleTime()) {	// idle node
+	    schedule << "idle";
+	    sumIdle += obj->getDuration();
+	} else {
+	    if (node->myStar())
+		schedule <<  node->readRealName();
+	    else if (node->getType() == -1)
+		schedule << "send";
+	    else
+		schedule << "recv";
 	}
+	schedule << "(" << obj->getDuration() << ")\n";
+    }
 
-	// statistics.
-	out += "\n** total idle time is ";
-	out += sumIdle;
-	out += "\n";
+    StringList out;
+    if (target())
+	out << target()->name() << " - ";
+    out << "idle time: " << sumIdle << '\n' << schedule << '\n';
 
-	return out;
+    return out;
 }
 
 // write Gantt chart.

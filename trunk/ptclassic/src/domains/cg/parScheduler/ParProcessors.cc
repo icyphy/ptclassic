@@ -350,42 +350,35 @@ ParNode* ParProcessors :: matchCommNodes(DataFlowStar* s, EGGate* g, PortHole* p
 
 StringList ParProcessors :: display (NamedObj* galaxy) {
 
-	int makespan = getMakespan();
-	int sum = 0;	// Sum of idle time.
+    int makespan = getMakespan();
+    int sum = 0;	// Sum of idle time.
 
-	StringList out;
+    StringList out;
 
-	// title and number of processors.
-	out += "** Parallel schedule of \"";
-	out += galaxy->fullName();
-	out += "\" on ";
-	out += numProcs;
-	out += " processors.";
-	out += "\n\n";
+    // title and number of processors.
+    out << "Parallel schedule of \"" << galaxy->fullName()
+	<< "\" on " << numProcs << " processors.\n\n";
 
-	// Per each processor.
-	for (int i = 0; i < numProcs; i++) {
-		out += "[PROCESSOR ";
-		out += i;
-		out += "]\n";
-		out += getProc(i)->display(makespan);
-		sum += getProc(i)->getSumIdle();
-		out += "\n\n";
-	}
+    // Per each processor.
+    for (int i = 0; i < numProcs; i++) {
+	out << "[PROCESSOR " << i << "] - "
+	    << getProc(i)->display(makespan);
+	sum += getProc(i)->getSumIdle();
+    }
 
-	double util = 100*(1 - sum / (double(numProcs)*double(makespan)));
+    double util = 100*(1 - sum / (double(numProcs)*double(makespan)));
 
-	// Print out the schedule statistics.
-	out += "************* STATISTICS ******************";
-	out += "\nMakespan is ................. ";
-	out += makespan;
-	out += "\nTotal Idle Time is .......... ";
-	out += sum;
-	out += "\nProcessor Utilization is .... ";
-	out += util;
-	out += " %\n\n";
+    // Print out the schedule statistics.
+    out += "************* STATISTICS ******************";
+    out += "\nMakespan is ................. ";
+    out += makespan;
+    out += "\nTotal Idle Time is .......... ";
+    out += sum;
+    out += "\nProcessor Utilization is .... ";
+    out += util;
+    out += " %\n\n";
 
-	return out;
+    return out;
 }
 
 /*****************************************************************
