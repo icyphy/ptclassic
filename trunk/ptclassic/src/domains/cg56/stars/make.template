@@ -57,6 +57,7 @@ PL_SRCS= \
  CG56MagnavoxIn.pl \
  CG56MagnavoxOut.pl \
  CG56MaxMin.pl \
+ CG56Mux.pl \
  CG56Mpy.pl \
  CG56MpyInt.pl \
  CG56MpyShift.pl \
