@@ -140,32 +140,32 @@ body ::tycho::EditPtcl::constructor {args} {
     # Set the fill prefix to be the comment character for Tcl.
     set fillPrefix "#"
 
-    menubar addMenu Special left {} -underline 0
-    menubar addMenuItem "Retarget" Special -underline 0 \
+    menubar addMenu Special -underline 0
+    menubar add "Retarget" Special -underline 0 \
             -command "set w \[::tycho::Retarget .rtrg#auto -edit $this];\
         \$w centerOnScreen"
 
-    menubar addMenuItem "List Stars" Special -underline 0 \
+    menubar add "List Stars" Special -underline 0 \
             -command "::tycho::inform \
         \"Stars used: \[$this stars\]\""
 
-    menubar addMenuItem "Universe Name" Special -underline 0 \
+    menubar add "Universe Name" Special -underline 0 \
             -command "::tycho::inform \
             \" Universe: \[$this universeName\]\""
 
-    menubar addMenuItem "Open Facet" File -underline 0 \
+    menubar add "Open Facet" File -underline 0 \
 	    -command "$this openFacet"
 
     # Stuff for the help menu
-    menubar addMenuItem "Ptolemy Universes" Help -underline 0 \
+    menubar add "Ptolemy Universes" Help -underline 0 \
             -command "::tycho::File::openContext \
 	    \[file join \$env(PTOLEMY) tycho typt lib PtolemyFacets.fst\]"
 
-    menubar addMenuItem "Star/Demo Xref" Help -underline 11 \
+    menubar add "Star/Demo Xref" Help -underline 11 \
             -command "::tycho::File::openContext \
             [file join $PTOLEMY doc star-demo-index index.html]"
 
-    menubar addMenuItem "Ptolemy stars" Help -underline 0 \
+    menubar add "Ptolemy stars" Help -underline 0 \
             -command "::tycho::File::openContext \
 	    \[file join \$env(PTOLEMY) src domains starHTML.idx.fst\]"
 }

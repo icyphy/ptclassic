@@ -125,17 +125,17 @@ class ::tycho::EditItcl {
 #
 body ::tycho::EditItcl::constructor {args} {
     eval itk_initialize $args
-    menubar addMenu Special left {} -underline 0
+    menubar addMenu Special -underline 0
 
-    menubar addMenuItem "Body Template" Special -underline 0 \
+    menubar add "Body Template" Special -underline 0 \
 	    -command "$this bodyTemplate"
 
-    menubar addMenuItem "File Template" Special -underline 0 \
+    menubar add "File Template" Special -underline 0 \
 	    -command "$this fileTemplate"
 
-    menubar addMenuSeparator Special
+    menubar addSeparator Special
 
-    menubar addMenuItem "Generate doc" Special -underline 0 \
+    menubar add "Generate doc" Special -underline 0 \
 	    -command "$this gendoc"
 }
 

@@ -90,19 +90,19 @@ body ::tycho::EditStack::constructor {args} {
     markUnmodified
 
     # Remove irrelevant capabilities from the menus.
-    menubar disableMenuItem  "Switch File..." File
-    menubar disableMenuItem  "Insert..." File
-    menubar disableMenuItem  "Save" File
-    menubar disableMenuItem  Reload File
-    menubar disableMenuItem  "Revision Control..." File
+    menubar delete  "Switch File..."
+    menubar delete  "Insert..."
+    menubar delete  "Save"
+    menubar delete  "Reload"
+    menubar delete  "Revision Control..."
 
-    menubar disableMenuItem "Undo/Redo" Edit
-    menubar disableMenuItem "Cut" Edit
-    menubar disableMenuItem "Paste" Edit
+    menubar delete "Undo/Redo"
+    menubar delete "Cut"
+    menubar delete "Paste"
 
-    menubar disableMenuItem "Fill Region" Format
-    menubar disableMenuItem "Right Fill Column" Format
-    menubar disableMenuItem "Set Fill Prefix" Format
+    menubar delete "Fill Region"
+    menubar delete "Right Fill Column"
+    menubar delete "Set Fill Prefix"
     
     # The default fill prefix works for Tcl and shell scripts.
     set fillPrefix "#"

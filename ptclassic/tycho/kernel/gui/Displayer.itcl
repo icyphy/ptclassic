@@ -279,8 +279,8 @@ body ::tycho::Displayer::constructor {args} {
 
     # Add  a File menu with a close command so that when there are 
     # no views, the display doesn't look empty.
-    $itk_component(menubar) addMenu File left {} -underline 0
-    $itk_component(menubar) addMenuItem Close File \
+    $itk_component(menubar) addMenu File -underline 0
+    $itk_component(menubar) add Close File \
 	    -command "$this nextWindow; delete object $this" \
             -underline 0
 

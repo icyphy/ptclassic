@@ -119,12 +119,12 @@ body ::tycho::EditJava::constructor {args} {
     
     # Set the fill prefix to be the comment character for Java.
     set fillPrefix "//"
-    menubar addMenu Special left {} -underline 0
+    menubar addMenu Special -underline 0
 
-    menubar addMenuItem "Appletviewer" Special -underline 0 \
+    menubar add "Appletviewer" Special -underline 0 \
             -command "$this execProcess appletviewer"
 
-    menubar addMenuItem "Generate doc" Special -underline 0 \
+    menubar add "Generate doc" Special -underline 0 \
             -command "$this gendoc"
 
 }

@@ -271,9 +271,9 @@ body ::tycho::HTML::constructor {args} {
     eval itk_initialize $args
 
     # Setup Special menu
-    menubar addMenu Special left {} -underline 0
+    menubar addMenu Special -underline 0
 
-    menubar addMenuItem "Appletviewer" Special -underline 0 \
+    menubar add "Appletviewer" Special -underline 0 \
             -command "$this appletViewer"
 
     if {$itk_option(-directory) == {}} {
@@ -291,7 +291,8 @@ body ::tycho::HTML::constructor {args} {
     array set sizes {tiny -2 small 0 medium 2 large 4 huge 8}
     if {$myMenubar != {}} {
         foreach size {tiny small medium large huge} {
-            $myMenubar addRadioItem [lindex $size 0] Format \
+            $myMenubar add [lindex $size 0] Format \
+		    -type radiobutton \
                     -variable [scope sizeName($this)] \
                     -command \
                     "$this configure -size $sizes($size); \
@@ -304,22 +305,22 @@ body ::tycho::HTML::constructor {args} {
 
     # Modify the menu commands appropriately.
     if {$myMenubar != {}} {
-        $myMenubar removeMenu Edit
-        $myMenubar disableMenuItem "Font..." Format
-        $myMenubar removeMenuItem "Fill Region" Format
-        $myMenubar removeMenuItem "Right Fill Column" Format
-        $myMenubar removeMenuItem "Set Fill Prefix" Format
+        $myMenubar delete  Edit
+        $myMenubar disable "Font..."
+        $myMenubar delete "Fill Region"
+        $myMenubar delete "Right Fill Column"
+        $myMenubar delete "Set Fill Prefix"
 
-        $myMenubar insertMenuItem "Open Source" "Switch File..." File \
+        $myMenubar insert "Open Source" "Switch File..." \
                 -underline 1 -accelerator {C-x s} \
                 -command "$this openSource"
         
-        $myMenubar disableMenuItem "Insert..." File
-        $myMenubar disableMenuItem "Save" File
-        $myMenubar disableMenuItem "SaveAs..." File
-        $myMenubar disableMenuItem "Evaluate" File
-        $myMenubar disableMenuItem "Revision Control..." File
-        $myMenubar disableMenuItem "Toggle Read-Only" File
+        $myMenubar disable "Insert..."
+        $myMenubar disable "Save"
+        $myMenubar disable "SaveAs..."
+        $myMenubar disable "Evaluate"
+        $myMenubar disable "Revision Control..."
+        $myMenubar disable "Toggle Read-Only"
     }
     bind $prefix <Control-x><Key-s> "$this openSource; break"
     # disable certain bindings
