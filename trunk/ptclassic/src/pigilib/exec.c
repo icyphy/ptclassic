@@ -36,7 +36,7 @@ $Id$
 #include <string.h>
 
 /* Octtools includes */
-#include "oct.h"		/* define octObject */
+#include "oct.h"		/* define octObject data & octXXX functions */
 #include "list.h"		/* define lsList */
 #include "rpc.h"		/* define RPC data structures */
 #include "oh.h"
@@ -104,9 +104,10 @@ boolean now;
     char* name;
     char octHandle[POCT_FACET_HANDLE_LEN];
 
-    lastFacet = *facetPtr;
-    ptkOctObj2Handle(facetPtr,octHandle);
-
+    /* Reset lastFacet to the current facet */
+    FreeOctMembers(&lastFacet);
+    octCopyFacet(&lastFacet, facetPtr);
+    ptkOctObj2Handle(facetPtr, octHandle);
     name = BaseName(facetPtr->contents.facet.cell);
 
     TCL_CATCH_ERR1(
@@ -118,6 +119,7 @@ boolean now;
 	    Tcl_VarEval(ptkInterp, "ptkGo ", name, " ", octHandle,
 	    (char *)NULL));
     }
+
     return (TRUE);
 }
 
@@ -216,24 +218,22 @@ long userOptionWord;
         if (!IsUnivFacet(&facet))
         {
 		PrintErr("Schematic is not a universe, can't run DesignMaker");
-		FreeOctMembers(&facet);
         }
 	/* check if DMM domain, else prompt user to use R */
 	else if (!GOCDomainProp(&facet, &domainName, DEFAULT_DOMAIN))
         {
 		PrintErr("Domain error in facet");
-		FreeOctMembers(&facet);
         }
         else if (strcmp(domainName,"DMM")!= 0)
         {
 		PrintErr("Domain is not DMM, use regular run control (R)");
-		FreeOctMembers(&facet);
 	}
-        /* set the lastFacet to be this facet */
 	else
 	{
+        	/* set the lastFacet to be this facet */
 		FreeOctMembers(&lastFacet);
-		lastFacet = facet;
+		octCopyFacet(&lastFacet, &facet);
+
 		/* reflect what is done in ptkRun() */
 		name = BaseName(facet.contents.facet.cell);
 		ptkOctObj2Handle(&facet, octHandle);
@@ -243,5 +243,6 @@ long userOptionWord;
 				    name, " ", octHandle, 0));
 	}
 
+	FreeOctMembers(&facet);
         ViDone();
 }
