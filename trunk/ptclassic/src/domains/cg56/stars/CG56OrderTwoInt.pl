@@ -31,11 +31,11 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 
 	codeblock(order) {
-	move	$ref(lower),a		; a1 = lower input
-	move	$ref(upper),b		; b1 = upper input
-	cmp	a,b	a1,x0		; compare upper to lower, x0=lower
-	tlt	b,a			; if upper(b) < lower(a) exchange b
-	tlt	x0,b			; with a
+	move	$ref(lower),a		; a = lower input
+	move	$ref(upper),b		; b = upper input
+	cmp	a,b	a,x0		; compare upper to lower, x0 = lower
+	tlt	b,a			; if upper(b) < lower(a) swap b and a
+	tlt	x0,b
 	move	b,$ref(greater)
 	move	a,$ref(lesser)
 	}
