@@ -48,12 +48,16 @@ extern StringList CG56ONE;
 
 class CG56Target : public virtual MotorolaTarget {
 public:
+    // constructor
     CG56Target (const char* nam, const char* desc);
 
     // copy constructor
     CG56Target(const CG56Target& src);
 
     /*virtual*/ Block* makeNew() const;
+
+    // return the domain of the galaxy if it exists and "CG56" otherwise
+    /*virtual*/ const char* domain();
 
     /*virtual*/ int isA(const char*) const;
     /*virtual*/ void headerCode();
