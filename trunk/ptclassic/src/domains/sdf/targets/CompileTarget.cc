@@ -28,6 +28,8 @@ public:
 	int setup(Galaxy& g);
 	int run();
 	void wrapup ();
+	CompileTarget(const char* nam,const char* stype,const char* desc) :
+		BaseCTarget(nam,stype,desc) {}
 	Block* clone() const
 		{ LOG_NEW; CompileTarget* t = new CompileTarget(readName(),
 						starType(), readDescriptor());
