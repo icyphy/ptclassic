@@ -68,9 +68,9 @@ Particle** CircularBuffer :: previous(int i) const
 }
 
 // Small virtual methods
-int GenericPort :: isItInput () { return FALSE;}
-int GenericPort :: isItOutput () { return FALSE;}
-int GenericPort :: isItMulti () { return FALSE;}
+int GenericPort :: isItInput () const { return FALSE;}
+int GenericPort :: isItOutput () const { return FALSE;}
+int GenericPort :: isItMulti () const { return FALSE;}
 
 PortHole& GenericPort :: newConnection () {
 	// my apologies for this horrible cast
@@ -151,8 +151,8 @@ PortHole :: ~PortHole() {
 
 // small virtual functions for PortHole, InPortHole, OutPortHole
 
-int InPortHole :: isItInput() { return TRUE;}
-int OutPortHole :: isItOutput() { return TRUE;}
+int InPortHole :: isItInput() const { return TRUE;}
+int OutPortHole :: isItOutput() const { return TRUE;}
 void PortHole :: grabData () { return;}
 void PortHole :: sendData () { return;}
 
@@ -185,7 +185,7 @@ PortHole& PortHole :: setPort(const char* s,
 
 // Print a Generic Port
 StringList
-GenericPort :: printVerbose () {
+GenericPort :: printVerbose () const {
         StringList out;
  
         if(isItInput())
@@ -207,7 +207,7 @@ GenericPort :: printVerbose () {
 }
 
 StringList
-PortHole :: printVerbose () {
+PortHole :: printVerbose () const {
 	StringList out;
 	out = GenericPort::printVerbose();
 	if (alias == NULL) {
@@ -222,15 +222,15 @@ PortHole :: printVerbose () {
         return out;
 }
 
-int MultiPortHole :: isItMulti() { return TRUE;}
+int MultiPortHole :: isItMulti() const { return TRUE;}
 
-void MultiPortHole :: initialize() { reset();}
+void MultiPortHole :: initialize() {}
 
 // this is not really a do-nothing: it destroys its member object "ports".
 MultiPortHole :: ~MultiPortHole() {}
 
 StringList
-MultiPortHole :: printVerbose () {
+MultiPortHole :: printVerbose () const {
 	StringList out;
 	out = "Multi ";
 	out += GenericPort::printVerbose();
@@ -370,7 +370,9 @@ void PortHole :: setMaxDelay(int delay)
 
 Particle& PortHole ::  operator % (int delay)
 {
-	Particle** p = myBuffer->previous(delay);
+	// use the much faster "here" method if delay = 0
+	Particle** p = delay ? myBuffer->previous(delay)
+			     : myBuffer->here();
 	if(p == NULL || *p == NULL) {
 		Error::abortRun(*this,CircularBuffer::errMsg());
 		// kludge -- gotta get a particle somehow so we don't
@@ -385,12 +387,6 @@ MultiPortHole& MultiPortHole :: setPort(const char* s,
                               dataType t = FLOAT) {
 	GenericPort::setPort (s, parent, t);
         return *this;
-}
-
-// Expand aliases.  This isn't inlinable by G++ since it's recursive
-GenericPort& GenericPort :: realPort() {
-	if (alias == NULL) return *this;
-	return alias->realPort();
 }
 
 // Method to generate names for new portholes.  Names are of the
@@ -426,10 +422,10 @@ PortHole& MultiPortHole :: newConnection() {
 	if (alias) return realPort().newConnection();
 
 	// find an unconnected porthole
-	ports.reset();
-	for (int i = ports.size(); i > 0; i--) {
-		PortHole& p = ports++;
-		if (p.far() == NULL) return p;
+	MPHIter next(*this);
+	PortHole* p;
+	while ((p = next++) != 0) {
+		if (p->far() == NULL) return *p;
 	}
 
 	// no disconnected ports, make a new one.
