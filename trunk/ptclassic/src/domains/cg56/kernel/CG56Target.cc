@@ -57,16 +57,21 @@ Block* CG56Target :: clone () const {
 
 StringList CG56Target::beginIteration(int repetitions, int) {
 	StringList out;
-	out = "\tmove ";
-	out += repetitions;
-	out += "r\n";
-	out += "\trep ";
-	out += "lable\n";
+	if (repetitions == -1)		// iterate infinitely
+		out = "label\n";
+	else {				// iterate finitely
+		out = "\tdo\t";
+		out += repetitions;
+		out += ",label\n";
+	}
 	return out;
 }
 
-StringList CG56Target::endIteration(int, int) {
+StringList CG56Target::endIteration(int repetitions, int) {
 	StringList out;
-	out = "lable:\n";
+	if (repetitions == -1)		// iterate infinitely
+		out = "\tjmp\tlabel\n";
+	else				// iterate finitely
+		out = "label\n";
 	return out;
 }
