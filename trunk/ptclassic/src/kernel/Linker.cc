@@ -202,15 +202,13 @@ int Linker::multiLink (int argc, char** argv) {
 	// DYNLIB is hppa specific
 	sprintf (command, "%s %s -A %s %s %x %s -o ",
 		 LOADER, LOADOPTS, symTableName, LOC_OPT, availMem, DYNLIB);
-
+#ifdef DEBUG
+	Error::message(command);
+#endif
 	StringList cmd = command;
 	cmd << tname;
 	for (int i = 1; i < argc; i++) {
 		const char* objName = expandPathName(argv[i]);
-#ifdef DEBUG
-		DebugMessage("multiLink():",command);
-		DebugMessage((char *)objName, (char *)myDefaultOpts);
-#endif //DEBUG
 		cmd << " " << objName;
 	}
 	// these options go last so libraries will be searched properly.
