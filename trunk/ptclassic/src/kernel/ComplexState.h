@@ -12,7 +12,7 @@ $Id$
                        All Rights Reserved.
 
  Programmer:  I. Kuroda and J. T. Buck
- Date of creation: 6/15/89
+ Date of creation: 6/15/90
  Revisions:
 
  State with Complex type
@@ -33,19 +33,13 @@ public:
         void initialize();
 
         // the type
-        char* type() { return "COMPLEX";}
+        char* type(); // { return "COMPLEX";}
 
         // the value as a string
-	StringList currentValue() { StringList s; 
-					s = "(";
-					s = val.real();
-					s = ",";
-					s = val.imag();
-					s = ")\n";
-					 return s;}
+	StringList currentValue();
 
         // assignment from a Complex
-        Complex operator=(Complex rvalue) { return val = rvalue;}
+        Complex operator=(const Complex& rvalue) { return val = rvalue;}
 
         // casting to a Complex
         operator Complex() { return val;}
@@ -53,7 +47,7 @@ public:
 	// Evaluate expression  in string
 	ParseToken evalExpression(Tokenizer& lexer, Block* blockIAmIn);	
 
-	virtual State* clone ()  {return new ComplexState;}
+	State* clone ();//  {return new ComplexState;}
 
 private:
 	friend class ComplexArrayState;

@@ -13,7 +13,7 @@ $Id$
                        All Rights Reserved.
 
  Programmer: I. Kuroda and J. T. Buck
- Date of creation: 6/15/89
+ Date of creation: 6/15/90
  Revisions:
 
  Functions for class ComplexState
@@ -24,6 +24,23 @@ $Id$
 	class ComplexState methods
 
 **************************************************************************/
+
+// the type
+char* ComplexState :: type() { return "COMPLEX";}
+
+// the value as a string
+StringList ComplexState :: currentValue() {
+	StringList s; 
+	s = "(";
+	s += val.real();
+	s += ",";
+	s += val.imag();
+	s += ")\n";
+	return s;
+}
+
+// clone
+State* ComplexState :: clone () { return new ComplexState;}
 
 void ComplexState  :: initialize() {
 	const  char* specialChars =  "*+-/(),";
