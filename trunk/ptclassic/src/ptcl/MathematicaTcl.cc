@@ -100,15 +100,15 @@ int MathematicaTcl::init() {
 
 // Evaluate a Mathematica command
 int MathematicaTcl::evaluate(char* command, int outputBufferFlag) {
-    int merror = mathematicaInterface->EvaluateOneCommand(command);
-    if (outputBufferFlag || merror) {
+    int retval = mathematicaInterface->EvaluateOneCommand(command);
+    if (outputBufferFlag || ! retval) {
 	Tcl_AppendResult(tclinterp, 
 			 mathematicaInterface->GetOutputBuffer(), 
 			 0);
     }
 
-    if (merror) return TCL_ERROR;
-    return TCL_OK;
+    if (retval) return TCL_OK;
+    return TCL_ERROR;
 }
 
 // Evaluate the Tcl command "mathematica"
@@ -171,14 +171,14 @@ int MathematicaTcl::end(int argc, char** /*argv*/) {
 
 // Evaluate a Mathematica command
 int MathematicaTcl::eval(int argc, char** argv) {
-    if (argc != 3) return usage("mathematica eval <mathematica_commad>");
+    if (argc != 3) return usage("mathematica eval <mathematica_command>");
     MATHEMATICATCL_CHECK_MATHEMATICA();
     return evaluate(argv[2], TRUE);
 }
 
 // Evaluate a Mathematica command
 int MathematicaTcl::send(int argc, char** argv) {
-    if (argc != 3) return usage("mathematica send <mathematica_commad>");
+    if (argc != 3) return usage("mathematica send <mathematica_command>");
     MATHEMATICATCL_CHECK_MATHEMATICA();
     return evaluate(argv[2], FALSE);
 }
