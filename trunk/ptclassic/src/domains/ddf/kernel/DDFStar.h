@@ -42,7 +42,7 @@ public:
 	Block& setBlock(char* starName, Block* parent = NULL);
 
 	// wait until this porthole has as many tokens as "waitNum"
-	void wait(PortHole& p, int num = 1) ;
+	void waitFor(PortHole& p, int num = 1) ;
 	
 	// is it recursion star?
 	virtual int isItSelf();
