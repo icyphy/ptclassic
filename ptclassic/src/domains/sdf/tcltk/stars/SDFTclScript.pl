@@ -114,4 +114,8 @@ delim $$
 		(*p)%0 << tcl.outputValues[i++];
 	    }
 	}
+
+	wrapup {
+	    tcl.wrapup();
+        }
 }
