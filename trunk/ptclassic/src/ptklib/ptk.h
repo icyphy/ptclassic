@@ -50,7 +50,12 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #   undef Complex
 #endif
 
+#ifdef __cplusplus
+extern "C" Tcl_Interp *ptkInterp;
+#else
 extern Tcl_Interp *ptkInterp;
+#endif
+
 extern Tk_Window ptkW;
 
 #endif   /* _PTK_H */
