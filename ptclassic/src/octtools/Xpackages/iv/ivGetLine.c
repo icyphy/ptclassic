@@ -22,13 +22,16 @@ static char SccsId[]="$Id$";
 #include "cursor.bitmap.11"
 #include "iv.h"
 #include "ivBuf.h"
+
+/* Can't place this in ivBuf.h, otherwise hppa.cfront cc won't compile
+   ivBuf.c   
+ */
+void ivBufAddChar
+        ARGS((ivBuf* buf, char c));
+
 #include "xformatevent.h"
 
 #include "ivGetLine.h"
-
-#if defined(hpux) || defined(SYSV) || defined(sgi) || defined(linux)
-#define HAS_TERMIOS
-#endif
 
 #ifdef HAS_TERMIOS
 #include <termios.h>
