@@ -83,8 +83,8 @@ end
 # create extra directories under domain-specific directories
 # everything must have one slash (be two levels down)
 
-foreach x (thor/pepp cg/targets sdf/expgraph sdf/image sdf/targets \
-	ddf/constructs sdf/loopScheduler cg/parScheduler thor/analyzerX11 \
+foreach x (thor/pepp cg/targets sdf/image sdf/targets \
+	sdf/loopScheduler cg/parScheduler thor/analyzerX11 \
 	cg/dlScheduler cg/HuScheduler cg/dcScheduler cgc/targets \
 	cg56/dsp cg96/dsp sdf/dsp sdf/image $EXPEXTRAS )
 	optmkdir $x
