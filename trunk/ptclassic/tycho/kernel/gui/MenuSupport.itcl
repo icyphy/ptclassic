@@ -182,7 +182,7 @@ body ::tycho::MenuSupport::add {name inMenu args} {
 		[expr [$entrypath($name) index $name] + 1] \
 		-label]
 	$this delete $name
-	eval $this insert $name [list $before] $args
+	eval $this insert [list $name] [list $before] $args
 	return
     }
 
