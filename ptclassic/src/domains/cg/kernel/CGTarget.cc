@@ -212,7 +212,9 @@ void CGTarget::setup() {
 		LOG_NEW; setSched(new LoopScheduler(schedFileName));
 		break;
 	    case 3:
-		LOG_NEW; setSched(new AcyLoopScheduler);
+		delete [] schedFileName;
+		schedFileName = writeFileName("schedule.log");
+		LOG_NEW; setSched(new AcyLoopScheduler(schedFileName));
 		break;
 	    default:
 		Error::abortRun(*this,"Unknown scheduler");
