@@ -29,6 +29,8 @@ static char SccsId[]="$Id$";
 #include "internal.h"
 #include "io_internal.h"
 #include "io.h"
+#include "io_procs.h"
+#include "oct_utils.h"
 
 #define IS_SPACE(c) ((c) == ' ' || (c) == '\t' || (c) == '\n')
 #define IS_DIGIT(c) ((c) >= '0' && (c) <= '9')
@@ -144,6 +146,7 @@ int *valuep;
 #endif
 
 
+int
 oct_put_version(version)
 int version;
 {
@@ -154,6 +157,7 @@ int version;
     return 1;
 }
 
+int
 oct_get_version(version)
 int *version;
 {
@@ -180,6 +184,7 @@ int *version;
     return 0;
 }
 
+int
 oct_put_type(type)
 int type;
 {
@@ -196,6 +201,7 @@ int type;
     return 1;
 }
 
+int
 oct_get_type(type)
 int *type;
 {
@@ -240,6 +246,7 @@ int *type;
     return 0;
 }
 
+int
 oct_put_string(ptr)
 char *ptr;
 {
@@ -264,7 +271,7 @@ char *ptr;
     return 1;
 }
 
-
+int
 oct_get_string(string)
 char **string;
 {
@@ -335,6 +342,7 @@ char **string;
     return 1;
 }
 
+int
 oct_put_nl()
 {
     if (! oct_binary_format) {
@@ -347,6 +355,7 @@ oct_put_nl()
     return 1;
 }
 
+int
 oct_put_32(val)
 int32 val;
 {
@@ -355,6 +364,7 @@ int32 val;
     return 1;
 }
 
+int
 oct_get_32(valp)
 int32 *valp;
 {
@@ -363,6 +373,7 @@ int32 *valp;
     return 1;
 }
 
+int
 oct_put_double(val)
 double val;
 {
@@ -373,6 +384,7 @@ double val;
     return 1;
 }
 
+int
 oct_old_get_double(val)
 double *val;
 {
@@ -383,6 +395,7 @@ double *val;
     return 1;
 }
 
+int
 oct_get_double(val)
 double *val;
 {
@@ -393,6 +406,7 @@ double *val;
     return 1;
 }
 
+int
 oct_put_byte(val)
 int val;
 {
@@ -409,6 +423,7 @@ int val;
     return 1;
 }
 
+int
 oct_get_byte(valp)
 int *valp;
 {
@@ -421,6 +436,7 @@ int *valp;
     return 1;
 }
 
+int
 oct_put_bytes(length, bytes)
 int32 length;
 char *bytes;
@@ -441,6 +457,7 @@ char *bytes;
 }
 
 
+int
 oct_get_bytes(length, bytes)
 int32 *length;
 char **bytes;
@@ -472,6 +489,7 @@ char **bytes;
     return 1;
 }
 
+int
 oct_put_points(length, points)
 int32 length;
 register struct octPoint *points;
@@ -488,6 +506,7 @@ register struct octPoint *points;
 }
 
 
+int 
 oct_get_points(length, points)
 int32 *length;
 register struct octPoint **points;
@@ -511,6 +530,7 @@ register struct octPoint **points;
 
 #define SMALL
 #ifdef SMALL
+int
 oct_put_box(box)
 struct octBox box;
 {
@@ -520,7 +540,7 @@ struct octBox box;
       oct_put_32(box.upperRight.y);
 }
 
-
+int
 oct_get_box(box)
 struct octBox *box;
 {
@@ -531,6 +551,7 @@ struct octBox *box;
 }
 
 
+int
 oct_put_point(point)
 struct octPoint point;
 {
@@ -538,6 +559,7 @@ struct octPoint point;
       oct_put_32(point.y);
 }
 
+int
 oct_get_point(point)
 struct octPoint *point;
 {
@@ -545,6 +567,7 @@ struct octPoint *point;
       oct_get_32(&(point->y));
 }
 #else
+int
 oct_put_box(box)
 struct octBox box;
 {
@@ -569,6 +592,7 @@ struct octBox *box;
 }
 
 
+int
 oct_put_point(point)
 struct octPoint point;
 {
