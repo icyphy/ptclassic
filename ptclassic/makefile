@@ -80,8 +80,11 @@ GNU_BUILD_CC=cc
 # If you are using cc to compile gnu under irix5, use this:
 IRIX5_GNU_BUILD_CC=cc -Wf,-XNh1500,-XNg1500 -Olimit 3000 -cckr -O1
 
+# irix5 /bin/make seems to need this
+SHELL=sh
+
 install_gnu:
-	@echo "Building gnu for $(ARCH);
+	@echo "Building gnu for $(ARCH)";
 	case $(ARCH) in \
 	hppa) 	$(MAKE) -f mk/scratch-srcs.mk CC=$(GNU_BUILD_CC) \
 		$(MFLAGS) hpgnu_all;; \
