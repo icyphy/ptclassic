@@ -77,7 +77,9 @@ when the run panel in the graphical interface is closed.
 	setup {
 		if ( ! matlabInterface.MatlabIsRunning() ) {
 		    if ( ! matlabInterface.StartMatlab() ) {
-			Error::error( *this, matlabInterface.GetErrorString() );
+			Error::abortRun( *this,
+					 matlabInterface.GetErrorString() );
+			return;
 		    }
 		}
 
@@ -85,10 +87,5 @@ when the run panel in the graphical interface is closed.
 		matlabInterface.SetDeleteFigures( int(DeleteOldFigures) );
 		matlabInterface.SetScriptDirectory( scriptDir );
 		matlabInterface.SetFigureHandle( fullName() );
-	}
-
-	go {
-                // tag any created figures with the handle for this star
-		matlabInterface.AttachMatlabFigureIds();
 	}
 }
