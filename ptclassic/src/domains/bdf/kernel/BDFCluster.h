@@ -110,6 +110,10 @@ protected:
 	// it merges it and returns the result; otherwise it returns 0.
 	BDFCluster* fullSearchMerge();
 
+	// function to attempt a combination merge and while-loop
+	// 0 is returned on failure, the new merged cluster on success.
+	BDFCluster* tryLoopMerge(BDFCluster*,BDFCluster*);
+
 	// check needed by fullSearchMerge
 	int buriedCtlArcs(BDFCluster*, BDFCluster*);
 
@@ -198,6 +202,9 @@ public:
 	// convert the cluster to a conditional cluster, to be executed
 	// only on the given condition.
 	void ifIze(BDFClustPort* condition,BDFRelation rel,ostream*);
+
+	// convert the cluster into a do-while loop.
+	void makeWhile(BDFClustPort* condition,BDFRelation rel);
 
 	// create a new arc to pass boolean information
 	BDFClustPort* connectBoolean(BDFClustPort* cond,BDFRelation& rel);
