@@ -29,7 +29,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #ifndef nb_fft_h
 #define nb_fft_h
 
-/* #include <Complex.h> */
+#include <ComplexSubset.h>
 #include "Constants.h"
 
 class nb_fft {
