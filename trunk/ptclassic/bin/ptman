@@ -66,7 +66,7 @@ if ($#argv < 1) goto usage
 # Find the star
 cd $domaindir
 if ($?PTMANPATH) then
-	set domains = $PTMANPATH
+	set domains = ($PTMANPATH)
 else
 	set domains = `ls`
 endif
