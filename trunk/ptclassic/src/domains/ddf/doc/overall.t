@@ -153,16 +153,16 @@ by the \fIwaitPort\fR.  This time, it actually routes the input
 port to the output port.  Another example will be shown in the section 4.
 .pp
 The third group of stars comprises the source
-.c Star s,
-which are all 
-.c SDF\ Star s.
+.c Star s.
 Since the source
 .c Star s
-have no input ports, they are always runnable, which makes the system
+are always runnable, they makes the system
 never deadlocked.  Therefore, we should limit the number of
 firing of those
 .c Star s
-in some way.
+in some way.  We also regard stars with initial 
+.c Particle s
+on all input arcs, as source stars.
 Recall again that the \*(DO domain is a superset of the untimed
 version of the SDF domain.  It implies that with a given
 system topology which contains only
@@ -230,6 +230,50 @@ means that it fires all source stars once beforehand and repeats scanning
 the list of
 .c Star s
 with lazy-evaluation technique until no more is runnable.
+.pp
+Up to now, we assume that we are given an error-free programs.
+In the SDF domain, the complicated compile scheduling may detect
+the errors and running the program very efficiently at runtime.
+On the other hand, in the DDF domain, the sources of errors are
+more diversified and very difficult to be detected at compile time.
+Instead, we would detect the errors at runtime relatively easily.
+The runtime detection of errors has a couple of disadvantages.
+First, it is a very slow mechanism, which will be explained shortly.
+Second, it is not easy to isolate the sources of errors since we
+are just examining the apparent situation.
+.pp
+We can think of two types of errors.  One is infinite waiting.
+If a program has a delay-free loop, the lazy evaluation stages
+will be spinning forever.  We can detect this type of error
+rather simply by  limiting the depth of the lazy evaluation.
+.IE "inconsistency"
+.IE "consistent graph"
+The other is inconsistency.  We call a dataflow graph \fIconsistent\fR
+if on each arc, in the long run, the same number of tokens are
+consumed as produced.  If a dataflow graph is not consistent, it
+is called (strongly) inconsistent\**.  One source of inconsistency
+is the sample-rate mismatch which is common to the SDF domain.
+The DDF domain has more error-sources due to the dynamic behaviour
+of the 
+.c DDF\ Star s.
+In an inconsistent graph, some arcs queues an unbounded number
+of tokens in the long run.  Therefore, we examine the number
+of tokens on each arc to detect whether the number is greater than
+a certain limit (default 1024).  If we find an arc with too many tokens,
+we consider it as an error condition and signal an error.
+We can specify the limit by defining a state
+\fIbufferSize\fR to the DDF 
+.c Galaxy .
+.IE bufferSize, ddf
+Since the source of inconsistency is not unique, the isolation of
+the error is also improbable.  We can just point out which
+arc has unbounded number of tokens.  What happens if the
+limit should be high?  Some errors would takes very long to
+build tokens more than the limit on an arc.  Thus, the runtime
+error detection is very slow mechanism.
+The enhanced modeling power of the DDF domain has another cost :
+inefficient error detection.  Therefore, we suggest the user
+to check the program carefully before running it in the DDF domain.
 .sp
 .H1 "Special \\*(DO Particles
 .pp
