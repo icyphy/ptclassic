@@ -102,17 +102,25 @@ tychoClasses.dag: FORCE
 HTMLDIRS= $(TYCHO)/doc \
 	$(TYCHO)/doc/coding \
 	$(TYCHO)/util/tydoc/doc \
+	$(TYCHO)/doc/packages \
+	$(TYCHO)/kernel/basic/doc/usersGuides \
+	$(TYCHO)/kernel/model/doc/usersGuides \
 	$(TYCHO)/kernel/gui/doc/usersGuides \
+	$(TYCHO)/kernel/html/doc/usersGuides \
 	$(TYCHO)/edit/textedit/doc/usersGuides \
 	$(TYCHO)/edit/visedit/doc/usersGuides \
+	$(TYCHO)/edit/graphedit/doc/usersGuides \
 	$(TYCHO)/edit/slate/doc/usersGuides \
+	$(TYCHO)/util/devtools/doc/usersGuides \
+	$(TYCHO)/util/tydoc/doc/usersGuides \
+	$(TYCHO)/util/notmake/doc/usersGuides \
+	$(TYCHO)/util/pakman/doc/usersGuides \
+	$(TYCHO)/util/tytest/doc/usersGuides \
+	$(TYCHO)/kernel/basic/doc/internals \
 	$(TYCHO)/kernel/gui/doc/internals \
 	$(TYCHO)/edit/slate/doc/internals \
 	$(TYCHO)/src/tytest \
 	$(TYCHO)/src/tytimer \
-	$(TYCHO)/java/doc \
-	$(TYCHO)/java/pn \
-	$(TYCHO)/java/pt/kernel \
 	$(TYCHO)/typt/doc \
 	$(TYCHO)/typt/doc/internals \
 	$(TYCHO)/typt/doc/usersGuides \
@@ -120,7 +128,7 @@ HTMLDIRS= $(TYCHO)/doc \
 
 # Traverse all the html files (except the codedoc files) and produce PostScript
 tycho.ps: ../bin/html2ps
-	netscape &
+	echo "You must be running netscape"
 	-chmod a+x $^
 	../bin/html2ps -d index.html tycho.ps $(HTMLDIRS)
 
