@@ -13,24 +13,6 @@ static const char file_id[] = "$RCSfile$";
 #endif
 
 #include "CodeStream.h"
-#include "UniqueStringList.h"
-
-CodeStream::CodeStream(int s)
-{
-    share = s;
-    if (share)
-    {
-	LOG_NEW; sharedNames = new UniqueStringList;
-    }
-}
-
-CodeStream::~CodeStream()
-{
-    if (share)
-    {
-	LOG_DEL; delete sharedNames;
-    }
-}
 
 int CodeStream::put(const char* string, const char* name)
 {
@@ -39,9 +21,9 @@ int CodeStream::put(const char* string, const char* name)
 	*this << string;
 	return TRUE;
     }
-    else if(share)
+    else
     {
-	int unique = sharedNames->isUnique(name);
+	int unique = sharedNames.isUnique(name);
 	if (unique) *this << string;
 	return unique;
     }
@@ -49,6 +31,6 @@ int CodeStream::put(const char* string, const char* name)
 }
 
 void CodeStream::initialize() {
-    if (share) sharedNames->initialize();
+    sharedNames.initialize();
     StringList :: initialize();
 }
