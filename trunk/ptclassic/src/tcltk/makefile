@@ -150,8 +150,8 @@ configure_tcltk:	$(TCL_OBJ)/config.status $(TK_OBJ)/config.status \
 			$(TCLTK_OBJ)/makefile
 bin_tcltk:		tcl tk
 install_tcltk:	install_tcl install_tk
-clean:		clean_tcl clean_tk
-realclean:	clean_tcl clean_tk
+clean_tcltk:		clean_tcl clean_tk
+realclean_tcltk:	clean_tcl clean_tk
 
 .PHONY:	tcl tk itcl configure install_tcl install_tk install_itcl \
 		clean_tcl clean_tk clean_itcl realclean 
