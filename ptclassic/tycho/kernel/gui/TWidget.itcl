@@ -214,6 +214,9 @@ body ::tycho::TWidget::busy {args} {
 # statements. To speed it up, we should keep a record of which
 # options have been subscribed and which haven't...
 #
+# If this method is modified, be sure to also update the
+# *itk_initialize{} method, and the same methods in ::tycho::TopLevel.
+#
 body ::tycho::TWidget::configure {args} {
     # FIXME: Delete this obsolete stuff
     set temp {}
@@ -231,7 +234,7 @@ body ::tycho::TWidget::configure {args} {
 	if [::info exists _subscribedOptions($option)] {
 	    regexp {^([^\.]+)\.(.+)$} \
 		    $_subscribedOptions($option) _ sheet param 
-	    ::tycho::stylesheet unsubscribe $this $sheet $param
+	    ::tycho::stylesheet unsubscribe $this $sheet $option
 	    unset _subscribedOptions($option)
 	}
     }
@@ -383,6 +386,14 @@ body ::tycho::TWidget::stylesheet {mode args} {
 		    # Make lists of options per sheet
 		    lappend lists($sheet) $option $param
 
+		    # If an option is already subscribed, then
+		    # remove that subscription so the new one will work
+		    if [::info exists _subscribedOptions($option)] {
+			regexp {^([^\.]+)\.(.+)$} \
+				$_subscribedOptions($option) _ s p 
+			::tycho::stylesheet unsubscribe $this $s $option
+		    }
+
 		    # Remember the subscribed options
 		    set _subscribedOptions($option) $parameter
 		}
@@ -476,6 +487,9 @@ body ::tycho::TWidget::configureContextMenu {} {
 # user. This is used by the preferences manager so that these
 # options "override" any option subscriptions.
 #
+# If this method is modified, be sure to also update the
+# *configure{} method, and the same methods in ::tycho::TopLevel.
+#
 body ::tycho::TWidget::itk_initialize {args} {
     # FIXME: Delete this obsolete stuff
     set temp {}
@@ -493,7 +507,7 @@ body ::tycho::TWidget::itk_initialize {args} {
 	if [::info exists _subscribedOptions($option)] {
 	    regexp {^([^\.]+)\.(.+)$} \
 		    $_subscribedOptions($option) _ sheet param 
-	    ::tycho::stylesheet unsubscribe $this $sheet $param
+	    ::tycho::stylesheet unsubscribe $this $sheet $option
 	    unset _subscribedOptions($option)
 	}
     }
