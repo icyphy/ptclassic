@@ -72,7 +72,7 @@ void EventQueue:: clearFreeEvents() {
 void EventQueue:: clearParticles() {
 	Event* temp = freeEventHead;
 	while (temp) {
-		temp->p->die();
+		if (temp->p) temp->p->die();
 		temp = temp->next;
 	}
 }
