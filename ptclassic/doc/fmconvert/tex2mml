@@ -119,7 +119,7 @@ BEGIN { OFS=""; ORS=""; page=1; }
 /^type_ref/ { print "<Marker <MType 14>"; }
 /^function_def/ { print "<Marker <MType 13>"; }
 /^function_ref/ { print "<Marker <MType 11>"; }
-\$1 ~ /_def/ || \$1 ~ /_ref/ { print " <Mtext \`", \$3;
+\$1 ~ /_def/ || \$1 ~ /_ref/ { print " <MText \`", \$3;
 	for ( i = 4; i <= NF; i++ ) { print " ", \$i; } print "'> >\n"; }
 END { print "<EndOfInput>\n"; }
 END-awk
