@@ -61,6 +61,8 @@ public:
 
 	// return TRUE if the actual static buffering achieved.
 	int staticBuf() const { return hasStaticBuf; }
+	// give up static buffering for loop scheduling
+	void giveUpStatic() { hasStaticBuf = FALSE; }
 
 	// set and get the buffer type
 	void setBufType(BufType b) { myType = b; }

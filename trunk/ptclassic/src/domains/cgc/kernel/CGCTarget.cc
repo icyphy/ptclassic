@@ -271,9 +271,10 @@ void CGCTarget :: setGeoNames(Galaxy& galaxy) {
 /////////////////////////////////////////
 
 // note that we allow the C compiler to do the actual allocation;
-// this routine just determines the buffer sizes.
+// this routine just determines the buffer sizes, and buffer properties.
 
 int CGCTarget :: allocateMemory() {
+	int loop = int(loopScheduler);
 	Galaxy& g = *galaxy();
 	// set up the forkDests members of each Fork inputs.
 	setupForkDests(g);
@@ -285,6 +286,16 @@ int CGCTarget :: allocateMemory() {
 		BlockPortIter next(*s);
 		CGCPortHole* p;
 		while ((p = (CGCPortHole*) next++) != 0) {
+			// for loop scheduler, giveup linear buffering if
+			// rate change occurs.
+			if (loop) {
+				if (p->far() && (!p->atBoundary())) {
+					int nMe = p->numXfer();
+					int nFar = p->far()->numXfer();
+					if ((nMe < nFar) || (nMe%nFar != 0))
+						p->giveUpStatic();
+				}
+			}
 			p->finalBufSize(useStaticBuffering());
 		}
 	}
