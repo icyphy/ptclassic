@@ -104,7 +104,7 @@ TK_INCDIR=$(TCL_ROOT)/tk/include
 
 # Combined -L and -l options to link with tk library.  Can add
 # addtional -L and/or -l options to support tk extensions.
-TK_LIBSPEC=-L$(TCL_ROOT)/tk.$(ARCH)/lib -ltk -lXpm
+TK_LIBSPEC=-L$(TCL_ROOT)/tk.$(ARCH)/lib -ltk #-lXpm
 
 #-----------------------------------------------------------------------
 # 		Global options to use
