@@ -84,14 +84,20 @@ protected:
 
 	// Look up the value of state and return it as a StringList.
 	// A zero-length StringList is returned if there is no such State.
-	StringList AsmStar::lookupVal(const char* name);
+	StringList lookupVal(const char* name);
 
 	// Look up the address of porthole or state with an offset for
 	// the current access.
-	StringList AsmStar::lookupAddress(const char* name);
+	StringList lookupAddress(const char* name);
 
 	// Look up the memory of porthole or state.
-	StringList AsmStar::lookupMem(const char* name);
+	StringList lookupMem(const char* name);
+
+	// Look up the size of a porthole or state
+	int lookupSize(const char* name);
+
+	// For generation of error messages
+	void codeblockError(const char* p1, const char* p2 = "");
 
 	// Process the macros that are defined for this star.
 	// These are found by gencode.  In this base class, the following
