@@ -163,6 +163,7 @@ proc ::tycho::invoke { args } {
 ##############################################################################
 #### mkdir
 # Create a directory
+#
 proc ::tycho::mkdir { args } {
     # Unix-ism
     eval exec mkdir $args
@@ -170,10 +171,15 @@ proc ::tycho::mkdir { args } {
 
 ##############################################################################
 #### rm
-# Removed a file
+# Remove a file
+# FIXME: In tcl7.6, this should go away
+#
 proc ::tycho::rm { args } {
-    # Unix-ism
-    eval exec rm $args
+    global tcl_platform
+    if { $tcl_platform(platform) != "windows" } { 
+	# Unix-ism
+	eval exec rm $args
+    }
 }
 
 #####################################################################
