@@ -80,6 +80,23 @@ this example, <CODE>tycho-mac</CODE> would end up at
 <LI> To start up Tycho, start <CODE>Itkwish</CODE>, then type
 <CODE>source tycho-mac</CODE>.
 
+<LI> Tycho includes HTML documentation of the Itcl classes that make up
+Tycho.  To save space, these files are not shipped in the Tycho tar
+file, you must build them after untarring the distribution.
+
+ <P>The
+<A HREF="../kernel/doc/usersGuides/BuilderDialogHelp.html">BuilderDialog</A>
+is an experimental graphical interface to the build process.  The
+BuilderDialog interface will change over time, but you may find it useful
+for building the HTML documentation.  To run the BuilderDialog, choose the
+<CODE>Build Tycho</CODE> submenu choice under the <CODE>Tools</CODE> menu
+choice in the main <CODE>Window</CODE> menu.
+
+ <P>Under Unix, the best way to build these files is to run
+<CODE>make install</CODE>.  However, under Windows, a <CODE>make</CODE>
+binary may or may not be present, so running the BuilderDialog
+is usually the best option.
+
 </OL>
 
 <p>
