@@ -1,26 +1,32 @@
 <!-- $Id$ -->
 <html>
 <head>
-<Title>User's Guide to the Tycho Font Manager</title>
+<Title>User's Guide to the Tycho Font Dialog</title>
 </head>
 <body bgcolor="#faf0e6">
-<h1><a name="font manager">User's Guide to the The Tycho Font Manager</a></h1>
+<h1><a name="font manager">User's Guide to the The Tycho Font Dialog</a></h1>
 <p>
-The FontManager in Tycho a top-level window within
-which you can select a font.
-When you select a font, the alphabet will be displayed in that font.
-When you have invoked the font manager from within an editor, the
-clicking OK or typing return will set the selected font in the
-editor.
-<p>
-Rather than exposing to the user the arcane font specification
-that is used by the X window system, the font manager has five
-pull-down menus that can be used to select fonts
-by family, size, weight, and style.  Since some of the best
-X window fonts do not conform to this partitioning, a
-separate menu is provided for selecting miscellaneous fonts
-by name.  For example, the 9x15 and 10x20 fonts are particularly
-nice screen fonts.
+The FontDialog in Tycho is a top-level window within
+which you can select a font. You will usually get access
+to it through the <A HREF="PreferencesHelp.html">preferences manager</A>.
+
+ <P>The window contains three option menus which you can use to set
+the font family, size, and style. The "Screen" family is a
+psuedo-family that maps to some common X fonts such as 8x13 and 9x15.
+There is a display of text in the selected font, and, for the
+hackers, the name of the actual X font selected. When you make a
+change to the selected font, the displayed text changes to that font.
+
+
+ <P>The font dialog (and the class that is doing the real work
+behind the scenes, the <A HREF="../internals/FontManager.html">font
+manager</A>, hide the arcane font specification
+that is used by the X window system from the user. As part of this,
+the font manager will always choose a valid X font, regardless of the
+specification you give it. For example, if you try and select a
+"Screen" font in italics, the font manager will display a Courier font
+since there is no italic screen font.
+
 <p>
 <a href="../../../doc/index.html">Tycho Home Page</a><br>
 <p>
