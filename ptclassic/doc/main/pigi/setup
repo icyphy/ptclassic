@@ -93,11 +93,16 @@ with whatever printer name you are using.
 .lp
 .b PIGIBW
 .pp
-If you are using a black and white monitor, you should set the PIGIBW
+If you are using a black and white monitor, you should either set the PIGIBW
 .Ir "monochrome monitors"
 .Ir "black and white monitors"
 .Ir "PIGIBW"
-eviroment variable before running pigi.  The command is as follows:
+eviroment variable before running pigi or run pigi using the "-bw"
+command line option, as in
+.(c
+pigi -bw
+.)c
+To use the environment variable instead,
 .(c
 setenv PIGIBW
 .)c

@@ -6,7 +6,7 @@ developed under \*(PT.
 .IE hardcopy
 The first option generates a postscript description and routes it
 .IE postscript
-to a printer. The second uses the screen capture capability
+to a printer or file. The second uses the screen capture capability
 of the X window system.
 .H2 "Printing Oct Facets"
 .pp
@@ -19,7 +19,8 @@ Then, keeping the mouse in the facet,
 .IE "printing facets"
 invoke the "print facet" command from the "Other" pigi menu.
 You must have the environment variable PRINTER set to point to
-a valid postscript printer. You can do this by putting the following
+a valid postscript printer if you are directing the file
+to a printer. You can do this by putting the following
 line in your .cshrc file:
 .(c
 	setenv PRINTER \fIprintername\fP
@@ -90,13 +91,13 @@ However, colors that work well on the screen are not always ideal
 for hardcopy.  For this reason, two sets of alternative colors
 have been devised.  The default works well with color printers.
 The second works well with black and white printers.
-For black and white printers, set the PIGIBW environment variable
-before running pigi, as in:
+For black and white printers, use the "-bw" command line option when
+starting \*(PT, as in:
 .(c
-setenv PIGIBW
-pigi
+pigi -bw
 .)c
 .IE "PIGIBW"
+.IE "Black and white"
 Now, the screen capture command can be used effectively.
 For example, under X11R4 or X11R5, 
 the following command will print a window on a
@@ -149,7 +150,14 @@ Maker.colorDocs:        True
 The FrameMaker utility "fmcolor" can be used to reduce a color window
 dump to a black and white window dump.  This will save space and avoid
 any dithered imitations of color.
-The color window dumps gotten with PIGICP set can be converted to black
+However, since fmcolor applies a threshold based on color intensity
+to the image, some foreground colors may get mapped to white instead of black.
+To prevent this, use the "-cp" command line option when starting pigi,
+as in
+.(c
+pigi -cp
+.)c
+Then color window dumps can be converted to black
 and white window dumps using the following FrameMaker command:
 .(c
 fmcolor -i 90 filein fileout
@@ -163,10 +171,3 @@ FrameMaker can also, in principle, import postscript files generated
 in the process of executing the ``print facet'' command.
 However, the results are not usually satisfactory, so this method
 is discouraged.
-.pp
-To restore normal color, simply exit pigi, and unset the environment variable:
-.(c
-unsetenv PIGIBW
-.)c
-Next time you run pigi, it will have whatever colors you originally
-specified in your X resources file, or if none, the default colors.
