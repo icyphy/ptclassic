@@ -63,7 +63,7 @@ private:
 	CodeStream* saveMainDecls;
 	CodeStream* saveMainClose;
 	CodeStream* saveCode;
-
+	CodeStream* oldDefault;
 	// recursive function definition.
 	StringList funcName;
 };
