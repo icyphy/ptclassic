@@ -39,6 +39,7 @@ They are registered with Tcl calling registerTclFns().
 #include "ganttIfc.h"
 #include "handle.h"
 #include "vemInterface.h"
+#include "octIfc.h"
 
 /*******************************************************************
  * Command to highlight an object given its name. Call as
@@ -114,7 +115,8 @@ ptkSetHighlightFacet(dummy, interp, argc, argv)
             "incorrect usage: should be \"ptkSetHighlightFacet <octHandle>\"");
         return TCL_ERROR;
     }
-    if (ptkHandle2OctObj(argv[1],&lastFacet)) return TCL_OK;
+    FreeOctMembers(&lastFacet);
+    if (ptkHandle2OctObj(argv[1], &lastFacet)) return TCL_OK;
     else {
 	strcpy(interp->result,
 	    "Failed to find oct object corresponding to handle");
