@@ -1,7 +1,7 @@
 static const char file_id[] = "DDFStar.cc";
 /******************************************************************
 Version identification:
-$Id$
+@(#)DDFStar.cc	2.20	7/19/95
 
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
@@ -65,7 +65,10 @@ void DDFStar :: initialize() {
 	}
 }
 
-int DDFStar :: run() { return Star :: run(); }
+int DDFStar :: run() {
+  incrFirings();
+  return Star :: run();
+}
 		
 // The following is defined in DDFDomain.cc -- this forces that module
 // to be included if any DDF stars are linked in.
