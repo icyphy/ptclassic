@@ -134,24 +134,30 @@ void CompileCGSubsystems::flattenWorm() {
 	  return;
 	}
 	else {
-	  if (!star->isA("CGCStar") && !farStar->isA("CGCStar") &&
-	      star->getProcId() != farStar->getProcId() &&
-	      (star->getProcId() >= 0) && (farStar->getProcId() >=0)) {
-	    int numDelays = port->numInitDelays();
-	    const char* delayValues = port->initDelayValues();
-	    port->disconnect();
-	    CGCFork* cgcFork = new CGCFork;
-	    // FIXME: I assume procId should be 0 for CGC.
-	    cgcFork->setProcId(0);
-	    galaxy()->addBlock(*cgcFork,"CGCWormFork");
-	    PortHole& cgcForkOutput = cgcFork->output.newConnection();
-	    if (farPort->isItOutput()) {
-	      farPort->connect(cgcFork->input,numDelays, delayValues);
-	      cgcForkOutput.connect(*port,0,"");
-	    }
-	    else {
-	      port->connect(cgcFork->input,numDelays, delayValues);
-	      cgcForkOutput.connect(*farPort,0,"");
+	  if (!star->isA("CGCStar")) {
+	    if (!farStar->isA("CGCStar")) {
+	      if ((star->getProcId() >= 0)) {
+		if ((farStar->getProcId() >=0)) {
+		  if (star->getProcId() != farStar->getProcId()) {
+		    int numDelays = port->numInitDelays();
+		    const char* delayValues = port->initDelayValues();
+		    port->disconnect();
+		    CGCFork* cgcFork = new CGCFork;
+		    // FIXME: I assume procId should be 0 for CGC.
+		    cgcFork->setProcId(0);
+		    galaxy()->addBlock(*cgcFork,"CGCWormFork");
+		    PortHole& cgcForkOutput = cgcFork->output.newConnection();
+		    if (farPort->isItOutput()) {
+		      farPort->connect(cgcFork->input,numDelays, delayValues);
+		      cgcForkOutput.connect(*port,0,"");
+		    }
+		    else {
+		      port->connect(cgcFork->input,numDelays, delayValues);
+		      cgcForkOutput.connect(*farPort,0,"");
+		    }
+		  }
+		}
+	      }
 	    }
 	  }
 	}
