@@ -33,18 +33,12 @@ public:
         // parses initValue to set value
         void initialize();
 
-	// the type
-        char* type() { return "STRING";}
+	// don't redefine type(), baseclass version returns "STRING"
 
         // the value as a string
 	StringList currentValue() { return val;}
 
-	// Evaluate expression in string	
-	const char* evalExpression(Tokenizer& lexer, Block* blockIAmIn);	
-	// Use as a string in stars
-	operator const char* () { return val;}
-
-	virtual State* clone ()  {return new StringState;}
+	State* clone ()  {return new StringState;}
 
 private:
 	const char* val;
