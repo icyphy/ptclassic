@@ -67,6 +67,7 @@ PL_SRCS= \
  CG56LMSRx.pl \
  CG56LMSGanged.pl \
  CG56RaisedCos.pl \
+ CG56Sinc.pl \
  CG56Window.pl
 
 # The .cc files
