@@ -49,11 +49,19 @@ static const char file_id[] = "MatlabTcl.cc";
 #include "StringList.h"
 #include "MatlabTcl.h"
 
+#define MATLABTCL_CHECK_MATLAB() \
+	if (! init()) return error("Could not start matlab")
+
 // constructor
-MatlabTcl::MatlabTcl() { tclinterp = 0; }
+MatlabTcl::MatlabTcl() {
+    tclinterp = 0;
+    matlabInterface = 0;
+}
 
 // destructor
-MatlabTcl::~MatlabTcl() {}
+MatlabTcl::~MatlabTcl() {
+    delete matlabInterface;
+}
 
 // set the Tcl interpreter held in the interp data member
 Tcl_Interp* MatlabTcl::SetTclInterpreter(Tcl_Interp* interp) {
@@ -82,7 +90,20 @@ int MatlabTcl::error(const char* msg) {
 void MatlabTcl::sethandle() {
     char handle[32];
     sprintf(handle, "MatlabTcl%-.8lx", (long)tclinterp);
-    matlabInterface.SetFigureHandle(handle);
+    matlabInterface->SetFigureHandle(handle);
+}
+
+// start a Matlab process if one is not running already
+int MatlabTcl::init() {
+    if ( matlabInterface == 0 ) {
+	matlabInterface = new MatlabIfc;
+    }
+    if (! matlabInterface->MatlabIsRunning()) {
+	if (! matlabInterface->StartMatlab() ) {
+	    return FALSE;
+	}
+    }
+    return TRUE;
 }
 
 // evaluate the Tcl command "matlab"
@@ -97,67 +118,88 @@ int MatlabTcl::matlab(int argc, char** argv) {
         return error("wrong # args in \"matlab\" command");
     }
 
-    if ( strcmp(argv[1], "end") == 0 ) {
-	return MatlabTcl::end(argc, argv);
-    }
-    else if ( strcmp(argv[1], "eval") == 0 ) {
-	return MatlabTcl::eval(argc, argv);
-    }
-    else if ( strcmp(argv[1], "get") == 0 ) {
-	return MatlabTcl::get(argc, argv);
-    }
-    else if ( strcmp(argv[1], "send") == 0 ) {
-	return MatlabTcl::send(argc, argv);
-    }
-    else if ( strcmp(argv[1], "set") == 0 ) {
-	return MatlabTcl::set(argc, argv);
-    }
-    else if ( strcmp(argv[1], "start") == 0 ) {
-	return MatlabTcl::start(argc, argv);
-    }
-    else if ( strcmp(argv[1], "unset") == 0 ) {
-	return MatlabTcl::unset(argc, argv);
-    }
-    else {
-	StringList msg = "unrecognized matlab command \"";
-	msg << argv[1]
-	    << "\": should be end, eval, get, send, set, start, or unset";
-	return error(msg);
+    // switch on the first letter of the command (second argument)
+    switch (*argv[1]) {
+      case 'e':
+	if ( strcmp(argv[1], "end") == 0 ) {
+	    return MatlabTcl::end(argc, argv);
+	}
+	else if ( strcmp(argv[1], "eval") == 0 ) {
+	    return MatlabTcl::eval(argc, argv);
+	}
+	break;
+
+      case 'g':
+	if ( strcmp(argv[1], "get") == 0 ) {
+	    return MatlabTcl::get(argc, argv);
+	}
+	break;
+
+      case 's':
+	if ( strcmp(argv[1], "send") == 0 ) {
+	    return MatlabTcl::send(argc, argv);
+	}
+	else if ( strcmp(argv[1], "set") == 0 ) {
+	    return MatlabTcl::set(argc, argv);
+	}
+	else if ( strcmp(argv[1], "start") == 0 ) {
+	    return MatlabTcl::start(argc, argv);
+	}
+	else if ( strcmp(argv[1], "status") == 0 ) {
+	    return MatlabTcl::status(argc, argv);
+	}
+	break;
+
+      case 'u':
+	if ( strcmp(argv[1], "unset") == 0 ) {
+	    return MatlabTcl::unset(argc, argv);
+	}
+	break;
     }
 
-    return TCL_OK;
+    StringList msg = "unrecognized matlab command \"";
+    msg << argv[1]
+	<< "\": should be "
+	<< "end, eval, get, send, set, start, status, or unset";
+    return error(msg);
 }
 
 // close a Matlab connection: don't do anything except close figures
 int MatlabTcl::end(int argc, char** /*argv*/) {
     if (argc != 2) return usage("matlab end");
-    matlabInterface.CloseMatlabFigures();
+    if (matlabInterface == 0) return error("the Tcl/Matlab interface has not been initialized");
+    matlabInterface->CloseMatlabFigures();
+    delete matlabInterface;
+    matlabInterface = 0;
     return TCL_OK;
 }
 
 // evaluate a Matlab command
 int MatlabTcl::eval(int argc, char** argv) {
     if (argc != 3) return usage("matlab eval <matlab_command>");
+    MATLABTCL_CHECK_MATLAB();
     sethandle();
-    matlabInterface.AttachMatlabFigureIds();
-    int merror = matlabInterface.EvaluateOneCommand(argv[2]);
-    Tcl_AppendResult(tclinterp, matlabInterface.GetOutputBuffer(), 0);
-    if ( merror ) return TCL_ERROR;
-    else return TCL_OK;
+    matlabInterface->AttachMatlabFigureIds();
+    int merror = matlabInterface->EvaluateOneCommand(argv[2]);
+    Tcl_AppendResult(tclinterp, matlabInterface->GetOutputBuffer(), 0);
+    if (merror) return TCL_ERROR;
+    return TCL_OK;
 }
 
 // get a Matlab matrix
 int MatlabTcl::get(int argc, char** /*argv*/) {
     if (argc != 3) return usage("matlab get <matrix_name>");
+    MATLABTCL_CHECK_MATLAB();
     return TCL_OK;
 }
 
 // evaluate a Matlab command
 int MatlabTcl::send(int argc, char** argv) {
     if (argc != 3) return usage("matlab send <matlab_command>");
+    MATLABTCL_CHECK_MATLAB();
     sethandle();
-    matlabInterface.AttachMatlabFigureIds();
-    int merror = matlabInterface.EvaluateOneCommand(argv[2]);
+    matlabInterface->AttachMatlabFigureIds();
+    int merror = matlabInterface->EvaluateOneCommand(argv[2]);
     if ( merror ) return TCL_ERROR;
     return TCL_OK;
 }
@@ -170,33 +212,45 @@ int MatlabTcl::set(int argc, char** argv) {
     int numrows, numcols;
     if ( sscanf(argv[3], "%d", &numrows) != 1 ) return usage(usagestr);
     if ( sscanf(argv[4], "%d", &numcols) != 1 ) return usage(usagestr);
+    MATLABTCL_CHECK_MATLAB();
 
     Matrix* matrix = 0;
     if ( argc == 6 ) {
 /* Figure out what to do here: we want to parse argv[5] and argv[6]
    as lists of numbers */
 /*
-       matrix = matlabInterface.SetVariable(argv[2], numrows, numcols,
+       matrix = matlabInterface->SetVariable(argv[2], numrows, numcols,
 					    argv[5], 0);
  */
     }
     else {
 /*
-       matrix = matlabInterface.SetVariable(argv[2], numrows, numcols,
+       matrix = matlabInterface->SetVariable(argv[2], numrows, numcols,
 					    argv[5], arg[6]);
  */
     }
-    if ( matrix ) return TCL_OK;
-    else return TCL_ERROR;
+    if (matrix) return TCL_OK;
+    return TCL_ERROR;
 }
 
 // start a Matlab process if one is not running already
 int MatlabTcl::start(int argc, char** /*argv*/) {
     if (argc != 2) return usage("matlab start");
-    if (! matlabInterface.MatlabIsRunning()) {
-	if (! matlabInterface.StartMatlab() ) {
-	    return error("cannot start matlab");
-	}
+    if (init()) return TCL_OK;
+    return error("Could not start matlab");
+}
+
+// return the status of the Matlab-Tcl interface
+int MatlabTcl::status(int argc, char** /*argv*/) {
+    if (argc != 2) return usage("matlab status");
+    if (matlabInterface == 0) {
+	Tcl_SetResult(tclinterp, "-1", TCL_STATIC);
+    } 
+    else if (matlabInterface->MatlabIsRunning()) {
+	Tcl_SetResult(tclinterp, "0", TCL_STATIC);
+    }
+    else {
+	Tcl_SetResult(tclinterp, "1", TCL_STATIC);
     }
     return TCL_OK;
 }
@@ -204,6 +258,6 @@ int MatlabTcl::start(int argc, char** /*argv*/) {
 // unset a Matlab matrix
 int MatlabTcl::unset(int argc, char** /*argv*/) {
     if (argc != 3) return usage("matlab unset <matrix_name>");
+    MATLABTCL_CHECK_MATLAB();
     return TCL_OK;
 }
-
