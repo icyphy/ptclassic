@@ -52,7 +52,9 @@ class ::tycho::Slider {
     # The number of significant digits to display.
     #
     itk_option define -digits digits Digits 1 {
-	updatevalue
+	if { $initialized } {
+	    updatevalue
+	}
     }
 
     ## from
@@ -62,7 +64,9 @@ class ::tycho::Slider {
     # NOTE: This value must always be less than the -to option.
     #
     itk_option define -from from From 0 {
-	updatevalue
+	if { $initialized } {
+	    updatevalue
+	}
     }
 
     ## label
@@ -95,43 +99,16 @@ class ::tycho::Slider {
 	}
     }
 
+
     ## resolution
     #
     # The resolution of the slider. If zero, there is no
     # quantization.
     #
-    itk_option define -resolution resolution Resolution 0 {
-	if { $initialized } {
-	    if { $itk_option(-resolution) != 0 } {
-		#
-		# The resolution is non-zero, so configure the
-		# stepping interactor with the right step and
-		# the update command. (Remove the update command
-		# from the alonger interactor.)
-		#
-		$stepper configure \
-			-gridsize [expr double($itk_option(-resolution)) \
-			/ ($itk_option(-to) - $itk_option(-from)) \
-			* $itk_option(-length)] \
-			-dragcommand "$this updatevalue"
-		$alonger configure -dragcommand {}
-		$alonger cascade $stepper
-	    } else {
-		#
-		# The resolution is zero, so remove the stepping interactor
-		# from the interaction chain. Set the alonger interactor
-		# to perform the update command.
-		#
-		$alonger configure -dragcommand "$this updatevalue"
-		$alonger uncascade
-	    }
+    # See below for config body
+    #
+    itk_option define -resolution resolution Resolution 0
 
-	    #
-	    # Adjust the slider position
-	    #
-	    $this set [$this adjust [$this get]]
-	}
-    }
 
     ## scale
     #
@@ -160,7 +137,9 @@ class ::tycho::Slider {
     # NOTE: This value must always be greater than the -from option.
     #
     itk_option define -to to To 10 {
-	updatevalue
+	if { $initialized } {
+	    updatevalue
+	}
     }
 
     ## totalwidth
@@ -169,7 +148,6 @@ class ::tycho::Slider {
     #
     itk_option define -totalwidth totalwidth TotalWidth 34 {
 	if { $initialized } {
-	    puts "$this totalwidth!"
 	    redraw
 	}
     }
@@ -182,7 +160,6 @@ class ::tycho::Slider {
     itk_option define -width width Width 4 {
 	if { $initialized && $itk_option(-width) != $width } {
 	    ::set width $itk_option(-width)
-	    puts "$this width = $itk_option(-width)"
 	    redraw
 	}
     }
@@ -193,111 +170,16 @@ class ::tycho::Slider {
     constructor {args} {}
 
 
-    ## updatevalue
+    ## Public methods
     #
-    # Recalculate and display the current value of the slider.
-    # With no argument, uses the current slider position; with
-    # an argument, uses that argument.
+    method get {} {}
+    method set {x} {}
+    method updatevalue {} {}
+
+
+    ## Private methods
     #
-    # If there is one, call the _command_ option.
-    #
-    method updatevalue {args} {
-	if { ! $initialized } {
-	    return
-	}
-
-	if { $args == "" } {
-	    ::set value [$this get]
-	} else {
-	    ::set value [lindex $args 0]
-	}
-
-	#
-	# Now for a bit of trickery: because the quantization
-	# of the slider movement may cause positioning errors,
-	# quantize the value and adjust the slider position.
-	#
-	# As it turns out, the errors are so small that this is
-	# not worth worrying about, so I commented it out --hjr--
-	#
-	# ::set value [adjust $value]
-	# slide $value
-
-	#
-	# Update the label
-	#
-	$valuelabel configure -text [format %.$itk_option(-digits)f $value]
-
-	#
-	# Call the command prefix
-	#
-	if { $itk_option(-command) != "" } {
-	    eval $itk_option(-command) $value
-	}
-    }
-
-
-    ## adjust
-    #
-    # Return a slider value adjusted to be within limits and on
-    # the correct interval.
-    #
-    # private
-    method adjust {x} {
-	if { $x < $itk_option(-from) } {
-	    ::set x $itk_option(-from)
-	} elseif { $x > $itk_option(-to) } {
-	    ::set x $itk_option(-to)
-	}
-
-	if { $itk_option(-resolution) != 0 } {
-	    ::set x [roundTo $x $itk_option(-resolution)]
-	}
-
-	return $x
-    }
-
-
-    ## slide
-    #
-    # Move the slider to the position indicated by the given value.
-    # Assumes the value is already "adjusted."
-    #
-    # private
-    method slide {x} {
-	::set position [expr $sliderbottom \
-		- ($x-$itk_option(-from)) \
-		/ double($itk_option(-to)-$itk_option(-from)) \
-		* ($sliderbottom-$slidertop)]
-
-	$bar move direct \
-		0 [expr $position - $barheight/2 - [lindex [$bar coords] 1]]
-    }
-
-
-    ## set
-    #
-    # Set the slider to a specified value.
-    #
-    method set {x} {
-	::set s [adjust $x]
-	slide $x
-	updatevalue $x
-    }
-
-
-    ## get
-    #
-    # Get the current slider value from slider position.
-    #
-    method get {} {
-	::set position [expr [lindex [$bar coords] 1] + $barheight/2]
-	::set value    [expr $itk_option(-from) \
-		+ ($sliderbottom-$position)/$itk_option(-length) \
-		* ($itk_option(-to) - $itk_option(-from))]
-
-	return $value
-    }
+    private method redraw {} {}
 
 
     ## Picture components
@@ -324,15 +206,11 @@ class ::tycho::Slider {
     private variable slidertop
     private variable sliderbottom
 
-
+    ## initialized
+    # 
+    # Hacky variable to prevent errors in initialization
+    #
     private variable initialized 0
-
-    ## redraw
-    #
-    # Deleting any existing components and redraw everything
-    #
-    method redraw {} {}
-    
 }
 
 
@@ -370,12 +248,31 @@ body ::tycho::Slider::constructor {args} {
     redraw
 }
 
+
+## get
+#
+# Get the current slider value from slider position.
+#
+body ::tycho::Slider::get {} {
+    ::set position [expr [lindex [$bar coords] 1] + $barheight/2]
+    ::set value    [expr $itk_option(-from) \
+	    + ($sliderbottom-$position)/$itk_option(-length) \
+	    * ($itk_option(-to) - $itk_option(-from))]
+
+    return $value
+}
+
+
 ## redraw
+#
+# Redraw the slider components. PRIVATE.
 #
 body ::tycho::Slider::redraw {} {
 
     #
     # Delete existing pictures
+    #
+    # FIXME: Should resize/move existing components (if they exist)!
     #
     if { [info exists trough] } {
 	delete object $trough
@@ -401,13 +298,12 @@ body ::tycho::Slider::redraw {} {
     ::set sliderbottom [expr $slidertop + $itk_option(-length)]
     ::set troughbottom [expr $sliderbottom + $protrudeby + $barheight/2]
 
-
     #
     # Create the value display.
     #
     ::set valuelabel [$itk_component(slate) create Text \
 	    $xcenter $textbase \
-	    -text $itk_option(-from) -anchor s -foreground blue]
+	    -text $itk_option(-from) -anchor s -fill blue]
 
     #
     # Create the slider objects
@@ -450,5 +346,160 @@ body ::tycho::Slider::redraw {} {
 	    [expr $sliderbottom + $barheight/2]]
     $alonger bind $bar
 
+    #
+    # Configure the resolution to make sure the slider starts
+    # in the right place.
+    #
     configure -resolution $itk_option(-resolution)
+}
+
+
+## resolution
+#
+# Configuration code for the -resolution option. Sets the
+# step size for the interactor, and adjust slider position
+# and the value label.
+#
+configbody ::tycho::Slider::resolution {
+    if { $initialized } {
+	if { $itk_option(-resolution) != 0 } {
+	    #
+	    # The resolution is non-zero, so configure the
+	    # stepping interactor with the right step and
+	    # the update command. (Remove the update command
+	    # from the alonger interactor.)
+	    #
+	    ::set stepsize [expr double($itk_option(-resolution)) \
+		    / ($itk_option(-to) - $itk_option(-from)) \
+		    * $itk_option(-length)]
+
+	    $stepper configure \
+		    -gridsize $stepsize \
+		    -dragcommand "$this updatevalue"
+
+	    $alonger configure -dragcommand {}
+	    $alonger cascade $stepper
+
+	    #
+	    # Adjust the slider position
+	    #
+	    ::set offset [expr $sliderbottom - [lindex [$bar coords] 1] \
+		    - $barheight/2 ]
+	    ::set offsetdash [roundTo $offset $stepsize]
+	    $bar move direct 0 [expr $offset - $offsetdash]
+
+	    #
+	    # Get the value represented by the slider
+	    #
+	    ::set value [expr $itk_option(-from) \
+		    + $offsetdash/$itk_option(-length) \
+		    * ($itk_option(-to) - $itk_option(-from))]
+
+	    #
+	    # Update the label
+	    #
+	    $valuelabel configure \
+		    -text [format %.$itk_option(-digits)f $value]
+
+	    #
+	    # Call the command prefix
+	    #
+	    if { $itk_option(-command) != "" } {
+		eval $itk_option(-command) $value
+	    }
+	} else {
+	    #
+	    # The resolution is zero, so remove the stepping interactor
+	    # from the interaction chain. Set the alonger interactor
+	    # to perform the update command.
+	    #
+	    $alonger configure -dragcommand "$this updatevalue"
+	    $alonger uncascade
+	}
+    }
+}
+
+
+## set
+#
+# Set the slider to a specified value.
+#
+body ::tycho::Slider::set {x} {
+    #
+    # Adjust the value to be within range and on the specified
+    # resolution.
+    #
+    if { $x < $itk_option(-from) } {
+	::set x $itk_option(-from)
+    } elseif { $x > $itk_option(-to) } {
+	::set x $itk_option(-to)
+    }
+
+    if { $itk_option(-resolution) != 0 } {
+	::set x [roundTo $x $itk_option(-resolution)]
+    }
+
+    #
+    # Calculate the corresponding bar position and move the
+    # bar there.
+    #
+    ::set position [expr $sliderbottom \
+	    - ($x-$itk_option(-from)) \
+	    / double($itk_option(-to)-$itk_option(-from)) \
+	    * ($sliderbottom-$slidertop)]
+
+    $bar move direct \
+	    0 [expr $position - $barheight/2 - [lindex [$bar coords] 1]]
+
+    #
+    # Update the label
+    #
+    $valuelabel configure -text [format %.$itk_option(-digits)f $x]
+
+    #
+    # Call the command prefix
+    #
+    if { $itk_option(-command) != "" } {
+	eval $itk_option(-command) $x
+    }
+}
+
+
+## updatevalue
+#
+# Recalculate and display the current value of the slider.
+# Call the -command option if there is one.
+#
+body ::tycho::Slider::updatevalue {} {
+    if { ! $initialized } {
+	return
+    }
+
+    #
+    # Get the current value from the slider
+    #
+    ::set value [$this get]
+
+    #
+    # Now for a bit of trickery: because the quantization
+    # of the slider movement may cause positioning errors,
+    # quantize the value and adjust the slider position.
+    #
+    # As it turns out, the errors are so small that this is
+    # not worth worrying about, so I commented it out --hjr--
+    #
+    # ::set value [adjust $value]
+    # slide $value
+
+    #
+    # Update the label
+    #
+    $valuelabel configure -text [format %.$itk_option(-digits)f $value]
+
+    #
+    # Call the command prefix
+    #
+    if { $itk_option(-command) != "" } {
+	eval $itk_option(-command) $value
+    }
 }
