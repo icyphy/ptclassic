@@ -148,6 +148,12 @@ gthreads_sol2.cfront gthreads_sol2.5.cfront: $(GT_OBJ)
 		COMP_ASM='$$(AS) $$(INC1) $$(INC2) -P $$(CFLAGS) $$*.S -o $$*.o' \
 		all install;
 
+# sol2.6 same as sol2(???)
+gthreads_sol2.6: gthreads_sol2
+
+# sol2.6.cfront same as sol2.cfront
+gthreads_sol2.6.cfront: gthreads_sol2.cfront
+
 # sol2.5 same as sol2
 gthreads_sol2.5: gthreads_sol2
 
