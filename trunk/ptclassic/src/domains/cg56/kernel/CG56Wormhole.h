@@ -53,10 +53,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 class CG56Wormhole : public CGWormBase, public CG56Star {
 
 public:
-	void setup();
-	void go();
-	void wrapup() { /* target->wrapup();  */ }
-
 	// Constructor
 	CG56Wormhole(Galaxy& g, Target* t = 0);
 	~CG56Wormhole();

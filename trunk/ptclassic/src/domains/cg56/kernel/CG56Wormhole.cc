@@ -44,16 +44,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 	class CG56Wormhole methods
 
 ********************************************************************/
-
-void CG56Wormhole :: setup() {
-	// main setup routine.
-	CGWormBase :: setup();
-}
-
-void CG56Wormhole :: go() { 
-	downLoadCode(0, 0);
-}
-
 // Constructor
 CG56Wormhole :: CG56Wormhole(Galaxy& g, Target* t) : CGWormBase(*this,g,t)
 	{ buildEventHorizons(); }
