@@ -30,9 +30,10 @@ limitation of liability, and disclaimer of warranty provisions.
     protected {
 	friend class CGCS56XTarget;
 	CG56S56XCGCBase* s56xSide;
+	CodeStream *dmaRoutines;
     }
 
-    codeblock(downloadCode,"const char* filePrefix,const char* s56path") {
+    codeblock(downloadCode,"const char* filePrefix,const char* s56path,const char* dmaRoutines") {
     {
 	Params dspParams;
 	/* open the DSP */
@@ -65,17 +66,8 @@ limitation of liability, and disclaimer of warranty provisions.
 	dspParams.topFill = 0;
 	dspParams.midFill = 0;
 	dspParams.dmaTimeout = 1000;
-        dspParams.startRead = qckLodGetIntr(dsp->prog,"STARTR");
-	dspParams.startWrite= qckLodGetIntr(dsp->prog,"STARTW");
 
-        if (dspParams.startRead == -1) {
-                perror("No STARTR label in @filePrefix.lod");
-                exit(1);
-        }
-        if (dspParams.startWrite == -1) {
-                perror("No STARTW label in @filePrefix.lod");
-                exit(1);
-        }
+@dmaRoutines
 
 	/* set the DSP parameters */
 	if (ioctl(dsp->fd,DspSetParams, &dspParams) == -1) {
@@ -89,6 +81,10 @@ limitation of liability, and disclaimer of warranty provisions.
     }
     }
 
+    setup {
+	    dmaRoutines = newStream("S56XRoutines");
+    }
+    
     initCode {
 	addInclude("<sys/types.h>");
 	addInclude("<sys/uio.h>");
@@ -96,16 +92,21 @@ limitation of liability, and disclaimer of warranty provisions.
 	addInclude("<qckMon.h>");
 	addInclude("<stdio.h>");
 	addDeclaration("    QckMon* dsp;","dsp");
-	const char *s56path = getenv("S56DSP");
-	if (s56path == NULL)
-		s56path = expandPathName("$PTOLEMY/vendors/s56dsp");
-	addMainInit(downloadCode(S56XFilePrefix,s56path),"s56load");
     }
 
     go {
 	StringList starName = this->fullName();
 	s56xSide->cgcCommOrder(starName);
     }	
+
+    wrapup {
+	    const char *s56path = getenv("S56DSP");
+	    if (s56path == NULL)
+		    s56path = expandPathName("$PTOLEMY/vendors/s56dsp");
+	    addMainInit(downloadCode(S56XFilePrefix,s56path,*dmaRoutines),"s56load");
+    }
     
 }
+
+
 

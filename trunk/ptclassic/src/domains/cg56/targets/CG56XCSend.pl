@@ -35,11 +35,36 @@ $label(wait)
 	movep	$mem(input):(r0)+,x:m_htx
 $label(WHL)
 	nop
-	}
+	}	
+codeblock(intTable) {
+;
+; HostPort Send Interrupt Point
+;
+$label(SAVEPC)  equ     *       ;save program counter
+        org     p:i_hstcm7              ; Host command 7
+STARTR  jsr	$starSymbol(DMAREAD) 
+	org	p:$label(SAVEPC)	;restore program counter
+}
+
+codeblock (intSub) {
+;
+; HostPort Send Interrupt Subroutine
+;
+$starSymbol(DMAREAD)
+	movep   x:m_hrx,$ref(wordCnt)   ; Save word count
+        nop
+	rti
+}
 
 	setup {
 		numXfer = input.numXfer();
 		CG56S56XCGCBase::setup();
+        }
+
+        initCode {
+		CG56S56XCGCBase::initCode();
+		addCode(intSub,PROCEDURE,"DMASendSubroutine");
+		addCode(intTable,CODE,"DMASendPointer");
 	}
 
 	go {

@@ -35,6 +35,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	buffer[3*i+2] = cvalue[3];
     }
     /* blocking write */
+    printf("Writing @numXfer tokens to the DSP\n");
     status = write(dsp->fd,buffer, @(numXfer*3));
     if (status == 0) {
 	perror("DSP write ioctl premature EOF");
@@ -45,6 +46,19 @@ limitation of liability, and disclaimer of warranty provisions.
 	exit(1);
     }
     }
+
+codeblock(STARTW,"const char* filePrefix"){
+	dspParams.startWrite= qckLodGetIntr(dsp->prog,"STARTW");
+        if (dspParams.startWrite == -1) {
+                perror("No STARTW label in @filePrefix.lod");
+                exit(1);
+        }
+}
+
+initCode {
+	CGCS56XBase::initCode();
+	addCode(STARTW(S56XFilePrefix),"S56XRoutines","STARTW");
+}
 
     go {
 	CGCS56XBase::go();

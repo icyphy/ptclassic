@@ -26,7 +26,7 @@ $label(wait)
 	movep	x:m_hrx,$ref(output)
 	}
 
-	codeblock(receiveMany) {
+codeblock(receiveMany) {
 	move	#$addr(output),r0	;read starting location address
 	do	a,$label(WHL)
 $label(wait)
@@ -34,7 +34,27 @@ $label(wait)
 	movep	x:m_hrx,$mem(output):(r0)+
 $label(WHL)
 	nop
+}
+        codeblock(intTable) {
+;
+; HostPort Receive Interrupt Pointer
+;
+$label(SAVEPC)  equ     *       ;save program counter
+	org	p:i_hstcm8		; Host command 8
+STARTW	jsr	$starSymbol(DMAWRITE)
+	org	p:$label(SAVEPC)	;restore program counter
 	}
+
+	codeblock (intSub) {
+;
+; HostPort Receive Interrupt Subroutine
+;
+$starSymbol(DMAWRITE)
+	movep   x:m_hrx,$ref(wordCnt)   ; Save word count
+        nop
+	rti
+        }
+	
 
 	setup {
 	    numXfer = output.numXfer();
@@ -44,7 +64,14 @@ $label(WHL)
 	    if (strcmp(inputType,FLOAT) == 0) {
 		    output.setPort("output",this,FIX,numXfer);
 	    }
+        }
+
+        initCode {
+	    CG56S56XCGCBase::initCode();
+	    addCode(intSub,PROCEDURE,"DMAReceiveSubroutine");
+            addCode(intTable,CODE,"DMAReceivePointer");
 	}
+
 	go {
 		addCode(wordCntCB);
 		if (output.numXfer()==1)
