@@ -32,7 +32,7 @@
 
 # FIXME: To do:
 # - The console should support sessions in separate interpreters.
-# - Control-e goes to the end of a line.  It should probably (for
+# - Control-e and End goes to the end of a line.  It should probably (for
 #   consistency) go the end of a command.
 
 
@@ -40,7 +40,7 @@
 #### TclShell
 # This class defines a shell widget that accepts Tcl and Itcl commands from
 # the keyboard and executes them. It tracks the command history, and
-# provides both menu commands and emacs-like key bindings for scrolling
+# provides both menu commands and keyboard shortcuts for scrolling
 # through and editing that command history. It will also, on request,
 # put the command history or a transcript of a session into a text
 # editor. The -text option, inherited from the base class, specifies
@@ -142,6 +142,9 @@ class ::tycho::TclShell {
     # Open a search window, or raise one that is already open.
     method search {}
 
+    # Select everything in the specified range.
+    method selectRange {start stop}
+
     # Go to the specified point in the console.
     method seeFragment {point}
 
@@ -165,6 +168,9 @@ class ::tycho::TclShell {
 
     # Insert text and apply one or more tags to that text.
     protected method insertWithTags {text args}
+
+    # Set the insertion cursor at the specified point.
+    protected method setInsert {index}
 
     ##########################################################################
     ####                         protected variables                      ####
@@ -219,8 +225,10 @@ configbody ::tycho::TclShell::stdout {
 #
 body ::tycho::TclShell::constructor {args} {
 
+    set text $itk_component(text)
+
     # Initialize the "promptEnd" mark
-    $itk_component(text) mark set promptEnd end
+    $text mark set promptEnd end
 
     eval itk_initialize $args
 
@@ -243,7 +251,7 @@ body ::tycho::TclShell::constructor {args} {
     # we have to remember where it is before executing the tk binding
     # code with a global variable. This is very ugly...
     #
-    bind $itk_component(text) <Button-1> {
+    bind $text <Button-1> {
 	set _tychoTclShellGlobalRememberedCursorPosition [%W index insert]
 	tkTextButton1 %W %x %y
 	%q tag remove sel 0.0 end
@@ -252,7 +260,7 @@ body ::tycho::TclShell::constructor {args} {
 	break
     }
 
-    bind $itk_component(text) <Double-Button-1> {
+    bind $text <Double-Button-1> {
 	set _tychoTclShellGlobalRememberedCursorPosition [%W index insert]
 	set tkPriv(selectMode) word
 	tkTextSelectTo %W %x %y
@@ -262,7 +270,7 @@ body ::tycho::TclShell::constructor {args} {
 	break
     }
 
-    bind $itk_component(text) <Triple-Button-1> {
+    bind $text <Triple-Button-1> {
 	set _tychoTclShellGlobalRememberedCursorPosition [%W index insert]
 	set tkPriv(selectMode) line
 	tkTextSelectTo %W %x %y
@@ -279,41 +287,50 @@ body ::tycho::TclShell::constructor {args} {
     # Go to the end of the line, insert a return, and take action
     # associated with producing another prompt, including (possibly)
     # executing a Tcl command.
-    bind $itk_component(text) <Return> {%M processReturn; break}
+    bind $text <Return> {%M processReturn; break}
 
     # Go to the beginning of the command.
-    bind $itk_component(text) <Control-a> {
-	namespace %C {%W mark set insert "promptEnd + 1 char"}
-	break
+    bind $text <<LineStart>> {
+        namespace %C {%W mark set insert "promptEnd + 1 char"}
+        break
+    }
+    # In case the above doesn't bind the home command.
+    bind $text <Home> {
+        namespace %C {%W mark set insert "promptEnd + 1 char"}
+        break
     }
 
     # Modify backspace, control-w, meta-b, etc to avoid deleting the prompt
-    # or backspacing beyond it.
+    # or backspacing beyond it.  Note that emacs bindings are assumed here.
+    # Bad idea?
     #
-    bind $itk_component(text) <BackSpace> "%Q backSpace; break"
-    bind $itk_component(text) <Control-h> "%Q backSpace; break"
-    bind $itk_component(text) <Delete> "%Q backSpace; break"
-    bind $itk_component(text) <Control-b> "%Q backChar; break"
-    bind $itk_component(text) <Control-w> "%Q deleteSelection; break"
-    bind $itk_component(text) <Meta-b> "%Q backWord; break"
-    bind $itk_component(text) <Key-Escape><Key-b> "%Q backWord; break"
-    bind $itk_component(text) <Control-p> "%Q backCommand 1; break"
-    bind $itk_component(text) <Control-n> "%Q backCommand -1; break" 
-    bind $itk_component(text) <Up> "%Q backCommand 1; break"
-    bind $itk_component(text) <Down> "%Q backCommand -1; break"
-    bind $itk_component(text) <Control-u> "%Q killLine; break"
+    bind $text <BackSpace> "%Q backSpace; break"
+    bind $text <Control-h> "%Q backSpace; break"
+    bind $text <Delete> "%Q backSpace; break"
+    bind $text <Control-b> "%Q backChar; break"
+    bind $text <Control-w> "%Q deleteSelection; break"
+    bind $text <Meta-b> "%Q backWord; break"
+    bind $text <Key-Escape><Key-b> "%Q backWord; break"
+    bind $text <Control-p> "%Q backCommand 1; break"
+    bind $text <Control-n> "%Q backCommand -1; break" 
+    bind $text <Up> "%Q backCommand 1; break"
+    bind $text <Down> "%Q backCommand -1; break"
+    bind $text <Control-u> "%Q killLine; break"
     
     # Modify search to not allow changing the text
-    bind $itk_component(text) <Control-s> "%Q searchQuery 0 1; break"
-    bind $itk_component(text) <Control-r> "%Q searchQuery 1 1; break"
+    bind $text <<Search>> \
+            "%Q incSearchMinibuffer; %Q adjustInsertionCursor; break"
+    bind $text <<SearchBackwards>> \
+            "%Q incSearchMinibuffer 1; %Q adjustInsertionCursor; break"
 
     printPrompt ""
 
     # Remove binding for altfile and revision control.
-    bind $prefix <Control-x><Control-v> { }
-    bind $prefix <Control-x><Control-q> { }
-    bind $prefix <Control-x><v> { }
-
+    # Others?
+    bind $prefix <<AltFile>> { }
+    bind $prefix <<RevisionControl>> { }
+    bind $prefix <<ToggleReadOnly>> { }
+    bind $prefix <<InsertFile>> { }
 }
 
 ###################################################################
@@ -356,14 +373,15 @@ body ::tycho::TclShell::destructor {} {
 # Tk's default text bindings may move the cursor.
 #
 body ::tycho::TclShell::adjustInsertionCursor {{point {}}} {
+    set text $itk_component(text)
     if { $point == "" } {
-	set point [$itk_component(text) index {promptEnd +1 chars}]
+	set point [$text index {promptEnd +1 chars}]
     }
-    if { [$itk_component(text) compare insert <= promptEnd] } {
-	if { [$itk_component(text) compare insert <= {promptEnd -1 lines lineend}] }  {
-	    $itk_component(text) mark set insert $point
+    if { [$text compare insert <= promptEnd] } {
+	if { [$text compare insert <= {promptEnd -1 lines lineend}] }  {
+	    $text mark set insert $point
 	} else {
-	    $itk_component(text) mark set insert {promptEnd +1 chars}
+	    $text mark set insert {promptEnd +1 chars}
 	}   
     }
 }
@@ -553,22 +571,9 @@ body ::tycho::TclShell::help {} {
 # This is redefined from the base class because the Format menu has been
 # removed and the base class method refers to it. Also, we don't want
 # to put a file status to the status bar, since this is bogus
-# for a console window.
+# for a console window. So we ignore.
 #
 body ::tycho::TclShell::indicateReadOnly {bool} {
-    if [winfo exists $prefix] {
-	if {$bool} {
-	    # Currently doesn't do anything, as this just
-	    # doesn't seem right... -- hjr
-	    # menubar disable insert
-	    # menubar disable save
-            # menubar disable undoredo
-	} {
-	    # menubar enable insert
-	    # menubar enable save
-            # menubar enable undoredo
-	}
-    }
 }
 
 #########################################################################
@@ -695,6 +700,17 @@ body ::tycho::TclShell::scroll {direction} {
 #
 body ::tycho::TclShell::search {} {
     searchQuery 0 1
+}
+
+#####################################################################
+#### selectRange
+# Select everything in the specified range.
+#
+body ::tycho::TclShell::selectRange {start stop} {
+    set text $itk_component(text)
+    undoBoundary
+    $text see $start
+    $text tag add sel $start $stop
 }
 
 #####################################################################
@@ -845,9 +861,9 @@ body ::tycho::TclShell::_initializeBars {menubar statusbar toolbar} {
         $menubar delete spelling
         $menubar delete filesep2
 
-	# Leave these these but disable them
-	$menubar disable cut
-	$menubar disable paste
+	# Leave these these but disable them.  Why!?!?!
+	# $menubar disable cut
+	# $menubar disable paste
 
         # Remove the Format menu altogether
 	$menubar delete format
@@ -856,15 +872,18 @@ body ::tycho::TclShell::_initializeBars {menubar statusbar toolbar} {
         $menubar separator specialsep1 special
 
         $menubar command edithistory special \
-		-label "Edit History" -underline 0 \
+		-label "Edit History" \
+                -underline 0 \
                 -command "$this displayHistory"
         
         $menubar command clearhistory special \
-		-label "Clear History" -underline 0 \
+		-label "Clear History" \
+                -underline 0 \
                 -command "$this clearHistory"
 
         $menubar command setnamespace special \
-		-label "Set Namespace..." -underline 0 \
+		-label "Set Namespace..." \
+                -underline 0 \
                 -command "$this queryNamespace"    
     }
 }
@@ -889,3 +908,15 @@ body ::tycho::TclShell::insertWithTags {text args} {
 	$itk_component(text) tag add $i $start insert
     }
 }
+
+#####################################################################
+#### setInsert 
+# Set the insertion mark at the specified index.
+# This is done by a protected method so that it can be overridden
+# in derived classes.
+#
+body ::tycho::TclShell::setInsert {index} {
+    $itk_component(text) mark set insert $index
+    adjustInsertionCursor
+}
+
