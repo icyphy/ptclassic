@@ -53,8 +53,9 @@ WARNINGS =	-Wall -Wcast-qual -Wsynth
 # Use -D_BSD_TIME for src/kernel/Clock.cc, see /usr/include/sys/time.h
 MISC_DEFINES =	-D_BSD_SIGNALS -D_BSD_TIME
 
-#  Under gcc-2.5.8 on Irix5.2, -g is not supported
-GPPFLAGS =	-G 0 $(MEMLOG) $(WARNINGS) $(MISC_DEFINES) $(OPTIMIZER)
+# Under gcc-2.5.8 on Irix5.2, -g is not supported unless you have gas-2.5
+# Under gcc-2.7.0, you will need -fno-for-scope for GPPFLAGS
+GPPFLAGS =	-G 0 $(MEMLOG) $(WARNINGS) $(MISC_DEFINES) $(OPTIMIZER) -fno-for-scope
 
 #     -cckr  The traditional K&R/Version7 C with SGI extensions
 # Note that -cckr will not work with gcc
