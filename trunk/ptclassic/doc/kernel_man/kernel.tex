@@ -701,15 +701,7 @@ node list containing \var{e}; the node is on the heap.
 virtual ~DoubleLinkList();
 \end{example}
 
-The destructor FIXME.
-
-\begin{example}
-DoubleLink* createLink(Pointer \var{p});
-\end{example}
-
-Create a new DoubleLink containing \var{p} on the heap.
-This is a design error: it has nothing to do with DoubleLinkList
-and should not be a member of this class.
+The destructor.
 
 \begin{example}
 void insertLink(DoubleLink *x);
@@ -780,7 +772,7 @@ void reset();
 \end{example}
 
 This function resets the fields of the DoubleLinkList object without
-doing anything to the nodes (why is this here?).
+doing anything to the nodes.
 
 \begin{example}
 int size();
