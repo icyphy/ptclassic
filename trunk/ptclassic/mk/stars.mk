@@ -86,6 +86,7 @@ CGTARGETS =	$(CGT)/CGMultiTarget.o $(CGT)/CGSharedBus.o \
 CGCTARGETS =	$(CGCT)/CGCUnixSend.o $(CGCT)/CGCUnixReceive.o \
 		$(CGCT)/CGCMultiTarget.o
 CG56TARGETS =	$(CG56T)/Sim56Target.o $(CG56T)/S56XTarget.o \
-		$(CG56T)/Sub56Target.o
+		$(CG56T)/Sub56Target.o $(CG56T)/CG56MultiSimTarget.o \
+		$(CG56T)/CG56MultiSimSend.o $(CG56T)/CG56MultiSimReceive.o
 CG96TARGETS =	$(CG96T)/Sim96Target.o
 
