@@ -54,30 +54,36 @@ $(ALLSTARIDXS): $(wildcard $(dir $@)/*.htm)
 		| itclsh
 
 # Star index of all the star index files
-$(VPATH)/starHTML.idx: $(ALLSTARIDXS)
-	@echo "Merging $@"
-	@rm -f $@
-	@echo "set TYCHO $(PTOLEMY)/tycho; \
+starHTML.idx: $(ALLSTARIDXS)
+	@echo "Merging $(VPATH)/$@"
+	@rm -f $(VPATH)/$@
+	@(cd $(VPATH); \
+	 echo "set TYCHO $(PTOLEMY)/tycho; \
 		source $(PTOLEMY)/tycho/lib/idx/tychoMakeIndex.tcl; \
 		tychoVpathMergeIndices \"$(ME) stars\" \
-			 $@ $(VPATH)/ $(ALLSTARIDXS)" | itclsh
+			 $(VPATH)/$@ $(VPATH)/ $(ALLSTARIDXS)" | itclsh)
 
 
 
 # star/demo recursive index
 STARDEMOIDXS = 	$(VPATH)/starDemo.idx
 
+
+demo.idx: starDemo.idx
+
+# This rule also produces demo.idx
 $(STARDEMOIDXS): $(wildcard $(dir $@)/schematic/contents\;)
 	echo "source $(PTOLEMY)/lib/tcl/starindex.tcl; \
 		starindex_WriteDemoIndex $(ME) " | itclsh
 
-$(VPATH)/domain.idx: $(STARDEMOIDXS) $(VPATH)/starHTML.idx
-	@echo "Merging $@"
-	@rm -f $@
-	@echo "set TYCHO $(PTOLEMY)/tycho; \
+domain.idx: $(STARDEMOIDXS) starHTML.idx
+	@echo "Merging $(VPATH)/$@"
+	@rm -f $(VPATH)/$@
+	@(cd $(VPATH); \
+	 echo "set TYCHO $(PTOLEMY)/tycho; \
 		source $(PTOLEMY)/tycho/lib/idx/tychoMakeIndex.tcl; \
-		tychoVpathMergeIndices \"$(ME) stars\" \
-			 $@ $(VPATH)/ $^" | itclsh
+		tychoVpathMergeIndices \"$(ME) stars and demos\" \
+			 $(VPATH)/$@ $(VPATH)/ $^ demo.idx" | itclsh)
 
 clean_indices:
 	rm -f $(ALLSTARIDXS) starHTML.idx starHTML.idx.fst $(STARDEMOIDXS)
