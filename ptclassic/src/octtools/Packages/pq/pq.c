@@ -55,8 +55,6 @@ static char SccsId[]="$Id$";
 	errRaise(PQ_NAME, 0, "Error: function fname passed a null queue");\
     }
 
-int pq_numcmp(), pq_ptrcmp(), pq_rev_numcmp(), pq_rev_ptrcmp(), pq_rev_strcmp();
-
 static pq_entry_t * pq_dup_entry();
 
 static void free_queue_entry();
