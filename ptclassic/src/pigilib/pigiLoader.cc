@@ -44,12 +44,12 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 // Include standard include files to prevent conflict with
 // the type definition Pointer used by "rpc.h". BLE
+#include "compat.h"
+#include "sol2compat.h"
 #include <std.h>
-#include <sys/types.h>
 #include <sys/stat.h>
 #include <ctype.h>
 
-#include "compat.h"
 #include "Linker.h"
 #include "Error.h"
 #include "Domain.h"
