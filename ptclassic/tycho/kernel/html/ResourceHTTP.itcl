@@ -848,8 +848,9 @@ body ::tycho::ResourceHTTP::httpget {url type} {
 
     # Create the cache file if getting the whole file.
     if { $type == "file" && $fileid == "" } {
-	set filename [::tycho::tmpFileName httpCache]
-	set fileid [::open $filename "w+"]
+        set filename \
+                [::tycho::tmpFileName httpCache][::tycho::url extension $url]
+        set fileid [::open $filename "w+"]
 	debugputs "Cache file $filename on $fileid"
     }
     #uplevel #0 "set _httpstatus header"  ;# Initially we're getting the header
@@ -1053,12 +1054,11 @@ body ::tycho::ResourceHTTP::splitURL {url} {
 # Wait until the current GET completes
 body ::tycho::ResourceHTTP::httpwait {} {
     # Wait until the status becomes "done"
-    #::puts -nonewline ">>>>Waiting (($socketid) $currentURL?" ; flush stdout
+    #::puts -nonewline ">Waiting (($socketid) $currentURL?" ; flush stdout
     while { [httpstatus] != "done" } {
         uplevel #0 "tkwait variable _httpstatus($currentURL)"
-        #tkwait variable _httpstatus
     }
-    #::puts "[::tycho::url tail $currentURL]<<<<" ; flush stdout
+    #::puts "([::tycho::url tail $currentURL]) ok<" ; flush stdout
     return
 }
 
