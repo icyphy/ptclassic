@@ -23,13 +23,13 @@ Initialization code for pigiRpc.
 /* Global Vars */
 
 char *xDisplay;  /* display name passed by vem */
-char *version = "Pigi Version: 0.2.1";
+extern char *pigiVersion;
 
 
 static void
 PrintVersion()
 {
-    PrintCon(version);
+    PrintCon(pigiVersion);
 }
 
 int
@@ -103,21 +103,6 @@ RPCFunction CommandArray[] = {
     {ExitApp, "Other", "exit-pigi"}
 };
 
-static char* pigiRpcName;
-
-/* The entry point.  RPCmain does the real setup; this just sets
-   the program name.
- */
-
-main (argc, argv)
-int argc;
-char **argv;
-{
-    pigiRpcName = argv[0];
-    RPCMain (argc, argv);
-    return 0;
-}
-
 int
 UserMain(display, spot, cmdList, userOptionWord, array) /* ARGSUSED */
 char *display;
@@ -127,8 +112,6 @@ long userOptionWord;
 RPCFunction **array;
 {
     char buf[MSG_BUF_MAX], *envVar, *getenv();
-
-    __main();  /* for c++ initialization */
 
     xDisplay = display;
     /* Set the DISPLAY environment variable for ptolemy stars that use it */
@@ -150,9 +133,6 @@ RPCFunction **array;
 	RPCExit(-1);
     }
 /* initialize modules: compilation of universes, signal catching, loader*/
-    CompileInit();
-    KcCatchSignals();
-    KcLoadInit(pigiRpcName);
     *array = CommandArray;
     PrintVersion();
     welcome_window ();
@@ -167,8 +147,8 @@ welcome_window ()
 {
 	open_display (xDisplay);
 	accum_string ("Ptolemy Interactive Graphics Interface\n");
-	accum_string (version);
-	accum_string ("\nCopyright 1990 Regents of the University of California");
+	accum_string (pigiVersion);
+	accum_string ("\nCopyright 1990, 1991 Regents of the University of California");
 	accum_string ("\nAll rights reserved.");
 	pr_accum_string ();
 }
