@@ -12,11 +12,12 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CGC Visual Instruction Set library }
 	desc { 
-Subtract the four 16-bit short integers concatenated in a 64-bit float particle
-with the four 16-bit short integers concatenated in another 64-bit float
-particle.  The result are four 16-bit signed short integers that are returned
-as a single floating point number.  There is no saturation arithmetic so
-that overflow results in wrap around. 
+Subtract the corresponding 16-bit fixed point numbers of two
+partitioned float particles.  Four signed 16-bit fixed point
+numbers of a partitioned 64-bit float particle are subtracted from
+those of another 64-bit float particle.  The result is returned 
+as a single 64-bit float particle.  There is no saturation arithmetic 
+so that overflow results in wrap around.
 	}
 	input {
 		name { inA }

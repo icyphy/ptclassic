@@ -12,10 +12,14 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CGC Visual Instruction Set library }
 	desc { 
-Unpack a single 64-bit floating point number into four floating point numbers.
-The input floating point number is first separated into four 16-bit short
-integers and then each short is up cast to a floating point number.
-	}
+Takes a single 64-bit float particle, unpacks them into four
+16-bit fixed point numbers, and casts them into four float particles.
+The input float particle is first separated into four 16-bit
+fixed point numbers.  Once again, the order of the fixed point numbers
+can be reversed.  The fixed point numbers are then up cast to float
+particles.  The exponent value of each float particle can
+be adjusted by the scaledown parameter.
+        }
 	input {
 		name { in }
 		type { float }
@@ -34,12 +38,12 @@ integers and then each short is up cast to a floating point number.
 		attributes { A_CONSTANT|A_SETTABLE }
 	}
 	defstate {
-	        name { forward }
+	        name { reverse }
 		type { int }
 		default { FALSE }
-		desc { forward = TRUE unpacks with most current sample at
-		       position 0; forward = FALSE unpacks with most
-		       current sample at position 3 }
+		desc { 
+TRUE unpacks with most current sample at initial position; 
+FALSE unpacks with most current sample at trailing position}
 		attributes { A_CONSTANT|A_SETTABLE }
 	}
 	code{
@@ -87,7 +91,7 @@ integers and then each short is up cast to a floating point number.
 	}
 	go {
 	  addCode(unpackit);
-	  if (!forward)
+	  if (!reverse)
 	    addCode(unpackbackwards);
 	  else
 	    addCode(unpackforwards);

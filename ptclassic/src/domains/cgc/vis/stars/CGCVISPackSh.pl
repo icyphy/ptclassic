@@ -12,12 +12,17 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CGC Visual Instruction Set library }
 	desc { 
-Pack four floating point numbers into a single floating point number.
-The input floating point numbers are first down cast into a 16-bit short
-integers and then concatenated to form a 64-bit floating number.
-The four shorts can be packed with the either the most current value
-leading or trailing but make sure that you pack and unpack with the
-same endian setting. }
+Takes four float particles, casts them into four signed 16-bit
+fixed point numbers, and packs them into a single 64-bit float
+particle.  The input float particles are first down cast 
+into 16-bit fixed point numbers.  The location of the binary point 
+of the fixed point number can be placed anywhere by adjusting 
+the scale parameter.  The fixed point numbers are then concatenated
+to produce a 64-bit result.  The order of the fixed point numbers
+can be reversed so that the most current input either leads or trails the pack,
+ie reverse equals FALSE produces (x[n],x[n-1],x[n-2],x[n-3]) and reverse equals 
+TRUE produces (x[n-3],x[n-2],x[n-1],x[n]).
+        }
 	input {
 		name { in }
 		type { float }
@@ -36,12 +41,12 @@ same endian setting. }
 		attributes { A_CONSTANT|A_SETTABLE }
 	}
 	defstate {
-	        name { forward }
+	        name { reverse }
 		type { int }
 		default { FALSE }
 		desc {
-TRUE unpacks with most current sample at position 0;
-FALSE unpacks with most current sample at position 3 }
+TRUE packs with most current sample at inital position;
+FALSE packs with most current sample at trailing position}
 		attributes { A_CONSTANT|A_SETTABLE }
 	}
 	code{
@@ -85,7 +90,7 @@ FALSE unpacks with most current sample at position 3 }
 	  $ref(out) = $starSymbol(packedout).outvaluedbl;
 	}
 	go {
-	  if (!forward)
+	  if (!reverse)
 	    addCode(packbackwards);
 	  else
 	    addCode(packforwards);
