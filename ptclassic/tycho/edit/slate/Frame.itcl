@@ -91,10 +91,30 @@ class ::tycho::Frame {
     # The object used to get shades of color
     common colorShadesObject
 
+    # All methods are looked up through a table
+    common methodtable
+
+    # All options have a default value
+    common optiondefault
+
     # The "shape" of pictures of this class
     common shape "rectangle"
 
+    ###################################################################
+    ####                       class initialization                ####
+
+    #### Set method table
+    array set methodtable [array get ::tycho::Picture::methodtable]
+
+    set methodtable(borderwidth) ::tycho::Frame::borderwidth
+    set methodtable(color)       ::tycho::Frame::color
+    set methodtable(construct)   ::tycho::Frame::construct
+    set methodtable(coords)      ::tycho::Frame::coords
+    set methodtable(relief)      ::tycho::Frame::relief
+
     #### Set option defaults
+    array set optionedefault [array get ::tycho::Picture::optiondefault]
+
     set optiondefault(-color)       background
     set optiondefault(-borderwidth) 2
     set optiondefault(-relief)      raised

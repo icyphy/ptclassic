@@ -403,9 +403,13 @@ body ::tycho::Slate::bind {id {sequence {}} args} {
 # Call a "method" on a picture. This just looks up the method in
 # the global "virtual function table" and calls it.
 #
+# In the Slate code itself, this method is called in non-critical
+# situations; in time-critical situations, the (very obscure)
+# code here is "in-lined."
+#
 body ::tycho::Slate::call {id method args} {
-    global $picttype($id)
-    eval [set $picttype($id)($method)] $id $canvas $args
+    @scope ::tycho::$picttype($id) [list \
+	    eval \[set methodtable($method)\] $id $canvas $args]
 }
 
 #######################################################################
@@ -433,8 +437,8 @@ body ::tycho::Slate::coords {id args} {
     }
 
     # Call the picture's coords method
-    global $picttype($id)
-    eval [set $picttype($id)(coords)] $id $canvas $args
+    @scope ::tycho::$picttype($id) [list \
+	    eval \[set methodtable(coords)\] $id $canvas $args]
 }
 
 #######################################################################
@@ -507,8 +511,8 @@ body ::tycho::Slate::delete {args} {
 	    $canvas delete $id
 	} elseif { [string match {_*} $id] } {
 	    # Delete a picture. First call its destruct method
-	    global $picttype($id)
-	    eval [set $picttype($id)(destruct)] $id $canvas
+	    @scope ::tycho::$picttype($id) [list \
+		    \[set methodtable(destruct)\] $id $canvas]
 
 	    # Then remove all items
 	    $canvas delete $id
@@ -848,10 +852,7 @@ body ::tycho::Slate::interact {mode id args} {
 
 	    # If the -ghost option is specified, create the ghost
 	    if { [lsearch -exact $args -ghost] != -1 } {
-		global $picttype($id)
-		set temp($id.ghost) \
-			[[set $picttype($id)(ghost)] $id $canvas]
-
+		set temp($id.ghost) [$this call $id ghost]
 		set temp($id.start) [$this coords $temp($id.ghost)]
 	    }
 	}
@@ -973,7 +974,7 @@ body ::tycho::Slate::itemconfigure {id args} {
 		# Set the tags of the picture. Figure out the differences.
 		set tags [$canvas gettags \
 			[@scope ::tycho::$picttype($id) \
-			[list set primary($id)]]]
+			    [list set primary($id)]]]
 
 		
 		set new [lsubtract $value $tags]
@@ -990,12 +991,7 @@ body ::tycho::Slate::itemconfigure {id args} {
 		}
 	    } else {
 		# Call the proc on the class to set the option
-		global $picttype($id)
-		[set $picttype($id)([string trimleft $option -])] \
-			$id $canvas $value
-
-		[set $picttype($id)(update)] $id $canvas
-		
+		$this call $id [string trimleft $option -] $value
 	    }
 	}
     }
