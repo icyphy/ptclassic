@@ -209,8 +209,8 @@ private:
 	int index;
 
 	// create special stars and connect them
-	DataFlowStar* makeSpread(PortHole* srcP, ParNode* sN);
-	DataFlowStar* makeCollect(PortHole* destP, ParNode* dN);
+	DataFlowStar* makeSpread(PortHole* srcP, ParNode* sN, int);
+	DataFlowStar* makeCollect(PortHole* destP, ParNode* dN, int);
 	void makeReceive(int pindex, PortHole* rP,
 		int delay, EGGate*, PortHole* orgP = 0);
 	void makeSend(int pindex, PortHole* sP, EGGate*, PortHole* orgP = 0);
