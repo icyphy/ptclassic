@@ -48,6 +48,7 @@ SRCS= \
  SDFCut.pl \
  SDFDB.pl \
  SDFDistributor.pl \
+ SDFDeMux.pl \
  SDFDownSample.pl \
  SDFDTFT.pl \
  SDFExp.pl \
@@ -71,9 +72,11 @@ SRCS= \
  SDFLimit.pl \
  SDFLMS.pl \
  SDFLog.pl \
+ SDFMux.pl \
  SDFPlay.pl \
  SDFPolarRect.pl \
  SDFPrinter.pl \
+ SDFQuantizer.pl \
  SDFRealComplex.pl \
  SDFReciprocal.pl \
  SDFRectPolar.pl \
