@@ -24,14 +24,14 @@ For more Java resources, see the Tycho
  <P>
 <H2>Compiling and Running Java</H2>
 
-The <CODE>Evaluate</CODE> menu choice under the <CODE>File</CODE> menu
+The <CODE>Compile and Load</CODE> menu choice under the <CODE>File</CODE> menu
 will compile and optionally run the Java file currently being edited.
 The <A
 HREF="../../../../kernel/doc/codeDoc/CompileJava.html"><CODE>CompileJava</CODE></A>
 class documentation discusses the programming details, we discuss the
 user level details below.
 <p>
-The EditJava editor supports two primary methods of evaluating Java files:
+The EditJava editor supports two primary methods of compiling Java files:
 <MENU>
 <li>If the <code>.java</code> file contains a <code>main()</code>, then we
 call <CODE>java -cs <i>ClassName</i></CODE>, which will check the
@@ -84,36 +84,36 @@ JDK.  The location of the JDK HTML documentation is used to fix
 <CODE>javadoc</CODE> hyperlinks.
 
 
-<H3>Evaluating a Java Application</H3>
+<H3>Compiling a Java Application</H3>
 <A
 HREF="../../test/DrawTest.java"><CODE>$TYCHO/editors/textedit/test/DrawTest.java</CODE></A>
 is a Java application that includes a <CODE>main()</CODE>.  If you edit
-this file and then invoke <CODE>Evaluate</CODE> with either 
+this file and then invoke <CODE>Compile and Load</CODE> with either 
 <MENU>
-<LI> The <CODE>Evaluate</CODE> choice under the <CODE>File</CODE> menu.
+<LI> The <CODE>Compile and Load</CODE> choice under the <CODE>File</CODE> menu.
 <LI> By typing <CODE>C-xC-r</CODE>
 </MENU>
 then an 
 <A
 HREF="../../../../kernel/doc/codeDoc/Exec.html"><CODE>Exec</CODE></A>
-widget will come up and evaluate and run the Java file with
+widget will come up and compile and run the Java file with
 <CODE>java -cs -v</CODE>
-<P> Note that evaluating a Java file will create a <CODE>.class</CODE>
+<P> Note that compiling a Java file will create a <CODE>.class</CODE>
 file in the directory where the <CODE>.java</CODE> file resides.  If
 you do not have write permission to <CODE>$TYCHO/editors/textedit/test</CODE>
 then you could copy the <CODE>.java</CODE> files to a directory
 where you have write permission.
-<H3>Evaluating a Java Applet</H3>
+<H3>Compiling a Java Applet</H3>
 <A
 HREF="../../test/Blink.java"><CODE>$TYCHO/editors/textedit/test/Blink.java</CODE></A>
 is a Java applet that does <B>not</B> include a <CODE>main()</CODE>. If
-you edit this file and then invoke <CODE>Evaluate</CODE> as above, first
+you edit this file and then invoke <CODE>Compile and Load</CODE> as above, first
 <CODE>javac</CODE> is run to compile the file, and then
 <CODE>appletviewer</CODE> is run.
 <p>
-Note that the Exec windows that come up when you evaluate a Java file are
-persistent between evaluations.  This allows you to modify the command line
-once and reuse your command line during the next evaluation.
+Note that the Exec windows that come up when you compile a Java file are
+persistent between compilations.  This allows you to modify the command line
+once and reuse your command line during the next compilation
 
 <H2><CODE>Special</CODE> Menu choices</H2>
 The <A NAME="Java Editor Body Template"><CODE>Body Template</CODE>
