@@ -18,7 +18,6 @@ Date of last revision:
 
 #include "QSGraph.h"
 #include "QSNode.h"
-#include "UserOutput.h"
 
 // redefine the virtual methods
 EGNode *QSGraph :: newNode(SDFStar* s, int i)
