@@ -365,7 +365,7 @@ if {$tychoOpenFiles == 0} {
 	    ::tycho::view TclShell \
 		    -geometry +0+0 \
 		    -master 1 \
-		    -prefix .mainConsole \
+		    -name   .mainConsole \
 		    -stdout 1 \
 		    -text "Welcome to Tycho\n"
 	}
