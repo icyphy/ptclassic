@@ -106,7 +106,7 @@ extern int sys_nerr;
 extern char *sys_errlist[];
 extern int errno;
 
-inline const char* why() {
+inline const char* State::why() {
 	return (errno >= 0 && errno < sys_nerr) ? sys_errlist[errno] :
 	"Unknown error";
 }

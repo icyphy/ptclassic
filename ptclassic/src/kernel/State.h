@@ -162,6 +162,9 @@ public:
 		return attributeBits = attr.clearAttribs(attributeBits);
 	}
 
+	// file reading error reporter
+        const char* why();
+
 	// class identification
 	int isA(const char*) const;
 
