@@ -29,24 +29,31 @@ instance of class name.
 
 #include "Block.h"
 #include "Galaxy.h"
-#include "Output.h"
+#include "StringList.h"
 
 class KnownBlock {
 // The known block list.  It's a pointer only so we can control when
 // the constructor is called.  Yuk.
-	static BlockList *allstars;
+	static BlockList *allBlocks;
+	static int numBlocks;
 public:
 // The constructor takes a block and a name, and adds a corresponding
 // entry to the known list.
 	KnownBlock (Block &block, const char* name);
 
+// The find method returns a pointer the appropriate block in
+// allstars.
+	static Block* find (const char* name);
+
 // The clone method takes a string, finds the appropriate block in
 // allstars, and returns a clone of that block.
-	static Block *clone (const char* name);
+	static Block* clone (const char* name);
 
-// method for printing all known blocks.  Maybe should use StringList
-// and return a char* instead.
-	static void printAll(UserOutput &output);
+// Return the names of all the known blocks.
+	static StringList nameList();
+
+// Return the number of known blocks.
+	static int nKnown() { return numBlocks;}
 };
 
 #endif
