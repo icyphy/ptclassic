@@ -475,7 +475,7 @@ body ::tycho::Library::makemenu {menubar menuname args} {
     }
     if { $opts(-types) == "" } {
         set opts(-types) [::tycho::lsubtract \
-                [type names] {attribute group xref}]
+                [types] {attribute group xref}]
     }
 
     # Call the recursive lower-level method
@@ -501,7 +501,7 @@ body ::tycho::Library::makemenu {menubar menuname args} {
 #
 body ::tycho::Library::_instantiate {item datamodel itemname} {
     # Process each type
-    foreach t [type names] {
+    foreach t [types] {
         if { $t == "attribute" } {
             continue
         }

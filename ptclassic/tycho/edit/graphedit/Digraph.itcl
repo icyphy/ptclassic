@@ -223,7 +223,7 @@ body ::tycho::Digraph::repair {} {
 # commands if the recording flag is set.
 #
 body ::tycho::Digraph::remove {vertex} {
-    if { ![exists $vertex] || [type get $vertex] != "vertex" } {
+    if { ![exists $vertex] || [type $vertex] != "vertex" } {
         error "Unknown vertex: \"$vertex\""
     }
     # Mark the history
