@@ -66,6 +66,6 @@ private:
 	MultiPortHole* forkOutput;
 	// cruft used for generating names for autoforks
 	static int nF;
-	static const char* autoForkName();
+	const char* autoForkName();
 };
 #endif
