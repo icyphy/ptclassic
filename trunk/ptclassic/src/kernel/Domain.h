@@ -16,6 +16,9 @@ $Id$
 
 #ifndef _Domain_h
 #define _Domain_h 1
+
+#include "StringList.h"
+
 class Scheduler;
 class Block;
 class Star;
@@ -41,6 +44,7 @@ public:
 	const char* domainName() { return name;}
 	static Domain* named(const char* name);
 	static Domain* domainOf(Block&);
+	StringList subDomains;
 private:
 	static int numDomains;
 	static Domain* allDomains[NUMDOMAINS];
