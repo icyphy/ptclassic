@@ -36,7 +36,11 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "SRStar.h"
 #include "Block.h"
 
-// #include <stream.h> // for debugging
+// #define DEBUG_SRSTAR
+
+#ifdef DEBUG_SRSTAR
+#  include <stream.h> // for debugging
+#endif
 
 extern const char SRdomainName[];
 
@@ -80,7 +84,9 @@ void SRStar::initializeInstant()
 // this with a method that advances a star's state based on its
 // inputs and computed outputs.  Schedulers call this exactly once at
 // the end of each instant for every star.  This may not be called
-// for reactive stars in instants where they have no present inputs.
+// for reactive stars in instants where they have no present inputs. <P>
+//
+// Zero-input reactive stars always fire.
 
 void SRStar::tick()
 {
@@ -96,45 +102,60 @@ int SRStar::run()
 {
   if ( !hasFired ) {
 
-    // cout << "Trying to run " << name() << " isReactive:" << isReactive <<'\n';
+#ifdef DEBUG_SRSTAR
+    cout << "Trying to run " << name() << " isReactive:" << isReactive <<'\n';
+#endif
 
     int ableToFire = 1;
     int presentInputs = 0;
+    int numInputs = 0;
 
     BlockPortIter nextPort(*((Block *) this) );
     PortHole * p;
 
     while ( ( p = nextPort++) != 0 ) {
-      // cout << "Checking " << p->name() << '\n';
+#ifdef DEBUG_SRSTAR
+      cout << "Checking " << p->name() << '\n';
+#endif
       if ( p->isItInput() ) {
+	numInputs++;
 	if ( !((InSRPort *) p)->isItIndependent() &&
 	     !((InSRPort *) p)->known() ) {
-	  // cout << "unknown dependent input\n";
+#ifdef DEBUG_SRSTAR
+	  cout << "unknown dependent input\n";
+#endif
 	  ableToFire = 0;
 	  break;
 	} else {
 	  if ( ((InSRPort *) p)->present() ) {
 	    presentInputs = TRUE;
-	    // cout << "present input\n";
+#ifdef DEBUG_SRSTAR
+	    cout << "present input\n";
+#endif
 	  }
 	}
       }
     }
 
     if ( ableToFire ) {
-      if (!isReactive || presentInputs ) {
+      if (!isReactive || numInputs == 0 || presentInputs != 0) {
 
 	// All of the inputs are known, and if the star is reactive,
 	// there is at least one present input--call go()
 
-	// cout << "Reactive with at least one present input: calling go()\n";
+#ifdef DEBUG_SRSTAR
+	cout << "Reactive with at least one present input: calling go()\n";
+#endif
 	Star::run();
 
       } else {
 
 	// All of the inputs are known, but none are present and the
 	// star is reactive--mark all outputs as absent and don't call go()
-      
+
+#ifdef DEBUG_SRSTAR
+	cout << "Reactive with no present inputs -- outputs made absent\n";
+#endif      
 	nextPort.reset();
 	while ( ( p = nextPort++ ) != 0 ) {
 	  if ( p->isItOutput() ) {
