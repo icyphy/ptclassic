@@ -79,8 +79,12 @@ OPTIMIZER =	-O2
 #-Wsynth is new in g++-2.6.x
 # Under gxx-2.7.0 -Wcast-qual will drown you with warnings from libg++ includes
 WARNINGS =	-Wall -Wsynth #-Wcast-qual 
-# Misc. flags for OS version
+
+# Misc. flags for OS version, if you are under HPUX9.x:
+#MISCCFLAGS =	-DUSE_SHLLOAD
+# If you are under HPUX10.x:
 MISCCFLAGS =	-DPTHPUX10 -DUSE_SHLLOAD
+
 # Under gcc-2.7.0, you will need to add -fno-for-scope to GPPFLAGS
 GPPFLAGS =	-DUSG -g $(MEMLOG) $(WARNINGS) $(OPTIMIZER) -fno-for-scope \
 		$(MISCCFLAGS)
@@ -126,10 +130,11 @@ LIBSUFFIX =		sl
 #
 # Directories to use
 #
-#X11_INCSPEC =	-I$(ROOT)/src/compat -I/usr/sww/X11R6/include
-#X11_LIBSPEC =	-L/usr/sww/X11R6/lib -lX11
-X11_INCSPEC =	-I$(ROOT)/src/compat -I/usr/sww/X11R5/include
-X11_LIBSPEC =	-L/usr/sww/X11R5/lib -lX11
+# To bad hp can't ship a complete set of X includes and libs
+#  in a standard location
+X11DIR = 	/usr/sww/X11R5
+X11_INCSPEC =	-I$(ROOT)/src/compat -I$(X11DIR)/include
+X11_LIBSPEC =	-L$(X11DIR)/lib -lX11
 #X11_INCSPEC =	-I$(ROOT)/src/compat
 #X11_LIBSPEC =	-L/usr/lib/X11R5 -lX11
 
@@ -162,6 +167,8 @@ XMKMF =		xmkmf
 XPM_DEFINES =	-DZPIPE $(X11_INCSPEC)
 
 # Used to flush the cache on the hppa.  (source is in the kernel/ directory)
+# If you are running under HPUX9.x, you may want to 
+# comment out FLUSH_CACHE and LIB_FLUSH_CACHE
 FLUSH_CACHE =	flush_cache.o
 # Destination of flush_cache.  Can't just subsitute $(LIBDIR)/flush_cache.o
 # in pigiRpc/makefile, or the make will fail on other archs.
