@@ -1,4 +1,4 @@
--*-Mode:text-*- -[Mon Apr 14 13:57:54 1997 by cxh]-
+-*-Mode:text-*- -[Mon Jul  7 16:52:57 1997 by cxh]-
 Version: $Id$
 
 src/gnu/README
@@ -237,6 +237,18 @@ DEC Alpha
 	bar
 
 	The fix is to put /usr/bin in your path before GNU sed
+
+
+	While trying to build GNU make 3.75 under OSF1 V4.0, read.c failed
+	to compile:
+	
+cc: Error: read.c, line 2135: In this statement, "GLOB_ALTDIRFUNC" is not declared.
+	switch (glob (old->name, GLOB_NOCHECK|GLOB_ALTDIRFUNC, NULL, &gl))
+	
+	The fix is to do
+	
+	cd $PTOLEMY/obj.$PTARCH/gnu/make
+	make CC="cc -D_BSD_SOURCE"
 
 gcc and Purify
 --------------
