@@ -3,7 +3,7 @@ defstar {
 	domain { SDF }
 	desc {
 Generates a fixed-point rectangular pulse of height "height" 
-(default 1.0).  and width "width" (default 8).  If "period" is 
+(default 1.0) and width "width" (default 8).  If "period" is 
 greater than zero, then the pulse is repeated with the given period. 
 The precision of "height" can be specified in bits.
 	}
@@ -19,10 +19,11 @@ of 24 bits with the number of range bits as required by the value.
 For example, the default value 1.0 creates a fixed-point object with
 precision 2.22, and a value like 0.5 would create one with precision
 1.23 and etc.  The alternative way of specifying the value and the
-precision of this parameter is to use the paranthesis notation which will be
-interpreted as (value, precision).  For example, filling the dialog
-box of this parameter by let's say (2.546, 3.5) would create a fixed-point
-object by casting the double 2.546 to the precision 3.5. }
+precision of this parameter is to use the parenthesis notation of
+(value, precision).  For example, filling the dialog
+box of this parameter by (2.546, 3.5) would create a fixed-point
+object by casting the double-precision floating-point number 2.546
+to a fixed-point precision of 3.5. }
 	output {
 		name { output }
 		type { fix }

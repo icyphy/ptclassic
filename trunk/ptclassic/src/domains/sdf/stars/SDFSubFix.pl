@@ -1,7 +1,8 @@
 defstar {
         name { SubFix }
         domain { SDF }
-        desc { Output the "pos" input minus all "neg" inputs as a fixed-point. }
+        desc {
+Output as a fixed-point number the "pos" input minus all "neg" inputs. }
         author { A. Khazeni }
 	version { $Id$ }
         location { SDF main library }
@@ -22,8 +23,9 @@ defstar {
                 type {int}
                 default {"YES"}
                 desc {
-Use the arriving particles ("neg" inputs) as they are if YES.  Cast them 
-to the precision specified by the parameter "InputPrecision" otherwise. }
+Flag indicating whether or not to use the precision of the arriving particles
+("neg" inputs) as they are:  YES processes them unaltered, and NO casts
+them to the precision specified by the parameter "InputPrecision". }
         }
         defstate {
                 name { InputPrecision }
@@ -31,7 +33,7 @@ to the precision specified by the parameter "InputPrecision" otherwise. }
                 default { "2.14" }
                 desc {
 Precision of the "neg" input in bits.  The input particles are only
-casted to this precision if the parameter "ArrivingPrecision" is set to NO.}
+cast to this precision if the parameter "ArrivingPrecision" is set to NO.}
         }
         defstate {
                 name { OutputPrecision }
@@ -46,8 +48,8 @@ the result of the difference of the inputs.}
                 type { string }
                 default { "saturate" }
                 desc {
-Set the overflow characteristic for the output.  If the result
-of the difference can not be fit into the precision of the output, overflow
+The overflow characteristic for the output.  If the result
+of the difference cannot be fit into the precision of the output, overflow
 occurs and the overflow is taken care of by the method specified by this
 parameter.  The keywords for overflow handling methods are :
 "saturate"(default), "zero_saturate", "wrapped", "warning". }

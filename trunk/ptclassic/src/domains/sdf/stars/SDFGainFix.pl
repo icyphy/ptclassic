@@ -16,7 +16,7 @@ of 24 bits with the number of range bits as required by the value.
 For example, the default value 1.0 creates a fixed-point object with
 precision 2.22, and a value like 0.5 would create one with precision
 1.23.  An alternative way of specifying the value and the
-precision of this parameter is to use the parenthesis notation 
+precision of this parameter is to use the parenthesis notation
 of (value, precision).  For example, filling the dialog
 box for the gain parameter with (2.546, 3.5) would create a fixed-point
 object formed by casting the double-precision floating-point number
@@ -40,8 +40,9 @@ object formed by casting the double-precision floating-point number
                 type {int}
                 default {"YES"}
                 desc {
-Use the arriving particles as they are if YES.  Cast them to the
-precision specified by the parameter "InputPrecision" otherwise. }
+Flag indicated whether or not to use the arriving particles as they are:
+YES keeps the same precision, and NO casts them to the
+precision specified by the parameter "InputPrecision". }
         }
         defstate {
                 name { InputPrecision }
@@ -64,8 +65,8 @@ the result of the arithmetic operation on the inputs.}
                 type { string }
                 default { "saturate" }
                 desc {
-Set the overflow characteristic for the output.  If the result
-of the product can not be fit into the precision of the output, overflow
+Overflow characteristic for the output.  If the result
+of the product cannot be fit into the precision of the output, overflow
 occurs and the overflow is taken care of by the method specified by this
 parameter.  The keywords for overflow handling methods are :
 "saturate"(default), "zero_saturate", "wrapped", "warning". }
