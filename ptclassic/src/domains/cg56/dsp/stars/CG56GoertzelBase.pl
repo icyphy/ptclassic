@@ -62,7 +62,7 @@ first-order feedback coefficient which is a function of k and N }
 		type { fix }
 		default { "0.0" }
 		desc { internal state. does not persist across invocations. }
-		attributes { A_NONCONSTANT|A_NONSETTABLE }
+		attributes { A_NONCONSTANT|A_NONSETTABLE|A_YMEM }
 	}
 	protected {
 		double theta;
@@ -104,7 +104,7 @@ first-order feedback coefficient which is a function of k and N }
 		double Nd = int(N);
 		theta = -2.0 * M_PI * kd / Nd;
 		halfd1 = cos(theta);
-		d1 = 2.0 * halfd1;
+		d1 = 2.0 * cos(theta);		// can't reuse halfd1
 		input.setSDFParams(int(size), int(size)-1);
 	}
 
@@ -118,7 +118,7 @@ first-order feedback coefficient which is a function of k and N }
 ; y0: feedback coefficient d1 divided by 2
 ; y1: ith input value
 	clr	a	#<$addr(input),r0		; a = 0
-	clr	b	a,x1	#$val(halfd1),y0		; x1 = 0 and y0 = d1/2
+	clr	b	a,x1	$ref(halfd1),y0		; x1 = 0 and y0 = d1/2
 	}
 
 	codeblock(loop,"int len") {
