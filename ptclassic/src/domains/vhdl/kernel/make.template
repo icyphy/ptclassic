@@ -68,7 +68,6 @@ HDRS= \
 	VHDLObj.h \
 	VHDLPort.h  \
 	VHDLPortHole.h \
-	VHDLPortVar.h \
 	VHDLSignal.h \
 	VHDLStar.h \
 	VHDLState.h \
