@@ -68,7 +68,7 @@ extern "C" {
 #define PTIRIX5
 #endif
 
-#if defined(PTHPPA) && ! defined(__GNUC__)
+#if defined(__sgi) && ! defined(__GNUC__)
 /* SGI running IRIX5.x with native SGI CC*/
 #define PTIRIX5_CFRONT
 #endif
@@ -81,7 +81,7 @@ extern "C" {
 #define PTNBSD_386
 #endif
 
-#if defined(__sparc) && (defined(__svr4__) || defined(__SVR4))
+#if defined(sparc) && (defined(__svr4__) || defined(__SVR4))
 /* Sun SPARC running Solaris2.x, SunC++ or g++ */
 #ifndef SOL2
 #define SOL2
@@ -90,18 +90,18 @@ extern "C" {
 #define PTSOL2
 #endif
 
-#if defined(__sparc) && (defined(__svr4__) || defined(__SVR4)) && !defined(__GNUC__)
+#if defined(sparc) && (defined(__svr4__) || defined(__SVR4)) && !defined(__GNUC__)
 /* Sun SPARC running Solaris2.x, with something other than gcc/g++ */
 #define PTSOL2_CFRONT
 #endif
 
-#if defined(__sparc) && !defined(__svr4__)
+#if defined(sparc) && !defined(__svr4__)
 /* Really, we mean sun4 running SunOs4.1.x, Sun C++ or g++ */
 #define SUN4
 #define PTSUN4
 #endif
 
-#if defined(__sparc) && !defined(__svr4__) && !defined(__GNUC__)
+#if defined(sparc) && !defined(__svr4__) && !defined(__GNUC__)
 /* Really, we mean sun4 running SunOs4.1.x with something other than gcc/g++ */
 #define SUN4
 #define PTSUN4_CFRONT
@@ -286,6 +286,11 @@ extern int symlink(const char *, const char *);	/* CGCTarget.cc */
 extern int unlink(const char *);
 
 /* End of common missing function prototypes */
+#else  /* !__GNUC__ */
+#ifdef PTIRIX5_CFRONT           /* dpwe addns */
+#include <unistd.h>             /* for select() */
+#include <stdio.h>              /* for sprintf() */
+#endif /* PTIRIX5_CFRONT */
 #endif /* __GNUC__ */
 
 
