@@ -49,7 +49,10 @@ TCL_SRCS =
 ITCL_SRCS = 
 
 EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) \
-	index.html
+	authors.html \
+	bugs.html \
+	index.html \
+	overview.html
 
 MISC_FILES =	$(DIRS) img
 
