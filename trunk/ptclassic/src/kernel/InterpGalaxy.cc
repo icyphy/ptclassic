@@ -456,7 +456,7 @@ InterpGalaxy::addState (const char* statename, const char* stateclass, const cha
         return TRUE;
 }
 
-// change a value of a state within the galaxy.
+// change a value of a state of a block within the galaxy.
 int
 InterpGalaxy::setState (const char* blockname, const char* statename, const char* statevalue) {
         statevalue = hashstring (statevalue);
@@ -484,6 +484,20 @@ InterpGalaxy::setState (const char* blockname, const char* statename, const char
         actionList += statename;
         actionList += statevalue;
         return TRUE;
+}
+
+// change the value of a state of the galaxy itself
+int
+InterpGalaxy :: setState(const char* stateName, const char* expression) {
+	if (Block::setState(stateName, expression) == TRUE) {
+	  // Add to action list
+	  actionList += "E";
+	  actionList += stateName;
+	  actionList += expression;
+	  return TRUE;
+	} else {
+	  return FALSE;
+	}
 }
 
 // create a specified number of ports in a porthole.
@@ -663,6 +677,13 @@ InterpGalaxy::copy(const InterpGalaxy& g) {
 
 			numPorts (a, b, atoi (c));
 			nacts -= 4;
+			break;
+
+		case 'E':	// set the state of a galaxy
+			a = next++;
+			b = next++;
+			setState(a,b);
+			nacts -= 3;
 			break;
 			
 		default: // impossible (?)
