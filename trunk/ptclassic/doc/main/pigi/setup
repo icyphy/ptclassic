@@ -41,6 +41,7 @@ As an alternative, the system manager may have set up the file
 ``/etc/hosts.equiv'' to make all the workstations on your cluster
 ``equivalent''.  If so, you need not bother with .rhosts.
 .H2 "Environment Variables"
+.Ir "environment variables"
 .pp
 The most basic requirement
 is that \*(PT executables be in your path.
@@ -81,6 +82,19 @@ setenv PRINTER lw
 You should replace
 .c "lw"
 with whatever printer name you are using.
+.pp
+If you are using a black and white monitor, you should set the PIGIBW
+.Ir "monochrome monitors"
+.Ir "black and white monitors"
+.Ir "PIGIBW"
+eviroment variable before running pigi.  The command is as follows:
+.(c
+setenv PIGIBW
+.)c
+With the
+PIGIBW environment variable set, the colors used in the graphical
+interface will be remapped
+to be readable on a monochrome monitor.
 .pp
 If, for some reason, you wish to use an alternate version of the
 .i pigiRpc
