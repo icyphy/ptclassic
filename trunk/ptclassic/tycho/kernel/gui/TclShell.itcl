@@ -886,7 +886,7 @@ body ::tycho::TclShell::_initializeBars {menubar statusbar toolbar} {
 
         $menubar command setnamespace special \
 		-label "Set Namespace..." \
-                -underline 0 \
+                -underline 4 \
                 -command "$this queryNamespace"    
     }
 }
