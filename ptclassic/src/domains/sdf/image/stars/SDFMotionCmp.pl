@@ -120,7 +120,7 @@ can be added or reduced-search motion compensation can be performed.
 						mini = i; minj = j;
 			}	}	}
 			yvec = mini - blocksize; xvec = minj - blocksize;
-			LOG_DEL; delete diffArr;
+			LOG_DEL; delete [] diffArr;
 		}
 	} // end FindMatch{}
 
