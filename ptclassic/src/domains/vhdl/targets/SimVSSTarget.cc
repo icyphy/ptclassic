@@ -38,11 +38,13 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #pragma implementation
 #endif
 
-#include <unistd.h>             // getpid()
 #include "SimVSSTarget.h"
 #include "KnownTarget.h"
 #include "CGUtilities.h"
 #include "paths.h"
+#include <stdio.h>              // printf()
+#include <unistd.h>             // getpid()
+
 
 // Constructor.
 SimVSSTarget :: SimVSSTarget(const char* name,const char* starclass,
