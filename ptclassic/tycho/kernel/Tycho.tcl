@@ -105,6 +105,8 @@ if {![info exists ptolemy]} {
 }
 
 global ::ptolemypresent
+# ptolemypresent is set to 1 if the ptk commands are present,
+# which indicates that we have access to the tcl/octtools commands.
 if {[uplevel #0 info commands ptkOpenFacet] != {} && \
 	[uplevel #0 info commands pvOpenWindow] != {}} {
     set ptolemypresent 1
