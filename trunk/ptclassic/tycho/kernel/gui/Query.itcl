@@ -35,8 +35,8 @@
 ##########################################################################
 #### query
 # Query the user for one or more responses of various types (a line of
-# text, multiple lines of text, a row of radio buttons, or a query mediated
-# by some other dialog).  Return
+# text, multiple lines of text, a row of radio buttons, an option menu
+# button, or a query mediated by some other dialog).  Return
 # only after the user enters information and hits OK or Cancel button.
 # If the OK button is hit, the entire contents of the query will be
 # returned as a list in the form {tag value tag value ...}. This list
@@ -51,17 +51,18 @@
 # and defaults to 40.
 # <p>
 # For example, the following call will create a dialog with one of
-# each of the four kinds of queries:
+# each of the five kinds of queries:
 # <tcl><pre>
 #    ::tycho::query {title text} { &#92
-#          {line w {w label} foo} &#92
-#          {lines x {x label} bar 4} &#92
-#          {radio y {y label} {A B C} A} &#92
+#          {line v {v label} foo} &#92
+#          {lines w {w label} bar 4} &#92
+#          {radio x {x label} {A B C} A} &#92
+#          {choice y {y label} {A B C} A} &#92
 #          {mediated z {z label} red &#92
-#          {::tycho::querycolor {Choose a color}}}}
+#              {::tycho::querycolor {Choose a color}}}}
 # </pre></tcl>
-# This will return a list of the form {w <i>value</i> x <i>value</i> y
-# <i>value</i> z <i>value</i>}.
+# This will return a list of the form {v <i>value</i> w <i>value</i>
+# x <i>value</i> y <i>value</i> z <i>value</i>}.
 # <p>
 # The <i>queries</i> argument is a list of method invocations.
 # There are four relevant methods, shown with their arguments below:
@@ -116,7 +117,13 @@ proc ::tycho::query {text queries {entrywidth 40} } {
 	    -text $text \
 	    -queries $queries \
 	    -entrywidth $entrywidth]
-    return [::tycho::Dialog::wait $nm]
+puts [list set queries $queries]
+    if {[lsearch -glob $queries choice*] >= 0} {
+        set autoraise 0
+    } {
+        set autoraise 1
+    }
+    return [::tycho::Dialog::wait $nm $autoraise]
 }
 
 ##########################################################################
@@ -216,6 +223,12 @@ class ::tycho::Query {
     # Clear all or one entry.
     method clear {{tag {}}}
 
+    # Disable user interaction with a query
+    method disable {tag}
+
+    # Enable user interaction with a query
+    method enable {tag}
+
     # Give the focus to the appropriate subwindow.
     method focusin {}
 
@@ -257,6 +270,12 @@ class ::tycho::Query {
 
     # Array of clear commands for each tag.
     private variable tagsclear
+
+    # Array of disable commands.
+    private variable tagsdisable
+
+    # Array of enable commands.
+    private variable tagsenable
 
     # Array of insert commands for each tag.
     private variable tagsinsert
@@ -395,6 +414,8 @@ body ::tycho::Query::check {tag label default args} {
     set tagsclear($tag) [list set [scope $itk_component(hull)_[set tag]sw] \
             $default]
     set tagsget($tag) [list set [scope $itk_component(hull)_[set tag]sw]]
+    set tagsenable($tag) "$itk_component(tag_$tag) configure -state normal"
+    set tagsdisable($tag) "$itk_component(tag_$tag) configure -state disabled"
 
     focusin
 }
@@ -409,15 +430,15 @@ body ::tycho::Query::check {tag label default args} {
 # <li> the default entry item (the one initially selected), and
 # <li> (optional) the command to execute when a new item is selected
 # </menu>
-# Typical usage is:
+# NOTE: If a modal dialog is created with a "choice" query, then it
+# must have the auto-raise feature disabled.  This can be accomplished
+# by calling <code>::tycho::Dialog::wait</code> with the optional second
+# argument given as "0".  For example,
 # <tcl><pre>
 # ::tycho::Query .e
 # .e choice foo {My Foo:} {a b c} a
-# .e centerOnScreen
+# ::tycho::Dialog::wait .e 0
 # </pre></tcl>
-#
-# FIXME: The width of the button depends on the current selection.
-# FIXME: Are there any useful options to pass to the button or menu?
 #
 body ::tycho::Query::choice {tag label entries default {command {}}} {
 
@@ -429,7 +450,7 @@ body ::tycho::Query::choice {tag label entries default {command {}}} {
         keep -background -cursor -font
 	rename -foreground labelcolor labelColor LabelColor
     }
-    grid $itk_component(label_$tag) -row $numentries -column 0 -sticky w
+    grid $itk_component(label_$tag) -row $numentries -column 0 -sticky e
 
     # Create the option menu button
     itk_component add tag_$tag {
@@ -446,7 +467,7 @@ body ::tycho::Query::choice {tag label entries default {command {}}} {
     
     # Create the menu that goes with it
     itk_component add menu_$tag {
-	menu $itk_component(tag_$tag).menu -tearoff 0
+	menu $itk_component(tag_$tag).menu -tearoff 0 -takefocus 1
     } {
 	keep -background -cursor -background -font
     }
@@ -472,6 +493,8 @@ body ::tycho::Query::choice {tag label entries default {command {}}} {
             $default]
     set tagsinsert($tag) [list set [scope $itk_component(hull)_[set tag]sw]]
     set tagsget($tag) [list set [scope $itk_component(hull)_[set tag]sw]]
+    set tagsenable($tag) "$itk_component(tag_$tag) configure -state normal"
+    set tagsdisable($tag) "$itk_component(tag_$tag) configure -state disabled"
 
     focusin
 }
@@ -490,6 +513,25 @@ body ::tycho::Query::clear {{tag {}}} {
     } {
         eval $tagsclear($tag)
     }
+}
+
+#####################################################################
+#### disable
+# Disable user interaction with a query.
+# 
+body ::tycho::Query::disable {tag} {
+    $itk_component(label_$tag) configure -foreground [::tycho::color grey60]
+    eval $tagsdisable($tag)
+}
+
+#####################################################################
+#### enable
+# Enable user interaction with a query.  Queries are enabled by default,
+# so this is only needed if a query has been explicitly disabled.
+# 
+body ::tycho::Query::enable {tag} {
+    $itk_component(label_$tag) configure -foreground black
+    eval $tagsenable($tag)
 }
 
 #####################################################################
@@ -600,7 +642,8 @@ body ::tycho::Query::line {tag label default args} {
     set tagsclear($tag) "$itk_component(tag_$tag) delete 0 end"
     set tagsinsert($tag) "$itk_component(tag_$tag) insert insert"
     set tagsget($tag) "$itk_component(tag_$tag) get"
-
+    set tagsenable($tag) "$itk_component(tag_$tag) configure -state normal"
+    set tagsdisable($tag) "$itk_component(tag_$tag) configure -state disabled"
     focusin
 }
 
@@ -679,6 +722,8 @@ body ::tycho::Query::lines {tag label default lines args} {
     set tagsclear($tag) "$itk_component(tag_$tag) deleteRange 1.0 end"
     set tagsinsert($tag) "$itk_component(tag_$tag) insertString insert"
     set tagsget($tag) "$itk_component(tag_$tag) get 1.0 {end -1 chars}"
+    set tagsenable($tag) "$itk_component(tag_$tag) configure -readonly 0"
+    set tagsdisable($tag) "$itk_component(tag_$tag) configure -readonly 1"
 
     # Correct for the fact that the text widget grabs the focus.
     after 1000 [list catch "$this focusin"]
@@ -738,6 +783,8 @@ body ::tycho::Query::mediated {tag label default command args} {
     set tagsclear($tag) [list $itk_component(tag_$tag) configure -text $default]
     set tagsinsert($tag) "$itk_component(tag_$tag) configure -text"
     set tagsget($tag) "$itk_component(tag_$tag) cget -text"
+    set tagsenable($tag) "$itk_component(tag_$tag) configure -state normal"
+    set tagsdisable($tag) "$itk_component(tag_$tag) configure -state disabled"
 
     focusin
 }
@@ -842,12 +889,25 @@ body ::tycho::Query::radio {tag label bttnNames default args} {
     
     incr numentries
 
-    # Record the tag, its get method, and its clear method.
+    # Record the tag, its get method, its clear method, enable, and disable.
     lappend tags $tag
     set tagsclear($tag) [list set [scope $itk_component(hull)_[set tag]sw] \
             $default]
     set tagsinsert($tag) [list set [scope $itk_component(hull)_[set tag]sw]]
     set tagsget($tag) [list set [scope $itk_component(hull)_[set tag]sw]]
+
+    # Enable and disable are a bit complicated here
+    set count 0
+    set encmd {}
+    set discmd {}
+    foreach name $bttnNames {
+        append encmd "$itk_component(radio_[set tag]_[incr count]) \
+                configure -state normal;"
+        append discmd "$itk_component(radio_[set tag]_$count) \
+                configure -state disabled;"
+    }
+    set tagsenable($tag) $encmd
+    set tagsdisable($tag) $discmd
 
     focusin
 }
