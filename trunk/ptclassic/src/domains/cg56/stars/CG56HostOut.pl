@@ -42,7 +42,7 @@ Output data from DSP to host via host port.
 	}
 	initCode {
 		const char* p=command;
-		if (p[0] != NULL) addRunCmd(command,"\n");
+		if (p[0] != 0) addRunCmd(command,"\n");
 	}
 	codeblock(yeshostBlock) {
 $label(l)
