@@ -32,6 +32,7 @@ static char SccsId[]="$Id$";
 #include "port.h"
 #include "internal.h"
 #include "io.h"
+#include "io_procs.h"
 
 extern struct object_desc oct_default_desc;
 static struct object_desc *super = &oct_default_desc;
@@ -42,6 +43,7 @@ static int bag_write_fields();
 static int bag_read_fields();
 static int bag_copy_fields();
 
+void
 oct_bag_desc_set(object_desc)
 struct object_desc *object_desc;
 {
@@ -74,6 +76,8 @@ int size;
     if (copy->name != NIL(char)) {
 	copy->name = oct_str_intern(copy->name);
     }
+    return 1;			/* This func must return an int, as we
+				   pass a func pointer to it around.  */
 }
 
 static int
@@ -85,6 +89,8 @@ generic *ptr;
     if (bag->user_bag.name != NIL(char)) {
 	oct_str_free(bag->user_bag.name);
     }
+    return 1;			/* This func must return an int as we
+				   pass a pointer to it around. */
 }
     
 static octStatus
