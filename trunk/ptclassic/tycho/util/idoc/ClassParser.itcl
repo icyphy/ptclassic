@@ -472,16 +472,8 @@ body ::tycho::IDocSys::shortDesc {comment} {
     set comment [formatDesc $comment]
 
     # Return the first sentence.
-    set index 0
-    set length [string length $comment]
-    for {} {$index < $length} {incr index} {
-        set letter [string index $comment $index]
-        if {$letter == "." || $letter == "!" || $letter == "?"} {
-            return [string range $comment 0 $index]
-        }
-        if {$letter == "@"} {
-            return [string range $comment 0 [incr index -1]]
-        }
-    }
+    regexp {^(.*[.!?])[ 	]+} $comment dmy comment
+    regexp {^(.*)@} $comment dmy comment
+
     return $comment
 }
