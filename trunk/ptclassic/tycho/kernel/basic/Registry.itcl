@@ -489,17 +489,20 @@ class ::tycho::Registry {
     # Info about window submenus. category' is the category
     # with "new" or "open" prepended.
     #     _menus($type)                       -> {category1' category2' ...}
+    #     _menus(counter)                     -> global-counter-stack
     #     _menus($type,counter)               -> category-counter
     #     _menus($category',options)          -> category-options
     #     _menus($category',accelerator)      -> category-accelerator
-    #     _menus($category',counter)          -> {$tag1 $tag2 ...}
+    #     _menus($category',counter)          -> entry-counter
     #     _menus($category',tags)             -> {$tag1 $tag2 ...}
     #     _menus($category',$tag,options)     -> entry-options
+    #     _menus($category',$tag,traversal)   -> entry-traversal-key
     #     _menus($category',$tag,accelerator) -> entry-accelerator
     private common _menus
     array set _menus {
         new,counter 0
         open,counter 0
+	accelerators {0 1 2 3 4 5 6 7 8 9}
     }
 
     # This array stores object names indexed by file names so that
@@ -555,7 +558,7 @@ body ::tycho::Registry::deregisterWindow {tag {window *}} {
 		continue
 	    }
 	    # Disable the binding to its parent menu
-	    bind [$mb path $cat] <Key-$_menus($cat,$v,accelerator)> {}
+	    bind [winfo toplevel $mb] <Alt-Key-$_menus($cat,$v,accelerator)> {}
 
 	    # Delete the entry
 	    $mb delete $v
@@ -567,10 +570,16 @@ body ::tycho::Registry::deregisterWindow {tag {window *}} {
 	}
 	# Remove it from the _menus array
 	set _menus($cat,tags) [::tycho::ldelete $_menus($cat,tags) $v]
-	set _menus($cat,counter) \
-		[linsert $_menus($cat,counter) 0 $_menus($cat,$v,accelerator)]
-
+	if { $_menus($cat,$v,counter) != "" } {
+	    set _menus($cat,counter) [lsort [lappend \
+		    _menus($cat,counter) $_menus($cat,$v,counter)]]
+	}
+	if { $_menus($cat,$v,accelerator) != "" } {
+	    set _menus(accelerators) [lsort [lappend \
+		    _menus(accelerators) $_menus($cat,$v,accelerator)]]
+	}
 	unset _menus($cat,$v,options)
+	unset _menus($cat,$v,counter)
 	unset _menus($cat,$v,accelerator)
 
 	# Delete the window info
@@ -632,31 +641,24 @@ body ::tycho::Registry::initWindowMenu {menubar} {
         }
     }
     
-     # Construct menu entries for registered files
-      set toplevel [winfo toplevel $menubar]
-      set windowmenu [$menubar path window]
-      foreach cat $_menus(open) {
-	  # Make the short-cut binding: if the sub-menu is empty
-	  # the main menu will be posted anyway
-	  set acc $_menus($cat,accelerator)
-	  bind $toplevel <Alt-Key-$acc> "$menubar post $cat"
-	  bind $windowmenu <Alt-Key-$acc> "$menubar post $cat"
-          if { $_menus($cat,tags) != "" } {
-              # Enable menu
-              $menubar enable $cat
+    # Construct menu entries for registered files
+    set toplevel [winfo toplevel $menubar]
+    foreach cat $_menus(open) {
+	if { $_menus($cat,tags) != "" } {
+	    # Enable menu
+	    $menubar enable $cat
  
-              # Make entries
-              set menu [$menubar path $cat]
-              foreach tag $_menus($cat,tags) {
-                  eval [list $menubar command $tag $cat] \
-			  $_menus($cat,$tag,options)
-                  set a $_menus($cat,$tag,accelerator)
-                  bind $menu <Key-$a> \
-			  "$menubar unpost $cat; $menubar invoke [list $tag]"
-              }
-          }
-      }
-  }
+	    # Make entries
+	    set menu [$menubar path $cat]
+	    foreach tag $_menus($cat,tags) {
+		eval [list $menubar command $tag $cat] \
+			$_menus($cat,$tag,options)
+		set a $_menus($cat,$tag,accelerator)
+		bind $toplevel <Alt-Key-$a> "$menubar invoke [list $tag]"
+	    }
+	}
+    }
+}
 
 ##########################################################################
 ## linkModel
@@ -739,19 +741,8 @@ body ::tycho::Registry::raiseWindow {tag window} {
 
     # Check for existence
     if { [::info which -command $w] == "" } {
-	# Oops... there's some bug or something.... Try and clean
-	# up by just removing the offending window from all
-	# menubars
-	# puts "!!! Deleting $window#$tag !!!"
-	foreach mb [array names _menubars] {
-	    # Make sure the menu bar still exists
-	    if { [::info which -command $mb] == "" } {
-		unset _menubars($mb)
-		continue
-	    }
-	    # Delete the entry
-	    catch {$mb delete $window#$tag}
-	}
+	# Oops... removing the offending window
+	::tycho::Registry::deregisterWindow $tag $window
     } else {
         # OK
         $w raiseWindow
@@ -775,13 +766,22 @@ body ::tycho::Registry::registerCategory {type name args} {
             set _menus(new$name,options) $args
         }
         "open" {
-	    # For the accelerator "counter" for open file, use a stack
+	    # Get a counter for this category
+	    set counter [incr _menus(open,counter)]
 	    lappend _menus(open) open$name
+
+	    # Modify the menu label
+	    array set opts {-label ""}
+	    array set opts $args
+	    set opts(-label) "$counter  $opts(-label)"
+	    set args [array get opts]
+
+	    # For the accelerator "counter" for open file, use a stack
 	    set _menus(open$name,tags) {}
-            set _menus(open$name,counter) \
-		    {1 2 3 4 5 6 7 8 9 0 q w e r t a s d f z x c v}
-            set _menus(open$name,options) [concat $args -state disabled]
-            set _menus(open$name,accelerator) [incr _menus(open,counter)]
+            set _menus(open$name,counter) {0 1 2 3 4 5 6 7 8 9}
+            set _menus(open$name,options) \
+		    [concat $args -state disabled -underline 0]
+            set _menus(open$name,accelerator) $counter
         }
         default {
             error "unknown type: \"$type\""
@@ -1134,25 +1134,39 @@ body ::tycho::Registry::registerWindow {tag window args} {
         set cat open$opts(-category)
         lappend _menus($cat,tags) $window#$tag
 
-	# Get the accelerator key
-	set tlacc $_menus($cat,accelerator)
-	if { $_menus($cat,counter) == "" } {
-	    # Oops, none left
-	    set accelerator ""
-	    set accstring ""
-	} else {
-	    set accelerator [lindex $_menus($cat,counter) 0]
-	    set _menus($cat,counter) \
-		    [lreplace $_menus($cat,counter) 0 0]
-	    set accstring "A-$tlacc $accelerator"
+	# Initialize menu options. If the label is a local file name,
+	# change it to show only the last component of the path
+	if { [::tycho::url server $opts(-label)] == "" } {
+	    set opts(-label) [::tycho::url tail $opts(-label)]
 	}
+	set mopts(-label) $opts(-label)
+	set mopts(-command) [list ::tycho::Registry::raiseWindow \
+		$opts(-tag) $opts(-window)]
+	
+	# Get the traversal key
+	if { $_menus($cat,counter) != "" } {
+	    # The counter within this submenu
+	    set counter [lindex $_menus($cat,counter) 0]
+	    set _menus($cat,counter) [lreplace $_menus($cat,counter) 0 0]
+	    set mopts(-label) "$counter  $mopts(-label)"
+	} else {
+	    set counter ""
+	    set mopts(-label) "   $mopts(-label)"
+	}
+	# Get the menu accelerator
+	if { $_menus(accelerators) != "" } {
+	    set accelerator [lindex $_menus(accelerators) 0]
+	    set _menus(accelerators) [lreplace $_menus(accelerators) 0 0]
+	    set mopts(-accelerator) "  Alt-$accelerator"
+	    set mopts(-underline) 0
+	} else {
+	    set accelerator ""
+	}
+
 	# Record data
+	set _menus($cat,$window#$tag,counter) $counter
 	set _menus($cat,$window#$tag,accelerator) $accelerator
-	set _menus($cat,$window#$tag,options) [list \
-		-label $opts(-label) \
-		-accelerator $accstring \
-		-command [list ::tycho::Registry::raiseWindow \
-		    $opts(-tag) $opts(-window)]]
+	set _menus($cat,$window#$tag,options) [array get mopts]
 
 	# Add to the Window menu of all registered menu bars
 	foreach mb [array names _menubars] {
@@ -1164,14 +1178,10 @@ body ::tycho::Registry::registerWindow {tag window args} {
 	    # Check for window menu
 	    if [$mb exists window] {
 		if { $accelerator != "" } {
-		    bind [$mb path $cat] <Key-$accelerator> \
-			    "$mb unpost $cat; $mb invoke [list $window#$tag]"
+		    bind [winfo toplevel $mb] <Alt-Key-$accelerator> \
+			    "$mb invoke [list $window#$tag]"
 		}
-		$mb command $window#$tag $cat \
-			-label $opts(-label) \
-			-accelerator $accstring \
-			-command [list ::tycho::Registry::raiseWindow \
-			$opts(-tag) $opts(-window)]
+		eval [list $mb command $window#$tag $cat] [array get mopts]
 		$mb enable $cat
 	    }
         }
