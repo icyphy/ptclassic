@@ -16,6 +16,12 @@ and INC_LOG_DEL should be used to provide source lines where the
 calls to new and delete occurred.
 
 **************************************************************************/
+
+// if the symbol MEMORYLOG is not defined, this whole source unit is
+// "commented out".
+
+#ifdef MEMORYLOG
+
 #include "logNew.h"
 #include <stdio.h>
 #include <sys/types.h>
@@ -113,3 +119,5 @@ void operator delete(void *p) {
 	// cast to char* needed for Sun port of cfront.  Gack.
 	free((char *)p);
 }
+
+#endif
