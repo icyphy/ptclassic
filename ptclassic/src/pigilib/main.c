@@ -73,7 +73,7 @@ RPCFunction CommandArray[] = {
     {EditParams, "Edit", "edit-params", "e", 0},
     {DefineParams, "Edit", "define-params", "+", 0},
     {RpcEditDomain, "Edit", "edit-domain", "d", 0},
-    {RpcEditArch, "Edit", "edit-architecture", "a", 0},
+    {RpcEditTarget, "Edit", "edit-target", "T", 0},
     {RpcEditComment, "Edit", "edit-comment", ";", 0},
     {RpcEditSeed, "Edit", "edit-seed", "#", 0},
     {RpcFindName, "Edit", "find-name"},
@@ -148,7 +148,9 @@ RPCFunction **array;
 	PrintErr(ErrGet());
 	RPCExit(-1);
     }
+/* initialize modules: compilation of universes, signal catching, loader*/
     CompileInit();
+    KcCatchSignals();
     KcLoadInit(pigiRpcName);
     *array = CommandArray;
     PrintVersion();
