@@ -43,12 +43,9 @@ ENHANCEMENTS, OR MODIFICATIONS.
  */
 #include "sol2compat.h"
 
-#include "Block.h"
 #include "InfString.h"
-extern "C" {
-#include "ptk.h"
-}
 
+class Block;
 // TclStarIfc will be instantiated by each star 
 
 class TclStarIfc {
@@ -143,3 +140,7 @@ protected:
 	int callTclProc(const char* name);
 };
 #endif
+
+
+
+

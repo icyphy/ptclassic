@@ -32,7 +32,11 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 **************************************************************************/
 
+#include "Block.h"
 #include "TclStarIfc.h"
+extern "C" {
+#include "ptk.h"
+}
 
 /////////////////////////////////////////////////////////////////////////
 //			Tcl Callable Procedures
