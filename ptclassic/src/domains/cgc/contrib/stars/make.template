@@ -40,9 +40,9 @@ CONFIG =	$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
 # SDFDIR is the directory containing SDF domain support
-SDFDIR = 	$(ROOT)/src/domains/sdf/kernel
 CGCDIR = 	$(ROOT)/src/domains/cgc/kernel
-INCL = 		-I$(SDFDIR) \
+CGDIR =		$(ROOT)/src/domains/cg/kernel
+INCL = 		-I$(CGDIR) \
 		-I$(CGCDIR) \
 		-I$(KERNDIR) \
 		-I$(ROOT)/src/domains/cgc/contrib/stars
