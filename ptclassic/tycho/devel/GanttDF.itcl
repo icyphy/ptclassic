@@ -1,0 +1,482 @@
+# Definition of Gantt Chart VSM
+#
+# @Author: Farhana Sheikh
+#
+# @Version: $Id$
+#
+# @Copyright (c) 1995-%Q% The Regents of the University of California.
+# All rights reserved.
+#
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the above
+# copyright notice and the following two paragraphs appear in all copies
+# of this software.
+#
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+#
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+#                                        PT_COPYRIGHT_VERSION_2
+#                                        COPYRIGHTENDKEY
+#######################################################################
+
+
+#######################################################################
+#### GanttVSM
+# This is a visualization state machine that translates a schedule
+# from text form to graphical form
+# create a Gantt VSM to interpret textual description of a 
+# schedule
+# The Gantt VSM should update the Gantt chart data somehow
+# Initialize the chart layout parameters
+#
+# FIXME: Fill in the documentation here
+#
+# <p>
+# Here is an example:
+# <tcl><pre>
+# tycho::GanttVSM .ganttvsm
+# </pre></tcl>
+#
+class ::tycho::GanttVSM {
+    inherit ::tycho::TychoWidget
+
+    constructor {args} {}
+    destructor {}
+
+    ###################################################################
+    ####                            options                        ####
+
+    # A .sched file to be used to create a Gantt Chart
+    itk_option define -file file File ""
+
+    # An identifier for this particular schedule; can be different
+    # from the name of the scheduler
+    itk_option define -id id ID ""
+
+    # Input the schedule string directly
+    itk_option define -schedule schedule Schedule {}
+
+    ###################################################################
+    ####                         public methods                    ####
+
+    # methods to interpret textual data and generate appropriate
+    # graphical annotations for display to render
+
+    # Create the hierarchy of nested schedules, each nested schedule
+    # getting an individual state machine; children of this vsm
+    method create {} {return $hierarchy} 
+
+    # Return the firing sequence if it exists otherwise list is empty
+    method getDisplayData {} {return $data}
+
+    # Return the id
+    method getID {} {return $identifier}
+
+    # Return the makespan or period of the schedule
+    method getMakespan {} {return $makespan}
+
+    # Return the number of processors
+    method getNumProcs {} {return $numprocs}
+
+    # Return the scheduler name
+    method getSchedName {} {return $name}
+
+    # Return schedule in list form
+    method getSchedule {} {return $schedule}
+    # Return the target
+    method getTarget {} {return $target}
+    
+    # Return the galaxy or universe name
+    method getUniverse {} {return $universe}
+
+    # Return the galaxy or universe name
+    method getUtilization {} {return $utilization}
+    
+    # Reset a VSM to initial state
+    method reset {}
+
+
+    # methods to generate and manipulate textual data from a given set 
+    # of graphical annotations 
+
+    ###################################################################
+    ####                   private variables                       ####
+
+    # Schedule file to be interpreted.
+    private variable filename ""
+
+    # Repository of schedule information
+    private variable schedInfo {}
+
+    # Store firing sequence as a list of <name, start, end>
+    private variable fireSeq {}
+    
+    # Store hierarchy
+    private variable schedHier {}
+
+    # Need an id in case we need to identify cluster names
+    private variable identifier ""
+
+    # display data required by view <type, proc, <name, start, end>+>
+    private variable ddata {}
+}
+
+#######################################################################
+#### -file configuration
+# Set the name of current schedule file
+#
+configbody ::tycho::GanttVSM::file {
+   
+    set filename $itk_option(-file)
+
+    # Check if file is a schedule file
+    if {[string compare [string trimleft $filename .] "sched"] == 0} {
+	error "File \"$filename\" is not a valid schedule file."
+    }
+
+    # Check if file exists
+    if {![file exists $filename]} {
+	error "File \"$filename\" does not exist."
+    } 
+    
+    # Open file for reading
+    set fileID [open $filename r]
+    set schedInfo [read $fileID nonewline]
+    
+    # Close the file
+    close $fileID
+
+    # strip off any extraneous information before schedule 
+    # information starts
+    set schedInfo [lindex $schedInfo [expr [llength $schedInfo] - 1]]
+    
+}
+#######################################################################
+#### -id configuration
+# Give the schedule an optional identifier; useful for clusters and 
+# processor schedules
+#
+configbody ::tycho::GanttVSM::id {
+   
+    set identifier $itk_option(-id)
+    
+}
+
+#######################################################################
+#### -schedule configuration
+# Set the schedule information
+#
+configbody ::tycho::GanttVSM::schedule {
+   
+    # if schedule file not read then prefer to use -schedule option
+    if {$filename == ""} {
+	set schedInfo $itk_option(-schedule)
+    }
+}
+
+#######################################################################
+#### constructor
+#
+body ::tycho::GanttVSM::constructor {args} {
+
+    eval itk_initialize $args
+}
+
+#######################################################################
+#### destructor
+#
+body ::tycho::GanttVSM::destructor {} {
+}
+
+    ###################################################################
+    ###################################################################
+    ####                      public methods                       ####
+
+#######################################################################
+#### create
+# Create schedule hierarchy and return names of nested GanttVSMs
+#
+body ::tycho::GanttVSM::create {} {
+
+    # Create may have already been called once, if so no need to parse
+    # again.
+    if {$schedHier != {}} {
+	return $schedHier
+    }
+
+    # Check if we have any nested schedules; if so create corresponding
+    # sub-VSMs
+    set curindex 0
+    set name ""
+    set hierarchy {}
+    set id ""
+
+    foreach item $schedInfo {
+	switch [lindex $item 0] {
+	    cluster {		
+		set nestedSched [lindex $item [expr [llength $item] - 1]]
+		set name cluster$curindex
+		itk_component add $name {
+		    ::tycho::GanttVSM $itk_component(hull).$name \
+			    -schedule $nestedSched \
+			    -id $id
+		} {
+		}
+		lappend hierarchy "$itk_component($name)"
+
+		if {[llength $item] > 2} {
+		    set id [lindex $item 1]
+		} else {
+		    lappend ddata "cluster"
+		    set nprocs [$itk_component($name) getNumProcs]
+		    lappend ddata 1
+		    lappend ddata {name 0 1}
+		    puts "$nprocs $ddata"
+		}
+	    }
+
+	    processor { 
+		set nestedSched [lindex $item [expr [llength $item] - 1]]
+		set procNum [lindex $item 1]
+		set name proc$procNum
+		itk_component add $name {
+		    ::tycho::GanttVSM $itk_component(hull).$name \
+			    -schedule $nestedSched \
+			    -id $name
+
+		} {
+		}
+		lappend hierarchy "$itk_component($name)"
+	    }
+
+	    preamble {
+		set nestedSched [lindex $item [expr [llength $item] - 1]]
+		set name preamble$curindex
+		itk_component add $name {
+		    ::tycho::GanttVSM $itk_component(hull).$name \
+			    -schedule $nestedSched
+		} {
+		}
+		lappend hierarchy "$itk_component($name)"
+	    }
+	    
+	    repeat {
+		# FIXME: need to figure out how to deal with this
+	    }
+	    
+	    default {
+	    }
+	}
+	
+	incr curindex
+    }
+    
+    set schedHier $hierarchy
+    return $hierarchy
+}
+
+#######################################################################
+#### getDisplayData
+# Get the display data
+#
+body ::tycho::GanttVSM::getDisplayData {} {
+
+    return $ddata
+}
+
+#######################################################################
+#### getID
+# Get the schedule identifier
+#
+body ::tycho::GanttVSM::getID {} {
+
+    return $identifier
+}
+
+#######################################################################
+#### getMakespan
+# Get the makespan or period of the schedule
+#
+body ::tycho::GanttVSM::getMakespan {} {
+
+    # check if we've read in a schedule
+    if {$schedInfo == {}} {
+	error "No schedule present."
+	return 0
+    }
+    
+    # initialize number of processor to one
+    set numprocs 1
+    set makespan 1
+
+    set curindex 0
+    while {$curindex < [llength $schedInfo]} {
+	if {[lindex [lindex $schedInfo $curindex] 0] == "makespan"} {
+	    set makespan [lindex [lindex $schedInfo $curindex] 1] 
+	}
+	incr curindex
+    }
+    
+    return $makespan
+}
+
+#######################################################################
+#### getNumProcs
+# Get the number of processors
+#
+body ::tycho::GanttVSM::getNumProcs {} {
+
+    # check if we've read in a schedule
+    if {$schedInfo == {}} {
+	error "No schedule present."
+	return 0
+    }
+    
+    # initialize number of processor to one
+    set numprocs 1
+
+    set curindex 0
+    while {$curindex < [llength $schedInfo]} {
+	if {[lindex [lindex $schedInfo $curindex] 0] == "numberOfProcessors"} {
+	    set numprocs [lindex [lindex $schedInfo $curindex] 1] 
+	}
+	incr curindex
+    }
+    
+    return $numprocs
+}
+
+#######################################################################
+#### getSchedName
+# Get scheduler name 
+#
+body ::tycho::GanttVSM::getSchedName {} {
+
+    # check if we've read in a schedule
+    if {$schedInfo == {}} {
+	error "No schedule present."
+	return 0
+    }
+    
+    # Set the ID to an empty string 
+    set name ""
+
+    set curindex 0
+    while {$curindex < [llength $schedInfo]} {
+	if {[lindex [lindex $schedInfo $curindex] 0] == "scheduler"} {
+	    set name [lindex [lindex $schedInfo $curindex] 1] 
+	}
+	incr curindex
+    }
+    
+    return $name
+}
+
+#######################################################################
+#### getSchedule
+# Get schedule 
+#
+body ::tycho::GanttVSM::getSchedule {} {
+    
+    return $schedInfo
+}
+
+#######################################################################
+#### getTarget
+# Get name of target
+#
+body ::tycho::GanttVSM::getTarget {} {
+
+    # check if we've read in a schedule
+    if {$schedInfo == {}} {
+	error "No schedule present."
+	return 0
+    }
+    
+    # Set the target name to an empty string  
+    set target ""
+
+    set curindex 0
+    while {$curindex < [llength $schedInfo]} {
+	if {[lindex [lindex $schedInfo $curindex] 0] == "target"} {
+	    set target [lindex [lindex $schedInfo $curindex] 1] 
+	}
+	incr curindex
+    }
+    
+    return $target
+    
+}
+
+#######################################################################
+#### getUniverse
+# Get name of universe or galaxy
+#
+body ::tycho::GanttVSM::getUniverse {} {
+
+    # check if we've read in a schedule
+    if {$schedInfo == {}} {
+	error "No schedule present."
+	return 0
+    }
+    
+    # Set the universe name to an empty string 
+    set universe ""
+
+    set curindex 0
+    while {$curindex < [llength $schedInfo]} {
+	if {[lindex [lindex $schedInfo $curindex] 0] == "galaxy"} {
+	    set universe [lindex [lindex $schedInfo $curindex] 1] 
+	}
+	incr curindex
+    }
+    
+    return $universe
+    
+}
+
+#######################################################################
+#### getUtilization
+# Get the processor utilization
+#
+body ::tycho::GanttVSM::getUtilization {} {
+
+    # check if we've read in a schedule
+    if {$schedInfo == {}} {
+	error "No schedule present."
+	return 0
+    }
+    
+    # initialize number of processor to one
+    set numprocs 1
+
+    set curindex 0
+    while {$curindex < [llength $schedInfo]} {
+	if {[lindex [lindex $schedInfo $curindex] 0] == "utilization"} {
+	    set utilization [lindex [lindex $schedInfo $curindex] 1] 
+	}
+	incr curindex
+    }
+    
+    return $utilization
+}
+
+#######################################################################
+#### reset
+# Reset a VSM to its initial state
+#
+body ::tycho::GanttVSM::reset {} {
+
+}
+
