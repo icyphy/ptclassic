@@ -52,7 +52,8 @@ EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) \
 	Lorenz.cts \
 	Coyote1.cts \
 	Coyote2.cts \
-	Coyote2Init.tcl
+	Coyote2Init.tcl \
+	index.html
 
 MISC_FILES = 
 
