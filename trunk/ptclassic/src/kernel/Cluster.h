@@ -148,7 +148,7 @@ public:
 
     Cluster* next() {
 	Star* star = GalStarIter::next();
-	return star? star->asCluster(): (Cluster*) NULL;
+	return star? star->asCluster(): (Cluster*)NULL;
     }
 
     Cluster* operator++(POSTFIX_OP) { return next();}
@@ -161,7 +161,7 @@ public:
 
     const Cluster* next() {
 	const Star* star = CGalStarIter::next();
-	return star? star->asCluster(): (const Cluster*) NULL;
+	return star? star->asCluster(): (Cluster*)NULL;
     }
 
     const Cluster* operator++(POSTFIX_OP) { return next();}
@@ -205,7 +205,7 @@ public:
 
     ClusterPort* next() {
 	PortHole* port = BlockPortIter::next();
-	return port? port->asClusterPort(): (ClusterPort*) NULL;
+	return port? port->asClusterPort(): (ClusterPort*)NULL;
     }
 
     ClusterPort* operator++(POSTFIX_OP) { return next();}

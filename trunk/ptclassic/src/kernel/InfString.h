@@ -71,27 +71,27 @@ public:
 
 	// Assignment operators do not inherit, so we need to redo them.
 
-	InfString& operator = (const StringList& arg) {
+	inline InfString& operator = (const StringList& arg) {
 		StringList::operator=(arg);
 		return *this;
 	}
-	InfString& operator = (const char* arg) {
+	inline InfString& operator = (const char* arg) {
 		StringList::operator=(arg);
 		return *this;
 	}
-	InfString& operator = (char arg) {
+	inline InfString& operator = (char arg) {
 		StringList::operator=(arg);
 		return *this;
 	}
-	InfString& operator = (int arg) {
+	inline InfString& operator = (int arg) {
 		StringList::operator=(arg);
 		return *this;
 	}
-	InfString& operator = (double arg) {
+	inline InfString& operator = (double arg) {
 		StringList::operator=(arg);
 		return *this;
 	}
-	InfString& operator = (unsigned arg) {
+	inline InfString& operator = (unsigned arg) {
 		StringList::operator=(arg);
 		return *this;
 	}

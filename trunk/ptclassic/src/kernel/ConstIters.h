@@ -52,8 +52,12 @@ Block.h, PortHole.h, State.h, or Galaxy.h.
 class CPortListIter : private CNamedObjListIter {
 public:
 	CPortListIter(const PortList& plist) : CNamedObjListIter (plist) {}
-	const PortHole* next() { return (const PortHole*)CNamedObjListIter::next();}
-	const PortHole* operator++(POSTFIX_OP) { return next();}
+	inline const PortHole* next() {
+	  return (const PortHole*)CNamedObjListIter::next();
+	}
+	inline const PortHole* operator++(POSTFIX_OP) {
+	  return next();
+	}
 	CNamedObjListIter::reset;
 };
 
@@ -61,8 +65,12 @@ public:
 class CStateListIter : private CNamedObjListIter {
 public:
 	CStateListIter(const StateList& sl) : CNamedObjListIter (sl) {}
-	const State* next() { return (const State*)CNamedObjListIter::next();}
-	const State* operator++(POSTFIX_OP) { return next();}
+	inline const State* next() {
+	  return (const State*)CNamedObjListIter::next();
+	}
+	inline const State* operator++(POSTFIX_OP) {
+	  return next();
+	}
 	CNamedObjListIter::reset;
 };
 
@@ -82,9 +90,9 @@ public:
 class CMPHListIter : private CNamedObjListIter {
 public:
 	CMPHListIter(const MPHList& plist) : CNamedObjListIter (plist) {}
-	const MultiPortHole* next() {
+	inline const MultiPortHole* next() {
 		return (const MultiPortHole*)CNamedObjListIter::next();}
-	const MultiPortHole* operator++(POSTFIX_OP) { return next();}
+	inline const MultiPortHole* operator++(POSTFIX_OP) { return next();}
 	CNamedObjListIter::reset;
 };
 
@@ -104,8 +112,10 @@ public:
 class CBlockListIter : private CNamedObjListIter {
 public:
 	CBlockListIter(const BlockList& sl) : CNamedObjListIter (sl) {}
-	const Block* next() { return (const Block*)CNamedObjListIter::next();}
-	const Block* operator++(POSTFIX_OP) { return next();}
+	inline const Block* next() {
+	  return (const Block*)CNamedObjListIter::next();
+	}
+	inline const Block* operator++(POSTFIX_OP) { return next();}
 	CNamedObjListIter::reset;
 };
 

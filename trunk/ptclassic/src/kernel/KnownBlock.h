@@ -68,8 +68,22 @@ interface where the flow of control is hard to follow.
 
 #include "Block.h"
 #include "StringList.h"
+#include "Linker.h"
 
-class KnownListEntry;
+// private class for entries on known lists
+
+class KnownListEntry {
+	friend class KnownBlock;
+	friend class KnownBlockIter;
+	Block* b;
+	int onHeap;
+	int dynLinked;
+	KnownListEntry *next;
+public:
+	KnownListEntry(Block* bl,int oh, KnownListEntry* n) :
+		b(bl), onHeap(oh), dynLinked(Linker::isActive()), next(n) {}
+	~KnownListEntry ();
+};
 
 class KnownBlock {
 	friend class KnownBlockIter;
@@ -134,8 +148,14 @@ public:
 	// argument is the domain to use for the knownlist: default
 	// is default domain.
 	KnownBlockIter(const char* dom = 0);
-	const Block* next();
-	const Block* operator++(POSTFIX_OP) { return next();}
+	inline const Block* next() {
+	  if (pos) {
+	    const Block* b = pos->b;
+	    pos = pos->next;
+	    return b;
+	  } else return 0;
+	}
+	inline const Block* operator++(POSTFIX_OP) { return next();}
 	void reset();
 };
 

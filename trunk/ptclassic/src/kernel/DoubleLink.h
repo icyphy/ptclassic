@@ -53,7 +53,7 @@ public:
 		next(n), prev(p), e(a) {}
 	DoubleLink(Pointer a): next(0), prev(0), e(a) {}
 
-	Pointer content() { return e; }
+	inline Pointer content() { return e; }
 
 	// virtual destructor
 	virtual ~DoubleLink();
@@ -74,7 +74,7 @@ public:
 	virtual ~DoubleLinkList();
 
 	// create link
-	DoubleLink* createLink(Pointer e) {
+	inline DoubleLink* createLink(Pointer e) {
 		INC_LOG_NEW; return new DoubleLink(e, 0, 0);
 	}
 
@@ -84,11 +84,11 @@ public:
 
         // Insert at the head of the list
         void insertLink(DoubleLink *x);  
-	void insert(Pointer e) { insertLink(createLink(e)); }
+	inline void insert(Pointer e) { insertLink(createLink(e)); }
 
         // Insert at the end of the list
         void appendLink(DoubleLink *x);
-	void append(Pointer e) { appendLink(createLink(e)); }
+	inline void append(Pointer e) { appendLink(createLink(e)); }
 
         // insert y immediately ahead of x
 	void insertAhead(DoubleLink *y, DoubleLink *x);
@@ -102,7 +102,7 @@ public:
 
         // Remove a link from the list.
 	// Alert! make sure that x is in the list before calling this method!
-	void removeLink(DoubleLink *x) { unlink(x);	
+	inline void removeLink(DoubleLink *x) { unlink(x);	
 					 INC_LOG_DEL; delete x; }
 	void remove(Pointer e);
         
@@ -117,22 +117,22 @@ public:
         void reset(); 
 
         // get the number of elements in the list
-        int size() { return mySize;}
+        inline int size() { return mySize;}
 
         // get a pointer to the head of the list
-        DoubleLink *head() {return myHead;}
+        inline DoubleLink *head() {return myHead;}
         
         // get a pointer to the tail of the list
-        DoubleLink *tail() {return myTail;}
+        inline DoubleLink *tail() {return myTail;}
 
         // pop the head node
-        DoubleLink *getHeadLink() 
+        inline DoubleLink *getHeadLink() 
 		{ if (mySize==0) return 0;
            	  else return unlink(myHead); }
 	Pointer takeFromFront();
         
         // get the tail node & unlink it from the list
-        DoubleLink *getTailLink() 
+        inline DoubleLink *getTailLink() 
 		{ if (mySize==0) return 0;
 		  else return unlink(myTail); }
 	Pointer takeFromBack();
@@ -158,14 +158,14 @@ class DoubleLinkIter
 {
 public:
 	DoubleLinkIter(const DoubleLinkList& l) : list(&l), ref(l.myHead) {}
-	void reset() { ref = list->myHead;}
-        void reset(DoubleLink *start) {ref=start;}
+	inline void reset() { ref = list->myHead;}
+        inline void reset(DoubleLink *start) {ref=start;}
 	DoubleLink* nextLink();
 	Pointer	next(); 
-	Pointer operator++ (POSTFIX_OP) { return next();}
+	inline Pointer operator++ (POSTFIX_OP) { return next();}
 
 	// attach the DoubleLinkIter to a different object
-	void reconnect(const DoubleLinkList& l) {
+	inline void reconnect(const DoubleLinkList& l) {
 		list = &l; ref = l.myHead;
 	}
 private:

@@ -134,7 +134,7 @@ public:
 	void setInitValue(const char* s);
 
 	// get the initial value
-	const char* initValue () const { return myInitValue;}
+	inline const char* initValue () const { return myInitValue;}
 
         // return the parameter type (for use in GUI, interpreter)
         virtual const char* type() const = 0;
@@ -165,13 +165,13 @@ public:
 	StringList print(int verbose) const;
 
 	// attributes
-	bitWord attributes() const { return attributeBits;}
+	inline bitWord attributes() const { return attributeBits;}
 
-	bitWord setAttributes(const Attribute& attr) {
+	inline bitWord setAttributes(const Attribute& attr) {
 		return attributeBits = attr.eval(attributeBits);
 	}
 
-	bitWord clearAttributes(const Attribute& attr) {
+	inline bitWord clearAttributes(const Attribute& attr) {
 		return attributeBits = attr.clearAttribs(attributeBits);
 	}
 
@@ -235,14 +235,14 @@ class StateList : private NamedObjList
 	friend class CStateListIter;
 public:
 	// Add State to list
-	void put(State& s) {NamedObjList::put(s);}
+	inline void put(State& s) {NamedObjList::put(s);}
 
 	// Find a state with the given name and return pointer
-	State* stateWithName(const char* name) {
+	inline State* stateWithName(const char* name) {
 		return (State*)objWithName(name);
 	}
 
-	const State* stateWithName(const char* name) const {
+	inline const State* stateWithName(const char* name) const {
 		return (const State*)objWithName(name);
 	}
 
@@ -260,8 +260,8 @@ public:
 class StateListIter : private NamedObjListIter {
 public:
 	StateListIter(StateList& sl) : NamedObjListIter (sl) {}
-	State* next() { return (State*)NamedObjListIter::next();}
-	State* operator++(POSTFIX_OP) { return next();}
+	inline State* next() { return (State*)NamedObjListIter::next();}
+	inline State* operator++(POSTFIX_OP) { return next();}
 	NamedObjListIter::reset;
 };
 

@@ -72,10 +72,10 @@ public:
 	}
 
 	// status inquiry functions
-	int empty() const { return stk.empty();}
-	int full() const { return count >= maxCount;}
-	unsigned int capacity() const { return maxCount;}
-	unsigned int length() const { return count;}
+	inline int empty() const { return stk.empty();}
+	inline int full() const { return count >= maxCount;}
+	inline unsigned int capacity() const { return maxCount;}
+	inline unsigned int length() const { return count;}
 
 	// put a particle into the queue: fails if capacity exceeded
 	int putq(Particle& p);
@@ -88,10 +88,10 @@ public:
 	void setCapacity(int sz);
 
 	// free up the queue contents
-	void initialize() { stk.freeup();}
+	inline void initialize() { stk.freeup();}
 
 	// free up and set capacity (good for star start() methods)
-	void initialize(int n) { initialize(); setCapacity(n);}
+	inline void initialize(int n) { initialize(); setCapacity(n);}
 protected:
 	unsigned int count;
 	unsigned int maxCount;

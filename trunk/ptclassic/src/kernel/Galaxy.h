@@ -57,23 +57,23 @@ class BlockList : private NamedObjList
 	friend class CBlockListIter;
 public:
 	// Add Block to list
-	void put(Block& b) {NamedObjList::put(b);}
+	inline void put(Block& b) {NamedObjList::put(b);}
 
 	// Return first Block on list (const, non-const forms)
-	Block* head () {return (Block*) NamedObjList::head();}
-	const Block* head () const {
+	inline Block* head () {return (Block*) NamedObjList::head();}
+	inline const Block* head () const {
 		return (const Block*) NamedObjList::head();
 	}
 
 	// Remove a Block from the list.  Note: block is not deleted
-	int remove (Block* b) { return NamedObjList::remove(b);}
+	inline int remove (Block* b) { return NamedObjList::remove(b);}
 
 	// find Block with given name (const and non-const forms)
-	Block* blockWithName(const char* name) {
+	inline Block* blockWithName(const char* name) {
 		return (Block*)objWithName(name);
 	}
 
-	const Block* blockWithName(const char* name) const {
+	inline const Block* blockWithName(const char* name) const {
 		return (const Block*)objWithName(name);
 	}
 
@@ -91,8 +91,8 @@ public:
 class BlockListIter : private NamedObjListIter {
 public:
 	BlockListIter(BlockList& sl) : NamedObjListIter (sl) {}
-	Block* next() { return (Block*)NamedObjListIter::next();}
-	Block* operator++(POSTFIX_OP) { return next();}
+	inline Block* next() { return (Block*)NamedObjListIter::next();}
+	inline Block* operator++(POSTFIX_OP) { return next();}
 	NamedObjListIter::reset;
 };
 
@@ -124,13 +124,13 @@ public:
 	void wrapup();
 
 	// Add block and call setBlock for it
-	void addBlock(Block& b,const char* bname) {
+	inline void addBlock(Block& b,const char* bname) {
 		b.setBlock(bname,this);
 		blocks.put(b);
 	}
 
 	// Remove a block from the list
-	int removeBlock(Block& b) { return blocks.remove(&b);}
+	inline int removeBlock(Block& b) { return blocks.remove(&b);}
 
         // States initialize
         virtual void initState();
@@ -139,7 +139,7 @@ public:
         virtual void initPorts();
 
 	// Return the number of blocks in the galaxy.
-	int numberBlocks() const {return blocks.size();}
+	inline int numberBlocks() const {return blocks.size();}
 
 	// Print a description of the galaxy
 	/* virtual */ StringList print(int verbose) const;
@@ -157,7 +157,7 @@ public:
 
 	// set my domain.  FIXME: should be protected, but
 	// DDFAutoWorm needs access.
-	void setDomain(const char* dom) { myDomain = dom;}
+	inline void setDomain(const char* dom) { myDomain = dom;}
 
 	// Add a block to the list of blocks to be deleted after initialization
 	void deleteBlockAfterInit(Block& b);
@@ -166,30 +166,30 @@ public:
 protected:
 
 	// Add blocks to the list
-	void addBlock(Block& b) {blocks.put(b);}
+	inline void addBlock(Block& b) {blocks.put(b);}
 
 	// Connect sub-blocks with an initial delay values string
-	void connect(GenericPort& source, GenericPort& destination,
+	inline void connect(GenericPort& source, GenericPort& destination,
 		     int numberDelays = 0, const char* initDelayValues = 0) {
 		source.connect(destination, numberDelays, initDelayValues);
 	}
 
 	// Connect a Galaxy PortHole to a PortHole of a sub-block
-	void alias(PortHole& galPort, PortHole& blockPort) {
+	inline void alias(PortHole& galPort, PortHole& blockPort) {
 		galPort.setAlias(blockPort);
 	}
 
 	// Overload to alias MultiPortHoles
-	void alias(MultiPortHole& galPort, MultiPortHole& blockPort) {
+	inline void alias(MultiPortHole& galPort, MultiPortHole& blockPort) {
 		galPort.setAlias(blockPort);
 	}
 
 	// support blockWithName message to access internal block list
-	const Block* blockWithName (const char* name) const {
+	inline const Block* blockWithName (const char* name) const {
 		return blocks.blockWithName(name);
 	}
 
-	Block* blockWithName (const char* name) {
+	inline Block* blockWithName (const char* name) {
 		return blocks.blockWithName(name);
 	}
 
@@ -203,7 +203,7 @@ protected:
 	void initPortsSubblocks();
 
 	// delete sub-blocks
-	void deleteAllBlocks() { blocks.deleteAll();}
+	inline void deleteAllBlocks() { blocks.deleteAll();}
 private:
 	// Keep a list of component Blocks
 	BlockList	blocks;

@@ -75,7 +75,7 @@ public:
 	// constructor, with argument
 	SequentialList(Pointer a);
 
-	int size() const { return dimen;}
+	inline int size() const { return dimen;}
 	
 	void prepend(Pointer a);	// Add at head of list
 
@@ -89,12 +89,12 @@ public:
 
         Pointer getTailAndRemove();     // Return and remove tail of list
 
-	Pointer head() const  // Return head, do not remove
+	inline Pointer head() const  // Return head, do not remove
 	{
 		return lastNode ? lastNode->next->e : 0;
 	}
 	
-	Pointer tail() const {	// return tail, do not remove
+	inline Pointer tail() const {	// return tail, do not remove
 		return lastNode ? lastNode->e : 0;
 	}
 	
@@ -104,7 +104,7 @@ public:
 
 	// predicates
 	// is list empty?
-	int empty() const { return (lastNode == 0);}
+	inline int empty() const { return (lastNode == 0);}
 
 	// is arg a member of the list? (returns TRUE/FALSE)
 	int member(Pointer arg) const;
@@ -144,7 +144,7 @@ public:
 	SequentialList::size;
 	SequentialList::initialize;
 
-	int length() const { return size();} // TEMPORARY
+	inline int length() const { return size();} // TEMPORARY
 	// need public destructor
 	~Queue() {}
 };
@@ -163,19 +163,19 @@ public:
 	ListIter(const SequentialList& l) : list(&l), ref(l.lastNode) {}
 
 	// reset to the beginning of a list
-	void reset() { ref = list->lastNode;}
+	inline void reset() { ref = list->lastNode;}
 
 	// next and operator++ are synonyms.  Return the next element,
 	// return 0 if there are no more.
 	// The compact and hard to read form is chosen so that cfront 2.1
 	// can inline it.
-	Pointer next() {
+	inline Pointer next() {
 		Pointer p = ref ? (ref = ref->next, ref->e) : 0;
 		if (ref == list->lastNode) ref = 0;
 		return p;
 	}
 
-	Pointer operator++ (POSTFIX_OP) { return next();}
+	inline Pointer operator++ (POSTFIX_OP) { return next();}
 
 // attach the ListIter to a different object
 	void reconnect(const SequentialList& l) {

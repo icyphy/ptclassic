@@ -57,24 +57,24 @@ public:
 	virtual const char* className() const;
 
 	// return just the end name
-	const char* name() const { return nm;}
+	inline const char* name() const { return nm;}
 
 	// return the descriptor
-	const char* descriptor() const {return myDescriptor;}
+	inline const char* descriptor() const {return myDescriptor;}
 
 	// return the parent block
-	Block* parent() const { return prnt;}
+	inline Block* parent() const { return prnt;}
 
 	// return the full name
 	virtual StringList fullName() const;
 
 	// set the name
-	void setName (const char* my_name) {
+	inline void setName (const char* my_name) {
 		nm = my_name;
 	}
 
 	// set the parent
-	void setParent (Block* my_parent) {
+	inline void setParent (Block* my_parent) {
 		prnt = my_parent;
 	}
 
@@ -140,9 +140,9 @@ public:
 	void initElements();
 
 	// head of list (const and non-const versions)
-	NamedObj* head() {return (NamedObj*)SequentialList::head();}
+	inline NamedObj* head() {return (NamedObj*)SequentialList::head();}
 
-	const NamedObj* head() const {
+	inline const NamedObj* head() const {
 		return (const NamedObj*)SequentialList::head();
 	}
 
@@ -164,8 +164,8 @@ private:
 class NamedObjListIter : private ListIter {
 public:
 	NamedObjListIter(NamedObjList& sl);
-	NamedObj* next() { return (NamedObj*)ListIter::next();}
-	NamedObj* operator++(POSTFIX_OP) { return next();}
+	inline NamedObj* next() { return (NamedObj*)ListIter::next();}
+	inline NamedObj* operator++(POSTFIX_OP) { return next();}
 	ListIter::reset;
 };
 
@@ -173,8 +173,8 @@ public:
 class CNamedObjListIter : private ListIter {
 public:
 	CNamedObjListIter(const NamedObjList& sl);
-	const NamedObj* next() { return (const NamedObj*)ListIter::next();}
-	const NamedObj* operator++(POSTFIX_OP) { return next();}
+	inline const NamedObj* next() { return (const NamedObj*)ListIter::next();}
+	inline const NamedObj* operator++(POSTFIX_OP) { return next();}
 	ListIter::reset;
 };
 

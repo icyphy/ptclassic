@@ -81,7 +81,7 @@ class SimControl {
 public:
 	// function to read the flag values.  If threading is on,
 	// we need a function call, otherwise it is inline.
-	static unsigned int flagValues() {
+	inline static unsigned int flagValues() {
 		return gate ? readFlags() : flags;
 	}
 	// function to read flags with a mutual exclusion region.
@@ -89,7 +89,7 @@ public:
 private:
 	// must appear before functions that use it for g++ 2.2's
 	// inlining to work correctly.
-	static int haltStatus () {
+	inline static int haltStatus () {
 		return (flagValues() & halt) != 0;
 	}
 public:
@@ -99,7 +99,7 @@ public:
 		interrupt = 4,
 		poll = 8 };
 
-	static int haltRequested () {
+	inline static int haltRequested () {
 		if ( flagValues() | getPollFlag() ) processFlags();
 		return haltStatus();
 	}
@@ -107,13 +107,13 @@ public:
 	// Execute all pre-actions for a particular Star.
 	// return TRUE if no halting condition arises, FALSE
 	// if we are to halt.
-	static int doPreActions(Star * which) {
+	inline static int doPreActions(Star * which) {
 		return (nPre > 0) ? internalDoActions(preList,which)
 			: !haltRequested();
 	}
 
 	// same, but do postactions.
-	static int doPostActions(Star * which) {
+	inline static int doPostActions(Star * which) {
 		return (nPost > 0) ? internalDoActions(postList,which)
 			: !haltRequested();
 	}

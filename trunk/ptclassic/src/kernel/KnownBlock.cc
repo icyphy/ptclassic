@@ -43,22 +43,7 @@ description.
 #include "Error.h"
 #include <std.h>
 #include "Domain.h"
-#include "Linker.h"
 
-// private class for entries on known lists
-
-class KnownListEntry {
-	friend class KnownBlock;
-	friend class KnownBlockIter;
-	Block* b;
-	int onHeap;
-	int dynLinked;
-	KnownListEntry *next;
-public:
-	KnownListEntry(Block* bl,int oh, KnownListEntry* n) :
-		b(bl), onHeap(oh), dynLinked(Linker::isActive()), next(n) {}
-	~KnownListEntry ();
-};
 
 KnownListEntry::~KnownListEntry () {
 	if (onHeap) { LOG_DEL; delete b;}
@@ -205,7 +190,7 @@ KnownBlock::find(const char* type, const char* dom) {
 			if (en) return en->b;
 		}
 	}
-	return e ? e->b : (const Block*) NULL;
+	return e ? e->b : (Block*)NULL;
 }
 
 // return TRUE if indicated name refers to a dynamically linked block.
@@ -286,13 +271,5 @@ KnownBlockIter::KnownBlockIter (const char* dom) {
 	reset();
 }
 
-const Block* KnownBlockIter::next() {
-	if (pos) {
-		const Block* b = pos->b;
-		pos = pos->next;
-		return b;
-	}
-	else return 0;
-}
 
 

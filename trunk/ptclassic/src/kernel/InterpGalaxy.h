@@ -54,7 +54,7 @@ public:
 	NodeList() {}
 	~NodeList() { deleteAll();}
 	void put(Geodesic& g);
-	Geodesic* nodeWithName (const char* name) {
+	inline Geodesic* nodeWithName (const char* name) {
 		return (Geodesic*) NamedObjList::objWithName(name);
 	}
 	int remove(Geodesic* g);
@@ -66,8 +66,8 @@ public:
 class NodeListIter : private NamedObjListIter {
 public:
 	NodeListIter(NodeList& n) : NamedObjListIter(n) {}
-	Geodesic* next() { return (Geodesic*) NamedObjListIter::next();}
-	Geodesic* operator++(POSTFIX_OP) { return next();}
+	inline Geodesic* next() { return (Geodesic*) NamedObjListIter::next();}
+	inline Geodesic* operator++(POSTFIX_OP) { return next();}
 	NamedObjListIter::reset;
 };
 
@@ -80,7 +80,7 @@ public:
 	InterpGalaxy(const InterpGalaxy& g) { copy(g);}
 
 // read the class name
-	const char* className() const {return myClassName; }
+	inline const char* className() const {return myClassName; }
 
 // assignment operator: change this galaxy to look like another one
 	InterpGalaxy& operator=(const InterpGalaxy& g) {
@@ -90,7 +90,7 @@ public:
 	}
 
 // set the descriptor
-	void
+	inline void
 	setDescriptor(const char* dtext) { NamedObj::setDescriptor(dtext);}
 
 // initialize: does variable-parameter connections
