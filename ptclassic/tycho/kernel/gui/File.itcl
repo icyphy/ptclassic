@@ -1478,6 +1478,13 @@ body ::tycho::File::_initializeMenubar {menubar} {
 		-command "::tycho::TopLevel::exitProgram"
     }
     
+    # Register the menubar so its Window and Help menus get set up
+    ::tycho::register menubar $menubar $this
+
+    # Add the window operations to the menu. It's not clear
+    # whether these should be in Registry or not...
+    $menubar separator windowsep2 window
+
     $menubar command nextwindow window \
 	    -label "Next Window" \
             -underline 5 \
@@ -1520,11 +1527,6 @@ body ::tycho::File::_initializeMenubar {menubar} {
             -underline 0 \
 	    -accelerator [::tycho::Shortcuts::getLabel HalfHeight] \
             -command "$this displayer halfHeight"
-
-    $menubar separator winsep window
-
-    # Register the menubar so its Window and Help menus get set up
-    ::tycho::register menubar $menubar $this
 }
 
 #####################################################################
