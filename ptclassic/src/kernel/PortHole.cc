@@ -100,7 +100,7 @@ extern const Attribute P_VISIBLE = {0,PB_HIDDEN};
 
 // constructor
 GenericPort :: GenericPort () : myType(ANYTYPE),aliasedTo(0),typePortPtr(0),
-	aliasedFrom(0), attributeBits(0) {}
+	aliasedFrom(0), attributeBits(0), myResolvedType(0) {}
 
 // Small virtual methods
 int GenericPort :: isItInput () const { return FALSE;}
@@ -158,12 +158,17 @@ void GenericPort :: inheritTypeFrom(GenericPort& p) {
 // Basic idea: remove all pointers to me before deletion.
 
 GenericPort :: ~GenericPort () {
-	if (aliasedFrom) aliasedFrom->aliasedTo = aliasedTo;
-	if (aliasedTo) aliasedTo->aliasedFrom = aliasedFrom;
+        clearAliases();
 	if (!typePortPtr) return;
 	GenericPort* q = typePortPtr;
 	while (q->typePortPtr != this) q = q->typePortPtr;
 	q->typePortPtr = typePortPtr;
+}
+
+void GenericPort :: clearAliases() {
+	if (aliasedFrom) aliasedFrom->aliasedTo = aliasedTo;
+	if (aliasedTo) aliasedTo->aliasedFrom = aliasedFrom;
+	aliasedFrom = aliasedTo = 0;
 }
 
 // The connect method
@@ -218,7 +223,7 @@ void PortHole :: disconnect(int delGeo) {
 
 // Porthole constructor.
 PortHole :: PortHole () : myGeodesic(0), farSidePort(0), 
-myPlasma(0), myBuffer(0), myMultiPortHole(0), myResolvedType(0) {}
+myPlasma(0), myBuffer(0), myMultiPortHole(0) {}
 	
 EventHorizon* PortHole :: asEH() { return NULL; }
 
@@ -241,20 +246,38 @@ void PortHole :: sendData () { return;}
 GalPort :: GalPort(GenericPort& a) { GenericPort::setAlias(a);}
 
 // get answer by asking the alias.
-int GalPort :: isItInput() const { return alias()->isItInput();}
-int GalPort :: isItOutput() const { return alias()->isItOutput();}
+int GalPort :: isItInput() const { 
+  if (alias()) return alias()->isItInput();
+  else return FALSE;
+}
+int GalPort :: isItOutput() const {
+  if (alias()) return alias()->isItOutput();
+  else return FALSE;
+}
 
 // constructor: a GalMultiPort always has an alias
 GalMultiPort ::	GalMultiPort(GenericPort& a) { GenericPort::setAlias(a);}
 
 // get answer by asking the alias.
-int GalMultiPort :: isItInput() const { return alias()->isItInput();}
-int GalMultiPort :: isItOutput() const { return alias()->isItOutput();}
+int GalMultiPort :: isItInput() const { 
+  if (alias()) return alias()->isItInput();
+  else return FALSE;
+}
+int GalMultiPort :: isItOutput() const {
+  if (alias()) return alias()->isItOutput();
+  else return FALSE;
+}
 
 // create a new porthole in a GalMultiPort
 PortHole& GalMultiPort :: newPort() {
-	PortHole& newAliasPort = ((MultiPortHole*)alias())->newPort();
-	LOG_NEW; return installPort(*new GalPort(newAliasPort));
+  if (alias()) {
+    PortHole& newAliasPort = alias()->newPort();
+    LOG_NEW; return installPort(*new GalPort(newAliasPort));
+  } else {
+    Error::abortRun(*this,
+		    "Attempt to create a new GalPort when there is no alias");
+    LOG_NEW; return installPort(*new GalPort());
+  }
 }
 
 // return number of tokens waiting on Geodesic
@@ -374,7 +397,7 @@ void MultiPortHole :: initialize() {}
 // MPH constructor
 // 3/2/94 changed to add initDelayValues
 MultiPortHole :: MultiPortHole() : peerMPH(0), numDelaysBus(0),
-                                   initDelayValuesBus(0)  {}
+                                   initDelayValuesBus(0) {}
 
 // MPH destructor
 
@@ -419,6 +442,20 @@ const DataType Mark = "MARK";
 //    same type
 // 4) Handle wormhole boundary conditions, where far() doesn't quite
 //    mean the same thing.
+//
+// On any given net, the type must be the same.  In addition, types
+// are constrained to be the same for all portholes of a multiporthole,
+// and they are constrained to be the same in portholes tied together by
+// the inheritTypeFrom method.  The way typing is implemented is that
+// a plasma of a particular type is associated with each output porthole.
+// That porthole requests a particle from the plasma whenever the star
+// is producing output. The plasma supplies a particle of the appropriate
+// type.
+//
+// This mechanism has a serious disadvantage.  Since multiportholes must
+// have the same type throughout, type conflicts occur often where intuition
+// would indicate that they shouldn't.  Perhaps we should remove this
+// constraint on multiportholes if they are anytype.
 //
 // In some cases the type is really undefined.  Consider this universe
 // (using interpreter syntax)
@@ -515,7 +552,14 @@ PortHole :: setResolvedType (DataType useType) {
 // Function to get plasma type for a MultiPortHole.
 DataType
 MultiPortHole :: setResolvedType (DataType useType) {
-	return typePort() ? typePort()->setResolvedType(useType) : 0;
+  if (myResolvedType == Mark) return 0;
+  if (myResolvedType == 0 && typePort()) {
+    myResolvedType = Mark;
+    myResolvedType = typePort()->setResolvedType(useType);
+    return myResolvedType;
+  } else {
+    return 0;
+  }
 }
 
 // by default, use the global Plasma appropriate to my resolved type.
@@ -652,9 +696,11 @@ PortHole& MultiPortHole :: newPort() {
 
 PortHole& MultiPortHole :: newConnection() {
 	// first resolve aliases.
-	MultiPortHole& real = realPort();
+	GenericPort& real = realPort();
+	if (!real.isItMulti()) return (PortHole&)real;
+	MultiPortHole& realmph = (MultiPortHole&)real;
 	// find an unconnected porthole in the real port
-	MPHIter next(real);
+	MPHIter next(realmph);
 	PortHole* p;
 	while ((p = next++) != 0) {
 		// work right even for GalMultiPortHole
