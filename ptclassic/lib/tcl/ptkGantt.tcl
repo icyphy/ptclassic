@@ -133,8 +133,10 @@ proc ptkGantt_SaveChart { chart } {
     global PTOLEMY
 
     # create instance of the FileBrowser class
-    set filename [DialogWindow::newModal FileBrowser [format "%s%s" . [string \
-	    trimleft $chart .gantt_]] -text "Save As File:"]
+    set filename [::tycho::queryfilename "Save As File:" \
+            [string trimleft $chart .gantt_]]
+
+    puts "ptkGantt_SaveChart: $filename"
     if {$filename == {NoName}} {
 	error {Cannot use name NoName.}
     }
@@ -406,7 +408,7 @@ proc ptkGantt_DrawProc { universe num_procs period proc star_name start fin } {
         # Initialize the chart data. This is updated each time a new star
 	# is added to the chart.
 	#
-	foreach p [interval 1 $num_procs] {
+	foreach p [_ptkGantt_interval 1 $num_procs] {
 	    set ptkGantt_Data($chart.$p) {}
 	}
 
@@ -458,13 +460,13 @@ proc ptkGantt_DrawProcLabels {chart} {
 
     set base [expr [winfo y $chart.canvas] - [winfo y $chart.proclabel]]
 
-    set layoutPositions [spread $ptkGantt_Layout($chart.numprocs) \
+    set layoutPositions [::tycho::spread $ptkGantt_Layout($chart.numprocs) \
 	    [expr $base + $ptkGantt_Layout($chart.graphTop) ]\
 	    [expr $base + $ptkGantt_Layout($chart.graphBottom) ]]
 
 #	    -indented
 
-    foreach* location $layoutPositions -counter n {
+    _ptkGantt_foreach* location $layoutPositions -counter n {
 	$chart.proclabel create text \
 		[expr   [winfo width $chart.proclabel] / 2] \
 		[expr   $location - 8] \
@@ -529,9 +531,9 @@ proc ptkGantt_UpdateHighlights { chart args } {
     set update off
 
     foreach star $candidates {
-	if { [lmember [$chart.canvas gettags $star] "box"] } {
+	if { [::tycho::lmember [$chart.canvas gettags $star] "box"] } {
 	    lappend starlist $star
-	    if { ! [lmember $previous $star] } {
+	    if { ! [::tycho::lmember $previous $star] } {
 		set update on
 	    }
 	}
@@ -599,12 +601,12 @@ proc ptkGantt_RedrawLabels {chart stars} {
     $chart.proclabel delete star
 
     set base [expr [winfo y $chart.canvas] - [winfo y $chart.proclabel]]
-    set layoutPositions [spread $ptkGantt_Layout($chart.numprocs) \
+    set layoutPositions [::tycho::spread $ptkGantt_Layout($chart.numprocs) \
 	    [expr $base + $ptkGantt_Layout($chart.graphTop) ]\
 	    [expr $base + $ptkGantt_Layout($chart.graphBottom) ] ]
 #	    -indented R
     foreach s $stars {
-	assign star proc $s
+	_ptkGantt_assign star proc $s
 
 	set location [lindex $layoutPositions [expr $proc-1]]
 	$chart.proclabel create text \
@@ -637,7 +639,7 @@ proc ptkGantt_MoveMarker { chart x } {
     # Calculate the corresponding time, and adjust the canvas
     # position to place it halfway in a time unit.
     #
-    set t [mapRange $leftEdge $rightEdge [list $x] 0 $period]
+    set t [::tycho::mapRange $leftEdge $rightEdge [list $x] 0 $period]
     set t [expr int($t)]
 
     if { $t < 0 } {
@@ -646,7 +648,8 @@ proc ptkGantt_MoveMarker { chart x } {
 	set t [expr $period - 1]
     }
 
-    set x [mapRange 0 $period [list [expr $t+0.5]] $leftEdge $rightEdge]
+    set x [::tycho::mapRange 0 $period \
+            [list [expr $t+0.5]] $leftEdge $rightEdge]
 
     #
     # Update the cursor position display
@@ -692,7 +695,8 @@ proc ptkGantt_UpdateMarker { chart t } {
 	set t [expr $period - 1]
     }
 
-    set x [mapRange 0 $period [list [expr $t+0.5]] $leftEdge $rightEdge]
+    set x [::tycho::mapRange 0 $period \
+            [list [expr $t+0.5]] $leftEdge $rightEdge]
 
     #
     # Move the marker
@@ -897,12 +901,13 @@ proc ptkGantt_UpdateParms {chart canvasWidth canvasHeight period numprocs zoomFa
     set scrollWidth  [expr $rightEdge  + $rightPad]
 
     set labelWidth [gantt_measureLabel $chart.canvas $period]
-    set increment  [axisIncrement 0 $period $virtualWidth $labelWidth 10]
+    set increment  [::tycho::axisIncrement 0 $period $virtualWidth $labelWidth 10]
     if { $increment < 1 } {
 	set increment 1
     }
-    set axisValues    [rangeValues 0 $period $increment]
-    set axisLocations [mapRange    0 $period $axisValues $leftEdge $rightEdge]
+    set axisValues    [::tycho::rangeValues 0 $period $increment]
+    set axisLocations [::tycho::mapRange 0 $period $axisValues \
+            $leftEdge $rightEdge]
 
     set rulerBase   [winfo pixels $chart.canvas $ptkGantt_Parms(padtop)c]
     set tickLength  [winfo pixels $chart.canvas $ptkGantt_Parms(tickLength)c]
@@ -914,8 +919,8 @@ proc ptkGantt_UpdateParms {chart canvasWidth canvasHeight period numprocs zoomFa
 	    - [winfo pixels $chart.canvas $ptkGantt_Parms(padbottom)c]]
     set graphHeight [expr $graphBottom - $graphTop]
 
-    set procLocations [mapRange 0 $numprocs \
-	    [interval 0 $numprocs] $graphTop $graphBottom]
+    set procLocations [::tycho::mapRange 0 $numprocs \
+	    [_ptkGantt_interval 0 $numprocs] $graphTop $graphBottom]
 
 
     set ptkGantt_Layout($chart.period)        $period
@@ -976,7 +981,7 @@ proc ptkGantt_DrawRuler {chart} {
     set axisValues    $ptkGantt_Layout($chart.axisValues)
     set axisLocations $ptkGantt_Layout($chart.axisLocations)
 
-    foreach* i $axisValues x $axisLocations {
+    _ptkGantt_foreach* i $axisValues x $axisLocations {
 	$chart.canvas create line \
 		$x [expr $rulerBase-$tickLength] \
 		$x $rulerBase \
@@ -1029,7 +1034,7 @@ proc ptkGantt_UpdateChart {chart} {
     global ptkGantt_Data ptkGantt_Layout
 
     set numprocs $ptkGantt_Layout($chart.numprocs)
-    foreach i [interval 1 $numprocs] {
+    foreach i [_ptkGantt_interval 1 $numprocs] {
 	set stars $ptkGantt_Data($chart.$i)
 	foreach s $stars {
 	    eval ptkGantt_MoveBox $chart $i $s
@@ -1059,12 +1064,13 @@ proc ptkGantt_MoveBox {chart proc star_name start fin box} {
 
     set leftEdge  $ptkGantt_Layout($chart.leftEdge)
     set rightEdge $ptkGantt_Layout($chart.rightEdge)
-    assign x0 x1 \
-	    [mapRange 0 $period [list $start $fin] $leftEdge $rightEdge]
+    _ptkGantt_assign x0 x1 \
+	    [::tycho::mapRange 0 $period \
+            [list $start $fin] $leftEdge $rightEdge]
 
 
     set procLocations $ptkGantt_Layout($chart.procLocations)
-    assign y0 y1 \
+    _ptkGantt_assign y0 y1 \
 	    [lrange $procLocations [expr $proc-1] $proc]
 
     $chart.canvas coords $box $x0 $y0 $x1 $y1
@@ -1093,26 +1099,25 @@ proc ptkGantt_MoveBox {chart proc star_name start fin box} {
 
 proc gantt_measureLabel {canvas value} {
     set t [$canvas create text 0 0 -text [format {%.0f} $value]]
-    set width [rectWidth [$canvas bbox $t]]
+    set width [_ptkGantt_rectWidth [$canvas bbox $t]]
     $canvas delete $t
 
     return $width
 }
-# 
-# #
-# # rectWidth: return the width of a rectangle
-# #
-proc rectWidth {rect} {
+
+#
+# _ptkGantt_rectWidth: return the width of a rectangle
+#
+proc _ptkGantt_rectWidth {rect} {
      return [expr [x1 $rect] - [x0 $rect]]
 }
-# 
-# 
-# 
-# #
-# # x, y
-# #
-# # Extract coordinates from a 2-list
-# #
+
+
+
+#
+# x, y
+#
+# Extract coordinates from a 2-list
 proc x {xy} {
     return [lindex $xy 0]
 }
@@ -1155,101 +1160,101 @@ proc y1 {xy} {
 #
 # Given a number, round up or down to the nearest power of two.
 #
-proc roundUpTwo {x} {
-    set exp [expr ceil (log($x)/log(2))]
-    set x   [expr pow(2,$exp)]
-}
+#proc roundUpTwo {x} {
+#    set exp [expr ceil (log($x)/log(2))]
+#    set x   [expr pow(2,$exp)]
+#}
 
-proc roundDownTwo {x} {
-    set exp [expr floor (log($x)/log(2))]
-    set x   [expr pow(2,$exp)]
-}
+#proc roundDownTwo {x} {
+#    set exp [expr floor (log($x)/log(2))]
+#    set x   [expr pow(2,$exp)]
+#}
 
 
 
 # Given a number, round up to the nearest power of ten
 # times 1, 2, or 5.
 #
-proc axisRoundUp {x} {
-    set exp [expr floor (log10($x))]
-    set x [expr $x * pow(10, -$exp)]
-
-    if {$x > 5.0} {
-	set x 10.0
-    } elseif {$x > 2.0} {
-	set x 5.0
-    } elseif {$x > 1.0 } {
-	set x 2.0
-    }
-
-    set x [expr $x * pow(10,$exp)]
-    return $x
-}
+#proc axisRoundUp {x} {
+#    set exp [expr floor (log10($x))]
+#    set x [expr $x * pow(10, -$exp)]
+#
+#    if {$x > 5.0} {
+#	set x 10.0
+#    } elseif {$x > 2.0} {
+#	set x 5.0
+#    } elseif {$x > 1.0 } {
+#	set x 2.0
+#    }
+#
+#    set x [expr $x * pow(10,$exp)]
+#    return $x
+#}
 
  
 #
 # Given a range, space, field width, and padding, figure out how
 # the field increment so they will fit.
 #
-proc axisIncrement {low high space width padding} {
-    set maxnum   [expr $space / ($width+$padding)]
-    set estimate [expr (double($high) - $low) / ($maxnum)]
-    set estimate [axisRoundUp $estimate]
-
-    return $estimate
-}
+#proc axisIncrement {low high space width padding} {
+#    set maxnum   [expr $space / ($width+$padding)]
+#    set estimate [expr (double($high) - $low) / ($maxnum)]
+#    set estimate [::tycho::axisRoundUp $estimate]
+#
+#    return $estimate
+#}
 
 # 
 #
 # Given a range and an increment, return the list of numbers
 # within that range and on that increment.
 #
-proc rangeValues {low high inc} {
-set result {}
-set n      1
-
-set val [roundUpTo $low $inc]
-while {$val <= $high} {
-lappend result $val
-set val [expr $val + $n * $inc]
-}
-
-return $result
-}
+#proc rangeValues {low high inc} {
+#    set result {}
+#    set n      1
+#
+#    set val [roundUpTo $low $inc]
+#    while {$val <= $high} {
+#	lappend result $val
+#	set val [expr $val + $n * $inc]
+#    }
+#
+#    return $result
+#}
 
 
 #
 # Given two ranges and a list of numbers in the first range,
 # produce the mapping of that list to the second range.
 #
-proc mapRange {low high values lowdash highdash} {
-set result {}
-
-set scale [expr (double($highdash) - $lowdash) / ($high - $low)]
-foreach n $values {
-lappend result [expr $lowdash + ($n-$low) * $scale]
-}
-
-return $result
-}
+#proc mapRange {low high values lowdash highdash} {
+#    set result {}
+#
+#    set scale [expr (double($highdash) - $lowdash) / ($high - $low)]
+#foreach n $values {
+#lappend result [expr $lowdash + ($n-$low) * $scale]
+#}
+#
+#return $result
+#}
 
 
 #
 # Given two numbers, round the first up or down to the
 # nearest multiple of the second.
 #
-proc roundDownTo {x i} {
-return [expr $i * (floor($x/$i))]
-}
+#proc roundDownTo {x i} {
+#    return [expr $i * (floor($x/$i))]
+#}
 
-proc roundUpTo {x i} {
-return [expr $i * (ceil($x/$i))]
-}
+#proc roundUpTo {x i} {
+#    return [expr $i * (ceil($x/$i))]
+#}
 # 
 # 
 # 
 #
-# foreach*
+# _ptkGantt_foreach*
 #
 # Multi-argument version of foreach. Stops when any one of the
 # argument lists runs out of elements.
@@ -1275,7 +1280,7 @@ return [expr $i * (ceil($x/$i))]
 # This is very inefficient, of course, and should be one of the
 # first things recoded in C when things need speeding up.
 #
-proc foreach* {args} {
+proc _ptkGantt_foreach* {args} {
     set c 0
 
     set v [readopt counter args]
@@ -1287,12 +1292,12 @@ proc foreach* {args} {
 	upvar   [lindex $args 0] i$c
 	set l$c [lindex $args 1]
 
-	set args [ldrop $args 2]
+	set args [_ptkGantt_ldrop $args 2]
 	incr c
     }
 
     if {[llength $args] != 1} {
-	ptkMessage "error: wrong number of args to foreach*"
+	ptkMessage "error: wrong number of args to _ptkGantt_foreach*"
 	return
     }
 
@@ -1308,8 +1313,8 @@ proc foreach* {args} {
 	uplevel $body
 
 	for {set i 0} {$i < $c} {incr i} {
-	    set l$i [ltail [set l$i]]
-	    if {[lnull [set l$i]]} {
+	    set l$i [_ptkGantt_ltail [set l$i]]
+	    if {[_ptkGantt_lnull [set l$i]]} {
 		set done 1
 	    }
 	}
@@ -1400,18 +1405,18 @@ return 0
 
 
 #
-# assign
+# _ptkGantt_assign
 #
 # Assign elements of a list to multiple variables. Doesn't
 # care if the list is longer than the number of variables, ot
 # the list is too short. (Should probably at least put an assertion
 # in here...)
 #
-proc assign {args} {
-foreach* var [linit $args] val [llast $args] {
-upvar $var v
-set v $val
-}
+proc _ptkGantt_assign {args} {
+    _ptkGantt_foreach* var [_ptkGantt_linit $args] val [_ptkGantt_llast $args] {
+	upvar $var v
+	set v $val
+    }
 }
 
 
@@ -1421,23 +1426,19 @@ set v $val
 # Utility functions on lists. See also syntax.tcl.
 #
 
-proc lhead {list} {
-return [lindex $list 0]
-}
-
 #proc lhead {list} {
-#    return [lindex $list 0
+#    return [lindex $list 0]
 #}
 
-proc ltail {list} {
-return [lreplace $list 0 0]
+proc _ptkGantt_ltail {list} {
+    return [lreplace $list 0 0]
 }
 
-proc linit {list} {
-return [ltake $list [expr [llength $list] - 1]]
+proc _ptkGantt_linit {list} {
+    return [_ptkGantt_ltake $list [expr [llength $list] - 1]]
 }
 
-proc llast {list} {
+proc _ptkGantt_llast {list} {
 return [lindex $list [expr [llength $list] - 1]]
 }
 
@@ -1450,7 +1451,7 @@ return [lindex $list [expr [llength $list] - 1]]
 # The second case checks for the list being null but indicated
 # by empty braces. I'm confused as to why I need this...
 #
-proc lnull {list} {
+proc _ptkGantt_lnull {list} {
 return [expr (! [string match "?*" $list]) \
 || [string match "{}" $list]]
 }
@@ -1459,40 +1460,40 @@ return [expr (! [string match "?*" $list]) \
 #
 # Take or drop list elements
 #
-proc ltake {list n} {
+proc _ptkGantt_ltake {list n} {
 return [lrange $list 0 [expr $n - 1]]
 }
 
-proc ldrop {list n} {
+proc _ptkGantt_ldrop {list n} {
 return [lreplace $list 0 [expr $n-1]]
 }
 
-proc ldropUntil {list item} {
-set index [lsearch -exact $list $item]
-if { $index == -1 } {
-return {}
-} else {
-return [ldrop $list $index]
-}
-}
+#proc ldropUntil {list item} {
+#    set index [lsearch -exact $list $item]
+#    if { $index == -1 } {
+#	return {}
+#    } else {
+#	return [_ptkGantt_ldrop $list $index]
+#    }
+#}
 
 
 #
 # Make a list containing n copies of the specified item
 #
-proc lcopy {n item} {
-set result {}
-loop $n {
-lappend result $item
-}
-return $result
-}
+#proc lcopy {n item} {
+#    set result {}
+#    loop $n {
+#	lappend result $item
+#    }
+#    return $result
+#}
 
 
 #
 # Return list of n integers in the range x to y
 # #
-proc interval {x y} {
+proc _ptkGantt_interval {x y} {
      set result {}
  
      while { $x <= $y } {
@@ -1508,23 +1509,23 @@ proc interval {x y} {
 #
 # Test whether an element is in a list
 #
-proc lmember {list item} {
-return [expr [lsearch -exact $list $item] != -1]
-}
+#proc lmember {list item} {
+#    return [expr [lsearch -exact $list $item] != -1]
+#}
 
 
 #
 # Remove an item from a list
 #
-proc ldelete {list item} {
-    set i [lsearch -exact $list $item]
-
-    if { $i != -1 } {
-        return [lreplace $list $i $i]
-    }
-
-    return $list
-}
+#proc ldelete {list item} {
+#    set i [lsearch -exact $list $item]
+#
+#    if { $i != -1 } {
+#        return [lreplace $list $i $i]
+#    }
+#
+#    return $list
+#}
 
 
 #
@@ -1534,20 +1535,20 @@ proc ldelete {list item} {
 # This is useful for spacing graphical elements "evenly" along
 # a given distance.
 #
-proc spread {n x y} {
-    set result {}
-    set i      0
-    set delta  [expr (double($y) - $x) / $n]
-
-    set x [expr $x + $delta / 2]
-    while { $i < $n } {
-        lappend result [expr $x + $i * $delta]
-
-        incr i +1
-    }
-
-    return $result
-}
+#proc spread {n x y} {
+#    set result {}
+#    set i      0
+#    set delta  [expr (double($y) - $x) / $n]
+#
+#    set x [expr $x + $delta / 2]
+#    while { $i < $n } {
+#        lappend result [expr $x + $i * $delta]
+#
+#        incr i +1
+#    }
+#
+#    return $result
+#}
 
 
 
