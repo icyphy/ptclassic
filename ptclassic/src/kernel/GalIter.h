@@ -33,7 +33,11 @@ protected:
 	void pop();
 };
 
-class GalStarIter : private GalAllBlockIter {
+// g++ 1.39.1 has a bug that prevents me from saying
+// class GalStarIter : private GalAllBlockIter
+// (it worked with 1.37.1 and is legal according to the ARM)
+
+class GalStarIter : public GalAllBlockIter {
 public:
 	GalStarIter(const Galaxy& g);
 	Star* next();
