@@ -1,5 +1,5 @@
 /* Version Identification:
- * @(#)attache.h	1.2	10/26/94
+ * $Id$
  */
 /* Copyright (c) 1990-1993 The Regents of the University of California.
  * All rights reserved.
@@ -28,9 +28,10 @@
 #define PROCESS_H
 
 #include "ansi.h"
-extern process	ARGS((char *pat_file, char *tech_spec, char *root_dir,
-		      char *out_tech, char *out_view, char *out_disp, 
-		      int chroma));
+extern void process	ARGS((char *pat_file, char *tech_spec,
+			      char *root_dir, char *out_tech,
+			      char *out_view, char *out_disp,  
+			      int chroma));
 
 
 #endif
