@@ -68,11 +68,11 @@ public:
 	adjustSampleRates();
     }
 };
-	
+
 CreateSDFStar::CreateSDFStar(const char* name,const char* starclass, const
 			 char* desc) : CGCTarget(name,starclass,desc) {
-    addStream("starPorts",&starPorts);
-    addStream("starSetup",&starSetup);
+    addStream("starPorts", &starPorts);
+    addStream("starSetup", &starSetup);
 }
 
 void CreateSDFStar::setup () {
@@ -153,7 +153,7 @@ int CreateSDFStar::compileCode() {
     StringList command;
     command << "cd " << (const char*) destDirectory << "; "
 	    << "make -f " << (const char*) filePrefix << ".mk all";
-    if(systemCall(command,"Compilation error")) return FALSE;
+    if (systemCall(command,"Compilation error")) return FALSE;
     return TRUE;
 }
 
@@ -178,7 +178,7 @@ void CreateSDFStar::frameCode() {
 	 <<"}\n\tdomain{SDF}\n\tdesc{\n"
 	 << headerComment() <<"\t}\n\tlocation{ "<<(const char*)destDirectory 
 	 << "}\nhinclude {\"Error.h\",\"SimControl.h\"}\n" 
-	 <<starPorts<< "\n\theader{\nextern \"C\" {\n" << include 
+	 << starPorts << "\n\theader{\nextern \"C\" {\n" << include 
 	 << "}\n" << globalDecls << procedures << "\t}\nprivate{\n"
 	 << mainDecls << "\t}\n\tbegin{\n" << commInit << mainInit 
 	 << "\t}\n\tsetup{\n" << starSetup
@@ -191,23 +191,19 @@ void CreateSDFStar::frameCode() {
 
 void CreateSDFStar::writeCode() {
     writeFile(myCode, ".pl", displayFlag);
+    CGCTarget::processDependentFiles();
 
     // Construct makefile
+    StringList compileArgs = getCompileOptions(TRUE);
     StringList makefile;
     makefile << headerComment("# ") << "# To make the star, do: " 
 	     << "make -f " << (const char*) filePrefix << ".mk all\n"
 	     << "ROOT = " << getenv("PTOLEMY") << "\n"
-	     << "WORM_INCL = " << (const char *) compileOptions << " ";
-    if (compileOptionsStream.numPieces()) {
-	char* expandedCompileOptionsStream =
-	    expandPathName(compileOptionsStream);
-	makefile << expandedCompileOptionsStream;
-	delete [] expandedCompileOptionsStream;
-    }
-    makefile << starIncludeDirs << "\n" 
-	     << "all: " << (const char*) filePrefix << ".o\n"
+	     << "WORM_INCL = " << starIncludeDirs << " "
+			       << compileArgs << "\n\n";
+    makefile << "all: " << (const char*) filePrefix << ".o\n"
 	     << "include $(ROOT)/mk/cgworm.mk\n\n";
-    writeFile(makefile,".mk");
+    writeFile(makefile, ".mk");
 }
 
 void CreateSDFStar::initCodeStrings() {
@@ -240,17 +236,13 @@ static CreateSDFStar targ("CreateSDFStar","CGCStar","Wormhole target for CGC.");
 static KnownTarget entry(targ,"CreateSDFStar");
 
 int CreateSDFStar::linkFiles () {
+    StringList linkArgs = getLinkOptions(TRUE);
     StringList dir, linkCmd;
 
     char* expandedDirName = expandPathName((const char*) destDirectory); 
     dir << expandedDirName;
     linkCmd << dir << "/" << (const char*) filePrefix << ".o " 
-	    << localLinkOptionsStream << " " << starLinkOptions << " ";
-    if (linkOptionsStream.numPieces()) {
-	char* expandedLinkOptionsStream = expandPathName(linkOptionsStream);
-	linkCmd << expandedLinkOptionsStream;
-	delete [] expandedLinkOptionsStream;
-    }
+	    << starLinkOptions << " " << linkArgs << " ";
 
     const char* argv[2];
     const char* multiLink = "multilink";

@@ -33,66 +33,67 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 *******************************************************************/
 
-/* This target is used primarily by the unixMulti_C target.  The
- * problem is that unixMulti_C uses inet_addr().  Under Solaris2.x
- * inet_addr() is in libsocket, and libsocket requires libnsl.  So to
- * compile unixMulti_C target files, we need to add -lsocket -lnsl to
- * the link line.
- *
- * unixMulti_C does uses default_C to actually generate code, and
- * unixMulti_C does not pass args down to default_C, in part because
- * we have no way of know what architecture the compiles are actually
- * happening on.  A good test of unixMulti_C would be to compile on a
- * SunOS machine, a DEC Alpha and a Solaris machine.
- * 
- * makefile_C generates a small makefile that is rcp'd over to the
- * remote machine.  The generated makefile uses
- * $PTOLEMY/lib/cgc/makefile_C.mk as a starting point, and then
- * appends lines to it.  The user may modify makefile_C.mk and add
- * site dependent rules and variables there.  If the user wants to
- * have site dependent include files on the remote machines, then they
- * could add 'include $(ROOT)/mk/mysite.mk' to makefile_C.mk, and that
- * file would be included on the remote machines at compile time.
- * 
- * One drawback of appending to makefile_C.mk is that the first rule
- * is what gets run if you run 'make' without a rule or target name.
- * However, we rsh to the remote machine and do a 'make all', so the
- * user can modify makefile_C.mk add add other rules to it.
+/*
+This target is used primarily by the unixMulti_C target.  The
+problem is that unixMulti_C uses inet_addr().  Under Solaris2.x
+inet_addr() is in libsocket, and libsocket requires libnsl.  So to
+compile unixMulti_C target files, we need to add -lsocket -lnsl to
+the link line.
 
- * The generated makefile is named after the universe.  If the
- * universe is called bigBang, then the makefile will be called
- * bigBang.mk.  We name the generated makefiles so that more than one
- * makefile can exist in the users' directory.
- * 
- * On the remote machine, we assume:
- *	1) $PTOLEMY and $PTARCH are set on the remote machine when rshing
- *	2) $PTOLEMY/mk/config-$PTARCH.mk and any makefile files included by
- *	that file are present.
- *	3) a make binary is present. (not necessarily GNU make)
- *
- * If the remote machine does not fulfill these constraints, then the
- * user should use default_C.
- *
- * makefile_C does not assume GNU make, so in the default situation
- * we could not include mk/common.mk.  The reason not to assume GNU make
- * is that we are not sure what the user's path is like when they log
- * in.  However, makefile_C has a target parameter 'skeletonMakefile' that
- * allows the user to specify an arbitrary makefile that could or
- * could need gmake.  If the 'skeletonMakefile' target parameter is empty,
- * then we use makefile_C.mk
- *
- * The target parameter 'appendToMakefile' controls whether we append rules
- * to the makefile or just copy it over to the remote machine.  In the
- * default situation, appendToMakefile is true and we append our rules
- * to makefile_C.mk
- *
- * If the parent target parameter 'compileOptions' is set, then we 
- * process any environment variables in that string, and then add it to
- * the end of the generated makefile as part of 'OTHERCFLAGS='.  In a similar
- * fashion, the parent target parameter 'linkOptions' ends up as part
- * of the right hand side of 'LOADLIBES='
- * 
- */
+unixMulti_C does uses default_C to actually generate code, and
+unixMulti_C does not pass args down to default_C, in part because
+we have no way of know what architecture the compiles are actually
+happening on.  A good test of unixMulti_C would be to compile on a
+SunOS machine, a DEC Alpha and a Solaris machine.
+
+makefile_C generates a small makefile that is rcp'd over to the
+remote machine.  The generated makefile uses
+$PTOLEMY/lib/cgc/makefile_C.mk as a starting point, and then
+appends lines to it.  The user may modify makefile_C.mk and add
+site dependent rules and variables there.  If the user wants to
+have site dependent include files on the remote machines, then they
+could add 'include $(ROOT)/mk/mysite.mk' to makefile_C.mk, and that
+file would be included on the remote machines at compile time.
+
+One drawback of appending to makefile_C.mk is that the first rule
+is what gets run if you run 'make' without a rule or target name.
+However, we rsh to the remote machine and do a 'make all', so the
+user can modify makefile_C.mk add add other rules to it.
+
+The generated makefile is named after the universe.  If the
+universe is called bigBang, then the makefile will be called
+bigBang.mk.  We name the generated makefiles so that more than one
+makefile can exist in the users' directory.
+
+On the remote machine, we assume:
+1) $PTOLEMY and $PTARCH are set on the remote machine when rshing
+2) $PTOLEMY/mk/config-$PTARCH.mk and any makefile files included by
+that file are present.
+3) a make binary is present. (not necessarily GNU make)
+
+If the remote machine does not fulfill these constraints, then the
+user should use default_C.
+
+makefile_C does not assume GNU make, so in the default situation
+we could not include mk/common.mk.  The reason not to assume GNU make
+is that we are not sure what the user's path is like when they log
+in.  However, makefile_C has a target parameter 'skeletonMakefile' that
+allows the user to specify an arbitrary makefile that could or
+could need gmake.  If the 'skeletonMakefile' target parameter is empty,
+then we use makefile_C.mk
+
+The target parameter 'appendToMakefile' controls whether we append rules
+to the makefile or just copy it over to the remote machine.  In the
+default situation, appendToMakefile is true and we append our rules
+to makefile_C.mk
+
+If the any compiler options are specified, then we process any environment
+variables in the options, and then add the options to the end of the
+generated makefile as part of the 'OTHERCFLAGS=' definition.  In a similar
+fashion, we process any linker options assign them to the 'LOADLIBES='
+definition in the makefile.
+*/
+
 #ifdef __GNUG__
 #pragma implementation
 #endif
@@ -219,7 +220,7 @@ void CGCMakefileTarget :: writeCode() {
     pt_ifstream input;
     char inBuf[BUFSIZ];
 
-    // Generate the C code.
+    // Generate the C code and process dependent files
     CGCTarget::writeCode();
 
     // Copy the makefile
@@ -228,23 +229,12 @@ void CGCMakefileTarget :: writeCode() {
     makefileName << filePrefix << ".mk";
 
     if ( appendToMakefile ) {
-      // We have two streams, compileOptionsStream and
-      // linkOptionsStream.  For each stream, we check to see if
-      // CreateSDFStar wants to add to the stream.  If it does, then
-      // we print out the appropriate lhs, either 'OTHERCFLAGS=' or
-      // 'LOADLIBES=', and then we print out the data that
-      // CreateSDFStar has added to the stream.
-      //
-      // The Makefile_C target has two states, compileOptions and
-      // loadOptions that then get printed out if necessary.  Before
-      // printing these, we need to optionally print the appropriate
-      // makefile lhs.
+      // If there are any compiler options defined, then we print the
+      // make defintion 'OTHERCFLAGS=' followed by the compiler options.
+      // If there are any linker options defined, then we print the
+      // make defintion 'LOADLIBES=' followed by the linker options.
 
-      int onhostflag = onHostMachine(targetHost);
-
-      // FIXME: is there a better way to read in a file and copy it to
-      // a stream?
-
+      // FIXME: is there a better way to read a file and copy it to a stream?
       input.open(skeletonMakefile);
       while ( input.good() && !input.eof() ) {
 	  input.getline(inBuf, BUFSIZ);
@@ -252,26 +242,17 @@ void CGCMakefileTarget :: writeCode() {
       }
       input.close();
 
-      // FIXME: Code duplication from CreateSDFStar
-      if (compileOptionsStream.numPieces()) {
-	  char* expandedCompileOptionsStream =
-	      expandMakefileVariables(compileOptionsStream);
-	  generatedMakefile << "OTHERCFLAGS= ";
-	  generatedMakefile << expandedCompileOptionsStream << ' ';
-	  delete [] expandedCompileOptionsStream;
-      }
+      // Get the compiler arguments but do not expand environment variables
+      StringList compileArgs = getCompileOptions(FALSE);
 
-      // Now process the parent target compileOptions
-      if (! compileOptions.null() ) {
-	  char* expandedCompileOptions =
-	      expandMakefileVariables(compileOptions);
-				// If we have not printed OTHERCFLAGS yet,
-				// then do it now
-	  if (!compileOptionsStream.numPieces())
-	      generatedMakefile << "OTHERCFLAGS= ";
-	  generatedMakefile << expandedCompileOptions;
+      // Convert the compiler arguments to makefile form
+      if (compileArgs.length()) {
+	  char* expandedCompileOptions = expandMakefileVariables(compileArgs);
+	  generatedMakefile << "OTHERCFLAGS= ";
+	  generatedMakefile << expandedCompileOptions << ' ';
 	  delete [] expandedCompileOptions;
       }
+
       generatedMakefile << "\n";
 
       // The GNU make info page says:
@@ -279,29 +260,25 @@ void CGCMakefileTarget :: writeCode() {
       // called `ld') via the C compiler. The precise command used is
       // `$(CC) $(LDFLAGS) N.o $(LOADLIBES)'."
 
-      // FIXME: Code duplication from CreateSDFStar and CGCTarget::compileLine
-      if (linkOptionsStream.numPieces() ||
-		localLinkOptionsStream.numPieces() ||
-		! linkOptions.null()) {
-	  StringList allLinkOptions;
-	  allLinkOptions << (const char*) linkOptions << " "
-			 << linkOptionsStream << " ";
-	  if (onhostflag) allLinkOptions << localLinkOptionsStream << " ";
-	  char* expandedLinkOptionsStream =
-	      expandMakefileVariables(allLinkOptions);
+      // Get the linker arguments but do not expand environment variables
+      StringList linkArgs = getLinkOptions(FALSE);
+
+      // Convert the linker arguments to makefile form
+      if (linkArgs.length()) {
+	  char* expandedLinkOptions = expandMakefileVariables(linkArgs);
 	  generatedMakefile << "LOADLIBES= ";
-	  generatedMakefile << expandedLinkOptionsStream << ' ';
-	  delete [] expandedLinkOptionsStream;
-      }     
+	  generatedMakefile << expandedLinkOptions << ' ';
+	  delete [] expandedLinkOptions;
+      }
       generatedMakefile << "\n";
-      
+
       // Append rules to the end of the makefile
       generatedMakefile << "all: " << (const char *) filePrefix << "\n"
 			<< filePrefix << ": " << filePrefix << ".o\n";
       writeFile(generatedMakefile, ".mk");
       rcpWriteFile(targetHost, destDirectory, makefileName, generatedMakefile);
     } else {
-      // We are using a user provided makefile.  Just copy it over.
+      // We are using a makefile provided by the user.  Just copy it over.
       rcpCopyFile(targetHost, destDirectory, skeletonMakefile,
 		  1, makefileName); 
     }
@@ -318,6 +295,6 @@ int CGCMakefileTarget :: compileCode() {
 ISA_FUNC(CGCMakefileTarget,CGCTarget);
 
 static CGCMakefileTarget targ("Makefile_C","CGCStar",
-"A target for C code generation using Ptolemy makefiles");
+	"A target for C code generation using Ptolemy makefiles");
 
 static KnownTarget entry(targ,"Makefile_C");
