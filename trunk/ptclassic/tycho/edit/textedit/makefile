@@ -1,7 +1,7 @@
 # Makefile for Ptolemy Tycho system, editors/textedit directory.
 #
 # $Id$
-# Author: Christopher Hylands
+# Makefile author: Christopher Hylands
 #
 # Copyright (c) %Q% The Regents of the University of California.
 # All rights reserved.
@@ -67,9 +67,12 @@ ITCL_SRCS = \
 	EditSpiceText.itcl \
 	EditTcl.itcl \
 	EditTclText.itcl \
-	EditText.itcl \
 	EditVHDL.itcl \
-	EditVHDLText.itcl
+	EditVHDLText.itcl \
+	Matlab.itcl \
+	MatlabText.itcl \
+	Mathematica.itcl \
+	MathematicaText.itcl
 
 EXTRA_SRCS =		$(TCL_SRCS) $(ITCL_SRCS)
 
@@ -84,7 +87,7 @@ REALCLEAN_STUFF =			tclIndex
 # Include information on all stars and targets.
 include $(ROOT)/mk/stars.mk
 
-all install: tclIndex $(MISC_SRCS)
+all install: sources tclIndex $(MISC_SRCS)
 
 tclIndex: $(TCL_SRCS) $(ITCL_SRCS)
 	@echo "Updating tclIndex"
