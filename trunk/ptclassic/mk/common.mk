@@ -1,7 +1,9 @@
 # common included makefile for all directories in which a makefile is
 # built from a make.template file.
+#
 # Version identification:
 # $Id$
+#
 # Copyright (c) 1990-%Q% The Regents of the University of California.
 # All rights reserved.
 # 
@@ -52,38 +54,8 @@ whatToBuild:	all
 
 .SUFFIXES:	.o .cc .h .pl .chdl .is
 
-# Rule for compiling C++ files
-.cc.o:
-	$(CPLUSPLUS) $(CC_SHAREDFLAGS) $(GPPFLAGS) -I$(VPATH) $(INCL) -c $<
-
-# Rule for compiling with cc
-.c.o:
-	$(CC) $(C_SHAREDFLAGS) $(CFLAGS) $(C_INCL) -c $<
-
-# The optimizer in g++-2.7.2 has a bug that we workaround by turning
-# off the optimizer.  The problem is that when the optimizer is turned on, 
-# certain files end up needing  operator= or a copy constructor from 
-# a parent class.  Unfortunately, the parent class does not define what
-# is needed
-#
-# The following files use these two rules:
-#  de/tcltk/stars/make.template
-#  de/stars/make.template
-#  cg56/stars/make.template
-#  cp/stars/make.template (cp domain is present only on sun4)
-#  cp/infopad/stars/make.template (cp domain is present only on sun4)
-#  sdf/matlab/stars/make.template
-#
-# We include this rule in common.mk rather than config-g++.mk so that
-# we can use any architecture specific variables in the
-# UNOPTIMIZED_COMPILE_RULE.  Having this rule in config-g++.mk means
-# that we don't see architecture dependent variables.
-#
-UNOPTIMIZED_WARNING_MESSAGE = @echo "DANGER: gcc-2.7.2 optimizer workaround here, see $$PTOLEMY/mk/config-g++.mk"
-
-UNOPTIMIZED_COMPILE_RULE = 	$(CPLUSPLUS) $(CC_SHAREDFLAGS) $(WARNINGS) \
-					$(ARCHFLAGS) $(LOCALCCFLAGS) \
-					$(USERFLAGS) -I$(VPATH) $(INCL) -c 
+# Include rules for compiling C and C++ code, building libraries, etc.
+include $(ROOT)/mk/compilation.mk
 
 # Note that forcing the installation of ptlang might not be the best
 # thing to do, it would be best if 'make sources' did not touch the
@@ -198,66 +170,6 @@ STARDOCRULE=if [ ! -d `dirname $(STARDOCDIR)` ]; then \
 .chdl.cc: $(PEPP_IN_OBJ)
 	cd $(VPATH); $(PEPP) $<
 
-ifeq ($(strip $(LIB)),)
-LIB=dummylib
-endif
-
-# Rule for building a C++ library
-# We use a GNU make conditional here
-$(LIB):	$(OBJS)
-ifeq ($(USE_SHARED_LIBS),yes) 
-	rm -f $@
-	$(SHARED_LIBRARY_COMMAND) $@ $(OBJS) 
-	# HPUX wants shared libraries to be 555 for performance reasons
-	chmod 555 $@
-else
-	rm -f $@
-	$(AR) cq $@ $(OBJS)
-	$(RANLIB) $@
-endif
-
-ifeq ($(strip $(CLIB)),)
-CLIB=dummyclib
-endif
-
-# Rule for building a C library (no C++).  Used primarily by octtools
-# We use a GNU make conditional here
-$(CLIB):	$(OBJS)
-ifeq ($(USE_SHARED_LIBS),yes) 
-	rm -f $@
-	$(CSHARED_LIBRARY_COMMAND) $@ $(OBJS) 
-	# HPUX wants shared libraries to be 555 for performance reasons
-	chmod 555 $@
-else
-	rm -f $@
-	$(AR) cq $@ $(OBJS)
-	$(RANLIB) $@
-endif
-
-# Used to explicitly build non-shared libraries. For an example, see 
-# $PTOLEMY/src/domains/cgc/rtlib/make.template
-$(LIBNONSHARED): $(OBJS)
-	rm -f $@
-	$(AR) cq $@ $^
-	$(RANLIB) $@
-
-$(LIBDIR)/$(LIBNONSHARED):	$(LIBNONSHARED) $(EXP)
-	rm -f $@
-	ln $(LIBNONSHARED) $(LIBDIR)
-
-# AIX used EXP for export lists
-$(EXP): $(LIB)
-
-# Rule for installing a C++ library
-$(LIBDIR)/$(LIB):	$(LIB) $(EXP)
-		rm -f $@
-		ln $(LIB) $(LIBDIR)
-
-# Rule for installing a C library
-$(LIBDIR)/$(CLIB):	$(CLIB) $(EXP)
-		rm -f $@
-		ln $(CLIB) $(LIBDIR)
-
 # Rule for making a star list for inclusion by make
 $(VPATH)/$(STAR_MK).mk:	make.template
 		cd $(VPATH); rm -f $(STAR_MK).mk
@@ -282,66 +194,6 @@ stars_install:	all $(LIBDIR)/$(LIB) $(LIBDIR)/$(STAR_MK).o
 $(LIBDIR)/$(STAR_MK).o:	$(STAR_MK).o
 		rm -f $@
 		ln $(STAR_MK).o $(LIBDIR)
-
-# "make sources" will do SCCS get on anything where SCCS file is newer.
-# Don't place $(STARDOCDIR) here, or the STARDOCDIR directory will be made
-# in non-star related directories.
-sources:	$(PTLANG_IN_OBJ) $(EXTRA_SRCS) $(SRCS) $(HDRS) make.template 
-CRUD=*.o *.so *.sl core *~ *.bak ,* LOG* $(KRUFT) 
-clean:
-	rm -f $(CRUD)
-
-# Make things "even cleaner".  Removes libraries, generated .cc and .h
-# files from preprocessor, etc.
-realclean:
-	rm -f $(CRUD) $(LIB) $(CLIB) $(PL_SRCS:.pl=.h) $(PL_SRCS:.pl=.cc) $(REALCLEAN_STUFF)
-
-DEPEND_INCL=$(INCL) $(C_INCL) $(SYSTEM_DEPEND_INCL)
-
-depend:		$(SRCS) $(HDRS)
-# We use a GNU make conditional here
-ifeq ($(USE_MAKEDEPEND),yes) 
-		# HPPA CC and SunSoft CC do not understand the -M option
-		# so we use makedepend
-		#
-		# Note that makedepend does not produce dependencies
-		# as GNU g++ -M, so you will probably want to run
-		# 'make depend' from an PTARCH that uses
-		# g++ -M instead of makedepend.  One way to do this
-		# would be to do (Assuming you have g++ installed):
-		# 	cd $PTOLEMY; make PTARCH=sol2 depend
-		cd $(VPATH); $(DEPEND) $(DEPEND_INCL) $(SRCS)
-else
-		cd $(VPATH); \
-                $(DEPEND) $(DEPEND_INCL) $(SRCS)|\
-                        cat make.template - > makefile.n;\
-                mv -f makefile.n makefile
-endif
-
-makefile:	make.template $(MDEPS)
-		cd $(VPATH); rm -f makefile; cp make.template makefile; \
-		$(MAKE) -f make.template sources depend
-		if [ ! -f makefile ]; then ln -s $(VPATH)/makefile makefile; fi
-		@echo makefile remade -- you must rerun make.
-		exit 1
-
-makefiles:	makefile
-
-# Convert relative VPATH to an absolute path.
-TAGS:		$(HDRS) $(SRCS)
-		etags++ -b $(HDRS:%=$(VPATH:$(ROOT)%=$(PTOLEMY)%)/%) \
-			$(SRCS:%=$(VPATH:$(ROOT)%=$(PTOLEMY)%)/%)
-
-# Rule for detecting junk files
-checkjunk:
-	@checkextra -v $(SRCS) $(HDRS) $(EXTRA_SRCS) $(OTHERSRCS) \
-		$(OBJS) $(LIB) \
-		$(STAR_MK).o $(STAR_MK).mk $(EXTRA_DESTS) \
-		$(MISC_FILES) makefile make.template SCCS TAGS
-
-# "check" does not print anything if nothing is being edited.
-sccsinfo:
-	@sccs check || true
 
 # Matlab settings
 include $(ROOT)/mk/matlab.mk
