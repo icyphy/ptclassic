@@ -34,7 +34,9 @@
 # of the Ptolemy installation
 
 # used to collect profile information before displaying:
-set ptkProfileString ""
+if ![info exists ptkProfileString] {
+    set ptkProfileString ""
+}
 
 ###################################################################
 #### ptkDisplayProfile
