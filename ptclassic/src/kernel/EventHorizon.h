@@ -97,6 +97,12 @@ public:
 		Wormhole* parentWormhole, Star* parentStar,
 		DataType type = FLOAT, unsigned numTokens = 1 );
 
+	// Function specifying whether more than one sample at a time
+	// can cross the wormhole boundary through this EventHorizon.
+	// if FALSE (the default), it is permissible.  if TRUE, only
+	// one token at a time may cross.
+	virtual int onlyOne() const;
+
 	// change the parameters (numberTokens)
 	void setParams(int numTok);
 
