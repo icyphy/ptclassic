@@ -71,8 +71,9 @@ catch {delete class ::tycho::Displayer}
 
 #######################################################################
 #### Displayer
-# This class defines a top level window that can contain one or more
-# View objects. It provides a status bar at the bottom and a menu at
+# This class is a top level window that can contain one or more
+# <a href="View.html">View</a> objects. It provides a status bar
+# at the bottom and a menu at
 # the top for each view. It can also optionally provide a tool bar.
 # Distinct menu, status and tool bars are created for each view that is
 # attached to the displayer, so views can have different menu
@@ -374,8 +375,9 @@ body ::tycho::Displayer::destructor {} {
 # the display. Call <code>showView</code> to do this.
 #
 body ::tycho::Displayer::attachView {window viewName} {
+puts "attachView $window $viewName"
 
-    if [info exists viewWindow($viewName)] {
+    if [::info exists viewWindow($viewName)] {
         error "View $viewName already exists in Displayer $this"
     }
 
@@ -710,7 +712,7 @@ body ::tycho::Displayer::normalExit {{enable {}}} {
 # If not, trigger an error.  Otherwise, return.
 # 
 body ::tycho::Displayer::verifyView {viewName} {
-    if ![info exists viewWindow($viewName)] {
+    if ![::info exists viewWindow($viewName)] {
 	error "View $viewName is not attached to display $this."
     }
 }
