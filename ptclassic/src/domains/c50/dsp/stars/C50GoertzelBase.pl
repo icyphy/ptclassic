@@ -16,6 +16,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	input {
 		name{input}
 		type{fix}
+		attributes { P_NOINIT }
 	}
 	defstate {
 		name { k }
