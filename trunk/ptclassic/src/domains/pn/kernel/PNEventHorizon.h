@@ -1,29 +1,67 @@
-/*  Version $Id$
+#ifndef _MTDFEventHorizon_h
+#define _MTDFEventHorizon_h
 
-    Copyright 1992 The Regents of the University of California.
-			All Rights Reserved.
+/* 
+Copyright (c) 1990-1993 The Regents of the University of California.
+All rights reserved.
 
-    Programmer:		T.M. Parks
-    Date of creation:	20 January 1992
+Permission is hereby granted, without written agreement and without
+license or royalty fees, to use, copy, modify, and distribute this
+software and its documentation for any purpose, provided that the above
+copyright notice and the following two paragraphs appear in all copies
+of this software.
+
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY 
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES 
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF 
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF 
+SUCH DAMAGE.
+
+THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+ENHANCEMENTS, OR MODIFICATIONS.
 */
-
-#ifndef _MTDFWormConnect_h
-#define _MTDFWormConnect_h
+/*  Version $Id$
+    Author:	T. M. Parks
+    Created:	20 January 1992
+*/
 
 #ifdef __GNUG__
 #pragma interface
 #endif
 
-#include "WormConnect.h"
+#include "EventHorizon.h"
+#include "MTDFPortHole.h"
 
-class MTDFtoUniversal : public ToEventHorizon
+class MTDFtoUniversal : public ToEventHorizon, public InMTDFPort
 {
-    void grabData();
+public:
+    // Constructor.
+    MTDFtoUniversal() : ToEventHorizon(this) {}
+
+    /*virtual*/ void initialize();
+    /*virtual*/ int isItInput() const;
+    /*virtual*/ int isItOutput() const;
+    /*virtual*/ EventHorizon* asEH();
+
+    /*virtual*/ void receiveData();
 };
 
-class MTDFfromUniversal : public FromEventHorizon
+class MTDFfromUniversal : public FromEventHorizon, public OutMTDFPort
 {
-    void sendData();
+public:
+    // Constructor.
+    MTDFfromUniversal() : FromEventHorizon(this) {}
+
+    /*virtual*/ void initialize();
+    /*virtual*/ int isItInput() const;
+    /*virtual*/ int isItOutput() const;
+    /*virtual*/ EventHorizon* asEH();
+
+    /*virtual*/ void sendData();
 };
 
 #endif
