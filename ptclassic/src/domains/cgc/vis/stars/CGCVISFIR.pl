@@ -86,14 +86,16 @@ into a single 64-bit float particle.
 	  else
 	    maxpast = (int)((taplength-1)/NUMPACK+2);
 
-	  signalIn.setSDFParams(NUMIN,maxpast-1);
+	  //signalIn.setSDFParams(NUMIN,maxpast-1);
 	}
 	codeblock(mainDecl) {
 	  /* allocate memory for tap matrix */
+	  double $starSymbol(src)[$val(maxpast)];
+	  int $starSymbol(currentValue),$starSymbol(nminusk);
 	  vis_s16* $starSymbol(tapmatrix) =
 	    (vis_s16*) memalign(sizeof(double),sizeof(vis_s16)*16*$val(maxpast));
 	  int $starSymbol(taprowindex),$starSymbol(tapcolindex);
-          int $starSymbol(numloop),$starSymbol(taprowlength);
+          int $starSymbol(numloop),$starSymbol(taprowlength),$starSymbol(i);
 	  short *$starSymbol(indexcount),$starSymbol(scaledown);
 	}
 	codeblock(initialize) {
@@ -109,6 +111,7 @@ into a single 64-bit float particle.
 		$starSymbol(tapcolindex)++){
 	      *$starSymbol(indexcount)++ = 0;
 	    }
+
 	  }
 	  /* fill tap matrix with tap coefficients*/
 	  for($starSymbol(taprowindex)=0;$starSymbol(taprowindex)<4;$starSymbol(taprowindex)++){
@@ -126,6 +129,11 @@ into a single 64-bit float particle.
 	    $starSymbol(numloop) = 0;	
 	  else		
 	    $starSymbol(numloop) = $val(maxpast);
+
+	  for($starSymbol(i)=0;$starSymbol(i)<$val(maxpast);$starSymbol(i)++){
+	    $starSymbol(src)[$starSymbol(i)] = 0;
+	  }
+	  $starSymbol(currentValue) = $starSymbol(nminusk) = 0;
 	}
 	initCode {
           addInclude("<vis_proto.h>");
@@ -154,11 +162,19 @@ into a single 64-bit float particle.
 	  accumpair3 = vis_fzero();
 	  tapptr3 = (double *) ($starSymbol(tapmatrix) + 12 * $starSymbol(numloop));
 
+	  if($starSymbol(currentValue)>$val(maxpast)-1)
+	    $starSymbol(currentValue) -= $val(maxpast);
+
+	  $starSymbol(src)[$starSymbol(currentValue)] = $ref(signalIn);
+	  $starSymbol(nminusk)= $starSymbol(currentValue);
 	  /* filter data */
 	  for (outerloop = 0; outerloop < $starSymbol(numloop); outerloop++) {
 	    /* set up data */
-	    datahi = vis_read_hi((double) $ref2(signalIn,outerloop));
-	    datalo = vis_read_lo((double) $ref2(signalIn,outerloop));
+	    if($starSymbol(nminusk) <0)
+	      $starSymbol(nminusk) += $val(maxpast);
+
+	    datahi = vis_read_hi((double) $starSymbol(src)[$starSymbol(nminusk)]);
+	    datalo = vis_read_lo((double) $starSymbol(src)[$starSymbol(nminusk)]);
 	    /* calculate four outputs */
 	    /*
 	     * 0: multiply first row of tap matrix with the input vector
@@ -228,6 +244,8 @@ into a single 64-bit float particle.
 	    pairhi = vis_fpadd32(pairhilo, pairhihi);
 	    pair = vis_fpadd32(pairhi, pairlo);
 	    accumpair3 = vis_fpadd32(accumpair3,pair);
+
+	    $starSymbol(nminusk)--;
 	  }
 	  /*
 	   * sum accumulators and pack outputs into a
@@ -251,6 +269,7 @@ into a single 64-bit float particle.
 	  packedlo = vis_fpackfix(dlo);
 
 	  $ref(signalOut) = vis_freg_pair(packedhi, packedlo);
+	  $starSymbol(currentValue)++;
 	}
 	go {   
 	  addCode(localDecl);
