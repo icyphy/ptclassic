@@ -20,7 +20,7 @@ Find the reciprocal of a fraction in terms of a fraction and some left shifts.
 	}
 	outmulti {
 		name {output}
-		type {FIX}
+		type {int}
 	}
 	state {
 		name {Nf}
