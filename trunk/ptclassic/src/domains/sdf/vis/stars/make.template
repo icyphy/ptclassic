@@ -71,6 +71,7 @@ PL_SRCS= \
  SDFVISFFTCx.pl \
  SDFVISFIR.pl \
  SDFVISMpyDblSh.pl \
+ SDFVISMpySh.pl \
  SDFVISPackSh.pl \
  SDFVISSubSh.pl \
  SDFVISUnpackSh.pl
