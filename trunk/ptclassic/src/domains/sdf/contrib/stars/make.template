@@ -26,7 +26,7 @@ LIB =		libsdfcontribstars.$(LIBSUFFIX)
 STARDOCDIR = 	../../doc/stars
 
 # supporting C++ files for stars
-LIB_SRCS= \
+LIB_CC_SRCS= \
 Decoder.cc \
 Encoder.cc \
 Interp.cc \
@@ -60,7 +60,7 @@ SDFReadVar.pl \
 SDFWriteVar.pl
 
 # The .cc files
-SRCS =		$(LIB_SRCS) $(PL_SRCS:.pl=.cc)
+SRCS =		$(LIB_CC_SRCS) $(PL_SRCS:.pl=.cc)
 
 # object files for all stars
 OBJS =		$(SRCS:.cc=.o)
