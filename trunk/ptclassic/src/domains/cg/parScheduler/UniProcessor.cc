@@ -190,7 +190,7 @@ int UniProcessor :: schedInMiddle(ParNode* pd, int when, int leng) {
 		// check the current node should be an idle node.
 		} else if (obj->isIdleTime() == 0) {  
 			if (curTime < when + leng) {
-				return FALSE;
+				return -1;
 			}
 		} else if ((curTime <= when) && (obj->getDuration() >= leng)) {
 			int endSlot = curTime + obj->getDuration();	
@@ -230,7 +230,7 @@ int UniProcessor :: schedInMiddle(ParNode* pd, int when, int leng) {
 		}
 		obj = (NodeSchedule*) obj->previousLink();
 	}
-	return FALSE;
+	return -1;
 }
 
 // Assign nodes into the processor
@@ -295,7 +295,7 @@ void UniProcessor::addNode(ParNode *node, int start) {
 		// start < availTime so check gaps
 		int newStart = filledInIdleSlot(node,start);
 		if (newStart >= 0) {
-			if (!schedInMiddle(node,newStart,d))
+			if (schedInMiddle(node,newStart,d) < 0)
 				Error::abortRun("no enough idle slot!");
 		} else {
 			schedAtEnd(node,availTime,d);
