@@ -67,8 +67,8 @@ class ::tycho::GanttView {
     ###################################################################
     ####                            options                        ####
 
-    # Specify the forest file that contains the precedence constraints
-    itk_option define -fst fst FST ""
+    # Specify the DAG file that contains the precedence constraints
+    itk_option define -dag dag DAG ""
 
     # Specify the visualization state machine
     itk_option define -vsm vsm VSM ""
@@ -145,27 +145,29 @@ class ::tycho::GanttView {
     # Array for keeping current Gantt Chart layout information
     protected variable layout
 
-    # Hold the forest file required to verify a modified schedule
-    protected variable forestFile ""
+    # Hold the dag file required to verify a modified schedule
+    protected variable dagFile ""
 
     # Handle to our ruler
     protected variable ruler ""
 
     # strips containing their schedules, indexed by processor number
     protected variable schedStrip
+
+    private variable schedName "No Schedule Identifier"
 }
 
 #######################################################################
-#### -fst configuration
-# Set the name of the fst file that will be used to verify a modified 
+#### -dag configuration
+# Set the name of the dag file that will be used to verify a modified 
 # schedule.
 #
-configbody ::tycho::GanttView::fst {
+configbody ::tycho::GanttView::dag {
 
-    set forestFile $itk_option(-fst)
+    set dagFile $itk_option(-dag)
 
     # if the forest file is null then disable the Edit Menu
-    if {$forestFile == ""} {
+    if {$dagFile == ""} {
 	# $myDisplayer disableMenu Edit
     }
 }
@@ -182,6 +184,7 @@ configbody ::tycho::GanttView::vsm {
         set data(MKSPAN) [$myVSM getMakespan]
         set data(NPROCS) [$myVSM getNumProcs]
         set data(HIER) [$myVSM create]
+	set schedName [$myVSM getSchedName]
 
 	# If we happen to have nested schedules, we should find
 	# out how many levels of nesting we have
@@ -212,15 +215,13 @@ body ::tycho::GanttView::constructor {args} {
     # Set the colours
     # FIXME: need a better way to do colours
     set layout(COLORS) \
-	    {red steelblue limegreen pink green yellow orangered blue \
-	    coral tan khaki magenta mediumaquamarine forestgreen sienna \
-	    purple orange}
+	    {red darkgreen blue purple maroon gold navyblue violetred}
     
     # Set the padding in cm
     set layout(PADTOP) 2.0
     set layout(PADBOTTOM) 0.5
     set layout(PADLEFT) 2.0
-    set layout(PADRIGHT) 0.75
+    set layout(PADRIGHT) 1.5
     
     # Ruler layout parameters in cm
     set layout(RBASE) 1.75
@@ -367,16 +368,8 @@ body ::tycho::GanttView::drawLabels {} {
     # get the height of the slate
     set height [winfo height $slate]
 
-    if {$myVSM != ""} {
-	# Write the schedule identifier at the top
-	set schedId [$myVSM getSchedName]
-    } else {
-	# Set the default schedule id
-	set schedId {No Schedule identifier}
-    }
-    puts "$myVSM $schedId"
     $slate create Text $layout(PADLEFT)c $layout(LBASE)c \
-	    -text $schedId \
+	    -text $schedName \
 	    -anchor nw \
 	    -tags label
 
@@ -399,14 +392,13 @@ body ::tycho::GanttView::drawLabels {} {
     # for each processor draw the label
     for {set i 1} {$i <= $data(NPROCS)} {incr i 1} {
 	set ypos [expr $padtop + (($i - 1) * $pheight)]
-	puts "P$i"
 	$slate create Text $layout(PLX)c $ypos \
 		-text "P$i" \
 		-anchor nw \
 		-font $layout(SMFONT) \
 		-tags label
     }
-	
+
 }
 
 #######################################################################
@@ -431,7 +423,7 @@ body ::tycho::GanttView::drawMarker {} {
 	    -tags marker
 
     # write the time on top of the marker
-    $slate create Text $x(2)c [expr $layout(RBASE) - $layout(TICK) \
+    # $slate create Text $x(2)c [expr $layout(RBASE) - $layout(TICK) \
 	    - $layout(LOFFSET)]c \
 	    -text [format {%.0f} $data(MTIME)] \
 	    -font $layout(SMFONT) \
@@ -514,6 +506,7 @@ body ::tycho::GanttView::drawProcessor {proc} {
 	set end [lindex [lindex $data(DISPLAY) 2] 2]
     }
     
+    set dlist {}
     set color 0
     if {[lindex $data(DISPLAY) 0] == "proc"} {
 	for {set i 2} {$i < [llength $data(DISPLAY)]} {incr i 1} {
@@ -521,23 +514,20 @@ body ::tycho::GanttView::drawProcessor {proc} {
 	    set start [lindex [lindex $data(DISPLAY) $i] 1]
 	    set end [lindex [lindex $data(DISPLAY) $i] 2]
 	    if {$name == "idle"} {
-		$schedStrip($proc) addBox $name $start $end \
-			-fill black
+		lappend dlist [list $name $start $end]
 	    } elseif {$name == "send"} {
-		$schedStrip($proc) addBox $name $start $end \
-			-fill grey
+		lappend dlist [list $name $start $end -fill lightseagreen]
 	    } elseif {$name == "receive"} {
-		$schedStrip($proc) addBox $name $start $end \
-			-fill white
+		lappend dlist [list $name $start $end -fill lightblue]
 	    } else {
-		$schedStrip($proc) addBox $name $start $end \
-			-fill [lindex $layout(COLORS) $color]
+		lappend dlist [list $name $start $end -fill [lindex $layout(COLORS) $color]]
 	    }
 	    incr color 
 	    if {$color == [llength $layout(COLORS)]} {
 		set color 0
 	    }
 	}
+	eval $schedStrip($proc) addBoxes $dlist
     }
 }
 
@@ -661,7 +651,6 @@ body ::tycho::GanttView::print {} {
 #
 body ::tycho::GanttView::redraw {} {
 
-    puts "redraw"
     # delete objects on the slate
     catch {$slate delete label marker}
    
