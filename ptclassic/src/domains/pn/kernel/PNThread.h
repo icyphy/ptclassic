@@ -2,7 +2,7 @@
 #define _MTDFThread_h
 
 /* 
-Copyright (c) 1990-1993 The Regents of the University of California.
+Copyright (c) 1990-1994 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -33,21 +33,31 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #pragma interface
 #endif
 
-#include "LwpThread.h"
+#include "AweThread.h"
 
-class MTDFStar;
+class Star;
+class PtCondition;
 
-class MTDFThread : public LwpThread
+class MTDFThread : public AweThread
 {
 public:
     // Constructor.
-    MTDFThread(int priority, void (*thread)(MTDFStar*), MTDFStar*);
+    MTDFThread(Star& s) : star(s) {}
 
-    // Disable Thread for the specified time.
-    int sleep(double);
+protected:
+    /*virtual*/ void run();
+    Star& star;
+};
 
-    // New MTDFThread object corresponding to the current thread.
-    static MTDFThread* currentThread();
+class MTDFSourceThread : public MTDFThread
+{
+public:
+    // Constructor.
+    MTDFSourceThread(Star& s, PtCondition& c) : MTDFThread(s), start(c) {}
+
+protected:
+    /*virtual*/ void run();
+    PtCondition& start;
 };
 
 #endif
