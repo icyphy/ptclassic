@@ -372,6 +372,10 @@ configbody ::tycho::File::file {
             if {[winfo exists $topwin.search]} {
                 wm withdraw $topwin.search
             }
+            # unmap the spell check window.
+            if {[winfo exists $topwin.spell]} {
+                wm withdraw $topwin.spell
+            }
         }
         if {$file != "NoName"} {
             # Add the current object to the menu entries in all open editors.
