@@ -1,36 +1,53 @@
-/**************************************************************************
+/**********************************************************************
 Version identification:
 $Id$
 
  Copyright (c) 1990 The Regents of the University of California.
                        All Rights Reserved.
 
- Programmer:  Joseph T. Buck
- Date of creation: 6/6/90
+ Programmer:  J. T. Buck
+ Date of creation: 7/2/90
 
- This module, when linked into the interpreter, makes it an SDF interpreter.
-**************************************************************************/
+ A device to produce the correct portholes, wormholes, event horizons,
+ etc, for the SDF domain so the interpreter can generate them dynamically.
+
+***********************************************************************/
+
 #include "Domain.h"
+#include "Target.h"
 #include "SDFScheduler.h"
-#include "SDFUniverse.h"
-#include "Output.h"
+#include "SDFWormhole.h"
+#include "SDFConnect.h"
+#include "SDFWormConnect.h"
+#include "SDFGeodesic.h"
 
-extern Error errorHandler;
+extern const char SDFdomainName[] = "SDF";
 
-Scheduler*
-Domain::newSched() { return new SDFScheduler;}
-
-const char*
-Domain::universeType() { return SDFstring;}
-
-const char*
-Domain::domainName() { return "SDF";}
-
-int
-Domain::set(const char* newDom) {
-	if (strcmp (newDom, domainName()) != 0) {
-		errorHandler.error("Cannot change domain (yet)!");
-		return FALSE;
+class SDFDomain : public Domain {
+public:
+	// new wormhole
+	Star& newWorm(Galaxy& innerGal,Target* innerTarget)  {
+		return *new SDFWormhole(innerGal,innerTarget);
 	}
-	else return TRUE;
-}
+
+	// new input porthole
+	PortHole& newInPort() { return *new InSDFPort;}
+
+	// new output porthole
+	PortHole& newOutPort() { return *new OutSDFPort;}
+
+	// new fromUniversal EventHorizon
+	EventHorizon& newFrom() { return *new SDFfromUniversal;}
+
+	// new toUniversal EventHorizon
+	EventHorizon& newTo() { return *new SDFtoUniversal;}
+
+	// new node (geodesic)
+	Geodesic& newNode() { return *new SDFGeodesic;}
+
+	// constructor
+	SDFDomain() : Domain("SDF") {}
+};
+
+// declare a prototype
+static SDFDomain proto;
