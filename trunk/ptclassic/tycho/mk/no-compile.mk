@@ -108,7 +108,7 @@ tests:: makefile
 # Generate html files from itcl files, requires itclsh and tycho
 # Note that $(ROOT) here is relative to the tycho directory, not
 # the Ptolemy directory.
-itcldocs: $(ITCL_SRCS) $(ROOT)/lib/tydoc/tydoc $(ROOT)/lib/tydoc/DocSys.itcl
+itcldocs: $(ITCL_SRCS)
 	@if [ "$(TYDOC_DESC)" = "" ] ; then \
 		echo "$(ROOT)/lib/tydoc/tydoc $(ITCL_SRCS)"; \
 	 	$(ROOT)/lib/tydoc/tydoc $(ITCL_SRCS); \
@@ -116,9 +116,6 @@ itcldocs: $(ITCL_SRCS) $(ROOT)/lib/tydoc/tydoc $(ROOT)/lib/tydoc/DocSys.itcl
 		echo "$(ROOT)/lib/tydoc/tydoc -t "$(TYDOC_DESC)" $(ITCL_SRCS)"; \
 		$(ROOT)/lib/tydoc/tydoc -t "$(TYDOC_DESC)" $(ITCL_SRCS); \
 	fi
-
-$(ROOT)/lib/tydoc/tydoc $(ROOT)/lib/tydoc/DocSys.itcl:
-	cd $(ROOT)/lib/tydoc; $(MAKE) $@
 
 # You probably don't want to add $(SRCS) here, since really $(SRCS)
 # get compiled and have dependencies.  Instead, modify the makefile
