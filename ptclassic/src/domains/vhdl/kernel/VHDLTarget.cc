@@ -39,10 +39,10 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "VHDLTarget.h"
 #include "VHDLStar.h"
 
-// constructor
-VHDLTarget :: VHDLTarget(const char* name,const char* starclass,
+// Constructor
+VHDLTarget :: VHDLTarget(const char* name, const char* starclass,
 			 const char* desc) :
-HLLTarget(name,starclass,desc) {
+HLLTarget(name, starclass, desc) {
   // Add additional codeStreams.
   addCodeStreams();
 
@@ -54,7 +54,7 @@ HLLTarget(name,starclass,desc) {
   variableList.initialize();
 }
 
-// clone
+// Clone
 Block* VHDLTarget :: makeNew() const {
   LOG_NEW; return new VHDLTarget(name(), starType(), descriptor());
 }
@@ -63,8 +63,7 @@ Block* VHDLTarget :: makeNew() const {
 // Add code to the beginning of a CodeStream instead of the end.
 void VHDLTarget :: prepend(StringList code, CodeStream& stream) {
   StringList temp;
-  temp << code;
-  temp << stream;
+  temp << code << stream;
   stream.initialize();
   stream << temp;
 }
@@ -93,7 +92,7 @@ void VHDLTarget :: setup() {
 
 // Main routine.
 int VHDLTarget :: runIt(VHDLStar* s) {
-  StringList code = "\n\t-- star ";
+  StringList code = "\n\t-- Star ";
   code << s->fullName() << " (class " << s->className() << ") \n";
   myCode << code;
   // Initialize lists for new firing.
@@ -102,18 +101,15 @@ int VHDLTarget :: runIt(VHDLStar* s) {
   int status = ((CGStar*) s)->CGStar::run();
 
   VHDLVariableList* varList = firingVariableList.newCopy();
-  registerVariableList(varList);
+  mergeVariableList(varList);
   
   if (!status) return status;
-
   if (s->isItFork()) {
     return status;
   }
-
   return status;
 }
 
-/*
 // Redefined from CGTarget to avoid cout messages.
 int VHDLTarget :: sendWormData(PortHole& p) {
 	CGPortHole& cp = *(CGPortHole*)&p;
@@ -132,17 +128,18 @@ int VHDLTarget :: receiveWormData(PortHole& p) {
 	cp.forceSendData();
 	return TRUE;
 }
-*/
 
 // Initial stage of code generation.
 void VHDLTarget :: headerCode() {
+  StringList galName = galaxy()->name();
+
   // Generate the entity_declaration.
   entity_declaration << "-- entity_declaration\n";
   entity_declaration << "entity ";
-  entity_declaration << galaxy()->name();
+  entity_declaration << galName;
   entity_declaration << " is\n";
   entity_declaration << "end ";
-  entity_declaration << galaxy()->name();
+  entity_declaration << galName;
   entity_declaration << ";\n";
 
   // Generate the architecture_body_opener.
@@ -150,7 +147,7 @@ void VHDLTarget :: headerCode() {
   architecture_body_opener << "architecture ";
   architecture_body_opener << "behavior";
   architecture_body_opener << " of ";
-  architecture_body_opener << galaxy()->name();
+  architecture_body_opener << galName;
   architecture_body_opener << " is\n";
   architecture_body_opener << "begin\n";
 }
@@ -207,19 +204,21 @@ void VHDLTarget :: frameCode() {
 // Write the code to a file.
 void VHDLTarget :: writeCode() {
   // Clean up the code by wrapping around long lines as separate lines.
-// !Warning! Not currently working properly!
-//  wrapAround(&myCode);
+  // !Warning! Not currently working properly!
+//wrapAround(&myCode);
   writeFile(myCode,".vhdl",displayFlag);
 }
 
 // Compile the code.
 int VHDLTarget :: compileCode() {
-  // Do nothing.
+  // Return TRUE indicating success.
+  return TRUE;
 }
 
 // Run the code.
 int VHDLTarget :: runCode() {
-  // Do nothing.
+  // Return TRUE indicating success.
+  return TRUE;
 }
 
 // Generate code for reading from a wormhole input port.
@@ -250,7 +249,8 @@ StringList VHDLTarget :: comment(const char* text, const char* b,
 void VHDLTarget :: beginIteration(int repetitions, int depth) {
   myCode << "\n";
   myCode << indent(depth);
-  if (repetitions == -1)          // iterate infinitely
+  // Check for infinite iteration.
+  if (repetitions == -1)
     myCode += "while TRUE loop\n";
   else {
     variable_declarations << indent(depth)
@@ -278,10 +278,8 @@ int VHDLTarget :: codeGenInit() {
   while ((s = (VHDLStar*) nextStar++) != 0) {
     // Nothing needs to be done for forks.
     if (s->isItFork()) continue;
-    
     s->initCode();
   }
-
   return TRUE;
 }
 
@@ -319,97 +317,23 @@ void VHDLTarget :: setGeoNames(Galaxy& galaxy) {
 // The only reason for redefining this from HLLTarget
 // is to change the separator from "." to "_".
 StringList VHDLTarget :: sanitizedFullName (const NamedObj& obj) const {
-        StringList out;
-        if(obj.parent() != NULL) {
-		Block* b = obj.parent();
-		if (b->isItWormhole() == 0) {
-                	out = sanitizedFullName(*obj.parent());
-                	out += "_";
-		}
-                out += sanitizedName(obj);
-        } else {
-                out = sanitizedName(obj);
-        }
-        return out;
-}
-
-// Return the VHDL type corresponding to the State type.
-StringList VHDLTarget :: stateType(const State* st) {
-  StringList type;
-  
-  if (st->isA("IntState") || st->isA("IntArrayState"))
-    type = "INTEGER";
-  else if (st->isA("ComplexState") || st->isA("ComplexArrayState"))
-    type = "complex";
-  else if (st->isA("StringState") || st->isA("StringArrayState"))
-    type = "char*";
-  else type = "REAL";
-
-  return type;
-}
-
-// Register the temporary storage reference.
-void VHDLTarget :: registerTemp(const char* temp, const char* type) {
-  StringList ref = sanitize(temp);
-  StringList dtyp;
-
-  if (firingVariableList.inList(ref)) return;
-  
-  if (!strcmp(type,"INT") || !strcmp(type,"int")) dtyp << "INTEGER";
-  else if (!strcmp(type,"COMPLEX") || !strcmp(type,"complex")) dtyp << "INTEGER";
-  else dtyp << "REAL";
-
-  // Allocate memory for a new VHDLVariable and put it in the list.
-  VHDLVariable* newvar = new VHDLVariable;
-  newvar->name = ref;
-  newvar->type = dtyp;
-  newvar->initVal.initialize();
-  firingVariableList.put(*newvar);
-}
-
-// Register the State reference.
-void VHDLTarget :: registerState(State* state, int offset/*=-1*/,
-				 int pos/*=-1*/) {
-  StringList temp = sanitizedFullName(*state);
-  StringList ref = sanitize(temp);
-  StringList initVal;
-
-  if (pos >= 0) {
-    ref << "_P" << pos;
-    // WARNING: The following is dangerous unless you know
-    // that state has a big enough array and that pos is valid!
-//    initVal = state[pos].initValue();
+  StringList out;
+  if(obj.parent() != NULL) {
+    Block* b = obj.parent();
+    if (b->isItWormhole() == 0) {
+      out = sanitizedFullName(*obj.parent());
+      out += "_";
+    }
+    out += sanitizedName(obj);
   }
   else {
-//    initVal = state->initValue();
+    out = sanitizedName(obj);
   }
-  
-  if (firingVariableList.inList(ref)) return;
-  
-  // Allocate memory for a new VHDLVariable and put it in the list.
-  VHDLVariable* newvar = new VHDLVariable;
-  newvar->name = ref;
-  newvar->type = stateType(state);
-  newvar->initVal = initVal;
-  firingVariableList.put(*newvar);
+  return out;
 }
 
-// Register PortHole reference.
-void VHDLTarget :: registerPortHole(VHDLPortHole* port, int offset/*=-1*/) {
-  StringList ref = port->getGeoName();
-
-  if (firingVariableList.inList(ref)) return;
-  
-  // Allocate memory for a new VHDLVariable and put it in the list.
-  VHDLVariable* newvar = new VHDLVariable;
-  newvar->name = ref;
-  newvar->type = port->dataType();
-  (newvar->initVal).initialize();
-  firingVariableList.put(*newvar);
-}
-
-// Register each variable in the star variable list.
-void VHDLTarget :: registerVariableList(VHDLVariableList* starVariableList) {
+// Merge the Star's variable list with the Target's variable list.
+void VHDLTarget :: mergeVariableList(VHDLVariableList* starVariableList) {
   VHDLVariableListIter starVariableNext(*starVariableList);
   VHDLVariable* nStarVariable;
   // Scan through the list of variables from the star firing.
@@ -480,6 +404,91 @@ void VHDLTarget :: wrapAround(StringList* codeList) {
 
 // return new code listing by reference;
   *codeList = *newCode;
+}
+
+// Register the State reference.
+void VHDLTarget :: registerState(State* state, int offset/*=-1*/,
+				 int pos/*=-1*/) {
+  StringList temp = sanitizedFullName(*state);
+  StringList ref = sanitize(temp);
+  StringList initVal;
+
+  if (pos >= 0) {
+    ref << "_P" << pos;
+    // WARNING: The following is dangerous unless you know
+    // that state has a big enough array and that pos is valid!
+//    initVal = state[pos].initValue();
+  }
+  else {
+//    initVal = state->initValue();
+  }
+  
+  if (firingVariableList.inList(ref)) return;
+  
+  // Allocate memory for a new VHDLVariable and put it in the list.
+  VHDLVariable* newvar = new VHDLVariable;
+  newvar->name = ref;
+  newvar->type = stateType(state);
+  newvar->initVal = initVal;
+  firingVariableList.put(*newvar);
+}
+
+// Register PortHole reference.
+void VHDLTarget :: registerPortHole(VHDLPortHole* port, int offset/*=-1*/) {
+  StringList ref = port->getGeoName();
+
+  if (firingVariableList.inList(ref)) return;
+  
+  // Allocate memory for a new VHDLVariable and put it in the list.
+  VHDLVariable* newvar = new VHDLVariable;
+  newvar->name = ref;
+  newvar->type = port->dataType();
+  (newvar->initVal).initialize();
+  firingVariableList.put(*newvar);
+}
+
+// Register the temporary storage reference.
+void VHDLTarget :: registerTemp(const char* temp, const char* type) {
+  StringList ref = sanitize(temp);
+
+  if (firingVariableList.inList(ref)) return;
+  
+  // Allocate memory for a new VHDLVariable and put it in the list.
+  VHDLVariable* newvar = new VHDLVariable;
+  newvar->name = ref;
+  newvar->type = sanitizeType(type);
+  newvar->initVal.initialize();
+  firingVariableList.put(*newvar);
+}
+
+// Return the VHDL type corresponding to the State type.
+StringList VHDLTarget :: stateType(const State* st) {
+  StringList type;
+  
+  if (st->isA("IntState") || st->isA("IntArrayState"))
+    type = "INTEGER";
+  else if (st->isA("ComplexState") || st->isA("ComplexArrayState"))
+    type = "COMPLEX";
+  else if (st->isA("StringState") || st->isA("StringArrayState"))
+    type = "CHARACTER";
+  else
+    type = "REAL";
+
+  return type;
+}
+
+// Return the VHDL type corresponding to the given const char*.
+StringList VHDLTarget :: sanitizeType(const char* ctyp) {
+  StringList type;
+
+  if (!strcmp(ctyp,"INT") || !strcmp(ctyp,"int"))
+    type << "INTEGER";
+  else if (!strcmp(ctyp,"COMPLEX") || !strcmp(ctyp,"complex"))
+    type << "COMPLEX";
+  else
+    type << "REAL";
+
+  return type;
 }
 
 ISA_FUNC(VHDLTarget,HLLTarget);

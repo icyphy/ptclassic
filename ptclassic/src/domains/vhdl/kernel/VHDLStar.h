@@ -51,16 +51,6 @@ class VHDLTarget;
 
 class VHDLStar : public CGStar {
 public:
-	// Lists of VHDL ports, generics, signals, and variables.
-	// Lists of VHDL port and generic mappings.
-	// This is public so that VHDLTarget and other targets can access it.
-//	VHDLPortList firingPortList;
-//	VHDLGenericList firingGenericList;
-//	VHDLPortMapList firingPortMapList;
-//	VHDLGenericMapList firingGenericMapList;
-//	VHDLSignalList firingSignalList;
-//	VHDLVariableList firingVariableList;
-
 	// initialize method
 	void initialize();
 
@@ -103,23 +93,6 @@ protected:
 private:
 	// Maintain counter of firing number.
 	int firing;
-
-	// Register port reference for use by target.
-//	void registerPort(StringList ref, StringList direction,
-//			  StringList type);
-	// Register generic reference for use by target.
-//	void registerGeneric(StringList ref, StringList type,
-//			  StringList defaultVal);
-	// Register variable reference for use by target.
-//	void registerVariable(StringList ref, StringList type,
-//			      StringList initVal);
-	// Register the signal mapped to for use by target.
-//	void registerSignal(StringList name, StringList type, 
-//			    StringList from, StringList to);
-	// Register port mapping for use by target.
-//	void registerPortMap(StringList ref, StringList mapping);
-	// Register generic mapping for use by target.
-//	void registerGenericMap(StringList ref, StringList mapping);
 };
 
 #endif
