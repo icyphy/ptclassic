@@ -187,6 +187,9 @@ body ::tycho::SimpleView::constructor {args} {
         }
         pack $itk_component($button) -side left
     }
+    $itk_component(undo) configure -state disabled
+    $itk_component(redo) configure -state disabled
+
     # Evaluate options
     eval itk_initialize $args
 }
@@ -251,7 +254,7 @@ body ::tycho::SimpleView::notify {command args} {
                 }
             }
         }
-         "attrdel" {
+        "attrdel" {
             # Attributes deleted: attrdel item ?attr...?
             # For each, call exists{} (in case
             # the attribute has a default, in which case we don't
@@ -266,7 +269,21 @@ body ::tycho::SimpleView::notify {command args} {
                 }
             }
         }
-    }               
+    }
+    # Update the undo and redo buttons
+    if [$model mark compare first == current] {
+        # No more undo commands
+        $itk_component(undo) configure -state disabled
+    } else {
+         $itk_component(undo) configure -state normal
+ 
+    }       
+    if [$model mark compare current == last] {
+        # No more redo commands
+        $itk_component(redo) configure -state disabled
+    } else {
+        $itk_component(redo) configure -state normal
+    }
 }
 
 ########################################################################
@@ -274,11 +291,11 @@ body ::tycho::SimpleView::notify {command args} {
 #
 body ::tycho::SimpleView::undo {} {
     $model undo
-    #if [$model mark compare first == current] {
-    #    # No more undo commands
-    #    $itk_component(undo) configure -state disabled
-    #}
-    #$itk_component(redo) configure -state normal
+    if [$model mark compare first == current] {
+        # No more undo commands
+        $itk_component(undo) configure -state disabled
+    }
+    $itk_component(redo) configure -state normal
 }
 
 ########################################################################
@@ -286,11 +303,11 @@ body ::tycho::SimpleView::undo {} {
 #
 body ::tycho::SimpleView::redo {} {
     $model redo
-    #if [$model mark compare current == last] {
-    #    # No more redo commands
-    #    $itk_component(redo) configure -state disabled
-    #}
-    #$itk_component(redo) configure -state normal
+    if [$model mark compare current == last] {
+        # No more redo commands
+        $itk_component(redo) configure -state disabled
+    }
+    $itk_component(undo) configure -state normal
 }
 
 
