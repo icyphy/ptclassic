@@ -20,6 +20,16 @@ In this case, you will need to extract the features you desire
 from the dot files in ~ptolemy and add them to your own.
 To make this easy to do, we explain below the salient features
 of each of these files.
+.H2 "Hosts"
+.pp
+Pigi runs as two separate processes, one of which is started using
+an rsh.  In order for the second process to start properly, you
+may need to have a file in your home directory called ``.rhosts''
+with the line
+.(c
+machine_name user_name
+.)c
+where these names depend on who you are and what your machine is called.
 .H2 "Environment Variables"
 .pp
 The most basic requirement
