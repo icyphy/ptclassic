@@ -13,7 +13,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	location { CG56 arithmetic library }
 	explanation {
 .Id "negation"
-The input is moved into accumlator "a", where the "neg" instruction is applied.
+The input is moved into accumulator "a", where the "neg" instruction is applied.
 	}
 	execTime {
 		return 3;

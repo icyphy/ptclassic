@@ -12,8 +12,11 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
     location { CG56 library }
     explanation {
-This is a source star (like the Const star).  The value(s) output
-by the star may be changed asynchonously by the host via the host port.
+This is a source star (like the
+c. Const
+star).
+The value(s) output by the star may be changed asynchronously by
+the host via the host port.
 This is intended as a base star for derivation; a derived star would provide
 some host-specific interface to this star.
 .LP
@@ -22,18 +25,20 @@ convenience of derived stars.
 .UH IMPLEMENTATION:
 .pp
 Since we may be followed by an up sampling operation, there may be
-an arbitrary number of memory locations cooresponding to our output.
+an arbitrary number of memory locations corresponding to our output.
 Since we can't expect the host to update all of these values, we
-can't apply the trick used by CG56Const to eliminate run-time code
-in all cases.  More work must be done to identify the safe cases.
+can't apply the trick used by the
+.c Const
+star to eliminate runtime code in all cases.
+More work must be done to identify the safe cases.
 .LP
 On each firing of the star, the \fIvalue\fP state is output.
-The host may modify the \fIvalue\fP state asyncronously.  Currently
-the value state is referenced by explicit memory location; however,
+The host may modify the \fIvalue\fP state asynchronously.
+Currently the value state is referenced by explicit memory location; however,
 we might want to generate a symbolic name.
 .LP
-Currently only scalors may be output (not waveforms).  This should
-be improved.
+Currently only scalars may be output (not waveforms).
+This should be improved.
     }
     seealso { CG56HostSlider, CG56HostButton }
     output {

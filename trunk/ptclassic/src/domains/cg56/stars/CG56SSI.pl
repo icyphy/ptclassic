@@ -3,7 +3,7 @@ defstar {
     domain { CG56 }
     desc { A generic input/output star the DSP56001 SSI port. }
     version { $Id$ }
-    author { Kennard White, Chih-Tsung Huang (ported from Gabriel) }
+    author { Kennard White and Chih-Tsung Huang (ported from Gabriel) }
     acknowledge { Gabriel version by Jeff Bier, Phil Lapsley, Eric Guntvedt. }
 	copyright {
 Copyright (c) 1990-%Q% The Regents of the University of California.
@@ -14,7 +14,7 @@ limitation of liability, and disclaimer of warranty provisions.
     location { CG56 io library }
     explanation {
 .PP
-This star is a generic star to provide input/ouput for the 560001's
+This star is a generic star to provide input/output for the 560001's
 SSI (Synchronous Serial Interface) port.
 .Ir "SSI port (Motorola DSP56001)"
 .Ir "synchronous serial interface (Motorola DSP56001)"
@@ -23,19 +23,17 @@ SSI (Synchronous Serial Interface) port.
 .Ir "Motorola DSP56001 SSI port"
 .Ir "real-time I/O"
 .Ir "I/O, real-time"
-It can implement both a
-synchronous, in-line interface based on polling,
-and an interupt-driven interface.
+It can implement both a synchronous, in-line interface based on polling,
+and an interrupt-driven interface.
 .Ir "interrupt-driven I/O"
 .Ir "polling I/O"
 The star inputs one sample from each of the two input channels
 and outputs one sample to each of the two output channels each
-time it fires.  The samples from the star's two input ports
-are transmited out the SSI port,
-and samples received from the SSI port are available on the star's
-two outputs.
-The star could be modified to support different
-sample rates on input and output.
+time it fires.
+The samples from the star's two input ports are transmitted out the SSI port,
+and samples received from the SSI port are available on the star's two outputs.
+The star could be modified to support different sample rates on input
+and output.
 .PP
 This star is commonly used as a base class for the Ariel Proport A/D and D/A
 .Ir "Ariel Proport"
@@ -52,35 +50,35 @@ that polls the SSI and busy waits if samples are not available.
 Interrupt-based code can be forced by setting the buffer size non-zero.
 The interrupt buffer holds at least \fIqueueSize\fP samples; the length
 of the queue will be adjusted upward according to the number of schedule
-repetitions of the star.  If \fIqueueSize\fP is negative, the negative
-of \fIqueueSize\fP is used directly without adjusting it for the
-number of star repetitions.  If stereo activity is occuring,
-the queue length will be doubled.
+repetitions of the star.
+If \fIqueueSize\fP is negative, the negative of \fIqueueSize\fP is used
+directly without adjusting it for the number of star repetitions.
+If stereo activity is occurring, the queue length will be doubled.
 .PP
-.Ir "real-time violation"
-If a real-time violation occurs and the parameter
-\fIabortOnRealtimeError\fP is TRUE, execution will abort
-and one of the following error codes will be left in register y0:
+.Ir "realtime violation"
+If a realtime violation occurs and the parameter \fIabortOnRealtimeError\fP
+is TRUE, execution will abort and one of the following error codes will
+be left in register y0:
 .ip "\fB123062\fP"
 An interrupt occurred and the receive buffer was full.
 .ip "\fB123063\fP"
 An interrupt occurred and the transmit buffer was empty.
 .UH "INTERUPTS: QUEUES:"
 .pp
-When using interupt based code, the SSI port generates interupts
+When using interrupt-based code, the SSI port generates interrupts
 that are handled by an interrupt service routine (ISR).
 .Id "interrupt buffers"
 .Id "buffers, interrupt"
 .Id "queues, interrupt"
 The ISR transmits samples
 out of a xmit queue, and stores received samples in a recv queue.
-The syncronous star code transfers data between these queues
-and the star portholes.  The data words in each buffer are called
-"slots", and at any given moment in time, a slot is either full (has
-a valid sample) or is empty.  
+The synchronous star code transfers data between these queues
+and the star portholes.
+The data words in each buffer are called "slots", and at any given moment
+in time, a slot is either full (has a valid sample) or is empty.  
 If a slot has valid data in it, bit #0 is cleared, otherwise it is set.
-There are two approaches to managing the
-memory and syncronization of these queues; these are described below.
+There are two approaches to managing the memory and synchronization of
+these queues; these are described below.
 .UH "INTERUPTS: DUAL-BUFFER QUEUEING:"
 .pp
 Two buffers are maintained:
@@ -92,27 +90,30 @@ the word in the recv buffer and clears the bit; it then takes a word
 from the xmit buffer, sets bit #0 in the slot, and writes it to the SSI.
 .PP
 The only reason to use dual-buffering is to support different recv and xmit
-rates.  In this case two independent buffers are required with
-independent pointers for each stream.  Note also
-that the SDF parameters of the star must correspond to the relative
+rates.
+In this case two independent buffers are required with independent pointers
+for each stream.
+Note also that the SDF parameters of the star must correspond to the relative
 recv and xmit rates, or buffer overflow/underrun will occur.
 .PP
 This star was originally written to use dual buffers, but has never
-(and still doesn't) support differing recv and xmit rates.  The code
-preserves this style for future use, but in general it should not be used,
-because it is less efficient than symmetric queuing, described below.
+(and still doesn't) support differing recv and xmit rates.
+The code preserves this style for future use, but in general it should
+not be used, because it is less efficient than symmetric queuing,
+described below.
 .UH "SYMMETRIC QUEUEING:"
 .pp
 .Id "symmetric queuing"
 .Id "queuing, symmetric"
-Symetric buffer queueing may be used only when the recv and xmit samples rates
-are the same.  In this case, we can always access the recv and xmit samples
-in pairs.  We align the two buffers symmetrically in X and Y memory.
+Symmetric buffer queuing may be used only when the recv and xmit samples rates
+are the same.
+In this case, we can always access the recv and xmit samples in pairs.
+We align the two buffers symmetrically in X and Y memory.
 This has the advantage that a single pointer can be used to walk through
-the queues instead of two paraell pointers.  Semaphoring of slots
-filled/empty status is easier: only one slot of the (recv/xmit)
-pair need be marked.  If bit #0 is set in the recv sample, the slot
-is empty and next slot is full.
+the queues instead of two parallel pointers.
+Semaphoring of slots filled/empty status is easier: only one slot of the
+(recv/xmit) pair need be marked.
+If bit #0 is set in the recv sample, the slot is empty and next slot is full.
 .PP
 To implement synchronized recv and xmit on the 56001, we used symmetric memory,
 taking advantage of the fact that we have independent X: and Y: memory.
@@ -124,8 +125,8 @@ the address until after the xmit had been taken care of.
 .UH BUGS:
 .pp
 The bulk of the this star should really be implemented as a
-real-time, memory mapped I/O port star,
-with this star just providing the specific information about the SSI port.
+realtime, memory mapped I/O port star, with this star just providing
+the specific information about the SSI port.
 This would be particularly useful when doing data acquisition via the Xylinx.
 .PP
 This star should be improved to support disabling (or hiding) or the
@@ -164,7 +165,7 @@ various ports (in order to make input-only, output-only, or mono stars).
     state {
 	    name { queueSize }
 	    type { INT }
-	    desc { Length of interupt queue (0==>polling). }
+	    desc { Length of interrupt queue (0==>polling). }
 	    default { 4 }
     }
     state {
@@ -209,7 +210,7 @@ various ports (in order to make input-only, output-only, or mono stars).
     state {
 	    name { missCnt }
 	    type { INT }
-	    desc { Count of missed interupt samples. }
+	    desc { Count of missed interrupt samples. }
 	    default { 0 }
 	    attributes { A_NONSETTABLE|A_NONCONSTANT|A_YMEM }
     }
@@ -308,7 +309,7 @@ various ports (in order to make input-only, output-only, or mono stars).
     codeblock(enableInterupts) {
         bset    #m_ssl0,x:m_ipr		; set SSI IPL 2
         bset    #m_ssl1,x:m_ipr
-        bset    #m_srie,x:m_crb         ; enable SSI rx interupts
+        bset    #m_srie,x:m_crb         ; enable SSI rx interrupts
     }    
 
     codeblock(abortyes) {
@@ -377,7 +378,7 @@ $starSymbol(ssi)_dualbuf	equ	$val(dualbufFlag)
 
     ////////////////////////////////////////////////////////////////////////
     //
-    //			Interupt: syncronous star code
+    //			Interrupt: synchronous star code
     //
     ////////////////////////////////////////////////////////////////////////
 
@@ -494,7 +495,7 @@ $starSymbol(ssi)_dualbuf	equ	$val(dualbufFlag)
 
     ////////////////////////////////////////////////////////////////////////
     //
-    //			Interupt: intr handler code
+    //			Interrupt: intr handler code
     //
     ////////////////////////////////////////////////////////////////////////
 
@@ -655,9 +656,9 @@ $label(tx_done)
 //	    bits 5-3: SSI aux. pin functions/enables 
 //	    bits 8-6: SSI core pin functions/enables
 //	PCDDR (x:m_pcddr)
-//	    data direction for PCC when in paraell data-mode
+//	    data direction for PCC when in parallel data-mode
 //	PCD (x:m_pcd)
-//	    data bits for PCC when in paraell data-mode
+//	    data bits for PCC when in parallel data-mode
 // 	CRA (x:m_cra)
 //	    bits 7-0 (PM7-0): crystal clock to bit rate
 //	    bits 12-8 (DC4-0): words per frame
@@ -669,7 +670,7 @@ $label(tx_done)
 //	    bit 6 (SHFD): shift dir
 //	    bit 8-7 (fsl0,1): sync length;	bit 9 (syn): sync rec&xmit
 //	    bit 10 (gck): gated clock;		bit 11 (mod): mode network
-//	    bit 15-11 (rie,tie,re,te): interupt enables and function enables
+//	    bit 15-11 (rie,tie,re,te): interrupt enables and function enables
 
 	    /*IF*/ if ( strcasecmp(hardware,"custom")==0 ) {
 		;
@@ -680,7 +681,7 @@ $label(tx_done)
 		  // sync rx&tx, not gated, network mode, enable rx&tx
 	    } else if ( strcasecmp(hardware,"digimic")==0 ) {
 		// the "Ariel" Digital Microphone is a receive only
-		// device.  However, it doesnt hurt
+		// device.  However, it doesn't hurt
 		// to send it data...it will just be dropped.
 		// The baud rate can be selected similarly as to the proport,
 		// but the conversion table is different.
