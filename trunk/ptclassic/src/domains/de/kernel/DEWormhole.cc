@@ -11,6 +11,7 @@ Version identification:
 
 *******************************************************************/
 #include "DEWormhole.h"
+#include "DEScheduler.h"
 
 /*******************************************************************
 
@@ -21,12 +22,15 @@ Version identification:
 void DEWormhole :: start()
 {
 	Wormhole :: setup();
-	if (mySched()->amITimed())	delayType = TRUE;
-	else				delayType = FALSE;
+	delayType = FALSE;
 }
 	
 void DEWormhole :: go()
 {
+	// synchronize the two domains
+	scheduler->setCurrentTime(arrivalTime);
+
+	// run the inner scheduler.
 	run();
 }
 
@@ -34,4 +38,28 @@ void DEWormhole :: go()
 Block* DEWormhole :: clone()
 {
 	return new DEWormhole(gal.clone()->asGalaxy());
+}
+
+// sumUp();  If the inner domain is timed and stopBeforeDeadlocked,
+// put the wormhole into the process queue.
+void DEWormhole :: sumUp() {
+	if (scheduler->stopBeforeDeadlocked) {
+		DEScheduler* sched = (DEScheduler*) parent()->mySched();
+		sched->eventQ.levelput(this, scheduler->currentTime ,0);
+	}
+}
+		
+// getStopTime() ; gives the stopTime to the inner domain.
+// If syncMode is set (in DEScheduler), return the currentTime meaning that
+//	the global clock of the inner domain marches with that in DE domain.
+// Otherwise, execute the inner domain until it is deadlocked by returning
+//	the stopTime of the DEScheduler.
+
+float DEWormhole :: getStopTime() {
+	DEScheduler* sched = (DEScheduler*) parent()->mySched();
+	if (sched->syncMode) {
+		return sched->currentTime;
+	} else {
+		return sched->whenStop();
+	}
 }
