@@ -6,7 +6,6 @@
 PTOLEMY       = ..
 
 DIRS =	\
-	
 	$(PTOLEMY)/src/domains/cg/doc \
 	$(PTOLEMY)/src/domains/cg56/doc \
 	$(PTOLEMY)/src/domains/cg96/doc \
