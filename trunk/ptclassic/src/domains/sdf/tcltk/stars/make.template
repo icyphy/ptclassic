@@ -40,6 +40,13 @@ PL_SRCS= \
  SDFTkSlider.pl \
  SDFTkText.pl
 
+TCL_SRCS= \
+ tkMeter.tcl \
+ tkScript.tcl \
+ tkShowValues.tcl \
+ tkSlider.tcl \
+ tkText.tcl
+
 # The .cc files
 SRCS=$(PL_SRCS:.pl=.cc)
 
@@ -55,7 +62,7 @@ SCRIPTS=
 STAR_MK=sdftclstars
 DOMAIN=SDF_TCL
 DOMAIN_2=SDF
-EXTRA_SRCS=$(STAR_MK).mk $(STAR_MK).c $(PL_SRCS) $(SCRIPTS)
+EXTRA_SRCS=$(STAR_MK).mk $(STAR_MK).c $(PL_SRCS) $(SCRIPTS) $(TCL_SRCS)
 
 all:		makefile stars_all
 
