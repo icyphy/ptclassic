@@ -74,7 +74,7 @@ SRCS =		$(LIBCSRCS)
 
 OBJS =		$(LIBCSRCS:.c=.o)
 
-LIB = 		libport.a
+LIB = 		libport.$(LIBSUFFIX)
 
 EXPHDR =	port.h
 

@@ -60,7 +60,7 @@ SRCS =		$(LIBCSRCS)
 
 OBJS =		$(LIBCSRCS:.c=.o)
 
-LIB = 		libtap.a
+LIB = 		libtap.$(LIBSUFFIX)
 
 EXPHDR =	tap.h
 

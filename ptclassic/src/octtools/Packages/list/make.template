@@ -51,7 +51,7 @@ SRCS =		$(LIBCSRCS)
 
 OBJS =		$(LIBCSRCS:.c=.o)
 
-LIB = 		liblist.a
+LIB = 		liblist.$(LIBSUFFIX)
 
 EXPHDR =	list.h
 

@@ -59,7 +59,7 @@ SRCS =		$(LIBCSRCS)
 
 OBJS =		$(LIBCSRCS:.c=.o)
 
-LIB = 		libutility.a
+LIB = 		libutility.$(LIBSUFFIX)
 
 EXPHDR =	utility.h
 

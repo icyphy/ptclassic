@@ -54,7 +54,7 @@ SRCS =		$(LIBCSRCS)
 
 OBJS =		$(LIBCSRCS:.c=.o)
 
-LIB = 		libharpoon.a
+LIB = 		libharpoon.$(LIBSUFFIX)
 
 EXPHDR =	harpoon.h
 
