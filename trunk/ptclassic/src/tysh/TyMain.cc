@@ -42,6 +42,7 @@ static const char file_id[] = "TyMain.cc";
 #include "Linker.h"
 #include "SimControl.h"
 #include "Error.h"
+#include "SetSigHandle.h"
 #include "InfString.h"
 #include "TyConsole.h"
 #include <stdio.h>
@@ -84,6 +85,13 @@ static void PrintVersion ()
 		(char*)pid, ")} {", tyFilename, "}", NULL);
 }
 
+static void PrintSigErrorMessage ()
+{
+    Tcl_VarEval(ptkInterp, "TyGrabMessage .message -text {Unable to set the \
+signal handlers, the program will continue but if a serious error occurs it \
+may not be handled appropriately.}", NULL);
+}
+
 /*
  *----------------------------------------------------------------------
  *
@@ -110,6 +118,9 @@ main(int argc, char **argv) {
     Linker::init(argv[0]);
 
     PrintVersion();
+
+    if (setSignalHandlers())
+        PrintSigErrorMessage();
 
     Tk_MainLoop();
     console.tyExit(0);
