@@ -100,7 +100,6 @@ body ::tycho::EditCpp::constructor {args} {
     
     # Set the fill prefix to be the comment character for C++.
     set fillPrefix "//"
-    menubar addMenu Special -underline 0
 
     menubar add "Body Template" Special -underline 0 \
 	    -command "$this bodyTemplate"

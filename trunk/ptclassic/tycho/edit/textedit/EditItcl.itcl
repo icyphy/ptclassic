@@ -120,7 +120,6 @@ class ::tycho::EditItcl {
 #
 body ::tycho::EditItcl::constructor {args} {
     eval itk_initialize $args
-    menubar addMenu Special -underline 0
 
     menubar add "Body Template" Special -underline 0 \
 	    -command "$this bodyTemplate"

@@ -216,6 +216,9 @@ body ::tycho::EditProgram::constructor {args} {
 	    -variablecolor variableColor \
 	    -proccolor procColor
 
+    # Create the Special menu for file templates and so on
+    menubar addMenu Special -underline 0
+
     # Add to the format menu commands to comment and uncomment
     # the regions defined by the selection.
     menubar addSeparator Format
