@@ -1,4 +1,4 @@
--*-Mode:text-*- -[Fri Jul  1 13:20:43 1994 by cxh]-
+-*-Mode:text-*- -[Sun Dec 31 15:07:13 1995 by cxh]-
 Version: $Id$
 
 src/gnu/README
@@ -17,13 +17,17 @@ distribution, you will need to have gcc available.
 Note that the tcl/tk source is elsewhere.
 
 This directory contains the following GNU tools
-	gcc-2.5.8
-	libg++-2.5.3
-	make-3.70
+	gcc-2.7.2
+	libg++-2.7.1
+	make-3.74
+
+If you obtained the hp GNU tar file, then you should also have:
+	binutils-2.6
+	bison-1.24
+	flex-2.5.2
 
 makeinfo, the GNU documentation program is not currently part of the
-Ptolemy GNU binary distribution.  There are makinfo sources in
-$PTOLEMY/src/gnu/hp/gas-2.2.u2/texinfo
+Ptolemy GNU binary distribution.
 
 makeinfo is part of the texinfo package.  texinfo is available via
 anonymous ftp at ftp.uu.net in packages/gnu.
@@ -41,10 +45,7 @@ Versions
 	use libg++-2.5.2 on site for about a month with no problem.
 	For the 0.5 release, we upgraded to libg++-2.5.3.
 
-	Around the time of the Ptolemy 0.5 code freeze (12/93-1/94),
-	there were many versions of gcc/libg++.  We decided to ship
-	the first version gcc/libg++ that compiled Ptolemy straight
-	out of the box.
+	The 0.5.2 release was under gcc-2.6.3
 
 	Ptolemy is not very sensitive to the version of GNU make.  Any
 	recent version of GNU make should work.  
@@ -76,79 +77,8 @@ GNU make
 	
 HP
 --
-	The version of gcc-2.5.8 from the FSF does not have support
-	for the -g option.  The sources in src/hp are from
-	jaguar.cs.utah.edu.  Below is part of the gcc.info document
-	that describes the hp situation:
------Start------	
-	
-File: gcc.info,  Node: PA Install,  Next: Sun Install,  Prev: Cross-Compiler,  Up: Installation
-
-Installing on the HP Precision Architecture
-===========================================
-
-   There are two variants of this CPU, called 1.0 and 1.1, which have
-different machine descriptions.  You must use the right one for your
-machine.  All 7NN machines and 8N7 machines use 1.1, while all other
-8NN machines use 1.0.
-
-   The easiest way to handle this problem is to use `configure hpNNN'
-or `configure hpNNN-hpux', where NNN is the model number of the
-machine.  Then `configure' will figure out if the machine is a 1.0 or
-1.1.  Use `uname -a' to find out the model number of your machine.
-
-   `-g' does not work on HP-UX, since that system uses a peculiar
-debugging format which GNU CC does not know about.  There are
-preliminary versions of GAS and GDB for the HP-PA which do work with
-GNU CC for debugging.  You can get them by anonymous ftp from
-`jaguar.cs.utah.edu' `dist' subdirectory.  You would need to install
-GAS in the file
-
-     /usr/local/lib/gcc-lib/CONFIGURATION/GCCVERSION/as
-
-where CONFIGURATION is the configuration name (perhaps `hpNNN-hpux')
-and GCCVERSION is the GNU CC version number.  Do this *before* starting
-the build process, otherwise you will get errors from the HPUX
-assembler while building `libgcc2.a'.  The command
-
-     make install-dir
-
-will create the necessary directory hierarchy so you can install GAS
-before building GCC.
-
-   If you obtained GAS before October 6, 1992 it is highly recommended
-you get a new one to avoid several bugs which have been discovered
-recently.
-
-   To enable debugging, configure GNU CC with the `--gas' option before
-building.
-
-   It has been reported that GNU CC produces invalid assembly code for
-1.1 machines running HP-UX 8.02 when using the HP assembler.  Typically
-the errors look like this:
-     as: bug.s @line#15 [err#1060]
-       Argument 0 or 2 in FARG upper
-              - lookahead = ARGW1=FR,RTNVAL=GR
-     as: foo.s @line#28 [err#1060]
-       Argument 0 or 2 in FARG upper
-              - lookahead = ARGW1=FR
-
-   You can check the version of HP-UX you are running by executing the
-command `uname -r'.   If you are indeed running HP-UX 8.02 on a PA and
-using the HP assembler then configure GCC with "hpNNN-hpux8.02".
-
------End------	
-
-SGI Irix5.x
------------
-	Note that the gcc 'make-compare' step may fail under Irix5.x
-	
-	The gcc info file says:
-	"In order to compile GCC on an SGI the "c.hdr.lib" option must
-	be installed from the CD-ROM supplied from Silicon Graphics."
-	
-	gcc-2.5.8 under Irix5.x does not support the -g option, so
-	debugging is painful.
+	gcc-2.7.2 needs the GNU assembler, gas, for the gcc -g option.
+	See gcc/INSTALL for details.
 
 gcc and Purify
 --------------
