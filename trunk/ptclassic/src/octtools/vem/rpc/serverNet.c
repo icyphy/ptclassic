@@ -1,7 +1,7 @@
 #ifndef lint
 static char SccsId[]="$Id$";
 #endif /*lint*/
-/* Copyright (c) 1990-1993 The Regents of the University of California.
+/* Copyright (c) 1990-1994 The Regents of the University of California.
  * All rights reserved.
  * 
  * Permission is hereby granted, without written agreement and without
@@ -34,10 +34,14 @@ static char SccsId[]="$Id$";
 /* for EWOULDBLOCK */
 #include <errno.h>
 
+#if defined(ULTRIX)
+#include <time.h>
+#else
 /* kludge - due to moving target, handled in -I */
 #define KERNEL
 #include <time.h>
 #undef KERNEL
+#endif
 
 #include <sys/types.h>
 #include <sys/socket.h>
