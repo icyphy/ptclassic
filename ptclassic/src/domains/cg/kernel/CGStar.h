@@ -18,6 +18,7 @@ $Id$
 #include "DataStruct.h"
 #include "Code.h"
 #include "CGSymbol.h"
+#include "IntState.h"
 
 	////////////////////////////////////
 	// class CGCodeBlock
@@ -63,6 +64,10 @@ public:
 
 	Symbol codeblockSymbol;
 	Symbol starSymbol;
+
+	// get and set the procId
+	int getProcId() { return int(procId); }
+	void setProcId(int i) { procId = i; }
 
 protected:
 
@@ -113,6 +118,9 @@ protected:
 	// Update all PortHoles so that the offset is incremented by the
 	// number of samples consumed or produced.
 	void advance();
+
+	// processor id 
+	IntState procId;
 
 private:
 	// List of all local star labels
