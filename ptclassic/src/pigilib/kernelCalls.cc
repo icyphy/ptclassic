@@ -212,6 +212,7 @@ Inputs: name = name of sog
 Outputs: terms = list of info about each porthole
 
 Changed to support multiPortHoles, 7/24/90
+Changed to add info on data types, 10/5/90
 */
 extern "C" boolean
 KcGetTerms(char* name, TermList* terms)
@@ -227,9 +228,20 @@ KcGetTerms(char* name, TermList* terms)
 		return FALSE;
 	}
 	char *names[TERM_ARR_MAX];
+	const char *types[TERM_ARR_MAX];
 	int isOut[TERM_ARR_MAX];
+
 	int n = block->portNames(names, isOut, TERM_ARR_MAX);
+// fill in datatypes
+	for (int i = 0; i < n; i++) {
+		PortHole* p = block->portWithName (names[i]);
+		if (p) types[i] = p->myType();
+	}
 	int nm = block->multiPortNames(names+n, isOut+n, TERM_ARR_MAX-n);
+	for (i = 0; i < n; i++) {
+		MultiPortHole* p = block->multiPortWithName (names[n+i]);
+		if (p) types[n+i] = p->myType();
+	}
 	if (npspec) {
 		if (nm == 0 || nm == 1 && strcmp (names[n], mphname) != 0) {
 			char buf[80];
@@ -245,11 +257,13 @@ KcGetTerms(char* name, TermList* terms)
 		else {
 			char* mphname = names[n];
 			int dir = isOut[n];
+			const char* mphtype = types[n];
 			for (int i = 1; i <= npspec; i++) {
 				char buf[128];
 				sprintf (buf, "%s#%d", mphname, i);
 				names[n+i-1] = savestring (buf);
 				isOut[n+i-1] = dir;
+				types[n+i-1] = mphtype;
 			}
 			n += npspec;
 			nm = 0;
@@ -257,13 +271,15 @@ KcGetTerms(char* name, TermList* terms)
 	}
 	terms->in_n = 0;
 	terms->out_n = 0;
-	for (int i=0; i < n + nm; i++) {
+	for (i=0; i < n + nm; i++) {
 		if (isOut[i]) {
 			terms->out[terms->out_n].name = names[i];
+			terms->out[terms->out_n].type = types[i];
 			terms->out[terms->out_n++].multiple = (i >= n);
 		}
 		else {
 			terms->in[terms->in_n].name = names[i];
+			terms->in[terms->in_n].type = types[i];
 			terms->in[terms->in_n++].multiple = (i >= n);
 		}
 	}
@@ -329,6 +345,78 @@ KcInfo(char* name, char** info)
 	*info = savestring((const char *)msg);
 	return TRUE;
 }
+
+/* 10/5/90 */
+extern "C" int
+KcProfile (char* name) {
+	Block* b = findClass (name);
+	if (!b) {
+		ErrAdd ("Unknown block");
+		return FALSE;
+	}
+	clr_accum_string ();
+	if (b->isItAtomic ()) {
+		accum_string ("Star: ");
+		accum_string (name);
+		accum_string (" (");
+		accum_string (b->asStar().domain());
+		accum_string (")\n");
+	}
+	else {
+		accum_string ("Compiled-in galaxy: ");
+		accum_string (name);
+		accum_string (" (");
+		accum_string (b->asGalaxy().myDomain);
+		accum_string ("\n");
+	}
+	const char* desc = b->readDescriptor();
+	accum_string (desc);
+// some descriptors don't end in '\n'
+	if (desc[strlen(desc)-1] != '\n')
+		accum_string ("\n");
+// get termlist
+	TermList terms;
+	KcGetTerms (name, &terms);
+	if (terms.in_n) accum_string ("Inputs:\n");
+	for (int i = 0; i < terms.in_n; i++) {
+		accum_string (terms.in[i].name);
+		if (terms.in[i].multiple) accum_string (" (multiple)");
+		accum_string (": ");
+		accum_string (terms.in[i].type);
+		accum_string ("\n");
+	}
+	if (terms.out_n) accum_string ("Outputs:\n");
+	for (i = 0; i < terms.out_n; i++) {
+		accum_string (terms.out[i].name);
+		if (terms.out[i].multiple) accum_string (" (multiple)");
+		accum_string (": ");
+		accum_string (terms.out[i].type);
+		accum_string ("\n");
+	}
+// now do states
+	accum_string ("States:\n");
+	for (i = b->numberStates(); i>0; i--) {
+		State& s = b->nextState();
+		accum_string (s.readName());
+		accum_string (" (");
+		accum_string (s.type());
+		accum_string ("): ");
+		const char* d = s.readDescriptor();
+		if (d && strcmp (d, s.readName()) != 0) {
+			accum_string (d);
+			accum_string (": ");
+		}
+		accum_string ("default = ");
+		const char* v = s.getInitValue();
+		if (!v) v = "";
+		if (strlen (v) > 32) accum_string ("\n        ");
+		accum_string (v);
+		accum_string ("\n");
+	}
+	pr_accum_string ();
+	return TRUE;
+}
+
 	
 /* 7/25/90
    Make multiple ports in a star multiporthole
