@@ -27,7 +27,7 @@ limitation of liability, and disclaimer of warranty provisions.
         explanation {
 .pp
 This star implements an infinite impulse response filter of arbitrary order
-in a direct form II [1] realization, using fixed point arithmetic.
+in a direct form II [1] realization, using fixed-point arithmetic.
 The parameters of the star specify $H(z)$, the $Z$-transform of an
 impulse response $h(n)$.
 The output of the star is the convolution of the input with $h(n)$.
@@ -48,6 +48,14 @@ after being added to other products.
 The state variables are stored with the precision given by \fIStatePrecision\fR.
 The output is quantized (rounded) to \fIOutputPrecision\fR before being
 sent to the output.
+.pp
+The numerator ``tap'' coefficients and the denominator ``feedback''
+coefficients have a default precision of 1.23, i.e., 1 sign bit and
+23 fractional bits.
+You can override the default precision by adding a precision specification
+surrounded by curly braces at the beginning of the string of array values.
+During computation of filter outputs, the precision of the filter taps
+is converted to the precision contained in the "CoefPrecision" parameter.
 .ID "Schafer, R. W."
 .ID "Oppenheim, A. V."
 .UH REFERENCES
