@@ -383,7 +383,7 @@ int
 SRRecursiveScheduler::mincost(
   Set & subgraph	/* Vertices in the subgraph being scheduled */,
   int max		/* Maximum allowable cost */,
-  SRRecursiveSchedule & schedule	/* The best schedule found */,
+  SRRecursiveSchedule & bestSchedule	/* The best schedule found */,
   int scheduleIndex	/* Where to put the subgraph in the schedule */,
   int depth		/* Depth of recursion */ )
 {
@@ -410,7 +410,7 @@ SRRecursiveScheduler::mincost(
   // Compute a rough bound on the cost by summing a rough bound on each SCC
   // and save the size of each SCC for later use
 
-  int SCCsize[ numSCCs ];
+  int * SCCsize = new int[ numSCCs ];
 
   int remaining = 0;
   int i = 0;
@@ -461,8 +461,8 @@ SRRecursiveScheduler::mincost(
       // A one-dimensional function -- its cost is always one
       remaining--;
 
-      scheduleIndex = schedule.addSingleVertex( scheduleIndex,
-						SCC->onemember() );
+      scheduleIndex = bestSchedule.addSingleVertex( scheduleIndex,
+						    SCC->onemember() );
 
     } else {
 
@@ -522,9 +522,9 @@ SRRecursiveScheduler::mincost(
 	    // Get the optimal schedule for the subgraph and
 	    // wrap the first partition around it
 	    
-	    schedule.getSection( scheduleIndex + psize, SCCsize[i] - psize,
-				 trialSchedule );
-	    schedule.addPartition( scheduleIndex, SCCsize[i], *partition );
+	    bestSchedule.getSection( scheduleIndex + psize, SCCsize[i] - psize,
+				     trialSchedule );
+	    bestSchedule.addPartition( scheduleIndex, SCCsize[i], *partition );
 	    
 	    bound = actual - 1;
 	  }
@@ -549,6 +549,7 @@ SRRecursiveScheduler::mincost(
   }
 
   destroySCCs( SCCs );
+  delete [] SCCsize;
   return max-remaining;
 
 }
