@@ -65,6 +65,7 @@ VHDLBSTARS = $(LIBDIR)/vhdlbstars.o
 MDSDFSTARS = $(LIBDIR)/mdsdfstars.o
 CPSTARS = $(LIBDIR)/cpstars.o $(LIBDIR)/cpipstars.o
 PNSTARS = $(LIBDIR)/pnstars.o
+IPUSSTARS = $(LIBDIR)/ipusstars.o
 
 # Optional star libraries
 ATMSTARS = $(LIBDIR)/mqstars.o $(LIBDIR)/deatmstars.o $(LIBDIR)/sdfatmstars.o
@@ -133,6 +134,7 @@ $(LIBDIR)/libsdf.$(LIBSUFFIX) \
 $(LIBDIR)/libvhdlfstars.$(LIBSUFFIX) $(LIBDIR)/libvhdlf.$(LIBSUFFIX) \
 $(LIBDIR)/libvhdlbstars.$(LIBSUFFIX) $(LIBDIR)/libvhdlb.$(LIBSUFFIX) \
 $(LIBDIR)/libmdsdfstars.$(LIBSUFFIX) $(LIBDIR)/libmdsdf.$(LIBSUFFIX) \
+$(LIBDIR)/libipusstars.$(LIBSUFFIX) $(LIBDIR)/libipus.$(LIBSUFFIX) \
 $(THREAD_STAR_LIBFILES) \
 $(MATLABSTARS_LIBFILE)
 
@@ -149,17 +151,19 @@ HOF_LIBFILES =	$(LIBDIR)/libhofstars.$(LIBSUFFIX) \
 # Tcl/Tk stars can be used in pigiRpc but not ptcl.
 PTINY_TCLSTARS = $(LIBDIR)/sdftclstars.o $(LIBDIR)/detclstars.o
 PTRIM_TCLSTARS = $(PTINY_TCLSTARS)
-TCLSTARS =	$(PTINY_TCLSTARS) $(LIBDIR)/mdsdftclstars.o
+TCLSTARS =	$(PTINY_TCLSTARS) $(LIBDIR)/mdsdftclstars.o \
+		$(LIBDIR)/ipustclstars.o
 
 PTINY_TCL_STAR_LIBS = -lsdftclstars -ldetclstars
 PTRIM_TCL_STAR_LIBS = $(PTINY_TCL_STAR_LIBS)
-TCL_STAR_LIBS =	$(PTINY_TCL_STAR_LIBS) -lmdsdftclstars
+TCL_STAR_LIBS =	$(PTINY_TCL_STAR_LIBS) -lmdsdftclstars -lipustclstars
 
 PTINY_TCL_STAR_LIBFILES =	$(LIBDIR)/libsdftclstars.$(LIBSUFFIX) \
 				$(LIBDIR)/libdetclstars.$(LIBSUFFIX)
 PTRIM_TCL_STAR_LIBFILES =	$(PTINY_TCL_STAR_LIBFILES)
 TCL_STAR_LIBFILES =	$(PTINY_TCL_STAR_LIBFILES) \
-			$(LIBDIR)/libmdsdftclstars.$(LIBSUFFIX)
+			$(LIBDIR)/libmdsdftclstars.$(LIBSUFFIX) \
+			$(LIBDIR)/libipustclstars.$(LIBSUFFIX)
 
 # Matlab settings
 include $(ROOT)/mk/matlab.mk
@@ -200,6 +204,7 @@ $(MATLABSTAR_LIB) $(MATLABEXT_LIB) \
 -lvhdlfstars -lvhdlf \
 -lvhdlbstars -lvhdlb \
 -lmdsdfstars -lmdsdf \
+-lipusstars -lipus \
 $(THREAD_STAR_LIBS)
 
 # Extra targets
