@@ -32,10 +32,10 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #define _std_h
 /*  _std_h     is defined by the g++ std.h file */
 
-#if defined(PTHPPA) || defined(SYSV) || defined (SVR4)
+#if defined(PTHPPA_CFRONT) || defined(SYSV) || defined (SVR4)
 #include <stdlib.h>
 #include <unistd.h>
-#include "../../kernel/miscFuncs.h"
+//#include "../../kernel/miscFuncs.h"
 inline long random() { return lrand48();}
 inline void srandom(int seed) { srand48(seed);}
 #else
