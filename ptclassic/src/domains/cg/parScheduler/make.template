@@ -1,0 +1,42 @@
+# @(#)make.template	1.6	6/16/92
+# Copyright (c) 1991 The Regents of the University of California.
+#				All Rights Reserved.
+# Gil Sih's parallel scheduler.
+
+
+# Root of Ptolemy directory
+ROOT=../../../..
+# True source directory
+VPATH = $(ROOT)/src/domains/cg/parScheduler
+
+# get configuration info
+CONFIG=$(ROOT)/config-$(ARCH).mk
+include $(CONFIG)
+
+SDFKERNEL = $(ROOT)/src/domains/sdf/kernel
+EGKERNEL = $(ROOT)/src/domains/sdf/expgraph
+CGKERNEL = $(ROOT)/src/domains/cg/kernel
+
+INCL=-I$(SDFKERNEL) -I$(CGKERNEL) -I$(KERNDIR) -I$(EGKERNEL) 
+
+SRCS =	ParNode.cc Parraph.cc ParScheduler.cc \
+		UniProcessor.cc ParProcessors.cc 
+
+HDRS =  ParNode.h ParGraph.h ParScheduler.h \
+		UniProcessor.h ParProcessors.h 
+
+OBJS = $(SRCS:.cc=.o)
+
+LIB = libPar.a
+
+all:	makefile $(LIB)
+
+# "make install" puts things in the official place
+install:	makefile $(LIBDIR)/$(LIB)
+
+# include common definitions, rules
+include $(ROOT)/common.mk
+
+# Don't add anything after the next line; makedepend will zap it.
+# DO NOT DELETE THIS LINE -- make depend depends on it.
+
