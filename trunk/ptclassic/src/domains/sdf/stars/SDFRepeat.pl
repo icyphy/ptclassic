@@ -24,16 +24,13 @@ defstar {
 	}
 	output {
 		name{output}
-		type{ANYTYPE}
+		type{=input}
 	}
 	defstate {
 		name {numTimes}
 		type {int}
 		default {2}
 		desc { "Repetition factor" }
-	}
-	constructor {
-		input.inheritTypeFrom(output);
 	}
 	start {
 		output.setSDFParams(int(numTimes),int(numTimes)-1);

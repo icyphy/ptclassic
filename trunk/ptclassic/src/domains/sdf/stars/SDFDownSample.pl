@@ -31,7 +31,7 @@ defstar {
 	}
 	output {
 		name{output}
-		type{ANYTYPE}
+		type{=input}
 	}
 	defstate {
 		name {factor}
@@ -44,9 +44,6 @@ defstar {
 		type {int}
 		default {0}
 		desc { "Downsample phase" }
-	}
-	constructor {
-		input.inheritTypeFrom(output);
 	}
 	start {
 		input.setSDFParams(int(factor),int(factor)-1);
