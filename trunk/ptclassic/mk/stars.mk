@@ -538,5 +538,12 @@ CUSTOM_DIRS += $(CROOT)/src/kernel $(CROOT)/src/pigiRpc $(CROOT)/src/ptcl \
 PT_DEPEND += $(LIBDIR)/libptcl.$(LIBSUFFIX) $(LIBDIR)/libptolemy.a \
 	$(LIBFILES) $(STARS)
 
-LIBS += version.o -lptcl -lptolemy $(ITCL_LIBSPEC) $(TCL_LIBSPEC) \
+# this would not be defined if we are making a small stand-alone 
+# program to test the ptolemy libraries, see standalone.mk
+ifdef PIGI
+	LIBS += version.o 
+endif
+
+LIBS += -lptcl -lptolemy $(ITCL_LIBSPEC) $(TCL_LIBSPEC) \
 	$(SYSLIBS) $(LIB_FLUSH_CACHE)
+
