@@ -144,8 +144,11 @@ octObject *facetPtr;
 	    /* skip */
 	    ;
 	} else if (IsGal(&inst)) {
-	    ERR_IF1(!MyOpenMaster(&galFacet, &inst, "contents", "r"));
-	    ERR_IF1(!CompileGal(&galFacet));
+	    if (!MyOpenMaster(&galFacet, &inst, "contents", "r")
+	      || !CompileGal(&galFacet)) {
+		octFreeGenerator(&genInst);
+		return FALSE;
+	    }
 	} else {
 	    /* assume inst is a star... */
 	    if (!AutoLoadCk(&inst)) {
@@ -257,17 +260,36 @@ octObject *facetPtr;
 	if (IsVemConnector(&inst) || IsIoPort(&inst)) {
 	    /* skip */
 	} else if (IsDelay(&inst)) {
-	    ERR_IF1(!ProcessMarker(facetPtr, &inst, "delay"));
+	    if (!ProcessMarker(facetPtr, &inst, "delay")) {
+		octFreeGenerator(&genInst);
+		return FALSE;
+	    }
 	} else if (IsBus(&inst)) {
-	    ERR_IF1(!ProcessMarker(facetPtr, &inst, "buswidth"));
+	    if (!ProcessMarker(facetPtr, &inst, "buswidth")) {
+		octFreeGenerator(&genInst);
+		return FALSE;
+	    }
 	} else {
 	    /* assume it's a sog */
-	    ERR_IF1(!GetOrInitSogParams(&inst, &pList));
+	    if (!GetOrInitSogParams(&inst, &pList)) {
+		octFreeGenerator(&genInst);
+		return FALSE;
+	    }
 	    akoName = BaseName(inst.contents.instance.master); 
-	    ERR_IF1((name = UniqNameGet(akoName)) == NULL);
+	    if ((name = UniqNameGet(akoName)) == NULL) {
+		octFreeGenerator(&genInst);
+		return FALSE;
+	    }
 	    inst.contents.instance.name = name;
-	    ERR_IF2(octModify(&inst) != OCT_OK, octErrorString());
-	    ERR_IF1(!KcInstance(name, akoName, &pList));
+	    if (octModify(&inst) != OCT_OK) {
+		octFreeGenerator(&genInst);
+		ErrAdd(octErrorString());
+		return FALSE;
+	    }
+	    if (!KcInstance(name, akoName, &pList)) {
+		octFreeGenerator(&genInst);
+		return FALSE;
+	    }
 	}
 	FreeOctMembers(&inst);
     }
@@ -338,7 +360,10 @@ int *inN, *outN;
 	}
 	if (term.contents.term.instanceId != oct_null_id) {
 	    /* actual term */
-	    ERR_IF1(!IsInputTerm(&term, &result));
+	    if (!IsInputTerm(&term, &result)) {
+		octFreeGenerator(&termGen);
+		return FALSE;
+	    }
 	    if (result) {
 		in[(*inN)++] = term;
 	    } else {
@@ -458,14 +483,21 @@ octObject *facetPtr;
 /* For each net, we require only that there be at least one input
    and at least one output.  Other errors are handled by the kernel.
  */
-	ERR_IF1(!CollectTerms(&net, in, &inN, out, &outN));
+	if (!CollectTerms(&net, in, &inN, out, &outN)) {
+	    octFreeGenerator(&netGen);
+	    return FALSE;
+	}
 	totalN = inN + outN;
 	GetStringizedProp(&net, "delay", delay, BLEN);
 	GetStringizedProp(&net, "buswidth", width, BLEN);
 
 	if (totalN < 2) {
 	    /* bad net, delete it */
-	    ERR_IF2(octDelete(&net) != OCT_OK, octErrorString());
+	    if (octDelete(&net) != OCT_OK) {
+		octFreeGenerator(&netGen);
+		ErrAdd(octErrorString());
+		return FALSE;
+	    }
 	    PrintDebug("Warning: bad net deleted");
 	    continue;
 	}
@@ -700,7 +732,6 @@ octObject *galFacetPtr;
      * and it is not modified.  Note that we will compile it
      * again even if it is unmodified if a different type of
      * wormhole must be generated.
-     * It is important that we switch domains before doing this check.
      */
 
     known = KcIsKnown(name);
@@ -708,8 +739,9 @@ octObject *galFacetPtr;
 	return(TRUE);
     }
 
-    /* Call Kernel function to set KnownBlock current domain to the inner
-     * domain
+    /* Call Kernel function to set the current domain to the inner
+     * domain.  It is important that we switch domains before processing
+     * the subgalaxies.
      */
     if (! KcSetKBDomain(galDomain)) {
         PrintErr("Domain error in galaxy or wormhole.");
@@ -756,7 +788,6 @@ octObject *galFacetPtr;
     if (!xferedBool) {
 	ERR_IF2(!DupSheetAdd(&xfered, name), msg);
     }
-    KcSetKBDomain(oldDomain);
     return (TRUE);
 }
 
@@ -922,6 +953,7 @@ octObject *facetPtr;
 	octObject univFacet;
 
 	if (!MyOpenMaster(&univFacet,&inst, "contents", "r")) {
+	    octFreeGenerator(&genInst);
 	    PrintErr(octErrorString());
 	    return FALSE;
 	}
@@ -940,6 +972,7 @@ octObject *facetPtr;
 		n = 10;  /* default number of iterations */
             }
 	    if (!CompileFacet(&univFacet) || !KcRun(n)) {
+		octFreeGenerator(&genInst);
 		sprintf (msg, "Execution of '%s' failed", name);
 		PrintErr(msg);
 		return FALSE;
