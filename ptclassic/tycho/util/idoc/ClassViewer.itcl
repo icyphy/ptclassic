@@ -32,26 +32,43 @@
 
 #######################################################################
 #### IDoc
+# This class defines a combination of a MultiPanel widget and two HTML
+# widgets which will soon be used for more efficient class browsing.
+#
+# The MultiPanel widget is along the left side of the screen and is used
+# for controlling the contents of the two HTML widgets. A click brings 
+# items into the proper HTML widgets, and placing the mouse over an item
+# puts an abbreviated version of the information in the statusbar at the
+# bottom of the screen. Items within the Panel can be expanded and 
+# contracted and should be able to scroll as well.
+#
+# The top HTML widget holds entire-class information, and usually will
+# be sized larger than the bottom one and changes less often.
+# 
+# The bottom HTML widget holds specific information relating to specific
+# constructs the user selects in the Panel on the left. 
 # This class defines a combination of an HTML widget and a text widget
 # which will eventually be used for more efficient class browsing.
 #  
-# Data is stored in an array of lists. The array is indexed by type
-# (Protected Variable, Private Method, etc.) and the lists are arranged in
-# name/content pairs (link {click here} altlink {shift-click here} etc {and
-# more}). 
+# Data is stored in a <a href="$TYCHO/kernel/doc/codeDoc/Class.html">
+# ::tycho::Class</a> model. The model is in turn generated from the code.
+# 
+# IDoc supports any language that can be encoded into a ::tycho::Class
+# representation. Currently, keywords are only correct for Itcl. However,
+# the default behaviour will allow browsing of any language, though certain
+# information may be left out in the current implementation.
+#
+# To add a new language to IDoc, modify the displayMeth (chooses the names 
+# and ordering for methods and procs in the MultiPanel), displayVar 
+# (chooses the names and ordering for variables in the MultiPanel), and 
+# formatExpl (formats the explanations of variables and methods in HTML) 
+# methods.
 #  
-# Eventually I would like to somehow add the methods of parent classes into
-# the text widget and ultimately I think a better design would inherit from
-# the HTML widget and add on to it. In a perfect world, this functionality 
-# could be implemented with frames. (Except for the shift-click, which is  
-# not well defined anyway.)
-#  
-# John suggested something about right clicking on the methods to allow
-# switching to the idoc for the parent class or something. I think a link to
-# the parent class(es) would be useful, but I would like to first document  
-# all the methods that are available to a user and to a maintainer of this  
-# particular class, which includes public and protected methods from the   
-# parent classes which are not redefined.
+# I am currently working on the generation of ::Class files and then the
+# importation of ancestors...I think it's important that the documentation
+# have the ability to be flattened. That is, a developer or user needs to know
+# which variables and methods have been inherited from the parents. Switching
+# back and forth is time consuming, confusing, and downright frustrating.
 #
 # Here's an example of how to use this class:
 #
@@ -375,11 +392,8 @@ body ::tycho::IDoc::ghostHandle {horizontal pixels} {
 
 #######################################################################
 #### insertData
-# Append the specified data to the existing display.
-# The data should be a list of items of the form <i>methodname args</i>,
-# where <i>methodname</i> is a method of this class (i.e. any class
-# derived from <code>IDoc</code>), and <i>args</i> is the
-# set of arguments appropriate for that method.
+# Append the specified data to the existing display. The data is in the
+# form of a ::tycho::Class and is read by methods from that class.
 #
 body ::tycho::IDoc::insertData {data} {
     if [getReadOnly] {bell; return}
@@ -393,14 +407,13 @@ body ::tycho::IDoc::insertData {data} {
 
 #########################################################################
 #### putHtml
-# Load a portion of HTML into the $myHtml widget
+# Load a portion of HTML into the proper HTML widget
 #
 body ::tycho::IDoc::putHtml {data {top 1}} {
     switch $top {
         1 {
             $myHtmlTop clear
             $myHtmlTop insertData $data
-
         }
         0 {
             $myHtmlBottom clear
@@ -479,7 +492,7 @@ body ::tycho::IDoc::bindExpl {item label} {
     set expl [formatExpl $item]
 
     # bind explanation to double click
-    $myContents bind $label <Double-Button-1> \
+    $myContents bind $label <Button-1> \
             [code "$this putHtml {$expl} {0}"]
 }
 
@@ -726,7 +739,4 @@ body ::tycho::IDoc::setupHandles {} {
         %Q resizeFrame 1 [expr $lastPress - %x]
         %Q ghostHandle 1 0
     }
-
-
-
 }
