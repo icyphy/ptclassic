@@ -44,12 +44,35 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "Scheduler.h"
 #include "EventQueue.h"
 
+// Base class for all DE schedulers.
+
+class DEBaseSched : public Scheduler
+{
+public:
+	// relative time scale to the outer domain when it is a inner domain.
+	double relTimeScale;
+
+        // synchronization mode. It is set by default.
+        // If reset, the execution of the process star can be optimized.
+        // Only knowledgeable user may reset this flag!
+        int syncMode;
+
+        // output the stopTime
+        virtual double whenStop();
+
+	// fetch an event on request.
+	virtual int fetchEvent(InDEPort* p, double timeVal);
+
+	// The event queue.
+	virtual BasePrioQueue* queue();
+};
+
 	////////////////////////////
 	// DEScheduler
 	////////////////////////////
 
 
-class DEScheduler : public Scheduler {
+class DEScheduler : public DEBaseSched {
 
 	// stoping condition of the scheduler
 	double stopTime;
@@ -111,18 +134,12 @@ public:
 	DEScheduler () { stopTime = 100.0; }
 
 	// output the stopTime
-	double whenStop() { return stopTime ;}
-
-	// relative time scale to the outer domain when it is a inner domain.
-	double relTimeScale;
-
-	// synchronization mode. It is set by default.
-	// If reset, the execution of the process star can be optimized.
-	// Only knowledgeable user may reset this flag!
-	int syncMode;
+	/*virtual*/ double whenStop() { return stopTime ;}
 
 	// fetch an event on request.
-	int fetchEvent(InDEPort* p, double timeVal);
+	/*virtual*/ int fetchEvent(InDEPort* p, double timeVal);
+
+	/*virtual*/ BasePrioQueue* queue() { return &eventQ; }
 };
 
 #endif

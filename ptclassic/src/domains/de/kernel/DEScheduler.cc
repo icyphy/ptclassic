@@ -49,6 +49,29 @@ These are the methods for the discrete event scheduler.
 
 extern const char DEdomainName[];
 
+// Base class methods produce error messages.
+
+// output the stopTime
+double DEBaseSched::whenStop()
+{
+    Error::abortRun("whenStop() is not implemented in base class!");
+    return 0.0;
+}
+
+// fetch an event on request.
+int DEBaseSched :: fetchEvent(InDEPort*, double)
+{
+    Error::abortRun("fetchEvent() is not implemented in base class!");
+    return 0;
+}
+
+// The event queue.
+BasePrioQueue* DEBaseSched::queue()
+{
+    Error::abortRun("queue() is not implemented in base class!");
+    return 0;
+}
+
 /*******************************************************************
 		Main DE scheduler routines
 *******************************************************************/
