@@ -26,6 +26,7 @@ special routines to generate the sub universes.
 // clone a star
 SDFStar* cloneStar(SDFStar* org) {
 	SDFStar* newS = (SDFStar*) org->clone();
+	newS->copyStates(*org);
 	if (org->numberMPHs() <= 0) return newS;
 	
 	// clone the multi portholes.
