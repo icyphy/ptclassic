@@ -1,39 +1,33 @@
 .H1 "Introduction"
 .pp
-The
-.c CG
-domain and derivative domains are used to generate code rather
-than run simulations.
-Only the derivative domains are of practical use for generating
-code (and none are included in this release).
-The stars in the
-.c CG
-domain itself can be thought of as ``comment generators''; they
-are useful for testing and debugging schedulers and for little else.
-The
-.c CG
-domain is intended as a model and a collection of base classes
-for derivative domains.
-This section, therefore, documents the common features and general
-structure of all code generation domains.
+.Id "CG, domain"
+The \fBCG\fR domain and derivative domains are used to generate code rather 
+than to run simulations. Only the derivative domains are of practical use 
+for generating code. The stars in the \fBCG\fR domain itself can be thought 
+of as ``comment generators''; they are useful for testing and debugging 
+schedulers and for little else. The \fBCG\fR domain is intended as a model 
+and a collection of base classes for derivative domains. This section, 
+therefore, documents the common features and general structure of all code 
+generation domains. All the code generation domains derived from the 
+\fBCG\fR in this release obey \fBSDF\fR semantics and can thus be scheduled 
+at compile time. Internally, however, the \fBCG\fR only assumes that stars 
+obey data flow semantics. A future release will take advantage of this 
+fact. 
 .pp
-The principle mechanism is to define
-.c codeblock s
-that are processed and written to a code file, which can then
-be compiled or assembled.
-These code blocks can be parsed and edited in ways that depend
-on the target processor.  In the generic
-.c CG
-domain, no such editing occurs.
+.Ir "target, code generation"
+A key feature of code generation domains is the notion of a target 
+architecture. Every application must have a user-specified target 
+architecture, selected from a set of targets supported by the user-selected 
+domain. Every target architecture is derived from the base class 
+\fBTarget\fR, and controls such operations as scheduling, compiling, 
+assembling, and downloading code. Since it controls scheduling, 
+multiprocessor architectures can be supported with automated task 
+partitioning and synchronization. 
 .pp
-A key feature of code generation domains is the notion of a target
-architecture.
-Every application must have a user-specified target
-architecture, selected from a set of targets supported
-by the user-selected domain.
-Every target architecture is derived from the base class
-.c Target ,
-and controls such operations as scheduling, compiling, assembling,
-and downloading code.
-Since it controls scheduling, multiprocessor architectures can be
-supported with automated task partitioning and synchronization.
+.Ir "CGStar, class"
+.Ir "codeblock"
+\fBCGStars\fR, define \fBcodeblocks\fR which are used to specify blocks of 
+code in the target language. The codeblocks are pieced together 
+\fBCGStar\fR methods thus allowing for conditional code generation. The 
+codeblocks are processed and written to \fBtarget code streams\fR, which 
+can then be compiled or assembled. 
