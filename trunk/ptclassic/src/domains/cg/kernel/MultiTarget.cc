@@ -36,13 +36,35 @@ BaseMultiTarget::BaseMultiTarget(const char* name,const char* starclass,
 	     "inheritProcessors",this,"NO","If yes, inherit child targets"));
         addState(sendTime.setState("sendTime",this,"1",
                                    "time to send one datum"));
+        addState(oneStarOneProc.setState("oneStarOneProc",this,"NO",
+	   "If yes, place all invocations of a star into the same processor"));
+        addState(manualAssignment.setState("manualAssignment",this,"NO",
+	   "If yes, specify processor assignment of stars manually"));
+        addState(adjustSchedule.setState("adjustSchedule",this,"NO",
+	   "If yes, overide the previously obtained schedule by manual assignment"));
 }
 
+// Based on priorities of the parameters, we may need to adjust the
+// value of the parameters of low priority.
+void BaseMultiTarget :: initState() {
+	Block :: initState();
+	if (int(adjustSchedule)) manualAssignment = TRUE;
+	if (int(manualAssignment)) oneStarOneProc = TRUE;
+}
+	
 int BaseMultiTarget :: run() {
 	iters = (int)mySched()->getStopTime();
 	mySched()->setStopTime(1);
 	int i = Target::run();
 	return i;
+}
+
+SDFStar* BaseMultiTarget :: createSend(int from, int to, int num) {
+	LOG_NEW; return new SDFStar;
+}
+
+SDFStar* BaseMultiTarget :: createReceive(int from, int to, int num) {
+	LOG_NEW; return new SDFStar;
 }
 
 void BaseMultiTarget :: setProfile(Profile*) {}
@@ -63,7 +85,10 @@ void BaseMultiTarget :: restoreCommPattern() {}
 void BaseMultiTarget :: clearCommPattern() {}
 
 // By default, assume zero communication time.
-int BaseMultiTarget :: scheduleComm(ParNode*,int when) { return when; }
+int BaseMultiTarget :: scheduleComm(ParNode*,int when, int) 
+	{ return when; }
+
+ParNode* BaseMultiTarget :: backComm(ParNode*) { return 0; }
 
 IntArray* BaseMultiTarget :: candidateProcs(ParProcessors*) 
 	{ return NULL; }
