@@ -256,6 +256,15 @@ class ::tycho::Model {
     # Unsubscribe from data changes
     method unsubscribe {whoiam {pattern {}}}
 
+    # Add data specific to a view
+    method viewput {key index data}
+
+    # Read one data item specific to a view
+    method viewget {key index}
+
+    # Read many data items specific to a view
+    method viewmatch {key pattern}
+
     # Write the data to a file
     method write {{file {}} {image {}}}
 
@@ -289,6 +298,9 @@ class ::tycho::Model {
     
     # The marks in the redo/undo history
     protected variable historyMark
+    
+    # The view-specific data stored here by views
+    protected variable viewdata
 }
 
 
@@ -871,6 +883,37 @@ body ::tycho::Model::unsubscribe {whoiam {pattern {}}} {
 	    set subscriptions($pattern) [array get temp]
 	}
     }
+}
+
+########################################################################
+#### viewput
+#
+# Add data specific to a view.
+#
+body ::tycho::Model::viewput {key index data} {
+	set viewData($key,$index) $data
+}
+
+########################################################################
+#### viewget
+#
+# Read one data item specific to a view. Null if no data.
+#
+body ::tycho::Model::viewget {key index} {
+	if { [::info exists viewData($key,$index)] } {
+		return viewData($key,$index)
+	} else {
+		return ""
+	}
+}
+
+########################################################################
+#### viewmatch
+#
+# Read many data items specific to a view. Null if no match. 
+#
+body ::tycho::Model::viewmatch {key pattern} {
+	return [array get viewData $pattern]
 }
 
 ########################################################################
