@@ -188,8 +188,8 @@ ifdef C50
 		LIBS += -lc50targets
 		LIBFILES += $(LIBDIR)/libc50targets.$(LIBSUFFIX)
 	else
-		TARGETS += $(CG56T)/DSKC50Target.o \
-			$(CG56T)/SubC50Target.o
+		TARGETS += $(C50T)/DSKC50Target.o \
+			$(C50T)/SubC50Target.o
 	endif
 	# Window and RaisedCosine star in c50/dsp/stars need Cephes Library
 	PTDSPLIB = 1
