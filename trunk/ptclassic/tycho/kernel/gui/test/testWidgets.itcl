@@ -247,6 +247,7 @@ test YesNoQuery-1.1 {Test YesNoQuery} {
     list {Done}
 } {Done}
 
+# Here we test Dialog::wait, too.  See $TYCHO/doc/coding/testing.html
 test YesNoQuery-2.1 {Test the modal ::tycho::askuser proc} {
     set TY_TEST_SCRIPT {
         %0 invoke yes
