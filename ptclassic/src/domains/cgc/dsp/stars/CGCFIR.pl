@@ -130,7 +130,7 @@ For more information about polyphase filters, see F. J. Harris,
 
    codeblock(bodyDecl) {
 	int phase, tapsIndex, inC, i;
-	int outCount = 0;
+	int outCount = $val(interpolation) - 1;
 	int inPos;
 	double out, tap;
    }
@@ -140,7 +140,7 @@ For more information about polyphase filters, see F. J. Harris,
 	phase = $val(decimation) - $val(decimationPhase) - 1;   
 	
 	/* Iterate once for each input consumed */
-	for (inC = $val(decimation); inC > 0; inC--) {
+	for (inC = 1; inC <= $val(decimation) ; inC++) {
 
 		/* Produce however many outputs are required for each 
 		   input consumed */
@@ -154,11 +154,11 @@ For more information about polyphase filters, see F. J. Harris,
 			    		tap = 0.0;
 				else
 			 		tap = $ref2(taps,tapsIndex);
-				inPos = $val(decimation) - inC - i;
+				inPos = $val(decimation) - inC + i;
 				out += tap * $ref2(signalIn,inPos);
 			}
 			$ref2(signalOut,outCount) = out;
-			outCount++;;
+			outCount--;;
 			phase += $val(decimation);
 		}
 		phase -= $val(interpolation);

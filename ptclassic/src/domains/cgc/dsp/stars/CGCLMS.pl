@@ -89,12 +89,12 @@ will be stored there after the run has completed.
 	int ix;
 	/* First update the taps */
 	double e = $ref(error);
-	int index = $val(decimation) - 1 - $val(errorDelay)*$val(decimation) - $val(decimationPhase);
+	int index = $val(errorDelay)*$val(decimation) + $val(decimationPhase);
 
 	for (ix = 0; ix < $val(tapSize); ix++) {
 		$ref2(taps,ix) = $ref2(taps,ix) +
 			e * $ref2(signalIn,index) * $val(stepSize);
-		index--;
+		index++;
 	}
    }
 
