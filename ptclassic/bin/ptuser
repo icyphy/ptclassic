@@ -9,7 +9,7 @@
 # Created:	26 November 1993
 
 # Host where Ptolemy development files live.
-set ptHost=watson
+set ptHost=kahn
 set ptUser=ptuser
 
 # Name of current host with domain stripped off.
@@ -19,8 +19,6 @@ set host=`hostname | sed 's/\([^.]*\).*/\1/'`
 if ($?DISPLAY) then
 	xterm -e /usr/kerberos/bin/rlogin -8l $ptUser $ptHost
 	#(xon $ptHost xterm -e /usr/kerberos/bin/rlogin -8l $ptUser $ptHost)
-else if ($host == $ptHost) then
-	exec /usr/kerberos/bin/rlogin -8l $ptUser $ptHost
 else
-	echo You must first login to $ptHost
+	exec /usr/kerberos/bin/rlogin -8l $ptUser $ptHost
 endif
