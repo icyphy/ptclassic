@@ -1,0 +1,156 @@
+<!-- $Id$ -->
+<html>
+<head>
+<title>How to use a package</title>
+</head>
+<body bgcolor="#faf0e6">
+<h1>How to use a package</a></h1>
+<p>
+
+In general, using a package is simple: just call <b>package
+require</b> with the package name as argument. However, things are not
+quite that simple, as a) the package has to be known to Tcl, and b)
+you have to make sure that you are requiring the right package.
+Mostly, this is tricky only if you are writing stand-alone
+applications that use portions of Tycho. If you
+need to know more, read on!
+
+<h2>Packages that need packages, are the happiest packages...</h2>
+
+Let's assume that you have created a new package (see <a
+href="create.html">How to create a new package</a>). This package
+uses one or more of the other Tycho packages, such as, say,
+the <b>tycho.gui</b> package. All you need to do is ensure
+that your package load script contains the line:
+
+<pre>
+  package require tycho.gui
+</pre>
+
+For robustness, you should specify the version number, so that
+anyone that tries to use your package with an old version
+of <b>tycho.gui</b> will get an error message:
+
+<pre>
+  package require tycho.gui 2.0
+</pre>
+
+Now, <b>tycho.gui</b> depends on functionality defined in
+<b>tycho.basic</b> and <b>tycho.lib</b>. Don't worry about it:
+as long as <b>tycho.gui</b> has a properly constructed
+package load file, you will get these as well. In other words,
+you only have to "require" the packages that you know you
+are interested in.
+
+<p>
+As another example, suppose that you had an application
+that used an HTML viewer and the Slate canvas package. Your
+package load file would in that case contain:
+<pre>
+  package require tycho.html
+  package require slate
+</pre>
+
+<p>You don't always have to do this in your package load file.  For
+example, you may have a package that has non-graphical <i>and</i>
+graphical functionality. In this case, your package load file should
+require, say, <b>tycho.basic</b> (which is non-graphical), and
+<b>tycho.gui</b> should be required <i>only in the files that require
+GUI functionality</i>. This allows the non-graphical part of your
+package to run in a non-graphical shell. If you required
+<b>tycho.gui</b> in your package load file, then your package would
+fail to load if used within a non-graphical shell such as
+<b>itclsh</b>. (Because <b>tycho.gui</b> requires Tk, which cannot be
+loaded into <b>itclsh</b>.
+
+<h2>Packages that require Tycho proper</h2>
+
+If you have written a package and you want to run as
+a part of the Tycho <i>application</i> (as opposed
+to running your own application that uses bits of Tycho),
+then call the procedure <b>::tycho::start</b> in
+your start-up script. This procedure accepts a bunch of
+arguments that tell is whether to show a splash screen,
+whether to start with a console, and so on. You need
+to do this after requiring <b>tycho.gui</b> or <b>tycho.kernel</b>,
+and any other packages you might need.
+
+<p>If your application really depends on all of Tycho, you
+can simple go
+<pre>
+  package require tycho
+</pre>
+
+before calling  <b>::tycho::start</b>, and every single
+package installed in your Tycho installation will be loaded.
+
+<h2>Startup scripts</h2>
+
+Startup scripts that work are a little tricky, because Tcl
+has such a lame package mechanism. The problem is that, in
+order to find a package, Tcl has to know what directories
+to look for packages in -- and what it does is look in
+the directories in the <b>auto_path</b> variable.
+
+<p>So how does <b>auto_path</b> get set? Why, by your Tcl code...
+Actually, it isn't that bad, but because there is no standard
+way of telling Tcl where to look for packages, shell scripts
+that run Tcl need to go through some contortions to find
+the packages they need.
+
+<p>The first and simplest way of having Tcl find packages is to
+install the package in the Tcl library directory. Tcl knows where that
+is, at least, and initializes <b>auto_path</b> to contain it. If you
+can't install there, then you have to rely on environment variables
+(see <a href="install.html">How to install a package</a>). Here is
+what we recommend a startup script looks like for a stand-alone
+application:
+
+<pre>
+FIXME FIXME
+
+#! /bin/sh
+# Startup itclsh \
+    exec itclsh "$0" "$@"
+
+# If the <i>PACKAGE</i>_LIBRARY variable is set, add it to the auto_path
+if [info exists env(<i>PACKAGE</i>_LIBRARY)] {
+    if { [lsearch -exact $auto_path $env(<i>PACKAGE</i>_LIBRARY)] }  {
+	lappend auto_path $env(<i>PACKAGE</i>_LIBRARY)
+    }
+}
+
+# Require the <i>PACKAGE</i> package. If this fails, require the Tycho
+# package first, since that may make the <i>PACKAGE</i> package visible
+if [catch {package require <i>PACKAGE</i>}] {
+    # Same for the TYCHO environment variable
+    if [info exists env(TYCHO)] {
+	if { [lsearch -exact $auto_path $env(TYCHO)] }  {
+	    lappend auto_path $env(TYCHO)
+	}
+    }
+    if [catch {package require Tycho}] {
+	puts "Cannot find <i>package</i> or Tycho. (More instructions)"
+	exit
+    } else {
+	package require <i>package</i>
+    }
+}
+</pre>
+
+<p>
+
+<HR>
+Copyright &#169 1998, The Regents of the University of California.
+All rights reserved.
+<br>
+Last updated: $Date$,
+comments to: <author>johnr@eecs.berkeley.edu</author>
+</body>
+</html>
+
+
+
+
+
+
