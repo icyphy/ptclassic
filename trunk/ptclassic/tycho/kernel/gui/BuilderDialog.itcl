@@ -39,7 +39,7 @@
 # FIXME: There should be a way to stop a build.
 #
 # <tcl><pre>
-# ::tycho::view BuilderDialog
+# ::tycho::view BuilderDialog -toolbar 1
 # </pre></tcl>
 #
 # BuilderDialog is a graphical front end for the Builder class.
@@ -177,7 +177,7 @@ body ::tycho::BuilderDialog::checkFiles { {displayOKMessage 0}} {
 	set msg "$msg\n\nBring up Build Dialog to build these files?"
 
 	if [::tycho::askuser $msg] {
-	    set bd [::tycho::view BuilderDialog]
+	    set bd [::tycho::view BuilderDialog -toolbar 1]
 	    # Return the name of the window so the test suite can get at it.
 	    return $bd
 	}
