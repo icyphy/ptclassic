@@ -3,71 +3,44 @@
 .SD
 Demonstrates the simulation of a blocking strategy in the queueing network.
 .DE
-.SV 1.1 "October 23, 1990"
-.AL "S. Ha"
+.SV $Revision$ $Date$
+.AL "S. Ha and E. A. Lee"
 .LD
-.IE Threshold
-.IE Gate
+.IE TestLevel
+.IE PassGate
 The
 .c Queue
-block in the library is a generic one without any special feature.
-If a Queue reaches capacity, further arrivals are lost silently.
+block discards arrivals after it reaches capacity.
 This demonstration shows how to implement a \fIblocking\fR
-strategy in the queueing network. Since we may have several
-blocking strategies, we isolate the blocking strategy into
-a separate module from the generic queueing network. We may
-change the module if want to use another blocking starategy.
+strategy in the queueing network.  This is done in a modular
+way so that a variety of blocking strategies are equally easy
+to implement.
 .pp
 The implementation of a simple blocking function is done by a pair of
-blocks :
-.c Threshold
-block and
-.c Gate
-block.
-The
-.c Threshold 
-block monitors the size of the Queue. If the Queue is saturated,
-the
-.c Threshold
-block generates a block-request(TRUE) output to the control input of the
-.c Gate
-block, which is connected to the Queue
-(\fIthreshold\fR state of the
-.c Threshold
-block should be matched to the \fIcapacity\fR of the second Queue.)
-The
-.c Gate
-block has a \fIcontrol\fR input and a \fIdiscard\fR state.  In this particular
-demo, the \fIdiscard\fR is set FALSE (refer to the manual for the
-.c Gate
-block.)  As long as the control input has FALSE value, the
-.c Gate
-.c Gate
-block is a trivial buffer without any latency. If the block-request
-input arrives at the control input, it sends no more output (it is blocked).
-Look at the demand input of the first Queue. If the
-.c Gate
-block is blocked, then the first server is also blocked since
-no data can be fetched from the first Queue. Therefore, the
-size of the first Queue keeps growing during the blocking period.
-Once the Queue is freed from the saturation, the 
-.c Threshold
-block generates a block-release (FALSE)
-output to the
-.c Gate
-block, which then resumes the normal operation.
+blocks:
+.c TestLevel,
+which checks the \fIsize\fR output of the Queue against its capacity, and
+.c PassGate,
+which blocks particles when the blocking Queue has reached capacity.
+When the blocking queue reaches capacity, the
+TestLevel block sends a signal (via an
+.c Inverter )
+to the PassGate, preventing further particles from arriving
+at the Queue.
 .pp
-Note that if we want to realize the chain of blockage, we have to
-manually insert this pair of blocks around the server.
-In the demonstration, the second server is slower (meanServiceTime = 2.0)
-then the first server (constant serviceTime = 1.0). Also, the capacity
-of the second Queue is pretty small (4) comparing with the first Queue (50).
-The large capacity of the first Queue guarantees that we do not lose
-any data from the source. The interesting display is the size of the
-second Queue. Once it reaches saturation, the size is bounced up and down
-between 3 and 4. It is because once the second Queue is freed from 
-saturation, the first server send the data to the Queue which makes
-it again saturated right away.
+Two successive Queue/Server pairs are implemented here.
+Only the second one is a blocking queue.  The capacity of the first one
+is set to 10, and after some time, this capacity is reached, and
+input particles are lost.
+The capacity of the second one is 4.
+When this capacity is reached, the PassGate is closed, preventing any
+further \fIdemand\fR events at the first queue.  While the gate
+is closed, further arrivals will accumulate in the first queue.
+When the second queue receives a \fIdemand\fR event, its size will drop
+below capacity, and a signal will be sent to the PassGate to open.
+The arrival interval of particles is 1.0, and the service time of
+the second server is 3.0, so the
+size of the first Queue grows until it reaches capacity.
 .SA
 ExpServer,
 Gate,
