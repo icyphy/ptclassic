@@ -49,6 +49,8 @@ class InACSPort : public ACSPortHole
 public:
     // Input/output identification.
     virtual int isItInput() const;
+	virtual void receiveData();
+
 };
 
 
@@ -57,6 +59,8 @@ class OutACSPort : public ACSPortHole
 public:
     // Input/output identification.
     virtual int isItOutput() const;
+	virtual void receiveData();
+	virtual void sendData();
 };
 
  

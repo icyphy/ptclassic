@@ -41,6 +41,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #endif
 
 #include "HLLTarget.h"
+#include "FloatState.h"
 
 // Defined in ACSDomain.cc
 extern const char ACSdomainName[];
@@ -59,9 +60,17 @@ public:
 
    const char* getCoreCategory() { return coreCategory; }
 
+    /* virtual */ void setup();
+
+    /* virtual */ void wrapup();
+
 protected:
 
     StringState coreCategory;
+    StringState logFile;
+
+    // schedulePeriod for interface with a timed domain.
+    FloatState schedulePeriod;
 
 };
 

@@ -48,6 +48,8 @@ public:
 
     // Domain identification.
     /*virtual*/ const char* domain() const;
+
+    int run() { return(DataFlowStar::run()); } // FIXME
 };
 
 #endif
