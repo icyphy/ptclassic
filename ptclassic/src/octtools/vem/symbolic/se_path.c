@@ -119,11 +119,6 @@ lsList cmdList;			/* Argument list            */
  */
 {
     octObject target_fct, pathLayer;
-    octCoord width;
-    struct octPoint *pnts;
-    lsGen gen;
-    int i;
-    vemOneArg *arg;
     vemStatus rt;
 
     /* All arguments should be in same buffer */
@@ -327,7 +322,6 @@ Or Cancel the operation and try again.\n";
 	} 
 
 	{
-	    octObject nc;
 	    char msg[SYM_MAX_MSG];
 
 	    /* Check to see if we can put down an end-point connector */
