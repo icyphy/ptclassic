@@ -69,8 +69,64 @@ Kluwer Academic Publishers, Norwood, MA, 1996
 // The following macros are used for Galaxies
 #define GALAXY_PARTITION(gg) ((gg).flags[2])
 
+/****
+
+*************** Class SimpleIntMartrix methods ******************
+
+****/
+
+// Constructor
+SimpleIntMatrix::SimpleIntMatrix (int nr=1, int nc=1) : nrows(nr), ncols(nc) {
+    m = new int *[nr];
+    for (int i=0; i<nr; i++) {
+	m[i] = new int[nc];
+	for (int j=0; j<nc; j++) m[i][j] = 0;
+    }
+}
+
+// Destructor
+SimpleIntMatrix :: ~SimpleIntMatrix() {
+    for(int i=0;i<nrows;i++) delete [] m[i];
+    delete m;
+}
+
+// Resize the matrix
+void SimpleIntMatrix :: resize(int nr, int nc) {
+    SimpleIntMatrix tmp(nr,nc);
+    *this = tmp;
+}
+							  
+// equality operator
+SimpleIntMatrix& SimpleIntMatrix :: operator=(const SimpleIntMatrix& a) {
+    for(int i=0; i<nrows; i++) delete m[i];
+    delete m;
+    m = new int *[nrows=a.nrows];
+    ncols=a.ncols;
+    for (i=0; i<nrows; i++) {
+	m[i] = new int[ncols];
+	for (int j=0; j<ncols; j++) m[i][j] = a.m[i][j];
+    }
+    return *this;
+}
+
+// Copy constructor
+SimpleIntMatrix :: SimpleIntMatrix(const SimpleIntMatrix& a) {
+    m = new int *[nrows=a.nrows];
+    ncols=a.ncols;
+    for(int i=0;i<nrows;i++) {
+	m[i] = new int[ncols];
+	for(int j=0;j<ncols;j++) m[i][j]=a.m[i][j];
+    }
+}
+
+/****
+
+*************** Class AcyLoopScheduler methods ******************
+
+****/
+
 // Constructor. Set all data member pointers to 0.
-AcyLoopScheduler :: AcyLoopScheduler()
+AcyLoopScheduler :: AcyLoopScheduler(const char* log) : logFile(log)
 {
     // NOTE: topSort is not allocated as an array; it is just a pointer.
     // Hence, it is not deleted in the destructor.
@@ -362,7 +418,7 @@ hierarchy, and several class data members are created.
 int AcyLoopScheduler :: computeSchedule(Galaxy& gal)
 {
     Block *d;
-    int i = 0, rpmcDppo, apganDppo;
+    int i = 0, rpmc, apgan, rpmcDppo, apganDppo;
     SequentialList wellOrderedList;
 
     if (!isAcyclic(&gal,0)) {
@@ -372,6 +428,21 @@ int AcyLoopScheduler :: computeSchedule(Galaxy& gal)
 		<< "2 and rerun the universe.\n";
 	Error::abortRun(message);
 	return FALSE;
+    }
+    // log file stuff
+    ostream* logstrm = 0;
+    if (logFile && *logFile) {
+	StringList tmp = logFile;
+	tmp << ".AcySchedLogs";
+	logstrm = new pt_ofstream(tmp.chars());
+	if (!*logstrm) {
+	    delete logstrm;
+	    return FALSE;
+	}
+    }
+    if (logstrm) {
+    	*logstrm << "Logs of AcyLoopScheduler computations for "
+	    << gal.name() << ".\n";
     }
 
     // Prepare the galaxy for clustering; this flattens all internal galaxies
@@ -412,23 +483,37 @@ int AcyLoopScheduler :: computeSchedule(Galaxy& gal)
 	}
 	topSort = RPMCTopSort;
 	rpmcDppo = DPPO();
-    }
-    else {
+	if (logstrm) {
+	    *logstrm << "\nGraph is well-ordered; only DPPO used.\n"
+		 << "DPPO cost is: " << rpmcDppo << ".\n";
+	}
+    } else {
 
 	// First of the two heuristics
-	rpmcDppo = callRPMC(gal);
+	rpmc = callRPMC(gal);
+	if (rpmc < 0) return FALSE;
+        if (logstrm) *logstrm << "RPMC cost (w/out DPPO) is " << rpmc << ".\n";
+
+	// Call DPPO
+	rpmcDppo = DPPO();
 	if (rpmcDppo < 0) return FALSE;
 
-	cout << displaySchedule();
+	if (logstrm) *logstrm << "RPMC+DPPO schedule:\n" << displaySchedule();
+
 	// save results for rpmc
 	SimpleIntMatrix RPMCGcdMatrix = gcdMatrix;
 	SimpleIntMatrix RPMCSplitMatrix = splitMatrix;
 
 	// Second of the two heuristics
-	apganDppo = callAPGAN(gal); 
+	apgan = callAPGAN(gal); 
+	if (apgan < 0) return FALSE;
+        if (logstrm) *logstrm << "APGAN cost (w/out DPPO) is " << apgan << ".\n";
+
+	apganDppo = DPPO();
 	if (apganDppo < 0) return FALSE;
 
-	cout << displaySchedule();
+	if (logstrm) *logstrm << "APGAN+DPPO schedule:\n" << displaySchedule();
+
 	// Compare the two and use the better one.
 	if (rpmcDppo < apganDppo) {
 	    // use RPMC results
@@ -436,9 +521,12 @@ int AcyLoopScheduler :: computeSchedule(Galaxy& gal)
 	    splitMatrix = RPMCSplitMatrix;
 	    topSort = RPMCTopSort;
 	}
-	cout << "\n" << "RPMC + DPPO cost was " << rpmcDppo << ".\n";
-	cout << "APGAN + DPPO cost was " << apganDppo << ".\n";
-	cout << "The BMLB for the graph is " << computeBMLB() << ".\n";
+	if (logstrm) {
+	    *logstrm << "\nSummary:\n";
+	    *logstrm << "\n" << "RPMC + DPPO cost is " << rpmcDppo << ".\n";
+	    *logstrm << "APGAN + DPPO cost is " << apganDppo << ".\n";
+	    *logstrm << "The BMLB for the graph is " << computeBMLB() << ".\n";
+	}
     }
 
     // build inverse topSort array, topInvSort.  This array gives
@@ -450,6 +538,9 @@ int AcyLoopScheduler :: computeSchedule(Galaxy& gal)
     // finally, set all the buffer sizes in accordance with the schedule.
     fixBufferSizes(0,graphSize-1);
 
+    if (logstrm) logstrm->flush();
+
+    delete logstrm;
     // FIXME: Should we check something here before returning?
     return TRUE;
 }
@@ -457,9 +548,8 @@ int AcyLoopScheduler :: computeSchedule(Galaxy& gal)
 // This function just sets up executes everything needed to run RPMC.
 int AcyLoopScheduler :: callRPMC(Galaxy& gal)
 {
-    int rpmc, rpmcDppo;
+    int rpmc;
     AcyCluster* clusterGraph=0;
-
 
     // Add a top level cluster inside the galaxy to hold all the
     // clusters inside.  This is needed because gal is of type
@@ -483,7 +573,6 @@ int AcyLoopScheduler :: callRPMC(Galaxy& gal)
 
     // call RPMC
     rpmc = RPMC(clusterGraph);
-    cout << "RPMC cost (w/out DPPO) is " << rpmc << ".\n";
     if (rpmc < 0) return -1;
 
     // now build up the topSort array
@@ -491,16 +580,13 @@ int AcyLoopScheduler :: callRPMC(Galaxy& gal)
     //check if topSort is valid
     if (!checkTopsort()) return -1;
 
-    // Call DPPO
-    rpmcDppo = DPPO();
-
-    return rpmcDppo;
+    return rpmc;
 }
 
 // This function just sets up and executes everything needed to run APGAN 
 int AcyLoopScheduler :: callAPGAN(Galaxy& gal)
 {
-    int apgan, apganDppo;
+    int apgan;
     AcyCluster* superOmega;
 
     // Flatten everything
@@ -520,15 +606,14 @@ int AcyLoopScheduler :: callAPGAN(Galaxy& gal)
 
     topSort = APGANTopSort;
     apgan = APGAN(&gal);
-    cout << "APGAN cost (w/out DPPO) is " << apgan << ".\n";
     if (apgan < 0) return -1;
+
     // Since apgan >= 0, gal has just one cluster when APGAN finishes.
     superOmega = (AcyCluster*)(gal.head());
     if (!buildTopsort(superOmega, 0)) return -1;
 
     if (!checkTopsort()) return -1;
-    apganDppo = DPPO();
-    return apganDppo;
+    return apgan;
 }
 
 /****
@@ -766,7 +851,6 @@ of this function, gr will have only two clusters in it.
 int AcyLoopScheduler::RPMC(AcyCluster* gr)
 {
     int cost = 0, leftCost = 0, rightCost = 0, totalCost = 0;
-    int cost1, cost2;
     int N, lflag = 0, rflag = 0;
     AcyCluster *c, *leftSubGraph = 0, *rightSubGraph = 0, *newL = 0, *newR = 0;
     SequentialList leftGroup, rightGroup;
@@ -790,31 +874,13 @@ int AcyLoopScheduler::RPMC(AcyCluster* gr)
 	    }
 	    gr = (AcyCluster*)gr->head();
 	}
-	cost1 = gr->legalCutIntoBddSets(3*N/4);
-	cost2 = gr->legalCutIntoBddSets(N-1);
-	if (cost1 != -1) {
-	    if (cost1 < cost2) {
-		// call again for now to re-mark the first marking.
-		cost = gr->legalCutIntoBddSets(3*N/4);
-		cout << "Used 3N/4.\n";
-	    } else {
-		cost = cost2;
-	    }
-	    if (cost1 > cost2) cout << "Used N-1.\n";
-	    if (cost1 == cost2) cout << "Both 3N/4 and N-1 the same.\n";
-	} else {
-	    cost = cost2;
-	    cout << "Used N-1.\n";
-	}
-	/*
-	if ( (cost=gr->legalCutIntoBddSets(3*N/4)) == -1) {
+	if ( (cost=gr->legalCutIntoBddSets((3*N)/4)) == -1) {
 	    // Means that a bounded cut was not found; call again
 	    // relaxing the bound.  Note that the splitter returns
 	    // -1 iff a cut respecting the bound was not found.
 	    // However, with a bound of N-1, a cut should always be found.
 	    cost = gr->legalCutIntoBddSets(N-1);
 	}
-	*/	
 
 	if (cost == -1) {
 	    // Something is wrong.  We have this check for debugging
