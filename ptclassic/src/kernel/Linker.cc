@@ -167,7 +167,12 @@ int Linker::multiLink (const char* args, int perm) {
 // to permit easy interfacing with Tcl.
 
 int Linker::multiLink (int argc, char** argv) {
-	if (!symTableName) {
+	if (linkingNotSupported) {
+		Error::abortRun ("Sorry, incremental linking is not yet ",
+				 "supported on this architecture");
+		return FALSE;
+	}
+	else if (!symTableName) {
 		Error::abortRun ("Incremental linking disabled");
 		return FALSE;
 	}

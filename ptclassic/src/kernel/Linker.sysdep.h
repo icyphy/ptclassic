@@ -30,7 +30,19 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
  This file defines the system-dependent cruft needed for incremental
  linking.
+
+ The stuff for HP is not yet completed, hence linkingNotSupported is
+ true.
+
 **************************************************************************/
+
+// Is linking supported?  Currently not complete for HP/UX.
+const int linkingNotSupported =
+#ifdef hpux
+ 1;
+#else
+ 0;
+#endif
 
 // The loader should do incremental linking; use a 4.3/Sun-style loader
 // or use the Gnu loader.
