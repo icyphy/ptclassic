@@ -398,7 +398,7 @@ int SDFClusterGal::loopTwoClusts() {
 	int r1 = c1->reps();
 	while ((p = nextPort++) != 0) {
 		if (p->numIO() == p->far()->numIO()) return FALSE;
-		if (p->fbDelay() && p->numTokens() >= p->numIO()*r1)
+		if (p->fbDelay() && p->numTokens() < p->numIO()*r1)
 			return FALSE;
 	}
 	// ok, loop both clusters so that their
