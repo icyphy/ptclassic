@@ -115,6 +115,7 @@ RPCFunction CommandArray[] = {
     {RpcPlotCxSignal, "Utilities", "plot Cx signal", "-", 0},
     {RpcDFT, "Utilities", "DFT", "^", 0},
     {RpcDFTCx, "Utilities", "DFT of Cx signal", "_", 0},
+    {ShowFacetNum, "Other", "facet number", "H",0},
     {Man, "Other", "man","M",0},
     {Profile, "Other", "profile", ",", 0},
     {PrintFacet, "Other", "print facet"},
