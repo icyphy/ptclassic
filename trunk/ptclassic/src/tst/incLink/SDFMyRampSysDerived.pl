@@ -6,7 +6,7 @@ defstar {
 Generate a ramp signal, starting at "value" (default 0) and
 incrementing by step size "step" (default 1) on each firing.
 	}
-	version {%Q% $Date$}
+	version {$Id$}
 	author { Christopher Hylands }
 	copyright {
 Copyright (c) 1990-%Q% The Regents of the University of California.
