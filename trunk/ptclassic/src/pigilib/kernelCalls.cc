@@ -962,9 +962,12 @@ KcDefTarget(const char* domain) {
 }
 
 ///////////////////////////////////////////////////////////////////////
-extern "C" char*
-KcExpandPathName(const char* name) {
-    return expandPathName(name);
+extern "C" void
+TildeExpand(const char *input, char* buffer) {
+    char *pathname = expandPathName(input);
+    strcpy(buffer, pathname);
+    delete [] pathname;
+    return;
 }
 
 ///////////////////////////////////////////////////////////////////////
