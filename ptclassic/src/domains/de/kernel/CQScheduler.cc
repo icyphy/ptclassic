@@ -66,8 +66,8 @@ void CQScheduler :: setup () {
 	clearHalt();
 	currentTime = 0;
 
-	if (!galaxy()) {
-		Error::abortRun("CQScheduler: no galaxy!");
+	if (! galaxy()) {
+		Error::abortRun("Calendar Queue scheduler has no galaxy defined");
 		return;
 	}
 
@@ -95,6 +95,8 @@ void CQScheduler :: setup () {
 
 // detect the delay free loop.
 int CQScheduler :: checkDelayFreeLoop() {
+	if (! galaxy()) return FALSE;
+
 	GalStarIter next(*galaxy());
 	DEStar* s;
 	while ((s = (DEStar*) next++) != 0) {
@@ -108,6 +110,12 @@ int CQScheduler :: checkDelayFreeLoop() {
 
 // set the depth of the stars...
 int CQScheduler :: computeDepth() {
+	if (! galaxy()) {
+		Error::abortRun("Calendar Queue scheduler has no galaxy defined");
+		return FALSE;
+	}
+
+
 	GalStarIter next(*galaxy());
 	DEStar* s;
 	while ((s = (DEStar*) next++) != 0) {
@@ -135,7 +143,7 @@ int CQScheduler :: computeDepth() {
 int CQScheduler :: run () {
 
     if (!galaxy()) {
-        Error::abortRun("No galaxy to run");
+        Error::abortRun("Calendar Queue scheduler has no galaxy to run");
         return FALSE;
     }
 

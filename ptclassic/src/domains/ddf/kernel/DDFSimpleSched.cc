@@ -115,11 +115,16 @@ int DDFSimpleSched :: classify (DataFlowStar* c) {
 ////////////////////////////////////////////////////////////////////////
 //
 void DDFSimpleSched :: setup () {
+  if (! galaxy()) {
+    Error::abortRun("Dynamic Dataflow simple scheduler has no galaxy defined.");
+    return;
+  }
+
   DDFScheduler::setup();
 
   // Check stars for registered pragmas and record in the pragmaStars list.
   pragmaStars.initialize();
-  DFGalStarIter nextStar(*(galaxy()));
+  DFGalStarIter nextStar(*galaxy());
   DataFlowStar* c;
   while((c = nextStar++) != 0) pragmaRegistered(c);
 }
@@ -183,13 +188,13 @@ int DDFSimpleSched :: fireStarsFrom(SequentialList& list) {
 // iterations until these specified numbers are met or exceeded.
 //
 int DDFSimpleSched :: run() {
-  if (!galaxy()) {
-    Error::abortRun("No galaxy to run");
+  if (! galaxy()) {
+    Error::abortRun("Dynamic Dataflow simple scheduler has no galaxy to run");
     return FALSE;
   }
   if (haltRequested()) return FALSE;
 
-  DFGalStarIter nextStar(*(galaxy()));
+  DFGalStarIter nextStar(*galaxy());
   DataFlowStar* c;
 
   // Classify all stars.  For efficiency, after this, we keep a
