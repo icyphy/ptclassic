@@ -116,6 +116,11 @@ namespace ::tycho {
     ::tycho::File::registerExtensions {} \
             {::tycho::view CommandShell  {-file {%s}}} \
             {Command shell} "tools"
+
+    ::tycho::File::registerExtensions {.icl} \
+            {::tycho::view ItclClassList {-file {%s}} Displayer {-toolbar 1}} \
+            {Itcl Class List} "tools"
+
     if {[uplevel #0 info commands matlab] != {}} {
 	::tycho::File::registerExtensions {} \
                 {::tycho::view Matlab {-file {%s}}} \
