@@ -96,7 +96,9 @@ periodically repeated, or the file contents can be padded with zeros.
 
 	go {
 		int x = 0;
-		unsigned char ch;
+                // initialize ch to 0, otherwise we could get garbage
+                // on EOF:sdf/263: SDFReadPCM does an uninitialized memory read
+		unsigned char ch = 0;
 		if (!input) {
 			// nothing
 		}
