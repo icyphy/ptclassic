@@ -100,12 +100,15 @@ int ParScheduler :: computeSchedule(Galaxy& g)
 		int sum = 0;
 		DFGalStarIter nextStar(*galaxy());
 		DataFlowStar* s;
-		Target* t = mtarget->child(0);
+		CGTarget* t = (CGTarget*) mtarget->child(0);
 		while ((s = nextStar++) != 0) {
 			sum += s->myExecTime() * s->reps();
 			s->setTarget(t);
 		}
 		totalWork = sum;
+		t->setGalaxy(*galaxy());
+		t->scheduler()->setGalaxy(*galaxy());
+		t->copySchedule(mySchedule);
 		return flag;
 	}
 
@@ -333,16 +336,8 @@ int ParScheduler :: preSchedule() {
 /////////////////////////////
 
 void ParScheduler :: compileRun() {
-	// If numProc == 1, 0, be special.
-	if (numProcs == 1) {
-		CGTarget* t = (CGTarget*) mtarget->child(0);
-		t->setGalaxy(*galaxy());
-		t->scheduler()->setGalaxy(*galaxy());
-		t->copySchedule(mySchedule);
-		t->generateCode();
-		mtarget->addProcessorCode(0,(*t->getStream("code")));
-		return;
-	} else if (numProcs == 0) {
+	// If 0, be special.
+	if (numProcs == 0) {
 		SDFScheduler :: compileRun();
 		return;
 	}
