@@ -160,10 +160,11 @@ body ::tycho::EditPtlang::gendoc {filename} {
     if {![file exists $fulldoc] || \
             [file mtime $filename] > [file mtime $fulldoc]} {
         # Need to regenerate the doc.  Check permissions first.
-        if {[file writable $dir] && \
-                (![file exists $fulldoc] || [file writable $fulldoc])} {
+        # It is sufficient for the directory to be writable.
+        if {[file writable $dir]} {
             set savedir [pwd]
             cd $dir
+            exec rm -f "$root.h" "$root.cc" "$root.htm" "$root.t"
             exec ptlang $tail
             cd $savedir
         } {
