@@ -115,7 +115,7 @@ OBJECTS=bags/bags.o buffers/bufinternal.o \
 	windows/trans.o windows/wininternal.o
 
 # Objects (*.o and *.a files) that are locally produced
-$(VEMOBJECTS) =	$(OBJECTS) rpc/librpcserver.a
+VEMOBJECTS =	$(OBJECTS) rpc/librpcserver.a
 
 # This rule uses GNU make specific directives $(@D) $(@F) 
 $(OBJECTS) $(LIBS):
