@@ -10,4 +10,4 @@ set path = ( ~ptolemy/octtools/bin.$ARCH $path )
 if (!($?OCTTOOLS)) then
 	setenv OCTTOOLS ~ptolemy
 endif
-oct2ps -=T ~ptolemy/lib/technology -f interface $*\:schematic | lpr -P$PRINTER
+oct2ps -=T ~ptolemy/lib/bw_patterns -f interface $*\:schematic | lpr -P$PRINTER
