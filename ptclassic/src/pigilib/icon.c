@@ -1,6 +1,6 @@
-/* icon.c  edg
-Version identification:
-$Id$
+/*
+    icon.c  edg
+    Version: $Id$
 */
 
 
@@ -215,6 +215,38 @@ static dmTextItem items[] = {
 }
 
 
+/**
+split this out of GetTildePath -- kennard
+**/
+static boolean
+IsSubPathB( fullPath, subPath, pRemainPath)
+    char	*fullPath, *subPath;
+    char	**pRemainPath;
+{
+    char	expanded_path[MAXPATHLEN];
+    int		n;
+    
+    /* Try the subPath as given */
+    n = strlen(subPath);
+    if (strncmp(fullPath, subPath, n) == 0) {
+	if ( pRemainPath )
+	    *pRemainPath = fullPath + n;
+	return TRUE;
+    }
+
+    /* Expand symlinks out of subPath and try that */
+    ERR_IF2((AbsPath(subPath, expanded_path) < 0),
+        "IsSubPathB: Path expansion failed on subPath.");
+    n = strlen(expanded_path);
+    if (strncmp(fullPath, expanded_path, n) == 0) {
+	if ( pRemainPath )
+	    *pRemainPath = fullPath + n;
+	return TRUE;
+    }
+    return FALSE;
+}
+
+
 /* 11/18/89
 Tries to convert the cell name of the facet into ~user format.
 It does this by comparing the absolute path of the facet with
@@ -226,68 +258,47 @@ Outputs: tPath = filled with cell name in ~user/... format.
 Caveats: The code should support more "shared users" than just ~ptolemy.
      In the extreme, it would search the entire /etc/passwd file.
      But this if probably too costly.
+Added handling of $PTOLEMY -- kennard
 */
 static boolean
 GetTildePath(facetPtr, tPath)
-octObject *facetPtr;
-char *tPath;
+    octObject		*facetPtr;
+    char		*tPath;
 {
-    char *fullName, expanded_path[MAXPATHLEN];
-    int uid, n;
-    struct passwd *pwent;
+    char		*fullName, *envPath, *remainPath;
+    int			uid;
+    struct passwd	*pwent;
 
     octFullName(facetPtr, &fullName);
 
-    /* check if in current user's directory tree */
+    /*
+     * try current user's directory tree: ~user/remainPath
+     */
     uid = getuid();
     ERR_IF2((pwent = getpwuid(uid)) == NULL,
 	"GetTildePath: Cannot get password entry");
-
-    n = strlen(pwent->pw_dir);
-
-    /* If the fullName begins with the absolute path name of the user's
-       home directory, convert to ~user format. */
-    if (strncmp(fullName, pwent->pw_dir, n) == 0) {
-	sprintf(tPath, "~%s%s", pwent->pw_name, fullName + n);
-	return (TRUE);
+    if ( IsSubPathB( fullName, pwent->pw_dir, &remainPath) ) {
+	sprintf(tPath, "~%s%s", pwent->pw_name, remainPath);
+	return TRUE;
     }
 
-    /* In case pw entry is not a real directory, but rather is connected
-       via symbolic links to a real directory, expand it.  */
-    ERR_IF2((AbsPath(pwent->pw_dir, expanded_path) < 0),
-        "GetTildePath: Path expansion failed on /etc/passwd entry.");
-
-    n = strlen(expanded_path);
-
-    /* If the fullName begins with the absolute path name of the user's
-       home directory, convert to ~user format. */
-    if (strncmp(fullName, expanded_path, n) == 0) {
-	sprintf(tPath, "~%s%s", pwent->pw_name, fullName + n);
-	return (TRUE);
+    /*
+     * try $(PTOLEMY) directory tree: $PTOLEMY/remainPath
+     */
+    if ( (envPath = getenv(UToolEnvName))!=NULL
+     && IsSubPathB( fullName, envPath, &remainPath) ) {
+	sprintf(tPath, "$%s%s", UToolEnvName, remainPath);
+	return TRUE;
     }
 
-    /* If the fullName begins with the absolute path name of ptolemy's
-       home directory, convert to ~ptolemy format. */
+    /*
+     * try ptolemy user's directory tree: ~ptolemy/remainPath
+     */
     ERR_IF2((pwent = getpwnam(UToolName)) == NULL,
-        "GetTildePath: Cannot get password entry for 'ptolemy'");
-
-    n = strlen(pwent->pw_dir);
-
-    if (strncmp(fullName, pwent->pw_dir, n) == 0) {
-	sprintf(tPath, "~%s%s", pwent->pw_name, fullName + n);
-	return (TRUE);
-    }
-
-    /* In case entry is not a real directory, but rather is connected
-       via symbolic links to a real directory, expand it.  */
-    ERR_IF2((AbsPath(pwent->pw_dir, expanded_path) < 0),
-        "GetTildePath: Path expansion failed on /etc/passwd entry.");
-
-    n = strlen(expanded_path);
-
-    if (strncmp(fullName, expanded_path, n) == 0) {
-	sprintf(tPath, "~%s%s", pwent->pw_name, fullName + n);
-	return (TRUE);
+	"GetTildePath: Cannot get password entry");
+    if ( IsSubPathB( fullName, pwent->pw_dir, &remainPath) ) {
+	sprintf(tPath, "~%s%s", pwent->pw_name, remainPath);
+	return TRUE;
     }
 
     /* Issue a warning that absolute path name is being used */

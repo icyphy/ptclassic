@@ -8,6 +8,7 @@ Header file for util.c
     /* name of the tool that this RPC application is for */
 #define UTechProp "ptolemy"  /* name of technology in technology directory */
 #define UAppName "pigi"  /* name of this application */
+#define UToolEnvName "PTOLEMY"	/* environment var name for tool */
 
 #define UFree(buf) (void) free((buf))
 
