@@ -2,7 +2,7 @@
 # @Version: $Id$
 # @Author: John Reekie, Bilung Lee
 #
-# @Copyright (c) 1996 The Regents of the University of California.
+# @Copyright (c) 1996-1997 The Regents of the University of California.
 # All rights reserved.
 #  
 # Permission is	hereby granted,	without	written	agreement and without
@@ -43,32 +43,29 @@ namespace ::tycho {
 #
 # <p><b>Options</b>
 #
-# <dl>
-# <dt><dd>
-# <dl>
+# <ul>
+# <li><b>-anchor</b>:
+# See <a href="LabeledItem.html">LabeledItem</a>.
 #
-# <dt><b>-anchor</b>
-# <dd>See <a href="LabeledItem.html">LabeledItem</a>.
-#
-# <dt><b>-fill</b>
-# <dd>The color with which the oval is filled. By default, 
+# <li><b>-fill</b>:
+# The color with which the oval is filled. By default, 
 # it is "", which means that the oval is not filled.
 #
-# <dt><b>-graphics</b>
-# <dd>See <a href="LabeledItem.html">LabeledItem</a>.
+# <li><b>-graphics</b>:
+# See <a href="LabeledItem.html">LabeledItem</a>.
 #
-# <dt><b>-outline</b>.
-# <dd>The color of the outline of the oval. If "", 
+# <li><b>-outline</b>:
+# The color of the outline of the oval. If "", 
 # the oval has no outline. By default, it is black.
 #
-# <dt><b>-text</b>
-# <dd>See <a href="LabeledItem.html">LabeledItem</a>.
+# <li><b>-text</b>:
+# See <a href="LabeledItem.html">LabeledItem</a>.
 #
-# <dt><b>-width</b>
-# <dd>The width of the outline of the oval, in pixels. By 
+# <li><b>-width</b>:
+# The width of the outline of the oval, in pixels. By 
 # default, it is one.
 #
-# </dl></dl>
+# </ul>
 #
 # <p><b>Bugs</b>: (none)
 #
@@ -92,23 +89,8 @@ namespace ::tycho {
 class ::tycho::LabeledOval {
     inherit ::tycho::LabeledItem
 
-    # Create a new item
-    proc construct {id canvas slate tags x0 y0 x1 y1 args}
-
     ###################################################################
-    ####                            options                        ####
-
-    # The fill color of the oval
-    common _fill
-
-    # The outline color of the oval
-    common _outline
-
-    # The width of the oval outline
-    common _width
-
-    ###################################################################
-    ####                     option update procs                   ####
+    ####                         public procs                      ####
 
     # Update the *-fill* option
     proc _fill {id canvas slate fill}
@@ -119,8 +101,8 @@ class ::tycho::LabeledOval {
     # Update the *-width* option
     proc _width {id canvas slate width}
 
-    ###################################################################
-    ####                         public procs                      ####
+    # Create a new item
+    proc construct {id canvas slate tags x0 y0 x1 y1 args}
 
     # Set or get the item's coordinates
     proc coords {id canvas slate args}
@@ -162,7 +144,7 @@ class ::tycho::LabeledOval {
 ## -fill option configuration
 #
 body ::tycho::LabeledOval::_fill {id canvas slate fill} {
-    set _fill($id) $fill
+    set option(fill$id) $fill
     $canvas itemconfigure $primary($id) -fill $fill
 }
 
@@ -170,9 +152,9 @@ body ::tycho::LabeledOval::_fill {id canvas slate fill} {
 ## -outline option configuration
 #
 body ::tycho::LabeledOval::_outline {id canvas slate outline} {
-    set _outline($id) $outline
+    set option(outline$id) $outline
     $canvas itemconfigure $primary($id) -outline $outline
-    if { $_text($id) != "" } {
+    if { $option(text$id) != "" } {
 	    $canvas itemconfigure $textitem($id) -fill $outline
 	}
 }
@@ -181,7 +163,7 @@ body ::tycho::LabeledOval::_outline {id canvas slate outline} {
 ## -width option configuration
 #
 body ::tycho::LabeledOval::_width {id canvas slate width} {
-    set _width($id) $width
+    set option(width$id) $width
     $canvas itemconfigure $primary($id) -width $width
 }
 
@@ -190,18 +172,18 @@ body ::tycho::LabeledOval::_width {id canvas slate width} {
 #
 body ::tycho::LabeledOval::construct {id canvas slate tags x0 y0 x1 y1 args} {
     # Initialize the options
-    foreach {option value} [concat [array get optiondefault] $args] {
-	set _[string trimleft $option -]($id) $value
+    foreach {opt val} [concat [array get optiondefault] $args] {
+	set option([string trimleft $opt -]$id) $val
     }
 
     # Create the primary component. This is the displayed oval.
     set primary($id) [$canvas create oval $x0 $y0 $x1 $y1 \
-	    -fill $_fill($id) -outline $_outline($id) \
-	    -width $_width($id) -tags $tags]
+	    -fill $option(fill$id) -outline $option(outline$id) \
+	    -width $option(width$id) -tags $tags]
 
     # Create the graphics and text label -- do not change the order!
-    _text     $id $canvas $slate $_text($id)
-    _graphics $id $canvas $slate $_graphics($id)
+    _text     $id $canvas $slate $option(text$id)
+    _graphics $id $canvas $slate $option(graphics$id)
 }
 
 ##########################################################################
@@ -219,6 +201,6 @@ body ::tycho::LabeledOval::coords {id canvas slate args} {
     eval $canvas coords $primary($id) $args
 
     # Move and scale the text and graphics FIXME: Inefficient
-    _graphics $id $canvas $slate $_graphics($id)
-    _anchor   $id $canvas $slate $_anchor($id)
+    _graphics $id $canvas $slate $option(graphics$id)
+    _anchor   $id $canvas $slate $option(anchor$id)
 }

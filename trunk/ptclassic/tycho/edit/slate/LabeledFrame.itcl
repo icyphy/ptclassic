@@ -2,7 +2,7 @@
 # @Version: $Id$
 # @Author: John Reekie
 #
-# @Copyright (c) 1996 The Regents of the University of California.
+# @Copyright (c) 1996-1997 The Regents of the University of California.
 # All rights reserved.
 #  
 # Permission is	hereby granted,	without	written	agreement and without
@@ -31,7 +31,10 @@
 # needed, but the common arrays get upset otherwise.
 namespace ::tycho {
     if { [::info classes LabeledItem] == "" } {
-		uplevel #0 {source $tychoslate/LabeledItem.itcl}
+	uplevel #0 {source $tychoslate/LabeledItem.itcl}
+    }
+    if { [::info classes Frame] == "" } {
+	uplevel #0 {source $tychoslate/Frame.itcl}
     }
 }
 
@@ -48,7 +51,6 @@ namespace ::tycho {
 # <dl>
 # <dt><dd>
 # <dl>
-#
 # <dt><b>-anchor</b>
 # <dd>See <a href="LabeledItem.html">LabeledItem</a>.
 #
@@ -100,7 +102,7 @@ class ::tycho::LabeledFrame {
 
     # Set or get the item's coordinates
     proc coords {id canvas slate args}
-    
+
     ###################################################################
     ####                         protected variables               ####
 
@@ -117,14 +119,14 @@ class ::tycho::LabeledFrame {
     ####                       class initialization                ####
 
     #### Set method table
-    array set methodtable [array get ::tycho::Frame::methodtable]
     array set methodtable [array get ::tycho::LabeledItem::methodtable]
+    array set methodtable [@scope ::tycho::Frame array get methodtable]
 
     set methodtable(construct) ::tycho::LabeledFrame::construct
     set methodtable(coords)    ::tycho::LabeledFrame::coords
 
     #### Set option defaults
-    array set optiondefault [array get ::tycho::Frame::optiondefault]
+    array set optiondefault [@scope ::tycho::Frame array get optiondefault]
     array set optiondefault [array get ::tycho::LabeledItem::optiondefault]
 }
 
@@ -133,8 +135,8 @@ class ::tycho::LabeledFrame {
 #
 body ::tycho::LabeledFrame::construct {id canvas slate tags x0 y0 x1 y1 args} {
     # Initialize the options
-    foreach {option value} [concat [array get optiondefault] $args] {
-        set _[string trimleft $option -]($id) $value
+    foreach {opt val} [concat [array get optiondefault] $args] {
+        set option([string trimleft $opt -]$id) $val
     }
 
     # Create the Frame
@@ -142,8 +144,8 @@ body ::tycho::LabeledFrame::construct {id canvas slate tags x0 y0 x1 y1 args} {
     	$id $canvas $slate [list $tags] $x0 $y0 $x1 $y1 $args
 
     # Create the graphics and text label -- do not change the order!
-    _text     $id $canvas $slate $_text($id)
-    _graphics $id $canvas $slate $_graphics($id)
+    _text     $id $canvas $slate $option(text$id)
+    _graphics $id $canvas $slate $option(graphics$id)
 }
 
 ##########################################################################
@@ -161,6 +163,6 @@ body ::tycho::LabeledFrame::coords {id canvas slate args} {
     eval ::tycho::Frame::coords $id $canvas $slate $args
 
     # Move and scale the text and graphics FIXME: Inefficient
-    _graphics $id $canvas $slate $_graphics($id)
-    _anchor   $id $canvas $slate $_anchor($id)
+    _graphics $id $canvas $slate $option(graphics$id)
+    _anchor   $id $canvas $slate $option(anchor$id)
 }

@@ -2,7 +2,7 @@
 # @Version: $Id$
 # @Author: H. John Reekie
 #
-# @Copyright (c) 1996 The Regents of the University of California.
+# @Copyright (c) 1996-1997 The Regents of the University of California.
 # All rights reserved.
 #  
 # Permission is	hereby granted,	without	written	agreement and without
@@ -78,7 +78,7 @@ class ::tycho::ComplexItem {
     proc ghost {id canvas slate}
     
     # Get a configuration option of an item
-    proc itemcget {id canvas slate scope option}
+    proc itemcget {id canvas slate scope opt}
 
     # Configure an item
     proc itemconfigure {id canvas slate scope args}
@@ -86,16 +86,15 @@ class ::tycho::ComplexItem {
     ###################################################################
     ####                         picture components                ####
 
-    # The "primary" component that defines the item's coordinates. 
-    # Every ComplexItem class must create exactly one primitive canvas item
-    # and place its ID into this array indexed by the complex item ID.
-    # The Slate uses this component to manipulate the coordinates of
-    # complex items. Note: subclasses are _not_ to create their own 
-    # copy of this variable.
-    common primary
-
     ###################################################################
     ####                         protected variables               ####
+
+    # The components of each item. Each subclass should place 
+    # component items into this array, instead of creating
+    # their own common arrays. This makes it much easier to build
+    # complex items out of existing complex items. Note: subclasses
+    # are _not_ to create their own copy of this variable.
+    protected common component
 
     # The virtual "method" table. This is a common array indexed by
     # method name, with contents being the actual procedure to call
@@ -106,18 +105,36 @@ class ::tycho::ComplexItem {
     # This array implements "inheritance": if a method is not implemented
     # in a given class, then the array contains the name of a procedure
     # in one of its superclasses.
-    common methodtable
+    protected common methodtable
+
+    # The options of each item. Note: subclasses are _not_ to create their own 
+    # copy of this variable.
+    protected common option
 
     # Default values of this item's options. Every class must create
     # its own copy of this array and initialize it with the default 
     # values of the item's options.
-    common optiondefault
+    protected common optiondefault
+
+    # Every ComplexItem class must create exactly one primitive canvas item
+    # and place its ID into this array indexed by the complex item ID.
+    # The Slate uses this component to manipulate the coordinates of
+    # complex items. Note: subclasses are _not_ to create their own 
+    # copy of this variable.
+    protected common primary
+
+    # The instance variables of each item. Each subclass should place
+    # all local variables into this array, instead of creating
+    # their own common arrays. This makes it much easier to build
+    # complex items out of existing complex items. Note: subclasses
+    # are _not_ to create their own copy of this variable.
+    protected common variable
 
     # The "shape" of items of this type. Every ComplexItem class must create
-    # its own copy of this array and set it to a type that indicates
+    # its own copy of this variable and set it to a type that indicates
     # what shape the complex item is: point, line, polygon, rectangle,
     # or oval.
-    common shape "rectangle"
+    protected common shape "rectangle"
 
     ###################################################################
     ####                       class initialization                ####
@@ -239,16 +256,16 @@ body ::tycho::ComplexItem::coords {id canvas slate args} {
 ##########################################################################
 #### itemcget
 #
-body ::tycho::ComplexItem::itemcget {id canvas slate scope option} {
+body ::tycho::ComplexItem::itemcget {id canvas slate scope opt} {
     # Process -tags specially
-    if { ! [string compare $option -tags] } {
+    if { ! [string compare $opt -tags] } {
 	# Return the tags
 	$slate gettags $id
-    } elseif { [@scope $scope [list ::info exists optiondefault($option)]] } {
+    } elseif { [@scope $scope [list ::info exists optiondefault($opt)]] } {
 	# Read the value directly from the class
-	return [@scope $scope [list set _[string trimleft $option -]($id)]]
+	return $option([string trimleft $opt -]$id)
     } else {
-	error "unknown option $option"
+	error "unknown option $opt"
     }
 }
 
@@ -261,39 +278,37 @@ body ::tycho::ComplexItem::itemconfigure {id canvas slate scope args} {
 	# the defaultoptions array to get the names of all options,
 	# and read their values.
 	set result {}
-	foreach option [@scope $scope {array names optiondefault}] {
+	foreach opt [@scope $scope {array names optiondefault}] {
 	    # Read its value
-	    set value [@scope $scope \
-		    [list set _[string trimleft $option -]($id)]]
+	    set value $option([string trimleft $opt -]$id)
 	    # Read default value
-	    set default [@scope $scope [list set optiondefault($option)]]
+	    set default [@scope $scope [list set optiondefault($opt)]]
 	    # Add to result
-	    lappend result [list $option {} {} $default $value]
+	    lappend result [list $opt {} {} $default $value]
 	}
 	# Add the tags
 	lappend result [list -tags {} {} {} [$slate gettags $id]]
 	return $result
 
     } elseif { [llength $args] == 1 } {
-	set option [lindex $args 0]
-	if { $option == "-tags" } {
+	set opt [lindex $args 0]
+	if { $opt == "-tags" } {
 	    return [list {} {} {} [$slate gettags $id]]
 	} elseif { [@scope $scope \
-		[list ::info exists optiondefault($option)]] } {
+		[list ::info exists optiondefault($opt)]] } {
 	    # Read its value
-	    set value [@scope $scope \
-		    [list set _[string trimleft $option -]($id)]]
+	    set value $option([string trimleft $opt -]$id)
 	    # Read default value
-	    set default [@scope $scope [list set optiondefault($option)]]
+	    set default [@scope $scope [list set optiondefault($opt)]]
 	    
-	    return [list $option {} {} $default $value]
+	    return [list $opt {} {} $default $value]
 	    
 	} else {
-	    error "unknown option \"$option\""
+	    error "unknown option \"$opt\""
 	}
     } else {
-	foreach {option value} $args {
-	    if { ! [string compare $option -tags] } {
+	foreach {opt value} $args {
+	    if { ! [string compare $opt -tags] } {
 		# Set the tags of the complex item. This is awkward and
 		# slow... First get the tags of the item
 		set tags [$slate gettags $id]
@@ -318,13 +333,13 @@ body ::tycho::ComplexItem::itemconfigure {id canvas slate scope args} {
 	    } else {
 		# Call the proc on the class to set the option
 		if { [@scope $scope \
-			[list ::info exists optiondefault($option)]] } {
+			[list ::info exists optiondefault($opt)]] } {
                     @scope $scope [list eval \
-                        \[set methodtable(_[string trimleft $option -])\] \
+                        \[set methodtable(_[string trimleft $opt -])\] \
                         $id $canvas $slate [list $value]]
 
 		} else {
-		    error "unknown option \"$option\""
+		    error "unknown option \"$opt\""
 		}
 	    }
 	}

@@ -43,32 +43,36 @@ namespace ::tycho {
 #
 # <p><b>Options</b>
 #
-# <dl>
-# <dt><dd>
-# <dl>
+# <ul>
+# <li><b>-anchor</b>:
+# See <a href="LabeledItem.html">LabeledItem</a>.
 #
-# <dt><b>-anchor</b>
-# <dd>See <a href="LabeledItem.html">LabeledItem</a>.
-#
-# <dt><b>-fill</b>
-# <dd>The color with which the rectangle is filled. By default, 
+# <li><b>-fill</b>:
+# The color with which the rectangle is filled. By default, 
 # it is "", which means that the rectangle is not filled.
 #
-# <dt><b>-graphics</b>
-# <dd>See <a href="LabeledItem.html">LabeledItem</a>.
+# <li><b>-graphics</b>:
+# See <a href="LabeledItem.html">LabeledItem</a>.
 #
-# <dt><b>-outline</b>.
-# <dd>The color of the outline of the rectangle. If "", 
+# <li><b>-outline</b>:
+# The color of the outline of the rectangle. If "", 
 # the rectangle has no outline. By default, it is black.
 #
-# <dt><b>-text</b>
-# <dd>See <a href="LabeledItem.html">LabeledItem</a>.
+# <li><b>-text</b>:
+# See <a href="LabeledItem.html">LabeledItem</a>.
 #
-# <dt><b>-width</b>
-# <dd>The width of the outline of the rectangle, in pixels. By 
+# <li><b>-width</b>:
+# The width of the outline of the rectangle, in pixels. By 
 # default, it is one.
 #
 # </dl></dl>
+#
+# <p><b>Components</b>
+#
+# <ul>
+# <li><b>label</b>:
+# The editable text label.
+# </ul>
 #
 # <p><b>Bugs</b>: (none)
 #
@@ -76,8 +80,8 @@ namespace ::tycho {
 # <tcl quiet><pre>
 #  source $tycho/editors/slate/doc/internals/newslate.itcl
 #  $slate create LabeledRect 40 40 100 80 -fill blue -outline red &#92
-#		-anchor nw -text Foo -tags moveable &#92
-#		-graphics "line 0 0 100 100; line 0 100 100 0"
+#               -anchor nw -text Foo -tags moveable &#92
+#               -graphics "line 0 0 100 100; line 0 100 100 0"
 # </pre></tcl>
 #
 # <p><b>Enhancements</b>: (none)
@@ -163,7 +167,7 @@ class ::tycho::LabeledRect {
 ## -fill option configuration
 #
 body ::tycho::LabeledRect::_fill {id canvas slate fill} {
-    set _fill($id) $fill
+    set option(fill$id) $fill
     $canvas itemconfigure $primary($id) -fill $fill
 }
 
@@ -171,10 +175,10 @@ body ::tycho::LabeledRect::_fill {id canvas slate fill} {
 ## -outline option configuration
 #
 body ::tycho::LabeledRect::_outline {id canvas slate outline} {
-    set _outline($id) $outline
+    set option(outline$id) $outline
     $canvas itemconfigure $primary($id) -outline $outline
-    if { $_text($id) != "" } {
-	    $canvas itemconfigure $textitem($id) -fill $outline
+    if { $option(text$id) != "" } {
+	$canvas itemconfigure $component(label$id) -fill $outline
     }
 }
 
@@ -182,7 +186,7 @@ body ::tycho::LabeledRect::_outline {id canvas slate outline} {
 ## -width option configuration
 #
 body ::tycho::LabeledRect::_width {id canvas slate width} {
-    set _width($id) $width
+    set option(width$id) $width
     $canvas itemconfigure $primary($id) -width $width
 }
 
@@ -191,18 +195,18 @@ body ::tycho::LabeledRect::_width {id canvas slate width} {
 #
 body ::tycho::LabeledRect::construct {id canvas slate tags x0 y0 x1 y1 args} {
     # Initialize the options
-    foreach {option value} [concat [array get optiondefault] $args] {
-	set _[string trimleft $option -]($id) $value
+    foreach {opt val} [concat [array get optiondefault] $args] {
+	set option([string trimleft $opt -]$id) $val
     }
 
     # Create the primary component. This is the displayed rectangle.
     set primary($id) [$canvas create rectangle $x0 $y0 $x1 $y1 \
-	    -fill $_fill($id) -outline $_outline($id) \
-	    -width $_width($id) -tags $tags]
+	    -fill $option(fill$id) -outline $option(outline$id) \
+	    -width $option(width$id) -tags $tags]
     
     # Create the graphics and text label -- do not change the order!
-    _text     $id $canvas $slate $_text($id)
-    _graphics $id $canvas $slate $_graphics($id)
+    _text     $id $canvas $slate $option(text$id)
+    _graphics $id $canvas $slate $option(graphics$id)
 }
 
 ##########################################################################
@@ -213,13 +217,13 @@ body ::tycho::LabeledRect::construct {id canvas slate tags x0 y0 x1 y1 args} {
 body ::tycho::LabeledRect::coords {id canvas slate args} {
     # No args: just return coordinates
     if { $args == "" } {
-		return [$canvas coords $primary($id)]
+	return [$canvas coords $primary($id)]
     }
 
     # Move the rectangle itself
     eval $canvas coords $primary($id) $args
 
     # Move and scale the text and graphics FIXME: Inefficient
-    _graphics $id $canvas $slate $_graphics($id)
-    _anchor   $id $canvas $slate $_anchor($id)
+    _graphics $id $canvas $slate $option(graphics$id)
+    _anchor   $id $canvas $slate $option(anchor$id)
 }

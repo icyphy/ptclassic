@@ -2,7 +2,7 @@
 # @Version: $Id$
 # @Author: John Reekie
 #
-# @Copyright (c) 1996 The Regents of the University of California.
+# @Copyright (c) 1996-1997 The Regents of the University of California.
 # All rights reserved.
 #  
 # Permission is	hereby granted,	without	written	agreement and without
@@ -26,6 +26,7 @@
 #							  COPYRIGHTENDKEY
 ##########################################################################
 
+
 # Explicitly load the superclass. I don't really know why this is
 # needed, but the common arrays get upset otherwise.
 namespace ::tycho {
@@ -43,11 +44,9 @@ namespace ::tycho {
 #
 # <p><b>Options</b>
 #
-# <dl>
-# <dt><dd>
-# <dl>
-# <dt><b>-anchor</b>
-# <dd>The anchor position of the text label relative to the region
+# <ul>
+# <li><b>-anchor</b>:
+# The anchor position of the text label relative to the region
 # occupied by the item. The anchor can be any of the compass points --
 # <i>n</i>, <i>s</i>, <i>e</i>, <i>w</i>, <i>ne</i>, <i>se</i>,
 # <i>nw</i>, <i>sw</i> -- and <i>c</i> or <i>center</i>. If it is
@@ -55,19 +54,26 @@ namespace ::tycho {
 # the label is drawn underneath the item (as though the anchor was
 # <i>s</i>).
 #
-# <dt><b>-graphics</b>
-# <dd>The graphics to draw on the item. This option consists of zero or
+# <li><b>-graphics</b>:
+# The graphics to draw on the item. This option consists of zero or
 # more item specs, where an item spec is the item type, coordinates, and
 # options. The coordinates are specified as a percentage of the item
 # size. Item specs are separates by newlines or semi-colons.
 #
-# <dt><b>-text</b>
-# <dd>The label of the item. If there are graphics also displayed, the
+# <li><b>-text</b>:
+# The label of the item. If there are graphics also displayed, the
 # label is placed outside the item; if not, the label is displayed
 # outside the item.  By default, this option is "", which means that
 # nothing is displayed.
 #
-# </dl></dl>
+# </ul>
+#
+# <p><b>Components</b>
+#
+# <ul>
+# <li><b>label</b>:
+# The editable text label.
+# </ul>
 #
 # <p><b>Bugs</b>
 #
@@ -93,18 +99,6 @@ class ::tycho::LabeledItem {
     ###################################################################
     ####                            options                        ####
 
-    # The anchor position of the label. Defaults to center
-    common _anchor
-
-    # The graphics to draw on the item
-    common _graphics
-
-    # The text in the label
-    common _text
-
-    ###################################################################
-    ####                     option update procs                   ####
-
     # Update the *-anchor* option
     proc _anchor {id canvas slate anchor}
     
@@ -118,7 +112,7 @@ class ::tycho::LabeledItem {
     ####                         protected variables               ####
 
     # The item with the text label
-    common textitem
+    # common textitem
 
     # The virtual "method" table
     common methodtable
@@ -148,22 +142,22 @@ class ::tycho::LabeledItem {
 ## -anchor option configuration
 #
 body ::tycho::LabeledItem::_anchor {id canvas slate anchor} {
-    set _anchor($id) $anchor
+    set option(anchor$id) $anchor
 
     # If there are no graphics, place inside the item, else place
     # outside the item
-    if { $_text($id) != "" } {
-        eval $canvas coords $textitem($id) \
+    if { $option(text$id) != "" } {
+        eval $canvas coords $component(label$id) \
 		[$slate aspect $id $anchor -region]
-        if { $_graphics($id) == "" } {
-            $canvas itemconfigure $textitem($id) -anchor $anchor
+        if { $option(graphics$id) == "" } {
+            $canvas itemconfigure $component(label$id) -anchor $anchor
         } else {
             if { $anchor == "center" || $anchor == "c" } {
                 set anchor "s"
-                eval $canvas coords $textitem($id) \
+                eval $canvas coords $component(label$id) \
 			[$slate aspect $id s -region]
             }
-            $canvas itemconfigure $textitem($id) \
+            $canvas itemconfigure $component(label$id) \
                     -anchor [::tycho::Shape::compass $anchor "ud"]
         }
     }
@@ -176,7 +170,7 @@ body ::tycho::LabeledItem::_anchor {id canvas slate anchor} {
 # percent of the parent item's size. <i>Do not specify tags.</i>
 #
 body ::tycho::LabeledItem::_graphics {id canvas slate graphics} {
-    set _graphics($id) $graphics
+    set option(graphics$id) $graphics
 
     # Delete existing graphics
     $slate delete graphics.$id
@@ -203,8 +197,8 @@ body ::tycho::LabeledItem::_graphics {id canvas slate graphics} {
     		[expr ($y1-$y0)/100.0]
     
     # Move the label outside the item if necessary
-    if { $graphics != "" && $_text($id) != "" } {
-    	 _anchor $id $canvas $slate $_anchor($id)
+    if { $graphics != "" && $option(text$id) != "" } {
+    	 _anchor $id $canvas $slate $option(anchor$id)
     }
 }
 
@@ -213,19 +207,19 @@ body ::tycho::LabeledItem::_graphics {id canvas slate graphics} {
 #
 body ::tycho::LabeledItem::_text {id canvas slate text} {
     if { $text != "" } {
-        if { ! [::info exists textitem($id)] } {
+        if { ! [::info exists component(label$id)] } {
 	    ::tycho::assign x0 y0 x1 y1 [$canvas coords $primary($id)]
-	    set textitem($id) [$canvas create text \
+	    set component(label$id) [$canvas create text \
                     [expr ($x0+$x1)/2] \
 		    [expr ($y0+$y1)/2] \
                     -text $text \
 		    -tags  [$canvas gettags $primary($id)]]
-            _anchor $id $canvas $slate $_anchor($id)
+            _anchor $id $canvas $slate $option(anchor$id)
         } else {
-	    $canvas itemconfigure $textitem($id) -text $text
+	    $canvas itemconfigure $component(label$id) -text $text
 	}
     } else {
-        catch {$canvas delete $textitem($id)}
+        catch {$canvas delete $component(label$id)}
     }
-    set _text($id) $text
+    set option(text$id) $text
 }

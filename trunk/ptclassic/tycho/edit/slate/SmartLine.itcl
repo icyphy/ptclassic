@@ -63,40 +63,45 @@ namespace ::tycho {
 #
 # <p><b>Options</b>:
 #
-# <dl>
-# <dt><dd>
-# <dl>
-# <dt><b>-alpha</b>
-# <dd>The minimum distance from an end-point of a line
+# <ul>
+# <li><b>-alpha</b>:
+# The minimum distance from an end-point of a line
 # to the first vertex.
 #
-# <dt><b>-arrow</b>
-# <dd>The location of the arrow-head on the line: can be
+# <li><b>-arrow</b>:
+# The location of the arrow-head on the line: can be
 # one of <i>none</i>, <i>first</i>, <i>last</i>, or <i>both</i>. 
 # <i>none</i> by default.
 #
-# <dt><b>-beta</b>
-# <dd>The preferred distance between vertices that "wrap" back
+# <li><b>-beta</b>:
+# The preferred distance between vertices that "wrap" back
 # in the opposite direction.
 #
-# <dt><b>-end</b>
-# <dd>The direction of the line end-point. Can be one of the
+# <li><b>-end</b>:
+# The direction of the line end-point. Can be one of the
 # four major compass points: <i>n</i>, <i>s</i>, <i>e</i>, or <i>w</i>. It is
 # <i>e</i> by default.
 #
-# <dt><b>-fill</b>
-# <dd>The color of the line. Black by default.
+# <li><b>-fill</b>:
+# The color of the line. Black by default.
 #
-# <dt><b>-smooth</b>
-# <dd>The flag controlling whether the line is
+# <li><b>-smooth</b>:
+# The flag controlling whether the line is
 # drawn with curves instead of straight segments. Off by default.
 #
-# <dt><b>-start</b>
-# <dd>The direction of the line start-point. Can be one of the
+# <li><b>-start</b>:
+# The direction of the line start-point. Can be one of the
 # four major compass points: <i>n</i>, <i>s</i>, <i>e</i>, or <i>w</i>. It is
 # <i>e</i> by default.
 #
-# </dl></dl>
+# </ul>
+#
+# <p><b>Components</b>
+#
+# <ul>
+# <li><b>segments</b>:
+# The visible line.
+# </ul>
 #
 # <b>Bugs</b>: (none)
 # 
@@ -145,35 +150,8 @@ namespace ::tycho {
 class ::tycho::SmartLine {
     inherit ::tycho::ComplexItem
 
-    # Create a new item
-    proc construct {id canvas slate tags x0 y0 x1 y1 args}
-
     ###################################################################
-    ####                            options                        ####
-
-    # The "alpha" parameter of the line
-    common _alpha
-
-    # The position of the arrow: none, first, last, both
-    common _arrow
-
-    # The "beta" parameter of the line
-    common _beta
-
-    # The direction of the end of the line
-    common _end
-
-    # The color of the line
-    common _fill
-
-    # Enable "smooth" mode
-    common _smooth
-
-    # The direction of the start of the line
-    common _start
-
-    ###################################################################
-    ####                     option update procs                   ####
+    ####                         public procs                      ####
 
     # Update the *-alpha* option
     proc _alpha {id canvas slate alpha}
@@ -196,18 +174,12 @@ class ::tycho::SmartLine {
     # Update the *-start* option
     proc _start {id canvas slate start}
 
-    ###################################################################
-    ####                         public procs                      ####
+    # Create a new item
+    proc construct {id canvas slate tags x0 y0 x1 y1 args}
 
     # Set or get the lines's coordinates
     proc coords {id canvas slate args}
 
-    ###################################################################
-    ####                         picture components                ####
-
-    # The segmented line
-    common segments
-    
     ###################################################################
     ####                         protected variables               ####
 
@@ -219,9 +191,6 @@ class ::tycho::SmartLine {
 
     # SmartLines are shaped like... lines
     common shape "line"
-
-    # Each line has a current state that controls its shape
-    common state
 
     ###################################################################
     ####                        private procs                      ####
@@ -466,7 +435,7 @@ class ::tycho::SmartLine {
 ## -alpha option configuration
 #
 body ::tycho::SmartLine::_alpha {id canvas slate alpha} {
-    set _alpha($id) $alpha
+    set option(alpha$id) $alpha
     redraw $id $canvas $slate
 }
 
@@ -474,15 +443,15 @@ body ::tycho::SmartLine::_alpha {id canvas slate alpha} {
 ## -arrow option configuration
 #
 body ::tycho::SmartLine::_arrow {id canvas slate arrow} {
-    set _arrow($id) $arrow
-    $canvas itemconfigure $segments($id) -arrow $arrow
+    set option(arrow$id) $arrow
+    $canvas itemconfigure $component(segments$id) -arrow $arrow
 }
 
 ##########################################################################
 ## -beta option configuration
 #
 body ::tycho::SmartLine::_beta {id canvas slate beta} {
-    set _beta($id) $beta
+    set option(beta$id) $beta
     redraw $id $canvas $slate
 }
 
@@ -490,8 +459,8 @@ body ::tycho::SmartLine::_beta {id canvas slate beta} {
 ## -end option configuration
 #
 body ::tycho::SmartLine::_end {id canvas slate end} {
-    set _end($id) $end
-    set state($id) 0
+    set option(end$id) $end
+    set variable(state$id) 0
     redraw $id $canvas $slate
 }
 
@@ -499,24 +468,24 @@ body ::tycho::SmartLine::_end {id canvas slate end} {
 ## -fill option configuration
 #
 body ::tycho::SmartLine::_fill {id canvas slate fill} {
-    set _fill($id) $fill
-    $canvas itemconfigure $segments($id) -fill $fill
+    set option(fill$id) $fill
+    $canvas itemconfigure $component(segments$id) -fill $fill
 }
 
 ##########################################################################
 ## -smooth option configuration
 #
 body ::tycho::SmartLine::_smooth {id canvas slate smooth} {
-    set _smooth($id) $smooth
-    $canvas itemconfigure $segments($id) -smooth $smooth
+    set option(smooth$id) $smooth
+    $canvas itemconfigure $component(segments$id) -smooth $smooth
 }
 
 ##########################################################################
 ## -start option configuration
 #
 body ::tycho::SmartLine::_start {id canvas slate start} {
-    set _start($id) $start
-    set state($id) 0
+    set option(start$id) $start
+    set variable(state$id) 0
     redraw $id $canvas $slate
 }
 
@@ -525,8 +494,8 @@ body ::tycho::SmartLine::_start {id canvas slate start} {
 #
 body ::tycho::SmartLine::construct {id canvas slate tags x0 y0 x1 y1 args} {
     # Initialize the options
-    foreach {option value} [concat [array get optiondefault] $args] {
-	set _[string trimleft $option -]($id) $value
+    foreach {opt val} [concat [array get optiondefault] $args] {
+	set option([string trimleft $opt -]$id) $val
     }
 
     # Create the primary component for the outline coordinates.
@@ -535,11 +504,12 @@ body ::tycho::SmartLine::construct {id canvas slate tags x0 y0 x1 y1 args} {
 	    -fill "" -tags $tags]
 
     # Create the "segments" component which is the visible line.
-    set segments($id) [$canvas create line $x0 $y0 $x1 $y1 \
-	    -fill $_fill($id) -arrow $_arrow($id) -tags $tags]
+    set component(segments$id) [$canvas create line $x0 $y0 $x1 $y1 \
+	    -fill $option(fill$id) -arrow $option(arrow$id) -tags $tags]
 
-    # Start in state 0
-    set state($id) 0
+    # Each line has a current state that controls its shape.
+    # Start in state 0.
+    set variable(state$id) 0
     
     # Call redraw to do the work
     redraw $id $canvas $slate
@@ -584,8 +554,8 @@ body ::tycho::SmartLine::redraw {id canvas slate} {
     set x [expr $x1-$x0]
     set y [expr $y1-$y0]
 
-    set type $rotate($_start($id)-$_end($id))
-    ::tycho::assign x y [eval list $normalize($_start($id))]
+    set type $rotate($option(start$id)-$option(end$id))
+    ::tycho::assign x y [eval list $normalize($option(start$id))]
 
     # Swap north-south if needed
     if { $type == "n" } {
@@ -595,8 +565,8 @@ body ::tycho::SmartLine::redraw {id canvas slate} {
     }
 
     # Get the relative coordinates
-    set state($id) [nextstate $id $type $state($id) $x $y]
-    set coords     [route_$type $id $state($id) $x $y]
+    set variable(state$id) [nextstate $id $type $variable(state$id) $x $y]
+    set coords [route_$type $id $variable(state$id) $x $y]
 
     # Swap north-south again if needed
     if { $flipped } {
@@ -612,14 +582,14 @@ body ::tycho::SmartLine::redraw {id canvas slate} {
     set temp $coords
     set coords {}
     foreach {x y} $temp {
-	eval lappend coords "$unnormalize($_start($id))"
+	eval lappend coords "$unnormalize($option(start$id))"
     }
 
     # Redraw the line
-    eval $canvas coords $segments($id) $coords
+    eval $canvas coords $component(segments$id) $coords
 
     # Move to correct coordinates
-    $canvas move $segments($id) $x0 $y0
+    $canvas move $component(segments$id) $x0 $y0
 }
 
 ##########################################################################
@@ -629,8 +599,8 @@ body ::tycho::SmartLine::redraw {id canvas slate} {
 # relative positions of its end points.
 #
 body ::tycho::SmartLine::route_e {id state x y} {
-    set a $_alpha($id)
-    set b $_beta($id)
+    set a $option(alpha$id)
+    set b $option(beta$id)
     
     switch -exact $state {
 	"0" {
@@ -698,8 +668,8 @@ body ::tycho::SmartLine::route_e {id state x y} {
 # relative positions of its end points.
 #
 body ::tycho::SmartLine::route_w {id state x y} {
-    set a $_alpha($id)
-    set b $_beta($id)
+    set a $option(alpha$id)
+    set b $option(beta$id)
     
     switch -exact $state {
 	"0" -
@@ -747,8 +717,8 @@ body ::tycho::SmartLine::route_w {id state x y} {
 # relative positions of its end points.
 #
 body ::tycho::SmartLine::route_s {id state x y} {
-    set a $_alpha($id)
-    set b $_beta($id)
+    set a $option(alpha$id)
+    set b $option(beta$id)
     
     switch -exact $state {
 	"0" {
@@ -789,8 +759,8 @@ body ::tycho::SmartLine::route_s {id state x y} {
 #
 body ::tycho::SmartLine::nextstate {id type state x y} {
     # Line parameters used by transition expressions
-    set a $_alpha($id)
-    set b $_beta($id)
+    set a $option(alpha$id)
+    set b $option(beta$id)
 
     # We jump out of the while loop when no transitions are satisfied
     while { 1 } {
