@@ -48,13 +48,14 @@ BINDIR=$(PTOLEMY)/bin.$(PTARCH)
 #---------------------------------------------------------
 
 # Version numbers
-#TCL_VERSION =	tcl7.3
+#TCL_VERSION =		tcl7.3
 #TK_MAJOR_VERSION = 	tk3.6
-#TK_VERSION =	tk3.6p1
+#TK_VERSION =		tk3.6p1
 
-TCL_VERSION =	tcl7.4p1
+TCL_MAJOR_VERSION = 	tcl7.4
+TCL_VERSION =		tcl7.4p1
 TK_MAJOR_VERSION = 	tk4.0
-TK_VERSION =	tk4.0p1
+TK_VERSION =		tk4.0p1
 
 ITCL_VERSION =	itcl-1.5
 
@@ -164,7 +165,8 @@ clean_tcl:
 # Configure tk
 #	Need to make a link for tk.h so that we are sure it is installed
 #	Theoretically, GNU make should do the right thing, but . . .
-$(TK_OBJ)/config.status: $(TCLTK_OBJ) $(TK_OBJ) $(TCLTK_OBJ)/$(TCL_VERSION) \
+$(TK_OBJ)/config.status: $(TCLTK_OBJ) $(TK_OBJ) \
+			$(TCLTK_OBJ)/$(TCL_MAJOR_VERSION) \
 			$(TCLTK_OBJ)/$(TK_MAJOR_VERSION) #$(TK_OBJ)/xpm
 	@echo "Configuring tk"
 	(cd $(TK_OBJ); $(TK_SRC)/configure -v --srcdir=$(TK_SRC) --prefix=$(TK_INDEPENDENT_DEST) --exec-prefix=$(TK_DEST) )
@@ -180,8 +182,8 @@ $(TK_OBJ)/xpm:
 	(cd $(TK_OBJ)/xpm; ln -s $(TK_SRC)/xpm/* .)
 
 # This link is necessary for the tk build to find libtcl.a
-$(TCLTK_OBJ)/$(TCL_VERSION): $(TCL_OBJ)
-	(cd $(TCLTK_OBJ); ln -s $(TCL_OBJ) $(TCLTK_OBJ)/$(TCL_VERSION))
+$(TCLTK_OBJ)/$(TCL_MAJOR_VERSION): $(TCL_OBJ)
+	(cd $(TCLTK_OBJ); ln -s $(TCL_OBJ) $(TCLTK_OBJ)/$(TCL_MAJOR_VERSION))
 
 # This link is necessary for the tk build to find libtk.a
 $(TCLTK_OBJ)/$(TK_MAJOR_VERSION): $(TK_OBJ)
