@@ -54,7 +54,7 @@ This class maintains the number of tokens transferred on the ports.
 class SynDFClusterPort : public ClusterPort {
 public:
 
-	SynDFClusterPort(GenericPort& gp) : ClusterPort(gp) {};
+	SynDFClusterPort(PortHole& p) : ClusterPort(p) {}
 
 	// Set the loop factor.
 	/* virtual */ void initializeClusterPort();
@@ -127,7 +127,7 @@ public:
 	/* virtual */ Block* makeNew() const { return new SynDFCluster; }
 
 	// make a new SynDFClusterPort
-	inline /* virtual */ ClusterPort* makeNewPort(GenericPort& p) {
+	inline /* virtual */ ClusterPort* makeNewPort(PortHole& p) {
 	    return new SynDFClusterPort(p);
 	}
 
