@@ -48,6 +48,7 @@ if ( -d demos ) then
 	cat * >> /tmp/pt$$
 	cd ..
 endif
+/bin/rm -rf index
 $printcommand $printoptions /tmp/pt$$ >& index
 chmod g+w index
 $contentscmd index
