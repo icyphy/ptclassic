@@ -70,10 +70,10 @@ proc ptkImportantMessage {w text} {
     wm geometry $w +200+200
     tkwait visibility $w
     focus $w
-    bind $w <Return> "destroy $w"
+    bind $w <Key> "destroy $w"
     bind $w <Button> "destroy $w"
     bind $w.msg <Button> "destroy $w"
-    grab -global $w
+    grab $w
     tkwait window $w
 }
 
