@@ -38,8 +38,6 @@ Code for functions declared in EventHorizon.h
 
 **************************************************************************/
 
-inline Particle** EventHorizon :: nextInBuffer() { return buffer()->next(); }
-
 void 
 EventHorizon :: ghostConnect(EventHorizon& to)
 {
@@ -86,6 +84,30 @@ int EventHorizon :: isItOutput() const { return (inOrOut > 1); }
 
 void EventHorizon :: initialize() {}
 
+// This method moves num particles from the EventHorizon "from"
+// to me.
+
+void EventHorizon::moveFromGhost(EventHorizon& from, int num) {
+	CircularBuffer* toBuffer = buffer();
+	CircularBuffer* fromBuffer = from.buffer();
+	toBuffer->backup(num);
+	for (int i = num; i > 0; i--) {
+		Particle** p = toBuffer->next();
+		Particle** q = fromBuffer->next();
+
+		// In the following code, particles aren't copied, only
+		// pointers to Particles.
+		// get a reference to the old particle from the fromBuffer.
+		Particle* tmp = *q;
+		// Transfer the particle from one buffer to the other
+		*q = *p;
+
+		// zero the old particle and put it in the source buffer.
+		tmp->initialize();
+		*p = tmp;
+	}
+}
+
 
 /**************************************************************************
 
@@ -111,28 +133,8 @@ void ToEventHorizon :: transferData ()
 	// check if data in.
 	if (tokenNew == FALSE) return;
 
-	// Back up in the buffer by numberTokens
-	buffer()->backup(asPort()->numberTokens);
-
-	// now, transfer the data.
-	for(int i = asPort()->numberTokens; i>0; i--) {
-
-		// get pointers to each of the CircularBuffer objects.
-		Particle** p = buffer()->next();
-		Particle** q = ghostPort->nextInBuffer();
-
-		// In the following code, particles aren't copied, only
-		// pointers to Particles.
-		// get a reference to the old particle from the ghostport.
-		Particle* tmp = *q;
-
-		// Transfer the particle from one buffer to the other
-		*q = *p;
-
-		// zero the old particle and put it in the source buffer.
-		tmp->initialize();
-		*p = tmp;
-	}
+	// move data.
+	moveFromGhost(*ghostPort, asPort()->numberTokens);
 
 	// set DataNew Value to ghostPort
 	ghostPort->tokenNew = TRUE;
@@ -170,7 +172,7 @@ void FromEventHorizon :: transferData ()
 void FromEventHorizon :: initialize()
 {
 	// Initialize members
-	timeMark = 0.0;
+	setTimeMark(0.0);
 	tokenNew = FALSE;
 
 	// if on the boundary, call ghostPort :: initialize()

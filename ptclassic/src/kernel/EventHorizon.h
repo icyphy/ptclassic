@@ -66,9 +66,6 @@ public:
 	// Connect two EventHorizons.
 	virtual void ghostConnect(EventHorizon& to );
 
-	// Which wormhole it is in.
-	Wormhole* wormhole;
-
 	// is it Input or Output? -- depends on the location.
 	virtual int isItInput() const;
 	virtual int isItOutput() const;
@@ -78,12 +75,6 @@ public:
 		Wormhole* parentWormhole, Star* parentStar,
 		DataType type = FLOAT, unsigned numTokens = 1 );
 
-	// this method lets transferData access the ghostPort's buffer.
-	// I'd prefer not to make it public, but the rules for protected
-	// members require it (could make ToEventHorizon and FromEventHorizon
-	// friends).
-	Particle** nextInBuffer(); // { return myBuffer->next();}
-
 	// return the timeMark
 	double getTimeMark() { return timeMark; }
 	void setTimeMark(double d) { timeMark = d; }
@@ -92,24 +83,36 @@ public:
 	virtual void initialize();
 
 protected:
-	// myself as a Porthole
-	PortHole* selfPort;
-
 	// Access the myBuffer of the porthole
 	CircularBuffer* buffer() { return asPort()->myBuffer; }
 
+	// Transfer data from another EventHorizon, for use in
+	// ToEventHorizon::transferData
+	void moveFromGhost(EventHorizon& from, int numParticles);
+
 	// We need another set of connection information
 	// between boundary and inside of the wormhole.
+	// ghostPort points to the other EventHorizon in the pair
+	// that interfaces between two domains.
+
 	EventHorizon* ghostPort;
 	
 	// Is data token new?
 	int tokenNew;
 
+	// Which wormhole it is in.
+	Wormhole* wormhole;
+
 	// TimeMark of the current data, which is necessary for interface
 	// of two domains. 
 	double timeMark;
-
+private:
+	// my direction
         int inOrOut;
+
+	// myself as a Porthole
+	PortHole* selfPort;
+
 };
 
         //////////////////////////////////////////
@@ -119,6 +122,10 @@ protected:
 // Input EventHorizon
 class ToEventHorizon : public EventHorizon
 {
+public:
+	ToEventHorizon(PortHole* p) : EventHorizon(p) {}
+
+	void initialize(); 
 protected:
 
 	// trasfering data from outside to Universal EventHorizon
@@ -126,12 +133,6 @@ protected:
 
 	// transfer data from Universal EventHorizon to ghostPort.
 	void transferData();
-
-public:
-	ToEventHorizon(PortHole* p) : EventHorizon(p) {}
-
-	void initialize(); 
-
 };
 
         //////////////////////////////////////////
@@ -142,6 +143,10 @@ public:
 class FromEventHorizon : public EventHorizon
 {
 friend class Wormhole;
+public:
+	FromEventHorizon(PortHole* p) : EventHorizon(p) {}
+
+	void initialize(); 
 protected:
 
 	//transfer data from Universal EventHorizon to outside
@@ -155,15 +160,16 @@ protected:
 	// if ready, set up the stopping condition for the inner-domain.
 	virtual int ready();
 			   
-public:
-	FromEventHorizon(PortHole* p) : EventHorizon(p) {}
-
-	void initialize(); 
 };
 
         //////////////////////////////////////////
         // class WormMultiPort
         //////////////////////////////////////////
+
+// This class is used for Wormholes that have multiportholes in the
+// inner galaxy.  The WormMultiPort acts as an alias on the outside,
+// and it correctly creates pairs of EventHorizons to perform the
+// interface.
 
 class WormMultiPort : public MultiPortHole {
 	Wormhole* worm;
