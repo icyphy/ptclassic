@@ -28,6 +28,7 @@ HDRS	      = compile.h \
 		edit.h \
 		err.h \
 		exec.h \
+		handle.h \
 		kernelCalls.h \
 		main.h \
 		local.h \
