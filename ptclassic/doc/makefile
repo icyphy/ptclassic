@@ -9,6 +9,8 @@ DIRS =	\
 	$(PTOLEMY)/src/domains/de/doc \
 	$(PTOLEMY)/src/domains/ddf/doc \
 	$(PTOLEMY)/src/domains/sdf/doc \
+	$(PTOLEMY)/src/domains/cg/doc \
+	$(PTOLEMY)/src/domains/thor/doc \
 	$(PTOLEMY)/doc/main
 
 # omitted from main distribution
@@ -20,24 +22,18 @@ MAKEVARS =	\
 		"PRINTER=$(PRINTER)"
 
 almagest print:
+	rm -f $$HOME/Almagest.index
 	for x in $(DIRS); do \
 		cd $$x ; \
 		make $(MAKEVARS) print ; \
 	done; \
 	cd $(PTOLEMY)/doc; \
-	make $(MAKEVARS) prtitle; \
+	make $(MAKEVARS) prtitle
 	make $(MAKEVARS) prindex
+
 
 prtitle:
 	ditroff -me -eqn -P$(PRINTER) $(PTOLEMY)/doc/headers/shared title; \
 
 prindex:
-	/bin/rm -f $(PTOLEMY)/doc/index; \
-	for x in $(DIRS); do \
-		cd $$x ; \
-		cat index >> $(PTOLEMY)/doc/index; \
-		chmod g+w $(PTOLEMY)/doc/index; \
-		cd .. ; \
-	done; \
-	cd $(PTOLEMY)/doc; \
-	$(PTOLEMY)/doc/bin/prindex index
+	cd $$HOME; $(PTOLEMY)/doc/bin/prindex Almagest.index
