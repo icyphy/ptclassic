@@ -11,18 +11,16 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
     }
     location { CGC target library }
-	htmldoc {
+    htmldoc {
     }
     public {
-	DataType sdfPortType;
-	StringList sdfPortName;
-	int numXfer;
-	int maxDelay;
+	virtual void setSDFPortInfo (const char* /*name*/, DataType /*type*/,
+				     int /*numXfer*/, int /*maxDelay*/) {}
 
 	/*virtual*/ Block* clone() const {
 	    CGCSDFBase* newStar = (CGCSDFBase*) CGCStar::clone();
-	    newStar->sdfPortType = sdfPortType;
 	    newStar->sdfPortName = sdfPortName;
+	    newStar->sdfPortType = sdfPortType;
 	    newStar->numXfer = numXfer;
 	    newStar->maxDelay = maxDelay;
 	    newStar->portPrecision = portPrecision;
@@ -31,8 +29,12 @@ limitation of liability, and disclaimer of warranty provisions.
     }
 
     protected {
-	StringList cgcToPtolemyTempVariable;
+	StringList sdfPortName;
+	DataType sdfPortType;
+	int numXfer;
+	int maxDelay;
 	Precision portPrecision;
+	StringList cgcToPtolemyTempVariable;
     }
     
     method {
