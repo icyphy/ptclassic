@@ -43,7 +43,7 @@ public:
 	virtual void prepareForScheduling() = 0;
 
 	// define firing 
-	virtual void fire();
+	virtual int fire();
 
 	// Method to print out description
 	StringList printVerbose () const;
