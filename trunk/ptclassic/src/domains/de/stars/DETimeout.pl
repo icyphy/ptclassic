@@ -6,14 +6,20 @@ defstar
     descriptor { Detect a timeout condition and generate an alarm. }
     version { $Id$ }
     author { T. M. Parks }
-    copyright { 1992 The Regents of the University of California }
+    copyright
+    {
+Copyright 1992 The Regents of the University of California.
+All rights reserved.
+See the file ~ptolemy/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+    }
     location { DE main library }
 
     input
     {
 	name { Set }
 	type { anyType }
-	desc { Start the timer from zero. }
+	desc { Reset and start the timer. }
     }
 
     input
@@ -26,7 +32,7 @@ defstar
     output
     {
 	name { alarm }
-	type { float }
+	type { = Set }
 	desc { Indicates that the timer has reached timeout. }
     }
 
@@ -44,9 +50,10 @@ defstar
 	    set();
 	}
 
-	if (expired)
+	if (expired())
 	{
-	    alarm.put(arrivalTime) << arrivalTime;
+	    // Output the event which started the timer.
+	    alarm.put(arrivalTime) << Set%0;
 	}
     }
 }
