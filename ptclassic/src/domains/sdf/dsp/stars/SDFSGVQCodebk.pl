@@ -142,9 +142,10 @@ represent a training vector.
   go {
     // Get the input training vectors and store them in the 2-dimension array
     Envelope inpkt;
+    int i;
     FloatMatrix zerovector(1, int(dimension));
     zerovector = 0;
-    for (int i=0; i<int(sizeTrnSet); i++) {
+    for (i=0; i<int(sizeTrnSet); i++) {
       const FloatMatrix* vectorp;
       (input%(int(sizeTrnSet)-1-i)).getMessage(inpkt);
       vectorp = (const FloatMatrix *)inpkt.myData();
@@ -169,8 +170,8 @@ represent a training vector.
     const int K1 = int(sizeTrnSet)/int(sizeShapeCodebook);
     for (i = 0; i < int(sizeShapeCodebook); i++) {
       double gain = 0.0;
-      int t_rowloc = i * K1 * int(dimension);
-      for (int j = 0; j < int(dimension); j++) {
+      int j, t_rowloc = i * K1 * int(dimension);
+      for (j = 0; j < int(dimension); j++) {
         gain += trnSet[t_rowloc + j] * trnSet[t_rowloc + j];
       }
       gain = sqrt(gain);
@@ -229,12 +230,12 @@ represent a training vector.
     count++;
 
     do {
-      int i;
+      int i,j;
       //  compute optimum shape codebook Cs(m+1) in partition R(Cs(m),Cg(m)).
       for (i = 0; i < int(sizeShapeCodebook); i++) {
 	double gain = 0.0;
 	int rowloc = i * int(dimension);
-        for (int j = 0; j < int(dimension); j++) {
+        for (j = 0; j < int(dimension); j++) {
           gain += shapeCentroid[rowloc + j] * shapeCentroid[rowloc + j];
         }
         gain = sqrt(gain);
