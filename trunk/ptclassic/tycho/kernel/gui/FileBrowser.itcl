@@ -138,6 +138,11 @@ class ::tycho::FileBrowser {
     # and the directory last visited.
     protected common fileLastOpened
     protected common CWD
+
+    # A local version of the CWD is kept in case multiple file browsers
+    # are open at once (each has to have its own notion of the current
+    # working directory).
+    protected variable localCWD
 }
 
 ######################################################################
@@ -161,9 +166,11 @@ body ::tycho::FileBrowser::constructor {args} {
 	}
     }
 
+    set localCWD $CWD
+
     # Current directory display.
     itk_component add dir {
-	label $itk_interior.childsite.dir -text $CWD -width 35 -anchor e
+	label $itk_interior.childsite.dir -text $localCWD -width 35 -anchor e
     } {
 	keep -background -cursor -foreground -font
     }
@@ -201,7 +208,7 @@ body ::tycho::FileBrowser::help {} {
 # Make a new directory and go to it.
 #
 body ::tycho::FileBrowser::mkdir {} {
-    set dirname [queryinfo "Directory name" "$CWD/" 80]
+    set dirname [queryinfo "Directory name" "$localCWD/" 80]
     if {$dirname != {}} {
 	# FIXME: Unix command built in
 	exec mkdir $dirname
@@ -241,7 +248,7 @@ body ::tycho::FileBrowser::processItem {filename} {
     # If the name is relative, calculate the absolute path.
     set char [string index $file 0]
     if {$char != "/" && $char != "~"} {
-	set file $CWD/$file
+	set file $localCWD/$file
     }
 
     # If the file does not exist, check to see whether the
@@ -272,6 +279,7 @@ body ::tycho::FileBrowser::processItem {filename} {
 		} else {
 		    set CWD $dir
 		    $itk_component(dir) config -text $CWD
+		    set localCWD $CWD
 		    set fileLastOpened ""
 		    updateListbox
 		    return 0
@@ -279,12 +287,13 @@ body ::tycho::FileBrowser::processItem {filename} {
 	    } elseif {$char == "/"} {
 		set CWD $relPath
 		$itk_component(dir) config -text $CWD
+		set localCWD $CWD
 		set fileLastOpened ""
 		updateListbox
 		return 0
 	    }
 	    # Else relative path
-	    set newPath $CWD
+	    set newPath $localCWD
 	    while {[regsub {^([^/]+)(/.*$|$)} $relPath {\1 \2} temp]} {
 		set partOfPath [lindex $temp 0]
 		set relPath [string trimleft [lindex $temp 1] "/"]
@@ -320,7 +329,8 @@ body ::tycho::FileBrowser::processItem {filename} {
 	    } else {
 		set CWD $newPath
 	    }
-	    $itk_component(dir) config -text $CWD
+	    set localCWD $CWD
+	    $itk_component(dir) config -text $localCWD
 	    set fileLastOpened ""
 	    updateListbox
 	    return 0
@@ -356,7 +366,7 @@ body ::tycho::FileBrowser::updateListbox {} {
     $itk_component(listbox) delete 0 end
     
     # Get a list of filenames in the current working directory
-    set files [glob -nocomplain $CWD/*]
+    set files [glob -nocomplain $localCWD/*]
     
     # Split the filename list into directories and plain files
     set dirList ""
@@ -386,7 +396,7 @@ body ::tycho::FileBrowser::updateListbox {} {
     set dirLength [llength $dirList]
     set fileLength [llength $fileList]
     
-    if {$CWD != "/"} {
+    if {$localCWD != "/"} {
 	$itk_component(listbox) insert 0 "../"
     }
     
@@ -397,7 +407,7 @@ body ::tycho::FileBrowser::updateListbox {} {
     } elseif {($dirLength == 0) && ($fileLength == 1)} {
 	insert entry [lindex $fileList 0]
     } elseif {($dirLength == 0) && ($fileLength == 0)} {
-	if {$CWD != "/"} {
+	if {$localCWD != "/"} {
 	    insert entry "../"
 	}
     }
