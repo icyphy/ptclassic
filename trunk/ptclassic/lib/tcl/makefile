@@ -50,26 +50,5 @@ EXTRA_SRCS = esterel2pl.tcl \
 MISC_FILES = Ptolemy.xbm left.xbm ptolemySmall.gif ptolemyWelcome.gif \
 	right.xbm
 
-# common.mk wants this, otherwise we get multiple targets for $(LIBDIR)/$(LIB)
-LIB = foo
-
-
 # We don't include common.mk since we don't use the compiler here
-# include common definitions, rules
-#include $(ROOT)/mk/common.mk
-
-all install:
-	@echo "nothing to be done in this directory"
-
-sources:	$(EXTRA_SRCS) $(MISC_FILES) makefile
-
-depend:
-	@echo "no dependencies in tkman directory (contributed code)"
-
-sccsinfo:
-	sccs info
-checkjunk:
-	@checkextra -v $(EXTRA_SRCS) $(MISC_FILES) makefile SCCS
-
-clean:
-	rm -f *~
+include $(ROOT)/mk/no-compile.mk
