@@ -13,10 +13,11 @@ limitation of liability, and disclaimer of warranty provisions.
 	desc {
 Accept a stream of black-and-white images from input GrayImages,
 save the images to files, and display the resulting files as a
-moving video sequence. This star requires that programs from
-the "Utah Raster Toolkit" be in your path. Although this
-toolkit is not included with Ptolemy, it is available for free.
-See this star’s long description (with the "look-inside" or
+moving video sequence.
+This star requires that programs from the "Utah Raster Toolkit"
+be in your path.
+Although this toolkit is not included with Ptolemy, it is available for free.
+See this star's long description (with the "look-inside" or
 "manual" commands in the Ptolemy menu) for information on how
 to get the toolkit.
 
@@ -38,7 +39,6 @@ frame lines 1, 3, 5, etc. and the second field should contain
 lines 0, 2, 4, 6, etc
 	}
 	explanation {
-.pp
 At the end of a simulation this star pops up an X window and
 loads in a sequence of video frames for display.
 Pressing the left or right mouse buttons inside the window plays
@@ -53,8 +53,7 @@ sequence alternately forwards and backwards.
 To end a loop playback, press any mouse button in the video window.
 To close the window type "q" inside.
 .pp
-This star uses programs from the
-\fIUtah Raster Toolkit\fR
+This star uses programs from the \fIUtah Raster Toolkit\fR
 to display moving video in an X window.
 The Utah Raster Toolkit is a collection of software tools from the
 University of Utah.
@@ -85,8 +84,8 @@ To use the software, put the name of the directory with the URT
 executable files into the definition of the \fIpath\fR variable
 inside the .cshrc file in your home directory.
 .pp
-These instructions are appropriate as of December 1992 but may change
-in the future.
+These instructions are appropriate as of December 1992 but 
+may have changed.
 	}
 
 	hinclude { "GrayImage.h" }
@@ -115,28 +114,40 @@ in the future.
 		desc { If true (YES), then inputs are interlaced fields. }
 	}
 
-////// Code
 	header { const int LINELEN = 100; }
 
 	protected {
 		unsigned char* tmpFrm;
 		int width, height, fieldNum, firstTime;
-		char allFileNames[100*LINELEN], rootName[LINELEN],
-				tmpFile[LINELEN];
+		char allFileNames[100*LINELEN],
+		     rootName[LINELEN],
+		     tmpFile[LINELEN];
+	}
+
+	constructor {
+		tmpFrm = 0;
 	}
 
 	setup {
 		fieldNum = 0;
 		firstTime = 1;
 		allFileNames[0] = '\000';
-		tmpFrm = NULL;
+		delete [] tmpFrm;
+		tmpFrm = 0;
 
 		const char* t = ImageName;
-		if (t && t[0]) { strcpy(rootName, ImageName); }
-		else { strcpy(rootName, tempFileName()); }
-		strcpy(tmpFile, tempFileName());
+		if (t && t[0]) {
+			strcpy(rootName, ImageName);
+		}
+		else {
+			char *nm = tempFileName();
+			strcpy(rootName, nm);
+			delete [] nm;
+		}
+		char *nm = tempFileName();
+		strcpy(tmpFile, nm);
+		delete [] nm;
 	}
-
 
 	method { // Remove all appropriate files.
 		name { CleanUp }
@@ -150,23 +161,23 @@ in the future.
 				sprintf(cmd, "rm -f %s", allFileNames);
 				system(cmd);
 			}
+			LOG_DEL; delete [] cmd;
 
 			allFileNames[0] = '\000'; // Clear the file list.
-			LOG_DEL; delete [] cmd;
-			LOG_DEL; delete [] tmpFrm; tmpFrm = NULL;
+			LOG_DEL; delete [] tmpFrm;
+			tmpFrm = 0;
 	}	}
 
 
-	wrapup { // Display the video here.
-		if (!(allFileNames[0])) { // No files to show.
-			CleanUp(); return;
+	wrapup {
+		// Display the video here.
+		if ( allFileNames[0] ) {
+		  LOG_NEW; char* cmd = new char[20 + strlen(allFileNames)];
+		  sprintf(cmd, "getx11 -m %s", allFileNames);
+		  system (cmd);
+		  LOG_DEL; delete [] cmd;
 		}
 
-		LOG_NEW; char* cmd = new char[20 + strlen(allFileNames)];
-		sprintf(cmd, "getx11 -m %s", allFileNames);
-		system (cmd);
-
-		LOG_DEL; delete [] cmd;
 		CleanUp();
 	}
 
@@ -181,6 +192,7 @@ in the future.
 			height = img.retHeight();
 			if (ByFields) {
 				height *= 2;
+				LOG_DEL; delete [] tmpFrm;
 				LOG_NEW; tmpFrm = new unsigned char[width*height];
 			}
 			firstTime = 0;
@@ -206,7 +218,7 @@ in the future.
 		access { protected }
 		arglist { "(const unsigned char* data, const int id)" }
 		code {
-// Open file, write data, close file.
+			// Open file, write data, close file.
 			FILE* fptr = fopen(tmpFile, "w");
 			if (fptr == (FILE*) NULL) {
 				Error::abortRun(*this, "can not create: ", tmpFile);
@@ -217,17 +229,17 @@ in the future.
 				(unsigned) (width*height), fptr);
 			fclose(fptr);
 
-// Translate data.
+			// Translate data.
 			char name[LINELEN];
 			sprintf(name, "%s%d", rootName, id);
 
 			char cmd[LINELEN];
 			sprintf(cmd,
-					"rawtorle -n 1 -w %d -h %d < %s | rleflip -v -o %s",
-					width, height, tmpFile, name);
+				"rawtorle -n 1 -w %d -h %d < %s | rleflip -v -o %s",
+				width, height, tmpFile, name);
 			system(cmd);
 
-// Add file to list.
+			// Add file to list.
 			strcat(allFileNames, " ");
 			strcat(allFileNames, name);
 		}
@@ -235,7 +247,7 @@ in the future.
 
 
 	go {
-// Read data from input.
+		// Read data from input.
 		Envelope envp;
 		(inData%0).getMessage(envp);
 		TYPE_CHECK(envp, "GrayImage");
@@ -246,7 +258,7 @@ in the future.
 			return;
 		}
 
-// Do size check.
+		// Do size check.
 		if (firstTime) {
 			DoFirstTime(*imD);
 		} else {
@@ -255,7 +267,7 @@ in the future.
 				return;
 		}	}
 
-// Process the input data.
+		// Process the input data.
 		if (ByFields) {
 			if (!fieldNum) {
 				for(int i = 0; i < height/2; i++) {
