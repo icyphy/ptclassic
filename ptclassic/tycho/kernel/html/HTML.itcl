@@ -422,7 +422,7 @@ body ::tycho::HTML::constructor {args} {
 	    -underlinelinks underlineLinks
 
     if {$itk_option(-directory) == {}} {
-        configure -directory [file dirname $file]
+        configure -directory [file dirname [filename]]
     }
 
     bind $text <space> "$this scroll 1; break"
@@ -464,7 +464,7 @@ body ::tycho::HTML::destructor {} {
     if [sourcewinIsMine] {
 	# Schedule this for after destruction is complete because the
 	# base class destructor removes the menu entry.
-	after idle "$sourcewin windowMenuAddAll $file"
+	after idle "$sourcewin windowMenuAddAll [filename]"
     }
 }
 
@@ -489,7 +489,8 @@ body ::tycho::HTML::altFile {} {
 # Start up appletviewer on the current file
 #
 body ::tycho::HTML::appletViewer {} {
-     ::tycho::execModal "appletviewer $file" [file dirname $file]
+     ::tycho::execModal "appletviewer [filename]" \
+             [file dirname [filename]]
 }
 
 #####################################################################
@@ -504,9 +505,9 @@ body ::tycho::HTML::back {} {
     # Update the current file with the current position
     if { [llength $stack] > $stackpos } {
         set stack [lreplace $stack $stackpos $stackpos \
-                [list $file [currentPoint]]]
+                [list [filename] [currentPoint]]]
     } else {
-        lappend stack [list $file [currentPoint]]
+        lappend stack [list [filename] [currentPoint]]
     }
 
     # Move back one position
@@ -585,7 +586,8 @@ body ::tycho::HTML::forward {} {
 	return
     }
     # Update the current position
-    set stack [lreplace $stack $stackpos $stackpos [list $file [currentPoint]]]
+    set stack [lreplace $stack $stackpos $stackpos \
+            [list [filename] [currentPoint]]]
 
     # Move forwards
     incr stackpos
@@ -761,7 +763,8 @@ body ::tycho::HTML::hyperJump {filename {point {}} {push 1}} {
 	# Use isRelative, not 'file pathtype' so that we handle paths
 	# that start with ~ and $.
 	if [::tycho::isRelative $filename] {
-            set filename [format "%s/%s" [file dirname $file] $filename]
+            set filename [format "%s/%s" \
+                    [file dirname [filename]] $filename]
         }
         set filename [::tycho::expandPath $filename]
 
@@ -990,7 +993,7 @@ body ::tycho::HTML::openSource {} {
 	$sourcewin raiseWindow
 	return
     }
-    set obj [::tycho::view EditHTML -file $file]
+    set obj [::tycho::view EditHTML -file [filename]]
     set sourcewin $obj
 }
 
@@ -1035,11 +1038,12 @@ body ::tycho::HTML::raiseWindow {} {
 #
 body ::tycho::HTML::reload {} {
     # Handle Image files specially
-    set ext [file extension $file]
+    set ext [file extension [filename]]
 
     if [isAnImageFileExtension $ext] {
         clear
-        insertData "<img src=\"$file\" alt=\"$file\">"
+        insertData \
+                "<img src=\"[filename]\" alt=\"[filename]\">"
     } else {
         ::tycho::File::reload
     }
@@ -1310,7 +1314,7 @@ body ::tycho::HTML::initialize {{menubar {}} \
     configure -readonly 1
 
     # Add myself to the list of open files. 
-    windowMenuAddAll $file
+    windowMenuAddAll [filename]
 
     # Disable auto-save.
     configure -save 0
@@ -1436,7 +1440,7 @@ body ::tycho::HTML::initializeToolbar {toolbar} {
             -text Stop -command "$this stopRendering"
 
     # Add the entry widget displaying the current page
-    $toolbar entry location Location $file "$this hyperJump"
+    $toolbar entry location Location [filename] "$this hyperJump"
 }
 
 #####################################################################
@@ -1451,7 +1455,7 @@ body ::tycho::HTML::pushNextHTMLFile {} {
     }
 
     # Set this one again, updating with the current point
-    lappend stack [list $file [currentPoint]]
+    lappend stack [list [filename] [currentPoint]]
 
     # Move the stack pointer up
     incr stackpos

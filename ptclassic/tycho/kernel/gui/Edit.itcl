@@ -983,6 +983,7 @@ body ::tycho::Edit::downSize {} {
             [::tycho::font [lindex $bf 0] $sz [lindex $bf 2]]
 }
 
+#####################################################################
 #### execProcess
 # Exec a subprocess.  The optional arg `waitForOk' determines whether
 # the process is started immediately, or if we wait for the user to
@@ -990,7 +991,7 @@ body ::tycho::Edit::downSize {} {
 #
 body ::tycho::Edit::execProcess {command {waitForOk 1}} {
     ::tycho::view Monitor -toolbar 1 \
-            -command $command -dir [file dirname $file] \
+            -command $command -dir [file dirname [filename]] \
             -autostart $waitForOk
 }
 
