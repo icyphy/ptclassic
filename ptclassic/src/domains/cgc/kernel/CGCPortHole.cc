@@ -148,7 +148,7 @@ int CGCPortHole :: maxBufReq() const {
 		CGCPortHole* cp = (CGCPortHole*) cgGeo().sourcePort();
 		return cp->maxBufReq();
 	}
-	if ((far() == 0) || atBoundary()) return maxBuf;
+	if (atBoundary()) return maxBuf;
 	return isItOutput()? maxBuf: realFarPort()->maxBufReq();
 }
 
@@ -156,15 +156,17 @@ int CGCPortHole :: maxBufReq() const {
 // reserve the buffer for initial offsets which the farSide input port
 // will read.
 void CGCPortHole :: finalBufSize(int statBuf) {
-	if (isItInput()) return;
+	if (isItInput())
+		return;
 	else if (far() == 0) {
 		maxBuf = numXfer();
 		return;
 	}
 
+	// check wormhole boundary
 	if (far()->isItOutput()) {
 		maxBuf = localBufSize();
-		return; // check boundary.
+		return;
 	}
 
 	// Try best to realize Linear or static buffering.
@@ -233,7 +235,7 @@ void CGCPortHole :: setupForkDests() {
 	ForkDestIter next(this);
 	CGCPortHole *outp, *inp;
 	while ((outp = next++) != 0) {
-		//  check boundary
+		// check boundary
 		if (!outp->far() || outp->far()->isItOutput()) continue;
 
 		inp = outp->realFarPort();
