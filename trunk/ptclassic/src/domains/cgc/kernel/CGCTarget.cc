@@ -18,6 +18,7 @@ $Id$
 
 #include "CGCTarget.h"
 #include "CGDisplay.h"
+#include "CGUtilities.h"
 #include "CGCStar.h"
 #include "GalIter.h"
 #include "miscFuncs.h"
@@ -31,6 +32,8 @@ CGCTarget::CGCTarget(const char* name,const char* starclass,
                    const char* desc) : HLLTarget(name,starclass,desc) {
 	addState(staticBuffering.setState("staticBuffering",this,"YES",
                         "static buffering is enforced between portholes."));
+	addState(hostMachine.setState("hostMachine",this,"",
+                        "Machine on which to compile/run the generated code"));
 	addState(funcName.setState("funcName",this,"main",
                         "function name to be created."));
         addState(doCompile.setState("doCompile",this,"YES",
@@ -148,8 +151,13 @@ void CGCTarget :: frameCode () {
 }
 
 void CGCTarget :: writeCode(const char* name) {
-	if (name == NULL) CGTarget :: writeCode("code.c");
-	else CGTarget :: writeCode(name);
+	if (name == NULL) {
+		StringList fname;
+		fname << galaxy()->name() << ".c"; 
+		CGTarget :: writeCode(fname);
+	} else {
+		CGTarget :: writeCode(name);
+	}
 }
 
 void CGCTarget :: wrapup () {
@@ -164,16 +172,60 @@ int CGCTarget :: wormLoadCode() {
 	return TRUE;
 }
 	
+// check whether the hostMachine is the same as my hostname.
+void CGCTarget :: checkHostMachine() {
+	localHost = FALSE;
+	FILE* fp = popen("/bin/hostname", "r");
+	if (fp == NULL) {
+		Error::warn("popen error");
+	} else {
+		char line[40];
+		if (fgets(line, 40, fp) != NULL) {
+			char* myHost = makeLower(line);
+			char* temp = makeLower((const char*) hostMachine);
+			if (strncmp(myHost, temp, strlen(temp)) == 0) {
+				localHost = TRUE;
+		   	}
+			LOG_DEL; delete temp;
+			LOG_DEL; delete myHost;
+		}
+	}
+	pclose(fp);    
+}
+
 // compile the code
 int CGCTarget :: compileCode() {
+	// check whether the hostMachine is the same as my hostname.
+	checkHostMachine();
 
 	// Compile and run the code
-	StringList cmd = "cd ";
-	cmd += (const char*)destDirectory;
-	cmd += "; ";
-	cmd += compileLine("code.c");
+	StringList fname;
+	fname << galaxy()->name() << ".c";
+	char* tempName = writeFileName(fname);
+	const char* dirName = (const char*) destDirectory;
+	StringList tempCmd = compileLine(fname);
+
+	StringList cmd;
+	if (localHost == FALSE) {
+		// move the file first. Create destDirectory if necessary.
+		cmd << "/bin/cat " << tempName;
+		cmd << " | rsh " << (const char*) hostMachine << " '";
+		cmd << "mkdir -p " << dirName << "; cd " << dirName;
+		cmd << "; rm -f " << fname;
+		cmd << "; /bin/cat - > " << fname << "; ";
+	} else {
+		cmd << "cd " << (const char*)destDirectory << "; ";
+	}
+	// compile the file.
+	cmd << tempCmd << " -o " << galaxy()->name();
+	if (localHost == FALSE) cmd << "'";
 	if(system(cmd)) {
-		Error::abortRun("Compilation errors in generated code.");
+		StringList err = " Can not compile ";
+		err << fname;
+		if (localHost == FALSE) {
+			err << " in machine: " << (const char*) hostMachine;
+		}
+		Error::abortRun(err);
 		return FALSE;
 	}
 	return TRUE;
@@ -189,18 +241,35 @@ StringList CGCTarget :: compileLine(const char* fName) {
 
 // down-load (do nothing here) and run the code
 int CGCTarget :: runCode() {
+	StringList fname = galaxy()->name();
 	StringList cmd = "cd ";
-	cmd += (const char*)destDirectory;
-	cmd += "; a.out";
-	system(cmd);
+	cmd << (const char*)destDirectory;
+	cmd << "; " << fname << " &";
+	if (localHost == FALSE) {
+		// use rshSystem method to preserve x environ.
+		if (rshSystem((const char*) hostMachine, cmd, 0)) {
+			StringList err = " Can not run ";
+			err << fname << " in machine: ";
+			err << (const char*) hostMachine;
+			Error :: abortRun(err);
+			return FALSE;
+		}
+	} else {
+		if(system(cmd)) {
+			StringList err = " Can not run ";
+			err << fname;
+			Error :: abortRun(err);
+			return FALSE;
+		}
+	}
 
-	// Move the code into files of more reasonable names
-	cmd = "cd ";
-	cmd += (const char*)destDirectory;
-	cmd += "; mv -f code.c ";
+	// Move the code into files if saveFileName is given.
 	const char* ch = (const char*) saveFileName;
-	if (ch == 0 || *ch == 0) ch = galaxy()->name();
-	cmd << ch << ".c; mv a.out " << ch;
+	if (ch == 0 || *ch == 0) return TRUE;
+	cmd = "cd ";
+	cmd << (const char*)destDirectory;
+	cmd << "; mv -f " << fname << ".c " << ch << ".c; mv ";
+	cmd << fname << " " << ch;
 	system(cmd);
 	return TRUE;
 }
