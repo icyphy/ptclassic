@@ -283,6 +283,12 @@ extern int abort(), exit();
 extern void free(), perror();
 #else
 #ifdef sgi
+/* The vfork man page says:
+ *   vfork is no longer supported in IRIX as of Release 4.0.  By default, IRIX 
+ *   does not preallocate swap space and thus fork(2) provides the same
+ *   performance advantages as vfork.
+ */
+#define vfork() fork()
 extern void free();
 #else
 extern VOID_HACK abort(), free(), exit(), perror();
@@ -350,7 +356,9 @@ extern long lrand48();
 #define srandom(a) srand48(a)
 #define bzero(a,b) memset(a, 0, b)
 #else
+#ifndef sgi
 extern VOID_HACK srandom();
+#endif
 extern long random();
 #endif
 #endif /* _std_h */
@@ -407,5 +415,6 @@ extern VOID_HACK sleep();
 #else
 #define SIG_FLAGS(s)    (s).sv_flags
 #endif
+
 
 #endif /* PORT_H */
