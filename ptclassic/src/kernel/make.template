@@ -116,6 +116,8 @@ HDRS= $(CCS_WITH_H_FILES:.cc=.h) \
  InfString.h \
  Linker.sysdep.h \
  ParticleStack.h \
+ PtCondition.h \
+ PtThread.h \
  SimAction.h \
  dataType.h \
  ieee.h \
