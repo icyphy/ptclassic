@@ -215,12 +215,7 @@ proc doneTests {args} {
     puts "Total: [expr $PASSED + $FAILED] (Passed: $PASSED Failed: $FAILED)"
     flush stderr
     update
-    if ![info exists reallyExit] {
+    if {![info exists reallyExit] || $reallyExit == 1} {
 	after [expr {2 * $duration}] ::tycho::TopLevel::exitProgram
-	#after [expr {2 * $duration}] ::tclexit
-    } else {
-	if {$reallyExit == 1} {
-	    after [expr {2 * $duration}] ::tycho::TopLevel::exitProgram
-	}
     }
 }
