@@ -213,8 +213,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	// Define the callback procedure used by Tcl to get the value of
 	// the inputs.
 	code {
-	    extern "C" static int
-            grabInputs(
+	    static int grabInputs(
                 ClientData star,                    // Pointer to the star
                 Tcl_Interp *interp,                 // Current interpreter
                 int argc,                           // Number of arguments
@@ -244,8 +243,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	// Define the callback procedure used by Tcl to get the value of
 	// the inputs.
 	code {
-	    extern "C" static int
-            setOutputs(
+	    static int setOutputs(
                 ClientData star,                    // Pointer to the star
                 Tcl_Interp *interp,                 // Current interpreter
                 int argc,                           // Number of arguments
