@@ -35,7 +35,7 @@
 
 # Register the standard context-sensitive editors
 namespace ::tycho {
-    global ptolemypresent
+    global ptolemypresent tcl_platform
     ############# text editors (alphabetical except the first one)
 
     ::tycho::File::registerExtensions {} \
@@ -117,11 +117,13 @@ namespace ::tycho {
     #        {::tycho::view CommandShell  {-file {%s}}} \
     #        {Command shell} "tools"
 
-    ::tycho::File::registerExtensions {} \
-            {set w [::tycho::autoName .glimpse]; \
+    if {$tcl_platform(platform) =! macintosh} {
+	::tycho::File::registerExtensions {} \
+		{set w [::tycho::autoName .glimpse]; \
                 ::tycho::Glimpse $w -geometry +0+0;\
                 wm deiconify $w} \
-            {Glimpse} "tools"
+		{Glimpse} "tools"
+    }
 
     ::tycho::File::registerExtensions {.icl} \
             {::tycho::view ItclClassList {-file {%s}} Displayer {-toolbar 1}} \
