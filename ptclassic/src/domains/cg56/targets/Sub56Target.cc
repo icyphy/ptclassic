@@ -21,60 +21,18 @@ $Id$
 #include "UserOutput.h"
 #include "CG56Star.h"
 #include "KnownTarget.h"
-#include <ctype.h>
-
-Sub56Target :: Sub56Target(const char* nam, const char* desc) :
-	CG56Target(nam,desc), uname(0)
-{
-	initStates();
-}
-
-void Sub56Target :: initStates() {
-	addState(dirName.setState("dirName",this,"~/DSPcode",
-                                  "directory for all output files"));
-	addState(disCode.setState("Display code?",this,"YES",
-	                          "display code if YES."));
-}
-
-Sub56Target :: ~Sub56Target() {
-	LOG_DEL; delete dirFullName; dirFullName = 0;
-}
 
 int Sub56Target :: run() {
-	StringList rts = "\trts\n";
-	addCode(rts);
-	StringList ptolemyMain = "ptolemyMain\n";
-	addCode(ptolemyMain);
+	addCode("	rts\n");
+	addCode("ptolemyMain\n");
 	mySched()->setStopTime(1);
 	int i = Target::run();
-	addCode(rts);
+	addCode("	rts\n");
 	return i;
-}
-
-Sub56Target::Sub56Target(const Sub56Target& arg) :
-	CG56Target(arg)
-{
-	initStates();
-	copyStates(arg);
-}
-
-int Sub56Target :: setup (Galaxy& g) {
-	LOG_DEL; delete dirFullName;
-	dirFullName = writeDirectoryName(dirName);
-	if (!CG56Target::setup(g)) return FALSE;
-	uname = (char*)g.readName();
-	return TRUE;
 }
 
 void Sub56Target :: headerCode () {
 	CG56Target :: headerCode();
-	const char* path = expandPathName("~ptolemy/lib/cg56");
-	StringList inc = "\tinclude '";
-	inc += path;
-	inc += "/intequlc.asm'\n\tinclude '";
-	inc += path;
-	inc += "/ioequlc.asm'\n";
-	addCode(inc);
 	addCode(
 		"	org	p:\n"
 		"ptolemyInit\n");
@@ -82,15 +40,6 @@ void Sub56Target :: headerCode () {
 
 Block* Sub56Target::clone() const {
 	LOG_NEW; return new Sub56Target(*this);
-}
-
-void Sub56Target :: wrapup () {
- 	inProgSection = TRUE;
-	StringList map = mem->printMemMap(";","");
-	addCode (map);
-	if (int(disCode)) CGTarget::wrapup();
-// put the stuff into the files.
-	if (!genFile(myCode, uname, ".asm")) return;
 }
 
 ISA_FUNC(Sub56Target,CG56Target);

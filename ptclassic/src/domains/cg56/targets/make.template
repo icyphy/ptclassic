@@ -32,7 +32,7 @@ CG56DIR=$(ROOT)/src/domains/cg56/kernel
 INCL=-I$(CG56DIR) -I$(CGDIR) -I$(SDFDIR) -I$(KERNDIR)
 
 # objects to make
-OBJS=	Sim56Target.o S56XTarget.o
+OBJS=	Sim56Target.o S56XTarget.o Sub56Target.o
 
 SRCS=	$(OBJS:.o=.cc)
 
