@@ -512,7 +512,8 @@ if(!bittrue)
 else if (bittrue)
 {
 /* ARRAY not handled yet, once see such a case, do so...*/
-    	GenEdgeName(edge);
+    	GenSingleEdgeDeref(edge);
+    	/*GenEdgeName(edge);*/
 	fprintf(CFD," = *r_%s_",Root->Name);
     	GenEdgeName(edge);
 	fprintf(CFD,";\n");
