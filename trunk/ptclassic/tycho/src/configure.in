@@ -35,57 +35,103 @@ dnl Checks for programs.
 AC_PROG_CC
 AC_PROG_MAKE_SET
 
-_PTOLEMY=/users/ptdesign
+#
+# User specified location of the Ptolemy Tree
+#
+AC_ARG_WITH(tcl, [  --with-ptolemy=DIR          use Tcl/Tk from DIR],
+        _PTOLEMY=$withval, _PTOLEMY=/users/ptdesign)
+if test ! -d $_PTOLEMY; then
+    AC_MSG_ERROR(Tcl directory $_PTOLEMY doesn't exist)
+fi
 
 #
 # User specified location of the tcl include
 #
-AC_ARG_WITH(tcl, [  --with-tclinclude=DIR          use Tcl 7.6 binaries from DIR],
-        TCL_INCLUDE_DIR=$withval, TCL_INCLUDE_DIR=`cd $_PTOLEMY/tcltk/itcl/include/itcl; pwd`)
+AC_ARG_WITH(tcl, [  --with-tclinclude=DIR          use Tcl 7.6 includes from DIR],
+        TCL_INCLUDE_DIR=$withval, TCL_INCLUDE_DIR=$_PTOLEMY/tcltk/itcl/include/itcl)
 if test ! -d $TCL_INCLUDE_DIR; then
     AC_MSG_ERROR(Tcl directory $TCL_INCLUDE_DIR doesn't exist)
+fi
+
+AC_MSG_CHECKING([for tcl.h])
+if test -f $TCL_INCLUDE_DIR/tcl.h; then 
+	AC_MSG_RESULT($TCL_INCLUDE_DIR/tcl.h)
+else
+	AC_MSG_ERROR([Cannot find $TCL_INCLUDE_DIR/tcl.h, try --with-tclinclude=DIR])
 fi
 
 #
 # User specified location of the tcl lib
 #
-AC_ARG_WITH(tcl, [  --with-tcllib=DIR          use Tcl 7.6 binaries from DIR],
-        TCL_LIB_DIR=$withval, TCL_LIB_DIR=`cd $_PTOLEMY/tcltk/itcl.$PTARCH/lib/itcl; pwd`)
+AC_ARG_WITH(tcl, [  --with-tcllib=DIR          use Tcl 7.6 lib from DIR],
+        TCL_LIB_DIR=$withval, TCL_LIB_DIR=$_PTOLEMY/tcltk/itcl.$PTARCH/lib/itcl)
 if test ! -d $TCL_LIB_DIR; then
     AC_MSG_ERROR(Tcl directory $TCL_LIB_DIR doesn't exist)
+fi
+
+AC_MSG_CHECKING([for tclConfig.sh])
+if test -f $TCL_LIB_DIR/tclConfig.sh; then 
+	AC_MSG_RESULT($TCL_LIB_DIR/tclConfig.sh)
+else
+	AC_MSG_ERROR([Cannot find $TCL_LIB_DIR/tclConfig.sh, try --with-tcllib=DIR])
 fi
 
 file=$TCL_LIB_DIR/tclConfig.sh
 . $file
 
-CFLAGS=$TCL_CFLAGS
-SHLIB_CFLAGS=$TCL_SHLIB_CFLAGS
-SHLIB_LD=$TCL_SHLIB_LD
-SHLIB_LD_LIBS=$TCL_SHLIB_LD_LIBS
-SHLIB_SUFFIX=$TCL_SHLIB_SUFFIX
-SHLIB_VERSION=$TCL_SHLIB_VERSION
-DL_LIBS=$TCL_DL_LIBS
-LD_FLAGS=$TCL_LD_FLAGS
-LD_SEARCH_FLAGS=$TCL_LD_SEARCH_FLAGS
+# The variables that we use from tclConfig.sh
+TCL_CC=$TCL_CC	
+TCL_CFLAGS=$TCL_CFLAGS
+TCL_LIB_SPEC=$TCL_LIB_SPEC
+TCL_SHLIB_CFLAGS=$TCL_SHLIB_CFLAGS
+TCL_SHLIB_LD=$TCL_SHLIB_LD
+TCL_SHLIB_LD_LIBS=$TCL_SHLIB_LD_LIBS
+TCL_SHLIB_SUFFIX=$TCL_SHLIB_SUFFIX
+TCL_SHLIB_VERSION=$TCL_SHLIB_VERSION
+TCL_DL_LIBS=$TCL_DL_LIBS
+TCL_LD_FLAGS=$TCL_LD_FLAGS
+TCL_LD_SEARCH_FLAGS=$TCL_LD_SEARCH_FLAGS
 
-
-#
-# User specified location of the tk lib
-#
-AC_ARG_WITH(tcl, [  --with-tklib=DIR          use Tk 4.2 binaries from DIR],
-        TK_LIB_DIR=$withval, TK_LIB_DIR=`cd $_PTOLEMY/tcltk/itcl.$PTARCH/lib/itcl; pwd`)
-if test ! -d $TK_LIB_DIR; then
-    AC_MSG_ERROR(Tk directory $TK_LIB_DIR doesn't exist)
-fi
 
 #
 # User specified location of the tk include
 #
-AC_ARG_WITH(tcl, [  --with-tkinclude=DIR          use Tk 4.2 binaries from DIR],
-        TK_INCLUDE_DIR=$withval, TK_INCLUDE_DIR=`cd $_PTOLEMY/tcltk/itcl/include/itcl; pwd`)
+AC_ARG_WITH(tcl, [  --with-tkinclude=DIR          use Tk 4.2 include from DIR],
+        TK_INCLUDE_DIR=$withval, TK_INCLUDE_DIR=$TCL_INCLUDE_DIR)
 if test ! -d $TK_INCLUDE_DIR; then
     AC_MSG_ERROR(Tk directory $TK_INCLUDE_DIR doesn't exist)
 fi
+
+AC_MSG_CHECKING([for tk.h])
+if test -f $TK_INCLUDE_DIR/tk.h; then 
+	AC_MSG_RESULT($TK_INCLUDE_DIR/tk.h)
+else
+	AC_MSG_ERROR([Cannot find $TK_INCLUDE_DIR/tk.h, try --with-tkinclude=DIR])
+fi
+
+#
+# User specified location of the tk lib
+#
+AC_ARG_WITH(tcl, [  --with-tklib=DIR          use Tk 4.2 libs from DIR],
+        TK_LIB_DIR=$withval, TK_LIB_DIR=$TCL_LIB_DIR)
+if test ! -d $TK_LIB_DIR; then
+    AC_MSG_ERROR(Tk directory $TK_LIB_DIR doesn't exist)
+fi
+
+AC_MSG_CHECKING([for tkConfig.sh])
+if test -f $TK_LIB_DIR/tkConfig.sh; then 
+	AC_MSG_RESULT($TK_LIB_DIR/tkConfig.sh)
+else
+	AC_MSG_ERROR([Cannot find $TK_LIB_DIR/tkConfig.sh, try --with-tklib=DIR])
+fi
+
+file=$TK_LIB_DIR/tkConfig.sh
+. $file
+
+# The variables that we use from tkConfig.sh
+TK_XINCLUDES=$TK_XINCLUDES
+TK_LIBS=$TK_LIBS
+TK_LIB_SPEC=$TK_LIB_SPEC
 
 #
 # User specified location of the Java Development Kit (JDK)
@@ -99,11 +145,14 @@ if test ! -f $JAVAHOME/include/StubPreamble.h; then
     AC_MSG_ERROR(There's no StubPreamble.h in $JAVAHOME/include;  use the --with-java= configure flag to specify the location of the Java Development Kit (JDK) )
 fi
 
+AC_MSG_CHECKING([for the java compiler])
+if test -f $JAVAHOME/bin/javac; then
+	AC_MSG_RESULT($JAVAHOME/bin/javac)
+else
+	AC_MSG_ERROR([Cannot find $JAVAHOME/bin/javac, try --with-java=DIR])
+fi
+
 dnl Checks for libraries.
-dnl Replace `main' with a function in -lX11:
-AC_CHECK_LIB(X11, main)
-dnl Replace `main' with a function in -lm:
-AC_CHECK_LIB(m, main)
 
 dnl Checks for header files.
 AC_HEADER_STDC
@@ -114,21 +163,34 @@ dnl Checks for typedefs, structures, and compiler characteristics.
 dnl Checks for library functions.
 AC_FUNC_VPRINTF
 
+dnl Unfortunately tcl7.6 has the wrong TCL_SHLIB_LD command in
+dnl tclConfig.sh if we are running gcc.
+AC_MSG_CHECKING([command to build shared libs])
+if test "$TCL_CC" = "gcc"; then
+	TCL_SHLIB_LD='gcc -shared'
+fi
+AC_MSG_RESULT($TCL_SHLIB_LD)
+
 dnl Substitute the following variables in the Makefile (in alphabetical order)
-AC_SUBST(CFLAGS)
-AC_SUBST(DL_LIBS)
+AC_SUBST(TCL_CC)
+AC_SUBST(TCL_CFLAGS)
+AC_SUBST(TCL_DL_LIBS)
 AC_SUBST(JAVAHOME)
-AC_SUBST(LD_FLAGS)
-AC_SUBST(LD_SEARCH_FLAGS)
-AC_SUBST(SHLIB_CFLAGS)
-AC_SUBST(SHLIB_LD)
-AC_SUBST(SHLIB_LD_LIBS)
-AC_SUBST(SHLIB_SUFFIX)
-AC_SUBST(SHLIB_VERSION)
+AC_SUBST(TCL_LD_FLAGS)
+AC_SUBST(TCL_LD_SEARCH_FLAGS)
+AC_SUBST(TCL_LIB_SPEC)
+AC_SUBST(TK_LIB_SPEC)
+AC_SUBST(TCL_SHLIB_CFLAGS)
+AC_SUBST(TCL_SHLIB_LD)
+AC_SUBST(TCL_SHLIB_LD_LIBS)
+AC_SUBST(TCL_SHLIB_SUFFIX)
+AC_SUBST(TCL_SHLIB_VERSION)
 AC_SUBST(TCL_INCLUDE_DIR)
 AC_SUBST(TCL_LIB_DIR)
 AC_SUBST(TK_INCLUDE_DIR)
 AC_SUBST(TK_LIB_DIR)
-
+AC_SUBST(TK_XINCLUDES)
+AC_SUBST(TK_LIBS)
+AC_SUBST(TK_LIB_SPEC)
 
 AC_OUTPUT(tcljava/makefile makefile)
