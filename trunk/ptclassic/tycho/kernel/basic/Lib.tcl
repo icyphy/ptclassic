@@ -165,6 +165,13 @@ namespace ::tycho {
             {::tycho::controlpanel {%s}} \
             {}
 
+    ########### Compound viewers (alphabetical)
+
+    # Cliff's IDoc viewer (still under construction)
+    ::tycho::File::registerExtensions {.idoc} \
+            {::tycho::view Idoc -file {%s}} \
+            {Idoc viewer} "graphics"
+
 }
 
 # FIXME: This entry binding patch may not be needed in the future.
