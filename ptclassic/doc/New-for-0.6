@@ -1,0 +1,33 @@
+Release Notes for the 0.6 release of Ptolemy
+
+** Please add to this file if you add to ~ptdesign **
+
+Additions for 0.6
+-----------------
+
+
+Changes for 0.6
+---------------
+src/pigilib/mkIcon.c
+        When generating the label for a new icon, we now remove
+        the extensions like ".input=2" or "state=value".
+        These extensions are totally redundant for ports.
+        For state, they might have been useful, but 
+        were rarely displayed anyway because the name gets
+        too long.
+
+src/pigilib/mkTerm.c
+        When a star has more than one input or more than one output,
+        we now generate labels for the the terminals.
+        These labels, of course, could be put in by hand, but
+        they are much easier to remove than to add, and we've had many users
+        complain about having to zoom in ridiculously to see which
+        port is which.
+
+GenericPort::connect() method
+The way the
+code in PortHole.cc is written, the method can only be called for
+output portholes.  I'm going to re-write the code to work for both
+input and output portholes.
+ - Tom 10/94
+
