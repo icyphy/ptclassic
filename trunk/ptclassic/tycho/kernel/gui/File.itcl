@@ -834,7 +834,7 @@ body ::tycho::File::reload {} {
     }
     if {$modified} {
 	if {![::tycho::askuser \
-		"This file has been modified. Proceed anyway?"]} {
+		"The data has been modified. Proceed anyway?"]} {
 	    return 
 	}
     }
