@@ -1,6 +1,7 @@
+# Octtools oct - OCT
 # Version Identification:
 # $Id$
-# Copyright (c) 1990-1993 The Regents of the University of California.
+# Copyright (c) 1990-1994 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -90,7 +91,6 @@ LIBCSRCS	= attach.c \
 		print.c \
 		prop.c \
 		ref.c \
-		save.facet_open.c \
 		stats.c \
 		str.c \
 		temp.c \
@@ -100,6 +100,7 @@ LIBCSRCS	= attach.c \
 		translate.c \
 		utils.c \
 		xid.c
+
 OTHERSRCS = 	regress.c
 
 SRCS =		$(LIBCSRCS)
@@ -109,6 +110,20 @@ OBJS =		$(LIBCSRCS:.c=.o)
 LIB = 		liboct.$(LIBSUFFIX)
 
 EXPHDR =	oct.h
+
+DRIVER =	oct_test
+
+KRUFT =		$(DRIVER)
+
+DRVROBJ =	regress.o
+
+DRVRLIBS = -ltr -lport -lutility -lerrtrap -luprintf -lst -lm
+
+tests:: $(DRIVER) tst
+	cd tst; ../$(DRIVER) 
+
+regress.o: regress.c
+	$(CC) $(C_SHAREDFLAGS) $(CFLAGS) -DCADROOT=\"$(PTOLEMY)/obj.$(ARCH)/octtools/Packages\" -g $^ -c $(C_INCL) 
 
 # common makefile file for vem libraries
 VEMLIBCONFIG=../../vem-lib.mk
