@@ -574,6 +574,7 @@ gu_change v_change;
 	}
     }
     /*NOTREACHED*/
+    return (struct octBox *) 0;
 }
 
 /*ARGSUSED*/
@@ -586,6 +587,7 @@ gu_change v_change;
 {
     errRaise(gu_pkg_name, GU_NOT_IMPL, "guOldObject() not implemented");
     /*NOTREACHED*/
+    return (octObject*) 0;
 }
 
 /*ARGSUSED*/
@@ -599,4 +601,5 @@ struct octPoint **pnts;
 {
     errRaise(gu_pkg_name, GU_NOT_IMPL, "guOldPoints() not implemented");
     /*NOTREACHED*/
+    return 0;
 }
