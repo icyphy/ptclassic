@@ -71,21 +71,33 @@ when the run panel in the graphical interface is closed.
 	hinclude { "MatlabIfc.h" }
 
 	protected {
-		MatlabIfc matlabInterface;
+		MatlabIfc* matlabInterface;
+	}
+
+	constructor {
+		matlabInterface = 0;
+	}
+
+	destructor {
+		delete matlabInterface;
 	}
 
 	setup {
-		if ( ! matlabInterface.MatlabIsRunning() ) {
-		    if ( ! matlabInterface.StartMatlab() ) {
+		if ( matlabInterface == 0 ) {
+		    matlabInterface = new MatlabIfc;
+		}
+		if ( ! matlabInterface->MatlabIsRunning() ) {
+		    if ( ! matlabInterface->StartMatlab() ) {
 			Error::abortRun( *this,
-					 matlabInterface.GetErrorString() );
+					 matlabInterface->GetErrorString() );
 			return;
 		    }
 		}
 
 		const char* scriptDir = ScriptDirectory;
-		matlabInterface.SetDeleteFigures( int(DeleteOldFigures) );
-		matlabInterface.SetScriptDirectory( scriptDir );
-		matlabInterface.SetFigureHandle( fullName() );
+		matlabInterface->SetDeleteFigures( int(DeleteOldFigures) );
+		matlabInterface->SetScriptDirectory( scriptDir );
+		matlabInterface->SetFigureHandle( fullName() );
 	}
+
 }
