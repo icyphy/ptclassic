@@ -163,7 +163,7 @@ X11EXT_LIBSPEC = -L$(X11_LIBDIR) -lXext
 COLLECTOR =
 
 PURELINK =
-PURIFY =	$(COLLECTOR) purify
+PURIFY =	purify -automount-prefix=/tmp_mnt:/vol -best-effort
 QUANTIFY =
 
 # Used by tcltk to build the X pixmap extension
