@@ -154,7 +154,7 @@ body ::tycho::EditTcl::evaluateConstruct {} {
 body ::tycho::EditTcl::help {} {
     global ::TYCHO
     ::tycho::File::openContext \
-        [file join $TYCHO editors textedit doc usersGuides \
+        [file join $TYCHO edit textedit doc usersGuides \
 	    EditTclHelp.html]
 }
 
