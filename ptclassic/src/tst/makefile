@@ -38,7 +38,7 @@
 # Note that some facets have glitches in them, so oct2ptcl barfs.
 
 #DOMAINS = sdf hof de ddf bdf cg cgc cg56 vhdl vhdlb mdsdf $(EXPDOMAINS)
-DOMAINS = bdf ddf de mdsdf sdf
+DOMAINS = bdf ddf de mdsdf sdf pn
 
 MAKEVARS = "PTARCH=$(PTARCH)"
 
