@@ -11,7 +11,7 @@
 # objects can be maintained.
 
 
-DIRS = kernel stars
+DIRS = kernel constructs stars
 
 ME = ddf
 
