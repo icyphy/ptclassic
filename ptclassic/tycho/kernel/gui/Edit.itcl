@@ -918,7 +918,7 @@ body ::tycho::Edit::deleteSelection {} {
 #
 body ::tycho::Edit::execProcess {command {waitForOk 1}} {
     set w [::tycho::autoName .exec]
-    ::tycho::Exec $w -command $command -dir [file dirname $file]
+    ::tycho::Monitor $w -command $command -dir [file dirname $file]
     $w centerOnScreen
     if {$waitForOk != 1} {
         $w invoke ok 
