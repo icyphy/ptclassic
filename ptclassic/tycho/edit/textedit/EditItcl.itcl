@@ -126,9 +126,7 @@ body ::tycho::EditItcl::constructor {args} {
 
     menubar add "Generate class diagram" Special -underline 0 \
 	    -command {
-	set nm [::tycho::autoName .itclclassdiagram]
-	::tycho::ItclClassDiagram $nm
-	$nm centerOnScreen
+	::tycho::view ItclClassDiagram [list -file classList.icl]
     }
 }
 
