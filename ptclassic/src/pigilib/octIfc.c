@@ -200,8 +200,9 @@ ParamListType *pListPtr;
     }
 }
 
-/* 3/19/89 1/31/89
+/* 7/26/90 3/19/89 1/31/89
 Get formal params of a galaxy schematic.
+There is always one extra slot in the returned pList.
 */
 boolean
 GetFormalParams(galFacetPtr, pListPtr)
@@ -212,6 +213,7 @@ ParamListType *pListPtr;
 
     if (GetByPropName(galFacetPtr, &prop, "params") == OCT_NOT_FOUND) {
 	pListPtr->length = 0;
+	pListPtr->array = (ParamType *) calloc(1, sizeof(ParamType));
     } else {
 	ERR_IF1(!PStrToPList(prop.contents.prop.value.string, pListPtr));
     }
