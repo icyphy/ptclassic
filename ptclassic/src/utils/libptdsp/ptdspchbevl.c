@@ -1,4 +1,15 @@
-/*
+/**CFile***********************************************************************
+
+  FileName    [ ptdspchbevl.c ]
+
+  PackageName [ ptdsp ]
+
+  Synopsis    [ Function definition for Ptdsp_chbevl ]
+
+  Author      [ Stephen L. Moshier ]
+
+  Copyright   [ 
+
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
 
@@ -23,22 +34,30 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 						PT_COPYRIGHT_VERSION_2
 						COPYRIGHTENDKEY
-*/
+
+ ]
+
+  Version     [ $Id$ ]
+
+******************************************************************************/
+
+#include "ptdspcephes.h"
+
+/*---------------------------------------------------------------------------*/
+/* Definition of exported functions                                          */
+/*---------------------------------------------------------------------------*/
+
+/**Function*******************************************************************
+  Synopsis    [ Evaluate Chebyshev series ]
+  SideEffects []
+******************************************************************************/
 /*
- * $Id$
- *
- *	Evaluate Chebyshev series
- *
- *
- *
  * SYNOPSIS:
  *
  * int N;
  * double x, y, coef[N], Ptdsp_chebevl();
  *
  * y = Ptdsp_chbevl( x, coef, N );
- *
- *
  *
  * DESCRIPTION:
  *
@@ -106,23 +125,21 @@ CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#include "ptdspcephes.h"
+double 
+Ptdsp_chbevl( double x, double * array, int n ) {
+  double b0, b1 = 0.0, b2;
+  double *p = array;
+  int i = n - 1;
 
-double Ptdsp_chbevl( double x, double array[], int n )
-{
-double b0, b1 = 0.0, b2;
-double *p = array;
-int i = n - 1;
+  b0 = *p++;
 
-b0 = *p++;
+  do {
+    b2 = b1;
+    b1 = b0;
+    b0 = x * b1  -  b2  + *p++;
+  } while( --i );
 
-do {
-	b2 = b1;
-	b1 = b0;
-	b0 = x * b1  -  b2  + *p++;
-} while( --i );
-
-return( 0.5*(b0-b2) );
+  return( 0.5*(b0-b2) );
 }
 
 
