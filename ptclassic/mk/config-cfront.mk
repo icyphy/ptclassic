@@ -34,21 +34,16 @@ CRT0=
 SYSLIBS=-lm
 
 # If you don't strip symbols, then pigiRpc will be about 69Mb
+# If you strip pigiRpc, then dynamic linking won't work
 # The SunOS4.1.3 ld man page says:
-#     -x   Preserve only global (non-.globl) symbols in the output
-#          symbol table; only enter external symbols.  This option
-#          saves some space in the output file.
-#
-#     -X   Record local symbols,  except  for  those  whose  names
-#          begin  with  L.   This  option is used by cc to discard
-#          internally generated  labels  while  retaining  symbols
-#          local to routines.
-#
+# pigiRpc images produced with the -x ld flag will segv upon startup
+# pigiRpc images produced with '-qoption ld -S' are still 69Mb
+
 # link flags
-LINKFLAGS=-L$(LIBDIR) -x
+LINKFLAGS=-Bstatic -L$(LIBDIR) -v
 # link flags if debugging symbols are to be left
 # In cfront, this will result in a 69Mb pigiRpc
-LINKFLAGS_D=-L$(LIBDIR) -X
+LINKFLAGS_D=-Bstatic -L$(LIBDIR)
 
 X11_INCSPEC = -I/usr/X11/include
 X11_LIBSPEC = -lX11
