@@ -35,6 +35,10 @@ Version: $Id$
 extern "C" {
 #endif
 
+extern int Ptdsp_GCD(int a, int b);
+
+extern int Ptdsp_LCM(int a, int b);
+
 extern int Ptdsp_ExtendedGCD(int a, int b, int* alphap, int* betap);
 
 #ifdef __cplusplus

@@ -4,7 +4,7 @@
 
   PackageName [ ptdsp ]
 
-  Synopsis    [ Function definition for Ptdsp_ExtendedGCD ]
+  Synopsis    [ Function definition for Ptdsp_ExtendedGCD, Ptdsp_GCD and Ptdsp_LCM. ]
 
   Author      [ Brian L. Evans ]
 
@@ -43,19 +43,22 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #define intabs(m)               ( ( (m) > 0 ) ? (m) : (-(m)) )
 
+/*---------------------------------------------------------------------------*/
+/* Definition of exported functions                                          */
+/*---------------------------------------------------------------------------*/
+
 /**Function*******************************************************************
 
-  Synopsis    [Greatest common divisor function]
+  Synopsis    [ Greatest common divisor function ]
 
-  Description [If the second arg is negative, result is negative.
-	       Magnitude of result equals gcd(abs(a),abs(b)).]
+  Description [ If the second arg is negative, result is negative.
+	        Magnitude of result equals gcd(abs(a),abs(b)). ]
 
   SideEffects []
 
-  SeeAlso     []
 ******************************************************************************/
-static int
-gcd(int a, int b) {
+int
+Ptdsp_GCD(int a, int b) {
   int rem, t;
   int sign = 1;
 
@@ -80,27 +83,40 @@ gcd(int a, int b) {
   return b*sign;
 }
 
-/*---------------------------------------------------------------------------*/
-/* Definition of exported functions                                          */
-/*---------------------------------------------------------------------------*/
+/**Function*******************************************************************
+
+  Synopsis    [ Lowest Common Denominator function]
+
+  Description [ Order of the multiplication and division is chosen to
+                avoid overflow in cases where a*b > MAXINT but
+		lcm(a,b) < MAXINT.  The division always goes evenly. ]
+
+  SideEffects []
+
+******************************************************************************/
+int 
+Ptdsp_LCM(int a,int b) { 
+  return a == b ? a : a * (b / Ptdsp_GCD(a,b));
+}
 
 /**Function*******************************************************************
 
-  Synopsis    [Extended greatest common divisor function]
+  Synopsis    [ Extended greatest common divisor function ]
 
-  Description [Solves the Bezout identity
-               alpha a + beta b == 1
-	       over the integers given the values for a and b.]
+  Description [ Solves the Bezout identity
+                alpha a + beta b == 1
+	        over the integers given the values for a and b. ]
 
-  SideEffects [Sets the values at addresses alpha and beta.]
+  SideEffects [ Sets the values at addresses alpha and beta. ]
 
-  SeeAlso     [gcd]
+  SeeAlso     [ Ptdsp_GCD ]
+
 ******************************************************************************/
 int
 Ptdsp_ExtendedGCD(int a, int b, int* alphap, int* betap) {
   int mu, lambda;
   int lambdavalue = 0, muvalue = 0;
-  int gcdvalue = gcd(a, b);
+  int gcdvalue = Ptdsp_GCD(a, b);
   int anorm = a / gcdvalue;
   int bnorm = b / gcdvalue;
 
