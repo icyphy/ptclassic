@@ -42,13 +42,12 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 extern const char SRdomainName[];
 
-// Constructor.
+// Constructor
 SRScheduler::SRScheduler()
 {
-    setStopTime(0.0);
-    setCurrentTime(0.0);
-
-    /* Insert your own initialization code. */
+  numInstantsSoFar = 0;
+  numInstants = 1;
+  schedulePeriod = 10000.0;
 }
 
 // Domain identification.
@@ -68,7 +67,7 @@ void SRScheduler::setup()
     galaxy()->initialize();
 }
 
-// Run (or continue) the simulation.
+// Run (or continue) the simulation
 int SRScheduler::run()
 {
     if (SimControl::haltRequested() || !galaxy()) {
@@ -76,65 +75,84 @@ int SRScheduler::run()
 	return FALSE;
     }
 
-    GalStarIter nextStar( *galaxy() );
-    Star *s;
-
-    while ( currentTime < stopTime ) {
-
-      // Begin the instant by initializing all the stars
-
-      nextStar.reset();
-      while ( ( s = nextStar++ ) != 0 ) {
-	((SRStar *) s)->initializeInstant();
-      }
-
-      int numKnown = 0;
-      int lastNumKnown;
-
-      // Simulate the instant by calling each star's go() method until
-      // no additional outputs become known
-
-      do {
-	lastNumKnown = numKnown;
-	numKnown = 0;
-
-	nextStar.reset();
-
-	while ( ( s = nextStar++ ) != 0 ) {
-	  ((SRStar *) s)->run();
-	  numKnown += ((SRStar *) s)->knownOutputs();
-	}
-
-	cout << "Completed iteration, " << numKnown << " outputs known\n";
-
-      } while ( numKnown != lastNumKnown );     
-
-      // Finish the instant by calling each star's tick() method
-
-      nextStar.reset();
-
-      while ( ( s = nextStar++ ) != 0 ) {
-	((SRStar *) s)->tick();
-      }
-
-      cout << "Completed instant\n";
-
-      // Advance to the next tick
-
-      currentTime += 1.0;
+    while ( numInstantsSoFar < numInstants && !SimControl::haltRequested() ) {
+      runOneInstant();
+      currentTime += schedulePeriod;
+      numInstantsSoFar++;
     }
 
     return !SimControl::haltRequested();
 }
 
-// Get the stopping time.
-double SRScheduler::getStopTime()
+// Execute the galaxy for an instant
+//
+// This is a very simple scheduler--in each instant, it initializes
+// all the stars, runs each, and checks to see if any more outputs
+// have become defined.  If any have, it runs them all again.
+// Finally, it calls tick() to advance the stars' states.
+//
+void SRScheduler::runOneInstant()
 {
-    return stopTime;
+  GalStarIter nextStar( *galaxy() );
+  Star *s;
+
+  // Begin the instant by initializing all the stars
+
+  while ( ( s = nextStar++ ) != 0 ) {
+    ((SRStar *) s)->initializeInstant();
+  }
+
+  // Count of the number of known outputs, for detecting when to stop
+
+  int numKnown = 0;
+  int lastNumKnown;
+
+  // Simulate the instant by calling each star's go() method until
+  // no additional outputs become known
+
+  do {
+    lastNumKnown = numKnown;
+    numKnown = 0;
+
+    nextStar.reset();
+
+    while ( ( s = nextStar++ ) != 0 ) {
+      cout << "Firing " << ((SRStar *) s)->name() << "\n";
+      ((SRStar *) s)->run();
+      numKnown += ((SRStar *) s)->knownOutputs();
+    }
+
+    cout << "Completed iteration, " << numKnown << " outputs known\n";
+
+  } while ( numKnown != lastNumKnown );     
+
+  // Finish the instant by calling each star's tick() method
+
+  nextStar.reset();
+
+  while ( ( s = nextStar++ ) != 0 ) {
+    ((SRStar *) s)->tick();
+  }
+
+  cout << "Completed instant\n";
+
 }
 
-// Set the stopping time.
+// Set the stopping time, for compatibility with the DE scheduler
+//
+// Roundoff errors makes this non-trivial
+//
 void SRScheduler::setStopTime(double limit)
 {
-  stopTime = limit;
+  numInstants = int( floor(limit + 0.001) );
+}
+
+// Set the stoppping time for a wormhole
+//
+// A wormhole invocation is always one instant--the time given is ignored.
+//
+void SRScheduler::resetStopTime(double)
+{
+  numInstants = 1;
+  numInstantsSoFar = 0;
 }
