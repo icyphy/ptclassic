@@ -19,8 +19,8 @@ vem*edit*borderWidth: 3
 #ifdef COLOR
 vem*cursor*color: red
 vem*background: white
-vem.background.color: gray
-vem.grid.zero.color: gray
+vem.background.color: #cdcdc1
+vem.grid.zero.color: #cdcdc1
 vem*menu*item*background: LightGray
 vem*button*foreground: IndianRed
 vem*title*foreground: black
@@ -38,7 +38,7 @@ ptolemy_sim*Foreground: 	green
 ptolemy_man*Background:		black
 ptolemy_man*Foreground: 	orange
 
-xgraph*Background: white
-xgraph*ZeroColor: navy
-xgraph*Markers: off
-xgraph*Foreground: black
+xgraph.Background: white
+xgraph.ZeroColor: navy
+xgraph.Markers: off
+xgraph.Foreground: black

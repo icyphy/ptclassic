@@ -38,10 +38,10 @@ ptolemy_sim.Foreground: 	white
 ptolemy_man*Background:		black
 ptolemy_man*Foreground: 	orange
 
-xgraph*Background: white
-xgraph*Markers: off
-xgraph*Foreground: black
-xgraph*ZeroColor: black
+xgraph.Background: white
+xgraph.Markers: off
+xgraph.Foreground: black
+xgraph.ZeroColor: black
 ! The following are ignored, contrary to xgraph documentation.
 xgraph*0*Color: black
 xgraph*1*Color: black
