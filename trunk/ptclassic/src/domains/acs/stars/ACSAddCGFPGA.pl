@@ -160,6 +160,7 @@ It outputs lines of comments, instead of code.
 	    arglist { "(int lock_mode)" }
 	    type {int}
 	    code {
+                int S_bitlen=0;
 		//
 		// Calculate BW
 		//
@@ -171,24 +172,25 @@ It outputs lines of comments, instead of code.
 		    int B_bitlen=pins->query_bitlen(1);
 		    
 		    int S_majorbit=(int) max(A_majorbit,B_majorbit)+1;
-		    int S_bitlen=S_majorbit - 
+		    S_bitlen=S_majorbit - 
 			(int) min((A_majorbit-A_bitlen),(B_majorbit-B_bitlen));
 		    
 		    // Set
 		    pins->set_precision(2,S_majorbit,S_bitlen,lock_mode);
 
-		    //
-		    // Calculate CLB sizes
-		    //
-		    resources->set_occupancy(S_bitlen/2,1);
-
-		    // Calculate pipe delay
-		    acs_delay=1;
 		}
 			    
+                //
+                // Calculate CLB sizes
+                //
+                resources->set_occupancy(S_bitlen/2,1);
+
+                // Calculate pipe delay
+                acs_delay=1;
+
 		// Return happy condition
 		return(1);
-		}
+            }
 	}
         method {
 	    name {sg_setup}
