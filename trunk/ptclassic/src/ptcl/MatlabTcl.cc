@@ -193,13 +193,11 @@ int MatlabTcl::get(int argc, char** argv) {
     int numrows = 0, numcols = 0;
     char **realStrings = 0;
     char **imagStrings = 0;
-    Matrix* matlabMatrix =
-	matlabInterface->GetVariable(argv[2], &numrows, &numcols,
-				     &realStrings, &imagStrings);
 
     // return a four-element list: numrows numcols realvalues imagvalues
-    if ( matlabMatrix ) {
-	char tmpbuf[64];			// temp. storage for int string
+    if ( matlabInterface->MatlabGetVariable(argv[2], &numrows, &numcols,
+					    &realStrings, &imagStrings) ) {
+	char tmpbuf[64];
 	sprintf(tmpbuf, "%d", numrows);
 	Tcl_AppendElement(tclinterp, tmpbuf);
 	sprintf(tmpbuf, "%d", numcols);
@@ -215,7 +213,6 @@ int MatlabTcl::get(int argc, char** argv) {
 	}
 	matlabInterface->FreeStringArray(realStrings, numelements);
 	matlabInterface->FreeStringArray(imagStrings, numelements);
-	mxFreeMatrix(matlabMatrix);
 	return TCL_OK;
     }
     return TCL_ERROR;
@@ -271,11 +268,15 @@ int MatlabTcl::set(int argc, char** argv) {
 	    return error("matlab set: not enough imaginary elements given");
 	}
     }
-    Matrix* matrix =
-    matlabInterface->SetVariable(argv[2], numrows, numcols, realArgv, imagArgv);
 
-    if (matrix) return TCL_OK;
-    return TCL_ERROR;
+    // set the Matlab matrix whose name is the third argument, argv[2]
+    if ( matlabInterface->MatlabSetVariable(argv[2], numrows, numcols,
+					    realArgv, imagArgv) ) {
+	return TCL_OK;
+    }
+    else {
+	return error("matlab set: Matlab could not allocate enough memory");
+    }
 }
 
 // start a Matlab process if one is not running already
