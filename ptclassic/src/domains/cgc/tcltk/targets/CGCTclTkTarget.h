@@ -68,7 +68,7 @@ protected:
         /*virtual*/ void initCodeStrings();
 
 	// String state for specifying tcl/tk start command.
-  	StringState startCommand;
+	// StringState startCommand;
 };
 
 #endif
