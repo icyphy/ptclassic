@@ -15,8 +15,7 @@ $Id$
  Copyright (c) 1990 The Regents of the University of California.
                        All Rights Reserved.
 
- Programmer:  J. T. Buck, from hacking on the SDF scheduler by
- 	      E. A. Lee and D. G. Messerschmitt
+ Programmer:  J. T. Buck
  Date of creation: 1/8/91
 
  BDF Scheduler methods
@@ -147,6 +146,26 @@ int BDFScheduler::prepareGalaxy() {
 	return TRUE;
 }
 
+// fn to check if a star obeys BDF semantics.
+static int isBDF(DataFlowStar& star) {
+	if (star.isSDF()) return TRUE;
+	// check any varying ports to see if they
+	// obey BDF rules
+	DFStarPortIter nextPort(star);
+	DFPortHole* p;
+	while ((p = nextPort++) != 0) {
+		if (p->isDynamic()) {
+			int rel = p->assocRelation();
+			if (rel != BDF_TRUE && rel != BDF_FALSE) {
+				Error::abortRun(star,
+						" not a valid BDF actor");
+				return FALSE;
+			}
+		}
+	}
+	return TRUE;
+}
+
 int BDFScheduler::checkStars() {
 // Allocate space for the SchedInfo structures.  Check the stars
 // for BDF-ness or SDF-ness, and set up the structures.
@@ -161,13 +180,18 @@ int BDFScheduler::checkStars() {
 	// make sure they are of the right domain.
 
 	while ((s = nextStar++) != 0) {
-		if (s->isA("BDFStar") || s->isA("SDFStar"))
-			initInfo (*s);
-		else {
-			Error::abortRun(*s, " is not an SDF or BDF star");
+		if (!s->isA("DataFlowStar")) {
+			Error::abortRun(*s, " is not a DataFlowStar");
 			invalid = TRUE;
 			return FALSE;
 		}
+		DataFlowStar& star = *(DataFlowStar*)s;
+		if (!isBDF(star)) {
+			invalid = TRUE;
+			return FALSE;
+		}
+		// if we get here it is OK.
+		initInfo (star);
 	}
 	return TRUE;
 }
@@ -381,9 +405,8 @@ int BDFScheduler :: reptConnectedSubgraph (Block& block) {
 	BlockPortIter nextp(block);
 	for(int i = block.numberPorts(); i>0; i--) {
 		PortHole& nearPort = *nextp++;
-		if (nearPort.isItInput() == nearPort.far()->isItInput())
-			// if the port is at the boundary of the wormhole.
-			continue;
+		// ignore if the port is at the boundary of the wormhole.
+		if (nearPort.atBoundary()) continue;
 
 		PortHole& farPort = *(nearPort.far());
 		// recursively call this function on the farSideBlock,
@@ -423,13 +446,12 @@ int BDFScheduler :: reptArc (PortHole& nearPort, PortHole& farPort){
 	BoolFraction& farReps = farStarInfo.reps;
 	BoolFraction farShouldBe;
 
-	if (debug) {
-		cout << "reptArc: nearPort = " << nearPort.fullName();
-		cout <<  ", nearReps = " << nearReps;
-		cout << "; farPort = " << farPort.fullName();
-		cout << "\n nearNumTok = " << numTok(nearPort);
-		cout <<  ", farNumTok = " << numTok(farPort) << "\n";
-	}
+	if (debug)
+		cout << "reptArc: nearPort = " << nearPort.fullName()
+		     <<  ", nearReps = " << nearReps
+		     << "; farPort = " << farPort.fullName()
+		     << "\n nearNumTok = " << numTok(nearPort)
+		     <<  ", farNumTok = " << numTok(farPort) << "\n";
 
 	// compute what the far star repetitions property should be.
 	farShouldBe = nearReps * BoolFraction(numTok(nearPort),numTok(farPort));
@@ -603,8 +625,7 @@ int BDFScheduler :: valueToWrite (const PortHole& port) {
 	if (srcval != TRUE && srcval != FALSE) {
 		StringList nm = port.fullName();
 		StringList anm = pinfo.assoc->fullName();
-		cout << "port: " << (const char*) nm <<
-			" assoc: " << (const char*) anm <<
+		cout << "port: " << nm << " assoc: " << anm <<
 				" bad srcval: " << srcval << "!\n";
 		return UNKNOWN;
 	}
@@ -707,7 +728,7 @@ const char* nrstatus[] = { "RUNNABLE", "NOT READY", "COMPLETED",
 
 int BDFScheduler :: notRunnable (Star& atom, int useKnownBools) {
 	StringList atomName = atom.fullName();
-	if (debug) cout << "notRunnable(" << (const char*)atomName << "): ";
+	if (debug) cout << "notRunnable(" << atomName << "): ";
 	int i, v = 0;
 	BlockPortIter nextp(atom);
 	BDFStarSchedInfo& sinfo = info(atom);
@@ -754,40 +775,28 @@ BDFStarSchedInfo::BDFStarSchedInfo() : numToksConst(TRUE), set(0),
 BDFPortSchedInfo::BDFPortSchedInfo() : num(0), assoc(0), relDelay(0), geo(0),
 		relation(0),finalAssoc(0), neg(0) {}
 
-// function to initialize information for a BDF star (arg is assumed to
-// really be a BDFStar -- important!)
-
+// function to initialize information for a DataFlowStar
 // In this function and the next, it is assumed that the info structure
 // has the values set in the constructor.
 
-void BDFScheduler::initInfo(Star& star) {
-	BlockPortIter nextPort(star);
-	if (star.isItWormhole()) {
-		// for now, assume wh has SDF behavior
-		// design problem????
-		PortHole* p;
-		while ((p = nextPort++) != 0)
-			commonPortInfo(*p);
-		return;
-	}
-	else {
-		BDFStarSchedInfo& sinfo = info(star);
-		DFPortHole* p;
-		while ((p = (DFPortHole*)nextPort++) != 0) {
-			commonPortInfo(*p);
-			BDFPortSchedInfo& pinfo = info(*p);
-			pinfo.assoc = p->assocPort();
-			pinfo.relation = p->assocRelation();
-			if (conditional(*p))
-				sinfo.numToksConst = FALSE;
-			else
-				pinfo.traceBack (*p);
-		}
+void BDFScheduler::initInfo(DataFlowStar& star) {
+	DFStarPortIter nextPort(star);
+	BDFStarSchedInfo& sinfo = info(star);
+	DFPortHole* p;
+	while ((p = nextPort++) != 0) {
+		commonPortInfo(*p);
+		BDFPortSchedInfo& pinfo = info(*p);
+		pinfo.assoc = p->assocPort();
+		pinfo.relation = p->assocRelation();
+		if (conditional(*p))
+			sinfo.numToksConst = FALSE;
+		else
+			pinfo.traceBack (*p);
 	}
 }
 
 // initialize the parts that work for any type of porthole.
-void BDFScheduler::commonPortInfo(PortHole& port) {
+void BDFScheduler::commonPortInfo(DFPortHole& port) {
 	BDFPortSchedInfo& pinfo = info(port);
 	pinfo.num = port.numXfer();
 	pinfo.inFlag = port.isItInput();
