@@ -122,8 +122,8 @@ Target* CGMultiTarget :: createChild() {
 	return KnownTarget::clone(childType);
 }
 
+// select the scheduler depending on the options.
 void CGMultiTarget :: chooseScheduler() {
-
 	delSched();
 	if (int(ignoreIPC)) {
 		LOG_NEW; setSched(new HuScheduler(this, logFile));
@@ -197,6 +197,13 @@ void CGMultiTarget::wrapup() {
 	// Wormhole support
 	/////////////////////
 
+// Wormhole support routines are tricky to interpret. The major difficulty
+// comes from the fact that one EventHorizon may be connected to more than
+// subGalaxies which can not be expressed by regular porthole connection.
+// So, we examine the stars at the wormhole boudnary (via expandedgraph nodes)
+// instead of portholes, make a temporary connection between EH and 
+// the corresponding porthole, and do things -> major hack!.
+
 int CGMultiTarget :: run() {
 	if((inWormHole() == FALSE) || (nChildrenAlloc == 1))
 		return CGTarget :: run();
@@ -252,6 +259,9 @@ int CGMultiTarget :: receiveWormData() {
 // default code generation for a wormhole.  This produces an infinite
 // loop that reads from the inputs, processes the schedule, and generates
 // the outputs.
+// Note that wormOutputCode is called before compileRun(). In compileRun(),
+// all child targets will finish generating code.
+
 void CGMultiTarget :: generateCode() {
 	if (nChildrenAlloc == 1) {
 		CGTarget :: generateCode();
@@ -270,6 +280,10 @@ void CGMultiTarget :: generateCode() {
         endIteration(iterations,0);
 }
 	
+// Trickiness again for wormholes. 
+// Since more than one ParNodes are correspond to one star in a subGal,
+// we are careful in searching the stars at the wormhole boundary!
+
 void CGMultiTarget :: wormInputCode() {
 	LOG_NEW; int* iprocs = new int[nChildrenAlloc];
 	for (int i = 0; i < nChildrenAlloc; i++)
