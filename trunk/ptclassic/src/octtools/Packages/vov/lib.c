@@ -37,6 +37,12 @@ static char SccsId[]="$Id$";
 #include <sys/wait.h>
 #include <signal.h>
 
+#if defined(__sparc) && !defined(__svr4__) && defined(__GNUC__)
+#include <sys/time.h>
+#include <sys/resource.h>
+extern int wait3(int *statusp, int options, struct rusage *rusage);
+#endif
+
 #include "vov_lib.h"
 
 #define VOV_CHANNEL "$OCTTOOLS/bin/vov_channel"
@@ -148,7 +154,7 @@ static int channelAlreadyOpen()
 static SIGNAL_FN trapChildHandler( ) /* All args are ignored */
 {
   int pid;
-#ifdef SYSV
+#if defined(hpux) || defined(SYSV) || defined(__sparc)
     int	status;
     if ( (pid = waitpid((pid_t) -1, &status, 0)) == -1)
       perror("waitpid");
@@ -486,7 +492,7 @@ void  VOVend( status )
      * Ends the current transition.
      */
 {
-#ifdef SYSV
+#if defined(hpux) || defined(SYSV) || defined(__sparc)
     int s;
 #else
     union wait s;
