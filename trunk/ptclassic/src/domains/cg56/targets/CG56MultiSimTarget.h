@@ -68,6 +68,10 @@ protected:
 	// redefine 
 	Target* createChild();
 
+        // AsmTargets always support "AnyAsmStar" stars.
+        const char* auxStarClass() const;
+
+
 	// redefine
 	int sendWormData(PortHole&);
 	int receiveWormData(PortHole&);

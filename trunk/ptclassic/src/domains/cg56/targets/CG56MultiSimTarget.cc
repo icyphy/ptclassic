@@ -47,6 +47,9 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "FixState.h"
 #include "pt_fstream.h"
 
+// CG56MultiSimTarget AnyAsmStar.
+const char* CG56MultiSimTarget :: auxStarClass() const { return "AnyAsmStar";}
+
 // ----------------------------------------------------------------------------	
 CG56MultiSimTarget::CG56MultiSimTarget(const char* name,const char* starclass,
 	const char* desc) : CGMultiTarget(name,starclass,desc), sharedMem(0) {
