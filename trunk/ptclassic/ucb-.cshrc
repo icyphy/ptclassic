@@ -6,8 +6,16 @@ if (-x /usr/bin/X11) set path = ($path /usr/bin/X11)
 # have umask set to 2, it should be set to 22.
 umask 02
 
+
+# Synopsys needs these
+setenv SYNOPSYS /usr/tools/synopsys
+setenv SIM_ARCH sparcOS5
+
 # Get software warehouse in the path
-set path = ( $path /usr/sww/bin )
+set path = ( $path \
+		$SYNOPSYS/sparcOS5/syn/bin \
+                $SYNOPSYS/sparcOS5/sim/bin \
+		/usr/sww/bin )
 
 # Modify the printer variable
 setenv PRINTER sp524
