@@ -37,8 +37,15 @@ static const char file_id[] = "$RCSfile$";
 #endif
 
 #include "Clock.h"
+#include "type.h"
 
 extern "C" int gettimeofday(timeval *, struct timezone *);
+#if defined(hppa)
+extern "C" int select(size_t, int*, int*, int*, const timeval*);
+#else
+#include <sys/types.h>
+extern "C" int select(int, fd_set*, fd_set*, fd_set*, timeval*);
+#endif
 
 Clock::Clock()
 {
@@ -55,7 +62,7 @@ void Clock::reset()
 TimeVal Clock::timeOfDay() const
 {
     TimeVal t;
-    gettimeofday((timeval*)&t,0);
+    gettimeofday(&t,0);
     return t;
 }
 
@@ -68,6 +75,12 @@ TimeVal Clock::elapsedTime() const
 // Sleep until specified elapsed time.
 int Clock::sleepUntil(const TimeVal& time) const
 {
-    TimeVal delay = time - elapsedTime();
-    return delay.sleep();
+    TimeVal elapsed = elapsedTime();
+    if (time > elapsed)	// Sleep only if not running late.
+    {
+	TimeVal delay = time - elapsed;
+	select(0, NULL, NULL, NULL, &delay);
+	return TRUE;
+    }
+    else return FALSE;
 }
