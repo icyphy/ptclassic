@@ -692,9 +692,17 @@ case $system in
 	# FreeBSD doesn't handle version numbers with dots.  Also, have to
 	# append a dummy version number to .so file names.
 
-	TCL_SHARED_LIB_SUFFIX='`echo ${VERSION} | tr -d .`.so.1.0'
-	TCL_UNSHARED_LIB_SUFFIX='`echo ${VERSION} | tr -d .`.a'
-	TCL_LIB_VERSIONS_OK=nodots
+	# [Ptolemy change: comment out the three lines below, and then
+	# add the following lines
+        #TCL_LIB_VERSIONS_OK=nodots
+        #TCL_SHARED_LIB_SUFFIX='`echo ${VERSION} | tr -d .`.so.1.0'
+        #TCL_UNSHARED_LIB_SUFFIX='`echo ${VERSION} | tr -d .`.a'
+
+        # FreeBSD 2.1.5 seems to handle version numbers with dots.
+        # we still want to append a dummy version number to .so file names.
+        TCL_SHARED_LIB_SUFFIX='`echo ${VERSION}`.so.1.0'
+        TCL_UNSHARED_LIB_SUFFIX='`echo ${VERSION}`.a'
+        TCL_LIB_VERSIONS_OK=ok
 	;;
     NEXTSTEP-*)
 	SHLIB_CFLAGS=""
