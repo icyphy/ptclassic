@@ -45,6 +45,7 @@ message.tcl \
 pigilib.tcl \
 ptcl.tcl \
 ptcl_help.tcl \
+ptk.rc \
 ptkBarGraph.tcl \
 ptkBind.tcl \
 ptkColor.tcl \
