@@ -62,7 +62,7 @@ ifdef NEED_MATLABDIR
 		MATLABDIR= 		$(ROOT)/src/compat/matlab
 		MATLABEXT_LIB = 	-lptmatlab
 		else
-		MATLABEXT_LIB = -L$(MATLABDIR)/extern/lib/$(MATARCH) -leng -lmat
+		MATLABEXT_LIB = -L$(MATLABDIR)/extern/lib/$(MATARCH) -leng -lmat -lmx
 		endif
 	endif
 	MATLAB_INCSPEC =	-I$(MATLABDIR)/extern/include
