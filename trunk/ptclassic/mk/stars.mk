@@ -80,6 +80,7 @@ $(LIBDIR)/libmdsdfstars.a $(LIBDIR)/libmdsdf.a
 CP_LIBFILES= $(LIBDIR)/libcpstars.a $(LIBDIR)/libcpipstars.a \
 	$(LIBDIR)/libcp.a
 LWP_LIBFILES= $(LIBDIR)/liblwpthread.a
+AWE_LIBFILES= $(LIBDIR)/libawethread.a $(LIBDIR)/libawe2.a
 
 ATM_LIBFILES = $(LIBDIR)/libmq.a $(LIBDIR)/libmqstars.a \
 	$(LIBDIR)/libdeatmstars.a $(LIBDIR)/libsdfatmstars.a \
@@ -110,6 +111,7 @@ $(MATLABLIBDIR) $(MATLABEXT_LIB) \
 # -laudio is for the Infopad stars in the CP domain
 CP_LIBS= -lcpstars -lcpipstars -lcp -laudio
 LWP_LIBS= -llwpthread -llwp
+AWE_LIBS= -lawethread -lawe2
 
 ATM_LIBS= -lmqstars -lmq -ldeatmstars -lsdfatmstars -latm
 
