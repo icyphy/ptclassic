@@ -28,14 +28,31 @@ static char SccsId[]="$Id$";
 #include "port.h"
 #include "internal.h"
 
+#include "create.h"
+#include "facet_info.h"
+#include "inst.h"
+#include "master.h"
+
+#include "term_update.h"
+
+/* Forward reference, could be static?*/
+octStatus oct_update_formals
+	ARGS((struct facet *contents, struct facet *interface));
+
 static octStatus check_contents();
 static octStatus check_masters();
-static int create_instance_terminals();
-static int create_interface_terminals();
-static int delete_instance_terminals();
-static int delete_interface_terminals();
-static int modify_instance_terminals();
-static int modify_interface_terminals();
+static void create_instance_terminals
+	ARGS((struct facet *desc, struct term *term));
+static void create_interface_terminals
+	ARGS((struct facet *desc, struct term *term));
+static void delete_instance_terminals
+	ARGS((struct facet *desc, struct term *term));
+static void delete_interface_terminals
+	ARGS((struct facet *desc, struct term *term));
+static void modify_instance_terminals
+	ARGS((struct term *term));
+static void modify_interface_terminals
+	ARGS((struct term *term));
 
 
 /*ARGSUSED*/
@@ -76,7 +93,9 @@ char *c_retval;
 		   next, last);
 	if (master->master_bb_date != master_facet->bb_date) {
 	    instance = master->instances;
-	    /* XXX removed and added the line below: instance->facet->facet_flags.bb_invalid_instances = 1; /*XXX - either this or keep bounding boxes on disk */
+	    /* XXX removed and added the line below:
+	       instance->facet->facet_flags.bb_invalid_instances = 1;
+	       */ /*XXX - either this or keep bounding boxes on disk */
 	    instance->facet->facet_flags.bb_valid = 0;
 	    (void) oct_invalidate_all_instance_bbs(instance->facet);
 	    while (instance != NIL(struct instance)) {
@@ -153,7 +172,7 @@ struct facet *desc;
 
 static struct term *find_interface_formal();
 
-static
+static octStatus
 delete_formal(interface, term)
 struct facet *interface;
 struct term *term;
@@ -171,6 +190,7 @@ struct term *term;
     return retval;
 }
 
+octStatus
 oct_update_formals(contents, interface)
 struct facet *contents;
 struct facet *interface;
@@ -262,6 +282,7 @@ struct facet *desc;
     return retval;
 }
 
+void
 oct_create_terminal_copies(desc, new)
 struct facet *desc;
 struct term *new;
@@ -270,7 +291,7 @@ struct term *new;
     create_interface_terminals(desc, new);
 }
 
-static create_instance_terminals(desc, term)
+static void create_instance_terminals(desc, term)
 struct facet *desc;
 struct term *term;
 {
@@ -287,7 +308,7 @@ struct term *term;
     }
 }
 
-static create_interface_terminals(desc, term)
+static void create_interface_terminals(desc, term)
 struct facet *desc;
 struct term *term;
 {
@@ -340,6 +361,7 @@ struct term *contents_formal;
     return NIL(struct term);
 }
 
+void
 oct_delete_terminal_copies(desc, new)
 struct facet *desc;
 struct term *new;
@@ -348,7 +370,7 @@ struct term *new;
     delete_interface_terminals(desc, new);
 }
 
-static delete_instance_terminals(desc, term)
+static void delete_instance_terminals(desc, term)
 struct facet *desc;
 struct term *term;
 {
@@ -375,7 +397,7 @@ struct term *term;
 }
     
 
-static delete_interface_terminals(desc, term)
+static void delete_interface_terminals(desc, term)
 struct facet *desc;
 struct term *term;
 {
@@ -397,6 +419,7 @@ struct term *term;
     }
 }
     
+void
 oct_modify_terminal_copies(new)
 struct term *new;
 {
@@ -404,7 +427,7 @@ struct term *new;
     modify_interface_terminals(new);
 }
 
-static modify_interface_terminals(term)
+static void modify_interface_terminals(term)
 struct term *term;
 {
     struct facet *contents = term->facet;
@@ -430,7 +453,7 @@ struct term *term;
     }
 }
     
-static modify_instance_terminals(term)
+static void modify_instance_terminals(term)
 struct term *term;
 {
     struct master *master = term->facet->instantiations;
