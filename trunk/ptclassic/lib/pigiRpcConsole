@@ -1,0 +1,8 @@
+#! /bin/sh
+# usage: pigiRpcConsole <vem-rpc-args>
+#
+# This is typically invoked from wtih pigiRpcShell as the $COMMAND.
+# It brings up an xterm with pigiRpc running inside.
+
+xterm -display $DISPLAY -title "pigiRpc console" -bg darkgreen -fg yellow \
+	-e $PIGIRPC $* &
