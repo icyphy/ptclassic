@@ -48,7 +48,11 @@ If no output y, return.}
   }
   setup {
     const char *commandstr = command;
+#ifdef PT_NT4VC
+    out = _popen( commandstr, "w" );
+#else
     out = popen( commandstr, "w" );
+#endif
     x = Xinit;
     if( !out ) {
       Error::abortRun( *this, "Error opening pipe to command",
@@ -76,6 +80,10 @@ If no output y, return.}
     fputs( "\n", out );
   }
   wrapup {
+#ifdef PT_NT4VC
+    _pclose( out );
+#else
     pclose( out );
+#endif
   }
 }
