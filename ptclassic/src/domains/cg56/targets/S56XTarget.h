@@ -35,7 +35,7 @@ public:
 	S56XTarget(const char*,const char*);
 	S56XTarget(const S56XTarget&);
 	int compileCode();
-	void writeCode();
+	void writeCode(const char* name);
 	int runCode();
 	Block* makeNew() const;
 	int isA(const char*) const;

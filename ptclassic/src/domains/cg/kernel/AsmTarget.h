@@ -100,16 +100,16 @@ public:
 	virtual void codeSection() = 0;
 
 	// generate file of stuff named base.suffix.
-	int genFile(const char* stuff, char* base,const char* suffix=NULL);
+	int genFile(const char* stuff, const char* base,const char* suffix=NULL);
 
 	// generate file of stuff named base.suffix and display it.
-	int genDisFile(const char* stuff,char* base,const char* suffix=NULL);
+	int genDisFile(const char* stuff,const char* base,const char* suffix=NULL);
   
 	// Return full file name including path.  
 	// NOTE: User must delete the char* returned after use.
 	char* fullFileName(const char* base, const char* suffix=NULL);
 
-	/*virtual*/ void writeCode();
+	/*virtual*/ void writeCode(const char* name);
 
 	// output an "org" directive that switches to the specified
 	// memory and address
