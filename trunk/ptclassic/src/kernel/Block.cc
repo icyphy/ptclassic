@@ -240,7 +240,7 @@ class Galaxy;
 // Error-catchers; these should be redefined.
 // return types are dummies to shut up compiler warnings.
 static void* bomb(const Block* b, const char* type) {
-	Error::error (*b, "is not a", type);
+	Error::error (*b, "is not a ", type);
 	exit (1);
 	return 0;
 }

@@ -71,7 +71,7 @@ Message* Message::clone() const {
 	LOG_NEW; Message* p = new Message;
 	if (strcmp(dataType(),p->dataType()) != 0)
 		Error::abortRun("Message class ",dataType(),
-				"doesn't redefine clone()!");
+				" doesn't redefine clone()!");
 	return p;
 }
 
