@@ -50,7 +50,7 @@ group sink -label {Sink Stars} {
         attribute YMax -default "1.0" -label "Y maximum" -type number
         port input -datatype float
     }
-    star XY_plot \
+    star xyplot \
             -class {XYPlot} \
             -label {2D-Plotter} \
             -icon {edit/cts/icons.tim#sink.xyplot} {
