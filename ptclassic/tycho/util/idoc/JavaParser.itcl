@@ -226,6 +226,11 @@ body ::tycho::JavaDocSys::readFile {filename} {
         if [ regexp {^(.*[\"\}]);(.*)$} $lineIn dmy first last] {
             set lineIn "$first ;$last"
         }
+        # Remove open brace following anything errors (only one pass)
+        if [ regexp "^(\[^\{\]+)\[\{\](.*)\$" $lineIn dmy first last] {
+            set lineIn "$first \{$last"
+        }
+
         append inEscapedComments "$lineIn \n"
     }
 
@@ -776,6 +781,8 @@ body ::tycho::JavaDocSys::addArgs {class entityName arguments} {
 #
 body ::tycho::JavaDocSys::addVariable {class protection modifiers\
         others comment} {
+
+    set default {}
 
     # Check if is static
     set static [lsearch -exact $modifiers "static"]
