@@ -1,0 +1,389 @@
+# Definition of an SDL context-sensitive editor.
+#
+# @Author: Tom Truman, based on EditEsterel.itcl
+#
+# @Version: $Id$
+#
+# @Copyright (c) 1996-%Q% The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the
+# above copyright notice and the following two paragraphs appear in all
+# copies of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+# 						PT_COPYRIGHT_VERSION_2
+# 						COPYRIGHTENDKEY
+#######################################################################
+
+# This is a first cut at an SDL editor. If you have any comments please
+# send me mail at truman@eecs.berkeley.edu.
+
+#######################################################################
+#### EditSDL
+# This class defines a text widget with an emacs-like editor with some
+# context-specific features for editing SDL files. The editor
+# automatically indents a line in response to a Tab character, and
+# provides a command for indenting a region (the selection). To enter a
+# literal Tab, enter the sequence <Control-q><Tab>. This editor also
+# colors comments, strings, and the words "FIXME" and "NOTE".
+#
+class ::tycho::EditSDL {
+    inherit ::tycho::EditProgram
+
+    constructor {args} { }
+    destructor {}
+
+    ##########################################################################
+    ####                         public methods                           ####
+
+    # Open a help window.
+    method help {}
+
+    # Indent the current line (the one with the insertion cursor).
+    method indentLine {}
+
+    # Return a string with keywords separated by "|".
+    method keywords {}
+
+    # Tag and color the code in a region.
+    method parseNow {start stop}
+    ##########################################################################
+    ####                         private methods                          ####
+
+    # Return 1 if the given line is the start of an indented block.
+    private method startline {line}
+
+    # Return 1 if the given line is the end of an indented block.
+    private method endline {line}
+
+    # Return 1 if the given line is to be continued on the next line.
+    private method tbcline {line}
+}
+
+###################################################################
+#
+body ::tycho::EditSDL::constructor {args} {
+
+    set fillPrefix "comment "
+
+    eval itk_initialize $args
+}
+
+#####################################################################
+#### keywords
+# Return a list of keywords separated by "|".
+#
+body ::tycho::EditSDL::keywords {} {
+
+    set r1 {a(ctive|dding|l(lternative)?)|and|any|as|atleast|axioms|block|call|channel|comment|connect|connection|constant|constants|create|dcl|decision|default|else}
+
+    set r2 {|endalternative|endblock|endchannel|endconnection|enddecision|endgenerator|endmacro|endnewtype|endoperator|endpackage|endprocedure|endprocess|endrefinement|endselect|endservice|endstate|endsubstructure|endsyntype|endsystem|env|error|export|exported|external}
+
+    set r3 {|fi|finalized|for|fpar|from|gate|generator|if|import|imported|in|inherites|input|interface|join|literal|literals|macro|macrodefinition|macroid|map|mod|nameclass|newtype|nextstate|nodelay|noequality|none|not|now|offspring|operator|operators|or|ordering|out|output}
+
+   set r4  {|package|parent|priority|procedure|process|provided|redefined|referenced|refinement|rem|remote|reset|return|returns|revealed|reverse|save|select|self|sender|service|set|signal|signallist|signalroute|signalset|spelling|start|state|stop|struct|substructure|synonym|syntype|system|task|then|this|timer|to|type|use|vi|view|viewed|virtual|with|xor}
+
+   return $r1$r2$r3$r4
+
+}
+
+
+###################################################################
+#### help
+# Open a window with help on the current widget.
+#
+body ::tycho::EditSDL::help {} {
+    global ::TYCHO
+    ::tycho::File::openContext \
+	    [file join $TYCHO editors textedit doc usersGuides \
+	    EditSDLHelp.html]
+}
+
+####################################################################
+#### indentLine
+# Base indentation on SDL keywords rather
+# than parentheses and brackets, as used in the base class. Lines are
+# classified into four nonoverlapping categories: start, end,
+# to-be-continued (tbc), and other. Let "line" denote the current line,
+# "pline" denote the first (non-blank, non-comment) line previous to the one
+# being indented, and "ppline" denote the first (non-blank, non-comment)
+# line before that. The indentation algorithm is then:
+# <pre>
+#    if (pline == start) indent+4
+#    if (line == end) indent-4
+#    if (pline == tbc && ppline != tbc && line != end) indent+8
+#    if (pline == tbc && ppline == tbc && line == end) indent-8
+#    if (pline != tbc && pline != end && ppline == tbc && pline != end)
+#                   indent-8
+# </pre>
+# Lines of class "start" are those that start an indented block.
+# Lines of class "end" end an indented block.
+# "To-be-continued" (tbc) lines are neither start or end, and do not end in a
+# semicolon.  "Other" lines are none of the above.
+# The syntax "indent+4" above means that we increase the indentation
+# by 4 spaces.
+# 
+body ::tycho::EditSDL::indentLine {} {
+    resetUndo
+
+    set text $itk_component(text)
+    
+    # To be able to sensibly place the insertion cursor,
+    # we record the current status.
+    set ins [$text index insert]
+    set atEnd [$text compare insert == "insert lineend"]
+    set atStart [$text compare insert == "insert linestart"]
+    
+    regexp {([0-9]+)\.([0-9]+)} $ins match lineno charno
+    $text mark set insert $lineno.0
+    set indent 0
+    set continuation 0
+
+    # Find the two previous non-blank, non-comment
+    # lines to determine the indentation.
+    set pline {}
+    set ppline {}
+    while {[incr lineno -1] > 0} {
+	set line [$text get $lineno.0 "$lineno.0 lineend"]
+	if {![regexp {^[ \t]*$} $line]} {
+            # Found a non-blank line.  Continue if it's a comment.
+            if [regexp {^[ \t]*%} $line] {continue}
+            if {$pline == {}} {
+                set pline $line
+            } {
+                set ppline $line
+                break
+            }
+        }
+    }
+    # Get the current line
+    set line [$text get {insert linestart} {insert lineend}]
+
+    # To debug, change all "# puts" to "puts"
+    # puts "line: $line"
+    # puts "pline: $pline"
+    # puts "ppline: $ppline"
+    # Determine the position of the first non-space character on the
+    # reference line. First replace all tabs with 8 spaces in the
+    # reference line:
+    regsub -all "\t" $pline "        " modline
+    regexp -indices "^(\[ \t\])*" $modline match firstchar
+    set indent [lindex $firstchar 0]
+    incr indent
+
+    # Here is the algorithm, repeated from above:
+    #    if (pline == start) indent+4
+    #    if (line == end) indent-4
+    #    if (pline == tbc && ppline != tbc && line != end) indent+8
+    #    if (pline == tbc && ppline == tbc && line == end) indent-8
+    #    if (pline != tbc && pline != end && ppline == tbc && pline != end)
+    #                   indent-8
+    if [startline $pline] {
+        # puts "pline is a startline"
+        set indent [expr $indent+4]
+    }
+    set ptbc [tbcline $pline]
+    set pptbc [tbcline $ppline]
+    set end [endline $line]
+    set pend [endline $pline]
+    if $end {
+        # puts "line is an endline"
+        set indent [expr $indent-4]
+    }
+    if {$ptbc && !$pptbc && !$end} {
+        # puts "ptbc && !pptbc && !end"
+        set indent [expr $indent+8]
+    } 
+    if {$ptbc && $pptbc && $end} {
+        # puts "ptbc && pptbc && end"
+        set indent [expr $indent-8]
+    } 
+    if {!$ptbc && $pptbc && !$end && !$pend} {
+        # puts "!ptbc && pptbc && !end"
+        set indent [expr $indent-8]
+    }
+
+    # Clear the leading space characters on the insertion line.
+    if [regexp -indices {^([ 	]+)} $line match firstchar] {
+	set lastspace [lindex $firstchar 1]
+	deleteRange "insert linestart" "insert + $lastspace chars +1 char"
+    }
+	    
+    set str ""
+    # Do not use tabs for indenting.
+    while {$indent > 0} {
+        append str " "
+        incr indent -1
+    }
+    insertString insert $str
+
+    # Put the insertion cursor back where it was or at the end of
+    # of the line, if it was before at the end.
+    if {$atEnd} {
+	$text mark set insert "$ins lineend"
+    } elseif {!$atStart} {
+	$text mark set insert $ins
+    }
+    
+    # Recolorize
+    parseNow "insert linestart" "insert lineend"
+}
+
+#####################################################################
+#####################################################################
+####                     private methods                         ####
+
+#####################################################################
+#### startline
+# Return 1 if the given line is the start of an indented block.
+# The local variable "startpats" is the regular expression pattern
+# used to determine this.  The patterns in that variable may be
+# preceeded by white space only and followed by a comment and/or
+# white space for the match to succeed.
+#
+body ::tycho::EditSDL::startline {line} {
+
+    # If a line contains a matching "end", it does not start a block
+    set startendpats {(substructure.+referenced|alternative.+endalternative|block.+endblock|channel.+endchannel|connection.+endconnection|decision.+enddecision|generator.+endgenerator|if[^/\*]+then[^/\*]+fi|macro.+endmacro|type.+endnewtype|operator.+endoperator|package.+endpackage|procedure.+endprocedure|process.+endprocess|refinement.+endrefinement|select.+endselect|service.+endservice|state.+endstate|substructure.+(referenced|endsubstructure)|syntype.+endsyntype|system.+endsystem)}
+
+
+    if [regexp "^\[ \t\]*$startendpats\[ \t\]*(/\*.*)?\$" $line] {
+        return 0
+    }
+    # some of the irregular block contructs (such as struct) should be 
+    # indented, but they don't have an easy way to indicate the end of
+    # the indentation area.  So... a comment of the form 
+    #
+    # [w]/*[w]end[construct][w]*/ 
+    #
+    #i s used to determine this
+    # where [w] is optional whitespace, and [construct] is an optional 
+    # construct name (e.g. struct).  The horrible regex at the end of 
+    # startpats identifies such expressions.
+    # Examples:
+    #   /* endstruct */
+    #   /* end */
+    #
+       set startpats {(alternative|axioms|block([ ]+type)?|channel|connection|decision|else([^/\*]+[ ]+fi)?|generator|if([^/\*]+then)?|ma(p|crodefinition)|newtype|operator|package|procedure|process([ \t]+type)?|refinement|select|service([ \t]+type)?|state|((sub)?struct(ure)?)|syntype|system|(/\*[ \t\]*end[A-Za-z0-9]*[ \t\]*\*/))}
+
+       	set prefix {^[ \t]*}
+       	set suffix {[ \t]*(/\*.*)?$}
+	set result [regexp "$prefix$startpats$suffix" $line]
+#	exec echo "found start = $result"
+	return $result
+}
+
+#####################################################################
+#### endline
+# Return 1 if the given line is the end of an indented block.
+# The local variable "endpats" is the regular expression pattern
+# used to determine this.  The patterns in that variable may be
+# preceeded by white space only and followed by a comment and/or
+# white space for the match to succeed.
+#
+body ::tycho::EditSDL::endline {line} {
+    #    set endpats {(end(block|channel|connection|decision|generator|macro|newtype|operator|package|proc(edure|ess)|refinement|se(lect|rvice)|state|substructure|sy(ntype|stem))|fi)}
+    set endpats {(endblock|endchannel|endconnection|enddecision|endgenerator|endmacro|endnewtype|endoperator|endpackage|(endproc(edure|ess))|endrefinement|(endse(lect|rvice))|endstate|endsubstructure|endsy(ntype|stem)|fi)}
+    set prefix {^[ \t]*}
+    set suffix {[ \t]*(/\*)?$}
+    set result [regexp "$prefix$endpats$suffix" $line]
+#    exec echo "found end = $result"
+    return $result	
+}
+
+#####################################################################
+#### tbcline
+# Return 1 if the given line is a command to be continued.
+# A "tbc" line is one that is neither a start line nor an end line,
+# does not end in a semicolon (possibly followed by white space and/or
+# a comment), is not a comment line, and is not a module declaration
+# line.
+#
+body ::tycho::EditSDL::tbcline {line} {
+    if {[startline $line] || [endline $line] || $line == {} || \
+            [regexp "(;\[ \t\]*(%.*)?\$)|(^\[ \t\]*%.*\$)" $line] || \
+            [regexp "^\[ \t\]*module.*:" $line]} {
+#	exec echo "found tbc = 0"
+        return 0
+    } {
+#	exec echo "found tbc = 1"
+        return 1
+    }
+}
+
+#####################################################################
+#### parseNow
+# Tag and color C-style comments in the text plus the strings "NOTE"
+# and "FIXME". Note that if a comment begins in the specified range but
+# ends outside the range, the entire comment is parsed.
+#
+body ::tycho::EditSDL::parseNow {start stop} {
+
+    set text $itk_component(text)
+
+    $text tag remove ccomment $start $stop
+
+    # The base class identifies line-oriented comments, which do not
+    # exist in C.  Therefore, we need to completely redefine this procedure.
+    set ind $start
+    set count 0
+    while {[set ret [$text search -exact \
+	    {/*} $ind $stop]] != {}} {
+	# Found the start of a comment.  Look for the end.
+	set endcmt [$text search -exact {*/} $ret end]
+	if {$endcmt != {}} {
+
+	    # Found the end of a comment.  Tag it.
+	    $text tag add ccomment $ret "$endcmt + 2 chars"
+	    
+	    set ind $endcmt
+	} else {
+	    set ind [$text index "$ret +2 chars"]
+	}
+	# The following appears to be needed to prevent infinite loops.
+	if [$text compare $ind >= end] {break}
+    }
+
+    # Now tag all occurrences of "FIXME" and "NOTE" within the range
+    # that got processed.
+    set ind $start
+    while {[set ind [$text search -count cnt -regexp \
+	    {FIXME|NOTE} $ind $stop]] != {}} {
+
+	$text tag add fixme $ind "$ind + $cnt chars"
+	    
+	set ind [$text index "$ind + $cnt chars"]
+	# The following appears to be needed to prevent infinite loops.
+	if [$text compare $ind >= end] {break}
+    }
+
+    # Set the visual characteristics of the tagged text
+    $text tag configure ccomment -foreground \
+	    [preference get commentColor]
+    $text tag configure fixme -foreground \
+	    [preference get fixmeColor]
+
+    # To get line-oriented comments:
+    EditProgram::parseNow $start $stop
+
+
+}
+
+
+
+
