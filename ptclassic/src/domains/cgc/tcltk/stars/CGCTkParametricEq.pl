@@ -2,9 +2,9 @@ defstar
 {
     name { TkParametricEq }
     domain { CGC }
-    derivedFrom { ParamBiquad }
+    derivedFrom { ParametricEq }
     desc {
-Just like ParamBiquad, except that a Tk slider is put in the master
+Just like ParametricEq, except that a Tk slider is put in the master
 control panel to control the gain.
     }
     version { $Id$ }
@@ -121,7 +121,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	    $ref(gain) = tkgain/5.0 - 10.0;
 	    /* procedure calls to update; defined in base class */
 	    $starSymbol(setparams)(&$starSymbol(parametric));
-	    $sharedSymbol(CGCParamBiquad,selectFilter)
+	    $sharedSymbol(CGCParametricEq,selectFilter)
 	      (&$starSymbol(parametric), $starSymbol(filtercoeff),
 	       $starSymbol(filtertaps), "$val(filtertype)");
 
@@ -150,7 +150,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	      + $val(lowFreq);
 	    /* procedure calls to update; defined in base class */	    
 	    $starSymbol(setparams)(&$starSymbol(parametric));
-	    $sharedSymbol(CGCParamBiquad,selectFilter)
+	    $sharedSymbol(CGCParametricEq,selectFilter)
 	      (&$starSymbol(parametric), $starSymbol(filtercoeff),
 	       $starSymbol(filtertaps), "$val(filtertype)");
 
@@ -178,7 +178,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	    $ref(bandwidth) = tkband*0.0399 + 0.01;
 	    /* procedure calls to update; defined in base class */
 	    $starSymbol(setparams)(&$starSymbol(parametric));
-	    $sharedSymbol(CGCParamBiquad,selectFilter)
+	    $sharedSymbol(CGCParametricEq,selectFilter)
 	      (&$starSymbol(parametric), $starSymbol(filtercoeff),
 	       $starSymbol(filtertaps), "$val(filtertype)");
 
@@ -208,7 +208,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	      + $val(lowFreq);
 	    /* procedure calls to update; defined in base class */	    
 	    $starSymbol(setparams)(&$starSymbol(parametric));
-	    $sharedSymbol(CGCParamBiquad,selectFilter)
+	    $sharedSymbol(CGCParametricEq,selectFilter)
 	      (&$starSymbol(parametric), $starSymbol(filtercoeff),
 	       $starSymbol(filtertaps), "$val(filtertype)");
 
@@ -219,7 +219,7 @@ limitation of liability, and disclaimer of warranty provisions.
     }
     
     initCode {
-	CGCParamBiquad :: initCode();
+	CGCParametricEq :: initCode();
 	addCode(tkSetup, "tkSetup");
 	if (strcasecmp(filtertype, "BAND") == 0) {
 	  addCode(tkSetupband, "tkSetup");
