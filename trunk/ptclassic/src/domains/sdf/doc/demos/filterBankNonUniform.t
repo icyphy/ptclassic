@@ -28,7 +28,7 @@ interpreter ptcl by the signal processing packages for Mathematica [2].
 .Ir "Evans, B."
 .SA
 filterBank
-.UH REFERENCES
+.UH References
 .ip [1]
 Nayebi, K., Barnwell, T., and M. J. T. Smith,
 ``Nonuniform Filter Banks: A Reconstruction and Design Theory,''

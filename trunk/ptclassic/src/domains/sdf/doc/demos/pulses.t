@@ -28,7 +28,7 @@ Cascading two square-root raised cosine pulses will not always yield
 exactly the expected raised cosine pulse.  The reason is that the
 pulses are truncated in time.  This effect is particularly noticeable
 at low excess bandwidths.
-.UH "REFERENCES"
+.UH "References"
 .ip [1]
 E. A. Lee and D. G. Messerschmitt,
 .i "Digital Communication" ,

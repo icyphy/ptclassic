@@ -50,7 +50,7 @@ The modulation index controls the relative strength of
 the harmonics.  For instance, a modulation index of zero will yield
 a pure tone.
 For more information, see [1].
-.UH REFERENCES
+.UH References
 .ip [1]
 C. Dodge and T. Jerse, \fIComputer Music:
 Synthesis, Composition, and Performance\fR, Schirmer Books,
