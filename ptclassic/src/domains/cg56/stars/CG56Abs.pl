@@ -13,17 +13,17 @@ The input is moved into accumlator "a", where the "abs" instruction is applied.
 		return 3;
 	}
 	input {
-		name {in}
-		type {FLOAT}
+		name {input}
+		type {FIX}
 	}
 	output {
-		name {out}
-		type {FLOAT}
+		name {output}
+		type {FIX}
 	}
 	codeblock (absblock) {
-	move	$ref(in),a
+	move	$ref(input),a
 	abs	a
-	move	a,$ref(out)
+	move	a,$ref(output)
 	}
 	go {
 		gencode(absblock);
