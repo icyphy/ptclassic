@@ -189,7 +189,10 @@ class ::tycho::Query {
     # Specify the width (in characters) of the entry boxes.
     itk_option define -entrywidth entryWidth EntryWidth 40
 
-    # Give a list of method invocations from which to make queries.
+    # Specify the color of the labels
+    itk_option define -labelcolor labelColor LabelColor black
+
+     # Give a list of method invocations from which to make queries.
     itk_option define -queries queries Queries {}
 
     # Specify the command to execute on an OK response.
@@ -202,6 +205,9 @@ class ::tycho::Query {
 
     ##################################################################
     ####                       public methods                     ####
+
+    # Add a checkbutton query.
+    method check {tag label default args}
 
     # Clear all or one entry.
     method clear {{tag {}}}
@@ -289,14 +295,6 @@ body ::tycho::Query::constructor {args} {
     }
     pack $itk_component(querysite) -pady 5 -after $itk_component(top)
 
-    itk_component add radiosite {
-	frame $itk_component(childsite).radiosite
-    } {
-	keep -background -cursor
-    }
-    pack $itk_component(radiosite) -fill x -pady 5 \
-	    -after $itk_component(querysite)
-
     eval itk_initialize $args
     eval preference exclude $this $args
 
@@ -337,6 +335,65 @@ body ::tycho::Query::constructor {args} {
     ##################################################################
     ##################################################################
     ####                       public methods                     ####
+
+#####################################################################
+#### check
+# Add a check button query. The arguments are:
+# <menu>
+# <li> a tag uniquely identifying the query,
+# <li> the label to put on the query,
+# <li> the default value,
+# <li> any additional arguments to pass to the checkbutton widget.
+# </menu>
+# The additional
+# arguments can be used to pass tk <CODE>checkbutton</CODE> options
+# such as <CODE>-command</CODE>.  Typical usage is:
+# <tcl><pre>
+# ::tycho::Query .e
+# .e check foo {My Foo:} 0 -command {puts foo}
+# .e centerOnScreen
+# </pre></tcl>
+#
+# If values other than 0 or 1 are needed, supply the -onvalue and
+# -offvalue options.
+#
+body ::tycho::Query::check {tag label default args} {
+
+    # The label
+    itk_component add label_$tag {
+        eval [list label $itk_component(querysite).label_$tag \
+                -text $label]
+    } {
+        keep -background -cursor -font
+	rename -foreground labelcolor labelColor LabelColor
+    }
+    grid $itk_component(label_$tag) -row $numentries -column 0 -sticky e
+    
+    # Make the checkbutton
+    itk_component add tag_$tag {
+        eval checkbutton $itk_component(querysite).tag_$tag \
+		[list -variable [scope $itk_component(hull)_[set tag]sw]] \
+		$args
+    } {
+        keep -background -cursor -background
+    }
+    grid $itk_component(tag_$tag) -row $numentries -column 1 -sticky w
+    set [scope $itk_component(hull)_[set tag]sw] $default
+
+    # Do not grab the focus for a checkbutton query, since it generally
+    # requires the mouse anyway.
+    # set focuswindow $itk_component($tag)
+    
+    incr numentries
+
+    # Record the tag, its get method, and its clear method.
+    lappend tags $tag
+    set tagsclear($tag) [list set [scope $itk_component(hull)_[set tag]sw] \
+            $default]
+    set tagsget($tag) [list set [scope $itk_component(hull)_[set tag]sw]]
+
+    focusin
+}
 
 #####################################################################
 #### clear
@@ -417,7 +474,8 @@ body ::tycho::Query::line {tag label default args} {
         label $itk_component(querysite).label_$tag \
                 -text "$label"
     } {
-        keep -background -cursor -foreground -font
+        keep -background -cursor -font
+	rename -foreground labelcolor labelColor LabelColor
     }
     grid $itk_component(label_$tag) -column 0 -row $numentries -sticky ne
     
@@ -485,7 +543,8 @@ body ::tycho::Query::lines {tag label default lines args} {
         label $itk_component(querysite).label_$tag \
                 -text "$label"
     } {
-        keep -background -cursor -foreground -font
+        keep -background -cursor -font
+	rename -foreground labelcolor labelColor LabelColor
     }
     grid $itk_component(label_$tag) -column 0 -row $numentries -sticky ne
     
@@ -567,10 +626,11 @@ body ::tycho::Query::mediated {tag label default command args} {
         label $itk_component(querysite).label_$tag \
                 -text "$label"
     } {
-        keep -background -cursor -foreground -font
+        keep -background -cursor -font
+	rename -foreground labelcolor labelColor LabelColor
     }
     grid $itk_component(label_$tag) -column 0 -row $numentries -sticky ne
-    
+
     set cmd "$this mediatedCommand $tag $command"
 
     itk_component add tag_$tag {
@@ -579,12 +639,7 @@ body ::tycho::Query::mediated {tag label default command args} {
                 -command $cmd] \
                 $args
     } {
-        rename -background -entrybackground \
-                entryBackground EntryBackground
-        rename -foreground -entryforeground \
-                entryForeground EntryForeground
-        rename -width -entrywidth entryWidth EntryWidth 
-        rename -font -entryfont entryFont EntryFont
+	keep -background -foreground -font
     }
     
     grid $itk_component(tag_$tag) -column 1 -row $numentries -sticky ew
@@ -660,7 +715,8 @@ body ::tycho::Query::radio {tag label bttnNames default args} {
         eval [list label $itk_component(querysite).label_$tag \
                 -text $label]
     } {
-        keep -background -cursor -foreground -font
+        keep -background -cursor -font
+	rename -foreground labelcolor labelColor LabelColor
     }
     grid $itk_component(label_$tag) -row $numentries -column 0 -sticky e
     
