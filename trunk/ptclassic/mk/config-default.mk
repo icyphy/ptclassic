@@ -39,6 +39,9 @@
 #		       
 # Authors:  J. T. Buck, Kennard White
 
+# NOTE: you can't use GNU make extensions in this file, or bootstrapping
+# with non-GNU makes will fail.
+
 # Each makefile must define ROOT, the relative position of the root
 # of the directory tree, and include one of the makefiles file.
 # ARCH is assumed set to, say, "sun4", "sun3", or "vax".
@@ -163,20 +166,6 @@ CC_STATIC=
 # Used to build xv.  xv is distributed in the other.src tar file
 XV_RAND=
 XV_INSTALL=install
-
-# Matlab settings
-# Matlab is installed if the matlabRootDir script returns an non-empty string
-# -- If Matlab is not installed, then set MATLABDIR to
-#    $(ROOT)/src/compat/matlab and do not set MATLABLIBDIR
-# -- If Matlab is installed, then set MATLABDIR accordingly
-#    and set MATLABEXT_LIB to the external library directory
-MATLABDIR := $(shell $(ROOT)/bin/matlabRootDir)
-ifeq ($MATLABDIR,)
-MATLABDIR= $(ROOT)/src/compat/matlab
-else
-MATARCH := $(shell $(ROOT)/bin/matlabArch $(ARCH))
-MATLABEXT_LIB = -L$(MATLABDIR)/extern/lib/$(MATARCH) -lmat
-endif
 
 # Directory for general compatiblity include files.  Mainly function
 # declarations to quiet gcc -Wall down
