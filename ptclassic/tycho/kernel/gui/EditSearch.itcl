@@ -102,6 +102,7 @@ class ::tycho::EditSearch {
     protected common lastChangeString ""
 
     # Keep common configuration information
+    protected common wordsw 0
     protected common casesw 0
     protected common backwardssw 0
     protected common regexpsw 0
@@ -148,6 +149,15 @@ body ::tycho::EditSearch::constructor {args} {
 	keep -cursor -background
     }
     pack $itk_component(switches) -side bottom
+
+    itk_component add word {
+	checkbutton $itk_component(switches).word -text "Whole Word" \
+		-variable [scope wordsw] \
+		-relief flat
+    } {
+	keep -cursor -font -background -foreground
+    }
+    pack $itk_component(word) -side left
 
     itk_component add case {
 	checkbutton $itk_component(switches).case -text "Consider Case" \
@@ -310,8 +320,11 @@ body ::tycho::EditSearch::find {{start {}}} {
     }
     set myLastSearchPattern $pattern
     
+    if {$wordsw} \
+	    {set word "-wholeword"} \
+	    {set word "-any"}
     if {$casesw} \
-	    {set case "--"} \
+	    {set case "-case"} \
 	    {set case "-nocase"}
     if {$backwardssw} \
 	    {set direction -backwards} \
@@ -320,26 +333,19 @@ body ::tycho::EditSearch::find {{start {}}} {
 	    {set regexp -regexp} \
 	    {set regexp -exact}
 
-    # This is ugly, but we have to have a "--" before the pattern
-    # to keep the command from getting confused if the pattern
-    # starts with --.
-    if {$case == "--"} {
-	set result [$tw find $direction $regexp $case $pattern $start]
-    } {
-	set result [$tw find $direction $regexp $case -- $pattern $start]
-    }
+    set result [$tw find $direction $regexp $case $word -- $pattern $start]
 
     if {$result == {}} {
 	if {$backwardssw} {
 	    if [::tycho::askuser \
 		    "Not found.  Start search again at the bottom?"] {
-		focusin
+		after idle [code "$this focusin"]
 		return [find end]
 	    }
 	} {
 	    if [::tycho::askuser \
 		    "Not found.  Start search again at the top?"] {
-		focusin
+		after idle [code "$this focusin"]
 		return [find 1.0]
 	    }
 	}
