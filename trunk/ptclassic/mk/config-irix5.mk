@@ -23,7 +23,7 @@ CC =		gcc
 OCT_CC =	gcc -fwritable-strings
 
 OPTIMIZER =	-O2
-WARNINGS =	-Wall -Wcast-qual -Wcast-align
+WARNINGS =	-Wall -Wcast-qual
 
 # Use -D_BSD_SIGNALS for src/kernel/SimControl.cc
 #  see /usr/include/sys/signals.h for more info.

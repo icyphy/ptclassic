@@ -18,7 +18,7 @@ RANLIB =	ranlib
 # Use gcc everywhere _except_ in octtools
 CC =		gcc
 OPTIMIZER =	-O2
-WARNINGS =	-Wall -Wcast-qual -Wcast-align
+WARNINGS =	-Wall -Wcast-qual
 GPPFLAGS =	-g $(MEMLOG) $(WARNINGS) $(OPTIMIZER)
 CFLAGS =	-g $(OPTIMIZER)
 
