@@ -146,6 +146,9 @@ class ::tycho::IDoc {
 
     # Display the proper variables in the contents widget.
     private method displayvar {protection}
+
+    # Format the explanation of the given item in HTML.
+    private method formatexpl {item}
     
 }
 
@@ -340,8 +343,7 @@ body ::tycho::IDoc::binddesc {item label} {
 body ::tycho::IDoc::bindexpl {item label} {
  
     # format explanation
-    # set expl [formatexpl {$item}]
-    set expl "Noodles!"
+    set expl [formatexpl $item]
 
     # bind explanation to double click
     $myContents bind $label <Double-Button-1> \
@@ -541,4 +543,17 @@ body ::tycho::IDoc::displayvar {protection} {
             }
         }
     }
+}
+
+#####################################################################
+#### formatexpl
+# Format the explanation of the given item in HTML. This is usually
+# bound to a double click on an item in the contents widget.
+# An item may not have an explanation, but _must_ have a description.
+#
+body ::tycho::IDoc::formatexpl {item} {
+    if [catch {set expl [$myClass annotationget $item.explanation]}] {
+        set expl [$myClass annotationget $item.description]
+    }
+    set html "$item \n $expl"
 }
