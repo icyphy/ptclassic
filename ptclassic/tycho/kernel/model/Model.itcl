@@ -110,13 +110,13 @@ class ::tycho::Model {
     # Record a change in data
     method record {command index args}
 
-    # Redo changes to the data
+    # Execute redo commands
     method redo {{distance 1}}
 
     # Subscribe to this model
     method subscribe {type subscriber args}
 
-    # Undo changes to the data
+    # Execute undo commands
     method undo {{distance 1}}
 
     # Unsubscribe from this model
@@ -138,7 +138,7 @@ class ::tycho::Model {
     private method _clearhistory {args}
     
     # Compact a portion of the command history
-    private method _compacthistory {from to publish {command {}} {inverse {}}}
+    private method _compacthistory {from to {command {}} {inverse {}}}
     
     #################################################################
     ####                  private variables                      ####
@@ -598,7 +598,7 @@ body ::tycho::Model::record {command args} {
 ########################################################################
 #### redo
 #
-# Redo changes to the model. If an argument is given and it is an integer,
+# Execute redo commands. If an argument is given and it is an integer,
 # redo that many steps, or until the end of the command history if the
 # number of steps goes that far. If not an integer, the argument must be
 # a mark, and commands are undone up to and including the
@@ -703,7 +703,7 @@ body ::tycho::Model::subscribe {mode subscriber {name {}} {command {}}} {
 ########################################################################
 #### undo
 #
-# Undo changes to the model. If an argument is given and it is an integer,
+# Execute undo commands. If an argument is given and it is an integer,
 # undo that many steps, or until the start of the command history if the
 # number of steps goes that far. If not an integer, the argument must be
 # a mark, and commands are undone back to but not including the
