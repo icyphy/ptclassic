@@ -1184,17 +1184,20 @@ body ::tycho::HTML::upSize {} {
 #### windowMenuAddAll
 # Add me to the window menus of all open File objects.
 # This is redefined in order to coordinate the source window, which
-# may be open.
+# may be open, and to refrain from adding to the menu if I'm a sub-view
+# ignorant of the displayer.
 #
 body ::tycho::HTML::windowMenuAddAll {label} {
-    # Reclaim the source window, if it is open.
-    if {[info exists filesOpen($label)]} {
-        set sourcewin $filesOpen($label)
-        $sourcewin windowMenuRemoveAll $label
-    } {
-        set sourcewin {}
+    if {[displayer] != {}} {
+        # Reclaim the source window, if it is open.
+        if {[info exists filesOpen($label)]} {
+            set sourcewin $filesOpen($label)
+            $sourcewin windowMenuRemoveAll $label
+        } {
+            set sourcewin {}
+        }
+        ::tycho::File::windowMenuAddAll $label
     }
-    ::tycho::File::windowMenuAddAll $label
 }
 
 #####################################################################
