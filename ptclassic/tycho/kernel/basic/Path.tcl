@@ -268,6 +268,38 @@ proc ::tycho::rm { args } {
 }
 
 #####################################################################
+#### simplifyPath
+# Given a path and a list of environment variables, try to simplify
+# the path by checking to see if we can use an environment variable instead
+# of a long string.
+#
+# For example, if the TYCHO environment variable is set to
+# <CODE>/users/ptolemy/tycho</CODE>, and this directory is actually
+# automounted at <CODE>/export/watson/watson2/ptolemy/tycho</CODE>, and
+# we pass simplifyPath the pathname
+# <CODE>/export/watson/watson2/ptolemy/tycho/README<CODE>, then we
+# should get back <CODE>$TYCHO/README</CODE>.
+#
+# If we cannot simplify the pathname, then we return the original pathname.
+# The first environment variable that matches a non-zero number of characters
+# is the environment variable that is used
+proc ::tycho::simplifyPath {pathName envVarList} {
+    global env
+    set expandedPathName [::tycho::expandPath $pathName]
+    foreach envVar $envVarList {
+	if [info exists env($envVar)] {
+	    set expandedEnvVar [::tycho::expandPath $env($envVar)]
+	    if { [string first $expandedEnvVar $expandedPathName] != -1} {
+		return [file join \$$envVar [string range $expandedPathName \
+			[expr {[string length $expandedEnvVar] +1 }] \
+			end]]
+	    }
+	}
+    }
+    return $pathName
+}
+
+#####################################################################
 #### tmpFileName
 # Return a temporary filename that does not exist yet.
 # The <CODE>TMPDIR</CODE> environment variable is as a base used if it is
