@@ -1,0 +1,442 @@
+##########################################################################
+# Version: $Id$
+# Author: John Reekie
+#
+# Copyright (c) 1996-1997 The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the above
+# copyright notice and the following two paragraphs appear in all copies
+# of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+#                                                         COPYRIGHTENDKEY
+##########################################################################
+
+
+##########################################################################
+#### KeyedDigraph
+#
+# The _KeyedDigraph_ model extends the _Digraph_ class with the
+# notion of "keys" at each vertex. Edges between vertices must
+# connect to a key of a vertex rather than just the vertex.
+# Keys are implemented as a special kind of entity nested within
+# vertices, and can therefore have a value and attributes.
+# The most obvious application of this kind of graph is dataflow
+# graphs, in which each edge from a vrtex must be uniquely identified.
+# Note that keys are not constrained to be "inputs" or "outputs".
+#
+# Here are some example of creating and accessing a keyed digraph.
+# See the <a href="AbstractGraph">AbstractGraph</a> and
+# <a href="Digraph">Digraph</a> classes for more information
+# about graphs and directed graphs, and the <a href="Model">Model</a> 
+# class for more information about the facilities inherited by this
+# class from Model. Create a graph and give keys and edges some attributes:
+# <tcl><pre>
+#     catch {delete object $graph}
+#     set graph [::tycho::KeyedDigraph [::tycho::autoName graph]]
+#     $graph edgeconfigure -initialdelay {}
+#     $graph keyconfigure -tokencount 1 -type input
+# </tcl></pre>
+#
+# Load data into the graph:
+# <pre>
+#   a---->c--->
+#         ^
+#   b-----+--->d
+# </pre>
+# <tcl><pre>
+#     catch {delete object $graph}
+#     set graph [::tycho::KeyedDigraph [::tycho::autoName graph]]
+#     $graph read string {
+#         vertex a {
+#             key out -tokencount 2 -type output
+#         }
+#         vertex b {
+#             key out -type output
+#         }
+#         vertex c {
+#             key in-0
+#             key in-1
+#             key out -type output
+#         }
+#         vertex d {
+#             key in
+#         }
+#         edge a out c in-0 -initialdelay 0
+#         edge b out c in-1
+#         edge b out d in
+#     }
+# </tcl></pre>
+#
+# Let's just make sure we have what we think we have:
+# <pre><tcl>
+#     $graph describe
+# </tcl></pre>
+#
+# Get the keys of a vertex:
+# <pre><tcl>
+#     $graph keys c
+# </tcl></pre>
+#
+# Get the edges coming _in_ to a given key:
+# <pre><tcl>
+#     $graph edges * * c in-0
+# </tcl></pre>
+#
+# Get the edges coming _out_ of a given key:
+# <pre><tcl>
+#     $graph edges b out * *
+# </tcl></pre>
+#
+# Get the keys at the other end of a given key. This differs
+# from the previous example in that the result does not include
+# the source vertex and key:
+# <pre><tcl>
+#     $graph adjacent c in-0
+# </tcl></pre>
+#
+# Same for the output example:
+# <pre><tcl>
+#     $graph adjacent b out
+# </tcl></pre>
+#
+class ::tycho::KeyedDigraph {
+    inherit ::tycho::Digraph
+    
+    constructor {args} {}
+    destructor {}
+
+    #################################################################
+    ####                     public methods                      ####
+
+    # Get adjacent vertices and keys
+    method adjacent {vertex key {select all}}
+
+    # Remove a vertex _and_ adjacent edges from the graph
+    method delete {vertex}
+
+    # Add an edge and attributes to the graph
+    method edge {vertex1 key1 vertex2 key2 args}
+
+    # Return all attributes of an edge
+    method edgeattrs {vertex1 key1 vertex2 key2}
+
+    # Get an attribute or attributes of an edge
+    method edgecget {vertex1 key1 vertex2 key2 attribute}
+
+    # Configure the edge with one or more attributes
+    method edgeconfigure {vertex1 key1 vertex2 key2 args}
+
+    # Remove an edge from the graph
+    method edgedelete {vertex1 key1 vertex2 key2}
+
+    # Return edges matching a vertex and key patterns
+    method edges {{vertex1 *} {key1 *} {vertex2 *} {key2 *}}
+
+	# Return all attributes of a key
+    method keyattrs {vertex key}
+
+    # Get an attribute or attributes of a key
+    method keycget {vertex key attribute}
+
+    # Configure the key with one or more attributes
+    method keyconfigure {vertex key args}
+
+    # Remove a key from the graph
+    method keydelete {vertex key}
+
+    # Add a key and attributes to a vertex
+    method keyin {vertex key args}
+
+    # Return keys of a vertex that match a pattern
+    method keys {vertex {key *}}
+
+    # "Repair" a graph by deleting improperly-connected edges
+    method repair {}
+
+    # Test whether a graph is correctly constructed
+    method verify {}
+
+    #################################################################
+    ####                   protected methods                     ####
+
+    # Keys cannot be created at the top level
+    protected method key {key args} {
+    	_toplevelerror key $context [list $vertex $key]
+    }
+    
+    #################################################################
+    ####                   private methods                       ####
+    
+    # Evaluate code in this object's context
+    private method evalInSpecificContext {args} {eval $args}
+}
+
+########################################################################
+#### constructor
+#
+body ::tycho::KeyedDigraph::constructor {args} {
+    # Key names are a list 
+    configure -separator " "
+    
+    # Define the "key" entity: no value, no default attributes
+    defineEntity key
+
+    # Evaluate options
+    eval configure $args
+}
+
+########################################################################
+#### adjacent
+#
+# Get the adjacent vertices and keys to a given vertex and key.
+# Return the empty string if the weld does not exist or there is
+# no connection to it. Edges are returned as a flat list of
+# vertex-key pairs. The third argument can be "in," "out,"
+# or "all." If "in," only return vertices and keys for which
+# this key is a sink; if "out," only return vertices and edges
+# for which this key is a source. If "all" or absent, return all
+# connected vertices.
+#
+body ::tycho::KeyedDigraph::adjacent {vertex key {select all}} {
+    set result {}
+    # The "in" direction
+    if { $select == "in" || $select == "all" } {
+	foreach quad [array names _info \
+		[list edge * * [list * * $vertex $key]]] {
+	    lappend result [lindex [lindex $quad 3] 0]
+	    lappend result [lindex [lindex $quad 3] 1]
+	}
+    }
+    # The "out" direction
+    if { $select == "out" || $select == "all" } {
+	foreach quad [array names _info \
+		[list edge * * [list $vertex $key * *]]] {
+	    lappend result [lindex [lindex $quad 3] 2]
+	    lappend result [lindex [lindex $quad 3] 3]
+	}
+    }
+    return $result
+}
+
+########################################################################
+#### delete
+#
+# Delete a vertex and all connected edges from the graph, and
+# return the inverse command.
+#
+# FIXME: doesn't work
+#
+body ::tycho::KeyedDigraph::delete {vertex} {
+    _verify vertex $vertex
+    error "Not implemented"
+}
+
+########################################################################
+#### edge
+#
+# Add a new edge to the graph, and return the inverse command.
+#
+body ::tycho::KeyedDigraph::edge {vertex1 key1 vertex2 key2 args} {
+    _verifynot edge [list $vertex1 $key1 $vertex2 $key2]
+    
+    # Record the edge
+    set inverse [_link edge [list $vertex1 $key1 $vertex2 $key2] $args]
+
+    # Add links to the adjacency matrix
+    adjacencyadd $vertex1 $vertex2
+
+    # Clear any cached structural information
+    catch {unset _cache}
+
+    # Return the inverse command
+    return $inverse
+}
+
+########################################################################
+#### edgeattrs
+#
+# Return a list containing the attributes of the edge as a flat
+# attribute-value list. An error will result if the edge does
+# not exist.
+#
+body ::tycho::KeyedDigraph::edgeattrs {vertex1 key1 vertex2 key2} {
+    _verify     edge [list $vertex1 $key1 $vertex2 $key2]
+    _attributes edge [list $vertex1 $key1 $vertex2 $key2]
+}
+
+########################################################################
+#### edgecget
+#
+# Get an attribute of an edge. An error will occur if the edge does not
+# exist or the attribute does not exist.
+#
+body ::tycho::KeyedDigraph::edgecget {vertex1 key1 vertex2 key2 attribute} {
+    _verify edge [list $vertex1 $key1 $vertex2 $key2]
+    _cget   edge [list $vertex1 $key1 $vertex2 $key2] $attribute
+}
+
+########################################################################
+#### edgeconfigure
+#
+# Configure the edge and return the inverse command. The argument list
+# is a flat list of attribute-value pairs.
+#
+body ::tycho::KeyedDigraph::edgeconfigure {vertex1 key1 vertex2 key2 args} {
+    _verify    edge [list $vertex1 $key1 $vertex2 $key2]
+    _configure edge [list $vertex1 $key1 $vertex2 $key2] $args
+}
+
+########################################################################
+#### edgedelete
+#
+# Remove an edge from the graph, and return the inverse command.
+#
+body ::tycho::KeyedDigraph::deleteedge {vertex1 key1 vertex2 key2} {
+    _verify edge [list $vertex1 $key1 $vertex2 $key2]
+
+    # Delete it from the adjacency list
+    adjacencydelete $vertex1 $vertex2
+
+    # Clear any cached structural information
+    catch {unset _cache}
+
+    # Delete the data and get the inverse command
+    set inverse [_delete edge [list $vertex1 $key1 $vertex2 $key2]]
+    
+    # If there are still edges between the same vertices, add
+    # back to the adjacency list
+    if { [array names _info \
+	    [list $type * * [list $vertex1 * $vertex2 *]]] != "" } {
+    	adjacencyadd $vertex1 $vertex2
+    }
+    return $inverse
+}
+
+########################################################################
+#### edges
+#
+# Return a list containing the edges of the graph that match the
+# given patterns. The result is a flat list of source-key-target-key
+# quads. If no arguments are supplied, return all edges.
+#
+body ::tycho::KeyedDigraph::edges {{vertex1 *} {key1 *} {vertex2 *} {key2 *}} {
+    set result {}
+    foreach quad [array names _info \
+	    [list edge * * [list $vertex1 $key1 $vertex2 $key2]]] {
+	eval lappend result [lindex $quad 3]
+    }
+    return $result
+}
+
+########################################################################
+#### keyattrs
+#
+# Return a list containing the attributes of the key as a flat
+# attribute-value list. An error will result if the key does
+# not exist.
+#
+body ::tycho::KeyedDigraph::keyattrs {vertex key} {
+    _verify     key [list $vertex $key]
+    _attributes key [list $vertex $key]
+}
+
+########################################################################
+#### keycget
+#
+# Get an attribute of a key. An error will occur if the key does not
+# exist or the attribute does not exist.
+#
+body ::tycho::KeyedDigraph::keycget {vertex key attribute} {
+    _verify key [list $vertex $key]
+    _cget   key [list $vertex $key] $attribute
+}
+
+########################################################################
+#### keyconfigure
+#
+# Configure the key and return the inverse command. The argument list
+# is a flat list of attribute-value pairs.
+#
+body ::tycho::KeyedDigraph::keyconfigure {vertex key args} {
+    _verify    key [list $vertex $key]
+    _configure key [list $vertex $key] $args
+}
+
+########################################################################
+#### keydelete
+#
+# Remove a key from the graph, and return the inverse command.
+#
+body ::tycho::KeyedDigraph::keydelete {vertex key} {
+    _verify key [list $vertex $key]
+
+    # Delete it from the adjacency list
+    adjacencydelete $vertex1 $vertex2
+
+    # Clear any cached structural information
+    catch {unset _cache}
+
+    # Delete the data and get the inverse command
+    set inverse [_delete key [list $vertex $key]]
+    
+    # If there are still keys between the same vertices, add
+    # back to the adjacency list
+    if { [array names _info \
+	    [list $type * * [list $vertex1 * $vertex2 *]]] != "" } {
+    	adjacencyadd $vertex1 $vertex2
+    }
+    return $inverse
+}
+
+########################################################################
+#### keyin
+#
+# Add a new key to a vertex, and return the inverse command.
+#
+body ::tycho::KeyedDigraph::keyin {vertex key args} {
+    _verifynot key [list $vertex $key]
+    
+    # Record the key
+    set inverse [_link key [list $vertex $key] $args]
+
+    # Add links to the adjacency matrix
+    adjacencyadd $vertex1 $vertex2
+
+    # Clear any cached structural information
+    catch {unset _cache}
+
+    # Return the inverse command
+    return $inverse
+}
+
+########################################################################
+#### keys
+#
+# Return a list of keys of the given vertex. If the second argument
+# is given, it is a glob-style pattern to be used to match against
+# key names.
+#
+body ::tycho::KeyedDigraph::keys {vertex {key *}} {
+    set result {}
+    foreach quad [array names _info \
+	    [list key $vertex $key *]] {
+	eval lappend result [lindex $quad 2]
+    }
+    return $result
+}
+
