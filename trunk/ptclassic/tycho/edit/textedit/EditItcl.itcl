@@ -320,7 +320,7 @@ body ::tycho::EditItcl::gendoc {} {
     set tail [file tail $filename]
     set root [file rootname $tail]
     set docfile [file join doc codeDoc \
-	    [info namespace tail [[$this component text] getClassName]].html]
+	    [info namespace tail [getClassName]].html]
     set fulldoc [file join $dir $docfile]
     if {![file exists $fulldoc] || \
 	    [isModified] || \
@@ -360,7 +360,7 @@ body ::tycho::EditItcl::gendoc {} {
         }
     }
     if [file exists $fulldoc] {
-        ::tycho::File::openContext $fulldoc
+        return [::tycho::File::openContext $fulldoc]
     }
 }
 
