@@ -41,9 +41,16 @@ PL_SRCS=\
  VHDLBxx73.pl \
  VHDLBxx74.pl \
  VHDLBAnd.pl \
- VHDLBOr.pl \
- VHDLBNot.pl \
+ VHDLBAnd3.pl \
  VHDLBNand.pl \
+ VHDLBNand3.pl \
+ VHDLBOr.pl \
+ VHDLBOr3.pl \
+ VHDLBNor.pl \
+ VHDLBNor3.pl \
+ VHDLBXor.pl \
+ VHDLBXor3.pl \
+ VHDLBNot.pl \
 
 # The .cc files
 SRCS=$(PL_SRCS:.pl=.cc)
