@@ -104,6 +104,10 @@ A future version will provide a "permalink" feature, allowing .o files
 to become a permanent part of the system.
 
 **************************************************************************/
+#ifdef __GNUG_
+#pragma implementation
+#endif
+
 #include "Linker.sysdep.h"
 #include "Linker.h"
 #include "Error.h"
