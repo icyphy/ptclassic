@@ -121,8 +121,8 @@ CC = 		cc
 # -Aa turns on ansi c, needed for tkoct
 # The cc man page says that defining _HPUX_SOURCE gives the same name space
 # compatibility as -Ac
-#LOCALCFLAGS =	-DUSG $(CDEBUGFLAGS) -Aa
-LOCALCFLAGS = 	-DUSGo $(CDEBUGFLAGS)
+LOCALCFLAGS =	-DUSG $(CDEBUGFLAGS) -Aa
+#LOCALCFLAGS = 	-DUSG $(CDEBUGFLAGS)
 
 CFLAGS =	$(OPTIMIZER) $(MEMLOG) $(WARNINGS) \
 			$(ARCHFLAGS) $(LOCALCFLAGS) $(USERFLAGS)
