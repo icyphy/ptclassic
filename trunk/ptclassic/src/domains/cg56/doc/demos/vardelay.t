@@ -5,7 +5,13 @@ Variable delay with linear interpolation.
 .DE
 .SV 1.1 "November 24, 1992"
 .AL "Chih-Tsung Huang (ported from Gabriel)"
-.LO "~ptolemy/src/domains/cg56/demo/sim"
+.EQ
+delim off
+.EN
+.LO "$PTOLEMY/src/domains/cg56/demo/sim"
+.EQ
+delim $$
+.EN
 .LD
 .pp
 .Id "vardelay with linear interpolation"

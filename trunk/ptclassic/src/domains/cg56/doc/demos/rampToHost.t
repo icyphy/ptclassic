@@ -1,11 +1,17 @@
 .\" $Id$
-.NA ramp
+.NA rampToHost
 .SD
 Simple ramp generator.
 .DE
 .SV 1.1 "November 24, 1992"
 .AL "Chih-Tsung Huang (ported from Gabriel)"
-.LO "~ptolemy/src/domains/cg56/demo/s56x"
+.EQ
+delim off
+.EN
+.LO "$PTOLEMY/src/domains/cg56/demo/s56x"
+.EQ
+delim $$
+.EN
 .LD
 .pp
 .Id "ramp generator"
