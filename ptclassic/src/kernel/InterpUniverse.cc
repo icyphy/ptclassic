@@ -88,11 +88,12 @@ void InterpUniverse :: initTarget() {
 	if (! myTarget()) return;
 
 	if (myTarget()->resetRequested()) {
-		reset();
+	  // SSS change: TSTarget requires being reset BEFORE the galaxy is
 		Target* newTarget = (Target*) myTarget()->clone();
 		// newTarget->copyStates(*myTarget());
 		delete myTarget();
 		setMyTarget(newTarget);
+		reset();
 	}
 
 	// The following invokes the scheduler
