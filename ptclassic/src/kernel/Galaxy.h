@@ -118,6 +118,9 @@ public:
 	// Print a description of the galaxy
 	StringList printVerbose();
 
+	// Print a description of the galaxy and all contained galaxies
+	StringList printRecursive();
+
 	// Method replies FALSE to indicate that component blocks
 	// can be seen from outside.
 	virtual int isItAtomic () const {return FALSE;}

@@ -54,6 +54,10 @@ public:
 
 	// method to dump all info, must be redefined
 	virtual StringList printVerbose () = 0;
+
+	// print all info at all levels.  Same as printVerbose
+	// unless redefined
+	virtual StringList printRecursive () { return printVerbose ();}
 };
 
 #endif
