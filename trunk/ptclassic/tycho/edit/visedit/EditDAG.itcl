@@ -1033,11 +1033,15 @@ body ::tycho::EditDAG::drawParentLines {node {parent {}}} {
             set parentx $x2
             set parenty [expr ($y1+$y2)/2]
         }
+        # Color the lines to the parents the same color as the parent.
+        contentsToArray $par cnt [list \
+            color $linecolor]
+
 	# Draw directly on the canvas for "efficiency"
         $canvas create line \
                 $parentx $parenty \
                 $childx $childy \
-                -tags line -fill $linecolor
+                -tags line -fill $cnt(color)
     }
 }
 
