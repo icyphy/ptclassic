@@ -194,15 +194,13 @@ ParseToken ComplexArrayState :: evalExpression(Tokenizer& lexer) {
 
 StringList ComplexArrayState :: currentValue() const {
 	StringList s; 
-	s =  "\n";
 	for(int i = 0; i<size(); i++) 
 	{
-		s = i; 
-		s = "	("; 
-		s = val[i].real();
-		s = ","; 
-		s = val[i].imag(); 
-		s= ")\n";
+                s += "(";
+                s += val[i].real();
+                s += ",";
+                s += val[i].imag();
+                s += ")\n";
 	} 
 	return s;
 }
