@@ -198,18 +198,33 @@ configbody ::tycho::RevControl::object {
 #
 body ::tycho::RevControl::constructor {args} {
     eval itk_initialize $args
-
+    
     addButton checkin -text "Checkin <i>" -command "$this checkInAndUpdate"
     addButton checkout -text "Checkout <o>" -command "$this checkOutAndUpdate"
-    addButton history -text "History <h>" -command "$this viewHistory"
-    #addButton diff -text "Diff <d>" -command "$this diffFile"
+    #addButton history -text "History <h>" -command "$this viewHistory"
     addButton unedit -text "Unedit <u>" -command "$this unedit"
     addButton cancel -text "Close <Esc>" -command \
-	   "$this nextWindow; delete object $this"
+            "$this nextWindow; delete object $this"
+
+
+    itk_component add history {
+        ::tycho::Edit $itk_component(hull).history -textheight 30
+    } {
+        keep -readonly -textwidth -background \
+                -highlightbackground -highlightcolor -selectforeground \
+                -cursor -insertbackground -textforeground -textfont \
+                -textbackground
+    }
+    $itk_component(history) configure -readonly 1
+    #pack $itk_component(history) -expand yes -fill both
+    ::tycho::Subpanel $itk_component(hull).pan -text "HISTORY" \
+            -childwidget $itk_component(hull).history \
+            -execute "$this viewHistory"
+    pack $itk_component(hull).pan -anchor nw
+
 
     bind $itk_component(hull) <i> "$this invoke checkin"
     bind $itk_component(hull) <o> "$this invoke checkout"
-    bind $itk_component(hull) <h> "$this invoke history"
     bind $itk_component(hull) <u> "$this invoke unedit"
     bind $itk_component(hull) <Escape> "$this invoke cancel"
 }
@@ -577,12 +592,12 @@ body ::tycho::RevControl::getComments {} {
 # History contains the entire "sccs prs" or "rlog" history list.
 # Info contains the status of the current file (empty means not checked out).
 body ::tycho::RevControl::parseHistory {history text} {
-    # Clear up all the checked files (with check button)
-    resetDiff
-
     set file [$object filename]
     set basefile [file tail $file]
     set lines [split $history "\n"]
+
+    # Clear up all the checked files (with check button)
+    resetDiff
 
     # FIXME: Error recovery scheme should be more complicated!
     if {[llength $lines] < 2} {
@@ -592,7 +607,7 @@ body ::tycho::RevControl::parseHistory {history text} {
 
     set commentColor [preference get commentColor]
     set versionColor [preference get versionColor]
-
+    
     $text insert insert "Double click the underlined text to view versions.\n" 
 
     # Diff list is currently empty (nothing in revision control yet)
