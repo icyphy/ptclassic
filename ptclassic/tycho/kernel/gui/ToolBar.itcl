@@ -251,33 +251,30 @@ body ::tycho::ToolBar::enable {tag} {
 # to the specified command, which is then invoked.
 #
 body ::tycho::ToolBar::entry {tag label default command args} {
-    # Preprocess the arguments (overloading arguments):
+    array set option {-command {}}
+    array set option {-foreground {}}
+    array set option $args
+
+    # Augment the arguments to pass to button or label automatically.
     # -command goes to button only
     # -foreground goes to button and label
     # Rest go to label (ie. textvariable, etc)
-    set buttonarg {}
-    set labelarg $args
-
-    # Take care of command
-    if {[regexp {(.*)(\-command {.*})(.*)} $labelarg match pre1 cmd pre2]} {
-        set buttonarg " $cmd"
-        set labelarg "$pre1 $pre2"
+    if {$option(-command)!={}} {
+        set option(-command) "-command \{$option(-command)\}"
     }
-    # Take care of foreground
-    if {[regexp {(.*)(\-foreground [^ \n\\]+)(.*)} \
-            $labelarg match pre1 color pre2]} {
-        append buttonarg " $color"
+    if {$option(-foreground)!={}} {
+        set option(-foreground) "-foreground $option(-foreground)"
     }
          
     # Check to see if the programmer intended a label or a button.
     # If the programmer used -command, then intention is button.
     # Otherwise, it's a normal label.
-    if {[regexp {(.*)\-command {(.*)}(.*)} $args]} {
+    if {$option(-command)!={}} {
         # if -command exists, then we want a button
         itk_component add label_$tag {
             # added eval and \" \" (highlighting: ")
             eval ::button $itk_component(entrysite).label_$tag \
-                    -text {$label} -relief flat $buttonarg
+                    -text {$label} $option(-foreground) $option(-command)
         } {
             keep -background -cursor -font
             rename -foreground labelcolor labelColor LabelColor
@@ -288,7 +285,7 @@ body ::tycho::ToolBar::entry {tag label default command args} {
         itk_component add label_$tag {
             # added eval and \" \" (highlighting: ")
             eval ::label $itk_component(entrysite).label_$tag \
-                    -text {$label} $labelarg
+                    -text {$label} $option(-foreground)
         } {
             keep -background -cursor -font
             rename -foreground labelcolor labelColor LabelColor
@@ -299,7 +296,7 @@ body ::tycho::ToolBar::entry {tag label default command args} {
     
     itk_component add tag_$tag {
         eval ::entry $itk_component(entrysite).tag_$tag \
-                -relief sunken $labelarg
+                -relief sunken $option(-foreground)
     } {
         rename -background -entrybackground \
                 entryBackground EntryBackground
