@@ -292,12 +292,12 @@ body ::tycho::EditItcl::gendocBuffer {} {
 body ::tycho::EditItcl::genidocBuffer {} {
     return [ ::tycho::EditProgram::gendocBufferInternal \
         [list set docfile [file join doc codeDoc \
-                [info namespace tail [getClassName]].idoc]] \
+                [info namespace tail [getClassName]].itclclass]] \
     {
         set debug 0
         set generateIndex 0
         file delete -force $docfile
-        ::tycho::IDocSys::generateIDoc \
+        ::tycho::ClassParser::generateIDoc \
                 $debug $generateIndex {An Itcl Class} $tail
     }]
 }
@@ -441,12 +441,13 @@ body ::tycho::EditItcl::gendoc {filename} {
 body ::tycho::EditItcl::genidoc {filename} {
     return [ ::tycho::EditProgram::gendocFileInternal $filename\
             [list set docfile [file join doc codeDoc \
-            [info namespace tail [file tail [file rootname $filename].idoc]]]] \
+            [info namespace tail \
+	    [file tail [file rootname $filename].itclclass]]]] \
             {
         set debug 0
         set generateIndex 0
         file delete -force $docfile
-        ::tycho::IDocSys::generateIDoc \
+        ::tycho::ClassParser::generateIDoc \
                 $debug $generateIndex {An Itcl Class} $tail
     }]
 }
