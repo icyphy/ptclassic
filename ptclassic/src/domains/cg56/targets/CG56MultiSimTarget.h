@@ -1,5 +1,5 @@
-#ifndef _FictionTarget_h
-#define  _FictionTarget_h 1
+#ifndef _CG56FictionTarget_h
+#define  _CG56FictionTarget_h 1
 
 /******************************************************************
 Version identification:
@@ -23,9 +23,9 @@ $Id$
 #include "StringState.h"
 #include "ProcMemory.h"
 
-class FictionTarget : public CGMultiTarget {
+class CG56FictionTarget : public CGMultiTarget {
 public:
-	FictionTarget(const char* name, const char* starclass, const char* desc);
+	CG56FictionTarget(const char* name, const char* starclass, const char* desc);
 
 	void setup();
 	void wrapup();
@@ -58,6 +58,9 @@ protected:
 
 	// shared memory
 	ProcMemory* sharedMem;
+
+	//CG56FictionTarget supports AnyAsmStar stars.
+	const char* auxStarClass() const;
 
 private:
 	// state to disallow compiling code.
