@@ -3,7 +3,7 @@ defstar {
 	domain { C50 }
 	desc { Sine or cosine function using second order oscillator } 
 	version { $Id$ }
-	author { A. Baensch, ported from Gabriel }
+	author { A. Baensch, Luis Gutierrez, ported from Gabriel }
 	acknowledge { Method from Motorola's "DSP News", Vol. 1., No. 3, 1988 }
 	copyright {
 Copyright (c) 1990-%Q% The Regents of the University of California.
@@ -48,17 +48,20 @@ limitation of liability, and disclaimer of warranty provisions.
 		default { 0 }
 		attributes { A_NONCONSTANT|A_NONSETTABLE|A_UMEM }
 	}
-	state {
-		name { X }
-		type { FIX }
-		desc { internal }
-		default { 0 }
-		attributes { A_NONCONSTANT|A_NONSETTABLE}
+
+	protected{
+		int	X;
 	}
+
 	setup {
 		// maximum fixed point value
 		double twoPiF = 2.0 * M_PI * frequency.asDouble();
-		X = cos(twoPiF);
+		double temp  = cos(twoPiF);
+		if (temp >= 0) {
+			X = int(double(32768)*temp + 0.5);
+		} else {
+			X = int(double(32768)*(2.0+temp)+0.5);
+		}
 		const char* p = calcType;
 		switch (*p) {
 		    case 's':	// sine
@@ -75,13 +78,13 @@ limitation of liability, and disclaimer of warranty provisions.
 		}
 	}
 	
-	codeblock (std) {
+	codeblock (std,"") {
 	lar	AR1,#$addr(state1)		;Address state1 =>AR1
 	lar	AR2,#$addr(state2)		;Address state2 =>AR2
 	lar	AR7,#$addr(output)		;Address output =>AR7
 	mar	*,AR2
 	lt	*,AR1				;val(state2) => TREG0
-	mpy	#$val(X)			;val(state2)*val(X)
+	mpy	#@(int(X))			;val(state2)*val(X)
 	pac					;Accu=state2*X
 	apac					;Accu=2*state2*X
 	sub	*,15,AR7			;Accu=2*state2*X - state1
@@ -91,7 +94,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 
 	go {
-		addCode(std);
+		addCode(std());
 	}
 
 	execTime {
