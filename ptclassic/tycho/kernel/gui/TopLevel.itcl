@@ -163,6 +163,10 @@ class ::tycho::TopLevel {
     # Prevent destruction of this object while evaluating the arguments.
     protected method safeEval {args}
 
+    # Access the preferences associated with this widget -- override
+    # to get different preferences.
+    protected method preference {mode args}
+
     #################################################################
     ####                  protected variables                    ####
 
@@ -278,6 +282,7 @@ body ::tycho::TopLevel::constructor {args} {
 
     # Explicitly handle configs that may have been ignored earlier.
     eval itk_initialize $args
+    eval preference exclude $this $args
 
     # Grab the focus when the window gets mapped.
     # NOTE: This causes focusin to be called a very large number of times!
@@ -333,6 +338,9 @@ body ::tycho::TopLevel::destructor {} {
             after 100 [code ::tycho::TopLevel::exitIfNoMoreWindows]
         }
     }
+
+    # Unsubscribe from all preferences
+    preference unsubscribe $this
 }
 
 #################################################################
@@ -570,6 +578,17 @@ body ::tycho::TopLevel::safeEval {args} {
     }
     set disableDestruction 0
     return $retval
+}
+
+#####################################################################
+#### preference
+# Access the preferences associated with this window. By default,
+# all widgets access the "global" preference set; some windows will,
+# however, need to access a different preference set, and they
+# must indicate so by overriding this method.
+#
+body ::tycho::TopLevel::preference {mode args} {
+    eval ::preference $mode "global" $args
 }
 
     #################################################################

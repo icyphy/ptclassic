@@ -49,6 +49,12 @@ class ::tycho::EditStack {
 
     # Color the stack information in a region.
     method parseNow {start stop}
+
+    ##########################################################################
+    ####                       protected methods                          ####
+
+    # Access the "stacktrace" preferences
+    protected method preference {mode args}
 }
 
 ###################################################################
@@ -56,6 +62,7 @@ class ::tycho::EditStack {
 body ::tycho::EditStack::constructor {args} {
 
     eval itk_initialize $args
+    eval preference exclude $this $args
 
 # FIXME:
 #    wm iconname $prefix "Stack Trace"
@@ -107,7 +114,7 @@ body ::tycho::EditStack::parseNow {start stop} {
     # The first line is always a title
     $text tag add title 1.0 "0.0 lineend"
     $text tag configure title -foreground \
-	    [preference get stacktrace titleColor]
+	    [preference get titleColor]
 
     set comments {while executing|invoked from within|\(while constructing [^)]*\)|\(command bound to event\)}
     set point $start
@@ -138,9 +145,26 @@ body ::tycho::EditStack::parseNow {start stop} {
     
     # Set the visual characteristics of the tagged text
     $text tag configure error -foreground \
-	    [preference get stacktrace errorColor]
+	    [preference get errorColor]
     $text tag configure comment -foreground \
-	    [preference get stacktrace commentColor]
+	    [preference get commentColor]
     $text tag configure link -foreground \
-	    [preference get stacktrace linkColor]
+	    [preference get linkColor]
 }
+
+
+#####################################################################
+#####################################################################
+####                     protected methods                       ####
+
+
+#####################################################################
+#### preference
+# Access the preferences associated with this widget. This method
+# overrides the default method in ::tycho::TWidget to access the
+# "stacktrace" preferences.
+#
+body ::tycho::EditStack::preference {mode args} {
+    eval ::preference $mode "stacktrace" $args
+}
+

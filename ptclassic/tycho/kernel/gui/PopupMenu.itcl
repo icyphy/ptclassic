@@ -87,6 +87,7 @@ body ::tycho::PopupMenu::constructor {args} {
     set menupath(top) $itk_component(top)
 
     eval itk_initialize $args
+    eval preference exclude $this $args
 }
 
 #######################################################################

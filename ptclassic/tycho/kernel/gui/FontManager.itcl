@@ -129,6 +129,12 @@ class ::tycho::FontManager {
     # Attempt to set the font specified by the argument.
     method tryFont {font}
 
+    ###################################################################
+    ####                     protected methods                     ####
+
+    # Access the "fontmanager" preferences
+    protected method preference {mode args}
+
     ##########################################################################
     ####                      private common variables                    ####
 
@@ -157,10 +163,10 @@ class ::tycho::FontManager {
 # their previous state.
 # 
 configbody ::tycho::FontManager::initialfont {
-    set families [join [preference get fontmanager families] |]
-    set sizes [join [preference get fontmanager sizes] |]
-    set weights [join [preference get fontmanager weights] |]
-    set styles [join [preference get fontmanager styles] |]
+    set families [join [preference get families] |]
+    set sizes [join [preference get sizes] |]
+    set weights [join [preference get weights] |]
+    set styles [join [preference get styles] |]
 
     set exp "^-(\[a-z\]*|\\*)-($families)-($weights)-($styles)-(\[a-z\]*|\\*)-(\[a-z\]*|\\*)-($sizes)0-"
     if [regexp -- $exp $itk_option(-initialfont) \
@@ -292,7 +298,7 @@ body ::tycho::FontManager::constructor {args} {
 		-background -foreground
     }
 
-    foreach family [preference get fontmanager families] {
+    foreach family [preference get families] {
 	$itk_component(familyMenu) add radio \
 		-label $family \
 		-variable [scope familySelection] \
@@ -306,7 +312,7 @@ body ::tycho::FontManager::constructor {args} {
 		-background -foreground
     }
 
-    foreach size [preference get fontmanager sizes] {
+    foreach size [preference get sizes] {
 	$itk_component(sizeMenu) add radio \
 		-label $size \
 		-variable [scope sizeSelection] \
@@ -320,7 +326,7 @@ body ::tycho::FontManager::constructor {args} {
 		-background -foreground
     }
 
-    foreach weight [preference get fontmanager weights] {
+    foreach weight [preference get weights] {
 	$itk_component(weightMenu) add radio \
 		-label $weight \
 		-variable [scope weightSelection] \
@@ -334,7 +340,7 @@ body ::tycho::FontManager::constructor {args} {
 		-background -foreground
     }
 
-    foreach style [preference get fontmanager styles] {
+    foreach style [preference get styles] {
 	$itk_component(styleMenu) add radio \
 		-label $style \
 		-variable [scope styleSelection] \
@@ -348,7 +354,7 @@ body ::tycho::FontManager::constructor {args} {
 		-background -foreground
     }
 
-    foreach font [preference get fontmanager special] {
+    foreach font [preference get special] {
 	$itk_component(miscMenu) add command \
 		-label $font \
 		-command "$this tryFont $font"
@@ -407,6 +413,7 @@ abcdefghijklmnopqrstuvwxyz
     catch {setCurrentFont}
 
     eval itk_initialize $args
+    eval preference exclude $this $args
 
     # If no -okcommand option is specified, use a reasonable default.
     if {$itk_option(-okcommand) == {}} {
@@ -426,7 +433,7 @@ abcdefghijklmnopqrstuvwxyz
 #
 body ::tycho::FontManager::defaultFont {optionName} {
     return [findFont \
-	    [preference get fonts $optionName]]
+	    [preference get $optionName]]
 }
 
 ########################################################################
@@ -519,9 +526,9 @@ body ::tycho::FontManager::getFont \
         set commandResult($prefix) $validFontSpecs($nm)
         return $validFontSpecs($nm)
     }
-    set foundries   [preference get fontmanager foundries]
-    set resolutions [preference get fontmanager resolutions]
-    set encodings   [preference get fontmanager encodings]
+    set foundries   [preference get foundries]
+    set resolutions [preference get resolutions]
+    set encodings   [preference get encodings]
     foreach res $resolutions {
 	foreach foundry $foundries {
 	    foreach cod $encodings {
@@ -545,7 +552,7 @@ body ::tycho::FontManager::getFont \
 # sizes list, or the largest value in the sizes list.
 #
 body ::tycho::FontManager::getValidSize {proposed} {
-    set sizes [preference get fontmanager sizes]
+    set sizes [preference get sizes]
 
     # The common case is that the proposed size is OK.  Optimize for this.
     if {[lsearch -exact $sizes $proposed] >= 0} {return $proposed}
@@ -596,3 +603,18 @@ body ::tycho::FontManager::tryFont {font} {
 	error "Invalid font: $font"
     }
 }
+
+#########################################################################
+#########################################################################
+####                    protected methods                            ####
+
+#####################################################################
+#### preference
+# Access the preferences associated with this widget. This method
+# overrides the default method in ::tycho::TWidget to access the
+# "fontmanager" preferences.
+#
+body ::tycho::FontManager::preference {mode args} {
+    eval ::preference $mode "fontmanager" $args
+}
+

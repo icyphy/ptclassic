@@ -246,6 +246,7 @@ body ::tycho::ListBrowser::constructor {args} {
     }
     # Process any unevaluated arguments.
     eval itk_initialize $args
+    eval preference exclude $this $args
 
     wm resizable $prefix 1 1
     # NOTE: There seems to be no way to find out the actual window size at this

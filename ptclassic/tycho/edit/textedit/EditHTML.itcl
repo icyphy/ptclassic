@@ -100,6 +100,9 @@ class ::tycho::EditHTML {
 
     # Given an HTML anchor, return the filename and point within the file.
     protected method parseLink {dest}
+
+    # Access the "edithtml" preferences
+    protected method preference {mode args}
 }
 
 ###################################################################
@@ -108,7 +111,7 @@ body ::tycho::EditHTML::constructor {args} {
     eval itk_initialize $args
 
     # Subscribe to the preference set
-    preference subscribe htmledit $this \
+    preference subscribe $this \
 	    -commandcolor commandColor \
 	    -pointercolor pointerColor \
 	    -destcolor destColor
@@ -304,7 +307,7 @@ body ::tycho::EditHTML::parseNow {start stop} {
     
     # Set the visual characteristics of the tagged commands
     $text tag configure command -foreground \
-	    [preference get htmledit commandColor]
+	    [preference get commandColor]
 
     # Scan the text for hypertext pointers.
     set upto $start
@@ -320,7 +323,7 @@ body ::tycho::EditHTML::parseNow {start stop} {
     
     # Set the visual characteristics of the tagged commands
     $text tag configure pointer -foreground \
-	    [preference get htmledit pointerColor]
+	    [preference get pointerColor]
 
     # for testing
     # $text tag configure text -foreground red
@@ -341,7 +344,7 @@ body ::tycho::EditHTML::parseNow {start stop} {
     
     # Set the visual characteristics of the tagged commands
     $text tag configure dest -foreground \
-	    [preference get htmledit destColor]
+	    [preference get destColor]
 }
 
 #####################################################################
@@ -392,7 +395,7 @@ body ::tycho::EditHTML::fixLink {link start end err} {
     # as normal.
     $itk_component(text) tag raise sel badlink
     $itk_component(text) tag configure badlink \
-	    -background [preference get htmledit targetColor]
+	    -background [preference get targetColor]
 
     set nm [::tycho::autoName .entry]
     ::tycho::EntryQuery $nm \
@@ -446,3 +449,14 @@ body ::tycho::EditHTML::parseLink {dest} {
 	return {}
     }
 }
+
+#####################################################################
+#### preference
+# Access the preferences associated with this widget. This method
+# overrides the default method in ::tycho::TWidget to access the
+# "edithtml" preferences.
+#
+body ::tycho::EditHTML::preference {mode args} {
+    eval ::preference $mode "edithtml" $args
+}
+

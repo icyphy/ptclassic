@@ -88,6 +88,10 @@ class ::tycho::TWidget {
     # Prevent destruction of this object while evaluating the arguments.
     protected method safeEval {args}
 
+    # Access the preferences associated with this widget -- override
+    # to get different preferences.
+    protected method preference {mode args}
+
     ###################################################################
     ####                         protected variables               ####
 
@@ -122,6 +126,7 @@ body ::tycho::TWidget::constructor {args} {
     set prefix $itk_component(hull)
 
     eval itk_initialize $args
+    eval preference exclude $this $args
 
     ::bind $itk_component(hull) <Enter> "$this focusin"
 }
@@ -138,6 +143,8 @@ body ::tycho::TWidget::destructor {} {
         after 1000 "$this nextWindow; delete object $this"
         ::tycho::silentError
     }
+    # Unsubscribe from all preferences
+    preference unsubscribe $this
 }
 
 
@@ -288,4 +295,15 @@ body ::tycho::TWidget::safeEval {args} {
     }
     set disableDestruction 0
     return $retval
+}
+
+#####################################################################
+#### preference
+# Access the preferences associated with this widget. By default,
+# all widgets access the "global" preference set; many widgets will,
+# however, need to access a different preference set, and they
+# must indicate so by overriding this method.
+#
+body ::tycho::TWidget::preference {mode args} {
+    eval ::preference $mode "global" $args
 }

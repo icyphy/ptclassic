@@ -298,9 +298,10 @@ body ::tycho::Query::constructor {args} {
 	    -after $itk_component(querysite)
 
     eval itk_initialize $args
+    eval preference exclude $this $args
 
     # Subscribe to the preference set
-    preference subscribe dialogs $this \
+    preference subscribe $this \
 	    -entrywidth entryWidth \
 	    -entryforeground entryForeground \
 	    -entrybackground entryBackground \
@@ -332,12 +333,6 @@ body ::tycho::Query::constructor {args} {
     bind $prefix <Escape> "$this invoke cancel"
 }
 
-#####################################################################
-#### destructor
-body ::tycho::Query::destructor {} {
-    # Unsubscribe from all preferences
-    preference unsubscribe dialogs $this
-}
 
     ##################################################################
     ##################################################################
@@ -494,6 +489,14 @@ body ::tycho::Query::lines {tag label default lines args} {
     }
     grid $itk_component(label_$tag) -column 0 -row $numentries -sticky ne
     
+puts "uplevel #0 [list ::tycho::Edit $itk_component(querysite).tag_$tag \
+                -text $default \
+                -save 0 \
+                -textheight $lines \
+                -scrollbar 0 \
+                -relief sunken] \
+                $args"
+
     itk_component add tag_$tag {
         uplevel #0 [list ::tycho::Edit $itk_component(querysite).tag_$tag \
                 -text $default \
@@ -507,8 +510,7 @@ body ::tycho::Query::lines {tag label default lines args} {
                 entryBackground EntryBackground
         rename -textforeground -entryforeground \
                 entryForeground EntryForeground
-        # FIXME: Pending proper fix
-        # rename -textwidth -entrywidth entryWidth EntryWidth
+        rename -textwidth -entrywidth entryWidth EntryWidth
         rename -textfont -entryfont entryFont EntryFont
     }
     # We have to configure the textheight option again:
@@ -516,10 +518,10 @@ body ::tycho::Query::lines {tag label default lines args} {
     # the subscribed values overwrite the ones set in the
     # options when the widget is created. What we need
     # is to fix the preference manager... FIXME
-    $itk_component(tag_$tag) configure -textheight $lines
-    $itk_component(tag_$tag) configure -textwidth \
-            $itk_option(-entrywidth)
-    $itk_component(tag_$tag) configure -relief sunken
+    # $itk_component(tag_$tag) configure -textheight $lines
+    # $itk_component(tag_$tag) configure -textwidth \
+    #        $itk_option(-entrywidth)
+    # $itk_component(tag_$tag) configure -relief sunken
     
     grid $itk_component(tag_$tag) -column 1 -row $numentries -sticky ew
     

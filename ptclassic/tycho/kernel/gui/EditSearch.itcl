@@ -173,6 +173,7 @@ body ::tycho::EditSearch::constructor {args} {
     pack $itk_component(regexp) -side left
 
     eval itk_initialize $args
+    eval preference exclude $this $args
 
     if {$itk_option(-nochange) == 0} {
         configure -queries {
@@ -186,7 +187,7 @@ body ::tycho::EditSearch::constructor {args} {
     }
 
     # Subscribe to the preference set
-    preference subscribe search $this \
+    preference subscribe $this \
 	    -entrywidth entryWidth
 
     bind $itk_component(hull) <Control-s> \
@@ -356,9 +357,9 @@ body ::tycho::EditSearch::find {{start {}}} {
         # priority of the tag so selection is still visible as normal.
         $text tag raise sel findmatch
         $text tag configure findmatch \
-                -background [preference get search matchBackgroundColor]
+                -background [preference get searchBackgroundColor]
         $text tag configure findmatch \
-                -foreground [preference get search matchForegroundColor]
+                -foreground [preference get searchForegroundColor]
     }
 }
 

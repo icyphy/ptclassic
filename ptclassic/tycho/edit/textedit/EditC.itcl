@@ -166,9 +166,9 @@ body ::tycho::EditC::parseNow {start stop} {
 
     # Set the visual characteristics of the tagged text
     $text tag configure ccomment -foreground \
-	    [preference get textedit commentColor]
+	    [preference get commentColor]
     $text tag configure fixme -foreground \
-	    [preference get textedit fixmeColor]
+	    [preference get fixmeColor]
 }
 
 #####################################################################

@@ -204,7 +204,7 @@ body ::tycho::EditProgram::constructor {args} {
     eval itk_initialize $args
 
     # Subscribe to the preference set
-    preference subscribe textedit $this \
+    preference subscribe $this \
 	    -stringcolor stringColor \
 	    -commentcolor commentColor \
 	    -fixmecolor fixmeColor \

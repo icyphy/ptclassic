@@ -310,6 +310,7 @@ body ::tycho::Subpanel::constructor {args} {
     pack $itk_component(widgetFrame) -side top -anchor nw
 
     eval itk_initialize $args
+    eval preference exclude $this $args
 }
 
     ###################################################################

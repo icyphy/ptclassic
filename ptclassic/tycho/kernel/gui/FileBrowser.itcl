@@ -183,26 +183,18 @@ body ::tycho::FileBrowser::constructor {args} {
 
     # Process any unevaluated arguments.
     eval itk_initialize $args
+    eval preference exclude $this $args
 
     # Subscribe to the preference set
-    preference subscribe filebrowser $this \
-	    -width width \
-	    -height height
+    preference subscribe $this \
+	    -width  fileBrowserWidth \
+	    -height fileBrowserHeight
 
     # In case updateListbox inserts into the entry; to avoid repetition
     clear entry
     insert entry $fileLastOpened
 }
 
-
-###################################################################
-#### destructor
-# Unsubscribe from all preferences
-#
-body ::tycho::FileBrowser::destructor {} {
-    # Unsubscribe from all preferences
-    preference unsubscribe filebrowser $this
-}
 
     ##################################################################
     ##################################################################

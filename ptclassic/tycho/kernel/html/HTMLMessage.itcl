@@ -89,4 +89,5 @@ body ::tycho::HTMLMessage::constructor {args} {
 
     # Process any unevaluated arguments.
     eval itk_initialize $args
+    eval preference exclude $this $args
 }

@@ -146,21 +146,14 @@ configbody ::tycho::IndexBrowser::file {
 body ::tycho::IndexBrowser::constructor {args} {
     # Process any unevaluated arguments.
     eval itk_initialize $args
+    eval preference exclude $this $args
 
     # Subscribe to the preference set
-    preference subscribe indexbrowser $this \
-	    -width width \
-	    -height height
+    preference subscribe $this \
+	    -width  indexBrowserWidth \
+	    -height indexBrowserHeight
 }
 
-###################################################################
-#### destructor
-# Unsubscribe from all preferences
-#
-body ::tycho::IndexBrowser::destructor {} {
-    # Unsubscribe from all preferences
-    preference unsubscribe indexbrowser $this
-}
 
     ##################################################################
     ##################################################################

@@ -144,6 +144,7 @@ body ::tycho::ErrorMessage::constructor {args} {
     set errorInfo $savestack
     # Process any unevaluated arguments.
     eval itk_initialize $args
+    eval preference exclude $this $args
 }
 
 ##########################################################################

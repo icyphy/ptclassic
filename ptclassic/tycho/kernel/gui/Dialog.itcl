@@ -118,6 +118,12 @@ class ::tycho::Dialog {
     # Create an object instance and return the name.
     proc new {class instance args} {}
 
+    ###################################################################
+    ####                     protected methods                     ####
+
+    # Access the "dialogs" preferences
+    protected method preference {mode args}
+
     #####################################################################
     ####                       protected variables                   ####
 
@@ -255,6 +261,7 @@ body ::tycho::Dialog::constructor {args} {
 
     # Process any unevaluated arguments.
     eval itk_initialize $args
+    eval preference exclude $this $args
 
     # Most dialog windows don't want the user resizing. Those that
     # do should reverse this.
@@ -438,4 +445,19 @@ body ::tycho::Dialog::new {class instance args} {
     # NOTE: Not sure why this needs to be deferred.
     after idle [list catch "$instance focusin"]
     return $instance
+}
+
+#########################################################################
+#########################################################################
+####                    protected methods                            ####
+
+#####################################################################
+#### preference
+# Access the preferences associated with this widget. This method
+# overrides the default method in ::tycho::TWidget to access the
+# "dialogs" preferences, which contains values for most preferences
+# needed by dialog boxes.
+#
+body ::tycho::Dialog::preference {mode args} {
+    eval ::preference $mode "dialogs" $args
 }

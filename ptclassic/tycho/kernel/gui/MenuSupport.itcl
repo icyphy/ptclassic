@@ -128,6 +128,7 @@ class ::tycho::MenuSupport {
 #
 body ::tycho::MenuSupport::constructor {args} {
     eval itk_initialize $args
+    eval preference exclude $this $args
 }
 
 #######################################################################

@@ -159,6 +159,9 @@ class ::tycho::TclShell {
     # Insert text and apply one or more tags to that text.
     protected method insertWithTags {text args}
 
+    # Access the "console" preferences
+    protected method preference {mode args}
+
     ##########################################################################
     ####                         protected variables                      ####
 
@@ -173,9 +176,6 @@ class ::tycho::TclShell {
 
     # Partially entered command.
     private variable partialCommand ""
-
-    ## class initialization
-    protected common preferences console
 }
 
 ###################################################################
@@ -223,9 +223,10 @@ body ::tycho::TclShell::constructor {args} {
     $itk_component(text) mark set promptEnd end
 
     eval itk_initialize $args
+    eval preference exclude $this $args
 
     # Subscribe to the preference set
-    preference subscribe console $this \
+    preference subscribe $this \
 	    -answerforeground answerForeground \
 	    -promptforeground promptForeground
 
@@ -348,8 +349,6 @@ body ::tycho::TclShell::destructor {} {
     if $itk_option(-stdout) {
         configure -stdout 0
     }
-    # Unsubscribe from all preferences
-    preference unsubscribe console $this
     set menulabel "[info class] $this"
     windowMenuRemoveAll $menulabel
 }
@@ -793,5 +792,15 @@ body ::tycho::TclShell::insertWithTags {text args} {
     foreach i $args {
 	$itk_component(text) tag add $i $start insert
     }
+}
+
+#####################################################################
+#### preference
+# Access the preferences associated with this widget. This method
+# overrides the default method in ::tycho::TWidget to access the
+# "console" preferences.
+#
+body ::tycho::TclShell::preference {mode args} {
+    eval ::preference $mode "console" $args
 }
 

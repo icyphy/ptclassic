@@ -54,6 +54,12 @@ class ::tycho::EditMake {
 
     # Tag and color the code in a region.
     method parseNow {start stop}
+
+    ##########################################################################
+    ####                         protected methods                        ####
+
+    # Access the "editmake" preferences
+    protected method preference {mode args}
 }
 
 ###################################################################
@@ -162,16 +168,27 @@ body ::tycho::EditMake::parseNow {start stop} {
     
     # Set the visual characteristics of the tagged text
     $text tag configure rule -foreground \
-	    [preference get makeedit ruleColor]
+	    [preference get ruleColor]
     $text tag configure include -foreground \
-	    [preference get makeedit includeColor]
+	    [preference get includeColor]
     $text tag configure variable -foreground \
-	    [preference get makeedit variableColor]
+	    [preference get variableColor]
     $text tag configure refvar -foreground \
-	    [preference get makeedit refvarColor]
+	    [preference get refvarColor]
 
     $text tag lower rule comment
     $text tag lower include comment
     $text tag lower variable comment
     $text tag lower refvar comment
 }
+
+#####################################################################
+#### preference
+# Access the preferences associated with this widget. This method
+# overrides the default method in ::tycho::TWidget to access the
+# "editmake" preferences.
+#
+body ::tycho::EditMake::preference {mode args} {
+    eval ::preference $mode "editmake" $args
+}
+

@@ -79,6 +79,7 @@ body ::tycho::ToolBar::constructor {args} {
 
     # Initialize options
     eval itk_initialize $args
+    eval preference exclude $this $args
 }
 
 #########################################################################
