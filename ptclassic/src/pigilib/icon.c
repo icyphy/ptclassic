@@ -253,15 +253,16 @@ GetTildePath(facetPtr, tPath)
     int			uid;
     struct passwd	*pwent;
 
-    /* fullName will be malloc'd */
-    octFullName(facetPtr, &fullName);
-
     /*
      * try current user's directory tree: ~user/remainPath
      */
     uid = getuid();
     ERR_IF2((pwent = getpwuid(uid)) == NULL,
 	"GetTildePath: Cannot get password entry");
+
+    /* fullName will be malloc'd */
+    octFullName(facetPtr, &fullName);
+
     if ( IsSubPathB( fullName, pwent->pw_dir, &remainPath) ) {
 	sprintf(tPath, "~%s%s", pwent->pw_name, remainPath);
     }
@@ -272,7 +273,6 @@ GetTildePath(facetPtr, tPath)
     else if ( (envPath = getenv(UToolEnvName))!=NULL
      && IsSubPathB( fullName, envPath, &remainPath) ) {
 	sprintf(tPath, "$%s%s", UToolEnvName, remainPath);
-	return TRUE;
     }
 
     /*
