@@ -94,7 +94,7 @@ class ::tycho::View {
     method focusin {}
 
     # Open a file and go to its internal point identified by name.
-    method hyperJump {file point}
+    method hyperJump {file {point {}}}
 
     # Insert this view into its Displayer
     method insertInDisplay {}
@@ -310,7 +310,7 @@ body ::tycho::View::focusin {} {
 # or "{range <i>start</i> <i>end</i>}", where <i>start</i> and
 # <i>end</i> have the form <i>linenumber.characternumber</i>.
 # 
-body ::tycho::View::hyperJump {file point} {
+body ::tycho::View::hyperJump {file {point {}}} {
     set tl [winfo toplevel $itk_component(hull)]
     set tlc [winfo command $tl]
     if {[info objects $tlc] != {} && \
