@@ -29,6 +29,7 @@ Arithmetic shifts are used.
 	    name {absShifts}
 	    type {INT}
 	    desc { Absolute value of number of bit shifts. }
+	    default { 0 }
 	    attributes { A_NONSETTABLE }
     }
     state {
@@ -50,11 +51,11 @@ Arithmetic shifts are used.
         move    $ref(input),a
     }
     codeblock(cbShifts) {
-	IF	$val(absShifts) >= 1
+	IF	$val(absShifts)>=1
           rep     #$val(absShifts)
 	ENDIF
 
-	IF	$val(leftShifts) > 0
+	IF	$val(leftShifts)>0
           asl     a
 	ELSE
           asr     a
