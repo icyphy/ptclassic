@@ -49,7 +49,8 @@ TCL_SRCS = \
 ITCL_SRCS = 
 
 EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) \
-	Lorenz.cts
+	Lorenz.cts \
+	Coyote1.cts
 
 MISC_FILES = 
 
