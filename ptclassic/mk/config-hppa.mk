@@ -212,12 +212,12 @@ X11EXT_LIBSPEC=-lXext -lSM -lICE
 #X11EXT_LIBSPEC=-lXext
 
 # Variables for Pure Inc tools (purify, purelink, quantify)
-COLLECTOR = 	-collector=$(ROOT)/gnu/$(PTARCH)/lib/gcc-lib/$(PTARCH)/2.7.2/ld
+COLLECTOR = 	-collector=$(ROOT)/gnu/$(PTARCH)/lib/gcc-lib/$(PTARCH)/egcs-2.90.27/ld
 
 # Purelink is not available on hppa
 PURELINK =
-PURIFY =	purelink $(COLLECTOR) purify
-QUANTIFY =	purelink $(COLLECTOR) quantify
+PURIFY =	purify $(COLLECTOR)
+QUANTIFY =	quantify $(COLLECTOR)
 PURECOV = 	purecov $(COLLECTOR)
 
 #
