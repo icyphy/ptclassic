@@ -85,9 +85,8 @@
 # <p>
 # The widget supports a set of default interaction mechanisms using
 # tags. Drawn items tagged with "selectable" can be selected with button
-# 1; items also tagged with "movable" can be selected and moved freely, and
-# text items tagged with "editable" can be edited in-place by clicking on
-# them with the button 2. Button 1 can also be used to "drag-select" one
+# 1; items also tagged with "movable" can be selected and moved freely.
+# Button 1 can also be used to "drag-select" one
 # or more items. If the shift key is pressed when selecting an item or when
 # starting drag-selecting, items are toggled in and out of the selection set.
 # <p>
@@ -209,7 +208,7 @@ class ::tycho::Graphics {
     method select {{append 0}}
 
     # Return a list of the ids of selected objects.
-    method selected {} {return [$selector contents]}
+    method selected {} {return [$slate selector selection]}
 
     # Clear the selection.
     method selectionClear {}
@@ -541,46 +540,20 @@ body ::tycho::Graphics::constructor {args} {
     # Defer until after constructors in derived classes have completed.
     after idle "$this interactiveEnable 1"
 
-    # Create the selector. Shift-click toggles selected items.
-    set selector [$slate interact create Selector \
-	    -dragcolor grey60 -highlightcolor black -highlightwidth 1]
-    $selector bind selectable -button 1
-    $selector bind selectable -button 1 -modifiers shift -toggle
+    # Enable selection with button 1; shift-click toggles
+    $slate selector bind click selectable -button 1
+    $slate selector bind click selectable -button 1 -modifiers shift -toggle
 
-    # Move selected items only if all are tagged "moveable"
-    $selector configure -movepredicate \
-	    "lnull \[lsubtract \[$selector contents\] \[$slate find withtag moveable\]\]"
+    # Enable drag-selection with button 1; shift-click toggles
+    $slate selector bind drag "#background" -button 1
+    $slate selector bind drag "#background" -button 1 -modifiers shift -toggle
 
-    # Create the background item used for drag-selecting
-    $slate create rect 0 0 0 0 -outline "" -tags background
-    ::bind $slate <Configure> \
-	    "$slate coords background 0 0 \
-	    \[winfo width $slate\] \[winfo height $slate\]"
-
-    # Create the drag-selector. Shift-click or button 2 toggles items
-    set dragselector [$slate interact create Follower]
-    $dragselector bind background -button 1
-    $dragselector bind background -button 1 -modifiers shift -toggle
-    $dragselector cascade $selector
-
-    # Create an editor for text items. Button 2 activates
-    set lineeditor [$slate interact create Editor]
-    $lineeditor bind editable -button 2
-
-    # Starting editing clears all selected items and prevents
-    # selection on the text item
-    $lineeditor configure -activatecommand \
-	    "$selector clear; $slate dtag \[$lineeditor target\] selectable"
-
-    # Stopping editing makes the text item selectable again
-    $lineeditor configure -deactivatecommand \
-	    "$slate addtag selectable withtag \[$lineeditor target\]"
-
-    # Selecting or deselecting an item deactivates the text editor
-    $selector configure -selectcommand "$lineeditor stop"
-
-    # Using the drag-selector deactivates the text editor
-    $dragselector configure -activatecommand "$lineeditor stop"
+    # Create the interactor to move selected items
+    set follower [$slate control interactor Follower]
+    $slate selector delegate immediate selected $follower moveable \
+	    -button 1 
+    $slate selector delegate immediate selected $follower moveable \
+	    -button 1 -modifiers shift
 
     # Set up export commands.  The mac does not have exec, so we 
     # can't do everything.
@@ -638,7 +611,7 @@ body ::tycho::Graphics::clear {} {
 # wider than the window. The remaining arguments are optional, although
 # if any one of them is given, then the ones before it must also be
 # given. The second argument is a tag to assign to the text (in
-# addition to "selectable" and "editable", which are always assigned).
+# addition to "selectable", which is always assigned).
 # If any items
 # already exist with this tag, then they are deleted.  The third
 # argument is a list of tags identifying tagged items in the canvas
@@ -651,7 +624,7 @@ body ::tycho::Graphics::clear {} {
 # font in a form accepted by the <code>findFont</code> method of the
 # <code>FontManager</code> class. If the color and font are not
 # specified, then the text is black using the default variable font.
-# The text is tagged "selectable" and "editable," and the id of the
+# The text is tagged "selectable" and the id of the
 # text object is
 # returned. If the text is an empty string and the tag is given, then
 # items with that tag are simply deleted and a null string is returned.
@@ -694,7 +667,7 @@ body ::tycho::Graphics::centeredText \
                 -anchor n \
                 -fill $usecolor \
                 -text $text \
-                -tags {selectable editable moveable} \
+                -tags {selectable} \
                 -font $usefont]
         if {$tag != {}} {
             $slate addtag $tag withtag $id
@@ -1342,8 +1315,8 @@ body ::tycho::Graphics::select {{append 0}} {
     }
     set objs [findAll current selectable]
     foreach obj $objs {
-	if { ! [$selector selected $obj] } {
-	    $selector select $obj
+	if { ! [$slate selector selected $obj] } {
+	    $slate selector select $obj
 	}
         # FIXME: Put into the Tk clipboard?
     }
@@ -1354,7 +1327,7 @@ body ::tycho::Graphics::select {{append 0}} {
 # Clear the selection.
 #
 body ::tycho::Graphics::selectionClear {} {
-    $selector clear
+    $slate selector clear
 }
 
 #####################################################################
