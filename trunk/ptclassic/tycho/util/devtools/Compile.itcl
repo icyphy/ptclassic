@@ -36,11 +36,11 @@
 # The format of the command is exactly that of the Tcl "exec" command.
 #
 set compiler {}
-proc ::tycho::compileC { args } {
+proc ::tycho::compileC {filename {autostart {}}} {
     global tcl_platform compiler
     if {$tcl_platform(platform) == "macintosh"} {
 	error "Sorry, the tcl \"exec\" command is not supported on the\
-		Macintosh.\nThe command:\n$args\ncannot be executed"
+		Macintosh.\nThe command:\n$filename\ncannot be executed"
     }
 
     # NOTE: Unix-ism.
@@ -48,16 +48,20 @@ proc ::tycho::compileC { args } {
     # Now always creating a new widget
     if {$compiler=={}} {
         set compiler [::tycho::CompileCTcl [::tycho::autoName .compilerC]]
+        if {$autostart==1} {
+            # When invoked the first time, this will just pop up window
+            $compiler compile $filename
+        }
     }
 
-    if [catch {eval $compiler compile $args} msg] {
+    if [catch {eval $compiler compile $filename} msg] {
         # The command failed.  It would be nice to check to see
         # whether the program exists, and generate a suitable message,
         # but it's not clear how to do this.
         error "The following command invocation failed:\n \
-                $args\n \
-                Is the program [lindex $args 0] installed and in your path?\n \
-                $msg"
+                $filename\n \
+                Is the program [lindex $filename 0] \
+                installed and in your path?\n $msg"
     }
 }
 
@@ -268,25 +272,9 @@ body ::tycho::Compile::compileFiles {} {
    } else {
         #set retList [::tycho::execModal {} {} $compileWidget]
         $compileWidget raiseWindow
-        # Make sure we parse the output of the compiler (ie. esp. error msg)
-        # Colorize our monitor
         $compileWidget execProcessInMonitor
         $compileWidget getStatusWait
     }
-
-
-    #set statusVariableName [$compileWidget getStatusVariableName]
-    #global $statusVariableName
-    
-    # If statement is used to prevent crashing
-    #if [info exists $statusVariableName] {
-    #    return [list [$execWidget getStatusWait] $execWidget]
-    #} else {
-    #    error "ERROR IN execModal: $statusVariableName doesn't exist!"
-    #}
-
-    #putStatus ""
-    #return $retList
 }
 
 #######################################################################
