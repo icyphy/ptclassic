@@ -27,7 +27,7 @@ CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
 							COPYRIGHTENDKEY
 
- Programmer: E. A. Lee
+ Programmer: Soonhoi Ha and E. A. Lee
 
  Basic target for C code generation.
 
@@ -44,6 +44,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 class CGCPortHole;
 class EventHorizon;
 class CGCStar;
+class SDFScheduler;
 
 class CGCTarget : public HLLTarget {
 public:
@@ -52,10 +53,10 @@ public:
 	void headerCode();
 	void setup();
 	void wrapup();
-	void beginIteration(int repetitions, int depth);
-	void endIteration(int repetitions, int depth);
+	/* virtual */ void beginIteration(int repetitions, int depth);
+	/* virtual */ void endIteration(int repetitions, int depth);
 
-	// name the offset of portholes
+	// name the offset-pointer of portholes
 	StringList offsetName(const CGCPortHole* p); 
 
 	// virtual method to generate compiling command
@@ -81,14 +82,23 @@ public:
 	void wantStaticBuffering() { staticBuffering = TRUE; }
 	int useStaticBuffering() { return int(staticBuffering); }
 
+	// incrementally add a star to the code
+	/* virtual */ int incrementalAdd(CGStar* s);
+
+	// incremental addition of a Galaxy code
+	/* virtual */ int insertGalaxyCode(Galaxy* g, SDFScheduler* s);
+
 protected:
 	char *schedFileName;
+
+	// code strings
 	CodeStream globalDecls;
 	CodeStream include;
 	CodeStream mainDecls;
 	CodeStream mainInit;
 	CodeStream wormIn;
 	CodeStream wormOut;
+	CodeStream mainClose;
 
 	// virtual function to initialize strings
 	virtual void initCodeStrings();
@@ -100,17 +110,21 @@ protected:
 	int codeGenInit();
 
 	// redefine frameCode() method
-	void frameCode();
+	/* virtual */ void frameCode();
+
+	// redefine compileRun() method to switch the code streams stars refer
+	// to.
+	/* virtual */ void compileRun(SDFScheduler*);
 
 	// redefine, compile and run code
-	int wormLoadCode();
+	/* virtual */ int wormLoadCode();
 
 	// Redefine:
 	// Add wormInputCode after iteration declaration and before the
 	// iteration body, and wormOutputCode just before the closure of
 	// the iteration.
-	virtual void wormInputCode(PortHole&);
-	virtual void wormOutputCode(PortHole&);
+	/* virtual */ void wormInputCode(PortHole&);
+	/* virtual */ void wormOutputCode(PortHole&);
 
 	// return a name that can be used as C identifier, derived from
 	// the actual name
@@ -128,11 +142,17 @@ protected:
 
 	// give a unique name for a galaxy. 
 	int galId;
+	int curId;
 
-private:
-	StringList sectionComment(StringList s);
+	// define the data structure of the galaxy and star
 	virtual void galDataStruct(Galaxy& galaxy, int level=0);
 	virtual void starDataStruct(CGCStar* block, int level=0);
+
+	// make a comment explaining the following code.
+	StringList sectionComment(StringList s);
+
+private:
+	// assign the variable for each geodesic (connection).
 	void setGeoNames(Galaxy& galaxy);
 
 	// Update the copy-offset (for embedded portholes) after
