@@ -2,8 +2,10 @@ defstar {
     name {Window}
     domain {SDF}
     desc {
-Generates standard window functions: Rectangle,
-Hanning, Hamming, Blackman, and SteepBlackman.
+Generates standard window functions:
+Rectangle, Hanning, Hamming, Blackman, and SteepBlackman.
+    }
+    explanation {
 .lp
 This star produces on its output values that are samples of a standard
 windowing function.  The window function to be sampled is determined by
