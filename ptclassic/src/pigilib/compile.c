@@ -44,7 +44,7 @@ the xfered list or if it has been changed since the last transfer.
 /* Includes */
 #include "local.h"
 #include <stdio.h>
-#include <strings.h>
+#include <string.h>
 #include <errno.h>
 #include "rpc.h"
 #include "paramStructs.h"
