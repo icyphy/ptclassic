@@ -20,7 +20,7 @@ limitation of liability, and disclaimer of warranty provisions.
 		type { int }
 	}
 	go {
-		float t = input%0;
+		double t = double(input%0);
 		int it = int(t);
 		// handle rounding towards 0 on some processors
 		if (it > t) it -= 1;
