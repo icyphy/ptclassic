@@ -77,15 +77,15 @@ limitation of liability, and disclaimer of warranty provisions.
 	  vis_write_gsr(8);	
 	}
 	codeblock(calculateSinandCos) {
-	  static void calcTwSinCos(double *$starSymbol(Twsine),double
-				   *$starSymbol(Twcosine),double ExpofW,int N2)
+	  static void calcTwSinCos(double *Twsine,double
+				   *Twcosine,double ExpofW,int N2)
 	    {
 	      double scale = 32767.0;
 	      int i;
 	      short *indexcount0,*indexcount1;
 	      
-	      indexcount0 = (short *) $starSymbol(Twcosine);
-	      indexcount1 = (short *) $starSymbol(Twsine);
+	      indexcount0 = (short *) Twcosine;
+	      indexcount1 = (short *) Twsine;
 	      for(i=0;i<N2;i++){
 		*indexcount0++ = (short) scale*cos(ExpofW*(N2-1-i));
 		*indexcount1++ = (short) -scale*sin(ExpofW*(N2-1-i));       
@@ -95,9 +95,9 @@ limitation of liability, and disclaimer of warranty provisions.
 	codeblock(quadmult) {
 	  static double mult4x4(double mult1,double mult2)
 	    { 
-	      double mult1hi,mult1lo,mult2hi,mult2lo;
 	      double prodhihi,prodhilo,prodlohi,prodlolo;
 	      double prodhi,prodlo,product;
+	      float mult1hi,mult1lo,mult2hi,mult2lo;
 	      float packhi,packlo;
 
 	      mult1hi = vis_read_hi(mult1);
@@ -117,6 +117,18 @@ limitation of liability, and disclaimer of warranty provisions.
 	      return product = vis_freg_pair(packhi,packlo);
 	    }
 	}
+	codeblock(doublemult){
+	  static float mult2x2(float mult1,float mult2)
+	    {
+	      double resultu,resultl,result;
+	      float product;
+
+	      resultu = vis_fmuld8sux16(mult1,mult2);
+	      resultl = vis_fmuld8ulx16(mult1,mult2);
+	      result = vis_fpadd32(resultu,resultl);
+	      return product = vis_fpackfix(result);
+	    }
+	}
 	codeblock(bitreverse) {
 #define SWAP(a, b) tempr=(a); (a)=(b); (b)=tempr
 
@@ -130,7 +142,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	      for(i=1;i<n;i+=2){
 		if(j>i){
 		  SWAP(s1[nn-1-(j-1)/2],s1[nn-1-(i-1)/2]);
-		  SWAP(s2[nn-1-(j-1)/2],s2[nn-1-(i-1)/2]);
+		  SWAP(s2[nn-(j-1)/2-1],s2[nn-(i-1)/2-1]);
 		}
 		m=n>>1;
 		while(m>=2 && j>m){
@@ -143,30 +155,29 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	initCode {
 	  addInclude("<vis_proto.h>");
+	  addInclude("<math.h>");
 	  addProcedure(calculateSinandCos);
 	  addProcedure(quadmult);
+	  addProcedure(doublemult);
 	  addProcedure(bitreverse);
 	  addDeclaration(mainDecl);
 	  addCode(initialize);
 	}
 	codeblock(localDecl) {
-	  double reindtmp,imagindtmp,xtcd,xtsd,ytsd,ytcd;
-	  double reinrepeat,iminrepeat;
-	  double xtcxts,ytsytc,xtcminusyts,xtsaddytc;
-	  double reindhi,reindlo,reindsub,reindadd;
-	  double imindhi,imindlo,imindsub,imindadd;
-	  double ExpofW,CSd,SCd;
+	  double ExpofW,reindtmp,imagindtmp;
+	  double xtcd,xtsd,ytsd,ytcd;
+	  float xtcf,ytsf,xtsf,ytcf;
 	  float reinftmp,imaginftmp;
 	  float *splitf_rein,*splitf_imin;
 	  float *Cf,*Sf;
 	  int N,N1,N2,i,j,k,l;
-	  short *splits_rein,*splits_imin;
+	  short *splits_rein,*splits_imin,reinstmp,imaginstmp;
 	}	
 	codeblock(fft) {       
 	  splitf_rein = (float*)$starSymbol(rein);
 	  splitf_imin = (float*)$starSymbol(imin);
-	  splits_rein = (short*)splitf_rein;
-	  splits_imin = (short*)splitf_imin;
+	  splits_rein = (short*)$starSymbol(rein);
+	  splits_imin = (short*)$starSymbol(imin);
 	  /*read in the input*/
 	  for(i=0;i<$val(sizeoffft)/4;i++){
 	    $starSymbol(rein)[i] = (double) $ref2(realIn,i);
@@ -205,37 +216,30 @@ limitation of liability, and disclaimer of warranty provisions.
 	  calcTwSinCos($starSymbol(Twsine),$starSymbol(Twcosine),ExpofW,N2);
 	  Cf=(float *) $starSymbol(Twcosine);
 	  Sf=(float *) $starSymbol(Twsine);
-	  CSd = vis_freg_pair(*Cf,*Sf);
-	  SCd = vis_freg_pair(*Sf,*Cf);
-	  for(i=0;i<N/2;i+=N1/2){
-	    reinftmp=vis_fpsub16s(splitf_rein[i+1],splitf_rein[i]);
-	    imaginftmp=vis_fpsub16s(splitf_imin[i+1],splitf_imin[i]);
-	    reinrepeat=vis_freg_pair(reinftmp,reinftmp);
-	    iminrepeat=vis_freg_pair(imaginftmp,imaginftmp);
-	    splitf_rein[i+1]=vis_fpadd16s(splitf_rein[i+1],splitf_rein[i]);
-	    splitf_imin[i+1]=vis_fpadd16s(splitf_imin[i+1],splitf_imin[i]);
-	    xtcxts=mult4x4(reinrepeat,CSd);
-	    ytsytc=mult4x4(iminrepeat,SCd);
-	    xtcminusyts=vis_fpsub16(xtcxts,ytsytc);
-	    xtsaddytc=vis_fpadd16(xtcxts,ytsytc);
-	    splitf_rein[i]=vis_read_hi(xtcminusyts);
-	    splitf_imin[i]=vis_read_lo(xtsaddytc);
+	  j=0;
+	  for(i=0;i<N/4;i++){
+	    reinftmp=vis_fpsub16s(splitf_rein[j+1],splitf_rein[j]);
+	    imaginftmp=vis_fpsub16s(splitf_imin[j+1],splitf_imin[j]);
+	    splitf_rein[j+1]=vis_fpadd16s(splitf_rein[j+1],splitf_rein[j]);
+	    splitf_imin[j+1]=vis_fpadd16s(splitf_imin[j+1],splitf_imin[j]);
+	    xtcf=mult2x2(reinftmp,*Cf);
+	    xtsf=mult2x2(reinftmp,*Sf);
+	    ytsf=mult2x2(imaginftmp,*Sf);
+	    ytcf=mult2x2(imaginftmp,*Cf);
+	    splitf_rein[j]=vis_fpsub16s(xtcf,ytsf);
+	    splitf_imin[j]=vis_fpadd16s(xtsf,ytcf);
+	    j+=2;
 	  }	
 	  /*last stage of the fft*/
+	  i=0;
 	  for(j=0;j<N/2;j++){
-	    i=2*j;
-	    reindhi=vis_ld_u16((splits_rein+i+1));
-	    reindlo=vis_ld_u16((splits_rein+i));
-	    reindsub=vis_fpsub16(reindhi,reindlo);
-	    reindadd=vis_fpadd16(reindhi,reindlo);
-	    imindhi=vis_ld_u16((splits_imin+i+1));
-	    imindlo=vis_ld_u16((splits_imin+i));
-	    imindsub=vis_fpsub16(imindhi,imindlo);
-	    imindadd=vis_fpadd16(imindhi,imindlo);
-	    vis_st_u16(reindadd,(splits_rein+i+1));
-	    vis_st_u16(imindadd,(splits_imin+i+1));
-	    vis_st_u16(reindsub,(splits_rein+i));
-	    vis_st_u16(imindsub,(splits_imin+i));
+	    reinstmp=splits_rein[i+1]-splits_rein[i];
+	    imaginstmp=splits_imin[i+1]-splits_imin[i];
+	    splits_rein[i+1]=splits_rein[i]+splits_rein[i+1];
+	    splits_imin[i+1]=splits_imin[i]+splits_imin[i+1];
+	    splits_rein[i]=reinstmp;
+	    splits_imin[i]=imaginstmp;
+	    i+=2;
 	  }	
 	  reorderfft(splits_rein,splits_imin,$val(sizeoffft));
 	  /*output the results*/
