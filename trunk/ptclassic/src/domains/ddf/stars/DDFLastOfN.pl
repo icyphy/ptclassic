@@ -25,6 +25,12 @@ where N is the control input.
 	protected {
 		int readyToGo;
 	}
+	method {
+		name { readClassName }
+		access { public }
+		type { "const char *" }
+		code { return "DownSample"; }
+	}
 	constructor {
 		output.inheritTypeFrom(input);
 	}
