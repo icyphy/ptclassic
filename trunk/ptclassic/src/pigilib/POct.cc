@@ -60,8 +60,12 @@ extern "C" {
 #include "compile.h"
 #include "octMacros.h"    // For GetOrCreatePropStr
 void win_msg(const char*);  // for error dialog box.  FIXME: formalize this
-int KcDomainTargets();  // Used by ptkGetTargetNames
-char* KcDefTarget();  // Used by ptkGetTargetNames
+/* Declare the functions in kernelCalls used by ptkGetTargetNames */
+int KcDomainTargets(); 
+char* KcDefTarget(); 
+/* Declare the functions in kernelCalls used by ptkGetDomainNames */
+int numberOfDomains();
+char* nthDomainName();
 #undef Pointer
 }
 #include "miscFuncs.h"
@@ -611,6 +615,101 @@ int POct::ptkSetParams (int aC,char** aV) {
 
 }
 
+// ptkGetDomainNames <facet-id>
+// returns a list of names of domains for the passed facet
+//
+// Written by Alan Kamas  12/93
+// 
+int POct::ptkGetDomainNames (int aC,char** aV) {
+    octObject facet;
+    char *domain;
+    int nDomains;
+
+    char *defaultTarget, *target ;
+    char *targetNames[MAX_NUM_TARGETS];
+    int nTargets, nChoices, i;
+
+    if (aC != 2) return  
+            usage ("ptkGetDomainNames <OctObjectHandle>");
+
+    if (strcmp(aV[1],"NIL")==0)  return result("NIL");
+
+    if (ptkHandle2OctObj(aV[1], &facet) == 0) {
+        Tcl_AppendResult(interp, "Bad or Stale Facet Handle passed to ", aV[0],
+                         (char *) NULL);
+        return TCL_ERROR;
+    }
+
+    if (!GOCDomainProp(&facet, &domain, DEFAULT_DOMAIN)) {
+        Tcl_AppendResult(interp, ErrGet(), (char *) NULL);
+        return TCL_ERROR;
+    }
+    // "domain" is now set to be the default domain
+
+    nDomains = numberOfDomains();
+
+    if(nDomains == 0) {
+        Tcl_AppendResult(interp, 
+			 "No domains supported by for this facet.",
+                         (char *) NULL);
+        return TCL_ERROR;
+    }
+
+    // Return the list with the default Domain first
+
+    if (nDomains == 1) {
+	// Only one element means that no ordering need be done.
+	Tcl_AppendElement ( interp, nthDomainName(0) );
+	return TCL_OK;
+    }
+
+    // If the default domain matches any of our domain choices, put it first
+    for (i = 0; i < nDomains; i++) {
+	if (strcmp(nthDomainName(i), domain)==0) {
+	    // The current domain has been found
+            Tcl_AppendElement(interp, domain);
+	}
+    }
+    // Now add the rest of the domain choices to the output list
+    for (i = 0; i < nDomains; i++) {
+        // Only add it if it has not already been used
+        if (strcmp(nthDomainName(i), domain)!=0) {
+            Tcl_AppendElement(interp, nthDomainName(i) );
+        }
+    }   
+    return TCL_OK;
+}
+
+
+// ptkSetDomain <facet-id> <domain_name>
+// saves the domain of the passed facet to the passed domain
+//
+// Written by Alan Kamas  12/93
+//
+int POct::ptkSetDomain (int aC,char** aV) {
+    octObject facet;
+    char *domain;
+
+    if (aC != 3) return
+      usage ("ptkSetDomain <OctObjectHandle> <DomainName>");
+
+    domain = aV[2];
+
+    if (ptkHandle2OctObj(aV[1], &facet) == 0) {
+        Tcl_AppendResult(interp, "Bad or Stale Facet Handle passed to ", aV[0],
+                         (char *) NULL);
+        return TCL_ERROR;
+    }
+
+    // Set the domain to be that of the passed name
+    if (!SetDomainProp(&facet, domain)) {
+        Tcl_AppendResult(interp, ErrGet(), (char *) NULL);
+        return TCL_ERROR;
+    }
+
+    return TCL_OK;
+
+}
 
 // ptkGetTargetNames <facet-id>
 // returns a list of names of targets for the passed facet
@@ -1111,7 +1210,6 @@ int POct::ptkSetRunLength (int aC,char** aV) {
 }
 
 
-
 // An InterpFuncP is a pointer to an PTcl function that takes an argc-argv
 // argument list and returns TCL_OK or TCL_ERROR.
 
@@ -1135,6 +1233,8 @@ static InterpTableEntry funcTable[] = {
 	ENTRY(ptkCompile),
 	ENTRY(ptkGetParams),
 	ENTRY(ptkSetParams),
+	ENTRY(ptkGetDomainNames),
+	ENTRY(ptkSetDomain),
 	ENTRY(ptkGetTargetNames),
 	ENTRY(ptkGetTargetParams),
 	ENTRY(ptkSetTargetParams),
