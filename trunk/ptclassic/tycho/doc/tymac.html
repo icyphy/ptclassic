@@ -28,7 +28,7 @@ HREF="http://www.tcltk.com"><CODE>www.tcltk.com</CODE></A>.
 
 <LI> Tycho 0.1.1 did not work under Itcl2.2 apparently because when Tycho
 started up the stack size was so large that it crashed the Mac.  With
-Itcl2.2p2, Tycho 0.1.1 and Tycho 0.2both seem to work.
+Itcl2.2p2, Tycho 0.1.1 and Tycho 0.2 both seem to work.
 
 <LI> Tycho0.2 does not handle spaces in pathnames very well.  Tycho
 will work best if the distribution is installed in a directory that
@@ -36,7 +36,7 @@ has a pathname that contains no spaces.
 
 <LI> Since the Mac has different filename conventions, not all the filename
  facilities work properly. See the Tcl <CODE>filename</CODE> man page
-for information about pathnames on the mac.
+for information about pathnames on the Mac.
 
 
 <LI> Cascade menus under Itcl2.2p2 and under Tk4.2 on the Mac seem to
@@ -45,10 +45,10 @@ such as <CODE>File</CODE> -&gt; <CODE>Tools</CODE>.  The workaround is
 to use the <CODE>Up</CODE>, <CODE>Down</CODE> and Arrow keys to invoke
 menu choices.
 
-<LI> Starting Tycho requires sourcing the <CODE>tycho-mac</CODE>
+<LI> Starting Tycho requires sourcing <CODE>$TYCHO/lib/mac/tycho-mac</CODE>
 script by hand.  There must be a better way.
 
-<LI> Tycho on the mac should use an installer.
+<LI> Tycho on the Mac should use an installer.
 </MENU>
 
  <HR>
@@ -57,13 +57,13 @@ script by hand.  There must be a better way.
 
 <LI> The Tycho home page at <A
 HREF="http://ptolemy.eecs.berkeley.edu/tycho/Tycho.html"><CODE>http://ptolemy.eecs.berkeley.edu/tycho/Tycho.html</CODE></A> has a
-link to the downloads page that contains Tycho sources and Itcl
-binaries for the Mac.
+link to the downloads page that contains Tycho sources.
+When Itcl2.2p2 is released, it will be available on that page as well.
 
 <LI> Download both the Tycho distribution and the Itcl distribution and
 place them in directories next to each other.  For example,
 <MENU>
-<LI>  The Tycho distributin could be in <CODE>mac:devel:tycho0.2</CODE>
+<LI>  The Tycho distribution could be in <CODE>mac:devel:tycho0.2</CODE>
 
 <LI>  The Itcl distribution could be in <CODE>mac:devel:Itk2.2p2-ppc</CODE>
 </MENU>
