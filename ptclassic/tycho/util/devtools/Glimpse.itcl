@@ -140,7 +140,7 @@ body ::tycho::Glimpse::constructor {args} {
     }
 
     addButton update -text "Update Tycho DB" \
-            -command "updateTychoDatabase"
+            -command "::tycho::Glimpse::updateTychoDatabase"
 
     addButton help -text "Help" -command "$this help"
 
