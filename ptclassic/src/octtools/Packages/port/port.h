@@ -586,4 +586,10 @@ extern int gethostname( char * name, int namelen);
 #define vfork() fork()
 #endif /* PTIRIX5 */
 
+#ifdef __CYGWIN__
+#define sys_errlist _sys_errlist
+#define sys_nerr _sys_nerr
+#include <ctype.h>
+#endif
+
 #endif /* PORT_H */
