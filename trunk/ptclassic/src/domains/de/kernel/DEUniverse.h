@@ -24,8 +24,7 @@ const char DEstring[] = "DISCRETE EVENT";
 	
 class DEUniverse : public Universe {
 public:
-	DEUniverse(Galaxy& g) : Universe(new DEScheduler,DEstring,&g) {}
-	DEUniverse() : Universe(new DEScheduler,DEstring,0) {}
+	DEUniverse() : Universe(new DEScheduler,DEstring) {}
 };
 
 #endif
