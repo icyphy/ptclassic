@@ -165,7 +165,7 @@ void FSMScheduler::setup() {
       PortHole *p = nexti++;
       outerDomain = p->far()->parent()->domain();
       if (!outerDomain) return;
-      printf("Galaxy = %s, outer domain = %s\n",galaxy()->name(),outerDomain);
+//printf("Galaxy = %s, outer domain = %s\n",galaxy()->name(),outerDomain);
     }
 
     // Set current state to be the initial state.
