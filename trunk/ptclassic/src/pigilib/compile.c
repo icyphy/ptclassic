@@ -1088,7 +1088,7 @@ octObject *facetPtr;
 	    /* ptkCompileRun is very similar to ptkGo, but assuming controlled
 	       by the run-all-demos panel instead of ordinary run control
 	       panel. */
-	    TCL_CATCH_ERR1(Tcl_VarEval(ptkInterp, "ptkCompileRun ", name,
+	    TCL_CATCH_ERR(Tcl_VarEval(ptkInterp, "ptkCompileRun ", name,
 	      " ", octHandle, (char *) NULL));
 	    /* delete the universe after run finishes. */
 	    TCL_CATCH_ERR1(Tcl_VarEval(ptkInterp, "ptkDelLite ", name,
