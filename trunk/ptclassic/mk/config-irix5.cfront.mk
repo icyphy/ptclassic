@@ -65,6 +65,35 @@ OCT_CC = cc -D_BSD_SIGNALS -acpp
 # BSD_SIGNALS needed *only* for src/octtools/Xpackages/iv/timer.c, 
 # but put it here for yuks
 
+# common.mk looks at this variable to decide how to build shared libraries
+USE_SHARED_LIBS = yes
+#USE_SHARED_LIBS = no
+
+# Using GNU make conditionals causes havoc while bootstrapping gcc,
+# so we don't use them here, however, this is what the code would look like
+
+#ifeq ($(USE_SHARED_LIBS),yes) 
+# Use Position Independent Code to build shared libraries
+# Octtools/Xpackages/rpc requires PIC instead of pic
+C_SHAREDFLAGS =         -KPIC
+# libcgstars.a requires PIC instead of pic
+CC_SHAREDFLAGS =        -KPIC
+# mk/userstars.mk uses these vars
+USER_C_SHAREDFLAGS =    $(C_SHAREDFLAGS)
+USER_CC_SHAREDFLAGS =   $(CC_SHAREDFLAGS)
+LIBSUFFIX =             so
+SHARED_LIBRARY_COMMAND =        CC -shared -o
+CSHARED_LIBRARY_COMMAND =       cc -shared -o
+
+# List of libraries to search, obviating the need to set LD_LIBRARY_PATH
+# See the ld man page for more information.  These path names must
+# be absolute pathnames, not relative pathnames.
+SHARED_LIBRARY_PATH = $(PTOLEMY)/lib.$(PTARCH):$(PTOLEMY)/octtools/lib.$(PTARCH):$(PTOLEMY)/tcltk/itcl.$(PTARCH)/lib/itcl
+SHARED_LIBRARY_R_LIST = -Wl,-rpath,$(SHARED_LIBRARY_PATH)
+
+#endif
+
+
 # In config-$PTARCH.mk, we set the following variables.  We need to 
 # use only the following variables so that we can use them elsewhere, say
 # for non-optimized compiles.
