@@ -149,7 +149,9 @@ body ::tycho::FileTester::clear {} {
 # Insert the specified data.
 #
 body ::tycho::FileTester::insertData {data} {
-    $itk_component(string) configure -text $data
+    set txt [$itk_component(string) cget -text]
+    append txt $data
+    $itk_component(string) configure -text $txt
     markModified
 }
 
