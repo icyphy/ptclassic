@@ -39,8 +39,8 @@ extern int ClearFrames();
 extern int DestroyFrames();
 /* following is not used */
 /* extern void FindAndMarkError( octObject *facetP, char *name ); */
+extern boolean FindNameSet ARGS((octObject *facetPtr, char *name));
 
-extern boolean FindNameSet(/* octObject *facetPtr, char *name */);
 /* FIXME:  These functions are not in ganttIfc.h */
 extern void FrameSetFacet();
 
@@ -61,7 +61,7 @@ extern int GanttMan();
 extern void GanttErr();
 /* extern void FindAndMarkError(); */
 /* Called by POct */
-extern boolean FindNameSet();
+extern boolean FindNameSet ARGS((octObject *facetPtr, char *name));
 
 /* Functions below should only be called by GGI */
 extern boolean GanttRun();
