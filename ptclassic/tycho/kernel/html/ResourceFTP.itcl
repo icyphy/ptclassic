@@ -842,7 +842,7 @@ body ::tycho::ResourceFTP::ftpdataport {fd} {
 
 #########################################################################
 #### ftpdone
-# Clean up after getting the FTPed file. $fd is the id of the data port.
+# Clean up after getting the FTP'd file. $fd is the id of the data port.
 #
 body ::tycho::ResourceFTP::ftpdone {fd} {
     debugputs "TRANSFER1> EOF"
