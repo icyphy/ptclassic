@@ -50,9 +50,11 @@ Geodesics can be created named or unnamed.
 #include "PortHole.h"
 #include "Plasma.h"
 #include "StringList.h"
+#include "PtGate.h"
 
+// constructor
 Geodesic::Geodesic() : pstack(0), originatingPort(0), destinationPort(0),
-numInitialParticles(0), sz(0), maxBufLength(0)
+numInitialParticles(0), sz(0), maxBufLength(0), gate(0)
 { }
 
 StringList Geodesic :: print (int) const {
@@ -137,20 +139,69 @@ void Geodesic :: initialize()
 
 // Functions for determining maximum buffer size during a simulated run.
 void Geodesic :: incCount(int n) {
+	CriticalSection region(gate);
 	sz += n;
 	if (sz > maxBufLength) maxBufLength = sz;
 }
 
-void Geodesic :: decCount(int n) { sz -= n;}
+void Geodesic :: decCount(int n) {
+	CriticalSection region(gate);
+	sz -= n;
+}
 
 void Geodesic :: setMaxArcCount(int n) {
+	CriticalSection region(gate);
 	if (n > maxBufLength) maxBufLength = n;
+}
+
+// fully general get, put, etc functions
+Particle* Geodesic :: slowGet() {
+	CriticalSection region(gate);
+	if (sz > 0) { 
+		sz--; return pstack.get();
+	}
+	else return 0;
+}
+
+void Geodesic :: slowPut(Particle* p) {
+	CriticalSection region(gate);
+	pstack.putTail(p); sz++;
+}
+
+//  Push a Particle back into the Geodesic
+void Geodesic :: pushBack(Particle* p) {
+	CriticalSection region(gate);
+	pstack.put(p); sz++;
+}
+
+// access head and tail of queue
+Particle* Geodesic :: head() const { 
+	CriticalSection region(gate);
+	return pstack.head();
+}
+
+Particle* Geodesic :: tail() const {
+	CriticalSection region(gate);
+	return pstack.tail();
+}
+
+
+// locking functions
+void Geodesic :: makeLock(const PtGate& master) {
+	LOG_DEL; delete gate;
+	gate = master.clone();
+}
+
+void Geodesic :: delLock() {
+	LOG_DEL; delete gate;
+	gate = 0;
 }
 
 // destructor
 Geodesic :: ~Geodesic () {
 	// free all particles (return them to Plasma)
 	pstack.freeup();
+	delLock();
 	// disconnect any connected portholes.  0 argument says
 	// not to have PortHole::disconnect try to do things to geodesic
 	if (originatingPort) originatingPort->disconnect(0);
