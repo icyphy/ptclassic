@@ -53,6 +53,7 @@ PL_SRCS = \
  VHDLSubInt.pl \
  VHDLMpy.pl \
  VHDLMpyInt.pl \
+ VHDLMpyCx.pl \
  VHDLRamp.pl \
  VHDLRampInt.pl \
  VHDLAverage.pl \
