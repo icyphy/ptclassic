@@ -53,7 +53,7 @@ namespace ::tycho
 # point in deferring them to auto-loading.
 uplevel #0 {
     source [file join $tychokernel Color.tcl]
-    source [file join $tychokernel CircularList.tcl]
+    source [file join $tychokernel CircularList.itcl]
     source [file join $tychokernel TopLevel.itcl]
     source [file join $tychokernel DialogWindow.itcl]
     source [file join $tychokernel FontManager.itcl]
