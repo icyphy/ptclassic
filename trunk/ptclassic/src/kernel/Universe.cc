@@ -23,13 +23,13 @@ $Id$
 #include "miscFuncs.h"
 
 Runnable :: Runnable (const char* targetname, const char* dom, Galaxy* g) :
-type(dom), gal(*g) {
+type(dom), galP(g) {
 	if (!targetname) targetname = KnownTarget::defaultName(dom);
 	target = KnownTarget::clone(targetname);
 }
 
 Runnable :: Runnable (Target* tar, const char* dom, Galaxy* g) :
-target(tar), type(dom), gal(*g) {
+target(tar), type(dom), galP(g) {
 	if (!target)
 		target = KnownTarget::clone(KnownTarget::defaultName(type));
 }
