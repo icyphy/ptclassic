@@ -186,6 +186,7 @@ public:
 	int halt(int argc,char** argv);
 	int knownlist(int argc,char** argv);
 	int link(int argc,char** argv);
+	int listobjs(int argc,char** argv);
 	int multilink(int argc,char** argv);
 	int newstate(int argc,char** argv);
 	int newuniverse(int argc,char** argv);
@@ -196,6 +197,7 @@ public:
 	int renameuniv(int argc,char** argv);
 	int reset(int argc,char** argv);
 	int run(int argc,char** argv);
+	int schedtime(int argc,char** argv);
 	int schedule(int argc,char** argv);
 	int seed(int argc,char** argv);
 	int setstate(int argc,char** argv);
