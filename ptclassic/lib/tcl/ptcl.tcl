@@ -7,6 +7,9 @@
 # We must find and load the tcl libraries, and then do any
 # argument processing we want.
 #
+# Author: Kennard White
+# $Id$
+#
 
 proc ptcl_init_env {} {
     global env
