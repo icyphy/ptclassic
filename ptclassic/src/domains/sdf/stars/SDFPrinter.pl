@@ -41,10 +41,7 @@ This is normal behavior for buffered input/output.
 	protected {
 		pt_ofstream *p_out;
 	}
-	constructor { p_out = 0;}
-	destructor { LOG_DEL; delete p_out;}
-	wrapup {
-		LOG_DEL; delete p_out;
+	constructor {
 		p_out = 0;
 	}
 	setup {
@@ -60,5 +57,7 @@ This is normal behavior for buffered input/output.
 		 	output << ((*p)%0).print() << "\t";
 		output << "\n";
 	}
+	destructor {
+		LOG_DEL; delete p_out;
+	}
 }
-
