@@ -208,7 +208,7 @@ Pointer HashTable::copyData(Pointer arg) const { return arg;}
 // * Results:
 // *	The return value is a string containing information
 // *	about tablePtr.  It is the caller's responsibility to free
-// *	this string with delete[].
+// *	this string with delete [].
 // *
 // * Side effects:	None.
 
