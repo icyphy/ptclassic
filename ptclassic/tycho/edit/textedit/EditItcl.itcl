@@ -77,7 +77,7 @@ body ::tycho::EditItcl::constructor {args} {
 # Open a window with help on the current widget.
 #
 body ::tycho::EditItcl::help {} {
-    global TYCHO
+    global ::TYCHO
     ::tycho::File::openContext \
 	    $TYCHO/editors/textedit/doc/usersGuides/EditItclHelp.html
 }

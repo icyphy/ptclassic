@@ -46,10 +46,6 @@ class ::tycho::EditHTML {
     # Open a help window.
     method help {}
 
-    #### reload
-    # Override the base-class reload to recolorize.
-    method reload {}
-
     constructor {args} {}
     destructor {}
 
@@ -74,14 +70,14 @@ body ::tycho::EditHTML::constructor {args} {
     $itk_component(formatMenu) add command \
 	    -label "Recolorize" \
 	    -underline 0 \
-	    -command [code $itk_component(text) parse]
+	    -command [code $itk_component(text) parseRegion 1.0 end]
 
     $itk_component(editMenu) add separator
         
     $itk_component(editMenu) add command \
 	    -label "Check Links" \
 	    -underline 6 \
-	    -command [code $itk_component(text) checkLinks]
+	    -command [code $itk_component(text) busy checkLinks]
 
     # Read contents from the specified file, unless the name is "NoName".
     # This needs to be repeated from the baseclass because the -file
@@ -106,16 +102,7 @@ body ::tycho::EditHTML::evaluate {} {
 # Open a window with help on the current widget.
 #
 body ::tycho::EditHTML::help {} {
-    global TYCHO
+    global ::TYCHO
     ::tycho::File::openContext \
 	    $TYCHO/editors/textedit/doc/usersGuides/EditHTMLHelp.html
-}
-
-#####################################################################
-#### reload
-# Override the base-class reload to recolorize.
-#
-body ::tycho::EditHTML::reload {} {
-    Edit::reload 
-    $itk_component(text) parse
 }

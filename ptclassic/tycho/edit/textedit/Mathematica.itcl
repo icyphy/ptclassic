@@ -53,7 +53,7 @@ class ::tycho::Mathematica {
 # Open a window with help on the current widget.
 #
 body ::tycho::Mathematica::help {} {
-    global TYCHO
+    global ::TYCHO
     ::tycho::File::openContext \
 	    $TYCHO/editors/textedit/doc/usersGuides/MathematicaHelp.html
 }

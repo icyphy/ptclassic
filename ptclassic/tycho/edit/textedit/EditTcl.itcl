@@ -76,7 +76,7 @@ body ::tycho::EditTcl::constructor {args} {
     $itk_component(formatMenu) add command \
 	    -label "Show Links" \
 	    -underline 1 \
-	    -command "$itk_component(text) tagLinks"
+	    -command [code "$itk_component(text) busy tagLinks"]
     
     # Read contents from the specified file, unless the name is "NoName".
     # This needs to be repeated from the baseclass because the -file
@@ -102,7 +102,7 @@ body ::tycho::EditTcl::evaluate {} {
 # Open a window with help on the current widget.
 #
 body ::tycho::EditTcl::help {} {
-    global TYCHO
+    global ::TYCHO
     ::tycho::File::openContext \
 	    $TYCHO/editors/textedit/doc/usersGuides/EditTclHelp.html
 }
