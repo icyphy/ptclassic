@@ -1,6 +1,4 @@
-#ifdef lint
 static const char file_id[] = "CGCVISSimTarget.cc";
-#endif /*lint*/
 /******************************************************************
 Version identification:
 @(#)CGCVISTarget.cc	1.4 06/29/96
@@ -31,6 +29,10 @@ ENHANCEMENTS, OR MODIFICATIONS.
  Programmer: William Chen
  
 *******************************************************************/
+#ifdef __GNUG__
+#pragma implementation
+#endif
+
 #include "CGCTarget.h"
 #include "CGCVISSimTarget.h"
 #include "Error.h"
