@@ -63,7 +63,7 @@ public:
 
 // The find method returns a pointer the appropriate block in
 // the current domain.
-	static Block* find (const char* name);
+	static const Block* find (const char* name);
 
 // The clone method takes a string, finds the appropriate block in
 // the current domain, and returns a clone of that block.
