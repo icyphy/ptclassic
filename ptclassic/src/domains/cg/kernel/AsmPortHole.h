@@ -69,6 +69,13 @@ public:
 	int circAccessThisTime() const {
 		return offset + numberTokens > bufSize();
 	}
+
+	// Initialize the offset member -- must be called after
+	// any setSDFParams calls on ports take place (e.g. start
+	// funcs in AsmStars).  This is handled by doing it from
+	// CGTarget after everything has been init-ed.
+	// it returns TRUE on success, else FALSE (0)
+	virtual int initOffset();
 };
 
 class InAsmPort : public AsmPortHole {

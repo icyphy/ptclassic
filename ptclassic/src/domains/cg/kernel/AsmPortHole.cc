@@ -68,6 +68,33 @@ ProcMemory* AsmPortHole::memory() const {
 	return geo().memory();
 }
 
+// initialize the offset member.  If there is no fork involved, input
+// portholes start reading from offset 0, and output portholes start
+// writing just after any delay tokens.
+// If there are forks, outputs are done the same way, and input pointers
+// are backed up to handle the "forkDelay".
+int AsmPortHole::initOffset() {
+	int bsiz = bufSize();
+	if (isItOutput()) {
+		offset = numTokens();
+		// the following error is already reported by bufSize()
+		if (offset > bsiz) return FALSE;
+		if (offset == bsiz) offset = 0;
+	}
+	else {
+		offset = -cgGeo().forkDelay();
+		if (offset < 0) offset += bsiz;
+		// if still < 0, forkDelay is larger than we can handle
+		if (offset < 0) {
+			Error::abortRun(*this,
+				" sorry, forkDelay is larger\n",
+				"than the current implementation can handle");
+			return FALSE;
+		}
+	}
+	return TRUE;
+}
+
 int InAsmPort :: isItInput() const {return TRUE; }
 int OutAsmPort :: isItOutput() const {return TRUE; }
 int MultiInAsmPort :: isItInput() const {return TRUE; }

@@ -49,36 +49,29 @@ public:
         // makes myGeodesic of this type.
         CGGeodesic& cgGeo() const { return *(CGGeodesic*)myGeodesic;}
 
-	// Return the size of the buffer connected to this PortHole.
-	int bufSize() const;
+        // Return the size of the buffer connected to this PortHole.
+        virtual int bufSize() const;
 
-	// Return the size of the "local buffer" connected to this
-	// PortHole.  This returns zero for cases where no separate
-	// buffer is allocated, e.g. fork outputs (all destinations
-	// of the fork share the same buffer, whose size is returned
-	// by bufSize).
-	int localBufSize() const;
+        // Return the size of the "local buffer" connected to this
+        // PortHole.  This returns zero for cases where no separate
+        // buffer is allocated, e.g. fork outputs (all destinations
+        // of the fork share the same buffer, whose size is returned
+        // by bufSize).
+        int localBufSize() const;
 
 	// return the offset position in the buffer.
 	unsigned bufPos() const { return offset;}
 
-	// Advance the offset by the number of tokens produced or
-	// consumed in this PortHole when the Star fires.
-	virtual void advance() {
-		offset += numberTokens;
-		int sz = bufSize();
-		if (offset >= sz) offset -= sz;
-	}
-
-	// Initialize the offset member -- must be called after
-	// any setSDFParams calls on ports take place (e.g. start
-	// funcs in AsmStars).  This is handled by doing it from
-	// CGTarget after everything has been init-ed.
-	// it returns TRUE on success, else FALSE (0)
-	int initOffset();
+        // Advance the offset by the number of tokens produced or
+        // consumed in this PortHole when the Star fires.
+        virtual void advance() {
+                offset += numberTokens;
+                int sz = bufSize();
+                if (offset >= sz) offset -= sz;
+        }
 
 	// return true if I am a fork input
-	int fork() const { return forkDests.size() > 0;}
+	int fork() const { return forkDests.size();}
 
 	// set a fork source
         void setForkSource(CGPortHole* p);
