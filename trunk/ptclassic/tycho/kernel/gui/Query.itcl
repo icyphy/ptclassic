@@ -789,4 +789,5 @@ body ::tycho::Query::remove {tag} {
     if {[set idx [lsearch -exact $tags $tag]] >= 0} {
         set tags [lreplace $tags $idx $idx]
     }
+    return {}
 }
