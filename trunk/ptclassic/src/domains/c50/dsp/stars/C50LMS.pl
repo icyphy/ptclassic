@@ -32,12 +32,13 @@ adjust the \fIerrorDelay\fP parameter accordingly.
 .PP
 	}
         
+	// FIXME: Should be derived from the FIR star
         output {
-		name { output }
+		name { signalOut }
 		type { fix }
 	}
         input  {
-                name { input }
+                name { signalIn }
 	        type { fix }
 	}
         input  {
