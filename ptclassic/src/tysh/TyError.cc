@@ -46,7 +46,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 // the gate object ensures that messages come out in one piece even
 // with multi-threading.
 
-KeptGate gate;
+/* Keep this extern so that there is only one instance in Ptolemy */
+extern KeptGate gate;
 
 typedef const char cc;
 
