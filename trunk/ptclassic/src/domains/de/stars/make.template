@@ -40,7 +40,6 @@ DEFilter.pl \
 DEFloatDC.pl \
 DEFloatRamp.pl \
 DEFork.pl \
-DEGate.pl \
 DEHandShake.pl \
 DEImpulse.pl \
 DEInvert.pl \
@@ -48,6 +47,7 @@ DEMeasureDelay.pl \
 DEMerge.pl \
 DENull.pl \
 DEOr.pl \
+DEPassGate.pl \
 DEPSServer.pl \
 DEPacketize.pl \
 DEPoisson.pl \
@@ -61,7 +61,7 @@ DEServer.pl \
 DEStatistics.pl \
 DEStopTimer.pl \
 DESwitch.pl \
-DEThreshold.pl \
+DETestLevel.pl \
 DEUDCounter.pl \
 DEUnPacketize.pl \
 DEVarDelay.pl \
