@@ -5,7 +5,7 @@ defstar {
 When run on the simulator, arranges for its input to be logged to a file.
 	}
 	version { $Id$ }
-	author { J. Buck }
+	author { J. Buck, Chih-Tsung Huang }
 	copyright { 1992 The Regents of the University of California }
 	location { CG56 demo library }
 	explanation {
@@ -13,7 +13,7 @@ This star relies on a feature of the Sim56Target, which captures code lines
 beginning with "!" and uses them as commands for the simulator.
 	}
 	execTime {
-		return (input.bufSize() > 1) ? 2 : 0;
+		return (input.bufSize() >= 1) ? 2 : 0;
 	}
 	input {
 		name {input}
@@ -32,31 +32,30 @@ beginning with "!" and uses them as commands for the simulator.
 		default { "0"}
 	}
 	start {
-		if (input.bufSize() > 1) {
+		if (input.bufSize() >= 1) {
 			// these attributes allocate memory
 			outVal.setAttributes(A_YMEM|A_NOINIT);
 		}
 	}
 	// this codeblock tells the simulator to log writes to the
-	// input, which works when the buffersize is 1.
-	codeblock (logIn) {
-!output $ref(input) $val(fileName).sim -RF
-}
-	// this codeblock tells the simulator to log writes to the
-	// outVal state, which works when the buffersize is > 1.
+	// outVal state, which works when the buffersize is >= 1.
+
 	codeblock (logOut) {
 !output $ref(outVal) $val(fileName).sim -RF
 }
 	initCode {
-		if (input.bufSize() == 1) gencode(logIn);
-		else gencode(logOut);
+                gencode(logOut);
 	}
+
 	// this codeblock produces code
 	codeblock (copy) {
 	move	$ref(input),a
 	move	a,$ref(outVal)
 	}
 	go {
-		if (input.bufSize() > 1) gencode(copy);
+		if (input.bufSize() >= 1) gencode(copy);
 	}
 }
+
+
+
