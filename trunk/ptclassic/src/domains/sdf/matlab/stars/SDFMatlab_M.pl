@@ -16,9 +16,9 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { SDF main library }
 	explanation {
-This star converts the matrices on the input ports to Matlab format,
+This star converts the matrices/scalars on the input ports to Matlab format,
 passes the Matlab matrices to the \fIMatlabFunction\fR, converts the
-resulting Matlab matrices to Ptolemy format, and outputs the matrices.
+resulting Matlab matrices to Ptolemy format, and outputs the matrices/scalars.
 If there are no inputs, then the \fIMatlabFunction\fR is evaluated as is
 without any arguments being passed to it; e.g., a value of
 "hilb(4)" for \fIMatlabFunction\fR would return a 4 x 4 Hilbert matrix.
@@ -38,17 +38,17 @@ the Matlab command "[Pout1, Pout2] = doit(Pin1, Pin2, Pin3);".
 	}
 	inmulti {
 		name { input }
-		type { COMPLEX_MATRIX_ENV }
+		type { anytype }
 	}
 	outmulti {
 		name { output }
-		type { COMPLEX_MATRIX_ENV }
+		type { anytype }
 	}
-        defstate {
-                name { MatlabFunction }
-                type { string }
-                default { "" }
-                desc {
+	defstate {
+		name { MatlabFunction }
+		type { string }
+		default { "" }
+		desc {
 The Matlab command to execute.
 The values of the input ports will be passed as arguments to this function.
 }
@@ -73,7 +73,7 @@ The variables will be of the form output name + port number, e.g. "Pmm1".
 	}
 
 	// Matrix.h is from the Ptolemy kernel
-	hinclude { "Matrix.h", "InfString.h" }
+	hinclude { "dataType.h", "Matrix.h", "InfString.h" }
 
 	header { typedef Matrix *MatrixPtr; }
 
@@ -172,27 +172,117 @@ The variables will be of the form output name + port number, e.g. "Pmm1".
 		for ( int i = 0; i < numInputs; i++ ) {
 		  // read a reference to the matrix on input port i
 		  PortHole *iportp = nexti++;
-		  Envelope Apkt;
-		  ((*iportp)%0).getMessage(Apkt);
-		  const ComplexMatrix& Amatrix =
+		  DataType portType = iportp->resolvedType();
+		  Matrix *matlabMatrix = 0;
+
+		  // can't use a switch because enumerated data types
+		  // are assigned to strings and not to integers
+		  if ( portType == INT ||
+		       portType == FLOAT ||
+		       portType == FIX ) {
+		    matlabMatrix = mxCreateFull(1, 1, MXREAL);
+		    double *realp = mxGetPr(matlabMatrix);
+		    *realp = double((*iportp)%0);
+		  }
+		  else if ( portType == COMPLEX ) {
+		    matlabMatrix = mxCreateFull(1, 1, MXCOMPLEX);
+		    double *realp = mxGetPr(matlabMatrix);
+		    double *imagp = mxGetPi(matlabMatrix);
+		    Complex temp = (*iportp)%0;
+		    *realp = real(temp);
+		    *imagp = imag(temp);
+		  }
+		  else if ( portType == COMPLEX_MATRIX_ENV ) {
+		    Envelope Apkt;
+		    ((*iportp)%0).getMessage(Apkt);
+		    const ComplexMatrix& Amatrix =
 			*(const ComplexMatrix *)Apkt.myData();
 
-		  // allocate a Matlab matrix and name it
-		  int rows = Amatrix.numRows();
-		  int cols = Amatrix.numCols();
-		  Matrix *matlabMatrix = mxCreateFull(rows, cols, MXCOMPLEX);
-		  mxSetName( matlabMatrix, (char *) matlabInputNames[i]);
+		    // allocate a Matlab matrix and name it
+		    int rows = Amatrix.numRows();
+		    int cols = Amatrix.numCols();
+		    matlabMatrix = mxCreateFull(rows, cols, MXCOMPLEX);
 
-		  // copy values in the Ptolemy matrix to the Matlab matrix
-		  double *realp = mxGetPr( matlabMatrix );
-		  double *imagp = mxGetPi( matlabMatrix );
-		  for ( int irow = 0; irow < rows; irow++ ) {
-		    for ( int icol = 0; icol < cols; icol++ ) {
-		      Complex temp = Amatrix[irow][icol];
-		      *realp++ = real(temp);
-		      *imagp++ = imag(temp);
+		    // copy values in the Ptolemy matrix to the Matlab matrix
+		    double *realp = mxGetPr(matlabMatrix);
+		    double *imagp = mxGetPi(matlabMatrix);
+		    for ( int irow = 0; irow < rows; irow++ ) {
+		      for ( int icol = 0; icol < cols; icol++ ) {
+			Complex temp = Amatrix[irow][icol];
+			*realp++ = real(temp);
+			*imagp++ = imag(temp);
+		      }
 		    }
 		  }
+		  else if ( portType == FIX_MATRIX_ENV ) {
+		    Envelope Apkt;
+		    ((*iportp)%0).getMessage(Apkt);
+		    const FixMatrix& Amatrix =
+			*(const FixMatrix *)Apkt.myData();
+
+		    // allocate a Matlab matrix and name it
+		    int rows = Amatrix.numRows();
+		    int cols = Amatrix.numCols();
+		    matlabMatrix = mxCreateFull(rows, cols, MXREAL);
+
+		    // copy values in the Ptolemy matrix to the Matlab matrix
+		    double *realp = mxGetPr(matlabMatrix);
+		    for ( int irow = 0; irow < rows; irow++ ) {
+		      for ( int icol = 0; icol < cols; icol++ ) {
+			*realp++ = double(Amatrix[irow][icol]);
+		      }
+		    }
+		  }
+		  else if ( portType == FLOAT_MATRIX_ENV ) {
+		    Envelope Apkt;
+		    ((*iportp)%0).getMessage(Apkt);
+		    const FloatMatrix& Amatrix =
+			*(const FloatMatrix *)Apkt.myData();
+
+		    // allocate a Matlab matrix and name it
+		    int rows = Amatrix.numRows();
+		    int cols = Amatrix.numCols();
+		    matlabMatrix = mxCreateFull(rows, cols, MXREAL);
+
+		    // copy values in the Ptolemy matrix to the Matlab matrix
+		    double *realp = mxGetPr(matlabMatrix);
+		    for ( int irow = 0; irow < rows; irow++ ) {
+		      for ( int icol = 0; icol < cols; icol++ ) {
+			*realp++ = Amatrix[irow][icol];
+		      }
+		    }
+		  }
+		  else if ( portType == INT_MATRIX_ENV ) {
+		    Envelope Apkt;
+		    ((*iportp)%0).getMessage(Apkt);
+		    const IntMatrix& Amatrix =
+			*(const IntMatrix *)Apkt.myData();
+
+		    // allocate a Matlab matrix and name it
+		    int rows = Amatrix.numRows();
+		    int cols = Amatrix.numCols();
+		    matlabMatrix = mxCreateFull(rows, cols, MXREAL);
+
+		    // copy values in the Ptolemy matrix to the Matlab matrix
+		    double *realp = mxGetPr(matlabMatrix);
+		    for ( int irow = 0; irow < rows; irow++ ) {
+		      for ( int icol = 0; icol < cols; icol++ ) {
+			*realp++ = double(Amatrix[irow][icol]);
+		      }
+		    }
+		  }
+		  else {
+		    char errstr[64];
+		    sprintf(errstr, "Unsupported data type %d on port %d",
+		     int(portType), i+1);
+		    Error::warn(*this, errstr);
+		    matlabMatrix = mxCreateFull(1, 1, MXREAL);
+		    double *realp = mxGetPr(matlabMatrix);
+		    *realp = 0.0;
+		  }
+
+		  // Give the current matrix a name
+		  mxSetName(matlabMatrix, (char *) matlabInputNames[i]);
 
 		  // let Matlab know about the new Matlab matrix we've defined
 		  putMatlabMatrix(matlabMatrix);
@@ -215,29 +305,62 @@ The variables will be of the form output name + port number, e.g. "Pmm1".
 		char *verbstr = "";
 		int fatalErrorFlag = FALSE;
 		for ( int j = 0; j < numOutputs; j++ ) {
+		  PortHole *oportp = nextp++;  // current output porthole
+		  int matlabMatrixWrongForm = TRUE;
+
 		  // create a new Matlab matrix for deallocation and save ref.
 		  Matrix *matlabMatrix =
 			getMatlabMatrix( (char *) matlabOutputNames[j] );
 
 		  // allocate a Ptolemy matrix
-		  int rows = mxGetM( matlabMatrix );
-		  int cols = mxGetN( matlabMatrix );
-		  LOG_NEW;
-		  ComplexMatrix& Amatrix = *(new ComplexMatrix(rows, cols));
+		  int rows = mxGetM(matlabMatrix);
+		  int cols = mxGetN(matlabMatrix);
 
 		  if ( mxIsFull(matlabMatrix) ) {
+
 		    // for real matrices, imagp will be null
 		    double *realp = mxGetPr( matlabMatrix );
 		    double *imagp = mxGetPi( matlabMatrix );
-		    for ( int jrow = 0; jrow < rows; jrow++ ) {
-		      for ( int jcol = 0; jcol < cols; jcol++ ) {
-		        double realValue = ( realp ) ? ( *realp++ ) : 0.0;
-		        double imagValue = ( imagp ) ? ( *imagp++ ) : 0.0;
-		        Amatrix[jrow][jcol] = Complex(realValue, imagValue);
+
+		    if ( mxIsComplex(matlabMatrix) ) {
+		      matlabMatrixWrongForm = FALSE;
+		      if ( rows == 1 && cols == 1 ) {
+			(*oportp)%0 << Complex(*realp, *imagp);
+		      }
+		      else {
+			LOG_NEW; ComplexMatrix& Amatrix =
+					*(new ComplexMatrix(rows, cols));
+			for ( int jrow = 0; jrow < rows; jrow++ ) {
+			  for ( int jcol = 0; jcol < cols; jcol++ ) {
+			    Amatrix[jrow][jcol] = Complex(*realp++, *imagp++);
+			  }
+			}
+			// write the matrix to output port j
+			// do not delete Amatrix: particle class handles that
+			(*oportp)%0 << Amatrix;
+		      }
+		    }
+		    else if ( mxIsDouble(matlabMatrix) ) {
+		      matlabMatrixWrongForm = FALSE;
+		      if ( rows == 1 && cols == 1 ) {
+			(*oportp)%0 << *realp;
+		      }
+		      else {
+			LOG_NEW; FloatMatrix& Amatrix =
+					*(new FloatMatrix(rows, cols));
+			for ( int jrow = 0; jrow < rows; jrow++ ) {
+			  for ( int jcol = 0; jcol < cols; jcol++ ) {
+			    Amatrix[jrow][jcol] = *realp++;
+			  }
+			}
+			// write the matrix to output port j
+			// do not delete Amatrix: particle class handles that
+			(*oportp)%0 << Amatrix;
 		      }
 		    }
 		  }
-		  else {
+
+		  if ( matlabMatrixWrongForm ) {
 		    if ( ! fatalErrorFlag ) {
 		      errstr = "For the Matlab command ";
 		      errstr << matlabCommand << ", ";
@@ -253,11 +376,6 @@ The variables will be of the form output name + port number, e.g. "Pmm1".
 
 		  // save the pointer to the new Matlab matrix for deallocation
 		  matlabOutputMatrices[j] = matlabMatrix;
-
-		  // write the matrix to output port j
-		  // do not delete Amatrix--- particle class will handle that
-		  PortHole *oportp = nextp++;
-		  (*oportp)%0 << Amatrix;
 		}
 
 		// free Matlab memory-- assume Matlab memory alloc is efficient
