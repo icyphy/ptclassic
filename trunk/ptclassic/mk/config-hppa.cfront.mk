@@ -162,6 +162,11 @@ CSYSLIBS = $(SYSLIBS)
 # ptlang uses this library to find alloca()
 PTLANGLIB= -lPW
 
+# List of libraries to search, obviating the need to set SHLIB_PATH
+# See the ld man page for more information.  These path names must
+# be absolute pathnames, not relative pathnames.
+SHARED_LIBRARY_R_LIST = -Wl,+s,+b,$(SHARED_LIBRARY_PATH)
+
 # If you don't strip symbols, then pigiRpc will be about 69Mb
 # If you strip pigiRpc, then dynamic linking won't work
 #      +A   Cause the linker ld(1) to use only archive libraries for all
@@ -175,11 +180,11 @@ PTLANGLIB= -lPW
 # whether a binary is dynamically or statically linked)
 
 # link flags
-LINKFLAGS =	-L$(LIBDIR) 
+LINKFLAGS =	-L$(LIBDIR) $(SHARED_LIBRARY_R_LIST)
 # link flags if debugging symbols are to be left
 # In cfront, this will result in a 69Mb pigiRpc
 #   -g causes chaos with /usr/lib/end.o and xdb, so we skip it
-LINKFLAGS_D =	-L$(LIBDIR)
+LINKFLAGS_D =	-L$(LIBDIR) $(SHARED_LIBRARY_R_LIST)
 
 #
 # Directories to use
