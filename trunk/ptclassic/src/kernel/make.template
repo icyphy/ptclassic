@@ -58,7 +58,7 @@ HDRS= AutoForkNode.h \
  Display.h Domain.h Fraction.h Galaxy.h GalIter.h Geodesic.h InterpGalaxy.h \
  InterpUniverse.h Interpreter.h KnownBlock.h Linker.h Linker.sysdep.h \
  NamedObj.h Output.h Particle.h ParticleStack.h Plasma.h PriorityQueue.h \
- Scheduler.h Star.h StringList.h Tokenizer.h Topology.h \
+ Scheduler.h Star.h StringList.h Tokenizer.h \
  Universe.h WormConnect.h Wormhole.h dataType.h miscFuncs.h type.h \
  ComplexArrayState.h ComplexState.h FloatState.h FloatArrayState.h \
  IntArrayState.h IntState.h KnownState.h State.h StringState.h 
