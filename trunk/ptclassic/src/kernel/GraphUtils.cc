@@ -59,9 +59,9 @@ Returns TRUE if Galaxy is acyclic; FALSE else.
 @Description
 Done by computing depth first search (dfs) on g.
 <p>
-If <code>ignoreDelayArcs</code> is 0, then every arc is taken into account.
-if <code>ignoreDelayArcs</code> is n>0, then arcs that have been tagged (at
-location <code>flags[ignoreDelayArcs])</code> non-zero are ignored as 
+If <code>ignoreTaggedArcs</code> is 0, then every arc is taken into account.
+if <code>ignoreTaggedArcs</code> is > 0, then arcs that have been tagged (at
+location <code>flags[tagLoc])</code> non-zero are ignored as 
 precedence arcs.
 
 @SideEffects
@@ -72,7 +72,7 @@ value in <code>flags[0]</code> will be lost.
 @Returns TRUE or FALSE
 
 ****/
-int isAcyclic(Galaxy* g, int ignoreDelayArcs)
+int isAcyclic(Galaxy* g, int ignoreTaggedArcs, int tagLoc)
 {
     // This is done by DFS.
     // flagLoc is hard-wired to be 0 here; perhaps it can become
@@ -83,12 +83,13 @@ int isAcyclic(Galaxy* g, int ignoreDelayArcs)
     GalStarIter nextBlock(*g);
     while ((node = nextBlock++) != NULL) {
 	if (node->flags[flagLoc]) continue;
-	if (findBackEdge(node,flagLoc,ignoreDelayArcs)) return FALSE;
+	if (findBackEdge(node,flagLoc,ignoreTaggedArcs,tagLoc)) return FALSE;
     }
     return TRUE;
 }
 
-int findBackEdge(Block* node, int flagLoc, int ignoreDelayArcs)
+// This method is used by isAcyclic above.  This method does the actual DFS.
+int findBackEdge(Block* node, int flagLoc, int ignoreTaggedArcs, int tagLoc)
 {
     Block *succ;
     int fl, result;
@@ -96,13 +97,13 @@ int findBackEdge(Block* node, int flagLoc, int ignoreDelayArcs)
     node->flags[flagLoc] = 1;
     SuccessorIter nextSucc(*node);
     BlockOutputIter nextO(*node);
-    if (ignoreDelayArcs) {
+    if (ignoreTaggedArcs) {
 
    	// now we only want to explore those edges
-	// that are not tagged non-zero
-	// at flags[ignoreDelayArcs] if ignoreDelayArcs > 0
+	// that are tagged zero (i.e, ignore arcs tagged non-zero)
+	// at flags[tagLoc]
 
-	while ( (p = nextO.next(ignoreDelayArcs,0)) != NULL) {
+	while ( (p = nextO.next(tagLoc,0)) != NULL) {
 	    if (!p->far() || !p->far()->parent()) continue;
 	    succ = p->far()->parent();
 	    fl = succ->flags[flagLoc];
@@ -110,7 +111,7 @@ int findBackEdge(Block* node, int flagLoc, int ignoreDelayArcs)
 	    if (fl == 1) {
 	    	result = TRUE;
 	    } else {
-	    	result = findBackEdge(succ,flagLoc,ignoreDelayArcs);
+	    	result = findBackEdge(succ,flagLoc,ignoreTaggedArcs,tagLoc);
 	    }
 	    if (result) return TRUE;
 	}
@@ -121,7 +122,7 @@ int findBackEdge(Block* node, int flagLoc, int ignoreDelayArcs)
 	    if (fl == 1) {
 		result = TRUE;
 	    } else {
-		result = findBackEdge(succ,flagLoc,ignoreDelayArcs);
+		result = findBackEdge(succ,flagLoc,ignoreTaggedArcs,tagLoc);
 	    }
 	    if (result) return TRUE;
 	}
@@ -199,7 +200,6 @@ void findSources(Galaxy* g, int flagLoc, SequentialList& sources, Block* deleted
 void findSinks(Galaxy* g, int flagLoc, SequentialList& sinks, Block* deletedNode)
 {
     // symmetric to findSources; see comments therein
-    // FIXME: Make this like findSources above after everything's been debugged
     Block *succ, *node;
     int notSink;
     if (deletedNode) {
@@ -232,6 +232,7 @@ Block* BlockParentIter::next() {
     return current;
 }
 
+// Used by printDot(Galaxy&)
 StringList printTopBlockDot(Galaxy& galaxy, const char* depth) {
     StringList dot;
     GalTopBlockIter nextBlock(galaxy);
@@ -252,6 +253,9 @@ StringList printTopBlockDot(Galaxy& galaxy, const char* depth) {
     return dot;
 }
 
+// This method returns a StringList that describes a Galaxy in
+// dotty format.  To find out more about this format refer to the
+// URL http://www.research.att.com/orgs/ssr/book/reuse.
 StringList printDot(Galaxy& galaxy) {
     numberAllBlocks(galaxy);
     StringList dot;
