@@ -52,7 +52,10 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "InfString.h"		// Pick up InfString for use in pragma()
 #include "ConversionTable.h"
 
-/* this modification is necessary to make galaxy code a function */
+// Defined in CGCDomain.cc
+extern const char CGCdomainName[];
+
+// this modification is necessary to make galaxy code a function
 #define MAINDECLS (*getStream("mainDecls"))
 #define MAININIT (*getStream("mainInit"))
 #define MAINLOOP (*getStream("mainLoop"))
@@ -880,7 +883,7 @@ void CGCTarget :: compileRun(SDFScheduler* s) {
 }
 
 const char* CGCTarget :: domain() {
-	return galaxy() ? galaxy()->domain() : "CGC";
+	return galaxy() ? galaxy()->domain() : CGCdomainName;
 }
 
 /////////////////////////////////////////
