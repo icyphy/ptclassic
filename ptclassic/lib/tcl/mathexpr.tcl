@@ -98,7 +98,7 @@ proc min {a args} {
 add_to_help range {<min> <max> ?<increment>?} {
 Produces an ordered list of numbers running from min to max at increments
 of increment.  If the sequence of numbers will never reach max, then
-the routine will report an error and return an empty list.
+the routine will return an empty list.
 }
 
 proc range {minindex maxindex {inc 1}} {
@@ -107,7 +107,6 @@ proc range {minindex maxindex {inc 1}} {
       lappend rangelist $i
     }
   } else {
-    error "improper specification for range: $minindex to $maxindex step $inc"
     set rangelist {}
   }
   return $rangelist
@@ -118,7 +117,7 @@ proc range {minindex maxindex {inc 1}} {
 add_to_help rangeapplyexpr {<tclexpr> <min> <max> ?<increment>?} {
 Evaluate tclexpr for values of i running from min to max at increments
 of increment to produce a list.  If the sequence of numbers will never
-reach max, then the routine will report an error and return an empty list.
+reach max, then the routine will return an empty list.
 }
 
 proc rangeapplyexpr {tclexpr minindex maxindex {inc 1}} {
@@ -127,7 +126,6 @@ proc rangeapplyexpr {tclexpr minindex maxindex {inc 1}} {
       lappend rangelist [expr $tclexpr]
     }
   } else {
-    error "improper specification for range: $minindex to $maxindex step $inc"
     set rangelist {}
   }
   return $rangelist
