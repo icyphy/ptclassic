@@ -61,8 +61,9 @@ class VHDLObj : public NamedObj
   /* virtual */ int isA(const char*) const;
   /* virtual */ const char* className() const;
 
+// cfront disapproves of this - conflict with derived classes
   // Return a pointer to a new copy of the VHDLObj.
-  virtual VHDLObj* newCopy() {return new VHDLObj;};
+//  virtual VHDLObj* newCopy() {return new VHDLObj;};
 
  protected:
  private:
