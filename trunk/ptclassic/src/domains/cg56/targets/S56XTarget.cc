@@ -108,9 +108,12 @@ void S56XTarget :: wrapup () {
 		 "; Error handler for s56x architecture: ignore interrupts, loop\n"
 		 "ERROR	ori	#03,mr\n"
 		 "WAIT	jmp	WAIT\n"
+		 "MAINEND equ	*\n"
 		 "	org	p:$1ff0\n"
 		 "	nop\n"
-		 "	stop\n");
+		 "	stop\n"
+		 "	org	p:MAINEND\n");
+		
 	inProgSection = TRUE;
 	CG56Target::wrapup();
 }
@@ -132,7 +135,9 @@ int S56XTarget :: loadCode() {
 int S56XTarget :: runCode() {
 	if (!genFile(runCmds,uname)) return FALSE;
 	chmod(fullFileName(uname),0755);	//make executable
-	return !hostSystemCall(uname,"Problems loading code onto S56X");
+	StringList runCmd(uname);
+	runCmd << " &";
+	return !hostSystemCall(runCmd,"Problems running code onto S56X");
 }
 
 
