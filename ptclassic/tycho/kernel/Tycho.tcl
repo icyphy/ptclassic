@@ -207,11 +207,11 @@ namespace ::tycho
 # Files that we are going to need right away, so there is no
 # point in deferring them to auto-loading.
 uplevel #0 {
+    source [file join $tychokernel FontManager.itcl]
     source [file join $tychokernel Color.tcl]
     source [file join $tychokernel CircularList.itcl]
     source [file join $tychokernel TopLevel.itcl]
     source [file join $tychokernel Dialog.itcl]
-    source [file join $tychokernel FontManager.itcl]
     source [file join $tychokernel Message.itcl]
     source [file join $tychokernel ErrorMessage.itcl]
 }
