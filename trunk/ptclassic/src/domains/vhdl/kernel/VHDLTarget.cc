@@ -39,17 +39,28 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #endif
 
 #include "VHDLTarget.h"
+#include "ConversionTable.h"
 //#include <ostream.h>
+// HPPA CC under HPUX10.01 cannot deal with arrays, the message is:
+//  'sorry, not implemented: general initializer in initializer lists'
+// if we have an array:
+//  static TypeConversionTable cgcCnvTable[7] = {
+//   {  COMPLEX, 	FIX, 		"CxToFix"	},
+// So, we create a class and let it do the work.
 
-static TypeConversionTable vhdlCnvTable[7] = {
-  {  FLOAT, 	COMPLEX,	"FloatToCx"	},
-  {  COMPLEX, 	FIX, 		"CxToFix"	},
-  {  COMPLEX, 	FLOAT,		"CxToFloat"	},
-  {  FIX,	COMPLEX,	"FixToCx"	},
-  {  FIX,	FIX,		"FixToFix"	},
-  {  FIX,	ANYTYPE,	"FixToFloat"	},
-  {  ANYTYPE, 	FIX,		"FloatToFix"	}
+class VHDLConversionTable: public ConversionTable {
+public:
+   VHDLConversionTable():ConversionTable(7) {
+     tblRow(  FLOAT, 	COMPLEX,	"FloatToCx"	);
+     tblRow(  COMPLEX, 	FIX, 		"CxToFix"	);
+     tblRow(  COMPLEX, 	FLOAT,		"CxToFloat"	);
+     tblRow(  FIX,	COMPLEX,	"FixToCx"	);
+     tblRow(  FIX,	FIX,		"FixToFix"	);
+     tblRow(  FIX,	ANYTYPE,	"FixToFloat"	);
+     tblRow(  ANYTYPE, 	FIX,		"FloatToFix"	);
+   }
 };
+static VHDLConversionTable vhdlConversionTable;
 
 // Constructor
 VHDLTarget :: VHDLTarget(const char* name, const char* starclass,
@@ -73,7 +84,7 @@ HLLTarget(name, starclass, desc) {
   loopingLevel.setInitValue("0");
   
   // Initialize type conversion table
-  typeConversionTable = vhdlCnvTable;
+  typeConversionTable = &vhdlConversionTable;
   typeConversionTableRows = 7;
 }
 

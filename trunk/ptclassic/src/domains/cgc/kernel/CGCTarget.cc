@@ -49,6 +49,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "SDFScheduler.h"
 #include "compat.h"		// Pickup symlink()
 #include "InfString.h"		// Pick up InfString for use in pragma()
+#include "ConversionTable.h"
 
 /* this modification is necessary to make a galaxy code as a function */
 #define MAINDECLS (*getStream("mainDecls"))
@@ -57,6 +58,27 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #define MYCODE (*getStream(CODE))
 #define MAINCLOSE (*getStream("mainClose"))
 
+
+// HPPA CC under HPUX10.01 cannot deal with arrays, the message is:
+//  'sorry, not implemented: general initializer in initializer lists'
+// if we have an array:
+//  static TypeConversionTable cgcCnvTable[7] = {
+//   {  COMPLEX, 	FIX, 		"CxToFix"	},
+// So, we create a class and let it do the work.
+
+class CGCConversionTable: public ConversionTable {
+public:
+  CGCConversionTable():ConversionTable(7) {
+    tblRow(  COMPLEX, 	FIX, 		"CxToFix"	);
+    tblRow(  COMPLEX, 	ANYTYPE,	"CxToFloat"	);
+    tblRow(  FIX,	COMPLEX,	"FixToCx"	);
+    tblRow(  FIX,	FIX,		"FixToFix"	);
+    tblRow(  FIX,	ANYTYPE,	"FixToFloat"	);
+    tblRow(  ANYTYPE, 	COMPLEX,	"FloatToCx"	);  
+    tblRow(  ANYTYPE, 	FIX,		"FloatToFix"	);
+  }
+};
+static CGCConversionTable cgcConversionTable;
 // Add code to the beginning of a CodeStream instead of the end.
 void prepend(StringList code, CodeStream& stream)
 {
@@ -66,16 +88,6 @@ void prepend(StringList code, CodeStream& stream)
     stream.initialize();
     stream << temp;
 }
-
-static TypeConversionTable cgcCnvTable[7] = {
-  {  COMPLEX, 	FIX, 		"CxToFix"	},
-  {  COMPLEX, 	ANYTYPE,	"CxToFloat"	},
-  {  FIX,	COMPLEX,	"FixToCx"	},
-  {  FIX,	FIX,		"FixToFix"	},
-  {  FIX,	ANYTYPE,	"FixToFloat"	},
-  {  ANYTYPE, 	COMPLEX,	"FloatToCx"	},
-  {  ANYTYPE, 	FIX,		"FloatToFix"	}
-};
 
 // constructor
 CGCTarget::CGCTarget(const char* name,const char* starclass,
@@ -112,7 +124,7 @@ CGCTarget::CGCTarget(const char* name,const char* starclass,
 	addStream("mainLoop",&mainLoop);
 
 	// Initialize type conversion table
-	typeConversionTable = cgcCnvTable;
+	typeConversionTable = &cgcConversionTable;
 	typeConversionTableRows = 7;
 }
 

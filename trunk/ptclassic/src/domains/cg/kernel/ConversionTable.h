@@ -1,3 +1,6 @@
+#ifndef _ConversionTable_h
+#define  _ConversionTable_h 1
+
 /******************************************************************
 Version identification:
 $Id$
@@ -58,3 +61,4 @@ private:
     int rows;
     int rowToInitialize;
 };
+#endif
