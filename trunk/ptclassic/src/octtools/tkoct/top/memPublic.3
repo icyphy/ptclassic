@@ -1,0 +1,70 @@
+'\" t
+'	# that line tells man to use tbl && col
+.TH memHeap 3 $Date$
+.SH NAME
+MEMHeap,
+memHeapCreate,
+memHeapDestroy,
+memHeapObAlloc,
+memHeapObFree
+\- Efficient Memory Heap Management
+.SH SYNOPSIS
+.CS
+#include "mem.h"
+
+typedef struct _MEMHeap MEMHeap;
+
+MEMHeap*
+memHeapCreate(pSuper)
+    MEMSuperHeap	*pSuper;
+
+void
+memHeapDestroy(pHeap)
+    MEMHeap		*pHeap;
+
+ASPtr
+memHeapObAlloc(pHeap)
+    MEMHeap		*pHeap;
+
+void
+memHeapObFree(pHeap, pOb)
+    MEMHeap		*pHeap;
+    ASPtr		*pOb;
+
+.CE
+.SH DESCRIPTION
+A heap allows efficient allocations of fixed sized objects with
+per-component or per-instance statistics collection.  A heap
+is attached at time of creation to a super heap, from which all
+objects are allocated.
+.PP
+The \fImemHeapCreate\fP function allocates a heap attached to
+super heap \fIpSuper\fP.  The returned value is a pointer to
+a heap control block, and is allocated out of a dedicated super heap.
+.PP
+The \fImemHeapDestroy\fP function frees a previously allocated
+heap.  An error will be logged if the heap is not empty.
+.PP
+The \fImemHeapObAlloc\fP function returns a pointer to a newly allocated
+object of the size specified when the attached super heap was created.
+.PP
+The \fImemHeapObFree\fP function frees an object.  The object must
+have been allocated with \fImemHeapObAlloc\fP, with the same heap specified
+in both calls.
+
+.SH ARGUMENTS
+.TP
+.B pSuper
+A pointer to a super heap control block.
+.TP
+.B pHeap
+A pointer to a heap control block previously obtained by
+\fImemHeapCreate\fP or \fImemPublicHeapCreate\fP.
+.TP
+.B pOb
+A pointer to an object previously allocated by \fImemHeapObAlloc\fP.
+
+.SH SEE ALSO
+mem(3),
+memPublic(3),
+memSuperHeap(3)

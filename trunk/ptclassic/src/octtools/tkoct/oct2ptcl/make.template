@@ -1,0 +1,61 @@
+# Ptolemy-style makefile for oct2ptcl
+# 
+# Version identification:
+# $Id$
+# Copyright (c) 1991-1994 The Regents of the University of California.
+#                       All Rights Reserved.
+#
+# oct2pcl was originally authored by Kennard White
+
+# Root of Ptolemy directory
+ROOT=../../..
+# Where we are
+VPATH = ../../../src/tkvem/oct2ptcl
+# get configuration info
+CONFIG=$(ROOT)/mk/config-$(ARCH).mk
+include $(CONFIG)
+
+OBJS = 		misc.o oct2ptcl.o
+
+SRCS = 		$(OBJS:.o=.c)
+
+HDRS = 		oct2ptcl.h
+
+MISC_FILES =	Policy README
+
+all:		makefile oct2ptcl
+
+OCT2PTCL_LIBS = 	-L../top -ltop -L$(OCTLIBDIR) \
+		-lregion -lkd -lgu -loh -loptions -loct -ltr -lst \
+		-lutility -lerrtrap -luprintf -lport $(TCL_LIBSPEC)
+
+# top is a package used by OCT2PTCL and oct2ptcl
+TOPDIR = 	$(VPATH)/../top
+
+C_INCL = 	-I$(OCTTOOLS)/include -I$(TOPDIR) -I$(TCL_INCDIR) $(PTCOMPAT_INCSPEC) $(X11_INCSPEC)
+
+# Use the $(LINKER) so the binary is statically linked for distribution.
+# On suns, cc takes -Bstatic, gcc takes -static, so we can't just add a flag
+# here.
+oct2ptcl:	$(OBJS)
+	rm -f $@
+	$(LINKER) $(LINKFLAGS) -o $@ $(OBJS) $(OCT2PTCL_LIBS) $(X11EXT_LIBSPEC) $(X11_LIBSPEC) $(SYSLIBS)
+
+oct2ptcl.debug:	$(OBJS)
+	rm -f $@
+	$(LINKER) $(LINKFLAGS_D) -o $@ $(OBJS) $(OCT2PTCL_LIBS) $(X11EXT_LIBSPEC) $(X11_LIBSPEC) $(SYSLIBS)
+
+OUT =		$(BINDIR)/oct2ptcl
+
+$(OUT):	oct2ptcl
+	rm -f $(OUT)
+	ln oct2ptcl $(OUT)
+
+install:	makefile $(OUT)
+
+
+# include common definitions, rules
+include $(ROOT)/mk/common.mk
+
+# Dont add anything after the next line; makedepend will zap it.
+# DO NOT DELETE THIS LINE -- make depend depends on it.

@@ -1,0 +1,16 @@
+93/May/27	Added error handling into seperate error window.  Added
+		scrolling commands.  Added directory of dirs.  Improved
+		error messages.  Added "options" entry with ShowHeaders,
+		and with NodeLook.  Implemented color,font,underline node
+		look.
+93/May/18	Changed -file option to -infofile.
+93/Apr/07	Added support for compressed files in tkinfo.
+93/Feb/25	Fixed bug in tkinfo: "quit" on a window with a failed
+		look would fail b/c fileKey for the window was unset.
+93/Feb/24       Fixed bug in tkinfo: when extracting follow references,
+		node names with more than one set of white space didnt
+		have the white space properly compressed out.
+		Improved documentation.
+
+		Fixed bug in xpscale: the semophoring wasnt working correctly
+		between scale & text updates & integer rounding.

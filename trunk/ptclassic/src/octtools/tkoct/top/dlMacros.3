@@ -1,0 +1,104 @@
+'\" t
+'	# that line tells man to use tbl && col
+.TH dlMacros 3 $Date$
+.SH NAME
+DLElem
+DL_CLEAR,
+DLINIT_HEAD,
+DL_INSERT_AFTER,
+DL_INSERT_BEFORE,
+DL_REMOVE,
+DLMAC_LOOP_FORW_BEGIN,
+DLMAC_LOOP_FORW_END
+\- Doublely linked list macros
+.SH SYNOPSIS
+.CS
+#include "dlMacros.h"
+
+typedef struct _DLElem DLElem;
+struct _DLElem {
+    DLElem              *next;
+    DLElem              *prev;
+};
+
+DL_CLEAR(pElem)
+DL_INIT_HEAD(pNew)
+DL_INSERT_AFTER(pOld, pNew)
+DL_INSERT_BEFORE(pOld, pNew)
+DL_REMOVE(pOld)
+DLMAC_LOOP_FORW_BEGIN(pHead, itemType, itemName)
+DLMAC_LOOP_FORW_END()
+
+.CE
+.SH DESCRIPTION
+These macros provide low-level support for doubly-linked lists.
+For more sophisticated features, see the dlList(3as) or ll(3as) components.
+The \fIDLElem\fP structure is the core of both this component and
+the dlList(3as) component.  In general the \fIDLElem\fP structure is
+embedded in the top of the application's data structure.  In cases
+where the \fIDLElem\fP structure is embedded in the middle, the
+link pointers \fInext\fP and \fIprev\fP should point to the top
+of the next and previous \fIDLElem\fP structure, not the top of the
+application's data structure.  This is to allow multiple link traversal
+without knowing the offset of the links within the containing data structure.
+.PP
+The macro \fIDL_CLEAR\fP sets the link pointers to NULL.
+.PP
+The macro \fIDL_INIT_HEAD\fP initializes the link pointers so that
+the object references itself.
+.PP
+The macro \fIDL_INSERT_AFTER\fP adjusts the link pointers so that
+\fIpNew\fP is inserted into the list following \fIpOld\fP.
+.PP
+The macro \fIDL_INSERT_BEFORE\fP adjusts the link pointers so that
+\fIpNew\fP is inserted into the list preceding \fIpOld\fP.
+.PP
+The macro \fIDL_REMOVE\fP adjusts the link pointers so that
+\fIpOld\fP is removed from the list it is in.
+.PP
+The macros \fIDLMAC_LOOP_FORW_BEGIN\fP and \fIDLMAC_LOOP_FORW_END\fP place
+an inline \fBfor\fP in the code.  The \fBfor\fP loop iterates over
+all elements of the list, starting with the element following \fIpHead\fP,
+and ending with the element preceding \fIpHead\fP.  It is assumed that
+the element \fIpHead\fP is not of interest itself.  On each iteration through
+the loop, the variable named \fIitemName\fP of type \fIitemType\fP is 
+declared and set to the properly cast value of the current element.
+
+.SH EXAMPLES
+.CS
+typedef struct _FOOName {
+    DLElem		chain;
+    int			code;
+    char		name[20];
+} FOOName;
+
+fooDoStuff()
+{
+    DLElem		head, v1, v2, v3;
+
+    DL_INIT_HEAD(&head);
+    DL_INSERT_AFTER(&head, &v1);
+    DL_INSERT_BEFORE(&head, &v2);
+    DL_INSERT_AFTER(&v1, &v3);
+
+    DLMAC_LOOP_FORW_BEGIN(&head, FOOName*, pName) {
+	printf("foo: name %s, code %d\n", pName->name, pName->code);
+    } DLMAC_LOOP_FORW_BEGIN();
+}
+.CE
+
+.SH ARGUMENTS
+.TP
+.B pNew
+A \fIDLElem\fP object that is not currently in any list.
+Using an object that is already in a list will result in corrupted
+link pointers.
+.TP
+.B pOld
+A \fIDLElem\fP object that is currently in a valid list.
+Using an object that is not already in a list will result in corrupted
+link pointers.
+
+.SH SEE ALSO
+dlList(3),
+ll(3)

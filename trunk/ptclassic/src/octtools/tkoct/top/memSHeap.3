@@ -1,0 +1,134 @@
+'\" t
+'	# that line tells man to use tbl && col
+.TH memSuperHeap 3 $Date$
+.SH NAME
+MEMSuperHeap,
+memSuperHeapCreate,
+memSuperHeapDestroy,
+memSuperHeapObAlloc,
+memSuperHeapObFree,
+MEMSuperHeapStats,
+memSuperHeapStatsCalc,
+memSuperHeapStatsPrint,
+memSuperHeapStatsShow
+\- Efficient Memory Heap Management
+.SH SYNOPSIS
+.CS
+#include "mem.h"
+
+typedef struct _MEMSuperHeap MEMSuperHeap;
+
+MEMSuperHeap*
+memSuperHeapCreate(name, objectSize)
+    char		*name;
+    int			objectSize;
+
+void
+memSuperHeapDestroy(pSuper)
+    MEMSuperHeap	*pSuper;
+
+ASPtr
+memSuperHeapObAlloc(pSuper)
+    MEMSuperHeap	*pSuper;
+
+ASStatus
+memSuperHeapObFree(pSuper, pOb)
+    MEMSuperHeap	*pSuper;
+    ASPtr		*pOb;
+
+void
+memSuperHeapStatsCalc(pSuper, pStats)
+    MEMSuperHeap	*pSuper;
+    MEMSuperHeapStats	*pStats;
+
+void
+memSuperHeapStatsPrint(pStats)
+    MEMSuperHeapStats	*pStats;
+
+void
+memSuperHeapStatsShow(pSuper)
+    MEMSuperHeap	*pSuper;
+
+.CE
+.SH DESCRIPTION
+A super heap is a pool of memory from which objects of a fixed size
+are allocated.  Since all objects within the super heap are of a
+fixed size, there is no extra overhead required to store the size
+of each block, nor is extra time required to
+search for a block of the requested size (as with malloc(3)).
+
+.PP
+The \fImemSuperHeapCreate\fP function allocates a super heap for objects
+of size \fIobjectSize\fP.  The \fIname\fP is used in
+statistics reporting.  The returned value is a pointer to
+a super heap control block, and is allocated out of a dedicated super heap.
+.PP
+The \fImemSuperHeapDestroy\fP function frees a previously allocated
+super heap.  An error will be logged if the heap is not empty or
+still has sub-heaps attached to it.
+.PP
+The \fImemSuperHeapObAlloc\fP function returns a pointer to a newly allocated
+object of the size specified when the heap was created.
+.PP
+The \fImemSuperHeapObFree\fP function frees an object.  The object must
+have been allocated with \fImemSuperHeapObAlloc\fP, with the same super heap
+specified in both calls.
+.PP
+The \fImemSuperHeapStatsCalc\fP function calculates statistics for
+super heap \fIpSuper\fP, and stores them into \fIpStats\fP.
+.PP
+The \fImemSuperHeapStatsPrint\fP function formats the statistics
+in \fIpStats\fP and prints it on stdout.
+.PP
+The \fImemSuperHeapStatsShow\fP function calculates and formats
+statistics for \fIpSuper\fP and prints it on stdout.
+
+.SH ARGUMENTS
+.TP
+.B name
+The name of the super heap.  This must be pointer to a static string
+(or at least a string whose lifetime will exceed that of the super heap).
+The name is used only for statistics reporting.
+.TP
+.B objectSize
+Specifies the size of all objects that will be allocated from the super
+heap.
+.TP
+.B pSuper
+A pointer to a super heap control block previously obtained by
+\fImemSuperHeapCreate\fP.
+.TP
+.B pOb
+A pointer to an object previously allocated by \fImemSuperHeapObAlloc\fP.
+
+.SH CAVEATS
+One of the primary features of the super heap system is that free'd
+objects are placed onto a freelist from which they may be rapidly
+re-allocated.  The free list is maintained as a singly linked list;
+as such, duplicate frees of the same block could potentially corrupt
+the freelist.  To prevent this, a probabilistic scheme using magic numbers
+is implemented internally.  There are two consequences the user should be
+aware of:
+.TP
+-
+It is acceptable for the user to attempt to free the same block more than
+once.  All attempts after the first (sucessful) free will take longer
+than normal (they will be O(n) instead of O(1)),
+but will not corrupt the super heap.
+.TP
+-
+If the user frees a block, writes into the block, and free it again,
+most likely the freelist for that super block will be corrupted.
+This will generally result in mysterious, untracable catastrophic failure
+later in the programs execution.  Thus it is extremely important that
+the user not write into a block after freeing it.
+.TP
+-
+If the user happens to leave a certain magic value at a certain location
+within the block, the free will take longer than normal.  However,
+no corruption will occur.  The core statistic \fBnumDupFreeFake\fP records
+such events.
+
+.SH SEE ALSO
+mem(3),
+memHeap(3)

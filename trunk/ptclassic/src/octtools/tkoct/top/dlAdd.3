@@ -1,0 +1,89 @@
+'\" t
+'	# that line tells man to use tbl && col
+.TH dlList 3 $Date$
+.SH NAME
+dlListInsertAtHead,
+dlListCreateAtHead,
+dlListInsertAtTail,
+dlListCreateAtTail,
+dlListInsertAfter,
+dlListCreateAfter,
+dlListElemRemove
+\- Light weight linked lists
+.SH SYNOPSIS
+.CS
+#include "dlMacros.h"
+#include "dlList.h"
+
+ASStatus
+dlListInsertAtHead(pList, pNew)
+    DLList*		*pList;
+    ASPtr		*pNew;
+
+ASPtr
+dlListCreateAtHead(pList)
+    DLList*		*pList;
+
+ASStatus
+dlListInsertAtTail(pList, pNew)
+    DLList*		*pList;
+    ASPtr		*pNew;
+
+ASPtr
+dlListCreateAtTail(pList)
+    DLList*		*pList;
+
+ASStatus
+dlListInsertAfter(pList, pCur, pNew)
+    DLList*		*pList;
+    ASPtr		*pCur;
+    ASPtr		*pNew;
+
+ASPtr
+dlListCreateAfter(pList, pOld)
+    DLList*		*pList;
+    ASPtr		*pOld;
+
+ASStatus
+dlListInsertBefore(pList, pOld, pNew)
+    DLList*		*pList;
+    ASPtr		*pOld;
+    ASPtr		*pNew;
+
+ASPtr
+dlListCreateBefore(pList, pOld)
+    DLList*		*pList;
+    ASPtr		*pOld;
+
+void
+dlListElemRemove(pList, pOld)
+    DLList*		*pList;
+    ASPtr		*pCur;
+
+.CE
+
+.SH DESCRIPTION
+There are two varieties of each function.  The \fIcreate\fP variety
+allocates a new element, and links it into the list.  A pointer
+to the new element is returned.  The \fIinsert\fP
+variety takes an element, \fIpNew\fP that has been allocated previously
+(and is currently \fBnot\fI in a list) and links
+it into the list.
+.PP
+The \fIdlListElemRemove\fP function will remove an element from the list.
+If the element is not currently in the list, no action will occur.
+
+.SH ARGUMENTS
+.TP
+.B pNew
+An element that is not currently in any list.
+Using an object that is already in a list will result in an error.
+.TP
+.B pOld
+An object that is currently in a valid list.  The new element
+is inserted adjacent to this element.
+Using an object that is not already in the list will result in an error.
+
+.SH SEE ALSO
+dlList(3),
+ll(3)

@@ -1,0 +1,118 @@
+'\" t
+'	# that line tells man to use tbl && col
+.TH memHeap 3 $Date$
+.SH NAME
+MEMHeap,
+memHeapCreate,
+memHeapDestroy,
+memHeapObAlloc,
+memHeapObFree,
+memPublicHeapCreate,
+MEMHeapStats,
+memHeapStatsCalc,
+memHeapStatsPrint
+\- Efficient Memory Heap Management
+.SH SYNOPSIS
+.CS
+#include "mem.h"
+
+typedef struct _MEMHeap MEMHeap;
+
+MEMHeap*
+memHeapCreate(name, pSuper)
+    char		*name;
+    MEMSuperHeap	*pSuper;
+
+MEMHeap*
+memPublicHeapCreate(name, objectSize)
+    char		*name;
+    int			objectSize;
+
+void
+memHeapDestroy(pHeap)
+    MEMHeap		*pHeap;
+
+ASPtr
+memHeapObAlloc(pHeap)
+    MEMHeap		*pHeap;
+
+void
+memHeapObFree(pHeap, pOb)
+    MEMHeap		*pHeap;
+    ASPtr		*pOb;
+
+typedef struct _MEMHeapStats MEMHeapStats;
+
+void
+memHeapStatsCalc(pHeap, pStats)
+    MEMHeap		*pHeap;
+    MEMHeapStats	*pStats;
+
+void
+memHeapStatsPrint(pStats)
+    MEMHeapStats	*pStats;
+
+.CE
+.SH DESCRIPTION
+A heap allows efficient allocations of fixed sized objects with
+per-component or per-instance statistics collection.  A heap
+is attached at time of creation to a super heap, from which all
+objects are allocated.
+.PP
+A public heap is heap that is attached to one of a set of process-wide
+super heaps.
+.PP
+The \fImemHeapCreate\fP function allocates a heap attached to
+super heap \fIpSuper\fP.  The returned value is a pointer to
+a heap control block, and is allocated out of a dedicated super heap.
+.PP
+The \fImemPublicHeapCreate\fP function creates a heap attached
+to a public super heap of size \fIobjectSize\fP.  There is only one
+public super heap of a given object size, thus all heaps created
+using this function, for a given object size, will reference the same
+the same pool of objects.
+The returned value is a pointer to
+a heap control block, and is allocated out of a dedicated super heap.
+Most applications and components will use this function.
+.PP
+The \fImemHeapDestroy\fP function frees a previously allocated
+heap.  An error will be logged if the heap is not empty.
+.PP
+The \fImemHeapObAlloc\fP function returns a pointer to a newly allocated
+object of the size specified when the attached super heap was created.
+.PP
+The \fImemHeapObFree\fP function frees an object.  The object must
+have been allocated with \fImemHeapObAlloc\fP, with the same heap specified 
+in both calls.
+.PP
+The \fImemHeapStatsCalc\fP function calculates the statistics of
+heap \fIpHeap\fP, and places the results in \fIpStats\fP.
+.PP
+The \fImemHeapStatsPrint\fP formats the statistics in \fIpStats\fP
+and prints it on stdout.
+
+.SH ARGUMENTS
+.TP
+.B name
+A statically allocated name for the heap.  Used only for statistics
+reporting.
+.TP
+.B pSuper
+A pointer to a super heap control block.
+.TP
+.B objectSize
+Specifies the size of all objects that will be allocated from the heap.
+.TP
+.B pHeap
+A pointer to a heap control block previously obtained by
+\fImemHeapCreate\fP or \fImemPublicHeapCreate\fP.
+.TP
+.B pOb
+A pointer to an object previously allocated by \fImemHeapObAlloc\fP.
+.TP
+.B pStats
+A pointer to a structure contains statistics on a heap.
+
+.SH SEE ALSO
+mem(3),
+memSuperHeap(3)

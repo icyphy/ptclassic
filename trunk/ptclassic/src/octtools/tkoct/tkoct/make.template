@@ -1,0 +1,58 @@
+# Ptolemy-style makefile for tkvem
+# tkvem is a tcltk vem replacement.
+# Version identification:
+# $Id$
+# Copyright (c) 1991-1994 The Regents of the University of California.
+#                       All Rights Reserved.
+
+# Root of Ptolemy directory
+ROOT=../../..
+# Where we are
+VPATH = ../../../src/tkvem/tkvem
+# get configuration info
+CONFIG=$(ROOT)/mk/config-$(ARCH).mk
+include $(CONFIG)
+
+OBJS = appinit.o gedTk.o toct.o gedDraw.o tkhFont.o toctFacet.o
+
+
+SRCS = $(OBJS:.o=.c)
+HDRS = ged.h gedInt.h tkh.h toct.h
+
+all:	makefile tkvem
+
+TKVEM_LIBS = -L../tkgraph -ltkgraph -L../top -ltop -L$(OCTLIBDIR) \
+	-lregion -lkd -lgu -ltap -loh -loct -ltr -lst \
+	-lutility -lerrtrap -luprintf -lport $(TK_LIBSPEC) $(TCL_LIBSPEC)
+
+# Use the $(LINKER) so the binary is statically linked for distribution.
+# On suns, cc takes -Bstatic, gcc takes -static, so we can't just add a flag
+# here.
+tkvem:	$(OBJS)
+	rm -f tkvem
+	$(LINKER) $(LINKFLAGS) -o $@ $(OBJS) $(TKVEM_LIBS) $(X11EXT_LIBSPEC) $(X11_LIBSPEC) $(SYSLIBS)
+
+tkvem.debug:	$(OBJS)
+	rm -f tkvem
+	$(LINKER) $(LINKFLAGS_D) -o $@ $(OBJS) $(TKVEM_LIBS) $(X11EXT_LIBSPEC) $(X11_LIBSPEC) $(SYSLIBS)
+
+
+OUT = $(BINDIR)/tkvem
+
+$(OUT):	tkvem
+	rm -f $(OUT)
+	ln tkvem $(OUT)
+
+install:	makefile $(OUT)
+
+# top is a package used by tkvem
+TOPDIR = $(VPATH)/../top
+TKGRAPHDIR = $(VPATH)/../tkgraph
+
+C_INCL = -I$(OCTTOOLS)/include -I$(TOPDIR) -I$(TKGRAPHDIR) -I$(TK_INCDIR) -I$(TCL_INCDIR) $(PTCOMPAT_INCSPEC) $(X11_INCSPEC)
+
+# include common definitions, rules
+include $(ROOT)/mk/common.mk
+
+# Dont add anything after the next line; makedepend will zap it.
+# DO NOT DELETE THIS LINE -- make depend depends on it.

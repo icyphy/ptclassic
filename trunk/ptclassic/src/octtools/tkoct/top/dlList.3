@@ -1,0 +1,104 @@
+'\" t
+'	# that line tells man to use tbl && col
+.TH dlList 3 $Date$
+.SH NAME
+DLList,
+dlListCreate,
+dlListDestroy,
+dlListElemCreate,
+dlListElemDestroy,
+dlListEmptyB,
+dlListSize,
+dlListElemValidB,
+\- Light weight linked list
+.SH SYNOPSIS
+.CS
+#include "dlMacros.h"
+#include "dlList.h"
+
+typedef struct _DLList DLList;
+
+DLList*
+dlListCreate(name, objectSize)
+    char		*name;
+    int			objectSize;
+
+void
+dlListDestroy(pList)
+    DLList*		*pList;
+
+ASPtr
+dlListElemCreate(pList)
+    DLList*		*pList;
+
+void
+dlListElemDestroy(pList, pCur)
+    DLList*		*pList;
+    ASPtr		*pCur;
+
+ASLogical
+dlListEmptyB(pList)
+    DLList*		*pList;
+
+int
+dlListSize(pList)
+    DLList*		*pList;
+
+ASLogical
+dlListElemValidB(pList, pCur)
+    DLList*		*pList;
+    ASPtr		*pCur;
+
+.CE
+.SH DESCRIPTION
+This subcomponent provides the functions for creating and destroying
+light weight doublely linked lists.  These light weight lists use
+the mem(3) efficient memory component to perform allocation on
+behalf of the application.  These functions build on the macros
+defined in dlMacros(3).
+.PP
+The \fIdlListCreate\fP function creates a new list and returns a pointer
+to it.  The elements that will be stored and linked by the list
+are of \fIobjectSize\fP.  This size does \fBnot\fP include the 
+memory used for the link pointers.  The \fIname\fP is used as the
+name of the heap created to store elements added to the list.
+.PP
+The \fIdlListDestroy\fP function destroys the list and releases all resources
+associated with it. \fIpList\fP and any elements allocated from it
+must not be referenced after this call.
+.PP
+The \fIdlListElemCreate\fP allocates an element from the heap associated
+with \fIpList\fP, and returns a pointer to it.  The element is \fBnot\fP
+linked into the list.
+.PP
+The \fIdlListElemDestroy\fP destroys an element, freeing the memory
+associated with it.  If the element is currently linked into the list,
+it is unlinked (removed) first.
+.PP
+The \fIdlListEmptyB\fP function return logical true if and only if
+the list has no elements linked into it.  It may, however, have
+elements that are allocated from it, but not linked into it.
+.PP
+The \fIdlListSize\fP function returns the number of elements linked
+into the list.
+.PP
+The \fIdlListElemValidB\fP function traverses the list in O(n) time
+to check if \fIpCur\fP is a valid element of \fIpList\fP.
+
+.SH ARGUMENTS
+.TP
+.B pList
+A DLList allocated with \fIdlListCreate\fP.
+.TP
+.B pCur
+An element of the list to act on.
+.TP
+.B name
+The name of the list and heap, used for statistics reporting only.
+.TP
+.B objectSize
+The size of the elements to allocate.
+
+.SH SEE ALSO
+dlAdd(3),
+ll(3)

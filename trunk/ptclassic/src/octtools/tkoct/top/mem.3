@@ -1,0 +1,119 @@
+'\" t
+'	# that line tells man to use tbl && col
+.TH mem 3 $Date$
+.SH NAME
+MEMHeap,
+MEMString,
+MEMSuperHeap
+\- Efficient Memory Management
+.SH SYNOPSIS
+.CS
+#include "mem.h"
+
+ASStatus
+memInitialize(acp, avp)
+    int			*acp;
+    char		***avp;
+
+typedef struct _MEMCoreStats MEMCoreStats;
+
+void
+memCoreStatsCalc(pStats)
+    MEMCoreStats	*pStats;
+
+void
+memCoreStatsShow()
+
+.CE
+.SH DESCRIPTION
+The \fImem\fP component supports a variety of efficient, special purpose
+memory management functions.  This manual page provides an overview of
+the concepts used.
+.PP
+The mem string sub-component provides efficient storage of arbitrary
+length character strings.  See memString(3as).
+.PP
+A super heap is a pool of memory from which objects of a fixed size
+are allocated.  Super heaps are close to zero memory-overhead,
+and are more than three times as fast as malloc(3).
+In general, a given super heap is process-wide (used by all components
+and all instances of all components within a process), but may,
+in certain cases, be component-specific or instance-specific.
+Thus statistics gathered on a super heap generally reflect process-wide
+memory usage, and don't help identify how much memory each component
+is using.
+.PP
+A heap is closely related to a super heap, but allows component-specific
+or instance-specific statistics gathering.  A given each heap is attached
+to a pre-existing super heap when it is created.  All object allocation
+is done from the attached super heap, but statistics are gathered
+on a per-heap basis.  Thus components and instances of components should
+allocate from a heap so that the memory usage of each component may
+be determined.
+.PP
+A public super heap is a global, process-wide super heap.  There is one
+public super heap for each unique object size (with sizeof(int) binning).
+Each public super heap is not created until needed, and the lookup from
+object size to super heap is constant time (table-based) for small objects,
+and linear for larger.
+.PP
+A public heap is a heap that is attached to a public super heap.
+In most components and applications, only public heaps will be used.
+.PP
+The \fImemInitialize()\fP function performs component initialization.
+Currently no arguments are used, but future versions may use resources
+to modify behavior.
+.PP
+The \fImemCoreStatsCalc\fP function calculates statistics for process-wide
+memory usage and store them into \fIpStats\fP.
+.PP
+The \fImemCoreStatsPrint\fP function displays on stdout the formatted
+version of \fIpStats\fP.
+.PP
+The \fImemCoreStatsShow()\fP function produces a listing on \fIstdout\fP
+of statistics on everything the \fImem\fP component knows about.
+This includes the statistics on every heap and super heap in the process.
+
+.SH PURPOSE
+This memory package exists to provide extra functionality, better allocation
+speed, and less memory overhead than used by traditional malloc/free.
+Specifically:
+.TP
+-
+The specification of \fImalloc\fP/\fIfree\fP allows \fIrealloc\fP to be
+called on objects that have been freed.  Allowing this functionality
+requires unnecessary memory and speed overhead.
+.TP
+-
+\fImalloc\fP provides no significant statistics, and its architecture prevents
+it from providing component-specific statistics.
+.TP
+-
+\fImalloc\fP must support arbitrary memory allocation patterns,
+typically by buddying (the process of combining two small, free
+blocks into a single larger block).  This provides very
+efficient memory usage, but at the expense of speed.  This memory package
+optimizes the speed, but at the expense of memory efficiency under certain
+allocation patterns.
+.TP
+-
+\fImalloc\fP must record the size of the blocks it allocates
+so that on a \fIfree\fP call it can tell how big the block is.
+This involves a memory overhead that can be avoided.
+.PP
+On the other hand, the goals achieved by this memory package do have
+a cost:
+.TP
+-
+It is possible for large amounts of memory to accumulate on the freelists,
+which under \fImalloc\fP could be utilized for objects of other sizes.
+.TP
+-
+It is fairly easy to corrupt this memory package, by returning memory
+to the wrong heap, writing into a block after freeing it, or freeing
+the same block twice.
+
+.SH SEE ALSO
+memHeap(3),
+memString(3),
+memSuperHeap(3)
