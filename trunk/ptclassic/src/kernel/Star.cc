@@ -66,3 +66,4 @@ int setStarIndices(Galaxy& g) {
 	return cnt;
 }
 
+ISA_FUNC(Star,Block);
