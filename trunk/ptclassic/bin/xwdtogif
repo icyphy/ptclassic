@@ -1,0 +1,8 @@
+#!/bin/csh -f
+# Version $Id$
+# Author:	T. M. Parks
+# Created:	13 April 1994
+# Generate a GIF image from a window dump.
+# Pass all command line arguments to xwd.
+
+xwd $argv | xwdtopnm | pnmdepth 255 | ppmtogif
