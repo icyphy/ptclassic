@@ -4,8 +4,9 @@ Version identification:  $Id$
  
 Author: Mudit Goel
         Neil Smyth
+        Claudio Passerone
 
-Copyright (c) 1997-1998 The Regents of the University of California.
+Copyright (c) 1997-%Q% The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -91,6 +92,11 @@ void DERCScheduler :: setup () {
         Error::abortRun(*galaxy(),
         "zero timeScale is not allowed in DE.");
     }
+
+    // Added by Claudio Passerone 09/24/1998
+    // Set indexValue of stars
+    setStarIndices(*galaxy());
+    resourceList = getResources();
 }
 
 
@@ -113,39 +119,40 @@ SequentialList* DERCScheduler :: getResources() {
 	
     SequentialList* resList = new SequentialList();
     while ((star = (DEStar*) nextStar++) != 0) {
-	if (star->isRCStar) {
-	    rcStar = (DERCStar*)star;
-	    newResourceName = rcStar->resource;; 	
+	    if (star->isRCStar) {
+	        rcStar = (DERCStar*)star;
+	        newResourceName = rcStar->resource;
             if (strcmp(newResourceName, "HW")) {	 //Not a HW star
-		found = 0;
-		ListIter nextResource(*resList);
-		while ((found == 0) && ((reslink = (Resource*)nextResource++) != NULL)) {
-		    if (strcmp (newResourceName, reslink->name) == 0){
-			found = 1;   // Resource already exists
-			rcStar->resourcePointer = reslink;
+		        found = 0;
+		        ListIter nextResource(*resList);
+		        while ((found == 0) && ((reslink = (Resource*)nextResource++) != NULL)) {
+		            if (strcmp (newResourceName, reslink->name) == 0) {
+    			        found = 1;   // Resource already exists
+	    		        rcStar->resourcePointer = reslink;
 
                         // Now check that this Star has the same scheduling
                         // policy as all the other Stars using this resource
-                        if (rcStar->schedPolicy != reslink->schedPolicy) {
-                            Error::abortRun("Stars with different scheduling \
-policies executing on same resource");
-                            return FALSE;
-                        }
-		    }
-		}
-		if (found == 0) {
-                    int schedPolicy = (rcStar->schedPolicy);
+//                        Deleted by Claudio Passerone
+//                        if (rcStar->schedPolicy != reslink->schedPolicy) {
+//                            Error::abortRun("Stars with different scheduling policies executing on same resource");
+//                            return FALSE;
+//                        }
+                    }
+		        }
+		        if (found == 0) {
+//                    Deleted by Claudio Passerone
+//                    int schedPolicy = (rcStar->schedPolicy);
+                    int schedPolicy = -1;
                     Resource* newResource = new Resource(newResourceName, schedPolicy, this); 
                     resList->append(newResource);
-		    rcStar->resourcePointer = newResource;
+    		        rcStar->resourcePointer = newResource;
                 }
-	    }
-	    else { // This is a HW star
-		// 1 indicates that the resource doesn't allow preemption
-		Resource* newResource = new Resource("HW", NonPreemptive, this);
+	        } else {
+                // This is a HW star
+		        Resource* newResource = new Resource("HW", -1, this);
                 rcStar->resourcePointer = newResource;	
+	        }
 	    }
-	}
     }
     return resList;
 }
@@ -160,8 +167,10 @@ policies executing on same resource");
 // Run until StopTime.
 
 int DERCScheduler :: run () {
-    resourceList = getResources();
-    
+//    Deleted by Claudio Passerone  9/24/1998
+//    Added in the setup() method
+//    resourceList = getResources();
+
     if (SimControl::haltRequested() || !galaxy()) {
         Error::abortRun("Calendar Queue scheduler has no galaxy to run");
         return FALSE;
