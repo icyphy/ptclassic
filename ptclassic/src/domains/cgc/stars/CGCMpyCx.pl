@@ -22,16 +22,16 @@ limitation of liability, and disclaimer of warranty provisions.
     constructor { noInternalState(); }
 
     go { 
-	addCode(startOp);
+	addCode(startOp(input.numberPorts()));
 	int i;
-	for (i=1;i<=input.numberPorts();i++) 
+	for (i=2;i<=input.numberPorts();i++) 
 	    addCode(doOp(i)); 
     }
 
-    codeblock(startOp) {
-	complex temp;
-	$ref(output).real = 1;
-	$ref(output).imag = 1;
+    codeblock(startOp,"int i") {
+	@(i>1?"complex temp;":"/*Unit gain - no multiplication required*/")
+	$ref(output).real = $ref(input#1).real;
+	$ref(output).imag = $ref(input#1).imag;
     }
 
     codeblock(doOp,"int i") {
@@ -39,8 +39,8 @@ limitation of liability, and disclaimer of warranty provisions.
 		    $ref(output).imag * $ref(input#@i).imag;
 	temp.imag = $ref(output).real * $ref(input#@i).imag +
 		    $ref(output).imag * $ref(input#@i).real;
-	$ref(output).real += temp.real;
-	$ref(output).imag += temp.imag;
+	$ref(output).real = temp.real;
+	$ref(output).imag = temp.imag;
     }
 
     exectime {return 4*input.numberPorts();}
