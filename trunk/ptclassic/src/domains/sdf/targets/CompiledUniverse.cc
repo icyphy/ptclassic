@@ -43,6 +43,7 @@ and the universe state values.
 **************************************************************************/
 
 #include "CompiledUniverse.h"
+#include <stdio.h>              // sscanf()
 
 // function to parse the command line.
 
