@@ -257,11 +257,11 @@ StringList CompileTarget::quoteQuotationMarks(const char* str) {
     StringList ret;
     char piece[101];
     if (!str) return "";
-    while (*str != `\0`) {
+    while (*str != '\0') {
 	char* piecep = piece;
         for (int i = 0; i < 100; i++) {
-	    if (*str == `\0`) {
-		*(piecep++) = `\0`;
+	    if (*str == '\0') {
+		*(piecep++) = '\0';
 		break;
 	    } else if (*str == '\"') {
 	        *(piecep++) = '\\';
