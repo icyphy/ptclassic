@@ -67,9 +67,9 @@
 # Usual options.
 #
 itk::usual Widgettree {
-    keep -disabledforeground -highlightthickness -borderwidth \
-	    -font -highlightcolor -background \
-	    -foreground -activebackground -cursor -activeforeground
+    keep -font -background -cursor -disabledforeground -foreground \
+	    -highlightthickness -highlightcolor
+    rename -labelfont -font font Font
 }
 
 # ------------------------------------------------------------------
@@ -80,7 +80,7 @@ itk::usual Widgettree {
 # each node to open and close the node. The widget is designed for
 # implementing unfolding preference and dialog boxes as well as
 # viewers of tree-like structures. Each item in the tree is referenced
-# by a tag, which is constructed in the same manner as hierarchical
+# by a unique id, which is constructed in the same manner as hierarchical
 # Tk widget names, but without the leading period. Widgets can be added
 # to the tree either when the Widgettree is created or as each node
 # is opened. Default bindings provides traversal through the tree using
@@ -92,8 +92,9 @@ class iwidgets::Widgettree {
     constructor {args} {}
     destructor {}
 
-    public variable closedbitmap @arrowclose.xbm
-    public variable openedbitmap @arrowopen.xbm
+    itk_option define -closedicon closedIcon Icon closedNode
+    itk_option define -openicon openIcon Icon openNode
+
     public variable closecommand ""
     public variable createcommand ""
     public variable opencommand ""
@@ -103,37 +104,39 @@ class iwidgets::Widgettree {
     itk_option define -pady padY PadY 0
     itk_option define -traversal traversal Traversal 1
 
-    itk_option define -activebackground activeBackground Foreground "#ececec"
-    itk_option define -activeborderwidth activeBorderWidth BorderWidth 2 
-    itk_option define -activeforeground activeForeground Background black
-    itk_option define \
-	    -disabledforeground disabledForeground DisabledForeground #a3a3a3 
-    itk_option define \
-	    -font font Font "-Adobe-Helvetica-Bold-R-Normal--*-120-*-*-*-*-*-*"
-    itk_option define -foreground foreground Foreground Black
+    itk_option define -background background Background "#ececec"
+    itk_option define -disabledforeground disabledForeground DisabledForeground #a3a3a3 
+    itk_option define -font font Font \
+	    "-Adobe-Helvetica-Bold-R-Normal--*-120-*-*-*-*-*-*"
+    itk_option define -foreground foreground Foreground black
+    itk_option define -highlightcolor highlightColor HighlightColor black
+    itk_option define -highlightthickness highlightThickness \
+	    HighlightThickness 2
 
-    public method add      {type tag args}
-    public method close    {tag}
-    public method delete   {tag}
-    public method hide     {tag}
-    public method itemcget {tag option}
-    public method itemconfigure {tag {option {}} args}
-    public method load     {tag contents {level 1}}
-    public method locate   {x y {tag {}}}
-    public method names    {{tag {}}}
-    public method open     {tag}
-    public method options  {type {optioncmds _}}
-    public method traverse {mode {tag {}}}
-    public method type     {tag}
+    public method add      {type id args}
+    public method close    {nodeid}
+    public method delete   {id}
+    public method disable  {nodeid}
+    public method enable   {nodeid}
+    public method hide     {nodeid}
+    public method itemcget {id option}
+    public method itemconfigure {id {option {}} args}
+    public method locate   {x y {id {}}}
+    public method names    {{nodeid {}}}
+    public method open     {nodeid}
+    public method toggle   {nodeid}
+    public method traverse {mode {nodeid {}}}
+    public method type     {id}
 
-    private method _mkNodeFrame {tag}  ;# Make the containing frame
+    private method _mkNodeFrame {id}  ;# Make the containing frame
+    private method _verifyNode {id}   ;# Verify that an id is a node
+    private method _updateNodes {}  ;# Update all nodes after configuration
 
-    private variable _options   ;# Option commands for each _type_
     private variable _children  ;# Children of each node
     private variable _type      ;# Type of each widget, or "node"
-    private variable _tag       ;# Mapping from widget path to tag
+    private variable _id        ;# Mapping from widget path to id
     private variable _row       ;# Grid row of each item
-    private variable _state     ;# State of each node: "open" or "closed"
+    private variable _state     ;# State of each node: "opened" or "closed"
     private variable _nextrow   ;# The next available row in each node
 
     method debug {args} {
@@ -175,29 +178,34 @@ body iwidgets::Widgettree::constructor {args} {
 ##                             OPTIONS
 # ------------------------------------------------------------------
 
-# ----------------------------------------------------------------------
-## OPTION -closedbitmap
+# ------------------------------------------------------------------
+# OPTION: -closedicon
 #
-# The bitmap to display in the open/close button of
-# closed tree nodes. The bitmap may be specified in any of the
-# forms accepted by Tk_GetPixmap.
-# ----------------------------------------------------------------------
-configbody iwidgets::Widgettree::closedbitmap {
-    foreach tag [array names _state] {
-        if { $_state($tag) == "closed" } {
-            $itk_component(${tag}button) configure -bitmap $closedbitmap
-        }
+# Specifies the closed icon image.  
+# The default value is an image called closedNode, which is generated
+# automatically. Currently we have no pixmap.
+# ------------------------------------------------------------------
+configbody iwidgets::Widgettree::closedicon {
+    if { $itk_option(-closedicon) == "closedNode" } {
+	if {[lsearch [image names] closedNode] == -1} {
+	    image create bitmap closedNode -data {
+		#define closednode_width 13
+		#define closednode_height 13
+		static char closednode_bits[] = {
+		    0x00, 0x00, 0x00, 0x00, 0x10, 0x10, 0x30, 0x10,
+		    0x70, 0x10, 0xf0, 0x10, 0xf0, 0x11, 0xf0, 0x13,
+		    0xf0, 0x11, 0xf0, 0x10, 0x70, 0x10, 0x30, 0x10,
+		    0x10, 0x10};
+	    }
+	}
     }
+    _updateNodes
 }
 
 # ----------------------------------------------------------------------
 ## OPTION -closecommand
 #
 # The command to execute when a node of the tree is closed.
-# If this command is null, clicking on the open-close button will
-# close the node; if not, the node tag is appended
-# to the command and the command is executed at the global scope,
-# and the node will not close automatically.
 # ----------------------------------------------------------------------
 configbody iwidgets::Widgettree::closecommand {
 }
@@ -205,14 +213,29 @@ configbody iwidgets::Widgettree::closecommand {
 # ----------------------------------------------------------------------
 ## OPTION -createcommand
 #
-# The command to execute when a node of the tree is opened
-# if the node does not currently contain any widgets. The node tag is appended
-# to the command and the command is executed at the global scope.
-# The command should use the <b>add</b> method to create the contents of
-# the node. If the command is null, the node is opened but
-# nothing will be displayed.
+# The command to execute when a node of the tree is opened and
+# the node has no children.
 # ----------------------------------------------------------------------
 configbody iwidgets::Widgettree::createcommand {
+}
+
+# ----------------------------------------------------------------------
+## OPTION -disabledforeground
+#
+# The foreground color propagated to disabled child widgets, including
+# node labels.
+# ----------------------------------------------------------------------
+configbody iwidgets::Widgettree::disabledforeground {
+    _updateNodes
+}
+
+# ----------------------------------------------------------------------
+## OPTION -foreground
+#
+# The foreground color propagated to child widgets, including node labels.
+# ----------------------------------------------------------------------
+configbody iwidgets::Widgettree::foreground {
+    _updateNodes
 }
 
 # ----------------------------------------------------------------------
@@ -221,43 +244,47 @@ configbody iwidgets::Widgettree::createcommand {
 # The minimum indent for each level of the tree. This
 # option is needed in order that each level is indented correctly,
 # regardless of the presence or not of open-close buttons at
-# each level. It sets the minimum indent, not the actual indent:
-# if either <b>-closedbitmap</b> or <b>-openedbitmap</b> makes an
-# open-close button wider than the specified indent, that width
-# will be used instead. (There is no reasonable way to avoid this,
-# since that's how Tk's grid manager works.) The default value is
-# 24 pixels.
+# each level. It sets the minimum indent, not the actual indent,
+# since that's how Tk's grid manager works.
 # ----------------------------------------------------------------------
 configbody iwidgets::Widgettree::indent {
     grid columnconfigure $itk_interior 0 -minsize $indent
-    foreach tag [array names _state] {
-	if [::info exists itk_component($tag)] {
-	    grid columnconfigure $itk_component($tag) 0 -minsize $indent
+    foreach id [array names _state] {
+	if [::info exists itk_component($id)] {
+	    grid columnconfigure $itk_component($id) 0 -minsize $indent
 	}
     }
 }
 
-# ----------------------------------------------------------------------
-## OPTION -openbitmap
+# ------------------------------------------------------------------
+# OPTION: -openicon
 #
-# The bitmap to display in the open/close button of
-# open tree nodes. The bitmap may be specified in any of the
-# forms accepted by Tk_GetPixmap.
-# ----------------------------------------------------------------------
-configbody iwidgets::Widgettree::openedbitmap {
-    foreach tag [array names _state] {
-        if { $_state($tag) == "open" } {
-            $itk_component(${tag}button) configure -bitmap $openedbitmap
-        }
+# Specifies the open icon image.  
+# The default value is an image called openNode, which is generated
+# automatically. Currently we have no pixmap.
+# ------------------------------------------------------------------
+configbody iwidgets::Widgettree::openicon {
+    if { $itk_option(-openicon) == "openNode" } {
+	if {[lsearch [image names] openNode] == -1} {
+	    image create bitmap openNode -data {
+		#define opennode_width 13
+		#define opennode_height 13
+		static char opennode_bits[] = {
+		    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xfc, 0x1f,
+		    0xf8, 0x0f, 0xf0, 0x07, 0xe0, 0x03, 0xc0, 0x01,
+		    0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0xfc, 0x1f,
+		    0x00, 0x00};
+	    }
+	}
     }
+    _updateNodes
 }
 
 # ----------------------------------------------------------------------
 ## OPTION -opencommand
 #
 # The command to execute when a node of the tree is opened
-# and the node already has children. The node tag is appended
-# to the command and the command is executed at the global scope.
+# and the node already has children.
 # The node is opened after the command returns.
 # ----------------------------------------------------------------------
 configbody iwidgets::Widgettree::opencommand {
@@ -268,20 +295,12 @@ configbody iwidgets::Widgettree::opencommand {
 #
 # The padding to use when packing widgets. Widgets are packed
 # with the <b>-padx</b> option to the Tk grid command set to this value.
-# To override this value for individual widgets, call <b>grid</b> directly
-# with the component widget. For example:
-# # <pre>
-#   grid configure [$widgettree component size] -padx 4
-# </pre>
-# Note that changing this option will return _all_ widgets
-# to this padding value, even if the padding has explicitly been
-# overridden as just described. 
+# Changing this option will re-pad _all_ widgets.
 # ----------------------------------------------------------------------
 configbody iwidgets::Widgettree::padx {
-    foreach tag [array names _state] {
-	if [::info exists itk_component($tag)] {
-	    grid configure $itk_component($tag) \
-		    -padx $itk_option(-padx)
+    foreach id [array names _type] {
+	if { $_type($id) != "node" } {
+	    grid configure $itk_component($id) -padx $itk_option(-padx)
 	}
     }
 }
@@ -291,20 +310,12 @@ configbody iwidgets::Widgettree::padx {
 #
 # The padding to use when packing widgets. Widgets are packed
 # with the <b>-pady</b> option to the Tk grid command set to this value.
-# To override this value for individual widgets, call <b>grid</b> directly
-# with the component widget. For example:
-# # <pre>
-#   grid configure [$widgettree component size] -pady 4
-# </pre>
-# Note that changing this option will return _all_ widgets
-# to this padding value, even if the padding has explicitly been
-# overridden as just described. 
+# Changing this option will re-pad _all_ widgets.
 # ----------------------------------------------------------------------
 configbody iwidgets::Widgettree::pady {
-    foreach tag [array names _state] {
-	if [::info exists itk_component($tag)] {
-	    grid configure $itk_component($tag) \
-		    -pady $itk_option(-pady)
+    foreach id [array names _type] {
+	if { $_type($id) != "node" } {
+	    grid configure $itk_component($id) -pady $itk_option(-pady)
 	}
     }
 }
@@ -334,63 +345,28 @@ configbody iwidgets::Widgettree::traversal {
 
 
 # ------------------------------------------------------------------
-## METHOD: _mkNodeFrame tag
+## METHOD: add type id ?option value...? ?optioncmds?
 #
-# Create the frame for an individual node. This method is called the
-# first time an item is added to a node, not when the node itself
-# is created. This strategy reduces the time to create each node
-# of the tree.
+# Add a new node or widget to the tree. The first argument is the widget type,
+# and the second is an id to give it. Raise an error if an item with
+# _id_ already exists. IDs are hierarchical, as in *foo.bar*. The
+# special type "node" creates a new node, in which case options are passed
+# directly to the label constructor. Any other _type_ is assumed to be
+# the type of the widget to create. Optional arguments are passed to the
+# widget constructor, except for the _optioncmds_, if supplied. The
+# return value is the id.
 # ------------------------------------------------------------------    
-body iwidgets::Widgettree::_mkNodeFrame {tag} {
-    # Create the frame
-    itk_component add $tag {
-	frame $itk_interior.$tag
+body iwidgets::Widgettree::add {type id args} {
+    if [::info exists _type($id)] {
+	error "Item $id already exists"
     }
-    # Remember the reverse mapping
-    set _tag($itk_interior.$tag) $tag
+    # Decompose the id
+    regexp {^((([^\.]+)?.*)?\.)?[^\.]+$} $id _ _ parent
 
-    # If the node is open, display its contents
-    if { $_state($tag) == "open" } {
-	grid $itk_interior.$tag \
-		-row [expr $_row($tag)+1] \
-		-column 1 \
-		-sticky nw
-    }
-    # Configure internal column size and weight
-    grid columnconfigure $itk_interior.$tag 0 -minsize $indent -weight 0
-    grid columnconfigure $itk_interior.$tag 1 -weight 1
-}
-
-# ------------------------------------------------------------------
-## METHOD: add type tag ?option value...?
-#
-# Add a new widget to the tree. The first argument is the widget type,
-# and the second is a tag to give it. Raise an error if an item with
-# _tag_ already exists. Tags are hierarchical, as in *foo.bar*. The
-# special type <b>node</b> is used to create a new node, in which case
-# options are passed directly to the constructor of the node label, which
-# is a Tk label.
-#
-# Any other value of _type_ is assumed to be the type of the widget to
-# create. The optional arguments comprise an option-value list which can
-# contain any valid options for _type_. The return value is the tag.
-# ------------------------------------------------------------------    
-body iwidgets::Widgettree::add {type tag args} {
-    if [::info exists _type($tag)] {
-	error "Item $tag already exists"
-    }
-    # Decompose the tag
-    regexp {^((([^\.]+)?.*)?\.)?[^\.]+$} $tag _ _ parent
-
-    # If this is a hierarchical tag, check that the parent is a
+    # If this is a hierarchical id, check that the parent is a
     # node. If the containing frame does not exist, create it.
     if { $parent != "" } {
-	if ![::info exists _type($parent)] {
-	    error "Unknown parent item: $parent"
-	}
-	if { $_type($parent) != "node" } {
-	    error "Item $parent is not a node"
-	}
+    	_verifyNode $parent
 	if ![::info exists itk_component($parent)] {
 	    _mkNodeFrame $parent
 	}
@@ -398,259 +374,264 @@ body iwidgets::Widgettree::add {type tag args} {
     # Process according to type
     if { $type == "node" } {
 	# Create the open/close button. Let it take the focus.
-	itk_component add ${tag}button {
-	    button $itk_interior.${tag}button \
-		    -command "$this open $tag; $this traverse to $tag" \
+	itk_component add ${id}button {
+	    button $itk_interior.${id}button \
+		    -command "$this toggle $id; $this traverse to $id" \
 		    -borderwidth 1 \
-		    -bitmap $closedbitmap
+		    -image $itk_option(-closedicon)
 	} {
-            rename -takefocus -traversal traversal Traversal
+	    keep -background -cursor
+	    rename -takefocus -traversal traversal Traversal
         }
-	grid $itk_component(${tag}button) \
+	grid $itk_component(${id}button) \
 		-row $_nextrow($parent) \
 		-column 0 \
 		-sticky nw
 
         # Create bindings for traversal and open-close
-        bind $itk_component(${tag}button) <Key> "$this traverse %K %W"
+        bind $itk_component(${id}button) <Key> "$this traverse %K %W"
 
 	# Create the accompanying label
-	itk_component add ${tag}label {
-	    eval label $itk_interior.${tag}label -takefocus 0 $args
+	itk_component add ${id}label {
+	    eval label $itk_interior.${id}label -takefocus 0 $args
 	}
-	grid $itk_component(${tag}label) \
+	grid $itk_component(${id}label) \
 		-row $_nextrow($parent) \
 		-column 1 \
 		-sticky nw
 	
 	# Remember the parameters of this node
-	set _tag($itk_component(${tag}label)) $tag
-        set _children($tag) {}
-	set _nextrow($tag) 0
-	set _row($tag) $_nextrow($parent)
-	set _state($tag) closed
-	set _type($tag) node
+	set _id($itk_component(${id}label)) $id
+        set _children($id) {}
+	set _nextrow($id) 0
+	set _row($id) $_nextrow($parent)
+	set _state($id) closed
+	set _type($id) node
 
-        lappend _children($parent) $tag
+        lappend _children($parent) $id
 
-	# Update the row counter. Increment it by two so that when the
-	# button is opened, the new widget can be placed in the intervening row
+	# Update the row counter. Increment it by two so that when the button
+	# is opened, the new widget can be placed in the intervening row
 	incr _nextrow($parent) 2
 
     } else {
 	# Extract options
-        if [::info exists _options($type)] {
-            set options $_options($type)
-        } else {
-            set options "\nusual\n"
-        }
+	if { [llength $args] & 1 } {
+	    set optioncmds [lindex $args end]
+	    set args [lreplace $args end end]
+	} else {
+	    set optioncmds "\nusual\n"
+	}
 	# Create the widget
-	itk_component add $tag {
-	    eval $type $itk_interior.$tag $args
-	} $options    ;# indenting \}
-
+	itk_component add $id {
+	    eval $type $itk_interior.$id $args
+	} $optioncmds    ;# indenting \}
+	
 	# Grid it
-	grid $itk_component($tag) \
+	grid $itk_component($id) \
 		-row $_nextrow($parent) \
 		-column 1 \
 		-padx $itk_option(-padx) \
 		-pady $itk_option(-pady) \
 		-sticky nw
-	    
+	
 	# Remember the parameters of this item
-	set _tag($itk_component($tag)) $tag
-	set _row($tag) $_nextrow($parent)
-	set _type($tag) $type
+	set _id($itk_component($id)) $id
+	set _row($id) $_nextrow($parent)
+	set _type($id) $type
 	
 	# Update the row counter
 	incr _nextrow($parent)
     }
-    return $tag
+    return $id
 }
 
 # ------------------------------------------------------------------
-## METHOD: close tag
+## METHOD: close nodeid
 #
-# Close a node of the tree. If the node is already closed, this
-# method does nothing. If the <b>-closecommand</b> option is
-# not null, append the tag and evaluate the command in the global
-# scope. In this case, the node is not closed -- the close command must
-# explicitly close it with the <b>hide</b> method. If the
-# <b>-closecommand</b> option is null, the node is just closed. 
-# Raise an error if the node does not exist or if _tag_ is a leaf.
+# Close a node of the tree. If the node is already closed or is
+# disabled, do nothing.
+# If the -closecommand option is not null, append the nodeid and evaluate
+# the command in the global scope -- the close command must explicitly close
+# the node with the hide{} method. Otherwise, just close the node.
 # ------------------------------------------------------------------
-body iwidgets::Widgettree::close {tag} {
-    if ![::info exists _type($tag)] {
-	error "Unknown item: $tag"
-    }
-    if { $_type($tag) != "node" } {
-	error "Item $tag is not a node"
-    }
-    if { $_state($tag) == "closed" } {
+body iwidgets::Widgettree::close {nodeid} {
+    _verifyNode $nodeid
+    if { $_state($nodeid) == "closed"  \
+	    || [$itk_component(${nodeid}button) cget -state] == "disabled" } {
 	return
     }
 
-    set _state($tag) closed
+    set _state($nodeid) closed
     if { $closecommand != "" } {
 	# If there's a command, execute it
-	uplevel #0 $closecommand $tag
+	uplevel #0 $closecommand $nodeid
     } else {
 	# Otherwise just close the node
-	hide $tag
+	hide $nodeid
     }
 }
 
 # ------------------------------------------------------------------
-## METHOD: delete tag
+## METHOD: delete id
 #
-# Delete an item from the tree. If the item is a node, then all
-# descendents are deleted too. Raise an error if the item
-# does not exist. Note that the grid rows occupied by the item
-# are not reclaimed, but this should not be visible.
+# Delete an item from the tree. If the item is a node, then all descendents
+# are deleted too. Raise an error if the item does not exist. Grid rows
+# occupied by the item are not reclaimed, but this should not be visible.
 # ------------------------------------------------------------------
-body iwidgets::Widgettree::delete {tag} {
-    if ![::info exists _type($tag)] {
-	error "Unknown item: $tag"
+body iwidgets::Widgettree::delete {id} {
+    if ![::info exists _type($id)] {
+	error "Unknown item: $id"
     }
-    # Decompose the tag
-    regexp {^((([^\.]+)?.*)?\.)?[^\.]+$} $tag _ _ parent
+    # Decompose the id
+    regexp {^((([^\.]+)?.*)?\.)?[^\.]+$} $id _ _ parent
 
     # Get the items to delete. If a node, get all descendents in
-    # bottom-up order, otherwise just the tag.
-    if { $_type($tag) == "node" } {
-	set items [lsort -decreasing [array names _type $tag.]]
-	lappend items $tag
+    # bottom-up order, otherwise just the id.
+    if { $_type($id) == "node" } {
+	set items [lsort -decreasing [array names _type $id.]]
+	lappend items $id
     } else {
-	set items $tag
+	set items $id
     }
     # Delete each item
-    foreach tag $items {
-	if { $_type($tag) == "node" } {
-	    destroy $itk_component(${tag}button)   ;# button
-	    destroy $itk_component(${tag}label)    ;# label
-	    destroy $itk_component($tag)           ;# frame
+    foreach id $items {
+	if { $_type($id) == "node" } {
+	    unset _id($itk_component(${id}label))
+	    unset _id($itk_component($id))
 
-	    unset _tag($itk_component(${tag}label))
-	    unset _tag($itk_component($tag))
+	    unset _type($id)
+	    unset _state($id)
+	    unset _row($id)
+	    unset _children($id)
 
-	    unset itk_component(${tag}button)
-	    unset itk_component(${tag}label)
-	    unset itk_component($tag)
+	    destroy $itk_component(${id}button)   ;# button
+	    destroy $itk_component(${id}label)    ;# label
+	    destroy $itk_component($id)           ;# frame
 
-	    unset _type($tag)
-	    unset _state($tag)
-	    unset _row($tag)
-	    unset _children($tag)
+	    unset itk_component(${id}button)   ;# button
+	    unset itk_component(${id}label)    ;# label
+	    unset itk_component($id)           ;# frame
 
 	} else {
-	    # Bogosity needed because we can't tell if this is
-	    # a Tk widget or a mega-widget... I think...
-	    if [catch {destroy $itk_component($tag)}] {
-		delete object $itk_component($tag)
-	    }
-	    unset _tag($itk_component($tag))
-	    unset itk_component($tag)
-	    unset _type($tag)
-	    unset _row($tag)
+	    unset _id($itk_component($id))
+	    unset _type($id)
+	    unset _row($id)
+
+	    destroy $itk_component($id)
+	    unset itk_component($id)
 	}
     }
     # Remove from parent list
-    set t [lsearch -exact $_children($parent) $tag]
+    set t [lsearch -exact $_children($parent) $id]
     set _children($parent) [lreplace $_children($parent) $t $t]
 }
 
 # ------------------------------------------------------------------
-## METHOD: hide tag
+## METHOD: disable nodeid
 #
-# Unconditionally close a node of the tree, without checking
-# the <b>-closecommand</b> option. If the node is already closed,
-# this method does nothing. Raise an error if the node does
-# not exist or if _tag_ is a leaf.
+# Disable a node. The button will be disabled, and the label foreground
+# change to the disabled foreground.
 # ------------------------------------------------------------------
-body iwidgets::Widgettree::hide {tag} {
-    if ![::info exists _type($tag)] {
-	error "Unknown item: $tag"
-    }
-    if { $_type($tag) != "node" } {
-	error "Item $tag is not a node"
-    } 
-    if { $_state($tag) != "closed" } {
+body iwidgets::Widgettree::disable {nodeid} {
+    _verifyNode $nodeid
+    $itk_component(${nodeid}button) configure -state disabled
+    $itk_component(${nodeid}label) configure \
+	    -foreground $itk_option(-disabledforeground)
+}
+
+# ------------------------------------------------------------------
+## METHOD: enable nodeid
+#
+# Enable a node. The button will be enabled, and the label foreground
+# change to the regular foreground.
+# ------------------------------------------------------------------
+body iwidgets::Widgettree::enable {nodeid} {
+    _verifyNode $nodeid
+    $itk_component(${nodeid}button) configure -state normal
+    $itk_component(${nodeid}label) configure -foreground $itk_option(-foreground)
+}
+
+# ------------------------------------------------------------------
+## METHOD: hide nodeid
+#
+# Unconditionally close a node of the tree, without checking the
+# -closecommand option. If the node is already closed or is disabled,
+# do nothing.
+# ------------------------------------------------------------------
+body iwidgets::Widgettree::hide {nodeid} {
+    _verifyNode $nodeid
+    if { $_state($nodeid) != "closed" } {
 	return
     } 
     # Hide the widget, making sure it exists first
-    if [::info exists itk_component($tag)] {
-	grid remove $itk_component($tag)
+    if [::info exists itk_component($nodeid)] {
+	grid remove $itk_component($nodeid)
     }
-    # Change the button
-    $itk_component(${tag}button) configure \
-	    -bitmap $closedbitmap \
-	    -command "$this open $tag; $this traverse to $tag"
+    # Change the icon
+    $itk_component(${nodeid}button) configure -image $itk_option(-closedicon)
 
     # Update state
-    set _state($tag) closed
+    set _state($nodeid) closed
 }
 
 # ------------------------------------------------------------------
-## METHOD: itemcget tag option
+## METHOD: itemcget id option
 #
-# Return a configuration option of an item. Raise an error if
-# the item does not exist or if the option is invalid. Legal
-# options are exactly those described for the <b>add</b> method.
+# Get a configuration option of an item. If a node, get an option of
+# the node label, otherwise get an option of the corresponding widget.
 # ------------------------------------------------------------------
-body iwidgets::Widgettree::itemcget {tag option} {
-    if ![::info exists _type($tag)] {
-	error "Unknown item: $tag"
+body iwidgets::Widgettree::itemcget {id option} {
+    if ![::info exists _type($id)] {
+	error "Unknown item: $id"
     }
-    if { $_type($tag) == "node" } {
-	$itk_component(${tag}label) cget $option
+    if { $_type($id) == "node" } {
+	$itk_component(${id}label) cget $option
     } else {
-	$itk_component($tag) cget $option
+	$itk_component($id) cget $option
     }
 }
 
 # ------------------------------------------------------------------
-## METHOD: itemconfigure tag ?option value ...? 
+## METHOD: itemconfigure id ?option value ...? 
 #
-# Configure options of an item. If only _tag_ is supplied, return
-# the list of options of that item. If _option_ is supplied,
-# return that option. If additional arguments are supplied,
-# configure each option with the given value. Raise an error
-# if the item does not exist or an invalid option is supplied. Legal
-# options are exactly those described for the <b>add</b> method.
+# Configure options of an item. If a node, configure the
+# node label, otherwise configure the corresponding widget.
 # ------------------------------------------------------------------
-body iwidgets::Widgettree::itemconfigure {tag {option {}} args} {
-    if ![::info exists _type($tag)] {
-	error "Unknown item: $tag"
+body iwidgets::Widgettree::itemconfigure {id {option {}} args} {
+    if ![::info exists _type($id)] {
+	error "Unknown item: $id"
     }
-    if { $_type($tag) == "node" } {
-	eval $itk_component(${tag}label) $option $args
+    if { $_type($id) == "node" } {
+	eval $itk_component(${id}label) $option $args
     } else {
-	eval $itk_component($tag) $option $args
+	eval $itk_component($id) $option $args
     }
 }
 
 # ------------------------------------------------------------------
-## METHOD: locate x y ?tag?
+## METHOD: locate x y ?id?
 #
-# Return the tag of the item at the given _x_ and _y_ coordinates.
-# If the _tag_ argument is given, it must be a node, and the _x_ and
+# Return the id of the item at the given _x_ and _y_ coordinates.
+# If the _id_ argument is given, it must be a node, and the _x_ and
 # _y_ coordinates are relative to the interior of that node. If _x_
 # is negative, then the _x_ coordinate is ignored in figuring out
-# which item is under the mouse. If _x_ is non-negative, then a tag
+# which item is under the mouse. If _x_ is non-negative, then an id
 # is returned only if the mouse is actually over an item.
 # ------------------------------------------------------------------
-body iwidgets::Widgettree::locate {x y {tag {}}} {
-    if { $tag == "" } {
+body iwidgets::Widgettree::locate {x y {id {}}} {
+    if { $id == "" } {
 	set master $itk_interior
     } else {
-	if ![::info exists itk_component($tag)] {
-	    error "Unknown item: $tag"
+	if ![::info exists itk_component($id)] {
+	    error "Unknown item: $id"
 	}
-	set master $itk_component($tag)
+	set master $itk_component($id)
     }
     if { $x < 0 } {
 	# Get the row in this widget
-	foreach {_ row} [grid location $master 0 $y] {}
+	set col 0
+	set row [lindex [grid location $master 0 $y] 1]
     } else {
 	# Get the column and row in this widget
 	foreach {col row} [grid location $master $x $y] {}
@@ -662,16 +643,16 @@ body iwidgets::Widgettree::locate {x y {tag {}}} {
     }
     # Scan the slave widgets in column 1. If a widget is found
     # in this row, return it. If a child widget is found instead,
-    # do a recursive call to find the tag in the child.
+    # do a recursive call to find the id in the child.
     foreach slave [grid slave $master -column 1] {
-	set tag $_tag($slave)
-	if { $_row($tag) == $row } {
-	    return $tag
-	} elseif { $_row($tag) + 1 == $row } {
+	set id $_id($slave)
+	if { $_row($id) == $row } {
+	    return $id
+	} elseif { $_row($id) + 1 == $row } {
 	    return [locate \
 		    [expr $x - [winfo x $slave]] \
 		    [expr $y - [winfo y $slave]] \
-		    $tag]
+		    $id]
 	} else {
 	    error "Uh-oh: something's gone wrong..."
 	}
@@ -679,137 +660,116 @@ body iwidgets::Widgettree::locate {x y {tag {}}} {
 }
 
 # ------------------------------------------------------------------
-## METHOD: names ?tag?
+## METHOD: names ?nodeid?
 #
-# Return the tags of items at a given level of the tree. If the
-# _tag_ argument is not supplied, return the list of items at
-# the top level of the tree. If _tag_ is supplied, it must be a node
-# or an error is raised. The result in this case will be a list
-# of children of that item.
+# Return the ids of children of a node. If _nodeid_ is not supplied, return
+# the top-level ids; otherwise return ids of the children of the node.
 # ------------------------------------------------------------------
-body iwidgets::Widgettree::names {{tag {}}} {
-    if { $tag != "" } {
-        if ![::info exists _type($tag)] {
-            error "Unknown item: \"$tag\""
-        } elseif ![::info exists _children($tag)] {
-            error "Item \"$tag\" is not a node"
-        }
+body iwidgets::Widgettree::names {{nodeid {}}} {
+    if { $nodeid != "" } {
+	_verifyNode $nodeid
     }
-    return $_children($tag)
+    return $_children($nodeid)
 }
 
 # ------------------------------------------------------------------
-## METHOD: open tag
+## METHOD: open nodeid
 #
-# Open a node of the tree. If the node is already open, do nothing. If the
-# node has no children and <b>-createcommand</b> is not null,
-# append the tag and evaluate at the global scope. If the node has
-# children and <b>-opencommand</b> is not null, append the tag and
+# Open a node of the tree. If the node is already opened or is disabled,
+# do nothing.
+# If the node has no children and -createcommand is not null,
+# append the id and evaluate at the global scope. If the node has
+# children and -opencommand is not null, append the id and
 # evaluate at the global scope. Raise an error if the node does not exist
-# or if _tag_ is not a node.
+# or if _nodeid_ is not a node.
 # ------------------------------------------------------------------
-body iwidgets::Widgettree::open {tag} {
-    if ![::info exists _type($tag)] {
-	error "Unknown item: $tag"
-    }
-    if { $_type($tag) != "node" } {
-	error "Item $tag is not a node"
-    }
-    if { $_state($tag) == "open" } {
+body iwidgets::Widgettree::open {nodeid} {
+    _verifyNode $nodeid
+    if { $_state($nodeid) == "open"  \
+	    || [$itk_component(${nodeid}button) cget -state] == "disabled"} {
 	return
     }
 
     # Set the state so that callbacks make new items display
-    set _state($tag) open
+    set _state($nodeid) open
 
     # If the containing frame doesn't exist, execute -createcommand.
-    if ![::info exists itk_component($tag)] {
+    if ![::info exists itk_component($nodeid)] {
 	if { $createcommand != "" } {
-	    uplevel #0 $createcommand $tag
+	    uplevel #0 $createcommand $nodeid
 	}
     } else {
-	# If it does exist, call -opencommand and then grid it
+	# If it does exist, call -opencommand and then grid the contents
 	if { $opencommand != "" } {
-	    uplevel #0 $opencommand $tag
+	    uplevel #0 $opencommand $nodeid
 	}
-	grid $itk_component($tag)
+	grid $itk_component($nodeid)
     }
-    # Configure the button
-    $itk_component(${tag}button) configure \
-	    -bitmap $openedbitmap \
-	    -command "$this close $tag; $this traverse to $tag"
+    # Change the icon
+    $itk_component(${nodeid}button) configure -image $itk_option(-openicon)
 }
 
 # ------------------------------------------------------------------
-## METHOD: options type optioncmds
+## METHOD: toggle nodeid
 #
-# Query or specify option commands for a type that can be passed to
-# <b>add</b>. By default, an added widget's options are integrated
-# into the option list with the <b>usual</b> option handling
-# mechanism. This method can be used to override the default behavior.
-# The _type_ is a widget type, and _optioncmds_ is a list of option
-# commands in the same format as the second argument to the 
-# *itk_component add*. If _optioncmds_ is not
-# supplied, return the option commands for the specified _type_.
+# Toggle the state of a node: if it is open, close it; if it is closed,
+# open it. If it is disabled, do nothing.
 # ------------------------------------------------------------------
-body iwidgets::Widgettree::options {type {optioncmds _}} {
-    if { $optioncmds == "_" } {
-        if [::info exists _options($type)] {
-            return $_options($type)
-        } else {
-            return {
-                usual
-            }
-        }
-    } else {
-        set _options($type) $optioncmds
+body iwidgets::Widgettree::toggle {nodeid} {
+    _verifyNode $nodeid
+    if { [$itk_component(${nodeid}button) cget -state] != "disabled" } {
+	if { $_state($nodeid) == "open" } {
+	    close $nodeid
+	} else {
+	    open $nodeid
+	}
     }
 }
 
 # ------------------------------------------------------------------
-## METHOD: traverse mode ?tag?
+## METHOD: traverse mode ?nodeid?
 #
 # Traverse the tree. This method is provided because Tk's default
 # Tab traversal doesn't give the user enough control over where
 # the traversal goes. The _mode_ controls the traversal operation,
-# while the _tag_ is the tag of the button that currently has the
-# focus. If _tag_ is null or not supplied, then no button has the
-# focus. To aid construction of call-backs, the _tag_ can either be
-# a tag or a widget path. _mode_ is case-insensitive, and can be one
+# while the _nodeid_ is the id of the button that currently has the
+# focus. If _nodeid_ is null or not supplied, then no button has the
+# focus. To aid construction of call-backs, the _nodeid_ can either be
+# a node id or a widget path. _mode_ is case-insensitive, and can be one
 # of <b>down</b>, <b>return</b>, <b>up</b>, <b>left</b>, or <b>right</b>,
 # with the effect described for the default bindings. It can also
 # be <b>to</b>, which moves the focus to the given node.
 # If the <b>-traversal</b> option is false, the method returns
 # without doing anything.
 # ------------------------------------------------------------------
-body iwidgets::Widgettree::traverse {mode {tag {}}} {
+body iwidgets::Widgettree::traverse {mode {nodeid {}}} {
     if !$itk_option(-traversal) {
         return
     }
     set mode [string tolower $mode]
     set new {}
     # If no button has the focus, give it somewhere
-    if { $tag == "" } {
+    if { $nodeid == "" } {
         if { $mode == "up" } {
             set new [lindex [names] end]
         } elseif [regexp {^(down|left|right)$} $mode] {
             set new [lindex [names] 0]
         }
     } else {
-        if { [regexp {(.+)button$} $tag _ t] \
-                && [::info exists _tag(${t}label)] } {
-            # Got a widget path, so convert to tag
-            set tag $_tag(${t}label)
-        } elseif ![::info exists _type($tag)] {
-            error "Unknown item: $tag"
+        if { [regexp {(.+)button$} $nodeid _ t] \
+                && [::info exists _id(${t}label)] } {
+            # Got a widget path, so convert to id
+            set nodeid $_id(${t}label)
+        } elseif ![::info exists _type($nodeid)] {
+            error "Unknown item: $nodeid"
         }
-        # Decompose the tag
-        regexp {^((([^\.]+)?.*)?\.)?[^\.]+$} $tag _ _ parent
+        # Decompose the id
+        regexp {^((([^\.]+)?.*)?\.)?[^\.]+$} $nodeid _ _ parent
 
         # A button currently has the focus, so move the focus
         switch -exact $mode {
             "down" {
-                set t [lsearch -exact $_children($parent) $tag]
+                set t [lsearch -exact $_children($parent) $nodeid]
                 while { [incr t] < [llength $_children($parent)] } {
                     if { $_type([lindex $_children($parent) $t]) == "node" } {
                         set new [lindex $_children($parent) $t]
@@ -818,7 +778,7 @@ body iwidgets::Widgettree::traverse {mode {tag {}}} {
                 }
             }
             "up" {
-                set t [lsearch -exact $_children($parent) $tag]
+                set t [lsearch -exact $_children($parent) $nodeid]
                 while { [incr t -1] >= 0 } {
                     if { $_type([lindex $_children($parent) $t]) == "node" } {
                         set new [lindex $_children($parent) $t]
@@ -832,24 +792,18 @@ body iwidgets::Widgettree::traverse {mode {tag {}}} {
                 }
             }
             "to" {
-                set new $tag
+                set new $nodeid
             }
             "right" {
-                if { $_state($tag) == "closed" } {
-                    open $tag
+                if { $_state($nodeid) == "closed" } {
+                    open $nodeid
                 }
-                if { $_children($tag) != "" } {
-                    set new [lindex $_children($tag) 0]
+                if { $_children($nodeid) != "" } {
+                    set new [lindex $_children($nodeid) 0]
                 }
             }
             "return" {
-                # Toggle the node
-                if { $_state($tag) == "open" } {
-                    close $tag
-                } else {
-                    open $tag
-                }
-                return
+            	toggle $nodeid
             }
         }
     }
@@ -859,16 +813,79 @@ body iwidgets::Widgettree::traverse {mode {tag {}}} {
 }
 
 # ------------------------------------------------------------------
-## METHOD: type tag
+## METHOD: type id
 #
-# Return the type of _tag_. The type will be value of the _type_
+# Return the type of _id_. The type will be value of the _type_
 # argument passed to the <b>add</b> method when the item was created.
 # Raise an error if the item does not exist.
 # ------------------------------------------------------------------
-body iwidgets::Widgettree::type {tag} {
-    if ![::info exists _type($tag)] {
-	error "Unknown item: $tag"
+body iwidgets::Widgettree::type {id} {
+    if ![::info exists _type($id)] {
+	error "Unknown item: $id"
     }
-    return $_type($tag)
+    return $_type($id)
 }
 
+# ------------------------------------------------------------------
+## PRIVATE METHOD: _mkNodeFrame id
+#
+# Create the frame for an individual node. This method is called the
+# first time an item is added to a node, not when the node itself
+# is created. This strategy reduces the time to create each node
+# of the tree.
+# ------------------------------------------------------------------    
+body iwidgets::Widgettree::_mkNodeFrame {id} {
+    # Create the frame
+    itk_component add $id {
+	frame $itk_interior.$id
+    }
+    # Remember the reverse mapping
+    set _id($itk_interior.$id) $id
+
+    # If the node is open, display its contents
+    if { $_state($id) == "open" } {
+	grid $itk_interior.$id \
+		-row [expr $_row($id)+1] \
+		-column 1 \
+		-sticky nw
+    }
+    # Configure internal column size and weight
+    grid columnconfigure $itk_interior.$id 0 -minsize $indent -weight 0
+    grid columnconfigure $itk_interior.$id 1 -weight 1
+}
+
+# ------------------------------------------------------------------
+## PRIVATE METHOD: _updateNodes
+#
+# Update node visuals in response to configuration update.
+# ------------------------------------------------------------------    
+body iwidgets::Widgettree::_updateNodes {} {
+    foreach id [array names _state] {
+        if { $_state($id) == "closed" } {
+            $itk_component(${id}button) configure -image $itk_option(-closedicon)
+        } else {
+	    $itk_component(${id}button) configure -image $itk_option(-openicon)
+	}
+	if { [$itk_component(${id}button) cget -state] == "disabled" } {
+	    $itk_component(${id}label) configure \
+		    -foreground $itk_option(-disabledforeground)
+    	} else {
+	    $itk_component(${id}label) configure \
+		    -foreground $itk_option(-foreground)
+	}
+    }
+}
+
+# ------------------------------------------------------------------
+## PRIVATE METHOD: _verifyNode id
+#
+# Raise an error if _id_ is not known or is not a node.
+# ------------------------------------------------------------------    
+body iwidgets::Widgettree::_verifyNode {id} {
+    if ![::info exists _type($id)] {
+	error "Unknown item: $id"
+    }
+    if { $_type($id) != "node" } {
+	error "Item $id is not a node"
+    }
+}
