@@ -689,16 +689,16 @@ body ::tycho::EditProgram::gendocFileInternal { file setDocCommand genCommand} {
             [file mtime $filename] > [file mtime $fulldoc] } {
         # Need to regenerate the doc.  Check permissions first.
         # It is sufficient for the directory to be writable.
-        if {[file writable [file dirname $fulldoc]]} {
+	set docdir [file dirname $fulldoc]
+        if {[file isdirectory $docdir] && ! [file writable $docdir]} {
+            ::tycho::warn "The documentation file is out of date, \
+                    and you do not have permission to write in the \
+		    existing documentation directory `$docdir'."
+	} {
             set savedir [pwd]
             cd $dir
             set retval [eval $genCommand]
             cd $savedir
-        } {
-            ::tycho::warn "The documentation file is out of date, \
-                    and you do not have permission to update it.
-                    The directory [file dirname $fulldoc] is not writable\
-                    by you."
         }
     }
     if [regexp -nocase "error|warning" $retval] {
@@ -766,16 +766,16 @@ body ::tycho::EditProgram::gendocBufferInternal {setDocCommand genCommand} {
             [file mtime $filename] > [file mtime $fulldoc] } {
         # Need to regenerate the doc.  Check permissions first.
         # It is sufficient for the directory to be writable.
-        if {[file writable [file dirname $fulldoc]]} {
+	set docdir [file dirname $fulldoc]
+        if {[file isdirectory $docdir] && ! [file writable $docdir]} {
+            ::tycho::warn "The documentation file is out of date, \
+                    and you do not have permission to write in the \
+		    existing documentation directory `$docdir'."
+        } {
             set savedir [pwd]
             cd $dir
             set retval [eval $genCommand]
             cd $savedir
-        } {
-            ::tycho::warn "The documentation file is out of date, \
-                    and you do not have permission to update it.\n\
-                    The directory [file dirname $fulldoc] is not writable\
-                    by you."
         }
     }
     if [regexp -nocase "error|warning" $retval] {
@@ -785,6 +785,8 @@ body ::tycho::EditProgram::gendocBufferInternal {setDocCommand genCommand} {
     if [file exists $fulldoc] {
         set window [::tycho::File::openContext $fulldoc]
 	$window reload
+	# Return the window that we opened so the test suite can close it
+	return $window
     }
 }
 
