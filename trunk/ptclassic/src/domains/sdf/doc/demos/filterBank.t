@@ -16,7 +16,8 @@ Discrete Wavelet Transform Filter Bank
 .Ie "wavelets"
  This universe implements an eight-level perfect reconstruction one-dimensional
 filter bank based on bi-orthogonal wavelet decomposition [1].
-.Ir "M. Vetterli and C. Herley"
+.Ir "Herley C."
+.Ir "Vetterli M."
  This filter bank is a form of subband coder, in which the sample rate
 decreases by powers of two, thereby forming a dyadic decomposition of the
 frequency axis.
@@ -32,7 +33,8 @@ in which successive representations have progressively better frequency
 resolution at the expense of progressively lower time resolution. 
  Such octave-band frequency decompositions have been studied extensively
 since the early 1970's [2-3].
-.Ir "M. J. T. Smith and T. P. Barnwell"
+.Ir "Smith M. J. T."
+.Ir "Barnwell T. P."
 .pp
  The multi-resolution representation at the analysis bank outputs is actually
 the Discrete Wavelet Transform (DWT) decomposition of the original signal.
@@ -49,7 +51,7 @@ bank, and so on, until the original sampling rate is restored.
 replica of the input (to within coefficient round-off error).
  This property, known as the 'perfect reconstruction' property,
 has been studied in great detail in the literature [4].
-.Ir "P. P. Vaidyanathan"
+.Ir "Vaidyanathan P. P."
 .pp
  All analysis stages are identical, as are all synthesis stages.
  There are, in all, only four unique FIR filters used.
