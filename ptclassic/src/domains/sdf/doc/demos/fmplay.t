@@ -15,6 +15,7 @@ Sound generator using FM modulation that plays on the workstation speaker.
 .Ie "modulation, frequency"
 .Ie "frequency modulation"
 .Ie "FM"
+.Ie "play program"
 This universe implements the FM-based sound synthesis system
 invented by H. M. Chowning and described in
 "The Synthesis of Complex Audio Spectra by Means of Frequency Modulation",
