@@ -51,6 +51,9 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include <thread.h>
 #endif /* SOLARIS */
 
+#include <sys/time.h>
+int gettimeofday(struct timeval *, struct timezone *);
+
 extern int  GlobalToIndex(ea_t endpoint, struct sockaddr_in *global);
 extern void BuildToken(Token *token, struct sockaddr_in *sender, int buf_id, 
 		       int seq_num, tag_t tag, ea_t dest_ep);
@@ -74,7 +77,7 @@ void ScanTimeoutList(ea_t ea)
 
   num_elements = ea->txtimeout.num_elements;
   timeout_elem = ea->txtimeout.head;
-  gettimeofday(&curr_time);
+  gettimeofday(&curr_time, (struct timezone*)0);
   while (num_elements-- > 0) {
     if ((curr_time.tv_sec - timeout_elem->timestamp.tv_sec) >
 	(1 << (timeout_elem->num_tries - 1))*QUANTA) {
@@ -402,7 +405,7 @@ void MoveToTailTimeout(ea_t endpoint, struct timeout_elem *timeout_elem)
   list = &(endpoint->txtimeout);
   timeout_elem->num_tries++;  
   if ((list->num_elements == 1) || (timeout_elem == list->tail)) {
-    gettimeofday(&(timeout_elem->timestamp));
+    gettimeofday(&(timeout_elem->timestamp), (struct timezone*)0);
     return;
   }
   if (timeout_elem == list->head) {
@@ -413,7 +416,7 @@ void MoveToTailTimeout(ea_t endpoint, struct timeout_elem *timeout_elem)
     timeout_elem->prev->next = timeout_elem->next;
     timeout_elem->next->prev = timeout_elem->prev;
   }
-  gettimeofday(&(timeout_elem->timestamp));
+  gettimeofday(&(timeout_elem->timestamp),(struct timezone*)0);
   list->tail->next = timeout_elem;
   timeout_elem->prev = list->tail;
   timeout_elem->next = (struct timeout_elem *)NULL;
@@ -466,7 +469,7 @@ void AddTimeout(ea_t endpoint, UDPAM_Buf *buf, int req_buf_id,
   list->unackmessages[i].message = buf;
   list->unackmessages[i].req_buf_id = req_buf_id;    /* BufID of Request */
   list->unackmessages[i].req_seq_num = req_seq_num;  /* SeqNum of Request */
-  gettimeofday(&(list->unackmessages[i].timestamp));
+  gettimeofday(&(list->unackmessages[i].timestamp),(struct timezone*)0);
   list->unackmessages[i].destination.sin_port = destination->sin_port;
   list->unackmessages[i].destination.sin_addr.s_addr = 
     destination->sin_addr.s_addr;
