@@ -92,7 +92,6 @@ blockSize))
     }
 
     initCode {
-	addModuleFromLibrary("ptdspMuLaw", "src/utils/libptdsp", "ptdsp");
 	addDeclaration(declarations);
     }
 
