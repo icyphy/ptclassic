@@ -560,10 +560,15 @@ body ::tycho::Model::mark {mode args} {
 # need to prevent recording temporarily.
 #
 body ::tycho::Model::norecord {method args} {
-	set saved $recording
-	set recording 0
-	@scope $scope eval $this $method $args
-	set recording $saved
+    set saved $recording
+    set recording 0
+    if [catch {
+        @scope $scope eval $this $method $args
+    } msg] {
+        set recording $saved
+        error $msg $errorInfo
+    }
+    set recording $saved
 }
 
 ########################################################################
@@ -702,9 +707,15 @@ body ::tycho::Model::publish {command index args} {
 #### record
 #
 # Set the "recording" flag and clear any future history, then execute
-# the command given by _method_ and following arguments. The
-# command should check the "recording" flag and use <b>history append</b>
-# to add to the history.
+# the command given by _method_ and following arguments. All subclasses
+# that implements methods that change data must:
+# <ul>
+# <li>Check the protected variable "recording," flag and if
+# it is set, use <b>history append</b> to add to the history.
+# <li>Make sure that any errors that may occur are _before_
+# the history is appended to, so that the history is not
+# corrupted.
+# </ul>
 #
 body ::tycho::Model::record {method args} {
     # Clear the redo future if needed
@@ -714,9 +725,18 @@ body ::tycho::Model::record {method args} {
     # Set the recording flag
     set recording 1
 
-    # Execute the command. If the command raises an error, this method
-    # will abort.
-    @scope $scope eval $this $method $args
+    # Execute the command. This is in a catch so we can recover
+    # by returning the recording flag to its proper state.
+    if [catch {
+        @scope $scope eval $this $method $args
+    } msg] {
+        # Reset the recording flag
+        set recording 0
+
+        # Throw the error again with the caught stack trace
+        global errorInfo
+        error $msg $errorInfo
+    }
 
     # Reset the recording flag
     set recording 0
