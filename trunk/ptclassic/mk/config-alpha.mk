@@ -40,10 +40,12 @@ include $(ROOT)/mk/config-default.mk
 # Get the g++ definitions; we override some below.
 include $(ROOT)/mk/config-g++.mk
 
+# Get the g++ definitions for shared libraries; we override some below.
+# Comment the next line out if you don't want shared libraries.
+# include $(ROOT)/mk/config-g++.shared.mk
+
 # Note that UC Berkeley does not formally support Ptolemy on the DEC Alpha.
-# UCB does not regularly build on this platform, nor does UCB provide
-# DEC Alpha Ptolemy binaries.  This is the first release of Ptolemy on the
-# DEC Alpha, so there are bound to be bugs.
+# UCB does not regularly build on this platform.
 #
 # Currently, there are problems with unaligned access that need to be cleaned
 # up.  For more information, see the ultrix-osf1 FAQ, available at
@@ -95,6 +97,8 @@ CFLAGS =	$(OPTIMIZER) $(MEMLOG) $(WARNINGS) \
 
 # system libraries for linking .o files from C files only
 # -lots is needed to resolve _OtsDivide64Unsigned which is in the Matlab lib.
+# To compile gcc, you may need to add -lots to CLIB in 
+#  $PTOLEMY/src/gnu/src/gcc/config/alpha/x-alpha
 CSYSLIBS = 	-lots -lm
 
 # system libraries (libraries from the environment)
@@ -106,12 +110,24 @@ SYSLIBS =	-lg++ $(CSYSLIBS)
 # The dynamically linked version of pigiRpc has problems that *may*
 # stem from a symbol collision (clog) between libm and libg++.
 #
+# If we are building static binaries, then
 # -depth_ring_search is necessary for incremental linking to work.
 # Without -depth_ring_search, changes in a reloaded star will
 # not be visible.  For more information about -depth_ring_search, see
 # ld(1) and loader(5)
-LINKFLAGS =	-L$(LIBDIR) -static -Xlinker -x -Xlinker -depth_ring_search
-LINKFLAGS_D =	-L$(LIBDIR) -Xlinker -depth_ring_search
+# To use dlopen() style linking, we cannot use build static binaries
+LINKFLAGS =	-L$(LIBDIR)
+LINKFLAGS_D =	-L$(LIBDIR)
+
+# After building the binaries, strip them or you will get a 38Mb ptcl!
+# On the DEC alpha, stripping ptcl did not break incremental linking.
+# The ld man page would indicate that you should be able to pass -x
+# to ld, however, with -x you may see the following error:
+# /usr/lib/cmplrs/cc/crt0.o: writeat_outbuf: Position 0x0 not in
+#     buffer pd_outbuf
+STRIP_DEBUG = /usr/ccs/bin/strip
+# To turn of stripping:
+#STRIP_DEBUG = true
 
 #
 # Directories to use
