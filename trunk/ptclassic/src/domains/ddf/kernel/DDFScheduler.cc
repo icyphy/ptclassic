@@ -208,14 +208,14 @@ DDFScheduler :: run (Galaxy& galaxy) {
 	// check whether it is a predefined construct or not.
 	switch(canDom) {
 		case RECUR : return(recurSched.run(galaxy));
-			 break;
+
 		case SDF : 
 			sdfSched.setStopTime((float) stopTime);
 			return(sdfSched.run(galaxy));
-			break;
+
 		case DDF : break;
 		default : return(realSched->run(galaxy)); 
-			break;
+
 	}
 		
 	// initialize the SpaceWalk member
@@ -581,7 +581,7 @@ void DDFScheduler::setStopTime (float limit) {
 	stopTime = int(limit + 0.001) ;
 }
 
-void DDFScheduler::resetStopTime (float v) {
+void DDFScheduler::resetStopTime (float) {
 	stopTime = 1; numFiring = 0;
 }
 
