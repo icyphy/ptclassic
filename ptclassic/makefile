@@ -82,6 +82,8 @@ octtools: obj.$(ARCH)/octtools
 	cd obj.$(ARCH)/octtools; $(MAKE) $(MFLAGS) all
 install_octtools: obj.$(ARCH)/octtools
 	cd obj.$(ARCH)/octtools; $(MAKE) $(MFLAGS) install
+clean_octtools:
+	cd obj.$(ARCH)/octtools; $(MAKE) $(MFLAGS) clean
 
 install_xv:
 	$(MAKE) -f mk/scratch-srcs.mk $(MFLAGS) xv_all
