@@ -86,19 +86,19 @@ LIBS =		$(STAR_LIBS) \
 PTINY_LIBFILES =	$(PTINY_STAR_LIBFILES) \
 	$(LIBDIR)/libdetclstars.$(LIBSUFFIX) \
 	$(LIBDIR)/libsdftclstars.$(LIBSUFFIX) \
-	$(LIBDIR)/libptolemy.$(LIBSUFFIX) \
+	$(LIBDIR)/libptolemy.a \
 	$(LIBDIR)/libptk.a
 
 PTRIM_LIBFILES = $(PTRIM_STAR_LIBFILES) \
 	$(LIBDIR)/libdetclstars.$(LIBSUFFIX) \
 	$(LIBDIR)/libsdftclstars.$(LIBSUFFIX) \
-	$(LIBDIR)/libpigi.$(LIBSUFFIX) $(LIBDIR)/libptolemy.$(LIBSUFFIX) \
+	$(LIBDIR)/libpigi.$(LIBSUFFIX) $(LIBDIR)/libptolemy.a \
 	$(LIBDIR)/libgantt.$(LIBSUFFIX) \
 
 LIBFILES = 		$(STAR_LIBFILES) \
 			$(LIBDIR)/libdetclstars.$(LIBSUFFIX) \
 			$(LIBDIR)/libsdftclstars.$(LIBSUFFIX) \
-			$(LIBDIR)/libptolemy.$(LIBSUFFIX) \
+			$(LIBDIR)/libptolemy.a \
 			$(LIBDIR)/libptk.a \
 			$(THREAD_LIBFILES)
 
