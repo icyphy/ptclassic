@@ -142,9 +142,14 @@ body ::tycho::Builder::classDiagram {} {
     if { [info command tychoStandardDAG] == {} } {
 	source [file join $TYCHO kernel tychoMakeClassDAG.tcl]
     }
+    set savedir [pwd]
     cd [file join $TYCHO doc]
 
-    tychoStandardDAG
+    if [ catch {tychoStandardDAG} errmsg] {
+        cd $savedir
+        error "errmsg"
+    }
+    cd $savedir
 }
 
 #######################################################################
@@ -166,12 +171,14 @@ body ::tycho::Builder::indices {} {
     }
     puts "Creating [file join $TYCHO lib idx tycho.idx]"
     update
+    set savedir [pwd]
     cd [file join $TYCHO lib idx]
     tychoStandardIndex
     puts "Creating [file join $TYCHO lib idx codeDoc.idx]"
     update
     cd [file join $TYCHO lib idx]
     tychoCodeDocIndex
+    cd $savedir
 }
 
 #######################################################################
@@ -186,6 +193,7 @@ body ::tycho::Builder::itcldocs {} {
     set generateIndex 1
     set debug 1
 
+    set savedir [pwd]
     foreach itcldir $itcldirs {
 	puts "Running itcldocs in $itcldir"
         update
@@ -199,6 +207,7 @@ body ::tycho::Builder::itcldocs {} {
 	    puts $retval
 	}
     }
+    cd $savedir
 }
 
 #######################################################################
