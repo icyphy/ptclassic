@@ -1,7 +1,13 @@
 defstar {
 	name { Impulse }
 	domain { CG56 }
-	desc { Impulse generator }
+	desc {
+Generate a single impulse or an impulse train.  The impulse(s) have
+amplitude "level" (default 1.0).  If "period" (default 0) is equal to 0,
+then only a single impulse is generated; otherwise, it specifies the
+period of the impulse train.  The impulse or impulse train is delayed
+by the amount specified by "delay".
+	}
 	version { $Id$ }
 	author { Chih-Tsung Huang, ported from Gabriel }
 	copyright {
@@ -11,45 +17,48 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CG56 signal sources library }
-        explanation {
+	explanation {
 The star produces at its output an impulse train with height given by the 
-parameter \fIimpulseSize\fR and period given by \fIperiod\fR which is 0 for
+parameter \fIlevel\fR and period given by \fIperiod\fR which is 0 for
 a single impulse.  The impulse train or pulse can be delayed by setting
 the parameter \fIdelay\fR to a positive value.
 .PP
 A state variable is maintained to keep around the next output value.
-At initialization, the state is set to \fIimpulseSize\fR.
-
-        }
-        seealso { Quasar, DC }
-        output {
+At initialization, the state is set to \fIlevel\fR.
+	}
+	seealso { Quasar, DC }
+	output {
 		name { output }
 		type { fix }
 	}
 	state {
-		name { impulseSize }
+		name { level }
 		type { fix }
-		desc { impulse size }
+		desc { Height of the impulse }
 		default { ONE }
 	}
 	state {
 		name { period }
 		type { int }
-		desc { period of the impulse train( 0 for one impulse) }
+		desc {
+Non-negative period of the impulse train (0 means aperiodic)
+		}
 		default { 0 }
 		attributes { A_CONSTANT|A_YMEM }
 	} 
 	state {
-		name { counter }
+		name { count }
 		type { int }
 		desc { internal counter }
 		default { 0 }
-		attributes { A_NONCONSTANT|A_NONSETTABLE|A_YMEM}
+		attributes { A_NONCONSTANT|A_NONSETTABLE|A_YMEM }
 	}
 	state {
 		name { delay }
 		type { int }
-		desc { output will be delayed by this amount }
+		desc {
+Non-negative delay on the output (0 means no delay)
+		}
 		default { 0 }
 	}
 	state {
@@ -59,42 +68,37 @@ At initialization, the state is set to \fIimpulseSize\fR.
 		default { 0 }
 		attributes { A_NONCONSTANT|A_NONSETTABLE|A_YMEM }
 	}
-	protected {
-		int time;
-	}
  	setup {
-	           pulse=impulseSize;
-		   counter = 0;
-		   time = 0;
-		   if ( int(period) < 0 ){
-			Error::abortRun( *this, 
-				"Period must be non-negative.");
-		   };
-		   if ( int(delay) < 0 ){
-		   	Error::abortRun( *this,
-		   		"Delay must be non-negative.");
-		   };
-		   if ( int(period) == 0 ){
-		   	counter = - int(delay);
-		   } else {
-		   	counter = -(int(delay)%int(period));
-		   };	
-	      }
+		pulse = level;
+		count = 0;
+		if ( int(period) < 0 ) {
+			Error::abortRun(*this, "Period must be non-negative.");
+		}
+		if ( int(delay) < 0 ) {
+			Error::abortRun( *this, "Delay must be non-negative.");
+		}
+		if ( int(period) == 0 ) {
+			count = - int(delay);
+		}
+		else {
+		   	count = -(int(delay)%int(period));
+		}
+	}
 
 	codeblock(multiple) {
-	move 	$ref(counter),a
+	move 	$ref(count),a
 	clr	b	$ref(period),x0
 	cmp 	x0,a	#>(0.0000001192093),x1
 	tge	b,a
 	tst	a	$ref(pulse),y0
 	teq	y0,b	
 	add	x1,a	b,$ref(output)
-	move	a,$ref(counter)
+	move	a,$ref(count)
 	} 
 	
-	codeblock(delayedSingle){        
+	codeblock(delayedSingle) {
 	clr	b	$ref(period),x1
-	move	b,x0	$ref(counter),a
+	move	b,x0	$ref(count),a
 	cmp 	x1,a	#>(0.0000001192093),y1
 	tge	b,a
 	tst	a	$ref(pulse),y0
@@ -103,7 +107,7 @@ At initialization, the state is set to \fIimpulseSize\fR.
 	move	x0,b
 	tne	y0,b	
 	add	y1,a	b,$ref(pulse)
-	move	a,$ref(counter)
+	move	a,$ref(count)
 	}	
 		
 	codeblock(single){
@@ -112,25 +116,23 @@ At initialization, the state is set to \fIimpulseSize\fR.
 	move	a,$ref(pulse)
 	}
 
-        go { 
-		if (int(period) > 0) {
+	go { 
+		if ( int(period) > 0 ) {
 			addCode(multiple);
-			time = 8; 
-		} else if ( int(delay) ){ 
+		}
+		else if ( int(delay) ) {
 			addCode(delayedSingle);
-			time = 11;
-		} else {
+		}
+		else {
 			addCode(single);
-			time = 3;
 		}
 	}
 
 	execTime { 
+		int time = 0;
+		if ( int(period) > 0 ) time = 8;
+		else if ( int(delay) ) time = 11;
+		else time = 3;
 		return (time);
 	}
- }
-
-
-
-
-
+}
