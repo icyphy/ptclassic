@@ -55,7 +55,7 @@
 #    foo add e {} a
 #    foo add f {} e
 #    foo addArc d e
-#    ::tycho::post [foo describe]
+#    foo describe
 # </pre></tcl>
 # The description that is posted in the last line will be:
 # "{d {} a} {e {} {a d}} {a {} {}} {f {} e} {c {} a}",
