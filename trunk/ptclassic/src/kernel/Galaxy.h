@@ -67,7 +67,7 @@ public:
 	Block& nextBlock() {return blocks++;}
 
 	// Print a description of the galaxy
-	operator char* ();
+	virtual operator char* ();
 
 	// Method replies FALSE to indicate that component blocks
 	// can be seen from outside.

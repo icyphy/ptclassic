@@ -7,6 +7,7 @@
 #include "Fraction.h"
 #include "Output.h"
 #include <String.h>
+#include <stream.h>
 
 extern Error errorHandler;
 
