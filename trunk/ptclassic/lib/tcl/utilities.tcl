@@ -149,7 +149,13 @@ proc ptkSetMeter {win name value} {
     set meterWidth [option get . meterWidthInC Pigi]
     set scale [expr {$meterWidth/($high - $low)}]
     set origin [expr {- $scale * $low}]
-    set x [expr {$scale * ($value - $low)}]
+    if {$value < $low} {
+	set x 0
+    } elseif {$value > $high} {
+	set x $meterWidth
+    } else {
+        set x [expr {$scale * ($value - $low)}]
+    }
     if {$value < 0.0} {
 	$s.bar.plot coords negative ${origin}c 0c ${x}c 0.6c
 	$s.bar.plot coords positive ${origin}c 0c ${origin}c 0.6c
@@ -157,12 +163,18 @@ proc ptkSetMeter {win name value} {
 	$s.bar.plot coords positive ${origin}c 0c ${x}c 0.6c
 	$s.bar.plot coords negative ${origin}c 0c ${origin}c 0.6c
     }
-    if {$value > $high} { $s.bar.highOL itemconfigure highOL \
-                -fill [option get . positiveColor PositiveColor] } \
-		{ $s.bar.highOL itemconfigure highOL -fill [ptkColor AntiqueWhite3] }
-    if {$value < $low}  { $s.bar.lowOL itemconfigure lowOL \
-                -fill [option get . negativeColor NegativeColor] } \
-		{ $s.bar.lowOL itemconfigure lowOL -fill [ptkColor AntiqueWhite3] }
+    if {$value > $high} {
+	$s.bar.highOL itemconfigure highOL \
+                -fill [option get . positiveColor PositiveColor]
+    } {
+        $s.bar.highOL itemconfigure highOL -fill [ptkColor AntiqueWhite3]
+    }
+    if {$value < $low}  {
+	$s.bar.lowOL itemconfigure lowOL \
+                -fill [option get . negativeColor NegativeColor]
+    } {
+        $s.bar.lowOL itemconfigure lowOL -fill [ptkColor AntiqueWhite3]
+    }
 }
 
 #######################################################################
