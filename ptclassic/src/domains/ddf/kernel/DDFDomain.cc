@@ -18,6 +18,7 @@ $Id$
 #include "DDFWormhole.h"
 #include "DDFConnect.h"
 #include "DDFWormConnect.h"
+#include "AutoForkNode.h"
 
 extern const char DDFdomainName[] = "DDF";
 
@@ -42,6 +43,9 @@ public:
 
 	// new toUniversal EventHorizon
 	EventHorizon& newTo() { return *new DDFtoUniversal;}
+
+	// new Geodesic (Node)
+	Geodesic& newNode() { return *new AutoForkNode;}
 
 	// constructor
 	DDFDomain() : Domain("DDF") {subDomains += "SDF" ;}
