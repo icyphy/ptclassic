@@ -214,6 +214,27 @@ group sink -label {Sink Icons} {
         terminal input-1 -coords {0 66} -direction w \
                 -style arrowtail -fill red
     }
+    icon plot_3 \
+            -slatetype IconFrame \
+            -label {Plotter_3} \
+            -text Plotter \
+            -color lightblue \
+            -graphics {
+        polygon 20 20 20 80 80 80 80 20 -fill gray -outline black
+        line 21 39 79 39 -fill green -stipple gray25
+        line 21 59 79 59 -fill green -stipple gray25
+        line 30 22 30 79 -fill green
+        line 50 22 50 79 -fill green 
+        line 70 23 70 79 -fill green
+	line 21 79 40 40 70 60 79 31 -smooth true -fill red
+    } {
+        terminal input-0 -coords {0 25} -direction w \
+                -style arrowtail -fill red
+        terminal input-1 -coords {0 50} -direction w \
+                -style arrowtail -fill red
+        terminal input-2 -coords {0 75} -direction w \
+                -style arrowtail -fill red
+    }
     icon xyplot \
             -slatetype IconFrame \
             -label {2D-Plotter} \
