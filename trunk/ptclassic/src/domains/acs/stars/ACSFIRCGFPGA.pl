@@ -16,7 +16,6 @@ limitation of liability, and disclaimer of warranty provisions.
 This star exists only for demoing the generic CG domain.
 It outputs lines of comments, instead of code.
 	}
-        ccinclude { <sys/ddi.h> }
         ccinclude { <sys/wait.h> }
 	ccinclude { "acs_vhdl_lang.h" }
 	ccinclude { "acs_starconsts.h" }
