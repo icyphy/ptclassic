@@ -71,6 +71,8 @@ ParamListType *pListPtr;
 
     if (param_n == 0) {
 	/* assume there are no params */
+	/* make an extra slot */
+    	pListPtr->array = (ParamType *) calloc(1, sizeof(ParamType));
 	return(TRUE);
     }
 
