@@ -52,6 +52,7 @@ The three key Tycho base classes,
 <code>safeEval</code>.
 This method simply disables destruction of the object,
 then evaluates its arguments, then re-enables destruction of the object.
+It returns the result of evaluating the arguments.
 Thus, if during evaluation of the arguments an attempt is made to destroy
 the object, the attempt will be intercepted and deferred until after
 evaluation of the arguments is complete.
