@@ -100,7 +100,7 @@ OCT_CC =	cc -32
 OPTIMIZER =	-g
 # -Wsynth was new in g++-2.6.x, but is not in egcs-1.1.1
 # Under gxx-2.7.0 -Wcast-qual will drown you with warnings from libg++ includes
-#WARNINGS =	-Wall #-Wsynth #-Wcast-qual 
+#WARNINGS =	-Wall -Wsynth #-Wcast-qual 
 WARNINGS =
 
 ARCHFLAGS =	-DIRIX5 -DIRIX6	

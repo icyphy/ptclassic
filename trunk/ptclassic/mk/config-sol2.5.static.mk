@@ -72,7 +72,7 @@ CC =		gcc
 OPTIMIZER =	#-O2
 # -Wsynth was new in g++-2.6.x, but is not in egcs-1.1.1
 # Under gxx-2.7.0 -Wcast-qual will drown you with warnings from libg++ includes
-WARNINGS =	-Wall #-Wsynth #-Wcast-qual 
+WARNINGS =	-Wall -Wsynth #-Wcast-qual 
 # Define PTSOL2_4 if you are on Solaris2_4.  config-sol2.5.mk defines ARCHFLAGS
 LOCALCCFLAGS =	-g -DPTSOL2_4 -D_REENTRANT -pipe
 GPPFLAGS =	$(OPTIMIZER) $(MEMLOG) $(WARNINGS) \
