@@ -160,7 +160,7 @@ class ::tycho::StatusBar {
     # The current mode: "message" or "progress" or "entry"
     private variable _mode "message"
 
-    # The delay between updates (in psuedo-milliseconds)
+    # The delay between updates (in pseudo-milliseconds)
     private variable _updateInterval 250
 
     # The command to get the current progress

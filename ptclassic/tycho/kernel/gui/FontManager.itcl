@@ -298,7 +298,7 @@ body ::tycho::FontManager::family {{type {}} {family {}} args} {
 #
 # All arguments are case-insensitive.
 #
-# In addition to the real font families, there is the psuedo-family
+# In addition to the real font families, there is the pseudo-family
 # "Screen," which is mapped to constant-width screen fonts on the
 # X window system. Also, the
 # font family can be one of "Serif," "Sans-serif," or "Constant-width,"

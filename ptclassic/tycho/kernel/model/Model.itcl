@@ -291,7 +291,7 @@ body ::tycho::Model::header {{prefix "# "}} {
 # that it cannot be deleted.)
 #
 # If the _from_ mark is not earlier than the _to_ mark, no error
-# will be reaised, but no commands will be cleared either.
+# will be raised, but no commands will be cleared either.
 # If either mark does not exist, then an error will be raised.
 # Any other marks that point to a deleted command will be set
 # to the _from_ mark. _from_ and _to_ can also be raw integer

@@ -62,8 +62,8 @@ proc ::tycho::resourceClass {path {procname {}} args} {
 #
 # Access a resource by URL-style name. This procedure provides options
 # that are similar to many of the options of the Tcl file{}
-# command. (See also the procudre <a 
-# href="Path.html"><code>:tycho::url</code></a>,
+# command. (See also the procedure
+# <a href="Path.html"><code>:tycho::url</code></a>,
 # which provides syntactic manipulation of URL-style names.) The options
 # are:
 # <dl>
