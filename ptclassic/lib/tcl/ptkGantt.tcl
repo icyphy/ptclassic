@@ -766,8 +766,7 @@ proc ptkGanttDisplay { universe {inputFile ""} {standalone 0} } {
     # make sure that tycho is running
     ptkStartTycho
     # set font using tycho font manager
-    set ptkGantt_Parms(smallFont) [.tychoFonts findFont  \
-	{helvetica 10 medium r}]
+    set ptkGantt_Parms(smallFont) [::tycho::font helvetica 10]
 
     set chart .gantt_${universe}
 
@@ -846,7 +845,7 @@ proc ptkGanttDisplay { universe {inputFile ""} {standalone 0} } {
 	    set NUMCHARS [gets $GFILE_ID LINEARR]
 	    if (!$NUMCHARS) continue;
 	    switch [lindex $LINEARR 0] {
-		no_processors { set ptkGantt_Layout($chart.numprocs)\
+		numberOfProcessors { set ptkGantt_Layout($chart.numprocs)\
 			[lindex $LINEARR 1];
 			continue}
 		period { set ptkGantt_Layout($chart.period) \
