@@ -33,7 +33,7 @@ GNU_DEST=$(PTOLEMY)/gnu
 GNU_SRC=$(PTOLEMY)/src/gnu/src
 
 # Location of the architecture specific build directory.
-OBJ_DIR=$(PTOLEMY)/obj.$(ARCH)
+OBJ_DIR=$(PTOLEMY)/obj.$(PTARCH)
 
 # We don't ship makeinfo source with Ptolemy, but the GNU make install
 # requires it.
@@ -50,15 +50,15 @@ GNU_PREFIX=$(GNU_DEST)/common
 GCC_VERSION=2.6.3
 
 # Machine dependent files
-GNU_EXEC_PREFIX=$(GNU_DEST)/$(ARCH)
+GNU_EXEC_PREFIX=$(GNU_DEST)/$(PTARCH)
 
 # Location of gnu bin directory relative to Ptolemy bin directory
 # Can't use absolute path name here, or we will create a distribution that
 # will not work if $PTOLEMY != /users/ptolemy
-REL_GNU_BINDIR=../gnu/$(ARCH)/bin
+REL_GNU_BINDIR=../gnu/$(PTARCH)/bin
 
 # Location of Ptolemy bin dir.  We make links from here to the GNU stuff
-BINDIR=$(PTOLEMY)/bin.$(ARCH)
+BINDIR=$(PTOLEMY)/bin.$(PTARCH)
 
 all: configure bin install
 .PHONY:	configure bin install
@@ -104,7 +104,7 @@ configure: $(GNU_OBJ)
 $(GNU_OBJ): $(OBJ_DIR) 
 	-mkdir "$(GNU_OBJ)"
 
-# If we are building GNU programs in a bare distribution, then the OBJ.$(ARCH)
+# If we are building GNU programs in a bare distribution, then the OBJ.$(PTARCH)
 # directory might not exist yet
 $(OBJ_DIR):
 	mkdir $(OBJ_DIR)
@@ -208,13 +208,13 @@ hp_configure: $(GNU_OBJ)
 	-(cd $(GNU_OBJ)/libstdc++/stl; ln -s $(HP_GNU_SRC)/libstdc++/stl/*.cc .)
 
 # Set up links for GNU as.
-hp_pregcc_install: $(GNU_DEST)/$(ARCH)
+hp_pregcc_install: $(GNU_DEST)/$(PTARCH)
 	(cd $(GNU_OBJ)/gcc; $(MAKE)  install-dir)
 	-ln -s $(GNU_OBJ)/gas/as.new $(GNU_OBJ)/gas/as
 	-chmod a+x $(GNU_OBJ)/gas/as.new
 	-ln -s $(GNU_EXEC_PREFIX)/bin/as  $(GNU_EXEC_PREFIX)/lib/gcc-lib/$(HP_MACH)/$(GCC_VERSION)/as
 
-$(GNU_DEST)/$(ARCH):
+$(GNU_DEST)/$(PTARCH):
 	if [ ! -d $@ ]; then \
 		mkdir $@; \
 	fi
