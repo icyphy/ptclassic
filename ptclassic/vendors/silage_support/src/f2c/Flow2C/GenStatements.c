@@ -18,23 +18,25 @@ extern st_table *Edgetable[];
 extern ListPointer ListOfParams;
 extern bool pl_flag;
 
-GenStatements(Graph)
+GenStatements(Graph,pl_flag)
 GraphPointer Graph;
+bool pl_flag;
 {
     register NodePointer Node;
 
     for(Node = Graph->NodeList; Node != NULL; Node = Node->Next) {
         if (IsHierarchy(Node)) {
-	    GenHierarchyNode(Node);
+	    GenHierarchyNode(Node,pl_flag);
 	}
 	else {
-	    GenSingleNode(Node);
+	    GenSingleNode(Node,pl_flag);
 	}
     }
 }
 
-GenHierarchyNode(Node)
+GenHierarchyNode(Node,pl_flag)
 NodePointer Node;
+bool pl_flag;
 {
     char *model;
     
@@ -45,15 +47,15 @@ NodePointer Node;
 	    GenFuncCall(Node);
 	}
 	CASE(ITER) {
-	    GenIterCall(Node);
+	    GenIterCall(Node,pl_flag);
 	}
 	CASE(DO) {
 	    Indent();
-	    GenDoLoopCall(Node);
+	    GenDoLoopCall(Node,pl_flag);
 	}
 	CASE(DOBODY) {
 	    Indent();
-	    GenDoLoopBodyCall(Node);
+	    GenDoLoopBodyCall(Node,pl_flag);
 	}
 	else {
 	    printmsg(NULL, "Node: %s, Not-implemented\n", Node->Name);
@@ -120,8 +122,9 @@ bool comma;
     return(comma);
 }
 
-GenIterCall(node)
+GenIterCall(node,pl_flag)
 NodePointer node;
+bool pl_flag;
 {
     GraphPointer Graph;
     char *index;
@@ -145,7 +148,7 @@ NodePointer node;
     RemoveDelaysInGraph(Graph);
     RemoveLpDelaysInGraph(Graph);
     TopologicalOrder(Graph);
-    GenStatements(Graph);
+    GenStatements(Graph,pl_flag);
 /*  Generate statements to display requested signals */
     GenDisplays(Graph->EdgeList);
     GenDisplays(Graph->ControlList);
@@ -161,8 +164,9 @@ NodePointer node;
         GenDecrementLoopDelays(Graph, FALSE);
 }
 
-GenDoLoopCall (node)
+GenDoLoopCall (node,pl_flag)
 NodePointer node;
+bool pl_flag;
 {
     GraphPointer LoopGraph;
   
@@ -177,7 +181,7 @@ NodePointer node;
     RemoveDelaysInGraph(LoopGraph);
     RemoveLpDelaysInGraph(LoopGraph);
     TopologicalOrder(LoopGraph);
-    GenStatements(LoopGraph);
+    GenStatements(LoopGraph,pl_flag);
 /*  Generate statements to display requested signals */
     GenDisplays(LoopGraph->EdgeList);
     GenDisplays(LoopGraph->ControlList);
@@ -188,8 +192,9 @@ NodePointer node;
     indexlevel--;
 }
 
-GenDoLoopBodyCall (node)
+GenDoLoopBodyCall (node,pl_flag)
 NodePointer node;
+bool pl_flag;
 {
     GraphPointer LoopBodyGraph;
 
@@ -205,7 +210,7 @@ NodePointer node;
     RemoveDelaysInGraph(LoopBodyGraph);
     RemoveLpDelaysInGraph(LoopBodyGraph);
     TopologicalOrder(LoopBodyGraph);
-    GenStatements(LoopBodyGraph);
+    GenStatements(LoopBodyGraph,pl_flag);
 /*  Generate statements to display requested signals */
     GenDisplays(LoopBodyGraph->EdgeList);
     GenDisplays(LoopBodyGraph->ControlList);
