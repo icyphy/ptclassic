@@ -168,7 +168,7 @@ body ::tycho::CompileJava::compileAndRun {filenames} {
     if {![winfo exists $compileWidget] && \
             [info object $compileWidget] == {}} {
         set compileWidget [$this cget -view].compile
-        ::tycho::Exec $compileWidget
+        ::tycho::Monitor $compileWidget
         set retList [::tycho::execModal $compileString $dirname $compileWidget]
     } else {
         set retList [::tycho::execModal {} {} $compileWidget]
