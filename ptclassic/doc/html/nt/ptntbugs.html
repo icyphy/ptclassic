@@ -17,11 +17,22 @@ See the <a href="ptntinstall.html">Ptolemy NT Installation page</a>
 for details
 
 <li> If you install the Cygwin X11R6 binaries and Exceed, then
-you can telnet to a PC, start up <CODE>bash</CODE>, and then start
-up an xterm with 
-<pre>
-xterm -sb -e bash &amp;
-</pre>
+you can set up NT so that you can telnet in and bring up remote xterms.
+The xterm terminal emulator is better than the vanilla bash terminal, since
+you can have scrollbars and use <CODE>less</CODE> with xterm, but not
+with the vanilla bash emulator.
+	<ol>
+	<li> Turn on the <CODE>telnetd</CODE> daemon by going
+	to <CODE>Control Panels</CODE> -&gt; <CODE>HCL Inetd</CODE>
+	and then selecting <CODE>Telnetd</CODE> and then <CODE>Enable</CODE>
+
+	
+	<li> To bring up an xterm,
+	start up <CODE>bash</CODE>, and then start up an xterm with 
+	<pre>
+	xterm -sb -e bash &amp;
+	</pre>
+	</ol>
 
 <li> The NT Resource kit includes a <CODE>shutdown.exe</CODE> binary
 that can be executed from a bash shell.  The following command should reboot:
@@ -79,6 +90,13 @@ NT:
 slashes, it may also attempt to substitute in any mount points it
 knows about.  This can cause problems as well.
 
+
+<li> The location of your root directory can also cause problems with
+<CODE>java</CODE>.  For example, if Cygwin is setup so that
+<CODE>/tmp</CODE> is actually <CODE>d:/tmp</CODE>, then
+<CODE>java</CODE> will probably look in the Windows root, which could
+be <CODE>c:\tmp</CODE>.  Remounting <CODE>d:/</CODE> as <CODE>/</CODE>
+might help here.  The Cygwin FAQ might also have hints.
 
 </menu>
 
