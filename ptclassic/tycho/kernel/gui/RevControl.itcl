@@ -1,10 +1,10 @@
 # Definition of the class which handles revision control.
 #
-# Author: Joel King
+# Authors: Joel King and Edward A. Lee
 #
-# Version: @(#)RevControl.itcl	$Id$\t$Date$
+# Version: $Id$
 #
-# Copyright (c) 1990-1996 The Regents of the University of California.
+# Copyright (c) 1990-%Q% The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -44,177 +44,138 @@ class ::tycho::RevControl {
     ###################################################################
     ####                         options                           ####
 
-    #### -textobject option
-    # Stores the value of the text widget object that we are 
-    # associated with.
-    itk_option define -textobject textobject TextObject ""
-
     #### -object option
-    # Stores the value of the object that we are associated with.
+    # The object under version control.
     itk_option define -object object Object ""
-
-    #### -file option
-    # Stores the value of the file that we are associated with.
-    itk_option define -file file File ""
 
     ###################################################################
     ####                      public methods                       ####
 
     #### checkIn
-    # Checkin the file associated with this class.
-    method checkIn {}
+    # Check in the file associated with this class.
+    method checkIn {} {enableButton checkout}
 
     #### checkOut
-    # Checkout the file associated with this class.
-    method checkOut {}
+    # Check out the file associated with this class.
+    method checkOut {} {enableButton checkin}
 
-    #### nextAction
-    # Perform the next logical action.
-    method nextAction {}
+    #### initializeRevControl
+    # Put the file under revision control.
+    method initializeRevControl {} {}
 
-    #### revert
+    #### unedit
     # Unedit the file associated with this class.
     method unedit {}
 
-    #### unMapWindow
-    # unmap the window from the screen and return the focus to the 
-    # previous owner.
-    method unMapWindow {}
-
     #### viewHistory
-    # View the prior comments and other information about the 
-    # associated file.
-    method viewHistory {}
+    # View the version control history.
+    method viewHistory {} {error "Sorry, not implemented yet"}
 
     ###################################################################
     ####                   protected methods                       ####
 
-    #### checkRevControl
-    # Check if the file associated with this class is under revision 
-    # control, and return a 1 if it is or a 0 otherwise.
-    protected method checkRevControl {}
+    #### enableButton
+    # Enable one of "checkin" or "checkout" buttons and make it the default.
+    method enableButton {button}
+
+    #### isCheckedOut
+    # Return 1 if the file is checked out, 0 otherwise.
+    method isCheckedOut {} {return 0}
+
+    #### isUnderRevControl
+    # Return 1 if the file is under revision control, 0 otherwise.
+    protected method isUnderRevControl {} {return 0}
 
     ###################################################################
     ####                  protected variables                      ####
 
     # The text widget object that we are associated with.
-    protected variable textobject ""
+    protected variable textobject {}
 
     # The object that we are associated with.
-    protected variable object ""
+    protected variable object {}
 
     # The file that we are associated with.
-    protected variable file ""
+    protected variable file {}
 
 }
 
-#########################################################################
-#### -file configuration
-# 
-configbody ::tycho::RevControl::file {
-    set file $itk_option(-file)
-    if {$file == "NoName"} {
-	set file ""
-    }
-}
-    
 #########################################################################
 #### -object configuration
 # 
 configbody ::tycho::RevControl::object {
     set object $itk_option(-object)
-}
-    
-#########################################################################
-#### -textobject configuration
-# 
-configbody ::tycho::RevControl::textobject {
-    set textobject $itk_option(-textobject)
+    # NOTE: It would be nice to check:
+    #     [uplevel #0 info objects $object] == {}
+    # However, "info" in itcl is basically broken.  It does not
+    # understand scoping annotations like a prefix "::".
+    if {$object == {} || ![$object isa ::tycho::File]} {
+	error "You must specify a File object with the -object option"
+    }
+    set file [$object cget -file]
+    configure -title "Revision control for $file"
+    configure -text "Revision control for $file"    
+    if {![isUnderRevControl]} {
+	if {![askuser "This file is not currently under revision control.\
+		Do you want it placed under revision control?"]} {
+	    error "Revision control cancelled"
+	} {
+	    initializeRevControl
+	}
+    }
+    if [isCheckedOut] {
+	enableButton checkin
+    } {
+	enableButton checkout
+    }
 }
     
 ###################################################################
-# constructor
-# Create the revision control dialog.
+#### constructor
 #
 body ::tycho::RevControl::constructor {args} {
     eval itk_initialize $args
-    $this configure -object $object
-    $this configure -file $file
-#    $this addButton checkin -text "Checkin" -command "$this checkIn"
-#    $this addButton checkout -text "Checkout" -command "$this checkOut"
-    $this addButton nextaction -text "Next Action" -command "$this nextAction"
-#    $this addButton history -text "History" -command "$this viewHistory"
-    $this addButton unedit -text "Unedit" -command "$this unedit"
-    $this addButton cancel -text "Close <ESC>" -command \
-	    "$this unMapWindow"
-    $this default nextaction
-    bind $itk_component(hull) <Escape> "$this unMapWindow"
-    $this configure -bitmap info
+
+    addButton checkin -text "Checkin" -command [code $this checkIn]
+    addButton checkout -text "Checkout" -command [code $this checkOut]
+    addButton history -text "History" -command [code $this viewHistory]
+    addButton unedit -text "Unedit" -command [code $this unedit]
+    addButton cancel -text "Close <Esc>" -command \
+	   [code "$this nextWindow; delete object $this"]
+
+    bind $itk_component(hull) <Escape> [code $this invoke cancel]
 }
 
-#####################################################################
-#### destructor
+###################################################################
+#### unedit
+# Query the user for confirmation, then unedit.  This base class method
+# only does the query.
 #
-body ::tycho::RevControl::destructor {} {
-}
-
-#####################################################################
-#### checkIn
-# 
-body ::tycho::RevControl::checkIn {} {
-    error "Sorry, files can't be checked in unless a base class of\
-	    RevControl specific to a certain revision control system\
-	    is used."
-}
-
-#####################################################################
-#### checkOut
-# 
-body ::tycho::RevControl::checkOut {} {
-    error "Sorry, files can't be checked out unless a base class of\
-	    RevControl specific to a certain revision control system\
-	    is used."
-}
-
-#####################################################################
-#### revert
-# 
 body ::tycho::RevControl::unedit {} {
-    error "Sorry, files can't unedited unless a base class of\
-	    RevControl specific to a certain revision control system\
-	    is used."
+    if {$file == {}} {
+	error "Revision control: no file specified"
+    }
+    if [askuser "Are you sure you want to discard your changes (if any)?"] {
+	enableButton checkout
+    } {
+	error "Unedit cancelled"
+    }
 }
 
-#####################################################################
-#### nextAction
-# 
-body ::tycho::RevControl::nextAction {} {
-    error "Sorry, you can't do this unless a base class of\
-	    RevControl specific to a certain revision control system\
-	    is used."
+###################################################################
+#### enableButton
+# Enable one of "checkin" or "checkout" buttons.
+# The argument must be one of "checkin" or "checkout".
+# The other button is disabled.
+#
+body ::tycho::RevControl::enableButton {button} {
+    if {$button == {checkin}} {
+	$itk_component(bbox) buttonconfigure checkin -state normal
+	default checkin
+	$itk_component(bbox) buttonconfigure checkout -state disabled
+    } {
+	$itk_component(bbox) buttonconfigure checkout -state normal
+	default checkout
+	$itk_component(bbox) buttonconfigure checkin -state disabled
+    }
 }
-
-#####################################################################
-#### viewHistory
-# 
-body ::tycho::RevControl::viewHistory {} {
-    error "Sorry, you can't view the revision control history of\
-	    this file unless a base class of\
-	    RevControl specific to a certain revision control system\
-	    is used."
-}
-
-#####################################################################
-#### checkRevControl
-# 
-body ::tycho::RevControl::checkRevControl {} {
-    # We don't know how to do this yet.
-}
-
-#####################################################################
-#### unMapWindow
-# 
-body ::tycho::RevControl::unMapWindow {} {
-    wm withdraw $itk_component(hull)    
-}
-
