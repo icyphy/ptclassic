@@ -60,7 +60,7 @@ SRCS =		$(LIBCSRCS)
 
 OBJS =		$(LIBCSRCS:.c=.o)
 
-LIB = 		libnle.$(LIBSUFFIX)
+CLIB = 		libnle.$(LIBSUFFIX)
 
 EXPHDR =	nle.h
 

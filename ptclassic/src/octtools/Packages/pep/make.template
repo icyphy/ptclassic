@@ -62,7 +62,7 @@ SRCS =		$(LIBCSRCS)
 
 OBJS =		$(LIBCSRCS:.c=.o)
 
-LIB = 		libpep.$(LIBSUFFIX)
+CLIB = 		libpep.$(LIBSUFFIX)
 
 EXPHDR =	pep.h
 

@@ -54,7 +54,7 @@ SRCS =		$(LIBCSRCS)
 
 OBJS =		$(LIBCSRCS:.c=.o)
 
-LIB = 		libuprintf.$(LIBSUFFIX)
+CLIB = 		libuprintf.$(LIBSUFFIX)
 
 EXPHDR =	uprintf.h
 

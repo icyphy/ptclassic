@@ -55,7 +55,7 @@ SRCS =		$(LIBCSRCS)
 
 OBJS =		$(LIBCSRCS:.c=.o)
 
-LIB = 		libTgl.$(LIBSUFFIX)
+CLIB = 		libTgl.$(LIBSUFFIX)
 
 EXPHDR =	Tgl.h
 

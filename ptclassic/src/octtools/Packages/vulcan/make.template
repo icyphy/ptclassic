@@ -54,7 +54,7 @@ SRCS =		$(LIBCSRCS)
 
 OBJS =		$(LIBCSRCS:.c=.o)
 
-LIB = 		libvulcan.$(LIBSUFFIX)
+CLIB = 		libvulcan.$(LIBSUFFIX)
 
 EXPHDR =	vulcan.h
 

@@ -69,7 +69,7 @@ SRCS =		$(LIBCSRCS)
 
 OBJS =		$(LIBCSRCS:.c=.o)
 
-LIB = 		libdds.$(LIBSUFFIX)
+CLIB = 		libdds.$(LIBSUFFIX)
 
 EXPHDR =	dds.h
 

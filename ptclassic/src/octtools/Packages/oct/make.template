@@ -144,7 +144,7 @@ SRCS =		$(LIBCSRCS)
 
 OBJS =		$(LIBCSRCS:.c=.o)
 
-LIB = 		liboct.$(LIBSUFFIX)
+CLIB = 		liboct.$(LIBSUFFIX)
 
 EXPHDR =	oct.h
 

@@ -53,7 +53,7 @@ SRCS =		$(LIBCSRCS)
 
 OBJS =		$(LIBCSRCS:.c=.o)
 
-LIB = 		libts.$(LIBSUFFIX)
+CLIB = 		libts.$(LIBSUFFIX)
 
 EXPHDR =	ts.h
 

@@ -63,7 +63,7 @@ SRCS =		$(LIBCSRCS)
 
 OBJS =		$(LIBCSRCS:.c=.o)
 
-LIB = 		liboctmm.$(LIBSUFFIX)
+CLIB = 		liboctmm.$(LIBSUFFIX)
 
 EXPHDR =	octmm.h
 

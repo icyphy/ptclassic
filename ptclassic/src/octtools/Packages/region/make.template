@@ -59,7 +59,7 @@ SRCS =		$(LIBCSRCS)
 
 OBJS =		$(LIBCSRCS:.c=.o)
 
-LIB = 		libregion.$(LIBSUFFIX)
+CLIB = 		libregion.$(LIBSUFFIX)
 
 EXPHDR =	region.h
 
