@@ -5,7 +5,7 @@ defcore
 	coreCategory { FPSim }
 	corona { Nop }
 	desc { Does nothing }
-	version {@(#)ACSNopFPSim.pl	1.0 8/4/99}
+	version {$Id$
         author { Eric K. Pauer }
         copyright {
 Copyright (c) 1998-1999 The Regents of the University of California

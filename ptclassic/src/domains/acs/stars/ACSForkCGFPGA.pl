@@ -6,7 +6,7 @@ defcore {
 	desc {
 	    Fork for CG dummy domain
 	}
-	version {@(#)ACSForkCGFPGA.pl	1.4	12 August 1998}
+	version {$Id$
 	author { E. A. Lee }
 	copyright {
 Copyright (c) 1998-1999 The Regents of the University of California

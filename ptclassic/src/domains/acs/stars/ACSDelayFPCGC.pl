@@ -4,7 +4,7 @@ defcore {
     coreCategory { FPCGC }
     corona { Delay } 
     desc { Provides explicit pipeline delay of one. }
-    version { @(#)ACSDelayFPCGC.pl    1.1     08/26/98 }
+    version { $Id$
     author { Eric Pauer }
     copyright {
 Copyright (c) 1999 The Regents of the University of California

@@ -4,7 +4,7 @@ defcore {
 	coreCategory { CGFPGA }
 	corona { FIR }
 	desc {FIR Filter}
-	version {@(#)ACSFIRCGFPGA.pl	1.0	03/29/99}
+	version {$Id$
 	author { K. Smith }
 	copyright {
 Copyright (c) 1998-1999 Sanders, a Lockheed Martin Company

@@ -4,7 +4,7 @@ defcore {
     coreCategory { FPSim }
     corona { IntGain } 
     desc { This is an amplifier; the output is the input multiplied by the integer "gain" (default 1). }
-    version { @(#)ACSIntGainFPSim.pl	1.1 08/26/99 }
+    version { $Id$
     author { Eric Pauer }
     copyright {
 Copyright (c) 1999 Sanders, a Lockheed Martin Company

@@ -1,5 +1,5 @@
 /*
-@Version: @(#)ACSGeodesic.h	1.7 04/29/98
+@Version: $Id$
 @Copyright (c) 1998 The Regents of the University of California.
 All rights reserved.
 

@@ -2,7 +2,7 @@ defcorona {
     name { Exp }
     domain { ACS }
     desc { Compute the exponential function of the input. }
-    version { @(#)ACSExp.pl	1.1 03/16/98 }
+    version { $Id$
     author { James Lundblad }
     copyright {
 Copyright (c) 1998 The Regents of the University of California.

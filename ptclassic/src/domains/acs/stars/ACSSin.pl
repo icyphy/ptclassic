@@ -2,7 +2,7 @@ defcorona {
     name { Sin }
     domain { ACS }
     desc { This star computes the sine of its input, assumed to be an angle in radians. }
-    version { @(#)ACSSin.pl	1.1 03/16/98 }
+    version { $Id$
     author { James Lundblad }
     copyright {
 Copyright (c) 1998 The Regents of the University of California.

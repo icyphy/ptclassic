@@ -7,7 +7,7 @@ defcore {
 	    Converts a bidirectional memory interface into individual
 	    source/sink memory lines
 	}
-	version {@(#)ACSNonBiMemCGFPGA.pl	1.0	7 November 1998}
+	version {$Id$
 	author { K. Smith}
 	copyright {
 Copyright (c) 1998-1999 Sanders, a Lockheed Martin Company

@@ -6,7 +6,7 @@ defcore {
 	desc {
 Produces the square root of the input.
 	}
-	version {@(#)ACSSqrtCGFPGA.pl	1.0	6 June 1999}
+	version {$Id$
 	author { K. Smith }
 	copyright {
 Copyright (c) 1998-1999 Sanders, a Lockheed Martin Company

@@ -2,7 +2,7 @@
 #define _ACSStar_h
 
 /*
-@Version: @(#)ACSStar.h	1.12 06/18/99
+@Version: $Id$
 
 Copyright (c) 1998-1999 The Regents of the University of California
 and Sanders, a Lockheed Martin Company

@@ -6,7 +6,7 @@ defcore {
 	desc {
 Produces constant coefficient multiply
 	}
-	version {@(#)ACSGainCGFPGA.pl	1.0    08/26/99 }
+	version {$Id$
 	author { P. Fiore }
 	copyright {
 Copyright (c) 1998-1999 Sanders, a Lockheed Martin Company

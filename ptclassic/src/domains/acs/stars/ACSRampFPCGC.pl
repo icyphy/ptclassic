@@ -4,7 +4,7 @@ defcore {
     coreCategory { FPCGC }
     corona { Ramp } 
     desc { Output the product of the inputs, as a floating-point value. }
-    version { @(#)ACSRampFPCGC.pl	1.1	04/14/98 }
+    version { $Id$
     author { James Lundblad }
     copyright {
 Copyright (c) 1998 The Regents of the University of California.

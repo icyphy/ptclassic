@@ -4,7 +4,7 @@ defcore {
 	coreCategory { CGFPGA }
 	corona { Shift }
 	desc {Scale by a power of 2}
-	version {@(#)ACSShifCGFPGA.pl	1.0	18 Jan 1999}
+	version {$Id$
 	author { P. Fiore }
 	copyright { 
 Copyright (c) 1998-1999 Sanders, a Lockheed Martin Company
