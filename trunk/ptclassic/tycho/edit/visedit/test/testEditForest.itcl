@@ -110,5 +110,4 @@ test EditForest-1.3 {Open a forest file and do a reload} {
     after $duration removeobj $win
     list {}
 } {{}}
-doneTests
 
