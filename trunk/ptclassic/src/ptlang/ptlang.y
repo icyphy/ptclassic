@@ -124,6 +124,7 @@ char* objVer;			/* sccs version number */
 char* objDate;			/* date of last update */
 char* objDesc;			/* descriptor of star or galaxy */
 char* objAuthor;		/* author of star or galaxy */
+char* objAcknowledge;		/* acknowledgements (previous authors) */
 char* objCopyright;		/* copyright */
 char* objExpl;			/* long explanation */
 char* objLocation;		/* location string */
@@ -200,8 +201,8 @@ typedef char * STRINGVAL;
 %token OUTMULTI INMULTI TYPE DEFAULT CLASS START GO WRAPUP CONNECT ID
 %token CCINCLUDE HINCLUDE PROTECTED PUBLIC PRIVATE METHOD ARGLIST CODE
 %token BODY IDENTIFIER STRING CONSCALLS ATTRIB LINE
-%token VERSION AUTHOR COPYRIGHT EXPLANATION SEEALSO LOCATION CODEBLOCK
-%token EXECTIME PURE INLINE HEADER INITCODE
+%token VERSION AUTHOR ACKNOWLEDGE COPYRIGHT EXPLANATION SEEALSO LOCATION
+%token CODEBLOCK EXECTIME PURE INLINE HEADER INITCODE
 %%
 /* production to report better about garbage at end */
 full_file:
@@ -250,6 +251,10 @@ sgitem:
 					  descMode = 0;}
 |	AUTHOR '{' 			{ bodyMode = 1; docMode = 1;}
 		BODY			{ objAuthor = $4;
+					  docMode = 0;
+					  bodyMode = 0;}
+|	ACKNOWLEDGE '{' 		{ bodyMode = 1; docMode = 1;}
+		BODY			{ objAcknowledge = $4;
 					  docMode = 0;
 					  bodyMode = 0;}
 |	COPYRIGHT '{'			{ bodyMode = 1; docMode = 1;}
@@ -592,7 +597,8 @@ ident:	keyword
 keyword:	DEFSTAR|GALAXY|NAME|DESC|DEFSTATE|DOMAIN|NUMPORTS|DERIVED
 |CONSTRUCTOR|DESTRUCTOR|STAR|ALIAS|OUTPUT|INPUT|OUTMULTI|INMULTI|TYPE
 |DEFAULT|START|GO|WRAPUP|CONNECT|CCINCLUDE|HINCLUDE|PROTECTED|PUBLIC
-|PRIVATE|METHOD|ARGLIST|CODE|ACCESS|AUTHOR|VERSION|COPYRIGHT|EXPLANATION
+|PRIVATE|METHOD|ARGLIST|CODE|ACCESS|AUTHOR|ACKNOWLEDGE|VERSION|COPYRIGHT
+|EXPLANATION
 |SEEALSO|LOCATION|CODEBLOCK|EXECTIME|PURE|INLINE|HEADER|INITCODE
 ;
 %%
@@ -1137,6 +1143,10 @@ genDef ()
 	if (objAuthor)
 		fprintf (fp, ".AL \"%s\"\n", objAuthor);
 
+/* acknowledge */
+	if (objAcknowledge)
+		fprintf (fp, ".AC \"%s\"\n", objAcknowledge);
+
 /* copyright */
 	if (objCopyright)
 		fprintf (fp, ".CO \"%s\"\n", objCopyright);
@@ -1184,6 +1194,7 @@ struct tentry {
 /* keyword table */
 struct tentry keyTable[] = {
 	"access", ACCESS,
+	"acknowledge", ACKNOWLEDGE,
 	"alias", ALIAS,
 	"arglist", ARGLIST,
 	"attrib", ATTRIB,
