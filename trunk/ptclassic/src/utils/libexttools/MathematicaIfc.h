@@ -71,14 +71,19 @@ public:
 
     // A. low-level interfaces
     int OpenMathLink(int argc, char **argv);
-    int SendToMathLink(char* command);
     int CloseMathLink();
+
+    int ExpectPacket(MLINK linkp, int discardFlag);
+    int LoopUntilPacket(MLINK linkp, int packetType);
+    int InitXWindows(MLINK linkp);
+    int SendToMathLink(MLINK linkp, char* command);
 
     // B. higher-level interfaces to the Mathematica process
     int EvaluateOneCommand(char* command);
 
     // C. highest-level interface to the Mathematica process
     int StartMathematica();
+    int StartMathematica(int oargc, char** oargv);
     int MathematicaIsRunning();
     int EvaluateUserCommand(char* command);
     int KillMathematica();
