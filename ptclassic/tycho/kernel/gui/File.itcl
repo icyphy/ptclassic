@@ -577,8 +577,11 @@ body ::tycho::File::constructor {args} {
     addMenuItem "User's Guide" Help -underline 0 \
 	    -command "$this help"
     
-    addMenuItem "Index" Help -underline 0 \
+    addMenuItem "Concept Index" Help -underline 0 \
 	    -command {::tycho::File::openContext $TYCHO/tycho.idx}
+
+    addMenuItem "Code Index" Help -underline 0 \
+	    -command {::tycho::File::openContext $TYCHO/codeDoc.idx}
     
     # Bindings
     bind $prefix <Control-x><Control-f> "::tycho::File::openWin; break"
