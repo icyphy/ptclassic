@@ -300,7 +300,7 @@ updatewebsite: $(JDISTS)
 	@echo "Updating website"
 	(cd $(JDESTDIR); rm -rf $(JPACKAGE); mkdir $(JPACKAGE))
 	cp $(JDISTS) $(JDESTDIR)/$(JPACKAGE)
-	(cd $(JDESTDIR); gtar -zxf $(JPACKAGE)/$(JDIST).tar.gz;
+	(cd $(JDESTDIR); gtar -zxf $(JPACKAGE)/$(JDIST).tar.gz;\
 	 chmod g+ws $(JPACKAGE))
 	(cd $(JDESTDIR)/$(JPACKAGE); chmod g+w $(JDISTS))
 
