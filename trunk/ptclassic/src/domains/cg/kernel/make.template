@@ -1,7 +1,7 @@
 # Makefile for CG domain support
 # Version identification:
 # $Id$
-# Copyright (c) 1990 The Regents of the University of California.
+# Copyright (c) 1994 The Regents of the University of California.
 #                       All Rights Reserved.
 # Date of creation: 9/14/90
 #
@@ -17,7 +17,7 @@ ROOT=../../../..
 VPATH = $(ROOT)/src/domains/cg/kernel
 
 # get configuration info
-CONFIG=$(ROOT)/mk/config-$(ARCH).debug.mk
+CONFIG=$(ROOT)/mk/config-$(ARCH).mk
 include $(CONFIG)
 
 # SDF directory
