@@ -8,7 +8,7 @@ thresholds, the output will be the n-th level.  If the input is greater
 than all thresholds, the output is the N+1-th level.
 There must be one more level than thresholds.
 	}
-	version {$Revision$ $Date$}
+	version {$Id$}
 	author { E. A. Lee }
 	copyright { 1991 The Regents of the University of California }
 	location { SDF main library }
