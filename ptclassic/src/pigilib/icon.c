@@ -96,19 +96,32 @@ char *codeDir, **iconDir;
     return(TRUE);
 }
 
+/* generate a command line to edit a file */
+extern char* getenv();
+static char defaultDisplay[] = "xedit -name ptolemy_code %s";
+
+static void genDispCommand(buf,file,background)
+char* buf;
+char* file;
+int background;
+{
+    char* dispCmd = getenv("PT_DISPLAY");
+    if (dispCmd == 0) dispCmd = defaultDisplay;
+    sprintf (buf, dispCmd, file);
+    if (background) strcat(buf, "&");
+}
 
 /* 5/8/90
-Open a window and run xedit on a file.
+Open a window and run xedit (or user selected program) on a file.
 Does not run in the background.
-This routine does not return until vi is exited.
+This routine does not return until program is exited.
 */
 static boolean
 EditFile(fileName)
 char *fileName;
 {
-    char buf[612];
-
-    sprintf(buf, "xedit -name ptolemy_code %s", fileName);
+    char buf[512];
+    genDispCommand(buf, fileName, 0);
     PrintDebug(buf);
     if (util_csystem(buf)) {
 	sprintf(buf, "Cannot edit Ptolemy code file '%s'", fileName);
@@ -126,9 +139,8 @@ boolean
 LookAtFile(fileName)
 char *fileName;
 {
-    char buf[612];
-
-    sprintf(buf, "xedit -name ptolemy_code %s &", fileName);
+    char buf[512];
+    genDispCommand(buf, fileName, 1);
     PrintDebug(buf);
     if (util_csystem(buf)) {
 	sprintf(buf, "Cannot edit Ptolemy code file '%s'", fileName);
