@@ -121,8 +121,10 @@ if ( -d targets ) then
                 cat targettitle.t >> $tempTroffFile
         endif
         cd targets
-        # print all targets
-        cat -s $troffFileNames >> $tempTroffFile
+	# print all targets, sorted in dictionary order
+	foreach file (`ls -1 -d $troffFileNames | sort -f -d`)
+		cat -s $file >> $tempTroffFile
+	end
         cd ..
 endif
 
@@ -147,8 +149,10 @@ if ( -d demos ) then
 		cat demotitle.t >> $tempTroffFile
 	endif
 	cd demos
-	# print all demos
-	cat -s $troffFileNames >> $tempTroffFile
+	# print all demos, sorted in dictionary order
+	foreach file (`ls -1 -d $troffFileNames | sort -f -d`)
+		cat -s $file >> $tempTroffFile
+	end
 	cd ..
 endif
 
