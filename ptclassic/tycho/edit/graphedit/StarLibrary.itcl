@@ -32,6 +32,8 @@
 ##########################################################################
 #### StarLibrary
 #
+# <b>This class is under development.</b>
+#
 # A _StarLibrary_ is a model containing a collection of "stars"
 # (in the Ptolemy sense).
 #
