@@ -67,7 +67,7 @@ defstar {
 		type {float}
 		default {"0.0"}
 		desc {"internal state"}
-		attributes { A_NONSETTABLE|A_NONCONSTANT }
+		attributes { A_NONCONSTANT }
 	}
 	protected {
 		double spread;
