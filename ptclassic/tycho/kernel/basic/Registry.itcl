@@ -31,7 +31,7 @@
 
 #####################################################################
 #### register
-# Register information. This is the prime interface to the
+# Register information. This is the primary interface to the
 # Registry class and should be used instead of direct access
 # to its procedures. Options are:
 #
@@ -77,22 +77,22 @@
 #
 # <li><b>help</b> _name_ ?_option value_ ...?:
 # Register an entry for the Help menus.
-# See <a href="Registry.html#registerHelp proc of class Registry">
+# See <a href="Registry.html#registerHelp proc of ::tycho::Registry class">
 # ::tycho::Registry::registerHelp</a>.
 #
 # <li><b>menubar</b> _menubar_ ?_owner_?:
 # Register a menubar containing Window and Help menus.
-# See <a href="Registry.html#registerMenubar proc of class Registry">
+# See <a href="Registry.html#registerMenubar proc of ::tycho::Registry class">
 # ::tycho::Registry::registerMenubar</a>.
 #
 # <li><b>mode</b> _mode_ ?_option value_ ...?:
 # Register a new file mode.
-# See <a href="Registry.html#registerMode proc of class Registry">
+# See <a href="Registry.html#registerMode proc of ::tycho::Registry class">
 # ::tycho::Registry::registerMode</a>.
 #
 # <li><b>window</b> _window_ _tag_ ?_option value_ ...?:
 # Register a viewer widget.
-# See <a href="Registry.html#registerWindow proc of class Registry">
+# See <a href="Registry.html#registerWindow proc of ::tycho::Registry class">
 # ::tycho::Registry::registerWindow</a>.
 #
 # </ul>
@@ -131,7 +131,20 @@ ensemble ::tycho::register {
 
 #####################################################################
 #### deregister
-# De-register something...
+# De-register an item. Options are:
+#
+# <ul>
+# <li><b>window</b> _tag_ ?_window_?:
+# Deregister a window.
+# See <a href="Registry.html#deregisterWindow proc of ::tycho::Registry class">
+# ::tycho::Registry::deregisterWindow</a>.
+#
+# <li><b>menubar</b> _menubar_:
+# Deregister a menu bar.
+# See <a href="Registry.html#deregisterMenubar proc of ::tycho::Registry class">
+# ::tycho::Registry::deregisterMenubar</a>.
+#
+# </ul>
 #
 ensemble ::tycho::deregister {
     option window {tag {window *}} {
@@ -149,7 +162,7 @@ ensemble ::tycho::deregister {
 # <ul>
 # <li><b>filemode</b> _filename_:
 # Return the default file mode registered with a given path name.
-# See <a href="Registry.html#registeredFileMode proc of class Registry">
+# See <a href="Registry.html#registeredFileMode proc of ::tycho::Registry class">
 # ::tycho::Registry::registeredFileMode</a>.
 #
 # <li><b>isopen</b> _tag_ ?_window_?:
@@ -165,6 +178,11 @@ ensemble ::tycho::deregister {
 #
 # <li><b>modecconfigure</b> _mode_ ?_option_ _value_...?:
 # Configure options of a mode.
+#
+# <li><b>registered</b> _type_ _name_:
+# Test if the entity of the given type is registered. The _type_ selects
+# what we're testing for. Currently it can take the values:
+# <code>mode</code>.
 #
 # <li><b>viewmode</b> _class_:
 # Given a class, as passed as the *-class* option to
@@ -187,6 +205,17 @@ ensemble ::tycho::deregister {
 ensemble ::tycho::registry {
     option filemode {filename} {
 	::tycho::Registry::registeredFileMode $filename
+    }
+    # FIXME: Support different types
+    option registered {type name} {
+	switch -exact $type {
+            "mode" {
+                @scope ::tycho::Registry ::info exists _modeinfo($mode)
+            }
+            default {
+                error "Unsupported type \"$type\""
+            }
+        }
     }
     option isopen {tag {window {}}} {
 	if { $window != {} } {
@@ -285,10 +314,6 @@ class ::tycho::Registry {
     # Deregister a viewer widget
     proc deregisterWindow {tag {window *}}
 
-    # Is the file already open? if YES, then return the window name,
-    # if NO, then return 0.
-    proc isFileOpen {filename} {}
-
     # Link to an open model
     proc linkModel {path key}
 
@@ -386,6 +411,10 @@ class ::tycho::Registry {
 #
 # If none is found, return null.
 #
+# <b>Note</b>: Do not call this procedure directly. Use
+# <a href="Registry_rel.html#registry Ensemble associated with ::tycho::Registry class">
+# <code>::tycho::registry</code></a>.
+#
 body ::tycho::Registry::registeredFileMode {name} {
     set ITHINKTHISISWRONG {
 	if {[::tycho::url protocol $name]=="http"} {
@@ -444,10 +473,15 @@ body ::tycho::Registry::registeredFileMode {name} {
 #### deregisterMenubar
 # Deregister a menubar
 #
+# <b>Note</b>: Do not call this procedure directly. Use
+# <a href="Registry_rel.html#deregister Ensemble associated with ::tycho::Registry class">
+# <code>::tycho::deregister</code></a>.
+#
 body ::tycho::Registry::deregisterMenubar {menubar} {
     if ![::info exists _menubars($menubar)] {
 	# FIXME: Should remove this later...
-	puts "Menubar \"$menubar\" has not been registered..."
+	# puts "Menubar \"$menubar\" has not been registered..."
+        return
     }   
     unset _menubars($menubar)
 }
@@ -462,6 +496,10 @@ body ::tycho::Registry::deregisterMenubar {menubar} {
 # exactly the tag given in the call to <code>::tycho::register window</code>
 # that created the entry in the first place.
 #
+# <b>Note</b>: Do not call this procedure directly. Use
+# <a href="Registry_rel.html#deregister Ensemble associated with ::tycho::Registry class">
+# <code>::tycho::deregister</code></a>.
+#
 body ::tycho::Registry::deregisterWindow {tag {window *}} {
     # puts "deregisterWindow $tag $window"
     if ![info exists _windows] {
@@ -471,8 +509,8 @@ body ::tycho::Registry::deregisterWindow {tag {window *}} {
 	# Remove from all registered menu bars
 	array set opts $_windows($v)
 	foreach mb [array names _menubars] {
-	    # Make sure the menu bar still exists
-	    if { [::info which -command $mb] == "" } {
+	    # Make sure the menu bar still exists and has a window menu
+	    if { [::info which -command $mb] == "" || ![$mb exists window]} {
 		unset _menubars($mb)
 		continue
 	    }
@@ -585,20 +623,6 @@ body ::tycho::Registry::initWindowMenu {menubar} {
     }
 }
 
-#####################################################################
-#### isFileOpen
-# Check if the file is already open, if YES, then return the window name,
-# if NO, then return empty string.
-#
-body ::tycho::Registry::isFileOpen {filename} {
-    set filename [::tycho::expandPath $filename]
-    if { [array names _windows *#$filename] != "" } {
-	return [lindex [array names $_windows *#$filename] 0]
-    } else {
-	return ""
-    }
-}
-
 ##########################################################################
 ## linkModel
 #
@@ -687,7 +711,7 @@ body ::tycho::Registry::raiseWindow {tag window} {
 	# Oops... there's some bug or something.... Try and clean
 	# up by just removing the offending window from all
 	# menubars
-	puts "!!! Deleting $window#$tag !!!"
+	# puts "!!! Deleting $window#$tag !!!"
 	foreach mb [array names _menubars] {
 	    # Make sure the menu bar still exists
 	    if { [::info which -command $mb] == "" } {
@@ -697,10 +721,10 @@ body ::tycho::Registry::raiseWindow {tag window} {
 	    # Delete the entry
 	    catch {$mb delete $window#$tag}
 	}
+    } else {
+        # OK
+        raise [winfo toplevel $w]
     }
-   
-    # OK
-    raise [winfo toplevel $w]
 }
 
 #####################################################################
@@ -720,7 +744,7 @@ body ::tycho::Registry::raiseWindow {tag window} {
 # any menubars are registered.
 # 
 # <b>Note</b>: Do not call this procedure directly. Use
-# <a href="Registry_rel.html#::tycho::register">
+# <a href="Registry_rel.html#registry Ensemble associated with ::tycho::Registry class">
 # <code>::tycho::register</code></a>.
 #
 body ::tycho::Registry::registerHelp {name args} {
@@ -757,14 +781,18 @@ body ::tycho::Registry::registerHelp {name args} {
 # registered with the <code>::tycho::register helpentry</code>.
 #
 # <b>Note</b>: Do not call this procedure directly. Use
-# <a href="Registry_rel.html#::tycho::register">
+# <a href="Registry_rel.html#registry Ensemble associated with ::tycho::Registry class">
 # <code>::tycho::register</code></a>.
 #
 body ::tycho::Registry::registerMenubar {menubar {owner {}}} {
     set _menubars($menubar) 1
 
-    initWindowMenu $menubar
-    initHelpMenu $menubar $owner
+    if [$menubar exists window] {
+        initWindowMenu $menubar
+    }
+    if [$menubar exists help] {
+        initHelpMenu $menubar $owner
+    }
 }
 
 #####################################################################
@@ -821,7 +849,7 @@ body ::tycho::Registry::registerMenubar {menubar {owner {}}} {
 # as the command does not contain a mode, it doesn't matter.
 #
 # <b>Note</b>: Do not call this procedure directly. Use
-# <a href="Registry_rel.html#::tycho::register">
+# <a href="Registry_rel.html#registry Ensemble associated with ::tycho::Registry class">
 # <code>::tycho::register</code></a>.
 #
 body ::tycho::Registry::registerMode {mode args} {
@@ -862,7 +890,7 @@ body ::tycho::Registry::registerMode {mode args} {
 # </ul>
 #
 # <b>Note</b>: Do not call this procedure directly. Use
-# <a href="Registry_rel.html#::tycho::register">
+# <a href="Registry_rel.html#registry Ensemble associated with ::tycho::Registry class">
 # <code>::tycho::register</code></a>.
 #
 body ::tycho::Registry::registerWindow {tag window args} {
@@ -884,12 +912,21 @@ body ::tycho::Registry::registerWindow {tag window args} {
     set _windows($window#$tag) [array get opts]
 
     # Add to the correct sub-menu of all registered menu bars
+    # with a Window menu
     foreach mb [array names _menubars] {
-	$mb command $window#$tag open$opts(-category) \
-		-label $opts(-label) \
-		-command [list ::tycho::Registry::raiseWindow \
-		$opts(-tag) $opts(-window)]
-	$mb enable open$opts(-category)
+	# Check for existence
+	if { [::info which -command $mb] == "" } {
+	    unset _menubars($mb)
+	    continue
+	}
+	# Check for window menu
+        if [$mb exists window] {
+            $mb command $window#$tag open$opts(-category) \
+                    -label $opts(-label) \
+                    -command [list ::tycho::Registry::raiseWindow \
+                    $opts(-tag) $opts(-window)]
+            $mb enable open$opts(-category)
+        }
     }
 }
 
