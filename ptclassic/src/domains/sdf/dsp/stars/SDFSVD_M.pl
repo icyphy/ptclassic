@@ -237,7 +237,7 @@ Data_M
         U = A;
 
         // Create a temporary working array
-        double *temp = new double[numCols];
+        LOG_NEW; double *temp = new double[numCols];
 
         // Reduce the U matrix to bidiagonal form with Householder transforms.
 
@@ -451,7 +451,7 @@ Data_M
             W.entry(k) = x;
           } // end testsplittng iteration loop
        }  // end k loop
-       delete[] temp;
+       LOG_DEL; delete[] temp;
        } // close code
     } // end method
 } // end defstar
