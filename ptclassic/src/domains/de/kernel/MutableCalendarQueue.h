@@ -39,8 +39,10 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #include <math.h>
 #ifdef sgi
+#ifndef HUGE_VAL /* WTC: On IRIX 6.2, HUGE_VAL is defined in math.h */
 extern const double __infinity;
 #define HUGE_VAL __infinity	
+#endif /* HUGE_VAL */
 #endif
 
 #ifndef HUGE_VAL
