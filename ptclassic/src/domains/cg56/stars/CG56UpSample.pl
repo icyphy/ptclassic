@@ -40,7 +40,7 @@ is to output it first (phase = 0). The maximum phase is "factor" - 1.
 	state {
 		name {fill}
 		type {FIX}
-		default {0}
+		default {0.0}
 		desc { Value to fill the output block. }
 		attributes { A_SETTABLE }
 	}
@@ -59,11 +59,13 @@ is to output it first (phase = 0). The maximum phase is "factor" - 1.
 	go {
 		gencode(sendsample);
 		if (factor > 1) {
-			if (factor > 2) gencode(repeatcode);
+			if (factor > 2) {
+				gencode(repeatcode);
+			}
 			gencode(fillcode);
 		}
 	}
 	execTime {
-		return factor + 2;
+		return int(factor) + 2 ;
 	}
 }
