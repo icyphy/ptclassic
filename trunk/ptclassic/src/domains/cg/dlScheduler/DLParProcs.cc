@@ -255,7 +255,6 @@ void DLParProcs :: scheduleBig(DLNode* node, int opt,
 	int syncP = pf.syncProc();
 
 	// schedule the idle node and the profile into the processors.
-	int nonzero = 1;
 	int shift = pf.frontIdleLength(avail);
 
 	for (int i = optNum - 1; i >= 0; i--) {
