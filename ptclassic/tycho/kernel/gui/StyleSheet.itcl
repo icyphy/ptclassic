@@ -89,6 +89,10 @@
 # of _subscriber_; if it is, change the style of _subscriber_ to
 # _style_.
 #
+# <dt><b>stylesheets</b>
+# <dd>
+# Return a list of registered stylesheet.
+#
 # <dt><b>subscribe</b> _subscriber_ _stylesheet_ ?_option_ _param_ ...?
 # <dd>
 # Subscribe a widget's options to parameters of a style-sheet.
@@ -101,6 +105,13 @@
 # relative to a particular style (as specified by the <b>select</b>
 # option). For example, the name <b>colors.textColor</b> is
 # the <b>textColor</b> parameter of the <b>colors</b> group. 
+#
+# <dt><b>unsubscribe</b> _subscriber_ ?_option_ ...?
+# <dd>
+# Unsubscribe a widget's options. Each _option_ is an option
+# of _subscriber_ that was previously subscribed with
+# <b>subscribe</b>. If no options are supplied, unsubscribe
+# all options of _subscriber_.
 #
 # </dl>
 #
@@ -159,6 +170,11 @@ ensemble ::tycho::stylesheet {
 	}
     }
 
+    # Return a list of registered stylesheets
+    option stylesheets {} {
+	@scope ::tycho::StyleSheet array names _userfile
+    }
+
     # Subscribe options
     option subscribe {subscriber stylesheet args} {
 	# Make sure it's loaded
@@ -181,9 +197,7 @@ ensemble ::tycho::stylesheet {
 ##########################################################################
 #### StyleSheet
 #
-# <b>This class is under development.</b>
-#
-# The <i>StyleSheet</i> class provides a mechanism for widgets
+# The <i>StyleSheet</i> model provides a mechanism for widgets
 # to have configuration options controlled by a central
 # database. Each style-sheet contains one or more _styles_,
 # which is a collection of parameters with arbitrary values.
@@ -426,7 +440,7 @@ body ::tycho::StyleSheet::namebysubscriber {subscriber param} {
 
     set name "style:$_widgetstyle($subscriber)"
     set splat [split $param .]
-    foreach g [lreplace $param end end] {
+    foreach g [lreplace $splat end end] {
 	lappend name "group:$g"
     }
     lappend name "parameter:[lindex $splat end]"
@@ -495,7 +509,7 @@ body ::tycho::StyleSheet::subscribe {mode {subscriber {}} args} {
             }
 
 	    # Remember the options and parameters
-	    lappend _widgetoptions($subscriber) $args
+	    eval lappend _widgetoptions($subscriber) $args
 
 	    set updatelist {}
 	    foreach {option param} $args {
@@ -569,6 +583,13 @@ body ::tycho::StyleSheet::subscribe {mode {subscriber {}} args} {
 body ::tycho::StyleSheet::synchronize {master mstyle {context {}}} {
     set styles [match style]
     set rstyle [lindex $styles 0]
+
+    # If this style sheet has no styles, just copy the data
+    # from the master
+    if { $styles == "" } {
+	parse [$master describe]
+	return
+    }
 
     # Update styles
     foreach s [$master match style] {
@@ -668,7 +689,7 @@ body ::tycho::StyleSheet::synchronize {master mstyle {context {}}} {
 # Unsubscribe from an "event" on the model. This is the same as for 
 # <a href="Model.html">Model</a>.
 #
-# <dt><b>option</b> _subscriber_ ?_option_ ...?
+# <dt><b>options</b> _subscriber_ ?_option_ ...?
 # <dd>
 # Unsubscribe widget options from data. Each _option_ is
 # the name of an itk_option or a public variable of _subscriber_, that
@@ -680,7 +701,7 @@ body ::tycho::StyleSheet::synchronize {master mstyle {context {}}} {
 #
 body ::tycho::StyleSheet::unsubscribe {mode subscriber args} {
     switch -exact $mode {
-        "option" {
+        "options" {
             # Get subscriber command if it exists
             set s [::info which -command $subscriber]
             if { $s != "" } {
@@ -689,7 +710,7 @@ body ::tycho::StyleSheet::unsubscribe {mode subscriber args} {
             if { $args == "" } {
                 # Unsubscribe from everything
 		chain unsubscribe data $subscriber
-		catch {unset _<($subscriber)}
+		catch {unset _widgetstyle($subscriber)}
 		catch {unset _widgetoptions($subscriber)}
 	    } else {
 		# Unsubscribe from selected options
@@ -700,7 +721,7 @@ body ::tycho::StyleSheet::unsubscribe {mode subscriber args} {
 		    lappend unsubs $name
 		    unset opts($option)
 		}
-		eval chain unsubscribe data $unsubs
+		eval chain data $subscriber $unsubs
 		set _widgetoptions($subscriber) [array get opts]
 	    }
     	}
@@ -750,40 +771,33 @@ body ::tycho::StyleSheet::_load {stylesheet} {
 	set userfile [::tycho::expandPath $_userfile($stylesheet)]
 	set basefile [::tycho::expandPath $_basefile($stylesheet)]
 
-	# If the user file doesn't exist, create it
-	if ![::file exists $userfile] {
-	    # Make sure directory exists
-	    ::file mkdir [::file dirname $userfile]
-	    ::file copy $basefile $userfile
-	}
-
-	# Read the user data
-	set fd [open $userfile]
-	set data [read $fd]
-	close $fd
-
 	# Create the model
-	set model [::tycho::StyleSheet [::tycho::autoName stylesheet] \
-		-modelname $stylesheet]
-	$model parse $data
+	set model [::tycho::StyleSheet \
+		[::tycho::autoName stylesheet] -modelname $stylesheet]
 	set _stylemodel($stylesheet) $model
 
-	# Check modification dates on the user and base files. If
-        # the base file is more recent than the user file, "synchronize"
-        # each sheet in the user file with the base file, using the
-        # "default" style.
+	# Check user and base files. If the user file doesn't exist,
+	# or the base file is more recent than the user file,
+	# update the model with the additional base file info.
         # FIXME: Based on experience with the earlier preferences manager
-        # (WidgetPreferences), this is not likely to be very robust.
-        # We need to use version numbers.
-        if { [::file mtime $basefile] > [file mtime $userfile] } {
-            # Read data
+        # (WidgetPreferences), the date comparison is not likely to be
+	# very robust. We need to use version numbers.
+        if { ![::file exists $userfile] \
+		|| [::file mtime $basefile] > [::file mtime $userfile] } {
+	    # If the user file exists, load it
+	    if [::file exists $userfile] {
+		# Load from the user file
+		set fd [open $userfile]
+		$model parse [read $fd]
+		close $fd
+	    }
+            # Load from base file
+            set base [::tycho::StyleSheet [::tycho::autoName stylesheet]]
             set fd [open $basefile]
-            set data [read $fd]
+	    $base parse [read $fd]
             close $fd
 
-            # Load and synchronize models
-            set base [::tycho::StyleSheet [::tycho::autoName stylesheet]]
-            $base parse $data
+	    # Synchronize the model with the updated base file data
             $model synchronize $base "default"
             ::delete object $base
 
@@ -791,7 +805,12 @@ body ::tycho::StyleSheet::_load {stylesheet} {
             set fd [open $userfile "w"]
             puts $fd [$model describe]
             close $fd
-        }
+        } else {
+	    # The user file is most recent. Just load it.
+	    set fd [open $userfile]
+	    $model parse [read $fd]
+	    close $fd
+	}
     } else {
 	set model $_stylemodel($stylesheet)
     }
