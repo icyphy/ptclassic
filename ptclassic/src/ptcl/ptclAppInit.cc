@@ -52,9 +52,9 @@ the [incr Tcl] (itcl) extension and the Ptolemy/PTcl facilities.
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
 
-#include "tcl.h"
+#include <tcl.h>
 #ifndef PT_NO_ITCL
-#include "itcl.h"
+#include <itcl.h>
 #endif
 #include "Linker.h"
 
