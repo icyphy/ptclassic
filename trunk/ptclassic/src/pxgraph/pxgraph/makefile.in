@@ -172,7 +172,7 @@ pxgraph:	$(OBJS)
 	$(CC) @LD_FLAGS@ -o $@ $(OBJS) $(LIBS)
 
 config.status: $(SRC_DIR)/makefile.in $(SRC_DIR)/configure
-	configure
+	./configure
 
 makefile: config.status
 	$(SHELL) config.status	
