@@ -27,7 +27,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
                                                         COPYRIGHTENDKEY
 
 
- Programmer:  Soonhoi Ha, R. S. Stevens
+ Programmer: Soonhoi Ha
+ The authors gratefully acknowledge the contributions of Richard Stevens.
  Date of creation: 7/20/94
 
 

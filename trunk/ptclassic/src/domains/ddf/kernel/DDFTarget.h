@@ -26,7 +26,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
                                                         COPYRIGHTENDKEY
 
 
- Programmer:  Soonhoi Ha, R. S. Stevens
+ Programmer:  Soonhoi Ha
+ The authors gratefully acknowledge the contributions of Richard Stevens
  Date of creation (simpler version): 7/20/94
 
  Declaration for CDFTarget, the default target to be used in the CDF
