@@ -30,7 +30,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #define SOL2
 #endif
 
-#if defined(USG) || defined(linux)
+#ifndef linux
+#if defined(USG) 
 extern int sprintf();
 #else
 #ifndef sgi
@@ -43,11 +44,12 @@ extern char *sprintf();
 #endif /*SOL2*/
 #endif /*sgi*/
 #endif
+#endif /*linux*/
 
 #ifdef __GNUC__
 
-#include <stdio.h>		/* Get the decl for FILE.  sigh. */
-
+#include <stdio.h>		/* Get the decl for FILE.  sigh.
+				 * Also get sprintf() for linux. */
 /* Alphabetical, please */
 extern int fclose (FILE *);
 extern int fflush (FILE *);
