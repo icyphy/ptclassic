@@ -875,7 +875,7 @@ body ::tycho::EditDAG::verify {{repair {}}} {
 # menu entries accordingly.
 #
 body ::tycho::EditDAG::configureContextMenu {} {
-    ::tycho::TWidget::configureContextMenu
+    chain
 
     set item [$slate find withtag current]
     if { $item != "" } {
@@ -886,7 +886,8 @@ body ::tycho::EditDAG::configureContextMenu {} {
 	    foreach {attr value} $contents {
 		if { $attr == "link" || $attr == "altlink" } {
 		    set filename [lindex [file split [lindex $value 0]] end]
-		    contextmenu add "Open $filename" \
+		    contextmenu command [list open$filename] \
+                            -label "Open $filename" \
 			    -command [list eval $this hyperJump $value]
 		}
 	    }
