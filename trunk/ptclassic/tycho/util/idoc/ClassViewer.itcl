@@ -196,7 +196,10 @@ class ::tycho::IDoc {
 
     # Setup the resizing handles to behave properly.
     private method setupHandles {}
-    
+     
+    # Preference function for this class
+    private method preference {mode args}
+
 }
 
 #########################################################################
@@ -380,7 +383,16 @@ body ::tycho::IDoc::constructor {args} {
     # Subscribe to the preference set
     preference subscribeoptions $this \
             -headfont displayFont \
-            -bodyfont entryFont
+            -bodyfont entryFont \
+            -bgcolor bgColor \
+            -height height \
+            -width width \
+            -publiccolor publicColor \
+            -protectedcolor protectedColor \
+            -privatecolor privateColor \
+            -optioncolor optionColor 
+
+            
     
     # Configure the handles
     setupHandles
@@ -821,3 +833,12 @@ body ::tycho::IDoc::setupHandles {} {
         %Q ghostHandle 1 0
     }
 }
+
+#####################################################################
+#### preference
+# preference function for IDoc
+#
+body ::tycho::IDoc::preference {mode args} {
+    eval ::tycho::preference $mode "idoc" $args
+}
+  
