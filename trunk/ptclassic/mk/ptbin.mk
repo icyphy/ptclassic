@@ -195,40 +195,40 @@ $(PTINY): $(PTINY_DEPEND)
 
 # Same, with debugging symbols.
 $(PTINY).debug: $(PTINY_DEPEND)
-	$(CC) -c version.c
 	echo char '*gVersion = "Version:' $(VERSION) \
 		'(sdf (no image stars) and de only,' \
 		'%created' `date` '";' | sed 's/%/\\n/g' > version.c
+	$(CC) -c version.c
 	$(PURELINK) $(LINKER) $(LINKFLAGS_D) $(PTINY_OBJS) $(PTINY_LIBS) \
 		version.o -o $@
 
 # Same, with debugging symbols and purify
 $(PTINY).debug.purify: $(PTINY_DEPEND)
-	$(CC) -c version.c
 	echo char '*gVersion = "Version:' $(VERSION) \
 		'(sdf (no image stars) and de only,' \
 		'% with debug symbols and purify)' \
 		'%created' `date` '";' | sed 's/%/\\n/g' > version.c
+	$(CC) -c version.c
 	$(PURIFY) $(LINKER) $(LINKFLAGS_D) $(PTINY_OBJS) $(PTINY_LIBS) \
 		version.o -o $@
 
 # Same, with quantify, for profiling.
 $(PTINY).debug.quantify: $(PTINY_DEPEND)
-	$(CC) -c version.c
 	echo char '*gVersion = "Version:' $(VERSION) \
 		'(sdf (no image stars) and de only,' \
 		'% with debug symbols and quantify)' \
 		'%created' `date` '";' | sed 's/%/\\n/g' > version.c
+	$(CC) -c version.c
 	$(QUANTIFY) $(LINKER) $(LINKFLAGS_D) $(PTINY_OBJS) $(PTINY_LIBS) \
 		version.o -o $@
 
 # Same, with purecov, for code coverage measurements.
 $(PTINY).debug.purecov: $(PTINY_DEPEND)
-	$(CC) -c version.c
 	echo char '*gVersion = "Version:' $(VERSION) \
 		'(sdf (no image stars) and de only,' \
 		'% with debug symbols and purecov)' \
 		'%created' `date` '";' | sed 's/%/\\n/g' > version.c
+	$(CC) -c version.c
 	$(PURECOV) $(LINKER) $(LINKFLAGS_D) $(PTINY_OBJS) $(PTINY_LIBS) \
 		version.o -o $@
 
@@ -249,41 +249,41 @@ $(PTRIM): $(PTRIM_DEPEND)
 
 # Same, with debugging symbols.
 $(PTRIM).debug: $(PTRIM_DEPEND)
-	$(CC) -c version.c
 	echo char '*gVersion = "Version:' $(VERSION) \
 		'(sdf, ddf, bdf, de, and cgc (minus parallel targets)' \
 		'% with debug symbols' \
 		'%created' `date` '";' | sed 's/%/\\n/g' > version.c
+	$(CC) -c version.c
 	$(PURELINK) $(LINKER) $(LINKFLAGS_D) $(PTRIM_OBJS) $(PTRIM_LIBS) \
 		version.o -o $@
 
 # Same, with debugging symbols and purify
 $(PTRIM).debug.purify: $(PTRIM_DEPEND)
-	$(CC) -c version.c
 	echo char '*gVersion = "Version:' $(VERSION) \
 		'(sdf, ddf, bdf, de, and cgc (minus parallel targets)' \
 		'% with debug symbols and purify)' \
 		'%created' `date` '";' | sed 's/%/\\n/g' > version.c
+	$(CC) -c version.c
 	$(PURIFY) $(LINKER) $(LINKFLAGS_D) $(PTRIM_OBJS) $(PTRIM_LIBS) \
 		version.o -o $@
 
 # Same, with quantify, for profiling.
 $(PTRIM).debug.quantify: $(PTRIM_DEPEND)
-	$(CC) -c version.c
 	echo char '*gVersion = "Version:' $(VERSION) \
 		'(sdf, ddf, bdf, de, and cgc (minus parallel targets)' \
 		'% with debug symbols and quantify)' \
 		'%created' `date` '";' | sed 's/%/\\n/g' > version.c
+	$(CC) -c version.c
 	$(QUANTIFY) $(LINKER) $(LINKFLAGS_D) $(PTRIM_OBJS) $(PTRIM_LIBS) \
 		version.o -o $@
 
 # Same, with purecov, for code coverage measurements.
 $(PTRIM).debug.purecov: $(PTRIM_DEPEND)
-	$(CC) -c version.c
 	echo char '*gVersion = "Version:' $(VERSION) \
 		'(sdf, ddf, bdf, de, and cgc (minus parallel targets)' \
 		'% with debug symbols and purecov)' \
 		'%created' `date` '";' | sed 's/%/\\n/g' > version.c
+	$(CC) -c version.c
 	$(PURECOV) $(LINKER) $(LINKFLAGS_D) $(PTRIM_OBJS) $(PTINY_LIBS) \
 		version.o -o $@
 
@@ -303,37 +303,37 @@ $(PIGI): $(PIGI_DEPEND)
 
 # Same, with debugging symbols.
 $(PIGI).debug: $(PIGI_DEPEND)
-	$(CC) -c version.c
 	echo char '*gVersion = "Version:' $(VERSION) \
 		'(with debug symbols)' \
 		'%created' `date` '";' | sed 's/%/\\n/g' > version.c
+	$(CC) -c version.c
 	$(PURELINK) $(LINKER) $(LINKFLAGS_D) $(PIGI_OBJS) $(PIGI_LIBS) \
 		version.o -o $@
 
 # Same, with debugging symbols and purify
 $(PIGI).debug.purify: $(PIGI_DEPEND)
-	$(CC) -c version.c
 	echo char '*gVersion = "Version:' $(VERSION) \
 		'(with debug symbols and purify)' \
 		'%created' `date` '";' | sed 's/%/\\n/g' > version.c
+	$(CC) -c version.c
 	$(PURIFY) $(LINKER) $(LINKFLAGS_D) $(PIGI_OBJS) $(PIGI_LIBS) \
 		version.o -o $@
 
 # Same, with quantify, for profiling.
 $(PIGI).debug.quantify: $(PIGI_DEPEND)
-	$(CC) -c version.c
 	echo char '*gVersion = "Version:' $(VERSION) \
 		'(with debug symbols and quantify)' \
 		'%created' `date` '";' | sed 's/%/\\n/g' > version.c
+	$(CC) -c version.c
 	$(QUANTIFY) $(LINKER) $(LINKFLAGS_D) $(PIGI_OBJS) $(PIGI_LIBS) \
 		version.o -o $@
 
 # Same, with purecov, for code coverage measurements.
 $(PIGI).debug.purecov: $(PIGI_DEPEND)
-	$(CC) -c version.c
 	echo char '*gVersion = "Version:' $(VERSION) \
 		'(with debug symbols and purecov)' \
 		'%created' `date` '";' | sed 's/%/\\n/g' > version.c
+	$(CC) -c version.c
 	$(PURECOV) $(LINKER) $(LINKFLAGS_D) $(PIGI_OBJS) $(PIGI_LIBS) \
 		version.o -o $@
 
