@@ -72,9 +72,11 @@ proc ptkImportantMessage {w text} {
     bind $w <Key> "destroy $w"
     bind $w <ButtonPress> "destroy $w"
     bind $w.msg <Button> "destroy $w"
+    set prevFocus [focus]
     focus $w
     grab $w
     tkwait window $w
+    focus $prevFocus
 }
 
 
