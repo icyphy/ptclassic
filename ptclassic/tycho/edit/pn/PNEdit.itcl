@@ -79,7 +79,7 @@ body ::tycho::PNEdit::constructor {args} {
     # Set the "mode" of the graph model so it will
     # be loaded correctly later
     # FIXME: Is this the right place for this?
-    $_graph configure -modelmode "cts"
+    $_graph configure -modelmode "pn"
 }
 
 #####################################################################
@@ -108,7 +108,7 @@ body ::tycho::PNEdit::openControlPanel {graph} {
 
 	# FIXME: need to be able to bring up the runwindow
 	# immediately
-	set sim [$rw simulation create -portnum $portnum]
+	set sim [$rw simulation create -portnum $portnum -debug 1]
 	$rw simulation name $name
 	$rw simulation script $file
 
@@ -153,7 +153,7 @@ body ::tycho::PNEdit::_initializeBars {menubar statusbar toolbar} {
 body ::tycho::PNEdit::_initializeMenubar {menubar} {
     # FIXME FIXME
     # Load the library. Should the library info be in the model?
-    library load [file join edit cts stars.tim]
+    library load [file join edit pn stars.tim]
     library addtomenu stars stars \
             -command "$this newstar stars" \
             -customizecommand "$this _initmenu stars" \
