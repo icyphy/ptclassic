@@ -50,7 +50,7 @@ ITCL_SRCS =
 
 EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) _makefile _index.html
 
-MISC_FILES =	$(DIRS) _README.txt
+MISC_FILES =	$(DIRS)
 
 REALCLEAN_STUFF =
 
