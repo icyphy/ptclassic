@@ -74,20 +74,20 @@ public:
 	// my domain
 	const char* domain() const;
 
+        // check delay free loop
+        int checkDelayFreeLoop();
+
+        // compute depth of all portholes
+        int computeDepth();
+
 protected:
 	// utility subroutines shared by all (or at least most) DE schedulers
 
 	// detect the delay-free loop
 	int checkLoop(PortHole* p, DEStar* s);
 
-	// check delay free loop
-	int checkDelayFreeLoop();
-
 	// set the depth of the DEStars.
 	int setDepth(PortHole* p, DEStar* s);
-
-	// compute depth of all portholes
-	int computeDepth();
 
 	// report error conditions
 	int errorDelayFree(PortHole* p);
