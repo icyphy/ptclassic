@@ -1898,6 +1898,7 @@ tstOffsetGen()
 
 
 /*ARGSUSED*/
+int
 main(argc, argv)
 int argc;
 char **argv;
@@ -1929,7 +1930,7 @@ char **argv;
     }
 #endif /* MCC_DMS */
 
-    fprintf(stderr, "OCT_MIN_COORD is %d, OCT_MAX_COORD is %d\n",
+    fprintf(stderr, "OCT_MIN_COORD is %ld, OCT_MAX_COORD is %ld\n",
 			OCT_MIN_COORD, OCT_MAX_COORD);
     tstFacets();
     tstInconsistent();
@@ -1957,5 +1958,6 @@ char **argv;
     
     (void) fprintf(stderr, "done: error count is %d\n", errorCount);
     
-    exit((errorCount == 0) ? 0 : -1);
+    /*exit((errorCount == 0) ? 0 : -1);*/
+    return((errorCount == 0) ? 0 : -1);
 }
