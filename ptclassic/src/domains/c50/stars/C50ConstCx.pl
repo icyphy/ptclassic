@@ -2,10 +2,10 @@ defstar {
     name { ConstCx }
     domain { C50 }
     desc { Constant source }
-    version { @(#)C50ConstCx.pl	1.3 3/7/96 }
+    version { $Id$ }
     author { Jose Luis Pino }
     copyright {
-Copyright (c) 1990-1996 The Regents of the University of California.
+Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

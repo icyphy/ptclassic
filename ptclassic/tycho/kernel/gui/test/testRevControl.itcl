@@ -4,7 +4,7 @@
 #
 # @Version: $Id$
 #
-# @Copyright (c) 1996 The Regents of the University of California.
+# @Copyright (c) 1996-%Q% The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -45,9 +45,8 @@ proc testRevControl {versionControlSystem} {
 	set testdir rcstst
 	set testfile [file join $testdir rcs.itcl]
     }
-    # FIXME: Unixism
-    exec rm -rf $testdir
-    exec mkdir $testdir
+    file delete -force $testdir
+    file mkdir $testdir
     set fd [open $testfile w]
     puts $fd "# This is a test file for the Tycho $versionControlSystem system"
     # Generate percentWpercent so that SCCS does not munge this for us
@@ -57,12 +56,12 @@ proc testRevControl {versionControlSystem} {
 
     close $fd
 
-    set wname [::tycho::autoName .view]
-    ::tycho::Displayer $wname
-    set myEdit [::tycho::Edit $wname.v -file $testfile]
-    $wname centerOnScreen
-    set myRevControl [::tycho::RevControl::setup $wname $myEdit]
-    ::tycho::safeUpdate $wname
+    #set wname [::tycho::autoName .view]
+    #::tycho::Displayer $wname
+    set myEditView [::tycho::view Edit -file $testfile]
+    #$wname centerOnScreen
+    set myRevControl [::tycho::RevControl::setup $myEditView $myEditView
+    ::tycho::safeUpdate $myEditView
 
     if {"$versionControlSystem" == "SCCS" } {
 	# Press the Yes(SCCS) button
@@ -103,5 +102,3 @@ test SCCS-1.1 {test out sccs} {
 test RCS-1.1 {test out sccs} {
     testRevControl RCS
 } {}
-
-doneTests
