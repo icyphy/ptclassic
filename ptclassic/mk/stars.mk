@@ -443,10 +443,15 @@ ifdef CGC
 	PALETTES += PTOLEMY/src/domains/cgc/icons/cgc.pal
 	# UltraSparc Visual Instruction Set stars
 	ifdef CGCVIS
-		CUSTOM_DIRS += $(CGCDIR)/vis/stars
+	        # CGC VIS stars
+		CUSTOM_DIRS += $(CGCDIR)/vis/stars 
 		STARS += $(LIBDIR)/cgcvisstars.o
 		LIBS += -lcgcvisstars
 		LIBFILES += $(LIBDIR)/libcgcvisstars.$(LIBSUFFIX)
+
+		# CGC VIS target (no shared library version)
+		#CUSTOM_DIRS += $(CGCDIR)/vis/targets
+		#TARGETS += $(CGCVIST)/CGCVISSimTarget.o
 	endif
 	# Tcl/Tk
 	ifdef CGCTK
