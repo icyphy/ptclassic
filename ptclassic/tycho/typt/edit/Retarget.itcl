@@ -213,7 +213,7 @@ body ::tycho::Retarget::compareDomains {} {
 body ::tycho::Retarget::help {} {
     global ::TYCHO
     ::tycho::File::openContext \
-	    $TYCHO/editors/textedit/doc/usersGuides/RetargetHelp.html
+	    $TYCHO/typt/editors/doc/usersGuides/RetargetHelp.html
 }
 
     ###################################################################
