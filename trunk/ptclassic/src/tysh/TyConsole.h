@@ -87,7 +87,7 @@ private:
 
   // Initialize Tcl and Tk and register the locally defined Tcl commands
   // with the Tcl interpreter. Returns TCL_ERROR or TCL_OK.
-  int appInit(Tcl_Interp *ip, Tk_Window win);
+  int appInit(Tcl_Interp *ip);
 };
 
 #endif
