@@ -1,5 +1,6 @@
 # Version identification:
 # $Id$
+# 
 # Copyright (c) 1990-%Q% The Regents of the University of California.
 # All rights reserved.
 # 
@@ -47,9 +48,7 @@ VHDLSIM = $(ROOT)/src/utils/ptvhdlsim
 SYNCOMPAT = $(ROOT)/src/compat/synopsys
 
 INCL = -I$(VHDLKERNEL) -I$(VHDLSTARS) -I$(SDFKERNEL) \
- -I$(KERNDIR) -I$(CGKERNEL) -I$(CGCKERNEL) -I$(VHDLSIM) -I$(SYNCOMPAT) \
- -I$(PTOLEMY)/tcltk/tcl/include \
- $(X11_INCSPEC)
+ -I$(KERNDIR) -I$(CGKERNEL) -I$(CGCKERNEL) -I$(VHDLSIM) -I$(SYNCOMPAT)
 
 PL_SRCS = \
  CGCVSynchComm.pl \
@@ -64,13 +63,13 @@ PL_SRCS = \
 EXTRA_SRCS = $(PL_SRCS)
 
 SRCS = \
- StructTarget.cc \
- ArchTarget.cc \
- SynthTarget.cc \
- SynthArchTarget.cc \
  SimVSSTarget.cc \
  SimMTTarget.cc \
  SimLFTarget.cc \
+ StructTarget.cc \
+ SynthTarget.cc \
+ ArchTarget.cc \
+ SynthArchTarget.cc \
  $(PL_SRCS:.pl=.cc)
 
 HDRS = $(SRCS:.cc=.h)
