@@ -102,10 +102,21 @@ static void PTclDeleteProc(ClientData clientData, Tcl_Interp */* interp */)
 extern "C" int Ptcl_Init(Tcl_Interp *interp)
 {
 
-#ifdef PTLINUX
-    // Fix for DECalendarQueue SIGFPE under linux.
+#if defined(PTLINUX) && defined(__i386__)
+    // Fix for DECalendarQueue SIGFPE under x86 linux.
+    // Note by W. Reimer: Glibc 2.1 does not support __setfpucw() any
+    // longer. Instead there is a macro _FPU_SETCW. Actually, the whole
+    // fix is not required any longer because in the default FPU control
+    // word of libc 5.3.12 and newer (glibc) the interrupt mask bit for
+    // invalid operation (_FPU_MASK_IM) is already set.
+#if (_FPU_DEFAULT & _FPU_MASK_IM) == 0
+#ifdef _FPU_SETCW
+    { fpu_control_t cw = (_FPU_DEFAULT | _FPU_MASK_IM); _FPU_SETCW(cw); }
+#else
     __setfpucw(_FPU_DEFAULT | _FPU_MASK_IM);
-#endif
+#endif /* _FPU_SETCW */
+#endif /* (_FPU_DEFAULT & _FPU_MASK_IM) == 0 */
+#endif /* defined(PTLINUX) && defined(__i386__) */
 
     PTcl *ptcl = new PTcl(interp);
     Tcl_CallWhenDeleted(interp, PTclDeleteProc, (ClientData) ptcl);
