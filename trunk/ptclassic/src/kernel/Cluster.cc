@@ -59,6 +59,8 @@ ClusterPort::~ClusterPort() {
 	    farSidePort->farSidePort = 0;
 	farSidePort = 0;
     }
+    // don't want PortHole destructor to try to disconnect from geodesic, so:
+    myGeodesic = 0;
 }    
 
 void ClusterPort::initializeClusterPort() {
