@@ -37,6 +37,11 @@ static char SccsId[]="$Id$";
 /* #include "region.h"  */
 #include "rpcApp.h"
 
+extern rpcInternalStatus        RPCSendRegionGenerator
+	ARGS((regGenerator *generator, STREAM stream));
+extern rpcInternalStatus        RPCReceiveRegionGenerator
+	ARGS((regGenerator *generator, STREAM stream));
+
 /*
  * region package
  */
