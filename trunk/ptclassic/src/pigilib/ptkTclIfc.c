@@ -126,6 +126,31 @@ ptkSetHighlightFacet(dummy, interp, argc, argv)
 	return TCL_ERROR;
     }
 }
+/*******************************************************************
+* The global "lastFacet" pointer is used by the highlighting
+* routines to begin the search for the object to be highlighted.
+* This routine gets that pointer. This is needed to explicitly
+* set back the lastFacet pointer.
+* Usage:
+*      ptkGetHighlightFacet
+*******************************************************************/
+static int
+ptkGetHighlightFacet(dummy, interp, argc, argv)
+ClientData dummy;                   /* Not used. */
+Tcl_Interp *interp;                 /* Current interpreter. */
+int argc;                           /* Number of arguments. */
+char **argv;                        /* Argument strings. */
+{
+        char handle[16];
+        if(argc != 1) {
+                strcpy(interp->result,
+                        "incorrect usage: should be \"ptkGetHighlightFacet \"");
+                return TCL_ERROR;
+        }
+        ptkOctObj2Handle(&lastFacet,handle);
+        Tcl_AppendResult(interp, handle, NULL );
+        return TCL_OK;
+}
 
 /*******************************************************************
  * Register the Tcl commands
@@ -139,5 +164,7 @@ void registerTclFns(interp)
     Tcl_CreateCommand(interp, "ptkClearHighlights", ptkClearHighlights, 0,
             (void (*)()) NULL);
     Tcl_CreateCommand(interp, "ptkSetHighlightFacet", ptkSetHighlightFacet, 0,
+            (void (*)()) NULL);
+    Tcl_CreateCommand(interp, "ptkGetHighlightFacet", ptkGetHighlightFacet, 0,
             (void (*)()) NULL);
 }
