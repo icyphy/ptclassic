@@ -89,6 +89,25 @@ For more information about polyphase filters, see F. J. Harris,
 	  StringList out;
 	  int tapSize = taps.size();
 	  // Perform calculation.
+	  for (int i=0; i<int(tapSize); i++) {
+	      if (i%10 == 0) {
+		 if (i!=0) out << ";\n";
+		 out <<  "$ref(signalOut) $assign(signalOut) "
+		     << (i != 0 ? "$ref(signalOut) + " : "") 
+		     << "$ref(signalIn,0)*$ref(taps," << i << ")";
+	     }
+	      else {
+		  out << "+ $ref(signalIn," << i << ")*$ref(taps," 
+		      << i << ")";
+	      }
+	  }
+	  out << ";\n";
+	  addCode(out);
+	  out.initialize();
+/*
+  	  StringList out;
+	  int tapSize = taps.size();
+	  // Perform calculation.
 	  out << "$ref(signalOut) $assign(signalOut) ";
 	  out << "$ref(signalIn,0)*$ref(taps,0)";
 	  for (int i=1; i<int(tapSize); i++) {
@@ -101,5 +120,6 @@ For more information about polyphase filters, see F. J. Harris,
 	  out << ";\n";
 	  addCode(out);
 	  out.initialize();
+	  */
 	}
 }
