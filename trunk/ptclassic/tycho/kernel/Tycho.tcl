@@ -229,6 +229,7 @@ uplevel #0 {
     set ::auto_path [linsert $auto_path 0 [file join $tychopt kernel ] ]
     set ::auto_path [linsert $auto_path 0 [file join $tychopt lib ] ]
     set ::auto_path [linsert $auto_path 0 [file join $tychopt editors ] ]
+    set ::auto_path [linsert $auto_path 0 [file join $tychopt controls ] ]
 }
 ::tycho::_announce "Set auto_path"
 
