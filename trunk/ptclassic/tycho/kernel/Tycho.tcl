@@ -71,7 +71,7 @@ if {![info exists tycho]} {
     }
 }
 
-if {![info exists tycho]} {
+if {![info exists tycho] || ![file exists $tycho]} {
     # All of the above failed, give up
     error {To run tycho, set your environment variable TYCHO to the tycho home}
 }
@@ -121,6 +121,8 @@ if [file isdirectory $PTOLEMY/tcltk/itcl/lib] {
 	source $PTOLEMY/tcltk/itcl/lib/tk/tk.tcl
 	source $PTOLEMY/tcltk/itcl/lib/itcl/init.itcl
 	source $PTOLEMY/tcltk/itcl/lib/itk/init.itk
+	set ::auto_path [linsert $auto_path 0 \
+		$PTOLEMY/src/tcltk/itcl2.0/iwidgets2.0.0 ]
     }
 }
 uplevel #0 {
@@ -128,8 +130,6 @@ uplevel #0 {
     set ::auto_path [linsert $auto_path 0 $tychoeditors/visedit ]
     set ::auto_path [linsert $auto_path 0 $tychoeditors/slate ]
     set ::auto_path [linsert $auto_path 0 $tycholib/widgets ]
-    set ::auto_path [linsert $auto_path 0 \
-	    $PTOLEMY/src/tcltk/itcl2.0/iwidgets2.0.0 ]
     source $tychokernel/Lib.tcl
     source $tycholib/util/lib.tcl
 }
