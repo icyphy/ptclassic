@@ -301,7 +301,15 @@ DEPEND_INCL=$(INCL) $(C_INCL) $(SYSTEM_DEPEND_INCL)
 depend:		$(SRCS) $(HDRS)
 # We use a GNU make conditional here
 ifeq ($(USE_MAKEDEPEND),yes) 
-		# HPPA CC does not understand the -M option
+		# HPPA CC and SunSoft CC do not understand the -M option
+		# so we use makedepend
+		#
+		# Note that makedepend does not produce dependencies
+		# as GNU g++ -M, so you will probably want to run
+		# 'make depend' from an PTARCH that uses
+		# g++ -M instead of makedepend.  One way to do this
+		# would be to do (Assuming you have g++ installed):
+		# 	cd $PTOLEMY; make PTARCH=sol2 depend
 		cd $(VPATH); $(DEPEND) $(DEPEND_INCL) $(SRCS)
 else
 		cd $(VPATH); \
