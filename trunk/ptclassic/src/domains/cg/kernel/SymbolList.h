@@ -48,7 +48,7 @@ class BaseSymbolList : private NamedList
 {
 public:
 	BaseSymbolList(char sep=defaultSepChar, int* count=NULL)
-	    : separator(sep), counter(count) {}
+	    : counter(count), separator(sep) {}
 
 	~BaseSymbolList() { deleteSymbols(); }
 
@@ -109,7 +109,7 @@ class ScopedSymbolList : private NamedList
 {
 public:
     ScopedSymbolList(char sep=defaultSepChar, int *count=NULL)
-	: separator(sep), counter(count) {}
+	: counter(count), separator(sep) {} 
     ~ScopedSymbolList() { deleteSymbolLists(); }
 
     void setSeparator(char);
