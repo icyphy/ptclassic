@@ -7,17 +7,19 @@ Two mechanisms for linear prediction are compared.
 .AL "E. A. Lee"
 .LO "~ptolemy/src/domains/sdf/demo"
 .LD
-.IE "linear prediction algorithm"
-.IE "prediction"
-.IE "system identification"
 This demo performs linear prediction on a test signal consisting
 of three sinusoids in colored, Gaussian noise.
+.Ie "linear prediction"
+.Ie "prediction, linear"
+.Ie "system identification"
 The first (upper) method uses Burg's algorithm and second (lower)
 method uses an adaptive filter, with the LMS stochastic gradient
 adaptation algorithm.
-.IE "Burg"
-.IE LMS
-.IE "Adaptive filter"
+.Ie LMS
+.Ie "adaptive filter"
+.Ie "filter, adaptive"
+.Ie "filter, LMS adaptive"
+.Ir "stochastic gradient algorithm"
 The plots that are generated show the original signal, the predicted
 signal, and the difference between these, or the prediction error.
 .pp
@@ -25,6 +27,7 @@ Burg's method is a block method.
 The
 .c Burg
 star collects 128 input samples, from which it estimates the autoregressive
+.IE "Burg"
 (AR) parameters of the input process.  These parameters are then loaded
 into the
 .c BlockFIR
@@ -35,6 +38,7 @@ occurs because the tapped delay line of the
 .c BlockFIR
 needs to fill up with input samples before accurate predictions
 can be made.
+.Ie BlockFIR
 If the system is run for two iterations (two blocks), there
 will be no transient at the start of the second block because
 the tapped delay line is full.
