@@ -209,6 +209,7 @@ foreach x ( c50/dsp/stars cg56/dsp/stars \
 	cgc/dsp/stars \
 	cgc/targets/uniprocessor cgc/targets/multiprocessor cgc/targets/NOWam \
 	cgc/tcltk/stars cgc/tcltk/targets cgc/vis/stars cgc/vis/targets \
+	cgc/vis/tcltk \
 	$EXPSUBEXTRAS )
 	optmkdir $x
 	cd $x
@@ -218,7 +219,8 @@ foreach x ( c50/dsp/stars cg56/dsp/stars \
 end
 
 # directories that are deep
-foreach x ( cgc/targets/NOWam/NOWam cgc/targets/NOWam/libudpam )
+foreach x ( cgc/targets/NOWam/NOWam cgc/targets/NOWam/libudpam \
+	cgc/vis/tcltk/stars )
 	optmkdir $x
 	cd $x
 	optlink ../../../../../../src/domains/$x make.template
