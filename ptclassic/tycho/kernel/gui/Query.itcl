@@ -57,7 +57,8 @@
 #          {line w {w label} foo} &#92
 #          {lines x {x label} bar 4} &#92
 #          {radio y {y label} {A B C} A} &#92
-#          {mediated z {z label} red ::tycho::querycolor}}
+#          {mediated z {z label} red &#92
+#          {::tycho::querycolor {Choose a color}}}}
 # </pre></tcl>
 # This will return a list of the form {w <i>value</i> x <i>value</i> y
 # <i>value</i> z <i>value</i>}.
@@ -631,7 +632,7 @@ body ::tycho::Query::mediated {tag label default command args} {
     }
     grid $itk_component(label_$tag) -column 0 -row $numentries -sticky e
 
-    set cmd "$this mediatedCommand $tag $command"
+    set cmd [list $this mediatedCommand $tag $command]
 
     itk_component add tag_$tag {
         eval [list button $itk_component(querysite).tag_$tag \
