@@ -30,7 +30,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 // This version substitutes for libg++ random-number classes.
 // This is the abstract base class for other random-number types.
 
-#if defined(hppa) || defined(SVR4) || defined(SYSV)
+#if defined(hppa) || defined(SVR4) || defined(SYSV) || defined(linux)
 #if !defined(__GNUG__) || defined(PT_EGCS)
 
 extern "C" long int lrand48();
