@@ -10,7 +10,7 @@ All rights reserved.
 See the file ~ptolemy/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
     }
-    location { CG56 demo library }
+    location { CG56 control library }
     explanation {
 Repeat repeats each input Particle the specified number of times
 (\fInumTimes\fR) on the output.  Note that this is a sample rate

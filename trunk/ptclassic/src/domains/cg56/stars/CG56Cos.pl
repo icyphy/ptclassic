@@ -14,7 +14,7 @@ All rights reserved.
 See the file ~ptolemy/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { CG56 demo library }
+	location { CG56 nonlinear functions library }
 	explanation {
 .Id "cosine"
 This star computes the cosine of the input, which must be in the range

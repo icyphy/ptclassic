@@ -16,7 +16,7 @@ All rights reserved.
 See the file ~ptolemy/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { CG56 demo library }
+	location { CG56 control library }
 	explanation {
 The star pads the input with fill values.
 An input block of length \fInread\fR is read in.

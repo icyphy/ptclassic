@@ -10,7 +10,7 @@ All rights reserved.
 See the file ~ptolemy/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { CG56 demo library }
+	location { CG56 nonlinear functions library }
 	explanation {The output is the square of the input.}
 	execTime {
 		return 3;

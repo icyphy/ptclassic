@@ -14,7 +14,7 @@ All rights reserved.
 See the file ~ptolemy/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { CG56 demo library }
+	location { CG56 nonlinear functions library }
         explanation {
 A sequence of values is repeated at the ouput with period N, zero-padding
 or tuncating to N if necessary.  A value of 0 for N outputs an aperiodic

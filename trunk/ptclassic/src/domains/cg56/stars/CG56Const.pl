@@ -10,7 +10,7 @@ All rights reserved.
 See the file ~ptolemy/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { CG56 demo library }
+	location { CG56 signal sources library }
 	explanation {
 There are no runtime instructions associated with this star.  The
 output buffer is initialized with the specified DC value.
