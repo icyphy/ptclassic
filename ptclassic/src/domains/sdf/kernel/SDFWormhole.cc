@@ -194,8 +194,8 @@ void SDFfromUniversal :: sendData ()
 	} else if (SDFfromUniversal::isItOutput()) {
 		// 2. inside domain does not generate enough number of tokens,
 		//    which is error.
-		Error::abortRun(*this, "not enough output tokens ",
-				"at SDF wormhole boundary");
+                // Error::abortRun(*this, "not enough output tokens ",
+                //		"at SDF wormhole boundary");
 	}
 }
 
