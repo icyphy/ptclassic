@@ -51,7 +51,7 @@ depend:
 makefile:	make.template
 		rm -f makefile
 		cp make.template makefile
-		make -f make.template depend  # note: use new SRCS list
+		make -f make.template sources depend  # note: use new SRCS list
 		@echo makefile remade -- you must rerun make.
 		exit 1
 
