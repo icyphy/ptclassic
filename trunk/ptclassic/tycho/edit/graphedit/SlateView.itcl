@@ -119,7 +119,7 @@ class ::tycho::SlateView {
     method _reshaperelease {name}
 
     # Manipulate the the selection
-    method _selection {mode {name {}}}
+    method _select {mode {name {}}}
 
     #################################################################
     ####                  protected variables                    ####
@@ -677,20 +677,20 @@ body ::tycho::SlateView::_reshaperelease {name} {
 }
 
 ########################################################################
-#### _selection
+#### _select
 #
 # Manipulate the selection.
 #
-body ::tycho::SlateView::_selection {mode {name {}}} {
+body ::tycho::SlateView::_select {mode {name {}}} {
     switch -exact $mode {
     	"add" {
-	    $_slate selection add $_itemid($name)
+	    $_slate select add $_itemid($name)
     	}
     	"remove" {
-	    $_slate selection add $_itemid($name)
+	    $_slate select add $_itemid($name)
     	}
     	"clear" {
-	    $_slate selection clear
+	    $_slate select clear
     	}
     }
 }
