@@ -122,8 +122,12 @@ else
 	$(AR) cq $(LIB) $(OBJS)
 	$(RANLIB) $(LIB)
 endif
+
+# AIX used EXP for export lists
+$(EXP): $(LIB)
+
 # Rule for installing a library
-$(LIBDIR)/$(LIB):	$(LIB)
+$(LIBDIR)/$(LIB):	$(LIB) $(EXP)
 		rm -f $(LIBDIR)/$(LIB)
 		ln $(LIB) $(LIBDIR)
 
