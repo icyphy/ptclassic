@@ -218,7 +218,7 @@ body ::tycho::ItclClassList::includeTychoClasses {} {
 #
 body ::tycho::ItclClassList::updateClassDiagram {} {
     eval tychoMkClassGraph {{Tycho Class Hierarchy}} $classDiagramFile \
-            [get 0.0 end]
+            [split [get 0.0 end]]
     ::tycho::File::openContext $classDiagramFile
 }
 
@@ -233,6 +233,6 @@ body ::tycho::ItclClassList::updateClassDiagram {} {
 #
 body ::tycho::ItclClassList::updateClassListFile {files} {
     foreach file $files {
-        insertData "[file join "\$TYCHO" $file] \n"
+        insertData "[::tycho::simplifyPath $file TYCHO]\n"
     }
 }
