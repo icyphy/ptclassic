@@ -114,18 +114,18 @@ This is not currently handled.
 	}
 	useModuloB = int(useCircular) && ! allScalorB;
 
-	addCode("	org	x:$addr(ptrvec)");
+	addCode("\torg	x:$addr(ptrvec)\n");
 	for (i=0; i < np; i++) {
-	    sprintf( buf, "\tdc\t$addr(input#%d)", i+1);
+	    sprintf( buf, "\tdc\t$addr(input#%d)\n", i+1);
 	    addCode(buf);
 	}
-	addCode("	org	y:$addr(ptrvec)");
+	addCode("\torg	y:$addr(ptrvec)\n");
 	for ( i=0; i < np; i++) {
 	    // There is a weirdness with scalar inputs: see cbCopy below
-	    sprintf( buf, "\tdc\t$size(input#%d)-1", i+1);
+	    sprintf( buf, "\tdc\t$size(input#%d)-1\n", i+1);
 	    addCode(buf);
 	}
-	addCode("	org	p:");
+	addCode("\torg	p:\n");
     }
     codeblock(cbCopyScalor) {
 	move	#$addr(ptrvec),r0
