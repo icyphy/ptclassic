@@ -2,12 +2,13 @@ defstar {
 	name {UpSample}
 	domain {SDF}
 	desc { 
-Upsample by a given "factor" (default 2), filling with "fill" (default 0.0).
-The "phase" parameter tells where to put the sample in an output block.
-The default is to output it first (phase = 0). The maximum phase is "factor" - 1.
-Although the "fill" parameter is a floating-point number, if the input is of
-some other type, such as complex, the fill particle will be obtained by casting
-"fill" to the appropriate type.
+Upsample by a given "factor" (default 2), giving inserted samples the
+value "fill" (default 0.0).  The "phase" parameter (default 0) tells where
+to put the sample in an output block.  A "phase" of 0 says to output
+the input sample first followed by the inserted samples. The maximum
+"phase" is "factor" - 1.  Although the "fill" parameter is a floating-point
+number, if the input is of some other type, such as complex, then fill
+particle will be obtained by casting "fill" to the appropriate type.
 	}
 	version {$Id$}
 	author { J. T. Buck }
