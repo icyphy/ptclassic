@@ -73,7 +73,9 @@ public:
 
   void setequal(Set &);
 
-  int cardinality();
+  int cardinality() const;
+
+  int onemember() const;
 
   StringList print() const;
 

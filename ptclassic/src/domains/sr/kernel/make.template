@@ -47,7 +47,7 @@ LIB=libsr.$(LIBSUFFIX)
 # Header files
 HDRS= SRPortHole.h SRScheduler.h SRStar.h SRNonStrictStar.h SRWormhole.h \
 	SRItclStar.h SRStaticScheduler.h Set.h SRRecursiveScheduler.h \
-	SRDependencyGraph.h
+	SRDependencyGraph.h SRRecursiveSchedule.h
 
 # Library sources
 SRCS= $(HDRS:.h=.cc) SRDomain.cc

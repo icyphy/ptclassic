@@ -35,6 +35,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #include "SRStar.h"
 #include "SRRecursiveScheduler.h"
+#include "SRRecursiveSchedule.h"
 #include "SRDependencyGraph.h"
 #include "Set.h"
 #include "StringList.h"
@@ -44,8 +45,11 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "GraphUtils.h"
 #include <stream.h>
 #include <assert.h>
+#include <limits.h>
 
 extern const char SRdomainName[];
+
+SRPartType SRParter::parter = SRPartOneT;
 
 // Return a printed representation of the schedule
 //
@@ -182,7 +186,14 @@ int SRRecursiveScheduler::computeSchedule( Galaxy & g )
 
   Set wholeGraph(dgraph->vertices(), 1);
 
-  SequentialList SCCs = SCCsOf( wholeGraph );
+  SRRecursiveSchedule schedule( *dgraph );
+
+  int mc = mincost( wholeGraph,
+		    wholeGraph.cardinality() * wholeGraph.cardinality(),
+		    schedule, 0);
+
+  cout << "mincost is " << mc << "\n";
+  cout << "best schedule was " << schedule.print() << '\n';
 
   return 0;
 }
@@ -194,13 +205,14 @@ int SRRecursiveScheduler::computeSchedule( Galaxy & g )
 //
 // <P> This uses the SCC algorithm from Cormen, Leiserson, and Rivest,
 // which computes two DFSs, one on the forward graph, the other on the back.
-SequentialList &
+// A new SequentialList is created, which the caller must ultimately free.
+SequentialList *
 SRRecursiveScheduler::SCCsOf(Set & subgraph /* Vertices in the subgraph of the
 					       dependency graph */ )
 {
   SequentialList * SCCs = new SequentialList;
 
-  cout << "SCCsOf called on " << subgraph.print() << "\n";
+  // cout << "SCCsOf called on " << subgraph.print() << "\n";
   int * finishingTimes = new int[ subgraph.cardinality() ];
   int finishIndex = 0;
   Set unvisitedSet(1);
@@ -243,7 +255,7 @@ SRRecursiveScheduler::SCCsOf(Set & subgraph /* Vertices in the subgraph of the
       bDFSVisit( v, unvisitedSet, *newSCC );
       SCCs->append((Pointer) newSCC);
 
-      cout << "SCC: " << newSCC->print() << "\n";
+      // cout << "SCC: " << newSCC->print() << "\n";
     }
   }
       
@@ -252,7 +264,7 @@ SRRecursiveScheduler::SCCsOf(Set & subgraph /* Vertices in the subgraph of the
 
   delete [] finishingTimes;
 
-  return *SCCs;
+  return SCCs;
 
 }
 
@@ -302,6 +314,200 @@ void SRRecursiveScheduler::bDFSVisit( int vertex,
     }
 
   }
+}
+
+// Compute the minimum cost schedule
+//
+// @Description Returns the cost of the minimum schedule that is
+// less than or equal to m, or INT_MAX if the bound cannot be met.
+
+int
+SRRecursiveScheduler::mincost(
+  Set & subgraph /* Vertices in the subgraph being scheduled */,
+  int max /* Maximum allowable cost */,
+  SRRecursiveSchedule & schedule /* The optimal schedule */,
+  int scheduleIndex /* Where to put the subgraph in the schedule */ )
+{
+
+  // cout << "mincost called on " << subgraph.print() << " with bound " << max
+  //      << "\n";
+
+  // Decompose the subgraph into strongly-connected components
+
+  SequentialList * SCCs = SCCsOf( subgraph );
+
+  // Compute a rough bound on the cost by summing a rough bound on each SCC
+  // and save the size of each SCC for later use
+
+  int numSCCs = SCCs->size();
+
+  // cout << "Found " << numSCCs << " SCCs\n";
+
+  int SCCsize[ numSCCs ];
+
+  int remaining = 0;
+  int i = 0;
+  Set * SCC;
+  ListIter next(*SCCs);
+  while( (SCC = (Set *)(next++)) != NULL ) {
+    SCCsize[i] = SCC->cardinality();
+
+    // cout << "Size " << SCCsize[i] << "\n";
+
+    remaining += SCCsize[i]*SCCsize[i] - (SCCsize[i] - 1);
+    i++;
+  }
+
+  if ( remaining < max ) {
+    max = remaining;	    // Rough bound was better -- use it
+  } else {
+    remaining = max;	    // Given bound was better -- use it
+  }
+
+  // cout << "remaining cost = " << remaining << "\n";
+
+  // Find the minimum cost of each SCC
+
+  i = 0;
+  next.reset();
+  while( (SCC = (Set *)next++ ) != NULL ) {
+
+    // cout << "Working with SCC " << SCC->print() << "\n";
+
+    // Compute a bound for this component by removing a best-case cost
+    // of all the unscheduled SCCs from the remaining cost
+
+    int bound = remaining;
+    for ( int j = numSCCs ; --j > i ; ) {
+      bound -= SCCsize[j];
+    }
+
+    if ( bound < SCCsize[i] ) {
+      return INT_MAX;		// Bound cannot possibly be met
+    }
+
+    if ( SCCsize[i] == 1 ) {
+
+      // A one-dimensional function -- its cost is always one
+      remaining--;
+
+      scheduleIndex = schedule.addSingleVertex( scheduleIndex,
+						SCC->onemember() );
+
+    } else {
+
+      // The main challenge: Find the minimum cost of a strongly-connected
+      // component
+
+      int actual = INT_MAX;	// No satisfying schedule has been found
+
+      // cout << "The bound on this component is " << bound << "\n";
+
+      SRParter part( *SCC );
+
+      SRRecursiveSchedule trialSchedule( *dgraph );
+
+      int maxpartition;
+      Set * partition;
+      while ( maxpartition = (bound - SCCsize[i]) / ( SCCsize[i] - 1 ),
+	      ( partition = part.next(maxpartition) ) != NULL ) {
+
+	// cout << "Attempting partition " << partition->print() << "\n";
+
+	int psize = partition->cardinality();
+
+	Set remaining( partition->size() );
+	remaining.setequal(*SCC);
+	remaining -= *partition;
+
+	// cout << "Remaining function " << remaining.print() << "\n";
+
+	int trycost = mincost( remaining,
+			       (bound - psize*psize) / (psize + 1),
+			       trialSchedule,
+			       scheduleIndex + psize );
+
+	if ( trycost < INT_MAX ) {
+	  int found = psize * psize + (psize + 1) * trycost;
+	  if ( found < actual ) {
+	    actual = found;
+	  }
+	  if ( actual <= bound ) {
+	    // cout << "Met the bound " << bound << " with a cost of " << actual
+	    //	 << "\n";
+
+	    // Get the optimal schedule for the subgraph and
+	    // wrap the first partition around it
+
+	    schedule.getSection( scheduleIndex + psize, SCCsize[i] - psize,
+				 trialSchedule );
+	    schedule.addPartition( scheduleIndex, SCCsize[i], *partition );
+
+	    bound = actual - 1;
+	  }
+	}
+
+	delete partition;
+      }
+
+      if ( actual == INT_MAX ) {
+	return INT_MAX;		// no considered partition could meet this
+      }
+
+      remaining -= actual;
+
+      scheduleIndex += SCCsize[i];
+
+    }
+
+    i++;
+  }
+
+  return max-remaining;
+
+}
+
+// Construct a new partitioner based on SRPartType and reset it
+SRParter::SRParter( Set & s )
+{
+
+  switch ( parter ) {
+  case SRPartOneT:
+    mypart = new SRPartOne( s );
+  default:
+    mypart = new SRPartOne( s );
+  }
+
+  mypart->init();
+
+}
+
+void SRPartOne::init()
+{
+  vertexIndex = -1;
+}
+
+Set * SRPartOne::next( int b /* Maximum size of the partition */ )
+{
+  if ( b >= 1 ) {
+
+    // Find the next vertex in the set
+
+    while ( vertexIndex < (partSet->size())-1 ) {
+      if ( (*partSet)[++vertexIndex] ) {
+
+	// Return a set containing only that vertex
+
+	Set * s = new Set( partSet->size() );
+	(*s) |= vertexIndex;
+	return s;
+
+      }
+    }
+  }
+
+  return NULL;
+
 }
 
 

@@ -68,7 +68,7 @@ Set::~Set()
 
 // Return the number of items in the set
 
-int Set::cardinality()
+int Set::cardinality() const
 {
   int count = 0;
   for ( int i = mysize ; --i >= 0 ; ) {
@@ -79,6 +79,18 @@ int Set::cardinality()
 
   return count;
 
+}
+
+// Return a member of a set, or -1 if it's empty
+
+int Set::onemember() const
+{
+  for ( int i = mysize ; --i >= 0 ; ) {
+    if ((*this)[i]) {
+      return i;
+    }
+  }
+  return -1;
 }
 
 // Add a set to a set
