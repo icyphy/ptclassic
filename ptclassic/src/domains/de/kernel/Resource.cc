@@ -1,8 +1,8 @@
 static const char file_id[] = "Resource.cc";
 /**************************************************************************
-Version identification:	$Id$
+Version identification:	@(#)Resource.cc	1.7 03/11/98
 
-Copyright (c) 1997-%Q% The Regents of the University of California.
+Copyright (c) 1997- The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -80,20 +80,17 @@ Resource::Resource(const char* n, int policy, DERCScheduler* sched)
 // of emission has arrived, and so must be emitted by the Star
 ///////////////////////////////////////////////////////////////////////
 
-int Resource::newEventFromInterruptQ(DERCEvent* e, double now) {
+void Resource::newEventFromInterruptQ(DERCEvent* e, double now) {
     // first get the priority of the received events source star
     double prio = e->src->priority;
-printf("\nprocessing intQ %p at time %f\n", e, now);fflush(0);
-    printf("dummy ? %d\n", e->isDummy);fflush(0);
 
     // Now go through the intEventList and remove this event
     SequentialList* store = new SequentialList();
     ResLLCell* p = (ResLLCell*)intEventList->getAndRemove();
-printf("event %p on intEventlist, called event %p\n", p->event, e);fflush(0);
     
     if (p->priority != prio) {
         Error::abortRun("unequal priorities");
-        return FALSE;
+        return;
     }
     while (p->priority == prio) {        
         if (p->event == e) {
@@ -115,7 +112,7 @@ printf("event %p on intEventlist, called event %p\n", p->event, e);fflush(0);
 
     if (p->event != e) {
         Error::abortRun("Event from IntQ not on Resources Linked List");
-        return FALSE;
+        return;
     }
     if (e->isDummy) {
         // resource is finished with the current Star, so update 
@@ -128,10 +125,9 @@ printf("event %p on intEventlist, called event %p\n", p->event, e);fflush(0);
         // Event can be emitted. This gets done via a call to the Star
         
         // Call Star to emit Event!!
-        printf("calling star %p to emit int event %p at time %f, to star %p\n", e->src, e, now, e->dest->parent()->asStar());fflush(0);
         e->src->emitEvent(e, now); 
     }   
-    return TRUE;
+    return;
 }
 
 /////////////////////////////////////////////////////////////////////////
@@ -146,13 +142,11 @@ printf("event %p on intEventlist, called event %p\n", p->event, e);fflush(0);
 // star as destination (this method is only called by DERCScheduler)
 /////////////////////////////////////////////////////////////////////////
 
-int Resource :: newEventFromEventQ(DERCEvent* e, double now) {
+void Resource :: newEventFromEventQ(DERCEvent* e, double now) {
     double nextTry;    
     // first get all events from the eventQ with the current time, 
     // for this Resource
     SequentialList* sortList = getOtherEvents(e, now);
-
-printf("processing eventQ %p at time %f\n", e, now);fflush(0);
         
     // Move these events to an array for more efficent processing
     int dimen = sortList->size();
@@ -209,12 +203,6 @@ printf("processing eventQ %p at time %f\n", e, now);fflush(0);
                 }
             }
         }
-        
-        for (i=0 ; i<dimen ; i++){
-            printf("event %p, destStar %p, resname %s, dummy %d, source star %p, ToA %f\n", sortArray[i], getDERCStar(sortArray[i]),getDERCStar(sortArray[i])->resource, sortArray[i]->isDummy, sortArray[i]->src, getDERCStar(sortArray[i])->timeOfArrival);fflush(0);
-        }
-
-        printf("\n top: event %p, destStar %p\n", sortArray[indexOftop], getDERCStar(sortArray[indexOftop]));fflush(0);
 
         /* Now have the current event of highest priority.     */
         /* See if this event can access the Resource           */
@@ -230,12 +218,11 @@ printf("processing eventQ %p at time %f\n", e, now);fflush(0);
                     ListIter getAppECT(*intEventList);
                     ResLLCell* p;
                     while ((p= (ResLLCell*)getAppECT++)!= 0) {
-                        printf("nextTry for SW event is %f\n", nextTry);fflush(0);
                         if (p->priority < getDERCStar(sortArray[indexOftop])->priority) {
                             // resource MUST be operating in NonPreemptive mode, else have error
                             if (schedPolicy == Preemptive) {
                                 Error::abortRun("if resource is using a Preemptive policy, it should not reach here");
-                                return FALSE;
+                                return;
                             }
                             // Try again some time in future, earlist time 
                             // being when currently executing star is finished
@@ -249,14 +236,12 @@ printf("processing eventQ %p at time %f\n", e, now);fflush(0);
                         }
                     }
                     if (nextTry == -1) {
-                        Error::abortRun("Event never got rescheduled in NewEventFromEventQ()");
-                        return FALSE;
+                        Error::abortRun(" SW Event never got rescheduled in NewEventFromEventQ()");
+                        return;
                     }
                     // getAppECT->~ListIter();
                     DEPortHole* destPort = (DEPortHole*)sortArray[i]->dest;
                     eventQ->levelput(sortArray[i], nextTry, destPort->depth);
-                    printf("SW put back all events %p eventQ, at time %f, resource not free\n", sortArray[i], nextTry);fflush(0);
-
                 }  
             }          
         } else {
@@ -266,14 +251,14 @@ printf("processing eventQ %p at time %f\n", e, now);fflush(0);
             DERCStar* dest;
         
             starUsingResource->startNewPhase();
-            printf("1\n");fflush(0);
+            
             for (i=0 ; i<dimen ; i++){
                 DEPortHole* port = (DEPortHole*)(sortArray[i]->dest);
                 dest = getDERCStar(sortArray[i]);
                 if (starUsingResource == dest) {
                     if (port->isItOutput()) {
                         Error::abortRun("Terminal goes to wormhole!!!");
-                        return FALSE;
+                        return;
                     }
                     else {
                         int success = ((InDEPort*) port)->getFromQueue(sortArray[i]->p);
@@ -282,13 +267,13 @@ printf("processing eventQ %p at time %f\n", e, now);fflush(0);
                     }
                 }
             }
-        printf("5\n");fflush(0);
+        
             // fire the star. The Star should write its events to the interruptQ.
-            if (!starUsingResource->run()) return FALSE;
-        printf("6\n");fflush(0);
+            starUsingResource->run();
+        
             // Now update the Resources SequentialList
             double updateDelay = starUsingResource->getDelay();
-        printf("7\n");fflush(0);
+        
             // first update all old events with the delay of the curreent Star
             ListIter oldEventsList(*intEventList);
             ResLLCell* p;
@@ -298,7 +283,7 @@ printf("processing eventQ %p at time %f\n", e, now);fflush(0);
                 intQupdate(p->event, p->ECT, oldTime);
             }
             this->timeWhenFree = now + updateDelay;
-         printf("8\n");fflush(0);   
+            
             // get the new events from the fired Star
             ListIter newEventsList(*(starUsingResource->getEvents()));
 
@@ -313,7 +298,7 @@ printf("processing eventQ %p at time %f\n", e, now);fflush(0);
             }
             // oldEventsList->~ListIter();
             // newEventsList->~ListIter();
-printf("9\n");fflush(0);
+
             // Now reschedule the remaining events that were originally taken 
             // from the eventQ       
             for (i=0 ; i<dimen ; i++){
@@ -332,16 +317,15 @@ printf("9\n");fflush(0);
                             break;
                         }
                         p = (ResLLCell*)getAppECT++;
-                    } 
-printf("10\n");fflush(0);
+                    }
                     if (nextTry == -1) {
-                        Error::abortRun("Event never got rescheduled in NewEventFromEventQ()");
-                        return FALSE;
+                        Error::abortRun("HW Event never got rescheduled in NewEventFromEventQ()");
+                        return;
                     }
                     //getAppECT->~ListIter();
                     DEPortHole* destPort = (DEPortHole*)e->dest;
                     eventQ->levelput(sortArray[i], nextTry, destPort->depth);
-                    printf("SW put back unused events %p eventQ, \n", sortArray[i]);fflush(0);
+                    
                 }      
             } 
         }
@@ -353,11 +337,10 @@ printf("10\n");fflush(0);
             // Resource is not free
             // Reschedule the Events. Remember all such Events use Star
             // for same time (same freq)
-            
+            printf("HW resource not free, timeWhenFree %f, now %f\n", timeWhenFree, now);fflush(0);
             for (i=0 ; i<dimen ; i++) {
                 DEPortHole* destPort = (DEPortHole*)sortArray[i]->dest;
-                eventQ->levelput(sortArray[i], timeWhenFree, destPort->depth);
-                printf("HW put back event %p back eventQ\n", sortArray[i]);fflush(0); 
+                eventQ->levelput(sortArray[i], timeWhenFree, destPort->depth); 
             }
         } else { // Resource is FREE!     
             // Need to make available any other Events for the Star
@@ -368,28 +351,25 @@ printf("10\n");fflush(0);
             for (i=0 ; i<dimen ; i++){
                 DEPortHole* port = (DEPortHole*)(sortArray[i]->dest);
                 dest = getDERCStar(sortArray[i]);
-                printf("star using resource is %p, dest is %p\n\n", starUsingResource, dest);fflush(0);
                 assert(starUsingResource == dest);
                 if (port->isItOutput()) {
                     Error::abortRun("Terminal goes to wormhole!!!");
-                    return FALSE;
+                    return;
                 }
                 else {
                     int success=((InDEPort*)port)->getFromQueue(sortArray[i]->p);
                     if (!success) {
                          eventQ->levelput(sortArray[i], now, port->depth);
-printf("HW put back event %p back eventQ\n", sortArray[i]);fflush(0); 
                      }
 	 	}
             }
             
             // fire the star. A HW Star writes its Events directly to the eventQ
-            if (!starUsingResource->run()) return FALSE;
+            starUsingResource->run();
             nextTry = now + starUsingResource->getDelay();
             this->timeWhenFree = nextTry;
         }
     }
-    return TRUE;
 }
 
 ////////////////////////////////////////////////////////////////////////////
@@ -401,7 +381,7 @@ SequentialList* Resource :: getOtherEvents(DERCEvent* e, double now) {
 
     SequentialList* sortList = new SequentialList();
     sortList->prepend(e);
-    printf("got event %p from eventQ, time %f, dest %p\n", e, now, e->dest->parent());fflush(0);
+
     // First get all current events from the eventQ
     while (TRUE) {
         CqLevelLink *h = eventQ->get();
@@ -417,34 +397,22 @@ SequentialList* Resource :: getOtherEvents(DERCEvent* e, double now) {
         // the events of highest priority are at the head of the list
         
         sortList->prepend(h->e);
-        printf("got event %p from eventQ, time %f, dest %p, dest from event %p\n", h->e, now, h->dest, ((Event*)h->e)->dest->parent());fflush(0);
-        //eventQ->putFreeLink(h); // NEEDS to be here, see CalanderQ.h
-        h->~CqLevelLink();
+        //eventQ->putFreeLink(h);
     }
-        // Now go through this SequentialList and pushback any events not looking 
+    // Now go through this SequentialList and pushback any events not looking 
     // for this resource. sortList is used for this in a circular fashion,
     // ie set a pointer to the top event and go through list until reach it 
     // again. Any events using this resource get appended to the tail of the 
     // list.
-    
-    ListIter test(*sortList); // this is a test
-    DERCEvent* testEvent;                   
-    while ((testEvent=test++) != 0) {
-        printf("XXXXevent %p, destStar %p, resname %s, dummy %d, source star %p, ToA %f\n", testEvent, getDERCStar(testEvent),getDERCStar(testEvent)->resource, testEvent->isDummy, testEvent->src, getDERCStar(testEvent)->timeOfArrival);fflush(0);
-    }
-                        
-DERCEvent* topEvent = (DERCEvent*)sortList->getAndRemove();
+    DERCEvent* topEvent = (DERCEvent*)sortList->getAndRemove();
     sortList->append(topEvent); // Set marker to event at end of list
     DERCEvent* nextEvent;   
     do {
         nextEvent = (DERCEvent*)sortList->getAndRemove();
-
-        printf("resource %p, resourceThis %p\n",getDERCStar(nextEvent)->resourcePointer ,this);fflush(0);
         if (getDERCStar(nextEvent)->resourcePointer != this){
             // not for this resource, so put back in queue
             DEPortHole* destPort = (DEPortHole*)nextEvent->dest;
             eventQ->levelput(nextEvent, now, destPort->depth);  
-            printf("put event %p back eventQ\n", nextEvent);fflush(0);
         } else {  
             sortList->append(nextEvent);
         }
