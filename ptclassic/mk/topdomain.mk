@@ -74,3 +74,9 @@ depend:
 		) \
 	    fi ; \
 	done
+
+doc/stars/starHTML.idx: $(wildcard doc/stars/*.htm)
+	@echo "Updating starHTML.idx:
+	(cd doc/stars; \
+	echo "set TYCHO $(PTOLEMY)/tycho; source $(PTOLEMY)/tycho/lib/idx/tychoMakeIndex.tcl; ptolemyStarHTMLIndex" | itclsh)
+
