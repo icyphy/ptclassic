@@ -4,9 +4,7 @@
 <Title>Dialog Classes</Title>
 </head>
 <body bgcolor="#faf0e6">
-<a name="dialog classes">
-<h1>Dialog Classes</h1>
-</a>
+<h1><a name="dialog classes">Dialog Classes</a></h1>
 <p>
 Tycho provides a set of classes for asking the user questions.
 These can be <a name="yes-no questions">yes-no questions</a>,
@@ -19,9 +17,7 @@ or questions that require a file name response.
 <li><a href="#EntryQuery class">EntryQuery Class</a>
 <li><a href="#FileBrowser class">FileBrowser Class</a>
 </ul>
-<a name="YesNoQuery class">
-<h2>YesNoQuery Class</h2>
-</a>
+<h2><a name="YesNoQuery class">YesNoQuery Class</a></h2>
 <p>
 The YesNoQuery class poses a question and offers two buttons,
 labeled "Yes" and "No".  For example:
@@ -79,9 +75,9 @@ set x [
 ::tycho::inform "Your answer was $x"
 </pre></tcl>
 
-<p><a name="YesNoCancel class">
-<h2>YesNoCancel Class</h2>
-</a>
+<p>
+<h2><a name="YesNoCancel class">YesNoCancel Class</a></h2>7
+
 <p>
 The YesNoCancel class is like the YesNoQuery class, but there is one
 more button labeled "Cancel" and one more option
@@ -93,9 +89,8 @@ set x [::tycho::DialogWindow::newModal YesNoCancel .z -text {Are you awake?}]
 </pre></tcl>
 By default, the cancel button returns -1.
 
-<p><a name="EntryQuery class">
-<h2>EntryQuery Class</h2>
-</a>
+<p>
+<h2><a name="EntryQuery class">EntryQuery Class</a></h2>
 <p>
 The EntryQuery class opens a dialog box with one or more
 <a name="text entry">text entry widgets widgets</a>
@@ -117,7 +112,7 @@ the widget is destroyed.
 <p>
 Entry boxes can be created using the
 <a name="addQuery method">addQuery method</a>, as shown here:
-<tcl><pre>
+<pre><tcl>
 ::tycho::EntryQuery .bb -okcommand {::tycho::inform [.bb get]}
 .bb addQuery month {Enter Month} Jan
 .bb addQuery day {Enter Day} Mon
@@ -134,7 +129,7 @@ have not dismissed the EntryQuery that you created above,
 <tcl><pre>
 .bb addRadioQuery selmonth {Select Month} {Jan Feb March} Jan
 .bb addRadioQuery selday {Select Day} {Mon Tue Wed Thu Fri} Mon
-</tcl></pre>
+</pre></tcl>
 The arguments are a name for the bank of buttons, a label,
 the list of possible values, and the default selection.
 <p>
@@ -229,10 +224,7 @@ For example,
     EntryQuery .z -queries {{n {Enter value} {default}}}]
 </pre></tcl>
 <p>
-<a name="FileBrowser class">
-<h2>FileBrowser Class</h2>
-</a>
-<p>
+<h2><a name="FileBrowser class">FileBrowser Class</a></h2>
 A rather more elaborate dialog box is a file browser.
 Consider the example:
 <tcl><pre>
