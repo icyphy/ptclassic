@@ -141,7 +141,12 @@ body ::tycho::EditCpp::classDAG {} {
     }
     set savedir [pwd]
     cd [file dirname [filename]]
-    if [ catch {eval ::cppDAG [list [list "C++ Class Diagram of [file dirname [filename]]"]] class.dag [glob *.h]} errmsg] {
+    if [ catch {glob *.h} errmsg] {
+        cd $savedir
+        error "Could not find any .h files in `[file dirname [filename]]'\n\
+               Error message was: $errmsg"
+    }
+    if [ catch {eval ::cppDAG [list [list "C++ Class Diagram of [file dirname [filename]]"]] class.dag [glob -nocomplain *.h]} errmsg] {
         cd $savedir
         global errorInfo
         error "$errmsg $errorInfo"
