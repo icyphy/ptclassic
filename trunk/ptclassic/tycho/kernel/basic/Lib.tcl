@@ -92,13 +92,14 @@ namespace ::tycho {
     ::tycho::File::registerExtensions .tcl \
             {::tycho::view EditTcl {-file {%s}}} \
             {Tcl editor} "text"
-    if {[info commands ::ptkOpenFacet] != {}} {
-        # Ptolemy is present.  Use it.
+    if {[uplevel #0 info commands ptkOpenFacet] != {} && \
+        [uplevel #0 info commands pvOpenWindow] != {}} {
+        # Ptolemy and vem are present.  Use them.
         ::tycho::File::registerContents [file join schematic {contents;}] \
                 {::pvOpenWindow [::ptkOpenFacet {%s} schematic contents]} \
                 {Vem facet} "graphics"
     } {
-        # Ptolemy is not present.
+        # Vem is not present.
         ::tycho::File::registerContents [file join schematic {contents;}] \
                 {::tycho::view EditPalette {-file {%s}}} \
                 {Palette editor} "graphics"
