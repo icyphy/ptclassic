@@ -32,8 +32,11 @@ void ivTextDestroy();
 
 int ivKeyOk
      ARGS((XKeyEvent   *keyEventPtr));
+/*
+ * Can't include prototype for ivGetLine because hppa.cfront cc fails
+ * to compile ivGetLine.c otherwise.
 int ivGetLine
 	ARGS((IVWindow *IVwin, XKeyEvent *keyEventPtr, int x, int y,
 	      int bufferSize, bool keepGoing));
-
+*/
 #endif
