@@ -571,7 +571,8 @@ long userOptionWord;
     char number[4];
     long *pointer;
     char remoteUser[128];
-    
+    extern long time();    
+
     application = RPCAddApplication(host, path);
 
     app = &(RPCApplication[application]);
