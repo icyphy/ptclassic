@@ -1,6 +1,16 @@
-#/bin/csh -f
+#!/bin/csh -f -v
 #
 # $Id$
+#
+# Use this script to create a new domain that compiles and can be linked
+# with ptcl or pigi.  To use it, create a directory in which to put
+# the new domain, and run this script in that domain, say
+#	mkdir $PTOLEMY/src/domains/yyy
+#	cd $PTOLEMY/src/domains/yyy
+#	$PTOLEMY/src/domains/xxx/mkdom yyy
+# Note that this script is not sensitive to the case in "yyy".
+# This script does not create any parallel object tree.  You will have
+# to do this manually (or write a script).
 #
 # Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
 # All rights reserved.
@@ -38,6 +48,9 @@ if ($#argv < 1) then
 endif
 
 if ( ! $?PTOLEMY ) setenv PTOLEMY ~ptolemy
+if ( ! $?ARCH ) then
+    setenv ARCH `$PTOLEMY/bin/arch`
+endif
 
 set domain = $1
 set DOM = `echo $domain | tr a-z A-Z`	# upper case domain abbreviation
@@ -51,21 +64,35 @@ if ($DOM == "XXX") then
 endif
 
 # Check that the program is being run from a resonable directory.
-if ($cwd !~ */src/domains/$dom/kernel) then
-	echo Run this program in the .../src/domains/$dom/kernel directory.
+if ($cwd !~ */src/domains/$dom) then
+	echo Run this program in the .../src/domains/$dom directory.
 	exit
 endif
 
-# Process the source files.
-set dir = $PTOLEMY/src/domains/xxx/kernel
-foreach file ( PortHole.h PortHole.cc Geodesic.h \
-		Scheduler.h Scheduler.cc Star.h Star.cc \
-		Wormhole.h Wormhole.cc )
+cp -r $PTOLEMY/src/domains/xxx/* .
 
-	echo $DOM$file
-	sed -e "s/XXX/$DOM/g" -e "s/xxx/$dom/g" < $dir/XXX$file > $DOM$file	
+sed -e "s/XXX/$DOM/g" -e "s/xxx/$dom/g" < makefile > tmp
+rm -f makefile
+mv tmp makefile
+rm -f mkdom
+rm -f *~
+
+foreach dir ( kernel stars )
+	cd $dir
+	# Process the source files.
+	foreach file ( `ls` )
+		set destfile=`echo $file | sed -e "s/XXX//"`
+		echo $DOM$destfile
+		sed -e "s/XXX/$DOM/g" -e "s/xxx/$dom/g" < $file > $DOM$destfile	
+	end
+
+	rm -f make.template makefile
+	mv ${DOM}makefile makefile
+	mv ${DOM}make.template make.template
+	
+	rm -f XXX* *~
+	
+	cd ..
 end
 
-# Process the make.template file.
-sed -e "s/XXX/$DOM/g" -e "s/xxx/$dom/g" < $dir/make.template > make.template
-
+cd ..
