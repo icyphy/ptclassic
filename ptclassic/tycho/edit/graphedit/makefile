@@ -47,6 +47,7 @@ ITCL_SRCS =  \
 	DFGEditor.itcl \
 	DFGVertexController.itcl \
 	IconLibrary.itcl \
+	IconPalette.itcl \
 	Junction.itcl \
 	Layout.itcl \
 	Net.itcl \
