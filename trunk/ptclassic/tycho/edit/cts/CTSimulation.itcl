@@ -2,7 +2,7 @@
 # Version: $Id$
 # Author: John Reekie
 #
-# @Copyright (c) 1996-%Q% The Regents of the University of California.
+# @Copyright (c) 1996-1998 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -77,12 +77,18 @@ body ::tycho::CTSimulation::constructor {args} {
 body ::tycho::CTSimulation::startServer {} {
     chain
 
-    # Create the universe
-    _send {
-	set univ [java::new pt.domains.ct.kernel.CTSystem]
-	$univ setName System
-        set exec [$univ getDirector]
-    }
+    # Initialize the simulation
+    set system [java::new ptolemy.domains.ct.kernel.CTSystem]
+    $system setName System
+    set anotherFreakingDirector \
+	    [java::new ptolemy.domains.ct.kernel.CTFixedStepRKDirector \
+	    Director]
+    $anotherFreakingDirector setSolverOrder 4
+    $system setDirector $anotherFreakingDirector
+
+    set director [$system getDirector]
+    setSystem $system
+    setDirector $director
 }
 
 ########################################################################
@@ -91,6 +97,9 @@ body ::tycho::CTSimulation::startServer {} {
 # Construct a simulation from the current graph.
 #
 body ::tycho::CTSimulation::_construct {} {
+    # Get the system
+    set system [getSystem]
+
     # Generate the stars from vertices
     foreach v [$_graph vertices] {
         # Is it a junction or a vertex? Currently, we can
@@ -102,11 +111,11 @@ body ::tycho::CTSimulation::_construct {} {
 
         } else {
             # Otherwise assume it represents a star. Get the class name.
-            set type pt.domains.ct.actors.CT[$_graph attrget $v -class]
+            set type ptolemy.domains.ct.lib.CT[$_graph attrget $v -class]
 
             # Create the star
-            debug "set $v \[java::new $type \$univ $type\]"
-            set result [_send "set $v \[java::new $type \$univ $v\]"]
+            debug "set $v \[java::new $type \$system $type\]"
+            set result [set $v [java::new $type $system $v]]
             debug " -> $result"
 
 	    # Set its parameters. Get the star master.
@@ -119,9 +128,10 @@ body ::tycho::CTSimulation::_construct {} {
             # Get the attributes of the star and set them
             foreach attr [$library match attribute $starname] {
                 set val [$_graph attrget $v -$attr]
+
+                # Now try and set it
                 debug "\$[set v] setParam [string trim $attr -] $val"
-                set result [_send \
-                        "\$[set v] setParam [string trim $attr -] $val"]
+		set result [[set $v] setParam [string trim $attr -] $val]
                 debug " -> $result"
             }
         }   
@@ -154,8 +164,8 @@ body ::tycho::CTSimulation::_construct {} {
         if [string match {junction*} $to] {
             # Create the relation
             set rname $to
-            debug "set $rname \[\$univ newRelation $rname\]"
-            set result [_send "set $rname \[\$univ newRelation $rname\]"]
+            debug "set $rname \[\$system newRelation $rname\]"
+            set result [set $rname [$system newRelation $rname]]
             debug " -> $result"
 
             # Link the first edge (the only input!)
@@ -164,12 +174,12 @@ body ::tycho::CTSimulation::_construct {} {
 	    set fromport [lindex [split $fromport -] 0]
 
             debug "set $fromname \[\$[set fromvertex] getPort $fromport\]"
-            set result [_send "set $fromname \[\$[set fromvertex] \
-                    getPort $fromport\]"]
+            set result [set $fromname [[set $fromvertex] \
+                    getPort $fromport]]
             debug " -> $result"
 
             debug "\$\{[set fromname]\} link \$[set rname]"
-            set result [_send "\$\{[set fromname]\} link \$[set rname]"]
+            set result [[set $fromname] link [set $rname]]
             debug " -> $result"
 
             # Find edges
@@ -200,12 +210,12 @@ body ::tycho::CTSimulation::_construct {} {
 		set toport [lindex [split $toport -] 0]
 
                 debug "set $toname \[\$[set tovertex] getPort $toport\]"
-                set result [_send "set $toname \[\$[set tovertex] \
-                        getPort $toport\]"]
+                set result [set $toname [[set $tovertex] \
+                        getPort $toport]]
                 debug " -> $result"
 
                 debug "\$\{[set toname]\} link \$[set rname]"
-                set result [_send "\$\{[set toname]\} link \$[set rname]"]
+                set result [[set $toname] link [set $rname]]
                 debug " -> $result"
             }
             continue
@@ -222,21 +232,21 @@ body ::tycho::CTSimulation::_construct {} {
 
         # Get the actual port names
         debug "set $fromname \[\$[set fromvertex] getPort $fromport\]"
-        set result [_send "set $fromname \
-            \[\$[set fromvertex] getPort $fromport\]"]
+        set result [set $fromname \
+            [[set $fromvertex] getPort $fromport]]
         debug " -> $result"
 
         debug "set $toname \[\$[set tovertex] getPort $toport\]"
-        set result [_send "set $toname \[\$[set tovertex] getPort $toport\]"]
+        set result [set $toname [[set $tovertex] getPort $toport]]
         debug " -> $result"
 
         # Make the connection, dude
         debug "set $e \[ \
-            \$univ connect \$\{[set fromname]\} \$\{[set toname]\} \
+            \$system connect \$\{[set fromname]\} \$\{[set toname]\} \
             $e\]"
-        set result [_send "set $e \[ \
-            \$univ connect \$\{[set fromname]\} \$\{[set toname]\} \
-            $e\]"]
+        set result [set $e [ \
+            $system connect [set $fromname] [set $toname] \
+            $e]]
         debug " -> $result"
     }
 }

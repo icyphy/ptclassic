@@ -2,7 +2,7 @@
 # Version: $Id$
 # Author: John Reekie
 #
-# @Copyright (c) 1996-%Q% The Regents of the University of California.
+# @Copyright (c) 1996-1998 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -87,9 +87,10 @@ body ::tycho::CTRunWindow::start {} {
     set timestep [$itk_component(time) get main.step]
 
     # FIXME: call through parameter est method of Simulation
-    $_simulation send "\$exec setParam startTime $starttime"
-    $_simulation send "\$exec setParam stopTime $stoptime"
-    $_simulation send "\$exec setParam stepSize $timestep"
+    set exec [$_simulation getDirector]
+    $exec setParam startTime $starttime
+    $exec setParam stopTime $stoptime
+    $exec setParam initialStepSize $timestep
 
     # Do main start method
     chain
