@@ -48,13 +48,13 @@ proc ptkMakeBarGraph {w desc geo numBars barGraphWidth barGraphHeight univ} {
     label $w.cntr.label -text "Scale range:"
     set startScale [${w}rescale 1.0]
     label $w.cntr.value -width 20 -text "$startScale"
-    button $w.cntr.hv -text "Zoom In (z)" -command "changeBarScale $w 0.5"
     button $w.cntr.dbl -text "Zoom Out (Z)" -command "changeBarScale $w 2.0"
+    button $w.cntr.hv -text "Zoom In (z)" -command "changeBarScale $w 0.5"
     pack append $w.cntr \
 	$w.cntr.label left \
 	$w.cntr.value left \
-	$w.cntr.hv right \
-	$w.cntr.dbl right
+	$w.cntr.dbl right \
+	$w.cntr.hv right
 
     frame $w.pf -bd 10
     canvas $w.pf.plot -relief sunken -bd 3 \
