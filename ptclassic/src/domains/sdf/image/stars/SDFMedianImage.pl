@@ -89,10 +89,7 @@ when displaying single frames from a moving sequence.
 // Read data from input and initialize.
 		Packet inPkt;
 		(inData%0).getPacket(inPkt);
-		if (!StrStr(inPkt.dataType(), "GrayI")) {
-			Error::abortRun(*this, inPkt.typeError("GrayI"));
-			return;
-		}
+		TYPE_CHECK(inPkt,"GrayImage");
 		GrayImage* inImage = (GrayImage*) inPkt.myData();
 		width = inImage->retWidth();
 		height = inImage->retHeight();

@@ -54,14 +54,8 @@ code {
 		code {
 			(diffIn%0).getPacket(inPkt);
 			(mvIn%0).getPacket(mvPkt);
-			if (!StrStr(inPkt.dataType(), "GrayI")) {
-				Error::abortRun(*this, inPkt.typeError("GrayI"));
-				return;
-			}
-			if (!StrStr(mvPkt.dataType(), "MVI")) {
-				Error::abortRun(*this, mvPkt.typeError("MVI"));
-				return;
-			}
+			TYPE_CHECK(inPkt,"GrayImage");
+			TYPE_CHECK(mvPkt,"MVImage");
 			*gi = (GrayImage*)	inPkt.myData();
 			*mi = (MVImage*)	mvPkt.myData();
 		}

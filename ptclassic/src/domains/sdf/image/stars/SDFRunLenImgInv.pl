@@ -63,10 +63,7 @@ See SDFrunLen.
 // Read input.
 		Packet inPkt;
 		(input%0).getPacket(inPkt);
-		if (!StrStr(inPkt.dataType(), "GrayI")) {
-			Error::abortRun(*this, inPkt.typeError("GrayI"));
-			return;
-		}
+		TYPE_CHECK(inPkt,"GrayImage");
 
 // Do processing and send out.
 		GrayImage* inImage = (GrayImage*) inPkt.writableCopy();

@@ -55,21 +55,11 @@ can choose whether or not the image file is saved or deleted.
 // Read data from input.
         Packet rpkt, gpkt, bpkt;
         (rinput%0).getPacket(rpkt);
-        if (!StrStr(rpkt.dataType(),"GrayI")) {
-            Error::abortRun(*this, rpkt.typeError("GrayI"));
-            return;
-        }
+	TYPE_CHECK(rpkt,"GrayImage");
         (ginput%0).getPacket(gpkt);
-        if (!StrStr(gpkt.dataType(),"GrayI")) {
-            Error::abortRun(*this,gpkt.typeError("GrayI"));
-            return;
-        }
+	TYPE_CHECK(gpkt,"GrayImage");
         (binput%0).getPacket(bpkt);
-        if (!StrStr(bpkt.dataType(),"GrayI")) {
-            Error::abortRun(*this,bpkt.typeError("GrayI"));
-            return;
-        }
-
+	TYPE_CHECK(bpkt,"GrayImage");
 // Set filename and save values.
         const char* saveMe = saveColor;
         int del = !((saveMe[0] == 'y') || (saveMe[0] == 'Y'));

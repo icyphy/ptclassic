@@ -48,10 +48,7 @@ can choose whether or not the image file is saved or deleted.
 // Read data from input.
         Packet pkt;
         (inData%0).getPacket(pkt);
-        if (!StrStr(pkt.myData()->dataType(), "GrayI")) {
-            Error::abortRun(*this, pkt.typeError("GrayI"));
-            return;
-        }
+	TYPE_CHECK(pkt,"GrayImage");
 
 // Set filename and save values.
         const char* saveMe = saveImage;

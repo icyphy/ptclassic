@@ -54,9 +54,8 @@ code {
 		arglist { "(Packet& inPkt)" }
 		code {
 			(input%0).getPacket(inPkt);
-			if (!StrStr(inPkt.dataType(), "GrayI")) {
-				Error::abortRun(*this, inPkt.typeError("GrayI"));
-				return((GrayImage*) NULL);
+			if (badType(*this,inPkt,"GrayImage")) {
+				return NULL;
 			}
 			return( (GrayImage*) inPkt.myData() );
 		}

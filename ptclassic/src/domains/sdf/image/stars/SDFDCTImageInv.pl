@@ -59,8 +59,9 @@ discrete cosine transform (DCT) coding and outputs a GrayImage.
         name { doInvDCT }
         type { void }
         access { protected }
-        arglist { "(unsigned char* outdata, float* indata, int outw,
-                int outh, int inw, int inh)" }
+        arglist {
+"(unsigned char* outdata,float* indata, int outw, int outh, int inw, int inh)"
+	}
         code {
     register int ndx, ndx2, cntr;
     int ii, jj, i, j;
@@ -137,10 +138,7 @@ discrete cosine transform (DCT) coding and outputs a GrayImage.
 // Read input image.
         Packet inPacket;
         (input%0).getPacket(inPacket);
-        if (!StrStr(inPacket.dataType(),"DCTI")) {
-            Error::abortRun(*this, inPacket.typeError("DCTI"));
-            return;
-        }
+	TYPE_CHECK(inPacket,"DCTImage");
 // Need to call "writableCopy()" rather than "myData()" because the
 // doInvDCT function modifies "dctimage"!!
         DCTImage* dctimage = (DCTImage*)  inPacket.writableCopy();

@@ -58,18 +58,9 @@ The inputs and outputs are packets of type GrayImage.
         (input1%0).getPacket(pkt1);
         (input2%0).getPacket(pkt2);
         (input3%0).getPacket(pkt3);
-        if(!(StrStr(pkt1.dataType(), "GrayI"))) {
-            Error::abortRun(*this, pkt1.typeError("GrayI"));
-            return;
-        }
-        if(!(StrStr(pkt2.dataType(), "GrayI"))) {
-            Error::abortRun(*this, pkt2.typeError("GrayI"));
-            return;
-        }
-        if(!(StrStr(pkt3.dataType(), "GrayI"))) {
-            Error::abortRun(*this, pkt3.typeError("GrayI"));
-            return;
-        }
+	TYPE_CHECK(pkt1,"GrayImage");
+	TYPE_CHECK(pkt2,"GrayImage");
+	TYPE_CHECK(pkt3,"GrayImage");
 
 // Change into RGB format
         GrayImage* redI = (GrayImage*) pkt1.writableCopy();

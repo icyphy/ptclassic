@@ -62,9 +62,8 @@ for errors in the transmission of the difference frames.
 		code {
 			Packet pkt;
 			(input%0).getPacket(pkt);
-			if (!StrStr(pkt.dataType(), "GrayI")) {
-				Error::abortRun(*this, pkt.typeError("GrayI"));
-				return((GrayImage*) NULL);
+			if (badType(*this,pkt,"GrayImage")) {
+				return NULL;
 			}
 			return( (GrayImage*) pkt.writableCopy() );
 		}
