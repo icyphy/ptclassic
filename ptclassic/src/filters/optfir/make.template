@@ -71,11 +71,14 @@ install: makefile $(BINDIR)/optfir
 # here.
 optfir:	optfir.o 
 	rm -f optfir
-	$(CLINKER) $(LINKFLAGS) optfir.o -lm -o optfir
+	$(CLINKER) $(LINKFLAGS) $^ -lm -o $@
 
 $(BINDIR)/optfir:	optfir
 	rm -f $(BINDIR)/optfir
 	ln optfir $(BINDIR)/optfir
+
+optfir.purify: optfir.o
+	$(PURIFY) $(CLINKER) $(LINKFLAGS) $^ -lm -o $@
 
 lint:	$(SRCS)
 	lint -u $(SRCS) > lint
