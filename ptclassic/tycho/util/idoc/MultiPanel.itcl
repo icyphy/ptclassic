@@ -70,7 +70,7 @@
 #
 class ::tycho::MultiPanel {
     inherit ::tycho::TWidget
-
+ 
     constructor {args} {}
     destructor {}
      
@@ -105,7 +105,7 @@ class ::tycho::MultiPanel {
     ####                      private variables                    ####
 
     private variable myData
-    private variable myFrame
+    private variable myCanvas
     private variable myList
 }
 
@@ -115,16 +115,44 @@ class ::tycho::MultiPanel {
 #
 body ::tycho::MultiPanel::constructor {args} {
 
-    itk_component add mainFrame {
-        frame $itk_interior.mainFrame
+    itk_component add canvas {
+        canvas $itk_interior.canvas
     } {
         keep -background
+        keep -width
+        keep -height
     }
 
-    set myFrame $itk_component(mainFrame)
+    set myCanvas $itk_component(canvas)
+
+    #FIXME: scrollbars are not packed and do not work
+
+    itk_component add hsb {
+        scrollbar $itk_interior.hsb \
+                -orient horizontal \
+                -command "$myCanvas xview"
+    } {
+        keep -background -cursor
+    }  
+      
+    itk_component add vsb {
+        scrollbar $itk_interior.vsb \
+                -orient vertical \
+                -command "$myCanvas yview"
+    } {
+        keep -background -cursor
+    }        
+
+    $myCanvas configure \
+            -xscrollcommand "$itk_component(hsb) set" \
+            -yscrollcommand "$itk_component(vsb) set"
+
     set myList [::tycho::CircularList [::tycho::autoName list]]
 
-    pack $myFrame -side top -expand 1 -fill both
+    pack $myCanvas -expand 1 -fill both -side left -anchor nw
+    
+    # let canvas set size, not internal widgets
+    pack propagate $myCanvas 0
 
     eval itk_initialize $args
 }
@@ -150,7 +178,7 @@ body ::tycho::MultiPanel::append {element {children} args} {
     # check children
     if {[llength $children] > 1} {
         # put multiple children in a frame
-        set child $myFrame[::tycho::autoName .cframe]
+        set child $myCanvas[::tycho::autoName .cframe]
         frame $child
         foreach childel $children {
             set cname [elementinfo $childel]
@@ -166,13 +194,13 @@ body ::tycho::MultiPanel::append {element {children} args} {
     # do this here in case there's an error
     $myList append $element
 
-    set newPanel $myFrame[::tycho::autoName .panel]
+    set newPanel $myCanvas[::tycho::autoName .panel]
     if {$children != ""} {
         eval "::tycho::Subpanel $newPanel -childwidget $child $args"
     } else {
         eval "::tycho::Subpanel $newPanel $args"
     }
-    pack $newPanel -anchor nw
+    pack $newPanel -anchor nw -side top
 
     set myData($element) $newPanel
 }
@@ -186,7 +214,7 @@ body ::tycho::MultiPanel::appendlabel {element args} {
     # do this first in case there's an error
     $myList append $element
 
-    set newLabel $myFrame[::tycho::autoName .label]
+    set newLabel $myCanvas[::tycho::autoName .label]
     eval "label $newLabel $args"
     pack $newLabel -anchor nw -side top
 
@@ -200,6 +228,7 @@ body ::tycho::MultiPanel::appendlabel {element args} {
 body ::tycho::MultiPanel::bind {element args} {
 
     set elname [elementinfo $element]
+
     # bind the subpanel/label
     uplevel "bind $elname $args"
 }
