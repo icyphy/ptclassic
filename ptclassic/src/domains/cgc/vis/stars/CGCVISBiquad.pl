@@ -11,7 +11,17 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CGC Visual Instruction Set library }
-	desc { An IIR Biquad filter. }
+	desc { 
+An IIR Biquad filter.  In order to take advantage of the 16-bit 
+partitioned multiplies, the VIS Biquad reformulates the filtering 
+operation to that of a matrix operation (Ax=y), where A is a matrix 
+calculated from the taps, x is an input vector, and y is an output vector.
+The matrix A is first calculated by substituting the biquad equation 
+y[n] = -a*y[n-1]-b*y[n-2]+c*x[n]+d*x[n-1]+e*x[n-2] into y[n-1], y[n-2], 
+and y[n-3].  The matrix A is then multiplied with the 16-bit partitioned 
+input vector.  The final result is accumulated in four 16-bit fixed point 
+numbers which are concatenated into a single 64-bit float particle.
+}
 	input {
 	  name { signalIn }
 	  type { float }
@@ -45,13 +55,6 @@ denominator coefficients between 0 and 1.
 	  attributes{ A_CONSTANT|A_SETTABLE }
 	}
       	defstate {
-	  name { scaledata }
-	  type { float }
-	  default { "32767.0" }
-	  desc { Filter tap scale }
-	  attributes { A_CONSTANT|A_SETTABLE }
-	}
-      	defstate {
 	  name { scaletaps }
 	  type { float }
 	  default { "32767.0" }
@@ -64,7 +67,6 @@ denominator coefficients between 0 and 1.
 	code {
 #define NUMPACK (4)
 	}
-
 	codeblock(quadmult){
 vis_d64 $sharedSymbol(CGCVISBiquad,mult4x4)(vis_d64 mult1,vis_d64 mult2) {
 	vis_d64 upper = vis_fmul8sux16(mult1,mult2);
@@ -72,7 +74,6 @@ vis_d64 $sharedSymbol(CGCVISBiquad,mult4x4)(vis_d64 mult1,vis_d64 mult2) {
 	return vis_fpadd16(upper,lower);
 }
 	}
-
 	codeblock(settaps){
 void $sharedSymbol(CGCVISBiquad,settaps)(vis_d64* filtertaps, vis_s16* tapmatrix,
 		vis_d64* betatop, vis_d64* betabott, vis_s16 scaledown) {
@@ -92,8 +93,10 @@ void $sharedSymbol(CGCVISBiquad,settaps)(vis_d64* filtertaps, vis_s16* tapmatrix
 	tapmatrix[8] = 0;
 	tapmatrix[9] = 0;
 	tapmatrix[10] = (vis_s16)$val(scaletaps)/scaledown*(-(filtertaps[4]*filtertaps[0]));
-	tapmatrix[11] = (vis_s16)$val(scaletaps)/scaledown*(filtertaps[4]-(filtertaps[3]*filtertaps[0]));
-	tapmatrix[12] = (vis_s16)$val(scaletaps)/scaledown*(filtertaps[3]-(filtertaps[2]*filtertaps[0]));
+	tapmatrix[11] =
+	  (vis_s16)$val(scaletaps)/scaledown*(filtertaps[4]-(filtertaps[3]*filtertaps[0]));
+	tapmatrix[12] =
+	  (vis_s16)$val(scaletaps)/scaledown*(filtertaps[3]-(filtertaps[2]*filtertaps[0]));
 	tapmatrix[13] = (vis_s16)$val(scaletaps)/scaledown*filtertaps[2];
 	tapmatrix[14] = 0;
 	tapmatrix[15] = 0;
@@ -106,7 +109,8 @@ void $sharedSymbol(CGCVISBiquad,settaps)(vis_d64* filtertaps, vis_s16* tapmatrix
 	tapmatrix[20] = (vis_s16)$val(scaletaps)/scaledown *
 	      (filtertaps[2]*filtertaps[0]*filtertaps[0] -
 	       filtertaps[3]*filtertaps[0]-filtertaps[2]*filtertaps[1]+filtertaps[4]);
-	tapmatrix[21] = (vis_s16)$val(scaletaps)/scaledown * (filtertaps[3]-(filtertaps[2]*filtertaps[0]));
+	tapmatrix[21] = (vis_s16)$val(scaletaps)/scaledown *
+	  (filtertaps[3]-(filtertaps[2]*filtertaps[0]));
 	tapmatrix[22] = (vis_s16)$val(scaletaps)/scaledown * filtertaps[2];
 	tapmatrix[23] = 0;
 	tapmatrix[24] = 0;
@@ -206,6 +210,7 @@ void $sharedSymbol(CGCVISBiquad,settaps)(vis_d64* filtertaps, vis_s16* tapmatrix
 	}
 
 	codeblock(filter){
+	/*set up inputs*/
 	in1 = (vis_d64)$ref2(signalIn,0);
 	in0 = (vis_d64)$ref2(signalIn,1);
 	  
