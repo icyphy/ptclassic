@@ -111,6 +111,7 @@ void Galaxy :: initSubblocks() {
 	while ((b = next++) && !Scheduler::haltRequested()) {
 		b->initialize();
 	}
+	if (Scheduler::haltRequested()) return;
 	BlockListIter bdel(blocksToDelete);
 	Block *bd;
 	while (bd = bdel++) {
