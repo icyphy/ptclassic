@@ -80,14 +80,18 @@ limitation of liability, and disclaimer of warranty provisions.
 	codeblock(initialize) {
 	  $starSymbol(scaledown) = (short) 1 << $val(scalefactor);
 	  /* initialize n0 */
-	  $starSymbol(n0) = ((short) $val(scale)/$starSymbol(scaledown)*(double)$ref2(numtaps,0));
+	  $starSymbol(n0) = ((short)
+			     $val(scale)/$starSymbol(scaledown)*
+			     (double)$ref2(numtaps,0));
 	  /*initialize denominator/numerator array*/
 	  $starSymbol(indexcount) = $starSymbol(dennum);
 	  for($starSymbol(i)=0;$starSymbol(i)<2;$starSymbol(i)++){
 	    *$starSymbol(indexcount)++ = (short)
-	      $val(scale)/$starSymbol(scaledown)*(double)$ref2(dentaps,$starSymbol(i));
+	      $val(scale)/$starSymbol(scaledown) *
+	      (double)$ref2(dentaps,$starSymbol(i));
 	    *$starSymbol(indexcount)++ = (short)
-	      $val(scale)/$starSymbol(scaledown)*(double)$ref2(numtaps,$starSymbol(i)+1);
+	      $val(scale)/$starSymbol(scaledown) *
+	      (double)$ref2(numtaps,$starSymbol(i)+1);
 	  }
 	  /*initialize state array*/
 	  $starSymbol(indexcount) = $starSymbol(state);
@@ -101,12 +105,12 @@ limitation of liability, and disclaimer of warranty provisions.
 	  addCode(initialize);
 	}
 	codeblock(localDecl) {
-	  double *outvalue,*packedfilt;
+	  double *outvalue;
 	  double upper, lower;
 	  double *allstates,*alltaps;
 	  float *statemem,*result_ptr;
-	  int outerloop,innerloop;
-	  short *statetap_prod,*invalue,*result_den;
+	  int outerloop;
+	  short *statetap_prod,*invalue;
 	}
 	codeblock(filter){
 	  *$starSymbol(inarray) = (double)$ref(signalIn);
