@@ -129,7 +129,9 @@ void CG56MultiSimTarget :: addProcessorCode(int i, const char* s) {
 	if (!cgChild(i)) return;
 
 	cgChild(i)->stateWithName("directory")->setCurrentValue(destDirectory);
-	cgChild(i)->writeCode();
+	StringList fn;
+	fn << (const char*) filePrefix << i << ".asm";
+	rcpWriteFile("localhost",destDirectory,fn,myCode);
 
 // 	to create the .cmd file
 	StringList fName,cmd;
