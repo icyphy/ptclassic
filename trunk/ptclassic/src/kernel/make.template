@@ -7,14 +7,14 @@
 #	make depend
 # This will add the dependencies to the makefile.
 
-GFLAGS = -g -fminimal-debug
+GPPFLAGS = -g -fminimal-debug
 GNU = g++
 GNUINCLUDE = /usr/gnu/lib/g++-include
 
 # Rule for compiling with g++
 .SUFFIXES: .cc
 .cc.o:
-	$(GNU) $(GFLAGS) -c  $<
+	$(GNU) $(GPPFLAGS) -c  $<
 
 # Root of Ptolemy directory
 ROOT=/usr/tools/ptolemy
@@ -28,19 +28,29 @@ HELPDIR=$(ROOT)/help
 # Library name
 LIB=libptolemy.a
 
-
-LIBSRCS=Star.cc Connect.cc Block.cc Galaxy.cc Scheduler.cc SpaceWalk.cc \
-	Output.cc Fraction.cc Universe.cc StringList.cc Particle.cc Help.cc \
+# Library sources
+LIBSRCS=Star.cc Connect.cc Block.cc Galaxy.cc SpaceWalk.cc \
+	Output.cc Fraction.cc StringList.cc Particle.cc Help.cc \
 	Command.cc KnownBlock.cc Tokenizer.cc InterpGalaxy.cc Interpreter.cc \
 	NamedObj.cc State.cc KnownState.cc FloatState.cc IntState.cc \
-	StringState.cc
+	StringState.cc SDFConnect.cc SDFScheduler.cc SDFStar.cc SDFUniverse.cc
 
+# All sources
 SRCS=$(LIBSRCS) interpmain.cc 
 
-LIBOBJS=Star.o Connect.o Block.o Galaxy.o Scheduler.o SpaceWalk.o  Output.o \
-	Fraction.o Universe.o StringList.o Particle.o Help.o Command.o \
+# Header files
+HDRS=Block.h Command.h Connect.h DataStruct.h FloatState.h Fraction.h \
+ Galaxy.h Help.h IntState.h InterpGalaxy.h Interpreter.h KnownBlock.h \
+ KnownState.h NamedObj.h Output.h Particle.h Scheduler.h SpaceWalk.h Star.h \
+ State.h StringList.h StringState.h Tokenizer.h Topology.h pigiIfc.h \
+ type.h SDFConnect.h SDFScheduler.h SDFStar.h SDFUniverse.h
+
+# Library objects
+LIBOBJS=Star.o Connect.o Block.o Galaxy.o SpaceWalk.o  Output.o \
+	Fraction.o StringList.o Particle.o Help.o Command.o \
 	KnownBlock.o Tokenizer.o InterpGalaxy.o Interpreter.o NamedObj.o \
-	State.o KnownState.o FloatState.o IntState.o StringState.o
+	State.o KnownState.o FloatState.o IntState.o StringState.o \
+	SDFConnect.o SDFScheduler.o SDFStar.o SDFUniverse.o
 
 # Things to make
 TOMAKE=$(LIB) interpmain.o 
@@ -67,7 +77,7 @@ clean:
 		rm -f *.o core
 
 # "make sources" will do SCCS get on anything where SCCS file is newer.
-sources:	$(SRCS)
+sources:	$(SRCS) $(HDRS) make.template
 
 depend:	
 		makedepend -I$(GNUINCLUDE) $(SRCS)
