@@ -114,7 +114,7 @@ $(OBJARCH)/xv:
 	if [ ! -d $(OBJARCH) ]; then mkdir $(OBJARCH); fi
 	mkdir $(OBJARCH)/xv
 $(OBJARCH)/xv/Imakefile:
-	-(cd $(OBJARCH)/xv; ln -s $(PTOLEMY)/src/xv/* .)	
+	-(cd $(OBJARCH)/xv; ln -s ../../src/xv/* .)	
 
 $(OBJARCH)/xv/jpeg:
 	mkdir $(OBJARCH)/xv/jpeg
@@ -132,7 +132,7 @@ xv_bin: $(OBJARCH)/xv
 		BINDIR=$(XV_DEST)/bin.$(ARCH) all)
 
 xv_install: $(OBJARCH)/xv
-	(cd $(PTOLEMY)/src/xv; \
+	(cd $(OBJARCH)/xv; \
 		$(MAKE) $(MFLAGS) \
 		VPATH=../../src/xv \
 		EXTRA_LDOPTIONS=-Bstatic \
