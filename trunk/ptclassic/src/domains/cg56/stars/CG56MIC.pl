@@ -57,21 +57,21 @@ DSP56000 - An input star for the Ariel digital microphone
 	        type { fix }
 	        desc { internal }
                 default { 0 }
-	        attributes { A_NONCONSTANT|A_NONSETTABLE|A_XMEM }
+	        attributes { A_NONCONSTANT|A_NONSETTABLE|A_XMEM|A_NOINIT }
         }
         state {
                 name { saveReg }
-                type { fix }
+                type { fixarray }
                 desc { internal }
-                default { 0 }
-                attributes { A_NONSETTABLE|A_NONCONSTANT|A_XMEM }
+                default { "0" }
+                attributes { A_NONSETTABLE|A_NONCONSTANT|A_XMEM|A_NOINIT }
         }        
         state {
                 name { intBuffer }
-                type { int }
+                type { intarray }
                 desc { internal }
-                default { 0 }
-                attributes {A_CIRC|A_NONSETTABLE|A_NONCONSTANT|A_XMEM|A_CONSEC}
+                default { "0" }
+                attributes {A_CIRC|A_NONSETTABLE|A_NONCONSTANT|A_XMEM|A_CONSEC|A_NOINIT}
         }        
         state {
                 name { intBufferStart }
@@ -237,6 +237,8 @@ $label(empty)
         rti
         }    
         start {
+        saveReg.resize(3);
+        intBuffer.resize(bufLen);
         const char* a=forceInterrupts;
 	const char* b=abortOnRealtimeError;
                 switch(a[0]) {

@@ -57,28 +57,28 @@ DSP56000 -  A combined input/output star for the Magnavox CD player.
 		type { fix }
   		desc { internal }
 		default { 0 }
- 		attributes { A_NONSETTABLE|A_NONCONSTANT|A_XMEM }
+ 		attributes { A_NONSETTABLE|A_NONCONSTANT|A_XMEM|A_NOINIT }
 	}
 	state {
 		name { starOutBufPtr }
 		type { fix }
   		desc { internal }
 		default { 0 }
- 		attributes { A_NONSETTABLE|A_NONCONSTANT|A_XMEM }
+ 		attributes { A_NONSETTABLE|A_NONCONSTANT|A_XMEM|A_NOINIT}
 	}
 	state {
 		name { saveReg }
-		type { fix }
+		type { fixarray }
   		desc { internal }
-		default { 0 }
- 		attributes { A_NONSETTABLE|A_NONCONSTANT|A_XMEM }
+		default { "0" }
+ 		attributes { A_NONSETTABLE|A_NONCONSTANT|A_XMEM|A_NOINIT}
 	}
 	state {
 		name { inIntBuffer }
-		type { int }
+		type { intarray }
   		desc { internal }
-		default { 0 }
- 		attributes {A_CIRC|A_NONSETTABLE|A_NONCONSTANT|A_XMEM|A_CONSEC}
+		default { "0" }
+ 		attributes {A_CIRC|A_NONSETTABLE|A_NONCONSTANT|A_XMEM|A_CONSEC|A_NOINIT}
 	}
 	state {
 		name { inIntBufferStart }
@@ -89,10 +89,10 @@ DSP56000 -  A combined input/output star for the Magnavox CD player.
 	}
 	state {
 		name { outIntBuffer }
-		type { int }
+		type { intarray }
   		desc { internal }
-		default { 0 }
- 		attributes {A_CIRC|A_NONSETTABLE|A_NONSETTABLE|A_XMEM|A_CONSEC}
+		default { "0" }
+ 		attributes {A_CIRC|A_NONSETTABLE|A_NONSETTABLE|A_XMEM|A_CONSEC|A_NOINIT}
 	}
 	state {
 		name { outIntBufferStart }
@@ -269,6 +269,11 @@ $label(empty)
         move    x:$starSymbol(mag)_savereg+2,m0
         rti
         }        
+        start {
+        saveReg.resize(3);
+	inIntBuffer.resize(bufLen);
+	outIntBuffer.resize(bufLen);
+	}
         initCode {
         const char* f = forceInterrupts;
 	     if (f[0]=='n' || f[0]=='N')
