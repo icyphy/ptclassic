@@ -144,16 +144,8 @@ contents</A>, and as a <A HREF="$PTOLEMY/src/domains/starHTML.idx.fst">graphical
 </DL>
 
 
-<H3>Minor changes</H3>
+<H3>New Stars and Demos</H3>
 <DL>
-
-<DT>Galaxy Recursion Tests
-<DD> Compiling recursive galaxies are warned against.
- <BR> <a href="mailto:tgl@sss.pgh.pa.us">Tom Lane</a> 
-(Structured Software Systems), 
-<A HREF="http://ptolemy.eecs.berkeley.edu/~cxh">Christopher Hylands</A> -
-<A HREF="ptrecursion.html">Further Documentation</A>
-
 <DT> New Audio Infrastructure
 <DD> New Stars that can use the linear16 audio capabilities of the UltraSparc.
  <BR><A HREF="http://ptolemy.eecs.berkeley.edu/~sunil">Sunil Bhave</A>,
@@ -186,14 +178,51 @@ star</A>.  See the individual star documentation for a list of demos that use th
  <A HREF="http://ptolemy.eecs.berkeley.edu/~sunil/talk/talk.html">Further
 documentation</A>
 
+
+
+<DT> Sun Video Star
+<DD> The SDF <A HREF="../../../src/domains/sdf/image/SDFSunVideo.htm"><CODE>SunVideo</CODE></A> star can be used to grab video data from a Sun Video camera.
+<A HREF="http://ptolemy.eecs.berkeley.edu/~luisgm">Luis Gutierrez</A>
+
+
+<DT> Discrete Event Domain <CODE>FlipFlop</CODE> stars
+<DD>  <A HREF="http://ptolemy.eecs.berkeley.edu/~davisj">John Davis Jr.</A>
+
 <DT> CGC control panel 
 <DD> The CGC control panel is more configurable.
  <br><A HREF="http://ptolemy.eecs.berkeley.edu/~johnr">John Reekie</A>,
  <A HREF="http://ptolemy.eecs.berkeley.edu/~sunil">Sunil Bhave</A> -
 <A HREF="$PTOLEMY/src/domains/cgc/tcltk/demo/tycho.pal">CGC Tycho Palette</A>
 
+</DL>
+
+<H3>Minor Infrastructure Changes</H3>
+<DL>
+
+<DT>Galaxy Recursion Tests
+<DD> Compiling recursive galaxies are warned against.
+ <BR> <a href="mailto:tgl@sss.pgh.pa.us">Tom Lane</a> 
+(Structured Software Systems), 
+<A HREF="http://ptolemy.eecs.berkeley.edu/~cxh">Christopher Hylands</A> -
+<A HREF="ptrecursion.html">Further Documentation</A>
+
 <DT> <CODE>ptcl</CODE> can handle HOF stars.
 <DD> <A HREF="http://ptolemy.eecs.berkeley.edu/~cxh">Christopher Hylands</A>
+
+<DT> <CODE>ParticleVector</CODE> class
+<DD> The <A
+HREF="../../../src/kernel/ParticleVector.h"><CODE>ParticleVector</CODE></A>
+class is new in Ptolemy 0.7.  The class allows Ptolemy to package
+arbitrary collections of data objects and treat them as a unit.
+
+<CODE>ParticleVector</CODE> can be used, for example, to constuct
+discrete-event models of communication networks, where the packages
+are packets.  The SDF <A
+HREF="../../../src/domains/sdf/demo/PackUnpack"><CODE>PackUnpack</CODE></A>
+demo shows a simple use of <CODE>ParticleVector</CODE>.
+
+ <br><A HREF="http://ptolemy.eecs.berkeley.edu/~galicia">Ron Galicia </A> -
+<A HREF="http://ptolemy.eecs.berkeley.edu/~gunturi">Ravi Gunturi </A>
 
 <DT> Ptolemy0.7 uses <A HREF="http://www.tcltk.com">Itcl 2.2</A>,
 	which runs under Tcl 7.6 and Tk4.2.
@@ -205,7 +234,31 @@ documentation</A>
 
  <BR> <A HREF="http://ptolemy.eecs.berkeley.edu/~cxh">Christopher Hylands</A>
 
+
+<DT> <CODE>Make-star</CODE> can create icons whose contents are html files.
+<DD> <CODE>Make-star</CODE> has been modified so that icons can have html files as their contents.  
+ <P> For example, to
+create an icon whose contents are the file <CODE>~/pt/myfile.html</CODE>
+<OL>
+<LI> Move the cursor over a vem window and hit <CODE>*</CODE>
+
+<LI> Type the following values into the <CODE>Make Star</CODE> window:
+<MENU>
+<LI> <CODE>Star name:</CODE> <CODE>myfile</CODE>
+
+<LI> <CODE>Domain:</CODE> <CODE>NODOMAIN</CODE>
+
+<LI> <CODE>Star src directory:</CODE> <CODE>~/pt</CODE>
+
+<LI> <CODE>Pathnmame of Palette:</CODE> <CODE>./user</CODE>
+
+</MENU>
+
+</OL>
+
+
 </DL>
+
 
 <H3>Backward compatiblity Issues</H3>
 
@@ -216,8 +269,16 @@ documentation</A>
 any user designed stars.
 
 <DT> Type system changes
-<DD> The type system has been changed.  Some CGC universes may need explicit
-conversion stars to properly compile.
+<DD> The type system has been changed.  Some Code Generation universes may
+need explicit conversion stars to properly compile.
+
+
+<DT> Certain HOF stars have been removed
+<DD> The type system changes mean that certain Higher Order Function stars have been removed.  The stars that have been removed are:
+<CODE>HOFDelayedMap</CODE>
+<CODE>HOFSrc</CODE><I>xxx</I> and <CODE>HOFSrcGr</CODE><I>xxx</I>
+(where <I>xxx</I> is a type, such as <CODE>Int</CODE>)
+If you have universes that were using the old stars, then you can update the universes with <CODE>masters</CODE> or <CODE>ptfixtree</CODE>.
 
 <DT> <CODE>htmldoc</CODE> is a new keyword that has been added to
 <CODE>ptlang</CODE>.
