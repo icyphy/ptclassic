@@ -104,6 +104,14 @@ if {![info exists ptolemy]} {
     set PTOLEMY $ptolemy
 }
 
+global ::ptolemypresent
+if {[uplevel #0 info commands ptkOpenFacet] != {} && \
+	[uplevel #0 info commands pvOpenWindow] != {}} {
+    set ptolemypresent 1
+} {
+    set ptolemypresent 0
+}
+
 global ::tychokernel
 set tychokernel [file join $tycho kernel]
 
