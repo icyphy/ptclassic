@@ -44,6 +44,7 @@ CCS_WITH_H_FILES=\
  DataStruct.cc \
  Display.cc \
  Domain.cc \
+ DynamicGalaxy.cc \
  Error.cc \
  FixSample.cc \
  FixState.cc \
