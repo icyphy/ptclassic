@@ -50,7 +50,7 @@ static char SccsId[]="$Id$";
 #include <sys/socket.h>
 #endif
 
-#ifdef SYSV
+#ifdef USE_GETRLIMIT
 #include <sys/time.h>
 #include <sys/resource.h>
 #endif
@@ -73,6 +73,11 @@ static char SccsId[]="$Id$";
 
 #include "serverNet.h"
 
+/* Ugh. hppa wants FDS_TYPE to be (int *), see compat.h */
+#ifndef FDS_TYPE
+#define FDS_TYPE 
+#endif
+
 /* maximum number of rpc applications */
 int RPCMaxApplications = 0;
 
@@ -88,7 +93,7 @@ extern char *getnodename();
 #endif /* DNET */
 
 /* how to spell "remote shell" */
-#ifdef hpux
+#ifdef PTHPPA
 #define RemoteShell "remsh"
 #else
 #define RemoteShell "rsh"
@@ -148,9 +153,9 @@ int *socket;                    /* socket selected on, for file event */
 	}
 
 	nfound = select(RPCLargestFD + 1,
-			(fd_set *)mask,
-			(fd_set *)RPCNIL(rpc_fd_set),
-			(fd_set *)RPCNIL(rpc_fd_set),
+			FDS_TYPE mask,
+			FDS_TYPE RPCNIL(rpc_fd_set),
+			FDS_TYPE RPCNIL(rpc_fd_set),
 			RPCNIL(struct timeval));
 	
 	/* select error condition */
@@ -402,11 +407,11 @@ RPCFindSlot()
 {
     int i;
 
-#ifdef SYSV
+#ifdef USE_GETRLIMIT
     struct rlimit	rlp;
 #endif
     if (RPCMaxApplications == 0) {
-#ifdef SYSV
+#ifdef USE_GETRLIMIT
 	getrlimit(RLIMIT_NOFILE, &rlp);
 	RPCMaxApplications = rlp.rlim_cur - 1 - 4; /* -4 for stdin, out, err, X */
 #else
