@@ -55,7 +55,7 @@ public:
             const char* assocDomain = ACSdomainName);
     /* virtual */ Block* makeNew() const;
 
-    /* virtual */ int run() { return(Target::run()); }   // FIXME
+    /* virtual */ int run() { if ( isCG() ) return(HLLTarget::run()); else return(Target::run()); }   // FIXME
 
     ACSTarget :: ~ACSTarget();
     // Class identification.
@@ -71,6 +71,9 @@ public:
 
     /* virtual */ void wrapup();
 
+    // determine if this is a simulation run or code-generation.
+    virtual int isCG() { return (ACSKnownCategory::find(coreCategory))->isCG(); }
+
 protected:
     // From SDF default Target
     StringState coreCategory;
@@ -82,8 +85,6 @@ protected:
     // determines if this is a Fixed-point simulation.
     virtual int isFixedPoint() { return (ACSKnownCategory::find(coreCategory))->isFixedPoint(); }
 
-    // determine if this is a simulation run or code-generation.
-    virtual int isCG() { return (ACSKnownCategory::find(coreCategory))->isCG(); }
 
 };
 

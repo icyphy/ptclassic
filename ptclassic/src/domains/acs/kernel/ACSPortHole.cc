@@ -40,7 +40,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "Plasma.h"
 
 // Class identification.
-ISA_FUNC(ACSPortHole,PortHole);
+//ISA_FUNC(ACSPortHole,PortHole);
 
 // Input/output identification.
 int InACSPort::isItInput() const
@@ -263,3 +263,185 @@ Precision MultiACSPort::precision() const
 		return prec;
 	}
 }
+
+void ACSPortHole :: setGeoName(const char* n) {
+	delete [] bufName;
+	if (myGeodesic == 0) bufName = savestring(n);
+	else geo().setBufName(n);
+}
+
+// setup ForkDests
+void ACSPortHole :: setupForkDests() {
+	SequentialList temp;
+	temp.initialize();
+
+	ACSForkDestIter next(this);
+	ACSPortHole *outp, *inp;
+	while ((outp = next++) != 0) {
+		// check boundary
+		if (!outp->far() || outp->far()->isItOutput()) continue;
+
+		inp = outp->realFarPort();
+		if (inp->fork()) temp.put(inp);
+	}
+
+	ListIter nextPort(temp);
+	while ((inp = (ACSPortHole*) nextPort++) != 0) {
+		inp->setupForkDests();
+		forkDests.remove(inp->far());
+		ACSForkDestIter realNext(inp);
+		while ((outp = realNext++) != 0)
+			forkDests.put(outp);
+	}
+}
+
+void ACSPortHole::setFlags() {
+	if (isItOutput() && (embedded() || embedding())) {
+		asLinearBuf = TRUE;
+		hasStaticBuf = TRUE;
+		return;
+	}
+	if (bufSize() % numXfer() != 0)
+		asLinearBuf = FALSE;
+	
+	// BufferSize might not be set - bufSize class error abort run
+	if (SimControl::haltRequested()) return;
+
+	if (!bufSize()) {
+	    Error::abortRun(*this," Buffer size has not been set.  Has the galaxy been scheduled?");
+	    return;
+	}
+
+	if ((numXfer() * parentReps()) % bufSize() != 0)
+		hasStaticBuf = FALSE; 
+}
+
+		////////////////////////////////////////
+		// Buffer type determination routines
+		////////////////////////////////////////
+
+// Set the buffer type.
+void ACSPortHole :: setBufferType() {
+	if (isItOutput()) {
+		ACSPortHole* farP = (ACSPortHole*) far();
+		if (embedded()) myType = EMBEDDED;
+		else if (farP && farP->embedded()) myType = EMBEDDED;
+		else myType = OWNER;
+	}
+}
+
+// Decide the buffer size finally
+// reserve the buffer for initial offsets which the farSide input port
+// will read.
+void ACSPortHole :: finalBufSize(int statBuf) {
+	if (isItInput())
+		return;
+	else if (far() == 0) {
+		maxBuf = numXfer();
+		return;
+	}
+
+	// check wormhole boundary
+	if (far()->isItOutput()) {
+		maxBuf = localBufSize();
+		return;
+	}
+
+	// Try best to realize Linear or static buffering.
+	// Look at CGGeodesic.cc to see the actual code for buffer size
+	// determination.
+	if (usesOldValues()) {
+		// if past values are used. give up linear buffering.
+		asLinearBuf = FALSE;
+		statBuf = 0;
+	}
+	geo().preferLinearBuf(statBuf);
+	int reqSize = localBufSize();
+
+	// check whether this size is set manually or not.
+	// If yes, range check.
+	if (manualFlag) {
+		if (maxBuf < reqSize) {
+			Error::warn(*this, "buffer request is too small.");
+			maxBuf = reqSize;
+		}
+	} else { // static buffering option.
+		if (asLinearBuf && (reqSize % numXfer() != 0)) {
+			// for maximum chance of linear buffering.
+			maxBuf = ((reqSize/numXfer())+1) * numXfer();
+		} else {
+			maxBuf = reqSize;
+		}
+	}
+
+	if ((!statBuf) && (maxBuf > numXfer()))
+		giveUpStatic();
+
+	// set the flags
+	setFlags();
+	ACSPortHole* p = realFarPort();
+	if (p->fork()) {
+		// determine the maximum offset.
+		ACSForkDestIter next(p);
+		ACSPortHole* outp;
+		while ((outp = next++) != 0) {
+			ACSPortHole* inp = outp->realFarPort();
+			if ((!statBuf) && (maxBuf > inp->numXfer()))
+				inp->giveUpStatic();
+			inp->setFlags();
+			// access to the past Particles
+			if (inp->usesOldValues() ||
+				(inp->numInitDelays() % inp->numXfer() != 0))
+				inp->asLinearBuf = FALSE;
+		}
+	} else {
+		if ((!statBuf) && (maxBuf > p->numXfer()))
+			p->giveUpStatic();
+		p->setFlags();
+		if (p->usesOldValues() ||
+			(p->numInitDelays() % p->numXfer() != 0)) {
+			p->asLinearBuf = FALSE;
+		}
+	}
+}
+		////////////////////////////////////////
+		// Buffer size determination routines
+		////////////////////////////////////////
+
+// initialize the offset member. If there is no fork involved, output
+// porthole start writing from offset 0, and the input porthole
+// start reading from the (maxBuf - offset).
+int ACSPortHole :: initOffset() {
+	if (manualOffset) {
+		offset = manualOffset;
+		asLinearBuf = FALSE;
+		hasStaticBuf = FALSE;
+		return TRUE;
+	}
+	if (isItOutput()) {
+		offset = numXfer() - 1;
+		return TRUE;
+	}
+	int del = cgGeo().forkDelay();
+	if (!del) del = numInitDelays();
+	if (!del) offset = numXfer() - 1;
+	else {
+		offset = numXfer() - del - 1;
+		if (offset < 0)  offset += maxBufReq();
+	}
+	if (del > maxBufReq()) {
+		Error :: abortRun(*this, " delay is too large\n");
+		return FALSE;
+	}
+	return TRUE;
+}
+
+/* int ACSPortHole :: localBufSize() const {
+	ACSGeodesic* g = (ACSGeodesic*)myGeodesic;
+	if ( atBoundary() ) {
+		return (parentReps()*numberTokens);
+	} else { 
+		return g->localBufSize();
+	}
+} */
+

@@ -64,6 +64,7 @@ public:
 
 class ACSPortHole : public CGPortHole
 {
+friend class ACSForkDestIter;
 public:
 
 	ACSPortHole() : maxBuf(1), manualFlag(0), hasStaticBuf(1),
@@ -72,7 +73,7 @@ public:
 	~ACSPortHole();
 
     // Class identification.
-    virtual int isA(const char* className) const;
+    //virtual int isA(const char* className) const;
 
 	void initialize();
 
@@ -82,6 +83,8 @@ public:
 	const ACSPortHole* getForkSrc() const {
 		return (const ACSPortHole*) forkSrc;
 	}
+
+	//int localBufSize() const;
 
 	// return the far port bypassing the fork stars
 	ACSPortHole* realFarPort();
@@ -169,6 +172,10 @@ public:
  	// abbreviation for 0 offsets
  	Precision precision() const { return (*this^"0").precision(); }
 
+ 	// return TRUE if the precision assigned to this port is valid
+	int validPrecision() const { return prec.isValid(); }
+
+
 protected:
 
     // Allows Target to change Plasma type for fixed-point simulation.
@@ -178,8 +185,6 @@ protected:
  	// assigned with the setPrecision() method
  	Precision getAssignedPrecision() const;
  
- 	// return TRUE if the precision assigned to this port is valid
-	int validPrecision() const { return prec.isValid(); }
 
 private:
 
@@ -207,7 +212,7 @@ class InACSPort : public ACSPortHole
 public:
 
     // Input/output identification.
-    virtual int isItInput() const;
+    int isItInput() const;
 
 	// Particle I/O for simulation.
 	virtual void receiveData();
@@ -219,7 +224,7 @@ class OutACSPort : public ACSPortHole
 {
 public:
     // Input/output identification.
-    virtual int isItOutput() const;
+    int isItOutput() const;
 
 	// Particle I/O for simulation.
 	virtual void receiveData();
@@ -256,20 +261,29 @@ class MultiInACSPort : public MultiACSPort
 {
 public:
     // Input/output identification.
-    virtual int isItInput() const;
+    int isItInput() const;
  
     // Add a new physical port to the MultiPortHole list.
-    virtual PortHole& newPort();
+    PortHole& newPort();
 };
  
 class MultiOutACSPort : public MultiACSPort
 {     
 public:
     // Input/output identification.
-    virtual int isItOutput() const;
+    int isItOutput() const;
 
     // Add a new physical port to the MultiPortHole list.
-    virtual PortHole& newPort();
+    PortHole& newPort();
 };
+
+class ACSForkDestIter : private ListIter {
+public:
+	ACSForkDestIter(ACSPortHole* p) : ListIter(p->myDest()) {}
+	ACSPortHole* next() { return (ACSPortHole*) ListIter::next(); }
+	ACSPortHole* operator++ (POSTFIX_OP) { return next(); }
+	ListIter::reset;
+};
+
 
 #endif

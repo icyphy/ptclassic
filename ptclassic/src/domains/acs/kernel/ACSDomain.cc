@@ -1,6 +1,6 @@
 static const char file_id[] = "ACSDomain.cc";
 /**********************************************************************
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -26,7 +26,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
  Programmer:  J. T. Buck
  Date of creation: 7/2/90
- Version: $Id$
+ Version: @(#)XDomain.ccP	1.15	07/30/96
 
  WARNING -- XDomain.ccP is a template file that is used to generate
  domain description modules.  If the name of this file is not XDomain.ccP,
@@ -43,6 +43,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "KnownTarget.h"
 #include "ACSScheduler.h"
 #include "ACSWormhole.h"
+#include "ACSForkNode.h"
+#include "ACSGeodesic.h"
 #include "ACSTarget.h"
 
 extern const char ACSdomainName[] = "ACS";
@@ -50,7 +52,7 @@ extern const char ACSdomainName[] = "ACS";
 class ACSDomain : public Domain {
 public:
 	// constructor
-	ACSDomain() : Domain(ACSdomainName) {subDomains += "AnyCG";}
+	ACSDomain() : Domain(ACSdomainName) {}
 
 	// new wormhole
 	Star& newWorm(Galaxy& innerGal,Target* innerTarget)  {
@@ -62,35 +64,21 @@ public:
 
 	// new toUniversal EventHorizon
 	EventHorizon& newTo() { LOG_NEW; return *new ACStoUniversal; }
+
+	// new geodesic
+	Geodesic& newGeo(int multi) {
+		if (multi) { LOG_NEW; return *new ACSForkNode;}
+		else { LOG_NEW; return *new ACSGeodesic;}
+	}
+
+	// require ACSTarget
+	const char* requiredTarget() { return "ACSTarget";}
 };
 
 // declare a prototype
 static ACSDomain proto;
 
-// declare the default Target object ( Now defined in ACSTarget.h )
-
-//class ACSTarget : public Target {
-//public:
-	// Constructor
-//	ACSTarget() : Target("default-ACS", "ACSStar",
-//			     "default ACS target", ACSdomainName) {}
-
-	// Destructor
-//	~ACSTarget() { delSched(); }
-
-	// Return a copy of itself
-//	/*virtual*/ Block* makeNew() const {
-//		LOG_NEW; return new ACSTarget;
-//	}
-
-//protected:
-//	void setup() {
-//		if (!scheduler()) { LOG_NEW; setSched(new ACSScheduler); }
-//		Target::setup();
-//	}
-//};
-
-static ACSTarget defaultACStarget("default-ACS", "ACSStar",
-"Runs ACS systems on the local workstation using the default\n"
+static ACSTarget defaultACStarget("default-CGC","ACSStar", "Runs ACS systems on the local workstation using the default\n"
 "one-processor SDF scheduler.");
 static KnownTarget entry(defaultACStarget, "default-ACS");
+

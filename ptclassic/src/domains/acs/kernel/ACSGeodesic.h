@@ -7,6 +7,7 @@
 #endif
 
 #include "CGGeodesic.h"
+class ACSPortHole;
 
 class ACSGeodesic : public CGGeodesic {
 public:
@@ -24,7 +25,16 @@ public:
 	// make large the wasteFactor
 	void preferLinearBuf(int i) { if (i) myWaste = 1e9; }
 
+	// Return the size of the "local buffer" connected to this
+	// PortHole.  This returns zero for cases where no separate
+	// buffer is allocated, e.g. fork outputs (all destinations
+	// of the fork share the same buffer, whose size is returned
+	// by bufSize).
+	// virtual int localBufSize() const;
+
 protected:
+//	ACSPortHole* src();
+//	const ACSPortHole* src() const;
 	// Redefine: decide the wasteFactor for linear buffering.
 	// Look at the comment in CGGeodesic class.
 	double wasteFactor() const;

@@ -58,3 +58,11 @@ const char* ACSCore :: domain () const { return ACSdomainName;}
 
 // isA
 ISA_FUNC(ACSCore, ACSStar);
+
+State*	ACSCore::stateWithName(const char* name) {
+	State* s;
+	if ((s = Block::stateWithName(name)) == NULL) {
+		return ((Block&)getCorona()).stateWithName(name);
+	}
+	return s;
+}

@@ -91,6 +91,28 @@ public:
 	// is true, append it to the end, otherwise prepend it.
 	void addSpliceStar(ACSStar* s, int atEnd);
 
+       // Generate declaration, initialization and function codes for
+       // command-line arguments
+       /* virtual */ StringList cmdargStates(Attribute a=ANY);
+       /* virtual */ StringList cmdargStatesInits(Attribute a=ANY);
+       /* virtual */ StringList setargStates(Attribute a=ANY);	
+       /* virtual */ StringList setargStatesHelps(Attribute a=ANY);	
+
+       // Generate declarations and initialization code for PortHoles
+       /* virtual */ StringList declarePortHoles(Attribute a=ANY);
+       /* virtual */ StringList initCodePortHoles(Attribute a=ANY);
+
+       // Generate declarations and initialization code for States
+       /* virtual */ StringList declareStates(Attribute a=ANY);
+       /* virtual */ StringList initCodeStates(Attribute a=ANY);
+
+	/* virtual */ StringList BufferIndex(const ACSPortHole * port, const char * name, const char * offset);
+
+	/* virtual */ int isItFork(); // { return forkId; }
+
+	/* virtual */ int setTarget(Target* t);
+
+	/* virtual */ int runCG();
 
 
 protected:
