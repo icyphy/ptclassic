@@ -25,7 +25,7 @@ limitation of liability, and disclaimer of warranty provisions.
 		type { fixarray }
 		desc { buffer }
 		default { "0" }
-                attributes {A_CIRC|A_NONCONSTANT|A_NONSETTABLE|A_UMEM|A_NOINIT}
+                attributes {A_NONCONSTANT|A_NONSETTABLE|A_UMEM|A_NOINIT}
         }
         state  {
                 name { delayBufStart }
@@ -48,9 +48,8 @@ limitation of liability, and disclaimer of warranty provisions.
 	        desc { maximum delay }
          }
 
-	protected {
-		int delayMask;
-		int tempDelay;
+	protected{
+		int bufSize;
 	}
 
 	codeblock(block) {
@@ -74,61 +73,42 @@ limitation of liability, and disclaimer of warranty provisions.
 
         codeblock(std,"") {
 	ldp	#00h
-	lmmr	ar2,#$addr(delayBufStart)
-	mar	*,ar2
-	lacc	#@delayMask
-	samm	dbmr
+	lmmr	ar1,#$addr(delayBufStart)
+	splk	#$addr(delayBuf),cbsr1
+	splk	#$addr(delayBuf,@(int(bufSize)-1)),cber1
+	splk	#9h,cbcr
+	mar	*,ar1
+	bldd	*,#$addr(output)
 	bldd	#$addr(input),*+
-	apl	ar2
-	opl	#$addr(delayBuf),ar2
-	smmr	ar2,#$addr(delayBufStart)
-@( (int(totalDelay) < 256) ? "\tsbrk\t#$val(totalDelay)\n" :\
-			     "\tlamm\tar2\n\tsub\t#$val(totalDelay)\n")\
-	apl	ar2
-	opl	#$addr(delayBuf),ar2
-	bldd	*,#$addr(output)		
+	smmr	ar1,#$addr(delayBufStart)
+	splk	#0,cbcr
         }
 
 	codeblock(zero) {
 	lmmr	ar1,#$addr(input)
+	nop
+	nop
 	smmr	ar1,#$addr(output)
 	}
+
         setup {
-		int tempSize = 1;
-
-	// the C50 does not support arbitrary modulo addressing; the easiest
-	// way to support this in the code is to have the size of the buffer
-	// equal to a power of 2
-
-		for (int i = 0; i < 16; i++,  tempSize = 2*tempSize){
-			if (tempSize >= int(totalDelay)) break;
-		};
-
-	// if the delay buffer is really huge the error will get flagged 
-	// later on but leave the error message anyway.  For now just
-	// make sure that tempSize <= 2^15
-
-		if (tempSize > 9000) Error::abortRun(*this, "the DSK does not have enough memory",
-							    "to handle this delay");
-                delayBuf.resize(tempSize);
-		delayBufSpace = tempSize * 16;
-		delayMask = tempSize - 1;
-		tempDelay = int(totalDelay);
-		totalDelay = int(totalDelay) + 1;
+		bufSize = int(totalDelay);
+                delayBuf.resize(bufSize);
+		delayBufSpace = bufSize * 16;
         }		
         initCode {
                 addCode(block);
 	}
         go {
-		if (tempDelay ==0 ) addCode(zero);
-                else if (tempDelay == 1) addCode(one);
+		if (int(totalDelay) ==0 ) addCode(zero);
+                else if ( int(totalDelay) == 1) addCode(one);
 		else addCode(std());
         }		
 
 	execTime { 
 		if (int(totalDelay) == 0) return 3;
 		else if (int(totalDelay) == 1 ) return 8;
-		else return 12;
+		else return 10;
 	}
 }
 
