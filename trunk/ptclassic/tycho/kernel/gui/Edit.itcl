@@ -624,38 +624,38 @@ body ::tycho::Edit::constructor {args} {
 	# Add an Edit menu
         $myMenubar addMenu Edit -before Window -underline 0
         
-        $myMenubar add {Undo/Redo} Edit -accelerator "C-x u" \
+        $myMenubar command {Undo/Redo} Edit -accelerator "C-x u" \
                 -underline 0 -command "$this undo"
         
         $myMenubar addSeparator Edit
         
-        $myMenubar add Cut Edit -underline 0 -accelerator "C-w" \
+        $myMenubar command Cut Edit -underline 0 -accelerator "C-w" \
                 -command "$this cut"
         
-        $myMenubar add Copy Edit -underline 1 -accelerator "M-w" \
+        $myMenubar command Copy Edit -underline 1 -accelerator "M-w" \
                 -command "$this copy"
         
-        $myMenubar add Paste Edit -underline 0 -accelerator "C-y" \
+        $myMenubar command Paste Edit -underline 0 -accelerator "C-y" \
                 -command "$this paste"
         
         $myMenubar addSeparator Edit
         
-        $myMenubar add "Select All" Edit -underline 0 \
+        $myMenubar command "Select All" Edit -underline 0 \
                 -accelerator "C-/" -command "$this selectRange 1.0 end"
         
-        $myMenubar add "Unselect" Edit -underline 0 \
+        $myMenubar command "Unselect" Edit -underline 0 \
                 -accelerator "C-\\" -command "$this unselectRange 1.0 end"
         
-        $myMenubar add "Find/Change..." Edit -underline 0 \
+        $myMenubar command "Find/Change..." Edit -underline 0 \
                 -accelerator "C-s" -command "$this search"
         
-        $myMenubar add "Spelling..." Edit -underline 2 \
+        $myMenubar command "Spelling..." Edit -underline 2 \
                 -accelerator "M-$" -command "$this spellCheck"
 	if {$tcl_platform(platform) == "macintosh"} {
 	    $myMenubar disable "Spelling..."
 	}
 
-        $myMenubar add {Goto Line...} Edit -underline 0 \
+        $myMenubar command {Goto Line...} Edit -underline 0 \
                 -accelerator "C-c C-g" -command "$this gotoLine"
         
         # Add a Format menu
@@ -663,34 +663,34 @@ body ::tycho::Edit::constructor {args} {
         
         $myMenubar addSeparator Format
         
-        $myMenubar add "Fill Region" Format -underline 2 \
+        $myMenubar command "Fill Region" Format -underline 2 \
                 -accelerator "M-q" -command "$this busy $this fillSelection"
         
-        $myMenubar add "Right Fill Column" Format -underline 2 \
+        $myMenubar command "Right Fill Column" Format -underline 2 \
                 -accelerator "C-x f" -command "$this queryFillColumn"
         
-        $myMenubar add "Set Fill Prefix" Format -underline 1 \
+        $myMenubar command "Set Fill Prefix" Format -underline 1 \
                 -accelerator "C-x ." -command "$this queryFillPrefix"
 
         $myMenubar addSeparator Format
 
-        $myMenubar add "Capitalize" Format -underline 0 \
+        $myMenubar command "Capitalize" Format -underline 0 \
                 -accelerator "M-C" -command "$this capitalize"
 
-        $myMenubar add "Lower Case" Format -underline 0 \
+        $myMenubar command "Lower Case" Format -underline 0 \
                 -accelerator "M-l" -command "$this lowerCase"
 
-        $myMenubar add "Upper Case" Format -underline 0 \
+        $myMenubar command "Upper Case" Format -underline 0 \
                 -accelerator "M-u" -command "$this upperCase"
     }
 
     insertInDisplay
 
     eval itk_initialize $args
-    eval preference exclude $this $args
+    eval preference excludeoptions $this $args
 
     # Subscribe to the preference set
-    preference subscribe $this \
+    preference subscribeoptions $this \
 	    -textfont textFont \
 	    -textforeground textForeground \
 	    -textbackground textBackground \

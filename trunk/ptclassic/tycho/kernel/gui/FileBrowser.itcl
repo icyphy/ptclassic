@@ -192,10 +192,10 @@ body ::tycho::FileBrowser::constructor {args} {
 
     # Process any unevaluated arguments.
     eval itk_initialize $args
-    eval preference exclude $this $args
+    eval preference excludeoptions $this $args
 
     # Subscribe to the preference set
-    preference subscribe $this \
+    preference subscribeoptions $this \
 	    -width  fileBrowserWidth \
 	    -height fileBrowserHeight
     if [::preference get dialogs fileBrowserUseLastDirectory] {

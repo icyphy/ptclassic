@@ -350,7 +350,7 @@ body ::tycho::TopLevel::destructor {} {
     }
 
     # Unsubscribe from all preferences
-    preference unsubscribe $this
+    preference unsubscribeoptions $this
 }
 
 #################################################################

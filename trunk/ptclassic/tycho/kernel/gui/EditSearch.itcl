@@ -173,7 +173,7 @@ body ::tycho::EditSearch::constructor {args} {
     pack $itk_component(regexp) -side left
 
     eval itk_initialize $args
-    eval preference exclude $this $args
+    eval preference excludeoptions $this $args
 
     if {$itk_option(-nochange) == 0} {
         configure -queries {
@@ -187,7 +187,7 @@ body ::tycho::EditSearch::constructor {args} {
     }
 
     # Subscribe to the preference set
-    preference subscribe $this \
+    preference subscribeoptions $this \
 	    -entrywidth entryWidth
 
     bind $itk_component(hull) <Control-s> \
