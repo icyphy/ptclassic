@@ -41,12 +41,12 @@ proc tychoCompareFirst {first second} {
 # Make an index file of the type read by the Tycho IndexBrowser class.
 # The first argument is the name of the index.
 # The second argument is the name of the index file to create.
-# The rest of the arguments are any number of glob patterns giving the files
+# The rest of the arguments are any number of file names
 # from which the index should be created.
 #
 proc tychoMkIndex {name filename args} {
     set entries {}
-    foreach file [eval glob $args] {
+    foreach file $args {
 	set fd [open $file r]
 	set contents [read $fd]
 	close $fd
@@ -70,19 +70,40 @@ proc tychoMkIndex {name filename args} {
     close $fd
 }
 
+#### tychoFindAllHTML
+# Search the current directory and recursively all subdirectories
+# for files with the extension .html, and return a list of all the file
+# names relative to the current directory.
+#
+proc tychoFindAllHTML {} {
+    set files [glob -nocomplain {*.html}]
+    foreach name [exec ls] {
+	if [file isdirectory $name] {
+	    # Skip SCCS and RCS directories and anything called "junk"
+	    if {$name != {SCCS} && $name != {RCS} && $name != {junk}} {
+		cd $name
+		set subfiles [tychoFindAllHTML]
+		cd ..
+		foreach file $subfiles {
+		    lappend files "$name/$file"
+		}
+	    }
+	}
+    }
+    return $files
+}
+
 #### tychoStandardIndex
 # Update the Tycho master index.
+# All files with the extension .html in the tree rooted at the environment
+# variable TYCHO are included.
 #
 proc tychoStandardIndex {} {
     global TYCHO
     set olddir [pwd]
     cd $TYCHO
-    tychoMkIndex {Tycho index} tycho.idx \
-	    kernel/doc/*.html \
-	    kernel/doc/usersGuides/*.html \
-	    kernel/doc/codeDoc/*.html \
-	    kernel/doc/internals/*.html \
-	    editors/textedit/doc/*.html \
-	    editors/textedit/doc/usersGuides/*.html
+
+    set files [tychoFindAllHTML]
+    eval tychoMkIndex {{Tycho index}} tycho.idx $files
     cd $olddir
 }
