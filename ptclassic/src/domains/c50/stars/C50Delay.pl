@@ -1,7 +1,7 @@
 defstar {
 	name { Delay }
 	domain { C50 }
-	desc { A delay star of parameter totalDelay unit delays. }
+	desc { Delay input by totalDelay unit delays. }
 	version { $Id$ }
 	author { A. Baensch, ported from Gabriel }
 	copyright {
@@ -11,9 +11,6 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { C50  control library }
-        explanation {
-A delay star of parameter totalDelay unit delays.
-}
 
         input  {
                 name { input }
@@ -86,24 +83,21 @@ A delay star of parameter totalDelay unit delays.
 	bldd	BMAR,#$addr(output)		; Input => Output
 	}
         setup {
-                delayBuf.resize(totalDelay);
-		delayBufSpace=int(delayBuf.size())*16;
+                delayBuf.resize(int(totalDelay));
+		delayBufSpace = int(delayBuf.size()) * 16;
         }		
         initCode {
                 addCode(block);
 	}
         go {
-		if(totalDelay==0)
-		     addCode(zero);
-                else if(totalDelay==1)
-	             addCode(one);
-		else     
-                     addCode(std);
+		if (int(totalDelay) ==0 ) addCode(zero);
+                else if (int(totalDelay) == 1) addCode(one);
+		else addCode(std);
         }		
 
 	execTime { 
-		if (totalDelay==0) return 3;
-		else if (totalDelay==1) return 8;
+		if (int(totalDelay) == 0) return 3;
+		else if (int(totalDelay) == 1 ) return 8;
 		else return 10;
 	}
 }
