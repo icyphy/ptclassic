@@ -32,7 +32,6 @@ CG56STARS = \
  $(CG56)/CG56FixRamp.o \
  $(CG56)/CG56FixRect.o \
  $(CG56)/CG56FixSum.o \
- $(CG56)/CG56FixTable.o \
  $(CG56)/CG56FixThresh.o \
  $(CG56)/CG56Fork.o \
  $(CG56)/CG56HostAIN.o \
@@ -43,6 +42,7 @@ CG56STARS = \
  $(CG56)/CG56IIDUniform.o \
  $(CG56)/CG56Integrator.o \
  $(CG56)/CG56Interpolator.o \
+ $(CG56)/CG56InterpTable.o \
  $(CG56)/CG56IntMult.o \
  $(CG56)/CG56IntProduct.o \
  $(CG56)/CG56IntQuantizer.o \
