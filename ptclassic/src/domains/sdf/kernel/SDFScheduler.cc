@@ -48,12 +48,12 @@ int SDFScheduler :: run (Block& galaxy, int numIterations = 1) {
    int i,j;
    SDFStar* currentStar;
 
-   // Run the initialize routines of all the atomic stars.
-   for (i = alanShepard.totalSize((Galaxy&)galaxy); i>0; i--)
-	((SDFStar&)alanShepard.nextBlock()).initialize();
-
    // assume the schedule has been set by the setup member
+   // Adjust the schedule pointer to point to the beginning of the schedule.
    mySchedule.reset();
+
+   // Dummy statement to prevent compiler warning
+   galaxy;
 
    for (j = numIterations; j>0; j--)
 	for (i = mySchedule.size(); i>0; i--) {
@@ -61,21 +61,27 @@ int SDFScheduler :: run (Block& galaxy, int numIterations = 1) {
 	    // next star in the list
 	    currentStar = &(SDFStar&)mySchedule.nextBlock();
 
-	    // First ensure output particles are created
-	    currentStar->produceParticles();
+	    // First get input Particles and empty output Particles
+	    currentStar->getParticles();
 
 	    // Then run the star
 	    currentStar->go();
-
-	    // Now discard the consumed samples
-	    currentStar->consumeParticles();
 	}
+}
+
+
+	////////////////////////////
+	// wrapup
+	////////////////////////////
+
+int SDFScheduler :: wrapup (Block& galaxy) {
 
    // Run the termination routines of all the atomic stars.
-   for (i = alanShepard.totalSize((Galaxy&)galaxy); i>0; i--)
-	((SDFStar&)alanShepard.nextBlock()).wrapup();
-
+   for (int i = alanShepard.totalSize((Galaxy&)galaxy); i>0; i--)
+        ((SDFStar&)alanShepard.nextBlock()).wrapup();
 }
+
+
 
 	////////////////////////////
 	// setup
@@ -155,6 +161,10 @@ int SDFScheduler :: setup (Block& galaxy) {
    if (passValue == 1)
 	errorHandler.error("DEADLOCK! Not enough delay in a loop containing:",
                                    dead->readFullName());
+
+   // Run the initialize routines of all the atomic stars.
+   for (i = alanShepard.totalSize((Galaxy&)galaxy); i>0; i--)
+	((SDFStar&)alanShepard.nextBlock()).initialize();
 
 }
 
@@ -371,7 +381,8 @@ int SDFScheduler :: simRunStar (Block& atom,
 		if(port->isItInput()) {
 
 		   // The farside port is an input.  Check Particle supply
-		   if(port->myGeodesic->noParticles < port->numberTokens)
+		   if(port->myGeodesic->numInitialParticles
+				< port->numberTokens)
 
 			// not enough data.  Block cannot be deferred.
 			goto noDefer;
@@ -389,7 +400,7 @@ int SDFScheduler :: simRunStar (Block& atom,
 noDefer:
 
 	// Iterate over the ports again to adjust
-	// the noParticles member of the geodesic.
+	// the numInitialParticles member of the geodesic.
 	// Note that this should work equally well if there are no inputs.
 
 	for(i = atom.numberPorts(); i>0; i--) {
@@ -398,12 +409,12 @@ noDefer:
 	   port = (SDFPortHole*)&atom.nextPort();
 
 	   if( port->isItInput() )
-		// OK to update noParticles for input PortHole
-		port->myGeodesic->noParticles -= port->numberTokens;
+		// OK to update numInitialParticles for input PortHole
+		port->myGeodesic->numInitialParticles -= port->numberTokens;
 
 	   else if (updateOutputs)
-		// OK to update noParticles for output PortHole
-		port->myGeodesic->noParticles += port->numberTokens;
+		// OK to update numInitialParticles for output PortHole
+		port->myGeodesic->numInitialParticles += port->numberTokens;
 	}
 
 	// Increment noTimes
@@ -442,7 +453,7 @@ int SDFScheduler :: notRunnable (SDFStar& atom) {
 
 	   if(port->isItInput())
 		// The port is an input.  Check Particle supply
-		if(port->myGeodesic->noParticles < port->numberTokens)
+		if(port->myGeodesic->numInitialParticles < port->numberTokens)
 		   // not enough data
 		   return 1;
 	}

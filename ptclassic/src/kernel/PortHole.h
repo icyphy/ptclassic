@@ -95,6 +95,14 @@ public:
 	// Maintain pointer to Geodesic
 	Geodesic* myGeodesic;
 
+	// Maintain pointer to the Plasma where we get
+	//  our Particles or replace unused Particles
+	Plasma* myPlasma;
+
+	// Allocate a return a Geodesic compatible with this
+	// type of PortHole
+	virtual Geodesic* allocateGeodesic();
+
 protected:
 	// Type of data carried by this PortHole
 	dataType type;
@@ -102,10 +110,6 @@ protected:
 	// The Particle that is currently being access
 	//  with delay 0 by the Star
 	Particle* currentParticle;
-
-	// Maintain pointer to the Plasma where we get
-	//  our Particles or replace unused Particles
-	Plasma* myPlasma;
 
 private:
 	char* name;             // Name of this PortHole
@@ -396,6 +400,11 @@ operator is independent of the type of Particle.
 class Geodesic : public Stack
 {
 public:
+	// A lot of things are kept public, unfortunately, because
+	//  these routines are called by a lot of different
+	//  types of PortHoles -- impossible to make them
+	//  all friends
+
         // We keep a pointer to the PortHoles corresponding to
         // this Geodesic
         PortHole *originatingPort;
@@ -404,20 +413,17 @@ public:
         // Constructor
         Geodesic() { originatingPort = NULL;
                      destinationPort = NULL;
-                     noParticles = 0;}
+		     numInitialParticles = 0;}
 
-	// Return the number of Particles currently on the Geodesic
-        int getNoParticles() {return noParticles;}
- 
-        // When a connection contains a delay, initial particles
-        // should be put on the Geodesic.  Something should be added
-        // here to put the right number of zero-valued particles
-        // on the geodesic (what is meant by "zero-valued" will
-        // depend on the Particle type).  Also, setInitialParticles
-        // should optionally accept two arguments,
-        // the second of which is a Particle& specifying
-        // some specific initial value.
-        void setInitialParticles (int howMany) {noParticles = howMany;}
+	// Initializer -- this is not part of the constructor
+	//  because it has to be called each time the system
+	//  is initialized and run again
+	// This routine initializes the Geodesic to the number of Particles
+	// given by the numInitialParticles field.
+	// TO BE DONE:  There should be a way to specify the value
+	// of these initial particles.
+	virtual void initialize();
+
 	// Put a Particle into the Geodesic
 	void put(Particle* p) {pushBottom(p);}
 
@@ -430,20 +436,12 @@ public:
 	// Return the number of Particles on the Geodesic
 	int size() {return Stack::size();}
 
-private:
-        // For now, the number of Particles on the Geodesic is simply
-        // stored as an integer.  Note that the SDFScheduler manipulates
-        // this number directly without actually
-        // putting any Particles on the geodesic.  The SDFScheduler
-        // guarantees that when it is done, the noParticles value will
+        // A connection may require some initial particles.
+        // Note that the SDFScheduler manipulates this number directly, but
+        // guarantees that when it is done, the value will
         // be the same as when it started, or the run will have been aborted
         // due to a sample-rate inconsistency.
-        int noParticles;
- 
-        // Make the SDFScheduler a friend so that noParticles can be
-        // manipulated directly.  Note that if the implementation of
-        // noParticles changes, so must the implementation of the SDFScheduler
-        friend class SDFScheduler;
+	int numInitialParticles;
 };
 
 /***********************************************************

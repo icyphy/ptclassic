@@ -1,9 +1,19 @@
+/**************************************************************************
+Version identification:
+$Id$
+
+ Copyright (c) 1990 The Regents of the University of California.
+                       All Rights Reserved.
+
+ Programmer:  E. A. Lee and D. G. Messerschmitt
+ Date of creation: 1/17/89
+ Revisions:
+
+ Basic system definitions.
+
+**************************************************************************/
 #ifndef _type_h
 #define _type_h 1
-
-
-// SCCS version identification
-// $Id$
 
 typedef void* Pointer;
 

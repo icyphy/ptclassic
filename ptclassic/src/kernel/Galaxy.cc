@@ -20,7 +20,7 @@ Geodesic& Galaxy :: connect (PortHole& source, PortHole& destination,
 	PortHole& realSource = source.realPort();
 	PortHole& realDest = destination.realPort();
 
-	Geodesic* geo = new Geodesic;
+	Geodesic* geo = source.allocateGeodesic();
 	geo->originatingPort = &realSource;
 	geo->destinationPort = &realDest;
 	realSource.myGeodesic = geo;
@@ -34,7 +34,7 @@ Geodesic& Galaxy :: connect (PortHole& source, PortHole& destination,
 	realDest.farSidePort = &realSource;
 
 	// Set the number of delays
-	geo->setInitialParticles(numberDelays);
+	geo->numInitialParticles = numberDelays;
 
 	return *geo;
 }

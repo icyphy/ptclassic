@@ -45,20 +45,10 @@ Block& SDFStar :: setBlock(char* s, Block* parent = NULL) {
 }
 
 // Methods to consume and produce particles, invoked by the scheduler
-void SDFStar :: produceParticles() {
+void SDFStar :: getParticles() {
 	SDFPortHole* port;
 	for(int i = numberPorts(); i>0; i--) {
 		port = &(SDFPortHole&)nextPort();
-		if (port->isItOutput())
-			port->increment(port->numberTokens);
-	}
-}
-
-void SDFStar :: consumeParticles() {
-	SDFPortHole* port;
-	for(int i = numberPorts(); i>0; i--) {
-		port = &(SDFPortHole&)nextPort();
-		if (port->isItInput())
-			port->increment(port->numberTokens);
+		port->increment(port->numberTokens);
 	}
 }
