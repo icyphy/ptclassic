@@ -182,7 +182,9 @@ int options;			/* BUFMUSTEXIST or BUFSILENT   */
 		   newFacet->contents.facet.cell,
 		   newFacet->contents.facet.view );
 	    vemMsg(MSG_A, "\
-Use the program `inconsistent' to find the problem\n\
+Use the Ptolemy program `masters' \n\
+or the Octtools program `inconsistent' \n\
+to find the problem\n\
 and the program `octmvlib' to fix it.\n\
 Then you can try to open the facet again.\n" );
 	}
