@@ -78,7 +78,7 @@ DSP56000 -  A combined input/output star for the Magnavox CD player.
 		type { intarray }
   		desc { internal }
 		default { "0" }
- 		attributes {A_CIRC|A_NONSETTABLE|A_NONCONSTANT|A_XMEM|A_CONSEC|A_NOINIT}
+ 		attributes {A_CIRC|A_NONSETTABLE|A_NONCONSTANT|A_XMEM|A_NOINIT}
 	}
 	state {
 		name { inIntBufferStart }
@@ -92,7 +92,7 @@ DSP56000 -  A combined input/output star for the Magnavox CD player.
 		type { intarray }
   		desc { internal }
 		default { "0" }
- 		attributes {A_CIRC|A_NONSETTABLE|A_NONSETTABLE|A_XMEM|A_CONSEC|A_NOINIT}
+ 		attributes {A_CIRC|A_NONSETTABLE|A_NONSETTABLE|A_XMEM|A_NOINIT}
 	}
 	state {
 		name { outIntBufferStart }
@@ -206,7 +206,7 @@ $starSymbol(mag)_outiptr   equ     $addr(outIntBufferStart)
         move    x:$starSymbol(mag)_insptr,r0  ; Get pointer to input position
         move    #$starSymbol(mag)_buflen-1,m0 ; and set modulus
 $label(fillOne)
-        jset    #0,x:(r0),$label(fillOne); Wait for position to have data
+        jset    #0,x:(r0),$label(fillOne) ; Wait for position to have data
         move    x:(r0),y0               ; Get sample from buffer
         bset    #0,x:(r0)+              ; Mark position as empty
         move    y0,$ref(output1)
@@ -229,7 +229,7 @@ $label(emptyOne)
 ; Output second sample to interrupt buffer
         move    $ref(input2),y0
 $label(emptyTwo)
-        jclr    #0,x:(r0),$label(emptyTwo); Wait for position to be empty
+        jclr    #0,x:(r0),$label(emptyTwo) ; Wait for position to be empty
         move    y0,x:(r0)               ; Put data there
         bclr    #0,x:(r0)+              ; Mark position as full
         move    r0,x:$starSymbol(mag)_outsptr ; Save pointer to next position
