@@ -35,6 +35,7 @@ PL_SRCS= \
  SDFBlockRLattice.pl \
  SDFBurg.pl \
  SDFConvolve.pl \
+ SDFDirichlet.pl \
  SDFDTFT.pl \
  SDFFFTCx.pl \
  SDFFIR.pl \
@@ -52,6 +53,7 @@ PL_SRCS= \
  SDFPattMatch.pl \
  SDFRLattice.pl \
  SDFRaisedCosine.pl \
+ SDFSinc.pl \
  SDFUnwrap.pl \
  SDFWindow.pl
 
