@@ -23,7 +23,7 @@ pack append $s.f $s.f.pad top
 pack append $s $s.f top
 
 set c $s.f.pad
-set ballRadius 0.25
+set ballRadius 0.5
 set x1 [expr 5.0-$ballRadius]
 set y1 [expr 2.5-$ballRadius]
 set x2 [expr 5.0+$ballRadius]
@@ -38,7 +38,7 @@ proc ${uniqueSymbol}callTcl {} {
 	global ballId
 	set s .${uniqueSymbol}field
 	set c $s.f.pad
-	set ballRadius 0.25
+	set ballRadius 0.5
 	set inputVals [${uniqueSymbol}grabInputs]
 	set xin [lindex $inputVals 0]
 	set yin [lindex $inputVals 1]
@@ -46,5 +46,6 @@ proc ${uniqueSymbol}callTcl {} {
 	set y1 [expr {$yin-$ballRadius}]
 	set x2 [expr $x1+2*$ballRadius]
 	set y2 [expr $y1+2*$ballRadius]
+	after 30
 	$c coords $ballId ${x1}c ${y1}c ${x2}c ${y2}c
 }
