@@ -74,6 +74,9 @@ class ::tycho::EditJava {
     # Open a help window.
     method help {}
 
+    # Open up the Java HTML documentation
+    method openJavaHTMLPage {} {}
+
     # Color the Java code in a region.
     method parseNow {start stop} {}
 
@@ -136,6 +139,8 @@ body ::tycho::EditJava::constructor {args} {
 	menubar disable "Generate doc"
 	menubar disable Appletviewer
     }
+    menubar insert "Java Documentation" {Preferences...} -underline 0 \
+	    -command "$this ::tycho::EditJava::openJavaHTMLPage"
 }
 
 ###################################################################
@@ -272,7 +277,7 @@ body ::tycho::EditJava::gendocBuffer {} {
     putStatus "Fixing HTML files in\
             [file join [file dirname [filename]] $docDir]"
     #::tycho::safeUpdate $this
-    fixJavaHTMLFiles [preference get javaHTMLDir] \
+    fixJavaHTMLFiles [file join [preference get javaHome] api] \
             [file join [file dirname [filename]] $docDir]
     putStatus ""
     #::tycho::safeUpdate $this
@@ -302,6 +307,30 @@ body ::tycho::EditJava::help {} {
     ::tycho::File::openContext \
         [file join $TYCHO editors textedit doc usersGuides \
 	    EditJavaHelp.html]
+}
+
+#####################################################################
+#### openJavaHTMLPage
+# Open up the Java HTML documentation.  The jdk1.1.1 documentation
+# is at jdk1.1.1/docs/index.html
+# contain the Java HTML documentation at java2.2/html/TclTkMainList.html
+#
+# In Tycho, the *javaHome* preference controls what file is opened.
+#
+body ::tycho::EditJava::openJavaHTMLPage {} {
+    set javaHome [::tycho::preference get misc javaHome]
+    if { $javaHome != "" } {
+	set javaHome [::tycho::expandPath $javaHome]
+    }
+    
+    set javaHTMLPage [file join $javaHome docs index.html]
+    if [file exists $javaHTMLPage] {
+        ::tycho::File::openContext "$javaHTMLPage"
+    } else {
+	error "Sorry, `$javaHTMLPage' does not exist. The pathname to
+	the Java documentation is generated using the javaHome\
+	Miscellaneous preference and the path 'docs/index.html'."
+    }
 }
 
 #####################################################################
