@@ -25,9 +25,9 @@ INCL = -I$(CG56DIR) -I$(CGDIR) -I$(SDFDIR) -I$(KERNDIR)
 # source files for all stars, using preprocessor
 PL_SRCS= \
  CG56Abs.pl \
- CG56ACOS.pl \
+ CG56ACos.pl \
  CG56Add.pl \
- CG56ASIN.pl \
+ CG56ASin.pl \
  CG56BiQuad.pl \
  CG56BlackHole.pl \
  CG56Commutator.pl \
