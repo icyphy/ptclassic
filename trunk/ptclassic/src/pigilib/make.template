@@ -53,7 +53,8 @@ HDRS	      = compile.h \
 		ptkTkSetup.h \
 		TclObj.h \
 		POct.h \
-		PVem.h
+		PVem.h \
+		TclStarIfc.h
 
 
 LIBCSRCS      = main.c \
@@ -89,7 +90,8 @@ LIBCPPSRCS    = kernelCalls.cc \
 		ptkRegisterCmds.cc \
 		TclObj.cc \
 		POct.cc \
-		PVem.cc
+		PVem.cc \
+		TclStarIfc.cc
 
 
 SRCS = $(LIBCSRCS) $(LIBCPPSRCS)
