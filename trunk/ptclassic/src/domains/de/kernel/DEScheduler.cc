@@ -162,4 +162,5 @@ DEScheduler :: run (Block& galaxy) {
 		}
 
 	} // end of while
+	return TRUE;
 }
