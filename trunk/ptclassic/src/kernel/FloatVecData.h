@@ -13,6 +13,10 @@ Date of creation: 4/3/91
 This is a simple vector packet body.  It stores an array of float values
 of arbitrary length.  The length is specified by the constructor.
 **************************************************************************/
+#ifdef __GNUG__
+#pragma once
+#pragma interface
+#endif
 
 #include "Packet.h"
 
