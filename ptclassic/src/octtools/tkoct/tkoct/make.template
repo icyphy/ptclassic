@@ -24,10 +24,12 @@ HDRS =		tkoct.h tkoctInt.h tkh.h toct.h
 
 all:	makefile tkoct
 
+# sol2.cfront requires -llist because of -ltap
+# sol2.cfront requires -lvov because of -loh
 TKOCT_LIBS =  -L../tkgraph -ltkgraph -L../top -ltop \
 	$(TK_LIBSPEC) $(TCL_LIBSPEC) \
 	-L$(OCTLIBDIR)\
-	-lregion -lkd -lgu -ltap -loh -loct -ltr -lst \
+	-lregion -lkd -lgu -ltap -llist -loh -lvov -loct -ltr -lst \
 	-lutility -lerrtrap -luprintf -lport
 
 # Use the $(LINKER) so the binary is statically linked for distribution.
