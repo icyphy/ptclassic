@@ -57,39 +57,66 @@ void SDFWormhole :: setup() {
 }
 
 void SDFWormhole :: go() {
-	// set the currentTime of the inner domain.
-	myTarget()->setCurrentTime(arrivalTime);
+	// At the first call of each iteration, initialize arrivalTime
+        // to the value of arriving tokens.  Subsequently in the
+	// iteration, it is incremented by "space", which tries to
+	// uniformly space the time stamps.  In a wormhole, normally
+	// the schedulePeriod will be zero, so space will be zero, and
+	// the arrival time will remain equal to the input arrival
+	// time throughout the iteration.
+        if (mark == 0) {
+		SDFScheduler* sched = (SDFScheduler*) outerSched();
+		arrivalTime = sched->now();
+	}
 
 	// run
 	Wormhole::run();
+
+	mark++;
+	if (mark == reps()) mark = 0;
 }
 
 void SDFWormhole :: wrapup() {
 	myTarget()->wrapup();
 }
-
-// return the next time Stamp for the stopping condition of the inner timed
-// domain.
+ 
+// Return the next time Stamp for the stopping condition of the inner
+// timed domain.  This is used to set the stop time of the inner
+// domain. Note that by default, "space" will have value zero, so the
+// inner domain will not progress ahead of outer domains.  However,
+// this can be overridden by the user by setting the schedulePeriod
+// parameter of the Target.
 
 double SDFWormhole :: getStopTime() {
-	// set the next token arrival time
-	arrivalTime += space;
-	return arrivalTime;
+    SDFScheduler* sched = (SDFScheduler*) outerSched();
+    return sched->now() + mark*space;
 }
 
 // return the token's arrival time.
-// At the beginning, token is arrived at the currentTime of the SDF
-// scheduler. It is incremented by "space" afterwards.
+// At the beginning of a cycle through the SDF schedule,
+// the arrival time is the currentTime of the outside scheduler.
+// On subsequent cycles, it is incremented by space.
 
 double SDFWormhole :: getArrivalTime() {
-	// At the very first call, we initialize "arrivalTime".
-	if (!mark) {
-		SDFScheduler* sched = (SDFScheduler*) outerSched();
-		arrivalTime = sched->now();
-		space = sched->schedulePeriod / double(repetitions) ;
-		mark = 1;
-	}
-	return arrivalTime;
+    SDFScheduler* sched = (SDFScheduler*) outerSched();
+    return sched->now() + mark*space;
+}
+
+void SDFWormhole :: begin () {
+    Wormhole::begin();
+
+    // Compute the spacing between events for multirate systems.
+    // When an SDF wormhole contains a timed system, and the SDF
+    // system is a multirate system, then we would like to space out
+    // the time stamps of the events passed to the timed system.
+    // The spacing of the time stamps is the schedulePeriod divided
+    // by the number of repetitions (number of firings) of the
+    // wormhole in one schedule period.  Note that by default, the
+    // schedulePeriod is zero, so this will have no effect unless the
+    // user specifically sets the Target parameter schedulePeriod.
+
+    SDFScheduler* sched = (SDFScheduler*) outerSched();
+    space = sched->schedulePeriod / double(repetitions) ;
 }
 
 // Constructor
@@ -117,7 +144,7 @@ Block* SDFWormhole :: makeNew() const {
 
 void SDFtoUniversal :: receiveData ()
 {
-	// 1. get data
+	// 1. get data from the SDF geodesic.
 	getData();
 
 	// Check it is an input or output.
@@ -157,11 +184,11 @@ EventHorizon* SDFtoUniversal :: asEH() { return this; }
 
 void SDFfromUniversal :: sendData ()
 {
-	// 1. transfer data
+	// 1. transfer data from the other side of the event horizon
 	transferData();
 
 	if (tokenNew) {
-		// 2. put data
+		// 2. put data to the SDF geodesic
 		putData();
 
 	} else if (SDFfromUniversal::isItOutput()) {
@@ -170,8 +197,6 @@ void SDFfromUniversal :: sendData ()
 		Error::abortRun(*this, "not enough output tokens ",
 				"at SDF wormhole boundary");
 	}
-
-	// no timeMark business since SDF is "untimed" domain.
 }
 
 // wait until has enough number of tokens to fire the inside star
