@@ -136,11 +136,14 @@ int inh)"
 
 		if (firstTime) { doFirst(dctimage); firstTime = 0; }
 
-		LOG_NEW; GrayImage* grayout = new GrayImage((BaseImage&) *dctimage);
+		LOG_NEW;
+		GrayImage* grayout = new GrayImage((BaseImage&) *dctimage);
 		doInvDCT(grayout->retData(), dctimage->retData(),
 				grayout->retWidth(), grayout->retHeight(),
 				dctimage->fullWidth(), dctimage->fullHeight());
 
+// Since we used writableCopy(), we own "dctimage".
+		delete dctimage;
 		Packet temp(*grayout);
 		output%0 << temp;
 	}
