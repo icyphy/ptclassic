@@ -56,7 +56,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "stdlib.h"
 #include "BooleanMatrix.h"
 #include "MultiScheduler.h"
-#include <sys/time.h>
+#include "ProfileTimer.h"
 
 CGMultiTarget::CGMultiTarget(const char* name,const char* sClass,
 			     const char* desc) :
@@ -452,21 +452,11 @@ int CGMultiTarget :: allReceiveWormData() {
 }
 
 /*virtual*/ int CGMultiTarget::schedulerSetup() {
-    itimerval year,elapsed;
-    year.it_interval.tv_sec = year.it_interval.tv_usec = 0;
-    year.it_value.tv_sec = 3600 * 24 * 355;
-    year.it_value.tv_usec = 0;
-
-    setitimer(ITIMER_PROF,&year,NULL);
-
+    ProfileTimer schedulingTimer;
     int status = MultiTarget::schedulerSetup();
 
     if (int(displaySchedulerStats)) {
-	// turn off timer and get elapsed time
-	getitimer(ITIMER_PROF,&elapsed);
-	setitimer(ITIMER_PROF,&year,NULL);
-	double schedulingTime =  3600 * 24 * 355 - elapsed.it_value.tv_sec 
-	    - 1.0e-6*elapsed.it_value.tv_usec;
+	double schedulingTime =  schedulingTimer.elapsedTime();
 
 	StringList message;
 
