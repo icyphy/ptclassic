@@ -52,7 +52,7 @@ extern const char ACSdomainName[];
 class ACSTarget : public HLLTarget {
 public:
     ACSTarget(const char* name, const char* starclass, const char* desc,
-            const char* assocDomain = ACSdomainName);
+            const char* category = NULL, const char* assocDomain = ACSdomainName);
     /* virtual */ Block* makeNew() const;
 
     /* virtual */ int run() { if ( isCG() ) return(HLLTarget::run()); else return(Target::run()); }   // FIXME
