@@ -9,8 +9,6 @@ When run on the simulator, arranges for its input to be logged to a file.
 	copyright { 1992 The Regents of the University of California }
 	location { CG56 demo library }
 	explanation {
-This star relies on a feature of the Sim56Target, which captures code lines
-beginning with "!" and uses them as commands for the simulator.
 	}
 	execTime {
 		return (input.bufSize() >= 1) ? 2 : 0;
@@ -41,21 +39,15 @@ beginning with "!" and uses them as commands for the simulator.
 	// outVal state, which works when the buffersize is >= 1.
 
 	codeblock (logOut) {
-@output $ref(outVal) $val(fileName).sim -RF
+output $ref(outVal) $val(fileName).sim -RF
 }
-	initCode {
-                gencode(logOut);
-	}
-
 	// this codeblock produces code
 	codeblock (copy) {
 	move	$ref(input),a
 	move	a,$ref(outVal)
 	}
 	go {
+		genMiscCmd(logOut);
 		if (input.bufSize() >= 1) gencode(copy);
 	}
 }
-
-
-

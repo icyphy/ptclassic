@@ -16,44 +16,35 @@ $Id$
 #pragma interface
 #endif
 #include "SDFConnect.h"
-#include "AsmConnect.h"
+#include "MotorolaConnect.h"
 #include "MotorolaAttributes.h"
 
 class ProcMemory;
 class AsmGeodesic;
 
-class CG56PortHole : public AsmPortHole {
-public:
-	// constructor sets default attributes.
-	CG56PortHole();
-};
+#define CG56PortHole	MotorolaPortHole
 
-class InCG56Port : public InAsmPort {
-public:
+class InCG56Port : public CG56PortHole {
 	int isItInput() const;
 };
 
-class OutCG56Port: public OutAsmPort {
-public:
+class OutCG56Port: public CG56PortHole {
 	int isItOutput() const;
 };
 
-// is anything here?
-class MultiCG56Port : public MultiAsmPort {
-public:
-	int someFunc();
-};
 
-class MultiInCG56Port : public MultiInAsmPort {
+#define MultiCG56Port	MultiMotorolaPort
+
+class MultiInCG56Port : public MultiMotorolaPort {
 public:
+	PortHole& newPort();
 	int isItInput() const;
-	PortHole& newPort();
 };
 
-class MultiOutCG56Port : public MultiOutAsmPort {
+class MultiOutCG56Port : public MultiMotorolaPort {
 public:
-	int isItOutput() const;
 	PortHole& newPort();
+	int isItOutput() const;
 };
 
 #endif
