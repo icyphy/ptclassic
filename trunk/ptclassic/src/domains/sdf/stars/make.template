@@ -8,9 +8,11 @@
 #	make depend
 # This will add the dependencies to the makefile.
 
-GFLAGS = -g
+# SRCDIR is the directory containing the Ptolemy kernel source.
+SRCDIR = ..
+GFLAGS = -g -I$(SRCDIR)
 GNU = g++
-GNUINCLUDE = /usr/gnu/lib/g++-include
+GNUINCLUDE = -I$(SRCDIR) -I/usr/gnu/lib/g++-include
 
 .SUFFIXES: .cc
 .cc.o:
@@ -27,8 +29,7 @@ OBJS=AdaptFilter.o FIR.o FloatFork.o FloatPrinter.o FloatRamp.o \
 all:		$(OBJS)
 
 depend:
-		makedepend -I$(GNUINCLUDE) $(SRCS)
-		sed 's?: $(GNUINCLUDE)?: $$(GNUINCLUDE)?' makefile > foo
-		mv foo makefile
+		makedepend $(GNUINCLUDE) $(SRCS)
+
 # Don't add anything after the next line; makedepend will zap it.
 # DO NOT DELETE THIS LINE -- make depend depends on it.
