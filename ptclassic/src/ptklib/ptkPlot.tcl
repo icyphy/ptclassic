@@ -1,4 +1,3 @@
-# 
 #  Tcl interface for creating a plotting utility
 # 
 #  Author: Wei-Jen Huang and E. A. Lee
@@ -75,16 +74,16 @@ proc ptkCreateXYPlot {w title geo univ} {
     pack [button $w.mbar.pr -text "  Print  " \
 	    -command "ptkPrintXYPlot $w \"$title\""] \
 	    -side left
-    pack [button $w.mbar.zf -text "Zoom Fit (f)" \
+    pack [button $w.mbar.zf -text "Fit (f)" \
 	    -command "ptkXYPlotZoomFit$w"] \
 	    -side right
-    pack [button $w.mbar.zo -text "Zoom Out (Z)" \
+    pack [button $w.mbar.zo -text "Out (Z)" \
 	    -command "ptkXYPlotZoom$w 1.5"] \
 	    -side right
-    pack [button $w.mbar.zi -text "Zoom In (z)"\
+    pack [button $w.mbar.zi -text "In (z)"\
 	    -command "ptkXYPlotZoom$w 0.75"] \
 	    -side right
-    pack [button $w.mbar.zor -text "Zoom Original (o)" \
+    pack [button $w.mbar.zor -text "Original (o)" \
 	    -command "ptkXYPlotZoomOriginal$w"] \
 	    -side right
 
