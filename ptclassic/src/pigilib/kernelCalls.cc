@@ -356,6 +356,18 @@ KcRun(int n) {
 	return TRUE;
 }
 
+extern "C" boolean
+KcDisplaySched(int n) {
+ 	// LOG << "run " << n << "\nwrapup\n";
+	// LOG.flush();
+	if ( galTarget == NULL ) {
+	    cerr << "No current target";
+	    return FALSE;
+	}
+	cout << galTarget->displaySchedule();
+	return TRUE;
+}
+
 // Set the seed for the random number generation.
 extern "C" void
 KcEditSeed(int n) {
