@@ -443,17 +443,17 @@ Block* CGTarget :: makeNew() const {
 }
 
 void CGTarget :: headerCode () {
-	myCode << headerComment();
+	*defaultStream << headerComment();
 }
 
 void CGTarget :: trailerCode() {}
 
 void CGTarget :: beginIteration(int reps, int depth) {
-    myCode << "REPEAT " << reps << " TIMES { /* depth " << depth << "*/\n";
+     *defaultStream << "REPEAT " << reps << " TIMES { /* depth " << depth << "*/\n";
 }
 
 void CGTarget :: endIteration(int /*reps*/, int depth) {
-	myCode << "} /* end repeat, depth " << depth << "*/\n";
+     *defaultStream << "} /* end repeat, depth " << depth << "*/\n";
 }
 
 
@@ -492,7 +492,7 @@ void CGTarget :: allWormInputCode() {
 	}
 }
 void CGTarget :: wormInputCode(PortHole& p) {
-	myCode << "/* READ from wormhole port " << p.fullName() << " */\n";
+	*defaultStream << "/* READ from wormhole port " << p.fullName() << " */\n";
 }
 
 void CGTarget :: allWormOutputCode() {
@@ -504,7 +504,7 @@ void CGTarget :: allWormOutputCode() {
 	}
 }
 void CGTarget :: wormOutputCode(PortHole& p) {
-	myCode << "/* WRITE to wormhole port " << p.fullName() << " */\n";
+	*defaultStream << "/* WRITE to wormhole port " << p.fullName() << " */\n";
 }
 
 int CGTarget :: allSendWormData() {
