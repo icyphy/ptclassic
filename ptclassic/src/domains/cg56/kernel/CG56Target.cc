@@ -81,7 +81,6 @@ void CG56Target::initDataMembers() {
     typeConversionTable = &cg56ConversionTable;
     typeConversionTableRows = 6;
     assemblerOptions = "-A -B -L -Oso";
-    destDirectory.setInitValue("$HOME/PTOLEMY_SYSTEMS/CG56");
 }
 
 int CG56Target :: compileCode() {

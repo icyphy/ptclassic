@@ -75,6 +75,9 @@ void MotorolaTarget :: initStates() {
 	// Make reportMemoryUsage visible
 	reportMemoryUsage.setAttributes(A_SETTABLE);
 
+	// Reset the destination directory
+	destDirectory.setInitValue("$HOME/PTOLEMY_SYSTEMS/CG56");
+
 	// Initialize other data members
 	inProgSection = 0;
  	mem = 0;
