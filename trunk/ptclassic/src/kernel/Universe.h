@@ -6,7 +6,6 @@
 #pragma interface
 #endif
 
-
 /*******************************************************************
 SCCS version identification
 $Id$
@@ -18,16 +17,16 @@ $Id$
 
 	The generic Universe class.
 
-	A Universe is a Galaxy with a Scheduler.
+	A Universe is a Galaxy with a Target.
 	From the outside, it looks like a Galaxy with no PortHoles.
-	(note that the portlist is still there because WormHoles,
-	 inherited from Universe, can have PortHoles.
+
 ********************************************************************/
 
-	
 #include "Galaxy.h"
-#include "Scheduler.h"
+#include "Target.h"
 #include "StringList.h"
+
+class Scheduler;
 
 	//////////////////////////////
 	// Runnable
@@ -36,32 +35,35 @@ $Id$
 class Runnable {
 public:
 	// constructor
-	Runnable(Scheduler* s, const char* t, Galaxy* g) :
-		type(t), scheduler(s), gal(*g) {}
+	Runnable(Target* tar, const char* ty, Galaxy* g);
+
+	// constructor to generate target from name
+	Runnable(const char* targetname, const char* dom, Galaxy* g);
 
 	// initialize and/or generate schedule
 	int initSched() {
-		return scheduler->setup(gal);
+		target->initialize();
+		return target->setup(gal);
 	}
 
 	// run, until stopping condition
-	void run() { scheduler->run(gal);}
+	void run() { target->run();}
 
 	// end simulation
-	void endSimulation() {wrapupGal(gal);}
+	void endSimulation() { target->wrapup();}
 
 	// set the stopping condition.  A hack.
 	virtual void setStopTime(float stamp);
 
 	// display schedule
-	StringList displaySchedule() {return scheduler->displaySchedule();}
+	StringList displaySchedule() {return target->displaySchedule();}
 
 	// destructor: deletes scheduler
-	~Runnable() { delete scheduler;}
+	~Runnable() { delete target;}
 
 protected:
 	const char* type;
-	Scheduler* scheduler;
+	Target* target;
 	Galaxy& gal;
 private:
 	void wrapupGal (Galaxy& g);
@@ -79,11 +81,11 @@ public:
 	StringList printRecursive() const {return print(1);}
 
 	// constructor
-	Universe(Scheduler* s,const char* typeDesc) :
+	Universe(Target* s,const char* typeDesc) :
 		Runnable(s,typeDesc,this) {}
 
 	// return my scheduler
-	Scheduler* mySched() const { return scheduler ;}
+	Scheduler* mySched() const { return target->mySched();}
 
 	// class identification
 	int isA(const char*) const;
