@@ -1004,6 +1004,15 @@ class ::tycho::HTMLDocSys {
     # itk_option add, and private methods and variables
     public variable verbose 0
 
+
+    ###################################################################
+    ####                       protected procs                     ####
+
+    # Capitalize the word that is passed in
+    protected proc capitalize {word} {
+	return "[string toupper [string range $word 0 0]][string range $word 1 end]" 
+    }
+
     ###################################################################
     ####                      protected methods                    ####
 
@@ -1039,11 +1048,6 @@ class ::tycho::HTMLDocSys {
 
     ###################################################################
     ####                         private procs                     ####
-
-    # Capitalize the word that is passed in
-    private proc capitalize {word} {
-	return "[string toupper [string range $word 0 0]][string range $word 1 end]" 
-    }
 
     # Given a class name, return the html file name for that class
     private proc getFileName {classname} {}
