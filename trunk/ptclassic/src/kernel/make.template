@@ -84,6 +84,7 @@ CCS_WITH_H_FILES=\
  Wormhole.cc \
  logNew.cc \
  miscFuncs.cc \
+ paths.cc \
  pt_fstream.cc \
  textAnimate.cc
 
