@@ -233,7 +233,7 @@ void CGCStar::initialize() {
 /////////////////////////////////////////////////////////////
 
 int CGCStar :: run() {
-	int status;
+	int status = 0;
 	if (spliceClust.size() > 1) {
 		ListIter nextStar(spliceClust);
 		CGCStar* s;
