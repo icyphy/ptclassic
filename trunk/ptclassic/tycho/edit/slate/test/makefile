@@ -49,24 +49,7 @@ include $(CONFIG)
 TCL_SRCS = 
   
 ITCL_SRCS = \
-	3d.itcl \
-	color.itcl \
-	composite.itcl \
-	frame.itcl \
-	highlight.itcl \
-	image.itcl \
-	line.itcl \
-	object.itcl \
-	oval.itcl \
-	picture.itcl \
-	polygon.itcl \
-	primitive.itcl \
-	rectangle.itcl \
-	ridge.itcl \
-	simple.itcl \
-	slate.itcl \
-	sticky.itcl \
-	tree.itcl
+	sample.itcl
 
 EXTRA_SRCS =		$(TCL_SRCS) $(ITCL_SRCS)
 
