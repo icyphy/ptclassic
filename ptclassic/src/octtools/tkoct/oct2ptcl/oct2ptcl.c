@@ -184,7 +184,7 @@ otpXlateParams( octObject *pInst, char *instName, OTPFacetType which,
 	      stateType, stateVal, NULL);
 	    break;
 	case OTP_FtTarget:
-	    Tcl_DStringAppendEls(pStr,"targetparam", stateName,
+	    Tcl_DStringAppendEls(pStr,"trytargetparam", stateName,
 	      stateVal, NULL);
 	    break;
 	default:
@@ -250,10 +250,14 @@ _otpNetErr( OTPNetInfo *pInfo, char *fmt, ...) {
     "INPUT" or "OUTPUT".
     If non-NULL, pNetInfo is used only for error reporting.
 **/
+/*
 static TOPMask
 _otpGetPortFlags( octObject *pTerm, OTPNetInfo *pNetInfo) {
+    TOPMask flags = 0;
+*/
+static octStatus
+_otpGetPortFlags( octObject *pTerm, OTPNetInfo *pNetInfo, long *flags) {
     octObject	fterm, aterm, prop, pntFacet;
-    TOPMask	flags = 0;
     char	*termName;
 
     if ( pTerm->contents.term.instanceId == oct_null_id ) {
@@ -270,17 +274,20 @@ _otpGetPortFlags( octObject *pTerm, OTPNetInfo *pNetInfo) {
 	OH_FAIL(ohFindFormal( &fterm, &aterm),
 	  "interface formal term from contents actual(1)", pTerm);
 #endif
-	flags |= OTP_PifFormal;
+	*flags |= OTP_PifFormal;
     } else {
 	OCTPTCL_OH_WARN(ohFindFormal( &fterm, pTerm),
 	  "interface formal term from contents actual(2)", pTerm);
     }
+    if (ohLastStatus < OCT_OK)
+      return ohLastStatus;
+
     if ( ohGetByPropName( &fterm, &prop, "input") == OCT_OK )
-	flags |= OTP_PifIn;
+	*flags |= OTP_PifIn;
     if ( ohGetByPropName( &fterm, &prop, "output") == OCT_OK )
-	flags |= OTP_PifOut;
+	*flags |= OTP_PifOut;
     termName = pTerm->contents.term.name;
-    if ( (flags & (OTP_PifIn|OTP_PifOut)) == 0 ) {
+    if ( (*flags & (OTP_PifIn|OTP_PifOut)) == 0 ) {
 	OH_FAIL(octGenFirstContainer( &fterm, OCT_FACET_MASK, &pntFacet),
 	  "facet of formal term", &fterm);
 	fprintf( stderr, "Error: Terminal ``%s'' of facet ``%s'' is neither input nor output\n",
@@ -289,7 +296,7 @@ _otpGetPortFlags( octObject *pTerm, OTPNetInfo *pNetInfo) {
 	    _otpNetErr( pNetInfo, "has bad terminal ``%s''\n", termName);
 	}
     }
-    return flags;
+    return OCT_OK;
 }
 
 /**
@@ -332,7 +339,8 @@ _otpGetNetInfo( OTPFacetInfo *pFInfo, octObject *pNet, OTPNetInfo *pNInfo) {
 	int		newB, *cntPtr;
 
 	ownerId = theTerm.contents.term.instanceId;
-	portflags = _otpGetPortFlags( &theTerm, pNInfo);
+	if ((sts = _otpGetPortFlags( &theTerm, pNInfo, &portflags)) < OCT_OK)
+	  return sts;
 	pPI = (portflags & OTP_PifIn) 
 	  ? (cntPtr=&pNInfo->numIn, &pNInfo->inPorts[*cntPtr])
 	  : (cntPtr=&pNInfo->numOut, &pNInfo->outPorts[*cntPtr]);
@@ -389,7 +397,15 @@ _otpGetNetInfo( OTPFacetInfo *pFInfo, octObject *pNet, OTPNetInfo *pNInfo) {
 		_otpNetErr(pNInfo,"has multiple delays (not allowed)\n");
 		return OCT_ERROR;
 	    }
-	    pNInfo->delayExpr = otpCvtPropToStr( &prop);
+	    pNInfo->delayExpr = otpCvtPropToStrDelay( &prop);
+	} else if ( strcmp(pMaster->facetName,"%dDelay2")==0 ) {
+	    OH_FAIL(ohGetByPropName(&theMarker,&prop,"delay2"),
+	      "delay property", &theMarker);
+	    if ( pNInfo->delayExpr != NULL ) {
+		_otpNetErr(pNInfo,"has multiple delays (not allowed)\n");
+		return OCT_ERROR;
+	    }
+	    pNInfo->delayExpr = otpCvtPropToStrDelay( &prop);
 	} else if ( strcmp(pMaster->facetName,"%dBus")==0 ) {
 	    OH_FAIL(ohGetByPropName(&theMarker,&prop,"buswidth"),
 	      "bus width property", &theMarker);
@@ -666,7 +682,8 @@ otpXlateInsts( OTPFacetInfo *pFInfo, octObject *pFacet, Tcl_DString *pStr) {
 
 	if ( mInfo->facetName[0]=='%' ) {
 	    if ( strcmp(mInfo->facetName,"%dDelay")==0
-	      || strcmp(mInfo->facetName,"%dBus")==0 ) {
+		|| strcmp(mInfo->facetName,"%dDelay2")==0
+		|| strcmp(mInfo->facetName,"%dBus")==0 ) {
 		/* these are pure-geometry, no terminals.  must x,y search */
 		_otpProcessMarker( pFInfo, pFacet, &theInst);
 	    }
@@ -1090,7 +1107,15 @@ static char _OtpDesignProlog[] =
    "    } else {\n"
    "	    setstate $star $state $value\n"
    "    }\n"
-   "}\n";
+   "}\n"
+   "proc trytargetparam {param value} {\n"
+   "    if [catch {targetparam $param $value} err] then {\n"
+   "        puts stdout \"Warning: $err\"\n"
+   "    } else {\n"
+   "        targetparam $param $value\n"
+   "    }\n"
+   "}\n"; 
+
 
 octStatus
 otpXlateDesignByName( char *facetName, int flags) {
