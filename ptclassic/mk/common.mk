@@ -62,26 +62,32 @@ whatToBuild:	all
 # GNU tools do something similar
 
 # ptlang binary in the obj directory
-PTLANG_IN_OBJ=$(PTOLEMY)/obj.$(PTARCH)/ptlang/ptlang
-ISLANG_IN_OBJ=$(PTOLEMY)/obj.$(PTARCH)/islang/islang
+PTLANG_OBJ_DIR=$(PTOLEMY)/obj.$(PTARCH)/ptlang
+PTLANG_IN_OBJ=$(PTLANG_OBJ_DIR)/ptlang
+PTLANG_VPATH=../../src/ptlang
 
 # Use either the ptlang binary in the obj directory or just use ptlang
 PTLANG= `if [ -f $(PTLANG_IN_OBJ) ]; \
 	then echo $(PTLANG_IN_OBJ) ; \
 	else echo ptlang; fi`
 
+# Build the ptlang binary if necessary
+$(PTLANG_IN_OBJ):
+	(cd $(PTOLEMY)/obj.$(PTARCH)/ptlang; $(MAKE) VPATH=$(PTLANG_VPATH))
+
+# islang binary in the obj directory
+ISLANG_OBJ_DIR=$(PTOLEMY)/obj.$(PTARCH)/domains/ipus/islang
+ISLANG_IN_OBJ=$(PTLANG_OBJ_DIR)/islang
+ISLANG_VPATH=../../../../src/domains/ipus/islang
+
 # Use either the islang binary in the obj directory or just use islang
 ISLANG= `if [ -f $(ISLANG_IN_OBJ) ]; \
 	then echo $(ISLANG_IN_OBJ) ; \
 	else echo $(ISLANG_IN_OBJ); fi`
 
-# Build the ptlang binary if necessary
-$(PTLANG_IN_OBJ):
-	(cd $(PTOLEMY)/obj.$(PTARCH)/ptlang; $(MAKE) VPATH=../../src/ptlang)
-
 # Build the islang binary if necessary
 $(ISLANG_IN_OBJ):
-	(cd $(PTOLEMY)/obj.$(PTARCH)/islang; $(MAKE) VPATH=../../src/islang)
+	(cd $(ISLANG_OBJ_DIR); $(MAKE) VPATH=$(ISLANG_VPATH))
 
 # Rule to build the ../doc/star directory
 # Can't use mkdir -p here, it might not exist everywhere
