@@ -60,6 +60,39 @@ set itcl::version
 you should get back <CODE>2.0</CODE>if you are running itcl2.0 and
 <CODE>2.1</CODE> if you are running itcl2.1.
 
+<H3><A NAME="Problems creating indexes">Problems creating indexes</A></H3>
+The steps to follow if the indexes start failing on you:
+
+<OL>
+
+<LI> Do
+<PRE>
+cd $TYCHO
+make realclean
+make install
+
+</PRE>
+
+<CODE>make realclean</CODE> removes the <CODE>tclIndex</CODE> files and
+<CODE>doc/codeDoc/*</CODE>.
+
+ <br><CODE>make install</CODE> creates the <CODE>tclIndex</CODE> files
+and recreates the <CODE>doc/codeDoc/*</CODE>.  The
+<CODE>doc/codeDoc/*</CODE> files get created once by
+<CODE>tydoc</CODE>, then <CODE>$TYCHO/lib/idx/codeDoc.idx</CODE> gets
+created, then the tydoc files get recreated so that they can use
+<CODE>$TYCHO/lib/idx/codeDoc.idx</CODE>.
+
+<LI> If that does not work, and you are using a private tree that has
+links to a master Tycho tree, destroy your private tree and use
+<CODE>tylndir</CODE>
+to create a new one.  <CODE>tylndir</CODE> is documented in <A
+HREF="directories.html#tylndir and private trees"><CODE>$TYCHO/doc/coding/directories.html</CODE></A>
+
+
+</OL>
+
+-Christopher
 <p>
 Up to: <A HREF="introduction.html">Tycho Introduction</A> -
 Previous: <A HREF="running.html">Running Tycho</A> -
