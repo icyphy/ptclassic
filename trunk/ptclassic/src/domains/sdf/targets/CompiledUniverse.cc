@@ -1,15 +1,13 @@
 static const char file_id[] = "CompiledUniverse.cc";
-#ifndef _CompiledUniverse_cc
-#define _CompiledUniverse_cc 1
 
 #ifdef __GNUG__
-#pragma once
+#pragma implementation
 #endif
 /**************************************************************************
 Version identification:
 $Id$
 
- Copyright (c) 1990 The Regents of the University of California.
+ Copyright (c) 1991 The Regents of the University of California.
                        All Rights Reserved.
 
  Programmer:  E. A. Lee
@@ -22,16 +20,9 @@ and the universe state values.
 
 **************************************************************************/
 
-#include "Galaxy.h"
+#include "CompiledUniverse.h"
 
-class CompiledUniverse : public Galaxy {
-public:
-	// This method returns 0 if command line was invalid, 1 otherwise.
-	// It sets Galaxy states given on the command line and updates
-	// numIters if the number of iterations is given on the command
-	// line.
-	int parseCommandLine(int argc, char** argv, int* numIters);
-};
+// function to parse the command line.
 
 int CompiledUniverse::parseCommandLine(int argc, char** argv, int* numIters) {
 	int i = 1;
@@ -59,7 +50,3 @@ int CompiledUniverse::parseCommandLine(int argc, char** argv, int* numIters) {
 	    }
 	}
 }
-
-#include "isa.h"
-
-#endif
