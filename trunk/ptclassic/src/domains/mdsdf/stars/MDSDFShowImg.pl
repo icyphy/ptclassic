@@ -112,7 +112,7 @@ This star does not support frame numbers.  See ShowImg2.
     unsigned int size = int(width) * int(height);
     unsigned char* buffer = new unsigned char[size];
     unsigned char* p = buffer;
-    for(int i = 0; i < size; i++) {
+    for(int i = 0; i < (int)size; i++) {
       // limit range to be between 0 and 255
       double tmp = image->entry(i);
       if(tmp < 0)
