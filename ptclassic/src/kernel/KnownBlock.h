@@ -45,7 +45,9 @@ static KnownBlock entry(proto,"MyType");
 
 Then the static method KnownBlock::clone(name, dom) can produce a new
 instance of the named class in the named domain.  As for blocks,
-clone copies everything, makeNew just makes a new one.
+clone copies everything, makeNew just makes a new one.  Recursive
+clone attempts are detected to avoid a crash in the event of a self-
+referential galaxy definition.
 
 KnownBlock::defaultDomain() returns the default domain name.  This is
 not used internally for anything; it is just set to the first domain
@@ -57,6 +59,18 @@ We no longer have the concept of the "current domain".  We used to use
 the "current domain" and repeatedly changed it; this is now going away
 since it is troublesome, especially with multiple threads or with an X
 interface where the flow of control is hard to follow.
+
+KnownBlock assigns a sequential serial number to each definition or
+redefinition of a known block type.  This can be used, for example,
+to determine whether a galaxy has been compiled more recently than
+any of its constituent blocks.
+
+KnownBlock also keeps track of the source of the definition of every
+known block type.  The system itself doesn't depend on this information
+at all, but it allows us to generate some helpful warning messages when
+a block name is accidentally re-used.  The source location information
+is currently rather crude for everything except VEM facets, but that's
+good enough to generate a useful warning in nearly all cases.
 
 *******************************************************************/
 #ifndef _KnownBlock_h
@@ -76,8 +90,9 @@ class KnownListEntry {
 	friend class KnownBlock;
 	friend class KnownBlockIter;
 	Block* b;
-	int onHeap;
-	int dynLinked;
+	long serialNumber;	// serial# of this knownblock definition
+	int onHeap;		// T => *b should be freed
+	int dynLinked;		// T => star defined by dynamically linked code
 	const char* definitionSource;
 	// definitionSource is:
 	// NULL for a built-in block type (anything defined by C++ code);
@@ -86,11 +101,17 @@ class KnownListEntry {
 	// "dynamically linked star" or "ptcl defgalaxy command"
 	int cloneInProgress;	// true while trying to clone this block
 	KnownListEntry *next;
+
+	// serial# last assigned
+	static long lastSerialNumber;
+
 public:
 	KnownListEntry(Block* bl, int oh, const char* ds, KnownListEntry* n) :
-		b(bl), onHeap(oh), dynLinked(Linker::isActive()),
+		b(bl), serialNumber(++lastSerialNumber),
+		onHeap(oh), dynLinked(Linker::isActive()),
 		definitionSource(ds), cloneInProgress(0), next(n) {}
 	~KnownListEntry ();
+	void redefine(Block* bl, int oh, const char* ds);
 };
 
 class KnownBlock {
@@ -135,6 +156,14 @@ public:
 // Return true if the named block is dynamically linked.
 	static int isDynamic (const char* type, const char* dom);
 	
+// Look up a KnownBlock definition by name and return its serial number.
+// Returns 0 iff no matching definition exists.
+	static long serialNumber (const char* name, const char* dom);
+
+// Given a block, find the matching KnownBlock definition,
+// and return its serial number (or 0 if no matching definition exists).
+	static long serialNumber (Block& block);
+
 private:
 	// code for default domain
 	static int defaultDomainCode;
@@ -148,6 +177,7 @@ private:
 	static int domainIndex (Block& block);
 	static KnownListEntry* findEntry (const char*, KnownListEntry*);
 	static KnownListEntry* findEntry (const char* name, const char* dom);
+	static KnownListEntry* findEntry (Block& block);
 	static void noMatch(const char* type, const char* dom);
 	static void recursiveClone(const char* type, const char* dom);
 };

@@ -43,6 +43,8 @@ description.
 #include "Error.h"
 #include <std.h>
 #include "Domain.h"
+#include "Star.h"
+#include "Wormhole.h"
 
 
 KnownListEntry::~KnownListEntry () {
@@ -50,9 +52,23 @@ KnownListEntry::~KnownListEntry () {
 	LOG_DEL; delete next;
 }
 
+inline
+void KnownListEntry::redefine (Block* bl, int oh, const char* ds) {
+	// Delete the old block if it was on the heap
+	if (onHeap) { LOG_DEL; delete b;}
+	// and install the new data
+	b = bl;
+	serialNumber = ++lastSerialNumber;
+	onHeap = oh;
+	dynLinked = Linker::isActive();
+	definitionSource = ds;
+}
+
+
 // declarations for static variables.  I would rather use class
 // static than file static for the arrays, but g++ has bugs.
 
+long KnownListEntry :: lastSerialNumber = 0L;
 static KnownListEntry* allBlocks[NUMDOMAINS];
 static const char* domainNames[NUMDOMAINS];
 int KnownBlock :: defaultDomainCode = 0;
@@ -161,7 +177,7 @@ void KnownBlock::addEntry (Block& block, const char* name, int onHeap,
 		  StringList msg = "Multiple built-in definitions for block named '";
 		  msg << name << "' in domain '" << domainNames[idx] << "'";
 		  Error::warn (msg);
-		  // note: above message appears on stderr during startup
+		  // note: is it safe to use Error::warn during startup???
 		}
 		else if (oldDef == NULL) {
 		  StringList msg = "Built-in star named '";
@@ -178,13 +194,8 @@ void KnownBlock::addEntry (Block& block, const char* name, int onHeap,
 		  msg << (definitionSource ? definitionSource : "built-in star");
 		  Error::warn (msg);
 		}
-		// Delete the old block if it was on the heap
-		if (kb->onHeap) { LOG_DEL; delete kb->b;}
-		// and install the new data
-		kb->b = &block;
-		kb->onHeap = onHeap;
-		kb->dynLinked = Linker::isActive();
-		kb->definitionSource = definitionSource;
+		// Install the new definition
+		kb->redefine(&block, onHeap, definitionSource);
 	}
 
 	// otherwise create a new entry
@@ -243,6 +254,60 @@ KnownBlock::isDynamic(const char* type, const char* dom) {
 	KnownListEntry* e = findEntry (type, allBlocks[domidx]);
 	if (!e) return FALSE;
 	return e->dynLinked;
+}
+
+// Look up a KnownBlock definition by name and return its serial number.
+// Returns 0 iff no matching definition exists.
+long
+KnownBlock::serialNumber (const char* name, const char* dom) {
+	KnownListEntry* e = findEntry (name, dom);
+	return e ? e->serialNumber : 0L;
+}
+
+
+// Find the knownlist entry matching a block, if there is one.
+// Note that this won't necessarily find an exact copy of the block.
+// For example, the given block might be an obsolete version of a
+// dynamically-linked star.  We will find the new entry that superseded it.
+// This is exactly what we want for serial number comparisons.
+
+// ISSUE: assuming that the className matches the name under which the
+// block is registered really isn't very safe.  Is there a better way?
+// Maybe KnownBlock should insist on registering blocks by their classnames,
+// rather than allowing the registered name to be given separately.
+
+KnownListEntry*
+KnownBlock::findEntry (Block& block) {
+	int idx = domainIndex (block);
+	// If the block is a wormhole, we need to use the classname of
+	// the inside galaxy; the combination would be under that name.
+	// (className of a wormhole does not return anything useful.)
+	const char * cname;
+	if (block.isItWormhole())
+	  cname = block.asStar().asWormhole()->insideGalaxy().className();
+	else
+	  cname = block.className();
+	// Stars generally have classNames starting with the domain name,
+	// and are registered under the rest of the className.  So if the
+	// className starts with the domain name, try the suffix first.
+	const char * dname = block.domain();
+	int domlength = strlen(dname);
+	KnownListEntry* kb = NULL;
+	if (strncmp(cname, dname, domlength) == 0)
+	  kb = findEntry (cname + domlength, allBlocks[idx]);
+	// Try the whole classname --- the right thing for InterpGalaxies.
+	if (!kb)
+	  kb = findEntry (cname, allBlocks[idx]);
+	return kb;
+}
+
+
+// Given a block, find the matching KnownBlock definition,
+// and return its serial number (or 0 if no matching definition exists).
+long
+KnownBlock::serialNumber (Block& block) {
+	KnownListEntry* e = findEntry (block);
+	return e ? e->serialNumber : 0L;
 }
 
 // The main cloner.  This method gives us a new block of the named
