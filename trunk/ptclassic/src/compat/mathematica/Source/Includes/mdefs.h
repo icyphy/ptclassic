@@ -2,7 +2,7 @@
 Version identification:
 $Id$
 
-Copyright (c) 1990-1995 The Regents of the University of California.
+Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
 
 Stub file for mdefs.h provided for inclusion when Mathematica is
@@ -12,8 +12,8 @@ The commercial version of mdefs.h is a Mathematica source file,
 Copyright 1986 through 1993 by Wolfram Research Inc.
 
 The file defines several C language definitions for use with
-Mathematica output as empty expressions for compatibility when
-Mathematica is not installed on the local machine.
+Mathematica output as empty expressions to prevent compilation
+errors when the true version of the file is not available.
 
 *************************************************************************/
 
