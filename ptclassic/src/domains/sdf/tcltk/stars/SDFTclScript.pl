@@ -1,6 +1,15 @@
 defstar {
 	name {TclScript}
 	domain {SDF}
+	version { $Id$ }
+	author { E. A. Lee }
+	copyright {
+Copyright (c) 1993 The Regents of the University of California.
+All rights reserved.
+See the file ~ptolemy/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
+	location { SDF tcltk library }
 	desc {
 Invoke a Tcl script that can optionally define a procedure that is
 invoked every time the star fires.
@@ -34,10 +43,10 @@ read inputs.  However, it may make sense to set output values (in order
 to initialize them).
 .pp
 The Tcl script can optionally define a Tcl procedure called
-"callTcl_$starID".  If this procedure is defined in the script,
+"goTcl_$starID".  If this procedure is defined in the script,
 then it will be invoked every time the star fires.
 It takes one argument, the starID, and returns no values.
-If the callTcl procedure is defined, then the communication with
+If the goTcl procedure is defined, then the communication with
 Tcl is said to be \fIsynchronous\fR (it is synchronized to the firing
 of the star).  Otherwise, it is \fIasynchronous\fR (the Tcl script is
 responsible for setting up procedures that will interact with the star
@@ -57,7 +66,7 @@ This mechanism is entirely asychronous, in that the Tcl/Tk script
 decides when these actions should be performed on the basis of X events.
 .pp
 In synchronous operation,
-the Tcl procedure callTcl_$starID will be called
+the Tcl procedure goTcl_$starID will be called
 by the star every time it fires.
 The procedure could,
 for example, grab input values and compute output values,
@@ -67,15 +76,6 @@ and output values.
 delim $$
 .EN
 	}
-	version { $Id$ }
-	author { E. A. Lee }
-	copyright {
-Copyright (c) 1993 The Regents of the University of California.
-All rights reserved.
-See the file ~ptolemy/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-	}
-	location { SDF tcltk library }
 	hinclude { "TclStarIfc.h" }
 	outmulti {
 		name {output}

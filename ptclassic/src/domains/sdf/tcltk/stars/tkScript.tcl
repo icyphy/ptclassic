@@ -54,7 +54,7 @@ if {![winfo exists $s] || ![info exists ballId_$starID]} {
 	setOutputs_$starID \[expr {\$value/20.0}]
     "
 
-    proc callTcl_$starID {starID} {
+    proc goTcl_$starID {starID} {
         global ballId_$starID
 	global ptkControlPanel
         set s $ptkControlPanel.field_$starID
