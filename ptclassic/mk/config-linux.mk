@@ -137,13 +137,13 @@ BISONFLEXLIB =	-fl
 #	Don't use -m486, it's the default, except for those with the
 #	Pentium optimized compiler; for them -m486 makes things worse.
 #OPTIMIZER =	-g #-m486 -pipe
-OPTIMIZER =	-O2 -mpentium -pipe
+OPTIMIZER =	-O3 -fomit-frame-pointer -malign-loops=4 -malign-jumps=4 -malign-functions=4 #-m486 -pipe
 # -Wsynth is new in g++-2.6.x, however 2.5.x does not support it
 # Under gxx-2.7.0 -Wcast-qual will drown you with warnings from libg++ includes
 WARNINGS =	-Wall -Wcast-align -Wsynth # -Wcast-qual 
 # you will need -DI_UNISTD for rman to find the declaration of getopt()
 # need _GNU_SOURCE for environ decl in glibc2
-ARCHFLAGS =	-Dlinux -DI_UNISTD -D_GNU_SOURCE# -D_BSD_SOURCE -DNO_RAND_OPTIMIZE
+ARCHFLAGS =	-Dlinux -DI_UNISTD -D_REENTRANT -D_PTHREAD_1003_1c
 # Comment out the -g below if you don't want debugging symbols 
 LOCALCCFLAGS =	-g
 GPPFLAGS =	$(OPTIMIZER) $(MEMLOG) $(WARNINGS) \
@@ -212,4 +212,29 @@ X11_LIBSPEC = -L$(X11_LIBDIR) -lX11
 CC_STATIC = #-static
 
 # Matlab architecture
-MATARCH = lnx86 #i486
+MATARCH = lnx86
+
+# If you have MATLAB 4 then you can set the environment variable MATLABDIR
+# to the MATLAB 4 root directory. Ptolemy won't link with MATLAB 5 libmat.so.
+ifdef MATLABDIR
+# Check if MATLABDIR points to a MATLAB 4 directory
+# MATLAB 4 has a static libmat.a whereas MATLAB 5 has a DLL libmat.so 
+INCLUDE_MATLAB := $(shell \
+	if [ -r "$(MATLABDIR)/extern/lib/$(MATARCH)/libmat.a" ]; \
+	then echo yes; else echo no; echo \
+	'Warning: $$MATLABDIR is not a MATLAB 4 root dir! Ignoring setting.' \
+	>&2; fi)
+else
+INCLUDE_MATLAB = no
+endif
+
+# If you have Mathematica 2 then you can set the environment variable
+# MATHEMATICADIR to the Mathematica 2 root directory. Ptolemy won't link
+# with Mathematica 3 interface library
+ifdef MATHEMATICADIR
+# FIXME: One should check if MATHEMATICADIR points to a Mathematica 2 directory
+INCLUDE_MATHEMATICA = yes
+else
+INCLUDE_MATHEMATICA = no
+endif
+INCLUDE_PN_DOMAIN = no
