@@ -1,5 +1,5 @@
 /* 
-Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
+Copyright (c) 1990-1993 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -20,11 +20,10 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
 PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
 CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
-							COPYRIGHTENDKEY
 */
 /*  Version $Id$
-    Programmer:		T.M. Parks
-    Date of creation:	2 April 1992
+    Author:	T. M. Parks
+    Created:	2 April 1992
 
 */
 
@@ -36,13 +35,13 @@ static const char file_id[] = "$RCSfile$";
 
 #include "MTDFTarget.h"
 #include "MTDFScheduler.h"
-#include "RTDFScheduler.h"
+#include "RTScheduler.h"
 
 // Constructor.
 MTDFTarget::MTDFTarget() : Target("default-MTDF", "MTDFStar",
 	"Schedule dataflow systems using Sun's lightweight process library.")
 {
-    addState(realTime.setState("realTime", this, "NO",
+    addState(realTime.setState("real-time", this, "NO",
 		"specify whether to run in real time."));
 }
 
@@ -62,7 +61,7 @@ Block* MTDFTarget::makeNew() const
 void MTDFTarget::setup()
 {
     delSched();
-    if (realTime) { LOG_NEW; setSched(new RTDFScheduler); }
+    if (realTime) { LOG_NEW; setSched(new RTScheduler); }
     else { LOG_NEW; setSched(new MTDFScheduler); }
     Target::setup();
 }
