@@ -39,6 +39,7 @@
 # Make sure that the required packages are loaded
 package require tycho.util.tytest
 package require tycho.typt.editors
+package require tycho.kernel.html
 
 #set VERBOSE 1
 
