@@ -68,8 +68,6 @@
 #  de/tcltk/stars/make.template
 #  de/stars/make.template
 #  cg56/stars/make.template
-#  cp/stars/make.template (cp domain is present only on sun4)
-#  cp/infopad/stars/make.template (cp domain is present only on sun4)
 #  sdf/matlab/stars/make.template
 #
 # We include this rule in common.mk rather than config-g++.mk so that
