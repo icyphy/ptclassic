@@ -64,18 +64,18 @@
 #
 # Usual options.
 #
-itk::usual ScrolledSlate {
-    keep -background -borderwidth -cursor \
-	 -foreground -highlightcolor -highlightthickness \
-	 -selectbackground -selectborderwidth \
-	 -selectforeground -textbackground -troughcolor
-}
+#itk::usual ScrolledSlate {
+#    keep -background -borderwidth -cursor \
+#	 -foreground -highlightcolor -highlightthickness \
+#	 -selectbackground -selectborderwidth \
+#	 -selectforeground -textbackground -troughcolor
+#}
 
 # ------------------------------------------------------------------
 #                            SCROLLEDSLATE
 # ------------------------------------------------------------------
 class tycho::ScrolledSlate {
-    inherit iwidgets::Scrolledwidget
+    inherit iwidgets3::Scrolledwidget
 
     constructor {args} {}
     destructor {}
@@ -97,14 +97,14 @@ proc ::tycho::scrolledslate {pathName args} {
 #
 # Use option database to override default resources of base classes.
 #
-option add *ScrolledSlate.width 200 widgetDefault
-option add *ScrolledSlate.height 230 widgetDefault
-option add *ScrolledSlate.labelPos n widgetDefault
+#option add *ScrolledSlate.width 200 widgetDefault
+#option add *ScrolledSlate.height 230 widgetDefault
+#option add *ScrolledSlate.labelPos n widgetDefault
 
 # ------------------------------------------------------------------
 #                        CONSTRUCTOR
 # ------------------------------------------------------------------
-body iwidgets::ScrolledSlate::constructor {args} {
+body tycho::ScrolledSlate::constructor {args} {
     #
     # Create a clipping frame which will provide the border for
     # relief display.
@@ -125,7 +125,7 @@ body iwidgets::ScrolledSlate::constructor {args} {
     # Create a slate to scroll
     #
     public itk_component add slate {
-	slate $itk_component(clipper).slate \
+	::tycho::slate $itk_component(clipper).slate \
 		-height 1.0 -width 1.0 \
                 -scrollregion "0 0 1 1" \
                 -xscrollcommand \
@@ -133,14 +133,15 @@ body iwidgets::ScrolledSlate::constructor {args} {
 		-yscrollcommand \
 		[code $this _scrollWidget $itk_interior.vertsb]
     } {
-	usual
+        keep -cursor -background
+	# usual
 
-	ignore -highlightthickness -highlightcolor
+	#ignore -highlightthickness -highlightcolor
 
-	keep -closeenough -confine -scrollregion 
-	keep -xscrollincrement -yscrollincrement
+	keep -closeenough -confine 
+	keep -scrollregion  -xscrollincrement -yscrollincrement
 
-	rename -background -textbackground textBackground Background
+	#rename -background -textbackground textBackground Background
     }
     grid $itk_component(slate) -row 0 -column 0 -sticky nsew
     grid rowconfigure $itk_component(clipper) 0 -weight 1
@@ -167,7 +168,7 @@ body iwidgets::ScrolledSlate::constructor {args} {
 # ------------------------------------------------------------------
 #                           DESTURCTOR
 # ------------------------------------------------------------------
-body iwidgets::ScrolledSlate::destructor {} {
+body tycho::ScrolledSlate::destructor {} {
 }
 
 # ------------------------------------------------------------------
@@ -182,7 +183,7 @@ body iwidgets::ScrolledSlate::destructor {} {
 # of any method which creates or destroys items.  Thus, as new 
 # items are added, the scrollbars adjust accordingly.
 # ------------------------------------------------------------------
-configbody iwidgets::ScrolledSlate::autoresize {
+configbody tycho::ScrolledSlate::autoresize {
     if {$itk_option(-autoresize)} {
 	set bbox [$itk_component(slate) bbox all]
 
@@ -207,7 +208,7 @@ configbody iwidgets::ScrolledSlate::autoresize {
 #
 # Returns the path name of the child site widget.
 # ------------------------------------------------------------------
-body iwidgets::ScrolledSlate::childsite {} {
+body tycho::ScrolledSlate::childsite {} {
     return $itk_component(slate)
 }
 
@@ -217,7 +218,7 @@ body iwidgets::ScrolledSlate::childsite {} {
 # Justifies the slate scrolled region in one of four directions: top,
 # bottom, left, or right.
 # ------------------------------------------------------------------
-body iwidgets::ScrolledSlate::justify {direction} {
+body tycho::ScrolledSlate::justify {direction} {
     if {[winfo ismapped $itk_component(slate)]} {
 	update idletasks
 	
