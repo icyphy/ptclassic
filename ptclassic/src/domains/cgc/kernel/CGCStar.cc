@@ -345,7 +345,7 @@ StringList CGCStar::expandFixPrecisionMacro(const char* name)
 		// reference here, we simply strip the ".len" tag from
 		// the symbolic length
 
-		const char* tp;  char* bp;
+		const char* tp = (const char *)NULL;  char* bp;
 		Precision p = port->precision();
 		const char* sym_len = p.symbolic_len();
 
@@ -452,7 +452,7 @@ StringList CGCStar::expandFixPrecisionMacro(const char* name, const char* offset
 		else
 		    p = (*port % offset).precision();
 
-		const char* tp;  char* bp;
+		const char* tp = (const char *)NULL;  char* bp;
 		const char* sym_len = p.symbolic_len();
 
 		if ((sym_len != NULL) &&
