@@ -47,6 +47,12 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 PendingEventList::PendingEventList() {}
 
+PendingEventList::~PendingEventList() {
+	if( size() != 0 ) {
+	    // FIXME: Clear list
+	}
+}
+
 Link * PendingEventList::appendGet( CqLevelLink * obj ) 
 {
 	return (Link *)LinkedList::appendGet( obj );
