@@ -38,12 +38,12 @@ ARCHFLAGS =	-DPTSOL2_5 -DPT_EGCS
 # Don't include -fno-for-scope
 LOCALCCFLAGS =	-g -DPTSOL2_4 -D_REENTRANT -pipe
 
-CC =		$(PTOLEMY)/gnu/egcs/sol2.5/bin/gcc
+CC =		$(PTOLEMY)/gnu/sol2.5.egcs/bin/gcc
 
-CPLUSPLUS =	$(PTOLEMY)/gnu/egcs/sol2.5/bin/g++ -I$(ROOT)/src/compat/cfront
+CPLUSPLUS =	$(PTOLEMY)/gnu/sol2.5.egcs/bin/g++ -I$(ROOT)/src/compat/cfront
 
 # system libraries (libraries from the environment)
 SYSLIBS=-lstdc++ $(CSYSLIBS)
 
 # where the Gnu library is
-GNULIB=$(PTOLEMY)/gnu/egcs/sol2.5/lib
+GNULIB=$(PTOLEMY)/gnu/sol2.5.egcs/lib
