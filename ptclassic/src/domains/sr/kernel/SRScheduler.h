@@ -27,8 +27,8 @@ PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
 CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
 
-    Author:	T.M. Parks
-    Created:	6 January 1992
+    Author:	S. A. Edwards
+    Created:	9 April 1996
 
 */
 
@@ -40,13 +40,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 class SRScheduler : public Scheduler
 {
-private:
-
-  // Tick in which to stop
-  double stopTime;
-  
 public:
-  // Constructor.
   SRScheduler();
 
   // Domain identification.
@@ -55,17 +49,35 @@ public:
   // Initialization.
   /*virtual*/ void setup();
 
-  // Run (or continue) the simulation.
-  /*virtual*/ int run();
 
-  // Get the stopping time.
-  /*virtual*/ double getStopTime();
-
-  // Set the stopping time.
+  // Set the stopping time
   /*virtual*/ void setStopTime(double);
 
   // Set the stopping time when inside a Wormhole.
-  /*virtual*/ // void resetStopTime(double);
+  /*virtual*/ void resetStopTime(double);
+
+  // Return the stopping time.
+  /*virtual*/ double getStopTime() { return double(numInstants); }
+
+
+
+  // Run (or continue) the simulation
+  /*virtual*/ int run();
+
+  // Run the simulation for an instant
+  virtual void runOneInstant();
+
+
+  // The "time" of each instant, used when interfacing with a timed domain
+  double schedulePeriod;
+
+protected:
+  // Number of instants to execute
+  int numInstants;
+
+  // Number of instants already executed
+  int numInstantsSoFar;
+
 };
 
 #endif
