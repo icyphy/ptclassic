@@ -37,15 +37,15 @@ it disregards the lsb from the codec that is lost at ThorSerToPar
 		int number =0 ;
 		int binary[8];
 		int change=0;
-//fprintf(stderr,"input bus: msb..lsb\t");		
+fprintf(stderr,"input bus: msb..lsb\t");		
 		MPHIter nexti(input);
 // fetch the bus contents
 		for( int i=0; i< int (bits); i++){
 		binary[i]= (*nexti++)%0;
 		//fprintf(stderr,"%d",binary[i]);
 		}
-//for(int l=6;l>=0;l--)
-//fprintf(stderr,"%d",binary[l]);
+for(int l=6;l>=0;l--)
+fprintf(stderr,"%d",binary[l]);
 //		fprintf(stderr,"\n");	
 /*	This is necessary as a temporary solution to a Thor limitation.
 	The star receives the input from ThorSerToPar that outputs a '3'
@@ -103,7 +103,7 @@ it disregards the lsb from the codec that is lost at ThorSerToPar
                                         }
                        }
 
-//printf("after : %d \n",number);
+//fprintf(stderr,"after : %d \n",number);
 //fprintf(stderr,"converted number is : %d\n ", number);
 		previous= number;
 		output%0 << number;	

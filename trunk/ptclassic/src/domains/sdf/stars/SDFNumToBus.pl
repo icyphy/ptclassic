@@ -54,10 +54,10 @@ and then it will convert it to a bus with the required no. of lines.
 					}
 	     }
 //lsb not printed bec 1-6 match with 2-7 of thorParToSer
-//fprintf(stderr,"from Out: (6-0) "); 
-//			for(int c=6;c>=0;c--)
-//			fprintf(stderr,"%d ",binary[c]);
-//			fprintf(stderr,"\n");
+fprintf(stderr,"from Out: (6-0) "); 
+			for(int c=6;c>=0;c--)
+			fprintf(stderr,"%d ",binary[c]);
+			fprintf(stderr,"\n");
 /*	Output the array to the bits on the output port */
 		MPHIter nextp(output);
 		i=0;
