@@ -93,14 +93,6 @@ public:
 
     virtual PortHole* clonePort(const PortHole*) = 0;
 
-    // unfortuanetly, we need this to return the nebula port side
-    // from a porthole pointer.  The derived class just needs to
-    // return the PortHole pointer casted to its repective NebulaPort
-    // hole class.  (ie DFNebulaPort for DFNebula)
-    virtual NebulaPort* nebulaPort(PortHole*) const = 0;
-
-    virtual Nebula* asNebula(Block*) const = 0;
-    
     virtual Nebula* newNebula(Block* s = NULL) const = 0;
 
     virtual int flattenGalaxy(Galaxy*) {return FALSE;}
@@ -122,29 +114,46 @@ protected:
 // An iterator for NebulaList.
 class NebulaIter : private GalStarIter {
 public:
-    NebulaIter(Nebula& n):master(n),GalStarIter(n.gal) {};
-    Nebula* next() { return master.asNebula(GalStarIter::next());}
+    NebulaIter(Nebula& n):GalStarIter(n.gal) {};
+
+    Nebula* next() {
+	Star* star = GalStarIter::next();
+	return star? star->asNebula(): NULL;
+    }
+
     Nebula* operator++(POSTFIX_OP) { return next();}
     GalStarIter::reset;
-private:
-    Nebula& master;
 };
 
 class NebulaPort {
 public:
     NebulaPort(PortHole& self, const PortHole& p, Nebula* parnetN);
-    const PortHole& real() const { return pPort; }
+    const PortHole& real() const { return master; }
     PortHole& asPort() const { return selfPort;}
     int isItInput() const {
-	return pPort.isItInput();
+	return real().isItInput();
     }
     int isItOutput() const {
-	return pPort.isItOutput();
+	return real().isItOutput();
     }
 
+    void setNebAlias(PortHole* np) {
+	nebAliasedTo = np;
+    }
+
+    PortHole* nebAlias() const { return nebAliasedTo; }
 private:
+    
+    // selfPort is a reference to the PortHole side of a NebulaPort
     PortHole& selfPort;
-    const PortHole& pPort;
+
+    // nebulaAliased much like aliases used in Galaxy ports, points to
+    // the actual nebulaPort.
+    PortHole* nebAliasedTo;
+
+    // master is a reference to the original PortHole that this
+    // porthole represents.
+    const PortHole& master;
 };
 
 class NebulaIterContext;
@@ -175,5 +184,9 @@ public:
 };
 
 #endif
+
+
+
+
 
 
