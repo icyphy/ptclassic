@@ -49,38 +49,35 @@ limitation of liability, and disclaimer of warranty provisions.
 		desc {upper limit of signal excursion }
 	}
 	protected {
-		float height;
+		double height;
 		int number;
 	}
 	setup {
-		if(high > low) 		
-			height	= (high-low)/(levels-0);
-		else			
-		{
-		Error::abortRun("quantization range incorrectly specified");
-		return;
+		if (double(high) > double(low)) {
+		    height = (double(high) - double(low))/(int(levels)-0);
+		}
+		else {
+		    Error::abortRun(*this,
+				    "quantization range incorrectly specified");
 		}
 	}
 	go {
-	    	float in = input%0;
+	    	double in = input%0;
+		double highvalue = double(high);
+		double lowvalue = double(low);
 
-	    	if( in >= high) 	
-		{
-			amplitude%0 << double(high);
-                    	stepNumber%0 << int(levels);
-		    	return;
+	    	if ( in >= highvalue ) {
+		    amplitude%0 << highvalue;
+                    stepNumber%0 << int(levels) - 1;
 		}
-		else if(in <=low) 
-		{
-			amplitude%0 << double(low);
-                    	stepNumber%0 << 0;
-		    	return;
+		else if ( in <= lowvalue ) {
+		    amplitude%0 << lowvalue;
+                    stepNumber%0 << 0;
 		}
-		else
-		{
-			int step = int((in-low)/height);
-			stepNumber%0 << step;
-        		amplitude%0 << (double(low + step*height));
+		else {
+		    int step = int((in - lowvalue)/height);
+		    stepNumber%0 << step;
+        	    amplitude%0 << double(lowvalue + step*height);
 		}
 	}
 }
