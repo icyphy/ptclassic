@@ -66,6 +66,9 @@ void CG56ScheduledTarget :: initStates() {
 }
 
 void CG56ScheduledTarget :: setup() {
+	// Return if the galaxy() is null
+	if (! galaxy()) return;
+
 	// Generate the schedule file name
 	StringList schedFileName;
 	char* pathName = expandPathName(destDirectory);
@@ -116,11 +119,12 @@ void CG56ScheduledTarget :: setup() {
 CG56Star* CG56ScheduledTarget::starWithFullName(const char* name)
 {
 	Galaxy* gal = galaxy();
-	GalStarIter nextStar(*gal);
-	CG56Star* star;
-	while( (star = (CG56Star*)nextStar++) != 0 )
-	{
-		if(strcmp(star->fullName(), name) == 0) return star;
+	if (gal) {
+		GalStarIter nextStar(*gal);
+		CG56Star* star;
+		while( (star = (CG56Star*)nextStar++) != 0 ) {
+			if(strcmp(star->fullName(), name) == 0) return star;
+		}
 	}
 	return 0;
 }
