@@ -92,7 +92,8 @@ void Cluster::setMasterBlock(Block* m,PortHole** newPorts) {
     }
     master = m;
     if (master->isItAtomic()) {
-	star().setName(master->name());
+	StringList fullname = master->fullName();
+	star().setName(hashstring(fullname));
 	// Add the star's ports to the internal galaxy,
 	// but do not change their parents.
 	BlockPortIter starPorts(*master);
@@ -117,7 +118,7 @@ void Cluster::setMasterBlock(Block* m,PortHole** newPorts) {
     else {
 	// Set the name, leave parent unchanged
 	StringList name;
-	name << master->name() << "_Cluster";
+	name << master->fullName() << "_Cluster";
 	const char* pname = hashstring(name);
 	star().setName(pname);
 	
@@ -131,39 +132,6 @@ void Cluster::setMasterBlock(Block* m,PortHole** newPorts) {
 	}
 
 	addGalaxy(g,newPorts);
-
-	// Connect the interal ports to dummy sink and source
-	// nodes.  Add the Cluster ports corresponding to the galaxy ports
-	int sources = 0, sinks = 0;
-	BlockPortIter galaxyPorts(*g);
-	PortHole* port;
-	while((port = galaxyPorts++) != NULL) {
-	    int index = ((PortHole&)port->realPort()).index();
-	    PortHole* clusterPort = newPorts[index];
-	    if (clusterPort) {
-		PortHole* realFar = (PortHole*) &clusterPort->
-		    asClusterPort()->real().far()->realPort();
-		Cluster* dummyCluster = newCluster();
-		Star* dummyStar = &dummyCluster->star();
-		PortHole* dummyPort = clonePort(realFar,dummyStar);
-		dummyPort->asClusterPort().setClusterAlias(clusterPort);
-		StringList name;
-		if (clusterPort->isItInput()) {
-		    name << "sourceCluster" << sources++;	
-		    connect(dummyPort,clusterPort);
-		}
-		else {
-		    name << "sinkCluster" << sinks++;
-		    connect(clusterPort,dummyPort);
-		}
-		dummyStar->setName(hashstring(name));       
-		addCluster(dummyCluster);
-		PortHole* fatClusterPort =
-		    clonePort(&clusterPort->asClusterPort().real(),&star());
-		fatClusterPort->asClusterPort().setClusterAlias(clusterPort);
-		newPorts[index] = fatClusterPort;
-	    }
-	}
 
 	// now connect up the Cluster ports to match the real ports.
 	// There may be fewer Cluster  ports than real ports if there
@@ -189,20 +157,73 @@ void Cluster::connect(PortHole* source, PortHole* destination) {
     source->geo()->initialize();
 }
 
+/* Add a galaxy, flattened at the the top-most level */
 void Cluster::addGalaxy(Galaxy* g,PortHole** newPorts) {
     GalTopBlockIter nextBlock(*g);
     Block* b; 
     while ((b = nextBlock++) != 0) {
-	if (b->isItAtomic()) {
+	if (b->isItAtomic()) { /* Add Star as cluster */
 	    Cluster* c = newCluster();
 	    c->setMasterBlock(b,newPorts);
 	    addCluster(c);
-	} else if (!flattenGalaxy((Galaxy*)b)) {
+	} else if (!flattenGalaxy((Galaxy*)b)) { /* Add Galaxy as cluster */
 	    Cluster* c = newCluster();
-	    c->setMasterBlock(b,newPorts);
+	    // Clusters must first be added to their parent clusters
+	    // before they built with setMasterBlock
 	    addCluster(c);
+	    c->setMasterBlock(b,newPorts);
+	    c->myDomain = ((Galaxy*)b)->domain();
+
+	    // Now create ports on the new cluster corresponding to
+	    // the galaxy ports
+	    BlockPortIter galaxyPorts(*b);
+	    PortHole* port;
+	    while((port = galaxyPorts++) != NULL) {
+		/* Resolve all the aliases */
+		PortHole& rPort = (PortHole&) port->realPort();
+		
+		/* Check if the realPort is still part of inside star.  If
+		   we remove ports of a star at a galaxy boundary... the
+		   galaxy port list will still contain the alias port in
+		   its port list. */
+		
+		if (! rPort.parent()->portWithName(rPort.name())) continue;
+
+		/* Now, we are can assume that the port is ok to index */
+		int index = rPort.index();
+
+		/* Get the internal cluster porthole which will correspond
+		   to the new external cluster porthole */
+
+		PortHole* clusterPort = newPorts[index];
+		if (clusterPort) {
+		    /* If clusterPort returned NULL, that means that the
+		       original porthole was a self loop, or at a
+		       boundary.  We now create a dummyPort which we'll
+		       connect to the internal porthole so that it is not
+		       left dangling.  This is much like even horizons.
+		       The atBoundary test will return true for these
+		       connections. */
+		    
+		    PortHole* dummyPort = clonePort(&clusterPort->asClusterPort()->real());
+		    dummyPort->asClusterPort().setClusterAlias(clusterPort);
+		    if (clusterPort->isItInput()) {
+			connect(dummyPort,clusterPort);
+		    }
+		    else {
+			connect(clusterPort,dummyPort);
+		    }
+
+		    /* Finally, we create the external cluster port */
+		    PortHole* fatClusterPort =
+			clonePort(&clusterPort->asClusterPort().real(),&c->star());
+		    fatClusterPort->asClusterPort().setClusterAlias(clusterPort);
+		    newPorts[index] = fatClusterPort;
+		}
+	    }
+
 	}
-	else {
+	else { /* Flatten Galaxy */
 	    addGalaxy((Galaxy*)b,newPorts);
 	}
     }
@@ -210,7 +231,8 @@ void Cluster::addGalaxy(Galaxy* g,PortHole** newPorts) {
 
 void Cluster::addCluster(Cluster* c) {
     gal.addBlock(c->star(),c->star().name());
-    c->star().setParent(&star());
+    c->star().setParent(&gal);
+    c->star().setTarget(star().target());
 }
 
 inline void Cluster::initMaster() {
@@ -219,7 +241,7 @@ inline void Cluster::initMaster() {
 }
 
 inline int Cluster::isClusterAtomic() const {
-    return master? master->isItAtomic() : TRUE;
+    return master? master->isItAtomic() : FALSE;
 }
 
 int Cluster::run() {
@@ -240,13 +262,20 @@ int Cluster::generateSchedule() {
 	return TRUE;
     }
     else {
+	if (!generateSubSchedules()) return FALSE;
+	sched->setup();
+	return !SimControl::haltRequested();
+    }
+}
+
+int Cluster::generateSubSchedules() {
+    if (!isClusterAtomic()) {
 	ClusterIter cluster(*this);
 	Cluster* n;
 	while ((n = cluster++) !=0)
-	    n->generateSchedule();
-	sched->setup();
-	return ! SimControl::haltRequested();
+	    if (!n->generateSchedule()) return FALSE;
     }
+    return TRUE;
 }
 
 ClusterPort::ClusterPort(PortHole& self, const PortHole& myMaster, Star* parent)
@@ -255,7 +284,7 @@ ClusterPort::ClusterPort(PortHole& self, const PortHole& myMaster, Star* parent)
     selfPort.myPlasma = Plasma::getPlasma(INT);
     selfPort.numberTokens = real().numXfer();
     selfPort.indexValue = real().index();
-    parent->addPort(selfPort);
+    if (parent) parent->addPort(selfPort);
 }
 
 PortHole* ClusterPort::realClusterPort() {
@@ -335,3 +364,15 @@ Cluster* FatClusterIter::next() {
 	if (!n->isClusterAtomic()) return n;
     }			
 }			
+
+virtual Block* Cluster::cloneCluster() const {
+    Star* s = (Star*) star().makeNew();
+    Cluster* cluster = s->asCluster();
+    if (!cluster) {
+	Error::abortRun
+	    (star(),"cloneCluster: makeNew not defined for the cluster class");
+	return NULL;
+    }
+    cluster->setMasterBlock(&this.star());
+    return s;
+}

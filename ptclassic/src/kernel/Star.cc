@@ -36,6 +36,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #pragma implementation
 #endif
 
+#include "Target.h"
 #include "Star.h"
 #include "StringList.h"
 #include "GalIter.h"
@@ -76,16 +77,23 @@ const Star& Star :: asStar () const { return *this;}
 Cluster* Star::asCluster() { return NULL; }
 
 // make a duplicate Star.  This will call Block::clone 
-// and then set Star specific data members such as targetPtr.
+// and then set Star specific data members such as the target pointer.
 /* virtual */ Block* Star::clone () const {
 	Star* star = (Star*)Block::clone();
-	if (star) star->targetPtr = targetPtr;
+	if (star && star->target()) star->setTarget(target());
 	return star;
 }
 
 // set the target for the star.
-void Star :: setTarget(Target* t) { 
-	targetPtr = t;
+int Star :: setTarget(Target* t) { 
+    if (!Block::setTarget(t)) return FALSE;
+    if(target()->support(this)) {
+	return TRUE;
+    }
+    else {
+	Error::abortRun (*this, "wrong star type for target ",name());
+	return FALSE;
+    }
 }
 
 // sets the index values of each star in the galaxy.  Returns the

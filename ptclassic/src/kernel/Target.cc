@@ -54,8 +54,10 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 // constructor
 Target::Target(const char* nam, const char* starClass,const char* desc) :
-Block(nam,0,desc), supportedStarClass(starClass), sched(0), gal(0),
-children(0), link(0), nChildren(0), dirFullName(0) {}
+Block(nam,0,desc), sched(0), gal(0),
+children(0), link(0), nChildren(0), dirFullName(0) {
+	starTypes = starClass;
+}
 
 // destructor
 Target::~Target() {
@@ -81,9 +83,6 @@ StringList Target::displaySchedule() {
 	}
 	return "no scheduler member, so no schedule\n";
 }
-
-// default auxiliary star class: none.
-const char* Target::auxStarClass() const { return "";}
 
 void Target::setGalaxy(Galaxy& g) {
 	gal = &g;
@@ -113,31 +112,28 @@ int Target::galaxySetup() {
     return FALSE;
   }
 
-  GalStarIter next(*gal);
-  Star* s;
-  while ((s = next++) != 0) {
-    if (!s->isA(supportedStarClass) && 
-	!s->isA(auxStarClass())) {
-      // The star is not a supported class or aux class.
-      // See whether its domain is in the subdomain list of
-      // galaxy's domain.
-      StringListIter subdomains(dom->subDomains);
-      const char* sub;
-      int flag = 0;
-      while ((sub = subdomains++) != 0) {
-	if(strcmp(sub,s->domain()) == 0) {
-	  flag = 1;
-	  break;
-	}
-      }
-      if(flag == 0) {
-	Error::abortRun (*s, "wrong star type for target ", name());
-	return FALSE;
-      }
+  return galaxy()->setTarget(this);
+}
+	   
+// do I support a given star
+int Target :: support(Star* star) {
+    // First check for target supported stars
+    int supportFlag = NULL;
+    StringListIter types(starTypes);
+    const char* starType;
+    while (!supportFlag && ((starType = types++) != 0))
+	supportFlag = star->isA(starType);
+
+    // Now check the sub-domain supported stars
+    if (!supportFlag && galaxy()) {
+	supportFlag = (strcmp(galaxy()->domain(),star->domain()) == 0);
+	Domain* dom = Domain::of(*galaxy());
+	StringListIter subdomains(dom->subDomains);
+	const char* sub;
+	while (!supportFlag && ((sub = subdomains++) != 0))
+	    supportFlag = (strcmp(sub,star->domain()) == 0);
     }
-    s->setTarget(this);
-  }
-  return TRUE;
+    return supportFlag;
 }
 
 // setup the scheduler

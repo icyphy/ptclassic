@@ -36,6 +36,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #pragma implementation
 #endif
 
+#include "Target.h"
 #include "Universe.h"
 #include "StringList.h"
 #include "GalIter.h"
@@ -45,17 +46,31 @@ ENHANCEMENTS, OR MODIFICATIONS.
 Runnable :: Runnable (const char* targetname, const char* dom, Galaxy* g) :
 type(dom), galP(g) {
 	if (!targetname) targetname = KnownTarget::defaultName(dom);
-	target = KnownTarget::clone(targetname);
+	pTarget = KnownTarget::clone(targetname);
 }
 
 Runnable :: Runnable (Target* tar, const char* dom, Galaxy* g) :
-target(tar), type(dom), galP(g) {
-	if (!target)
-		target = KnownTarget::clone(KnownTarget::defaultName(type));
+pTarget(tar), type(dom), galP(g) {
+	if (!myTarget())
+		pTarget = KnownTarget::clone(KnownTarget::defaultName(type));
 }
 
-StringList
-Universe :: print (int recursive) const {
+void Runnable :: initTarget() {
+	myTarget()->setGalaxy(*galP);
+	myTarget()->initialize();
+}
+
+int Runnable :: run() { return myTarget()->run(); }
+
+StringList Runnable :: displaySchedule() {
+	return myTarget()->displaySchedule();
+}
+
+Scheduler* Universe :: scheduler() const {
+	return myTarget()->scheduler();
+}
+
+StringList Universe :: print (int recursive) const {
 	StringList out;
 	out = type;
 	out += " UNIVERSE: ";
@@ -71,7 +86,7 @@ Universe :: print (int recursive) const {
 
 // setting the stopping condition
 void Runnable :: setStopTime (double stamp) {
-	target->setStopTime(stamp) ;
+	myTarget()->setStopTime(stamp) ;
 }
 
 // Modify initTarget to invoke begin methods
@@ -79,8 +94,12 @@ void Universe :: initTarget() {
 	// The following invokes the scheduler
 	Runnable::initTarget();
 	// The following invokes the begin methods of the stars
-	target->begin();
+	myTarget()->begin();
 }
 
 // isa
 ISA_FUNC(Universe,Galaxy);
+
+
+
+

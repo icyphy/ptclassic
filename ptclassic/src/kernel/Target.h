@@ -57,7 +57,7 @@ public:
 	// Invoke the begin methods of the constituent stars
 	virtual void begin();
 
-	const char* starType() const { return supportedStarClass;}
+	const char* starType() const { return starTypes.head();}
 
 	Scheduler* scheduler() const { return sched;}
 
@@ -152,6 +152,13 @@ public:
 	virtual int childIsA(const char*) const;
 
 	Galaxy* galaxy() { return gal;}
+    
+	// star classes supported
+	StringList starTypes;
+	
+	// virtual method: do I support the given star type?
+	virtual int support(Star* s); 
+
 protected:
 
 	// initialization for the target (called by initialize)
@@ -181,10 +188,6 @@ protected:
 
 	// delete all the "children" (for when they are created dynamically)
 	void deleteChildren();
-
-	// auxililary star class: permits a second type of star in addition
-	// to supportedStarClass.
-	virtual const char* auxStarClass() const;
 
 	// Method returns a directory name for writing.
 	// If the directory does not exist, it attempts create it.

@@ -62,12 +62,10 @@ public:
 	const char* targetName() const;
 	// return my scheduler
 	Scheduler* scheduler() const;
-	// return my target
-	Target* myTarget() const { return target;}
 	// run universe
 	int run() { return Runnable::run();}
 	// wrapup universe
-	void wrapup() { target->wrapup();}
+	void wrapup();
 
 	// The following is redefined to invoke the begin methods.
 	void initTarget();

@@ -225,7 +225,7 @@ int Wormhole :: checkReady() const {
 
 // set scheduler stop time.  By default, argument is ignored.
 void Wormhole :: setStopTime(double) {
-	target->resetStopTime(getStopTime());
+	myTarget()->resetStopTime(getStopTime());
 }
 
 // return the scheduler of the outer domain.

@@ -44,6 +44,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "KnownTarget.h"
 #include "miscFuncs.h"
 #include "SimControl.h"
+#include "Target.h"
 
 // constructor: set name and domain
 InterpUniverse::InterpUniverse (const char* name, const char* dom) :
@@ -55,23 +56,29 @@ const char* InterpUniverse :: targetName() const {
 }
 
 int InterpUniverse :: newTarget(const char* newTargName) {
-	if (target) {
-		LOG_DEL; delete target;
-		target = 0;
+	if (myTarget()) {
+		LOG_DEL; delete myTarget();
+		setMyTarget(0);
 	}
 	type = domain();
 	targName = newTargName;
-	target = KnownTarget::clone (targetName());
-	return target != 0;
+	setMyTarget(KnownTarget::clone (targetName()));
+	return myTarget() != 0;
 }
 
 Scheduler* InterpUniverse :: scheduler() const {
-	return target->scheduler();
+	return myTarget()->scheduler();
+}
+
+void InterpUniverse::wrapup() {
+	myTarget()->wrapup();
 }
 
 InterpUniverse :: ~InterpUniverse() {
-	if (!target) return;
-	LOG_DEL; delete target; target = 0;
+	if (!myTarget()) return;
+	LOG_DEL; delete myTarget();
+	//Is this necessary?
+	setMyTarget(0);
 }
 
 // Modify initTarget to invoke begin methods
@@ -79,7 +86,7 @@ void InterpUniverse :: initTarget() {
         // The following invokes the scheduler
         Runnable::initTarget();
         // The following invokes the begin methods of the stars
-        if (!SimControl::haltRequested()) target->begin();
+        if (!SimControl::haltRequested()) myTarget()->begin();
 }
 
 // isa

@@ -46,6 +46,7 @@ class ClusterPort;
 
 class Cluster {
 friend class ClusterIter;
+friend class ClusterPortIter;
 public:
 
     Cluster(Star& self,const char* domain);
@@ -67,9 +68,6 @@ public:
     
     Galaxy* galaxy() { return &gal;}
 
-    // Generate the schedules of the nested Clusters recursively.
-    virtual int generateSchedule();
-
     int isClusterAtomic() const;
 
     // Add a cluster into the internal galaxy of this cluster.
@@ -78,6 +76,8 @@ public:
     void addGalaxy(Galaxy*,PortHole**);
 
     void initMaster();
+
+    void compileRun() { innerSched()->compileRun(); }
 
     Scheduler* outerSched() {
 	return star().scheduler()?star().scheduler():master->scheduler();
@@ -90,7 +90,7 @@ public:
 
     int run();
 
-    virtual PortHole* clonePort(const PortHole*,Star*) = 0;
+    virtual PortHole* clonePort(const PortHole*,Star* parent=NULL) = 0;
 
     // By default the domain is set to the same as this cluster.
     virtual Cluster* newCluster(Block* s = NULL,const char* domain = NULL)
@@ -101,6 +101,13 @@ public:
     Star& star() const { return selfStar; }
     StringList displaySchedule();
     
+    /* Generate the schedules of the nested clusters recursively.
+       It first calls generateSubSchedules() to generate the internal
+       cluster schedules, then schedules itself. */
+    
+    virtual int generateSchedule();
+
+    virtual Block* cloneCluster()  const;
 protected:
     // The Star part of the Cluster.
     Star& selfStar;
@@ -111,6 +118,10 @@ protected:
     Scheduler* sched;
 
     const char* myDomain;
+
+    // Generate the schedules of all the internal clusters.
+    virtual int generateSubSchedules();
+
 private:
     // Connect two Cluster PortHoles together
     void connect(PortHole* source, PortHole* destination);
@@ -133,7 +144,7 @@ public:
 class ClusterPort {
 public:
     ClusterPort(PortHole& self, const PortHole& p, Star* parent);
-    const PortHole& real() const { return master; }
+    PortHole& real() const { return master; }
     PortHole& asPort() const { return selfPort;}
     int isItInput() const {
 	return real().isItInput();
@@ -158,7 +169,20 @@ private:
 
     // master is a reference to the original PortHole that this
     // porthole represents.
-    const PortHole& master;
+    PortHole& master;
+};
+
+class ClusterPortIter : private BlockPortIter {
+public:
+    ClusterPortIter(Cluster& n):BlockPortIter(n.star()) {};
+
+    ClusterPort* next() {
+	PortHole* port = BlockPortIter::next();
+	return port? port->asClusterPort(): NULL;
+    }
+
+    ClusterPort* operator++(POSTFIX_OP) { return next();}
+    BlockPortIter::reset;
 };
 
 class ClusterIterContext;

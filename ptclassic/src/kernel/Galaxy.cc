@@ -91,6 +91,14 @@ Galaxy :: print (int verbose) const {
 	return out;
 }
 
+int Galaxy :: setTarget(Target* t) {
+    GalTopBlockIter next(*this);
+    Block* block;
+    while((block = next++) != 0)
+	if (!block->setTarget(t)) return FALSE;
+    return TRUE;
+}
+	
         ////////////////////////////////////
         // initialize()
         ////////////////////////////////////

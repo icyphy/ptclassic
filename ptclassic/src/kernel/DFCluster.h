@@ -37,6 +37,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 ********************************************************************/
 
 #include "Cluster.h"
+#include "DFClusterBase.h"
 #include "DataFlowStar.h"
 #include "DFPortHole.h"
 
@@ -52,10 +53,8 @@ public:
     /*virtual*/ ClusterPort* asClusterPort() { return this; }
 };
 
-class DFCluster : public DataFlowStar, public Cluster{
+class DFCluster : public DataFlowStar, public DFClusterBase{
 public:
-
-    /*virtual*/ void setMasterBlock(Block*,PortHole**);
     /*virtual*/ int run();
 
     // Constructors
@@ -67,9 +66,9 @@ public:
 
     /*virtual*/ Cluster* asCluster() { return this; }
     
-    /*virtual*/ int isSDFinContext() const;
-
-    /*virtual*/ int generateSchedule();
+    /*virtual*/ int isSDFinContext() const {
+	return isClusterSDFinContext();
+    }
 
     // return my domain.  all clusters should redefine this method of block.
     /*virtual*/ const char* domain () const { return myDomain; }

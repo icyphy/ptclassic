@@ -41,6 +41,8 @@ Definition of the Galaxy class, together with the BlockList class.
 
 **************************************************************************/
 
+class Target;
+
 	////////////////////////////////////
 	// class BlockList
 	////////////////////////////////////
@@ -158,6 +160,7 @@ public:
 	// Add a block to the list of blocks to be deleted after initialization
 	void deleteBlockAfterInit(Block& b);
 
+    	/* virtual */ int setTarget(Target*);
 protected:
 
 	// Add blocks to the list
