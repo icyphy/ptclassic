@@ -3,7 +3,7 @@ static const char file_id[] = "CG56Target.cc";
 Version identification:
 $Id$
 
-Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
+Copyright (c) 1990-1994 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -58,18 +58,14 @@ void CG56Target :: headerCode () {
 
 void CG56Target :: setup() {
 	Galaxy* g = galaxy();
-	addCG56One(this,g);
-	MotorolaTarget :: setup();
-}
-
-void addCG56One(Target* target,Galaxy* g) {
 	if (g && (g->stateWithName("ONE") == 0)) {
 		LOG_NEW; FixState& ONE = *new FixState;
-		g->addState(ONE.setState("ONE",target,"",
+		g->addState(ONE.setState("ONE",this,"",
 					"Max Fix point value",
 					A_NONSETTABLE|A_CONSTANT));
 		ONE.setInitValue(CG56_ONE);
 	}
+	MotorolaTarget :: setup();
 }
 
 // makeNew
@@ -84,3 +80,5 @@ void CG56Target::writeFloat(double val) {
 }
 
 const char* CG56Target::className() const { return "CG56Target";}
+
+ISA_FUNC(CG56Target,MotorolaTarget);

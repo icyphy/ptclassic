@@ -54,6 +54,9 @@ public:
 
 	Block* makeNew() const = 0;
 
+	// Class identification.
+	/*virtual*/ int isA(const char*) const;
+
 	// output a directive that switches to the code section
 	virtual void codeSection() = 0;
 
