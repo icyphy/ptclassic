@@ -63,10 +63,6 @@ PL_SRCS= \
   SDFMatlab_M.pl \
   SDFMatlabCx_M.pl
 
-MATLAB_SRCS= \
-  PtCloseStarFigures.m \
-  PtSetStarFigures.m
-
 # The .cc files
 SRCS=$(PL_SRCS:.pl=.cc)
 
@@ -83,7 +79,7 @@ HDRS= $(SRCS:.cc=.h)
 STAR_MK=sdfmatlabstars
 DOMAIN=SDF_MATRIX
 DOMAIN_2=SDF
-EXTRA_SRCS=$(STAR_MK).c $(PL_SRCS) $(MATLAB_SRCS)
+EXTRA_SRCS=$(STAR_MK).c $(PL_SRCS)
 
 all:		$(SRCS) stars_all
 
