@@ -656,7 +656,7 @@ body ::tycho::EdgeController::_initdrag:edge {x y} {
     # Get two unique edge names
     set edgename2 [$graph uniqueid edge]
     set _edgename [$graph uniqueid edge]
-puts "$edgename1 $edgename2 $_edgename"
+
     # Split the edge: get coordinates
     set out [eval ::tycho::Line::direction [list $coords] $point]
     set in [::tycho::Shape::compass $out rev]
@@ -715,7 +715,7 @@ puts "$edgename1 $edgename2 $_edgename"
             -fromaspect $joinat \
             -tags "edge"
 
-	set _aspect "end"
+    set _aspect "end"
     set _edgeitem [slateid $_edgename]
     set _totags "input"
 }
