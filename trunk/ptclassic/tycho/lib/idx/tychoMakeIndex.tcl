@@ -45,11 +45,11 @@ proc tychoCompareFirst {first second} {
 # from which the index should be created.
 #
 proc tychoMkIndex {name filename args} {
+    set entries {}
     foreach file [eval glob $args] {
 	set fd [open $file r]
 	set contents [read $fd]
 	close $fd
-	set entries {}
 	set nameexp "<\[ \t\]*a\[ \t\]+name\[ \t\]*=\[ \t\]*\"?(\[^>\"\]*)\"?>"
 	while {[regexp -nocase -indices $nameexp $contents matchvar matchname] \
 		!= 0} {
@@ -61,9 +61,26 @@ proc tychoMkIndex {name filename args} {
 	}
     }
     set fd [open $filename w]
-    puts $fd $name
+    puts $fd [list $name]
     puts $fd \{
-    puts $fd [lsort -command compareFirst $entries]
+    foreach entry [lsort -command tychoCompareFirst $entries] {
+	puts $fd [list $entry]
+    }
     puts $fd \}
     close $fd
+}
+
+#### tychoStandardIndex
+# Update the Tycho master index.
+#
+proc tychoStandardIndex {} {
+    global TYCHO
+    set olddir [pwd]
+    cd $TYCHO
+    tychoMkIndex {Tycho index} tycho.idx \
+	    kernel/doc/*.html \
+	    kernel/doc/usersGuides/*.html \
+	    kernel/doc/codeDoc/*.html \
+	    kernel/doc/internals/*.html
+    cd $olddir
 }
