@@ -336,7 +336,7 @@ body ::tycho::Subpanel::constructor {args} {
 	label $itk_component(labelFrame).title \
 		-justify right
     } {
-	keep -background -font
+	keep -background -font -foreground
     }
     pack $itk_component(title) -side left
 
