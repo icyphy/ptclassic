@@ -77,6 +77,7 @@ void MultiTarget :: pairSendReceive(DataFlowStar*, DataFlowStar*) {}
 
 void MultiTarget :: setProfile(Profile*) {}
 void MultiTarget :: prepareCodeGen() {}
+int MultiTarget :: prepareSchedule() { return TRUE; }
 
 int MultiTarget :: totalWorkLoad() { return -1; }		// undefined...
 

@@ -151,6 +151,11 @@ public:
 	// by default, do nothing.
 	virtual void prepareCodeGen();
 
+	// prepare scheduling: setting up information 
+	// after galaxy is initialized and before 
+	// scheduling starts.
+	virtual int prepareSchedule();
+
 protected:
 	IntState nprocs;		// number of processors
 	IntState inheritProcessors;	// Inside the wormhole, use the
