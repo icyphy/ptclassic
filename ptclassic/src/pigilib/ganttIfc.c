@@ -147,6 +147,8 @@ int usePattern;
 	      inst = {OCT_UNDEFINED_OBJECT, 0};
     char word[256];
     vemSelSet ss;
+    char cmd[256];
+    int length;
 
     if (name == NULL) return TRUE;
     facet = *rootFacetPtr;			/* don't deallocate facet */
@@ -169,6 +171,31 @@ int usePattern;
 	        return FALSE;
 	    }
 	    FreeOctMembers(&inst);
+	} else {
+
+	    // Find the graphical editor of the instance in Tycho.
+	    strcpy(cmd, "::tycho::File::winGetByRootName ");
+	    length = strlen(cmd);
+	    strcpy(cmd+length, word);
+	    Tcl_Eval(ptkInterp,cmd);
+
+	    if (strcmp(ptkInterp->result,"")) {
+		// If the window name of the editor exists, use it as command.
+		strcpy(cmd,ptkInterp->result);
+		length = strlen(cmd);
+		strcpy(cmd+length," highlightState {");
+		length = strlen(cmd);
+		
+		// Use next string as the state name.
+		if ((name = incr(name)) == NULL) break;
+		head(name, word, 256);
+		length = strlen(cmd);
+		strcpy(cmd+length,word);
+		length = strlen(cmd);
+		strcpy(cmd+length,"}");
+		Tcl_Eval(ptkInterp,cmd);
+	    }
+
 	}
 	if ((name = incr(name)) == NULL) break;
     }
