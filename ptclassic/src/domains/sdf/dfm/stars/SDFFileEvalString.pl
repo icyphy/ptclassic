@@ -40,9 +40,9 @@ executed.
     }
     ccinclude { "FileMessage.h" }
     code {
-	extern "C" {
-	    #include "ptk.h"
-	}
+extern "C" {
+#include "ptk.h"
+}
     }
     go {
 	SDFFileEval::go();
