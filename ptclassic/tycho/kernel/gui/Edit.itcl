@@ -1357,6 +1357,7 @@ body ::tycho::Edit::indicateReadOnly {bool} {
             menubar disable {Fill Region}
             menubar disable {Right Fill Column}
             menubar disable {Set Fill Prefix}
+            menubar disable {Capitalize}
             menubar disable {Lower Case}
             menubar disable {Upper Case}
 	} {
@@ -1366,6 +1367,7 @@ body ::tycho::Edit::indicateReadOnly {bool} {
             menubar enable {Fill Region}
             menubar enable {Right Fill Column}
             menubar enable {Set Fill Prefix}
+            menubar enable {Capitalize}
             menubar enable {Lower Case}
             menubar enable {Upper Case}
 	}
