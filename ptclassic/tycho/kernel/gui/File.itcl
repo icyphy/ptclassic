@@ -108,7 +108,10 @@ proc ::tycho::openContext {filename {mode {}}} {
             set mode "text"
         }
     }
-    
+    # Check that the mode exists
+    if ![::tycho::registry modeexists $mode] {
+	set mode "text"
+    }
     # Get the command for this mode and execute it
     set command [::tycho::registry modecget $mode -command]
     if [catch {
