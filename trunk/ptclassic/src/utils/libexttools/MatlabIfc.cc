@@ -659,8 +659,9 @@ int MatlabIfc :: GetMatlabVariable(char* name,
 	Real* realp = mxGetPr(matlabMatrix);
 	Real* imagp = mxGetPi(matlabMatrix);
 	int numelements = (*numrows) * (*numcols);
-	*realPartStrings = new (char*) [numelements];
-	if ( imagp ) *imagPartStrings = new (char*) [numelements];
+	// Under cfront compiler, we cannot use (char *) instead of char* here
+	*realPartStrings = new char* [numelements];
+	if ( imagp ) *imagPartStrings = new char* [numelements];
 	else *imagPartStrings = 0;
 	for ( int jcol = 0; jcol < *numcols; jcol++ ) {
 	    // index = jrows * numcols + jcol
