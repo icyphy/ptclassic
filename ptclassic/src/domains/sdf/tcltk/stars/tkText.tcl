@@ -11,9 +11,10 @@
 # When this file is sourced, it is assumed that the following global
 # variables have been set:
 #	uniqueSymbol
-#	numInputs
-#	label
-#	numberOfValues
+#	TkText_numInputs
+#	TkText_label
+#	TkText_numberOfValues
+#	TkText_waitBetweenOutputs
 # where the last three are given values corresponding to parameter values.
 
 set s $ptkControlPanel.${uniqueSymbol}label
@@ -64,7 +65,8 @@ if {![winfo exists $s]} {
         pack append $win $win.ok {top fillx}
     }
 
-    tkTextMakeWindow $s $label $numInputs [curuniverse] $waitBetweenOutputs
+    tkTextMakeWindow $s $TkText_label $TkText_numInputs [curuniverse] \
+		$TkText_waitBetweenOutputs
 
     proc tkTextSetValues {uniqueSymbol numInputs win numLines} {
         set c $win.f
@@ -104,7 +106,9 @@ if {![winfo exists $s]} {
     # In the following definition, the value of uniqueSymbol and
     # numInputs is evaluated when the file is sourced.
     proc ${uniqueSymbol}callTcl {} "
-        tkTextSetValues $uniqueSymbol $numInputs $s $numberOfValues
-	tkTextWait $waitBetweenOutputs $uniqueSymbol $numInputs $s
+        tkTextSetValues $uniqueSymbol $TkText_numInputs $s \
+		$TkText_numberOfValues
+	tkTextWait $TkText_waitBetweenOutputs $uniqueSymbol \
+		$TkText_numInputs $s
     "
 }

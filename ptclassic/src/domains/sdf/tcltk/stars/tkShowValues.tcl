@@ -11,8 +11,9 @@
 # When this file is sourced, it is assumed that the following global
 # variables have been set:
 #	uniqueSymbol
-#	numInputs
-#	label
+#	TkShowValues_numInputs
+#	TkShowValues_label
+#	TkShowValues_waitBetweenOutputs
 #	putInCntrPan
 # where the last three are given values corresponding to parameter values.
 
@@ -61,7 +62,8 @@ if {![winfo exists $s]} {
         }
     }
 
-    tkShowValueMakeWindow $putInCntrPan $s $label $numInputs [curuniverse]
+    tkShowValueMakeWindow $putInCntrPan $s $TkShowValues_label \
+	$TkShowValues_numInputs [curuniverse]
 
     proc tkShowValueSetValues {uniqueSymbol numInputs win} {
         set c $win.f
@@ -92,7 +94,8 @@ if {![winfo exists $s]} {
     # In the following definition, the value of uniqueSymbol and
     # numInputs is evaluated when the file is sourced.
     proc ${uniqueSymbol}callTcl {} "
-        tkShowValueSetValues $uniqueSymbol $numInputs $s
-	tkShowValueWait $waitBetweenOutputs $uniqueSymbol $numInputs $s
+        tkShowValueSetValues $uniqueSymbol $TkShowValues_numInputs $s
+	tkShowValueWait $TkShowValues_waitBetweenOutputs $uniqueSymbol \
+		$TkShowValues_numInputs $s
     "
 }

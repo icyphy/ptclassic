@@ -12,10 +12,10 @@
 # variables have been set:
 #	uniqueSymbol
 #	ptkControlPanel
-#	identifier
-#	low
-#	high
-#	value
+#	TkSlider_identifier
+#	TkSlider_low
+#	TkSlider_high
+#	TkSlider_value
 # where the last three are given values corresponding to parameter values.
 
 if {![info exists putInCntrPan]} {set putInCntrPan 1}
@@ -40,17 +40,16 @@ if {![winfo exists $s]} {
     }
 
     proc ${uniqueSymbol}setOut {position} "
-        ${uniqueSymbol}setOutputs \[expr {$low+($high-$low)*\$position/100.0}]
+        ${uniqueSymbol}setOutputs \
+	\[expr {$TkSlider_low+($TkSlider_high-$TkSlider_low)*\$position/100.0}]
     "
 
     frame $s.f
-    set position [expr 100*($value-$low)/($high-$low)]
-    ptkMakeScale $s.f m $identifier $position ${uniqueSymbol}setOut
+    set position [expr \
+	100*($TkSlider_value-$TkSlider_low)/($TkSlider_high-$TkSlider_low)]
+    ptkMakeScale $s.f m $TkSlider_identifier $position ${uniqueSymbol}setOut
     pack append $s $s.f top
-
-    # Most of the work was done on sourcing this file.
-    # Just initialize the output
-    proc ${uniqueSymbol}callTcl {} "
-    	${uniqueSymbol}setOutputs $value
-    "
 }
+
+# Initialize the output
+${uniqueSymbol}setOutputs $TkSlider_value

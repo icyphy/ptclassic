@@ -52,10 +52,10 @@ limitation of liability, and disclaimer of warranty provisions.
 	    // For now, we pass the relevant parameter values to tcl
 	    // by setting global variables.  We need a better way.
 	    sprintf(buf,"%d",input.numberPorts());
-	    if((Tcl_SetVar(ptkInterp, "label", label, TCL_GLOBAL_ONLY) == NULL)
-	    || (Tcl_SetVar(ptkInterp, "low", low, TCL_GLOBAL_ONLY) == NULL)
-	    || (Tcl_SetVar(ptkInterp, "high", high, TCL_GLOBAL_ONLY) == NULL)
-	    || (Tcl_SetVar(ptkInterp, "numInputs", buf, TCL_GLOBAL_ONLY)
+	    if((Tcl_SetVar(ptkInterp, "TkMeter_label", label, TCL_GLOBAL_ONLY) == NULL)
+	    || (Tcl_SetVar(ptkInterp, "TkMeter_low", low, TCL_GLOBAL_ONLY) == NULL)
+	    || (Tcl_SetVar(ptkInterp, "TkMeter_high", high, TCL_GLOBAL_ONLY) == NULL)
+	    || (Tcl_SetVar(ptkInterp, "TkMeter_numInputs", buf, TCL_GLOBAL_ONLY)
 		== NULL)) {
                 Error::abortRun(*this,"Failed to set parameter values for tcl");
                 return;
@@ -71,6 +71,12 @@ limitation of liability, and disclaimer of warranty provisions.
 	    // Hide irrelevant outputs and states.
 	    output.setAttributes(P_HIDDEN);
 	    tcl_file.clearAttributes(A_SETTABLE);
-	    synchronous.clearAttributes(A_SETTABLE);
+	}
+	destructor {
+	    Tcl_UnsetVar(ptkInterp, "TkMeter_label", TCL_GLOBAL_ONLY);
+	    Tcl_UnsetVar(ptkInterp, "TkMeter_low", TCL_GLOBAL_ONLY);
+	    Tcl_UnsetVar(ptkInterp, "TkMeter_high", TCL_GLOBAL_ONLY);
+	    Tcl_UnsetVar(ptkInterp, "TkMeter_numInputs", TCL_GLOBAL_ONLY);
+	    Tcl_UnsetVar(ptkInterp, "putInCntrPan", TCL_GLOBAL_ONLY);
 	}
 }
