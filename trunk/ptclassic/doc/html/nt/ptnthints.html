@@ -62,6 +62,42 @@ cd $PTOLEMY
 pigi
 </pre>
 
+
+<li> If pigi does not start up, follow the steps below:
+<ol>
+<li> Verify that your x server is running by starting up a client, such as:
+<pre>
+xterm &amp;
+</pre>
+
+<li> Try running the <CODE>pigi</CODE> script with <CODE>sh -x</CODE>
+
+<pre>
+sh -x $PTOLEMY/bin/pigi
+</pre>
+and look for errors in the output.
+</ol>
+
+<li> <CODE>pigi</CODE> starts up <CODE>vem</CODE>, which in turn
+starts up <CODE>pigiRpc</CODE>.  You can start vem by hand with the
+following under bash
+
+<pre>
+OCTTOOLS=$PTOLEMY
+export OCTTOOLS
+vem
+</pre>
+
+<li> You could also try starting up ptcl, which is the non-graphical Ptolemy
+type:
+<pre>
+ptcl
+</pre>
+if you get a prompt, type
+<pre>
+domains
+</pre>
+you should get the domains listed.
 </ol>
 
 
