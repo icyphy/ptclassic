@@ -157,6 +157,7 @@ proc ptkRunControlDel { name window octHandle defNumIter} {
 	return
     }
     if {$ptkRunFlag($name) == {ACTIVE} || \
+	    $ptkRunFlag($name) == {PAUSED} || \
 	    $ptkRunFlag($name) == {STOP_PENDING} } {
 	ptkImportantMessage .message {System is still running.  Please stop it.}
 	return
