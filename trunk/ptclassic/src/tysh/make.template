@@ -48,6 +48,7 @@ include $(CONFIG)
 
 # Directory containing the [incr Tcl] extensions to Tcl
 # FIXME: This should be in the Ptolemy tree
+
 ITCL_INCDIR = $(ROOT)/tcltk/itcl/include
 ITCL_LIBSPEC = -L$(ROOT)/tcltk/itcl.$(PTARCH)/lib -litcl
 
@@ -69,7 +70,7 @@ OPTIMIZER=
 # it from PTINY_LIBS below
 PTINY__LIBS =	$(PTINY_STAR_LIBS) \
 		$(PTINY_TCL_STAR_LIBS) $(HOF_LIBS) \
-		-lptk -lptolemy $(LIB_FLUSH_CACHE)
+		-lptk -lptolemy -lgantt $(LIB_FLUSH_CACHE)
 
 PTRIM__LIBS =	$(PTRIM_STAR_LIBS) \
 		$(PTRIM_TCL_STAR_LIBS) $(HOF_LIBS) \
