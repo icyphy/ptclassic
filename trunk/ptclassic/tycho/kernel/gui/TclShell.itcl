@@ -115,6 +115,9 @@ class ::tycho::TclShell {
     # Open a help window.  This should be redefined in derived classes.
     method help {}
 
+    # Specify whether or not modifications are allowed in the displayed text.
+    method indicateReadOnly {bool}
+
     # Kill the current command, saving it to the clipboard.
     method killLine {}
 
@@ -147,9 +150,6 @@ class ::tycho::TclShell {
 
     # Go to the specified point in the console.
     method seePoint {point}
-
-    # Specify whether or not modifications are allowed in the displayed text.
-    method setReadOnly {bool}
 
     # Insert text from the selection and possibly execute a command.
     method stuff {}
@@ -547,6 +547,28 @@ body ::tycho::TclShell::help {} {
     ::tycho::File::openContext $TYCHO/kernel/doc/usersGuides/TclShellHelp.html
 }
 
+#####################################################################
+#### indicateReadOnly
+# Indicate in the status bar and in the menus
+# whether modifications are allowed on the buffer.
+# This is redefined from the base class because the Format menu has been
+# removed and the base class method refers to it.
+#
+body ::tycho::TclShell::indicateReadOnly {bool} {
+    ::tycho::File::indicateReadOnly $bool
+    if [winfo exists $prefix] {
+	if {$bool} {
+            menubar disableMenuItem {Undo/Redo} Edit
+            menubar disableMenuItem Cut Edit
+            menubar disableMenuItem Paste Edit
+	} {
+            menubar enableMenuItem {Undo/Redo} Edit
+            menubar enableMenuItem Cut Edit
+            menubar enableMenuItem Paste Edit
+	}
+    }
+}
+
 #########################################################################
 #### killLine
 # Kill the current command, saving it to the clipboard.
@@ -683,30 +705,6 @@ body ::tycho::TclShell::search {} {
 body ::tycho::TclShell::seePoint {point} {
     Edit::seePoint $point
     after 200 "$this adjustInsertionCursor"
-}
-
-#####################################################################
-#### setReadOnly
-# Specify whether or not modifications are allowed in the displayed text.
-# Note that this is independent of whether the associated file is readonly.
-# It merely determines whether the buffer can be modified, not whether the
-# file can be modified.  To control the file, use <code>toggleReadOnly</code>.
-# This is redefined from the base class because the Format menu has been
-# removed and the base class method refers to it.
-#
-body ::tycho::TclShell::setReadOnly {bool} {
-    ::tycho::File::setReadOnly $bool
-    if [winfo exists $prefix] {
-	if {$bool} {
-            menubar disableMenuItem {Undo/Redo} Edit
-            menubar disableMenuItem Cut Edit
-            menubar disableMenuItem Paste Edit
-	} {
-            menubar enableMenuItem {Undo/Redo} Edit
-            menubar enableMenuItem Cut Edit
-            menubar enableMenuItem Paste Edit
-	}
-    }
 }
 
 #########################################################################
