@@ -61,7 +61,7 @@ tkman:
 		MANDIR=$(ROOT)/man/man1 \
 		all
 
-install:	#tkman $(BINDIR)/tkman $(ROOT)/man/man1/tkman.1
+install:	$(ROOT)/man/man1 #tkman $(BINDIR)/tkman
 	rm -f $(BINDIR)/tkman
 	$(MAKE) -f $(VPATH)/Makefile.dist \
 		VPATH=$(VPATH) \
@@ -69,6 +69,11 @@ install:	#tkman $(BINDIR)/tkman $(ROOT)/man/man1/tkman.1
 		BINDIR=$(BINDIR) \
 		MANDIR=$(ROOT)/man/man1 \
 		install
+
+# Can't use mkdir -p here, because not all machines have it
+$(ROOT)/man/man1:
+	if [ ! -d $(ROOT)/man ]; then mkdir $(ROOT)/man; fi
+	if [ ! -d $(ROOT)/man/man1 ]; then mkdir $(ROOT)/man/man1; fi
 
 $(BINDIR)/tkman:	tkman
 	@echo Installing $<
