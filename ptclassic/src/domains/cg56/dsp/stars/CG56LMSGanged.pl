@@ -1,9 +1,10 @@
 defstar {
 	name { LMSGanged }
 	domain { CG56 }
-	desc { Ganged Least mean square (LMS) adaptive filter. }
+	desc { Ganged least mean square (LMS) adaptive filter. }
 	version { $Id$ }
 	author { Chih-Tsung Huang, ported from Gabriel }
+	acknowledge { Gabriel version by Martha Fratt }
 	copyright {
 Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
 All rights reserved.
@@ -12,8 +13,12 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CG56 demo library }
         explanation {
-DSP56000 - Ganged Least Mean Square Adaptive Filter Star
-Coefficients from the adaptive filter are used for the fir filter in parallel. The order is determined from the number of initial coefficients.  Initial coefficients default to a lowpass filter of order 8.  Default stepSize 0.01.  The errorDelay must specify the total delay between the filter output and the error input.
+Coefficients from the adaptive filter are used for the FIR filter in parallel.
+The order is determined from the number of initial coefficients.
+Initial coefficients default to a lowpass filter of order 8.
+Default stepSize 0.01.
+The errorDelay must specify the total delay between the
+filter output and the error input.
 	}
         
         input  {
