@@ -35,24 +35,31 @@ if [ $# != 2 ]; then
 	exit 4
 fi
 
+arch=`uname -s`
+
+
+tmpfile1=$1
+tmpfile2=$2
+
 filetype1=`file $1 | awk '{print $NF}`
 filetype2=`file $2 | awk '{print $NF}`
-
-tmpfile1=/tmp/${prog}.1.$$
-tmpfile2=/tmp/${prog}.2.$$
-
-if [ "$filetype1" = "data" ]; then
-	bin2ascii $1 > $tmpfile1
+if [ $arch = "SunOS" ]; then
+    if [ "$filetype1" = "data" ]; then
+    	tmpfile1=/tmp/${prog}.1.$$
+	$PTOLEMY/obj.$PTARCH/tst/bin2ascii $1 > $tmpfile1
+    fi	
+    if [ "$filetype2" = "data" ]; then
+    	tmpfile2=/tmp/${prog}.2.$$
+	$PTOLEMY/obj.$PTARCH/tst/bin2ascii $2 > $tmpfile2
+    fi
 else
-	tmpfile1=$1
-fi
-	
-if [ "$filetype2" = "data" ]; then
-	bin2ascii $2 > $tmpfile2
-else
-	tmpfile2=$2
+    	tmpfile1=/tmp/${prog}.1.$$
+	$PTOLEMY/obj.$PTARCH/tst/bin2ascii $1 > $tmpfile1
+    	tmpfile2=/tmp/${prog}.2.$$
+	$PTOLEMY/obj.$PTARCH/tst/bin2ascii $2 > $tmpfile2
 fi
 
+diff $tmpfile1 $tmpfile2
 awk '	{ 	if (FILENAME != oldfilename) {
 				oldfilename=FILENAME
 				lineNum=0
