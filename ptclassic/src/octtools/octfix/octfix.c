@@ -1,3 +1,12 @@
+/*
+ * octfix
+ * Hacked version of octmvlib.
+ * Improved to support multiple (old,new) pairs by Joe Buck.
+ * Improved to support view-name matching and replacement by Kennard.
+ * Improved to support full string matches (instead of partial) by Kennard.
+ *
+ * $Id$
+ */
 #include "port.h"
 #include "utility.h"
 #include "options.h"
@@ -84,7 +93,9 @@ char **argv;
     char *input_name, *output_name;
     char *oldpath[MAX_PATHS];
     int oldlen[MAX_PATHS];
+    char *oldview[MAX_PATHS];
     char *newpath[MAX_PATHS];
+    char *newview[MAX_PATHS];
     int n_oldp = 0, n_newp = 0;
     octObject outfacet, facet, instance, newinstance;
     octGenerator gen;
@@ -117,13 +128,29 @@ char **argv;
 	    break;
 	case 'O':
 	    if (n_oldp >= MAX_PATHS) bomb("Too many -O options");
-	    oldlen[n_oldp] = strlen(optarg);
-	    oldpath[n_oldp++] = util_strsav(optarg);
+	    oldpath[n_oldp] = util_strsav(optarg);
+	    if ( (oldview[n_oldp]=strchr(oldpath[n_oldp],':')) != NULL ) {
+		*(oldview[n_oldp]) = '\0';
+		if ( *(++(oldview[n_oldp])) == '\0' ) {
+		    oldview[n_oldp] = NULL;
+		}
+		oldlen[n_oldp] = -1;
+	    } else {
+	        oldlen[n_oldp] = strlen(oldpath[n_oldp]);
+	    }
+	    ++n_oldp;
 	    break;
 
 	case 'N':
 	    if (n_newp >= MAX_PATHS) bomb("Too many -N options");
-	    newpath[n_newp++] = util_strsav(optarg);
+	    newpath[n_newp] = util_strsav(optarg);
+	    if ( (newview[n_newp]=strchr(newpath[n_newp],':')) != NULL ) {
+		*(newview[n_newp]) = '\0';
+		if ( *(++(newview[n_newp])) == '\0' ) {
+		    newview[n_newp] = NULL;
+		}
+	    }
+	    ++n_newp;
 	    break;
 
 	case 'o':
@@ -206,38 +233,48 @@ char **argv;
     count = ohCountContents( &facet, OCT_INSTANCE_MASK );
     while (octGenerate(&gen, &instance) == OCT_OK) {
 	int old_len;
-        char * new_path;
+        char * new_path, *new_view, *old_path, *old_view;
 	int idx;
+	char newname[2048];
 
 	if ( count-- == 0 ) break;
 
-	old_len = -1;
-
+	new_path = NULL;
         for (idx = 0; idx < n_oldp; idx++) {
-	    if(strncmp(instance.contents.instance.master,
-		       oldpath[idx], oldlen[idx]) == 0) {
+	    old_path = instance.contents.instance.master;
+	    old_view = instance.contents.instance.view;
+	    old_len = oldlen[idx];
+	    if((old_len>0 && strncmp(old_path,oldpath[idx],old_len)==0)
+	      || strcmp(old_path,oldpath[idx])==0 ) {
+		if ( oldview[idx]!=NULL && strcmp(old_view,oldview[idx])!=0 )
+		    continue;
 		new_path = newpath[idx];
-		old_len = oldlen[idx];
+		new_view = newview[idx];
 		break;
 	    }
 	}
-        if (old_len >= 0) {
-	    char newname[2048];
+	if (new_path==NULL)
+	    continue;
 
-	    (void) strcpy(newname, new_path);
-	    (void) strcat(newname, &instance.contents.instance.master[old_len]);
-	    newinstance = instance;
-	    newinstance.contents.instance.master = newname;
-	    if ( forceFacet ) {
-		newinstance.contents.instance.facet = forceFacet;
-	    }
-	    if ( verbose ) {
-		printf( "Replacing \n\tOLD: %s\n\tNEW: %s\n", ohFormatName(&instance), ohFormatName(&newinstance) );
-		fflush( stdout );
-	    }
-	    replaceInstance(&newinstance, &instance, force);
-	    subst++;
+
+	(void) strcpy(newname, new_path);
+	if ( old_len > 0 ) {
+	    (void) strcat(newname, &old_path[old_len]);
 	}
+	newinstance = instance;
+	newinstance.contents.instance.master = newname;
+	if ( new_view ) {
+	    newinstance.contents.instance.view = new_view;
+	}
+	if ( forceFacet ) {
+	    newinstance.contents.instance.facet = forceFacet;
+	}
+	if ( verbose ) {
+	    printf( "Replacing \n\tOLD: %s\n\tNEW: %s\n", ohFormatName(&instance), ohFormatName(&newinstance) );
+	    fflush( stdout );
+	}
+	replaceInstance(&newinstance, &instance, force);
+	subst++;
     }
     printf( "octmvlib: %d substitutions.\n", subst );
     octFreeGenerator( &gen );
