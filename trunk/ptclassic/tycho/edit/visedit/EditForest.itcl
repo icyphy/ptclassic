@@ -158,11 +158,7 @@ option add *EditForest.vertspacing 1.2 widgetDefault
 # <p>
 # Here is an example of how to use the EditForest:
 # <tcl><pre>
-#     catch {delete object .f}
-#     ::tycho::TopLevel .f
-#     ::tycho::EditForest .f.f
-#     pack .f.f
-#     .f centerOnScreen
+#     ::tycho::view EditForest
 # </pre></tcl>
 # <p>
 # The widget has a number of options. The <b>-forest</b> option gives
