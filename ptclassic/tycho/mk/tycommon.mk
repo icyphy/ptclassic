@@ -222,7 +222,7 @@ $(LIBDIR)/$(LIB_DEBUG):	$(LIBDIR)/$(LIB)
 
 .SUFFIXES: .class .java
 .java.class:
-	rm -f `basename .java`.class
+	rm -f `basename $< .java`.class
 	CLASSPATH=$(CLASSPATH) $(JAVAC) $(JFLAGS) $<
 
 # Build all the Java class files.
@@ -269,7 +269,7 @@ htest-netscape: $(JTESTHTML) $(JCLASS)
 # We cd up one level so that the zip file has the proper package name
 jzip: $(JZIP)
 $(JZIP): $(JSRCS) $(JCLASS)
-	(cd ..; zip -n .class $(JPACKAGE)/$@ $(JPACKAGE)/*.class)
+	(cd $(CLASSPATH); zip -n .class $@ $(JPACKAGE)/*.class)
 
 
 # Rules to build Java package distributions
