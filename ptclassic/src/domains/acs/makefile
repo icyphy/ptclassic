@@ -24,7 +24,7 @@
 # 						PT_COPYRIGHT_VERSION_2
 # 						COPYRIGHTENDKEY
 #		       
-# Programmer:  E. A. Lee and D. Niehaus
+# Programmer:  Eric Pauer (Sanders), Edward A. Lee, Christopher Hylands
 # $Id$
 #
 # Important!  Do not run this makefile while in $PTOLEMY/src/domains/acs.
