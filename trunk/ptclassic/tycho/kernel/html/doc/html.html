@@ -31,7 +31,7 @@ namespace.
 <p>
 You may create an instance of the HTML class as follows:
 <tcl><pre>
-::tycho::view HTML [list -file $TYCHO/doc/introduction.html]
+::tycho::view HTML -file $TYCHO/doc/introduction.html
 </pre></tcl>
 There are many public methods associated with this class.
 See the class documentation for details.
@@ -39,11 +39,10 @@ See the class documentation for details.
 HTML has a number of options.  For example:
 <tcl><pre>
 set h [::tycho::view HTML &#92
-	[list &#92
-	  -data "&lt;h1&gt;Initial header in the HTML widget&lt;/h1&gt;" &#92
-	  -textwidth 60 &#92
-	  -scrollbar 0 &#92
-	  -textheight 20]]
+	-data "&lt;h1&gt;Initial header in the HTML widget&lt;/h1&gt;" &#92
+	-textwidth 60 &#92
+	-scrollbar 0 &#92
+	-textheight 20]
 </pre></tcl>
 By default, an HTML widget is read only, so
 you cannot modify its contents.
