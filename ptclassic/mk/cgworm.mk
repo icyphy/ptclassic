@@ -35,6 +35,6 @@ CGCDIR = $(ROOT)/src/domains/cgc/rtlib
 INCL = -I$(SDFDIR) -I$(KERNDIR) -I$(CGCDIR) $(WORM_INCL)
 include $(ROOT)/mk/common.mk
 
-GPPFLAGS := $(INC_LINK_FLAGS)
+GPPFLAGS += $(INC_LINK_FLAGS)
 
 all: $(WORM_ALL) 
