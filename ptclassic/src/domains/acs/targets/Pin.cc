@@ -1,5 +1,5 @@
 /**********************************************************************
-Copyright (c) 1999-%Q% Sanders, a Lockheed Martin Company
+Copyright (c) 1999 Sanders, a Lockheed Martin Company
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -25,7 +25,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
  Programmers:  Ken Smith
  Date of creation: 3/23/98
- Version: $Id$
+ Version: @(#)Pin.cc      1.0     06/16/99
 ***********************************************************************/
 #include "Pin.h"
 Pin::Pin() 
@@ -33,17 +33,21 @@ Pin::Pin()
 {
   major_bit=new ACSIntArray;
   vector_length=new ACSIntArray;
+  word_count=new ACSIntArray;
   min_vlength=new ACSIntArray;
   max_vlength=new ACSIntArray;
   word_lock=new ACSIntArray;
   prec_lock=new ACSIntArray;
   netlist_ids=new ACSIntArray;
 
+  skip_pin=new ACSIntArray;
   data_type=new ACSIntArray;
   pin_type=new ACSIntArray;
+  pin_assertion=new ACSIntArray;
   pin_assigned=new ACSIntArray;
   pin_limit=new ACSIntArray;
   pin_priority=new ACSIntArray;
+  phase_dependency=new ACSIntArray;
 
   pin_name=new StringArray;
   alt_pinname=new StringArray;
@@ -52,24 +56,29 @@ Pin::Pin()
 
   inode_pins=new ACSIntArray;
   onode_pins=new ACSIntArray;
-  cnode_pins=new ACSIntArray;
+  icnode_pins=new ACSIntArray;
+  ocnode_pins=new ACSIntArray;
 }
 
 Pin::~Pin() 
 {
   delete major_bit;
   delete vector_length;
+  delete word_count;
   delete min_vlength;
   delete max_vlength;
   delete word_lock;
   delete prec_lock;
   delete netlist_ids;
 
+  delete skip_pin;
   delete data_type;
   delete pin_type;
+  delete pin_assertion;
   delete pin_assigned;
   delete pin_limit;
   delete pin_priority;
+  delete phase_dependency;
 
   for (int dloop=0;dloop<pin_count;dloop++)
     {
@@ -90,7 +99,8 @@ Pin::~Pin()
   delete corona_pinname;
   delete inode_pins;
   delete onode_pins;
-  delete cnode_pins;
+  delete icnode_pins;
+  delete ocnode_pins;
 }
 
 
@@ -103,17 +113,21 @@ Pin& Pin::operator=(Pin& rh_pin)
 
   major_bit->copy(rh_pin.major_bit);
   vector_length->copy(rh_pin.vector_length);
+  word_count->copy(rh_pin.word_count);
   min_vlength->copy(rh_pin.min_vlength);
   max_vlength->copy(rh_pin.max_vlength);
   word_lock->copy(rh_pin.word_lock);
   prec_lock->copy(rh_pin.prec_lock);
   netlist_ids->copy(rh_pin.netlist_ids);
 
+  skip_pin->copy(rh_pin.skip_pin);
   data_type->copy(rh_pin.data_type);
   pin_type->copy(rh_pin.pin_type);
+  pin_assertion->copy(rh_pin.pin_assertion);
   pin_assigned->copy(rh_pin.pin_assigned);
   pin_limit->copy(rh_pin.pin_limit);
   pin_priority->copy(rh_pin.pin_priority);
+  phase_dependency->copy(rh_pin.phase_dependency);
 
   pin_directions=new ACSIntArray*[pin_count];
   pin_name=new StringArray;
@@ -135,12 +149,48 @@ Pin& Pin::operator=(Pin& rh_pin)
   altpin_flag->copy(rh_pin.altpin_flag);
   inode_pins=rh_pin.inode_pins;
   onode_pins=rh_pin.onode_pins;
-  cnode_pins=rh_pin.cnode_pins;
-//  inode_pins->copy(rh_pin.inode_pins);
-//  onode_pins->copy(rh_pin.onode_pins);
-//  cnode_pins->copy(rh_pin.cnode_pins);
+  icnode_pins=rh_pin.icnode_pins;
+  ocnode_pins=rh_pin.ocnode_pins;
 
   return *this;
+}
+
+void Pin::copy_pin(Pin* source_pins, const int index)
+{
+  int new_pin=add_pin(source_pins->query_pinname(index),
+		      source_pins->query_majorbit(index),
+		      source_pins->query_bitlen(index),
+		      source_pins->query_datatype(index),
+		      source_pins->query_pintype(index),
+		      source_pins->query_pinassertion(index));
+  set_pinpriority(new_pin,source_pins->query_pinpriority(index));
+}
+void Pin::copy_pins(Pin* source_pins)
+{
+  for (int loop=0;loop<source_pins->query_pincount();loop++)
+    {
+      int new_pin=add_pin(source_pins->query_pinname(loop),
+			  source_pins->query_majorbit(loop),
+			  source_pins->query_bitlen(loop),
+			  source_pins->query_datatype(loop),
+			  source_pins->query_pintype(loop),
+			  source_pins->query_pinassertion(loop));
+      set_pinpriority(new_pin,source_pins->query_pinpriority(loop));
+    }
+}
+void Pin::copy_pins(Pin* source_pins, ACSIntArray* pin_list)
+{
+  for (int loop=0;loop<pin_list->population();loop++)
+    {
+      int index=pin_list->query(loop);
+      int new_pin=add_pin(source_pins->query_pinname(index),
+			  source_pins->query_majorbit(index),
+			  source_pins->query_bitlen(index),
+			  source_pins->query_datatype(index),
+			  source_pins->query_pintype(index),
+			  source_pins->query_pinassertion(index));
+      set_pinpriority(new_pin,source_pins->query_pinpriority(index));
+    }
 }
 
 
@@ -148,15 +198,17 @@ void Pin::update_pins()
 {
   delete inode_pins;
   delete onode_pins;
-  delete cnode_pins;
+  delete icnode_pins;
+  delete ocnode_pins;
   
   inode_pins=classify_datapins(INPUT_PIN);
   onode_pins=classify_datapins(OUTPUT_PIN);
-  cnode_pins=classify_controlpins();
+  icnode_pins=classify_controlpins(INPUT_PIN);
+  ocnode_pins=classify_controlpins(OUTPUT_PIN);
 }
 
 
-ACSIntArray* Pin::classify_datapins(int find_type)
+ACSIntArray* Pin::classify_datapins(const int find_type)
 {
   ACSIntArray* result=new ACSIntArray;
   int alt_type=0;
@@ -196,7 +248,7 @@ ACSIntArray* Pin::classify_datapins(int find_type)
 }
 
 
-ACSIntArray* Pin::classify_controlpins()
+ACSIntArray* Pin::classify_controlpins(const int type)
 {
   ACSIntArray* result=new ACSIntArray;
   for (int loop=0;loop<pin_count;loop++)
@@ -211,9 +263,14 @@ ACSIntArray* Pin::classify_controlpins()
 	  (query_pintype(loop)!=INPUT_PIN_MUX_SWITCHABLE) &&
 	  (query_pintype(loop)!=INPUT_PIN_MUX_RESULT))
 	{
-	  result->add(loop);
 	  if (DEBUG_PIN)
 	    printf(" a contol pin\n");
+	  if ((pin_type->query(loop) >= IPIN_MIN) && (pin_type->query(loop) <= IPIN_MAX) 
+	      && (type==INPUT_PIN))
+	    result->add(loop);
+	  if ((pin_type->query(loop) >= OPIN_MIN) && (pin_type->query(loop) <= OPIN_MAX) 
+	      && (type==OUTPUT_PIN))
+	    result->add(loop);
 	}
       else
 	if (DEBUG_PIN)
@@ -228,7 +285,7 @@ ACSIntArray* Pin::classify_controlpins()
 int Pin::add_pin(const char* name, 
 		 const int p_type)
 {
-  if (DEBUG_PIN)
+  if (DEBUG_PIN_ADD)
     printf("Pin::add_pin(%s,%d)\n",name,p_type);
 
   new_pin();
@@ -246,11 +303,34 @@ int Pin::add_pin(const char* name,
   // Return happy condition
   return(pin_count-1);
 }
+int Pin::add_pin(const char* name, 
+		 const int p_type,
+		 const char a_type)
+{
+  if (DEBUG_PIN_ADD)
+    printf("Pin::add_pin(%s,%d,%d)\n",name,p_type,a_type);
+
+  new_pin();
+  
+  // Add new information
+  pin_name->add(name);
+  alt_pinname->add("NO_ALTERNATE_PIN_NAME");
+  altpin_flag->add(0);
+  corona_pinname->add("NO_CORONA_PIN");
+  pin_type->set(pin_count-1,p_type);
+  pin_assertion->set(pin_count-1,a_type);
+
+  // Update nodes
+  update_pins();
+  
+  // Return happy condition
+  return(pin_count-1);
+}
 int Pin::add_pin(const char* pname,
 		 const char* cpname,
 		 const int p_type)
 {
-  if (DEBUG_PIN)
+  if (DEBUG_PIN_ADD)
     printf("Pin::add_pin(%s,%s,%d)\n",pname,cpname,p_type);
 
   new_pin();
@@ -273,7 +353,7 @@ int Pin::add_pin(const char* name,
 		 const int v_len,
 		 const int p_type)
 {
-  if (DEBUG_PIN)
+  if (DEBUG_PIN_ADD)
     printf("Pin::add_pin(%s,%d,%d,%d)\n",name,m_bit,v_len,p_type);
   
   new_pin();
@@ -293,13 +373,40 @@ int Pin::add_pin(const char* name,
   // Return happy condition
   return(pin_count-1);
 }
+int Pin::add_pin(const char* name, 
+		 const int m_bit, 
+		 const int v_len,
+		 const int p_type,
+		 const char a_type)
+{
+  if (DEBUG_PIN_ADD)
+    printf("Pin::add_pin(%s,%d,%d,%d,%d)\n",name,m_bit,v_len,p_type,a_type);
+  
+  new_pin();
+
+  // Add new information
+  pin_name->add(name);
+  alt_pinname->add("NO_ALTERNATE_PIN_NAME");
+  altpin_flag->add(0);
+  corona_pinname->add("NO_CORONA_PIN");
+  major_bit->set(pin_count-1,m_bit);
+  vector_length->set(pin_count-1,v_len);
+  pin_type->set(pin_count-1,p_type);
+  pin_assertion->set(pin_count-1,a_type);
+
+  // Update nodes
+  update_pins();
+  
+  // Return happy condition
+  return(pin_count-1);
+}
 int Pin::add_pin(const char* name,
 		 const int m_bit, 
 		 const int v_len,
 		 const int d_type, 
 		 const int p_type)
 {
-  if (DEBUG_PIN)
+  if (DEBUG_PIN_ADD)
     printf("Pin::add_pin(%s,%d,%d,%d,%d)\n",name,m_bit,v_len,d_type,p_type);
   
   new_pin();
@@ -321,13 +428,42 @@ int Pin::add_pin(const char* name,
   return(pin_count-1);
 }
 int Pin::add_pin(const char* name,
+		 const int m_bit, 
+		 const int v_len,
+		 const int d_type, 
+		 const int p_type,
+		 const char a_type)
+{
+  if (DEBUG_PIN_ADD)
+    printf("Pin::add_pin(%s,%d,%d,%d,%d,%d)\n",name,m_bit,v_len,d_type,p_type,a_type);
+  
+  new_pin();
+
+  // Add new information
+  pin_name->add(name);
+  alt_pinname->add("NO_ALTERNATE_PIN_NAME");
+  altpin_flag->add(0);
+  corona_pinname->add("NO_CORONA_PIN");
+  major_bit->set(pin_count-1,m_bit);
+  vector_length->set(pin_count-1,v_len);
+  pin_type->set(pin_count-1,p_type);
+  pin_assertion->set(pin_count-1,a_type);
+  data_type->set(pin_count-1,d_type);
+  
+  // Update nodes
+  update_pins();
+  
+  // Return happy condition
+  return(pin_count-1);
+}
+int Pin::add_pin(const char* name,
 		 const char* alt_name,
 		 const int m_bit, 
 		 const int v_len,
 		 const int d_type, 
 		 const int p_type)
 {
-  if (DEBUG_PIN)
+  if (DEBUG_PIN_ADD)
     printf("Pin::add_pin(%s,%s,%d,%d,%d,%d)\n",name,alt_name,
 	   m_bit,v_len,d_type,p_type);
   
@@ -371,17 +507,21 @@ int Pin::new_pin()
   // Add new field and assign default values to all fields
   major_bit->add(0);
   vector_length->add(0);
+  word_count->add(0);
   min_vlength->add(0);
   max_vlength->add(INF);
   word_lock->add(UNLOCKED);
   prec_lock->add(UNLOCKED);
   netlist_ids->add(UNASSIGNED);
 
+  skip_pin->add(0);
   data_type->add(UNASSIGNED);
   pin_type->add(UNASSIGNED);
+  pin_assertion->add(UNASSIGNED);
   pin_assigned->add(UNASSIGNED);
   pin_limit->add(INF);
   pin_priority->add(NO_PRIORITY);
+  phase_dependency->add(UNASSIGNED);
   
   ACSIntArray** tmp_pindir=new ACSIntArray*[pcount];
   Connectivity** tmp_con=new Connectivity*[pcount];
@@ -424,6 +564,18 @@ int Pin::new_pin()
   return(pin_count);
 }
 
+int Pin::change_pinname(const int index,
+			const char* new_name)
+{
+  if (DEBUG_PIN)
+    printf("Pin::change_pinname(%d,%s)\n",index,new_name);
+
+  pin_name->set(index,new_name);
+
+  // Return happy condition
+  return(1);
+}
+
 
 // Set a priority for ranking multiple requests for association
 int Pin::set_pinpriority(const int index,
@@ -433,6 +585,19 @@ int Pin::set_pinpriority(const int index,
     printf("Pin::set_pinpriority(%d,%d)\n",index,priority);
 
   pin_priority->set(index,priority);
+
+  // Return happy condition
+  return(1);
+}
+
+// Set a particular control pin's phase dependency on either an INPUT or OUTPUT_PIN
+int Pin::set_phasedependency(const int index,
+			     const int dependency)
+{
+  if (DEBUG_PIN)
+    printf("Pin::set_phasedependency(%d,%d)\n",index,dependency);
+
+  phase_dependency->set(index,dependency);
 
   // Return happy condition
   return(1);
@@ -467,13 +632,38 @@ int Pin::set_pintype(const int index,
   return(1);
 }
 
+// Set the pin assertion level
+int Pin::set_pinassertion(const int index,
+			  const int assertion_level)
+{
+  if (DEBUG_PIN)
+    printf("Pin::set_pinassertion(%d,%d)\n",index,assertion_level);
+
+  pin_assertion->set(index,assertion_level);
+
+  // Return happy condition
+  return(1);
+}
+
 ////////////////////////////////////////////////////////
 // Set the directionality on a per-bit basis for the pin
+// FIX:Obviously, some coding is needed here;)
 ////////////////////////////////////////////////////////
 int Pin::set_directionality(const int pin_no,
 			    const int bit,
 			    const int direction)
 {
+
+  // Return happy condition
+  return(1);
+}
+
+int Pin::set_skip(const int index, const int state)
+{
+  if (DEBUG_PIN)
+    printf("Pin::set_skip(%d,%d)\n",index,state);
+
+  skip_pin->set(index,state);
 
   // Return happy condition
   return(1);
@@ -488,6 +678,18 @@ int Pin::set_datatype(const int index,
     printf("Pin::set_datatype(%d,%d)\n",index,type);
 
   data_type->set(index,type);
+
+  // Return happy condition
+  return(1);
+}
+
+int Pin::set_wordcount(const int index,
+		       const int count)
+{
+  if (DEBUG_PIN)
+    printf("Pin::set_wordcount(%d,%d)\n",index,count);
+  
+  word_count->set(index,count);
 
   // Return happy condition
   return(1);
@@ -538,6 +740,18 @@ int Pin::set_precision(const int index,
   vector_length->set(index,v_len);
 
   // Lock down this value after vectorlen was calculated
+  prec_lock->set(index,lock);
+
+  // Return happy condition
+  return(1);
+}
+
+
+// Directly set the precision lock status on an individual pin
+int Pin::set_preclock(const int index,
+		      const int lock)
+{
+  // Lock down this value
   prec_lock->set(index,lock);
 
   // Return happy condition
@@ -689,6 +903,11 @@ int Pin::query_bitlen(const int index)
   return(vector_length->query(index));
 }
 
+int Pin::query_wordcount(const int index)
+{
+  return(word_count->query(index));
+}
+
 int Pin::query_minbitlen(const int index)
 {
   return(min_vlength->query(index));
@@ -715,6 +934,11 @@ int Pin::query_netlistid(const int index)
   return(netlist_ids->query(index));
 }
 
+int Pin::query_skip(const int index)
+{
+  return(skip_pin->query(index));
+}
+
 int Pin::query_datatype(const int index)
 {
   return(data_type->query(index));
@@ -723,6 +947,11 @@ int Pin::query_datatype(const int index)
 int Pin::query_pintype(const int index)
 {
   return(pin_type->query(index));
+}
+
+int Pin::query_pinassertion(const int index)
+{
+  return(pin_assertion->query(index));
 }
 
 int Pin::query_pinassigned(const int index)
@@ -738,6 +967,11 @@ int Pin::query_pinlimit(const int index)
 int Pin::query_pinpriority(const int index)
 {
   return(pin_priority->query(index));
+}
+
+int Pin::query_phasedependency(const int index)
+{
+  return(phase_dependency->query(index));
 }
 
 char* Pin::query_pinname(const int index)
@@ -788,9 +1022,13 @@ ACSIntArray* Pin::query_onodes(void)
 {
   return(onode_pins);
 }
-ACSIntArray* Pin::query_cnodes(void)
+ACSIntArray* Pin::query_icnodes(void)
 {
-  return(cnode_pins);
+  return(icnode_pins);
+}
+ACSIntArray* Pin::query_ocnodes(void)
+{
+  return(ocnode_pins);
 }
 
 
@@ -846,19 +1084,15 @@ int Pin::retrieve_type(const int req_ptype)
 }
 
 
-// Return the port number that matches the passed type, and the correct bit 
-// value
+// Return the port number that matches the passed type, and the correct priority
 int Pin::retrieve_type(const int req_ptype,
-		       const int order)
+		       const int priority)
 {
-  int order_count=0;
   for (int loop=0;loop<pin_type->population();loop++)
     if (pin_type->query(loop)==req_ptype)
       {
-	if (order_count==order)
+	if (priority==pin_priority->query(loop))
 	  return(loop);
-	else
-	  order_count++;
       }
   
   if (DEBUG_PIN)
@@ -872,12 +1106,14 @@ void Pin::print_pins(const char* title)
   printf("Pin has %d instances\n",pin_count);
   for (int loop=0;loop<pin_count;loop++)
     {
-      printf("pin_name(%d)=%s, pin_type=%d, Vector_length=%d, major_bit=%d\n",
+      printf("pin_name(%d)=%s, pin_type=%d, pin_assertion=%d, vector_length=%d, major_bit=%d, word_count=%d\n",
 	     loop,
 	     pin_name->get(loop),
 	     pin_type->query(loop),
+	     pin_assertion->query(loop),
 	     vector_length->query(loop),
-	     major_bit->query(loop));
+	     major_bit->query(loop),
+	     word_count->query(loop));
       connect[loop]->dump();
     }
 }
@@ -891,9 +1127,12 @@ void Pin::print_pinclasses(void)
   printf("\nonodes are : ");
   for (int loop=0;loop<onode_pins->population();loop++)
     printf("%d ",onode_pins->query(loop));
-  printf("\ncnodes are : ");
-  for (int loop=0;loop<cnode_pins->population();loop++)
-    printf("%d ",cnode_pins->query(loop));
+  printf("\nicnodes are : ");
+  for (int loop=0;loop<icnode_pins->population();loop++)
+    printf("%d ",icnode_pins->query(loop));
+  printf("\nocnodes are : ");
+  for (int loop=0;loop<ocnode_pins->population();loop++)
+    printf("%d ",ocnode_pins->query(loop));
   printf("\n");
 }
 
@@ -902,54 +1141,65 @@ void Pin::print_pinclasses(void)
 // FIX:pin limit should be utilized here
 int Pin::free_pintype(const int ptype)
 {
+  return(free_pintype(ptype,-1));
+}
+int Pin::free_pintype(const int ptype,
+		      const int priority)
+{
   if (DEBUG_PIN)
-    printf("Looking for free_pintype %d given %d pins\n",ptype,pin_count);
+    printf("Looking for free_pintype %d, priority %d given %d pins\n",
+	   ptype,
+	   priority,
+	   pin_count);
   for (int loop=0;loop<pin_count;loop++)
     {
       if (DEBUG_PIN)
-	printf("Testing pin %d, assignment state is %d, pin_limit=%d, pintype=%d\n",
+	printf("Testing pin %d, assignment state is %d, priority=%d, pin_limit=%d, pintype=%d\n",
 	       loop,
 	       pin_assigned->query(loop),
+	       pin_priority->query(loop),
 	       pin_limit->query(loop),
 	       pin_type->query(loop));
 
-      if ((pin_assigned->query(loop)==UNASSIGNED) && 
-	  (pin_classtype(loop)==INPUT_PIN))
+      if ((pin_assigned->query(loop)==UNASSIGNED) &&
+	  (pin_priority->query(loop)==priority))
 	{
-	  if (pin_type->query(loop)==ptype)
-	    return(loop);
-	}
-      else if (pin_classtype(loop)==OUTPUT_PIN)
-	{
-	  // Test for exceptions
-	  if (ptype==OUTPUT_PIN_MUX_SWITCHABLE)
+	  switch (pin_classtype(loop))
 	    {
-	      if ((pin_type->query(loop)==ptype) && 
-		  (pin_assigned->query(loop)==UNASSIGNED))
+	    case INPUT_PIN:
+	      if (pin_type->query(loop)==ptype)
+		return(loop);
+	      break;
+	    case OUTPUT_PIN:
+	      // Test for exceptions
+	      if (ptype==OUTPUT_PIN_MUX_SWITCHABLE)
+		{
+		  if (pin_type->query(loop)==ptype)
+		    return(loop);
+		}
+	      else if (pin_type->query(loop)==ptype)
+		return(loop);
+	      break;
+	    case BIDIR_PIN:
+	      // Trap for input-type bidir pins
+	      if (pin_type->query(loop)==BIDIR_PIN_MUX_SWITCHABLE)
+		{
+		  if ((ptype==INPUT_PIN) || (ptype==BIDIR_PIN_MUX_SWITCHABLE))
+		    return(loop);
+		}
+	      else if (pin_type->query(loop)==BIDIR_PIN_MUX_RESULT)
+		{
+		  if ((ptype==OUTPUT_PIN) || (ptype==BIDIR_PIN_MUX_RESULT))
+		    return(loop);
+		}
+	      break;
+	    default:
+	      if (pin_type->query(loop)==ptype)
 		return(loop);
 	    }
-	  else if (pin_type->query(loop)==ptype)
-	    return(loop);
-	}
-      else if (pin_classtype(loop)==BIDIR_PIN)
-	{
-	  // Trap for input-type bidir pins
-	  if (pin_type->query(loop)==BIDIR_PIN_MUX_SWITCHABLE)
-	    {
-	      if ((pin_assigned->query(loop)==UNASSIGNED) && 
-		  ((ptype==INPUT_PIN) || (ptype==BIDIR_PIN_MUX_SWITCHABLE)))
-		return(loop);
-	    }
-	  else if (pin_type->query(loop)==BIDIR_PIN_MUX_RESULT)
-	    {
-	      if ((pin_assigned->query(loop)==UNASSIGNED) && 
-		  ((ptype==OUTPUT_PIN) || (ptype==BIDIR_PIN_MUX_RESULT)))
-		return(loop);
-	    }
-	  else if (pin_type->query(loop)==ptype)
-	    return(loop);
 	}
     }
+
   if (DEBUG_PIN)
     printf("Pin::free_pintype:Warning, no matching & free type available\n");
   return(-1);
@@ -969,13 +1219,14 @@ int Pin::connect_pin(const int pin_no,
 
   if (pin_assigned->query(pin_no)==UNASSIGNED)
     {
+      if (DEBUG_PIN_CONNECT)
+	printf("pin is unassigned\n");
       pin_assigned->set(pin_no,ASSIGNED);
       connect[pin_no]->add_node(acs_id,dest_pin,node_type);
     }
   else
     {
-      if ((pin_classtype(pin_no)==OUTPUT_PIN) ||
-	  (pin_classtype(pin_no)==BIDIR_PIN))
+      if ((pin_classtype(pin_no)==OUTPUT_PIN) || (pin_classtype(pin_no)==BIDIR_PIN))
 	connect[pin_no]->add_node(acs_id,dest_pin,node_type);
       else
 	{
@@ -984,6 +1235,9 @@ int Pin::connect_pin(const int pin_no,
 	    printf("Pin::connect_pin:Error? Overwriting existing connection\n");
 	}
     }
+
+  if (DEBUG_PIN_CONNECT)
+    print_pins("after connect_pin");
 
   // Return happy condition
   return(1);
@@ -1048,11 +1302,16 @@ int Pin::match_acstype(const int acsid,
     if ((pin_type->query(loop)==find_type) || 
 	(pin_type->query(loop)==alt_type))
       for (int cloop=0;cloop<connect[loop]->node_count;cloop++)
-	if (connect[loop]->query_acsid(cloop)==acsid)
-	  return(loop);
+	{
+	  if (DEBUG_PIN_MATCH)
+	    printf("match_acstype, pin=%d, ref_acsid=%d. connect[%d]_acsid=%d\n",
+		   loop,acsid,cloop,connect[loop]->query_acsid(cloop));
+	  if (connect[loop]->query_acsid(cloop)==acsid)
+	    return(loop);
+	}
   
   // Return unhappy condition
-  if (DEBUG_PIN)
+  if (DEBUG_PIN_MATCH)
     {
       printf("Pin::match_acstype:Warning, unable to find matching type\n");
       printf("acsid=%d, find_type=%d\n",acsid,find_type);
@@ -1073,7 +1332,7 @@ int Pin::match_acsnode(const int acsid,
 {
   for (int cloop=0;cloop<connect[node]->node_count;cloop++)
     {
-      if (DEBUG_PIN)
+      if (DEBUG_PIN_MATCH)
 	printf("match_acsnode, pin=%d, ref_acsid=%d.  connect[%d]_acsid=%d\n",
 	       node,acsid,cloop,connect[node]->query_acsid(cloop));
       if (connect[node]->query_acsid(cloop)==acsid)
@@ -1081,7 +1340,7 @@ int Pin::match_acsnode(const int acsid,
     }
 
   // Return unhappy condition
-  if (DEBUG_PIN)
+  if (DEBUG_PIN_MATCH)
     printf("Pin::match_acsnode:Warning, unable to find matching type\n");
   return(-1);
 }
@@ -1098,6 +1357,83 @@ int Pin::disconnect_pin(const int pin_no,
   return(1);
 }
 
+int Pin::disconnect_pin_to(const int ref_id,
+			   const int src_pin)
+{
+  Connectivity* onodes=query_connection(src_pin);
+  for (int onode_loop=0;onode_loop<onodes->node_count;onode_loop++)
+    if (onodes->query_acsid(onode_loop)==ref_id)
+      disconnect_pin(src_pin,onode_loop);
+
+  // Return happy condition
+  return(1);
+}
+
+int Pin::disconnect_pin_from(const int ref_id,
+			     const int dest_pin)
+{
+  Connectivity* inodes=query_connection(dest_pin);
+  if (inodes->query_acsid(0)==ref_id)
+    disconnect_pin(dest_pin,0);
+
+  // Return happy condition
+  return(1);
+}
+
+int Pin::disconnect_all_pinsto(const int ref_id)
+{
+  int a_disconnection=0;
+  for (int loop=0;loop<inode_pins->population();loop++)
+    {
+      int ipin=inode_pins->query(loop);
+      Connectivity* inodes=query_connection(ipin);
+      if (inodes->query_acsid(0)==ref_id)
+	{
+	  disconnect_pin(ipin,0);
+	  a_disconnection=1;
+	}
+    }
+  for (int loop=0;loop<onode_pins->population();loop++)
+    {
+      int opin=onode_pins->query(loop);
+      Connectivity* onodes=query_connection(opin);
+      for (int onode_loop=0;onode_loop<onodes->node_count;onode_loop++)
+	if (onodes->query_acsid(onode_loop)==ref_id)
+	  {
+	    disconnect_pin(opin,onode_loop);
+	    a_disconnection=1;
+	  }
+    }
+
+  // Return disconnection status
+  return(a_disconnection);
+}
+
+int Pin::disconnect_all_ipins(void)
+{
+  for (int loop=0;loop<inode_pins->population();loop++)
+    {
+      int ipin=inode_pins->query(loop);
+      pin_assigned->set(ipin,UNASSIGNED);
+      connect[ipin]->remove_allnodes();
+    }
+
+  // Return happy condition
+  return(1);
+}
+
+int Pin::disconnect_all_opins(void)
+{
+  for (int loop=0;loop<onode_pins->population();loop++)
+    {
+      int opin=onode_pins->query(loop);
+      pin_assigned->set(opin,UNASSIGNED);
+      connect[opin]->remove_allnodes();
+    }
+
+  // Return happy condition
+  return(1);
+}
 
 int Pin::disconnect_allpin_nodes(const int pin_no)
 {
@@ -1188,6 +1524,40 @@ int Pin::pin_withnetlist(const int ref_netlist)
   printf("Pin::pin_withnetlist:Error, no pin is associated with netlist %d\n",
 	 ref_netlist);
   return(-1);
+}
+int Pin::pin_withnetlist(const int ref_netlist, const int inst)
+{
+  int pin_inst=0;
+  for (int pin_no=0;pin_no<pin_count;pin_no++)
+    {
+      if (DEBUG_PIN)
+	  printf("pin(%d):netlist_id=%d, comparing to %d\n",
+		 pin_no,
+		 netlist_ids->query(pin_no),
+		 ref_netlist);
+      if (netlist_ids->query(pin_no)==ref_netlist)
+	{
+	  pin_inst++;
+	  if (pin_inst==inst)
+	    return(pin_no);
+	}
+    }
+  
+  printf("Pin::pin_withnetlist:Error, no pin is associated with netlist %d\n",
+	 ref_netlist);
+  return(-1);
+}
+
+///////////////////////////////////////////////////////
+// Return the total number of pins with this netlist id
+///////////////////////////////////////////////////////
+int Pin::pins_withnetlist(const int ref_netlist)
+{
+  int net_count=0;
+  for (int pin_no=0;pin_no<pin_count;pin_no++)
+    if (netlist_ids->query(pin_no)==ref_netlist)
+      net_count++;
+  return(net_count);
 }
 
 ///////////////////////////////////////////////////////////

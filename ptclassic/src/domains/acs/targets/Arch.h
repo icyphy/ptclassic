@@ -1,5 +1,5 @@
 /**********************************************************************
-Copyright (c) 1999-%Q% Sanders, a Lockheed Martin Company
+Copyright (c) 1999 Sanders, a Lockheed Martin Company
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -25,7 +25,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
  Programmers:  Ken Smith
  Date of creation: 3/23/98
- Version: $Id$
+ Version: @(#)Arch.h      1.0     06/16/99
 ***********************************************************************/
 #ifndef ARCH_H
 #define ARCH_H
@@ -34,15 +34,28 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include "CoreList.h"
 #include "Fpga.h"
-#include "MemPort.h"
+#include "Port.h"
+#include "ACSIntArray.h"
+#include "StringArray.h"
 
-static const int DEBUG_ADDMEM=0;
-static const int DEBUG_ROUTES=0;
+static const int MEMORY=1;
+static const int SYSTOLIC=2;
 
 class Arch
 {
+  static const int DEBUG_ARCH=0;
+  static const int DEBUG_ADDMEM=0;
+  static const int DEBUG_ROUTES=0;
+  static const int DEBUG_LAUNCHRATE=0;
+  static const int DEBUG_PACKIO=0;
+
  public:
+  // IO Dept.
+  char* arch_directory;
+  ifstream* arch_stream;
+
   // Available FPGAs
   int fpga_count;     // Total number of available FPGAs
   Fpga* fpgas;
@@ -58,23 +71,68 @@ class Arch
 
   // Available Memory elements
   int mem_count;     // Total number of available memories
-  MemPort* mem_ports;
+  Port* mem_ports;
+  int mem_slice;
+
+  // Availabe Systolic interconnects
+  // FIX: Should a distinction be made at this level between memories and  systolic interconnects?
+  int systolic_count;
+  ACSIntArray** systolic_connections;
+  Port* sys_ports;
+
+  // Scheduling-related
+  int launch_rate;
+
+  // Build related
+  StringArray* archsynthesis_libname;
+  StringArray* archsynthesis_files;
+  StringArray* archsynthesis_path;
+  StringArray* archsupport_files;
+  StringArray* archsupport_path;
+  StringArray* misc_files;
+  StringArray* misc_path;
+  ACSIntArray* misc_origin;
+  StringArray* simulation_commands;
     
  public:
  Arch::Arch(void);
- Arch::Arch(int);
- Arch::Arch(int,int);
+ Arch::Arch(const char*,const char*);
  Arch::~Arch(void);
-  
+
+  void Arch::read_header(void);
   void Arch::wipe_solution(void);
   void Arch::set_fpga(void);
   void Arch::set_memory(void);
-  Fpga* Arch::get_fpga_handle(const int);
-  MemPort* Arch::get_memory_handle(const int);
+  void Arch::set_systolic(void);
+
+  int Arch::evaluate_fpga_assignment(int&);
   int Arch::activate_fpga(const int);
+
+  int Arch::evaluate_memory_assignment(int&);
+  int Arch::activate_memory(const int);
+
+  Fpga* Arch::get_fpga_handle(const int);
+  Port* Arch::get_memory_handle(const int);
+  Port* Arch::get_systolic_handle(const int);
+  int Arch::determine_systolic_handle(const int,const int);
+  int Arch::unassign_all(void);
+  int Arch::mem_to_fpga(const int);
+
+  // Routing search
   void Arch::find_routes(const int,const int);
   void Arch::find_route(const int);
   void Arch::add_solution(void);
+
+  // Scheduling
+  int Arch::assess_io(void);
+  ACSIntArray* Arch::compressed_io(const int);
+  int Arch::calc_launchrate(void);
+  int Arch::query_addressing(void);
+
+  // Sequencing
+  void Arch::generate_sequencer(void);
+    
+  // Support
   void Arch::print_arch(const char*);
 };
 

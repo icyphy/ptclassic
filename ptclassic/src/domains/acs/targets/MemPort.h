@@ -1,5 +1,5 @@
 /**********************************************************************
-Copyright (c) 1999-%Q% Sanders, a Lockheed Martin Company
+Copyright (c) 1999 Sanders, a Lockheed Martin Company
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -25,7 +25,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
  Programmers:  Ken Smith
  Date of creation: 3/23/98
- Version: $Id$
+ Version: @(#)MemPort.h      1.0     06/16/99
 ***********************************************************************/
 #ifndef MEMPORT_H
 #define MEMPORT_H
@@ -51,13 +51,13 @@ class MemPort
   // Class attributes
   int total_sgs;
   int controller_fpga;
-  SequentialList* source_stars;
-  SequentialList* sink_stars;
+  CoreList* source_cores;
+  CoreList* sink_cores;
   ACSCGFPGACore* dataimux_star;
   ACSCGFPGACore* dataomux_star;
   int data_size;
   ACSCGFPGACore* addrmux_star;
-  SequentialList* const_stars;
+  CoreList* const_stars;
   ACSCGFPGACore* addrgen_star;
   ACSCGFPGACore* addrbuf_star;
   int addr_size;
@@ -82,6 +82,7 @@ public:
   int MemPort::init_pt(int);
   int MemPort::add_pt(int,int);
   int MemPort::fetch_pt(int);
+  int MemPort::reset_cores(void);
   int MemPort::assign_srccore(ACSCGFPGACore*);
   int MemPort::assign_snkcore(ACSCGFPGACore*,int);
   int MemPort::set_controller(const int);

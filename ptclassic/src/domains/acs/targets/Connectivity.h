@@ -1,5 +1,5 @@
 /**********************************************************************
-Copyright (c) 1999-%Q% Sanders, a Lockheed Martin Company
+Copyright (c) 1999 Sanders, a Lockheed Martin Company
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -25,7 +25,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
  Programmers:  Ken Smith
  Date of creation: 3/23/98
- Version: $Id$
+ Version: @(#)Connectivity.h      1.0     06/16/99
 ***********************************************************************/
 #ifndef CONNECTIVITY_H
 #define CONNECTIVITY_H
@@ -88,6 +88,7 @@ public:
    int Connectivity::query_acsid(const int);
    int Connectivity::query_pintype(const int);
    int Connectivity::query_pinid(const int);
+   int Connectivity::connected(void);
 
    int Connectivity::dump(void);
 };

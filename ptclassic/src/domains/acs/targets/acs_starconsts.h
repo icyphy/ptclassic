@@ -1,5 +1,5 @@
 /**********************************************************************
-Copyright (c) 1999-%Q% Sanders, a Lockheed Martin Company
+Copyright (c) 1999 Sanders, a Lockheed Martin Company
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -25,7 +25,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
  Programmers:  Ken Smith
  Date of creation: 3/23/98
- Version: $Id$
+ Version: @(#)acs_starconsts.h      1.0     06/16/99
 ***********************************************************************/
 #ifndef ACS_STARCONSTS_H
 #define ACS_STARCONSTS_H
@@ -33,6 +33,10 @@ ENHANCEMENTS, OR MODIFICATIONS.
 static const int MAX_STR=80;
 static const int MAX_PATH=160;
 
+// FPGA types
+static const int UNKNOWN_DEVICE=0;
+static const int XC4000=1;
+static const int VIRTEX=2;
 
 // General star constants
 static const int UNDEFINED=-1;
@@ -109,15 +113,18 @@ static const int SNK_LARGER=4;
 static const int STANDALONE=0;
 static const int SHAREABLE=1;
 
-// MEMPort Constants
-
-// Node Constants
+// ACS_Type Constants
+static const int SOURCE_LUT=5;
 static const int IOPORT=4;
 static const int FORK=3;
 static const int BOTH=2;        // Designates that this is an algorithmic component
 static const int SOURCE=1;
 static const int SINK=0;
 static const int UNKNOWN=-1;
+
+// ACS_State Constants
+static const int SAVE_STATE=1;
+static const int NO_SAVE_STATE=0;
 
 // Directivity Constants
 static const int BIDIR=3;

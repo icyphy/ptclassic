@@ -1,5 +1,5 @@
 /**********************************************************************
-Copyright (c) 1999-%Q% Sanders, a Lockheed Martin Company
+Copyright (c) 1999 Sanders, a Lockheed Martin Company
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -25,7 +25,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
  Programmers:  Ken Smith
  Date of creation: 3/23/98
- Version: $Id$
+ Version: @(#)acs_vhdl_lang.cc      1.0     06/16/99
 ***********************************************************************/
 #include "acs_vhdl_lang.h"
 
@@ -34,11 +34,14 @@ VHDL_LANG::VHDL_LANG()
 {
   // Should add a mode switch for selecting amongst
   // VHDL dialects.
+
+  nc_sizes=new ACSIntArray;
 }
 
 
 VHDL_LANG::~VHDL_LANG()
 {
+  delete nc_sizes;
 }
 
 
@@ -141,7 +144,7 @@ char* VHDL_LANG::gen_entity(const char* entity_str,
 
 
 char* VHDL_LANG::gen_architecture(const char* entity_name,
-				  const SequentialList* sg_list,
+				  CoreList* sg_list,
 				  const int mode,
 				  Pin* ext_signals,
 				  Pin* data_signals,
@@ -210,28 +213,6 @@ char* VHDL_LANG::gen_architecture(const char* entity_name,
 	expression << endl;
       }
   
-  // Add all constant signals
-  if (constant_signals != NULL)
-    if (constant_signals->query_pincount() != 0)
-      {
-	expression << "--" << endl;
-	expression << "-- Stitcher-generated constant signals" << endl;
-	expression << "--" << endl;
-
-	expression << "signal NC:std_logic;" << endl;
-	expression << "constant VCC:std_ulogic:='1';" << endl;
-	expression << "constant GND:std_ulogic:='0';" << endl;
-
-// FIX: Need to add Constant class or other to remedy this call
-/*
-	for (int loop=0;loop<constant_signals->pin_count;loop++)
-	  expression << signal(constant_signals->query_pinname(loop),
-	                       (constant_signals->data_type)->query(loop),
-			       (constant_signals->vector_length)->query(loop));
-			       */
-	expression << endl;
-      }
-
   if (sg_list != NULL)
   {
     expression << gen_components(entity_name,sg_list);
@@ -245,6 +226,8 @@ char* VHDL_LANG::gen_architecture(const char* entity_name,
 				     constant_signals);
     expression << end_architecture(mode) << endl;
   }
+  else
+    expression << const_definitions(constant_signals);
   
   // Terminate stream
   expression << endl << ends;
@@ -254,7 +237,7 @@ char* VHDL_LANG::gen_architecture(const char* entity_name,
 
 
 char* VHDL_LANG::gen_components(const char* entity_name,
-				const SequentialList* sg_list)
+				CoreList* sg_list)
 {
   ostrstream expression;
 
@@ -273,6 +256,9 @@ char* VHDL_LANG::gen_components(const char* entity_name,
 		printf("Set port definitions for sg %s\n",
 		       smart_generator->comment_name());
 
+	      // For multiple implementations, instruct the cores to rename their pins now!
+	      smart_generator->revisit_pins();
+	  
 	      // Generate components
 	      expression << "-- " << smart_generator->comment_name() << endl;
 	      if ((smart_generator->unique_component) && 
@@ -295,7 +281,7 @@ char* VHDL_LANG::gen_components(const char* entity_name,
 	      
 	      // Cleanup
 	    }
-	} //      for (int loop=1;loop<=smart_generators->size();loop++)
+	} //      for (int loop=0;loop<smart_generators->size();loop++)
 
     } //  if (smart_generators != NULL) 
   
@@ -306,7 +292,7 @@ char* VHDL_LANG::gen_components(const char* entity_name,
 }
 
 
-char* VHDL_LANG::gen_configurations(const SequentialList* smart_generators)
+char* VHDL_LANG::gen_configurations(CoreList* smart_generators)
 {
   ostrstream expression;
 
@@ -320,7 +306,7 @@ char* VHDL_LANG::gen_configurations(const SequentialList* smart_generators)
       
       char* unique_star_name=new char[MAX_STR];
       char* output_file=new char[MAX_STR];
-      for (int loop=1;loop<=smart_generators->size();loop++)
+      for (int loop=0;loop<smart_generators->size();loop++)
 	{
 	  ACSCGFPGACore* smart_generator=(ACSCGFPGACore*) smart_generators->elem(loop);
 	  
@@ -351,12 +337,13 @@ char* VHDL_LANG::gen_configurations(const SequentialList* smart_generators)
 
 
 char* VHDL_LANG::gen_instantiations(const int mode,
-				    const SequentialList* smart_generators,
+				    CoreList* smart_generators,
 				    Pin* ext_signals,
 				    Pin* data_signals,
 				    Pin* ctrl_signals,
 				    Pin* constant_signals)
 {
+  ostrstream constant_expression;
   ostrstream expression;
 
   // For all star instances
@@ -370,10 +357,10 @@ char* VHDL_LANG::gen_instantiations(const int mode,
       char* unique_star_name=new char[MAX_STR];
       
       expression << begin_scope << endl;
-      for (int loop=1;loop<=smart_generators->size();loop++)
+      for (int loop=0;loop<smart_generators->size();loop++)
 	{
 	  ACSCGFPGACore* smart_generator=(ACSCGFPGACore*) smart_generators->elem(loop);
-	  
+
 	  // Only generate configurations for algorithmic stars
 	  if (smart_generator->acs_type==BOTH)
 	    {
@@ -385,7 +372,6 @@ char* VHDL_LANG::gen_instantiations(const int mode,
 	      StringArray* lh_names=new StringArray;
 	      StringArray* rh_names=new StringArray;
 	      
-	      // FIX: avoid constants!!
 	      // Assign ports
 	      bind_ports(smart_generator,lh_names,rh_names,
 			 ext_signals,data_signals,ctrl_signals,constant_signals);
@@ -418,17 +404,50 @@ char* VHDL_LANG::gen_instantiations(const int mode,
 	      delete rh_names;
 
 	    } // if (smart_generator->acs_type==BOTH)
-	} // for (int loop=1;loop<=smart_generators->size();loop++)
+	} // for (int loop=0;loop<smart_generators->size();loop++)
 
       // Cleanup
       delete []unique_star_name;
 	
     } // if (smart_generators != NULL) 
 
-  // Terminate stream
-  expression << endl << ends;
+  // Merge and terminate stream
+  ostrstream result_stream;
+  expression << ends;
+  result_stream << const_definitions(constant_signals) << endl << expression.str() << endl << ends;
 
-  return(expression.str());
+  return(result_stream.str());
+}
+
+char* VHDL_LANG::const_definitions(Pin* constant_signals)
+{
+  ostrstream constant_expression;
+
+  constant_expression << "--" << endl;
+  constant_expression << "-- Stitcher-generated constant signals" << endl;
+  constant_expression << "--" << endl;
+  
+  constant_expression << "signal NC:std_logic;" << endl;
+  constant_expression << "constant VCC:std_ulogic:='1';" << endl;
+  constant_expression << "constant GND:std_ulogic:='0';" << endl;
+  
+  if (constant_signals!=NULL)
+    for (int loop=0;loop<constant_signals->query_pincount();loop++)
+      {
+	// FIX: VCC, GND traps should be removed once assignments like above can be made
+	//      they are still kept as constant signals for binding purposes, but need to 
+	//      preclude multiple definitions
+	char* pin_name=constant_signals->query_pinname(loop);
+	if ((strcmp(pin_name,"GND")!=0) && (strcmp(pin_name,"VCC")!=0))
+	  constant_expression << signal(constant_signals->query_pinname(loop),
+					constant_signals->query_datatype(loop),
+					constant_signals->query_bitlen(loop));
+      }
+	
+  // Terminate streams
+  constant_expression << endl << ends;
+
+  return(constant_expression.str());
 }
 
 
@@ -446,83 +465,130 @@ int VHDL_LANG::bind_ports(ACSCGFPGACore* smart_generator,
 
   Pin* smartgen_pins=smart_generator->pins;
   for (int pin_loop=0;pin_loop<smartgen_pins->query_pincount();pin_loop++)
-    {
-      lh_names->add(smartgen_pins->query_pinname(pin_loop));
-      if (DEBUG_BIND)
-	printf("Port %s is being bound to ",lh_names->get(pin_loop));
-	  
-      Connectivity* smartgen_connector=
-	smartgen_pins->query_connection(pin_loop);
-
-      // Signals above 0 are redundant and are only useful for 
-      // resolving connections
-      if (smartgen_connector->node_count > 0)
-	{
-	  int signal=smartgen_connector->query_pinsignal(0);
-	  if (DEBUG_BIND)
-	    printf("signal %d of type %d \n",
-		   signal,
-		   smartgen_connector->query_pintype(0));
-
-	  // Bind proper signal names
-	  if (smartgen_connector->query_pintype(0)==DATA_NODE)
-	    rh_names->add(data_signals->query_pinname(signal));
-	  else if (smartgen_connector->query_pintype(0)==CTRL_NODE)
-	    rh_names->add(ctrl_signals->query_pinname(signal));
-	  else if (smartgen_connector->query_pintype(0)==EXT_NODE)
-	    {
-	      if (DEBUG_BIND)
-		printf("Binding to external signal\n");
-	      if (ext_signals->query_altpinflag(signal))
-		{
-		  if (ext_signals->req_pintype(pin_loop)==INPUT_PIN)
-		    {
-		      if (DEBUG_BIND)
-			printf("Split-type, will use primary pinname %s\n",
-			       ext_signals->query_pinname(signal));
-		      rh_names->add(ext_signals->query_pinname(signal));
-		    }
-		  else
-		    {
-		      if (DEBUG_BIND)
-			printf("Split-type, will use alternate pinname %s\n",
-			       ext_signals->query_altpinname(signal));
-		      rh_names->add(ext_signals->query_altpinname(signal));
-		    }
-		}
+    if (!smartgen_pins->query_skip(pin_loop))
+      {
+	lh_names->add(smartgen_pins->query_pinname(pin_loop));
+	if (DEBUG_BIND)
+	  printf("Port %s is being bound to ",lh_names->get(pin_loop));
+	
+	Connectivity* smartgen_connector=smartgen_pins->query_connection(pin_loop);
+	
+	// Signals above 0 are redundant and are only useful for resolving connections
+	if (smartgen_connector->node_count > 0)
+	  {
+	    int signal=smartgen_connector->query_pinsignal(0);
+	    if (DEBUG_BIND)
+	      printf("signal %d of type %d \n",
+		     signal,
+		     smartgen_connector->query_pintype(0));
+	    
+	    // Bind proper signal names
+	    // FIX:Instead of the 1bit GND, this function should analyze for larger sized inputs
+	    //     and add sufficient bitwidth grounds!!
+	    if (signal==-1)
+	      if (smartgen_pins->pin_classtype(pin_loop)==INPUT_PIN)
+		rh_names->add("GND");
 	      else
 		{
-		  if (DEBUG_BIND)
-		    printf("Will use primary pinname %s\n",
-			   ext_signals->query_pinname(signal));
-		  rh_names->add(ext_signals->query_pinname(signal));
+		  if (smartgen_pins->query_bitlen(pin_loop)==1)
+		    rh_names->add("NC");
+		  else
+		    rh_names->add(set_nc(smartgen_pins->query_bitlen(pin_loop),
+					 constant_signals));
 		}
-	    }
-	  else if (smartgen_connector->query_pintype(0)==CONSTANT_NODE)
-	    rh_names->add(constant_signals->query_pinname(signal));
-	  else
-	    {
-	      rh_names->add("NC");
-	      if (DEBUG_BIND)
-		printf("VHDL_LANG::bind_ports, error unknown dnode type\n");
-	    }
-	}
-      else
-	{
-	  rh_names->add("NC");
-	  if (DEBUG_BIND)
-	    printf(" NC\n");
-	}
-      
-      // Complete the binding
-      if (DEBUG_BIND)
-	printf("that is named %s\n",rh_names->get(pin_loop));
-    }
-
+	    else if (smartgen_connector->query_pintype(0)==DATA_NODE)
+	      rh_names->add(data_signals->query_pinname(signal));
+	    else if (smartgen_connector->query_pintype(0)==CTRL_NODE)
+	      rh_names->add(ctrl_signals->query_pinname(signal));
+	    else if (smartgen_connector->query_pintype(0)==EXT_NODE)
+	      {
+		if (DEBUG_BIND)
+		  printf("Binding to external signal\n");
+		if (ext_signals->query_altpinflag(signal))
+		  {
+		    if (ext_signals->req_pintype(pin_loop)==INPUT_PIN)
+		      {
+			if (DEBUG_BIND)
+			  printf("Split-type, will use primary pinname %s\n",
+				 ext_signals->query_pinname(signal));
+			rh_names->add(ext_signals->query_pinname(signal));
+		      }
+		    else
+		      {
+			if (DEBUG_BIND)
+			  printf("Split-type, will use alternate pinname %s\n",
+				 ext_signals->query_altpinname(signal));
+			rh_names->add(ext_signals->query_altpinname(signal));
+		      }
+		  }
+		else
+		  {
+		    if (DEBUG_BIND)
+		      printf("Will use primary pinname %s\n",
+			     ext_signals->query_pinname(signal));
+		    rh_names->add(ext_signals->query_pinname(signal));
+		  }
+	      }
+	    else if (smartgen_connector->query_pintype(0)==CONSTANT_NODE)
+	      rh_names->add(constant_signals->query_pinname(signal));
+	    else
+	      {
+		if (smartgen_pins->query_bitlen(pin_loop)==1)
+		  rh_names->add("NC");
+		else
+		  rh_names->add(set_nc(smartgen_pins->query_bitlen(pin_loop),
+				       constant_signals));
+		if (DEBUG_BIND)
+		  printf("VHDL_LANG::bind_ports, error unknown dnode type\n");
+	      }
+	  }
+	else
+	  {
+	    if (smartgen_pins->pin_classtype(pin_loop)==INPUT_PIN)
+	      rh_names->add("GND");
+	    else
+	      {
+		if (smartgen_pins->query_bitlen(pin_loop)==1)
+		  rh_names->add("NC");
+		else
+		  rh_names->add(set_nc(smartgen_pins->query_bitlen(pin_loop),
+				       constant_signals));
+	      }
+	    if (DEBUG_BIND)
+	      printf(" NC\n");
+	  }
+	
+	// Complete the binding
+	if (DEBUG_BIND)
+	  printf("that is named %s\n",rh_names->get(pin_loop));
+      }
+  
   // Return happy condition
   return(1);
 }
 
+
+// FIX:NC should be tracked for both INPUT and OUTPUTS separately!!!
+char* VHDL_LANG::set_nc(const int nc_size, Pin* constants)
+{
+  ostrstream expression;
+  
+  // Form NC expression
+  expression << "NC" << nc_size << ends;
+
+  if (!nc_sizes->find(nc_size))
+    {
+      nc_sizes->add(nc_size);
+
+      constants->add_pin(expression.str(),
+			 0,
+			 nc_size,
+			 STD_LOGIC,
+			 INTERNAL_PIN);
+    }
+
+  return(expression.str());
+}
 
 
 
@@ -644,70 +710,71 @@ char* VHDL_LANG::set_port(Pin* pin_ref)
 
   if (pin_ref->query_pincount() != 0)
     for (int loop=0;loop<pin_ref->query_pincount();loop++)
-      {
-	
-	// Determine the pin's type
-	switch (pin_ref->pin_classtype(loop))
-	  {
-	  case INPUT_PIN:
-	    if (pin_ref->query_altpinflag(loop))
-	      {
-		expression << "\t" << pin_ref->query_altpinname(loop);
-		expression << " :in ";
-		expression << pin_declaration(pin_ref,loop);
-		expression << "\t" << pin_ref->query_pinname(loop);
-		expression << " :out ";
-		expression << pin_declaration(pin_ref,loop);
-	      }
-	    else
-	      {
-		expression << "\t" << pin_ref->query_pinname(loop);
-		expression << " :in ";
-		expression << pin_declaration(pin_ref,loop);
-	      }
-	    break;
-	  case OUTPUT_PIN:
-	    if (pin_ref->query_altpinflag(loop))
-	      {
-		expression << "\t" << pin_ref->query_altpinname(loop);
-		expression << " :in ";
-		expression << pin_declaration(pin_ref,loop);
-		expression << "\t" << pin_ref->query_pinname(loop);
-		expression << " :out ";
-		expression << pin_declaration(pin_ref,loop);
-	      }
-	    else
-	      {
-		expression << "\t" << pin_ref->query_pinname(loop);
-		expression << " :out ";
-		expression << pin_declaration(pin_ref,loop);
-	      }
-	    break;
-	  case BIDIR_PIN:
-	    if (pin_ref->query_altpinflag(loop))
-	      {
-		expression << "\t" << pin_ref->query_altpinname(loop);
-		expression << " :in ";
-		expression << pin_declaration(pin_ref,loop);
-		expression << "\t" << pin_ref->query_pinname(loop);
-		expression << " :out ";
-		expression << pin_declaration(pin_ref,loop);
-	      }
-	    else
-	      {
-		expression << "\t" << pin_ref->query_pinname(loop);
-		expression << " :inout ";
-		expression << pin_declaration(pin_ref,loop);
-	      }
-	    break;
-	  default:
-	    if (DEBUG_SETPORT)
-	      printf("VHDL::set_port:Error unknown pin_classtype %d\n",
-		     pin_ref->query_pintype(loop));
-	    expression << " :UNKNOWN ";
-	  }
-      }
-
+      if (!pin_ref->query_skip(loop))
+	{
+	  
+	  // Determine the pin's type
+	  switch (pin_ref->pin_classtype(loop))
+	    {
+	    case INPUT_PIN:
+	      if (pin_ref->query_altpinflag(loop))
+		{
+		  expression << "\t" << pin_ref->query_altpinname(loop);
+		  expression << " :in ";
+		  expression << pin_declaration(pin_ref,loop);
+		  expression << "\t" << pin_ref->query_pinname(loop);
+		  expression << " :out ";
+		  expression << pin_declaration(pin_ref,loop);
+		}
+	      else
+		{
+		  expression << "\t" << pin_ref->query_pinname(loop);
+		  expression << " :in ";
+		  expression << pin_declaration(pin_ref,loop);
+		}
+	      break;
+	    case OUTPUT_PIN:
+	      if (pin_ref->query_altpinflag(loop))
+		{
+		  expression << "\t" << pin_ref->query_altpinname(loop);
+		  expression << " :in ";
+		  expression << pin_declaration(pin_ref,loop);
+		  expression << "\t" << pin_ref->query_pinname(loop);
+		  expression << " :out ";
+		  expression << pin_declaration(pin_ref,loop);
+		}
+	      else
+		{
+		  expression << "\t" << pin_ref->query_pinname(loop);
+		  expression << " :out ";
+		  expression << pin_declaration(pin_ref,loop);
+		}
+	      break;
+	    case BIDIR_PIN:
+	      if (pin_ref->query_altpinflag(loop))
+		{
+		  expression << "\t" << pin_ref->query_altpinname(loop);
+		  expression << " :in ";
+		  expression << pin_declaration(pin_ref,loop);
+		  expression << "\t" << pin_ref->query_pinname(loop);
+		  expression << " :out ";
+		  expression << pin_declaration(pin_ref,loop);
+		}
+	      else
+		{
+		  expression << "\t" << pin_ref->query_pinname(loop);
+		  expression << " :inout ";
+		  expression << pin_declaration(pin_ref,loop);
+		}
+	      break;
+	    default:
+	      if (DEBUG_SETPORT)
+		printf("VHDL::set_port:Error unknown pin_classtype %d\n",
+		       pin_ref->query_pintype(loop));
+	      expression << " :UNKNOWN ";
+	    }
+	}
+  
   // Terminate stream
   expression << ends;
 
@@ -728,7 +795,16 @@ char* VHDL_LANG::pin_declaration(Pin* pin_ref,const int index)
   
   // Determine the number of bits involved and their classification
   if (index < pin_ref->query_pincount()-1)
-    expression << end_statement << endl;
+    {
+      // Ensure that this truely isnt the last one due to pin skips
+      int skip=1;
+      int pin_index=index+1;
+      while ((skip==1) && (pin_index < pin_ref->query_pincount()))
+	if (!pin_ref->query_skip(pin_index++))
+	  skip=0;
+      if (!skip)
+	expression << end_statement << endl;
+    }
 
   // Terminate stream
   expression << ends;
@@ -1104,14 +1180,10 @@ char* VHDL_LANG::instantiate(const int mode,
     }
   expression << ")" << end_statement << endl;
 
-  if (mode==STRUCTURAL)
-//    expression << "end for;" << endl;
-
-  // Return happy condition
-
   // Terminate stream
   expression << ends;
 
+  // Return happy condition
   return(expression.str());
 }
 
@@ -1228,8 +1300,18 @@ char* VHDL_LANG::val(const char* val_str)
 ////////////////////////////////////////////////////////////////////////////////
 // VHDL constructor to generate an assignment.  Expression is returned to caller
 //
-// "<= (rh_name)
+// "lh_name <= (rh_name) or <= if void arg
 ////////////////////////////////////////////////////////////////////////////////
+char* VHDL_LANG::equals(void)
+{
+  ostrstream expression;
+  expression << " <= ";
+
+  // Terminate stream
+  expression << ends;
+
+  return(expression.str());
+}
 char* VHDL_LANG::equals(const char* lh_name,const char* rh_name)
 {
   ostrstream expression;
@@ -1268,6 +1350,56 @@ char* VHDL_LANG::equals(const strstreambuf* lh_name,const strstreambuf* rh_name)
   ostrstream expression;
 
   expression << lh_name << " <= " << rh_name;
+
+  // Terminate stream
+  expression << ends;
+
+  return(expression.str());
+}
+
+//////////////////////////////////////////////////////////////////////////////////////
+// VHDL constructor to generate a nested expression.  Expression is returned to caller
+//
+// "(lh_name) expr  (rh_name)
+//////////////////////////////////////////////////////////////////////////////////////
+char* VHDL_LANG::expr(const char* lh_name,const char* rh_name)
+{
+  ostrstream expression;
+
+  expression << lh_name << rh_name;
+
+  // Terminate stream
+  expression << ends;
+
+  return(expression.str());
+}
+char* VHDL_LANG::expr(const strstreambuf* lh_name,const char* rh_name)
+{
+  ostrstream expression;
+
+  expression << lh_name << rh_name;
+
+  // Terminate stream
+  expression << ends;
+
+  return(expression.str());
+}
+char* VHDL_LANG::expr(const char* lh_name,const strstreambuf* rh_name)
+{
+  ostrstream expression;
+
+  expression << lh_name << rh_name;
+
+  // Terminate stream
+  expression << ends;
+
+  return(expression.str());
+}
+char* VHDL_LANG::expr(const strstreambuf* lh_name,const strstreambuf* rh_name)
+{
+  ostrstream expression;
+
+  expression << lh_name << rh_name;
 
   // Terminate stream
   expression << ends;
@@ -1532,8 +1664,19 @@ char* VHDL_LANG::l_case(const char* switch_name,
 ///////////////////////////////////////////////////////////////////////////////////
 // VHDL constructor to generate an and expression  Expression is returned to caller
 //
-// "and (rh_name)
+// "and (rh_name) or " and " if void argument
 ///////////////////////////////////////////////////////////////////////////////////
+char* VHDL_LANG::and(void)
+{
+  ostrstream expression;
+
+  expression << " and ";
+
+  // Terminate stream
+  expression << ends;
+
+  return(expression.str());
+}
 char* VHDL_LANG::and(const char* rh_name)
 {
   ostrstream expression;
@@ -1563,6 +1706,17 @@ char* VHDL_LANG::and(const strstreambuf* rh_name)
 //
 // "not(rh_name)"
 /////////////////////////////////////////////////////////////////////////////////
+char* VHDL_LANG::not(void)
+{
+  ostrstream expression;
+
+  expression << " not";
+
+  // Terminate stream
+  expression << ends;
+
+  return(expression.str());
+}
 char* VHDL_LANG::not(const char* rh_name)
 {
   ostrstream expression;
@@ -1590,8 +1744,19 @@ char* VHDL_LANG::not(const strstreambuf* rh_name)
 ///////////////////////////////////////////////////////////////////////////////////
 // VHDL constructor to generate an and expression  Expression is returned to caller
 //
-// "or (rh_name)
+// "or (rh_name) or " or " if void argument
 ///////////////////////////////////////////////////////////////////////////////////
+char* VHDL_LANG::or(void)
+{
+  ostrstream expression;
+
+  expression << " or ";
+
+  // Terminate stream
+  expression << ends;
+
+  return(expression.str());
+}
 char* VHDL_LANG::or(const char* rh_name)
 {
   ostrstream expression;
@@ -1617,12 +1782,70 @@ char* VHDL_LANG::or(const strstreambuf* rh_name)
 
 
 ///////////////////////////////////////////////////////////////////////////////////
-// VHDL constructor to slice a signal from hi_bits to lo_bits.  
+// VHDL constructor to generate an XOR expression  Expression is returned to caller
+//
+// "xor (rh_name)
+///////////////////////////////////////////////////////////////////////////////////
+char* VHDL_LANG::xor(const char* rh_name)
+{
+  ostrstream expression;
+
+  expression << " xor " << rh_name;
+
+  // Terminate stream
+  expression << ends;
+
+  return(expression.str());
+}
+char* VHDL_LANG::xor(const strstreambuf* rh_name)
+{
+  ostrstream expression;
+
+  expression << " xor " << rh_name;
+
+  // Terminate stream
+  expression << ends;
+
+  return(expression.str());
+}
+
+///////////////////////////////////////////////////////////////////////////////////
+// VHDL constructor to generate an XOR expression  Expression is returned to caller
+//
+// "xnor (rh_name)
+///////////////////////////////////////////////////////////////////////////////////
+char* VHDL_LANG::xnor(const char* rh_name)
+{
+  ostrstream expression;
+
+  expression << " xnor " << rh_name;
+
+  // Terminate stream
+  expression << ends;
+
+  return(expression.str());
+}
+char* VHDL_LANG::xnor(const strstreambuf* rh_name)
+{
+  ostrstream expression;
+
+  expression << " xnor " << rh_name;
+
+  // Terminate stream
+  expression << ends;
+
+  return(expression.str());
+}
+
+
+///////////////////////////////////////////////////////////////////////////////////
+// VHDL constructor to slice a signal from hi_bits to lo_bits, or individual bit.
 // Expression is returned to caller
 //
-// "(sig_name) (hi_bits downto lo_bits)
+// "(sig_name) (hi_bits downto lo_bits)  or
+// "(sig_name) (bit)
 ///////////////////////////////////////////////////////////////////////////////////
-char* VHDL_LANG::slice(const char* sig_name,int hi_bits, int lo_bits)
+char* VHDL_LANG::slice(const char* sig_name, const int hi_bits, const int lo_bits)
 {
   ostrstream expression;
 
@@ -1636,7 +1859,7 @@ char* VHDL_LANG::slice(const char* sig_name,int hi_bits, int lo_bits)
 
   return(expression.str());
 }
-char* VHDL_LANG::slice(const strstreambuf* sig_name,int hi_bits, int lo_bits)
+char* VHDL_LANG::slice(const strstreambuf* sig_name, const int hi_bits, const int lo_bits)
 {
   ostrstream expression;
 
@@ -1658,7 +1881,7 @@ char* VHDL_LANG::slice(const strstreambuf* sig_name,int hi_bits, int lo_bits)
 //
 // "(sig_name) (bit)
 ///////////////////////////////////////////////////////////////////////////////////
-char* VHDL_LANG::slice(const char* sig_name,int bit)
+char* VHDL_LANG::slice(const char* sig_name, const int bit)
 {
   ostrstream expression;
 
@@ -1669,7 +1892,7 @@ char* VHDL_LANG::slice(const char* sig_name,int bit)
 
   return(expression.str());
 }
-char* VHDL_LANG::slice(const strstreambuf* sig_name,int bit)
+char* VHDL_LANG::slice(const strstreambuf* sig_name, const int bit)
 {
   ostrstream expression;
 

@@ -1,7 +1,7 @@
 static const char file_id[] = "HWTarget.cc";
 
 /**********************************************************************
-Copyright (c) 1999-%Q% Sanders, a Lockheed Martin Company
+Copyright (c) 1999 Sanders, a Lockheed Martin Company
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -27,7 +27,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
  Programmers:  Ken Smith
  Date of creation: 3/23/98
- Version: $Id$
+ Version: @(#)HWTarget.cc      1.0     06/16/99
 ***********************************************************************/
 #include "HWTarget.h"
 
@@ -143,7 +143,7 @@ void ACSCGFPGATarget::HWinitialize()
       design_directory->make_directory();
     }
 
-  // Determine path for building resultatn VHDL code, if blank, use the design_directory
+  // Determine path for building resultant VHDL code, if blank, use the design_directory
   StringList compile_strlist=compile_state.currentValue();
   const char* compile_str=(const char *)compile_strlist;
   compile_directory=new Directory;
@@ -155,20 +155,7 @@ void ACSCGFPGATarget::HWinitialize()
       compile_directory->make_directory();
     }
 
-  printf("All output sent to %s\n",design_directory->retrieve());
-
-  // Make sure the coregen is installed if vhdl is to be built
-  // otherwise the "Hydra" will be unleashed
-  if (do_vhdlbuild==TRUE)
-    {
-      char* environ_path=getenv("COREGEN");
-      if (environ_path==NULL)
-	{
-	  fprintf(stderr, "WARNING:COREGEN environment variable not set, is\n");
-	  fprintf(stderr, " Xilinx Coregen installed? vhdlbuild cancelled.\n");
-	  do_vhdlbuild=FALSE;
-	}
-    }
+  printf("All output will be sent to %s\n",design_directory->retrieve());
 
   // Determine if wordlength analysis should be conducted
   StringList current_wordstate=word_state.currentValue();
@@ -185,6 +172,29 @@ void ACSCGFPGATarget::HWinitialize()
   // Determine the vector size for processing
   IntState* int_state=&vlen_state;
   vector_length=(int) (*int_state);
+  automatic_wordlength=0;
+/*
+  if (vector_length<0)
+    automatic_wordlength=1;
+  else
+    {
+      automatic_wordlength=0;
+      multirate=0;
+    }
+    */
+
+  // Make sure the coregen is installed! If VHDL is to be built,
+  // otherwise the "Hydra" will be unleashed
+  if (do_vhdlbuild==TRUE)
+    {
+      char* environ_path=getenv("COREGEN");
+      if (environ_path==NULL)
+	{
+	  fprintf(stderr, "WARNING:COREGEN environment variable not set, is\n");
+	  fprintf(stderr, " Xilinx Coregen installed? vhdlbuild cancelled.\n");
+	  do_vhdlbuild=FALSE;
+	}
+    }
 
   // Assist the memory manager
   memory_monitor();
@@ -193,7 +203,7 @@ void ACSCGFPGATarget::HWinitialize()
   err_message=new char[MAX_STR];
 
   // Smart generator list initializations
-  smart_generators=new SequentialList;
+  smart_generators=new CoreList;
 
   // Identifier initialization
   free_netlist_id=1;
@@ -205,17 +215,20 @@ void ACSCGFPGATarget::HWinitialize()
   all_libraries=new StringArray;
   all_includes=new StringArray;
 
-  //
-  // Hardcoded hardware definitions for now
-  //
-  arch=new Arch(NUM_FPGAS,NUM_MEMS);
-  arch->set_fpga();
-  arch->set_memory();
-//  arch->print_arch("Allocated architecture:\n");
+  // Determine path and filename for the target architecture descriptor
+//  StringList arch_strlist=arch_state.currentValue();
+//  char* arch_str=(const char *)arch_strlist;
+  char* arch_name="wildforce.arch";
+//  char* arch_name="wildstar.arch";
+  char* arch_path=new char[MAX_STR];
+  strcpy(arch_path,getenv("PTOLEMY"));
+//  strcpy(arch_path,"/common/projects/ptolemy/aptix/jmsmith/pt_r3");
+  arch=new Arch(arch_path,arch_name);
+  delete []arch_path;
 }
 
 
-int ACSCGFPGATarget::HWalg_query()
+int ACSCGFPGATarget::HWalg_query(CoreList* sg_list)
 {
   // FIRST PASS:
   // Collect all stars into the smart generator list.
@@ -230,7 +243,7 @@ int ACSCGFPGATarget::HWalg_query()
       strcpy(name,fpga_core->className());
       if (fpga_core!=NULL)
 	if (strcmp(name,"ACSForkCGFPGA")!=0)
-	  smart_generators->append((Pointer) fpga_core);
+	  sg_list->append(fpga_core);
 	else
 	  {
 	    // Forks should be initialized anyways AND
@@ -246,10 +259,10 @@ int ACSCGFPGATarget::HWalg_query()
   // determine initial pipeline delays consumned, and
   // assign io to memory ports
 
-  int sg_count=smart_generators->size();
+  int sg_count=sg_list->size();
   for (int loop=0;loop<sg_count;loop++)
     {
-      ACSCGFPGACore* fpga_core=(ACSCGFPGACore*) smart_generators->elem(loop);
+      ACSCGFPGACore* fpga_core=(ACSCGFPGACore*) sg_list->elem(loop);
 
       // FIX: This shouldn't be needed
       // Hunt-down all UNDEFINED smart generators and make preliminary 
@@ -264,14 +277,23 @@ int ACSCGFPGATarget::HWalg_query()
 
       // Apply unique identifier to stars
       HWstar_assignids(fpga_core);
+
+      // Since these come from the Ptolemy graph, they are user generated
       fpga_core->acs_origin=USER_GENERATED;
+
+      // If the user intentionally added a delay element then it needs to be 
+      // classified as a save state device;
+      // NOTE: Modify as other algorithmic save state cores are added to the user palette
+      // FIX: Or this could be left to the core to evaluate its origin with new method:P
+      if (strncmp(fpga_core->name(),"ACSDelay",8)==0)
+	fpga_core->acs_state=SAVE_STATE;
 
       // Determine technology specifications given by user
       // Alloc smart generator memories
       // Query and set pipe states
       // Query memory assignment info
       int rc_sginit=fpga_core->sg_initialize(design_directory->retrieve_extended(),
-					     ALGORITHM,&free_acsid);
+					     &free_acsid);
       if (rc_sginit==0)
 	return(0);
 
@@ -282,7 +304,7 @@ int ACSCGFPGATarget::HWalg_query()
 	}
 
       // Translate star parameters
-      HWsg_queryprec(fpga_core);
+      HWsg_query_params(fpga_core);
     }
 
 
@@ -294,7 +316,7 @@ int ACSCGFPGATarget::HWalg_query()
   //       indeed flattened into Output ports!
   for (int loop=0;loop<sg_count;loop++)
     {
-      ACSCGFPGACore* fpga_core=(ACSCGFPGACore*) smart_generators->elem(loop);
+      ACSCGFPGACore* fpga_core=(ACSCGFPGACore*) sg_list->elem(loop);
       
       // ASSUMPTION:There should only be one(?) connected graph
       // Only connect relevant stars
@@ -305,20 +327,20 @@ int ACSCGFPGATarget::HWalg_query()
 	    return(0);
 	}
 
-    } //  for (int loop=1;loop<=smart_generators->size();loop++)
+    } //  for (int loop=0;loop<sg_list->size();loop++)
 
 
   // FOURTH PASS:
   // Remove all SW domain cores, since all HW connections have been established
-  SequentialList* tmp_gens=new SequentialList;
+  CoreList* tmp_gens=new CoreList;
   for (int loop=0;loop<sg_count;loop++)
     {
-      ACSCGFPGACore* fpga_core=(ACSCGFPGACore*) smart_generators->elem(loop);
+      ACSCGFPGACore* fpga_core=(ACSCGFPGACore*) sg_list->elem(loop);
       if (fpga_core->acs_domain==HW)
-	tmp_gens->append((Pointer) fpga_core);
+	tmp_gens->append(fpga_core);
     }
-  delete smart_generators;
-  smart_generators=tmp_gens;
+//  delete sg_list;
+  sg_list=tmp_gens;
 
   // Cleanup
   delete []name;
@@ -362,11 +384,11 @@ void ACSCGFPGATarget::HWdup_component(ACSCGFPGACore* dup_core)
 // ASSUMPTION: Pin #s are implicitly linked to Ptolemy parameters.
 //             input pins are first, starting at zero!
 //////////////////////////////////////////////////////////////////////////
-void ACSCGFPGATarget::HWsg_queryprec(ACSCGFPGACore* fpga_core)
+void ACSCGFPGATarget::HWsg_query_params(ACSCGFPGACore* fpga_core)
 {
   // Allocate local storage
-  SequentialList* input_list=new SequentialList;
-  SequentialList* output_list=new SequentialList;
+  StringArray* input_list=new StringArray;
+  StringArray* output_list=new StringArray;
   int pin_count=0;
   
   // Obtain parameter name info from each smart generator
@@ -374,12 +396,17 @@ void ACSCGFPGATarget::HWsg_queryprec(ACSCGFPGACore* fpga_core)
 
   // Retrieve precision from Ptolemy states and assign precisions
   HWsg_updateprec(fpga_core,input_list,pin_count,"InputPrecision","LockInput");
-  pin_count+=(input_list->size())/2;
+  pin_count+=(input_list->population())/2;
   HWsg_updateprec(fpga_core,output_list,pin_count,"OutputPrecision","LockOutput");
 
-  // Treat all precision information as being locked and update delays
-  fpga_core->sg_resources(LOCKED);
+  // Retrieve user delay information
   fpga_core->sg_delay_query();
+
+  // Update precisions, source precisions are locked, all designs can float
+  if (fpga_core->acs_type==SOURCE)
+    fpga_core->update_sg(LOCKED,UNLOCKED);
+  else
+    fpga_core->update_sg(UNLOCKED,UNLOCKED);
 
   // Cleanup
   delete input_list;
@@ -392,35 +419,42 @@ void ACSCGFPGATarget::HWsg_queryprec(ACSCGFPGACore* fpga_core)
 // if defaults, then retrieve precisions from fixed precision parameter field
 /////////////////////////////////////////////////////////////////////////////
 void ACSCGFPGATarget::HWsg_updateprec(ACSCGFPGACore* fpga_core,
-				      SequentialList* pin_list,
+				      StringArray* pin_list,
 				      int pin_count,
 				      const char* fixed_statename,
 				      const char* lock_statename)
 {
   Pin* pins=fpga_core->pins;
+  char* lock_name=new char[MAX_STR];
 
   if (DEBUG_PTPRECISION)
     printf("Interpreting precisions for sg %s\n",fpga_core->comment_name());
 
   // ASSUMPTION:ACS precisions have two entries => (loop+=2)
-  for (int loop=0;loop<pin_list->size();loop+=2)
+  for (int loop=0;loop<pin_list->population();loop+=2)
     {
       // Obtain major bit
-      char* mbit_field=(char*) pin_list->elem(loop);
+      char* mbit_field=pin_list->get(loop);
       int majorbit=fpga_core->intparam_query(mbit_field);
 
       // Obtain bit length
-      char* bitlen_field=(char*) pin_list->elem(loop+1);
+      char* bitlen_field=pin_list->get(loop+1);
       int bitlen=fpga_core->intparam_query(bitlen_field);
 
       if (DEBUG_PTPRECISION)
 	printf("ACS Ptolemy precision fields are (%d,%d)\n",majorbit,bitlen);
 
       // Obtain user lock directive
-      int lock_state=fpga_core->intparam_query(lock_statename);
+      State* lock_state=fpga_core->stateWithName(lock_statename);
+      strcpy(lock_name,lock_state->currentValue());
+      if (DEBUG_PTPRECISION)
+	printf("Lock state for field %s is %s\n",lock_statename,lock_name);
+      int lock_status=0;
+      if (strcmp(lock_name,"1")==0)
+	lock_status=1;
 
       // FIX: FixSim core use of YES/NO implies 1/0 interpretation.
-      if (((majorbit==0) && (bitlen==0)) || (lock_state==1))
+      if ((majorbit==0) && (bitlen==0))
 	{
 	  // ACS precisions not set, retrieve from Ptolemy precisions
 	  State* precision_state=fpga_core->stateWithName(fixed_statename);
@@ -431,7 +465,7 @@ void ACSCGFPGATarget::HWsg_updateprec(ACSCGFPGACore* fpga_core,
 	  
 	      Fix infix=Fix((const char*) current_char);
 	      majorbit=infix.intb();
-	      bitlen=infix.len();
+	      bitlen=infix.len()-majorbit;
 	    }
 	  else
 	    {
@@ -442,15 +476,25 @@ void ACSCGFPGATarget::HWsg_updateprec(ACSCGFPGACore* fpga_core,
 	}
 
       // Set precision
-      pins->set_wordlock(pin_count,lock_state);
+      if (lock_status)
+	pins->set_wordlock(pin_count,LOCKED);
+      else
+	pins->set_wordlock(pin_count,UNLOCKED);
+	
       if (DEBUG_PTPRECISION)
 	printf("pin %s, precision set to (%d,%d)\n",
 	       pins->query_pinname(pin_count),
 	       majorbit,
 	       bitlen);
 	       
-      pins->set_precision(pin_count++,majorbit,bitlen,LOCKED);
+      if (lock_status)
+	pins->set_precision(pin_count++,majorbit,bitlen,LOCKED);
+      else
+	pins->set_precision(pin_count++,majorbit,bitlen,UNLOCKED);
     }
+
+  // Cleanup
+  delete []lock_name;
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -595,7 +639,9 @@ void ACSCGFPGATarget::HWassign_netlist(Pin* src_pins,
   int netlist_id=src_pins->query_netlistid(output_pin);
   if (netlist_id==UNASSIGNED)
     {
-      netlist_id=free_netlist_id++;
+      int id=free_netlist_id;
+      netlist_id=id;
+      free_netlist_id++;
       src_pins->set_netlistid(output_pin,netlist_id);
     }
   snk_pins->set_netlistid(input_pin,netlist_id);
@@ -625,87 +671,20 @@ int ACSCGFPGATarget::HWstar_assignids(ACSCGFPGACore*& fpga_core)
 /////////////////////////////////////////////////////
 // Allocate cores to resources, if not user-specified
 /////////////////////////////////////////////////////
-void ACSCGFPGATarget::HWassign_devices()
+void ACSCGFPGATarget::HWassign_devices(CoreList* sg_list)
 {
+  arch->unassign_all();
+
   printf("Assigning memories....");
-  HWassign_memory();
+  HWassign_memory(sg_list);
   printf("Done.\n");
 
-  printf("Assign fpgas....");
-  HWassign_fpga();
+  printf("Assigning FPGAs....");
+  HWassign_fpga(sg_list);
   printf("Done.\n");
 
   if (DEBUG_ASSIGNMENTS)
-    HWtest_assignments();
-}
-
-void ACSCGFPGATarget::HWtest_assignments()
-{
-  for (int fpga_no=0;fpga_no<arch->fpga_count;fpga_no++)
-    {
-      Fpga* its_fpga=arch->get_fpga_handle(fpga_no);
-      printf("Fpga %d has the following children:\n",fpga_no);
-      its_fpga->print_children();
-    }
-}
-
-/////////////////////////////////////////////////////////
-// Watch for unassigned smart generators and default them
-// FIX:A rudimentary algorithm should be added?
-/////////////////////////////////////////////////////////
-void ACSCGFPGATarget::HWassign_fpga(void)
-{
-  int sg_count=smart_generators->size();
-  for (int loop=0;loop<sg_count;loop++)
-    {
-      ACSCGFPGACore* fpga_core=(ACSCGFPGACore*) smart_generators->elem(loop);
-      int local_device=-1;
-      if (DEBUG_ASSIGNMENTS)
-	printf("Core %s is assigned to acs_device %d\n",
-	       fpga_core->comment_name(),
-	       fpga_core->acs_device);
-      
-      if (fpga_core->acs_type==BOTH)
-	{
-	  /////////////////////////////////////////
-	  // Evaluate core assignments to the fpgas
-	  /////////////////////////////////////////
-	  if (fpga_core->acs_device<=UNASSIGNED)
-	    {
-	      fpga_core->acs_device=1;
-	      printf("HWassign_fpga:Warning, core %s, not assigned to an fpga, will assign to 1\n",
-		     fpga_core->comment_name());
-	    }
-	  if (fpga_core->acs_device > NUM_FPGAS)
-	    {
-	      fpga_core->acs_device=1;
-	      printf("HWassign_fpga:Warning, core %s, assigned to fictitious fpga, will assign to 1\n",
-		     fpga_core->comment_name());
-	      printf("Available Fpgas are %d to %d\n",0,arch->fpga_count-1);
-	    }
-      
-	  //////////////////////////////////////////////////
-	  // Notify fpga that it will be used in this design
-	  // FIX: Should do a search for a non-reserved fpga
-	  //////////////////////////////////////////////////
-	  int rc=arch->activate_fpga(fpga_core->acs_device);
-	  if (!rc)
-	    {
-	      printf("HWassign_fpga:Warning, core %s, assigned to reserved fpga, will assign to 1\n",
-		     fpga_core->comment_name());
-	      fpga_core->acs_device=1;
-	      arch->activate_fpga(fpga_core->acs_device);
-	    }
-	  local_device=fpga_core->acs_device;
-
-	  ////////////////////////////////////////////////////////////////
-	  // To ease searching, assign the core handle to its respectively
-	  // assigned FPGA
-	  ////////////////////////////////////////////////////////////////
-	  Fpga* its_fpga=arch->get_fpga_handle(local_device);
-	  its_fpga->set_child(fpga_core);
-	}
-    }
+    arch->print_arch("after HWassign_devices");
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -713,124 +692,122 @@ void ACSCGFPGATarget::HWassign_fpga(void)
 // Issue a firing schedule to Source stars on a first-come-first-serve basis.
 // Allocate star pointers to each memory port for later access.
 /////////////////////////////////////////////////////////////////////////////
-void ACSCGFPGATarget::HWassign_memory()  
+void ACSCGFPGATarget::HWassign_memory(CoreList* sg_list)  
 {
-  // Assign an array to depict the total number of times a port is 
-  // used for a given sequence
-  seqlen=0;
-  int* port_hits=new int[arch->mem_count];
-  for (int loop=0;loop<arch->mem_count;loop++)
-    port_hits[loop]=0;
-
+  ///////////////////////////////////////////////////////////////////
   // Assign memory as dictated by source addresses and port addresses
   // Set initial node activations on a first-come-first-served basis
-  int sg_count=smart_generators->size();
+  ///////////////////////////////////////////////////////////////////
+  int sg_count=sg_list->size();
   for (int loop=0;loop<sg_count;loop++)
     {
-      ACSCGFPGACore* fpga_core=(ACSCGFPGACore*) smart_generators->elem(loop);
+      ACSCGFPGACore* fpga_core=(ACSCGFPGACore*) sg_list->elem(loop);
+
+      if (DEBUG_ASSIGNMENTS)
+	printf("checking core %s\n",fpga_core->name());
 
       // For now only schedule sources 
-      if ((fpga_core->acs_type==SOURCE) || (fpga_core->acs_type==SINK))
+      if ((fpga_core->acs_type==SOURCE) || (fpga_core->acs_type==SINK) || (fpga_core->acs_type==SOURCE_LUT))
 	{
-	  int reserved_mem=0;
-	  if (fpga_core->acs_device != UNASSIGNED)
-	    {
-	      MemPort* mem_port=arch->get_memory_handle(fpga_core->acs_device);
-	      if (mem_port->portuse==MEMORY_RESERVED)
-		reserved_mem=1;
-	    }
-	  if ((fpga_core->acs_device!=UNASSIGNED) && (!reserved_mem))
-	    {
-	      if (DEBUG_ARCH)
-		printf("Assigning %s to :\n",fpga_core->comment_name());
-	    }
+	  if (DEBUG_ASSIGNMENTS)
+	    printf("core %s is a %d\n",fpga_core->name(),fpga_core->acs_type);
+	  int ok=arch->evaluate_memory_assignment(fpga_core->acs_device);
+	  if (!ok)
+	    fprintf(stderr,"HWassign_memory:Caution bad assignment for core %s, reassigned to %d\n",
+		    fpga_core->comment_name(),
+		    fpga_core->acs_device);
 	  else
-	    {
-	      // Automatically assign this component to a memory
-	      // FIX: Only a first-available approach used
-
-	      if (DEBUG_ASSIGNMENTS)
-		{
-		  if (fpga_core->acs_device == UNASSIGNED)
-		    printf("Memory not assigned, will make an assignment\n");
-		  if (reserved_mem)
-		    printf("Memory assigned to a reserved memory, will make new assignment\n");
-		}
-
-	      // Identify memory ports in use as dictated by addresses
-	      int mem_loop=0;
-	      int assigned=0;
-	      while ((mem_loop<arch->mem_count) && (!assigned))
-		{
-		  MemPort* mem_port=arch->get_memory_handle(mem_loop);
-		  if (mem_port->portuse != MEMORY_RESERVED)
-		    {
-		      if ((fpga_core->address_start < mem_port->addr_hi) &&
-			  (fpga_core->address_start >= mem_port->addr_lo))
-			{
-			  if (DEBUG_ASSIGNMENTS)
-			    printf("addr=%d, fits under port %d of address range (%d,%d)\n",
-				   fpga_core->address_start,
-				   mem_loop,
-				   mem_port->addr_lo,
-				   mem_port->addr_hi);
-			  
-			  // Associate this memory with the star
-			  fpga_core->acs_device=mem_loop;
-			  assigned=1;
-			}
-		    }
-		  mem_loop++;
-		} //  while ((mem_loop<arch->mem_count) && (!assigned))
-	    }
+	    fpga_core->memory_device=fpga_core->acs_device;
 		
-	  ///////////////////////////////////////////////////////
-	  // Inform the memory port of this star and schedule it.
-	  // SINK stars will be assigned during scheduling, but
-	  // at least they are tracked here.
-	  ///////////////////////////////////////////////////////
-	  MemPort* mem_port=arch->get_memory_handle(fpga_core->acs_device);
+	  //////////////////////////////////////
+	  // Inform the memory port of this core
+	  // FIX:Reassign to iocores member
+	  //////////////////////////////////////
+	  Port* mem_port=arch->get_memory_handle(fpga_core->memory_device);
 	  if (fpga_core->acs_type==SOURCE)
 	    mem_port->assign_srccore(fpga_core);
-	  port_hits[fpga_core->acs_device]++;
+	  else if (fpga_core->acs_type==SINK)
+	    mem_port->assign_snkcore(fpga_core);
+	  else if (fpga_core->acs_type==SOURCE_LUT)
+	    {
+	      mem_port->assign_lutcore(fpga_core);
+	      
+	      // LUT has been trapped as a source, maintain revert to an algorithm star
+//	      fpga_core->acs_type=BOTH;
+	    }
+	  else
+	    fprintf(stderr,"ERROR:Unknown core type for %s when assigning to port\n",fpga_core->comment_name());
 
+	  ///////////////////////////////////////////////////////////////////////////////////////
+	  // If unirate, then word counts for all smart generators are derived from the global
+	  // If wordlengths are set at the smart generator level, then this is the launch count
+	  ///////////////////////////////////////////////////////////////////////////////////////
+	  multirate=1;
+	  mem_port->set_launchrate(vector_length);
 
-	  ///////////////////////////////////////////////////////////////
-	  // Since this memory will be used, its controlling FPGA will be 
+	  ////////////////////////////////////////////////////
+	  // Now determine through which fpga this is going
+	  // FIX: For now, the memory device is the acs_device
+	  //      this only works for the Annapolis Wildforce!
+	  ////////////////////////////////////////////////////
+	  fpga_core->acs_device=fpga_core->memory_device;
+
+	  ////////////////////////////////////////////////////////////
+	  // Since this memory will be used, its controlling FPGA will
 	  // contain (of course) controlling circuitry.
-	  ///////////////////////////////////////////////////////////////
+	  ////////////////////////////////////////////////////////////
 	  arch->activate_fpga(fpga_core->acs_device);
-
-
-	  //////////////////////////////////////////////////////////////
-	  // To ease searching, assign the core handle to its controller
-	  // FPGA
-	  //////////////////////////////////////////////////////////////
-	  Fpga* its_fpga=arch->get_fpga_handle(mem_port->controller_fpga);
+	  
+	  ///////////////////////////////////////////////////////////////////
+	  // To ease searching, assign the core handle to its controller FPGA
+	  ///////////////////////////////////////////////////////////////////
+	  Fpga* its_fpga=arch->get_fpga_handle(fpga_core->acs_device);
 	  its_fpga->set_child(fpga_core);
 
-	} // if (fpga_core->acs_type==SOURCE) || (fpga_core->acs_type==SINK))
-    } // for (int loop=1;loop<=smart_generators->size();loop++)
-
-  // Determine sequence length
-  for (int loop=0;loop<arch->mem_count;loop++)
-    if (port_hits[loop]>seqlen)
-      seqlen=port_hits[loop];
-
-  // Adjust sequence length based on memory delays
-  // ASSUMPTION:Delays are the same on all memory models
-  // FIX:The sequence adjustment should be the difference of skews!!
-  //     Long term solution will obviate this, so ok for now.
-  MemPort* mem_port=arch->get_memory_handle(0);
-  seqlen+=mem_port->read_skew;
-  seqlen+=mem_port->write_skew;
-
-  if (DEBUG_SCHEDULER)
-    printf("seqlen=%d\n",seqlen);
-
-  // Cleanup
-  delete []port_hits;
+	} // if ((fpga_core->acs_type==SOURCE) || (fpga_core->acs_type==SINK))
+    } // for (int loop=0;loop<smart_generators->size();loop++)
 }
+
+
+/////////////////////////////////////////////////////////
+// Watch for unassigned smart generators and default them
+// FIX:A rudimentary algorithm should be added?
+/////////////////////////////////////////////////////////
+void ACSCGFPGATarget::HWassign_fpga(CoreList* sg_list)
+{
+  int sg_count=sg_list->size();
+  for (int loop=0;loop<sg_count;loop++)
+    {
+      ACSCGFPGACore* fpga_core=(ACSCGFPGACore*) sg_list->elem(loop);
+      if (DEBUG_ASSIGNMENTS)
+	printf("Core %s is assigned to acs_device %d\n",
+	       fpga_core->comment_name(),
+	       fpga_core->acs_device);
+      
+      if (fpga_core->acs_type==BOTH)
+	{
+	  int ok=arch->evaluate_fpga_assignment(fpga_core->acs_device);
+	  if (!ok)
+	    fprintf(stderr,"HWassign_fpga:Caution bad assignment for core %s, reassigned to %d\n",
+		    fpga_core->comment_name(),
+		    fpga_core->acs_device);
+      
+
+	  ////////////////////////////////////////////////////////////////
+	  // To ease searching, assign the core handle to its respectively
+	  // assigned FPGA
+	  ////////////////////////////////////////////////////////////////
+	  int local_device=fpga_core->acs_device;
+	  Fpga* its_fpga=arch->get_fpga_handle(local_device);
+	  its_fpga->set_child(fpga_core);
+
+
+	  // Notify the core of technology type
+	  fpga_core->target_type=its_fpga->part_type;
+	}
+    }
+}
+
 
 
 ///////////////////////////////////////////////////////////////////
@@ -909,6 +886,47 @@ int ACSCGFPGATarget::Ptquery_bitlen(const int io_type,
 
 
 ///////////////////////////////////////////////////////////////////////////////
+// This algorithm will trigger the architecture to examine its I/O utility and
+// check for any opportunities to reduce total latency, by compressing multiple
+// I/O channels into one via bit packing.  Then adds packing cores to support.
+///////////////////////////////////////////////////////////////////////////////
+int ACSCGFPGATarget::HWpack_ports(CoreList* sg_list)
+{
+  int ok=arch->assess_io();
+  if (!ok)
+    return(0);
+
+  ACSIntArray* packed_list=NULL;
+
+  // Check the memories
+  packed_list=arch->compressed_io(MEMORY);
+  if (packed_list!=NULL)
+    {
+      ACSIntArray* unneeded=HWpack_bits(packed_list,MEMORY,sg_list);
+      for (int loop=0;loop<unneeded->population();loop++)
+	sg_list->remove(unneeded->query(loop));
+
+      delete unneeded;
+    }
+
+  // Check the systolics
+  packed_list=arch->compressed_io(SYSTOLIC);
+  if (packed_list!=NULL)
+    {
+//      ACSIntArray* unneeded=HWpack_bits(packed_list,MEMORY,sg_list);
+      ACSIntArray* unneeded=HWpack_bits(packed_list,SYSTOLIC,sg_list);
+      for (int loop=0;loop<unneeded->population();loop++)
+	sg_list->remove(unneeded->query(loop));
+
+      delete unneeded;
+    }
+
+  // Return happy condition
+  return(1);
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
 // Generates a single rate schedule for the algorithm given a fixed set of 
 // input times.
 // TODO: (1) Need to preclude constants or other non-timed functions from
@@ -916,20 +934,72 @@ int ACSCGFPGATarget::Ptquery_bitlen(const int io_type,
 ///////////////////////////////////////////////////////////////////////////////
 void ACSCGFPGATarget::HWunirate_sched()
 {
+  ////////////////////////
+  // Determine launch rate
+  ////////////////////////
+  seqlen=arch->calc_launchrate();
+  if (DEBUG_SCHEDULER)
+    printf("launch rate calculated to be %d\n",seqlen);
+
+  ///////////////////////////////////////////////////////////////////////////////
+  // Determine if addressing has been fixed or needs to be determined by stitcher
+  ///////////////////////////////////////////////////////////////////////////////
+  automatic_addressing=arch->query_addressing();
+  if (automatic_wordlength)
+    {
+      vector_length=arch->mem_slice;
+      if (DEBUG_SCHEDULER)
+	printf("automatic wordlength calculation results in a maximum wordlength of %d\n",
+	       vector_length);
+    }
+
+  ///////////////////////////////////////////////////
   // Recalculate pipe delay for phase_dependent cores
+  // FIX:Revist this once multirate sequencer in place!!!
+  //////////////////////////////////////////////////
   int sg_count=smart_generators->size();
   for (int loop=0;loop<sg_count;loop++)
     {
       ACSCGFPGACore* fpga_core=(ACSCGFPGACore*) smart_generators->elem(loop);
       if (fpga_core->phase_dependent)
+	fpga_core->pipe_delay*=seqlen;
+    }
+
+  /////////////////////////////////////////////////////////////////////////////////
+  // Determine if the algorithm has been scheduled already, if so then we are done.
+  /////////////////////////////////////////////////////////////////////////////////
+  if (HWall_scheduled())
+    return;
+
+  ////////////////////////////////////////////////////////////////////////////////////////////
+  // Start by scheduling the sources
+  // FIX:Should this be delegated to one of the subclasses?  The thought is to keep scheduling
+  //     outside the domain of the architecture.
+  ////////////////////////////////////////////////////////////////////////////////////////////
+  for (int loop=0;loop<arch->mem_count;loop++)
+    {
+      Port* mem_port=arch->get_memory_handle(loop);
+      if (mem_port->port_active())
 	{
-//	  printf("before, pipe_delay=%d\n",fpga_core->pipe_delay);
-	  fpga_core->pipe_delay*=seqlen;
-//	  printf("after, pipe_delay=%d\n",fpga_core->pipe_delay);
+	  CoreList* source_list=mem_port->source_cores;
+	  int free_time=0;
+	  for (int core_loop=0;core_loop<source_list->size();core_loop++)
+	    {
+	      if (mem_port->sources_packed)
+		mem_port->schedule_src(core_loop,0);
+	      else
+		mem_port->schedule_src(core_loop,free_time++);
+	      ACSCGFPGACore* src_core=source_list->elem(core_loop);
+	      src_core->act_launch=seqlen;
+	      src_core->act_complete=(seqlen*vector_length)+src_core->act_output;
+	    }
 	}
     }
 
-  // Now iteratively schedule
+
+  ////////////////////////////////////////////////
+  // Now iteratively schedule all downstream cores
+  ////////////////////////////////////////////////
   int runaway=0;
   int done=0;
   while (!done)
@@ -977,8 +1047,19 @@ void ACSCGFPGATarget::HWunirate_sched()
 		    int unsched_pin=unsched_inode_pins->query(ipin_loop);
 		    Connectivity* icons=unsched_pins->query_connection(unsched_pin);
 		    
+		    // Sinks and Ioports may have been disconnected during the bit packing
+		    // process.  These need to be removed from the scheduler's prying eye
 		    // FIX: For now no bidirectionals drive this
 		    // ASSUMPTION: Only one input node!!
+		    if ((!icons->connected()) && 
+			((unsched_core->acs_type==SINK) || (unsched_core->acs_type==IOPORT)))
+		      {
+			unsched_core->act_output=NONSCHEDULED;
+			failed=1;
+			unsched_pipe->start_over();
+			break;  // ipin iterator
+		      }
+		    
 		    int acs_id=icons->query_acsid(0);
 		    ACSCGFPGACore* src_core=HWfind_star(acs_id);
 		    if (src_core==NULL)
@@ -998,7 +1079,8 @@ void ACSCGFPGATarget::HWunirate_sched()
 			break;  // ipin iterator
 		      }
 		    
-		    unsched_pipe->add_src(unsched_pin,src_core->act_output,src_core->acs_id);
+		    if (src_core->act_output >= 0)
+		      unsched_pipe->add_src(unsched_pin,src_core->act_output,src_core->acs_id);
 		    
 		    if (DEBUG_SCHEDULER)
 		      printf("Source star %s is scheduled at %d\n",
@@ -1021,13 +1103,17 @@ void ACSCGFPGATarget::HWunirate_sched()
 		      }
 		    unsched_core->act_input=unsched_pipe->max_nodeact;
 		    unsched_core->act_output=unsched_pipe->max_nodeact + unsched_core->pipe_delay;
+		    unsched_core->act_launch=seqlen;
+		    unsched_core->act_complete=unsched_core->act_input+(vector_length*seqlen);
+
 		    if (unsched_core->delay_offset)
 		      unsched_core->act_output+=unsched_core->delay_offset;
 		    
 		    if (unsched_core->acs_type==SINK)
 		      {
-			MemPort* mem_port=arch->get_memory_handle(unsched_core->acs_device);
-			mem_port->assign_snkcore(unsched_core,unsched_core->act_output);
+			Port* mem_port=arch->get_memory_handle(unsched_core->acs_device);
+			mem_port->schedule_snk(unsched_core,unsched_core->act_output);
+			unsched_core->act_complete=unsched_core->act_input+(vector_length*seqlen);
 		      }
 		    if (DEBUG_SCHEDULER)
 		      {
@@ -1041,7 +1127,7 @@ void ACSCGFPGATarget::HWunirate_sched()
 		      }
 		  }
 	      } // if (unsched_star->act_output==UNSCHEDULED)
-	  } // for (int loop=1;loop<=smart_generators->size();loop++)
+	  } // for (int loop=0;loop<smart_generators->size();loop++)
 	// DEBUG
 	runaway++;
 	if (runaway>RUNAWAY_SCHEDULER)
@@ -1051,56 +1137,75 @@ void ACSCGFPGATarget::HWunirate_sched()
 	      printf("HWunirate_sched:Runaway scheduler!\n");
 	  }
       } // if (!HWall_scheduled())
+}
 
 
+/////////////////////////////////////////////////////////////////////////////////////////
+// Memory-based smart generators need to have phase-dependent control signals associated
+// with them in order to ensure that it\'s contents are valid and not corrupted with 
+// constant clock cycle execution.  Execution is only warranted on the appropriate phase,
+// identify this control signal for proper binding
+/////////////////////////////////////////////////////////////////////////////////////////
+void ACSCGFPGATarget::HWmultirate_sg(CoreList* sg_list)
+{
   // For algorithmic smart generators, their effective delay
   // is based on the sequence length rather than the system clock.
   // Tag their CEs for sequencer phase hookups
   // ASSUMPTION: Algorithm delays imply a different rate.
   //             Shared memories are always used.
+  int sg_count=sg_list->size();
   for (int loop=0;loop<sg_count;loop++)
     {
-      ACSCGFPGACore* alg_core=(ACSCGFPGACore*) smart_generators->elem(loop);
+      ACSCGFPGACore* alg_core=(ACSCGFPGACore*) sg_list->elem(loop);
       if (DEBUG_SCHEDULER)
 	{
-	  printf("Examining smart generator %s\n",alg_core->comment_name());
+	  printf("HWmultirate_sg:Examining smart generator %s\n",alg_core->comment_name());
 	  Pipealign* core_pipe=alg_core->pipe_alignment;
 	  core_pipe->print_delays();
 	}
 	    
-      if ((alg_core->alg_delay > 0) || (alg_core->phase_dependent))
+      if (alg_core->phase_dependent)
+//      if ((alg_core->alg_delay > 0) || (alg_core->phase_dependent))
 	{
 	  Pin* alg_pins=alg_core->pins;
 
+	  // Test for any input control pins
+	  ACSIntArray* input_controls=alg_pins->query_icnodes();
+	  HWmultirate_controlpins(alg_core,input_controls);
+
+	  // Test for any output control pins
+	  ACSIntArray* output_controls=alg_pins->query_ocnodes();
+	  HWmultirate_controlpins(alg_core,output_controls);
+
+	}
+    }
+}
+
+
+void ACSCGFPGATarget::HWmultirate_controlpins(ACSCGFPGACore* core,
+					      ACSIntArray* control_pins)
+{
+  Pin* core_pins=core->pins;
+  for (int loop=0;loop<control_pins->population();loop++)
+    {
+      int pin_no=control_pins->query(loop);
+      int phase_dependency=core_pins->query_phasedependency(pin_no);
+      if (phase_dependency!=UNASSIGNED)
+	{
 	  // Convert the pintypes for the resolver
-	  int ce_pin=alg_pins->retrieve_type(INPUT_PIN_CE);
-
-	  //FIX: Once pin type is split into class and defaults then
-	  //     remove this kludgy trap
-	  if (ce_pin==-1)
-	    ce_pin=alg_pins->retrieve_type(INPUT_PIN_AH);
-	    
-	  alg_pins->set_pintype(ce_pin,INPUT_PIN_PHASE);
-
-	  // Assign the appropriate phase activation
-	  // As determined by the pipe-aligned source as a function of the ring counter
-	  int phase=alg_core->act_input % seqlen;
-/*
-	  if (alg_core->delay_offset)
-	    phase=(alg_core->act_output-alg_core->pipe_delay+alg_core->delay_offset) % seqlen;
+	  core_pins->set_pintype(pin_no,INPUT_PIN_PHASE_START);
+	  int phase=-1;
+	  if (phase_dependency==INPUT_PIN)
+	    phase=core->act_input;
 	  else
-	    phase=(alg_core->act_output-alg_core->pipe_delay) % seqlen;
-	    */
-
-//	  printf("dataact=%d, seqlen=%d, phase=%d\n",alg_core->act_output,seqlen,phase);
-//	  phase--;
-	  if (phase<0)
-	    phase=seqlen;
-	  alg_pins->set_pinpriority(ce_pin,phase);
+	    phase=core->act_output;
+	  core_pins->set_pinpriority(pin_no,phase);
 
 	  if (DEBUG_SCHEDULER)
-	    printf("Smart generator %s is phase-dependent and will activate on phase %d\n",
-		   alg_core->comment_name(),
+	    printf("Smart generator %s pin %d of type %d is phase-dependent on phase %d\n",
+		   core->comment_name(),
+		   pin_no,
+		   core_pins->query_pintype(pin_no),
 		   phase);
 	}
     }
@@ -1293,25 +1398,19 @@ int ACSCGFPGATarget::HWadd_delaychain(ACSCGFPGACore* src_core,
   int target_device=src_core->acs_device;
   if (src_core->acs_type==IOPORT)
     {
-      target_device=src_core->acs_outdevice;
+      ACSIntArray* device_nums=src_core->sg_get_privaledge();
+      int acs_outdevice=device_nums->query(1);
+      target_device=acs_outdevice;
       if (DEBUG_DELAYS)
 	printf("Adding delays to an IoPort, will target for device %d\n",
 	       target_device);
     }
 
-  // Add a constructor engine.  For now all delays will be targeted for the
-  // same device as the source core
-  /*
-  construct=new Sg_Constructs(&free_acsid,
-			      design_directory->retrieve_extended(),
-			      arch->get_fpga_handle(target_device),
-			      target_device);
-			      */
-  construct->set_targetdevice(arch->get_fpga_handle(target_device),target_device);
+  construct->set_targetdevice(arch->get_fpga_handle(target_device));
 
   ACSCGFPGACore* prev_core=NULL;
   int prev_opin=UNASSIGNED;
-  int sign_convention=src_core->sign_convention;
+//  int sign_convention=src_core->sign_convention;
   for (int gen_delay=1;gen_delay<=add_delays;gen_delay++)
     {
       if (DEBUG_DELAYS)
@@ -1323,11 +1422,9 @@ int ACSCGFPGATarget::HWadd_delaychain(ACSCGFPGACore* src_core,
       
       // Update internal delay list
       ACSCGFPGACore* delay_core=NULL;
-      delay_core=construct->add_sg("ACS","Delay","CGFPGA",
-				   BOTH,sign_convention,smart_generators);
+      delay_core=construct->add_delay(1,smart_generators);
       delay_ids->add(delay_core->acs_id);
       delay_core->act_output=src_core->act_output+gen_delay;
-      delay_core->pipe_delay=1;
       delay_core->add_comment((const char*) src_core->comment_name(),
 			      "Pipealignment",
 			      gen_delay);
@@ -1340,11 +1437,11 @@ int ACSCGFPGATarget::HWadd_delaychain(ACSCGFPGACore* src_core,
       (delay_core->pins)->set_precision(delay_ipin,
 					major_bit,
 					bit_length,
-					LOCKED);
+					UNLOCKED);
       (delay_core->pins)->set_precision(delay_opin,
 					major_bit,
 					bit_length,
-					LOCKED);
+					UNLOCKED);
       
       if (gen_delay==1)
 	{
@@ -1401,22 +1498,15 @@ int ACSCGFPGATarget::HWall_scheduled(void)
   return(1);
 }
 
-
-
-
-
-
-
-
+////////////////////////////////////////////////////////////////////
+// Examine each memory port, shuffle the sinks in case of collisions
+////////////////////////////////////////////////////////////////////
 void ACSCGFPGATarget::HWio_sched()
 {
-  /////////////////////////////////////////////////////////////////
-  // Examine each memory port
-  /////////////////////////////////////////////////////////////////
   for (int mem_loop=0;mem_loop<arch->mem_count;mem_loop++)
     {
-      MemPort* mem_port=arch->get_memory_handle(mem_loop);
-      if (mem_port->portuse==MEMORY_USED) 
+      Port* mem_port=arch->get_memory_handle(mem_loop);
+      if (mem_port->port_active()) 
 	{
 	  if (DEBUG_IOSCHEDULER)
 	    printf("HWio_sched::Memory %d is being used as a source/sink\n",
@@ -1425,8 +1515,8 @@ void ACSCGFPGATarget::HWio_sched()
 	  /////////////////////////////////////
 	  // Determine source and sink pointers
 	  /////////////////////////////////////
-	  SequentialList* source_stars=mem_port->source_stars;
-	  SequentialList* sink_stars=mem_port->sink_stars;
+	  CoreList* source_stars=mem_port->source_cores;
+	  CoreList* sink_stars=mem_port->sink_cores;
 	  int src_count=source_stars->size();
 	  int snk_count=sink_stars->size();
 	  
@@ -1436,7 +1526,7 @@ void ACSCGFPGATarget::HWio_sched()
 	      // Reschedule sinks should there be any read delays
 	      ///////////////////////////////////////////////////
 	      ACSIntArray* read_block=new ACSIntArray(seqlen,FALSE);
-	      for (int source_loop=1;source_loop<=src_count;source_loop++)
+	      for (int source_loop=0;source_loop<src_count;source_loop++)
 		{
 		  ACSCGFPGACore* fpga_core=(ACSCGFPGACore *) source_stars->elem(source_loop);
 		  int addr_time=fpga_core->act_input;
@@ -1444,82 +1534,63 @@ void ACSCGFPGATarget::HWio_sched()
 		  if (mem_port->read_skew != 0)
 		    read_block->set(addr_time+mem_port->read_skew,TRUE);
 		  if (DEBUG_IOSCHEDULER)
-		    printf("Reads block times %d and %d\n",
+		    printf("Reads (%d of %d) block times %d and %d\n",
+			   source_loop,src_count,
 			   addr_time,
 			   addr_time+mem_port->read_skew);
 		}
 	      
+	      if (DEBUG_IOSCHEDULER)
+		read_block->print("read_block contents after source formulation");
+
 	      // FIX: Assuming that (for writes) address and data are in sync
-	      for (int sink_loop=1;sink_loop<=snk_count;sink_loop++)
+	      for (int sink_loop=0;sink_loop<snk_count;sink_loop++)
 		{
 		  ACSCGFPGACore* fpga_core=(ACSCGFPGACore *) sink_stars->elem(sink_loop);
 		  int addr_time=fpga_core->act_input;
-		  int next_seqlen=FALSE;
-		  if (addr_time >= seqlen)
-		    next_seqlen=TRUE;
+		  int seq_time=addr_time;
+		  while (seq_time >= seqlen)
+		    seq_time-=seqlen;
+		  
+		  if (read_block->query(seq_time)==FALSE)
+		    {
+		      read_block->set(seq_time,TRUE);
+		      if (DEBUG_IOSCHEDULER)
+			printf("Write (%d of %d) is not blocked at time %d\n",
+			       sink_loop+1,snk_count,
+			       seq_time);
+		    }
 		  else
-		    if (read_block->query(addr_time)==FALSE)
-		      {
-			read_block->set(addr_time,TRUE);
-			if (DEBUG_IOSCHEDULER)
-			  printf("Write is not blocked at time %d\n",
-				 addr_time);
-		      }
-		    else
-		      {
-			if (DEBUG_IOSCHEDULER)
-			  printf("Write at time %d is currently blocked\n",
-				 addr_time);
-			next_seqlen=TRUE;
-			for (int srch_loop=addr_time+1;srch_loop<seqlen;srch_loop++)
-			  if (read_block->query(srch_loop)==FALSE)
-			    {
-			      next_seqlen=FALSE;
-			      fpga_core->act_input=srch_loop;
-			      fpga_core->act_output=srch_loop;
-			      Pipealign* sink_pipe=fpga_core->pipe_alignment;
-			      sink_pipe->calc_netdelays(fpga_core->act_output);
-			      
-			      if (DEBUG_IOSCHEDULER)
-				printf("Adjusting sink core firing time to %d\n",srch_loop);
-			      read_block->set(srch_loop,TRUE);
-			      break; // srch_loop
-			    }
-		      }
-	      
-		  if (next_seqlen)
 		    {
 		      if (DEBUG_IOSCHEDULER)
-			printf("HWio_sched:Unable to fit in 1st seqlen\n");
-		      
-		      for (int srch_loop=0;srch_loop<seqlen;srch_loop++)
-			if (read_block->query(srch_loop)==FALSE)
-			  {
-			    // Ensure that it occurs AFTER its current
-			    // algorithmic schedule time!  Otherwise delays
-			    // would not be added as the sourcer fires AFTER
-			    // the seqlen+srch_loop time.
-			    int new_time=seqlen+srch_loop;
-			    while (new_time < fpga_core->act_input)
-			      new_time+=seqlen;
+			printf("Write (%d of %d) at time %d is currently blocked\n",
+			       sink_loop+1,snk_count,
+			       seq_time);
+		      int slot_found=0;
+		      int offset=1;
+		      while (!slot_found)
+			{
+			  seq_time++;
+			  if (seq_time==seqlen)
+			    seq_time=0;
+			  if (read_block->query(seq_time)==FALSE)
+			    {
+			      mem_port->schedule_snk(sink_loop,addr_time+offset);
+			      Pipealign* sink_pipe=fpga_core->pipe_alignment;
+			      sink_pipe->calc_netdelays(fpga_core->act_output);
+			      fpga_core->act_complete=fpga_core->act_input+(vector_length*seqlen);
 			    
-			    // FIX:Address and data may not always be unskewed
-			    fpga_core->act_input=new_time;
-			    fpga_core->act_output=new_time;
-			    Pipealign* sink_pipe=fpga_core->pipe_alignment;
-			    sink_pipe->calc_netdelays(fpga_core->act_output);
-			    
-			    if (DEBUG_IOSCHEDULER)
-			      printf("Adjusting sink core firing time to %d\n",
-				     fpga_core->act_output);
-			    mem_port->total_latency=fpga_core->act_output;
-			    read_block->set(srch_loop,TRUE);
-			    
-			    break; // srch_loop
-			  }
+			      if (DEBUG_IOSCHEDULER)
+				printf("Adjusting sink core firing time to %d\n",fpga_core->act_output);
+			      read_block->set(seq_time,TRUE);
+			      slot_found=1;
+			    }
+			  else
+			    offset++;
+			}
 		    }
 		} // if (snk_count > 0)
-
+	      
 	      // Cleanup
 	      delete read_block;
 
@@ -1538,11 +1609,12 @@ void ACSCGFPGATarget::HWio_sched()
 	  //////////////////////////////
 	  // Add port timing information
 	  //////////////////////////////
+	  // REMOVE:This code was useful for the release 1 unirate sequencer
 	  mem_port->init_pt(seqlen);
-	  for (int src_loop=1;src_loop<=src_count;src_loop++)
+/*
+	  for (int src_loop=0;src_loop<src_count;src_loop++)
 	    {
-	      ACSCGFPGACore* src_sg=(ACSCGFPGACore*) 
-		source_stars->elem(src_loop);
+	      ACSCGFPGACore* src_sg=(ACSCGFPGACore*) source_stars->elem(src_loop);
 	      int addr_act=src_sg->act_input;
 
 	      // Was if, converted to while (of hand)
@@ -1552,7 +1624,7 @@ void ACSCGFPGATarget::HWio_sched()
 	      if (DEBUG_IOSCHEDULER)
 		printf("Source address set to activate at %d in sequence\n",addr_act);
 	    }
-	  for (int snk_loop=1;snk_loop<=snk_count;snk_loop++)
+	  for (int snk_loop=0;snk_loop<snk_count;snk_loop++)
 	    {
 	      ACSCGFPGACore* snk_sg=(ACSCGFPGACore*) sink_stars->elem(snk_loop);
 	      int addr_act=snk_sg->act_input;
@@ -1560,10 +1632,10 @@ void ACSCGFPGATarget::HWio_sched()
 		addr_act-=seqlen;
 	      mem_port->add_pt(addr_act,SINK);
 	      if (DEBUG_IOSCHEDULER)
-		printf("Sink address set to activate at %d in sequence\n",
-		       addr_act);
+		printf("Sink address set to activate at %d in sequence\n",addr_act);
 	    }
-	} // if ((mem_port->portuse==MEMORY_USED) && ...
+	    */
+	} // if ((mem_port->port_active()) && ...
     } //  for (int mem_loop=0;mem_loop<arch->mem_count;mem_loop++)
 }
 
@@ -1575,7 +1647,48 @@ int ACSCGFPGATarget::HWsynth_pipealigns(void)
   if (DEBUG_PIPESYNTH)
     printf("\n\nHWsynth_pipealigns engaged\n");
   
+  // Now that the smart generators have been rescheduled, then have each examine
+  // their effective pipe alignment requirements
   int sg_count=smart_generators->size();
+  for (int loop=0;loop<sg_count;loop++)
+    {
+      ACSCGFPGACore* unsched_core=(ACSCGFPGACore*) smart_generators->elem(loop);
+      if (!unsched_core->phase_dependent)
+	{
+	  Pin* unsched_pins=unsched_core->pins;
+	  Pipealign* unsched_pipe=unsched_core->pipe_alignment;
+	  ACSIntArray* unsched_inode_pins=unsched_pins->query_inodes();
+	  int snkpin_count=unsched_inode_pins->population();
+	  
+	  for (int ipin_loop=0;ipin_loop<snkpin_count;ipin_loop++)
+	    {
+	      int unsched_pin=unsched_inode_pins->query(ipin_loop);
+	      Connectivity* icons=unsched_pins->query_connection(unsched_pin);
+	      int src_acsid=icons->query_acsid(0);
+	      ACSCGFPGACore* src_core=HWfind_star(src_acsid);
+
+	      // FIX: Scheduling done by wordlength analysis currently will 
+	      // schedule constants to fire at time zero, irregardless of when
+	      // the data is needed.  Hence pipedelays may be unnecessarily 
+	      // generated.  Avoid this by rescheduling the constant core here.
+	      
+              // Crude trap for constant star
+	      if (src_core->sg_constants != NULL)
+		unsched_pipe->add_src(unsched_pin,unsched_core->act_input,
+				      src_core->acs_id);	
+	      else if (src_core->act_output >= 0)
+		unsched_pipe->add_src(unsched_pin,src_core->act_output,src_core->acs_id);	
+	      if (DEBUG_PIPESYNTH)
+		printf("core %s, input time %d, is driven by core %s with an output time of %d\n",
+		       unsched_core->comment_name(),
+		       unsched_core->act_input,
+		       src_core->comment_name(),
+		       src_core->act_output);
+	    }
+	  unsched_pipe->calc_netdelays(unsched_core->act_input);
+	}
+    }
+
   for (int loop=0;loop<sg_count;loop++)
     {
       ACSCGFPGACore* src_core=(ACSCGFPGACore*) smart_generators->elem(loop);
@@ -1612,7 +1725,8 @@ int ACSCGFPGATarget::HWsynth_pipealigns(void)
 		    {
 		      int delay_id=snk_pipe->find_pin(snk_pin);
 		      int delay_req=(snk_pipe->new_delays)->query(delay_id);
-		      srcpin_delays->add_dest(acs_id,snk_pin,delay_req);
+		      if (delay_req > 0)
+			srcpin_delays->add_dest(acs_id,snk_pin,delay_req);
 		      if (DEBUG_PIPESYNTH)
 			printf("this connection requires %d delays\n",
 			       delay_req);
@@ -1631,14 +1745,16 @@ int ACSCGFPGATarget::HWsynth_pipealigns(void)
   for (int loop=0;loop<sg_count;loop++)
     {
       ACSCGFPGACore* src_core=(ACSCGFPGACore*) smart_generators->elem(loop);
-      Pin* src_pins=(src_core->pins);
+      Pin* src_pins=src_core->pins;
       ACSIntArray* opins=src_pins->query_onodes();
 
       if (DEBUG_PIPESYNTH)
-	printf("Evaluating source %s for adding delays\n",
-	       src_core->comment_name());
+	printf("Evaluating source %s (acsid=%d) for adding delays\n",
+	       src_core->comment_name(),
+	       src_core->acs_id);
       
       // Add delays if necessary
+      // FIX: Delegate more to the Delay class:P
       for (int opin_loop=0;opin_loop<opins->population();opin_loop++)
 	{
 	  int opin=opins->query(opin_loop);
@@ -1651,18 +1767,79 @@ int ACSCGFPGATarget::HWsynth_pipealigns(void)
 	      ACSIntArray* src_dest_ids=srcpin_delays->dest_ids;
 	      int delay_count=src_dest_ids->population();
 	      srcpin_delays->sort_delays();
+
+	      // Incremental delay info
+	      int delays_added=0;
+	      int src_pin=opin;
+	      ACSCGFPGACore* sourcing_core=src_core;
+
 	      for (int dloop=0;dloop<delay_count;dloop++)
 		{
 		  int dest_id=src_dest_ids->query(dloop);
-		  ACSCGFPGACore* dest_sg=HWfind_star(dest_id);
+		  ACSCGFPGACore* dest_core=HWfind_star(dest_id);
+		  
+                  // Break original links
+		  src_pins->disconnect_all_pinsto(dest_id);
 
 		  ACSIntArray* srcpin_delay_reqs=srcpin_delays->delay_requirements;
 		  ACSIntArray* srcpin_delay_pins=srcpin_delays->dest_pins;
+		  int delay_amt=srcpin_delay_reqs->query(dloop);
 		  if (DEBUG_PIPESYNTH)
-		    printf("%d delays to %s on pin %d\n",
-			   srcpin_delay_reqs->query(dloop),
-			   dest_sg->comment_name(),
+		    printf("%d delays to %s (acsid=%d) on pin %d\n",
+			   delay_amt,
+			   dest_core->comment_name(),
+			   dest_core->acs_id,
 			   srcpin_delay_pins->query(dloop));
+
+		  if (src_core->acs_type==BOTH)
+		    construct->set_targetdevice(arch->get_fpga_handle(src_core->acs_device));
+		  else
+		    construct->set_targetdevice(arch->get_fpga_handle(dest_core->acs_device));
+
+		  int net_delay=delay_amt-delays_added;
+
+		  if (net_delay > 0)
+		    {
+		      if (DEBUG_PIPESYNTH)
+			printf("Adding delay of %d between %s and %s\n",
+			       net_delay,
+			       sourcing_core->comment_name(),
+			       dest_core->comment_name());
+
+		      ACSCGFPGACore* delay_core=construct->add_delay(net_delay,
+								     smart_generators);
+
+		      construct->connect_sg(sourcing_core,src_pin,UNASSIGNED,
+					    delay_core,UNASSIGNED,UNASSIGNED,DATA_NODE);
+		      construct->connect_sg(delay_core,UNASSIGNED,UNASSIGNED,
+					    dest_core,srcpin_delay_pins->query(dloop),UNASSIGNED,DATA_NODE);
+
+/*
+		      construct->insert_sg(sourcing_core,
+					   delay_core,
+					   dest_core,
+					   UNASSIGNED,
+					   UNASSIGNED,
+					   DATA_NODE,
+					   srcpin_delay_pins->query(dloop),
+					   UNASSIGNED,
+					   DATA_NODE);
+					   */
+		      sourcing_core=delay_core;
+		      src_pin=UNASSIGNED;
+		      delays_added=delay_amt;
+		    }
+		  else
+		    {
+		      construct->connect_sg(sourcing_core,src_pin,UNASSIGNED,
+					    dest_core,srcpin_delay_pins->query(dloop),UNASSIGNED,DATA_NODE);
+
+		      if (DEBUG_PIPESYNTH)
+			printf("Sufficient delay exists, connecting %s to %s\n",
+			       sourcing_core->comment_name(),
+			       dest_core->comment_name());
+		    }
+/*
 		  HWadd_delayto(src_core,
 				dest_sg,
 				opin,
@@ -1670,1382 +1847,258 @@ int ACSCGFPGATarget::HWsynth_pipealigns(void)
 				srcpin_delay_pins->query(dloop),
 				UNKNOWN,
 				srcpin_delay_reqs->query(dloop));
+				*/
 		}
 	    }
 	}
     }
 
-  /*
-  for (int loop=0;loop<new_delays->population();loop++)
-    if (new_delays->query(loop)>0)
-      {
-	// This star needs to be delayed
-	ACSCGFPGACore* src_core=
-	  (ACSCGFPGACore *)src_cores->elem(loop+1);
-	HWadd_delayto(src_core,
-		      unsched_core,
-		      new_delays->query(loop));
-      } // if (new_delays->query(loop) > 0)
-      */
   // Return happy condition
   return(1);
 }
 
 
-///////////////////////////////////////////////////////////////////////////
-// Should become a star method
-// FIX: Need to make architecture independent as well
-// FIX: Sink and delay counters should be replicated on a per-sink basis!!!
-///////////////////////////////////////////////////////////////////////////
-void ACSCGFPGATarget::HWunirate_sequencer(Fpga* fpga_elem, const int fpga_no)
+//////////////////////////////////////////////////////////////////////
+// Generate a sequencer to control the algorithm for this architecture
+//////////////////////////////////////////////////////////////////////
+void ACSCGFPGATarget::HWsequencer(void)
 {
-  //
-  // Generate some local handles to frequented structures
-  //
-  Sequencer* sequencer=fpga_elem->sequencer;
-  ACSCGFPGACore* seq_core=sequencer->seq_sg;
-  Pin* seq_pins=seq_core->pins;
-
-  // Determine if this fpga will be sourcing and/or sinking
-  int total_srcs=0;
-  int total_snks=0;
-  for (int mem_loop=0;mem_loop<fpga_elem->mem_count;mem_loop++)
-    if ((fpga_elem->mem_connected)->query(mem_loop)==MEMORY_AVAILABLE)
-      {
-	MemPort* mem_port=arch->get_memory_handle(mem_loop);
-	total_srcs+=(mem_port->source_stars)->size();
-	total_snks+=(mem_port->sink_stars)->size();
-      }
-
-  // FIX:Need to switch amongst language models
-  VHDL_LANG lang;
-
-  //
-  // Define common external signals
-  //
-  if (DEBUG_SEQUENCER)
-    printf("Generating seq_ext_signals for fpga %d\n",fpga_no);
-  Pin* seq_ext_signals=new Pin;
-  seq_ext_signals->add_pin("Clock",0,1,STD_LOGIC,INPUT_PIN_CLK);
-  seq_ext_signals->add_pin("Reset",0,1,STD_LOGIC,INPUT_PIN_RESET);
-  seq_ext_signals->add_pin("Go",0,1,STD_LOGIC,INPUT_PIN_EXTCTRL);
-  seq_ext_signals->add_pin("Alg_Start",0,1,STD_LOGIC,OUTPUT_PIN_START);
-  seq_ext_signals->add_pin("MemBusGrant_n",0,1,STD_LOGIC,INPUT_PIN_MEMOK);
-  seq_ext_signals->add_pin("MemBusReq_n",0,1,STD_LOGIC,OUTPUT_PIN_MEMREQ);
-  seq_ext_signals->add_pin("Done",0,1,STD_LOGIC,OUTPUT_PIN_DONE);
-  seq_ext_signals->add_pin("ADDR_CE",0,1,STD_LOGIC,OUTPUT_PIN_ADDRCE);
-  seq_ext_signals->add_pin("ADDR_CLR",0,1,STD_LOGIC,OUTPUT_PIN_ADDRCLR);
-  seq_pins->add_pin("Clock",0,1,STD_LOGIC,INPUT_PIN_CLK);
-  seq_pins->add_pin("Reset",0,1,STD_LOGIC,INPUT_PIN_RESET);
-  seq_pins->add_pin("Go",0,1,STD_LOGIC,INPUT_PIN_EXTCTRL);
-  seq_pins->add_pin("Alg_Start",0,1,STD_LOGIC,OUTPUT_PIN_START);
-  seq_pins->add_pin("MemBusGrant_n",0,1,STD_LOGIC,INPUT_PIN_MEMOK);
-  seq_pins->add_pin("MemBusReq_n",0,1,STD_LOGIC,OUTPUT_PIN_MEMREQ);
-  seq_pins->add_pin("Done",0,1,STD_LOGIC,OUTPUT_PIN_DONE);
-  seq_pins->add_pin("ADDR_CE",0,1,STD_LOGIC,OUTPUT_PIN_ADDRCE);
-  seq_pins->add_pin("ADDR_CLR",0,1,STD_LOGIC,OUTPUT_PIN_ADDRCLR);
-
-  //
-  // Add fpga interconnect pins
-  //
-  int right_port=UNASSIGNED;
-  int left_port=UNASSIGNED;
-  if (fpga_no != 4)
+  //////////////////////////////////////////////////////
+  // Generate the multirate sequencer for each used fpga
+  //////////////////////////////////////////////////////
+  for (int fpga_no=0;fpga_no<arch->fpga_count;fpga_no++)
     {
-      int enable_pin=seq_ext_signals->add_pin("Right_OE",0,36,STD_LOGIC,
-					      OUTPUT_PIN_INTERCONNECT_ENABLE);
-      int enable_pin2=seq_pins->add_pin("Right_OE",0,36,STD_LOGIC,
-					OUTPUT_PIN_INTERCONNECT_ENABLE);
-      seq_ext_signals->set_pinpriority(enable_pin,1);
-      seq_pins->set_pinpriority(enable_pin2,1);
-      right_port=fpga_elem->query_mode(fpga_no+1);
-    }
-  if (fpga_no != 1)
-    {
-      int enable_pin=seq_ext_signals->add_pin("Left_OE",0,36,STD_LOGIC,
-					      OUTPUT_PIN_INTERCONNECT_ENABLE);
-      int enable_pin2=seq_pins->add_pin("Left_OE",0,36,STD_LOGIC,
-					OUTPUT_PIN_INTERCONNECT_ENABLE);
-      seq_ext_signals->set_pinpriority(enable_pin,0);
-      seq_pins->set_pinpriority(enable_pin2,0);
-      left_port=fpga_elem->query_mode(fpga_no-1);
-    }
-    
-  if (DEBUG_SEQUENCER)
-    {
-      printf("right_port=%d, left_port=%d\n",right_port,left_port);
-
-      if (right_port!=UNASSIGNED)
-	printf("fpga %d is connected to fpga %d as a %d\n",
-	       fpga_no,
-	       fpga_no+1,
-	       right_port);
-      if (left_port!=UNASSIGNED)
-	printf("fpga %d is connected to fpga %d as a %d\n",
-	       fpga_no,
-	       fpga_no-1,
-	       left_port);
+      Fpga* fpga_elem=arch->get_fpga_handle(fpga_no);
+      if (fpga_elem->usage_state==FPGA_USED)
+	HWmultirate_sequencer(fpga_elem,fpga_no);
     }
 
-  if (DEBUG_SEQUENCER)
+  ////////////////////////////////////////////////////
+  // Construct architecture-specific kickoff sequencer
+  ////////////////////////////////////////////////////
+  arch->generate_sequencer();
+}
+
+///////////////////////////////////////////////
+// Generate the generalized multirate sequencer
+///////////////////////////////////////////////
+void ACSCGFPGATarget::HWmultirate_sequencer(Fpga* fpga_elem, const int fpga_no)
+{  
+  ////////////////////////////
+  // Generate the master timer
+  ////////////////////////////
+  ACSIntArray* master_timing=new ACSIntArray;
+  ACSIntArray* master_rate=new ACSIntArray;
+  ACSIntArray* master_totalacts=new ACSIntArray;
+
+  // First determine the needed timing signals, then make them dependent
+  // FIX: Scheduling similarites could be identified in order to reduce 
+  //      the complexity of the sequencer here
+  // NOTE: IOPORTs times are split between fpgas, only one time is relevant.  Unneeded hw will be
+  //       instantiated here, but trimmed during synthesis.
+  CoreList* sg_list=fpga_elem->get_childcores_handle();
+  int sg_count=sg_list->size();
+  for (int loop=0;loop<sg_count;loop++)
     {
-      printf("\n\nDumping ioport timing info\n");
-      fpga_elem->mode_dump();
-    }
-
-  //
-  // Establish pins for any source counter
-  //
-  char* source_carry_name=new char[MAX_STR];
-  if (total_srcs)
-    {
-      ACSCGFPGACore* src_add=sequencer->src_add;
-      Pin* srcadd_pins=src_add->pins;
-      int port_id=srcadd_pins->retrieve_type(OUTPUT_PIN_SRC_WC);
-      int major_bit=srcadd_pins->query_majorbit(port_id);
-      int bitlen=srcadd_pins->query_bitlen(port_id);
-      seq_ext_signals->add_pin("SRC_Carry",major_bit,bitlen,STD_LOGIC,INPUT_PIN_SRC_WC);
-      seq_ext_signals->add_pin("SRC_MUX",0,1,STD_LOGIC,OUTPUT_PIN_SRC_MUX);
-      seq_ext_signals->add_pin("SRC_CE",0,1,STD_LOGIC,OUTPUT_PIN_SRC_CE);
-      seq_pins->add_pin("SRC_Carry",major_bit,bitlen,STD_LOGIC,INPUT_PIN_SRC_WC);
-      seq_pins->add_pin("SRC_MUX",0,1,STD_LOGIC,OUTPUT_PIN_SRC_MUX);
-      seq_pins->add_pin("SRC_CE",0,1,STD_LOGIC,OUTPUT_PIN_SRC_CE);
-      sprintf(source_carry_name,"SRC_Carry(%d)",bitlen-1);
-    }
-
-  //
-  // Establish pins for any sink and delay counters
-  //
-  char* sink_carry_name=new char[MAX_STR];
-  char* delay_carry_name=new char[MAX_STR];
-  if (total_snks)
-    {
-      ACSCGFPGACore* snk_adder=sequencer->snk_add;
-      Pin* snkadd_pins=snk_adder->pins;
-      int snk_id=snkadd_pins->retrieve_type(OUTPUT_PIN_SNK_WC);
-      int mbit=snkadd_pins->query_majorbit(snk_id);
-      int blen=snkadd_pins->query_bitlen(snk_id);
-      seq_ext_signals->add_pin("SNK_CE",0,1,STD_LOGIC,OUTPUT_PIN_SNK_CE);
-      seq_ext_signals->add_pin("SNK_MUX",0,1,STD_LOGIC,OUTPUT_PIN_SNK_MUX);
-      seq_ext_signals->add_pin("SNK_Carry",mbit,blen,STD_LOGIC,INPUT_PIN_SNK_WC);
-      seq_pins->add_pin("SNK_CE",0,1,STD_LOGIC,OUTPUT_PIN_SNK_CE);
-      seq_pins->add_pin("SNK_MUX",0,1,STD_LOGIC,OUTPUT_PIN_SNK_MUX);
-      seq_pins->add_pin("SNK_Carry",mbit,blen,STD_LOGIC,INPUT_PIN_SNK_WC);
-      sprintf(sink_carry_name,"SNK_Carry(%d)",blen-1);
-
-      ACSCGFPGACore* delay_adder=sequencer->delay_add;
-      Pin* deladd_pins=delay_adder->pins;
-      int del_id=deladd_pins->retrieve_type(OUTPUT_PIN_DELAY_WC);
-      mbit=deladd_pins->query_majorbit(del_id);
-      blen=deladd_pins->query_bitlen(del_id);
-      seq_ext_signals->add_pin("Delay_CE",0,1,STD_LOGIC,OUTPUT_PIN_DELAY_CE);
-      seq_ext_signals->add_pin("Delay_MUX",0,1,STD_LOGIC,OUTPUT_PIN_DELAY_MUX);
-      seq_ext_signals->add_pin("Delay_Carry",mbit,blen,STD_LOGIC,INPUT_PIN_DELAY_WC);
-      seq_pins->add_pin("Delay_CE",0,1,STD_LOGIC,OUTPUT_PIN_DELAY_CE);
-      seq_pins->add_pin("Delay_MUX",0,1,STD_LOGIC,OUTPUT_PIN_DELAY_MUX);
-      seq_pins->add_pin("Delay_Carry",mbit,blen,STD_LOGIC,INPUT_PIN_DELAY_WC);
-      sprintf(delay_carry_name,"Delay_Carry(%d)",blen-1);
-    }
-	      
-  Pin* seq_data_signals=NULL;
-
-  if (DEBUG_SEQUENCER)
-    printf("Generating seq_ctrl_signals\n");
-  Pin* seq_ctrl_signals=new Pin;
-  seq_ctrl_signals->add_pin("Go_Addr",0,1,STD_LOGIC,INTERNAL_PIN);
-  seq_ctrl_signals->add_pin("Wait_AlgFin",0,1,STD_LOGIC,INTERNAL_PIN);
-  seq_ctrl_signals->add_pin("Addr_Addr_CE",0,1,STD_LOGIC,INTERNAL_PIN);
-  seq_ctrl_signals->add_pin("Addr_Ring_CE",0,1,STD_LOGIC,INTERNAL_PIN);
-  seq_ctrl_signals->add_pin("Go_Ring",0,1,STD_LOGIC,INTERNAL_PIN);
-  
-  // Word counter relevant, reduced if not applicable by synthesis
-  seq_ctrl_signals->add_pin("Go_WC_SRC",0,1,STD_LOGIC,INTERNAL_PIN);
-  seq_ctrl_signals->add_pin("SRC_WC_Control",0,1,STD_LOGIC,INTERNAL_PIN);
-  seq_ctrl_signals->add_pin("SRC_Addr_Control",0,1,STD_LOGIC,INTERNAL_PIN);
-  seq_ctrl_signals->add_pin("SRC_Ring_Control",0,1,STD_LOGIC,INTERNAL_PIN);
-  seq_ctrl_signals->add_pin("Go_WC_SNK",0,1,STD_LOGIC,INTERNAL_PIN);
-  seq_ctrl_signals->add_pin("SNK_WC_Control",0,1,STD_LOGIC,INTERNAL_PIN);
-  seq_ctrl_signals->add_pin("SNK_Addr_Control",0,1,STD_LOGIC,INTERNAL_PIN);
-  seq_ctrl_signals->add_pin("SNK_Ring_Control",0,1,STD_LOGIC,INTERNAL_PIN);
-  seq_ctrl_signals->add_pin("SNK_OK",0,1,STD_LOGIC,INTERNAL_PIN);
-
-  Pin* seq_constant_signals=new Pin;
-  seq_constant_signals->add_pin("VCC",1.0,STD_LOGIC,OUTPUT_PIN_VCC);
-  seq_constant_signals->add_pin("GND",1.0,STD_LOGIC,OUTPUT_PIN_GND);
-
-
-
-  // Connectivity model
-  ostrstream preamble_expr;
-  ostrstream default_expr;
-  ostrstream process_expr;
-
-  /////////////////////////////
-  // State machine declarations
-  /////////////////////////////
-  if (DEBUG_SEQUENCER)
-    printf("Generating state machine states\n");
-  StringArray* master_states=new StringArray;
-  master_states->add("Init_State");
-  master_states->add("Wait_For_Mem");
-  master_states->add("Wait_For_Finish");
-  master_states->add("End_State");
-  preamble_expr << "--Master state machine states" << endl;
-  preamble_expr << lang.type_def("Master_States",master_states);
-  preamble_expr << endl;
-
-  StringArray* addr_states=new StringArray;
-  addr_states->add("Init_State");
-  addr_states->add("Clear_Addr");
-  addr_states->add("Enable_Addr");
-  addr_states->add("Wait_For_Finish");
-  preamble_expr << "--Address state machine states" << endl;
-  preamble_expr << lang.type_def("Addr_States",addr_states);
-  preamble_expr << endl;
-
-  StringArray* ring_states=new StringArray;
-  ring_states->add("Init_State");
-  char* state_name=new char[MAX_STR];
-  char* sig_name=new char[MAX_STR];
-  for (int loop=0;loop<seqlen;loop++)
-    {
-      sprintf(state_name,"Phase%d",loop);
-      sprintf(sig_name,"%s_Go",state_name);
-      int phase_pin=seq_ext_signals->
-	add_pin(sig_name,0,1,STD_LOGIC,OUTPUT_PIN_PHASE);
-      seq_pins->add_pin(sig_name,0,1,STD_LOGIC,OUTPUT_PIN_PHASE);
-      seq_ext_signals->set_pinpriority(phase_pin,loop);
-      seq_pins->set_pinpriority(phase_pin,loop);
-      ring_states->add(state_name);
-    }
-  delete []state_name;
-  delete []sig_name;
-  
-  preamble_expr << "--Ring state machine states" << endl;
-  preamble_expr << lang.type_def("Ring_States",ring_states);
-  preamble_expr << endl;
-
-  StringArray* src_wc_states=new StringArray;
-  src_wc_states->add("Init_State");
-  src_wc_states->add("Clear_WC");
-  src_wc_states->add("Prep_WC");
-  preamble_expr << "-- Source WC state machine states" << endl;
-  preamble_expr << lang.type_def("SRCWC_States",src_wc_states);
-  preamble_expr << endl;
-
-  StringArray* snk_wc_states=new StringArray;
-  snk_wc_states->add("Init_State");
-  snk_wc_states->add("Clear_WC");
-  snk_wc_states->add("Wait_For_Delay");
-  snk_wc_states->add("Prep_WC");
-  preamble_expr << "-- Sink WC state machine states" << endl;
-  preamble_expr << lang.type_def("SNKWC_States",snk_wc_states);
-  preamble_expr << endl;
-
-
-  /////////////////////////////
-  // State machine declarations
-  /////////////////////////////
-  if (DEBUG_SEQUENCER)
-    printf("Generating state machine declarations\n");
-
-  preamble_expr << "--State machine signals" << endl;
-  preamble_expr << lang.signal("Master_State","Master_States");
-  preamble_expr << lang.signal("Next_Master_State","Master_States");
-  preamble_expr << lang.signal("Addr_State","Addr_States");
-  preamble_expr << lang.signal("Next_Addr_State","Addr_States");
-  preamble_expr << lang.signal("Ring_State","Ring_States");
-  preamble_expr << lang.signal("Next_Ring_State","Ring_States");
-  preamble_expr << lang.signal("SRCWC_State","SRCWC_States");
-  preamble_expr << lang.signal("Next_SRCWC_State","SRCWC_States");
-  preamble_expr << lang.signal("SNKWC_State","SNKWC_States");
-  preamble_expr << lang.signal("Next_SNKWC_State","SNKWC_States");
-  preamble_expr << endl;
-
-
-  //////////////////////////////
-  // Local variable declarations
-  //////////////////////////////
-
-  ///////////////////////////////
-  // Generate default assignments
-  ///////////////////////////////
-  if (DEBUG_SEQUENCER)
-    printf("Generating default assignments\n");
-
-  // Master kickoff
-  if (total_srcs)
-    default_expr << "-- Source word counter control" << endl
-		 << lang.equals("SRC_CE","SRC_Addr_Control") 
-		 << lang.or("SRC_Ring_Control")
-		 << lang.or("SRC_WC_Control")
-		 << lang.end_statement << endl << endl;
-  if (total_snks)
-    default_expr << "-- Sink word counter control" << endl
-		 << lang.equals("SNK_CE","SNK_Addr_Control") 
-		 << lang.or("(SNK_Ring_Control") << lang.and("SNK_OK)")
-		 << lang.or("SNK_WC_Control")
-		 << lang.end_statement << endl << endl;
-
-  default_expr << "-- Addr counter control" << endl
-	       << lang.equals("ADDR_CE","Addr_Addr_CE");
-  if ((total_snks) & (!total_srcs))
-    default_expr << lang.or("(Addr_Ring_CE") << lang.and("SNK_OK)");
-  else
-    default_expr << lang.or("Addr_Ring_CE");
-  default_expr << lang.end_statement << endl << endl;
-
-
-  default_expr << "-- InterFPGA port control" << endl;
-  if (right_port==1)
-    default_expr << lang.equals("Right_OE","(others => '1')")
-		 << lang.end_statement << endl;
-  else
-    if (fpga_no != 4)
-      default_expr << lang.equals("Right_OE","(others => '0')")
-		   << lang.end_statement << endl;
-  if (left_port==1)
-    default_expr << lang.equals("Left_OE","(others => '1')")
-		 << lang.end_statement << endl << endl;
-  else
-    if (fpga_no != 1)
-      default_expr << lang.equals("Left_OE","(others => '0')")
-		   << lang.end_statement << endl << endl;
-    
-
-  ////////////////////////
-  // Synchronous processes
-  ////////////////////////
-  if (DEBUG_SEQUENCER)
-    printf("Generating synchronous process\n");
-  StringArray* sync_sensies=new StringArray;
-
-  sync_sensies->add("Reset");
-  sync_sensies->add("Clock");
-
-  process_expr << "-- Synchronous process" << endl;
-  process_expr << lang.process("Sync",sync_sensies) << endl;
-  process_expr << lang.begin_scope << endl;
-  
-  process_expr << lang.if_statement << lang.test("Reset","'1'") 
-	       << lang.then_statement << endl
-	       // THEN
-	       << "\t" << lang.equals("Master_State","Init_State") 
-	       << lang.end_statement << endl 
-	       << "\t" << lang.equals("Addr_State","Init_State") 
-	       << lang.end_statement << endl
-	       << "\t" << lang.equals("Ring_State","Init_State") 
-	       << lang.end_statement << endl
-	       << "\t" << lang.equals("SRCWC_State","Init_State") 
-	       << lang.end_statement << endl
-	       << "\t" << lang.equals("SNKWC_State","Init_State") 
-	       << lang.end_statement << endl
-	       // ELSE_IF
-	       << lang.elseif_statement << lang.test("Clock","'1'") 
-	       << lang.and("(Clock'event)") << lang.then_statement << endl
-	       << "\t" << lang.equals("Master_State","Next_Master_State") 
-	       << lang.end_statement << endl
-	       << "\t" << lang.equals("Addr_State","Next_Addr_State") 
-	       << lang.end_statement << endl
-	       << "\t" << lang.equals("Ring_State","Next_Ring_State") 
-	       << lang.end_statement << endl
-	       << "\t" << lang.equals("SRCWC_State","Next_SRCWC_State") 
-	       << lang.end_statement << endl
-	       << "\t" << lang.equals("SNKWC_State","Next_SNKWC_State") 
-	       << lang.end_statement << endl
-	       << lang.endif_statement << lang.end_statement << endl;
-  
-  process_expr << lang.end_function_scope("Sync") << endl;
-  
-  ////////////////////////////////////////
-  // Generate master state machine process 
-  ////////////////////////////////////////
-  if (DEBUG_SEQUENCER)
-    printf("Generating master state machine process\n");
-  StringArray* master_sensies=new StringArray;
-  master_sensies->add("Master_State");
-  master_sensies->add("MemBusGrant_n");
-  master_sensies->add("Go");
-  master_sensies->add("Wait_AlgFin");
-/*
-  if (total_srcs)
-    master_sensies->add("SRC_Carry");
-    */
-  if (total_snks)
-    {
-      master_sensies->add("Delay_Carry");
-//      master_sensies->add("SNK_Carry");
-    }
-
-
-  StringArray* master_cases=new StringArray;
-
-  // State1 -- Init_State
-  // If there are no memory requirements, then bypass all the master states and idle
-  ostrstream master_state1;
-  if (total_srcs || total_snks)
-    master_state1 << lang.if_statement << lang.test("Go","'1'") 
-		  << lang.then_statement << endl
-		  << "\t" << lang.equals("Next_Master_State","Wait_For_Mem")
-		  << lang.end_statement << endl;
-  else
-    // For FPGA's without memory accesses, then no memory sequencing needed
-    master_state1 << lang.if_statement << lang.test("Go","'1'") 
-		  << lang.then_statement << endl
-		  << "\t" << lang.equals("Next_Master_State","End_State")
-		  << lang.end_statement << endl;
-    
-  master_state1 << lang.else_statement << endl
-		<< "\t" << lang.equals("Next_Master_State","Init_State") 
-		<< lang.end_statement << endl
-		<< lang.endif_statement << lang.end_statement << ends;
-
-  master_cases->add(master_state1.str());
-  
-  // State2 -- Wait_For_Mem
-  ostrstream master_state2;
-  master_state2 << lang.equals("MemBusReq_n","'0'") << lang.end_statement << endl
-		<< lang.if_statement << lang.test("MemBusGrant_n","'0'") 
-		<< lang.then_statement << endl;
-  
-  // Start the address counter and word counter monitors
-  master_state2 << "\t" << lang.equals("Go_Addr","'1'") << lang.end_statement << endl;
-  if (total_srcs)
-    master_state2 << "\t" << lang.equals("Go_WC_SRC","'1'") << lang.end_statement << endl;
-  if (total_snks)
-    master_state2 << "\t" << lang.equals("Go_WC_SNK","'1'") << lang.end_statement << endl;
-		  
-  master_state2 << "\t" << lang.equals("Next_Master_State","Wait_For_Finish") 
-		<< lang.end_statement << endl
-		<< lang.else_statement << endl
-		<< "\t" << lang.equals("Next_Master_State","Wait_For_Mem") 
-		<< lang.end_statement << endl
-		<< lang.endif_statement << lang.end_statement << ends;
-  master_cases->add(master_state2.str());
-
-  // State3 -- Wait_For_Finish
-  ostrstream master_state3;
-  master_state3 << lang.if_statement << lang.test("Wait_AlgFin","'0'") 
-		<< lang.then_statement << endl
-		<< "\t" << lang.equals("Next_Master_State","End_State") 
-		<< lang.end_statement << endl 
-		<< lang.else_statement << endl
-		<< "\t" << lang.equals("Next_Master_State","Wait_For_Finish") 
-		<< lang.end_statement << endl
-		<< "\t" << lang.equals("MemBusReq_n","'0'") 
-		<< lang.end_statement << endl << endl
-
-		// Address kickoff
-		<< "\t" << "--Address kickoff signal" << endl
-		<< "\t" << lang.equals("Go_Addr","'1'") << lang.end_statement << endl
-		<< lang.endif_statement << lang.end_statement << ends;
-  master_cases->add(master_state3.str());
-
-
-  // State4 -- End_State
-  ostrstream master_state4;
-  master_state4 << lang.equals("Done","'1'") << lang.end_statement << endl
-		<< "\t" << lang.equals("Next_Master_State","Init_State") << lang.end_statement 
-		<< endl << ends;
-  master_cases->add(master_state4.str());
-
-  process_expr << "--" << endl 
-	       << "-- Master process" << endl 
-	       << "--" << endl;
-  process_expr << lang.process("Master",master_sensies) << endl;
-
-  process_expr << lang.begin_scope << endl
-	       << endl << "-- Defaults" << endl 
-	       << lang.equals("MemBusReq_n","'1'") << lang.end_statement << endl
-	       << lang.equals("Go_Addr","'0'") << lang.end_statement << endl
-	       << lang.equals("Done","'0'") << lang.end_statement << endl
-	       << lang.equals("Go_WC_SRC","'0'") << lang.end_statement << endl
-	       << lang.equals("Go_WC_SNK","'0'") << lang.end_statement << endl;
-  process_expr << lang.l_case("Master_State",master_states,master_cases);
-  process_expr << lang.end_function_scope("Master") << endl;
-  
-
-
-
-  ///////////////////////////////////////////////////
-  // Generate source word counter state machine logic
-  ///////////////////////////////////////////////////
-  if (total_srcs)
-    {
-      StringArray* src_wc_sensies=new StringArray;
-      src_wc_sensies->add("SRCWC_State");
-      src_wc_sensies->add("Go_WC_SRC");
-      StringArray* src_wc_cases=new StringArray;
-
-      // State1 -- Init_State
-      ostrstream src_state1;
-      src_state1 << lang.if_statement << lang.test("Go_WC_SRC","'1'") << lang.then_statement << endl
-		 << "\t" << lang.equals("Next_SRCWC_State","Clear_WC") << lang.end_statement << endl
-		 << lang.else_statement << endl
-		 << "\t" << lang.equals("Next_SRCWC_State","Init_State") << lang.end_statement << endl
-		 << lang.endif_statement << lang.end_statement << endl << ends;
-      src_wc_cases->add(src_state1.str());
-      
-      // State2 -- Clear_WC
-      ostrstream src_state2;
-      src_state2 << lang.equals("SRC_WC_Control","'1'") << lang.end_statement << endl
-		 << "\t" << lang.equals("Next_SRCWC_State","Prep_WC") << lang.end_statement << endl << ends;
-      src_wc_cases->add(src_state2.str());
-
-      // State3 -- Prep_WC
-      ostrstream src_state3;
-      src_state3 << lang.equals("SRC_MUX","'1'") << lang.end_statement << endl
-		 << "\t" << lang.equals("Next_SRCWC_State","Prep_WC") << lang.end_statement << endl << ends;
-      src_wc_cases->add(src_state3.str());
-      
-      process_expr << endl << endl
-		   << "--" << endl << "-- Source word counter startup process" << endl 
-		   << "--" << endl
-		   << lang.process("Source_WC",src_wc_sensies) << endl
-		   << lang.begin_scope << endl
-		   << endl << "-- Source word counter preload default state" << endl
-		   << lang.equals("SRC_MUX","'0'") << lang.end_statement << endl
-		   << lang.equals("SRC_WC_Control","'0'") << lang.end_statement << endl
-		   << lang.l_case("SRCWC_State",src_wc_states,src_wc_cases) << endl
-		   << lang.end_function_scope("Source_WC") << endl;
-
-      // Cleanup
-      delete src_wc_sensies;
-      delete src_wc_cases;
-    }
-
-
-  ///////////////////////////////////////////////////
-  // Generate sink word counter state machine logic
-  ///////////////////////////////////////////////////
-  if (total_snks)
-    {
-      StringArray* snk_wc_sensies=new StringArray;
-      snk_wc_sensies->add("SNKWC_State");
-      snk_wc_sensies->add("Go_WC_SNK");
-      snk_wc_sensies->add(delay_carry_name);
-      StringArray* snk_wc_cases=new StringArray;
-      
-      // State1 -- Init_State
-      ostrstream snk_state1;
-      snk_state1 << lang.if_statement << lang.test("Go_WC_SNK","'1'") << lang.then_statement << endl
-		 << "\t" << lang.equals("Next_SNKWC_State","Clear_WC") << lang.end_statement << endl
-		 << lang.else_statement << endl
-		 << "\t" << lang.equals("Next_SNKWC_State","Init_State") << lang.end_statement << endl
-		 << lang.endif_statement << lang.end_statement << endl << ends;
-      snk_wc_cases->add(snk_state1.str());
-      
-      // State2 -- Clear_WC
-      ostrstream snk_state2;
-      snk_state2 << lang.equals("SNK_WC_Control","'1'") << lang.end_statement << endl
-		 << "\t" << lang.equals("Delay_CE","'1'") << lang.end_statement << endl
-		 << "\t" << lang.equals("Next_SNKWC_State","Wait_For_Delay") << lang.end_statement << endl 
-		 << ends;
-      snk_wc_cases->add(snk_state2.str());
-      
-      // State3 -- Wait_For_Delay
-      ostrstream snk_state3;
-      snk_state3 << lang.if_statement << lang.test(delay_carry_name,"'0'") << lang.then_statement << endl
-		 << "\t" << lang.equals("SNK_MUX","'1'") << lang.end_statement << endl
-		 << "\t" << lang.equals("Next_SNKWC_State","Prep_WC") << lang.end_statement << endl
-		 << lang.else_statement << endl
-		 << "\t" << lang.equals("Delay_CE","'1'") << lang.end_statement << endl
-		 << "\t" << lang.equals("Delay_MUX","'1'") << lang.end_statement << endl
-		 << "\t" << lang.equals("Next_SNKWC_State","Wait_For_Delay") << lang.end_statement << endl
-		 << lang.endif_statement << lang.end_statement << ends;
-      snk_wc_cases->add(snk_state3.str());
-      
-      // State4 -- Prep_WC
-      ostrstream snk_state4;
-      snk_state4 << lang.equals("SNK_MUX","'1'") << lang.end_statement << endl
-		 << "\t" << lang.equals("SNK_OK","'1'") << lang.end_statement << endl
-		 << "\t" << lang.equals("Next_SNKWC_State","Prep_WC") << lang.end_statement << endl << ends;
-      snk_wc_cases->add(snk_state4.str());
-      
-      process_expr << endl << endl
-		   << "--" << endl << "-- Sink word counter startup process" << endl 
-		   << "--" << endl
-		   << lang.process("Sink_WC",snk_wc_sensies) << endl
-		   << lang.begin_scope << endl
-		   << endl << "-- Sink word counter preload default state" << endl
-		   << lang.equals("SNK_MUX","'0'") << lang.end_statement << endl
-		   << lang.equals("SNK_WC_Control","'0'") << lang.end_statement << endl
-		   << lang.equals("SNK_OK","'0'") << lang.end_statement << endl
-		   << lang.equals("Delay_CE","'0'") << lang.end_statement << endl
-		   << lang.equals("Delay_MUX","'0'") << lang.end_statement << endl
-		   << lang.l_case("SNKWC_State",snk_wc_states,snk_wc_cases) << endl
-		   << lang.end_function_scope("Sink_WC") << endl;
-
-      // Cleanup
-      delete snk_wc_sensies;
-      delete snk_wc_cases;
-    }
-
-
-  ///////////////////////////////////////
-  // Generate address state machine logic
-  ///////////////////////////////////////
-  StringArray* addr_sensies=new StringArray;
-  addr_sensies->add("Addr_State");
-  addr_sensies->add("Go_Addr");
-  addr_sensies->add("Wait_AlgFin");
-
-  StringArray* addr_cases=new StringArray;
-
-  // State1 -- Init_State
-  ostrstream addr_state1;
-  addr_state1 << lang.if_statement << lang.test("Go_Addr","'1'") << lang.then_statement << endl
-	      << "\t" << lang.equals("Next_Addr_State","Clear_Addr") << lang.end_statement << endl
-	      << lang.else_statement << endl
-	      << "\t" << lang.equals("Next_Addr_State","Init_State") << lang.end_statement << endl 
-	      << lang.endif_statement << lang.end_statement << endl << ends;
-  addr_cases->add(addr_state1.str());
-
-  // State2 -- Clear_Addr
-  ostrstream addr_state2;
-  addr_state2 << lang.equals("Next_Addr_State","Enable_Addr") << lang.end_statement << endl << endl
-
-	      // Enable the preload signal (clr on the adder)
-	      << "-- Address generator preload generator" << endl
-	      << lang.equals("ADDR_CLR","'1'") << lang.end_statement << endl << endl
-	      << "-- Initialize algorithm" << endl
-	      << lang.equals("Alg_Start","'1'") << lang.end_statement << endl << ends;
-  addr_cases->add(addr_state2.str());
-
-  // State3 -- Enable_Addr
-  ostrstream addr_state3;
-  addr_state3 << "-- Address count enable engaged" << endl
-	      << "\t" << lang.equals("Addr_Addr_CE","'1'") << lang.end_statement << endl
-	      << "\t" << "-- Ring counter enable engaged" << endl
-	      << "\t" << lang.equals("Go_Ring","'1'") << lang.end_statement << endl
-	      << "\t" << lang.equals("Next_Addr_State","Wait_For_Finish") << lang.end_statement << endl
-	      << ends;
-  addr_cases->add(addr_state3.str());
-
-  // Stat4 -- Wait_For_Finish
-  ostrstream addr_state4;
-  addr_state4 << lang.if_statement << lang.test("Wait_AlgFin","'0'") << lang.then_statement << endl
-	      << "\t" << lang.equals("Next_Addr_State","Init_State") << lang.end_statement << endl
-	      << lang.else_statement << endl
-	      << "\t" << lang.equals("Next_Addr_State","Wait_For_Finish") << lang.end_statement << endl 
-	      << lang.endif_statement << lang.end_statement << endl << ends;
-  addr_cases->add(addr_state4.str());
-
-
-  process_expr << endl << endl;
-  process_expr << "--" << endl << "-- Address startup process" << endl 
-	       << "--" << endl;
-  process_expr << lang.process("Addr",addr_sensies) << endl;
-  process_expr << lang.begin_scope << endl;
-  process_expr << endl << "-- Address generator preload default state" << endl
-	       << lang.equals("ADDR_CLR","'0'") << lang.end_statement  << endl << endl
-	       << "-- Address counter count enable default state" << endl
-	       << lang.equals("Addr_Addr_CE","'0'") << lang.end_statement << endl << endl
-	       << "-- Ringer counter enable default state" << endl
-	       << lang.equals("Go_Ring","'0'") << lang.end_statement << endl << endl
-	       << "-- Algorithm initialization default state" << endl
-	       << lang.equals("Alg_Start","'0'") << lang.end_statement << endl << endl
-	       << "-- Source and/or Sink Word counter kickoff default state" << endl;
-  if (total_srcs)
-    process_expr << lang.equals("SRC_Addr_Control","'0'") << lang.end_statement << endl;
-  if (total_snks)
-    process_expr << lang.equals("SNK_Addr_Control","'0'") << lang.end_statement << endl;
-
-  process_expr << lang.l_case("Addr_State",addr_states,addr_cases) << endl;
-  process_expr << lang.end_function_scope("Addr") << endl;
-
-  // Store mux activation signals in an index stream array.  The index
-  // specifies the applicable Phase.
-  ostrstream* phase_streams=new ostrstream[seqlen+1];
-  ostrstream mux_defaults;
-
-  ///////////////////////////////
-  // Generate output mux controls
-  ///////////////////////////////
-  // ASSUMPTION: MUXs are organized with the LSB
-  //             assigned to the first algoritm smart generator and 
-  //             the MSB assigned to the last algorithm smart generator
-
-  if (DEBUG_SEQUENCER)
-    printf("Generating the output mux controls\n");
-  // FIX: Should compress method with address mux controls!
-  ostrstream ram_defaults;
-  ostrstream ram_init_state;
-  ostrstream ctrl_defaults;
-  for (int mem_loop=0;mem_loop<fpga_elem->mem_count;mem_loop++)
-    if ((fpga_elem->mem_connected)->query(mem_loop)==MEMORY_AVAILABLE)
-      {
-	MemPort* mem_port=arch->get_memory_handle(mem_loop);
-	ACSIntArray* mem_con=fpga_elem->mem_connected;
-	int mem_connected=mem_con->get(mem_loop);
-	if (DEBUG_SEQUENCER)
-	  printf("Memory %d con status to fpga %d is %d\n",mem_loop,fpga_no,mem_connected);
-	
-	if ((mem_port->portuse==MEMORY_USED) && (mem_connected==MEMORY_AVAILABLE))
-	  {
-	    SequentialList* source_stars=mem_port->source_stars;
-	    SequentialList* sink_stars=mem_port->sink_stars;
-	    int src_sgs=source_stars->size();
-	    int snk_sgs=sink_stars->size();
-	    int total_sgs=src_sgs+snk_sgs;
-	    
-	    int sources_reconnected=FALSE;
-	    int sinks_reconnected=FALSE;
-	    
-	    if (mem_port->bidir_data)
-	      {
-		if (src_sgs+snk_sgs > 1)
-		  {
-		    sources_reconnected=TRUE;
-		    sinks_reconnected=TRUE;
-		  }
-	      }
-	    else
-	      {
-		if (src_sgs > 1)
-		  sources_reconnected=TRUE;
-		if (snk_sgs > 1)
-		  sinks_reconnected=TRUE;
-	      }
-	    
-	    Port_Timing* port_timing=mem_port->port_timing;
-	    
-	    if (DEBUG_SEQUENCER)
-	      {
-		int entries=(port_timing->data_activation)->population();
-		printf("Times for port %d:\n[",mem_loop);
-		for (int sg_loop=0;sg_loop<entries;sg_loop++)
-		  if (sg_loop==entries-1)
-		    printf("%d]\n",
-			   (port_timing->data_activation)->query(sg_loop));
-		  else
-		    printf("%d ",(port_timing->data_activation)->query(sg_loop));
-		printf("Types for memory %d:\n[",mem_loop);
-		for (int sg_loop=0;sg_loop<entries;sg_loop++)
-		  if (sg_loop==entries-1)
-		    printf("%d]\n",
-			   (port_timing->mem_type)->query(sg_loop));
-		  else
-		    printf("%d ",(port_timing->mem_type)->query(sg_loop));
-		printf("List ids for port %d:\n[",mem_loop);
-		for (int sg_loop=0;sg_loop<entries;sg_loop++)
-		  if (sg_loop==entries-1)
-		    printf("%d]\n",
-			   (port_timing->mem_id)->query(sg_loop));
-		  else
-		    printf("%d ",(port_timing->mem_id)->query(sg_loop));
-		printf("Mux_lines for memory %d:\n[",mem_loop);
-		for (int sg_loop=0;sg_loop<entries;sg_loop++)
-		  if (sg_loop==entries-1)
-		    printf("%d]\n",
-			   (port_timing->mux_line)->query(sg_loop));
-		  else
-		    printf("%d ",(port_timing->mux_line)->query(sg_loop));
-	      }
-	    
-
-
-	    //////////////////////////////////////
-	    // Reassign mux control pin identities
-	    //////////////////////////////////////
-	    int imux_cnodes=0;
-	    if (sources_reconnected)
-	      {
-		ACSCGFPGACore* data_imux=mem_port->dataimux_star;
-		Pin* imux_pins=data_imux->pins;
-		ACSIntArray* imux_cnode=imux_pins->query_cnodes();
-		imux_cnodes=imux_cnode->population();
-		imux_pins->reclassify_pin(INPUT_PIN_CTRL,INPUT_PIN_MEMORYMUX);
-	      }
-	    
-	    int omux_cnodes=0;
-	    if (sinks_reconnected)
-	      {
-		ACSCGFPGACore* data_omux=mem_port->dataomux_star;
-		Pin* omux_pins=data_omux->pins;
-		ACSIntArray* omux_cnode=omux_pins->query_cnodes();
-		omux_cnodes=omux_cnode->population();
-		omux_pins->reclassify_pin(INPUT_PIN_CTRL,INPUT_PIN_MEMORYMUX);
-	      }
-	    
-	    // Establish data mux selection control line
-	    char* mux_cname=new char[MAX_STR];
-	    char* mux_prefix=new char[MAX_STR];
-	    
-	    // Maintain a phase list for each control line
-	    int mode;
-	    if (mem_port->bidir_data)
-	      {
-		mode=1;
-		strcpy(mux_prefix,"_BI_");
-	      }
-	    else
-	      mode=2;
-	    
-
-	    // FIX: Boy, this is sure ugly stuff....
-	    for (int mux_loop=1;mux_loop<=mode;mux_loop++)
-	      {
-		mux_defaults << "--Data MUX" << mem_loop 
-			     << " Controls (defaults)" << endl;
-		if (!mem_port->bidir_data)
-		  if (mux_loop==1)
-		    strcpy(mux_prefix,"_IN_");
-		  else
-		    strcpy(mux_prefix,"_OUT_");
-		
-		int ctrl_count=imux_cnodes;
-		if (mux_loop==2)
-		  ctrl_count=omux_cnodes;
-		
-		for (int ctrl_loop=0;ctrl_loop<ctrl_count;ctrl_loop++)
-		  {
-		    // ASSUMPTION: mux_sline controls an entire row of muxs in the hierarchy
-		    sprintf(mux_cname,"%s%s%d_%d","MEMORY_MUX",mux_prefix,mem_loop,ctrl_loop);
-		    mux_defaults << lang.equals(mux_cname,"'0'") 
-				 << lang.end_statement << endl;
-		    
-		    // FIX: And kludge up the entry in the UniSeq port definition
-		    int mux_pin=seq_pins->add_pin(mux_cname,
-						  0,1,
-						  STD_LOGIC,
-						  OUTPUT_PIN_MEMORYMUX);
-		    seq_ext_signals->add_pin(mux_cname,
-					     0,1,
-					     STD_LOGIC,
-					     OUTPUT_PIN_MEMORYMUX);
-		    seq_pins->set_pinpriority(mux_pin,ctrl_loop);
-		    
-		    // Test to see if data is sourced or sunked on any given phase
-		    for (int sg_loop=0;sg_loop < (port_timing->data_activation)->population();sg_loop++)
-		      {
-			int data_act=(port_timing->data_activation)->query(sg_loop);
-			int sg_pos=(port_timing->mem_id)->query(sg_loop)-1;
-			if (DEBUG_SEQUENCER)
-			  printf("DataMux:data_act=%d, sg_pos=%d\n",
-				 data_act,
-				 sg_pos);
-			
-			if (mem_port->bidir_data)
-			  {
-			    if (bselcode(sg_pos,ctrl_loop)==1)
-			      phase_streams[data_act] << lang.equals(mux_cname,"'1'")
-						      << lang.end_statement << endl;
-			  }
-			else
-			  {
-			    if (DEBUG_SEQUENCER)
-			      printf("ctrl=%d, sg_loop=%d, bselcode=%d, mem_type=%d\n",
-				     ctrl_loop,
-				     sg_loop,
-				     bselcode(sg_pos,ctrl_loop),
-				     (port_timing->mem_type)->query(sg_loop));
-			    if (mux_loop==1)
-			      {
-				if ((bselcode(sg_pos,ctrl_loop)==1) &&
-				    ((port_timing->mem_type)->query(sg_loop)==SOURCE))
-				  {
-				    phase_streams[data_act] << lang.equals(mux_cname,"'1'")
-							    << lang.end_statement << endl;
-				    if (DEBUG_SEQUENCER)
-				      {
-					ACSCGFPGACore* src_star=(ACSCGFPGACore*) 
-					  source_stars->elem(sg_pos+1);
-					printf("Source sg %s, addr_act=%d, selected on time %d\n",
-					       src_star->comment_name(),
-					       src_star->act_input,
-					       data_act);
-				      }
-				  }
-			      }
-			    else
-			      if ((bselcode(sg_pos,ctrl_loop)==1) &&
-				  ((port_timing->mem_type)->query(sg_loop)==SINK))
-				{
-				  phase_streams[data_act] << lang.equals(mux_cname,"'1'")
-							  << lang.end_statement << endl;
-				  if (DEBUG_SEQUENCER)
-				    {
-				      ACSCGFPGACore* snk_star=(ACSCGFPGACore*) sink_stars->elem(sg_pos+1);
-				      printf("Sink sg %s, selected on time %d\n",
-					     snk_star->comment_name(),
-					     data_act);
-				    }
-				}
-			  }
-		      }
-		  }
-	      }
-	    
-	    // Cleanup
-	    mux_defaults << endl;
-	    delete []mux_cname;
-	    delete []mux_prefix;
-	    
-
-	    /////////////////////////////////////////////
-	    // Generate address generator control signals
-	    /////////////////////////////////////////////
-	    // Hookup the reset line
-	    mux_defaults << "-- Address Generator " << mem_loop 
-			 << " Controls (defaults)" << endl;
-
-	    // If address is active, then engage the count enabler
-	    // Trap for duplicates, although will not hinder Synplicity VHDL-comp.
-	    int* dup_phase=NULL;
-	    int dup_count=0;
-	    for (int sg_loop=0;sg_loop<total_sgs;sg_loop++)
-	      {
-		// Address mux switching must occur one clock period
-		// prior to its necessity
-		Port_Timing* port_timing=mem_port->port_timing;
-		int addr_phase=(port_timing->address_activation)->query(sg_loop)-1;
-		if (addr_phase < 0)
-		  addr_phase=seqlen-1;
-		if (DEBUG_SEQUENCER)
-		  printf("sg %d will engage addr counter on phase %d, orig %d\n",
-			 sg_loop,
-			 addr_phase,
-			 (port_timing->address_activation)->query(sg_loop));
-		
-		int not_dup=TRUE;
-		if (dup_count>0)
-		  for (int dup_loop=0;dup_loop<dup_count;dup_loop++)
-		    if (addr_phase==dup_phase[dup_loop])
-		      {
-			not_dup=FALSE;
-			break;
-		      }
-		if (not_dup)
-		  {
-		    phase_streams[addr_phase] << lang.equals("Addr_Ring_CE","'1'")
-					      << lang.end_statement << endl;
-		    if (dup_count==0)
-		      dup_phase=new int;
-		    else
-		      {
-			int *tmp_dup=new int[dup_count+1];
-			for (int cloop=0;cloop<dup_count;cloop++)
-			  tmp_dup[cloop]=dup_phase[cloop];
-			delete []dup_phase;
-			dup_phase=tmp_dup;
-		      }
-		    dup_phase[dup_count]=addr_phase;
-		    dup_count++;
-		  }
-	      }
-	    delete []dup_phase;
-	    
-	    // Test for MUXs
-	    if (DEBUG_SEQUENCER)
-	      printf("Generating the mux/ram processes\n");
-	    if (mem_port->addrmux_star != NULL)
-	      {
-		// Generate control lines for each MUX "bank"
-		ACSCGFPGACore* addr_mux=mem_port->addrmux_star;
-		Pin* mux_ctrl=addr_mux->pins;
-		Port_Timing* port_timing=mem_port->port_timing;
-		
-		// Establish addr mux selection control line
-		char* mux_name=new char[MAX_STR];
-		char* dmux_name=new char[MAX_STR];
-		char* tmp_name=new char[MAX_STR];
-		
-		// Maintain a phase list for each control line
-		// ASSUMPTION:Only mux switching lines are in the cnodes list
-		for (int pin_loop=0;pin_loop<mux_ctrl->query_pincount();pin_loop++)
-		  if (mux_ctrl->query_pintype(pin_loop)==INPUT_PIN_CTRL)
-		    mux_ctrl->set_pintype(pin_loop,INPUT_PIN_ADDRMUX);
-		
-		Pin* addrmux_pins=addr_mux->pins;
-		ACSIntArray* cnode_pins=addrmux_pins->query_cnodes();
-		int cnode_count=cnode_pins->population();
-		for (int ctrl_loop=0;ctrl_loop<cnode_count;ctrl_loop++)
-		  {
-		    // FIX: Kludge up the entry in the UniSeq port definition
-		    sprintf(mux_name,"%s%d_%d","ADDR_MUX",mem_loop,ctrl_loop);
-		    mux_defaults << lang.equals(mux_name,"'0'") 
-				 << lang.end_statement << endl;
-		    
-		    int mux_pin=seq_pins->add_pin(mux_name,
-						  0,1,
-						  STD_LOGIC,
-						  OUTPUT_PIN_ADDRMUX);
-		    seq_ext_signals->add_pin(mux_name,
-					     0,1,
-					     STD_LOGIC,
-					     OUTPUT_PIN_ADDRMUX);
-		    seq_pins->set_pinpriority(mux_pin,ctrl_loop);
-		    
-		    // Test each star to see if it will be selected on this phase
-		    for (int time_loop=0;time_loop<total_sgs;time_loop++)
-		      {
-			int mux_phase=(port_timing->address_activation)->query(time_loop)-1;
-			
-			// Mux position is skewed since pos 0 is the initial
-			// address
-			int mux_pos=0;
-			if (mux_phase < 0)
-			  {
-			    mux_phase=seqlen-1;
-			    mux_pos=total_sgs;
-			  }
-			else
-			  // Since addresses are ordered
-			  mux_pos=time_loop;
-			
-
-			if (DEBUG_SEQUENCER)
-			  {
-			    int debug=bselcode(mux_pos,ctrl_loop);
-			    printf("MemPort %d, ctrl_loop= %d, AddrMux:addr_act=%d, mux_phase=%d, mux_pos=%d, bselcode=%d\n",
-				   mem_loop,
-				   ctrl_loop,
-				   (port_timing->address_activation)->query(time_loop),
-				   mux_phase,
-				   mux_pos,
-				   debug);
-			  }
-			
-			if (bselcode(mux_pos,ctrl_loop)==1)
-			  phase_streams[mux_phase] << lang.equals(mux_name,"'1'")
-						   << lang.end_statement << endl;
-			
-		      }
-		  }
-		
-		// Cleanup
-		mux_defaults << endl;
-		delete []dmux_name;
-		delete []mux_name;
-		delete []tmp_name;
-	      }
-	    mux_defaults << endl;
-	    
-	    
-	    //////////////////////////////////
-	    // Generate memory control signals
-	    //////////////////////////////////
-	    char* ramg_name=new char[80];
-	    char* ramw_name=new char[80];
-	    char* rame_name=new char[80];
-	    
-	    // FIX: If a single R/W control line, which is active(H)??
-	    //      Defaulting to W is active high
-	    sprintf(ramg_name,"%s_%d","RAMG",mem_loop);
-	    sprintf(ramw_name,"%s_%d","RAMW",mem_loop);
-	    sprintf(rame_name,"%s_%d","RAME",mem_loop);
-	    
-	    // Add pin definitions on sequencer smart generator for available
-	    // control signals
-	    ram_defaults << endl << "--Address Generator" << mem_loop 
-			 << " RAM Control Lines (defaults)" << endl;
-	    
-	    if (fpga_elem->separate_rw)
-	      if ((fpga_elem->read_signal_id)->get(mem_loop)!=UNASSIGNED)
-		{
-		  int ramg_pin=seq_pins->add_pin(ramg_name,
-						 0,1,
-						 STD_LOGIC,
-						 OUTPUT_PIN_RAMG);
-		  seq_ext_signals->add_pin(ramg_name,
-					   0,1,
-					   STD_LOGIC,
-					   OUTPUT_PIN_RAMG);
-		  seq_pins->set_pinpriority(ramg_pin,mem_loop);
-		  
-		  ram_defaults << lang.equals(ramg_name,"'1'") 
-			       << lang.end_statement << endl;
-		}
-	    
-	    if ((fpga_elem->write_signal_id)->get(mem_loop)!=UNASSIGNED)
-	      {
-		int ramw_pin=seq_pins->add_pin(ramw_name,
-					       0,1,
-					       STD_LOGIC,
-					       OUTPUT_PIN_RAMW);
-		seq_ext_signals->add_pin(ramw_name,
-					 0,1,
-					 STD_LOGIC,
-					 OUTPUT_PIN_RAMW);
-		seq_pins->set_pinpriority(ramw_pin,mem_loop);
-		
-		ram_defaults << lang.equals(ramw_name,"'1'") 
-			     << lang.end_statement << endl;
-	      }
-	    
-	    if ((fpga_elem->enable_signal_id)->get(mem_loop)!=UNASSIGNED)
-	      {
-		int rame_pin=seq_pins->add_pin(rame_name,
-					       0,1,
-					       STD_LOGIC,
-					       OUTPUT_PIN_RAME);
-		seq_ext_signals->add_pin(rame_name,
-					 0,1,
-					 STD_LOGIC,
-					 OUTPUT_PIN_RAME);
-		seq_pins->set_pinpriority(rame_pin,mem_loop);
-		
-		ram_defaults << lang.equals(rame_name,"'0'") << lang.end_statement << endl;
-		ram_init_state << lang.equals(rame_name,"'1'") << lang.end_statement << endl;
-	      }
-	    
-	    for (int phase_loop=0;phase_loop<mem_port->pt_count;phase_loop++)
-	      {
-//		printf("phase %d, mem_port->fetch_pt=%d\n",phase_loop,
-//		       mem_port->fetch_pt(phase_loop));
-		if (mem_port->fetch_pt(phase_loop)==SOURCE)
-		  {
-//		    printf("sourcing\n");
-		    if ((fpga_elem->separate_rw) && 
-			((fpga_elem->read_signal_id)->get(mem_loop)!=UNASSIGNED))
-		      {
-//			printf("read high\n");
-			phase_streams[phase_loop] << "\t" 
-						  << lang.equals(ramg_name,"'1'")
-						  << lang.end_statement << endl;
-		      }
-		  }
-		else if (mem_port->fetch_pt(phase_loop)==SINK)
-		  {
-//		    printf("sinking\n");
-		    if ((fpga_elem->write_signal_id)->get(mem_loop)!=UNASSIGNED)
-		      {
-//			printf("write = delay?\n");
-			phase_streams[phase_loop] << "\t" 
-						  << lang.equals(ramw_name,"'0'") 
-						  << lang.or("(") << lang.not("SNK_OK)")
-						  << lang.end_statement << endl;
-		      }
-		  }
-		else
-		  {
-//		    printf("othering\n");
-		    phase_streams[phase_loop] << "\t" 
-					      << lang.equals(rame_name,"'1'")
-					      << lang.end_statement << endl;
-		  }
-	      }
-	    
-	    
-	    delete []ramg_name;
-	    delete []ramw_name;
-	    delete []rame_name;
-	  } //if ((mem_port->portuse==MEMORY_USED) && (mem_connected==MEMORY_AVAILABLE))
-	mux_defaults << endl;
-	
-      } // if (mem_port->portuse==MEMORY_USED)
-  
-  ///////////////////////////////////
-  // Generate default control signals
-  ///////////////////////////////////
-  ctrl_defaults << endl << "-- Source and/or Sink Control defaults" << endl;
-  if (total_srcs)
-    ctrl_defaults << lang.equals("SRC_Ring_Control","'0'") << lang.end_statement << endl;
-  if (total_snks)
-    ctrl_defaults << lang.equals("SNK_Ring_Control","'0'") << lang.end_statement << endl;
-  
-  ctrl_defaults << lang.equals("Addr_Ring_CE","'0'")
-		<< lang.end_statement << endl;
-
-  ctrl_defaults << endl << "-- Completion signals" << endl;
-  ctrl_defaults << lang.equals("Wait_AlgFin","'1'") << lang.end_statement << endl;
+      ACSCGFPGACore* fpga_core=(ACSCGFPGACore*) sg_list->elem(loop);
+      if (fpga_core->acs_type != BOTH)
+	{
+	  if (DEBUG_SEQUENCER)
+	    printf("Examining core %s for the master timer in=%d, out=%d, complete=%d, launch=%d, totalacts=%d\n",
+		   fpga_core->comment_name(),
+		   fpga_core->act_input,
+		   fpga_core->act_output,
+		   fpga_core->act_complete,
+		   fpga_core->act_launch,
+		   fpga_core->word_count);
+//		 (fpga_core->act_complete-fpga_core->act_input)/fpga_core->act_launch);
 	  
-  char* rsig_name=new char[MAX_STR];
-  ctrl_defaults << endl << "-- Current phase signals" << endl;
-  for (int loop=0;loop<seqlen;loop++)
-    {
-      sprintf(rsig_name,"Phase%d_Go",loop);
-      ctrl_defaults << lang.equals(rsig_name,"'0'") << lang.end_statement << endl;
-    }
-  ctrl_defaults << endl;
-  delete []rsig_name;
-
-  ///////////////////////////////////////////////////////
-  // Generate the ring (i.e., phase0 through phase(seqlen)
-  ////////////////////////////////////////////////////////
-  if (DEBUG_SEQUENCER)
-    printf("Generating the ring process\n");
-
-  StringArray* ring_sensies=new StringArray;
-  StringArray* ring_cases=new StringArray;
-  ring_sensies->add("Ring_State");
-  ring_sensies->add("Go_Ring");
-  if (total_snks)
-    {
-      ring_sensies->add("SNK_Carry");
-      ring_sensies->add("SNK_OK");
-    }
-  else if (total_srcs) 
-    ring_sensies->add("SRC_Carry");
-      
-  ram_init_state << ends;
-  
-  ostrstream ring_state;
-  ring_state << ram_init_state.str()
-	     << lang.equals("Addr_Ring_CE","'1'") << lang.end_statement << endl
-	     << lang.if_statement << lang.test("Go_Ring","'1'") << lang.then_statement << endl
-	     << "\t" << lang.equals("Next_Ring_State","Phase0") << lang.end_statement << endl
-	     << lang.else_statement << endl
-	     << "\t" << lang.equals("Next_Ring_State","Init_State") << lang.end_statement << endl
-	     << lang.endif_statement << lang.end_statement << endl << ends;
-  ring_cases->add(ring_state.str());
-
-  char* ring_name=new char[MAX_STR];
-  char* ringsig_name=new char[MAX_STR];
-
-  // Terminate all phase streams
-  for (int loop=0;loop<seqlen;loop++)
-    phase_streams[loop] << ends;
-
-  for (int loop=0;loop<seqlen;loop++)
-    {
-      ostrstream lring_case;
-      if (loop!=0)
-	{
-	  if ((loop+1)==seqlen)
+	  // Trap for scheduling an input
+	  if (fpga_core->act_input != UNASSIGNED)
 	    {
-	      strcpy(ring_name,"Phase0");
-	      lring_case << "\t" << "-- Source and/or Sink word counter control generator" << endl;
-	      if (total_snks)
-		lring_case << lang.if_statement << lang.test(sink_carry_name,"'0'");
-	      else if (total_srcs)
-		lring_case << lang.if_statement << lang.test(source_carry_name,"'0'");
+	      // FIX:Uniqueness must span ALL three categories!
+	      // FIX:Shouldnt need to trap for Source LUT, need to improve ctrl signal traps
+	      //     past the input and output only stages!
+	      int unique=0;
+	      if (fpga_core->acs_type == SOURCE_LUT)
+		unique=master_timing->add_unique(fpga_core->act_input+2);
+	      else
+		unique=master_timing->add_unique(fpga_core->act_input);
 
-	      if (total_snks || total_srcs)
+	      if (unique)
 		{
-		  lring_case << lang.then_statement << endl
-			     << "\t" << lang.equals("Wait_AlgFin","'0'") << lang.end_statement << endl
-			     << "\t" << lang.equals("Next_Ring_State","Init_State") 
-			     << lang.end_statement << endl
-			     << lang.else_statement << endl
-			     << "\t" << lang.equals("Next_Ring_State","Phase0") << lang.end_statement
-			     << endl;
-		  if (total_srcs)
-		    lring_case << lang.equals("SRC_Ring_Control","'1'") << lang.end_statement << endl;
-		  if (total_snks)
-		    lring_case << lang.equals("SNK_Ring_Control","'1'") << lang.end_statement << endl;
+		  master_rate->add(fpga_core->act_launch);
+		  master_totalacts->add(fpga_core->word_count);
 
-		  lring_case << lang.endif_statement << lang.end_statement << endl;
+/*
+		  if (fpga_core->acs_type == SOURCE)
+		    master_totalacts->add((fpga_core->act_complete-fpga_core->act_input)
+					  / fpga_core->act_launch);
+		  else if (fpga_core->acs_type == SINK)
+		    master_totalacts->add(((fpga_core->act_complete-fpga_core->act_input)+1)
+					  / fpga_core->act_launch);
+		  else
+		    master_totalacts->add((fpga_core->act_complete-fpga_core->act_output)
+					  / fpga_core->act_launch);
+					  */
 		}
 	    }
-	  else
+	  
+	  // Trap for scheduling a unique output
+	  if ((fpga_core->act_input) != (fpga_core->act_output))
 	    {
-	      sprintf(ring_name,"Phase%d",loop+1);
-	      lring_case << lang.equals("Next_Ring_State",ring_name) 
-			 << lang.end_statement << endl;
+	      // FIX:Uniqueness must span ALL three categories!
+	      int unique=master_timing->add_unique(fpga_core->act_output);
+	      if (unique)
+		{
+		  master_rate->add(fpga_core->act_launch);
+		  if ((fpga_core->acs_type == SOURCE) || (fpga_core->acs_type == SINK))
+		    master_totalacts->add((fpga_core->act_complete-fpga_core->act_input)
+					  / fpga_core->act_launch);
+		  else
+		    master_totalacts->add((fpga_core->act_complete-fpga_core->act_output)
+					  / fpga_core->act_launch);
+		}
 	    }
-
-	  sprintf(ringsig_name,"Phase%d_Go",loop);
-	      
-	  lring_case << phase_streams[loop].str() 
-		     << lang.equals(ringsig_name,"'1'") << lang.end_statement
-		     << ends;
 	}
-      else
+      if ((fpga_core->act_output != UNASSIGNED) && (fpga_core->acs_state == SAVE_STATE))
 	{
-	  lring_case << lang.equals("Next_Ring_State","Phase1") << lang.end_statement << endl << endl
-		     << "\t" << "-- Increment word count for this sequence" << endl
-		     << "\t" << phase_streams[0].str() << endl
-		     << "\t" << lang.equals("Phase0_Go","'1'") << lang.end_statement << endl 
-		     << ends;
+	  // FIX?:Is this truely asking for a oneshot activation or multiple?
+	  // FIX:Uniqueness must span ALL three categories!
+	  Pin* fpga_pins=fpga_core->pins;
+	  for (int pin_loop=0;pin_loop<fpga_pins->query_pincount();pin_loop++)
+	    {
+	      int depend_assignment=fpga_pins->query_phasedependency(pin_loop);
+	      if (depend_assignment != UNASSIGNED)
+		{
+		  int phase=UNASSIGNED;
+		  if (depend_assignment==INPUT_PIN)
+		    phase=fpga_core->act_input;
+		  else
+		    phase=fpga_core->act_output;
+		  
+		  int unique=master_timing->add_unique(phase);
+		  if (unique)
+		    {
+		      master_rate->add(fpga_core->act_launch);
+		      master_totalacts->add((fpga_core->act_complete-fpga_core->act_output)/fpga_core->act_launch);
+		    }
+		}
+	    }
 	}
-      ring_cases->add(lring_case.str());
     }
-  delete []ring_name;
-  delete []ringsig_name;
-  delete []phase_streams;
-  delete []source_carry_name;
-  delete []sink_carry_name;
-  delete []delay_carry_name;
 
-
-  // Terminate streams
-  mux_defaults << ends;
-  ram_defaults << ends;
-  ctrl_defaults << ends;
-
+  ACSIntArray* master_order=master_timing->sort_lh();
+  master_timing->reorder(master_order);
+  master_rate->reorder(master_order);
+  master_totalacts->reorder(master_order);
+  delete master_order;
   
-  process_expr << "--" << endl 
-	       << "-- Ring process" << endl 
-	       << "--" << endl;
-  process_expr << lang.process("Ring",ring_sensies) << endl;
-  process_expr << lang.begin_scope << endl;
-  process_expr << mux_defaults.str();
-  process_expr << ram_defaults.str();
-  process_expr << ctrl_defaults.str();
-  process_expr << lang.l_case("Ring_State",ring_states,ring_cases) << endl;
-  process_expr << lang.end_function_scope("Ring") << endl;
-  
-
-  ///////////////////////////
-  // Now propagate bit widths
-  ///////////////////////////
-  /*
-  HWset_bw(smart_generators,
-	   seq_ext_signals,
-	   root_constant_signals,
-	   seq_ctrl_signals);
-	   */
-
-
-  ////////////////////
-  // Conduct stitching
-  ////////////////////
   if (DEBUG_SEQUENCER)
-    printf("Exporting sequencer vhdl\n");
+    {
+      master_timing->print("scheduled times for master timer");
+      master_rate->print("scheduled rates for master timer");
+      master_totalacts->print("scheduled word counts for master timer");
+    }
 
-  // Establish filenames and open file stream
-  ostrstream of_filename;
-  of_filename << design_directory->retrieve_extended() 
-	      << seq_core->name() << ".vhd" << ends;
-  ofstream fstr(of_filename.str());
+  // Test if sequencer isnt needed for this fpga
+  if (master_timing->population()==0)
+    {
+      delete master_timing;
+      delete master_rate;
+      delete master_totalacts;
+      return;
+    }
 
-  ostrstream entity_name;
-  entity_name << seq_core->name() << ends;
+  if (DEBUG_SEQUENCER)
+    printf("Building multirate sequencer for fpga %d\n",fpga_no);
 
-  // Freeze streams
-  preamble_expr << ends;
-  default_expr << ends;
-  process_expr << ends;
+  construct->set_targetdevice(fpga_elem);
+  ACSCGFPGACore* master_timer=construct->add_timer(master_timing,smart_generators);
+  master_timer->alter_pintype(INPUT_PIN_START,INPUT_PIN_ADDRCLR);
+  master_timer->alter_pintype(INPUT_PIN_EXTCTRL,INPUT_PIN_START);
+  master_timer->alter_pintype(INPUT_PIN_RESET,INPUT_PIN_SEQRESET);
 
-  // Generate code
-  fstr << lang.gen_libraries(all_libraries,all_includes);
-  fstr << lang.gen_entity(entity_name.str(),seq_ext_signals);
-  fstr << lang.gen_architecture(entity_name.str(),
-				NULL,
-				BEHAVIORAL,
-				seq_ext_signals,
-				seq_data_signals,
-				seq_ctrl_signals,
-				seq_constant_signals);
-//  fstr << lang.gen_components(entity_name.str(),NULL);
-//  fstr << lang.gen_configurations(NULL);
-//  fstr << lang.gen_instantiations(NULL,seq_ext_signals,seq_data_signals,
-//				  seq_ctrl_signals,root_constant_signals);
-  fstr << preamble_expr.str() << endl << endl;
-  fstr << lang.begin_scope << endl;
-  fstr << default_expr.str() << endl;
-  fstr << process_expr.str() << endl;
-  fstr << lang.end_scope << lang.end_statement << endl;
+  // Force implementation to use a delay-based counter
+  master_timer->target_implementation=1;
+
+
+  ////////////////////////////////////////////////////
+  // Notify fpga of the counter to indicate completion
+  ////////////////////////////////////////////////////
+  int completion_time=master_timing->tail();
+  fpga_elem->set_completiontime(completion_time);
+
+  //////////////////
+  // Add the phasers
+  //////////////////
+  char* comment=new char[MAX_STR];
+  for (int loop=0;loop<master_rate->population();loop++)
+    {
+      int phase_count=master_rate->query(loop);
+      ACSCGFPGACore* phase_core=construct->add_phaser(phase_count,smart_generators);
+      sprintf(comment,"Phaser for time %d",master_timing->query(loop));
+      phase_core->add_comment(comment);
+
+      // Annotate phase information for the I/O pins
+      int start_time=master_timing->query(loop);
+      int phasein_pin=phase_core->find_hardpin(INPUT_PIN_EXTCTRL);
+      phase_core->set_pinpriority(phasein_pin,start_time);
+      phase_core->replace_pintype(phasein_pin,INPUT_PIN_PHASE_START);
+      if (DEBUG_SEQUENCER)
+	printf("set phase_core pin %d, priority=%d\n",phasein_pin,start_time);
+      int phaseout_pin=phase_core->find_hardpin(OUTPUT_PIN_PHASE);
+      phase_core->set_pinpriority(phaseout_pin,start_time);
+      int prephaseout_pin=phase_core->find_hardpin(OUTPUT_PIN_PREPHASE);
+      phase_core->set_pinpriority(prephaseout_pin,start_time);
+      int pstop_pin=phase_core->find_hardpin(INPUT_PIN_STOP);
+      phase_core->set_pinpriority(pstop_pin,start_time); 
+
+      int master_pin=master_timer->find_hardpin(OUTPUT_PIN,start_time);
+      master_timer->replace_pintype(master_pin,OUTPUT_PIN_PHASE_START);
+
+      // Add the word counters
+      int count_duration=master_totalacts->query(loop);
+//      int count_duration=master_totalacts->query(loop)+1;
+      if (DEBUG_SEQUENCER)
+	printf("count_duration=%d\n",count_duration);
+      if (count_duration > 0)
+	{
+	  ACSCGFPGACore* counter_core=construct->add_timer(count_duration,smart_generators);
+
+	  // Connect the phaser to the word counter and visa-versa
+	  int counter_pin=counter_core->find_hardpin(INPUT_PIN_EXTCTRL);
+	  counter_core->set_pinpriority(counter_pin,start_time);
+	  counter_core->replace_pintype(counter_pin,INPUT_PIN_PHASE_START);
+	  int countout_pin=counter_core->find_hardpin(OUTPUT_PIN);
+	  counter_core->set_pinpriority(countout_pin,start_time);
+	  counter_core->replace_pintype(countout_pin,OUTPUT_PIN_STOP);
+	  int countclr_pin=counter_core->find_hardpin(INPUT_PIN_RESET);
+	  counter_core->replace_pintype(countclr_pin,INPUT_PIN_SEQRESET);
+	  
+	  // Add word counter CE controller
+	  // ASSUMPTION:OR pin numbers wont change
+	  ACSCGFPGACore* orce_core=construct->add_sg("ACS","OR","CGFPGA",
+						     BOTH,UNSIGNED,smart_generators);
+	  construct->connect_sg(orce_core,
+				counter_core,INPUT_PIN_CE);
+	  Pin* orce_pins=orce_core->pins;
+	  
+	  orce_pins->set_pintype(0,INPUT_PIN_PHASE);
+	  orce_pins->set_pinpriority(0,start_time);
+	  orce_pins->set_precision(0,0,1,LOCKED);
+	  orce_pins->set_pintype(1,INPUT_PIN_PHASE_START);
+	  orce_pins->set_pinpriority(1,start_time);
+	  orce_pins->set_precision(1,0,1,LOCKED);
+	  orce_pins->set_precision(2,0,1,LOCKED);
+	}
+    }
 
   // Cleanup
-  delete seq_ext_signals;
-  delete seq_ctrl_signals;
-//  delete seq_data_signals;
-  delete seq_constant_signals;
-  delete sync_sensies;
-  delete master_states;
-  delete master_sensies;
-  delete master_cases;
-  delete addr_states;
-  delete addr_sensies;
-  delete addr_cases;
-  delete ring_states;
-  delete ring_sensies;
-  delete ring_cases;
-  delete src_wc_states;
-  delete snk_wc_states;
+  delete []comment;
+  delete master_timing;
+  delete master_rate;
+  delete master_totalacts;
 }
 
 
@@ -3144,7 +2197,7 @@ void ACSCGFPGATarget::HWlink_resolver(Pin* data_signals,Pin* ext_signals,
   if (output_core != NULL)
     {
       Fpga* fpga_elem=arch->get_fpga_handle(output_core->acs_device);
-      construct->set_targetdevice(fpga_elem,output_core->acs_device);
+      construct->set_targetdevice(fpga_elem);
 
       switch (output_nodes->query_pintype(output_node))
 	{
@@ -3159,7 +2212,11 @@ void ACSCGFPGATarget::HWlink_resolver(Pin* data_signals,Pin* ext_signals,
 	  dest_pins=constant_signals;
 	  break;
 	case CTRL_NODE:
-	  dest_pins=ctrl_signals;
+	  dest_core=HWfind_star(output_nodes->query_acsid(output_node));
+	  if (dest_core==NULL)
+	    dest_pins=ctrl_signals;
+	  else
+	    dest_pins=dest_core->pins;
 	  break;
 	default:
 	  dest_pins=NULL;
@@ -3173,7 +2230,7 @@ void ACSCGFPGATarget::HWlink_resolver(Pin* data_signals,Pin* ext_signals,
       dest_pins=dest_core->pins;
 
       Fpga* dest_fpga=arch->get_fpga_handle(dest_core->acs_device);
-      construct->set_targetdevice(dest_fpga,dest_core->acs_device);
+      construct->set_targetdevice(dest_fpga);
     }
 
   int input_pin=output_nodes->query_pinid(output_node);
@@ -3189,8 +2246,11 @@ void ACSCGFPGATarget::HWlink_resolver(Pin* data_signals,Pin* ext_signals,
   int dest_majorbit=dest_pins->query_majorbit(input_pin);
   int dest_bitlen=dest_pins->query_bitlen(input_pin);
 
+/*
   if ((src_majorbit != dest_majorbit) ||
       (src_bitlen != dest_bitlen))
+      */
+  if (src_bitlen != dest_bitlen)
     {
       if (DEBUG_BWRESOLVER)
 	{
@@ -3207,6 +2267,8 @@ void ACSCGFPGATarget::HWlink_resolver(Pin* data_signals,Pin* ext_signals,
 	  sign_convention=output_core->sign_convention;
 	  bitslice_strategy=output_core->bitslice_strategy;
 	}
+      if (dest_core==NULL)
+	bitslice_strategy=PRESERVE_LSB;
 
       ACSCGFPGACore* buffer_core=construct->add_buffer(sign_convention,smart_generators);
       buffer_core->bitslice_strategy=bitslice_strategy;
@@ -3229,17 +2291,19 @@ void ACSCGFPGATarget::HWlink_resolver(Pin* data_signals,Pin* ext_signals,
 	      // Sense of direction is confusing at this point since external signals
 	      // can be both input and output pins
 	      int ptype=output_pins->pin_classtype(output_pin);
-/*
-	      printf("Inserting a buffer core %s between the extpin (type %d) and %s\n",
-		     buffer_core->comment_name(),
-		     ptype,
-		     dest_core->comment_name());
-	      printf("output_pin=%d, output_node=%d, input_pin=%d, input_node=%d\n",
-		     output_pin,
-		     output_node,
-		     input_pin,
-		     input_node);
-		     */
+
+	      if (DEBUG_BWRESOLVER)
+		{
+		  printf("Inserting a buffer core %s between the extpin (type %d) and %s\n",
+			 buffer_core->comment_name(),
+			 ptype,
+			 dest_core->comment_name());
+		  printf("output_pin=%d, output_node=%d, input_pin=%d, input_node=%d\n",
+			 output_pin,
+			 output_node,
+			 input_pin,
+			 input_node);
+		}
 
 	      construct->insert_sg(output_pins,
 				   buffer_core,
@@ -3272,42 +2336,72 @@ void ACSCGFPGATarget::HWlink_resolver(Pin* data_signals,Pin* ext_signals,
       buffer_pins->set_precision(0,
 				 src_majorbit,
 				 src_bitlen,
-				 LOCKED);
+				 UNLOCKED);
       buffer_pins->set_precision(1,
 				 dest_majorbit,
 				 dest_bitlen,
-				 LOCKED);
+				 UNLOCKED);
 
       if (DEBUG_BWRESOLVER)
 	printf("BWerror resolved\n\n");
     }
 
   // Cleanup
-//  delete construct;
 }
 
 
 ////////////////////////////////////////////////////
 // Identify sg links which cross domains and resolve
 ////////////////////////////////////////////////////
-void ACSCGFPGATarget::HWalg_resolver(void)
+void ACSCGFPGATarget::HWalg_resolver(CoreList* sg_list)
 {
   if (DEBUG_RESOLVER)
     printf("\n\nResolver\n");
 
   // Determine data signal links between smart generators
-  int sg_count=smart_generators->size();
+  if (DEBUG_RESOLVER)
+    printf("Resolving data driving signals\n");
+  HWresolve_drivingsignals(sg_list,DATA_NODE);
+
+  // Determine ctrl signal links between smart generators
+  if (DEBUG_RESOLVER)
+    printf("Resolving ctrl driving signals\n");
+  HWresolve_drivingsignals(sg_list,CTRL_NODE);
+
+  if (DEBUG_RESOLVER)
+    printf("Resolving unconnected ctrl driven signals\n");
+  HWresolve_ictrlsignals(sg_list);
+
+  if (DEBUG_RESOLVER)
+    printf("Resolving unconnected external driven signals\n");
+  HWresolve_ectrlsignals();
+}
+
+void ACSCGFPGATarget::HWresolve_drivingsignals(CoreList* sg_list,
+					       const int mode)
+{
+  int sg_count=sg_list->size();
   for (int loop=0;loop<sg_count;loop++)
     {
-      ACSCGFPGACore* fpga_core=(ACSCGFPGACore*) smart_generators->elem(loop);
+      ACSCGFPGACore* fpga_core=(ACSCGFPGACore*) sg_list->elem(loop);
       Fpga* fpga_elem=arch->get_fpga_handle(fpga_core->acs_device);
       Pin* fpga_pins=fpga_core->pins;
 
-      ACSIntArray* opins=fpga_pins->query_onodes();
+      ACSIntArray* opins=NULL;
+      if (mode==DATA_NODE)
+	opins=fpga_pins->query_onodes();
+      else
+	opins=fpga_pins->query_ocnodes();
+
       if (DEBUG_RESOLVER)
-	printf("resolving driving links for star %s with %d opins\n",
-	       fpga_core->comment_name(),
-	       opins->population());
+	if (mode==DATA_NODE)
+	  printf("resolving driving links for sg %s with %d opins\n",
+		 fpga_core->comment_name(),
+		 opins->population());
+	else
+	  printf("resolving driving links for sg %s with %d copins\n",
+		 fpga_core->comment_name(),
+		 opins->population());
       
       for (int opin_loop=0;opin_loop<opins->population();opin_loop++)
 	{
@@ -3315,10 +2409,10 @@ void ACSCGFPGATarget::HWalg_resolver(void)
 	  Connectivity* output_nodes=fpga_pins->query_connection(output_pin);
 
 	  if (DEBUG_RESOLVER)
-	    printf("pin %d has %d nodes\n",opin_loop,output_nodes->node_count);
+	    printf("pin %d has %d nodes\n",output_pin,output_nodes->node_count);
 	  for (int onode_loop=0;onode_loop<output_nodes->node_count;onode_loop++)
 	    {
-	      Pin* dest_pins;
+	      Pin* dest_pins=NULL;
 	      char* name=new char[MAX_STR];
 	      ACSCGFPGACore* dest_core=NULL;
 	      switch (output_nodes->query_pintype(onode_loop))
@@ -3337,8 +2431,17 @@ void ACSCGFPGATarget::HWalg_resolver(void)
 		  strcpy(name,"constant_signals");
 		  break;
 		case CTRL_NODE:
-		  dest_pins=fpga_elem->ctrl_signals;
-		  strcpy(name,"ctrl_signals");
+		  dest_core=HWfind_star(output_nodes->query_acsid(onode_loop));
+		  if (dest_core==NULL)
+		    {
+		      dest_pins=fpga_elem->ctrl_signals;
+		      strcpy(name,"ctrl_signals");
+		    }
+		  else
+		    {
+		      dest_pins=dest_core->pins;
+		      strcpy(name,dest_core->comment_name());
+		    }
 		  break;
 		default:
 		  dest_pins=NULL;
@@ -3355,8 +2458,7 @@ void ACSCGFPGATarget::HWalg_resolver(void)
 	      int data_signal=-1;
 	      if (output_nodes->query_pinsignal(onode_loop)==UNASSIGNED)
 		{
-		  if (onode_loop!=0) // Bind all additonal node signals to 
-		                     // the primary
+		  if (onode_loop!=0) // Bind all additonal node signals to the primary
 		    {
 		      data_signal=output_nodes->query_pinsignal(0);
 		      output_nodes->set_pinsignal(onode_loop,data_signal);
@@ -3366,15 +2468,27 @@ void ACSCGFPGATarget::HWalg_resolver(void)
 		      // Need to assign an intermediate signal name for these
 		      // Add a new data signal name
 		      char* tmp_name=new char[MAX_STR];
-		      Pin* local_dsignals=fpga_elem->data_signals;
-		      sprintf(tmp_name,"data_signal%d",
-			      local_dsignals->query_pincount());
-		      data_signal=local_dsignals->
-			add_pin(tmp_name,
-				fpga_pins->query_majorbit(output_pin),
-				fpga_pins->query_bitlen(output_pin),
-				STD_LOGIC,
-				INTERNAL_PIN);
+
+		      if (output_nodes->query_pintype(onode_loop)==DATA_NODE)
+			{
+			  Pin* local_dsignals=fpga_elem->data_signals;
+			  sprintf(tmp_name,"data_signal%d",local_dsignals->query_pincount());
+			  data_signal=local_dsignals->add_pin(tmp_name,
+							      fpga_pins->query_majorbit(output_pin),
+							      fpga_pins->query_bitlen(output_pin),
+							      STD_LOGIC,
+							      INTERNAL_PIN);
+			}
+		      else
+			{
+			  Pin* local_dsignals=fpga_elem->ctrl_signals;
+			  sprintf(tmp_name,"ctrl_signal%d",local_dsignals->query_pincount());
+			  data_signal=local_dsignals->add_pin(tmp_name,
+							      fpga_pins->query_majorbit(output_pin),
+							      fpga_pins->query_bitlen(output_pin),
+							      STD_LOGIC,
+							      INTERNAL_PIN);
+			}
 		      // Cleanup
 		      delete []tmp_name;
 		      
@@ -3384,83 +2498,111 @@ void ACSCGFPGATarget::HWalg_resolver(void)
 	      else
 		data_signal=output_nodes->query_pinsignal(onode_loop);
 	      
+	      // Notify the driven node of its data signal identifier
 	      input_nodes->set_pinsignal(input_node,data_signal);
 
 	      if (DEBUG_RESOLVER)
 		{
-		  printf("it is connected to star %s via input_node %d\n",
-			 name,
-			 input_node);
-		  printf("Assigning signal %d of type %s to this link\n",
-			 data_signal,
-			 name);
+		  printf("it is connected to star %s via input_node %d\n",name,input_node);
+		  printf("Assigning signal %d of type %s to this link\n",data_signal,name);
 		}
 	      delete []name;
 	      
 	    } // for (int onode_loop=0;onode_loop<output_nodes->node_count; ...
 	} // for (int opin_loop=0;opin_loop<opins->size();opin_loop++)
-    } // for (int loop=1;loop<=smart_generators->size();loop++)
+    } // for (int loop=0;loop<sg_list->size();loop++)
+}
 
-  ////////////////////////////////////////////////////////
-  // Now examine control signals and find a correspondance
-  ////////////////////////////////////////////////////////
+
+// Check for dangling internal control signals
+void ACSCGFPGATarget::HWresolve_ictrlsignals(CoreList* sg_list)
+{
+  int sg_count=sg_list->size();
   for (int loop=0;loop<sg_count;loop++)
     {
-      ACSCGFPGACore* fpga_core=(ACSCGFPGACore*) smart_generators->elem(loop);
+      ACSCGFPGACore* fpga_core=(ACSCGFPGACore*) sg_list->elem(loop);
       Fpga* fpga_elem=arch->get_fpga_handle(fpga_core->acs_device);
       Pin* fpga_pins=fpga_core->pins;
       if (DEBUG_RESOLVER)
 	printf("\nResolving control links for star %s\n",
 	       fpga_core->comment_name());
-      
-      ACSIntArray* cpins=fpga_pins->query_cnodes();
-      for (int cpin_loop=0;cpin_loop<cpins->population();cpin_loop++)
+
+      HWresolve_ctrlpins(fpga_elem,fpga_core,fpga_pins,fpga_pins->query_icnodes());
+    }
+}
+
+// Check for dangling internal control signals
+void ACSCGFPGATarget::HWresolve_ectrlsignals(void)
+{
+  for (int loop=0;loop<arch->fpga_count;loop++)
+    {
+      Fpga* fpga_elem=arch->get_fpga_handle(loop);
+      if (fpga_elem->usage_state==FPGA_USED)
 	{
-	  int control_pin=cpins->query(cpin_loop);
+	  Pin* cpins=fpga_elem->ext_signals;
+	  HWresolve_ctrlpins(fpga_elem,NULL,fpga_elem->ext_signals,cpins->query_icnodes());
+	  HWresolve_ctrlpins(fpga_elem,NULL,fpga_elem->ext_signals,cpins->query_ocnodes());
+	}
+    }
+}
+
+
+void ACSCGFPGATarget::HWresolve_ctrlpins(Fpga* fpga_elem, 
+					 ACSCGFPGACore* fpga_core,
+					 Pin* fpga_pins,
+					 ACSIntArray* cpins)
+{      
+  for (int cpin_loop=0;cpin_loop<cpins->population();cpin_loop++)
+    {
+      int control_pin=cpins->query(cpin_loop);
+      if (fpga_pins->query_pinassigned(control_pin)==UNASSIGNED)
+	{
+	  // Port was not assigned previously, need to resolve with externals
+	  if (DEBUG_RESOLVER)
+	    printf("Driving control pin %s, of type %d, priority %d is unresolved\n",
+		   fpga_pins->query_pinname(control_pin),
+		   fpga_pins->query_pintype(control_pin),
+		   fpga_pins->query_pinpriority(control_pin));
+	  
+	  // Trap for external signals
+	  if (DEBUG_RESOLVER)
+	    printf("Comparing to external signals\n");
+	  HWsig_compare(fpga_pins->query_pintype(control_pin),
+			fpga_pins,
+			control_pin,
+			fpga_elem->ext_signals,
+			EXT_NODE,
+			NULL);
+
+	  // Still unresolved?
+	  // Then check against internal control signals
 	  if (fpga_pins->query_pinassigned(control_pin)==UNASSIGNED)
 	    {
-	      // Port was not assigned previously, need to resolve with 
-	      // externals
 	      if (DEBUG_RESOLVER)
-		printf("Pin %s, of type %d is unresolved\n",
-		       fpga_pins->query_pinname(control_pin),
-		       fpga_pins->query_pintype(control_pin));
+		printf("Comparing to internal signals\n");
 	      
-	      // Trap for external signals
-	      if (DEBUG_RESOLVER)
-		printf("Comparing to external signals\n");
-	      HWsig_compare(fpga_pins->query_pintype(control_pin),
-			    fpga_pins,
-			    control_pin,
-			    fpga_elem->ext_signals,
-			    EXT_NODE,
-			    NULL);
-
-	      // Still unresolved?
-	      // Then check against internal control signals
-	      if (fpga_pins->query_pinassigned(control_pin)==UNASSIGNED)
+	      // Only local control signals are allowed!
+	      CoreList* fpga_children=fpga_elem->get_childcores_handle();
+	      
+	      for (int iloop=0;iloop<fpga_children->size();iloop++)
 		{
-		  if (DEBUG_RESOLVER)
-		    printf("Comparing to internal signals\n");
+		  ACSCGFPGACore* candidate_core=(ACSCGFPGACore*) fpga_children->elem(iloop);
 		  
-		  // FIX: Only local control signals are allowed!
-		  SequentialList* fpga_children=
-		    fpga_elem->get_childcores_handle();
-
-		  for (int iloop=1;iloop<=fpga_children->size();iloop++)
+		  // No inbreeding:)
+		  int acs_id=UNASSIGNED;
+		  if (fpga_core!=NULL)
+		    acs_id=fpga_core->acs_id;
+		  if (acs_id != candidate_core->acs_id)
 		    {
-		      ACSCGFPGACore* candidate_core=
-			(ACSCGFPGACore*) fpga_children->elem(iloop);
+		      if (DEBUG_RESOLVER)
+			printf("Checking sg %s\n",candidate_core->comment_name());
 		      
-		      // No inbreeding:)
-		      if (fpga_core->acs_id != candidate_core->acs_id)
+		      // Check smart generators 
+		      // fpga_elem->ctrl_signals or candidate_core????
+		      if (fpga_core!=NULL)
 			{
 			  if (DEBUG_RESOLVER)
-			    printf("Checking sg %s\n",
-				   candidate_core->comment_name());
-
-			  // Check smart generators 
-			  // fpga_elem->ctrl_signals or candidate_core????
+			    printf("checking for binds to control signals\n");
 			  HWsig_compare(fpga_pins->query_pintype(control_pin),
 					fpga_pins,
 					control_pin,
@@ -3468,33 +2610,48 @@ void ACSCGFPGATarget::HWalg_resolver(void)
 					CTRL_NODE,
 					fpga_elem->ctrl_signals);
 			}
+		      else
+			{
+			  if (DEBUG_RESOLVER)
+			    printf("checking for binds to external signals\n");
+			  HWsig_compare_ext(fpga_pins->query_pintype(control_pin),
+					    fpga_pins,
+					    control_pin,
+					    candidate_core->pins,
+					    EXT_NODE,
+					    NULL);
+			}
 		    }
 		}
+	    }
 	      
-	      // Still unresolved?
-	      // Then check against constant signals
-	      if (fpga_pins->query_pinassigned(control_pin)==UNASSIGNED)
-		{
-		  if (DEBUG_RESOLVER)
-		    printf("Comparing to constant signals\n");
-		  
-		  HWsig_compare(fpga_pins->query_pintype(control_pin),
-				fpga_pins,
-				control_pin,
-				fpga_elem->constant_signals,
-				CONSTANT_NODE,
-				NULL);
-		}
-	    } // if (fpga_pins->query_pinassigned(control_pin)==UNASSIGNED)
-	  else
+	  // Still unresolved?
+	  // Then check against constant signals using the pin's default pin assertion
+	  if (fpga_pins->query_pinassigned(control_pin)==UNASSIGNED)
 	    {
 	      if (DEBUG_RESOLVER)
-		printf("Pin %s, of type %d is already resolved\n",
-		       fpga_pins->query_pinname(control_pin),
-		       fpga_pins->query_pintype(control_pin));
+		printf("Comparing to constant signals\n");
+	      
+	      HWsig_compare(fpga_pins->query_pinassertion(control_pin),
+			    fpga_pins,
+			    control_pin,
+			    fpga_elem->constant_signals,
+			    CONSTANT_NODE,
+			    NULL);
 	    }
-	} // for (int cpin_loop=0;cpin_loop<cpins->size();cpin_loop++)
-    } //   for (int loop=1;loop<=smart_generators->size();loop++)
+	} // if (fpga_pins->query_pinassigned(control_pin)==UNASSIGNED)
+	else
+	  {
+	    if (DEBUG_RESOLVER)
+	      {
+		Connectivity* control_nodes=fpga_pins->query_connection(control_pin);
+		printf("Pin %s, of type %d is already resolved, pin_signal=%d\n",
+		       fpga_pins->query_pinname(control_pin),
+		       fpga_pins->query_pintype(control_pin),
+		       control_nodes->query_pinsignal(0));
+	      }
+	  }
+    } // for (int cpin_loop=0;cpin_loop<cpins->size();cpin_loop++)
 }
   
 void ACSCGFPGATarget::HWsig_compare(const int refpin_type,
@@ -3509,18 +2666,28 @@ void ACSCGFPGATarget::HWsig_compare(const int refpin_type,
       Connectivity* candidate_connects=candidate_pins->query_connection(pin_loop);
 
       int match=0;
+      int assertion_type=0;
       switch (rule_type)
 	{
 	case EXT_NODE:
-	  match=HWresolver_extrules(refpin_type,
-				    candidate_pins->query_pintype(pin_loop));
+	  match=HWresolver_extrules_driving(refpin_type,
+					    candidate_pins->query_pintype(pin_loop));
 	  break;
 	case CTRL_NODE:
 	  match=HWresolver_ctrlrules(refpin_type,
-				     candidate_pins->query_pintype(pin_loop));
+				     ref_pins->query_pinpriority(pin_no),
+				     candidate_pins->query_pintype(pin_loop),
+				     candidate_pins->query_pinpriority(pin_loop));
 	  break;
 	case CONSTANT_NODE:
-	  match=HWresolver_construles(refpin_type,
+	  assertion_type=ref_pins->query_pinassertion(pin_no);
+
+	  if (DEBUG_RESOLVER)
+	    printf("constant rules, comparing pin %s, assertion_type %d with %s\n",
+		   ref_pins->query_pinname(pin_no),
+		   ref_pins->query_pinassertion(pin_no),
+		   candidate_pins->query_pinname(pin_loop));
+	  match=HWresolver_construles(assertion_type,
 				      candidate_pins->query_pintype(pin_loop));
 	  break;
 	default:
@@ -3547,7 +2714,6 @@ void ACSCGFPGATarget::HWsig_compare(const int refpin_type,
 
 	    // Connect control signal on referring smart generator
 	    // ASSUMPTION: acs ids are uninteresting at this point
-	    // FIX?: Should smart generator connectivity be emplaced?
 	    if (DEBUG_CONNECT)
 	      printf("Assigning ref_pins\n");
 	    ref_pins->connect_pin(pin_no,
@@ -3564,6 +2730,14 @@ void ACSCGFPGATarget::HWsig_compare(const int refpin_type,
 				   ctrl_pin,
 				   rule_type,
 				   ctrl_pin);
+
+	    if (DEBUG_CONNECT)
+	      printf("Assigning candidate_pins\n");
+	    candidate_pins->connect_pin(pin_loop,
+					UNASSIGNED,
+					ctrl_pin,
+					rule_type,
+					ctrl_pin);
 	    
 	    if (DEBUG_RESOLVER)
 	      printf("it binds to signal %s (%d)\n",
@@ -3667,17 +2841,90 @@ void ACSCGFPGATarget::HWsig_compare(const int refpin_type,
 	  }
       else
 	if (DEBUG_RESOLVER)
-	  printf(" does not match, srctype=%d, cand_type=%d\n",
+	  printf(" does not match, srctype=%d, cand_type=%d, cand_priority=%d\n",
 		 refpin_type,
-		 candidate_pins->query_pintype(pin_loop));
+		 candidate_pins->query_pintype(pin_loop),
+		 candidate_pins->query_pinpriority(pin_loop));
+    }
+}
+void ACSCGFPGATarget::HWsig_compare_ext(const int refpin_type,
+					Pin* ref_pins,
+					const int pin_no,
+					Pin* candidate_pins,
+					const int rule_type,
+					Pin* ctrl_pins)
+{
+  int src_priority=ref_pins->query_pinpriority(pin_no);
+
+  for (int pin_loop=0;pin_loop<candidate_pins->query_pincount();pin_loop++)
+    {
+      int match=HWresolver_extrules_driven(refpin_type,
+					   candidate_pins->query_pintype(pin_loop));
+
+      // Check priorities (if applicable)
+      if (match)
+	{
+	  if (DEBUG_RESOLVER)
+	    printf("Match found for pin %s, its match is %s\n",
+		   ref_pins->query_pinname(pin_no),candidate_pins->query_pinname(pin_loop));
+
+	  if (src_priority != UNASSIGNED)
+	    {
+	      if (DEBUG_RESOLVER)
+		printf("there is a source priority of %d\n",src_priority);
+	      if (candidate_pins->query_pinpriority(pin_loop) == src_priority)
+		{
+		  // ASSUMPTION: acs ids are uninteresting at this point
+		  candidate_pins->connect_pin(pin_loop,
+					      UNASSIGNED,
+					      pin_no,
+					      EXT_NODE,
+					      pin_no);
+		  if (DEBUG_RESOLVER)
+		    printf("match found srctype=%d, binds to ext signal #%d\n",
+			   refpin_type,pin_no);
+		  return;
+		}
+	      else
+		if (DEBUG_RESOLVER)
+		  printf("match found srctype=%d, to ext signal #%d, but priorities mismatch (%d vs. %d)\n",
+			 refpin_type,pin_no,
+			 src_priority,candidate_pins->query_pinpriority(pin_loop));
+	    }
+	  else
+	    {
+	      if (DEBUG_RESOLVER)
+		printf("there is no source priority, making connection\n");
+
+	      // ASSUMPTION: acs ids are uninteresting at this point
+	      candidate_pins->connect_pin(pin_loop,
+					  UNASSIGNED,
+					  pin_no,
+					  EXT_NODE,
+					  pin_no);
+	      if (DEBUG_RESOLVER)
+		printf("match found srctype=%d, binds to ext signal #%d\n",
+		       refpin_type,pin_no);
+	      return;
+	    }
+	}
+      else
+	if (DEBUG_RESOLVER)
+	  printf(" does not match, srctype=%d, cand_type=%d, cand_priority=%d\n",
+		 refpin_type,
+		 candidate_pins->query_pintype(pin_loop),
+		 candidate_pins->query_pinpriority(pin_loop));
     }
 }
 	    
 
 
+////////////////////////////////////////////////////////////////////////////////
 // These rules define if a control signal should be associated given a reference
 // pin on a smart generator (sg_sig) and a likely candidate signal (pool_sig)
-int ACSCGFPGATarget::HWresolver_extrules(int sg_sig,int pool_sig)
+// These rules are only to be used for driving external signals!
+////////////////////////////////////////////////////////////////////////////////
+int ACSCGFPGATarget::HWresolver_extrules_driving(int sg_sig,int pool_sig)
 {
   switch (sg_sig)
     {
@@ -3685,10 +2932,7 @@ int ACSCGFPGATarget::HWresolver_extrules(int sg_sig,int pool_sig)
     case INPUT_PIN_CLK:
       switch (pool_sig)
 	{
-	  // Latch onto an external pin first
 	case INPUT_PIN_CLK:
-	  return(1);
-	case OUTPUT_PIN_CLK:
 	  return(1);
 	default:
 	  return(0);
@@ -3696,18 +2940,7 @@ int ACSCGFPGATarget::HWresolver_extrules(int sg_sig,int pool_sig)
     case INPUT_PIN_RESET:
       switch (pool_sig)
 	{
-	  // Latch onto an external pin first
 	case INPUT_PIN_RESET:
-	  return(1);
-	case OUTPUT_PIN_RESET:
-	  return(1);
-	default:
-	  return(0);
-	}
-    case INPUT_PIN_CE:
-      switch (pool_sig)
-	{
-	case OUTPUT_PIN_CE:
 	  return(1);
 	default:
 	  return(0);
@@ -3736,24 +2969,24 @@ int ACSCGFPGATarget::HWresolver_extrules(int sg_sig,int pool_sig)
 	default:
 	  return(0);
 	}
-    case OUTPUT_PIN_CLK:
+    }
+
+  // Return unhappy condition
+  return(0);
+}
+////////////////////////////////////////////////////////////////////////////////
+// These rules define if a control signal should be associated given a reference
+// pin on a smart generator (sg_sig) and a likely candidate signal (pool_sig)
+// These rules are only to be used for driven external signals!
+////////////////////////////////////////////////////////////////////////////////
+int ACSCGFPGATarget::HWresolver_extrules_driven(int sg_sig,int pool_sig)
+{
+  switch (sg_sig)
+    {
+    case OUTPUT_PIN_INTERCONNECT_ENABLE:
       switch (pool_sig)
 	{
-	  // Latch onto an external pin first
-	case INPUT_PIN_CLK:
-	  return(1);
-	case OUTPUT_PIN_CLK:
-	  return(1);
-	default:
-	  return(0);
-	}
-    case OUTPUT_PIN_RESET:
-      switch (pool_sig)
-	{
-	  // Latch onto an external pin first
-	case INPUT_PIN_RESET:
-	  return(1);
-	case OUTPUT_PIN_RESET:
+	case OUTPUT_PIN_INTERCONNECT_ENABLE:
 	  return(1);
 	default:
 	  return(0);
@@ -3774,38 +3007,6 @@ int ACSCGFPGATarget::HWresolver_extrules(int sg_sig,int pool_sig)
 	default:
 	  return(0);
 	}
-    case OUTPUT_PIN_RAMG:
-      switch (pool_sig)
-	{
-	case OUTPUT_PIN_RAMG:
-	  return(1);
-	default:
-	  return(0);
-	}
-    case OUTPUT_PIN_RAMW:
-      switch (pool_sig)
-	{
-	case OUTPUT_PIN_RAMW:
-	  return(1);
-	default:
-	  return(0);
-	}
-    case OUTPUT_PIN_RAME:
-      switch (pool_sig)
-	{
-	case OUTPUT_PIN_RAME:
-	  return(1);
-	default:
-	  return(0);
-	}
-    case OUTPUT_PIN_INTERCONNECT_ENABLE:
-      switch (pool_sig)
-	{
-	case OUTPUT_PIN_INTERCONNECT_ENABLE:
-	  return(1);
-	default:
-	  return(0);
-	}
     }
 
   // Return unhappy condition
@@ -3813,86 +3014,37 @@ int ACSCGFPGATarget::HWresolver_extrules(int sg_sig,int pool_sig)
 }
 // These rules define if a control signal should be associated given a reference
 // pin on a smart generator (sg_sig) and a likely candidate signal (pool_sig)
-int ACSCGFPGATarget::HWresolver_ctrlrules(int sg_sig,int pool_sig)
+int ACSCGFPGATarget::HWresolver_ctrlrules(const int sg_sig,
+					  const int sg_priority,
+					  const int pool_sig,
+					  const int pool_priority)
 {
+  // Trivial test for mismatch on priorities would preclude any match
+  if (sg_priority!=pool_priority)
+    return(0);
+
   switch (sg_sig)
     {
-    case INPUT_PIN_SRC_WC:
+    case INPUT_PIN_RAMG:
       switch (pool_sig)
 	{
-	case OUTPUT_PIN_SRC_WC:
+	case INPUT_PIN_RAMG:
 	  return(1);
 	default:
 	  return(0);
 	}
-    case OUTPUT_PIN_SRC_WC:
+    case INPUT_PIN_RAMW:
       switch (pool_sig)
 	{
-	case INPUT_PIN_SRC_WC:
+	case INPUT_PIN_RAMW:
 	  return(1);
 	default:
 	  return(0);
 	}
-    case INPUT_PIN_SRC_MUX:
+    case INPUT_PIN_RAME:
       switch (pool_sig)
 	{
-	case OUTPUT_PIN_SRC_MUX:
-	  return(1);
-	default:
-	  return(0);
-	}
-    case OUTPUT_PIN_SRC_MUX:
-      switch (pool_sig)
-	{
-	case INPUT_PIN_SRC_MUX:
-	  return(1);
-	default:
-	  return(0);
-	}
-    case INPUT_PIN_SRC_CE:
-      switch (pool_sig)
-	{
-	case OUTPUT_PIN_SRC_CE:
-	  return(1);
-	default:
-	  return(0);
-	}
-    case OUTPUT_PIN_SRC_CE:
-      switch (pool_sig)
-	{
-	case INPUT_PIN_SRC_CE:
-	  return(1);
-	default:
-	  return(0);
-	}
-    case INPUT_PIN_MEMORYMUX:
-      switch (pool_sig)
-	{
-	case OUTPUT_PIN_MEMORYMUX:
-	  return(1);
-	default:
-	  return(0);
-	}
-    case OUTPUT_PIN_MEMORYMUX:
-      switch (pool_sig)
-	{
-	case INPUT_PIN_MEMORYMUX:
-	  return(1);
-	default:
-	  return(0);
-	}
-    case INPUT_PIN_ADDRMUX:
-      switch (pool_sig)
-	{
-	case OUTPUT_PIN_ADDRMUX:
-	  return(1);
-	default:
-	  return(0);
-	}
-    case OUTPUT_PIN_ADDRMUX:
-      switch (pool_sig)
-	{
-	case INPUT_PIN_ADDRMUX:
+	case INPUT_PIN_RAME:
 	  return(1);
 	default:
 	  return(0);
@@ -3905,42 +3057,10 @@ int ACSCGFPGATarget::HWresolver_ctrlrules(int sg_sig,int pool_sig)
 	default:
 	  return(0);
 	}
-    case OUTPUT_PIN_ADDRCE:
-      switch (pool_sig)
-	{
-	case INPUT_PIN_ADDRCE:
-	  return(1);
-	default:
-	  return(0);
-	}
     case INPUT_PIN_ADDRCLR:
       switch (pool_sig)
 	{
 	case OUTPUT_PIN_ADDRCLR:
-	  return(1);
-	default:
-	  return(0);
-	}
-    case OUTPUT_PIN_ADDRCLR:
-      switch (pool_sig)
-	{
-	case INPUT_PIN_ADDRCLR:
-	  return(1);
-	default:
-	  return(0);
-	}
-    case INPUT_PIN_DMUX:
-      switch (pool_sig)
-	{
-	case OUTPUT_PIN_DMUX:
-	  return(1);
-	default:
-	  return(0);
-	}
-    case OUTPUT_PIN_DMUX:
-      switch (pool_sig)
-	{
-	case INPUT_PIN_DMUX:
 	  return(1);
 	default:
 	  return(0);
@@ -3953,106 +3073,10 @@ int ACSCGFPGATarget::HWresolver_ctrlrules(int sg_sig,int pool_sig)
 	default:
 	  return(0);
 	}
-    case OUTPUT_PIN_PHASE:
+    case INPUT_PIN_PREPHASE:
       switch (pool_sig)
 	{
-	case INPUT_PIN_PHASE:
-	  return(1);
-	default:
-	  return(0);
-	}
-    case INPUT_PIN_SNK_WC:
-      switch (pool_sig)
-	{
-	case OUTPUT_PIN_SNK_WC:
-	  return(1);
-	default:
-	  return(0);
-	}
-    case OUTPUT_PIN_SNK_WC:
-      switch (pool_sig)
-	{
-	case INPUT_PIN_SNK_WC:
-	  return(1);
-	default:
-	  return(0);
-	}
-    case INPUT_PIN_SNK_CE:
-      switch (pool_sig)
-	{
-	case OUTPUT_PIN_SNK_CE:
-	  return(1);
-	default:
-	  return(0);
-	}
-    case OUTPUT_PIN_SNK_CE:
-      switch (pool_sig)
-	{
-	case INPUT_PIN_SNK_CE:
-	  return(1);
-	default:
-	  return(0);
-	}
-    case INPUT_PIN_SNK_MUX:
-      switch (pool_sig)
-	{
-	case OUTPUT_PIN_SNK_MUX:
-	  return(1);
-	default:
-	  return(0);
-	}
-    case OUTPUT_PIN_SNK_MUX:
-      switch (pool_sig)
-	{
-	case INPUT_PIN_SNK_MUX:
-	  return(1);
-	default:
-	  return(0);
-	}
-    case INPUT_PIN_DELAY_WC:
-      switch (pool_sig)
-	{
-	case OUTPUT_PIN_DELAY_WC:
-	  return(1);
-	default:
-	  return(0);
-	}
-    case OUTPUT_PIN_DELAY_WC:
-      switch (pool_sig)
-	{
-	case INPUT_PIN_DELAY_WC:
-	  return(1);
-	default:
-	  return(0);
-	}
-    case INPUT_PIN_DELAY_CE:
-      switch (pool_sig)
-	{
-	case OUTPUT_PIN_DELAY_CE:
-	  return(1);
-	default:
-	  return(0);
-	}
-    case OUTPUT_PIN_DELAY_CE:
-      switch (pool_sig)
-	{
-	case INPUT_PIN_DELAY_CE:
-	  return(1);
-	default:
-	  return(0);
-	}
-    case INPUT_PIN_DELAY_MUX:
-      switch (pool_sig)
-	{
-	case OUTPUT_PIN_DELAY_MUX:
-	  return(1);
-	default:
-	  return(0);
-	}
-    case OUTPUT_PIN_DELAY_MUX:
-      switch (pool_sig)
-	{
-	case INPUT_PIN_DELAY_MUX:
+	case OUTPUT_PIN_PREPHASE:
 	  return(1);
 	default:
 	  return(0);
@@ -4065,10 +3089,34 @@ int ACSCGFPGATarget::HWresolver_ctrlrules(int sg_sig,int pool_sig)
 	default:
 	  return(0);
 	}
-    case OUTPUT_PIN_START:
+    case INPUT_PIN_PHASE_START:
       switch (pool_sig)
 	{
-	case INPUT_PIN_START:
+	case OUTPUT_PIN_PHASE_START:
+	  return(1);
+	default:
+	  return(0);
+	}
+    case INPUT_PIN_STOP:
+      switch (pool_sig)
+	{
+	case OUTPUT_PIN_STOP:
+	  return(1);
+	default:
+	  return(0);
+	}
+    case INPUT_PIN_SEQRESET:
+      switch (pool_sig)
+	{
+	case OUTPUT_PIN_SEQRESET:
+	  return(1);
+	default:
+	  return(0);
+	}
+    case INPUT_PIN_LUTINDEX:
+      switch (pool_sig)
+	{
+	case OUTPUT_PIN_LUTINDEX:
 	  return(1);
 	default:
 	  return(0);
@@ -4082,17 +3130,7 @@ int ACSCGFPGATarget::HWresolver_construles(int sg_sig,int pool_sig)
 {
   switch (sg_sig)
     {
-      // Clocking pins
-    case INPUT_PIN_RESET:
-      switch (pool_sig)
-	{
-	  // Latch onto an external pin first
-	case OUTPUT_PIN_VCC:
-	  return(1);
-	default:
-	  return(0);
-	}
-    case INPUT_PIN_CE:
+    case AH:
       switch (pool_sig)
 	{
 	case OUTPUT_PIN_VCC:
@@ -4100,23 +3138,7 @@ int ACSCGFPGATarget::HWresolver_construles(int sg_sig,int pool_sig)
 	default:
 	  return(0);
 	}
-    case INPUT_PIN_CLR:
-      switch (pool_sig)
-	{
-	case OUTPUT_PIN_GND:
-	  return(1);
-	default:
-	  return(0);
-	}
-    case INPUT_PIN_AH:
-      switch (pool_sig)
-	{
-	case OUTPUT_PIN_VCC:
-	  return(1);
-	default:
-	  return(0);
-	}
-    case INPUT_PIN_AL:
+    case AL:
       switch (pool_sig)
 	{
 	case OUTPUT_PIN_GND:
@@ -4130,60 +3152,296 @@ int ACSCGFPGATarget::HWresolver_construles(int sg_sig,int pool_sig)
   return(0);
 }
 
-
-///////////////////////////////////////////////////////////////////
-// This method refines BWs, sizing estimates, and names utilized by
-// each star.
-///////////////////////////////////////////////////////////////////
-void ACSCGFPGATarget::HWalg_setup()
+void ACSCGFPGATarget::HWmacro(CoreList* sg_list)
 {
-  // Invoke setup methods for each star.  This should refine BWs and sizing
-  // estimates, as determined by the star's smart generator
-  int status=0;
+  int all_queried=0;
+  while (!all_queried)
+    {
+      all_queried=1;
+      int sg=0;
+      while ((sg<sg_list->size()) && (all_queried==1))
+	{
+	  ACSCGFPGACore* fpga_core=(ACSCGFPGACore*) sg_list->elem(sg);
+	  if (DEBUG_WHITESTAR)
+	    printf("macro_queried for %s is %d\n",fpga_core->comment_name(),
+		   fpga_core->macro_queried);
+	  
+	  // If this is a white star, then let's build it's interior
+	  if (!fpga_core->macro_queried)
+	    {
+	      all_queried=0;
+	      fpga_core->macro_queried=1;
 
-  // Loop over all the smart generators
-  int sg_count=smart_generators->size();
+	      if (DEBUG_WHITESTAR)
+		printf("evaluating core %d %s for macros\n",
+		       sg,
+		       fpga_core->comment_name());
+	      if (fpga_core->macro_query()==WHITE_STAR)
+		{
+		  // White star investigator
+		  HWwhite_star(fpga_core,sg_list);
+		}
+	      else if (fpga_core->macro_query()==DARK_STAR)
+		{
+		  // Dark star investigator
+		  HWdark_star(fpga_core,sg_list);
+		}
+	    }
+	  sg++;
+	}
+    }
+}
+
+//////////////////////////////////////////////////////////////////////////////////
+// This method should be invoked after any cores have been added to the algorithm.
+// White stars and dark stars are examined, core requirements are determined and
+// BWs are refined.
+//////////////////////////////////////////////////////////////////////////////////
+void ACSCGFPGATarget::HWalg_setup(CoreList* sg_list)
+{
+  // Identify any libraries needed
+  HWlib_needs(sg_list);
+
+  // Ensure that precision requirements are met before proceeding to scheduling
+  HWset_bw(sg_list);
+}
+
+
+void ACSCGFPGATarget::HWwhite_star(ACSCGFPGACore* fpga_core, CoreList* sg_list)
+{
+  fpga_core->macro_queried=1;
+
+  CoreList* white_stars=fpga_core->macro_build(&free_acsid,&free_netlist_id);
+  Connection_List* white_cons=fpga_core->macro_connections();
+  
+  if (white_stars!=NULL)
+    {
+      if (DEBUG_WHITESTAR)
+	printf("sg %s is a white star with %d children\n",fpga_core->comment_name(),
+	       white_stars->size());
+      for (int white_loop=0;white_loop<white_stars->size();white_loop++)
+	{
+	  ACSCGFPGACore* white_star=(ACSCGFPGACore*) white_stars->elem(white_loop);
+	  sg_list->append(white_star);
+	  if (DEBUG_WHITESTAR)
+	    printf("\tchild:%s\n",white_star->comment_name());
+	}
+      
+      // FIX: If parent core has a resource assignment then follow up the assignment
+      //      with the children
+      
+      // Propagate device ownership of parent to children as well as origin
+      Fpga* target_fpga=arch->get_fpga_handle(fpga_core->acs_device);
+      for (int white_loop=0;white_loop<white_stars->size();white_loop++)
+	{
+	  ACSCGFPGACore* white_star=(ACSCGFPGACore*) white_stars->elem(white_loop);
+	  white_star->acs_device=target_fpga->retrieve_acsdevice();
+	  white_star->target_type=target_fpga->part_type;
+	  white_star->acs_origin=fpga_core->acs_origin;
+	  target_fpga->set_child(white_star);
+	}
+
+      // Remap the io of the parent white star to the child cores
+      Pin* fpga_pins=fpga_core->pins;
+      for (int con_loop=0;con_loop<white_cons->count();con_loop++)
+	{
+	  int ext_src_pin, src_id, src_pin;
+	  int ext_dest_pin, dest_id, dest_pin;
+	  white_cons->get(con_loop,
+			  ext_src_pin,src_id,src_pin,
+			  ext_dest_pin,dest_id,dest_pin);
+	  if (DEBUG_WHITESTAR)
+	    printf("con(%d)=%d, %d, %d and %d, %d, %d\n",
+		   con_loop,
+		   ext_src_pin,src_id,src_pin,
+		   ext_dest_pin,dest_id,dest_pin);
+
+	  // Reconnect source pin
+	  if (src_id==UNASSIGNED)
+	    {
+	      // Recast the pin type, priority and defaults
+	      // FIX:Probably a buncha others to:(
+	      if (dest_pin!=UNASSIGNED)
+		{
+		  int pin_type=fpga_pins->query_pintype(ext_dest_pin);
+		  int pin_priority=fpga_pins->query_pinpriority(ext_dest_pin);
+		  int pin_assertion=fpga_pins->query_pinassertion(ext_dest_pin);
+		  int pin_netlistid=fpga_pins->query_netlistid(ext_dest_pin);
+		  if (DEBUG_WHITESTAR)
+		    printf("white_star:dest_pin netlist id=%d\n",pin_netlistid);
+
+		  ACSCGFPGACore* dest_core=HWfind_star(dest_id);
+		  Pin* dest_pins=dest_core->pins;
+		  dest_core->replace_pintype(dest_pin,pin_type);
+		  dest_core->set_pinpriority(dest_pin,pin_priority);
+		  dest_pins->set_pinassertion(dest_pin,pin_assertion);
+		  dest_pins->set_netlistid(dest_pin,pin_netlistid);
+		}
+
+	      // First remove the old
+	      Connectivity* inodes=fpga_pins->query_connection(ext_dest_pin);
+	      if (inodes != NULL)
+		if (inodes->node_count != 0)
+		  {
+		    src_id=inodes->query_acsid(0);
+		    src_pin=inodes->query_pinid(0);
+		    if (src_id != UNASSIGNED)
+		      {
+			ACSCGFPGACore* src_core=HWfind_star(src_id);
+			Pin* src_pins=src_core->pins;
+			src_pins->disconnect_pin_to(fpga_core->acs_id,src_pin);
+
+			// Now connect the new
+			ACSCGFPGACore* dest_core=HWfind_star(dest_id);
+
+			// Ensure that, indeed, there was a connection to begin with
+			// FIX:Are both connection constructs needed?
+			if (dest_core != NULL)
+			  if (dest_pin == UNASSIGNED)
+			    construct->connect_sg(src_core,
+						  src_pin,
+						  UNASSIGNED,
+						  dest_core,
+						  UNASSIGNED,
+						  UNASSIGNED,
+						  DATA_NODE);
+			  else
+			    {
+			      if (DEBUG_WHITESTAR)
+				printf("white_star:connection %s pin %d to %s pin %d\n",
+				       src_core->comment_name(),src_pin,
+				       dest_core->comment_name(),dest_pin);
+			      construct->connect_sg(src_core,
+						    src_pin,
+						    UNASSIGNED,
+						    dest_core,
+						    dest_pin,
+						    UNASSIGNED,
+						    DATA_NODE);
+			    }
+		      }
+		  }
+	      
+	    }
+	  else // dest_id==UNASSIGNED
+	    {
+	      ACSCGFPGACore* src_core=HWfind_star(src_id);
+
+	      // Recast the pin type and priority
+	      if (src_pin!=UNASSIGNED)
+		{
+		  int pin_type=fpga_pins->query_pintype(ext_src_pin);
+		  int pin_priority=fpga_pins->query_pinpriority(ext_src_pin);
+		  int pin_netlistid=fpga_pins->query_netlistid(ext_src_pin);
+		  if (DEBUG_WHITESTAR)
+		    printf("white_star:src_pin netlist id=%d\n",pin_netlistid);
+
+		  src_core->replace_pintype(src_pin,pin_type);
+		  src_core->set_pinpriority(src_pin,pin_priority);
+		  Pin* src_pins=src_core->pins;
+		  src_pins->set_netlistid(src_pin,pin_netlistid);
+		}
+
+	      // First remove the old
+	      Connectivity* onodes=fpga_pins->query_connection(ext_src_pin);
+	      if (onodes != NULL)
+		for (int onode_loop=0;onode_loop<onodes->node_count;onode_loop++)
+		  {
+		    dest_id=onodes->query_acsid(onode_loop);
+		    if (dest_id != UNASSIGNED)
+		      {
+			// Now connect the new
+			ACSCGFPGACore* dest_core=HWfind_star(dest_id);
+
+			// Ensure that, indeed, there was a connection to begin with
+			if (dest_core != NULL)
+			  {
+			    Pin* dest_pins=dest_core->pins;
+			    dest_pin=onodes->query_pinid(onode_loop);
+			    dest_pins->disconnect_pin_from(fpga_core->acs_id,
+							    dest_pin);
+			    
+			    if (src_pin == UNASSIGNED)
+			      construct->connect_sg(src_core,dest_core);
+			    else
+			      construct->connect_sg(src_core,
+						    src_pin,
+						    UNASSIGNED,
+						    dest_core,
+						    dest_pin,
+						    UNASSIGNED,
+						    DATA_NODE);
+			  }
+			else
+			  {
+			    Fpga* fpga_elem=arch->get_fpga_handle(src_core->acs_device);
+			    Pin* dest_pins=fpga_elem->ext_signals;
+			    dest_pin=onodes->query_pinid(onode_loop);
+			    dest_pins->disconnect_pin(src_pin,onode_loop);
+			    
+			    construct->connect_sg(src_core,
+						  src_pin,
+						  onode_loop,
+						  dest_pin,
+						  dest_pins,
+						  dest_pin,
+						  UNASSIGNED,
+						  dest_pin,
+						  EXT_NODE);
+			  }
+		      }
+		  }
+
+	    }
+	}
+      // White core no longer needed
+      fpga_pins->disconnect_allpins();
+      sg_list->remove(fpga_core->acs_id);
+      Fpga* white_fpga=arch->get_fpga_handle(fpga_core->acs_device);
+      CoreList* fpga_list=white_fpga->get_childcores_handle();
+      fpga_list->remove(fpga_core->acs_id);
+      
+      // Cleanup
+      delete white_stars;
+      delete white_cons;
+    }
+  else
+    fprintf(stderr,"Sg %s claims to be a WHITE_STAR yet returns no children...ingoring\n",
+	    fpga_core->comment_name());
+}
+
+void ACSCGFPGATarget::HWdark_star(ACSCGFPGACore* fpga_core, CoreList* sg_list)
+{
+  fpga_core->macro_queried=1;
+  
+//  CoreList* dark_stars=fpga_core->macro_build(&free_acsid);
+  
+  // Trap the dark star list for any white stars
+  // any child white stars would be a violation
+}
+
+// FIX: Should the libraries also be parameterized since the origin is as well?
+void ACSCGFPGATarget::HWlib_needs(CoreList* sg_list)
+{
+  int sg_count=sg_list->size();
   for (int loop=0;loop<sg_count;loop++)
     {
-      ACSCGFPGACore* fpga_core=(ACSCGFPGACore*) smart_generators->elem(loop);
+      ACSCGFPGACore* fpga_core=(ACSCGFPGACore*) sg_list->elem(loop);
       StringArray* star_libraries=fpga_core->libs;
       StringArray* star_includes=fpga_core->incs;
-      if (!fpga_core->queried)
+      if (!fpga_core->lib_queried)
 	{
 	  // Bundle up library and include dependencies
-	  if (status)
-	    {
-	      for (int lib_loop=0;
-		   lib_loop<star_libraries->population();
-		   lib_loop++)
-		all_libraries->add(star_libraries->get(lib_loop));
-	      for (int inc_loop=0;
-		   inc_loop<star_includes->population();
-		   inc_loop++)
-		all_includes->add(star_includes->get(inc_loop));
-	    }
-
-	  fpga_core->sg_resources(UNLOCKED);
-	  int row_size=0;
-	  int col_size=0;
-	  status=(fpga_core->resources)->get_occupancy(row_size, col_size);
-	  if (DEBUG_ALGSETUP)
-	    if (status)
-	      {
-		printf("Invoked acs_size on star %s: (%d,%d)\n",
-		       fpga_core->comment_name(),
-		       row_size,col_size);
-	      }
-
+	  for (int lib_loop=0;lib_loop<star_libraries->population();lib_loop++)
+	    all_libraries->add(star_libraries->get(lib_loop));
+	  for (int inc_loop=0;inc_loop<star_includes->population();inc_loop++)
+	    all_includes->add(star_includes->get(inc_loop));
+	  fpga_core->lib_queried=1;
 	}
       else
 	if (DEBUG_ALGSETUP)
-	  printf("sg_setup already invoked for sg %s\n",
-		 fpga_core->comment_name());
+	  printf("sg_setup already invoked for sg %s\n",fpga_core->comment_name());
     }
-
-  // Ensure that precision requirements are met before proceeding to scheduling
-  HWset_bw(smart_generators);
 }
 
 
@@ -4194,7 +3452,7 @@ void ACSCGFPGATarget::HWalg_create(const int fpga_no)
 
   // Only generate information for the smart generator at-hand
   Fpga* fpga_elem=arch->get_fpga_handle(fpga_no);
-  SequentialList* sg_subset=fpga_elem->get_childcores_handle();
+  CoreList* sg_subset=fpga_elem->get_childcores_handle();
 
   // Results
   ostrstream expression;
@@ -4215,9 +3473,14 @@ void ACSCGFPGATarget::HWalg_create(const int fpga_no)
   
   // Add libraries/includes
   open_file << lang->gen_libraries(all_libraries,all_includes);
-  open_file << lang->gen_entity(fpga_elem->retrieve_rootfilename(),
+//  open_file << lang->gen_entity(fpga_elem->retrieve_rootfilename(),
+//				fpga_elem->ext_signals);
+  char* entity_name=new char[MAX_STR];
+  sprintf(entity_name,"fpga%d_entity",fpga_no);
+  open_file << lang->gen_entity(entity_name,
 				fpga_elem->ext_signals);
-  open_file << lang->gen_architecture(fpga_elem->retrieve_rootfilename(),
+//  open_file << lang->gen_architecture(fpga_elem->retrieve_rootfilename(),
+  open_file << lang->gen_architecture(entity_name,
 				      sg_subset,
 				      STRUCTURAL,
 				      fpga_elem->ext_signals,
@@ -4230,7 +3493,7 @@ void ACSCGFPGATarget::HWalg_create(const int fpga_no)
     open_file.close();
 
   // Task each smart generator to produce "code" for this fpga
-  for (int loop=1;loop<=sg_subset->size();loop++)
+  for (int loop=0;loop<sg_subset->size();loop++)
     {
       ACSCGFPGACore* fpga_core=(ACSCGFPGACore*) sg_subset->elem(loop);
       if (DEBUG_ALGCREATE)
@@ -4243,9 +3506,10 @@ void ACSCGFPGATarget::HWalg_create(const int fpga_no)
   // Cleanup
   delete lang;
   delete []root_filename;
+  delete []entity_name;
 }
 
-  // FIX: A bit hard coded to the Annapolis Wildforce...
+// FIX: A bit hard coded to the Annapolis Wildforce...
 void ACSCGFPGATarget::HWalg_integrate(const int fpga_no)
 {
   if (DEBUG_ALGINTEGRATE)
@@ -4380,7 +3644,7 @@ void ACSCGFPGATarget::HWalg_integrate(const int fpga_no)
 // FIX: Still some dependencies based on the Annoplis VHDL
 //      VHDL hierarchy:(
 //////////////////////////////////////////////////////////////////
-void ACSCGFPGATarget::HWexport_simulation(SequentialList* smart_generators)
+void ACSCGFPGATarget::HWexport_simulation(CoreList* smart_generators)
 {
   char* root_filename=new char[MAX_STR];
   strcpy(root_filename,galaxy()->name());
@@ -4419,7 +3683,7 @@ void ACSCGFPGATarget::HWexport_simulation(SequentialList* smart_generators)
 	       << "---------------------------------------------------------"
 	       << endl;
 
-  compile_file << "set WF4_BASE " << hw_path->retrieve() << endl;
+  compile_file << "set ARCH_BASE " << hw_path->retrieve() << endl;
   compile_file << "set MODEL_TECH " << sim_path->retrieve() << endl;
   compile_file << "set COREGEN " << core_path->retrieve() << endl;
   compile_file << "set PROJECT_BASE " << compile_directory->retrieve() << endl;
@@ -4436,134 +3700,142 @@ void ACSCGFPGATarget::HWexport_simulation(SequentialList* smart_generators)
 	       << "vmap std $MODEL_TECH/std" << endl
 	       << "vmap ieee $MODEL_TECH/ieee" << endl
 	       << "vmap xul $COREGEN/xul" << endl
-	       << "vmap unisim $COREGEN/unisim" << endl
-	       << "vmap WF4 $WF4_BASE/lib/mti" << endl
+//	       << "vmap unisim $COREGEN/unisim" << endl
+	       << "vmap ARCH $ARCH_BASE/lib/mti" << endl
 	       << "vmap work ./mti_" << root_filename << endl
 	       << "vmap system ./mti_" << root_filename << endl
-	       << "vmap cpe0 ./mti_" << root_filename << "/mti_fpga0" << endl;
+//	       << "vmap cpe0 ./mti_" << root_filename << "/mti_fpga0" 
+	       << endl;
 
   
   char* compile=new char[MAX_STR];
   char* compile_fpga0=new char[MAX_STR];
-  char* board_path=new char[MAX_STR];
   strcpy(compile,"vcom -93 -explicit -work work ");
   strcpy(compile_fpga0,"vcom -93 -explicit -work cpe0 ");  
-  strcpy(board_path,"$WF4_BASE/src/comp/");
 
   compile_file << "--" << endl
-	       << "--  Compile the VHDL files" << endl
-	       << "--" << endl
-	       << compile << "$WF4_BASE/src/pkg/wf4comp.vhd" << endl
-	       << compile << board_path << "cpe0ife.vhd" << endl
-	       << compile << board_path << "cpe0ifa.vhd" << endl
-	       << compile << board_path << "pe1ife.vhd" << endl
-	       << compile << board_path << "pe1ifa.vhd" << endl
-	       << compile << board_path << "pe2ife.vhd" << endl
-	       << compile << board_path << "pe2ifa.vhd" << endl
-	       << compile << board_path << "pe3ife.vhd" << endl
-	       << compile << board_path << "pe3ifa.vhd" << endl
-	       << compile << board_path << "pe4ife.vhd" << endl
-	       << compile << board_path << "pe4ifa.vhd" << endl
-	       << compile << board_path << "cpe0lce.vhd" << endl
-	       << endl;
+	       << "--  Top level architecture files" << endl
+	       << "--" << endl;
+  StringArray* support_files=arch->archsupport_files;
+  StringArray* support_path=arch->archsupport_path;
+  for (int loop=0;loop<support_files->population();loop++)
+    compile_file << compile
+		 << hw_path->retrieve_extended()
+		 << support_path->get(loop) 
+		 << support_files->get(loop) << endl;
 
-  compile_file << "--" << endl
-	       << "-- ACS Controller Interface (standard)" << endl
-	       << "--" << endl
-	       << compile_fpga0 << "cpe0_counter/FPGA0_UniSeq.vhd" << endl
-	       << compile_fpga0 << "cpe0_counter/Stat_Start.vhd" << endl
-	       << compile_fpga0 << "cpe0_counter/Stat_Step.vhd" << endl
-	       << compile_fpga0 << "cpe0_counter/Stat_Switch.vhd" << endl
-	       << compile_fpga0 << "cpe0_counter/Stat_Switch_Buffer.vhd" << endl
-	       << compile_fpga0 << "cpe0_counter/add21.vhd" << endl
-	       << compile_fpga0 << "cpe0_counter/Stat_SBuffer.vhd" << endl
-	       << compile_fpga0 << "cpe0_counter/add31.vhd" << endl
-	       << compile_fpga0 << "cpe0_counter/Stat_Buffer.vhd" << endl
-	       << compile_fpga0 << "cpe0_counter/reg2.vhd" << endl
-	       << compile_fpga0 << "cpe0_counter/Completion_Switch.vhd" << endl
-	       << compile_fpga0 << "cpe0_counter/fpga0.vhd" << endl
-	       << compile << "./cpe0lca_counter.vhd" << endl << endl;
-
-  compile_file << compile << board_path << "cpe0e.vhd" << endl
-	       << compile << board_path << "cpe0a.vhd" << endl;
-
-  /////////////////////////////////////////////////////////////////////////
-  // Fix:  Pe0 not encorporated due to its utilization as a host controller
-  /////////////////////////////////////////////////////////////////////////
-  for (int fpga_no=1;fpga_no<arch->fpga_count;fpga_no++)
+  for (int fpga_no=0;fpga_no<arch->fpga_count;fpga_no++)
     {
       compile_file << "--" << endl;
       Fpga* fpga_elem=arch->get_fpga_handle(fpga_no);
-      if (fpga_elem->usage_state==FPGA_USED)
-	compile_file << "-- ACS-generated Algorithm for FPGA " << fpga_no << endl
-		     << "--" << endl;
-      else
-	compile_file << "-- No ACS-generated Algorithm for FPGA " << fpga_no << endl
-		     << "--" << endl;
-
-      compile_file << compile << board_path << "pe" << fpga_no << "lce.vhd" << endl;
-      
-      if (fpga_elem->usage_state==FPGA_USED)
+      StringArray* preamble_path=fpga_elem->preamble_path;
+      StringArray* preamble_files=fpga_elem->preamble_files;
+      ACSIntArray* preamble_origin=fpga_elem->preamble_origin;
+      StringArray* postamble_files=fpga_elem->postamble_files;
+      StringArray* postamble_path=fpga_elem->postamble_path;
+      ACSIntArray* postamble_origin=fpga_elem->postamble_origin;
+	  
+      if ((fpga_elem->usage_state==FPGA_USED) || (fpga_elem->usage_state==FPGA_RESERVED))
 	{
+	  compile_file << "-- ACS-generated Algorithm for FPGA " << fpga_no << endl
+		       << "--" << endl;
 
-	  SequentialList* sg_subset=fpga_elem->get_childcores_handle();
-	  for (int sg_loop=1;sg_loop<=sg_subset->size();sg_loop++)
+	  // Start the preamble
+	  for (int loop=0;loop<preamble_files->population();loop++)
 	    {
-	      ACSCGFPGACore* fpga_core=(ACSCGFPGACore*) sg_subset->elem(sg_loop);
-	      if (fpga_core->acs_type==BOTH)
-		{
-//		  printf("NOVOID:Simulating %s\n",fpga_core->comment_name());
-		  // CAUTION: May not need to examine for children, since the FPGA is aware of
-		  //          all it's children?
-		  for (int child_loop=0;
-		       child_loop < (fpga_core->child_filenames)->population();
-		       child_loop++)
-		    compile_file << compile  
-				 << (fpga_core->child_filenames)->get(child_loop) 
-				 << endl;
-		  
-		  // FIX: Extension should be obtained from the core
-		  // FIX: Prohibit reliance on black_box status requiring lower
-		  //      case name! This is only to satisfy coregen->xnf naming
-		  //      conventions
-		  if ((fpga_core->unique_component) &&  (fpga_core->declaration_flag))
-		    compile_file << compile << fpga_core->unique_name.str() << ".vhd" << endl;
-		  else
-		    if (fpga_core->black_box==0)
-		      compile_file << compile  
-				   << fpga_core->name() << ".vhd" << endl;
-		    else
-		      compile_file << compile 
-				   << fpga_core->lc_name() << ".vhd" << endl;
-		}
-//	      else
-//		printf("VOID:Not simulating core %s\n",fpga_core->comment_name());
+	      if (DEBUG_ALGSUPPORT)
+		printf("%s has origin %d\n",preamble_files->get(loop),
+		       preamble_origin->query(loop));
+	      compile_file << compile;
+	      if (preamble_origin->query(loop)==0)
+		compile_file << hw_path->retrieve_extended() << preamble_path->get(loop);
+	      compile_file << preamble_files->get(loop) << endl;
 	    }
-	  compile_file << compile << fpga_elem->retrieve_rootfilename() << ".vhd" << endl;
-	  compile_file << compile << "pe" << fpga_no << "lca.vhd" << endl;
+
+	  // Ellicit algorithm files
+	  if (fpga_elem->usage_state==FPGA_USED)
+	    {
+	      CoreList* sg_subset=fpga_elem->get_childcores_handle();
+	      for (int sg_loop=0;sg_loop<sg_subset->size();sg_loop++)
+		{
+		  ACSCGFPGACore* fpga_core=(ACSCGFPGACore*) sg_subset->elem(sg_loop);
+		  if (fpga_core->acs_type==BOTH)
+		    {
+		      // CAUTION: May not need to examine for children, since the FPGA is
+		      //           aware of all it's children?
+		      for (int child_loop=0;
+			   child_loop < (fpga_core->child_filenames)->population();
+			   child_loop++)
+			compile_file << compile  
+				     << (fpga_core->child_filenames)->get(child_loop) 
+				     << endl;
+		      
+		      // FIX: Extension should be obtained from the core
+		      // FIX: Prohibit reliance on black_box status requiring lower
+		      //      case name! This is only to satisfy coregen->xnf naming
+		      //      conventions
+		      if ((fpga_core->unique_component) &&  (fpga_core->declaration_flag))
+			compile_file << compile << fpga_core->unique_name.str() << ".vhd" 
+				     << endl;
+		      else
+			if (fpga_core->black_box==0)
+			  compile_file << compile  
+				       << fpga_core->name() << ".vhd" << endl;
+			else
+			  compile_file << compile 
+				       << fpga_core->lc_name() << ".vhd" << endl;
+		    }
+		}
+	      compile_file << compile << fpga_elem->retrieve_rootfilename() << ".vhd" << endl;
+	    }
+
+	  // Wrap-up with the postamble
+	  for (int loop=0;loop<postamble_files->population();loop++)
+	    {
+	      if (DEBUG_ALGSUPPORT)
+		printf("%s has origin %d\n",postamble_files->get(loop),
+		       postamble_origin->query(loop));
+	      compile_file << compile;
+	      if (postamble_origin->query(loop)==0)
+		compile_file << hw_path->retrieve_extended() << postamble_path->get(loop);
+	      compile_file << postamble_files->get(loop) << endl;
+	    }
 	}
       else
-	compile_file << compile << board_path << "pe" << fpga_no << "lca.vhd" << endl;
-      
-      compile_file << compile << board_path << "pe" << fpga_no << "e.vhd" << endl;
+	{
+	compile_file << "-- Externally generated Algorithm for FPGA " << fpga_no << endl
+		     << "--" << endl;
+	  for (int loop=0;loop<preamble_path->population();loop++)
+	    compile_file << compile 
+			 << hw_path->retrieve_extended()
+			 << preamble_path->get(loop) 
+			 << preamble_files->get(loop) << endl;
 
-      compile_file << "-- Should be obtained from standard directory and copied to your design area" 
-		   << endl;
-      compile_file << compile << "pe" << fpga_no << "a.vhd" << endl << endl;
+	  for (int loop=0;loop<postamble_path->population();loop++)
+	    compile_file << compile
+			 << hw_path->retrieve_extended()
+			 << postamble_path->get(loop) 
+			 << postamble_files->get(loop) << endl;
+      }
+
     }
 
   // Misc Wildforce files
-  compile_file << compile << "$WF4_BASE/template/vhdl/dsp_card.vhd" << endl
-	       << compile << "$WF4_BASE/template/vhdl/mez_card.vhd" << endl
-	       << compile << "$WF4_BASE/template/vhdl/ext_io.vhd" << endl
-	       << compile << "$WF4_BASE/template/vhdl/simd.vhd" << endl;
-  compile_file << compile << board_path << "wf4board.vhd" << endl
-	       << compile << board_path << "wf4host.vhd" << endl;
-  
-  // Particular Annapolis configuration
-  compile_file << compile << "./wfhstcfg.vhd" << endl;
+  compile_file << "--" << endl
+	       << "--  Additional architecture files" << endl
+	       << "--" << endl;
 
-
+  StringArray* misc_path=arch->misc_path;
+  StringArray* misc_files=arch->misc_files;
+  ACSIntArray* misc_origin=arch->misc_origin;
+  for (int loop=0;loop<misc_files->population();loop++)
+    {
+      compile_file << compile;
+      if (misc_origin->query(loop)==0)
+	compile_file << hw_path->retrieve_extended() << misc_path->get(loop);
+      compile_file << misc_files->get(loop) << endl;
+    }
+      
   ////////////////////
   simulate_file << "-----------------------------------------------------------------" 
 		<< endl 
@@ -4599,7 +3871,7 @@ void ACSCGFPGATarget::HWexport_simulation(SequentialList* smart_generators)
   compile_file.close();
   simulate_file.close();
   delete []compile;
-  delete []board_path;
+  delete []compile_fpga0;
   delete []root_filename;
 }
 
@@ -4612,7 +3884,7 @@ void ACSCGFPGATarget::HWexport_simulation(SequentialList* smart_generators)
 void ACSCGFPGATarget::HWexport_synthesis(Fpga* fpga_elem,
 					 const int fpga_no)
 {
-  SequentialList* sg_subset=fpga_elem->get_childcores_handle();
+  CoreList* sg_subset=fpga_elem->get_childcores_handle();
 
   char* root_filename=new char[MAX_STR];
   strcpy(root_filename,galaxy()->name());
@@ -4631,24 +3903,45 @@ void ACSCGFPGATarget::HWexport_synthesis(Fpga* fpga_elem,
 	       << "set_option -speed_grade -" << fpga_elem->speed_grade << endl 
 	       << endl;
 
-
   char* command=new char[MAX_STR];
   char* board_path=new char[MAX_STR];
   strcpy(command,"add_file -vhdl -lib ");
-  compile_file << "# Precanned design files" << endl
-	       << command << "WF4 \"" << hw_path->retrieve() << "/src/pkg/ams4ksyn.vhd\"" << endl
-	       << command << "WF4 \"" << hw_path->retrieve() << "/src/pkg/wf4pack.vhd\"" << endl
-	       << command << "work \"" << hw_path->retrieve() << "/src/pkg/wf4comp.vhd\"" << endl
-	       << command << "work \"" << hw_path->retrieve() 
-	       << "/src/comp/pe" << fpga_no << "ife.vhd\"" << endl
-	       << command << "work \"" << hw_path->retrieve() 
-	       << "/src/comp/pe" << fpga_no << "ifa.vhd\"" << endl
-	       << command << "work \"" << hw_path->retrieve() 
-	       << "/src/comp/pe" << fpga_no << "lce.vhd\"" << endl
-	       << endl;
+  compile_file << "# Architecture files" << endl;
+  StringArray* archlib=arch->archsynthesis_libname;
+  StringArray* archfiles=arch->archsynthesis_files;
+  StringArray* archpath=arch->archsynthesis_path;
+  for (int loop=0;loop<archlib->population();loop++)
+    compile_file << command << archlib->get(loop) << " \"" << hw_path->retrieve_extended() 
+		 << archpath->get(loop) << archfiles->get(loop) << "\"" << endl;
 
-  compile_file << "# ACS-generated files" << endl;
-  for (int loop=1;loop<=sg_subset->size();loop++)
+  StringArray* support_files=arch->archsupport_files;
+  StringArray* support_path=arch->archsupport_path;
+  for (int loop=0;loop<support_files->population();loop++)
+    compile_file << command << "work \""
+		 << hw_path->retrieve_extended() << support_path->get(loop) 
+		 << support_files->get(loop) << "\"" << endl;
+
+  StringArray* synthesis_libname=fpga_elem->synthesis_libname;
+  StringArray* synthesis_path=fpga_elem->synthesis_path;
+  StringArray* synthesis_files=fpga_elem->synthesis_files;
+  for (int loop=0;loop<synthesis_libname->population();loop++)
+    compile_file << command << synthesis_libname->get(loop) << " \""
+		 << hw_path->retrieve_extended() << synthesis_path->get(loop)
+		 << synthesis_files->get(loop) << "\"" << endl;
+
+  StringArray* preamble_path=fpga_elem->preamble_path;
+  StringArray* preamble_files=fpga_elem->preamble_files;
+  ACSIntArray* preamble_origin=fpga_elem->preamble_origin;
+  for (int loop=0;loop<preamble_files->population();loop++)
+    {
+      compile_file << command << "work \"";
+      if (preamble_origin->query(loop)==0)
+	compile_file << hw_path->retrieve_extended() << preamble_path->get(loop);
+      compile_file << preamble_files->get(loop) << "\"" << endl;
+    }
+
+  compile_file << endl << "# ACS-generated files" << endl;
+  for (int loop=0;loop<sg_subset->size();loop++)
     {
       ACSCGFPGACore* fpga_core=(ACSCGFPGACore*) sg_subset->elem(loop);
       if ((fpga_core->acs_type==BOTH) && (fpga_core->black_box==0))
@@ -4657,17 +3950,22 @@ void ACSCGFPGATarget::HWexport_synthesis(Fpga* fpga_elem,
 	else
 	  compile_file << command << "work \"" << fpga_core->name() << ".vhd\"" << endl;
     }
-  compile_file << command << "work \"pe" << fpga_no << "lca.vhd\"" << endl
-	       << command << "work \"" << fpga_elem->retrieve_rootfilename() << ".vhd\"" << endl
-	       << endl;
+  compile_file << command << "work \"" << fpga_elem->retrieve_rootfilename() << ".vhd\"" << endl;
 
-  compile_file << "# Remainder of precanned design files" << endl
-	       << command << "work \"" << hw_path->retrieve() << "/src/comp/pe" 
-	       << fpga_no << "e.vhd\"" << endl
-	       << command << "work \"pe" << fpga_no << "a.vhd\"" << endl
-	       << endl;
 
-  compile_file << "# Compilation/Mapping options" << endl
+  StringArray* postamble_files=fpga_elem->postamble_files;
+  StringArray* postamble_path=fpga_elem->postamble_path;
+  ACSIntArray* postamble_origin=fpga_elem->postamble_origin;
+  for (int loop=0;loop<postamble_files->population();loop++)
+    {
+      compile_file << command << "work \"";
+      if (postamble_origin->query(loop)==0)
+	compile_file << hw_path->retrieve_extended() << postamble_path->get(loop);
+      compile_file << postamble_files->get(loop) << "\"" << endl;
+    }
+  
+
+  compile_file << endl << "# Compilation/Mapping options" << endl
 	       << "set_option -frequency 20.000" << endl
 	       << "set_option -fanout_limit 100" << endl
 	       << "set_option -maxfan_hard false" << endl
@@ -4691,7 +3989,7 @@ void ACSCGFPGATarget::HWexport_synthesis(Fpga* fpga_elem,
 
 // Export relevant information to the Ptolemy star that will invoke
 // the FPGAs
-void ACSCGFPGATarget::HWexport_controlinfo(SequentialList* smart_generators)
+void ACSCGFPGATarget::HWexport_controlinfo(CoreList* smart_generators)
 {
   // Allocate and assign standard filenames
   char* pe_filename=new char[MAX_STR];
@@ -4721,44 +4019,50 @@ void ACSCGFPGATarget::HWexport_controlinfo(SequentialList* smart_generators)
   int last_fpga=-1;
   for (int mem_loop=0;mem_loop<arch->mem_count;mem_loop++)
     {
-      MemPort* mem_port=arch->get_memory_handle(mem_loop);
-      if (mem_port->portuse==MEMORY_USED)
-	total++;
+      Port* mem_port=arch->get_memory_handle(mem_loop);
+      if (mem_port->port_active())
+	{
+	  Port_Timing* port_timing=mem_port->port_timing;
+	  total+=port_timing->count;
+	}
       
+      // FIX: worst_latency is a factor related to an Fpga not memory,
+      //      for now last_fpga will be the mem_loop (works for Annapolis model)
       if (mem_port->total_latency > worst_latency)
 	{
 	  worst_latency=mem_port->total_latency;
-	  last_fpga=mem_port->controller_fpga;
+	  last_fpga=mem_loop;
 	}
     }
 
-  meminfo_file << vector_length << endl;
   meminfo_file << last_fpga-1 << endl;
   meminfo_file << total << endl;
   for (int mem_loop=0;mem_loop<arch->mem_count;mem_loop++)
     {
-      MemPort* mem_port=arch->get_memory_handle(mem_loop);
-      if (mem_port->portuse==MEMORY_USED)
+      Port* mem_port=arch->get_memory_handle(mem_loop);
+      if (mem_port->port_active())
 	{
 	  Port_Timing* port_timing=mem_port->port_timing;
 	  for (int loop=0;loop<port_timing->count;loop++)
 	    if (port_timing->get_memtype(loop)==SOURCE)
 	      {
-		SequentialList* src_list=mem_port->source_stars;
+		CoreList* src_list=mem_port->source_cores;
 		ACSCGFPGACore* fpga_core=(ACSCGFPGACore*) src_list->elem(port_timing->get_memid(loop));
 		meminfo_file << mem_loop << " " 
 			     << 1 << " "
 			     << fpga_core->address_start << " " 
+			     << port_timing->get_vectorlength(loop) << " "
 			     << port_timing->get_majorbit(loop) << " "
 			     << port_timing->get_bitlen(loop) << endl;
 	      }
-	    else
+	    else if (port_timing->get_memtype(loop)==SINK)
 	      {
-		SequentialList* snk_list=mem_port->sink_stars;
+		CoreList* snk_list=mem_port->sink_cores;
 		ACSCGFPGACore* fpga_core=(ACSCGFPGACore*) snk_list->elem(port_timing->get_memid(loop));
 		meminfo_file << mem_loop << " "
 			     << 0 << " "
 			     << fpga_core->address_start << " " 
+			     << port_timing->get_vectorlength(loop) << " "
 			     << port_timing->get_majorbit(loop) << " "
 			     << port_timing->get_bitlen(loop) << endl;
 	      }

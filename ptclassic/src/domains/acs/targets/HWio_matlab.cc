@@ -1,7 +1,7 @@
 static const char file_id[] = "HWio_matlab.cc";
 
 /**********************************************************************
-Copyright (c) 1999-%Q% Sanders, a Lockheed Martin Company
+Copyright (c) 1999 Sanders, a Lockheed Martin Company
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -27,7 +27,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
  Programmers:  Ken Smith
  Date of creation: 10/25/99
- Version: $Id$
+ Version: @(#)HWio_matlab.cc      1.0     10/25/99
 ***********************************************************************/
 #include "HWio_matlab.h"
 
@@ -45,17 +45,19 @@ int ACSCGFPGATarget::HWnetlist_export(void)
   char* root_filename=new char[MAX_STR];
   strcpy(root_filename,galaxy()->name());
 
-  ostrstream of_filename,  types_filename, pnames_filename;
+  ostrstream of_filename, types_filename, pnames_filename, del_filename;
   of_filename << design_directory->retrieve_extended() << root_filename 
 	      << "_netlist.txt" << ends;
   types_filename << design_directory->retrieve_extended() << root_filename 
 		 << "_types.txt" << ends;
   pnames_filename << design_directory->retrieve_extended() << root_filename
 		  << "_pnames.txt" << ends;
+  del_filename << design_directory->retrieve_extended() << "delchain_cost.m" << ends;
 
   ofstream net_file(of_filename.str());
   ofstream type_file(types_filename.str());
   ofstream pname_file(pnames_filename.str());
+  ofstream del_file(del_filename.str());
 
   // Export execution script
   HWexport_wgscript();
@@ -70,12 +72,26 @@ int ACSCGFPGATarget::HWnetlist_export(void)
     {
       ACSCGFPGACore* fpga_core=(ACSCGFPGACore*) smart_generators->elem(sloop);
       
+      // Generate type entry for each smart generator
+      type_file << fpga_core->name() << endl;
+      
       // Trap for Sources and Sinks
-      if ((fpga_core->acs_type==SOURCE) || (fpga_core->acs_type==SINK))
+      if (fpga_core->acs_type==SOURCE)
 	{
-	  // Generate type entry for each smart generator
-	  type_file << fpga_core->name() << endl;
-
+	  // Generate netlist entry for this smart generator
+	  net_file << HWexport_net(fpga_core,0,fpga_core->acs_type);
+	}
+    }
+  for (int sloop=0;sloop<total_sgs;sloop++)
+    {
+      ACSCGFPGACore* fpga_core=(ACSCGFPGACore*) smart_generators->elem(sloop);
+      
+      // Generate type entry for each smart generator
+      type_file << fpga_core->name() << endl;
+      
+      // Trap for Sources and Sinks
+      if (fpga_core->acs_type==SINK)
+	{
 	  // Generate netlist entry for this smart generator
 	  net_file << HWexport_net(fpga_core,0,fpga_core->acs_type);
 	}
@@ -90,12 +106,12 @@ int ACSCGFPGATarget::HWnetlist_export(void)
       
       // Tell each smart generator to create matlab scripts
       // dont need to do this for Sources or Sinks
-      if (fpga_core->acs_type==BOTH)
+      if ((fpga_core->acs_type==BOTH) || (fpga_core->acs_type==SOURCE_LUT))
 	{
 	  fpga_core->sg_costfunc(id);
 	  
 	  // Generate type entry for each smart generator
-	  type_file << fpga_core->name() << endl;
+//	  type_file << fpga_core->name() << endl;
       
 	  // Generate netlist entry for this smart generator
 	  net_file << HWexport_net(fpga_core,
@@ -111,10 +127,14 @@ int ACSCGFPGATarget::HWnetlist_export(void)
   // Generate pin names for all (unique) netlist nodes
   pname_file << HWexport_pnames();
 
+  // Generate a matlab-cost file for adding delay chains
+  del_file << HWexport_delaychain();
+
   // Wrapup
   net_file.close();
   type_file.close();
   pname_file.close();
+  del_file.close();
 
   // Return happy condition
   return(1);
@@ -214,27 +234,31 @@ char* ACSCGFPGATarget::HWexport_net(ACSCGFPGACore* fpga_core,
   for (int loop=0;loop<node_count;loop++)
     {
       int pin_no=(int) the_nodes->query(loop);
-      expression << sg_id << " "
-		 << fpga_core->acs_id << " ";
-      if (fpga_core->acs_type==BOTH)
-	expression << fpga_core->acs_device << " " << "-1 ";
-      else
-	expression << "-1 " << fpga_core->acs_device << " ";
-
-      // Standard netlist information
-      expression << device_lock << " "
-		 << node_type << " " 
-		 << localp->query_netlistid(pin_no) << " " 
-		 << "0 " 
-		 << localp->query_majorbit(pin_no) << " "
-		 << localp->query_bitlen(pin_no) << " "
-		 << localp->query_wordlock(pin_no) << " "
-		 << vector_length << " ";
-
-      // Stubs for scheduling information (ignored by wordgui)
-      // FIX: One zero gets dropped out for some stupid reason, an extra has been
-      //      added to pad this thing:(
-      expression << "0 0 0" << endl;
+      if (localp->query_pinassigned(pin_no)!=UNASSIGNED)
+	{
+	  expression << sg_id << " "
+		     << fpga_core->acs_id << " ";
+	  if ((fpga_core->acs_type==BOTH) || (fpga_core->acs_type==SOURCE_LUT))
+	    expression << fpga_core->acs_device << " " << "-1 ";
+	  else
+	    expression << "-1 " << fpga_core->acs_device << " ";
+	  
+	  // Standard netlist information
+	  expression << device_lock << " "
+		     << node_type << " " 
+		     << localp->query_netlistid(pin_no) << " " 
+		     << "0 " 
+		     << localp->query_majorbit(pin_no) << " "
+		     << localp->query_bitlen(pin_no) << " "
+		     << localp->query_wordlock(pin_no) << " "
+		     << localp->query_wordcount(pin_no) << " ";
+//		 << vector_length << " ";
+	  
+	  // Stubs for scheduling information (ignored by wordgui)
+	  // FIX: One zero gets dropped out for some stupid reason, an extra has been
+	  //      added to pad this thing:(
+	  expression << "0 0 0" << endl;
+	}
     }
 
   expression << ends;
@@ -275,6 +299,55 @@ char* ACSCGFPGATarget::HWexport_pnames()
 	}
     }
 
+  expression << ends;
+
+  // Cleanup
+  
+  // Return happy condition
+  return(expression.str());
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+// This function will generate a matlab cost file relating to the cost of adding
+// delays to an algorithm
+// FIX: Should request information from the Arch instance for more info on costs
+//      rather than this hard-coded for XC4000
+////////////////////////////////////////////////////////////////////////////////
+char* ACSCGFPGATarget::HWexport_delaychain(void)
+{
+  ostrstream expression;
+
+  // Function preamble
+  expression << "function [cost,sd,so]=delchain_cost(outsizes,delamts,numforms)" << endl
+	     << "% Delay chain cost for xc4000" << endl
+	     << "% sd = incremental delays" << endl
+	     << "% so = incremental width" << endl;
+
+  // Meaty bits
+  expression << "len=size(delamts,2);" << endl
+	     << "if (numforms(1)==0)" << endl
+	     << "\t% parallel fixed" << endl
+	     << "\t[sd,inds]=sort(delamts); % sorted" << endl
+	     << "\tfor k=1:len" << endl
+	     << "\t\tso(:,k)=outsizes(inds(:,k),k); % sorted outsizes" << endl
+	     << "\tend" << endl << endl
+	     << "\t% reverse cumulative max" << endl
+	     << "\tfor k=size(so,1)-1:-1:1" << endl
+	     << "\t\tso(k,:)=max(so(k+1,:),so(k,:));" << endl
+	     << "\tend" << endl << endl
+	     << "\tsd=[sd(1,:);diff(sd)]; %ds has amt of dels, so has bit width" << endl
+	     << "\tbd1=sd.*so/2; %clb's req'd building discretely" << endl
+	     << "\tt=find(sd==0);" << endl
+	     << "\tsd(t)=1;" << endl
+	     << "\tbd2=so.*ceil(sd/16)/2+ceil(log2(sd))/2;" << endl
+	     << "\tbd2(t)=0; % the neg inf problem" << endl
+	     << "\tcost=sum(min(bd1,bd2)); % total clbs" << endl
+	     << "else" << endl
+	     << "\tdisp('****Error: delchain_cost****');" << endl
+	     << "end" << endl
+	     << "return;" << endl;
+  
   expression << ends;
 
   // Cleanup
@@ -328,15 +401,13 @@ int ACSCGFPGATarget::HWpause_for_wordgui(void)
 // Read in the resultant netlist from the wordlength analysis tool.  Prohibit
 // updates if no new netlist was generated
 /////////////////////////////////////////////////////////////////////////////
-void ACSCGFPGATarget::HWrevise(void)
+void ACSCGFPGATarget::HWrevise(CoreList* sg_list)
 {
   if (HWnetlist_import())
     {
-/*
-      HWrevise_fixed();
-      HWrevise_partition();
-      HWrevise_pipes();
-      */
+      HWrevise_const(sg_list);
+      HWrevise_fixed(sg_list);
+      HWrevise_pipes(sg_list);
     }
   else
     printf("WARNING:No netlist generated by wordgui, bit widths not revised\n");
@@ -442,65 +513,136 @@ int ACSCGFPGATarget::HWnetlist_import(void)
       step_times->add(step_time);
       end_times->add(end_time);
     }
-
-  // Update the smart generators
   int total_nets=star_ids->population();
 
+  // Update the smart generators
+  int prev_node=-1;
+  int prev_acsid=-1;
+  int pin_index=1;
   for (int net_loop=0;net_loop<total_nets;net_loop++)
     {
       ACSCGFPGACore* fpga_core=HWfind_star(acs_ids->query(net_loop));
-
       if (DEBUG_REVISE)
 	printf("Examining netrow %d, for star %s\n",
 	       net_loop,fpga_core->comment_name());
 
       // Reset core parameters
+      int read_skew=0;
+      int write_skew=0;
       if (fpga_core->acs_type==BOTH)
 	fpga_core->acs_device=fpga_nos->query(net_loop);
       else
-	fpga_core->acs_device=ram_nos->query(net_loop);
+	{
+	  // FIX:Mapping of fpga and RAM bad mojo!
+	  int ram_no=-1;
+	  if (fpga_core->acs_type==SOURCE_LUT)
+	    ram_no=fpga_nos->query(net_loop);
+	  else
+	    ram_no=ram_nos->query(net_loop);
+	  fpga_core->acs_device=ram_no;
+	  Port* mem_port=arch->get_memory_handle(ram_no);
+	  read_skew=mem_port->read_skew;
+	  write_skew=mem_port->write_skew;
+	}
 	  
       // Reset pin parameters
-      Pin* fpga_pin=fpga_core->pins;
+      Pin* fpga_pins=fpga_core->pins;
       int node=node_nums->query(net_loop);
-      int pin_no=fpga_pin->pin_withnetlist(node);
+
+//      int pin_count=fpga_pins->pins_withnetlist(node);
+      // If multiple inputs with the same node, bitwidths may be different, need to trap
+      // for dissimilar precisions on the same node!
+      if ((prev_node==node) && (prev_acsid==acs_ids->query(net_loop)))
+	pin_index++;
+      else
+	{
+	  prev_node=node;
+	  prev_acsid=acs_ids->query(net_loop);
+	  pin_index=1;
+	}
+
+      int pin_no=fpga_pins->pin_withnetlist(node,pin_index);
       if (DEBUG_REVISE)
 	printf("Node #%d corresponds to sg's %s pin #%d\n",
 	       node,fpga_core->comment_name(),pin_no);
-
-      // Reset scheduling info
-      // FIX:If memories, first trap for, but do skews need to be
-      //     accounted for here?
-      if (fpga_pin->pin_classtype(pin_no)==OUTPUT_PIN)
-	{
-	  int strt_time=start_times->query(net_loop);
-	  if (DEBUG_REVISE)
-	    printf("Output node, activation time set for %d\n",strt_time);
-//	  fpga_core->acs_dataact=strt_time;
-	}
-
+      
       // Update precision if necessary
-      int old_mbit=fpga_pin->query_majorbit(pin_no);
-      int old_blen=fpga_pin->query_bitlen(pin_no);
+      int old_mbit=fpga_pins->query_majorbit(pin_no);
+      int old_blen=fpga_pins->query_bitlen(pin_no);
       int new_mbit=major_bits->query(net_loop);
       int new_blen=bitlens->query(net_loop);
       if ((old_mbit != new_mbit) || (old_blen != new_blen))
 	{
-	  if (do_vhdlbuild)
-	    {
-	      printf("Word lengths did change, smart generator scheduling\n");
-	      printf("could be affected.  The CGFPGATarget should be reinvoked with the\n");
-	      printf("new precisions.  VHDL build is cancelled\n");
-//		  do_vhdlbuild=FALSE;
-	    }
-	  
 	  if (DEBUG_REVISE)
 	    printf("SG %s, precision changed from (%d,%d) to (%d,%d)\n",
 		   fpga_core->comment_name(),
 		   old_mbit,old_blen,
 		   new_mbit,new_blen);
-	  fpga_pin->set_precision(pin_no,new_mbit,new_blen,LOCKED);
+	  fpga_pins->set_precision(pin_no,new_mbit,new_blen,LOCKED);
+
+	  // Recalculate pipeline size
+	  fpga_core->sg_delays();
 	}
+      else
+	fpga_pins->set_preclock(pin_no,LOCKED);
+
+      // Reset scheduling info
+      // FIX:If memories, first trap for, but do skews need to be
+      //     accounted for here?
+      if (fpga_pins->pin_classtype(pin_no)==OUTPUT_PIN)
+	{
+	  fpga_core->act_output=start_times->query(net_loop);
+	  fpga_core->act_launch=step_times->query(net_loop);
+	  fpga_core->act_complete=end_times->query(net_loop);
+	  fpga_core->word_count=veclens->query(net_loop);
+	  if ((fpga_core->acs_type==BOTH) || (fpga_core->acs_type==SOURCE_LUT))
+	    fpga_core->act_input=fpga_core->act_output-fpga_core->acs_delay;
+	  else
+	    {
+	      fpga_core->act_input=fpga_core->act_output;
+		
+	      // Adjust source/sink firing time since not returned from wordgui tool
+	      if (fpga_core->acs_type==SOURCE)
+		fpga_core->act_output+=read_skew;
+	      else
+		fpga_core->act_output+=write_skew;
+	      
+	    }
+	  if (DEBUG_REVISE)
+	    printf("Output node, core times set to [%d %d %d], input time is %d\n",
+		   fpga_core->act_output,
+		   fpga_core->act_launch,
+		   fpga_core->act_complete,
+		   fpga_core->act_input);
+	}
+      else
+	{
+	  if (fpga_core->acs_type==SINK)
+	    {
+	      fpga_core->act_input=start_times->query(net_loop)+write_skew;
+	      fpga_core->act_output=fpga_core->act_input;
+	      fpga_core->act_launch=step_times->query(net_loop);
+	      fpga_core->act_complete=end_times->query(net_loop)+write_skew;
+	      fpga_core->word_count=veclens->query(net_loop);
+
+	      if (DEBUG_REVISE)
+		printf("Sink node, core times set to [%d %d %d], input time is %d\n",
+		       fpga_core->act_output,
+		       fpga_core->act_launch,
+		       fpga_core->act_complete,
+		       fpga_core->act_input);
+	    }
+	  
+	}
+      
+    }
+
+  // Have each smart generator re-examine their precisions
+  int sg_count=smart_generators->size();
+  for (int loop=0;loop<sg_count;loop++)
+    {
+      ACSCGFPGACore* fpga_core=(ACSCGFPGACore*) smart_generators->elem(loop);
+      fpga_core->sg_bitwidths(LOCKED);
     }
 
   // Cleanup
@@ -527,11 +669,20 @@ int ACSCGFPGATarget::HWnetlist_import(void)
   return(1);
 }
 
+
+// FIX: Unnecessary, trap moved to HWsynth_pipealigns
+int ACSCGFPGATarget::HWrevise_const(CoreList* sg_list)
+{
+  // Return happy condition
+  return(1);
+}
+
+
 ////////////////////////////////////////////////////////////////////
 // Translate new precision types back to Ptolemy precisions for each
 // smart generator/star
 ////////////////////////////////////////////////////////////////////
-int ACSCGFPGATarget::HWrevise_fixed(void)
+int ACSCGFPGATarget::HWrevise_fixed(CoreList* sg_list)
 {
   // Establish filenames and open file stream
   char* root_filename=new char[MAX_STR];
@@ -544,17 +695,17 @@ int ACSCGFPGATarget::HWrevise_fixed(void)
 
   delete []root_filename;
 
-  int total_sgs=smart_generators->size();
+  int total_sgs=sg_list->size();
   for (int sloop=0;sloop<total_sgs;sloop++)
     {
       // Allocate local storage
-      ACSCGFPGACore* fpga_core=(ACSCGFPGACore*) smart_generators->elem(sloop);
+      ACSCGFPGACore* fpga_core=(ACSCGFPGACore*) sg_list->elem(sloop);
       ACSCorona& fpga_corona=fpga_core->getCorona();
       Pin* fpga_pins=fpga_core->pins;
       ACSIntArray* inodes=fpga_pins->query_inodes();
       ACSIntArray* onodes=fpga_pins->query_onodes();
-      SequentialList* input_list=new SequentialList;
-      SequentialList* output_list=new SequentialList;
+      StringArray* input_list=new StringArray;
+      StringArray* output_list=new StringArray;
 
       // Start a recipe entry for this smart generator
       recipe_file << "Smart generator " << fpga_core->comment_name()
@@ -567,8 +718,8 @@ int ACSCGFPGATarget::HWrevise_fixed(void)
 	HWrevise_pins(fpga_corona,fpga_core,inodes,input_list,0,SINK,
 		      recipe_file);
       if (onodes->population() > 0)
-	  HWrevise_pins(fpga_corona,fpga_core,onodes,output_list,
-			input_list->size(),SOURCE,recipe_file);
+	HWrevise_pins(fpga_corona,fpga_core,onodes,output_list,
+		      input_list->population(),SOURCE,recipe_file);
 
       // Cleanup
       delete input_list;
@@ -587,7 +738,7 @@ int ACSCGFPGATarget::HWrevise_fixed(void)
 int ACSCGFPGATarget::HWrevise_pins(ACSCorona& fpga_corona,
 				   ACSCGFPGACore* fpga_core,
 				   ACSIntArray* nodes,
-				   SequentialList* state_names,
+				   StringArray* state_names,
 				   int state_offset,
 				   char mode,
 				   ofstream& recipe_file)
@@ -616,7 +767,7 @@ int ACSCGFPGATarget::HWrevise_pins(ACSCorona& fpga_corona,
       int q_bitlen=fpga_pins->query_bitlen(pin_no);
 
       int state_index=(pin_no*2)-state_offset;
-      char* mbit_statename=(char*) state_names->elem(state_index);
+      char* mbit_statename=(char*) state_names->get(state_index);
       if (DEBUG_REVISE)
 	printf("sg %s retrieved mbit state name of %s (%d)\n",
 	       fpga_core->comment_name(),
@@ -636,7 +787,7 @@ int ACSCGFPGATarget::HWrevise_pins(ACSCorona& fpga_corona,
       recipe_file << "\t" << mbit_statename << "=" << q_majorbit << endl;
 
       state_index=(pin_no*2)+1-state_offset;
-      char* bitlen_statename=(char*) state_names->elem(state_index);
+      char* bitlen_statename=(char*) state_names->get(state_index);
       if (DEBUG_REVISE)
 	printf("sg %s retrieved bitlen state name of %s (%d)\n",
 	       fpga_core->comment_name(),
@@ -700,27 +851,18 @@ int ACSCGFPGATarget::HWrevise_pins(ACSCorona& fpga_corona,
 }
 
 
-///////////////////////////////////////////////////////////////////////
-// Revise the partitioning information based on results from wordlength
-// analysis.
-///////////////////////////////////////////////////////////////////////
-int ACSCGFPGATarget::HWrevise_partition(void)
-{
-  // Return happy condition
-  return(1);
-}
-
 ///////////////////////////////////////////////////////
 // Once bitwidths have been altered, revise pipe delays
 ///////////////////////////////////////////////////////
-int ACSCGFPGATarget::HWrevise_pipes(void)
+int ACSCGFPGATarget::HWrevise_pipes(CoreList* sg_list)
 {
-  int total_sgs=smart_generators->size();
+  int total_sgs=sg_list->size();
   for (int sloop=0;sloop<total_sgs;sloop++)
     {
-      ACSCGFPGACore* fpga_core=(ACSCGFPGACore*) smart_generators->elem(sloop);
-      fpga_core->sg_resources(LOCKED);
-      fpga_core->sg_delay_query();
+      ACSCGFPGACore* fpga_core=(ACSCGFPGACore*) sg_list->elem(sloop);
+//      fpga_core->sg_resources(LOCKED);
+//      fpga_core->sg_delay_query();
+      fpga_core->update_sg(UNLOCKED,UNLOCKED);
     }
 
   // Return happy condition

@@ -1,7 +1,7 @@
 static const char file_id[] = "Sequencer.cc";
 
 /**********************************************************************
-Copyright (c) 1999-%Q% Sanders, a Lockheed Martin Company
+Copyright (c) 1999 Sanders, a Lockheed Martin Company
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -27,7 +27,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
  Programmers:  Ken Smith
  Date of creation: 3/23/98
- Version: $Id$
+ Version: @(#)Sequencer.cc      1.0     06/16/99
 ***********************************************************************/
 #include "Sequencer.h"
 
@@ -39,13 +39,13 @@ ENHANCEMENTS, OR MODIFICATIONS.
 Sequencer::Sequencer(void)
 {
   seq_sg=NULL;
-  src_consts=new SequentialList;
+  src_consts=new CoreList;
   src_mux=NULL;
   src_add=NULL;
-  snk_consts=new SequentialList;
+  snk_consts=new CoreList;
   snk_mux=NULL;
   snk_add=NULL;
-  delay_consts=new SequentialList;
+  delay_consts=new CoreList;
   delay_mux=NULL;
   delay_add=NULL;
 }
