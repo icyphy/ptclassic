@@ -2,6 +2,7 @@
 Version identification:
 $Id$ $Revision$
 
+
 Copyright (c) 1990-1994 The Regents of the University of California.
 All rights reserved.
 
@@ -34,6 +35,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #pragma interface
 #endif
 
+#include <math.h>
 #include "DataStruct.h"
 #include "DEStar.h"
 #include "PriorityQueue.h"
@@ -58,10 +60,6 @@ class CqLevelLink : public LevelLink
 {
 	friend class CalendarQueue;
 public:
-	Pointer e;
-	double	level;		// currently, level is "double" type.
-	double fineLevel;	// If levels are equal, we may need
-				// finerLevel which is optional.
 	Star* dest;             // All the destinations are also stored
 				// contiguously to allow sequential
 				// popping off of same Star event;
@@ -127,14 +125,16 @@ public:
 
 	// Constructor
 	CalendarQueue() : freeLinkHead(0), cq_eventNum(0), numFreeLinks(0), 
-			  cq_absEventCounter(0), cq_resizeEnabled(1)
-        { LocalInit(0, 2, 1.0, 0.0); }
+			  cq_absEventCounter(0), cq_resizeEnabled(1),
+			  cq_debug(0)
+        { LocalInit(0, 2, 1.0, HUGE_VAL ); }
 	virtual ~CalendarQueue();
 
 protected:
 
 	CqLevelLink **cq_bucket;
 
+	int cq_debug;           // Used to turn on debug statements
 	int cq_lastBucket;      // bucket number last event was dequeued 
 	double cq_bucketTop;    // priority at the top of that bucket   
 	double cq_lastTime;     // priority of last dequeued event     
