@@ -64,6 +64,22 @@ appears as follows in a document:
 </pre></tcl>
 Double clicking on this script will execute it if you are
 viewing the document under Tycho.
+In the above example, the <code>post</code> command returns the name
+of the widget it just created.  By default, this returned value
+is displayed in a popup dialog box.  This can be annoying if the
+returned value has no meaning to the reader.  To suppress this,
+use the following syntax:
+<pre>
+    &lt;tcl quiet&gt;&lt;pre&gt;
+    ::tycho::post "hello world"
+    &lt;/pre&gt;&lt;/tcl&gt;
+</pre>
+which appears as follows in a document:
+<tcl quiet><pre>
+    ::tycho::post "hello world"
+</pre></tcl>
+The only difference is that the returned value is displayed
+in the status bar at the bottom of the window rather than in a dialog box.
 <p>
 
 When creating embedded tcl scripts, you may find it necessary to use
