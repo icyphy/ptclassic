@@ -1,7 +1,9 @@
 defstar {
 	name { Quant }
 	domain { CG56 }
-	desc { Polynomial evaluation for real numbers}
+	desc { The star quantizes the input to one of N+1 possible output levels
+using N thresholds.
+	}
 	version { $Id$ }
 	author { Chih-Tsung Huang }
 	copyright {
