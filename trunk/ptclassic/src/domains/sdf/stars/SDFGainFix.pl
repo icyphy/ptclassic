@@ -81,6 +81,7 @@ parameter.  The keywords for overflow handling methods are :
                 int in_len;
                 int out_IntBits;
                 int out_len;
+		Fix out;
         }
         setup {
                 IP = InputPrecision;
@@ -90,13 +91,13 @@ parameter.  The keywords for overflow handling methods are :
                 in_len = Fix::get_length (IP);
                 out_IntBits = Fix::get_intBits (OP);
                 out_len = Fix::get_length (OP);
-        }
-	go {    
-                Fix out(out_len, out_IntBits);
+                out = Fix(out_len, out_IntBits);
                 out.set_ovflow(OV);
+        }
+	go {
                 Fix fixIn;
 
-                if(int(ArrivingPrecision))
+                if ( int(ArrivingPrecision) )
                    fixIn = Fix(input%0);
                 else
                    fixIn = Fix(in_len, in_IntBits, Fix(input%0));
@@ -105,4 +106,3 @@ parameter.  The keywords for overflow handling methods are :
 		output%0 << out;
 	}
 }
-
