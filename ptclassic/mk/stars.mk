@@ -546,8 +546,8 @@ ifdef CGC
 		# stars and library for generated code
 		CUSTOM_DIRS += $(CGCDIR)/contrib/stars
 		STARS += $(LIBDIR)/cgccontribstars.o
-		LIBS += -lcgccontrib
-		LIBFILES += $(LIBDIR)/libcgccontrib.$(LIBSUFFIX)
+		LIBS += -lcgccontribstars
+		LIBFILES += $(LIBDIR)/libcgccontribstars.$(LIBSUFFIX)
 	endif
 	# Tcl/Tk
 	ifdef CGCTK
