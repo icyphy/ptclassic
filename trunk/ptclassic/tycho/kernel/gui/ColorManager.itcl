@@ -706,7 +706,7 @@ proc ptkColor {name {alternate {}}} {
     } elseif [info exists ptkColorList($aname)] {
         return $ptkColorList($aname)
     } else {
-        return $ptkColorList($black)
+        return $ptkColorList(black)
     }
 }
 
