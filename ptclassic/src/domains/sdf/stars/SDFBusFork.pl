@@ -34,7 +34,9 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	go {
 	  MPHIter nextin(input), nextoutA(outputA), nextoutB(outputB);
-	  PortHole *in, *outA = (PortHole *)NULL, *outB = (PortHole *)NULL;
+	  PortHole* in;
+	  PortHole* outA = 0;
+	  PortHole* outB = 0;
 	  while (((in = nextin++) != 0) &&
 		 ((outA = nextoutA++) != 0) &&
 		 ((outB = nextoutB++) != 0)) {
