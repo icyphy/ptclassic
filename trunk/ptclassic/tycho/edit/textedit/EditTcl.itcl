@@ -56,6 +56,9 @@ class ::tycho::EditTcl {
     # Execute the Tcl code in the selection (or the entire text widget).
     method evaluate {}
 
+    # Execute the Tcl code in the construct surrounding the insertion cursor
+    method evaluateConstruct {}
+
     # Open a help window.
     method help {}
 
@@ -100,6 +103,12 @@ body ::tycho::EditTcl::constructor {args} {
     set fillPrefix "#"
 
     menubar insert "Select Body" "Unselect"  -command "$this selectConstruct"
+    menubar insert "Evaluate Body" "Reload" \
+            -accelerator "C-R" \
+            -command "$this evaluateConstruct"
+
+    bind $itk_component(text) <Control-x><Control-Shift-R> \
+            "$this evaluateConstruct"
 }
 
 #####################################################################
@@ -127,6 +136,17 @@ body ::tycho::EditTcl::evaluate {} {
     }
     focusin
     return $ret
+}
+
+#####################################################################
+#### evaluateConstruct
+# Evaluate the entire construct that the point is within.  In Tcl
+# this is a proc.  As with evaluate, the construct is evaluated
+# in the global context.  Display and return the result of the evaluation.
+#
+body ::tycho::EditTcl::evaluateConstruct {} {
+    selectConstruct
+    evaluate
 }
 
 ###################################################################
