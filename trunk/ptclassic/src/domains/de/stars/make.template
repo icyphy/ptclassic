@@ -58,6 +58,7 @@ DEPrQueue.pl \
 DEPriorityCheck.pl \
 DEPriorityQueue.pl \
 DEPrinter.pl \
+DEPulseGen.pl \
 DERamp.pl \
 DEQueue.pl \
 DEQueueBase.pl \
