@@ -47,7 +47,8 @@ IntArray.h \
 MReq.h \
 MemMap.h \
 ProcMemory.h \
-Profile.h
+Profile.h \
+StringStack.h \
 
 # Header files
 HDRS= $(H_WITH_MATCH) CGWormConnect.h
