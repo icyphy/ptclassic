@@ -108,26 +108,31 @@ void S56XTarget :: writeCode() {
     /*
      * generate .aio data file
      */
-    if (aioCmds.numPieces() > 0) {
+    if (!parent() && aioCmds.numPieces() > 0) {
 	if (!writeFile(aioCmds,".aio")) {
-    		Error::abortRun(*this,"Aio data file write failed");
-    		return;
+	    Error::abortRun(*this,"Aio data file write failed");
+	    return;
 	}
     }
     /*
      * generate shell-cmd file (/bin/sh)
      */
-    const char *monprog = monitorProg;
-    StringList realcmds = "#!/bin/sh\n";
-    realcmds << headerComment("# ");
-    if ( monprog==NULL || *monprog=='\0' ) {
-	realcmds << "load_s56x" << " '" << filePrefix << ".lod'\n" << shellCmds;
-    } else {
-	realcmds << monprog << " '" << filePrefix << ".lod'\n" << shellCmds;
-    }
-    if (!writeFile(realcmds,"",FALSE,0755)) {
-	Error::abortRun(*this,"Shell command file write failed");
-	return;
+    if (!parent()) {
+	const char *monprog = monitorProg;
+    	StringList realcmds = "#!/bin/sh\n";
+    	realcmds << headerComment("# ");
+    	if ( monprog==NULL || *monprog=='\0' ) {
+	    realcmds << "load_s56x" << " '" << filePrefix << ".lod'\n"
+		     << shellCmds;
+    	}
+	else {		
+	    realcmds << monprog << " '" << filePrefix << ".lod'\n"
+		     << shellCmds;
+	}	
+    	if (!writeFile(realcmds,"",FALSE,0755)) {
+	    Error::abortRun(*this,"Shell command file write failed");
+		return;
+	}
     }
     /*
      * generate the .asm file (and optionally display it)
