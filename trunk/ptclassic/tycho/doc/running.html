@@ -28,10 +28,20 @@ on your system, or are not set up to run Ptolemy,
 then you must have the program <a name=itkwish>"itkwish"</a> in your
 <a name="path environment variable">path</a>.
 This program is a generic Itcl shell.
-You must be running Itcl version 2.0 or higher.
+<A NAME="Itcl2.0 vs. Itcl2.1"> must be running Itcl version 2.0 or higher.</A>
 Tycho0.01 was shipped with Ptolemy0.6, and it will only work with Itcl2.0.
 Tycho0.1 was first shipped in August, 1996, and it will work with Itcl2.0
 or Itcl2.1.
+ <P>
+The version of Tycho we ship has <CODE>itclIndex</CODE> files that
+were built with Itcl2.1.  If you are using Itcl2.0, you must regenerate
+the <CODE>tclIndex</CODE> files
+<PRE>
+cd $TYCHO
+make sources
+</PRE>
+<P>
+
 You can obtain the latest tycho release from 
 <A HREF="http://ptolemy.eecs.berkeley.edu">http://ptolemy.eecs.berkeley.edu</A>
 To check the version number of tycho, look at the startup screen
@@ -164,6 +174,9 @@ Note that the .tycho directory is used to store other state
 information for Tycho, such as your personal dictionary for spelling
 checks.
 <p>
+Up to: <A HREF="introduction.html">Tycho Introduction</A> -
+Previous: <A HREF="releasenotes.html">Release Notes</A> -
+Next: <A HREF="troubleshooting.html">Troubleshooting Tycho</A> -
 <a href="index.html">Tycho Home Page</a><br>
 <p>
 <HR>
