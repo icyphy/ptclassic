@@ -49,21 +49,33 @@ ifdef DIRS
 	done
 endif
 
-CRUD=*.o *.so core *~ *.bak ,* LOG* $(KRUFT) 
-
-clean:
-	rm -f $(CRUD)
-
-realclean:
-	rm -f $(CRUD) $(REALCLEAN_STUFF)
-
 depend:
 	@echo "no dependencies in this directory"
 
 sccsinfo:
 	sccs info
+ifdef DIRS
+	@for x in $(DIRS); do \
+	    if [ -w $$x ] ; then \
+		( cd $$x ; \
+		echo making $@ in $$x ; \
+		$(MAKE) $(MFLAGS) $(MAKEVARS) $@ ;\
+		) \
+	    fi ; \
+	done
+endif
 
 makefiles: makefile
+ifdef DIRS
+	@for x in $(DIRS); do \
+	    if [ -w $$x ] ; then \
+		( cd $$x ; \
+		echo making $@ in $$x ; \
+		$(MAKE) $(MFLAGS) $(MAKEVARS) $@ ;\
+		) \
+	    fi ; \
+	done
+endif
 
 # Generate html files from itcl files, requires itclsh and tycho
 itcldocs:
@@ -74,4 +86,43 @@ itcldocs:
 # that includes this one and have it set $(EXTRA_SRCS)
 checkjunk:
 	@checkextra -v $(HDRS) $(EXTRA_SRCS) $(MISC_FILES) makefile SCCS
+ifdef DIRS
+	@for x in $(DIRS); do \
+	    if [ -w $$x ] ; then \
+		( cd $$x ; \
+		echo making $@ in $$x ; \
+		$(MAKE) $(MFLAGS) $(MAKEVARS) $@ ;\
+		) \
+	    fi ; \
+	done
+endif
 
+CRUD=*.o *.so core *~ *.bak ,* LOG* $(KRUFT) 
+
+clean:
+	rm -f $(CRUD)
+ifdef DIRS
+	@for x in $(DIRS); do \
+	    if [ -w $$x ] ; then \
+		( cd $$x ; \
+		echo making $@ in $$x ; \
+		$(MAKE) $(MFLAGS) $(MAKEVARS) $@ ;\
+		) \
+	    fi ; \
+	done
+endif
+
+realclean:
+	rm -f $(CRUD) $(REALCLEAN_STUFF)
+ifdef DIRS
+	@for x in $(DIRS); do \
+	    if [ -w $$x ] ; then \
+		( cd $$x ; \
+		echo making $@ in $$x ; \
+		$(MAKE) $(MFLAGS) $(MAKEVARS) $@ ;\
+		) \
+	    fi ; \
+	done
+endif
+
+depend:
