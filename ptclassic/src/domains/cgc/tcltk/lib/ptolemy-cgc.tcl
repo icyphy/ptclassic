@@ -32,20 +32,28 @@ proc expandEnvVars { path } {
     }
 }
 
+# Read Ptolemy color settings from the Ptolemy Library
+source [expandEnvVars \$PTOLEMY/tcl/lib/ptkColor.tcl]
+
+puts gothere
+
+# Read Ptolemy options settings from the Ptolemy Library
+source [expandEnvVars \$PTOLEMY/tcl/lib/ptkOptions.tcl]
+
 # Read utilities from Ptolemy library
 source [expandEnvVars \$PTOLEMY/tcl/lib/ptkBarGraph.tcl]
 
-message .header -font -Adobe-times-medium-r-normal--*-180* -relief raised \
+message .header -relief raised \
 	-width 400 -borderwidth 1 -text "Control panel for $applicationName"
 
 # stop/start control
-button .go -text " GO <Return> " -fg blue3
+button .go -text " GO <Return> "
 bind .go <ButtonRelease-1> "go"
 
-button .pause -text "PAUSE <Space>" -fg blue3
+button .pause -text "PAUSE <Space>"
 bind .pause <ButtonRelease-1> "pause"
 
-button .stop -text "STOP <Escape>" -command "stop" -fg blue3
+button .stop -text "STOP <Escape>" -command "stop"
 
 frame .control -borderwidth 10
 pack append .control .go {left expand fill} \
@@ -54,7 +62,7 @@ pack append .control .go {left expand fill} \
 
 # number of iterations control
 frame .numberIters -bd 10
-entry .numberIters.entry -relief sunken -width 10 -insertofftime 0 -bg wheat3
+entry .numberIters.entry -relief sunken -width 10 -insertofftime 0
 label .numberIters.label
 pack append .numberIters .numberIters.label left .numberIters.entry right
 .numberIters.label config -text "Number of Iterations:"
@@ -70,7 +78,7 @@ frame .middle -bd 10
 frame .low -bd 10
 
 # quit button
-button .quit -text QUIT -command "stop; destroy ." -fg blue3
+button .quit -text QUIT -command "stop; destroy ."
 
 # overall structure
 pack append . \
@@ -117,13 +125,6 @@ proc updateIterations {} {
 	return $numIterations
 }
 
-# procedure to issue an error message from any internal tk error
-proc tkerror message {
-    popupMessage .error "Background error in Tk"
-    global REPORT_TCL_ERRORS
-    if {$REPORT_TCL_ERRORS == 1} {popupMessage .error $message}
-}
-
 # procedure to issue an error message
 proc popupMessage {w text} {
 #   catch {destroy $w}
@@ -132,8 +133,7 @@ proc popupMessage {w text} {
     wm iconname $w "Message"
 
     button $w.ok -text "OK <Return>" -command "destroy $w"
-    message $w.msg -font -Adobe-times-medium-r-normal--*-180* -width 5i \
-            -text $text
+    message $w.msg -width 5i -text $text
     pack append $w $w.msg {top fill expand} $w.ok {top fill expand}
 
     wm geometry $w +300+300
@@ -142,6 +142,13 @@ proc popupMessage {w text} {
     grab $w
     bind $w <Return> "destroy $w"
     tkwait window $w
+}
+
+# procedure to issue an error message from any internal tk error
+proc tkerror message {
+    popupMessage .error "Background error in Tk"
+    global REPORT_TCL_ERRORS
+    if {$REPORT_TCL_ERRORS == 1} {popupMessage .error $message}
 }
 
 # procedure to make an entry for a star parameter in the master control panel
@@ -153,7 +160,7 @@ proc popupMessage {w text} {
 proc makeEntry {win name desc default callback} {
     set s $win.$name
     frame $s
-    entry $s.entry -relief sunken -width 20 -insertofftime 0 -bg burlywood1
+    entry $s.entry -relief sunken -width 20 -insertofftime 0 
     label $s.label -text "${desc}:"
     pack append $s $s.label left $s.entry right
     pack append $win $s {top fill expand}
@@ -171,7 +178,7 @@ proc makeEntry {win name desc default callback} {
 #	callback	the name of the callback procedure
 proc makeButton {win name desc callback} {
     set s $win.$name
-    button $s -text "$desc" -fg tan4 -command $callback
+    button $s -text "$desc" -command $callback
     pack append $win $s {top fill expand}
     bind $s <ButtonPress-1> "$s configure -relief sunken; $s invoke"
     bind $s <ButtonRelease-1> "$s configure -relief raised"
@@ -194,8 +201,7 @@ proc makeScale {win name desc position callback} {
     frame $s
     label $s.msg -text "${desc}:"
     label $s.value -width 6
-    scale $s.scale -orient horizontal -from 0 -to 100 -bg tan4 \
-	-sliderforeground bisque1 -fg bisque1 -length 7c \
+    scale $s.scale -orient horizontal -from 0 -to 100 -length 7c \
 	-command $callback -showvalue 0
     $s.scale set $position
     pack append $s $s.msg left $s.scale right $s.value right
