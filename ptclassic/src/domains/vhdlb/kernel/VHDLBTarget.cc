@@ -186,7 +186,7 @@ int VHDLBTarget :: galFunctionDef(Galaxy& galaxy) {
     }
   }
 
-  if((inputs.numPieces() > 1) | (outputs.numPieces() > 1)) {
+  if((inputs.numPieces() > 1) || (outputs.numPieces() > 1)) {
     vhdlCode << indent(1) << "port(" << inputs;
     if((inputs.numPieces() > 1) && (outputs.numPieces() > 1)) vhdlCode << "; ";
     vhdlCode << outputs << ");\n";
