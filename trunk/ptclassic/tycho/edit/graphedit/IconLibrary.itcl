@@ -151,10 +151,13 @@ body ::tycho::IconLibrary::constructor {args} {
     eval configure $args
 
     # The icon type
-    type define icon -label ""
+    type define icon \
+	    -label ""
 
     # The port type
-    type define port -leafonly 1 -type input
+    type define port \
+	    :leafonly 1 \
+	    -type input
 }
 
 ########################################################################

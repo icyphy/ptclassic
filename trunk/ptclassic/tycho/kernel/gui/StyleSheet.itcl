@@ -171,7 +171,7 @@ body ::tycho::StyleSheet::constructor {args} {
 
     # Define the preference type
     type define preference \
-            -leafonly 1 \
+            :leafonly 1 \
             -label {} \
             -description {} \
             -type string \

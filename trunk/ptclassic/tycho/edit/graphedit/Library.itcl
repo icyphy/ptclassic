@@ -117,7 +117,7 @@ body ::tycho::Library::constructor {args} {
 
     # The xref entity type. Label is for menu display.
     type define xref \
-    	-leafonly 1
+    	:leafonly 1
 }
 
 ########################################################################
