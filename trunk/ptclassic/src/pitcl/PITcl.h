@@ -129,6 +129,9 @@ public:
 	// create a new universe with name nm and domain dom.
 	void newUniv(const char* nm, const char* dom);
 
+	// reset -- for backward compatibility
+	void resetUniverse() { reset(1,0);}
+
 	// delete the universe named nm.  return FALSE if no such univ.
 	int delUniv(const char* nm);
 
