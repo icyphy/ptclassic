@@ -1,4 +1,3 @@
-static const char file_id[] = "MReq.cc";
 /******************************************************************
 Version identification:
 $Id$
@@ -32,6 +31,12 @@ ENHANCEMENTS, OR MODIFICATIONS.
  in decreasing order, for efficient memory allocation.
 
 *******************************************************************/
+static const char file_id[] = "MReq.cc";
+
+#ifdef __GNUG__
+#pragma implementation
+#endif
+
 #include "MReq.h"
 
 // append a request to the end of the list.

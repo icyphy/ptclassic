@@ -1,9 +1,3 @@
-static const char file_id[] = "CGPortHole.cc";
-#include "Block.h"
-#include "CGPortHole.h"
-#include "CircularBuffer.h"
-#include "CGGeodesic.h"
-
 /**************************************************************************
 Version identification:
 $Id$
@@ -36,6 +30,18 @@ ENHANCEMENTS, OR MODIFICATIONS.
 Code for CG-type portholes and multiportholes.
 
 **************************************************************************/
+
+static const char file_id[] = "CGPortHole.cc";
+
+#ifdef __GNUG__
+#pragma implementation
+#endif
+
+#include "Block.h"
+#include "CGPortHole.h"
+#include "CircularBuffer.h"
+#include "CGGeodesic.h"
+
 
 // constructor
 CGPortHole :: CGPortHole() : offset(0), forkSrc(0), embeddedPort(0),

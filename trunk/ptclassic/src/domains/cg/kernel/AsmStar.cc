@@ -31,6 +31,10 @@ ENHANCEMENTS, OR MODIFICATIONS.
  This is the baseclass for stars that generate assembly language code.  
 
 *******************************************************************/
+#ifdef __GNUG__
+#pragma implementation
+#endif
+
 #include "AsmStar.h"
 #include "AsmTarget.h"
 #include "ProcMemory.h"

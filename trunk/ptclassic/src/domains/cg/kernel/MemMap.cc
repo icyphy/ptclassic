@@ -1,4 +1,3 @@
-static const char file_id[] = "MemMap.cc";
 /******************************************************************
 Version identification:
 $Id$
@@ -31,6 +30,12 @@ ENHANCEMENTS, OR MODIFICATIONS.
  This is support for lists of allocated memory arranged sequentially.
 
 *******************************************************************/
+static const char file_id[] = "MemMap.cc";
+
+#ifdef __GNUG__
+#pragma implementation
+#endif
+
 #include "MemMap.h"
 
 // Append an allocation sorted in order of memory address.

@@ -1,7 +1,3 @@
-static const char file_id[] = "Code.cc";
-#include "CodeBlock.h"
-#include <stream.h>
-
 /**************************************************************************
 Version identification:
 $Id$
@@ -32,6 +28,15 @@ ENHANCEMENTS, OR MODIFICATIONS.
  Programmer:  E. A. Lee
 
 **************************************************************************/
+
+static const char file_id[] = "Code.cc";
+
+#ifdef __GNUG__
+#pragma implementation
+#endif
+
+#include "CodeBlock.h"
+#include <stream.h>
 
 void CodeBlock:: printCode () {
 	cout << text << "\n";

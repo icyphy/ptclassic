@@ -38,6 +38,10 @@ of registering it as a pseudo-domain instead.
 
 static const char file_id[] = "AnyAsmStar.cc";
 
+#ifdef __GNUG__
+#pragma implementation
+#endif
+
 #include "AnyAsmStar.h"
 #include "Domain.h"
 #include "CGWormhole.h"

@@ -34,6 +34,10 @@ ENHANCEMENTS, OR MODIFICATIONS.
  processor, etc) can be derived from this.
 
 *******************************************************************/
+#ifdef __GNUG__
+#pragma implementation
+#endif
+
 #include "AsmTarget.h"
 #include "GalIter.h"
 #include "AsmStar.h"
