@@ -32,8 +32,8 @@
 #include <stdlib.h>
 #include <sys/unistd.h>
 #include "../../kernel/miscFuncs.h"
-extern VOID_HACK srand48();
-extern long lrand48();
+//extern void srand48(long int);
+//extern long int lrand48(void);
 #define random() lrand48()
 #define srandom(a) srand48(a)
 //#define random() ((long)(rand()))
