@@ -203,7 +203,7 @@ void trap( name, code, message )
   longjmp( env, 1 );
 }
 
-test_resolve( )
+void test_resolve( )
 {
   static char* paths[] = {
     "$OCTTOOLS",
