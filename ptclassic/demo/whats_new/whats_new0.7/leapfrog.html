@@ -29,9 +29,20 @@ ENHANCEMENTS, OR MODIFICATIONS.
 <body bgcolor=#faf0e6>
 <H1>Cadence Leapfrog Ptolemy Interface</H1>
 
-Xavier Warzee (<CODE>warzee@sctf.thomson-csf.fr</CODE>)
-an interface for the
- <A HREF="http://www.cadence.com/software/qx-leap.html">Cadence Leapfrog VHDL Simulator</A>.
+Xavier Warzee (<CODE>warzee@sctf.thomson-csf.fr</CODE>) of Thomson CSF
+and
+<A HREF="http://ptolemy.eecs.berkeley.edu/~cameron">Michael C. Williamson</A> 
+created an interface for the
+ <A HREF="http://www.cadence.com/software/qx-leap.html">Cadence
+Leapfrog VHDL Simulator</A>.
+
+ <P><A HREF="../../../src/domains/vhdl/targets"><CODE>$PTOLEMY/src/domains/vhdl/targets</CODE></A>
+contains the Cadence Leapfrog VHDL Target.
+This target, SimLF-VHDL, allows simulation of generated VHDL code with
+the Leapfrog simulator from Cadence.  This target is analogous to the
+SimVSS-VHDL target, which supports simulation with the Synopsys VHDL
+System Simulator.
+
 <H2>Setup</H2>
 
 To use the Leapfrog you need to have the following setup.  Locally, our
