@@ -73,12 +73,14 @@ class ::tycho::BuilderDialog {
 #
 body ::tycho::BuilderDialog::constructor {args} {
     global TYCHO tcl_platform
+
     displayer configure -title "Tycho Build Manager" \
 	    -menupadx 10
 
     $myMenubar addMenu Build -underline 0
+
     $myMenubar add {Full (10 Minutes)} Build -underline 0 \
-	    -command ::tycho::Builder::build
+	    -command "$this busy ::tycho::Builder::build"
 
     $myMenubar addSeparator Build
 
@@ -231,9 +233,7 @@ body ::tycho::BuilderDialog::checkFiles {} {
 	set msg "$msg\n\nBring up Build Dialog to build these files?"
 
 	if [::tycho::askuser $msg] {
-	    set bd [::tycho::autoName .builderDialog]
-	    ::tycho::BuilderDialog $bd
-	    $bd centerOnScreen
+	    set bd [::tycho::view BuilderDialog]
 	    # Return the name of the window so the test suite can get at it.
 	    return $bd
 	}
