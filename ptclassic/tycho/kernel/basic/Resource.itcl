@@ -59,6 +59,9 @@ proc ::tycho::resourceClass {path {procname {}} args} {
 	    file:/ {
 		set rclass ::tycho::ResourceFile
 	    }
+	    weld:// {
+		set rclass ::tycho::ResourceWELD
+	    }
 	    default {
 		error "Unknown protocol \"$protocol\""
 	    }
