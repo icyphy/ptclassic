@@ -11,7 +11,6 @@ and
 stars.
 The inside system (in the SDF domain) multiplies the data value
 by a ramp.
-.DE
 .EQ
 delim off
 .EN

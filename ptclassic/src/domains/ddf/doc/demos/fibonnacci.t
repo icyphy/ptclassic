@@ -3,7 +3,6 @@
 .SD
 Generate the Fibonnacci sequence using a rather inefficient recursive
 algorithm that is nonetheless a good example of how to realize recursion.
-.DE
 .EQ
 delim off
 .EN

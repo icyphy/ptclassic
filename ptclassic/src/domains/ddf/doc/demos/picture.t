@@ -6,7 +6,6 @@ The outermost SDF domain has a wormhole called "drawline" which internally
 uses the DDF domain.
 That wormhole, in turn, has a wormhole called "display"
 which internally uses the SDF domain.
-.DE
 .EQ
 delim off
 .EN

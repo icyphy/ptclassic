@@ -7,7 +7,6 @@ An if-then-else is such a dynamically scheduled construct.
 The top level schematic represents an SDF system, while the
 inside schematic represents a DDF system (implementing an
 if-then-else).
-.DE
 .EQ
 delim off
 .EN
