@@ -104,7 +104,7 @@ A future version will provide a "permalink" feature, allowing .o files
 to become a permanent part of the system.
 
 **************************************************************************/
-#ifdef __GNUG_
+#ifdef __GNUG__
 #pragma implementation
 #endif
 
