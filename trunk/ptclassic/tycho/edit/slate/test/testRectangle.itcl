@@ -62,49 +62,36 @@ if { ! [::info exists SHORTTIME] } {
 # FIXME: What about multiple aspects specified?
 #
 set delta 30
-_twoitems
-set coords {}
+set i 0
+
 foreach a {n s e w ne nw se sw} {
-    lappend coords \
-	    [_finally ::tycho::Rectangle::reshape $r 1 1 $delta $a]
+    incr i
+    _twoitems
+   test Rectangle-_reshapeclick.$i \
+            "Reshape a simple item, no ghosting, $a" {
+        _interact ::tycho::Rectangle::_reshape $r 1 1 $delta -aspects $a
+    } [_finally ::tycho::Rectangle::reshape $r 1 1 $delta $a]
 }
 
-test Rectangle-_reshapeclick.1 {Reshape a simple item, no ghosting} {
-    set result {}
-    foreach a {n s e w ne nw se sw} {
-	.s coords $r 40 40 80 80
-	lappend result \
-		[_interact ::tycho::Rectangle::_reshape $r 1 1 $delta $a]
-    }
-    set result
-} $coords
-
-test Rectangle-_reshapeclick.2 {Reshape a simple item, with ghosting} {
-    set result {}
-    foreach a {n s e w ne nw se sw} {
-	.s coords $r 40 40 80 80
-	lappend result \
-		[_interact ::tycho::Rectangle::_reshape $r 1 1 \
-		$delta $a -ghost 1]
-	_update
-    }
-    set result
-} $coords
-
-set coords {}
 foreach a {n s e w ne nw se sw} {
-    lappend coords \
-	    [_finally ::tycho::Rectangle::reshape $f -1 -1 $delta $a]
+    incr i
+    _twoitems
+   test Rectangle-_reshapeclick.$i \
+            "Reshape a simple item, with ghosting, $a" {
+        _interact ::tycho::Rectangle::_reshape $r 1 1 $delta \
+                -aspects $a -ghost 1
+    } [_finally ::tycho::Rectangle::reshape $r 1 1 $delta $a]
 }
-test Rectangle-_reshapeclick.3 {Reshape a complex item by tag, no ghosting} {
-    set result {}
-    foreach a {n s e w ne nw se sw} {
-	.s coords $f 140 140 180 180
-	lappend result \
-		[_interact ::tycho::Rectangle::_reshape bar -1 -1 $delta $a]
-    }
-    set result
-} $coords
+
+foreach a {n s e w ne nw se sw} {
+    incr i
+    _twoitems
+   test Rectangle-_reshapeclick.$i \
+            "Reshape a complex item by tag, no ghosting, $a" {
+        _interact ::tycho::Rectangle::_reshape $f -1 -1 $delta \
+                -aspects $a
+    } [_finally ::tycho::Rectangle::reshape $f -1 -1 $delta $a]
+}
 
 
 ##########################################################################
