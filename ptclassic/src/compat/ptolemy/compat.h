@@ -350,6 +350,7 @@ extern int unlink(const char *);
 #ifdef NEED_SYS_ERRLIST
 #if defined(PTNBSD_386) || defined(PTFREEBSD)
 /* See also kernel/State.h */
+extern const int sys_nerr;
 extern const char *const sys_errlist[];
 #else
 extern char *sys_errlist[];
