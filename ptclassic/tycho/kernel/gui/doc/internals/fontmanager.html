@@ -24,7 +24,7 @@
 </a>
 The FontManager class in Tycho provides a top-level window within
 which the user can select a font, together with a set of utilities
-for controling X window fonts.  The simplest use of the class is as follows:
+for controlling X window fonts.  The simplest use of the class is as follows:
 <tcl><pre>
 ::tycho::FontManager .fontmanager
 .fontmanager centerOnScreen
@@ -112,7 +112,7 @@ if {$font != {}} {
 Frequently, applications will wish to search through some set of
 preferred fonts before resorting to the only font guaranteed to exist
 on all systems, "fixed".  The method <a name="findFont method">"findFont"</a>
-takes a list of
+stakes a list of
 specifications and tries to find a font that matches one in the list.
 Specifications earlier in the list are given priority.
 A specification is either a font name or a list with four items. The
