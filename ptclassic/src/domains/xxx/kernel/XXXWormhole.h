@@ -59,6 +59,9 @@ public:
 	// identify myself as a wormhole
 	int isItWormhole() const { return TRUE; }
 
+	// Override Star::asWormhole definition
+        Wormhole* asWormhole() { return this; }
+
 	// use statelist for inner galaxy for stateWithName
 	State* stateWithName (const char* name) {
 		return gal.stateWithName(name);
