@@ -1,5 +1,5 @@
-#ifndef _AsmArch_h
-#define _AsmArch_h 1
+#ifndef _AsmTarget_h
+#define _AsmTarget_h 1
 /******************************************************************
 Version identification:
 $Id$
@@ -9,44 +9,34 @@ $Id$
 
  Programmer: J. Buck
 
- Basic assembly language code architecture for a single processor.
+ Basic assembly language code Target for a single processor.
  Either an SDFScheduler or a LoopScheduler object can be used as
- the scheduler.  More specialized architectures (for a specific
+ the scheduler.  More specialized Targets (for a specific
  processor, etc) can be derived from this.
 
 *******************************************************************/
 
-#include "Architecture.h"
+#include "CGTarget.h"
 #include "SDFScheduler.h"
 
 class ProcMemory;
 class AsmStar;
 
-class AsmArch : public Architecture {
+class AsmTarget : public CGTarget {
 private:
 	const char* starClass;
 protected:
 	ProcMemory& mem;
+
+	int allocMem(AsmStar&);
 public:
-	AsmArch(char*n, char* d, const char* stype, ProcMemory& m) :
-		Architecture(n,d,stype), mem(m) {}
-	void printCode ();
-	virtual int allocMem(AsmStar&);
-	int performAllocation();
-	virtual void headerCode();
-	virtual int loadCode();
-	virtual int runCode();
+	AsmTarget(char*nam, char* desc, const char* stype, ProcMemory& m) :
+		CGTarget(nam,stype,desc), mem(m) {}
+
+	Block* clone() const = 0;
+
+	int setup(Galaxy&);
+
 };
 
-class AsmArchSched : public ArchSched {
-public:
-	AsmArchSched(AsmArch* a,SDFScheduler* sch) : ArchSched(a), sched(sch){}
-protected:
-	int setup(Block& galaxy);
-	int run (Block& galaxy) {return sched->run(galaxy);}
-	void setStopTime(float t) { sched->setStopTime(t);}
-	AsmArch* asmArch() const { return (AsmArch*)arch;}
-private:
-	SDFScheduler* sched;
-};
 #endif
