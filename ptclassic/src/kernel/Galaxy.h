@@ -133,6 +133,7 @@ public:
 class Galaxy : public Block  {
 	friend class GalTopBlockIter;
 	friend class CGalTopBlockIter;
+	friend class Scope;	// nt4.vc needs this.
 public:
 
 	// Constructor
