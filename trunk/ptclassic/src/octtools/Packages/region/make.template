@@ -68,6 +68,8 @@ DRVROBJ =	reg_test.o
 
 DRVRLIBS =	-lregion -loh -lvov -lgu -loct -ltr -lkd -lport -lutility -lport -lerrtrap -luprintf -lst -lm
 
+MISC_FILES =	region.doc region_inst region_test test_std_1 test_std_2
+
 # common makefile file for vem libraries
 VEMLIBCONFIG=../../vem-lib.mk
 include $(VEMLIBCONFIG)

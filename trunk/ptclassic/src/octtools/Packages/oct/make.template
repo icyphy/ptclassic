@@ -155,6 +155,8 @@ DRVRLIBS = -ltr -lport -lutility -lerrtrap -luprintf -lst -lm
 
 DRVRDIR =	tst
 
+MISC_FILES =	TODO man oct.doc resolve.doc tst
+
 # common makefile file for vem libraries
 VEMLIBCONFIG=../../vem-lib.mk
 include $(VEMLIBCONFIG)

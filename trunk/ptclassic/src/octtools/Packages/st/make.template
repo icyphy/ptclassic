@@ -63,6 +63,8 @@ DRVROBJ =	$(DRIVER).o
 
 DRVRLIBS =  	-lport -lutility -lerrtrap -luprintf 
 
+MISC_FILES =	st.c-octtools st.doc test_input test_output
+
 # common makefile file for vem libraries
 VEMLIBCONFIG=../../vem-lib.mk
 include $(VEMLIBCONFIG)

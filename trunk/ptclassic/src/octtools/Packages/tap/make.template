@@ -41,7 +41,8 @@ VPATH         = $(ROOT)/src/octtools/Packages/tap
 CONFIG=$(ROOT)/mk/config-$(ARCH).mk
 include $(CONFIG)
 
-HDRS		= lsort.h \
+HDRS		= desrule.h \
+		lsort.h \
 		tap.h \
 		tap_int.h
 
@@ -73,6 +74,8 @@ KRUFT =		$(DRIVER)  tapvempat
 DRVROBJ =	tap-print.o
 
 DRVRLIBS = 	-ltap -llist -loh -lvov -loptions -lgu -loct -ltr -lkd -lutility -lport -lerrtrap -luprintf -lst -lm
+
+MISC_FILES =	gaas.physical.pat tap.doc tap.doc.src
 
 # common makefile file for vem libraries
 VEMLIBCONFIG=../../vem-lib.mk

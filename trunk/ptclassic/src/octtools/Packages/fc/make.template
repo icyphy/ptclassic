@@ -64,6 +64,8 @@ DRVROBJ =	fc_test.o
 DRVRLIBS = 	-lutility -lport -lerrtrap -luprintf -lst -lm
 DRVRDIR =	sample
 
+MISC_FILES =	fc.doc sample test_output
+
 # common makefile file for vem libraries
 VEMLIBCONFIG=../../vem-lib.mk
 include $(VEMLIBCONFIG)

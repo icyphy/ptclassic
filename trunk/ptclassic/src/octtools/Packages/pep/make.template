@@ -71,6 +71,8 @@ DRVROBJ =	test.o
 
 DRVRLIBS =	-lth -lregion -lkd -lgu -loh -ltap -lvov -loptions -loct -ltr -lst -llist -lport -lutility -lerrtrap -luprintf -lm
 
+MISC_FILES =	areacap.dat experim.data pep.doc
+
 # common makefile file for vem libraries
 VEMLIBCONFIG=../../vem-lib.mk
 include $(VEMLIBCONFIG)

@@ -53,6 +53,8 @@ LIB = 		libtimer.$(LIBSUFFIX)
 
 EXPHDR =	timer.h
 
+MISC_FILES =	timer.doc
+
 # common makefile file for vem libraries
 VEMLIBCONFIG=../../vem-lib.mk
 include $(VEMLIBCONFIG)

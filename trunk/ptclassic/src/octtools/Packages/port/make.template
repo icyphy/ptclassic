@@ -88,6 +88,8 @@ DRVROBJ =	tester.o
 
 DRVRLIBS =	
 
+MISC_FILES =	port.doc
+
 # common makefile file for vem libraries
 VEMLIBCONFIG=../../vem-lib.mk
 include $(VEMLIBCONFIG)

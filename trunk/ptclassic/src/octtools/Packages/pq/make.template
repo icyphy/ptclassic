@@ -65,6 +65,8 @@ DRVRLIBS =	-lda -lst -lport -lutility -lerrtrap -luprintf
 
 DRVRDIR =	input
 
+MISC_FILES =	input output pq.doc
+
 # common makefile file for vem libraries
 VEMLIBCONFIG=../../vem-lib.mk
 include $(VEMLIBCONFIG)

@@ -67,6 +67,8 @@ DRVRLIBS =	-loh -lvov -ltap -loptions -loh -loct -ltr -llist -lutility -lport -l
 
 DRVRDIR =	tst
 
+MISC_FILES = 	lel.doc test.old tst
+
 # common makefile file for vem libraries
 VEMLIBCONFIG=../../vem-lib.mk
 include $(VEMLIBCONFIG)
