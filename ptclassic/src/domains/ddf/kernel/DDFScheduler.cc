@@ -478,6 +478,8 @@ void fireSource(Star& s, int k) {
 			
 	}
 
+	if (s.numberPorts() == 0) min = 0;
+
 	// fire sources "k-min" times.
 	if (minIn > k - min) minIn = k - min;
 	for (int i = 0; i < minIn; i++) 
