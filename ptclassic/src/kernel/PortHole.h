@@ -250,7 +250,7 @@ public:
 	Plasma* setPlasma(Plasma *useType = NULL);
 
 	// destructor
-	~MultiPortHole() { delPorts();}
+	~MultiPortHole();
 protected:                           
         // List of ports allocated
         PortList ports;
@@ -338,7 +338,11 @@ public:
 	// time the Geodesic is accessed -- normally this is
 	// one except for SDF, where it is the number of
 	// Particles consumed or generated
+	// THIS WILL CHANGE TO PROTECTED!  USE numXfer()!
 	int numberTokens;
+
+	// return the number of tokens transferred per execution
+	int numXfer() const { return numberTokens;}
 
 	// return the number of particles on my Geodesic
 	int numTokens() const;
@@ -419,7 +423,7 @@ private:
 class GalPort : public PortHole {
 public:
 	GalPort(GenericPort& a);
-	GalPort() {};
+	GalPort() {}
 	int isItInput() const;
 	int isItOutput() const;
 };
@@ -448,7 +452,7 @@ public:
 	GalMultiPort(GenericPort& a);
 
 	// If you want to defer creating the alias to an alias() call
-	GalMultiPort() {};
+	GalMultiPort() {}
 
 	// queries pass through to the inside
 	int isItInput() const;
