@@ -79,17 +79,14 @@ class ::tycho::EditPtlang {
     ##########################################################################
     ####                         public methods                           ####
 
+    # Generate and display a doc file from the current buffer
+    method gendoc {}
+
     # Open a help window.
     method help {}
 
     # Tag and color the code in a region.
     method parseNow {start stop}
-
-    ###################################################################
-    ####                         public procs                      ####
-
-    # Given a source file (a .pl file) generate and display a doc file.
-    proc gendoc {filename}
 }
 
 #######################################################################
@@ -152,7 +149,22 @@ body ::tycho::EditPtlang::constructor {args} {
     menubar addMenuSeparator Special
 
     menubar addMenuItem "Generate doc" Special -underline 0 \
-            -command "::tycho::EditPtlang::gendoc $file"
+            -command "$this gendoc"
+
+}
+
+###################################################################
+#### gendoc
+# Generate and display a doc file.
+# If the doc file already exists and is newer than the source file,
+# then it is simply displayed, not regenerated.
+# NOTE: This is a Unix-specific implementation, since "exec" is used
+# to invoke "ptlang".
+#
+body ::tycho::EditPtlang::gendoc {} {
+    return [::tycho::EditProgram::gendoc {set docfile $root.htm} \
+            { ::tycho::rm -f "$root.h" "$root.cc" "$root.htm" "$root.t"; \
+            exec ptlang $tail}] 
 
 }
 
@@ -199,51 +211,4 @@ body ::tycho::EditPtlang::parseNow {start stop} {
 
     # To get C++ parsing
     EditCpp::parseNow $start $stop
-}
-
-    ###################################################################
-    ###################################################################
-    ####                      public procedures                    ####
-
-###################################################################
-#### gendoc
-# Given a source file (a .pl file) generate and display a doc file.
-# If the doc file already exists and is newer than the source file,
-# then it is simply displayed, not regenerated.
-# NOTE: This is a Unix-specific implementation, since "exec" is used
-# to invoke "ptlang".
-#
-body ::tycho::EditPtlang::gendoc {filename} {
-    set filename [::tycho::expandPath $filename]
-    set dir [file dirname $filename]
-    set tail [file tail $filename]
-    set root [file rootname $tail]
-    set docfile "$root.htm"
-    set fulldoc [file join $dir $docfile]
-    if {![file exists $fulldoc] || \
-            [file mtime $filename] > [file mtime $fulldoc] } {
-        # Need to regenerate the doc.  Check permissions first.
-        # It is sufficient for the directory to be writable.
-        if {[file writable $dir]} {
-	    # Save the file if it has not been saved
-#	    if {[isModified] == 1} {
-#		if {[::tycho::askuser \
-#			"File $filename has not been saved, Save it now?"]} {
-#		    save
-#		}
-#	    }
-
-            set savedir [pwd]
-            cd $dir
-            exec rm -f "$root.h" "$root.cc" "$root.htm" "$root.t"
-            exec ptlang $tail
-            cd $savedir
-        } {
-            ::tycho::warn "The documentation file is out of date, \
-                    and you do not have permission to update it."
-        }
-    }
-    if [file exists $fulldoc] {
-        ::tycho::File::openContext $fulldoc
-    }
 }
