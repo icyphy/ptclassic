@@ -550,9 +550,9 @@ body ::tycho::Slate::ghost {tag {tags {}}} {
     } elseif { [string match {_*} $tag] } {
 	# If it's a complex item and it has a ghost{} method,
 	# call that
-	if { [@scope ::tycho::$itemclass($id) \
+	if { [@scope ::tycho::$itemClass($id) \
 		[list ::info exists methodtable(ghost)]] } {
-	    return [@scope ::tycho::$itemclass($id) \
+	    return [@scope ::tycho::$itemClass($id) \
 		    [list eval \[set methodtable(ghost)\] \
 		    $id $canvas $this]]
     	}
@@ -598,9 +598,9 @@ body ::tycho::Slate::highlight {tag args} {
     if { [string match {_*} $tag] } {
 	# If it's a complex item and it has a highlight{} method,
 	# call that
-	if { [@scope ::tycho::$itemclass($tag) \
+	if { [@scope ::tycho::$itemClass($tag) \
 		[list ::info exists methodtable(highlight)]] } {
-	    return [@scope ::tycho::$itemclass($tag) \
+	    return [@scope ::tycho::$itemClass($tag) \
 		    [list eval \[set methodtable(highlight)\] \
 		    $tag $canvas $this]]
     	}
@@ -1073,7 +1073,7 @@ body ::tycho::Slate::shape {id {method {}} {region 0}} {
             set shape point
         }
     } else {
-	set shape [@scope ::tycho::$itemclass($id) [list set shape]]
+	set shape [@scope ::tycho::$itemClass($id) [list set shape]]
     }
 
     # Return just the shape
@@ -1082,11 +1082,11 @@ body ::tycho::Slate::shape {id {method {}} {region 0}} {
     } else {
 	# If a method name is given, get the proc that implements it
 	if { ! $region && [string match {_*} $id] && \
-		[@scope ::tycho::$itemclass($id) \
+		[@scope ::tycho::$itemClass($id) \
 		[list ::info exists methodtable($method)]] } {
 	    # If the item is complex and the region flag is not given,
 	    # get it from the complex item class
-	    return [@scope ::tycho::$itemclass($id) \
+	    return [@scope ::tycho::$itemClass($id) \
 		    [list set methodtable($method)]]
 	} else {
 	    # If we can't get it from the item class, then get it
@@ -1105,9 +1105,9 @@ body ::tycho::Slate::unhighlight {tag} {
     if { [string match {_*} $tag] } {
 	# If it's a complex item and it has an unhighlight{} method,
 	# call that
-	if { [@scope ::tycho::$itemclass($tag) \
+	if { [@scope ::tycho::$itemClass($tag) \
 		[list ::info exists methodtable(unhighlight)]] } {
-	    @scope ::tycho::$itemclass($tag) \
+	    @scope ::tycho::$itemClass($tag) \
 		    [list eval \[set methodtable(unhighlight)\] \
 		    $tag $canvas $this]
 
