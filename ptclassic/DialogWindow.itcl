@@ -424,11 +424,20 @@ body ::tycho::DialogWindow::invoke {args} {
 # directly to the constructor of the class.
 # The class is assumed to be defined in namespace ::tycho, so the
 # string "::tycho::" is prepended to the class name.
+# If the option -geometry is given, then it specifies the placement
+# of the window.  Otherwise, the window is centered on the screen.
 #
 body ::tycho::DialogWindow::new {class instance args} {
     # FIXME: Should check to make sure the class is derived from this.
     uplevel #0 ::tycho::$class $instance $args
-    $instance centerOnScreen
+
+    # If -geometry option is given, use deiconify.  Otherwise, center.
+    if {[lsearch -exact $args {-geometry}] >= 0} {
+	update idletasks
+	wm deiconify $instance
+    } {
+	$instance centerOnScreen
+    }
     update
     if [info exists commandResult($instance)] {
 	unset commandResult($instance)
@@ -452,6 +461,8 @@ body ::tycho::DialogWindow::new {class instance args} {
 # names are just passed directly to the constructor of the class.
 # The class is assumed to be defined in namespace ::tycho, so the
 # string "::tycho::" is prepended to the class name.
+# If the option -geometry is given, then it specifies the placement
+# of the window.  Otherwise, the window is centered on the screen.
 #
 body ::tycho::DialogWindow::newModal {class instance args} {
     # FIXME: Should check to make sure the class is derived from this.
@@ -473,7 +484,12 @@ body ::tycho::DialogWindow::newModal {class instance args} {
     } {
 	uplevel #0 ::tycho::$class $instance $args
     }
-    $instance centerOnScreen
+    if {[lsearch -exact $args {-geometry}] >= 0} {
+	update idletasks
+	wm deiconify $instance
+    } {
+	$instance centerOnScreen
+    }
     update
     # Do not continue in this thread until the window is dismissed.
     if [winfo exists $instance] {
