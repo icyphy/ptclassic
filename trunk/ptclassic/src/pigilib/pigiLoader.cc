@@ -43,11 +43,18 @@ $Id$
 #define ARCH "mips"
 #endif
 
+// root of Ptolemy source/lib directory
+static const char* ptolemyRoot;
+// a temporary file name for compiler errors
+static const char* tmpFileName;
+
 // pigi funcs to call
 extern "C" void PrintDebug(const char*);
 extern "C" void DirName(char*);
 extern "C" char* BaseName(const char*);
 extern "C" int IconFileToSourceFile (const char*, char*, char*);
+extern "C" int util_csystem (const char*);
+extern "C" void win_msg(const char*);
 
 static void strcpyLC (char* out, const char* in) {
 	char c;
@@ -79,19 +86,44 @@ static int isYounger (const char* fileA, const char* fileB) {
 	return bufA.st_mtime > bufB.st_mtime;
 }
 
+// make a window with the stuff in the file.
+static void reportErrors (const char* text) {
+	const int BUFLEN = 2048;
+	char buf[BUFLEN];
+	sprintf (buf, "Loader: %s\n", text);
+	int l = strlen (buf);
+	char* p = buf + l;
+	FILE* fd = fopen (tmpFileName, "r");
+	if (fd == 0) {
+		strcpy (p, "Can't open error file!");
+	}
+	else {
+		int c;
+		while ((c = getc (fd)) != EOF && p < buf + BUFLEN - 1)
+			*p++ = c;
+		*p = 0;
+	}
+	win_msg (buf);
+	unlink (tmpFileName);
+}
+
+// Default compile statement.  We include the kernel directory, the domain-
+// specific kernel and stars directories, and the source file directory.
+// If others are required as well, you must use a makefile.
+
 static int compile (const char* name, const char* idomain, const char* srcDir,
 		    const char* objDir)
 {
 	char domain[32], cmd[512];
-	const char* PTOLEMY = getenv ("PTOLEMY");
-	if (PTOLEMY == 0) PTOLEMY = expandPathName ("~ptolemy");
 	strcpyLC (domain, idomain);
 	sprintf (cmd, "cd %s; g++ -c -I %s/src/domains/%s/kernel "
-		 "-I %s/src/kernel -I %s %s/%s%s.cc", objDir, PTOLEMY,
-		 domain, PTOLEMY, srcDir, srcDir, idomain, name);
+		 "-I %s/src/domains/%s/stars -I %s/src/kernel "
+		 "-I %s %s/%s%s.cc >& %s", objDir, ptolemyRoot, domain,
+		 ptolemyRoot, domain, ptolemyRoot,
+		 srcDir, srcDir, idomain, name, tmpFileName);
 	PrintDebug (cmd);
-	if (system (cmd)) {
-		Error::abortRun ("Loader: errors in compilation");
+	if (util_csystem (cmd)) {
+		reportErrors ("errors in compilation");
 		return FALSE;
 	}
 	return TRUE;
@@ -118,11 +150,11 @@ static char* genObjDir (const char* src) {
 // Function to initialize the loader
 extern "C" void
 KcLoadInit (const char* argv0) {
+	ptolemyRoot = getenv ("PTOLEMY");
+	if (ptolemyRoot == 0) ptolemyRoot = "~ptolemy";
+	tmpFileName = tempFileName();
 	Linker::init (argv0);
 }
-
-		
-
 
 // Here is the function that loads in a star!
 // name = username of the star
@@ -136,7 +168,7 @@ KcCompileAndLink (const char* name, const char* idomain, const char* srcDir) {
 // debug statement
 	sprintf (cmd, "compileAndLink(%s,%s,%s)", name, idomain, srcDir);
 	PrintDebug (cmd);
-	sprintf (cmd, "objDir = %s", objDir);
+	sprintf (cmd, "objDir is %s", objDir);
 	PrintDebug (objDir);
 
 // form the source file name
@@ -146,16 +178,33 @@ KcCompileAndLink (const char* name, const char* idomain, const char* srcDir) {
 	if (fd < 0) return noPermission ("Loader: can't open ", plName);
 	close (fd);
 	sprintf (oName, "%s/%s%s.o", objDir, idomain, name);
+// if there is a makefile, use make.
+	char makeFile[512];
+	sprintf (makeFile, "%s/%s", objDir, "Makefile");
+	if (!exists (makeFile)) {
+		sprintf (makeFile, "%s/%s", objDir, "makefile");
+	}
+	if (exists (makeFile)) {
+		sprintf (cmd, "cd %s; make %s%s.o >& %s",
+			 objDir, idomain, name, tmpFileName);
+		PrintDebug (cmd);
+		if (util_csystem (cmd)) {
+			reportErrors ("errors from make");
+			return FALSE;
+		}
+		return Linker::linkObj (oName);
+	}
+// No makefile.  If object is younger than source, assume it's good.
 	if (exists (oName) && isYounger (oName, plName))
 		return Linker::linkObj (oName);
 	sprintf (ccName, "%s/%s%s.cc", srcDir, idomain, name);
-// preprocess if need be.
+// Preprocess if need be.
 	if (!exists (ccName) || isYounger (plName, ccName)) {
-		sprintf (cmd, "cd %s; ptlang %s%s.pl",
-			 srcDir, idomain, name);
+		sprintf (cmd, "cd %s; ptlang %s%s.pl >& %s",
+			 srcDir, idomain, name, tmpFileName);
 		PrintDebug (cmd);
-		if (system (cmd)) {
-			Error::abortRun ("Loader: preprocessor error");
+		if (util_csystem (cmd)) {
+			reportErrors (cmd);
 			return FALSE;
 		}
 		// make sure we now have the .cc file
@@ -169,10 +218,7 @@ KcCompileAndLink (const char* name, const char* idomain, const char* srcDir) {
 		}
 	}
 // now compile.
-	srcDir = savestring (srcDir); // yuk: expandPathName has static string
-	int status = compile (name, idomain, srcDir, objDir);
-	delete srcDir;
-	if (!status) return FALSE;
+	if (!compile (name, idomain, srcDir, objDir)) return FALSE;
 // finally incremental link.
 	return Linker::linkObj (oName);
 }
