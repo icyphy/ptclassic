@@ -26,6 +26,8 @@ $Id$
 // In this generic architecture, a code block is identical to the base class
 #define CGCodeBlock CodeBlock
 
+class CGWormhole;
+
 	////////////////////////////////////
 	// class CGStar
 	////////////////////////////////////
@@ -44,6 +46,13 @@ public:
 
 	// class identification
 	int isA(const char*) const;
+
+        // virtual method to return this pointer if it is a wormhole.
+        // Return NULL if not.
+        virtual CGWormhole* myWormhole();
+
+        // max {cost of communication with its anscestros}
+        int maxComm();
 
 protected:
 

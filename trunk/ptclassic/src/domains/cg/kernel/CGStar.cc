@@ -1,4 +1,5 @@
 static const char file_id[] = "CGStar.cc";
+
 /******************************************************************
 Version identification:
 $Id$
@@ -10,7 +11,12 @@ $Id$
 
 *******************************************************************/
 
+#ifdef __GNUG__
+#pragma implementation
+#endif
+
 #include "CGStar.h"
+#include "CGWormhole.h"
 #include "Target.h"
 
 /*******************************************************************
@@ -44,6 +50,25 @@ void CGStar :: gencode (CGCodeBlock& block) {
 void CGStar :: addCode (const char* code) {
 	targetPtr->addCode(code);
 }
+
+// max Comm. time.
+int CGStar :: maxComm() {
+
+	int max = 0;	// maximum traffic with anscestors.
+
+	BlockPortIter next(*this);
+	for(int i = numberPorts(); i > 0; i--) {
+		PortHole* p = next++;
+		if (p->isItInput() && max < p->numberTokens)
+				max = p->numberTokens;
+	}
+
+	// processor 1 to 2, "max" sample, both sending plus receiving.
+	return targetPtr->commTime(1,2,max,2);
+}
+
+// return NULL
+CGWormhole* CGStar :: myWormhole() { return NULL; }
 
 // The following is defined in CGDomain.cc -- this forces that module
 // to be included if any CG stars are linked in.
