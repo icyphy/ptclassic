@@ -34,23 +34,12 @@ Pixels at the image boundaries are copied and not median filtered.
 	}
 
 	setup {
-		// Filter length must be positive and odd
-		int flen = int(FilterWidth);
-		if ( flen <= 0 ) {
-		    Error::error(*this, "must have a positive filter length.");
-		    return;
-		}
-		int oddflen = 1 + 2*(flen/2);
-		if ( flen != oddflen ) {
-		    Error::error(*this, "must have an odd filter length.");
-		    return;
-		}
-
-		// In a flen x flen neighborhood of pixels, data is
+		// In a fwidth x fwidth neighborhood of pixels, data is
 		// written into the one-dimensional buffer buf, which
-		// is indexed from 0 ... (flen * flen - 1).
-		// Median value at middle index, (flen * flen - 1)/2
-		RankOrder = (flen*flen - 1)/2;
+		// is indexed from 0 ... (fwidth * fwidth - 1).
+		// Median value at middle index, (fwidth * fwidth - 1)/2
+		int fwidth = int(FilterWidth);
+		RankOrder = (fwidth*fwidth - 1)/2;
 
 		// Initialize data members
 		SDFRankImage::setup();
