@@ -44,19 +44,22 @@ transients die away.
 		type {int}
 		default {"0"}
 		desc { Counter for samples in trace interval }
-		attributes { A_NONCONSTANT|A_SETTABLE }
+		attributes { A_NONCONSTANT|A_NONSETTABLE }
 	}
 	defstate {
 		name {nTracesSoFar}
 		type {int}
 		default {"0"}
 		desc { Counter for trace intervals }
-		attributes { A_NONCONSTANT|A_SETTABLE }
+		attributes { A_NONCONSTANT|A_NONSETTABLE }
 	}
 
+	setup {
+	    traceCount= 0-(int)ignore;
+	    CGCXgraph::setup();
+	}
 	go {
 		if (int(traceLength) > 0) {
-
 @	if ($ref(traceCount) >= $val(traceLength)) {
 @		$ref(traceCount) = 0;
 @		fprintf($starSymbol(fp), "move ");
@@ -64,7 +67,7 @@ transients die away.
 @		$ref(nTracesSoFar)++;
 @	}
 @	$ref(traceCount)++;
-
+@	if (!$ref(traceCount)) $ref(index) = 0;
 		}
 
 		CGCXgraph::go();
