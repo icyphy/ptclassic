@@ -82,6 +82,12 @@ class ::tycho::Builder {
     # Create itcldocs in the subdirectories.
     proc itcldocs {}
 
+    # Return a list of files that correspond with the classes that have been loaded.
+    proc filesLoaded {}
+
+    # Get the sources from version control system.
+    proc sources {}
+
     # Build tcl extensions in %TYCHO/obj.$PTARCH.
     proc tclexts {}
 
@@ -263,6 +269,30 @@ body ::tycho::Builder::sources {} {
             -command {make sources} \
             -dir $TYCHO \
             -autostart 1 -autodestroy 1
+}
+
+#######################################################################
+#### filesLoaded
+# Return a list of files that correspond with the classes that have been loaded.
+# This method assumes that the file is named after the class.  If, for a particular
+# class, a file can't be found, then error is called.
+#
+proc ::tycho::Builder::filesLoaded { {namespace ::tycho}} {
+    global auto_path
+    set filelist {}
+    set loadedclasslist [info namespace children $namespace]
+    foreach loadedclass $loadedclasslist {
+	foreach dir $auto_path {
+	    foreach file [glob -nocomplain [file join $dir *]] {
+		if {[file rootname $dir] \
+			== [info namespace tail $loadedclass]} {
+		    lappend filelist $file
+		}
+	    }
+	}
+	error "Could not find File for $loadedclass"
+    }
+    return $filelist
 }
 
 #######################################################################
