@@ -1,6 +1,9 @@
 .VR $Revision$ $Date$
 .TI "CG Domain"
 .ds DO "CG
+.EQ
+delim off
+.EN
 .AU
 Joseph Buck
 Soonhoi Ha
@@ -39,3 +42,6 @@ J. Pino, S. Ha, E. Lee, and J. Buck,
 "Software Synthesis for DSP Using Ptolemy"
 , invited paper in the \fIJournal on VLSI Signal Processing\fR, special
 issue on "Synthesis for DSP", to appear.
+.EQ
+delim $$
+.EN
