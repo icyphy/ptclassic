@@ -3,7 +3,7 @@ static const char file_id[] = "CGTarget.cc";
 Version identification:
 $Id$
 
-Copyright (c) 1990-1994 The Regents of the University of California.
+Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -118,16 +118,6 @@ CGTarget::CGTarget(const char* name,const char* starclass,
 CGTarget::~CGTarget() {
 	delSched();
 	LOG_DEL; delete schedFileName;
-
-	ListIter next(spliceList);
-	Block* b;
-	while ((b = (Block*)next++) != 0) {
-		// prevent some galaxy types from deleting b twice.
-		galaxy()->removeBlock(*b);
-		if (b->isItAtomic() && ((Star*)b)->parentCluster())
-		    ((Star*)b)->parentCluster()->clearMaster();
-		LOG_DEL; delete b;
-	}
 }
 
 
