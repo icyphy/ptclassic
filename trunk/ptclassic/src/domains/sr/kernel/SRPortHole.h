@@ -39,66 +39,76 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #include "PortHole.h"
 
-	//////////////////////////////
-	// class SRPortHole
-	//////////////////////////////
+/**********************************************************************
 
+  Port Hole for the SR domain
+
+  @Description Communication in the SR domain is done through
+  unbuffered wires that take on one value at the end of each instant,
+  although the value of each wire evolves monotonically during each instant.
+
+  <P> The value on a wire (and hence a port) may be unknown, absent,
+  or present with some value.  The status (unknown, known absent, or
+  known present) of both input and output ports may be tested.
+
+ **********************************************************************/
 class SRPortHole : public PortHole {
 public:
-  // Class identification
-  virtual int isA(const char* className) const;
+  // Identify the class
+  int isA(const char* className) const;
 
-  // Return TRUE if the particle in the port hole is known (present or absent)
   virtual int known() const;
 
-  // Return TRUE if the particle in the port hole is (known as) absent
   virtual int absent() const;
 
-  // Return TRUE if this input is (known as) present
   virtual int present() const;
 
-  // Return the particle being emitted
   virtual Particle & get() const;
 
 };
 
-	//////////////////////////////
-	// class InSRPort
-	//////////////////////////////
 
+/**********************************************************************
+
+  Input Port Hole for the SR domain
+
+ **********************************************************************/
 class InSRPort : public SRPortHole {
 public:
 
-  // Input/output identification.
   virtual int isItInput() const;
 
-  // Return the particle being emitted
   Particle & get() const;
 
-
-  /*virtual*/ int known() const;
-  /*virtual*/ int absent() const;
-  /*virtual*/ int present() const;
+  int known() const;
+  int absent() const;
+  int present() const;
   
 };
 
-	//////////////////////////////
-	// class OutSRPort
-	//////////////////////////////
+/**********************************************************************
 
+  Output Port Hole for the SR domain
+
+ **********************************************************************/
 class OutSRPort : public SRPortHole {
 
   friend class InSRPort;
 
 private:
 
-  // The particle emitted by this Port Hole.  0 denotes unknown,
-  // 1 denotes absent, and everything else is a present particle.
+  // The particle emitted on this Port Hole.
+  //
+  // @Description 0 denotes unknown, 1 denotes absent, and everything
+  // else is a pointer to present particle.
+
   Particle * emittedParticle;
 
 public:
 
-  // Destroy the particle in the port, if any, resetting it to "unknown"
+  // Destroy the particle in the port, if any, resetting it to
+  // "unknown"
+
   void clearPort();
 
   // Input/output identification.
@@ -110,29 +120,18 @@ public:
   // Emit a particle
   Particle & emit();
 
-  /*virtual*/ int known() const;
-  /*virtual*/ int absent() const;
-  /*virtual*/ int present() const;
+  int known() const;
+  int absent() const;
+  int present() const;
 
   // Return the particle being emitted
-  /*virtual*/ Particle & get() const;
+  Particle & get() const;
 
   void initialize();
 
 };
 
-	//////////////////////////////
-	// class MultiSRPort
-	//////////////////////////////
- 
-class MultiSRPort : public MultiPortHole {
-};
-
-	//////////////////////////////
-	// class MultiInSRPort
-	//////////////////////////////
-
-class MultiInSRPort : public MultiSRPort {
+class MultiInSRPort : public MultiPortHole {
 public:
   // Input/output identification.
   virtual int isItInput() const;
@@ -141,11 +140,7 @@ public:
   virtual PortHole& newPort();
 };
 
-	//////////////////////////////
-	// class MultiOutSRPort
-	//////////////////////////////
- 
-class MultiOutSRPort : public MultiSRPort {     
+class MultiOutSRPort : public MultiPortHole {     
 public:
   // Input/output identification.
   virtual int isItOutput() const;
