@@ -21,21 +21,6 @@ $Id$
 ********************************************************************/
 
 
-void SDFStar :: beforeGo()
-{
-        for(int i = numberPorts(); i>0; i--) {
-                SDFPortHole& port = (SDFPortHole&)nextPort();
-                port.beforeGo();
-                }
-}
- 
-void SDFStar :: afterGo()
-{
-        for(int i = numberPorts(); i>0; i--) {
-                SDFPortHole& port = (SDFPortHole&)nextPort();
-                port.afterGo();
-                }
-}
 
 // Redefine method setting internal data in the Block
 // so that various SDF-specific initilizations can be performed.
