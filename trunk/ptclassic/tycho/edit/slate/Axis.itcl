@@ -238,7 +238,7 @@ body ::tycho::Axis::redrawTicks {x0 y0} {
 
     # Create the tick lines: first, make a list of components
     set itemspecs {}
-    foreach* x $axisLocations v $axisValues {
+    foreach x $axisLocations v $axisValues {
 	lappend itemspecs [list "ticks" [list line $x $y0 $x \
 		[expr $y0-$ticklength]]]
 	lappend itemspecs [list "labels" \
