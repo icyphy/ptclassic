@@ -140,7 +140,9 @@ protected:
     CodeStream procedures(SHARE);
 
     StringState destDirectory;
-    IntState loopScheduler;
+    // If we set this state 0, no looping. 1, Joe's looping.
+    // If set to 2, Shuvra and Ha's extensive looping.
+    IntState loopingLevel;
 
     char *schedFileName;
 

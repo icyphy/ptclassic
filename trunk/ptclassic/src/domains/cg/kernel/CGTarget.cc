@@ -21,6 +21,7 @@ $Id$
 #include "GalIter.h"
 #include "Error.h"
 #include "SDFScheduler.h"
+#include "LoopScheduler.h"
 #include "SDFCluster.h"
 #include "CGDisplay.h"
 #include "miscFuncs.h"
@@ -49,8 +50,8 @@ CGTarget::CGTarget(const char* name,const char* starclass,
 	targetNestedSymbol.setSeparator(separator);
 	addState(destDirectory.setState("destDirectory",this,
 		"PTOLEMY_SYSTEMS","Directory to write to"));
-	addState(loopScheduler.setState("loopScheduler",this,"NO",
-			"Specify whether to use loop scheduler."));
+	addState(loopingLevel.setState("loopingLevel",this,"0",
+		"Specify whether to use loop scheduler and in what level."));
 	addStream("myCode",&myCode);
 	addStream("procedures",&procedures);
 }
@@ -78,9 +79,14 @@ void CGTarget::setup() {
 	procedures.initialize();
 	writeDirectoryName(destDirectory);
 	if (!scheduler()) {
-		if(int(loopScheduler)) {
+		int lv = int(loopingLevel);
+		if(lv > 0) {
 			schedFileName = writeFileName("schedule.log");
-			LOG_NEW; setSched(new SDFClustSched(schedFileName));
+			if (lv == 1) {
+			   LOG_NEW; setSched(new SDFClustSched(schedFileName));
+			} else {
+			   LOG_NEW; setSched(new LoopScheduler(schedFileName));
+			}
 		} else {
 			LOG_NEW; setSched(new SDFScheduler);
 		}
