@@ -62,8 +62,8 @@ long userOptionWord;
 	{"Error Windows", 1, 10, NULL, NULL},
 	{"Tk Event Loop", 1, 10, NULL, NULL}
     };
-#define ITEMS_N sizeof(items) / sizeof(dmTextItem)
 
+#define ITEMS_N sizeof(items) / sizeof(dmTextItem)
     ViInit("options");
     ErrClear();
     items[0].value = BooleanToYesNo(PrintDebugGet());
@@ -71,13 +71,15 @@ long userOptionWord;
     items[2].value = BooleanToYesNo(KcEventLoopActive());
     if (dmMultiText("Options", ITEMS_N, items) != VEM_OK) {
 	PrintCon("Aborted entry");
-	ViDone();
     }
-    PrintDebugSet(YesNoToBoolean(items[0].value));
-    ViSetErrWindows(YesNoToBoolean(items[1].value));
-    KcSetEventLoop(YesNoToBoolean(items[2].value));
+    else {
+	PrintDebugSet(YesNoToBoolean(items[0].value));
+	ViSetErrWindows(YesNoToBoolean(items[1].value));
+	KcSetEventLoop(YesNoToBoolean(items[2].value));
+    }
     ViDone();
 #undef ITEMS_N
+
 }
 
 boolean
