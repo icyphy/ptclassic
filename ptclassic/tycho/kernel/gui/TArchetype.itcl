@@ -120,7 +120,10 @@ class ::tycho::TArchetype {
     # Give the window or a subwindow the focus.
     method focusin {}
 
-     # Open a file and go to its internal point identified by name.
+    # Return the name of the hull as a Tk window name
+    method hull {}
+    
+    # Open a file and go to its internal point identified by name.
     method hyperJump {file {point {}}}
 
     # Remember explicitly-set options and then call the built-in
@@ -317,7 +320,7 @@ body ::tycho::TArchetype::configure {args} {
 }
 
 #####################################################################
-#### currentPiint
+#### currentPoint
 # In derived classes, this method will return the current position
 # of the cursor in a form that will be understood by seeFragment{}.
 # In this base class, return an empty string.
@@ -333,6 +336,22 @@ body ::tycho::TArchetype::currentPoint {} {
 #
 body ::tycho::TArchetype::focusin {} {
     focus $itk_component(hull)
+}
+
+#########################################################################
+#### hull
+# Return the name of the hull component as a Tk window name. This
+# method should be used when a handle to a window may include the
+# global namespace qualifier (for example, <code>.mainConsole</code>,
+# but the Tk window name (<code>.mainConsole</code>) is needed
+# instead. Note that the <code>$this</code> variable includes
+# the global namespace qualifier, but commands such as winfo{}
+# require the Tk window name. This method is generally used as
+# shorthand for <code>info namespace tail $this</code> or
+# <code>component hull</code>.
+#
+body ::tycho::TArchetype::hull {} {
+    return $itk_hull
 }
 
 #####################################################################
@@ -551,7 +570,6 @@ body ::tycho::TArchetype::safeEval {args} {
 # be executed within an object's constructor.
 #
 body ::tycho::TArchetype::whenConstructed {command} {
-    set w [string trimleft $this :]
     if $_isConstructed {
         uplevel $command
     } else {
