@@ -259,6 +259,89 @@ Returns the offset position in the buffer, which ranges from 0 to bufSize()-1.
 This method returns true (nonzero) if the data to be read or written on 
 this execution "wrap around", so that accessing them in a linear order will 
 not work. 
+.H1 "Writing a 56000/96000 Single-Processor Code Generation Target"
+.Id "assembly language target"
+.Id "MotorolaTarget, class"
+.Id "AsmTarget, class"
+.pp
+Both \fBCG56Target\fR and \fBCG96Target\fR are derived from 
+\fBMotorolaTarget\fR class, which in turn is derived from
+the \fBAsmTarget\fR class.  Most of what was presented in the
+\fISingle-Processor Target\fR section of the \fBCG\fR chapter,
+still holds.  There are few default methods which simplify
+writing a new 56000 or 96000 assembly language target.
+.pp
+Listed are the single-processor states, grouped
+by the target in which they are defined.  A target writer is free to
+change any of the state default values by calling the
+\fBsetInitValue()\fR from the target's constructor.  Also,
+the \fIrunFlag\fR and \fItargetHost\fR states are originally
+hidden from the \fIpigi edit-targets\fR menu.  These can be made
+user accessible by calling the \fBsetAttributes\fR method on the state.
+For an example of where this can be seen is in the \fBS56XTarget\fR.
+.Ie "setInitValue, state method"
+.Ie "setAttributes, state method"
+.Ir "S56XTarget, CG56 Target"
+.Ir "CGTarget states"
+.UH "CGTarget States"
+.NE
+\fIdestDirectory\fR : directory to write the generated code to 
+.DF "~/DSPcode"
+.NE
+\fIloopingLevel\fR : Valid values are 0 - 2.  See the
+\fISingle-Processor Schedulers\fR section in the \fBCG\fR chapter. 
+.DF "0"
+.Ir "AsmTarget states"
+.UH "AsmTarget States"
+.NE
+\fIdisplayFlag\fR : If yes, display the generated code.
+.DF "YES"
+.NE
+\fIrunFlag\fR : If yes, display the generated code.
+.DF "NO"
+.NE
+\fItargetHost\fR : If yes, display the generated code.
+.DF "localhost"
+.UH "MotorolaTarget States"
+.Ir "MotorolaTarget states"
+.NE
+\fIxMemMap\fR : X memory space, segmented memory can be specified by
+separating the intervals with commas. 
+.DF "0-4095"
+.NE
+\fIyMemMap\fR : Y memory space, segmented memory can be specified by
+separating the intervals with commas. 
+.DF "0-4095"
+.pp
+As described in the \fISingle-Processor Target\fR section of the 
+\fBCG\fR chapter, the \fIwriteCode()\fR method can be overloaded
+by derived targets.  This method is used to write the code out to files.
+Both the \fBCG56\fR and \fBCG96\fR domain default to writing out
+the \fBmyCode\fR target stream to the file with path,
+\fIdestDirectory/universe-name.asmSuffix()\fR (See
+$PTOLEMY/src/domains/cg/kernel/AsmTarget.h for details).
+.pp
+Finally, the functions that a target writer will probably
+need to overload are:
+.(c
+headerCode()
+trailerCode()
+compileCode()
+runCode()
+.)c
+.Ir "headerCode, cg target method"
+.Ir "trailerCode, cg target method"
+.Ir "compileCode, cg target method"
+.Ir "runCode, cg target method"
+.pp
+The target writer should also set the \fIxMemMap\fR and \fIyMemMap\fR
+states to model the memory correctly.  To see how this is done,
+refer to the \fBS56XTarget\fR specification (See 
+$PTOLEMY/src/domains/cg56/targets/S56XTarget.{h,cc})
+.pp
+.Ir "ptlang, targets"
+Presently we are looking into possiblities to simplify writing new target 
+descriptions by using \fIptlang\fR.
 .EQ
 delim $$
 .EN
