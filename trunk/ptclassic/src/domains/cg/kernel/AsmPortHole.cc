@@ -37,9 +37,9 @@ int AsmPortHole::circAccess() const {
 	return FALSE;
 }
 
-// return a string indicating the address.  This is virtual so it
+// return an int indicating the address.  This is virtual so it
 // could be handled differently by derived classes.
-StringList AsmPortHole::location() {
+int AsmPortHole::location() {
 	int n = baseAddr() + offset;
 	return n;
 }

@@ -54,9 +54,9 @@ public:
 	// geodesic connected to this PortHole.
 	ProcMemory* memory() const;
 
-	// Return a string indicating the address with an offset for
+	// Return an int indicating the address with an offset for
 	// the current access.
-	virtual StringList location();
+	virtual int location();
 
 	// Return TRUE if a circular buffer access is ever required
 	// for this buffer.  This was either specified by the programmer,
