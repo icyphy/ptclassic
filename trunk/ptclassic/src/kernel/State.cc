@@ -3,7 +3,7 @@ static const char file_id[] = "State.cc";
 Version identification:
 $Id$
 
-Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
+Copyright (c) 1990-1993 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -26,7 +26,8 @@ CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
 							COPYRIGHTENDKEY
 
- Programmer:  I. Kuroda and J. T. Buck
+ Programmer:  J. T. Buck
+ Original version by I. Kuroda
  Date of creation: 5/26/90
  Revisions:
 
@@ -46,6 +47,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "miscFuncs.h"
 #include "Error.h"
 #include "KnownState.h"
+#include "PtGate.h"
 
 #define TOKSIZE 256
 
@@ -98,8 +100,6 @@ extern const Attribute A_NONCONSTANT = {0,AB_CONST};
 extern const Attribute A_NONSETTABLE = {0,AB_SETTABLE};
 extern const Attribute A_DYNAMIC = {AB_DYNAMIC,0};
 
-ParseToken State :: pushback;
-
 // Stuff to access Unix system error info.
 
 extern int sys_nerr;
@@ -116,15 +116,12 @@ inline const char* why() {
 ParseToken
 State :: getParseToken(Tokenizer& lexer, int stateType) {
         char token[TOKSIZE];
-	ParseToken t;
-
 // allow for one pushback token.
-	if (pushback.tok) {
-		t = pushback;
-		pushback.tok = 0;
+	ParseToken t = pushback();
+	if (t.tok) {
+		clearPushback();
 		return t;
 	}
-
 	lexer >> token;
         if (*token == '<') {
                 char filename[TOKSIZE];
@@ -257,3 +254,29 @@ int power(int base,int exp) {
 	while (exp > 0) { r *= base; exp--;}
 	return r;
 }
+
+// The following functions arrange for exclusive access to the pushback
+// token in case we are multi-threading.
+
+ParseToken State :: pushbackToken;
+
+// mutex for protecting access to pushback
+static KeptGate gate;
+
+// functions for safely accessing the pushback token.
+void State :: setPushback(const ParseToken& t) {
+	CriticalSection region(gate);
+	pushbackToken = t;
+}
+
+void State :: clearPushback() {
+	CriticalSection region(gate);
+	pushbackToken.tok = 0;
+}
+
+ParseToken State::pushback() {
+	CriticalSection region(gate);
+	ParseToken t = pushbackToken;
+	return t;
+}
+

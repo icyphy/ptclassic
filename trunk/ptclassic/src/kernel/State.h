@@ -175,8 +175,12 @@ protected:
 	// complain of parse error
 	void parseError (const char*, const char* = "");
 
-	// pushback token, for use in parsing
-	static ParseToken pushback;
+	// read the pushback token
+	static ParseToken pushback();
+	// write the pushback token
+	static void setPushback(const ParseToken&);
+	// clear the pushback token
+	static void clearPushback();
 
 	// expression evaluation functions
 	ParseToken evalIntExpression(Tokenizer& lexer);
@@ -190,6 +194,9 @@ protected:
 	ParseToken evalFloatAtom(Tokenizer& lexer);
 
 private:
+	// pushback token, for use in parsing
+	static ParseToken pushbackToken;
+
 	// string used to set initial value by initialize()
 	const char* myInitValue;
 
