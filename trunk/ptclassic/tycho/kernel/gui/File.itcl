@@ -564,6 +564,9 @@ body ::tycho::File::constructor {args} {
     # Initiate the auto-save loop
     autoSave
 
+    # Save if instructed by the window manager.
+    wm protocol $prefix WM_SAVE_YOURSELF "$this saveCrash"
+
     # FIXME: Because of some itcl bogosity, filesOpen finds itself
     # not settable as an array.  Here we force it to be an array
     # and hope nobody uses the file name here.
