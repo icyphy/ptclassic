@@ -48,6 +48,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "EventHorizon.h"
 #include "LoopScheduler.h"
 #include "SDFCluster.h"
+#include "AcyLoopScheduler.h"
 #include "miscFuncs.h"
 #include "CGUtilities.h"
 #include "pt_fstream.h"
@@ -55,6 +56,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "KnownBlock.h"
 #include "Tokenizer.h"
 #include "ProfileTimer.h"
+#include "checkConnect.h"
 #include <time.h>
 
 extern const char* CODE = "code";
@@ -203,6 +205,9 @@ void CGTarget::setup() {
 		delete [] schedFileName;
 		schedFileName = writeFileName("schedule.log");
 		LOG_NEW; setSched(new LoopScheduler(schedFileName));
+		break;
+	    case 3:
+		LOG_NEW; setSched(new AcyLoopScheduler);
 		break;
 	    default:
 		Error::abortRun(*this,"Unknown scheduler");
@@ -591,6 +596,8 @@ StringList CGTarget::comment(const char* text, const char* b,
     const char* special = "";
     const char* white = "\n";
     Tokenizer lexer(text, special, white);
+    // don't want Tokenizer to use # as the comment character
+    (void)lexer.setCommentChar((char)0);
     char line[1024];
 
     if (text==NULL) return cmnt;
@@ -657,7 +664,6 @@ int CGTarget :: modifyGalaxy() {
     if(haltRequested()) return FALSE;
     if(!typeConversionTable) return TRUE;
 
-    extern int warnIfNotConnected (Galaxy&);
 
     Galaxy& gal = *galaxy();
     GalStarIter starIter(gal);
