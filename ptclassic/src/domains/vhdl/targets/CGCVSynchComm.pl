@@ -24,7 +24,7 @@ defstar {
   defstate {
     name {destDir}
     type {string}
-    default {"~/PTOLEMY_SYSTEMS"}
+    default {"$HOME/PTOLEMY_SYSTEMS/MIXED"}
   }
   defstate {
     name {filePre}
