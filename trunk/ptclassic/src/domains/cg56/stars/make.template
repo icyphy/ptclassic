@@ -50,8 +50,11 @@ STAR_MK=cg56stars
 DOMAIN=CG56
 EXTRA_SRCS= $(STAR_MK).c $(PL_SRCS)
 
-# source files for all stars, using preprocessor
+# source files for all stars, using preprocessor, listing base stars first
 PL_SRCS= \
+ CG56HostASrc.pl \
+ CG56SSI.pl \
+ CG56WrtFile.pl \
  CG56ACos.pl \
  CG56ASin.pl \
  CG56Abs.pl \
@@ -69,7 +72,6 @@ PL_SRCS= \
  CG56Expr.pl \
  CG56Gain.pl \
  CG56HostAOut.pl \
- CG56HostASrc.pl \
  CG56HostOut.pl \
  CG56HostSldr.pl \
  CG56HostButton.pl \
@@ -113,7 +115,6 @@ PL_SRCS= \
  CG56Reverse.pl \
  CG56Rotate.pl \
  CG56RectToCx.pl \
- CG56SSI.pl \
  CG56SSIMono.pl \
  CG56SSISink1.pl \
  CG56SSISkew.pl \
@@ -131,7 +132,6 @@ PL_SRCS= \
  CG56VarQuasar.pl \
  CG56WasteCycles.pl \
  CG56WaveForm.pl \
- CG56WrtFile.pl \
  CG56WrtFileInt.pl \
  CG56Xgraph.pl \
  CG56Xor.pl
