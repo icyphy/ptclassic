@@ -49,7 +49,7 @@ static char SccsId[]="$Id$";
 
 /* Forward declarations */
 
-static octStatus find_cut_set();
+/*static octStatus find_cut_set();*/
 static void inst_cut_set();
 static void path_cut_set();
 
