@@ -78,6 +78,8 @@ ITCL_SRCS = \
 	EditTcl.itcl \
 	EditTclText.itcl \
 	EditText.itcl \
+	EditVHDL.itcl \
+	EditVHDLText.itcl \
 	EntryQuery.itcl \
 	ErrorMessage.itcl \
 	File.itcl \
