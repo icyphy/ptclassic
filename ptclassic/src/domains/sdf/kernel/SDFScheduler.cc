@@ -73,7 +73,7 @@ int SDFScheduler :: run (Block& galaxy) {
 		runOnce();
 		numItersSoFar++;
 	}
-	numItersSoFar = 0;
+	numIters++;
 }
 
 	////////////////////////////
