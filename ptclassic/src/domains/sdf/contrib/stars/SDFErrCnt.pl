@@ -3,6 +3,7 @@ defstar {
 	domain { SDF } 
 	desc { Error Counter.}
 	author { N. Becker }
+	version { $Id$ }
         copyright {
 Copyright (c) 1990-1994 The Regents of the University of California.
 All rights reserved.
@@ -46,17 +47,17 @@ limitation of liability, and disclaimer of warranty provisions.
 	setup {
 	  numBits = 0;
 	  numErrs = 0;
-	  count = (int)skip;
-	  a.setSDFParams( (int)block, (int)block - 1);
-	  b.setSDFParams( (int)block, (int)block - 1);
+	  count = int(skip);
+	  a.setSDFParams( int(block), int(block) - 1);
+	  b.setSDFParams( int(block), int(block) - 1);
 	}
 	go {
-	  for( int i = (int)block - 1; i >= 0; i-- ) {
+	  for( int i = int(block) - 1; i >= 0; i-- ) {
 	    if( count )
 	      count--;
 	    else {
 	      numBits++;
-	      if( (int)(a%i) != (int)(b%i) )
+	      if( int(a%i) != int(b%i) )
 	      numErrs++;
 	    }
 	  }

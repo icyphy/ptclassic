@@ -3,6 +3,7 @@ defstar {
 	domain {SDF}
 	desc { Integer Divide. }
 	author { N. Becker }
+	version { $Id$ }
         copyright {
 Copyright (c) 1990-1994 The Regents of the University of California.
 All rights reserved.
@@ -25,6 +26,6 @@ limitation of liability, and disclaimer of warranty provisions.
 		desc { Divisor }
 	}
 	go {
-		output%0 << ( (int)(input%0) / (int)Divisor );
+		output%0 << ( int(input%0) / int(Divisor) );
 	}
 }
