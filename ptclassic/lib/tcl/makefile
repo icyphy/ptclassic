@@ -34,17 +34,37 @@ VPATH = $(ROOT)/lib/tcl
 CONFIG=$(ROOT)/mk/config-$(ARCH).mk
 include $(CONFIG)
 
-EXTRA_SRCS = esterel2pl.tcl \
-	mathexpr.tcl message.tcl pigilib.tcl ptcl.tcl ptcl_help.tcl \
-	ptkBarGraph.tcl ptkBind.tcl ptkColor.tcl ptkControl.tcl \
-	ptkDialog.tcl ptkGantt.tcl ptkLogicAnalyzer.itcl \
-	ptkOptions.tcl ptkParams.tcl \
-	ptkPrfacet.tcl ptkRunAllDemos.tcl ptkRunDesignMaker.tcl \
-	ptkStarIndex.tcl tkoct.tcl topgetopt.tcl utilities.tcl
+EXTRA_SRCS = \
+esterel2pl.tcl \
+gantt.tcl \
+mathexpr.tcl \
+message.tcl \
+pigilib.tcl \
+ptcl.tcl \
+ptcl_help.tcl \
+ptkBarGraph.tcl \
+ptkBind.tcl \
+ptkColor.tcl \
+ptkControl.tcl \
+ptkDialog.tcl \
+ptkGantt.tcl \
+ptkLogicAnalyzer.itcl \
+ptkOptions.tcl \
+ptkParams.tcl \
+ptkPrfacet.tcl \
+ptkRunAllDemos.tcl \
+ptkRunDesignMaker.tcl \
+ptkStarIndex.tcl \
+tkoct.tcl \
+topgetopt.tcl \
+utilities.tcl
 
-MISC_FILES = Ptolemy.xbm left.xbm ptolemySmall.gif ptolemyWelcome.gif \
-	right.xbm
-
+MISC_FILES = \
+Ptolemy.xbm \
+left.xbm \
+ptolemySmall.gif \
+ptolemyWelcome.gif \
+right.xbm
 
 # We don't include common.mk since we don't use the compiler here
 include $(ROOT)/mk/no-compile.mk
