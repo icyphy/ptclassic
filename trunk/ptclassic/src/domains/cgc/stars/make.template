@@ -63,7 +63,14 @@ PL_SRCS= \
  CGCXgraph.pl \
  CGCXMgraph.pl \
  CGCXscope.pl \
- CGCXYgraph.pl
+ CGCXYgraph.pl \
+ CGCCase.pl \
+ CGCEndCase.pl \
+ CGCDownCounter.pl \
+ CGCRepeater.pl \
+ CGCLastOfN.pl \
+ CGCSumOfN.pl \
+ CGCSelf.pl 
 
 # The .cc files
 SRCS=$(PL_SRCS:.pl=.cc)
