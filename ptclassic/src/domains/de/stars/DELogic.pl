@@ -73,12 +73,12 @@ of TRUEs among the inputs.  The other operations are self explanatory.
 		else if ( strcasecmp ( cn, "NOR") == 0) test = NORID;
 		else if ( strcasecmp ( cn, "XOR") == 0) test = XORID;
 		else if ( strcasecmp ( cn, "XNOR") == 0) test = XNORID;
-		else Error::abortRun(*this,"Unrecognized test.");
+		else Error::abortRun(*this, "Unrecognized test ", cn);
 	}
 	go {
 	    InDEMPHIter nexti(input);
 	    InDEPort *p;
-	    int result = 0;
+	    int result = FALSE;
 
 	    switch( test ) {
 		case NOTID:
@@ -87,21 +87,21 @@ of TRUEs among the inputs.  The other operations are self explanatory.
 		    break;
 		case ANDID:
 		case NANDID:
-		    result = 1;
+		    result = TRUE;
 		    while ((p = nexti++) != 0)
 			result = result && int(p->get());
 		    if (test == NANDID) result = !result;
 		    break;
 		case ORID:
 		case NORID:
-		    result = 0;
+		    result = FALSE;
 		    while ((p = nexti++) != 0)
 			result = result || int(p->get());
 		    if (test == NORID) result = !result;
 		    break;
 		case XORID:
 		case XNORID:
-		    result = 0;
+		    result = FALSE;
 		    while ((p = nexti++) != 0)
 			if (int(p->get())) result = !result;
 		    if (test == XNORID) result = !result;
