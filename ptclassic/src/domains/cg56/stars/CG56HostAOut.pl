@@ -1,7 +1,7 @@
 defstar {
     name { HostAOut }
     domain { CG56 }
-    desc { Asyncronous Host Output. }
+    desc { Asynchronous host output. }
     version { $Id$ }
     author { Kennard White }
 	copyright {

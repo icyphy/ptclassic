@@ -2,7 +2,7 @@ defstar {
 	name { Cos }
 	domain { CG56 }
 	desc { 
-DSP56000 - Cosine function.
+Cosine function.
 Calculation by table lookup.  Input range of (-1,1) scaled by pi.
 	}
 	version { $Id$ }
