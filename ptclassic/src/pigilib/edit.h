@@ -10,7 +10,7 @@ extern int RpcOpenPalette();
 extern boolean OpenPaletteInit();
 extern int RpcEditHardware();
 extern int RpcEditDomain();
-extern int RpcEditArch();
+extern int RpcEditTarget();
 extern int RpcEditComment();
 extern int RpcEditSeed();
 extern int PlotSignal();
