@@ -17,6 +17,7 @@ $Id$
 #include "err.h"
 #include "octIfc.h"
 
+
 #define dmWidth 40
 #define dmIncrement 20
 
@@ -110,10 +111,74 @@ octObject *facetPtr, *instPtr;
 }
 
 /* 4/14/89 3/19/89
-Edit the formal param list of a galaxy schematic facet.
+Edit the formal parameters of a galaxy schematic facet.
+Returns 0 if there is an error.
+Returns 1 if the parameters were changed or if the user clicked OK.
+Returns 2 if the command was aborted by the user.
 */
-static boolean
+static int
 EditFormalParams(galFacetPtr)
+octObject *galFacetPtr;
+{
+    ParamType *place;
+    int i, width, maxwidth;
+    ParamListType pList;
+    dmTextItem *items;
+
+    ERR_IF1(!GetFormalParams(galFacetPtr, &pList));
+
+    if (pList.length == 0) {
+        PrintErr("Galaxy or Universe has no parameters");
+        return(1);
+    }
+    items = (dmTextItem *) calloc(pList.length, sizeof(dmTextItem));
+    place = pList.array;
+    width = 0;
+    maxwidth = 0;
+    for (i = 0; i < pList.length; i++) {
+	items[i].itemPrompt = place->name;
+	items[i].rows = 1;
+	items[i].value = place->value;
+	width = strlen(place->value);
+	if(maxwidth < width) maxwidth = width;
+	items[i].userData = NULL;
+	place++;
+    }
+    for (i = 0; i < pList.length; i++) {
+        items[i].cols = maxwidth + dmIncrement;
+    }
+    if (dmMultiText("Edit Formal Parameters", pList.length, items) != VEM_OK) {
+	PrintCon("Aborted entry");
+	return(2);
+    }
+    /* should free place->value string before assignment */
+    place = pList.array;
+    for (i = 0; i < pList.length; i++) {
+	if (!IsBalancedParen(items[i].value)) {
+		char buf[512];
+		sprintf(buf, "Unbalanced parentheses in parameter `%s`",
+			place->name);
+		ErrAdd(buf);
+		return (FALSE);
+	}
+	place->value = items[i].value;
+	place++;
+    }
+
+    free(items);
+
+    ERR_IF1(!SetFormalParams(galFacetPtr, &pList));
+    return(1);
+}
+
+/* 4/14/89 3/19/89
+Edit the formal param list of a galaxy schematic facet.
+Returns 0 if there is an error.
+Returns 1 if the parameters were changed or if the user clicked OK.
+Returns 2 if the command was aborted by the user.
+*/
+static int
+EditFormalParamList(galFacetPtr)
 octObject *galFacetPtr;
 {
 static dmTextItem defaultItem = {NULL, 1, dmIncrement, NULL, NULL};
@@ -166,7 +231,7 @@ static dmTextItem defaultItem = {NULL, 1, dmIncrement, NULL, NULL};
     }
     if (dmMultiText("Edit Formal Parameters", itemsN, items) != VEM_OK) {
 	PrintCon("Aborted entry");
-	return(TRUE);
+	return(2);
     }
     /* Tranfer params from item list to pList, deleting blank entries.
 	Assumes there is an extra empty slot in pList.array (kludgy).
@@ -192,7 +257,35 @@ static dmTextItem defaultItem = {NULL, 1, dmIncrement, NULL, NULL};
     free(items);
 
     ERR_IF1(!SetFormalParams(galFacetPtr, &pList));
-    return(TRUE);
+    return(1);
+}
+
+/* DefineParams 8/4/91 - eal
+Define the formal parameter list and default values for a Universe
+or galaxy.
+*/
+int
+DefineParams(spot, cmdList, userOptionWord)
+RPCSpot *spot;
+lsList cmdList;
+long userOptionWord;
+{
+    octObject facet;
+
+    ViInit("define-params");
+    ErrClear();
+    /* get current facet */
+    facet.objectId = spot->facet;
+    if (octGetById(&facet) != OCT_OK) {
+	PrintErr(octErrorString());
+    } else if (IsGalFacet(&facet) || IsUnivFacet(&facet)) {
+	if (!EditFormalParamList(&facet)) {
+	    PrintErr(ErrGet());
+	}
+    } else {
+	PrintErr("Cursor must be over a universe or a galaxy schematic");
+    }
+    ViDone();
 }
 
 /* EditParams  5/27/88 4/24/88
@@ -227,7 +320,7 @@ long userOptionWord;
 	if (IsGalFacet(&facet) || IsUnivFacet(&facet)) {
 	    status2 = EditFormalParams(&facet);
 	} else {
-	    PrintErr("Cursor must be over an instance or a galaxy schematic");
+	    PrintErr("Cursor must be over an instance, galaxy, or universe schematic");
 	    ViDone();
 	}
     } else {
@@ -610,4 +703,86 @@ long userOptionWord;
     PrintCon(sprintf(buf, "architecture = '%s'", arch));
     free(items);
     ViDone();
+}
+
+static int
+RunUniverse(spot, name, iterations)
+RPCSpot *spot;
+char* name;
+int iterations;
+{
+	octObject facet;
+	octStatus status;
+	int editStatus;
+	Window newWindow;
+
+	ViInit(name);
+	ErrClear();
+
+	if( ohOpenFacet(&facet, name, "schematic", "contents", "r") <= 0) {
+		PrintErr(octErrorString());
+		ViDone();
+	}
+
+	/* I don't understand why the following two commands are needed,
+	   but if they are omitted, than an error in the run causes the
+	   RPC application to exit.  */
+	newWindow = vemOpenWindow(&facet, NULL);
+
+	if (octGetById(&facet) != OCT_OK) {
+		PrintErr(octErrorString());
+		ViDone();
+	}
+
+	if (!IsUnivFacet(&facet)) {
+		PrintErr("Schematic is not a universe");
+		ViDone();
+	}
+	if(! KcSetKBDomain(DEFAULT_DOMAIN)) {
+		PrintErr("Failed to set default domain.");
+		ViDone();
+	}
+
+	if (!(editStatus = EditFormalParams(&facet))) {
+	    PrintErr(ErrGet());
+            ViDone();
+        }
+
+	if(editStatus == 1) {
+		if(!CompileFacet(&facet)) {
+			PrintErr(ErrGet());
+			ViDone();
+		}
+		if(!KcRun(iterations)) {
+			PrintErr(ErrGet());
+			ViDone();
+		}
+	} else if (editStatus == 2) {
+		PrintCon("Aborted entry");
+	}
+	ViDone();
+}
+
+
+/* Invoke a standard facet to plot a signal */
+int 
+PlotSignal(spot, cmdList, userOptionWord)
+RPCSpot *spot;
+lsList cmdList;
+long userOptionWord;
+{
+	return RunUniverse(spot,
+		"~ptolemy/src/domains/sdf/utilities/plotsignal", 100000);
+}
+
+
+/* Invoke a standard facet to plot a magnitude DFT */
+int 
+MagDFT(spot, cmdList, userOptionWord)
+RPCSpot *spot;
+lsList cmdList;
+long userOptionWord;
+{
+	return RunUniverse(spot,
+		"~ptolemy/src/domains/sdf/utilities/magdft",1);
 }

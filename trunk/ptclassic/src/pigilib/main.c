@@ -70,6 +70,7 @@ long userOptionWord;
 
 RPCFunction CommandArray[] = {
     {EditParams, "Edit", "edit-params", "e", 0},
+    {DefineParams, "Edit", "define-params", "+", 0},
     {RpcEditDomain, "Edit", "edit-domain", "d", 0},
     {RpcEditArch, "Edit", "edit-architecture", "a", 0},
     {RpcEditComment, "Edit", "edit-comment", ";", 0},
@@ -88,6 +89,8 @@ RPCFunction CommandArray[] = {
     {RpcLoadStar, "Extend", "load-star", "L", 0},
     {ERFilterDesign, "Filter", " equirriple FIR", "<", 0},
     {WFilterDesign, "Filter", " window FIR", ">", 0},
+    {PlotSignal, "Utilities", "plot signal", "~", 0},
+    {MagDFT, "Utilities", "magnitude DFT", "^", 0},
     {Man, "Other", "man"},
     {Profile, "Other", "profile", ",", 0},
     {PrintFacet, "Other", "print facet"},
