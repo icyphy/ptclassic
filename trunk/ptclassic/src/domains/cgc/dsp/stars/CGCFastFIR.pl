@@ -70,7 +70,7 @@ Circular buffer.
 	}
 	codeblock(body) {
 
-	  if(currentValue > 7){
+	  if(currentValue > $val(tapSize)-1){
 	    currentValue -= $val(tapSize);
 	  }
 	  
