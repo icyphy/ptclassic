@@ -217,8 +217,9 @@ Geodesic* ToEventHorizon::allocateGeodesic()
     const char* dName = isItOutput() ? wormhole->insideDomain()
 	: asPort()->parent()->parent()->domain();
     Domain* d = Domain::named(dName);
-    Geodesic* g = &d->newGeo();
-    g->setNameParent(hashstring(nm),asPort()->parent());
+    Geodesic* g = NULL;
+    if (d != NULL) g = &d->newGeo();
+    if (g != NULL) g->setNameParent(hashstring(nm),asPort()->parent());
     return g;
 }
 
@@ -256,8 +257,9 @@ Geodesic* FromEventHorizon::allocateGeodesic()
     const char* dName = isItInput() ? wormhole->insideDomain()
 	: asPort()->parent()->parent()->domain();
     Domain* d = Domain::named(dName);
-    Geodesic* g = &d->newGeo();
-    g->setNameParent(hashstring(nm),asPort()->parent());
+    Geodesic* g = NULL;
+    if (d != NULL) g = &d->newGeo();
+    if (g != NULL) g->setNameParent(hashstring(nm),asPort()->parent());
     return g;
 }
 
