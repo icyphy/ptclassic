@@ -212,6 +212,8 @@ ptkTkSetup(funcArray, size)
         pipe_channel = Tcl_MakeFileChannel(
                 (ClientData) fileno (RPCReceiveStream),   
                 TCL_READABLE | TCL_EXCEPTION);
+        Tcl_RegisterChannel(ptkInterp, pipe_channel);
+        /* FIXME: in theory, we should be unregistering this somewhere */
         Tcl_CreateChannelHandler (pipe_channel, TCL_READABLE, ptkRPCFileProc,
                             (ClientData) &RPCdata);
     }
