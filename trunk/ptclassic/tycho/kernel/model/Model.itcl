@@ -548,7 +548,14 @@ body ::tycho::Model::entity {type count args} {
 #
 body ::tycho::Model::externalize {fd {nohistory {}}} {
     puts $fd "# Tycho model state file for $modelname\n\n"    
-    eval _externalize $fd $nohistory
+    if { $nohistory == "" || ! $nohistory } {
+	puts $fd "# Undo/redo history\n"
+	puts $fd "array set undoCommands [list [array get undoCommands]]\n"
+	puts $fd "array set redoCommands [list [array get redoCommands]]\n"
+	puts $fd "array set publishable  [list [array get publishable]]\n"
+	puts $fd "array set historyMark  [list [array get historyMark]]\n"
+    }
+    _externalize $fd
 }
 
 ########################################################################
