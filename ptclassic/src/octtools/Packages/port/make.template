@@ -44,7 +44,7 @@ include $(CONFIG)
 HDRS		= ansi.h \
 		copyright.h \
 		port.h \
-		stdlib.h
+		oct_stdlib.h
 
 LIBCSRCS	= dummy.c \
 		getdts.c \
