@@ -100,17 +100,6 @@ extern const Attribute A_NONCONSTANT = {0,AB_CONST};
 extern const Attribute A_NONSETTABLE = {0,AB_SETTABLE};
 extern const Attribute A_DYNAMIC = {AB_DYNAMIC,0};
 
-// Stuff to access Unix system error info.
-
-extern int sys_nerr;
-extern char *sys_errlist[];
-extern int errno;
-
-inline const char* State::why() {
-	return (errno >= 0 && errno < sys_nerr) ? sys_errlist[errno] :
-	"Unknown error";
-}
-
 // The state tokenizer: return next token when parsing a state
 // initializer string.  Handles references to files and other states.
 ParseToken
