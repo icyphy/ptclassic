@@ -56,20 +56,20 @@ void Decoder::Reset() {
   StateMetricIndex = 0;
 }
 
-float Decoder::BM( int xsym, int I, int Q ) {
-  float NormI = float( I ) / float( Gain );
-  float NormQ = float( Q ) / float( Gain );
-  float XmitI = XmitMap (xsym & 1);
-  float XmitQ = XmitMap ((xsym >> 1) & 1);
-  float Dist = sqdist( XmitI, NormI ) + sqdist( XmitQ, NormQ );
+double Decoder::BM( int xsym, int I, int Q ) {
+  double NormI = double( I ) / double( Gain );
+  double NormQ = double( Q ) / double( Gain );
+  double XmitI = XmitMap (xsym & 1);
+  double XmitQ = XmitMap ((xsym >> 1) & 1);
+  double Dist = sqdist( XmitI, NormI ) + sqdist( XmitQ, NormQ );
   return Dist;
 }
 
 /* Do ACS */
 void Decoder::DoACS( int I, int Q ) {
   int state;
-  float* NewState;
-  float* OldState;
+  double* NewState;
+  double* OldState;
   int* PathPt;
 
   PathPt = Path[ PathIndex ];
@@ -85,9 +85,9 @@ void Decoder::DoACS( int I, int Q ) {
 
 
   for( state = 0; state < 64; state++ ) {
-    float d0 = BM (Xsymbol [0][state], I, Q) + 
+    double d0 = BM (Xsymbol [0][state], I, Q) + 
       OldState [PrevState [0][state]];
-    float d1 = BM (Xsymbol [1][state], I, Q) +
+    double d1 = BM (Xsymbol [1][state], I, Q) +
       OldState [PrevState [1][state]];
     if( d0 < d1 ) {
       NewState[ state ] = d0;
@@ -120,7 +120,7 @@ int Decoder::TraceBack() {
 /* normalize, it's the most basic. */
 /* StateMetricIndex is flipped here also. */
 void Decoder::Normalize() {
-  float* NewState;
+  double* NewState;
   int state;
 
   if( StateMetricIndex == 0 ) {
@@ -132,7 +132,7 @@ void Decoder::Normalize() {
     StateMetricIndex = 0;
   }
 
-  float MinMetric = NewState[0];
+  double MinMetric = NewState[0];
   for( state = 1; state < 64; state++ ) {
     MinMetric = ( NewState[ state ] < MinMetric ) ?
 		NewState[ state ] : MinMetric;
