@@ -59,6 +59,9 @@ public:
 	// define the firing 
 	void fire();
 
+	// class identification
+	int isA(const char*) const;
+
 	// The number of repetitions of the star in a periodic
 	// schedule.  Initialized to 0 by constructor.  Set to correct
 	// value by an SDF scheduler.  It is represented as a fraction
