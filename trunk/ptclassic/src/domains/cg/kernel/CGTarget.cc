@@ -92,10 +92,12 @@ CGTarget::CGTarget(const char* name,const char* starclass,
 	starTypes += "HOFStar";
 	starTypes += "AnyCGStar";
 
+	StringList destDirName = destDirectoryName(CGdomainName);
+
 	addState(targetHost.setState("host", this, "",
 	    "Host machine to compile or assemble code on."));
 	addState(destDirectory.setState("directory", this,
-	    "$HOME/PTOLEMY_SYSTEMS/CG", "Directory to write to"));
+	    destDirName, "Directory to write to"));
 	addState(filePrefix.setState("file", this, "",
 	    "Prefix for file names."));
 	addState(loopingLevel.setState("Looping Level",this, "1",
@@ -803,15 +805,22 @@ Block* CGTarget::spliceStar(PortHole* p, const char* name,
 }
 
 int CGTarget::needsTypeConversionStar(PortHole& port) {
-    if (port.isItOutput()) {
-	// splice conversion star if type of output port does not
-	// match the type of the data connection
-	if ((port.type() != port.resolvedType()) && (port.type() != ANYTYPE))
-	    return TRUE;
-    }
-    return FALSE;
+	if (port.isItOutput()) {
+	    // splice conversion star if type of output port does not
+	    // match the type of the data connection
+	    if ((port.type() != port.resolvedType()) &&
+	        (port.type() != ANYTYPE))
+		return TRUE;
+	}
+	return FALSE;
 }
 
 const char* CGTarget::domain() {
-      return galaxy() ? galaxy()->domain() : CGdomainName;
+	return galaxy() ? galaxy()->domain() : CGdomainName;
+}
+
+StringList destDirectoryName(const char* subdir) {
+	StringList dir = "$HOME/PTOLEMY_SYSTEMS";
+	dir << subdir;
+	return dir;
 }
