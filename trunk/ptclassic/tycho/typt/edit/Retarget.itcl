@@ -224,6 +224,15 @@ body ::tycho::EditRetarg::printStars { starName relation domainA domainB} {
     ::tycho::HTMLMessage .editRetargPrintStars -html "
         <H1>Star: $starName in domains $domainA and $domainB</H1>
         $relationMessage
+
+        <tcl><pre>
+        ::tycho::EditPtlang .ePtlangA -star {$domainA $starName}
+        .ePtlangA centerOnScreen
+        </pre></tcl>
+        <tcl><pre>
+        ::tycho::EditPtlang .ePtlangB -star {$domainB $starName}
+        .ePtlangB centerOnScreen
+        </pre></tcl>
         <H2>$domainA Domain</H2>
         <pre>
         $domainAPrint
