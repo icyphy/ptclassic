@@ -58,8 +58,6 @@ static char SccsId[]="$Id$";
 #define COPY_RETURN_NAME	";;; Copied Objects ;;;"
 #define DEST_OBJS_NAME		";;; Destination Objects ;;;"
 
-static vemStatus symNewCopyOrMoveCmd();
-
 /* Stolen from physical */
 extern vemStatus MCParse();
 
@@ -69,6 +67,7 @@ static vemStatus parse_verify();
 static vemStatus dest_check();
 static void do_reconnects();
 
+#ifdef OLD_DISPLAY
 /*ARGSUSED*/
 static void move_item(item, after_p, data)
 octObject *item;		/* Moved item             */
@@ -80,7 +79,6 @@ char *data;			/* User specific data     */
  * after the automatic redisplay stuff is operational.
  */
 {
-#ifdef OLD_DISPLAY
     octObject facet;
     struct octBox bb;
 
@@ -88,8 +86,8 @@ char *data;			/* User specific data     */
     if (octBB(item, &bb) == OCT_OK) {
 	wnQRegion(facet.objectId, &bb);
     }
-#endif
 }
+#endif
 
 vemStatus seBaseMove(spot, cmdList, cf)
 vemPoint *spot;			/* Where command was issued */
@@ -101,7 +99,9 @@ int cf;				/* Connect flag             */
  * attempt to connect items in the destination region.
  */
 {
+#ifdef OLD_DISPLAY
     static symMoveItemFunc callback = { move_item, (char *) 0 };
+#endif
     octObject facet;
     octObject set;
     octObject reconnect_set;
@@ -154,7 +154,7 @@ octObject *di;			/* Destination instances    */
     vemOneArg *theArg;
     octId destFctId;
     vemStatus r_code;
-    char *command_name;
+    char *command_name = (char *)NULL;
 
     switch (type) {
     case MOVE:
@@ -222,8 +222,7 @@ octObject *dest_insts;		/* Instances in destination reg.  */
     octGenerator gen;
     struct octBox geo_bb;
     regObjGen reg_gen;
-    int count;
-    char conn[1024], noconn[1024];
+    int count = 0;
 
     otherMovingPathsSet.type = OCT_BAG;
     otherMovingPathsSet.contents.bag.name = ";;;TMP MOVING PATHS SET;;;";
@@ -331,10 +330,8 @@ char *data;			/* User data  */
  * will make the latter unnecessary.
  */
 {
-    struct octBox bb;
     lsList item_list = (lsList) data;
     cp_item *new_item;
-    octObject fct;
 
     /* Conditions for adding items */
     if ((old && (old->type == OCT_INSTANCE || old->type == OCT_PATH)) ||
