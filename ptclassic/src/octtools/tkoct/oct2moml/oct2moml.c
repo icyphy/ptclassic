@@ -187,26 +187,22 @@ otpXlateParams( octObject *pInst, char *instName, OTPFacetType which,
 	case OTP_FtStar:
 	    /*Tcl_DStringAppendEls(pStr,"trysetstate", instName, stateName,
 	      stateVal, NULL); */
-	    Tcl_DStringAppends(pStr,"<property name=\"", stateName,
-                    "\" value=\"", 
-                    stateVal, 
-                    "\"></property>",
+	    Tcl_DStringAppends(pStr,"<property name=\"", stateName, "\"\n",
+                    "\t          value=\"", stateVal, "\">\n",
+                    "\t          class=\"ptolemy.data.expr.Parameter\">\n",
+                    "\t</property>",
                     NULL);
 	    break;
 	case OTP_FtGalaxy:
 	case OTP_FtUniverse:
-	    Tcl_DStringAppendEls(pStr,"newstate", stateName,
-	      stateType, stateVal, NULL);
+	    Tcl_DStringAppendEls(pStr,"    <!-- newstate", stateName,
+	      stateType, stateVal, "-->", NULL);
 	    break;
 	case OTP_FtTarget:
-	    Tcl_DStringAppends(pStr,"<!-- trytargetparam ", stateName,
-	      stateVal, " -->\n", NULL);
-            
-            Tcl_DStringAppends(pStr,"    <property name=\"", stateName,
-                    " value=\"",
-                    stateVal,
-                    "\"\n",
-                    "     class=\"ptolemy.data.expr.Parameter\">",
+	    Tcl_DStringAppends(pStr,"<property name=\"", stateName, "\"\n",
+                    "\t          value=\"",  stateVal,  "\">\n",
+                    "\t          class=\"ptolemy.data.expr.Parameter\">\n",
+                    "\t</property>",
                     NULL);
 	    break;
 	default:
@@ -1123,9 +1119,31 @@ _otpXlateFacetCore( OTPFacetInfo *pFInfo, octObject *pFacet, Tcl_DString *pStr){
             Tcl_DStringAppendEls(pStr,"domain", pFInfo->outerDomain, NULL);
             Tcl_DStringAppend(pStr,"\n",-1);
            */
-            Tcl_DStringAppends(pStr,"<!-- domain", pFInfo->outerDomain,
-                    "-->", NULL);
-            
+            char *downCaseDomain=strdup(pFInfo->outerDomain);
+            int i;
+            char *iterCntPtr;
+            octObject prop;
+
+            Tcl_DStringAppends( pStr, "<!-- outerDomain",
+                    pFInfo->curDomain, "-->", NULL);
+            for(i=0; i < strlen(downCaseDomain); i++) {
+                downCaseDomain[i] = downCaseDomain[i] + 32;
+            }
+
+            if ( ohGetByPropName( pFacet, &prop, "iterate") == OCT_OK ) {
+                iterCntPtr = otpCvtPropToStr(&prop);
+            } else {
+                iterCntPtr = "10";
+            }
+
+            Tcl_DStringAppends(pStr,
+                    "    <director name=\"director\" class=\"ptolemy.domains.",
+                    downCaseDomain, "kernel.", pFInfo->outerDomain,
+                    ".Director\">\n",
+                    "\t<property name=\"iterations\"\n ",
+                    "\t          class=\"ptolemy.data.expr.Parameter\"\n",
+                    "\t          value=\"",
+                    iterCntPtr, "\">\n\t</property>", NULL);
 	}
         /*
         Tcl_DStringAppendEls(pStr,"defgalaxy", pFInfo->facetName, NULL);
@@ -1151,9 +1169,35 @@ _otpXlateFacetCore( OTPFacetInfo *pFInfo, octObject *pFacet, Tcl_DString *pStr){
     }
 
     if ( pFInfo->curDomain ) {
+            char *downCaseDomain=strdup(pFInfo->curDomain);
+            int i;
+            char *iterCntPtr;
+            octObject prop;
+
+
 	Tcl_DStringAppend(pStr,"    ",-1);
-	Tcl_DStringAppends( pStr, "<!-- domain", pFInfo->curDomain, "-->",
+	Tcl_DStringAppends( pStr, "<!-- curDomain", pFInfo->curDomain, "-->\n",
                 NULL);
+
+            for(i=0; i < strlen(downCaseDomain); i++) {
+                downCaseDomain[i] = downCaseDomain[i] + 32;
+            }
+
+            if ( ohGetByPropName( pFacet, &prop, "iterate") == OCT_OK ) {
+                iterCntPtr = otpCvtPropToStr(&prop);
+            } else {
+                iterCntPtr = "10";
+            }
+
+            Tcl_DStringAppends(pStr,
+                    "    <director name=\"director\" class=\"ptolemy.domains.",
+                    downCaseDomain, "kernel.", pFInfo->curDomain,
+                    ".Director\">\n",
+                    "\t<property name=\"iterations\"\n",
+                    "\t          class=\"ptolemy.data.expr.Parameter\"\n",
+                    "\t          value=\"",
+                    iterCntPtr, "\">\n\t</property>", NULL);
+
 	Tcl_DStringAppend(pStr,"\n",-1);
     }
 
@@ -1164,6 +1208,7 @@ _otpXlateFacetCore( OTPFacetInfo *pFInfo, octObject *pFacet, Tcl_DString *pStr){
 	Tcl_DStringAppends( pStr, "<!-- target", strval, "-->", NULL);
 	Tcl_DStringAppend(pStr,"\n",-1);
     }
+
     if ( otpXlateParams( pFacet, pFInfo->facetName, OTP_FtTarget, pStr)
       != OCT_OK ) {
 	fprintf(stderr,"Tgt params failed (%s)\n", ohFormatName(pFacet));
@@ -1174,6 +1219,8 @@ _otpXlateFacetCore( OTPFacetInfo *pFInfo, octObject *pFacet, Tcl_DString *pStr){
 	fprintf(stderr,"Gal params failed (%s)\n", ohFormatName(pFacet));
 	sts = OCT_ERROR;
     }
+    Tcl_DStringAppends(pStr, "    </director>\n", NULL);
+
     if ( otpXlateInsts( pFInfo, pFacet, pStr) != OCT_OK ) {
 	fprintf(stderr,"Instances failed (%s)\n", ohFormatName(pFacet));
 	sts = OCT_ERROR;
