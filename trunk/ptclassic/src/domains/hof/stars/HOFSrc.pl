@@ -6,7 +6,7 @@ defstar {
 Create one or more instances of the named block to produce the
 required number of output stream(s).
 This is implemented by replacing the Src star with the named block
-at preinitialize time.
+at preinitialization time.
 The replacement block(s) are connected as specified by "output_map",
 using the existing connections to the Src star.
 Their parameters are determined by "parameter_map".

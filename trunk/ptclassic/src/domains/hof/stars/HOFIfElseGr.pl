@@ -5,8 +5,8 @@ defstar {
 	desc {
 A variant of the IfElse star where the two possible replacement
 blocks are specified graphically rather than textually.
-There must be exactly one block connected in the positions of the
-replacement blocks.
+There must be exactly one block connected in the position of each
+of the two replacement blocks.
 The HOFNop stars are the only exception: they may be used in addition to the
 replacement block in order to control the order of connection.
 	}
