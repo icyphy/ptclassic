@@ -59,7 +59,8 @@ SRGeodesic::~SRGeodesic()
   // Copy the list of receivers onto a new list
 
   ListIter nextReceiver( receivers );
-  for ( int size = receivers.size() ; --size >= 0 ; ) {
+  int size;
+  for ( size = receivers.size() ; --size >= 0 ; ) {
     rec.append((Pointer) nextReceiver++);
   }
 
