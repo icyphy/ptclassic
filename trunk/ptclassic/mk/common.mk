@@ -106,14 +106,17 @@ $(PTLANG_IN_OBJ):
 	(cd $(PTLANG_OBJ_DIR); $(MAKE) VPATH=$(PTLANG_VPATH))
 
 # islang binary in the obj directory
-ISLANG_OBJ_DIR=$(PTOLEMY)/obj.$(PTARCH)/domains/ipus/islang
+ISLANG_OBJ_DIR=$(PTOLEMY)/obj.$(PTARCH)/domains/ipus/icp/islang
 ISLANG_IN_OBJ=$(ISLANG_OBJ_DIR)/islang
-ISLANG_VPATH=../../../../src/domains/ipus/islang
+ISLANG_VPATH=../../../../../src/domains/ipus/icp/islang
 
-# Use either the islang binary in the obj directory or just use islang
-ISLANG= `if [ -f $(ISLANG_IN_OBJ) ]; \
-	then echo $(ISLANG_IN_OBJ) ; \
-	else echo $(ISLANG_IN_OBJ); fi`
+# Use islang on the path; if it has not been installed yet, then install it
+ISLANG= `if [ ! -f $(ISLANG_IN_OBJ) ]; \
+	 then (cd $(ISLANG_OBJ_DIR) ; \
+		  $(MAKE) $(ISLANG_IN_OBJ) VPATH=$(ISLANG_VPATH) >/dev/null 2>&1); fi; \
+	 if [ ! -f $(ISLANG_IN_OBJ) ]; \
+	 then echo islang; \
+	 else echo $(ISLANG_IN_OBJ); fi`
 
 # Build the islang binary if necessary
 $(ISLANG_IN_OBJ):
@@ -135,11 +138,9 @@ PEPP= `if [ ! -f $(PEPP_IN_OBJ) ]; \
 	then echo pepp; \
 	else echo $(PEPP_IN_OBJ); fi`
 
-
 # Build the pepp binary if necessary
 $(PEPP_IN_OBJ):
 	(cd $(PEPP_OBJ_DIR); $(MAKE) VPATH=$(PEPP_VPATH) pepp)
-
 
 # Rule to build the ../doc/star directory
 # Can't use mkdir -p here, it might not exist everywhere

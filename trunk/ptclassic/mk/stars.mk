@@ -316,18 +316,15 @@ endif
 
 ifdef IPUS
 	ifdef TK
-		CUSTOM_DIRS += $(IPUSDIR)/kernel $(IPUSDIR)/stars \
-				 $(IPUSDIR)/tcltk/kernel \
-				 $(IPUSDIR)/tcltk/stars 
+		CUSTOM_DIRS += $(IPUSDIR)/icp/kernel $(IPUSDIR)/kernel \
+				$(IPUSDIR)/stars $(IPUSDIR)/tcltk/stars 
 		PALETTES += PTOLEMY/src/domains/ipus/icons/ipus.pal
 		STARS += $(LIBDIR)/ipustclstars.o $(LIBDIR)/ipusstars.o
-		LIBS += -lipustclstars -lipusstars -lipus \
-			-lipustcltk -licp
+		LIBS += -lipustclstars -lipusstars -lipus -licp
 		LIBFILES += $(LIBDIR)/libipustclstars.$(LIBSUFFIX) \
-			$(LIBDIR)/libipustcltk.$(LIBSUFFIX) \
-			$(LIBDIR)/libipusstars.$(LIBSUFFIX) \
-			$(LIBDIR)/libipus.$(LIBSUFFIX) \
-			$(LIBDIR)/libicp.$(LIBSUFFIX)
+				$(LIBDIR)/libipusstars.$(LIBSUFFIX) \
+				$(LIBDIR)/libipus.$(LIBSUFFIX) \
+				$(LIBDIR)/libicp.$(LIBSUFFIX)
 	endif
 endif
 
