@@ -1,9 +1,4 @@
 #
-# This is the Tcl/Tk script used as the default for the SDFTkImgDisplay star.
-#
-# Author: Mei Xiao
-# Version: $Id$
-#
 # Copyright (c) 1990-%Q% The Regents of the University of California.
 # All rights reserved.
 # 
@@ -28,6 +23,14 @@
 # 
 # 						PT_COPYRIGHT_VERSION_2
 # 						COPYRIGHTENDKEY
+#
+# This is the Tcl/Tk script used as the default for the SDFTkImageDisplay
+# star.  It creates a Tcl/Tk name for the image as ptkImageData_$starID.
+# It also assumes that "ptimage" has been installed as an Tk image type
+# so that the Tcl/Tk command "image create ptimage" works.
+#
+# Author: Mei Xiao and Brian L. Evans
+# Version: $Id$
 
 # Define the window to hold the image
 set s $ptkControlPanel.image_$starID
