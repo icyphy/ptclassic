@@ -32,7 +32,11 @@ $Id$
 
 /* functions to convert from Octobjects to string "handles" */
 
+#ifdef __cplusplus
+extern int ptkHandle2OctObj( char *stringValue, octObject *objPtr );
+extern void ptkOctObj2Handle( octObject *objPtr, char *stringValue );
+#else
 extern int ptkHandle2OctObj ();
 extern void ptkOctObj2Handle ();
-
+#endif
 #endif /* HANDLE_H */
