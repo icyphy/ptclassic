@@ -1,15 +1,7 @@
 defstar {
     name { BitsToInt }
     domain { CG56 }
-    desc {
-The integer input sequence is interpreted as a bit stream in which any nonzero
-value is interpreted as to mean a 'one' bit.
-This star consumes "nBits" successive bits from the input,
-packs them into an integer, and outputs the resulting integer.
-The first received bit becomes the most significant bit of the output.
-If "nBits" is smaller than the wordsize minus one, then the
-output integer will always be non-negative.
-}
+    desc { Packs several input bits into an integer. }
     version { $Id$ }
     author { Jose Luis Pino }
     copyright {
@@ -20,6 +12,13 @@ output integer will always be non-negative.
     }
     location { CG56 demo library }
     explanation {
+The integer input sequence is interpreted as a bit stream in which any nonzero
+value is interpreted as to mean a "one" bit.
+This star consumes \fInBits\fR successive bits from the input,
+packs them into an integer, and outputs the resulting integer.
+The first received bit becomes the most significant bit of the output.
+If \fInBits\fR is smaller than the word size minus one, then the
+output integer will always be non-negative.
     }
     input {
 	name {input}

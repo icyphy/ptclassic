@@ -2,9 +2,10 @@ defstar {
 	name { CircToLin }
 	domain { CG56 }
 	desc {
-Copy data from a circular buffer to a linear buffer.  If N is zero (default),
-the number transferred per execution equals the number read per execution
-by the star that reads from the output. 
+Copy data from a circular buffer to a linear buffer.
+If N is zero (the default), the number of samples transferred per execution
+equals the number of samples read per execution by the star that reads
+from the output. 
 	}
 	version { $Id$ }
 	author { J. Buck }
@@ -21,8 +22,8 @@ limitation of liability, and disclaimer of warranty provisions.
 .Ir "buffer, linear"
 .Ir "linear buffer"
 .Ir "circular buffer"
-This star is normally inserted automatically, as needed.  Data movement
-is repeated inline so may not be efficient for large N.
+This star is normally inserted automatically, as needed.
+Data movement is repeated inline so may not be efficient for large N.
 	}
 	input {
 		name { input }
@@ -44,8 +45,9 @@ is repeated inline so may not be efficient for large N.
 	}
 	setup {
 		n = int(N);
-		if (n == 0)
+		if (n == 0) {
 			n = output.far()->numXfer();
+		}
 		input.setSDFParams(n,n-1);
 		output.setSDFParams(n,n-1);
 	}
@@ -79,7 +81,6 @@ is repeated inline so may not be efficient for large N.
 	exectime {
 		return 4+2*n;
 	}
-
 
 	codeblock(init) {
 	move	#>$addr(input),x0
