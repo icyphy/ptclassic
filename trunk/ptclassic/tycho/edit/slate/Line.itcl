@@ -28,7 +28,7 @@
 
 
 #######################################################################
-#### AsLine
+#### Line
 #
 # The shape of lines. Items with
 # this shape include <I>line</I> and <I>SmartLine</I>.
@@ -58,7 +58,7 @@
 # <li><a href="../internals/shapes.html">Shape classes</a>.
 # </ul>
 #
-class ::tycho::AsLine {
+class ::tycho::Line {
     inherit ::tycho::AsPolygon
 
     ###################################################################
@@ -91,7 +91,7 @@ class ::tycho::AsLine {
 # "end," "length," or <code>vertex-</code><i>n</i>, where _n_ is
 # between 0 and _length_.
 #
-body ::tycho::AsLine::aspect {id canvas slate args} {
+body ::tycho::Line::aspect {id canvas slate args} {
     set coords [$slate coords $id]
     set result {}
 
@@ -140,7 +140,7 @@ body ::tycho::AsLine::aspect {id canvas slate args} {
 # value -- for example, if the "e" (east) aspect is specified, it
 # is moved only by the _x_ amount.
 #
-body ::tycho::AsLine::reshape {id canvas slate x y args} {
+body ::tycho::Line::reshape {id canvas slate x y args} {
     # Get the coordinates of the line into an efficient-to-process form
     set i 0
     set indexes {}
@@ -188,7 +188,7 @@ body ::tycho::AsLine::reshape {id canvas slate x y args} {
 #######################################################################
 #### reshapeclick
 #
-body ::tycho::AsLine::reshapeclick {id canvas slate x y args} {
+body ::tycho::Line::reshapeclick {id canvas slate x y args} {
     getflag ghost args
 
     # Remember how I am now.
@@ -243,7 +243,7 @@ body ::tycho::AsLine::reshapeclick {id canvas slate x y args} {
 # This just calls the "parent" class -- we should probably
 # implement "inheritance."
 #
-body ::tycho::AsLine::reshapedrag {id canvas slate x y} {
+body ::tycho::Line::reshapedrag {id canvas slate x y} {
 	::tycho::AsPolygon::reshapedrag $id $canvas $slate $x $y
 }
 
@@ -253,6 +253,6 @@ body ::tycho::AsLine::reshapedrag {id canvas slate x y} {
 # This just calls the "parent" class -- we should probably
 # implement "inheritance."
 #
-body ::tycho::AsLine::reshaperelease {id canvas slate x y} {
+body ::tycho::Line::reshaperelease {id canvas slate x y} {
 	::tycho::AsPolygon::reshaperelease $id $canvas $slate $x $y
 }
