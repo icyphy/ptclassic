@@ -24,16 +24,19 @@ RANLIB = true
 # Use gcc everywhere including in octtools
 CC =		gcc
 
-# common.mk looks at this variable to decide how to build shared libraries
-USE_SHARED_LIBS = no
+# Using GNU make conditionals causes havoc while bootstrapping gcc,
+# so we don't use them here, however, this is what the code would look like
 
-ifeq ($(USE_SHARED_LIBS),yes) 
+# common.mk looks at this variable to decide how to build shared libraries
+#USE_SHARED_LIBS = no
+#
+#ifeq ($(USE_SHARED_LIBS),yes) 
 # Use Position Independent Code to build shared libraries
 # Not yet supported on Solaris2 with g++
 #C_SHAREDFLAGS =	-fPIC
 #CC_SHAREDFLAGS =	-fPIC
 #LIBSUFFIX =		so
-endif
+#endif
 
 OPTIMIZER =	-O2
 WARNINGS =	-Wall -Wcast-qual
