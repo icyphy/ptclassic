@@ -36,22 +36,21 @@
 
 set ${uniqueSymbol}Frequency {}
 
+set ${uniqueSymbol}Color {}
+
+set ${uniqueSymbol}lastKey 1
+
 proc ptkPianoKeyboardBinding {key keyid uniqueSymbol octave freq color} {
     global ${uniqueSymbol}Frequency
+    global ${uniqueSymbol}Color
     lappend ${uniqueSymbol}Frequency [expr $octave*$freq]
+    lappend ${uniqueSymbol}Color $color
     $key bind $keyid <ButtonPress-1> \
 	"${uniqueSymbol}setOutputs 1.0 [expr $octave*$freq]; $key itemconfigure $keyid -fill gold"
     $key bind $keyid <ButtonRelease-1> \
-	"${uniqueSymbol}setOutputs 0.0 0.0; $key itemconfigure $keyid -fill $color"
-# The following two commands, regrettably, do not work in the current
-# version of Tk.
-    $key bind $keyid <Button1-Leave> \
-	"puts \"leaving $octave*$freq $key $keyid\";${uniqueSymbol}setOutputs 0.0 0.0; $key itemconfigure $keyid -fill $color"
-    $key bind $keyid <Button1-Enter> \
-	"puts \"entering $octave*$freq $key $keyid\";${uniqueSymbol}setOutputs 1.0 [expr $octave*$freq]; $key itemconfigure $keyid -fill gold"
-
+	"${uniqueSymbol}setOutputs 0.0 0.0; $key itemconfigure $keyid -fill $color;set lastColor \[lindex \[set ${uniqueSymbol}Color \] \[expr  \[set ${uniqueSymbol}lastKey\]-1\]\]; $key itemconfigure \[set ${uniqueSymbol}lastKey\] -fill \$lastColor"
     $key bind $keyid <Button1-Motion> \
-	"puts \[set ${uniqueSymbol}Frequency \]; set newKey \[$key find closest %x %y\]; set newFreq \[lindex \[set ${uniqueSymbol}Frequency \] \[expr \$newKey-1\]\]; puts \"motion \$newFreq \$newKey\";${uniqueSymbol}setOutputs 1.0 \$newFreq; $key itemconfigure \$newKey -fill gold"
+	"set lastColor \[lindex \[set ${uniqueSymbol}Color \] \[expr  \[set ${uniqueSymbol}lastKey\]\-1]\]; $key itemconfigure \[set ${uniqueSymbol}lastKey\] -fill \$lastColor ; set newKey \[$key find closest %x %y\]; set newFreq \[lindex \[set ${uniqueSymbol}Frequency \] \[expr \$newKey-1\]\]; set ${uniqueSymbol}lastKey \$newKey; ${uniqueSymbol}setOutputs 1.0 \$newFreq; $key itemconfigure \$newKey -fill gold"
 
 }
 
