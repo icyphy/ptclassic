@@ -865,7 +865,7 @@ void ArchTarget :: frameCode() {
   signal_declarations.initialize();
   component_mappings.initialize();
   architecture_body_closer.initialize();
-  configuration_declaration.initialize();
+  configuration_declarations.initialize();
 
   myCode.initialize();
 
@@ -1042,10 +1042,10 @@ void ArchTarget :: frameCode() {
   buildArchitectureBodyCloser(level);
 
   //  buildConfigurationDeclaration(level);
-  configuration_declaration << addConfigurationDeclarations(&mainCompDeclList, level);
-  configuration_declaration << addConfigurationDeclarations(&sourceCompDeclList, level);
-  configuration_declaration << addConfigurationDeclarations(&muxCompDeclList, level);
-  configuration_declaration << addConfigurationDeclarations(&regCompDeclList, level);
+  configuration_declarations << addConfigurationDeclarations(&mainCompDeclList, level);
+  configuration_declarations << addConfigurationDeclarations(&sourceCompDeclList, level);
+  configuration_declarations << addConfigurationDeclarations(&muxCompDeclList, level);
+  configuration_declarations << addConfigurationDeclarations(&regCompDeclList, level);
 
   // Combine all sections of code.
   StringList code = headerComment();
@@ -1077,8 +1077,8 @@ void ArchTarget :: frameCode() {
   myCode << "\n" << component_mappings;
   myCode << "\n-- architecture_body_closer\n";
   myCode << "\n" << architecture_body_closer;
-  //  myCode << "\n-- configuration_declaration\n";
-  //  myCode << "\n" << configuration_declaration;
+  //  myCode << "\n-- configuration_declarations\n";
+  //  myCode << "\n" << configuration_declarations;
 
   // Prepend the header, declarations, and initialization.
   prepend(code, myCode);
@@ -2323,124 +2323,10 @@ StringList ArchTarget :: addFiregroupCode(VHDLFiregroupList* fgList, int level) 
   return all;
 }
 
-/*
-// Add in component declarations here from mainCompDeclList.
-void ArchTarget :: buildComponentDeclarations(int level) {
-  Error::warn("buildComponentDeclarations", ": Don't call me anymore!");
-
-  // HashTable to keep track of which components already declared.
-  HashTable myTable;
-  myTable.clear();
-
-  VHDLCompDeclListIter nextCompDecl(mainCompDeclList);
-  VHDLCompDecl* compDecl;
-  while ((compDecl = nextCompDecl++) != 0) {
-    if (!(myTable.hasKey(compDecl->type))) {
-      myTable.insert(compDecl->type, compDecl);
-
-      level++;
-      component_declarations << indent(level) << "component " << compDecl->type
-			     << "\n";
-
-      // Add in generic refs here from genList.
-      if (compDecl->genList->head()) {
-	level++;
-	component_declarations << indent(level) << "generic(\n";
-	VHDLGenericListIter nextGen(*(compDecl->genList));
-	VHDLGeneric* ngen;
-	int genCount = 0;
-	while ((ngen = nextGen++) != 0) {
-	  level++;
-	  if (genCount) {
-	    component_declarations << ";\n";
-	  }
-	  component_declarations << indent(level) << ngen->name << ": "
-				 << ngen->type;
-	  if (ngen->defaultVal.length() > 0) {
-	    component_declarations << " := " << ngen->defaultVal;
-	  }
-	  genCount++;
-	  level--;
-	}
-	component_declarations << "\n";
-	component_declarations << indent(level) << ");\n";
-	level--;
-      }
-    
-      // Add in port refs here from portList.
-      if (compDecl->portList->head()) {
-	level++;
-	component_declarations << indent(level) << "port(\n";
-	VHDLPortListIter nextPort(*(compDecl->portList));
-	VHDLPort* nport;
-	int portCount = 0;
-	while ((nport = nextPort++) != 0) {
-	  level++;
-	  if (portCount) {
-	    component_declarations << ";\n";
-	  }
-	  component_declarations << indent(level) << nport->name << ": "
-				 << nport->direction << " " << nport->type;
-	  portCount++;
-	  level--;
-	}
-	component_declarations << "\n";
-	component_declarations << indent(level) << ");\n";
-	level--;
-      }
-    
-      component_declarations << indent(level) << "end component;\n";
-      level--;
-    }
-  }
-}
-*/
-
 // Generate the architecture_body_closer.
 void ArchTarget :: buildArchitectureBodyCloser(int /*level*/) {
   architecture_body_closer << "end structure;\n";
 }
-
-/*
-// Add in configuration declaration here from mainCompDeclList.
-void ArchTarget :: buildConfigurationDeclaration(int level) {
-  // HashTable to keep track of which components already configured.
-  HashTable myTable;
-  myTable.clear();
-
-  configuration_declaration << "configuration " << (const char*) filePrefix
-			    << "_parts" << " of " << (const char*) filePrefix
-			    << " is\n";
-  configuration_declaration << "for " << "structure" << "\n";
-
-  configuration_declaration << cli_configs;
-
-  VHDLCompDeclListIter nextCompDecl(mainCompDeclList);
-  VHDLCompDecl* compDecl;
-  while ((compDecl = nextCompDecl++) != 0) {
-    if (!(myTable.hasKey(compDecl->type))) {
-      myTable.insert(compDecl->type, compDecl);
-
-      // Filter out the CLI components C2V,V2C integer, real.
-      if (!strcmp(compDecl->type,"C2Vreal")) continue;
-      if (!strcmp(compDecl->type,"V2Creal")) continue;
-      if (!strcmp(compDecl->type,"C2Vinteger")) continue;
-      if (!strcmp(compDecl->type,"V2Cinteger")) continue;
-
-      level++;
-      configuration_declaration << indent(level) << "for all:"
-				<< compDecl->type
-				<< " use entity " << "work." << compDecl->type
-				<< "(behavior); end for;\n";
-      level--;
-    }
-  }
-
-  configuration_declaration << "end " << "for" << ";\n";
-  configuration_declaration << "end " << (const char*) filePrefix << "_parts"
-			    << ";\n";
-}
-*/
 
 // Generate the clock generator entity and architecture.
 StringList ArchTarget :: clockGenCode() {
@@ -2679,7 +2565,7 @@ void ArchTarget :: addCodeStreams() {
   addStream("signal_declarations", &signal_declarations);
   addStream("component_mappings", &component_mappings);
   addStream("architecture_body_closer", &architecture_body_closer);
-  addStream("configuration_declaration", &configuration_declaration);
+  addStream("configuration_declarations", &configuration_declarations);
   addStream("preSynch", &preSynch);
   addStream("firingAction", &firingAction);
   addStream("postSynch", &postSynch);
@@ -2698,7 +2584,7 @@ void ArchTarget :: initCodeStreams() {
   signal_declarations.initialize();
   component_mappings.initialize();
   architecture_body_closer.initialize();
-  configuration_declaration.initialize();
+  configuration_declarations.initialize();
   preSynch.initialize();
   firingAction.initialize();
   postSynch.initialize();

@@ -183,7 +183,7 @@ private:
 	CodeStream component_declarations;
 	CodeStream signal_declarations;
 	CodeStream component_mappings;
-	CodeStream configuration_declaration;
+	CodeStream configuration_declarations;
 	CodeStream preSynch;
 	CodeStream firingAction;
 	CodeStream postSynch;
@@ -301,14 +301,8 @@ private:
 	// Generate the architecture_body_opener.
 	void buildArchitectureBodyOpener(int);
 
-//	// Add in component declarations here from mainCompDeclList.
-//	void buildComponentDeclarations(int);
-
 	// Generate the architecture_body_closer.
 	void buildArchitectureBodyCloser(int);
-
-//	// Add in configuration declaration here from mainCompDeclList.
-//	void buildConfigurationDeclaration(int);
 
 	// Generate the clock generator entity and architecture.
 	StringList clockGenCode();
@@ -321,9 +315,6 @@ private:
 
 	// Generate the source entity and architecture.
 	StringList sourceCode(StringList);
-
-//	// Merge all firings into one cluster.
-//	void allFiringsOneCluster();
 
 };
 
