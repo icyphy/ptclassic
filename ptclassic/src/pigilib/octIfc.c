@@ -256,7 +256,7 @@ ParamListType *pListPtr;
     }
 }
 
-/* 12/11/89
+/* 
 Check if star corresponding to instPtr, is known to the kernel and if not,
 try to load it in.
 */
@@ -265,8 +265,7 @@ AutoLoadCk(instPtr)
 octObject *instPtr;
 {
     char buf[128];
-    octObject mFacet;
-    char *fullName, *akoName;
+    char *akoName;
 
     akoName = AkoName(instPtr->contents.instance.master);
     if (KcIsKnown(akoName)) {
@@ -276,6 +275,20 @@ octObject *instPtr;
 	sprintf(buf,
 	  "Unknown star '%s' in current domain, trying to load it...",
 	  akoName));
+    return LoadTheStar(instPtr);
+}
+
+/* used to be part of AutoLoadCk; this always loads the star,
+   whether known or not.
+ */
+boolean
+LoadTheStar(instPtr)
+octObject *instPtr;
+{
+    char *akoName = AkoName(instPtr->contents.instance.master);
+    octObject mFacet;
+    char *fullName;
+
     ERR_IF1(!MyOpenMaster(&mFacet, instPtr, "interface", "r"));
     octFullName(&mFacet, &fullName);
     ERR_IF1(!KcLoad(fullName));
@@ -283,7 +296,7 @@ octObject *instPtr;
 	PrintCon("Load completed");
 	return (TRUE);
     }
-    ErrAdd("Load failed.  Load star manually.");
+    ErrAdd("Load failed.");
     return (FALSE);
 }
 
