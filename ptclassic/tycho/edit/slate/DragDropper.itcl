@@ -63,15 +63,37 @@
 # option, the second argument is that item; if not, the second argument
 # is null).
 #
-# <dt><b>-halo</b>
+# <dt><b>-targethalo</b>
 # <dd>The distance from a target item needed for the item to be
 # considered under the mouse. This is mainly used for thin items
 # like lines. By default, this is zero.
 #
+# <dt><b>-sourcehalo</b>
+# <dd>The distance from a source item needed for the mouse to be
+# considered no longer over the item.
+#
+# <dt><b>-sourcepredicate</b>
+# <dd>If not null, this script that is executed when the mouse moves
+# over an item to which the DragDropper has been bound. If it
+# returns 1, then the DragDropper continues with the drag-drop
+# sequence (the default if this script is null). If it returns
+# zero, the DragDropper does nothing. This can be used to provide
+# dynamic control over what the DragDropper considers a suitable
+# source item.
+#
+# <dt><b>-targetpredicate</b>
+# <dd>If not null, this script that is executed when the mouse moves
+# over an item that has one of the tags given by <b>-targettags</b>.
+# If it returns 1, then the DragDropper continues with the drag-drop
+# sequence (the default if this script is null). If it returns
+# zero, the DragDropper does nothing. This can be used to provide
+# dynamic control over what the DragDropper considers a suitable
+# target item.
+#
 # <dt><b>-targettags</b>
 # <dd>The tags of suitable target items. Any item with one of these tags
 # is highlighted and passed to *-dragcommand* when the mouse moves
-# within *-halo* pixels of it.
+# within *-targethalo* pixels of it.
 #
 # </dl></dl>
 #
@@ -104,14 +126,26 @@ class ::tycho::DragDropper {
     ###################################################################
     ####                            options                        ####
 
-    # The distance from the mouse to be considered under it
-    public variable halo 0
+    # The distance from the mouse to be considered no longer over it
+    public variable sourcehalo 0
+
+   # The distance from the mouse to be considered under it
+    public variable targethalo 0
+
+    # The source item predicate
+    public variable sourcepredicate {}
+
+    # The target item predicate
+    public variable targetpredicate {}
 
     # The tags of target items
     public variable targettags {}
 
     ###################################################################
     ####                         public methods                    ####
+
+    # Activate the drag-dropper on the current item
+    method activate {t x y args}
 
     # Bind to a tag or item
     method bind {tagOrID args}
@@ -128,8 +162,11 @@ class ::tycho::DragDropper {
     # Move mouse away from a bound item
     method leave {}
 
+    # Test if the mouse is over the current item
+    method overcurrent {x y}
+
     # Test if the mouse is over a target item
-    method over {x y}
+    method overtarget {x y}
 
     # Terminate interaction sequence
     method release {}
@@ -137,14 +174,31 @@ class ::tycho::DragDropper {
     ###################################################################
     ####                   protected variables                     ####
 
-    # The line being create
-    private variable line
+    # A flag that disables the drag-drop sequence
+    private variable _disabled 0
+
+    # A flag that enables movement
+    private variable _moving 0
+}
+
+#######################################################################
+#### activate
+#
+# Activate the dragdropper on an item object. If the drag-drop sequence
+# is disabled, this method does nothing. Otherwise it makes bindings
+# for mouse motion and release events, and calls <b>-activatecommand</b>
+# if it is not null.
+# 
+body ::tycho::DragDropper::activate {t x y args} {
+    if !$_disabled {
+        eval chain $t $x $y $args
+    }
 }
 
 #######################################################################
 #### bind 
 #
-# ``Bind'' a connector to a tag type. This overrides the superclass
+# ``Bind'' a drag-dropper to a tag type. This overrides the superclass
 # method to add bindings for entering and leaving the terminal.
 #
 body ::tycho::DragDropper::bind {t args} {
@@ -165,18 +219,31 @@ body ::tycho::DragDropper::bind {t args} {
 body ::tycho::DragDropper::click {x y args} {
     # Delete all other highlights
     $slate delete highlight
+
+    # Set state indicating no movement
+    set _moving 0
 }
 
 #######################################################################
 #### drag
 #
-# Continue an interaction sequence. If the mouse is over a suitable
+# Continue an interaction sequence. If the mouse is still over the
+# source item, do nothing. Otherwise, if the mouse is over a suitable
 # target item, highlight that item and pass it to the *-dragcommand*
 # option. If not, delete all highlights and pass null to *-dragcommand*.
 #
 body ::tycho::DragDropper::drag {x y} {
-    # See if we overlap any suitable connections
-    set item [over $x $y]
+    # See if we have starting moving yet
+    if !$_moving {
+        if [overcurrent $x $y] {
+            return
+        } else {
+            set _moving 1
+        }
+    }
+
+    # See if we overlap any suitable target items
+    set item [overtarget $x $y]
 
     # Adjust highlighting
     $slate delete highlight
@@ -193,18 +260,33 @@ body ::tycho::DragDropper::drag {x y} {
 #######################################################################
 #### enter
 #
-# Move over a bound item. Highlight the item.
+# Move over a bound item. If -sourcepredicate is not null, evaluate
+# it and if it returns true, highlight the item and enable the rest
+# of the drag-drop sequence. If -sourcepredicate is null, highlight
+# the item and enable the rest of the drag-drop sequence
 #
 body ::tycho::DragDropper::enter {} {
-    $slate highlight [$slate find withtag current]
+    set item [$slate find withtag current]
+    if { $sourcepredicate != "" } {
+        if ![uplevel #0 $sourcepredicate $item] {
+            set _disabled 1
+            return
+        }
+    }
+    $slate highlight $item
 }
 
 #######################################################################
 #### leave
 #
-# Move mouse away from a bound item.
+# Move mouse away from a bound item. This reenables the drag-drop
+# sequence if it was disabled.
 #
 body ::tycho::DragDropper::leave {} {
+    # Always reenable the dragdropper
+    set _disabled 0
+
+    # Remove the highlight
     $slate unhighlight [$slate find withtag current]
 }
 
@@ -218,19 +300,42 @@ body ::tycho::DragDropper::release {} {
 }
 
 #######################################################################
-#### over
+#### overcurrent
+#
+# See if the mouse is still over the current item. If the mouse
+# has been clicked an a source item, then the current item
+# will be the source item.
+#
+body ::tycho::DragDropper::overcurrent {x y} {
+    foreach item [eval $slate find overlapping \
+	    [::tycho::Rectangle::stretch $x $y $x $y $sourcehalo]] {
+        if [$slate hastag $item "current"] {
+            return 1
+        }
+    }
+    return 0
+}
+
+#######################################################################
+#### overtarget
 #
 # See if the mouse is over a suitable target item. Return the
 # item if it is, null if not.
 #
-body ::tycho::DragDropper::over {x y} {
-    set found 0
+body ::tycho::DragDropper::overtarget {x y} {
     foreach item [eval $slate find overlapping \
-	    [::tycho::Rectangle::stretch $x $y $x $y $halo]] {
+	    [::tycho::Rectangle::stretch $x $y $x $y $targethalo]] {
 	foreach tag $targettags {
 	    if [$slate hastag $item $tag] {
-		set found 1
-		return $item
+                # OK, we're over an item that has the right
+                # tag. Now perform an additional test with -targetpredicate
+                if { $targetpredicate != "" } {
+                    if [uplevel #0 $targetpredicate $item] {
+                        return $item
+                    }
+                } else {
+                    return $item
+                }
 	    }
 	}
     }
