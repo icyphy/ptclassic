@@ -186,7 +186,7 @@ void DLParProcs :: scheduleSmall(DLNode* pd)
 
 	// renew the states of the graph
 	myGraph->decreaseNodes();
-	myGraph->decreaseWork(pd->myExecTime());
+	myGraph->decreaseWork(pd->getExTime());
 }
 
 // Among candidate processors, choose a processor that can execute
@@ -196,19 +196,31 @@ int DLParProcs :: compareCost(DLNode* node, int* earliest) {
 	// prepare the sortest list of the finish times of the ancestors.
 	prepareComm(node);
 
+	int leng; 
+	if (!node->myMaster()) leng = node->getExTime();
+
 	int ix = 0;	// candidate array index
 	int optId = candidate->elem(0);
 	*earliest = costAssignedTo(node, optId, executeIPC(optId));
+	if (node->myMaster()) leng = mtarget->execTime(node->myMaster(), 
+					getProc(optId)->target());
+	int min = *earliest + leng;
+
 	int bound = candidate->size() - 1;
 
 	while (ix < bound) {
 		ix++;
 		int pix = candidate->elem(ix);
 		int cost = costAssignedTo(node, pix, executeIPC(pix));
+		if (cost >= 0) {
+			if (node->myMaster()) leng = mtarget->execTime(
+				node->myMaster(), getProc(pix)->target());
 			
-		if (cost < *earliest && cost >= 0) {
-			*earliest = cost;
-			optId = pix;
+			if (cost+leng < min) {
+				*earliest = cost;
+				optId = pix;
+				min = cost+leng;
+			}
 		}
 	}
 	return optId;
@@ -227,7 +239,6 @@ int DLParProcs :: costAssignedTo(DLNode* node, int destP, int start) {
 		int temp = getProc(destP)->filledInIdleSlot(node, start);
 		if (temp >= 0) availT = temp;
 	}
-
 	return availT;
 }
 
@@ -238,12 +249,15 @@ void DLParProcs :: assignNode(DLNode* pd, int destP, int tm) {
 	scheduleIPC(destP);
 
 	// assigning the node into the processor.
-	pd->setProcId(destP);
-	pd->setFinishTime(tm + pd->myExecTime());
-
 	UniProcessor* proc = getProc(destP);
+	int leng;
+	if (!pd->myMaster()) leng = pd->getExTime();
+	leng = mtarget->execTime(pd->myMaster(), proc->target());
+
+	pd->setProcId(destP);
+	pd->setFinishTime(tm + leng);
+
 	int availT = proc->getAvailTime();
-	int leng = pd->myExecTime();
 	if (availT <= tm) {
 		// schedule the node at the end.
 		proc->schedAtEnd(pd,tm,leng);
@@ -294,7 +308,7 @@ void DLParProcs :: scheduleBig(DLNode* node, int when, IntArray& avail)
 	// renew the states of the graph
 	fireNode(node);
 	myGraph->decreaseNodes();
-	myGraph->decreaseWork(node->myExecTime());
+	myGraph->decreaseWork(node->getExTime());
 }
 
 // First, schedule the communication nodes associate with the wormhole node.

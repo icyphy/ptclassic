@@ -121,7 +121,7 @@ void HuParProcs :: scheduleSmall(DLNode* node)
 
 		// renew the states of the graph
 		myGraph->decreaseNodes();
-		myGraph->decreaseWork(pd->myExecTime());
+		myGraph->decreaseWork(pd->getExTime());
 	} else {
 		pd->setAvailTime(earliest);
 		myGraph->sortedInsert(myGraph->runnableNodes, pd, 1);
