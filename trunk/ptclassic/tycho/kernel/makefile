@@ -42,9 +42,12 @@ include $(CONFIG)
 
 TCL_SRCS = \
 	Defaults.tcl \
+	List.tcl \
 	Loader.tcl \
 	Lib.tcl \
+	Misc.tcl \
 	Path.tcl \
+	String.tcl \
 	tychoMakeClassDAG.tcl
 
 ITCL_SRCS = \
