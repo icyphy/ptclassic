@@ -834,7 +834,12 @@ body ::tycho::HTML::insertData {data} {
     set currentHTMLText $data
     set currentHTMLLength [string length $data]
 
-    # This is done in the background so that construction completes.
+    # Because the HTML rendering is slow, defer it to run
+    # after the text widget is mapped. In order to make
+    # the window appear immediately, precede the rendering by
+    # an update. (Don't really know know why this is needed,
+    # but it works better this way...)
+    whenMapped text "::tycho::safeUpdate $this"
     whenMapped text [list ::tycho::HTML::render $this $data]
 }
 
@@ -1226,7 +1231,9 @@ body ::tycho::HTML::upSize {} {
 # in a constructor.
 #
 body ::tycho::HTML::render {obj {html {}}} {
-    if {[info objects $obj] == {} || ![$obj isa ::tycho::HTML]} {return}
+    if {[info objects $obj] == {} || ![$obj isa ::tycho::HTML]} {
+	return
+    }
     if {$html == {}} {
         set html [$obj getCurrentHTML]
     }
@@ -1257,6 +1264,7 @@ body ::tycho::HTML::render {obj {html {}}} {
     # the HMrender is not in the context of this class.
     uplevel #0 "set HMrender_progress($tktext) 0"
     $obj statusbar progress "HTML Rendering" "$obj progress"
+    ::tycho::safeUpdate $obj
 
     # Remove HTML comments. This will barf on nested comments
     # (are they legal anyway?)
@@ -1941,10 +1949,11 @@ proc HMset_image {win handle src} {
                     [uplevel #0 $HTML lastDirectory] $src]
         }
 
-        # For some reason there was an update here. This is REALLY
-        # bad because the widget can get deleted and make the
-        # call to HMgot_image generate an error. So we took it out.
-        # update
+        # There is an update here so that the alt= text provided
+	# for an image is displayed while the image is being converted.
+	# Note that we use the safeUpdate procedure to ensure that the
+	# widget still exists after this call returns.
+        ::tycho::safeUpdate $HTML
         if {[string first " $image " " [image names] "] >= 0} {
             HMgot_image $handle $image
         } else {
@@ -1974,7 +1983,7 @@ proc HMset_image {win handle src} {
                     }
                 }
             }
-
+            
             # Put the image creation in a catch in case of 
             # unknown image type or corrupt image file.
             if { ! [catch {image create $type $image -file \
@@ -1982,10 +1991,9 @@ proc HMset_image {win handle src} {
                 # If successful, load the image
                 HMgot_image $handle $image
             }
-        }
+	}
     }
 }
-
 
 #######################################################################
 #### HMstack
