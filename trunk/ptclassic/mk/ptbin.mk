@@ -62,8 +62,14 @@ endif
 endif
 
 ifdef PTCL
-# To build ptcl with Tk, create the following 
-# $PTOLEMY/obj.$PTARCH/ptcl/override.mk file
+# To build ptcl with Tk, follow the steps below: 
+# 1. Recompile Star.cc:
+#    cd $PTOLEMY/obj.$PTARCH/kernel
+#    rm -f Star.o
+#    make USERFLAGS="-DPT_PTCL_WITH_TK -I$PTOLEMY/tcltk/tcl/include -I/usr/openwin/include" install
+#
+# 2. Create the following  $PTOLEMY/obj.$PTARCH/ptcl/override.mk file
+# --start--
 #     GPP_FLAGS += -DPT_PTCL_WITH_TK -I../../src/ptklib -I$PTOLEMY/tcltk/tcl/include -I/usr/openwin/include"
 #     PTCL_WITH_TK = 1
 #     TK = 1
@@ -72,6 +78,13 @@ ifdef PTCL
 #     # uncomment the next two lines:
 #     #LIBS += tkConsole.o
 #     #LIBFILES += tkConsole.o
+# --end--
+#
+# 3. Rebuild ptcl:
+#    cd $PTOLEMY/obj.$PTARCH/ptcl
+#    make clean
+#    make
+#		
 ifndef PTCL_WITH_TK
 	TK =
 endif
