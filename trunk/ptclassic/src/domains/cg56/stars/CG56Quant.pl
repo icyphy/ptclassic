@@ -21,10 +21,10 @@ an optional offset can be added to shift the output levels up or down.
 		type { fix }
 	}
 	state {
-		name { no_bits }
+		name { noBits }
 		type { int }
 		desc {   }
-		default { 4.0 }
+		default { 4 }
 	}
 	state {
 		name { offset }
@@ -33,21 +33,21 @@ an optional offset can be added to shift the output levels up or down.
 		default { 0 }
 	}
     	state {
-		name { integer_out }
-		type {   }
-		desc {    . }
+		name { intOut }
+		type { string  }
+		desc {  yes ignores offset. }
 		default { "no" }
 	}
 	state  {
 		name { X }
-		type { FIX }
+		type { int }
 		desc { internal }
 		default { 0 }
 		attributes { A_NONCONSTANT|A_NONSETTABLE }
 	}
 	state  {
 		name { Y }
-		type { FIX }
+		type { int }
 		desc { internal }
 		default { 0 }
 		attributes { A_NONCONSTANT|A_NONSETTABLE }
@@ -55,38 +55,78 @@ an optional offset can be added to shift the output levels up or down.
         codeblock(std) {
 	move	$ref(input),x0
 	} 
+        codeblock(cont) {
+	move	-#$val(X),a
+	}
+	codeblock(adjust1) {
+ 	move	#$val(offset),x1
+	}
+	codeblock(cont1) {
+	and	x0,a
+	}
+	codeblock(adjust2) {
+	add	x1,a
+	}
+	codeblock(cont2) {
+	move	a1,$ref(output)
+	}
+	codeblock(cont3) {
+	move	#$val(Y),a1
+	move	a1,y0
+	}	
+	codeblock(cont4) {
+	move	#$val(Y),y0
+	}
+	codeblock(cont5) {
+	mpy	x0,y0,a
+	move	a1,$ref(output)
+	}
+	codeblock(cont6) {
+	move	x0,$ref(output)
+	}
 	ccinclude { <math.h> }
         go { 
-		const double X = pow(2,(1.0-double(no_bits)));
-		const double Y; 
-		const *p=integer_out;
-                char buf[80];
-                char buf1[80];
-		if (p[0]=='y' || p[0]=='Y') {
-                            sprintf (buf, "\tmove\t$val(X),a");
-                            gencode(CodeBlock(buf));
+		
+		const int X = 1-int(noBits);
+        	const int Y = int(noBits)-1;
+		const char *p=intOut;
+		if (X<0)
+	          X=1/pow(2,X);
+		else
+	          X=pow(2,X);
+		if (Y<0)
+	          Y=1/pow(2,Y);
+		else
+	          Y=pow(2,Y);
+
+	
+		gencode(std);
+		if (p[0]=='n' || p[0]=='N') {
+                            gencode(cont);
 			    if (offset !=0) {
-                            sprintf (buf1, "\tmove\t$val(offset),x1");
-                            gencode(CodeBlock(buf1));			     
+                            gencode(adjust1);			     
 			    }
-			    sprintf (buf2, "\tand\tx0,a");
-			    gencode(CodeBlock(buf2));
+  			    gencode(cont1);
 			    if (offset !=0) {
-                            sprintf (buf3, "\tadd\tx1,a");
-                            gencode(CodeBlock(buf3));
+                            gencode(adjust2);
 			    }
-                            sprintf (buf4, "\tmove\ta1,$ref(output)");
-                            gencode(CodeBlock(buf4));
+                            gencode(cont2);
                 }
 	        else {
-	        if (no_bits!=24) {
-	                    if (no_bits<9)
-			         { Y=pow(2,(double(no_bits)-1));
-			    
-					
-		gencode(std);
-	   }
+	        if (noBits !=24) {
+	                    if (noBits<9) 
+				 gencode(cont3);
+			    else
+			         gencode(cont4);
+			    gencode(cont5);
+		}
+		else
+			gencode(cont6);
+	
+   	        }
+	}
+
 	execTime { 
-		return 3;
+		return 5;
 	}
  }
