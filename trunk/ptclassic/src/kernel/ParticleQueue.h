@@ -58,11 +58,11 @@ const unsigned int QSIZE_UNLIM = ~0;
 class ParticleQueue {
 public:
 	// constructor: starts empty, unlimited capacity by default
-	ParticleQueue() : stk(0), count(0),
-			  maxCount(QSIZE_UNLIM) {}
+	ParticleQueue() : count(0), maxCount(QSIZE_UNLIM), stk(0) {}
 
 	// constructor: specified capacity
-	ParticleQueue(unsigned int cap) : stk(0), count(0), maxCount(cap) {}
+	ParticleQueue(unsigned int cap) : count(0),  maxCount(cap),
+	  stk(0) {} 
 
 	// destructor: free all Particles
 	~ParticleQueue() {
