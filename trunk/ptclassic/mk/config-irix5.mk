@@ -36,7 +36,7 @@ GPPFLAGS =	-G 0 $(MEMLOG) $(WARNINGS) $(MISC_DEFINES) $(OPTIMIZER)
 #     -cckr   The traditional K&R/Version7 C with SGI extensions
 # Note that -cckr will not work with gcc
 #CFLAGS =	-G 0 -cckr $(OPTIMIZER)
-CFLAGS =	-G 0 $(WARNINGS) $(OPTIMIZER)
+CFLAGS =	-G 0 $(MEMLOG) $(WARNINGS) $(MISC_DEFINES) $(OPTIMIZER)
 #
 # Variables for the linker
 #
