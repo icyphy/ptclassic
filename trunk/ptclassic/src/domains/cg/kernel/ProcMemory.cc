@@ -299,8 +299,8 @@ DualMemory:: DualMemory(const char* n_x,     // name of the first memory space
 	sLen(share_len(x_addr,y_addr,x_len,y_len)),
 	// set up the shared memory part
 	LinProcMemory("shared",
-		      (st_x&st_y)|A_SHARED,
-		      (p_x&p_y)|A_SHARED,
+		      (st_x&st_y)|A_SYMMETRIC,
+		      (p_x&p_y)|A_SYMMETRIC,
 		      max(x_addr,y_addr),
 		      share_len(x_addr,y_addr,x_len,y_len)),
 	x(n_x,st_x,p_x,0,0),
