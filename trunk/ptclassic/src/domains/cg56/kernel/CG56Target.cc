@@ -19,12 +19,10 @@ $Id$
 #include "CG56Target.h"
 #include "CG56Star.h"
 
-#ifdef __GNUG__
-#pragma implementation
-#endif
-
 const Attribute ANY(0,0);
 
+// a CG56Memory represents the X and Y memories of a 56000.  It is
+// derived from DualMemory.
 CG56Memory :: CG56Memory(unsigned x_addr, unsigned x_len, unsigned y_addr,
 			 unsigned y_len) :
 	DualMemory("x",A_XMEM,ANY,x_addr,x_len,"y",A_YMEM,ANY,y_addr,y_len)
@@ -57,8 +55,16 @@ CG56Target :: ~CG56Target () {
 	LOG_DEL; delete mem;
 }
 
+// copy constructor
+CG56Target :: CG56Target (const CG56Target& src) :
+AsmTarget(src.readName(),src.readDescriptor(),"CG56Star"),
+xa(src.xa), xl(src.xl), ya(src.ya), yl(src.yl), inProgSection(0) {
+	LOG_NEW; mem = new CG56Memory(xa,xl,ya,yl);
+}
+
+// clone
 Block* CG56Target :: clone () const {
-	LOG_NEW; return new CG56Target(readName(),readDescriptor(),xa,xl,ya,yl);
+	LOG_NEW; return new CG56Target(*this);
 }
 
 StringList CG56Target::beginIteration(int repetitions, int) {
@@ -66,7 +72,7 @@ StringList CG56Target::beginIteration(int repetitions, int) {
 	if (repetitions == -1)		// iterate infinitely
 		out = "label\n";
 	else {				// iterate finitely
-		out = "\tdo\t";
+		out = "\tdo\t#";
 		out += repetitions;
 		out += ",label\n";
 	}
