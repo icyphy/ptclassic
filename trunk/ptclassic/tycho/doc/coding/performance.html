@@ -16,7 +16,6 @@ In a stock tcl binary, you can use the <CODE>time</CODE> command
 to measure the execution time of a command.  The
 format of the command is: <CODE>time</CODE> <I>tcl_command</I> <I>optional_repetition_count</I>.  For example:
 <PRE>
-cxh@watson 110% itclsh
 % time {foreach i [list a b c d e ] { lappend result $i}} 
 808 microseconds per iteration
 % time {foreach i [list a b c d e ] { lappend result $i}}  10
@@ -72,11 +71,11 @@ through a loop or executes a procedure.
 <LI> There is a lot of overhead in starting another process.  For
 example, calling the Unix date command is fairly slow:
 <PRE>
-% time date
-Sun Sep 22 15:36:05 PDT 1996
-180879 microseconds per iteration
-% time {clock format [clock seconds]}
-1203 microseconds per iteration
+% time {exec date}
+287316 microseconds per iteration
+% time {puts [clock format [clock seconds]]}
+Sun Sep 22 16:10:33 PDT 1996
+1606 microseconds per iteration
 % 
 </PRE>
 
