@@ -39,7 +39,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
  Date of creation: 7/20/94
 
- Methods for the CDF Scheduler
+ Methods for the DDF Scheduler
 
 ***********************************************************************/
 
