@@ -78,13 +78,15 @@ ifdef DIRS
 endif
 
 # Generate html files from itcl files, requires itclsh and tycho
+# Note that $(ROOT) here is relative to the tycho directory, not
+# the Ptolemy directory.
 itcldocs:
 	@if [ "$(TYDOC_DESC)" = "" ] ; then \
-		echo "$(ROOT)/tycho/lib/tydoc/tydoc $(ITCL_SRCS)"; \
-	 	$(ROOT)/tycho/lib/tydoc/tydoc $(ITCL_SRCS); \
+		echo "$(ROOT)/lib/tydoc/tydoc $(ITCL_SRCS)"; \
+	 	$(ROOT)/lib/tydoc/tydoc $(ITCL_SRCS); \
 	else \
-		echo "$(ROOT)/tycho/lib/tydoc/tydoc -t "$(TYDOC_DESC)" $(ITCL_SRCS)"; \
-		$(ROOT)/tycho/lib/tydoc/tydoc -t "$(TYDOC_DESC)" $(ITCL_SRCS); \
+		echo "$(ROOT)/lib/tydoc/tydoc -t "$(TYDOC_DESC)" $(ITCL_SRCS)"; \
+		$(ROOT)/lib/tydoc/tydoc -t "$(TYDOC_DESC)" $(ITCL_SRCS); \
 	fi
 
 # You probably don't want to add $(SRCS) here, since really $(SRCS)
