@@ -83,6 +83,9 @@ public:
 	// Push back the link just gotten.
 	void pushBack(CqLevelLink*);
 
+	// Push back the link just gotten and set pending event reference.
+	void pushBackPendingEvent(CqLevelLink*);
+
 	// Remove and return link from the head of the queue...
 	Pointer getFirstElem() {
 		CqLevelLink *f = get();
