@@ -174,46 +174,82 @@ int AsmTarget::modifyGalaxy() {
 	// the numberTokens values will be correct.
 	if (warnIfNotConnected(g)) return FALSE;
 	g.initialize();
+
+/* hack to be removed */
+	SDFScheduler tempSched;
+	tempSched.setGalaxy(g);
+	SDFSchedule tempList;
+	tempSched.copySchedule(tempList);
+/* hack done */
+
 	if (Scheduler::haltRequested()) return FALSE;
 	int status = TRUE;
 	GalStarIter nextStar(g);
 	Star* s;
 	while ((s = nextStar++) != 0) {
 		BlockPortIter nextPort(*s);
-		PortHole* p;
-		while ((p = nextPort++) != 0 && status) {
-			if (p->isItOutput() || wormEdge(*p) ||
-			    p->numberTokens == p->far()->numberTokens)
+		DFPortHole* p;
+		while ((p = (DFPortHole*) nextPort++) != 0 && status) {
+			int nread;
+			int nwrite;
+			int boundaryFlag = 0;
+			if (p->atBoundary()) {
+				if (p->parentReps() == 0) continue;
+				boundaryFlag = 1;
+				if (p->isItOutput()) {
+					nread = p->numberTokens * 
+						p->parentReps();
+					nwrite = p->far()->numberTokens;
+				} else {
+					nread = p->far()->numberTokens;
+					nwrite = p->numberTokens * 
+						p->parentReps();
+				}
+				if (nread == nwrite) continue;
+			} else if (p->isItOutput() || 
+			    p->numberTokens == p->far()->numberTokens) {
 				continue;
+			} else {
+				nread = p->numberTokens;
+				nwrite = p->far()->numberTokens;
+			}
+
 			// we have a rate conversion.
-			int nread = p->numberTokens;
-			int nwrite = p->far()->numberTokens;
 			if (nread < nwrite && nwrite%nread == 0) {
 				// I run more often than my writer.
 				// must have P_CIRC but writer does not
 				// need it.
 				if (!hasCirc(p)) {
-					if (!spliceStar(p, "CircToLin",0,dom))
-						return FALSE;
+					PortHole* newP =
+					   spliceStar(p, "CircToLin",0,dom);
+					if (!newP) return FALSE;
+					if (boundaryFlag) {
+					    p->aliasFrom()->setAlias(*newP);
+					}
 				}
 			}
 			else if (nread > nwrite && nread%nwrite == 0) {
 				// My writer runs more often than me.
 				// It needs PB_CIRC, I do not.
 				if (!hasCirc(p->far())) {
-					if (!spliceStar(p, "LinToCirc",1,dom))
-						return FALSE;
+					PortHole* newP = 
+					   spliceStar(p, "LinToCirc",1,dom);
+					if (!newP) return FALSE;
+					if (boundaryFlag) {
+					    p->aliasFrom()->setAlias(*newP);
+					}
 				}
 			}
-			else {
+ 			else {
 				// nonintegral rate conversion, both need
 				// PB_CIRC
-				if (!hasCirc(p)) {
-					p = spliceStar(p, "CircToLin", 0,dom);
-					if (!p) return FALSE;
+				PortHole* newP = p;
+				if (!hasCirc(newP)) {
+					newP = spliceStar(newP, "CircToLin", 0,dom);
+					if (!newP) return FALSE;
 				}
-				if (!hasCirc(p->far())) {
-					if (!spliceStar(p, "LinToCirc", 1,dom))
+				if (!hasCirc(newP->far())) {
+					if (!spliceStar(newP, "LinToCirc", 1,dom))
 						return FALSE;
 				}
 			}
@@ -264,7 +300,8 @@ PortHole* AsmTarget::spliceStar(PortHole* p, const char* name,
 
 	// check errors in initialization
 	if (Scheduler::haltRequested()) return 0;
-	return ip;
+	if (delayBefore == 0) return ip;
+	else return op;
 }
 
 AsmTarget::~AsmTarget() {
