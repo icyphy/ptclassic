@@ -55,6 +55,9 @@ obj.$(PTARCH) obj.$(PTARCH)/octtools: MAKEARCH
 everything: obj.$(PTARCH) install_tcltk install_octtools install_xv \
 	install_gthreads install
 
+everything_shared: obj.$(PTARCH) install_tcltk install_tcltk_shared \
+	install_octtools install_xv install_gthreads install
+
 everything_clean: clean_tcltk clean_octtools clean_xv clean_gthreads clean
 
 # This rule builds and installs gcc and tcl/tk from scratch, then octtools,
