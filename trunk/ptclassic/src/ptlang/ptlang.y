@@ -674,6 +674,7 @@ coronaitem:
 		'{' dstatelist '}'	{ genState(); describeState();}
 |	portkey '{' portlist '}'	{ genPort();
 					  describePort(); }
+|	sgitem
 
 ;
 
