@@ -7,7 +7,8 @@
 #define SWAP(a, b) tempr=(a); (a)=(b); (b)=tempr
 
 /***************************************************************/
-void vdk_cfloat_ptolemyfft(double *redata, double *imdata, int nn)
+void vdk_cfloat_ptolemyfft(double *redata, double *imdata, int nn,
+			   double *cosfarray, double *sinfarray)
 {
   int N2,N1,k,i,j,l,v;
   double C,S,A,E;
@@ -17,12 +18,9 @@ void vdk_cfloat_ptolemyfft(double *redata, double *imdata, int nn)
   for(k=0;k<8;k++){
     N1=N2;
     N2=N2/2;
-    E=6.28318/N1;
-    A=0;
     for(j=0;j<N2;j++){
-      A=j*E;
-      C=cos(A);
-      S=-sin(A);
+      C=*cosfarray++;
+      S=*sinfarray++;
       v=j;
       while(v<nn){
 	l=v+N2;

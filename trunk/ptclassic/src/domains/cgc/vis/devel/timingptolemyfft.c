@@ -26,10 +26,10 @@ main (int argc, char *argv[])
   int      verbose,print;
   hrtime_t start, end;
   float    time1, time2;
-  double sinarg,twopiover50;
-  vis_d64  *src0re,*src0im;
-  int      i,j;
-  vis_s16  *src1re,*src1im;
+  double sinarg,twopiover50,twopioverN2;
+  vis_d64  *src0re,*src0im,*cosfarray,*sinfarray,*indexcountf0,*indexcountf1;
+  int      i,j,N2;
+  vis_s16  *src1re,*src1im,*cossarray,*sinsarray,*indexcounts0,*indexcounts1;
 
   ntime = NTIME;
   length = LENGTH;
@@ -56,6 +56,10 @@ src0re = (vis_d64 *) memalign(sizeof(double),sizeof(double)*length);
 src0im = (vis_d64 *) memalign(sizeof(double),sizeof(double)*length);
 src1re = (vis_s16 *) memalign(sizeof(double),sizeof(short)*length);
 src1im = (vis_s16 *) memalign(sizeof(double),sizeof(short)*length);
+cosfarray = (vis_d64 *) memalign(sizeof(double),sizeof(double)*255);
+sinfarray = (vis_d64 *) memalign(sizeof(double),sizeof(double)*255);
+cossarray = (vis_s16 *) memalign(sizeof(double),sizeof(short)*252);
+sinsarray = (vis_s16 *) memalign(sizeof(double),sizeof(short)*252);
 /**************setup input***********************************/
   twopiover50 = 0.0;
   for(i=0;i<length;i++){
@@ -72,6 +76,29 @@ src1im = (vis_s16 *) memalign(sizeof(double),sizeof(short)*length);
     src1im[i] = (short)SCALE * (double) cos(sinarg);
   }
   vis_write_gsr(8);
+/**************setup twiddle***********************************/
+  N2=256;
+  indexcountf0=cosfarray;
+  indexcountf1=sinfarray;
+  for(i=0;i<8;i++){
+    twopioverN2 = 6.28318/N2;
+    N2 = N2/2;
+    for(j=0;j<N2;j++){
+      *indexcountf0++=cos(twopioverN2*j);
+      *indexcountf1++=-sin(twopioverN2*j);
+    }
+  }
+  N2=256;
+  indexcounts0=cossarray;
+  indexcounts1=sinsarray;
+  for(i=0;i<6;i++){
+    twopioverN2 = 6.28318/N2;
+    N2 = N2/2;
+    for(j=0;j<N2;j++){
+      *indexcounts0++=(short)32767* cos(twopioverN2*j);
+      *indexcounts1++=(short)-32767*sin(twopioverN2*j);
+    }
+  }
 /***************************************************************/
   if (verbose) {
     printf("NTIME=%d\n", ntime);
@@ -82,12 +109,12 @@ src1im = (vis_s16 *) memalign(sizeof(double),sizeof(short)*length);
 /****************measure fp unit fft************************/
   start = gethrtime();
   for (j = 0; j < ntime; j ++) {
-    vdk_cfloat_ptolemyfft(src0re, src0im, length);
+    vdk_cfloat_ptolemyfft(src0re, src0im, length, cosfarray, sinfarray);
   }
   end = gethrtime();
   time1 = (float) (end - start)/1000000/ntime;
 
-  reorderfloatfft(src0re, src0im, length);
+  reorderfloatfft(src0re,src0im,length);
 
   if (verbose) {
     printf("    CFLOAT-GL Time = %f msec\n", time1);
@@ -95,7 +122,8 @@ src1im = (vis_s16 *) memalign(sizeof(double),sizeof(short)*length);
 /***************measure vis unit fft*****************************/
   start = gethrtime();
   for (j = 0; j < ntime; j ++) {
-    vdk_vis_ptolemyfft((double*)src1re, (double*)src1im, length);
+    vdk_vis_ptolemyfft((double*)src1re, (double*)src1im, length,
+		       (double*)cossarray, (double*)sinsarray);
   }
   end = gethrtime();
   time2 = (float) (end - start)/1000000/ntime;
