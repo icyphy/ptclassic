@@ -94,13 +94,17 @@ OTHERSRCS = \
   README
 
 # Objects
-OBJS = $(SRCS:.cc=.o)
+OBJS =		$(SRCS:.cc=.o)
 
-LIB=	libtycho.$(LIBSUFFIX)
+LIB =		libtycho.$(LIBSUFFIX)
 
 # Set up definitions for ptbin.mk
 BASENAME = 	tycho
 SPECIAL_LIBS =	-L./ -ltycho -lptcl -lptk -lptolemy -lgantt
+# We always depend on libptolemy, so there is no need to add it
+SPECIAL_LIBS_DEPENDS = 	$(LIBDIR)/libptcl.$(LIBSUFFIX) \
+			$(LIBDIR)/libptk.a \
+			$(LIBDIR)/libgantt.$(LIBSUFFIX)
 NEED_PALETTES = no
 NEED_HOF =	yes
 NEED_GRAPHICS =	yes
