@@ -28,7 +28,16 @@ static char SccsId[]="$Id$";
 #include "port.h"
 #include "internal.h"
 
+#include "change_record.h"
+#include "oct_utils.h"
+
+#include "modify.h"
+
 #undef octModify
+
+/* Forward references (Should these be static?) */
+int oct_do_unmodify
+	ARGS((generic *ptr, octObject *object));
 
 octStatus
 octModify(object)
@@ -50,6 +59,7 @@ octObject *object;
     return retval;
 }
 
+octStatus
 oct_do_modify(ptr, object)
 generic *ptr;
 octObject *object;
@@ -123,6 +133,7 @@ octObject *object;
     return retval;
 }
 
+int
 oct_do_unmodify(ptr, object)
 generic *ptr;
 octObject *object;
