@@ -59,6 +59,7 @@ ITCL_SRCS = \
 	Edit.itcl \
 	EditItcl.itcl \
 	EditItclText.itcl \
+	EditSearch.itcl \
 	EditTcl.itcl \
 	EditTclText.itcl \
 	EditText.itcl \
