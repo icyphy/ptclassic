@@ -86,7 +86,7 @@ class ::tycho::Shape {
     ####                         public procs                      ####
 
     # Get one or more aspects of an item
-    proc _aspect {id canvas slate args}
+    proc _aspect {id canvas slate x y args}
 
     # Attach a set of grapples to an item
     proc _grapple {id canvas slate interactor args}
@@ -130,7 +130,7 @@ class ::tycho::Shape {
     # Storage for temporary variables. Note: all methods must be careful
     # to make array indexes unique, since this array stores data for
     # multiple slates. The best way to do this is to make the slate
-    # name oart of the index.
+    # name part of the index.
     protected common scratch
 
     ## pi and friends
@@ -158,23 +158,10 @@ class ::tycho::Shape {
 #######################################################################
 #### _aspect
 #
-# Return the value of one or more aspects. Valid aspects in this
-# class are "center."
+# _Abstract procedure._
 #
-body ::tycho::Shape::_aspect {id canvas slate args} {
-    set coords [$slate bbox $id]
-
-    switch -exact [lindex $args 0] {
-	"c" -
-	"center" {
-	    return [list \
-		    [expr ([lindex $coords 0] + [lindex $coords 2]) / 2] \
-		    [expr ([lindex $coords 1] + [lindex $coords 3]) / 2]]
-	}
-	default {
-	    error "Invalid aspect [lindex $args 0] of $id"
-	}
-    }
+body ::tycho::Shape::_aspect {id canvas slate x y args} {
+    error "Abstract procedure"
 }
 
 #######################################################################
@@ -190,17 +177,19 @@ body ::tycho::Shape::_grapple {id canvas slate interactor args} {
 #### _moveclick
 #
 body ::tycho::Shape::_moveclick {id canvas slate x y args} {
+    set unique $id.[$slate uniqueid]
+
     # Remember where we started
-    set scratch($slate.$id.prevX) $x
-    set scratch($slate.$id.prevY) $y
+    set scratch(prevX.$unique) $x
+    set scratch(prevY.$unique) $y
 
     # If the -ghost option is specified, create the ghost
     if { [lsearch -exact $args -ghost] != -1 } {
 	$slate ghost $id
-	set scratch($slate.$id.start) [list $x $y]
-	set scratch($slate.$id.ghost) 1
+	set scratch(start.$unique) [list $x $y]
+	set scratch(ghost.$unique) 1
     } else {
-	set scratch($slate.$id.ghost) 0
+	set scratch(ghost.$unique) 0
     }
 }
 
@@ -208,42 +197,46 @@ body ::tycho::Shape::_moveclick {id canvas slate x y args} {
 #### _movedrag
 #
 body ::tycho::Shape::_movedrag {id canvas slate x y} {
+    set unique $id.[$slate uniqueid]
+
     # If there's a ghost, move it, else move the item.
-    if $scratch($slate.$id.ghost) {
-	set movethis ghost
+    if $scratch(ghost.$unique) {
+	set movethis ghost.$id
     } else {
 	set movethis $id
     }
 
     # Move is a delta operation.
     $slate move $movethis \
-	    [expr $x - $scratch($slate.$id.prevX)] \
-	    [expr $y - $scratch($slate.$id.prevY)]
+	    [expr $x - $scratch(prevX.$unique)] \
+	    [expr $y - $scratch(prevY.$unique)]
 
     # Remember the new position
-    set scratch($slate.$id.prevX) $x
-    set scratch($slate.$id.prevY) $y
+    set scratch(prevX.$unique) $x
+    set scratch(prevY.$unique) $y
 }
 	
 #######################################################################
 #### _moverelease
 #
 body ::tycho::Shape::_moverelease {id canvas slate x y} {
+    set unique $id.[$slate uniqueid]
+
     # If there's a ghost, move the complex item to its
     # position and then delete it
-    if $scratch($slate.$id.ghost) {
-	::tycho::assign a b $scratch($slate.$id.start)
+    if $scratch(ghost.$unique) {
+	::tycho::assign a b $scratch(start.$unique)
 
 	$slate move $id [expr $x - $a] [expr $y - $b]
-	$slate delete ghost
+	$slate delete ghost.$id
 
-	unset scratch($slate.$id.start)
+	unset scratch(start.$unique)
     }
 
     # Clean up
-    unset scratch($slate.$id.ghost)
-    unset scratch($slate.$id.prevX)
-    unset scratch($slate.$id.prevY)
+    unset scratch(ghost.$unique)
+    unset scratch(prevX.$unique)
+    unset scratch(prevY.$unique)
 }
 
 #######################################################################

@@ -67,7 +67,7 @@ class ::tycho::Polygon {
     ####                         public procs                      ####
 
     # Get one or more aspects of an item
-    proc _aspect {id canvas slate args}
+    proc _aspect {id canvas slate x y args}
 
     # Attach a set of grapples to an item
     proc _grapple {id canvas slate interactor args}
@@ -100,10 +100,12 @@ class ::tycho::Polygon {
 #######################################################################
 #### _aspect
 #
-body ::tycho::Polygon::_aspect {id canvas slate args} {
+body ::tycho::Polygon::_aspect {id canvas slate x y args} {
+    array set opts {-aspects {}}
+    array set opts $args
     set coords [$slate coords $id]
 
-    if { $args == "" } {
+    if { $opts(-aspects) == "" } {
 	set result {length start end}
 	foreach n [::tycho::linterval 0 \
 		[expr [llength $coords] / 2 - 2]] {
@@ -111,7 +113,7 @@ body ::tycho::Polygon::_aspect {id canvas slate args} {
 	}
 	return $result
     } else {
-	return [eval aspect [list $coords] $args]
+	return [eval aspect [list $coords] $opts(-aspects)]
     }
 }
 
@@ -119,50 +121,57 @@ body ::tycho::Polygon::_aspect {id canvas slate args} {
 #### _reshape
 #
 body ::tycho::Polygon::_reshape {id canvas slate x y args} {
+    array set opts {-aspects {}}
+    array set opts $args
+
     eval $slate coords $id \
-	    [eval reshape [list [$slate coords $id]] $x $y $args]
+	    [eval reshape [list [$slate coords $id]] $x $y $opts(-aspects)]
 }
 
 #######################################################################
 #### _reshapeclick
 #
 body ::tycho::Polygon::_reshapeclick {id canvas slate x y args} {
+    set unique $id.[$slate uniqueid]
+
     # Extract options
-    array set opts [concat {-ghost 0 -aspects {}} $args]
+    array set opts {-ghost 0 -aspects {}}
+    array set opts $args
     if { $opts(-aspects) == "" } {
         error "Empty aspect list"
     }
 
     # Remember how I am now.
-    set scratch($id.prevX) $x
-    set scratch($id.prevY) $y
+    set scratch(prevX.$unique) $x
+    set scratch(prevY.$unique) $y
 
     # Get the coordinates of the polygon into an efficient-to-process form
     set i 0
-    set scratch($id.indexes) {}
+    set scratch(indexes.$unique) {}
     foreach {a b} [$slate coords $id] {
-	set scratch($id.$i.x) $a
-	set scratch($id.$i.y) $b
-	lappend scratch($id.indexes) $i
+	set scratch(x.$i.$unique) $a
+	set scratch(y.$i.$unique) $b
+	lappend scratch(indexes.$unique) $i
 	incr i
     }
 
     # If the start vertex is repeated, delete it
     set last [expr $i-1]
-    if { $scratch($id.0.x) == $scratch($id.$last.x) \
-	    && $scratch($id.0.y) == $scratch($id.$last.y) } {
-	unset scratch($id.$last.x)
-	unset scratch($id.$last.y)
-        set scratch($id.indexes) [lreplace $scratch($id.indexes) end end]
+    if { $scratch(x.0.$unique) == $scratch(x.$last.$unique) \
+	    && $scratch(y.0.$unique) == $scratch(y.$last.$unique) } {
+	unset scratch(x.$last.$unique)
+	unset scratch(y.$last.$unique)
+        set scratch(indexes.$unique) \
+        	[lreplace $scratch(indexes.$unique) end end]
     }
 
     # Figure out the vertices that will be changed
-    set scratch($id.vertices) {}
+    set scratch(vertices.$unique) {}
     foreach aspect $opts(-aspects) {
         ::tycho::assign a n [split $aspect "-"]
 	switch -exact $a {
 	    "vertex" {
-		lappend scratch($id.vertices) $n
+		lappend scratch(vertices.$unique) $n
 	    }
 	    "length" {
 		error "Cannot set the \"length\" aspect of a line"
@@ -174,14 +183,15 @@ body ::tycho::Polygon::_reshapeclick {id canvas slate x y args} {
     }
     
     # Make sure there are no duplicates
-    set scratch($id.vertices) [::tycho::lnub $scratch($id.vertices)]
+    set scratch(vertices.$unique) \
+	    [::tycho::lnub $scratch(vertices.$unique)]
 
     # If the -ghost flag is set, draw the ghost line.
     if { $opts(-ghost) } {
 	$slate ghost $id
- 	set scratch($id.ghost) 1
-   } else {
-	set scratch($id.ghost) 0
+ 	set scratch(ghost.$unique) 1
+    } else {
+	set scratch(ghost.$unique) 0
     }
 }
 

@@ -92,7 +92,7 @@ class ::tycho::Oval {
     ####                         public procs                      ####
 
     # Get one or more aspects of an item
-    proc _aspect {id canvas slate args}
+    proc _aspect {id canvas slate x y args}
 
     # Attach a set of grapples to an item
     proc _grapple {id canvas slate interactor args}
@@ -176,12 +176,12 @@ body ::tycho::Oval::_reshape {id canvas slate x y args} {
     # For each of the two possible aspects, see if it is present in
     # the aspects list, and if it is, alter the appropriate coordinates
     if { [lsearch -exact $args hradius] >= 0 } {
-		set x0 [expr $x0 - $x]
-		set x1 [expr $x1 + $x]
+	set x0 [expr $x0 - $x]
+	set x1 [expr $x1 + $x]
     }
     if { [lsearch -exact $args vradius] >= 0 } {
-		set y0 [expr $y0 - $y]
-		set y1 [expr $y1 + $y]
+	set y0 [expr $y0 - $y]
+	set y1 [expr $y1 + $y]
     }
     
     # Reshape with coords{}
@@ -192,77 +192,85 @@ body ::tycho::Oval::_reshape {id canvas slate x y args} {
 #### _reshapeclick
 #
 body ::tycho::Oval::_reshapeclick {id canvas slate x y args} {
-    ::tycho::getflag ghost args
+    set unique $id.[$slate uniqueid]
+
+    # Extract options
+    array set opts {-ghost 0 -aspects {}}
+    array set opts $args
+    if { $opts(-aspects) == "" } {
+        error "Empty aspect list"
+    }
 
     # Remember how I am now.
-    set scratch($id.aspects) $args
-    set scratch($id.prevX) $x
-    set scratch($id.prevY) $y
+    set scratch(aspects.$unique) $args
+    set scratch(prevX.$unique) $x
+    set scratch(prevY.$unique) $y
 
     # If the -ghost flag is set, draw the ghost oval.
-    if { $ghost } {
-		set scratch($id.ghost) [eval $canvas create oval \
-			[$slate coords $id] \
-			-outline grey]
+    if { $opts(-ghost) } {
+	$slate ghost $id
+ 	set scratch(ghost.$unique) 1
+    } else {
+	set scratch(ghost.$unique) 0
     }
+}
 }
 
 #######################################################################
 #### _reshapedrag
 #
 body ::tycho::Oval::_reshapedrag {id canvas slate x y} {
+    set unique $id.[$slate uniqueid]
+
     # Get the current coordinates
     ::tycho::assign x0 y0 x1 y1 [$slate coords $id]
     
-   # Get delta coordinates
-    set deltaX [expr $x - $scratch($id.prevX)]
-    set deltaY [expr $y - $scratch($id.prevY)]
+    # Get delta coordinates
+    set deltaX [expr $x - $scratch(prevX.$unique)]
+    set deltaY [expr $y - $scratch(prevY.$unique)]
 
-	# Remember the current coordinates
-	set scratch($id.prevX) $x
-    set scratch($id.prevY) $y
+    # Remember the current coordinates
+    set scratch(prevX.$unique) $x
+    set scratch(prevY.$unique) $y
 
     # For each of the two possible aspects, see if it is present in
     # the aspects list, and if it is, alter the appropriate coordinates
     if { [lsearch -exact $args hradius] >= 0 } {
-		set x0 [expr $x0 - $x]
-		set x1 [expr $x1 + $x]
+	set x0 [expr $x0 - $x]
+	set x1 [expr $x1 + $x]
     }
     if { [lsearch -exact $args vradius] >= 0 } {
-		set y0 [expr $y0 - $y]
-		set y1 [expr $y1 + $y]
+	set y0 [expr $y0 - $y]
+	set y1 [expr $y1 + $y]
     }
 
     # If there's a ghost, reshape it. Otherwise reshape the item.
-    if { [::info exists scratch($id.ghost)] } {
-		$canvas coords $scratch($id.ghost) $x0 $y0 $x1 $y1
+    if $scratch(ghost.$unique) {
+	$canvas coords ghost.$id $x0 $y0 $x1 $y1
     } else {
-		$slate coords $id $x0 $y0 $x1 $y1
+	$slate coords $id $x0 $y0 $x1 $y1
     }
-}
 }
 
 #######################################################################
 #### _reshaperelease
 #
 body ::tycho::Oval::_reshaperelease {id canvas slate x y} {
+    set unique $id.[$slate uniqueid]
+
     # If there's a ghost, reshape the item to its shape
     # and then delete the ghost.
-    if { [::info exists scratch($id.ghost)] } {
-		# Reshape the item
-		eval $slate coords $id [$slate coords $scratch($id.ghost)]
-		$canvas delete $scratch($id.ghost)
-
-		# Clean up
-		unset scratch($id.ghost)
+    if $scratch(ghost.$unique) {
+	# Reshape the item
+	eval $slate coords $id [$slate coords ghost.$id]
+	$canvas delete ghost.$id
     }
 
     # General cleaning up
-    unset scratch($id.prevX)
-    unset scratch($id.prevY)
+    unset scratch(ghost.$unique)
+    unset scratch(prevX.$unique)
+    unset scratch(prevY.$unique)
 }
-
-
 
 ##########################################################################
 #### fromRect
