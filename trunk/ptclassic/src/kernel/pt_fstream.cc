@@ -51,6 +51,15 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "StringList.h"
 #include "compat.h"		// Pick up sys_errlist[] etc.
 
+// older versions of the GNU libg++ library have a bug; this
+// turns on the bug fix code
+
+#ifdef __GNUG__
+#if !defined(__GNUC_MINOR__) || __GNUC_MINOR__ < 7
+#define NEED_DONT_CLOSE
+#endif
+#endif
+
 // lastName is used to remember the filename for the reporting of errors.
 static const char* lastName = 0;
 
@@ -111,7 +120,7 @@ void pt_ifstream::open(const char* name, int mode, int prot) {
 	int fd = check_special(name, nobufB);
 	if (fd == 0) {
 		rdbuf()->attach(fd);
-#ifdef __GNUG__
+#ifdef NEED_DONT_CLOSE
 		// this should not be needed: problem with libg++ 2.5
 		setf(ios::dont_close);
 #endif
