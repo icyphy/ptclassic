@@ -254,7 +254,8 @@ namespace ::tycho
 uplevel #0 {
     # Source the preference manager and the default preferences.
     # Might as well source needed files first
-    # Already loaded (?): source [file join $tychokernel Object.itcl]
+    source [file join $tychokernel Path.tcl]
+    source [file join $tychokernel Object.itcl]
     source [file join $tychokernel Interchange.itcl]
     source [file join $tychokernel Model.itcl]
     source [file join $tychokernel WidgetPreferences.itcl]
@@ -262,15 +263,19 @@ uplevel #0 {
 
     # More files that we are going to need right away, so there
     # is no point in deferring them to auto-loading.
+    source [file join $tychokernel Uninstantiable.itcl]
     source [file join $tychokernel FontManager.itcl]
     source [file join $tychokernel ColorManager.itcl]
     source [file join $tychokernel CircularList.itcl]
     source [file join $tychokernel TopLevel.itcl]
+    source [file join $tychokernel TWidget.itcl]
+    source [file join $tychokernel View.itcl]
     source [file join $tychokernel Dialog.itcl]
     source [file join $tychokernel Message.itcl]
     source [file join $tychokernel ErrorMessage.itcl]
+    source [file join $tychokernel File.itcl]
 
-    ::tycho::_announce "Sourced ErrorMessage.itcl"
+    ::tycho::_announce "Sourced File.itcl"
 
     # Load the library file
     source [file join $tychokernel Lib.tcl]
@@ -344,10 +349,27 @@ if {![info exists TychoVersionInfo]} {
 if { $tychoWelcomeWindow \
     && [::tycho::preference get misc welcomeWindow] \
     && ! [::tycho::preference get misc slowNetwork] } {
+    ::tycho::_announce "About to create a welcome message"
+    uplevel #0 {
+	source [file join $tychokernel ButtonBox.itcl]
+	source [file join $tychokernel Edit.itcl]
+	source [file join $tychokernel HTML.itcl]
+	source [file join $tychokernel HTMLMessage.itcl]
+	source [file join $tychokernel WelcomeMessage.itcl]
+	source [file join $tychokernel MenuSupport.itcl]
+	source [file join $tychokernel PopupMenu.itcl]
+    }
     ::tycho::welcomeMessage $TychoBinaryInfo $TychoVersionInfo
+    ::tycho::_announce "Done creating a welcome message"
+
 }
 # Determine whether we exit when there are no more windows.
 ::tycho::TopLevel::exitWhenNoMoreWindows $tychoExitWhenNoMoreWindows
+
+# Wait to source the displayer code so that the html widget can come up first
+uplevel #0 {
+	source [file join $tychokernel Displayer.itcl]
+}
 ::tycho::Displayer::normalExit $tychoShouldWeDoRegularExit
 
 # FIXME: if the user starts with slowNetwork==1 and then sets it to 0
@@ -370,6 +392,9 @@ if {$tychoOpenFiles == 0} {
     if {$tychoConsoleWindow != 0} {
 	::tycho::_announce "About to create a TclShell"
 	uplevel #0 {
+	    source [file join $tychokernel StatusBar.itcl]
+	    source [file join $tychokernel MenuBar.itcl]
+	    source [file join $tychokernel TclShell.itcl]
 	    ::tycho::view TclShell \
 		    -geometry +0+0 \
 		    -master 1 \
