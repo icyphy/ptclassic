@@ -85,6 +85,11 @@ namespace ::tycho {
             {::tycho::view EditTcl -file {%s}} \
             {Tcl editor} "text"
 
+    # For now, TIM files open a Tcl editor
+    ::tycho::File::registerExtensions .tim \
+            {::tycho::view EditTcl -file {%s}} \
+            {TIM editor} "text"
+
     ########### graphical editors (alphabetical)
     ::tycho::File::registerExtensions {.dag} \
             {::tycho::view EditDAG -file {%s}} \
