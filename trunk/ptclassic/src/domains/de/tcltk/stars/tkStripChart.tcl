@@ -170,9 +170,9 @@ proc tkStripChartMkWindow { top stopTime starID univ} {
     pack $top.mBar.com -side left -padx 2m
 
     label $top.mBar.timeLabel -text Time:
-    label $top.mBar.time -text 0 -width 9 -relief sunken -bg [ptkColor wheat3]
+    label $top.mBar.time -text 0 -width 9 -relief sunken -bg [ptkColor grey90]
     label $top.mBar.valueLabel -text Value:
-    label $top.mBar.value -width 9 -relief sunken -bg [ptkColor wheat3]
+    label $top.mBar.value -width 9 -relief sunken -bg [ptkColor grey90]
     pack $top.mBar.value -side right -padx 2m
     pack $top.mBar.valueLabel -side right -padx 2m
     pack $top.mBar.time -side right -padx 2m
@@ -203,12 +203,12 @@ proc tkStripChartMkWindow { top stopTime starID univ} {
 
 	# Create the canvas for labeling the vertical axis
 	set ht [set ${starID}(height_cm)]
-	canvas $top.d$m.yBar  -bg LightCyan1 -relief sunken \
+	canvas $top.d$m.yBar  -bg [ptkColor azure1] -relief sunken \
 		-height ${ht}c -width 14m
 	pack $top.d$m.yBar -side left -fill y
 
 	# Create the canvas for plotting the points.
-	canvas $top.d$m.c -bg LightCyan1 -relief sunken \
+	canvas $top.d$m.c -bg [ptkColor azure1] -relief sunken \
 		-height ${ht}c \
 		-width [set ${starID}(width_cm)]c \
 		-closeenough 3
@@ -285,14 +285,14 @@ proc tkStripChartPaginate { top starID stopTime } {
   
 	if {$stopTime < $timeWindow} {
 	    $top.d$m.c create text ${bordX} $textYposition \
-		-text "0" -fill blue
+		-text "0" -fill [ptkColor blue]
 	    $top.d$m.c create text $endPoint $textYposition \
-		-text "$stopTime" -fill blue
+		-text "$stopTime" -fill [ptkColor blue]
 	} else {  
 	    for {set t 0} {$t <= $stopTime} {set t [expr $t+$timeWindow]} {
 		$top.d$m.c create text \
 		    [expr ($t*$unitDistance)+$bordX] $textYposition \
-		    -text "$t" -fill blue
+		    -text "$t" -fill [ptkColor blue]
 	    }
 	}
     } 
@@ -367,7 +367,7 @@ proc tkStripChartMkYScale { canv plotNum starID} {
 	{set tick [expr $tick+$tickIncrement] } {
 	    $canv create line 14m ${tickYposition} \
 		12m ${tickYposition} -fill black
-	    $canv create text 7m ${tickYposition} -text "$tick" -fill blue
+	    $canv create text 7m ${tickYposition} -text "$tick" -fill [ptkColor blue]
 	    set tickYposition [expr $tickYposition-$tickYincrement]
     }                   
 }
@@ -431,13 +431,13 @@ proc tkStripChartPlotPoint { canv x y plotNum starID} {
 		[$canv create line \
 			${px} ${py} \
 			${scaledTime} ${py} \
-			-fill blue]
+			-fill [ptkColor blue]]
 	    $canv lower $line1
 	    set line2 \
 		[$canv create line \
 			${scaledTime} ${py} \
 			${scaledTime} ${scaledValue} \
-			-fill blue]
+			-fill [ptkColor blue]]
 	    # Make lines lowest in the stacking order
 	    $canv lower $line2
 	}
@@ -446,7 +446,7 @@ proc tkStripChartPlotPoint { canv x y plotNum starID} {
 		[$canv create line \
 			${px} ${py} \
 			${scaledTime} ${scaledValue} \
-			-fill blue]
+			-fill [ptkColor blue]]
 	    $canv lower $line
 	}
 	set ${starID}(prevScaledTime,$plotNum) $scaledTime
