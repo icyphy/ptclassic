@@ -37,7 +37,7 @@ This file contains definitions of DDF-specific PortHole classes.
 #pragma interface
 #endif
 
-#include "SDFPortHole.h"
+#include "DFPortHole.h"
 
         //////////////////////////////////////////
         // class DDFPortHole
@@ -180,14 +180,14 @@ class InDDFMPHIter : public MPHIter {
 public:
 	InDDFMPHIter(MultiInDDFPort& mph) : MPHIter(mph) {}
 	InDDFPort* next() { return (InDDFPort*) MPHIter::next();}
-	InDDFPort* operator++() { return next();}
+	InDDFPort* operator++(POSTFIX_OP) { return next();}
 };
 
 class OutDDFMPHIter : public MPHIter {
 public:
 	OutDDFMPHIter(MultiOutDDFPort& mph) : MPHIter(mph) {}
 	OutDDFPort* next() { return (OutDDFPort*) MPHIter::next();}
-	OutDDFPort* operator++() { return next();}
+	OutDDFPort* operator++(POSTFIX_OP) { return next();}
 };
 
 #endif

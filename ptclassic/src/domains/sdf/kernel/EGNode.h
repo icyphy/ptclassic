@@ -162,7 +162,7 @@ public:
 	EGNodeLink* nextLink() 
 		{ return (EGNodeLink*) DoubleLinkIter::nextLink(); }
 	EGNode* next() { return (EGNode*) DoubleLinkIter::next(); }
-	EGNode* operator++() { return next(); }
+	EGNode* operator++(POSTFIX_OP) { return next(); }
 };
 
 #endif

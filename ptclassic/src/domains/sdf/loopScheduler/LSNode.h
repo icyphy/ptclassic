@@ -136,7 +136,7 @@ public:
 	LSNodeLink* nextLink()
 		{ return (LSNodeLink*) DoubleLinkIter::nextLink(); }
 	LSNode* next() { return (LSNode*) DoubleLinkIter::next(); }
-	LSNode* operator++() { return next(); }
+	LSNode* operator++(POSTFIX_OP) { return next(); }
 };
 
 

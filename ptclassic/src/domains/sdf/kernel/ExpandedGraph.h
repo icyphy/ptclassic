@@ -197,7 +197,7 @@ public:
 
 	// return the next node
 	EGNode* next();
-	EGNode* operator++() { return next(); }
+	EGNode* operator++(POSTFIX_OP) { return next(); }
 
 	// reconnect this iterator to another graph
 	void reconnect(ExpandedGraph& g) {
