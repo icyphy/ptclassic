@@ -72,7 +72,7 @@ ParamListType *pListPtr;
     int i, param_n;
     char *from, *to, *copy;
     ParamType *place;
-    int sep, err = 0;
+    int sep, err = FALSE;
 
     /* return a pList length of 0 by default */
     pListPtr->length = 0;
@@ -91,34 +91,37 @@ ParamListType *pListPtr;
     	pListPtr->array = (ParamType *) calloc(1, sizeof(ParamType));
 	return(TRUE);
     }
+
 /* We support old-style parameters (with '|' as the separator and no
  * type information) and new-style (with ^A as the separator).
  */
 
     sep = CTLA;
     from = strchr(pStr, sep);
-    if (!from) {
+    if (from == NULL) {
 	sep = '|';
 	if ((from = strchr(pStr, sep)) == NULL) {
 	    /* can't find separator between length and first param! */
 	    return(FALSE);
         }
     }
-    /* Dupicate Lisp param string, skiping the # of params, so we can chop 
-        it up into smaller strings.
+
+    /* Duplicate Lisp param string, skiping the # of params, so we can chop 
+       it up into smaller strings.
     */
-    copy = DupString(++from); /* copy all the params in pStr */
+    copy = DupString(++from);	/* copy all the params in pStr */
 
     /* Allocate space for pList array, plus extra slot 4/14/89 */
     pListPtr->array = (ParamType *) calloc(param_n + 1, sizeof(ParamType));
 
-    from = copy; /* from points to first param name of copy */
-    place = pListPtr->array; /* points to first pList param slot */
-		    
+    from = copy;		/* from points to first param name of copy */
+    place = pListPtr->array;	/* points to first pList param slot */
+
     for (i = 0; i < param_n; i++) {
 	/* set param name at current place */
 	if ((to = strchr(from, sep)) == NULL) {
-	    err++; break;
+	    err = TRUE;
+	    break;
 	}
 	*to = '\0';
 	place->name = from;
@@ -127,7 +130,8 @@ ParamListType *pListPtr;
 	else {
 	    /* set param type at current place */
 	    if ((to = strchr(from, sep)) == NULL) {
-		err++; break;
+		err = TRUE;
+		break;
 	    }
 	    *to = '\0';
 	    place->type = from;
@@ -135,7 +139,8 @@ ParamListType *pListPtr;
 	}
 	/* set param value at current place */
 	if ((to = strchr(from, sep)) == NULL) {
-	    err++; break;
+	    err = TRUE;
+	    break;
 	}
 	*to = '\0';
 	place->value = from;
