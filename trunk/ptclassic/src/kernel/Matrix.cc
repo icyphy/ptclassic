@@ -49,12 +49,12 @@ ENHANCEMENTS, OR MODIFICATIONS.
  It is possible to define some of these functions in terms of others,
  for example:
 
-  PMatrix operator + (const PMatrix& src1, const PMatrix& src2) {
-    PMatrix result(src1);
+  PtMatrix operator + (const PtMatrix& src1, const PtMatrix& src2) {
+    PtMatrix result(src1);
     result += src2;
     return result;
   }
-  PMatrix& operator += (const PMatrix& src2) {
+  PtMatrix& operator += (const PtMatrix& src2) {
     // do add stuff
   }
 
@@ -483,7 +483,7 @@ IntMatrix& multiply (const IntMatrix& left,const IntMatrix& right,
 // Matrix Message Class
 /////////////////////////////////////////////////////////////
 
-int PMatrix::compareType(const PMatrix & m) const {
+int PtMatrix::compareType(const PtMatrix & m) const {
   if(typesEqual(m)) return 1;
   StringList msg = "Attempt to copy ";
   msg += m.dataType();
@@ -601,7 +601,7 @@ StringList ComplexMatrix::print() const {
   return StringList(strm.str());
 }
 
-int ComplexMatrix::operator == (const PMatrix& src) const {
+int ComplexMatrix::operator == (const PtMatrix& src) const {
   if(!typesEqual(src)) return 0;
   if((nRows != ((const ComplexMatrix*)&src)->nRows) || 
      (nCols != ((const ComplexMatrix*)&src)->nCols))
@@ -635,7 +635,7 @@ ComplexMatrix::operator IntMatrix () const {
 }
 
 // destructive replacement operators
-PMatrix& ComplexMatrix::operator = (const PMatrix& m) {
+PtMatrix& ComplexMatrix::operator = (const PtMatrix& m) {
 // WARNING: any SubMatricies refering to the data in this matrix 
 // will become invalid if this matrix's storage is reallocated.
   if(compareType(m)) {
@@ -1052,7 +1052,7 @@ StringList FixMatrix::print() const {
   return StringList(strm.str());
 }
 
-int FixMatrix::operator == (const PMatrix& src) const {
+int FixMatrix::operator == (const PtMatrix& src) const {
   if(!typesEqual(src)) return 0;
   if((nRows != ((const FixMatrix*)&src)->nRows) || 
      (nCols != ((const FixMatrix*)&src)->nCols))
@@ -1086,7 +1086,7 @@ FixMatrix::operator IntMatrix () const {
 }
 
 // destructive replacement operators
-PMatrix& FixMatrix::operator = (const PMatrix& m) {
+PtMatrix& FixMatrix::operator = (const PtMatrix& m) {
 // WARNING: any SubMatricies refering to the data in this matrix 
 // will become invalid if this matrix's storage is reallocated.
   if(compareType(m)) {
@@ -1391,7 +1391,7 @@ StringList FloatMatrix::print() const {
   return StringList(strm.str());
 }
 
-int FloatMatrix::operator == (const PMatrix& src) const {
+int FloatMatrix::operator == (const PtMatrix& src) const {
   if(!typesEqual(src)) return 0;
   if((nRows != ((const FloatMatrix*)&src)->nRows) || 
      (nCols != ((const FloatMatrix*)&src)->nCols))
@@ -1425,7 +1425,7 @@ FloatMatrix::operator IntMatrix () const {
 }
 
 // destructive replacement operators
-PMatrix& FloatMatrix::operator = (const PMatrix& m) {
+PtMatrix& FloatMatrix::operator = (const PtMatrix& m) {
 // WARNING: any SubMatricies refering to the data in this matrix 
 // will become invalid if this matrix's storage is reallocated.
   if(compareType(m)) {
@@ -1731,7 +1731,7 @@ StringList IntMatrix::print() const {
   return StringList(strm.str());
 }
 
-int IntMatrix::operator == (const PMatrix& src) const {
+int IntMatrix::operator == (const PtMatrix& src) const {
   if(!typesEqual(src)) return 0;
   if((nRows != ((const IntMatrix*)&src)->nRows) || 
      (nCols != ((const IntMatrix*)&src)->nCols))
@@ -1765,7 +1765,7 @@ IntMatrix::operator FloatMatrix () const {
 }
 
 // destructive replacement operators
-PMatrix& IntMatrix::operator = (const PMatrix& m) {
+PtMatrix& IntMatrix::operator = (const PtMatrix& m) {
 // WARNING: any SubMatricies refering to the data in this matrix 
 // will become invalid if this matrix's storage is reallocated.
   if(compareType(m)) {
