@@ -192,7 +192,7 @@ DFT	^	T{
 Plot the discrete-time Fourier transform (magnitude and phase) of a signal,
 as a function of normalized frequency.
 T}
-DFT of a Cx signal	_	T{
+DFT of a Cx signal		T{
 Plot the discrete-time Fourier transform (magnitude and phase) of a complex
 signal, as a function of normalized frequency.
 T}
