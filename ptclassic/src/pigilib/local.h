@@ -62,10 +62,14 @@ extern RAW_PTR malloc ARGS((size_t));
 
 #include <sys/param.h>
 
-#if !defined(PTALPHA) && !defined(PTLINUX) && !defined(PTIRIX5) && !defined(PTHPPA)
+#ifdef PTHPPA
+#define getwd(foo) getcwd(foo,MAXPATHLEN-1)
+#else /* PTHPPA */
+#if !defined(PTALPHA) && !defined(PTLINUX) && !defined(PTIRIX5)
 extern char *getwd ARGS((char *));
-#endif /* ! PTALPHA . . .*/
-
+#endif /* PTALPHA ... */
+#endif /* PTHPPA */
+  
 /* buffer length for messages */
 #define MSG_BUF_MAX 512
 
