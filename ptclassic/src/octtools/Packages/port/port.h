@@ -258,7 +258,14 @@ extern double trunc();
 extern FILE *popen(), *tmpfile();
 extern int pclose();
 #ifndef clearerr	/* is a macro on many machines, but not all */
+#if defined(__sgi) || defined(sgi)
+#if defined(__SYSTYPE_SVR4) || defined(SYSTYPE_SVR4)
+/* SGI irix5 */
+extern void	clearerr(FILE *);
+#endif /* SVR4 */
+#else  /* sgi */
 extern VOID_HACK clearerr();
+#endif /* sgi */
 #endif /* clearerr */
 #ifndef _IBMR2
 #ifndef rewind
