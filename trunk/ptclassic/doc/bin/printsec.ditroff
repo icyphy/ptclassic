@@ -92,8 +92,8 @@ else
 else
 endif
 
-cat /tmp/index$$ >>! $ALMAGEST_INDEX
-/bin/rm /tmp/pt$$ /tmp/index$$
+if (-r /tmp/index$$ ) cat /tmp/index$$ >>! $ALMAGEST_INDEX
+/bin/rm -f /tmp/pt$$ /tmp/index$$
 
 exit 0
 
