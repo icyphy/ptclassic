@@ -6,4 +6,4 @@
 
 PTOLEMY=${PTOLEMY-`csh -fc 'echo ~ptolemy'`}
 export PTOLEMY
-$PTOLEMY/octtools/bin.$ARCH/attache "$@"
+$PTOLEMY/octtools/bin.$PTARCH/attache "$@"

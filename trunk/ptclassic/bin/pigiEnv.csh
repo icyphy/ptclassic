@@ -20,14 +20,14 @@ set progname = `basename $0`
 
 if ( ! $?PTOLEMY ) setenv PTOLEMY ~ptolemy
 if ( ! $?OCTTOOLS ) setenv OCTTOOLS $PTOLEMY
-if ( ! $?ARCH ) then
-    setenv ARCH `$PTOLEMY/bin/ptarch`
+if ( ! $?PTARCH ) then
+    setenv PTARCH `$PTOLEMY/bin/ptarch`
 endif
 if ( ! $?USER ) then
     setenv USER $LOGNAME
 endif
 if ( ! $?PTX11DIR ) then
-    switch ($ARCH)
+    switch ($PTARCH)
 	case sol2:
 	case sol2.cfront:
 	    setenv PTX11DIR /usr/openwin
@@ -39,7 +39,7 @@ if ( ! $?PTX11DIR ) then
 endif
 
 if ( ! $?QCKMON ) then
-    switch ($ARCH)
+    switch ($PTARCH)
 	case sol2:
 	    setenv QCKMON qckMon5
 	    breaksw
@@ -50,7 +50,7 @@ if ( ! $?QCKMON ) then
 endif
 
 if ( ! $?S56DSP ) then
-    switch ($ARCH)
+    switch ($PTARCH)
 	case sol2:
 	    setenv S56DSP /users/ptdesign/vendors/s56sol2
 	    breaksw
@@ -139,7 +139,7 @@ endif
 
 # Try and do some smart error recovery if the pigiRpc binary can't be found.
 # Rules if we can't find a binary:
-# If we can't find $PIGIRPC, try looking in obj.$ARCH/pigiRpc
+# If we can't find $PIGIRPC, try looking in obj.$PTARCH/pigiRpc
 # If we are running this script as ptiny or ptrim, or as pigi -ptiny or
 # pigi -ptrim try looking for ptinyRpc or ptrimRpc.
 # If we are running with -debug, try looking for .debug images
@@ -162,12 +162,12 @@ endif
 # smart here
 if ($?pigidebug && ! $?PIGIRPC ) then
 	if ( ! $?PIGIRPC ) then
-	     setenv PIGIRPC $PTOLEMY/bin.$ARCH/$PIGIBASE
+	     setenv PIGIRPC $PTOLEMY/bin.$PTARCH/$PIGIBASE
 	endif
 	if ($?pigidebug && ! -x $PIGIRPC.debug ) then
 		echo "$PIGIRPC.debug does not exist or is not executable"	
-		if ( -x $PTOLEMY/obj.$ARCH/pigiRpc/${PIGIBASE}.debug ) then
-			setenv PIGIRPC $PTOLEMY/obj.$ARCH/pigiRpc/${PIGIBASE}.debug
+		if ( -x $PTOLEMY/obj.$PTARCH/pigiRpc/${PIGIBASE}.debug ) then
+			setenv PIGIRPC $PTOLEMY/obj.$PTARCH/pigiRpc/${PIGIBASE}.debug
 			echo "Using $PIGIRPC instead"
 		else
 			if ( -x $PIGIRPC ) then
@@ -182,17 +182,17 @@ if ($?pigidebug && ! $?PIGIRPC ) then
 endif
 
 if ( ! $?PIGIRPC ) then
-     setenv PIGIRPC $PTOLEMY/bin.$ARCH/$PIGIBASE
+     setenv PIGIRPC $PTOLEMY/bin.$PTARCH/$PIGIBASE
 endif
 
 if ( ! -x $PIGIRPC ) then
 	echo "$PIGIRPC does not exist or is not executable."
-	if ( $?pigidebug && -x $PTOLEMY/obj.$ARCH/pigiRpc/${PIGIBASE}.debug ) then
-		setenv PIGIRPC $PTOLEMY/obj.$ARCH/pigiRpc/${PIGIBASE}.debug
+	if ( $?pigidebug && -x $PTOLEMY/obj.$PTARCH/pigiRpc/${PIGIBASE}.debug ) then
+		setenv PIGIRPC $PTOLEMY/obj.$PTARCH/pigiRpc/${PIGIBASE}.debug
 		echo "Using $PIGIRPC instead"
 	else
-		if ( -x $PTOLEMY/obj.$ARCH/pigiRpc/$PIGIBASE ) then
-			setenv PIGIRPC $PTOLEMY/obj.$ARCH/pigiRpc/$PIGIBASE
+		if ( -x $PTOLEMY/obj.$PTARCH/pigiRpc/$PIGIBASE ) then
+			setenv PIGIRPC $PTOLEMY/obj.$PTARCH/pigiRpc/$PIGIBASE
 			echo "Using $PIGIRPC instead"
 		else
 			echo "${progname}: exiting"
@@ -235,13 +235,13 @@ if ( $?PIGIXRES ) then
     xrdb -merge $PIGIXRES
 endif
 
-set path = ( $PTOLEMY/bin.$ARCH $PTOLEMY/bin $path )
+set path = ( $PTOLEMY/bin.$PTARCH $PTOLEMY/bin $path )
 
 if ( $?pigiconsole ) then
         setenv TAILARGS -console
 endif
 if ( $?pigidebug ) then
-	switch ($ARCH)
+	switch ($PTARCH)
 		case hppa.cfront:
 	                setenv COMMAND $PTOLEMY/lib/pigiRpcDebug.xdb
 			breaksw
@@ -256,7 +256,7 @@ else if ( $?pigiconsole ) then
         setenv COMMAND $PTOLEMY/lib/pigiRpcConsole
 endif
 
-if ( ! $?VEMBINARY) setenv VEMBINARY $PTOLEMY/bin.$ARCH/vem 
+if ( ! $?VEMBINARY) setenv VEMBINARY $PTOLEMY/bin.$PTARCH/vem 
 
 $VEMBINARY -G 600x150+0+0 -F ${cell}:schematic -G +0+200 -R $PTOLEMY/lib/pigiRpcShell
 

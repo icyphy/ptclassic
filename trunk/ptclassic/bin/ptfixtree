@@ -7,4 +7,4 @@
 #
 #if ( ! $?PTOLEMY ) setenv PTOLEMY ~ptolemy
 PTOLEMY=${PTOLEMY-`csh -fc 'echo ~ptolemy'`}
-$PTOLEMY/tcltk/tcl.$ARCH/bin/tclsh $PTOLEMY/bin/ptfixtree.tcl "$@"
+$PTOLEMY/tcltk/tcl.$PTARCH/bin/tclsh $PTOLEMY/bin/ptfixtree.tcl "$@"
