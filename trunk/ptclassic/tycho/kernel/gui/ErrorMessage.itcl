@@ -157,16 +157,23 @@ body ::tycho::ErrorMessage::constructor {args} {
 #
 body ::tycho::ErrorMessage::stackTrace {} {
     if {$localErrorInfo != ""} {
-	set nm [::tycho::autoName .stack]
-        ::tycho::Displayer $nm
-	::tycho::EditStack $nm.v \
-		-text "The most recent stack trace found is:\n$localErrorInfo" \
-                -readonly 1
-        $nm centerOnScreen
+	set nm [::tycho::view EditStack \
+		-prefix .stack \
+		-text "The most recent stack trace found is:\n$localErrorInfo"\
+                -readonly 1 \
+		-withdrawn 1]
+        [winfo toplevel $nm] centerOnScreen
     } {
 	safeEval ::tycho::warn "No stack trace found"
     }
     # NOTE: I'm not sure why this has to be delayed.
-    after 200 "update; $nm focusin"
+    # NOTE: I took this out, because a) it doesn't work and b) the
+    # Displayer has already given the focus to the stack window. But
+    # for some reason, the stack window loses it by the time we get
+    # back to idle -- hjr 1/30/97
+    # 
+    # after 200 "update; $nm focusin"
+
+    # Delete this dialog box
     delete object $this
 }
