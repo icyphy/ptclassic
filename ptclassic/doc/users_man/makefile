@@ -55,6 +55,7 @@ fm2ps: update_book
 	$(FMPRINT2PS) $(DOCS)
 	$(FIXFRAMEPS) *.ps
 	-chmod g+w *.ps
+	rm -f *.ps.bak
 
 # Produce the obtainPtolemy docs in ascii format
 /tmp/obtainPtolemy.txt: obtainPtolemy.doc /tmp/fmobtainPtolemy.fmb
