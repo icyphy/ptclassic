@@ -115,12 +115,3 @@ main(int argc, char **argv) {
     console.tyExit(0);
 }
 
-// the following stub is here until we support the Gantt chart
-// under Tycho.
-
-extern "C" int displayGanttChart(const char* file) {
-	InfString cmd;
-	cmd << "gantt " << file;
-	system(cmd);
-	return 0;
-}
