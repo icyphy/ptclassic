@@ -20,5 +20,6 @@ HTMLDIR = www
 L2HARGS = -address $(ADDRESS) -t $(TITLE) -dir $(HTMLDIR) -auto_navigation
 
 # List of files to install
-INSTALL_LIST = $(PAPER).dvi $(PAPER).pdf $(PAPER).ps.Z $(HTMLDIR)/$(PAPER)
+INSTALL_LIST = $(PAPER).dvi $(PAPER).pdf $(PAPER).ps.Z \
+		$(HTMLDIR)/$(PAPER)/$(PAPER).html
 
