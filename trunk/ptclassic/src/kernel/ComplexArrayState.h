@@ -39,39 +39,22 @@ public:
 	// Constructor
 	ComplexArrayState () {nElements = 0; val = 0;}
 
-	// Constructor
-	ComplexArrayState (int size) { val = new Complex [nElements = size];}
+	// alternate constructor: size
+	ComplexArrayState (int size);
 
-	// Constructor
-	ComplexArrayState (int size, Complex& fill_value) 
-				{ val = new Complex [nElements = size];
-				Complex * top = &(val[nElements]);
-				Complex * t = val;
-				while (t < top) *t++ = fill_value; }
+	// alternate constructor: size and fill value
+	ComplexArrayState (int size, const Complex& fill_value) ;
 
 	// Destructor
 	~ComplexArrayState ();
 
-	// Assignment operator
-	ComplexArrayState &	operator = (ComplexArrayState & v) {
-				if (this != &v) {
-				delete[nElements] val;
-				val  = new Complex [nElements = v.nElements];
-				Complex* top = &(val[nElements]);
-				Complex* t = val;
-				Complex* u = v.val;
-				while (t < top) *t++ = *u++;
-				}
-				return *this;
-			}
-
 	// Size
-	int size() const { return nElements;}
+	int size() const;
 
 	// Array element 
 	Complex & operator [] (int n) {
-				return val[n];
-			}
+		return val[n];
+	}
 
 	// The type
 	const char* type() const; // { return "ComplexArray";}
@@ -92,7 +75,7 @@ public:
 	ParseToken evalExpression(Tokenizer&);
 
 	// clone method
-	virtual State* clone() const {return new ComplexArrayState;}
+	virtual State* clone() const;
 };
 
 #endif
