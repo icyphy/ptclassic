@@ -2056,6 +2056,62 @@ The default implementation simply passes this call along to the
 scheduler; derived classes may modify this.
 
 \begin{example}
+virtual StringList pragma () const;
+\end{example}
+
+A Target may understand certain annotations associated with Blocks
+called ``Pragmas''.  For example, an annotation may specify how
+many times a particular Star should fire.
+Or it could specify that a particular Block should be mapped
+onto a particular processor.  Or it could specify that a particular
+State of a particular Block should be settable on the command line
+that invokes a generated program.
+
+The above method returns the list of names
+pragmas that a particular target understands (e.g. ``firingsPerIteration'' or
+``processorNumber'').
+In derived classes, each item in the list is a three
+part string, ``name type value'', separated by spaces.
+The ``value'' will be a default value.
+The implementation in class Target returns a StringList
+with only a single zero-length string in it.
+The ``type'' can be any type used in states.
+
+\begin{example}
+virtual StringList pragma (const char* \var{parentname}, const char* \var{blockname}) const;
+\end{example}
+
+To determine the value of all pragmas that have been
+specified for a particular block, call this method.
+In derived classes, it returns a list of ``name value''
+pairs, separated by spaces.  In the base class, it
+returns an empty string. The \var{parentname} is the name
+of the parent class (universe or galaxy master name).
+
+\begin{example}
+virtual StringList pragma (const char* \var{parentname},
+	const char* \var{blockname},
+	const char* \var{pragmaname}) const;
+\end{example}
+
+To determine the value of a pragma of a particular type
+that has been specified for a particular block, call this
+method. In derived classes, it returns a value.
+In the base class, it returns a zero-length string.
+
+\begin{example}
+virtual StringList pragma (const char* \var{parentname},
+	const char* \var{blockname},
+	const char* \var{pragmaname},
+	const char* \var{value}) const;
+\end{example}
+
+To specify a pragma to a target, call this method.
+The implementation in the base class ``Target'' does nothing.
+In derived classes, the pragma will be registered in some way.
+The return value is always a zero-length string.
+
+\begin{example}
 Target* child(int \var{n});
 \end{example}
 
@@ -4624,19 +4680,40 @@ Creates an identical copy with \code{new}.
 
 The incremental linker permits user written code to be added to the
 system at runtime.  Two different mechanisms are provided, called
-a temporary link and a permanent link.
+a temporary link and a permanent link.  
 
-In either case, code is linked using the incremental linking facilities
-of the Unix linker, the new code is read into the Ptolemy executable,
-and symbols corresponding to C++ global constructors are located and called.
-This means that such code is expected to register objects on Ptolemy's
-known lists (e.g. KnownBlock, KnownState, or KnownTarget) so that new
-classes become usable.
+With either a temporary link or a permanent link, code is linked using
+the incremental linking facilities of the Unix linker, the new code is
+read into the Ptolemy executable, and symbols corresponding to C++
+global constructors are located and called.  This means that such code
+is expected to register objects on Ptolemy's known lists
+(e.g. KnownBlock, KnownState, or KnownTarget) so that new classes
+become usable.
 
 \emph{Warning:} if the executable containing the Linker class is
 stripped, the incremental linker will not work!
 
-\node types of links
+\node ld -A style linking vs. dlopen() style linking
+\subsection{ld -A style linking vs. dlopen() style linking}
+
+There are two ways incremental linking is implemented: ``ld -A'' and
+``dlopen()'' style linking.
+
+1. The first type of implementation uses a BSD Sun-style loader with
+the -A flag to load in .o files.  Usually, binaries that are to be
+dynamically linked must be built with the -N option.  This is the
+older style of linking present in Ptolemy0.5 and earlier.
+
+2. The second type of implementation uses the System V Release 4
+\code{dlopen()} call to load in shared objects (.so files).
+SunOS4.1.x, Solaris2.x and Irix5.x support this style of dynamic
+linking.  In Ptolemy0.5.1, only the sol2, sol2.cfront and irix5 ARCHs
+support dynamic linking of shared objects.
+
+The interface to both styles of linking is very similar, though there
+are differences.
+
+\node Types of links
 \subsection{Temporary vs. Permanent Incremental Linking}
 
 Code that is linked in by the ``temporary link'' technique does not
@@ -4648,15 +4725,45 @@ which is useful in code development, as buggy star definitions can be
 replaced by valid ones without exiting Ptolemy.
 
 Code that is linked in by the ``permanent link'' method has the same
-status as code that was linked into the original executable.  A
-permanent link creates or replaces the \file{.pt_symtable} file in
-the directory in which Ptolemy was started.  This file contains the
-current symbol table for use by subsequent links, temporary or
-permanent.  This file is deleted when the Ptolemy process exits
-normally.  It is left around when the process crashes, as it is useful
-for debugging (as it contains symbols for object files that were
-incrementally linked using the permanent method as well as those in
-the original executable).
+status as code that was linked into the original executable.  
+
+With ``ld -A'' style incremental linking, a permanent link creates or
+replaces the \file{.pt_symtable} file in the directory in which
+Ptolemy was started.  This file contains the current symbol table for
+use by subsequent links, temporary or permanent.  This file is deleted
+when the Ptolemy process exits normally.  It is left around when the
+process crashes, as it is useful for debugging (as it contains symbols
+for object files that were incrementally linked using the permanent
+method as well as those in the original executable).
+
+With \code{dlopen()} style incremental linking, we keep track of all
+the files that have been permanently linked in.  After a file has been
+permanently linked in, each successive link (permanent or not)
+includes all the permanently linking in files.  That is, if we permanently
+link in foo.o, then when we link in bar.o, we will generate a shared
+object file that includes both foo.o and bar.o, and then call
+\code{dlopen()} on that shared object file.  
+
+Note that with \code{dlopen()} style linking it is possible to relink
+in stars that have been permanently linked.  When a file is to be
+linked in, we check against the list of permanently linked in file
+names and remove any duplicates.  This method of checking will fail if
+one permanently links in a file, and then links in the same file as a
+different name, perhaps through the use of symbolic links. That is, if
+we permanently link in \file{./foo.o} and \code{./bar.o} is a link to
+\file{./foo.o}, when we link in \code{./bar.o}, we will have multiple
+symbols defined, and we will get an error. In other words, we only
+check for duplicate file names, we do not check for duplicate symbols
+in any files, the loader does this for us.
+
+Currently each
+\code{dlopen()} style link generates a temporary shared object in
+\file{/tmp}.  If you are doing a large number of \code{dlopen()} style
+permanent links, you will have many files in \file{/tmp}.  We hope to
+resolve this potential problem in a later release.  Eventually, it
+would be nice if the code read the value of an optional environment
+variable, such as \code{TMPDIR}.
+
 
 \node Linker public members
 \subsection{Linker public members}
@@ -4704,7 +4811,6 @@ argument to the Unix linker.
 static int isActive();
 \end{example}
 
-
 This function returns TRUE if the linker is currently active (so objects
 can be marked as dynamically linked by the known list classes).
 Actually the flag it returns is set while constructors or other
@@ -4715,7 +4821,9 @@ static int enabled();
 \end{example}
 
 Returns true if the linker is enabled (it is enabled by calling
-\code{Linker::init} if that function returns successfully).
+\code{Linker::init} if that function returns successfully).  On
+platforms that do not support dynamic linking, this function
+always returns false (zero).
 
 \begin{example}
 static const char* imageFileName();
@@ -4735,6 +4843,59 @@ flags appended to the end of the command line by all links.
 \node Linker implementation
 \subsection{Linker implementation}
 
+For each port of Ptolemy to a particular release, the Linker is
+implemented in one of two styles: ``ld -A'' style  or ``dlopen()''
+style.  We discuss each style below.
+
+\node Shared Objects
+\subsection{Shared Objects and dlopen() style linking}
+
+If a Ptolemy release on a platform supports \code{dlopen} style
+dynamic linking, then the ptcl \code{link} command can be called with
+either a \file{.o} file or a \file{.so} file.
+
+If the \code{link} ptcl command is passed a \file{.o} file, then a
+\file{.so} file will be generated.
+
+If link ptcl command is passed a \file{.so} file, then the \file{.so}
+file will be loaded.  If the \file{.so} file does not exist, then an
+error message will be produced and the link will return.
+
+There are several ways to specify the path to a shared object.
+
+1) Using just a file name ``link foo.so'' will not work unless
+LD_LIBRARY_PATH includes the directory where \file{foo.so} resides.
+The man pages for code{dlopen()} and code{ld} discuss LD_LIBRARY_PATH
+
+Interestingly, using code{putenv()} to set LD_LIBRARY_PATH from within ptcl
+has no effect on the runtime loader.
+	
+2) If the file name begins with ``./'', then the current directory is
+searched.  ``link ./foo.so'' should work, as will ``link ./mydir/foo.so''
+
+3) If the file name is an absolute pathname, then the shared object
+will be loaded. ``link /tmp/foo.so'' should work.
+
+4) Dynamic programs can have a run path specified at link time.  The
+run path is the path searched at runtime for shared object.  (Under
+Solaris2.3, the -R option to ld controls the run path.  Under Irix5.2,
+the -rpath option to ld controls the run path).
+If ptcl or pigiRpc has been compiled with a run path built in, and the
+shared object is in that path, then the shared object will be found.
+
+The Sun Linker Manual says:
+	To locate the shared object foo.so.1, the runtime linker will
+	use any LD_LIBRARY_PATH definition presently in effect,
+	followed by any runpath specified during the link-edit of prog
+	and finally, the default location /usr/lib.  If the file name
+	had been specified ./foo.so.1, then the runtime linker would
+	have searched for the file only in the present working
+	directory.
+
+	
+\node Porting the Dynamic Linker
+\subsection{Porting the Dynamic Linking capability}
+
 This section is intended to assist those that attempt to port the
 Linker module to other platforms.
 
@@ -4743,13 +4904,31 @@ specifying the class interface, \file{Linker.cc}, specifying the
 implementation, and \file{Linker.sysdep.h}, specifying all the machine
 dependent parts of the implementation.
 
-The Linker class currently works on the Sun-3 or Sun-4 running
-\code{g++}, the Sun-4 running Sun's \code{cfront} port, and
-Vaxes and DecStations running Ultrix.  Some work has been done to
-port it to the HP-PA architecture; this is not yet complete.
+To turn on debugging, compile \file{Linker.cc} with the DEBUG flag
+defined.  One way to do this would be:
+\begin{example}
+cd $PTOLEMY/obj.$ARCH/kernel; rm -f Linker.o; make OPTIMIZER=-DDEBUG
+\end{example}
+
+The Linker class currently uses ``ld -A'' style dynamic linking on the
+Sun4(SPARC) running SunOS4.1 and \code{g++}, the Sun4(SPARC) running
+SunOS4.1 and Sun's \code{cfront} port, DECStations running Ultrix,
+HP-PA running \code{g++} or HP's \code{cfront} port.
+
+The Linker class currently uses ``dlopen()'' style dynamic linking on the
+Sun4(SPARC) running Solaris2.3 and \code{g++}, the Sun4(SPARC) running
+Solaris2 and Sun's \code{cfront} port (Sun \code{CC-3.0}), the Sun4(SPARC)
+running Solaris2 and Sun's native C++ compiler \code{CC-4.0}, and SGI
+Indigos running IRIX-5.2 and \code{g++}.
+
+Currently Linux does not support any form of dynamic linking within
+Ptolemy. 
 
 The intent is to structure the code in such a way that no \code{#ifdef}s
 appear in \file{Linker.cc}; they should all be in \file{Linker.sysdep.h}.
+
+\node ld -A style linking
+\subsection{ld -A Style Dynamic Linking}
 
 The linker reads all new code into a pre-existing large array, rather
 than creating blocks of the right size with \code{new}, because the
@@ -4768,8 +4947,9 @@ in the command line will be system-dependent.
 
 Read in the object file.  This is heavily system-dependent.
 
-Make the read-in text executable.  On most systems this is a do-nothing
-step.
+Make the read-in text executable.  On most systems this is a
+do-nothing step. On some platforms (such as HP) it is necessary to
+flush the instruction cache and that would be done at this point.
 
 Invoke constructors in the newly read in code.  Constructors are found
 by use of the \file{nm} program; the output is parsed to search for
@@ -4777,6 +4957,42 @@ constructor symbols, whose form depends on the compiler used.
 
 If this is a permanent link, copy the linker output to file
 \file{.pt_symtable}; otherwise delete it.
+
+\node dlopen() style linking
+\subsection{dlopen() Style Dynamic Linking}
+
+Here's how we link in an object using \code{dlopen()} style linking.
+
+Generate a list of files to be linked in.  If we have not yet done a
+permanent link, then the list of files to be linked in will consist of
+only the files in this link or multilink command.
+
+If the link is a permanent link, then we save the object name. For
+each successive link, we check the name of the object to be linked in
+against the list of objects permanently linked for duplicate file
+names.  For each link after a permanent link, we include the names of
+all the unique permanently linked in objects in the generation of a
+temporary shared object file.
+
+Generate a shared object \file{.so} file from all the objects to be
+linked in.  The \file{.so} file is created in /tmp.
+
+Do a \code{dlopen()} on the shared object.
+
+Most ARCHs use \code{nm} to search for constructors, which are then
+invoked.  Currently, sol2.cfront does not need to search for, or
+invoke constructors.  gcc-2.5.8 has patches that allow similar
+functionality, but apparently these patches are not in gcc-2.6.0.
+
+Shared libraries in the SVR4 implementation contain optional \code{__init}
+and \code{__fini} functions, called when the library is first connected to
+(at startup or \code{dlopen()}) and when the library is disconnected from (at
+\code{dlclose()} or program exit), respectively.  Some C++ implementations
+can arrange for these \code{__init} and \code{__fini} functions to
+contain calls to all the global constructors or destructors.  On
+platforms where this happens, such as sol2.cfront, there is no need
+for the Linker class to explicitly call the constructors, as this will
+happen automatically.
 
 \node Parameters and States
 \chapter{Parameters and States}
