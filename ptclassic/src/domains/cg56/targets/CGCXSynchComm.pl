@@ -87,6 +87,16 @@ codeblock(loadSemaphoreItem) {
         QckAddr($sharedSymbol(comm,s56xCurrentBuffer));
 }
 
+codeblock(sigsetUSR1) {
+{ 
+    struct sigaction pt_alarm_action;
+    sigset(SIGUSR1,s56xSignal);
+    sigaction(SIGUSR1, 0, &pt_alarm_action);
+    pt_alarm_action.sa_flags |= SA_RESTART;
+    sigaction(SIGUSR1, &pt_alarm_action, 0);
+}
+}
+
 initCode {
 	StringList s56xSemaphores;
 	s56xSemaphores << "int s56xSemaphores[" << *commCount/24 + 1 << "];";
@@ -102,7 +112,7 @@ initCode {
 	CGCXBase::initCode();
 	addGlobal(s56xInterrupt,"s56xInterrupt");
 #ifdef PTSOL2
-	addMainInit("	sigset(SIGUSR1,s56xSignal);","s56x_sigset");
+	addMainInit(sigsetUSR1,"s56x_sigset");
 	addMainInit("	dsp->intr=sbusMemHostIntr;","s56x_dspintr");
 #else
 	addMainInit("   signal(SIGUSR1,s56xSignal);");
