@@ -23,14 +23,36 @@ CC =		gcc
 OCT_CC =	gcc
 
 
-LINUXDEF =	-Dlinux -D_GNU_SOURCE -D_BSD_SOURCE
-#
-# 'production' version
-#OPTIMIZER =	-O2 -m486 -fomit-frame-pointer -pipe
-#
+# /usr/include/stdlib.h may need to be modified for optimization to work.
+# In particular, there could be a problem with __OPTIMIZE__ being defined
+# and random().  Below is diff for the changes:
+#    *** /usr/include/stdlib.h-dist	Mon Nov 29 08:36:11 1993
+#    --- /usr/include/stdlib.h	Sun Aug  7 21:10:43 1994
+#    ***************
+#    *** 135,144 ****
+#    --- 135,146 ----
+#      extern void * setstate __P((void * __statebuf));
+#      
+#      #ifdef	__OPTIMIZE__
+#    + #ifndef NO_RAND_OPTIMIZE
+#      #define	random()		__random()
+#      #define	srandom(seed)		__srandom(seed)
+#      #define	initstate(s, b, n)	__initstate((s), (b), (n))
+#      #define	setstate(state)		__setstate(state)
+#    + #endif /* NO_RAND_OPTIMIZE */
+#      #endif	/* Optimizing.  */
+#      #endif	/* Use BSD.  */
+
+
 # debug version
+LINUXDEF =	-Dlinux #-D_GNU_SOURCE -D_BSD_SOURCE
+OPTIMIZER =	-m486 -pipe -g
+
 #
-OPTIMIZER =	-m486 -pipe #-g
+# 'production' version with optimization
+#OPTIMIZER =	-O2 -m486 -fomit-frame-pointer -pipe
+#LINUXDEF =	-Dlinux -DNO_RAND_OPTIMIZE #-D_GNU_SOURCE -D_BSD_SOURCE
+
 WARNINGS =	-Wall -Wcast-qual -Wcast-align
 GPPFLAGS =	$(LINUXDEF) $(WARNINGS) $(OPTIMIZER) $(MEMLOG)
 CFLAGS =	$(LINUXDEF) $(OPTIMIZER) -fwritable-strings
@@ -39,10 +61,10 @@ CFLAGS =	$(LINUXDEF) $(OPTIMIZER) -fwritable-strings
 # Variables for the linker
 #
 # system libraries (libraries from the environment)
-SYSLIBS=-lg++ -lbsd -lm
+SYSLIBS=-lg++ -lm
 
-LINKFLAGS=-L$(LIBDIR) -Xlinker -S -Xlinker -x -static
-LINKFLAGS_D=-L$(LIBDIR) -g -static
+LINKFLAGS=-L$(LIBDIR) -Xlinker -S -Xlinker -x #-static
+LINKFLAGS_D=-L$(LIBDIR) -g #-static
 
 # octtools/attache uses this
 TERMLIB_LIBSPEC = -ltermcap
@@ -66,7 +88,7 @@ X11_LIBSPEC = -L/usr/X11/lib -lX11
 # Binaries that are shipped should be statically linked.
 # Note that currently vem is built with cc, not gcc, so vem uses
 # this flag. See also config-g++.mk
-CC_STATIC = -static
+CC_STATIC = #-static
 
 #S56DIR= $(ROOT)/vendors/s56dsp
 S56DIR=
