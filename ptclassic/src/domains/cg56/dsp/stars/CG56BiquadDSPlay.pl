@@ -17,13 +17,13 @@ coefficients from the DSPlay filter design tool.
 If DSPlay gives the coefficients: A B C D E then define the parameters
 as follows:
 .sp 0.5
-.(b
+.(l
 a = A
 b = B
 c = C
 d = -(D+1)
 e = -E
-.)b
+.)l
 .sp 0.5
 .pp
 This only works if a, b, c, d, and e are in the range (-1,+1).
