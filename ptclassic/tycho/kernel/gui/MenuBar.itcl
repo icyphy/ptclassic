@@ -194,7 +194,7 @@ body ::tycho::MenuBar::addMenuItem {itemName inMenu args} {
                 [list -label $itemName] $args
     } else {
 	# if it does then link it to cmd
-        eval $itk_component(menu$inMenu) entryconfigure $itemName $args
+        eval $itk_component(menu$inMenu) entryconfigure [list $itemName] $args
     }
 }
 
