@@ -309,8 +309,6 @@ void StructTarget :: trailerCode() {
     myCode << "\n";
     myCode << "entity " << cl->name << " is\n";
 
-    //    addGenericRefs(cl, level);
-    //    addPortRefs(cl, level);
     myCode << addGenericRefs(cl->genericList(), level);
     myCode << addPortRefs(cl->portList(), level);
 
@@ -323,10 +321,10 @@ void StructTarget :: trailerCode() {
 
     // To please the Synopsys synthesis:
     // it insists on there being a sensitivity list.
-    addSensitivities(cl, level);
+    myCode << addSensitivities(cl, level);
 
-    addDeclarations(cl, level);
-    addVariableRefs(cl, level);
+    myCode << addDeclarations(cl, level);
+    myCode << addVariableRefs(cl, level);
 
     myCode << "begin\n";
 
@@ -336,11 +334,14 @@ void StructTarget :: trailerCode() {
     // of explicit initialization for everything (which is unsynthesizable)
     // then you get arithmetic overflow when you hit arithmetic expressions
     // whose inputs are unitiialized variables.
-    //    addWaitStatement(cl, level);
+    // Currently we are handling this by doing an explicit global
+    // initialization to zero of these values in the simulation
+    // command file.
+    //   myCode << addWaitStatement(cl, level);
 
-    addPortVarTransfers(cl, level);
-    addActions(cl, level);
-    addVarPortTransfers(cl, level);
+    myCode << addPortVarTransfers(cl, level);
+    myCode << addActions(cl, level);
+    myCode << addVarPortTransfers(cl, level);
 
     myCode << "end process;\n";
     myCode << "end behavior;\n";
@@ -408,6 +409,7 @@ void StructTarget :: frameCode() {
 
 // Write the code to a file.
 void StructTarget :: writeCode() {
+  /*
   ////////////////////////////////////////////
   // Print out the list of clock names.
   printf("CLOCK FIRINGS IN ORDER:\n\n");
@@ -448,6 +450,7 @@ void StructTarget :: writeCode() {
   printf("Sequencer Code:\n");
   printf("%s", (const char*) ctlerCode);
   ////////////////////////////////////////////
+  */
 
   SimVSSTarget::writeCode();
   /*
@@ -989,7 +992,8 @@ ISA_FUNC(StructTarget,SimVSSTarget);
 
 // Add in sensitivity list of input ports.
 // Do this explicitly for sake of synthesis.
-void StructTarget :: addSensitivities(VHDLCluster* cl, int level) {
+StringList StructTarget :: addSensitivities(VHDLCluster* cl, int level) {
+  StringList all;
   if ((*(cl->firingList)).head()) {
     StringList opener, body, closer;
 
@@ -1027,14 +1031,16 @@ void StructTarget :: addSensitivities(VHDLCluster* cl, int level) {
     level--;
 
     if (sensCount) {
-      myCode << opener << body << closer;
+      all << opener << body << closer;
     }
   }
+  return all;
 }
 
 // Add in wait statement with list of input ports.
 // Do this explicitly for sake of simulation.
-void StructTarget :: addWaitStatement(VHDLCluster* cl, int level) {
+StringList StructTarget :: addWaitStatement(VHDLCluster* cl, int level) {
+  StringList all;
   if ((*(cl->firingList)).head()) {
     StringList opener, body, closer;
 
@@ -1073,13 +1079,15 @@ void StructTarget :: addWaitStatement(VHDLCluster* cl, int level) {
     level--;
 
     if (sensCount) {
-      myCode << opener << body << closer;
+      all << opener << body << closer;
     }
   }
+  return all;
 }
 
 // Add in variable refs here from variableList.
-void StructTarget :: addVariableRefs(VHDLCluster* cl, int level) {
+StringList StructTarget :: addVariableRefs(VHDLCluster* cl, int level) {
+  StringList all;
   if ((*(cl->firingList)).head()) {
     StringList body;
 
@@ -1103,13 +1111,16 @@ void StructTarget :: addVariableRefs(VHDLCluster* cl, int level) {
     }
     
     if (varCount) {
-      myCode << body;
+      all << body;
     }
   }
+  return all;
 }
 
 // Add in port to variable transfers here from portVarList.
-void StructTarget :: addPortVarTransfers(VHDLCluster* cl, int /*level*/) {
+StringList StructTarget :: addPortVarTransfers(VHDLCluster* cl,
+					       int /*level*/) {
+  StringList all;
   if ((*(cl->firingList)).head()) {
     StringList body;
 
@@ -1126,13 +1137,15 @@ void StructTarget :: addPortVarTransfers(VHDLCluster* cl, int /*level*/) {
     }
     
     if (portVarCount) {
-      myCode << body;
+      all << body;
     }
   }
+  return all;
 }
 
 // Add in firing declarations here.
-void StructTarget :: addDeclarations(VHDLCluster* cl, int /*level*/) {
+StringList StructTarget :: addDeclarations(VHDLCluster* cl, int /*level*/) {
+  StringList all;
   if ((*(cl->firingList)).head()) {
     StringList body;
 
@@ -1145,13 +1158,15 @@ void StructTarget :: addDeclarations(VHDLCluster* cl, int /*level*/) {
     }
     
     if (declsCount) {
-      myCode << body;
+      all << body;
     }
   }
+  return all;
 }
 
 // Add in firing actions here.
-void StructTarget :: addActions(VHDLCluster* cl, int /*level*/) {
+StringList StructTarget :: addActions(VHDLCluster* cl, int /*level*/) {
+  StringList all;
   if ((*(cl->firingList)).head()) {
     StringList body;
 
@@ -1164,13 +1179,16 @@ void StructTarget :: addActions(VHDLCluster* cl, int /*level*/) {
     }
     
     if (actionCount) {
-      myCode << body;
+      all << body;
     }
   }
+  return all;
 }
 
 // Add in variable to port transfers here from varPortList.
-void StructTarget :: addVarPortTransfers(VHDLCluster* cl, int /*level*/) {
+StringList StructTarget :: addVarPortTransfers(VHDLCluster* cl,
+					       int /*level*/) {
+  StringList all;
   if ((*(cl->firingList)).head()) {
     StringList body;
 
@@ -1187,9 +1205,10 @@ void StructTarget :: addVarPortTransfers(VHDLCluster* cl, int /*level*/) {
     }
     
     if (varPortCount) {
-      myCode << body;
+      all << body;
     }
   }
+  return all;
 }
 
 // Register compDecls and compMaps and merge signals.
