@@ -42,7 +42,7 @@ Programmer: Jose Luis Pino, Praveen K. Murthy
 #include "GalIter.h"
 #include <string.h>
 
-int findBackEdge(Block* node, int flagLoc, int igonreDelayArcs);
+int findBackEdge(Block* node, int flagLoc, int ignoreTaggedArcs, int tagLoc);
 
 // function to count stars in a galaxy
 int totalNumberOfStars(Galaxy& g) {
