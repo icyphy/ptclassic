@@ -1,9 +1,9 @@
 static const char file_id[] = "CreateSDFStar.cc";
 /******************************************************************
 Version identification:
-$Id$
+@(#)CreateSDFStar.cc	1.23 3/25/96
 
-Copyright (c) 1991-%Q%  The Regents of the University of California.
+Copyright (c) 1991-1996  The Regents of the University of California.
 All Rights Reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -55,7 +55,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 // This class duplicates some of the functionality of
 // SDFScheduler::setup  FIXME
 
-class Repetitions:public SDFScheduler {
+class Repetitions: public SDFScheduler {
 public:
     Repetitions(Galaxy& gal) {
 	invalid = FALSE;
@@ -71,8 +71,8 @@ public:
 	
 CreateSDFStar::CreateSDFStar(const char* name,const char* starclass, const
 			 char* desc) : CGCTarget(name,starclass,desc) {
-			     addStream("starPorts",&starPorts);
-			     addStream("starSetup",&starSetup);
+    addStream("starPorts",&starPorts);
+    addStream("starSetup",&starSetup);
 }
 
 void CreateSDFStar::setup () {
@@ -83,8 +83,7 @@ void CreateSDFStar::setup () {
 
     CGCTarget::setup();
 
-    if(Scheduler::haltRequested()) return ;
-
+    if (Scheduler::haltRequested()) return;
 }
 
 inline void commStarInit(CGCSDFBase& s,PortHole& p,int numXfer,int maxDelay) {
@@ -122,7 +121,7 @@ int CreateSDFStar::convertWormholePorts(Galaxy& gal) {
 	    ((DataFlowStar*)cgPort.parent())->reps()*cgPort.numXfer(); 
 	int maxDelay= numXfer + cgPort.maxDelay()-cgPort.numXfer();
 	cgPort.disconnect();
-	DFPortHole *source,*destination,*newPort;
+	DFPortHole *source, *destination, *newPort;
 	CGCSDFBase *newStar;
 	StringList nm;
 	if (p->isItInput()) {
@@ -152,7 +151,7 @@ int CreateSDFStar::convertWormholePorts(Galaxy& gal) {
 		
 int CreateSDFStar::compileCode() {
     StringList command;
-    command << "cd " << (const char*)destDirectory << "; "
+    command << "cd " << (const char*) destDirectory << "; "
 	    << "make -f " << (const char*) filePrefix << ".mk all";
     if(systemCall(command,"Compilation error")) return FALSE;
     return TRUE;
@@ -191,7 +190,8 @@ void CreateSDFStar::frameCode() {
 }
 
 void CreateSDFStar::writeCode() {
-    writeFile(myCode,".pl",displayFlag);
+    writeFile(myCode, ".pl", displayFlag);
+
     // Construct makefile
     StringList makefile;
     makefile << headerComment("# ") << "# To make the star, do: " 
@@ -245,8 +245,7 @@ int CreateSDFStar::linkFiles () {
     char* expandedDirName = expandPathName((const char*) destDirectory); 
     dir << expandedDirName;
     linkCmd << dir << "/" << (const char*) filePrefix << ".o " 
-	    << "-L" << getenv("PTOLEMY") << "/lib." <<getenv("PTARCH")
-	    << " -lCGCrtlib " << starLinkOptions << " ";
+	    << localLinkOptionsStream << " " << starLinkOptions << " ";
     if (linkOptionsStream.numPieces()) {
 	char* expandedLinkOptionsStream = expandPathName(linkOptionsStream);
 	linkCmd << expandedLinkOptionsStream;
@@ -259,9 +258,9 @@ int CreateSDFStar::linkFiles () {
     // The link commands must be in the second argv location
     argv[0] = multiLink;
     argv[1] = hashstring(linkCmd);
-    fprintf(stderr,"multiLink: %s\n",argv[1]);
+    fprintf(stderr, "multiLink: %s\n",argv[1]);
     int status = Linker::multiLink(2,(char**) argv); 
-    fprintf(stderr,"multiLink completed\n");
+    fprintf(stderr, "multiLink completed\n");
     delete [] expandedDirName;
     return status;
 }
@@ -307,20 +306,3 @@ int CreateSDFStar::connectStar() {
 
     return TRUE;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
