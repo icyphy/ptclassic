@@ -682,15 +682,15 @@ int CGTarget :: modifyGalaxy() {
 
 		int i;
 		for (i=0; i < typeConversionTableRows; i++) {
-		    if (((port->type() == typeConversionTable[i].src) ||
-			 (typeConversionTable[i].src == ANYTYPE)) &&
+		    if (((port->type() == typeConversionTable->table[i].src) ||
+			 (typeConversionTable->table[i].src == ANYTYPE)) &&
 			((port->resolvedType() ==
-			  typeConversionTable[i].dst) ||
-			 (typeConversionTable[i].dst == ANYTYPE)))
+			  typeConversionTable->table[i].dst) ||
+			 (typeConversionTable->table[i].dst == ANYTYPE)))
 		    {
 			Block* s = 0;
 			if (!(s = spliceStar(input,
-					     typeConversionTable[i].star,
+				            typeConversionTable->table[i].star,
 					     TRUE, domain)))
 			    return FALSE;
 			else {

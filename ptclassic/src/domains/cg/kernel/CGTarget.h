@@ -54,10 +54,11 @@ class SDFSchedule;
 class SDFScheduler;
 class CGCStar;
 
-class TypeConversionTable {
-public:
-    const char *src, *dst, *star;
-};
+#include "ConversionTable.h"
+//class TypeConversionTable {
+//public:
+//    const char *src, *dst, *star;
+//};
 
 class CommPair {
 public:
@@ -364,7 +365,7 @@ protected:
     Block* spliceStar(PortHole*, const char* name, int delayBefore,
                              const char* domainName);
 
-    TypeConversionTable *typeConversionTable;
+    ConversionTable *typeConversionTable;
     int typeConversionTableRows;
     virtual int needsTypeConversionStar(PortHole& port);
     

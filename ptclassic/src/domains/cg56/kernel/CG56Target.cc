@@ -43,15 +43,27 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #include "CG56Target.h"
 #include "CG56Star.h"
+#include "ConversionTable.h"
 
-static TypeConversionTable cg56CnvTable[6] = {
-  {  FIX,	COMPLEX,	"FixToCx"	},
-  {  FIX,	INT,		"FixToInt"	},
-  {  COMPLEX, 	FIX, 		"CxToFix"	},
-  {  COMPLEX, 	INT,		"CxToInt"	},
-  {  INT,	COMPLEX,	"IntToCx"	},
-  {  INT,	FIX,		"IntToFix"	},
+// HPPA CC under HPUX10.01 cannot deal with arrays, the message is:
+//  'sorry, not implemented: general initializer in initializer lists'
+// if we have an array:
+//  static TypeConversionTable cgcCnvTable[7] = {
+//   {  COMPLEX, 	FIX, 		"CxToFix"	},
+// So, we create a class and let it do the work.
+
+class CG56ConversionTable: public ConversionTable {
+public:
+   CG56ConversionTable():ConversionTable(6) {
+     tblRow(  FIX,	COMPLEX,	"FixToCx"	);
+     tblRow(  FIX,	INT,		"FixToInt"	);
+     tblRow(  COMPLEX, 	FIX, 		"CxToFix"	);
+     tblRow(  COMPLEX, 	INT,		"CxToInt"	);
+     tblRow(  INT,	COMPLEX,	"IntToCx"	);
+     tblRow(  INT,	FIX,		"IntToFix"	);
+   }
 };
+static CG56ConversionTable cg56ConversionTable;
 
 CG56Target::CG56Target (const char* nam, const char* desc) :
 MotorolaTarget(nam,desc,"CG56Star") {
@@ -66,7 +78,7 @@ MotorolaTarget(src.name(),src.descriptor(),"CG56Star") {
 
 void CG56Target::initDataMembers() {
     // Initialize type conversion table
-    typeConversionTable = cg56CnvTable;
+    typeConversionTable = &cg56ConversionTable;
     typeConversionTableRows = 6;
     assemblerOptions = "-A -B -L -Oso";
 }
