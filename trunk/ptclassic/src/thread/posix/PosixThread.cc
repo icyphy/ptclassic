@@ -52,7 +52,7 @@ const int maxPriority =  sched_get_priority_max(SCHED_FIFO);
 // Initialize the main thread.
 static pthread_t initMainThread()
 {
-#ifndef PTHPUX10
+#if !defined(PTHPUX10) && !defined(_PTHREAD_1003_1c)
     // Be sure that thread library has already been initialized.
     pthread_init();
 #endif
@@ -63,7 +63,15 @@ static pthread_t initMainThread()
     // Set the priority to maximum.
 #ifdef PTHPUX10
     pthread_setscheduler(thread, SCHED_FIFO, maxPriority);
-#else
+#else // PTHPUX10
+#ifdef _PTHREAD_1003_1c
+    struct sched_param param;
+    int policy;
+    pthread_getschedparam(thread, &policy, &param);
+    policy = SCHED_FIFO;
+    param.sched_priority = maxPriority;
+    pthread_setschedparam(thread, policy, &param);
+#else // _PTHREAD_1003_1c
     pthread_attr_t attributes;
     pthread_attr_init(&attributes);
     pthread_getschedattr(thread, &attributes);
@@ -71,8 +79,8 @@ static pthread_t initMainThread()
     pthread_attr_setprio(&attributes, maxPriority);
     pthread_setschedattr(thread, attributes);
     pthread_attr_destroy(&attributes);
-#endif
-
+#endif // _PTHREAD_1003_1c
+#endif // PTHPUX10
     return thread;
 }
 
@@ -84,15 +92,28 @@ void PosixThread::initialize()
     // Initialize attributes.
     pthread_attr_t attributes;
     pthread_attr_init(&attributes);
+#ifdef _PTHREAD_1003_1c
+    pthread_attr_setschedpolicy(&attributes, SCHED_FIFO);
+    struct sched_param param;
+    param.sched_priority = maxPriority;
+    pthread_attr_setschedparam(&attributes, &param);    
+#ifdef _POSIX_THREAD_ATTR_STACKSIZE
+    pthread_attr_setstacksize(&attributes, 0x8000);
+#endif
+#else // _PTHREAD_1003_1c
     pthread_attr_setsched(&attributes, SCHED_FIFO);
     pthread_attr_setprio(&attributes, maxPriority);
     pthread_attr_setstacksize(&attributes, 0x8000);
-
+#endif // _PTHREAD_1003_1c
     // Create a thread.
 #ifdef PTHPUX10
     pthread_create(&thread, attributes, (pthread_startroutine_t)runThis, this);
 #else
+#ifdef _PTHREAD_1003_1c
+    pthread_create(&thread, &attributes, runThis, this);
+#else
     pthread_create(&thread, &attributes, (pthread_func_t)runThis, this);
+#endif // _PTHREAD_1003_1c
 #endif
 
     // Discard temporary attribute object.
@@ -109,7 +130,11 @@ void PosixThread::terminate()
 
     // Now wait.
     pthread_join(thread, NULL);
+#ifdef _PTHREAD_1003_1c
+    pthread_detach(thread);
+#else
     pthread_detach(&thread);
+#endif
 }
 
 
@@ -133,6 +158,17 @@ void PosixThread::runAll()
 
     pthread_setprio(mainThread, maxPriority);
 #else
+#ifdef _PTHREAD_1003_1c
+    struct sched_param param;
+    int policy;
+    pthread_getschedparam(mainThread, &policy, &param);
+
+    param.sched_priority = minPriority;
+    pthread_setschedparam(mainThread, policy, &param);
+
+    param.sched_priority = maxPriority;
+    pthread_setschedparam(mainThread, policy, &param);    
+#else // _PTHREAD_1003_1c
     pthread_attr_t attributes;
     pthread_attr_init(&attributes);
     pthread_getschedattr(mainThread, &attributes);
@@ -144,5 +180,6 @@ void PosixThread::runAll()
     pthread_setschedattr(mainThread, attributes);
 
     pthread_attr_destroy(&attributes);
+#endif // _PTHREAD_1003_1c
 #endif
 }
