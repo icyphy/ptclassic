@@ -1,4 +1,4 @@
-\c version $Id$ $Revision$
+\c version $Id$
 \node Top, Copyright, (dir), (dir)
 \begin{ifinfo}
 \input{title}
@@ -312,6 +312,7 @@ Class IntervalList
 
 \begin{ifinfo}
 \node Copyright, Basic concepts, Top, Top
+
 \input{copyright}
 \end{ifinfo}
 
@@ -350,13 +351,14 @@ The Ptolemy system has grown up with the C++ language, so it does not
 use all the latest features in the newest compilers or every nook and
 cranny of Ellis and Stroustrup's Annotated Reference Manual, because
 of unimplemented features or lack of stability of implementation.
-Instead, we focused on stability.  Accordingly, Ptolemy builds under
+Instead, we focused on stability.  Accordingly, Ptolemy can be built with
 the Gnu C++ compiler, version 2.2.2, with version 2.2 of the library
-\code{libg++}; it also build under Sun C++ 2.1, a port of the AT&T
-\file{cfront} compiler to the Sun.
+\code{libg++} (though we are now using much more recent versions of
+the g++ compiler); it also works fine Sun C++ 2.1, a port of the AT&T
+\file{cfront} compiler to the Sun, and with Hewlett-Packard's C++ compiler.
 
 Ptolemy also builds under the (at the time of writing) latest versions
-of g++ (2.4.5) and libg++ (2.4), but it is important that the same
+of g++ (2.5.7) and libg++ (2.5.2), but it is important that the same
 version of compiler and libraries be used for compilation of all of
 Ptolemy.
 
@@ -451,7 +453,9 @@ replaced by the home directory for \var{user}, unless there is no
 such user, in which case the original string is returned.  Finally,
 a leading ``\code{$\var{env}}'' is replaced by the value of the
 environment variable \var{env}; if there is no such environment
-variable, the original string is returned.
+variable, the original string is returned.  Note that references
+to environment variables other than at the beginning are \emph{not}
+substituted.
 
 If any substitutions are made, the return value is actually a pointer
 into a static buffer.  This means that a second call to this function
@@ -2575,6 +2579,18 @@ Function called to generate code for the star, with any modifications
 required by this particular Target (the default version does nothing).
 
 \begin{example}
+virtual void beginIf(PortHole& \var{cond}, int \var{truthdir},
+        int \var{depth}, int \var{haveElsePart});
+virtual void beginElse(int \var{depth});
+virtual void endIf(int \var{depth});
+virtual void beginDoWhile(PortHole& \var{cond}, int \var{truthdir}, int \var{depth});
+virtual void endDoWhile(PortHole& \var{cond});
+\end{example}
+
+These functions are used in code generation to generate conditionals.
+The default implementations do nothing.
+
+\begin{example}
 virtual int commTime(int \var{sender},int \var{receiver},int \var{nUnits}, int \var{type});
 \end{example}
 
@@ -2601,15 +2617,29 @@ virtual void setup();
 
 This is the main initialization function for the target.  It is called
 by the \code{initialize} function, which by default initializes the
-Target states.
+Target states.  The default implementation calls \code{galaxySetup()},
+and if it returns a nonzero value, then calls \code{schedulerSetup()}.
 
-The default implementation does the following.  The halt flag of
-SimControl is cleared.  Each star is checked to see if its type is
+\begin{example}
+virtual int galaxySetup();
+\end{example}
+
+This method (and overloaded versions of it) is responsible for checking
+the galaxy belonging to the target.  In the default implementation,
+each star is checked to see if its type is
 supported by the target (because the \code{isA} function reports
 that it is one of the supported star classes).  If a star does not
-match this condition an error is reported.  If all goes well, then
-the \code{setup} member function of the target's Scheduler object
-is called.
+match this condition an error is reported.  In addition,
+\code{setTarget()} is called for each star with a pointer to the Target
+as an argument.  If there are errors, 0 is returned, otherwise 1.
+
+\begin{example}
+virtual int schedulerSetup();
+\end{example}
+
+This method (and overloaded versions of it) are responsible for
+initializing an execution of the universe.  The default implementation
+initializes the scheduler and calls \code{setup()} on it.
 
 \begin{example}
 void setSched(Scheduler* \var{sch});
@@ -3482,6 +3512,7 @@ wormhole.  Its \code{newPort} function correctly creates a pair of
 EventHorizon objects when a new port is created in the multiporthole.
 Instances of this object are created by Wormhole::buildEventHorizons
 when the inner galaxy has one or more MultiPortHole objects.
+Its \code{newConnection} method always calls \code{newPort}.
 
 \node connection classes, Particles and Messages, Interfacing domains, Top
 \chapter{Classes for connections between blocks}
