@@ -120,7 +120,8 @@ public:
 
 	int isItInput() const;
 	int isItOutput() const;
-	
+	int onlyOne() const;	// returns TRUE
+
 	// as eventhorizon
 	EventHorizon* asEH();
 };
@@ -142,7 +143,7 @@ public:
 
 	int isItInput() const;
 	int isItOutput() const;
-	
+	int onlyOne() const;	// returns TRUE
 	// as eventhorizon
 	EventHorizon* asEH();
 };
