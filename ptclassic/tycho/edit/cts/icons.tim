@@ -4,6 +4,15 @@
 # $Id$
 # Test icon library for CT domain
 
+termstyle 3-1-east {
+    terminal in-0 -coords {0 50} -direction w -style circle
+    terminal in-1 -coords {50 0} -direction n -style circle
+    terminal in-2 -coords {50 100} -direction s -style circle
+    terminal out -coords {100 50} -direction e \
+            -style arrowout \
+            -tags output
+}
+
 termstyle 2-1-north-east {
     terminal in-0 -coords {0 50} -direction w -style circle
     terminal in-1 -coords {50 0} -direction n -style circle
@@ -141,7 +150,6 @@ group source -label {Source Icons} {
     }
 }
 
-
 group sink -label {Sink Icons} {
     icon plotter \
             -slatetype IconFrame \
@@ -162,9 +170,7 @@ group sink -label {Sink Icons} {
                 -style circle -fill red
     }
 }
-#polygon 20 50 20 90 80 90 80 50 50 50 45 45 30 45 25 50 \
-        #        -fill red -outline red
-        #line 50 10 50 45 -width 10 -arrow last
+
 group dynamic -label {Dynamic Icons} {
     icon integral \
             -slatetype IconFrame \
@@ -174,7 +180,7 @@ group dynamic -label {Dynamic Icons} {
             -termstyles {1-1-east} \
             -graphics {
          polygon 40 25 40 70 35 75 30 70 25 80 35 85 45 75 45 30 \
-                 50 25 55 30 60 25 50 15 -fill black -outline black
+                 50 25 55 30 60 25 50 15 -fill black -outline yellow
      }
 }
 
@@ -184,10 +190,20 @@ group arithmetic -label {Arithmetic Icons} {
             -label {Gain} \
             -text Gain \
             -color lightsteelblue \
-            -termstyles {1-1-east} \
+            -termstyles {1-1-west} \
             -graphics {
-         polygon 30 20 30 80 70 50 -fill red -outline black
+         polygon 70 20 70 80 30 50 -fill red -outline black
          line 10 50 30 50 -width 1 -fill black
          line 70 50 90 50 -width 1 -fill black
+     }
+     icon add3 \
+            -slatetype IconOval \
+            -label Add \
+            -text "" \
+            -fill white \
+            -termstyles {3-1-east} \
+            -graphics {
+         line 20 50 80 50 -width 4
+         line 50 20 50 80 -width 4
      }
 }
