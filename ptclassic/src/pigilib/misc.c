@@ -40,6 +40,40 @@ long userOptionWord;
 }
 
 int
+PrintFacet(spot, cmdList, userOptionWord)
+RPCSpot *spot;
+lsList cmdList;
+long userOptionWord;
+{
+    static dmTextItem item = {"Options (e.g. -p -b 3x3):", 1, 40, "-x -X", NULL};
+    char buf[512];
+    octObject facet;
+    char* fullName;
+
+    ViInit("print facet");
+    ErrClear();
+
+    facet.objectId = spot->facet;
+    if (octGetById(&facet) != OCT_OK) {
+        PrintErr(octErrorString());
+        ViDone();
+    }
+    octFullName(&facet,&fullName);
+
+    if (dmMultiText("print facet (PRINTER variable must be set)", 1, &item) != VEM_OK) {
+        PrintCon("Aborted entry");
+        ViDone();
+    }
+    sprintf(buf, "prfacet %s %s", item.value, fullName);
+    PrintDebug(buf);
+    if (util_csystem(buf)) {
+        PrintErr(sprintf(buf, "Error invoking prfacet utility."));
+    }
+    ViDone();
+}
+
+
+int
 ERFilterDesign(spot, cmdList, userOptionWord)
 RPCSpot *spot;
 lsList cmdList;

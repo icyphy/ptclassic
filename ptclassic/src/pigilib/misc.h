@@ -5,6 +5,7 @@ $Id$
 
 extern int Man();
 extern int Profile();
+extern int PrintFacet();
 extern int RpcOpenFacet();
 extern int RpcPlot();
 extern int RpcLoadStar();

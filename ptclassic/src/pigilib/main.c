@@ -90,6 +90,7 @@ RPCFunction CommandArray[] = {
     {WFilterDesign, "Filter", " window FIR", ">", 0},
     {Man, "Other", "man"},
     {Profile, "Other", "profile", ",", 0},
+    {PrintFacet, "Other", "print facet"},
     {Options, "Other", "options"},
     {Version, "Other", "version"},
     {ExitApp, "Other", "exit-pigi"}
