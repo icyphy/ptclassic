@@ -59,6 +59,8 @@ proc ::tycho::autoName {stem} {
 #### egrep
 # Simple implementation of the Unix egrep command.
 #
+# If a grep binary is in the user's path, then use it
+
 # The code below returns all the lines that have a # as the first character
 # in two files.
 # <tcl><pre>
@@ -76,12 +78,15 @@ proc ::tycho::autoName {stem} {
 proc ::tycho::egrep {regexp args} {
     set retval {}
     set regexparg {}
+    set greparg {}
     switch -- $regexp {
         -i {set regexparg -nocase
+        set greparg -i
         set regexp [lindex $args 0]
         set filelist [lrange $args 1 end]
     }
         -nocase {set regexparg -nocase
+        set greparg -i
         set regexp [lindex $args 0]
         set filelist [lrange $args 1 end]
     }
@@ -89,6 +94,12 @@ proc ::tycho::egrep {regexp args} {
     }
 
     
+    if {[ ::tycho::pathEnvSearch egrep] != {}} {
+        # We have an egrep binary, use it.
+        set files [glob -nocomplain $filelist]
+        return [split [eval exec egrep -n $greparg $regexp $files] "\n"]
+    } else {
+
     # Only show the first 100 matches
     set count 1
     while {[llength $filelist] > 0 && [incr count] < 100} {
@@ -136,7 +147,7 @@ proc ::tycho::egrep {regexp args} {
         lappend retval "*** egrep terminated, more than $count files matched"
     }
     return $retval
-
+  }
 }
 
 ########################################################################
@@ -658,8 +669,8 @@ proc ::tycho::simplifyPath {pathName {envVarList {}}} {
 #####################################################################
 #### tmpFileName
 # Return a temporary filename that does not exist yet.
-# The <CODE>TMPDIR</CODE> environment variable is used as a base if it is
-# present, if <CODE>TMPDIR</CODE> is not present, then
+# The <CODE>TMPDIR</CODE> environment variable is used as a base if it is,
+# if <CODE>TMPDIR</CODE> is not present, then
 # <CODE>env(TEMP)</CODE> is used. If neither are present<CODE>/tmp</CODE>
 # is used.
 # If the optional arg `stem' is present, then a unique string is appended
