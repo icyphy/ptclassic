@@ -30,7 +30,7 @@ ROOT=../..
 DESTDIR=$(ROOT)/lib.$(ARCH)
 
 # Where to install the help file(s)
-HELPDIR=~ptolemy/lib
+HELPDIR=../../lib
 
 # Library name
 LIB=libptolemy.a
