@@ -65,7 +65,7 @@ output.
   }
 
   // CODE
-  hinclude { "Matrix.h", "Error.h" }
+  hinclude { "Matrix.h", "Error.h", "ptdspRunLength.h" }
 
   code {
     const float StartOfBlock = 524288.0;
@@ -86,100 +86,34 @@ output.
     thresh = float(fabs(double(Thresh)));
   }
 
-  method { // Do the run-length coding.
-    name { doRunLen }
-    type { "void" }
-    access { protected }
-    arglist { "(const FloatMatrix& inImage)" }
-    code {
-      // Initialize.
-      const int bSize = int(BlockSize);
-      const int size = inImage.numCols() * inImage.numRows();
-      const int blocks = size / (bSize*bSize);
-
-      // Temporary storage for one block.
-      float* tmpFloatPtr = new float[size];
-      float* tmpPtr = tmpFloatPtr;
-      for (int i = 0; i < size; i++) {
-	tmpPtr[i] = float(inImage.entry(i));
-      }
-
-      // The biggest runlen blowup we can have is the string "01010101...".
-      // This gives a blowup of 50%, so with StartOfBlock and StartOfRun
-      // markers, 1.70 should be ok.
-      delete [] outDc;
-      delete [] outAc;
-      outDc = new float[int(1.70*size + 1)];
-      outAc = new float[int(1.70*size + 1)];
-      indxDc = 0; indxAc = 0;
-      for (int blk = 0; blk < blocks; blk++) {
-	// High priority coefficients.
-	for(i = 0; i < HiPri; i++) {
-	  outDc[indxDc++] = *tmpPtr++;
-	}
-	
-	// Low priority coefficients--start with block header.
-	outAc[indxAc++] = StartOfBlock;
-	outAc[indxAc++] = float(blk);
-	
-	int zeroRunLen = 0;
-	for(; i < bSize*bSize; i++) {
-	  if(zeroRunLen) {
-	    if (larger(*tmpPtr, thresh)) {
-	      outAc[indxAc++] = float(zeroRunLen);
-	      zeroRunLen = 0;
-	      outAc[indxAc++] = *tmpPtr;
-	    } else {
-	      zeroRunLen++;
-	    }
-	  } else {
-	    if (larger(*tmpPtr, thresh)) {
-	      outAc[indxAc++] = *tmpPtr;
-	    } else {
-	      outAc[indxAc++] = StartOfRun;
-	      zeroRunLen++;
-	    }
-	  }
-	  tmpPtr++;
-				}
-	// Handle zero-runs that last till end of the block.
-	if(zeroRunLen) {
-	  outAc[indxAc++] = float(zeroRunLen);
-	}
-      }
-
-      // Delete tmpFloatPtr and not tmpPtr since tmpPtr has been incremented
-      delete [] tmpFloatPtr;
-    }
-  }
-
-
-  inline method {
-    name { larger }
-    type { "int" }
-    access { protected }
-    arglist { "(const float fl, const float in)" }
-    code { return (fabs(double(fl)) >= double(in)); }
-  }
-
-
   go {
     // Read input.
     Envelope inEnvp;
     (inport%0).getMessage(inEnvp);
-    const FloatMatrix& inImage = *(const FloatMatrix *) inEnvp.myData();
+    FloatMatrix& inImage = *(FloatMatrix *) inEnvp.myData();
 
     if (inEnvp.empty()) {
       Error::abortRun(*this, "Input is a dummyMessage.");
       return;
     }
 
+    // transfer matrix information from FloatMatrix to Ptdsp_FloatMatrix_t,
+    // before passing to Ptdsp_RunLengthEncode
+    Ptdsp_FloatMatrix_t inImageMatrix;
+
+    inImageMatrix = Ptdsp_FloatMatrixAllocRows (inImage.numRows(), inImage.numCols());
+    // copy each row pointer over, not entire contents of the matrix
+    for (int i = 0; i < inImage.numRows(); i++) {
+      inImageMatrix.matrix[i] = inImage[i];
+    }
+
     // Do processing and send out.
-    doRunLen(inImage);
+    Ptdsp_RunLengthEncode (inImageMatrix, BlockSize, HiPri, thresh, &outDc, &outAc, 
+			   &indxDc, &indxAc);
 
     // Copy the data to the output images.
     FloatMatrix& dcImage = *(new FloatMatrix(1,indxDc));
-    for(int i = 0; i < indxDc; i++) {
+    for ( i = 0; i < indxDc; i++) {
       dcImage.entry(i) = outDc[i];
     }
 
