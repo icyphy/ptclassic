@@ -112,12 +112,12 @@ the widget is destroyed.
 <p>
 Entry boxes can be created using the
 <a name="addQuery method">addQuery method</a>, as shown here:
-<pre><tcl>
+<tcl><pre>
 ::tycho::EntryQuery .bb -okcommand {::tycho::inform [.bb get]}
 .bb addQuery month {Enter Month} Jan
 .bb addQuery day {Enter Day} Mon
 .bb centerOnScreen
-</tcl></pre>
+</pre></tcl>
 This method takes three arguments,
 a tag, a label, and a default string.
 The get method, invoked on clicking the OK button, returns

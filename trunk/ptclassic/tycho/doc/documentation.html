@@ -57,9 +57,9 @@ For example, the HTML source
     &lt;/pre&gt;&lt;/tcl&gt;
 </pre>
 appears as follows in a document:
-<pre><tcl>
+<tcl><pre>
     ::tycho::post "hello world"
-</tcl></pre>
+</pre></tcl>
 Double clicking on this script will execute it if you are
 viewing the document under Tycho.
 <p>
@@ -91,9 +91,9 @@ attribute will appear in the index with a pointer to precisely
 this point in the document.  Thus, for example, the Tycho master
 index has a pointer to the above sentence under both "anchors"
 and "name attribute".  Try it:
-<pre><tcl>
+<tcl><pre>
     ::tycho::File::openContext $TYCHO/lib/idx/tycho.idx
-</tcl></pre>
+</pre></tcl>
 Notice that the name attribute can (an often should) have spaces in it.
 It must be surrounded by quotation marks if it has spaces in it.
 <p>
