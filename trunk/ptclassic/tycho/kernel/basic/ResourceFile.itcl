@@ -231,7 +231,7 @@ body ::tycho::ResourceFile::read {} {
     if !$fileIsOpen {
 	error "File \"$this\" is not open"
     }
-	::read $fileid
+    ::read $fileid
 }
 
 #####################################################################
@@ -293,12 +293,13 @@ body ::tycho::ResourceFile::delete {path} {
 #
 body ::tycho::ResourceFile::dirlist {path} {
     regsub {^file:} $path {} path
+    set path [string trimright $path *]
     set result {}
     foreach f [::glob -nocomplain [file join $path *]] {
 	if [::file isdirectory $f] {
-	    lappend result [file tail $f]/
+	    lappend result $f/
 	} else {
-	    lappend result [file tail $f]
+	    lappend result $f
 	}
     }
     # Sort and return
@@ -351,8 +352,6 @@ body ::tycho::ResourceFile::source {path} {
 #### stat
 body ::tycho::ResourceFile::stat {path varName} {
     regsub {^file:} $path {} path
-    if [::file exists $path] {
-	upvar $varName v
-	::file stat $path v
-    }
+    upvar $varName v
+    ::file stat $path v
 }
