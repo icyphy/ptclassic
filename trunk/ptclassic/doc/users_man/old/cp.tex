@@ -316,111 +316,23 @@ model is used.
 \section{Installing the CP Domain}
 
 By default, the CP domain is not compiled into the Ptolemy
-\code{pigiRpc} and \code{ptcl} programs. \pindex{pigiRpc}\pindex{ptcl}
-Only the necessary libraries are built.
-Because of conflicts between Sun's lightweight process library
-and the SDF domain, you should not include any part of the dataflow
-domains (SDF, DDF, BDF, CG, CGC, etc.) in \code{pigiRpc} or
-\code{ptcl}.  If you do, then you will get a core dump every time you
-quit.  You may also get core dumps when running some systems.  If you
-must have both the CP domain and one or more of the dataflow domains
-and can accept this problem, then disregard the instructions below
-about excluding the dataflow domains from \code{pigiRpc} and \code{ptcl}.
-
-\node Customizing pigiRpc
-\subsection{Customizing \protect\code{pigiRpc}}
-
-To build a version of \code{pigiRpc} that includes the CP domain, you
-will have to edit the files \file{makefile} and \file{defpalettes.c} in
-\file{$PTOLEMY/src/pigiRpc}.  In \file{makefile}, modify the definition
-of \code{LIBS} to include \samp{$(CP_LIBS)} following
-\samp{$(STARLIBS)}, and \samp{$(LWP_LIBS)} after \samp{-lptolemy}.
-This change causes the proper libraries to be searched when
-\code{pigiRpc} is built.
-
+\code{pigiRpc} program. \pindex{pigiRpc} Only the necessary libraries
+are built.  It is necessary to build a special version of the program,
+\code{pigiRpc.cp}.  To do this, issue the command \samp{make
+pigiRpc.cp} in the \file{$PTOLEMY/obj.$ARCH/pigiRpc} directory.  To use this
+program when you run \code{pigi}, set the \code{PIGIRPC} variable:
 \begin{example}
-LIBS=     $(STAR_LIBS) $(CP_LIBS) -lsdftclstars \back
-          -lrpc -lpigi -lptk -lgantt -lptolemy \back
-          $(LWP_LIBS) $(OCTLIBS)
+setenv PIGIRPC $PTOLEMY/obj.$ARCH/pigiRpc/pigiRpc.cp
+\end{example}
+Or use the \samp{-rpc} option for \code{pigi}:
+\begin{example}
+pigi -rpc $PTOLEMY/obj.$ARCH/pigiRpc/pigiRpc.cp
 \end{example}
 
-Modify the definition of \code{LIBFILES} to include
-\samp{$(CP_LIBFILES)} and \samp{$(LWP_LIBFILES)}.  This change,
-which is optional, sets up
-the proper dependencies so that \code{pigiRpc} will be considered
-out-of-date if any of the required library files are more recent.
-
-\begin{example}
-LIBFILES=  $(STAR_LIBFILES) $(CP_LIBFILES) $(LWP_LIBFILES) \back
-           $(LIBDIR)/libsdftclstars.a \back
-           $(LIBDIR)/libpigi.a $(LIBDIR)/libptolemy.a \back
-           $(LIBDIR)/libgantt.a $(LIBDIR)/libptk.a
-\end{example}
-
-Modify the definition of \code{ALLSTARS} to include \samp{$(CPSTARS)}
-and exclude all dataflow and code generation stars.  Also eliminate the
-targets in \samp{ALLTARGETS}.  This causes the CP domain to be compiled
-in to \code{pigiRpc}, and prevents the other domains from being
-included.
-
-\begin{example}
-ALLSTARS=  $(THORSTARS) $(DESTARS) $(CPSTARS)
-ALLTARGETS= 
-\end{example}
-
-In \file{defpalettes.c} add \samp{$PTOLEMY/src/domains/cp/icons/cp.pal}
-to the definition of \code{defaultPalettes}.  If you wish, you may also
-remove references to the palettes of unused domains, but this is not
-necessary.  Also modify the value of \code{DEFAULT_DOMAIN} to refer to
-a domain that will be included in  \code{pigiRpc}, such as CP.
-Once these changes have been made, simply issue the command \samp{make}
-in the \file{$PTOLEMY/obj.$ARCH/pigiRpc} directory.  You can now use
-this version of \code{pigiRpc} either by setting the environment
-variable \code{PIGIRPC} to the full path name of this newly created
-version of \code{pigiRpc}, or by using the \samp{-rpc} option of the
-\code{pigi} command.
-
-\node Customizing ptcl
-\subsection{Customizing \protect\code{ptcl}}
-
-To build a version of \code{ptcl} that includes the CP domain, you will
-have to edit the file \file{makefile.template} in
-\file{$PTOLEMY/src/ptcl}.  The modifications to \file{make.template}
-are similar to those made to \file{makefile} for \code{pigiRpc}.
-In \file{make.template}, modify the definition of \code{LIBS} to
-include \samp{$(CP_LIBS)} after \samp{$(STAR_LIBS)} and
-\samp{$(LWP_LIBS)} after \samp{-lptolemy}.  This change causes the
-proper libraries to be searched when \code{ptcl} is built.
-
-\begin{example}
-LIBS= $(STAR_LIBS) $(CP_LIBS) -lptolemy $(LWP_LIBS) \back
-      $(TCL_LIBSPEC) $(SYSLIBS)
-\end{example}
-
-Modify the definition of \code{LIBFILES} to include
-\samp{$(CP_LIBFILES)} and \samp{$(LWP_LIBFILES)}.  This change, which
-is optional, sets up the proper dependencies so that \code{ptcl} will
-be considered out-of-date if any of the required library files are more
-recent.
-
-\begin{example}
-LIBFILES= $(STAR_LIBFILES) $(CP_LIBFILES) $(LWP_LIBFILES) \back
-	  $(LIBDIR)/libptolemy.a
-\end{example}
-
-Modify the definition of \code{ALLSTARS} to include \samp{$(CPSTARS)}
-and exclude all dataflow and code generation stars.  Also eliminate the
-targets in \samp{ALLTARGETS}.  This causes the CP domain to be compiled
-in to \code{pigiRpc}, and prevents the other domains from being
-included.
-
-\begin{example}
-ALLSTARS = $(CPSTARS) $(THORSTARS) $(DESTARS)
-ALLTARGETS =
-\end{example}
-
-\begin{sloppypar}
-Once these changes have been made, simply issue the command \samp{make}
-in the \file{$PTOLEMY/obj.$ARCH/ptcl} directory.  Your special version
-of \code{ptcl} is ready for use.
-\end{sloppypar}
+Because of conflicts between Sun's lightweight process library and the
+SDF domain, the dataflow domains (SDF, DDF, BDF, CG, CGC, etc.) are
+excluded from \code{pigiRpc.cp}.  To include one or more of these
+domains in \code{pigiRpc.cp}, change the definition of
+\code{PTCP_STARS} in the \file{makefile} for \code{pigiRpc}.
+If you do, then you will get a core dump every time you
+quit.  You may also get core dumps when running some systems.
