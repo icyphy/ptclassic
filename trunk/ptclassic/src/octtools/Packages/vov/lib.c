@@ -162,9 +162,16 @@ static SIGNAL_FN trapChildHandler( ) /* All args are ignored */
     if ( (pid = waitpid((pid_t) -1, &status, 0)) == -1)
       perror("waitpid");
 #else
+
+#ifdef WAIT_TAKES_INT_STAR
+    int status;    
+#else
     union wait status;
+#endif /* WAIT_TAKES_INT_STAR */
+
     pid = wait3( &status, 0, 0 );
-#endif
+
+#endif /* USE_WAITPID */
     
     if ( pid == channelPid ) {
 	errRaise( "VOV", 1, "Channel died" );
@@ -180,7 +187,9 @@ static int pipeOpen()
      */
 {
     int pipes[4][2];
-    extern char* environ;	/*  */
+#ifndef PTHPPA
+    extern char* environ;	/* Declared in unistd.h on hppa*/
+#endif
     char* channelBin;
     int p;			/* index for pipes. */
 
