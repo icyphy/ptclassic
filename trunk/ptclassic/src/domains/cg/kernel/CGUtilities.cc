@@ -39,18 +39,9 @@ int rshSystem(const char* hname,const char* cmd,
 	if (dir != NULL) directory = savestring(dir);
 	StringList rshCommand = "";
 	if (strcmp(hostname,"localhost") != 0 ) 
-	{
-		rshCommand = "xon ";
-		rshCommand += hostname;
-		rshCommand += " -debug 'export DISPLAY; ";
-	}
-	if (directory != NULL) {
-		rshCommand += "cd ";
-		rshCommand += directory;
-		rshCommand += "; ";
-	}
-	rshCommand += command;
-	if (strcmp(hostname,"localhost") != 0 ) rshCommand += "'";
+	    rshCommand << "xon " << hostname << " -debug 'export DISPLAY; "	              	       << command << "'"; 
+	if (directory != NULL) 
+	    rshCommand << "cd " << directory << "; " << command;
 	LOG_DEL; delete hostname;
 	LOG_DEL; delete command;
 	LOG_DEL; delete directory;
