@@ -82,7 +82,7 @@ all: tclIndex
 tclIndex: $(TCL_SRCS) $(ITCL_SRCS)
 	@echo "Updating tclIndex"
 	rm -f $@
-	echo 'set auto_path [linsert $$auto_path 0 $(ITCL_LIBDIR)]; itcl_mkindex . $(TCL_SRCS) $(ITCL_SRCS)' | $(ITCL_SH)
+	echo 'set auto_path [linsert $$auto_path 0 $(ITCL_LIBDIR)]; auto_mkindex . $(TCL_SRCS) $(ITCL_SRCS)' | $(ITCL2_0_SH)
 
 install: tclIndex
 
