@@ -319,7 +319,7 @@ body ::tycho::EditJava::help {} {
     global ::TYCHO
     ::tycho::File::openContext \
         [file join $TYCHO edit textedit doc usersGuides \
-	    EditJavaHelp.html]
+	    EditJavaHelp.html] html
 }
 
 #####################################################################
