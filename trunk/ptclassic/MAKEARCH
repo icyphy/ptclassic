@@ -38,21 +38,8 @@ foreach x (domains interp ptcl kernel pigiRpc pigilib libgantt ptlang xgraph ptk
 	cd ..
 end
 
-# Directories with out top level make.templates or Makefiles
-foreach x (utils)
-	optmkdir $x
-end
-cd utils
-foreach x (libgslider)
-	optmkdir $x
-	cd $x
-	optlink ../../../src/utils/$x make.template
-	optlink ../../../src/utils/$x makefile
-	cd ..
-end
-cd ..
 
-foreach x (filters)
+foreach x (filters utils)
 	optmkdir $x
 	cd $x
 	optlink ../../src/$x Makefile
@@ -65,6 +52,16 @@ foreach x (optfir wfir)
 	optmkdir $x
 	cd $x
 	optlink ../../../src/filters/$x Makefile
+	cd ..
+end
+cd ..
+
+cd utils
+foreach x (libgslider)
+	optmkdir $x
+	cd $x
+	optlink ../../../src/utils/$x make.template
+	optlink ../../../src/utils/$x makefile
 	cd ..
 end
 cd ..
