@@ -110,6 +110,10 @@ class ::tycho::File {
     # Return the name of the file associated with the object.
     method filename {} {return $file}
 
+    #### getReadonly
+    # Return the value of the readonly option.
+    method getReadonly {} 
+
     #### help
     # Open a help window.  This should be redefined in derived classes.
     method help {}
