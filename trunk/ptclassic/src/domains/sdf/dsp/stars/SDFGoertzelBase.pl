@@ -54,7 +54,7 @@ first-order feedback coefficient which is a function of k and N }
 		name { state2 }
 		type { float }
 		default { "0.0" }
-		desc {internal state. }
+		desc { internal state. }
 		attributes { A_NONCONSTANT|A_NONSETTABLE }
 	}
 	protected {
@@ -99,9 +99,14 @@ first-order feedback coefficient which is a function of k and N }
 		input.setSDFParams(int(size), int(size)-1);
 	}
 	go {
-		// Run all-pole section of Goertzel's algorithm N iterations
-		// Only one multipler (d1) in iteration
-		// FIXME: Zero state1 & state2 each time go method is called?
+		// Run all-pole section of Goertzel's algorithm N iterations.
+		// Only one multipler (d1) in iteration.
+		// Zero the IIR state for each DFT calculation; otherwise,
+		// the filter output could grow without bound.
+		// state1 and state2 are states and not local variables
+		// ONLY to pass their values to derived stars
+		state1 = 0.0;
+		state2 = 0.0;
 		double acc = 0.0;
 		double d1val = d1;
 		for (int i = int(N)-1; i >= 0; i--) {
