@@ -29,7 +29,7 @@ $Id$
 #endif
 
 class FixState : public FloatState {
-
+public:
 	void initialize();
 
 	const char* type() const; // return "FIX"
