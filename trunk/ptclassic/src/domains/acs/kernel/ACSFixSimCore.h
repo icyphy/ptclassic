@@ -28,7 +28,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
  Programmers:  J. A. Lundblad
  Date of creation: 3/11/98
- Version: $Id$
+ Version: @(#)ACSFixSimCore.h	1.4 03/18/98
 
 ***********************************************************************/
 #ifdef __GNUG__
@@ -56,6 +56,9 @@ public:
 
 	// tells target this is a fixed point core.
 	/* virtual */ int isFixedPoint() const { return TRUE; }
+
+	// JMS
+	  /*virtual*/ int isA(const char*) const;
 
 protected:
 

@@ -4,7 +4,7 @@ defcore {
     coreCategory { FPSim }
     corona { Sin } 
     desc { This star computes the sine of its input, assumed to be an angle in radians. }
-    version { $Id$ }
+    version { @(#)ACSSinFPSim.pl	1.1 03/16/98 }
     author { James Lundblad }
     copyright {
 Copyright (c) 1998 The Regents of the University of California.

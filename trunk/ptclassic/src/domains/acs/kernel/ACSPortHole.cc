@@ -1,6 +1,6 @@
 static const char file_id[] = "ACSPortHole.cc";
 
-/*  Version $Id$
+/*  Version @(#)ACSPortHole.cc	1.9 05/29/98
 
 @Copyright (c) 1998 The Regents of the University of California.
 All rights reserved.

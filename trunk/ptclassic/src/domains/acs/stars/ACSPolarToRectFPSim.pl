@@ -4,7 +4,7 @@ defcore {
     coreCategory { FPSim }
     corona { PolarToRect } 
     desc { Convert magnitude and phase to rectangular form. }
-    version { $Id$ }
+    version { @(#)ACSPolarToRectFPSim.pl	1.1 03/16/98 }
     author { James Lundblad }
     copyright {
 Copyright (c) 1998 The Regents of the University of California.

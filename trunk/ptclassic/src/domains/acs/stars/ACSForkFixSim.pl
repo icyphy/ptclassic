@@ -4,7 +4,7 @@ defcore {
     coreCategory { FixSim }
     corona { Fork } 
     desc { Copy input particles to each output. }
-    version { $Id$ }
+    version { @(#)ACSForkFixSim.pl	1.2 04/29/98 }
     author { James Lundblad }
     copyright {
 Copyright (c) 1998 The Regents of the University of California.

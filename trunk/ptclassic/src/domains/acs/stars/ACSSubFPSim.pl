@@ -3,8 +3,8 @@ defcore {
     domain { ACS }
     coreCategory { FPSim }
     corona { Sub } 
-    desc { Output the product of the inputs, as a floating-point value. }
-    version { $Id$ }
+    desc { Output the difference of the inputs, as a floating-point value. }
+    version { @(#)ACSSubFPSim.pl	1.1 03/09/98 }
     author { James Lundblad }
     copyright {
 Copyright (c) 1998 The Regents of the University of California.
@@ -16,9 +16,7 @@ limitation of liability, and disclaimer of warranty provisions.
     go {
 		double diff;
 		diff = double(corona.pos%0);
-		MPHIter nexti(corona.neg);
-		for(int i=corona.neg.numberPorts(); i>0; i--)
-			diff -= double((*nexti++)%0);
+		diff -= double(corona.neg%0);
 		corona.output%0 << diff;
     }
 }

@@ -1,7 +1,7 @@
 static const char file_id[] = "ACSGeodesic.cc";
 /******************************************************************
 Version identification:
-$Id$
+@(#)ACSGeodesic.cc	1.2	04/14/98
 
 Copyright (c) 1990-1995 The Regents of the University of California.
 All rights reserved.

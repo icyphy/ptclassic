@@ -29,7 +29,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
  Programmers:  James A. Lundblad
  Date of creation: 3/18/98
- Version: $Id$
+ Version: @(#)ACSCGCore.h	1.4	05/26/98
 
 The ACS CG Core class provides a base class for all derived CG Core category classes. May instance variables and methods are stolen from CGCStar.
 
@@ -85,6 +85,8 @@ public:
 	// We're now in CG core territory.
 	/* virtual */ int isCG() const { return TRUE; }
 
+	// JMS
+	  /*virtual*/ int isA(const char*) const;
 
 protected:
 

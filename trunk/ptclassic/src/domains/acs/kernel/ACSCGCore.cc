@@ -25,7 +25,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
  Programmers:  James A. Lundblad
  Date of creation: 3/23/98
- Version: $Id$
+ Version: @(#)ACSCGCore.cc	1.4	05/26/98
 
 The ACS CG Core class provides a base class for all derived CG Core category classes. Many instance variables and methods are stolen from CGCStar.
 
@@ -45,6 +45,11 @@ The ACS CG Core class provides a base class for all derived CG Core category cla
 #include "PrecisionState.h"
 #include "CGUtilities.h"
 #include <ctype.h>
+
+
+// isA
+ISA_FUNC(ACSCGCore, ACSCore);
+
 
 // int isCmdArg (const State*);  // FIXME: should probably be a member function.
 

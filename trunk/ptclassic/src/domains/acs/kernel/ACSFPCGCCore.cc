@@ -26,7 +26,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
  Programmers:  J. A. Lundblad
  Date of creation: 4/1/98
- Version: $Id$
+ Version: @(#)ACSFPCGCCore.cc	1.1	04/14/98
 
 ***********************************************************************/
 
@@ -44,4 +44,6 @@ extern const char ACSFPCGCCategory[] = "FPCGC";
 static ACSFPCGCCore proto;
 static ACSKnownCategory	entry(proto);
 
+// isA
+ISA_FUNC(ACSFPCGCCore, ACSCGCCore);
 

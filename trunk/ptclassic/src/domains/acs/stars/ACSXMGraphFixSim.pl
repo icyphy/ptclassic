@@ -3,7 +3,6 @@ defcore {
 	domain { ACS }
 	coreCategory { FixSim }
 	corona { XMGraph }
-	version { $Id$ }
     copyright {
 Copyright (c) 1998 The Regents of the University of California.
 All rights reserved.

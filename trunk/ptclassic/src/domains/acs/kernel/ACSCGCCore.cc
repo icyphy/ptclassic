@@ -26,7 +26,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
  Programmers:  J. A. Lundblad
  Date of creation: 3/29/98
- Version: $Id$
+ Version: @(#)ACSCGCCore.cc	1.4	04/28/98
 
 ***********************************************************************/
 
@@ -42,6 +42,10 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "FixArrayState.h"
 #include "CGUtilities.h"
 #include <ctype.h>
+
+
+// isA
+ISA_FUNC(ACSCGCCore, ACSCGCore);
 
 
 // Generate initialization code for State variable.
@@ -548,7 +552,7 @@ StringList index;
 	    else
 	    {
 		if (!port->linearBuf()) // use circular addressing
-			index << "ACS_MOD(";
+			index << "CGC_MOD(";
 		else
 			index << '(';
 		if (port->staticBuf()) index << port->bufPos();

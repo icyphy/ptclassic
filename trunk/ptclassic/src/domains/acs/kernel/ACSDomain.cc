@@ -1,6 +1,6 @@
 static const char file_id[] = "ACSDomain.cc";
 /**********************************************************************
-@Version: $Id$
+@Version: @(#)ACSDomain.cc	1.10 04/29/98
 
 @Copyright (c) 1998 The Regents of the University of California.
 All rights reserved.
@@ -74,8 +74,13 @@ public:
 static ACSDomain proto;
 
 static ACSTarget defaultACStarget("default-ACS","ACSStar", "Runs ACS systems on the local workstation using the default\n"
-"one-processor SDF scheduler.","FPSim");
+"one-processor SDF scheduler, using floating point cores.","FPSim");
 static KnownTarget entry(defaultACStarget, "default-ACS");
+
+static ACSTarget floatACStarget("ACS-float","ACSStar", "Runs ACS systems on the local workstation using the default\n"
+"one-processor SDF scheduler, using floating point cores.","FPSim");
+static KnownTarget entry1(floatACStarget, "ACS-float");
+
 static ACSTarget FixACStarget("ACS-Fix","ACSStar", "Runs ACS systems on the local workstation using the default\n"
 "one-processor SDF scheduler.","FixSim");
 static KnownTarget entry2(FixACStarget, "ACS-Fix");

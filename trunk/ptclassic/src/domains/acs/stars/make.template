@@ -41,70 +41,50 @@ include $(CONFIG)
 
 # ACSDIR is the directory containing ACS domain support
 ACSDIR = 	$(ROOT)/src/domains/acs/kernel
+ACSTARGET =     $(ROOT)/src/domains/acs/targets
 CGKERNEL = 	$(ROOT)/src/domains/cg/kernel
-INCL = 		-I$(ACSDIR) -I$(CGKERNEL) -I$(KERNDIR)
+SDFKERNEL =     $(ROOT)/src/domains/sdf/kernel
+INCL = 		-I$(ACSDIR) -I$(CGKERNEL) -I$(SDFKERNEL) -I$(KERNDIR) -I$(ACSTARGET)
 
 # Library name
-PTLIB =		libacsstars.$(LIBSUFFIX)
+PTLIB=libacsstars.$(LIBSUFFIX)
 
 # source files for all stars, using preprocessor
 # base classes/stars go in the front of the list
 PL_SRCS= \
-  ACSNop.pl \
-  ACSAdd.pl		ACSPrinter.pl		ACSSub.pl \
-  ACSAddFPSim.pl ACSAddFixSim.pl		ACSPrinterFPSim.pl	ACSSubFPSim.pl \
-  ACSMpy.pl		ACSRamp.pl \
-  ACSMpyFPSim.pl ACSMpyFixSim.pl	ACSRampFPSim.pl  ACSRampFixSim.pl \
-  ACSFork.pl	ACSForkFPSim.pl  ACSForkFixSim.pl \
-  ACSCos.pl ACSCosFPSim.pl ACSCosFixSim.pl \
-  ACSSin.pl ACSSinFPSim.pl ACSSinFixSim.pl \
-  ACSExp.pl ACSExpFPSim.pl ACSExpFixSim.pl \
-  ACSGain.pl ACSGainFPSim.pl ACSGainFixSim.pl \
-  ACSPolarToRect.pl ACSPolarToRectFPSim.pl ACSPolarToRectFixSim.pl \
-  ACSXYgraph.pl ACSXYgraphFPSim.pl ACSXYgraphFixSim.pl ACSRampFPCGC.pl \
-  ACSAddFPCGC.pl ACSSinFPCGC.pl ACSCosFPCGC.pl ACSExpFPCGC.pl \
-  ACSForkFPCGC.pl ACSPolarToRectFPCGC.pl ACSXYgraphFPCGC.pl \
-  ACSGainFPCGC.pl ACSMpyFPCGC.pl ACSXMGraph.pl ACSXMGraphFPSim.pl \
-  ACSXMGraphFixSim.pl ACSXMGraphFPCGC.pl ACSPrinterFixSim.pl \
-  ACSConstFixSim.pl ACSImpulseFixSim.pl \
-  ACSImpulseFPCGC.pl ACSImpulseFPSim.pl ACSImpulse.pl \
-  ACSConstFPCGC.pl ACSConstFPSim.pl ACSConst.pl \
-  ACSPrinterFPCGC.pl
-
-
-  
-
-TMP_PL_SRCS = \
-  ACSAdd.pl \
-  ACSAddCGC.pl \
-  ACSAddFPGA.pl \
-  ACSAddFPSim.pl \
-  ACSAddFPSimStat.pl \
-  ACSAddJava.pl \
-  ACSFork.pl \
-  ACSForkCGC.pl \
-  ACSForkFPGA.pl \
-  ACSForkFPSim.pl \
-  ACSForkFPSimStat.pl \
-  ACSForkJava.pl \
-  ACSMpy.pl \
-  ACSMpyCGC.pl \
-  ACSMpyFPGA.pl \
-  ACSMpyFPSim.pl \
-  ACSMpyFPSimStat.pl \
-  ACSMpyJava.pl \
-  ACSRamp.pl \
-  ACSRampCGC.pl \
-  ACSRampFPGA.pl \
-  ACSRampFPSim.pl \
-  ACSRampFPSimStat.pl \
-  ACSRampJava.pl \
-  ACSSink.pl \
-  ACSSinkCGC.pl \
-  ACSSinkFPGA.pl \
-  ACSSinkFPSim.pl \
-  ACSSinkFPSimStat.pl \
-  ACSSinkJava.pl
+  ACSAbs.pl ACSAbsCGFPGA.pl ACSAbsFPCGC.pl ACSAbsFPSim.pl ACSAbsFixSim.pl \
+  ACSAdd.pl ACSAddCGFPGA.pl ACSAddFPCGC.pl ACSAddFPSim.pl ACSAddFixSim.pl \
+  ACSBuffer.pl ACSBufferCGFPGA.pl \
+  ACSCompare.pl ACSCompareCGFPGA.pl ACSCompareFPCGC.pl ACSCompareFPSim.pl ACSCompareFixSim.pl \
+  ACSConst.pl ACSConstCGFPGA.pl ACSConstFPCGC.pl ACSConstFPSim.pl ACSConstFixSim.pl \
+  ACSCos.pl ACSCosCGFPGA.pl ACSCosFPCGC.pl ACSCosFPSim.pl ACSCosFixSim.pl \
+  ACSDelay.pl ACSDelayCGFPGA.pl ACSDelayFPCGC.pl ACSDelayFPSim.pl ACSDelayFixSim.pl \
+  ACSExp.pl ACSExpCGFPGA.pl ACSExpFPCGC.pl ACSExpFPSim.pl ACSExpFixSim.pl \
+  ACSFIR.pl ACSFIRCGFPGA.pl ACSFIRFPCGC.pl ACSFIRFPSim.pl ACSFIRFixSim.pl \
+  ACSFork.pl ACSForkCGFPGA.pl ACSForkFPCGC.pl ACSForkFPSim.pl ACSForkFixSim.pl \
+  ACSGain.pl ACSGainFPCGC.pl ACSGainFPSim.pl ACSGainFixSim.pl \
+  ACSIDCT.pl ACSIDCTFPCGC.pl ACSIDCTFPSim.pl ACSIDCTFixSim.pl \
+  ACSImpulse.pl ACSImpulseCGFPGA.pl ACSImpulseFPCGC.pl ACSImpulseFPSim.pl ACSImpulseFixSim.pl \
+  ACSIntegrator.pl ACSIntegratorCGFPGA.pl ACSIntegratorFPCGC.pl ACSIntegratorFPSim.pl ACSIntegratorFixSim.pl \
+  ACSIntGain.pl ACSIntGainCGFPGA.pl ACSIntGainFPCGC.pl ACSIntGainFPSim.pl ACSIntGainFixSim.pl \
+  ACSMpy.pl ACSMpyCGFPGA.pl ACSMpyFPCGC.pl ACSMpyFPSim.pl ACSMpyFixSim.pl \
+  ACSMux.pl ACSMuxCGFPGA.pl ACSMuxFPCGC.pl ACSMuxFPSim.pl ACSMuxFixSim.pl \
+  ACSNL.pl ACSNLFPCGC.pl ACSNLFPSim.pl ACSNLFixSim.pl \
+  ACSNonBiMem.pl ACSNonBiMemCGFPGA.pl \
+  ACSNop.pl ACSNopFPCGC.pl ACSNopFPSim.pl ACSNopFixSim.pl \
+  ACSPolarToRect.pl ACSPolarToRectFPCGC.pl ACSPolarToRectFPSim.pl ACSPolarToRectFixSim.pl \
+  ACSPrinter.pl ACSPrinterCGFPGA.pl ACSPrinterFPCGC.pl ACSPrinterFPSim.pl ACSPrinterFixSim.pl \
+  ACSRamDelay.pl ACSRamDelayCGFPGA.pl ACSRamDelayFPCGC.pl ACSRamDelayFPSim.pl ACSRamDelayFixSim.pl \
+  ACSRamp.pl ACSRampCGFPGA.pl ACSRampFPCGC.pl ACSRampFPSim.pl ACSRampFixSim.pl \
+  ACSShift.pl ACSShiftCGFPGA.pl ACSShiftFPSim.pl ACSShiftFixSim.pl \
+  ACSSin.pl ACSSinCGFPGA.pl ACSSinFPCGC.pl ACSSinFPSim.pl ACSSinFixSim.pl \
+  ACSSink.pl ACSSinkCGFPGA.pl ACSSinkFPCGC.pl ACSSinkFPSim.pl ACSSinkFixSim.pl \
+  ACSSource.pl ACSSourceCGFPGA.pl \
+  ACSSqrt.pl ACSSqrtCGFPGA.pl ACSSqrtFPCGC.pl ACSSqrtFPSim.pl ACSSqrtFixSim.pl \
+  ACSSub.pl ACSSubCGFPGA.pl ACSSubFPCGC.pl ACSSubFPSim.pl ACSSubFixSim.pl \
+  ACSUniSeq.pl ACSUniSeqCGFPGA.pl \
+  ACSXMGraph.pl ACSXMGraphCGFPGA.pl ACSXMGraphFPCGC.pl ACSXMGraphFPSim.pl ACSXMGraphFixSim.pl \
+  ACSXYgraph.pl ACSXYgraphCGFPGA.pl ACSXYgraphFPCGC.pl ACSXYgraphFPSim.pl ACSXYgraphFixSim.pl 
 
 # The .cc files
 SRCS=$(PL_SRCS:.pl=.cc)

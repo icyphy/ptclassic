@@ -1,7 +1,7 @@
 #ifndef _ACSWormhole_h
 #define _ACSWormhole_h
 
-/*  Version $Id$
+/*  Version @(#)ACSWormhole.h	1.4 04/28/98
 
 @Copyright (c) 1998 The Regents of the University of California.
 All rights reserved.
@@ -41,6 +41,13 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "EventHorizon.h"
 #include "ACSPortHole.h"
 
+// JMS
+#include "HWSchedule.h"
+#include "acs_starconsts.h"
+#include "ACSCGFPGACore.h"
+
+class Capability;
+class Port_Id;
 
 class ACSWormhole : public Wormhole, public ACSStar {
 public:
