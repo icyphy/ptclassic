@@ -2,7 +2,7 @@
 Version identification:
 $Id$
 
-Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
+Copyright (c) 1990-1994 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -132,6 +132,9 @@ public:
 	/*virtual*/ int loadCode();
 	/*virtual*/ int runCode();
 
+	// Determine whether we have (or will have, once createChild
+	// operations are complete) a child of the appropriate type.
+	/*virtual*/ int childIsA(const char*) const;
 protected:
 	void setup();
 
