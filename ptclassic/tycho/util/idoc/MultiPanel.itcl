@@ -215,9 +215,11 @@ body ::tycho::MultiPanel::destructor {} {
 #### append
 # Add a subpanel to the bottom of the MultiPanel. 
 #
-# @param element   A Tcl string to identify the new subpanel
-# @param children  Element names of desired children of this element.
-# @param args      Any number of optional arguments that a 
+# element - A Tcl string to identify the new subpanel
+#
+# children - Element names of desired children of this element.
+#
+# args - Any number of optional arguments that a 
 # <a href = "SubPanel.idoc"> subpanel</a> widget will accept.  
 #
 body ::tycho::MultiPanel::append {element {children} args} {
@@ -271,8 +273,9 @@ body ::tycho::MultiPanel::append {element {children} args} {
 #### appendlabel
 # Add a label to the bottom of the MultiPanel.
 #
-# @param element A Tcl string to identify the new label
-# @param args Any number of optional arguments that a 
+# element - A Tcl string to identify the new label
+#
+# args - Any number of optional arguments that a 
 # label widget will accept.  
 #
 body ::tycho::MultiPanel::appendlabel {element args} {
@@ -294,9 +297,9 @@ body ::tycho::MultiPanel::appendlabel {element args} {
 #### bind
 # Bind events to internal subpanel widgets. Identical to global bind.
 #
-# @param element   The user supplied name to identify the element to bind
-# @param args      Identical to arguments that the
-# standard Tk bind would accept.
+# element - The user supplied name to identify the element to bind
+#
+# args - Identical to arguments that the standard Tk bind would accept.
 #
 body ::tycho::MultiPanel::bind {element args} {
 
@@ -374,7 +377,7 @@ body ::tycho::MultiPanel::redoScroll {} {
 # Remove an element. FIXME: Children of subpanels are not removed yet 
 # will no longer be seen or useful.
 #
-# @param element   The user supplied name to identify the element to remove
+# element - The user supplied name to identify the element to remove
 #
 body ::tycho::MultiPanel::remove {element} {
     set elname [elementinfo $element]
@@ -387,9 +390,9 @@ body ::tycho::MultiPanel::remove {element} {
 #### itemcget 
 # cget on an individual subpanel.
 #
-# @param element   The user supplied name to identify the element to cget
-# @param args      Identical to arguments that the
-# standard Tk cget would accept.
+# element - The user supplied name to identify the element to cget
+#
+# args - Identical to arguments that the standard Tk cget would accept.
 #
 body ::tycho::MultiPanel::itemcget {element args} {
 
@@ -401,9 +404,8 @@ body ::tycho::MultiPanel::itemcget {element args} {
 #### itemconfig 
 # configure on an individual subpanel.
 #
-# @param element   The user supplied name to identify the element to config
-# @param args      Identical to arguments that the
-# standard Tk config would accept.
+# element - The user supplied name to identify the element to config
+# args - Identical to arguments that the standard Tk config would accept.
 #
 body ::tycho::MultiPanel::itemconfig {element args} {
     
