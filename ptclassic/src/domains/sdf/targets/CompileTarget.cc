@@ -69,7 +69,7 @@ int CompileTarget::writeGalDef(Galaxy& galaxy, StringList className) {
     pt_ofstream codeFile(codeFileName);
     if (!codeFile) return FALSE;
 
-    myCode = ""; // reinitialize the code stringList
+    myCode.initialize();
     myCode << "// Galaxy definition file from: " << className << "\n\n";
     myCode << "#ifndef _" << className << "_h\n#define _" << className <<
 	    "_h 1\n";
@@ -132,7 +132,6 @@ int CompileTarget::run() {
     myCode += "\n";
     myCode += "// MAIN LOOP\n";
     myCode += "while(iterations-- > 0) {\n";
-    addCode(myCode);
     scheduler()->compileRun();
     myCode += "}\n";
 
@@ -142,7 +141,6 @@ int CompileTarget::run() {
 
     myCode += "exit(0);\n";
     myCode += "}\n";
-    addCode(myCode);
     return 1;
 }
 
@@ -230,6 +228,7 @@ StringList CompileTarget::expandedName(const GenericPort* p) const {
 // Define a galaxy
 StringList CompileTarget::galDef(Galaxy* galaxy,
 			StringList className, int level) {
+    StringList myCode;
     myCode.initialize();
     // The following iterator looks only at the current level of the graph
     GalTopBlockIter next(*galaxy);
@@ -427,7 +426,6 @@ StringList CompileTarget::galDef(Galaxy* galaxy,
 		    if (!farPort) {
 			Error::abortRun(b->fullName(),
 				" Disconnected Universe.");
-			addCode(myCode);
 			return 0;
 		    }
 		    // Work up to top level of aliases
