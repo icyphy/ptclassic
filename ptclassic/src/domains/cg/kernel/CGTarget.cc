@@ -144,7 +144,6 @@ int CGTarget :: runCode() { return TRUE; }
 void CGTarget::setup() {
 	myCode.initialize();
 	procedures.initialize();
-	writeDirectoryName(destDirectory);
 	if (!scheduler()) {
 		int lv = int(loopingLevel);
 		if(lv > 0) {
@@ -161,6 +160,10 @@ void CGTarget::setup() {
 	if (!galaxy()) return;
 
 	if (filePrefix.null()) filePrefix = galaxy()->name();
+	
+	// This will be phased out.  Use either CGTarget::writeFile
+	// or CGUtilities.h rpcWriteFile.
+	writeDirectoryName(destDirectory);
 
 	// Reset the symbol lists.
 	symbolCounter = 0;
@@ -208,12 +211,11 @@ int CGTarget :: run() {
     return !haltRequested();
 }
 
-// If not in a WormHole, conditionally display, compile, load, and run code.
+// If not in a WormHole, conditionally compile, load, and run code.
 void CGTarget :: wrapup()
 {
     if (!inWormHole())
     {
-	if (displayFlag) display(myCode);
 	if (compileFlag)
 	{
 	    if (!compileCode())
@@ -439,13 +441,25 @@ void CGTarget :: genLoopEnd(Star& s) {
 	ds->endLoop();
 }
 
-void CGTarget :: writeCode(const char* name) {
-    if (name == NULL) name = filePrefix;
-    char* codeFileName = writeFileName(name);
-    pt_ofstream codeFile(codeFileName);
-    if (!codeFile) return;
-    codeFile << myCode;
-    codeFile.flush();
+void CGTarget :: writeCode() {
+    writeFile(myCode,"",displayFlag);
+}
+
+int CGTarget::writeFile(const char* text,const char* suffix,
+			int display,int mode){
+    StringList fileName;
+    fileName << filePrefix << suffix;
+    int status = rcpWriteFile( targetHost, destDirectory, fileName, text, 
+		 display, mode);
+    if (status) {
+	return TRUE;
+    }
+    else {
+	StringList errMsg;
+	errMsg << "Write of file " << fileName << " unsuccessful.";
+	Error::abortRun(*this,errMsg);
+	return FALSE;
+    }
 }
 
 ISA_FUNC(CGTarget,Target);
