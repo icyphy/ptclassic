@@ -48,7 +48,7 @@ int findBackEdge(Block* node, int flagLoc, int igonreDelayArcs);
 int totalNumberOfStars(Galaxy& g) {
     GalStarIter nextStar(g);
     int n = 0;
-    while (nextStar++ != NULL) n++;
+    while (nextStar++ != NULL) {n++;}
     return n;
 }
 
@@ -80,7 +80,7 @@ int isAcyclic(Galaxy* g, int ignoreDelayArcs)
     int flagLoc = 0;
     resetFlags(*g,flagLoc,0);
     Block *node;
-    GalTopBlockIter nextBlock(*g);
+    GalStarIter nextBlock(*g);
     while ((node = nextBlock++) != NULL) {
 	if (node->flags[flagLoc]) continue;
 	if (findBackEdge(node,flagLoc,ignoreDelayArcs)) return FALSE;
@@ -295,16 +295,18 @@ void numberAllBlocks(Galaxy& galaxy, int flagLocation) {
     GalAllBlockIter nextBlock(galaxy);
     Block* block;
     int number=0;
-    while ((block = nextBlock++) != NULL)
+    while ((block = nextBlock++) != NULL) {
 	block->flags[flagLocation] = number++;
+    }
 }
 
 void numberBlocks(Galaxy& galaxy, int flagLocation) {
     GalTopBlockIter nextBlock(galaxy);
     Block* block;
     int number=0;
-    while ((block = nextBlock++) != NULL)
+    while ((block = nextBlock++) != NULL) {
 	block->flags[flagLocation] = number++;
+    }
 }
 
 void resetAllFlags(Galaxy& galaxy,int flagLocation, int resetValue) {
