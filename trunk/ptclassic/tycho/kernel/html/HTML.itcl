@@ -206,6 +206,9 @@ class ::tycho::HTML {
     # Return 1 if the sourcewin window is a valid source window.
     private method sourcewinIsMine {}
 
+    # Return 1 if the extension is the extension of an image file.
+    private method isAnImageFileExtension {extension}
+
     ###################################################################
     ####                     private variables                     ####
 
@@ -524,7 +527,7 @@ body ::tycho::HTML::hyperJump {filename {point {}} {push 1}} {
         set filename [::tycho::expandPath $filename]
 
         # If the file is a directory, open "index.html" in that directory,
-        # if it exists. Else continue.
+        # if it exist, otherwise display the contents of the directory.
         if [file isdirectory $filename] {
             set newfilename [format "%s/%s" $filename index.html]
             if ![file exists $newfilename] {
@@ -532,7 +535,6 @@ body ::tycho::HTML::hyperJump {filename {point {}} {push 1}} {
                 if $push {
                     $stack push [list $file [currentPoint]]
                 }
-
                 configure -directory [file dirname $filename]
                 configure -file $filename
                 toolbar clear location
@@ -557,7 +559,8 @@ body ::tycho::HTML::hyperJump {filename {point {}} {push 1}} {
         # in this window (unless it is already open in another window or
         # we are not inside a Displayer).
         set ext [file extension $filename]
-        if {($ext == ".html" || $ext == ".htm" || $ext == ".htl") && \
+        if {($ext == ".html" || $ext == ".htm" || $ext == ".htl" || \
+            [isAnImageFileExtension $ext]) && \
                 $myDisplayer != {}} {
 
             # Special care is required here because there might be a
@@ -590,30 +593,24 @@ body ::tycho::HTML::hyperJump {filename {point {}} {push 1}} {
             configure -file $filename
             toolbar clear location
             toolbar insert location $filename
+
             # Reset the insertion cursor to the origin, or else we will
             # try to preserve the point in the file.
             $itk_component(text) mark set insert 1.0
-            reload
+
+            # Handle Image files specially
+	    if [isAnImageFileExtension $ext] {
+		insertData "<img src=\"$filename\" alt=\"$filename\">"
+	    } else {
+                reload
+            }
+
             if {$point != {}} {
                 after 200 [list $this seeFragment $point]
             }
             configure -readonly 1
             return
-        } else {
-	    # Handle Image files specially
-	    if {($ext == ".gif" || $ext == ".ppm" || $ext == ".pgm" || \
-		    $ext == ".xbm") && $myDisplayer != {}} {
-		clear
-
-		configure -directory [file dirname $filename]
-		configure -file $filename
-
-		toolbar clear location
-		toolbar insert location $filename
-
-		insertData "<img src=\"$filename\" alt=\"$filename\">"
-	    }
-	}
+        }
     } {
         # For backtracking
         if $push {
@@ -1037,6 +1034,15 @@ body ::tycho::HTML::sourcewinIsMine {} {
     } {
 	return 0
     }
+}
+
+#####################################################################
+#### isAnImageFileExtension
+# Return 1 if the extension is the extension of an image file.
+#
+body ::tycho::HTML::isAnImageFileExtension {ext} {
+    return [expr {($ext == ".gif" || $ext == ".ppm" || $ext == ".pgm" || \
+		    $ext == ".xbm") && $myDisplayer != {}}]
 }
 
 
