@@ -1,0 +1,75 @@
+.\" $Id$
+.\" If you edit this document, PLEASE BE SURE TO MANUALLY CHANGE THE DATE
+.\" BELOW, to indicate a new version.  Be sure you have properly checked
+.\" out this file with SCCS (the version number should not be a number below):
+.VR 0.$Revision$ "October 10, 1990"
+.TI "An Overview of \*(PT"
+.AU
+Joseph Buck
+Edwin E. Goei
+Soonhoi Ha
+Ichiro Kuroda
+Phil Lapsley
+Edward A. Lee
+David G. Messerschmitt
+.AE
+.H1 Introduction
+.pp
+\*(PT is a very flexible foundation upon which to build
+simulation environments, where a key objective is the ability
+to combine these environments into multi-paradigm simulations
+as necessary.
+Further detail about the objectives and design of the \*(PT system
+are to be found in the paper "\*(PT: A Multi-Paradigm Simulation
+Environment" by Edward A. Lee and David G. Messerschmitt.
+\*(PT is programmed in C++, and uses modern object-oriented
+software technologies to achieve its basic objectives.
+.pp
+A word about notation:
+In this and other \*(PT documentation, keywords from C++,
+or an abstract data type defined as a
+.c class
+in C++, or fragments of C++ code, are printed in the special font
+just used for "class".
+.H1 "Getting Started"
+.pp
+\*(PT relies on a basic very flexible computational model of a
+simulation.
+The overall simulation is decomposed into software modules called
+.i blocks .
+These blocks at runtime are invoked in an order determined by a
+.i scheduler ,
+and exchange data among themselves as
+they execute.
+From the user perspective there are two types of blocks: the
+.c Star
+and the
+.c Galaxy .
+The
+.c Star
+is elemental, in the sense that it is implemented by a user-provided
+code.
+There are also many pre-coded
+.c Star s
+in the \*(PT library, but these should be viewed as examples,
+rather than as a comprehensive set.
+A
+.c Galaxy
+is a block which internally contains
+.c Star s
+as well as possibly other
+.c Galaxy s.
+The
+.c Galaxy
+is thus a construct for producing a hierarchical description
+of the simulation.
+.pp
+To get started, you can use the \*(PT interactive
+graphical interface (pigi), described below, or the \*(PT
+interpreter.
+Thus, both a graphical and textual specification langauge are available.
+It is unlikely that these two user interfaces will the only
+ones developed for \*(PT.
+They are, in fact, quite distinct from the \*(PT kernel,
+precisely so that other types of user interfaces can be readily
+accepted.

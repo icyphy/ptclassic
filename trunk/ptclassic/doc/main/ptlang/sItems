@@ -1,0 +1,106 @@
+.\" $Id$
+.H1 "Items that may appear only in stars"
+.UH domain
+.pp
+This is a required item; it specifies the domain, such as SDF.
+Syntax:
+.sp
+.c domain " {"
+.i identifier " }"
+.sp
+where
+.i identifier
+specifies the domain.  Currently, the SDF, DDF, and DE domains
+are fully supported; a separate group is working on the Thor domain
+but that is not yet supported by the preprocessor.
+.UH derivedfrom
+.pp
+This item indicates that the star is derived from another class.
+Syntax:
+.sp
+.c derivedfrom " {"
+.i identifier " }"
+.sp
+where
+.i identifier
+specifies the base class.  The
+.c .h
+file for the base class is automatically included in the output
+.c .h
+file.
+.pp
+An important thing to remember for derived stars is that the
+real C++ classname is formed by concatenating the user-visible
+name and the domain name.  Thus the C++ classname for the star
+.c LMS
+in the
+.c SDF
+domain is
+.c SDFLMS .
+The
+.c derivedfrom
+statement, which may also be written
+.c derivedFrom
+or
+.c derived ,
+allows you to say either
+.(c
+derivedfrom { FIR }
+.)c
+or
+.(c
+derivedfrom { SDFFIR }
+.)c
+to specify the base class.
+.UH go
+.pp
+This item defines the action taken by the star when it is fired.
+Syntax:
+.sp
+.c start
+.i body
+.UH "input, output, inmulti, outmulti"
+.pp
+These keywords are used to define a porthole, which may be an input or
+output porthole or an input or output multiporthole.  Like
+.c defstate ,
+it contains other items.  Here is an example:
+.(c
+input {
+        name { signalIn }
+        type { complex }
+	numtokens { 2 }
+}
+.)c
+.pp
+Here,
+.c name
+specifies the porthole name.  This is a required item.
+.c type
+specifies the particle type.  The type may be one of
+.c int ,
+.c float ,
+.c complex ,
+or
+.c anytype .
+Again, case does not matter for the type value.  The
+.c type
+item may be omitted; the default type is
+.c anytype .
+The
+.c numtokens
+keyword (it may also be written
+.c num
+or
+.c numTokens )
+specifies the number of tokens consumed or produced on
+each firing of the star; if the item is omitted, a value of one
+is used.  For stars where this number depends on the value
+of a state, it is preferable to leave out the
+.c numtokens
+specification and to have the
+.c start
+method set the number of tokens (in the SDF domain, this is
+accomplished with the
+.c setSDFParams
+method).

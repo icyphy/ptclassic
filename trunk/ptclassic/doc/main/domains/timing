@@ -1,0 +1,67 @@
+.\" $Id$
+.H1 "Timing Relation Between Domains
+.pp
+\*(PT can support an effectively unlimited number of different
+domains since adding a new domain does not affect any existing
+implementation of other domains as well as kernels.
+The domain interface should take care of timing relations between
+the outer and inner domains. It is the most challenging task of the
+design of
+.c Wormhole s
+and their interconnection mechanism.  Our approach is to
+classify the domains\** into two groups : \fItimed\fR, and
+\fIuntimed\fR. The \fItimed\fR domain is such that the scheduler
+of the domain requires the timing relations among data packets
+over the domain.  On the other hand, the \fIuntimed\fR domain
+requires only the local ordering information of data packets.
+.(f
+\**refer to the "\fBPtolemy Primer\fR" for more information on the
+domains supported by \fBPtolemy\fR.
+.)f
+Thus, the resulting taxonomy is :
+.sp
+.nf
+\fItimed\fR : DE, THOR, etc
+\fIuntimed\fR : SDF, DDF, CAPSIM, etc
+.fi
+.sp
+.pp
+One possible solution is to add timing concept to the untimed domains.
+But it should be prohibited simply because it requires a lot of overhead.
+Instead, we make an assumption that the untimed domain takes zero
+time to perform the scheduling action. 
+This assumption is persuading since it seems not only awkward but also
+infeasible to assign the execution delay to the untimed domain.
+The possible counter-argument is that it doesn't fit the real situation.
+Here is our response : the execution delay of the untimed domain
+is modeled with a 
+.c Delay\ Star
+in the timed domain if necessary. The
+.c Delay\ Star
+will be attached to the end of the 
+.c Wormhole
+that contains the untimed domain whenever we need the execution delay
+of the untimed domain.  The biggest advantage of our approach
+is that the implementation is simple.
+.pp
+If a untimed domain contains a timed domain, it is necessary to specify
+the repetition period of the scheduling action in the untimed outer domain.
+By default, the repetition period is set so large that the timed
+domain would not be interrupted before it is deadlocked (or no 
+.c Star
+is runnable).  A user can change the value of the
+repetition period by defining a 
+.c FloatState
+(\fIschedulePeriod\fR) in the outermost galaxy of the untimed domain.
+In the interpreter command, the following line does it :
+.sp
+.(c
+(state schedulePeriod float "10.0")
+.)c
+.sp
+More difficult situation arises when a timed domain contains a untimed
+domain which by turns contains another timed domain.  
+The principle for this situation is that any inner domain
+may not be ahead of the outer domain in time.  Except the very first
+run, the composite system will work correctly.  The proof of this
+is beyond this document.  Further research is in process on this topic.

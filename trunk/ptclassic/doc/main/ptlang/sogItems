@@ -1,0 +1,231 @@
+.\" $Id$
+.H1 "Items that may appear in both defstar and defgalaxy"
+.pp
+This section lists the
+.i sgitems .
+.UH name
+.pp
+This is a required item, and has the syntax
+.sp
+.c name " {"
+.i identifier " }"
+.sp
+It provides the name of the class to be defined, and (together with
+the domain) determines
+the names of the output files.
+.UH descriptor
+.pp
+This item defines the descriptor for the class.  It has the syntax
+.sp
+.c descriptor " {"
+.i desclist " }"
+.sp
+or
+.c desc " {"
+.i desclist " }"
+.sp
+where
+.i desclist
+is either a C++ character string, or a series of C++ character strings
+separated by whitespace.  If multiple strings are given, they are effectively
+concatenated into one string.  Note that if you want line breaks in
+the descriptor when it is printed, you must include \\n characters
+inside the string(s).
+.UH constructor
+.pp
+This item allows the user to specify extra C++ code to be executed in
+the constructor for the class.  This code appears
+.i after
+any automatically generated code to initialize portholes, states, etc.
+The most common use is to insert a call to
+.c inheritTypeFrom
+when ANYTYPE portholes are used.  Syntax:
+.sp
+.c constructor
+.i body
+.sp
+where
+.i body
+is a piece of C++ code surrounded by curly braces.  Note that actions
+that must be performed before every simulation run should appear in the
+start method, not the constructor.
+.UH destructor
+.pp
+This item defines a destructor.  Syntax:
+.sp
+.c destructor
+.i body
+.lp
+You generally need a destructor only if you allocate memory in the
+constructor; termination functions that happen with every run should
+appear in the
+.c wrapup
+function.
+.UH start
+.pp
+This item defines the
+.c start()
+method, which is called every time the simulation is restarted.  Syntax:
+.sp
+.c start
+.i body
+.UH wrapup
+This item defines the
+.c wrapup()
+method, which is called at the completion of a simulation.  Syntax:
+.sp
+.c wrapup
+.i body
+.UH "public, protected, private"
+.pp
+These three keywords allow the user to declare extra members for the
+class with the desired protection.  Syntax:
+.sp
+.i "protkey body"
+.sp
+where
+.i protkey
+is
+.c public ,
+.c protected ,
+or
+.c private .
+Example, from the Xgraph star:
+.(c
+protected {
+        FILE *strm;
+        int delFile;
+        int index;
+        const char* fileName;
+}
+.)c
+.UH "ccinclude, hinclude"
+.pp
+These directives cause the
+.c .cc
+file, or the
+.c .h
+file, to
+.c #include
+extra files.  By default, the
+.c .cc
+file includes
+.c KnownBlock.h
+and the generated
+.c .h
+file; the
+.c .h
+file will (for stars) include
+.c \fIXXX\fPStar.h ,
+where
+.i XXX
+is the domain name, or (for galaxies)
+.c Galaxy.h ,
+as well as the files for any states that are defined, and if
+a
+.c derived
+section is found, the name of the baseclass as well.  Syntax:
+.sp
+.c ccinclude
+{
+.i inclist
+} or
+.sp
+.c hinclude
+{
+.i inclist
+}
+.sp
+where
+.i inclist
+is a comma-separated list of include files.  Each filename must
+be surrounded either by quotes or by "<" and ">" (for system include
+files like
+.c <math.h> ).
+.UH code
+.pp
+This keyword allows the user to specify a chunk of arbitrary C++ code.
+This code is inserted into the
+.c .cc
+file after the include files but before everything else; it can be
+used to define static non-class functions, declare external variables,
+or anything else.  The outermost pair of curly braces is stripped.
+Syntax:
+.sp
+.c code
+.i body
+.UH defstate
+.pp
+This item is used to define a state; it has other items inside it.
+Here is an example of a state definition:
+.(c
+defstate {
+        name { gain }
+        type { int }
+        default { "1.0" }
+        desc { "output gain" }
+}
+.)c
+There are four types of sub-items that may appear in a defstate
+statement, in any order.  The
+.c name
+field is the name of the state; the
+.c type
+field is its type, which may be one of
+.c int ,
+.c float ,
+.c string ,
+.c complex ,
+.c intarray ,
+.c floatarray ,
+or
+.c complexarray .
+Case is ignored for the type argument.
+.pp
+.c default
+specifies the default value of the state; its argument is either
+a string or a numeric value.
+.c desc
+(or
+.c descriptor ),
+which is optional, gives a descriptor to the state.
+.UH method
+.pp
+The
+.c method
+item provides a fully general way to specify an additional method
+for the class of star or galaxy that is being defined.  Here is an
+example:
+.(c
+method {
+	name { exec }
+	access { protected }
+	arglist { "(const char* extraOpts)" }
+	type { void }
+	code {
+		// code for the SDFXgraph::exec method goes here
+	}
+}
+.)c
+Here are the
+.c method
+subitems:
+.ip name
+The name of the method.  This is a required item.
+.ip access
+The level of access for the method, one of
+.c public ,
+.c protected ,
+or
+.c private .
+If the item is omitted,
+.c protected
+is assumed.
+.ip arglist
+The argument list for the method, as a quoted string.  If omitted,
+the method has no arguments.
+.ip type
+The return type of the method.  If the return type is not a single
+identifier, you must put quotes around it.
+.ip code
+The code that implements the method.  This is a required item.

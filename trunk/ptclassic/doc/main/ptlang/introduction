@@ -1,0 +1,142 @@
+.\" $Id$
+.H1 "Introduction"
+.pp
+The Ptolemy preprocessor exists to make it easier to write star
+and galaxy class definitions to run under Ptolemy.  Instead of
+writing all the initialization code required for a Ptolemy star,
+the user can concentrate on writing the action code for a star
+and let the preprocessor generate the standard initialization code
+for portholes, states, etc.
+.pp
+The Ptolemy preprocessor reads class definitions from an input file,
+and generates one
+.c .cc
+and one
+.c .h
+file for each class defined.  By convention, only one class is defined
+per file, and the filename is of the form
+.c MyClass.pl
+where
+.c MyClass
+is the name of the class to be defined.
+.pp
+The preprocessor is written in Yacc and C.  It does not attempt to
+parse the parts of the language that consist of C++ code (for example,
+.c go()
+methods); for these it simply counts curly braces to find the ends
+of the items in question.  It outputs
+.c #line
+directives so the C++ compiler will print error messages, if any, with
+respect to the original source file.
+.pp
+To make things clearer, let's
+start with an example, the file
+.c SDFFloatRect.pl :
+.(c
+ident {
+/************************************************************************
+Copyright (c) 1990 The Regents of the University of California.
+                        All Rights Reserved.
+
+This star generates a rectangular pulse as output.
+
+************************************************************************/
+}
+defstar {
+        name { FloatRect }
+        domain { SDF }
+        desc {  "Generates an rectangular pulse of height 'height'\n"
+                "(default 1.0) with width 'width' (default 8)."
+        }
+        defstate {
+                name { height }
+                type { float }
+                default { "1.0" }
+                desc { "Pulse height" }
+        }
+        defstate {
+                name { width }
+                type { int }
+                default { "8" }
+                desc { "Pulse width" }
+        }
+        defstate {
+                name { count }
+                type { int }
+                default { "0" }
+                desc { "count (internal)" }
+        }
+        output {            // the output port
+                name { output }
+                type { float }
+        }
+        go {                // the run-time function
+                double t = 0.0;
+                if (count < width) t = height;
+                count = int(count) + 1;
+                output%0 << t;
+        }
+}
+.)c
+.pp
+Running the preprocessor on the above file produces the two files
+.c SDFFloatRect.h
+and
+.c SDFFloatRect.cc ;
+the name is determined
+.i not
+by the input filename but by concatenating the domain and name
+fields.
+.pp
+Three types of declarations may appear at the "top level" of a Ptolemy
+language file: an
+.c ident
+section, a
+.c defstar
+section, or a
+.c defgalaxy
+section.  Any number of these may appear in the file.  For each
+.c defstar
+or
+.c defgalaxy
+section, two files are created, a
+.c .h
+file declaring the class
+and a
+.c .cc
+file implementing its methods.  The most recently seen
+.c ident
+section is inserted, uninterpreted, at the beginning of all output files;
+it should be a valid C++ comment surrounded by curly braces.  The
+.c defstar
+and
+.c defgalaxy
+sections are themselves composed of subitems that define various
+attributes of the star or galaxy.  All subitems are of the form
+.sp
+.i keyword " {"
+.i stuff " }"
+.sp
+where the
+.i stuff
+may itself be composed of sub-sub-items, or may be C++ code (in which
+case the Ptolemy language processor checks it only for balanced curly
+braces).  Note that the keywords are
+.i not
+reserved words; they may also be used as identifiers.
+.pp
+There are three types of subitems to be discussed.  A
+.i sgitem
+may appear either in a
+.c defstar
+or a
+.c defgalaxy
+section.  A
+.i staritem
+may appear only in a
+.c defstar
+section, and a
+.i galitem
+may appear only in a
+.c defgalaxy
+section.
