@@ -18,8 +18,17 @@ limitation of liability, and disclaimer of warranty provisions.
 		name {output}
 		type {FLOAT}
 	}
+	defstate {
+		name {n}
+		type {int}
+		desc {number of samples to write}
+		default {1}
+	}
+	setup {
+		output.setSDFParams(n,int(n)-1);
+	}
 	codeblock (blockname) {
-// Line 1 from Source star
+// Source star: write $val(n) samples
 // Line 2 from Source star
 	}
 	go {
