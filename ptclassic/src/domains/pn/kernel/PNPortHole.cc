@@ -49,15 +49,13 @@ ISA_FUNC(MTDFPortHole,DFPortHole);
 Geodesic* MTDFPortHole::allocateGeodesic()
 {
     // Construct name for new Geodesic.
-    ostrstream string;
-    string << "Node_" << name();
-    char* nm = string.str();
+    StringList nm;
+    nm << "Node_" << name();
 
     LOG_NEW; MTDFGeodesic* g = new MTDFGeodesic;
     g->setNameParent(hashstring(nm), parent());
     g->makeLock(LwpMonitor::prototype);
 
-    LOG_DEL; delete nm;
     return g;
 }
 
