@@ -123,7 +123,7 @@ proc ptkMakeMeter {win name desc low high} {
 	# overload display on the low side
 	canvas $s.bar.lowOL -width 0.3c -height 0.6c -relief sunken 
 	$s.bar.lowOL create rect 0c 0c 0.3c 0.6c \
-            -fill [ptkColor AntiqueWhite3] \
+            -fill [ptkColor grey70] \
 	    -tags lowOL
 
 	# The meter display itself
@@ -133,7 +133,7 @@ proc ptkMakeMeter {win name desc low high} {
 	# High overload display
 	canvas $s.bar.highOL -relief sunken -width 0.3c -height 0.6c 
 	$s.bar.highOL create rect 0c 0c 0.3c 0.6c \
-            -fill [ptkColor AntiqueWhite3] \
+            -fill [ptkColor grey70] \
 	    -tags highOL
 
 	# Control for the high end of the meter
@@ -211,13 +211,13 @@ proc ptkSetMeter {win name value} {
 	$s.bar.highOL itemconfigure highOL \
                 -fill [option get . positiveColor PositiveColor]
     } {
-        $s.bar.highOL itemconfigure highOL -fill [ptkColor AntiqueWhite3]
+        $s.bar.highOL itemconfigure highOL -fill [ptkColor grey70]
     }
     if {$value < $low}  {
 	$s.bar.lowOL itemconfigure lowOL \
                 -fill [option get . negativeColor NegativeColor]
     } {
-        $s.bar.lowOL itemconfigure lowOL -fill [ptkColor AntiqueWhite3]
+        $s.bar.lowOL itemconfigure lowOL -fill [ptkColor grey70]
     }
 }
 

@@ -130,7 +130,7 @@ if {!$window_previously_existed} {
 		$win.f.att$i.button configure -background [ptkColor white]
 	    } {
 		set in {FALSE}
-		$win.f.att$i.button configure -background [ptkColor burlywood1]
+		$win.f.att$i.button configure -background [ptkColor azure3]
 	    }
 	    $win.f.att$i.button configure -text "[lindex $ids $i]: $in"
 	}

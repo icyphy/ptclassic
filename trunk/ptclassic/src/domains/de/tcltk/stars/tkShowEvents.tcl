@@ -133,7 +133,7 @@ if {!$window_previously_existed} {
 		    -text "[lindex $ids $i]: $in at time [schedtime]" \
 		    -background [ptkColor white]
 	    } {
-		$win.f.att$i.button configure -background [ptkColor burlywood1]
+		$win.f.att$i.button configure -background [ptkColor azure3]
 	    }
 	}
     }
