@@ -4,7 +4,7 @@ defstar {
 	desc {
 The output is set to the input multiplied by a gain term.
 The gain must be in the interval [-1,1].
-}
+	}
 	version { $Id$ }
 	author { J. Buck }
 	copyright {
@@ -23,14 +23,15 @@ We eliminate ourselves from the circuit in that case.
 		short identity;
 	}
 	setup {
-		identity = (gain.asDouble() >= CG56_ONE);
-		if (identity) forkInit(input,output);
+		double thegain = gain.asDouble();
+		if (thegain < -1.0 || gain > 1.0) {
+		    Error::warn(*this, "gain is not in the range [-1,1]");
+		}
+		identity = (thegain >= CG56_ONE);
+		if (identity) forkInit(input, output);
 	}
 	constructor {
 		noInternalState();
-	}
-	execTime {
-		return identity ? 0 : 5;
 	}
 	input {
 		name {input}
@@ -64,12 +65,16 @@ We eliminate ourselves from the circuit in that case.
 	go {
 		if (identity) {
 		    ;
-		} else if (gain.asDouble()==0.0) {
+		} else if (gain.asDouble() == 0.0) {
 		    addCode(cbZero);
-		} else if (gain.asDouble()==-1.0) {
+		} else if (gain.asDouble() == -1.0) {
 		    addCode(cbNeg);
 	 	} else {
 		    addCode(cbStd);
 		}
+	}
+	execTime {
+		identity = (gain.asDouble() >= CG56_ONE);
+		return identity ? 0 : 5;
 	}
 }
