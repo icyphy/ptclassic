@@ -52,8 +52,6 @@ CGCTarget::CGCTarget(const char* name,const char* starclass,
                    const char* desc) : HLLTarget(name,starclass,desc) {
 	addState(staticBuffering.setState("staticBuffering",this,"YES",
                         "static buffering is enforced between portholes."));
-	addState(hostMachine.setState("hostMachine",this,"",
-                        "Machine on which to compile/run the generated code"));
 	addState(funcName.setState("funcName",this,"main",
                         "function name to be created."));
 	addState(compileCommand.setState("compileCommand",this,"cc",
@@ -62,11 +60,13 @@ CGCTarget::CGCTarget(const char* name,const char* starclass,
                         "options to be specified for compiler."));
 	addState(linkOptions.setState("linkOptions",this,"-lm",
                         "options to be specified for linking."));
-	addState(saveFileName.setState("saveFileName",this,"",
-                        "file name to save the generated code."));
         addState(resources.setState("resources",this,"STDIO",
         	"standard I/O resource"));
 	initCodeStrings();
+
+
+	targetHost.setAttributes(A_SETTABLE);
+	filePrefix.setAttributes(A_SETTABLE);
 
 	// stream definition
 	addStream("globalDecls", &globalDecls);
@@ -196,17 +196,15 @@ void CGCTarget :: frameCode () {
     initCodeStrings();
 }
 
-void CGCTarget :: writeCode(const char* name) {
-	if (name == NULL) {
-		StringList fname;
-		fname << galaxy()->name() << ".c"; 
-		HLLTarget :: writeCode(fname);
-	} else {
-		HLLTarget :: writeCode(name);
-	}
+void CGCTarget :: writeCode(const char* name)
+{
+    if (name == NULL) name = filePrefix;
+    StringList fileName;
+    fileName << name << ".c";
+    HLLTarget::writeCode(fileName);
 }
 
-// check whether the hostMachine is the same as my hostname.
+// check whether the targetHost is the same as my hostname.
 void CGCTarget :: checkHostMachine() {
 	localHost = FALSE;
 	FILE* fp = popen("/bin/hostname", "r");
@@ -216,7 +214,7 @@ void CGCTarget :: checkHostMachine() {
 		char line[40];
 		if (fgets(line, 40, fp) != NULL) {
 			char* myHost = makeLower(line);
-			char* temp = makeLower((const char*) hostMachine);
+			char* temp = makeLower((const char*) targetHost);
 			if (strncmp(myHost, temp, strlen(temp)) == 0) {
 				localHost = TRUE;
 		   	}
@@ -229,7 +227,7 @@ void CGCTarget :: checkHostMachine() {
 
 // compile the code
 int CGCTarget :: compileCode() {
-	// check whether the hostMachine is the same as my hostname.
+	// check whether the targetHost is the same as my hostname.
 	checkHostMachine();
 
 	// Compile and run the code
@@ -243,7 +241,7 @@ int CGCTarget :: compileCode() {
 	if (localHost == FALSE) {
 		// move the file first. Create destDirectory if necessary.
 		cmd << "/bin/cat " << tempName;
-		cmd << " | rsh " << (const char*) hostMachine << " '";
+		cmd << " | rsh " << (const char*) targetHost << " '";
 		cmd << "mkdir -p " << dirName << "; cd " << dirName;
 		cmd << "; /bin/cat - > " << fname << ".tmp ";
 		cmd << "; mv -f " << fname << ".tmp " << fname << "; ";
@@ -257,7 +255,7 @@ int CGCTarget :: compileCode() {
 		StringList err = " Can not compile ";
 		err << fname;
 		if (localHost == FALSE) {
-			err << " in machine: " << (const char*) hostMachine;
+			err << " in machine: " << (const char*) targetHost;
 		}
 		Error::abortRun(err);
 		return FALSE;
@@ -274,39 +272,12 @@ StringList CGCTarget :: compileLine(const char* fName) {
 	return cmd;
 }
 
-// down-load (do nothing here) and run the code
-int CGCTarget :: runCode() {
-	StringList fname = galaxy()->name();
-	StringList cmd = "cd ";
-	cmd << (const char*)destDirectory;
-	cmd << "; " << fname << " &";
-	if (localHost == FALSE) {
-		// use rshSystem method to preserve x environ.
-		if (rshSystem((const char*) hostMachine, cmd, 0)) {
-			StringList err = " Can not run ";
-			err << fname << " in machine: ";
-			err << (const char*) hostMachine;
-			Error :: abortRun(err);
-			return FALSE;
-		}
-	} else {
-		if(system(cmd)) {
-			StringList err = " Can not run ";
-			err << fname;
-			Error :: abortRun(err);
-			return FALSE;
-		}
-	}
-
-	// Move the code into files if saveFileName is given.
-	const char* ch = (const char*) saveFileName;
-	if (ch == 0 || *ch == 0) return TRUE;
-	cmd = "cd ";
-	cmd << (const char*)destDirectory;
-	cmd << "; mv -f " << fname << ".c " << ch << ".c; mv ";
-	cmd << fname << " " << ch;
-	system(cmd);
-	return TRUE;
+// Run the code.
+int CGCTarget :: runCode()
+{
+    StringList cmd;
+    cmd << filePrefix << "&";
+    return (rshSystem(targetHost, cmd, destDirectory) == 0);
 }
 
 // Routines for writing code: schedulers may call these
