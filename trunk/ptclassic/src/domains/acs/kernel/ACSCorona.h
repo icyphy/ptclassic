@@ -76,9 +76,12 @@ public:
 		return ACSKnownCategory::getCategories();
 	}
 
+	// initialize cores name and parent members
 	void initCores();
 
-	/* virtual */ int isSDF() const { return TRUE; } // FIXME
+	/* virtual */ int isSDF() const { return TRUE; } // FIXME: DDF?
+
+	// call the corresponding core method.
 	/* virtual */ void initialize();
 	/* virtual */ void wrapup();
 	/* virtual */ void initCode();
@@ -87,9 +90,10 @@ public:
 
 protected:
 
+	// calls the core->go() method.
 	/* virtual */ void go();
 
-	// List of availabel cores
+	// List of available cores
         SequentialList coreList;
 
 	// Core used in current run ( FIXME: could be a list also ).

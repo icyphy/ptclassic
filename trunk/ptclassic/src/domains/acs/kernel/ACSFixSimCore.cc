@@ -44,6 +44,8 @@ extern const char ACSFixSimCategory[] = "FixSim";
 static ACSFixSimCore proto;
 static ACSKnownCategory	entry(proto);
 
+// there is no corona member in the base class but we need to pass the
+// corona to the constructor to addStates to it.
 ACSFixSimCore::ACSFixSimCore(ACSCorona& corona) : ACSCore(ACSFixSimCategory) {
 
 corona.addState(OverflowHandler.setState("OverflowHandler",this,"saturate","Overflow characteristic for the output.\nIf the result of the sum cannot be fit into the precision of the output,\nthen overflow occurs and the overflow is taken care of by the method\nspecified by this parameter.\nThe keywords for overflow handling methods are:\n\"saturate\" (the default), \"zero_saturate\", \"wrapped\", and \"warning\".\nThe \"warning\" option will generate a warning message whenever overflow occurs."));
@@ -54,9 +56,8 @@ corona.addState(RoundFix.setState("RoundFix",this,"YES","If YES or TRUE, then al
 
 } 
 
-
+// copied from SDFFix
 void ACSFixSimCore::wrapup() {
-# line 75 "ACSFix.pl"
 if ( int(ReportOverflow) && ( overflows > 0 ) ) {
 		  StringList msg;
 		  char percentageStr[24];      // must be at least 6 chars
@@ -73,16 +74,15 @@ if ( int(ReportOverflow) && ( overflows > 0 ) ) {
 		}
 }
 
+// copied from SDFFix
 void ACSFixSimCore::setup() {
-# line 69 "ACSFix.pl"
 overflows = 0;
 		totalChecks = 0;
 }
 
-
+// copied from SDFFix
 int ACSFixSimCore::checkOverflow (Fix& fix)
 {
-# line 59 "ACSFix.pl"
 int overflag = fix.ovf_occurred();
 			totalChecks++;
 			if ( overflag ) {

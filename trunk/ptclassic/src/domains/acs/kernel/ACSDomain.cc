@@ -67,7 +67,7 @@ public:
 // declare a prototype
 static ACSDomain proto;
 
-// declare the default Target object
+// declare the default Target object ( Now defined in ACSTarget.h )
 
 //class ACSTarget : public Target {
 //public:

@@ -40,7 +40,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 // Global category string
 extern const char ACSFPSimCategory[] = "FPSim";
 
-// add string to KnownCategory list
+// add base class core to KnownCategory list
 static ACSFPSimCore proto;
 static ACSKnownCategory	entry(proto);
 
