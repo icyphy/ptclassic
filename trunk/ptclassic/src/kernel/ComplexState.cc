@@ -80,7 +80,7 @@ State* ComplexState :: clone () const {
 }
 
 void ComplexState  :: initialize() {
-	const  char* specialChars =  "*+-/(),";
+	const  char* specialChars =  "*+-/(),!";
 	Tokenizer lexer(initValue(),specialChars);
 
 	ParseToken t =getParseToken(lexer);
