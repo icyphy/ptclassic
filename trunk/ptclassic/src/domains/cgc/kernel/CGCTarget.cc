@@ -443,6 +443,59 @@ int CGCTarget :: codeGenInit() {
         return TRUE;
 }
 
+// Splice in stars.
+// Return FALSE on error.
+int CGCTarget::modifyGalaxy()
+{
+    extern int warnIfNotConnected (Galaxy&);
+
+    Galaxy& gal = *galaxy();
+    GalStarIter starIter(gal);
+    Star* star;
+    const char* domain = gal.domain();
+
+    if (warnIfNotConnected(gal)) return FALSE;
+
+    while ((star = starIter++) != NULL)
+    {
+	BlockPortIter portIter(*star);
+	PortHole* port;
+	while ((port = portIter++) != NULL)
+	{
+	    // Splice in type conversion stars.
+	    if (port->isItOutput()
+		&& (port->type() != ANYTYPE)
+		&& (port->type() != port->resolvedType()) )
+	    {
+		PortHole* input = port->far();	// destination input PortHole
+
+		// Avoid re-initializing the Galaxy, which will break
+		// things if this is a child in a MultiTarget. (Why? See
+		// comments for CGTarget::setup() method.)  Initialize it
+		// only if there is no resolved type.
+		if (port->resolvedType() == NULL)
+		{
+		    gal.initialize();
+		    if (SimControl::haltRequested()) return FALSE;
+		    if (port->type() == port->resolvedType()) continue;
+		}
+
+		if (port->type() == COMPLEX)
+		{
+		    if (!spliceStar(input, "CxToFloat", TRUE, domain))
+			return FALSE;
+		}
+		else if (port->resolvedType() == COMPLEX)
+		{
+		    if (!spliceStar(input, "FloatToCx", TRUE, domain))
+			return FALSE;
+		}
+	    }
+	}
+    }
+    return TRUE;
+}
+
 /////////////////////////////////////////
 // addSpliceStars
 /////////////////////////////////////////
@@ -461,13 +514,13 @@ static void setupBuffer(CGCStar* s, int dimen, int bufsz) {
 	p->setFlags();
 }
 
-// we add "copy" stars in case
-// a input/output porthole is an embedding/embedded porthole, 
-//     and buffer size is greater than the sample rate.
+// "Copy" stars are added if an input/output PortHole is a host/embedded
+// PortHole and the buffer size is greater than the number of Particles
+// transferred.
 
-// we add "type-conversion star" if necessary: complex to float/int and
-// int/float to complex. If we add type-conversion star, we do not need to
-// splice "copy" star.
+// NOTE:  Because this splicing takes place after the schedule has been
+// constructed, the CGCStar::addSpliceStar() method is used as a hack to
+// ensure that code will be generated for the new spliced stars.
 
 void CGCTarget :: addSpliceStars() {
 	const char* dom = galaxy()->domain();
@@ -483,25 +536,10 @@ void CGCTarget :: addSpliceStars() {
 
 			if (p->isItInput()) {
 				farP = (CGCPortHole*) p->far();
-				int flag = farP->isConverted();
 
-				// splice type conversion(CxToFloat) star.
-				if (flag > 0) {
-					news = (CGCStar*) spliceStar(p, 
-						"CxToFloat", 1, dom);
-
-				// splice type conversion(FloatToCx) star.
-				} else if (flag < 0) {
-					news = (CGCStar*) spliceStar(p, 
-						"FloatToCx", 1, dom);
-
-				// splice copy star.	
-				} 
 				if ((p->embedded() || p->embedding()) &&
 					 (p->numXfer() < p->bufSize())) {
-					// splice copy star
-					if (!flag)
-						news = (CGCStar*)
+					news = (CGCStar*)
 						spliceStar(p, "Copy", 1, dom);
 					CGCPortHole* tp = (CGCPortHole*) 
 						news->portWithName("input");
@@ -511,7 +549,6 @@ void CGCTarget :: addSpliceStars() {
 					news->setTarget(this);
 					setupBuffer(news, p->numXfer(), 0);
 					s->addSpliceStar(news, 0);
-					if (flag) farP->initialize();
 				}
 
 			// output
