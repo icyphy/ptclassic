@@ -1,0 +1,120 @@
+##########################################################################
+# Version: $Id$
+# Author: John Reekie
+#
+# Copyright (c) 1996 The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the above
+# copyright notice and the following two paragraphs appear in all copies
+# of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+#                                                         COPYRIGHTENDKEY
+##########################################################################
+
+
+##########################################################################
+#### HyperGraph
+#
+# A _HyperGraph_ has hyper-edges -- edges that connect between
+# more than two vertices. Connections are made to welds (like the
+# _MultiGraph_), and each weld has a _type_ which can be used to`
+# indicate what "kind" of connection the weld is. For example, in
+# a circuit simulation graph, welds may have one of the types
+# "input," "output," or "bidirectional." Obviously, weld types can
+# be used to implement directional hypergraphs simply by having the
+# two types "in" and "out," or "parent" and "child." The hypergraph
+# supports construction of directed graphs by the options
+# *-parentweldtype* and -*childweldtype*, which will be used to
+# construct a directed graph topology that can be used by all of the
+# directed graph algorithms.
+#
+class ::tycho::HyperGraph {
+    inherit ::tycho::AbstractGraph
+
+    constructor {args} {}
+    destructor {}
+
+    #################################################################
+    ####                        options                          ####
+
+    # The weld type of parent connections
+    public variable parentweldtype {}
+
+    # The weld type of child connections
+    public variable childweldtype {}
+
+    #################################################################
+    ####                     public methods                      ####
+
+    # Get the edge connected to the given weld
+    method edge {weld}
+
+    # Get the welds of an edge matching the pattern
+    method adjacentwelds {edge pattern}
+
+    # Get the vertices of an edge matching the pattern
+    method adjacentvertices {edge pattern}
+
+    # Add an edge and options to the graph
+    method connect {source target args}
+
+    # Remove a vertex (but not adjacent edges) from the graph
+    method delete {vertex}
+
+    # Remove an edge from the graph
+    method disconnect {source target}
+}
+
+########################################################################
+#### constructor
+#
+body ::tycho::HyperGraph::constructor {args} {
+    # Evaluate options
+    eval configure $args
+}
+
+########################################################################
+#### connect
+#
+# Add a new edge to the graph, and return the inverse command.
+# The edge is specified by two welds; additional arguments are a
+# flat option-value list for the edge. Flag an error if the edge
+# already exists, but not if the two vertices or their welds do not exist. 
+#
+body ::tycho::HyperGraph::connect {source target args} {
+    error "Not implemented"
+}
+
+########################################################################
+#### delete
+#
+# Delete a vertex from the graph, and return the inverse command.
+#
+body ::tycho::Digraph::delete {vertex} {
+    error "Not implemented"
+}
+
+########################################################################
+#### disconnect
+#
+# Remove an edge from the graph, and return the inverse command. Flag an
+# error if the edge does not exist.
+#
+body ::tycho::Digraph::disconnect {source target} {
+    error "Not implemented"
+}
