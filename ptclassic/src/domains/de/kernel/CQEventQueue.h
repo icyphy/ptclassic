@@ -63,6 +63,10 @@ public:
 	     return CalendarQueue::levelput(a, v, fv, dest);
 	}
 
+	CqLevelLink* levelput(Pointer a, double v, double fv, Star* dest) {
+	    return CalendarQueue::levelput(a, v, fv, dest);
+	}
+
 	void putFreeLink(CqLevelLink* p); // virtual
 
 	// put the residual events and particles into the free stores.
