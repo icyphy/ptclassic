@@ -144,7 +144,7 @@ octObject *facetPtr;
     while (octGenerate(&genInst, &inst) == OCT_OK) {
 	if (IsVemConnector(&inst) || IsIoPort(&inst) || IsMarker(&inst)) {
 	    /* skip */
-	    continue;
+	    ;
 	} else if (IsGal(&inst)) {
 	    ERR_IF1(!MyOpenMaster(&galFacet, &inst, "contents", "r"));
 	    ERR_IF1(!CompileGal(&galFacet));
@@ -156,6 +156,7 @@ octObject *facetPtr;
 		return (FALSE);
 	    }
 	}
+	FreeOctMembers(&inst);
     }
     octFreeGenerator(&genInst);
     return(TRUE);
@@ -236,6 +237,7 @@ char *propname;
     /* fill in default values, and get or create the property. */
     prop.contents.prop.type = OCT_INTEGER;
     prop.contents.prop.value.integer = 1;
+    prop.objectId = 0;		/* silence Purify */
     octGetOrCreate (instPtr, &prop);
     ERR_IF2(octAttach(&net, &prop) != OCT_OK, octErrorString());
     return(TRUE);
@@ -256,7 +258,6 @@ octObject *facetPtr;
     while (octGenerate(&genInst, &inst) == OCT_OK) {
 	if (IsVemConnector(&inst) || IsIoPort(&inst)) {
 	    /* skip */
-	    continue;
 	} else if (IsDelay(&inst)) {
 	    ERR_IF1(!ProcessMarker(facetPtr, &inst, "delay"));
 	} else if (IsBus(&inst)) {
@@ -270,6 +271,7 @@ octObject *facetPtr;
 	    ERR_IF2(octModify(&inst) != OCT_OK, octErrorString());
 	    ERR_IF1(!KcInstance(name, akoName, &pList));
 	}
+	FreeOctMembers(&inst);
     }
     octFreeGenerator(&genInst);
     return(TRUE);
@@ -290,14 +292,20 @@ boolean *result;
     ERR_IF2(GetById(&inst, aTermPtr->contents.term.instanceId) != OCT_OK,
 	octErrorString());
     ERR_IF1(!MyOpenMaster(&master, &inst, "interface", "r"));
+    FreeOctMembers(&inst);
     ERR_IF2(GetByTermName(&master, &fTerm, aTermPtr->contents.term.name)
 	!= OCT_OK, octErrorString());
+    FreeOctMembers(&master);
     if (GetByPropName(&fTerm, &prop, "input") != OCT_NOT_FOUND) {
 	*result = TRUE;
+	FreeOctMembers(&prop);
+	FreeOctMembers(&fTerm);
 	return (TRUE);
     }
     if (GetByPropName(&fTerm, &prop, "output") != OCT_NOT_FOUND) {
 	*result = FALSE;
+	FreeOctMembers(&prop);
+	FreeOctMembers(&fTerm);
 	return (TRUE);
     }
     *result = FALSE;
@@ -400,6 +408,8 @@ char *delay, *width;
 	EssAddObj(&outInst);
 	return (FALSE);
     }
+    FreeOctMembers(&inInst);
+    FreeOctMembers(&outInst);
     return (TRUE);
 }
 
@@ -420,6 +430,7 @@ char *nodename;
     }
     ERR_IF1(!KcNodeConnect(inst.contents.instance.name,
 			       termPtr->contents.term.name, nodename));
+    FreeOctMembers(&inst);
     return (TRUE);
 }
 
@@ -513,6 +524,9 @@ octObject *facetPtr;
 	EssAddObj(&net);
     }
     octFreeGenerator(&netGen);
+/* free up the terms */
+    for (i = 0; i < inN; i++) FreeOctMembers(in[i]);
+    for (i = 0; i < outN; i++) FreeOctMembers(out[i]);
     return errMsg ? FALSE : TRUE;
 }
 
@@ -569,6 +583,7 @@ octObject *facetPtr;
 	~OCT_CHANGE_LIST_MASK & ~OCT_CHANGE_RECORD_MASK;
     cl.contents.changeList.functionMask = OCT_ATTACH_CONTENT_MASK |
 	OCT_DETACH_CONTENT_MASK | OCT_MODIFY_MASK | OCT_PUT_POINTS_MASK;
+    cl.objectId = 0;		/* silence Purify */
     CK_OCT(octCreate(facetPtr, &cl));
     octMarkTemporary(&cl);
     return (TRUE);

@@ -288,6 +288,7 @@ GetTildePath(facetPtr, tPath)
     int			uid;
     struct passwd	*pwent;
 
+    /* fullName will be malloc'd */
     octFullName(facetPtr, &fullName);
 
     /*
@@ -298,13 +299,12 @@ GetTildePath(facetPtr, tPath)
 	"GetTildePath: Cannot get password entry");
     if ( IsSubPathB( fullName, pwent->pw_dir, &remainPath) ) {
 	sprintf(tPath, "~%s%s", pwent->pw_name, remainPath);
-	return TRUE;
     }
 
     /*
      * try $(PTOLEMY) directory tree: $PTOLEMY/remainPath
      */
-    if ( (envPath = getenv(UToolEnvName))!=NULL
+    else if ( (envPath = getenv(UToolEnvName))!=NULL
      && IsSubPathB( fullName, envPath, &remainPath) ) {
 	sprintf(tPath, "$%s%s", UToolEnvName, remainPath);
 	return TRUE;
@@ -314,15 +314,16 @@ GetTildePath(facetPtr, tPath)
      * try ptolemy user's directory tree: ~ptolemy/remainPath
      * it is not an error if there is no such account.
      */
-    pwent = getpwnam(UToolName);
-    if (pwent && IsSubPathB( fullName, pwent->pw_dir, &remainPath)) {
+    else if ((pwent = getpwnam(UToolName)) != 0 &&
+	     IsSubPathB( fullName, pwent->pw_dir, &remainPath)) {
 	sprintf(tPath, "~%s%s", pwent->pw_name, remainPath);
-	return TRUE;
     }
-
-    /* Issue a warning that absolute path name is being used */
-    PrintErr("Warning: Can't convert absolute path to ~user. Icon master should not henceforth be moved.");
-    strcpy(tPath,fullName);
+    else {
+	/* Issue a warning that absolute path name is being used */
+	PrintErr("Warning: Can't convert absolute path to ~user. Icon master should not henceforth be moved.");
+	strcpy(tPath,fullName);
+    }
+    free(fullName);
     return (TRUE);
 }
 
@@ -439,44 +440,41 @@ long userOptionWord;
     }
 
     status = vuFindSpot(spot, &inst, OCT_INSTANCE_MASK);
-    if (status == VEM_NOSELECT) {
+    if (status == VEM_NOSELECT)
 	PrintCon("Aborted");
-        ViDone();
-    } else if (status != VEM_OK) {
+    else if (status != VEM_OK)
 	PrintErr("Cursor must be over an icon instance");
-	ViDone();
-    } else {
-	if (IsGal(&inst) || IsUniv(&inst) || IsPal(&inst)) {
+    else {
+	if (IsStar(&inst)) {
+	    if (!MyOpenMaster(&mFacet, &inst, "interface", "r"))
+		PrintErr(ErrGet());
+	    else {
+		octFullName(&mFacet, &fullName);
+		/* Figure out file names */
+		if (!IconFileToSourceFile(fullName, codeFile, domain) ||
+		    !LookAtFile(codeFile))
+		    PrintErr(ErrGet());
+		free(fullName);
+		FreeOctMembers(&mFacet);
+	    }
+	}
+	else if (IsGal(&inst) || IsUniv(&inst) || IsPal(&inst)) {
 	    if (!MyOpenMaster(&mFacet, &inst, "contents", "r")) {
 		PrintErr(ErrGet());
-		ViDone();
 	    }
-	    /* Change to full name because VEM re-opens facet */
-	    octFullName(&mFacet, &fullName);
-	    mFacet.contents.facet.cell = fullName;
-	    vemOpenWindow(&mFacet, NULL);
-	} else {
-	    if (IsStar(&inst)) {
-	    	if (!MyOpenMaster(&mFacet, &inst, "interface", "r")) {
-		    PrintErr(ErrGet());
-		    ViDone();
-	        }
-	        octFullName(&mFacet, &fullName);
-
-	        /* Figure out file names */
-		if (!IconFileToSourceFile(fullName, codeFile, domain)) {
-		    PrintErr(ErrGet());
-		    ViDone();
-		}
-	        if (!LookAtFile(codeFile))
-		    PrintErr(ErrGet());
-		ViDone();
-	    } else {
-		PrintErr("The icon instance is not a universe, galaxy, palette, or star.");
-                ViDone();
-            }
+	    else {
+		/* Change to full name because VEM re-opens facet */
+		octFullName(&mFacet, &fullName);
+		mFacet.contents.facet.cell = fullName;
+		vemOpenWindow(&mFacet, NULL);
+		FreeOctMembers(&mFacet);
+	    }
 	}
+	else 
+	    PrintErr("The icon instance is not a universe, galaxy, palette, or star.");
+	FreeOctMembers(&inst);
     }
+    FreeOctMembers(&facet);
     ViDone();
 }
 

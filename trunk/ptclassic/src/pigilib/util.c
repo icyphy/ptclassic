@@ -252,6 +252,7 @@ char *s;
     found = hsearch(item, FIND);
     if (found == NULL) {
 	item.data = 0;
+	item.key = DupString(s);
 	if (!(found = hsearch(item, ENTER))) {
 	    ErrAdd("UniqNameGet: hash table is full!");
 	    return NULL;
