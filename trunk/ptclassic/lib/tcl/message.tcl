@@ -45,7 +45,7 @@ set ptkVerboseErrors 0
 
 ###################################################################
 # Destroy a window if it exists
-proc ptkSafeDestroy {win} {catch {destroy $win}}
+proc ptkSafeDestroy {win} {if {[winfo exists $win]} {destroy $win}}
 
 ###################################################################
 # procedure to issue an error message from any internal tk error
