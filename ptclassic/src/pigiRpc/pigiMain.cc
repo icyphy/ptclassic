@@ -42,7 +42,7 @@ extern "C" {
 	void KcLoadInit(const char*);
 
 	int ptkRPCInit( int argc, char **argv);
-	int ptkMainLoop ();
+	void ptkMainLoop ();
 
 };
 
