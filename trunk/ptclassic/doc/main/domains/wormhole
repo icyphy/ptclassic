@@ -115,7 +115,7 @@ The \fIcurrentTime\fR of the inner
 scheduler is set to equal the arrival time of the data packets
 .c (arrivalTime) .
 Since the SDF domain is untimed, decision on the arrival time of the
-data packets is not trivial, as explained above.
+data packets is trivial, as explained above.
 The next step is to call the \fIrun()\fR method of the base
 .c Wormhole\ class .
 Here is a part of the definition\** of the base 
