@@ -186,7 +186,7 @@ foreach x (cg/targets sdf/image sdf/targets \
 	sdf/matrix sdf/matlab sdf/vis \
 	cgc/dsp cgc/rtlib \
 	vhdl/targets vhdl/tcltk \
-	mdsdf/tcltk de/atm de/contrib cg/hierScheduler $EXPEXTRAS )
+	mdsdf/tcltk de/atm de/contrib de/java cg/hierScheduler $EXPEXTRAS )
 	optmkdir $x
 	cd $x
 	optlink ../../../../src/domains/$x make.template
@@ -206,6 +206,7 @@ foreach x ( c50/dsp/stars cg56/dsp/stars \
 	mdsdf/tcltk/stars \
 	de/atm/stars \
 	de/contrib/stars \
+	de/java/stars \
 	de/tcltk/stars \
 	vhdl/tcltk/targets \
 	cgc/dsp/stars \
