@@ -64,7 +64,7 @@ cosine transform (DCT) and outputs a DCTImage.
 	method {
 		name { doDCT }
 		type { void }
-		arglist { "(float* out, unsigned const char* in, int outw, \
+		arglist { "(float* out, unsigned const char* in, int outw,
 				int outh, int inw, int inh)"
 		}
 		code {

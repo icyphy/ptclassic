@@ -16,7 +16,7 @@ set to 2 and if the 'fileName' state is 'dir.#/pic#' then the files that
 are read and output are 'dir.2/pic2', 'dir.3/pic3', etc.
 	}
 
-	ccinclude { "GrayImage.h", <std.h>, <stdio.h>, "UserOutput.h" }
+	ccinclude { "GrayImage.h", <std.h>, <stdio.h> }
 
 //////// OUTPUTS AND STATES.
 	output {

@@ -59,7 +59,7 @@ discrete cosine transform (DCT) coding and outputs a GrayImage.
 		type { void }
 		access { protected }
 		arglist {
-			"(unsigned char* outdata, float* indata, int outw, \
+			"(unsigned char* outdata, float* indata, int outw,
 				int outh, int inw, int inh)"
 		}
 		code {

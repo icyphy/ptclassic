@@ -46,9 +46,11 @@ processes DCTImages, not GrayImages.
 // CODE
 	hinclude { "DCTImage.h", "Error.h" }
 
-	protected {
+	code {
 		const float StartOfBlock = 524288.0;
 		const float StartOfRun = 1048576.0;
+	}
+	protected {
 		float thresh;
 	}
 
