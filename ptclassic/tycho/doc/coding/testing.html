@@ -56,9 +56,10 @@ files.  <CODE>$TYCHO/makefile</CODE> has two rules:
 	<DD> Run all the tests in a <CODE>tycho -ptiny</CODE>
 
 	</DL>
-
-
-
+If you are on a machine that does not have make, you can try
+<tcl><pre>
+source [file join $TYCHO kernel test alltychotests.tcl]
+</pre></tcl>
 <LI> The tests can also be run by cding into a <CODE>test</CODE>
 directory and typing <CODE>make</CODE> from a shell.  To try this out,
 click on the tcl code below:
