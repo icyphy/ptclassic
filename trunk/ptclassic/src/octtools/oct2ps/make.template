@@ -57,7 +57,9 @@ C_INCL= -I../include $(PTCOMPAT_INCSPEC)
 
 MISC_FILES =	oct2ps.1 oct2ps.pro sample sample.ps sample2 sample2.ps
 
-all::	 makefile $(ROOT)/octtools/lib/oct2ps.pro $(ROOT)/lib/oct2ps.pro oct2ps
+BINARY =	masters(BINARY_EXT)
+
+all::	 makefile $(BINARY)
 
 LIBS	= -L$(OCTLIBDIR) -llel$(DBGFLAG) -lda$(DBGFLAG) -ltap$(DBGFLAG) \
 	-loh$(DBGFLAG) -lvov$(DBGFLAG) -loptions$(DBGFLAG) \
@@ -65,7 +67,7 @@ LIBS	= -L$(OCTLIBDIR) -llel$(DBGFLAG) -lda$(DBGFLAG) -ltap$(DBGFLAG) \
 	-lutility$(DBGFLAG) -lerrtrap$(DBGFLAG) \
 	-luprintf$(DBGFLAG) -lport$(DBGFLAG) 
 
-oct2ps:	$(OBJS)
+$(BINARY):	$(OBJS)
 	$(CLINKER) $(LINKFLAGS) $(OBJS) -o $@ $(LIBS) $(CSYSLIBS) 
 
 oct2ps.debug:	$(OBJS)
