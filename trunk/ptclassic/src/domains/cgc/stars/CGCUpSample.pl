@@ -41,12 +41,6 @@ limitation of liability, and disclaimer of warranty provisions.
 		default {0.0}
 		desc { Value to fill the output block. }
 	}
-	state {
-		name {ix}
-		type {int}
-		default {0}
-		attributes { A_NONSETTABLE }
-	}
 	setup {
 		output.setSDFParams(int(factor),int(factor)-1);
 		if (int(phase) >= int(factor))
@@ -55,22 +49,22 @@ limitation of liability, and disclaimer of warranty provisions.
 	constructor {
 		noInternalState();
 	}
-	codeblock (sendOne) {
-	$ref2(output,ix) = $ref(input);
+	codeblock (sendOne,"int index") {
+	$ref2(output,@index) = $ref(input);
 	}
-	codeblock (sendAll) {
+	codeblock (sendAll,"int index") {
 	int i;
 	for (i = 0; i < $val(factor); i++) {
 		$ref2(output,i) = $val(fill);
 	}
-	$ref2(output,ix) = $ref(input);
+	$ref2(output,@index) = $ref(input);
 	}
 	go {
-		ix = int(factor) - int(phase) - 1;
+		int index = int(factor) - int(phase) - 1;
 		if (output.staticBuf() && output.linearBuf())
-			addCode(sendOne);
+			addCode(sendOne(index));
 		else
-			addCode(sendAll);
+			addCode(sendAll(index));
 	}
 	exectime {
 		return 1 + int(factor);

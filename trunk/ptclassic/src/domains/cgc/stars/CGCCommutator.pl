@@ -33,13 +33,6 @@ limitation of liability, and disclaimer of warranty provisions.
 		default {1}
 		desc {Number of particles in a block.}
 	}
-	state {
-		name {ix}
-		type { int }
-		default { 1 }
-		desc { index for multiple output trace }
-		attributes { A_NONSETTABLE|A_NONCONSTANT }
-	}
 	setup {
 		int n = input.numberPorts();
 		input.setSDFParams(int(blockSize),int(blockSize)-1);
@@ -49,18 +42,18 @@ limitation of liability, and disclaimer of warranty provisions.
 		StringList out;
 		if(int(blockSize) > 1) out << "\tint j;\n";
 		for (int i = input.numberPorts()-1; i >= 0; i--) {
-		    ix = input.numberPorts() - i;
+		    int port = input.numberPorts() - i;
 		    if(int(blockSize) > 1) {
 			out << "\tfor (j = ";
 			out << int(blockSize)-1;
 			out << "; j >= 0; j--)\n";
 			out << "\t\t$ref2(output,j+";
 			out << i*int(blockSize);
-			out << ") = $ref2(input#ix,j";
+			out << ") = $ref2(input#" << port << ",j";
 		   } else {
 			out << "\t$ref2(output,";
 			out << i;
-			out << ") = $ref2(input#ix,0";
+			out << ") = $ref2(input#" << port << ",0";
 		   }
 		   out << ");\n";
 		   addCode(out);
