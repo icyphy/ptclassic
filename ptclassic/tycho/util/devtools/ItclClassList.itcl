@@ -126,7 +126,7 @@ body ::tycho::ItclClassList::help {} {
     global ::TYCHO
     ::tycho::File::openContext \
 	    [file join $TYCHO edit textedit doc usersGuides \
-            ItclClassListHelp.html]
+            ItclClassListHelp.html] html
 }
 
 #####################################################################
