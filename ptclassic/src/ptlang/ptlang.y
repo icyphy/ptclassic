@@ -2,6 +2,7 @@
 /************************************************************************
  Version identification:
  $Id$
+
 Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
 All rights reserved.
 
@@ -78,6 +79,8 @@ int nerrs = 0;			/* # syntax errors detected */
 char* blockID;			/* identifier for code blocks */
 char* blockNames[NUMCODEBLOCKS];
 char* codeBlocks[NUMCODEBLOCKS];
+char* blockArg;
+char* codeBlockArgs[NUMCODEBLOCKS];
 int numBlocks = 0;
 
 /* scratch buffers */
@@ -126,6 +129,7 @@ int stateMarks[NSTATECLASSES];
 
 /* external functions */
 char* save();			/* duplicate a string */
+char* save_optblk();			/* duplicate a string */
 char* malloc();
 char* ctime();
 time_t time();
@@ -429,11 +433,13 @@ staritem:
 |	DERIVED '{' ident '}'		{ derivedFrom = $3;}
 |	portkey '{' portlist '}'	{ genPort();
 					  describePort(); }
-|	CODEBLOCK '(' ident ')' '{'
+|	CODEBLOCK '(' ident cbargs ')' '{'
 					{ char* b = malloc(SMALLBUFSIZE);
 					  blockID = $3;
 					  strcpy(b,blockID);
 					  blockNames[numBlocks]=b;
+					  codeBlockArgs[numBlocks]=
+					    save_optblk($4);
 					  codeMode = 1;
 					  codeModeBraceCount = 1;
 					}
@@ -449,6 +455,10 @@ lines:	/* nothing */
 		sprintf(b,"\"%s\\n\"\n",$2);
 		strcat(codeBlock,b);
 				}
+;
+
+cbargs: /*nothing*/		{ $$ = ""; }
+|	',' STRING		{ $$ = stripQuotes($2); }
 ;
 
 conscalls:
@@ -948,6 +958,56 @@ char* defs;
 	return;
 }
 
+/*
+    Generate a code block's function internals.  Basically just
+    parsing the string {str} and looking for @ substitutions.
+*/
+genCodeBlockFunc( fp, str)
+FILE *fp;
+char *str;
+{
+    char	*s;
+    int		c;
+
+    for ( s=str, c = *s++; c != '\0'; c = *s++) {
+top:;
+	if ( c != '@' ) {
+	    putc( c, fp);
+	} else {
+	    c = *s++;
+	    /*IF*/ if ( c == '@' ) {
+		putc( c, fp);
+	    } else if ( c == '(' ) {
+		fputs( "\" << ", fp);
+		for ( c = *s++; c != ')'; c = *s++) {
+		    if ( c == '(' ) {
+			do {
+		    	    putc( c, fp);
+			    c = *s++;
+			} while ( c != ')' && c != '\0');
+		    }
+		    if ( c == '\0' ) {
+			fprintf(stderr,"Unbalanced parans in codeblock\n");
+			exit(1);
+		    }
+		    putc( c, fp);
+		}
+		fputs( " << \"", fp);
+	    } else if ( isalnum(c) ) {
+		fputs( "\" << ", fp);
+		do { 
+		    putc( c, fp);
+		    c = *s++;
+		} while ( isalnum(c) );
+		fputs( " << \"", fp);
+		goto top;
+	    } else {
+		putc( c, fp);
+	    }
+	}
+    }
+}
+
 /* This is the main guy!  It outputs the complete class definition. */
 genDef ()
 {
@@ -1040,8 +1100,14 @@ genDef ()
 	if (!pureFlag)
 		fprintf (fp, "\t/* virtual */ Block* makeNew() const;\n");
         fprintf (fp, "\t/* virtual*/ const char* className() const;\n");
-	for (i=0; i<numBlocks; i++)
-		fprintf (fp, "\tstatic CodeBlock %s;\n",blockNames[i]);
+	for (i=0; i<numBlocks; i++) {
+		if ( codeBlockArgs[i] == NULL ) {
+		    fprintf (fp, "\tstatic CodeBlock %s;\n",blockNames[i]);
+		} else {
+		    fprintf (fp, "\tstatic const char* %s(%s);\n",
+		      blockNames[i], codeBlockArgs[i]);
+		}
+	}
 	for (i = C_EXECTIME; i <= C_DEST; i++)
 		genStdProto(fp,i);
 	if (publicMembers[0])
@@ -1100,9 +1166,18 @@ genDef ()
 			 fullClass, fullClass);
 	}
 /* generate the CodeBlock constructor calls */
-	for (i=0; i<numBlocks; i++)
+	for (i=0; i<numBlocks; i++) {
+	    if ( codeBlockArgs[i] == NULL ) {
 		fprintf (fp, "\nCodeBlock %s :: %s (\n%s);\n",
 			fullClass,blockNames[i],codeBlocks[i]);
+	    } else {
+		fprintf (fp, "\nconst char* %s :: %s(%s) {\n",
+			fullClass,blockNames[i],codeBlockArgs[i]);
+		fprintf (fp, "\tstatic StringList _str_; _str_.initialize(); _str_ << \n");
+		genCodeBlockFunc( fp, codeBlocks[i]);
+		fprintf (fp, ";\n\treturn (const char*)_str_;\n}\n");
+	    }
+	}
 /* prefix code and constructor */
 	fprintf (fp, "\n%s%s::%s ()", ccCode, fullClass, fullClass);
 	if (consCalls[0])
@@ -1608,6 +1683,17 @@ char* save(in)
 char* in;
 {
 	char* out = malloc((unsigned)strlen(in)+1);
+	return strcpy(out,in);
+}
+
+/* save token in dynamic memory, optional block (handle NULLs) */
+char* save_optblk(in)
+char* in;
+{
+	char* out;
+	if ( in == NULL || in[0] == '\0' )
+	    return NULL;
+	out = malloc((unsigned)strlen(in)+1);
 	return strcpy(out,in);
 }
 
