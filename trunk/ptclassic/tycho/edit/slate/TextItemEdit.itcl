@@ -85,6 +85,17 @@
 # in arguments to the bind{} method -- this option controls
 # the button used in subsequent interaction.
 # 
+# <dt><b>-highlightcolor</b> _color_
+# <dd> The highlight color when the interactor is activated.
+# By default this is "", which means that the highlight rectangle
+# has no color.
+# 
+# <dt><b>-highlightfill</b> _color_
+# <dd> The highlight fill color when the interactor is activated.
+# This gives the text a background which is a more subtle way of
+# distinguishing text being edited than changing the color of the
+# outline box.
+# 
 # </dl></dl>
 #
 # <p><b>Bugs</b>
@@ -143,6 +154,15 @@ class ::tycho::TextItemEdit {
     # The button used to move the cursor
     public variable button 1
 
+    # The highlight color when text is being edited
+    public variable highlightcolor ""
+
+    # The highlight fill color when text is being edited
+    public variable highlightfill grey75
+
+    # The highlight width when text is being edited
+    public variable highlightwidth 1
+
     ###################################################################
     ####                         public methods                    ####
 
@@ -183,10 +203,13 @@ class ::tycho::TextItemEdit {
     ####                        private  variables                 ####
 
     # The "anchor" of the selection
-    protected variable anchor
+    private variable anchor
 
     # A flag to indicate word-dragging mode
-    protected variable wordmode 0
+    private variable wordmode 0
+
+    # A flag saying whether to rehighlight when done
+    private variable rehighlight 0
 }
 
 #######################################################################
@@ -211,6 +234,12 @@ body ::tycho::TextItemEdit::activate {t x y args} {
 
     # Focus on the target
     $slate focus $target
+
+    # Highlight in the right color
+    set rehighlight [expr {[$slate find withtag highlight.$t] != ""}]
+    $slate highlight $target \
+	    -highlightcolor $highlightcolor \
+	    -highlightfill  $highlightfill
 
     # Create the binding to insert keys
     # FIXME: Can this be bound to the individual item?
@@ -306,6 +335,11 @@ body ::tycho::TextItemEdit::deactivate {x y args} {
     # If there is no target, return here
     if { $target == "" } {
         return
+    }
+
+    # Rehighlight the item with its default highlight
+    if $rehighlight {
+	$slate highlight $target
     }
 
     # Remove the text drag-selection bindings
@@ -507,8 +541,9 @@ body ::tycho::TextItemEdit::key {key keysym state args} {
 		    $slate dchars $target insert
 		}
                 # Adjust the highlight
-                $slate unhighlight sel
-                $slate highlight sel
+                $slate highlight $target \
+			-highlightcolor $highlightcolor \
+			-highlightfill  $highlightfill
 	    }
 	    "Delete" {
 		# If there's a selection then delete it
@@ -519,8 +554,9 @@ body ::tycho::TextItemEdit::key {key keysym state args} {
 		    $slate dchars $target insert
 		}
                 # Adjust the highlight
-                $slate unhighlight sel
-                $slate highlight sel
+                $slate highlight $target \
+			-highlightcolor $highlightcolor \
+			-highlightfill  $highlightfill
             }
 	    "Left" {
 		# Move the cursor. Adjust the selection if shift.
@@ -556,8 +592,9 @@ body ::tycho::TextItemEdit::key {key keysym state args} {
 		$slate insert $target [$slate index $target insert] $key
 
                 # Adjust the highlight
-                $slate unhighlight sel
-                $slate highlight sel
+                $slate highlight $target \
+			-highlightcolor $highlightcolor \
+			-highlightfill  $highlightfill
 	    }
 	}
     }
@@ -644,8 +681,9 @@ body ::tycho::TextItemEdit::select {mode args} {
 		$slate dchars $target sel.first sel.last
 		$slate select clear
                 # Adjust the highlight
-                $slate unhighlight sel
-                $slate highlight sel
+                $slate highlight $target \
+			-highlightcolor $highlightcolor \
+			-highlightfill  $highlightfill
 	    }
 	}
 	"exists" {

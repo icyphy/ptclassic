@@ -143,8 +143,11 @@ class ::tycho::Slate {
     ###################################################################
     ####                            options                        ####
 
-    # The color of the highlight box
+    # The outline color of the highlight box
     itk_option define -highlightcolor highlightColor HighlightColor "black"
+
+    # The fill color of the highlight box
+    itk_option define -highlightfill highlightFill HighlightFill ""
 
     # The width of the highlight box
     itk_option define -highlightwidth highlightWidth HighlightWidth 1
@@ -282,7 +285,7 @@ body ::tycho::Slate::_selection {mode {id {}} {index {}}} {
 	"add" {
 	    $canvas select clear
 	    addtag "sel" withtag $id
-	    highlight $id highlight.sel
+	    highlight $id -tags highlight.sel
 	}
 	"clear" {
 	    unhighlight "sel"
@@ -464,43 +467,88 @@ body ::tycho::Slate::ghost {tag args} {
 # around the item's bounding box. Complex items can choose their
 # own style of highlighting by providing a highlight{} procedure.
 # Each created highlight item is tagged with "highlight" and
-# "highlight._id_", where _id_ is the item it highlights, and any
-# additional arguments to this method. If the first argument is
-# tag, then each highlighted item is also tagged with
-# "highlight._tag_". The return value is a list of created items.
+# "highlight._id_", where _id_ is the item it highlights. If the
+# first argument is tag, then each highlighted item is also tagged
+# with "highlight._tag_". Additional options can be:
+# <ul>
+# <li><b>-tags</b> _tags_: Also add these tags to the highlight item.
+# <li><b>-highlightcolor</b> _color_: The highlight color. Overrides the
+# slate's option with the same name.
+# <li><b>-highlightfill</b> _color_: The highlight fill color. Overrides the
+# slate's option with the same name.
+# <li><b>-highlightwidth</b> _int_: The highlight width. Overrides the
+# slate's option with the same name.
+# </ul>
+#
+# If an item is not highlighted, then new highlight items are
+# created and the return value is a list of the created items.
+# If an item is already highlighted, then the highlight item is
+# adjusted in size and in color and line width, and its id
+# added to the return list. In this case, any tags in the option
+# are ignored.
 #
 body ::tycho::Slate::highlight {tag args} {
+    if { ! [string match {[_0-9]*} $tag] } {
+    	# It's a tag, so do for each item
+    	set result {}
+	array set opt [concat {-tags {}} $args]
+	lappend opt(-tags) highlight.$tag
+    	foreach item [find withtag $tag] {
+	    lappend result [eval highlight $item [array get opt]]
+    	}
+    	return $result
+    }
+
+    # The tag must represent a single item. Extract options
+    array set opt [concat {-tags {}} \
+	    [list -highlightcolor $itk_option(-highlightcolor) \
+	    -highlightwidth $itk_option(-highlightwidth) \
+	    -highlightfill  $itk_option(-highlightfill)] \
+	    $args]
+    
     if { [string match {_*} $tag] } {
 	# If it's a complex item and it has a highlight{} method,
-	# call that
+	# call that. Note that this method must deal with the
+	# situation in which the item is already highlighted
+	# by adjusting the highlight rather than recreating it.
 	if { [@scope ::tycho::$itemClass($tag) \
 		[list ::info exists methodtable(highlight)]] } {
 	    return [@scope ::tycho::$itemClass($tag) \
 		    [list eval \[set methodtable(highlight)\] \
 		    $tag $canvas $this \
-		    [list -width $itk_option(-highlightwidth) \
-		    -outline $itk_option(-highlightcolor) \
-		    -tags [concat "highlight" "highlight.$tag" $args]]]]
+		    [list -width $opt(-highlightwidth) \
+		    -outline $opt(-highlightcolor) \
+		    -fill $opt(-highlightfill)] \
+		    [list -tags [concat \
+		        "highlight" "highlight.$tag" $opt(-tags)]]]]
     	}
-    } elseif { ! [string match {[_0-9]*} $tag] } {
-    	# It's a tag, so do for each item
-    	set result {}
-    	foreach item [find withtag $tag] {
-	    lappend result [eval highlight $item highlight.$tag $args]
-    	}
-    	return $result
     }
 
     # If we get to here, tag represents a single item.
-    # Draw a box around it.
-    set result [eval $canvas create rectangle \
-	    [$canvas bbox $tag] \
-	    -width $itk_option(-highlightwidth) \
-	    -outline $itk_option(-highlightcolor) \
-	    [list -tags [concat "highlight" "highlight.$tag" $args]]]
+    # If the item is not already highlighted, draw a box around it.
+    if { [$canvas find withtag highlight.$tag] == "" } {
+	set result [eval $canvas create rectangle \
+		[$canvas bbox $tag] \
+		[list -width $opt(-highlightwidth) \
+		-outline $opt(-highlightcolor) \
+		-fill $opt(-highlightfill)] \
+		[list -tags [concat \
+		    "highlight" "highlight.$tag" $opt(-tags)]]]
 
-    # Lower the box to just below the item
-    $canvas lower highlight.$tag $tag
+	# Lower the box to just below the item
+	$canvas lower highlight.$tag $tag
+
+    } else {
+	# It is highlighted, so change the coordinates and
+	# the highlighting colors. Note that tags are not changed.
+	eval $canvas coords highlight.$tag [$canvas bbox $tag]
+	$canvas itemconfigure highlight.$tag \
+		-width $opt(-highlightwidth) \
+		-outline $opt(-highlightcolor) \
+		-fill $opt(-highlightfill)
+	# Return the item
+	set result $tag
+    }
 
     # Return it
     return $result
@@ -905,7 +953,7 @@ body ::tycho::Slate::selection {mode {id {}} {index {}}} {
 	    # Only add to the selection if it is not already
 	    if { ! [hastag $id sel] } {
 		addtag "sel" withtag $id
-		highlight $id highlight.sel
+		highlight $id -tags highlight.sel
 	    }
 	    # Update interactor bindings
 	    selector refresh

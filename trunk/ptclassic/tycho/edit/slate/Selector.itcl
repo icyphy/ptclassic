@@ -121,7 +121,7 @@ class ::tycho::Selector {
 	# ::selection handle $slate "$this describe"
 
         # The Escape key clears the selection
-        ::bind $slate <Key-Escape> "$slate selection clear"
+        ::bind $slate <Key-Escape> "$this clear"
     }
     destructor {}
 
@@ -328,6 +328,17 @@ body ::tycho::Selector::bind {tag args} {
     
     # Make the drag-select binding
     $slate bind $bgtag $event "$this activate $bgtag %x %y $args"
+}
+
+#######################################################################
+#### clear
+#
+# Clear the selection.
+#
+body ::tycho::Selector::clear {} {
+    _detach
+    _rebind
+    $slate selection clear
 }
 
 #######################################################################
