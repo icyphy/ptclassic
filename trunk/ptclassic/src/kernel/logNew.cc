@@ -105,10 +105,19 @@ static void openLog () {
 	setvbuf(logfd, NULL, _IOLBF, 0);
 }
 
-// operator new -- allocate memory
+static const char noMemMsg[] =
+"FATAL: operator new failed: virtual memory exhausted\n";
+
+// operator new -- allocate memory.  Bomb on malloc failure.
 void* operator new(size_t sz) {
 	if (firstCall) openLog();
 	void* p = malloc(sz);
+	if (p == 0) {
+		// use write rather than fprintf because fprintf may
+		// try doing a malloc.
+		write(2, noMemMsg, sizeof(noMemMsg)-1);
+		exit(1);
+	}
 	if (logfd) {
 		if (mode == 0) {
 			ccfile = "Unknown";
