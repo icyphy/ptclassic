@@ -348,7 +348,7 @@ config_jacl: $(JACL_OBJ)
 
 jacl:
 	(cd $(JACL_OBJ); PWD=$(JACL_OBJ); export PWD; $(MAKE))
-
+	(cd $(JACL_OBJ); PWD=$(JACL_OBJ); export PWD; $(MAKE) jars)
 install_jacl:
 	(cd $(JACL_OBJ); PWD=$(JACL_OBJ); export PWD; $(MAKE) install)
 
