@@ -99,9 +99,9 @@ This star uses the Matrix class.
 	// Get the input matrix and call the svd function.
         Envelope inputPkt;
         (input%0).getMessage(inputPkt);
-        const FloatMatrix *A = (const FloatMatrix*)inputPkt.myData();
+        const FloatMatrix& A = *(const FloatMatrix*)inputPkt.myData();
 
-	svd(*A,*U,*V,*W,(double)threshold,(int)generate_left,(int)generate_right);
+	svd(A,*U,*V,*W,(double)threshold,(int)generate_left,(int)generate_right);
 
 	// There are ncols singular values, a ncolsx1 matrix
         // Output singular values
