@@ -128,6 +128,12 @@ class ::tycho::RevControl {
 
     # The file that we are associated with.
     protected variable file {}
+
+    # The list of different versions.
+    protected variable filelist {}
+
+    # The stack of files to diff.
+    protected variable difflist {}
 }
 
 #########################################################################
@@ -166,6 +172,7 @@ body ::tycho::RevControl::constructor {args} {
     addButton checkin -text "Checkin <i>" -command "$this checkInAndUpdate"
     addButton checkout -text "Checkout <o>" -command "$this checkOutAndUpdate"
     addButton history -text "History <h>" -command "$this viewHistory"
+    #addButton diff -text "Diff <d>" -command "$this diffFile"
     addButton unedit -text "Unedit <u>" -command "$this unedit"
     addButton cancel -text "Close <Esc>" -command \
 	   "$this nextWindow; delete object $this"
