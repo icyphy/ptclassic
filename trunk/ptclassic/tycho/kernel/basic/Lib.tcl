@@ -218,14 +218,6 @@
 	#       {::tycho::view EditFSM -file {%s}} \
 	#       {Finite state machine editor}
 
-# Prototype dataflow graph editor
-::tycho::register mode "dfg" \
-	-command {::tycho::editgraph {%s}} \
-	-viewclass ::tycho::EditGraph \
-	-label {Graph Editor}  \
-	-category "graphics" \
-	-underline 0
-
 # Tree viewer
 ::tycho::register mode "forest" \
 	-command {::tycho::view EditForest -file {%s}} \
@@ -233,6 +225,14 @@
 	-label {Forest Editor}  \
 	-category "graphics" \
 	-underline 0
+
+# Prototype dataflow graph editor
+#::tycho::register mode "dfg" \
+#	-command {::tycho::editgraph {%s}} \
+#	-viewclass ::tycho::EditGraph \
+#	-label {Graph Editor}  \
+#	-category "graphics" \
+#	-underline 0
 
 # State-transition diagram editor
 ::tycho::register mode "std" \
@@ -249,12 +249,15 @@
 
 ########### tools (alphabetical)
 
-# Tycho Builder Tool
-::tycho::register mode "builder" \
-	-command {::tycho::view BuilderDialog -toolbar 1} \
-	-label {Tycho Builder}  \
-	-category "tool" \
-	-underline 6
+# "Diff" viewer -- will not run on the Macintosh
+if {$tcl_platform(platform) != "macintosh"} {
+    ::tycho::register mode "diffviewer" \
+	    -command {::tycho::view EditDiff -toolbar 1} \
+	    -viewclass ::tycho::EditDiff \
+	    -label {Diff Viewer}  \
+	    -category "tool" \
+	    -underline 0
+}
 
 # Directory Search
 ::tycho::register mode "dirsearch" \
@@ -264,6 +267,27 @@
 	    -label {Directory Search}  \
 	    -category "tool" \
 	    -underline 0
+
+# Monitor window for exec'ed processes -- will not run on the Macintosh
+if {$tcl_platform(platform) != "macintosh"} {
+    ::tycho::register mode "monitor" \
+	    -command {::tycho::view Monitor -toolbar 1} \
+	    -viewclass ::tycho::Monitor \
+	    -label {Exec Window}  \
+	    -category "tool" \
+	    -underline 0
+}
+
+# Glimpse interface -- will not run on the Macintosh
+if {$tcl_platform(platform) != "macintosh"} {
+    ::tycho::register mode "glimpse" \
+	    -command {set w [::tycho::autoName .glimpse]; \
+	    ::tycho::Glimpse $w -geometry +0+0;\
+	    wm deiconify $w} \
+	    -label {Glimpse}  \
+	    -category "tool" \
+	    -underline 0
+}
 
 # Itcl class list and class diagram generator
 ::tycho::register mode "itclclasslist" \
@@ -288,34 +312,13 @@
 	-category "tool" \
 	-underline 4
 
-# Tools that will not run on the Macintosh
-if {$tcl_platform(platform) != "macintosh"} {
-    
-    # "Diff" viewer
-    ::tycho::register mode "diffviewer" \
-	    -command {::tycho::view EditDiff -toolbar 1} \
-	    -viewclass ::tycho::EditDiff \
-	    -label {Diff Viewer}  \
-	    -category "tool" \
-	    -underline 0
+# Tycho Builder Tool
+::tycho::register mode "builder" \
+	-command {::tycho::view BuilderDialog -toolbar 1} \
+	-label {Tycho Builder}  \
+	-category "tool" \
+	-underline 6
 
-    # Monitor window for exec'ed processes
-    ::tycho::register mode "monitor" \
-	    -command {::tycho::view Monitor -toolbar 1} \
-	    -viewclass ::tycho::Monitor \
-	    -label {Exec Window}  \
-	    -category "tool" \
-	    -underline 0
-
-    # Glimpse interface
-    ::tycho::register mode "glimpse" \
-	    -command {set w [::tycho::autoName .glimpse]; \
-	    ::tycho::Glimpse $w -geometry +0+0;\
-	    wm deiconify $w} \
-	    -label {Glimpse}  \
-	    -category "tool" \
-	    -underline 0
-}
 
 ########### Compound viewers (alphabetical)
 
