@@ -75,3 +75,8 @@ makefile:	make.template
 
 TAGS:		$(SRCS)
 		etags $(SRCS)
+
+# Rule for detecting junk files
+
+checkjunk:
+	@checkextra -v $(SRCS) $(HDRS) $(EXTRA_SRCS) makefile make.template SCCS
