@@ -39,7 +39,7 @@ ROOT =	../../../../../..
 VPATH = $(ROOT)/src/domains/cgc/targets/NOWam/libudpam
 
 # get configuration info
-CONFIG =$(ROOT)/mk/config-$(ARCH).mk
+CONFIG =$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
 SRCS = 	management.c misc.c transport.c
