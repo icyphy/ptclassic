@@ -130,6 +130,9 @@ class ::tycho::ResourceHTTP {
     # Can't write into HTTP file! Read permission of off
     method puts {string}
 
+    # Return the progess indicator, as a decimal number. 1.0 is full.
+    method progress {}
+
     # Write to the file
     method write {data}
 
@@ -293,6 +296,18 @@ body ::tycho::ResourceHTTP::open {{mode "r"}} {
     # Open the cache file
     set cachefileid [::open [::tycho::cache getcachefile $url] "r"]
     set fileIsOpen 1
+}
+
+#########################################################################
+#### progress
+# Get the current progress of a non-blocking read. Won't make sense
+# if not called during a non-blocking read.
+#
+body ::tycho::ResourceRemote::progress {} {
+    if {$contentlength==0} {
+        return 0
+    }
+    expr $contentloaded / $contentlength.0
 }
 
 #####################################################################
