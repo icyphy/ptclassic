@@ -715,25 +715,19 @@ body ::tycho::Registry::raiseWindow {tag window} {
 # corresponding mode.
 # </ol>
 #
-# If none is found, return null.
+# If none is found, return null. <b>Note</b>: no useful
+# default mode is returned by this method! This is because some
+# clients need to know if a file has a registered mode, and
+# returning, say, "text," would not help them. Therefore
+# clients must be sure to test the result from this
+# call and choose their own default mode if the result is
+# null.
 #
 # <b>Note</b>: Do not call this procedure directly. Use
 # <a href="Registry_rel.html#registry Ensemble associated with ::tycho::Registry class">
 # <code>::tycho::registry</code></a>.
 #
 body ::tycho::Registry::registeredFileMode {name} {
-    set ITHINKTHISISWRONG {
-	if {[::tycho::url protocol $name]=="http"} {
-	    # EXCEPTION: If something's on HTTP, it is ***ALWAYS*** a HTML file.
-	    set ext ".html"
-	    if {[info exists editorsExtension] && \
-		    [info exists editorsExtension($ext)]} {
-		return $editorsExtension($ext)
-	    } else {
-		error "HTML protocol is gone! Assertion failed."
-	    }
-	} elseif {}
-    }
     if [::tycho::resource isdirectory $name] {
         # FIXME: For now, do not try and do this test
         # on remote directories. The test for a VEM
