@@ -94,11 +94,18 @@ CGCPortHole* CGCPortHole :: realFarPort() {
 	return p;
 }
 
-void CGCPortHole :: setGeoName(char* n) const {
+// const version: hate this duplication.
+const CGCPortHole* CGCPortHole :: realFarPort() const {
+	const CGCPortHole* p = (const CGCPortHole*) far();
+	if (p->getForkSrc()) return p->getForkSrc()->realFarPort();
+	return p;
+}
+
+void CGCPortHole :: setGeoName(char* n) {
 	geo().setBufName(n);
 }
 
-const char* CGCPortHole :: getGeoName() {
+const char* CGCPortHole :: getGeoName() const {
 	return geo().getBufName();
 }
 

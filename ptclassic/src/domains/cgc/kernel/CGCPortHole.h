@@ -26,27 +26,38 @@ public:
 
 	CGCPortHole* getForkSrc() { return (CGCPortHole*) forkSrc; }
 
+	// const version
+	const CGCPortHole* getForkSrc() const {
+		return (const CGCPortHole*) forkSrc;
+	}
+
 	// return the far port bypassing the fork stars
 	CGCPortHole* realFarPort();
+	// const version
+	const CGCPortHole* realFarPort() const;
 
 	// make a complete list of forkDests after resolving the indirect
 	// list via fork stars
 	void setupForkDests();
 
 	// return the buffer requirements for static buffering.
-	int maxBufReq() 
+	int maxBufReq() const
 		{ return isItOutput()? maxBuf: realFarPort()->maxBufReq(); }
 
-	void setGeoName(char* n) const;
-	const char* getGeoName();
+	void setGeoName(char* n);
+	const char* getGeoName() const;
 
 	// Return the geodesic connected to this PortHole.
 	// This is typesafe because allocateGeodesic
 	// makes myGeodesic of this type.
-	CGCGeodesic& geo() const { return *(CGCGeodesic*)myGeodesic;}
+	CGCGeodesic& geo() { return *(CGCGeodesic*)myGeodesic;}
+
+	// const version
+	const CGCGeodesic& geo() const {
+		return *(const CGCGeodesic*)myGeodesic;}
 
 	// buf Size
-	int bufSize() { return maxBufReq(); }
+	int bufSize() const { return maxBufReq(); }
 
 	// return bufferSize
 	int inBufSize() { return bufferSize; }

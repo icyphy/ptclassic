@@ -324,7 +324,7 @@ void CGCTarget :: setGeoNames(Galaxy& galaxy) {
     Star* b;
     while ((b = next++) != 0) {
 	BlockPortIter nextPort(*b);
-	const CGCPortHole* p;
+	CGCPortHole* p;
 	while ((p = (CGCPortHole*)nextPort++) != 0) {
 	    // Assign names only for each output port
 	    if (p->isItOutput()) {
