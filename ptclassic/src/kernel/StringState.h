@@ -46,6 +46,9 @@ public:
 	// for use as a string in stars
 	operator const char* () { return val;}
 
+	// class identification
+	int isA(const char*) const;
+
 	State* clone () const; // {return new StringState;}
 
 private:

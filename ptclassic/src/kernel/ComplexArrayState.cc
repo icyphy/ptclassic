@@ -162,3 +162,6 @@ void ComplexArrayState :: resize (int newSize) {
 // make knownstate entry
 static ComplexArrayState proto;
 static KnownState entry(proto,"COMPLEXARRAY");
+
+// isa
+ISA_FUNC(ComplexArrayState,State);

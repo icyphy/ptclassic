@@ -50,6 +50,9 @@ public:
         // casting to a <C>
         operator <C>() { return val;}
 
+	// class identification
+	int isA(const char*) const;
+
 	State* clone () const; //  {return new <T>State;}
 
 private:

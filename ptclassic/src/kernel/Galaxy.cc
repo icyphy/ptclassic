@@ -144,3 +144,6 @@ Galaxy::domain() const {
 		return "UNKNOWN";
 	else return blocks.head().domain();
 }
+
+// isa
+ISA_FUNC(Galaxy,Block);

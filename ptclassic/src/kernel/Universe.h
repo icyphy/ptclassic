@@ -85,6 +85,9 @@ public:
 	// return my scheduler
 	Scheduler* mySched() const { return scheduler ;}
 
+	// class identification
+	int isA(const char*) const;
+
 protected:
 	// print, possibly recursively
 	StringList print(int recursive) const;

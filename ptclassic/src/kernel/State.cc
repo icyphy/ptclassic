@@ -211,3 +211,5 @@ void State::parseError (const char* text, const char* text2) {
 			 text2);
 }
 
+// isa
+ISA_FUNC(State,NamedObj);

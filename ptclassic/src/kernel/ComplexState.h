@@ -49,6 +49,8 @@ public:
         // casting to a Complex
         operator Complex() { return val;}
 
+	// class identification
+	int isA(const char*) const;
 
 	State* clone () const;//  {return new ComplexState;}
 

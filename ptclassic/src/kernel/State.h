@@ -145,6 +145,9 @@ public:
 		return attributeBits = attr.clearAttribs(attributeBits);
 	}
 
+	// class identification
+	int isA(const char*) const;
+
 protected:
 	// string used to set initial value by initialize()
 	const char* initValue;

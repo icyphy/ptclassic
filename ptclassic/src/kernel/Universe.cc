@@ -49,3 +49,6 @@ void Runnable::wrapupGal (Galaxy& g) {
 	Block* b;
 	while ((b = next++) != 0) b->wrapup();
 }
+
+// isa
+ISA_FUNC(Universe,Galaxy);

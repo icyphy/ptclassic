@@ -88,3 +88,5 @@ State* StringState :: clone() const {
 // make known state entry
 static StringState proto;
 static KnownState entry(proto,"STRING");
+
+ISA_FUNC(StringState,State);

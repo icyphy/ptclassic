@@ -106,3 +106,5 @@ ParseToken ComplexState :: evalExpression(Tokenizer& lexer) {
 static ComplexState proto;
 static KnownState entry(proto,"COMPLEX");
 
+// isa
+ISA_FUNC(ComplexState,State);

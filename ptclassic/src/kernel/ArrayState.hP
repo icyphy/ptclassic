@@ -68,6 +68,9 @@ public:
         // the value as a string
         StringList currentValue() const;
 
+	// class identification
+	int isA(const char*) const;
+
 	// extend/truncate the array size
 	void resize(int);
 
