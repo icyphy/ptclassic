@@ -93,6 +93,7 @@ PL_SRCS= \
  CG56Limit.pl \
  CG56LinToCirc.pl \
  CG56Log.pl \
+ CG56Logic.pl \
  CG56LookupTbl.pl \
  CG56Magnavox.pl \
  CG56MagnavoxIn.pl \
@@ -134,6 +135,7 @@ PL_SRCS= \
  CG56Sqr.pl \
  CG56Sqrt.pl \
  CG56Sub.pl \
+ CG56Test.pl \
  CG56Tone.pl \
  CG56UpSample.pl \
  CG56VarDelay.pl \
