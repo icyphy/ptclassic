@@ -35,7 +35,7 @@ EXTRA_SRCS = tkMain.c
 MISC_FILES = \
 	README \
 	compat.h \
-	ptolemy-cgc.tcl \
-	init.tcl
+	ptolemy-cgc.tcl 
+#	init.tcl
 
 include $(ROOT)/mk/no-compile.mk
