@@ -126,6 +126,9 @@ set tychoeditors [file join $tycho editors]
 global ::tychopt
 set tychopt [file join $tycho typt]
 
+global ::tychoslate
+set tychoslate [file join $tycho editors slate]
+
 # Check to see whether the usual exit mechanism (where we exit
 # if there are no more windows) is enabled.
 if {![info exists tychoExitWhenNoMoreWindows]} {
