@@ -318,12 +318,16 @@ specifies the particle type.  The type may be one of
 .c int ,
 .c float ,
 .c complex ,
+.c packet ,
 or
 .c anytype .
 Again, case does not matter for the type value.  The
 .c type
 item may be omitted; the default type is
 .c anytype .
+For more information on 
+.c packet ,
+please see the appendix at the end of this section.
 .pp
 The
 .c numtokens
