@@ -22,11 +22,6 @@ extern const Attribute A_XMEM(AB_MEMORY|AB_XMEM,0);
 extern const Attribute A_YMEM(AB_MEMORY,AB_XMEM);
 extern const Attribute A_XMEM_BIT(AB_XMEM,0);
 
-void CG56Star::fire() {
-	// Issue a comment here giving the full name of the star
-	AsmStar::fire();
-}
-
 // const char* CG56Star::format(unsigned addr) {
 	// static char* tmp = "ADDRESS";
 	// return tmp;
@@ -41,3 +36,15 @@ const char* CG56Star :: domain () const { return CG56domainName;}
 // isa
 
 ISA_FUNC(CG56Star, CGStar);
+
+// fire: prefix the code with a comment
+
+void CG56Star::fire() {
+	StringList code = "; code from star ";
+	code += readFullName();
+	code += " (class ";
+	code += readClassName();
+	code += ")\n";
+	addCode(code);
+	AsmStar::fire();
+}
