@@ -79,29 +79,29 @@ if ![info exists TESTS] {
 proc print_verbose {test_name test_description contents_of_test code answer} {
     global FAILED
     global errorInfo 
-    puts stdout "\n"
-    puts stdout "==== $test_name $test_description"
-    puts stdout "==== Contents of test case:"
-    puts stdout "$contents_of_test"
+    puts "\n"
+    puts "==== $test_name $test_description"
+    puts "==== Contents of test case:"
+    puts "$contents_of_test"
     if {$code != 0} {
 	incr FAILED
         if {$code == 1} {
-            puts stdout "==== Test generated error:"
-	    puts stdout "$errorInfo"
+            puts "==== Test generated error:"
+	    puts "$errorInfo"
         } elseif {$code == 2} {
-            puts stdout "==== Test generated return exception;  result was:"
-            puts stdout $answer
+            puts "==== Test generated return exception;  result was:"
+            puts $answer
         } elseif {$code == 3} {
-            puts stdout "==== Test generated break exception"
+            puts "==== Test generated break exception"
         } elseif {$code == 4} {
-            puts stdout "==== Test generated continue exception"
+            puts "==== Test generated continue exception"
         } else {
-            puts stdout "==== Test generated exception $code;  message was:"
-            puts stdout $answer
+            puts "==== Test generated exception $code;  message was:"
+            puts $answer
         }
     } else {
-        puts stdout "==== Result was:"
-        puts stdout "$answer"
+        puts "==== Result was:"
+        puts "$answer"
     }
 }
 
@@ -126,16 +126,16 @@ proc test {test_name test_description contents_of_test passing_results} {
         if $VERBOSE then {
             print_verbose $test_name $test_description $contents_of_test \
                     $code $answer
-            puts stdout "++++ $test_name PASSED"
+            puts "++++ $test_name PASSED"
 
         }
 	incr PASSED
     } else {
         print_verbose $test_name $test_description $contents_of_test $code \
                 $answer 
-        puts stdout "---- Result should have been:"
-        puts stdout "$passing_results"
-        puts stdout "---- $test_name FAILED" 
+        puts "---- Result should have been:"
+        puts "$passing_results"
+        puts "---- $test_name FAILED" 
 	incr FAILED
     }
 }
