@@ -179,7 +179,6 @@ defstar{
             handy=list_h;
             while (handy) {
                 if (handy->cellnumber==del_cellno) {
-                    int usr= handy->startnum;
                     cellno=del_cellno;
                     shifter+=band;
                     band=  handy->B;
