@@ -53,6 +53,5 @@ const char * SRNonStrictStar::domain() const
 
 int SRNonStrictStar::run()
 {
-  go();
-  return 0;
+  return Star::run();
 }

@@ -128,7 +128,7 @@ int SRStar::run()
 	// there is at least one present input--call go()
 
 	// cout << "Reactive with at least one present input: calling go()\n";
-	go();
+	Star::run();
 
       } else {
 
