@@ -387,6 +387,7 @@ foreach _name {
     {ftp://ptolemy.eecs/design/ /schematic/drawing and.wir}
     {ftp://ptolemy.eecs/design/ /schematic/drawing and.wir /~ptdesign}
     {ftp://ptolemy.eecs/eal a b /c ~d}
+    {ftp://ptolemy.eecs/eal ../../../cxh}
 } _result {
     foo.bar
     ptolemy/foo/bar
@@ -411,6 +412,7 @@ foreach _name {
     ftp://ptolemy.eecs/schematic/drawing/and.wir
     ftp://ptolemy.eecs/~ptdesign
     ftp://ptolemy.eecs/~d
+    ftp://ptolemy.eecs/eal/../../../cxh
 } {
     test Path-::tycho::url-$_count [list ::tycho::url join $_name] {
         incr _count
