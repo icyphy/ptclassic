@@ -15,9 +15,11 @@ limitation of liability, and disclaimer of warranty provisions.
 
     explanation {  
 Accept two input packets, and route them to the proper
-output based on the information in the header packet. 
+output based on the information in the headers.
 The actual bit of the VPI being used for routing is based
-on the state "stage," set in SDFBanyanGal.  This star maintains
+on the state \fIstage\fR set in 
+.c SDFBanyanGal
+compiled galaxy.  This star maintains
 internal FIFO queues for each of the two input terminals.
 Note the special processing required due to null packets.
     }

@@ -15,7 +15,8 @@ limitation of liability, and disclaimer of warranty provisions.
     location  { ATM demo library }
 
     explanation {  
-This star maintains a routing table which is updated by an MQ Control
+This star maintains a routing table which is updated by the
+.c MQControl
 star.  For input packets, they have their headers reassigned according
 to the table's data.
     }
