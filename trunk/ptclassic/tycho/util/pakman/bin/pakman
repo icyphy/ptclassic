@@ -1,0 +1,45 @@
+#! /bin/sh
+# Command-line program for the pakman utility \
+    exec tclsh "$0" "$@"
+
+# @(#)pakman	1.2 02/10/98
+# Author: John Reekie
+
+# If the PAKMAN_LIBRARY variable is set, add it to the auto_path
+if [info exists env(PAKMAN_LIBRARY)] {
+    if { [lsearch -exact $auto_path $env(PAKMAN_LIBRARY)] }  {
+	lappend auto_path $env(PAKMAN_LIBRARY)
+    }
+}
+
+# Same for the TYCHO environment variable
+if [info exists env(TYCHO)] {
+    if { [lsearch -exact $auto_path $env(TYCHO)] }  {
+	lappend auto_path $env(TYCHO)
+    }
+}
+
+# Require the Pakman package. If this fails, require the Tycho
+# package first, since that may make the Pakman package visible
+if [catch {package require Pakman}] {
+    if [catch {package require Tycho}] {
+	puts "Cannot find Pakman or Tycho. You can\n\
+		1. Set the TYCHO variable to point to your \
+		Tycho installation\n\
+		2. Set the PAKMAN_LIBRARY variable to point to the \
+		pakman directory\n\
+		3. Install Pakman in a subdirectory of your Tcl library"
+	exit
+    } else {
+	package require Pakman
+    }
+}
+
+# Print startup sig
+puts "Pakman, version 1.0"
+
+# Run the main procedure
+eval pakman $argv
+
+# Done
+
