@@ -149,6 +149,8 @@ ifdef CG56
 	endif
 	# Window star in cg56/dsp/stars needs the Cephes Library
 	CEPHESLIB = 1
+	# CG56 targets need CGCStar
+	CGCLIB = 1
 endif
 
 ifdef SILAGE
@@ -217,6 +219,7 @@ ifdef VHDL
 	CUSTOM_DIRS += $(VHDLDIR)/kernel $(VHDLDIR)/stars  $(VHDLDIR)/targets
 	CG = 1
 	SDFLIB = 1
+	CGCLIB = 1
 	PALETTES += PTOLEMY/src/domains/vhdl/icons/vhdl.pal
 	STARS += $(LIBDIR)/vhdlstars.o
 	LIBS += -lvhdlstars -lvhdl -lvhdltargets
@@ -355,7 +358,7 @@ ifdef CM5
 endif
 
 ifdef CGC
-	CUSTOM_DIRS += $(CGCDIR)/stars $(CGCDIR)/kernel
+	CUSTOM_DIRS += $(CGCDIR)/stars
 	ifdef CGCTK
 		CUSTOM_DIRS += $(CGCDIR)/tcltk/stars $(CGCDIR)/tcltk/targets
 		STARS += $(LIBDIR)/cgctcltkstars.o
@@ -363,6 +366,7 @@ ifdef CGC
 		LIBFILES += $(LIBDIR)/libcgctcltk.$(LIBSUFFIX)
 		TARGETS += $(CGCTCL)/CGCTclTkTarget.o
 	endif
+	CGCLIB = 1
 	CG = 1
 	SDFLIB = 1
 	BDFLIB = 1
@@ -386,9 +390,16 @@ ifdef CGC
 	endif
 	PALETTES += PTOLEMY/src/domains/cgc/icons/cgc.pal
 	STARS += $(LIBDIR)/cgcstars.o
-	LIBS += -lcgcstars -lcgc
+	CUSTOM_DIRS += $(CGCDIR)/stars $(CGCDIR)/kernel
+	LIBS += -lcgcstars
 	LIBFILES += $(LIBDIR)/libcgcstars.$(LIBSUFFIX) \
 		$(LIBDIR)/libcgc.$(LIBSUFFIX)
+endif
+
+ifdef CGCLIB
+	SDFLIB = 1
+	CUSTOM_DIRS += $(CGCDIR)/kernel
+	LIBS += -lcgc
 endif
 
 ifdef BDF
