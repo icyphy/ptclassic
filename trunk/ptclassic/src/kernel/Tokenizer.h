@@ -31,16 +31,31 @@ private:
 	char *special;
 	char *whitespace;
 	istream *strm;
+	istream *savestrm;
 	char comment_char;
 	char quote_char;
 	char escape_char;
 	char c;				// last char read
+	get();
 
 public:
+	// Open a file and read tokens from it
+	int fromFile(const char* name);
+
+	// return true if reading from a file
+	int readingFromFile() { return savestrm ? 1 : 0;}
+
+	// constructors
 	Tokenizer(istream& input,char *spec);
 	Tokenizer();
+
+	// get next token
 	Tokenizer& operator >> (char * s);
+
+	// EOF check
 	int eof() {return strm->eof();}
+
+	// discard current line, or close file (error cleanup)
 	void flush();
 };
 
@@ -50,6 +65,7 @@ public:
 inline	Tokenizer::Tokenizer(istream& input,char *spec="()") {
 	special=spec;
 	strm=&input;
+	savestrm=NULL;
 	whitespace= " \n\t";
 	comment_char = '#';
 	quote_char = '\"';
@@ -59,6 +75,7 @@ inline	Tokenizer::Tokenizer(istream& input,char *spec="()") {
 inline Tokenizer::Tokenizer() {
 	special="()";
 	strm=cin;
+	savestrm=NULL;
 	whitespace=" \n\t";
 	comment_char = '#';
 	quote_char = '\"';
