@@ -41,6 +41,7 @@ Programmer: J. Buck, E. Goei
 #include "Domain.h"
 #include "Target.h"
 #include "KnownTarget.h"
+#include "KnownState.h"
 #include "ConstIters.h"
 #include "pt_fstream.h"
 #include <ACG.h>
@@ -48,11 +49,13 @@ Programmer: J. Buck, E. Goei
 #include <ctype.h>
 
 extern ACG* gen;
+extern char DEFAULT_DOMAIN[];
 
 static InterpUniverse *universe = NULL;  // Universe to execute
 static InterpGalaxy *currentGalaxy = NULL;  // current galaxy to make things in
 static InterpGalaxy *saveGalaxy = NULL;  // used to build galaxies
 static Target *galTarget = NULL;	 // target for a galaxy
+static const char *curDomain = DEFAULT_DOMAIN; // current domain
 
 // Define a stream for logging -- log output to pigiLog.pt
 
@@ -247,7 +250,7 @@ static const Block* findClass (const char* name) {
 	int nf;
 	const char* c = parseClass (name, nf, names);
 	if (!c) return 0;
-	const Block* b = KnownBlock::find (c);
+	const Block* b = KnownBlock::find (c, curDomain);
 	if (!b) return b;
 	return checkFields(b,names,nf,isMPH) ? b : 0;
 }
@@ -257,10 +260,9 @@ static const Block* findClass (const char* name) {
 
 static void logDomain() {
 	static const char* oldDom = "";
-	const char* dom = KnownBlock::domain();
-	if (strcmp(dom, oldDom) == 0) return;
-	LOG << "domain " << dom << "\n";
-	oldDom = dom;
+	if (strcmp(curDomain, oldDom) == 0) return;
+	LOG << "domain " << curDomain << "\n";
+	oldDom = curDomain;
 }
 
 // Return the domain of an object: note, it may not be the current
@@ -279,7 +281,7 @@ KcDomainOf(char* name) {
 extern "C" void
 KcClearUniverse(const char* name) {
 	LOG_DEL; delete universe;
-	LOG_NEW; universe = new InterpUniverse(name);
+	LOG_NEW; universe = new InterpUniverse(name,curDomain);
 	currentGalaxy = universe;
 	LOG << "reset\n";
 	LOG << "# Creating universe '" << name << "'\n";
@@ -295,7 +297,7 @@ KcInstance(char *name, char *ako, ParamListType* pListPtr) {
 	int nf;
 	const char* cname = parseClass (ako, nf, names, values);
 	if (!cname) return FALSE;
-	const Block* b = KnownBlock::find(cname);
+	const Block* b = KnownBlock::find(cname, curDomain);
 	if (!b || !checkFields(b,names,nf,isMPH)) return FALSE;
 	if (!cname || !currentGalaxy->addStar(name, cname))
 		return FALSE;
@@ -380,18 +382,25 @@ KcAlias(char *fterm, char *inst, char *aterm) {
 	return currentGalaxy->alias(fterm, inst, aterm);
 }
 
-/* Given the name of a domain, set
-   the KnownBlocks currentDomain to correspond to the this domain.
-   Returns false if this fails.
+/* Given the name of a domain, set curDomain, and the domain of the
+   galaxy if it exists, to correspond to the this domain.
+   Returns false if this fails (invalid domain).
         EAL, 9/23/90
 */
 
-extern char DEFAULT_DOMAIN[];
-
 extern "C" boolean
 KcSetKBDomain(const char* domain) {
-	if (!domain) domain = DEFAULT_DOMAIN;
-	return KnownBlock::setDomain(domain) ? TRUE : FALSE;
+	domain = domain ? hashstring(domain) : DEFAULT_DOMAIN;
+	if (!KnownBlock::validDomain(domain)) {
+		Error::abortRun("Invalid domain: ", domain);
+		return FALSE;
+	}
+	// equality can be used here because of hashstring call.
+	if (currentGalaxy && currentGalaxy->domain() != domain &&
+	    !currentGalaxy->setDomain(domain))
+		return FALSE;
+	curDomain = domain;
+	return TRUE;
 }
 
 /* 9/22/90, by eal
@@ -399,7 +408,7 @@ Return the name of the current domain in KnownBlock
 */
 extern "C" const char*
 curDomainName() {
-        return KnownBlock::domain();
+	return curDomain;
 }
 
 // start a galaxy definition
@@ -414,10 +423,10 @@ KcDefgalaxy(const char *galname, const char *domain, const char* innerTarget) {
 	}
 	else galTarget = 0;
 	saveGalaxy = currentGalaxy;
-	LOG_NEW; currentGalaxy = new InterpGalaxy(galname);
+	LOG_NEW; currentGalaxy = new InterpGalaxy(galname,curDomain);
 	currentGalaxy->setBlock(galname, saveGalaxy);
 	// Set the domain of the galaxy
-	return currentGalaxy->setDomain(domain);
+	return KcSetKBDomain(domain);
 }
 
 extern "C" boolean
@@ -429,9 +438,8 @@ KcEndDefgalaxy(const char* outerDomain) {
 	// to equal the outerDomain.
 	LOG << "}\n";
 	currentGalaxy->addToKnownList(outerDomain,galTarget);
-
 	currentGalaxy = saveGalaxy;
-	return TRUE;
+	return KcSetKBDomain(outerDomain);
 }
 
 static char dummyDesc[] =
@@ -508,7 +516,7 @@ extern "C" boolean
 KcIsCompiledInStar(char *className) {
 	const Block* b = findClass(className);
 	if (b == 0 || b->isA("InterpGalaxy")) return FALSE;
-	return !KnownBlock::isDynamic(b->name());
+	return !KnownBlock::isDynamic(b->name(), curDomain);
 }
 
 /* 12/22/91 - by Edward A. Lee
@@ -722,7 +730,7 @@ KcGetParams(char* name, ParamListType* pListPtr) {
 	char *stateNames[MAX_NUM_FIELDS];
 	int nf;
 	const char* cname = parseClass(name, nf, stateNames);
-	return realGetParams(KnownBlock::find(cname),
+	return realGetParams(KnownBlock::find(cname, curDomain),
 			     pListPtr, stateNames, nf);
 }
 
@@ -796,7 +804,7 @@ KcProfile (char* name) {
 	clr_accum_string ();
 	// if dynamically linked, say so
 	if (tFlag && KnownTarget::isDynamic(b->name())
-	    || !tFlag && KnownBlock::isDynamic (b->name()))
+	    || !tFlag && KnownBlock::isDynamic (b->name(), curDomain))
 		accum_string ("Dynamically linked ");
 	if (tFlag) {
 		accum_string ("Target: ");
@@ -932,7 +940,7 @@ Return a list of targets supported by the current domain.
 */
 extern "C" int
 KcDomainTargets(const char** names, int nMax) {
-	return KnownTarget::getList(KnownBlock::domain(),names,nMax);
+	return KnownTarget::getList(curDomain,names,nMax);
 }
 
 /*
@@ -951,7 +959,7 @@ Return the default target name for the current domain.
 */
 extern "C" const char*
 KcDefTarget() {
-	return KnownTarget::defaultName();
+	return KnownTarget::defaultName(curDomain);
 }
 
 /*
