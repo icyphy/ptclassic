@@ -23,8 +23,6 @@ These are the methods for the discrete event scheduler.
 
 **************************************************************************/
 
-extern Error errorHandler;
-
 extern const char DEdomainName[];
 
 /*******************************************************************
@@ -504,13 +502,13 @@ int DEScheduler :: errorDelayFree(PortHole* p) {
 	StringList msg;
 	msg += p->readFullName();
 	msg += " lies on a delay-free loop";
+	Error::mark(*p);
 	Error::abortRun(msg);
 	return FALSE;
 }
 
 void DEScheduler :: errorUndefined(PortHole* p) {
 	StringList msg;
-	msg += "Warning : ";
 	msg += p->readFullName();
 	msg += " lies on a non-deterministic loop\n";
 	msg += "(execution order of simultaneous events is \
@@ -518,7 +516,7 @@ void DEScheduler :: errorUndefined(PortHole* p) {
 	msg += "Please put an infinitesimal delay on a feedback arc.\n";
 	msg += "Without the delay, sorry, the \
 correct simulation may not be guaranteed.";
-	errorHandler.error(msg);
+	Error::warn(msg);
 }
 
 // my domain

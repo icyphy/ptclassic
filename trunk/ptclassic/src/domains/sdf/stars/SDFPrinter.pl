@@ -25,6 +25,7 @@ the same line, separated by tabs.
 		default { "cout" }
 		desc { Filename for output. }
 	}
+	hinclude { "UserOutput.h" }
 	protected {
 		UserOutput output;
 	}
