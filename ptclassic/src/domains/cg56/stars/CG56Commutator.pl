@@ -18,11 +18,11 @@ the next B particles from the next input, etc.
 	}
 	inmulti {
 		name {input}
-		type {FIX}
+		type {anytype}
 	}
 	output {
 		name {output}
-		type {FIX}
+		type {anytype}
 	}
         state {
                 name {blockSize}
@@ -35,13 +35,6 @@ the next B particles from the next input, etc.
                 type { int }
                 default { 0 }
                 desc { input#() }
-                attributes { A_NONCONSTANT|A_NONSETTABLE }
-        }
-        state  {
-                name { runtimeVal }
-                type { int }
-                default { 0 }
-                desc { runtime value }
                 attributes { A_NONCONSTANT|A_NONSETTABLE }
         }
         start {
@@ -76,9 +69,8 @@ the next B particles from the next input, etc.
                         inputNum=i;
                         gencode(loop);
                 }
-                runtimeVal=input.numberPorts();
 	}
 	exectime {
-		return (2*(int(runtimeVal))+1) ;
+		return (2*(int(input.numberPorts()))+1) ;
 	}
 }
