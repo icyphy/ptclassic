@@ -166,6 +166,18 @@ set duration 4000
 set longDuration 8000
 
 ############################################################################
+#### sleep
+# sleep for 'seconds'.
+#
+proc sleep {seconds} {
+    puts -nonewline "sleeping $seconds seconds: "
+    set endtime [expr [clock seconds] + $seconds]
+    while {[clock seconds] < $endtime} {
+	puts -nonewline "."
+	update
+    }
+}
+############################################################################
 #### openAllFiles 
 # Open up the files that are passed in as arguments, then destroy
 # the windows after a short wait
