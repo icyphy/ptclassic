@@ -167,13 +167,16 @@ body ::tycho::CompileJava::compileAndRun {filenames} {
     # Compile.  If we already have a compileWidget, reuse it. 
     if {![winfo exists $compileWidget] && \
             [info object $compileWidget] == {}} {
-        set compileWidget [$this cget -view].compile
-        ::tycho::Monitor $compileWidget
-        set retList [::tycho::execModal $compileString $dirname $compileWidget]
+        #set compileWidget [$this cget -view].compile
+        #::tycho::Monitor $compileWidget
+        #set retList [::tycho::execModal $compileString $dirname $compileWidget]
+        set retList [::tycho::execModal $compileString $dirname]
     } else {
         set retList [::tycho::execModal {} {} $compileWidget]
     }
     set compileWidget [lindex $retList 1]
+    # Make sure we parse the output of the compiler (ie. esp. error msg)
+    parseError $retList
 
     # If necessary, run the appletviewer.
     # If there is already an appletviewer widget, reuse it.
@@ -198,6 +201,7 @@ body ::tycho::CompileJava::compileAndRun {filenames} {
     ###################################################################
     ###################################################################
     ####                      protected methods                    ####
+
 
 #######################################################################
 #### checkSourceFiles
