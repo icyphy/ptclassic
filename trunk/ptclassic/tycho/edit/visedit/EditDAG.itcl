@@ -64,7 +64,7 @@
 # black is used.
 # <dt><b>font</b><dd>The <i>value</i> field gives the font used to show
 # the node in the display. If this is not present, then the default
-# font given by the defaultFont preference is chosen. The <i>value</i>
+# font given by the -defaultfont option is chosen. The <i>value</i>
 # can take any form understood by the <code>getFont</code> method of
 # the <code>FontManager</code> class.
 # <dt><b>link</b><dd>The <i>value</i> field gives a list with two elements,
@@ -103,6 +103,9 @@ class ::tycho::EditDAG {
     
     ###################################################################
     ####                            options                        ####
+
+    # Default font
+    itk_option define -defaultfont defaultFont Font {}
 
     # Specify the graph object to display and edit.
     itk_option define -graph graph Graph {}
@@ -231,9 +234,6 @@ class ::tycho::EditDAG {
     # The color of the background box
     protected variable boxcolor
 
-    # The default font name
-    protected variable defaultfont
-
     # The color of hyperlinks
     protected variable linkcolor
 
@@ -272,6 +272,14 @@ class ::tycho::EditDAG {
 
     # An array that indicates whether a position in the grid is taken.
     private variable taken
+}
+
+#####################################################################
+#### -defaultfont option
+# Redraw when font is changed.
+#
+configbody ::tycho::EditDAG::defaultfont {
+    redrawGraph
 }
 
 #######################################################################
@@ -360,7 +368,6 @@ body ::tycho::EditDAG::constructor {args} {
 
     # The following is done once in the constructor because it's fairly
     # expensive.
-    set defaultfont [eval ::tycho::font [preference get defaultFont]]
     set boxcolor   [eval ::tycho::color [preference get nodeBoxColor]]
     set linkcolor   [eval ::tycho::color [preference get linkColor]]
     set linecolor   [eval ::tycho::color [preference get lineColor]]
@@ -369,6 +376,7 @@ body ::tycho::EditDAG::constructor {args} {
 
     # Subscribe to the preferences
     preference subscribeoptions $this \
+            -defaultfont graphicsFont \
 	    -spacingx spacingx \
 	    -spacingy spacingy \
 	    -startx startx \
@@ -945,7 +953,7 @@ body ::tycho::EditDAG::drawNode {node xcoord ycoord} {
     if { $cnt(fontspec) != "" } {
 	set font [eval ::tycho::font $cnt(fontspec)]
     } else {
-	set font $defaultfont
+	set font $itk_option(-defaultfont)
     }
     set color [::tycho::color $cnt(color) black]
     if {$cnt(link) != {} && $cnt(altlink) != {} && $cnt(color) == {black}} {
