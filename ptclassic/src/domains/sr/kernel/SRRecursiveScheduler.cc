@@ -181,7 +181,7 @@ int SRRecursiveScheduler::computeSchedule( Galaxy & g )
 
   dgraph = new SRDependencyGraph( g );
 
-  // cout << dgraph->displayGraph();
+  cout << dgraph->displayGraph();
 
   Set wholeGraph(dgraph->vertices(), 1);
 
@@ -199,6 +199,10 @@ int SRRecursiveScheduler::computeSchedule( Galaxy & g )
 
     int cost = schedule.cost();
     assert( cost == mc );
+
+    for ( int v = 0 ; v < dgraph->vertices() ; v++ ) {      
+      schedule.mergeVertex(v);
+    }
 
   }
 
