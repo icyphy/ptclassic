@@ -43,6 +43,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "Domain.h"
 #include "Target.h"
 #include "Galaxy.h"
+#include "Wormhole.h"
 #include "KnownBlock.h"
 #include "InfString.h"
 #include "ptk.h"
