@@ -3,9 +3,9 @@ defstar {
   domain { SDF }
   desc {  
 Use the generalized Lloyd algorithm to yield a codebook from input  
-training vectors.
-Note that each input matrix will be viewed as a row vector in row 
-by row. Each row of output matrix represent a codeword of the codebook. 
+training vectors.  Note that each input matrix will be viewed as a
+row vector in row by row. Each row of output matrix represent a
+codeword of the codebook. 
   }
   version { $Id$ }
   author { Bilung Lee }
@@ -133,11 +133,12 @@ represent a training vector.
   }
   go {
 //  Define a 2-dimension array for storing input training vectors
+    delete [] trnSet;
     LOG_NEW; trnSet = new double[int(sizeTrnSet)*int(dimension)];
 
 //  Get the input training vectors and store them in the 2-dimension array
     Envelope inpkt;
-    FloatMatrix& vector = *(new FloatMatrix(1,int(dimension)));
+    FloatMatrix& vector = *(new FloatMatrix(1,int(dimension))); // MEMORY LEAK
     for (int i=0; i<int(sizeTrnSet); i++) {
       (input%(int(sizeTrnSet)-1-i)).getMessage(inpkt);
       vector = *(const FloatMatrix *)inpkt.myData();
@@ -157,6 +158,7 @@ represent a training vector.
     }
     
 //  Allocate a array for storing the generated codebook
+    delete [] codebook;
     LOG_NEW; codebook = new double[int(sizeCodebook)*int(dimension)];
 
 /*
@@ -175,6 +177,7 @@ represent a training vector.
  *  are closest to the i_th codeword in the codebook after using the 
  *  nearest neighbor condition to partition the training set.
  */
+    delete [] numPart;
     LOG_NEW; numPart = new int[int(sizeCodebook)];
     for (i=0; i<int(sizeCodebook); i++)
       numPart[i] = 0;
@@ -183,6 +186,7 @@ represent a training vector.
  *  The 1-dimension array centroid[int(sizeCodebook)*int(dimension)]
  *  store the centroid of each partitioned cluster of training set.
  */
+    delete [] centroid;
     LOG_NEW; centroid = new double[int(sizeCodebook)*int(dimension)];
     for (i=0; i<int(sizeCodebook); i++) {
       for (int j=0; j<int(dimension); j++)
@@ -265,32 +269,38 @@ represent a training vector.
     } while ( (oldDistortion-distortion)/oldDistortion>double(thresholdRatio)
 	      && (++count)<int(maxIteration) );
 
+    // allocate dynamic memory for output which will be automatically deleted
     FloatMatrix& result = *(new FloatMatrix(int(sizeCodebook),int(dimension)));
     for (i=0; i<int(sizeCodebook)*int(dimension); i++)
         result.entry(i) = codebook[i];
     output%0 << result;
-  }	// end of go method
+
+    // deallocate dynamic memory
+    LOG_DEL; delete [] codebook;
+    LOG_DEL; delete [] trnSet;
+    LOG_DEL; delete [] numPart;
+    LOG_DEL; delete [] centroid;
+    LOG_DEL; delete [] halfCodewordPower;
+  } 
   wrapup {
     const char* sf = saveFile;
     if (sf != NULL && *sf != 0) {
-      char* saveFileName = savestring (expandPathName(sf));
+      char* saveFileName = savestring(expandPathName(sf));
       // open the file for writing
       FILE* fp;
       if (!(fp = fopen(saveFileName,"w"))) {
       // File cannot be opened
          Error::warn(*this,"Cannot open saveTapsFile for writing: ",
                            saveFileName, ". Taps not saved.");
-      } else
+      } else {
          for (int i=0; i<int(sizeCodebook); i++) {
            for (int j=0; j<int(dimension); j++)
              fprintf(fp,"%e ",codebook[i*int(dimension)+j]);
            fprintf(fp,"\n");
          }
+      }
       fclose(fp);
-      LOG_DEL; delete saveFileName;
+      LOG_DEL; delete [] saveFileName;
     }
   }	//end of wrapup method
 }
-
-
-

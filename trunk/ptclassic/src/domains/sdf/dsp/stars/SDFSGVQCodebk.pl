@@ -170,11 +170,12 @@ represent a training vector.
   }
   go {
 //  Define an array for storing input training vectors
+    delete [] trnSet;
     LOG_NEW; trnSet = new double[int(sizeTrnSet)*int(dimension)];
 
 //  Get the input training vectors and store them in the 2-dimension array
     Envelope inpkt;
-    FloatMatrix& vector = *(new FloatMatrix(1,int(dimension)));
+    FloatMatrix& vector = *(new FloatMatrix(1,int(dimension))); // MEMORY LEAK
     for (int i=0; i<int(sizeTrnSet); i++) {
       (input%(int(sizeTrnSet)-1-i)).getMessage(inpkt);
       vector = *(const FloatMatrix *)inpkt.myData();
@@ -184,11 +185,13 @@ represent a training vector.
 	return;
       }
       for (int j=0; j<int(dimension); j++) 
-	trnSet[i*int(dimension)+j]=vector.entry(j);
+	trnSet[i*int(dimension)+j] = vector.entry(j);
     }
-    
+
 //  Allocate a array for storing the generated codebooks
+    delete [] shapeCodebook;
     LOG_NEW; shapeCodebook = new double[int(sizeShapeCodebook)*int(dimension)];
+    delete [] gainCodebook;
     LOG_NEW; gainCodebook = new double[int(sizeGainCodebook)];
 
 /*
@@ -218,11 +221,13 @@ represent a training vector.
  *  The array store the centroid of each partitioned cluster 
  *  of training set.
  */
+    delete [] shapeCentroid;
     LOG_NEW; shapeCentroid = new double[int(sizeShapeCodebook)*int(dimension)];
     for (i=0; i<int(sizeShapeCodebook); i++)
       for (int j=0; j<int(dimension); j++)
         shapeCentroid[i*int(dimension)+j]  = 0;
 
+    delete [] gainCentroid;
     LOG_NEW; gainCentroid  = new double[int(sizeGainCodebook)];
     for (i=0; i<int(sizeGainCodebook); i++)
       gainCentroid[i] = 0;
@@ -231,6 +236,7 @@ represent a training vector.
  *  The numGainPart[i] store the number of how many input training vectors
  *  are partitioned into the region of i_th gain codeword. 
  */
+    delete [] numGainPart;
     LOG_NEW; numGainPart = new int[int(sizeGainCodebook)];
     for (i=0; i<int(sizeGainCodebook); i++)
       numGainPart[i] = 0;
@@ -318,38 +324,50 @@ represent a training vector.
     } while ( (oldDistortion-distortion)/oldDistortion>double(thresholdRatio)
 	      && (++count)<int(maxIteration) );
 
-    FloatMatrix& result1 = *(new FloatMatrix(int(sizeShapeCodebook),int(dimension)));
+    // allocate memory for first output which will be deleted automatically
+    FloatMatrix& result1 =
+		*(new FloatMatrix(int(sizeShapeCodebook),int(dimension)));
     for (i=0; i<int(sizeShapeCodebook)*int(dimension); i++)
       result1.entry(i) = shapeCodebook[i];
     output%0 << result1;
 
+    // allocate memory for second output which will be deleted automatically
     FloatMatrix& result2 = *(new FloatMatrix(int(sizeGainCodebook),1));
     for (i=0; i<int(sizeGainCodebook); i++)
       result2.entry(i) = gainCodebook[i];
     outGain%0 << result2;
-  }	// end of go method
+
+    // deallocate dynamic memory
+    LOG_DEL; delete [] shapeCodebook;
+    LOG_DEL; delete [] gainCodebook;
+    LOG_DEL; delete [] trnSet;
+    LOG_DEL; delete [] shapeCentroid;
+    LOG_DEL; delete [] gainCentroid;
+    LOG_DEL; delete [] numGainPart;
+  }
   wrapup {
     const char* sf1 = saveShapeCodebook;
     if (sf1 != NULL && *sf1 != 0) {
-      char* saveFileName = savestring (expandPathName(sf1));
+      char* saveFileName = savestring(expandPathName(sf1));
       // open the file for writing
       FILE* fp;
       if (!(fp = fopen(saveFileName,"w"))) {
       // File cannot be opened
          Error::warn(*this,"Cannot open saveTapsFile for writing: ",
                            saveFileName, ". Taps not saved.");
-      } else
+      } else {
          for (int i=0; i<int(sizeShapeCodebook); i++) {
            for (int j=0; j<int(dimension); j++)
              fprintf(fp,"%e ",shapeCodebook[i*int(dimension)+j]);
            fprintf(fp,"\n");
          }
+      }
       fclose(fp);
-      LOG_DEL; delete saveFileName;
+      LOG_DEL; delete [] saveFileName;
     }
     const char* sf2 = saveGainCodebook;
     if (sf2 != NULL && *sf2 != 0) {
-      char* saveFileName = savestring (expandPathName(sf2));
+      char* saveFileName = savestring(expandPathName(sf2));
       // open the file for writing
       FILE* fp;
       if (!(fp = fopen(saveFileName,"w"))) {
@@ -363,7 +381,7 @@ represent a training vector.
          }
       }
       fclose(fp);
-      LOG_DEL; delete saveFileName;
+      LOG_DEL; delete [] saveFileName;
     }
-  }	//end of wrapup method
+  }
 }
