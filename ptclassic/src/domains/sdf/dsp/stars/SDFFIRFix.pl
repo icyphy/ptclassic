@@ -25,8 +25,14 @@ This star implements a finite-impulse response filter with multirate capability.
 .Id "filter, FIR"
 .Id "FIR filter"
 The default coefficients correspond to an eighth-order, equiripple,
-linear-phase, lowpass filter.
-The 3 dB cutoff frequency is at approximately $1/3$ of the Nyquist frequency.
+linear-phase, lowpass filter which has a 3 dB cutoff frequency at
+approximately $1/3$ of the Nyquist frequency.
+The default precision on these coefficients is 1.23, i.e.,
+1 sign bit and 23 fractional bits.
+You can override the default precision by adding a precision specification
+surrounded by curly braces at the beginning of the string of array values.
+During computation of filter outputs, the precision of the filter taps
+is converted to the precision contained in the "TapsPrecision" parameter.
 .pp
 To load the filter coefficients from a file, simply replace the default
 coefficients with the string "<filename".
@@ -102,15 +108,7 @@ Networks, and Applications: A Tutorial'',
                 default {
 "-.040609 -.001628 .17853 .37665 .37665 .17853 -.001628 -.040609"
                 }
-                desc {
-Filter tap values.
-The default precision on these numbers is 1.23;
-i.e., 1 sign bit and 23 fractional bits.
-You can override the default precision by adding a precision specification
-surrounded by curly braces at the beginning of the string of array values.
-During computation of filter outputs, the precision of the filter taps
-is converted to the precision contained in the TapsPrecision parameter.
-		}
+                desc { Filter tap values. }
         }
         defstate {
                 name {decimation}
