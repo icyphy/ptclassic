@@ -359,7 +359,7 @@ body ::tycho::ParameterDialog::editfont {parameter label current} {
     $dialog addButton help -row 0 -column 3 \
 	    -text "Help" \
 	    -command {::tycho::File::openContext \
-	    [file join $TYCHO kernel doc usersGuides FontDialogHelp.html]}
+	    [file join $TYCHO kernel gui doc usersGuides FontDialogHelp.html]}
 
     # Now that it has all its buttons, map it to the screen
     # and tell it not to change size anymore.
