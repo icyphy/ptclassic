@@ -14,10 +14,7 @@ Version identification:
 #include "SDFWormhole.h"
 #include "SDFScheduler.h"
 #include "StringList.h"
-#include "Output.h"
-#include <stream.h>
-
-extern Error errorHandler;
+#include "Error.h"
 
 /*******************************************************************
 
