@@ -294,9 +294,7 @@ body ::tycho::ToolBar::entry {tag label default command args} {
             $labelarg match pre1 color pre2]} {
         append buttonarg " $color"
     }
-    puts "debug buttonarg: $buttonarg"
-    puts "debug labelarg: $labelarg"
-        
+         
     # Check to see if the programmer intended a label or a button.
     # If the programmer used -command, then intention is button.
     # Otherwise, it's a normal label.
