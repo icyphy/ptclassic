@@ -97,7 +97,9 @@ body ::tycho::PreferenceDialog::constructor {args} {
 	}
     }
 
-    addButton apply -text "Apply <M-a>" -command "$this update"
+    # Add an apply button
+    addButton apply -text "Apply <M-a>" -command "$this update" \
+	    -row 1 -column 0
     configure -okcommand "$this update"
 
     ## FIXME: disabled pending proper implementation of tycho database
@@ -107,6 +109,12 @@ body ::tycho::PreferenceDialog::constructor {args} {
     # Meta-a performs update
     bind $itk_component(hull) <Meta-a> \
 	    "$this update; break"
+
+    # Add a help button
+    addButton help -text "Help" -command {
+	::tycho::File::openContext \
+		[file join $TYCHO kernel doc usersGuides PreferencesHelp.html]
+    } -row 1 -column 1
 
     # Initialise options
     eval itk_initialize $args
