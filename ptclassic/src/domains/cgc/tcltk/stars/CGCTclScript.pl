@@ -214,7 +214,7 @@ limitation of liability, and disclaimer of warranty provisions.
 		/* FIX ME: Is 32 always enough? */
 		static char* temp[32];
 		int i;
-		for(i=0; i<$ref(numInputs); i++) {
+		for(i=0; i<$val(numInputs); i++) {
                     sprintf(temp, "%f", $starSymbol(ins)[i]);
 		    Tcl_AppendElement(interp,temp,0);
 		}
