@@ -58,6 +58,7 @@ PL_SRCS= \
  CGCSqrt.pl \
  CGCSub.pl \
  CGCSpread.pl \
+ CGCSunSound.pl \
  CGCUpSample.pl \
  CGCWaveForm.pl \
  CGCXgraph.pl \
