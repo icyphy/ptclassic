@@ -124,7 +124,7 @@ id, geo, deswidth, desheight)
 
     /* Get the actual plot window size, which may differ from that requested */
     sprintf(command, "%s.pf.plot", name);
-    plotwin = Tk_NameToWindow(interp,command,win);
+    plotwin = Tk_NameToWindow(interp,command,*win);
     if (plotwin == 0) return 0;
     width = Tk_Width (plotwin);
     height = Tk_Height (plotwin);
@@ -185,7 +185,7 @@ int ptkSetBarGraph (interp, win, name, data, numTraces,
 
     /* Get the current plot window size */
     sprintf(command, "%s.pf.plot", name);
-    plotwin = Tk_NameToWindow(interp,command,win);
+    plotwin = Tk_NameToWindow(interp,command,*win);
     if (plotwin == 0) return 0;
     width = Tk_Width (plotwin);
     height = Tk_Height (plotwin);
