@@ -410,7 +410,10 @@ body ::tycho::HTML::altFile {} {
 #
 body ::tycho::HTML::appletViewer {} {
      set w [::tycho::autoName .appletViewer]
-     ::tycho::Exec $w -command "appletviewer $file" -dir [file dirname $file]
+     ::tycho::Exec $w \
+	     -command "appletviewer $file" \
+	     -dir [file dirname $file] \
+	     -entrywidth 80
      $w centerOnScreen
 }
 
