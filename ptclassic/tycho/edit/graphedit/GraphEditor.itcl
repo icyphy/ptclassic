@@ -1,0 +1,609 @@
+##########################################################################
+# Version: $Id$
+# Author: John Reekie
+#
+# @Copyright (c) 1996-1997 The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the
+# above copyright notice and the following two paragraphs appear in all
+# copies of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+# 						PT_COPYRIGHT_VERSION_2
+# 						COPYRIGHTENDKEY
+##########################################################################
+
+
+##########################################################################
+#### foo
+#
+# Procedure to create a test graph editor
+#
+proc ::tycho::foo {} {
+    set nm [::tycho::view DFGEditor]
+
+    # FIXME FIXME
+    # Load stars and icons
+    # $nm loadStars [::tycho::expandPath {$TYCHO/editors/graphedit/stars.tim}]
+    # $nm loadIcons [::tycho::expandPath {$TYCHO/editors/graphedit/icons.tim}]
+
+    $nm library load editors/graphedit/stars.tim
+    $nm library addtomenu stars stars -command "$nm addvertex stars"
+    return $nm
+}
+
+##########################################################################
+#### DFGEditor
+#
+# _DFGEditor_ is an editor for the _GraphLayout_ model. It edits
+# directed graphs.
+#
+class ::tycho::DFGEditor {
+    inherit ::tycho::SlateView
+
+    constructor {args} {}
+    destructor {}
+    
+    #################################################################
+    ####                        options                          ####
+
+    #################################################################
+    ####                     public methods                      ####
+
+    # Clear all data
+    method clear {}
+
+    # Edit parameters of the given vertices
+    method editparameters {args}
+
+    # Place a star
+    method addvertex {libname starname}
+
+    # Handle change notification from the graph model
+    method notifygraph {method args}
+
+    # Place an icon
+    method placeicon {iconlib iconname starname}
+
+    # Move mouse over a port
+    method portenter {}
+
+    # Move mouse away from a port
+    method portleave {}
+
+    # Redo the most recent command
+    method redo {}
+    
+    # Handle changes to the selection
+    method select {mode args}
+    
+    # Undo the most recent command
+    method undo {}
+
+    # Start moving a vertex
+    method vertexclick {tag x y args}
+
+    # Delete a vertex
+    method deletevertex {vertex}
+
+    # Continue moving a vertex
+    method vertexdrag {tag x y}
+
+    # Stop moving a vertex
+    method vertexrelease {tag}
+
+    #################################################################
+    ####                  protected methods                      ####
+
+    # Initialize the menu/status/tool bars
+    protected method _initializeBars {menubar statusbar toolbar}
+
+    # Insert the specified data
+    protected method insertData {data}
+
+    # Return the data to be saved
+    protected method saveText {}
+
+    #################################################################
+    ####                 protected variables                     ####
+    
+    # The interactor to move things around
+    protected variable follower
+
+    # The controller for connecting edges
+    protected variable connector
+
+    # The controller for moving vertexes
+    protected variable mover
+
+    # The item selector
+    protected variable selector
+
+    # The semantic model
+    protected variable _graph ""
+
+    # Storage for temporary variables
+    protected variable _scratch
+
+    # The currently grappled edge
+    protected variable _grapplededge ""
+
+    #################################################################
+    ####                   private methods                       ####
+
+    # Initialize the menubar
+    private method _initializeMenubar {menubar}
+
+    #################################################################
+    ####                  FIXME FIXME FIXME                      ####
+    
+    # Position used to place new icons
+    private variable iconx 50
+    private variable icony 50
+}
+
+########################################################################
+#### constructor
+#
+body ::tycho::DFGEditor::constructor {args} {
+
+    # Create the models. The graph model has a special notify{} method
+    set _graph [uplevel #0 ::tycho::PortedGraph [::tycho::autoName graph]]
+    model add graph $_graph
+    $_graph subscribe data $this "$this notifygraph"
+
+    # The layout model uses notify{} inherited from SlateView
+    set _layout [uplevel #0 ::tycho::Layout [::tycho::autoName layout]]
+    model add layout $_layout
+    $_layout subscribe data $this
+
+    # In addition, subscribe to the layout model as a "view". This
+    # is necessary because the Layout model sometimes needs to get
+    # data from a real Tk canvas...
+    $_layout subscribe view $this
+
+    # Evaluate options
+    eval itk_initialize $args
+
+    # Key bindings
+    bind $_slate <Meta-Key-z> "$this undo"
+    bind $_slate <Meta-Key-r> "$this redo"
+
+    # Make a more pronounced highlight
+    $_slate configure -highlightcolor azure2 -highlightwidth 4
+
+    # Create the interactor to move selected items
+    set follower [$_slate interactor Follower]
+
+	# Create the controller object for connecting edges
+	set connector [::tycho::DFGConnector [::tycho::autoName controller] \
+		-slate $_slate -slateview $this \
+		-graph $_graph -layout $_layout \
+	]
+		
+	# Create the controller object for moving vertexes
+	set mover [::tycho::DFGMover [::tycho::autoName controller] \
+		-slate $_slate -slateview $this \
+		-graph $_graph -layout $_layout \
+		-follower $follower
+	]
+		
+    # Enable vertex selection with button 1; shift-click toggles
+    set selector [$_slate interactor Selector]
+    $selector bind vertex -button 1
+    $selector bind vertex -button 1 \
+            -modifiers shift -toggle 1
+
+    # Enable edge selection with button 1; shift-click toggles
+    $selector bind edge -button 1
+    $selector bind edge -button 1 \
+            -modifiers shift -toggle 1
+
+    # Enable grapple selection with button 2; shift-click toggles
+    $selector bind grapple -button 2
+    $selector bind grapple -button 2 \
+            -modifiers shift -toggle 1
+
+	# Delegate vertex movement for selected vertexes
+	set follower [$mover interactor follower]
+    $selector delegate $follower vertex -button 1
+    $selector delegate $follower vertex -button 1 \
+            -modifiers shift
+
+    # The selector sends selection events here
+    $selector configure \
+            -clearprefix "$this select clear" \
+            -deselectprefix "$this select remove" \
+            -selectprefix "$this select add"
+
+    # Delegate to the edge splitter if control-clicked on an edge
+    # that is the only selected item
+    set splitter [$connector interactor splitter]
+    $selector delegate $splitter edge -button 1 -mode {0 1} \
+    		-modifiers control
+    $selector delegate $splitter edge -button 1 -mode {0 1} \
+            -modifiers {shift control}
+
+    # Delegate to the edge connector if control-clicked on a junction
+    set droppper [$connector interactor dropper]
+    $selector delegate $dropper junction -button 1 -mode {0 1} \
+    		-modifiers control
+    $selector delegate $dropper junction -button 1 -mode {0 1} \
+            -modifiers {shift control}
+
+    # Is this needed?
+    # $_slate configure -exportselection 0
+    # Experiment: move disconnected edges
+    $selector delegate $follower disconnected -button 1
+    $selector delegate $follower disconnected -button 1 \
+            -modifiers shift    
+}
+
+########################################################################
+#### addvertex
+#
+# Add a vertex given the library name and star name
+#
+body ::tycho::DFGEditor::addvertex {libname starname} {
+    set lib [library access $libname]
+
+    # Instantiate the star as a vertex of the graph
+    set starname [$lib instantiate $starname $_graph -itemtype vertex]
+
+    # Find the icon of the star
+    if [$_graph exists $starname -icon] {
+        set iconpath [$_graph attrget $starname -icon]
+        set splat [split $iconpath #]
+        set iconlib [lindex $splat 0]
+        set iconname [lindex $splat 1]
+
+        # FIXME: Need a shorter way of doing this...
+        set libpath [::tycho::model load $iconlib]
+        # FIXME: key cannpt be reused, hence the autoname...
+        set iconmodel [::tycho::model link $libpath [::tycho::autoName $this]]
+
+        # See if the icon has a dot-separated name
+        if ![$iconmodel exists $iconname] {
+            if [$iconmodel exists [split $iconname .]] {
+                set iconname [split $iconname .]
+            } else {
+                error "Unknown icon \"$iconname\" in $iconlib"
+            }
+        }
+        # Place the icon
+        placeicon $iconmodel $iconname $starname
+    } else {
+        # FIXME
+        error "No icon for $starname"
+    }
+}
+
+########################################################################
+#### deleteedge
+#
+# Delete an edge and net by name
+#
+body ::tycho::DFGEditor::deleteedge {edge} {
+    $_layout publish delete $edge
+    $_graph publish delete $edge
+}
+
+########################################################################
+#### deletevertex
+#
+# Delete a vertex and icon by name
+#
+body ::tycho::DFGEditor::deletevertex {vertex} {
+    # Mark the histories
+    $_layout mark vertex
+    $_graph mark vertex
+
+    # Disconnect input edges
+	foreach edge [$_graph edges * [list $vertex *]] {
+		$connector disconnect $edge end
+	}
+    # Disconnect output edges
+	foreach edge [$_graph edges [list $vertex *] *] {
+		$connector disconnect $edge start
+	}
+	# Delete the vertex and icon
+    $_layout publish delete $vertex
+    $_graph publish delete $vertex
+
+    # Compact the histories
+    $_layout history compact vertex current
+    $_graph history compact vertex current
+}
+
+########################################################################
+#### editparameters
+#
+body ::tycho::DFGEditor::editparameters {args} {
+    # FIXME: The parameter editing window must include the whole
+    # path name of the model
+    foreach v $args {
+        set item [$_graph vertexcget $v -type]
+        regsub -all {\.} $v "_" nm
+        set nm .$nm
+        if { [::info which -command $nm] != "" } {
+            # Already exists
+            wm deiconify $nm
+            raise $nm
+        } else {
+            uplevel #0 [list ::tycho::ParameterEdit $nm \
+                    -command "::tycho::post \[$nm get\]"]
+            $nm edit $starLibrary $item $_graph $v vertex
+            wm deiconify $nm
+        }
+    }
+}
+
+########################################################################
+#### notifygraph
+#
+body ::tycho::DFGEditor::notifygraph {method args} {
+    # puts "$this notifygraph $method"
+    # eval _$method $args
+
+    # Assume any notification means a modification...
+    # (This is too agrresive -- even selecting an item
+    # causes the view to be marked modified...)
+    # markModified
+}
+
+########################################################################
+#### placeicon
+#
+# Place an icon into the layout model. Currently, this just guesses
+# at a good location to put the icon. Later on, it should do some
+# kind of grab and place or drag-and-drop.
+#
+body ::tycho::DFGEditor::placeicon {iconlib iconname starname} {
+    # Figure out where to put the icon. First check if topleft is free
+    if { [$_slate find overlapping 10 10 10 10] == "" } {
+        set iconx 10
+        set icony 10
+    }
+    # Place the icon into the layout model, giving it the
+    # same name as the vertex in the graph.
+    $iconlib instantiate $iconname $_layout \
+            -itemname $starname \
+            -coords [list $iconx $icony] \
+            -tags vertex
+
+    # Move its nw corner to the right position. Find the position
+    # from my slate, and then move by publishing to the model
+    # $_slate moveto $id $iconx $icony "nw" -shape rectangle
+    set current [$_layout forward aspect $starname "nw" -shape "rectangle"]
+    set x [expr $iconx - [lindex $current 0]]
+    set y [expr $icony - [lindex $current 1]]
+    $_layout publish move $starname $x $y
+
+    # Advance place position
+    incr iconx 10
+    incr icony 10
+}
+
+########################################################################
+#### redo
+#
+# Redo the most recent command
+#
+body ::tycho::DFGEditor::redo {} {
+    eval $_layout redo
+    eval $_graph redo
+}
+
+########################################################################
+#### select
+#
+# Handle changes to the selection.
+#
+body ::tycho::DFGEditor::select {mode args} {
+    # puts "DFGEditor::select $mode $args ([$_slate find withtag sel])"
+    switch -exact $mode {
+        "clear" {
+            $_slate select clear
+        }
+        "add" {
+            eval $_slate select add $args
+        }
+        "remove" {
+            eval $_slate select remove $args
+        }
+    }
+    # See if there is a single edge selected
+    set sel [$_slate find withtag sel]
+    if { [llength $sel] == 1 } {
+        set id [lindex $sel 0]
+        if [$_slate hastag $id edge] {
+            # There is: grapple it
+            # FIXME: publish to model
+            set _grapplededge $id
+            $_slate grapple $id -interactor $dropper -aspects {start end}
+        }
+    } elseif { $_grapplededge != "" } {
+        $_slate ungrapple $_grapplededge
+        set _grapplededge ""
+    }
+}
+
+########################################################################
+#### undo
+#
+# Undo the most recent command
+#
+body ::tycho::DFGEditor::undo {} {
+    set foo [eval $_layout undo]
+    set bar [eval $_graph undo]
+}
+
+###################################################################
+###################################################################
+####                      protected methods                    ####
+
+#####################################################################
+#### _initializeBars
+# Initialize the menu, status, and toolbars associated with this widget.
+# The root (view) class sets up the menubar methods in it's initialize
+# via the chain command, which should always be the first command in
+# this method.
+# 
+# This method is called by it's displayer when attachView is called (usually
+# in ::tycho::view
+#
+body ::tycho::DFGEditor::_initializeBars {menubar statusbar toolbar} {
+    chain $menubar $statusbar $toolbar
+
+    if {$menubar != {}} {
+        # We have to qualify the call to this supposed-ly private
+        # method because Itcl (2.2) has virtual private methods!
+        ::tycho::DFGEditor::_initializeMenubar $menubar
+    }
+}
+
+#####################################################################
+#### clear
+# Clear the data.
+#
+body ::tycho::DFGEditor::clear {} {
+    if { $_graph != "" } {
+        $_graph clear
+    }
+    if { $_layout != "" } {
+        $_layout clear
+    }
+    $_slate delete all
+}
+
+#####################################################################
+#### insertData
+# Insert the specified data. For now, this is a two-list containing
+# a description of the graph and the layout respectively.
+# Note that data cannot be just inserted: it will always
+# be cleared too.
+#
+body ::tycho::DFGEditor::insertData {data} {
+    # Delete all data
+    clear
+
+    # Load the data into the models
+    $_graph parse [lindex $data 0]
+    $_layout parse [lindex $data 1]
+
+    # Load the new data into this view
+    loadLayout
+}
+
+#####################################################################
+#### saveText
+# Return the text to save. For now, this is a two-list containing
+# a description of the graph and the layout respectively.
+#
+body ::tycho::DFGEditor::saveText {} {
+    set result "\{\n"
+    append result [$_graph describe]
+    append result "\}\n\{\n"
+    append result [$_layout describe]
+    append result "\}\n"
+    return $result
+}
+
+    #####################################################################
+    #####################################################################
+    ####                       private methods                       ####
+
+#####################################################################
+#### _initializeMenubar
+# Adds entries to the menu bar specific to this class.
+#
+body ::tycho::DFGEditor::_initializeMenubar {menubar} {
+    # Add an Edit menu before the Window menu
+    $menubar addMenu edit -label Edit -before window -underline 0
+    
+    $menubar command undo edit \
+	    -label "Undo" -accelerator "M-z" \
+	    -underline 0 -command "$this undo"
+    
+    $menubar command redo edit \
+	    -label "Redo" -accelerator "M-r" \
+	    -underline 0 -command "$this redo"
+    
+    $menubar separator editsep1 edit
+    
+    $menubar command cut edit \
+	    -label "Cut" -underline 0 -accelerator "C-w" \
+	    -command "$this cut"
+    
+    $menubar command copy edit \
+	    -label "Copy" -underline 1 -accelerator "M-w" \
+	    -command "$this copy"
+    
+    $menubar command paste edit \
+	    -label "Paste" -underline 0 -accelerator "C-y" \
+	    -command "$this paste"
+    
+    $menubar separator editsep2 edit
+    
+    $menubar command selectall edit \
+	    -label "Select All" -underline 0 \
+	    -accelerator "C-/" -command "$this selectRange 1.0 end"
+    
+    $menubar command unselect edit \
+	    -label "Unselect" -underline 0 \
+	    -accelerator "C-\\" -command "$this unselectRange 1.0 end"
+
+    # Build a menu for stars
+    $menubar addMenu stars -label Stars -underline 0
+    $menubar menuconfigure stars -tearoff 1
+
+    $menubar command editparameters stars \
+            -label "Edit Parameters..." \
+            -underline 5 \
+            -command "eval $this editparameters \[$this find withtag sel\]"
+
+    $menubar separator starsep1 stars
+
+    # Add a Devel menu for development use
+    $menubar addMenu devel -label Devel -underline 0
+
+    $menubar add separator develsep1 devel
+
+    $menubar command showlayout devel \
+	    -label "Show layout" \
+            -command "set _nm_ \[::tycho::view EditTcl\]; \
+        \$_nm_ insertData \[$this model access layout describe\]"
+
+    $menubar command showgraph devel \
+	    -label "Show graph" \
+            -command "set _nm_ \[::tycho::view EditTcl\]; \
+        \$_nm_ insertData \[$this model access graph describe\]"
+
+    $menubar add separator develsep2 devel
+
+    $menubar command showlayouthistory devel \
+	    -label "Show layout history" \
+            -command "set _nm_ \[::tycho::view EditTcl\]; \
+        \$_nm_ insertData \[$this model access layout history get\]"
+
+    $menubar command showgraphhistory devel \
+	    -label "Show graph history" \
+            -command "set _nm_ \[::tycho::view EditTcl\]; \
+        \$_nm_ insertData \[$this model access graph history get\]"
+
+}
