@@ -53,6 +53,7 @@ protected:
 				// another timed domain.
 	IntState   syncMode;	// If TRUE, the inner timed domain can not
 				// be ahead of the outer DE domain.
+	IntState calQ;		// Use CalendarQueue scheduler if TRUE;
 
 };
 
