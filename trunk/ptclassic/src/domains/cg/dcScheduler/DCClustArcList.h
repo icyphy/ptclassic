@@ -88,7 +88,7 @@ public:
 	DCClustArcListIter(const DCClustArcList& l) : ListIter(l) {}
 
 	DCClustArc *next() {return (DCClustArc*)ListIter::next();}
-	DCClustArc *operator++() {return next();}
+	DCClustArc *operator++(POSTFIX_OP) {return next();}
 
 	ListIter::reset;
 

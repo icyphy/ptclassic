@@ -272,7 +272,7 @@ public:
 	// Get the next scheduled node in the processor
 	NodeSchedule* next() 
 		{ return (NodeSchedule*) DoubleLinkIter::nextLink(); }
-	NodeSchedule* operator++() { return next(); }
+	NodeSchedule* operator++(POSTFIX_OP) { return next(); }
 
 	ParNode* nextNode() { NodeSchedule* ns = next();
 			      return ns? ns->getNode(): 0; }

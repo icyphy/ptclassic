@@ -198,7 +198,7 @@ class ParAncestorIter : public EGNodeListIter
 public:
 	ParAncestorIter(ParNode* n) : EGNodeListIter(n->tempAncs) {}
 	ParNode* next() { return (ParNode*) EGNodeListIter::next(); }
-	ParNode* operator++() { return next(); }
+	ParNode* operator++(POSTFIX_OP) { return next(); }
 };
 
 class ParDescendantIter : public EGNodeListIter
@@ -206,7 +206,7 @@ class ParDescendantIter : public EGNodeListIter
 public:
 	ParDescendantIter(ParNode* n) : EGNodeListIter(n->tempDescs) {}
 	ParNode* next() { return (ParNode*) EGNodeListIter::next(); }
-	ParNode* operator++() { return next(); }
+	ParNode* operator++(POSTFIX_OP) { return next(); }
 };
 
 #endif

@@ -117,7 +117,7 @@ public:
 	DCClusterLink* nextLink() 
 		{ return (DCClusterLink*) DoubleLinkIter :: nextLink(); }
 	DCCluster *next() {return (DCCluster*)DoubleLinkIter::next();}
-	DCCluster *operator++() {return next();}
+	DCCluster *operator++(POSTFIX_OP) {return next();}
 
 	void reset() {DoubleLinkIter::reset();}
 

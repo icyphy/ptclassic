@@ -133,7 +133,7 @@ public:
 
 	// Get the next DCArc in the list
 	DCArc *next() {return (DCArc*)ListIter::next();}
-	DCArc *operator++ () {return next();}
+	DCArc *operator++ (POSTFIX_OP) {return next();}
 
 	// reset to the beginning of the list
 	void reset() {ListIter::reset();}
