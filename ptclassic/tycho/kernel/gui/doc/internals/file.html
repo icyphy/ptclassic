@@ -38,24 +38,20 @@ the File class itself has no persistent data.
 <p>
 The File class accepts the following options:
 <dl>
-<a name="file option">
-<b><dt>-file <i>name</i></b><dd>
-</a>
+<b><a name="file option"><dt>-file</a> <i>name</i></b><dd>
 This associates
 a file name with the File object and adjusts the
 label in the window header.
-<a name="readonly option">
-<b><dt>-readonly <i>bool</i></b><dd>
-</a>
+
+<b><a name="readonly option"><dt>-readonly</a> <i>bool</i></b><dd>
 This specifies whether or not the file object accepts commands
 to modify its data.  In the base class, the only action is to handle
 the annotation at the botton of the window that indicates whether the
 file has been modified.
 The "bool" value can be
 "yes", "no", "true", "false", "1", or "0" (it is not case sensitive).
-<a name="autosaveinterval option">
-<b><dt>-autosaveinterval <i>value</i></b><dd>
-</a>
+
+<b><a name="autosaveinterval option"><dt>-autosaveinterval</a> <i>value</i></b><dd>
 The value
 is the time (in minutes) between saves.  In this base class,
 there is no meaningful save operation, so the
