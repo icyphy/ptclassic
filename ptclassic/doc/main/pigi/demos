@@ -38,8 +38,8 @@ The remaining VEM windows can be moved and resized.
 The palette contains icons that themselves represent palettes.
 If you have a color monitor, the outline on the icons is purple,
 the color used for icons representing palettes.
-In the current version of \*(PT, three palettes are included,
-one for each of three domains.
+In the current version of \*(PT, four palettes are included,
+one for each of the domains.
 We will begin with the leftmost palette, which contains applications
 in the synchronous dataflow (SDF) domain.
 .pp
@@ -178,7 +178,7 @@ In addition, using the mouse you can position the cursor anywhere
 in the text to begin editing by clicking the left button.  The left
 and right arrow keys may also be used to move the cursor.
 .pp
-For example, to enter a new number for the number of iterations for run,
+For example, to enter a new number for the number of iterations to run,
 position the cursor in the number box, type control-k followed by the
 new number.
 Do not type return;
