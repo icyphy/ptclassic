@@ -78,17 +78,17 @@ body ::tycho::YesNoQuery::constructor {args} {
     # Pack the yes and no buttons.
     #
     addButton yes -text "Yes <Ret>" -command \
-	    [code "$this execCommand -yescommand; \
+	    "$this execCommand -yescommand; \
 	    $this nextWindow; \
-	    delete object $this"]
+	    delete object $this"
     addButton no -text "No <Esc>" -command \
-	    [code "$this execCommand -nocommand; \
+	    "$this execCommand -nocommand; \
 	    $this nextWindow; \
-	    delete object $this"]
+	    delete object $this"
     default yes
 
-    bind $prefix <Return> [code "$this invoke yes"]
-    bind $prefix <Escape> [code "$this invoke no"]
+    bind $prefix <Return> "$this invoke yes"
+    bind $prefix <Escape> "$this invoke no"
 
     #
     # Explicitly handle configs that may have been ignored earlier.
