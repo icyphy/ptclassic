@@ -88,10 +88,15 @@ defstar {
        
   
 	    }	
-
+            constructor {
+                Gelesen = 0;
+                for (int i = 1; i < 50; i++) {
+                    Art[i] = 0;
+                }
+            }
 begin { 
     tunnel_flag=0;
-    DEcell_list::begin();    
+    DEcell_list::begin();
 }
 
 
