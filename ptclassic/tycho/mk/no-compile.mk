@@ -79,7 +79,13 @@ endif
 
 # Generate html files from itcl files, requires itclsh and tycho
 itcldocs:
-	$(ROOT)/tycho/lib/tydoc/tydoc $(ITCL_SRCS)
+	@if [ $(TYDOC_DESC) = "" ] ; then \
+		echo "$(ROOT)/tycho/lib/tydoc/tydoc $(ITCL_SRCS)"; \
+	 	$(ROOT)/tycho/lib/tydoc/tydoc $(ITCL_SRCS); \
+	else \
+		echo "$(ROOT)/tycho/lib/tydoc/tydoc -t $(TYDOC_DESC) $(ITCL_SRCS)"; \
+		$(ROOT)/tycho/lib/tydoc/tydoc -t $(TYDOC_DESC) $(ITCL_SRCS); \
+	fi
 
 # You probably don't want to add $(SRCS) here, since really $(SRCS)
 # get compiled and have dependencies.  Instead, modify the makefile
