@@ -28,20 +28,24 @@ public {
 codeblock(downloadCode,"const char* s56path") {
     /* open the DSP */
     if (($val(S56XFilePrefix)_dsp = qckAttach("/dev/s56dsp", NULL, 0)) == NULL) {
-	perror("Could not access the S-56X Card");
-	EXIT_CGC(0);
+	char message[1024];
+	sprintf(message,"%s: %s","Could not access the S-56X Card",
+		strerror(errno));
+	EXIT_CGC(message);
     }
 
     /* boot the moniter */
     if (qckBoot($val(S56XFilePrefix)_dsp,"@s56path/lib/qckMon.lod")==-1) {
-	perror(qckErrString);
-	EXIT_CGC(0);
+	char message[1024];
+	sprintf(message,"%s: %s",qckErrString,strerror(errno));
+	EXIT_CGC(message);
     }
 
     /* load the application */
     if (qckLoad($val(S56XFilePrefix)_dsp,"@(cgTarget()->destDirectory)/$val(S56XFilePrefix).lod") == -1) {
-	perror(qckErrString);
-	EXIT_CGC(0);
+	char message[1024];
+	sprintf(message,"%s: %s",qckErrString,strerror(errno));
+	EXIT_CGC(message);
     }
 }
 
@@ -49,20 +53,25 @@ codeblock(signalSOL2){
 {
     int sig = SIGUSR1;
     if (ioctl($val(S56XFilePrefix)_dsp->fd,DspSetAsyncSig, &sig) == -1) {
-	perror("Setting of interrupt process pointer to S56X driver failed");
-	EXIT_CGC(0);
+	char message[1024];
+	sprintf(message,"%s: %s",
+		"Setting of interrupt process pointer to S56X driver failed",
+		strerror(errno));
+	EXIT_CGC(message);
     }
 }
 }
 
 codeblock(startDSP) {    
     if (qckJsr($val(S56XFilePrefix)_dsp,"START") == -1) {
-	perror(qckErrString);
-	EXIT_CGC(0);
+	char message[1024];
+	sprintf(message,"%s: %s",qckErrString,strerror(errno));
+	EXIT_CGC(message);
     }
 }
 
 initCode {
+        addInclude("<errno.h>");
 	addInclude("<unistd.h>");
         addCompileOption("-I$S56DSP/include");
         addLinkOption("-L$S56DSP/lib -l$QCKMON");
