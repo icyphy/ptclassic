@@ -24,8 +24,10 @@ limitation of liability, and disclaimer of warranty provisions.
 		type { complex }
 	}
 	go {
-		output%0 << ((const Complex&)(pos%0)) - 
-	                   ((const Complex&)(neg%0));
+		// We use temporary variables to avoid gcc2.7.2/2.8 problems
+		Complex tmppos = (pos%0);
+		Complex tmpneg = (neg%0);
+		output%0 << tmppos - tmpneg;
 	}
 }
 
