@@ -21,6 +21,8 @@ Routines implementing class Block methods
  
 **************************************************************************/
 
+// print all port names in the block, omitting hidden ports
+
 StringList
 Block :: printPorts (const char* type) const {
 	StringList out;
@@ -32,7 +34,7 @@ Block :: printPorts (const char* type) const {
 		BlockPortIter next(*this);
 		PortHole* p;
 		while ((p = next++) != 0)
-			out += p->printVerbose();
+			if (!hidden(*p)) out += p->printVerbose();
 	}
 // next the multiports
 	if (numberMPHs()) {
@@ -42,7 +44,7 @@ Block :: printPorts (const char* type) const {
 		BlockMPHIter next(*this);
 		MultiPortHole* mp;
 		while ((mp = next++) != 0)
-			out += mp->printVerbose();
+			if (!hidden(*mp)) out += mp->printVerbose();
 	}
 	return out;
 }
@@ -125,7 +127,7 @@ Block* Block::clone() const {
 	return 0;
 }
 
-// Return the names of the ports within the block.
+// Return the names of the ports within the block.  Omit hidden ports.
 int
 Block::portNames (const char** names, int* io, int nMax) const {
 	int n = numberPorts();
@@ -133,13 +135,14 @@ Block::portNames (const char** names, int* io, int nMax) const {
 	BlockPortIter next(*this);
 	for (int i = n; i>0; i--) {
 		PortHole& p = *next++;
+		if (hidden(p)) continue;
 		*names++ = p.readName();
 		*io++ = p.isItOutput();
 	}
 	return ports.size();
 }
 
-// Return the names of the multiports within the block.
+// Return the names of the multiports within the block.  Omit hidden ports.
 int
 Block::multiPortNames (const char** names, int* io, int nMax) const {
 	int n = numberMPHs();
@@ -147,6 +150,7 @@ Block::multiPortNames (const char** names, int* io, int nMax) const {
 	BlockMPHIter next(*this);
 	for (int i = n; i>0; i--) {
 		MultiPortHole& p = *next++;
+		if (hidden(p)) continue;
 		*names++ = p.readName();
 		*io++ = p.isItOutput();
 	}
