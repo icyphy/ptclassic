@@ -7,6 +7,7 @@
 # User .cshrc file must contain "setenv PRINTER whatever"
 
 # The optional argument is the directory of the domain documentation
+# The -index option generates an index only, printing nothing.
 # An implicit header file, ~ptolemy/doc/headers/shared, is prepended.
 
 # The following files are assumed to present in the documentation directory:
@@ -28,6 +29,7 @@ set dirheader = ~ptolemy/doc/headers
 set printcommand = ditroff
 set printoptions = "-me -tbl -eqn -P$PRINTER"
 set contentscmd = ~ptolemy/doc/bin/contents
+set indexonly = 0
 
 if (!($?ALMAGEST_INDEX)) then
 	setenv ALMAGEST_INDEX $HOME/Almagest.index
@@ -35,6 +37,10 @@ endif
 
 while ($#argv)
 	switch ($argv[1])
+		case -index:
+			set indexonly = 1
+			shift
+			breaksw
 		case -*:
 			set printoptions = ($printoptions $argv[1])
 			shift
@@ -50,6 +56,8 @@ soelim $dirheader/shared $dirheader/domain \
 	init overall > /tmp/pt$$
 if ( -d stars ) then
 	if (-e starstitle) then
+		# set type for this section
+		echo '.ds TY "star' >> /tmp/pt$$
 		cat starstitle >> /tmp/pt$$
 	endif
 	cd stars
@@ -59,6 +67,8 @@ if ( -d stars ) then
 endif
 if ( -d demos ) then
 	if (-e demotitle) then
+		# set type for this section
+		echo '.ds TY "demo' >> /tmp/pt$$
 		cat demotitle >> /tmp/pt$$
 	endif
 	cd demos
@@ -67,9 +77,14 @@ if ( -d demos ) then
 	cd ..
 endif
 
-$printcommand $printoptions /tmp/pt$$ >& /tmp/index$$
-$contentscmd /tmp/index$$
-$printcommand $printoptions $dirheader/shared title
+if ($indexonly) then
+	# if only generating index, add -t option and throw away the output
+	($printcommand $printoptions -t /tmp/pt$$ > /dev/null) >& /tmp/index$$
+else
+	$printcommand $printoptions /tmp/pt$$ >& /tmp/index$$
+	$contentscmd /tmp/index$$
+	$printcommand $printoptions $dirheader/shared title
+endif
 cat /tmp/index$$ >>! $ALMAGEST_INDEX
 /bin/rm /tmp/pt$$ /tmp/index$$
 exit 0
