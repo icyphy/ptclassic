@@ -50,7 +50,6 @@ extern "C" {
 }
 
 #include "TclObj.h"
-#include "StringList.h"
 #include "InfString.h"
 
 #if defined(hppa)
@@ -136,10 +135,10 @@ private:
         int OldRandomSeed; 	
 
 	// For ptkGetMkStar and ptkSetMkStar
-	StringList MkStarName; 
-        StringList MkStarDomain; 
-	StringList MkStarDir; 
-	StringList MkStarPalette;
+	InfString MkStarName; 
+	InfString MkStarDomain; 
+	InfString MkStarDir; 
+	InfString MkStarPalette;
 
 	// For ptkSetMkSchemIcon and ptkGetMkSchemIcon to remember past values
 	InfString MkSchemPalette;
