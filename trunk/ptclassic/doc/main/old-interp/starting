@@ -11,6 +11,7 @@ are in your PATH
 is replaced by ``sun3'' if you are on a Sun-3, ``sun4'' if you are on a Sun-4,
 ``vax'' if you are on a Vax, or ``mips'' if you are on a DecStation based
 on the MIPS architecture).
+.IE path
 Now type
 .c interpreter
 to invoke the Ptolemy interpreter.
