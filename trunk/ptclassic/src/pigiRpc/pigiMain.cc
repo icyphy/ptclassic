@@ -33,27 +33,38 @@ ENHANCEMENTS, OR MODIFICATIONS.
  Main program for pigiRpc.
 
 ********************************************************************/
+
 #include <string.h>
+
 #ifdef linux
 #include <fpu_control.h>
 #endif
 
-extern ptkConsoleWindow();
+/* C++ function prototypes not defined in any include files */
+extern void ptkConsoleWindow();
 
 extern "C" {
-	int KcInitLog(const char*);
-	void KcCatchSignals();
-	void CompileInit();
-	void KcLoadInit(const char*);
+#include "kernelCalls.h"	/* define KcInitLog and KcCatchSignals */
+#include "pigiLoader.h"		/* define KcLoadInit */
+#include "xfunctions.h"		/* define global variable pigiFilename */
 
-	int ptkRPCInit( int argc, char **argv);
-	void ptkMainLoop ();
+/* Prototypes for functions defined in pigilib includes that depend on Oct */
+extern void CompileInit();	/* defined in compile.h */
+extern void ptkMainLoop();	/* defined in ptkTkSetup.h */
 
+/* Prototypes not defined in any include files */
+int ptkRPCInit(int argc, char **argv);
 };
 
-extern const char* pigiFilename;
+#ifndef TRUE
+#define TRUE 1
+#endif
 
-main (int argc, char ** argv)
+#ifndef FALSE
+#define FALSE 0
+#endif
+
+int main(int argc, char** argv)
 {
 	pigiFilename = argv[0];
 	KcLoadInit(argv[0]);
@@ -66,14 +77,14 @@ main (int argc, char ** argv)
 	KcCatchSignals();
 
 	/* Strip off end of argv, not front */
-	int doConsole = 0;
-	if (argc>=2 && strcmp(argv[argc-1], "-console")==0) {
-		doConsole = 1;
+	int doConsole = FALSE;
+	if (argc >= 2 && strcmp(argv[argc-1], "-console") == 0) {
+		doConsole = TRUE;
 		--argc;
 	}
 
-	ptkRPCInit (argc, argv);
-	if ( doConsole )  ptkConsoleWindow();
+	ptkRPCInit(argc, argv);
+	if (doConsole) ptkConsoleWindow();
 	ptkMainLoop();
 	return 0;
 }
