@@ -23,11 +23,9 @@ ENHANCEMENTS, OR MODIFICATIONS.
 							COPYRIGHTENDKEY
 */
 /* compile.c  edg
+
 Version identification:
 $Id$
-Updates:
-    4/16/90 = added Oct change lists to keep track of changes so that only
-    facets that the user changes get compiled.
 
 There are two representations of a design: the Oct one and the internal
 kernel one.  The compile routines keep these representations
@@ -56,8 +54,8 @@ the xfered list or if it has been changed since the last transfer.
 #include "main.h"
 #include "octIfc.h"
 #include "octMacros.h"
+#include "ptk.h"
 
-void KcClearUniverse();
 void KcSetDesc();
 
 #define TERMS_MAX 50  /* maximum number of actual terms allowed on a net */
@@ -548,7 +546,7 @@ octObject *termPtr;
 }
 
 /*
-Checks to see if facet has been changed.
+Checks to see whether a galaxy facet has been changed since the last run.
 Outputs: return = true if facet has been changed or if not sure.
 */
 static boolean
@@ -556,6 +554,37 @@ IsDirty(facetPtr)
 octObject *facetPtr;
 {
     octObject cl, cr;
+
+    if (octGenFirstContent(facetPtr, OCT_CHANGE_LIST_MASK, &cl) != OCT_OK) {
+	return (TRUE);
+    }
+    if (octGenFirstContent(&cl, OCT_CHANGE_RECORD_MASK, &cr) == OCT_OK) {
+	return (TRUE);
+    } else {
+	return (FALSE);
+    }
+}
+
+/*
+Checks to see whether a universe facet has been changed since the last run, or
+if the Ptolemy kernel image of the facet has been deleted.  The latter
+occurs whenever the run control window is dismissed.
+Outputs: return = true if facet has been changed or if not sure.
+*/
+static boolean
+IsDirtyOrGone(facetPtr)
+octObject *facetPtr;
+{
+    octObject cl, cr;
+    char* name;
+
+    /* First check to see whether the Ptolemy image exists */
+    name = BaseName(facetPtr->contents.facet.cell);
+    TCL_CATCH_ERR2(
+	Tcl_VarEval(ptkInterp, "ptkGetRunFlag ", name, (char*) NULL),
+	TRUE);
+    if ((*(ptkInterp->result) == '1') ||
+	(*(ptkInterp->result) == '0')) return (TRUE);
 
     if (octGenFirstContent(facetPtr, OCT_CHANGE_LIST_MASK, &cl) != OCT_OK) {
 	return (TRUE);
@@ -738,12 +767,13 @@ octObject *facetPtr;
 {
     char *name;
     boolean xferedBool;
-    char* oldDomain;
+    char *oldDomain, *domain;
     char* target;
     
-    if((oldDomain = setCurDomainF(facetPtr)) == NULL) {
+    oldDomain = curDomainName();
+    domain = getDomainF(facetPtr);
+    if(!domain) {
         PrintErr("Domain error in facet.");
-        KcSetKBDomain(oldDomain);
         return (FALSE);
     }
 
@@ -754,16 +784,20 @@ octObject *facetPtr;
     }
 
     name = BaseName(facetPtr->contents.facet.cell);
+    TCL_CATCH_ERR1(Tcl_VarEval(ptkInterp, "domain ", domain, "; ",
+    				"target ", target, (char*) NULL));
     ERR_IF1(!ProcessSubGals(facetPtr));
     xferedBool = DupSheetIsDup(&xfered, name);
-    if (xferedBool && !IsDirty(facetPtr)) {
+    if (xferedBool && !IsDirtyOrGone(facetPtr)) {
 	/* universe already xfered to kernel and is unchanged */
-        KcSetKBDomain(oldDomain);
+        TCL_CATCH_ERR1(Tcl_VarEval(ptkInterp, "domain ",
+		oldDomain, (char*) NULL));
 	return (TRUE);
     }
     PrintDebug("CompileUniv");
-    KcClearUniverse(name);
-    ERR_IF1(!KcSetTarget(target));
+    TCL_CATCH_ERR1(Tcl_VarEval(ptkInterp, "deluniverse ", name, "; ",
+		"newuniverse ", name, " ", domain, "; ",
+		"target ", target, "; ", (char*) NULL));
     ERR_IF1(!ProcessTargetParams(target,facetPtr));
     ERR_IF1(!ProcessFormalParams(facetPtr));
     ERR_IF1(!ProcessInsts(facetPtr));
@@ -772,6 +806,9 @@ octObject *facetPtr;
     if (!xferedBool) {
 	ERR_IF1(!DupSheetAdd(&xfered, name));
     }
+    /* Replacing the following line with a tcl call fails with a complaint
+       that the galaxy is not empty, so we can't change domains. 
+       Is the line even necessary? */
     KcSetKBDomain(oldDomain);
     return (TRUE);
 }
@@ -787,15 +824,6 @@ boolean
 CompileFacet(facetPtr)
 octObject *facetPtr;
 {
-    static octId lastFacetId = OCT_NULL_ID;
-
-    /* if this is not the same facet as last time... */
-    if (!octIdsEqual(lastFacetId, facetPtr->objectId)) {
-	/* Different facet, so compile everything */
-	DupSheetClear(&xfered);
-	lastFacetId = OCT_NULL_ID;  /* forget last facet */
-    }
-
     ERR_IF1(!UniqNameInit());
     DupSheetClear(&traverse);
     if (IsGalFacet(facetPtr)) {
@@ -810,7 +838,6 @@ octObject *facetPtr;
 	    return (FALSE);
 	}
     }
-    lastFacetId = facetPtr->objectId;  /* remember this facet */
     return (TRUE);
 }
 
@@ -846,6 +873,7 @@ long userOptionWord;
     ViDone();
 }
 
+/* Called once when pigi is started */
 void
 CompileInit()
 {
