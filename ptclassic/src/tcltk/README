@@ -1,4 +1,5 @@
--*-Mode: text-*- -[Sun Jan 23 11:29:40 1994 by cxh]-
+-*-Mode: text-*- -[Fri Jul  1 13:30:36 1994 by cxh]-
+Version: $Id$
 
 src/tcl/README
 
@@ -9,6 +10,16 @@ tcl/tk from this directory.
 Probably the only time you would want to build from this directory is
 if you were doing a Ptolemy port to a new platform.
 
+You should be able to build tcl and tk from the top level Ptolemy
+directory.  You will need to set the $PTOLEMY and $ARCH variables:
+	setenv PTOLEMY /users/ptolemy
+	cd $PTOLEMY
+	setenv ARCH sun4
+	make install_tcltk	
+
+The makefile $PTOLEMY/mk/scratch-srcs.mk has rules to build tcl and
+tk. 
+
 Most of the sources in this directory are available via anonymous ftp from
 ftp.cs.berkeley.edu in ucb/tcl/.  The TkPixmap is available via
 anonymous ftp from harbor.ecn.purdue.edu in pub/tcl/extensions
@@ -18,7 +29,7 @@ Versions
 	Ptolemy 0.5 uses tcl7.3 and tk3.6.
 	tk3.6 has had the following patches applied:
 		tk3.6p1 patch
-	TkPixmap3.6a is necessary for xpole, and to get the Mr Ptolemy
+	TkPixmap3.6e is necessary for xpole, and to get the Mr Ptolemy
 	face in the welcome window.
 
 GNU make
