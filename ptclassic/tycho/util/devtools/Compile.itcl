@@ -285,9 +285,9 @@ body ::tycho::Compile::compileFiles {{args {}}} {
         if {$option(-autostart)} {
             $monitorWidget getStatusWait
         } else {
-            # Raise current window back, since default is not autostart
             set editorName [$this cget -view]
-            if {$editorName!={}} {$editorName raiseWindow}
+            # Raise current window back, since default is not autostart
+            #if {$editorName!={}} {$editorName raiseWindow}
         }
    } else {
         #set retList [::tycho::execModal {} {} $monitorWidget]
