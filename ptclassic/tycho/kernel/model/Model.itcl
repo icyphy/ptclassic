@@ -304,6 +304,9 @@ class ::tycho::Model {
     # script (if any).
     protected variable _subscription
     
+    # A flag saying whether commands are being recorded (usually true)
+    protected variable recording 1
+
     # The array of redo commands
     protected variable redoCommands
 
@@ -317,6 +320,12 @@ class ::tycho::Model {
     method debug {args} {
 	eval $args
     }
+
+    # HACK FIXME
+    method getUndo {mark} {set undoCommands($historyMark($mark))}
+    method getRedo {mark} {set redoCommands($historyMark($mark))}
+    method setUndo {mark cmd} {set undoCommands($historyMark($mark)) $cmd}
+    method setRedo {mark cmd} {set redoCommands($historyMark($mark)) $cmd}
 }
 
 
@@ -382,7 +391,7 @@ body ::tycho::Model::constructor {args} {
 body ::tycho::Model::appendHistory {redo undo {publishable 1}} {
     # Clear the redo future if needed
     if { $historyMark(current) < $historyMark(last) } {
-		clearHistory current last
+	clearHistory current last
     }
 
     # Record the commands
@@ -417,21 +426,21 @@ body ::tycho::Model::appendHistory {redo undo {publishable 1}} {
 #
 body ::tycho::Model::clearHistory {{from first} {to last}} {
     # Get the indexes corresponding to the marks
-    if { ! [info exists historyMark($from)] } {
-	error "Unknown mark $from in $modelname"
-    }
-    if { ! [info exists historyMark($to)] } {
-	error "Unknown mark $to in $modelname"
-    }
-    if { ! [string match {[0-9]*} $from] } {
-	set fromindex $historyMark($from)
-    } else {
+    if { [string match {[0-9]*} $from] } {
 	set fromindex $from
-    }
-    if { ! [string match {[0-9]*} $to] } {
-	set toindex $historyMark($to)
     } else {
+	if { ! [info exists historyMark($from)] } {
+	    error "Unknown mark $from in $modelname"
+	}
+	set fromindex $historyMark($from)
+    }
+    if { [string match {[0-9]*} $to] } {
 	set toindex $to
+    } else {
+	if { ! [info exists historyMark($to)] } {
+	    error "Unknown mark $to in $modelname"
+	}
+	set toindex $historyMark($to)
     }
 
     # Do nothing if from is not earlier than to
@@ -466,9 +475,9 @@ body ::tycho::Model::clearHistory {{from first} {to last}} {
     # If any marks got clobbered, set them to "from". Any marks
     # above "to" are shifted down the right amount.
     foreach {mark index} [array get historyMark] {
-	if { $index > $fromindex || $index <= $toindex } {
+	if { $index > $fromindex && $index < $toindex } {
 	    set historyMark($mark) $fromindex
-	} elseif { $index > $toindex } {
+	} elseif { $index >= $toindex } {
 	    set historyMark($mark) [expr $index - $delta]
 	}
     }
@@ -478,9 +487,9 @@ body ::tycho::Model::clearHistory {{from first} {to last}} {
 #### compactHistory
 #
 # Compact a portion of the undo history. The first two arguments are the 
-# marks of the command to compact from and the command to compact to: commands
-# from _the one after_ "from" up to _and including_ "to" are compacted
-# into a single command. The third
+# marks of the command to compact from and the command to compact to:
+# commands from _the one after_ "from" up to _and including_ "to"
+# are compacted into a single command. The third
 # argument is a flag indicating whether the compacted command is to
 # be marked as publishable: if it is, then an undo or redo of the 
 # compacted command will be published. If the
@@ -497,22 +506,30 @@ body ::tycho::Model::compactHistory \
 	{from to publish {command {}} {inverse {}}} {
 
     # Get the indexes corresponding to the marks
-    if { ! [info exists historyMark($from)] } {
-	error "Unknown mark $from in $modelname"
+    if { [string match {[0-9]*} $from] } {
+	set fromindex $from
+    } else {
+	if { ! [info exists historyMark($from)] } {
+	    error "Unknown mark $from in $modelname"
+	}
+	set fromindex $historyMark($from)
     }
-    if { ! [info exists historyMark($to)] } {
-	error "Unknown mark $to in $modelname"
+    if { [string match {[0-9]*} $to] } {
+	set toindex $to
+    } else {
+	if { ! [info exists historyMark($to)] } {
+	    error "Unknown mark $to in $modelname"
+	}
+	set toindex   $historyMark($to)
     }
-    set fromindex $historyMark($from)
-    set toindex   $historyMark($to)
 
     # Flag an error if from is not earlier than to
     if { $fromindex >= $toindex } {
 	error "Cannot compact from $from ($fromindex) to $to ($toindex) in $modelname"
     }
-    
+
     # Build composite commands if not supplied
-    if { $command == "" } {
+    if { $command == "" && [expr $fromindex+1] < $toindex } {
 	set i [expr $fromindex + 1]
 	set command [list sequence]
 	set inverse [list sequence]
@@ -521,15 +538,14 @@ body ::tycho::Model::compactHistory \
 	    lappend inverse $undoCommands($i)
 	    incr i
 	}
+	# Put the new command into the history
+	set redoCommands($toindex) $command
+	set undoCommands($toindex) $inverse
+	set _publishable($toindex) $publish
+	
+	# Clear the compacted commands
+	clearHistory $fromindex [expr $toindex - 1]
     }
-
-    # Put the new command into the history
-    set redoCommands($toindex) $command
-    set undoCommands($toindex) $inverse
-    set _publishable($toindex) $publish
-
-    # Clear the compacted commands
-    clearHistory $from [expr $toindex - 1]
 }
 
 ########################################################################
@@ -896,7 +912,7 @@ body ::tycho::Model::mark {{markname {}} {position current}} {
 	    error "Mark $position unknown in $modelname"
 	}
 	# Set a mark
-	set historyMark($mark) $historyMark($position)
+	set historyMark($markname) $historyMark($position)
     }
 }
 
@@ -1011,8 +1027,18 @@ body ::tycho::Model::redo {{distance 1}} {
 	incr count
 
 	# Execute the command.
-	$this evalInSpecificContext \
-		eval $redoCommands($historyMark(current))
+	# FIXME: This is in a catch because the command might not exist on
+	# this model. Need to figure out better notification mechanism
+        # Note that here we reset the "recording" flag, so that
+        # any methods that usually write to the history know not to.
+        set recording 0
+#         if [catch {$this evalInSpecificContext \
+#                 eval $redoCommands($historyMark(current))} result] {
+#             set recording 1
+# 	    puts "Debug: $result"
+# 	}
+        $this evalInSpecificContext eval $redoCommands($historyMark(current))
+        set recording 1
 
 	# Publish if publishable
 	if { $_publishable($historyMark(current)) } {
@@ -1171,9 +1197,18 @@ body ::tycho::Model::undo {{distance 1}} {
     set count 0
     while { $count < $distance } {
         # Execute the command
-        $this evalInSpecificContext \
-                eval $undoCommands($historyMark(current))
-        
+	# FIXME: This is in a catch because the command might not exist on
+	# this model. Need to figure out better notification mechanism
+        # Note that here we reset the "recording" flag, so that
+        # any methods that usually write to the history know not to.
+        set recording 0
+#         if [catch {$this evalInSpecificContext \
+#                 eval $undoCommands($historyMark(current))} result] {
+# 	    puts "Debug: $result"
+# 	}
+        $this evalInSpecificContext eval $undoCommands($historyMark(current))
+        set recording 1
+
         # Publish if publishable
         if { $_publishable($historyMark(current)) } {
             eval notifyDataChange noone $undoCommands($historyMark(current))
@@ -1291,11 +1326,12 @@ body ::tycho::Model::_dataname {} {
 # are notified of each such command.
 #
 body ::tycho::Model::notifyDataChange {subscriber command index args} {
+
     # Test for the command "sequence", and recursively call if so
     if { $command == "sequence" } {
-	eval notify $subscriber $index
+	eval notifyDataChange $subscriber $index
 	foreach cmd $args {
-	    eval notify $subscriber $index
+	    eval notifyDataChange $subscriber $cmd
 	}
 	return
     }
