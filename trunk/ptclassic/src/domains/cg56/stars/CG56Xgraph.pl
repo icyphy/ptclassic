@@ -66,11 +66,11 @@ for a complete explanation of the options.
 	codeblock(xgraph,"const char* outfile") {
 /bin/rm -f @outfile
 
-tail +$val(ignore) $starSymbol(/tmp/cgwritefile).io | awk '{n+=$val(xUnits);print n+$val(xInit)-$val(xUnits), $$1}' > @outfile
+tail +$val(ignore) $starSymbol(cgwritefile).io | awk '{n+=$val(xUnits);print n+$val(xInit)-$val(xUnits), $$1}' > @outfile
 
-/bin/rm -f $starSymbol(/tmp/cgwritefile).io
+/bin/rm -f $starSymbol(cgwritefile).io
 
-(pxgraph -t "$val(title)" $val(options) @outfile ; @(saveFile.null()?"":"/bin/rm -f  $starSymbol(/tmp/cgxgraph)")) &
+(pxgraph -t "$val(title)" $val(options) @outfile ; @(saveFile.null()?"":"/bin/rm -f  $starSymbol(cgxgraph)")) &
 	}
 
 constructor {
@@ -80,7 +80,7 @@ constructor {
 initCode {
 	StringList outfile;
 	if ( saveFile.null() ) {
-		outfile << "$starSymbol(/tmp/cgxgraph)";
+		outfile << "$starSymbol(cgxgraph)";
 	}
 	else {
 		char *expandedName = expandPathName(saveFile);
