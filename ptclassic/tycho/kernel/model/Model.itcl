@@ -115,7 +115,7 @@ class ::tycho::Model {
     # Change model data, record, and publish it
     method publish {command args}
 
-    # Execute a command and record it in ths history
+    # Execute a command and record it in this history
     method record {command args}
 
     # Execute redo commands
@@ -136,7 +136,7 @@ class ::tycho::Model {
     # Execute a sequence of commands in a list
     protected method _compound {cmdlist}
 
-    # Execute a command and don't record it in ths history
+    # Execute a command and don't record it in this history
     protected method _norecord {command args}
 
     #################################################################
