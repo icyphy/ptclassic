@@ -2,13 +2,13 @@ defstar {
 	name {ParamBiquad}
 	derivedFrom {Biquad}
 	domain {CGC}
-	version {@(#)CGCParamBiquad.pl	1.5 6/29/96 }
+	version { $Id$ }
 	desc {
 A two-pole, two-zero parametric digital IIR filter (a biquad).
 	}
 	author { William Chen and John Reekie}
 	copyright {
-Copyright (c) 1990-1995 The Regents of the University of California.
+Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -35,16 +35,19 @@ based on the procedure defined by Shpak.
 		name {centerFreq}
 		type { float }
 		default { "1000" }
-		desc { given in Hz. Center frequency for bandpass and cutoff
-			 frequency for low/highpass filters}
+		desc {
+Center frequency in Hz for bandpass and cutoff frequency for
+low/highpass filters
+		}
 	}
 	defstate {
 		name {passFreq}
 		type { float }
 		default { "1000" }
-		desc { given in Hz. Passband frequency for
-		  low/highpass filters.  Not needed for bandpass
-		    types. }
+		desc {
+Passband frequency in Hz for low/highpass filters.
+Not needed for bandpass types.
+		}
 	}
 	defstate {
 		name {gain}
@@ -56,12 +59,14 @@ based on the procedure defined by Shpak.
 		name {bandwidth}
 		type { float }
 		default { "1" }
-		desc { given in Octave and ranges from [0,4]. 
-			 Not needed for Lowpass and Hipass types. }
+		desc {
+Given in Octave and ranges from [0,4]. 
+Not needed for Lowpass and Hipass types.
+		}
 	}
 	codeblock(setparams) {
-	  static void setparams(parametric_t *parametric){
-	    double gaintmp,t0,invf1prime;
+	  static void $sharedSymbol(CGCParamBiquad,setparams)(parametric_t *parametric){
+	    double gaintmp, t0, invf1prime;
 
 	    parametric->T = 1/$val(sampleFreq);
 	    parametric->omegap = 2*PI*$val(passFreq)*parametric->T;
@@ -82,9 +87,9 @@ based on the procedure defined by Shpak.
 	  }
 	}
         codeblock(constbw) {
-          static double constbw(int niter,double tol,double
-				bw,double wc,double initial_guess)
-            {
+	  /* Newton approximation */
+          static double $sharedSymbol(CGCParamBiquad,constbw)(int niter, double tol, double bw,
+				double wc, double initial_guess) {
 	      double x0,x1;
 	      double fval,fprimeval;
 	      int i;
@@ -108,8 +113,7 @@ based on the procedure defined by Shpak.
             }        
 	}
 	codeblock(lowpass) {
-          static void lowpass(parametric_t *parametric,double
-			      *filtercoeff)
+          static void $sharedSymbol(CGCParamBiquad,lowpass)(parametric_t *parametric, double *filtercoeff)
 	    {
 	      double omegapwarp,omegacwarp;
 	      double n0,d0,d1,d2,Qzsquared,Qpsquared,Qz,Qp;
@@ -146,8 +150,7 @@ based on the procedure defined by Shpak.
 	    }
 	}
 	codeblock(bandpass) {
-          static void bandpass(parametric_t *parametric,double *filtercoeff)
-	    {
+          static void $sharedSymbol(CGCParamBiquad,bandpass)(parametric_t *parametric, double *filtercoeff) {
 	      double omegacwarp,omegacornerwarp,omegacorner_guess,gamma;
 	      double Qz,Qp,initial;
 	      double a2,b2;
@@ -155,7 +158,7 @@ based on the procedure defined by Shpak.
 	      omegacwarp = 2*tan(parametric->omegac/2);
 	      omegacorner_guess = parametric->omegac - (parametric->omegabw/2);
 	      initial = parametric->omegac/omegacorner_guess;
-	      gamma = constbw(10,0.001,parametric->omegabw,omegacwarp,initial);
+	      gamma = $sharedSymbol(CGCParamBiquad,constbw)(10,0.001, parametric->omegabw, omegacwarp, initial);
 	      omegacornerwarp = omegacwarp/gamma;
 	      Qp = (sqrt(parametric->lineargain)*omegacwarp*omegacornerwarp) /
 		(omegacwarp*omegacwarp-omegacornerwarp*omegacornerwarp);
@@ -174,7 +177,7 @@ based on the procedure defined by Shpak.
 	    }
 	}
 	codeblock(hipass) {
-          static void hipass(parametric_t *parametric,double *filtercoeff)
+          static void $sharedSymbol(CGCParamBiquad,hipass)(parametric_t *parametric, double *filtercoeff)
 	    {
 	      double omegapwarp,omegacwarp;
 	      double n0,d0,d1,d2,Qzsquared,Qpsquared,Qz,Qp;
@@ -212,9 +215,9 @@ based on the procedure defined by Shpak.
 	    }
 	}
 	codeblock(setfiltertaps){
-	  static void setfiltertaps(parametric_t *parametric,double
-				    *filtercoeff,double *filtertaps){
-	    if(parametric->gainflag == 1){
+	  static void $sharedSymbol(CGCParamBiquad,setfiltertaps)(parametric_t *parametric,
+			double *filtercoeff, double *filtertaps) {
+	    if (parametric->gainflag == 1){
 	      filtertaps[0]=filtercoeff[2];
 	      filtertaps[1]=filtercoeff[3];	      
 	      filtertaps[2]=filtercoeff[4];
@@ -231,15 +234,14 @@ based on the procedure defined by Shpak.
 	  }
 	}
 	codeblock(globalDecl){
-	  typedef struct parametric_band
-	  {
-	    double omegac;
-	    double omegap;
-	    double omegabw;
-	    double T;
-	    double lineargain;
-	    int gainflag;
-	  } parametric_t;
+typedef struct parametric_band {
+  double omegac;
+  double omegap;
+  double omegabw;
+  double T;
+  double lineargain;
+  int gainflag;
+} parametric_t;
 
 #define LOW  (0)
 #define BAND (1)
@@ -247,33 +249,33 @@ based on the procedure defined by Shpak.
 #define PI (M_PI)
 	}
 	codeblock(mainDecl){
-	  parametric_t $starSymbol(parametric);
-	  double $starSymbol(filtercoeff)[5];
+	parametric_t $starSymbol(parametric);
+	double $starSymbol(filtercoeff)[5];
 	}
 	codeblock(findparams){
-	  setparams(&$starSymbol(parametric));
-	  if($val(filtertype) == LOW){
-	    lowpass(&$starSymbol(parametric),$starSymbol(filtercoeff));
+	  $sharedSymbol(CGCParamBiquad,setparams)(&$starSymbol(parametric));
+	  if ($val(filtertype) == LOW){
+	    $sharedSymbol(CGCParamBiquad,lowpass)(&$starSymbol(parametric),$starSymbol(filtercoeff));
 	  }
-	  else if($val(filtertype) == HI){
-	    hipass(&$starSymbol(parametric),$starSymbol(filtercoeff));
+	  else if ($val(filtertype) == HI){
+	    $sharedSymbol(CGCParamBiquad,hipass)(&$starSymbol(parametric),$starSymbol(filtercoeff));
 	  }
-	  else if($val(filtertype) == BAND){
-	    bandpass(&$starSymbol(parametric),$starSymbol(filtercoeff));
+	  else if ($val(filtertype) == BAND){
+	    $sharedSymbol(CGCParamBiquad,bandpass)(&$starSymbol(parametric),$starSymbol(filtercoeff));
           }
 	  /*else
 	    error;*/
-	  setfiltertaps(&$starSymbol(parametric),$starSymbol(filtercoeff),$starSymbol(filtertaps));
+	  $sharedSymbol(CGCParamBiquad,setfiltertaps)(&$starSymbol(parametric),$starSymbol(filtercoeff),$starSymbol(filtertaps));
 	}
 	initCode {
 	  CGCBiquad::initCode();
 	  addGlobal(globalDecl, "global");
-	  addProcedure(setparams, "CGCParamBiquad_param");
-          addProcedure(constbw, "CGCParamBiquad_newtonapprox");
-	  addProcedure(lowpass, "CGCParamBiquad_lp");
-	  addProcedure(hipass, "CGCParamBiquad_hp");
-	  addProcedure(bandpass, "CGCParamBiquad_bp");
-	  addProcedure(setfiltertaps, "CGCParamBiquad_taps");
+	  addProcedure(setparams, "CGCParamBiquad_setparams");
+          addProcedure(constbw, "CGCParamBiquad_constbw");
+	  addProcedure(lowpass, "CGCParamBiquad_lowpass");
+	  addProcedure(hipass, "CGCParamBiquad_hipass");
+	  addProcedure(bandpass, "CGCParamBiquad_bandpass");
+	  addProcedure(setfiltertaps, "CGCParamBiquad_setfiltertaps");
           addDeclaration(mainDecl);
           addCode(findparams);
         }
@@ -281,5 +283,3 @@ based on the procedure defined by Shpak.
 	  CGCBiquad::go();
 	}
 }
-
-
