@@ -695,8 +695,8 @@ void StructTarget :: registerRegister(StringList /*type*/) {
 }
 
 // Register PortHole reference.
-void StructTarget :: registerPortHole(VHDLPortHole* port,
-				      int tokenNum/*=-1*/) {
+void StructTarget :: registerPortHole(VHDLPortHole* port, int tokenNum/*=-1*/,
+				      const char* part/*=""*/) {
   // The registry keeps track of all refed arcs, and their min/max R/W offsets.
   registerArcRef(port, tokenNum);
 
@@ -715,6 +715,7 @@ void StructTarget :: registerPortHole(VHDLPortHole* port,
   else { /* (tokenNum < 0) */
     ref << "_N" << (-tokenNum);
   }
+  ref << part;
   
   firingPortList.put(ref, port->direction(), port->dataType());
   firingPortMapList.put(ref, ref);
