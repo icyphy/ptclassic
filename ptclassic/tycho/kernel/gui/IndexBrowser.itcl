@@ -88,7 +88,7 @@ class ::tycho::IndexBrowser {
     method help {}
 
     # Open a file and go to its internal point identified by name.
-    method hyperJump {filename point}
+    method hyperJump {filename {point {}}}
 
     ##################################################################
     ####                   protected methods                      ####
@@ -189,7 +189,7 @@ body ::tycho::IndexBrowser::help {} {
 # <i>start</i> and <i>end</i> have the form
 # <i>linenumber.characternumber</i>.
 #
-body ::tycho::IndexBrowser::hyperJump {filename point} {
+body ::tycho::IndexBrowser::hyperJump {filename {point {}}} {
     set char [string index $filename 0]
     if {$char != "/" && $char != "~" && $char != "\$" && $CWD != {}} {
         set filename [format "%s/%s" $CWD $filename]
