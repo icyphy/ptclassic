@@ -150,6 +150,8 @@ ParseToken State :: eval<T>Atom(Tokenizer& lexer) {
 	case EOF:
 		break;
 	case '(':
+		// cfront wants the declaration of t1 in a block
+	{
 		ParseToken t1 = eval<T>Expression(lexer);
 		if (t1.tok != T_<T>) return t1;
 		t = getParseToken(lexer, T_<T>);
@@ -161,6 +163,7 @@ ParseToken State :: eval<T>Atom(Tokenizer& lexer) {
 			parseError ("unbalanced parentheses");
 			t.tok = T_ERROR;
 		}
+	}
 		break;
 	case T_<T>:
 		t.<C>val = signflag * t.<C>val;
