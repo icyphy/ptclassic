@@ -243,21 +243,21 @@ private:
 };
 
 // An iterator for NamedObjList
-class NamedObjListIter : private ListIter {
+class NamedObjListIter : public ListIter {
 public:
 	NamedObjListIter(NamedObjList& sl);
 	inline NamedObj* next() { return (NamedObj*)ListIter::next();}
-	inline NamedObj* operator++(POSTFIX_OP) { return next();}
+	inline NamedObj* operator++(POSTFIX_OP) { return (NamedObj*)ListIter::next();}
 	ListIter::reset;
 	ListIter::remove;
 };
 
 // An iterator for NamedObjList, const form
-class CNamedObjListIter : private ListIter {
+class CNamedObjListIter : public ListIter {
 public:
 	CNamedObjListIter(const NamedObjList& sl);
 	inline const NamedObj* next() { return (const NamedObj*)ListIter::next();}
-	inline const NamedObj* operator++(POSTFIX_OP) { return next();}
+	inline const NamedObj* operator++(POSTFIX_OP) { return (const NamedObj*)ListIter::next();}
 	ListIter::reset;
 };
 
