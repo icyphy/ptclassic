@@ -46,6 +46,7 @@ SRCS= \
  SDFDB.pl \
  SDFDistributor.pl \
  SDFDownSample.pl \
+ SDFExp.pl \
  SDFFIR.pl \
  SDFFloatDC.pl \
  SDFFloatDiff.pl \
@@ -56,12 +57,15 @@ SRCS= \
  SDFFloatRect.pl \
  SDFFloatSum.pl \
  SDFFloatThresh.pl \
+ SDFFloor.pl \
  SDFFork.pl \
  SDFIIDGaussian.pl \
  SDFIIDUniform.pl \
  SDFIntRamp.pl \
  SDFIntegrator.pl \
  SDFLMS.pl \
+ SDFLog.pl \
+ SDFPlay.pl \
  SDFPolarRect.pl \
  SDFPrinter.pl \
  SDFRealComplex.pl \
