@@ -27,6 +27,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 						PT_COPYRIGHT_VERSION_2
 						COPYRIGHTENDKEY
 */
+#define NEED_SYS_ERRLIST	// compat.h uses this.
 #include "copyright.h"
 #include "port.h"
 #include "utility.h"

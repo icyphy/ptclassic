@@ -43,15 +43,13 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #pragma implementation
 #endif
 
+#define NEED_SYS_ERRLIST	// compat.h uses this.
 #include "pt_fstream.h"
 #include "miscFuncs.h"
 #include "Error.h"
 #include <errno.h>
 #include "StringList.h"
-
-extern int sys_nerr;
-extern char *sys_errlist[];
-extern int errno;
+#include "compat.h"		// Pick up sys_errlist[] etc.
 
 // lastName is used to remember the filename for the reporting of errors.
 static const char* lastName = 0;
