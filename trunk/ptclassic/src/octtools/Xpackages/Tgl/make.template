@@ -44,8 +44,9 @@ include $(CONFIG)
 HDRS		= Tgl.h \
 		TglP.h
 
-LIBCSRCS	= Tgl.c \
-		tgtest.c
+LIBCSRCS	= Tgl.c
+
+OTHERSRCS	= tgtest.c
 
 SRCS =		$(LIBCSRCS)
 
@@ -62,12 +63,13 @@ KRUFT =		$(DRIVER)
 DRVROBJ =	tgtest.o
 
 DRVRLIBS =	-lutility -lst -lTable -lerrtrap -luprintf -lport $(X11_LIBSPEC)  $(X11EXT_LIBSPEC) -lXt -lXaw -lXmu -lX11
+
 # common makefile file for vem libraries
 VEMLIBCONFIG=../../vem-lib.mk
 include $(VEMLIBCONFIG)
 
 tests:: $(DRIVER) 
-	$(DRIVER) 
+	@echo "run $(DRIVER) by hand."
 
 # include common definitions, rules
 include $(ROOT)/mk/common.mk
