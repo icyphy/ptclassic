@@ -30,12 +30,12 @@ extern Error errorHandler;
 *************************************************************************/
 
 	////////////////////////////
-	// operator char*
+	// operator StringList
 	////////////////////////////
 
 // Display a schedule
 
-SDFSchedule :: operator char* () {
+SDFSchedule :: operator StringList () {
 	StringList out;
 	out = "SDF SCHEDULE:\n";
 	reset();

@@ -5,6 +5,7 @@
 #include "Star.h"
 #include "Scheduler.h"
 #include "Galaxy.h"
+#include "StringList.h"
 
 
 // SCCS version identification
@@ -37,11 +38,14 @@ public:
 	void wrapup () {scheduler.wrapup(*myTopology);}
 
 	// Redefine char* cast
-	operator char* ();
+	operator StringList ();
 
 	// Display the schedule
-	char* displaySchedule() {scheduler.displaySchedule();}
+	StringList displaySchedule() {scheduler.displaySchedule();}
 
+	// Define clone() for convenience so Universe writers don't need to
+	// Since it returns NULL, clone will fail unless redefined.
+	Block* clone() { return NULL;}
 protected:
 	// The addBlock method should get invoked only once, with a
 	// reference to the component galaxy specified.

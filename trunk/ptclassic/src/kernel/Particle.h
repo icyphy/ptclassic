@@ -1,6 +1,7 @@
 #ifndef _particle_h
 #define _particle_h 1
 
+#include "StringList.h"
 #include "DataStruct.h"
 
 /**************************************************************************
@@ -36,7 +37,7 @@ public:
 	// Cast this Particle to an int, float, and char*
 	virtual operator int () {return 0;};
 	virtual operator float () {return 0.;};
-	virtual operator char* () {return "";};
+	virtual operator StringList () {return "";};
 
 	// Zero or initialize this Particle
 	virtual void initialize() {};
@@ -83,7 +84,7 @@ public:
 	// Cast to an int, float, and char*
 	operator int () {return data;}
 	operator float () {return (float)data;}
-	operator char* ();
+	operator StringList ();
 
 	// Initialize
 	IntSample(int i) {data=i;}
@@ -116,7 +117,7 @@ public:
         // Cast to an int, float, and char*
         operator int () {return (int)data;}
         operator float () {return data;}
-        operator char* ();
+        operator StringList ();
  
         // Initialize
         FloatSample(float f) {data=f;}

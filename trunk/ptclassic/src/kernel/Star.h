@@ -68,7 +68,7 @@ public:
 	void afterGo();
 
 	// Method to print out description
-	operator char* ();
+	operator StringList ();
 };
 
 #include "Fraction.h"

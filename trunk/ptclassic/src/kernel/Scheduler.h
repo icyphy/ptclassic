@@ -73,7 +73,7 @@ public:
 	void reset() {SequentialList::reset();}
 
 	// Display the schedule
-	operator char* ();
+	operator StringList ();
 
 	// Clear the data structure
 	void initialize() {SequentialList::initialize();}
@@ -132,7 +132,7 @@ public:
 	// execution time of the scheduler.
 	int deferredFiring;
 
-	char* displaySchedule() {return mySchedule.operator char* ();}
+	StringList displaySchedule() {return mySchedule;}
 
 	// Constructor sets default options
 	SDFScheduler () {

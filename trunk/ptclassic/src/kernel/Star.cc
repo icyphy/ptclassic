@@ -18,7 +18,7 @@ $Id$
 
 ********************************************************************/
 
-Star :: operator char* () {
+Star :: operator StringList () {
 	StringList out;
 	out = "Star: ";
 	out += readFullName();
@@ -28,7 +28,7 @@ Star :: operator char* () {
 	out += "\n";
 	out += "Ports in the star:\n";
 	for(int i = numberPorts(); i>0; i--)
-		out += nextPort().operator char* ();
+		out += StringList(nextPort());
 	return out;
 }
 
