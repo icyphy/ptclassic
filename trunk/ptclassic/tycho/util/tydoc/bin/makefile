@@ -60,9 +60,9 @@ TYDOC_DESC =
 
 # Do make sources so that we ensure that the subdirectories are checked out
 all:  sources $(MISC_SRCS)
-	chmod a+x tydoc
+	-chmod a+x tydoc
 
-install: all
+install: all tybin_install
 
 # We have an all rule, so include tycommon.mk.
 include $(ROOT)/mk/tycommon.mk
