@@ -74,5 +74,5 @@ TAGS:
 starindex:
 	-mkdir $(ROOT)/doc
 	-mkdir $(ROOT)/doc/star-demo-index
-	mkStarIndex "$(DOMAINS)" $(ROOT)/doc/star-demo-index
+	mkStarIndex "$(sort $(DOMAINS))" $(ROOT)/doc/star-demo-index
 
