@@ -7,6 +7,7 @@
 
 #include <ctype.h>
 #include <stdio.h>
+#include <stdlib.h>		/* Pick up atoi() for sol2. */
 #include "st.h"
 #include "params.h"
 
@@ -459,7 +460,7 @@ register char *a, *b;
  * This routine compares two strings disregarding case.
  */
 {
-    register int value;
+    register int value = 0;
 
     if ((a == (char *) 0) || (b == (char *) 0)) {
 	return a - b;
