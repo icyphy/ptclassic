@@ -38,7 +38,7 @@ The remaining VEM windows can be moved and resized.
 The palette contains icons that themselves represent palettes.
 If you have a color monitor, the outline on the icons is purple,
 the color used for icons representing palettes.
-In the current version of \*(PT, four palettes are included,
+In the current version of \*(PT, five palettes are included,
 one for each of the domains.
 We will begin with the leftmost palette, which contains applications
 in the synchronous dataflow (SDF) domain.
