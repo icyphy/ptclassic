@@ -102,22 +102,22 @@ class ::tycho::PreferenceDialog {
 #### constructor
 #
 body ::tycho::PreferenceDialog::constructor {args} {
-    # Collect groups and their descriptions
+    # Collect groups and their labels
     set groups {}
     foreach tag [::tycho::preference group] {
-	set description [::tycho::preference cget $tag -description]
-	if { $description != "" } {
-	    lappend groups [list $tag $description]
+	set label [::tycho::preference cget $tag -label]
+	if { $label != "" } {
+	    lappend groups [list $tag $label]
 	}
     }
-    # Sort the groups by description
+    # Sort the groups by label
     set groups [eval concat [lsort -command ::tycho::PreferenceDialog::cmp \
 	    $groups]]
 
     # Create a button for each group
-    foreach {tag description} $groups {
+    foreach {tag label} $groups {
 	itk_component add $tag {
-	    button $itk_component(childsite).$tag -text $description \
+	    button $itk_component(childsite).$tag -text $label \
 		    -command "$this edit $tag" \
 		    -highlightthickness 0
 	} {
@@ -145,13 +145,11 @@ body ::tycho::PreferenceDialog::constructor {args} {
     addButton undo -text "Undo" -row 2 -column 0 -command "$this undo"
     addButton redo -text "Redo" -row 2 -column 1 -command "$this redo"
 
-    # Disable the buttons if there is no history. This is rather awkward.
-    if { [::tycho::preference model markIndex "first"] \
-	    == [::tycho::preference model markIndex "current"] } {
+    # Disable the buttons if there is no history.
+    if { [::tycho::preference model compareMarks "first" == "current"] } {
 	component bbox buttonconfigure undo -state disabled
     }
-    if { [::tycho::preference model markIndex "last"] \
-	    == [::tycho::preference model markIndex "current"] } {
+    if { [::tycho::preference model compareMarks "last" == "current"] } {
 	component bbox buttonconfigure redo -state disabled
     }
 
@@ -212,10 +210,10 @@ body ::tycho::PreferenceDialog::notify {args} {
 #
 body ::tycho::PreferenceDialog::redo {} {
     # Call preferences manager to redo
-    set more [::tycho::preference model redo]
+    ::tycho::preference model redo
 
     # If there's no more redo, disable the redo button
-    if { ! $more } {
+    if { [::tycho::preference model compareMarks "last" == "current"] } {
 	component bbox buttonconfigure redo -state disabled
     }
 
@@ -228,10 +226,11 @@ body ::tycho::PreferenceDialog::redo {} {
 #
 body ::tycho::PreferenceDialog::undo {} {
     # Call preferences manager to undo
-    set more [::tycho::preference model undo]
+    ::tycho::preference model undo
 
     # If there's no more undo, disable the undo button
-    if { ! $more } {
+    # If there's no more redo, disable the redo button
+    if { [::tycho::preference model compareMarks "first" == "current"] } {
 	component bbox buttonconfigure undo -state disabled
     }
 

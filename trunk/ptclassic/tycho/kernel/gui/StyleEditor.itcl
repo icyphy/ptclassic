@@ -60,10 +60,10 @@ class ::tycho::PreferenceEditor {
     ####                         public methods                    ####
 
     # Build a non-modal color browser
-    method editcolor {preference description current}
+    method editcolor {preference label current}
 
     # Build a non-modal font browser
-    method editfont {preference description current}
+    method editfont {preference label current}
 
     # Update specified or changed preferences
     method update {args}
@@ -110,7 +110,7 @@ configbody ::tycho::PreferenceEditor::preferences {
     if { $group == "" } {
 	return
     }
-    configure -title [::tycho::preference cget $group -description]
+    configure -title [::tycho::preference cget $group -label]
     configure -labelcolor [::tycho::color blue black]
 
     # Initialize lists of preferences by type
@@ -119,12 +119,12 @@ configbody ::tycho::PreferenceEditor::preferences {
     }
     # Build list of preferences by type
     foreach preference [::tycho::preference preferences $group] {
-	set description \
-		[::tycho::preference cget $group $preference -description]
+	set label \
+		[::tycho::preference cget $group $preference -label]
 	set type \
 		[::tycho::preference cget $group $preference -type]
-	if { $description != "" } {
-	    lappend _$type [list $preference $description]
+	if { $label != "" } {
+	    lappend _$type [list $preference $label]
 	}
 
 	# Subscribe to the preference so undo and redo update the display
@@ -133,7 +133,7 @@ configbody ::tycho::PreferenceEditor::preferences {
 		\[::tycho::preference get $group $preference\]"
     }
 
-    # Sort the lists of preferences by description
+    # Sort the lists of preferences by label
     foreach type {boolean choice font color integer string number} {
 	set _$type [eval concat \
 		[lsort -command ::tycho::PreferenceEditor::cmp [set _$type]]]
@@ -204,7 +204,7 @@ body ::tycho::PreferenceEditor::destructor {} {
 #######################################################################
 #### editcolor
 #
-body ::tycho::PreferenceEditor::editcolor {preference description current} {
+body ::tycho::PreferenceEditor::editcolor {preference label current} {
     set group $itk_option(-preferences)
     set dialog .$preference
 
@@ -216,7 +216,7 @@ body ::tycho::PreferenceEditor::editcolor {preference description current} {
 
     # Make a color browser
     uplevel #0 [list ::tycho::ColorBrowser $dialog \
-	    -title $description \
+	    -title $label \
 	    -default $current]
     wm deiconify $dialog
 
@@ -245,7 +245,7 @@ body ::tycho::PreferenceEditor::editcolor {preference description current} {
 #######################################################################
 #### editfont
 #
-body ::tycho::PreferenceEditor::editfont {preference description current} {
+body ::tycho::PreferenceEditor::editfont {preference label current} {
     set group $itk_option(-preferences)
     set dialog .$preference
 
@@ -257,7 +257,7 @@ body ::tycho::PreferenceEditor::editfont {preference description current} {
 
     # Make a font browser but don't map it to the screen yet
     uplevel #0 [list ::tycho::FontDialog $dialog \
-	    -title $description \
+	    -title $label \
  	    -initialfont $current]
 
     # Remember it
