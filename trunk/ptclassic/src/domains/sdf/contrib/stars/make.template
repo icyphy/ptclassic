@@ -1,0 +1,78 @@
+# Makefile for Ptolemy SDF stars contributed by users
+# $Id$
+#
+# If this file's name is "make.template" and there is no makefile in
+# this directory, do
+#	cp make.template makefile
+#	chmod +w makefile
+#	make depend
+# This will add the dependencies to the makefile.
+
+ROOT = 		../../../../..
+VPATH = 	$(ROOT)/src/domains/sdf/contrib/stars
+
+# get configuration info
+CONFIG =	$(ROOT)/mk/config-$(ARCH).mk
+include $(CONFIG)
+
+# SDFDIR is the directory containing SDF domain support
+SDFDIR = 	$(ROOT)/src/domains/sdf/kernel
+INCL = 		-I$(SDFDIR) -I$(KERNDIR) -I$(ROOT)/src/domains/contrib/stars
+
+# Library name
+LIB =		libsdfcontribstars.$(LIBSUFFIX)
+
+# Where star doc files go
+STARDOCDIR = 	../../doc/stars
+
+# source files for all stars, using preprocessor
+PL_SRCS= \
+SDFCIIDGaussian.pl \
+SDFCfft.pl \
+SDFErrCnt.pl \
+SDFExpGen.pl \
+SDFIntDiv.pl \
+SDFMagSqr.pl \
+SDFModulus.pl \
+SDFPipeOut.pl \
+SDFPnGen.pl \
+SDFPowerEst.pl \
+SDFPowerEstCx.pl \
+SDFQPSK.pl \
+SDFQPSK2.pl \
+SDFReadVar.pl \
+SDFRfft.pl \
+SDFSharedMem.pl \
+SDFSineGen.pl \
+SDFTWTA.pl \
+SDFVDecoder.pl \
+SDFVEncoder.pl \
+SDFVariance.pl \
+SDFWriteVar.pl
+
+# The .cc files
+SRCS =		$(PL_SRCS:.pl=.cc)
+
+# object files for all stars
+OBJS =		$(SRCS:.cc=.o)
+
+# header files for all stars
+HDRS =		$(SRCS:.cc=.h)
+
+STAR_MK =	sdfcontribstars
+DOMAIN =	SDF_CONTRIB
+DOMAIN_2 =	SDF
+EXTRA_SRCS =	$(STAR_MK).c $(PL_SRCS) fft.c
+MISC_FILES =	README README.notes
+
+all:		$(SRCS) stars_all
+
+install:	stars_install
+
+# include common definitions, rules
+include $(ROOT)/mk/common.mk
+
+
+# Don't add anything after the next line; makedepend will zap it.
+# DO NOT DELETE THIS LINE -- make depend depends on it.
+
