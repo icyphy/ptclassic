@@ -96,7 +96,7 @@ body ::tycho::Edit::constructor {args} {
 
     # The text widget.
     itk_component add text {
-	[textWidget] $itk_component(childsite).text -top $this
+	uplevel #0 [textWidget] $itk_component(childsite).text -top $this
     } {
 	keep -text -readonly \
 		-highlightbackground -highlightcolor -selectforeground \
