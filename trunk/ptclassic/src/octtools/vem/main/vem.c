@@ -2478,19 +2478,19 @@ int typeFlag;
     (void) sprintf(errMsgArea, "Description: %s\n", binding->help_str);
     vemMessage(errMsgArea, MSG_NOLOG|MSG_DISP);
     bdQuery(binding, &keys, &menus, &aliases);
-    if (STRLEN(keys) > 0) {
+    if ((int)STRLEN(keys) > 0) {
 	(void) sprintf(errMsgArea, "Key bindings: %s\n", keys);
 	vemMessage(errMsgArea, MSG_NOLOG|MSG_DISP);
     } else {
 	vemMessage("No key bindings\n", MSG_NOLOG|MSG_DISP);
     }
-    if (STRLEN(menus) > 0) {
+    if ((int)STRLEN(menus) > 0) {
 	(void) sprintf(errMsgArea, "Menu bindings: %s\n", menus);
 	vemMessage(errMsgArea, MSG_NOLOG|MSG_DISP);
     } else {
 	vemMessage("No menu bindings\n", MSG_NOLOG|MSG_DISP);
     }
-    if (STRLEN(aliases) > 0) {
+    if ((int)STRLEN(aliases) > 0) {
 	(void) sprintf(errMsgArea, "Type-in names: %s\n", aliases);
 	vemMessage(errMsgArea, MSG_NOLOG|MSG_DISP);
     } else {

@@ -751,7 +751,7 @@ char *outKey;			/* Returned character */
 	    /* Corrupt character */
 	    return 0;
 	} else *outKey = (int) temp;
-    } else if (STRLEN(keyStr) > 1) {
+    } else if ((int)STRLEN(keyStr) > 1) {
 	/* Corrupt character */
 	return 0;
     } else *outKey = keyStr[0];

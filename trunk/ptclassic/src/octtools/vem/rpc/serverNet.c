@@ -211,7 +211,7 @@ int *socket;                    /* socket selected on, for file event */
 
 		/* close the old socket */
 		(void) close(s);
-		RPCLargestFD = MAX(RPCLargestFD, fileno(RPCApplication[index].ReceiveStream));
+		RPCLargestFD = MAX(RPCLargestFD, (int)fileno(RPCApplication[index].ReceiveStream));
 
 		/*
 	  	 * stop connection attempts and allow requests 
@@ -677,7 +677,7 @@ long userOptionWord;
 	/* if the remote and local hosts are different,
 		or if a remote user has been specified */
 	if ((strcmp(app->host, app->localhost) != 0)
-		|| (strlen(remoteUser) > 0))
+		|| ((int)strlen(remoteUser) > 0))
 	    /* then build up a backgrounded r-shell with stdin disconnected */
             (void) sprintf(command,
 			   "%s %s %s -n %s %s %s %d %s %d %d %d %d %ld &",

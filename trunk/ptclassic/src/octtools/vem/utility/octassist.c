@@ -1397,10 +1397,10 @@ octObject *obj;
 		   obj->contents.instance.master,
 		   obj->contents.instance.view,
 		   obj->contents.instance.facet);
-    if (STRLEN(obj->contents.instance.name) > 0) {
+    if ((int)STRLEN(obj->contents.instance.name) > 0) {
 	(void) sprintf(END(ibuf), " N=`%s'", obj->contents.instance.name);
     }
-    if (STRLEN(obj->contents.instance.version) > 0) {
+    if ((int)STRLEN(obj->contents.instance.version) > 0) {
 	(void) sprintf(END(ibuf), " V=`%s'", obj->contents.instance.version);
     }
     switch (obj->contents.instance.transform.transformType) {
