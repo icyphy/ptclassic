@@ -55,6 +55,7 @@ extern void SetIterateProp();
 /* Added for POct.cc */
 extern boolean IsUnivFacet();
 extern boolean IsBus();
+extern boolean MyOpenMaster();
 
 
 /* FIXME: These Functions are NOT defined in octIfc.c */
