@@ -334,6 +334,13 @@ if {$tychoWelcomeWindow != 0} {
 # Determine whether we exit when there are no more windows.
 ::tycho::TopLevel::exitWhenNoMoreWindows $tychoExitWhenNoMoreWindows
 ::tycho::Displayer::normalExit $tychoShouldWeDoRegularExit
+
+
+# FIXME: Workaround for bug on the Mac under itcl2.2
+if [info exists $tyMacBug] {
+    return
+}
+
 # If there are no command-line arguments, and the -noconsole
 # option was not given, open a console window
 if {$tychoOpenFiles == 0} {
