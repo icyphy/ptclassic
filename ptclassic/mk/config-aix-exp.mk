@@ -95,7 +95,6 @@ libvhdlb.exp\
 libvhdlbstars.exp\
 libvhdlf.exp\
 libvhdlfstars.exp\
-libgantt.exp\
 libpigi.exp\
 libX11.exp
 

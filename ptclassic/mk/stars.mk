@@ -608,9 +608,8 @@ endif
 
 ifdef TK
 	CUSTOM_DIRS += $(CROOT)/src/ptklib 
-	LIBS += -lptk -lgantt $(ITK_LIBSPEC) $(TK_LIBSPEC) $(X11_LIBSPEC) 
-	PT_DEPEND += $(LIBDIR)/libptk.a \
-		$(LIBDIR)/libgantt.$(LIBSUFFIX)
+	LIBS += -lptk $(ITK_LIBSPEC) $(TK_LIBSPEC) $(X11_LIBSPEC) 
+	PT_DEPEND += $(LIBDIR)/libptk.a
 endif
 
 CUSTOM_DIRS += $(CROOT)/src/kernel $(CROOT)/src/pigiRpc $(CROOT)/src/ptcl \
