@@ -1,3 +1,4 @@
+static const char file_id[] = "pigiLoader.cc";
 /**************************************************************************
 Version identification:
 $Id$
