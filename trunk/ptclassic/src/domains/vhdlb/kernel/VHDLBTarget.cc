@@ -65,7 +65,10 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 VHDLBTarget::VHDLBTarget(const char* name,const char* starclass,
 			 const char* desc) : HLLTarget(name,starclass,desc) 
-{ }
+{
+  // Set the destination directory.
+  destDirectory.setInitValue("$HOME/PTOLEMY_SYSTEMS/VHDLB");
+}
 
 /////////////////////////////////////////
 // sectionComment
