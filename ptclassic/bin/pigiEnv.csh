@@ -74,6 +74,10 @@ while ($#argv)
 			shift
 			breaksw
 		case -console:
+			echo "-console is obsolete and no longer supported."
+			echo " To bring up a Tycho console that has similar"
+			echo " functionality, start pigi and type a 'y' while"
+			echo " the mouse is over a facet." 
 			set pigiconsole
 			breaksw
 		case -bw:
