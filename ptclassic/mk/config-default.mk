@@ -124,8 +124,8 @@ ITCL_LIBSPEC=-L$(TCL_ROOT)/$(ITCL_VERSION).$(PTARCH)/lib/itcl \
 	-litcl$(ITCL_VERSION_NUM)
 
 ITK_INCDIR=$(TCL_ROOT)/$(ITCL_VERSION)/include
-# Uncomment the next line for itcl-2.0b2
-ITK_LIBSPEC=-L$(TCL_ROOT)/$(ITCL_VERSION).$(PTARCH)/lib/itcl -litk
+ITK_LIBSPEC=-L$(TCL_ROOT)/$(ITCL_VERSION).$(PTARCH)/lib/itcl \
+	-litk$(ITCL_VERSION_NUM)
 
 # Location of the ish binary (tcl + namespaces)
 ISH=$(ROOT)/tcltk/$(ITCL_VERSION).$(PTARCH)/bin/ish
