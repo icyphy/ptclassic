@@ -64,6 +64,8 @@ ptplay.cfront:  ptplay.sun4
 	ln -s $^ $@ 
 ptplay.irix4: ptplay.irix5
 	ln -s $^ $@ 
+ptplay.irix5.cfront: ptplay.irix5
+	ln -s $^ $@ 
 ptplay.hppa.cfront: ptplay.hppa
 	ln -s $^ $@ 
 ptplay.mips:
