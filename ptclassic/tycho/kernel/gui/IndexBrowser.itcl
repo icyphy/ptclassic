@@ -189,7 +189,7 @@ body ::tycho::IndexBrowser::help {} {
 #####################################################################
 #### hyperJump
 # Open a file and go to its internal point identified by name. If the
-# filename is relative (does not begin with "/", "~", or "$"), then
+# filename is relative (it does not begin with "/"(unix), "~", or "$"), then
 # prepend the directory of the file currently being edited or viewed.
 # Then, expand the filename using <code>::tycho::expandPath</code> and
 # open the resulting file with <code>::tycho::File::openContext</code>,
