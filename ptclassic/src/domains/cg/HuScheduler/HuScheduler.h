@@ -56,7 +56,7 @@ public:
   	int scheduleIt();
 
 	// temporal hack
-	void createSubGals();
+	int createSubGals();
 };
 
 #endif
