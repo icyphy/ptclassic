@@ -116,15 +116,28 @@ if {![info exists tychoShouldWeDoRegularExit]} {
 # been sourced.
 
 if [file isdirectory $PTOLEMY/tcltk/itcl/lib] {
-    set env(TCL_LIBRARY) $PTOLEMY/tcltk/itcl/lib/tcl
-    set env(TK_LIBRARY) $PTOLEMY/tcltk/itcl/lib/tk
-    set tk_library $env(TK_LIBRARY)
     
-    uplevel #0 {
-	source $PTOLEMY/tcltk/itcl/lib/tcl/init.tcl
-	source $PTOLEMY/tcltk/itcl/lib/tk/tk.tcl
-	source $PTOLEMY/tcltk/itcl/lib/itcl/init.itcl
-	source $PTOLEMY/tcltk/itcl/lib/itk/init.itk
+    if {$tk_version >= 4.1 } {
+	set env(TCL_LIBRARY) $PTOLEMY/tcltk/itcl/lib/itcl/tcl
+	set env(TK_LIBRARY) $PTOLEMY/tcltk/itcl/lib/itcl/tk
+	set tk_library $env(TK_LIBRARY)
+	uplevel #0 {
+	    source $PTOLEMY/tcltk/itcl/lib/itcl/tcl/init.tcl
+	    source $PTOLEMY/tcltk/itcl/lib/itcl/tk/tk.tcl
+	    source $PTOLEMY/tcltk/itcl/lib/itcl/itcl/init.itc
+	    source $PTOLEMY/tcltk/itcl/lib/itcl/itk/itk.tcl
+	    source $PTOLEMY/tcltk/itcl/lib/itcl/iwidgets/iwidgets.tcl
+	}
+    } else {
+	set env(TCL_LIBRARY) $PTOLEMY/tcltk/itcl/lib/tcl
+	set env(TK_LIBRARY) $PTOLEMY/tcltk/itcl/lib/tk
+	set tk_library $env(TK_LIBRARY)
+	uplevel #0 {
+	    source $PTOLEMY/tcltk/itcl/lib/tcl/init.tcl
+	    source $PTOLEMY/tcltk/itcl/lib/tk/tk.tcl
+	    source $PTOLEMY/tcltk/itcl/lib/itcl/init.itcl
+	    source $PTOLEMY/tcltk/itcl/lib/itk/init.itk
+	}
     }
 }
 uplevel #0 {
