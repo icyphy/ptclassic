@@ -185,6 +185,7 @@ void CGMultiTarget::setup() {
 
 int CGMultiTarget::recursiveModifyGalaxy(Galaxy& gal) {
     if (SimControl::haltRequested()) return FALSE;
+    gal.initialize();
     
     StringList topStarType;
     topStarType << gal.domain() << "Star";
