@@ -87,16 +87,6 @@ int DEScheduler :: setup (Galaxy& galaxy) {
 
 	if (!computeDepth(galaxy)) return FALSE;
 
-	// set the relative time scale.
-	FloatState* st = (FloatState*) galaxy.stateWithName("timeScale");
-	if (st)	relTimeScale = float ((double) (*st));
-	else	relTimeScale = 1.0;
-	
-	// set the synchronization flag
-	IntState* ist = (IntState*) galaxy.stateWithName("sycnMode");
-	if (ist)	syncMode = int(ist);	
-	else		syncMode = TRUE;
-	
 	if (!relTimeScale) {
 		Error::abortRun(galaxy,
 				": zero timeScale is not allowed in DE.");
