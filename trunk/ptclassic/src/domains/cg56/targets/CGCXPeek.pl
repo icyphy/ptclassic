@@ -1,8 +1,8 @@
 defstar {
-    name { XAReceive }
+    name { XPeek }
     domain { CGC }
     desc { Receive data asynchronously from S56X to CGC }
-    derivedFrom { XABase }
+    derivedFrom { XAsynchComm }
     version { $Id$ }
     author { Jose Luis Pino }
     copyright { 
@@ -62,7 +62,7 @@ setup {
 		txType = "int";
 	else
 		txType = "double";
-	CGCXABase::setup();
+	CGCXAsynchComm::setup();
 }
 		
 go {

@@ -1,8 +1,8 @@
 defstar {
-    name { XASend }
+    name { XPoke }
     domain { CGC }
     desc { Send data asynchronously from CGC to S56X }
-    derivedFrom { XABase }
+    derivedFrom { XAsynchComm }
     version { $Id$ }
     author { Jose Luis Pino }
 

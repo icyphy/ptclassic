@@ -1,11 +1,11 @@
 defstar {
-    name { XSBase }
+    name { XSynchComm }
     domain { CGC }
     derivedFrom { XBase }
     desc { Base star for Synchronous CGC <-> S56X IPC }
     version { $Id$ }
     author { Jose Luis Pino }
-    hinclude { "CG56XCSBase.h" }
+    hinclude { "CG56XCSynchComm.h" }
     copyright { 
 Copyright (c) 1994, 1993 The Regents of the University of California.
 All rights reserved.
@@ -21,7 +21,7 @@ between the Sparc and S-56X board.
 ccinclude { <stdio.h> }
 
 public {
-	CG56XCSBase* s56xSide;
+	CG56XCSynchComm* s56xSide;
 	int pairNumber;
 	int commCount;
 	unsigned int bufferPtr;

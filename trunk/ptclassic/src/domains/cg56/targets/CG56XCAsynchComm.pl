@@ -1,5 +1,5 @@
 defstar {
-	name { XCABase }
+	name { XCAsynchComm }
 	domain { CG56 }
 	desc { S56X to CGC asynchronous IPC base star }
 	version { $Id$ }

@@ -1,10 +1,10 @@
 defstar {
-	name { XCSReceive }
+	name { XCReceive }
 	domain { CG56 }
 	desc { CGC to S56X Receive star }
 	version { $Id$ }
 	author { Jose L. Pino }
-	derivedFrom {XCSBase}
+	derivedFrom {XCSynchComm}
 	copyright {
 Copyright (c) 1994,1993 The Regents of the University of California.
 All rights reserved.
@@ -12,7 +12,7 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CG56 Target Directory }
-	ccinclude { "CGCXSReceive.h" }
+	ccinclude { "CGCXReceive.h" }
 	explanation {
 	}
 protected {
@@ -38,7 +38,7 @@ $label(XFR)
 
 setup {
 	numXfer = output.numXfer();     
-	CG56XCSBase::setup();      
+	CG56XCSynchComm::setup();      
 }
 
 go {

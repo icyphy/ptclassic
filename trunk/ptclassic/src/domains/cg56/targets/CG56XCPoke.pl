@@ -1,10 +1,10 @@
 defstar	{
-name { XCASend }
+name { XCPoke }
 domain { CG56 }
 desc { S56X to CGC synchronous send star }
 version	{ $Id$ }
 author { Jose Luis Pino }
-derivedFrom { XCABase }
+derivedFrom { XCAsynchComm }
 
 copyright {
 Copyright (c) 1994, 1993 The Regents of the University of California.
@@ -39,7 +39,7 @@ codeblock(sendBuffer) {
 }
 
 setup {
-	CG56XCABase::setup();
+	CG56XCAsynchComm::setup();
 }
 
 go {

@@ -1,11 +1,11 @@
 defstar	{
 
-name { XCSSend }
+name { XCSend }
 domain { CG56 }
 desc { S56X to CGC sunchronous send star }
 version	{ $Id$ }
 author { Jose Luis Pino }
-derivedFrom { XCSBase }
+derivedFrom { XCSynchComm }
 
 copyright {
 Copyright (c) 1994, 1993 The Regents of the University of California.
@@ -44,7 +44,7 @@ $label(XFR)
 
 setup {
 	numXfer = input.numXfer();
-	CG56XCSBase::setup();
+	CG56XCSynchComm::setup();
 }
 	
 go {

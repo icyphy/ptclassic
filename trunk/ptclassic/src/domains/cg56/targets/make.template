@@ -45,12 +45,12 @@ S56WHO= S56XTargetWH.o
 S56WHI= -I$(S56DIR)/include
 endif
 
-S56PL_SRCS = 	CG56XCABase.pl CG56XCSBase.pl \
-		CGCXBase.pl CGCXSBase.pl CGCXABase.pl \
-		CG56XCSSend.pl CG56XCSReceive.pl \
-		CGCXSSend.pl CGCXSReceive.pl \
-		CG56XCASend.pl CG56XCAReceive.pl \
-		CGCXASend.pl CGCXAReceive.pl
+S56PL_SRCS = 	CG56XCAsynchComm.pl CG56XCSynchComm.pl \
+		CGCXBase.pl CGCXSynchComm.pl CGCXAsynchComm.pl \
+		CG56XCSend.pl CG56XCReceive.pl \
+		CGCXSend.pl CGCXReceive.pl \
+		CG56XCPoke.pl CG56XCPeek.pl \
+		CGCXPoke.pl CGCXPeek.pl
 
 INCL=-I$(CG56DIR) -I$(CGDIR) -I$(CGSTARDIR) -I$(SDFDIR) -I$(KERNDIR) \
      -I$(PARDIR) -I$(CGTARDIR) -I$(CG56STARDIR) -I$(CGCDIR) $(S56WHI)
