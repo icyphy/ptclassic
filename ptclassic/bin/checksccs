@@ -7,7 +7,9 @@
 #   files ending in .class
 tmpfile=/tmp/checksccs.$$
 
-awk ' {filelist=$0}
+# Regular awk barfs on cg56
+# awk: record `CG56Chop.cc CG56Host...' too long
+gawk ' {filelist=$0}
 	END { nf=split(sccsfiles,s," ")
 		for(i=1;i<=nf;i++) {
 			sccsfiles[s[i]]=s[i]
