@@ -36,7 +36,7 @@
 # drawn on the slate.
 #
 class ::tycho::Layout {
-    inherit ::tycho::OldModel
+    inherit ::tycho::DataModel
 
     constructor {args} {}
     destructor {}
@@ -120,15 +120,6 @@ class ::tycho::Layout {
     method type {item}
 
     #################################################################
-    ####                  protected methods                      ####
-    
-    # Add a nested item -- parser call
-    protected method _item {context item spec args}
-
-    # Evaluate code in this object's context
-    protected method evalInSpecificContext {args} {eval $args}
-
-    #################################################################
     ####                   private variables                     ####
     
     # Storage used during interaction sequences
@@ -142,14 +133,11 @@ class ::tycho::Layout {
 #### constructor
 #
 body ::tycho::Layout::constructor {args} {
-    # Items can have arbitrary attributes
-    configure -strictoptions 0
-
     # Evaluate options
     eval configure $args
 
-    # The item entity has a value (its type and coords)
-    defineEntityType item -valued 1
+    # The "item" type
+    definetype item
 }
 
 ########################################################################
@@ -576,14 +564,4 @@ body ::tycho::Layout::type {item} {
 
     _verify item $cntxt $local
     lindex $_value($item) 0
-}
-
-########################################################################
-#### _item
-#
-# Add a nested item -- parser call
-#
-body ::tycho::Layout::_item {context item value args} {
-    _verifynot item $context $item $context.$item
-    _addentity item $context $item $context.$item $value $args]
 }
