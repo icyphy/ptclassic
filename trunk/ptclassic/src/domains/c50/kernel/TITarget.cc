@@ -69,6 +69,22 @@ void TITarget :: setup() {
 	LOG_DEL; delete mem;
 	LOG_NEW; mem = new TIMemory(bMemMap,uMemMap);
 	AsmTarget::setup();
+// complex numbers in the C50 will be allocated 2 consecutive words of
+// memory.
+
+	GalStarIter nextStar(*galaxy());
+	AsmStar* s;
+	while((s = (AsmStar*)nextStar++) != 0){
+	   BlockPortIter next(*s);
+	   AsmPortHole * p;
+	       while((p = (AsmPortHole*) next++) != 0) {
+		   if (p->resolvedType() == COMPLEX ){
+		       p->setSDFParams(2,1);
+		    }
+		}
+		
+	}
+
 }
 
 TITarget :: ~TITarget () {
