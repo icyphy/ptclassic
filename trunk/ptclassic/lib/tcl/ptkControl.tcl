@@ -416,8 +416,6 @@ proc ptkGrAnimation { on } {
 proc ptkHighlightStar { star args } {
     global ptkColorList
 
-    puts stderr "dbg: ptkHighlightStar $star $args"
-
     ptkClearHighlights
     if {([llength $args] == 1)} {
 	if {[lsearch [array names ptkColorList] [lindex $args 0]] == -1} {
