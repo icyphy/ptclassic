@@ -2,7 +2,7 @@ defstar {
 	name { PolarRect }
 	domain { SDF }
 	desc { Convert magnitude and phase to rectangular form. }
-	version {$Revision$ $Date$}
+	version {$Id$}
 	author { E. A. Lee }
 	copyright { 1991 The Regents of the University of California }
 	location { SDF main library }

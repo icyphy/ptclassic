@@ -1,7 +1,7 @@
 defstar {
 	name { Autocor }
 	domain {SDF}
-	version {$Revision$ $Date$}
+	version {$Id$}
 	desc { Estimates an autocorrelation by averaging input samples. }
 	author { E. A. Lee }
 	copyright { 1991 The Regents of the University of California }

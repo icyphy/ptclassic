@@ -1,7 +1,7 @@
 defstar {
 	name {Commutator}
 	domain {SDF}
-	version {$Revision$ $Date$}
+	version {$Id$}
 	desc {
 Takes n input streams and combines them to form one output stream.
 	}

@@ -2,7 +2,7 @@ defstar {
 	name {Fork}
 	domain {SDF}
 	desc { Copies input particles to each output. }
-	version {$Revision$ $Date$}
+	version {$Id$}
 	author { D. G. Messerschmitt }
 	copyright { 1991 The Regents of the University of California }
 	location { SDF main library }

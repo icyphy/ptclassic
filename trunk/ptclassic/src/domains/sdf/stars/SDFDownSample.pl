@@ -8,7 +8,7 @@ If phase = 0, the most recent sample is the output,
 while if phase = factor-1 the oldest sample is the output.
 Phase = 0 is the default.
 	}
-	version {$Revision$ $Date$}
+	version {$Id$}
 	author { J. T. Buck }
 	copyright { 1991 The Regents of the University of California }
 	location { SDF main library }

@@ -2,7 +2,7 @@ defstar {
 	name { Xhistogram }
 	domain { SDF }
 	desc { Generate a histogram with the xgraph program. }
-	version {$Revision$ $Date$}
+	version {$Id$}
 	author { E. A. Lee }
 	copyright { 1991 The Regents of the University of California }
 	location { SDF main library }

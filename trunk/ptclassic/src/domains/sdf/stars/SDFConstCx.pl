@@ -1,7 +1,7 @@
 defstar {
 	name {ComplexDC}
 	domain {SDF}
-	version {$Revision$ $Date$}
+	version {$Id$}
 	desc {
 Outputs a constant complex signal with real part "real"
 (default 0.0) and imaginary part "imag" (default 0.0).

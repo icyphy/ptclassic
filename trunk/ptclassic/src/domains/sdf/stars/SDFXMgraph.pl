@@ -2,7 +2,7 @@ defstar {
 	name { XMgraph }
 	domain { SDF }
 	desc { Generate a multi-signal plot with the xgraph program. }
-	version {$Revision$ $Date$}
+	version {$Id$}
 	author { J. T. Buck and E. A. Lee }
 	copyright { 1991 The Regents of the University of California }
 	location { SDF main library }

@@ -6,7 +6,7 @@ Generates an i.i.d. uniformly distributed pseudo-random process.
 Output is uniformly distributed between "lower" (default 0)
 and "upper" (default 1).
 	}
-	version {$Revision$ $Date$}
+	version {$Id$}
 	author { D. G. Messerschmitt }
 	copyright { 1991 The Regents of the University of California }
 	location { SDF main library }

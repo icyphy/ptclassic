@@ -2,7 +2,7 @@ defstar {
 	name {FloatSum}
 	domain {SDF}
 	desc { Output the sum of the inputs, as a floating value.  }
-	version {$Revision$ $Date$}
+	version {$Id$}
 	author { J. T. Buck }
 	copyright { 1991 The Regents of the University of California }
 	location { SDF main library }

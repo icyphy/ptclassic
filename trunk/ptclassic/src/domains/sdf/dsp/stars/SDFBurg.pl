@@ -5,7 +5,7 @@ ident {
 defstar {
 	name {Burg}
 	domain {SDF}
-	version {$Revision$ $Date$}
+	version {$Id$}
 	desc { Burg's algorithm. }
 	author { E. A. Lee }
 	copyright { 1991 The Regents of the University of California }

@@ -10,7 +10,7 @@ If "saturate" = 1, saturation is performed.
 If "saturate" = 0, wrap-around is performed (default).
 When the "reset" input is non-zero, the Integrator is reset to 0.0.
 	}
-	version {$Revision$ $Date$}
+	version {$Id$}
 	author { E. A. Lee }
 	copyright { 1991 The Regents of the University of California }
 	location { SDF main library }

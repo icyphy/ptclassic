@@ -2,7 +2,7 @@ defstar {
 	name { FloatGain }
 	domain { SDF }
 	desc { Amplifier: output is input times "gain" (default 1.0). }
-	version {$Revision$ $Date$}
+	version {$Id$}
 	author { J. T. Buck }
 	copyright { 1991 The Regents of the University of California }
 	location { SDF main library }

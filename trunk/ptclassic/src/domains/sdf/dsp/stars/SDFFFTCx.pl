@@ -7,7 +7,7 @@ Parameter "order" (default 8) is the log, base 2, of the transform size.
 Parameter "size" (default 256) is the number of samples read (<= 2^order).
 Parameter "direction" (default 1) is 1 for forward, -1 for inverse FFT.
 	}
-	version {$Revision$ $Date$}
+	version {$Id$}
 	author { J. T. Buck }
 	copyright { 1991 The Regents of the University of California }
 	location { SDF dsp library }

@@ -5,7 +5,7 @@ ident {
 defstar {
 	name { BlockFIR }
 	domain { SDF }
-	version {$Revision$ $Date$}
+	version {$Id$}
 	desc { An FIR filter with coefficients externally supplied. }
 	author { E. A. Lee }
 	copyright { 1991 The Regents of the University of California }

@@ -2,7 +2,7 @@ defstar {
 	name { RealComplex }
 	domain { SDF }
 	desc {Convert real and imaginary parts to a complex output.}
-	version {$Revision$ $Date$}
+	version {$Id$}
 	author { E. A. Lee }
 	copyright { 1991 The Regents of the University of California }
 	location { SDF main library }

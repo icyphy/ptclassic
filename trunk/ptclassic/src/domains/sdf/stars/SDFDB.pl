@@ -5,7 +5,7 @@ defstar {
 Converts input to dB.  Zero and negative values are
 converted to 'min' (default -100).
 	}
-	version {$Revision$ $Date$}
+	version {$Id$}
 	author { J. T. Buck }
 	copyright { 1991 The Regents of the University of California }
 	location { SDF main library }

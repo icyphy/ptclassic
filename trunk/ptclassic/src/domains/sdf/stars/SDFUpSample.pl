@@ -7,7 +7,7 @@ The "phase" tells where to put the sample in an output block.
 The default is to output it first (phase = 0).
 The maximum phase is "factor" - 1.
 	}
-	version {$Revision$ $Date$}
+	version {$Id$}
 	author { J. T. Buck }
 	copyright { 1991 The Regents of the University of California }
 	location { SDF main library }

@@ -7,7 +7,7 @@ never changes by more than PI in one iteration, and that we "catch"
 all phase transitions.  It also assumes that the input is in the
 [-PI,PI]  range.
 	}
-	version {$Revision$ $Date$}
+	version {$Id$}
 	author { J. T. Buck }
 	copyright { 1991 The Regents of the University of California }
 	location { SDF main library }

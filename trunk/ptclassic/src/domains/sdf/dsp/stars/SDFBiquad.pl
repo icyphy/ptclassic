@@ -1,7 +1,7 @@
 defstar {
 	name {BiQuad}
 	domain {SDF}
-	version {$Revision$ $Date$}
+	version {$Id$}
 	desc {
 A two-pole, two-zero IIR filter (a biquad).
 The default is a Butterworth filter with a cutoff 0.1 times sample freq.

@@ -1,7 +1,7 @@
 defstar {
 	name {BlackHole}
 	domain {SDF}
-	version {$Revision$ $Date$}
+	version {$Id$}
 	desc {
 Discards all inputs.
 	}
