@@ -76,8 +76,11 @@ protected:
 	StringState bMemMap;
 	StringState uMemMap;
 
+
 	// Write star firings as subroutine calls.
 	IntState subFire;
+        // loop counter
+        int loopCounter;
 
 #ifdef __GNUG__
 	// Workaround a bug in gcc-2.6.0.  Otherwise DSK320Target.cc 
