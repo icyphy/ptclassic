@@ -1,0 +1,265 @@
+# The superclass of all simulation controllers.
+#
+# @Author: John Reekie
+#
+# @Version: $Id$
+#
+# @Copyright (c) 1996-1997 The Regents of the University of California.
+# All rights reserved.
+#
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the above
+# copyright notice and the following two paragraphs appear in all copies
+# of this software.
+#
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+#
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+#                                        PT_COPYRIGHT_VERSION_2
+#                                        COPYRIGHTENDKEY
+#######################################################################
+
+
+#######################################################################
+#### Simulation
+#
+# A <i>Simulation</i> object controls and communicates with a
+# running Ptolemy II simulation. It is a subclass of the Tycho
+# Model class, in order that multiple views can monitor the
+# simulation.
+#
+# Most of the implementations of the methods in here are garbage,
+# and will be fixed when we get a proper interface to Ptolemy II.
+#
+class ::tycho::Simulation {
+    inherit ::tycho::Model
+
+    constructor {args} {}
+    destructor {}
+    
+    ###################################################################
+    ####                            options                        ####
+    
+    # The name of the simulation for messages and the like
+    public variable simulationName ""
+
+    # The debug flag
+    public variable debug 0
+
+    # The port number to use to talk to the simulator
+    public variable portnum 13579
+
+    # A flag that says that we have no simulation running
+    public variable disconnect 0
+
+    ###################################################################
+    ####                         public methods                    ####
+
+    # Pause the task
+    method pause {}
+
+    # Resume the task
+    method resume {}
+
+    # Start the task
+    method start {}
+
+    # Stop the task
+    method stop {}
+
+    ###################################################################
+    ####                      public procs                         ####
+
+    ###################################################################
+    ####                   protected methods                       ####
+
+    # Print a debug message
+    protected method debug {msg} {
+	if $debug {
+	    puts "DEBUG: $simulationName: $msg"
+	}
+    }
+
+    # Send a message to the simulation
+    protected method _send {msg}
+
+    ###################################################################
+    ####                   protected variables                     ####
+
+    ###################################################################
+    ####                     private variables                     ####
+
+    # The object that talks to the simulation. This is temporary
+    private variable _socketTalker
+}
+
+
+#######################################################################
+#### debug
+#
+# Set or clear the debug flag.
+#
+configbody ::tycho::Simulation::debug {
+    if [info exists _socketTalker] {
+	$_socketTalker configure -debug $debug
+    }
+}
+
+#######################################################################
+#### portnum
+#
+# Update the port number used for talking to the simulation.
+# This trashes the old process and creates a new one.
+#
+configbody ::tycho::Simulation::portnum {
+    if !$disconnect {
+	if [info exists _socketTalker] {
+	    delete object $_socketTalker
+	}
+	set _socketTalker [::tycho::JRPC #0 -debug $debug -portnum $portnum]
+    }
+}
+
+#######################################################################
+#### constructor
+#
+body ::tycho::Simulation::constructor {args} {
+    set simulationName [info namespace tail $this]
+
+    # Initialize args
+    eval configure $args
+
+    # Create the remote process and the object that talks to it
+    if !$disconnect {
+	set _socketTalker [::tycho::JRPC #0 -debug 1 -portnum $portnum]
+    }
+}
+
+
+    ###################################################################
+    ###################################################################
+    ####                      public methods                       ####
+
+#######################################################################
+#### pause
+#
+# Pause the simulation.
+#
+body ::tycho::Simulation::pause {} {
+    debug "Pause"
+}
+
+#######################################################################
+#### resume
+#
+# Resume the simulation.
+#
+body ::tycho::Simulation::resume {} {
+    debug "Resume"
+}
+
+#######################################################################
+#### start
+#
+# Start the simulation.
+#
+body ::tycho::Simulation::start {} {
+    debug "Start"
+    set script {
+set univ [java::new pt.domains.ct.kernel.CTUniverse]
+$univ setName Universe
+set exec [$univ getExecutor]
+set const [java::new pt.domains.ct.stars.CTConst $univ Const]
+set add1 [java::new pt.domains.ct.stars.CTAdd $univ Add1]
+set add2 [java::new pt.domains.ct.stars.CTAdd $univ Add2]
+set intgl1 [java::new pt.domains.ct.stars.CTIntegraRK4 $univ Integral1]
+set intgl2 [java::new pt.domains.ct.stars.CTIntegraRK4 $univ Integral2]
+set gain1 [java::new pt.domains.ct.stars.CTGain $univ Gain1]
+set gain2 [java::new pt.domains.ct.stars.CTGain $univ Gain2]
+set gain3 [java::new pt.domains.ct.stars.CTGain $univ Gain3]
+set gain4 [java::new pt.domains.ct.stars.CTGain $univ Gain4]
+set plot [java::new pt.domains.ct.stars.CTPlot $univ Plot]
+
+set constout [$const getIOPort output]
+set add1in [$add1 getIOPort input]
+set add1out [$add1 getIOPort output]
+set add2in [$add2 getIOPort input]
+set add2out [$add2 getIOPort output]
+
+set intgl1in [$intgl1 getIOPort input]
+set intgl1out [$intgl1 getIOPort output]
+set intgl2in [$intgl2 getIOPort input]
+set intgl2out [$intgl2 getIOPort output]
+set gain1in [$gain1 getIOPort input]
+set gain1out [$gain1 getIOPort output]
+set gain2in [$gain2 getIOPort input]
+set gain2out [$gain2 getIOPort output]
+set gain3in [$gain3 getIOPort input]
+set gain3out [$gain3 getIOPort output]
+set gain4in [$gain4 getIOPort input]
+set gain4out [$gain4 getIOPort output]
+set plotin [$plot getIOPort input]
+
+set r1 [$univ {connect pt.kernel.IOPort pt.kernel.IOPort String} $constout $add1in R1]
+set r2 [$univ {connect pt.kernel.IOPort pt.kernel.IOPort String} $add1out $intgl1in R2]
+set r3 [$univ {connect pt.kernel.IOPort pt.kernel.IOPort String} $intgl1out $plotin R3]
+set r4 [$univ {connect pt.kernel.IOPort pt.kernel.IOPort String} $gain1out $add1in R4]
+$gain1in link $r3
+$gain2in link $r3
+set r5 [$univ {connect pt.kernel.IOPort pt.kernel.IOPort String} $gain2out $add2in R5]
+set r6 [$univ {connect pt.kernel.IOPort pt.kernel.IOPort String} $gain3out $add1in R6]
+set r7 [$univ {connect pt.kernel.IOPort pt.kernel.IOPort String} $add2out $intgl2in R7]
+set r8 [$univ {connect pt.kernel.IOPort pt.kernel.IOPort String} $intgl2out $gain3in R8]
+set r9 [$univ {connect pt.kernel.IOPort pt.kernel.IOPort String} $gain4out $add2in R9]
+$gain4in link $r8
+
+$exec setSimulationParams 0 500 0.5
+$const setValue 1
+$gain1 setGain -0.061803398874499
+$gain2 setGain 0.19021130325903
+$gain3 setGain -0.19021130325903
+$gain4 setGain -0.061803398874499
+$plot setYRange 0 5
+$exec start
+#after 10000 [$const setState 3]
+}
+$_socketTalker send eval $script
+}
+
+#######################################################################
+#### stop
+#
+# Stop the simulation.
+#
+body ::tycho::Simulation::stop {} {
+    debug "Stop"
+}
+
+
+    ###################################################################
+    ###################################################################
+    ####                    protected methods                      ####
+
+#######################################################################
+#### _send
+#
+# Send a message to the simulation.
+#
+body ::tycho::Simulation::_send {msg} {
+    if $disconnect {
+	puts "Disconnected: $msg"
+    } else {
+	$_socketTalker send $msg
+    }
+}
