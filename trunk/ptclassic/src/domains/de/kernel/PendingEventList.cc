@@ -66,9 +66,25 @@ Link * PendingEventList::appendGet( CqLevelLink * obj )
 	return (Link *)LinkedList::appendGet( obj );
 }
 
-Pointer PendingEventList::getHeadAndRemove() {
+void PendingEventList::freeHeadAndRemove() {
+	CqLevelLink *aboutToDieLevelLink;
+	CqLevelLink *before;
+	CqLevelLink *next;
         myQueue->decrementEventCount(); 
-	return LinkedList::getHeadAndRemove();
+	aboutToDieLevelLink = LinkedList::getHeadAndRemove();
+        if( aboutToDieLevelLink ) {
+            aboutToDieLevelLink->destinationRef = 0; 
+	    before = aboutToDieLevelLink->before; 
+	    next = aboutToDieLevelLink->next; 
+	    if( before ) { 
+		before->next = next;
+            }
+            if( next ) {
+                next->before = before;
+            }
+	    myQueue->putFreeLink(aboutToDieLevelLink); 
+	}
+
 }
 
 CqLevelLink * PendingEventList::remove( Link * obj )
