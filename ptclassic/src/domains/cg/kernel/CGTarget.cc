@@ -289,12 +289,15 @@ void CGTarget :: writeCode() {
 ISA_FUNC(CGTarget,Target);
 
 StringList CGTarget::comment(const char* msg, const char* b, 
-const char* end, const char* cont) {
+const char* e, const char* cont) {
     StringList cmt;
     if (msg==NULL) return cmt;
     char begin;
     if (b==NULL) begin ='#';
     else begin = *b;
+    char end;
+    if (e==NULL) end =' ';
+    else end = *e;
     if (cont==NULL) {	/*multiline comments unsupported*/
 	LOG_NEW; char* c = new char[strlen(msg)];
 	strcpy(c,msg);
