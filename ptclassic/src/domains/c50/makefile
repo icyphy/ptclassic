@@ -41,6 +41,9 @@ VPATH = $(ROOT)/src/domains/$(ME)
 CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
+# source files
+SRCS = asmc50 loadc50
+
 include $(ROOT)/mk/topdomain.mk
 
 # Subdirectories with star directories in them
