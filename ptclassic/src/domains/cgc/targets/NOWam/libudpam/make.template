@@ -70,9 +70,9 @@ include $(ROOT)/mk/common.mk
 
 # sol2 and sol2.cfront
 ifneq (,$(filter sol%,$(PTARCH)))
-all: makefile $(LIB)
+all: makefile $(CLIB)
 
-install: makefile $(LIBDIR)/$(LIB)
+install: makefile $(LIBDIR)/$(CLIB)
 else
 # Non solaris platforms
 all: makefile
