@@ -139,16 +139,36 @@ STARDOCRULE=if [ ! -d `dirname $(STARDOCDIR)` ]; then \
 .chdl.cc:
 	cd $(VPATH); pepp $<
 
-# Rule for building a library
+ifeq ($(strip $(LIB)),)
+LIB=dummylib
+endif
+
+# Rule for building a C++ library
 # We use a GNU make conditional here
 $(LIB):	$(OBJS)
 ifeq ($(USE_SHARED_LIBS),yes) 
-	rm -f $(LIB) 
-	$(SHARED_LIBRARY_COMMAND) $(LIB) $(OBJS) 
+	rm -f $@
+	$(SHARED_LIBRARY_COMMAND) $@ $(OBJS) 
 else
-	rm -f $(LIB)
-	$(AR) cq $(LIB) $(OBJS)
-	$(RANLIB) $(LIB)
+	rm -f $@
+	$(AR) cq $@ $(OBJS)
+	$(RANLIB) $@
+endif
+
+ifeq ($(strip $(CLIB)),)
+CLIB=dummyclib
+endif
+
+# Rule for building a C library (no C++).  Used primarily by octtools
+# We use a GNU make conditional here
+$(CLIB):	$(OBJS)
+ifeq ($(USE_SHARED_LIBS),yes) 
+	rm -f $@
+	$(CSHARED_LIBRARY_COMMAND) $@ $(OBJS) 
+else
+	rm -f $@
+	$(AR) cq $@ $(OBJS)
+	$(RANLIB) $@
 endif
 
 # Used to explicitly build non-shared libraries. For an example, see 
@@ -159,16 +179,21 @@ $(LIBNONSHARED): $(OBJS)
 	$(RANLIB) $@
 
 $(LIBDIR)/$(LIBNONSHARED):	$(LIBNONSHARED) $(EXP)
-	rm -f $(LIBDIR)/$(LIBNONSHARED)
+	rm -f $@
 	ln $(LIBNONSHARED) $(LIBDIR)
 
 # AIX used EXP for export lists
 $(EXP): $(LIB)
 
-# Rule for installing a library
+# Rule for installing a C++ library
 $(LIBDIR)/$(LIB):	$(LIB) $(EXP)
-		rm -f $(LIBDIR)/$(LIB)
+		rm -f $@
 		ln $(LIB) $(LIBDIR)
+
+# Rule for installing a C library
+$(LIBDIR)/$(CLIB):	$(CLIB) $(EXP)
+		rm -f $@
+		ln $(CLIB) $(LIBDIR)
 
 # Rule for making a star list for inclusion by make
 $(VPATH)/$(STAR_MK).mk:	make.template
@@ -192,7 +217,7 @@ stars_install:	all $(LIBDIR)/$(LIB) $(LIBDIR)/$(STAR_MK).o
 # Rule for installing the star list
 
 $(LIBDIR)/$(STAR_MK).o:	$(STAR_MK).o
-		rm -f $(LIBDIR)/$(STAR_MK).o
+		rm -f $@
 		ln $(STAR_MK).o $(LIBDIR)
 
 # "make sources" will do SCCS get on anything where SCCS file is newer.
@@ -206,7 +231,7 @@ clean:
 # Make things "even cleaner".  Removes libraries, generated .cc and .h
 # files from preprocessor, etc.
 realclean:
-	rm -f $(CRUD) $(LIB) $(PL_SRCS:.pl=.h) $(PL_SRCS:.pl=.cc) $(REALCLEAN_STUFF)
+	rm -f $(CRUD) $(LIB) $(CLIB) $(PL_SRCS:.pl=.h) $(PL_SRCS:.pl=.cc) $(REALCLEAN_STUFF)
 
 DEPEND_INCL=$(INCL) $(C_INCL)
 
