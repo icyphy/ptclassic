@@ -79,8 +79,8 @@ else
     else
 	echo ""
 	# Installation error: no Bin/MathLink sub-directory
-	# echo "Found the Mathematica installation directory '$newpath', but it did not contain a Bin/MathLink sub-directory." >! /dev/tty
-	# exit 1
+	ptErrorMessage "Found the Mathematica installation directory '$newpath', but it did not contain a Bin/MathLink sub-directory."
+	exit 1
     endif
   else
     echo ""
