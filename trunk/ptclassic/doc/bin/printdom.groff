@@ -1,8 +1,8 @@
 #! /bin/csh -f
 # $Id$
 #
-# Print documentation for a Ptolemy domain.  Assumed to be started in
-# the "doc" subdirectory of a domain.
+# Print documentation for a Ptolemy domain for the Star Atlas.  Assumed
+# to be started in the "doc" subdirectory of a domain.
 #
 # Command line options:
 #
@@ -33,7 +33,7 @@
 # The documentation consists of a concatenation of the following files:
 #
 #   $PTOLEMY/doc/headers/shared - macro definitions
-#   overall.t - introduction to the domain
+#   init.t - defines section number in Almagest Star Atlas
 #   targettitle.t - title page for the target section
 #   targets/*.t - target troff documentation
 #   startitle.t - title page for the stars section
@@ -42,6 +42,8 @@
 #   demos/*.t- demo troff documentation.
 #
 # Any troff file may include other troff files with the .so command
+# The overall.t file is no longer included.  That information is
+# now available in the User's Manual.
 #
 # Index information is appended to the file $HOME/Almagest.index,
 # or to whatever ALAMAGEST_INDEX is set to.
@@ -123,7 +125,7 @@ endif
 
 
 gsoelim $dirheader/groff-fix $dirheader/shared $dirheader/domain \
-	init.t overall.t > $tempTroffFile
+	init.t > $tempTroffFile
 
 # Set icon printing flag: 0 if not printing icons, 1 if printing them.
 if ($icons) then
