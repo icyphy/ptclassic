@@ -509,7 +509,8 @@ void StructTarget :: trailerCode() {
   
   buildEntityDeclaration(level);
   buildArchitectureBodyOpener(level);
-  buildComponentDeclarations(level);
+  //  buildComponentDeclarations(level);
+  component_declarations << addComponentDeclarations(&mainCompDeclList, level);
   signal_declarations << addSignalDeclarations(&mainSignalList, level);
   component_mappings << addComponentMappings(&mainCompDeclList, level);
   buildArchitectureBodyCloser(level);
@@ -520,7 +521,7 @@ void StructTarget :: trailerCode() {
 void StructTarget :: frameCode() {
   StringList code = headerComment();
 
-  myCode << cli_models;
+  //  myCode << cli_models;
 
   if (systemClock()) {
     myCode << clockGenCode();
@@ -1155,50 +1156,54 @@ void StructTarget :: registerComm(int direction, int pairid, int numxfer,
   
   // Construct unique label and signal names and put comp map in main list
   StringList label;
-  StringList startName, goName, dataName, doneName, endName;
+  StringList goName, dataName, doneName;
   StringList rootName = name;
   rootName << pairid;
 
   label << rootName;
-  startName << rootName << "_start";
   goName << rootName << "_go";
   dataName << rootName << "_data";
   doneName << rootName << "_done";
-  endName << rootName << "_end";
   
-  VHDLGenericList* genMapList = new VHDLGenericList;
-  VHDLPortList* portMapList = new VHDLPortList;
+  VHDLGenericList* genList = new VHDLGenericList;
+  VHDLPortList* portList = new VHDLPortList;
   
-  genMapList->put("pairid", "INTEGER", "", pairid);
-  genMapList->put("numxfer", "INTEGER", "", numxfer);
+  genList->put("pairid", "INTEGER", "", pairid);
+  genList->put("numxfer", "INTEGER", "", numxfer);
 
+  portList->put("go", "STD_LOGIC", "IN", goName, NULL);
+  if (direction) {
+    firingPortList.put(dataName, vtype, "OUT", dataName, NULL);
+    firingSignalList.put(dataName, vtype, NULL);
+    portList->put("data", vtype, "IN", dataName, NULL);
+  }
+  else {
+    portList->put("data", vtype, "OUT", dataName, NULL);
+    firingSignalList.put(dataName, vtype, NULL);
+    firingPortList.put(dataName, vtype, "IN", dataName, NULL);
+  }
+  portList->put("done", "STD_LOGIC", "OUT", doneName, NULL);
+
+  mainCompDeclList.put(label, portList, genList, name, portList, genList);
+
+  StringList startName;
+  StringList endName;
+  startName << rootName << "_start";
+  endName << rootName << "_end";
+
+  // Also add to port list of controller.
   ctlerPortList.put(startName, "STD_LOGIC", "OUT", startName, NULL);
   ctlerSignalList.put(startName, "STD_LOGIC", NULL);
   firingSignalList.put(startName, "STD_LOGIC", NULL);
   firingPortList.put(startName, "STD_LOGIC", "IN", startName, NULL);
   firingPortList.put(goName, "STD_LOGIC", "OUT", goName, NULL);
   firingSignalList.put(goName, "STD_LOGIC", NULL);
-  portMapList->put("go", "STD_LOGIC", "IN", goName, NULL);
-  if (direction) {
-    firingPortList.put(dataName, vtype, "OUT", dataName, NULL);
-    firingSignalList.put(dataName, vtype, NULL);
-    portMapList->put("data", vtype, "IN", dataName, NULL);
-  }
-  else {
-    portMapList->put("data", vtype, "OUT", dataName, NULL);
-    firingSignalList.put(dataName, vtype, NULL);
-    firingPortList.put(dataName, vtype, "IN", dataName, NULL);
-  }
-  portMapList->put("done", "STD_LOGIC", "OUT", doneName, NULL);
   firingSignalList.put(doneName, "STD_LOGIC", NULL);
   firingPortList.put(doneName, "STD_LOGIC", "IN", doneName, NULL);
   firingPortList.put(endName, "STD_LOGIC", "OUT", endName, NULL);
   firingSignalList.put(endName, "STD_LOGIC", NULL);
   ctlerSignalList.put(endName, "STD_LOGIC", NULL);
   ctlerPortList.put(endName, "STD_LOGIC", "IN", endName, NULL);
-
-  mainCompDeclList.put(label, portMapList, genMapList,
-		       name, portMapList, genMapList);
 
   ctlerAction << startName << " <= '0';\n";
   preSynch << "wait on " << startName << "'transaction;\n";
@@ -1531,7 +1536,8 @@ void StructTarget :: buildArchitectureBodyOpener(int /*level*/) {
 
 // Add in component declarations here from mainCompDeclList.
 void StructTarget :: buildComponentDeclarations(int level) {
-  component_declarations << cli_comps;
+  Error::warn("buildComponentDeclarations", ": Don't call me anymore!");
+  //  component_declarations << cli_comps;
 
   // HashTable to keep track of which components already declared.
   HashTable myTable;
