@@ -31,6 +31,46 @@ LIB=libvhdlbstars.$(LIBSUFFIX)
 
 # source files for all stars, using preprocessor
 PL_SRCS=\
+ VHDLBALU.pl \
+ VHDLBExp.pl \
+ VHDLBLog.pl \
+ VHDLBBFork.pl \
+ VHDLBFAdd.pl \
+ VHDLBMBlackHole.pl \
+ VHDLBBSplit.pl \
+ VHDLBFBlackHole.pl \
+ VHDLBMultiple.pl \
+ VHDLBBusToNum.pl \
+ VHDLBFGain.pl \
+ VHDLBNumToBus.pl \
+ VHDLBBus_14.pl \
+ VHDLBFMult.pl \
+ VHDLBReciprocal.pl \
+ VHDLBBus_18.pl \
+ VHDLBFRamp.pl \
+ VHDLBRect.pl \
+ VHDLBBus_41.pl \
+ VHDLBFReg.pl \
+ VHDLBReg.pl \
+ VHDLBBus_81.pl \
+ VHDLBFile_In.pl \
+ VHDLBSgn.pl \
+ VHDLBComparator.pl \
+ VHDLBFile_Store.pl \
+ VHDLBSinc.pl \
+ VHDLBConvolve.pl \
+ VHDLBFloatToInt.pl \
+ VHDLBSine.pl \
+ VHDLBCosine.pl \
+ VHDLBFloor.pl \
+ VHDLBSqrt.pl \
+ VHDLBCounter.pl \
+ VHDLBGnd.pl \
+ VHDLBVdd.pl \
+ VHDLBDB.pl \
+ VHDLBIntToFloat.pl \
+ VHDLBDirichlet.pl \
+ VHDLBLimit.pl \
  VHDLBDC.pl \
  VHDLBRamp.pl \
  VHDLBBlackHole.pl \
