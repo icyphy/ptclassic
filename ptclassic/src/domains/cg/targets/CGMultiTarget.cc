@@ -227,11 +227,6 @@ inline int hierSchedulerTest(const char* c) {
     return *(c+1) == 'I' || *(c+1) == 'i';
 }
 
-/*virtual*/ int CGMultiTarget::schedulerSetup() {
-    int status = MultiTarget::schedulerSetup();
-    return status;
-}    
-
 void CGMultiTarget :: prepareChildren() {
     deleteChildren();
     nChildrenAlloc = nprocs;
