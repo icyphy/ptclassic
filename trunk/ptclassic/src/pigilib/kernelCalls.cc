@@ -183,6 +183,17 @@ KcGetTerms(char* name, TermList* terms)
     return (TRUE);
 }
 
+/* 7/31/90
+Ask if a porthole within a named block is a multiporthole.
+*/
+extern "C" boolean
+KcIsMulti(char* blockname, char* portname)
+{
+    Block *block = currentGalaxy->blockWithName(blockname);
+    if (block == 0) return (FALSE);
+    return block->multiPortWithName(portname) ? TRUE : FALSE;
+}
+
 /*
 Get default params of a block.
 
