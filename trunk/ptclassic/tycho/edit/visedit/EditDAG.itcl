@@ -353,29 +353,29 @@ body ::tycho::EditDAG::constructor {args} {
     set mygraph [[structClass] #auto]
     set graphmine 1
 
-    menubar addMenuSeparator Edit
+    menubar addSeparator Edit
 
-    menubar addMenuItem {New Root} Edit -underline 4 -accelerator "R" \
+    menubar add {New Root} Edit -underline 4 -accelerator "R" \
 	    -command "$this addRoot"
 
-    menubar addMenuItem {New Child} Edit -underline 4 -accelerator "C" \
+    menubar add {New Child} Edit -underline 4 -accelerator "C" \
 	    -command "$this addChild"
 
-    menubar addMenuItem {New Arc} Edit -underline 4 -accelerator "A" \
+    menubar add {New Arc} Edit -underline 4 -accelerator "A" \
 	    -command "$this addArc"
 
-    menubar addMenuItem {Transpose} Format -underline 0 \
+    menubar add {Transpose} Format -underline 0 \
             -command "$this transpose"
 
-    menubar addMenuItem {Scale} Format -underline 1 \
+    menubar add {Scale} Format -underline 1 \
             -command "$this setSpacing"
 
     # Register that if any centered text is added, we should update display.
     dependenceAdd centeredtext node "$this redrawGraph"
 
-    bind $itk_component(canvas) <Key-A> {%Q addArc; break}
-    bind $itk_component(canvas) <Key-R> {%Q addRoot; break}
-    bind $itk_component(canvas) <Key-C> {%Q addChild; break}
+    bind $slate <Key-A> {%Q addArc; break}
+    bind $slate <Key-R> {%Q addRoot; break}
+    bind $slate <Key-C> {%Q addChild; break}
 
     # The following is done once in the constructor because it's fairly
     # expensive.
@@ -624,7 +624,7 @@ body ::tycho::EditDAG::exportImagemap {filename {keepfragment 0}} {
         set node $nametable($xid)
         contentsToArray $node cnt [list link {}]
         if {$cnt(link) != {}} {
-            set bbox [component canvas bbox $xid]
+            set bbox [$slate bbox $xid]
             set x1 [lindex $bbox 0]
             set y1 [lindex $bbox 1]
             set x2 [lindex $bbox 2]
@@ -689,7 +689,7 @@ body ::tycho::EditDAG::redrawGraph {} {
     # Disable the undo system.
     set saveinteractiveEnabled $interactiveEnabled
     interactiveEnable 0
-    $canvas delete node line arrow
+    $slate delete node line arrow
     selectionClear
     catch {unset nametable}
 
@@ -760,7 +760,7 @@ body ::tycho::EditDAG::redrawGraph {} {
             drawParentLines $node
         }
     }
-    component canvas lower line node
+    $slate lower line node
     interactiveEnable $saveinteractiveEnabled
     # The bounding box may have changed, so...
     ::tycho::Graphics::updateScrollbars
@@ -792,11 +792,11 @@ body ::tycho::EditDAG::setReadOnly {bool} {
     ::tycho::Graphics::setReadOnly $bool
     if [winfo exists $prefix] {
 	if {$bool} {
-            menubar disableMenuItem {New Root} Edit
-            menubar disableMenuItem {New Child} Edit
+            menubar disable {New Root}
+            menubar disable {New Child}
 	} {
-            menubar enableMenuItem {New Root} Edit
-            menubar enableMenuItem {New Child} Edit
+            menubar enable {New Root}
+            menubar enable {New Child}
 	}
     }
 }
@@ -892,10 +892,9 @@ body ::tycho::EditDAG::drawNode {node xcoord ycoord} {
     set font [::tycho::.tychoFonts findFont $cnt(fontspec)]
     set color [ptkColor $cnt(color) black]
 
-    set cvs $itk_component(canvas)
-    set id [$cvs create text $xcoord $ycoord -anchor nw \
+    set id [$slate create text $xcoord $ycoord -anchor nw \
             -fill $color -tag node -text $cnt(label) -font $font]
-    $cvs addtag selectable withtag $id
+    $slate addtag selectable withtag $id
 
     register $id \
             [list add $node [$mygraph contents $node] \
@@ -906,24 +905,24 @@ body ::tycho::EditDAG::drawNode {node xcoord ycoord} {
 
     if {$cnt(link) != {} && $cnt(color) == {black}} {
         # FIXME: cache the option for efficiency.
-        $cvs itemconfigure $id -fill \
+        $slate itemconfigure $id -fill \
                 [ptkColor [option get $itk_component(hull) \
                 linkColor EditDAG] black]
     }
     set nametable($id) $node
     if {$cnt(link) != {}} {
-        $cvs bind $id <Double-Button-1> "$this hyperJump $cnt(link)"
+        $slate bind $id <Double-Button-1> "$this hyperJump $cnt(link)"
     }
     if {$cnt(html) != {}} {
-        $cvs bind $id <Double-Button-1> \
+        $slate bind $id <Double-Button-1> \
                 "+[list ::tycho::htmlmessage $cnt(html)]"
     }
     if {$cnt(tcl) != {}} {
-        $cvs bind $id <Double-Button-1> \
+        $slate bind $id <Double-Button-1> \
                 "eval $cnt(tcl)"
     }
     # Get coordinates of the node.
-    $mygraph attributeSet bbox $node [component canvas bbox $id]
+    $mygraph attributeSet bbox $node [$slate bbox $id]
     return $cnt(open)
 }
 
@@ -976,7 +975,7 @@ body ::tycho::EditDAG::drawParentLines {node {parent {}}} {
             set parenty [expr ($y1+$y2)/2]
         }
 
-        component canvas create line \
+        $slate create line \
                 $parentx $parenty \
                 $childx $childy \
                 -tags line -fill \

@@ -105,9 +105,6 @@ class ::tycho::EditSTD {
     ##########################################################################
     ####                     protected variables                          ####
 
-    # The name of the Tk canvas as a variable, for convenience.
-    protected variable canvas
-
     # Machine type of this state transition diagram.
     protected variable machineType
 
@@ -127,29 +124,26 @@ body ::tycho::EditSTD::constructor {args} {
     interactiveEnable 0
 
     # Add items into File menu
-    menubar insertMenuItem "Look Inside" "Close" File \
+    menubar insert "Look Inside" "Close" \
 	    -underline 5 -accelerator "i" -command "$this lookInside selected"
-    menubar insertMenuSeparator "Close" File
+    menubar insertSeparator "Close"
 
     # Enable items in Edit menu
-    menubar enableMenuItem "Edit Item" Edit
+    menubar enable "Edit Item"
 
     # Renew items in Edit menu
-    menubar addMenuItem {Edit Item} Edit -underline 0 \
+    menubar add {Edit Item} Edit -underline 0 \
 	    -command "$this editItem selected"
 
     # Add items into Special menu
-    menubar insertMenuItem "I/O Port Names..." "Smooth Toggle" Special \
+    menubar insert "I/O Port Names..." "Smooth Toggle" \
 	    -underline 0 -command "$this ioPortNames"
-    menubar insertMenuItem "Set Initial State" "Smooth Toggle" Special \
+    menubar insert "Set Initial State" "Smooth Toggle" \
 	    -underline 0 -command "$this setInitialState selected"
-    menubar insertMenuSeparator "Smooth Toggle" Special
+    menubar insertSeparator "Smooth Toggle"
 
-    menubar insertMenuItem "Make Icon..." "Get Info" Special -underline 0 \
+    menubar insert "Make Icon..." "Get Info" -underline 0 \
             -command "$this makeIcon"
-
-    # Initialize the variables.
-    set canvas [canvasName]
 
     # Initialize the io portNames array elements.
     set portNames(in)  ""
@@ -157,9 +151,9 @@ body ::tycho::EditSTD::constructor {args} {
     set portNames(internal) ""
 
     # Setup menu hot key and mouse binding
-    bind $canvas <Key-e> "$this editItem selected"
-    bind $canvas <Double-1> "$this editItem current"
-    bind $canvas <Key-i> "$this lookInside current"
+    bind $slate <Key-e> "$this editItem selected"
+    bind $slate <Double-1> "$this editItem current"
+    bind $slate <Key-i> "$this lookInside current"
 
     # The following initialize options and then invoke any
     # configuration options, assuming there are options specified.
@@ -195,18 +189,18 @@ body ::tycho::EditSTD::constructor {args} {
 body ::tycho::EditSTD::clear {} {
     if [getReadOnly] {bell; return}
 
-#    foreach node [$canvas find withtag node] {
+#    foreach node [$slate find withtag node] {
 #	# destroy the corresponding edit state window if it exists.
 #	set w $prefix.stdEditState$node
 #	if [winfo exists $w] { destroy $w }
 #    }
-#    foreach arc [$canvas find withtag arc] {
+#    foreach arc [$slate find withtag arc] {
 #	# destroy the corresponding edit arc window if it exists.
 #	set w $prefix.stdEditArc$arc
 #	if [winfo exists $w] { destroy $w }
 #    } 
 
-    $canvas delete all
+    $slate delete all
     foreach index [array names nodeInfo] {
 	unset nodeInfo($index)
     }
@@ -226,9 +220,9 @@ body ::tycho::EditSTD::editArc {arc} {
 	raise $w
     } else {
 
-	set arcLabel [$canvas itemcget $edgeInfo($arc,label) -text]
-	set src [$canvas itemcget $nodeInfo($edgeInfo($arc,src),label) -text]
-	set dest [$canvas itemcget $nodeInfo($edgeInfo($arc,dest),label) -text]
+	set arcLabel [$slate itemcget $edgeInfo($arc,label) -text]
+	set src [$slate itemcget $nodeInfo($edgeInfo($arc,src),label) -text]
+	set dest [$slate itemcget $nodeInfo($edgeInfo($arc,dest),label) -text]
 	set title "Edit $machineType Arc \"$arcLabel\"\nSource state: $src\
 		\nDestination state: $dest"
 
@@ -282,10 +276,10 @@ body ::tycho::EditSTD::editArc {arc} {
 }
 
 body ::tycho::EditSTD::editArcDone {arc w} {
-    set label [$canvas itemcget $edgeInfo($arc,label) -text]
+    set label [$slate itemcget $edgeInfo($arc,label) -text]
     set newLabel [$w get label]
     if {$label != $newLabel} {
-	$canvas itemconfigure $edgeInfo($arc,label) -text $newLabel
+	$slate itemconfigure $edgeInfo($arc,label) -text $newLabel
 	$this markModified
     }
 
@@ -334,11 +328,11 @@ body ::tycho::EditSTD::editArcDone {arc w} {
 body ::tycho::EditSTD::editItem {item} {
     # The indices in the nodeInfo and edgeInfo arrays
     # are item IDs.
-    set id [$canvas find withtag $item]
-    if {[lsearch -exact [$canvas gettags $id] node] >= 0} {
+    set id [$slate find withtag $item]
+    if {[lsearch -exact [$slate gettags $id] node] >= 0} {
 	# id is a node.
 	$this editState $id
-    } elseif {[lsearch -exact [$canvas gettags $id] arc] >= 0} {
+    } elseif {[lsearch -exact [$slate gettags $id] arc] >= 0} {
 	# id is an arc.
 	$this editArc $id
     }
@@ -356,7 +350,7 @@ body ::tycho::EditSTD::editState {node} {
 	raise $w
     } else {
 
-	set nodeLabel [$canvas itemcget $nodeInfo($node,label) -text]
+	set nodeLabel [$slate itemcget $nodeInfo($node,label) -text]
 	set title "Edit $machineType State \"$nodeLabel\""
 	set labelQuery [list label {Label:} $nodeLabel]
 
@@ -381,10 +375,10 @@ body ::tycho::EditSTD::editState {node} {
 
 body ::tycho::EditSTD::editStateDone {node w} {
 
-    set label [$canvas itemcget $nodeInfo($node,label) -text]
+    set label [$slate itemcget $nodeInfo($node,label) -text]
     set newLabel [$w get label]
     if {$label != $newLabel} {
-	$canvas itemconfigure $nodeInfo($node,label) -text $newLabel
+	$slate itemconfigure $nodeInfo($node,label) -text $newLabel
 	$this markModified
     }
 
@@ -400,8 +394,8 @@ body ::tycho::EditSTD::editStateDone {node w} {
 ##############################################################
 #### getInfo
 body ::tycho::EditSTD::getInfo {} {
-    set nodes [$canvas find withtag node]
-    set arcs [$canvas find withtag arc]
+    set nodes [$slate find withtag node]
+    set arcs [$slate find withtag arc]
     set w $prefix.getInfo
     catch {destroy $w}
     ::tycho::Message $w -text "Machine type: $machineType\
@@ -467,8 +461,8 @@ body ::tycho::EditSTD::ioPortNamesDone {w} {
 # Look inside an item with tag $tag.
 #
 body ::tycho::EditSTD::lookInside {tag} {
-    set id [$canvas find withtag $tag]
-    if {[lsearch -exact [$canvas gettags $id] node] >= 0} {
+    set id [$slate find withtag $tag]
+    if {[lsearch -exact [$slate gettags $id] node] >= 0} {
 	# If item is a node (state).
 	$this lookInsideState $id
     }
@@ -571,18 +565,18 @@ body ::tycho::EditSTD::ptkCompile {} {
 	# Set Target parameters.
 	set inPorts "";
 	foreach inName $portNames(in) {
-	    append inPorts \"$inName\"
+	    append inPorts \"$inName\"     ;#" (emacs highlighting)
 	}
 	targetparam inputNameMap $inPorts
 	set outPorts "";
 	foreach outName $portNames(out) {
-	    append outPorts \"$outName\"
+	    append outPorts \"$outName\"     ;#" (emacs highlighting)
 	}
 	targetparam outputNameMap $outPorts
 	if {$machineType == "Mixed"} {
 	    set internalEvents "";
 	    foreach internalName $portNames(internal) {
-		append internalEvents \"$internalName\"
+		append internalEvents \"$internalName\"  ;#" (emacs highlighting)
 	    }
 	    targetparam internalNameMap $internalEvents
 	}
@@ -606,13 +600,13 @@ body ::tycho::EditSTD::ptkCompile {} {
         
 	# Step through all the nodes in the canvas.
 	# Creating a star for each node : 
-	foreach node [$canvas find withtag node] {
-	    set star$node [$canvas itemcget $nodeInfo($node,label) -text]
+	foreach node [$slate find withtag node] {
+	    set star$node [$slate itemcget $nodeInfo($node,label) -text]
 	    star [set star$node] $machineType
 	}
 
 	# Set initial state
-	set init_state_id [$canvas find withtag init_state]
+	set init_state_id [$slate find withtag init_state]
 	if {$init_state_id == ""} {
 	    error "No initial state is specified. "
 	} elseif {[llength $init_state_id] > 1} {
@@ -623,14 +617,14 @@ body ::tycho::EditSTD::ptkCompile {} {
 	}
     
 	# Set the parameters for each star :
-	foreach node [$canvas find withtag node] {
+	foreach node [$slate find withtag node] {
 
 	    set conditions ""
 	    foreach arc $nodeInfo($node,outEdges) {
 		if {![info exists edgeInfo($arc,guard)]} {
 		    error "A guard is required in each arc. "
 		} else {
-		    append conditions \"$edgeInfo($arc,guard)\"
+		    append conditions \"$edgeInfo($arc,guard)\" ;#"
 		}
 	    }
 	    setstate [set star$node] conditions $conditions
@@ -678,13 +672,13 @@ body ::tycho::EditSTD::ptkCompile {} {
 			if "![info exists edgeInfo($arc,output,$outName)]" {
 			    set edgeInfo($arc,output,$outName) 0
 			}
-			append actions \"$edgeInfo($arc,output,$outName)\"
+			append actions \"$edgeInfo($arc,output,$outName)\" ;#"
 		    }
 		    foreach internalName $portNames(internal) {
 			if "![info exists edgeInfo($arc,action,$internalName)]" {
 			    set edgeInfo($arc,action,$internalName) 0
 			}
-			append actions \"$edgeInfo($arc,action,$internalName)\"
+			append actions \"$edgeInfo($arc,action,$internalName)\" ;#"
 		    }
 		    append actions "\}"
 		}
@@ -698,7 +692,7 @@ body ::tycho::EditSTD::ptkCompile {} {
 	}
 
 	# Do the output connection of each star :
-	foreach node [$canvas find withtag node] {
+	foreach node [$slate find withtag node] {
 	    numports [set star$node] stateOut \
 		    [llength $nodeInfo($node,outEdges)]
 	    set count 1
@@ -719,18 +713,18 @@ body ::tycho::EditSTD::ptkCompile {} {
 # of the STD.
 #
 body ::tycho::EditSTD::setInitialState {tag} {
-    set item [$canvas find withtag $tag]
+    set item [$slate find withtag $tag]
     if {$item == {}} return
     
-    if {[lsearch -exact [$canvas gettags $item] node] >= 0} {
+    if {[lsearch -exact [$slate gettags $item] node] >= 0} {
 	# Item is a node.  See if there is already an initial state.
-	set init_state_id [$canvas find withtag init_state]
+	set init_state_id [$slate find withtag init_state]
 	if {$init_state_id != ""} {
-	    $canvas itemconfigure $init_state_id -width 1.0
-	    $canvas dtag init_state
+	    $slate itemconfigure $init_state_id -width 1.0
+	    $slate dtag init_state
 	}
-	$canvas addtag init_state withtag $item
-	$canvas itemconfigure $item -width 5.0
+	$slate addtag init_state withtag $item
+	$slate itemconfigure $item -width 5.0
 	$this markModified
     }
 }
@@ -753,11 +747,11 @@ body ::tycho::EditSTD::setReadOnly {bool} {
     ::tycho::File::setReadOnly $bool
     if [winfo exists $prefix] {
 	if {$bool} {
-	    menubar disableMenuItem {Edit Item} Edit
-            menubar disableMenuItem {Delete} Edit
+	    menubar disable {Edit Item}
+            menubar disable {Delete}
 	} {
-	    menubar enableMenuItem {Edit Item} Edit
-            menubar enableMenuItem {Delete} Edit
+	    menubar enable {Edit Item}
+            menubar enable {Delete}
 	}
     }
 }
@@ -792,18 +786,18 @@ body ::tycho::EditSTD::saveText {} {
 
     # First, save the canvas dimensions
     append text "\n### Canvas widget dimensions\n"
-    set height [winfo height $canvas]
+    set height [winfo height $slate]
     if {$height == 1} {
         # Canvas has not been mapped yet
         set height [cget -canvasheight]
     }
-    append text "\$canvas configure -height $height\n"
-    set width [winfo width $canvas]
+    append text "\$slate configure -height $height\n"
+    set width [winfo width $slate]
     if {$width == 1} {
         # Canvas has not been mapped yet
         set width [cget -canvaswidth]
     }
-    append text "\$canvas configure -width $width\n"
+    append text "\$slate configure -width $width\n"
 
     # Set member variables
     append text "\n### Member variables\n"
@@ -817,19 +811,19 @@ body ::tycho::EditSTD::saveText {} {
 
     # Step through all the nodes in the canvas.
     append text "\n### Creating the nodes\n"
-    foreach node [$canvas find withtag node] {
+    foreach node [$slate find withtag node] {
 	# Generate code to draw the node as an oval on the canvas.
 	append text "set node$node\
-		\[\$canvas create oval [$canvas coords $node]\
+		\[\$slate create oval [$slate coords $node]\
 		-outline black -fill white -tags node\]\n"
 	append text "set nodeInfo(\$node$node,inEdges) \{\}\n"
 	append text "set nodeInfo(\$node$node,outEdges) \{\}\n"
 
 	# Generate code to draw the label.
 	append text "set nodeInfo(\$node$node,label)\
-		\[\$canvas create text\
-		[$canvas coords $nodeInfo($node,label)] -fill black"
-	set label [$canvas itemcget $nodeInfo($node,label) -text]
+		\[\$slate create text\
+		[$slate coords $nodeInfo($node,label)] -fill black"
+	set label [$slate itemcget $nodeInfo($node,label) -text]
 	if {$label != {}} {
 	    append text " -text \{$label\}"
 	}
@@ -849,21 +843,21 @@ body ::tycho::EditSTD::saveText {} {
     
     # See if the initial state is specified.  If so, generate
     # code to set the initial state.
-    set init_state_id [$canvas find withtag init_state]
+    set init_state_id [$slate find withtag init_state]
     if {[llength $init_state_id] > 1} {
 	error "Internel error: more than one initial state!!! "
     } elseif {$init_state_id != ""} {
 	append text "### Initial state\n"
-	append text "\$canvas addtag init_state withtag \$node$init_state_id\n"
-	append text "\$canvas itemconfigure \$node$init_state_id -width 5.0\n"
+	append text "\$slate addtag init_state withtag \$node$init_state_id\n"
+	append text "\$slate itemconfigure \$node$init_state_id -width 5.0\n"
     }
 
     # Step through all the arcs in the canvas.
     append text "\n### Creating the arcs\n"
-    foreach arc [$canvas find withtag arc] {
-	set smooth [$canvas itemcget $arc -smooth]
-	append text "set arc \[\$canvas create line\
-		[$canvas coords $arc] -arrow last -tags arc -fill black\
+    foreach arc [$slate find withtag arc] {
+	set smooth [$slate itemcget $arc -smooth]
+	append text "set arc \[\$slate create line\
+		[$slate coords $arc] -arrow last -tags arc -fill black\
 		-smooth $smooth\]\n"
 	# Set up the corresponding nodeInfo and edgeInfo entries.
 	set src $edgeInfo($arc,src)
@@ -875,8 +869,8 @@ body ::tycho::EditSTD::saveText {} {
 
 	# Set up the points of the arc.
 	foreach point $edgeInfo($arc,points) {
-	    append text "set point \[\$canvas create rectangle\
-		    [$canvas coords $point] -fill \{\} -outline \{\}\]\n"
+	    append text "set point \[\$slate create rectangle\
+		    [$slate coords $point] -fill \{\} -outline \{\}\]\n"
 	    append text "lappend edgeInfo(\$arc,points) \$point\n"
 	}
 	
@@ -891,11 +885,11 @@ body ::tycho::EditSTD::saveText {} {
 	set mid_x [lindex $mid_xy 0]
 	set mid_y [lindex $mid_xy 1]
 	append text "set edgeInfo(\$arc,label)\
-		\[\$canvas create text\
+		\[\$slate create text\
 		[expr $mid_x + $edgeInfo($arc,label_deltax)]\
 		[expr $mid_y + $edgeInfo($arc,label_deltay)]\
 		-fill black"
-	set label [$canvas itemcget $edgeInfo($arc,label) -text]
+	set label [$slate itemcget $edgeInfo($arc,label) -text]
 	if {$label != {}} {
 	    append text " -text \{$label\}"
 	}

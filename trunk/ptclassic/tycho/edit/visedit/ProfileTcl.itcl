@@ -160,8 +160,7 @@ body ::tycho::ProfileTcl::constructor {args} {
     ::tycho::loadIfNotPresent profile tclx
 
     # Set up bindings to update the times.
-    set cvs [canvasName]
-    $cvs bind node <Enter> "$this updateTimes"
+    $slate bind node <Enter> "$this updateTimes"
 }
 
 
