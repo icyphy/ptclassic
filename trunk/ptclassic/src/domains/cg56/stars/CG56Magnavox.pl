@@ -5,7 +5,7 @@ defstar {
 DSP56000 -  A combined input/output star for the Magnavox CD player.
 	}
 	version { $Id$ }
-	author { Chih-Tsung Huang, J. Pino, ported from Gabriel }
+	author { Chih-Tsung Huang, ported from Gabriel }
 	copyright { 1992 The Regents of the University of California }
 	location { CG56 demo library }
 	explanation {
@@ -46,14 +46,21 @@ DSP56000 -  A combined input/output star for the Magnavox CD player.
 		default { "yes" }
 	}
 	state {
-		name { starInBufptr }
+		name { bufLen }
+		type { int }
+  		desc { internal }
+		default { 4 }
+ 		attributes { A_NONSETTABLE|A_NONCONSTANT }
+	}
+	state {
+		name { starInBufPtr }
 		type { fix }
   		desc { internal }
 		default { 0 }
  		attributes { A_NONSETTABLE|A_NONCONSTANT|A_XMEM }
 	}
 	state {
-		name { starOutBufptr }
+		name { starOutBufPtr }
 		type { fix }
   		desc { internal }
 		default { 0 }
@@ -68,19 +75,32 @@ DSP56000 -  A combined input/output star for the Magnavox CD player.
 	}
 	state {
 		name { inIntBuffer }
-		type { fix }
+		type { int }
   		desc { internal }
 		default { 0 }
- 		attributes { A_CIRC|A_NONSETTABLE|A_NONCONSTANT|A_XMEM }
+ 		attributes {A_CIRC|A_NONSETTABLE|A_NONCONSTANT|A_XMEM|A_CONSEC}
+	}
+	state {
+		name { inIntBufferStart }
+		type { int }
+  		desc { internal }
+		default { 0 }
+ 		attributes { A_NONSETTABLE|A_NONCONSTANT|A_XMEM|A_NOINIT }
 	}
 	state {
 		name { outIntBuffer }
-		type { fix }
+		type { int }
   		desc { internal }
 		default { 0 }
- 		attributes { A_CIRC|A_NONSETTABLE|A_NONSETTABLE|A_XMEM }
+ 		attributes {A_CIRC|A_NONSETTABLE|A_NONSETTABLE|A_XMEM|A_CONSEC}
 	}
- 	
+	state {
+		name { outIntBufferStart }
+		type { int }
+  		desc { internal }
+		default { 0 }
+ 		attributes {A_NONSETTABLE|A_NONCONSTANT|A_XMEM}
+	} 	
         codeblock(pollingInit) {
 ; Polling version
 ; Configure SSI Port: Control Register A
@@ -96,6 +116,8 @@ DSP56000 -  A combined input/output star for the Magnavox CD player.
         bset    #7,x:m_pcc
         bset    #6,x:m_pcc
         bset    #5,x:m_pcc
+; Enable interrupts
+        bset    #m_srie,x:m_crb         ; SSI Receive Interrupt enable
         }
 
         codeblock(abortyes) {
@@ -124,10 +146,138 @@ $label(loopTwo)
         movep   x0,x:m_tx
         }
 
+        codeblock(interruptInit) {
+$starSymbol(mag)_savereg   equ     $addr(saveReg)
+$starSymbol(mag)_buflen    equ     $val(bufLen)
+$starSymbol(mag)_insptr    equ     $addr(starInBufPtr)
+$starSymbol(mag)_iniptr    equ     $addr(inIntBuffer)
+$starSymbol(mag)_outsptr   equ     $addr(starOutBufPtr)
+$starSymbol(mag)_outiptr   equ     $addr(outIntBuffer)
+
+; Interrupt handler's next-word-to-write pointer
+
+        org     $ref(inIntBufferStart)
+        dc      $addr(inIntBuffer)
+        org     p:
+    
+; Interrupt handler's next-word-to-read pointer
+        org     $ref(outIntBufferStart)
+        dc      $addr(outIntBuffer)
+        org     p:
+; Empty input buffer by setting bit 0 in each word
+        move    x:$starSymbol(mag)_iniptr,r0
+        move    r0,x:$starSymbol(mag)_insptr
+        move    #$starSymbol(mag)_buflen-1,m0
+        rep     #$val(bufLen)
+        bset    #0,x:(r0)+
+        move    #-1,m0
+; Fill output buffer by clearing bit 0 in each word
+        move    x:$starSymbol(mag)_outiptr,r0
+        move    r0,x:$starSymbol(mag)_outsptr
+        move    #$starSymbol(mag)_buflen-1,m0
+        rep     #$val(bufLen)
+        bclr    #0,x:(r0)+
+        move    #-1,m0
+        }
+        codeblock(interrupt) {
+; SSI receive data interrupt vector
+        org     p:i_ssird
+        jsr     $starSymbol(mag)_intr
+        }
+        codeblock(interruptCont) {
+; set SSI interrupt priority = 2
+        bset    #m_ssl0,x:m_ipr
+        bset    #m_ssl1,x:m_ipr
+; Configure SSI Port: Control Register A
+        bset    #m_wl1,x:m_cra          ; SSI word length = 16
+; Configure SSI Port: Control Register B
+        bset    #m_fsl,x:m_crb     ; SSI TX & RX frame-sync pulse width = 1 bit
+        bset    #m_syn,x:m_crb          ; SSI TX & RX Synchronous
+        bset    #m_ste,x:m_crb          ; SSI Transmit enable
+        bset    #m_sre,x:m_crb          ; SSI Receive enable
+; Configure Port C pins 8-5 as SSI pins
+        bset    #8,x:m_pcc
+        bset    #7,x:m_pcc
+        bset    #6,x:m_pcc
+        bset    #5,x:m_pcc
+        }    
+        codeblock(interruptIn) {
+; Input first sample from interrupt buffer
+        move    x:$starSymbol(mag)_insptr,r0  ; Get pointer to input position
+        move    #$starSymbol(mag)_buflen-1,m0 ; and set modulus
+$label(fillOne)
+        jset    #0,x:(r0),$label(fillOne); Wait for position to have data
+        move    x:(r0),y0               ; Get sample from buffer
+        bset    #0,x:(r0)+              ; Mark position as empty
+        move    y0,$ref(output1)
+; Input second sample from interrupt buffer
+$label(fillTwo)
+        jset    #0,x:(r0),$label(fillTwo) ; Wait for position to have data
+        move    x:(r0),y0               ; Get sample from buffer
+        bset    #0,x:(r0)+              ; Mark position as empty
+        move    y0,$ref(output2)
+        move    r0,x:$starSymbol(mag)_insptr ; Save pointer to next position
+        move    #-1,m0                  ; Restore modulus
+; Output first sample to interrupt buffer
+        move    x:$starSymbol(mag)_outsptr,r0  ; Get pointer to output position
+        move    #$starSymbol(mag)_buflen-1,m0  ; and set modulus
+        move    $ref(input1),y0
+$label(emptyOne)
+        jclr    #0,x:(r0),$label(emptyOne) ; Wait for position to be empty
+        move    y0,x:(r0)               ; Put data there
+        bclr    #0,x:(r0)+              ; Mark position as full
+; Output second sample to interrupt buffer
+        move    $ref(input2),y0
+$label(emptyTwo)
+        jclr    #0,x:(r0),$label(emptyTwo); Wait for position to be empty
+        move    y0,x:(r0)               ; Put data there
+        bclr    #0,x:(r0)+              ; Mark position as full
+        move    r0,x:$starSymbol(mag)_outsptr ; Save pointer to next position
+        move    #-1,m0                  ; Restore modulus
+        }
+        codeblock(interruptTerminate) {
+; Input/output interrupt handler for 56magnavox1
+$starSymbol(mag)_intr
+        move    y0,x:$starSymbol(mag)_savereg+0      ; Save y0, r0, m0
+        move    r0,x:$starSymbol(mag)_savereg+1
+        move    m0,x:$starSymbol(mag)_savereg+2
+        move    #$starSymbol(mag)_buflen-1,m0
+; Input sample and update buffers
+        move    x:$starSymbol(mag)_iniptr,r0 ;r0 points to where to save sample
+        nop
+        jset    #0,x:(r0),$label(used)  ; Error if it's already used
+        move    #$$123052,y0
+        jmp     ERROR
+$label(used)
+        move    x:m_rx,y0
+        move    y0,x:(r0)
+        bclr    #0,x:(r0)+              ; Mark location as used
+        move    r0,x:$starSymbol(mag)_iniptr    ; Save updated pointer
+; Output sample and update buffers
+        move    x:$starSymbol(mag)_outiptr,r0  ; r0 points to sample to output
+        nop
+        jclr    #0,x:(r0),$label(empty)  ; Error if it's empty
+        move    #$$123053,y0
+        jmp     ERROR
+$label(empty)
+        move    x:(r0),y0
+        bset    #0,x:(r0)+              ; Mark location as empty
+        move    r0,x:$starSymbol(mag)_outiptr    ; Save updated pointer
+        move    y0,x:m_tx
+        move    x:$starSymbol(mag)_savereg+0,y0      ; Restore y0, r0, m0
+        move    x:$starSymbol(mag)_savereg+1,r0
+        move    x:$starSymbol(mag)_savereg+2,m0
+        rti
+        }        
         initCode {
         const char* f = forceInterrupts;
 	     if (f[0]=='n' || f[0]=='N')
 	          gencode(pollingInit);
+             else {
+	          gencode(interruptInit);
+		  genInterruptCode(interrupt);
+		  gencode(interruptCont);
+             }
 	}	   
 
 	go {
@@ -139,13 +289,21 @@ $label(loopTwo)
 	               gencode(abortyes);
                   gencode(polling);
 	      }
+              else {
+	          gencode(interruptIn);
+              }
         }
 	execTime {
+        const char* a = forceInterrupts;               
+    	      if (a[0]=='n' || a[0]=='N') 
                   return 21;
-	}
+              else
+	          return 73;
+	}    
         wrapup {
         const char* i = forceInterrupts;               
-  //  	      if (i[0]=='y' || i[0]=='Y') 
-                  // interrupts
+    	      if (i[0]=='y' || i[0]=='Y') {
+	          gencode(interruptTerminate);
+              }
         }
-}
+}    
