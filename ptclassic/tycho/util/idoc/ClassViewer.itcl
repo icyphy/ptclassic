@@ -199,7 +199,7 @@ body ::tycho::IDoc::constructor {args} {
 
     set myContents $itk_component(contents)
 
-    pack $itk_component(contents) -side left -anchor e  -fill y \
+    pack $itk_component(contents) -side left -anchor w -fill y \
             -in $itk_interior.mainFrame
 
     pack $itk_component(html) -side left -expand 1 -fill both \
@@ -231,7 +231,9 @@ body ::tycho::IDoc::constructor {args} {
     # Subscribe to the preference set
     preference subscribeoptions $this \
             -headfont displayFont \
-            -bodyfont entryFont
+            -bodyfont entryFont \
+            -height textHeight \
+            -htmlwidth textWidth
 
     # Something annoying inherited insists on creating this thing
     pack forget $itk_interior.childsite
@@ -303,7 +305,6 @@ body ::tycho::IDoc::display {} {
 
     # insert each type (Protected Method, etc.) by protection order
     foreach protection {public protected private} {
-
         # Variables        
         displayvar $protection   
         # Methods
@@ -327,7 +328,6 @@ body ::tycho::IDoc::displaymeth {protection} {
             set subnames {}
             foreach method [$myClass methods \
                     -protection $protection -scope instance] {
-                puts "$protection Method $method"
                 # put label into contents widget
                 $myContents appendlabel $method\m \
                         -text $method \
@@ -340,8 +340,9 @@ body ::tycho::IDoc::displaymeth {protection} {
             }
             # insert panel if any methods found
             if {$subnames != {}} {
+                set temp [::tycho::capitalize $protection]
                 $myContents append $protection\m "$subnames" \
-                        -text "$protection methods" \
+                        -text "$temp Methods" \
                         -font [$this cget -headfont]
             }
 
@@ -349,7 +350,6 @@ body ::tycho::IDoc::displaymeth {protection} {
             set subnames {}
             foreach method [$myClass methods \
                     -protection $protection -scope class] {
-                puts "$protection Proc $method"
                 # put label into contents widget
                 $myContents appendlabel $method\p \
                         -text $method \
@@ -362,8 +362,9 @@ body ::tycho::IDoc::displaymeth {protection} {
             }
             # insert panel if any procs found
             if {$subnames != {}} {
+                set temp [::tycho::capitalize $protection]
                 $myContents append $protection\p "$subnames" \
-                        -text "$protection procs" \
+                        -text "$temp Procs" \
                         -font [$this cget -headfont]
             }   
         }
@@ -383,8 +384,9 @@ body ::tycho::IDoc::displaymeth {protection} {
             }
             # insert panel if any methods found
             if {$subnames != {}} {
+                set temp [::tycho::capitalize $protection]
                 $myContents append $protection\p "$subnames" \
-                        -text "$protection methods" \
+                        -text "$temp Methods" \
                         -font [$this cget -headfont]
             }
         }   
@@ -405,12 +407,11 @@ body ::tycho::IDoc::displayvar {protection} {
             set subnames {}
             foreach variable [$myClass variables \
                     -protection $protection -modifiers itk_option] {
-                puts "itk_option $variable"
                 # put label into contents widget
                 $myContents appendlabel $variable\v \
                         -text $variable \
                         -font [$this cget -bodyfont] \
-                        -fg [$this cget -$protection\color]
+                        -fg [$this cget -optioncolor]
                 # setup bindings on <Enter> and <Double-Click>
                 binddesc $variable $variable\v
                 bindexpl $variable $variable\v
@@ -419,7 +420,7 @@ body ::tycho::IDoc::displayvar {protection} {
             # insert panel if any itk_options found
             if {$subnames != {}} {
                 $myContents append $protection\i "$subnames" \
-                        -text "itk_options" \
+                        -text "Itk Options" \
                         -font [$this cget -headfont]
             }
             
@@ -427,7 +428,6 @@ body ::tycho::IDoc::displayvar {protection} {
             set subnames {}
             foreach variable [$myClass variables \
                     -protection $protection -modifiers {}] {
-                puts "$protection Variable $variable"
                 # put label into contents widget   
                 $myContents appendlabel $variable\v \
                         -text $variable \
@@ -440,8 +440,9 @@ body ::tycho::IDoc::displayvar {protection} {
             }
             # insert panel if any variables found
             if {$subnames != {}} {
+                set temp [::tycho::capitalize $protection]
                 $myContents append $protection\v "$subnames" \
-                        -text "$protection variables" \
+                        -text "$temp Variables" \
                         -font [$this cget -headfont]
             }
         }
@@ -461,8 +462,9 @@ body ::tycho::IDoc::displayvar {protection} {
             }
             # insert panel if any variables found
             if {$subnames != {}} {
+                set temp [::tycho::capitalize $protection]
                 $myContents append $protection\v "$subnames" \
-                        -text "$protection variables" \
+                        -text "$temp Variables" \
                         -font [$this cget -headfont]
             }
         }
