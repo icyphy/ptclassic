@@ -48,6 +48,7 @@ PL_SRCS = \
  VHDLGainInt.pl \
  VHDLAdd.pl \
  VHDLAddInt.pl \
+ VHDLAddCx.pl \
  VHDLSub.pl \
  VHDLSubInt.pl \
  VHDLMpy.pl \
