@@ -62,8 +62,8 @@ LIBS = $(STAR_LIBS) -lptolemy $(THREAD_LIBS) $(TCL_LIBSPEC) $(SYSLIBS)\
 			$(LIB_FLUSH_CACHE)
 
 PTINY_LIBFILES =	$(PTINY_STAR_LIBFILES) \
-				$(LIBDIR)/libptolemy.$(LIBSUFFIX)
-LIBFILES = 		$(STAR_LIBFILES) $(LIBDIR)/libptolemy.$(LIBSUFFIX) \
+				$(LIBDIR)/libptolemy.a
+LIBFILES = 		$(STAR_LIBFILES) $(LIBDIR)/libptolemy.a \
 			$(THREAD_LIBFILES)
 
 # first star determines default domain as a rule
