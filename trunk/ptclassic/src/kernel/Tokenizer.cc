@@ -26,6 +26,9 @@ and a quote character for strings.
 #include <stream.h>
 #include "miscFuncs.h"
 
+// The default whitespace string
+const char Tokenizer::defWhite[] = " \t\n\r";
+
 // Constructors
 // for some reason, g++ has trouble when these are included in the
 // class definition: complains about stray \ characters.
