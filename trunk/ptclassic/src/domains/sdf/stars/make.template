@@ -66,6 +66,7 @@ PL_SRCS= \
  SDFDiffImage.pl \
  SDFDisplayImage.pl \
  SDFDisplayRgb.pl \
+ SDFDisplaySeq.pl \
  SDFDistributor.pl \
  SDFDownSample.pl \
  SDFDpcm.pl \
