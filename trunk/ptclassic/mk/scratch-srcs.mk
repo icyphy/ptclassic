@@ -155,7 +155,7 @@ $(OBJARCH)/xv/tiff/Makefile:
 xv_bin: $(OBJARCH)/xv
 	(cd $(OBJARCH)/xv; \
 		$(MAKE) \
-		CC=$(XV_CC) \
+		CC="$(XV_CC)" \
 		EXTRA_LDOPTIONS=$(CC_STATIC) \
 		AR=ar \
 		RANLIB=$(RANLIB) \
@@ -166,7 +166,7 @@ xv_bin: $(OBJARCH)/xv
 xv_install: $(OBJARCH)/xv
 	(cd $(OBJARCH)/xv; \
 		$(MAKE) \
-		CC=$(XV_CC) \
+		CC="$(XV_CC)" \
 		EXTRA_LDOPTIONS=$(CC_STATIC) \
 		AR=ar \
 		RANLIB=$(RANLIB) \
