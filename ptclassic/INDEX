@@ -1,0 +1,120 @@
+An index to the Ptolemy distribution
+$Id$
+
+In this structure listing, wherever sunX appears, replace it by
+sun3 if you're running on a Sun 3, and sun4 if you're running on
+a Sun 4.  If you're on a mixed cluster, both versions exist (one
+containing Sun 3 objects and binaries, and one containing those
+for the Sun 4).  To work correctly, the ARCH environment variable
+should be set to "sun3" or sun4" (whichever is appropriate).  If
+this is done, just typing "make" from the top level directory will
+build and install everything.  The top level directory should be
+the home directory of the user "ptolemy".
+
+MAKEARCH
+	a script to build architecture-specific directories for
+	object files, libraries, and binaries.  If the ARCH environment
+	variable is "vax", say, it will make bin.vax, lib.vax, obj.vax
+	and appropriate subdirectories
+
+bin/	Contains user-executable shell scripts:
+	pigi
+		Runs the Ptolemy interactive graphics interface
+	pigiDebug
+		Runs pigi with gdb debugger
+bin.sunX/
+	Contains Sun-X binary user-executables:
+	interpreter
+		Ptolemy interpreter
+	pigiRpc
+		"RPC application" run by vem in the "pigi" script
+	ptlang
+		Ptolemy language preprocessor
+	xgraph
+		Program for drawing graphs under X11
+demo/
+	Directory containing pigi and interpreter demos.
+doc/
+	Some sketchy attempts at documentation
+lib/
+	interpreter.help
+		Interpreter help file
+	pigiDebugRpc
+		Script used by "pigiDebug" script
+	pigiXRes
+		X11 resource file used by pigi
+	technology/
+		Directory containing "system facets" for pigi
+	vem.bindings.7-3
+	vem.bindings.8-0
+		VEM bindings files for use with pigi
+lib.sunX/
+	interpmain.o
+		main() for interpreter
+	libddf.a, libsdf.a, libde.a
+		Domain-specific support functions
+	libptolemy.a
+		The "Ptolemy kernel" library
+makefile
+	The top level makefile for Ptolemy -- it builds everything
+obj.sunX/
+	Directory for building the system on a sunX architecture.
+	It has subdirectories paralleling the subdirectories of src
+	and is initially built by MAKEARCH.  That is, it has
+	subdirectories domains/, interp/, kernel/, pigiRpc/, preproc/,
+	tests/, and xgraph/, and domains/ has subdirectories stars/
+	and kernel/.
+octtools/
+	Contains the parts of the OCT/VEM system required to build
+	and run pigi.
+	bin.sunX/
+		Contains binaries for sunX.  Currently contains only
+		vem.
+	include/
+		Contains header files needed to build pigiRpc.
+	lib.sunX/
+		Contains libaries needed to build pigiRpc
+src/
+	Source files and OCT icons for Ptolemy.
+
+Contents of ~ptolemy/src:
+
+domains/
+	Domain-specific support:
+	ddf/
+	de/
+	sdf/
+		Support for DDF, DE, SDF domains (see below)
+	makefile
+		Makefile for domain support
+example/
+	Example of how the user can make a customized interpreter
+interp/
+	Stuff to build the interpreter with
+kernel/
+	The Ptolemy kernel sources
+makefile
+	Makefile to build everything
+pigiRpc/
+	Sources for pigi (actually, for the pigiRpc program)
+preproc/
+	The Ptolemy language preprocessor
+tests/
+	Tests of the Ptolemy kernel (and some SDF)
+xgraph/
+	The xgraph program
+
+Each domain (e.g. sdf) has its support in, say, ~ptolemy/domains/sdf.
+That directory has the following structure:
+
+demo/
+	Pigi demos for the domain
+icons/
+	Pigi icons for stars in the domain
+kernel/
+	Enhancements to the kernel to support the domain (sources and
+	include files)
+makefile
+	makefile; makes stuff in kernel/ and stars/
+stars/
+	Stars that run under the domain.
