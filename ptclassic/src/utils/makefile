@@ -34,7 +34,8 @@
 
 
 DIRS = libgslider ptplay rman-2.4 tkman-1.7.3
-PTOLEMY = ../..
+# Need to have $PTOLEMY as an absolute pathname for wish
+#PTOLEMY = ../..
 
 MAKEVARS =	\
 		"ARCH=$(ARCH)" 
@@ -43,6 +44,6 @@ all install clean realclean sources depend checkjunk sccsinfo:
 	 @for x in $(DIRS); do \
 	 	cd $$x ; \
 		echo making $@ in filters/$$x ; \
-		$(MAKE) $(MFLAGS) $(MAKEVARS) PTOLEMY=../../.. VPATH=../../../src/utils/$$x $@ ;\
+		$(MAKE) $(MFLAGS) $(MAKEVARS) VPATH=../../../src/utils/$$x $@ ;\
 	  	cd .. ; \
 	 done
