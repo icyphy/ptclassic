@@ -55,7 +55,7 @@ cd ..
 
 # EXPDOMAINS = experimental domains
 # EXPDOMAINS = capsim bdf
-set EXPDOMAINS=(cg-ddf cg56)
+set EXPDOMAINS=(cg-ddf cg56 cgc)
 set EXPEXTRAS=(cg56/targets cg-ddf/constructs)
 
 cd domains
