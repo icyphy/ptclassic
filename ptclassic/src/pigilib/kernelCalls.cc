@@ -433,12 +433,12 @@ realGetParams(const Block* block, ParamListType* pListPtr)
 	    }
 	    CBlockStateIter nexts(*block);
 	    for (int i = 0; i < n; i++) {
-		    const State& s = *nexts++;
+		    const State* s = nexts++;
 		    // Only return settable states
-		    if (s.attributes() & AB_SETTABLE) {
-		        tempArray[j].name = s.readName();
-			tempArray[j].type = s.type();
-		        tempArray[j++].value = s.getInitValue();
+		    if (s->attributes() & AB_SETTABLE) {
+		        tempArray[j].name = s->readName();
+			tempArray[j].type = s->type();
+		        tempArray[j++].value = s->getInitValue();
 		    }
 	    }
 	    /* Now we know there are exactly j settable states.
@@ -535,6 +535,21 @@ KcProfile (char* name) {
 		accum_string ("Dynamically linked ");
 	if (tFlag) {
 		accum_string ("Target: ");
+		accum_string (name);
+		accum_string ("\n");
+	}
+	else if (b->isItWormhole()) {
+		// get the first line put out by printVerbose.
+		StringList pv = b->printVerbose();
+		char* msg = pv.newCopy();
+		char* p = index(msg, ':');
+		if (p) {
+			p[1] = 0;
+			accum_string (msg);
+			accum_string (" ");
+		}
+		else accum_string ("Wormhole: ");
+		delete msg;
 		accum_string (name);
 		accum_string ("\n");
 	}
