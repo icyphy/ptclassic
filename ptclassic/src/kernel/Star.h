@@ -56,7 +56,7 @@ public:
 	int index() const { return indexValue;}
 
 	// set the Target
-	void setTarget(Target* t) { targetPtr = t;}
+	virtual void setTarget(Target* t);
 
 	// Check whether invocations are parallelizable or not.
 	void noInternalState() { inStateFlag = FALSE; }
