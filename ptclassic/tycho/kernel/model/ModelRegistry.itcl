@@ -36,7 +36,7 @@
 # class.
 #
 proc ::tycho::model {method args} {
-    eval [::tycho::ModelRegistry::_tycho] $method $args
+    eval [::tycho::ModelRegistry::instance] $method $args
 }
 
 #########################################################################
@@ -48,9 +48,9 @@ proc ::tycho::model {method args} {
 # that multiple views can access models.
 #
 # This model is not usually going to be stored on disk, since
-# it represents run-time information. Tycho creates a single
-# instance of ModelRegistry, named <b>::tycho::model</b>, which
-# all clients should use to access models.
+# it represents run-time information. This is also a singleton
+# class, since there should only ever be one of these. Use the
+# instance{} procedure to get access to the unique instance.
 #
 # This model has the following types:
 # <dl>
@@ -80,9 +80,9 @@ proc ::tycho::model {method args} {
 #   <dd>
 #   The mode obtained from the file header.
 #
-#   <dt><b>-modelpath</b> _path_
+#   <dt><b>-modelname</b> _path_
 #   <dd>
-#   The absolute path to the file which contains the model.
+#   The relative path to the file which contains the model.
 #
 #   <dt><b>-object</b> _object_
 #   <dd>
@@ -130,8 +130,8 @@ class ::tycho::ModelRegistry {
     #################################################################
     ####                     public procs                      ####
 
-    # Get access to the tycho model databse
-    proc _tycho {} {
+    # Get access to the unique instance
+    proc instance {} {
         if { [info which ::tycho::modelRegistry] == "" } {
             uplevel #0 ::tycho::ModelRegistry ::tycho::modelRegistry
         }
@@ -151,7 +151,6 @@ class ::tycho::ModelRegistry {
     private variable _client
 }
 
-
 ########################################################################
 #### constructor
 #
@@ -163,7 +162,7 @@ body ::tycho::ModelRegistry::constructor {args} {
             -extension "" \
             -keys "" \
             -modelmode "tcl" \
-            -modelpath "" \
+            -modelname "" \
             -object "" \
             -searchpath "" \
             -version ""
@@ -248,14 +247,29 @@ body ::tycho::ModelRegistry::load {path args} {
         set cls [attrget $path -class]
         set nm [::tycho::autoName [string tolower [info namespace tail $cls]]]
         set model [uplevel #0 $cls $nm]
-        attrset $path -object $model
-puts "Loading $cls::$nm"
+ 
+        puts "Loading $cls $nm"
 
         # Load its data
         set fd [open $path]
         set data [read $fd]
         close $fd
-        $model parse $data
+        if [catch {
+            $model parse $data
+        } msg] {
+            # Recovery: delete model
+            # ::delete object $model
+
+            # Re-throw error
+            global errorInfo
+            error $msg $errorInfo
+        }
+        
+        # Remember the model (this must be after the call to parse{})
+        attrset $path -object $model
+        
+        # Give the model name its name
+        $model configure -modelname [attrget $path -modelname]
     }
     return $path
 }
@@ -296,6 +310,10 @@ puts "Loading $cls::$nm"
 #
 body ::tycho::ModelRegistry::locate {path args} {
     array set opts $args
+
+    # Make sure the model knows its relative path
+    set opts(-modelname) $path
+
     # FIXME: use TIM_PATH from: environment? preferences?
     if [::info exists opts(-searchpath)] {
         set searchpath [concat $opts(-searchpath) \
@@ -308,18 +326,17 @@ body ::tycho::ModelRegistry::locate {path args} {
         set path $path.$opts(-extension)
     }
     # Find the file, return if not found or unreadable
-    set path [::tycho::urlPathSearch $path $searchpath]
-    if { $path == "" || ![::tycho::resource readable $path] } {
+    set file [::tycho::urlPathSearch $path $searchpath]
+    if { $file == "" || ![::tycho::resource readable $file] } {
         return ""
     }
-    set opts(-modelpath) $path
 
     # Get the default suffix-based mode
-    set filemode [::tycho::registry filemode $path]
+    set filemode [::tycho::registry filemode $file]
     set opts(-mode) $filemode
 
     # Read the actual file header
-    ::tycho::readFileHeader $path hdr
+    ::tycho::readFileHeader $file hdr
     foreach {o v} [array get hdr] {
         set opts(-$o) $v
     }
@@ -338,16 +355,16 @@ body ::tycho::ModelRegistry::locate {path args} {
     }
 
     # If there is no model item, create one
-    if ![exists $path] {
-        add model $path
+    if ![exists $file] {
+        add model $file
     }
     # Configure it
-    foreach {o _} [attrget $path] {
+    foreach {o _} [attrget $file] {
         if [::info exists opts($o)] {
-            attrset $path $o $opts($o)
+            attrset $file $o $opts($o)
         }
     }
-    return $path
+    return $file
 }
 
 ########################################################################
@@ -423,7 +440,7 @@ body ::tycho::ModelRegistry::unlink {path key} {
 
     # If there are no linked clients, delete the model
     if { $keys == "" } {
-        delete object [attrget $path -object]
+        ::delete object [attrget $path -object]
         attrset $path -object ""
     }
 }
