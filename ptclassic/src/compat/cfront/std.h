@@ -28,14 +28,14 @@
 #define _std_h
 /*  _std_h     is defined by the g++ std.h file */
 
-#if defined(hppa)
+#if defined(hppa) || defined(SYSV) || defined (SVR4)
 #include <stdlib.h>
 #include <sys/unistd.h>
 #include "../../kernel/miscFuncs.h"
 inline long random() { return lrand48();}
 inline void srandom(int seed) { srand48(seed);}
 #else
-// Sun
+// SunOS4.1 CC
 #include <stdlib.h>
 #include <sysent.h>
 #include "../../kernel/miscFuncs.h"
