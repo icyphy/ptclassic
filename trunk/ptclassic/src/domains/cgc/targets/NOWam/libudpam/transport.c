@@ -1930,14 +1930,24 @@ int AM_Poll(eb_t bundle)
 	    /* UnlockEP(endpoint); */
 	  }
 	  else { 
-	    memcpy(endpoint->start_addr + packetPtr->dest_offset, 
-		   packetPtr->data, packetPtr->nbytes);
+	    /* Cast for sol2.5.cfront, or else error:
+	    cannot do pointer arithmetic on operand of unknown size */
+	    /* memcpy(endpoint->start_addr + packetPtr->dest_offset, 
+		   packetPtr->data, packetPtr->nbytes); */
+	    memcpy((void *)((int)endpoint->start_addr + 
+			    packetPtr->dest_offset), 
+		   packetPtr->data, packetPtr->nbytes); 
 	    endpoint->translation_table[sourceEndpoint].wsize++;
 	    RemoveTimeout(endpoint, &(endpoint->txpool[packetPtr->buf_id]));
 	    Enqueue(endpoint, &(endpoint->txpool[packetPtr->buf_id])); 
+	    /* Cast for sol2.5.cfront, or else error:
+	    cannot do pointer arithmetic on operand of unknown size */
 	    ((HandlerGet4)(endpoint->handler_table[packetPtr->handler]))(
-                           (void *)&token, endpoint->start_addr + 
-			    packetPtr->dest_offset, packetPtr->nbytes,
+                           /* (void *)&token, endpoint->start_addr + 
+			    packetPtr->dest_offset, packetPtr->nbytes, */
+                            (void *)&token, 
+			    (void *) ((int)endpoint->start_addr + 
+			    packetPtr->dest_offset), packetPtr->nbytes,
                             packetPtr->arg0, packetPtr->arg1, packetPtr->arg2, 
 			    packetPtr->arg3);
 	    ReplyACK(endpoint->socket, sender, packetPtr->buf_id, 
@@ -1963,8 +1973,13 @@ int AM_Poll(eb_t bundle)
 	    /* UnlockEP(endpoint); */
 	  }
 	  else { 
-	    memcpy(endpoint->start_addr + packetPtr->dest_offset, 
-		   packetPtr->data, packetPtr->nbytes);
+	    /* Cast for sol2.5.cfront, or else error:
+	    cannot do pointer arithmetic on operand of unknown size */
+	    /* memcpy(endpoint->start_addr + packetPtr->dest_offset, 
+		   packetPtr->data, packetPtr->nbytes); */
+	    memcpy((void *)((int)endpoint->start_addr + 
+			    packetPtr->dest_offset), 
+		   packetPtr->data, packetPtr->nbytes); 
 	    endpoint->translation_table[sourceEndpoint].wsize++;
 	    RemoveTimeout(endpoint, &(endpoint->txpool[packetPtr->buf_id]));
 	    Enqueue(endpoint, &(endpoint->txpool[packetPtr->buf_id])); 
