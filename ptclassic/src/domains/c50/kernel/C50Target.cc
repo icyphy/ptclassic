@@ -44,20 +44,16 @@ Base target for TI 320C5x assembly code generation.
 #include "FixState.h"
 
 int C50Target :: compileCode() {
-
       StringList assembleCmds;
       assembleCmds << "assembl " << filePrefix << ".asm";
-      if (systemCall(assembleCmds,"Errors in assembly")!=0)
-              return FALSE;
+      if (systemCall(assembleCmds, "Errors in assembly") != 0) return FALSE;
       return TRUE;
 }
-
-void C50Target :: headerCode () {
 
 // code starts at address 1AC0h so that splits the SARAM chip in C50 into
 // two sections, one for program and one for data, each roughly 4400 words
 // long.
-
+void C50Target :: headerCode () {
     TITarget::headerCode();
     myCode << "\t.mmregs\t		; Include memory map reg\n"
 	   << "\t.ps	01AC0h		; initialize PC\n"
@@ -70,9 +66,7 @@ void C50Target :: headerCode () {
 	   << "\tsamm	CWSR		; set Wait State Control Register\n"
 	   << "\tsamm	PDWSR		; for 0 waits in pgm & data memory\n"
 	   << "\tclrc	OVM		\n";
-
 }
-
 
 void C50Target :: setup() {
 	Galaxy* g = galaxy();
@@ -84,8 +78,8 @@ void addC50One(Target* target,Galaxy* g) {
 	if (g && (g->stateWithName("ONE") == 0)) {
 		LOG_NEW; FixState& ONE = *new FixState;
 		g->addState(ONE.setState("ONE",target,"",
-					"Max Fix point value",
-					A_NONSETTABLE|A_CONSTANT));
+					 "Max Fix point value",
+					 A_NONSETTABLE|A_CONSTANT));
 		ONE.setInitValue(C50_ONE);
 	}
 }
@@ -101,13 +95,6 @@ void C50Target::writeFloat(double val) {
 	TITarget::writeFloat(val);
 }
 
-const char* C50Target::className() const { return "C50Target";}
+const char* C50Target::className() const { return "C50Target"; }
 
 ISA_FUNC(C50Target,TITarget);
-
-
-
-
-
-
-
