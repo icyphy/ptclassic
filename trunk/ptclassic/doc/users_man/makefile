@@ -7,16 +7,12 @@
 ROOT= ../..
 include $(ROOT)/mk/latexinfo.mk
 
-DOM=$(ROOT)/src/domains
-MORE_TEXINPUTS=$(DOM)/cg/doc:$(DOM)/cgc/doc:$(DOM)/cp/doc:
-
-SRCS = \
-	userMan.tex \
+SRCS =	userMan.tex \
 	other.tex \
 	index.tex \
-	$(DOM)/cg/doc/CGUser.tex \
-	$(DOM)/cgc/doc/CGCUser.tex \
-	$(DOM)/cp/doc/CPUser.tex
+	cg.tex \
+	cgc.tex \
+	cp.tex
 
 CLEAN = $(SRCS:.tex=.clean)
 
