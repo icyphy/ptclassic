@@ -73,7 +73,7 @@
 # If the *useEnvClassPath* preference is false, then Tycho reads the
 # *classPath* preference and sets the *CLASSPATH* environment
 # variable before calling the java tools.  The *useEnvClassPath* and 
-# *classpath* preferences are set in the miscellaneous preferences.
+# *classpath* preferences are set in the "java" preferences.
 #
 # <p>
 # Here is an example of how to use the CompileJava class:
@@ -148,15 +148,17 @@ body ::tycho::CompileJava::destructor {} {
 body ::tycho::CompileJava::compileAndRun {filenames} {
     global env
 
-    if [preference get useEnvClassPath] {
+    if [::tycho::preference get java useEnvClassPath] {
 	if [info exists env(CLASSPATH)] { 
-	    set classPath [::tycho::expandPathSplit [preference get classPath]]
+	    set classPath [::tycho::expandPathSplit \
+                    [::tycho::preference get java classPath]]
 	    set classPathArg "-classpath $classPath"
 	} else {
 	    set classPathArg ""
 	}
     } else {
-	set classPath [::tycho::expandPathSplit [preference get classPath]]
+	set classPath [::tycho::expandPathSplit \
+                [::tycho::preference get java classPath]]
 	if {$classPath == {} } { 
 	    if [info exists env(CLASSPATH)] { 
 		unset env(CLASSPATH)

@@ -49,10 +49,6 @@ class ::tycho::EditJava {
     ##########################################################################
     ####                            options                               ####
 
-    # Pathname to the java distribution
-    itk_option define -javahome javaHome JavaHome \
-	    /opt/SUNWjws/JDK
-
     constructor {args} {}
     destructor {}
 
@@ -114,9 +110,6 @@ class ::tycho::EditJava {
 body ::tycho::EditJava::constructor {args} {
     global tcl_platform
     eval itk_initialize $args
-
-    preference subscribeoptions $this \
-	    -javahome javaHome
 
     # Set the fill prefix to be the comment character for Java.
     set fillPrefix "//"
@@ -277,7 +270,8 @@ body ::tycho::EditJava::gendocBuffer {} {
     putStatus "Fixing HTML files in\
             [file join [file dirname [filename]] $docDir]"
     #::tycho::safeUpdate $this
-    fixJavaHTMLFiles [file join [preference get javaHome] api] \
+    fixJavaHTMLFiles [file join \
+            [::tycho::preference get java javaHome] api] \
             [file join [file dirname [filename]] $docDir]
     putStatus ""
     #::tycho::safeUpdate $this
@@ -318,7 +312,7 @@ body ::tycho::EditJava::help {} {
 # In Tycho, the *javaHome* preference controls what file is opened.
 #
 body ::tycho::EditJava::openJavaHTMLPage {} {
-    set javaHome [::tycho::preference get misc javaHome]
+    set javaHome [::tycho::preference get java javaHome]
     if { $javaHome != "" } {
 	set javaHome [::tycho::expandPath $javaHome]
     }
@@ -329,7 +323,7 @@ body ::tycho::EditJava::openJavaHTMLPage {} {
     } else {
 	error "Sorry, `$javaHTMLPage' does not exist. The pathname to
 	the Java documentation is generated using the javaHome\
-	Miscellaneous preference and the path 'docs/index.html'."
+	Java preference and the path 'docs/index.html'."
     }
 }
 
