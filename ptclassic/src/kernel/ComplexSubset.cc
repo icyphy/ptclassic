@@ -1,4 +1,8 @@
-/* 
+static const char file_id[] = "ComplexSubset.cc";
+/**************************************************************************
+Version identification:
+$Id$
+
 Copyright (c) 1990-1994 The Regents of the University of California.
 All rights reserved.
 
@@ -21,10 +25,13 @@ PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
 CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
 							COPYRIGHTENDKEY
-*/
-// A small complex class -- a subset of the cfront and libg++ versions,
-// but written from scratch.
-// $Id$
+
+A small complex class -- a subset of the cfront and libg++ versions,
+but written from scratch.
+**************************************************************************/
+#ifdef __GNUG__
+#pragma interface
+#endif
 
 #include "ComplexSubset.h"
 #include <stream.h>
