@@ -114,4 +114,30 @@ group test -label {Test Icons} {
     	port in-2
     	port in-3
     }
+    star ramp \
+            -label {Ramp} \
+            -icon {edit/graphedit/icons.tim#test.ramp} {
+        attribute step -default 1.0 -type number -label step
+        attribute value -default 0.0 -type number -label value
+        port out -composite 0 -datatype float
+    }
+    star printer \
+            -label {Printer} \
+            -icon {edit/graphedit/icons.tim#test.printer} {
+        attribute fileName -default "<stdout>" -label fileName
+        port in -composite 0 -datatype float -composite 1
+    }
+    star ramp1 \
+            -label {Ramp} \
+            -icon {edit/graphedit/icons.tim#test.ramp1} {
+        attribute step -default 1.0 -type number -label step
+        attribute value -default 0.0 -type number -label value
+        port out -composite 0 -datatype float
+    }
+    star printer1 \
+            -label {Printer} \
+            -icon {edit/graphedit/icons.tim#test.printer1} {
+        attribute fileName -default "<stdout>" -label fileName
+        port in -composite 0 -datatype float -composite 1
+    }
 }
