@@ -41,6 +41,7 @@ PL_SRCS = \
  VHDLImpulse.pl \
  VHDLRect.pl \
  VHDLWaveForm.pl \
+ VHDLWaveFormCx.pl \
  VHDLFork.pl \
  VHDLGain.pl \
  VHDLAdd.pl \
