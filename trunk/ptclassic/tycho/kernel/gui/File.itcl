@@ -290,7 +290,7 @@ class ::tycho::File {
     # If the argument is a File object, call its autoSave method.
     proc callAutoSave {obj}
 
-     # Check for auto-save or crash-recovery files, and return the file to open.
+    # Check for auto-save or crash-recovery files, and return the file to open.
     proc checkForAutoSaveFiles {filename} {}
 
    # Call the saveCrash method for all File objects.
@@ -338,6 +338,9 @@ class ::tycho::File {
     # Initialize the menubar.
     private method _initializeMenubar {menubar}
 
+    # Initialize the menubar.
+    private method _configureFile {menubar}
+
     # Remove the backup file that gets automatically created periodically.
     private method removeBackupFiles {}
 
@@ -353,9 +356,6 @@ class ::tycho::File {
     # This array stores the names of all currently active objects
     # of type File.  This is used to create crash recovery files.
     private common fileObjects
-
-    # The object representing the current resource.
-    private variable resourceObject ""
 
     # Keep track of the compare widget
     private variable diffWidget {}
@@ -383,12 +383,6 @@ configbody ::tycho::File::file {
         if {$itk_option(-file) != {NoName}} {
             set completeFilePath [::tycho::expandPath $completeFilePath]
         }
-	# Check and delete the old resource object
-	if { $resourceObject != "" \
-		&& [$resourceObject path] != $completeFilePath } {
-	    delete object $resourceObject
-	    set resourceObject ""
-	}
 	if { $completeFilePath != "NoName" \
 		&& [::tycho::registry isopen $completeFilePath] } {
 	    foreach win [::tycho::registry windows $completeFilePath] {
@@ -432,20 +426,6 @@ configbody ::tycho::File::file {
         }
 	# Add the current object to the menu entries in all open editors.
 	windowMenuAddAll $completeFilePath
-
-	# Remove Control-X from the <<Cut>> event 
-	# In Itcl2.2, we have virtual events, so Control-Key-x is bound to
-	#<<Cut>> in tk.tcl.  This means that we cannot have things like C-x C-r
-	# bound to reload.
-	if {[namespace ::itcl {set version}] > 2.1 } {
-	    event delete <<Cut>> <Control-Key-x>
-	}
-    }
-    # If there's no resource object, create one
-    if { $resourceObject == "" } {
-	if { $completeFilePath != "" && $completeFilePath != "NoName" } {
-	    set resourceObject [::tycho::resource new $completeFilePath]
-	}
     }
     # Hocus pocus
     focusin
@@ -467,6 +447,13 @@ configbody ::tycho::File::tmpfile {
 body ::tycho::File::constructor {args} {
     global tcl_platform
 
+    # Remove Control-X from the <<Cut>> event 
+    # In Itcl2.2, we have virtual events, so Control-Key-x is bound to
+    #<<Cut>> in tk.tcl.  This means that we cannot have things like C-x C-r
+    # bound to reload.
+    if {[namespace ::itcl {set version}] > 2.1 } {
+	::event delete <<Cut>> <Control-Key-x>
+    }
 
     # Bindings.
     # <Control-x><Control-f> is bound in TopLevel to open the file
@@ -862,9 +849,7 @@ body ::tycho::File::reload {} {
 	    configure -readonly 0
             set point [currentPoint]
             clear
-            $resourceObject open "r"
-            insertData [$resourceObject read]
-            $resourceObject close
+            insertData [::tycho::resource read $completeFilePath]
             seeFragment $point
             if {[::tycho::resource writable $completeFilePath]} {
 		configure -readonly 0
@@ -1384,15 +1369,7 @@ body ::tycho::File::_initializeBars {menubar statusbar toolbar} {
 #
 body ::tycho::File::saveFile {filename} {
     set txt [saveText]
-    # If a resource object exists, use it, otherwise call
-    # ::tycho::resource
-    if { $resourceObject != "" && [$resourceObject path] == $filename } {
-	$resourceObject open "w+"
-	$resourceObject write $txt
-	$resourceObject close
-    } else {
-	::tycho::resource write $filename $txt
-    }
+    ::tycho::resource write $filename $txt
 }
 
 #####################################################################
