@@ -499,13 +499,22 @@ KcIsKnown(char *className) {
 }
 
 /* 3/28/91
-Return TRUE if name is a compiled-in star, false if static, derived from
-InterpGalaxy (meaning it is legal to replace it), or unknown.
+Return TRUE if className is a compiled-in star of the current domain,
+FALSE if unknown, derived from InterpGalaxy (meaning it is legal
+legal to replace it), or dynamic.
 */
 extern "C" boolean
 KcIsCompiledInStar(char *className) {
 	const Block* b = findClass(className);
 	if (b == 0 || b->isA("InterpGalaxy")) return FALSE;
+
+	// If b is nonzero, it means b is a star that is known, or works,
+	// in the current domain.  b could be a star of a subdomain.
+	// In that case, we consider b NOT a compiled-in star
+	// of the current domain.  This way, we can allow dynamically
+	// linking in a star with the same name as a star in a subdomain.
+	if (strcmp(b->domain(), ptcl->curDomain)) return FALSE;
+
 	return !KnownBlock::isDynamic(b->name(), ptcl->curDomain);
 }
 
