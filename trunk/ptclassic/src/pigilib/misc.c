@@ -197,7 +197,7 @@ long userOptionWord;
 
 
 /***********************************************************************
-PrintFacet(): calls "ptkPrfacet" utility to save PostScript to printer
+PrintFacet(): calls "ptkPrintFacet" utility to save PostScript to printer
 or file.
 ***********************************************************************/
 int
@@ -222,7 +222,7 @@ long userOptionWord;
 	}
 	octFullName(&facet, &fullName);
 
-	command = "ptkPrfacet ";
+	command = "ptkPrintFacet ";
 	TCL_CATCH_ERR(
              Tcl_VarEval( ptkInterp, command, fullName, (char *) NULL) );
 
