@@ -83,7 +83,13 @@ void CG56Target::initDataMembers() {
     // Initialize type conversion table
     typeConversionTable = &cg56ConversionTable;
     typeConversionTableRows = 6;
+
+    // Initialize the assembler options
     assemblerOptions = "-A -B -L -Oso";
+
+    // Set the pathname of the directory to hold generated code
+    StringList destDirName = destDirectoryName(CG56domainName);
+    destDirectory.setInitValue(destDirName);
 }
 
 int CG56Target :: compileCode() {

@@ -108,7 +108,8 @@ CGCTarget::CGCTarget(const char* name,const char* starclass,
         	"standard I/O resource"));
 	initCodeStrings();
 
-	destDirectory.setInitValue("$HOME/PTOLEMY_SYSTEMS/CGC");
+	StringList destDirName = destDirectoryName(CGCdomainName);
+	destDirectory.setInitValue(destDirName);
 
 	targetHost.setAttributes(A_SETTABLE);
 	filePrefix.setAttributes(A_SETTABLE);
