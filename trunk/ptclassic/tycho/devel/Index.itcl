@@ -181,7 +181,7 @@ body ::tycho::Index::assign {name value} {
 # Return the children of an entry.
 #
 body ::tycho::Index::children {name} {
-    _children $name entry
+    _children entry $name
 }
 
 ########################################################################

@@ -196,7 +196,7 @@ class ::tycho::Schedule {
     method annotationin {context name string args}
 
     # Get the children of a given type
-    method children {context type}
+    method children {type context}
 
     # Add a top-level dependency with attributes to the schedule
     method dependency {name string args}
@@ -482,8 +482,8 @@ body ::tycho::Schedule::exists {name} {
 #
 # Get the names of the items of the specified type within a given context.
 #
-body ::tycho::Schedule::children {context type} {
-    _children $context $type
+body ::tycho::Schedule::children {type context} {
+    _children $type $context
 }
 
 ########################################################################
