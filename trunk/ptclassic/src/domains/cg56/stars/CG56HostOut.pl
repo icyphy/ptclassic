@@ -38,10 +38,17 @@ Output data from DSP to host via host port.
 		default { "" }
 	}
         start {
-               !$val(command);
                input.setSDFParams(int(samplesConsumed),int(samplesConsumed)-1);
         }
 
+        initCode {
+                 const char* p=command;
+                 if (p[0] != NULL) gencode(begin);
+        }
+
+        codeblock(begin) {
+!output $val(command)
+        }
         codeblock(yeshostBlock) {
 $label(l)
         jclr    #m_htde,x:m_hsr,$label(l)
@@ -79,7 +86,7 @@ $label(l3)
         go { 
             const char* p=blockOnHost;		
             if (samplesConsumed==1) {
-                if(p[0]=='y` || p[0]=='Y') 
+                if (p[0]=='y' || p[0]=='Y') 
 	              gencode(yeshostBlock);
 		else
 	              gencode(elsehostBlock);
@@ -88,7 +95,7 @@ $label(l3)
                if (p[0]=='n' || p[0]== 'N')
 	              gencode(nohostBlock);
 	       else
-	              gencodeblock(done);
+	              gencode(done);
             }
        }
 
