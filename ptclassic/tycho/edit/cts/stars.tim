@@ -4,7 +4,7 @@
 # $Id$
 # Test star library for CTS
 
-group source -label {Source Stars} {
+group source -label {Source Actors} {
    
     star const \
             -class {Const} \
@@ -41,7 +41,7 @@ group source -label {Source Stars} {
     
 }
 
-group sink -label {Sink Stars} {
+group sink -label {Sink Actors} {
     star plot \
             -class {Plot} \
             -label {Plotter} \
@@ -63,12 +63,23 @@ group sink -label {Sink Stars} {
     }
 }
 
-group dynamic -label {Dynamic Stars} {
+group dynamic -label {Dynamic Actors} {
     star integral \
             -class {Integrator} \
             -label {Integrator} \
             -icon {edit/cts/icons.tim#dynamic.integral} {
         attribute initialState -default "0.0" -label "Initial State" -type number
+        port input -datatype float
+        port output -datatype float
+    }
+}
+
+group function -label {Functional Actors} {
+    star lookup \
+            -class {LookupTable} \
+            -label {LookupTable} \
+            -icon {edit/cts/icons.tim#function.lookup} {
+        attribute fromFile -default "table.txt" -label "Load From File" -type string
         port input -datatype float
         port output -datatype float
     }
