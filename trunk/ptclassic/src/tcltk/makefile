@@ -150,12 +150,11 @@ fixlinks:
 		ln -s itcl$(ITCL_MAJOR_VERSION_NUMBER) itcl; \
 		ln -s itk$(ITCL_MAJOR_VERSION_NUMBER) itk; \
 		ln -s iwidgets$(IWIDGETS_MAJOR_VERSION_NUMBER) iwidgets )
-	@echo "Create links for the itcl2.1 lib files in the directory"
+	#@echo "Create links for the itcl2.1 lib files in the directory"
 	#@echo " where itcl2.0 lib files were"
 	#-(cd $(ITCL_DEST)/lib; ln -s itcl/* .)
 	-(cd $(ITCL_DEST)/lib/itcl; \
 		ln -s libtcl$(ITCL_TCL_MAJOR_VERSION_NUMBER)i.so libtcl.so)
-
 	@echo "Create links so Ptolemy can find tcl.h and tk.h easily"
 	-(cd $(TCLTK_DEST); mkdir tcl tk; \
 		cd tcl; ln -s ../itcl/include/itcl include; \
