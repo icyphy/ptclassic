@@ -12,12 +12,12 @@ give an 8th order, linear phase lowpass filter. To read coefficients
 from a file, replace the default coefficients with "<fileName".
 Decimation parameters > 1 reduces sample rate.
 	}
-	signalIn {
-		name {signalIn}
+	input {
+		name {input}
 		type {FIX}
 	}
-	signalOut {
-		name {signalOut}
+	output {
+		name {output}
 		type {FIX}
 	}
 	state {
@@ -27,7 +27,7 @@ Decimation parameters > 1 reduces sample rate.
 	"-.040609 -.001628 .17853 .37665 .37665 .17853 -.001628 -.040609"
 		}
 		desc { Filter tap values. }
-		attributes { A_NONCONSTANT|A_YMEM }		
+		attributes { A_NONCONSTANT|A_YMEM }
 	}
 	state {
 		name {decimation}
@@ -102,8 +102,8 @@ Decimation parameters > 1 reduces sample rate.
 
 
               int modtemp=tapsNum%interpolation;
-              signalIn.setSDFParams(decimation, decimation-1);
-	      signalOut.setSDFParams(interpolation, interpolation-1);
+              input.setSDFParams(decimation, decimation-1);
+	      output.setSDFParams(interpolation, interpolation-1);
 
               if (decimation>1 && interpolation>1) 
 	              Error::abortRun (*this, ": Cannot both interpolate and decimate.");
@@ -224,7 +224,7 @@ Decimation parameters > 1 reduces sample rate.
         move    #<$val(tp)-$val(decimation)-1,m5
         }
         codeblock(must) {
-        move    $ref2(signalIn,adjust),x0
+        move    $ref2(input,adjust),x0
         }    
         codeblock(greaterTwo) {
         clr     a         x:(r5)+,x1      y:(r0)-,y1
@@ -233,21 +233,21 @@ Decimation parameters > 1 reduces sample rate.
         mac     x1,y1,a   x0,x:(r5)+      y:(r0)-,y1
         macr    x0,y1,a   r5,$ref(oldsampleStart)
         move            m7,m5
-        move    a,$ref(signalOut)
+        move    a,$ref(output)
         }    
         codeblock(equalTwo) {
         clr     a         x:(r5)+,x1      y:(r0)-,y1
         mac     x1,y1,a   x0,x:(r5)       y:(r0)-,y1
         macr    x0,y1,a 
-        move    a,$ref(signalOut)
+        move    a,$ref(output)
         }
         codeblock(lessTwo) {    
         clr     a         $ref(taps),y1
         mpyr    x0,y1,a
-        move    a,$ref(signalOut)
+        move    a,$ref(output)
         }
         codeblock(decmust) {
-        move    #<$val(adjust)+$addr(signalIn),r6
+        move    #<$val(adjust)+$addr(input),r6
         }
         codeblock(decgreater) {
         clr     a         x:(r5)+,x1      y:(r0)-,y1
@@ -259,14 +259,14 @@ Decimation parameters > 1 reduces sample rate.
 $label(loop)
         macr    x1,y1,a   r5,$ref(oldsampleStart)
         move    m7,m5
-        move    a,$ref(signalOut)
+        move    a,$ref(output)
         }
         codeblock(decequal) {
         clr     a               x:(r5),x1       y:(r0)-,y1
         rep     #$val(dec)
         mac     x1,y1,a         x:(r6)+,x1      y:(r0)-,y1
         macr    x1,y1,a         x1,x:(r5)
-        move    a,$ref(signalOut)
+        move    a,$ref(output)
         }
         codeblock(decless) {        
         nop
@@ -274,11 +274,11 @@ $label(loop)
         rep     #$val(tp)-1
         mac     x1,y1,a   x:(r6)+,x1      y:(r0)-,y1
         macr    x1,y1,a
-        move    a,$ref(signalOut)
+        move    a,$ref(output)
         }
         codeblock(interpmust) {
-        move    $ref2(signalIn,adjust),x0
-        move    #<$addr(signalOut),r6
+        move    $ref2(input,adjust),x0
+        move    #<$addr(output),r6
         }
         codeblock(greater) {
         clr   a         x:(r5)+,x1      y:(r0)-,y1
