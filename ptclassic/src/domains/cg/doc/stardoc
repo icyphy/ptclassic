@@ -15,8 +15,14 @@ altar a array state buffer size which can then be properly allocated
 and automatically initialized.  The initCode() method of a star is called
 after the the static schedule has been generate and before the schedule is
 fired. This method is used to generate the code outside of the main
-loop such as initialization code and procedure declaration code. The go
-function is used to generate the main loop code for the star.
+loop such as initialization code and procedure declaration code. 
+To generate startup code, use the initCode method, NOT the start method,
+since start is called before scheduling and memory allocation.  The
+main use of the start method, as in SDF, is to tell the scheduler
+if more than one sample is to be accessed from a porthole with the
+setSDFParams call.
+.pp
+The go function is used to generate the main loop code for the star.
 Finally, the wrapup function is used to generate the code after the
 main loop.
 .pp
@@ -65,7 +71,12 @@ pseudo-language specification of a code segment.  By pseudo-language we
 mean that the block of code is written in the target language with
 interspersed macros.  Macros will be explained in the following section
 and the exact function of C code generation macros will be described in
-the CGC chapter.  The \fBcodeblock\fR directive defines a block of code
+the CGC chapter.  
+.pp
+Codeblocks are implemented as protected static class members (e.g. there
+is one instance of a codeblock for the entire class).  Since they are
+protected, codeblocks from one star class can be used from a derived
+star.  The \fBcodeblock\fR directive defines a block of code
 with an associated identifying name ("addCB" in this case).
 .(c
 	codeblock (addCB) {
