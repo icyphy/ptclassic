@@ -417,29 +417,11 @@ ifeq ($(USE_SHARED_LIBS),yes)
 	STARS =
 endif
 
-ifeq ($(NEED_PALETTES),yes)
-	PALETTES =		defpalettes-pigi.o
-endif
-
 ifdef TK
-	LIBS += -L$(OCTLIBDIR) -lrpc -lpigi -lptk -lgantt \
-		-loh -lvov -lrpc -llist -ltr -lutility -lst \
-		-lerrtrap -luprintf -lport \
+	LIBS += -lptk -lgantt \
 		 $(ITK_LIBSPEC) $(TK_LIBSPEC) $(X11_LIBSPEC) 
-	PT_DEPEND += $(OCTLIBDIR)/librpc.$(LIBSUFFIX) \
-		$(LIBDIR)/libpigi.$(LIBSUFFIX) \
-		$(LIBDIR)/libptk.a \
-		$(LIBDIR)/libgantt.$(LIBSUFFIX) \
-		$(OCTLIBDIR)/liboh.$(LIBSUFFIX) \
-		$(OCTLIBDIR)/libvov.$(LIBSUFFIX) \
-		$(OCTLIBDIR)/liblist.$(LIBSUFFIX) \
-		$(OCTLIBDIR)/libtr.$(LIBSUFFIX) \
-		$(OCTLIBDIR)/libutility.$(LIBSUFFIX) \
-		$(OCTLIBDIR)/libst.$(LIBSUFFIX) \
-		$(OCTLIBDIR)/liberrtrap.$(LIBSUFFIX) \
-		$(OCTLIBDIR)/libuprintf.$(LIBSUFFIX) \
-		$(OCTLIBDIR)/libport.$(LIBSUFFIX)
-
+	PT_DEPEND += $(LIBDIR)/libptk.a \
+		$(LIBDIR)/libgantt.$(LIBSUFFIX)
 endif
 
 PT_DEPEND += $(LIBDIR)/libptcl.$(LIBSUFFIX) $(LIBDIR)/libptolemy.a \
