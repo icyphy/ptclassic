@@ -1,4 +1,4 @@
-# VERSION: $Id$	%H%
+# VERSION: $Id$
 #
 #---------------------------------------------------------------------------
 # Copyright (c) 1993 The Regents of the University of California.
@@ -281,7 +281,6 @@ proc ed_AddParamDialog {facet number} {
 		destroy $ask"
     ptkRecursiveBind $ask <M-Delete> "destroy $ask"
 
-    grab $ask
     focus $ask.fname.entry
 }
 
@@ -1022,8 +1021,10 @@ proc ptkEditStrings {instr cmd editList args} {
    }
    set nmFrame [frame $w.f -bd 3 -relief raised]
    pack [label $w.label -text $instr -relief raised \
-        -font [option get . mediumfont Pigi]] \
+	-font [option get . mediumfont Pigi]] \
         -side top -fill x -expand 1
+   set counter 1
+   set length [llength $pairs]
    foreach name_value $pairs {
     set name [lindex $name_value 0]
     ed_MkEntryButton $nmFrame.name_$name $name
@@ -1031,8 +1032,27 @@ proc ptkEditStrings {instr cmd editList args} {
     if {[llength $name_value] == 2} {
         $nmFrame.name_$name.entry insert 0 [lindex $name_value 1]
     }
+    if {$counter == $length} {
+	set nextIdx 0
+    } else { set nextIdx $counter }
+    set nextName [lindex [lindex $pairs $nextIdx] 0]
+    if {$counter == 1} {
+	set prevIdx [expr $length-1]
+    } else { set prevIdx [expr $counter-2] }
+    set prevName [lindex [lindex $pairs $prevIdx] 0]
+    bind $nmFrame.name_$name.entry <Return> "
+        focus \"$nmFrame.name_$nextName.entry\""
+    bind $nmFrame.name_$name.entry <Tab> "
+        focus \"$nmFrame.name_$nextName.entry\""
+    bind $nmFrame.name_$name.entry <Control-n> "
+        focus \"$nmFrame.name_$nextName.entry\""
+    bind $nmFrame.name_$name.entry <Control-p> "
+        focus \"$nmFrame.name_$prevName.entry\""
     pack $nmFrame.name_$name -side top -fill x -expand 1
+    incr counter
    }
+
+
    pack $nmFrame -side top -fill x -expand 1
 
    if {$args == "Params"} {
@@ -1204,4 +1224,96 @@ proc ptkEditText {title cmd string} {
 
 proc ed_EditTextExecute {cmd textWidget} {
     eval [format $cmd \"[$textWidget get 0.0 end]\"]
+}
+
+
+# This procedure calls a command for each checkbutton selected
+# Author: Wei-Jen Huang
+# Based on ptkChooseOne
+
+proc ptkChooseMany {
+    optionList
+    command
+    {instruction "Choose:"} } {
+
+    global unique
+    global  ptkChooseMany$unique
+    upvar #0 ptkChooseMany$unique chooseArr
+
+    set w .ptkChooseMany$unique
+    set currNum $unique
+    incr unique
+    toplevel $w
+
+    label $w.label -text $instruction -anchor w
+    frame $w.optFrame -bd 3 -relief sunken
+    set b [frame $w.buttonFrame -bd 3]
+
+
+    set chooseArr(optionList) $optionList
+    set num 0
+    foreach opt $optionList {
+       pack [checkbutton $w.optFrame.opt$num -text $opt -var selVar$w.$opt \
+                -anchor w] -side top -expand 1 -fill x
+       incr num
+    }
+   ptkOkCancelButtons $b "ed_ChooseManyOk $w $currNum \"$command\"" \
+			 "ed_ChooseManyCancel $w $currNum"
+
+   pack [button $b.all -text "All" -command "ed_ChooseManyAll $w $num"] \
+	-side left -after $b.cancel \
+	-padx 2m -pady 2m -ipadx 1m -ipady 1m -expand 1
+   pack [button $b.clear -text "Clear" \
+	-command "ed_ChooseManyClear $w $num"] -side left \
+	-after $b.all -padx 2m -pady 2m -ipadx 1m -ipady 1m -expand 1
+   pack $w.label -side top -fill x -expand 1
+   pack $w.optFrame -side top -expand 1 -fill x
+   pack $b -side top -expand 1 -fill x
+
+# FIXME? Restore old focus?
+   ptkRecursiveBind $w <Any-Enter> {focus %W}
+   ptkRecursiveBind $w <Return> "$b.f.ok invoke"
+}
+
+proc ed_ChooseManyAll {w num} {
+   set count 0
+   while {$count < $num} {
+	$w.optFrame.opt$count select
+	incr count
+   }
+}
+
+proc ed_ChooseManyClear {w num} {
+   set count 0
+   while {$count < $num} {
+	$w.optFrame.opt$count deselect
+	incr count
+   }
+}
+
+# This procedure is used in conjunction with ptkChooseOne
+# It is invoked when Okay is pressed
+proc ed_ChooseManyOk {w unique command} {
+   upvar #0 ptkChooseMany$unique chooseArr
+   foreach opt $chooseArr(optionList) {
+	upvar #0 selVar$w.$opt optVar
+	if {$optVar == 1} {
+	   eval [format $command \$opt]
+	}
+	unset optVar
+   }
+   uplevel #0 "unset ptkChooseMany$unique"
+   destroy $w
+}
+
+# This procedure is used in conjunction with ptkChooseOne
+# It is invoked when the cancelling
+proc ed_ChooseManyCancel {w unique} {
+   upvar #0 ptkChooseMany$unique chooseArr
+   foreach opt $chooseArr(optionList) {
+	upvar #0 selVar$w.$opt optVar
+	unset optVar
+   }
+   uplevel #0 "unset ptkChooseMany$unique"
+   destroy $w
 }
