@@ -257,6 +257,11 @@ body ::tycho::EditSearch::change {} {
 
     set changeto [get change]
     if {$changeallsw} {
+        set pattern [get pattern]
+        if {$pattern == ""} {
+            error "A change all requires text in the Search Pattern box"
+        }
+        if {$pattern != $lastSearchPattern} find
 	# Change all tagged text.  Note that we have to have done
 	# a search, or we will get an error message.
 	$editWindow replaceAll findmatch $changeto
