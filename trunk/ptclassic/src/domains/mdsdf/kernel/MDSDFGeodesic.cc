@@ -146,7 +146,6 @@ void MDSDFGeodesic::setValid(int row, int col) {
   }
 }
     
-
 // Accessing the location of a single scalar value, no type checking done
 double MDSDFGeodesic::getFloatInput(int rowFiringIndex,int colFiringIndex,
 				    int rowDelay, int colDelay) {
@@ -168,7 +167,6 @@ double MDSDFGeodesic::getFloatInput(int rowFiringIndex,int colFiringIndex,
 // NOTE: Star should delete submatrix when done
 PtMatrix* MDSDFGeodesic::getInput(int rowFiringIndex,int colFiringIndex,
 				int rowDelay, int colDelay) {
-  PtMatrix* result;
   int destRows = ((MDSDFPortHole*)destinationPort)->numRowXfer();
   int destCols = ((MDSDFPortHole*)destinationPort)->numColXfer();
   rowFiringIndex = (rowFiringIndex+rowDelay)*destRows;
@@ -185,20 +183,15 @@ PtMatrix* MDSDFGeodesic::getInput(int rowFiringIndex,int colFiringIndex,
     pstack.putTail(backParticle);
     return backParticle->subMatrix(0,0,destRows,destCols);
   }
-  else
-    result = motherParticle->subMatrix(rowFiringIndex, colFiringIndex,
-				       destRows, destCols);
-  return result;
+  return motherParticle->subMatrix(rowFiringIndex, colFiringIndex,
+				   destRows, destCols);
 }
 
 PtMatrix* MDSDFGeodesic::getOutput(int rowFiringIndex, int colFiringIndex) {
   int srcRows = ((MDSDFPortHole*)originatingPort)->numRowXfer();
   int srcCols = ((MDSDFPortHole*)originatingPort)->numColXfer();
-  PtMatrix* result;
- 
-  result=motherParticle->subMatrix(rowFiringIndex*srcRows+rowDelays,
+  return motherParticle->subMatrix(rowFiringIndex*srcRows+rowDelays,
 				   (colFiringIndex*srcCols+colDelays)%mNumCols,
 				   srcRows,
 				   srcCols);
-  return result;
 }  
