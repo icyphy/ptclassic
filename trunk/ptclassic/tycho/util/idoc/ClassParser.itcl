@@ -341,6 +341,18 @@ body ::tycho::IDocSys::tydocUpdate {obj} {
 # version) is used.
 #
 body ::tycho::IDocSys::formatClassComment {expl} {
+    # save old information
+    set oldauthor $author
+    set oldcontrib $contributor
+    set oldversion $version
+    set oldcopyright $copyright
+
+    # clear it
+    set author {}
+    set contributor {}
+    set version {}
+    set copyright {}
+
     # Parse line by line
     set explList [split $expl "\n"]
     set docTag desc
@@ -367,7 +379,13 @@ body ::tycho::IDocSys::formatClassComment {expl} {
     }
     
     set expl [formatExpl $desc]
-    
+
+    # Restore old information if necessary
+    if {$author == {}} { set author $oldauthor }
+    if {$contributor == {}} { set contributor $oldcontrib }
+    if {$version == {}} { set version $oldversion }
+    if {$copyright == {}} { set copyright $oldcopyright }
+
     # Append the footer
     append expl <hr>
     if {$author != ""} {
