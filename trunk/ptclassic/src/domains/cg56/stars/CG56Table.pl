@@ -54,7 +54,7 @@ This is currently not supported in the CG56 domain.
 ; There is no check to make sure that the index is in bounds
 	}
 	codeblock(lookup) {
-	move	y:(r0+n0),x0		; read table value
+	move	y:(r0+n0),x0		; read table value (2 instructions)
 	move	x0,$ref(output)			; write table value to output
 	}
 	go {
@@ -63,6 +63,6 @@ This is currently not supported in the CG56 domain.
 		addCode(lookup);
 	}
 	exectime {
-		return 5;
+		return 6;
 	}
 }
