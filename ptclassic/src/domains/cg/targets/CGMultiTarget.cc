@@ -176,11 +176,6 @@ inline int hierSchedulerTest(const char* c) {
 
 /*virtual*/ int CGMultiTarget::schedulerSetup() {
     int status = MultiTarget::schedulerSetup();
-    if (status && int(writeScheduleFlag) && hierSchedulerTest(schedName)) {
-	StringList dot;
-    	dot << printClusterDot(*galaxy());
-	writeFile(dot,".dot");
-    }
     return status;
 }    
 
@@ -330,15 +325,7 @@ void CGMultiTarget :: flattenWorm() {
     Galaxy* myGalaxy = galaxy();
     GalStarIter next(*myGalaxy);
     CGStar* s;
-    CGStar* prev = 0;
-    Galaxy* prevG = myGalaxy;
-    int changeFlag = FALSE;
     while ((s = (CGStar*) next++) != 0) {
-	if (prev) {
-	    prevG->removeBlock(*prev);
-	    LOG_DEL; delete prev;
-	    prev = 0;
-	}
 	if (s->isItWormhole()) {
 	    CGWormBase* w = (CGWormBase*)s->asWormhole();
 	    if (w == NULL) {
@@ -349,22 +336,14 @@ void CGMultiTarget :: flattenWorm() {
 		return;
 	    }
 	    // if inside domain is a CG domain, explode wormhole.
-	    prevG = (Galaxy*) s->parent();
 	    if (w->isCGinside()) {
-		prev = s;
 		Galaxy* inG = w->explode();
-		prevG->addBlock(*inG, inG->name());
-		changeFlag = TRUE;
+		s->parent()->asGalaxy().addBlock(*inG, inG->name());
+		delete s;
+		next.remove();
 	    }
 	}
     }
-    if (prev) {
-	prevG->removeBlock(*prev);
-	LOG_DEL; delete prev;
-    }
-
-    // recursive application of this routine.
-    if (changeFlag) flattenWorm();
 }
 
 void CGMultiTarget :: setStopTime(double f) {
@@ -422,11 +401,6 @@ int CGMultiTarget :: run() {
 }
 
 int CGMultiTarget :: allSendWormData() {
-/*	if (nChildrenAlloc == 1) {
-	CGTarget* t = (CGTarget*) child(0);
-	return t->allSendWormData();
-	} */
-
     BlockPortIter nextPort(*galaxy());
     PortHole* p;
     while ((p = nextPort++) != 0) {
@@ -448,11 +422,6 @@ int CGMultiTarget :: allSendWormData() {
 }
 
 int CGMultiTarget :: allReceiveWormData() {
-/*	if (nChildrenAlloc == 1) {
-	CGTarget* t = (CGTarget*) child(0);
-	return t->allReceiveWormData();
-	} */
-
     BlockPortIter nextPort(*galaxy());
     PortHole* p;
     while ((p = nextPort++) != 0) {
