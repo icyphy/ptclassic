@@ -340,19 +340,28 @@ void CGCTarget :: frameCode () {
     initCodeStrings();
 }
 
-void CGCTarget :: writeCode()
-{
-    writeFile(myCode, ".c", displayFlag);
+// if the compilation will occur on a remote machine, then copy
+// over any dependent modules to the remote machine
+int CGCTarget :: processDependentFiles() {
+    int retval = TRUE;
     if (!onHostMachine(targetHost)) {
 	if (remoteFilesStream.length() > 0) {
-	    rcpCopyMultipleFiles(targetHost, destDirectory,
-				 remoteFilesStream, FALSE);
+	    retval = rcpCopyMultipleFiles(targetHost, destDirectory,
+					  remoteFilesStream, FALSE);
 	}
     }
+    return retval;
 }
 
-int CGCTarget::compileCode()
-{
+// write the generated code to a file called <filePrefix>.c
+// and copy over and needed files to the remote machine
+void CGCTarget :: writeCode() {
+    writeFile(myCode, ".c", displayFlag);
+    processDependentFiles();
+}
+
+// compile the file <filePrefix>.c
+int CGCTarget::compileCode() {
     // invoke the compiler
     StringList cmd, error, file;
     file << filePrefix << ".c ";
