@@ -47,7 +47,7 @@ void DEWormhole :: startNewPhase()
         PortHole* p;
         while ((p = next++) != 0) {
                 if (p->isItInput()) {
-                        DEtoUniversal* inp = (DEtoUniversal*) p;
+                        InDEPort* inp = (InDEPort*) p;
                         inp->cleanIt();
                 }
         }
