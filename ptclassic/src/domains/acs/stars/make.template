@@ -1,5 +1,5 @@
 # Makefile for Ptolemy ACS stars
-# $Id$
+# @(#)make.template	1.2   01/16/98
 #
 # If this file's name is "make.template" and there is no makefile in
 # this directory, do
@@ -27,6 +27,11 @@ LIB=libacsstars.$(LIBSUFFIX)
 # base classes/stars go in the front of the list
 PL_SRCS= \
   ACSNop.pl \
+  ACSAdd.pl		ACSPrinter.pl		ACSSub.pl \
+  ACSAddFPSim.pl		ACSPrinterFPSim.pl	ACSSubFPSim.pl \
+  ACSMpy.pl		ACSRamp.pl \
+  ACSMpyFPSim.pl		ACSRampFPSim.pl \
+  ACSFork.pl	ACSForkFPSim.pl
 
 TMP_PL_SRCS = \
   ACSAdd.pl \
