@@ -30,16 +30,6 @@
 # 						COPYRIGHTENDKEY
 ##########################################################################
 
-#### FIXME - known bugs
-#
-# - This uses the buttonbox widget by Mark Ulferts.  This widget defers
-# mapping the buttons, and thus the size of the window is not known
-# until the window has been mapped.  This results in two artifacts:
-# the window is not properly centered on the screen by the centerOnScreen
-# method, and when using interactive placement, the initial window outline
-# is smaller than the window will finally end up being.  We need to
-# rewrite this buttonbox megawidget.
-
 ##########################################################################
 #### Dialog class.
 # This is a top-level dialog window to which buttons and other widgets
@@ -241,27 +231,29 @@ body ::tycho::Dialog::constructor {args} {
     pack $itk_component(separator) -expand no -fill x \
 	    -after $itk_component(childsite)
     
-    # Create a button box.
-    # FIXME: We should replace this with a Tycho buttonbox, since the iwidgets
-    # button box uses a different policy for mapping to the screen.  The
-    # iwidgets policy makes it impossible to center a window on the screen
-    # because the size of the window will not actually be known until after
-    # the window is mapped.
+    # Create a button box, and pack it with a bit of space
+    # around it.
     itk_component add bbox {
-	buttonbox $itk_component(hull).bbox
+	::tycho::ButtonBox $itk_component(hull).bbox
     } {
-	keep -background -cursor
+	keep -background -cursor -font -padx -pady
     }
-    pack $itk_component(bbox) -expand no \
+    pack $itk_component(bbox) -expand no -padx 6 -pady 4\
 	    -after $itk_component(separator)
     
     # FIXME: In itcl2.0-beta, the following silliness appears to be
     # necessary to enable commandResult to be an array.
-    set commandResult(junk) ""
+    #    set commandResult(junk) ""
 
     # Process any unevaluated arguments.
     eval itk_initialize $args
     eval preference exclude $this $args
+
+    # Subscribe to the preference set
+    preference subscribe $this \
+	    -font menuFont \
+	    -padx buttonPadX \
+	    -pady buttonPadY
 
     # Most dialog windows don't want the user resizing. Those that
     # do should reverse this.
