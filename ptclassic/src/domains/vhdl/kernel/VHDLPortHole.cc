@@ -129,7 +129,7 @@ StringList VHDLPortHole :: dataType() const {
   type.initialize();
   
   if (dtyp == INT) type << "INTEGER";
-  else if (dtyp == COMPLEX) type << "COMPLEX";
+  else if (dtyp == COMPLEX) type << "REAL";
   else type << "REAL";
 
   return type;
