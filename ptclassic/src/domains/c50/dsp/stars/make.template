@@ -68,6 +68,7 @@ PL_SRCS= \
  C50LMS.pl \
  C50LMSGanged.pl \
  C50LMSOscDet.pl \
+ C50NdftVarD.pl \
  C50RaisedCosine.pl \
  C50Sinc.pl \
  C50Window.pl
