@@ -592,6 +592,8 @@ void
 InterpGalaxy::addToKnownList(const char* outerDomain, Target* innerTarget) {
 	const char* myName = hashstring(readName());
 	setNameParent(myName, parent());
+// use my name as the "class name" for all objects that are cloned from me.
+	className = myName;
 
 // If there was a domain change, this is a Wormhole.  Make the appropriate
 // type of wormhole, add it to the list, and change back to outerDomain
