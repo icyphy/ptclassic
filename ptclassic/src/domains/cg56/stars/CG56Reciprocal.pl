@@ -41,9 +41,10 @@ Find the reciprocal of a fraction in terms of a fraction and some left shifts.
 	codeblock (Rblock) {
         move    $ref(input),a
         move    #0,r7
-$label(start)
+	tst	a			; must setup flags before norm
+$label(normalize)
         norm    r7,a
-        jnn     $label(start)                   ;normalize data
+        jnn     $label(normalize)                   ;normalize data
         move    r7,y0
         move    #$$010001,b
         sub     y0,b    a,x0            ;number of left shifts in LSBs of b
