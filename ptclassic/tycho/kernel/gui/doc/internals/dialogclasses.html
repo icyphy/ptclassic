@@ -27,8 +27,8 @@ The YesNoQuery class poses a question and offers two buttons,
 labeled "Yes" and "No".  For example:
 <tcl><pre>
 ::tycho::YesNoQuery .y -text {Are you awake?} &#92
-    -yescommand {inform {You said yes!}} &#92
-    -nocommand {inform {Then how did you click on the No button?}}
+    -yescommand {::tycho::inform {You said yes!}} &#92
+    -nocommand {::tycho::inform {Then how did you click on the No button?}}
 .y centerOnScreen
 </pre></tcl>
 The options "<a name="yescommand option">-yescommand</a>" and
@@ -40,9 +40,9 @@ To get the return value, you should use the
 For example,
 <tcl><pre>
 if [::tycho::DialogWindow::newModal YesNoQuery .z -text {Are you awake?}] {
-    inform {You said yes!}
+    ::tycho::inform {You said yes!}
 } {
-    inform {Then how did you click on the No button?}
+    ::tycho::inform {Then how did you click on the No button?}
 }
 </pre></tcl>
 
@@ -59,7 +59,7 @@ set x [
          -yescommand {set y {yes}} &#92
          -nocommand {set y {no}}
 ]
-inform "Your answer was $x"
+::tycho::inform "Your answer was $x"
 </pre></tcl>
 But this not good coding style.  The variable "y" gets set
 at the global scope, clobbering any previous value the user might
@@ -72,9 +72,9 @@ that simply returns its argument precisely
 for this purpose.  Thus, the preferred script is:
 <tcl><pre>
 set x [
-    DialogWindow::newModal YesNoQuery .z -text {Are you awake?} &#92
-        -yescommand {DialogWindow::answer {yes}} &#92
-        -nocommand {DialogWindow::answer {no}}
+    ::tycho::DialogWindow::newModal YesNoQuery .z -text {Are you awake?} &#92
+        -yescommand {::tycho::DialogWindow::answer {yes}} &#92
+        -nocommand {::tycho::DialogWindow::answer {no}}
 ]
 ::tycho::inform "Your answer was $x"
 </pre></tcl>
@@ -118,7 +118,7 @@ the widget is destroyed.
 Entry boxes can be created using the
 <a name="addQuery method">addQuery method</a>, as shown here:
 <tcl><pre>
-::tycho::EntryQuery .bb -okcommand {inform [.bb get]}
+::tycho::EntryQuery .bb -okcommand {::tycho::inform [.bb get]}
 .bb addQuery month {Enter Month} Jan
 .bb addQuery day {Enter Day} Mon
 .bb centerOnScreen
@@ -153,8 +153,8 @@ For example,
     -queries {{first {First entry:} {Default string}} &#92
         {second {Second entry:} {Another default}}}  &#92
     -entrywidth 60 &#92
-    -okcommand {inform "Result of a get: [.z get]"} &#92
-    -cancelcommand {inform "You canceled"}
+    -okcommand {::tycho::inform "Result of a get: [.z get]"} &#92
+    -cancelcommand {::tycho::inform "You canceled"}
 .z centerOnScreen
 </pre></tcl>
 If you click OK, you see the result of the
@@ -215,8 +215,8 @@ For example,
         {second {Second entry:} {Another default}}}  &#92
     -entrywidth 20 &#92
     -title "EntryQuery Widget" &#92
-    -okcommand {inform "Result of a get: [.aa get]"} &#92
-    -cancelcommand {inform "You canceled"}
+    -okcommand {::tycho::inform "Result of a get: [.aa get]"} &#92
+    -cancelcommand {::tycho::inform "You canceled"}
 .aa centerOnScreen
 </pre></tcl>
 The order of the -bitmap and -text options relative to the -queries
@@ -236,7 +236,7 @@ For example,
 A rather more elaborate dialog box is a file browser.
 Consider the example:
 <tcl><pre>
-::tycho::FileBrowser .f -command "inform"
+::tycho::FileBrowser .f -command "::tycho::inform"
 wm deiconify .f
 </pre></tcl>
 The <a name="command option">-command option</a>
@@ -244,7 +244,7 @@ specifies a command to execute once the user
 has selected a file name.  The file name is appended as an argument
 to the command before the command is executed.  Thus, in this example,
 if you select a file named "foo" in directory /users/bar/, then
-the command that is executed will be "inform /users/bar/foo".
+the command that is executed will be "::tycho::inform /users/bar/foo".
 Refer to the <a href="../usersGuides/FileBrowserHelp.html">user-level documentation</a>
 for further information about the file browser.
 <p>
