@@ -61,7 +61,7 @@ public:
 			}
 
 	// Size
-	int size() { return nElements;}
+	int size() const { return nElements;}
 
 	// Array element 
 	Complex & operator [] (int n) {
@@ -69,7 +69,7 @@ public:
 			}
 
 	// The type
-	const char* type(); // { return "ComplexArray";}
+	const char* type() const; // { return "ComplexArray";}
 
         // the value as a string
         StringList currentValue();
@@ -81,7 +81,7 @@ public:
 	ParseToken evalExpression(Tokenizer&);
 
 	// clone method
-	virtual State* clone() {return new ComplexArrayState;}
+	virtual State* clone() const {return new ComplexArrayState;}
 };
 
 #endif
