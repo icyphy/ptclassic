@@ -44,11 +44,13 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #pragma implementation
 #endif
 
+#include <stdio.h>
 #include "EventQueue.h"
 #include "LinkedList.h"
 #include "MutableCalendarQueue.h"
 #include <assert.h>
 #include <limits.h>		// We use INT_MAX below
+
 
 // get a free CqLevelLink if any. If none, create a new CqLevelLink.
 // Once created, it's never destroyed.
