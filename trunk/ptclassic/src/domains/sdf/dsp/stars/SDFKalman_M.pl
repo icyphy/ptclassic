@@ -1,29 +1,31 @@
 defstar {
   name      { Kalman_M }
   domain    { SDF }
-  desc      {
-Implements the Kalman filter. 
-  }
+  desc      { Implements the Kalman filter. }
   version   { $Id$ }
   author    { Mike J. Chen }
-  copyright { 1993 The Regents of the University of California }
+  copyright {
+Copyright (c) 1990-1995 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+}
   location  { SDF dsp library }
   explanation {
-.pp
-Initial values for the state transition matrix,
-state vector, correlation matrix, and process noise correlation matrix are
-parameters to the star.  Also parameters are the number of elements in
-the observation vector and the number of elements in the state vector.
+Initial values for the state transition matrix, state vector, correlation
+matrix, and process noise correlation matrix are parameters to the star.
+Also parameters are the number of elements in the observation vector and
+the number of elements in the state vector.
 Inputs are the current values of the state transition matrix, process
 noise correlation matrix, measurement noise correlation matrix, 
-measurement matrix, and the observation vector.  The single output is
-the state vector.
-.UH "References"
+measurement matrix, and the observation vector.
+The single output is the state vector.
+.UH REFERENCES
 .ip [1]
 R.E. Kalman, "A new approach to linear filtering and prediction problems",
 \fITrans. ASME, J. Basic Eng., Ser 82D, pp. 35-45, March 1960.
 .ip [2]
-S. Haykin, \fAdaptive Filter Theory\fR, Prentice-Hall, Inc., Englewood Cliffs,
+S. Haykin, \fIAdaptive Filter Theory\fR, Prentice-Hall, Inc., Englewood Cliffs,
 N.J., 1986.
   }
   input {
@@ -99,7 +101,15 @@ N.J., 1986.
     FloatMatrix *predStateVector;                    // x(n+1|y(n));
     FloatMatrix *predStateErrCorrMatrix;             // K(n+1,n)
     FloatMatrix *presentErrCorrMatrix;               // K(n)
-
+  }
+  constructor {
+    stateVector = 0;
+    gainMatrix = 0;
+    innovationsVector = 0;
+    innovationsCorrMatrix = 0;
+    predStateVector = 0;
+    predStateErrCorrMatrix = 0;
+    presentErrCorrMatrix = 0;
   }
   destructor {
     delete stateVector;
@@ -113,6 +123,15 @@ N.J., 1986.
   setup {
     stateDim = int(stateDimension);
     inputDim = int(inputDimension);
+
+    // delete previously allocation arrays
+    delete stateVector;
+    delete gainMatrix;
+    delete innovationsVector;
+    delete innovationsCorrMatrix;
+    delete predStateVector;
+    delete predStateErrCorrMatrix;
+    delete presentErrCorrMatrix;
 
     // initialize storage for intermediate and state variables
     stateVector = new FloatMatrix(stateDim,1,InitialState);  // x(n|y(n))

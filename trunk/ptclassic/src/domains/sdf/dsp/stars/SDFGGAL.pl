@@ -38,7 +38,7 @@ limitation of liability, and disclaimer of warranty provisions.
 
     destructor
     {
-	LOG_DEL; delete b;
+	LOG_DEL; delete [] b;
     }
 
     setup
@@ -46,7 +46,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	// Reallocate array only if size has changed.
 	if (previousOrder != order)
 	{
-	    LOG_DEL; delete b;
+	    LOG_DEL; delete [] b;
 	    LOG_NEW; b = new double[order+1];
 	}
 
