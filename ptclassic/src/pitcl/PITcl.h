@@ -215,8 +215,9 @@ public:
     int aliasDown(int argc,char** argv);
     int aliasUp(int argc,char** argv);
     int animation(int argc,char** argv);
+    int begin(int argc,char** argv);
     int blocks(int argc,char** argv);
-    int cancelAction(int argc,char** argv);
+    int clear(int argc,char** argv);
     int connect(int argc,char** argv);
     int connected(int argc,char** argv);
     int cont(int argc,char** argv);
@@ -225,17 +226,18 @@ public:
     int defWormhole(int argc,char** argv);
     int delnode(int argc,char** argv);
     int disconnect(int argc,char** argv);
-    int exit(int argc,char** argv);
     int galaxyPort(int argc,char** argv);
     int getAnnotation(int argc,char** argv);
     int getClassName(int argc,char** argv);
+    int getData(int argc, char** argv);
     int getDescriptor(int argc,char** argv);
     int getDomain(int argc,char** argv);
     int getFullName(int argc,char** argv);
     int getParent(int argc,char** argv);
+    int getSchedule(int argc,char** argv);
     int getTarget(int argc,char** argv);
     int halt(int argc,char** argv);
-    int initBlock(int argc,char** argv);
+    int init(int argc,char** argv);
     int initState(int argc,char** argv);
     int isGalaxy(int argc,char** argv);
     int isMultiPort(int argc,char** argv);
@@ -252,18 +254,18 @@ public:
     int multilink(int argc,char** argv);
     int node(int argc,char** argv);
     int nodeconnect(int argc,char** argv);
+    int onFiring(int argc,char** argv);
+    int onFiringCancel(int argc,char** argv);
     int pragma(int argc,char** argv);
     int pragmaDefaults(int argc,char** argv);
     int print(int argc,char** argv);
     int ports(int argc,char** argv);
     int portsContained(int argc,char** argv);
     int remove(int argc,char** argv);
-    int registerAction(int argc,char** argv);
     int reset(int argc,char** argv);
     int run(int argc,char** argv);
     int stoptime(int argc,char** argv);
     int schedtime(int argc,char** argv);
-    int schedule(int argc,char** argv);
     int seed(int argc,char** argv);
     int setState(int argc,char** argv);
     int setTarget(int argc,char** argv);
@@ -355,7 +357,7 @@ private:
     const Block* getSubBlock(const char*, const Block*);
 
     // Initialize a universe or wormhole.
-    int initBlockInternal(Block*);
+    int initBlock(Block*);
 
     // Return true if the target targetName is a legal target.
     int legalTarget(const char*, const char*);
