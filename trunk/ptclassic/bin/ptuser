@@ -17,7 +17,7 @@ set host=`hostname | sed 's/\([^.]*\).*/\1/'`
 
 # If using X, then create a new xterm.
 if ($?DISPLAY) then
-	rsh -n $ptHost xterm -display $DISPLAY -title $ptUser@$ptHost \
+	xon $ptHost -debug xterm -title $ptUser@$ptHost \
 		-e rlogin -l $ptUser $ptHost &
 else if ($host == $ptHost) then
 	exec rlogin -l $ptUser $ptHost
