@@ -274,7 +274,8 @@ void StructTarget :: trailerCode() {
 	connectSource(state->initVal, stateSignal);
       }
       else {
-	Error::abortRun(state->name, ": no such signal with this name in topSignalList");
+	Error::abortRun(state->name,
+			": no such signal with this name in topSignalList");
 	return;
       }
     }
@@ -290,8 +291,10 @@ void StructTarget :: trailerCode() {
 
       mainSignalList.put(*initSignal);
 
-      VHDLSignal* lastRefSignal = topSignalList.vhdlSignalWithName(state->lastRef);
-      VHDLSignal* firstRefSignal = topSignalList.vhdlSignalWithName(state->firstRef);
+      VHDLSignal* lastRefSignal =
+	topSignalList.vhdlSignalWithName(state->lastRef);
+      VHDLSignal* firstRefSignal =
+	topSignalList.vhdlSignalWithName(state->firstRef);
       if (!lastRefSignal) {
 	Error::abortRun(state->lastRef, ": no such signal in topSignalList");
 	return;
@@ -650,7 +653,8 @@ void StructTarget :: registerPortHole(VHDLPortHole* port, const char* dataName,
 	}
 	// tokenNum not negative: signal should already exist, but doesn't.
 	else {
-	  Error::abortRun(ref, ": Need to connect to signal for data which hasn't",
+	  Error::abortRun(ref,
+			  ": Need to connect to signal for data which hasn't",
 			  " been generated yet - firing order error?");
 	  return;
 	}
@@ -817,11 +821,14 @@ void StructTarget :: registerState(State* state, const char* varName,
 	firingPortMapList.put(inPort->name, "", "", inSignal->name);
       }
       if (!isFirstStateRef) {
-	// Need to find the previous signal to connect to.  That signal should have
-	// been created during the previous firing's first reference to the state.
+	// Need to find the previous signal to connect to.
+	// That signal should have been created during the previous firing's
+	// first reference to the state.
 	VHDLSignal* inSignal = topSignalList.vhdlSignalWithName(root);
 	if (!inSignal) {
-	  Error::abortRun(root, ": Not first state ref, but can't find any signal created for it");
+	  Error::abortRun(root,
+			  ": Not first state ref, ",
+			  "but can't find any signal created for it");
 	  return;
 	}
 
@@ -864,7 +871,9 @@ void StructTarget :: registerState(State* state, const char* varName,
 	// FIXME: Still don't like this, depends on knowing the name already!!
 	VHDLSignal* inSignal = topSignalList.vhdlSignalWithName(state_in);
 	if (!inSignal) {
-	  Error::abortRun(state_in, ": Not first state ref, but can't find any signal created for it");
+	  Error::abortRun(state_in,
+			  ": Not first state ref, ",
+			  " but can't find any signal created for it");
 	  return;
 	}
 
@@ -897,7 +906,8 @@ void StructTarget :: registerState(State* state, const char* varName,
 }
 
 // Connect a source of the given value to the given signal.
-void StructTarget :: connectSource(StringList initVal, VHDLSignal* initSignal) {
+void StructTarget :: connectSource(StringList initVal, VHDLSignal* initSignal)
+{
   if (!initSignal) {
     Error::abortRun(*this, "connectSource passed a null initSignal");
     return;
@@ -928,11 +938,13 @@ void StructTarget :: connectSource(StringList initVal, VHDLSignal* initSignal) {
   outPort->connect(initSignal);
   portMapList->put(*outPort);
 
-  mainCompDeclList.put(label, portMapList, genMapList, name, portMapList, genMapList);
+  mainCompDeclList.put(label, portMapList, genMapList,
+		       name, portMapList, genMapList);
 }
 
 // Connect a multiplexor between the given input and output signals.
-void StructTarget :: connectMultiplexor(VHDLSignal* inSignal, VHDLSignal* outSignal,
+void StructTarget :: connectMultiplexor(VHDLSignal* inSignal,
+					VHDLSignal* outSignal,
 					VHDLSignal* initSignal) {
   if (!inSignal) {
     Error::abortRun(*this, "connectMultiplexor passed a null inSignal");
@@ -949,7 +961,8 @@ void StructTarget :: connectMultiplexor(VHDLSignal* inSignal, VHDLSignal* outSig
 
   if ((strcmp(outSignal->getType(),inSignal->getType())) ||
       (strcmp(outSignal->getType(),initSignal->getType()))) {
-    Error::error(outSignal->name, ": connectMultiplexor: Types of signals do not match");
+    Error::error(outSignal->name,
+		 ": connectMultiplexor: Types of signals do not match");
     return;
   }
   StringList type = outSignal->getType();
@@ -1004,11 +1017,13 @@ void StructTarget :: connectMultiplexor(VHDLSignal* inSignal, VHDLSignal* outSig
   else {
     systemPortList.put("system_clock", "boolean", "IN");
   }
-  mainCompDeclList.put(label, portMapList, genMapList, name, portMapList, genMapList);
+  mainCompDeclList.put(label, portMapList, genMapList,
+		       name, portMapList, genMapList);
 }
 
 // Connect a register between the given input and output signals.
-void StructTarget :: connectRegister(VHDLSignal* inSignal, VHDLSignal* outSignal,
+void StructTarget :: connectRegister(VHDLSignal* inSignal,
+				     VHDLSignal* outSignal,
 				     VHDLSignal* clkSignal) {
   if (!inSignal) {
     Error::abortRun(*this, "connectRegister passed a null inSignal");
@@ -1024,7 +1039,8 @@ void StructTarget :: connectRegister(VHDLSignal* inSignal, VHDLSignal* outSignal
   }
 
   if (strcmp(outSignal->getType(),inSignal->getType())) {
-    Error::error(outSignal->name, ": connectRegister: Types of signals do not match");
+    Error::error(outSignal->name,
+		 ": connectRegister: Types of signals do not match");
     return;
   }
   StringList type = outSignal->getType();
@@ -1069,7 +1085,8 @@ void StructTarget :: connectRegister(VHDLSignal* inSignal, VHDLSignal* outSignal
   else {
     systemPortList.put("system_clock", "boolean", "IN");
   }
-  mainCompDeclList.put(label, portMapList, genMapList, name, portMapList, genMapList);
+  mainCompDeclList.put(label, portMapList, genMapList,
+		       name, portMapList, genMapList);
 }
 
 // Connect a clock generator driving the given signal.
@@ -1107,7 +1124,8 @@ const char* StructTarget :: portAssign() {
 ISA_FUNC(StructTarget,SimVSSTarget);
 
 // Method called by comm stars to place important code into structure.
-void StructTarget :: registerComm(int direction, int pairid, int numxfer, const char* dtype) {
+void StructTarget :: registerComm(int direction, int pairid, int numxfer,
+				  const char* dtype) {
   // direction == 0 --> C2V ; direction == 1 --> V2C.
   // Create a string with the right VHDL data type
   StringList vtype = "";
@@ -1179,7 +1197,8 @@ void StructTarget :: registerComm(int direction, int pairid, int numxfer, const 
   ctlerSignalList.put(endName, "STD_LOGIC", NULL);
   ctlerPortList.put(endName, "STD_LOGIC", "IN", endName, NULL);
 
-  mainCompDeclList.put(label, portMapList, genMapList, name, portMapList, genMapList);
+  mainCompDeclList.put(label, portMapList, genMapList,
+		       name, portMapList, genMapList);
 
   ctlerAction << startName << " <= '0';\n";
   preSynch << "wait on " << startName << "'transaction;\n";
@@ -1465,7 +1484,8 @@ void StructTarget :: registerAndMerge(VHDLCluster* cl) {
     }
   }
 
-  mainCompDeclList.put(clLabel, masterPortList, masterGenericList, clName, masterPortList, masterGenericList);
+  mainCompDeclList.put(clLabel, masterPortList, masterGenericList,
+		       clName, masterPortList, masterGenericList);
   mergeSignalList(masterSignalList);
   //  mainCompDeclList.put(clLabel,  masterPortMapList, masterGenericMapList,
   //		       clName, masterPortMapList, masterGenericMapList);
@@ -1611,7 +1631,8 @@ void StructTarget :: buildConfigurationDeclaration(int level) {
       if (!strcmp(compDecl->type,"V2Cinteger")) continue;
 
       level++;
-      configuration_declaration << indent(level) << "for all:" << compDecl->type
+      configuration_declaration << indent(level) << "for all:"
+				<< compDecl->type
 				<< " use entity " << "work." << compDecl->type
 				<< "(behavior); end for;\n";
       level--;
