@@ -118,7 +118,7 @@ Our technique is to assign a level (called \fIdepth\fR) to the
 blocks in the DE domain.  The \fIdepth\fR of a block is
 defined as the minus of the longest path from the block 
 to any "terminating block".
-There are three categories of the terminating blocks.  The first one
+There are three kinds of the terminating blocks.  The first one
 is a
 .c Star
 without output ports.  The second one is the 
@@ -129,13 +129,15 @@ boundary where the output ports of the
 .c Star
 corresponds to the output ports of the
 .c Wormhole .
-The third category is the \fIdelay-star\fRs which will be discussed
+The third kind is the \fIdelay-star\fRs which will be discussed
 in the next section.  By defining the \fIdepth\fR of a terminating star $-1$,
 the \fIdepth\fR of any non-terminating star is less than $-1$.
 If a 
 .c Star
 has a smallest \fIdepth\fR, it means that the star is to be scheduled first
-among the destinations of the simultaneous events.
+among the destination
+.c Star s 
+of the simultaneous events.
 Therefore, when we put an event into the event queue, we first check the
 time stamp of the event, second compare the \fIdepth\fRs of the
 destination blocks among simultaneous events.
@@ -190,7 +192,7 @@ The DE domain is a timed domain.
 If it contains another
 timed domain (such as THOR) in a
 .c DE\ Wormhole ,
-the wormhole can become a "process star"\** if the
+the wormhole can become a "process-star"\** if the
 .(f
 \** Read document "\fBDomains in Ptolemy\fR" before read this paragraph.
 .)f
@@ -199,26 +201,65 @@ inner domain is not deadlocked\** when stopping condition is met.
 \** The domain is said deadlocked if there is no more runnable blocks
 in the domain.
 .)f
-Therefore, we keep another queue structure, called \fIprocess queue\fR.
-.IE "process queue"
-A process star is inserted into the process queue after
+In this case, we have to fire the process-star without incoming events
+to the block until it is deadlocked.  Therefore, we put the
+process-star into the event queue with the time stamp telling when
+it should be fired again.  We can differentiate the process-stars
+from the events in the queue by marking them.
+A process star is inserted into the event queue after
 execution as long as it is not deadlocked.
 On the other hand, the DE domain may reside inside a 
 .c Wormhole
 of another timed domain.  In this case, the 
 .c DE\ Scheduler
-must check when the system produces output events to the outer domain.
-The DE domain finishes its execution normally when the stop time
-is reached.  But if the flag \fIstopAfterOutput\fR is set,
-it finishes when it generates any output even before the stop time.
-The flag is set if the outer domain is timed.
-There is another flag, called \fIstopBeforeDeadlocked\fR, which
+must check whether it is deadlocked at the end of the execution (meeting
+the stopping condition).
+The flag, called \fIstopBeforeDeadlocked\fR, 
 is set when the DE domain finishes the current execution not
 deadlocked.  If the outer domain is a timed domain and the
 \fIstopBeforeDeadlocked\fR flag of the inner DE domain is set, then
 the
 .c Wormhole
-will be regarded as a process star in the outer domain.
+will be regarded as a process-star in the outer domain.
+.pp
+If a
+.c DE\ Wormhole
+contains a timed domain inside, the stop time of the timed domain
+is set equal to the current global time of the DE domain, which makes
+the 
+.c Wormhole
+as a functional block.  This scheme is inevitable for hazardless domain
+interface as described in the document "\fBDomains in Ptolemy\fR".
+If this scheme is applied, we say that the DE domain operates in the
+\fIsynchronized mode\fR.
+.IE "synchronized mode, de"
+The synchronized mode operation suffers a lot of overhead at 
+runtime since the
+.c Wormhole
+should be called at
+every time increment in the inner domain.  If we can be sure that
+the inner domain can be processed until it finishes the current execution,
+stopping the inner domain at each time increment is too conservative.
+This situation will be not rare ; for example, if a 
+.c Wormhole
+has only one input port, we may execute the
+.c Wormhole
+until it is deadlocked without worrying about the next input event.
+Therefore, to improve the runtime efficiency, we take an option to 
+ignore the
+synchronized mode operation.  Instead, we process the 
+.c Wormhole
+until the inner domain is deadlocked or the inner time reaches the global
+stoptime.  Then, we say the DE domain operates in the
+\fIoptimized mode\fR.
+.IE "optimized mode, de"
+We may choose the mode by setting a 
+.c int\ State ,
+called \fIsyncMode\fR in the outermost 
+.c Galaxy
+of the DE domain.  If the \fIsyncMode\fR is set to zero, we enter into the
+optimized mode.  The default value of the \fIsyncMode\fR is one (means
+synchronized mode operation).
 .H1 "Special \\*(DO Particles
 .pp
 .c Particle s
@@ -768,17 +809,26 @@ from the \*(DO domain, it is fired when any input port
 has an event. When it is fired, it initiates the
 .c Scheduler
 of the inner domain.
-It is regarded as a delay star if the inner domain is timed, or
-as a functional star otherwise.
+It is always regarded as a functional star. 
+The
+.c DE\ Wormhole
+redefined the \fIsumUp()\fR method to detect whether the
+.c Wormhole 
+is a process-star or not.
+If the DE domain is the outer domain and the inner domain is also
+timed, this method
+examined the \fIstopBeforeDeadlocked\fR flag of the inner
+.c Scheduler .
+If the flag is set, the 
+.c Wormhole
+is regarded as a process star in the DE domain.
 .H2 "DEtoUniversal EventHorizon
 .pp
 .IE "DEtoUniversal
 It transfers the incoming data packets from the DE domain to the paired 
 .c FromEventHorizon
 of the other domain.  It also passes the timing information
-of the DE domain to the other domain.  Since the DE domain is timed,
-it sets the flag \fIoutputBeforeDeadlocked\fR if the DE domain
-finishes before deadlocked.
+of the DE domain to the other domain by setting the time stamps.
 Refer to the "\fBDomains in Ptolemy\fR" for the standard
 functions of the
 .c ToEventHorizon\ class .
@@ -793,27 +843,3 @@ of the other domain and transfers them to the DE domain.
 The time stamp is copied from that of its counterpart after scaled.
 According to the time stamp, the received events are put into
 the global queue of the \*(DO domain.
-If the DE domain is the outer domain and the inner domain is also
-timed, this 
-.c EventHorizon
-examined the \fIoutputBeforeDeadlocked\fR flag of the counterpart
-.c EventHorizon .
-If the flag is set, the 
-.c Wormhole
-is regarded as a process star in the DE domain.
-On the other hand, if a DE domain is placed in a
-.c Wormhole
-of a timed domain, it sets the \fIstopAfterOutput\fR flag
-for the 
-.c DE\ Scheduler .
-Since this flag can be set only once before the 
-.c Scheduler
-runs, we redefine \fIinitialize()\fR method of the
-.c DEfromUniversal\ class
-to set the flag.
-If the
-.c DEfromUniversal
-is at an input port of a
-.c Wormhole
-it also sets the stopping condition of the inner
-\*(DO domain through \fIready()\fR method. 
