@@ -25,9 +25,10 @@ include $(CONFIG)
 # VHDLDIR is the directory containing VHDL domain support
 VHDLDIR = $(ROOT)/src/domains/vhdl/kernel
 CGDIR = $(ROOT)/src/domains/cg/kernel
+CGCDIR = $(ROOT)/src/domains/cgc/kernel
 SDFDIR = $(ROOT)/src/domains/sdf/kernel
 
-INCL = -I$(VHDLDIR) -I$(CGDIR) -I$(SDFDIR) -I$(KERNDIR)
+INCL = -I$(VHDLDIR) -I$(CGDIR) -I$(CGCDIR) -I$(SDFDIR) -I$(KERNDIR)
 
 # stars library
 LIB=libvhdlstars.$(LIBSUFFIX)
