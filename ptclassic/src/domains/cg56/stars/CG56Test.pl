@@ -140,11 +140,11 @@ test.  This ensures that the first test result will always be TRUE.
 	}
 	codeblock(greaterThan) {
 	cmp	x0,a	#$$FF,a		; test a - x0 and set a = TRUE
-	tgt	b,a			; if upper > lower, then a = TRUE
+	tle	b,a			; if upper <= lower, then a = FALSE
 	}
 	codeblock(greaterEqual) {
 	cmp	x0,a	#$$FF,a		; test a - x0 and set a = TRUE
-	tge	b,a			; if upper >= lower, then a = TRUE
+	tlt	b,a			; if upper < lower, then a = FALSE
 	}
 
 	// 3. Post-process
