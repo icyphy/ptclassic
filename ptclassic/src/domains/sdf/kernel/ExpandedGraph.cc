@@ -306,6 +306,7 @@ int ExpandedGraph::createMe(Galaxy& galaxy, int selfLoopFlag)
 	   DFStarPortIter nextPort(*dest);
 	   while((dest_port = nextPort++) != 0) {
 		source_port = (DFPortHole*)dest_port->far();
+		if (!source_port) continue;
       		if (dest_port->isItInput() && source_port->isItOutput()) {
 			source = (DataFlowStar*)source_port->parent();
 
