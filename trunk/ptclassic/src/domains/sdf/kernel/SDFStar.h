@@ -17,7 +17,6 @@ $Id$
 
 #include "Star.h"
 #include "Fraction.h"
-// next are included so SDFStar defns don't have to.
 #include "SDFConnect.h"
 #include "Particle.h"
 
@@ -52,6 +51,13 @@ public:
 	// so that various SDF-specific initilizations can be performed.
 	// If the parent pointer is not provied, it defaults to NULL
 	Block& setBlock(char* starName, Block* parent = NULL);
+};
+
+class SDFStarPortIter : public BlockPortIter {
+public:
+	SDFStarPortIter(SDFStar& s) : BlockPortIter(s) {}
+	SDFPortHole* next() { return (SDFPortHole*)BlockPortIter::next();}
+	SDFPortHole* operator++() { return next();}
 };
 
 #endif
