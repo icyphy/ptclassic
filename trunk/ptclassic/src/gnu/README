@@ -1,4 +1,4 @@
--*-Mode:text-*- -[Thu Feb  1 11:44:48 1996 by cxh]-
+-*-Mode:text-*- -[Tue Apr  2 09:55:16 1996 by cxh]-
 Version: $Id$
 
 src/gnu/README
@@ -31,6 +31,10 @@ Ptolemy GNU binary distribution.
 
 makeinfo is part of the texinfo package.  texinfo is available via
 anonymous ftp at ftp.uu.net in packages/gnu.
+
+The makefile in this directory has only been tested with Solaris2.4,
+SunOS4.1.3 and HPUX10.01.  It may work on other platforms, but we have
+not tried.
 
 Versions
 --------
@@ -128,6 +132,11 @@ checking whether setvbuf arguments are reversed... configure: error: can not run
 	If you don't have gcc, then you can try getting a prebuilt binary
 	from ftp://ptolemy.eecs.berkeley.edu/pub/gnu.  You can then rebuild
 	if necessary.
+
+Linux
+-----
+	If you are trying to build GNU with this makefile, you may need
+	to modify LIBGPLUSPLUS_VERSION.
 
 gcc and Purify
 --------------
