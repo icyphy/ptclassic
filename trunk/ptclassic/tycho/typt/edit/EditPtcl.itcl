@@ -117,7 +117,7 @@ body ::tycho::EditPtcl::constructor {args} {
     menubar add "Retarget" Special -underline 0 \
             -command "::tycho::view Retarget -edit $this -toolbar 1"
 
-    if {[catch {::pitcl::domains}] == 1 } {
+    if {[catch {::pitcl::knownDomains}] == 1 } {
 	menubar disable Retarget
     }
     menubar add "List Domain(s)" Special -underline 5 \
