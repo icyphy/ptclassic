@@ -38,6 +38,9 @@ public:
         // the value as a string
 	StringList currentValue() { return val;}
 
+	// for use as a string in stars
+	operator const char* () { return val;}
+
 	State* clone ()  {return new StringState;}
 
 private:
