@@ -172,7 +172,7 @@ protected:
 	virtual Target* createChild(int);
  
 	// flatten wormholes if heterogeneous targets
-	void flattenWorm();
+	virtual void flattenWorm();
 
 	// redefine the top-level iterations to do nothing
 	void beginIteration(int repetitions, int depth);
