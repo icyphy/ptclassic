@@ -43,11 +43,9 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "FixState.h"
 
 int CG56Target :: compileCode() {
-        StringList assembleCmds = "asm56000 -b -l -A -oso ";
-        assembleCmds += filePrefix;
-        if (systemCall(assembleCmds,"Errors in assembly")!=0)
-                return FALSE;
-        return TRUE;
+	StringList assembleCmds;
+	assembleCmds << "asm56000 -b -l -A -oso " << filePrefix;
+	return !systemCall(assembleCmds,"Errors in assembly",targetHost);
 }
 
 void CG56Target :: headerCode () {
