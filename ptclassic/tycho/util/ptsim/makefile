@@ -44,9 +44,11 @@ include $(CONFIG)
 # Sub directories to run make in.
 DIRS =	bin demo doc test
 
-TCL_SRCS = 
+TCL_SRCS = \
+	JRPCServer.tcl
 
 ITCL_SRCS = \
+	JRPC.itcl \
 	RunPanel.itcl \
 	RunWindow.itcl \
 	Simulation.itcl \
