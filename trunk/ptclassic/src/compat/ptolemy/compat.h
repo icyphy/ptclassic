@@ -180,10 +180,10 @@ extern int vfprintf(FILE *, const char *, char *);
 
 /* Alphabetical, please */
 
-#ifndef PTIRIX5
+#if !defined(PTIRIX5) && !defined(PTHPPA)
 				/* thor/kernel/rpc.c use bind2(), listen(). */
 extern int bind(int, struct sockaddr *, int);
-#endif /* PTIRIX5 */
+#endif /* ! PTIRIX5 && ! PTHPPA */
 
 extern void endpwent();		/* octtools/Packages/fc/fc.c and
 				   octtools/Packages/utility/texpand.c */
