@@ -39,7 +39,9 @@ extern char *realloc();
 #ifdef USG
 extern int sprintf();
 #else
+#ifndef sgi
 extern char *sprintf();
+#endif
 #endif
 extern char *strcpy();
 extern char *strcat();
