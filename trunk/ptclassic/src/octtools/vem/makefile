@@ -190,8 +190,9 @@ $(DESTBIN):	vem $(OCTBINDIR)
 		@echo Installing vem
 		rm -f $(DESTBIN)
 		cp vem $(DESTBIN)
+		-strip $(DESTBIN)
 
-$(DESTBIN_D):	vem $(OCTBINDIR)
+$(DESTBIN_D):	vem.debug $(OCTBINDIR)
 		@echo Installing vem
 		rm -f $(DESTBIN_D)
 		cp vem $(DESTBIN_D)
