@@ -42,11 +42,6 @@ provisions.
       channels.setInitValue(2);
     }
 
-    setup {
-      left.setSDFParams(int(blockSize/4), int(blockSize/4)-1);
-      right.setSDFParams(int(blockSize/4), int(blockSize/4)-1);
-    }
-
     codeblock(globalDecl){
       union $sharedSymbol(CGCVISStereoIn,regoverlay) {
 	vis_d64 regvaluedbl;
@@ -57,6 +52,8 @@ provisions.
     codeblock(mainDecl){
       union $sharedSymbol(CGCVISStereoIn,regoverlay) $starSymbol(packright);
       union $sharedSymbol(CGCVISStereoIn,regoverlay) $starSymbol(packleft);
+      int $starSymbol(numread),$starSymbol(numbytes);
+      vis_s16 *$starSymbol(dataptr);
     }
 
     initCode {
@@ -65,7 +62,7 @@ provisions.
       addGlobal(globalDecl,"CGCVISStereoIn_regoverlay");
       addDeclaration(mainDecl);
       /* Declare "buffer" to be of type short and blockSize/2 bytes */
-      addDeclaration(declarations("short", int(blockSize*2)));
+      addDeclaration(declarations("short", int(blockSize)*2));
       /* Open file for reading data */
       addCode(openFileForReading);	
       /* Update audio_control */
@@ -82,46 +79,47 @@ provisions.
 			<<  balance << ", "
 			<< "1);\n";
       addCode(controlParameters);
+      addCode(setbufptr);
+      addCode(read);
+      addCode("$starSymbol(numbytes) = 8180;");
+      addCode("$starSymbol(numread) = 1;");
     }
 
+    codeblock (fireonce) {
+	$starSymbol(packleft).regvaluesh[0] = *$starSymbol(dataptr)++;
+	$starSymbol(packright).regvaluesh[0] = *$starSymbol(dataptr)++;
+	$starSymbol(packleft).regvaluesh[1] = *$starSymbol(dataptr)++;
+	$starSymbol(packright).regvaluesh[1] = *$starSymbol(dataptr)++;
+	$starSymbol(packleft).regvaluesh[2] = *$starSymbol(dataptr)++;
+	$starSymbol(packright).regvaluesh[2] = *$starSymbol(dataptr)++;
+	$starSymbol(packleft).regvaluesh[3] = *$starSymbol(dataptr)++;
+	$starSymbol(packright).regvaluesh[3] = *$starSymbol(dataptr)++;
+	$ref(left) = $starSymbol(packleft).regvaluedbl;
+	$ref(right) = $starSymbol(packright).regvaluedbl;
+	$starSymbol(numbytes) -= 16;
+      }
+	
     codeblock (setbufptr) {
       $starSymbol(bufferptr) = $starSymbol(buffer);
+      $starSymbol(dataptr) = $starSymbol(bufferptr);
     }
 
     codeblock(updatebufptr){
-      $starSymbol(bufferptr) = $starSymbol(bufferptr)+$val(blockSize)/2;
-    }
-
-    codeblock (convert_separate) {
-      /* Convert data in buffer to Output format */
-      {
-	int i, j;
-	for (i=0; i <($val(blockSize)/4); i++) {
-	  j = 8*i;
-	  $starSymbol(packleft).regvaluesh[0] = $starSymbol(buffer)[j];
-	  $starSymbol(packright).regvaluesh[0] = $starSymbol(buffer)[j+1];
-	  $starSymbol(packleft).regvaluesh[1] = $starSymbol(buffer)[j+2];
-	  $starSymbol(packright).regvaluesh[1] = $starSymbol(buffer)[j+3];
-	  $starSymbol(packleft).regvaluesh[2] = $starSymbol(buffer)[j+4];
-	  $starSymbol(packright).regvaluesh[2] = $starSymbol(buffer)[j+5];
-	  $starSymbol(packleft).regvaluesh[3] = $starSymbol(buffer)[j+6];
-	  $starSymbol(packright).regvaluesh[3] = $starSymbol(buffer)[j+7];
-	  $ref(left,$val(blockSize)/4-1-i) = $starSymbol(packleft).regvaluedbl;
-	  $ref(right,$val(blockSize)/4-1-i) = $starSymbol(packright).regvaluedbl;
-	}
-      }
+      $starsymbol(bufferptr) = $starSymbol(bufferptr)+$val(blockSize)/2;
     }
 
     go {
+      addCode(fireonce);
+      addCode("if ($starSymbol(numbytes) < 16) {");
+      addCode("$starSymbol(numbytes) += 8180;");
+      addCode("if ($starSymbol(numread) == 4) {");
       addCode(setbufptr);
-      addCode(read);
+      addCode("$starSymbol(numread) = 1;");
+      addCode("}else {");
       addCode(updatebufptr);
+      addCode("$starSymbol(numread)++;}");
       addCode(read);
-      addCode(updatebufptr);
-      addCode(read);
-      addCode(updatebufptr);
-      addCode(read);
-      addCode(convert_separate);
+      addCode("}");
     }
 
     wrapup {

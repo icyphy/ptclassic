@@ -42,11 +42,6 @@ provisions.
       channels.setInitValue(2);
     }
 
-    setup {
-      left.setSDFParams(int(blockSize/4), int(blockSize/4)-1);
-      right.setSDFParams(int(blockSize/4), int(blockSize/4)-1);
-    }
-
     codeblock(globalDecl){
       union $sharedSymbol(CGCVISStereoOut,regoverlay) {
 	vis_d64 regvaluedbl;
@@ -57,7 +52,14 @@ provisions.
     codeblock(mainDecl){
       union $sharedSymbol(CGCVISStereoOut,regoverlay) $starSymbol(unpackright);
       union $sharedSymbol(CGCVISStereoOut,regoverlay) $starSymbol(unpackleft);
-    } 
+      int $starSymbol(numwrites),$starSymbol(numbytes);
+      vis_s16 *$starSymbol(dataptr);
+    }
+
+    codeblock (setbufptr) {
+      $starSymbol(bufferptr) = $starSymbol(buffer);
+      $starSymbol(dataptr) = $starSymbol(bufferptr);
+    }
     
     initCode {
       CGCAudioBase::initCode();
@@ -65,7 +67,7 @@ provisions.
       addGlobal(globalDecl,"CGCVISStereoOut_regoverlay");
       addDeclaration(mainDecl);
       /* Declare "buffer" to be of type short and blockSize/2 bytes */
-      addDeclaration(declarations("short", int(blockSize*2)));
+      addDeclaration(declarations("short", int(blockSize)*2));
       /* Open file for writing data */
       addCode(openFileForWriting);	
       /* audio_setup : to set encodingType, sampleRate and channels */
@@ -83,48 +85,44 @@ provisions.
 			<<  balance << ", "
 			<< "0);\n";
       addCode(controlParameters);
-    }
-
-    codeblock (setbufptr) {
-      $starSymbol(bufferptr) = $starSymbol(buffer);
-    }
-
-    codeblock(updatebufptr){
-      $starSymbol(bufferptr) = $starSymbol(bufferptr)+$val(blockSize)/2;
+      addCode("$starSymbol(numbytes) = 0;"); 
+      addCode("$starSymbol(numwrites) = 1;"); 
+      addCode(setbufptr);
     }
 
     codeblock (convert_separate) {
       /* Convert data in buffer to Output format */
       {
-	int i, j;
-
-	for (i=0; i <($val(blockSize)/4); i++) {
-	  j = 8*i;
-	  $starSymbol(unpackleft).regvaluedbl = $ref(left,$val(blockSize)/4-1-i);
-	  $starSymbol(unpackright).regvaluedbl = $ref(right,$val(blockSize)/4-1-i);
-
-	  $starSymbol(buffer)[j]   = $starSymbol(unpackleft).regvaluesh[0];
-	  $starSymbol(buffer)[j+1] = $starSymbol(unpackright).regvaluesh[0];
-	  $starSymbol(buffer)[j+2] = $starSymbol(unpackleft).regvaluesh[1];
-	  $starSymbol(buffer)[j+3] = $starSymbol(unpackright).regvaluesh[1];
-	  $starSymbol(buffer)[j+4] = $starSymbol(unpackleft).regvaluesh[2];
-	  $starSymbol(buffer)[j+5] = $starSymbol(unpackright).regvaluesh[2];
-	  $starSymbol(buffer)[j+6] = $starSymbol(unpackleft).regvaluesh[3];
-	  $starSymbol(buffer)[j+7] = $starSymbol(unpackright).regvaluesh[3];
-	}
+	$starSymbol(unpackleft).regvaluedbl = $ref(left);
+	$starSymbol(unpackright).regvaluedbl = $ref(right);
+	
+	*$starSymbol(dataptr)++ = $starSymbol(unpackleft).regvaluesh[0];
+	*$starSymbol(dataptr)++ = $starSymbol(unpackright).regvaluesh[0];
+	*$starSymbol(dataptr)++ = $starSymbol(unpackleft).regvaluesh[1];
+	*$starSymbol(dataptr)++ = $starSymbol(unpackright).regvaluesh[1];
+	*$starSymbol(dataptr)++ = $starSymbol(unpackleft).regvaluesh[2];
+	*$starSymbol(dataptr)++ = $starSymbol(unpackright).regvaluesh[2];
+	*$starSymbol(dataptr)++ = $starSymbol(unpackleft).regvaluesh[3];
+	*$starSymbol(dataptr)++ = $starSymbol(unpackright).regvaluesh[3];
+	$starSymbol(numbytes) += 16;
       }
     }
 
+    codeblock(updatebufptr){
+      $starsymbol(bufferptr) = $starSymbol(bufferptr)+$val(blockSize)/2;
+    }
+
     go {
-      addCode(setbufptr);
       addCode(convert_separate);
+      addCode("if ($starSymbol(numbytes) >= 8180){");
       addCode(write);
+      addCode("$starSymbol(numbytes) -= 8180;");
+      addCode("if ($starSymbol(numwrites) == 4) {");
+      addCode(setbufptr);
+      addCode("$starSymbol(numwrites) = 1;");
+      addCode("}else {");
       addCode(updatebufptr);
-      addCode(write);
-      addCode(updatebufptr);
-      addCode(write);
-      addCode(updatebufptr);
-      addCode(write);
+      addCode("$starSymbol(numwrites)++;}}");      
     }
     
     wrapup {
