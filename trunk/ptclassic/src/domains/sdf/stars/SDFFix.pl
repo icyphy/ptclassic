@@ -47,6 +47,7 @@ data type conversions will be rounded.
 Otherwise, truncation will be used.
                 }
         }
+	hinclude { <stdio.h> }
         protected {
 		int overflows, totalChecks;
         }

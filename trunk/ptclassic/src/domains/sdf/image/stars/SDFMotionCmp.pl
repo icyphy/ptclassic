@@ -29,7 +29,7 @@ can be added or reduced-search motion compensation can be performed.
 <a name="image, motion compensation"></a>
   }
 
-  hinclude { "Matrix.h", "Error.h" }
+  hinclude { "Matrix.h", "Error.h", <stdio.h> }
 
   //////// I/O AND STATES.
   input { name { input } type { FLOAT_MATRIX_ENV } }
