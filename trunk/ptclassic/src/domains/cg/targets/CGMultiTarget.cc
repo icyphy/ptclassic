@@ -59,7 +59,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 CGMultiTarget::CGMultiTarget(const char* name,const char* sClass,
 			     const char* desc) :
-	MultiTarget(name,sClass,desc), parProcs(0), rm(0)
+	MultiTarget(name,sClass,desc), modifiedGalaxy(0), rm(0)
 {
 	addState(childType.setState("childType",this,"default-CG",
 				    "child proc types"));
@@ -113,6 +113,12 @@ void CGMultiTarget::setup() {
 	// or CGUtilities.h rpcWriteFile.
 	writeDirectoryName(destDirectory);
 
+	// We only want to modify the galaxy once.  See the comment in
+	// CGMultiTarget.h for protected member modifiedGalaxy for details.
+	if (!modifiedGalaxy) {
+	    modifiedGalaxy = 1;
+	    if (!modifyGalaxy()) return;
+	}
 
 	// check whether communication can be amortized or not.
 	// If YES, setup the  Reachability matrix.
@@ -132,7 +138,6 @@ void CGMultiTarget::setup() {
 	ParScheduler* sched = (ParScheduler*) scheduler();
 	sched->setGalaxy(*galaxy());
 	sched->setUpProcs(nChildrenAlloc);
-	parProcs = sched->myProcs();
 
 	canProcs.create(nChildrenAlloc);
 
