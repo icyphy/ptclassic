@@ -150,7 +150,7 @@ int usePattern;
 
     if (name == NULL) return TRUE;
     facet = *rootFacetPtr;			/* don't deallocate facet */
-    while (1) {
+    while (*depth < MAX_DEPTH) {		/* stop marking at max depth */
 	head(name, word, 256);
 	/* If name is wormhole, the following get will fail because */
 	/* there is no icon.  Skip the name in this case.	    */
