@@ -40,11 +40,20 @@ VPATH =		$(ROOT)/typt/demo
 CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
-ITCL_SRCS =     audioio.tcl
+ITCL_SRCS =
+
+TCL_SRCS =		audioio.tcl \
+				graphic.tcl \
+				parametric.tcl \
+				tonecontrol.tcl
 
 EXTRA_SRCS =	$(TCL_SRCS) $(ITCL_SRCS)
 
-MISC_FILES =	tclIndex audioio.html
+MISC_FILES =	tclIndex \
+				audioio.html \
+				graphic.html \
+				parametric.html \
+				tonecontrol.html
 
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =	tclIndex
