@@ -9,12 +9,12 @@ sample tydoc output.
 	
  <P>Tydoc consists of two main parts:
 <DL>
-	<DT>DocSys classes<DD>The tydoc itcl classes <CODE>DocSys</CODE>, 
+	<DT>TyDoc classes<DD>The tydoc itcl classes <CODE>DocSys</CODE>, 
 	<CODE>DocClass</CODE>, <CODE>ListDocSys</CODE> and 
 	<CODE>HTMLDocSys</CODE>.  These classes are defined in 
-	<A HREF="../DocSys.itcl"><CODE>$TYCHO/lib/tydoc/DocSys.itcl</CODE></A>
+	<A HREF="../TyDoc.itcl"><CODE>$TYCHO/lib/tydoc/TyDoc.itcl</CODE></A>
 	These classes could be used inside tycho for direct runtime
-	conversion of itcl files to html.
+	conversion of Itcl files to html.
 	
 	<DT>tydoc<DD>A small standalone script that takes file names
 	as command line arguments and converts the files to html
@@ -31,21 +31,21 @@ sample tydoc output.
 
 <H2>How it works</H2>
 	
-Tydoc reads in an itcl file, protects the contents of the comments
+Tydoc reads in an Itcl file, protects the contents of the comments
 from interpretation, and then parses the file as a list into lists of
-different itcl <I>constructs</I>. An itcl construct is a part of the
+different Itcl <I>constructs</I>. An Itcl construct is a part of the
 language like a class or method declaration.
 
 <P> To produce output in different formats, we have all of the format
 specific information a child class.  Currently, we only generate HTML
-output, but we have written test code that merely regenerates the itcl
-file as text, operating as a pretty printer. That code is at <A
-HREF="../TextDocSys.itcl"><CODE>TextDocSys.itcl</CODE></A> in the
-tydoc directory.
+output, but it could be possible to write a Itcl pretty printer that would
+read in Itcl and output a cleaned up version.
 
 <HR>
 <H2><A NAME="comment format conventions">Comment Format Conventions</A></H2>
-Note: this should be merged into a Tycho style guide.
+
+Note: this should be merged into the <A
+HREF="../../../doc/coding/style.html">Tycho coding style guide</A>.
 
 <P> Tydoc depends on certain formatting conventions to grab comment
 information.
@@ -64,7 +64,6 @@ with a itcl construct.  For a block of comments to be
 associated with a construct, there must be no blank lines
 between the block of comments and the construct.
 
-	
  <P>A doc comment may contain <I>doc tags</I>, which consist of
 a tag and a value.  For example, if we had a doc comment that looked 
 like:	
@@ -210,6 +209,9 @@ cd $TYCHO
 make itcldocs indices itcldocs
 </PRE>
 
+ <P>
+<A
+HREF="../../../doc/index.html">Tycho Home Page</A>.
 
 <HR>
 Copyright &#169 %Q%, The Regents of the University of California.
