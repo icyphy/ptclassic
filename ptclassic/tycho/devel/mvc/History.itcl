@@ -28,56 +28,55 @@
 
 
 ##########################################################################
-#### Publisher
+#### History
 #
 # Some views maintain their own information -- in effect, the
 # view combines the model and view entities into a single one.
-# The _Publisher_ class supports interchange of data between
+# The _History_ class supports interchange of data between
 # such views: it is an "empty" information model that uses the
 # publishing mechanism to keep all views synchronized.
 # It also enables the same history and persistence mechanisms to be
-# used for these views. (Perhaps this class should be renamed
-# _History_ since that may perhaps be a more usage.)
+# used for these views.
 #
-# For the persistence mechanism to work, a _Publisher_ must be given
+# For the persistence mechanism to work, a _History_ must be given
 # the *-information* option, being a view with a describe{} method.
 # I considered just using one of the subscribers, but decided against
 # it because (a) not all subscribers will necessarily have a
 # describe{} method and (b) a view does not have to subscribe to
-# a _Publisher_ to use the history and persistence mechanisms.
+# a _History_ to use the history and persistence mechanisms.
 #
-class ::tycho::Publisher {
-	inherit ::tycho::Model
+class ::tycho::History {
+    inherit ::tycho::Model
 
-	constructor {args} {}
-	destructor {}
+    constructor {args} {}
+    destructor {}
 
-	####################################################################
-	
-	# A view containing the real "information"
-	pubic variable information ""
-	
-	####################################################################
-	
-	# Publish a change in data
-	method publish {whoiam command inverse}
+    ####################################################################
+    
+    # A view containing the real "information"
+    public variable information ""
+    
+    ####################################################################
+    
+    # Publish a change in data
+    method publish {whoiam command inverse}
 
-	# Record a change in data
-	method record {command inverse}
+    # Record a change in data
+    method record {command inverse}
 
-	####################################################################
-	
-	# Write data to a data file and image file.
-	protected method writeData {fd id}
+    ####################################################################
+    
+    # Write data to a data file and image file.
+    protected method writeData {fd id}
 }
 
 
 ########################################################################
 #### constructor
 #
-body ::tycho::Publisher::constructor {args} {
-	# Evaluate options
-	eval configure $args
+body ::tycho::History::constructor {args} {
+    # Evaluate options
+    eval configure $args
 }
 
 ########################################################################
@@ -87,18 +86,18 @@ body ::tycho::Publisher::constructor {args} {
 # the change is forwarded to any subscribers to the index
 # embedded (first argument) in the command.
 #
-body ::tycho::Publisher::publish {whoiam command inverse} {
-	# Record the command
-	record $command $inverse
+body ::tycho::History::publish {whoiam command inverse} {
+    # Record the command
+    record $command $inverse
 
-	# Mark as publishable
-	set publishable($historyMark(current)) 1
+    # Mark as publishable
+    set publishable($historyMark(current)) 1
 
-	# Remember where it happened
-	set historyMark(published) $historyMark(current)
+    # Remember where it happened
+    set historyMark(published) $historyMark(current)
 
-	# Update subscribers.
-	eval notify $whoiam $command
+    # Update subscribers.
+    eval notify $whoiam $command
 }
 
 ########################################################################
@@ -109,20 +108,20 @@ body ::tycho::Publisher::publish {whoiam command inverse} {
 # provide the inverse of the command, since this model has no
 # information and thus has no way of working out what the inverse is.
 #
-body ::tycho::Publisher::record {command inverse} {
-	# Clear the redo future if needed
-	if { $historyMark(current) < $historyMark(last) } {
-		clear current last
-	}
+body ::tycho::History::record {command inverse} {
+    # Clear the redo future if needed
+    if { $historyMark(current) < $historyMark(last) } {
+	clear current last
+    }
 
-	# Record the command and its inverse
-	incr historyMark(current)
-	set undoCommands($historyMark(current)) $command
-	set redoCommands($historyMark(current)) $inverse
-	set publishable($historyMark(current)) 0
+    # Record the command and its inverse
+    incr historyMark(current)
+    set undoCommands($historyMark(current)) $command
+    set redoCommands($historyMark(current)) $inverse
+    set publishable($historyMark(current)) 0
 
-	# Mark as modified
-	set modified 1
+    # Mark as modified
+    set modified 1
 }
 
 
@@ -138,15 +137,15 @@ body ::tycho::Publisher::record {command inverse} {
 # *-information* option, which must be a view that responds to
 # the methods get{} and describe{} (both with no arguments).
 #
-body ::tycho::Publisher::writeData {fd id} {
-	if { $information == "" } {
-		error "Cannot write $dataname: no information"
-	}
+body ::tycho::History::writeData {fd id} {
+    if { $information == "" } {
+	error "Cannot write $dataname: no information"
+    }
 
-	if { $fd != "" } {
-		puts $fd [$information get]
-	}
-	if { $id != "" } {
-		puts $id [$information describe]
-	}
+    if { $fd != "" } {
+	puts $fd [$information get]
+    }
+    if { $id != "" } {
+	puts $id [$information describe]
+    }
 }

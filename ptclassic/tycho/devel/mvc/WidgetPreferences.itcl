@@ -40,7 +40,7 @@
 # the add{} method of the _TypedData_ class.
 # <li>*create* _group_ ?_inherits_? ... : Create a new
 # preference group. The _inherits_ arguments are groups from this
-# one can :inherit" preferences.
+# one can "inherit" preferences.
 # <li>*groups*: Return the names of the current groups.
 # <li>*inherit* _group_ _preference_ ?_value_? : Add
 # a preference to a group, getting all inherited options from an 
@@ -56,107 +56,108 @@
 # <li>*unsubscribe* _group_ _widget_ ?_preference_? ...: Unsubscribe
 # a widget from the specified preferences. If there are no arguments,
 # unsubscribe it from all options.
-#
+# </ul>
 proc ::tycho::preference {command {group {}} args} {
-	switch -exact $command {
+    switch -exact $command {
 	"add" {
-		# Add a preference to a group
-		set preference [lindex $args 0]
-		set value [lindex $args 1]
-		set args [lreplace $args 0 1]
+	    # Add a preference to a group
+	    set preference [lindex $args 0]
+	    set value [lindex $args 1]
+	    set args [lreplace $args 0 1]
 
-		eval tychoPreferences add $group.$preference $value $args
+	    eval tychoPreferences add $group.$preference $value $args
 	}
 	"create" {
-		# Create a new preference group with dependencies
-		tychoPreferences add _$group -depends $args
+	    # Create a new preference group with dependencies
+	    tychoPreferences add _$group -depends $args
 	}
 	"groups" {
-		# Return the names of all groups.
-		set result {}
-		foreach i [tychoPreferences indexes _*] {
-			lappend result [string range $i 1 end]
-		}
-		return $result
+	    # Return the names of all groups.
+	    set result {}
+	    foreach i [tychoPreferences indexes _*] {
+		lappend result [string range $i 1 end]
+	    }
+	    return $result
 	}
 	"names" {
-		# Return the names of preferences in a group
-		return [tychoPreferences indexes $group.*]
+	    # Return the names of preferences in a group
+	    return [tychoPreferences indexes $group.*]
 	}
 	"inherit" {
-		# Add a preference to a group but inherit from another group
-		set preference [lindex $args 0]
-		if { $args != "" } {
-			set value [lindex $args 1]
-		} else {
-			set value "UNKNOWN"
-		}
+	    # Add a preference to a group but inherit from another group
+	    set preference [lindex $args 0]
+	    if { $args != "" } {
+		set value [lindex $args 1]
+	    } else {
+		set value "UNKNOWN"
+	    }
 
-		# Get the anti-dependent
-		set dependson [tychoPreferences dependson $preference]
-		if { $dependson == "" } {
-			error "Cannot inherit a value for $preference in $group"
-		}
+	    # Get the anti-dependent
+	    set dependson [tychoPreferences dependson $preference]
+	    if { $dependson == "" } {
+		error "Cannot inherit a value for $preference in $group"
+	    }
 
-		# Get the parameters of the antidependent and add a new entry
-		eval tychoPreferences add $group.$preference [list $value] \
-				[tychoPreferences entrycget $dependson]
+	    # Get the parameters of the antidependent and add a new entry
+	    eval tychoPreferences add $group.$preference [list $value] \
+		    [tychoPreferences entrycget $dependson]
 
-		# Add the link
-		tychoPreferences link $dependson $group.$preference
+	    # Add the link
+	    tychoPreferences link $dependson $group.$preference
 	}
 	"subscribe" {
-		# Subscribe configuration options to preferences. If this
-		# is too slow, a widgetsubscribe{} method could be added to
-		# WidgetPreferences and that called instead.
-		set widget [lindex $args 0]
-		set args [lreplace $args 0 0]
+	    # Subscribe configuration options to preferences. If this
+	    # is too slow, a widgetsubscribe{} method could be added to
+	    # WidgetPreferences and that called instead.
+	    set widget [lindex $args 0]
+	    set args [lreplace $args 0 0]
 
-		# First do all subscriptions
-		foreach {option entry} $args {
-			tychoPreferences subscribe $widget $group.$entry \
-				[list tychoPreferences widgetnotify %0 $option $group.$entry]
-		}
+	    # First do all subscriptions
+	    foreach {option entry} $args {
+		tychoPreferences subscribe $widget $group.$entry \
+			[list tychoPreferences widgetnotify %0 $option $group.$entry]
+	    }
+	    
+	    # Collect current values
+	    set arglist {}
+	    foreach {option entry} $args {
+		set value [tychoPreferences get $group.$entry]
 		
-		# Collect current values
-		set arglist {}
-		foreach {option entry} $args {
-			set value [tychoPreferences get $group.$entry]
-			
-			# Translate if necessary
-			switch -exact [tychoPreferences cget $group.$entry -type] {
-				"font" {
-					set value [::tycho::font $value]
-				}
-				"color" {
-					set value [::tycho::color $value]
-				}
-			}
-			lappend arglist $option $value
+		# Translate if necessary
+		switch -exact [tychoPreferences cget $group.$entry -type] {
+		    "font" {
+			set value [::tycho::font $value]
+		    }
+		    "color" {
+			set value [::tycho::color $value]
+		    }
 		}
+		lappend arglist $option $value
+	    }
 
-		# Update the widget now
-		eval $subscriber configure $arglist
+	    # Update the widget now
+	    eval $subscriber configure $arglist
 	}
 	"unsubscribe" {
-		# Unsubscribe from preferences.  If this
-		# is too slow, a widgetunsubscribe{} method could be added to
-		# WidgetPreferences and that called instead.
-		set widget [lindex $args 0]
-		set args [lreplace $args 0 0]
+	    # Unsubscribe from preferences.  If this
+	    # is too slow, a widgetunsubscribe{} method could be added to
+	    # WidgetPreferences and that called instead.
+	    set widget [lindex $args 0]
+	    set args [lreplace $args 0 0]
 
-		if { $args == "" } {
-			tychoPreferences unsubscribe $widget
-		} else {
-			foreach entry $args {
-				tychoPreferences unsubscribe $widget $group.$entry
-			}
+	    if { $args == "" } {
+		tychoPreferences unsubscribe $widget
+	    } else {
+		foreach entry $args {
+		    tychoPreferences unsubscribe $widget $group.$entry
 		}
+	    }
 	}
 	default {
-		error "Unknown command $command"
+	    error "Unknown command $command"
 	}
-	return ""
+    }
+    return ""
 }
 
 
@@ -183,38 +184,40 @@ proc ::tycho::preference {command {group {}} args} {
 # this shouldn't be a problem.
 #
 class ::tycho::WidgetPreferences {
-	inherit ::tycho::TypedData
+    inherit ::tycho::TypedData
 
-	constructor {args} {}
-	destructor {}
+    constructor {args} {}
+    destructor {}
 
-	####################################################################
+    #################################################################
+    ####                     public methods                      ####
 
-	# Flag error on attempt to delete an entry
-	method delete {index}
+    # Flag error on attempt to delete an entry
+    method delete {index}
 
-	# Get an entry, following anti-dependence links if needed
-	method get {index}
+    # Get an entry, following anti-dependence links if needed
+    method get {index}
 
-	# Find  an entry on which a given entry can "depend"
-	method dependson {index}
+    # Find  an entry on which a given entry can "depend"
+    method dependson {index}
 
-	# "Inherit" a data entry by following links at top level
-	method inherit {index {data UNKNOWN}}
+    # "Inherit" a data entry by following links at top level
+    method inherit {index {data UNKNOWN}}
 
-	# Add a dependence link between entries
-	method link {from to}
+    # Add a dependence link between entries
+    method link {from to}
 
-	# Notify a widget by configuring an option
-	method widgetnotify {widget option entry}
+    # Notify a widget by configuring an option
+    method widgetnotify {widget option entry}
 
-	####################################################################
-	
-	# The dependence links
-	protected variable _dependence
-	
-	# The anti-dependence link
-	protected variable _antidependence
+    #################################################################
+    ####                  protected variables                    ####
+
+    # The dependence links
+    protected variable _dependence
+    
+    # The anti-dependence link
+    protected variable _antidependence
 }
 
 
@@ -222,11 +225,11 @@ class ::tycho::WidgetPreferences {
 #### constructor
 #
 body ::tycho::WidgetPreferences::constructor {args} {
-	# Unless overridden, notify by calling the notify method
-	configure -notifyscript {eval %0 notify [list %1] %2}
+    # Unless overridden, notify by calling the notify method
+    configure -notifyscript {eval %0 notify [list %1] %2}
 
-	# Evaluate options
-	eval configure $args
+    # Evaluate options
+    eval configure $args
 }
 
 ########################################################################
@@ -234,8 +237,8 @@ body ::tycho::WidgetPreferences::constructor {args} {
 #
 # Flag an error if an attempt is made to delete an entry.
 #
-body ::tycho::DataArray::delete {index} {
-	error "Cannot delete entry from $dataname"
+body ::tycho::WidgetPreferences::delete {index} {
+    error "Cannot delete entry from $dataname"
 }
 
 ########################################################################
@@ -245,29 +248,29 @@ body ::tycho::DataArray::delete {index} {
 # not exist yet, so there is no error-checking. Return a null
 # string if none is found.
 #
-body ::tycho::DataArray::dependson {index} {
-	set result ""
-	set index [split $index "."]
-	set root [lindex $index 0]
-	set tail [join [lrange $index 1 end] "."]
-	
-	# Try the immediate antidependents
-	foreach p [entrycget $root -depends] {
-		if { [::info exists _value($p.tail)] } {
-			return $p.tail
-		}
+body ::tycho::WidgetPreferences::dependson {index} {
+    set result ""
+    set index [split $index "."]
+    set root [lindex $index 0]
+    set tail [join [lrange $index 1 end] "."]
+    
+    # Try the immediate antidependents
+    foreach p [entrycget $root -depends] {
+	if { [::info exists _value($p.tail)] } {
+	    return $p.tail
 	}
-	
-	# That didn't work, so try a recursive call
-	foreach p [entrycget $root -depends] {
-		set result [dependson $p.$tail]
-		if { $result != "" } {
-			return $result
-		}
+    }
+    
+    # That didn't work, so try a recursive call
+    foreach p [entrycget $root -depends] {
+	set result [dependson $p.$tail]
+	if { $result != "" } {
+	    return $result
 	}
-	
-	# Failed to find one
-	return ""
+    }
+    
+    # Failed to find one
+    return ""
 }
 
 ########################################################################
@@ -277,23 +280,23 @@ body ::tycho::DataArray::dependson {index} {
 # not exist. If the value is "UNKNOWN," follow the antidependence
 # link until data is found or the links stop.
 #
-body ::tycho::TypedData::get {index} {
-	if { ! [::info exists $_value($index)] } {
-		error "Data $index does not exist in $dataname"
-	}
+body ::tycho::WidgetPreferences::get {index} {
+    if { ! [::info exists $_value($index)] } {
+	error "Data $index does not exist in $dataname"
+    }
 
-	set value $_value($index)
+    set value $_value($index)
 
-	# Follow anti-dependence links if necessary to find known data
-	while { $value == "UNKNOWN" } {
-		# If we ran out of links, return "UNKNOWN"
-		if { ! [::info exists _antidependence($index)] } {
-			return "UNKNOWN"
-		}
-		set index $_antidependence($index)
-		set value _value($index)
+    # Follow anti-dependence links if necessary to find known data
+    while { $value == "UNKNOWN" } {
+	# If we ran out of links, return "UNKNOWN"
+	if { ! [::info exists _antidependence($index)] } {
+	    return "UNKNOWN"
 	}
-	return $value
+	set index $_antidependence($index)
+	set value _value($index)
+    }
+    return $value
 }
 
 ########################################################################
@@ -305,15 +308,15 @@ body ::tycho::TypedData::get {index} {
 # FIXME: Have I got the sense of "dependence" and "antidependence"
 # the wrong way around?
 #
-body ::tycho::TypedData::link {from to} {
-	if { ! [::info exists $_value($from)] } {
-		error "Data $from does not exist in $dataname"
-	}
-	if { ! [::info exists $_value($to)] } {
-		error "Data $to does not exist in $dataname"
-	}
-	lappend _dependence($from) $to
-	lappend _antidependence($to) $from
+body ::tycho::WidgetPreferences::link {from to} {
+    if { ! [::info exists $_value($from)] } {
+	error "Data $from does not exist in $dataname"
+    }
+    if { ! [::info exists $_value($to)] } {
+	error "Data $to does not exist in $dataname"
+    }
+    lappend _dependence($from) $to
+    lappend _antidependence($to) $from
 }
 
 ########################################################################
@@ -324,24 +327,24 @@ body ::tycho::TypedData::link {from to} {
 # is given to the subscriber widgets.
 #
 body ::tycho::WidgetPreferences::widgetnotify {widget option entry} {
-	# Get the current value
-	set value [get $entry]
-	
-	# If it's "UNKNOWN," do nothing
-	if { $value == "UNKNOWN" } {
-		return
+    # Get the current value
+    set value [get $entry]
+    
+    # If it's "UNKNOWN," do nothing
+    if { $value == "UNKNOWN" } {
+	return
+    }
+    
+    # If the datum is a color or font, translate into a system-dependent form
+    switch -exact $_optns($entry@-type) {
+	"font" {
+	    set value [::tycho::font $value]
 	}
-	
-	# If the datum is a color or font, translate into a system-dependent form
-	switch -exact $_optns($entry@-type) {
-		"font" {
-			set value [::tycho::font $value]
-		}
-		"color" {
-			set value [::tycho::color $value]
-		}
+	"color" {
+	    set value [::tycho::color $value]
 	}
+    }
 
-	# Update the subscriber (we have already checked that it exists)
-	$subscriber configure $option $value
+    # Update the subscriber (we have already checked that it exists)
+    $subscriber configure $option $value
 }

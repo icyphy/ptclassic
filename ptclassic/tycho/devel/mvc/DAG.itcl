@@ -32,18 +32,19 @@
 
 
 #######################################################################
-#### DirectedAcyclicGraph
-# A directed acyclic graph is a <code>Graph</code> without cycles. This
+#### DAG
+# A directed acyclic graph is a <code>Digraph</code> (directed graph)
+# without cycles. This
 # class provides methods to build, browse, and edit such a data
 # structure. The method <code>verifyAcyclic</code> verifies that the
 # graph has no cycles. Methods are also provided to topologically sort
 # the graph and to sort by depth (distance from a root). Data stored on
-# the nodes is as in the base class <code>Graph</code>.
+# the vertices is as in the base class <code>AbstractGraph</code>.
 # <p>
 # Here is an example of how to use the class:
 # <tcl><pre>
 #    catch {delete object foo}
-#    ::tycho::DirectedAcyclicGraph foo
+#    ::tycho::DAG foo
 #    foo add a {}
 #    foo add c {} a
 #    foo add d {} a
@@ -54,12 +55,12 @@
 # </pre></tcl>
 # The description that is posted in the last line will be:
 # "{d {} a} {e {} {a d}} {a {} {}} {c {} a}".
-# This is a list of nodes in the graph in arbitrary order.
-# Each node is a list of three items, the name, contents,
+# This is a list of vertices in the graph in arbitrary order.
+# Each vertex is a list of three items, the name, contents,
 # and parents.
 #
-class ::tycho::DirectedAcyclicGraph {
-    inherit ::tycho::Graph
+class ::tycho::DAG {
+    inherit ::tycho::Digraph
 
     constructor {args} {}
     destructor {}
@@ -67,13 +68,13 @@ class ::tycho::DirectedAcyclicGraph {
     ###################################################################
     ####                         public methods                    ####
 
-    # Check to see whether an arc between a parent and child is in a cycle.
-    method checkArc {parent child}
+    # Check to see whether an edge between a parent and child is in a cycle.
+    method checkEdge {parent child}
 
-    # Return the depth of the specified node.
-    method depth {node {init 1}}
+    # Return the depth of the specified vertex.
+    method depth {vertex {init 1}}
 
-    # Return a list of lists of nodes sorted by depth.
+    # Return a list of lists of vertices sorted by depth.
     method depthSort {}
 
     # Return the width of the subgraph with the given roots.
@@ -88,8 +89,8 @@ class ::tycho::DirectedAcyclicGraph {
     ###################################################################
     ####                         private methods                   ####
 
-    # Check to see whether a node is part of a cycle in the graph.
-    private method checkNode {node {repair {}}}
+    # Check to see whether a vertex is part of a cycle in the graph.
+    private method checkVertex {vertex {repair {}}}
 }
 
     ###################################################################
@@ -97,19 +98,19 @@ class ::tycho::DirectedAcyclicGraph {
     ####                      public methods                       ####
 
 #######################################################################
-#### checkArc
-# Return 1 if an arc between the specified parent and child is part of
-# a cycle.  Return 0 otherwise.  The arc need not exist in the graph.
-# It is assumed that without the arc in question, there are no cycles
+#### checkEdge
+# Return 1 if an edge between the specified parent and child is part of
+# a cycle.  Return 0 otherwise.  The edge need not exist in the graph.
+# It is assumed that without the edge in question, there are no cycles
 # in the graph (otherwise, an infinite recursion could result).  This
-# can be verified using <code>verifyAcyclic</code> prior to adding the arc.
+# can be verified using <code>verifyAcyclic</code> prior to adding the edge.
 # It is an error if either the parent or child do not exist.
 #
-body ::tycho::DirectedAcyclicGraph::checkArc {parent child} {
+body ::tycho::DAG::checkEdge {parent child} {
     verify $parent
     verify $child
-    foreach node [topologicalSort [list $child]] {
-        set name [lindex $node 0]
+    foreach vertex [topologicalSort [list $child]] {
+        set name [lindex $vertex 0]
         if {$name == $parent} {
             return 1
         }
@@ -119,12 +120,12 @@ body ::tycho::DirectedAcyclicGraph::checkArc {parent child} {
 
 #######################################################################
 #### depth
-# Return the depth of a given node. The depth is the maximum number of
-# hops from a root node. A root node has depth zero. A "hop" is a
+# Return the depth of a given vertex. The depth is the maximum number of
+# hops from a root vertex. A root vertex has depth zero. A "hop" is a
 # parent-child relationship. As a side effect, an attribute called
-# "depth" is set for the specified node and all its ancestors. If the
+# "depth" is set for the specified vertex and all its ancestors. If the
 # second argument is not given or has a non-zero value, the the "depth"
-# attribute is reset to -1 for all nodes in the graph before beginning.
+# attribute is reset to -1 for all vertices in the graph before beginning.
 # It is necessary to do this the first time this method is called, or
 # if the graph has been modified since the method was last called.
 # Alternatively, you can directly initialize the attribute using
@@ -132,12 +133,12 @@ body ::tycho::DirectedAcyclicGraph::checkArc {parent child} {
 # no directed loops (or this method goes into an infinite recursion).
 # This can be verified using <code>verifyAcyclic</code>.
 #
-body ::tycho::DirectedAcyclicGraph::depth {node {init 1}} {
+body ::tycho::DAG::depth {vertex {init 1}} {
     if $init {
         attributeInit depth -1
     }
     set max -1
-    foreach dep $parentnames($node) {
+    foreach dep [parents $vertex] {
         set level [attribute depth $dep]
         if {$level < 0} {
             set level [depth $dep 0]
@@ -146,36 +147,36 @@ body ::tycho::DirectedAcyclicGraph::depth {node {init 1}} {
             set max $level
         }
     }
-    attributeSet depth $node [incr max]
+    attributeSet depth $vertex [incr max]
 }
 
 #######################################################################
 #### depthSort
-# Return a list of lists of node names by depth. The list of root nodes
-# is first (index 0). A node will be in the (N+1)-th list (index N) if
-# the maximum number of hops to a node in the first list is N. A "hop"
+# Return a list of lists of vertex names by depth. The list of root vertices
+# is first (index 0). A vertex will be in the (N+1)-th list (index N) if
+# the maximum number of hops to a vertex in the first list is N. A "hop"
 # is simply a parent-child relationship.
-# Within each depth, nodes are sorted alphabetically by name.
+# Within each depth, vertices are sorted alphabetically by name.
 #
-body ::tycho::DirectedAcyclicGraph::depthSort {} {
-    if ![array exists contentslist] {
+body ::tycho::DAG::depthSort {} {
+    if ![array exists _vertices] {
         # graph is empty.
         return {}
     }
     set result {}
     attributeInit depth -1
-    set searchid [array startsearch contentslist]
-    while {[set node [array nextelement contentslist $searchid]] != {}} {
-        set lv [attribute depth $node]
+    set searchid [array startsearch _vertices]
+    while {[set vertex [array nextelement _vertices $searchid]] != {}} {
+        set lv [attribute depth $vertex]
         if {$lv < 0} {
-            set lv [depth $node 0]
+            set lv [depth $vertex 0]
         }
-        lappend nodesAtLevel($lv) $node
+        lappend verticesAtLevel($lv) $vertex
     }
-    array donesearch contentslist $searchid
+    array donesearch _vertices $searchid
 
-    foreach lv [lsort -integer [array names nodesAtLevel]] {
-        lappend result $nodesAtLevel($lv)
+    foreach lv [lsort -integer [array names verticesAtLevel]] {
+        lappend result $verticesAtLevel($lv)
     }
     return $result
 }
@@ -183,34 +184,34 @@ body ::tycho::DirectedAcyclicGraph::depthSort {} {
 #######################################################################
 #### subgraphWidth
 # Return the width of the subgraph with the given roots. The subgraph
-# includes all nodes that are descendants of the given roots, plus the
-# roots themselves. The width is the number of nodes in the largest
-# anti-chain, where an anti-chain is a set of nodes that are neither
+# includes all vertices that are descendants of the given roots, plus the
+# roots themselves. The width is the number of vertices in the largest
+# anti-chain, where an anti-chain is a set of vertices that are neither
 # ancestors nor descendants of one another. As a side effect, an
-# attribute called "width" is set for each node in the subgraph. If the
+# attribute called "width" is set for each vertex in the subgraph. If the
 # second argument is not given or has a non-zero value, the the "width"
-# attribute is reset to 0 for all nodes in the graph before beginning.
+# attribute is reset to 0 for all vertices in the graph before beginning.
 # It is necessary to do this the first time the method is called, or if
 # the graph has been modified since the method was last called.
 # Alternatively, it can be initialized directly using
 # <code>attributeInit width 0</code>.
 #
-body ::tycho::DirectedAcyclicGraph::subgraphWidth {roots {init 1}} {
+body ::tycho::DAG::subgraphWidth {roots {init 1}} {
     if $init {
         attributeInit width 0
     }
     set mywidth 0
-    foreach node $roots {
-        set width [attribute width $node]
+    foreach vertex $roots {
+        set width [attribute width $vertex]
         if {$width == 0} {
-            set kids [children $node]
+            set kids [children $vertex]
             if {$kids == {}} {
                 set width 1
             } {
                 set width [subgraphWidth $kids 0]
             }
         }
-        attributeSet width $node $width
+        attributeSet width $vertex $width
         incr mywidth $width
     }
     return $mywidth
@@ -218,9 +219,9 @@ body ::tycho::DirectedAcyclicGraph::subgraphWidth {roots {init 1}} {
 
 #######################################################################
 #### topologicalSort
-# Return a list of node names in the subgraph with the given roots.
+# Return a list of vertex names in the subgraph with the given roots.
 # This includes the roots themselves and all descendants. The returned
-# list contains one element for each node in the subgraph, beginning
+# list contains one element for each vertex in the subgraph, beginning
 # with the roots, sorted alphabetically, then children of the first
 # root, followed by children of the second root, etc. The descendants
 # are listed in a topologically sorted order, meaning that parents are
@@ -231,11 +232,11 @@ body ::tycho::DirectedAcyclicGraph::subgraphWidth {roots {init 1}} {
 # although it does not directly support describing a subgraph (it
 # describes the entire graph).
 #
-body ::tycho::DirectedAcyclicGraph::topologicalSort {roots} {
+body ::tycho::DAG::topologicalSort {roots} {
     # Keep track of our current position in the result list.
-    foreach node [lsort $roots] {
-        lappend result $node
-        set done($node) 1
+    foreach vertex [lsort $roots] {
+        lappend result $vertex
+        set done($vertex) 1
     }
     set idx 0
     while {$idx < [llength $result]} {
@@ -259,23 +260,23 @@ body ::tycho::DirectedAcyclicGraph::topologicalSort {roots} {
 #### verifyAcyclic
 # Verify that there are no cycles in the graph. If no argument is
 # given, or if the argument is an empty string, trigger an error on the first
-# arc closing a cycle that is encountered. Otherwise, repair the graph
-# by removing the offending reference to an arbitrary arc in each
+# edge closing a cycle that is encountered. Otherwise, repair the graph
+# by removing the offending reference to an arbitrary edge in each
 # cycle.
 #
-body ::tycho::DirectedAcyclicGraph::verifyAcyclic {{repair {}}} {
-    if ![array exists contentslist] {
+body ::tycho::DAG::verifyAcyclic {{repair {}}} {
+    if ![array exists _vertices] {
         # graph is empty.
         return
     }
     attributeInit visited 0
-    set searchid [array startsearch contentslist]
-    while {[set node [array nextelement contentslist $searchid]] != {}} {
-        if [checkNode $node $repair] {
+    set searchid [array startsearch _vertices]
+    while {[set vertex [array nextelement _vertices $searchid]] != {}} {
+        if [checkVertex $vertex $repair] {
             error "graph is not acyclic"
         }
     }
-    array donesearch contentslist $searchid
+    array donesearch _vertices $searchid
 }
 
 
@@ -284,56 +285,56 @@ body ::tycho::DirectedAcyclicGraph::verifyAcyclic {{repair {}}} {
     ####                         private methods                   ####
 
 #######################################################################
-#### checkNode
+#### checkVertex
 # If a second argument is not given, or has value 0, then return 1 if
-# the node specified by the first argument or any of its children is
+# the vertex specified by the first argument or any of its children is
 # part of a directed cycle, and 0 otherwise. If a non-zero argument is
-# given, then remove the first arc encountered in each cycle and always
+# given, then remove the first edge encountered in each cycle and always
 # return 0. This must be called by <code>verifyAcyclic</code> (so that
 # the whole graph is tested at once).
 #
-body ::tycho::DirectedAcyclicGraph::checkNode {node {repair {}}} {
+body ::tycho::DAG::checkVertex {vertex {repair {}}} {
 
     # The visited attribute is used encoded as follows:
     #    0 - not tested yet.
     #    1 - test in progress.
-    #    2 - the node and its children are not part of any loop.
-    #    3 - the node or one of its children are part of a loop.
+    #    2 - the vertex and its children are not part of any loop.
+    #    3 - the vertex or one of its children are part of a loop.
 
-    # If the node has already been checked...
-    if {[attribute visited $node] == 2} {return 0}
-    if {[attribute visited $node] == 3} {return 1}
+    # If the vertex has already been checked...
+    if {[attribute visited $vertex] == 2} {return 0}
+    if {[attribute visited $vertex] == 3} {return 1}
 
-    # Mark the current node to indicate that checking is in progress.
-    attributeSet visited $node 1
+    # Mark the current vertex to indicate that checking is in progress.
+    attributeSet visited $vertex 1
 
     # Check the children (if any).
-    foreach child $childrennames($node) {
+    foreach child [children $vertex] {
         switch [attribute visited $child] {
             0 {
                 # child not tested.
-                if [checkNode $child $repair] {
-                    attributeSet visited $node 3
+                if [checkVertex $child $repair] {
+                    attributeSet visited $vertex 3
                     return 1
                 }
             }
             1 {
                 # loop found.
                 if {$repair != {}} {
-                    deleteArc $node $child
+                    disconnect $vertex $child
                 } {
                     attributeSet visited $child 3
-                    attributeSet visited $node 3
+                    attributeSet visited $vertex 3
                     return 1
                 }
             }
             3 {
-                attributeSet visited $node 3
+                attributeSet visited $vertex 3
                 return 1
             }
         }
     }
     # All children are OK.
-    attributeSet visited $node 2
+    attributeSet visited $vertex 2
     return 0
 }
