@@ -113,8 +113,9 @@ cd ..
 # EXPSUBEXTRAS: sub-dirs of non-standard sub-dirs of experimental domains
 # Experimental domains not included: capsim cgdsp3
 
-set EXPDOMAINS=(cg56 cgc vhdlb vhdl mdsdf hof ipus sr)
-set EXPEXTRAS=(cg56/targets vhdl/targets ipus/cat ipus/icp ipus/tcltk)
+set EXPDOMAINS=(c50 cg56 cgc vhdlb vhdl mdsdf hof ipus sr)
+set EXPEXTRAS=(c50/targets cg56/targets vhdl/targets ipus/cat ipus/icp \
+		ipus/tcltk)
 set EXPSUBEXTRAS=(ipus/cat/stars ipus/icp/islang ipus/icp/kernel \
 		ipus/tcltk/stars)
 
@@ -178,7 +179,7 @@ foreach x (thor/pepp cg/targets sdf/image sdf/targets \
 	sdf/loopScheduler sdf/tcltk de/tcltk cg/parScheduler thor/analyzerX11 \
 	cg/dlScheduler cg/HuScheduler cg/dcScheduler \
 	cg/macroScheduler cg/ddfScheduler cgc/targets cgc/tcltk \
-	cg56/dsp \
+	c50/dsp cg56/dsp \
 	sdf/atm sdf/contrib sdf/dsp sdf/dfm sdf/image \
 	sdf/matrix sdf/matlab \
 	cgc/rtlib \
@@ -198,7 +199,7 @@ cd ../..
 # create extra subsub dirs in each domain
 # everything must have two slashs (be three levels down)
 
-foreach x ( cg56/dsp/stars \
+foreach x ( c50/dsp/stars cg56/dsp/stars \
 	sdf/atm/kernel sdf/atm/stars sdf/contrib/kernel sdf/contrib/stars \
 	sdf/dsp/stars sdf/image/stars sdf/tcltk/stars \
 	sdf/dfm/stars sdf/matrix/stars sdf/matlab/stars \
