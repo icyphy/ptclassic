@@ -54,11 +54,13 @@ after processing the input is sent to the ``size'' output.
 	defstate {
 		name {capacity}
 		type {int}
-		default {"10"}
+		default {"-1"}
 		desc { Maximum size of the queue (if -1, infinite). }
 	}
 	constructor {
 		inData.triggers(size);
+		inData.before(demand);
+		demand.triggers(size);
 		demand.triggers(outData);
 	}
 	start {
