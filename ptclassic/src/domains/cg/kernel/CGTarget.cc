@@ -34,10 +34,8 @@ StringList CGTarget::indent(int depth) {
 	return out;
 }
 
-// code to do initialiation for a star
-void CGTarget::doInitialization(CGStar& cgStar) {
-	cgStar.initCode();
-}
+int CGTarget :: decideBufSize(Galaxy& g) { return TRUE; }
+int CGTarget :: codeGenInit(Galaxy& g) { return TRUE; }
 
 // constructor
 CGTarget::CGTarget(const char* name,const char* starclass,
@@ -54,25 +52,10 @@ int CGTarget::setup(Galaxy& g) {
 
 	if (!Target::setup(g)) return FALSE;
 
-	// BUG ALERT?
-	// It is not clear whether the following is correct.
-	// AsmTarget and CompileTarget have to bypass it.
-	// The cast to CGPortHole clearly creates the problem for
-	// CompileTarget.  It's not clear what the problem is for
-	// AsmTarget.
+	// decide the buffer size
+	if(!decideBufSize(g)) return FALSE;
 
-	// initialize the porthole offsets, and do all initCode methods.
-	GalStarIter nextStar(g);
-	CGStar* s;
-	while ((s = (CGStar*)nextStar++) != 0) {
-		BlockPortIter next(*(Block*)s);
-		PortHole* p;
-                while ((p = next++) != 0) {
-                        if (!((CGPortHole*)p)->initOffset()) return FALSE;
-                }
-                doInitialization(*s);
-        }
-        return TRUE;
+	return codeGenInit(g);
 }
 
 void CGTarget :: start() {

@@ -32,8 +32,13 @@ protected:
 	// Return a list of spaces for indenting
 	StringList indent(int depth);
 
-	// In base class, initialization just invokes the star initCode.
-	virtual void doInitialization(CGStar&);
+	// calculate the buffer request.
+	virtual int decideBufSize(Galaxy&);
+
+	// do initialization: say compute offsets of portholes and
+	// generate initCode. But in this base class, do nothing
+	virtual int codeGenInit(Galaxy&);
+
 public:
 	CGTarget(const char* name, const char* starclass, const char* desc);
 	void initialize();
