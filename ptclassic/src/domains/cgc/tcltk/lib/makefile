@@ -34,6 +34,9 @@ EXTRA_SRCS = tkMain.c \
 	ptolemy-cgc.tcl \
 	README
 
+# Dummy value to quiet down make
+LIBR = dummylib
+
 # Files or directories that are present, but that 'make checkjunk' 
 # should not complain about
 MISC_FILES = \
