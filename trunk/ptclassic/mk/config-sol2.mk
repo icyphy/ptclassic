@@ -91,6 +91,10 @@ LINKFLAGS=-L$(LIBDIR) -Wl,-R,$(PTOLEMY)/lib.$(PTARCH):$(PTOLEMY)/octtools/lib.$(
 # link flags if debugging symbols are to be left
 LINKFLAGS_D=-L$(LIBDIR) -Wl,-R,$(PTOLEMY)/lib.$(PTARCH):$(PTOLEMY)/octtools/lib.$(ARCH):$(X11_LIBDIR)
 
+# These are the additional flags that we need when we are compiling code
+# which is to be dynamically linked into Ptolemy
+INC_LINK_FLAGS = -fpic
+
 # Flag that gcc expects to create statically linked binaries.
 # Binaries that are shipped should be statically linked.
 # Note that cc uses -Bstatic
