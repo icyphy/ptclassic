@@ -27,6 +27,7 @@ SDFSTARS = $(LIBDIR)/sdfstars.o $(LIBDIR)/sdfimagestars.o \
 CGCSTARS = $(LIBDIR)/cgcstars.o $(LIBDIR)/cgctcltkstars.o
 CG96STARS = $(LIBDIR)/cg96dspstars.o $(LIBDIR)/cg96stars.o
 CG56STARS = $(LIBDIR)/cg56dspstars.o $(LIBDIR)/cg56stars.o
+SilageSTARS = $(LIBDIR)/silagestars.o
 CGSTARS = $(LIBDIR)/cgstars.o
 DDFSTARS = $(LIBDIR)/ddfstars.o
 THORSTARS = $(LIBDIR)/thorstars.o
@@ -56,6 +57,7 @@ $(LIBDIR)/libcg96dspstars.a \
 $(LIBDIR)/libcg96stars.a $(LIBDIR)/libcg96.a \
 $(LIBDIR)/libcg56dspstars.a \
 $(LIBDIR)/libcg56stars.a $(LIBDIR)/libcg56.a \
+$(LIBDIR)/libsilagestars.a $(LIBDIR)/libsilage.a \
 $(LIBDIR)/libcgddfstars.a $(LIBDIR)/libcgddf.a \
 $(LIBDIR)/libcgstars.a $(PARLIBFILES) $(LIBDIR)/libcg.a \
 $(LIBDIR)/libddfstars.a $(LIBDIR)/libddf.a \
@@ -71,6 +73,7 @@ STAR_LIBS=\
 -lcgcstars -lcgc -lcgctcltk \
 -lcg96dspstars -lcg96stars -lcg96 \
 -lcg56dspstars -lcg56stars -lcg56 $(S56WH_LIBDIR) $(S56WH_LIB)\
+-lsilagestars -lsilage \
 -lcgddfstars -lcgddf \
 -lcgstars -lDC -lHu -lDL -lPar -lcg \
 -lddfstars -lddf \
