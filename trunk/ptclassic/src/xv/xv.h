@@ -84,7 +84,8 @@
 
 #ifndef VMS
 extern int   errno;             /* this SHOULD be in errno.h */
-#ifdef netbsd_i386
+#if defined(netbsd_i386) || defined(__FreeBSD__)
+/* This SHOULD be conditional on something like defined(__POSIX__) */
 extern const char *const sys_errlist[];
 #else
 extern char *sys_errlist[];     /* this SHOULD be in errno.h */
