@@ -238,15 +238,27 @@ limitation of liability, and disclaimer of warranty provisions.
 	    arglist { "(GenericPort& source, GenericPort& sink, int numberDelays, const char* initDelayValues)" }
 	    code {
 		source.connect(sink,numberDelays,initDelayValues);
-		if (parent()->isA("InterpGalaxy") && 
-		    ((numberDelays > 0) ||
-		     (initDelayValues && *initDelayValues))) {
-			((InterpGalaxy*)parent())->registerInit("C",
+		if (parent()->isA("InterpGalaxy")) {
+		  if (initDelayValues && *initDelayValues) {
+		    ((InterpGalaxy*)parent())->registerInit("C",
 				source.parent()->name(),
 				source.name(),
 				initDelayValues,
 				sink.parent()->name(),
 				sink.name());
+		  } else if (numberDelays > 0) {
+		    // construct an old-style delay string, of the form *n
+		    // necessary because registerInit doesn't save old-style
+		    // delays explicitly (yech)
+		    char delayString[32];
+		    sprintf(delayString, "*%d", numberDelays);
+		    ((InterpGalaxy*)parent())->registerInit("C",
+				source.parent()->name(),
+				source.name(),
+				hashstring(delayString),
+				sink.parent()->name(),
+				sink.name());
+		  }
 		}
 	    }
 	}
