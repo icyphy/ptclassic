@@ -24,6 +24,8 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  * 
  */
+#ifndef TAP_INT_H
+#define TAP_INT_H
 #include "copyright.h"
 #include "tap.h"
 
@@ -155,3 +157,4 @@ struct connLayer {
 #define CONN_LAYER_PROP_NAME	"LAYER-WIDTHS"
 
 void tapFreeConnTable();
+#endif
