@@ -52,7 +52,6 @@ EXTRA_SRCS =	\
 	edit.html \
 	error.html \
 	file.html \
-	html.html \
 	index.html \
 	introduction.html \
 	messageclasses.html \
