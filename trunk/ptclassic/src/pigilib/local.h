@@ -62,10 +62,12 @@ extern RAW_PTR malloc ARGS((size_t));
 
 #include <sys/param.h>
 
-#ifdef PTHPPA
+#if defined(PTHPPA) && !defined(PTHPUX10)
+/* HPUX10.20 will fail if the line below is defined, however HPUX9.x
+ does not have getwd(). */
 #define getwd(foo) getcwd(foo,MAXPATHLEN-1)
 #else /* PTHPPA */
-#if !defined(PTALPHA) && !defined(PTLINUX) && !defined(PTIRIX5)
+#if !defined(PTALPHA) && !defined(PTLINUX) && !defined(PTIRIX5) && !defined(PTHPPA)
 extern char *getwd ARGS((char *));
 #endif /* PTALPHA ... */
 #endif /* PTHPPA */
