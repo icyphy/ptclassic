@@ -135,8 +135,8 @@ class ::tycho::DataModel {
     # Describe the data as a string in TIM format
     method describe {{name {}} {prefix {}}}
 
-    # Check if an item exists
-    method exists {name}
+    # Check if an item, and optionally, an attribute, exists
+    method exists {name {attribute {}}}
 
     # Get the names and attributes of each item matching a pattern
     method get {{pattern *}}
@@ -510,10 +510,23 @@ body ::tycho::DataModel::describe {{name {}} {prefix {}}} {
 #### exists
 #
 # Test if the item given by _name_ is present in the model, returning
-# 1 if it does and 0 if not.
+# 1 if it does and 0 if not. If the item does exists and _attribute_
+# is given, test if the item has that attribute (including its
+# defaults), and return 1 if it does and 0 if it dies not.
 #
-body ::tycho::DataModel::exists {name} {
-    @scope $scope ::info exists [set _dataname]($name)
+body ::tycho::DataModel::exists {name {attribute {}}} {
+    if { $attribute == "" } {
+	@scope $scope ::info exists [set _dataname]($name)
+    } else {
+	if [@scope $scope ::info exists [set _dataname]($name)] {
+	    regexp {^[^:]+} [lindex $name end] type
+	    array set data $_defaults($type)
+	    array set data [@scope $scope set [set _dataname]($name)]
+	    ::info exists data($attribute)
+	} else {
+	    return 0
+	}
+    }
 }
 
 ########################################################################
