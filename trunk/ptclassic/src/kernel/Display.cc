@@ -77,7 +77,8 @@ const int MAX_NO_GRAPHS = 64;
 #include <fcntl.h>
 #include <unistd.h>	// unlink()
 #include <stdlib.h>	// system()
-#include "compat.h"     // PT_FOPEN_WRITE_BINARY
+#include <errno.h>
+#include "compat.h"     // PT_FOPEN_WRITE_BINARY, sys_errlist[]
 
 #ifdef PT_NT4VC
 #include <process.h>
@@ -149,7 +150,10 @@ void XGraph :: initialize(Block* parent,
 	    if ((strm[i] = fopen(tmpFileNames[i], PT_FOPEN_WRITE_BINARY))
                     == NULL) {
 		StringList msg = "Can't open temporary file for writing: ";
-		msg << tmpFileNames[i];
+                const char * reason = "Unknown error";
+                if (errno >= 0 && errno < sys_nerr)
+                    reason = sys_errlist[errno];
+		msg << reason << ": " << tmpFileNames[i];
 		Error::abortRun(*blockIamIn, msg);
 	    }
 	}
