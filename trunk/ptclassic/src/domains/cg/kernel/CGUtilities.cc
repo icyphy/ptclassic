@@ -38,9 +38,10 @@ static const char file_id[] = "CGUtilities.cc";
 #pragma implementation
 #endif
 
-#include <stdio.h>		// Pick up decl for pclose().
+#include <stdio.h>		// Pick up decl for pclose
 #include <unistd.h>		// Pick up F_OK for access() under sun4 cfront.
 #include "pt_fstream.h"
+#include "type.h"
 #include "CGUtilities.h"
 #include "StringList.h"
 #include "miscFuncs.h"
@@ -56,6 +57,7 @@ static const char file_id[] = "CGUtilities.cc";
 
 static const char defaultDisplay[] = "xedit -name ptolemy_code %s";
 
+// Converts a string to lower case
 char* makeLower(const char* name) {
     LOG_NEW; char* newp = new char[strlen(name)+1];
     char *o = newp;
@@ -68,6 +70,9 @@ char* makeLower(const char* name) {
     return newp;
 }
 
+// Run command on hostname in specified directory.  If directory == 0
+// then the command will be executed in the home directory.  Returns
+// the status flag of the system call.
 int rshSystem(const char* hname, const char* cmd, const char* dir) {
     StringList rshCommand = cmd;
     if ( dir != NULL ) {
@@ -131,13 +136,18 @@ int rshSystem(const char* hname, const char* cmd, const char* dir) {
     return system(rshCommand);
 }
 
+// Write a string to a file in a specified directory on a given host.  If
+// the direcory does not exit, it will be created.  The code can be
+// optionally displayed.  If host is not the localhost, then this method
+// will use rcp to copy it.  If mode is not null, will execute a
+// chmod on the file with the given mode.  Returns TRUE if successful.
 int rcpWriteFile(const char* hname, const char* dir, const char* file,
                  const char* text, int displayFlag, int mode) {
     StringList mkdir, directory, fileName;
     char* tmpFile = 0;
 
-// if it on a local machine, do a expandPathName; if not, rely on
-// the remote shell to expand the variables correctly
+    // if it on a local machine, do a expandPathName; if not, rely on
+    // the remote shell to expand the variables correctly
 
     if ( !onHostMachine(hname)) {
 	LOG_NEW; tmpFile = tempFileName();
@@ -236,6 +246,9 @@ int rcpWriteFile(const char* hname, const char* dir, const char* file,
     return status;
 }
 
+// Copy a file to a directory.  This will either perform a link system
+// call or do a rcp to copy a file over the network. Returns TRUE if
+// successful
 int rcpCopyFile(const char* hname, const char* dir, const char* filePath,
 		int deleteOld, const char* newFileName) {
     char* expandedName = expandPathName(filePath);
@@ -282,9 +295,11 @@ int rcpCopyFile(const char* hname, const char* dir, const char* filePath,
     return !rshSystem("localhost",(const char*)command);
 }
  
-// Open a pipe to the Unix command "hostname" and read the result
+// Returns TRUE if hname is the machine Ptolemy is running on.  Open a pipe
+// to the Unix command "hostname" and read the result.  It returns TRUE if
+// hname is 0, "\0", or "localhost" as well.
 int onHostMachine(const char* hname) {
-	if (hname == 0 || *hname == '\0' || strcmp(hname,"localhost") == 0) {
+	if (hname == 0 || *hname == '\0' || strcmp(hname, "localhost") == 0) {
 	    return TRUE;
 	}
 
@@ -304,14 +319,13 @@ int onHostMachine(const char* hname) {
 	return retval;
 }
 
-
-// This function sanitizes a string so that it is usable as a
-// C/C++ identifier.  If the string begins with a digit, the
-// character 'x' is prepended.  Then, all the characters in
-// the string that are not alphanumeric are changed to '_'.
-// The returned (const char*) pointer points to the resulting
-// string in an internal buffer maintained by this function,
-// and is only valid until the next invocation of this function.
+// Sanitize a string so that it is usable as a C/C++ identifier.  If
+// the string begins with a digit, the character 'x' is prepended.
+// Then, all the characters in the string that are not alphanumeric
+// are changed to '_'.  The returned (const char*) pointer points to
+// the resulting string in an internal buffer maintained by this
+// function, and is only valid until the next invocation of this
+// function.
 const char* ptSanitize(const char* string)
 {
     // This pointer points to the dynamically allocated buffer that
@@ -342,9 +356,10 @@ const char* ptSanitize(const char* string)
     return sanitizedString;
 }
 
-// This function returns an expanded local file name
-// If we are the local machine, then we just expand the path name.
-// Otherwise, we copy the file to the /tmp directory.
+// Find a local file name: either copy the remote file to a local temporary
+// file in /tmp or return the expanded path name of the local file.  If the
+// deleteFlag is set to TRUE, then delete the filename after finishing with
+// it.  This deletion is automated by the cleanupLocalFileName function.
 // An error is indicated if the result is an empty string list
 StringList findLocalFileName(const char* hname, const char* dir,
 			     const char* filename, int& deleteFlag) {
@@ -373,4 +388,19 @@ StringList findLocalFileName(const char* hname, const char* dir,
 	delete [] expandedPathName;
     }
     return pathname;
+}
+
+// Delete the filename if deleteFlag is TRUE.
+int cleanupLocalFileName(const char* pathname, int deleteFlag) {
+    int retval = TRUE;
+    if ( deleteFlag ) {
+	StringList removeCommand = "/bin/rm -f ";
+	removeCommand << pathname;
+	if (! system(removeCommand)) {
+	    StringList errmsg = "Could not remove ";
+	    errmsg << pathname;
+	    Error::warn(errmsg);
+	}
+    }
+    return retval;
 }
