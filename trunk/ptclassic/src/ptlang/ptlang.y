@@ -2,7 +2,7 @@
 /************************************************************************
  Version: $Id$
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c)1990-%Q%  The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -31,6 +31,8 @@ compiled-in galaxies yet and the language may still change slightly.
 Caveat hacker.
 
 Programmer: J. T. Buck and E. A. Lee
+
+6/9/95 tgl: handle default arguments in method arglists correctly.
 
 ************************************************************************/
 
@@ -146,7 +148,7 @@ void clearDefs(), clearStateDefs(), addMembers(), genState(), describeState(),
      initPort(), genPort(), describePort(), clearMethodDefs(), wrapMethod(),
      genInstance(), genStdProto(), yyerror(), yyerr2(), cvtCodeBlockExpr(),
      cvtCodeBlock(), genCodeBlock(), cvtMethod(), genMethod(), genDef(),
-     yywarn(), mismatch(), genAlias();
+     yywarn(), mismatch(), genAlias(), stripDefaultArgs();
 
 char* inputFile;		/* input file name */
 char* idBlock;			/* ID block */
@@ -953,10 +955,12 @@ void wrapMethod ()
 	}
 	/* not inline: put it into the .cc file */
 	strcat (p, ";\n");
-	sprintf (str2, "\n\n%s %s%s::%s %s\n{\n", methodType,
-		 galDef ? "" : domain, objName,
-		 methodName, methodArgs);
+	sprintf (str2, "\n\n%s %s%s::%s ", methodType,
+		 galDef ? "" : domain, objName, methodName);
 	strcat (miscCode, str2);
+	stripDefaultArgs (str2, methodArgs);
+	strcat (miscCode, str2);
+	strcat (miscCode, "\n{\n");
 	strcat (miscCode, methodCode);
 	strcat (miscCode, "\n}\n");
 }
@@ -2066,13 +2070,64 @@ char* in;
 	return out;
 }
 
-/* make sure a function is a valid arglist */
+/*
+ * make sure a function is a valid arglist:
+ * for now, must start with (, end with ), and have balanced parens.
+ */
 char* checkArgs(in)
 char* in;
 {
+	char* ptr = in;
+	int parenlevel = 0;
+
 	if (*in != LPAR || in[strlen(in)-1] != RPAR)
 		yyerror ("Invalid argument list");
+
+	while (*ptr) {
+		if (*ptr == LPAR)
+			parenlevel++;
+		else if (*ptr == RPAR && --parenlevel < 0)
+			yyerror ("Mismatched parentheses in argument list");
+		ptr++;
+	}
+	if (parenlevel != 0)
+	  yyerror ("Mismatched parentheses in argument list");
+
 	return in;
+}
+
+/*
+ * copy arglist at *in to *out, deleting any default-argument specifications.
+ * A default arg spec starts with '=' at paren level 1, and extends until a
+ * ',' or ')' occuring at paren level 1.
+ */
+void stripDefaultArgs(out, in)
+char* out;
+char* in;
+{
+	int copying = 1;
+	int parenlevel = 0;
+
+	while (*in) {
+	  switch (*in) {
+	  case LPAR:
+	    parenlevel++;
+	    break;
+	  case RPAR:
+	    if (parenlevel == 1) copying = 1;
+	    parenlevel--;
+	    break;
+	  case '=':
+	    if (parenlevel == 1) copying = 0;
+	    break;
+	  case ',':
+	    if (parenlevel == 1) copying = 1;
+	    break;
+	  }
+	  if (copying) *out++ = *in;
+	  in++;
+	}
+	*out = 0;
 }
 
 /*
