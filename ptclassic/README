@@ -1,3 +1,22 @@
+Version control:
+$Id$
+
+README file for Ptolemy
+-----------------------
+
+In order to run Ptolemy, do the following:
+
+% setenv PTOLEMY This_Directory
+% set path = ($PTOLEMY/bin $path)
+% cd $PTOLEMY/demo
+% pigi
+
+Where "This_Directory" is the directory where you installed
+Ptolemy.
+
+For further information, see the Ptolemy manual.  To print
+your own copy of the manual, see the README.users_man file in the 
+directory ptolemy/doc/users_man
    In order to run Ptolemy, two things are necessary:
       1.  Create a user called "ptolemy" (no quotes). 
       2.  Set certain environment variables correctly.  The following 
