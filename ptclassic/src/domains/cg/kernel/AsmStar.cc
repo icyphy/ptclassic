@@ -50,6 +50,14 @@ AsmStar::lookupAddress(const char* name) {
 	return s;
 }
 
+void AsmStar::genInterruptCode(CodeBlock& cb) {
+	AsmTarget* asmTargetPtr = targetPtr;
+	asmTargetPtr->saveProgramCounter();
+	gencode(cb);
+	asmTargetPtr->restoreProgramCounter();
+	asmTargetPtr->interruptFlag = TRUE;
+}
+	
 unsigned
 AsmStar::addrWithOffset (const char* name, const char* offset) {
 	int off;
