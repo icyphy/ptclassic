@@ -67,8 +67,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 extern "C" {
 #endif
 
-extern double i0( double x );
-extern double chbevl( double x, double array[], int n );
+extern double PTDSPi0( double x );
+extern double PTDSPchbevl( double x, double array[], int n );
 
 #ifdef __cplusplus
 }
