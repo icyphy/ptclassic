@@ -6,6 +6,7 @@
 PTOLEMY = ..
 
 DIRS =	\
+	$(PTOLEMY)/src/domains/cg-ddf/doc \
 	$(PTOLEMY)/src/domains/cg56/doc \
 	$(PTOLEMY)/src/domains/cg96/doc \
 	$(PTOLEMY)/src/domains/cgc/doc \
@@ -17,7 +18,6 @@ DIRS =	\
 	$(PTOLEMY)/doc/main
 
 # omitted from main distribution
-#	$(PTOLEMY)/src/domains/cg-ddf/doc \
 #	$(PTOLEMY)/src/domains/bdf/doc \
 #	$(PTOLEMY)/src/domains/silage/doc \
 #	$(PTOLEMY)/src/domains/sproc/doc \
