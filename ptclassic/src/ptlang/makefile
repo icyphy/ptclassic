@@ -7,8 +7,10 @@
 ROOT = ../..
 VPATH = $(ROOT)/src/ptlang
 BINDIR = $(ROOT)/bin.$(ARCH)
-YFLAGS =
-CFLAGS = -O
+
+# get configuration info
+CONFIG=$(ROOT)/config-$(ARCH).mk
+include $(CONFIG)
 
 all:	ptlang
 
@@ -26,19 +28,16 @@ install:	$(BINDIR)/ptlang
 $(BINDIR)/ptlang:	ptlang
 		rm -f $(BINDIR)/ptlang; ln ptlang $(BINDIR)
 
-clean:
-	rm -f *.o
-
-realclean:
-	rm -f *.o ptlang.c
-
 sources:	ptlang.y
 
 depend:
 	echo no dependencies to make in this directory
 
+checkjunk:
+	@checkextra -v ptlang.y ptlang.c ptlang.o ptlang
+
 sccsinfo:
-		sccs info
+	@sccs check || true
 
 # Rule for making .o file from .c file (the Gnu-make default rule breaks
 # on Vaxes running older versions of Ultrix)
