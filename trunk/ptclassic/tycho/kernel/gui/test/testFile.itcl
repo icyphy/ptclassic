@@ -35,6 +35,9 @@ if {[string compare test [info procs test]] == 1} then {
 } {}
 
 source [file join $TYCHO kernel test FileTester.itcl]
+set foo [file join $TYCHO kernel test test.junk]
+set autofoo [file join $TYCHO kernel test #auto#test.junk]
+set bar [file join $TYCHO kernel test test.knuj]
 
 #set VERBOSE 1
 
