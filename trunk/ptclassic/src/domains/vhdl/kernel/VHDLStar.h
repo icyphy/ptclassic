@@ -74,11 +74,14 @@ protected:
         /* virtual */ StringList expandMacro(const char*, const StringList&);
 
 	// Expand State or PortHole reference macros.
-//	/* virtual */ StringList expandRef(const char*, const char* ="",
-//					   const char* ="");
-//	StringList expandRefCx(const char*, const char*, const char*);
-	/* virtual */ StringList expandRef(const char*, const char* ="",
-					   const char* ="");
+	// First form is new prototype with three arguments.
+	StringList expandRef(const char*, const char*, const char*);
+	// Second and third forms are redefinitions of virtual prototypes.
+	/* virtual */ StringList expandRef(const char* name)
+	  { return expandRef(name, "", ""); }
+	/* virtual */ StringList expandRef(const char* name,
+					   const char* offset)
+	  { return expandRef(name, offset, ""); }
 
 	// Form expression interspersing operators within arg list.
 	StringList VHDLStar :: expandInterOp(const char*, const char*,
