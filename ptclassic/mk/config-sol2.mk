@@ -50,18 +50,26 @@ RANLIB = true
 # Use gcc everywhere including in octtools
 CC =		gcc
 
+# In config-$PTARCH.mk, we set the following variables
+# OPTIMIZER - The setting for the optimizer, usually -O2.
+# MEMLOG    - Formerly used to log memory allocation and deallocation.
+# WARNINGS  - Flags that print warnings.
+# ARCHFLAGS - Architecture dependent flags, useful for determining which
+#	      OS we are on.  Often of the form -DPTSOL2_4.
+# LOCALFLAGS - Other architecture dependent flags that apply to all releases
+#	      of the OS for this architecture.
+# USERFLAGS - Ptolemy makefiles should never set this, but the user can set it.
+
 OPTIMIZER =	-O2
 # -Wsynth is new in g++-2.6.x
 # Under gxx-2.7.0 -Wcast-qual will drown you with warnings from libg++ includes
 WARNINGS =	-Wall -Wsynth #-Wcast-qual 
-MULTITHREAD =	-D_REENTRANT
-# Define PTSOL2_4 if you are on Solaris2_4
-# config-sol2.5.mk defines ARCHFLAGS
+# Define PTSOL2_4 if you are on Solaris2_4.  config-sol2.5.mk defines ARCHFLAGS
 # Under gcc-2.7.0, you will need -fno-for-scope for GPPFLAGS
-LOCALFLAGS =	-DPTSOL2_4 $(ARCHFLAGS) -pipe -fno-for-scope
-GPPFLAGS =	-g $(MEMLOG) $(WARNINGS) $(OPTIMIZER) $(MULTITHREAD) $(LOCALFLAGS)
+LOCALFLAGS =	-g -DPTSOL2_4 -D_REENTRANT -pipe -fno-for-scope 
+GPPFLAGS =	$(OPTIMIZER) $(MEMLOG) $(WARNINGS) $(ARCHFLAGS) $(LOCALFLAGS) $(USERFLAGS)
 # If you are not using gcc, then you might have problems with the WARNINGS flag
-CFLAGS =	-g $(MEMLOG) $(WARNINGS) $(OPTIMIZER) $(MULTITHREAD) $(LOCALFLAGS)
+CFLAGS =	$(GPPFLAGS)
 
 #
 # Variables for the linker
