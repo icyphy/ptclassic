@@ -10,22 +10,11 @@ $Id$
 
  This is a replacement version of the methods for the Error class 
  in Ptolemy (the UserOutput class is the same) -- link this in instead
- of Output.cc to get popup windows for error messages.  The
- routine "open_display" must be called first.
-
- This initial version could use some cleaning up.
+ of Output.cc to go through the PrintErr error message handler in pigi.
 
 *******************************************************************/
 extern "C" {
-int open_display(const char *);
-void close_display();
-int accum_string(const char*);
-void pr_accum_string();
-void clr_accum_string();
-void win_msg(const char *);
-void close_msg();
-int noxquery(const char *);
-int query(const char *);
+void PrintErr(const char*);
 }
 
 #include <stream.h>
@@ -39,34 +28,27 @@ int query(const char *);
 Error errorHandler;
 
 // Constructor: set the ostream to cerr
-Error :: Error () : UserOutput (cerr) {
-	clr_accum_string();
-}
+Error :: Error () : UserOutput (cerr) {}
 
 Error :: Error (ostream& foo) : UserOutput (foo) {}
 
 void
 Error :: error() {
-	clr_accum_string ();
-	accum_string ("ERROR (no message specified)\n");
-	pr_accum_string ();
+	PrintErr("(no message specified)");
 }
 
 void
 Error :: error(const char *s) {
-	clr_accum_string ();
-	accum_string ("ERROR: ");
-	accum_string (s);
-	pr_accum_string ();
+	PrintErr(s);
 }
 
 void
 Error :: error(const char *s, const char *c) {
-	clr_accum_string ();
-	accum_string ("ERROR: ");
-	accum_string (s);
-	accum_string (c);
-	pr_accum_string ();
+	char* buf = new char[strlen(s)+strlen(c)+1];
+	strcpy (buf, s);
+	strcat (buf, c);
+	PrintErr (buf);
+	delete buf;
 }
 
 void
