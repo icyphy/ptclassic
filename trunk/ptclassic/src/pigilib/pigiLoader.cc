@@ -51,6 +51,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include <std.h>
 #include <sys/stat.h>
 #include <ctype.h>
+#include <unistd.h>             // access()
 
 #include "Linker.h"
 #include "Error.h"
