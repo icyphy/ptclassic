@@ -87,28 +87,28 @@ void Wormhole :: buildEventHorizons () {
 		if (galp.isItInput()) {
 			EventHorizon& to = outSideDomain->newTo();
 			EventHorizon& from = inSideDomain->newFrom();
-			to.setPort(in, galp.readName(), this, &selfStar,
-				   type, numToken);
-			selfStar.addPort(to);
-			from.setPort(in, ghostName(galp), this, &selfStar,
-				     type, numToken);
+			to.setEventHorizon(in, galp.readName(), this, 
+				&selfStar, type, numToken);
+			selfStar.addPort(to.asPort());
+			from.setEventHorizon(in, ghostName(galp), this, 
+				&selfStar, type, numToken);
 			to.ghostConnect (from);
-			from.inheritTypeFrom (realGalp);
-			to.inheritTypeFrom (from);
-			from.connect(realGalp,0);
+			from.asPort().inheritTypeFrom (realGalp);
+			to.asPort().inheritTypeFrom (from.asPort());
+			from.asPort().connect(realGalp,0);
 		}
 		else {
 			EventHorizon& to = inSideDomain->newTo();
 			EventHorizon& from = outSideDomain->newFrom();
-			from.setPort(out, galp.readName(), this, &selfStar,
-				     type, numToken);
-			selfStar.addPort(from);
-			to.setPort(out, ghostName(galp), this, &selfStar,
-				   type, numToken);
+			from.setEventHorizon(out, galp.readName(), this, 
+				&selfStar, type, numToken);
+			selfStar.addPort(from.asPort());
+			to.setEventHorizon(out, ghostName(galp), this, 
+				&selfStar, type, numToken);
 			to.ghostConnect (from);
-			to.inheritTypeFrom (realGalp);
-			from.inheritTypeFrom (to);
-			realGalp.connect(to,0);
+			to.asPort().inheritTypeFrom (realGalp);
+			from.asPort().inheritTypeFrom (to.asPort());
+			realGalp.connect(to.asPort(),0);
 		}
 	}
 // Take care of galaxy multi porthole
@@ -130,12 +130,11 @@ void Wormhole :: buildEventHorizons () {
 void Wormhole::freeContents () {
 	if (!dynamicHorizons || !galP) return;
 	BlockPortIter nextp(selfStar);
-	EventHorizon* p;
-	while ((p = (EventHorizon*)nextp++) != 0) {
+	PortHole* p;
+	while ((p = nextp++) != 0) {
 		// remove parents
-		p->ghostPort->PortHole::setPort("",0);
-		p->PortHole::setPort("",0);
-		LOG_DEL; delete p->ghostPort;
+		p->asEH()->ghostAsPort().setPort("",0);
+		p->setPort("",0);
 		LOG_DEL; delete p;
 	}
 	// delete the inner galaxy.
@@ -181,9 +180,10 @@ int Wormhole :: checkReady() const {
 	// check each porthole whether it is ready.
 	BlockPortIter next(selfStar);
 	for (int i = selfStar.numberPorts(); i > 0; i--) {
-		EventHorizon& p = *(EventHorizon*) next++;
-		if (p.isItInput()) {
-			FromEventHorizon* fp = (FromEventHorizon*) p.ghostPort;
+		PortHole* p = next++;
+		if (p->isItInput()) {
+			FromEventHorizon* fp = 
+				(FromEventHorizon*) p->asEH()->ghostPort;
 			if (!(fp->ready())) { flag = FALSE;
 					      return flag ;}
 		}
