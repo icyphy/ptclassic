@@ -67,17 +67,17 @@ ENABLE_GCC =		--enable-gcc
 ENABLE_SHARED =		`$(PTOLEMY)/src/tcltk/tcl_shared`
 
 # Used to find the itcl source directory
-ITCL_VERSION =		itcl2.2
-ITCL_TCL_MAJOR_VERSION_NUMBER =	7.6
-ITCL_TK_MAJOR_VERSION_NUMBER =	4.2
-ITCL_MAJOR_VERSION_NUMBER =	2.2
-IWIDGETS_MAJOR_VERSION_NUMBER =	2.2.0
+#ITCL_VERSION =		itcl2.2
+#ITCL_TCL_MAJOR_VERSION_NUMBER =	7.6
+#ITCL_TK_MAJOR_VERSION_NUMBER =	4.2
+#ITCL_MAJOR_VERSION_NUMBER =	2.2
+#IWIDGETS_MAJOR_VERSION_NUMBER =	2.2.0
 
-#ITCL_VERSION =		itcl3.0a1
-#ITCL_TCL_MAJOR_VERSION_NUMBER =	8.0
-#ITCL_TK_MAJOR_VERSION_NUMBER =	8.0
-#ITCL_MAJOR_VERSION_NUMBER =	3.0
-#IWIDGETS_MAJOR_VERSION_NUMBER =	3.0.0
+ITCL_VERSION =		itcl3.0a1
+ITCL_TCL_MAJOR_VERSION_NUMBER =	8.0
+ITCL_TK_MAJOR_VERSION_NUMBER =	8.0
+ITCL_MAJOR_VERSION_NUMBER =	3.0
+IWIDGETS_MAJOR_VERSION_NUMBER =	3.0.0
 
 # TclX
 TCLX_VERSION =		tclX7.5.3-a1
@@ -120,7 +120,7 @@ ITCL_INDEPENDENT_DEST =		$(TCLTK_DEST)/itcl
 
 ITCL_DEST_LIB = $(ITCL_DEST)/lib
 
-# itcl2.1 contains its own custom tcltk
+# Itcl contains its own custom tcltk
 all: 		configure itcl
 configure:	$(PTOLEMY)/src/tcltk/tcl_shared \
 			$(ITCL_OBJ)/config.status $(TCLTK_OBJ)/makefile
@@ -130,9 +130,9 @@ clean:		clean_itcl
 realclean:	clean_itcl
 
 ######################################################################
-# Rules for itcl
-# itcl is an extension for tcl that provides tcl 'classes'
-# The itcl2.1 distribution contains tcl and tk
+# Rules for Itcl
+# Itcl is an extension for tcl that provides tcl 'classes'
+# The Itcl distribution contains tcl and tk
 
 # Configure itcl
 FORCE:
@@ -181,8 +181,22 @@ $(ITCL_OBJ)/libitcl.a: $(ITCL_OBJ)
 		all)
 
 # Install itcl
-install_itcl: $(ITCL_DEST_LIB)/libitcl.a fixlinks
+install_itcl: $(ITCL_DEST_LIB)/libitcl.a fixlinks \
+			$(ITCL_INDEPENDENT_DEST)/include/tclInt.h \
+			$(ITCL_INDEPENDENT_DEST)/include/tclRegexp.h
 	-(cd $(BINDIR); ln -s $(REL_ITCL_BINDIR)/* .)
+
+$(ITCL_INDEPENDENT_DEST)/include/tclInt.h:
+	if [ ! -f $@ ]; then \
+		echo "Copying tclInt.h"; \
+		cp $(ITCL_SRC)/tcl$(ITCL_TCL_MAJOR_VERSION_NUMBER)/generic/tclInt.h $@; \
+	fi
+
+$(ITCL_INDEPENDENT_DEST)/include/tclRegexp.h:
+	if [ ! -f $@ ]; then \
+		echo "Copying tclRegexp.h"; \
+		cp $(ITCL_SRC)/tcl$(ITCL_TCL_MAJOR_VERSION_NUMBER)/generic/tclRegexp.h $@; \
+	fi
 
 $(ITCL_DEST_LIB)/libitcl.a:
 	@echo "Making install in itcl"
@@ -310,14 +324,31 @@ config_tclblend: $(TCLBLEND_OBJ)
 		--exec-prefix=$(TCLBLEND_DEST) \
 		$(ENABLE_SHARED) $(ENABLE_GCC))
 
-tclblend:
-	(cd $(TCLBLEND_OBJ); PWD=$(TCLBLEND_OBJ); export PWD; $(MAKE))
+tclblend: $(TCLBLEND_OBJ)/pkgIndex.tcl
+	(cd $(TCLBLEND_OBJ); PWD=$(TCLBLEND_OBJ); export PWD; $(MAKE) tclblend.jar)
+
+$(TCLBLEND_OBJ)/pkgIndex.tcl: $(TCLBLEND_SRC)/pkgIndex.tcl
+	rm -f $@
+	cp $^ $@
 
 install_tclblend:
 	(cd $(TCLBLEND_OBJ); PWD=$(TCLBLEND_OBJ); export PWD; $(MAKE) install)
 
+clean_tclblend:
+	(cd $(TCLBLEND_OBJ); PWD=$(TCLBLEND_OBJ); export PWD; $(MAKE) clean)
+
 test_tclblend:
 	(cd $(TCLBLEND_OBJ); PWD=$(TCLBLEND_OBJ); export PWD; $(MAKE) test)
+
+# Run JavaScope, the Java Code Coverage tool.
+# See http://www.suntest.com/JavaScope
+jsall_tclblend:
+	(cd $(TCLBLEND_OBJ); PWD=$(TCLBLEND_OBJ); export PWD; $(MAKE) jsall)
+jstest_tclblend:
+	(cd $(TCLBLEND_OBJ); PWD=$(TCLBLEND_OBJ); export PWD; $(MAKE) jstclblendTest)
+jsrestore_tclblend:
+	(cd $(TCLBLEND_OBJ); PWD=$(TCLBLEND_OBJ); export PWD; $(MAKE) jsrestore)
+
 
 time_tclblend:
 	@echo "Be sure to run 'make test_jacl' first"
