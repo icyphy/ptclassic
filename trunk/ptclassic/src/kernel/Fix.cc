@@ -471,7 +471,7 @@ void complement(Fix& x)
   {  
     for (int i=x.words()-1 ; i >= 0; i-- )
     {
-      uint32 a = (uint16)~x.bit[i] + carry; // cast to prevent sign extension
+      uint32 a = (uint16)~x.Bits[i] + carry; // cast to prevent sign extension
       x.Bits[i] = (uint16)a;
       carry = a >> 16;
     } 
