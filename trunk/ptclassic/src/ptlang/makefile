@@ -57,7 +57,7 @@ endif
 ptlang.o:	ptlang.c
 
 $(VPATH)/ptlang.c:	ptlang.y
-		cd $(VPATH); yacc ptlang.y; mv y.tab.c ptlang.c
+		cd $(VPATH); $(YACC) ptlang.y; mv y.tab.c ptlang.c
 
 # Debugging version of ptlang
 ptlang.debug:	ptlang.debug.o
