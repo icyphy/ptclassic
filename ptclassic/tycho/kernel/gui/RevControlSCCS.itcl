@@ -194,15 +194,13 @@ body ::tycho::RevControlSCCS::initializeRevControl {} {
     }
     cdDir $dir
 
-    # Run sccs create
+    # There was some nasty error, so trash the SCCS file
     if [catch {eval exec sccs create $basefile} output] {
-	# There was some nasty error, so trash the SCCS file
-	set revfile [file join $revdir s.$basefile]
-	exec rm -f $revfile
-	exec chmod u+w $basefile
-	error "Failed to place $basefile under revision\
-		control: $output."
-    }   
+        set revfile [file join $revdir s.$basefile]
+        catch {exec rm -f $revfile}
+        catch {exec chmod u+w $basefile}
+	error "Failed to place $basefile under revision	control: $output."
+    }
 
     # Run sccs admin
     set opts [preference get sccsAdminOptions]
@@ -435,9 +433,10 @@ body ::tycho::RevControlSCCS::isCheckedOutBy {} {
     catch {exec sccs info} infolist
     set info {}
     foreach i [split $infolist \n] {
-        if [string match "$basefile: *" $i] {
+        # Need to match the format:
+        #    ToolBar.itcl: being edited: 1.19 1.20 kchang 97/04/15 14:12:17
+        if [regexp " *$basefile: .*" $i] {
             # Format is:
-            # ToolBar.itcl: being edited: 1.19 1.20 kchang 97/04/15 14:12:17
             set info $i
         }
     }
@@ -473,7 +472,11 @@ body ::tycho::RevControlSCCS::updateHistory {} {
 # History contains the entire "sccs prs" history list.
 # Info contains the status of the current file (empty means not checked out).
 body ::tycho::RevControlSCCS::parseHistory {history text} {
+    # Clear up all the checked files (with check button)
+    resetDiff
+
     set file [$object filename]
+    set basefile [file tail $file]
     set lines [split $history "\n"]
 
     # FIXME: Error recovery scheme should be more complicated!
@@ -487,12 +490,14 @@ body ::tycho::RevControlSCCS::parseHistory {history text} {
 
     $text insert insert "Double click the underlined text to view versions.\n" 
 
-    # Diff
+    # Diff list is currently empty (nothing in revision control yet)
     set filelist {}
-    set uniqueID [join [split $this .] ""]
+    set uniqueID [join [split [string tolower $basefile] .] ""]
+
     # strip off leading ::
     #regexp {(::)?(.*)} $uniqueID match leadingTrailingJunk uniqueID
     set uniqueID [string trim $uniqueID :]+
+
     set background [$text cget -background]
 
     $text insert insert "Select two check buttons to the left of the \
@@ -574,8 +579,11 @@ body ::tycho::RevControlSCCS::parseHistory {history text} {
 
 #####################################################################
 #### updateDiff
-# update the check buttons so that only two is activated at once
-# 
+# update the check buttons so that only two is activated at once.
+# updateDiff takes in the argument of the name of the button, and
+# decides whether it should set the other button off or not, and
+# adds the list of names (file names) to the diff list
+#
 body ::tycho::RevControlSCCS::updateDiff {buttonName} {
     global $buttonName [lindex $difflist 0]
     
@@ -599,10 +607,11 @@ body ::tycho::RevControlSCCS::updateDiff {buttonName} {
     }
 }
 
-# Reset all the buttons to click on nothing
+# Reset all the buttons to click on nothing, and clear the list of
+# checked files.
 #
 body ::tycho::RevControlSCCS::resetDiff {} {
-    foreach i $difflist {
+    foreach i $filelist {
         uplevel #0 "set $i 0"
     }
     set difflist {}
