@@ -7,7 +7,7 @@
 	exec itkwish -f "$0" ${1+"$@"}
 
 catch {delete class iwidgets::Query}
-source query.itk
+source query.itk.saved
 
 catch {delete class iwidgets::Widgettree}
 source ../Widgettree/widgettree.itk
