@@ -96,9 +96,16 @@ proc ptlangTroffToHTML {args} {
 
                     # Search for various common troff macros
                     switch -regexp $lineIn {
-                        {^\.c[ 	]} {
+                        {^\.br} {
+                            puts $tmpfile "<br>"
+                        }
+                        {^\.c([ 	]+|$)} {
                             if [regexp {.c[ 	]*(.*)$} $lineIn dummy entry] {
                                 puts $tmpfile "<tt>$entry</tt>"
+                            } {
+                                if {[gets $infile lineIn] >= 0} {
+                                    puts $tmpfile "<tt>$lineIn</tt>"
+                                }
                             }
                         }
                         {^\.\(c} -
@@ -135,21 +142,29 @@ proc ptlangTroffToHTML {args} {
                                 puts $tmpfile "<h4>$entry</h4>"
                             }
                         }
-                        {^\.I[deEr]} {
+                        {^\.I[dDeErR]} {
                             if [regexp {^\.I[deEr][ 	]*\"?([^\"]*)\"?} \
                                     $lineIn dummy entry] {
                                 puts $tmpfile "<a name=\"$entry\"></a>"
                             }
                         }
-                        {^\.ir} {
-                            if [regexp {^\.ir][ 	]*\"?([^\"]*)\"?} \
+                        {^\.[iS]r} {
+                            if [regexp {^\.[iS]r][ 	]*\"?([^\"]*)\"?} \
                                     $lineIn dummy entry] {
                                 puts $tmpfile "<a name=\"$entry\"></a>"
                             }
                         }
-                        {^\.ip} {
-                            if [regexp {^\.ip[ 	]*\"?([^\"]*)\"?} \
-                                    $lineIn dummy entry] {
+                        {^\.\(l} {
+                            puts $tmpfile "<ul>"
+                            while {[gets $infile lineIn] >= 0} {
+                                if [regexp {^\.\)l} $lineIn] {break}
+                                puts $tmpfile "<li> $lineIn"
+                            }
+                            puts $tmpfile "</ul>"
+                        }
+                        {^\.(ip|IP)} {
+                            if [regexp {^\.(ip|IP)[ 	]*\"?([^\"]*)\"?} \
+                                    $lineIn dummy dummy2 entry] {
                                 puts $tmpfile "<p>$entry  "
                             } {
                                 puts $tmpfile "<p>"
@@ -157,6 +172,7 @@ proc ptlangTroffToHTML {args} {
                         }
                         {^\.sp} -
                         {^\.lp} -
+                        {^\.LP} -
                         {^\.PP} -
                         {^\.pp} {
                             puts $tmpfile {<p>}
@@ -168,11 +184,28 @@ proc ptlangTroffToHTML {args} {
                             }
                         }
                         {^\.cs} {}
+                        {^\.ti} {
+                            if {[gets $infile lineIn] >= 0} {
+                                puts $tmpfile "<blockquote>$lineIn</blockquote>"
+                            }
+                        }
+                        {^\.ul} {
+                            if {[gets $infile lineIn] >= 0} {
+                                puts $tmpfile "<em>$lineIn</em>"
+                            }
+                        }
                         {^\.(EQ)} {
                             puts $tmpfile "<pre>"
                             puts "WARNING: Equation in $file"
                         }
                         {^\.(EN)} {
+                            puts $tmpfile "</pre>"
+                        }
+                        {^\.(TS)} {
+                            puts $tmpfile "<pre>"
+                            puts "WARNING: Table in $file"
+                        }
+                        {^\.(TE)} {
                             puts $tmpfile "</pre>"
                         }
                         {^\.} {
