@@ -20,11 +20,11 @@ Date of last revision:
 #include "BaseMultiTarget.h"
 #include "ParProcessors.h"
 #include "Profile.h"
+#include "ParGraph.h"
 
 class UniProcessor;
 class UserOutput;
 class Galaxy;
-class ParGraph;
 class ostream;
 
 ///////////////////////////
@@ -32,6 +32,11 @@ class ostream;
 ///////////////////////////
 
 class ParScheduler : public SDFScheduler {
+private:
+	// set the procId of stars after scheduling with OSOP option
+	// is executed. Prepare for adjustment.
+	void saveProcIds(Galaxy& g);
+	
 protected:
 	const char* logFile;
 	ostream* logstrm;	// for logging.
@@ -60,6 +65,14 @@ protected:
 	// If it is a scheduler of a wormhole, reseted.
 	int inUniv;
 
+	// Obtain the scheduling option from the target
+	// OSOP requirement: all invocations to the same processor
+	// manualAssignment:
+	// adjustSchedule:
+	int OSOPreq() { return mtarget->getOSOPreq(); }
+	int assignManually() { return mtarget->assignManually(); }
+	int overrideSchedule() { return mtarget->overrideSchedule(); }
+
 	// redefine "run once"
 	void runOnce();
 
@@ -74,6 +87,7 @@ public:
   	// Constructor
   	ParScheduler(BaseMultiTarget* t, const char* log = 0) : mtarget(t),
 		logFile(log), exGraph(0) { inUniv = TRUE; }
+
 	virtual ~ParScheduler() {}
 
 	// reset the flag; to be called inside a wormhole.
@@ -88,11 +102,18 @@ public:
 	UniProcessor* getProc(int n) { return parProcs->getProc(n); }
 	ParProcessors* myProcs() { return parProcs; }
 
+	// create subGals for each processor
+	virtual void createSubGals();
+
 	// set up processors
 	virtual void setUpProcs(int num);
 
-        // main body of the schedule, to be redefined in the derived class.
-        virtual int scheduleIt();
+        // main body of the schedule. 
+	int mainSchedule(Galaxy& g);
+
+	virtual int scheduleManually(Galaxy& g);  // manual assignment.
+        virtual int scheduleIt();		  // automatic assignment.
+				// Should be redefined in the derived class.
 
 ////////// Methods for wormholes ////////////////
 
