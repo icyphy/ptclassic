@@ -14,6 +14,8 @@ static const char file_id[] = "PortHole.cc";
 #include "miscFuncs.h"
 #include "GalIter.h"
 #include "EventHorizon.h"
+#include "Domain.h"
+#include "Wormhole.h"
  
 /**************************************************************************
 Version identification:
@@ -199,8 +201,12 @@ void GenericPort :: connect(GenericPort& destination, int numberDelays,
 	// create Geodesic, wire it up.
 	PortHole* realSource = &newConnection();
 	Geodesic* geo = realSource->allocateGeodesic();
-	geo->setSourcePort(*realSource, numberDelays, initDelayValues);
-	geo->setDestPort(destination);
+	if (geo != NULL)
+	{
+	    geo->setSourcePort(*realSource, numberDelays, initDelayValues);
+	    geo->setDestPort(destination);
+	}
+	// else fail silently 
 	return;
 }
 
@@ -756,14 +762,31 @@ void MultiPortHole::busConnect (MultiPortHole& peer, int width, int numDelays,
 	initDelayValuesBus = initDelayValues;
 }
 
+// Be extra careful to accomodate connections in the star's constructor
+// when there is no parent galaxy, like for DERepeatStar.
+Domain* domainOf(GenericPort& port)
+{
+    Domain* d = NULL;
+    if (port.parent() != NULL)
+    {
+	// Get the domain of the galaxy that the parent star is in.
+	if (port.parent()->parent() != NULL)
+	    d = Domain::of(*port.parent()->parent());
+	// Or get the domain of the parent star itself.
+	else d = Domain::of(*port.parent());
+    }
+    return d;
+}
+
 // allocate a new Geodesic.  Set its name and parent according to the
 // source porthole (i.e. *this).
 Geodesic* PortHole :: allocateGeodesic () {
-	char buf[80];
-	strcpy (buf, "Node_");
-	strcat (buf, name());
-	LOG_NEW; Geodesic *g = new Geodesic;
-	g->setNameParent(hashstring(buf), parent());
+	StringList nm;
+	nm << "Node_" << name();
+	Geodesic* g = NULL;
+	Domain* d = domainOf(*this);
+	if (d != NULL) g = &d->newGeo();
+	if (g != NULL) g->setNameParent(hashstring(nm), parent());
 	return g;
 }
 
