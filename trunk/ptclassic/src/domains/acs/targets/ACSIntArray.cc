@@ -1,5 +1,5 @@
 /**********************************************************************
-Copyright (c) 1999 Sanders, a Lockheed Martin Company
+Copyright (c) 1999- Sanders, a Lockheed Martin Company
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -25,7 +25,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
  Programmers:  Ken Smith
  Date of creation: 3/23/98
- Version: @(#)ACSIntArray.cc      1.0     06/16/99
+ Version: @(#)ACSIntArray.cc	1.4 08/15/00
 ***********************************************************************/
 #include <sys/types.h>
 #include <unistd.h>
@@ -83,50 +83,32 @@ void ACSIntArray::copy(ACSIntArray* rh_array)
     ints[loop]=rh_array->ints[loop];
 }
 
-void ACSIntArray::cat(ACSIntArray* rh_array)
-{
-  int* tmp_ints=new int[total+rh_array->total];
-  for (int loop=0;loop<total;loop++)
-    tmp_ints[loop]=ints[loop];
-  for (int loop=0;loop<rh_array->total;loop++)
-    tmp_ints[total+loop]=rh_array->ints[loop];
-  
-  total+=rh_array->total;
-  delete []ints;
-  ints=tmp_ints;
-}
-
-void ACSIntArray::fill(const int default_val)
+void ACSIntArray::fill(int default_val)
 {
   for (int loop=0;loop<total;loop++)
     ints[loop]=default_val;
 }
-void ACSIntArray::fill(const int count, const int default_val)
-{
-  ints=new int[count];
 
-  for (int loop=0;loop<count;loop++)
-    ints[loop]=default_val;
-}
-
-inline static int intcompare(int *i, int *j)
+static int intcompare(const void *i, const void *j)
 {
-  if (*i > *j)
+
+  if (*((int *)i) > *((int *)j))
     return(1);
-  if (*i <= *j)
+  if (*((int *)i) <= *((int *)j))
     return(-1);
   return(0);
     
 }
-inline static int intcompare2(int *i, int *j)
+static int intcompare2(const void *i, const void *j)
 {
-  if (*i < *j)
+  if (*((int *)i) < *((int *)j))
     return(1);
-  if (*i >= *j)
+  if (*((int *)i) >= *((int *)j))
     return(-1);
   return(0);
     
 }
+
 ACSIntArray* ACSIntArray::sort_lh(void)
 {
   ACSIntArray* results=new ACSIntArray(total);
