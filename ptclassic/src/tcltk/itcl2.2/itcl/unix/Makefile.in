@@ -81,7 +81,10 @@ TCL_BIN_DIR =           @TCL_BIN_DIR@
 # Additional libraries to use when linking.  The "LIBS" part will be
 # replaced (or has already been replaced) with relevant libraries as
 # determined by the configure script.
-LIBS = @TCL_BUILD_LIB_SPEC@ @LIBS@ @DL_LIBS@ @MATH_LIBS@ -lc
+
+# -lc makes ld fail on the alpha. I don't see why it is needed.
+# Frederic Boulanger <Frederic.Boulanger@supelec.fr>
+LIBS = @TCL_BUILD_LIB_SPEC@ @LIBS@ @DL_LIBS@ @MATH_LIBS@ #-lc
 
 # To change the compiler switches, for example to change from -O
 # to -g, change the following line:
