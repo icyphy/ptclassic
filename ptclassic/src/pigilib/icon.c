@@ -136,7 +136,6 @@ static void startTycho() {
 	"   set tychoRegExit 0\n",
 	"   source $ptolemy/tycho/kernel/Tycho.tcl",
 	"}}\n",
-	"::tycho::TopLevel::exitWhenNoMoreWindows 0", 
 	(char *)NULL) );
 }
 
