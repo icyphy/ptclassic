@@ -36,9 +36,10 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #endif
 
 #include "CGCStar.h"
-#include "CGCTarget.h"
 #include "CGCGeodesic.h"
 #include "Tokenizer.h"
+#include "ComplexState.h"
+#include <ctype.h>
 
 // The following is defined in CGCDomain.cc -- this forces that module
 // to be included if any CGC stars are linked in.
@@ -50,31 +51,30 @@ const char* CGCStar :: domain () const { return CGCdomainName;}
 
 ISA_FUNC(CGCStar, CGStar);
 
-// return the actual buffer position to write to.
-StringList CGCStar :: getActualRef(CGCPortHole* port, const char* offset) {
-	StringList ref;
-	ref << port->getGeoName();
-	if (port->bufSize() > 1) {
-		ref << "[(";
-		if (port->staticBuf() == FALSE) {
-			ref << targ()->offsetName(port);
-		} else {
-			ref << port->bufPos();
-		}
-		if (offset != 0) {
-	    		ref << " - (" << offset << ")";
-	    		if (port->linearBuf() == FALSE) {
-	    			ref << " + " << port->bufSize() << ") % "
-					<< port->bufSize();
-	    		} else {
-				ref << ")";
-	    		}
-	    		ref << ']';
-		} else {
-			ref << ")]";
-		}
-	}
-    return ref;
+// Sanitize a string so that it is usable as a C identifier.
+const char* sanitize(const char* string)
+{
+    const int MAX_LENGTH = 64;
+    static char clean[MAX_LENGTH];
+    char* c = clean;
+    int i = 0;
+
+    // Check for leading digit.
+    if (isdigit(*string))
+    {
+	*c++ = '_';
+	i++;
+    }
+
+    // Replace strange charachters.
+    while (++i < MAX_LENGTH && *string)
+    {
+	*c++ = isalnum(*string) ? *string : '_';
+	string++;
+    }
+    *c = 0;
+
+    return clean;
 }
 
 // Reference to State or PortHole.
@@ -82,23 +82,33 @@ StringList CGCStar::expandRef(const char* name)
 {
     StringList ref;
     CGCPortHole* port;
-    State* st;
+    State* state;
     StringList portName = expandPortName(name);
 
-    if ((st = stateWithName(name)) != NULL)
+    // Expand State reference.
+    if ((state = stateWithName(name)) != NULL)
     {
-	registerState(name);
-	ref << targ()->correctName(*st);
+	registerState(state);
+	ref << starSymbol.lookup(state->name());
     }
+
+    // Expand PortHole reference.
     else if ((port = (CGCPortHole*)genPortWithName(portName)) != NULL)
     {
-	// for embedded porthole
-	if (port->bufType() == EMBEDDED) {
-		ref << "(*" << port->getGeoName() << ")";
-	} else {
-		ref << getActualRef(port, 0);
+	ref << port->getGeoName();
+
+	// Use array notation for large buffers and for embedded buffers
+	// which are referenced through a pointer.
+	if (port->bufSize() > 1 || port->bufType() == EMBEDDED)
+	{
+	    ref << '[';
+	    if (port->staticBuf()) ref << port->bufPos();
+	    else ref << sanitize(starSymbol.lookup(port->name()));
+	    ref << ']';
 	}
     }
+
+    // Could not find State or PortHole with given name.
     else
     {
 	codeblockError(name, " is not defined as a state or port");
@@ -111,22 +121,19 @@ StringList CGCStar::expandRef(const char* name)
 StringList CGCStar::expandRef(const char* name, const char* offset)
 {
     StringList ref;
-    State* state;
+    State *state, *offsetState;
+    StringList offsetVal;
     CGCPortHole* port;
-    StringList stateVal;
     StringList portName = expandPortName(name);
-    int valOffset;
-    int useState = FALSE;
 
-    if ((state = stateWithName(offset)) != NULL)
+    // Use State value as offset (if such a State exists).
+    if ((offsetState = stateWithName(offset)) != NULL)
     {
-	// Note: currently only the value of a State can be used as an offset
-	if (state->isA("IntState"))
+	// Get State value as a string.
+	if (offsetState->isA("IntState"))
 	{
-	    stateVal = expandVal(offset);
-	    offset = stateVal;
-	    valOffset = int(*(IntState*)state);
-	    useState = TRUE;
+	    offsetVal = expandVal(offset);
+	    offset = offsetVal;
 	}
 	else
 	{
@@ -136,46 +143,58 @@ StringList CGCStar::expandRef(const char* name, const char* offset)
 	}
     }
 
+    // Expand array State reference.
     if ((state = stateWithName(name)) != NULL)
     {
-	ref = expandRef(name);
-	if (ref.length() == 0) return ref;	// error in getRef()
-	if (state->size() > 1) ref << '[' << offset << ']';
+	if (state->isArray())
+	{
+	    registerState(state);
+	    ref << starSymbol.lookup(state->name()) << '[' << offset << ']';
+	}
+	else
+	{
+	    codeblockError(name, " is not an array state");
+	    ref.initialize();
+	}
     }
+
+    // Expand PortHole reference with offset.
     else if (port = (CGCPortHole*)genPortWithName(portName))
     {
-	// for embedded porthole.
-	if ((port->bufSize() == 1) && (port->bufType() == EMBEDDED)) {
-		ref << "(*";
-		ref << port->getGeoName();
-		ref << ")";
-		return ref;
-	}
+	ref << port->getGeoName();
 
-	if (port->bufSize() > 1) {
-		if ((port->staticBuf() == TRUE)&&(useState == TRUE)) {
-			ref << port->getGeoName();
-			int v = (port->bufPos() - valOffset +
-				 	port->bufSize()) % port->bufSize();
-			ref << '[' << v << ']';
-		} else {
-			ref << getActualRef(port, offset);
+	// Use array notation for large buffers and for embedded buffers
+	// which are referenced through a pointer.
+	if (port->bufSize() > 1 || port->bufType() == EMBEDDED)
+	{
+	    ref << '[';
+
+	    // generate constant for index
+	    if (port->staticBuf() && (offsetState != NULL))
+	    {
+		int offset = *(IntState*)offsetState;
+		ref << ( (port->bufPos() - offset + port->bufSize())
+			 % port->bufSize() );
+	    }
+
+	    // generate expression for index
+	    else
+	    {
+		ref << '(';
+		if (port->staticBuf()) ref << port->bufPos();
+		else ref << sanitize(starSymbol.lookup(port->name()));
+		ref << "-(" << offset << ')';
+		if (!port->linearBuf())	// use circular addressing
+		{
+		    ref << '+' << port->bufSize() << ")%" << port->bufSize();
 		}
-	} else {
-		ref << port->getGeoName();
+		else ref << ')';
+	    }
+
+	    ref << ']';
 	}
     }
     return ref;
-}
-
-void CGCStar :: initBufPointer() {
-	BlockPortIter next(*this);
-	CGCPortHole* p;
-	while ((p = (CGCPortHole*) next++) != 0) {
-		StringList out = initializeOffset(p);
-		out << initializeBuffer(p);
-		if (out.length() > 0) addMainInit(out);
-	}
 }
 
 // add a splice star to the spliceClust list.  If atEnd
@@ -186,17 +205,15 @@ void CGCStar :: addSpliceStar(CGCStar* s, int atEnd) {
 	else spliceClust.prepend(s);
 }
 
-void CGCStar::registerState(const char* name) {
-	State* state;
-	if(state = stateWithName(name)) {
-		// If the state is not already on the list of referenced
-		// states, add it.
-		StateListIter nextState(referencedStates);
-		const State* sp;
-		while ((sp = nextState++) != 0)
-			if(strcmp(name,sp->name()) == 0) return;
-		referencedStates.put(*state);
-	}
+void CGCStar::registerState(State* state)
+{
+    // If the State is not already on the list of referenced States, add it.
+    StateListIter stateIter(referencedStates);
+    State* s;
+    while ((s = stateIter++) != NULL)
+	if (s == state) return;
+    
+    referencedStates.put(*state);
 }
 
 void CGCStar::initialize() {
@@ -322,9 +339,8 @@ void CGCStar :: moveDataBetweenShared() {
 	if (code.length() > 0) addCode(code);
 }
 
-void CGCStar :: updateOffsets() {
-
-	CGCTarget* t = targ();
+void CGCStar :: updateOffsets()
+{
 	StringList code2;
 
 	BlockPortIter next(*this);
@@ -334,7 +350,7 @@ void CGCStar :: updateOffsets() {
 		if (bs > 1 && p->staticBuf() == FALSE) {
 			int nx = p->numXfer();
 			if (nx == bs) continue;
-			StringList pname = t->offsetName(p);
+			StringList pname = sanitize(starSymbol.lookup(p->name()));
 			code2 << "\t" << pname << " += ";
 			code2 << nx << ";\n\tif (" << pname << " >= ";
 			code2 << bs << ")\n\t\t";
@@ -345,273 +361,272 @@ void CGCStar :: updateOffsets() {
 	addCode(code2);
 }
 
-// Convert from PortHole type to C data type.
-static const char* ctype(const PortHole& p)
+// Declare PortHole data structures.
+StringList CGCStar::declarePortHoles()
 {
-    DataType t = p.resolvedType();
+    StringList dec;	// declarations
 
-    if (t == INT) return "int";
-    else if (t == COMPLEX) return "complex";
-    else return "double";
-}
-
-// Convert from State type to C data type.
-static const char* ctype(const State& state)
-{
-    const char* t = state.type();
-
-    if (strcmp(t, "INT") == 0 || strcmp(t, "INTARRAY") == 0)
-        return "int";
-    else if (strcmp(t, "COMPLEX") == 0 || strcmp(t, "COMPLEXARRAY") == 0)
-        return "complex";
-    else if (strcmp(t, "STRING") == 0 || strcmp(t, "STRINGARRAY") == 0)
-        return "char*";
-    else
-        return "double";
-}
-
-	/////////////////////////////////////////////
-	// porthole declarations and initializations
-	/////////////////////////////////////////////
-
-// Define variables only for each output port, except outputs of forks.
-StringList CGCStar :: declarePortHole(CGCPortHole* p) {
-	StringList out;
-	if (p->isItOutput()) {
-		emptyFlag = FALSE;
-		int dimen = p->bufSize();
-
-		out << ctype(*p);
-
-		// if embedded properly, do not allocate the buffer.
-		if (p->bufType() == EMBEDDED) {
-			out << "*";	// add pointer
-			dimen = 0;
-		}
-
-		out << " " << p->getGeoName();
-
-		if(dimen > 1) {
-			out << "[" << dimen << "]";
-		}
-		out << ";\n";
-	}
-	return out;
-}
-
-// Type-specific initialization for PortHole data structures.
-static StringList typeInit(CGCPortHole& port, int dim = 1,
-	double realVal = 0.0, double imagVal = 0.0)
-{
-    DataType typeName = port.resolvedType();
-    const char* pName = port.getGeoName();
-
-    StringList out;
-    out << pName;
-    if (dim > 0) out << "[i]";
-
-    if (typeName == COMPLEX)
+    CGCPortHole* port;
+    BlockPortIter portIter(*this);
+    while ((port = (CGCPortHole*)portIter++) != NULL)
     {
-	out << ".real = " << realVal << ";\n\t";
-	out << pName;
-	if (dim > 0) out << "[i]";
-	out << ".imag = " << imagVal << ";\n";
+	dec << declareBuffer(port);
+	dec << declareOffset(port);
     }
-    else out << " = " << realVal << ";\n";
-    return out;
+
+    return dec;
 }
 
-// Initialize the porthole
-StringList CGCStar :: initializeBuffer(CGCPortHole* p) {
-	StringList out;
-	if (p->isItInput()) return out;
-
-	out << "    /* initializeBuffer for " << p->fullName() << " */\n";
-	CGCPortHole* farP = (CGCPortHole*) p->far();
-
-	// if embedded properly, do not allocate the buffer.
-	if (p->bufType() == EMBEDDED) {
-		out << "    " << p->getGeoName() << " = ";
-
-		CGCPortHole* ep;	// embedding buffer.
-		int loc = 0;
-		// there are some hacks to handle buffer size = 1 scalar.
-		if (p->embedded()) {
-			ep = ((CGCPortHole*) p->embedded())->realFarPort();
-			loc = p->whereEmbedded();
-			if (ep->maxBufReq() == 1) out << "&";
-			out << ep->getGeoName();
-		} else if (farP->embedded()) {
-			ep = (CGCPortHole*) farP->embedded();
-			loc = farP->whereEmbedded();
-			if (ep->maxBufReq() == 1) out << "&";
-			out << ep->getGeoName();
-		}
-		if (ep->maxBufReq() > 1)
-			out << " + " << loc;
-		out << ";\n";
-		return out;
-
-	} 
-
-	// for owner buffer
-	if (p->bufSize() > 1) {
-		// initialize output buffer
-		StringList init = typeInit(*p);
-
-		out << "    { int i;\n    for (i = 0; i < ";
-		out << p->bufSize() << "; i++) {\n\t" << init << "    }}\n";
-	}
-
-	return out;
-}
-
-	////////////////////////////////////
-	// declare and initialize offset
-	////////////////////////////////////
-
-// declare offset and copy_offset for moving embedded data.
-StringList CGCStar :: declareOffset(const CGCPortHole* p) {
-	StringList out;
-	if ((p->bufSize() > 1) && (p->staticBuf() == FALSE)) {
-		emptyFlag = FALSE;
-		out << "    " << "int ";
-		out << targ()->offsetName(p) << ";\n";
-	}
-	return out;
-}
-
-StringList CGCStar :: initializeOffset(const CGCPortHole* p) {
-	StringList out;
-	if ((p->bufSize() > 1) && (p->staticBuf() == FALSE)) {
-		out << "    /* initializeOffset for " << p->fullName()
-		    << " */\n";
-		out << "    " << targ()->offsetName(p);
-		out << " = " << p->bufPos() << ";\n";
-	}
-	return out;
-}
-
-	////////////////////////////////////
-	// declare and initialize states
-	////////////////////////////////////
-
-// Type-specific initialization for State data structures.
-static StringList typeInit(const State& state, const char* val)
+// Generate initialization code for PortHole data structures.
+StringList CGCStar::initCodePortHoles()
 {
-    const char* typeName = state.type();
-
-    StringList out;
-    if ( (strcmp(typeName, "COMPLEX") == 0)
-	|| (strcmp(typeName, "COMPLEXARRAY") == 0) )
-    {
-	const char* special = "(,)";
-	Tokenizer lexer(val,special);
-	char token[256];
-
-	do	// find token following '('
-	{
-	    lexer >> token;
-	} while (*token != '(');
-
-	lexer >> token;		// real part
-	out << "{ " << token << ", ";
-
-	do	// find token following ','
-	{
-	    lexer >> token;
-	} while (*token != ',');
-
-	lexer >> token;		// imaginary part
-	out << token << " }";
-    }
-    else if ( (strcmp(typeName, "STRING") == 0)
-	|| (strcmp(typeName, "STRINGARRAY") == 0) )
-    {
-	out << '"' << val << '"';
-    }
-    else	// simple type
-    {
-	out << val;
-    }
-    return out;
-}
-
-// declare and initialize state
-// Note: no automatic aggregate initialization is possibile inside
-// functions.
-
-StringList CGCStar :: declareState(const State* s)
-{
-    StringList dec;	// declaration
     StringList code;	// initialization code
 
-    int insideMain = targ()->makingFunc();
-    StringList sname = targ()->correctName(*s);
+    CGCPortHole* port;
+    BlockPortIter portIter(*this);
+    while ((port = (CGCPortHole*)portIter++) != NULL)
+    {
+	code << initCodeBuffer(port);
+	code << initCodeOffset(port);
+    }
 
-    dec << "    " << ctype(*s) << " " << sname;
-    if (s->isArray()) dec << "[" << s->size() << "]";
+    return code;
+}
 
-    if (s->isArray())	// initialize each element
+// Declare State data structures.
+StringList CGCStar::declareStates()
+{
+    StringList dec;	// declarations
+
+    State* state;
+    StateListIter stateIter(referencedStates);
+    while ((state = stateIter++) != NULL)
+    {
+	dec << declareState(state);
+    }
+
+    return dec;
+}
+
+// Generate initialization code for State data structures.
+StringList CGCStar::initCodeStates()
+{
+    StringList code;	// initialization code
+
+    State* state;
+    StateListIter stateIter(referencedStates);
+    while ((state = stateIter++) != NULL)
+    {
+	code << initCodeState(state);
+    }
+
+    return code;
+}
+
+// Declare PortHole buffer.
+StringList CGCStar::declareBuffer(const CGCPortHole* port)
+{
+    StringList dec;	// declarations
+
+    if (!port->switched() && port->isItOutput())
+    {
+	StringList name = port->getGeoName();
+	DataType type = port->resolvedType();
+
+	if (type == INT) dec << "int";
+	else if (type == COMPLEX) dec << "complex";
+	else dec << "double";
+
+	if (port->bufType() == EMBEDDED)
+	{
+	    dec << " *" << name << ";\n";        // declare a pointer
+	}
+	else	// not embedded
+	{
+	    dec << " " << name;
+	    if (port->bufSize() > 1)	// declare as array
+		dec << '[' << port->bufSize() << ']';
+	    dec << ";\n";
+	}
+    }
+    return dec;
+}
+
+// Generate initialization code for PortHole buffer.
+StringList CGCStar::initCodeBuffer(CGCPortHole* port)
+{
+    StringList code;
+
+    if (!port->switched() && port->isItOutput())
+    {
+	StringList name = port->getGeoName();
+	if (port->bufType() == EMBEDDED)
+	{
+	    CGCPortHole* far = (CGCPortHole*) port->far();
+	    CGCPortHole* host;		// Host buffer.
+	    int loc = 0;		// Embedding location.
+
+	    if (port->embedded() != NULL)
+	    {
+		host = ((CGCPortHole*) port->embedded())->realFarPort();
+		loc = port->whereEmbedded();
+	    }
+	    else
+	    {
+		host = (CGCPortHole*) far->embedded();
+		loc = far->whereEmbedded();
+	    }
+
+	    code << name << " = &" << host->getGeoName();
+	    if (host->bufSize() > 1) code << '[' << loc << ']';
+	    code << ";\n";
+	}
+	else	// not embedded
+	{
+	    DataType type = port->resolvedType();
+	    int array = (port->bufSize() > 1);
+
+	    if (array)
+		code << "{int i; for(i=0;i<" << port->bufSize() << ";i++) ";
+	    code << name;
+	    if (array) code << "[i]";
+	    if (type == INT)
+	    {
+		code << " = 0;";
+	    }
+	    else if (type == COMPLEX)
+	    {
+		code << ".real = " << name;
+		if (array) code << "[i]";
+		code << ".imag = 0.0;";
+	    }
+	    else	// default to double
+	    {
+		code << " = 0.0;";
+	    }
+	    if (array) code << '}';
+	    code << '\n';
+	}
+    }
+    return code;
+}
+
+// Declare PortHole buffer index.
+StringList CGCStar::declareOffset(const CGCPortHole* port)
+{
+    StringList dec;	// declarations
+
+    if (!port->staticBuf())
+    {
+	dec << "int " << sanitize(starSymbol.lookup(port->name()))
+	    << ";\n";
+    }
+    return dec;
+}
+
+// Generate initialization code for PortHole buffer index.
+StringList CGCStar::initCodeOffset(const CGCPortHole* port)
+{
+    StringList code;	// initialization code
+
+    if (!port->staticBuf())
+    {
+	code << sanitize(starSymbol.lookup(port->name()))
+	    << " = " << port->bufPos() << ";\n";
+    }
+    return code;
+}
+
+// Declare State variable.
+StringList CGCStar::declareState(const State* state)
+{
+    StringList dec;
+
+    if (state->isA("IntState") || state->isA("IntArrayState"))
+	dec << "int";
+    else if (state->isA("ComplexState") || state->isA("ComplexArrayState"))
+	dec << "complex";
+    else if (state->isA("StringState") || state->isA("StringArrayState"))
+	dec << "char*";
+    else dec << "double";
+
+    dec << " " << starSymbol.lookup(state->name());
+    if (state->isArray()) dec << "[" << state->size() << "]";
+    dec << ";\n";
+
+    return dec;
+}
+
+// Generate initialization code for State variable.
+StringList CGCStar::initCodeState(const State* state)
+{
+    StringList code;
+    StringList val = state->currentValue();
+    StringList name = starSymbol.lookup(state->name());
+
+    if (state->isArray())	// Array initialization.
     {
 	/* By convention, array States separate each value by a
 	   carriage return character, '\n'.  Scan through the
 	   StringList returned by State::currentValue() looking for
-	   these separators. (Wouldn't it be easier if each value were
-	   simply in a separate string of the StringList?  Then it
-	   would be possible to iterate through the StringList to get
-	   these values. tmp)
+	   these separators.
 	*/
 
 	const char* special = "";
 	const char* white = "\n";
-	StringList val = s->currentValue();
 	Tokenizer lexer(val, special, white);
 	char token[256];
-
-	if (insideMain) dec << ";\n";
-	else dec << " = {\n";
 
 	lexer >> token;
 	for (int i = 0; *token != '\0'; i++, lexer >> token)
 	{
-	    StringList init = typeInit(*s, token);
-	    if (insideMain)
+	    code << name << '[' << i << ']';
+	    if (state->isA("ComplexArrayState"))
 	    {
-		code << sname << "[" << i << "] = " << init << ";\n";
+		ComplexState cxState;
+		cxState.setInitValue(token);
+		cxState.initialize();
+		Complex x = cxState;
+
+		code << ".real=" << x.real() << ";\n";
+		code << name << '[' << i << ']';
+		code << ".imag=" << x.imag() << ";\n";
+	    }
+	    else if (state->isA("StringArrayState"))
+	    {
+		code << '=' << '"' << token << '"' << ";\n";
 	    }
 	    else
 	    {
-		// separator before all but first
-		if (i != 0) dec << ",\n";
-		dec << "\t" << init;
+		code << '=' << token << ";\n";
 	    }
 	}
-	if (!insideMain) dec << " };\n";
     }
-    else	// not an array
+    else	// Scalar initialization.
     {
-	StringList val = s->currentValue();
-	StringList init = typeInit(*s, val);
-	if (insideMain)
+	code << name;
+	if (state->isA("ComplexState"))
 	{
-	    dec << ";\n";
-	    code << sname << " = " << init << ";\n";
+	    ComplexState cxState;
+	    cxState.setInitValue(val);
+	    cxState.initialize();
+	    Complex x = cxState;
+
+	    code << ".real=" << x.real() << ";\n";
+	    code << name;
+	    code << ".imag=" << x.imag() << ";\n";
+	}
+	else if (state->isA("StringState"))
+	{
+	    code << '=' << '"' << val << '"' << ";\n";
 	}
 	else
 	{
-	    dec << " = " << init << ";\n";
+	    code << '=' << val << ";\n";
 	}
     }
-    if (insideMain) addMainInit(code);
-    emptyFlag = FALSE;
-    return dec;
+    return code;
 }
-
-
-	////////////////////////////////////
-	// code stream management
-	////////////////////////////////////
 
 // Add lines to be put at the beginning of the code file
 int CGCStar :: addInclude(const char* decl) {
@@ -619,4 +634,3 @@ int CGCStar :: addInclude(const char* decl) {
 	temp << decl << "\n";
 	return addCode(temp, "include", decl);
 }
-
