@@ -46,7 +46,7 @@ The ACS CG Core class provides a base class for all derived CG Core category cla
 #include "CGUtilities.h"
 #include <ctype.h>
 
-int isCmdArg (const State*);  // FIXME: should probably be a member function.
+// int isCmdArg (const State*);  // FIXME: should probably be a member function.
 
 void ACSCGCore::addSpliceStar(ACSStar* s, int atEnd) {
     if (spliceClust.member(s)) return;
@@ -764,3 +764,40 @@ void ACSCGCore :: moveDataBetweenShared() {
 	if (code.length() > 0) addCode(code);
 }
 	
+// This function checks whether "state" is to be set from a command-line
+// argument. If it is, returns the name to be specified on the command-
+// line. The function returns "" otherwise.
+
+StringList ACSCGCore::cmdArg(const State* state) const {
+  StringList temp;
+ // Check whether the block has a NULL parent
+ // This is necessary for CGDDF
+  if (!state->parent()->parent()) return "";
+  StringList mapsList = state->parent()->target()->\
+    pragma(state->parent()->parent()->name(),
+	   state->parent()->name(),
+	   "state_name_mapping");
+  const char* maps = (const char*)mapsList;
+  maps = strstr(maps, state->name());
+
+  if (maps) {
+    while((!isspace(*maps)) && (*maps != '\0'))
+      maps++;
+
+    if (*maps != '\0')
+      while((isspace(*maps)) && (*maps != '\0'))
+	maps++;
+
+    if (*maps != '\0')
+      while ((!isspace(*maps)) && (*maps != '\0')) {
+	temp << *maps++;
+      }
+  }
+  return temp;
+}
+    
+int ACSCGCore::isCmdArg (const State* state) const {
+  StringList pragma;
+  pragma << cmdArg(state);
+  return pragma.length();
+}

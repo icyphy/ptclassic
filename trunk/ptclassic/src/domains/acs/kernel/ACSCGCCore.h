@@ -103,14 +103,6 @@ protected:
 	// Add a file to be copied over the remote machine
 	int addRemoteFile(const char*, int flag = FALSE);
 
-
-	// This function checks whether "state" is to be set from a command-line
-	// argument. If it is, returns the name to be specified on the command-
-	// line. The function returns "" otherwise.
-	StringList cmdArg(const State* state) const;
-	int isCmdArg (const State* state) const;
-
-
 };
 
 
