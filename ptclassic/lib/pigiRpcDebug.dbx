@@ -25,9 +25,11 @@ echo "------start----"
 cat $dbxcmdfile
 echo "------end----"
 
+echo "type run $*"
+
 xterm -display $DISPLAY -title "pigiRpc dbx debug window" -bg black -fg green \
 	-e dbx -I$PTOLEMY/src/pigilib \
-	-I$PTOLEMY/src/pigiRpc -s $dbxcmdfile -c "run $*" \
+	-I$PTOLEMY/src/pigiRpc -s $dbxcmdfile 
 	$PIGIRPC &
 
-
+#	-I$PTOLEMY/src/pigiRpc -s $dbxcmdfile -c "run $*"\ 
