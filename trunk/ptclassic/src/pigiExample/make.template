@@ -26,7 +26,8 @@
 #############################################################################
 # DON'T EDIT THIS STUFF.
 # get configuration info
-ROOT = $(PTOLEMY)
+#ROOT = $(PTOLEMY)
+ROOT = ../..
 CONFIG=$(ROOT)/mk/config-$(ARCH).mk
 include $(CONFIG)
 
