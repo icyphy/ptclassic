@@ -40,11 +40,8 @@ EXTRA_SRCS = \
 	vhdl_done.tk \
 	wordgui_pause.tk
 
-all:		$(SRCS)
+all:		$(EXTRA_SRCS)
 install:	all
 
 # include common definitions, rules
-include $(ROOT)/mk/common.mk
-
-# Don't add anything after the next line; makedepend will zap it.
-# DO NOT DELETE THIS LINE -- make depend depends on it.
+include $(ROOT)/mk/no-compile.mk
