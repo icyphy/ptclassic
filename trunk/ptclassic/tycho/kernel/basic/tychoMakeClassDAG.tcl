@@ -86,8 +86,9 @@ proc tychoMkClassGraph {name filename args} {
 	    set classEnd [expr {[lindex $classStartIndices 1] + \
 		    $classEnd}]
             set classfile($nm) $file
-
-	    #puts "$nm $classStartIndices $classEnd\
+	    set htmlfile($nm) [file join [file dirname $file] \
+		    doc codeDoc [info namespace tail $nm].html]
+	    #puts "$nm $classStartIndices $classEnd \
 	    #    [string range $contents $classEnd [expr {$classEnd+40}]]"
 
 	    # Look for inheritance only if a class definition was found.
@@ -164,13 +165,8 @@ proc tychoMkClassGraph {name filename args} {
         set sname $nm
         regexp "::(\[^: \t\]*)\$" $nm match sname
 
-	set path [file split $classfile($nm)]
-	set htmlfile [join [lreplace [split [lindex $path end] .] \
-		end end "html"] .]
-	set htmlfile [eval file join \
-		[lreplace $path end end doc codeDoc $htmlfile]]
-
-        puts $fd "\{add $nm \{label \{$sname\} altlink \{$classfile($nm) \{$rxp\}\} link \{$htmlfile \{\}\}\} \{$pnt\}\}"
+        puts $fd "\{add $nm \{label \{$sname\} altlink \{$classfile($nm)\
+		\{$rxp\}\} link \{$htmlfile($nm) \{\}\}\} \{$pnt\}\}"
     }
 
     # Dump the files that don't define classes, but do define procs
@@ -200,13 +196,13 @@ proc tychoMkClassGraph {name filename args} {
     foreach nonClassFile [lsort $nonClassFileList] {
 	set nm [file tail [file rootname $nonClassFile]]
 	set sname $nm
-	set path [file split $nonClassFile]
-	set htmlfile [join [lreplace [split [lindex $path end] .] \
-		end end "html"] .]
-	set htmlfile [eval file join \
-		[lreplace $path end end doc codeDoc $htmlfile]]
+	set basefile [file rootname [file tail $nonClassFile]]
 	set dirname [file dirname $nonClassFile]
-	puts $fd "\{add $nm \{label \{$sname\} altlink \{$nonClassFile \{\}\} link \{$htmlfile \{\}\}\} \{$nonClassDirectory($dirname)\}\}"
+	set html [file join $dirname doc codeDoc $basefile.html]
+
+	puts $fd "\{add $nm \{label \{$sname\} altlink \{$nonClassFile\
+		\{\}\} link \{$html \{\}\}\}\
+		\{$nonClassDirectory($dirname)\}\}"
 	# Save the current node in the slot for the current directory.
 	# This makes the class diagram much wider
 	#set nonClassDirectory($dirname) $nm
