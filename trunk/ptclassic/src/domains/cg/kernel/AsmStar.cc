@@ -51,7 +51,7 @@ AsmStar::lookupAddress(const char* name) {
 }
 
 void AsmStar::genInterruptCode(CodeBlock& cb) {
-	AsmTarget* asmTargetPtr = targetPtr;
+	AsmTarget* asmTargetPtr = (AsmTarget*)targetPtr;
 	asmTargetPtr->saveProgramCounter();
 	gencode(cb);
 	asmTargetPtr->restoreProgramCounter();
