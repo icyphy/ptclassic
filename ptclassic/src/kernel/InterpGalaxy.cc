@@ -17,13 +17,11 @@ $Id$
 *******************************************************************/
 #include "InterpGalaxy.h"
 #include "StringList.h"
-#include "Output.h"
+#include "Error.h"
 #include "Connect.h"
 #include "Geodesic.h"
 #include "string.h"
 #include "Domain.h"
-
-extern Error errorHandler;
 
 // Report an error: no such star or porthole
 
@@ -34,7 +32,7 @@ static void noInstance(const char* star,const char* gal) {
 	msg += "\" in \"";
 	msg += gal;
 	msg += "\"\n";
-	errorHandler.error (msg);
+	Error::abortRun (msg);
 }
 
 // Find a port or multiport -- preserve its "identity" -- things
@@ -312,7 +310,7 @@ InterpGalaxy :: numPorts (const char* star, const char* port, int num) {
 		msg += "\" in \"";
 		msg += star;
 		msg += "\"";
-		errorHandler.error (msg);
+		Error::abortRun (msg);
 		return FALSE;
 	}
 
@@ -342,7 +340,7 @@ InterpGalaxy::setDomain (const char* name) {
 	// if we're already in the given domain, do nothing and return true
 	if (strcmp (name, KnownBlock::domain()) == 0) return TRUE;
 	if (numberBlocks() > 0) {
-		errorHandler.error ("Can't change domain, non-empty galaxy");
+		Error::error ("Can't change domain, non-empty galaxy");
 		return FALSE;
 	}
 	if (!KnownBlock::setDomain (name)) return FALSE;
