@@ -205,11 +205,21 @@ topTkInitialize1( Tcl_Interp *ip, int *argc, char **argv, Tk_Window *pWin) {
      * Create a window
      */
     if ( win == NULL ) {
-    	if ( (win = Tk_CreateMainWindow(ip, display, showname, "Tk")) == NULL ){
+#if TK_MAJOR_VERSION <= 4 && TK_MINOR_VERSION < 1
+        win = Tk_CreateMainWindow(ip, display, showname, "Tk");
+#else
+        win = Tk_MainWindow(ip);
+#endif
+
+    	if (!win) {
 	    Tcl_AppendResult(ip,"\nError creating main window", NULL);
 	    return TCL_ERROR;
 	}
-        /* Tk_SetClass(win, "Tk"); */
+#if TK_MAJOR_VERSION <= 4 && TK_MINOR_VERSION < 1
+#else
+        Tk_SetClass(win, "Tk");
+        Tk_SetAppName(win, showname);
+#endif /* TK_MAJOR_VERSION <= 4 && TK_MINOR_VERSION < 1 */
     }
     info.win = win;
     Tk_CreateEventHandler(win, StructureNotifyMask, _topStructureProc,
