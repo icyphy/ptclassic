@@ -64,7 +64,7 @@ TO PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
 * APEG generation::		Generation of an APEG graph from an SDF graph
 * Parallel Schedulers::         Parallel Scheduling Procedure
 * Base Classes for Code Generation:: 
-* Target ::          		Target Definition
+* Target::          		Target Definition
 * Heterogeneous Support::	Focus on heterogeneous code generation.
 * CGC Domain::			C-code generation domain for example
 * CGDDF Domain::		CGDDF domain in Ptolemy
@@ -119,7 +119,7 @@ code segments.
 Since all code generation domains depends on the SDF domain, and 
 the same routine is needed by a specialized loop scheduler in the SDF
 domain ($(PTOLEMY)/src/domains/sdf/loopScheduler), the source of APEG 
-generation is placed in $(PTOLEMY)/src/domains/sdf/expgraph.
+generation is placed in $(PTOLEMY)/src/domains/sdf/kernel.
 
 An APEG graph (an ExpandedGraph class) consists of EGNodes and 
 EGGates. Class EGNode represents
@@ -530,26 +530,27 @@ This method is virtual since the derived ExpandedGraph class may have
 derived classes from the EGNode class.
 
 (3) For each star in the original SDF graph, 
-    (3-1) Make connections between invocations of the star if any one of the
-          conditions is met: @var{selfLoopFlag} is set in the second argument,
-          the star has internal states, the star accesses past values on its
-          portholes, or the star is a wormhole. The connection made in this
-          stage does not indicate the flow path of samples, but the
-          precedence relation of two EGNodes. Therefore, EGGates associated
-          with this connection are not associated with portholes in the
-          original SDF graph. If the connections are made, 
-          the @code{claimSticky} method of EGNode class is called for each
-          invocation EGNode. If any such connection is made, the APEG
-          is said not-parallelizable as a whole: A protected member,
-          @code{parallelizable}, is set FALSE.
 
-    (3-2) For each input porthole, get the far-side output porthole and make
-          connections between invocations of two DataFlowStars. A connection
-          in the original SDF graph may be mapped to several connections
-          in the APEG since the APEG is homogeneous. 
+(3-1) Make connections between invocations of the star if any one of the
+conditions is met: @var{selfLoopFlag} is set in the second argument,
+the star has internal states, the star accesses past values on its
+portholes, or the star is a wormhole. The connection made in this
+stage does not indicate the flow path of samples, but the
+precedence relation of two EGNodes. Therefore, EGGates associated
+with this connection are not associated with portholes in the
+original SDF graph. If the connections are made, 
+the @code{claimSticky} method of EGNode class is called for each
+invocation EGNode. If any such connection is made, the APEG
+is said not-parallelizable as a whole: A protected member,
+@code{parallelizable}, is set FALSE.
+
+(3-2) For each input porthole, get the far-side output porthole and make
+connections between invocations of two DataFlowStars. A connection
+in the original SDF graph may be mapped to several connections
+in the APEG since the APEG is homogeneous. 
 
 (4) Find the root nodes in the APEG and stored in its protected member
-    @code{sources}.
+@code{sources}.
 
 @example
 void insertSource(EGNode* @var{node});
@@ -637,7 +638,7 @@ sub-universe generations.
 * class ParProcessors::		class ParProcessors, scheduling algorithm
 * class UniProcessor::		class UniProcessor
 * Dynamic Level Scheduler::	Sih's dynamic level scheduling algorithm
-* Hu's Level Scheduler::	Hu's static level scheduling algorithm
+* Hu Level Scheduler::		Hu's static level scheduling algorithm
 * Declustering Scheduler::	Sih's declustering algorithm
 @end menu
 
@@ -2015,7 +2016,7 @@ ParNode* nextNode();
 
 Returns the ParNode in the list.
 
-@node Dynamic Level Scheduler, Hu's Level Scheduler, class UniProcessor, Parallel Schedulers
+@node Dynamic Level Scheduler, Hu Level Scheduler, class UniProcessor, Parallel Schedulers
 @section Dynamic Level Scheduler
 
 Dynamic Level Scheduling is one of the list scheduling algorithm where
@@ -2355,8 +2356,8 @@ This method is a protected method to compute the earliest time when
 the processor of index @var{destP} could schedule the node @var{n} that
 is runnable at time @var{start}.
 
-@node Hu's Level Scheduler, Declustering Scheduler, Dynamic Level Scheduler, Parallel Schedulers
-@section Hu's Level Scheduler
+@node Hu Level Scheduler, Declustering Scheduler, Dynamic Level Scheduler, Parallel Schedulers
+@section Hu Level Scheduler
 
 Hu's level scheduling algorithm is a simple list scheduling algorithm, in
 which a node is assigned a fixed priority. No communication overhead is
@@ -2372,7 +2373,7 @@ are derived from the classes for the dynamic level schedulers.
 * class HuParProcs::		a ParProcessors for Hu's level scheduler
 @end menu
 
-@node class HuNode, class HuGraph, Hu's Level Scheduler, Hu's Level Scheduler
+@node class HuNode, class HuGraph, Hu Level Scheduler, Hu Level Scheduler
 @subsection Class HuNode
 
 Class HuNode represents a node in the APEG for Hu's level scheduling algorithm.
@@ -2407,7 +2408,7 @@ the earliest time when all ancestors are completed. The last two methods
 get and set the index of the processor on which
 the node is preferred to be scheduled.
 
-@node class HuGraph, class HuScheduler, class HuNode, Hu's Level Scheduler
+@node class HuGraph, class HuScheduler, class HuNode, Hu Level Scheduler
 @subsection Class HuGraph
 
 Class HuGraph is the input APEG for Hu's level scheduler. It redefines
@@ -2434,7 +2435,7 @@ In the ParGraph class, this method sorts the nodes in order of decreasing
 @code{StaticLevel} of nodes. Now, we redefine it to sort the nodes in order
 of increasing available time first, and decreasing the static level next.
 
-@node class HuScheduler, class HuParProcs, class HuGraph, Hu's Level Scheduler
+@node class HuScheduler, class HuParProcs, class HuGraph, Hu Level Scheduler
 @subsection Class HuScheduler
 
 Class HuScheduler, derived from the ParScheduler class, is parallel to the
@@ -2481,7 +2482,7 @@ StringList displaySchedule();
 
 Displays the scheduling result textually.
 
-@node class HuParProcs, , class HuScheduler, Hu's Level Scheduler
+@node class HuParProcs, , class HuScheduler, Hu Level Scheduler
 @subsection Class HuParProcs
 
 Class HuParProcs is derived from class DLParProcs so that it has the
@@ -2534,7 +2535,7 @@ and put the node back to the list of runnable nodes.
 If we find a processor to schedule the node, we set the @var{avail} and
 @var{pIndex} arrays with information of the pattern of processor availability.
 
-@node Declustering Scheduler, , Hu's Level Scheduler, Parallel Schedulers
+@node Declustering Scheduler, , Hu Level Scheduler, Parallel Schedulers
 @section Declustering Scheduler
 
 Declustering scheduler is the most elaborate scheduler developed by Sih
@@ -5106,7 +5107,7 @@ IntState useCluster;
 
 The first state indicates whether we want to ignore communication overhead
 in scheduling or not. If it says YES, we select the Hu's level scheduler
-(@pxref{Hu's Level Scheduler}). If it says NO, we use the next state,
+(@pxref{Hu Level Scheduler}). If it says NO, we use the next state,
 @code{overlapComm}. If this state says YES, we use the dynamic level scheduler
 (@pxref{Dynamic Level Scheduler}). If it says No, we use the last state.
 @code{useCluster}. If it says YES, we use the declustering algorithm
