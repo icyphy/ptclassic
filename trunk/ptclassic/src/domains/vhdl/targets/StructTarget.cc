@@ -261,13 +261,13 @@ void StructTarget :: trailerCode() {
     // only have a source with a signal, and no mux or reg.
     if (state->constant) {
       mainSignalList.put(state->name, state->type);
-      VHDLSignal* stateSignal = topSignalList.vhdlSignalWithName(state->name);
+      VHDLSignal* stateSignal = mainSignalList.vhdlSignalWithName(state->name);
       if (stateSignal) {
 	connectSource(state->initVal, stateSignal);
       }
       else {
 	Error::abortRun(state->name,
-			": no such signal with this name in topSignalList");
+			": no such signal with this name in mainSignalList");
 	return;
       }
     }
@@ -284,15 +284,15 @@ void StructTarget :: trailerCode() {
       mainSignalList.put(*initSignal);
 
       VHDLSignal* lastRefSignal =
-	topSignalList.vhdlSignalWithName(state->lastRef);
+	mainSignalList.vhdlSignalWithName(state->lastRef);
       VHDLSignal* firstRefSignal =
-	topSignalList.vhdlSignalWithName(state->firstRef);
+	mainSignalList.vhdlSignalWithName(state->firstRef);
       if (!lastRefSignal) {
-	Error::abortRun(state->lastRef, ": no such signal in topSignalList");
+	Error::abortRun(state->lastRef, ": no such signal in mainSignalList");
 	return;
       }
       else if (!firstRefSignal) {
-	Error::abortRun(state->firstRef, ": no such signal in topSignalList");
+	Error::abortRun(state->firstRef, ": no such signal in mainSignalList");
 	return;
       }
       else {
@@ -390,16 +390,16 @@ void StructTarget :: trailerCode() {
 	  poMap->mapping = newMapping;
 	  fi->signalList->put(newMapping, po->getType());
 
-	  VHDLSignal* oldSignal = topSignalList.vhdlSignalWithName(oldMapping);
+	  VHDLSignal* oldSignal = mainSignalList.vhdlSignalWithName(oldMapping);
 	  VHDLSignal* newSignal = new VHDLSignal;
 	  newSignal->setName(newMapping);
 	  newSignal->setType(po->getType());
-	  VHDLSignal* clkSignal = topSignalList.vhdlSignalWithName(clkName);
+	  VHDLSignal* clkSignal = mainSignalList.vhdlSignalWithName(clkName);
 	  if (!clkSignal) {
 	    clkSignal = new VHDLSignal;
 	    clkSignal->setName(clkName);
 	    clkSignal->setType("boolean");
-	    topSignalList.put(*clkSignal);
+	    mainSignalList.put(*clkSignal);
 	  }
 
 	  oldSignal->disconnect();
@@ -616,7 +616,7 @@ void StructTarget :: registerPortHole(VHDLPortHole* port, const char* dataName,
 
     // If it's an input port, find the signal generating the data.
     if (!strcmp(newPort->direction,"IN")) {
-      VHDLSignal* mySignal = topSignalList.vhdlSignalWithName(ref);
+      VHDLSignal* mySignal = mainSignalList.vhdlSignalWithName(ref);
       // Check for signal already existing.
       if (mySignal) {
 	// mySignal exists with ref as name, so connect to it.
@@ -652,7 +652,7 @@ void StructTarget :: registerPortHole(VHDLPortHole* port, const char* dataName,
 	  mySignal->setName(ref);
 	  mySignal->setType(port->dataType());
 
-	  topSignalList.put(*mySignal);
+	  mainSignalList.put(*mySignal);
 	  firingSignalList.put(*mySignal);
 
 	  newPort->connect(mySignal);
@@ -672,7 +672,7 @@ void StructTarget :: registerPortHole(VHDLPortHole* port, const char* dataName,
       newSignal->setName(ref);
       newSignal->setType(port->dataType());
 
-      topSignalList.put(*newSignal);
+      mainSignalList.put(*newSignal);
       firingSignalList.put(*newSignal);
 
       newPort->connect(newSignal);
@@ -821,7 +821,7 @@ void StructTarget :: registerState(State* state, const char* varName,
 	inSignal->setName(root);
 	inSignal->setType(stType);
 
-	topSignalList.put(*inSignal);
+	mainSignalList.put(*inSignal);
 	firingSignalList.put(*inSignal);
 
 	inPort->connect(inSignal);
@@ -830,7 +830,7 @@ void StructTarget :: registerState(State* state, const char* varName,
 	// Need to find the previous signal to connect to.
 	// That signal should have been created during the previous firing's
 	// first reference to the state.
-	VHDLSignal* inSignal = topSignalList.vhdlSignalWithName(root);
+	VHDLSignal* inSignal = mainSignalList.vhdlSignalWithName(root);
 	if (!inSignal) {
 	  Error::abortRun(root,
 			  ": Not first state ref, ",
@@ -860,7 +860,7 @@ void StructTarget :: registerState(State* state, const char* varName,
 	inSignal->setName(refIn);
 	inSignal->setType(stType);
 
-	topSignalList.put(*inSignal);
+	mainSignalList.put(*inSignal);
 	firingSignalList.put(*inSignal);
 
 	inPort->connect(inSignal);
@@ -868,7 +868,7 @@ void StructTarget :: registerState(State* state, const char* varName,
       if (!isFirstStateRef) {
 	// Need to find the previous signal to connect to
 	// FIXME: Still don't like this, depends on knowing the name already!!
-	VHDLSignal* inSignal = topSignalList.vhdlSignalWithName(state_in);
+	VHDLSignal* inSignal = mainSignalList.vhdlSignalWithName(state_in);
 	if (!inSignal) {
 	  Error::abortRun(state_in,
 			  ": Not first state ref, ",
@@ -879,7 +879,7 @@ void StructTarget :: registerState(State* state, const char* varName,
 	inPort->connect(inSignal);
       }
 
-      topSignalList.put(*outSignal);
+      mainSignalList.put(*outSignal);
       firingSignalList.put(*outSignal);
 
       VHDLVariable* outVar = new VHDLVariable;
@@ -1858,8 +1858,6 @@ void StructTarget :: initVHDLObjLists() {
   mainSignalList.initialize();
   stateList.initialize();
   clusterList.initialize();
-
-  topSignalList.initialize();
 
   ctlerGenericList.initialize();
   ctlerPortList.initialize();
