@@ -96,7 +96,7 @@ proc _JRPCServer_ReadOrClose {fd} {
 
     # Check for cookie and execute command if one was got
     if { $line == "_JRPC_EndCommand_Cookie_" } {
-        puts "JRPCServer: Executing \"$_JRPC_command_\""
+        puts "JRPCServer: \"[string trimright $_JRPC_command_ \n]\""
 
         if [catch {uplevel #0 $_JRPC_command_} result] {
             puts $fd [list 1 $result]
@@ -108,7 +108,7 @@ proc _JRPCServer_ReadOrClose {fd} {
         set _JRPC_command_ ""
 
     } else {
-        append _JRPC_command_ \n $line
+        append _JRPC_command_ $line \n
     }
     
     # Exit if done
