@@ -19,10 +19,10 @@ Leakage is controlled by the "feedbackGain" state (default 1.0).
 The output is the data input plus feedbackGain*state, where state
 is the previous output.
 	}
-	version {@(#)ACSIntegratorCGFPGA.pl	1.4 09/10/99}
+	version{ $Id$ }
 	author { K. Smith }
 	copyright {
-Copyright (c) 1998-1999 Sanders, a Lockheed Martin Company
+Copyright (c) 1998-%Q% Sanders, a Lockheed Martin Company
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

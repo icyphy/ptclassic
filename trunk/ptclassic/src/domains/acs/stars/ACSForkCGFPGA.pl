@@ -6,10 +6,10 @@ defcore {
 	desc {
 	    Fork for CGFPGA dummy domain
 	}
-	version {@(#)ACSForkCGFPGA.pl	1.3 09/08/99}
+	version{ $Id$ }
 	author { K. Smith }
 	copyright {
-Copyright (c) 1998-1999 The Regents of the University of California
+Copyright (c) 1998-%Q% The Regents of the University of California
 and Sanders, a Lockheed Martin Company
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
