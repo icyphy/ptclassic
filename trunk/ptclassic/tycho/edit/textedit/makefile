@@ -1,4 +1,4 @@
-# Makefile for Ptolemy Tycho system, editors/textedit directory.
+# Makefile for Ptolemy Tycho system, tycho.edit.textedit package
 #
 # @Author: Christopher Hylands
 #
@@ -35,13 +35,13 @@ ROOT =		../..
 # Path (absolute or relative) to the object directory root
 OBJDIR =	../..
 # True source directory
-VPATH =		$(ROOT)/editors/textedit
+VPATH =		$(ROOT)/edit/textedit
 
 # Get configuration info
 CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
-TCL_SRCS = 
+TCL_SRCS =
   
 ITCL_SRCS = \
 	EditC.itcl \
@@ -66,18 +66,20 @@ ITCL_SRCS = \
 EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) \
 	editcolors.style \
 	edithtml.style \
-	makefile.style
+	makefile.style \
+	pkgIndex.tcl \
+	textedit.tcl
 
-MISC_FILES =		doc img templates test tclIndex 
+MISC_FILES = doc img templates test tclIndex 
 
 # Sub directories to run make in.
-DIRS =			doc test templates
+DIRS =	doc test templates
 
 # 'make realclean' should remove tclIndex
-REALCLEAN_STUFF =			tclIndex
+REALCLEAN_STUFF = tclIndex
 
 # Title for the tydoc index page
-TYDOC_DESC =	Index of classes in tycho/kernel/textedit
+TYDOC_DESC =	Index of classes in tycho/edit/textedit
 
 all install: sources tclIndex $(MISC_SRCS)
 
