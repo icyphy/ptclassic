@@ -374,7 +374,7 @@ ifdef PN
 		else
 			# HPUX 
 			LIBS += -lposixthread \
-				-L/opt/dce/lib/libcma.a	-lcma
+				-L/opt/dce/lib/libcma -lcma
 		endif
 		LIBFILES += $(LIBDIR)/libposixthread.$(LIBSUFFIX)
 	endif
