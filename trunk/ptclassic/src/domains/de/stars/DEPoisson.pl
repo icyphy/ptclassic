@@ -50,7 +50,6 @@ given as parameters.
 		if(random) delete random;
 		random = new NegativeExpntl(double(meanTime),gen);
 		DERepeatStar :: start();
-		random->mean(double(meanTime));
 	}
 	go {
 	   // Generate the output event
