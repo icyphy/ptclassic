@@ -44,6 +44,25 @@ if { [lsearch -exact $auto_path $env(GUI_LIBRARY)] == -1 } {
     lappend auto_path $env(GUI_LIBRARY)
 }
 
+# Some files are going to be needed anway, so source them now
+uplevel #0 {
+    source [file join $env(GUI_LIBRARY) FontManager.itcl]
+    source [file join $env(GUI_LIBRARY) ColorManager.itcl]
+    source [file join $env(GUI_LIBRARY) CircularList.itcl]
+    source [file join $env(GUI_LIBRARY) TopLevel.itcl]
+    source [file join $env(GUI_LIBRARY) TWidget.itcl]
+    source [file join $env(GUI_LIBRARY) View.itcl]
+
+    # Note: ErrorMessage MUST be sourced at startup in
+    # order to override the default error-handling procs
+    source [file join $env(GUI_LIBRARY) ErrorMessage.itcl]
+    source [file join $env(GUI_LIBRARY) File.itcl]
+    
+    source [file join $env(GUI_LIBRARY) MenuSupport.itcl]
+    source [file join $env(GUI_LIBRARY) MenuBar.itcl]
+}
+
+
 ##### This section should be in tycho.kernel.basic
 
 ### PROTOCOLS
@@ -99,11 +118,6 @@ if { [lsearch -exact $auto_path $env(GUI_LIBRARY)] == -1 } {
 ::tycho::register stylesheet "text" \
 	[file join {$TYCHO} kernel styles text.style] \
 	[file join ~ .Tycho styles text.style]
-
-::tycho::register stylesheet "tydoc" \
-	[file join {$TYCHO} lib tydoc tydoc.style] \
-	[file join ~ .Tycho styles tydoc.style]
-
 
 
 ### CATEGORIES
