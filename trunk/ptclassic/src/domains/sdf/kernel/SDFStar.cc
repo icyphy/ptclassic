@@ -19,12 +19,22 @@ $Id$
 #include "SDFStar.h"
 #include "SDFConnect.h"
 
+
+/*******************************************************************
+
+	class DataFlowStar methods
+
+********************************************************************/
+
+int DataFlowStar::isSDF() const { return FALSE;}
+
 /*******************************************************************
 
 	class SDFStar methods
 
 ********************************************************************/
 
+int SDFStar::isSDF() const { return TRUE;}
 
 // SDF-specific initialize
 void SDFStar :: prepareForScheduling() {
@@ -85,7 +95,7 @@ int SDFStar :: notRunnable () {
 	SDFStarPortIter nextp(*this);
 	SDFPortHole *p;
 	// Check to see whether the requisite repetitions have been met.
-	if (repetitions.numerator <= noTimes)
+	if (repetitions.numerator <= int(noTimes))
 		return 2;
 
 	// Step through all the input ports, checking to see whether
@@ -93,7 +103,7 @@ int SDFStar :: notRunnable () {
 	while ((p = nextp++) != 0) {
 		// worm edges always have enough data
 		if (wormEdge(*p)) continue;
-		if (p->isItInput() && p->numTokens() < p->numberTokens)
+		if (p->isItInput() && p->numTokens() < p->numXfer())
 			// not enough data
 			return 1;
 	}
@@ -138,10 +148,10 @@ int SDFStar :: simRunStar (int deferFiring) {
 
 		if( port->isItInput() )
 			// OK to update size for input PortHole
-			port->decCount(port->numberTokens);
+			port->decCount(port->numXfer());
 		else 
 			// OK to update size for output PortHole
-			port->incCount(port->numberTokens);
+			port->incCount(port->numXfer());
 	}
 
 	// Increment noTimes
@@ -202,7 +212,7 @@ int SDFStar :: deferrable () {
 
 		// The farside port is an input.  Check Particle supply
 		// if not enough, atom cannot be deferred.
-		if(port->numTokens() < port->numberTokens)
+		if(port->numTokens() < port->numXfer())
 			return FALSE;
 			
 		// Since the farside port is an input, the nearside is
