@@ -31,8 +31,8 @@ Pixels at the image boundaries are copied and not rank filtered.
 		type	{ int }
 		default { 3 }
 		desc	{
-Size of the rank filter window in each dimension.
-For a median filter, this value must be odd.
+Size of the rank filter window in each dimension,
+which must be odd.
 		}
 	}
 
@@ -78,6 +78,11 @@ Which ordered sample is chosen from each neighborhood of pixels,
 		    Error::error(*this, "FilterWidth must be positive.");
 		    return;
 		}
+		int oddsize = 1 + 2*(size/2);
+		if ( size != oddsize ) {
+		    Error::error(*this, "FilterWidth must be odd.");
+		    return;
+		}
 		halfsize = size/2;
 		neighborhoodSize = size * size;
 
@@ -103,21 +108,20 @@ Which ordered sample is chosen from each neighborhood of pixels,
 		name	{ retRankedElement }
 		access	{ protected }
 		type	{ "unsigned char" }
-		arglist { "(unsigned const char* p, int pi, int pj)" }
+		arglist { "(unsigned const char* p)" }
 		code {
-		    // Select size x size neighbor around pixel (pi, pj)
-		    // and write data to one-dimensional buffer
-		    // We want to copy pixel values at p[i][j] where
-		    //   i = (pi - halfsize) ... pi ... (pi + halfsize)
-		    //   j = (pj - halfsize) ... pj ... (pj + halfsize)
-		    int maxi = pi + halfsize;
-		    int pjstart = pj - halfsize;
+		    // Select size x size neighbor around pixel at location p
+		    // and write 2-D data to 1-D buffer buf by copying
+		    // pixel values at p[i][j] where
+		    //   i = -halfsize ... 0 ... halfsize
+		    //   j = -halfsize ... 0 ... halfsize
 		    unsigned char *bufp = buf;
-		    unsigned const char *pijptr;
-		    for (int i = pi - halfsize; i <= maxi; i++) {
-			// pijptr begins at p[i][pj - halfsize]
-			pijptr = &p[i * width + pjstart];
-			for (int k = 0; k < size; k++) {
+		    for (int i = -halfsize; i <= halfsize; i++) {
+			// pijptr begins at p[i][-halfsize]
+			// pointer arithmetic: yeah, I feel lucky
+		        unsigned const char *pijptr =
+				p - (i * width - halfsize);
+			for (int j = -halfsize; j <= halfsize; j++) {
 			    *bufp++ = *pijptr++;
 			}
 		    }
@@ -155,7 +159,7 @@ Which ordered sample is chosen from each neighborhood of pixels,
 			    *outptr++ = *inptr++;
 			}
 			for ( ; j < width - halfsize; j++) {	// med. filter
-			    *outptr++ = retRankedElement(inptr, i, j);
+			    *outptr++ = retRankedElement(inptr);
 			    inptr++;
 			}
 			for ( ; j < width; j++) {	// copy boundary pixels
