@@ -33,6 +33,6 @@ limitation of liability, and disclaimer of warranty provisions.
 
     go
     {
-	output.put(arrivalTime) = input.get();
+	if (input.dataNew) output.put(arrivalTime) = input.get();
     }
 }
