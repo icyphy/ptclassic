@@ -39,7 +39,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #endif
 
 #include "Block.h"
-#include "StringList.h"
+#include "InfString.h"
 extern "C" {
 #include "ptk.h"
 }
@@ -72,7 +72,7 @@ public:
 	int go ();
 
 	// Method to get inputs from myStar
-	StringList getInputs();
+	InfString getInputs();
 
 	// Array of values that can be set from Tcl using the "setOutputs"
 	// command.
@@ -93,7 +93,7 @@ protected:
 
 	// A unique string for each instance of this object identifies
 	// the star within which it sits for the benefit of Tcl routines.
-	StringList starID;
+	InfString starID;
 
 	// A flag specifying whether a callTcl procedure was defined
 	// when the Tcl file was sourced.

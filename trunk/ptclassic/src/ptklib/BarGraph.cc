@@ -63,7 +63,7 @@ static int rescale(
 	return TCL_ERROR;
     }
     ((BarGraph*)bargraph)->rescaleGraph(scaleFactor);
-    StringList buf = ((BarGraph*)bargraph)->top;
+    InfString buf = ((BarGraph*)bargraph)->top;
     buf += " ";
     buf += ((BarGraph*)bargraph)->bottom;
     Tcl_SetResult(ptkInterp,(char*)buf, TCL_VOLATILE);
@@ -83,7 +83,7 @@ BarGraph::BarGraph () {
 
 // destructor
 BarGraph::~BarGraph() {
-	StringList buf;
+	InfString buf;
 
 	// Delete Tcl commands created by this object
 	buf = winName;
@@ -159,7 +159,7 @@ int BarGraph::setup (Block* star,       // The star I am in
 	}
 
 	// Define the Tcl procedure to redraw the bar graph
-	StringList buf;
+	InfString buf;
 	buf = winName;
 	buf += "redraw";
 	Tcl_CreateCommand(ptkInterp, (char*)buf, redraw,
@@ -214,7 +214,7 @@ int BarGraph::update (int input,          // Identifies the data set
 		noInputs, noBars, actualWidth, actualHeight,
 		top, bottom, newVal);
 
-	StringList buf = winName;
+	InfString buf = winName;
 	buf += ".pf.plot coords ";
 	buf += ids[input][bar];
 	buf += " "; buf += x0;
@@ -238,7 +238,7 @@ void BarGraph::redrawBars () {
 		ids);
 	// Update the size parameters, in case they have changed
 	// Set plotwin member
-	StringList buf = winName;
+	InfString buf = winName;
 	buf += ".pf.plot";
 	Tk_Window plotwin = Tk_NameToWindow(ptkInterp,(char*)buf,ptkW);
 	if (plotwin == 0) return;

@@ -40,7 +40,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #endif
 
 #include "Block.h"
-#include "StringList.h"
+#include "InfString.h"
 extern "C" {
 #include "ptk.h"
 }
@@ -73,7 +73,7 @@ public:
 	Block* myStar;
 
 	// Window name to use
-	StringList winName;
+	InfString winName;
 
 	// Redraw the bars (invoked after a configure event in the window)
 	void redrawBars();
@@ -93,7 +93,7 @@ protected:
 
 	// A unique string for each instance of this object identifies
 	// the star within which it sits for the benefit of Tcl routines.
-	StringList starID;
+	InfString starID;
 
 	// Pointer to dynamically allocated array of pointers to data arrays
 	double** data;
