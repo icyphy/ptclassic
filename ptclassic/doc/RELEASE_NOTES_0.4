@@ -1,0 +1,97 @@
+FIXME: needs lots of work.
+
+Release Notes for the 0.4 release of Ptolemy
+
+This file discusses differences between the 0.3 and 0.4 distributions
+of Ptolemy.
+
+ADDITIONS:
+
+In addition to the domains included in 0.3.1, there are new domains
+CG56 and CG96 for code generation on the Motorola 56000 and 96000
+DSP chips, and CGC for C code generation.  The CG domain now provides
+a base for development of a variety of assembly-language or higher
+level language code generation domains.
+
+There are many new stars and new demos in all domains.
+
+The incremental linking facility is more powerful; it can link in
+multiple modules at a time, and can link in code either temporarily
+(so it can be replaced) or permanently (so subsequent links can
+build on it).
+
+There is a new interpreter based on John Ousterhout's extendable
+interpreter Tcl.
+
+There is now a programmer's manual that describes the Ptolemy kernel
+in detail.
+
+CHANGES:
+
+A ptolemy account is no longer required; the PTOLEMY environment
+variable may be used instead to specify the location of the PTOLEMY
+directory tree.
+
+Many stars have been renamed to provide a more consistent naming
+scheme across domains.
+
+Many member function names have been changed to provide a more
+uniform interface.
+
+Converting stars from 0.3.1 to 0.4
+
+The change most likely to affect the casual star writer is that
+the UserOutput class is gone.  We recommend using the new
+classes pt_ifstream and pt_ofstream instead.  These are derived
+from the standard iostreams classes ifstream and ofstream.  They
+are "real streams", not fake streams like UserOutput (which had
+an << operator but was otherwise not a stream).  These classes
+are defined in ~ptolemy/src/kernel/pt_fstream.h.
+
+Where a UserOutput object was used before, simply substitute a
+pt_ofstream object.  There are some differences: a UserOutput
+object writes to standard output by default.  A pt_ofstream must
+be opened, or else a filename must be given as the constructor
+argument.
+
+Other changes likely to affect the star writer:
+
+The classes Packet and PacketData have become Envelope and Message,
+respectively.  This was done at the insistence of users who simulate
+data networks.  Portholes that have type packet should change to
+type message.  The getPacket and accessPacket methods of Packet
+have become getMessage and accessMessage methods of class Envelope.
+
+The member functions readDescriptor(), readName(),
+readFullName(), and readClassName() have had their read
+prefixes dropped, and are now descriptor(), name(),
+fullName(), and className().
+
+The start() function of stars is now named setup().
+The fire() function of stars is now renamed run(), and it
+returns TRUE for success and FALSE for failure.
+
+The clone() function of blocks has been replaced by two functions,
+clone() and makeNew().  The latter function makes an object of
+identical type, but does not necessarily copy all information.
+clone(), on the other hand, copies state values from the original
+object to the new copy.
+
+The setValue() and getInitValue() functions of States have been
+renamed to setInitValue() and initValue(), respectively.
+
+The myType() function of PortHole and MultiPortHole is now type().
+The grabData() function of PortHole is now receiveData().
+
+The tup() function of SequentialList is now prepend().
+
+The readType() function of Particle is now type().  The
+getPacket and accessPacket functions are now getMessage, accessMessage.
+Methods that took an argument of type Packet now want an Envelope
+argument.
+
+In ptlang, start { ... } is still permitted for backward compatibility,
+but it generates a setup() member function.  We recommend use of setup,
+as it is less confusing.
+
+
