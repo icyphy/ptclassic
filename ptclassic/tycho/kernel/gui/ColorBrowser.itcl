@@ -34,7 +34,9 @@
 #### querycolor
 # Query the user for a color and return it.  This procedure brings up
 # a simple color browser, and returns only when that browser is dismissed.
-# The returned string is the name of a color.  This name should be passed
+# The returned string is the name of a color.  If the user cancels the
+# dialog, the given default (or null if not given) is returned.
+# This name should be passed
 # to <code>::tycho::color</code> before being used, to convert it to a standard
 # color format recognized by all installations.  One argument is required:
 # a string that labels the query.  If a second argument is given,
@@ -59,7 +61,12 @@ proc ::tycho::querycolor {string {default {}}} {
     if {$default != {}} {
         $name configure -default $default
     }
-    return [::tycho::Dialog::wait $name]
+    set color [::tycho::Dialog::wait $name]
+    if { $color == "" } {
+	return $default
+    } else {
+	return $color
+    }
 }
 
 ##########################################################################
