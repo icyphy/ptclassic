@@ -81,10 +81,11 @@ proc ::tycho::loadIfNotPresent {command package {packagePathList {}}} {
 		set libNameList [list $packageLibName]
 	    }
 
+	    set libDirList ""
 	    if [info exists env(PTARCH)] {
 		set PTARCH $env(PTARCH)
 		if [file isdirectory [file join $TYCHO lib.$PTARCH]] {
-		    set libDirList \
+		    lappend libDirList \
 			    [file join $TYCHO lib.$PTARCH]
 		}
 	    }
