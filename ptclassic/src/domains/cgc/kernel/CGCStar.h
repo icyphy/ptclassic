@@ -162,7 +162,7 @@ protected:
 	int addRemoteLinkOption(const char*);
 
 	// Add a file to be copied over the remote machine
-	int addRemoteFile(const char*);
+	int addRemoteFile(const char*, int flag = FALSE);
 
 	// Add declarations, to be put at the beginning of the main section
 	int addDeclaration(const char* decl, const char* name = NULL) {
