@@ -49,6 +49,7 @@ EXTRA_SRCS =	buildtclexts.html \
 		scope.html \
 		style.html \
 		template.html \
+		testing.html \
 		update.html
 MISC_FILES =
 
