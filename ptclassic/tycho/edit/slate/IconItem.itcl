@@ -131,19 +131,13 @@ class ::tycho::Connectible {
     protected proc coords {id canvas slate x0 y0 x1 y1}
     
     ###################################################################
-    ####                         protected variables               ####
+    ####                         private variables                 ####
 
     # All methods are looked up through a table
-    common methodtable
+    private common methodtable
 
     # All options have a default value
-    common optiondefault
-
-    # The "direction" of the input ports
-    common indirn
-
-    # The "direction" of the output ports
-    common outdirn
+    private common optiondefault
 
     ###################################################################
     ####                           private procs                   ####

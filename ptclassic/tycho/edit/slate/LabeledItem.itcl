@@ -117,16 +117,13 @@ class ::tycho::LabeledItem {
     proc _text {id canvas slate text}
 
     ###################################################################
-    ####                         protected variables               ####
-
-    # The item with the text label
-    # common textitem
+    ####                           private variables               ####
 
     # The virtual "method" table
-    common methodtable
+    private common methodtable
 
     # Default values of this item's options
-    common optiondefault
+    private common optiondefault
 
     ###################################################################
     ####                       class initialization                ####

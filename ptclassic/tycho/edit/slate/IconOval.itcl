@@ -118,14 +118,14 @@ class ::tycho::IconOval {
     # Update the coordinates
     proc _coords {id canvas slate x y}
     
-   ###################################################################
-    ####                         protected variables               ####
+    ###################################################################
+    ####                         private variables                 ####
 
     # All methods are looked up through a table
-    common methodtable
+    private common methodtable
 
     # All options have a default value
-    common optiondefault
+    private common optiondefault
 
     ###################################################################
     ####                       class initialization                ####

@@ -160,14 +160,17 @@ class ::tycho::LabeledLine {
     ###################################################################
     ####                         protected variables               ####
 
+    # LabeledLines are shaped like... lines
+    protected common shape "line"
+
+    ###################################################################
+    ####                          private variables                ####
+
     # The virtual "method" table
-    common methodtable
+    private common methodtable
 
     # Default values of this item's options
-    common optiondefault
-
-    # LabeledLines are shaped like... lines
-    common shape "line"
+    private common optiondefault
 
     ###################################################################
     ####                       class initialization                ####

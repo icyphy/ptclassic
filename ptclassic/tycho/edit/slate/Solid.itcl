@@ -150,14 +150,17 @@ class ::tycho::Solid {
     ###################################################################
     ####                         protected variables               ####
 
+    # The "shape" of items of this class
+    protected common shape "polygon"
+
+    ###################################################################
+    ####                         private variables                 ####
+
     # All methods are looked up through a table
-    common methodtable
+    private common methodtable
 
     # All options have a default value
-    common optiondefault
-
-    # The "shape" of items of this class
-    common shape "polygon"
+    private common optiondefault
 
     ###################################################################
     ####                        private procs                      ####
