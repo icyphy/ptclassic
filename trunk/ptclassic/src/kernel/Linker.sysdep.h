@@ -36,10 +36,13 @@ ENHANCEMENTS, OR MODIFICATIONS.
 // get size_t definition
 #include <sys/types.h>
 
+#if defined(__sparc) && defined(__svr4__)
+#define SOL2
+#endif
+
 // Is linking supported?
-// Currently, linking does not work under hppa and irix4, but this may change.
 const int linkingNotSupported =
-#if defined(__alpha) 
+#if defined(__alpha) || defined(SOL2)
  1;
 #else
  0;
@@ -179,7 +182,9 @@ extern "C" {
 #define COFF
 #include <aouthdr.h>
 #endif
+#ifndef SOL2
 #include <a.out.h>
+#endif /*SOL2*/
 #endif
 }
 
@@ -268,15 +273,17 @@ read (fd, (void *) &h2, sizeof h2) <= 0)
 #endif
 
 #if defined(sun) || defined(vax)
+#if !defined(SOL2)
 #define STRUCT_DEFS exec header
 #define READHEAD_FAIL (read (fd, (char*) &header, sizeof(header)) <= 0)
 #define OBJ_READ_SIZE ((size_t)(header.a_text + header.a_data))
 #define READOBJ_FAIL (read (fd, availMem, OBJ_READ_SIZE) < OBJ_READ_SIZE)
 #define OBJ_SIZE (size_t)(header.a_text + header.a_data + header.a_bss)
 #endif
+#endif
 
 // alpha stuff
-#ifdef __alpha
+#if defined(__alpha) || defined(SOL2)
 #define STRUCT_DEFS
 #define READHEAD_FAIL 1
 #define READOBJ_FAIL 1
