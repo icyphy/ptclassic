@@ -149,10 +149,9 @@ if ( -d ../src/tst ) then
 		optlink ../../../src/tst/$x make.template
 		optlink ../../../src/tst/$x makefile
 		cd ..
-	endif
+	end
 
 	cd ..
-
 endif
 
 cd domains
