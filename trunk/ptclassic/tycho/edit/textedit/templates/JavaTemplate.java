@@ -28,21 +28,21 @@
 package MyPackageName;
 
 //////////////////////////////////////////////////////////////////////////
-//// ClassName                                                        ////
+//// ClassName
 /** 
- @author
- @version $Id$
- Description of the class
- @see classname
- @see full-classname
- */
+Description of the class
+@author
+@version $Id$
+@see classname
+@see full-classname
+*/
 public class ClassName {
     /** Constructor
-     @see full-classname/method-name
-     @param parameter-name description
-     @param parameter-name description
-     @return description
-     @exception full-classname description
+     * @see full-classname/method-name
+     * @param parameter-name description
+     * @param parameter-name description
+     * @return description
+     * @exception full-classname description
      */	
     public ClassName() {
     }
@@ -51,11 +51,11 @@ public class ClassName {
     ////                         public methods                           ////
 
     /** Description
-      @see full-classname/method-name
-      @param parameter-name description
-      @param parameter-name description
-      @return description
-      @exception full-classname description
+     * @see full-classname/method-name
+     * @param parameter-name description
+     * @param parameter-name description
+     * @return description
+     * @exception full-classname description
      */	
     public int APublicMethod() {
         return 1;
@@ -66,11 +66,11 @@ public class ClassName {
     ////                         protected methods                        ////
 
     /** Description
-     @see full-classname/method-name
-     @param parameter-name description
-     @param parameter-name description
-     @return description
-     @exception full-classname description
+     * @see full-classname/method-name
+     * @param parameter-name description
+     * @param parameter-name description
+     * @return description
+     * @exception full-classname description
      */	
     protected int AProtectedMethod() {
         return 1;
@@ -86,12 +86,12 @@ public class ClassName {
     ////                         private methods                          ////
 
     /* Private methods should not have doc comments, they should
-	have regular comments.
-     @see full-classname/method-name
-     @param parameter-name description
-     @param parameter-name description
-     @return description
-     @exception full-classname description
+     * have regular comments.
+     * @see full-classname/method-name
+     * @param parameter-name description
+     * @param parameter-name description
+     * @return description
+     * @exception full-classname description
      */	
     private int APrivateMethod() {
         return 1;
