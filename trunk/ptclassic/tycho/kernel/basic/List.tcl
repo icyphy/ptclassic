@@ -105,6 +105,36 @@ proc ldelete {list item} {
 }
 
 ##########################################################################
+#### ldiff l1 l2
+#
+# Return the difference of two lists: _l1_ - _l2_. Example:
+# <pre><tcl>
+#     lsubtract {1 2 3 4 5} {2 4 6}
+# </tcl></pre>
+#
+# For short lists, this proc is faster then the equivalent lsubtract{},
+# but is substantially slower for long lists.
+#
+proc ldiff {l1 l2} {
+    set result {}
+
+    # Optimize if they're the same
+    if { $l1 == $l2 } {
+	return ""
+    }
+
+    # Put an element in the first list into the result only if it's not
+    # in the second list.
+    foreach i $l1 {
+	if {[lsearch -exact $l2 $i] == -1} {
+	    lappend result $i
+	}
+    }
+
+    return $result
+}
+
+##########################################################################
 #### ldisjoint l1 l2
 #
 # Return true if l1 and l2 are disjoint -- that is, their
@@ -309,14 +339,26 @@ proc lmember {list item} {
 #     lnub {1 2 3 2 1 2}
 # </tcl></pre>
 #
+# The implementation uses an array to remove duplicates, and
+# is faster than a list-based implementation for all length lists.
+#
 proc lnub {list} {
-    set result {}
-    foreach i $list {
-	if { [lsearch -exact $result $i] == -1 } {
-	    lappend result $i
-	}
+    # Create an array indexed by elements of the list
+    set l [llength $list]
+    if { $l & 1 } {
+	# The list is odd length
+	array set temp [lreplace $list 0 0]
+	lappend list 0
+	array set temp $list
+    } else {
+	# The list is even length
+	array set temp $list
+	lappend list 0
+	array set temp [lreplace $list 0 0]
     }
-    return $result
+
+    # The result is the indexes of the array
+    return [array names temp]
 }
 
 ##########################################################################
@@ -541,20 +583,38 @@ proc lsubset {l1 l2} {
 #     lsubtract {1 2 3 4 5} {2 4 6}
 # </tcl></pre>
 #
+# This procedure is implemented using arrays, and on 100-elements lists
+# is nearly three times faster than a simpler implementation using
+# lists. However, on short lists (a few elements) it is slower, so
+# the list version is still available as ldiff{}.
+#
 proc lsubtract {l1 l2} {
-    set result {}
-
+    # Optimize if they're the same
     if { $l1 == $l2 } {
 	return ""
     }
 
-    foreach i $l1 {
-	if {[lsearch -exact $l2 $i] == -1} {
-	    lappend result $i
-	}
+    # Create an array indexed by elements of the first list
+    set l [llength $l1]
+    if { $l & 1 } {
+	# The list is odd length
+	array set temp [lreplace $l1 0 0]
+	lappend l1 0
+	array set temp $l1
+    } else {
+	# The list is even length
+	array set temp $l1
+	lappend l1 0
+	array set temp [lreplace $l1 0 0]
     }
 
-    return $result
+    # Remove each element in l2 from the array
+    foreach i $l2 {
+	catch {unset temp($i)}
+    }
+
+    # What's left is the result
+    return [array names temp]
 }
 
 ##########################################################################
