@@ -1,6 +1,7 @@
 #ifndef _SDFWormhole_h
 #define _SDFWormhole_h 1
 
+#include "StringList.h"
 #include "Wormhole.h"
 #include "SDFStar.h"
 
@@ -48,14 +49,14 @@ public:
 	SDFWormhole(Galaxy& g);
 
 	// return my scheduler
-	Scheduler* mySched() { return scheduler ;}
+	Scheduler* mySched() const { return scheduler ;}
 
 	// print methods
-	StringList printVerbose() { return Wormhole :: print(0);}
-	StringList printRecursive() { return Wormhole :: print(1);}
+	StringList printVerbose() const;
+	StringList printRecursive() const;
 
-	// clone -- allows interpreter to make copies
-	Block* clone();
+	// clone -- allows interpreter/pigi to make copies
+	Block* clone() const;
 
 	// get the token's arrival time to the wormhole
 	float getArrivalTime();
