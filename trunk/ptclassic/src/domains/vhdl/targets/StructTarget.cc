@@ -118,10 +118,12 @@ int StructTarget :: runIt(VHDLStar* s) {
   StringList clsName = s->className();
   if (!strcmp(clsName,"VHDLCReceive") || !strcmp(clsName,"VHDLCSend")) {
     fi->noSensitivities = TRUE;
+    fi->noOutclocking = TRUE;
     // Do not tack on the firing number to the name.
   }
   else {
     fi->noSensitivities = FALSE;
+    fi->noOutclocking = FALSE;
     // Tack on the firing number to the name.
     tempName << "_F" << s->firingNum();
   }
@@ -319,6 +321,7 @@ void StructTarget :: trailerCode() {
 
       // sourceName is input to register, destName is output of register.
       connectRegister(sourceName, destName, "feedback_clock", arc->type);
+      toggleClock("feedback_clock");
 
       // Must also create signals for those lines which are neither read nor
       // written by a $ref() - e.g. if more delays than tokens read.
@@ -334,6 +337,58 @@ void StructTarget :: trailerCode() {
       }
     }
   }
+
+  // NEW 7/18/96 -- Relocate the addition of registers after all outputs of
+  // firings to here.  Attempt to consolidate this as a postaction in prelude
+  // to having wholesale rearrangement of structure by intermediate tool.
+  VHDLClusterListIter nCluster(clusterList);
+  VHDLCluster* ncl;
+  while ((ncl = nCluster++) != 0) {
+    VHDLFiringListIter nFiring(*(ncl->firingList));
+    VHDLFiring* fi;
+    while ((fi = nFiring++) != 0) {
+      // An exception for those firings that wish to disable
+      // output clocking:
+      if (fi->noOutclocking) continue;
+      // Otherwise, proceed.
+      StringList fiName = fi->name;
+      StringList clkName = fiName;
+      clkName << "_clk";
+      VHDLPortListIter nextPort(*(fi->portList));
+      VHDLPort* po;
+      while ((po = nextPort++) != 0) {
+	if (!strcmp((po->direction),"OUT")) {
+	  StringList oldMapping = "";
+	  StringList newMapping = "";
+	  VHDLPortMap* poMap;
+	  const char* poName = po->name;
+	  /*
+	  {
+	    printf("poName is:  %s\n", poName);
+	    VHDLPortMapListIter pomNext(*(fi->portMapList));
+	    VHDLPortMap* pom;
+	    while ((pom = pomNext++) != 0) {
+	      const char* nameo = pom->name;
+	      printf("Port Map Name:  %s\n", nameo);
+	    }
+	  }
+	  */
+	  poMap = fi->portMapList->vhdlPortMapWithName(poName);
+	  if (!poMap) {
+	    Error::abortRun("poMap is null.");
+	    return;
+	  }
+	  oldMapping = poMap->mapping;
+	  newMapping = oldMapping;
+	  newMapping << "_new";
+	  poMap->mapping = newMapping;
+	  fi->signalList->put(newMapping, po->type, newMapping, oldMapping);
+	  connectRegister(newMapping, oldMapping, clkName, po->type);
+	}
+      }
+    }
+  }
+
 
   // Add in the entity, architecture, entity declaration, and
   // component mapping for the controller.
@@ -352,6 +407,7 @@ void StructTarget :: trailerCode() {
   ctlerFi->action = ctlerAction;
   ctlerAction.initialize();
   ctlerFi->varPortList = ctlerVarPortList.newCopy();
+  ctlerFi->noOutclocking = TRUE;
 
   // Create a new VHDLFiringList and put the firing in the list.
   VHDLFiringList* ctlerFl = new VHDLFiringList;
@@ -666,13 +722,17 @@ void StructTarget :: registerState(State* state, const char* varName,
       StringList clockName = sanitize(state->parent()->fullName());
       clockName << "_F" << thisFiring;
       clockName << "_clk";
-      // Create a register for data value.
-      connectRegister(temp_out, temp_out_reg, clockName, stType);
-      firingSignalList.put(temp_out_reg, stType, temp_out_reg, "");
+      // NEW: Stil need to get that clock timing right.
+      toggleClock(clockName);
+
+      //      // Create a register for data value.
+      //      connectRegister(temp_out, temp_out_reg, clockName, stType);
+      //      firingSignalList.put(temp_out_reg, stType, temp_out_reg, "");
     }
 
     // Reset state's lastRef name.
-    listState->lastRef = temp_out_reg;
+    //    listState->lastRef = temp_out_reg;
+    listState->lastRef = temp_out;
   }
 
   // Reset state's lastFiring tag just before exiting.
@@ -725,8 +785,11 @@ void StructTarget :: registerSource(StringList type/*="INTEGER"*/) {
 // Connect a multiplexor between the given input and output signals.
 void StructTarget :: connectMultiplexor(StringList inName, StringList outName,
 					StringList initVal, StringList type) {
+  assertClock("control");
+  /*
   // Add the clock to the list of clocks to be triggered.
   const char* clock = "control";
+  // First check to see if it isn't already listed at the end.
   if (clockList.tail()) {
     if (strcmp(clockList.tail(),clock)) {
       clockList << clock;
@@ -743,6 +806,7 @@ void StructTarget :: connectMultiplexor(StringList inName, StringList outName,
 		<< "system_clock'event and system_clock = TRUE;\n";
     ctlerAction << clock << " <= TRUE;\n";
   }
+  */
 
   registerMultiplexor(type);
   StringList label = outName;
@@ -805,8 +869,10 @@ void StructTarget :: registerMultiplexor(StringList type/*="INTEGER"*/) {
 // Connect a register between the given input and output signals.
 void StructTarget :: connectRegister(StringList inName, StringList outName,
 				     StringList clkName, StringList type) {
-  // Add the clock to the list of clocks to be triggered.
-  addClock(clkName);
+  // NEW: We add registers after all firings run now, so we add clock
+  // at the time of firing to preserve order, no need to add clock now.
+  //  // Add the clock to the list of clocks to be triggered.
+  //  toggleClock(clkName);
 
   registerRegister(type);
   StringList label = outName;
@@ -940,8 +1006,12 @@ void StructTarget :: registerPortHole(VHDLPortHole* port, const char* dataName,
   }
   else {
     // Create a register for data value.
-    connectRegister(sourceName, sinkName, clockName, port->dataType());
-    firingPortMapList.put(ref, sourceName);
+    //    connectRegister(sourceName, sinkName, clockName, port->dataType());
+    //    firingPortMapList.put(ref, sourceName);
+    // NEW: Since eliminating reg here, output from port directly onto sinkName.
+    firingPortMapList.put(ref, sinkName);
+    // NEW: But still need right clock timing, so add a clock here.
+    toggleClock(clockName);
   }
 
   // For wormhole inputs, create a system port.
@@ -954,7 +1024,7 @@ void StructTarget :: registerPortHole(VHDLPortHole* port, const char* dataName,
     //    systemPortList.put(ref, port->direction(), port->dataType());
   }
   else {
-    firingSignalList.put(sourceName, port->dataType(), ref, ref);
+    //    firingSignalList.put(sourceName, port->dataType(), ref, ref);
     firingSignalList.put(sinkName, port->dataType(), ref, ref);
   }
 }
@@ -1609,14 +1679,14 @@ void StructTarget :: beginIteration(int /*repetitions*/, int /*depth*/) {
 
 // Generate code to end an iterative procedure
 void StructTarget :: endIteration(int /*reps*/, int /*depth*/) {
-  addClock("iter_clock");
-  ctlerPortList.put("iter_clock", "OUT", "boolean");
-  ctlerPortMapList.put("iter_clock", "iter_clock");
-  ctlerSignalList.put("iter_clock", "boolean", "", "");
+  toggleClock("iter_clock");
+  //  ctlerPortList.put("iter_clock", "OUT", "boolean");
+  //  ctlerPortMapList.put("iter_clock", "iter_clock");
+  //  ctlerSignalList.put("iter_clock", "boolean", "", "");
 }
 
 // Add the clock to the clock list and generate code to toggle it.
-void StructTarget :: addClock(const char* clock) {
+void StructTarget :: toggleClock(const char* clock) {
   // Pulse it HI-LO if it isn't already at the end of the list.
   if (!(clockList.tail()) || (strcmp(clockList.tail(),clock))) {
     clockList << clock;
@@ -1627,6 +1697,24 @@ void StructTarget :: addClock(const char* clock) {
     ctlerAction << "wait until "
 		<< "system_clock'event and system_clock = TRUE;\n";
     ctlerAction << clock << " <= FALSE;\n";
+    ctlerPortList.put(clock, "OUT", "boolean");
+    ctlerPortMapList.put(clock, clock);
+    ctlerSignalList.put(clock, "boolean", "", "");
+  }
+}
+
+// Add the clock to the clock list and generate code to assert it.
+void StructTarget :: assertClock(const char* clock) {
+  // Assert it HI if it isn't already at the end of the list.
+  if (!(clockList.tail()) || (strcmp(clockList.tail(),clock))) {
+    clockList << clock;
+    ctlerAction << "     -- Assert " << clock << "\n";
+    ctlerAction << "wait until "
+		<< "system_clock'event and system_clock = TRUE;\n";
+    ctlerAction << clock << " <= TRUE;\n";
+    ctlerPortList.put(clock, "OUT", "boolean");
+    ctlerPortMapList.put(clock, clock);
+    ctlerSignalList.put(clock, "boolean", "", "");
   }
 }
 
