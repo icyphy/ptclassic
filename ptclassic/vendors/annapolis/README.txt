@@ -24,7 +24,15 @@ Adding links for installed boards...
 /dev/pw*: No such file or directory
 
 
-
+Here's how to replicate:
+andrews.eecs 42# pwd
+/platform/sun4u/kernel/drv
+andrews.eecs 43# /usr/sbin/rem_drv pwfdrv
+andrews.eecs 44# /usr/sbin/add_drv -m"* 0666 root root" -i'"pci12db,1"' pwfdrv
+drvconfig: Driver (pwfdrv) failed to attach
+Warning: Driver (pwfdrv) successfully added to system but failed to attach
+andrews.eecs 45# /usr/sbin/modinfo | grep pwfdrv
+andrews.eecs 46# 
 
 
 To: Bill Hulbert <hulbert@annapmicro.com>
