@@ -15,97 +15,12 @@ Start Pigi:
 .(c
 pigi &
 .)c
-A dialog box titled ``Missing properties for init:schematic'' will appear.
+A dialog box titled ``Missing properties for init.pal:schematic'' will appear.
 Just click the mouse on ``OK'' and continue.
 Wait until the ``Pigi is running'' message appears in the VEM console.
 We are now ready to learn about the basics of using VEM.
-.H2 "Basic VEM Commands"
-.pp
-VEM uses post-fix commands.  This means that the user enters the 
-arguments to a command before the command name itself.  Arguments
-appear in the VEM console window as the user enters them.
-.pp
-There are several types of arguments.  Each argument type is
-entered in a different way.  All graphics arguments are created
-with the left mouse button.  The five types of arguments are listed
-below:
-.BU
-Point: position cursor, click left mouse button
-.BU
-Box: position cursor, drag\**
-.IE drag
-.(f
-\** ``Drag'' means to press
-down on a mouse button, move the mouse while holding it down, and then
-release the button.
-.)f
-left mouse button
-.BU
-Line: make a point, position cursor above point, drag left
-mouse button
-.BU
-Object: use \fIselect-objects\fP and \fIunselect-objects\fP
-commands (explained later)
-.IE "select-objects"
-.IE "unselect-objects"
-.BU
-Text: enclose text in double quotes
-.lp
-Arguments can be removed from the command line by typing the delete
-key, backspace key, or control-u, which deletes all the current arguments.
-There are three ways to enter commands:
-.BU
-Menus: middle-button for VEM commands, shift-middle-button
-for Pigi commands.  Menus are of the ``walking'' variety, as explained before.
-.BU
-Key bindings: commands can be bound to single keys
-and activated by just pressing the key.
-.IE "key bindings"
-Key bindings are case sensitive.
-We'll give key bindings for the Pigi commands that have them
-as we go along.
-There are also tables at the end of this document summarizing
-VEM and Pigi commands and their key bindings.
-.BU
-Type-in: type a colon followed by the command name
-.lp
-Let's try a few examples.
-Place the cursor in the window labeled ``init:schematic'' and:
-.BU
-Type ``shift-Z'' (capital Z) for \fIzoom-out\fP.
-This makes everything smaller.
-.IE zoom-out
-.BU
-Type ``z'' (lower-case z) for \fIzoom-in\fP.
-This makes everything bigger.
-.IE zoom-in
-.BU
-Type ``p'' for \fIpan\fP.  Pan moves the spot under the cursor
-to the center of the window.
-.IE pan
-Some people find the cross-hairs that automatically appear
-in new VEM windows extremely annoying.
-They mark the origin of your schematic, in case the concept
-of an origin in a schematic has any meaning to you.
-.IE cross-hairs
-Panning in some direction is a convenient way to be rid of them.
-.BU
-Try entering each type of argument listed above,
-except for type ``object'', which we will explain later.
-For instance, enter a point.
-You will notice that you are only permitted to place points
-at certain locations.
-VEM has an implicit \fIgrid\fR to which points \fIsnap\fR.
-.IE grid
-.IE snap
-The default snap resolution is suitable for making \*(PT universes.
-Unfortunately, the default scale of the VEM window is far from suitable.
-To correct this, zoom out three times, if you haven't already
-done so.
-You will notice that now you can place points in many more locations.
-If the annoying cross-hairs re-appear, just pan to be rid of them.
-.BU
-Type a ``control-u'' to clear all arguments when you are done.
+More complete VEM documentation can be found in the VEM section
+of the Almagest.
 .H2 "Terminology"
 .pp
 As we said earlier, the fundamental Oct objects that we edit with VEM
@@ -150,19 +65,20 @@ schematic symbols called \fBicons\fP.  These icons are stored in
 interface facets.
 The universe itself can be given an icon, which will become
 its interface facet.
-.H2 "Back to the example"
+.H2 "Building an application"
 .pp
 Now we are ready to create a simple universe.  Let's create a simulation
 that generates a sine wave and displays it.
 .BU
 Open a new facet:
-The facet called ``init:schematic'' is special because pigi always
-.IE init
+The facet that is already open,
+called ``init.pal:schematic'', is special because pigi always
+.IE "init.pal facet"
 opens a facet by this name in the directory in which it starts.
 Instead of using this facet, we will create a new one.
 .in +0.5i
 .LE
-Place cursor in window labeled ``init:schematic''.
+Place cursor in window labeled ``init.pal:schematic''.
 .LE
 Select the \fIopen-facet\fP command from the ``Window''
 Pigi menu (shift-middle-button).
@@ -172,9 +88,6 @@ Alternatively, type an ``F''.
 Replace the cell name in the dialog with ``wave'' and click
 the ``OK'' button.  Leave the view and facet entries
 unmodified.  A new window will appear.
-.LE
-Close the ``init:schematic'' window by typing ``control-d''
-in it.
 .in -0.5i
 .BU
 Open a palette:
@@ -186,10 +99,10 @@ Select the \fIopen-palette\fP command from the ``Window''
 Pigi menu (shift-middle-button).
 .IE open-palette
 Alternatively, type an ``O''.
-.IP \-
+.LE
 Pigi will present a palette menu.
 Select the main ``sdf'' palette by clicking
-any button in the circle next to the
+the left button in the box next to the
 ``~ptolemy/src/domains/sdf/icons/main.pal'' entry
 and then click on ``OK''.
 This palette shows the basic synchronous dataflow stars that are available.
@@ -197,41 +110,141 @@ This palette shows the basic synchronous dataflow stars that are available.
 The companion palette, ``~ptolemy/src/domains/sdf/icons/dsp.pal'',
 has more advanced signal processing stars in it.
 .in -0.5i
+.H2 "Some Basic VEM Commands"
+.pp
+At this time, it is worth exploring some basic VEM commands for
+manipulating window displays.
+VEM uses post-fix commands.  This means that the user enters the 
+arguments to a command before the command name itself.  Arguments
+appear in the VEM console window as the user enters them.
+.pp
+There are several types of arguments.  Each argument type is
+entered in a different way.  All graphics arguments are created
+with the left mouse button.  The five types of arguments are listed
+below:
 .BU
-Select a star:
-there should be a label on each icon that gives its name.
-If the label is not visible, typing control-p with the mouse cursor
-on top of the icon will display its full name in the VEM console window.
-You can more closely examine this palette using the following operations.
-.in +0.5i
-.LE
-Use the pan and zoom commands to zoom in on a particular
-area of the palette.  For example, create a box around any icon and
-type ``z'' for \fIzoom-in\fP.
-.LE
-Create a box around any icon and execute \fIopen-window\fP
-in the VEM ``System'' menu (middle-button) or just type ``o''.
-Use \fIclose-window\fP or ``control-d'' to close the window.
+Point: position cursor, click left mouse button
+.BU
+Box: position cursor, drag\**
+.IE drag
+.IE "drawing a box"
+.IE "box"
+.(f
+\** ``Drag'' means to press
+down on a mouse button, move the mouse while holding it down, and then
+release the button.
+.)f
+left mouse button
+.BU
+Line: make a point, position cursor above point, drag left
+mouse button
+.IE "drawing a line"
+.IE "line"
+.BU
+Object: use \fIselect-objects\fP and \fIunselect-objects\fP
+commands (explained later)
+.BU
+Text: enclose text in double quotes
+.lp
+Arguments can be removed from the command line by typing the delete
+key, backspace key, or ``control-u'', which deletes all the current arguments.
+There are three ways to enter commands:
+.BU
+Menus: middle-button for VEM commands, shift-middle-button
+for Pigi commands.  Menus are of the ``walking'' variety, as explained before.
+.BU
+Key bindings: commands can be bound to single keys
+and activated by just pressing the key.
+.IE "key bindings"
+.IE "bindings"
+Key bindings are case sensitive.
+We'll give key bindings for the Pigi commands that have them
+as we go along.
+There are also tables at the end of this document summarizing
+VEM and Pigi commands and their key bindings.
+.BU
+Type-in: type a colon followed by the command name
+.lp
+Let's try a few examples.
+Place the cursor in the palette window and:
+.BU
+Type ``shift-Z'' (capital Z) for \fIzoom-out\fP.
+This makes everything smaller.
+.IE zoom-out
+.BU
+Type ``z'' (lower-case z) for \fIzoom-in\fP.
+This makes everything bigger.
+.IE zoom-in
+If you zoom in sufficiently, labels will appear below each icon
+giving the name of the star.  VEM does not display these labels
+if they will be too small.
+.BU
+The VEM \fIshow-property\fR command (``control-p'') is useful
+for finding out the name of a star when the lable is not visible.
+Just place the mouse cursor on the icon of interest and type
+``control-p''.
+.IE "show-property"
+.BU
+Try ``p'' for \fIpan\fP.  Pan moves the spot under the cursor
+to the center of the window.
+.IE pan
+.BU
+The VEM \fIpan\fP command can also take as an argument a point
+which will indicate the new center of the window.
+Recall that the argument must be entered first.
+Place a point somewhere in the palette window by clicking
+the left button, and type ``p''.
+The location of your point became the center of the window.
+.BU
+The VEM \fIopen-window\fP command can take as an argument a box.
+Draw a box in the palette window by dragging the left mouse button.
+Then type ``o'', or find the \fIopen-window\fR command in the VEM
+menu.
 .IE open-window
-.IE close-window
-.LE
-Resize the palette window to make it larger and select
-\fIshow-all\fP from the VEM ``Display'' menu (or type ``f'').
-.IE show-all
-.in -0.5i
 .BU
-Create an instance of the star called ``FloatRamp'':
+Try placing points in the new window.
+Notice that they also appear in the original palette
+window.
+Also notice that you are only permitted to place points
+at certain locations.
+VEM has an implicit \fIgrid\fR to which points \fIsnap\fR.
+.IE grid
+.IE snap
+The default snap resolution is suitable for making \*(PT universes.
+.BU
+You can get rid of your point (or any argument list) by typing ``control-u''.
+You can delete arguments one-at-a-time by typing ``control-h''.
+Try placing several points and then deleting them one by one.
+.BU
+You can close the new window (or any window)
+with ``control-d''.
+.IE close-window
+.BU
+A particularly useful command at this time is \fIshow-all\fP, or ``f''.
+Try this command in the palette window.
+This rescales and recenters the display so that everything in
+the facet is visible.
+.IE "show-all"
+.BU
+You can also resize a window, using whatever X Window
+bindings you have installed, and then type ``f'' to show all.
+.H2 "Back to the example"
+.BU
+Draw a box around the first five rows and columns of the palette,
+and type ``o'' to open a new window.  This window contains all the
+stars you will need for this example.  Hopefully, the labels are
+visible.  If not, you can use the ``control-p'' command to verify
+the names of the stars.
+.BU
+Create an instance of the star called ``FloatRamp'', which should
+be at the upper right of your new window (the fifth star of the first
+row).  Its icon is an orange triangle.  To do this:
 .in +0.5i
 .LE
-While in the window ``wave:schematic'', zoom out three times
-(type ``Z'').
+With your mouse cursor in the window ``wave:schematic'':
 .LE
-Create a point in the ``wave:schematic'' window anywhere in the
+Create a point anywhere in the
 window by clicking the left button.
-.LE
-Locate the ``FloatRamp'' icon in the palette.
-It's the fifth one to the right of the upper-left corner, and
-has as its icon an orange triangle.
 .LE
 Move the cursor over the ``FloatRamp'' icon in the palette and
 press the ``c'' key.
@@ -243,8 +256,6 @@ icon.  The actual data which describes how the ``FloatRamp'' icon should
 be drawn is stored in another facet (an interface facet).  An
 \fBinstance\fP\ of the `FloatRamp'' icon points to this facet.
 .IE instance
-Use \fIzoom-out\fP if necessary, so the icon is in full
-view.
 .in -0.5i
 .BU
 Delete and select instances:
@@ -253,9 +264,9 @@ need to delete objects.  As an example, let's create another ramp
 instance and then delete it.
 .in +0.5i
 .LE
-Zoom out and create another ramp instance next to the first one:
+Create another ramp instance next to the first one:
 place a point near the original ramp, place the cursor over the
-ramp icon in the palette, and press ``c''.
+ramp icon in the palette and press ``c''.
 Actually, you don't have to use the icon in the palette \- you
 could also put the cursor over the already existing ramp icon
 and achieve the same effect.
@@ -274,6 +285,13 @@ does the reverse of \fIselect-objects\fP.
 .LE
 Execute \fIdelete-objects\fP by typing ``D'' (upper-case!).
 This deletes the objects we selected previously.
+.LE
+You could also have deleted the newly created ramp with the \fIundo\fR
+command (``U'').
+.IE undo
+This is an infinite undo, so you can backtrack through all changes
+you have made since starting the VEM session by repeatedly executing
+the undo command.
 .LE
 Sometimes when you use the select and unselect commands, the
 objects are not redrawn correctly.  When this happens, use the
@@ -301,6 +319,10 @@ we will connect them together.
 .BU
 Connect the ramp output to the sin input:
 .in +0.5i
+.LE
+Type ``f'' to show all.
+This will rescale your system, and make it easier
+to make connections.
 .LE
 Draw a line between the output of the ramp and the input of the
 Sin:
@@ -330,7 +352,7 @@ Execute the \fIrun\fP command from the Pigi ``Exec'' menu,
 or type an ``R''.
 .LE
 Enter ``100'' for the number of iterations.
-Do this by typing control-k to remove the default entry,
+Do this by typing ``control-k'' to remove the default entry,
 typing 100, and clicking ``OK''.
 .LE
 A new window with a graph of a rough
@@ -338,7 +360,7 @@ sine wave should appear.
 The execution of the Xgraph star created
 this new window which shows the output of our simulation.
 To remove this window, click on the ``Close'' button or
-press control-d in it.
+press ``control-d'' in it.
 .in -0.5i
 .BU
 Save the facet by typing ``S'' (upper-case) with the cursor in
@@ -361,12 +383,12 @@ that shows the current parameters of the ramp.
 .IE edit-params
 .LE
 Replace the value of ``step'' with ``PI/50''.
-(You can use control-k to erase the old value.)
+(You can use ``control-k'' to erase the old value.)
 Finally, click the ``OK'' button to store the new parameters.
 This is an example of Ptolemy's parameter expression syntax.
 This syntax supports addition, subtraction, multiplication,
 and division, written exactly as they would be in C or Fortran
-(exponentiation is not supported).  The built-in symbol PI has
+(exponentiation is not yet supported).  The built-in symbol PI has
 the value 3.14... as you would expect.
 .in -0.5i
 .BU
@@ -375,15 +397,47 @@ should look like one cycle of a sine wave.
 .BU
 Use \fIsave-window\fP again to save the new parameters.
 .BU
+To be able to conveniently access this example
+again, you should create an icon for it.
+To do this, use the pigi command
+``Extend:make-schem-icon'', or ``@''.
+.IE "make-schem-icon"
+.IE icons
+.IE "making icons"
+Just place the mouse cursor in the ``wave'' facet
+window, and hit the ``@'' key.
+A dialog box appears asking for the name of the
+palette in which you would like to put the icon.
+By convention, we put universe icons in
+palettes called ``init.pal''.
+So replace the default entry with ``init.pal''.
+When making the icon is finished, find the ``init.pal''
+window that first opened when you started the system,
+and type ``f'' to show all.
+An icon will appear.  Looking inside this icon
+(``i'') will get you your ``wave'' palette.
+The second item in the palette is a marker
+indicating where the next icon that you create
+will go.
+Henceforth, anytime you start pigi in this
+same directory, the first window you will see
+will be this ``init.pal'' window.
+.BU
 Our example is now complete.  To exit:
 .in +0.5i
 .LE
 Close all xgraph windows.
 .LE
-Execute \fIexit-pigi\fP from the Pigi menu.
+Type ``control-d'' in the VEM console window.
+A dialog box will appear asking you to choose buffers to be saved.
+Unfortunately, as of this writing, some of these have already been
+saved, and nothing has changed.  To indicate which ones you wish
+to save, click on the box to the left of each name.  Then click on the
+``OK'' button.
+Do not attempt to save any facets belonging to the user ``ptolemy''.
 .LE
-Execute \fIclose-window\fP with the cursor in the VEM
-console window (or type control-d).
+A final warning appears telling you that closing the console window
+will terminate the program.  Click on ``Yes''.
 .in -0.5i
 .H2 "Particle Types"
 .pp

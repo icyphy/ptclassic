@@ -31,7 +31,7 @@ The system palette contains input and output ports which can be instantiated
 into schematics just like stars.
 .BU
 Use \fIopen-facet\fP (or ``F'') to open the ``singen:schematic''
-you created earlier (using ``cp -r'').
+you created using ``cp -r''.
 You must replace the default name ``untitled'' with ``singen''.
 .BU
 In the ``singen:schematic'' window, delete the Xgraph star and
@@ -42,13 +42,13 @@ and then press ``D'' to delete them.
 .BU
 Place an output port where the Xgraph star used to be and connect
 it to the output of the Sin star.
-The output port is the one with an arrowhead.
+The output port is the icon in the system palette with an arrowhead.
 .BU
 Name the output port ``out'':
 .LE
-Position the cursor over the new output port.
+Position the cursor over the black box on the new output port.
 .LE
-Type ``out'' as a text argument, including quotes.
+Type "out" as a text argument, including quotation marks.
 .LE
 Type ``c'' for \fIcreate\fP.
 Again, note that the \fIcreate\fP command has a different action
@@ -66,21 +66,26 @@ Create an icon:
 .LE
 Place cursor in ``singen:schematic'' window.
 .LE
-Execute \fImake-schem-icon\fP in the Pigi ``Extend'' menu.
+Execute \fImake-schem-icon\fP in the Pigi ``Extend'' menu (``@'').
 .IE make-schem-icon
 .LE
 The dialog box should contain:
 .(c
-Palette name:  ./user.pal
+Palette:  ./user.pal
 .)c
 This specifies the name of the palette that will contain your icon.
 By convention, we usually put galaxy icons in the palette called
 ``user.pal'' in the current directory.
 Hence, this is the default name.
 .LE
-Click ``OK'' and wait until \fImake-schem-icon\fP is done.
+Click ``OK''.
+Since you had already created an icon for the ``wave'' universe, and
+that icon was copied by your ``cp -r'', VEM asks whether it is OK to
+overwrite the icon.
+Click ``OK''.
+Wait until \fImake-schem-icon\fP is done.
 VEM informs you that it is done with a message in the VEM console
-window, which is likely to be buried by now.
+window, which may be buried by now.
 You must find it and bring it to the surface.
 .BU
 Open the palette called ``user.pal'' using \fIopen-palette\fP.  The
@@ -107,6 +112,9 @@ Unless the main ``sdf'' palette is already open, you'll probably
 need to open it to create instances of the ``Xgraph'' and
 ``FloatProduct'' stars (the latter star is in the second row,
 sixth from the left).
+\fBHint\fR: If you place the icons so that their terminals
+fall on top of one another, then a connection gets made without
+having to draw a wire.
 .BU
 Now run the universe with the number of iterations set to 100.  The output
 should appear as a squared sine wave, which is just an inverted
@@ -144,6 +152,11 @@ New name:  freq
 New value:  PI/50
 .)c
 Then click on ``OK''.
+Recall that you can use ``tab'' to move from one field to the next
+of the dialog box and ``meta-return'' instead of ``OK''.
+Hence, the dialog can be managed from the keyboard, without requiring
+the mouse.
+.IE "dialog boxes"
 .LE
 We just created a new formal parameter called ``freq'' with a
 default value of ``PI/50''.  Additional parameters may be added or
@@ -159,8 +172,8 @@ Place the cursor over the ramp icon in ``singen:schematic''.
 .LE
 Execute \fIedit-params\fP and fill in the dialog as follows:
 .(c
-start:  0.0
-increment:  freq
+step:  freq
+value:  0.0
 .)c
 This allows the ``freq'' parameter of a singen instance to control
 the increment of the internal ramp star, thus controlling the
@@ -197,7 +210,14 @@ For example, all of the facets we have created so far are in the
 An important note: whenever the contents of a galaxy are changed so that
 the new definition has different I/O ports, the icon must be updated as
 well.  You can do this by calling \fImake-schem-icon\fP again to replace
-the old icon with a new one.  Furthermore, whenever you update the
+the old icon with a new one.
+.IE "make-schem-icon"
+VEM will not allow you to overwrite the old icon if you have instances
+of the old icon in any open window (regardless of whether the window
+is iconified).  Hence, you must either close those windows with
+``control-d'' or delete the offending icon before replacing
+it with a new icon.
+Furthermore, whenever you update the
 formal parameters of a galaxy or create a new icon for a galaxy, you
 must also re-instantiate the icon in all facets that refer to it.  This
-insures that data will be consistent.
+ensures that data will be consistent.
