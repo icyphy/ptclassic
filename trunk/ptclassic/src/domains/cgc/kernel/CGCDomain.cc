@@ -49,6 +49,9 @@ extern const char CGCdomainName[] = "CGC";
 class CGCDomain : public Domain {
 public:
 	// no XXXinCGC wormholes yet, so no newWorm
+	Star& newWorm(Galaxy& innerGal, Target* tg)  {
+		LOG_NEW; return *new CGCWormhole(innerGal, tg);
+	}
 
 	// new fromUniversal EventHorizon
 	EventHorizon& newFrom() {
