@@ -31,7 +31,7 @@ $Id$
 **************************************************************************/
 
 
-class Block : NamedObj
+class Block : public NamedObj
 {
 public:
 	// Initialize the data structures
