@@ -242,7 +242,7 @@ fa_geometry *outGeoPtr;
     register fa_vertex *fangVertPtr;
     struct octPoint coord;
     octTransformType trType;
-    int mustTransformP;
+    int mustTransformP = 0;
 
     HAR_START("harAddTransformedFang");
 
