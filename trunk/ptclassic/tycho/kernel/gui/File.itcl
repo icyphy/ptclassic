@@ -1536,11 +1536,11 @@ body ::tycho::File::initializeMenubar {} {
 	    -command {::tycho::File::openContext \
 	    [file join \$TYCHO lib idx tycho.idx]}
     
-    set nm [::tycho::autoName .index]
     $myMenubar command "Code Index..." Help -underline 0 \
-	    -command "::tycho::IndexBrowser $nm \
+	    -command {set _nmBogosity [::tycho::autoName .index]; \
+            ::tycho::IndexBrowser $_nmBogosity \
 	    -file [file join \$TYCHO lib idx codeDoc.idx] \
-	    -width 80; $nm centerOnScreen"
+	    -width 80; $_nmBogosity centerOnScreen}
     
     $myMenubar command "Class Diagram" Help -underline 6 -command \
 	    {::tycho::File::openContext \
