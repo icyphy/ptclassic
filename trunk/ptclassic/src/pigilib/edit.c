@@ -641,14 +641,15 @@ long userOptionWord;
     ViDone();
 }
 
-/* Maximum number of architectures that can be supported by one domain */
-#define MAX_NUM_ARCHS 50
+/* Maximum number of targets that can be supported by one domain */
+#define MAX_NUM_TARGETS 50
 
 /* Declare the functions in kernelCalls that the next func uses */
-int supportedArches();
+int KcDomainTargets();
+char* KcDefTarget();
 
 int
-RpcEditArch(spot, cmdList, userOptionWord)
+RpcEditTarget(spot, cmdList, userOptionWord)
 RPCSpot *spot;
 lsList cmdList;
 long userOptionWord;
@@ -656,11 +657,11 @@ long userOptionWord;
     dmWhichItem *items;
     octObject facet;
     char buf[MSG_BUF_MAX];
-    char *arch;
-    int i, which, nArchs;
-    char *archNames[MAX_NUM_ARCHS];
+    char *target, *defaultTarget;
+    int i, which, nTargets, galFlag = 0;
+    char *targetNames[MAX_NUM_TARGETS];
 
-    ViInit("edit-architecture");
+    ViInit("edit-target");
     ErrClear();
     /* get current facet */
     facet.objectId = spot->facet;
@@ -669,38 +670,51 @@ long userOptionWord;
         ViDone();
     }
     setCurDomainF(&facet);
-    nArchs = supportedArches(archNames,MAX_NUM_ARCHS);
+    nTargets = KcDomainTargets(targetNames,MAX_NUM_TARGETS);
 
-    if(nArchs == 0) {
-	PrintErr("No architectures supported by current domain.");
+    if(nTargets == 0) {
+	PrintErr("No targets supported by current domain.");
 	ViDone();
     }
 
     /* init data structure for dialog box... */
-    items = (dmWhichItem *) malloc(nArchs * sizeof(dmWhichItem));
-    for (i = 0; i < nArchs; i++) {
-        items[i].itemName = archNames[i];
+    items = (dmWhichItem *) malloc(nTargets * sizeof(dmWhichItem));
+
+    for (i = 0; i < nTargets; i++) {
+        items[i].itemName = targetNames[i];
         items[i].userData = NULL;
         items[i].flag = 0;
     }
 
-    if (!GOCArchProp(&facet, &arch, archNames[0])) {
+    /* for a galaxy, add "<parent>" as an option */
+
+    if (IsGalFacet(&facet)) {
+	items[nTargets].itemName = defaultTarget = "<parent>";
+	items[nTargets].userData = NULL;
+	items[nTargets].flag = 0;
+	galFlag = 1;
+    }
+    else defaultTarget = KcDefTarget();
+    
+    if (!GOCTargetProp(&facet, &target, defaultTarget)) {
         PrintErr(ErrGet());
         ViDone();
     }
 
-    sprintf(buf, "architecture = '%s'", arch);
-    if (dmWhichOne(buf, nArchs, items, &which, NULL, NULL) != VEM_OK
+    sprintf(buf, "target = '%s'", target);
+    if (dmWhichOne(buf, nTargets+galFlag, items, &which, NULL, NULL) != VEM_OK
         || which == -1) {
         PrintCon("Aborted entry");
         ViDone();
     }
-    arch = archNames[which];
-    if (!SetArchProp(&facet, arch)) {
+
+    target = targetNames[which];
+
+    if (!SetTargetProp(&facet, target)) {
         PrintErr(ErrGet());
         ViDone();
     }
-    PrintCon(sprintf(buf, "architecture = '%s'", arch));
+    PrintCon(sprintf(buf, "target = '%s'", target));
     free(items);
     ViDone();
 }
