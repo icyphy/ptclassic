@@ -2,9 +2,9 @@ defstar {
 	name { Sin }
 	domain { CG56 }
 	desc { 
-DSP56000 - Sin function.
+Sine function.
 Calculation by table lookup.  Input range of (-1,1) scaled by pi.
-output is sin(pi*input)
+Output is sin(pi*input).
 	}
 	version { $Id$ }
 	acknowledge { Gabriel version by Maureen O'Reilly }
@@ -12,7 +12,11 @@ output is sin(pi*input)
 	copyright { 1992 The Regents of the University of California }
 	location { CG56 demo library }
 	explanation {
-
+This star computes the sine of the input, which must be in the range
+(-1.0, 1.0).
+The output equals sin($~pi~cdot~$\fIin\fR),
+so the input range is effectively (-$~pi$, $pi~$).
+The output is in the range (-1.0, 1.0).
 	}
 	input {
 		name {input}

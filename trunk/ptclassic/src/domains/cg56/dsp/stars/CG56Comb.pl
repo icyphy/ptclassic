@@ -8,13 +8,14 @@ defstar {
 	copyright { 1992 The Regents of the University of California }
 	location { CG56 demo library }
         explanation {
-DSP56000 - A comb filter with a one-pole lowpass filter
-           in the delay loop.  The pole location is given
-           by the pole parameter.  The reverberation time
-           is given by the time input.  This filter is
-           from fig. 5 of J. A. Moore, `About this
-           reverberation business', Computer Music
-           Journal, Vol.  3, No. 2.
+.pp
+A comb filter with a one-pole lowpass filter
+in the delay loop.  The pole location is given
+by the pole parameter.  The reverberation time
+is given by the time input.  This filter is
+from fig. 5 of J. A. Moore, `About this
+reverberation business', Computer Music
+Journal, Vol.  3, No. 2.
 	}
 
         input  {

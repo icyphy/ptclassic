@@ -7,15 +7,28 @@ defstar {
 	copyright { 1992 The Regents of the University of California }
 	location { CG56 demo library }
         explanation {
-DSP56000 - Second order IIR filter (Biquad).  This biquad is taylored to use the coefs from the DSPlay filter design tool.  If DSPlay gives the coefs:  A B C D E  then define the parameters thus:
-                         a = A
-                         b = B
-                         c = C
-                         d = -(D+1)
-                         e = -E
-Of course this only works if abcde are (-1,+1)
-Xfer function: (a+bz1+cz2)/(1-(d+1)z1-ez2)
-Default coefs:  Low Pass Filter
+Second order IIR filter (Biquad).  This biquad is tailored to use the
+coefficients from the DSPlay filter design tool.
+If DSPlay gives the coefficients: A B C D E then define the parameters
+as follows:
+.sp 0.5
+.(b
+a = A
+b = B
+c = C
+d = -(D+1)
+e = -E
+.)b
+.sp 0.5
+.pp
+This only works if a, b, c, d, and e are in the range (-1,+1).
+The transfer function realized by the filter is:
+.EQ
+H(z) ~ = ~ { { a ~ + ~ b z sup { -1 } ~ + ~ c z sup { - 2 } } over
+{ 1 ~ - ~ (d ~ + ~ 1) z sup { - 1 } ~ - ~ e z sup { -2 } }  }
+.EN
+.pp
+The default coefficients implement a low pass filter.
         }
         input {
                 name { input }
