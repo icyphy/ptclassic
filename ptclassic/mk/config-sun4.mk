@@ -75,3 +75,5 @@ PURECOV = 	purecov $(COLLECTOR)
 # Used to compile xv.  Use -traditional to avoid varargs problems
 XV_CC =		gcc -traditional
 
+# Matlab architecture
+MATARCH = sun4

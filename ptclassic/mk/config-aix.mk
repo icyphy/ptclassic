@@ -97,3 +97,6 @@ TERMLIB_LIBSPEC = -lbsd
 
 # Used to compile xv.  Use -traditional to avoid varargs problems
 XV_CC =        gcc -traditional
+
+# Matlab architecture
+MATARCH = aix

@@ -117,3 +117,5 @@ S56DIR =
 
 # Used to compile xv.  Use -traditional to avoid varargs problems
 XV_CC =		gcc -traditional
+
+# Unknown Matlab architecture - No NetBSD port of Matlab as of 5/27/95

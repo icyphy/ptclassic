@@ -87,3 +87,5 @@ XV_CC =		cc -cckr -DSVR4 -DXLIB_ILLEGAL_ACCESS
 # Used by tcltk to build the X pixmap extension
 XPM_DEFINES =	-DZPIPE
 
+# Matlab architecture
+MATARCH = sgi

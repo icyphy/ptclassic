@@ -125,3 +125,5 @@ FLUSH_CACHE =	flush_cache.o
 # in pigiRpc/makefile, or the make will fail on other archs.
 LIB_FLUSH_CACHE = $(LIBDIR)/flush_cache.o
 
+# Matlab architecture
+MATARCH = hp700

@@ -69,3 +69,6 @@ COLLECTOR = 	-collector=$(ROOT)/gnu/sun4/lib/gcc-lib/sparc-sun-sunos4.1.3/2.6.2/
 PURELINK =	purelink $(COLLECTOR) -hardlink=yes
 PURIFY =	purelink $(COLLECTOR) purify
 QUANTIFY =	purelink $(COLLECTOR) quantify
+
+# Matlab architecture
+MATARCH = sun4
