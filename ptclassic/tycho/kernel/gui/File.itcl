@@ -421,6 +421,15 @@ configbody ::tycho::File::file {
     if {$itk_option(-file) != {NoName}} {
         set file [::tycho::expandPath $file]
     }
+    if {[info exists filesOpen($file)] && ![$filesOpen($file) getReadOnly]} {
+        $filesOpen($file) raiseWindow
+        if {![::tycho::askuser \
+                "File $file is already open for writing.  Proceed anyway? \
+                (The new window will not appear in the Windows menu.)"]} {
+            # Exit by triggering an error.
+            error "Cancelled."
+        }
+    }
     if {[winfo exists $prefix]} {
 	wm iconname $prefix [file tail $file]
         configure -title "$file"
