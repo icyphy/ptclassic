@@ -36,7 +36,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	defstate {
 		name {options}
 		type {string}
-		default {"-P =800x300+0+0"}
+		default {"-bb -tk -P =800x400"}
 		desc { Command line options for the pxgraph program.}
 	}
 	hinclude { "Display.h" }
