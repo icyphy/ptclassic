@@ -422,8 +422,7 @@ static void pl_print_method( fp, node, autotick, unittime )
     fprintf( fp, "    type { void }\n" );
     fprintf( fp, "    code {\n" );    
     fprintf( fp, "\n   /*CLEANUP : code reuse, combine next 2 methods into 1? */\n");
-  /*  fprintf( fp, "    printf(\"emitting event to interrupt Q\");fflush(0);\n\n"); */
-
+  
     output_event_count = 1;
     foreach_net_node_fanout( node, var ) {
         pvar = isOutputEvent( var, node );
@@ -472,7 +471,7 @@ static void pl_print_method( fp, node, autotick, unittime )
             fprintf( fp, "                break;\n" );
         }
     } end_foreach_net_node_fanout;
-    fprintf( fp, "            default:\n             /*   printf(\"dummy event being released \");*/\n                break;\n" );
+    fprintf( fp, "            default:\n                break;\n" );
     fprintf( fp, "      }\n" );
     fprintf( fp, "      if (needResource) { \n");   
     fprintf( fp, "        emitTime = now + (delay/clkFreq); \n");
@@ -486,16 +485,13 @@ static void pl_print_method( fp, node, autotick, unittime )
     fprintf( fp, "        emittedEvents->prepend(newEvent); \n");
     fprintf( fp, "      }\n");
     fprintf( fp, "    }\n  }\n\n");
- 
-
-   
+    
     fprintf( fp, "  method {\n");
     fprintf( fp, "    name { emitEvent }\n");
     fprintf( fp, "    access { public }\n" );
     fprintf( fp, "    type { void }\n" );
     fprintf( fp, "    arglist { \"(PolisEvent* event, double emitTime)\" }\n" );
     fprintf( fp, "    code {\n" );
- /*  fprintf( fp, "      printf(\"emitting event\");fflush(0);\n\n"); */
 
     output_event_count = 1;
     foreach_net_node_fanout( node, var ) {
@@ -534,7 +530,7 @@ static void pl_print_method( fp, node, autotick, unittime )
             fprintf( fp, "                break;\n" );
         }
     } end_foreach_net_node_fanout;
-    fprintf( fp, "            default:\n                printf(\"shouldn't reach here in emitEvent!\");\n                break;\n" );
+    fprintf( fp, "            default:\n               break;\n" );
     fprintf( fp, "      }\n" );
     fprintf( fp, "      tl->sendData();\n");    
     fprintf( fp, "      event->~PolisEvent();\n");
@@ -560,7 +556,6 @@ static void pl_print_method( fp, node, autotick, unittime )
     fprintf( fp, "    type { \"SequentialList*\" }\n" );
     fprintf( fp, "    arglist { \"()\" }\n" );
     fprintf( fp, "    code {\n" );
-  /*  fprintf( fp, "      printf(\"returning list of emitted events\");fflush(0);\n\n"); */
     fprintf( fp, "      return emittedEvents;\n" );
     fprintf( fp, "    }\n}\n\n");
 
@@ -844,7 +839,6 @@ static void pl_print_begin( fp, node, option, trace )
         node_name = net_node_name( node );
     model_name = net_node_name( net_node_model( node ));
     fprintf( fp, "  begin {\n" );
-    fprintf( fp, "          printf(\"Entering begin method\");\n\n"); 
     fprintf( fp, "    char stemp[1024];\n" );
     fprintf( fp, "    InfString name;\n\n" );
     /* set variables which reflect Star parameters, and others*/
