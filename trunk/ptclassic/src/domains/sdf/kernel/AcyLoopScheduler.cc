@@ -51,17 +51,14 @@ Kluwer Academic Publishers, Norwood, MA, 1996
 #include "Error.h"
 #include "pt_fstream.h"
 #include "DataFlowStar.h"
+#include "GraphUtils.h"
 #include <minmax.h>
+#include <iostream.h>
 
 // following defines are used for Blocks
 #define PARTITION flags[2]
 #define TMP_PARTITION flags[1]
 #define NODE_NUM flags[0]
-
-int isAcyclic(Galaxy* g, int ignoreDelayTags);
-void findSources(Galaxy* g, int flagLoc, SequentialList& sources, Block* deletedNode=0);
-void findSinks(Galaxy* g, int flagLoc, SequentialList& sinks, Block* deletedNode=0);
-
 
 // Set a bunch of pointers to 0 (that will be allocated later).
 AcyLoopScheduler :: AcyLoopScheduler()
@@ -96,45 +93,81 @@ path from node i to node j in the SDF graph.  R(i,j) = 0 otherwise.
 <p>
 We use a very simple algorithm to compute this matrix here; there
 are probably faster algorithms around (notably, Strassen's algorithm
-for multiplying 2 NxN matrices in O(N^2.81) time is asymptotically
+for multiplying 2 NxN matrices in O(lg(N)*N^2.81) time is asymptotically
 better than the O(N^3) algorithm used here).
-For each node i, we do a breadth-first search from i and set those
+<p>
+For each node i, we do a depth-first search from i and set those
 entries R(i,j) to 1 for which j gets visted during the search.
-We do this for every node in the graph.  Since every node and edge
-could be visited during the search from i, the running time is
-O(N+E) for one node.  Since there are N nodes, the time is
-O(N(N+E)) = O(N^2 + N*E) = O(N^3) in the worst case.  However, most
-practical acyclic SDF graphs are sparse; hence, O(N^2) is more realistic.
+Starting from a source node, we will visit every edge and node in
+the subgraph that can be reached from that source node.  For each
+edge, there is a potential O(N) update step when the reachability
+matrix is updated.  Hence, if V_i,E_i is the set of nodes and edges
+visited from a source node i, the total time is O( (|E_i|+|V_i|)*N )
+starting from that source node.  Since a node is not visited again if
+it has been visited already, we will only visit all the subgraphs that
+form a disjoint union of the graph.
+Adding up over the source nodes just gives the total running time of
+O(|E|*N+|V|*N) = O(N^3) in general.
+<p>
+However, most practical acyclic SDF graphs are sparse; hence, O(N^2)
+is more realistic.
 
-@SideEffects Creates reachMatrix, a class data member.
+@SideEffects
+Creates <code>reachMatrix</code> a class data member.
+Also, uses <code>flags[1]</code> for marking nodes.
 
 ****/
-void AcyLoopScheduler :: createReachabilityMatrix(Galaxy& gal)
-{
-    DataFlowStar *s, *t, *u;
-    GalTopBlockIter nextStar(gal);
-    SequentialList nodesTobeVisited;
-    reachMatrix.resize(graphSize, graphSize);
 
-    while ((s=(DataFlowStar*)nextStar++) != NULL) {
-	nodesTobeVisited.initialize();
-	nodesTobeVisited.append(s);
-	while ((t = (DataFlowStar*)nodesTobeVisited.getAndRemove()) != NULL) {
-	    SuccessorIter nextSucc(*t);
-	    while ((u=(DataFlowStar*)nextSucc++) != NULL) {
-		if (reachMatrix.m[u->NODE_NUM][s->NODE_NUM]) {
-			StringList message;
-			message << "Failed to create reachability matrix.";
-		    message << "Graph appears to be non-acyclic.";
-		    Error::abortRun(message);
-		    return;
-		}
-		reachMatrix.m[s->NODE_NUM][u->NODE_NUM] = 1;
-		nodesTobeVisited.append(u);
+void AcyLoopScheduler::createReachabilityMatrix(Galaxy& gal)
+{
+    Block *s;
+    int count=0;
+    // reset flags[1] to 0 for all blocks in gal
+    resetFlags(gal,1,0);
+    graphSize = gal.numberBlocks();
+    reachMatrix.resize(graphSize, graphSize);
+    GalTopBlockIter nextStar(gal);
+    while ((s=nextStar++) != NULL) {
+	if (s->flags[1]) continue;
+	if (!(count=visitSuccessors(s,1,count))) return;
+    }
+    cout << "The total number of steps take is " << count << "\n";
+}
+
+int AcyLoopScheduler::visitSuccessors(Block* s, int flagLoc, int cnt)
+{
+    Block *succ;
+    int fl;
+    s->flags[flagLoc] = 1;
+    SuccessorIter nextSucc(*s);
+    while ((succ=nextSucc++) != NULL) {
+	cnt++;
+	fl = succ->flags[flagLoc];
+	if (fl == 1) {
+	    Error::abortRun("Graph is cyclic.  Aborting...");
+	    return FALSE;
+	}
+	if (fl == 0) {
+	    if (!(cnt+=visitSuccessors(succ, flagLoc, cnt))) return FALSE;
+	}
+	// Now we have visited and updated the row in the reachability
+	// matrix corresponding to succ.  Hence, s can visit anything that
+	// succ can; we simply OR succ's row with s's.  However, if
+	// we already know we can visit succ, then we do not have to
+	// update since it would have happened before.
+	if (!reachMatrix.m[s->NODE_NUM][succ->NODE_NUM]) {
+	    cnt += graphSize;
+	    for (int i=0; i<graphSize; i++) {
+		reachMatrix.m[s->NODE_NUM][i] = reachMatrix.m[s->NODE_NUM][i] |
+			reachMatrix.m[succ->NODE_NUM][i];
 	    }
+	    reachMatrix.m[s->NODE_NUM][succ->NODE_NUM] = 1;
 	}
     }
+    s->flags[flagLoc] = 2;
+    return cnt;
 }
+
 
 // following definition is for ports
 #define DELETE flags[2]
@@ -193,6 +226,7 @@ void AcyLoopScheduler :: createIncidenceMatrix(Galaxy& gal)
     DataFlowStar *s, *t;
     DFPortHole* starPort;
     int numP, numD;
+    graphSize = gal.numberBlocks();
     GalTopBlockIter nextStar(gal);
     incMatrix.resize(graphSize,graphSize);
     delMatrix.resize(graphSize,graphSize);
@@ -412,8 +446,9 @@ int AcyLoopScheduler::addTopLevelCluster(Galaxy* gal)
 	cleanupAfterCluster(*gal);
 	if (gal->numberBlocks() != 1) {
 	    StringList message;
-	    message << "Bug in addTopLevelCluster; galaxy has more than";
-		message << "one block after clustering process";
+	    message << "Bug in AcyLoopScheduler::addTopLevelCluster";
+	    message << "galaxy has more than";
+	    message << "one block after clustering process";
 	    Error::abortRun(message);
 	    return -1;
 	}
@@ -529,6 +564,7 @@ int AcyLoopScheduler::RPMC(AcyCluster* gr)
 	    // Means that a bounded cut was not found; call again
 	    // relaxing the bound.  Note that the splitter returns
 	    // -1 iff a cut respecting the bound was not found.
+	    // However, with a bound of N, a cut should always be wrong.
 	    cost = gr->legalCutIntoBddSets(N);
 	}
 	if (cost == -1) {
@@ -536,7 +572,7 @@ int AcyLoopScheduler::RPMC(AcyCluster* gr)
 	    // since normally the graph splitter should never return -1
 	    // if it can find a bounded cut, and the code above takes
 	    // care of that.
-	    Error::abortRun("A bug detected in legalCutIntoBddSets");
+	    Error::abortRun("A bug detected in AcyCluster::legalCutIntoBddSets");
 	    return cost;
 	}
 	// Now build up the right and left subgraphs.
@@ -1048,6 +1084,100 @@ StringList AcyLoopScheduler::dispNestedSchedules(int depth,int i,int j,int g)
     return sch;
 }
 
+// move over to Galaxy later
+void AcyLoopScheduler::isWellOrdered(Galaxy* g, SequentialList& topsort)
+{
+    // Returns a list containing ALL the nodes in the graph in topological
+    // ordering if the graph is
+    // well ordered.  This means that the
+    // following are equivalent for this graph
+    // a) there is only 1 topological sort
+    // b) there is a hamiltonian path
+    // c) there is a total precedence ordering rather than a partial one,
+    // d) For any two nodes u,v, it is either the case that u->v is a path
+    //     or v->u is a path
+
+    // The algorithm is to repeatedly find sources, and return the incomplete
+    // list if there is more than 1 source node at any stage.  If there is
+    // only one source at any stage, we mark that node (meaning it is
+    // "removed" from the graph) and find sources on the resulting
+    // graph.  Worst case running time: O(N+E) where N=graphSize,
+    // E is the number of edges.
+
+
+    int flagLoc = 0, numPasses=0;
+    resetFlags(*g,flagLoc); // reset flags[flagLoc] for all blocks
+    SequentialList sources;
+    findSources(g,flagLoc, sources);
+    while (numPasses < graphSize) {
+	if (sources.size() == 1) {
+	    DataFlowStar* src = (DataFlowStar*)sources.getAndRemove();
+	    topsort.append(src);
+	    src->flags[flagLoc] = 1;
+	    numPasses++;
+	    findSources(g,flagLoc,sources,src);
+	} else {
+	    return;
+	}
+    }
+}
+
+// These methods are for debugging; they print out the various matrices
+// used by this scheduler.
+// This one prints the topology-related matrices
+void AcyLoopScheduler::printTopMatrices()
+{
+    cout << "The incidence matrix is:\n\n" << incMatrix;
+    cout << "The delay matrix is:\n\n" << delMatrix;
+    cout << "The reachability matrix is:\n\n" << reachMatrix;
+}
+
+// This one prints out the matrices used by DPPO
+void AcyLoopScheduler::printDPPOMatrices()
+{
+    cout << "The GCD matrix is:\n\n" << gcdMatrix;
+    cout << "The costs matrix is:\n\n" << costMatrix;
+    cout << "The splits matrix is:\n\n" << splitMatrix;
+}
+
+// This one prints out the RPMC and APGAN topSort arrays
+void AcyLoopScheduler::printTopSorts()
+{
+    cout << "The RPMC top sort array is:\n\n[";
+    for (int i=0; i<graphSize; i++) {
+	cout << RPMCTopSort[i] << "  ";
+    }
+    cout << "]\n\n" << "The APGAN top sort array is:\n\n[";
+    for (i=0; i<graphSize; i++) {
+	cout << APGANTopSort[i] << "  ";
+    }
+    cout << "]\n";
+}
+
+// This one prints out the node number corresponding to each star
+void AcyLoopScheduler::printStarNumbers()
+{
+    for (int i=0; i<graphSize; i++) {
+	cout << nodelist[i]->name() << " : " << i << "\n";
+    }
+    cout << "\n";
+}
+
+ostream& operator << (ostream& o, const SimpleIntMatrix& a)
+{
+    StringList sl;
+    for (int i=0; i<a.nrows; i++) {
+	for (int j=0; j<a.ncols; j++) {
+	    sl << a.m[i][j] << "  ";
+	}
+	sl << "\n";
+    }
+    sl << "\n";
+    o << sl;
+    return o;
+}
+
+/*
 int isAcyclic(Galaxy* g, int ignoreDelayTags)
 {
     // Done by computing breath first search (bfs) on g.
@@ -1103,43 +1233,6 @@ int isAcyclic(Galaxy* g, int ignoreDelayTags)
     return TRUE;
 }
 
-// move over to Galaxy later
-void AcyLoopScheduler::isWellOrdered(Galaxy* g, SequentialList& topsort)
-{
-    // Returns a list containing ALL the nodes in the graph in topological
-    // ordering if the graph is
-    // well ordered.  This means that the
-    // following are equivalent for this graph
-    // a) there is only 1 topological sort
-    // b) there is a hamiltonian path
-    // c) there is a total precedence ordering rather than a partial one,
-    // d) For any two nodes u,v, it is either the case that u->v is a path
-    //     or v->u is a path
-
-    // The algorithm is to repeatedly find sources, and return the incomplete
-    // list if there is more than 1 source node at any stage.  If there is
-    // only one source at any stage, we mark that node (meaning it is
-    // "removed" from the graph) and find sources on the resulting
-    // graph.  Worst case running time: O(N+E) where N=graphSize,
-    // E is the number of edges.
-
-
-    int flagLoc = 0, numPasses=0;
-    resetFlags(*g,flagLoc); // reset flags[flagLoc] for all blocks
-    SequentialList sources;
-    findSources(g,flagLoc, sources);
-    while (numPasses < graphSize) {
-	if (sources.size() == 1) {
-	    DataFlowStar* src = (DataFlowStar*)sources.getAndRemove();
-	    topsort.append(src);
-	    src->flags[flagLoc] = 1;
-	    numPasses++;
-	    findSources(g,flagLoc,sources,src);
-	} else {
-	    return;
-	}
-    }
-}
 
 void findSources(Galaxy* g, int flagLoc, SequentialList& sources, Block* deletedNode)
 {
@@ -1219,3 +1312,51 @@ void findSinks(Galaxy* g, int flagLoc, SequentialList& sinks, Block* deletedNode
 	}
     }
 }
+// old one with BFS
+
+We use a very simple algorithm to compute this matrix here; there
+are probably faster algorithms around (notably, Strassen's algorithm
+for multiplying 2 NxN matrices in O(N^2.81) time is asymptotically
+better than the O(N^3) algorithm used here).
+For each node i, we do a breadth-first search from i and set those
+entries R(i,j) to 1 for which j gets visted during the search.
+We do this for every node in the graph.  Since every node and edge
+could be visited during the search from i, the running time is
+O(N+E) for one node.  Since there are N nodes, the time is
+O(N(N+E)) = O(N^2 + N*E) = O(N^3) in the worst case.  However, most
+practical acyclic SDF graphs are sparse; hence, O(N^2) is more realistic.
+
+void AcyLoopScheduler :: createReachabilityMatrix(Galaxy& gal)
+{
+    DataFlowStar *s, *t, *u;
+    GalTopBlockIter nextStar(gal);
+    SequentialList nodesTobeVisited;
+    graphSize = gal.numberBlocks();
+    reachMatrix.resize(graphSize, graphSize);
+    SimpleIntMatrix nodeColors(1,graphSize);
+
+    while ((s=(DataFlowStar*)nextStar++) != NULL) {
+	nodesTobeVisited.initialize();
+	nodesTobeVisited.append(s);
+	for (int i=0; i<graphSize; i++) nodeColors.m[0][i] = 0;
+	while ((t = (DataFlowStar*)nodesTobeVisited.getAndRemove()) != NULL) {
+	    nodeColors.m[0][t->NODE_NUM] = 2;
+	    SuccessorIter nextSucc(*t);
+	    while ((u=(DataFlowStar*)nextSucc++) != NULL) {
+		if (reachMatrix.m[u->NODE_NUM][s->NODE_NUM]) {
+		    StringList message;
+		    message << "Failed to create reachability matrix.";
+		    message << "Graph appears to be non-acyclic.";
+		    Error::abortRun(message);
+		    return;
+		}
+		reachMatrix.m[s->NODE_NUM][u->NODE_NUM] = 1;
+		if (nodeColors.m[0][u->NODE_NUM] == 0) {
+		    nodesTobeVisited.append(u);
+		    nodeColors.m[0][u->NODE_NUM] = 1;
+		}	
+	    }
+	}
+    }
+}
+*/
