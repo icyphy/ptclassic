@@ -411,8 +411,9 @@ proc ::tycho::simplifyPath {pathName {envVarList {}}} {
 #####################################################################
 #### tmpFileName
 # Return a temporary filename that does not exist yet.
-# The <CODE>TMPDIR</CODE> environment variable is as a base used if it is
-# present, if <CODE>TMPDIR</CODE> is not present, then <CODE>/tmp</CODE>
+# The <CODE>TMPDIR</CODE> environment variable is used as a base if it is
+# present, if <CODE>TMPDIR</CODE> is not present, then
+# <CODE>env(TEMP)</CODE> is used. If neither are present<CODE>/tmp</CODE>
 # is used.
 # If the optional arg `stem' is present, then a unique string is appended
 # on to it.  The stem arg defaults to tytmp.
@@ -428,10 +429,13 @@ proc ::tycho::simplifyPath {pathName {envVarList {}}} {
 #
 proc ::tycho::tmpFileName { {stem {tytmp}} {extension {}}} {
     # Unix-isms here
+    # DOS-ism added ;) Mac-isms, where are you?
     global env
     if [info exists env(TMPDIR)] {
 	set tmpdir $env(TMPDIR)
-    } else {
+    } elseif [info exists env(TEMP)] {
+	set tmpdir $env(TEMP)
+    } else
 	set tmpdir /tmp
     }
     
