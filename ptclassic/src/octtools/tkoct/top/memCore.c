@@ -19,7 +19,6 @@ static char SccsId[] = "$Id$";
 #include "memCore.h"
 #include "memStats.h"
 
-extern caddr_t sbrk();
 extern int end;
 
 /*global*/ TOPLogical _MemInitedB = TOP_FALSE;
@@ -70,7 +69,7 @@ memCoreStatsCalc(pStats)
 
     memset((char*)pStats, 0, sizeof(*pStats));
 
-    pStats->totalMem.bytes = (caddr_t)sbrk(0) - (caddr_t) &end;
+    pStats->totalMem.bytes = ((unsigned)sbrk(0)) - ((unsigned)&end);
 
     /*
      * Go through each of the super heaps and its heaps
