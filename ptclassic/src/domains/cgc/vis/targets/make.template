@@ -42,7 +42,7 @@ CGCKERNEL = $(ROOT)/src/domains/cgc/kernel
 
 INCL= -I$(CGCKERNEL) -I$(CGKERNEL) -I$(SDFKERNEL) -I$(KERNDIR)
 
-SRCS =	CGCVISTarget.cc
+SRCS =	CGCVISSimTarget.cc
 
 HDRS=$(SRCS:.cc=.h)
 
@@ -60,4 +60,3 @@ include $(ROOT)/mk/common.mk
 
 # Don't add anything after the next line; makedepend will zap it.
 # DO NOT DELETE THIS LINE -- make depend depends on it.
-
