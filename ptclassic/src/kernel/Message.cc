@@ -47,6 +47,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "Particle.h"
 #include "Plasma.h"
 #include "Error.h"
+#include <stdio.h>	// Pick up sprintf
 
 Message Envelope::dummyMessage;
 
