@@ -66,6 +66,8 @@ public:
     TimeVal lag;
     TimeVal period;
 
+    void sleepUntil(TimeVal);
+
 protected:
     MTDFThread* myThread;
 };
