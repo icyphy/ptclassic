@@ -61,11 +61,9 @@ public:
     MultiInFSMPort stateIn;
     MultiOutFSMPort stateOut;
 
-    // Return if this state is initial state.
-    int isInit() { return int(isInitState); }
-
-    // Return the next state according the conditions.
-    virtual FSMStateStar *nextState(int& condNum, int preemption);
+    // clear those internal events that are not emitted by the slave
+    // and the triggered action indexed by "actNum".
+    virtual clearIntlEvent (int actNum);
 
     // Execute the action.
     virtual int execAction(int actNum);
@@ -75,6 +73,12 @@ public:
 
     // Get the entry type of a possible transition out of this state.
     int getEntryType(int transNum);
+
+    // Return if this state is initial state.
+    int isInit() { return int(isInitState); }
+
+    // Return the next state according the conditions.
+    virtual FSMStateStar *nextState(int& condNum, int preemption);
 
 protected:
     IntState isInitState;

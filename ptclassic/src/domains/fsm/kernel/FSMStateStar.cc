@@ -92,6 +92,64 @@ void FSMStateStar::begin() {
     }
 }
 
+int FSMStateStar::clearIntlEvent (int actNum) {
+    FSMScheduler *sched = (FSMScheduler *)scheduler();
+    StringListIter nextEvent(sched->intlEventNames);
+    const char* event;
+
+    if (actNum != -1) {
+        // When a triggered action exist, clear those internal events that
+        // (1) are not the outputs of the slave, and
+        // (2) are not the emitted event of the action.
+        StringListIter nextActEvent(parsedActEvents[actNum]);
+        const char* actEvent;
+
+	while ((event = nextEvent++) != NULL) {
+
+            // Check if the event is an output of the slave.
+            if (slave != NULL) {
+                PortHole* p = slave->portWithName(event);
+                if (p != NULL) {
+                    if (p->isItOutput()) continue; // an output found
+                }
+            }
+
+            // Check if the event is an emitted event of the action.
+            nextActEvent.reset();
+            while ((actEvent = nextActEvent++) != NULL) {
+                if (!strcmp(actEvent,event)) break; // an emitted event found
+            }
+            if (actEvent != NULL) continue; // an emitted event found
+
+            // Clear the status of the event to 0 (absent).
+            InfString buf = event;
+            buf << "(s)";
+            Tcl_SetVar(myInterp,buf,"0",TCL_GLOBAL_ONLY);
+        }
+
+    } else {  // else of if (actNum != -1)
+        // When no triggered action, clear those internal events that
+        // are not the outputs of the slave.
+ 	while ((event = nextEvent++) != NULL) {
+            // Check if the event is an output of the slave.
+            if (slave != NULL) {
+                PortHole* p = slave->portWithName(event);
+                if (p != NULL) {
+                    if (p->isItOutput()) continue; // an output found
+                }
+            }
+            
+            // Clear the status of the event to 0 (absent).
+            InfString buf = event;
+            buf << "(s)";
+            Tcl_SetVar(myInterp,buf,"0",TCL_GLOBAL_ONLY);
+        }       
+
+    }
+      
+    return TRUE;
+}
+
 Star* FSMStateStar::createNewWormhole(const char *galname,
                                       const char* where_defined) {
     // Compile the specified galaxy into kernel.
