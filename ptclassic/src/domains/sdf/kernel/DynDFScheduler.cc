@@ -134,8 +134,11 @@ int DynDFScheduler::checkBlocks() {
 	if (! galaxy()) return FALSE;
 
 	DFGalStarIter nextStar(*galaxy());
-	// star initialize.  Stars must be derived from DataFlowStar.
-	// (for example, SDF, DDF).  Also compute the size.
+	// Verify all stars are derived from DataFlowStar
+	// (for example, SDF, DDF), and set their dynamic-execution property.
+	// We cannot do this until after galaxy()->initialize,
+	// because HOF stars might be in the graph before that,
+	// and might add or delete other stars from the graph.
 	DataFlowStar* s;
 	while ((s = nextStar++) != 0) {
 	        if (!s->isA("DataFlowStar")) {
@@ -147,6 +150,10 @@ int DynDFScheduler::checkBlocks() {
 			Error::abortRun (*s,
 				 " cannot be executed by a dynamic scheduler");
 			return FALSE;
+		} else {
+			// some stars may need to be reinitialized after
+			// setDynamicExecution; eg, BDF stars require this
+			s->initialize();
 		}
 	}
 	return TRUE;
