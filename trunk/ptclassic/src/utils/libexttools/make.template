@@ -78,8 +78,8 @@ NEED_MATHEMATICADIR = 	1
 MATLABAUTO = MatlabHook.cc.Auto MatlabIfc.cc.Auto1 MatlabIfc.cc.Auto2 \
 	     MatlabIfc.h.Auto
 REALCLEAN_STUFF = $(MATLABAUTO)
-EXTRA_SRCS = MatlabIfcGen.tcl MatlabIfcGen.data
-$(MATLABAUTO): MatlabIfcGen.tcl MatlabIfcGen.data
+EXTRA_SRCS = MatlabIfcGen.tcl MatlabIfcGen.dat
+$(MATLABAUTO): MatlabIfcGen.tcl MatlabIfcGen.dat
 	cd $(VPATH) && itclsh MatlabIfcGen.tcl
 
 depend: $(MATLABAUTO)
