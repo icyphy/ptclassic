@@ -105,8 +105,15 @@ you should also do:
 cp /Cygnus/cygwin-b20/H-i386-cygwin32/bin/rm.exe /bin
 </pre>
 
-<li> Copy the file gcc.exe from <CODE>Cygnus/cygwin-b20/H-i386-cygwin-32/bin</CODE> to <CODE>/bin</CODE> and rename it to <CODE>cc.exe</CODE>. Otherwise
-you will get problems while trying to compile xv.
+<li> Currently, xv does not build properly.
+You can download a version of xv from
+<a href="ftp://linc.cis.upenn.edu/pub/xv/xv-3.10.NTbin.tar.gz"><CODE>ftp://linc.cis.upenn.edu/pub/xv/xv-3.10.NTbin.tar.gz</CODE></a>
+
+If you plan on trying to compile xv, copy the file gcc.exe from
+<CODE>Cygnus/cygwin-b20/H-i386-cygwin-32/bin</CODE> to
+<CODE>/bin</CODE> and rename it to <CODE>cc.exe</CODE>. Otherwise you
+will get problems while trying to compile xv.
+
 
 <li> Create <CODE>/etc/passwd</CODE> and <CODE>/etc/group</CODE>
 by running 
