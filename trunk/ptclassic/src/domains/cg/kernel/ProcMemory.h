@@ -82,7 +82,8 @@ public:
 	// The string consists of multiple lines, with each line beginning
 	// with the startString and ending with the endString.
 	// In this base class, just return a comment.
-	virtual StringList printMemMap(char* startString, char* endString) {
+	virtual StringList printMemMap(const char* startString,
+				       const char* endString) {
 		StringList l = startString;
 		l += " don't know how to print memory map ";
 		l += endString;
@@ -146,6 +147,9 @@ public:
 
 	// Reset the memory, clearing all previous allocations.
 	void reset();
+
+	// print (debug)
+	StringList print();
 };
 
 class LinProcMemory : public ProcMemory {
@@ -162,8 +166,7 @@ public:
 	// Constructor with name, required State attributes, required PortHole
 	// attributes, starting address, and length specified.
 	LinProcMemory(const char* n, const Attribute& a,
-		      const Attribute& p,unsigned addr, unsigned len)
-		: ProcMemory(n,a,p), mem(addr,len), consec(0) {}
+		      const Attribute& p,unsigned addr, unsigned len);
 
 	~LinProcMemory() { reset();}
 
@@ -185,7 +188,7 @@ public:
 	// Return a string describing the memory map.
 	// The string consists of multiple lines, with each line beginning
 	// with the startString and ending with the endString.
-	virtual StringList printMemMap(char* startString, char* endString);
+	virtual StringList printMemMap(const char* startString, const char* endString);
 };
 
 // this models a two-address-space chip such as the Motorola 56000
@@ -232,7 +235,7 @@ public:
 	// Return a string describing the memory map.
 	// The string consists of multiple lines, with each line beginning
 	// with the startString and ending with the endString.
-	virtual StringList printMemMap(char* startString, char* endString);
+	virtual StringList printMemMap(const char* startString, const char* endString);
 };
 	
 #endif
