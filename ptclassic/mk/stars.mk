@@ -356,9 +356,10 @@ ifdef PN
 	PALETTES += PTOLEMY/src/domains/pn/icons/pn.pal
 	# kernel and stars
 	CUSTOM_DIRS += $(PNDIR)/kernel $(PNDIR)/stars 
-	# PN is only supported under Sun, Solaris and HP-UX operating systems,
-	# matched by patterns sun% and sol% and hppa% respectively
-	ifneq ("$(filter sun% sol% hppa% ,$(PTARCH))","")
+	# PN is only supported under Sun, Solaris, HP-UX  and Linux
+	# operating systems,
+	# matched by patterns sun%, sol%, hppa% and linux% respectively
+	ifneq ("$(filter sun% sol% hppa% linux% ,$(PTARCH))","")
 		STARS += $(LIBDIR)/pnstars.o
 		LIBS += -lpnstars -lpn
 		LIBFILES += $(LIBDIR)/libpnstars.$(LIBSUFFIX) \
@@ -374,9 +375,13 @@ ifdef PN
 			LIBS += -lposixthread \
 				-L$(ROOT)/thread/lib.$(PTARCH) -lgthreads
 		else
-			# HPUX 
-			LIBS += -lposixthread \
-				-L/opt/dce/lib -lcma
+			ifneq ("$(filter linux% ,$(PTARCH))","")
+		        	LIBS += -lposixthread -lpthread
+			else
+				# HPUX 
+				LIBS += -lposixthread \
+					-L/opt/dce/lib -lcma
+			endif
 		endif
 		LIBFILES += $(LIBDIR)/libposixthread.$(LIBSUFFIX)
 	endif
