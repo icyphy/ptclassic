@@ -87,20 +87,29 @@ void Block :: initialize()
 // The real port is always returned (no need to check for aliases).
 PortHole *
 Block::portWithName (const char* name) {
+
 	// If the MultiPortHole name matches, return that
 	// (this will create a new connection)
-	for (int i = multiports.size(); i>0; i--) {
-		MultiPortHole& mpt = multiports++;
-		if (strcmp (name, mpt.readName()) == 0)
-			return &(mpt.newConnection());
-	}
+	MultiPortHole *mpt = multiPortWithName (name);
+	if (mpt) return &(mpt->newConnection());
+
 	// Not found, search the port list
-	for (i=numberPorts(); i>0; i--) {
+	for (int i=numberPorts(); i>0; i--) {
 		PortHole& pt = ports++;
 		if (strcmp (name, pt.readName()) == 0)
 			return &(pt.newConnection());
 	}
 	// Still not found, return NULL
+	return NULL;
+}
+
+// Return the matching MultiPortHole.
+MultiPortHole* Block::multiPortWithName(const char* name) {
+	for (int i = multiports.size(); i>0; i--) {
+		MultiPortHole& mpt = multiports++;
+		if (strcmp (name, mpt.readName()) == 0)
+			return &mpt;
+	}
 	return NULL;
 }
 

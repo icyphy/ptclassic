@@ -87,6 +87,9 @@ public:
 	// Retrieve the PortHole with the given name
 	PortHole *portWithName(const char* name);
 
+	// Retrieve the MultiPortHole with the given name
+	MultiPortHole *multiPortWithName(const char* name);
+
 	// Get a list of contained PortHole names
 	int portNames (const char** names, int* io, int nMax);
 
