@@ -49,7 +49,7 @@
 #
 # <p><b>Bugs</b>: (none)
 #
-# <p><b>Example</b>: Create a labelled rectangle:
+# <p><b>Example</b>: Create a labeled rectangle:
 # <tcl quiet><pre>
 #  source $tycho/editors/slate/doc/internals/newslate.itcl
 #  $slate create LabeledFrame 40 40 100 80 -color green &#92

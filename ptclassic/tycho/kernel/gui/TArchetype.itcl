@@ -447,7 +447,7 @@ body ::tycho::TArchetype::seeFragment {point} {
 # Get the value of the given _parameter_ of _stylesheet_,
 # where _parameter_ is parameter name with a style of the
 # style-sheet. The style user is the correct style for this
-# particular widget, based upon user's style prefeernces.
+# particular widget, based upon user's style preferences.
 # Color and font values are converted to raw X values
 # before returning.
 #

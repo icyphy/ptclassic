@@ -262,7 +262,7 @@ body ::tycho::FontManager::checkXFont {font} {
 #
 body ::tycho::FontManager::family {{type {}} {family {}} args} {
     if { $type == "" } {
-	# Return the prefered fonts
+	# Return the preferred fonts
 	return [concat $serifFamilies $sansserifFamilies \
 		$constantwidthFamilies]
     } elseif { $family == "" } {
