@@ -34,10 +34,10 @@
 # Many thanks to Mike Peck of Berkeley Camera Engineering (www.bce.com)
 # for providing access to a Solaris 7 machine for testing this port
 
+include $(ROOT)/mk/config-sol2.cfront.mk
+
 # PTSOL7 is read in src/compat/ptolemy/compat.h
 ARCHFLAGS =	-DPTSOL2_5 -DPTSOL2_6 -DPTSOL7 -D_PTHREAD_1003_1c
-
-include $(ROOT)/mk/config-sol2.mk
 
 # Building gthreads fails because of messages like:
 # ../include/pthread.h:179: conflicting types for `pthread_mutex_t'
