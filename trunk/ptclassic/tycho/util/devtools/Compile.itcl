@@ -56,6 +56,9 @@ class ::tycho::Compile {
     ###################################################################
     ####                         public methods                    ####
 
+    # Compile each file in the list of filenames.
+    method compile { filenames}
+
     # Compile and load in each file in the list of filenames.
     method compileAndLoad { filenames}
 
@@ -131,16 +134,23 @@ body ::tycho::Compile::destructor {} {
     ####                      public methods                       ####
 
 #######################################################################
-#### compileAndLoad
-# Compile and load in each file in the list of filenames.
+#### compile
+# Compile each file in the list of filenames.
 #
-body ::tycho::Compile::compileAndLoad {filenames} {
+body ::tycho::Compile::compile {filenames} {
     initialize $filenames
     # Should we check that the files exist here?
     checkSourceFiles
     set makefile [makefileName]
     createMakefile
     compileFiles
+}
+#######################################################################
+#### compileAndLoad
+# Compile and load in each file in the list of filenames.
+#
+body ::tycho::Compile::compileAndLoad {filenames} {
+    eval compile $filenames
     loadFiles
 }
 #######################################################################
