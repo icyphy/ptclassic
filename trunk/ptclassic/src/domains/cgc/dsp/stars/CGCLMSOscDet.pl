@@ -24,30 +24,32 @@ The initial taps of this LMS filter are 1, -2, and 1.  The second tap
 is adapted while the others are held fixed.  The second tap is equal
 to <i>-</i>2<i> a <sub></i>1<i></sub></i>, and its adaptation has the form
 <pre>
-y[n] = x[n] - 2 a sub 1[k] x[n-1] + x[n - 2]
-a sub 1[k] = a sub 1 [k-1] + 2 mu e[n] x[n-1]
+y[n] = x[n] - 2a<sub>1[k]</sub>x[n-1] + x[n-2]a<sub>1[k]</sub> = a<sub>1</sub>[k-1] + 2*mu*e[n]x[n-1]
 </pre>
+<p>
 where <i>y[n]</i> is the output of this filter which can be used as the
 error signal.  The step size term <i>mu</i> is fixed by the value of
 the <i>stepSize</i> parameter.  You can effectively vary the step size
 by attenuating the error term as
 <pre>
-e[n] = {{y[n]} over {k}}
+e[n] = y[n] / k
 </pre>
+<p>
 assuming that k = 1, 2, 3, and so forth.  When the error becomes relatively
 small, this filter gives an estimate of the strongest sinusoidal component:
 <pre>
-a sub 1 = cos omega
+a<sub>1</sub> = cos(omega)
 </pre>
+<p>
 In this implementation the taps are scaled by 1/2 to make the
 star behave like the CG56 version.  Thus the output of the filter is also
 scaled by 1/2.  To compensate for this scaling <i>mu</i> is multiplied by 2. 
-This filter outputs the current value of <i>a <sub></i>1<i></sub></i> on the <i>cosOmega</i>
-output port.  The initial value is <i>a <sub></i>1<i></sub> </i>=<i> </i>1, that is, zero frequency,
+This filter outputs the current value of <i>a</i><sub>1</sub> on the <i>cosOmega</i>
+output port.  The initial value is <i>a</i><sub>1</sub> = 1, that is, zero frequency,
 so the initial value of the second tap is -1(because of the 1/2 scaling).
 <p>
 For more information on the LMS filter implementation, see the description
-of the LMS star upon which this star derived.
+of the LMS star upon which this star is derived.
 <a name="Direct Adaptive Frequency Estimation"></a>
 	}
 	seealso {FIR, LMS}
