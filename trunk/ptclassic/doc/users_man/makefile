@@ -19,8 +19,7 @@ clean:	$(CLEAN)
 chapter%.dvi:
 	$(ROOT)/doc/tex/mkchap $(TEX) $(<:.tex=) front,other $*
 	$(ROOT)/doc/tex/mkchap $(TEX) $(<:.tex=) null $*
-	$(ROOT)/doc/tex/mktoc chapter $* > $(<:.tex=.contents)
-	$(ROOT)/doc/tex/mkindex chapter $* > $(<:.tex=.index)
+	$(ROOT)/doc/fmconvert/tex2mml chapter $* > $(<:.tex=.mml)
 
 chapter13.dvi:	cgc.tex
 cgc.dvi:	chapter13.dvi
