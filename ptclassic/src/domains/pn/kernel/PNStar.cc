@@ -36,7 +36,6 @@ static const char file_id[] = "$RCSfile$";
 #include "MTDFStar.h"
 #include "MTDFScheduler.h"
 #include "MTDFThread.h"
-#include "MTDFGeodesic.h"
 
 extern const char MTDFdomainName[];
 
@@ -47,23 +46,6 @@ ISA_FUNC(MTDFStar,DataFlowStar);
 const char* MTDFStar::domain() const
 {
     return MTDFdomainName;
-}
-
-// Prepare for scheduling.
-void MTDFStar::initialize()
-{
-    DataFlowStar::initialize();
-    if (isSource())
-    {
-        BlockPortIter next(*this);
-        // Limit the capacity of Geodesics.
-	for(int i = numberPorts(); i > 0; i--)
-        {
-	    PortHole& port = *next++;
-            MTDFGeodesic& geodesic = *(MTDFGeodesic*)port.geo();
-	    geodesic.setCapacity(port.numXfer());
-        }
-    }
 }
 
 // Execute the Star.

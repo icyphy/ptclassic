@@ -50,9 +50,6 @@ public:
     // Domain identification.
     /* virtual */ const char* domain() const;
 
-    // Prepare for scheduling.
-    /* virtual */ void initialize();
-
     // Execute the Star.
     /* virtual */ int run();
 
