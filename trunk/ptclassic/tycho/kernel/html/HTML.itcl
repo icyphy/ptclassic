@@ -726,8 +726,8 @@ body ::tycho::HTML::hyperJump {filename {point {}} {push 1}} {
                 set filename $newfilename
                 unset newfilename
             } else {
-		global ptolemypresent
-		if { $ptolemypresent && \
+		global ptolemyfeature
+		if { $ptolemyfeature(octtools) && \
                         [file exists [file join \
                         $filename schematic {contents;}]]} {
 		    # If Ptolemy is present, then open this as a facet

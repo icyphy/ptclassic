@@ -124,14 +124,33 @@ if {![info exists ptolemy]} {
 
 ::tycho::_announce "TYCHO=$TYCHO"
 
-global ::ptolemypresent
-# ptolemypresent is set to 1 if the ptk commands are present,
+global ::ptolemyfeature
+
+# pitclpresent is set to 1 if the ::pitcl commands are present,
+# which indicates that we have access to the ptolemy kernel
+# via ::pitcl
+if {[uplevel #0 info namespace all pitcl] == "pitcl"} {
+    set ptolemyfeature(pitcl) 1
+} {
+    set ptolemyfeature(pitcl) 0
+}
+
+# ptclpresent is set to 1 if the ptcl commands are present,
+# which indicates that we have access to the ptolemy kernel
+# via the older ptcl interface
+if {[uplevel #0 info namespace all pitcl] != "pitcl"} {
+    set ptolemyfeature(ptcl) 1
+} {
+    set ptolemyfeature(ptcl) 0
+}
+
+# octtoolspresent is set to 1 if the ptk commands are present,
 # which indicates that we have access to the tcl/octtools commands.
 if {[uplevel #0 info commands ptkOpenFacet] != {} && \
 	[uplevel #0 info commands pvOpenWindow] != {}} {
-    set ptolemypresent 1
+    set ptolemyfeature(octtools) 1
 } {
-    set ptolemypresent 0
+    set ptolemyfeature(octtools) 0
 }
 
 global ::tychokernel
