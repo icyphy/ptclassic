@@ -124,7 +124,7 @@ reparse:
 	if (is_idchar(*token)) {
                 const State* s = lookup(token,parent()->parent());
 		if (!s) {
-			parseError ("undefined symbol", token);
+			parseError ("undefined symbol ", token);
 			t.tok = T_ERROR;
 			return t;
 		}
