@@ -134,9 +134,12 @@ int LinProcMemory::allocReq( State& s) {
 	// request for consecutive allocation: add this state to a
 	// MConsecStateReq and do not request memory yet.
 	if (s.attributes() & AB_CONSEC) {
-		if (!consec) { LOG_NEW; consec = new MConsecStateReq; }
-		consec->append(s);
-		return TRUE;
+	    if (s.attributes() & AB_CIRC) {
+		Error::warn(s,"The AB_CIRC bit for all states that have the AB_CONSEC bit set is ignored.  To align a consecutive block of memory for circular addressing, set the AB_CIRC bit for the last consecutive state.  This will align the beginning of the block for circular addressing.");
+	    }
+	    if (!consec) { LOG_NEW; consec = new MConsecStateReq; }
+	    consec->append(s);
+	    return TRUE;
 	}
 
 	// Test for the last state in a consecutive block (consec is
