@@ -332,7 +332,9 @@ void UniProcessor :: run() {
 				int index = obj->getIndex();
 				worm->downLoadCode(index);
 			} else {
-				s->fire();
+				Star* star = (Star*)s;
+				mtarget->writeFiring(*star,1);
+				// s->fire();
 			}
 		}
 	}
