@@ -63,7 +63,7 @@ vemStatus phyCopyOrMove();
 vemStatus MCParse();
 
 
-phyCngLayer(spot, cmdList)
+vemStatus phyCngLayer(spot, cmdList)
 vemPoint *spot;			/* Where command was issued */
 lsList cmdList;			/* List of arguments        */
 /*
@@ -76,7 +76,6 @@ lsList cmdList;			/* List of arguments        */
     octObject oldLayer, newLayer;
     octObject changeSetBag, changeItem;
     octGenerator theGen, subGen;
-    struct octBox bb;
     int len, retCode;
 
     /* First,  all kinds of validity checking */
@@ -162,7 +161,7 @@ vemStatus code;
 
 
 
-phyDelCmd(spot, cmdList)
+vemStatus phyDelCmd(spot, cmdList)
 vemPoint *spot;			/* Where command was issued */
 lsList cmdList;			/* List of arguments        */
 /*
@@ -304,7 +303,7 @@ lsList cmdList;			/* List of arguments        */
 }
 
 
-phyMoveCmd(spot, cmdList)
+vemStatus phyMoveCmd(spot, cmdList)
 vemPoint *spot;			/* Where command was issued */
 lsList cmdList;			/* List of arguments        */
 {
@@ -318,7 +317,7 @@ lsList cmdList;			/* List of arguments        */
     }
 }
 
-phyCopyCmd(spot, cmdList)
+vemStatus phyCopyCmd(spot, cmdList)
 vemPoint *spot;			/* Where command was issued */
 lsList cmdList;			/* List of arguments        */
 {
