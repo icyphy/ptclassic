@@ -55,7 +55,7 @@ W. Pratt, \fIDigital Image Processing\fR,
 Wiley & Sons: New York.  1991.  2nd ed.
 	}
 
-	ccinclude { "Matrix.h", "Error.h" }
+	ccinclude { "Matrix.h", "Error.h", "ptdspRGBYUVConversion.h" }
 
 //////// OUTPUTS AND STATES.
 	input { name { input1 } type { FLOAT_MATRIX_ENV } }
@@ -113,46 +113,39 @@ to the usual YUV definition.
 			return;
 		}
 
-		LOG_NEW;
-		FloatMatrix& yI = *(new FloatMatrix(redI));
-		LOG_NEW;
-		FloatMatrix& uI = *(new FloatMatrix(greenI));
-		LOG_NEW;
-		FloatMatrix& vI = *(new FloatMatrix(blueI));
+		// FIXME
+		// Sets redimg to the vector representing the FloatMatrix, redI, 
+		// greenImg to greenI, and blueImg to blueI.
+		// This only works because in the underlying implementation of 
+		// FloatMatrix, redImg[0] for example, which returns the 1st row of the 
+		// matrix, also returns the entire vector representing the matrix. 
+		// A method should be added to the FloatMatrix class to do this instead
+		// of relying on this current operation
+		const double * redImg = redI[0];
+		const double * greenImg = greenI[0];
+		const double * blueImg = blueI[0];
 
-		int i, j, temp1, temp2;
-		double rvalue, gvalue, bvalue;
-		double yvalue, uvalue, vvalue;
-		for ( i = 0; i < height; i++ ) {
-			temp1 = i*width;
-			for ( j = 0; j < width; j++ ) {
-				temp2 = j + temp1;
-				rvalue = yI.entry(temp2);
-				gvalue = uI.entry(temp2);
-				bvalue = vI.entry(temp2);
-				yvalue =  0.299  * rvalue +
-					  0.587  * gvalue +
-					  0.114  * bvalue;
-				uvalue = -0.1687 * rvalue +
-					 -0.3313 * gvalue +
-					  0.5    * bvalue;
-				vvalue =  0.5    * rvalue +
-					 -0.4187 * gvalue +
-					 -0.0813 * bvalue;
-				if ( int(CCIR_601) ) {
-				  yvalue = (219.0*yvalue)/255.0 +  16;
-				  uvalue = (224.0*uvalue)/255.0 + 128;
-				  vvalue = (224.0*vvalue)/255.0 + 128;
-				}
-				else {
-				  uvalue += 128;
-				  vvalue += 128;
-				}
-				yI.entry(temp2) = quant(yvalue);
-				uI.entry(temp2) = quant(uvalue);
-				vI.entry(temp2) = quant(vvalue);
-			}
+		int size = height * width;
+		double * YImg = new double[size];
+		double * UImg = new double[size];
+		double * VImg = new double[size];
+		
+		Ptdsp_RGBToYUV (redImg, greenImg, blueImg, YImg, UImg,
+				VImg, width, height, CCIR_601);
+
+		FloatMatrix& yI = *(new FloatMatrix(height, width));
+		FloatMatrix& uI = *(new FloatMatrix(height, width));
+		FloatMatrix& vI = *(new FloatMatrix(height, width));
+
+		for (int i = 0; i < size; i++) {
+		  yI.entry(i) = YImg[i];
+		  uI.entry(i) = UImg[i];
+		  vI.entry(i) = VImg[i];
 		}
+		
+		delete [] YImg;
+		delete [] UImg;
+		delete [] VImg;
 
 		// Write whole frame to output here...
 		output1%0 << yI;
@@ -160,3 +153,5 @@ to the usual YUV definition.
 		output3%0 << vI;
 	} // end go{}
 } // end defstar{ Rgb2Yuv }
+
+
