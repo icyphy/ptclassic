@@ -56,6 +56,12 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "NamedObj.h"			/* define NamedObj class */
 #include "PtGate.h"
 
+#if defined(hppa)
+/* Include math.h outside of extern "C" */
+/* Otherwise, we get errors with pow() g++2.7.0 via vemInterface.h */
+#include <math.h>
+#endif
+
 // Pigilib includes: vemInterface.h includes rpc.h
 extern "C" {
 #define Pointer screwed_Pointer         /* rpc.h and type.h define Pointer */
