@@ -29,7 +29,7 @@ limitation of liability, and disclaimer of warranty provisions.
 		desc { Gain of the star. }
 	}
 	go {
-		output%0 << Complex(gain) * Complex(input%0);
+		output%0 << (const Complex&)(gain) * (const Complex&)(input%0);
 	}
 }
 
