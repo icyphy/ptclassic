@@ -1830,6 +1830,7 @@ bdTable theTable;		/* Binding table */
 	}
 	VEMFREE(realTable);
     }
+    return VEM_OK;
 }
 
 
@@ -1848,7 +1849,7 @@ lsList cmdList;			/* Argument list             */
  * log file.
  */
 {
-    char *tableName;
+    char *tableName = (char *)NULL;
     bd_table *table;
 
     if (spot) {
