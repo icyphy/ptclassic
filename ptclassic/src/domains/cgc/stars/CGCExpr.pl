@@ -3,7 +3,7 @@ defstar
     name { Expr }
     domain { CGC } 
     desc { General expression evaluation. }
-    version { $Id$ %G}
+    version { $Id$}
     author { T. M. Parks }
     copyright {
 Copyright (c) 1990-%Q% The Regents of the University of California.
