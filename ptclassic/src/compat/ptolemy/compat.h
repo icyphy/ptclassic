@@ -45,15 +45,20 @@ extern char *sprintf();
 #endif
 
 #ifdef __GNUC__
-/* Alphabetical, please */
-#if !defined(NULL) || defined(_STDIO_H)
+
 #include <stdio.h>		/* Get the decl for FILE.  sigh. */
-#endif
+
+/* Alphabetical, please */
 extern int fclose (FILE *);
 extern int fflush (FILE *);
 extern int fprintf (FILE *, const char *, ...);
 extern int fscanf (FILE *, const char *, ...);
-extern int pclose(FILE *);
+/* gcc-2.5.8 under SunOS4.1.3 can't deal with a full declaration of
+ * pclose, or we get an undefined symbol:   _pclose__FP6_iobuf 
+ * cg/kernel/CGUtilities.cc uses pclose().
+ */
+/*extern int pclose(FILE *);*/
+/*extern int pclose(...);*/
 extern void perror (const char *);
 extern int printf (const char *, ...);
 extern int putenv (char *);
