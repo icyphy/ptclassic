@@ -52,6 +52,7 @@ CGCTclTkTarget::CGCTclTkTarget(const char* name,const char* starclass,
 	linkOptions.setInitValue(
 		  "$PTOLEMY/tcl/tk3.1/lib/$ARCH.opt/libtk.a "
 		  "$PTOLEMY/tcl/tcl6.6/lib/$ARCH.opt/libtcl.a "
+		  "$PTOLEMY/lib.$ARCH/libptk.a "
 		  "-L$PTOLEMY/tcl/tk3.1/lib/$ARCH.opt "
 		  "-L/usr/X11/lib -lXpm -lX11 -lm");
 	loopingLevel.setInitValue("1");
