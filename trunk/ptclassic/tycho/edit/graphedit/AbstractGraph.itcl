@@ -59,14 +59,16 @@
 # <pre><tcl quiet>
 #     catch {delete object $graph}
 #     set graph [::tycho::Digraph [::tycho::autoName graph]]
-#     $graph configureEntity vertex -label ""
-#     $graph configureLink edge -weight 0
+#     $graph configureEntityType vertex -label ""
+#     $graph configureLinkType edge -weight 0
 # </tcl></pre>
 #
-# Note that, by default, vertices and edges can only be given the attributes
-# declared with entityconfigure{} and linkconfigure{}. If the *-strictoptions*
-# option is set to 0, however, the vertices and edges will accept
-# any attributes. Now load the graph with some data. In
+# (Note that, by default, vertices and edges can only be given the attributes
+# declared when the entity or link is defined with defineEntityType{}
+# or defineLinkType{}, or added later with configureEntityType{}
+# or configureLinkType{}. If, however, the *-strictoptions*
+# option is set to 0 the vertices and edges will accept
+# any attributes.) Now load the graph with some data. In
 # this example, give it a string
 # in TIM format -- usually, you would set the *-datafile* option and
 # call load{} (see <a href="Model.html">Model</a>):
@@ -265,7 +267,7 @@ body ::tycho::AbstractGraph::constructor {args} {
     eval configure $args
 
     # Define the "vertex" entity: no value
-    defineEntity vertex \
+    defineEntityType vertex \
 	    -description ""
 }
 
