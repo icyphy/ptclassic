@@ -41,8 +41,9 @@ Programmer: Soonhoi Ha
 #include "KnownTarget.h"
 #include "ParNode.h"
 
-CGSharedBus::CGSharedBus(const char* name,const char* starType,
-	const char* desc) : CGMultiTarget(name,starType,desc) {}
+CGSharedBus::CGSharedBus(const char* name, const char* starType,
+			 const char* desc, const char* assocDomain) :
+CGMultiTarget(name,starType,desc,assocDomain) {}
 
 void CGSharedBus :: resetResources() {
 	bus.initialize();
@@ -63,47 +64,33 @@ void CGSharedBus::restoreCommPattern() {
 	bus.copy(&bestBus);
 }
 
-			//////////////////////
-			///  scheduleComm  ///
-			//////////////////////
 // Returns the earliest time the communication node can be scheduled
-//	without contention for resources.
-// cNode is the communication node to be scheduled
-// when is the time its ancestors have finished execution 
-
+// without contention for resources.  The argument cNode is the
+// communication node to be scheduled and when is the time its ancestors
+// have finished execution.
 int CGSharedBus::scheduleComm(ParNode *cNode, int when, int limit) {
 	if ((limit > 0) && (when < bus.getAvailTime())) {
 		int t = bus.filledInIdleSlot(cNode, when, limit);
-		if (t < 0) return -1;
+		if (t < 0)
+			return -1;
 		else if (t >= bus.getAvailTime())
 			bus.schedAtEnd(cNode, t, cNode->getExTime());
 		else
 			bus.schedInMiddle(cNode, t, cNode->getExTime());
-	} else {
+	}
+	else {
 		bus.addNode(cNode, when);
 	}
 	return cNode->getScheduledTime();
 }
 
-			/////////////////////////
-			///  candidateProces  ///
-			/////////////////////////
-// Returns a pointer to a list of candidate processors for the cluster.
-// Since this is a shared bus architecture, one unused processor
-//	is the same as any other, so it returns the used processors
-// 	and one unused processor. (to reduce scheduling time)
-// Same as default method defined in CGMultiTarget.cc
-
 Block* CGSharedBus::makeNew() const {
-	LOG_NEW; return	new CGSharedBus(name(),starType(),descriptor());
+	LOG_NEW; return	new CGSharedBus(name(),starType(),descriptor(),
+					getAssociatedDomain());
 }
 
-			//////////////////
-			///  backComm  ///
-			//////////////////
 // For a given communication node, find a comm. node scheduled
 // just before the argument node on the same communication resource.
-
 ParNode* CGSharedBus :: backComm(ParNode* n) {
 	ProcessorIter iter(bestBus);
 	ParNode* pn;
@@ -120,6 +107,6 @@ ParNode* CGSharedBus :: backComm(ParNode* n) {
 }
 
 static CGSharedBus targ("SharedBus","CGStar",
-"a shared bus with user-selectable child targets");
+			"a shared bus with user-selectable child targets");
 
 static KnownTarget entry(targ,"SharedBus");
