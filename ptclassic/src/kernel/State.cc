@@ -330,7 +330,8 @@ State :: getParseToken(Tokenizer& lexer, int stateType) {
 			// here and reparse (stay in while loop)
 			else if (s->size() == 1) {
 				StringList value = s->currentValue();
-				strncpy (token, value, TOKSIZE-1);
+				strncpy(token, value, TOKSIZE-1);
+				token[TOKSIZE-1] = 0;
 				// (re-execute the loop)
 			}
 		}
