@@ -33,9 +33,9 @@
 # The following silliness is need so that the hypertext links in the
 # welcome window work.  Regrettably, "info classes" does not work
 # in the current version of Itcl, so the if statement is moot.
-if {[info classes ::tycho::HTML] == {}} {
-    auto_load ::tycho::HTML
-}
+#if {[info classes ::tycho::HTML] == {}} {
+#    auto_load ::tycho::HTML
+#}
 
 ##########################################################################
 #### welcomeMessage
