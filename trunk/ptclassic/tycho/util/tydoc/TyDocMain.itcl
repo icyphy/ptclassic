@@ -1401,8 +1401,7 @@ body ::tycho::HTMLDocSys::generateHTMLIndex { {title {"Index of classes"}}} {
 #####################################################################
 #### modCheck
 # Checks if the current file is newer than it's associated documentation.
-# And returns 1 if so. (This function is repeated in ::tycho::IDocSys)
-# This was not made general because I plan to supersede this file. :)
+# And returns 1 if so.
 #
 # This requires searching for all classes defined within the file and
 # checking if those class's documents are older. Takes about 5% of 
@@ -1412,27 +1411,45 @@ body ::tycho::HTMLDocSys::generateHTMLIndex { {title {"Index of classes"}}} {
 # However, there are few sources with more than one class so this is a
 # decent compromise.
 #
-# One bug, it doesn't know how to check if a classfile_rel.html should be
-# created, so doesn't check. This is not critical because docs are 
-# generated at the same time, so if one is okay, the other must be as well. 
-#
-# For non-itcl files, it silently returns 1 because it can't tell.
+# For non-itcl/itk/tcl/tk files, it silently returns 1 because it can't tell.
 #
 body ::tycho::HTMLDocSys::modCheck {filename} {
-    if {[file extension $filename] != ".itcl"} {
-        return 1
+    set sourceTime [file mtime $filename]
+    set extension [file extension $filename]
+
+    if {$extension == ".tcl" || $extension == ".tk" || $extension == ""} {
+        set docFile [file join doc codeDoc [file root $filename].html]
+        if ![file exists $docFile] {
+            # No tcl-only documentation
+            return 1
+        }
+        if {$sourceTime > [file mtime $docFile]} {
+            # The source is newer than the tcl-only docs
+            return 1
+        }
+        # It's okay
+        return 0
     }
     
-    set sourceTime [file mtime $filename]
-
-    set classes [getClassesInSource $filename]
-
-    if {$classes == {}} {
-        # Don't know how to check, so reparse
+    if {$extension != ".itcl" && $extension != ".itk"} {
+        # Can't check other types of files
         return 1
     }
 
+    set classes [getClassesInSource $filename]
     foreach class $classes {
+        if {$class == "related"} {
+            set relFile [file join doc codeDoc [file root $filename]_rel.html]
+            if ![file exists $relFile] {
+                # No class-related documentation
+                return 1
+            }
+            if {$sourceTime > [file mtime $relFile]} {
+                # The source is newer than the related docs
+                return 1
+            }
+            continue
+        }
         set docFile [file join doc codeDoc [info namespace tail $class].html]
         if ![file exists $docFile] {
             # There is no documentation.
@@ -1446,7 +1463,6 @@ body ::tycho::HTMLDocSys::modCheck {filename} {
     # not modified
     return 0
 }
-
 
     ###################################################################
     ###################################################################
@@ -1467,21 +1483,16 @@ body ::tycho::HTMLDocSys::generateHTML {verbose debug generateIndex \
     }
     set retval ""
     foreach filename $filelist {
-        if $debug {
-            puts -nonewline "$filename"
-        }
 	if ![file readable $filename] {
 	    set retval "$retval\nWarning: generateHTML: $filename is not readable"
 	} else {
             if ![$HTMLDocSys modCheck $filename] {
-                if $debug {
-                    puts " <not modified>"
-                }
+                # It doesn't need to be regenerated.
                 continue
             }
             if $debug {
-                # Put newline
-                puts ""
+                # Put name only if it _is_ being regenerated.
+                puts "$filename"
             }
 	    $HTMLDocSys readFile $filename
 	    cd doc/codeDoc
@@ -1510,19 +1521,45 @@ body ::tycho::HTMLDocSys::generateHTML {verbose debug generateIndex \
 #####################################################################
 #### getClassesInSource
 # Quickly scan the source file for the classes which are defined within.
-# Requires around 5% of the time it takes to make the docs.
-# This is identical to the same proc in IDocSys. It's repeated here
-# for efficiency so that the tydoc executable does not need to source
-# IDocSys. Maybe there is a shorter file it could belong to?
+# Requires around 5% of the time it takes to make the docs. Returns 
+# "related" if there are non-class structures (such as ensembles and 
+# procs) in the file. 
+#
+# This is approximate, they must be declared before the first class 
+# in a file or after a body within a file. Which is only decent coding
+# style.
 #
 body ::tycho::HTMLDocSys::getClassesInSource {filename} {
+    set inClass 0
+    set related 0
     set retval {}
+    
     set fd [open $filename]
     while {![eof $fd]} {
         gets $fd lineIn
-        if [regexp {^[	 ]*(class)[ 	]+(::[a-zA-Z_:]*)[ 	]+\{} \
+        if [regexp {^[	 ]*(class)[ 	]+([^ ]+)[ 	]+\{} \
                 $lineIn dummy dummy2 classname] {
             lappend retval $classname
+            set inClass 1
+        }
+        if {$related} {
+            # don't bother checking
+            continue
+        }
+        # If no related information found yet, keep looking
+        if {$inClass} {
+            # if we see a body, we're out of the class declaration
+            if [regexp {^[	 ]*(body)[ 	]+[^ ]+[ 	]+[^ ]+} \
+                    $lineIn] {
+                set inClass 0
+            }
+        } else {
+            # check for outside procs or ensembles when not in the class
+            if [regexp {^[	 ]*((proc)|(ensemble))[ 	]+[^ ]+[ 	]+[^ ]+} \
+                    $lineIn] {
+                set retval [linsert $retval 0 "related"]
+                set related 1
+            }
         }
     }
     close $fd
