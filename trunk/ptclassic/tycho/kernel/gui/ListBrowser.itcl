@@ -226,8 +226,8 @@ body ::tycho::ListBrowser::constructor {args} {
 
     bind $itk_component(hull) <Control-v> {%Q scroll 1 pages}
     bind $itk_component(hull) <Control-backslash> {%Q clearSelection}
-    bind $itk_component(hull) <Control-p> {%Q scroll -1 selection}
-    bind $itk_component(hull) <Control-n> {%Q scroll 1 selection}
+    bind $itk_component(hull) <Control-p> {%Q scroll -1 units}
+    bind $itk_component(hull) <Control-n> {%Q scroll 1 units}
 
     # Special keys for moving about.
     bind $itk_component(hull) <Prior> {%Q scroll -1 pages}
@@ -235,8 +235,8 @@ body ::tycho::ListBrowser::constructor {args} {
     bind $itk_component(hull) <End> {%Q goto end}
     bind $itk_component(hull) <Meta-greater> {%Q goto end}
     # bind $itk_component(hull) <Escape><greater> {%Q goto end}
-    bind $itk_component(hull) <Up> {%Q scroll -1 selection}
-    bind $itk_component(hull) <Down> {%Q scroll 1 selection}
+    bind $itk_component(hull) <Up> {%Q scroll -1 units}
+    bind $itk_component(hull) <Down> {%Q scroll 1 units}
     bind $itk_component(hull) <Home> {%Q goto 0}
     bind $itk_component(hull) <Meta-less> {%Q goto 0}
     # bind $itk_component(hull) <Escape><less> {%Q goto 0}
@@ -248,8 +248,8 @@ body ::tycho::ListBrowser::constructor {args} {
 	bind $itk_component(hull) <KP_Prior> {%Q scroll -1 pages}
 	bind $itk_component(hull) <KP_Next> {%Q scroll 1 pages}
 	bind $itk_component(hull) <KP_End> {%Q goto end}
-	bind $itk_component(hull) <KP_Up> {%Q scroll -1 selection}
-	bind $itk_component(hull) <KP_Down> {%Q scroll 1 selection}
+	bind $itk_component(hull) <KP_Up> {%Q scroll -1 units}
+	bind $itk_component(hull) <KP_Down> {%Q scroll 1 units}
 	bind $itk_component(hull) <KP_Home> {%Q goto 0}
     }
 
@@ -313,6 +313,7 @@ body ::tycho::ListBrowser::chooseItem {lb ypos} {
     if {[llength [$lb curselection]] > 1} { 
 	$lb selection clear [lindex [$lb curselection] 0]
     }
+    set scrollposition [lindex [$lb curselection] 0]
     setEntry [selection get]
 }
 
@@ -508,19 +509,24 @@ body ::tycho::ListBrowser::selectItem {name} {
 #
 body ::tycho::ListBrowser::scroll {num what} {
     clear
+    set lb $itk_component(listbox)
     if {$what == "pages"} {
-	$itk_component(listbox) yview scroll $num $what
-	set scrollposition [$itk_component(listbox) nearest 0]
+	$lb yview scroll $num $what
+	set scrollposition [$lb nearest 0]
+        $lb selection clear 0 end
+        $lb selection set $scrollposition
     } elseif {$what == "units"} {
 	incr scrollposition $num
-	set size [$itk_component(listbox) size]
+	set size [$lb size]
 	if {$scrollposition < 0} {
 	    set scrollposition 0
 	} elseif {$scrollposition >= $size} {
 	    set scrollposition [incr size -1]
 	}
+        $lb selection clear 0 end
+        $lb selection set $scrollposition
     } elseif {$what == "selection"} {
-	set indexes [$itk_component(listbox) curselection]
+	set indexes [$lb curselection]
 	if {$indexes == {}} {
 	    scroll $num units
 	    return
@@ -538,7 +544,8 @@ body ::tycho::ListBrowser::scroll {num what} {
 	error "Unrecognized argument: $what.  \
 		Should be units, pages, or selection"
     }
-    setEntry [$itk_component(listbox) get $scrollposition]
+    setEntry [$lb get $scrollposition]
+    $lb see $scrollposition
 }
 
 
@@ -583,4 +590,5 @@ body ::tycho::ListBrowser::setEntry {string} {
 body ::tycho::ListBrowser::updateListbox {} {
     ;# By default, do nothing
 }
+
 
