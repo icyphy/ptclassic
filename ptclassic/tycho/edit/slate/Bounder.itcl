@@ -51,16 +51,10 @@
 #
 # <dl>
 # <dt><dd>
+#
+# See also: <a href="Interactor.html">Interactor</a>.
+#
 # <dl>
-# <dt><b>-activatecommand</b>
-# <dd>See <a href="Interactor.html">Interactor</a>.
-#
-# <dt><b>-deactivatecommand</b>
-# <dd>See <a href="Interactor.html">Interactor</a>.
-#
-# <dt><b>-dragcommand</b>
-# <dd>See <a href="Interactor.html">Interactor</a>.
-#
 # <dt><b>-bounds</b>
 # <dd>A four-list giving the rectangular coordinates in 
 # which to keep the target item.  If it is the empty list, then the 
