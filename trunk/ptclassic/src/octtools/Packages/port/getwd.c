@@ -27,7 +27,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 						PT_COPYRIGHT_VERSION_2
 						COPYRIGHTENDKEY
 */
-#include "compat.h"
+#include "port.h"
 #if defined(PTHPPA)
 #include <sys/types.h>
 #include <sys/param.h>
