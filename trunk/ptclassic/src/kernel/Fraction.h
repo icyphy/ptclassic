@@ -59,7 +59,7 @@ public:
 	friend int operator == (Fraction, Fraction);
 
 	// Print operator
-	void print();
+	operator char* ();
 
 	// Simplify the fraction (compute an equivalent fraction with
 	// numerator and denominator relatively prime).
