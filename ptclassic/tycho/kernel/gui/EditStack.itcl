@@ -56,6 +56,9 @@ class ::tycho::EditStack {
     # Change the associated file to the specified file name and then save.
     method saveAsFile {filename}
 
+    # Add me to the window menus of all menu bars
+    method windowMenuAddAll {label}
+
     ##########################################################################
     ####                       protected methods                          ####
    
@@ -205,6 +208,23 @@ body ::tycho::EditStack::saveAsFile {filename} {
     puts -nonewline $fd [$itk_component(text) get 1.0 {end -1 char}]
     close $fd
     return 1
+}
+
+#####################################################################
+#### windowMenuAddAll
+# Add me to all "Window" menus of all current file objects.
+# The argument is just the tag used to reference this
+# window, and is basically ignored. The label used in the Window
+# menu will be "Stack Trace #n" where #n is a unique integer.
+# Do nothing if this View is not inside a Displayer.
+#
+body ::tycho::EditStack::windowMenuAddAll {label} {
+    if { [displayer] == {} } {
+	return
+    }
+    ::tycho::register window $label $this \
+	    -label [::tycho::autoName "Stack Trace "] \
+	    -mode "tclshell"
 }
 
 #####################################################################
