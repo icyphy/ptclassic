@@ -464,8 +464,9 @@ ifdef SDF
 	ifdef SDFCONTRIB
 		CUSTOM_DIRS += $(SDFDIR)/contrib/stars
 		STARS += $(LIBDIR)/sdfcontribstars.o
+		LIBFILES += $(LIBDIR)/libsdfcontrib.$(LIBSUFFIX)
 		LIBFILES += $(LIBDIR)/libsdfcontribstars.$(LIBSUFFIX)
-		LIBS += -lsdfcontribstars
+		LIBS += -lsdfcontrib -lsdfcontribstars
 	endif
 	CUSTOM_DIRS += $(SDFDIR)/stars $(SDFDIR)/targets 
 	STARS += $(LIBDIR)/sdfstars.o 
