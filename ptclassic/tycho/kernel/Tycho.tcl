@@ -169,6 +169,11 @@ if {![info exists TychoVersionInfo]} {
 if {$tychoWelcomeWindow != 0} {
     ::tycho::welcomeMessage $TychoBinaryInfo $TychoVersionInfo
 }
+# If tychoRegExit is 0, then disable exiting when the last window is
+# killed.
+if {$tychoRegExit == 0} {
+    ::tycho::TopLevel::exitWhenNoMoreWindows 0
+}
 # If there are no command-line arguments, and the -noconsole
 # option was not given, open a console window
 if {$tychoOpenFiles == 0} {
