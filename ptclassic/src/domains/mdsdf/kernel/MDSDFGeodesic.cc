@@ -97,10 +97,10 @@ void MDSDFGeodesic::initialize() {
     rowDelays = (int)initDelays[0];
     colDelays = (int)initDelays[1];
 
-    // for now, the row and column delays must be a multiple of the
+    // for now, the column delays must be a multiple of the
     // originating porthole's dimensions
-    if((rowDelays%oNumRows != 0) || (colDelays%oNumCols != 0)) {
-      Error::abortRun("row and column delay specifications must be multiples of the dimensions of the input porthole");
+    if(colDelays%oNumCols != 0) {
+      Error::abortRun("column delay specification must be a multiple of the column dimension of the input porthole");
       return;
     }
 
