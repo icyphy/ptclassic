@@ -24,7 +24,8 @@ limitation of liability, and disclaimer of warranty provisions.
 		type { complex }
 	}
 	go {
-		output%0 << Complex(pos%0) - Complex(neg%0);
+		output%0 << ((const Complex&)(pos%0)) - 
+	                   ((const Complex&)(neg%0));
 	}
 }
 

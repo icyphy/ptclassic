@@ -236,9 +236,9 @@ The input particles are only cast to this precision if the parameter
             if ( numState == 1 ) {
                 // Actually, this means no state; just feed through
 		if ( int(ArrivingPrecision) )
-		    out = fwdCoefs[0] * Fix(signalIn%0);
+		    out = fwdCoefs[0] * (const Fix&)(signalIn%0);
 		else {
-		    fixIn = Fix(signalIn%0);
+		    fixIn = (const Fix&)(signalIn%0);
 		    out = fwdCoefs[0] * fixIn;
 		}
 		checkOverflow(out);
@@ -253,10 +253,10 @@ The input particles are only cast to this precision if the parameter
 		    checkOverflow(fwdAccum);
 		}
 		if ( int(ArrivingPrecision) )
-		    fdbckAccum += Fix(signalIn%0);
+		    fdbckAccum += (const Fix&)(signalIn%0);
 		else {
 		    fixIn = Fix(signalIn%0);
-		    fdbckAccum += fixIn;
+		    fdbckAccum += (const Fix&)fixIn;
 		}
 		checkOverflow(fdbckAccum);
 		for ( i=numState-1; i > 1; i--) {

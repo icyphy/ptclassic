@@ -41,7 +41,7 @@ limitation of liability, and disclaimer of warranty provisions.
 
       // do scalar * matrix
       ComplexMatrix& result = *(new ComplexMatrix(matrix.numRows(),matrix.numCols()));
-      result = Complex(gain%0) * matrix;
+      result = (const Complex&)(gain%0) * matrix;
       output%0 << result;
     }
   }

@@ -91,8 +91,8 @@ Prentice-Hall: Englewood Cliffs, NJ, 1989.
 	    for (int n = int(numberOfSamples)-1; n>=0; n--) {
 		Complex sum = Complex(0.0, 0.0);
 		for (int i = 0;i < int(length); i++) {
-		    sum += Complex(signal%(int(length)-i-1))
-			* Complex(
+		    sum += (const Complex&)(signal%(int(length)-i-1))
+			* (const Complex&)(
 			    cos(double(omega%n)*i*double(timeBetweenSamples)),
 			    -sin(double(omega%n)*i*double(timeBetweenSamples)));
 		}

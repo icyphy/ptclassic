@@ -100,10 +100,10 @@ the OverflowHandler will be called.
 		// is the Fix variable with the desired overflow handler
 		out = Fix(gain);
 		if ( int(ArrivingPrecision) ) {
-                  out *= Fix(input%0);
+                  out *= (const Fix &)(input%0);
 		}
 		else {
-                  fixIn = Fix(input%0);
+                  fixIn = (const Fix &)(input%0);
                   out *= fixIn;
 		}
 		checkOverflow(out);
