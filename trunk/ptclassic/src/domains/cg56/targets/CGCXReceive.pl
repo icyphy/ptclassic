@@ -1,25 +1,24 @@
 defstar {
-    name { S56XReceive }
+    name { XSReceive }
     domain { CGC }
-    desc { Receive data from S56X to CGC }
-    derivedFrom { S56XBase }
+    desc { Receive data synchronously from S56X to CGC }
+    derivedFrom { XSBase }
     version { $Id$ }
-    author { Jose L. Pino }
+    author { Jose Luis Pino }
     copyright { 
-Copyright (c) 1993 The Regents of the University of California.
+Copyright (c) 1994,1993 The Regents of the University of California.
 All rights reserved.
-See the file ~ptolemy/copyright for copyright notice,
+See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
     }
 
     location { CG56 Target Directory }
-    ccinclude {"CG56S56XCGCReceive.h" }
     explanation {
     }
     output {
 	name {output}
 	type {ANYTYPE}
-}
+    }
 
 codeblock(receiveData,"const char* command, int numXfer") {
 	int i, semaphoreMask = 1<<@(pairNumber%24);
@@ -51,3 +50,5 @@ go {
 }
 
 }
+
+

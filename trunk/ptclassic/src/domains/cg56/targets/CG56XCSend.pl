@@ -1,24 +1,24 @@
 defstar	{
 
-name { S56XCGCSend }
+name { XCSSend }
 domain { CG56 }
-desc { S56X to CGC send	star }
+desc { S56X to CGC sunchronous send star }
 version	{ $Id$ }
-author { Jose Pino }
-derivedFrom { S56XCGCBase }
+author { Jose Luis Pino }
+derivedFrom { XCSBase }
 
 copyright {
-Copyright (c) 1993 The Regents of the University of	California.
-All	rights reserved.
-See	the	file ~ptolemy/copyright	for	copyright notice,
-limitation of liability, and disclaimer	of warranty	provisions.
+Copyright (c) 1994, 1993 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright	for copyright notice,
+limitation of liability, and disclaimer	of warranty provisions.
 }
 
-ccinclude {	"CGTarget.h" }
+ccinclude { "CGTarget.h" }
 	
 location { CG56	Target Directory }
 
-explanation	{}
+explanation {}
 
 protected {
 	friend class S56XTargetWH;
@@ -44,7 +44,7 @@ $label(XFR)
 
 setup {
 	numXfer = input.numXfer();
-	CG56S56XCGCBase::setup();
+	CG56XCSBase::setup();
 }
 	
 go {
