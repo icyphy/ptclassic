@@ -192,6 +192,8 @@ Block& Block::setBlock(const char* s, Block* parent) {
 
 int Block::isItAtomic () const { return TRUE;}
 
+int Block::isItWormhole () const { return FALSE;}
+
 void Block::initState () { states.initElements();}
 
 Scheduler* Block :: mySched() const { return parent()->mySched() ;}
