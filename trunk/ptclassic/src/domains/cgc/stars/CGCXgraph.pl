@@ -4,7 +4,12 @@ defstar {
 	desc { Generate a plot with the xgraph program. }
 	version {$Id$}
 	author { S. Ha }
-	copyright { 1992 The Regents of the University of California }
+	copyright {
+Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
+All rights reserved.
+See the file ~ptolemy/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
 	location { CGC main library }
 	explanation {
 This star is actually equivalent to the XMgraph star with only one input.

@@ -4,6 +4,7 @@ defstar {
 	author { GSWalter }
 	derivedFrom { SeqATMZero }
 	version { $Id$ }
+WARNING: CHECK COPYRIGHT - not UC
 	copyright { 1992 (c) U. C. Regents }
 	location { DE main palette }
 	desc {

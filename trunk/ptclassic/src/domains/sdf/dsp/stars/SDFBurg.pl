@@ -8,7 +8,12 @@ and the refl output receives reflection coefficients.  The errPower output
 gets the power of the prediction error at each stage.
 	}
 	author { E. A. Lee and J. T. Buck }
-	copyright { 1991 The Regents of the University of California }
+	copyright {
+Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
+All rights reserved.
+See the file ~ptolemy/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
 	location { SDF dsp library }
 	explanation {
 .pp

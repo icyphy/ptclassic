@@ -4,7 +4,12 @@ defstar {
 	desc { Output the product of the inputs, as a float value. }
 	version {$Id$}
 	author { J. T. Buck }
-	copyright { 1991 The Regents of the University of California }
+	copyright {
+Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
+All rights reserved.
+See the file ~ptolemy/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
 	location { SDF main library }
 	inmulti {
 		name {input}

@@ -10,7 +10,12 @@ Real and imaginary parts should be paired with parentheses, e.g. (1.0, 0.0).
 	}
 	location { SDF dsp library }
 	version {$Id$}
-	copyright { 1990 The Regents of the University of California }
+	copyright {
+Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
+All rights reserved.
+See the file ~ptolemy/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
 	author { E. A. Lee }
 	explanation {
 .pp

@@ -12,7 +12,12 @@ signalIn samples should be processed for each set of coefficients.
 	}
 	version {$Id$}
 	author { Alan Kamas and Edward Lee }
-	copyright { 1992 The Regents of the University of California }
+	copyright {
+Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
+All rights reserved.
+See the file ~ptolemy/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
 	location { SDF dsp library }
 	seealso { IIR, Lattice, RLattice, BlockLattice }
 	input {

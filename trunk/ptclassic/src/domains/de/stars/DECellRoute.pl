@@ -4,6 +4,7 @@ defstar {
 	version		{ $Id$ }
 	author		{ Paul Haskell }
 	location	{ DE main library }
+WARNING: CHECK COPYRIGHT - not UC
 	copyright	{ (c) 1992 U.C. Regents }
 	desc {
 This star reads in input "NetworkCell"s from multiple input

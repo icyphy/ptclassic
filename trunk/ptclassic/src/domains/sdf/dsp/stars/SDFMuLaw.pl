@@ -5,7 +5,12 @@ defstar {
 		using the conversion formula
 	|v2| = log (1+ mu*|v1|) / log( 1+mu)  }
 	author { Asawaree Kalavade }
-	copyright { 1991 The Regents of the University of California }
+	copyright {
+Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
+All rights reserved.
+See the file ~ptolemy/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
 	version {$Id$}
 	explanation {
 .Id "Mu law compression"

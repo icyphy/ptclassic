@@ -4,7 +4,12 @@
 	domain	{ SDF }
 	version	{ $Id$ }
 	author	{ Sun-Inn Shih }
-	copyright	{ 1991 The Regents of the University of California }
+	copyright {
+Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
+All rights reserved.
+See the file ~ptolemy/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
 	location	{ SDF image library }
 	desc {
 Read three GrayImages that describe a color image in YUV format and

@@ -6,6 +6,7 @@ Swallows an input sample
 	}
 	version     { $Id$ }
 	author      { E. Ammicht }
+WARNING: CHECK COPYRIGHT - not UC
 	copyright   { 1992 AT&T Bell Laboratories }
 	location    { CGC main library }
 

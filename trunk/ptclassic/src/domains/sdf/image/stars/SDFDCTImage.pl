@@ -3,7 +3,12 @@ defstar {
 	domain		{ SDF }
 	version		{ $Id$ }
 	author		{ Sun-Inn Shih, Paul Haskell }
-	copyright	{ 1991 The Regents of the University of California }
+	copyright {
+Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
+All rights reserved.
+See the file ~ptolemy/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
 	location	{ SDF image library }
 	desc {
 This star takes GrayImage input and does discrete
