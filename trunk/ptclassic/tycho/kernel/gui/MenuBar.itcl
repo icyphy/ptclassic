@@ -38,15 +38,9 @@
 # simple access to menu, menu entries, and hierarchical menus.
 # It may become obsolete once Tk 4.3 is out.
 # <p>
-# Here is an example:
-# <tcl><pre>
-# ::tycho::TopLevel .f
-# ::tycho::MenuBar .f.mb
-# pack .f.mb
-# .f.mb addMenu File
-# .f.mb add Close File -command {delete object .f}
-# .f centerOnScreen
-# </pre></tcl>
+# For examples illustrating the use of the menu-bar, see
+# the <a href="../internals/decorators.html#MenuBar class">
+# programmer's documentation</a>.
 #
 class ::tycho::MenuBar {
     inherit ::tycho::MenuSupport
