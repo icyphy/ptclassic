@@ -14,14 +14,14 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { SDF main library }
 	htmldoc {
-The input signal is plotted using the <i>pxgraph</i></b> program which
+The input signal is plotted using the <i>pxgraph</i> program which
 is provided with the Ptolemy distribution.
 Note that pxgraph is a specially modified version of xgraph.
-The <i>title</i></b> parameter specifies a title for the plot.
-The <i>saveFile</i></b> parameter optionally specifies a file for
+The <i>title</i> parameter specifies a title for the plot.
+The <i>saveFile</i> parameter optionally specifies a file for
 storing the data in a syntax acceptable to xgraph.
 A null string prevents any such storage.
-The <i>options</i></b> string is passed directly to the xgraph program
+The <i>options</i> string is passed directly to the xgraph program
 as command-line options.  See the manual section describing xgraph
 for a complete explanation of the options.
 <a name="xgraph program"></a>

@@ -33,7 +33,7 @@ the 'PatternMatch' galaxy to implement lost-speech recovery.
 <p>
 This star performs a specific function related to a
 voice-packet interpolation technique for PCM encoded
-data.  On its <i>input</i></b> port, this star reads in
+data.  On its <i>input</i> port, this star reads in
 <tt>SeqATMCell</tt>
 types which have a field containing a packet sequence
 number.  The sequence number is read and the star determines
@@ -43,7 +43,7 @@ first five
 <tt>SeqATMCell</tt>
 s to be sent over the network, then this star will substitute
 all zero bits for the bits which were lost during
-transmission.  These bits are sent through the <i>output</i></b>
+transmission.  These bits are sent through the <i>output</i>
 port.  If the dropped packet was not one of the first
 five, a pattern matching technique is used to determine
 the proper bits to substitute for those lost.  This is
@@ -55,34 +55,34 @@ star after it sees a
 numbered seven immediately following a
 <tt>SeqATMCell</tt>
 numbered five.  This star will then output a string
-of bits on its <i>temp</i></b> port of size <i>tempSize</i></b>
-* 8.  These bits describe the first <i>tempSize</i></b>
+of bits on its <i>temp</i> port of size <i>tempSize</i>
+* 8.  These bits describe the first <i>tempSize</i>
 samples immediately preceding the missing packet.  Likewise,
-<i>searchWindowSize</i></b> * 8 + <i>numInfoBits</i></b> bits
-are sent through the <i>window</i></b> port.  These bits describe
+<i>searchWindowSize</i> * 8 + <i>numInfoBits</i> bits
+are sent through the <i>window</i> port.  These bits describe
 the
 <tt>SeqATMCell</tt>
 immediately preceding the lost packet as well as the
-previous <i>searchWindowSize</i></b> samples before the lost packet.
+previous <i>searchWindowSize</i> samples before the lost packet.
 In this context of this example of a missing sixth packet, this means
-that the <i>temp</i></b> bits will come from the end of
-packet five and the <i>window</i></b> bits will include
+that the <i>temp</i> bits will come from the end of
+packet five and the <i>window</i> bits will include
 all of packets 5, 4, 3, 2, and a portion of the
-end of packet 1 (note the restriction on <i>searchWindowSize</i></b>).
+end of packet 1 (note the restriction on <i>searchWindowSize</i>).
 These bits are converted to samples in an SDF domain
 wormhole and a cross-correlation is performed between the
-<i>temp</i></b> and the <i>window</i></b> to determine the best
+<i>temp</i> and the <i>window</i> to determine the best
 match, i.e., the one with largest cross-correlation value.  This SDF
-galaxy will take the <i>numInfoBits</i></b> / 8 samples
-from the <i>window</i></b> samples following the <i>window</i></b>'s
-best match with the <i>temp</i></b> samples. These samples
+galaxy will take the <i>numInfoBits</i> / 8 samples
+from the <i>window</i> samples following the <i>window</i>'s
+best match with the <i>temp</i> samples. These samples
 are then encoded, loaded into a
 <tt>SeqATMCell</tt>
 and sent back to the DE domain where they enter the
-<i>subIn</i></b> port of this star.  This star unloads
+<i>subIn</i> port of this star.  This star unloads
 the bits from this
 <tt>SeqATMCell</tt>
-and outputs them in their proper order on the <i>output</i></b>
+and outputs them in their proper order on the <i>output</i>
 port.  If more than one packet was missing, this star
 will repeat the derived packet enough times to fill the
 void.
@@ -90,7 +90,7 @@ void.
 J. Goodman, G. LockHart, O. Wasem, and W. Wong,
 "Waveform Substitution Techniques for Recovering
 Missing Speech Segments in Packet Voice Communications,"
-<i>IEEE Trans. on Acoustics, Speech, and Signal Processing</i></b>,
+<i>IEEE Trans. on Acoustics, Speech, and Signal Processing</i>,
 vol ASSP-34, no. 6, pp. 1440-1448, December 1986.
 	}
 

@@ -37,7 +37,7 @@ into account, and computes n1 and d1 from the parameters k and N.
 It is implemented in direct form II.
 <h3>References</h3>
 <p>[1]  
-A. V. Oppenheim and R. W. Schafer, <i>Discrete-Time Signal Processing</i></b>,
+A. V. Oppenheim and R. W. Schafer, <i>Discrete-Time Signal Processing</i>,
 Prentice-Hall: Englewood Cliffs, NJ, 1989.
 	}
 	output {

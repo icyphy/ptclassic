@@ -7,7 +7,7 @@ and defining their common functionality.
 	}
 	htmldoc {
 This star provides the base class for a family of <i>higher-order
-functions</i></b> in Ptolemy.
+functions</i> in Ptolemy.
 This star should not be used on its own.
 <a name="higher-order functions"></a>
 A higher-order function is a function that takes a function as

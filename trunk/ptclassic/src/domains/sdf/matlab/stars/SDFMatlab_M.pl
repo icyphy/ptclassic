@@ -18,19 +18,19 @@ limitation of liability, and disclaimer of warranty provisions.
 	htmldoc {
 <a name="Matlab interface"></a>
 This star converts the matrices/scalars on the input ports to Matlab format,
-passes the Matlab matrices to the <i>MatlabFunction</i></b>, converts the
+passes the Matlab matrices to the <i>MatlabFunction</i>, converts the
 resulting Matlab matrices to Ptolemy matrices, and outputs the matrices.
-The <i>MatlabFunction</i></b> state can either be a Matlab function name,
+The <i>MatlabFunction</i> state can either be a Matlab function name,
 a call to a Matlab function, or one Matlab command.
 The star will add the missing pieces to form a complete command.
 <p>
-For example, if <i>MatlabFunction</i></b> were "eig" and the star had one input
+For example, if <i>MatlabFunction</i> were "eig" and the star had one input
 and two outputs, then the star would build the Matlab command
 "[output#1, output#2] = eig(input#1);".
-If <i>MatlabFunction</i></b> were "hilb(4)" and the star had no inputs and
+If <i>MatlabFunction</i> were "hilb(4)" and the star had no inputs and
 one output, then the star would build the Matlab command
 "[output#1] = hilb(4);".
-If <i>MatlabFunction</i></b> were
+If <i>MatlabFunction</i> were
 "[output#1,output#2] = func1(func2(input#2),input#1)", then
 the star would simply add a semicolon at the end.
 Before the command is passed to Matlab, the pound '#' characters are replaced

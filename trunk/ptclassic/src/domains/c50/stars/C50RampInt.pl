@@ -12,9 +12,9 @@ limitation of liability, an ddisclaimer of warranty provisions.
 	}
 	location { C50 main library }
 	htmldoc {
-Generates an integer ramp signal, starting at <i>value</i></b> (default 0)
-with step size <i>step</i></b> (default 1) saturating upon reaching largest
-integer if <i>saturation</i></b> is "YES".
+Generates an integer ramp signal, starting at <i>value</i> (default 0)
+with step size <i>step</i> (default 1) saturating upon reaching largest
+integer if <i>saturation</i> is "YES".
 	}
 	output {
 		name { output }

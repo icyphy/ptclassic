@@ -20,7 +20,7 @@ Second, it improves robustness against noisy DTMF signals and speech input.
 <p>[1]  
 Pat Mock, "Add DTMF Generation and Decoding to DSP-uP Designs,"
 Electronic Data News, March 21, 1985.  Reprinted in
-<i>Digital Signal Processing Applications with the TMS320 Family</i></b>,
+<i>Digital Signal Processing Applications with the TMS320 Family</i>,
 Texas Instruments, 1986.
 	}
 	author { Brian L. Evans }

@@ -31,7 +31,7 @@ to -2<i>a</i><sub>1</sub>, and its adaptation has the form
 <p>
 where <i>y[n]</i> is the output of this filter which can be used as the
 error signal.  The step size term <i>mu</i> is fixed by the value of
-the <i>stepSize</i></b> parameter.  You can effectively vary the step size
+the <i>stepSize</i> parameter.  You can effectively vary the step size
 by attenuating the error term as
 <pre>
     e[n] = y[n]/k
@@ -46,7 +46,7 @@ small, this filter gives an estimate of the strongest sinusoidal component:
 In this implementation the taps are scaled by 1/2 to make the
 star behave like the CG56 version.  Thus the output of the filter is also
 scaled by 1/2.  To compensate for this scaling <i>mu</i> is multiplied by 2. 
-This filter outputs the current value of <i>a <sub></i>1<i></sub></i> on the <i>cosOmega</i></b>
+This filter outputs the current value of <i>a <sub></i>1<i></sub></i> on the <i>cosOmega</i>
 output port.  The initial value is <i>a<sub></i>1<i></sub> </i>=<i> </i>1<i></i>, that is, zero frequency,
 so the initial value of the second tap is -1 (because of the 1/2 scaling).
 <p>

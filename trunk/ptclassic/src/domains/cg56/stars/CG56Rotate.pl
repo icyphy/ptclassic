@@ -13,16 +13,16 @@ limitation of liability, and disclaimer of warranty provisions.
 	location { CG56 control library }
 	htmldoc {
 <a name="reverse"></a>
-The star reads in an input block of length <i>length</i></b> and performs a
+The star reads in an input block of length <i>length</i> and performs a
 circular shift of the input.
-If <i>rotation</i></b> is positive, then the input is shifted to the left so
-that output[0] = input[<i>rotation</i></b>], output[1] = input[<i>rotation</i></b> + 1],
+If <i>rotation</i> is positive, then the input is shifted to the left so
+that output[0] = input[<i>rotation</i>], output[1] = input[<i>rotation</i> + 1],
 etc.
-If <i>rotation</i></b> is negative, then the input is shifted to the right so
-that output[<i>rotation</i></b>] = input[0], output[<i>rotation</i></b> + 1] = input[1],
+If <i>rotation</i> is negative, then the input is shifted to the right so
+that output[<i>rotation</i>] = input[0], output[<i>rotation</i> + 1] = input[1],
 etc.
-The parameter <i>rotation</i></b> must be smaller than the parameter
-<i>length</i></b> in absolute value.
+The parameter <i>rotation</i> must be smaller than the parameter
+<i>length</i> in absolute value.
 	}
 	input {
 		name {input}

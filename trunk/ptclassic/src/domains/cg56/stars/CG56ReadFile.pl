@@ -15,9 +15,9 @@ limitation of liability, and disclaimer of warranty provisions.
 <a name="Motorola DSP56000 simulator"></a>
 <a name="simulator, Motorola DSP56000"></a>
 <a name="file input"></a>
-Reads one data value from the <i>fileName</i></b> for use with the
+Reads one data value from the <i>fileName</i> for use with the
 Motorola DSP56000 simulator.
-The <i>inVal</i></b> is used as the storage location of the read data value.
+The <i>inVal</i> is used as the storage location of the read data value.
 	}
 	output {
 		name {output}

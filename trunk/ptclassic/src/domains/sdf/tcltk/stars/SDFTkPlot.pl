@@ -21,12 +21,12 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { SDF Tcl/Tk library }
 	htmldoc {
-The <i>persistence</i></b> parameter specifies the number
+The <i>persistence</i> parameter specifies the number
 of points that are buffered, and hence the number that will
 be shown on a plot.  In line-drawing mode, however, where style = "connect",
-some points are plotted twice if the <i>repeat_border_points</i></b>
+some points are plotted twice if the <i>repeat_border_points</i>
 parameter is true.
-The <i>repeat_border_points</i></b> parameter specifies whether the rightmost point
+The <i>repeat_border_points</i> parameter specifies whether the rightmost point
 (those on the right boundary of the plot)
 should be repeated on the left boundary when a new trace is started.
 These points occupy two positions in the buffer, and hence take two slots of persistence.

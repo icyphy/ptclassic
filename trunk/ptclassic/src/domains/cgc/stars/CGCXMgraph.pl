@@ -12,13 +12,13 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CGC main library }
 	htmldoc {
-The input signal is plotted using the <i>pxgraph</i></b> program.
+The input signal is plotted using the <i>pxgraph</i> program.
 This program must be in your path, or this star will not work!
-The <i>title</i></b> parameter specifies a title for the plot.
-The <i>saveFile</i></b> parameter optionally specifies a file for
+The <i>title</i> parameter specifies a title for the plot.
+The <i>saveFile</i> parameter optionally specifies a file for
 storing the data in a syntax acceptable to pxgraph.
 A null string prevents any such storage.
-The <i>options</i></b> string is passed directly to the pxgraph program
+The <i>options</i> string is passed directly to the pxgraph program
 as command-line options.  See the manual section describing pxgraph
 for a complete explanation of the options.
 	}

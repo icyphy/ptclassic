@@ -30,11 +30,11 @@ documentation for background information.
 <h3>Number of replacement blocks</h3>
 <p>
 The star is replaced by one or more instances of the block with name
-given by <i>blockname</i></b> at setup time, before the scheduler is invoked.
+given by <i>blockname</i> at setup time, before the scheduler is invoked.
 The number of instances of the replacement block is given by the
-<i>chain_length</i></b> parameter.
+<i>chain_length</i> parameter.
 If the named block is not on the knownlist (e.g., it is not a built-in block),
-then the <i>where_defined</i></b> parameter is taken to be the full path name and
+then the <i>where_defined</i> parameter is taken to be the full path name and
 filename of facet that should be compiled to define the block.
 This path name may (and probably should) begin with the environment
 <pre>
@@ -44,9 +44,9 @@ variable $PTOLEMY or ~username.
 </pre>
 <h3>Connections</h3>
 <p>
-The input and output connections specified by <i>input_map</i></b> and
-<i>output_map</i></b> are made to the first and last blocks in the chain.
-The internal connections are made as specified by the <i>internal_map</i></b>
+The input and output connections specified by <i>input_map</i> and
+<i>output_map</i> are made to the first and last blocks in the chain.
+The internal connections are made as specified by the <i>internal_map</i>
 parameter.
 This parameter should consist of an alternating list of output names and
 input names for the replacement block.
@@ -55,7 +55,7 @@ As with the
 star, if inputs or outputs are multiple, repeated names can be used.
 <h3>Setting parameter values</h3>
 <p>
-The <i>parameter_map</i></b> parameter can be used to set parameter values
+The <i>parameter_map</i> parameter can be used to set parameter values
 for the replacement blocks.
 The syntax is the same as in the
 <tt>Map</tt>

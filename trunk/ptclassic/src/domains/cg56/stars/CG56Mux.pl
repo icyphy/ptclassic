@@ -19,13 +19,13 @@ But only one of these blocks of particles is copied to the output.
 The one copied is determined by the <i>control</i> input.
 Integers from <i></i>0<i></i> through <i>N-</i>1<i></i> are accepted at the <i>control</i> input,
 where <i>N</i> is the number of inputs.
-If the <i>control</i></b> input is outside this range, random data (possibly
+If the <i>control</i> input is outside this range, random data (possibly
 memory mapped devices) will be copied.
 <h3>IMPLEMENTATION:</h3>
 <p>
 There are potentially very many special cases that could be handled
 for increased efficiency: looped vs. non-looped, circular vs. linear,
-and scalars vs vectors (<i>blockSize</i></b> &gt; 1), uniform inputs vs. non-uniform
+and scalars vs vectors (<i>blockSize</i> &gt; 1), uniform inputs vs. non-uniform
 inputs (port.bufSize()).
 The current implementation handles only some of these cases.
 Use this star at your own risk.

@@ -25,16 +25,16 @@ is usually provided by the
 Data_M
 star.
 The dimensions of the input data matrix is given by the
-<i>rows</i></b> and <i>cols</i></b> parameters to the star.
+<i>rows</i> and <i>cols</i> parameters to the star.
 The outputs are the three matrices: the vector of singular values,
 the matrix of right singular vectors, and the matrix of left singular vectors.
 The terminals for each output is labeled on the star's icon as
 S, R, and L respectively.
 <p>
-The <i>threshold</i></b> parameter gives the smallest floating point number
+The <i>threshold</i> parameter gives the smallest floating point number
 that the algorithm will represent.
 Anything smaller is considered zero.
-The <i>max_iterations</i></b> parameter allows the user to control the number of
+The <i>max_iterations</i> parameter allows the user to control the number of
 iterations that the SVD algorithm will be allowed to run before stopping.
 Normally, the SVD algorithm should converge before this value but this
 parameter is provided to prevent non-convergent matrices from causing
@@ -48,7 +48,7 @@ The vector of singular values is always generated.
 <a name="Haykin, S."></a>
 <h3>References</h3>
 <p>[1]  
-S. Haykin, <i>Modern Filters</i></b>, pp. 333-335,
+S. Haykin, <i>Modern Filters</i>, pp. 333-335,
 Macmillan Publishing Company, New York, 1989.
     }
     seealso { Data_M }

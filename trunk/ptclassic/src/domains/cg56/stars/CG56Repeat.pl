@@ -13,7 +13,7 @@ limitation of liability, and disclaimer of warranty provisions.
     location { CG56 control library }
 	htmldoc {
 Repeat repeats each input the specified number of times
-(<i>numTimes</i></b>) on the output.
+(<i>numTimes</i>) on the output.
 Note that this is a sample rate change, and hence affects the number
 of invocations of downstream stars.
 <h3>IMPLEMENTATION</h3>

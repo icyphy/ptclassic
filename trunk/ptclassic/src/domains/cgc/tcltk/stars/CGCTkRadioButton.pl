@@ -19,7 +19,7 @@ The star always outputs one of a finite number of values: the output is
 controlled by the user selecting one of several buttons.
 Exactly one button in the group is on.
 <p>
-The <i>pairs</i></b> parameter defines a set of pairs.
+The <i>pairs</i> parameter defines a set of pairs.
 Each pair should be enclosed in double quotes.
 Each pair consists of two words: a one word label and a value.
 The value is not checked at compile time: it is literally passed to Tk.

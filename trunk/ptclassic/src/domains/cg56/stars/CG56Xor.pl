@@ -12,7 +12,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CG56 main library }
 	htmldoc {
-This star outputs the bitwise exclusive-or of <i>input1</i></b> and <i>input2</i></b>.
+This star outputs the bitwise exclusive-or of <i>input1</i> and <i>input2</i>.
 	}
 	execTime {
 		return 4;

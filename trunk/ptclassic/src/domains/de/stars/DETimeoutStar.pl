@@ -22,7 +22,7 @@ The <i>set</i> method resets and starts a timer.
 Invoking <i>set</i> again will reset the timer and restart it.
 Invoking <i>clear</i> stops the timer.
 The <i>expired</i> method indicates whether or not the timer
-has reached <i>time-out</i></b>.
+has reached <i>time-out</i>.
     }
 
     state {

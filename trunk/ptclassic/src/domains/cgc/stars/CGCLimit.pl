@@ -14,7 +14,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	location { CGC main library }
 	htmldoc {
 This star hard limits input samples to keep the in the range
-of (<i>bottom, top</i></b>).
+of (<i>bottom, top</i>).
 <a name="hard limiter"></a>
 	}
 	input {

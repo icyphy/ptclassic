@@ -24,15 +24,15 @@ it fires), interrupt-based code will be generated.
 If the star is not repeated, it will generate code
 that polls the Proport and busy waits if samples are not available.
 Interrupt-based code can be forced by setting the string
-parameter <i>forceInterrupts</i></b> to "yes".
+parameter <i>forceInterrupts</i> to "yes".
 The interrupt buffer will be the minimum required size if the
-parameter <i>interruptBufferSize</i></b> is "default=4".
+parameter <i>interruptBufferSize</i> is "default=4".
 If this parameter is a number, it will be used for the length
 (in words) of the interrupt buffer.
 <p>
 In the event of a real-time violation, execution will abort
 and the following error code will be left in register y0:
-<p><b>123061</i></b>  
+<p><b>123061</i>  
 An interrupt occurred and the output buffer was empty.
 	}
         seealso { PrPrtAD, PrPrtADDA }

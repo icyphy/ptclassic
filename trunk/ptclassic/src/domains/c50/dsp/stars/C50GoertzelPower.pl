@@ -25,7 +25,7 @@ This one-pole IIR filter has a transfer function of
 </pre>
 <h3>References</h3>
 <p>[1]  
-A. V. Oppenheim and R. W. Schafer, <i>Discrete-Time Signal Processing</i></b>,
+A. V. Oppenheim and R. W. Schafer, <i>Discrete-Time Signal Processing</i>,
 Prentice-Hall: Englewood Cliffs, NJ, 1989.
 	}
 	output {

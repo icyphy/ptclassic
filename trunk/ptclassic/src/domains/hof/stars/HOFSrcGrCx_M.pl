@@ -24,7 +24,7 @@ limitation of liability, and disclaimer of warranty provisions.
 See the explanation for MapGr star, from which this is derived.
 The only difference is that this star forces the number of inputs to zero
 and output datatype to complex matrix.  It also hides the input ports and the
-<i>input_map</i></b> parameter.
+<i>input_map</i> parameter.
 	}
 	ccinclude { "Matrix.h" } 
 	constructor {

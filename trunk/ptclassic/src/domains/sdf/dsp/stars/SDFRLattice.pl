@@ -72,12 +72,12 @@ given by the LevDur and Burg stars.
 <h3>References</h3>
 <p>[1]  
 J. Makhoul, "Linear Prediction: A Tutorial Review",
-<i>Proc. IEEE</i></b>, Vol. 63, pp. 561-580, Apr. 1975.
+<i>Proc. IEEE</i>, Vol. 63, pp. 561-580, Apr. 1975.
 <p>[2]  
-S. M. Kay, <i>Modern Spectral Estimation: Theory & Application</i></b>,
+S. M. Kay, <i>Modern Spectral Estimation: Theory & Application</i>,
 Prentice-Hall, Englewood Cliffs, NJ, 1988.
 <p>[3]  
-S. Haykin, <i>Modern Filters</i></b>, MacMillan Publishing Company,
+S. Haykin, <i>Modern Filters</i>, MacMillan Publishing Company,
 New York, 1989.
 	}
 	seealso { IIR, Lattice }

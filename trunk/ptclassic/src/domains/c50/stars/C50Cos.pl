@@ -20,7 +20,7 @@ limitation of liability, and disclaimer of warranty provisions.
 <a name="cosine"></a>
 This star computes the cosine of the input, which must be in the range
 (-1.0, 1.0).
-The output equals cos(<i> pi cdot </i><i>in</i></b>), so the input range is 
+The output equals cos(<i> pi cdot </i><i>in</i>), so the input range is 
 effectively (-<i> pi</i>, <i>pi </i>).
 The output is in the range (-1.0, 1.0).
 	}

@@ -22,7 +22,7 @@ before edge detection.  It removes inter-field flicker quite well
 when displaying single frames from a moving sequence.
 	}
 	htmldoc {
-The <i>FilterWidth</i></b> parameter must be an odd, positive integer.
+The <i>FilterWidth</i> parameter must be an odd, positive integer.
 Pixels at the image boundaries are copied and not median filtered.
 <a name="filter, median"></a>
 <a name="image, median filter"></a>

@@ -13,7 +13,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	location { CGC main library }
 	htmldoc {
 Repeat repeats each input Particle the specified number of times
-(<i>numTimes</i></b>) on the output.  Note that this is a sample rate
+(<i>numTimes</i>) on the output.  Note that this is a sample rate
 change, and hence affects the number of invocations of downstream
 stars.
 	}

@@ -27,33 +27,33 @@ limitation of liability, and disclaimer of warranty provisions.
 	htmldoc {
 This star queues input particles and produces output particles on demand.
 The inputs are assigned priorities so that when an output is demanded,
-if any particle from <i>inData#1</i></b> is available, it
+if any particle from <i>inData#1</i> is available, it
 will be sent to the output.  If several particles from
-<i>inData#1</i></b> are available, a FIFO policy is used.
-Only if the queue for <i>inData#1</i></b> is empty
-will the queue for <i>inData#2</i></b> be examined.
-This means that later arrivals on <i>inData#1</i></b> may go to the output before
-earlier arrivals on <i>inData#2</i></b>.
+<i>inData#1</i> are available, a FIFO policy is used.
+Only if the queue for <i>inData#1</i> is empty
+will the queue for <i>inData#2</i> be examined.
+This means that later arrivals on <i>inData#1</i> may go to the output before
+earlier arrivals on <i>inData#2</i>.
 <p>
 The first particle to arrive at an input is always passed directly
-to the output, unless <i>numDemandsPending</i></b> is initialized to 0.
+to the output, unless <i>numDemandsPending</i> is initialized to 0.
 If several particles arrive first with the same time stamp, the highest
 priority particle will go to the output.
 <p>
-If <i>consolidateDemands</i></b> is set to TRUE (the default),
-then <i>numDemandsPending</i></b> is not permitted to rise above unity.
+If <i>consolidateDemands</i> is set to TRUE (the default),
+then <i>numDemandsPending</i> is not permitted to rise above unity.
 This means that
-if multiple <i>demand</i></b> particles with the same time stamp
-are waiting at the <i>demand</i></b> input, they are
+if multiple <i>demand</i> particles with the same time stamp
+are waiting at the <i>demand</i> input, they are
 consolidated into a single demand, and only one output is produced.
-As usual, if a <i>demand</i></b> input arrives between the time that the queue
+As usual, if a <i>demand</i> input arrives between the time that the queue
 goes empty and the next arrival of a data input, it enables
-the next <i>inData</i></b> particle to pass immediately to the output by
-setting the state <i>numDemandsPending</i></b> to unity.
-But if more than one <i>demand</i></b> event arrives in this time period, the
+the next <i>inData</i> particle to pass immediately to the output by
+setting the state <i>numDemandsPending</i> to unity.
+But if more than one <i>demand</i> event arrives in this time period, the
 effect is the same as if only one such event had arrived.
 <p>
-If <i>consolidateDemands</i></b> is set to FALSE, then every <i>demand</i></b> input
+If <i>consolidateDemands</i> is set to FALSE, then every <i>demand</i> input
 will eventually stimulate an output, even if successive demands arrive
 when the queue is empty, and even if successive demands arrive with the
 same time stamp.
@@ -79,7 +79,7 @@ Any intervening demand inputs (between the time that the queues
 go empty and the next arrival of a data input) are ignored.
 <p>
 Each time a data or demand input arrives, the size of the queue
-after processing the input is sent to the <i>size</i></b> output.
+after processing the input is sent to the <i>size</i> output.
 	}
 	seealso {Queue}
 	input {

@@ -24,13 +24,13 @@ limitation of liability, and disclaimer of warranty provisions.
 <a name="linear prediction"></a>
 <a name="spectral estimation, maximum entropy"></a>
 <a name="maximum entropy spectral estimation"></a>
-The number of inputs looked at is given by the <i>numInputs</i></b> parameter
+The number of inputs looked at is given by the <i>numInputs</i> parameter
 and the order of the autoregressive (AR) model is given by
-the <i>order</i></b> parameter.
+the <i>order</i> parameter.
 <a name="autoregressive model"></a>
 <a name="AR model"></a>
-The order specifies how many outputs appear on the <i>lp</i></b> and
-<i>refl</i></b> output portholes.
+The order specifies how many outputs appear on the <i>lp</i> and
+<i>refl</i> output portholes.
 These outputs are, respectively, the autoregressive (AR) parameters
 (also called the linear predictor parameters),
 and the reflection coefficients.
@@ -57,7 +57,7 @@ coefficients in the statistics literature.
 <a name="coefficients, partial correlation"></a>
 <a name="PARCOR"></a>
 <p>
-The <i>errPower</i></b> output is the power of the prediction error
+The <i>errPower</i> output is the power of the prediction error
 as a function of the model order.
 There are <i>order+</i>1<i></i> output samples, and the first sample corresponds
 to the prediction error of a zero-th order predictor.
@@ -68,12 +68,12 @@ This is simply an estimate of the input signal power.
 <h3>References</h3>
 <p>[1]  
 J. Makhoul, "Linear Prediction: A Tutorial Review",
-<i>Proc. IEEE</i></b>, Vol. 63, pp. 561-580, Apr. 1975.
+<i>Proc. IEEE</i>, Vol. 63, pp. 561-580, Apr. 1975.
 <p>[2]  
-S. M. Kay, <i>Modern Spectral Estimation: Theory & Application</i></b>,
+S. M. Kay, <i>Modern Spectral Estimation: Theory & Application</i>,
 Prentice-Hall, Englewood Cliffs, NJ, 1988.
 <p>[3]  
-S. Haykin, <i>Modern Filters</i></b>, MacMillan Publishing Company,
+S. Haykin, <i>Modern Filters</i>, MacMillan Publishing Company,
 New York, 1989.
 	}
 	seealso { LevDur, linearPrediction, powerSpectrum }

@@ -16,18 +16,18 @@ limitation of liability, and disclaimer of warranty provisions.
 This star is an enhanced version of Xgraph.  It is identical
 except that it can plot multiple traces, like an oscilloscope.
 As for Xgraph,
-the <i>title</i></b> parameter specifies a title for the plot.
-The <i>saveFile</i></b> parameter optionally specifies a file for
+the <i>title</i> parameter specifies a title for the plot.
+The <i>saveFile</i> parameter optionally specifies a file for
 storing the data in a syntax acceptable to pxgraph.
 A null string prevents any such storage.
-The <i>options</i></b> string is passed directly to the pxgraph program
+The <i>options</i> string is passed directly to the pxgraph program
 as command-line options.  See the manual section describing pxgraph
 for a complete explanation of the options.
 <p>
-Multiple traces may be plotted by setting the <i>traceLength</i></b>
+Multiple traces may be plotted by setting the <i>traceLength</i>
 state to a nonzero value.  In this case, a new plot (starting at
-x value zero) is started every <i>traceLength</i></b> samples.  The
-first <i>ignore</i></b> samples are not plotted; this is useful for letting
+x value zero) is started every <i>traceLength</i> samples.  The
+first <i>ignore</i> samples are not plotted; this is useful for letting
 transients die away.
 <a name="pxgraph program"></a>
 <a name="oscilloscope, X window"></a>

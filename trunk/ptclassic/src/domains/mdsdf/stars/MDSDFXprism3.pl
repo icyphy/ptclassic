@@ -16,11 +16,11 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { MDSDF library }
 	htmldoc {
-The input signal is plotted using the <i>xprism3</i></b> program which is
-provided with the Ptolemy distribution.  The <i>title</i></b> parameter specifies
-a title for the plot.  The <i>saveFile</i></b> parameter optionally specifies a
+The input signal is plotted using the <i>xprism3</i> program which is
+provided with the Ptolemy distribution.  The <i>title</i> parameter specifies
+a title for the plot.  The <i>saveFile</i> parameter optionally specifies a
 file for storing the data in a syntax acceptable to xprism3.  A null string
-prevents any such storage.  The <i>options</i></b> string is passed directly to
+prevents any such storage.  The <i>options</i> string is passed directly to
 the xprism3 program as command-line options.  See the manual section
 describing xprism3 for a complete explanation of the options.
 <a name="xprism program"></a>

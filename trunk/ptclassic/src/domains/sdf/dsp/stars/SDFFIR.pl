@@ -73,7 +73,7 @@ the decimation ratio.
 <p>
 For more information about polyphase filters, see F. J. Harris,
 "Multirate FIR Filters for Interpolating and Desampling", in
-<i>Handbook of Digital Signal Processing</i></b>, Academic Press, 1987.
+<i>Handbook of Digital Signal Processing</i>, Academic Press, 1987.
 	}
 	seealso { FIRCx, Biquad, UpSample, DownSample,
 		  firDemo, interp, multirate }

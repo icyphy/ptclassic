@@ -19,12 +19,12 @@ limitation of liability, and disclaimer of warranty provisions.
 	location { CG56 signal sources library }
 	htmldoc {
 The star produces at its output an impulse train with height given by the 
-parameter <i>level</i></b> and period given by <i>period</i></b> which is 0 for
+parameter <i>level</i> and period given by <i>period</i> which is 0 for
 a single impulse.  The impulse train or pulse can be delayed by setting
-the parameter <i>delay</i></b> to a positive value.
+the parameter <i>delay</i> to a positive value.
 <p>
 A state variable is maintained to keep around the next output value.
-At initialization, the state is set to <i>level</i></b>.
+At initialization, the state is set to <i>level</i>.
 	}
 	seealso { Quasar, DC }
 	output {

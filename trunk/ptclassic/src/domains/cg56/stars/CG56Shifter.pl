@@ -13,7 +13,7 @@ limitation of liability, and disclaimer of warranty provisions.
     location { CG56 main library }
 	htmldoc {
 <a name="bit shifter"></a>
-Scale by shifting left <i>leftShifts</i></b> bits.
+Scale by shifting left <i>leftShifts</i> bits.
 Negative values of <i>N</i> implies right shifting.
 Arithmetic shifts are used.
     }

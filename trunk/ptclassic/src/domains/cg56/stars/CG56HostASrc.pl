@@ -19,7 +19,7 @@ The value(s) output by the star may be changed asynchronously by
 the host via the host port.
 This is intended as a base star for derivation; a derived star would provide
 some host-specific interface to this star.
-The <i>label</i></b> parameter is not directly used by the star; it is for the
+The <i>label</i> parameter is not directly used by the star; it is for the
 convenience of derived stars.
 <h3>IMPLEMENTATION</h3>
 <p>
@@ -31,8 +31,8 @@ cannot apply the trick used by the
 star to eliminate runtime code in all cases.
 More work must be done to identify the safe cases.
 <p>
-On each firing of the star, the <i>value</i></b> state is output.
-The host may modify the <i>value</i></b> state asynchronously.
+On each firing of the star, the <i>value</i> state is output.
+The host may modify the <i>value</i> state asynchronously.
 Currently, the value state is referenced by explicit memory location; however,
 we might want to generate a symbolic name.
 Currently, only scalars may be output (not waveforms).

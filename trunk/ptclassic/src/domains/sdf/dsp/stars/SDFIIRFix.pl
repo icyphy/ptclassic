@@ -38,15 +38,15 @@ into a parallel or cascade form.
 <p>
 Quantization is performed in several places.
 First, the coefficients are quantized (rounded) to the precision
-specified by <i>CoefPrecision</i></b>.
+specified by <i>CoefPrecision</i>.
 Each time the star fires, the
 input is optionally quantized (rounded) to precision specified
-by <i>InputPrecision</i></b>.
+by <i>InputPrecision</i>.
 The multiplication of the state by the coefficients preserves
-full precision, but the result is quantized to <i>AccumPrecision</i></b>
+full precision, but the result is quantized to <i>AccumPrecision</i>
 after being added to other products.
-The state variables are stored with the precision given by <i>StatePrecision</i></b>.
-The output is quantized (rounded) to <i>OutputPrecision</i></b> before being
+The state variables are stored with the precision given by <i>StatePrecision</i>.
+The output is quantized (rounded) to <i>OutputPrecision</i> before being
 sent to the output.
 <p>
 The numerator "tap" coefficients and the denominator "feedback"
@@ -58,7 +58,7 @@ During computation of filter outputs, the precision of the filter taps
 is converted to the precision contained in the "CoefPrecision" parameter.
 <h3>References</h3>
 <p>[1]  
-A. V. Oppenheim and R. W. Schafer, <i>Discrete-Time Signal Processing</i></b>,
+A. V. Oppenheim and R. W. Schafer, <i>Discrete-Time Signal Processing</i>,
 Prentice-Hall: Englewood Cliffs, NJ, 1989.
         }
         seealso { FIR, Biquad }

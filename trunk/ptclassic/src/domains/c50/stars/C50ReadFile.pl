@@ -15,9 +15,9 @@ limitation of liability, and disclaimer of warranty provisions.
 <a name="TI DSK320C5x simulator"></a>
 <a name="simulator, TI DSK320C5x"></a>
 <a name="file input"></a>
-Reads one value data from the <i>fileName</i></b> for use with
+Reads one value data from the <i>fileName</i> for use with
 Texas Instruments DSK320C5x simulator.
-The <i>inVal</i></b> is used as the storage location of the read data value.
+The <i>inVal</i> is used as the storage location of the read data value.
 	}
 	output {
 		name {output}

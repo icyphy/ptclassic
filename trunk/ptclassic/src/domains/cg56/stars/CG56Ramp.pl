@@ -12,8 +12,8 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CG56 signal sources library }
 	htmldoc {
-Generates a ramp signal, starting at <i>value</i></b> (default 0.0)
-with step size <i>step</i></b> (default 0.001).
+Generates a ramp signal, starting at <i>value</i> (default 0.0)
+with step size <i>step</i> (default 0.001).
 	}
 	output {
 		name { output }

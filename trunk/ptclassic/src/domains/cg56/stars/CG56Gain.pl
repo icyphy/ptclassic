@@ -16,7 +16,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	location { CG56 main library }
 	htmldoc {
 We make no attempt to be heroic and handle all cases as was done with Gabriel.
-The only special case is for a <i>gain</i></b> of 1.
+The only special case is for a <i>gain</i> of 1.
 We eliminate ourselves from the circuit in that case.
 	}
 	protected {

@@ -23,7 +23,7 @@ which is in the range -1.0 to 1.0.  The output is in the principle range of
 <p>
 The power series is factorized carefully so that intermediate factors never
 exceed 1.0 in magnitude.  This is essential because these intermediate results
-have to be moved from the accumulator back to the <i>x</i></b> or <i>y</i></b>
+have to be moved from the accumulator back to the <i>x</i> or <i>y</i>
 data registers for subsequent multiplication.
 <p>
 The runtime of this star can vary from a few instruction cycles, if

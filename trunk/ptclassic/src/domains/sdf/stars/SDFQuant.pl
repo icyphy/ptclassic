@@ -24,8 +24,8 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	htmldoc {
-Assume that the <i>thresholds</i></b> parameter is set to <i></i>(<i></i>8<i>.</i>1<i>, </i>9<i>.</i>2<i>, </i>10<i>.</i>3<i></i>)<i></i>,
-and that the <i>levels</i></b> parameter is not set so that the default values
+Assume that the <i>thresholds</i> parameter is set to <i></i>(<i></i>8<i>.</i>1<i>, </i>9<i>.</i>2<i>, </i>10<i>.</i>3<i></i>)<i></i>,
+and that the <i>levels</i> parameter is not set so that the default values
 of <i></i>(<i></i>0<i>.</i>0<i>, </i>1<i>.</i>0<i>, </i>2<i>.</i>0<i>, </i>3<i>.</i>0<i></i>)<i></i> are used.  Then, an input of <i>-</i>1<i>.</i>5<i></i> would give
 an output of <i></i>0<i>.</i>0<i></i>, an input of <i></i>8<i>.</i>2<i></i> would give an output of <i></i>1<i>.</i>0<i></i>, and
 an input of <i></i>15<i>.</i>5<i></i> would give an output of <i></i>3<i>.</i>0<i></i>.

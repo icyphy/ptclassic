@@ -31,33 +31,33 @@ predictor coefficients.
 <a name="maximum entropy spectral estimation"></a>
 If the
 <tt>Autocor</tt>
-star is set so that it's <i>unbiased</i></b> parameter is zero,
+star is set so that it's <i>unbiased</i> parameter is zero,
 then the combined effect of that star and this one is called the
 autocorrelation algorithm.
 <a name="autocorrelation method"></a>
-The given order should be the same as the <i>noLags</i></b> parameter of the
+The given order should be the same as the <i>noLags</i> parameter of the
 <tt>Autocor</tt>
 star.  Three outputs are generated.
-On the <i>errPower</i></b> output, a sequence of <i>order  +  </i>1<i></i>
+On the <i>errPower</i> output, a sequence of <i>order  +  </i>1<i></i>
 samples gives the prediction
-error power for each predictor order from zero to <i>order</i></b>.
+error power for each predictor order from zero to <i>order</i>.
 The first sample, which corresponds to the zeroth-order predictor,
 is simply an estimate of the power of the input process.
-Note that for signals without noise, the <i>errPower</i></b> output can sometimes
+Note that for signals without noise, the <i>errPower</i> output can sometimes
 end up being a small negative number.
 <p>
-The <i>lp</i></b> output gives the coefficients of an FIR filter that
+The <i>lp</i> output gives the coefficients of an FIR filter that
 performs linear prediction for the input process.
 <a name="linear prediction"></a>
 This set of coefficients is suitable for directly feeding a
 <tt>BlockFIR</tt>
 filter star that accepts outside coefficients.
-The number of coefficients produced is equal to the <i>order</i></b>.
-The final output <i>refl</i></b> is the reflection coefficients,
+The number of coefficients produced is equal to the <i>order</i>.
+The final output <i>refl</i> is the reflection coefficients,
 suitable for feeding directly to a
 <tt>BlockLattice</tt>
 star, which will then generate the forward and backward prediction error.
-The number of coefficients produced is equal to the <i>order</i></b>.
+The number of coefficients produced is equal to the <i>order</i>.
 <p>
 Note that the definition of reflection coefficients is not quite
 universal in the literature.
@@ -77,12 +77,12 @@ coefficients in the statistics literature.
 <h3>References</h3>
 <p>[1]  
 J. Makhoul, "Linear Prediction: A Tutorial Review",
-<i>Proc. IEEE</i></b>, vol. 63, pp. 561-580, Apr. 1975.
+<i>Proc. IEEE</i>, vol. 63, pp. 561-580, Apr. 1975.
 <p>[2]  
-S. M. Kay, <i>Modern Spectral Estimation: Theory & Application</i></b>,
+S. M. Kay, <i>Modern Spectral Estimation: Theory & Application</i>,
 Prentice-Hall, Englewood Cliffs, NJ, 1988.
 <p>[3]  
-S. Haykin, <i>Modern Filters</i></b>, MacMillan Publishing Company,
+S. Haykin, <i>Modern Filters</i>, MacMillan Publishing Company,
 New York, 1989.
 	}
 	seealso { Autocor, BlockFIR, linearPrediction }

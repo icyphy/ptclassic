@@ -7,7 +7,7 @@ This is a base class containing utility methods shared by HOF stars,
 and defining their common functionality.
 	}
 	htmldoc {
-This star provides the base class for a family of <i>higher-order functions</i></b>
+This star provides the base class for a family of <i>higher-order functions</i>
 in Ptolemy.
 <a name="higher-order functions"></a>
 A higher-order function is a function that takes a function as
@@ -20,8 +20,8 @@ The basic mechanism is that a star or galaxy is statically
 specified, and the higher-order star replaces itself with
 one or more instances of the specified replacement block.
 <p>
-The name of the replacement block is given by the <i>blockname</i></b> parameter.
-If the replacement block is a galaxy, then the <i>where_defined</i></b> parameter
+The name of the replacement block is given by the <i>blockname</i> parameter.
+If the replacement block is a galaxy, then the <i>where_defined</i> parameter
 gives the full name (including the full path) of the definition of the galaxy.
 This path name may (and probably should) begin with the environment
 <pre>
@@ -34,7 +34,7 @@ specifications (like ptcl files) may be allowed.
 The oct facet should contain the replacement galaxy,
 or it could simply be the facet that defines the replacement galaxy.
 If the replacement block is a built-in star, then there
-is no need to give a value to the <i>where_defined</i></b> parameter.
+is no need to give a value to the <i>where_defined</i> parameter.
 <p>
 For all higher-order stars derived from this base class, the replacement
 blocks are substituted for the higher-order star at setup time.
@@ -48,7 +48,7 @@ They share a common mechanism for specifying the value
 of parameters in the replacement block.
 <h3>Setting parameter values</h3>
 <p>
-The <i>parameter_map</i></b> parameter can be used to set parameter values
+The <i>parameter_map</i> parameter can be used to set parameter values
 for the replacement blocks.
 There are four acceptable forms:
 <pre>
@@ -59,7 +59,7 @@ name(number) = value
 </pre>
 There should be no spaces between "name" and "(number)", and the name
 cannot contain spaces, "=", or "(".
-In all cases, <i>name</i></b> is the name of a parameter in the
+In all cases, <i>name</i> is the name of a parameter in the
 replacement block.
 In the first case, the value is applied to all instances
 of the replacement block.

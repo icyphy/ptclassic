@@ -25,12 +25,12 @@ into the delay line.
 With proper choice of polynomial, the resulting output appears highly random
 even if the input is highly non-random (e.g., all zeros or all ones).
 <p>
-If the polynomial is a <i>primitive polynomial</i></b>, then the feedback shift
-register is a so-called <i>maximal length feedback shift register</i></b>.
+If the polynomial is a <i>primitive polynomial</i>, then the feedback shift
+register is a so-called <i>maximal length feedback shift register</i>.
 <a name="primitive polynomial"></a>
 <a name="maximal length feedback shift register"></a>
 This means that with a constant input, the output will be sequence
-with period <i></i>2<i> <sup>N</sup>  -  </i>1<i></i>, where <i>N</i></b> is the order of the polynomial
+with period <i></i>2<i> <sup>N</sup>  -  </i>1<i></i>, where <i>N</i> is the order of the polynomial
 (the length of the shift register).  This is the longest possible sequence.
 Moreover, within this period, the sequence will appear to be white,
 in that a computed autocorrelation will be very nearly an impulse.
@@ -40,15 +40,15 @@ to generate a pseudo-random bit sequence.
 The maximal-length feedback shift register with constant input will
 pass through <i></i>2<i> <sup>N</sup>  -  </i>1<i></i> states before returning to a state it has
 been in before.  This is one short of the <i></i>2<i> <sup>N</sup></i> states that a register
-with <i>N</i> bits can take on.  This one missing state, in fact, is a <i>lock-up</i></b>
+with <i>N</i> bits can take on.  This one missing state, in fact, is a <i>lock-up</i>
 state, in that if the input is an appropriate constant, the scrambler will
 cease to produce random-looking output, and will output a constant.
 For example, if the input is all zeros, and the initial state of the
 scrambler is zero, then the outputs will be all zero, hardly random.
 This is easily avoided by initializing the scrambler to some non-zero state.
 <p>
-The <i>polynomial</i></b> must be carefully chosen. It must represent a
-<i>primitive polynomial</i></b>, which is one that cannot be factored into two
+The <i>polynomial</i> must be carefully chosen. It must represent a
+<i>primitive polynomial</i>, which is one that cannot be factored into two
 (nontrivial) polynomials with binary coefficients.  See Lee and Messerschmitt
 for more details.  For convenience, we give here a set of primitive polynomials
 (expressed as octal numbers so that they are easily translated into taps

@@ -38,7 +38,7 @@ To minimize this distortion, it is often desirable to expand the filter
 into a parallel or cascade form.
 <h3>References</h3>
 <p>[1]  
-A. V. Oppenheim and R. W. Schafer, <i>Discrete-Time Signal Processing</i></b>,
+A. V. Oppenheim and R. W. Schafer, <i>Discrete-Time Signal Processing</i>,
 Prentice-Hall: Englewood Cliffs, NJ, 1989.
     }
     seealso { FIR, Biquad }
