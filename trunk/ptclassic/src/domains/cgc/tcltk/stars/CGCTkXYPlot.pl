@@ -2,10 +2,17 @@ defstar {
 	name {TkXYPlot}
 	domain {CGC}
 	desc {
+Plot Y input(s) vs. X input(s) with dynamic updating.
+Two styles are currently supported: style = 0 causes
+points to be plotted, whereas style = 1 causes connected
+lines to be plotted. Drawing a box in the plot will
+reset the plot area to that outlined by the box.
+There are also buttons for zooming in and out, and for
+resizing the box to just fit the data in view.
 Generate an animated X-Y plot in a Tk window.
 	}
 	version { $Id$ }
-	author { W. Huang, E. A. Lee, D. Niehaus }
+	author { W.-J. Huang, E. A. Lee, D. Niehaus }
 	copyright {
 Copyright (c) 1994 The Regents of the University of California.
 All rights reserved.
@@ -22,7 +29,7 @@ limitation of liability, and disclaimer of warranty provisions.
         defstate {
 		name {geometry}
 		type{string}
-                default { "600x600+100+100" }
+                default { "600x400+0+0" }
                 desc { Specified the location and/or size of the window }
 	}
 	defstate {
@@ -56,17 +63,23 @@ limitation of liability, and disclaimer of warranty provisions.
 		desc {The number of points displayed at any one time }
 	}
 	defstate {
+	        name {style}
+		type {int}
+		default {"0"}
+		desc {Plot style (0 for points, 1 for lines)}
+	}
+	defstate {
 	        name {updateSize}
 		type{int}
 		default {10}
 		desc { The number of points drawn simulataneously. Higher numbers make the response faster.  }
 	}
-	input {
+	inmulti {
 		name {X}
 		type{float}	
 		desc { horizontal coordinate }
 	}
-	input {
+	inmulti {
 		name {Y}
 		type{float}
 		desc { vertical coordinate }
@@ -77,6 +90,10 @@ limitation of liability, and disclaimer of warranty provisions.
 	    return;
 	  }
 	  double xMin, xMax, yMin, yMax;
+	  // Store xMin and xMax for the benefit of the line style in TkPlot
+	  addGlobal("double $starSymbol(xMin);");
+	  addGlobal("double $starSymbol(xMax);");
+
 	  if ((sscanf((const char*)xRange,"%lf %lf", &xMin, &xMax) != 2) ||
 	      (xMin >= xMax)) {
 	    Error::abortRun(*this,"xRange parameter values are invalid");
@@ -86,53 +103,54 @@ limitation of liability, and disclaimer of warranty provisions.
 	    Error::abortRun(*this,"yRange parameter values are invalid");
 	  }
 	  addInclude("\"ptkPlot_defs.h\"");
-	  addGlobal("Tcl_HashTable $starSymbol(hashTable);");
-	  addGlobal("plotWin $starSymbol(plotwin);");
-	  addGlobal("plotDataset $starSymbol(plotdataset);");
-	  addCode(createHashTable,"tkSetup");
+	  addGlobal("ptkPlotWin $starSymbol(plotwin);");
+	  addGlobal("ptkPlotDataset $starSymbol(plotdataset);");
 
 	  // This is sourced multiple times if there are multiple
 	  // instances of the star.  Should this be fixed?
 	  addCode(srcTclFile,"tkSetup");
-	  addCode(createPlot(xMin,xMax,yMin,yMax),"tkSetup");
+
+	  addCode(createPlot(xMin,xMax,yMin,yMax,Y.numberPorts()),"tkSetup");
 	}
 	go {
-	    addCode(updateDisplay);
-	}
-	codeblock(createHashTable) {
-	    Tcl_InitHashTable(&$starSymbol(hashTable),TCL_STRING_KEYS);
+	  for (int i = 0; i < X.numberPorts(); i++) {
+	    addCode(updateDisplay(i+1));
+	  }
 	}
 	codeblock(srcTclFile) {
 	  {
-	    char temp[] = "source $$env(PTOLEMY)/src/ptklib/ptkPlot.tcl";
+	    /* This ridiculosity is required because Tcl scribbles on strings */
+	    static char temp[100];
+	    sprintf(temp,"source $$env(PTOLEMY)/src/ptklib/ptkPlot.tcl");
 	    if(Tcl_Eval(interp, temp) != TCL_OK)
 		 errorReport("Cannot source tcl script for TkXYPlot star");
 	  }
 	}
-	codeblock (createPlot,"double xMin, double xMax, double yMin, double yMax") {
-	  if(createPlot(interp,
-			&$starSymbol(plotwin),
-			&w,
-			".$starSymbol(win)",
-			"$val(label)",
-			"$val(geometry)",
-			"$val(xTitle)",
-			"$val(yTitle)",
-			@xMin,@xMax, @yMin,@yMax) == 0) {
-	    errorReport("In TkXYPlot, error creating plot");
-	  }
-	  if(createDataset(interp,
-			   &$starSymbol(plotdataset),
+	codeblock (createPlot,
+		   "double xMin, double xMax, double yMin, double yMax, int numsets") {
+	  ptkInitPlot(&$starSymbol(plotwin));
+	  $starSymbol(xMin) = @xMin;
+	  $starSymbol(xMax) = @xMax;
+	  if(ptkCreatePlot(interp,
+			   &$starSymbol(plotwin),
 			   &w,
-			   $val(persistence),
-			   $val(updateSize)) == 0) {
-	    errorReport("In TkXYPlot, error creating data set");
+			   ".$starSymbol(win)",
+			   "$val(label)",
+			   "$val(geometry)",
+			   "$val(xTitle)",
+			   "$val(yTitle)",
+			   @xMin,@xMax, @yMin,@yMax,
+			   @numsets,
+			   $val(updateSize),
+			   $val(style),
+			   $val(persistence)) == 0) {
+	    errorReport(ptkPlotErrorMsg());
 	  }
-	  assocData(interp,&$starSymbol(plotdataset),&$starSymbol(plotwin),"dataset 1");
 	}
-        codeblock (updateDisplay) {
-	  if (plotPoint(interp, &$starSymbol(plotdataset), $ref(X), $ref(Y)) == 0) {
-	    errorReport("in TkXYPlot, error plotting data point");
+        codeblock (updateDisplay,"int setnum") {
+	  if (ptkPlotPoint(interp, &$starSymbol(plotwin), @setnum,
+			   $ref(X#@setnum), $ref(Y#@setnum)) == 0) {
+	    errorReport(ptkPlotErrorMsg());
 	  }
 	}
 }
