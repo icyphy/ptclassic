@@ -93,6 +93,8 @@ PL_SRCS= \
  CGCLimit.pl \
  CGCLMS.pl \
  CGCLog.pl \
+ CGCModulo.pl \
+ CGCModuloInt.pl \
  CGCMpy.pl \
  CGCMpyFix.pl \
  CGCMux.pl \
@@ -106,6 +108,7 @@ PL_SRCS= \
  CGCQuant.pl \
  CGCRamp.pl \
  CGCRampFix.pl \
+ CGCRampInt.pl \
  CGCReciprocal.pl \
  CGCRect.pl \
  CGCRectFix.pl \
