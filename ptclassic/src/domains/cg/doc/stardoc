@@ -11,7 +11,7 @@ stars have two more methods, called \fBinitCode()\fR and \fBexecTime()\fR.
 .pp
 The setup() method is called before the schedule is generated and
 before any memory is allocated.  In this method, a star writer can
-altar a array state buffer size which can then be properly allocated
+alter a array state buffer size which can then be properly allocated
 and automatically initialized.  The initCode() method of a star is called
 after the the static schedule has been generate and before the schedule is
 fired. This method is used to generate the code outside of the main
