@@ -1157,7 +1157,7 @@ int SDFClustSched::computeSchedule (Galaxy& g) {
 StringList SDFClustSched::displaySchedule() {
     StringList out;
     out << "J.T. Buck and S.S. Bhattacharyya's SDF Loop Scheduler\n\n"
-	<< mySchedule.printVerbose();
+	<< SDFBagScheduler::displaySchedule();
     return out;
 }
 
