@@ -63,6 +63,8 @@ LIB_INSTALL_DIR =	$(TCL_LIB_DIR)
 # is a variable "LIB_INSTALL_DIR" defined in the Makefile.
 TCL_LD_SEARCH_FLAGS =	@TCL_LD_SEARCH_FLAGS@
 
+TK_SRC_DIR =		@TK_SRC_DIR@
+
 # -I switch(es) to use to make all of the X11 include files accessible:
 TK_XINCLUDES =		@TK_XINCLUDES@
 
