@@ -273,7 +273,3 @@ void TITarget::writeFiring(Star& s, int level) {
 	AsmTarget::writeFiring(s,level);
     }
 }
-
-const char* TITarget::domain() {
-	return galaxy() ? galaxy()->domain() : "C50";
-}
