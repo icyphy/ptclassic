@@ -120,9 +120,32 @@
 
 
 ### SHORTCUTS, BINDINGS
-# FIXME: Need a way to have this set when the preference changes.
+# Note that the shortcuts preference is read only once at startup,
+# so changing it requires restarting Tycho for the changes to be visible.
 set tycho_bindings [::tycho::Shortcuts::choose \
         [::tycho::stylesheet get interaction shortcuts]]
+
+# Define a procedure to respond to changes in the shortcuts preference
+# by posting a message that a restart is needed for the changes to take
+# effect.
+#
+proc _tychoBindingsNotifyRestart {method args} {
+    if { $method == "attrset" } {
+        if { [lindex [lindex $args 0] end] == "shortcuts" } {
+            array set attrs [lreplace $args 0 0]
+            if [::info exists attrs(-value)] {
+                ::tycho::inform \
+                        "Tycho will use the $attrs(-value) keyboard \
+                        shortcuts the next time you start it.\n\
+                        To prevent this, do not save the changes permanently."
+            }
+        }
+    }
+}
+
+set __s [::tycho::stylesheet access interaction]
+$__s subscribe notify checkforbindings _tychoBindingsNotifyRestart
+unset __s
 
 if {$tycho_bindings == {unix}} {
     # To prevent handled characters from appearing in Entry windows,
