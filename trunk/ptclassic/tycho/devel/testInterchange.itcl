@@ -128,13 +128,13 @@ test NewInterchange-add-2 {Add non-root items} {
     ic add {root branch} {Bo Bo}
     ic add {root leaf} {Peep Peep} Hello -color blue
     list \
-            [ic itemcget {root branch} {Bo Bo}] \
-            [ic value {root leaf} {Peep Peep}] \
-            [ic itemcget {root leaf} {Peep Peep}] \
-            [ic exists {root branch} {Bo Bo}] \
-            [ic exists {root leaf} {Peep Peep}] \
-            [ic exists {root leaf} {Bo Bo}] \
-            [ic exists {root leaf} {Bo Peep}]
+            [ic itemcget {root branch} {Bo Bo} ] \
+            [ic value {root leaf} {Peep Peep} ] \
+            [ic itemcget {root leaf} {Peep Peep} ] \
+            [ic exists {root branch} {Bo Bo} ] \
+            [ic exists {root leaf} {Peep Peep} ] \
+            [ic exists {root leaf} {Bo Bo} ] \
+            [ic exists {root leaf} {Bo Peep} ]
 		
 } {{-color brown} Hello {-color blue} 1 1 0 0}
 
@@ -144,10 +144,10 @@ test NewInterchange-exists-1 {Test for existence} {
             [ic exists root Peep] \
             [ic exists branch Peep] \
             [ic exists root Sheep] \
-            [ic exists {root branch} {Bo Bo}] \
-            [ic exists {root leaf} {Peep Peep}] \
-            [ic exists {root leaf} {Bo Bo}] \
-            [ic exists {root leaf} {Bo Peep}]
+            [ic exists {root branch} {Bo Bo} ] \
+            [ic exists {root leaf} {Peep Peep} ] \
+            [ic exists {root leaf} {Bo Bo} ] \
+            [ic exists {root leaf} {Bo Peep} ]
     
 } {1 1 0 0 1 1 0 0}
 
@@ -158,9 +158,9 @@ test NewInterchange-clear-1 {Clear data} {
             [ic exists root Peep] \
             [ic exists branch Peep] \
             [ic exists root Sheep] \
-            [ic exists {root branch} {Bo Bo}] \
-            [ic exists {root leaf} {Peep Peep}] \
-            [ic exists {root leaf} {Bo Bo}] [ic exists {root leaf} {Bo Peep}]
+            [ic exists {root branch} {Bo Bo} ] \
+            [ic exists {root leaf} {Peep Peep} ] \
+            [ic exists {root leaf} {Bo Bo} ] [ic exists {root leaf} {Bo Peep} ]
 		
 } {0 0 0 0 0 0 0 0}
 
@@ -176,17 +176,17 @@ test NewInterchange-add-3 {Add using nested syntax} {
     list \
             [ic itemcget root Bo] \
             [ic itemcget root Peep] \
-            [ic itemcget {root branch} {Bo Bo}] \
-            [ic value {root leaf} {Peep Peep}] \
-            [ic itemcget {root leaf} {Peep Peep}] \
+            [ic itemcget {root branch} {Bo Bo} ] \
+            [ic value {root leaf} {Peep Peep} ] \
+            [ic itemcget {root leaf} {Peep Peep} ] \
             [ic exists root Bo] \
             [ic exists root Peep] \
             [ic exists branch Peep] \
             [ic exists root Sheep] \
-            [ic exists {root branch} {Bo Bo}] \
-            [ic exists {root leaf} {Peep Peep}] \
-            [ic exists {root leaf} {Bo Bo}] \
-            [ic exists {root leaf} {Bo Peep}]
+            [ic exists {root branch} {Bo Bo} ] \
+            [ic exists {root leaf} {Peep Peep} ] \
+            [ic exists {root leaf} {Bo Bo} ] \
+            [ic exists {root leaf} {Bo Peep} ]
 
 } {{-color red} {-color pink} {-color brown} Hello {-color blue} 1 1 0 0 1 1 0 0}
 
@@ -223,13 +223,13 @@ ic add root Peep {
 }
 
 test NewInterchange-delete-1 {Delete leaf} {
-    set result [list [ic delete {root branch} {Bo Bo}]]
-    lappend result [ic exists root Bo] [ic exists {root branch} {Bo Bo}]
+    set result [list [ic delete {root branch} {Bo Bo} ]]
+    lappend result [ic exists root Bo] [ic exists {root branch} {Bo Bo} ]
 } {{-color brown} 1 0}
 
 test NewInterchange-delete-2 {Delete root -- leaf stays} {
     set result [list [ic delete root Peep]]
-    lappend result [ic exists root Peep] [ic exists {root leaf} {Peep Peep}]
+    lappend result [ic exists root Peep] [ic exists {root leaf} {Peep Peep} ]
 } {{-color pink} 0 1}
 
 ########################################################################
@@ -418,7 +418,7 @@ root Peep {
     leaf Peep Hello -color blue
 }
 root Sheep -color pink
-}]
+} ]
 
 ########################################################################
 #### externalize
