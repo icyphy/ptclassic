@@ -9,7 +9,7 @@
 This class provides a text editor specialized for editing
 Tcl source.
 It is automatically invoked whenever you open a file with an
-<a name=".tcl extension">".tcl" extension</a>.
+<a name=".tcl extension"><CODE>.tcl</CODE> extension</a>.
 Tcl is a scripting language developed by John Ousterhout at
 U.C. Berkeley (now at Sun Microsystems).
 The <a name="EditTcl class">EditTcl class</a> is derived from the
@@ -18,29 +18,18 @@ therefore inherits all of its features.
 It colors certain Tcl constructs, such as comments
 and procedure definitions.
 <p>
-A unique feature of this editor is its ability to create hyperlinks
-to procedure definitions.
-This feature is invoked by the
-<a name="Show Links command">"Show Links" command</a> in the "Format"
-menu.
-Upon invoking this command,
-any procedure that is registered
-in the current (Tycho) Tcl process for auto-loading will be colored
-and underlined, and will become a hyperlink to its definition in
-the source code.
-Internally, the Tcl process uses a
-global array <a name="auto_index"><CODE>auto_index</CODE></a> for registering
-procedures that can be auto-loaded.
-<p>
-Another feature provided by this class is that the
-<a name="Evaluate command">"Evaluate" command</a> in the "File" menu
+One feature provided by this class is that the
+<a name="Evaluate command"><CODE>Evaluate</CODE> command</a> in the
+<CODE>File</CODE> menu
 evaluated the Tcl code in the current (Tycho) Tcl editor.
 If there is a selection, then the code in the selection is evaluated.
  Otherwise, the entire file is evaluated.
- <P>The <A NAME="Evaluate proc command">"Evaluate Proc" command </A> in
-the "File" menu will evaluate the Tcl <CODE>proc</CODE> that the 
-insertion cursor is inside of.
-The returned value is displayed.
+
+ <P>The <A NAME="Evaluate proc command"><CODE>Evaluate Proc</CODE>
+command </A> in the <CODE>File</CODE> menu will evaluate the Tcl
+<CODE>proc</CODE> that the insertion cursor is inside of.  The
+returned value is displayed.
+
 <p>
 <a href="../../../../doc/index.html">Tycho Home Page</a><br>
 <p>
