@@ -9,6 +9,8 @@
 Itcl files written for Tycho should conform to a specific style so that
 documentation can be automatically generated.  The template provided below
 is to be used as a starting point for all itcl files written for Tycho.
+All files should begin with a standard header.  For details regarding 
+this header, see <a href="fileheader.html">Tycho File Headers</a>.
 <p>
 	
 <H3>Template</A></H3>
@@ -16,10 +18,11 @@ is to be used as a starting point for all itcl files written for Tycho.
 <PRE>
 # One line description of file
 #
-# Author:
-# Version: $Id$
+# @Author:
 #
-# Copyright (c) %Q% The Regents of the University of California.
+# @Version: &#37;W&#37;	&#37;G&#37;
+#
+# @Copyright (c) 1995-&#37;Q&#37; The Regents of the University of California.
 # All rights reserved.
 #
 # Permission is hereby granted, without written agreement and without
@@ -41,8 +44,8 @@ is to be used as a starting point for all itcl files written for Tycho.
 # CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 # ENHANCEMENTS, OR MODIFICATIONS.
 # 
-# 						PT_COPYRIGHT_VERSION_2
-# 						COPYRIGHTENDKEY
+#                                        PT_COPYRIGHT_VERSION_2
+#                                        COPYRIGHTENDKEY
 #######################################################################
 
 
@@ -68,7 +71,7 @@ class ::tycho::ClassName {
     ###################################################################
     ####                            options                        ####
 
-    # One line description of xxxx option
+    # One line description of xxxx option; listed in alphabetical order
     itk_option define -xxxx xxxx Xxxx ""
 
     ###################################################################
@@ -200,5 +203,5 @@ body ::tycho::ClassName::NameA {} {
 Copyright &#169 , The Regents of the University of California.
 All rights reserved.
 <br>
-Last updated: 96/06/24,
+Last updated: 96/06/26,
 comments to: <author>tycho@eecs.berkeley.edu</author>
