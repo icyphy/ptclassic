@@ -382,13 +382,21 @@ char **typeNamePtr;
     octGenFirstContainer(&thePath, OCT_LAYER_MASK, &layer);
     octCloseFacet(&subfacet);
     layerName = layer.contents.layer.name;
-    if (strncmp(layerName, FLOAT_COLOR, strlen(FLOAT_COLOR)) == 0) {
+    /* Note that icon stems used to be implemented on blueSolid, blueOutline,
+       etc, so for backward compatibility before we re-implement all the
+       icon stems on the new floatColor, intColor, ... layers, we still need
+       the second test in the following if clauses. */
+    if (strcmp(layerName, "floatColor") == 0 || 
+	strncmp(layerName, FLOAT_COLOR, strlen(FLOAT_COLOR)) == 0) {
 	StrDup(typeNamePtr, "float");
-    } else if (strncmp(layerName, INT_COLOR, strlen(INT_COLOR)) == 0) {
+    } else if (strcmp(layerName, "intColor") == 0 || 
+	       strncmp(layerName, INT_COLOR, strlen(INT_COLOR)) == 0) {
         StrDup(typeNamePtr, "int");
-    } else if (strncmp(layerName, COMPLEX_COLOR, strlen(COMPLEX_COLOR)) == 0) {
+    } else if (strcmp(layerName, "complexColor") == 0 ||
+	       strncmp(layerName, COMPLEX_COLOR, strlen(COMPLEX_COLOR)) == 0) {
 	StrDup(typeNamePtr, "complex");
-    } else if (strncmp(layerName, ANYTYPE_COLOR, strlen(ANYTYPE_COLOR)) == 0) {
+    } else if (strcmp(layerName, "anytypeColor") == 0 ||
+	       strncmp(layerName, ANYTYPE_COLOR, strlen(ANYTYPE_COLOR)) == 0) {
 	StrDup(typeNamePtr, "anytype");
     } else { /* layer is nonstandard, i.e., not blueSolid, blueOutline, etc */
 	/* return as default type "float" */
