@@ -78,61 +78,28 @@ class ::tycho::ResourceRemote {
     # Test if the local cache file is currently open.
     method isopen {}
 
-    # Open the resource. Open up connection through remote protocol.
-    method open {{mode "r"}} {error "This should be redefined!"}
-
-    # Write a string to a streamable resource.
-    method puts {string} {error "This should be redefined!"}
-
     # Return a string containing the data in a streamable resource.
     # In this case, read from a local cache file.
     method read {}
 
     # Return 1 if this resource is streamable
-    method streamable {}
-
-    # Return the progess indicator, as a decimal number. 1.0 is full.
-    method progress {} {error "This should be redefined!"}
-
-    # Write to the remote file.
-    method write {data} {error "Should be redefined"}
+    method streamable {} {return 1}
 
     ###################################################################
     ####                      public procedures                    ####
 
-    # Change the permissions of a resource
-    proc chmod {permissions path} {error "Should be redefined"}
-
     # Return the content type of the current file
-    proc contenttype {path} {error "Should be redefined"}
+    proc contenttype {path} {::tycho::abstractMethod contenttype}
 
-    # Delete a resource
-    proc delete {path} {error "Should be redefined"}
-
-    # Return a directory listing
-    proc dirlist {path} {error "Should be redefined"}
-
-    # Test if a given resource exists
-    proc exists {path} {error "Should be redefined"}
-
-    # Get a file name, and forward automatically.
+    # Get a file name, and forward automatically. NOTE: Only in this class.
     proc forward {url}
 
     # reset all the internal variable such as _exists
     # and _forward. NOTE: This exists ONLY in this class.
     proc initialize {}
 
-    # Create a new directory
-    proc mkdir {path} {error "Should be redefined"}
-
-    # Create a new resource object
-    proc new {path args} {error "Should be redefined"}
-
-    # Query properties of a file
-    proc query {path option} {error "Should be redefined"}
-
-    # Get the status of a resource
-    proc stat {path varName} {error "Should be redefined"}
+    # Return yes, we are remote
+    proc isremote {path} {return 1}
 
     ###################################################################
     ####                         protected methods                 ####
@@ -141,10 +108,10 @@ class ::tycho::ResourceRemote {
     protected method debugputs {string}
 
     # Set or read the http status. If newvalue is {}, then just return
-    method remotestatus {newvalue}
+    protected method remotestatus {newvalue}
 
     # Wait until an HTTP GET completes.
-    method remotewait {}
+    protected method remotewait {}
 
     ###################################################################
     ####                        protected commons                  ####
@@ -297,12 +264,6 @@ body ::tycho::ResourceRemote::read {} {
 	error "File \"$this\" is not open (read)"
     }
     ::read $cachefileid
-}
-
-#####################################################################
-#### streamable
-body ::tycho::ResourceRemote::streamable {} {
-    return 1
 }
 
 #########################################################################
