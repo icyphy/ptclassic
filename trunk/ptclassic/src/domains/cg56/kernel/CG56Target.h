@@ -25,7 +25,7 @@ $Id$
 
 extern StringList CG56ONE;
 
-class CG56Target : public MotorolaTarget {
+class CG56Target : public virtual MotorolaTarget {
 protected:
 	void writeFloat(double);
 	FixState ONE;

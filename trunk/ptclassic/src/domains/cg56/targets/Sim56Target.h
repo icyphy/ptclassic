@@ -19,24 +19,19 @@ $Id$
 #endif
 
 #include "CG56Target.h"
-#include "StringState.h"
-#include "IntState.h"
+#include "MotorolaSimTarget.h"
 
-class Sim56Target : public CG56Target {
+class Sim56Target :public CG56Target, public MotorolaSimTarget {
 private:
 	void initStates();
-protected:
-	StringState plotFile;
-	StringState plotTitle;
-	StringState plotOptions;
-	IntState interactiveFlag;
 public:
 	Sim56Target(const char*,const char*);
 	Sim56Target(const Sim56Target&);
 	void headerCode();
 	void wrapup();
-	int compileTarget();
-	int runTarget();
+	int compileCode();
+	int loadCode();
+	int runCode();
 	Block* clone() const;
 	int isA(const char*) const;
 	const char* readClassName() const {return "Sim56Target";}

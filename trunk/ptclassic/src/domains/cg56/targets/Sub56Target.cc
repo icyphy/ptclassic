@@ -18,18 +18,17 @@ $Id$
 #endif
 
 #include "Sub56Target.h"
-#include "UserOutput.h"
-#include "CG56Star.h"
 #include "KnownTarget.h"
+#include "MotorolaTarget.h"
 
 Sub56Target :: Sub56Target(const char* nam, const char* desc) :
-	CG56Target(nam,desc)
+	CG56Target(nam,desc),MotorolaTarget(nam,desc,"CG56Star")
 {
 	initStates();
 }
 
 Sub56Target::Sub56Target(const Sub56Target& arg) :
-	CG56Target(arg)
+	CG56Target(arg),MotorolaTarget(arg)
 {
 	initStates();
 	copyStates(arg);
