@@ -15,12 +15,11 @@ include $(CONFIG)
 
 INCL_THREADS=-I$(ROOT)/thread/include.$(ARCH) -I$(ROOT)/src/thread/posix
 SDFDIR=$(ROOT)/src/domains/sdf/kernel
-COMPAT=$(ROOT)/src/compat/ptolemy
 
-INCL=-I$(COMPAT) -I$(KERNDIR) -I$(SDFDIR) $(INCL_THREADS)
+INCL= $(INCL_THREADS) -I$(KERNDIR) -I$(SDFDIR)
 
 # Library name
-LIB=libpn.a
+LIB=libpn.$(LIBSUFFIX)
 
 # Library sources
 CC_WITH_H=\
