@@ -84,7 +84,7 @@ ComplexArrayState :: ~ComplexArrayState () {
 void ComplexArrayState  :: initialize() {
 
 	Complex buf[MAXLEN];
-	const char* specialChars = "*+-/()<,[]";
+	const char* specialChars = "*+-/()<,[]!";
 	Tokenizer lexer(initValue(),specialChars);
 	double realval = 0;
 	double imagval = 0;

@@ -207,7 +207,7 @@ void StringArrayState  :: initialize() {
 	if (initString == 0 || *initString == 0) return;
 
 	// initialize lexical parsing
-	const char* specialChars = "<{[]}";
+	const char* specialChars = "<{[]}!";
 	Tokenizer lexer(initString, specialChars);
 	lexer.clearwhite();
 
