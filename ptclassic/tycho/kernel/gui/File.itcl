@@ -213,6 +213,12 @@ class ::tycho::File {
     # In derived classes, clear the data being displayed or edited.
     method clear {} {}
 
+    # Disable the item in the specified menu.
+    protected method disableMenuItem {itemName inMenu}
+
+    # Enable the item in the specified menu.
+    protected method enableMenuItem {itemName inMenu}
+
     # Query the user for a filename, then evaluate its contents as Tcl commands.
     method evaluate {}
 
@@ -315,12 +321,6 @@ class ::tycho::File {
 
     # Add a separator to the specified menu.
     protected method addMenuSeparator {menu args}
-
-    # Disable the item in the specified menu.
-    protected method disableMenuItem {itemName inMenu}
-
-    # Enable the item in the specified menu.
-    protected method enableMenuItem {itemName inMenu}
 
     # Insert a menu item to the specified menu before the specified item.
     protected method insertMenuItem {itemName before inMenu args}
@@ -697,6 +697,46 @@ body ::tycho::File::autoSave {} {
     }
     if {$interval != 0} {
 	after $interval "::tycho::File::callAutoSave $this"
+    }
+}
+
+#####################################################################
+#### disableMenuItem
+# Disable the item in the specified menu.
+#
+body ::tycho::File::disableMenuItem {itemName inMenu} {
+
+    if {![info exists itk_component(menu$inMenu)]} {
+	error "Menu $inMenu does not exist."
+    }
+    
+    # check if itemName exists
+    if [catch {set check [$itk_component(menu$inMenu) index "$itemName"] } ] {
+        global ::errorInfo
+        set saveInfo $errorInfo
+	error "Menu item $itemName does not exist." $saveInfo
+    } {
+	$itk_component(menu$inMenu) entryconfigure "$itemName" -state disabled
+    }
+}
+
+#####################################################################
+#### enableMenuItem
+# Enable the item in the specified menu.
+#
+body ::tycho::File::enableMenuItem {itemName inMenu} {
+
+    if {![info exists itk_component(menu$inMenu)]} {
+	error "Menu $inMenu does not exist."
+    }
+    
+    # check if itemName exists
+    if [catch {set check [$itk_component(menu$inMenu) index "$itemName"] } ] {
+        global ::errorInfo
+        set saveInfo $errorInfo
+	error "Menu item $itemName does not exist." $saveInfo
+    } {
+	$itk_component(menu$inMenu) entryconfigure "$itemName" -state normal
     }
 }
 
@@ -1342,46 +1382,6 @@ body ::tycho::File::addMenuItem {itemName inMenu args} {
 #
 body ::tycho::File::addMenuSeparator {menu args} {
     eval $itk_component(menu$menu) add separator $args
-}
-
-#####################################################################
-#### disableMenuItem
-# Disable the item in the specified menu.
-#
-body ::tycho::File::disableMenuItem {itemName inMenu} {
-
-    if {![info exists itk_component(menu$inMenu)]} {
-	error "Menu $inMenu does not exist."
-    }
-    
-    # check if itemName exists
-    if [catch {set check [$itk_component(menu$inMenu) index "$itemName"] } ] {
-        global ::errorInfo
-        set saveInfo $errorInfo
-	error "Menu item $itemName does not exist." $saveInfo
-    } {
-	$itk_component(menu$inMenu) entryconfigure "$itemName" -state disabled
-    }
-}
-
-#####################################################################
-#### enableMenuItem
-# Enable the item in the specified menu.
-#
-body ::tycho::File::enableMenuItem {itemName inMenu} {
-
-    if {![info exists itk_component(menu$inMenu)]} {
-	error "Menu $inMenu does not exist."
-    }
-    
-    # check if itemName exists
-    if [catch {set check [$itk_component(menu$inMenu) index "$itemName"] } ] {
-        global ::errorInfo
-        set saveInfo $errorInfo
-	error "Menu item $itemName does not exist." $saveInfo
-    } {
-	$itk_component(menu$inMenu) entryconfigure "$itemName" -state normal
-    }
 }
 
 #####################################################################
