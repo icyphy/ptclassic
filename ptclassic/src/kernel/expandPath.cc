@@ -49,13 +49,93 @@ Reference:
    Addison-Wesley, Reading, MA, ISBN 0-201-56317-7, 1992.
 
 **************************************************************************/
-
+#ifndef PT_NO_PWD
 #include <pwd.h>
+#endif
 #include "Error.h"
 #include "Tokenizer.h"
 #include "StringList.h"
 #include "miscFuncs.h"
 #define MAXSTRINGLEN 4096
+
+#ifdef PT_NO_PWD
+// We don't have pwd.h, so 
+// Expand a pathname. The pathname may begin with ~, ~user, or $var where
+// var is an environment variable.  The expansion of ~ and ~user is
+// POSIX compliant.  The expansion of environment variables is ANSI C
+// compliant.  This function returns the result of savestring applied
+// to the expanded path name, which allocates a new dynamic string via
+// the new operator.
+char* expandPathName(const char* name) {
+    // Allow file name to expand to an arbitrary length
+    StringList expandedPath;
+    expandedPath.initialize();
+
+    // Parse file name using Tokenizer class
+    // '#' is default Tokenizer comment char which is a valid file name char
+    const char* specialChars = "~/$";	// separators
+    const char* whitespace = "\r";	// allow TABS and SPACES in file name
+    Tokenizer lexer(name, specialChars, whitespace);
+    lexer.setCommentChar('\n');		// override default comment char '#'
+    lexer.setQuoteChar('\002');		// unprintable quote character CTRL-B
+
+    while(!lexer.eof()) {
+	char tokbuf[MAXSTRINGLEN];
+	lexer >> tokbuf;
+	char c = tokbuf[0];
+	if (c != 0 && tokbuf[1]) c = 0;
+	switch (c) {
+	  case '~' : {
+	    // we only expand the first tilda
+	    if (expandedPath.numPieces() != 0) {
+		expandedPath << '~';
+		break;
+	    }
+
+	    // next token might be user name or /.
+	    lexer >> tokbuf;
+	    if (tokbuf[0] == '/') {
+//		passwd* pwd = getpwuid(getuid());
+//		if (pwd == 0) {
+		    Error::abortRun ("getpwuid doesn't know you!");
+//		    exit (1);
+//		}
+//		expandedPath << pwd->pw_dir << '/';
+	    }
+	    else {
+
+//		passwd* pwd = getpwnam(tokbuf);
+//		if (pwd == 0)
+		    expandedPath << tokbuf;
+//		else
+//		    expandedPath << pwd->pw_dir;
+	    }
+	    break;
+	  }    
+	  case '/' : {
+	    expandedPath << '/';
+	    break;
+	  }
+	  case '$' : {
+	    // next token might be an environment variable
+	    lexer >> tokbuf;
+	    const char* value = getenv(tokbuf);
+	    if (!value)
+		expandedPath << '$' << tokbuf;
+	    else
+		expandedPath << value;
+	    break;
+	  }
+	  default: {
+	    expandedPath << tokbuf;
+	  }
+	}
+    }
+    return savestring(expandedPath);
+}
+
+
+#else /* PT_NO_PWD */
 
 // Expand a pathname. The pathname may begin with ~, ~user, or $var where
 // var is an environment variable.  The expansion of ~ and ~user is
@@ -100,6 +180,7 @@ char* expandPathName(const char* name) {
 		expandedPath << pwd->pw_dir << '/';
 	    }
 	    else {
+
 		passwd* pwd = getpwnam(tokbuf);
 		if (pwd == 0)
 		    expandedPath << tokbuf;
@@ -129,3 +210,4 @@ char* expandPathName(const char* name) {
     }
     return savestring(expandedPath);
 }
+#endif /* PT_NO_PWD */
