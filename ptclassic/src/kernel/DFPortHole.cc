@@ -112,20 +112,18 @@ MultiPortHole& MultiDFPort :: setPort (const char* s,
 }
 
 PortHole& MultiDFPort :: installPort(PortHole& p) {
-        // We need this cast or else ddf demos give bogus results
-        // This problems is probably a results of the virtualization of
-        // installPort().  The real fix would probably be to have
-        // both version of setPort have the same args and then make
-        // it virtual.
+	// We need this function because setPort() isn't virtual.
+	// So p must be explicitly cast to DFPortHole in order to
+	// call the right version of setPort().
+        // The real fix would probably be to have both version of setPort
+	// have the same args and then make it virtual.
         DFPortHole &dp = (DFPortHole &)p;
 	ports.put(dp);
-	parent()->addPort(dp.setPort(newName(), parent(),
-				     type(), numberTokens));
- // for ANYTYPE multiportholes, all ports are resolved to be the same type.
-	if (type() == ANYTYPE)
-		dp.inheritTypeFrom(*this);
-	// we can do the following as a friend function
+	dp.setPort(newName(), parent(), type(), numberTokens);
+	if (parent()) parent()->addPort(dp);
 	letMeKnownToChild(dp);
+	// If I am part of an inheritance chain, add the child to it too.
+	if (typePort()) dp.inheritTypeFrom(*this);
 	return dp;
 }
 
