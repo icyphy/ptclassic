@@ -43,6 +43,12 @@ class ::tycho::PopupMenu {
     destructor {}
 
     ###################################################################
+    ####                            options                        ####
+
+    # The command to call before posting the menu
+    itk_option define -command command Command {}
+
+    ###################################################################
     ####                         public methods                    ####
 
     # Add a menu entry to a menu
@@ -50,6 +56,9 @@ class ::tycho::PopupMenu {
 
     # Add a separator to a menu
     method addSeparator {args}
+
+    # Clear a menu
+    method clear {{menu {}}}
 
     # Get an option of a menu
     method menucget {name option}
@@ -76,6 +85,8 @@ body ::tycho::PopupMenu::constructor {args} {
     # Record its "path" and type
     set itemtype(top) "menu"
     set menupath(top) $itk_component(top)
+
+    eval itk_initialize $args
 }
 
 #######################################################################
@@ -99,7 +110,6 @@ body ::tycho::PopupMenu::add {name args} {
     } else {
 	set inMenu "top"
     }
-
     eval ::tycho::MenuSupport::add [list $name] [list $inMenu] $args
 }
 
@@ -114,8 +124,18 @@ body ::tycho::PopupMenu::addSeparator {args} {
     } else {
 	set inMenu "top"
     }
-
     eval ::tycho::MenuSupport::addSeparator [list $inMenu] $args
+}
+
+
+#####################################################################
+#### clear
+#
+body ::tycho::PopupMenu::clear {{menu {}}} {
+    if { $menu == "" } {
+	set menu "top"
+    }
+    ::tycho::MenuSupport::clear $menu
 }
 
 
@@ -128,7 +148,6 @@ body ::tycho::PopupMenu::menucget {name {option {}}} {
 	set option $name
 	set name "top"
     }
-
     ::tycho::MenuSupport::menucget $name $option
 }
 
@@ -143,7 +162,6 @@ body ::tycho::PopupMenu::menuconfigure {args} {
     } else {
 	set name "top"
     }
-
     eval ::tycho::MenuSupport::menuconfigure [list $name] $args
 }
 
@@ -152,5 +170,8 @@ body ::tycho::PopupMenu::menuconfigure {args} {
 # Post the popup.
 #
 body ::tycho::PopupMenu::post {x y} {
+    if { $itk_option(-command) != "" } {
+	uplevel #0 $itk_option(-command)
+    }
     tk_popup $itk_component(top) $x $y
 }
