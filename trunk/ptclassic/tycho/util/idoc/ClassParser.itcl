@@ -993,7 +993,7 @@ body ::tycho::IDocSys::addConfigBody {configName expl} {
 #
 body ::tycho::IDocSys::addOutsideProc {procName arguments expl} {
     # add to $myClass(related)
-    set class $myClass(related)
+    set classModel $myClass(related)
     $classModel method $procName -protection public -scope class
     set expl [formatExpl "$expl"]
     if {$expl != {}} {
