@@ -137,7 +137,7 @@ class MReqListIter {
 	MReq* ptr;
 	MReqList& ref;
 public:
-	MReqListIter(MReqList& l) : ref(l), ptr(l.first) {}
+	MReqListIter(MReqList& l) :  ptr(l.first), ref(l) {}
 	void reset() { ptr = ref.first;}
 	MReq* next() {
 		MReq* res = ptr;
