@@ -22,6 +22,9 @@ GPPFLAGS = -g -Wall -Wcast-qual $(MEMLOG)
 CFLAGS = -g
 DEPEND= $(CPLUSPLUS) -MM
 
+# Command to build shared libraries (Not really supported yet)
+SHARED_LIBRARY_COMMAND =	g++ -shared -o
+
 # where the Gnu library is
 GNULIB=$(PTOLEMY)/gnu/$(ARCH)/lib
 
