@@ -1,10 +1,11 @@
 .\" $Id$
-.NA Chain_Treatment
+.NA RadarChainProcessing
 .SD
-The Chain Treatment (Processing) demonstration simulates radar without
-beamforming.  The system has been converted from a data parallel form
-that uses a five-dimensional data array to a functional parallel form
-that uses higher-order functions to produce streams of streams.
+The radar chain processing demonstration simulates radar without
+beamforming.
+The system has been converted from a data parallel form that uses
+a five-dimensional data array to a functional parallel form
+that uses higher-order functions to manipulate streams of streams.
 .DE
 .EQ
 delim off
@@ -29,9 +30,13 @@ It can be used to determine the target speed by looking for the highest filter
 response.
 Thus, this filter will give the Doppler range frequency for the targets.
 
-We give dimensions of the data processed by the bank of Radar Antennas.
-Each Radar Antenna produces Np streams of Ns x Na x Ntargets samples.
-Thus, the Matlab matrix is Np by (Ns x Na x Ntargets).
+We give dimensions of the data processed by the bank of
+.c RadarAntenna
+galaxies.
+Each
+.c RadarAntenna
+galaxy produces $N sub p$ streams of $Ns x Na x Ntargets$ samples.
+Thus, the MATLAB matrix is $Np$ by $Ns x Na x Ntargets$.
 The hypercube dimension is Na . [ Ntarget . [  Ns. Nf ] ].
 .IR "radar"
 .IR "Doppler radar"
@@ -40,10 +45,10 @@ K. Khiar and E. A. Lee, "Modeling Radar Systems Using Hierarchical Dataflow,"
 .i "Proc. IEEE Int. Conf. on Acoustics, Speech, and Signal Processing",
 Detroit, MI, May 1995, pp. 3259-3262.
 .SA
-GeneTarget.pal,
-One_Doppler,
+GenTarget,
+OneDoppler,
 PulseComp,
-Radar_Antenna,
-Radar_Targets,
-subantenna.pal.
+RadarAntenna,
+RadarTargets,
+SubAntenna.
 .ES
