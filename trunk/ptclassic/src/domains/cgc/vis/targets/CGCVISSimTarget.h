@@ -29,9 +29,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
  
 *******************************************************************/
 
-#ifndef _CGCVISSimTarget_h
-#define  _CGCVISSimTarget_h 1
- 
 #ifdef __GNUG__
 #pragma interface
 #endif
@@ -50,7 +47,6 @@ protected:
 	int compileCode();
 };
 
-#endif
 
 
 
