@@ -1,6 +1,7 @@
 defstar {
 	name { Matlab_M }
 	domain { SDF }
+	derivedFrom { Matlab }
 	desc {
 Evaluate Matlab functions if inputs are given or evaluate
 Matlab commands and scripts if no inputs are given.
@@ -21,10 +22,10 @@ The \fIoptions\fR string is passed directly to the Matlab kernel.
 The Matlab kernel is started during the setup phase and exitted during
 the wrapup phase.
 At each firing of the star, the matrices on the input ports are converted
-to Matlab format and passed to the Matlab function \fImatlabFunction\fR
+to Matlab format and passed to the Matlab function \fIMatlabFunction\fR
 in the order that the input ports are connected to the star.
-If there are no inputs, then the \fImatlabFunction\fR is evaluated without
-any arguments; e.g., a \fImatlabFunction\fR of "hilb(4)" would return
+If there are no inputs, then the \fIMatlabFunction\fR is evaluated without
+any arguments; e.g., a \fIMatlabFunction\fR of "hilb(4)" would return
 a 4 x 4 Hilbert matrix.
 The names of the input and output variables in Matlab are derived from
 \fImatlabInputName\fR and \fImatlabOutputName\fR, respectively.
@@ -40,17 +41,11 @@ then some or all of the matrices are reused by Matlab.
 		name { output }
 		type { COMPLEX_MATRIX_ENV }
 	}
-	defstate {
-		name { options }
-		type { string }
-		default { "" }
-		desc { Command line options for Matlab. }
-	}
-	defstate {
-		name { matlabFunction }
-		type { string }
-		default { "" }
-		desc {
+        defstate {
+                name { MatlabFunction }
+                type { string }
+                default { "" }
+                desc {
 The Matlab command to execute.
 The values of the input ports will be passed as arguments to this function.
 }
@@ -77,24 +72,8 @@ The variables will be of the form output name + port number, e.g. "Pmm1".
 	// Matrix.h is from the Ptolemy kernel
 	hinclude { "Matrix.h" }
 
-	// matrix.h and engine.h are provided with Matlab
-	header{
-// Matlab interface library and Matlab data types (clash with COMPLEX)
-extern "C" {
-#include "matrix.h"
-#include "engine.h"
-
-// Give Matlab's definition of COMPLEX and REAL different names
-#undef  COMPLEX
-#undef  REAL
-#define MXCOMPLEX  1
-#define MXREAL     0
-}
-	}
-
 	protected {
 		// Matlab (C) structures
-		Engine *matlabEnginePtr;
 		Matrix **matlabInputMatrices;
 		Matrix **matlabOutputMatrices;
 
@@ -109,7 +88,6 @@ extern "C" {
 	}
 
 	constructor {
-		matlabEnginePtr = 0;
 		matlabInputMatrices = 0;
 		matlabOutputMatrices = 0;
 
@@ -119,23 +97,7 @@ extern "C" {
 	}
 
 	setup {
-		char numstr[16];
-		int i;
-
-		// make sure that we can start up Matlab
-		StringList shellCommand = "matlab "; 
-		shellCommand << ((char *) options);
-		if ( matlabEnginePtr != 0 ) {
-		  if ( engClose( matlabEnginePtr ) ) {
-		    Error::warn(*this, "Error when terminating connection ",
-			        "to the Matlab kernel.");
-		  }
-		}
-		matlabEnginePtr = engOpen( ((char *) shellCommand) );
-		if ( matlabEnginePtr == 0 ) {
-		  Error::abortRun( *this, "Could not start Matlab using ",
-				   (char *) shellCommand );
-		}
+		SDFMatlab::setup();
 
 		// establish of number inputs & allocate Matlab matrices &
 		// generate names for Matlab versions of input matrix names
@@ -151,11 +113,9 @@ extern "C" {
 		    LOG_DEL; delete [] matlabInputNames;
 		  }
 		  LOG_NEW; matlabInputNames = new StringList[numInputs];
-		  char *inputBaseName = ((char *) MatlabInputVarName);
-		  for ( i = 0; i < numInputs; i++ ) {
-		    sprintf(numstr, "%d", i+1);
-		    matlabInputNames[i] << inputBaseName << numstr;
-		  }
+		  nameMatlabMatrices( matlabInputNames,
+		  		      numInputs,
+				      (char *) MatlabInputVarName );
 		}
 
 		// establish of number outputs & allocate Matlab matrices &
@@ -172,33 +132,16 @@ extern "C" {
 		    LOG_DEL; delete [] matlabOutputNames;
 		  }
 		  LOG_NEW; matlabOutputNames = new StringList[numOutputs];
-		  char *outputBaseName = ((char *) MatlabOutputVarName);
-		  for ( i = 0; i < numOutputs; i++ ) {
-		    sprintf(numstr, "%d", i+1);
-		    matlabOutputNames[i] << outputBaseName << numstr;
-		  }
+		  nameMatlabMatrices( matlabOutputNames,
+		  		      numOutputs,
+				      (char *) MatlabOutputVarName );
 		}
 
 		// create the command to be sent to the Matlab interpreter
-		if ( matlabCommand != 0 ) {
-		  LOG_DEL; delete [] matlabCommand;
-		}
 		StringList commandString;
-		if ( numOutputs > 0 ) {
-		  commandString << "[" << matlabOutputNames[0];
-		  for ( i = 1; i < numOutputs; i++ ) {
-		    commandString << ", " << matlabOutputNames[i];
-		  }
-		  commandString << "] = ";
-		}
-		commandString << ((char *) matlabFunction);
-		if ( numInputs > 0 ) {
-		  commandString << "(" << matlabInputNames[0];
-		  for ( i = 1; i < numInputs; i++ ) {
-		    commandString << ", " << matlabInputNames[i];
-		  }
-		  commandString << ")";
-		}
+		buildMatlabCommand(commandString, matlabInputNames, numInputs,
+				   (char *) MatlabFunction, matlabOutputNames,
+				   numOutputs);
 		LOG_NEW; matlabCommand = new char[commandString.length()];
 		strcpy(matlabCommand, (char *) commandString);
 	}
@@ -231,22 +174,16 @@ extern "C" {
 		    }
 		  }
 
-		  // let the Matlab engine know about the new Matlab matrix
-		  engPutMatrix( matlabEnginePtr, matlabMatrix );
+		  // let Matlab know about the new Matlab matrix we've defined
+		  putMatlabMatrix(matlabMatrix);
 
 		  // save the pointer to the new Matlab matrix for deallocation
 		  matlabInputMatrices[i] = matlabMatrix;
 		}
 
 		// evaluate the Matlab command (non-zero means error)
-		int mstatus = engEvalString( matlabEnginePtr, matlabCommand );
-		if ( mstatus != 0 ) {
-		  char numstr[64];
-		  sprintf(numstr, "Matlab returned %d indicating ", mstatus);
-		  Error::abortRun( *this, numstr,
-				   "an error in the Matlab command ",
-				   matlabCommand );
-		}
+		// second argument indicates whether or not to abort on error
+		evaluateMatlabCommand(matlabCommand, TRUE);
 
 		// copy each Matlab output matrix to a Ptolemy matrix
 		MPHIter nextp(output);
@@ -256,8 +193,7 @@ extern "C" {
 		for ( int j = 0; j < numOutputs; j++ ) {
 		  // create a new Matlab matrix for deallocation and save ref.
 		  Matrix *matlabMatrix =
-			engGetMatrix( matlabEnginePtr,
-				      (char *) matlabOutputNames[j] );
+			getMatlabMatrix( (char *) matlabOutputNames[j] );
 
 		  // allocate a Ptolemy matrix
 		  int rows = mxGetM( matlabMatrix );
@@ -310,8 +246,7 @@ extern "C" {
 
 		// close Matlab connection and exit Ptolemy if fatal error
 		if ( fatalErrorFlag ) {
-		  engClose(matlabEnginePtr);
-		  matlabEnginePtr = 0;
+		  killMatlab();
 		  if ( matlabInputMatrices != 0 ) free( matlabInputMatrices );
 		  if ( matlabOutputMatrices != 0 ) free( matlabOutputMatrices );
 		  Error::abortRun(*this, (char *) errstr, verbstr);
@@ -325,12 +260,8 @@ extern "C" {
 	}
 
 	wrapup {
-		if ( engClose(matlabEnginePtr) ) {
-		  Error::warn(*this, "Error when terminating connection ",
-			      "to the Matlab kernel.");
-		}
-		matlabEnginePtr = 0;
 		if ( matlabInputMatrices != 0 ) free( matlabInputMatrices );
 		if ( matlabOutputMatrices != 0 ) free( matlabOutputMatrices );
+		SDFMatlab::wrapup();
 	}
 }
