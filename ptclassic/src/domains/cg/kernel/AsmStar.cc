@@ -143,7 +143,7 @@ void AsmStar::gencode(CodeBlock& cb) {
 			}
 			// get the identifier
 			char id[TOKLEN], *p = id;
-			while (isalnum(*t)) *p++ = *t++;
+			while (isalnum(*t) || *t == '#') *p++ = *t++;
 			*p = 0;
 			// skip any whitespace
 			while (isspace(*t)) t++;
