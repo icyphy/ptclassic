@@ -2,7 +2,7 @@
 #define _PNScheduler_h
 
 /* 
-Copyright (c) 1990-1993 The Regents of the University of California.
+Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -34,8 +34,9 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #endif
 
 #include "Scheduler.h"
-#include "PNMonitor.h"
 
+class PNThreadScheduler;
+class PNMonitor;
 class PNCondition;
 
 class PNScheduler : public Scheduler
@@ -75,14 +76,23 @@ protected:
     // Create threads.
     void createThreads();
 
+    // Delete threads.
+    void deleteThreads();
+
+    // Enable locking.
+    void enableLocking();
+
     // Stopping time.
     double stopTime;
 
     // Monitor for guarding the Conditions used by the Scheduler.
-    PNMonitor monitor;
+    PNMonitor* monitor;
 
     // Condition variable for synchronizing the start of an iteration.
     PNCondition* start;
+
+    // ThreadScheduler for keeping track of Threads.
+    PNThreadScheduler* threads;
 };
 
 #endif
