@@ -93,11 +93,11 @@ libpigi.a:	$(LIBOBJS)
 
 pigiRpc:	defpalettes.o libpigi.a $(LDIR)/libptolemy.a \
 		$(LDIR)/libsdf.a $(LDIR)/libddf.a $(LDIR)/libde.a
-	$(LINKER) $(LDFLAGS) defpalettes.o libpigi.a \
+	$(LINKER) $(LDFLAGS) defpalettes.o \
 	    ../domains/ddf/stars/*.o \
 	    ../domains/de/stars/*.o \
 	    ../domains/sdf/stars/*.o \
-	    $(LIBS) -o pigiRpc
+	    libpigi.a $(LIBS) -o pigiRpc
 
 DESTLIB = $(ROOT)/lib.$(ARCH)/libpigi.a
 DESTBIN = $(ROOT)/bin.$(ARCH)/pigiRpc
