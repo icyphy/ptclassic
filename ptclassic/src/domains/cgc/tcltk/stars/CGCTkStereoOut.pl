@@ -26,15 +26,15 @@ limitation of liability, and disclaimer of warranty provisions.
 
     codeblock (tkSetup) {
       /* Establish the Tk window for setting the value    */
-      /* "position" is  a local variable which scales the */
+      /* "tkvolume" is  a local variable which scales the */
       /* volume from (0 - 10) to (0 - 100) for makeScale  */ 
       {
-	int position;
-	position = $val(volume)*10;
+	int tkvolume;
+	tkvolume = (int) ($val(volume)*100);
         makeScale(".high",
 		  "$starSymbol(scale1)",
 		  "Volume control",
-		  position,
+		  tkvolume,
                   $starSymbol(setVolume));
 	displaySliderValue(".high", "$starSymbol(scale1)",
 			   "$val(volume)");
@@ -43,7 +43,7 @@ limitation of liability, and disclaimer of warranty provisions.
       /* balance from (-10 to 10) to (0 to 100) for makeScale */ 
       {
 	int tkbalance;
-	tkbalance = 5*$val(balance)+50;
+	tkbalance = (int)(50*$val(balance)+50);
 	makeScale(".low",
 		  "$starSymbol(scale2)",
 		  "Balance control",
@@ -69,18 +69,17 @@ limitation of liability, and disclaimer of warranty provisions.
             char **argv;                        /* Argument strings. */
         {
 	    static char buf[20];
-	    int position;
-            if(sscanf(argv[1], "%d", &position) != 1) {
+	    int tkvolume;
+            if(sscanf(argv[1], "%d", &tkvolume) != 1) {
                 errorReport("Invalid volume");
                 return TCL_ERROR;
             }
 	    /* conveying the value changes of volume to audio device */
-	    $ref(volume) = (int) position/10;
-	    $sharedSymbol(CGCStereoBase,set_parameters)
-	      ($starSymbol(file), "$val(outputPort)", $ref(volume),
-	       $ref(balance), 0);
+	    $ref(volume) = (float) (tkvolume/100.0);
+	    $sharedSymbol(CGCAudioBase, audio_gain)
+	    ($starSymbol(file), $ref(volume), 0);
 
-	    sprintf(buf, "%d", $ref(volume));
+	    sprintf(buf, "%f", $ref(volume));
 	    displaySliderValue(".high", "$starSymbol(scale1)", buf);
 
             return TCL_OK;
@@ -100,13 +99,12 @@ limitation of liability, and disclaimer of warranty provisions.
                 errorReport("Invalid balance");
                 return TCL_ERROR;
             }
-	    $ref(balance) = ((int)tkbalance/5) - 10;
+	    $ref(balance) = (float) ((tkbalance/50.0) - 1.0);
 	    /* conveying the value changes of balance to audio device */
-	    $sharedSymbol(CGCStereoBase,set_parameters)
-	      ($starSymbol(file), "$val(outputPort)", $ref(volume),
-	       $ref(balance), 0);
+	    $sharedSymbol(CGCAudioBase, audio_balance)
+	      ($starSymbol(file), $ref(balance));
 
-	    sprintf(buf, "%d", $ref(balance));
+	    sprintf(buf, "%f", $ref(balance));
 	    displaySliderValue(".low", "$starSymbol(scale2)", buf);
 
             return TCL_OK;
@@ -114,9 +112,9 @@ limitation of liability, and disclaimer of warranty provisions.
     }
 
     initCode {
-	CGCStereoOut :: initCode();
-	addCode(tkSetup, "tkSetup");
-        addCode(setVolumeDef, "procedure");
-        addCode(setBalanceDef, "procedure");
+      CGCStereoOut :: initCode();
+      addCode(tkSetup, "tkSetup");
+      addCode(setVolumeDef, "procedure");
+      addCode(setBalanceDef, "procedure");
     }
 }

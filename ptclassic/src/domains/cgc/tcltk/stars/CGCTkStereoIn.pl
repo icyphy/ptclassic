@@ -26,15 +26,15 @@ limitation of liability, and disclaimer of warranty provisions.
 
     codeblock (tkSetup) {
       /* Establish the Tk window for setting the value   */
-      /* "position" is  a local variable which scale the */
+      /* "tkvolume" is  a local variable which scale the */
       /* volume from (0 - 10) to (0 - 100) for makeScale */ 
       {	
-	int position;
-        position = $val(volume)*10;
+	int tkvolume;
+        tkvolume = (int)($val(volume)*100);
         makeScale(".high",
 		  "$starSymbol(scale1)",
 		  "Record volume control",
-		  position,
+		  tkvolume,
 		  $starSymbol(setVolume));
 	displaySliderValue(".high", "$starSymbol(scale1)",
 			   "$val(volume)");
@@ -47,28 +47,27 @@ limitation of liability, and disclaimer of warranty provisions.
     }
 
     codeblock (setVolumeDef) {
-        static int $starSymbol(setVolume)(dummy, interp, argc, argv)
-	    ClientData dummy;                   /* Not used. */
-            Tcl_Interp *interp;                 /* Current interpreter. */
-            int argc;                           /* Number of arguments. */
-            char **argv;                        /* Argument strings. */
+      static int $starSymbol(setVolume)(dummy, interp, argc, argv)
+	ClientData dummy;                   /* Not used. */
+        Tcl_Interp *interp;                 /* Current interpreter. */
+        int argc;                           /* Number of arguments. */
+	char **argv;                        /* Argument strings. */
         {
-	    static char buf[20];
-	    int position;
-            if(sscanf(argv[1], "%d", &position) != 1) {
-                errorReport("Invalid volume");
-                return TCL_ERROR;
-            }
-	    /* conveying the value changes of record volume to audio device */
-	    $ref(volume) = (int) position/10;
-	    $sharedSymbol(CGCStereoBase,set_parameters)
-	      ($starSymbol(file), "$val(inputPort)", $ref(volume),
-	       $ref(balance), 1);
-
-	    sprintf(buf, "%d", $ref(volume));
-	    displaySliderValue(".high", "$starSymbol(scale1)", buf);
-
-            return TCL_OK;
+	  static char buf[20];
+	  int tkvolume;
+	  if(sscanf(argv[1], "%d", &tkvolume) != 1) {
+	    errorReport("Invalid volume");
+	    return TCL_ERROR;
+	  }
+	  /* conveying the value changes of record volume to audio device */
+	  $ref(volume) = (float) (tkvolume/100.0);
+	  $sharedSymbol(CGCAudioBase, audio_gain)
+	    ($starSymbol(file), $ref(volume), 1);
+	  
+	  sprintf(buf, "%f", $ref(volume));
+	  displaySliderValue(".high", "$starSymbol(scale1)", buf);
+	  
+	  return TCL_OK;
         }
     }
 
@@ -78,4 +77,3 @@ limitation of liability, and disclaimer of warranty provisions.
         addCode(setVolumeDef, "procedure");
     }
 }
-
