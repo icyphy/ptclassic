@@ -118,6 +118,7 @@ public:
 
 	// A. not specific to Ptolemy
 	//    1. generate a list of names for Matlab matrices
+	//       use FreeStringArray to deallocate matNames
 	void NameMatlabMatrices(char *matNames[],
 				int numMatrices,
 				const char* baseName);
@@ -145,20 +146,21 @@ public:
 			    int* errflag);
 
 	// Methods for interface to/from another scripting language (e.g. Tcl)
-	Matrix* CreateMatlabMatrix(const char* name,
-				   int numrows, int numcols,
-				   Real* realPart, Real* imagPart);
-	Matrix* CreateMatlabMatrix(const char* name,
-				   int numrows, int numcols,
-				   const char** realPartStrings,
-				   const char** imagPartStrings);
-	Matrix* FetchMatlabMatrix(char* name,
-				  int* numrows, int* numcols,
-				  Real** realPart, Real** imagPart);
-	Matrix* FetchMatlabMatrix(char* name,
-				  int* numrows, int* numcols,
-				  char** realPartStrings,
-				  char** imagPartStrings);
+	// Use FreeStringArray to deallocate realPartStrings/imagPartStrings
+	Matrix* SetVariable(const char* name,
+			    int numrows, int numcols,
+			    Real* realPart, Real* imagPart);
+	Matrix* SetVariable(const char* name,
+			    int numrows, int numcols,
+			    const char** realPartStrings,
+			    const char** imagPartStrings);
+	Matrix* GetVariable(char* name,
+			    int* numrows, int* numcols,
+			    Real** realPart, Real** imagPart);
+	Matrix* GetVariable(char* name,
+			    int* numrows, int* numcols,
+			    char** realPartStrings,
+			    char** imagPartStrings);
 	void FreeStringArray(char** strarray, int numstrings);
 
 private:
