@@ -473,6 +473,7 @@ endif
 
 ifdef CG
 	CUSTOM_DIRS += $(CGDIR)/kernel $(CGDIR)/targets $(CGDIR)/stars
+	TARGETS += $(CGT)/CGCostTarget.o
 	PALETTES += PTOLEMY/src/domains/cg/icons/cg.pal
 	ifdef CGPAR
 		CUSTOM_DIRS += $(CGDIR)/HuScheduler $(CGDIR)/ddfScheduler \
