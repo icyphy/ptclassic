@@ -78,6 +78,7 @@ DEFlipFlopD.pl \
 DEFlipFlopJK.pl \
 DEFlipFlopT.pl \
 DEFork.pl \
+DEGain.pl \
 DEHandShake.pl \
 DEImageToCell.pl \
 DEImageToMx.pl \
@@ -119,6 +120,7 @@ DETimeStamp.pl \
 DEUDCounter.pl \
 DEUnPacketize.pl \
 DEVarDelay.pl \
+DEVarGain.pl \
 DEVarServer.pl \
 DEVirtClock.pl \
 DEWaveForm.pl \
