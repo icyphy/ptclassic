@@ -31,19 +31,14 @@ ENHANCEMENTS, OR MODIFICATIONS.
  Creation Date: Sat Nov  4 17:25:01 PST 1995
 */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <errno.h>
-#include <unistd.h>
-#include <netdb.h>
-#include <sys/ipc.h>
-#include <sys/sem.h>
-#include <sys/time.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
+#include <stdio.h>		/* define NULL, fprintf, and perror */
+#include <stdlib.h>		/* define exit function */
+#include <string.h>		/* define memcpy function */
+#include <errno.h>		/* define errno variable */
+
+#include <sys/time.h>		/* define gettimeofday */
+#include <netinet/in.h>		/* define struct in_addr */
+#include <arpa/inet.h>		/* define inet_ntoa function */
 
 #include <udpam.h>
 #include <am.h>
@@ -68,9 +63,9 @@ void ScanTimeoutList(ea_t ea)
   num_elements = ea->txtimeout.num_elements;
   timeout_elem = ea->txtimeout.head;
 #ifdef SOL_2_5
-  gettimeofday(&curr_time);
-#elif SOLARIS
   gettimeofday(&curr_time, NULL);
+#elif SOLARIS
+  gettimeofday(&curr_time);
 #endif 
 
   while (num_elements-- > 0) {
@@ -531,8 +526,7 @@ int AM_PostSvar(eb_t eb)
       perror("sema_post error\n");
       exit(-1);
     }
-    DPRINTF(("Posted Semaphore.  Count is now %d\n",
-	     eb->synch_var.count));
+    DPRINTF(("Posted Semaphore.  Count is now %ld\n", eb->synch_var.count));
   }
   return(AM_OK);
 }
