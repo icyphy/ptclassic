@@ -1,10 +1,15 @@
 #include "type.h"
 #include "DDFScheduler.h"
+#include "DDFWormhole.h"
 #include "Output.h"
 #include "StringList.h"
 #include "FloatState.h"
 #include "Geodesic.h"
 #include "GalIter.h"
+
+#include "CaseScheduler.h"
+#include "ForScheduler.h"
+#include "DoWhileScheduler.h"
 
 /**************************************************************************
 Version identification:
@@ -24,6 +29,15 @@ These are the methods for the dynamic dataflow scheduler.
 extern const char DDFdomainName[];
 
 void fireSource(Star&, int);
+Galaxy* deCrust(Block* dw);
+const char* galPortName(const char* starName, const char* portName); 
+static void expandGal (Galaxy* g, Block* org); 
+static void reConnect(PortHole* eveP, PortHole* galP); 
+static void connectWormholes (Galaxy&, Galaxy&);
+			
+static CaseScheduler caseSched;
+static ForScheduler  forSched;
+static DoWhileScheduler dowhileSched;
 
 /*******************************************************************
  error messages for inconsistent graphs
@@ -94,7 +108,6 @@ int DDFScheduler :: setup (Block& b) {
 	// star initialize.  We allow any domain ending in "DF"
 	// (for example, SDF, DDF).  Also compute the size.
 	Star* s;
-	galSize = 0;
 	while ((s = nextStar++) != 0) {
 		const char* dom = s->domain();
 		int l = strlen(dom) - 2;
@@ -104,11 +117,6 @@ int DDFScheduler :: setup (Block& b) {
 		}
 		// member initialization.
 		s->prepareForScheduling();
-
-		// put the source block into the sourceBlocks list.
-		if (isSource(*s))
-			sourceBlocks.put(s);
-		galSize++;
 	}
 
 	galaxy.initialize();
@@ -129,6 +137,26 @@ int DDFScheduler :: setup (Block& b) {
 	currentTime = schedulePeriod;
 	overFlow = FALSE;
 
+	// fancy stuff...
+	// auto-creation of SDF wormholes and decide the most efficient
+	// scheduler (Case, For, DoWhile, Recur)
+	makeWormholes(galaxy);
+	selectScheduler();
+
+	if (canDom == DDF) {
+		GalStarIter nextS(*newGal);
+		Star* sW;
+
+		galSize = 0;
+		while ((sW = nextS++) != 0) {
+			// put the source block into the sourceBlocks list.
+			if (isSource(*sW))
+				sourceBlocks.put(sW);
+			galSize++;
+		}
+	}
+			
+		
 	return !haltRequestFlag;
 }
 
@@ -155,7 +183,19 @@ DDFScheduler :: run (Block& block) {
 		return FALSE;
 	}
 
-	Galaxy& galaxy = block.asGalaxy();
+	switch(canDom) {
+		case 1 : return(caseSched.run(*newGal));
+			 break;
+		case 2 : return(forSched.run(*newGal));
+			 break;
+		case 3 : return(dowhileSched.run(*newGal));
+			 break;
+		case 4 : return(recurSched.run(*newGal));
+			 break;
+		default : break;
+	}
+		
+	Galaxy& galaxy = *newGal;
 
 	// initialize the SpaceWalk member
 	GalStarIter nextStar(galaxy);
@@ -245,7 +285,7 @@ int DDFScheduler :: isRunnable(Star& s) {
 
 		// if user specified waitPort exists...
 		DDFStar* p = (DDFStar*) &s;
-		if (p->waitPort != NULL) {
+		if (p->hasWaitPort()) {
 		
 			// check Geodesic overflow
 
@@ -266,7 +306,7 @@ int DDFScheduler :: isRunnable(Star& s) {
 
 			// regular routine
 
-			int req = p->waitNum - p->waitPort->numTokens();
+			int req = p->reqTokens();
 			while (req > 0) {
 			   // if # tokens are static, return FALSE.
 			   // if on wormhole boundary, return FALSE.
@@ -276,9 +316,10 @@ int DDFScheduler :: isRunnable(Star& s) {
 				lazyDepth++;
 				if (!lazyEval((Star*) po->far()->parent()))
 					return FALSE;
+				lazyDepth--;
 			   } else
 					return FALSE;
-			   req = p->waitNum - p->waitPort->numTokens();
+			   req = p->reqTokens();
 			}
 			return TRUE;
 		}
@@ -310,9 +351,9 @@ int DDFScheduler :: lazyEval(Star* s) {
 
 		// if user specified waitPort exists...
 		DDFStar* p = (DDFStar*) s;
-		if (p->waitPort != NULL) {
+		if (p->hasWaitPort()) {
 
-			int req = p->waitNum - p->waitPort->numTokens();
+			int req = p->reqTokens();
 			DDFPortHole* po = (DDFPortHole*) p->waitPort;
 			while (req > 0) {
 			   // if on wormhole boundary, return FALSE.
@@ -321,10 +362,11 @@ int DDFScheduler :: lazyEval(Star* s) {
 				if (!lazyEval((Star*) po->far()->parent())) {
 					return FALSE;
 				}
+				lazyDepth--;
 			   } else {
 					return FALSE;
 			   }
-			   req = p->waitNum - p->waitPort->numTokens();
+			   req = p->reqTokens();
 			}
 			s->fire();
 			return TRUE;
@@ -374,6 +416,7 @@ int DDFScheduler :: checkLazyEval(Star* s) {
 				lazyDepth++;
 				if (!lazyEval(str)) 
 					return FALSE;
+				lazyDepth--;
 				req = p.numberTokens - p.numTokens();
 			}
 
@@ -421,6 +464,329 @@ void fireSource(Star& s, int k) {
 }
 
 // my domain
-extern const char DDFdomainName[];
-
 const char* DDFScheduler :: domain () const { return DDFdomainName ;}
+
+// variable used for generating names
+int DDFScheduler::nW = 0;
+
+// generate a new name for Wormholes of SDF domain
+const char* DDFScheduler::wormName() {
+	char buf[16];
+	sprintf (buf, "!worm%d", ++nW);
+	return savestring (buf);
+}
+
+const char* galPortName(const char* starName, const char* portName) {
+	char buf[32];
+	int len = strlen(starName);
+	strcpy(buf, starName);
+	buf[len++] = '(';
+	strcpy(buf+len, portName); 
+	len += strlen(portName);
+	strcpy(buf+len, ")"); 
+	return savestring (buf);
+}
+
+	////////////////////////////
+	// makeWormholes
+	////////////////////////////
+
+// In the DDF domain, we group SDF stars and wormholes of SDF domain
+// as a as large a DDFWormhole of SDF domain as possible.
+// This grouping will improve the runtime speed by utilizing the
+// compile-time SDF scheduler.
+// Also, with modified topology, check whether it is a special domain
+// or not : Case, For, DoWhile, Recur.
+
+void DDFScheduler :: makeWormholes (Galaxy& galaxy) {
+
+	GalStarIter nextStar(galaxy);
+
+	Star* s;
+
+	// create a new Galaxy which will replace the old galaxy.
+	newGal = new Galaxy;
+	if (galaxy.parent()) {
+		newGal->setBlock(galaxy.readName(), galaxy.parent());
+	} else {	// for DDF universe
+		newGal->setBlock(galaxy.readName(), &galaxy);
+	}
+	sdfWorms.initialize();
+	canDom = UnKnown;
+
+	while ((s = nextStar++) != 0) {
+
+	    // detect a SDF star which is not grouped into a newly
+	    // created SDF galaxy.  If found, create a new SDF galaxy (newG)
+	    // and add the SDF star into the galaxy.
+	    // Then, expand the galaxy as much as possible.
+
+	    if (strcmp(s->domain(), DDFdomainName) || 
+		 (!strcmp(s->mySched()->domain(), "SDF"))) {
+
+		if (s->parent() != (Block*) &galaxy) continue; 
+
+		Galaxy* newG = new Galaxy;
+		sdfWorms.put(newG);
+		newG->setBlock(wormName(), 0);
+		newG->myDomain = savestring("SDF");
+
+		if (s->isItWormhole()) {
+			// take off wormhole crust
+		    Galaxy* inG = deCrust(s);
+		    newG->addBlock(*inG, inG->readName());
+		    expandGal(newG, inG);
+		} else {
+			newG->addBlock(*s, s->readName());
+			expandGal(newG, s);
+		}
+
+	    } else {
+
+	    // if it is a DDF Star or a Wormhole of non-SDF domain, add
+	    // this block into the newGal.  And check the candidate domain.
+
+		if ((!s->isItWormhole()) || 
+			strcmp(s->mySched()->domain(), "SDF")) {
+		    	newGal->addBlock(*s, s->readName());
+		}
+
+		// check the candidate domain...
+
+		if (canDom != DDF) {
+		DDFStar* ds = (DDFStar*) s;
+		const char* nm = ds->readClassName();
+
+			// Only Recur domain may have "Self" star.
+		if (!strcmp(nm, "Self")) {
+			if (canDom == UnKnown) canDom = Recur;
+			else if (canDom != Recur) canDom = DDF;
+
+			// Only For domain may have "UpSample" star.
+		} else if ((!strcmp(nm, "UpSample")) 
+			|| (!strcmp(nm, "DownSample"))) {
+			if (canDom == UnKnown) canDom = For;
+			else if (canDom != For) canDom = DDF;
+
+			// Case and DoWhile domain may have "Case" star
+		} else if (!strcmp(nm, "Case")) {
+			BlockPortIter np(*s);
+			PortHole* p;
+
+			while((p = np++) != 0) {
+			    if (p->isItInput() == p->far()->isItInput()) {
+				if (p->isItInput()) {
+				    if (canDom == UnKnown) canDom = Case;
+				    else if (canDom != Case) canDom = DDF;
+				} else {
+				    if (canDom == UnKnown) canDom = DoWhile;
+				    else if(canDom != DoWhile) canDom = DDF;
+				}
+			    }
+			}   // end of inner while
+		}} 	// end of inner if
+	    }	// end of outermost if
+	}	// end of while
+
+	if (canDom == UnKnown)	canDom = DDF;
+
+	// Now we have SDF galaxies. Make them as DDF Wormholes.
+	ListIter nextb(sdfWorms);
+	for (int i = sdfWorms.size(); i > 0; i--) {
+		Galaxy* inG = (Galaxy*) nextb++;
+		DDFWormhole* dW = new DDFWormhole(*inG);
+		dW->prepareForScheduling();
+		newGal->addBlock(*dW, inG->readName());
+		dW->start();
+	} 
+
+	// make connections for broken arcs.
+	connectWormholes(galaxy, *newGal);
+}
+
+	////////////////////////////
+	// selectScheduler
+	////////////////////////////
+
+Scheduler* DDFScheduler :: selectScheduler() {
+
+	// select a candidate domain
+	int flag = 1;
+	Scheduler* realSched;
+	switch(canDom) {
+		case 1 : flag = caseSched.setup(*newGal);
+			 break;
+		case 2 : flag = forSched.setup(*newGal);
+			 break;
+		case 3 : flag = dowhileSched.setup(*newGal);
+			 break;
+		case 4 : flag = recurSched.setup(*newGal);
+			 break;
+		default : flag = 0;
+			  break;
+	}
+
+	if (!flag)
+		canDom = DDF;
+}
+			
+	////////////////////////////
+	// connectWormholes
+	////////////////////////////
+
+// During the procedure of making DDF Wormholes of SDF domain, we
+// broke the connections at the boundary of the Wormholes.
+// This routine remakes the connections.
+
+void connectWormholes (Galaxy& g, Galaxy& newG) {
+
+	if (g.numberPorts()) {
+	    // verify the wormhole boundary connection.
+	    Block* parW = g.parent();
+
+	    // exclude DDF Self in the recursion construct
+	    if (parW->isItWormhole()) {
+		BlockPortIter nextp(*parW);
+		PortHole* p;
+
+		while((p = nextp++) != 0) {
+			EventHorizon* eveP = ((EventHorizon*) p)->ghostPort;
+			PortHole* galP = eveP->far();
+			// check the connection
+			if (eveP != galP->far()) 
+				reConnect(eveP, galP);	
+		}
+	    }
+	}
+
+	// verify the connections of the DDF Stars and Wormholes.
+	// Call reConnect if necessary.
+
+	GalStarIter nextStar(newG);
+	Star* s;
+
+	while ((s = nextStar++) != 0) {
+	    if ((!s->isItWormhole()) ||
+			strcmp(s->mySched()->domain(), "SDF")) {
+		BlockPortIter nextp(*s);
+		PortHole* p;
+
+		while((p = nextp++) != 0) {
+			PortHole* galP = p->far();
+			// check the connection
+			if (p != galP->far()) 
+				reConnect(p, galP);	
+		}
+	    }
+	}
+}
+
+	////////////////////////////
+	// reConnect
+	////////////////////////////
+
+// When create a new DDFWormhole of SDF domain, the connections around
+// the Wormholes are all broken.  galP points to the PortHole inside the
+// Wormhole and eveP points to the PortHole of the other block.
+// Now, connect eveP to the proper EventHorizon of the Wormhole, which by
+// turns connected to galP.
+
+void reConnect(PortHole* eveP, PortHole* galP) {
+
+	EventHorizon* realP = ((EventHorizon*) galP->far())->ghostPort;
+	int delay = eveP->myGeodesic->numInitialParticles;
+	eveP->myGeodesic->disconnect(*galP);
+	eveP->disconnect(1);
+	if (galP->isItInput())
+		eveP->connect(*realP, delay);
+	else
+		realP->connect(*eveP, delay);
+	realP->initialize();
+}
+		
+	////////////////////////////
+	// expandGal
+	////////////////////////////
+
+// Once create a SDF galaxy, expand it as much as possible.
+// First, include any adjacent SDF stars into the galaxy.
+// Second, if there is any Wormholes of SDF domain, remove the
+// crust of Wormhole and make the inside galaxy as a normal
+// galaxy.
+
+void expandGal (Galaxy* g, Block* org) {
+
+	BlockPortIter nextp(*org);
+	PortHole* p;
+
+	while((p = nextp++) != 0) {
+		PortHole& realP = p->newConnection();
+		Star* s = (Star*) realP.far()->parent();;
+
+	   if (s->parent() != (Block*) g) {
+
+		if (!s->isItWormhole() && strcmp(s->domain(), DDFdomainName)) {
+			// if SDF star, put it into the galaxy and
+			// call expandGal for this star.
+			g->addBlock(*s, s->readName());
+			expandGal(g, s);
+		} else if ((!s->isItWormhole()) ||
+			strcmp(s->mySched()->domain(), "SDF") ||
+			(realP.isItInput() == realP.far()->isItInput())) {
+			// if DDF star, create a galaxy porthole
+			// and alias it.
+			if (realP.isItInput()) {
+				InPortHole* gp = new InPortHole;
+				g->addPort(gp->setPort(
+			   galPortName(org->readName(), realP.readName()), g));
+				gp->setAlias(realP);
+			} else {
+				OutPortHole* gp = new OutPortHole;
+				g->addPort(gp->setPort(
+			   galPortName(org->readName(), realP.readName()), g));
+				gp->setAlias(realP);
+			}
+		} else {
+			// DDF wormhole of SDF domain
+			// First, take off wormhole crust
+			Galaxy* inG = deCrust(s);
+			g->addBlock(*inG, inG->readName());
+			expandGal(g, inG);
+		}
+	    }
+	}
+}
+			 
+	////////////////////////////
+	// deCrust
+	////////////////////////////
+
+Galaxy* deCrust(Block* dw) {
+
+	BlockPortIter nextp(*dw);
+	PortHole* p;
+	Galaxy* myGal;
+
+	while((p = nextp++) != 0) {
+		int delay = p->myGeodesic->numInitialParticles;
+		PortHole* tempP = p->far();
+		EventHorizon* eveP = (EventHorizon*) p;
+		PortHole* galP = eveP->ghostPort->far();
+		Block* galS = galP->parent();
+		while (!galS->parent()->isItWormhole())
+			galS = galS->parent();
+		myGal = (Galaxy*) galS;
+		tempP->disconnect(1);
+		galP->disconnect(1);
+		delete eveP->ghostPort;
+		delete eveP;
+		if (tempP->isItInput()) 
+			galP->connect(*tempP, delay);
+		else
+			tempP->connect(*galP, delay);
+	}
+
+	return myGal;
+}
+
+
