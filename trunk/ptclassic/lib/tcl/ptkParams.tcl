@@ -212,7 +212,7 @@ proc ed_YesNoDialog {mesg} {
 #  Checks to make sure that parameters with the same name aren't overwritten
 
 proc ed_AddParam {facet number name type value} {
-
+    upvar 1 localNum localNum
     if {[string match $name ""] || [string match $type ""]} {
 	ptkImportantMessage .error \
 		"You have not entered sufficient information"
@@ -224,7 +224,9 @@ proc ed_AddParam {facet number name type value} {
     set top .o$num
     set f $top.f.c.f
     set overWriteParam 0
-    if [winfo exists $f.par.f$name] {
+
+    set count $ed_ToplevelNumbers($facet,$number,n_$name)
+    if [winfo exists $f.par.f$count] {
 	if [ed_YesNoDialog "Parameter: \"$name\" exists.  Overwrite?"] {
 		destroy $f.par.f$name
 		set overWriteParam 1
@@ -233,23 +235,23 @@ proc ed_AddParam {facet number name type value} {
 	}
     }
 
-    frame $f.par.f$name -bd 2
-    label $f.par.f$name.l -text "$name: " -anchor w
+    frame $f.par.f$count -bd 2
+    label $f.par.f$count.l -text "$name: " -anchor w
 #    if {[string length $name] > 15} {
 #            set paramArray(addBorder) 1
 #    }
-    entry $f.par.f$name.e -width $ed_MaxEntryLength -relief sunken
-#    bind $f.par.f$name.e <Configure> "ed_CheckForChange %W"
-    bind $f.par.f$name.e <Any-Leave> \
+    entry $f.par.f$count.e -width $ed_MaxEntryLength -relief sunken
+#    bind $f.par.f$count.e <Configure> "ed_CheckForChange %W"
+    bind $f.par.f$count.e <Any-Leave> \
 	"ed_UpdateParam $facet $number $name \[%W get\]"
-    bind $f.par.f$name.e <Return> \
+    bind $f.par.f$count.e <Return> \
 	"ed_UpdateParam $facet $number $name \[%W get\]"
-    $f.par.f$name.e insert 0 "$value"
-    pack append $f.par.f$name \
-	$f.par.f$name.l {left expand fillx} \
-	$f.par.f$name.e {right expand fillx}
-    pack append $f.par $f.par.f$name {top expand fillx pady 1m}
-    ed_AddScroll $f.par.f$name.e
+    $f.par.f$count.e insert 0 "$value"
+    pack append $f.par.f$count \
+	$f.par.f$count.l {left expand fillx} \
+	$f.par.f$count.e {right expand fillx}
+    pack append $f.par $f.par.f$count {top expand fillx pady 1m}
+    ed_AddScroll $f.par.f$count.e
     if {$overWriteParam} {
 	ed_UpdateParam $facet $number $name $type $value
     } else {
@@ -371,13 +373,13 @@ proc ed_Remove {facet number winName} {
 
 proc ptkEditParams {facet number} {
     global ed_MaxEntryLength ed_ToplevelNumbers
-
     if {[info exists ed_ToplevelNumbers($facet,$number)] && \
 	[winfo exists .o$ed_ToplevelNumbers($facet,$number)]} {
 	ptkImportantMessage .error \
 	    "Already editing the parameters for this object."
 	return
     }
+    set ed_ToplevelNumbers($facet,$number,count) 0
 
     set num $ed_ToplevelNumbers(ed_Num)
     incr ed_ToplevelNumbers(ed_Num)
@@ -388,7 +390,7 @@ proc ptkEditParams {facet number} {
 #    set paramArray(addBorder) 0
 
     set ed_GetResult [ptkGetParams $facet $number]
-    regsub -all {(\})(\{)} $ed_GetResult {\1 \2} ed_GetResult
+#    regsub -all {(\})(\{)} $ed_GetResult {\1 \2} ed_GetResult
     if {$ed_GetResult == ""} {
 	ptkImportantMessage .error "ed_GetParams returns {}"
 	return
@@ -399,7 +401,6 @@ proc ptkEditParams {facet number} {
 	  "For OctInstanceHandle: \"$number\", \"$editType\" unrecognized"
 	return
     }
-
 
     if {[ptkIsBus $number]} {
 	set editType "Bus Width"
@@ -457,6 +458,11 @@ proc ptkEditParams {facet number} {
     set paramList [lindex $ed_GetResult 1]
     set paramArray($facet,$number) $paramList
     set paramBAKArray($facet,$number) $paramList
+    if {[llength $paramList] == 0} {
+	ptkImportantMessage .error \
+		"Error: Star has no parameters"
+	return
+    }
     foreach param $paramList {
 	set name [lindex $param 0]
 	if [string match NIL $name] {
@@ -470,33 +476,35 @@ proc ptkEditParams {facet number} {
 			break
 		}
 	}
-	if [winfo exist $f.par.f$name] {
+	if [info exist ed_ToplevelNumbers($facet,$number,n_$name)] {
 		ptkImportantMessage .error \
 		"Warning: Parameter \"$name\" is listed more than once."
-		for {set count 2; set name ${name}$count} \
-			{[winfo exist $f.par.f$name]} {incr count} {}
 	}
+	set count $ed_ToplevelNumbers($facet,$number,count)
+	incr ed_ToplevelNumbers($facet,$number,count)
 	set value [lindex $param 2]
-	frame $f.par.f$name -bd 2
-	label $f.par.f$name.l -text "$name: " -anchor w
+	frame $f.par.f$count -bd 2
+	label $f.par.f$count.l -text "$name: " -anchor w
 #	if {[string length $name] > 15} {
 #		set paramArray(addBorder) 1
 #	}
-	entry $f.par.f$name.e -width $ed_MaxEntryLength -relief sunken
-#	bind $f.par.f$name.e <Configure> "ed_CheckForChange %W"
-	bind $f.par.f$name.e <Any-Leave> \
+	entry $f.par.f$count.e -width $ed_MaxEntryLength \
+		-relief sunken
+#	bind $f.par.f$count.e <Configure> "ed_CheckForChange %W"
+	bind $f.par.f$count.e <Any-Leave> \
 		"ed_UpdateParam $facet $number $name \[%W get\]"
-	bind $f.par.f$name.e <Return> \
+	bind $f.par.f$count.e <Return> \
 		"ed_UpdateParam $facet $number $name \[%W get\]"
-	$f.par.f$name.e insert 0 "$value"
-	pack append $f.par.f$name \
-		$f.par.f$name.l {left expand fillx} \
-		$f.par.f$name.e {right expand fillx}
-	pack append $f.par $f.par.f$name {top fillx expand pady 1m}
-	ed_AddScroll $f.par.f$name.e
+	$f.par.f$count.e insert 0 "$value"
+	pack append $f.par.f$count \
+		$f.par.f$count.l {left expand fillx} \
+		$f.par.f$count.e {right expand fillx}
+	pack append $f.par $f.par.f$count {top fillx expand \
+		pady  1m}
+	ed_AddScroll $f.par.f$count.e
     }
     grab $top
-    focus $f.par.f[lindex [lindex $paramList 0] 0].e
+    if [info exists $f.par.f0.e] {focus $f.par.f0.e}
     $c create window 0 0 -anchor nw -window $f -tags frameWindow
     set mm [winfo fpixels $c 1m]
 #    bind $c <Configure> "ed_ConfigFrame $top"
