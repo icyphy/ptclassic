@@ -71,6 +71,7 @@ protected:
     /*virtual*/ void trailerCode();
     /*override TITarget*/void orgDirective(const char* memName, unsigned addr);
     /*override TITarget*/void writeFloat(double);
+    /*override TITarget*/void writeFix(double);
     StringState typeOfBoard;
 
 private:
