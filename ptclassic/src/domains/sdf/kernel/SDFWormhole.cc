@@ -163,8 +163,8 @@ void SDFfromUniversal :: sendData ()
 // (#repetitions) times from SDF scheduler.
 
 int SDFfromUniversal :: ready() {
-	SDFStar* s = (SDFStar*) far()->parent();
-	int target = far()->numXfer() * s->reps();
+	DFPortHole *pFar = (DFPortHole*)far();
+	int target = pFar->numXfer() * pFar->parentReps();
 	if (numTokens() >= target) {
 		// yes, enough tokens
 		return TRUE;
