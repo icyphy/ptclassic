@@ -40,7 +40,7 @@ StringList CGCStar::getRef(const char* name) {
 	return ((CGCPortHole*)p)->getGeoName();
 }
 
-StringList CGCStar::getRef2(const char* name, int offset) {
+StringList CGCStar::getRef2(const char* name, const char* offset) {
 	StringList out = getRef(name);
 	out += "[";
 	out += offset;
