@@ -168,6 +168,7 @@ extern int warnIfNotConnected (Galaxy&);
 // Here's the main guy.
 int AsmTarget::modifyGalaxy() {
 	Galaxy& g = *galaxy();
+	const char* dom = g.domain();
 	if (!int(loopingLevel)) return TRUE;
 	// init and call start methods.  We must do this so that
 	// the numberTokens values will be correct.
@@ -192,7 +193,7 @@ int AsmTarget::modifyGalaxy() {
 				// must have P_CIRC but writer does not
 				// need it.
 				if (!hasCirc(p)) {
-					if (!spliceStar(p, "CircToLin",0))
+					if (!spliceStar(p, "CircToLin",0,dom))
 						return FALSE;
 				}
 			}
@@ -200,7 +201,7 @@ int AsmTarget::modifyGalaxy() {
 				// My writer runs more often than me.
 				// It needs PB_CIRC, I do not.
 				if (!hasCirc(p->far())) {
-					if (!spliceStar(p, "LinToCirc",1))
+					if (!spliceStar(p, "LinToCirc",1,dom))
 						return FALSE;
 				}
 			}
@@ -208,11 +209,11 @@ int AsmTarget::modifyGalaxy() {
 				// nonintegral rate conversion, both need
 				// PB_CIRC
 				if (!hasCirc(p)) {
-					p = spliceStar(p, "CircToLin", 0);
+					p = spliceStar(p, "CircToLin", 0,dom);
 					if (!p) return FALSE;
 				}
 				if (!hasCirc(p->far())) {
-					if (!spliceStar(p, "LinToCirc", 1))
+					if (!spliceStar(p, "LinToCirc", 1,dom))
 						return FALSE;
 				}
 			}
@@ -222,7 +223,7 @@ int AsmTarget::modifyGalaxy() {
 }
 
 PortHole* AsmTarget::spliceStar(PortHole* p, const char* name,
-				int delayBefore)
+				int delayBefore, const char* dom)
 {
 	PortHole* pfar = p->far();
 	int ndelay = p->numTokens();
@@ -234,7 +235,7 @@ PortHole* AsmTarget::spliceStar(PortHole* p, const char* name,
 	}
 	
 	// p is now an input port.
-	Block* newb = KnownBlock::clone(name);
+	Block* newb = KnownBlock::clone(name,dom);
 	if (newb == 0) {
 		Error::abortRun("failed to clone a ", name, "!");
 		return 0;
