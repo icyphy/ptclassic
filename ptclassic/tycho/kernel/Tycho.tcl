@@ -54,6 +54,22 @@ if {${itcl::version} < 2.1} {
     exit 3
 }
 
+# Currently Tycho.tcl checks this variable to workaround a bug
+if {$tcl_platform(platform) == "macintosh"} {
+    set tyMacBug 1
+}
+
+# FIXME: this is for debugging only, and should go away
+proc ::tycho::_announce { msg } {
+    global tyMacBug
+    if [info exists tyMacBug] {
+	puts $msg
+	flush stdout
+	update
+    }
+}
+
+
 ########################################################################
 # If the environment variable TYCHO is set, use that to determine
 # where the tycho libraries are.  Otherwise, use PTOLEMY.  If neither
@@ -103,6 +119,8 @@ if {![info exists ptolemy]} {
     set ptolemy [file join $tycho ..]
     set PTOLEMY $ptolemy
 }
+
+::tycho::_announce "TYCHO=$TYCHO"
 
 global ::ptolemypresent
 # ptolemypresent is set to 1 if the ptk commands are present,
@@ -213,6 +231,7 @@ uplevel #0 {
     set ::auto_path [linsert $auto_path 0 [file join $tychopt lib ] ]
     set ::auto_path [linsert $auto_path 0 [file join $tychopt editors ] ]
 }
+::tycho::_announce "Set auto_path"
 
 # auto-loading
 # Set up the directories to be searched in order of priority.
@@ -233,6 +252,7 @@ namespace ::tycho
 
 # Files that we are going to need right away, so there is no
 # point in deferring them to auto-loading.
+::tycho::_announce "About to source FontManager.itcl"
 uplevel #0 {
     source [file join $tychokernel FontManager.itcl]
     source [file join $tychokernel ColorManager.itcl]
@@ -242,6 +262,7 @@ uplevel #0 {
     source [file join $tychokernel Message.itcl]
     source [file join $tychokernel ErrorMessage.itcl]
 }
+::tycho::_announce "Sourced ErrorMessage.itcl"
 
 uplevel #0 {
     ## FIXME: This should be ~/.Tycho/preferences
@@ -264,6 +285,7 @@ uplevel #0 {
     # Load the library file
     source [file join $tychokernel Lib.tcl]
 }
+::tycho::_announce "Handled preferences"
 
 if {![info exists tychoWelcomeWindow]} {
     # If tychoWelcomeWindow is 0, then no 'Mr. Tycho' window is opened
@@ -312,6 +334,8 @@ if {[info exists argv]} {
 	}
     }
 }
+::tycho::_announce "Processed argv"
+
 # Retrieve binary and version info. If the two variables already exist,
 # then we must be in a tysh binary we they are set by SetVersionInfo
 # which is in TyConsole.cc. Otherwise we are being called from itkwish,
@@ -335,9 +359,10 @@ if {$tychoWelcomeWindow != 0} {
 ::tycho::TopLevel::exitWhenNoMoreWindows $tychoExitWhenNoMoreWindows
 ::tycho::Displayer::normalExit $tychoShouldWeDoRegularExit
 
-
 # FIXME: Workaround for bug on the Mac under itcl2.2
 if [info exists tyMacBug] {
+    ::tycho::_announce "Returning early out of Tycho.tcl because of a Mac bug"
+    ::tycho::_announce " Note: This will always happen on the Mac if tyMacBug is set"
     return
 }
 
@@ -345,6 +370,7 @@ if [info exists tyMacBug] {
 # option was not given, open a console window
 if {$tychoOpenFiles == 0} {
     if {$tychoConsoleWindow != 0} {
+	::tycho::_announce "About to create a TclConsole"
 	uplevel #0 {::tycho::Displayer .mainConsole -geometry +0+0 -master 1; \
                 ::tycho::TclShell .mainConsole.s \
                 -stdout 1 -text "Welcome to Tycho\n"}
