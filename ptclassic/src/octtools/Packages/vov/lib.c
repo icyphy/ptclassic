@@ -215,7 +215,8 @@ static int pipeOpen()
 	}
 	argv[i++] = 0 ;		/* Terminate arg list. */
 
-	if ( execve( argv[0], argv, environ ) == -1 ) {
+	if ( execve( argv[0], (char **CONST)argv,
+		    (char **CONST)environ ) == -1 ) {
 	    errRaise( "VOV", 1, "Failed execve");
 	}
 	_exit( 127 );		/* Not reached. */
