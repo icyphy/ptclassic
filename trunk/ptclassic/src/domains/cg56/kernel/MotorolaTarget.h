@@ -59,6 +59,13 @@ public:
 	virtual double limitFix(double val);
 	/*virtual*/ StringList comment(const char*,const char*,const char*,const char*);
 	/*virtual*/ void writeFiring(Star&,int);
+
+#ifdef __GNUG__
+	// Workaround a bug in gcc-2.6.0.  Otherwise Sim56Target.cc 
+	// won't compile
+	void trailerCode() { CGTarget::trailerCode();}
+#endif
+
 	~MotorolaTarget();
 protected:
 	StringState xMemMap;
@@ -66,6 +73,12 @@ protected:
 
 	// Write star firings as subroutine calls.
 	IntState subFire;
+
+#ifdef __GNUG__
+	// Workaround a bug in gcc-2.6.0.  Otherwise Sim56Target.cc 
+	// won't compile
+	Block* copyStates(const Block& arg) { return Block::copyStates(arg);}
+#endif
 
 	/*virtual*/ void tailerCode();
 	void codeSection();
