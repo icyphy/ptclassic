@@ -2,14 +2,16 @@ defstar {
     name {IIR}
     domain {SDF}
     desc {
-An infinite impulse response (IIR) filter implemented in direct form 2.
+An infinite impulse response (IIR) filter implemented in a direct form II
+realization.
 The transfer function is of the form H(z) = G*N(1/z)/D(1/z),
-where N() and D() are polynomials.  The parameter "gain" specifies G, and
-the floating-point arrays "numerator" and "denominator" specify N() and D(),
-respectively. Both arrays start with the constant terms of the polynomial
-and decrease in powers of z (increase in powers of 1/z). Note that the
-constant term of D is not omitted, as is common in other programs that
-assume it is always normalized to unity.
+where N() and D() are polynomials.
+The parameter "gain" specifies G, and the floating-point arrays
+"numerator" and "denominator" specify N() and D(), respectively.
+Both arrays start with the constant terms of the polynomial
+and decrease in powers of z (increase in powers of 1/z).
+Note that the constant term of D is not omitted, as is common in
+other programs that assume that it has been normalized to unity.
     }
     version { $Id$ }
     author { Kennard White }
@@ -18,18 +20,25 @@ Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
 All rights reserved.
 See the file ~ptolemy/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
-	}
+    }
     location { SDF dsp library }
     explanation {
 .PP
-This star implements an infinite impulse response filter of arbitrary order.
+This star implements an infinite impulse response filter of arbitrary order
+in a direct form II [1] realization.
 The parameters of the star specify $H(z)$, the $Z$-transform of an
-impulse response $h(n)$.  The output of the star is the convolution
-of the input with $h(n)$.
+impulse response $h(n)$.
+The output of the star is the convolution of the input with $h(n)$.
 .PP
 Note that the numerical finite precision noise increases with the filter order.
 To minimize this distortion, it is often desirable to expand the filter
 into a parallel or cascade form.
+.ID "Schafer, R. W."
+.ID "Oppenheim, A. V."
+.UH REFERENCES
+.ip [1]
+A. V. Oppenheim and R. W. Schafer, \fIDiscrete-Time Signal Processing\fR,
+Prentice-Hall: Englewood Cliffs, NJ, 1989.
     }
     seealso { FIR, Biquad }
     input {
@@ -117,7 +126,7 @@ into a parallel or cascade form.
 	scaleNumer = scaleDenom * double(gain);
 
 	// Set up the state vector.  The state vector includes
-	// both the delay states and the cooeficients in the appropriate
+	// both the delay states and the coefficients in the appropriate
 	// order:
 	// S(0) A(0) -1 S(1) A(1) -B(1) ... S(n-1) A(n-1) -B(n-1) Sn An -Bn
 	// state[0] and state[2] are never referenced
