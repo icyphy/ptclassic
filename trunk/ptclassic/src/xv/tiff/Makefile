@@ -27,7 +27,7 @@
 
 ROOT = ../../..
 # get configuration info
-CONFIG=$(ROOT)/mk/config-$(ARCH).mk
+CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
 DESTDIR=.
