@@ -1012,7 +1012,6 @@ proc ed_ConfigCanvas {top facet number} {
 # Authors: Wei-Jen Huang and Alan Kamas
 
 # General-purpose option selector
-# One caveat, options cannot contain certain characters, notably '.'
 # Executes a command string suitable for formatting
 
 # Right now, ptkChooseOne generates a unique toplevel window name
@@ -1091,8 +1090,6 @@ proc ptkFormatCmd {cmd radioVarName} {
 # If a name-value pair consists of only one element, then the value is
 #  initialized to the null string (which is the entry widget contents
 #  default)
-# Above caveat holds: names of name-value pairs will be used in window
-#  names; as such, names may not start with '.'
 # if a final argument has the value "Params" then name/value pairs
 # are output.  Otherwise, only the values are output.
 
@@ -1125,32 +1122,33 @@ proc ptkEditStrings {instr cmd editList args} {
    set length [llength $pairs]
    foreach name_value $pairs {
     set name [lindex $name_value 0]
-    ed_MkEntryButton $nmFrame.name_$name $name
-    $nmFrame.name_$name.entry config -width 40
+    set widget [ed_WidgetName $name]
+    ed_MkEntryButton $nmFrame.$widget $name
+    $nmFrame.$widget.entry config -width 40
     if {[llength $name_value] == 2} {
-      $nmFrame.name_$name.entry insert 0 [lindex $name_value 1]
+      $nmFrame.$widget.entry insert 0 [lindex $name_value 1]
     }
     if {$counter == $length} {
       set nextIdx 0
     } else {
       set nextIdx $counter
     }
-    set nextName [lindex [lindex $pairs $nextIdx] 0]
+    set nextWidget [ed_WidgetName [lindex [lindex $pairs $nextIdx] 0]]
     if {$counter == 1} {
       set prevIdx [expr $length-1]
     } else {
       set prevIdx [expr $counter-2]
     }
-    set prevName [lindex [lindex $pairs $prevIdx] 0]
-    bind $nmFrame.name_$name.entry <Return> "
-        focus \"$nmFrame.name_$nextName.entry\""
-    bind $nmFrame.name_$name.entry <Tab> "
-        focus \"$nmFrame.name_$nextName.entry\""
-    bind $nmFrame.name_$name.entry <Control-n> "
-        focus \"$nmFrame.name_$nextName.entry\""
-    bind $nmFrame.name_$name.entry <Control-p> "
-        focus \"$nmFrame.name_$prevName.entry\""
-    pack $nmFrame.name_$name -side top -fill x -expand 1
+    set prevWidget [ed_WidgetName [lindex [lindex $pairs $prevIdx] 0]]
+    bind $nmFrame.$widget.entry <Return> "
+        focus \"$nmFrame.$nextWidget.entry\""
+    bind $nmFrame.$widget.entry <Tab> "
+        focus \"$nmFrame.$nextWidget.entry\""
+    bind $nmFrame.$widget.entry <Control-n> "
+        focus \"$nmFrame.$nextWidget.entry\""
+    bind $nmFrame.$widget.entry <Control-p> "
+        focus \"$nmFrame.$prevWidget.entry\""
+    pack $nmFrame.$widget -side top -fill x -expand 1
     incr counter
    }
 
@@ -1183,8 +1181,9 @@ proc ed_GetAndExecuteParams {cmd frame paramList} {
   foreach param $paramList {
     set name [lindex $param 0]
     set type [lindex $param 1]
+    set widget [ed_WidgetName $name]
     lappend newList \
-            "[list $name] [list $type] [list [$frame.name_$name.entry get]]"
+            "[list $name] [list $type] [list [$frame.$widget.entry get]]"
   }
   eval [format $cmd $newList]
 }
@@ -1196,11 +1195,19 @@ proc ed_GetAndExecute {cmd frame pairs} {
   set newList ""
   foreach arg $pairs {
     set name [lindex $arg 0]
-    lappend newList [$frame.name_$name.entry get]
+    set widget [ed_WidgetName $name]
+    lappend newList [$frame.$widget.entry get]
   }
   eval [format $cmd $newList]
 }
 
+# This procedure converts the given "name" to something safe for a
+# widget name.
+
+proc ed_WidgetName {name} {
+    regsub -all {[. ]} $name {_} subst
+    return "name_$subst"
+}
 
 # NOTE: this function should be phased out in favor of ptkEditStrings
 #############################################################################
@@ -1215,8 +1222,6 @@ proc ed_GetAndExecute {cmd frame pairs} {
 # If a name-value pair consists of only one element, then the value is
 #  initialized to the null string (which is the entry widget contents
 #  default)
-# Above caveat holds: names of name-value pairs will be used in window
-#  names; as such, names may not start with '.'
 
 proc ptkEditValues {instr cmd args} {
   global unique
@@ -1236,12 +1241,13 @@ proc ptkEditValues {instr cmd args} {
        -side top -fill x -expand 1
   foreach name_value $args {
     set name [lindex $name_value 0]
-    ed_MkEntryButton $nmFrame.name_$name $name
-    $nmFrame.name_$name.entry config -width 32
+    set widget [ed_WidgetName $name]
+    ed_MkEntryButton $nmFrame.$widget $name
+    $nmFrame.$widget.entry config -width 32
     if {[llength $name_value] == 2} {
-    $nmFrame.name_$name.entry insert 0 [lindex $name_value 1]
+      $nmFrame.$widget.entry insert 0 [lindex $name_value 1]
     }
-    pack $nmFrame.name_$name -side top -fill x -expand 1
+    pack $nmFrame.$widget -side top -fill x -expand 1
   }
   pack $nmFrame -side top -fill x -expand 1
 
@@ -1264,8 +1270,9 @@ proc ed_RetrieveAndExecute {cmd frame args} {
    set newList ""
    foreach arg $args {
     set name [lindex $arg 0]
+    set widget [ed_WidgetName $name]
     lappend newList \
-        "[list $name] [list [$frame.name_$name.entry get]]"
+        "[list $name] [list [$frame.$widget.entry get]]"
    }
    eval [format $cmd $newList]
 }
