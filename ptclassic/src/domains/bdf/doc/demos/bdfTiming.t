@@ -2,9 +2,17 @@
 .NA bdfTiming
 .SD
 This demo is identical to the DDF timing demo, except
-that it uses BDF Switch and Select stars instead of
-DDF Case and EndCase.  The static schedule has some
-simple if-then constructs to implement conditional firing.
+that it uses BDF
+.c Switch
+and
+.c Select
+stars instead of DDF
+.c Case
+and
+.c EndCase
+stars.
+The static schedule has some simple if-then constructs to
+implement conditional firing.
 .DE
 .LO "$PTOLEMY/src/domains/bdf/demo"
 .SV $Revision$ $Date$
@@ -13,7 +21,7 @@ simple if-then constructs to implement conditional firing.
 .Ie "MMSE timing recovery"
 .Ir "asynchronous signal processing"
 .SA
-timing
-Select
+Select,
 Switch
+timing.
 .ES
