@@ -51,7 +51,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 // constructor
 AsmTarget :: AsmTarget(const char* nam, const char* desc,
     const char* stype, ProcMemory* m) :
-    CGTarget(nam,stype,desc), mem(m), interruptFlag(FALSE) { 
+    CGTarget(nam,stype,desc), interruptFlag(FALSE), mem(m) { 
 	initStates();
 	addStream("mainLoop",&mainLoop);
 	addStream("trailer",&trailer);
