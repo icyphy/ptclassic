@@ -57,6 +57,12 @@ Produce code for inter-process communication (receive-side).
 		numData = output.numXfer();
 	}
 
+	codeblock (converttype) {
+typedef union ints_or_double {
+        int asInt[2];
+        double asDouble;
+} convert;
+	}
 	codeblock (timeincludes) {
 #ifdef TIME_INFO
 #include <sys/fcntl.h>
