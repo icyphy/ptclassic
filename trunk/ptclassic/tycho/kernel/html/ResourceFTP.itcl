@@ -96,8 +96,12 @@ class ::tycho::ResourceFTP {
     # See if the server or hostname exists
     proc exists {path}
 
+    # Forward the location
+    # NOTE: This is unique (ie. not in the base class)
+    proc forward {url}
+
     # Create a new directory
-    proc mkdir {path}
+    proc mkdir {path} {error "Mkdir not implemented yet"}
 
     # Create a new resource object
     proc new {path args}
@@ -106,10 +110,7 @@ class ::tycho::ResourceFTP {
     proc query {path option}
 
     # Get the status of a resource
-    proc stat {path varName} {error "Stat not implemeneted"}
-
-    # Return the type of a given file
-    proc type {path}
+    proc stat {path varName}
 
     ###################################################################
     ####                         protected methods                 ####
@@ -147,8 +148,14 @@ class ::tycho::ResourceFTP {
     ###################################################################
     ####                        protected commons                  ####
 
+    # forward (ie. ftp://ptolemy/pub --> ftp://ptolemy/pub/)
+    protected common _forward
+
     # A flag tagging whether a given URL exists or not.
     protected common _exists
+
+    # Stat information, used for caching the LIST info.
+    protected common _stat
 
     # Timeout for sending/receiving protocol message. Default 5 seconds
     protected common timeout 5000
@@ -186,11 +193,11 @@ class ::tycho::ResourceFTP {
     protected variable _datafd -1
 
     # Transfer could be either "file" or "directory" (distince FTP commands).
-    protected variable ftptype {directory}
+    protected variable ftptype "directory"
 
     # Attribute of myself (FTP client)
-    protected variable _myusername {anonymous}
-    protected variable _mypassword {tycho@}
+    protected variable _myusername "anonymous"
+    protected variable _mypassword "tycho@"
 
     ###################################################################
     ####                         private variables               ####
@@ -240,13 +247,26 @@ body ::tycho::ResourceFTP::close {} {
 }
 
 #####################################################################
+#### forward
+# Get a file name, and forward it automatically.
+# Used with _forward to forward the right location. For example,<br>
+# <tt>ftp://ptolemy/pub   -->   ftp://ptolemy/pub/</tt>
+#
+body ::tycho::ResourceFTP::forward {url} {
+    while { [::info exists _forward($url)] } {
+	set url $_forward($url)
+    }
+    return $url
+}
+
+#####################################################################
 #### open
 # Open a connection for ftp on port 21.
 #
 body ::tycho::ResourceFTP::open {{mode "r"}} {
     if {$fileIsOpen} {error "File is already open!"}
 
-    set currentURL [path]
+    set currentURL [forward [path]]
 
     # FIXME: Need to implement write on FTP!
     if {$mode != "r"} {
@@ -254,9 +274,10 @@ body ::tycho::ResourceFTP::open {{mode "r"}} {
     }
 
     if { ! [exists $currentURL] } {
-	error "File $url does not exist"
+	error "File $currentURL does not exist"
     }
-
+    set currentURL [forward $currentURL]
+    
     # Seek out on network for the file
     if {![::tycho::cache exists $currentURL]} {
         # Get it if not already
@@ -283,6 +304,68 @@ body ::tycho::ResourceFTP::puts {string} {
 ####                          public procedures                      ####
 
 #####################################################################
+#### contenttype
+# Return the content type of the open file.
+body ::tycho::ResourceFTP::contenttype {url} {
+    # In order to speed up, check the cache manager
+    set url [forward $url]
+    set URLexists [exists $url]
+    set url [forward $url]
+
+    if {$URLexists && [info exists _stat($url)]} {
+        array set tmp $_stat($url)
+        return $tmp(type)
+    } else {
+        set ftpobj [::tycho::resource new $url]
+        $ftpobj open
+        after $timeout "delete object $ftpobj"
+
+        if {[info exists _stat($url)]} {
+            # Cache always contains the content type
+            array set tmp $_stat($url)
+            return $tmp(type)
+        }
+        return NOTHING
+        #error "contenttype: URL $url does not exist"
+    }
+}
+
+#####################################################################
+#### dirlist
+# 
+body ::tycho::ResourceFTP::dirlist {url} {
+    # Many times we're passed in the format: ftp://ptolemy/*, so need
+    # to manually get rid of the "*".
+    set url [string trimright $url "*"]
+
+    set URLexists [forward [exists $url]]
+    set url [forward $url]
+
+    if {!$URLexists} {error "URL $url doesn't exist!"}
+    
+    # It's possible to exist, but not cached...
+    if {![::tycho::cache exists $url]} {
+        set ftpobj [::tycho::resource new $url]
+        $ftpobj open
+        after $timeout "delete object $ftpobj"
+    }
+    if {![::tycho::cache exists $url]} {error "Can't cache $url"}
+
+    set cachefile [::tycho::cache getcachefile $url]
+    set fd [::open $cachefile "r"]
+    set buffer {}
+    while {![::eof $fd]} {
+        ::gets $fd line
+        if {[lindex $line 8]!={}} {
+            append buffer \
+                    "[forward [::tycho::url join $url [lindex $line 8]]] "
+        }
+    }
+    ::close $fd
+    return $buffer
+}
+
+#####################################################################
 #### exists
 # Check if the given URL exists. If the URL has already been
 # accessed before, use the data obtained from the earlier
@@ -291,15 +374,16 @@ body ::tycho::ResourceFTP::puts {string} {
 # does not exist on the server.
 #
 body ::tycho::ResourceFTP::exists {url} {
+    set url [forward $url]
+    
     # Do we already know if it exists?
     if {[::info exists _exists($url)]} {return $_exists($url)}
 
     # If not, need to get it again (once per session). Set to -1
     # so that during httpget, we don't invoke Tcl's error.
     set _exists($url) -1
-    set resource [new $url]
-    $resource ftpget $url
-    $resource ftpwait
+    set resource [::tycho::resource new $url]
+    $resource open
     after $timeout "::delete object $resource"
 
     return $_exists($url)
@@ -320,6 +404,8 @@ body ::tycho::ResourceFTP::new {path args} {
 # Query properties of a file
 #
 body ::tycho::ResourceFTP::query {url option} {
+    set url [forward $url]
+
     switch -exact $option {
         "executable" {
 	    # FIXME: Do directories need to be executable to read them?
@@ -334,21 +420,17 @@ body ::tycho::ResourceFTP::query {url option} {
         }
         "isdirectory" {
             if [exists $url] {
-                # Possibility: ftp://ptolemy/pub   doesn't exist on cache,
-                # but          ftp://ptolemy/pub/  does.
-                if {![::tycho::cache exists $url] && \
-                        [regexp {^.*[^/]$} $url]} {
-                    append url /
+                if {[::tycho::resource contenttype $url]=="directory"} {
+                    return 1
                 }
-                
-                if {![::tycho::cache exists $url]} {return -1}
-                if [regexp {^.*/$} $url] {return 1} {return 0}
             }
-            error "URL $url doesn't exist."
+            return 0
         }
         "isfile" {
             if [exists $url] {
-		return [expr { ! [query $url isdirectory] }]
+                if {[::tycho::resource contenttype $url]=="file"} {
+                    return 1
+                }
 	    }
 	    return 0
         }
@@ -367,6 +449,19 @@ body ::tycho::ResourceFTP::query {url option} {
 	}
     }
 }
+
+#########################################################################
+#### stat
+#
+body ::tycho::ResourceFTP::stat {url varName} {
+    set url [forward $url]
+
+    if [info exists _stat($url)] {
+        upvar $varName v
+        array set v $_stat($url)
+    }
+}
+
 
 #########################################################################
 #########################################################################
@@ -410,7 +505,11 @@ body ::tycho::ResourceFTP::ftpget {{url {}}} {
     regsub [::tycho::url tail $currentURL] $ftppath {} ftppath
 
     # If trailing char is /, then it is a directory. Else, probably file.
-    if [regexp {^.*/$} $currentURL] {set ftptype "dir"} {set ftptype "file"}
+    if [regexp {^.*/$} $currentURL] {
+        set ftptype "directory"
+    } else {
+        set ftptype "file"
+    }
     debugputs "$ftpserver:$ftpport   path:$ftppath   file:$ftpfile"
 
     # Connect to server
@@ -537,7 +636,7 @@ body ::tycho::ResourceFTP::ftphandler {} {
             set cmd "PORT $tmpport,$p1,$p2"
             if {$ftptype=="file"} {
                 set state TYPE
-            } elseif {$ftptype=="dir"} {
+            } elseif {$ftptype=="directory"} {
                 set state CWD
             } else {
                 ftpabort "syntax error: ftptype is unknown: $ftptype"
@@ -576,7 +675,8 @@ body ::tycho::ResourceFTP::ftphandler {} {
                 # DO NOT SET A TIMEOUT!
             } else {
                 # This is probably a directory then. Take a guess...
-                set ftptype "dir"
+                set _forward($currentURL) "$currentURL/"
+                set ftptype "directory"
                 set status 150          ;# Error shouldn't fault
                 set cmd "CWD [::tycho::url join $ftppath $ftpfile]"
                 set state LIST
@@ -708,7 +808,6 @@ body ::tycho::ResourceFTP::ftpdataportinit {fd location port} {
 body ::tycho::ResourceFTP::ftpdataport {fd} {
     if [::eof $fd] {
         ftpdone $fd
-        ftpstatus "done"
         return
     }
     ::gets $fd line
@@ -731,24 +830,66 @@ body ::tycho::ResourceFTP::ftpdone {fd} {
     set fileid -1
     set state DISCONNECTED
 
-    set tmpURL $currentURL
-
+    set tmpURL [forward $currentURL]
     set _exists($tmpURL) 1
-    # If a directory, return suffix with /. Otherwise, without.
-    if {$ftptype=="dir"} {
-        set tmpURL "[string trimright $tmpURL /]/"
-        set _exists($tmpURL) 1
-    }
-
-    # Do cache update here -----
-    debugputs "url: $tmpURL ($ftptype) ($ftpsize bytes)"
-    debugputs "cache file: $filename"
+    set _stat($tmpURL) \
+            [list type $ftptype mtime 0 size $ftpsize url [forward $tmpURL]]
+    debugputs "_stat($tmpURL) = $_stat($tmpURL)"
     ::tycho::cache update \
             $tmpURL \
-            {no_date} \
+            {} \
             $ftpsize \
             $ftptype \
             $filename
+
+    if {$ftptype=="file"} {
+        # Do cache update here -----
+        set _exists([string trimright $tmpURL /]/) 0
+        debugputs "url: $tmpURL ($ftptype) ($ftpsize bytes)"
+        debugputs "cache file: $filename"
+    } elseif {$ftptype=="directory"} {
+        set _exists([string trimright $tmpURL /]) 1
+        set _forward([string trimright $tmpURL /]) $tmpURL
+        # Need to parse the contents of the listing
+        # dr-xr-xr-x   2 root     other        512 Jun  5  1995 dev
+        # dr-xr-xr-x   2 root     other        512 Jun  5  1995 etc
+        # -rw-r--r--   1 6269     30        223856 Jun 15 19:41 ls-lR.Z
+        # drwxrws--x   2 4035     244          512 May  9 05:22 private
+        # drwxr-xr-x   6 root     root         512 Aug 14  1996 pub
+        # drwxr-xr-x   4 root     other        512 Jun  5  1995 usr
+
+        # Open the cache file to retrieve content
+        set cachefd [::open $filename]
+
+        while {![::eof $cachefd]} {
+            ::gets $cachefd line
+
+            if {[lindex $line 8]!={}} {
+                set fname [::tycho::url join $tmpURL [lindex $line 8]]
+                set permission [lindex $line 0]
+                if [regexp -nocase {^d.*$} $permission] {
+                    set ftype "directory"
+                    # Used for systems that don't append / to directories
+                    set fname "[string trimright $fname /]/"
+                    set _forward([string trimright $fname /]) $fname
+                } elseif [regexp -nocase {^-.*$} $permission] {
+                    set ftype "file"
+                } elseif [regexp -nocase {^l.*$} $permission] {
+                    set ftype "symbolic"
+                } else {
+                    set ftype "unknown"
+                }
+                set _exists($fname) 1
+ 
+                set _stat($fname) [list \
+                        type $ftype \
+                        mtime 0 \
+                        size [lindex $line 4] \
+                        url [forward $fname]]
+            }
+        }
+        ::close $cachefd
+    }
 
     ftpstatus "done"
 }
@@ -803,6 +944,8 @@ body ::tycho::ResourceFTP::ftptimeout {oldstate} {
 body ::tycho::ResourceFTP::ftpabort {message} {
     catch {::close $_socketid}
     catch {::close $fileid}
+    catch {unset _forward([string trimright $currentURL /])}
+    catch {unset _forward([string trimright $currentURL /]/)}
     set _sockid -1
     set fileid -1
     set state DISCONNECTED
@@ -811,7 +954,7 @@ body ::tycho::ResourceFTP::ftpabort {message} {
 
     # If we're not executing proc exists, then output error.
     if {$_exists($currentURL)!=-1} {error $message}
-    set _exists($currentURL) 0
-
+    set _exists([string trimright $currentURL /]) 0
+    set _exists([string trimright $currentURL /]/) 0
     ftpstatus "done"
 }
