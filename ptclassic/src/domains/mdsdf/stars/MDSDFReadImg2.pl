@@ -69,12 +69,14 @@ are read are 'dir.2/pic2', 'dir.3/pic3', etc.
     arglist { "(char* outstr, const char* str, const int d)" }
     access { protected }
     code {
-      char* p = outstr;
-      const char* q = expandPathName(str);
-      char num[16];
+      char* expandedName = expandPathName(str);
 
+      char num[16];
       sprintf(num, "%d", d);
       int len = strlen(num);
+
+      char* q = expandedName;
+      char* p = outstr;
       while (*q != '\000') { // Replace '#' with 'num's value.
 	if (*q == '#') {
 	  strcpy(p, num);
@@ -85,6 +87,7 @@ are read are 'dir.2/pic2', 'dir.3/pic3', etc.
 	}
       }
       *p = '\000';
+      delete [] expandedName;
     } // end genFileName()
   }
 
@@ -141,7 +144,7 @@ are read are 'dir.2/pic2', 'dir.3/pic3', etc.
     unsigned char *p = buffer;
     fread((char*)buffer, sizeof(unsigned char), size, fp);
     FloatSubMatrix* imgData = (FloatSubMatrix*)imageOutput.getOutput();
-    for(int i = 0; i < size; i++)
+    for(unsigned int i = 0; i < size; i++)
       imgData->entry(i) = double(*p++);
     delete[] buffer;
     delete imgData;
