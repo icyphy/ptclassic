@@ -33,6 +33,7 @@ Useful higher level OCT interface functions.
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
+#include "compat.h"
 #include "rpc.h"
 #include "paramStructs.h"
 #include "err.h"
