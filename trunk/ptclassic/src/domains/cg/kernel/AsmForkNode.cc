@@ -46,8 +46,9 @@ int AsmForkNode::isItPersistent () const {
 }
 
 // make a new source connection
-PortHole* AsmForkNode::setSourcePort (GenericPort &sp, int delay) {
-	return af.setSource(sp, delay);
+PortHole* AsmForkNode::setSourcePort (GenericPort &sp, int numDelays,
+				      const char* initDelayValues) {
+	return af.setSource(sp, numDelays, initDelayValues);
 }
 
 // make a new destination connection.  We always make a fork star.
