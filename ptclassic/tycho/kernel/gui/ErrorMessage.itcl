@@ -72,7 +72,7 @@ proc ::tycho::showStack {args} {
 proc ptkImportantMessage {win msg} {::tkerror $msg}
 proc ptkDisplayErrorInfo {} {
     global errorInfo
-    ::tycho::post $errorInfo
+    tkerror $errorInfo
 }
 
 ##########################################################################
