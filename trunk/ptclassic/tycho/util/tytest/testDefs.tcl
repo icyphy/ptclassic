@@ -205,7 +205,7 @@ proc dotests {file args} {
 #
 proc removeobj {name} {
     if {[uplevel ::itcl::find objects $name] != ""} {
-	itcl::delete objects $name
+	itcl::delete object $name
     }
 }
 
