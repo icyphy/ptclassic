@@ -94,7 +94,7 @@ For more information about polyphase filters, see F. J. Harris,
 		 if (i!=0) out << ";\n";
 		 out <<  "$ref(signalOut) $assign(signalOut) "
 		     << (i != 0 ? "$ref(signalOut) + " : "")
-		     << "$ref(signalIn,0)*$ref(taps," << i << ")";
+		     << "$ref(signalIn," << i << ")*$ref(taps," << i << ")";
 	     }
 	      else {
 		  out << "+ $ref(signalIn," << i << ")*$ref(taps," 
