@@ -68,7 +68,7 @@ LIB_HDRS = \
  ptdspExtendedGCD.h \
  ptdspSmithForm.h
 
-HDRS = ptdsp.h ptdspcephes.h $(LIB_HDRS)
+HDRS = ptdspcephes.h $(LIB_HDRS)
 
 LIBCSRCS = ptdspchbevl.c ptdspi0.c $(LIB_HDRS:.h=.c)
 
