@@ -31,7 +31,7 @@ DESTDIR=$(ROOT)/lib.$(ARCH)
 
 # Where to install the help file(s).  This MUST be an absolute path
 # or the (help) interpreter command will not work.
-HELPDIR=$(ROOT)/lib
+HELPDIR=~ptolemy/lib
 
 # Library name
 LIB=libptolemy.a
@@ -79,7 +79,7 @@ $(LIB):	$(LIBOBJS)
 	ranlib $(LIB)
 
 # "make install" puts things in the official place
-install:	makefile $(DESTDIR)/$(LIB) $(DESTDIR)/interpmain.o ins_help
+install:	makefile $(DESTDIR)/$(LIB) $(DESTDIR)/interpmain.o
 
 $(DESTDIR)/$(LIB):	$(LIB)
 		rm -f $(DESTDIR)/$(LIB)
@@ -88,12 +88,6 @@ $(DESTDIR)/$(LIB):	$(LIB)
 $(DESTDIR)/interpmain.o:	interpmain.o
 		rm -f $(DESTDIR)/interpmain.o
 		cp interpmain.o $(DESTDIR)
-
-ins_help:	$(HELPDIR)/interpreter.help
-# install the help file
-$(HELPDIR)/interpreter.help:	interpreter.help
-		rm -f $(HELPDIR)/interpreter.help
-		cp $(VPATH)/interpreter.help $(HELPDIR)
 
 # "make clean" removes .o files and other cruft
 clean:
