@@ -106,7 +106,7 @@ SRCS =		$(LIBCSRCS)
 
 OBJS =		$(LIBCSRCS:.c=.o)
 
-LIB = 		liboct.a
+LIB = 		liboct.$(LIBSUFFIX)
 
 EXPHDR =	oct.h
 

@@ -59,7 +59,7 @@ SRCS =		$(LIBCSRCS)
 
 OBJS =		$(LIBCSRCS:.c=.o)
 
-LIB = 		libsymlib.a
+LIB = 		libsymlib.$(LIBSUFFIX)
 
 EXPHDR =	symlib.h
 

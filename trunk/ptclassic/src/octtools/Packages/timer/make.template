@@ -48,7 +48,7 @@ SRCS =		$(LIBCSRCS)
 
 OBJS =		$(LIBCSRCS:.c=.o)
 
-LIB = 		libtimer.a
+LIB = 		libtimer.$(LIBSUFFIX)
 
 EXPHDR =	timer.h
 

@@ -79,7 +79,7 @@ SRCS =		$(LIBCSRCS)
 
 OBJS =		$(LIBCSRCS:.c=.o)
 
-LIB = 		libsymbolic.a
+LIB = 		libsymbolic.$(LIBSUFFIX)
 
 EXPHDR =	symbolic.h
 

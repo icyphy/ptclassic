@@ -53,7 +53,7 @@ SRCS =		$(LIBCSRCS)
 
 OBJS =		$(LIBCSRCS:.c=.o)
 
-LIB = 		libxg.a
+LIB = 		libxg.$(LIBSUFFIX)
 
 EXPHDR =	xg.h
 

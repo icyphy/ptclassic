@@ -75,7 +75,7 @@ SRCS =		$(LIBCSRCS)
 
 OBJS =		$(LIBCSRCS:.c=.o)
 
-LIB = 		libfang.a
+LIB = 		libfang.$(LIBSUFFIX)
 
 EXPHDR =	fang.h
 

@@ -49,7 +49,7 @@ SRCS =		$(LIBCSRCS)
 
 OBJS =		$(LIBCSRCS:.c=.o)
 
-LIB = 		liberrtrap.a
+LIB = 		liberrtrap.$(LIBSUFFIX)
 
 EXPHDR =	errtrap.h
 
