@@ -72,6 +72,20 @@ protected:
 	// writes initial code
 	virtual void headerCode();
 
+	// methods for generating code for reading and writing
+	// wormhole ports.  Argument is the "real port" of the interior
+	// star that is attached to an event horizon.
+	virtual void wormInputCode(PortHole&);
+	virtual void wormOutputCode(PortHole&);
+
+	// The following method downloads code for the inside of a wormhole
+	// and starts it executing.
+	virtual int wormLoadCode();
+
+	// methods for sending and receiving data to a target when
+	// run inside of a wormhole.  Arguments are same as above.
+	virtual int sendWormData(PortHole&);
+	virtual int receiveWormData(PortHole&);
 public:
 	CGTarget(const char* name, const char* starclass, const char* desc,
 		 char sep = '_');
