@@ -46,7 +46,6 @@ interpreter.
 #include "tcl.h"
 #include "NamedObj.h"
 #include "SimControl.h"
-#include "MatlabTcl.h"
 
 #undef setstate                 /* work around bug in Linux headers */
 
@@ -183,9 +182,6 @@ private:
 	// This procedure can be redefined in Tcl to monitor all commands
 	// executed.
 	static int monitor;
-
-	// the Matlab/Tcl interface class
-	MatlabTcl matlabtcl;
 
 protected:
 
