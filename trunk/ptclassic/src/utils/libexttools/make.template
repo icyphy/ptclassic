@@ -1,6 +1,6 @@
 # Makefile for external tool interface library libexttools
 # Version identification:
-# $Id$ 
+# $Id$
 # Copyright (c) 1990-%Q% The Regents of the University of California.
 # All rights reserved.
 # 
@@ -60,7 +60,7 @@ SRCS= $(CCS_WITH_H_FILES)
 
 # Header files.  When adding a new header, add it here only if there is
 # no corresponding .cc file; otherwise add the .cc file to CCS_WITH_H_FILES.
-HDRS= $(CCS_WITH_H_FILES:.cc=.h)
+HDRS= $(CCS_WITH_H_FILES:.cc=.h) MatlabIfcFuns.h
 
 # Library objects
 OBJS= $(SRCS:.cc=.o)
@@ -74,8 +74,27 @@ install:	makefile $(LIBDIR)/$(LIB)
 NEED_MATLABDIR = 	1
 NEED_MATHEMATICADIR = 	1
 
+# Automatically generated files
+MATLABAUTO = MatlabHook.cc.Auto MatlabIfc.cc.Auto1 MatlabIfc.cc.Auto2 \
+	     MatlabIfc.h.Auto
+REALCLEAN_STUFF = $(MATLABAUTO)
+EXTRA_SRCS = MatlabIfcGen.tcl MatlabIfcGen.data
+$(MATLABAUTO): MatlabIfcGen.tcl MatlabIfcGen.data
+	cd $(VPATH) && itclsh MatlabIfcGen.tcl
+
+depend: $(MATLABAUTO)
+
 # Include common make definitions
 include $(ROOT)/mk/common.mk
+
+# MatlabIfc.cc needs to know if Matlab libraries are shared, static,
+# or non-existent.
+ifneq ($(strip $(MATLABEXT_LIB)),)
+GPPFLAGS += -DMATLABSTATIC
+endif
+ifneq ($(strip $(MATLABEXT2_LIB)),)
+GPPFLAGS += -DMATLABSHARED
+endif
 
 # Don't add anything after the next line; makedepend will zap it.
 # DO NOT DELETE THIS LINE -- make depend depends on it.
