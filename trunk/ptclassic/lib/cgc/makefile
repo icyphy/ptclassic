@@ -34,7 +34,7 @@ VPATH = $(ROOT)/lib/cgc
 CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
-MISC_FILES = makefile_C.mk
+MISC_FILES = makefile_C.mk TclTk_Target.mk
 
 # We don't include common.mk since we don't use the compiler here
 include $(ROOT)/mk/no-compile.mk
