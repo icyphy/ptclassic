@@ -83,17 +83,8 @@ EventHorizon :: ~EventHorizon() {
 // at a time.  This is the default implementation.
 int EventHorizon :: onlyOne() const { return FALSE; }
 
-void EventHorizon :: setEventHorizon (
-			     inOutType inOut,
-			     const char* s,
-                             Wormhole* parentWormhole,
-                             Star* parentStar,
-                             DataType t,
-			     unsigned numTokens)
-{
-	// Initialize PortHole
-        asPort()->setPort(s, parentStar,t);
-
+void EventHorizon::setEventHorizon (inOutType inOut, Wormhole* parentWormhole,
+			     	unsigned numTokens) {
 	// Initialize the EventHorizon members
 	timeMark = 0.0;
 	tokenNew = FALSE;
@@ -276,7 +267,7 @@ int WormMultiPort :: isItOutput() const { return myGMPH->isItOutput(); }
 
 extern const char* ghostName(const GenericPort&);
 
-PortHole& WormMultiPort :: newPort() {
+PortHole& WormMultiPort::newPort() {
 
 	// identify domain
 	Domain* inSideDomain = Domain::named(worm->insideDomain());
@@ -289,35 +280,45 @@ PortHole& WormMultiPort :: newPort() {
 	// build eventHorizon
         DataType type = realP.type();
         int numToken = realP.numXfer();
+	
 // separate rules for connecting inputs and outputs.
         if (galp->isItInput()) {
                 EventHorizon& to = outSideDomain->newTo();
+		PortHole& toPort = *to.asPort();
+
+                to.setEventHorizon(in, worm, numToken);
+		installPort(toPort);
+
                 EventHorizon& from = inSideDomain->newFrom();
-                to.setEventHorizon(in, galp->name(), worm, 
-			(Star*) parent(), type, numToken);
-                parent()->addPort(*(to.asPort()));
-		ports.put(*(to.asPort()));
-                from.setEventHorizon(in, ghostName(*galp), worm, 
-			(Star*) parent(), type, numToken);
-                to.ghostConnect (from);
-                from.asPort()->inheritTypeFrom (realP);
-                to.asPort()->inheritTypeFrom (*(from.asPort()));
-                from.asPort()->connect(realP,0);
-		return *(to.asPort());
-        } else {
-                EventHorizon& to = inSideDomain->newTo();
+		PortHole& fromPort = *from.asPort();
+
+                from.setEventHorizon(in, worm, numToken);
+		fromPort.setPort(ghostName(toPort), parent(), type);
+                fromPort.inheritTypeFrom (realP);
+
+                to.ghostConnect(from);
+
+                fromPort.connect(realP,0);
+		return toPort;
+        }
+	else {
                 EventHorizon& from = outSideDomain->newFrom();
-                from.setEventHorizon(out, galp->name(), worm, 
-			(Star*) parent(), type, numToken);
-                parent()->addPort(*(from.asPort()));
-		ports.put(*(from.asPort()));
-                to.setEventHorizon(out, ghostName(*galp), worm, 
-			(Star*) parent(), type, numToken);
-                to.ghostConnect (from);
-                to.asPort()->inheritTypeFrom (realP);
-                from.asPort()->inheritTypeFrom (*(to.asPort()));
-                realP.connect(*(to.asPort()),0);
-		return *(from.asPort());
+		PortHole& fromPort = *from.asPort();
+		
+                from.setEventHorizon(out, worm, numToken);
+		installPort(fromPort);
+		
+                EventHorizon& to = inSideDomain->newTo();
+		PortHole& toPort = *to.asPort();
+		
+                to.setEventHorizon(out, worm, numToken);
+		toPort.setPort(ghostName(fromPort), parent(), type);
+                toPort.inheritTypeFrom (realP);
+
+                to.ghostConnect(from);
+		
+                realP.connect(toPort,0);
+		return fromPort;
         }
 }
 
