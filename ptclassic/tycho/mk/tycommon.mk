@@ -206,6 +206,17 @@ itcldocs: $(ITCL_SRCS) $(TCL_SRCS)
 		echo "$(TYDOC) -d -t "$(TYDOC_DESC)" $(ITCL_SRCS) $(TCL_SRCS)"; \
 		$(TYDOC) -d -t "$(TYDOC_DESC)" $(ITCL_SRCS) $(TCL_SRCS); \
 	fi
+	@if [ "x$(DIRS)" != "x" ]; then \
+		set $(DIRS); \
+		for x do \
+		    if [ -w $$x ] ; then \
+			( cd $$x ; \
+			echo making $@ in $$x ; \
+			$(MAKE) $(MFLAGS) $(MAKEVARS) $@ ;\
+			) \
+		    fi ; \
+		done ; \
+	fi
 
 # Generate idoc files from itcl and java files, requires itclsh and tycho
 # Note that $(ROOT) here is relative to the tycho directory, not
