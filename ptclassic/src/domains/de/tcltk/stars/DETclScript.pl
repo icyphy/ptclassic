@@ -109,7 +109,7 @@ delim $$
 			   (const char*) tcl_file );
 		if ( input.numberPorts() == 0 ) {
 		  Error::warn( *this, "Tcl/Tk source stars are not yet ",
-			       "supported yet in the DE domain." );
+			       "supported in the DE domain." );
 		}
 	}
 	method {
