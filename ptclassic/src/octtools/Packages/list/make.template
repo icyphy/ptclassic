@@ -43,8 +43,9 @@ include $(CONFIG)
 HDRS		= list.h \
 		lsort.h
 
-LIBCSRCS	= list.c \
-		ltest.c
+LIBCSRCS	= list.c
+
+OTHERSRCS	= ltest.c
 
 SRCS =		$(LIBCSRCS)
 
