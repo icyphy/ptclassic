@@ -17,18 +17,23 @@ $Id$
 
 #include "DoubleLink.h"
 
-/////////////////////////
-// Double Link Methods //
-/////////////////////////
+////////////////////////
+// DoubleLink Methods //
+////////////////////////
 
 void DoubleLink::unlinkMe() {
   if (prev!=0) prev->next=next;
   if (next!=0) next->prev=prev;
 }
 
+DoubleLink::~DoubleLink() {}
+
 ///////////////////////////////
 // DoubleLinkList    Methods //
 ///////////////////////////////
+
+// destructor
+DoubleLinkList::~DoubleLinkList() { initialize();}
 
 // insert y immediately ahead of x
 void DoubleLinkList::insertAhead(DoubleLink *y, DoubleLink *x) { 

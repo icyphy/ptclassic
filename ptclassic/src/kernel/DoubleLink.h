@@ -39,7 +39,7 @@ public:
 	Pointer content() { return e; }
 
 	// virtual destructor
-	virtual ~DoubleLink() {}
+	virtual ~DoubleLink();
 
 	void unlinkMe();
 	void removeMe() { unlinkMe(); INC_LOG_DEL; delete this; }
@@ -60,7 +60,7 @@ protected:
        
 public:
 	// virtual destructor
-	virtual ~DoubleLinkList() { initialize(); }
+	virtual ~DoubleLinkList();
 
 	// create link
 	DoubleLink* createLink(Pointer e) {

@@ -35,7 +35,7 @@ class <T>State : public State
 {
 public:
         // constructor
-        <T>State() { val = 0;}
+        <T>State();
 
         // parses initValue to set value
         void initialize();
