@@ -1435,7 +1435,6 @@ int AM_Poll(eb_t bundle)
   UDPAM_Buf           *buf;
   char                packet[MAX_PACKET_SIZE];
 
-  UDPAM_GetXferReply4_Pkt *packetPtr4;
  if (initialized == FALSE)
     return(AM_ERR_NOT_INIT);   
   timeout.tv_sec = timeout.tv_usec = 0;
