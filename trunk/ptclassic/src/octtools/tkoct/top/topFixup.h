@@ -27,7 +27,7 @@
 #define _INCLUDE_POSIX_SOURCE
 #endif
 
-#if defined(PTHPPA_CFRONT)
+#if defined(PTHPPA_CFRONT)  || defined(PTSOL2_CFRONT)
 /* memCore.c needs sbrk() */
 #include <sys/unistd.h>
 extern void *sbrk(int);
