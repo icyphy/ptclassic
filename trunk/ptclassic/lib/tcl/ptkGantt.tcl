@@ -29,18 +29,9 @@
 #
 # KNOWN BUGS:
 #
-# 1. The star labels do not com up when the chart is first created.
-#    This is bcause of the wat the calling interface is set up, and
-#    can't be fixed without fixing the call i/f first.
-#
-# 2. There's some redundant work going on when first displaying
-#     and when zooming. Part of this is due to the poor call i/f.
-#
 # 3. The whole thing is generallly a mess. The code needs to be
 #    migrated into itcl and some new objects abstracted from it:
 #    a scrolling canvas would be a good start.
-#
-# 4. There's a hive of procs at the end that belong in library files.
 #
 # 5. The scroll bar doesn't quite cover the whole chart when the zoom
 #    factor is 1.0. Odd....
@@ -50,6 +41,8 @@
 #
 # 7. Global data is not being deleted when the window is closed.
 #    The easiest way to fix this would be to migrate to itcl...
+#
+# 8. The exclusion flags on redrawing are a massive kludge.
 #
 
 
@@ -92,77 +85,66 @@ proc ptkGanttExit {} {
 }
 
 # Print Gantt chart
-proc ptkGantt_PrintChart { chartName } {
+proc ptkGantt_PrintChart { chart } {
     global env
-    set universe [string trimleft $chartName .gantt_]
+    set universe [string trimleft $chart .gantt_]
     if {![info exists env(PRINTER)]} {
 	set ptkGantt_Printer "lp"
     } else {
 	set ptkGantt_Printer $env(PRINTER)
     }
-    if ![winfo exists $chartName.print] {
+    if ![winfo exists $chart.print] {
 	# create a toplevel window
-	toplevel $chartName.print
-	wm title $chartName.print "Print Gantt Chart"
+	toplevel $chart.print
+	wm title $chart.print "Print Gantt Chart"
 	# top label for window
-	message $chartName.print.msg -width 10c -pady 2m -padx 1m \
+	message $chart.print.msg -width 10c -pady 2m -padx 1m \
 		-text "Print $universe:"
-	pack $chartName.print.msg -fill x
+	pack $chart.print.msg -fill x
 	# label for entry window
-	label $chartName.print.label -text "Printer:"
+	label $chart.print.label -text "Printer:"
 	# create entry widget for printer name
-	entry $chartName.print.entry -relief sunken -bd 2
+	entry $chart.print.entry -relief sunken -bd 2
 	# place default of lp or env var in entry
-	$chartName.print.entry insert 0 $ptkGantt_Printer
-	pack $chartName.print.label $chartName.print.entry -fill x 
-	button $chartName.print.ok -text Print -command \
-		"ptkGantt_Print $chartName {[$chartName.print.entry get]}; \
-		destroy $chartName.print"
-	button $chartName.print.cancel -text Cancel -command \
-		"destroy $chartName.print"
-	pack $chartName.print.ok $chartName.print.cancel -side left -fill x \
-		-expand 1 -after $chartName.print.entry
+	$chart.print.entry insert 0 $ptkGantt_Printer
+	pack $chart.print.label $chart.print.entry -fill x 
+	button $chart.print.ok -text Print -command \
+		"ptkGantt_Print $chart {[$chart.print.entry get]}; \
+		destroy $chart.print"
+	button $chart.print.cancel -text Cancel -command \
+		"destroy $chart.print"
+	pack $chart.print.ok $chart.print.cancel -side left -fill x \
+		-expand 1 -after $chart.print.entry
 	# set up binding for return to print
-	bind $chartName.print.entry <Return> "ptkGantt_Print $chartName \
-		{[$chartName.print.entry get]}; destroy $chartName.print"
+	bind $chart.print.entry <Return> "ptkGantt_Print $chart \
+		{[$chart.print.entry get]}; destroy $chart.print"
     }
 }
 
-proc ptkGantt_Print { chartName printer } {
+proc ptkGantt_Print { chart printer } {
     set OUTPUT [open "|lpr -P$printer" w]
-    puts $OUTPUT [${chartName}.canvas postscript -colormode gray \
+    puts $OUTPUT [$chart.canvas postscript -colormode gray \
 	    -pageheight 10i -pagewidth 8i -rotate 1]
     close $OUTPUT
 }
 
 
-proc ptkGantt_SaveChart { chartName } {
+proc ptkGantt_SaveChart { chart } {
     global PTOLEMY
-    # check to make sure that Tycho.tcl has been sourced
-    if {"" == [info classes ::tycho::File]} {
-	# this sourcing wants to bring up tycho so we supress console and 
-	# welcome windows and ensure that tycho does not exit after browser
-	# exits
-	set tychoWelcomeWindow 0
-	set tychoConsoleWindow 0
-	set tychoExitWhenNoMoreWindows 0
-	set tychoShouldWeDoRegularExit 0
-	source $PTOLEMY/tycho/kernel/Tycho.tcl
-    }
 
     # create instance of the FileBrowser class
     set filename [DialogWindow::newModal FileBrowser [format "%s%s" . [string \
-	    trimleft $chartName .gantt_]] -text "Save As File:"]
+	    trimleft $chart .gantt_]] -text "Save As File:"]
     if {$filename == {NoName}} {
 	error {Cannot use name NoName.}
     }
     # Ignore if the user cancels
     if {$filename != {}} {
-	return [ptkGantt_SaveFile $chartName $filename]
+	return [ptkGantt_SaveFile $chart $filename]
     }
 }
 
-proc ptkGantt_SaveFile {chartName filename} {
+proc ptkGantt_SaveFile {chart filename} {
     global ptkGantt_Layout ptkGantt_Data
     # check to see if file exists
     if {[file exists $filename]} {
@@ -174,20 +156,20 @@ proc ptkGantt_SaveFile {chartName filename} {
     set FILEOUT [open $filename w]
 
     # first write out period and # of processors
-    puts $FILEOUT "no_processors $ptkGantt_Layout($chartName.numprocs)"
-    puts $FILEOUT "period $ptkGantt_Layout($chartName.period)"
+    puts $FILEOUT "no_processors $ptkGantt_Layout($chart.numprocs)"
+    puts $FILEOUT "period $ptkGantt_Layout($chart.period)"
 
     # throw in an extra return
     puts -nonewline $FILEOUT "\n"
 
     # now with a foreach loop write each of the processors
-    for {set i 1} { $i <= $ptkGantt_Layout($chartName.numprocs)} { incr i} {
+    for {set i 1} { $i <= $ptkGantt_Layout($chart.numprocs)} { incr i} {
 	# another for loop for the individual stars of the processor
-	for {set k [llength $ptkGantt_Data($chartName.$i)]} {$k > 0} \
+	for {set k [llength $ptkGantt_Data($chart.$i)]} {$k > 0} \
 		{incr k -1} {
 	    # write a tab, processor name followed by a "{0}"
 	    # this bit of info was never used by the original gantt chart
-	    set procStarList [lindex $ptkGantt_Data($chartName.$i) \
+	    set procStarList [lindex $ptkGantt_Data($chart.$i) \
 		    [expr $k - 1]]
 	    puts -nonewline $FILEOUT "\t[lindex $procStarList 0] {0} "
 	    # write start and finish times of star
@@ -197,10 +179,10 @@ proc ptkGantt_SaveFile {chartName filename} {
 	puts $FILEOUT "\$end proc\$"
     }
     # place min., percentage and optimum at bottom of file
-    puts $FILEOUT "min $ptkGantt_Data($chartName.min)"
-    puts $FILEOUT "percentage $ptkGantt_Data($chartName.prcent)"
-    puts $FILEOUT "optimum $ptkGantt_Data($chartName.opt)"
-    puts $FILEOUT "runtime $ptkGantt_Data($chartName.runtime)"
+    puts $FILEOUT "min $ptkGantt_Data($chart.min)"
+    puts $FILEOUT "percentage $ptkGantt_Data($chart.prcent)"
+    puts $FILEOUT "optimum $ptkGantt_Data($chart.opt)"
+    puts $FILEOUT "runtime $ptkGantt_Data($chart.runtime)"
 
     # close file 
     close $FILEOUT
@@ -224,45 +206,12 @@ Gantt Chart help:
 }
 
 
-# # This proc was created to facilitate moving both the ruler and chart along
-# # the x-axis at the same time.
-# proc ptkGantt_DualMove { chartName dir args } {
-# puts "ptkGantt_DualMove $chartName $dir $args"
-# 
-#     set arg_num [llength $args]
-#     if { ($arg_num == 1) } {
-# 	if { $dir == "x" } {
-# 	    ${chartName}.chart.graph xview $args
-# 	    ${chartName}.chart.ruler xview $args
-# 	} else {
-# 	    ${chartName}.chart.graph yview $args
-# 	    ${chartName}.proclabel yview $args
-# 	}
-#     } elseif {$arg_num == 2 } {
-# 	if { $dir == "x" } {
-# 	    ${chartName}.chart.graph xview moveto [lindex $args 1]
-# 	    ${chartName}.chart.ruler xview moveto [lindex $args 1]
-# 	} else {
-# 	    ${chartName}.chart.graph yview moveto [lindex $args 1]
-# 	    ${chartName}.proclabel yview moveto [lindex $args 1]
-# 	}
-#     } else {
-# 	if { $dir == "x" } {
-# 	    ${chartName}.chart.graph xview scroll [lindex $args 1] units
-# 	    ${chartName}.chart.ruler xview scroll [lindex $args 1] units
-# 	} else {
-# 	    ${chartName}.chart.graph yview scroll [lindex $args 1] units
-# 	    ${chartName}.proclabel yview scroll [lindex $args 1] units
-# 	}
-#     }
-# }
-
 proc ptkGantt_Zoom { universe num_procs period dir } {
     global ptkGantt_Layout
 
-    set chartName .gantt_${universe}
+    set chart .gantt_${universe}
 
-    set zoomFactor [$chartName.mbar.zoomindex cget -text]
+    set zoomFactor [$chart.mbar.zoomindex cget -text]
 
     #
     # prevent zoom out if zoom factor is already 1.
@@ -278,30 +227,38 @@ proc ptkGantt_Zoom { universe num_procs period dir } {
     }
 
     set zoomFactor [expr $scale * $zoomFactor]
-    $chartName.mbar.zoomindex configure -text $zoomFactor
+    $chart.mbar.zoomindex configure -text $zoomFactor
 
     if { $zoomFactor <= 1.0 } {
-	$chartName.mbar.zoomout configure -state disabled
+	$chart.mbar.zoomout configure -state disabled
     } elseif {$zoomFactor >= 2.0} {
-	$chartName.mbar.zoomout configure -state normal
+	$chart.mbar.zoomout configure -state normal
     }
 
     #
     # Delete the ruler and the stars, update layout, and redraw.
     #
-    ptkGantt_Redraw $chartName \
-	    [winfo width  $chartName.canvas] \
-	    [winfo height $chartName.canvas]
+    ptkGantt_Redraw $chart \
+	    [winfo width  $chart.canvas] \
+	    [winfo height $chart.canvas]
 
     #
-    # Force a redraw, to multiple zoom requests .. 
+    # Force a redraw, to prevent multiple zoom requests .. 
     #
     update idletasks
 }
 
 
 proc ptkGantt_Redraw {chart canvasWidth canvasHeight} {
-    global ptkGantt_Layout
+    global ptkGantt_Layout ptkGantt_Data
+
+    #
+    # Redraw only if setup is complete
+    #
+    if { ! $ptkGantt_Data($chart.okToRedraw) } {
+	return
+    }
+    set ptkGantt_Data($chart.onScreen) 1
 
     set zoomFactor [$chart.mbar.zoomindex cget -text]
 
@@ -323,7 +280,6 @@ proc ptkGantt_Redraw {chart canvasWidth canvasHeight} {
 
     ptkGantt_DrawProcLabels $chart
 
-
     #
     # Update the scroll bar parameters
     #
@@ -339,42 +295,39 @@ proc ptkGantt_Redraw {chart canvasWidth canvasHeight} {
 proc ptkGantt_DrawProc { universe num_procs period proc star_name start fin } {
     global ptkGantt_Data ptkGantt_Parms ptkGantt_Layout
 
-    set chartName .gantt_${universe}
+    set chart .gantt_${universe}
 
-    if ![winfo exists ${chartName}.canvas] {
-
+    if ![winfo exists $chart.canvas] {
 
 	# first we add the zoom buttons...not done earlier because we need
 	# to pass tons of variables not yet set earlier
-	button $chartName.mbar.zoomin \
+	button $chart.mbar.zoomin \
 		-text    "Zoom In" \
 		-command "ptkGantt_Zoom $universe $num_procs $period in"
 
-	button $chartName.mbar.zoomout \
+	button $chart.mbar.zoomout \
 		-text    "Zoom Out" \
 		-state    disabled \
 		-command "ptkGantt_Zoom $universe $num_procs $period out"
 	
-	label $chartName.mbar.zoomlabel -text "  Zoom factor: "
-	label $chartName.mbar.zoomindex -text "1.0"
+	label $chart.mbar.zoomlabel -text "  Zoom factor: "
+	label $chart.mbar.zoomindex -text "1.0"
 
-	label $chartName.mbar.cursorlabel -text "  Cursor: "
-	label $chartName.mbar.cursorindex -text "0"
+	label $chart.mbar.cursorlabel -text "  Cursor: "
+	label $chart.mbar.cursorindex -text "0"
 
-
-	pack    $chartName.mbar.zoomin      $chartName.mbar.zoomout \
-		$chartName.mbar.zoomlabel   $chartName.mbar.zoomindex \
-		$chartName.mbar.cursorlabel $chartName.mbar.cursorindex \
+	pack    $chart.mbar.zoomin      $chart.mbar.zoomout \
+		$chart.mbar.zoomlabel   $chart.mbar.zoomindex \
+		$chart.mbar.cursorlabel $chart.mbar.cursorindex \
 		-side left
-
 
 	# Now we create the label for the processors
 
-	canvas ${chartName}.proclabel \
-		-width [winfo pixels $chartName $ptkGantt_Parms(labelWidth)c] \
+	canvas $chart.proclabel \
+		-width [winfo pixels $chart $ptkGantt_Parms(labelWidth)c] \
 		-bg    bisque
 
-	pack ${chartName}.proclabel \
+	pack $chart.proclabel \
 		-side     left \
 		-anchor   n -padx 4 -fill y
 
@@ -384,99 +337,116 @@ proc ptkGantt_DrawProc { universe num_procs period proc star_name start fin } {
 	# when packing later. The label text is set later by a
 	# call from the scheduler.
 	#
-	label $chartName.label -text "  "
-	pack  $chartName.label -side top
+	label $chart.label -text "  "
+	pack  $chart.label -side top
+
+
+	#
+	# add dismiss button
+	#
+	button $chart.dismiss -relief raised -text "DISMISS" -command \
+		"ptkClearHighlights; destroy $chart; ptkGanttExit"
+	pack $chart.dismiss -side bottom -fill x
 
 
 	#
 	# Create the scrollbar
 	#
-	scrollbar ${chartName}.scroll \
-		-command "$chartName.canvas xview" \
+	scrollbar $chart.scroll \
+		-command "$chart.canvas xview" \
 		-orient   horizontal
 
-	pack $chartName.scroll -side bottom -fill x -padx 4
+	pack $chart.scroll -side bottom -fill x -padx 4
 
 
 	#
 	# Create a frame for the canvas. The sunken relief offsets the
 	# scrolling region nicely from the background.
 	#
-	canvas ${chartName}.frame \
+	canvas $chart.frame \
 		-bg          bisque \
 		-borderwidth 2 \
 		-relief      sunken
  
-	pack ${chartName}.frame \
+	pack $chart.frame \
 		-padx 4    -pady   4 \
 		-fill both -expand on
  
 	# 
-	# Create the main canvas, pack it, and draw it so that we
-	# can figure out its size. The scroll region is set a bit
-	# later, after we know the size of the canvas.
+	# Create the main canvas and pack it.
 	#
-	canvas $chartName.canvas \
+	canvas $chart.canvas \
 		-bg              bisque \
-		-xscrollcommand "${chartName}.scroll set"
+		-xscrollcommand "$chart.scroll set"
 
-	pack   $chartName.canvas \
-		-in  $chartName.frame \
+	pack   $chart.canvas \
+		-in  $chart.frame \
 		-fill both -expand on \
 		-padx 4    -pady 4
 
-	update idletasks
 
 	#
-	# Update the chart layout parameters, and draw the ruler. The chart
-	# is drawn one box at a time later on...
+	# A click anywhere on the canvas moves the marker to that
+	# position. Dragging moves the marker as well.
 	#
-	ptkGantt_UpdateParms $chartName \
-		[winfo width $chartName.canvas] [winfo height $chartName.canvas] \
-		$period $num_procs 1.0
+	bind $chart.canvas <Button-1> \
+		"ptkGantt_MoveMarker $chart %x"
+	
+	bind $chart.canvas <B1-Motion> \
+		"ptkGantt_MoveMarker $chart %x"
 
-	ptkGantt_DrawProcLabels $chartName
-	ptkGantt_DrawRuler $chartName
 
 	#
-	# Set the scroll bar region
+	# When the canvas is resized, redraw the chart.
 	#
-	$chartName.canvas configure -scrollregion \
-		"0 0 $ptkGantt_Layout($chartName.scrollWidth) 0"
+	bind $chart.canvas <Configure> \
+		[concat ptkGantt_Redraw $chart {%w %h}]
 
         #
         # Initialize the chart data. This is updated each time a new star
 	# is added to the chart.
 	#
 	foreach p [interval 1 $num_procs] {
-	    set ptkGantt_Data($chartName.$p) {}
+	    set ptkGantt_Data($chart.$p) {}
 	}
 
 	#
-	# Draw the "marker" control
+	# Initialize the chart layout parameters (with bogus canvas
+	# sizes: they are set properly when the window is displayed).
 	#
-	ptkGantt_DrawMarker $chartName -initialize
-		
-	#
-	# Force it to the left hand edge. Unfortunately, the stars
-	# won't be highlighted because they don't exist yet. The calling
-	# interface to the Gantt chart is badly in need of an overhaul...
-	#
-	ptkGantt_MoveMarker $chartName 0
+	ptkGantt_UpdateParms $chart 600 480 $period $num_procs 1.0
 
-	# add dismiss button
-	button $chartName.dismiss -relief raised -text "DISMISS" -command \
-		"ptkClearHighlights; destroy $chartName; ptkGanttExit"
-	pack $chartName.dismiss -before $chartName.scroll -side bottom -fill x
 
+	#
+	# Create and initialize the marker
+	#
+	ptkGantt_DrawMarker $chart -initialize
+
+	#
+	# Allow redrawing
+	#
+	set ptkGantt_Data($chart.okToRedraw) 1
     }
 
     #
-    # Draw a single box, and record its data in a global array.
+    # Draw a single box at zero co-ordinates, and record
+    # its data in a global array.
+    #
+    # If the chart has already appeared on the screen, then draw
+    # a box at the correct position.
     #
     if {$start < $fin} {
-	lappend ptkGantt_Data($chartName.$proc) \
-		[ptkGantt_DrawBox $chartName $proc $star_name $start $fin]
+	if { $ptkGantt_Data($chart.onScreen) } {
+	    lappend ptkGantt_Data($chart.$proc) \
+		    [ptkGantt_DrawBox $chart $proc $star_name $start $fin]
+	} else {
+	    set box [$chart.canvas create rectangle 0 0 0 0 \
+		    -fill [lindex $ptkGantt_Parms(colors) [expr $proc - 1]] \
+		    -tags [list box star_$star_name p$proc]]
+	    
+	    lappend ptkGantt_Data($chart.$proc) \
+		    [list $star_name $start $fin $box]
+	}
     }
 }
 
@@ -572,14 +542,6 @@ proc ptkGantt_UpdateHighlights { chart args } {
     #
     if { $update == "on" || $force } {
 
-	#
-	# Unhighlight highlighted stars
-	#
-#	set highlighted [$chart.canvas find withtag highlight]
-#	foreach box $highlighted {
-#	    $chart.canvas itemconfigure $box -width 1
-#	}
-#	$chart.canvas dtag highlight
 	ptkClearHighlights
 
 	#
@@ -589,17 +551,6 @@ proc ptkGantt_UpdateHighlights { chart args } {
 	set ptkGantt_Data($chart.highlighted) $starlist
 	foreach star $starlist {
 	    set tags [$chart.canvas gettags $star]
-
-	    #
-	    # Highlight the star by thickening the border
-	    #
-#	    $chart.canvas itemconfigure $star \
-#		    -width  2 \
-#		    -tags  [concat $tags "highlight"]
-
-	    # Raise the box so the outline shows properly
-
-#	    $chart.canvas raise $star
 
             # 
 	    # Figure out the star parameters
@@ -633,7 +584,7 @@ proc ptkGantt_UpdateHighlights { chart args } {
 	$chart.canvas raise marker
 
 	#
-	# Force a display update
+	# Force a display update, so that the marker follows the mouse
 	#
 	update idletasks
     }
@@ -777,156 +728,116 @@ proc ptkGantt_UpdateMarker { chart t } {
 }
 
 
-
-# Here is the somewhat useless move mouse to bar function
-
-proc ptkGantt_MoveMouse {} {
-    
-}
-
-proc ptkGantt_SetNumProcs { num } {
-    global ptkGantt_NumProcs
-    set ptkGantt_NumProcs $num
-}
-
-proc ptkGantt_SetPeriod { num } {
-    global ptkGantt_Period
-    set ptkGantt_Period $num
-}
-
-proc ptkGantt_SetMin { num } {
-    global ptkGantt_Min
-    set ptkGantt_Min $num
-}
-
-proc ptkGantt_SetPercentage { num } {
-    global ptkGantt_Percentage
-    set ptkGantt_Percentage $num
-}
-
-proc ptkGantt_SetOptimum { num } {
-    global ptkGantt_Optimum
-    set ptkGantt_Optimum $num
-}
-
-proc ptkGantt_SetRuntime { num } {
-    global ptkGantt_Runtime
-    set ptkGantt_Runtime $num
-}
-
 proc ptkGantt_MakeLabel {universe period min prcent opt {runtime 0}} {
     global ptkGantt_Data
 
-    set chartName .gantt_${universe}
+    set chart .gantt_${universe}
     set prcent [format %.5f $prcent]
     set opt [format %.5f $opt]
-    $chartName.label configure \
+    $chart.label configure \
 	    -text [format "Period = %d (vs. PtlgMin %d), busy time =\
 	    %.2f%% (vs. max %.2f%%)" \
 	    $period $min $prcent $opt]
 
     # place all these datum in ptkGantt_Data array
-    set ptkGantt_Data($chartName.min) $min
-    set ptkGantt_Data($chartName.prcent) $prcent
-    set ptkGantt_Data($chartName.opt) $opt
-    set ptkGantt_Data($chartName.runtime) $runtime
-
-#     set chartName .gantt_${universe}
-#     set prcent [format %.5f $prcent]
-#     set opt [format %.5f $opt]
-#     label $chartName.label \
-# 	    -text [format "Period = %d (vs. PtlgMin %d), busy time =\
-# 	    %.2f%% (vs. max %.2f%%)" \
-# 	    $period $min $prcent $opt]
-# 
-#     pack $chartName.label -side top -before $chartName.frame
+    set ptkGantt_Data($chart.min) $min
+    set ptkGantt_Data($chart.prcent) $prcent
+    set ptkGantt_Data($chart.opt) $opt
+    set ptkGantt_Data($chart.runtime) $runtime
 }
 
 proc ptkGantt_Bindings {universe num_procs} {
-
-    set chartName .gantt_${universe}
-    # Here we set up the bindings
-    bind $chartName <Enter> "focus ${chartName}.mbar"
-    bind ${chartName}.mbar <Control-d> "ptkClearHighlights; destroy $chartName"
-
-    #
-    # Add some bindings so the cursor can be moved with the
-    # cursor keys
-    #
-    bind $chartName.mbar <Left> \
-	    "ptkGantt_UpdateMarker $chartName \
-	   \[expr \$ptkGantt_Layout($chartName.markerTime) - 1\]"
-
-    bind $chartName.mbar <Right> \
-	    "ptkGantt_UpdateMarker $chartName \
-	   \[expr \$ptkGantt_Layout($chartName.markerTime) + 1\]"
-
-    bind $chartName.mbar <Shift-Left> \
-	    "ptkGantt_UpdateMarker $chartName \
-	   \[expr \$ptkGantt_Layout($chartName.markerTime) - 10\]"
-
-    bind $chartName.mbar <Shift-Right> \
-	    "ptkGantt_UpdateMarker $chartName \
-	   \[expr \$ptkGantt_Layout($chartName.markerTime) + 10\]"
-
-
-    #
-    # A click anywhere on the canvas moves the marker to that
-    # position. Dragging moves the marker as well.
-    #
-    bind $chartName.canvas <Button-1> \
-	    "ptkGantt_MoveMarker $chartName %x"
-
-    bind $chartName.canvas <B1-Motion> \
-	    "ptkGantt_MoveMarker $chartName %x"
-
-#   bind ${chartName}.chart.graph <Button-3> "ptkGantt_MoveMouse"
-
-    #
-    # If the window is resized, redraw the chart.
-    #
-    bind $chartName.canvas <Configure> \
-	    [concat ptkGantt_Redraw $chartName {%w %h}]
+    # Null procedure: all bindings have been moved to where
+    # the widgets are created (ptkGantt_DrawProc and ptkGantt_Display)
 }
 
 proc ptkGanttDisplay { universe {inputFile ""} {standalone 0} } {
 
-    global ptkGantt_Data ptkGantt_Layout
-    set ganttChartName .gantt_${universe}
-    toplevel $ganttChartName
+    global env ptkGantt_Data ptkGantt_Layout
+    global tychoWelcomeWindow tychoConsoleWindow
+    global tychoExitWhenNoMoreWindows tychoShouldWeDoRegularExit
+
+    # check to make sure that Tycho.tcl has been sourced
+    if {"" == [info classes ::tycho::File]} {
+	# this sourcing wants to bring up tycho so we supress console and 
+	# welcome windows and ensure that tycho does not exit after browser
+	# exits
+	set tychoWelcomeWindow 0
+	set tychoConsoleWindow 0
+	set tychoExitWhenNoMoreWindows 0
+	set tychoShouldWeDoRegularExit  0
+	uplevel #0 {source $env(PTOLEMY)/tycho/kernel/Tycho.tcl}
+    }
+
+    set chart .gantt_${universe}
+
+    #
+    # Disable redrawing until setup is complete, and create window
+    #
+    set ptkGantt_Data($chart.okToRedraw) 0
+    set ptkGantt_Data($chart.onScreen)   0
+    toplevel $chart
 
     # Set a default window size
-    wm geometry $ganttChartName 840x320
+    wm geometry $chart 840x320
 
     # Here we have the menu bar.
-    frame $ganttChartName.mbar -relief raised -bd 2
-    pack $ganttChartName.mbar -side top -fill x
-    menubutton $ganttChartName.mbar.file -text "File" -underline 0 -menu \
-	    $ganttChartName.mbar.file.menu
-    pack $ganttChartName.mbar.file -side left
-    button $ganttChartName.mbar.help -relief raised -text "Help" -command \
+    frame $chart.mbar -relief raised -bd 2
+    pack $chart.mbar -side top -fill x
+    menubutton $chart.mbar.file -text "File" -underline 0 -menu \
+	    $chart.mbar.file.menu
+    pack $chart.mbar.file -side left
+    button $chart.mbar.help -relief raised -text "Help" -command \
 	    ptkGantt_HelpButton
-    pack $ganttChartName.mbar.help -side right
+    pack $chart.mbar.help -side right
     
-    menu $ganttChartName.mbar.file.menu -tearoff 0
-    $ganttChartName.mbar.file.menu add command -label "Print Chart..." \
-	    -command "ptkGantt_PrintChart $ganttChartName"
+    menu $chart.mbar.file.menu -tearoff 0
+    $chart.mbar.file.menu add command -label "Print Chart..." \
+	    -command "ptkGantt_PrintChart $chart"
     if { ! $standalone } {
-    $ganttChartName.mbar.file.menu add command -label "Save..." \
-	    -command "ptkGantt_SaveChart $ganttChartName"
+    $chart.mbar.file.menu add command -label "Save..." \
+	    -command "ptkGantt_SaveChart $chart"
     }
-    set exitcommand "ptkClearHighlights; destroy $ganttChartName; ptkGanttExit"
-    $ganttChartName.mbar.file.menu add separator
-    $ganttChartName.mbar.file.menu add command -label "Exit" \
+    set exitcommand "ptkClearHighlights; destroy $chart; ptkGanttExit"
+    $chart.mbar.file.menu add separator
+    $chart.mbar.file.menu add command -label "Exit" \
 	    -command $exitcommand -accelerator "Ctrl+d"
 
-    # Here is where we open the file and parse its contents
 
-    set EXISTS [file exists $inputFile]
-    if { $EXISTS == 0 } {
-	ptkMessage "ptkGanttDisplay: No file name given. \
-		    Expecting input from the scheduler."
-    } else {
+    # Entering the window focuses on the menu bar.
+
+    bind $chart <Enter> "focus $chart.mbar"
+
+    # Here we set up the bindings
+    bind $chart <Enter> "focus $chart.mbar"
+    bind $chart.mbar <Control-d> "ptkClearHighlights; destroy $chart"
+    
+    #
+    # Add some bindings so the cursor can be moved with the
+    # cursor keys
+    #
+    bind $chart.mbar <Left> \
+	    "ptkGantt_UpdateMarker $chart \
+	    \[expr \$ptkGantt_Layout($chart.markerTime) - 1\]"
+
+    bind $chart.mbar <Right> \
+	     "ptkGantt_UpdateMarker $chart \
+	    \[expr \$ptkGantt_Layout($chart.markerTime) + 1\]"
+
+    bind $chart.mbar <Shift-Left> \
+	    "ptkGantt_UpdateMarker $chart \
+	    \[expr \$ptkGantt_Layout($chart.markerTime) - 10\]"
+
+    bind $chart.mbar <Shift-Right> \
+	    "ptkGantt_UpdateMarker $chart \
+	    \[expr \$ptkGantt_Layout($chart.markerTime) + 10\]"
+
+    #
+    # If there is a schedule file, open it and parse its contents.
+    # Otherwise do nothing, since the scheduler will supply
+    # data later.
+    #
+    if { [file exists $inputFile] } {
 	set GFILE_ID [open $inputFile r]
 	set proc_num 1
 	set NUMCHARS 0
@@ -935,40 +846,39 @@ proc ptkGanttDisplay { universe {inputFile ""} {standalone 0} } {
 	    set NUMCHARS [gets $GFILE_ID LINEARR]
 	    if (!$NUMCHARS) continue;
 	    switch [lindex $LINEARR 0] {
-		no_processors { set ptkGantt_Layout($ganttChartName.numprocs)\
+		no_processors { set ptkGantt_Layout($chart.numprocs)\
 			[lindex $LINEARR 1];
 			continue}
-		period { set ptkGantt_Layout($ganttChartName.period) \
+		period { set ptkGantt_Layout($chart.period) \
 			[lindex $LINEARR 1];
 			continue}
-		min { set ptkGantt_Data($ganttChartName.min) \
+		min { set ptkGantt_Data($chart.min) \
 			[lindex $LINEARR 1];
 			continue}
-		percentage { set ptkGantt_Data($ganttChartName.prcent) \
+		percentage { set ptkGantt_Data($chart.prcent) \
 			[lindex $LINEARR 1];
 			continue}
-		optimum { set ptkGantt_Data($ganttChartName.opt) \
+		optimum { set ptkGantt_Data($chart.opt) \
 			[lindex $LINEARR 1];
 			continue}
-		runtime { set ptkGantt_Data($ganttChartName.runtime) \
+		runtime { set ptkGantt_Data($chart.runtime) \
 			[lindex $LINEARR 1]l
 			continue}
 	    	\$end { incr proc_num ; continue}
 		default { ptkGantt_DrawProc $universe \
-			$ptkGantt_Layout($ganttChartName.numprocs) \
-			$ptkGantt_Layout($ganttChartName.period) \
+			$ptkGantt_Layout($chart.numprocs) \
+			$ptkGantt_Layout($chart.period) \
 			$proc_num [lindex $LINEARR 0] [string trimleft \
 			[lindex $LINEARR 2] (] [string trimright \
 			[lindex $LINEARR 3] )]}
 	    }
 	}   
 	close $GFILE_ID
-	ptkGantt_MakeLabel $universe $ptkGantt_Layout($ganttChartName.period) \
-		$ptkGantt_Data($ganttChartName.min) \
-		$ptkGantt_Data($ganttChartName.prcent) \
-		$ptkGantt_Data($ganttChartName.opt) \
-		$ptkGantt_Data($ganttChartName.runtime)
-	ptkGantt_Bindings $universe $ptkGantt_Layout($ganttChartName.numprocs)
+	ptkGantt_MakeLabel $universe $ptkGantt_Layout($chart.period) \
+		$ptkGantt_Data($chart.min) \
+		$ptkGantt_Data($chart.prcent) \
+		$ptkGantt_Data($chart.opt) \
+		$ptkGantt_Data($chart.runtime)
     }
 }
 
@@ -1120,7 +1030,6 @@ proc ptkGantt_UpdateChart {chart} {
     global ptkGantt_Data ptkGantt_Layout
 
     set numprocs $ptkGantt_Layout($chart.numprocs)
-
     foreach i [interval 1 $numprocs] {
 	set stars $ptkGantt_Data($chart.$i)
 	foreach s $stars {
@@ -1190,456 +1099,456 @@ proc gantt_measureLabel {canvas value} {
 
     return $width
 }
-
-#
-# rectWidth: return the width of a rectangle
-#
-proc rectWidth {rect} {
-    return [expr [x1 $rect] - [x0 $rect]]
-}
-
-
-
-#
-# x, y
-#
-# Extract coordinates from a 2-list
-#
-proc x {xy} {
-    return [lindex $xy 0]
-}
-
-proc y {xy} {
-    return [lindex $xy 1]
-}
-
-
-#
-# x0, y0, x1, y1
-#
-# Extract coordinates from a 4-list
-#
-proc x0 {xy} {
-    return [lindex $xy 0]
-}
-
-proc y0 {xy} {
-    return [lindex $xy 1]
-}
-
-proc x1 {xy} {
-    return [lindex $xy 2]
-}
-
-proc y1 {xy} {
-    return [lindex $xy 3]
-}
-
-
-
-#
-# mapping.tcl
-#
-# Utility functions for mapping between number ranges, scaling
-# intervals, and so on.
-#
-
-
-#
-# Given a number, round up or down to the nearest power of two.
-#
-proc roundUpTwo {x} {
-    set exp [expr ceil (log($x)/log(2))]
-    set x   [expr pow(2,$exp)]
-}
-
-proc roundDownTwo {x} {
-    set exp [expr floor (log($x)/log(2))]
-    set x   [expr pow(2,$exp)]
-}
-
-
-#
-# Given a number, round up to the nearest power of ten
-# times 1, 2, or 5.
-#
-proc axisRoundUp {x} {
-    set exp [expr floor (log10($x))]
-    set x [expr $x * pow(10, -$exp)]
-
-    if {$x > 5.0} {
-	set x 10.0
-    } elseif {$x > 2.0} {
-	set x 5.0
-    } elseif {$x > 1.0 } {
-	set x 2.0
-    }
-
-    set x [expr $x * pow(10,$exp)]
-    return $x
-}
-
-
-#
-# Given a range, space, field width, and padding, figure out how
-# the field increment so they will fit.
-#
-proc axisIncrement {low high space width padding} {
-    set maxnum   [expr $space / ($width+$padding)]
-    set estimate [expr (double($high) - $low) / ($maxnum)]
-    set estimate [axisRoundUp $estimate]
-
-    return $estimate
-}
-
-
-#
-# Given a range and an increment, return the list of numbers
-# within that range and on that increment.
-#
-proc rangeValues {low high inc} {
-    set result {}
-    set n      1
-
-    set val [roundUpTo $low $inc]
-    while {$val <= $high} {
-	lappend result $val
-	set val [expr $val + $n * $inc]
-    }
-
-    return $result
-}
-
-
-#
-# Given two ranges and a list of numbers in the first range,
-# produce the mapping of that list to the second range.
-#
-proc mapRange {low high values lowdash highdash} {
-    set result {}
-
-    set scale [expr (double($highdash) - $lowdash) / ($high - $low)]
-    foreach n $values {
-	lappend result [expr $lowdash + ($n-$low) * $scale]
-    }
-
-    return $result
-}
-
-
-#
-# Given two numbers, round the first up or down to the
-# nearest multiple of the second.
-#
-proc roundDownTo {x i} {
-    return [expr $i * (floor($x/$i))]
-}
-
-proc roundUpTo {x i} {
-    return [expr $i * (ceil($x/$i))]
-}
-
-
-
-#
-# foreach*
-#
-# Multi-argument version of foreach. Stops when any one of the
-# argument lists runs out of elements.
-#
-# As for loop{},. "body" cannot contain return commands. As
-# for loop{}, this could be fixed later if necessary.
-#
-# Also as for loop{}, the "-counter" option introduces the name
-# of a variable that counts from 0 to n-1, where n is the length
-# of the shortest argument list.
-#
-# How does it work? I wish you hadn't asked.... For each variable
-# name, it creates a local variable called i0, i1 etc, and binds
-# the local variable to the passed variable with upvar{}. For each
-# argument list, it creates local variable called l0, l1 etc.
-#
-# Then, in a frenzy of list heading and tailing, it sets each i(n)
-# to the head element of the corresponding l(n), and evaluates the
-# body in the caller's context (so that variable names passed to
-# this procedure reference the appropriate i(n)). It takes the tail
-# of the lists and, provided none are empty, does the same thing again.
-#
-# This is very inefficient, of course, and should be one of the
-# first things recoded in C when things need speeding up.
-#
-proc foreach* {args} {
-    set c 0
-
-    set v [readopt counter args]
-    if {$v != ""} {
-	upvar $v counter
-    }
-
-    while {[llength $args] > 2} {
-	upvar   [lindex $args 0] i$c
-	set l$c [lindex $args 1]
-
-	set args [ldrop $args 2]
-	incr c
-    }
-
-    if {[llength $args] != 1} {
-	ptkMessage "error: wrong number of args to foreach*"
-	return
-    }
-
-    set body [lindex $args 0]
-
-    set done    0
-    set counter 0
-    while { ! $done } {
-	for {set i 0} {$i < $c} {incr i} {
-	    set i$i [lindex [set l$i] 0]
-	}
-
-	uplevel $body
-
-	for {set i 0} {$i < $c} {incr i} {
-	    set l$i [ltail [set l$i]]
-	    if {[lnull [set l$i]]} {
-		set done 1
-	    }
-	}
-
-	incr counter
-    }
-}
-
-
-#
-# loop
-#
-# Loop $n times. Called as "loop n body." The -counter option
-# introduces the name of a variable that ranges from 0 to $n-1.
-#
-# "body" cannot contain return commands. This could be fixed
-# if it ever becomes a problem --- see pg 123 of Ousterhout's
-# book.
-#
-proc loop {args} {
-    set v [readopt counter args]
-    if {$v != ""} {
-	upvar $v counter
-    }
-
-    set n    [lindex $args 0]
-    set body [lindex $args 1]
-    for {set counter 0} {$counter < $n} {incr counter} {
-	uplevel $body
-    }
-}
-
-
-#
-# readopt
-#
-# Read an option argument, like getopt{}, but instead of setting
-# a variable return the read value of the option.
-#
-# The argument list is modified as for getopt{}.
-#
-# Example:
-#
-#    set thing [readopt fred args]
-#
-# Note that readopt{} does not make getopt{} redundant, since getopt{]
-# does not change the option variable if the option is not present.
-#
-proc readopt {option listname} {
-
-    upvar $listname l
-
-    set t [lsearch -exact $l -$option]
-    if { $t != -1 } {
-	set v [lindex   $l [expr $t+1]]
-	set l [lreplace $l $t [expr $t+1]]
-
-	return $v
-    }
-    return ""
-}
-
-
-#
-# getflag
-#
-# Like getopt{}, but set the option variable to 1 if the
-# option flag is there, else 0. Delete the option flag 
-# from the argument list.
-#
-proc getflag {option listname} {
-
-    upvar $listname l
-    upvar $option   v
-
-    set t [lsearch -exact $l -$option]
-    if { $t != -1 } {
-	set v 1
-	set l [lreplace $l $t $t]
-
-	return 1
-    } else {
-	set v 0
-
-	return 0
-    }
-}
-
-
-#
-# assign
-#
-# Assign elements of a list to multiple variables. Doesn't
-# care if the list is longer than the number of variables, ot
-# the list is too short. (Should probably at least put an assertion
-# in here...)
-#
-proc assign {args} {
-    foreach* var [linit $args] val [llast $args] {
-	upvar $var v
-	set v $val
-    }
-}
-
-
-#
-# list.itcl
-#
-# Utility functions on lists. See also syntax.tcl.
-#
-
-proc lhead {list} {
-    return [lindex $list 0]
-}
-
-#proc lhead {list} {
-#    return [lindex $list 0
-#}
-
-proc ltail {list} {
-    return [lreplace $list 0 0]
-}
-
-proc linit {list} {
-    return [ltake $list [expr [llength $list] - 1]]
-}
-
-proc llast {list} {
-    return [lindex $list [expr [llength $list] - 1]]
-}
-
-
-#
-# Test for a null list (or element). Written the way it is
-# because a) `==' cannot be used if the list starts with a number and b
-# llength is not so good because it traverses the whole list.
-#
-# The second case checks for the list being null but indicated
-# by empty braces. I'm confused as to why I need this...
-#
-proc lnull {list} {
-    return [expr (! [string match "?*" $list]) \
-	         || [string match "{}" $list]]
-}
-
-
-#
-# Take or drop list elements
-#
-proc ltake {list n} {
-    return [lrange $list 0 [expr $n - 1]]
-}
-
-proc ldrop {list n} {
-    return [lreplace $list 0 [expr $n-1]]
-}
-
-proc ldropUntil {list item} {
-    set index [lsearch -exact $list $item]
-    if { $index == -1 } {
-	return {}
-    } else {
-	return [ldrop $list $index]
-    }
-}
-
-
-#
-# Make a list containing n copies of the specified item
-#
-proc lcopy {n item} {
-    set result {}
-    loop $n {
-	lappend result $item
-    }
-    return $result
-}
-
-
-#
-# Return list of n integers in the range x to y
-#
-proc interval {x y} {
-    set result {}
-
-    while { $x <= $y } {
-	lappend result $x
-	incr x +1
-    }
-
-    return $result
-}
-
-
-#
-# Test whether an element is in a list
-#
-proc lmember {list item} {
-    return [expr [lsearch -exact $list $item] != -1]
-}
-
-
-#
-# Remove an item from a list
-#
-proc ldelete {list item} {
-    set i [lsearch -exact $list $item]
-
-    if { $i != -1 } {
-	return [lreplace $list $i $i]
-    }
-
-    return $list
-}
-
-
-#
-# Return list of n numbers in the range x to y, but with
-# half the interval before the first and last numbers.
-#
-# This is useful for spacing graphical elements "evenly" along
-# a given distance.
-#
-proc spread {n x y} {
-    set result {}
-    set i      0
-    set delta  [expr (double($y) - $x) / $n]
-
-    set x [expr $x + $delta / 2]
-    while { $i < $n } {
-	lappend result [expr $x + $i * $delta]
-
-	incr i +1
-    }
-
-    return $result
-}
+# 
+# #
+# # rectWidth: return the width of a rectangle
+# #
+# proc rectWidth {rect} {
+#     return [expr [x1 $rect] - [x0 $rect]]
+# }
+# 
+# 
+# 
+# #
+# # x, y
+# #
+# # Extract coordinates from a 2-list
+# #
+# proc x {xy} {
+#     return [lindex $xy 0]
+# }
+# 
+# proc y {xy} {
+#     return [lindex $xy 1]
+# }
+# 
+# 
+# #
+# # x0, y0, x1, y1
+# #
+# # Extract coordinates from a 4-list
+# #
+# proc x0 {xy} {
+#     return [lindex $xy 0]
+# }
+# 
+# proc y0 {xy} {
+#     return [lindex $xy 1]
+# }
+# 
+# proc x1 {xy} {
+#     return [lindex $xy 2]
+# }
+# 
+# proc y1 {xy} {
+#     return [lindex $xy 3]
+# }
+# 
+# 
+# 
+# #
+# # mapping.tcl
+# #
+# # Utility functions for mapping between number ranges, scaling
+# # intervals, and so on.
+# #
+# 
+# 
+# #
+# # Given a number, round up or down to the nearest power of two.
+# #
+# proc roundUpTwo {x} {
+#     set exp [expr ceil (log($x)/log(2))]
+#     set x   [expr pow(2,$exp)]
+# }
+# 
+# proc roundDownTwo {x} {
+#     set exp [expr floor (log($x)/log(2))]
+#     set x   [expr pow(2,$exp)]
+# }
+# 
+# 
+# #
+# # Given a number, round up to the nearest power of ten
+# # times 1, 2, or 5.
+# #
+# proc axisRoundUp {x} {
+#     set exp [expr floor (log10($x))]
+#     set x [expr $x * pow(10, -$exp)]
+# 
+#     if {$x > 5.0} {
+# 	set x 10.0
+#     } elseif {$x > 2.0} {
+# 	set x 5.0
+#     } elseif {$x > 1.0 } {
+# 	set x 2.0
+#     }
+# 
+#     set x [expr $x * pow(10,$exp)]
+#     return $x
+# }
+# 
+# 
+# #
+# # Given a range, space, field width, and padding, figure out how
+# # the field increment so they will fit.
+# #
+# proc axisIncrement {low high space width padding} {
+#     set maxnum   [expr $space / ($width+$padding)]
+#     set estimate [expr (double($high) - $low) / ($maxnum)]
+#     set estimate [axisRoundUp $estimate]
+# 
+#     return $estimate
+# }
+# 
+# 
+# #
+# # Given a range and an increment, return the list of numbers
+# # within that range and on that increment.
+# #
+# proc rangeValues {low high inc} {
+#     set result {}
+#     set n      1
+# 
+#     set val [roundUpTo $low $inc]
+#     while {$val <= $high} {
+# 	lappend result $val
+# 	set val [expr $val + $n * $inc]
+#     }
+# 
+#     return $result
+# }
+# 
+# 
+# #
+# # Given two ranges and a list of numbers in the first range,
+# # produce the mapping of that list to the second range.
+# #
+# proc mapRange {low high values lowdash highdash} {
+#     set result {}
+# 
+#     set scale [expr (double($highdash) - $lowdash) / ($high - $low)]
+#     foreach n $values {
+# 	lappend result [expr $lowdash + ($n-$low) * $scale]
+#     }
+# 
+#     return $result
+# }
+# 
+# 
+# #
+# # Given two numbers, round the first up or down to the
+# # nearest multiple of the second.
+# #
+# proc roundDownTo {x i} {
+#     return [expr $i * (floor($x/$i))]
+# }
+# 
+# proc roundUpTo {x i} {
+#     return [expr $i * (ceil($x/$i))]
+# }
+# 
+# 
+# 
+# #
+# # foreach*
+# #
+# # Multi-argument version of foreach. Stops when any one of the
+# # argument lists runs out of elements.
+# #
+# # As for loop{},. "body" cannot contain return commands. As
+# # for loop{}, this could be fixed later if necessary.
+# #
+# # Also as for loop{}, the "-counter" option introduces the name
+# # of a variable that counts from 0 to n-1, where n is the length
+# # of the shortest argument list.
+# #
+# # How does it work? I wish you hadn't asked.... For each variable
+# # name, it creates a local variable called i0, i1 etc, and binds
+# # the local variable to the passed variable with upvar{}. For each
+# # argument list, it creates local variable called l0, l1 etc.
+# #
+# # Then, in a frenzy of list heading and tailing, it sets each i(n)
+# # to the head element of the corresponding l(n), and evaluates the
+# # body in the caller's context (so that variable names passed to
+# # this procedure reference the appropriate i(n)). It takes the tail
+# # of the lists and, provided none are empty, does the same thing again.
+# #
+# # This is very inefficient, of course, and should be one of the
+# # first things recoded in C when things need speeding up.
+# #
+# proc foreach* {args} {
+#     set c 0
+# 
+#     set v [readopt counter args]
+#     if {$v != ""} {
+# 	upvar $v counter
+#     }
+# 
+#     while {[llength $args] > 2} {
+# 	upvar   [lindex $args 0] i$c
+# 	set l$c [lindex $args 1]
+# 
+# 	set args [ldrop $args 2]
+# 	incr c
+#     }
+# 
+#     if {[llength $args] != 1} {
+# 	ptkMessage "error: wrong number of args to foreach*"
+# 	return
+#     }
+# 
+#     set body [lindex $args 0]
+# 
+#     set done    0
+#     set counter 0
+#     while { ! $done } {
+# 	for {set i 0} {$i < $c} {incr i} {
+# 	    set i$i [lindex [set l$i] 0]
+# 	}
+# 
+# 	uplevel $body
+# 
+# 	for {set i 0} {$i < $c} {incr i} {
+# 	    set l$i [ltail [set l$i]]
+# 	    if {[lnull [set l$i]]} {
+# 		set done 1
+# 	    }
+# 	}
+# 
+# 	incr counter
+#     }
+# }
+# 
+# 
+# #
+# # loop
+# #
+# # Loop $n times. Called as "loop n body." The -counter option
+# # introduces the name of a variable that ranges from 0 to $n-1.
+# #
+# # "body" cannot contain return commands. This could be fixed
+# # if it ever becomes a problem --- see pg 123 of Ousterhout's
+# # book.
+# #
+# proc loop {args} {
+#     set v [readopt counter args]
+#     if {$v != ""} {
+# 	upvar $v counter
+#     }
+# 
+#     set n    [lindex $args 0]
+#     set body [lindex $args 1]
+#     for {set counter 0} {$counter < $n} {incr counter} {
+# 	uplevel $body
+#     }
+# }
+# 
+# 
+# #
+# # readopt
+# #
+# # Read an option argument, like getopt{}, but instead of setting
+# # a variable return the read value of the option.
+# #
+# # The argument list is modified as for getopt{}.
+# #
+# # Example:
+# #
+# #    set thing [readopt fred args]
+# #
+# # Note that readopt{} does not make getopt{} redundant, since getopt{]
+# # does not change the option variable if the option is not present.
+# #
+# proc readopt {option listname} {
+# 
+#     upvar $listname l
+# 
+#     set t [lsearch -exact $l -$option]
+#     if { $t != -1 } {
+# 	set v [lindex   $l [expr $t+1]]
+# 	set l [lreplace $l $t [expr $t+1]]
+# 
+# 	return $v
+#     }
+#     return ""
+# }
+# 
+# 
+# #
+# # getflag
+# #
+# # Like getopt{}, but set the option variable to 1 if the
+# # option flag is there, else 0. Delete the option flag 
+# # from the argument list.
+# #
+# proc getflag {option listname} {
+# 
+#     upvar $listname l
+#     upvar $option   v
+# 
+#     set t [lsearch -exact $l -$option]
+#     if { $t != -1 } {
+# 	set v 1
+# 	set l [lreplace $l $t $t]
+# 
+# 	return 1
+#     } else {
+# 	set v 0
+# 
+# 	return 0
+#     }
+# }
+# 
+# 
+# #
+# # assign
+# #
+# # Assign elements of a list to multiple variables. Doesn't
+# # care if the list is longer than the number of variables, ot
+# # the list is too short. (Should probably at least put an assertion
+# # in here...)
+# #
+# proc assign {args} {
+#     foreach* var [linit $args] val [llast $args] {
+# 	upvar $var v
+# 	set v $val
+#     }
+# }
+# 
+# 
+# #
+# # list.itcl
+# #
+# # Utility functions on lists. See also syntax.tcl.
+# #
+# 
+# proc lhead {list} {
+#     return [lindex $list 0]
+# }
+# 
+# #proc lhead {list} {
+# #    return [lindex $list 0
+# #}
+# 
+# proc ltail {list} {
+#     return [lreplace $list 0 0]
+# }
+# 
+# proc linit {list} {
+#     return [ltake $list [expr [llength $list] - 1]]
+# }
+# 
+# proc llast {list} {
+#     return [lindex $list [expr [llength $list] - 1]]
+# }
+# 
+# 
+# #
+# # Test for a null list (or element). Written the way it is
+# # because a) `==' cannot be used if the list starts with a number and b
+# # llength is not so good because it traverses the whole list.
+# #
+# # The second case checks for the list being null but indicated
+# # by empty braces. I'm confused as to why I need this...
+# #
+# proc lnull {list} {
+#     return [expr (! [string match "?*" $list]) \
+# 	         || [string match "{}" $list]]
+# }
+# 
+# 
+# #
+# # Take or drop list elements
+# #
+# proc ltake {list n} {
+#     return [lrange $list 0 [expr $n - 1]]
+# }
+# 
+# proc ldrop {list n} {
+#     return [lreplace $list 0 [expr $n-1]]
+# }
+# 
+# proc ldropUntil {list item} {
+#     set index [lsearch -exact $list $item]
+#     if { $index == -1 } {
+# 	return {}
+#     } else {
+# 	return [ldrop $list $index]
+#     }
+# }
+# 
+# 
+# #
+# # Make a list containing n copies of the specified item
+# #
+# proc lcopy {n item} {
+#     set result {}
+#     loop $n {
+# 	lappend result $item
+#     }
+#     return $result
+# }
+# 
+# 
+# #
+# # Return list of n integers in the range x to y
+# #
+# proc interval {x y} {
+#     set result {}
+# 
+#     while { $x <= $y } {
+# 	lappend result $x
+# 	incr x +1
+#     }
+# 
+#     return $result
+# }
+# 
+# 
+# #
+# # Test whether an element is in a list
+# #
+# proc lmember {list item} {
+#     return [expr [lsearch -exact $list $item] != -1]
+# }
+# 
+# 
+# #
+# # Remove an item from a list
+# #
+# proc ldelete {list item} {
+#     set i [lsearch -exact $list $item]
+# 
+#     if { $i != -1 } {
+# 	return [lreplace $list $i $i]
+#     }
+# 
+#     return $list
+# }
+# 
+# 
+# #
+# # Return list of n numbers in the range x to y, but with
+# # half the interval before the first and last numbers.
+# #
+# # This is useful for spacing graphical elements "evenly" along
+# # a given distance.
+# #
+# proc spread {n x y} {
+#     set result {}
+#     set i      0
+#     set delta  [expr (double($y) - $x) / $n]
+# 
+#     set x [expr $x + $delta / 2]
+#     while { $i < $n } {
+# 	lappend result [expr $x + $i * $delta]
+# 
+# 	incr i +1
+#     }
+# 
+#     return $result
+# }
 
 
 
