@@ -27,6 +27,14 @@ static char SccsId[]="$Id$";
 #include "copyright.h"
 #include "port.h"
 #include "internal.h"
+
+#include "default.h"
+#include "facet_info.h"
+#include "inst.h"
+#include "io_procs.h"
+#include "oct_utils.h"
+
+#include "master.h"
   /* 
    * Implementation of the oct functions for master-object.
    * 
@@ -50,6 +58,7 @@ static char SccsId[]="$Id$";
    */
 extern struct object_desc oct_default_desc; 
 
+void
 oct_master_desc_set(object_desc)
 struct object_desc *object_desc;
 {
@@ -62,7 +71,7 @@ struct object_desc *object_desc;
   ((p1) == NIL(char) ? ((p1) == (p2) ? 0 : -1) :\
                        ((p2) == NIL(char) ? 1 : strcmp(p1,p2)))
 
-static
+static int
 master_compare(c_a, c_b)
 char *c_a;
 char *c_b;
@@ -71,17 +80,17 @@ char *c_b;
     struct master *b = (struct master *) c_b;
     int retval;
 
-    (retval = SAFE_CMP(a->cell, b->cell)) ||
+    (void) ((retval = SAFE_CMP(a->cell, b->cell)) ||
       (retval = SAFE_CMP(a->view, b->view)) ||
       (retval = SAFE_CMP(a->facet, b->facet)) ||
-      (retval = SAFE_CMP(a->version, b->version));
+      (retval = SAFE_CMP(a->version, b->version)));
 
     return retval;
 }
 
 #define SAFE_HASH(ptr, max) ((ptr) == NIL(char) ? 0 : st_strhash(ptr,max))
   
-static
+static int
 master_hash(c_master, max)
 char *c_master;
 int max;
@@ -117,6 +126,7 @@ master_table *table;
  * Normally only oct_get_master should be used.
  */
 
+int
 oct_make_master(desc, inst, master_p)
 struct facet *desc;
 struct octInstance *inst;
@@ -159,7 +169,7 @@ struct master **master_p;
     return OCT_OK;
 }
 
-
+octStatus
 oct_remove_master(desc, master)
 struct facet *desc;
 struct master *master;
@@ -172,6 +182,7 @@ struct master *master;
 }
 
 
+octStatus
 oct_bind_master(desc, master)
 struct facet *desc;
 struct master *master;
@@ -204,6 +215,7 @@ struct master *master;
  * get or create a master object on the facet `desc'
  * for the instance `inst'.
  */
+int
 oct_get_master(desc, inst, master_p)
 struct facet *desc;
 struct octInstance *inst;
@@ -232,7 +244,7 @@ struct master **master_p;
 /*
  * write the master out
  */
-static
+static octStatus
 write_master(master)
 struct master *master;
 {
@@ -247,7 +259,7 @@ struct master *master;
 /*
  * read the master in
  */
-static
+static int
 read_master(desc, master_p)
 struct facet *desc;
 struct master **master_p;
@@ -310,6 +322,7 @@ char *c_retval;
     return ST_CONTINUE;
 }
 
+int
 oct_dump_instances(desc)
 struct facet *desc;
 {
@@ -320,6 +333,7 @@ struct facet *desc;
     return retval;
 }
 
+int
 oct_restore_instances(desc, next_type)
 struct facet *desc;
 int *next_type;
