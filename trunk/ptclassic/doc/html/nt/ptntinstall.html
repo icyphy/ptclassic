@@ -52,6 +52,15 @@ Your <CODE>PATH</CODE> should include
 <CODE>%PTOLEMY%\bin;%PTOLEMY%\bin.nt4</CODE>
 
 
+
+<li> <LI> If you have not yet done so, download the Ptolemy <CODE>src</CODE>
+and <CODE>other.src</CODE> tar files from
+<a href="http://ptolemy.eecs.berkeley.edu/ptolemyclassic/pt0.7.2/download.htm"><CODE>http://ptolemy.eecs.berkeley.edu/ptolemyclassic/pt0.7.2/download.htm</CODE></a>
+and then use GNU tar to extract the files.  
+ <br> Do <B>not</B> use Winzip to extract the tar files.
+These tar files contain Cygwin symbolic links, which Winzip cannot
+handle.
+
 <li> In a bash shell, do
 <pre>
 cd $PTOLEMY
@@ -197,8 +206,8 @@ and you will need to update your path to include
 avoid FAT partitions and placing the sources on a NTFS partition.
 
 <LI> If you have not yet done so, download the Ptolemy <CODE>src</CODE>
-zip file from
-<a href="http://ptolemy.eecs.berkeley.edu/pt0.7.2/download.html"><CODE>http://ptolemy.eecs.berkeley.edu/pt0.7.2/download.html</CODE></a>
+and <CODE>other.src</CODE> tar files from
+<a href="http://ptolemy.eecs.berkeley.edu/ptolemyclassic/pt0.7.2/download.htm"><CODE>http://ptolemy.eecs.berkeley.edu/ptolemyclassic/pt0.7.2/download.htm</CODE></a>
 and then use GNU tar to extract the files.  
  <br> Do <B>not</B> use Winzip to extract the tar files.
 These tar files contain Cygwin symbolic links, which Winzip cannot
@@ -209,7 +218,7 @@ handle.
 problems have been fixed in 0.7.2devel
  <br> If you are using tar and you get a warning like
 <pre>
-bash-2.02$ tar -xf /tmp/pt0.7.2devel.src.tar
+bash-2.02$ tar -zxf /tmp/pt0.7.2devel.src.tar.gz
 tar: ptolemy/tcltk/tcl/man/mann/Toplevel.n: Could not create file: Permission denied
 tar: ptolemy/tcltk/tcl/man/mann/optionmenu.n: Could not create file: Permission denied
 tar: ptolemy/tcltk/tcl/man/mann/messagebox.n: Could not create file: Permisson denied
