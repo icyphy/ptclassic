@@ -256,9 +256,10 @@ void CGCTarget::trailerCode()
 {
     include << stdlibDecl << fixDecl << complexDecl;		
 
-    declareGalaxy(*galaxy());
-    if (!SimControl::haltRequested())
+    if (galaxy() && !SimControl::haltRequested()) {
+        declareGalaxy(*galaxy());
 	HLLTarget::trailerCode();
+    }
 }
 
 // Initial stage of code generation.
@@ -405,6 +406,8 @@ Block* CGCTarget :: makeNew () const {
 // (5) buffer offset initialization
 
 int CGCTarget :: allocateMemory() {
+	if (! galaxy()) return FALSE;
+
 	Galaxy& g = *galaxy();
 	// set up the forkDests members of each Fork inputs.
 	setupForkDests(g);
@@ -470,6 +473,7 @@ void CGCTarget :: setupForkDests(Galaxy& g) {
 /////////////////////////////////////////
 
 int CGCTarget :: codeGenInit() {
+	if (! galaxy()) return FALSE;
 
 	// call initialization code.
 	defaultStream = &MAININIT;
@@ -580,6 +584,7 @@ static void setupBuffer(CGCStar* s, int dimen, int bufsz) {
 // ensure that code will be generated for the new spliced stars.
 
 void CGCTarget :: addSpliceStars() {
+	if (! galaxy()) return;
 	const char* dom = galaxy()->domain();
 
 	GalStarIter nextStar(*galaxy());
