@@ -63,7 +63,7 @@ Geodesic: The place where the Particles reside in transit
 	between Stars.
 
 Plasma: The place where Particles reside in transit back.
-	Particles are re-used as a way to preserve memory.
+	Particles are re-used as a way to conserve memory.
 
 By default, all connections with the same resolved DataType use
 the same global Plasma.  This can be changed by overriding
@@ -94,6 +94,7 @@ class PtGate;
 
 class PortHole;
 class MultiPortHole;
+class ClusterPort;
 
 // attribute bits for PortHoles.  Only one is defined here: PB_HIDDEN.
 // if it is true, the porthole is not visible to user interfaces, so
@@ -136,12 +137,9 @@ public:
 		return *this;
 	}
 
-	// set up a port for determining the type of ANYTYPE connections.
-	// typePort pointers form a circular loop.
+	// set up a link for determining the type of ANYTYPE connections.
+	// this would be better named sameTypeAs().
 	void inheritTypeFrom(GenericPort& p);
-
-	// function to resolve types.
-	virtual DataType setResolvedType(DataType useType = 0) = 0;
 
 	// function to connect two portholes
 	// 3/2/94 changed to support initDelayValues
@@ -184,17 +182,22 @@ public:
 
 	// Remove me from a chain of aliases
 	void clearAliases();
-protected:
 
+protected:
 	// Translate aliases, if any.
 	GenericPort* translateAliases();
 
-	// Used to prevent infinite loops.  The resolved type
-	// in the constituent portholes is used to determine particle types.
+	// Actual type of particles flowing through my geodesic.
+	// 0 if not determined yet.
 	DataType myResolvedType;
 
+	// Two recursive phases of type resolution
+	DataType resolvePass1(DataType useType = 0);
+	DataType resolvePass2(DataType useType = 0);
+
 private:
-	// datatype of particles in this porthole
+	// Declared datatype of this porthole (may be ANYTYPE).
+	// This is not necessarily what the connection will resolve to!
 	DataType myType;
 
 	// PortHole this is aliased to
@@ -203,12 +206,12 @@ private:
 	// Name of a PortHole that is aliased to me (a back-pointer)
 	GenericPort* aliasedFrom;
 
-	// My type matches type of this port
+	// My type matches type of this port.
+	// If not NULL, typePort pointers form a circular loop.
 	GenericPort* typePortPtr;
 
 	// My attributes
 	bitWord attributeBits;
-
 };
 
 // predicate for a hidden porthole (or multiporthole)
@@ -291,9 +294,6 @@ public:
         // Print a description of the MultiPortHole
 	/* virtual */ StringList print (int verbose = 0) const;
 
-	// function to resolve types.
-	virtual DataType setResolvedType(DataType useType = 0);
-
 	// destructor
 	~MultiPortHole();
 
@@ -329,7 +329,6 @@ private:
         // class PortHole
         //////////////////////////////////////////
 
-class ClusterPort;
 // Contains all the facilities of all PortHoles; base class
 //  for all PortHoles
 class PortHole : public GenericPort
@@ -414,7 +413,11 @@ public:
 	// portholes have agreed to use.  This will never by ANYTYPE.
 	// The result will be 0 (a null pointer) if type resolution has
 	// not yet been performed.
-	inline DataType resolvedType () const { return myResolvedType;};
+	inline DataType resolvedType () const { return myResolvedType;}
+
+	// function to resolve types during initialization.
+	// perhaps this ought to be protected?
+	virtual DataType setResolvedType();
 
 	// return the number of tokens transferred per execution
 	inline int numXfer() const { return numberTokens;}
@@ -431,9 +434,6 @@ public:
 
 	// return pointer to my Geodesic
 	inline Geodesic* geo() { return myGeodesic;}
-
-	// function to resolve types.
-	virtual DataType setResolvedType(DataType useType = 0);
 
 	// index value
 	inline int index() const { return indexValue;}
