@@ -447,6 +447,30 @@ body ::tycho::HTML::constructor {args} {
     # Double clicks normally select text, something we don't want here.
     bind $text <Double-Button-1> {break}
 
+    # Modify the menu commands appropriately.
+    if {$myMenubar != {}} {
+        $myMenubar disable {Undo/Redo}
+        $myMenubar disable {Cut}
+        $myMenubar disable {Paste}
+        $myMenubar disable "Font..."
+        $myMenubar delete "Fill Region"
+        $myMenubar delete "Right Fill Column"
+        $myMenubar delete "Set Fill Prefix"
+        $myMenubar delete "Lower Case"
+        $myMenubar delete "Upper Case"
+        $myMenubar delete "Capitalize"
+
+        $myMenubar insert "Open Source" "Switch File..." \
+                -underline 1 -accelerator {C-x s} \
+                -command "$this openSource"
+
+        # delete entire Format bar (to remove Separators)
+        $myMenubar delete Format
+
+        # then re-create it
+        $myMenubar addMenu Format -underline 1
+    }
+
     array set sizes {tiny -2 small 0 medium 2 large 4 huge 8}
     if {$myMenubar != {}} {
         foreach size {tiny small medium large huge} {
@@ -466,32 +490,6 @@ body ::tycho::HTML::constructor {args} {
     set sizeName($this) "small"
     configure -size $sizes($sizeName($this))
 
-    # Modify the menu commands appropriately.
-    if {$myMenubar != {}} {
-        $myMenubar disable {Undo/Redo}
-        $myMenubar disable {Cut}
-        $myMenubar disable {Paste}
-        $myMenubar disable "Font..."
-        $myMenubar delete "Fill Region"
-        $myMenubar delete "Right Fill Column"
-        $myMenubar delete "Set Fill Prefix"
-        $myMenubar delete "Lower Case"
-        $myMenubar delete "Upper Case"
-        $myMenubar delete "Capitalize"
-
-        $myMenubar insert "Open Source" "Switch File..." \
-                -underline 1 -accelerator {C-x s} \
-                -command "$this openSource"
-
-        $myMenubar delete "Insert..."
-        $myMenubar delete "Save"
-        $myMenubar delete "SaveAs..."
-        $myMenubar delete "Evaluate"
-        $myMenubar delete "Revision Control..."
-        $myMenubar delete "Toggle Read-Only"
-        $myMenubar delete "Increase Size"
-        $myMenubar delete "Decrease Size"
-    }
     bind $prefix <Control-x><Key-s> "$this openSource; break"
     # disable certain bindings
     bind $prefix <Control-x><Control-s> {bell; break}
@@ -500,6 +498,12 @@ body ::tycho::HTML::constructor {args} {
     bind $prefix <Control-x><Control-q> {bell; break}
     bind $prefix <Control-x><Key-i> {bell; break}
     bind $prefix <Control-x><Key-v> {bell; break}
+
+    # disable Edit's resize font bindings
+    bind $prefix <Control-equal> {break}
+    bind $prefix <Control-plus> {break}
+    bind $prefix <Control-minus> {break}
+   
 
     # Add bindings for forward and back
     bind $itk_component(text) <Meta-Left> "$this back"
