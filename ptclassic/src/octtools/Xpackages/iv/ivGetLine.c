@@ -12,10 +12,6 @@ static char SccsId[]="$Id$";
  * All rights reserved.
  */
 
-#ifndef lint
-static char rcsid[] = "$Header$";
-#endif
-
 #include "copyright.h"
 #include "port.h"
 #include <sys/ioctl.h>
@@ -25,7 +21,10 @@ static char rcsid[] = "$Header$";
 #include "ualloc.h"
 #include "cursor.bitmap.11"
 #include "iv.h"
+#include "ivBuf.h"
+#include "xformatevent.h"
 
+#include "ivGetLine.h"
 
 #if defined(hpux) || defined(SYSV) || defined(sgi) || defined(linux)
 #define HAS_TERMIOS
@@ -210,7 +209,7 @@ int ivGetLine( IVwin, keyEventPtr, x, y, bufferSize, keepGoing)
 
 
 
-ivTextDestroy() 
+void ivTextDestroy() 
 {
     /* XFreePixmap(getLnPixmap); */
 }
