@@ -1,0 +1,188 @@
+<!-- $Id$-->
+<html>
+<head>
+<title>Building Tcl Extensions</title>
+</head>
+<body bgcolor="#faf0e6">
+<H1><A NAME="tcl extensions, building">Building Tcl Extensions</A></H1>
+
+Tycho includes several Tcl extensions that consist of C code that is
+compiled and loaded into a vanilla <CODE>itkwish</CODE>:
+
+<MENU>
+<LI> <A HREF="../../lib/java/tycho/doc/usersGuides/index.html">Tycho/Java Interface</A>
+
+<LI> <A HREF="../../editors/visedit/doc/usersGuides/ProfileTclHelp.html">Tcl Profiler</A>
+</MENU>
+
+This page discusses the mechanism behind building and installing Tcl
+extensions.  This information is primarily useful for adding your own
+Tcl package.
+
+<H2><A NAME="autoconf software package">Autoconf</A></H2>
+
+Autoconf is a package from the Free Software Foundation that is used
+to configure software.  Autoconf has extensive documentation, but the
+overview is that the software author writes a <A NAME="configure.in
+file"><CODE>configure.in</CODE></A> which <CODE>autoconf</CODE>
+converts to a <A NAME="configure script"><CODE>configure</CODE> script</A>.
+
+ <P>The user runs <CODE>configure</CODE> which examines the operating
+systems for idiosyncrasies and the reads in the <A NAME="makefile.in
+template file"><CODE>makefile.in</CODE> template file</A> and produces
+a <CODE>makefile</CODE>.  The user can then run <CODE>make</CODE> and
+compile and install the package.
+
+ <P>The user need not have <CODE>autoconf</CODE> installed to run
+<CODE>configure</CODE>.  The <CODE>autoconf</CODE> package need only
+be present if the user wishes to modify <CODE>configure.in</CODE> and
+produce a new <CODE>configure</CODE> file.  If <CODE>autoconf</CODE>
+is not available, then it is possible to edit the <CODE>configure</CODE>
+file directly, it is merely a <CODE>/bin/sh</CODE> script.
+
+<H2>Overall Tcl Extension Build Procedure</H2>
+
+To build and install all the Tcl Extensions, the user sets the <A
+NAME="PTARCH environment variable"> <CODE>PTARCH</CODE> environment
+variable</A>.  This variable is used to differentiate between different
+architectures.  To set the <CODE>PTARCH</CODE> variable, under <CODE>/bin/csh</CODE>, do:
+<PRE>
+setenv PTARCH `$TYCHO/bin/ptarch`
+</PRE>
+
+The user then cds to
+<CODE>$TYCHO</CODE> and then types <A NAME="tclexts makefile
+rule"><CODE>make tclexts</CODE></A>.
+
+The <CODE>tclexts</CODE> makefile rule configures, builds and installs
+all the tcl extensions.  Below we discuss each step in turn:
+
+<DL>
+<DT> <CODE>config_tclexts</CODE>
+<DD> This rule creates <CODE>$TYCHO/obj.$PTARCH</CODE> and then runs
+<CODE>configure</CODE>, which creates the <CODE>makefiles</CODE> below
+<CODE>$TYCHO/obj.$PTARCH</CODE>.
+
+<DT> <CODE>all_tclexts</CODE>
+<DD> The rule cds into <CODE>$TYCHO/obj.$PTARCH</CODE> and builds
+all the binaries.
+
+<DT> <CODE>install_tclexts</CODE>
+<DD> This rule cds into <CODE>$TYCHO/obj.$PTARCH</CODE> and installs
+the shared libraries into <CODE>$TYCHO/lib.$PTARCH</CODE>
+
+</DL>
+
+<H2>Tcl Extensions in general</H2>
+
+In Tcl7.5 and later it is fairly easy to load in shared objects that
+add new Tcl commands.  The Tcl <CODE>load</CODE> and
+<CODE>package</CODE> command man pages cover the details.
+
+ <P>The general overview is that C code is compiled with special flags
+to build a shared object.  The special flags are compiler and
+architecture dependent, <CODE>configure</CODE> determines these flags
+by reading the <CODE>tclConfig.sh</CODE> file located in the
+architecture dependent Tcl library directory.
+
+ <P>The shared object has a architecture dependent file extension,
+such as <CODE>.so</CODE> under Solaris2, and <CODE>.sl</CODE> under
+HPUX.  To see what the extension is on your system, start up <CODE>tclsh</CODE>
+or <CODE>itkwish</CODE> and run <CODE>info sharedlibextension</CODE>.
+
+ <P>When the file is loaded by Tcl, a C initialization procedure is
+called by Tcl.  The name of the procedure depends on the name of the
+package or file that is being loaded, see the Tcl <CODE>load</CODE>
+command documentation.  Usually, this procedure is used to create new
+Tcl commands that call user supplied C procedures.
+
+</OL>
+
+<H2>Files in Tycho that are used to create Tcl Extensions</H2>
+Below we describe individual files that are used to create Tcl extensions.
+<DL>
+
+<DT> <A HREF="../../makefile"><CODE>$TYCHO/makefile</CODE></A>
+
+<DD> This file contains the <CODE>tclexts</CODE> rule which
+configures, builds and installs the extensions.  This file is
+described above in more detail.
+
+<DT> <CODE>$TYCHO/src</CODE>
+
+<DD> This directory contains the Tcl extension sources.  Note that
+this directory need not be present once the extensions have been
+built.  Tcl extension authors should not rely on this directory being
+present at runtime.
+
+<DT> <CODE>$TYCHO/obj.$PTARCH</CODE>
+<DD> This directory contains the architecture dependent files created
+by configure, compiling and installing the extensions.  This directory
+can be removed after installation.
+
+<DT> <CODE>$TYCHO/lib.$PTARCH</CODE>
+<DD> This directory contains the Tcl extension shared objects.  Tcl loads packages from this directory.
+
+<DT> <CODE>src/configure.in</CODE>
+<DD> The autoconf template file that <CODE>autoconf</CODE> uses to
+create <CODE>src/configure</CODE>.
+
+<DT> <CODE>src/configure</CODE>
+<DD> Users execute this file to configure the makefiles
+
+<DT> <CODE>mk/java.mk.in</CODE>
+<DD> Java template makefile used by configure to create
+<CODE>obj.$PTARCH/java.mk</CODE>
+
+<DT> <CODE>mk/tcl.mk.in</CODE>
+<DD> Tcl template makefile used by configure to create
+<CODE>obj.$PTARCH/tcl.mk</CODE>
+
+</DL>
+
+<H2>Adding a tcl extension</H2>
+<OL>
+<LI> Create a directory in <CODE>$TYCHO/src</CODE> for your extension.
+
+<LI> Edit <A
+HREF="../../src/configure.in"><CODE>$TYCHO/src/configure.in</CODE></A>
+and add the makefile to the <CODE>AC_OUTPUT()</CODE> macro.
+ <br> The <CODE>$TYCHO/makefile</CODE> rules should automatically run
+<CODE>autoconf</CODE> and update <CODE>src/configure</CODE>.
+
+<LI> Copy a <CODE>makefile.in</CODE> from another directory, such as 
+<CODE>src/profile/makefile.in</CODE> to the directory for your extension.
+
+<LI> Edit the <CODE>makefile.in</CODE> appropriately. 
+<MENU>
+<LI> Substitute in the name of your <CODE>.c</CODE> file
+
+<LI> Modify the name of the library to be produced.  It is best 
+if the shared object that is produced starts with <CODE>lib</CODE>.  
+The <A HREF="../../kernel/doc/usersGuides/Loader.html">Tycho Loader</A> searches
+for shared objects that begin with <CODE>lib</CODE>.
+
+
+<LI> Add the <CODE>makefile.in</CODE> of your extension to <A
+HREF="../../makefile"><CODE>$TYCHO/makefile</CODE></A> so that when
+others run <CODE>make sources</CODE>, your makefile will be retrieved
+from version control.
+
+<LI> Configure, build and install your extension with
+<PRE>
+cd $TYCHO
+make tclexts
+</PRE>
+
+</MENU>
+
+</OL>
+
+<HR>
+Copyright &#169 1996, The Regents of the University of California.
+All rights reserved.
+<br>
+Last updated: 12/29/96,
+comments to: <author>tycho@eecs.berkeley.edu</author>
+</body>
+</html>
