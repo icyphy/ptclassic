@@ -31,7 +31,7 @@
 # Please don't use GNU make extensions in this or any other Tycho makefile
 
 # The doc directory should be last, since it contains the Tycho class diagram
-DIRS = kernel editors lib domains devel typt doc java #bin
+DIRS = kernel editors lib devel typt doc java #bin
 
 # Root of Tycho directory
 ROOT =		.
