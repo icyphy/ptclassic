@@ -60,8 +60,9 @@ variable.
 #include <std.h>
 #include <string.h>
 #include <math.h>
-#include <minmax.h>
+#include <stdio.h>
 #include <ctype.h>
+#include <minmax.h>
 
 //////////////////////
 // Default parameters
@@ -277,7 +278,8 @@ int Fix::is_zero() const {
     uint16 bitmask = (m == 0 ? 0xffff : (uint16)(0xffff0000L >> m));
     return (Bits[nwords-1] & bitmask) == 0;
 }
-
+#undef max
+#undef min
 // max legal value
 double Fix::max() const { return find_max(length, intBits);}
 
@@ -328,6 +330,9 @@ void Fix::initialize()
 static char *OverflowDescriptions[] =
 	{ "saturate", "zero_saturate", "wrap", "warn" };
 
+#ifdef PT_NT4VC
+#define strcasecmp(a,b) strcmp((a),(b))
+#endif
 void Fix::set_ovflow(const char *p)
 {
     int found = FALSE;
@@ -572,6 +577,15 @@ Fix& Fix::operator = (const Fix& x)
 ////////////////////////
 // Arithmetic operators
 ////////////////////////
+#ifdef PT_NT4VC
+#ifndef max
+#define max(a,b)            (((a) > (b)) ? (a) : (b))
+#endif
+
+#ifndef min
+#define min(a,b)            (((a) < (b)) ? (a) : (b))
+#endif
+#endif
 
 void Fix::complement()
 {
@@ -680,7 +694,8 @@ Fix operator * (const Fix& x, const Fix& y)
   else return z;
 }
 
-
+#undef max
+#undef min
 Fix operator * (const Fix& x, int n)
 {  
   int32 a, carry = 0;
