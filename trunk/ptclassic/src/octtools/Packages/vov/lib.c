@@ -154,7 +154,7 @@ static int channelAlreadyOpen()
 static SIGNAL_FN trapChildHandler( ) /* All args are ignored */
 {
   int pid;
-#if defined(hpux) || defined(SYSV) || defined(__sparc)
+#ifdef USE_WAITPID
     int	status;
     if ( (pid = waitpid((pid_t) -1, &status, 0)) == -1)
       perror("waitpid");
@@ -492,7 +492,7 @@ void  VOVend( status )
      * Ends the current transition.
      */
 {
-#if defined(hpux) || defined(SYSV) || defined(__sparc)
+#ifdef WAIT_TAKES_INT_STAR
     int s;
 #else
     union wait s;
@@ -505,12 +505,12 @@ void  VOVend( status )
 	    fflush( stderr );
 	    _VOVend( status );
 	    do {
-#ifdef SYSV
+#ifdef USE_WAITPID
 	      if ((w = waitpid((pid_t) -1, &s, 0)) == -1)
 		perror("waitpid");
 #else
 		w = wait3( &s, 0, 0 );
-#endif
+#endif /* USE_WAITPID */
 	    } while ( w!= channelPid );
 	    exit( status );		/*  */
 	} else {
