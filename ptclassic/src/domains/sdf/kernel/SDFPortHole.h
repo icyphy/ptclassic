@@ -37,7 +37,7 @@ This file contains definitions of SDF-specific PortHole classes.
 #pragma interface
 #endif
 
-#include "PortHole.h"
+#include "DFPortHole.h"
 
 /*****************************************************************
 SDF: Synchronous Data Flow
@@ -56,65 +56,6 @@ from other cases:
 ****************************************************************/
 
     
-        //////////////////////////////////////////
-        // class DFPortHole
-        //////////////////////////////////////////
-
-// Common ancestor for BDFPortHole and SDFPortHole.
-
-class DFPortHole : public PortHole
-{
-protected:
-	int maxBackValue;	// maximum % argument allowed
-public:
-	DFPortHole();
-
-	// farSidePort is always DFPortHole or derived.  This
-	// overrides PortHole::far.
-	DFPortHole* far() const { return (DFPortHole*)farSidePort;}
-
-	// Tell whether port uses old values
-	int usesOldValues() const { return maxBackValue >= numberTokens;}
-
-	// access the maximum delay
-	int maxDelay() const { return maxBackValue;}
-
-	// Modify simulated counts on geodesics, for scheduling
-	void decCount(int n);
-	void incCount(int n);
-
-	// class identification
-	int isA(const char*) const;
-
-	// associated control port (default: none)
-	virtual PortHole* assocPort();
-
-	// relation to associated port (default: none)
-	virtual int assocRelation() const;
-
-	// Function to alter only numTokens and delay.
-	// We re-do porthole initialization if bufferSize changes
-	virtual PortHole& setSDFParams(unsigned numTokens = 1,
-				       unsigned maxPctValue=0);
-
-	// is the port dynamic? (default: return 0)
-	virtual int isDynamic() const;
-
-        // The setPort function is redefined to take one more optional
-        // argument, the number of Particles consumed/generated
-        PortHole& setPort(const char* portName,
-                          Block* parent,
-                          DataType type = FLOAT,
-			  // Number Particles consumed/generated
-                          unsigned numTokens = 1,
-			  // Maximum delay the Particles are accessed
-			  unsigned maxPctValue = 0);
-
-	// The number of repetitions of the parent star, valid only
-	// after the schedule is computed.
-	int parentReps() const;
-
-};
 
         //////////////////////////////////////////
         // class SDFPortHole
@@ -181,28 +122,9 @@ public:
         // class MultiSDFPort
         //////////////////////////////////////////
  
-// Synchronous dataflow MultiPortHole
- 
-class MultiSDFPort : public MultiPortHole {
-protected:
-        // The number of Particles consumed
-        unsigned numberTokens;
-public:
-	MultiSDFPort();
-	~MultiSDFPort();
+// Synchronous dataflow MultiPortHole: same as DFPortHole
 
-	// Function to alter only numTokens and delay.
-	// We re-do porthole initialization if bufferSize changes
-	MultiPortHole& setSDFParams(unsigned numTokens = 1,
-				    unsigned maxPstValue=0);
-
-        // The setPort function is redefined to take one more optional
-        // argument, the number of Particles produced
-        MultiPortHole& setPort(const char* portName,
-                          Block* parent,
-                          DataType type = FLOAT,        // defaults to FLOAT
-                          unsigned numTokens = 1);      // defaults to 1
-};
+typedef MultiDFPort MultiSDFPort;
 
         //////////////////////////////////////////
         // class MultiInSDFPort
