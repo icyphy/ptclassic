@@ -82,7 +82,7 @@ void Wormhole :: buildEventHorizons () {
 			to.ghostConnect (from);
 			from.inheritTypeFrom (realGalp);
 			to.inheritTypeFrom (from);
-			from.connect(galp,0);
+			from.connect(realGalp,0);
 		}
 		else {
 			EventHorizon& to = inSideDomain->newTo();
@@ -95,7 +95,7 @@ void Wormhole :: buildEventHorizons () {
 			to.ghostConnect (from);
 			to.inheritTypeFrom (realGalp);
 			from.inheritTypeFrom (to);
-			galp.connect(to,0);
+			realGalp.connect(to,0);
 		}
 	}
 	dynamicHorizons = TRUE;
