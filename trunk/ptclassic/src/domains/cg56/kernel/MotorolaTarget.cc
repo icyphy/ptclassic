@@ -51,6 +51,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "MotorolaAttributes.h"
 #include "CGUtilities.h"
 
+#define CG56_BITS_IN_WORD 24
+
 const Attribute ANY = {0,0};
 
 // a MotorolaMemory represents the X and Y memories of a 56000 or 96000.  
@@ -84,6 +86,8 @@ void MotorolaTarget :: initStates() {
 	assemblerOptions = "-A -B -L";
 	softwareCost = 0;
 	costString.initialize();
+	maxFixedPointValue = 1.0 - 1.0 / double(1 << (CG56_BITS_IN_WORD - 1));
+	minFixedPointValue = -1.0;
 }
 
 void MotorolaTarget :: setup() {
@@ -144,15 +148,15 @@ Block* MotorolaTarget :: makeNew () const {
 	LOG_NEW; return new MotorolaTarget(*this);
 }
 
-void MotorolaTarget::beginIteration(int repetitions, int) {
-    if (repetitions == -1)		// iterate infinitely
-	*defaultStream << targetNestedSymbol.push("LOOP") << "\n";
-    else				// iterate finitely
-	*defaultStream << "\tdo\t#" << repetitions << "," 
-	       << targetNestedSymbol.push("LOOP") << "\n";
+void MotorolaTarget::beginIteration(int repetitions, int /*depth*/) {
+	if (repetitions == -1)		// iterate infinitely
+	    *defaultStream << targetNestedSymbol.push("LOOP") << "\n";
+	else				// iterate finitely
+	    *defaultStream << "\tdo\t#" << repetitions << "," 
+			   << targetNestedSymbol.push("LOOP") << "\n";
 }
 
-void MotorolaTarget::endIteration(int repetitions, int) {
+void MotorolaTarget::endIteration(int repetitions, int /*depth*/) {
 	if (repetitions == -1)		// iterate infinitely
 		*defaultStream << "\tjmp\t"<< targetNestedSymbol.pop() << "\n";
 	else 				// iterate finitely
@@ -205,16 +209,15 @@ void MotorolaTarget::writeFloat(double val) {
 }
 
 double MotorolaTarget::limitFix(double val) { 
-	const double limit = 1.0 - 1.0/double(1<<23);
-	if (val >= limit) return limit;
-	else if (val <= -1.0) return -1.0;
+	if (val >= maxFixedPointValue) return maxFixedPointValue;
+	else if (val <= minFixedPointValue) return minFixedPointValue;
 	else return val;
 }
 
 StringList MotorolaTarget::comment(const char* msg, const char* begin,
-const char* end, const char* cont) {
-	if (begin==NULL) return CGTarget::comment(msg,"; ");
-	else return CGTarget::comment(msg,begin,end,cont);
+				   const char* end, const char* cont) {
+	return (begin) ? CGTarget::comment(msg, begin, end, cont) :
+			 CGTarget::comment(msg,"; ");
 }
 
 // Determine whether or not the star firing can be implemented with
@@ -224,12 +227,11 @@ static int staticCode(CGStar& star) {
     CGPortHole* port;
 
     // Test the parameters of all ports.
-    while ( (port = (CGPortHole*)nextPort++) != NULL) {
+    while ( (port = (CGPortHole*)nextPort++) != 0) {
 	// If the buffer size is not the same as the number of
 	// particles transferred in one firing, then each firing must
 	// read from a different location.
-	if (port->numXfer() != port->bufSize())
-	{
+	if (port->numXfer() != port->bufSize()) {
 	    if ((port->attributes() & PB_CIRC) == 0) return FALSE;
 	}
     }
