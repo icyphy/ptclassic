@@ -9,7 +9,7 @@
 #include "copyright.h"				COPYRIGHTENDKEY
 */
 #if !defined(lint) && !defined(SABER)
-static char rcsid[] = "$Header$";
+static char SccsId[] = "$Id$";
 #endif
 
 #include "topFixup.h"
