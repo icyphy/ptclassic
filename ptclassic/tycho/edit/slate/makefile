@@ -62,7 +62,6 @@ ITCL_SRCS = \
 	Slider.itcl \
 	Solid.itcl \
 	Stepper.itcl \
-	Strip.itcl \
 	Terminal.itcl
 
 EXTRA_SRCS =		$(TCL_SRCS) $(ITCL_SRCS)
