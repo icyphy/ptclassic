@@ -43,12 +43,12 @@ TCL_SRCS = testDEDefs.tcl
 
 # Demos that use stars that are not present in pitcl
 SIMPLE_PTCL_TESTS = \
-	testSDFContrib.tcl
+	testDEContrib.tcl
 
 
-# testSDFStars.tcl should be first, since it instantiates one of every star.
+# testDEStars.tcl should be first, since it instantiates one of every star.
 SIMPLE_TESTS = \
-	testSDFStars.tcl \
+	testDEStars.tcl \
 
 GRAPHICAL_TESTS = \
 	dummy
