@@ -54,8 +54,9 @@ Programmer: J. Buck, E. Goei, E. A. Lee
 #include <signal.h>
 #include <ctype.h>
 
-// Include the global ptcl object (contains the universe) - aok
-#include "ptcl.h"
+// Include the global ptcl object (contains the universe)
+#include "PTcl.h"
+extern PTcl *ptcl;  
 
 extern "C" {
 #define Pointer screwed_Pointer         /* rpc.h and type.h define Pointer */
