@@ -15,8 +15,6 @@ Invoke a Tcl script that can optionally define a procedure that is
 invoked every time the star fires.
 	}
 	htmldoc {
-<pre>
-</pre>
 The star reads a file containing Tcl commands.
 It can be used in a large variety of ways, including using Tk to animate
 or control a simulation.
@@ -84,8 +82,6 @@ the invocation time of the star.
 If it occurs asynchronously, then the timestamp is somewhat arbitrary,
 in that the current time of the scheduler, whenever the procedure happens
 to be invoked, will be used.
-<pre>
-</pre>
 	}
 	hinclude { "TclStarIfc.h" }
 	ccinclude { "ptk.h" }
