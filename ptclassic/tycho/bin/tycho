@@ -268,10 +268,12 @@ if ( $?selectPtolemy && ! $?selectJava) then
 		endif
 		set debugcmdfile = /tmp/tychodbg.$$
 		echo "break main" > $debugcmdfile
+		# Since we are running tysh, not itkwish, we need
+		# not pass -f .../Tycho.tcl
 		if ( $?filename) then
-			echo run -f \"$TYCHO/kernel/Tycho.tcl\" \"$filename\"  >> $debugcmdfile
+			echo run \"$filename\"  >> $debugcmdfile
 		else
-			echo "run -f $TYCHO/kernel/Tycho.tcl "  >> $debugcmdfile
+			echo "run "  >> $debugcmdfile
 		endif
 
 		if ( ! $?tychodebugnoprog ) then
