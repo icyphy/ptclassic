@@ -24,7 +24,7 @@ RANLIB =	ranlib
 # Hopefully, this will go away sometime soon
 CC =		gcc
 OPTIMIZER =	-O2
-WARNINGS =	-Wall -Wcast-qual -Wcast-align
+WARNINGS =	-Wall -Wcast-qual
 GPPFLAGS =	-DUSG -g $(MEMLOG) $(WARNINGS) $(OPTIMIZER)
 CFLAGS =	-DUSG -g $(OPTIMIZER)
 
