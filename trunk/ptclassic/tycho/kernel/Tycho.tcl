@@ -3,7 +3,7 @@
 # on the command-line arguments.  If no command-line arguments are given,
 # then a console window is opened.
 #
-# @Author: Edward A. Lee
+# @Authors: Edward A. Lee, Christopher Hylands
 #
 # @Version: $Id$
 #
@@ -122,25 +122,29 @@ if [file isdirectory $PTOLEMY/tcltk/itcl/lib] {
     if {$tk_version >= 4.1 } {
 	# Really, we should be checking the environment variables here, rather
 	# than just overriding them.
-	set env(TCL_LIBRARY) $PTOLEMY/tcltk/itcl/lib/itcl/tcl
-	set env(TK_LIBRARY) $PTOLEMY/tcltk/itcl/lib/itcl/tk
-	set tk_library $env(TK_LIBRARY)
-	uplevel #0 {
-	    source $PTOLEMY/tcltk/itcl/lib/itcl/tcl/init.tcl
-	    source $PTOLEMY/tcltk/itcl/lib/itcl/tk/tk.tcl
-	    source $PTOLEMY/tcltk/itcl/lib/itcl/itcl/itcl.tcl
-	    source $PTOLEMY/tcltk/itcl/lib/itcl/itk/itk.tcl
-	    source $PTOLEMY/tcltk/itcl/lib/itcl/iwidgets/iwidgets.tcl
+	if [file isdirectory $PTOLEMY/tcltk/itcl/lib/itcl/tcl] {
+	    set env(TCL_LIBRARY) $PTOLEMY/tcltk/itcl/lib/itcl/tcl
+	    set env(TK_LIBRARY) $PTOLEMY/tcltk/itcl/lib/itcl/tk
+	    set tk_library $env(TK_LIBRARY)
+	    uplevel #0 {
+		source $PTOLEMY/tcltk/itcl/lib/itcl/tcl/init.tcl
+		source $PTOLEMY/tcltk/itcl/lib/itcl/tk/tk.tcl
+		source $PTOLEMY/tcltk/itcl/lib/itcl/itcl/itcl.tcl
+		source $PTOLEMY/tcltk/itcl/lib/itcl/itk/itk.tcl
+		source $PTOLEMY/tcltk/itcl/lib/itcl/iwidgets/iwidgets.tcl
+	    }
 	}
     } else {
-	set env(TCL_LIBRARY) $PTOLEMY/tcltk/itcl/lib/tcl
-	set env(TK_LIBRARY) $PTOLEMY/tcltk/itcl/lib/tk
-	set tk_library $env(TK_LIBRARY)
-	uplevel #0 {
-	    source $PTOLEMY/tcltk/itcl/lib/tcl/init.tcl
-	    source $PTOLEMY/tcltk/itcl/lib/tk/tk.tcl
-	    source $PTOLEMY/tcltk/itcl/lib/itcl/init.itcl
-	    source $PTOLEMY/tcltk/itcl/lib/itk/init.itk
+	if [file isdirectory $PTOLEMY/tcltk/itcl/lib/tcl] {
+	    set env(TCL_LIBRARY) $PTOLEMY/tcltk/itcl/lib/tcl
+	    set env(TK_LIBRARY) $PTOLEMY/tcltk/itcl/lib/tk
+	    set tk_library $env(TK_LIBRARY)
+	    uplevel #0 {
+		source $PTOLEMY/tcltk/itcl/lib/tcl/init.tcl
+		source $PTOLEMY/tcltk/itcl/lib/tk/tk.tcl
+		source $PTOLEMY/tcltk/itcl/lib/itcl/init.itcl
+		source $PTOLEMY/tcltk/itcl/lib/itk/init.itk
+	    }
 	}
     }
 }
