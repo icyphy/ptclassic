@@ -53,6 +53,7 @@ protected:
 	StringList endAddress;
 	/*virtual*/ void headerCode();
 	/*virtual*/ void trailerCode();
+
 public:
 	MotorolaSimTarget(const char* nam,const char* desc,
 		  const char* sclass) : MotorolaTarget(nam,desc,sclass) {}
@@ -72,6 +73,9 @@ private:
 	// stream for writeFile stars
 	CodeStream simulatorCmds;
 	CodeStream shellCmds;
+
+	// implementation costs
+	StringList costInfoString;
 };
 
 #endif
