@@ -84,6 +84,7 @@ class ::tycho::IndexBrowser {
     # FIXME: Should remove the -command option (or support it?)
 
     constructor {args} {}
+    destructor {}
 
     ##################################################################
     ####                     public methods                       ####
