@@ -52,7 +52,7 @@ extern const char DEdomainName[];
 	////////////////////////////
 
 StringList CQScheduler :: displaySchedule () {
-	return "DE schedule is computed at run-time\n";
+    return "{ { scheduler \"Calendar queue run-time scheduler\" } }";
 }
 
 
@@ -133,6 +133,11 @@ int CQScheduler :: computeDepth() {
 // Run until StopTime.
 
 int CQScheduler :: run () {
+
+    if (!galaxy()) {
+        Error::abortRun("No galaxy to run");
+        return FALSE;
+    }
 
     if (haltRequested()) {
 	    Error::abortRun(*galaxy(),
