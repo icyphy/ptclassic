@@ -487,6 +487,52 @@ proc pftProcessArgs { } {
 }
 
 
+#   In Ptolemy 0.7.1 and earlier, some of the facets in
+#   $PTOLEMY/lib/ptolemy had the % character in their names, which
+#   causes no end of trouble under NT4.0 with Cygwin 20.1.
+#   In Ptolemy 0.7.1 and later, we changed the name of these
+#   files and substituted in the string "percent" for the character
+#   "%".
+#   See also $PTOLEMY/bin/fixntpaths, src/pigilib/local.h
+
+proc pftPreLoadMap {} {
+    global env
+    if [file isdirectory "$env(PTOLEMY)/lib/colors/ptolemy/percentcCursor"] {
+	puts "Preloading \$PTOLEMY/lib/colors/ptolemy/% conversions"
+	pftSetCellMap {$PTOLEMY/lib/colors/ptolemy/%cCursor} \
+		{$PTOLEMY/lib/colors/ptolemy/percentcCursor}
+
+	pftSetCellMap {$PTOLEMY/lib/colors/ptolemy/%dBus} \
+		{$PTOLEMY/lib/colors/ptolemy/percentdBus}
+
+	pftSetCellMap {$PTOLEMY/lib/colors/ptolemy/%dDelay} \
+		{$PTOLEMY/lib/colors/ptolemy/percentdDelay}
+
+	pftSetCellMap {$PTOLEMY/lib/colors/ptolemy/%dDelay2} \
+		{$PTOLEMY/lib/colors/ptolemy/percentdDelay2}
+
+	pftSetCellMap {$PTOLEMY/lib/colors/ptolemy/%iNewGal} \
+		{$PTOLEMY/lib/colors/ptolemy/percentiNewGal}
+
+	pftSetCellMap {$PTOLEMY/lib/colors/ptolemy/%iNewPal} \
+		{$PTOLEMY/lib/colors/ptolemy/percentiNewPal}
+
+	pftSetCellMap {$PTOLEMY/lib/colors/ptolemy/%iNewStar} \
+		{$PTOLEMY/lib/colors/ptolemy/percentiNewStar}
+
+	pftSetCellMap {$PTOLEMY/lib/colors/ptolemy/%iNewUniv} \
+		{$PTOLEMY/lib/colors/ptolemy/percentiNewUniv}
+
+	pftSetCellMap {$PTOLEMY/lib/colors/ptolemy/%pInput} \
+		{$PTOLEMY/lib/colors/ptolemy/percentpInput}
+
+	pftSetCellMap {$PTOLEMY/lib/colors/ptolemy/%pOutput} \
+		{$PTOLEMY/lib/colors/ptolemy/percentpOutput}
+	pftSetCellMap {$PTOLEMY/lib/colors/ptolemy/con} \
+		{$PTOLEMY/lib/colors/ptolemy/con0}
+    }
+}
+
 proc pftMain { } {
     global env
 
@@ -505,7 +551,9 @@ proc pftMain { } {
     uplevel #0 source $env(PTOLEMY)/lib/tcl/topgetopt.tcl
 
     pftProcessArgs
+    pftPreLoadMap
     pftMainLoop
 }
+
 
 pftMain
