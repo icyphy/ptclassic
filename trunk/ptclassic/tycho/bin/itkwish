@@ -22,17 +22,28 @@ else
 endif
 
 # ITCLDIR should be the location of the untar'd itcl files
-if (! $?ITCLDIR) setenv ITCLDIR $TYCHO
+if (! $?ITCLDIR) setenv ITCLDIR $PTOLEMY/tcltk
 
 
-# The value of PTARCH is the architecture.
+# The value of PTARCH is the architecture (sol2.5, hppa, sun4)
 if (! $?PTARCH) then
-	if ( ! -x "$ITCLDIR/bin/ptarch") then
-	  echo "$ITCLDIR/bin/ptarch either is not executable or does not exist"
-	  echo 'Perhaps you need to set $ITCLDIR'
+	if ( -x "$TYCHO/bin/ptarch") then
+		setenv PTARCH `$TYCHO/bin/ptarch`
+	else
+		if ( -x "$ITCLDIR/itcl/bin/ptarch") then
+		setenv PTARCH `$ITCLDIR/itcl/bin/ptarch`
+		else
+			echo '$PTARCH is not set."
+			echo "$TYCHO/bin/ptarch and 
+			echo "$ITCLDIR/itcl/bin/ptarch either are not"
+			echo " executable or do not exist, so we cannot"
+			echo " run ptarch."
+			echo 'Perhaps you need to set $ITCLDIR?'
+		endif
 	endif
-	setenv PTARCH ` $ITCLDIR/bin/ptarch`
 endif
+
+set progname =  `basename $0`
 
 if ( -f $ITCLDIR/itcl/lib/itcl/itcl/itcl.tcl ) then
 	if ($PTARCH =~ hppa?*) then
@@ -56,7 +67,7 @@ if ( -f $ITCLDIR/itcl/lib/itcl/itcl/itcl.tcl ) then
 	setenv ITK_LIBRARY $ITCLDIR/itcl/lib/itcl/itk
 	setenv IWIDGETS_LIBRARY $ITCLDIR/itcl/lib/itcl/iwidgets
 
-	exec $ITCLDIR/itcl.$PTARCH/bin/itkwish $*
+	exec $ITCLDIR/itcl.$PTARCH/bin/$progname $*
 else
 	if ( -f $PTOLEMY/tcltk/tcl/lib/tcl/init.tcl) then
 		# Itcl2.0, which was shipped with Ptolemy0.6
@@ -65,7 +76,7 @@ else
 		setenv ITCL_LIBRARY $PTOLEMY/tcltk/itcl/lib/itcl
 		setenv ITK_LIBRARY $PTOLEMY/tcltk/itcl/lib/itk
 		setenv IWIDGETS_LIBRARY $PTOLEMY/tcltk/itcl/lib/iwidgets
-		exec $PTOLEMY/bin.$PTARCH/itkwish $*
+		exec $PTOLEMY/bin.$PTARCH/$progname $*
 	else
 		# If we just call itkwish here, we will end up in 
 		# a recursive loop
@@ -79,12 +90,12 @@ else
 		set newpath=''
 		foreach dir ($path)
 			if ( $dir != $bindir ) then
-				if ( -e $dir/itkwish ) then
-					file $dir/itkwish | \
+				if ( -e $dir/progname ) then
+					file $dir/progname | \
 					 egrep -s 'csh|c-shell|script'
 					if ($status != 0) then
-						echo $dir/itkwish
-						exec $dir/itkwish $*
+						echo $dir/progname
+						exec $dir/progname $*
 					endif	
 				endif
 			endif	
