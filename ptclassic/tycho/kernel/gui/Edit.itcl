@@ -256,7 +256,8 @@ body ::tycho::Edit::focusin {} {
 # This should be redefined in derived classes.
 #
 body ::tycho::Edit::help {} {
-    ::tycho::File::openContext doc/EditHelp.html
+    global TYCHO
+    ::tycho::File::openContext $TYCHO/doc/EditHelp.html
 }
 
 ###################################################################
