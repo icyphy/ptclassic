@@ -113,7 +113,7 @@ int CompileTarget::writeGalDef(Galaxy& galaxy, StringList className) {
     // -- use the original class name, not the sanitized class name
     // -- destructor for pt_ofstream will close the file automatically
     StringList galFileName = galaxy.className();
-    galFileName += ".h";
+    galFileName << ".h";
     char* codeFileName = writeFileName(galFileName);
     pt_ofstream codeFile(codeFileName);
     delete [] codeFileName;
@@ -142,7 +142,7 @@ int CompileTarget::run() {
     }
 
     StringList universeClassName = sanitizedName(*galaxy());
-    universeClassName += "Class";
+    universeClassName << "Class";
     StringList universeName = sanitizedName(*galaxy());
 
     // First generate the files that define the galaxies
@@ -217,7 +217,7 @@ int CompileTarget::run() {
 
     myCode += "exit(0);\n";
     myCode += "}\n";
-    return 1;
+    return TRUE;
 }
 
 void CompileTarget::wrapup() {
@@ -235,8 +235,7 @@ void CompileTarget::wrapup() {
 
     // Check to see whether makefile is present, and if not, copy it in.
     // The makefile will invoke the compiler
-    StringList cmd;
-    cmd = "cd ";
+    StringList cmd = "cd ";
     cmd += (const char*)destDirectory;
     cmd += "; if (test -r make.template) then ";
     cmd += "( echo make.template already exists) ";
@@ -248,9 +247,11 @@ void CompileTarget::wrapup() {
     cmd += "fi";
     if(system(cmd)) {
 	Error::abortRun("Failed to copy ", templName, " into make.template");
-	delete [] templName;
+        delete [] templName;
 	return;
     }
+    delete [] templName;
+
     // Invoke make depend
     cmd = "cd ";
     cmd += destDirectory;
@@ -263,6 +264,7 @@ void CompileTarget::wrapup() {
 	Error::abortRun("Compilation errors in generated code.");
 	return;
     }
+
     cmd = "cd ";
     cmd += (const char*)destDirectory;
     cmd += "; mv -f code ";
@@ -275,7 +277,6 @@ void CompileTarget::wrapup() {
     cmd += galaxy()->name();
     cmd += "; ";
     cmd += galaxy()->name();
-    delete [] templName;
     system(cmd);
 }
 
@@ -320,8 +321,7 @@ void CompileTarget::writeFiring(Star& s, int depth) {
 
 const GenericPort* CompileTarget::findMasterPort(const PortHole* p) const {
 	const GenericPort* g = p->getMyMultiPortHole();
-	if (!g) 
-		g = p;
+	if (!g) g = p;
 	return g;
 }
 
@@ -344,34 +344,35 @@ StringList CompileTarget::expandedName(const GenericPort* p) const {
 
 // Replace all quotation marks in a string with \"
 StringList CompileTarget::quoteQuotationMarks(const char* str) {
-    StringList ret;
-    char piece[101];
     if (!str) return "";
-    while (*str != '\0') {
+    StringList ret;
+    while (*str) {
+	char piece[128];
 	char* piecep = piece;
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < 127; i++) {
 	    if (*str == '\0') {
 		*(piecep++) = '\0';
 		break;
-	    } else if (*str == '\"') {
+	    }
+	    else if (*str == '\"') {
 	        *(piecep++) = '\\';
 	        *(piecep++) = '\"';
 		i++;
-	    } else {
+	    }
+	    else {
 	        *(piecep++) = *str;
 	    }
 	    str++;
 	}
-	ret += piece;
+	piece[127] = 0;			// make sure piece is null terminated
+	ret << piece;
     }
     return ret;
 }
 
 // Define the routines necessary for Tcl/Tk (Wan-Teh Chang and Brian Evans)
 StringList CompileTarget::tcltkSetup() {
-    StringList myCode;
-    myCode.initialize();
-    myCode += "// Include files needed by Tcl/Tk commands\n";
+    StringList myCode = "// Include files needed by Tcl/Tk commands\n";
     myCode += "#include <iostream.h>\n";
     myCode += "#include \"SimControl.h\"\n";
     myCode += "extern \"C\" {\n";
@@ -394,10 +395,7 @@ StringList CompileTarget::tcltkSetup() {
 
 // Initialize the Tcl/Tk interpreter (Wan-Teh Chang and Brian Evans)
 StringList CompileTarget::tcltkInitialize(StringList& universeName) {
-    StringList myCode;
-    myCode.initialize();
-
-    myCode += "\n// Initialize the Tcl interpreter\n";
+    StringList myCode = "\n// Initialize the Tcl interpreter\n";
     myCode += "ptkInterp = Tcl_CreateInterp();\n";
     myCode += "ptkW = Tk_CreateMainWindow(ptkInterp, NULL, \"";
     myCode += universeName;
@@ -453,6 +451,7 @@ StringList CompileTarget::galDef(Galaxy* galaxy,
 			StringList className, int level) {
     StringList myCode;
     myCode.initialize();
+
     // The following iterator looks only at the current level of the graph
     GalTopBlockIter next(*galaxy);
     Block* b;
@@ -460,9 +459,7 @@ StringList CompileTarget::galDef(Galaxy* galaxy,
 	// An include file is generated for every block.  This means some
 	// classes will have their definitions included more than once.
 	// This is harmless.
-	myCode += "#include \"";
-	myCode += b->className();
-	myCode += ".h\"\n";
+	myCode << "#include \"" << b->className() << ".h\"\n";
     }
     // Generate include statements for galaxy states
     BlockStateIter galStateIter(*galaxy);
