@@ -86,7 +86,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	    InDEMPHIter nextp(input);
 	    InDEPort* p;
 	    int i = 0;
-	    while ((p = nexti++) != 0) {
+	    while ((p = nextp++) != 0) {
 		if ( p->dataNew ) {
 		  if ( bar.update(i, count, p->get()) == FALSE ) {
 		    Error::abortRun(*this, "failed to update bar chart");
