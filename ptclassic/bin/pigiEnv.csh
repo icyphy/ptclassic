@@ -68,7 +68,7 @@ endif
 xrdb -merge $PTOLEMY/lib/$resfile
 
 # Allow user-specified X resources
-if ( $?PIGIRES ) then
+if ( $?PIGIXRES ) then
     xrdb -merge $PIGIXRES
 endif
 
