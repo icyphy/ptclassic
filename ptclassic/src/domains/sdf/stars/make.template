@@ -34,6 +34,8 @@ SRCS= \
  SDFAutocor.pl \
  SDFBiQuad.pl \
  SDFBlackHole.pl \
+ SDFBlockFIR.pl \
+ SDFBurg.pl \
  SDFCommutator.pl \
  SDFComplexDC.pl \
  SDFComplexFFT.pl \
@@ -47,6 +49,7 @@ SRCS= \
  SDFDB.pl \
  SDFDistributor.pl \
  SDFDownSample.pl \
+ SDFDTFT.pl \
  SDFExp.pl \
  SDFFIR.pl \
  SDFFloatDC.pl \
@@ -64,13 +67,17 @@ SRCS= \
  SDFIIDUniform.pl \
  SDFIntRamp.pl \
  SDFIntegrator.pl \
+ SDFLevDur.pl \
+ SDFLimit.pl \
  SDFLMS.pl \
  SDFLog.pl \
  SDFPlay.pl \
  SDFPolarRect.pl \
  SDFPrinter.pl \
  SDFRealComplex.pl \
+ SDFReciprocal.pl \
  SDFRectPolar.pl \
+ SDFRepeat.pl \
  SDFSin.pl \
  SDFSqrt.pl \
  SDFUpSample.pl \
