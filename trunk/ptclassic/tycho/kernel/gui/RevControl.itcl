@@ -690,7 +690,6 @@ body ::tycho::RevControl::parseHistory {history text} {
 	    $text tag configure comment -lmargin2 0.5c
 	}
     }
-    puts "Filelist: $filelist"
 }
 
     ###################################################################
