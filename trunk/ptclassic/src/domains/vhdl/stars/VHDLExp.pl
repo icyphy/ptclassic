@@ -54,7 +54,7 @@ $temp(result,float) :=
   $temp(term6,float) + $temp(term7,float) + $temp(term8,float) +
   $temp(term9,float) + $temp(term10,float) + $temp(term11,float);
 
-$ref(output) := $temp(result,float);
+$ref(output) $assign(output) $temp(result,float);
 	}
 	go {
 	  addCode(std);
