@@ -287,7 +287,7 @@ body ::tycho::Edit::insertFile {} {
 # no file has been specified by the -file option.
 #
 body ::tycho::Edit::revert {} {
-    if {[isModified] && $file != "NoName" && $file != ""} {
+    if {$modified && $file != "NoName" && $file != ""} {
 	if [askuser "OK to discard changes in [file tail $file]?"] {
 	    $itk_component(text) deleteRange 1.0 end
 	    $itk_component(text) readFile $file
