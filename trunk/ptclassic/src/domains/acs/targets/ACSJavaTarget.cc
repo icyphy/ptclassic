@@ -29,6 +29,26 @@ ENHANCEMENTS, OR MODIFICATIONS.
  Version: $Id$
 
 ***********************************************************************/
-
+#ifdef __GNUG__
+#pragma implementation
+#endif
 
 #include "ACSJavaTarget.h"
+#include "KnownTarget.h"
+
+ACSJavaTarget::ACSJavaTarget(const char* name,const char* starclass,
+        const char* desc, const char* assocDomain)
+    : ACSCGTarget(name,starclass,desc,assocDomain) {}
+
+ACSJavaTarget :: ~ACSJavaTarget() {}
+
+Block* ACSJavaTarget::makeNew() const {
+    LOG_NEW; return new ACSJavaTarget(name(),starType(),descriptor());
+}
+
+ISA_FUNC(ACSJavaTarget,ACSCGTarget);
+
+static ACSJavaTarget targ("ACS-Java","ACSStar",
+	"A target for Java code generation using Adaptive Computing System Coronas and Cores");
+
+static KnownTarget entry(targ,"ACS-Java");
