@@ -7,7 +7,7 @@ A finite impulse response (FIR) filter with fixed-point capabilities.
 The fixed-point coefficients are specified by the "taps" parameter.
 The default coefficients give an 8th-order, linear phase lowpass filter.
 To read coefficients from a file, replace the default coefficients
-with "< fileName", preferably specifying a complete path.
+with "<fileName", preferably specifying a complete path.
 Polyphase multirate filtering is also supported.
         }
         version { $Id$ }
@@ -27,10 +27,10 @@ This star implements a finite-impulse response filter with multirate capability.
 The default coefficients correspond to an eighth-order, equiripple,
 linear-phase, lowpass filter which has a 3 dB cutoff frequency at
 approximately $1/3$ of the Nyquist frequency.
-The default precision on these coefficients is 1.23, i.e.,
-1 sign bit and 23 fractional bits.
-You can override the default precision by adding a precision specification
-surrounded by curly braces at the beginning of the string of array values.
+The default precision on these coefficients is a total of 24 bits.
+The number of decimal bits is chosen as the minimum number of bits
+needed to represent the number in fixed-point.
+One bit is reserved for the sign, and the rest are fractional bits.
 During computation of filter outputs, the precision of the filter taps
 is converted to the precision contained in the "TapsPrecision" parameter.
 .pp

@@ -49,11 +49,11 @@ The state variables are stored with the precision given by \fIStatePrecision\fR.
 The output is quantized (rounded) to \fIOutputPrecision\fR before being
 sent to the output.
 .pp
-The numerator ``tap'' coefficients and the denominator ``feedback''
-coefficients have a default precision of 1.23, i.e., 1 sign bit and
-23 fractional bits.
-You can override the default precision by adding a precision specification
-surrounded by curly braces at the beginning of the string of array values.
+The numerator "tap" coefficients and the denominator "feedback"
+coefficients have a default precision of 24 bits.
+The number of decimal bits is chosen as the minimum number of bits
+needed to represent the number in fixed-point.
+One bit is reserved for the sign, and the rest are fractional bits.
 During computation of filter outputs, the precision of the filter taps
 is converted to the precision contained in the "CoefPrecision" parameter.
 .ID "Schafer, R. W."
