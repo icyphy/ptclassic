@@ -41,17 +41,15 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "VHDLTarget.h"
 #include <ostream.h>
 
-/*
 static TypeConversionTable vhdlCnvTable[7] = {
+  {  FLOAT, 	COMPLEX,	"FloatToCx"	},
   {  COMPLEX, 	FIX, 		"CxToFix"	},
-  {  COMPLEX, 	ANYTYPE,	"CxToFloat"	},
+  {  COMPLEX, 	FLOAT,		"CxToFloat"	},
   {  FIX,	COMPLEX,	"FixToCx"	},
   {  FIX,	FIX,		"FixToFix"	},
   {  FIX,	ANYTYPE,	"FixToFloat"	},
-  {  ANYTYPE, 	COMPLEX,	"FloatToCx"	},
   {  ANYTYPE, 	FIX,		"FloatToFix"	}
 };
-*/
 
 // Constructor
 VHDLTarget :: VHDLTarget(const char* name, const char* starclass,
@@ -70,11 +68,9 @@ HLLTarget(name, starclass, desc) {
   // Make states defined in CGTarget settable.
   displayFlag.setAttributes(A_SETTABLE);
 
-/*
   // Initialize type conversion table
   typeConversionTable = vhdlCnvTable;
   typeConversionTableRows = 7;
-  */
 }
 
 // Clone
@@ -706,7 +702,7 @@ StringList VHDLTarget :: stateType(const State* st) {
   if (st->isA("IntState") || st->isA("IntArrayState"))
     type = "INTEGER";
   else if (st->isA("ComplexState") || st->isA("ComplexArrayState"))
-    type = "COMPLEX";
+    type = "REAL";
   else if (st->isA("StringState") || st->isA("StringArrayState"))
     type = "CHARACTER";
   else
@@ -722,7 +718,7 @@ StringList VHDLTarget :: sanitizeType(const char* ctyp) {
   if (!strcmp(ctyp,"INT") || !strcmp(ctyp,"int"))
     type << "INTEGER";
   else if (!strcmp(ctyp,"COMPLEX") || !strcmp(ctyp,"complex"))
-    type << "COMPLEX";
+    type << "REAL";
   else
     type << "REAL";
 
