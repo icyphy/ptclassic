@@ -29,7 +29,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
  Programmer: Brian L. Evans
 
-       Functions for decompostion of matrices to their Smith forms. 
+       Functions for decomposition of integer matrices into their
+       Smith forms. 
 
 ********************************************************************/
 
@@ -37,8 +38,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "ptdspExtendedGCD.h"
 #include <malloc.h>
 
-#define intmin(m,n)             ( ( (m) < (n) ) ? (m) : (n) )
-#define intabs(m)               ( ( (m) > 0 ) ? (m) : (-(m)) )
+#define INT_MIN_VALUE(m,n)      ( ( (m) < (n) ) ? (m) : (n) )
+#define INT_ABS_VALUE(m)        ( ( (m) > 0 ) ? (m) : (-(m)) )
 #define INT_IS_ZERO(x)          ( ! (x) )
 #define INT_IS_NOT_ZERO(x)      (x)
 #define INT_SWAP3(a,b,t)        { t = a; a = b; b = t; }
@@ -138,8 +139,8 @@ mul(int* outMatrix, const int* src1, const int nRows1, const int nCols1,
    matrices is analogous to singular value decomposition for
    floating-point matrices. 
 
-   U, D and V are stored in the integer arrays d, u and v
-   repsectively. 
+   U, D and V are stored in the integer arrays d, u and v,
+   respectively. 
 */
 void 
 Ptdsp_SmithForm(const int* inputMat, int* d, int* u, int* v,
@@ -148,7 +149,7 @@ Ptdsp_SmithForm(const int* inputMat, int* d, int* u, int* v,
   /* perform the basic Smith form decomposition */
   int* mVector = (int *) malloc(m * sizeof(int));
   int* nVector = (int *) malloc(n * sizeof(int));
-  int r = intmin(m, n);
+  int r = INT_MIN_VALUE(m, n);
   int dim, i;
 
   /* copy contents of inputMat into d */
@@ -168,7 +169,7 @@ Ptdsp_SmithForm(const int* inputMat, int* d, int* u, int* v,
       int minrow = dim;
       int mincol = dim;
       int minvalue = d[minrow * n + mincol]; /* ie inputMat[minrow][mincol] */
-      int minabsvalue = intabs(minvalue);
+      int minabsvalue = INT_ABS_VALUE(minvalue);
       for (row = dim; row < m; row++) {
 	int col;
 	for (col = dim; col < n; col++) {
@@ -273,7 +274,7 @@ Ptdsp_SmithCanonForm (int * d, int * u, int * v, const int m, const int n) {
   int* hinv = (int *) malloc(n * n * sizeof(int));
   int i, j, di, jend, temp, lastd, lasti;
   int lcmvalue, lambda, mu, gcdvalue;
-  int r = intmin(m, n);
+  int r = INT_MIN_VALUE(m, n);
 
   /* (1) pull out negative signs */
   identity(ginv, m, m);

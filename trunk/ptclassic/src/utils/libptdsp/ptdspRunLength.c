@@ -37,41 +37,51 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include <malloc.h>
 #include "ptdspRunLength.h"
 
-const double StartOfBlock = 524288.0;
-const double StartOfRun = 1048576.0;
+static const double StartOfBlock = 524288.0;
+static const double StartOfRun = 1048576.0;
 
-#define larger(fl,in) (fabs(fl) >= (in))
+#define DBL_MAX_VALUE(fl,in) (fabs(fl) >= (in))
 
-/* Run length encodes a DCT image.
-   This function takes a double array which represents a DCT image,
-   inserts "start of block" markers, run-length encodes it, and
-   outputs the modified image.
+/* Run length encode a floating-point matrix in subblocks.
+   In each subblock of size "bSize x bSize", this function sends the
+   first "HiPri" elements in the "outDc" array.  For the remaining
+   elements, inserts start-of-block markers, run-length encodes it,
+   and outputs the encoded elements in the "outAc" array.
 
    For the run-length encoding, all values with absolute value less
-   than "thresh" are set to 0.0, to help improve compression.
-   Runlengths are coded with a "start of run" symbol and then an
-   (integer) run-length. 
+   than "thresh" are set to 0.0 to help improve compression.
+   Run lengths are coded with a "start of run" symbol and then an
+   (integer) run-length.
 
-   The integer values at addresses indxDc and indxAc and the double
-   arrays at address outDc and outAc are set. 
+   This technique is especially useful when applied to images
+   subblocks have been transformated by the Discrete Cosine Transform.
+
+   The routine reallocates the double arrays at *outDc and *outAc.
+   The integer values at addresses "indxDc" and "indxAc" are set to
+   zero.
 */
 void 
-Ptdsp_RunLengthEncode ( const double * inImagePtr, int arraySize, int bSize,
-			int HiPri, double thresh, double **outDc,
-			double **outAc, int *indxDc, int *indxAc) { 
-  /* Initialize. */
+Ptdsp_RunLengthEncode ( const double* inImagePtr, int arraySize, int bSize,
+			int HiPri, double thresh, double** outDc,
+			double** outAc, int* indxDc, int* indxAc) { 
+  /* Initialize */
+  int blk;
   int blocks = arraySize / (bSize*bSize);
-  int i, blk, zeroRunLen;
-  
-  /* The biggest runlen blowup we can have is the string "01010101...".
+ 
+  /* The biggest run length blowup we can have is the string "01010101...".
      This gives a blowup of 50%, so with StartOfBlock and StartOfRun
-     markers, 1.70 should be ok. */
+     markers, 1.70 should be ok.
+   */
   if (*outDc != 0) free(*outDc);
   if (*outAc != 0) free(*outAc);
   *outDc = ( double* ) malloc(((int)(1.70*arraySize + 1)) * sizeof(double));
   *outAc = ( double* ) malloc(((int)(1.70*arraySize + 1)) * sizeof(double));
-  *indxDc = 0; *indxAc = 0;
+  *indxDc = 0;
+  *indxAc = 0;
   for ( blk = 0; blk < blocks; blk++) {
+    int i;
+    int zeroRunLen = 0;
+
     /* High priority coefficients. */
     for(i = 0; i < HiPri; i++) {
       (*outDc)[(*indxDc)++] = *inImagePtr++;
@@ -81,20 +91,21 @@ Ptdsp_RunLengthEncode ( const double * inImagePtr, int arraySize, int bSize,
     (*outAc)[(*indxAc)++] = StartOfBlock;
     (*outAc)[(*indxAc)++] = (double)blk;
 	
-    zeroRunLen = 0;
     for(; i < bSize*bSize; i++) {
       if(zeroRunLen) {
-	if (larger(*inImagePtr, thresh)) {
+	if (DBL_MAX_VALUE(*inImagePtr, thresh)) {
 	  (*outAc)[(*indxAc)++] = (double)zeroRunLen;
 	  zeroRunLen = 0;
 	  (*outAc)[(*indxAc)++] = *inImagePtr;
-	} else {
+	}
+	else {
 	  zeroRunLen++;
 	}
       } else {
-	if (larger(*inImagePtr, thresh)) {
+	if (DBL_MAX_VALUE(*inImagePtr, thresh)) {
 	  (*outAc)[(*indxAc)++] = *inImagePtr;
-	} else {
+	}
+	else {
 	  (*outAc)[(*indxAc)++] = StartOfRun;
 	  zeroRunLen++;
 	}
@@ -108,26 +119,30 @@ Ptdsp_RunLengthEncode ( const double * inImagePtr, int arraySize, int bSize,
   }
 }
 
-/* Inverts run length encoding on a DCT image.
-   This function reads 2 double array, representing two coded DCT
+/* Inverts the run length encoding of a floating-point matrix.
+   This function reads 2 double arrays, representing two coded
    images (one high priority and one low-priority), inverts the
    run-length encoding, and outputs the resulting image.
 
    Protection is built in to avoid crashing even if some of the coded
    input data is affected by loss. 
 
-   The double array outPtr is modified to store the resulting image. 
+   This is particular useful when applied to images for which a
+   Discrete Cosine Transform has been applied to each of the subblocks.
+
+   The double array "outPtr" is modified to store the resulting image. 
 */
 void 
-Ptdsp_RunLengthInverse (const double * hiImage, const double * loImage,
-			double * outPtr, int origSize, 
-			int bSize,  int loSize, int HiPri) {
+Ptdsp_RunLengthInverse (const double* hiImage, const double* loImage,
+			double* outPtr, int origSize, 
+			int bSize, int loSize, int HiPri) {
   /* Initialize. */
-  int i, j, k, l, blk, runLen;
+  int i, j;
 
   /* Do DC image first. */
   i = 0;
   for(j = 0; j < origSize; j += bSize * bSize) {
+    int k;
     for(k = 0; k < HiPri; k++) {
       outPtr[j + k] = hiImage[i++];
     }	
@@ -136,7 +151,8 @@ Ptdsp_RunLengthInverse (const double * hiImage, const double * loImage,
   /* While still low priority input data left... */
   i = 0;
   while (i < loSize) {
-    
+    int blk;
+
     /* Process each block, which starts with "StartOfBlock". */
     while ((i < loSize) && (loImage[i] != StartOfBlock)) {
       i++;
@@ -146,20 +162,22 @@ Ptdsp_RunLengthInverse (const double * hiImage, const double * loImage,
       blk = (int)loImage[i++];
       blk *= bSize*bSize;
       if ((blk >= 0) && (blk < origSize)) {
+	int k = 0;
 	blk += HiPri;
-	k = 0;
 	while ((i < loSize) && (k < bSize*bSize - HiPri)
 	       && (loImage[i] != StartOfBlock)) {
 	  if (loImage[i] == StartOfRun) {
 	    i++;
 	    if (i < loSize) {
-	      runLen = (int)loImage[i++];
+	      int l;
+	      int runLen = (int)loImage[i++];
 	      for( l = 0; l < runLen; l++ ) {
 		outPtr[blk+k] = 0.0;
 		k++;
 	      }
 	    }
-	  } else {
+	  }
+	  else {
 	    outPtr[blk+k] = loImage[i++];
 	    k++;
 	  }
