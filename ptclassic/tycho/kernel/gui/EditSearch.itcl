@@ -355,23 +355,35 @@ body ::tycho::EditSearch::find {{start {}}} {
 	}
     } {
         # Found a match.  Select it.
-        set text [$tw textWinName]
+
+        # The behaviour of the selection tag changed in Tk 8.
+        # The changes file says:
+        #
+        # 11/25/96 (feature change) Under Windows and Macintosh, the selection
+        # highlight is now hidden whenever an entry or text widget loses focus.
+        # Also, the previous selection information is not lost when a new
+        # selection is made in a different widget. (SS)
+
         selection clear -displayof $text
+        $text tag delete currmatch
         set firstind [lindex $result 0]
         set numchars [lindex $result 1]
         if {$firstind != {}} {
-            $tw selectRange $firstind "$firstind + $numchars chars"
+            $text see $firstind
+            $text tag add currmatch $firstind "$firstind + $numchars chars"
+            $text mark set insert $firstind
+	    $text tag configure currmatch -background systemHighlight
+	    $text tag configure currmatch -foreground systemHighlightText
         }
         # Mark the rest of the matches.
         $tw findAll findmatch $casesw $regexpsw $wordsw $pattern 1.0 end {}
 
         # Set up reverse video for the found text. First lower the
         # priority of the tag so selection is still visible as normal.
+
         $text tag raise sel findmatch
         $text tag configure findmatch \
                 -background [stylesheet get text search.background]
         $text tag configure findmatch \
-                -foreground [stylesheet get text search.foreground]
+                -foreground [stylesheet get text search.foreground]    }
     }
-}
-
