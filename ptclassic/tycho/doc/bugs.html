@@ -57,13 +57,12 @@
 
 <h3><a href="$TYCHO/kernel/Query.itcl">Query</a></h3>
 <ul>
-<li>-entrywidth should be respected by all types of queries.
-    E.g., it is ignored in the following:
+<li>choice method fails.  E.g.
     <tcl><pre>
-    ::tycho::Query .bb -entrywidth 70
-    .bb mediated color {Color:} red {::tycho::querycolor {Choose color}}
-    .bb mediated font {Font:} fixed ::tycho::queryfont
-    ::tycho::post [::tycho::Dialog::wait .bb]
+::tycho::Query .bb
+.bb choice drink {Drink:} {Coke Snapple Lemmonade} Coke
+.bb choice chips {Chips:} {None Potato Plantain} None
+::tycho::Dialog::wait .bb
     </pre></tcl>
 
 </ul>
