@@ -221,6 +221,9 @@ class ::tycho::Displayer {
     # Hide the given view without destroying it.
     method hideView {view}
 
+    # Move the focus to the next View
+    method nextView {}
+
     # Resize the window to the original requested size.
     method originalSize {}
 
@@ -323,6 +326,11 @@ body ::tycho::Displayer::constructor {args} {
     } else {
 	bind $prefix <Control-x><Control-c> {}
     }
+
+    # And yet again following emacs convention, the following will
+    # cycle the focus through the attached views and the minibuffer 
+    # (if there is one).
+    bind $prefix <Control-x><o> "$this nextView; break"
 
     # Setup a frame for the menu bar
     itk_component add menuFrame {
@@ -686,6 +694,32 @@ body ::tycho::Displayer::hideView {view} {
 	setEmptyView
     } else {
 	$newview focusin
+    }
+}
+
+#######################################################################
+#### nextView
+# Move the focus to the next view, or to the status bar. If the
+# focus is on the status bar, move it to the current view.
+# Otherwise, move the focus to the next view in the list of
+# views, or, if at the end of the list of views, to the
+# status bar if it has an entry widget.
+#
+# <b>Note</b>: This method currently only toggles between the current
+# view and its statusbar. It needs to be fixed...
+#
+body ::tycho::Displayer::nextView {} {
+    set f [focus -lastfor $itk_component(hull)]
+    set sb [$currentView statusbar]
+
+    if { [string first $sb $f] == 0 } {
+        $currentView focusin
+    } else {
+        if { [$sb mode] == "entry" } {
+            $sb focusin
+        } else {
+            $currentView focusin
+        }
     }
 }
 
