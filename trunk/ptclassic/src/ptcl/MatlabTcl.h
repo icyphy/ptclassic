@@ -64,6 +64,7 @@ public:
 	int end(int argc, char** argv);
 	int eval(int argc, char** argv);
 	int get(int argc, char** argv);
+	int send(int argc, char** argv);
 	int set(int argc, char** argv);
 	int start(int argc, char** argv);
 	int unset(int argc, char** argv);
