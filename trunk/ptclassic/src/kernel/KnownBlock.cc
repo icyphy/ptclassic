@@ -249,38 +249,16 @@ KnownBlock::makeNew(const char* type, const char* dom) {
 	return 0;
 }
 
-// comparison function for qsort.  Done this way to shut up the compiler;
-// this is the right thing for qsort.
-static int compar(void* a, void* b) {
-	const char** ca = (const char**)a;
-	const char** cb = (const char**)b;
-	return strcmp (*ca, *cb);
-}
-
 // Return known list for domain index i as text, separated by linefeeds
-// Names are printed in sorted order.
+
 StringList
 KnownBlock::nameListForDomain (int idx) {
-	StringList s;
 	KnownListEntry* l = allBlocks[idx];
-	// count entries in list
-	int n = 0;
+	StringList s;
 	while (l) {
-		n++;
-		l = l->next;
+	  s << l->b->name() << "\n";
+	  l = l->next;
 	}
-	LOG_NEW; const char** table = new const char*[n];
-	l = allBlocks[idx];
-	for (int i = 0; i < n; i++) {
-		table[i] = l->b->name();
-		l = l->next;
-	}
-	qsort (table, n, sizeof (char*), compar);
-	for (i = 0; i < n; i++) {
-		s += table[i];
-		s += "\n";
-	}
-	LOG_DEL; delete table;
 	return s;
 }
 
