@@ -86,7 +86,7 @@ class ::tycho::Graphics {
     ####                   protected methods                       ####
 
     # Add or configure a textual display at the bottom.
-    protected method addInfo {tag label value {width {}}}
+    protected method addInfo {tag label value {width {}} {description {}}}
 
     # Add a button to the toolbar.
     protected method addTool {name args}
@@ -292,20 +292,33 @@ body ::tycho::Graphics::setReadOnly {bool} {
 #####################################################################
 #### addInfo
 # Add or configure textual information displayed at the bottom.
-# The arguments are: a name for the widget, ...
+# The arguments are: a name for the widget, the label to be displayed,
+# the value to be displayed, an optional width field and an optional
+# textual description
+# If the description argument is non-empty, then when the user moves
+# the mouse over the widget, the status line will have the description
+# displayed in it.
 # For example:
 # <pre>
-#    addInfo foo -text PushMe -command {puts pushed}
+#    addInfo foo {Value of foobar} $foobar 3 {foobar is a variable}
 # </pre>
-# will create a button labeled "PushMe" with a command that prints
-# a message on the standard output.
-#
-body ::tycho::Graphics::addInfo {tag label value {width {}}} {
+# will create a widget with a label 'Value of foobar', a value that
+# is the value of the foobar variable and displayed with a width of 3
+# characters.
+body ::tycho::Graphics::addInfo {tag label value {width {}} \
+        {description {}}} {
 
     if [info exists itk_component($tag)] {
         # Display already exists.  Configure it.
         component label_$tag configure -text $label
         component value_$tag configure -text $value
+        if {$description != {} } {
+            bind $itk_component($tag) <Enter> \
+                    "$this putStatus \"$description\" "
+            bind $itk_component($tag) <Leave> \
+                    "$this putStatus \"\" "
+        }
+
     } {
         # Display does not exist. Create it.
 	itk_component add $tag {
@@ -314,6 +327,13 @@ body ::tycho::Graphics::addInfo {tag label value {width {}}} {
 	    keep -background -cursor
 	}
 	pack $itk_component($tag) -side right -padx 5
+
+        if {$description != {} } {
+            bind $itk_component($tag) <Enter> \
+                    "$this putStatus \"$description\" "
+            bind $itk_component($tag) <Leave> \
+                    "$this putStatus \"\" "
+        }
 
         itk_component add label_$tag {
             label $itk_component($tag).label -text $label -relief flat
@@ -355,6 +375,13 @@ body ::tycho::Graphics::addTool {name args} {
 		-foreground -highlightcolor -highlightbackground
     }
     pack $itk_component($name) -side left
+
+    #if {$description != {} } {
+    #    bind $itk_component($name) <Enter> \
+    #            "$this putStatus \"$description\" "
+    #    bind $itk_component($name) <Leave> \
+    #            "$this putStatus \"\" "
+    #}
 }
 
 #####################################################################
