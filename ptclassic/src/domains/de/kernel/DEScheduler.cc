@@ -50,7 +50,7 @@ extern int warnIfNotConnected (Galaxy&);
 	////////////////////////////
 
 int DEScheduler :: setup (Block& b) {
-	haltRequestFlag = 0;
+	clearHalt();
 	currentTime = 0;
 
 	Galaxy& galaxy = b.asGalaxy();
@@ -121,7 +121,7 @@ int DEScheduler :: setup (Block& b) {
 		return FALSE;
 	}
 
-	return !haltRequestFlag;
+	return !haltRequested();
 }
 
 	////////////////////////////
@@ -135,11 +135,11 @@ int
 DEScheduler :: run (Block& galaxy) {
 
 
-	if (haltRequestFlag) {
+	if (haltRequested()) {
 		Error::abortRun(galaxy,": Can't continue after run-time error");
 		return FALSE;
 	}
-	while (eventQ.length() > 0 && !haltRequestFlag) {
+	while (eventQ.length() > 0 && !haltRequested()) {
 
 		int bFlag = FALSE;  // flag = TRUE when the terminal is on the
 		   		    // boundary of a wormhole of DE domain.
@@ -158,9 +158,14 @@ DEScheduler :: run (Block& galaxy) {
 		// If the event time is less than the global clock,
 		// it is an error...
 		} else if (level < currentTime - 0.1) {
-			Error::abortRun(galaxy, ": global clock is screwed up in DE");
+		    // The event is in the past!  Argh!
+		    // Try to give a good error message.
+			Event* ent = (Event*) f->e;
+			PortHole* src = ent->dest->far();
+			Error::abortRun(*src, ": event from this porthole",
+					" is in the past!");
 			return FALSE;
-		} 
+		}
 
 		// set currentTime
 		currentTime = level;
@@ -249,7 +254,7 @@ DEScheduler :: run (Block& galaxy) {
 
 	} // end of while
 
-	if (haltRequestFlag) return FALSE;
+	if (haltRequested()) return FALSE;
 
 	stopBeforeDeadlocked = FALSE;	// yes, no more events...
 	return TRUE;
