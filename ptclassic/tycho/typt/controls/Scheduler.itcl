@@ -1,0 +1,358 @@
+#########################################################################
+# @Version: $Id$
+# @Author: H. John Reekie
+#
+# @Copyright (c) 1997 The Regents of the University of California.
+# All rights reserved.
+#  
+# Permission is	hereby granted,	without	written	agreement and without
+# license or royalty fees, to use, copy, modify, and distribute	this
+# software and its documentation for any purpose, provided that	the above
+# copyright notice and the following two paragraphs appear in all copies
+# of this software.
+# 
+# IN NO	EVENT SHALL THE	UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT,	SPECIAL, INCIDENTAL, OR	CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN	ADVISED	OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES	OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.	THE SOFTWARE
+# PROVIDED HEREUNDER IS	ON AN "AS IS" BASIS, AND THE UNIVERSITY	OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT,	UPDATES,
+# ENHANCEMENTS,	OR MODIFICATIONS.
+#							  COPYRIGHTENDKEY
+##########################################################################
+
+
+
+##########################################################################
+## Scheduler
+#
+# The Tycho "scheduler." This class provides a simple way of
+# managing "background" processing at a finer grain than supported
+# by Tk's event mechanism. The primary motivation for this is to
+# support execution of long-running C programs while keeping the
+# interface "live," but it should also be used to execute Tcl programs
+# that might take a "long time" in order to avoid holding up
+# realtime programs.
+#
+# The scheduler requires that a "task" be broken into setup, execute,
+# and wrapup scripts. The first and last can be null, but the second
+# can't. The execute script must either return by itself after it has
+# performed some work. If the tyTimer package has been loaded, the
+# script can use ::tycho::setAfter to set a flag it can check to
+# see if it has used up enough time yet. If the script is directly
+# calling a function in a C module, the C code can use Ty_StartTimer
+# for the same purpose.
+#
+# The scheduler is deliberately designed to be "non-reentrant." That
+# is, none of the three phases may:
+# <ul>
+# <li>Cause the Tk <code>update</code> proc to be called, or
+# <li>Cause any of the scheduler procs to be called.
+# </ul>
+#
+# If these requirements are violated, <i>then Tycho may crash or hang</i>.
+# The reason for (i) is to keep the scheduling code simple: without it,
+# the scheduler will have to check whether any task is currently inside
+# any of its three phases and defer another call until that one completes.
+# It is not merely a matter of deferring calls with "after idle": the
+# scheduler would have to ??? FIXME
+#
+class ::tycho::Scheduler {
+    inherit ::tycho::Uninstantiable
+
+    ###################################################################
+    ####                         protected variables               ####
+
+    # The setup scripts
+    protected common _setup {}
+
+    # The execute scripts
+    protected common _execute {}
+
+    # The wrapup scripts
+    protected common _wrapup {}
+
+    # The completion callbacks
+    protected common _notify {}
+
+    # The list of "real-time" tasks
+    protected common realtimetasks {}
+
+    # A flag saying whether the scheduler is currently running
+    protected common running 0
+
+    # The scheduler period in ms
+    protected common schedulerPeriod 20
+
+    # An array of suspended tasks
+    protected common suspended
+
+    # The list of "non-real-time" tasks
+    protected common tasks {}
+
+    ###################################################################
+    ####                            public procs                   ####
+
+    # Add a task. The task's setup code is called.
+    proc add {task setup execute wrapup notify {realtime 0}}
+
+    # Delete a task. The task's wrapup code is executed.
+    proc delete {task}
+
+    # Get or set the period of the scheduler.
+    proc period {{period {}}}
+
+    # Resume a suspended task.
+    proc resume {task}
+
+    # Suspend a task.
+    proc suspend {task}
+
+    ###################################################################
+    ####                            public procs                   ####
+
+    # Execute a task for one tick and schedule for another
+    protected proc tick {}
+}
+
+
+##########################################################################
+## add
+#
+# Add a task to the schedule, and call its setup proc. If the scheduler
+# is not running, start it. The second argument is a callback that is
+# executed when the task terminates. If the task is terminated by calling
+# delete{}, the callback is _not_ called. The third argument, if present
+# and true, indicates the the task is "real-time." Realtime tasks can return
+# -1 to indicate that they have not performed any processing because they
+# are runable (waiting on I/O, for example). Real-time tasks, if they
+# can process, always take priority over non-real-time tasks.
+#
+body ::tycho::Scheduler::add {task setup execute wrapup notify {realtime 0}} {
+    if { [lsearch -exact $realtimetasks $task] != -1 \
+	    || [lsearch -exact $tasks $task] != -1 } {
+	error "Task $task is already scheduled"
+    }
+    
+    # Add to the appropriate list
+    if { $realtime } {
+	lappend realtimetasks $task
+    } else {
+	lappend tasks $task
+    }
+    # Remember scripts
+    set _setup($task) $setup
+    set _execute($task) $execute
+    set _wrapup($task) $wrapup
+    set _notify($task) notify
+    
+    # Intialize it
+    if { $setup != "" } {
+	uplevel #0 $setup
+    }
+    
+    # Start the scheduler if necessary
+    if { ! $running } {
+	set running 1
+	tick
+    }
+}
+
+##########################################################################
+## delete
+#
+# Remove a task from the schedule, and schedule its wrapup proc. If there
+# are no tasks left, stop the scheduler. If the task is not in the
+# scheduler, ignore (since the task may have already terminated). Note
+# that the task does not terminate immediately: when the task terminates,
+# its notify procedure is called.
+#
+body ::tycho::Scheduler::delete {task} {
+    set t [lsearch -exact $realtimetasks $task]
+    if { $t != -1 } {
+	set realtimetasks [lreplace $realtimetasks $t $t]
+    } else {
+	set t [lsearch -exact $tasks $task]
+	if { $t != -1 } {
+	    set tasks [lreplace $tasks $t $t]
+	} elseif { [::info exists suspended($task)] } {
+	    unset suspended($task)
+	} else {
+	    return
+	}
+    }
+    # Schedule the wrapup and notify procs. Note that these cannot 
+    if { $_wrapup($task) != "" } {
+	after idle [list uplevel #0 $_wrapup($task)]
+    }
+    if { $_notify($task) != "" } {
+	after idle [list uplevel #0 $_notify($task)]
+    }
+    # Forget it
+    unset _setup($task)
+    unset _execute($task)
+    unset _wrapup($task)
+    unset _notify($task)
+
+    # If there are no active tasks, stop the scheduler
+    if { $realtimetasks == "" && $tasks == "" } {
+	set running 0
+    }
+}
+
+##########################################################################
+## suspend
+#
+# Suspend a task. If the task is not in the
+# scheduler, ignore (since the task may have already terminated).
+#
+body ::tycho::Scheduler::suspend {task} {
+    set t [lsearch -exact $realtimetasks $task]
+    if { $t != -1 } {
+	set suspended([lindex $realtimetasks $t]) 1
+	set realtimetasks [lreplace $realtimetasks $t $t]
+    } else {
+	set t [lsearch -exact $tasks $task]
+	if { $t != -1 } {
+	    set suspended([lindex $tasks $t]) 0
+	    set tasks [lreplace $tasks $t $t]
+	} else {
+	    # Not there: just return
+	    return
+	}
+    }
+    # If there are no active tasks, stop scheduler
+    if { $realtimetasks == "" && $tasks == "" } {
+	set running 0
+    }
+}
+
+##########################################################################
+## period
+#
+# Get or set the period of the scheduler in ms.
+#
+body ::tycho::Scheduler::period {{period {}}} {
+    if { $period == "" } {
+	return $schedulePeriod
+    } else {
+	set schedulePeriod $period
+	::tycho::setTimerPeriod $period
+    }
+}
+
+##########################################################################
+## resume
+#
+# Resume a task. If the task is not suspended, flag an error.
+#
+body ::tycho::Scheduler::resume {task} {
+    if { ! [::info exists suspended($task)] } {
+	error "Task $task is not suspended"
+    }
+    # Add to the appropriate list
+    if { $suspended($task) } {
+	lappend realtimetasks $task
+    } else {
+	lappend tasks $task
+    }
+    unset suspended($task)
+    
+    # Start schedule if necessary
+    if { ! $running } {
+	set running 1
+	tick
+    }
+}
+
+##########################################################################
+## tick
+#
+# Execute a task and schedule another call after all
+# pending Tk events have been processed. If the task terminates,
+# by itself, do _not_ call its wrapup proc (because it has presumably
+# already done that itself), but do call its notify callback to
+# inform someone that the task finished.
+#
+body ::tycho::Scheduler::tick {} {
+    # It's possible we may have stopped the scheduler
+    if { ! $running } {
+	return
+    }
+    
+    # Execute the next task: try realtime tasks first
+    set done 0
+    foreach task $realtimetasks {
+	# Evaluate its execution function
+	set code [uplevel #0 $_execute($task)]
+	if { $code == 0 } {
+	    # Terminated by itself: remove task from list
+	    set t [lsearch -exact $realtimetasks $task]
+	    set realtimetasks [concat \
+		    [lreplace $realtimetasks 0 $t] \
+		    [lreplace $realtimetasks $t end]]
+	    # Call callback. We can do this immediately.
+	    if { $_notify($task) != "" } {
+		uplevel #0 $_notify($task)
+	    }
+	    # Forget it
+	    unset _setup($task)
+	    unset _execute($task)
+	    unset _wrapup($task)
+	    unset _notify($task)
+
+	    # If there are no active tasks, stop the scheduler
+	    if { $realtimetasks == "" && $tasks == "" } {	
+		set running 0
+	    }
+	    # Exit
+	    set done 1
+	    break
+	} elseif { $code == 1 } {
+	    # Did some processing, so break
+	    set t [lsearch -exact $realtimetasks $task]
+	    set realtimetasks [concat \
+		    [lreplace $realtimetasks 0 $t] \
+		    [lrange $realtimetasks 0 $t]]
+	    set done 1
+	    break
+	}
+	# (Otherwise, the task wasn't ready, so try the next one)
+    }
+
+    # Do a non-realtime task if no real-time task executed
+    if { ! $done && $tasks != "" } {
+	set task  [lindex $tasks 0]
+	set tasks [lreplace $tasks 0 0]
+
+	# Evaluate its execution function
+	if { [uplevel #0 $_execute($task)] } {
+	    # Didn't terminate, so add task to end of list
+	    lappend tasks $task
+	} else {
+	    # Terminated, so call notify callback. We can do this immediately.
+	    if { $_notify($task) != "" } {
+		uplevel #0 $_notify($task)
+	    }
+	    # Forget it
+	    unset _setup($task)
+	    unset _execute($task)
+	    unset _wrapup($task)
+	    unset _notify($task)
+
+	    # If there are no active tasks, stop the scheduler
+	    if { $realtimetasks == "" && $tasks == "" } {	
+		set running 0
+	    }
+	}
+    }
+    # Reschedule another call after processing events if there are active tasks
+    if { $running } {
+	::after idle {@scope ::tycho::Scheduler tick}
+    }	
+}
