@@ -182,6 +182,12 @@ class ::tycho::TopLevel {
     protected variable prefix
 
     #################################################################
+    ####                  private procedures                     ####
+
+    # Check to see whether any windows are left and exit the program if not.
+    private proc exitIfNoMoreWindows {} {}
+
+    #################################################################
     ####                  private variables                      ####
 
     # A circular list of top-level windows is kept here and supported by
@@ -215,14 +221,12 @@ class ::tycho::TopLevel {
 # and the new window is placed in the window order before that one.
 #
 configbody ::tycho::TopLevel::before {
-    if {$itk_option(-before) != ""} {
-	set tl [winfo toplevel $itk_option(-before)]
-	if {$tl != {} &&  \
-		[uplevel #0 info objects $tl] != {} && \
-		[$tl isa ::tycho::TopLevel]} {
-	    $topLevelWindows remove $prefix
-	    $topLevelWindows insert $prefix $tl
-	}
+    set tl [winfo toplevel $itk_option(-before)]
+    if {$tl != {} &&  \
+	    [uplevel #0 info objects $tl] != {} && \
+	    [$tl isa ::tycho::TopLevel]} {
+	$topLevelWindows remove $prefix
+	$topLevelWindows insert $prefix $tl
     }
 }
 
@@ -236,6 +240,8 @@ configbody ::tycho::TopLevel::before {
 # left corner of the screen.  Using "-" instead of "+" will
 # define the screen position relative to the right or
 # bottom of the screen rather than the left or top.
+# FIXME: Putting this here causes Itcl 2.0 to crash.  Should be
+# fixed in 2.1.
 # 
 #configbody ::tycho::TopLevel::geometry {
 #    wm geometry $itk_component(hull) $itk_option(-geometry)
@@ -292,8 +298,8 @@ body ::tycho::TopLevel::constructor {args} {
 #####################################################################
 #### Destructor
 # Destroy the window containing the widget. If there are no remaining
-# top-level windows that are mapped, then exit the program. The latter
-# functionality can be disabled by calling
+# top-level windows, then exit the program. The latter functionality
+# can be disabled by calling
 # <code>::tycho::TopLevel::exitWhenNoMoreWindows</code> with the
 # argument "0". Normally, you should call <code>nextWindow</code>
 # before destroying any top-level that has the focus. This puts the
@@ -324,17 +330,8 @@ body ::tycho::TopLevel::destructor {} {
 	# Check to see whether this is the last open window.
 	# If so, exit the program.
 	if $exitflag {
-	    set noMore 1
-	    foreach win [$topLevelWindows elements] {
-		if [winfo exists $win] {
-		    set noMore 0
-		    break
-		}
-	    }
-	    if $noMore {
-		after 100 {::tclexit}
-	    }
-	}
+            after 100 [code ::tycho::TopLevel::exitIfNoMoreWindows]
+        }
     }
 }
 
@@ -555,4 +552,27 @@ body ::tycho::TopLevel::exitWhenNoMoreWindows {bool} {
 #
 body ::tycho::TopLevel::returnExitCon {} {
     return $exitconfirmed
+}
+
+    #################################################################
+    ####                  private procedures                     ####
+
+#####################################################################
+#### exitIfNoMoreWindows
+# Check to see whether any windows are left and exit the program if not.
+#
+body ::tycho::TopLevel::exitIfNoMoreWindows {} {
+    set noMore 1
+    foreach win [$topLevelWindows elements] {
+        if [winfo exists $win] {
+            # Tycho fonts window handled specially
+            if {$win != {.tychoFonts}} {
+                set noMore 0
+                break
+            }
+        }
+    }
+    if $noMore {
+        after 100 {::tclexit}
+    }
 }
