@@ -39,9 +39,9 @@
 #
 # The Matlab include files are located in $(MATLABDIR)/extern/include
 # At compile time, sdfmatlabstars.o and libsdfmatlabstars.a are created
-# At link time, Ptolemy is linked against libexttools.a (MatlabIfc class)
+# At link time, Ptolemy is linked against libexttools.so (MatlabIfc class)
 # and either
-# (a) libptmatlab.a if Matlab is not installed, or
+# (a) libptmatlab.so if Matlab is not installed, or
 # (b) libmat.a if Matlab is installed.
 #
 # If Matlab is installed, the old way to determine the Matlab architecture is
