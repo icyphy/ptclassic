@@ -34,7 +34,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 static const char file_id[] = "MathematicaTcl.cc";
 
-#ifndef __GNUG__
+#ifdef __GNUG__
 #pragma implementation
 #endif
 
