@@ -100,6 +100,7 @@ An array of numeric values for the window.
 The values to be output will be calculated and
 stored in this array in preparation for output.
 	}
+	attributes { A_NONCONSTANT|A_NONSETTABLE }
     }
 
 //  defstate {
