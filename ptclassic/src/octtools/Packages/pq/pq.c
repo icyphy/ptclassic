@@ -53,9 +53,12 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #define EQUAL(func, x, y) ((*func)((x), (y)) == 0)
 #define LT(func, x, y) ((*func)((x), (y)) < 0)
 
+/* Note that we use ANSI cpp here to substitute in the value of
+ * fname into a literal string
+ */
 #define SANITY_CHECK(queue, fname) \
     if(queue == NIL(pq_t)) { \
-	errRaise(PQ_NAME, 0, "Error: function fname passed a null queue");\
+	errRaise(PQ_NAME, 0, "Error: function %s passed a null Queue", #fname);\
     }
 
 static pq_entry_t * pq_dup_entry();
