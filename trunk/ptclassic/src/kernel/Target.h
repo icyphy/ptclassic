@@ -16,6 +16,11 @@ $Id$
 #ifndef _Target_h
 #define _Target_h 1
 
+#ifdef __GNUG__
+#pragma once
+#pragma interface
+#endif
+
 #include "StringList.h"
 #include "Block.h"
 
@@ -29,13 +34,23 @@ class IntList;
 class Target : public Block {
 private:
 	const char* supportedStarClass;
+	Target* children;
+	Target* link;
+	int nChildren;
 protected:
 	Scheduler* sched;
 	Galaxy* gal;
-	Target* ptrToChildren;
-	int nChildren;
 
 	void setSched(Scheduler* sch) { sched = sch;}
+
+	// add a new child
+	void addChild(Target&);
+
+	// remove the "children" list (no effect on children)
+	void remChildren() { nChildren = 0; children = 0;}
+
+	// delete all the "children" (for when they are created dynamically)
+	void deleteChildren();
 
 // method for copying states during cloning.  It is designed for use
 // by clone methods, and it assumes that the src argument has the same
@@ -47,8 +62,8 @@ public:
 	Target(const char* nam, const char* starClass, Scheduler* s = 0,
 	       const char* desc = "") :
 		Block(nam,0,desc),
-		supportedStarClass(starClass), sched(0), ptrToChildren(0),
-		nChildren(0), gal(0) {}
+		supportedStarClass(starClass), sched(0), gal(0),
+		children(0), link(0), nChildren(0) {}
 
 	StringList printVerbose() const;
 
@@ -73,19 +88,17 @@ public:
 	virtual int commTime(int sender,int receiver,int nUnits, int type);
 
 	// return the nth child Target, null if no children.
-	Target* child(int n) {
-		if (n < 0 || n > nChildren || !ptrToChildren) return NULL;
-		return ptrToChildren + n;
-	}
+	Target* child(int n);
 
 	// return the nth target, where I count as #0 if no children
 	Target* proc(int n) {
-		if (!ptrToChildren && n == 0) return this;
+		if (n == 0 && nChildren == 0)
+			return this;
 		else return child(n);
 	}
 
 	// return number of processors
-	int nProcs() const { return ptrToChildren ? nChildren : 1;}
+	int nProcs() const { return children ? nChildren : 1;}
 
 	// initialize the target, given a galaxy.
 	virtual int setup(Galaxy&);
@@ -130,5 +143,7 @@ public:
 	virtual IntList* whichProcs(Cluster*, PGParSchedule*);
 
 };
+
+
 #endif
 
