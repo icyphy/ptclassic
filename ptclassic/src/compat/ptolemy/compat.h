@@ -63,7 +63,7 @@ extern int fscanf (FILE *, const char *, ...);
 /*extern int pclose(...);*/
 extern void perror (const char *);
 extern int printf (const char *, ...);
-#if !defined(hppa) && !defined(__hppa__)
+#if !defined(hppa) && !defined(__hppa__) && !defined(linux)
 extern int putenv (char *);
 #endif
 extern int puts (const char *);
