@@ -188,29 +188,23 @@ and disclaimer of warranty provisions, push the button below. "
 
     pack [frame .version.msg.at -class Attention] -side bottom -fill x
 
-    global tk_version
-    if { $tk_version >= 4.0 } {
-      set buttonBackground [ptkColor grey85]
-      set bitmapBackground [ptkColor grey85]
-    } else {
-      set buttonBackground [ptkColor burlywood1]
-      set bitmapBackground [ptkColor bisque]
-    }
-
+    # We are using the old tk3.x colors, rather than grey85
     button .version.msg.at.copyright -command "ptkDisplayCopyright" \
 	-text {more information} \
-        -background $buttonBackground \
+        -background [ptkColor burlywood1] \
+        -activebackground [ptkColor bisque2] \
 	-font [option get . mediumfont Pigi]
+
     pack .version.msg.at.copyright -side bottom -fill x
 
-    pack [canvas .version.bm -width 6c -height 7.5c -bg $bitmapBackground ] \
+    pack [canvas .version.bm -width 6c -height 7.5c -bg [ptkColor bisque] ] \
 	-side left
     global ptolemy
     .version.bm create bitmap 3c 3.75c -bitmap @$ptolemy/lib/tcl/Ptolemy.xbm
 
     wm geometry . +200+300
     tkwait visibility .
-    bind . <Button> "wm iconify ."
+    bind . <ButtonRelease> "wm iconify ."
     bind .version.msg <Button> "wm iconify ."
     bind .version.msg.msg1 <Button> "wm iconify ."
     bind .version.msg.msg2 <Button> "wm iconify ."
