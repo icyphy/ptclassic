@@ -245,7 +245,7 @@ body ::tycho::EditJava::gendocBuffer {} {
 
     putStatus "Running javadoc"
     # If the gendocBufferInteral fails, clear up the status bar
-    after 1000 $this putStatus \"\"
+    after 1000 $this putStatus ""
     #::tycho::safeUpdate $this
     # FIXME: should we have a preference for the javadoc command? 
     ::tycho::EditProgram::gendocBufferInternal \
@@ -328,7 +328,7 @@ body ::tycho::EditJava::openJavaHTMLPage {} {
     } else {
 	error "Sorry, `$javaHTMLPage' does not exist. The pathname to
 	the Java documentation is generated using the javaHome\
-	Java stye parameter and the path 'docs/index.html'."
+	Java style parameter and the path 'docs/index.html'."
     }
 }
 
@@ -412,11 +412,8 @@ body ::tycho::EditJava::parseNow {start stop} {
     $text tag configure methodname -foreground \
 	    [option get $hull methodColor EditJava]
 
-    # Put useful info in the status bar, using the deferred
-    # mechanism to make sure the status bar is mapped correctly
-    set cmd [list puts \
-            "Package Name: $packageName  Class Name: $className"]
-    statusbar whenmapped $cmd
+    # Put useful info in the status bar
+    putStatus "Package Name: $packageName  Class Name: $className"
 }
 
 #####################################################################
