@@ -30,15 +30,15 @@
 # Explicitly load the superclass. I don't really know why this is
 # needed, but the common arrays get upset otherwise.
 namespace ::tycho {
-    if { [::info classes LabelledItem] == "" } {
-        uplevel #0 {source $tychoslate/LabelledItem.itcl}
+    if { [::info classes LabeledItem] == "" } {
+        uplevel #0 {source $tychoslate/LabeledItem.itcl}
     }
 }
 
 ##########################################################################
-## LabelledRect
+## LabeledRect
 #
-# <i>LabelledRect</i> is a rectangle with a text label and graphics.
+# <i>LabeledRect</i> is a rectangle with a text label and graphics.
 # In all other respects, it can be treated like any other rectangle item.
 #
 # <p><b>Options</b>
@@ -48,21 +48,21 @@ namespace ::tycho {
 # <dl>
 #
 # <dt><b>-anchor</b>
-# <dd>See <a href="LabelledItem.html">LabelledItem</a>.
+# <dd>See <a href="LabeledItem.html">LabeledItem</a>.
 #
 # <dt><b>-fill</b>
 # <dd>The color with which the rectangle is filled. By default, 
 # it is "", which means that the rectangle is not filled.
 #
 # <dt><b>-graphics</b>
-# <dd>See <a href="LabelledItem.html">LabelledItem</a>.
+# <dd>See <a href="LabeledItem.html">LabeledItem</a>.
 #
 # <dt><b>-outline</b>.
 # <dd>The color of the outline of the rectangle. If "", 
 # the rectangle has no outline. By default, it is black.
 #
 # <dt><b>-text</b>
-# <dd>See <a href="LabelledItem.html">LabelledItem</a>.
+# <dd>See <a href="LabeledItem.html">LabeledItem</a>.
 #
 # <dt><b>-width</b>
 # <dd>The width of the outline of the rectangle, in pixels. By 
@@ -75,7 +75,7 @@ namespace ::tycho {
 # <p><b>Example</b>: Create a labelled rectangle:
 # <tcl quiet><pre>
 #  source $tycho/editors/slate/doc/internals/newslate.itcl
-#  $slate create LabelledRect 40 40 100 80 -fill blue -outline red &#92
+#  $slate create LabeledRect 40 40 100 80 -fill blue -outline red &#92
 #		-anchor nw -text Foo -tags moveable &#92
 #		-graphics "line 0 0 100 100; line 0 100 100 0"
 # </pre></tcl>
@@ -90,8 +90,8 @@ namespace ::tycho {
 # <li><a href="../internals/items.html">Complex item classes</a>.
 # </ul>
 #
-class ::tycho::LabelledRect {
-    inherit ::tycho::LabelledItem
+class ::tycho::LabeledRect {
+    inherit ::tycho::LabeledItem
 
     # Create a new item
     proc construct {id canvas slate tags x0 y0 x1 y1 args}
@@ -135,24 +135,24 @@ class ::tycho::LabelledRect {
     # Default values of this item's options
     common optiondefault
 
-    # Labelled rectangles are rectangular in shape
+    # Labeled rectangles are rectangular in shape
     common shape "rectangle"
 
     ###################################################################
     ####                       class initialization                ####
 
     #### Set method table
-    array set methodtable [array get ::tycho::LabelledItem::methodtable]
+    array set methodtable [array get ::tycho::LabeledItem::methodtable]
 
-    set methodtable(_fill)     ::tycho::LabelledRect::_fill
-    set methodtable(_outline)  ::tycho::LabelledRect::_outline
-    set methodtable(_width)    ::tycho::LabelledRect::_width
+    set methodtable(_fill)     ::tycho::LabeledRect::_fill
+    set methodtable(_outline)  ::tycho::LabeledRect::_outline
+    set methodtable(_width)    ::tycho::LabeledRect::_width
 
-    set methodtable(construct) ::tycho::LabelledRect::construct
-    set methodtable(coords)    ::tycho::LabelledRect::coords
+    set methodtable(construct) ::tycho::LabeledRect::construct
+    set methodtable(coords)    ::tycho::LabeledRect::coords
 
     #### Set option defaults
-    array set optiondefault [array get ::tycho::LabelledItem::optiondefault]
+    array set optiondefault [array get ::tycho::LabeledItem::optiondefault]
 
     set optiondefault(-fill)    ""
     set optiondefault(-outline) "black"
@@ -162,7 +162,7 @@ class ::tycho::LabelledRect {
 ##########################################################################
 ## -fill option configuration
 #
-body ::tycho::LabelledRect::_fill {id canvas slate fill} {
+body ::tycho::LabeledRect::_fill {id canvas slate fill} {
     set _fill($id) $fill
     $canvas itemconfigure $primary($id) -fill $fill
 }
@@ -170,7 +170,7 @@ body ::tycho::LabelledRect::_fill {id canvas slate fill} {
 ##########################################################################
 ## -outline option configuration
 #
-body ::tycho::LabelledRect::_outline {id canvas slate outline} {
+body ::tycho::LabeledRect::_outline {id canvas slate outline} {
     set _outline($id) $outline
     $canvas itemconfigure $primary($id) -outline $outline
     if { $_text($id) != "" } {
@@ -181,7 +181,7 @@ body ::tycho::LabelledRect::_outline {id canvas slate outline} {
 ##########################################################################
 ## -width option configuration
 #
-body ::tycho::LabelledRect::_width {id canvas slate width} {
+body ::tycho::LabeledRect::_width {id canvas slate width} {
     set _width($id) $width
     $canvas itemconfigure $primary($id) -width $width
 }
@@ -189,7 +189,7 @@ body ::tycho::LabelledRect::_width {id canvas slate width} {
 ##########################################################################
 #### construct
 #
-body ::tycho::LabelledRect::construct {id canvas slate tags x0 y0 x1 y1 args} {
+body ::tycho::LabeledRect::construct {id canvas slate tags x0 y0 x1 y1 args} {
     # Initialize the options
     foreach {option value} [concat [array get optiondefault] $args] {
 	set _[string trimleft $option -]($id) $value
@@ -210,7 +210,7 @@ body ::tycho::LabelledRect::construct {id canvas slate tags x0 y0 x1 y1 args} {
 #
 # Set or read the rectangle's coordinates
 #
-body ::tycho::LabelledRect::coords {id canvas slate args} {
+body ::tycho::LabeledRect::coords {id canvas slate args} {
     # No args: just return coordinates
     if { $args == "" } {
 		return [$canvas coords $primary($id)]

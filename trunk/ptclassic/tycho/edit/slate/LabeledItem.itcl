@@ -35,11 +35,11 @@ namespace ::tycho {
 }
 
 ##########################################################################
-## LabelledItem
+## LabeledItem
 #
 # An item with a label attached to it, and optional graphics drawn in it.
-# This class is the abstract superclass of the LabelledOval, 
-# LabelledRect, and LabelledFrame items.
+# This class is the abstract superclass of the LabeledOval, 
+# LabeledRect, and LabeledFrame items.
 #
 # <p><b>Options</b>
 #
@@ -87,7 +87,7 @@ namespace ::tycho {
 # <li><a href="../internals/items.html">Complex item classes</a>.
 # </ul>
 #
-class ::tycho::LabelledItem {
+class ::tycho::LabeledItem {
     inherit ::tycho::Picture
 
     ###################################################################
@@ -132,9 +132,9 @@ class ::tycho::LabelledItem {
     #### Set method table
     array set methodtable [array get ::tycho::Picture::methodtable]
 
-    set methodtable(_anchor)   ::tycho::LabelledItem::_anchor
-    set methodtable(_graphics) ::tycho::LabelledItem::_graphics
-    set methodtable(_text)     ::tycho::LabelledItem::_text
+    set methodtable(_anchor)   ::tycho::LabeledItem::_anchor
+    set methodtable(_graphics) ::tycho::LabeledItem::_graphics
+    set methodtable(_text)     ::tycho::LabeledItem::_text
 
     #### Set option defaults
     array set optiondefault [array get ::tycho::Picture::optiondefault]
@@ -147,7 +147,7 @@ class ::tycho::LabelledItem {
 ##########################################################################
 ## -anchor option configuration
 #
-body ::tycho::LabelledItem::_anchor {id canvas slate anchor} {
+body ::tycho::LabeledItem::_anchor {id canvas slate anchor} {
     set _anchor($id) $anchor
 
     # If there are no graphics, place inside the item, else place
@@ -175,7 +175,7 @@ body ::tycho::LabelledItem::_anchor {id canvas slate anchor} {
 # Draw the specified items specified using coordinates in
 # percent of the parent item's size. <i>Do not specify tags.</i>
 #
-body ::tycho::LabelledItem::_graphics {id canvas slate graphics} {
+body ::tycho::LabeledItem::_graphics {id canvas slate graphics} {
     set _graphics($id) $graphics
 
     # Delete existing graphics
@@ -211,7 +211,7 @@ body ::tycho::LabelledItem::_graphics {id canvas slate graphics} {
 ##########################################################################
 ## -text option configuration
 #
-body ::tycho::LabelledItem::_text {id canvas slate text} {
+body ::tycho::LabeledItem::_text {id canvas slate text} {
     if { $text != "" } {
         if { ! [::info exists textitem($id)] } {
 	    assign x0 y0 x1 y1 [$canvas coords $primary($id)]

@@ -30,15 +30,15 @@
 # Explicitly load the superclass. I don't really know why this is
 # needed, but the common arrays get upset otherwise.
 namespace ::tycho {
-    if { [::info classes LabelledItem] == "" } {
-		uplevel #0 {source $tychoslate/LabelledItem.itcl}
+    if { [::info classes LabeledItem] == "" } {
+		uplevel #0 {source $tychoslate/LabeledItem.itcl}
     }
 }
 
 ##########################################################################
-## LabelledFrame
+## LabeledFrame
 #
-# <i>LabelledFrame</i> is a frame with a text label and graphics.
+# <i>LabeledFrame</i> is a frame with a text label and graphics.
 # In all other respects, it can be treated like any other rectangle item.
 # At present, the graphics do not take account of the width
 # of the 3D border.
@@ -50,7 +50,7 @@ namespace ::tycho {
 # <dl>
 #
 # <dt><b>-anchor</b>
-# <dd>See <a href="LabelledItem.html">LabelledItem</a>.
+# <dd>See <a href="LabeledItem.html">LabeledItem</a>.
 #
 # <dt><b>-borderwidth</b>
 # <dd>See <a href="Frame.html">Frame</a>
@@ -59,13 +59,13 @@ namespace ::tycho {
 # <dd>See <a href="Frame.html">Frame</a>
 #
 # <dt><b>-graphics</b>
-# <dd>See <a href="LabelledItem.html">LabelledItem</a>.
+# <dd>See <a href="LabeledItem.html">LabeledItem</a>.
 #
 # <dt><b>-relief</b>
 # <dd>See <a href="Frame.html">Frame</a>
 #
 # <dt><b>-text</b>
-# <dd>See <a href="LabelledItem.html">LabelledItem</a>.
+# <dd>See <a href="LabeledItem.html">LabeledItem</a>.
 #
 # </dl></dl>
 #
@@ -74,7 +74,7 @@ namespace ::tycho {
 # <p><b>Example</b>: Create a labelled rectangle:
 # <tcl quiet><pre>
 #  source $tycho/editors/slate/doc/internals/newslate.itcl
-#  $slate create LabelledFrame 40 40 100 80 -color green &#92
+#  $slate create LabeledFrame 40 40 100 80 -color green &#92
 #          -text Foo -tags moveable &#92
 #          -graphics "Frame 25 25 75 75 -color green -relief sunken"
 # </pre></tcl>
@@ -92,8 +92,8 @@ namespace ::tycho {
 #
 # <a href="../internals/howtoread.html">Reading <i>Picture</i> documentation</a>.
 #
-class ::tycho::LabelledFrame {
-    inherit ::tycho::LabelledItem
+class ::tycho::LabeledFrame {
+    inherit ::tycho::LabeledItem
 
     # Create a new item
     proc construct {id canvas slate tags x0 y0 x1 y1 args}
@@ -113,7 +113,7 @@ class ::tycho::LabelledFrame {
     # Default values of this item's options
     common optiondefault
 
-    # Labelled frames are rectangular in shape
+    # Labeled frames are rectangular in shape
     common shape "rectangle"
 
     ###################################################################
@@ -121,20 +121,20 @@ class ::tycho::LabelledFrame {
 
     #### Set method table
     array set methodtable [array get ::tycho::Frame::methodtable]
-    array set methodtable [array get ::tycho::LabelledItem::methodtable]
+    array set methodtable [array get ::tycho::LabeledItem::methodtable]
 
-    set methodtable(construct) ::tycho::LabelledFrame::construct
-    set methodtable(coords)    ::tycho::LabelledFrame::coords
+    set methodtable(construct) ::tycho::LabeledFrame::construct
+    set methodtable(coords)    ::tycho::LabeledFrame::coords
 
     #### Set option defaults
     array set optiondefault [array get ::tycho::Frame::optiondefault]
-    array set optiondefault [array get ::tycho::LabelledItem::optiondefault]
+    array set optiondefault [array get ::tycho::LabeledItem::optiondefault]
 }
 
 ##########################################################################
 #### construct
 #
-body ::tycho::LabelledFrame::construct {id canvas slate tags x0 y0 x1 y1 args} {
+body ::tycho::LabeledFrame::construct {id canvas slate tags x0 y0 x1 y1 args} {
     # Initialize the options
     foreach {option value} [concat [array get optiondefault] $args] {
         set _[string trimleft $option -]($id) $value
@@ -154,7 +154,7 @@ body ::tycho::LabelledFrame::construct {id canvas slate tags x0 y0 x1 y1 args} {
 #
 # Set or read the frame's coordinates
 #
-body ::tycho::LabelledFrame::coords {id canvas slate args} {
+body ::tycho::LabeledFrame::coords {id canvas slate args} {
     # No args: just return coordinates
     if { $args == "" } {
         return [$canvas coords $primary($id)]
