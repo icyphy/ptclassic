@@ -483,4 +483,9 @@ DERCStar* Resource :: getDERCStar(Event* e) {
     return tmp;
 }
 
-
+// For some reason, under Cygwin32, we need to the body in the .cc file
+ResLLCell :: ResLLCell( DERCEvent* e, double time, int prio) {
+    event = e;
+    ECT = time;
+    priority = prio;
+}
