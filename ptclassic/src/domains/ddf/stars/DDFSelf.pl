@@ -105,7 +105,7 @@ At compile time, this star appears to just be an atomic star.
 		// clone the recursion galaxy
 		InterpGalaxy* myGal = (InterpGalaxy*) gal->clone();
 		myGal->setNameParent(gal->readName(), this);
-		sched.resetGal();
+		sched.resetFlag();
 
 		// make a image connection between DDFSelf and galaxy.
 		BlockPortIter next(*myGal);
