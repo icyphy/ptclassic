@@ -245,6 +245,15 @@ void AsmStar::genMiscCmd(CodeBlock& cb) {
 	addMiscCmd(t);
 }
 
+void AsmStar::addProcCode(const char* cmd) {
+	((AsmTarget*)targetPtr)->addProcCode(cmd);
+}
+
+void AsmStar::genProcCode(CodeBlock& cb) {
+	const char* t = processCode(cb);
+	addProcCode(t);
+}
+
 // fire: prefix the code with a comment
 
 int AsmStar::fire() {
