@@ -80,7 +80,7 @@ void StringState :: initialize() {
 	StringList parsedString = "";
 	while (TRUE) {
         	ParseToken t = getParseToken(lexer, T_STRING);
-		if (t.tok == T_EOF) break;
+		if (t.tok == T_EOF || t.tok == T_ERROR) break;
 		parsedString << t.sval;
 		delete [] t.sval;
 	}
