@@ -26,36 +26,37 @@
 #                                                         COPYRIGHTENDKEY
 # The global array ptkRunFlag($name), indexed by the name of the universe,
 # has the following values:
-#	undefined or 0		no active run window, universe not created
-#	1			active run window, but no run yet
-#	2			active run
-#	3			paused run
-#	4			finished run
-#	5			pending stop requested
+#	undefined		no active run window, universe not created
+#	IDLE			active run window, but no run yet
+#	ACTIVE			active run
+#	PAUSED			paused run
+#	FINISHED		finished a run
+#	STOP_PENDING		pending stop requested
 
-set ptkRunFlag(main) 0
-
-#######################################################################
-# Return the ptkRunFlag for a given name, or return zero if none exists.
-#
-proc ptkGetRunFlag { name } {
-    global ptkRunFlag
-    if {[info exists ptkRunFlag($name)] && [set temp $ptkRunFlag($name)] > 0} {
-	return $temp
-    } { return 0 }
-}
 
 #######################################################################
-# Set the ptkRunFlag to 4, indicating the run is over, and pop up the
+# Set the ptkRunFlag to IDLE, indicating the run is over, and pop up the
 # GO button.
 #
 proc ptkClearRunFlag { name } {
     global ptkRunFlag
     set  cntrWindow .run_$name
     catch {$cntrWindow.panel.go configure -relief raised}
-    set ptkRunFlag($name) 4
+    set ptkRunFlag($name) FINISHED
     return ""
 }
+
+#######################################################################
+# Return "1" if the system has has been run at least once, "0" otherwise.
+# This procedure is used by pigilib/compile.c.
+#
+proc ptkHasRun { name } {
+    global ptkRunFlag
+    if {![info exists ptkRunFlag($name)] || $ptkRunFlag($name) == {IDLE}} {
+        return 0
+    } { return 1 }
+}
+
 
 #######################################################################
 # Procedure to run a universe.
@@ -64,13 +65,13 @@ proc ptkClearRunFlag { name } {
 proc ptkRunControl { name octHandle } {
     global ptkRunFlag
     set w .run_$name
-    if {[ptkGetRunFlag $name] > 0 && [winfo exists $w]} {
+    if {[info exists ptkRunFlag($name)] && [winfo exists $w]} {
             ptkImportantMessage .error \
 		"Sorry.  Only one run window for $name at time. "
 	    return
     }
     # Mark an open window, but with no run yet.
-    set ptkRunFlag($name) 1
+    set ptkRunFlag($name) IDLE
 
     catch {destroy $w}
     toplevel $w
@@ -149,11 +150,12 @@ proc ptkRunControl { name octHandle } {
 #
 proc ptkRunControlDel { name window octHandle defNumIter} {
     global ptkRunFlag
-    if {$ptkRunFlag($name) == 2 || $ptkRunFlag($name) == 5 } {
+    if {$ptkRunFlag($name) == {ACTIVE} || \
+	    $ptkRunFlag($name) == {STOP_PENDING} } {
 	ptkImportantMessage .message {System is still running.  Please stop it.}
 	return
     }
-    set ptkRunFlag($name) 0
+    unset ptkRunFlag($name)
     # update the oct facet only if the number of iterations has changed.
     if {$defNumIter != [$window.iter.entry get]} {
          ptkSetRunLength $octHandle [$window.iter.entry get]
@@ -167,8 +169,8 @@ proc ptkRunControlDel { name window octHandle defNumIter} {
 proc ptkStop { name } {
     global ptkRunFlag
     # Ignore if the named system is not running
-    if {$ptkRunFlag($name) != 2} return
-    set ptkRunFlag($name) 5
+    if {$ptkRunFlag($name) != {ACTIVE}} return
+    set ptkRunFlag($name) STOP_PENDING
     halt
     # Finish processing the run command
     update
@@ -185,7 +187,7 @@ proc ptkPause { name } {
     ptkImportantMessage .error {Pause not implemented yet}
 #   global ptkRunFlag
 #   #Ignore the command if the system is not running
-#   if {$ptkRunFlag($name) != 2} return
+#   if {$ptkRunFlag($name) != {ACTIVE}} return
 #   set olduniv [curuniverse]
 #   curuniverse $name
 #   halt
@@ -195,7 +197,7 @@ proc ptkPause { name } {
 #   set cntrWindow .run_$name
 #   catch {$cntrWindow.panel.go configure -relief raised}
 #   catch {$cntrWindow.panel.pause configure -relief sunken}
-#   set ptkRunFlag($name) 3
+#   set ptkRunFlag($name) PAUSED
 }
 
 #######################################################################
@@ -206,21 +208,22 @@ proc ptkGo {name octHandle} {
     set numIter [$w.iter.entry get]
     global ptkRunFlag
     # For now, we allow only one run at a time.
-    if {$ptkRunFlag([curuniverse]) == 2 || $ptkRunFlag([curuniverse]) == 5} {
+    if {$ptkRunFlag([curuniverse]) == {ACTIVE} || \
+	    $ptkRunFlag([curuniverse]) == {STOP_PENDING}} {
         ptkImportantMessage .error \
 		"Sorry.  Only one run at time. "
 	return
     }
     set prevRunFlag $ptkRunFlag($name)
-    set ptkRunFlag($name) 2
+    set ptkRunFlag($name) ACTIVE
     catch {$cntrWindow.panel.go configure -relief sunken}
     catch {$cntrWindow.panel.pause configure -relief raised}
-    if {$prevRunFlag != 3} {
+    if {$prevRunFlag != {PAUSED}} {
         curuniverse $name
         ptkCompile $octHandle
         run $numIter
     } { cont }
-    if {$ptkRunFlag($name) != 3} {
+    if {$ptkRunFlag($name) != {PAUSED}} {
 	wrapup
 	ptkClearRunFlag $name
     }
