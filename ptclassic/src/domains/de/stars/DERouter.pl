@@ -35,10 +35,10 @@ limitation of liability, and disclaimer of warranty provisions.
 		random = NULL;
 	}
 	destructor {
-		if(random) { LOG_DEL; delete random;}
+		LOG_DEL; delete random;
 	}
 	setup {
-		if(random) { LOG_DEL; delete random;}
+		LOG_DEL; delete random;
 		LOG_NEW; random = new Uniform(0,double(output.numberPorts()),gen);
 	}
 

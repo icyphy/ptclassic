@@ -36,18 +36,18 @@ The mean inter-arrival time and magnitude of the events are given as parameters.
 	protected {
 		NegativeExpntl *random;
 	}
-// declare the static random-number generator in the .cc file
+	// declare the static random-number generator in the .cc file
 	code {
 		extern ACG* gen;
 	}
 	constructor {
-		random = NULL;
+		random = 0;
 	}
 	destructor {
-		if(random) { LOG_DEL; delete random;}
+		LOG_DEL; delete random;
 	}
 	setup {
-		if(random) { LOG_DEL; delete random;}
+		LOG_DEL; delete random;
 		LOG_NEW; random = new NegativeExpntl(double(meanTime),gen);
 	}
 	go {

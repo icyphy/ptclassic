@@ -52,13 +52,13 @@ limitation of liability, and disclaimer of warranty provisions.
 		extern ACG* gen;
 	}
 	constructor {
-		random = NULL;
+		random = 0;
 	}
 	destructor {
-		if(random) { LOG_DEL; delete random;}
+		LOG_DEL; delete random;
 	}
 	setup {
-		if(random) { LOG_DEL; delete random;}
+		LOG_DEL; delete random;
 
 		// decide which distribution.
 		const char* dist = distribution;

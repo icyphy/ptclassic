@@ -37,8 +37,12 @@ will not even exist.  This is normal.
 	protected {
 		pt_ofstream *p_out;
 	}
-	constructor { p_out = 0;}
-	destructor { LOG_DEL; delete p_out;}
+	constructor {
+		p_out = 0;
+	}
+	destructor {
+		LOG_DEL; delete p_out;
+	}
 	setup {
 		// in case file was open from previous run w/o wrapup call
 		LOG_DEL; delete p_out;
@@ -59,9 +63,4 @@ will not even exist.  This is normal.
 			}
 		}
 	}
-	wrapup {
-		LOG_DEL; delete p_out;
-		p_out = 0;
-	}
 }
-
