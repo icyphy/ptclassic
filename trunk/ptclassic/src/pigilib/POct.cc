@@ -257,6 +257,10 @@ int POct::SetDelayParams(octObject *instPtr, ParamListType *pListp) {
 
 // Deletes all of the elements of the passed parameter list pList
 // The memory was allocated in POct::MakePList below 
+// This does not apply to other ParamListType instances created by routines
+// in compile.c or octIfc.c because these routines do not create new
+// copies of name and value fields but instead are indices into a single
+// string
 void POct::DeletePList(ParamListType* pListp) {
     if ( pListp ) {
 	if ( pListp->array ) {
@@ -293,10 +297,11 @@ void POct::DeletePList(ParamListType* pListp) {
 int POct::MakePList(char* parameterList, ParamListType* pListp) {
 
     // Error checking
+    // By default, return an empty parameter list (0 elements)
+    pListp->length = 0;
+    pListp->array = 0;
+
     if (strcmp(parameterList, "NIL") == 0) {
-        // Create a "NIL" pList with 0 elements
-        pListp->length = 0;
-        pListp->array = 0;
         return TRUE;
     }
 
@@ -363,12 +368,14 @@ int POct::MakePList(char* parameterList, ParamListType* pListp) {
 // FIXME:  If a non-universe facet is passed to this function,
 //         it churns ahead anyway and then crashes.  - aok
 //         fix it by adding an IsUniv check.
+// Do not use octObjectClass: let the memory leak happen; otherwise
+// we will get an array bounds read error from Purify. -BLE
 int POct::ptkCompile (int aC, char** aV) {
-    octObjectClass facet;
+    octObject facet = {OCT_UNDEFINED_OBJECT};
 
     // Error checking: number of arguments, oct facet file
     if (aC != 2) return usage ("ptkCompile <OctObjectHandle>");
-    if (ptkHandle2OctObj(aV[1], facet) == 0) {
+    if (ptkHandle2OctObj(aV[1], &facet) == 0) {
 	Tcl_AppendResult(interp, "Bad or Stale Facet Handle passed to ", aV[0], 
                          (char *) NULL);
         return TCL_ERROR;
@@ -376,7 +383,7 @@ int POct::ptkCompile (int aC, char** aV) {
 
     // Compile the facet
     int retval = TCL_OK;
-    if ( ! CompileFacet(facet) ) {
+    if ( ! CompileFacet(&facet) ) {
         Tcl_AppendResult(interp, ErrGet(), (char *) NULL);
 	retval = TCL_ERROR;
     }
@@ -415,7 +422,7 @@ int POct::ptkGetParams (int aC, char** aV) {
     }
 
     // Check to see if a valid instance was passed
-    ParamListType pList;
+    ParamListType pList = {0, 0};
     char title[64];
     if (strcmp(aV[2], "NIL") == 0) {
         // If there is no instance, then this must be a Galaxy or Universe
@@ -516,6 +523,10 @@ int POct::ptkGetParams (int aC, char** aV) {
             place++;
         }
         Tcl_AppendResult(interp, " }", NULL);
+
+	// Free pList which was created by PStrToPList via a call to
+	// GetFormalParams or GetOrInitSogParams
+	FreeFlatPList(&pList);
     } else {					// There are no parameters
 	Tcl_AppendResult(interp, " NIL", NULL);
     }
@@ -547,8 +558,8 @@ int POct::ptkSetParams (int aC, char** aV) {
 
     // Covert the parameter List string in the pList structure.
     // Be sure to free pList before returning
-    ParamListType pList;
-    if (MakePList(aV[3], &pList) == 0) {
+    ParamListType pList = {0, 0};
+    if (!MakePList(aV[3], &pList)) {
         Tcl_AppendResult(interp, "Unable to parse parameter list: ",
                          aV[3], (char *) NULL);
         return TCL_ERROR;
@@ -577,10 +588,9 @@ int POct::ptkSetParams (int aC, char** aV) {
         octObjectClass instance;
         if (ptkHandle2OctObj(aV[2], instance) == 0) {
             // No way to go on if the handle is bad.  Clean up and exit.
-            DeletePList(&pList);
+	    ErrorFound = TRUE;
             Tcl_AppendResult(interp, "Bad or Stale Facet Handle passed to ", 
-		aV[0], (char *) NULL);
-            return TCL_ERROR;
+			     aV[0], (char *) NULL);
         }
 
         if ( IsDelay(instance) || IsDelay2(instance)) {
@@ -604,8 +614,8 @@ int POct::ptkSetParams (int aC, char** aV) {
             // Must be a star or Galaxy
 	    // Set the domain to be that of the instance
 	    if (!setCurDomainInst(instance)) {
+		ErrorFound = TRUE;
                 Tcl_AppendResult(interp,"Invalid Domain Found.",(char *) NULL);
-                return TCL_ERROR;
             }
             // Set Star or Galaxy params from the pList
             if (SetSogParams(instance, &pList) == 0) {
@@ -614,7 +624,6 @@ int POct::ptkSetParams (int aC, char** aV) {
                                  " Could not save parameters to Oct. ",
                                  ErrGet(), (char *) NULL);
             }
-
         } else {
             ErrorFound = TRUE;
             Tcl_AppendResult(interp, 
@@ -623,6 +632,7 @@ int POct::ptkSetParams (int aC, char** aV) {
         }
     }
 
+    // Clean up memory created by MakePList
     DeletePList(&pList);
 
     if (ErrorFound) return TCL_ERROR;
@@ -1204,7 +1214,7 @@ int POct::ptkGetTargetParams (int aC, char** aV) {
     }
 
     // Get the pList form
-    ParamListType pList;
+    ParamListType pList = {0, 0};
     if (!GetTargetParams(target, facet, &pList)) {
 	Tcl_AppendResult(interp, ErrGet(), (char *) NULL);
         return TCL_ERROR;
@@ -1264,8 +1274,8 @@ int POct::ptkSetTargetParams (int aC, char** aV) {
 
     // Covert the parameter List string into the pList structure.
     // Now that the pList has been made, it should be freed before returning.
-    ParamListType pList;
-    if (MakePList(aV[3], &pList) == 0) {
+    ParamListType pList = {0, 0};
+    if (!MakePList(aV[3], &pList)) {
         Tcl_AppendResult(interp, "Unable to parse parameter list: ",
                          aV[3], (char *) NULL);
         return TCL_ERROR;
@@ -1274,14 +1284,14 @@ int POct::ptkSetTargetParams (int aC, char** aV) {
     // Now (finally) set the Target Parameters
     if (pList.length > 0 ) {
         if (!SetTargetParams(facet, &pList)) {
+	    DeletePList(&pList); 	// Clean up memory created by MakePList
 	    Tcl_AppendResult(interp, ErrGet(), (char *) NULL);
             return TCL_ERROR;
         }
     }
-    
-    // Free up the pList as it is no longer needed
-    DeletePList(&pList);
 
+    // Clean up memory created by MakePList
+    DeletePList(&pList);
 
     return TCL_OK;
 }
