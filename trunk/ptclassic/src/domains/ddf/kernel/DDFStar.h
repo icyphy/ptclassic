@@ -18,7 +18,7 @@ $Id$
 
 *******************************************************************/
 
-#include "Star.h"
+#include "SDFStar.h"
 #include "Particle.h"
 #include "Fraction.h"
 #include "DDFConnect.h"
@@ -27,7 +27,7 @@ $Id$
 	// class DDFStar
 	////////////////////////////////////
 
-class DDFStar : public Star  {
+class DDFStar : public DataFlowStar  {
 
  	friend class DDFScheduler;
 	PortHole* waitPort;
@@ -39,6 +39,9 @@ public:
 
 	// initialize DDF-specific members
 	void prepareForScheduling();
+
+	// class identification
+	int isA(const char*) const;
 
 	// my domain
 	const char* domain() const;
