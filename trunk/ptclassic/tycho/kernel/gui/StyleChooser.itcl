@@ -67,14 +67,34 @@ class ::tycho::PreferenceDialog {
     # Open an editor for the specified preference set
     method edit {set}
 
+    # Redo the last undone change
+    method redo {}
+
+    # Undo the last change
+    method undo {}
+
+    # Notify (from preference editor) that preferences have been edited
+    method notify {args}
+
     # Update changed preferences
-    method update {}
+    method update {args}
+
+    ###################################################################
+    ####                         private procs                     ####
+
+    # Compare two lists by element 1
+    private proc cmp {a b} {
+	string compare [lindex $a 1] [lindex $b 1]
+    }
 
     ###################################################################
     ####                       private variables                   ####
 
     # Open preferences editors
     private variable editors {}
+
+    # Changed preferences that I have to update -- group, preference
+    private variable changed {}
 }
 
 
@@ -82,51 +102,80 @@ class ::tycho::PreferenceDialog {
 #### constructor
 #
 body ::tycho::PreferenceDialog::constructor {args} {
-
-    foreach tag [::tycho::preference info] {
+    # Collect groups and their descriptions
+    set groups {}
+    foreach tag [::tycho::preference group] {
 	set description [::tycho::preference cget $tag -description]
 	if { $description != "" } {
-	    itk_component add $tag {
-		button $itk_component(childsite).$tag -text $description \
-			-command "$this edit $tag" \
-			-highlightthickness 0
-	    } {
-		keep -background -cursor -font
-	    }
-	    pack $itk_component(childsite).$tag -fill x -expand on
+	    lappend groups [list $tag $description]
 	}
+    }
+    # Sort the groups by description
+    set groups [eval concat [lsort -command ::tycho::PreferenceDialog::cmp \
+	    $groups]]
+
+    # Create a button for each group
+    foreach {tag description} $groups {
+	itk_component add $tag {
+	    button $itk_component(childsite).$tag -text $description \
+		    -command "$this edit $tag" \
+		    -highlightthickness 0
+	} {
+	    keep -background -cursor -font
+	}
+	pack $itk_component(childsite).$tag -fill x -expand on
     }
 
     # Add an apply button
-    addButton apply -text "Apply <M-a>" -command "$this update" \
-	    -row 1 -column 0
+    addButton apply -row 1 -column 0 \
+	    -text "Apply <M-a>" -command "$this update"
     configure -okcommand "$this update"
-
-    ## FIXME: disabled pending proper implementation of tycho database
-    #
-    # addButton save -text "Save <M-s>" -command "tychoPreferences write"
 
     # Meta-a performs update
     bind $itk_component(hull) <Meta-a> \
 	    "$this update; break"
 
     # Add a help button
-    addButton help -text "Help" -command {
-	::tycho::File::openContext \
-		[file join $TYCHO kernel doc usersGuides PreferencesHelp.html]
-    } -row 1 -column 1
+    addButton help -text "Help" -row 1 -column 1 \
+	    -command { \
+	    ::tycho::File::openContext \
+	    [file join $TYCHO kernel doc usersGuides PreferencesHelp.html] }
+
+    # Add undo and redo commands
+    addButton undo -text "Undo" -row 2 -column 0 -command "$this undo"
+    addButton redo -text "Redo" -row 2 -column 1 -command "$this redo"
+
+    # Disable the buttons if there is no history. This is rather awkward.
+    if { [::tycho::preference model markIndex "first"] \
+	    == [::tycho::preference model markIndex "current"] } {
+	component bbox buttonconfigure undo -state disabled
+    }
+    if { [::tycho::preference model markIndex "last"] \
+	    == [::tycho::preference model markIndex "current"] } {
+	component bbox buttonconfigure redo -state disabled
+    }
 
     # Initialise options
     eval itk_initialize $args
-#    eval preference exclude $this $args
+    eval preference exclude $this $args
 }
 
 #######################################################################
 #### destructor
 #
 body ::tycho::PreferenceDialog::destructor {} {
+    # Delete open preference editors
     foreach e $editors {
 	catch {delete object $e}
+    }
+
+    # Save the whole bag of preferences
+    ::tycho::preference model write
+
+    # Also save just the ones the user wants
+    # FIXME: Save file in Model?
+    foreach {group preference} $changed {
+	# puts "$group $changed"
     }
 }
 
@@ -137,16 +186,64 @@ body ::tycho::PreferenceDialog::edit {set} {
     if { [::info which -command .$set] != "" } {
 	raise .$set
     } else {
-	set ed [uplevel #0 ::tycho::PreferenceEditor .$set -preferences $set]
+	set ed [uplevel #0 \
+		::tycho::PreferenceEditor .$set \
+		-preferences $set \
+		-parentdialog $this]
 	wm deiconify $ed
 	lappend editors $ed
     }
 }
 
 #######################################################################
+#### notify
+#
+body ::tycho::PreferenceDialog::notify {args} {
+    # Enable the undo button and disable the redo button
+    component bbox buttonconfigure undo -state normal
+    component bbox buttonconfigure redo -state disabled
+
+    # Remember changed preferences for saving later
+    eval lappend changed $args
+}
+
+#######################################################################
+#### redo
+#
+body ::tycho::PreferenceDialog::redo {} {
+    # Call preferences manager to redo
+    set more [::tycho::preference model redo]
+
+    # If there's no more redo, disable the redo button
+    if { ! $more } {
+	component bbox buttonconfigure redo -state disabled
+    }
+
+    # Enable the undo button
+    component bbox buttonconfigure undo -state normal
+}
+
+#######################################################################
+#### undo
+#
+body ::tycho::PreferenceDialog::undo {} {
+    # Call preferences manager to undo
+    set more [::tycho::preference model undo]
+
+    # If there's no more undo, disable the undo button
+    if { ! $more } {
+	component bbox buttonconfigure undo -state disabled
+    }
+
+    # Enable the redo button
+    component bbox buttonconfigure redo -state normal
+}
+
+#######################################################################
 #### update
 #
 body ::tycho::PreferenceDialog::update {} {
+    # Update each open editor
     foreach e $editors {
 	if { [::info which -command $e] != "" } {
 	    $e update
@@ -154,4 +251,7 @@ body ::tycho::PreferenceDialog::update {} {
 	    set editors [::tycho::ldelete $editors $e]
 	}
     }
+
+    # Enable the undo button
+    component bbox buttonconfigure undo -state normal
 }
