@@ -208,22 +208,60 @@ logConnect(StringList& list,const char* srcStar,const char* srcPipe,
 	list += initDelayValues;
 }
 
-void InterpGalaxy::registerInit(const char* tag,
-				const char* srcStar,
-				const char* srcPort,
-				const char* initDelayValues,
-				const char* dstStar,
-				const char* dstPort,
-				const char* node,
-				const char* busWidth) {
+void InterpGalaxy::registerInit(const char*  tag,
+				GenericPort* srcPort,
+				const char*  initDelayValues,
+				GenericPort* dstPort,
+				const char*  node,
+				const char*  busWidth) {
+  // Register a repeatable action on the initList.
+  // Source and destination ports may have had aliases resolved,
+  // so we need to use getPortHoleName to find out what to call them.
+  const char* srcBlockName;
+  const char* srcPortName;
+  if (! getPortHoleName(*srcPort, srcBlockName, srcPortName)) {
+    Error::abortRun (*srcPort, "can't find name in surrounding galaxy");
+    return;
+  }
   initList += tag;
-  initList += srcStar;
-  initList += srcPort;
-  if(dstStar)  initList += dstStar;
-  if(dstPort)  initList += dstStar;
-  if(busWidth) initList += busWidth;
-  if(node)     initList += node;
+  initList += srcBlockName;
+  initList += srcPortName;
+  if (dstPort) {
+    const char* dstBlockName;
+    const char* dstPortName;
+    if (! getPortHoleName(*dstPort, dstBlockName, dstPortName)) {
+      Error::abortRun (*dstPort, "can't find name in surrounding galaxy");
+      return;
+    }
+    initList += dstBlockName;
+    initList += dstPortName;
+  }
+  if (busWidth) initList += busWidth;
+  if (node)     initList += node;
   initList += initDelayValues;
+}
+
+
+// Given a porthole, determine the block name and porthole name that name it
+// in this galaxy.  This is nontrivial since the desired name may be for an
+// alias leading to the given porthole.  Returns TRUE if successful.
+int InterpGalaxy::getPortHoleName (GenericPort& port,
+				   const char* & blockName,
+				   const char* & portName)
+{
+  GenericPort* ph = &port;
+  do {
+    // Does port belong to a member star of this galaxy?
+    Block* b = ph->parent();
+    if (b && b->parent() == (Block*) this) {
+      blockName = b->name();
+      portName = ph->name();
+      return TRUE;
+    }
+    // Nope, try the next alias.
+    ph = ph->aliasFrom();
+  } while (ph);
+  return FALSE;			// failed to find it
 }
 
 
@@ -234,18 +272,24 @@ InterpGalaxy::connect(const char* srcStar,const char* srcPipe,
 		      const char* initDelayValues) {
 	if ((initDelayValues == 0) || (*initDelayValues == 0))
 	    initDelayValues = &emptyDelay;
-// Get the source and destination ports
+// Get the source and destination ports; do first to verify the names are OK
 	PortHole *srcP = findPortHole (srcStar, srcPipe);
 	PortHole *dstP = findPortHole (dstStar, dstPipe);
 	if (srcP == NULL || dstP == NULL) return FALSE;
 
-// add the action to the list, and to initList if variable
+// Add the connection to the action list, using original forms of parameters.
 	logConnect(actionList,srcStar,srcPipe,dstStar,dstPipe,initDelayValues);
 
+// Check for an old-style delay spec (constant number of delays, no values).
+// CAUTION: this can change initDelayValues!
 	int numDelays = getNumDelays(this, initDelayValues);
 
+// If the delay spec is variable, add it to the initList so that the
+// delays get reinitialized at preinit time.
 	if (*initDelayValues)
-	  logConnect(initList,srcStar,srcPipe,dstStar,dstPipe,initDelayValues);
+	  registerInit("C", srcP, initDelayValues, dstP);
+
+// Finally make the connection itself.
 	Galaxy::connect (*srcP, *dstP, numDelays, initDelayValues);
 	return TRUE;
 }
@@ -273,12 +317,20 @@ InterpGalaxy::busConnect(const char* srcStar,const char* srcPipe,
   MultiPortHole* s = findMPH (srcStar, srcPipe);
   MultiPortHole* d = findMPH (dstStar, dstPipe);
   if (s == 0 || d == 0) return FALSE;
+
+// Add the connection to the action list, using original forms of parameters.
   logBus(actionList,srcStar,srcPipe,dstStar,dstPipe,width,initDelayValues);
 
+// Check for an old-style delay spec (constant number of delays, no values).
+// CAUTION: this can change initDelayValues!
   int numDelays = getNumDelays(this, initDelayValues);
 
+// If the delay or width is variable, add it to the initList to be
+// reinitialized at preinit time.
   if (isVarExp(width) || *initDelayValues)
-    logBus(initList,srcStar,srcPipe,dstStar,dstPipe,width,initDelayValues);
+    registerInit("B", s, initDelayValues, d, NULL, width);
+
+// And do the connection.
   int w = evalExp(this,width,"busWidth");
   if (w == 0) w = 1;
   s->busConnect (*d, w, numDelays, initDelayValues);
@@ -338,11 +390,11 @@ InterpGalaxy::alias(const char* galportname,const char* starname,
 // create new galaxy port, add to galaxy, do the alias
 	DataType dType = ph->type();
 	if (ph->isItMulti()) {
-		LOG_NEW; GalMultiPort *p = new GalMultiPort(*ph);
+		GalMultiPort *p = new GalMultiPort(*(MultiPortHole*)ph);
 		addPort(p->setPort(galportname,this,dType));
 	}
 	else {
-		LOG_NEW; GalPort *p = new GalPort(*ph);
+		GalPort *p = new GalPort(*(PortHole*)ph);
 		addPort(p->setPort(galportname,this,dType));
 	}
 // add action to list
@@ -400,29 +452,29 @@ InterpGalaxy::nodeConnect (const char* star, const char* port,
 		noInstance (node, name());
 		return FALSE;
 	}
-	if (ph->isItOutput()) {
 
-		int numDelays = getNumDelays(this, initDelayValues);
-
-		if (!g->setSourcePort (*ph, numDelays, initDelayValues)) return FALSE;
-	} else if (*initDelayValues) {
-	  Error::abortRun ("delay not allowed when nodeConnecting an input");
-	  return FALSE;
-	} else if (!g->setDestPort (*ph)) return FALSE;
-
-	// add to action list
+	// add original forms of parameters to action list
 	actionList += "c";
 	actionList += star;
 	actionList += port;
 	actionList += node;
 	actionList += initDelayValues;
-	if (*initDelayValues) {
-		initList += "c";
-		initList += star;
-		initList += port;
-		initList += node;
-		initList += initDelayValues;
-	}
+
+	if (ph->isItOutput()) {
+		// Caution: this can change initDelayValues!
+		int numDelays = getNumDelays(this, initDelayValues);
+		if (!g->setSourcePort (*ph, numDelays, initDelayValues))
+		  return FALSE;
+	} else if (*initDelayValues) {
+	  Error::abortRun(*ph,
+			  "delay not allowed when nodeConnecting an input");
+	  return FALSE;
+	} else if (!g->setDestPort (*ph)) return FALSE;
+
+	// If variable delay, add connection to initList to get reinitialized.
+	if (*initDelayValues)
+	  registerInit("c", ph, initDelayValues, NULL, node);
+
 	return TRUE;
 }
 
