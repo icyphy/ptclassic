@@ -45,3 +45,14 @@
 ARCHFLAGS =	-DPTSOL2_5 -DPTSOL2_6 -DPTSOL7 -D_PTHREAD_1003_1c
 
 include $(ROOT)/mk/config-sol2.mk
+
+# Building gthreads fails because of messages like:
+# ../include/pthread.h:179: conflicting types for `pthread_mutex_t'
+# /usr/include/sys/types.h:361: previous declaration of `pthread_mutex_t'
+# So, we cannot have the PN Domain
+
+# Build gthreads
+INCLUDE_GTHREADS =	no
+
+# Include the PN domain.
+INCLUDE_PN_DOMAIN =	no
