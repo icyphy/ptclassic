@@ -44,6 +44,12 @@
       (fillPattern 8 8 "0001100000011000000110000001100011111111000110000001100000011000")
       (borderPattern 1 "1")
   )
+  (figureGroupDefault delayOutline
+      (userData priority 12)
+      (width -2)
+      (fillPattern 1 1 "0")
+      (borderPattern 1 "1")
+  )
   (figureGroupDefault label
       (userData priority 5)
       (width -2)
@@ -100,13 +106,14 @@
   (figureGroupDefault brownOutline
       (userData priority 5)
       (width -2)
-      (fillPattern 8 8 "1101101101101101101101101101101101101101101101101101101101101101")
+      (fillPattern 1 1 "0")
       (borderPattern 1 "1")
   )
   (figureGroupDefault brownSolid
       (userData priority 5)
       (width -2)
-      (fillPattern 1 1 "1")
+      (fillPattern 8 8 "1101101101101101101101101101101101101101101101101101101101101101")
+      (borderPattern 1 "1")
   )
   (figureGroupDefault tanOutline
       (userData priority 5)
@@ -263,13 +270,14 @@
   (figureGroupDefault brownOutline3
       (userData priority 3)
       (width -2)
-      (fillPattern 8 8 "1101101101101101101101101101101101101101101101101101101101101101")
+      (fillPattern 1 1 "0")
       (borderPattern 1 "1")
   )
   (figureGroupDefault brownSolid3
       (userData priority 3)
       (width -2)
-      (fillPattern 1 1 "1")
+      (fillPattern 8 8 "1101101101101101101101101101101101101101101101101101101101101101")
+      (borderPattern 1 "1")
   )
   (figureGroupDefault tanOutline3
       (userData priority 3)
@@ -381,13 +389,14 @@
   (figureGroupDefault brownOutline4
       (userData priority 4)
       (width -2)
-      (fillPattern 8 8 "1101101101101101101101101101101101101101101101101101101101101101")
+      (fillPattern 1 1 "0")
       (borderPattern 1 "1")
   )
   (figureGroupDefault brownSolid4
       (userData priority 4)
       (width -2)
-      (fillPattern 1 1 "1")
+      (fillPattern 8 8 "1101101101101101101101101101101101101101101101101101101101101101")
+      (borderPattern 1 "1")
   )
   (figureGroupDefault tanOutline4
       (userData priority 4)
@@ -499,13 +508,14 @@
   (figureGroupDefault brownOutline6
       (userData priority 6)
       (width -2)
-      (fillPattern 8 8 "1101101101101101101101101101101101101101101101101101101101101101")
+      (fillPattern 1 1 "0")
       (borderPattern 1 "1")
   )
   (figureGroupDefault brownSolid6
       (userData priority 6)
       (width -2)
-      (fillPattern 1 1 "1")
+      (fillPattern 8 8 "1101101101101101101101101101101101101101101101101101101101101101")
+      (borderPattern 1 "1")
   )
   (figureGroupDefault tanOutline6
       (userData priority 6)
@@ -617,13 +627,14 @@
   (figureGroupDefault brownOutline7
       (userData priority 7)
       (width -2)
-      (fillPattern 8 8 "1101101101101101101101101101101101101101101101101101101101101101")
+      (fillPattern 1 1 "0")
       (borderPattern 1 "1")
   )
   (figureGroupDefault brownSolid7
       (userData priority 7)
       (width -2)
-      (fillPattern 1 1 "1")
+      (fillPattern 8 8 "1101101101101101101101101101101101101101101101101101101101101101")
+      (borderPattern 1 "1")
   )
   (figureGroupDefault tanOutline7
       (userData priority 7)
