@@ -86,6 +86,9 @@ public:
 	// value, -1 if it does not.
 	int member(const char*) const;
 
+	// Resize the array.  All contents lost.
+	void resize(int);
+
 private:
 	// destructor body
 	void zap();
