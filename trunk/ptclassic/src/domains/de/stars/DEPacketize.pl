@@ -11,10 +11,10 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { DE main library }
 	desc {
-Convert floating input data into a stream of packets.  A packet is produced
-when either an input appears on the demand input or when "maxLength" data
-values have arrived.  Note that a null packet is produced if a demand
-signal arrives and there is no data.
+Convert floating-point input data into a stream of packets of type FloatVecData.
+A packet is produced when either an input appears on the demand input or when
+"maxLength" data values have arrived.  Note that a null packet is produced if
+a demand signal arrives and there is no data.
 	}
 	ccinclude { "FloatVecData.h" }
 	input {

@@ -10,7 +10,9 @@ See the file ~ptolemy/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { DE main library }
-	desc {	Does nothing. Can be connected to any unused input ports. }
+	desc {
+This star does nothing. It is useful for connecting to any unused input ports.
+	}
 	outmulti {
 		name { output }
 		type { int }

@@ -2,7 +2,7 @@ defstar {
 	name {Switch}
 	domain {DE}
 	desc {
-Switches input events to one of two outputs, depending on
+Switch input events to one of two outputs, depending on
 the last received control input.
 	}
 	version { $Id$}

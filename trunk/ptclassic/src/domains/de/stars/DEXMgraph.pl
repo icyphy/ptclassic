@@ -1,7 +1,12 @@
 defstar {
 	name { XMgraph }
 	domain { DE }
-	desc { Generate a plot with the xgraph program. }
+	desc {
+Generate a plot with the xgraph program with one point per event.
+Any number of event sequences can be plotted simultaneously, up
+to the limit determined by the XGraph class.
+By default, a straight line is drawn between each pair of events.
+	}
 	version { $Id$}
 	author { E. A. Lee }
 	copyright {
@@ -11,13 +16,7 @@ See the file ~ptolemy/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { DE main library }
-	explanation {
-Draws a graph with the xgraph function.  It is assumed that "xgraph"
-is on your path, or this will not work!!!
-Any number of distinct DE signals can be plotted together, up to a
-maximum number of inputs determined in the definition of the XGraph class.
-	}
-	seealso {xgraph Xgraph Xhistogram}
+	seealso {xgraph Xhistogram}
 	inmulti {
 		name { input }
 		type { float }
@@ -37,7 +36,7 @@ maximum number of inputs determined in the definition of the XGraph class.
 	defstate {
 		name {options}
 		type {string}
-		default {""}
+		default {"-P =800x300+0+0"}
 		desc { Command line options for the xgraph program.}
 	}
 	hinclude { "Display.h" }

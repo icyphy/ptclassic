@@ -3,16 +3,15 @@ defstar {
 	domain {DE}
 	derivedFrom { QueueBase }
 	desc {
-FIFO queue with finite or infinite length.
-Events on the "demand" input trigger "outData" if the queue is not empty.
-If the queue is empty, then a "demand" event enables the next future
-"inData" particle to pass immediately to "outData".
+This star is a first-in first-out (FIFO) queue with finite or infinite length.
+Events on the "demand" input trigger a dequeue on the "outData"  port
+if the queue is not empty. If the queue is empty, then a "demand" event
+enables the next future "inData" particle to pass immediately to "outData".
 The first particle to arrive at "inData" is always passed directly
 to the output, unless "numDemandsPending" is initialized to 0.
 If "consolidateDemands" is set to TRUE (the default), then "numDemandsPending"
-is not permitted to rise above unity.
-The size of the queue is sent to the "size" output whenever an "inData"
-or "demand" event is processed.
+is not permitted to rise above unity. The size of the queue is sent to the
+"size" output whenever an "inData" or "demand" event is processed.
 Input data that doesn't fit in the queue is sent to the "overflow" output.
 	}
 	version { $Id$}

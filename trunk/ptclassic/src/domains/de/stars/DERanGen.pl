@@ -2,9 +2,11 @@ defstar {
 	name { RanGen }
 	domain { DE }
 	desc {
-This is a parameterized random number generator.
-We can select the distribution function by setting the state and parameters.
-Distributions currently supported : uniform(u), exponential(e), normal(n).
+This is a parameterized random number generator.  Upon receiving an input event,
+it generates a random number with a uniform(u), exponential(e), or normal(n)
+distribution, as determined by the "distribution" parameter.  Depending on
+the distribution, parameters also specify either the mean and variance or
+the lower and upper extent of the range.
 	}
 	version { $Id$}
 	author { Soonhoi Ha }

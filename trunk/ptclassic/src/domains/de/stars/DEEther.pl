@@ -12,8 +12,14 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { DE main library }
 	desc {
-Base class for transmitter and receiver
-stars that communication over a shared medium.
+This is the base class for transmitter and receiver
+stars that communicate over a shared medium.
+Each transmitter can communicate with any or all receivers
+that have the same value for the "medium" parameter.
+The communication is accomplished without graphical connections,
+and the communication topology can be continually changing.
+This base class implements the data structures that are shared
+between the transmitters and receivers.
 	}
 	explanation {
 This star, and its derivatives
@@ -30,7 +36,7 @@ Any ASCII string can be used as a name.
 The
 .c EtherSend
 star is given a Particle, an address, and a duration.
-It checks to see if the medium is currently occupied by another
+It checks to see whether the medium is currently occupied by another
 transmitter using the same medium.  If not, it occupies
 the medium for the specified duration, and delivers a copy of
 the particle to a receiver that matches the specified address.

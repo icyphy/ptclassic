@@ -11,7 +11,7 @@ See the file ~ptolemy/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
         }
 	desc {
-This star reads in input "NetworkCell"s from multiple input
+This star reads in input NetworkCells from multiple input
 sources and routes them to the appropriate output.
 	}
 

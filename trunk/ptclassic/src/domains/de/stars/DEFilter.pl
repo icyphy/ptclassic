@@ -1,16 +1,3 @@
-ident {
-/**************************************************************************
-Version identification:
-$Id$
-
-Copyright (c) 1990 The Regents of the University of California.
-                       All Rights Reserved.
-
-Programmer:  E. A. Lee
-Date of creation: 10/9/90
-
-**************************************************************************/
-}
 defstar {
 	name {Filter}
 	domain {DE}
@@ -23,11 +10,14 @@ See the file ~ptolemy/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { DE main library }
-	explanation {
+	desc {
 This star filters the input signal with a first-order, AR impulse response.
-The data input is interpreted as weighted impulses.  An output is triggered
-by a clock input.  Assuming a clock input event triggers the star at time $T$,
-the output is:
+The data input is interpreted as weighted impulses (Dirac delta functions).
+An output is triggered by a clock input.
+	}
+	explanation {
+Assuming a clock input event
+triggers the star at time $T$, the output is:
 .EQ
 y(T) ~=~ d sup {(T ~-~ tau )} s( tau )
 .EN
@@ -42,7 +32,6 @@ s( tau ) ~=~ i( tau ) ~+~ d sup {( tau ~-~ tau prime )} s( tau prime )
 where $tau prime$ is the time of the previous data input event,
 and $i( tau )$ is the data input.
 	}
-	desc { First order AR filter.  }
 	input {
 		name {clock}
 		type {anytype}

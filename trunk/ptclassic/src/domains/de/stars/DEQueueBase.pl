@@ -2,9 +2,8 @@ defstar {
 	name {QueueBase}
 	domain {DE}
 	desc {
-Base class for FIFO and LIFO queues.
-This star is not intended to be used except to serve as a model from which
-to derive useful stars.
+This is the  base class for FIFO and LIFO queues.
+This star is not intended to be used except to derive useful stars.
 All inputs are simply routed to the "overflow" output.  None are stored.
 	}
 	version { $Id$}

@@ -10,7 +10,7 @@ See the file ~ptolemy/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { DE main library }
-	desc { Replicates input events on the outputs. }
+	desc { Replicate input events on the outputs with zero delay. }
 	input {
 		name{input}
 		type{ANYTYPE}

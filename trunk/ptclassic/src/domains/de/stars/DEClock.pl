@@ -12,7 +12,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { DE main library }
 	desc {
-Generates events at regular intervals, starting at time zero.
+Generate events at regular intervals, starting at time zero.
 	}
 	output {
 		name {output}

@@ -2,7 +2,10 @@ defstar
 {
     name { And }
     domain { DE } 
-    desc { Outputs the logical AND of the inputs. }
+    desc {
+THIS STAR IS OBSOLETE. USE THE Logic STAR.
+Outputs the logical AND of the inputs.
+	}
     version { $Id$ }
     author { T. M. Parks }
 	copyright {

@@ -11,11 +11,8 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { DE main library }
 	desc {
-Discards input events that occur before the threshold time.
-	}
-	explanation {
 This star discards input events that occur before the threshold time.
-Events after the threshold time are passed to the output.
+Events after the threshold time are passed immediately to the output.
 It is useful for removing transients and studying steady-state effects.
 	}
 	seealso { Gate }

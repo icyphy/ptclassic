@@ -2,7 +2,7 @@ defstar {
 	name {Impulse}
 	derivedFrom { RepeatStar }
 	domain {DE}
-	desc { Generates a single event at time zero. }
+	desc { Generate a single event at time zero. }
 	version { $Id$}
 	author { Soonhoi Ha }
 	copyright {

@@ -13,7 +13,7 @@ A finite total capacity of the queue can be specified by setting the
 "capacity" parameter to a positive integer.
 When the capacity has been reached, further inputs are sent to the "overflow"
 output and are not stored.
-The "numDemandsPending" and "consolidateDemands" states have the same
+The "numDemandsPending" and "consolidateDemands" parameters have the same
 meaning as in other Queue stars.
 The size of the queue is sent to the "size" output whenever an "inData"
 or "demand" event is processed.

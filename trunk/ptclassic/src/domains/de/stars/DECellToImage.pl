@@ -14,8 +14,7 @@ limitation of liability, and disclaimer of warranty provisions.
 This star reads in NetworkCells containing image data and outputs whole
 images. The current image is sent to the output when the star reads
 image data with a higher frame id than the current image.
-
-Every frame, the fraction of input data that was lost is sent to the
+For each frame, the fraction of input data that was lost is sent to the
 "lossPct" output.
 	}
 

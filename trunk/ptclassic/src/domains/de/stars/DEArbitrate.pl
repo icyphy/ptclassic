@@ -5,8 +5,8 @@ defstar
     descriptor
     {
 This star acts as a non-preemptive arbitrator, granting requests for
-exclusive control.  If simultaneous "requests" arrive, priority is
-given to port A.  When control is released, any pending "requests" on
+exclusive control.  If simultaneous requests arrive, priority is
+given to port A.  When control is released, any pending requests on
 the other port will be serviced.  The "requestOut" and "grantIn"
 connections allow interconnection of multiple arbitration stars for
 more intricate control structures.

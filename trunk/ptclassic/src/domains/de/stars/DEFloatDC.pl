@@ -11,9 +11,9 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { DE main library }
 	desc {
-Produces a DC output (default value is zero) when stimulated
-by an input.  The time stamp of the output is the same as
-that of the input. The value of the input is ignored.
+Produce an output event with a constant value (the default value is zero)
+when stimulated by an input event. The time stamp of the output is the
+same as that of the input. The value of the input is ignored.
 	}
 	input {
 		name {input}
