@@ -48,8 +48,9 @@ LIBCSRCS	= iv.c \
 		ivBuf.c \
 		ivGetLine.c \
 		test.c \
-		timer.c \
 		xformatevent.c
+
+OTHERSRCS	= test.c
 
 SRCS =		$(LIBCSRCS)
 
@@ -59,9 +60,20 @@ LIB = 		libiv.$(LIBSUFFIX)
 
 EXPHDR =	iv.h
 
+DRIVER =	iv_test
+
+KRUFT =		$(DRIVER)
+
+DRVROBJ = 	test.o
+
+DRVRLIBS =	-lkd -lport -lerrtrap -luprintf
+
 # common makefile file for vem libraries
 VEMLIBCONFIG=../../vem-lib.mk
 include $(VEMLIBCONFIG)
+
+tests:: $(DRIVER)
+	@echo "run $(DRIVER)"
 
 # include common definitions, rules
 include $(ROOT)/mk/common.mk
