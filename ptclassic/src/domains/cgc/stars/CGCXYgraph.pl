@@ -8,7 +8,12 @@ The X data is on "xInput" and the Y data is on "input".
 	}
 	version {$Id$}
 	author { S. Ha }
-	copyright { 1992 The Regents of the University of California }
+	copyright {
+Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
+All rights reserved.
+See the file ~ptolemy/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
 	location { CGC main library }
 	explanation {
 The input signal is plotted using the \fIxgraph\fR program, with one

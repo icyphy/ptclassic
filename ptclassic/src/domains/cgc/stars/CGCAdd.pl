@@ -4,7 +4,12 @@ defstar {
 	desc { Output the sum of the inputs, as a floating value.  }
 	version { $Id$ }
 	author { S. Ha }
-	copyright { 1991 The Regents of the University of California }
+	copyright {
+Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
+All rights reserved.
+See the file ~ptolemy/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
 	location { CGC main library }
 	inmulti {
 		name {input}

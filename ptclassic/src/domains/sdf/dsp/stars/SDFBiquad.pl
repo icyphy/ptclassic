@@ -9,7 +9,12 @@ The transfer function is (n0+n1*z1+n2*z2)/(1+d1*z1+d2*z2)
 where z1 = {z sup -1}, z2 = {z sup -2}.
 	}
 	author { J. T. Buck }
-	copyright { 1991 The Regents of the University of California }
+	copyright {
+Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
+All rights reserved.
+See the file ~ptolemy/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
 	location { SDF dsp library }
 	explanation {
 .lp

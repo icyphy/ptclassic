@@ -3,6 +3,7 @@ defstar {
 	domain { SDF }
 	author { GSWalter, E. A. Lee }
 	version { $Id$ }
+WARNING: CHECK COPYRIGHT - not UC
 	copyright { 1992 (c) U. C. Regents }
 	location { Ptolemy SDF Signal Processing palette }
 	desc {

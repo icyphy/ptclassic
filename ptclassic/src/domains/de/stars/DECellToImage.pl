@@ -4,6 +4,7 @@ defstar {
 	version		{ $Id$ }
 	author		{ Paul Haskell }
 	location	{ DE main library }
+WARNING: CHECK COPYRIGHT - not UC
 	copyright	{ (c) 1991, 1992 Univ. of Calif. Regents }
 	desc {
 This star reads in NetworkCells containing image data and outputs whole

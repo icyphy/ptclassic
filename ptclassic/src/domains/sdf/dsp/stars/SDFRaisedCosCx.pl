@@ -7,7 +7,12 @@ Output a complex raised-cosine Nyquist pulse.
 	}
 	version { $Id$ }
 	author { J. T. Buck }
-	copyright { 1991 The Regents of the University of California }
+	copyright {
+Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
+All rights reserved.
+See the file ~ptolemy/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
 	location { SDF dsp library }
 	explanation {
 This star outputs a complex raised cosine pulse with excess bandwidth given

@@ -6,7 +6,12 @@ Takes multiple inputs and produces one output.
 	}
 	version {$Id$ }
 	author { S. Ha }
-	copyright { 1991 The Regents of the University of California }
+	copyright {
+Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
+All rights reserved.
+See the file ~ptolemy/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
 	location { CG demo library }
 	explanation {
 This star does not generate codes. In multiprocessor code generation domain,

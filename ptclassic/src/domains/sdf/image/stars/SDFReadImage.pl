@@ -4,6 +4,7 @@ defstar {
 	domain	{ SDF }
 	version	{ $Id$ }
 	author	{ Paul Haskell }
+WARNING: CHECK COPYRIGHT - not UC
 	copyright	{ 1991, 1992 The Regents of the Univ. of California }
 	location	{ SDF image library }
 	desc {

@@ -4,7 +4,12 @@ defstar {
 	desc { A down counter from the input value to zero. }
 	version { $Id$ }
 	author { Soonhoi Ha }
-	copyright { 1991 The Regents of the University of California }
+	copyright {
+Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
+All rights reserved.
+See the file ~ptolemy/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
 	location { DDF library }
 	explanation {
 This star generates (int-1), (int-2), ... 1,0 samples for (int) input.

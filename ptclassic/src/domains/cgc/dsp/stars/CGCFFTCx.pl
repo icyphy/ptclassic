@@ -9,7 +9,12 @@ Parameter "direction" (default 1) is 1 for forward, -1 for inverse FFT.
 	}
 	version { $Id$ }
 	author { S. Ha }
-	copyright { 1991 The Regents of the University of California }
+	copyright {
+Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
+All rights reserved.
+See the file ~ptolemy/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
 	location { CGC dsp library }
 	explanation {
 A number of input samples given by the parameter \fIsize\fR will

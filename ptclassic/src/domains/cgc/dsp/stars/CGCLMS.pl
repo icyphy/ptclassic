@@ -12,7 +12,12 @@ Supports decimation, but not interpolation.
 	}
 	version {$Id$}
 	author { Soonhoi Ha }
-	copyright { 1991 The Regents of the University of California }
+	copyright {
+Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
+All rights reserved.
+See the file ~ptolemy/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
 	location { cgc main library }
 	explanation {
 When correctly used, this filter will adapt to try to minimize

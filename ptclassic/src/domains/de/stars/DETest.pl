@@ -3,7 +3,12 @@ defstar {
 	domain { DE }
 	version { $Id$ }
 	author { Rolando Diesta and Edward Lee }
-	copyright { 1991 The Regents of the University of California }
+	copyright {
+Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
+All rights reserved.
+See the file ~ptolemy/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
 	location { DE logic library }
 	desc {
 This star compares two inputs.  The test condition can be any of

@@ -6,7 +6,12 @@ Samples "input" at the times given by events on its "clock" input.
 	}
 	version { $Id$}
 	author { E. A. Lee and Soonhoi Ha }
-	copyright { 1991 The Regents of the University of California }
+	copyright {
+Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
+All rights reserved.
+See the file ~ptolemy/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
 	location { DE main library }
 	explanation {
 This star samples its data input at the times given by events on
