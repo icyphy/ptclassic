@@ -85,7 +85,11 @@ extern void		Tk_PreserveColormap _ANSI_ARGS_((Display *display,
 #endif
 
 /* panic is a function in Tcl/Tk we redefine to use pigilib error reporting */
-#define panic(msg)	ErrAdd(msg)
+/* FIXME: we can't use ErrAdd here, since it is only defined in pigilib
+ * and not in tycho, so instead we just print
+ */
+/*#define panic(msg)	ErrAdd(msg)*/
+#define panic(msg)	fprintf(stderr,"%s",msg)
 
 /*
  * Declaration for internal Xlib function used here:
