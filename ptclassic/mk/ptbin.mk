@@ -66,10 +66,6 @@ ifdef PTCL
 	TK =
 endif
 
-ifdef PITCL
-	TK =
-endif
-
 # Note that some of these settings will be filtered out by stars.mk
 ifdef FULL
 	PIGI = 		$(BASENAME)
