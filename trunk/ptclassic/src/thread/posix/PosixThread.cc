@@ -37,6 +37,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #endif
 
 #include "PosixThread.h"
+#include "compat.h"
 
 #ifdef PTHPUX10
 #define pthread_attr_init pthread_attr_create
@@ -90,9 +91,17 @@ void PosixThread::initialize()
     // Create a thread.
 #ifdef PTHPUX10
     pthread_create(&thread, attributes, runThis, this);
-#else
+#else // PTHPUX10
+#if defined(PTSOL2_CFRONT) && defined(PTSOL2_5)
+    // Sol2.5.cfront CC4.1 gets the following error unless we cast:
+    //  Error: Formal argument __func of type void*(*)(void*) in call to
+    //  pthread_create(pthread**, pthread_attr_t*, void*(*)(void*), void*) is
+    //  being passed void*(*)(PosixThread*).
+    pthread_create(&thread, &attributes, (void*(*)(void*))runThis, this);
+#else // PTSOL2_CFRONT && PTSOL2_5
     pthread_create(&thread, &attributes, runThis, this);
-#endif
+#endif // PTSOL2_CFRONT && PTSOL2_5
+#endif //PTHPUX10
 
     // Discard temporary attribute object.
     pthread_attr_destroy(&attributes);
