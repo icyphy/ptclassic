@@ -1,10 +1,9 @@
-# Makefile for Ptolemy Tycho system, editors/textedit directory.
+# Makefile for Ptolemy Tycho system, editors/textedit/test directory.
 #
-# @Author: Christopher Hylands
+# $Id$
+# Author: Christopher Hylands
 #
-# @Version: @(#)makefile	1.25 09/24/97
-#
-# @Copyright (c) 1996-1997 The Regents of the University of California.
+# Copyright (c) 1996-1997 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -31,54 +30,58 @@
 ##########################################################################
 
 # Root of Tycho directory
-ROOT =		../..
-# Path (absolute or relative) to the object directory root
-OBJDIR =	../..
+ROOT =		../../..
+
 # True source directory
-VPATH =		$(ROOT)/editors/textedit
+VPATH =		$(ROOT)/editors/textedit/test
 
 # Get configuration info
 CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
-TCL_SRCS = 
-  
-ITCL_SRCS = \
-	EditC.itcl \
-	EditCpp.itcl \
-	EditDiff.itcl \
-	EditEsterel.itcl \
-	EditHTML.itcl \
-	EditItcl.itcl \
-	EditJava.itcl \
-	EditMake.itcl \
-	EditMail.itcl \
-	EditProgram.itcl \
-	EditPtcl.itcl \
-	EditPtlang.itcl \
-	EditSDL.itcl \
-	EditTcl.itcl \
-	ItclClassList.itcl \
-	Matlab.itcl \
-	Mathematica.itcl
+TCL_SRCS = 	
 
-EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) \
-	editcolors.style \
-	edithtml.style \
-	makefile.style
+GRAPHICAL_TESTS = \
+	testEditC.itcl \
+	testEditHTML.itcl \
+	testFiles.itcl \
+	testPtWidgets.itcl \
+	testWidgets.itcl
 
-MISC_FILES =		doc img templates test tclIndex 
+ITCL_SRCS = $(GRAPHICAL_TESTS) \
+	alltests.itcl all.itcl
 
-# Sub directories to run make in.
-DIRS =			doc test templates
+EXTRA_SRCS =	$(ITCL_SRCS)
+
+MISC_FILES = \
+	Blink.html \
+	Blink.java \
+	CTestFile.c \
+	CppTestFile.cc \
+	DrawTest.java \
+	PtclTestFile.pt \
+	SDFMyRamp.cc \
+	SDFMyRamp.h \
+	SDFMyRamp.htm \
+	SDFMyRamp.pl \
+	myTclCmd.c \
+	wristwatch.strl \
+	ItclClassListA.itcl \
+	ItclClassListB.itcl \
+	ItclClassListC.itcl \
+	EditItcl.itcl
+
+# Sources that may or may not be present, but if they are present, we don't
+# want make checkjunk to barf on them.
+OPTIONAL_FILES =
 
 # 'make realclean' should remove tclIndex
-REALCLEAN_STUFF =			tclIndex
+REALCLEAN_STUFF =
 
-# Title for the tydoc index page
-TYDOC_DESC =	Index of classes in tycho/kernel/textedit
+tests:: test_graphics
 
-all install: sources tclIndex $(MISC_SRCS)
+test_graphics: alltests.itcl all.itcl $(TCL_SRCS) $(ITCL_SRCS)
+	tycho -noconsole -e alltests.itcl
 
 # We don't include common.mk since we don't use the compiler here
 include $(ROOT)/mk/no-compile.mk
