@@ -66,8 +66,8 @@ The values of the input ports will be passed as arguments to this function.
 		MatrixPtr *matlabOutputMatrices;
 
 		// Ptolemy (C++) structures for Matlab calls
-		InfString *matlabInputNames;	    // array of variable names
-		InfString *matlabOutputNames;	    // array of variable names
+		char **matlabInputNames;    // array of Matlab variable names
+		char **matlabOutputNames;   // array of Matlab variable names
 		char *matlabCommand;
 
 		// Variables for number of inputs and outputs to this star
@@ -82,6 +82,9 @@ The values of the input ports will be passed as arguments to this function.
 		matlabInputNames = 0;
 		matlabOutputNames = 0;
 		matlabCommand = 0;
+
+		numInputs = 0;
+		numOutputs = 0;
 	}
 
 	setup {
@@ -107,26 +110,30 @@ The values of the input ports will be passed as arguments to this function.
 		// allocate Matlab input matrices and generate their names
 		if ( numInputs > 0 ) {
 		  freeMatlabMatrices(matlabInputMatrices, numInputs);
-		  LOG_DEL; delete [] matlabInputMatrices;
-		  LOG_NEW; matlabInputMatrices = new MatrixPtr[numInputs];
+		  delete [] matlabInputMatrices;
+		  matlabInputMatrices = new MatrixPtr[numInputs];
 		  for ( int k = 0; k < numInputs; k++ ) {
 		    matlabInputMatrices[k] = 0;
 		  }
-		  LOG_DEL; delete [] matlabInputNames;
-		  LOG_NEW; matlabInputNames = new InfString[numInputs];
+
+		  freeStringArray(matlabInputNames, numInputs);
+		  delete [] matlabInputNames;
+		  matlabInputNames = new char*[numInputs];
 		  nameMatlabMatrices(matlabInputNames, numInputs, "input");
 		}
 
 		// allocate Matlab output matrices and generate their names
 		if ( numOutputs > 0 ) {
 		  freeMatlabMatrices(matlabOutputMatrices, numOutputs);
-		  LOG_DEL; delete [] matlabOutputMatrices;
-		  LOG_NEW; matlabOutputMatrices = new MatrixPtr[numOutputs];
+		  delete [] matlabOutputMatrices;
+		  matlabOutputMatrices = new MatrixPtr[numOutputs];
 		  for ( int k = 0; k < numOutputs; k++ ) {
 		    matlabOutputMatrices[k] = 0;
 		  }
-		  LOG_DEL; delete [] matlabOutputNames;
-		  LOG_NEW; matlabOutputNames = new InfString[numOutputs];
+
+		  freeStringArray(matlabOutputNames, numOutputs);
+		  delete [] matlabOutputNames;
+		  matlabOutputNames = new char*[numOutputs];
 		  nameMatlabMatrices(matlabOutputNames, numOutputs, "output");
 		}
 
@@ -136,9 +143,8 @@ The values of the input ports will be passed as arguments to this function.
 				   matlabInputNames, numInputs,
 				   (const char *) MatlabFunction,
 				   matlabOutputNames, numOutputs);
-		LOG_DEL; delete [] matlabCommand;
-		LOG_NEW; matlabCommand = new char[commandString.length() + 1];
-		strcpy(matlabCommand, (char *) commandString);
+		delete [] matlabCommand;
+		matlabCommand = commandString.newCopy();
 	}
 
 	go {
@@ -169,12 +175,27 @@ The values of the input ports will be passed as arguments to this function.
 	}
 
 	destructor {
-		LOG_DEL; delete [] matlabInputMatrices;
-		LOG_DEL; delete [] matlabOutputMatrices;
+		delete [] matlabInputMatrices;
+		delete [] matlabOutputMatrices;
 
-		LOG_DEL; delete [] matlabInputNames;
-		LOG_DEL; delete [] matlabOutputNames;
-		LOG_DEL; delete [] matlabCommand;
+		freeStringArray(matlabInputNames, numInputs);
+		freeStringArray(matlabOutputNames, numOutputs);
+		delete [] matlabCommand;
+	}
+
+	method {
+	  name { freeStringArray }
+	  access { protected }
+	  type { void }
+	  arglist { "(char *strarray[], int numstrings)" }
+	  code {
+		// Do not free the strarray itself
+		if ( strarray ) {
+		  for ( int k = 0; k < numstrings; k++ ) {
+		    delete [] strarray[k];
+		  }
+		}
+	  }
 	}
 
 	method {
@@ -183,7 +204,8 @@ The values of the input ports will be passed as arguments to this function.
 	  type { void }
 	  arglist { "(MatrixPtr *matlabMatrices, int numMatrices)" }
 	  code {
-		if ( matlabMatrices != 0 ) {
+		// do not free the matlabMatrices pointer itself
+		if ( matlabMatrices ) {
 		  for ( int k = 0; k < numMatrices; k++ ) {
 		    if ( matlabMatrices[k] != 0 ) {
 		      mxFreeMatrix(matlabMatrices[k]);
@@ -217,7 +239,7 @@ The values of the input ports will be passed as arguments to this function.
 		       portType == FIX ) {
 		    matlabMatrix = mxCreateFull(1, 1, MXREAL);
 		    double *realp = mxGetPr(matlabMatrix);
-		    *realp = (double)((*iportp)%0);
+		    *realp = double((*iportp)%0);
 		  }
 		  else if ( portType == COMPLEX ) {
 		    matlabMatrix = mxCreateFull(1, 1, MXCOMPLEX);
@@ -322,7 +344,7 @@ The values of the input ports will be passed as arguments to this function.
 		  }
 
 		  // Give the current matrix a name
-		  mxSetName(matlabMatrix, (char *) matlabInputNames[i]);
+		  mxSetName(matlabMatrix, matlabInputNames[i]);
 
 		  // let Matlab know about the new Matlab matrix we've defined
 		  putMatlabMatrix(matlabMatrix);
@@ -357,8 +379,7 @@ The values of the input ports will be passed as arguments to this function.
 		  DataType portType = oportp->resolvedType();
 
 		  // create a new Matlab matrix for deallocation and save ref.
-		  Matrix *matlabMatrix =
-			getMatlabMatrix( (char *) matlabOutputNames[j] );
+		  Matrix *matlabMatrix = getMatlabMatrix(matlabOutputNames[j]);
 
 		  // save the pointer to the new Matlab matrix for deallocation
 		  matlabOutputMatrices[j] = matlabMatrix;
@@ -391,8 +412,7 @@ The values of the input ports will be passed as arguments to this function.
 
 		    // copy Matlab matrices (in column-major order) to Ptolemy
 		    if ( portType == COMPLEX_MATRIX_ENV ) {
-		      LOG_NEW; ComplexMatrix& Amatrix =
-					*(new ComplexMatrix(rows, cols));
+		      ComplexMatrix& Amatrix = *(new ComplexMatrix(rows, cols));
 		      for ( int jcol = 0; jcol < cols; jcol++ ) {
 			for ( int jrow = 0; jrow < rows; jrow++ ) {
 			  double realValue = *realp++;
@@ -405,8 +425,7 @@ The values of the input ports will be passed as arguments to this function.
 		      (*oportp)%0 << Amatrix;
 		    }
 		    else if ( portType == FLOAT_MATRIX_ENV ) {
-		      LOG_NEW; FloatMatrix& Amatrix =
-					*(new FloatMatrix(rows, cols));
+		      FloatMatrix& Amatrix = *(new FloatMatrix(rows, cols));
 		      if ( mxIsComplex(matlabMatrix) ) {
 			InfString myerrstr;
 			myerrstr = "\nImaginary components ignored for the ";
@@ -467,5 +486,4 @@ The values of the input ports will be passed as arguments to this function.
 			matlabFatalError );
 	  }
 	}
-
 }
