@@ -173,7 +173,7 @@ private:
 	// General VHDLObjLists.
 	VHDLPortList systemPortList;
 	VHDLCompDeclList mainCompDeclList;
-	VHDLSignalList mainSignalList;
+	VHDLSignalList signalList;
 	VHDLStateList stateList;
 
 	// The following are for keeping track of components and
