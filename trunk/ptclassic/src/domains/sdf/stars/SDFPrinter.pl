@@ -29,6 +29,9 @@ the same line, separated by tabs.
 	protected {
 		UserOutput output;
 	}
+	wrapup {
+		output.flush();
+	}
 	start {
 		if (!output.fileName(fileName))
 			Error::abortRun(*this,"can't open file ",fileName);
