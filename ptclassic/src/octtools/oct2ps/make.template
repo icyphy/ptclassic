@@ -50,7 +50,7 @@ SRCS = $(LIBCSRCS)
 
 OBJS = $(LIBCSRCS:.c=.o)
 
-C_INCL= -I../include
+C_INCL= -I../include $(PTCOMPAT_INCSPEC)
 
 all::	 makefile oct2ps
 
@@ -63,7 +63,7 @@ LIBS	= -L$(OCTLIBDIR) -llel$(DBGFLAG) -lda$(DBGFLAG) -ltap$(DBGFLAG) \
 
 oct2ps:	$(OBJS)
 	$(LINKER) $(LINKFLAGS) $(OBJS) \
-  		-o oct2ps \
+		-o oct2ps \
 		$(LIBS) -lm 
 
 DEST = $(ROOT)/octtools/bin.$(ARCH)/oct2ps
@@ -74,8 +74,7 @@ $(DEST):	oct2ps
 		ln oct2ps $(DEST)
 
 install: makefile $(DEST) $(ROOT)/lib/oct2ps.pro $(BINDIR)/oct2ps
-	
-	
+
 $(BINDIR)/oct2ps:
 	(cd $(BINDIR); rm -f oct2ps; ln -s ../octtools/bin.$(ARCH)/oct2ps .)
 
