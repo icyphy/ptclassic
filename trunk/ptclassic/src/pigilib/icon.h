@@ -49,6 +49,8 @@ extern int RpcMkSchemIcon();
 extern int RpcLookInside();
 extern int RpcShowName();
 extern int RpcEditIcon();
+extern int IconFileToSourceFile();
+extern int AbsPath(/* char *path, char *abs_path */);
 extern int GetTildePath();  /* used by POct - SetMkSchemIcon */
 #endif /* __cplusplus */
 
