@@ -1,8 +1,3 @@
-#ifndef _StringList_h
-#define _StringList_h 1
-#include "miscFuncs.h"
-#include "DataStruct.h"
-
 /****************************************************************
 SCCS version identification
 $Id$
@@ -29,6 +24,16 @@ Revised by: J.T. Buck
 The revised version eliminates memory leaks and adds constructors
 with arguments.
 *******************************************************************/
+
+#ifndef _StringList_h
+#define _StringList_h 1
+
+#ifdef __GNUG__
+#pragma interface
+#endif
+
+#include "miscFuncs.h"
+#include "DataStruct.h"
 
 class StringList : public SequentialList
 {
