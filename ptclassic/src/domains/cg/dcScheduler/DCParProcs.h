@@ -31,20 +31,11 @@ class BaseMultiTarget;
 class DCParProcs : public ParProcessors {
 
 private:
-	// A list of communication DCNodes
-	DCNodeList SCommNodes;
-
-	// The number of interprocessor communications in the schedule
-	int commCount;
-
-	// account for communication cost in list scheduling.
-	void findCommNodes(DCGraph*);
-
-	// find out the partner send node of a given receive node.
-	DCNode* backComm(DCNode*);
-
 	// schedules
 	DCUniProc* schedules;
+
+protected:
+	ParNode* createCommNode(int i);
 
 public:
 	// Constructor takes number of processors as an argument
@@ -57,13 +48,6 @@ public:
 	DCUniProc *getSchedule(int num) { return &(schedules[pId[num]]); }
 	UniProcessor* getProc(int num);
 
-	// Clear the schedule
-	void initialize();
-
-	// list scheduling, after identifying the IPC requirements.
-	// return the makespan.
-	int listSchedule(DCGraph* graph);
-
 	// return the amount of the IPC.
 	int commAmount() { return commCount; }
 
@@ -73,6 +57,10 @@ public:
 
 	// save best schedule results for nodes
 	void saveBestResult(DCGraph*);
+
+	// After the best schedule is obtained, we make a final version
+	// of expanded graph including comm. nodes
+	void finalizeGalaxy(DCGraph*);
 
 	// Categorizes each processor as being heavily or lightly loaded.
 	// It sets an integer array: 1 for heavy and -1 for light processors.
