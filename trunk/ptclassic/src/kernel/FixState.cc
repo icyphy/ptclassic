@@ -83,7 +83,7 @@ State* FixState :: clone () const {
 }
 
 void FixState :: initialize() {
-        const  char* specialChars =  "*+-/(),";
+        const  char* specialChars =  "*+-/(),!";
         Tokenizer lexer(initValue(),specialChars);
 
         ParseToken t =getParseToken(lexer);

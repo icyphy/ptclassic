@@ -359,7 +359,7 @@ Precision PrecisionState :: parsePrecisionString(Tokenizer& lexer, const char* n
 Precision PrecisionState :: parsePrecisionString(Tokenizer& lexer)
 {
         char token[TOKSIZE];
-        const char* specialChars =  "*+-/(),.:";
+        const char* specialChars = "*+-/(),.:!";
 
 	// replace set of special characters for tokenizer
 	// make sure that the tokenizer is reset when leaving this method
