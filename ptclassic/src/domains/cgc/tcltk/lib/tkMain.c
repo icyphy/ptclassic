@@ -553,12 +553,24 @@ verticalScale(fullScale, interp, argc, argv)
  *----------------------------------------------------------------------
  */
 
-main() {
+main(int argc, char *argv[]) {
     Tk_3DBorder border;
     interp = Tcl_CreateInterp();
+#if TK_MAJOR_VERSION <= 4 && TK_MINOR_VERSION < 1
     w = Tk_CreateMainWindow(interp, display, name, appClass);
+#else
+    if (Tk_Init(interp) == TCL_ERROR)  {
+        fprintf(stderr,
+		"%s: Error while trying to get main window: %s\n",
+		argv[0], interp->result);
+        exit(1);
+    }
+    w = Tk_MainWindow(interp);
+#endif /* TK_MAJOR_VERSION <= 4 && TK_MINOR_VERSION < 1 */
     if (w == NULL) {
-        fprintf(stderr, "%s\n", interp->result);
+        fprintf(stderr,
+		"%s: Error while trying to get main window: %s\n",
+		argv[0], interp->result);
         exit(1);
     }
     Tk_SetClass(w, "CGC");
