@@ -46,7 +46,6 @@ struct OTPDesignInfo {
     A facet may be one of 3 mutually exclusive types, plus the psuedo-type
     target.
 **/
-typedef enum _OTPFacetType OTPFacetType;
 enum _OTPFacetType {
     OTP_FtNull,
     OTP_FtStar,		/* star (leaf node) */
@@ -57,6 +56,7 @@ enum _OTPFacetType {
     OTP_FtMarker,	/* special star (bus & delay) */
     OTP_FtContact,	/* net connector (contact) */
 };
+typedef enum _OTPFacetType OTPFacetType;
 
 
 /**
@@ -64,7 +64,6 @@ enum _OTPFacetType {
     design proceeds.  Note that this usage of the "state" is very different
     than "galaxy state".
 **/
-typedef enum _OTPFacetState OTPFacetState;
 enum _OTPFacetState {
     OTP_FcsNull,
     OTP_FcsInit,	/* facet is referenced but hasnt been xlated yet */
@@ -72,6 +71,7 @@ enum _OTPFacetState {
     OTP_FcsBegin,	/* xlation of facet has begun */
     OTP_FcsDone,	/* facet has been sucessfully xlated */
 };
+typedef enum _OTPFacetState OTPFacetState;
 
 /**
     All relevant information about the facet.  This structure is dynmically
