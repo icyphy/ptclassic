@@ -35,6 +35,51 @@ class ExpandedGraph {
 friend class EGMasterIter;
 friend class EGSourceIter;
 
+public:
+	ExpandedGraph() : myGal(0), nodecount(0) {}	
+	virtual ~ExpandedGraph();
+
+	// return the nodecount
+	int numNodes() { return nodecount; }
+
+	// Constructor for creating the expanded graph from a galaxy.
+	// The resulting graph will depict the precedence relationships
+	// among the stars in the galaxy.
+	// Return value : nonzero iff a valid expanded graph could be created.
+	// If the selfLoop is TRUE, make an arc between invocations of a
+	// star regardless of the dependency.
+	virtual int createMe (Galaxy& galaxy, int selfLoopFlag = 0);
+
+	// Initialize the internal data structure.
+	virtual void initialize();
+
+	// insert a new source node into the source list for the graph
+	void insertSource(EGNode *p) { sources.insert(p); }
+
+	// method for displaying the graph
+	virtual StringList display();
+
+	// this method removes all arcs which have delays on
+	// them
+	virtual void removeArcsWithDelay();
+
+protected:
+	// pointer to the original galaxy
+	Galaxy* myGal;
+
+	// The list of the first instances of the clusters and SDF 
+	// atomic blocks whose invocations make up the extended graph
+	EGNodeList masters;
+
+	// The source nodes for the expanded graph : 
+	// A node is considered a source node if it has no input arcs 
+	// (ancestor links) of if all of its input arcs have one or 
+	// more delays associated with them.
+	EGNodeList sources;
+
+	// Create a new star node with given invocation index
+	virtual EGNode *newNode(DataFlowStar*, int);
+
 private:
 
 	// Create the precedence links corresponding to an
@@ -73,54 +118,6 @@ private:
 
 	// the node count
 	int nodecount;
-
-protected:
-	// pointer to the original galaxy
-	Galaxy* myGal;
-
-	// The list of the first instances of the clusters and SDF 
-	// atomic blocks whose invocations make up the extended graph
-	EGNodeList masters;
-
-	// The source nodes for the expanded graph : 
-	// A node is considered a source node if it has no input arcs 
-	// (ancestor links) of if all of its input arcs have one or 
-	// more delays associated with them.
-	EGNodeList sources;
-
-	// Create a new star node with given invocation index
-	virtual EGNode *newNode(DataFlowStar*, int);
-
-public:
-
-	// Constructor, Destructor
-	ExpandedGraph() : myGal(0), nodecount(0) {}	
-	virtual ~ExpandedGraph();
-
-	// return the nodecount
-	int numNodes() { return nodecount; }
-
-	// Constructor for creating the expanded graph from a galaxy.
-	// The resulting graph will depict the precedence relationships
-	// among the stars in the galaxy.
-	// Return value : nonzero iff a valid expanded graph could be created.
-	// If the selfLoop is TRUE, make an arc between invocations of a
-	// star regardless of the dependency.
-	virtual int createMe (Galaxy& galaxy, int selfLoopFlag = 0);
-
-	// Initialize the internal data structure.
-	virtual void initialize();
-
-	// insert a new source node into the source list for the graph
-	void insertSource(EGNode *p) { sources.insert(p); }
-
-	// method for displaying the graph
-	virtual StringList display();
-
-	// this method removes all arcs which have delays on
-	// them
-	virtual void removeArcsWithDelay();
-
 };
 
 ///////////////////////////////////

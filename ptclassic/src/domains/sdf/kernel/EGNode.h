@@ -19,7 +19,7 @@ derived from SDFStar class.
 
 #include "SDFStar.h"
 #include "DoubleLink.h"
-#include "EGConnect.h"
+#include "EGGate.h"
 #include "StringList.h"
 
 class EGNodeLink;
@@ -33,24 +33,6 @@ class EGNodeLink;
 
 class EGNode
 {
-private:
-
-  	// invocation number is tabulated starting from "1" 
-  	int invocation; 
-
-	// pointer to the original star
-	DataFlowStar* pStar;
-
-	// link to the next invocation.
-	EGNode* next;
-
-	// Flag to set if there is dependency between invocations.
-	unsigned stickyFlag : 1;
-
-	// flag for graph-traversal algorithms -- this marks whether or
-	// not this node has been visited
-	unsigned visited : 1;
-
 public:
   	// constructor with origin and invocation number arguments
   	EGNode(DataFlowStar*, int n = 1);
@@ -109,6 +91,24 @@ public:
 
 	// get the execution time of the invocation
 	int myExecTime() { return myMaster()->myExecTime(); }
+
+private:
+
+  	// invocation number is tabulated starting from "1" 
+  	int invocation; 
+
+	// pointer to the original star
+	DataFlowStar* pStar;
+
+	// link to the next invocation.
+	EGNode* next;
+
+	// Flag to set if there is dependency between invocations.
+	unsigned stickyFlag : 1;
+
+	// flag for graph-traversal algorithms -- this marks whether or
+	// not this node has been visited
+	unsigned visited : 1;
 };
 
 ////////////////////////////
@@ -118,7 +118,7 @@ public:
 class EGNodeLink : public DoubleLink
 {
 public:
-	EGNode* myNode()	{ return (EGNode*) e; }
+	EGNode* node()	{ return (EGNode*) e; }
 
 	// constructor
 	EGNodeLink(EGNode* e):DoubleLink(e) {}
@@ -136,7 +136,7 @@ public:
         EGNode* takeFromFront()
                 { return (EGNode*) DoubleLinkList :: takeFromFront(); }
 	
-	EGNode* headNode() { return ((EGNodeLink*) head())->myNode(); }
+	EGNode* headNode() { return ((EGNodeLink*) head())->node(); }
 
 	StringList print();
 };
