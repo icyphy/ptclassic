@@ -64,7 +64,7 @@ all: sources $(MISC_SRCS) tclIndex
 
 install: all
 
-# We have an all rule, so  include tycommon.mk.
+# We have an all rule, so include tycommon.mk.
 include $(ROOT)/mk/tycommon.mk
 
 
