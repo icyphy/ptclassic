@@ -71,16 +71,6 @@ PL_SRCS= \
  SDFTkText.pl \
  SDFTkXYPlot.pl
 
-TCL_SRCS= \
- tkButtons.tcl \
- tkBreakPt.tcl \
- tkMeter.tcl \
- tkScript.tcl \
- tkShowBooleans.tcl \
- tkShowValues.tcl \
- tkSlider.tcl \
- tkText.tcl
-
 # The .cc files
 SRCS=$(PL_SRCS:.pl=.cc)
 
@@ -90,13 +80,21 @@ OBJS= $(SRCS:.cc=.o)
 # header files for all stars
 HDRS= $(SRCS:.cc=.h)
 
-# extra source files: tcl/tk script files
-SCRIPTS= 
+# extra source files: Tcl/Tk script files
+SCRIPTS= \
+ tkButtons.tcl \
+ tkBreakPt.tcl \
+ tkMeter.tcl \
+ tkScript.tcl \
+ tkShowBooleans.tcl \
+ tkShowValues.tcl \
+ tkSlider.tcl \
+ tkText.tcl
 
 STAR_MK=sdftclstars
 DOMAIN=SDF_TCL
 DOMAIN_2=SDF
-EXTRA_SRCS=$(STAR_MK).c $(PL_SRCS) $(SCRIPTS) $(TCL_SRCS)
+EXTRA_SRCS=$(STAR_MK).c $(PL_SRCS) $(SCRIPTS)
 
 all:		makefile stars_all
 
