@@ -1,5 +1,5 @@
 .\" $Id$
-.TI "SDF Stars"
+.TI "SDF Stars and Galaxies"
 .pp
 .EQ
 delim off
@@ -27,6 +27,7 @@ Look inside one of these icons, and you will see the icons
 representing the stars in the subpalette.
 The main palette is identified
 as $PTOLEMY/src/domains/sdf/icons/main.pal.
+The sub-palettes are:
 .Id "SDF main palette"
 .Id "palette, SDF main"
 .Id "main palette, SDF"
@@ -34,33 +35,31 @@ as $PTOLEMY/src/domains/sdf/icons/main.pal.
 .Id "SDF signal sources palette"
 .Id "palette, SDF signal sources"
 .Id "signal sources palette, SDF"
-\fBsignal sources\fR: This sub-palette contains a variety of actors
-with no inputs and a single output.
+\fBsignal sources\fR: Stars with no inputs that generate signals.
 .bu
 .Id "SDF signal sinks palette"
 .Id "palette, SDF signal sinks"
 .Id "signal sinks palette, SDF"
-\fBsignal sinks\fR: This sub-palette contains stars for graphing
+\fBsignal sinks\fR: Stars with no outputs used for graphing
 or printing signals or "playing" them to the workstation speaker.
 .bu
 .Id "SDF arithmetic palette"
 .Id "palette, SDF arithmetic"
 .Id "arithmetic palette, SDF"
 \fBarithmetic\fR:
-This palette contains basic arithmetic operations.
+Basic arithmetic operations.
 .bu
 .Id "SDF nonlinear functions palette"
 .Id "palette, SDF nonlinear functions"
 .Id "nonlinear functions palette, SDF"
 \fBnonlinear functions\fR:
-This palette contains various mathematical
-function operators, such as trigonometric functions.
+Mathematical function operators, such as trigonometric functions.
 .bu
 .Id "SDF control palette"
 .Id "palette, SDF control"
 .Id "control palette, SDF"
 \fBcontrol\fR:
-This palette contains actors such as fork, upsample,
+Stars such as fork, upsample,
 downsample, distributor, that manipulate the flow of particles.
 All the stars in this palatte operate on
 .c ANYTYPE
@@ -70,18 +69,17 @@ of particle.
 .Id "palette, SDF conversion"
 .Id "conversion palette, SDF"
 \fBconversion\fR:
-This palette contains type conversion functions: real
-to complex, bits to integer, etc.
+Type conversion functions, such as real
+to complex and bits to integer.
 .bu
 \fBdsp\fR:
-This palette contains signal processing functions.
+Signal processing functions.
 .Id "SDF dsp palette"
 .Id "palette, SDF dsp"
 .Id "dsp palette, SDF"
 .bu
 \fBimage\fR:
-This palette  contains
-stars dedicated to image display and processing.
+Image display and processing.
 .Id "SDF image palette"
 .Id "palette, SDF image"
 .Id "image palette, SDF"
@@ -90,12 +88,16 @@ stars dedicated to image display and processing.
 .Id "palette, SDF communications"
 .Id "communications palette, SDF"
 \fBcommuncations\fR:
-This palette contains stars and galaxies with
-communication applications.
+Communication functions such as channel models, modulators,
+and encoders.
 .pp
-In this section of the Almagest, all stars and galaxies
+All galaxy definitions are stored in
+$PTOLEMY/src/domains/sdf/demo, but since they will almost always
+be accessed through a palette, this should not matter to a user.
+Below all stars and galaxies (blocks)
 in any of these palettes are listed.
-The only distinction made between them is in the location field.
+The location field (usually) indicates the palette in which the
+block can be found.
 .pp
 Note that any star library in \*(PT should be viewed as a set of
 examples, not as an all inclusive set.
