@@ -199,7 +199,11 @@ body ::tycho::ItclClassList::includeTychoClasses {} {
     global tycho
     set olddir [pwd]
     cd $tycho
+
     # Generate a list of classes
+
+    # If you update this list, update
+    # $TYCHO/kernel/tychoMakeClassDAG.tcl
     set dirs [list \
             kernel \
             [file join editors textedit] \
@@ -208,10 +212,15 @@ body ::tycho::ItclClassList::includeTychoClasses {} {
             [file join typt editors ] \
             [file join typt kernel ] \
             [file join lib tydoc ] \
+            [file join lib util ] \
+            [file join lib widgets ] \
     ]
 
     foreach dir $dirs {
-        eval lappend files [glob [file join $dir {*.itcl}]]
+	if [file isdirectory "$dir"] {
+	    eval lappend files [glob \
+		    [file join $dir {{*.itcl,*.tcl,*.tk,*.itk}}]]
+	}
     }
     updateClassListFile $files
     cd $olddir
