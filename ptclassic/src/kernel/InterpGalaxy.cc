@@ -359,6 +359,7 @@ int
 InterpGalaxy::addNode (const char* nodename) {
 	nodename = hashstring (nodename);
 	// get a geodesic appropriate for the current domain, add to list
+	// FIXME: Memory leak as many domains (e.g. CG56) return dynamic memory
 	Geodesic& geo = Domain::named(domain())->newGeo(TRUE);
 	geo.setNameParent (nodename, this);
 	nodes.put(geo);
