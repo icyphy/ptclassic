@@ -47,6 +47,7 @@ SRCS= \
  CG56IIDUniform.pl \
  CG56Integrator.pl \
  CG56Sub.pl \
+ CG56Tone.pl \
  CG56UpSample.pl \
  CG56WriteFile.pl
 

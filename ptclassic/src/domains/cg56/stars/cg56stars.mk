@@ -19,6 +19,7 @@ CG56STARS = \
  $(CG56)/CG56IIDUniform.o \
  $(CG56)/CG56Integrator.o \
  $(CG56)/CG56Sub.o \
+ $(CG56)/CG56Tone.o \
  $(CG56)/CG56UpSample.o \
  $(CG56)/CG56WriteFile.o
 
