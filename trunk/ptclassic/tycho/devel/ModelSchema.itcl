@@ -226,11 +226,8 @@ class ::tycho::ModelSchema {
     	_nesterror link $context $name
     }
 
-    #################################################################
-    ####                   private methods                       ####
-    
     # Evaluate code in this object's context
-    private method evalInSpecificContext {args} {eval $args}
+    protected method evalInSpecificContext {args} {eval $args}
 }
 
 ########################################################################
@@ -241,19 +238,19 @@ body ::tycho::ModelSchema::constructor {args} {
     eval configure $args
 
     # Define the "attribute" entity
-    defineEntity attribute \
+    defineEntityType attribute \
 	    -valued 1 \
 	    -toplevel 1 \
 	    -nestable 1
 
     # Define the "entity" entity
-    defineEntity entity \
+    defineEntityType entity \
 	    -valued 0 \
 	    -toplevel 1 \
 	    -nestable 0
 
     # Define the "link" entity
-    defineEntity link \
+    defineEntityType link \
 	    -valued 0 \
 	    -toplevel 1 \
 	    -nestable 0

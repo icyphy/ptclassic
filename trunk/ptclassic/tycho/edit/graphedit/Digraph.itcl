@@ -159,11 +159,8 @@ class ::tycho::Digraph {
     	_nesterror edge $context [list $vertex1 $vertex2]
     }
     
-    #################################################################
-    ####                   private methods                       ####
-    
     # Evaluate code in this object's context
-    private method evalInSpecificContext {args} {eval $args}
+    protected method evalInSpecificContext {args} {eval $args}
 }
 
 ########################################################################

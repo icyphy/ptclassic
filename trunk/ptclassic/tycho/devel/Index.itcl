@@ -144,24 +144,24 @@ class ::tycho::Index {
     method roots {}
     
     #################################################################
-    ####                   private methods                       ####
+    ####                  protected methods                      ####
     
     # Evaluate code in this object's context
-    private method evalInSpecificContext {args} {eval $args}
+    protected method evalInSpecificContext {args} {eval $args}
 }
 
 ########################################################################
 #### constructor
 #
 body ::tycho::Index::constructor {args} {	
-	# By default, use a period as separator
-	configure -separator "."
+    # By default, use a period as separator
+    configure -separator "."
 
     # Evaluate options
     eval configure $args
 
     # I have only one entity type with a value and no default attributes
-    defineEntity entry -valued 1
+    defineEntityType entry -valued 1
 }
 
 ########################################################################
