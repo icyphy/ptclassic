@@ -27,7 +27,7 @@ precision specified by the parameter "InputPrecision" otherwise. }
                 type { string }
                 default { "2.14" }
                 desc { 
-Precision of the input in bits.  The input particles are only casted 
+Precision of the input in bits.  The input particles are only cast
 to this precision if the parameter "ArrivingPrecision" is set to NO.}
         }
         defstate {
