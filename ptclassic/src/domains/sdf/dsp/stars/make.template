@@ -50,8 +50,13 @@ LIB=libsdfdspstars.$(LIBSUFFIX)
 # Where star doc files go
 STARDOCDIR = ../../doc/stars
 
-# source files for all stars, using preprocessor
+# source files for all stars, using preprocessor, putting base stars first
 PL_SRCS= \
+ SDFFIR.pl \
+ SDFFIRCx.pl \
+ SDFGAL.pl \
+ SDFLMS.pl \
+ SDFLMSCx.pl \
  SDFAutocor.pl \
  SDFBiquad.pl \
  SDFBlockAllPole.pl \
@@ -64,17 +69,13 @@ PL_SRCS= \
  SDFDirichlet.pl \
  SDFDTFT.pl \
  SDFFFTCx.pl \
- SDFFIR.pl \
- SDFFIRCx.pl \
  SDFFIRFix.pl \
- SDFGAL.pl SDFGGAL.pl \
+ SDFGGAL.pl \
  SDFGLA.pl \
  SDFHilbert.pl \
  SDFIIR.pl \
  SDFIIRFix.pl \
  SDFKalman_M.pl \
- SDFLMS.pl \
- SDFLMSCx.pl \
  SDFLMSPlot.pl \
  SDFLMSPlotCx.pl \
  SDFLMSLeak.pl \
