@@ -73,7 +73,7 @@ public:
 
 	// get available Core Categories
 	StringList getCoreCategories() { 
-		return ACSKnownCategory::Categories();
+		return ACSKnownCategory::getCategories();
 	}
 
 protected:

@@ -68,7 +68,7 @@ public:
 	static void addEntry( const char* category );
 
 	// return the entire list
-	static const StringList Categories();
+	static const StringList getCategories();
 
 	// find an entry in the list
 	static const char* find( const char* category );
