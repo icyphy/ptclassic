@@ -83,11 +83,12 @@ delim off
 ..
 
 .de SD
-.ne 7
+.ne 2i
 .S \\n(BX
+.ta 1.0i
 .lp
 .hl
-\\f\\n(SXNAME: \\f(\\*F\\*(NM\\fR
+\\f\\n(SXNAME:\t\\f(\\*F\\*(NM\\fR
 .lp
 .tm headerU \\n(AS-\\n% \\*(NM
 .tm index_star_def \\n(AS-\\n% \\*(NM (\\*(DO \\*(TY)
@@ -101,14 +102,16 @@ delim off
 
 .de SV
 .\" First argument is the version number, then the date.
+.ta 1i
 .lp
-\\f\\n(SXVERSION:\\fR \\$1 (\\$2)
+\\f\\n(SXVERSION:\\fR\t\\$1 (\\$2)
 ..
 
 .de DM
 .\" domain information
+.ta 1i
 .lp
-\\f\\n(SXDOMAIN: \\f(\\*F\\$1  \\f\\n(SX(DERIVED FROM:\\f(\\*F \\$2\\fR)
+\\f\\n(SXDOMAIN:\t\\f(\\*F\\$1  \\f\\n(SX(DERIVED FROM:\\f(\\*F \\$2\\fR)
 ..
 
 .de IH
@@ -164,8 +167,9 @@ delim off
 ..
 
 .de AL \" Author list
+.ta 1i
 .lp
-\\f\\n(SXAUTHOR(S):\\fI  \\$1
+\\f\\n(SXAUTHOR(S):\\fI\t\\$1
 ..
 
 .de AC \" Acknowlegements info
@@ -193,10 +197,10 @@ delim off
 .\" Single argument is the location
 .br
 .na
-.if \\n(Ic .ta 5i
+.if \\n(Ic .ta 1i 5i
 .lp
-.if !\\n(Ic \\f\\n(SXLOCATION:\\fR \\$1
-.if \\n(Ic \\f\\n(SXLOCATION:\\fR \\$1	\\fR
+.if !\\n(Ic \\f\\n(SXLOCATION:\\fR	\\$1
+.if \\n(Ic \\f\\n(SXLOCATION:\\fR \\$1		\\fR
 .nr Im 0
 .\"
 .if \\n(Ic .if '\\$1'DE main library' \{\
@@ -320,8 +324,9 @@ delim off
 
 .de LD \"long description
 .lp
+.ne 1i
 \\f\\n(SXDESCRIPTION: \\fR\\$1
-.br
+.pp
 ..
 
 .de SA \"See also section
