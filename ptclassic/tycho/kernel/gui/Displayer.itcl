@@ -598,7 +598,7 @@ body ::tycho::Displayer::halfHeight {} {
 #
 body ::tycho::Displayer::hideView {view} {
     set view [::info namespace tail $view]
-    if { ! [info exists _viewtag($view)] || !! $_showing($view) } {
+    if { ! [info exists _viewtag($view)] || ! $_showing($view) } {
         return
     }
 
