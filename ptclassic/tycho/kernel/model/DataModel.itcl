@@ -1070,7 +1070,7 @@ body ::tycho::DataModel::type {name} {
 #
 body ::tycho::DataModel::types {{type {}}} {
     if { $type != "" } {
-	::tycho::lmember [array names $_defaults($type)] $type
+	::info exists _defaults($type)
     } else {
 	array names _defaults
     }
