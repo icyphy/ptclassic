@@ -96,7 +96,8 @@ _ptkPrompt(Tcl_Interp *interp, int gotPartial) {
   inChannel = Tcl_GetStdChannel(TCL_STDIN);
   outChannel = Tcl_GetStdChannel(TCL_STDOUT);
   promptCmd = Tcl_GetVar(interp,
-		 gotPartial ? "tcl_prompt2" : "tcl_prompt1", TCL_GLOBAL_ONLY);
+          (char *) (gotPartial ? "tcl_prompt2" : "tcl_prompt1"),
+          TCL_GLOBAL_ONLY);
   if (promptCmd == NULL) {
 defaultPrompt:
     if (!gotPartial && outChannel) {
