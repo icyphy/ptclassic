@@ -495,7 +495,7 @@ body ::tycho::File::constructor {args} {
 	    -label "About Tycho" \
 	    -underline 0 \
 	    -command \
-	    {::tycho::welcomeMessage}
+	    {::tycho::welcomeMessage $TychoBinaryInfo $TychoVersionInfo}
     
     $itk_component(helpMenu) add command \
 	    -label "User's Guide" \
