@@ -35,18 +35,17 @@ SDF_LOOP_SRC =	 $(ROOT)/src/domains/sdf/loopScheduler
 
 # libraries
 
-# MATLAB include and library specifications
-include $(ROOT)/mk/matlab.mk
-
 # Follows the order used by the pigiRpc makefile which uses "stars.mk".
-# To support all SDF demos, we need the SDF, ATM, and HOF domains, and Tcl/Tk.
-# We also need the compileSDF library
+# To support all SDF demos, we need to include SDF, ATM, and HOF domains, and
+# and link against Matlab, Mathematica, Tcl/Tk, and compile-SDF libraries.
+NEED_MATLABDIR = 1
+NEED_MATHEMATICADIR = 1
+TK = 1
 LIBS += -lcompileSDF
 LIBFILES += $(LIBDIR)/libcompileSDF.$(LIBSUFFIX)
-TK = 1
+SDFFULL = 1
 ATM = 1
 HOF = 1
-SDFFULL = 1
 include $(ROOT)/mk/stars.mk
 
 OBJS =	code.o
