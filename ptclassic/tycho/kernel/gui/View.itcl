@@ -123,6 +123,9 @@ class ::tycho::View {
     # Invoke a command on the status bar, if it exists.
     method statusbar {args}
 
+    # Invoke a command on the tool bar, if it exists.
+    method toolbar {args}
+
     ###################################################################
     ####                         public procs                      ####
 
@@ -149,6 +152,9 @@ class ::tycho::View {
 
     # Name of my status bar
     protected variable myStatusbar {}
+
+    # Name of my toolbar
+    protected variable myToolbar {}
 
     # The prefix is just a shorthand for $itk_component(hull).
     protected variable prefix
@@ -219,6 +225,7 @@ body ::tycho::View::constructor {args} {
     # The "code" prevents triggering "unknown".
     set myMenubar [lindex $bars 0]
     set myStatusbar [lindex $bars 1]
+    set myToolbar [lindex $bars 2]
     insertInDisplay
 
     ::bind $itk_component(hull) <Enter> "$this focusin"
@@ -370,7 +377,7 @@ body ::tycho::View::insertInDisplay {} {
 
 #########################################################################
 #### menubar
-# If there is a manu bar associated with this view, use the arguments
+# If there is a menu bar associated with this view, use the arguments
 # as a command to issue to the Menubar, and return whatever is returned
 # by the command.  Otherwise, return an empty string.
 #
@@ -460,3 +467,16 @@ body ::tycho::View::statusbar {args} {
     }
 }
 
+#########################################################################
+#### toolbar
+# If there is a tool bar associated with this view, use the arguments
+# as a command to issue to the toolbar, and return whatever is returned
+# by the command.  Otherwise, return an empty string.
+#
+body ::tycho::View::toolbar {args} {
+    if {$myToolbar != {}} {
+        return [eval $myToolbar $args]
+    } {
+        return {}
+    }
+}

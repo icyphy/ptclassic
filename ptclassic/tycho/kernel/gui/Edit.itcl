@@ -399,7 +399,12 @@ body ::tycho::Edit::constructor {args} {
 
     set tl [winfo toplevel $itk_component(hull)]
     bindtags $itk_component(text) \
-	    "EditClearStatus $tl $itk_component(hull) $itk_component(text) Text all"
+	    "EditClearStatus $tl $itk_component(hull) \
+            $itk_component(text) Text all"
+
+    # NOTE: This used to be bound to the hull of TopLevel, which caused
+    # focusin to be called a very large number of times.
+    bind $itk_component(text) <Map> "$this focusin; break"
 
     # Set the bindings that clear the status bar
     bind EditClearStatus <KeyPress> "%Q putStatus {}"

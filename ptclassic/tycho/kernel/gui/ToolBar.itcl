@@ -49,7 +49,13 @@ class ::tycho::ToolBar {
     ####                         public methods                    ####
 
     # Add a button to the toolbar.
-    method addButton {name label command args}
+    method addButton {name description args}
+
+    # Disable a button to the toolbar.
+    method disableButton {name}
+
+    # Enable a button to the toolbar.
+    method enableButton {name}
 
     ###################################################################
     ####                         protected methods                 ####
@@ -112,6 +118,23 @@ body ::tycho::ToolBar::addButton {name description args} {
     # Bind description output.
     bind $itk_component($name) <Enter> [code [list %Q putStatus $description]]
     bind $itk_component($name) <Leave> [code "%Q putStatus {}"]
+}
+
+#####################################################################
+#### disableButton
+# Disable a button added with <code>addButton</code, graying out
+# the button.
+#
+body ::tycho::ToolBar::disableButton {name} {
+    component $name configure -state disabled
+}
+
+#####################################################################
+#### enableButton
+# Enable a button added with <code>addButton</code.
+#
+body ::tycho::ToolBar::enableButton {name} {
+    component $name configure -state normal
 }
 
 #########################################################################
