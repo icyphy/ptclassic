@@ -58,7 +58,7 @@ int KnownBlock::domainIndex (Block& block) {
 	return domainIndex (block.asStar().domain(), TRUE);
 }
 
-// Constructor #1.  Add a block to the appropriate known list
+// Constructor.  Add a block to the appropriate known list
 
 KnownBlock::KnownBlock (Block& block, const char* name) {
 	// set my name
@@ -77,13 +77,6 @@ KnownBlock::KnownBlock (Block& block, const char* name) {
 		nkb->next = allBlocks[idx];
 		allBlocks[idx] = nkb;
 	}
-}
-
-// Constructor #2.  Add a scheduler to the table of schedulers.
-
-KnownBlock::KnownBlock (Scheduler& sched, const char* name) {
-	int idx = domainIndex (name, TRUE);
-	allSchedulers[idx] = &sched;
 }
 
 // Find a known list entry
@@ -119,26 +112,15 @@ KnownBlock::clone(const char* type) {
 	return 0;
 }
 
-// Produce a scheduler matching the current domain
+// Produce a scheduler matching the named domain
 Scheduler*
 KnownBlock::newSched(const char* name) {
-	int idx = domainIndex (name);
-	if (idx < 0 || allSchedulers[idx] == 0) {
-		errorHandler.error ("No scheduler defined for domain ",
-				    name);
-		return NULL;
-	}
-	return allSchedulers[idx]->clone();
+	return &Domain::named(name)->newSched();
 }
 
 Scheduler*
 KnownBlock::newSched() {
-	if (allSchedulers[currentDomain] == 0) {
-		errorHandler.error ("No scheduler defined for domain ",
-				    domain());
-		return NULL;
-	}
-	return allSchedulers[currentDomain]->clone();
+	return &Domain::named(domainNames[currentDomain])->newSched();
 }
 
 // Function to set the domain.
