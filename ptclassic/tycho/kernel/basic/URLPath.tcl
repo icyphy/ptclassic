@@ -37,26 +37,29 @@
 # Read the header string from a file and set the elements of
 # the passed array, with each index being the name of a headed
 # variable. The file name can be a local file name or a
-# URL-style name. Return the mode if successful, or null
-# if there was no header or it was malformed.
+# URL-style name. Return 1 if a header was found and parsed,
+# or zero if there was no header or it was malformed. The
+# header can be multiline.
 #
-proc ::tycho::readFileHeader {filename {var {}}} {
-    if { $var != "" } {
-        upvar $var v
-    }
-
+proc ::tycho::readFileHeader {filename var} {
+    upvar $var v
     set fo [::tycho::resource new $filename]
     $fo open
-    set string [$fo gets]
-    while { ![$fo eof] && $string == "" } {
-	set string [$fo gets]
+    set line [$fo gets]
+    while { ![$fo eof] && $line == "" } {
+	set line [$fo gets]
+    }
+    set string ""
+    while { [regexp -- {-\*-.*-\*-} $line line] } {
+        append string $line\n
+        set line [$fo gets]
     }
     $fo close
     delete object $fo
-    if [regexp -- {-\*-.*-\*-} $string string] {
-	return [::tycho::parseHeaderString $string v]
+    if { $string == "" } {
+        return 0
     } else {
-	return ""
+        return [::tycho::parseHeaderString $string v]
     }
 }
 
@@ -408,7 +411,7 @@ ensemble ::tycho::url {
 # as this will interfere with url-style names) of url-style pathnames, 
 # return the path of the first file found relative to the
 # names in the list. Note that if the filename includes
-# direcctories, it is expected to be a Unix-style name
+# directories, it is expected to be a Unix-style name
 # containing slashes -- this is because this function is
 # typically used to look for files obtained from portable
 # files.
@@ -416,7 +419,7 @@ ensemble ::tycho::url {
 proc ::tycho::urlPathSearch {name searchpath} {
     set f [split $name /]
     foreach p $searchpath {
-	set file [::tycho::url join [concat $p $f]]
+	set file [eval ::tycho::url join [concat [::tycho::url split $p] $f]]
 	if [::tycho::resource exists $file] {
 	    return $file
 	}
