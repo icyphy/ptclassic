@@ -37,8 +37,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #endif
 
 #include "CGCTarget.h"
-#include "SDFScheduler.h"
-
 
 // This target allows for the creation of target specific code generation
 // wormholes to simulation.  It can be used stand-alone, for CGC inside of
@@ -74,29 +72,15 @@ http://ptolemy.eecs.berkeley.edu/papers/autoMultiCodeGen/www/proceedings_1.html
 //          |-------------|            I 'inner' stars, may be any CG
 //
 
-class CommPair {
-public:
-    CGCStar* outer;
-    CGStar* inner;
-};
-
-// A simple method to fire a target-generated linear SDF schedule. 
-void fireSDFSchedule(SDFSchedule&,CGTarget&);
-
-// Each target that uses this target as a helper target must define
-// two functions (NOT methods) of the type CommPairF.  These functions
-// must return a send/receive communication pair.
-typedef CommPair (*CommPairF) (PortHole&,int,CGTarget&);
-
 class CGCTargetWH : public CGCTarget {
 public:
     CGCTargetWH(const char* name, const char* starclass, const char* desc);
 
     int isA(const char*) const;
+
     /*virtual*/ void setup();
     /*virtual*/ int run();
     /*virtual*/ Block* makeNew() const;
-    /*virtual*/ void wrapup();
 	
     /*virtual*/ int compileCode();
     /*virtual*/ int loadCode();
@@ -105,25 +89,16 @@ public:
     /*virtual*/ void writeCode();
     /*virtual*/ void initCodeStrings();
 
-    /*virtual*/ void wormPrepare();
-    /*virtual*/ void allWormInputCode();
-    /*virtual*/ void allWormOutputCode();
-
-    // This method should not be necessary, see CGCTargetWH.cc for details
-    /*virtual*/ int modifyGalaxy();
-
     int linkFiles();
     
     // This method allows CGCTargetWH to be used as a helper target to
-    // another wormhole target.  It contains all of the code that splices
-    // in the new communication stars and creates the wormhole communication
-    // schedules.  The 'inputs' and 'outputs' schedules are for the 
-    // wormhole input ports and output ports respectively.  The function
-    // pointers "incoming" and "outgoing" return the target specific
-    // communcation star pairs.
-    int prepareCGCWorm(SDFSchedule& inputs, SDFSchedule& outputs,
-		       CommPairF incoming, CommPairF outgoing, CGTarget&);
+    // the cg wormhole target.  
+    int convertWormholePorts(Galaxy&);
 
+
+    // This method allows CGCTargetWH to be used as a stand-alone target
+    /*virtual*/ void wormPrepare();
+    
     // This string list collects the include directory locations (in
     // the form of "-I<directory name >"
     StringList starIncludeDirs;
@@ -132,33 +107,22 @@ public:
     // in the replacement SDF worm star
     StringList starLinkOptions;
 
-protected:
     // method to connect the new SDF star
     int connectStar();
 
+protected:
     /*virtual*/ void mainLoopCode();
+
 private:
-
-    // Schedule containing the CGC stars that receive input from SDF
-    SDFSchedule wormInputStars;
-
-    // Schedule containing the CGC stars that send output to SDF
-    SDFSchedule wormOutputStars;
-
-    // We may leave graph in broken state if an Error::abortRun is
-    // called.  When we disconnect the SDF-CGC wormhole, we mark the
-    // graph as dirty.  When we successfully link in the SDFCGC worm
-    // star, the graph is marked as ok.
-    int dirty;
-
+    
+    Galaxy* topLevelGalaxy;
+    
     // Codestream that collects all of the SDF porthole definitions
     CodeStream starPorts;
 
     // Codestream that collects the setSDFParams instructions
     CodeStream starSetup;
 
-    // Pointer to wormhole that I am replacing
-    Block* wormhole;
 };
 
 #endif
