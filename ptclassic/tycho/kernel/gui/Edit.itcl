@@ -382,6 +382,7 @@ configbody ::tycho::Edit::scrollbar {
 	$itk_component(text) configure -yscrollcommand {}
 
 	# Remove scrollbar packing from statusbar
+	# This is also done in initialize{}.
 	statusbar configure -scrollbarpad 0
     } {
 	#
@@ -407,6 +408,7 @@ configbody ::tycho::Edit::scrollbar {
 		-yscrollcommand "$itk_component(scroll) set"
 	}
 	# Add scrollbar packing to statusbar
+	# This is also done in initialize{}.
 	statusbar configure -scrollbarpad 1
     }
 }
@@ -2112,6 +2114,8 @@ body ::tycho::Edit::initialize {{menubar {}} {statusbar {}} {toolbar {}}} {
         # method because Itcl (2.2) has virtual private methods!
         ::tycho::Edit::initializeMenubar $menubar
     }
+    # Set the statusbarpadding according to the -scrollbar option
+    statusbar configure -scrollbarpad $itk_option(-scrollbar)
 }
 
 
