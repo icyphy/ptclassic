@@ -40,7 +40,9 @@ static const char file_id[] = "PTcl.cc";
 #pragma implementation
 #endif
 
+#include "isa.h"		// define the quote macro
 #include "PTcl.h"
+
 #include "InterpUniverse.h"
 #include "Target.h"
 #include "KnownTarget.h"
