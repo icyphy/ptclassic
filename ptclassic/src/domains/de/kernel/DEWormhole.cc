@@ -29,7 +29,7 @@ Version identification:
 
 ********************************************************************/
 
-void DEWormhole :: start()
+void DEWormhole :: setup()
 {
 	Wormhole :: setup();
 	delayType = FALSE;
