@@ -11,7 +11,6 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
         }
-	location { SDF dsp library }
 	output {
 		name { output }
 		type { complex }
