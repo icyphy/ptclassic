@@ -10,7 +10,7 @@
 Other sources of information:
 <MENU>
 <LI> <A HREF="help.html">Tycho Help System Overview </A>
-<LI> <A HREF="releasenotes0.2.1.html">Tycho 0.2.1 Release Notes</A>
+<LI> <A HREF="releasenotes0.3.html">Tycho 0.3 Release Notes</A>
 <LI> <A HREF="bugs.html">Tycho Bugs</A>
 <LI> <A HREF="tychoFaq.html">Tycho Frequently Asked Questions (FAQ)</A>
 <LI> <A HREF="itcllinks.html">Tcl and Itcl Internet Resources</A>
@@ -23,90 +23,10 @@ Below is a list of common problems that people have with Tycho.
 
 <H3><A NAME="itcl versions">Itcl Versions</A></H3>
 
-Note that Tycho 0.2 and later will <B>not</B> work with Itcl 2.0 or
-Itcl 2.1, you must have Itcl 2.2.  (Itcl 2.0 was shipped with Ptolemy 0.6,
-Itcl 2.2 was shipped with with Ptolemy 0.7 and 0.7.1)
-
-<H3><A NAME="libitk error messages"></A></H3>
-If Tycho fails to start with a message like:
-<PRE>
-cxh@kahn &gt; tycho
-ld.so.1: itkwish: fatal: libitk2.2.so: can't open file: errno=2
-Killed
-cxh@kahn
-</PRE>
-
-then the problem is that the <CODE>itkwish</CODE> binary cannot find
-its shared libraries.  If you are using prebuilt Itcl binaries, be
-sure that your path is setup so <CODE>$TYCHO/bin</CODE> is before
-directory that contains the <CODE>itkwish</CODE> binary. 
- <P>
-For example, under C shell:
-<PRE>
-set path = ($TYCHO/bin $path)
-</PRE>
-If you are using the prebuilt Itcl binaries, the <CODE>ITCLDIR</CODE>
-environment variable should be set to the location of the untar'd Itcl
-files.
-
- <P>
-If you are using Ptolemy, then your path should be set:
-<PRE>
-set path = ($PTOLEMY/bin $PTOLEMY/bin.$PTARCH $path)
-</PRE>
-
-<H3><A NAME="Error Message about error while autoloading tk_setPalette">
-Error Message about "error while autoloading tk_setPalette"
-</A></H3>
-
-If you see a message like:
-<PRE>
-error while autoloading "tk_setPalette": bad option "join": should be
-atime, dirname, executable, exists, extension, isdirectory,
-isfile, lstat, mtime, owned, readable, readlink, root, size,
-stat, tail, type, or writable
-	
-    invoked from within
-"tk_setPalette activeBackground #e6ceb1 activeForeground black \
-background #ffe4c4 disabledForeground #b0b0b0 foreground black \
-highlightBackground ..."
-</PRE>
-
-then you are probably running Itcl 2.0, but the <CODE>tclIndex</CODE>
-files were prepared with Itcl 2.1 or later.  Tycho 0.2 will not work
-with Itcl 2.0, you must upgrade to Itcl 2.2 or later.  See the <A
-HREF="install.html">Installation guide</A> for more information.
-
-
-<H3><A NAME="CircularList error message">CircularList error message</A></H3>
-<PRE>
-Unable to load Tycho.tcl startup file: invalid command name "CircularList"
-</PRE>
-Probably the <CODE>$TYCHO/kernel/tclIndex</CODE>
-file is corrupt, try
-recreating it by <CODE>cd</CODE>ing to that directory and 
-typing <CODE>make</CODE>.
-
-<H3><A NAME="file join error message">file join error message</A></H3>
-If you are starting up Tycho 0.1.1 or later and you see a message about
-<PRE>
- bad option "join": should be atime, dirname, executable, 
-    exists, extension, isdirectory, isfile, lstat, mtime, owned, readable, 
-    readlink, root, size, stat, tail, type, or writable
-        while executing
-    "file join $tycho kernel"
-        invoked from within
-</PRE>
-
-then the problem is that you are running an
-Itcl 2.0 <CODE>itkwish</CODE>, and Tycho 0.2 requires Itcl 2.2, which
-includes the Tcl7.6 <CODE>file join</CODE> command.  The way to tell
-is to start <CODE>itkwish</CODE> by hand and type
-
-<PRE>
-set itcl::version
-</PRE>
-you should get back <CODE>2.2</CODE> if you are running Itcl 2.2.
+Note that Tycho 0.3 and later will <B>not</B> work with Itcl 2.2 or
+earlier, you must have Itcl 3.0
+(Itcl 2.2 was shipped with with Ptolemy 0.7, 0.7.1, and 0.7.1p1, Itcl 3.0
+was shipped with Ptolemy 0.7.1p2)
 
 <H3><A NAME="Problems creating indices">Problems creating indices</A></H3>
 The <A HREF="../kernel/gui/doc/usersGuides/BuilderDialogHelp.html">BuilderDialog</a>
