@@ -52,9 +52,20 @@ struct ParamListStruct {
 };
 typedef struct ParamListStruct ParamListType;
 
-extern boolean PStrToPList();
-extern char * PListToPStr();
+/* Function prototypes */
+
+#ifdef __cplusplus
+
+extern void FreeFlatPList(ParamListType *pListPtr);
+extern boolean PStrToPList(char *pStr, ParamListType *pListPtr);
+extern char *PListToPStr(ParamListType *pListPtr);
+
+#else
+
 extern void FreeFlatPList();
+extern boolean PStrToPList();
+extern char *PListToPStr();
+
+#endif
 
 #endif /* PARAMSTRUCTS_H */
-
