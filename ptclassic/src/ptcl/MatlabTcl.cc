@@ -112,27 +112,29 @@ int MatlabTcl::matlab(int argc, char** argv) {
 	return MatlabTcl::unset(argc, argv);
     }
     else {
-	StringList msg = "unrecognized matlab option \"";
-	msg << argv[1] << "\": should be end, eval, get, set, start, or unset";
+	StringList msg = "unrecognized matlab command \"";
+	msg << argv[1]
+	    << "\": should be end, eval, get, send, set, start, or unset";
 	return error(msg);
     }
 
     return TCL_OK;
 }
 
-// close a Matlab connection: don't do anything
+// close a Matlab connection: don't do anything except close figures
 int MatlabTcl::end(int argc, char** /*argv*/) {
     if (argc != 2) return usage("matlab end");
+    matlabInterface.CloseMatlabFigures();
     return TCL_OK;
 }
 
 // evaluate a Matlab command
 int MatlabTcl::eval(int argc, char** argv) {
     if (argc != 3) return usage("matlab eval <matlab_command>");
-    int retval = matlabInterface.EvaluateOneCommand(argv[2]);
-    Tcl_AppendResult(tclinterp, matlabInterface.GetOutputBuffer(),
-		     TCL_VOLATILE);
-    if ( !retval) return TCL_ERROR;
+    matlabInterface.AttachMatlabFigureIds();
+    int merror = matlabInterface.EvaluateOneCommand(argv[2]);
+    Tcl_AppendResult(tclinterp, matlabInterface.GetOutputBuffer(), 0);
+    if ( merror ) return TCL_ERROR;
     else return TCL_OK;
 }
 
@@ -145,7 +147,9 @@ int MatlabTcl::get(int argc, char** /*argv*/) {
 // evaluate a Matlab command
 int MatlabTcl::send(int argc, char** argv) {
     if (argc != 3) return usage("matlab send <matlab_command>");
-    if (! matlabInterface.EvaluateOneCommand(argv[2]) ) return TCL_ERROR;
+    matlabInterface.AttachMatlabFigureIds();
+    int merror = matlabInterface.EvaluateOneCommand(argv[2]);
+    if ( merror ) return TCL_ERROR;
     return TCL_OK;
 }
 
