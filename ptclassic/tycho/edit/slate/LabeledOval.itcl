@@ -57,6 +57,9 @@ class ::tycho::LabelledOval {
     # The text in the label
     common text
 
+    # The width of the oval
+    common width
+
     ###################################################################
     ####                         public procs                      ####
 
@@ -141,7 +144,8 @@ body ::tycho::LabelledOval::text {id canvas tx} {
 # Set the width configuration option.
 #
 body ::tycho::LabelledOval::width {id canvas wd} {
-    $canvas itemconfigure $primary($id) -width $wd
+    set width($id) $wd
+    $canvas itemconfigure $primary($id) -width $width($id)
 }
 
 
