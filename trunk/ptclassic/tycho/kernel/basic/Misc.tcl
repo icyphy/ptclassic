@@ -254,6 +254,27 @@ proc getflag {option listname} {
 
 
 #
+# makeflag
+#
+# More-or-less the reverse of getopt: given the name of a boolean value,
+# return a string that is either empty or contains an option. For example,
+#
+#     makeflag fred
+#
+# returns "-fred" if $fred is true in the calling environment, and
+#
+# returns "" if $fred is false in the calling environment.
+#
+proc makeflag {option} {
+    if {[uplevel [list set $option]]} {
+	return "-$option"
+    } else {
+	return ""
+    }
+}
+
+
+#
 # setquery
 #
 # A useful procedure for set-query methods. If the argument 'list'
