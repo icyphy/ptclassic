@@ -55,7 +55,7 @@ cd ..
 
 # EXPDOMAINS = experimental domains
 # EXPDOMAINS = capsim bdf
-set EXPDOMAINS=cg56
+set EXPDOMAINS=cg-ddf cg56
 
 cd domains
 foreach x (sdf ddf de thor cg $EXPDOMAINS)
@@ -78,7 +78,8 @@ end
 # everything must have one slash (be two levels down)
 
 foreach x (thor/pepp cg/targets sdf/expgraph sdf/image sdf/targets \
-	ddf/constructs sdf/loopScheduler cg/gilsScheduler thor/analyzerX11)
+	ddf/constructs sdf/loopScheduler cg/gilsScheduler thor/analyzerX11 \
+	cg-ddf/constructs )
 	optmkdir $x
 	cd $x
 	optlink ../../../../src/domains/$x make.template
