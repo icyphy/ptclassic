@@ -46,7 +46,6 @@ proc axisIncrement {low high space width padding} {
     return $estimate
 }
 
-
 #######################################################################
 #### axisRoundUp
 #
@@ -71,15 +70,14 @@ proc axisRoundUp {x} {
     return $x
 }
 
-
 #######################################################################
 #### interval
 #
 # Return list of integers in the range _x_ to _y_. For example,
-#
+# <pre>
 #    interval 2 5
-#
-# returns {2 3 4 5}.
+# </pre>
+# returns <code>{2 3 4 5}</code>.
 #
 proc interval {x y} {
     set result {}
@@ -91,7 +89,6 @@ proc interval {x y} {
 
     return $result
 }
-
 
 #######################################################################
 #### mapRange
@@ -110,7 +107,6 @@ proc mapRange {low high values lowdash highdash} {
     return $result
 }
 
-
 #######################################################################
 #### mapValue
 #
@@ -121,7 +117,6 @@ proc mapValue {low high value lowdash highdash} {
     set scale [expr (double($highdash) - $lowdash) / ($high - $low)]
     return [expr $lowdash + ($value-$low) * $scale]
 }
-
 
 #######################################################################
 #### rangeValues
@@ -142,7 +137,6 @@ proc rangeValues {low high inc} {
     return $result
 }
 
-
 #######################################################################
 #### roundDownTwo
 #
@@ -154,7 +148,6 @@ proc roundDownTwo {x} {
     return $x
 }
 
-
 #######################################################################
 #### roundDownTo
 #
@@ -164,7 +157,6 @@ proc roundDownTwo {x} {
 proc roundDownTo {x i} {
     return [expr $i * int(floor(double($x)/$i))]
 }
-
 
 #######################################################################
 #### roundTo
@@ -176,7 +168,6 @@ proc roundTo {x i} {
     return [expr $i * round(double($x)/$i)]
 }
 
-
 #######################################################################
 #### roundUpTo
 #
@@ -186,7 +177,6 @@ proc roundTo {x i} {
 proc roundUpTo {x i} {
     return [expr $i * int(ceil(double($x)/$i))]
 }
-
 
 #######################################################################
 #### roundUpTwo
@@ -200,7 +190,6 @@ proc roundUpTwo {x} {
     return $x
 }
 
-
 #######################################################################
 #### spread
 #
@@ -208,15 +197,15 @@ proc roundUpTwo {x} {
 # option causes the first and list numbers to be more or less
 # the end points by half the interval between the reset of the
 # elements. For example,
-#
+# <pre>
 #     spread 4 1 5
-#
-# returns {1.0 2.33333 3.66666 4.99999}, and
-#
+# </pre>
+# returns <code>{1.0 2.33333 3.66666 4.99999}</code>, and
+# <pre>
 #     spread 4 1 5 -indented
-#
-# returns {1.5 2.5 3.5 4.5}. Note that there may be some rounding
-# errors, as in the first example above.
+# </pre>
+# returns <code>{1.5 2.5 3.5 4.5}</code>. Note that there may
+# be some rounding errors, as in the first example above.
 #
 proc spread {n x y args} {
     getflag indented args

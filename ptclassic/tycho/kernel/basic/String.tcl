@@ -3,6 +3,8 @@
 #
 # Utility functions on strings
 #
+# FIXME: Move into ::tycho namespace
+#
 
 ##########################################################################
 #
@@ -37,7 +39,8 @@
 ##########################################################################
 
 
-## butt {word}
+##########################################################################
+#### butt {word}
 #
 # Join arguments into a string without intervening spaces
 #
@@ -45,31 +48,8 @@ proc butt {args} {
     return [join $args ""]
 }
 
-
-## spaces n
-#
-# Generate a string of n spaces
-#
-proc spaces {n} {
-    return [join [lcopy $n " "] ""]
-}
-
-
-## namespaceStrip namespacepath
-#
-# Strip an itcl namespace path of all by the last name
-#
-proc namespaceStrip {nsp} {
-   set index [string last "::" $nsp]
-   if {$index == -1} { 
-       return $nsp
-   } else {
-       return [string range $nsp [expr $index+2] end]
-   }
-}
-
-
-## capitalize
+##########################################################################
+#### capitalize
 #
 # Capitalize a word -- first letter is uppercase; rest are lowercase.
 #
@@ -78,8 +58,8 @@ proc capitalize {word} {
 	    [string index $word 0]][string tolower [string range $word 1 end]]
 }
 
-
-## stringSubtract
+##########################################################################
+#### stringSubtract
 #
 # Subtract one string from another. No change if no match.
 # The -all option causes all such strings to be replaced.
@@ -105,8 +85,8 @@ proc stringSubtract {args} {
     }
 }
 
-
-## wordleft
+##########################################################################
+#### wordleft
 #
 # Return the index of the start of the word immediately to the
 # left of the cursor. The behaviour is more useful than "string
@@ -140,8 +120,8 @@ proc wordleft {string index} {
     return $index
 }
 
-
-## wordright
+##########################################################################
+#### wordright
 #
 # Return the index of the start of the word immediately to the
 # rightof the cursor. The behaviour is more useful than "string
