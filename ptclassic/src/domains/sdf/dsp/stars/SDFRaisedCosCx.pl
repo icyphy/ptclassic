@@ -16,7 +16,8 @@ zero crossing) given by \fIP\fP.  The length of the filter (number
 of taps) is \fIN\fP, and the output sample rate is \fIupsample\fP
 times the input.  This star is implemented by deriving from the ComplexFIR
 star.
-.IE "raised cosine pulses"
+.Id "raised cosine pulse, complex"
+.Id "Nyquist pulse, complex"
 .pp
 See "Digital Communication" by Lee and Messerschmitt for a discussion
 of raised cosine pulses in communications systems.
