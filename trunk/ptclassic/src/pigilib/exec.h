@@ -49,5 +49,8 @@ extern int RpcDisplaySchedule ARGS((RPCSpot *spot, lsList cmdList,
 				    long userOptionWord));
 extern void PigiErrorMark ARGS((char *objname));
 extern void PigiMark ARGS((char *objname));
+extern void PigiMarkColor ARGS((char *objName, char *color));
+extern int RpcRunDesignMaker ARGS((RPCSpot *spot, lsList cmdList,
+				   long userOptionWord));
 
 #endif /* _EXEC_H */
