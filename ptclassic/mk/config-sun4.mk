@@ -161,6 +161,9 @@ XV_CC =		gcc -traditional -DXLIB_ILLEGAL_ACCESS
 # Matlab architecture
 MATARCH = sun4
 
+# Mathematica architecture
+MATHEMATICAARCH = SPARC
+
 # Build gthreads
 INCLUDE_GTHREADS =	yes
 

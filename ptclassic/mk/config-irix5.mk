@@ -111,3 +111,6 @@ XPM_DEFINES =	-DZPIPE
 
 # Matlab architecture
 MATARCH = sgi
+
+# Mathematica architecture
+MATHEMATICAARCH = SGI
