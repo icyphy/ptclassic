@@ -4,7 +4,7 @@
 #
 # @Version: $Id$
 #
-# @Copyright (c) %Q% The Regents of the University of California.
+# @Copyright (c) 1998-%Q% The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -54,6 +54,11 @@ if { [lsearch -exact $auto_path $env(TEXTEDIT_LIBRARY)] == -1 } {
 ::tycho::register stylesheet "makefile" \
 	[file join $env(TEXTEDIT_LIBRARY) makefile.style] \
 	[file join ~ .Tycho styles makefile.style]
+
+::tycho::register stylesheet "tex" \
+	[file join $env(TEXTEDIT_LIBRARY) tex.style] \
+	[file join ~ .Tycho styles tex.style]
+
 
 ### MODE MAPPINGS
 
