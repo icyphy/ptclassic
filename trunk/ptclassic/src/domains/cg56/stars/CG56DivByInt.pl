@@ -3,7 +3,8 @@ defstar {
 	domain { CG56 }
 	desc {
 This is an amplifier.  The integer output is the integer input
-divided by the integer "divisor".
+divided by the integer "divisor" (default 2).  Truncated integer
+division is used.
 	}
 	version { $Id$ }
 	author { Brian L. Evans }
