@@ -931,7 +931,9 @@ octObject *o;
 	struct octProp *p;
 	struct octInstance *i;
 	switch (o->type) {
-	case OCT_FACET:
+	  case OCT_UNDEFINED_OBJECT:
+		break;
+	  case OCT_FACET:
 		f = &(o->contents.facet);
 		free(f->cell);
 		free(f->view);
@@ -939,7 +941,13 @@ octObject *o;
 		free(f->version);
 		free(f->mode);
 		break;
-	case OCT_INSTANCE:
+	  case OCT_TERM:
+		free (o->contents.term.name);
+		break;
+	  case OCT_NET:
+		free (o->contents.net.name);
+		break;
+	  case OCT_INSTANCE:
 		i = &(o->contents.instance);
 		free(i->name);
 		free(i->master);
@@ -947,7 +955,12 @@ octObject *o;
 		free(i->facet);
 		free(i->version);
 		break;
-	case OCT_PROP:
+	  case OCT_POLYGON:
+	  case OCT_BOX:
+	  case OCT_CIRCLE:
+	  case OCT_PATH:
+		break;				/* nothing to free */
+	  case OCT_PROP:
 		p = &(o->contents.prop);
 		free (p->name);
 		switch (p->type) {
@@ -958,24 +971,21 @@ octObject *o;
 		case OCT_INTEGER:
 		case OCT_REAL:
 		case OCT_ID:
-			/* nothing to free */
-			break;
+			break;			/* nothing to free */
 		default:
 			fprintf(stderr,
-			   "FreeOctMembers, OCT_PROP type %d not handled\n",
+			        "FreeOctMembers: OCT_PROP type %d not handled\n",
 				p->type);
 			break;
 		}
 		break;
-	case OCT_TERM:
-		free (o->contents.term.name);
+	  case OCT_POINT:
+	  case OCT_EDGE:
 		break;
-	case OCT_NET:
-		free (o->contents.net.name);
-		break;
-	default:
-		fprintf (stderr, "FreeOctMembers, type %d not handled\n",
-			 o->type);
+	  default:
+		fprintf(stderr,
+			"FreeOctMembers: type %d not handled\n",
+			o->type);
 		break;
 	}
 	return TRUE;
