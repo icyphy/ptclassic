@@ -38,7 +38,7 @@ ptolemy_sim*Foreground: 	green
 ptolemy_man*Background:		black
 ptolemy_man*Foreground: 	orange
 
-xgraph.Background: white
-xgraph.ZeroColor: navy
-xgraph.Markers: off
-xgraph.Foreground: black
+pxgraph.Background: white
+pxgraph.ZeroColor: navy
+pxgraph.Markers: off
+pxgraph.Foreground: black
