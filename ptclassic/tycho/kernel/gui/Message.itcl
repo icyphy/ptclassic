@@ -98,6 +98,7 @@ class ::tycho::Message {
     inherit ::tycho::DialogWindow
 
     constructor {args} {}
+    destructor {}
 }
 
 ##########################################################################
@@ -106,14 +107,16 @@ class ::tycho::Message {
 body ::tycho::Message::constructor {args} {
 
     # Pack the OK button.
-    # For some reason I don't understand, if instead of the "destroy"
-    # call below I do "delete object $this", then a tkwait on this
-    # window never returns.  Perhaps "delete object" does not fully
-    # inform tk that the window is gone?
-    addButton ok -text "OK <Ret>" -command \
-	    "catch [list $this nextWindow] ; delete object $this"
+    addButton ok -text "OK <Ret>" -command "delete object $this"
     default ok
 
     # Explicitly handle configs that may have been ignored earlier.
     eval itk_initialize $args
+}
+
+##########################################################################
+#### destructor
+#
+body ::tycho::Message::destructor {} {
+    catch {nextWindow}
 }
