@@ -15,6 +15,9 @@ Useful higher level OCT interface functions.
 #include "octMacros.h"
 #include "mkIcon.h"
 #include "oh.h"
+#include "region.h"
+#include "oct.h"
+#include "mkTerm.h"
 
 /* 8/14/89
 Opens the master of an instance, but allows you to choose which facet.
@@ -339,6 +342,60 @@ octObject *instPtr, *propPtr;
     (void) octGetOrCreate(instPtr, propPtr);
 }
 
+/* This function is used by GetGalTerms.  It will find the datatype of fTerm.
+Right now I (Wan-teh) use the following scheme.  Each galaxy porthole is just
+an alias for a porthole of a star or subgalaxy.  I will color the stem of fTerm
+with the same color as the stem of the star or subgalaxy porthole it is an 
+alias for. 
+*/
+static boolean
+FindTermType(fTermPtr, aTermPtr, typeNamePtr)
+octObject *fTermPtr, *aTermPtr;
+char **typeNamePtr;
+{
+    octObject net, term, subInst, subfterm, subfacet, thePath, layer;
+    octGenerator gen;
+    struct octBox bb;
+    regObjGen theGen;
+    char *layerName;
+
+    octGenFirstContainer(fTermPtr, OCT_NET_MASK, &net);
+    octInitGenContents(&net, OCT_TERM_MASK, &gen);
+    do
+    {
+        octGenerate(&gen, &term);
+    } while (term.objectId == fTermPtr->objectId 
+	     || term.objectId == aTermPtr->objectId);
+    octGenFirstContainer(&term, OCT_INSTANCE_MASK, &subInst);
+    ohFindFormal(&subfterm, &term);
+    ohTerminalBB(&subfterm, &bb);
+    subfacet.type = OCT_FACET;
+    subfacet.contents.facet.cell = subInst.contents.instance.master;
+    subfacet.contents.facet.view = "schematic";
+    subfacet.contents.facet.facet = "interface";
+    subfacet.contents.facet.version = OCT_CURRENT_VERSION;
+    subfacet.contents.facet.mode = "r";
+    octOpenFacet(&subfacet);
+    regObjStart(&subfacet, &bb, OCT_PATH_MASK, &theGen, 0);
+    regObjNext(theGen, &thePath);
+    regObjFinish(theGen);
+    octGenFirstContainer(&thePath, OCT_LAYER_MASK, &layer);
+    octCloseFacet(&subfacet);
+    layerName = layer.contents.layer.name;
+    if (strncmp(layerName, FLOAT_COLOR, strlen(FLOAT_COLOR)) == 0) {
+	StrDup(typeNamePtr, "float");
+    } else if (strncmp(layerName, INT_COLOR, strlen(INT_COLOR)) == 0) {
+        StrDup(typeNamePtr, "int");
+    } else if (strncmp(layerName, COMPLEX_COLOR, strlen(COMPLEX_COLOR)) == 0) {
+	StrDup(typeNamePtr, "complex");
+    } else if (strncmp(layerName, ANYTYPE_COLOR, strlen(ANYTYPE_COLOR)) == 0) {
+	StrDup(typeNamePtr, "anytype");
+    } else { /* layer is nonstandard, i.e., not blueSolid, blueOutline, etc */
+	/* return as default type "float" */
+	StrDup(typeNamePtr, "float");
+    }
+}
+
 /* GetGalTerms  2/4/89
 Generates a TermList for a galaxy schematic facet.
 Caveats: Allocates space but does not deallocate before exit.
@@ -352,6 +409,8 @@ TermList *termsPtr;
     octGenerator genTerm;
     char *name;
     Term *inPtr, *outPtr;
+    char *type;
+
 
     termsPtr->in_n = 0;
     termsPtr->out_n = 0;
@@ -364,10 +423,12 @@ TermList *termsPtr;
 	    octErrorString());;
 	ERR_IF2(GetById(&inst, aTerm.contents.term.instanceId) != OCT_OK,
 	    octErrorString());
+	FindTermType(&fTerm, &aTerm, &type);
 	if (IsInputPort(&inst)) {
 	    ERR_IF2(termsPtr->in_n >= TERM_ARR_MAX,
 		"GetGalTerms: too many input terminals");
 	    inPtr->name = name;
+	    inPtr->type = type;
 	    inPtr->multiple = FALSE;
 	    inPtr++;
 	    termsPtr->in_n++;
@@ -375,6 +436,7 @@ TermList *termsPtr;
 	    ERR_IF2(termsPtr->out_n >= TERM_ARR_MAX,
 		"GetGalTerms: too many output terminals");
 	    outPtr->name = name;
+	    outPtr->type = type;
 	    outPtr->multiple = FALSE;
 	    outPtr++;
 	    termsPtr->out_n++;
