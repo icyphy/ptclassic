@@ -92,11 +92,12 @@ for a complete explanation of the options.
 	}
 
 	initCode {
-                StringList s = "FILE *$starSymbol(fp)[";
+		StringList sym = processCode("$starSymbol(fp)");
+                StringList s;
+		s << "FILE* " << sym << '[';
 		s += input.numberPorts();
 		s += "];\n";
-		StringList ss = processCode(CodeBlock((const char*)s));
-                addDeclaration(ss);
+                addDeclaration(s, sym);
                 addInclude("<stdio.h>");
 		for (int i = 0; i < input.numberPorts(); i++) {
 			StringList w = "    if(!($starSymbol(fp)[";
@@ -106,8 +107,8 @@ for a complete explanation of the options.
 			w += "_$starSymbol(temp)";
 			w += i;
 			w += "\",\"w\")))";
-			gencode(CodeBlock((const char*) w));
-			gencode(err);
+			addCode(CodeBlock((const char*) w));
+			addCode(err);
 		}
 	}
 
@@ -124,10 +125,10 @@ codeblock (err) {
 		for (int i = 1; i <= int(numIn); i++) {
 			ix = i;
 			iy = i - 1;
-			gencode(CodeBlock(
+			addCode(CodeBlock(
 "\tfprintf($starSymbol(fp)[$val(iy)],\"%g %g\\n\",$ref(index),$ref(input#ix));\n"));
 		}
-		gencode(CodeBlock("\t$ref(index) += $val(xUnits);\n"));
+		addCode(CodeBlock("\t$ref(index) += $val(xUnits);\n"));
 		
 	}
 
@@ -136,10 +137,10 @@ codeblock(closeFile) {
 }
 
 	wrapup {
-		gencode(CodeBlock("    { int i;\n"));
+		addCode(CodeBlock("    { int i;\n"));
 
 		// close the files
-		gencode(closeFile);
+		addCode(closeFile);
 
 		StringList cmd;
 		cmd += "(xgraph ";
@@ -200,6 +201,6 @@ codeblock(closeFile) {
 		StringList out = "    system(\"";
 		out += cmd;
 		out += "\");\n    }\n";
-		gencode(CodeBlock((const char*)out));
+		addCode(CodeBlock((const char*)out));
 	}
 }

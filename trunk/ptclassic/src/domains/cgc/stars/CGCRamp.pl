@@ -26,7 +26,7 @@ with step size "step" (default 1).
 		desc { Initial (or latest) value output by Ramp. }
 		attributes { A_SETTABLE|A_NONCONSTANT }
 	}
-	go { gencode(std); }
+	go { addCode(std); }
 	codeblock (std) {
 	$ref(output) = $ref(value);
 	$ref(value) += $val(step);

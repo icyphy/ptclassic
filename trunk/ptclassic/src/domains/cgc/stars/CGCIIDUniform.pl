@@ -36,11 +36,11 @@ part. The code should be modified for portability.
 		default { 1 }
 	}
 	initCode {
-		addGlobal("double drand48();\n");
-		gencode(initSeed);
+		addGlobal("double drand48();\n", "drand48");
+		addCode(initSeed);
 	}
 	go {
-		gencode(random);
+		addCode(random);
 	}
 	// "code" to initialize the seed
 	codeblock(initSeed) {

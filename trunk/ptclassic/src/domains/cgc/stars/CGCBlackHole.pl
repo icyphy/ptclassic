@@ -22,7 +22,7 @@ This star absorbs all inputs, hence no code needs to be generated!
 		noInternalState();
 	}
 	go {
-		gencode( CodeBlock( "/* BLACK HOLE FOR $ref(input) */" ));
+		addCode( CodeBlock( "/* BLACK HOLE FOR $ref(input) */" ));
 	}
 }
 

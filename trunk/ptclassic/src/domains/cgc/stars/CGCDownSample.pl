@@ -45,6 +45,6 @@ default.
 	$ref(output) = $ref2(input,phase);
 	}
 	go {
-		gencode(sendsample);
+		addCode(sendsample);
 	}
 }
