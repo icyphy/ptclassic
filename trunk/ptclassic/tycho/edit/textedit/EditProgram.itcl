@@ -134,7 +134,6 @@ class ::tycho::EditProgram {
 		-foreground $itk_option(-variablecolor)
     }
 
-
     ##########################################################################
     ####                         public methods                           ####
 
@@ -152,6 +151,9 @@ class ::tycho::EditProgram {
 
     # Open a help window.  This should be redefined in derived classes.
     method help {}
+
+    # Get the blank itcl template for a file and insert it into the window
+    method fileTemplate { fileTemplate {newClassName {}}}
 
     # Indent the line with the insertion cursor.
     method indentLine {}
@@ -337,6 +339,55 @@ body ::tycho::EditProgram::help {} {
     ::tycho::File::openContext \
         [file join $TYCHO editors textedit doc usersGuides \
 	    EditProgramHelp.html]
+}
+
+#####################################################################
+#### fileTemplate
+# Insert the blank template into the file.
+# The fileTemplate argument names the template file that should by used.  
+# $TYCHO/editors/textedit/templates contains some sample templates.
+# If the optional className argument is set, then its value will 
+# be substituted wherever the template file contains the string 'ClassName'
+#
+body ::tycho::EditProgram::fileTemplate {fileTemplate {newClassName {}}} {
+    global TYCHO
+
+    if {$fileTemplate!= "" && $fileTemplate != "NoName"} {
+	if {[file exists $fileTemplate]} {
+	    if {[file readable $fileTemplate]} {
+
+		# Read in the template file and stuff it into editor
+		set fd [open $fileTemplate r]
+		set data [read $fd]
+		close $fd
+		insertData $data
+                markModified
+
+		if { $newClassName != {} } {
+		    # Find all the 'ClassName' strings.
+		    # The arguments for findAll are:
+		    # tag them 'oldClass', 1 - don't ignore case,
+		    # 0 - return only exact matches, 0 -ignore word boundaries,
+		    # search for 'ClassName', search from the start to the end,
+		    # {} - don't restrict the search.
+		    findAll oldClass 1 0 0 ClassName 0.0 end {}
+
+		    # Substitute the new class name for 'ClassName'
+		    set ind 1.0
+		    while {[set res \
+			    [$itk_component(text) tag nextrange \
+			    oldClass $ind end]] != {}} {
+			eval deleteRange $res
+			insertString [lindex $res 0] $newClassName
+		    }
+		}
+	    } {
+		safeEval ::tycho::warn "File is not readable: $fileTemplate"
+	    }
+	} {
+	    safeEval ::tycho::warn "File does not exist: $fileTemplate"
+	}
+    }
 }
 
 #####################################################################
