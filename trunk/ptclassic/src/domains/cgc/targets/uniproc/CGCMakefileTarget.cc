@@ -157,17 +157,23 @@ void CGCMakefileTarget :: writeCode()
       }
       input.close();
 
-      generatedMakefile << "OTHERCFLAGS= ";
-
       /* Code duplication from CreateSDFStar - FIXME */
       if (compileOptionsStream.numPieces()) {
 	  char* expandedCompileOptionsStream =
 	      expandPathName(compileOptionsStream);
+	  generatedMakefile << "OTHERCFLAGS= ";
 	  generatedMakefile << expandedCompileOptionsStream << ' ';
 	  delete [] expandedCompileOptionsStream;
       }
-      if(strlen((const char*) compileOptions) > 0)
+      if(strlen((const char*) compileOptions) > 0) {
+				// If we have not printed OTHERCFLAGS yet,
+				// then do it now
+	  if (!compileOptionsStream.numPieces())
+	     generatedMakefile << "OTHERCFLAGS= ";
 	  generatedMakefile << (const char *)compileOptions;
+      }
+      generatedMakefile << "\n";
+
 
 				// The GNU make info page says:
 				// "`N' is made automatically from
@@ -176,17 +182,20 @@ void CGCMakefileTarget :: writeCode()
       				//  compiler. The precise command
       				//  used is
       				//  `$(CC) $(LDFLAGS) N.o $(LOADLIBES)'."
-      generatedMakefile << "\n";
-
-      generatedMakefile << "LOADLIBES= ";
       /* Code duplication from CreateSDFStar - FIXME */
       if (linkOptionsStream.numPieces()) {
 	  char* expandedLinkOptionsStream = expandPathName(linkOptionsStream);
+	  generatedMakefile << "LOADLIBES= ";
 	  generatedMakefile << expandedLinkOptionsStream << ' ';
 	  delete [] expandedLinkOptionsStream;
       }     
-      if(strlen((const char*) linkOptions) > 0)
+      if(strlen((const char*) linkOptions) > 0) {
+	  if (!linkOptionsStream.numPieces())
+				// If we have not printed LOADLIBES= yet,
+				// then do it now.
+	     generatedMakefile << "LOADLIBES= ";
 	  generatedMakefile << (const char *)linkOptions;
+      }
       generatedMakefile << "\n";
       
 				// Append rules to the end of the makefile
