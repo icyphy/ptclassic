@@ -154,18 +154,17 @@ else
 	    setenv MANPATH $PTOLEMY/tcltk/tk/man:$PTOLEMY/tcltk/tcl/man:$PTOLEMY/doc/man:$MANPATH
 	endif
 
-	# For now, look for the executable in obj.$PTARCH, rather than bin.$ARCH
-	set bindir = $PTOLEMY/obj.$PTARCH
+	set bindir = $PTOLEMY/bin.$PTARCH
 
 	if ( ! $?prog ) then
 		if ( "$progname" == "tysh.ptiny" || $?tychoptiny ) then
-		    set prog = $PTOLEMY/obj.$PTARCH/tycho/tysh/tysh.ptiny
+		    set prog = $PTOLEMY/bin.$PTARCH/tycho/tysh/tysh.ptiny
 		else
 			if ( "$progname" == "tysh.ptrim" || $?tychoptrim ) then
-			    set prog = $PTOLEMY/obj.$PTARCH/tycho/tysh/tysh.ptrim
+			    set prog = $PTOLEMY/bin.$PTARCH/tycho/tysh/tysh.ptrim
 			else 
 				if ( "$progname" == "tysh.pigi" || $?tychopigi ) then
-				    set prog = $PTOLEMY/obj.$PTARCH/tycho/tysh/tysh
+				    set prog = $PTOLEMY/bin.$PTARCH/tycho/tysh/tysh
 				else
 				    set tychoedit
 				    set prog = ($PTOLEMY/tcltk/itcl.$PTARCH/bin/itkwish -f $TYCHO/kernel/Tycho.tcl)
