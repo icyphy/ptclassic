@@ -22,6 +22,7 @@ Formatted text can appear in any Tycho widget.
 <li><a href="#tydoc - The Tycho documentation system"><CODE>tydoc</CODE></A> -
 The Tycho documentation system.
 <li><a href="#user's guides, adding">Adding a User's Guide</a> 
+<li><a href="#itcl documentation">Itcl/Java Documentation</a> 
 </ul>
 <p>
 <H2><a name="HTML conventions">HTML Conventions</a></H2>
@@ -265,7 +266,24 @@ contains the following subdirectories:
 <LI> <CODE>codeDoc/</CODE>: documentation automatically generated from
 source files.
 </MENU>
+<h2><a name="itcl documentation">Itcl/Java Documentation</a> 
+External html documentation for packages such as Itcl and
+<A NAME="java documentation">Java</A> can be downloaded and installed 
+in specific locations so that Tycho can find the documentation.
+<H3>Itcl</H3>
+The Itcl2.2 included html documentation in <CODE>itcl2.2/html</CODE>.
 
+If you link <A HREF="itclhtml"><CODE>$TYCHO/doc/itclhtml</CODE></A> 
+to the <CODE>itcl2.2/html</CODE> directory, then the links within the docs and 
+in the <A HREF="itcllinks.html">Tcl and Itcl Internet Resources page</A>
+will work properly.
+<H3>Java</H3>
+The Java documentation is available from <A HREF="http://www.javasoft.com"><CODE>http://www.javasoft.com</CODE></A>.  If you link
+<A HREF="../java/doc/javahtml"><CODE>$TYCHO/java/doc/javahtml</CODE></A>
+to the <CODE>docs/api</CODE> directory of the Java documentation distribution,
+then the links within the documentation and 
+<A HREF="../java/doc/javalinks.html">Java Internate Resources page</A>
+should work properly.
 <p>
 <a href="index.html">Tycho Home Page</a><br>
 <p>
