@@ -65,7 +65,7 @@ else
   set maxsymlinks = 8
   set oldpath = ""
   set newpath = $matpath
-  while ( $oldpath != $newpath && $numlinks < $maxsymlinks )
+  while ( "$oldpath" != "$newpath" && $numlinks < $maxsymlinks )
     set lsinfo = `ls -l $newpath`
     if ( "$lsinfo[1]" != "lrwxrwxrwx" ) then
       break
@@ -74,17 +74,25 @@ else
     set newpath = ""
     foreach lsword ( $lsinfo )
       if ( $?getlsrest ) then
-        set newpath = "$newpath $lsword"
+        set newpath = "$lsword"
+        unset getlsrest
+	break
       endif
       if ( "$lsword" == "->" ) then
         set getlsrest = ""
       endif
     end
+    # If the newpath is not an absolute path name, then append
+    # newpath to the oldpath (oldpath is always guaranteed to be correct)
+    if ( ! -e $newpath ) then
+      set newdir = "$oldpath:h"
+      set newpath = "$newdir/$newpath"
+    endif
     @ numlinks ++
   end
   set oldpath = $newpath
   set newpath = $oldpath:h
-  while ( $oldpath != $newpath )
+  while ( "$oldpath" != "$newpath" )
     set matextern = $newpath/extern
     if ( -x $matextern && -r $matextern && -d $matextern ) then
       set matexterninc = $matextern/include
