@@ -384,13 +384,14 @@ body ::tycho::Terminal::_width {id canvas slate width} {
 #### aspect
 #
 body ::tycho::Terminal::aspect {id canvas slate args} {
-    if { $args == "" } {
+    array set opts $args
+    if ![::info exists opts(-aspects)] {
 	return {origin terminal}
     }
 
     set result {}
     set coords [$canvas coords $primary($id)]
-    foreach aspect $args {
+    foreach aspect $opts(-aspects) {
 	switch -exact $aspect {
 	    "origin" {
 		lappend result [lindex $coords 0]
