@@ -102,11 +102,35 @@ tychoClasses.dag: FORCE
 		echo "set TYCHO \"$(TYCHO)\"; source ../kernel/tychoMakeClassDAG.tcl; tychoStandardDAG" | $(ITCLSH); \
 	fi
 
+HTMLDIRS= $(TYCHO)/doc \
+	$(TYCHO)/doc/coding \
+	$(TYCHO)/lib/tydoc/doc \
+	$(TYCHO)/kernel/doc/usersGuides \
+	$(TYCHO)/editors/textedit/doc/usersGuides \
+	$(TYCHO)/editors/visedit/doc/usersGuides \
+	$(TYCHO)/editors/slate/doc/usersGuides \
+	$(TYCHO)/kernel/doc/internals \
+	$(TYCHO)/editors/slate/doc/internals \
+	$(TYCHO)/editors/slate/doc/tutorial \
+	$(TYCHO)/src/tytest \
+	$(TYCHO)/src/tytimer \
+	$(TYCHO)/java/doc \
+	$(TYCHO)/java/pn \
+	$(TYCHO)/java/pt/kernel \
+	$(TYCHO)/java/tycho/doc/internals \
+	$(TYCHO)/src/tksteal \
+	$(TYCHO)/typt/doc \
+	$(TYCHO)/typt/doc/internals \
+	$(TYCHO)/typt/doc/usersGuides \
+	$(TYCHO)/typt/editors/doc/usersGuides
+
+
+
 # Traverse all the html files (except the codedoc files) and produce PostScript
 tycho.ps: ../bin/html2ps
 	netscape &
 	-chmod a+x $^
-	../bin/html2ps index.html tycho.ps
+	../bin/html2ps -d index.html tycho.ps $(HTMLDIRS)
 
 # We don't include common.mk since we don't use the compiler here
 include $(ROOT)/mk/no-compile.mk
