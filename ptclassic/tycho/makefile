@@ -40,8 +40,10 @@ include $(CONFIG)
 
 MISC_FILES =	README README.files copyright
 
+INDICES = 	tycho.idx codeDoc.idx
+
 makefiles all clean depend realclean checkjunk sccsinfo itcldocs \
-extraclean echohtmls:
+extraclean:
 	@for x in $(DIRS); do \
 	    if [ -w $$x ] ; then \
 		( cd $$x ; \
@@ -51,7 +53,7 @@ extraclean echohtmls:
 	    fi ; \
 	done
 
-install: subinstall itcldocs tycho.idx
+install: subinstall $(INDICES)
 subinstall:
 	@for x in $(DIRS); do \
 	    if [ -w $$x ] ; then \
@@ -68,7 +70,7 @@ TAGS:
 # "make sources" will do SCCS get on anything where SCCS file is newer.
 # You probably don't want to add $(SRCS) to this, rather, change
 # the makefile that includes this one to use $(EXTRA_SRCS)
-sources:: subsources tycho.idx makefile README.files
+sources:: subsources $(INDICES) makefile README.files
 
 # We use a subtarget here so that we do make sources in the subdirs
 # before trying to update tycho.idx
@@ -82,11 +84,14 @@ subsources:	$(EXTRA_SRCS) $(HDRS) $(MISC_FILES) makefile
 	    fi ; \
 	done
 
-# Create a tycho index file
+# Creat all the indexes
+indices: $(INDICES)
+
+# Create a tycho index file.
+# Note that $wildcard is a gnu make extension
 tycho.idx: kernel/tychoMakeIndex.tcl \
 	    $(wildcard kernel/doc/*.html \
 		    kernel/doc/usersGuides/*.html \
-		    kernel/doc/codeDoc/*.html \
 		    kernel/doc/internals/*.html \
 		    editors/textedit/doc/*.html \
 		    editors/textedit/doc/usersGuides/*.html)
@@ -99,4 +104,18 @@ tycho.idx: kernel/tychoMakeIndex.tcl \
 	else \
 		echo "Running $(ITCLSH)"; \
 		echo "set TYCHO $(TYCHO); source kernel/tychoMakeIndex.tcl; tychoStandardIndex" | $(ITCLSH); \
+	fi
+
+# Create a tycho code index file
+codeDoc.idx: $(wildcard kernel/doc/codeDoc/*.html \
+		    editors/textedit/doc/codeDoc/*.html)
+	@echo "Updating $@"
+	rm -f $@
+	@if [ "$(TYCHO)" = "" ]; then \
+		echo "TYCHO is not set so we assume we are part of PTOLEMY"; \
+		echo "Running $(ITCLSH), \$$PTOLEMY=$(PTOLEMY)"; \
+		echo "set TYCHO $(PTOLEMY)/tycho; source kernel/tychoMakeIndex.tcl; tychoCodeDocIndex" | $(ITCLSH); \
+	else \
+		echo "Running $(ITCLSH)"; \
+		echo "set TYCHO $(TYCHO); source kernel/tychoMakeIndex.tcl; tychoCodeDocIndex" | $(ITCLSH); \
 	fi
