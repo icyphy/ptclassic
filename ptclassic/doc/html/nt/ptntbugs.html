@@ -57,7 +57,13 @@ adds a layer to file access and other operations.
 making install in kernel
 ../../mk/compile.mk:95: *** missing separator.  Stop.
 </pre>
-Be sure that you do not have the <CODE>LIB</CODE> environment
+You should only see this error if you are building from sources
+0.7.2devel created before 2/22/99.
+In versions of Ptolemy 0.7.2devel before 2/22/99, the makefiles
+referred to the library being built with the <CODE>LIB</CODE>
+makefile variable, which was overridden by the <CODE>LIB</CODE>
+environment variable.  The fix was to 
+be sure that you do not have the <CODE>LIB</CODE> environment
 variable set in bash.  Try typing:
 <CODE>unset LIB</CODE>
 
