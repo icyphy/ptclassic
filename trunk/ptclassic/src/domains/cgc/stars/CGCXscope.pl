@@ -1,7 +1,7 @@
 defstar {
 	name { Xscope }
 	domain { CGC }
-	desc { Generate a multi-trace plot with the xgraph program. }
+	desc { Generate a multi-trace plot with the pxgraph program. }
 	derivedFrom { Xgraph }
 	version {$Id$}
 	author { S. Ha }
@@ -18,10 +18,10 @@ except that it can plot multiple traces, like an oscilloscope.
 As for Xgraph,
 the \fItitle\fR parameter specifies a title for the plot.
 The \fIsaveFile\fR parameter optionally specifies a file for
-storing the data in a syntax acceptable to xgraph.
+storing the data in a syntax acceptable to pxgraph.
 A null string prevents any such storage.
-The \fIoptions\fR string is passed directly to the xgraph program
-as command-line options.  See the manual section describing xgraph
+The \fIoptions\fR string is passed directly to the pxgraph program
+as command-line options.  See the manual section describing pxgraph
 for a complete explanation of the options.
 .pp
 Multiple traces may be plotted by setting the \fItraceLength\fR
@@ -29,7 +29,7 @@ state to a nonzero value.  In this case, a new plot (starting at
 x value zero) is started every \fItraceLength\fR samples.  The
 first \fIignore\fR samples are not plotted; this is useful for letting
 transients die away.
-.Ir "xgraph program"
+.Ir "pxgraph program"
 .Id "oscilloscope, X window"
 .Id "graph, X window, multi-trace"
 	}
