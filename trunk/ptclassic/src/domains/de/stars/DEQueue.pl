@@ -167,13 +167,6 @@ after processing all inputs is sent to the "size" output.
 		outData.put(completionTime) = *pp;
 		pp->die();
 		numDemandsPending = int(numDemandsPending) - 1;
-
-		// Having just freed a space on the queue, see whether there
-		// is an input to fill it
-		if (inData.dataNew) {
-		    queue.put(inData.get().clone());
-		    inData.getSimulEvent();
-		}
 	    }
 
 	    // If there is new inData, and the queue is not full, store it
