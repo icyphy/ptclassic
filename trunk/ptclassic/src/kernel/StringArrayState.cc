@@ -124,42 +124,30 @@ void StringArrayState  :: initialize() {
 	zap();
 
 	// handle empty initial value
-	const char* inival = initValue();
-	if (inival == 0 || *inival == 0) return;
+	const char* initString = initValue();
+	if (initString == 0 || *initString == 0) return;
 
 	// initialize lexical parsing
 	const char* specialChars = "<{[]}";
-	Tokenizer lexer(inival, specialChars);
+	Tokenizer lexer(initString, specialChars);
 	lexer.clearwhite();
 
 	int i = 0, err = FALSE;
 	char* buf[MAXLEN];
 	while(!lexer.eof() && i < MAXLEN && !err) {
+		ParseToken t;
 		char tokbuf[MAXSTRINGLEN];
 		lexer >> tokbuf;
 		char c = tokbuf[0];
 		if (c != 0 && tokbuf[1]) c = 0;
+
 		switch (c) {
 
-		  case '<':
-		      {
-			char filename[MAXLEN];
-			// temporarily disable special characters, so '/'
-			// (for instance) does not screw us up.
-                	const char* tc = lexer.setSpecial ("");
-                	lexer >> filename;
-			// put special characters back.
-                	lexer.setSpecial (tc);
-                	if (!lexer.fromFile(filename)) {
-                        	StringList msg;
-                        	msg << filename << ": " << why();
-                        	parseError ("cannot open the file ", msg);
-				err = TRUE;
-                	}
-		      }
-		      break;
+		    case '<':
+			err = !mergeFileContents(lexer, t, tokbuf);
+			break;
 
-		  case '[':
+		    case '[':
 		      {
 			char* saveValue = 0;
 			if ( i > 0 ) {
@@ -197,39 +185,34 @@ void StringArrayState  :: initialize() {
 			if (t.tok != ']') {
 				parseError ("expected ']'");
 				err = TRUE;
-				break;
 			}
 		      }
 		      break;
 
-		  case '{':
+		    case '{':
 		      {
-			// next token must be a state name.
-			lexer >> tokbuf;
-			const State* s = lookup(tokbuf, parent()->parent());
-			if (!s) {
-				parseError ("undefined symbol: ", tokbuf);
-				err = TRUE;
+		        char parameterName[MAXSTRINGLEN];
+			char closeBraceBuf[MAXSTRINGLEN];
+
+			// look for state name followed by closed curly brace
+			lexer >> parameterName;
+			lexer >> closeBraceBuf;
+			const State* s =
+				lookup(parameterName, parent()->parent());
+			if (s == 0 ||
+			    closeBraceBuf[0] != '}' || closeBraceBuf[1]) {
+				lexer.pushBack(closeBraceBuf);
+				lexer.pushBack(parameterName);
 				break;
 			}
 
-			// save name of included parameter for error messages
-			StringList parameterName = tokbuf;
-
-			// read the next token
-			lexer >> tokbuf;
-			if (tokbuf[0] != '}') {
-				parseError ("expected '}'");
-				err = TRUE;
-				break;
-			}
-			// stringarraystate: copy element-by-element
+			// String array state: copy element-by-element
 			if (s->isA("StringArrayState")) {
 				const StringArrayState *ss = 
 					(const StringArrayState*)s;
 				int numstrings = ss->size();
 				if (i + numstrings > MAXLEN) {
-					parseError ("too many strings encountered while including the StringArrayState parameter ",
+					parseError("too many strings encountered while including the StringArrayState parameter ",
 						    parameterName );
 					err = TRUE;
 					break;
@@ -252,15 +235,20 @@ void StringArrayState  :: initialize() {
 		      }
 		      break;
 
-		  default:
-		      buf[i++] = savestring(tokbuf);
+		    case '!':
+			err = !sendToInterpreter(lexer, t, tokbuf);
+			break;
+
+		    default:
+			buf[i++] = savestring(tokbuf);
+			break;
 		}
 		lexer.clearwhite();
 	}
 
 	// Make sure that we did not exceed the capacity of buf
 	if ( !lexer.eof() && i == MAXLEN ) {
-		parseError ("too many strings!");
+		parseError("too many strings!");
 		err = TRUE;
 	}
 
@@ -271,6 +259,7 @@ void StringArrayState  :: initialize() {
 		for(int j = 0; j < nElements; j++)
 			val[j] = buf[j];
 	}
+
 	return;
 }
 
