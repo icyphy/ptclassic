@@ -66,6 +66,7 @@ CCS_WITH_H_FILES=\
  InterpGalaxy.cc \
  InterpUniverse.cc \
  Interpreter.cc \
+ IntervalList.cc \
  KnownBlock.cc \
  KnownState.cc \
  KnownTarget.cc \
