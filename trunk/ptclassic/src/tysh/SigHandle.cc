@@ -47,17 +47,10 @@ Some refinement by Brian Evans.
 #include "ptarch.h"
 #include "tcl.h"
 #include "SigHandle.h"
-
-// Maximum path name length in characters
-#define MAX_PATH_LENGTH  512
+#include "InfString.h"
 
 // Define the name of the [incr tk] program: either itcl_wish or itkwish
 #define SH_ITCLTK_PROG "itkwish"
-
-// Sub-directory of $PTOLEMY that contains the itcl binary plus binary
-// file name, e.g., "/bin.sol2/itkwish"
-// ANSI C and C++ will concatenate adjacent strings into a single string
-#define SH_ITCLTK_SUB_PATH ("/bin." PTARCH "/" SH_ITCLTK_PROG)
 
 // Sub-directory of $PTOLEMY that contains itcl files to source plus file names
 #define SH_ITCLTK_DEBUG_SCRIPT "/tycho/kernel/TyCoreDebug.itcl"
@@ -70,6 +63,18 @@ extern Tcl_Interp *ptkInterp;
 // Needed by the execle() function to setup the process it is launching
 extern "C" char **environ;
 
+// Use execle to execute the Unix command "$signalPath $signalScript 
+// -name Tycho" where
+//   signalPath = $PTOLEMY/bin.$PTARCH/itkwish
+//   signalScript = $PTOLEMY/tycho/kernel/TyCoreRelease.itcl, or
+//   signalScript = $PTOLEMY/tycho/kernel/TyCoreDebug.itcl
+// signalMsg is used by abortHandling() to inform user of the error.
+// Cannot use dynamic memory since malloc and new are not reentrant.
+static char *signalPath = NULL, *signalScript = NULL, *signalMsg = NULL;
+
+// Store size of signalMsg for use by abortHandling. We do this here 
+// since neither sizeof() nor strlen are reentrant.
+int signalMsgSize;
 
 // DoTychoSave
 //
@@ -129,6 +134,54 @@ int setHandlers(SIG_PF sigHandler)
     return 0;
 }
 
+// setReleaseStrings
+//
+// This function sets the value of path and script for release mode, 
+// since this cannot be done dynamically in the signal handler because 
+// new and malloc are not reentrant.
+
+void setReleaseStrings(void) 
+{
+
+    InfString tempPath, tempScript, tempMsg, ptolemy, itcl_path;
+
+    // Sub-directory of $PTOLEMY that contains the itcl binary plus binary
+    // file name, e.g., "/bin.sol2/itkwish"
+    itcl_path << "/bin.";
+    if (getenv("PTARCH") == 0)
+    {
+        itcl_path << PTARCH;
+    }
+    else
+    {
+        itcl_path << getenv("PTARCH");
+    }  
+    itcl_path << "/";
+    itcl_path << SH_ITCLTK_PROG;
+
+    // 1. Find the value of the PTOLEMY environment variable
+    ptolemy << getenv("PTOLEMY");
+    if ((char *) ptolemy == 0 ) {
+        ptolemy.initialize();
+        ptolemy << "~ptolemy";
+    }
+
+    // 2. Define the path of [incr tk] and tcltk script to source
+    tempPath << ptolemy;
+    tempPath << itcl_path;
+    tempScript << ptolemy;
+    tempScript << SH_ITCLTK_RELEASE_SCRIPT;
+    tempMsg << "\n\nFatal error occured. Tycho was not able to intercept the error signal and deal with it appropriately.\n";
+
+    // These values don't change for the life of the program. So if the 
+    // environment changes during execution those changes will not be 
+    // reflected until program in launched again.
+    signalPath = tempPath.newCopy();
+    signalScript = tempScript.newCopy();
+    signalMsg = tempMsg.newCopy();
+    signalMsgSize = strlen(signalMsg);
+
+}
 
 // signalHandlerRelease
 //
@@ -139,6 +192,7 @@ int setHandlers(SIG_PF sigHandler)
 
 void signalHandlerRelease(void)
 {
+
     // We check this in case the call to DoTychoSave bombs 
     // out and generates another signal. 
     static int times = 0;
@@ -147,28 +201,9 @@ void signalHandlerRelease(void)
 	DoTychoSave();
     }
 
-    // Use execle to execute the Unix command "$path $script -name Tycho" where
-    //   path = $PTOLEMY/bin.$PTARCH/itkwish
-    //   script = $PTOLEMY/tycho/kernel/TyCoreRelease.itcl
-    // Cannot use dynamic memory
-    static char path[MAX_PATH_LENGTH], script[MAX_PATH_LENGTH];
-
-    // 1. Find the value of the PTOLEMY environment variable
-    const char *ptolemy = getenv("PTOLEMY");
-    if ( ptolemy == 0 ) ptolemy = "~ptolemy";
-
-    // 2. Make sure that path and file names will not overflow static buffer
-    unsigned int pstrlen = strlen(ptolemy);
-    if ( ( sizeof(SH_ITCLTK_SUB_PATH) + pstrlen >= MAX_PATH_LENGTH ) ||
-         ( sizeof(SH_ITCLTK_RELEASE_SCRIPT) + pstrlen >= MAX_PATH_LENGTH ) ) {
-      abortHandling();
+    if (signalPath == NULL || signalScript == NULL) {
+        abortHandling();
     }
-
-    // 3. Define the path of [incr tk] and tcltk script to source
-    strcpy(path, ptolemy);
-    strcat(path, SH_ITCLTK_SUB_PATH);
-    strcpy(script, ptolemy);
-    strcat(script, SH_ITCLTK_RELEASE_SCRIPT);
 
     switch(fork()) 
     {
@@ -177,15 +212,64 @@ void signalHandlerRelease(void)
 
 	case 0:			// fork() return value for child. 
 	    sleep(1);		// Allow time for core file to be generated.   
-	    execle(path, SH_ITCLTK_PROG, script, "-name", "Tycho", (char *)0,
-		   environ);
+	    execle(signalPath, SH_ITCLTK_PROG, signalScript, "-name", \
+"Tycho", (char *)0, environ);
 	    abortHandling();	// If you make it this far something went wrong
     }
 
-    // We are now in the parent process.  Kill off parent.
+    // We are now in the parent process. Kill off parent.
     exit(0);
+
 }
 
+// setDebugStrings
+//
+// This function sets the value of path and script for release mode, 
+// since this cannot be done dynamically in the signal handler because 
+// new and malloc are not reentrant.
+
+void setDebugStrings(void) 
+{
+
+    InfString tempPath, tempScript, tempMsg, ptolemy, itcl_path;
+
+    // Sub-directory of $PTOLEMY that contains the itcl binary plus binary
+    // file name, e.g., "/bin.sol2/itkwish"
+    itcl_path << "/bin.";
+    if (getenv("PTARCH") == 0)
+    {
+        itcl_path << PTARCH;
+    }
+    else
+    {
+        itcl_path << getenv("PTARCH");
+    }  
+    itcl_path << "/";
+    itcl_path << SH_ITCLTK_PROG;
+
+    // 1. Find the value of the PTOLEMY environment variable
+    ptolemy << getenv("PTOLEMY");
+    if ((char *) ptolemy == 0 ) {
+        ptolemy.initialize();
+        ptolemy << "~ptolemy";
+    }
+
+    // 2. Define the path of itcl_wish and itcl file name to source
+    tempPath << ptolemy;
+    tempPath << itcl_path;
+    tempScript << ptolemy;
+    tempScript << SH_ITCLTK_DEBUG_SCRIPT;
+    tempMsg << "\n\nFatal error occured. Tycho was not able to intercept the error signal and deal with it appropriately.\n";
+
+    // These values don't change for the life of the program. So if the 
+    // environment changes during execution those changes will not be 
+    // reflected until program in launched again.
+    signalPath = tempPath.newCopy();
+    signalScript = tempScript.newCopy();
+    signalMsg = tempMsg.newCopy();
+    signalMsgSize = strlen(signalMsg);
+
+}
 
 // signalHandlerDebug
 //
@@ -204,28 +288,9 @@ void signalHandlerDebug(int signo)
 	DoTychoSave();
     }
 
-    // Use execle to execute the Unix command "$path $script -name Tycho" where
-    //   path = $PTOLEMY/bin.$PTARCH/itkwish
-    //   script = $PTOLEMY/tycho/kernel/TyCoreDebug.itcl
-    // Cannot use dynamic memory
-    static char path[MAX_PATH_LENGTH], script[MAX_PATH_LENGTH];
-
-    // 1. Find the value of the PTOLEMY environment variable
-    const char *ptolemy = getenv("PTOLEMY");
-    if ( ptolemy == 0 ) ptolemy = "~ptolemy";
-
-    // 2. Make sure that path and file names will not overflow static buffer
-    unsigned int pstrlen = strlen(ptolemy);
-    if ( ( sizeof(SH_ITCLTK_SUB_PATH) + pstrlen >= MAX_PATH_LENGTH ) ||
-         ( sizeof(SH_ITCLTK_DEBUG_SCRIPT) + pstrlen >= MAX_PATH_LENGTH ) ) {
-      abortHandling();
+    if (signalPath == NULL || signalScript == NULL) {
+        abortHandling();
     }
-
-    // 3. Define the path of itcl_wish and itcl file name to source
-    strcpy(path, ptolemy);
-    strcat(path, SH_ITCLTK_SUB_PATH);
-    strcpy(script, ptolemy);
-    strcat(script, SH_ITCLTK_DEBUG_SCRIPT);
 
     switch(fork()) 
     {
@@ -234,12 +299,14 @@ void signalHandlerDebug(int signo)
       
 	case 0:			// fork() return value for child. 
 	    sleep(1);		// Allow core file to be generated.  
-	    execle(path, SH_ITCLTK_PROG, script, "-name", "Tycho", (char *)0,
-		   environ);
+	    execle(signalPath, SH_ITCLTK_PROG, signalScript, "-name", \
+"Tycho", (char *)0, environ);
 	    abortHandling();	// If you make it this far something went wrong
     }
 
     // We are now in the parent process
+    // Set the handler for the current signal to the default, so that  
+    // the kernel will generate a core file.
     ptSignal(signo, (SIG_PF) SIG_DFL);
 
     // Commit suicide in manner that generates core file for child,
@@ -258,10 +325,11 @@ void signalHandlerDebug(int signo)
 
 void abortHandling() 
 {
-    static char msg[128] = "\n\nFatal error occured. Tycho was not able to intercept the error signal and deal with it appropriately.\n";
-
+    if (signalMsg == NULL) {
+        exit(1);
+    }
     // Use write instead of printf because it is reentrant.
     // Send message to the standard output
-    write(1, msg, sizeof(msg));
+    write(1, signalMsg, signalMsgSize);
     exit(1);
 }
