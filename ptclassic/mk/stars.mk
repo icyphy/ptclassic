@@ -134,7 +134,7 @@ ATM_LIBFILES = $(LIBDIR)/libmq.$(LIBSUFFIX) $(LIBDIR)/libmqstars.$(LIBSUFFIX) \
 PTINY_STAR_LIBS=\
 -ldestars -lde \
 -lImage -lsdfdspstars -lsdfstars -lLS -lsdf -lsdfmatrixstars \
-$(MATLABLIBDIR) $(MATLABEXT_LIB) \
+$(MATLABLIBDIR) $(MATLABEXT_LIB)
 
 PTRIM_STAR_LIBS=\
 -lcgcstars -lcgc -lcgctcltk \
@@ -143,7 +143,7 @@ PTRIM_STAR_LIBS=\
 -ldestars -lde \
 -lbdfstars -lbdf \
 -lsdfimagestars -lImage -lsdfdspstars -lsdfstars -lLS -lsdf -lsdfmatrixstars \
-$(MATLABLIBDIR) $(MATLABEXT_LIB) \
+$(MATLABLIBDIR) $(MATLABEXT_LIB)
 
 # Library switches reqd by stars.  Note that -lptolemy is not included.
 STAR_LIBS=\
