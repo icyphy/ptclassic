@@ -273,15 +273,21 @@ ifdef MDSDF
 endif
 
 ifdef CP
-	CUSTOM_DIRS += $(CPDIR)/kernel $(CPDIR)/stars \
-		$(CPDIR)/infopad/kernel $(CPDIR)/infopad/stars
-	PALETTES += PTOLEMY/src/domains/cp/icons/cp.pal
-	LWP = 1
-	STARS += $(LIBDIR)/cpstars.o $(LIBDIR)/cpipstars.o
-	LIBS += -lcpstars -lcpipstars -lcp -laudio
-	LIBFILES += $(LIBDIR)/libcpstars.$(LIBSUFFIX) \
-		$(LIBDIR)/libcpipstars.$(LIBSUFFIX) \
-		$(LIBDIR)/libcp.$(LIBSUFFIX)
+	# The CP domain is only supported under sun4
+	ifneq (,$(filter sun%, $(PTARCH)))
+		CUSTOM_DIRS += $(CPDIR)/kernel $(CPDIR)/stars \
+			$(CPDIR)/infopad/kernel $(CPDIR)/infopad/stars
+		PALETTES += PTOLEMY/src/domains/cp/icons/cp.pal
+		LWP = 1
+		STARS += $(LIBDIR)/cpstars.o $(LIBDIR)/cpipstars.o
+		LIBS += -lcpstars -lcpipstars -lcp -laudio
+		LIBFILES += $(LIBDIR)/libcpstars.$(LIBSUFFIX) \
+			$(LIBDIR)/libcpipstars.$(LIBSUFFIX) \
+			$(LIBDIR)/libcp.$(LIBSUFFIX)
+	else
+		# This line will not echo, but it will produce an error
+		echo "The CP domain is only supported under sun4"
+	endif
 endif
 
 ifdef LWP
