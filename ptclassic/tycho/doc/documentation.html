@@ -33,7 +33,9 @@ written by Stephen Uhler of Sun Microsystems, which supports all the
 features of HTML 2.0.
 There is currently no support in Tycho for
 <a name=HTTP>HTTP</a> hyperlink references, so you cannot
-within Tycho directly read documents on the internet.
+read documents that reside on non-local filesystems from within Tycho.
+(However under Unix, Tycho can start use <code>netscape</code> to
+view Internet documents).
 A <a href="../lib/html_library/html/sample.html">sample document</a>
 illustrates the HTML tags that are supported.
 <p>
@@ -121,14 +123,25 @@ then remote users will be able to view the documentation.
 The Tycho documentation should follow a consistent look and feel.
 <DL>
 <DT> Capitalization
-<DD> Macintosh, Tcl, Tk, Itcl, Tycho, Unix and Windows 
-should be capitalized.  For example
+<DD> Emacs, Macintosh, Tcl, Tk, Itcl, Tycho, Unix and Windows 
+should usually be capitalized.  For example
 <BLOCKQUOTE>
 Tycho0.1.1 will not work with Itcl2.0. 
 </BLOCKQUOTE>
-Words such as HTML or SCCS, where one would speak each letter individually
-should have all the letters capitalized.  Words such as Tcl, where one
-says, "Tickle" should only have the first letter capitalized.
+
+ <P>Words such as HTML or SCCS, where one would speak each letter
+individually should have all the letters capitalized.  Words such as
+Tcl, where one says, "Tickle" should only have the first letter
+capitalized.  Michael McLennan prefers that the software he has written
+be referred to as:
+<DL COMPACT>
+<DT> [incr Tcl] 
+<DD> Itcl
+<DT> [incr Tk] 
+<DD> Itk
+<DT> [incr Widgets]
+<DD> Iwidgets
+</DL>
 
 <DT> Filenames, Environment variables, HTML examples, Key bindings
 
@@ -136,6 +149,14 @@ says, "Tickle" should only have the first letter capitalized.
 <CODE>&lt;CODE&gt;. . . &lt;/CODE&gt;</CODE>.  Please avoid wrapping
 things in "quotes".  If you must use quotes, then use double quotes,
 not single quotes.
+
+ <br>Usually user input follows its own capitalization rules.  For
+example, the user would type <CODE>tycho</CODE>, not
+<CODE>Tycho</CODE>, even though 'Tycho' should always be capitalized.
+
+<BLOCKQUOTE>
+The main program in the Tycho system is the <CODE>tycho</CODE> script.
+</BLOCKQUOTE>
 
 <DT> <CODE>&lt;DL&gt; . . . <CODE>&lt;/DL&gt;</CODE></CODE>
 <DD> Use Display Lists for describing Tcl proc args and listing 
