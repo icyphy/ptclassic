@@ -49,6 +49,8 @@ provisions.
 
     codeblock(mainDecl){
       union $sharedSymbol(CGCVISInterleaveOut,regoverlay) $starSymbol(unpackit);
+      int $starSymbol(numwrites),$starSymbol(numbytes);
+      vis_s16 *$starSymbol(dataptr);
     }
 
     initCode {
@@ -73,10 +75,14 @@ provisions.
 			<<  balance << ", "
 			<< "0);\n";
       addCode(controlParameters);
+      addCode("$starSymbol(numbytes) = 0;"); 
+      addCode("$starSymbol(numwrites) = 1;"); 
+      addCode(setbufptr);
     }
 
     codeblock (setbufptr) {
       $starSymbol(bufferptr) = $starSymbol(buffer);
+      $starSymbol(dataptr) = $starSymbol(bufferptr);
     }
 
     codeblock(updatebufptr){
@@ -86,25 +92,27 @@ provisions.
     codeblock (convert_interleave) {
       /* Convert data in buffer to Output format */
       {
-	int i, j;
-	for (i=0; i <($val(blockSize)/4); i++) {
-	  j = 4*i;
-	  $starSymbol(unpackit).regvaluedbl = $ref(stereoIn,$val(blockSize)/4-1-i);
+	$starSymbol(unpackit).regvaluedbl = $ref(stereoIn);
 
-	  $starSymbol(buffer)[j]   = $starSymbol(unpackit).regvaluesh[0];
-	  $starSymbol(buffer)[j+1] = $starSymbol(unpackit).regvaluesh[1];
-	  $starSymbol(buffer)[j+2] = $starSymbol(unpackit).regvaluesh[2];
-	  $starSymbol(buffer)[j+3] = $starSymbol(unpackit).regvaluesh[3];
-	}
-      }
+	*$starSymbol(dataptr)++ = $starSymbol(unpackit).regvaluesh[0];
+	*$starSymbol(dataptr)++ = $starSymbol(unpackit).regvaluesh[1];
+	*$starSymbol(dataptr)++ = $starSymbol(unpackit).regvaluesh[2];
+	*$starSymbol(dataptr)++ = $starSymbol(unpackit).regvaluesh[3];
+ 	$starSymbol(numbytes) += 8;
+     }
     }
 
     go {
       addCode(convert_interleave);
+      addCode("if ($starSymbol(numbytes) >= 8180){");
+      addCode(write);
+      addCode("$starSymbol(numbytes) -= 8180;");
+      addCode("if ($starSymbol(numwrites) > 1) {");
       addCode(setbufptr);
-      addCode(write);
+      addCode("$starSymbol(numwrites) = 1;");
+      addCode("}else {");
       addCode(updatebufptr);
-      addCode(write);
+      addCode("$starSymbol(numwrites)++;}}");   
     }
 
     wrapup {

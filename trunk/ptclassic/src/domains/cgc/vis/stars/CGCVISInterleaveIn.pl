@@ -49,6 +49,8 @@ provisions.
 
     codeblock(mainDecl){
       union $sharedSymbol(CGCVISInterleaveIn,regoverlay) $starSymbol(packit);
+      int $starSymbol(numread),$starSymbol(numbytes);
+      vis_s16 *$starSymbol(dataptr);
     }
 
     initCode {
@@ -73,10 +75,15 @@ provisions.
 			<<  balance << ", "
 			<< "1);\n";
       addCode(controlParameters);
+      addCode(setbufptr);
+      addCode(read);
+      addCode("$starSymbol(numbytes) = 8180;");
+      addCode("$starSymbol(numread) = 1;");
     }
 
     codeblock (setbufptr) {
       $starSymbol(bufferptr) = $starSymbol(buffer);
+      $starSymbol(dataptr) = $starSymbol(bufferptr);
     }
 
     codeblock(updatebufptr){
@@ -86,24 +93,27 @@ provisions.
     codeblock (convert_interleave) {
       /* Convert data in buffer to Output format */
       {
-	int i, j;
-	for (i=0; i <($val(blockSize)/4); i++) {
-	  j = 4*i;
-	  $starSymbol(packit).regvaluesh[0] = $starSymbol(buffer)[j];
-	  $starSymbol(packit).regvaluesh[1] = $starSymbol(buffer)[j+1];
-	  $starSymbol(packit).regvaluesh[2] = $starSymbol(buffer)[j+2];
-	  $starSymbol(packit).regvaluesh[3] = $starSymbol(buffer)[j+3];
-	  $ref(stereoOut,$val(blockSize)/4-1-i) = $starSymbol(packit).regvaluedbl;
-	}
+	$starSymbol(packit).regvaluesh[0] = *$starSymbol(dataptr)++;
+	$starSymbol(packit).regvaluesh[1] = *$starSymbol(dataptr);
+	$starSymbol(packit).regvaluesh[2] = *$starSymbol(dataptr);
+	$starSymbol(packit).regvaluesh[3] = *$starSymbol(dataptr);
+	$ref(stereoOut) = $starSymbol(packit).regvaluedbl;
+	$starSymbol(numbytes) -= 8;
       }
     }
 
     go {
-      addCode(setbufptr);
-      addCode(read);
-      addCode(updatebufptr);
-      addCode(read);
       addCode(convert_interleave);
+      addCode("if ($starSymbol(numbytes) < 8) {");
+      addCode("$starSymbol(numbytes) += 8180;");
+      addCode("if ($starSymbol(numread) > 1) {");
+      addCode(setbufptr);
+      addCode("$starSymbol(numread) = 1;");
+      addCode("}else {");
+      addCode(updatebufptr);
+      addCode("$starSymbol(numread)++;}");
+      addCode(read);
+      addCode("}");
     }
 
     wrapup {
