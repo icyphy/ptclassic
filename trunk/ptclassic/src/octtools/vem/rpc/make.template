@@ -61,6 +61,10 @@ OBJS = $(LIBCSRCS:.c=.o)
 
 LIB =		librpcserver.a
 
+# The clean rule in mk/common.mk will remove KRUFT files.  If 
+# make clean does not remove librpcserver.a then rebuild will not recreate
+# librpcserver.a
+KRUFT =		$(LIB) 
 OTHERCFLAGS=-DSERVER
 
 all::	$(LIB)
