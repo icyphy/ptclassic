@@ -34,7 +34,7 @@ has a <CODE>Test</CODE> menu which has choices for the tests arranged
 by directory.
 
 <LI> Open a test file such as <A
-HREF="../../kernel/gui/test/testStack.itcl"><CODE>$TYCHO/kernel/gui/test/testStack.itcl</CODE></A>  with Tycho and then evaluate the contents of the file with
+HREF="../../kernel/basic/test/testStack.itcl"><CODE>$TYCHO/kernel/basic/test/testStack.itcl</CODE></A>  with Tycho and then evaluate the contents of the file with
 the <CODE>Evaluate</CODE> choice from the <CODE>File</CODE> menu 
 (<CODE>C-x C-r</CODE>).
 
@@ -365,7 +365,7 @@ Below are some hints about writing code that can be tested.
 <HR>
 <H2><A NAME="testing java">Testing Java</A></H2>
 
-TclBlend is Sun's Tcl/Java interface.  We use TclBlend to test Java
+Tcl Blend is Sun's Tcl/Java interface.  We use Tcl Blend to test Java
 by writing Tcl code that exercises the Java classes.
 
 <H3>Running the tests</H3>
@@ -375,12 +375,12 @@ should just happen.  The Java testbed does have a few differences:
 <DL>
 <DT> The <CODE>make test_jsimple</CODE> rule
 <DD> This rule will run only the Java tests in a <CODE>tclsh</CODE> binary
-that can load the TclBlend extension
+that can load the Tcl Blend extension
 
 <DT> The <CODE>alljtests.tcl</CODE> file
-<DD> This file will run all the Java tests that require TclBlend.
-The reason we have yet another file is that TclBlend will not necessarily
-work on all platforms, and we want to be able to run the non-TclBlend
+<DD> This file will run all the Java tests that require Tcl Blend.
+The reason we have yet another file is that Tcl Blend will not necessarily
+work on all platforms, and we want to be able to run the non-Tcl Blend
 tests on those platforms.
 
 </DL>
@@ -390,8 +390,8 @@ tests on those platforms.
 Below we discuss some of the details of writing tests in Tcl that test
 Java classes.
 <H4>Simple Example</H4>
-<p>TclBlend allows us to instantiate objects in a class and call public
-methods.  We use TclBlend and the standard Tcl test bed to create tests.
+<p>Tcl Blend allows us to instantiate objects in a class and call public
+methods.  We use Tcl Blend and the standard Tcl test bed to create tests.
 In the example below, we call <CODE>java::new</CODE> to create an
 instance of the Java <CODE>NamedObj</CODE> class.  We can then
 call public methods of <CODE>NamedObj</CODE> by referring to the 
@@ -416,7 +416,7 @@ is defined.
 the Tcl test file should be at <CODE>test/NamedObj.tcl</CODE>.
 
 <H4><A NAME="getJavaInfo testing proc">getJavaInfo Testing Proc</A></H4>
- <P>TclBlend provides a Tcl procedure called <CODE>java::info</CODE>
+ <P>Tcl Blend provides a Tcl procedure called <CODE>java::info</CODE>
 which returns information about an instance of a Java class.  
 <A HREF="../../kernel/gui/test/testDefs.tcl"><CODE>$TYCHO/kernel/gui/test/testDefs.tcl</CODE></A>
 defines the <CODE>getJavaInfo</CODE> Tcl proc, which takes a Java object
@@ -471,7 +471,7 @@ make jsrestore
 </PRE>
 
 </OL>
-<H4>JavaScript Details</H4>
+<H4>JavaScope Details</H4>
 <MENU>
 <LI> <CODE>jsinstr</CODE> saves the original Java files to the 
 <CODE>jsoriginal</CODE> directory.  The <CODE>jsall</CODE> makefile
@@ -517,9 +517,9 @@ resources in order.
 <OL>
 <LI> system properties - environment variables 
 
-<LI> $(HOME)/<CODE>javascope.properties</CODE>
+<LI> <CODE>$HOME/javascope.properties</CODE>
 
-<LI> ./<CODE>javascope.properties</CODE> in the current directory.
+<LI> <CODE>./javascope.properties</CODE> in the current directory.
 
 <LI> Options can be embedded in files as comments:
 <PRE>
@@ -535,7 +535,7 @@ Embedded comment option.
 
 See the <A HREF="http://www.suntest.com/JavaScope/jsinstr.html"><CODE>jsinstr</CODE></A> documentation for details.
 
-I tried to use TclBlend to call a dummy Java method that flushes the
+I tried to use Tcl Blend to call a dummy Java method that flushes the
 database using an embedded comment, and then call that method before
 exiting.
 
@@ -592,7 +592,7 @@ and then run <CODE>htmlchek</CODE>
 <OL>
 <LI> Create the test distribution:
 <PRE>
-cd /users/ptdesign/adm/gen-latest; make clean; make
+cd /users/ptdesign/adm/gen-latest; make htmlchek
 </PRE>
 
 <LI> Reset <CODE>TYCHO</CODE> to point to the test distribution:
