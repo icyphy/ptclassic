@@ -47,6 +47,7 @@ ITCL_SRCS = \
 	Bounder.itcl \
 	ComplexItem.itcl \
 	Connectible.itcl \
+	Connector.itcl \
 	Editor.itcl \
 	Follower.itcl \
 	Frame.itcl \
