@@ -5,6 +5,7 @@
 #pragma interface
 #endif
 #include "StringList.h"
+#include "SimControl.h"
 
 /**************************************************************************
 Version identification:
@@ -15,7 +16,6 @@ $Id$
 
  Programmer:  E. A. Lee and D. G. Messerschmitt
  Date of creation: 1/17/90
- Revisions: 5/29/90 -- SDF-specific stuff moved to SDFScheduler.h
 
  Scheduler sets up the execution by determining the order in which
  Blocks are executed. This is done in two phases -- setup and
@@ -59,18 +59,6 @@ public:
 	// make destructor virtual
 	virtual ~Scheduler() {}
 
-	// allow errorhandler to ask for a halt
-	static void requestHalt() { haltRequestFlag = TRUE; }
-
-	// read the halt flag
-	static int haltRequested() {
-		if (interrupt) reportInterrupt();
-		return haltRequestFlag;
-	}
-
-	// turn on interrupt catching
-	static void catchInt(int signo = -1, int always = 0);
-
 	// current time of the schedule
 	float currentTime;
 
@@ -91,25 +79,22 @@ public:
 	// effect a run.  In the base class, this just causes an error.
 	virtual StringList compileRun();
 
+	// The following functions now forward requests to SimControl,
+	// which is responsible for controlling the simulation.
+
+	// requestHalt, for backward compatibility
+	// NOTE: SimControl::requestHalt only sets the halt bit,
+	// not the error bit.
+	static void requestHalt() { SimControl::declareErrorHalt();}
+
+	// haltRequested, for backward compatibilty
+	static int haltRequested() { return SimControl::haltRequested();}
+
 protected:
-	// only schedulers can clear the halt flag.
-	static void clearHalt() {
-		interrupt = haltRequestFlag = FALSE;
-	}
+	// clearHalt, for backward compatibilty
+	static void clearHalt() { SimControl::clearHalt();}
 
 private:
-	// request flag for halting -- schedulers must poll and reset
-	static int haltRequestFlag;
-
-	// interrupt flag -- set by user interrupt.
-	volatile static int interrupt;
-
-	// interrupt handler routine
-	static void intCatcher(int);
-
-	// tell user about interrupts
-	static void reportInterrupt();
-
 	// Target pointer
 	Target* myTarget;
 };
