@@ -102,7 +102,7 @@ starHTML.idx: subdomainstarHTML doc/stars/starHTML.idx
 	rm -f $@
 	@if [ "$(SUBDOMAINDIRS)" != "" ]; then \
 		subdirs="$(addsuffix /doc/stars/starHTML.idx, $(SUBDOMAINDIRS))"; \
-		echo "Merging $$subdirs";\
+		echo "Merging doc/stars/starHTML.idx $$subdirs ";\
 		echo "set TYCHO $(PTOLEMY)/tycho; \
 			source $(PTOLEMY)/tycho/lib/idx/tychoMakeIndex.tcl; \
 			tychoMergeIndices \"All Ptolemy $(ME) stars\" $@ \
