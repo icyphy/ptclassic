@@ -222,11 +222,8 @@ KcMakeState(char *name, char *type, char *initVal) {
 
 // connect or busconnect
 extern "C" boolean
-KcConnect(char *inst1, char *t1, char *inst2, char *t2, int delay, int width) {
-	char delayStr[32], widthStr[32];
-	sprintf (delayStr, "%d", delay);
-	if (width > 0) {
-		sprintf (widthStr, "%d", width);
+KcConnect(char *inst1, char *t1, char *inst2, char *t2, char* delay, char* width) {
+	if (*width) {
 		LOG << "\t(busconnect (";
 	}
 	else {
@@ -234,16 +231,16 @@ KcConnect(char *inst1, char *t1, char *inst2, char *t2, int delay, int width) {
 	}
 	LOG << inst1 << " \"" << t1 << "\") (" <<
  		inst2 << " \"" << t2 << "\")";
-	if (width > 0)
+	if (*width)
 		LOG << " " << width;
- 	if (delay)
+ 	if (*delay)
  		LOG << " " << delay;
  	LOG << ")\n";
-	if (width > 0)
+	if (*width)
 		return currentGalaxy->busConnect(inst1, t1, inst2, t2,
-						 widthStr, delayStr);
+						 width, delay);
 	else
-		return currentGalaxy->connect(inst1, t1, inst2, t2, delayStr);
+		return currentGalaxy->connect(inst1, t1, inst2, t2, delay);
 }
 
 // create a galaxy formal terminal
