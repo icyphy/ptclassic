@@ -120,7 +120,7 @@ install_gcc:
 	(cd $(GNU_OBJ)/make; $(MAKE) install)
 	(cd $(GNU_OBJ)/gcc; $(GNU_OBJ)/make/make install CC="stage2/xgcc -Bstage2/" CFLAGS="-g -O")
 	@echo "Install c++filt, the g++ name demangler"
-	(cd $(GNU_OBJ)/gcc; cp c++filt $(REL_GNU_BINDIR))
+	(cd $(GNU_OBJ)/gcc; cp c++filt $(BINDIR))
 	@echo "Set up some links so we can move the compiler"
 	(cd $(GNU_DEST)/$(PTARCH); ln -s $(MACH) $(PTARCH) )
 	(cd $(GNU_DEST)/$(PTARCH)/lib/gcc-lib; ln -s $(MACH) $(PTARCH) )
