@@ -74,7 +74,7 @@ class ::tycho::Forest {
     method addArc {parent child}
 
     # Return a list of node names in depth-first sort order.
-    method depthFirstSort {roots}
+    method depthFirstSort {{roots {}}}
 }
 
     ###################################################################

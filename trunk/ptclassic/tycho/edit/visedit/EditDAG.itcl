@@ -295,7 +295,7 @@ class ::tycho::EditDAG {
 configbody ::tycho::EditDAG::graph {
     set gph $itk_option(-graph)
     if {$gph != {}} {
-        if {[uplevel #0 info objects $gph] != {} && \
+        if {[uplevel #0 infoObjects $gph] != {} && \
                 [uplevel #0 $gph isa [structClass]]} {
             if $graphmine {
                 if {$mygraph != {}} {

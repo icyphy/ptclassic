@@ -971,7 +971,7 @@ body ::tycho::Graphics::edit {{ids {}}} {
             set queries [list [list \
                     line x {Create command:} $itemCreate($id) 8]]
             ::tycho::Query $name -queries $queries \
-                    -okcommand "if {\[info objects $this\] != {}} \
+                    -okcommand "if {\[infoObjects $this\] != {}} \
                     {eval $this modify \[$name get x\]}"
             $name centerOnScreen
         }
