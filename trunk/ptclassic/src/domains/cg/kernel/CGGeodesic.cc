@@ -118,7 +118,9 @@ int CGGeodesic :: forkDelay() const {
 
 int CGGeodesic :: internalBufSize() const {
 	CGPortHole* dest = (CGPortHole*)destinationPort;
-	if (dest->parentReps() == 0) {
+	int drep = dest->parentReps();
+	if (dest->atBoundary()) drep = 1;
+	if (drep == 0) {
 		Error::abortRun(*dest,
 "Attempt to determine buffer size before schedule has been computed\n"
 "(possibly from calling bufSize() in a star's setup() method)");
@@ -141,7 +143,7 @@ int CGGeodesic :: internalBufSize() const {
 	if (numInit() > 0 || dest->usesOldValues()) {
 		// cannot determine size without schedule.
 		if (maxNumParticles == 0) return 0;
-		int total = dest->parentReps() * dest->numXfer();
+		int total = drep * dest->numXfer();
 		if (total >= bsiz) {
 			// return the smallest factor of total
 			// that is >= size
