@@ -1,4 +1,4 @@
--*-Mode:text-*- -[Sun Dec 31 15:07:13 1995 by cxh]-
+-*-Mode:text-*- -[Tue Jan  2 16:12:57 1996 by cxh]-
 Version: $Id$
 
 src/gnu/README
@@ -80,6 +80,42 @@ HP
 	gcc-2.7.2 needs the GNU assembler, gas, for the gcc -g option.
 	See gcc/INSTALL for details.
 
+	HPUX10.01 comes with a broken version of cc that is sufficient
+	to bootstrap gcc.
+
+Solaris
+-------
+	Solaris2.x does not come with a working compiler.  The
+	compiler at /usr/ucb/cc should be avoided at all costs.
+
+	If you don't have a working compiler under Solaris, you can
+	download one from ftp://ptolemy.eecs.berkeley.edu/pub/gnu
+
+	If the prebuilt compiler on the ftp site is not based on the
+	the same release of the OS that you are running, you can use
+	the prebuilt compiler to bootstrap build a compiler for your
+	current release.  Download the prebuilt compiler, and do
+	'gcc -v' to see what version of the OS the compiler was built
+	with.
+
+	In this case, the compiler was built with solaris2.4
+	cxh@watson 80% gcc -v
+	Reading specs from /users/ptdesign/gnu/sol2/lib/gcc-lib/sparc-sun-solaris2.4/2.7.2/specs
+	gcc version 2.7.2
+	cxh@watson 81% 
+
+	Under solaris libg++-2.7.1 has a bug where /usr/ucb/ln will
+	fail:
+
+	gcc -h libstdc++.so.2.7.1 -shared -o libstdc++.so.2.7.1 `cat piclist` -lm
+	ln -sf libstdc++.so.2.7.1 libstdc++.so
+	Usage: ln [-f] [-s] f1
+	       ln [-f] [-s] f1 f2
+	       ln [-f] [-s] f1 ... fn d1
+
+	The fix is to place /bin in your path before /usr/ucb.  This
+	bug will probably be fixed in the next release of libg++
+
 gcc and Purify
 --------------
 	To use Purelink and Purify from Pure Inc, be sure to build gcc
@@ -87,6 +123,32 @@ gcc and Purify
 	ld-collect rather than GNU ld.  In this directory, we
 	configure gcc to not use gas and not to use GNU ld.  
 
+
+How to Install
+--------------
+	The top level PTOLEMY makefile contains a target called
+	'install_gnu' which will install the GNU tools for you.
+
+	Note that libg++ requires that gcc be installed before
+	compiling libg++.  It is possible to use a link for gcc, see
+	src/libg++/libg++/README
+
+	1. Set your PTARCH and PTOLEMY environment variables:
+		setenv PTARCH sol2
+		setenv PTOLEMY /users/ptolemy
+
+	2. Set your path:
+		set path = ($PTOLEMY/bin.sol2 $PTOLEMY/bin $path)
+	Note that if you are running Solaris2.x and compiling libg++-2.7.1
+	then you will need to have /bin in your path before /usr/ucb
+	(See the Solaris section above).
+	
+	3. Do the build:
+		cd $PTOLEMY
+		make install_gnu
+
+	The contents of the src/gnu and obj/gnu directories may be
+	removed after installation.
 
 
 See Also
