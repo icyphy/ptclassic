@@ -61,17 +61,15 @@ setSignalHandlers(void)
          
     if (isDevelop == 0 || isDevelop[0] == '0') 
     {
-        if (setCoreLimitRelease() != 0) 
-            returnValue = 1; 
+        setCoreLimitRelease(); 
         if (setHandlers((SIG_PF) signalHandlerRelease) != 0)
-	    returnValue = 2;
+	    returnValue = 1;
     }
     else
     {
-        if (setCoreLimitDebug() != 0) 
-            returnValue = 3; 
+        setCoreLimitDebug(); 
         if (setHandlers((SIG_PF) signalHandlerDebug) != 0)
-	    returnValue = 4;
+	    returnValue = 1;
     }
 
     return returnValue;
