@@ -1,0 +1,85 @@
+#! /bin/csh -f
+# usage: tycho [-debug] [-ptiny] [script_file]
+
+# tycho - Ptolemy Tycho Brahe Graphical Interface
+#
+# Version: $Id$
+# Copyright (c) 1995 The Regents of the University of California.
+# 	All Rights Reserved.
+#
+
+# If 'tycho.ptiny' is a link to this script, then we just use tycho.ptiny
+set progname = `basename $0`
+
+if ( ! $?PTOLEMY ) setenv PTOLEMY ~ptolemy
+if ( ! $?ARCH ) then
+    setenv ARCH `$PTOLEMY/bin/arch`
+endif
+if ( ! $?USER ) then
+    setenv USER $LOGNAME
+endif
+
+# FIXME: Hardwired in the beta version of Tcl/Tk
+setenv TCL_LIBRARY $PTOLEMY/tcltk/tcl7.4b3/lib/tcl
+setenv TK_LIBRARY $PTOLEMY/tcltk/tk4.0b3/lib/tk
+setenv PTPWD `pwd`
+
+# To get tcl/tk man pages before corresponding unix man pages
+setenv MANPATH $PTOLEMY/tcltk/tk/man:$PTOLEMY/tcltk/tcl/man:$MANPATH
+
+while ($#argv)
+	switch ($argv[1])
+		case -help:
+			echo "usage: tycho [-debug] [-ptiny] [script_file]"
+			exit 0
+		case -debug:
+			set tychodebug
+			breaksw
+		case -ptiny:
+			set tychoptiny
+			breaksw
+		case -*:
+			echo Bad option: $argv[1]
+			echo "usage: tycho [-debug] [-ptiny] [script_file]"
+			exit 1
+			breaksw
+		case *:
+			set script=$1
+			breaksw
+	endsw
+	shift
+end
+
+if ( ! $?DISPLAY ) then
+    echo "${0}: Your DISPLAY environment variable must be set"
+    exit 1
+endif
+
+# For now, look for the executable in obj.$ARCH, rather than bin.$ARCH.
+set bindir = $PTOLEMY/obj.$ARCH
+
+if ( "$progname" == "tycho.ptiny" || $?tychoptiny ) then
+    set prog = $PTOLEMY/obj.$ARCH/tycho/kernel/tycho.ptiny
+else
+    set prog = $PTOLEMY/obj.$ARCH/tycho/kernel/tycho
+endif
+
+if ( $?tychodebug ) then
+    set prog = $prog.debug
+endif
+
+if ( "$1" =~ "-*" ) then
+    echo "${0}: Bad option: $1"
+    exit 1
+endif
+
+# FIXME: Should check starting palette/facet for validity.
+# FIXME: Should make the starting facet if needed.
+
+set path = ( $PTOLEMY/bin.$ARCH $PTOLEMY/bin $path )
+
+if (! -x $prog) then
+    echo "Program does not exist: $prog"
+else
+    $prog &
+endif
