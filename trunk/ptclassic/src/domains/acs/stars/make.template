@@ -68,7 +68,8 @@ PL_SRCS= \
   ACSXMGraphFixSim.pl ACSXMGraphFPCGC.pl ACSPrinterFixSim.pl \
   ACSConstFixSim.pl ACSImpulseFixSim.pl \
   ACSImpulseFPCGC.pl ACSImpulseFPSim.pl ACSImpulse.pl \
-  ACSConstFPCGC.pl ACSConstFPSim.pl ACSConst.pl
+  ACSConstFPCGC.pl ACSConstFPSim.pl ACSConst.pl \
+  ACSPrinterFPCGC.pl
 
 
   
