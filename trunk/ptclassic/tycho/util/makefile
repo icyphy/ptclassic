@@ -29,12 +29,14 @@
 # 						COPYRIGHTENDKEY
 ##########################################################################
 
-DIRS = notmake pakman
+DIRS = notmake pakman obstcl devtools
+
+EXTRA_SRCS = pkgIndex.tcl
 
 # Root of Tycho directory
 ROOT =		..
 
-ME = 		utils
+ME = 		util
 
 # True source directory
 VPATH =		$(ROOT)/$(ME)
