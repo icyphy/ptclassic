@@ -57,7 +57,7 @@ be a parameter.
 		char* fileName;		// name of file to use (on heap)
 	}
 	hinclude { <stdio.h> }
-	ccinclude { "miscFuncs.h", "paths.h", "PTDSPMuLaw.h", <std.h> }
+	ccinclude { "miscFuncs.h", "paths.h", "ptdspMuLaw.h", <std.h> }
 	constructor {
 		strm = NULL;
 		delFile = FALSE;
@@ -89,9 +89,9 @@ be a parameter.
 // go.  Does nothing if open failed.  Does mu-law compression.
 	go {
 		if (!strm) return;
-		// add gain, cvt to integer
+		// add gain, convert to integer
 		int data = int(double(input%0) * double(gain));
-		putc (PTDSPMuLaw(data), strm);
+		putc(Ptdsp_MuLaw(data), strm);
 	}
 // wrapup.  Does nothing if open failed, or 2nd wrapup call.
 // closes file and runs the command.
