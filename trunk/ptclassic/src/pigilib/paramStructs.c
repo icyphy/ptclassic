@@ -16,22 +16,7 @@ Updates: 4/14/89 to PStrToPList()
 #include "local.h"
 #include "util.h"
 #include "err.h"
-
-
-/* Data Structures */
-struct ParamStruct {
-    char *name;
-    char *value;
-};
-typedef struct ParamStruct ParamType;
-
-struct ParamListStruct {
-    int length; /* length of array */
-    ParamType *array; /* points to first element */
-};
-typedef struct ParamListStruct ParamListType;
-
-
+#include "paramStructs.h"
 
 /* PStrToPList  11/14/88 4/18/88
 Converts a param str to a ParamList.
@@ -99,6 +84,7 @@ ParamListType *pListPtr;
 	}
 	*to = '\0';
 	place->name = from;
+	place->type = 0;	/* for now */
 	from = ++to;
 
 	/* set param value at current place */
