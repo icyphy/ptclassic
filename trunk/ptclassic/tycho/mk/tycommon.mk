@@ -544,7 +544,7 @@ htmlchek:
 		map=1 netscape=1 nowswarn=1 arena=1 strictpair=TCL,AUTHOR
 
 checkjunk:
-	@checkextra -v $(SRCS) $(HDRS) $(EXTRA_SRCS) $(MISC_FILES) $(DIRS) \
+	@checkextra -v $(SRCS) $(HDRS) $(EXTRA_SRCS) $(MISC_FILES) \
 		$(OPTIONAL_FILES) $(JSRCS) makefile SCCS \
 		$(JCLASS) $(OBJS) $(LIBR) 
 	@if [ "x$(DIRS)" != "x" ]; then \
