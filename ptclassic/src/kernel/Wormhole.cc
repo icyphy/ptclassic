@@ -114,7 +114,8 @@ StringList Wormhole :: print (int recursive) const {
 	out += selfStar.readDescriptor();
 	out += "\n";
 	out += selfStar.printPorts ("wormhole");
-	out += selfStar.printStates ("wormhole");
+// we use the states from the inner galaxy.
+	out += gal.printStates ("wormhole");
 	out += "Blocks in the inner galaxy: ";
 	GalTopBlockIter next(gal);
 	if (recursive) {
