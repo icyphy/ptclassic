@@ -86,11 +86,15 @@ zcat pt-0.4.sun4.tar.Z |  ( chdir ~ptolemy/..; tar xf - )
 Note that is possible to install both the Sun-4 and the DecStation
 binaries on the same file system as different directories are used for each
 set of binaries.
-.ip 4
-cd "~ptolemy"
+.ip 4.
+You no longer need the pt-0.4.xxx.tar.Z files that you got
+from the FTP site or the tape.  Remember to delete these
+files to free up storage space.
+.ip 5.
+cd ~ptolemy
 .br
 (change directories to the ptolemy root directory)
-.ip 5.
+.ip 6.
 Edit ~ptolemy/.rhosts, adding a line for your system
 (This gives pigi permission to create an RPC server process with the
 .i rsh
@@ -246,6 +250,11 @@ configured to run ptolemy.  All the .files in the home directory
 are set up according to the tastes of the \*(PT authors,
 and according the standard use of windowing software in the \*(PT
 development group.
+.pp
+Once ptolemy is installed and running correctly, you no longer
+need the compressed tar files (the "pt-0.4.xxx.tar.Z" files and
+the "gnu-xxx.tar.Z" file) that you down loaded from the FTP site
+or the tape.  Remember to delete these files to free up storage space.
 .H2 "Rebuilding Ptolemy From Source"
 .pp
 If you wish to rebuild \*(PT from source (this step is recommended
