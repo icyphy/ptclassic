@@ -92,6 +92,8 @@ ITCL_SRCS = \
 	MatlabText.itcl \
 	Message.itcl \
 	Preferences.itcl \
+	RevControl.itcl \
+	RevControlSCCS.itcl \
 	Stack.itcl \
 	TopLevel.itcl \
 	Tycho.tcl \
