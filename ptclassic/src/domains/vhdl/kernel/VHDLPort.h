@@ -54,6 +54,8 @@ class VHDLPort : public VHDLObj
   StringList type;
   // Data direction.
   StringList direction;
+  // Map binding.
+  StringList mapping;
 
   // Class Idenitification.
   /* virtual */ int isA(const char*) const;
@@ -97,7 +99,7 @@ class VHDLPortList : public VHDLObjList
   VHDLPortList* newCopy();
 
   // Allocate memory for a new VHDLPort and put it in the list.
-  void put(StringList, StringList, StringList);
+  void put(StringList, StringList, StringList, StringList="");
 };
 
 class VHDLPortListIter : public VHDLObjListIter {

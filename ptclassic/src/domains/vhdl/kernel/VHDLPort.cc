@@ -53,6 +53,7 @@ VHDLPort* VHDLPort :: newCopy() {
   newPort->setName(this->name);
   newPort->direction = this->direction;
   newPort->type = this->type;
+  newPort->mapping = this->mapping;
 
   return newPort;
 }
@@ -79,10 +80,11 @@ VHDLPortList* VHDLPortList :: newCopy() {
 
 // Allocate memory for a new VHDLPort and put it in the list.
 void VHDLPortList :: put(StringList name, StringList direction,
-			 StringList type) {
+			 StringList type, StringList mapping/*=""*/) {
   VHDLPort* newPort = new VHDLPort;
   newPort->setName(name);
   newPort->direction = direction;
   newPort->type = type;
+  newPort->mapping = mapping;
   this->put(*newPort);
 }

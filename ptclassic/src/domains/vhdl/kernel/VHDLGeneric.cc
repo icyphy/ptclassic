@@ -54,6 +54,7 @@ VHDLGeneric* VHDLGeneric :: newCopy() {
   newGeneric->setName(this->name);
   newGeneric->type = this->type;
   newGeneric->defaultVal = this->defaultVal;
+  newGeneric->mapping = this->mapping;
 
   return newGeneric;
 }
@@ -79,9 +80,11 @@ VHDLGenericList* VHDLGenericList :: newCopy() {
 }
 
 // Allocate memory for a new VHDLGeneric and put it in the list.
-void VHDLGenericList :: put(StringList name, StringList type) {
+void VHDLGenericList :: put(StringList name, StringList type,
+			    StringList mapping/*=""*/) {
   VHDLGeneric* newGeneric = new VHDLGeneric;
   newGeneric->setName(name);
   newGeneric->type = type;
+  newGeneric->mapping = mapping;
   this->put(*newGeneric);
 }

@@ -54,6 +54,8 @@ class VHDLGeneric : public VHDLObj
   StringList type;
   // Default value.
   StringList defaultVal;
+  // Map binding.
+  StringList mapping;
 
   // Class Idenitification.
   /* virtual */ int isA(const char*) const;
@@ -97,7 +99,7 @@ class VHDLGenericList : public VHDLObjList
   VHDLGenericList* newCopy();
 
   // Allocate memory for a new VHDLGeneric and put it in the list.
-  void put(StringList, StringList);
+  void put(StringList, StringList, StringList="");
 };
 
 class VHDLGenericListIter : public VHDLObjListIter {
