@@ -60,10 +60,8 @@ public:
 
 protected:
 	// States.
-	IntState analyze;
 	IntState elaborate;
 	IntState compile;
-	IntState report;
 	
 	// Return the condition indicating if system clock generator is needed.
 	// For synthesis, we don't want a system clock.
