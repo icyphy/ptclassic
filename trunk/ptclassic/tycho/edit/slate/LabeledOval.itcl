@@ -33,7 +33,7 @@
 # needed, but the common arrays get upset otherwise.
 namespace ::tycho {
     if { [::info classes LabeledItem] == "" } {
-	uplevel #0 {source $tychoslate/LabeledItem.itcl}
+	uplevel #0 {source $env(SLATE_LIBRARY)/LabeledItem.itcl}
     }
 }
 
