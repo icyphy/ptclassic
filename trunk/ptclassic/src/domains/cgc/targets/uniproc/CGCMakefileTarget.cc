@@ -27,7 +27,7 @@ CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
 							COPYRIGHTENDKEY
 
- Programmer: Christopher Hylands
+ Programmers: Christopher Hylands, Jose Pino
 
  This is a Makefile target class for CGCdomain.
 
@@ -157,6 +157,38 @@ void CGCMakefileTarget :: writeCode()
       }
       input.close();
 
+      generatedMakefile << "OTHERCFLAGS= ";
+
+      /* Code duplication from CreateSDFStar - FIXME */
+      if (compileOptionsStream.numPieces()) {
+	  char* expandedCompileOptionsStream =
+	      expandPathName(compileOptionsStream);
+	  generatedMakefile << expandedCompileOptionsStream << ' ';
+	  delete [] expandedCompileOptionsStream;
+      }
+      if(strlen((const char*) compileOptions) > 0)
+	  generatedMakefile << (const char *)compileOptions;
+
+				// The GNU make info page says:
+				// "`N' is made automatically from
+      				//  `N.o' by running the linker 
+      				//  (usually called `ld') via the C
+      				//  compiler. The precise command
+      				//  used is
+      				//  `$(CC) $(LDFLAGS) N.o $(LOADLIBES)'."
+      generatedMakefile << "\n";
+
+      generatedMakefile << "LOADLIBES= ";
+      /* Code duplication from CreateSDFStar - FIXME */
+      if (linkOptionsStream.numPieces()) {
+	  char* expandedLinkOptionsStream = expandPathName(linkOptionsStream);
+	  generatedMakefile << expandedLinkOptionsStream << ' ';
+	  delete [] expandedLinkOptionsStream;
+      }     
+      if(strlen((const char*) linkOptions) > 0)
+	  generatedMakefile << (const char *)linkOptions;
+      generatedMakefile << "\n";
+      
 				// Append rules to the end of the makefile
       generatedMakefile << "all: " << (const char *) filePrefix << "\n"
 	       << filePrefix << ": " << filePrefix << ".o\n";
