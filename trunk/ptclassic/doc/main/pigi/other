@@ -1,4 +1,7 @@
 .\" $Id$
+.EQ
+delim off
+.EN
 .H1 "Other Useful Information"
 .pp
 In this section we cover additional information which may be useful.
@@ -501,3 +504,9 @@ to modify any palettes that reference the moved icon.
 For instance, the "user.pal" palette is a likely candidate.
 If you miss a reference, Oct will issue an error message when it tries
 to open the offending palette.  
+.EQ
+delim $$
+.EN
+.\" Local variables:
+.\" mode: nroff
+.\" End:

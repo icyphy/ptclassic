@@ -9,6 +9,9 @@ to change a demo, you can copy it to your own directory
 by using ``cp -r''.
 See the section below on copying and moving Oct facets.
 .H2 "Executing Demos"
+.EQ
+delim off
+.EN
 .pp
 To execute a demo, in any xterm window,
 change to the demo directory by typing:
@@ -356,3 +359,9 @@ not want to save them.
 Do not select any of them.  Just click ``OK''.
 Then a warning window will appear telling you that closing the console
 window will terminate the program.  Just click ``Yes''.
+.EQ
+delim $$
+.EN
+.\" Local variables:
+.\" mode: nroff
+.\" End:

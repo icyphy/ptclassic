@@ -1,4 +1,7 @@
 .\" $Id$
+.EQ
+delim off
+.EN
 .H1 "Creating Your Own Universes"
 .pp
 In this section, we will show how to create your own universes with
@@ -455,3 +458,9 @@ to save, click on the box to the left of each name.  Then click on the
 A final warning appears telling you that closing the console window
 will terminate the program.  Click on ``Yes''.
 .in -0.5i
+.EQ
+delim $$
+.EN
+.\" Local variables:
+.\" mode: nroff
+.\" End:
