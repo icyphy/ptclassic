@@ -45,6 +45,7 @@ a Tcl interpreter.
 // the type definition Pointer used by "rpc.h". BLE
 #include <stdio.h>
 #include <string.h>
+#include <unistd.h>             // getuid()
 
 #include "POct.h"
 extern POct *poct;
