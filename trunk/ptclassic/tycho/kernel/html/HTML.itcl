@@ -131,8 +131,8 @@ body ::tycho::HTML::constructor {args} {
     } {
 	keep -text -readonly -textfont -width -height -background \
 		-highlightbackground -highlightcolor -selectforeground \
-		-cursor -insertbackground -foreground -textfont \
-		-textbackground
+		-cursor -insertbackground -textfont \
+		-textbackground -textforeground
     }
     pack $itk_component(text) -expand yes -fill both
 

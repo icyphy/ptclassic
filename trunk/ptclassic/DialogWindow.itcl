@@ -195,7 +195,7 @@ configbody ::tycho::DialogWindow::html {
 			-scrollbar 0 \
 			-html $itk_option(-html)
 	    } {
-		keep -background -cursor -foreground \
+		keep -background -cursor -textforeground \
 			-width -height
 	    }
 	    pack $itk_component(html) -side right -fill both
