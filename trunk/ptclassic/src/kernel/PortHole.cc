@@ -71,7 +71,7 @@ Pointer* CircularBuffer :: previous(int i)
         return buffer + ((current - i) % dimen);
 }
 
-void PortHole :: allocateBuffer(int bufferSize)
+void PortHole :: allocateBuffer()
 {
 	// If there is a buffer, release its memory
 	if(myBuffer != NULL) {
@@ -100,10 +100,11 @@ PortHole& PortHole :: setPort(const char* s,
 	GenericPort::setPort (s, parent, t);
         myGeodesic = NULL;
 	myBuffer = NULL;
-	myPlasma = plasmaList.getPlasma(t);
+	bufferSize = numberTokens;
 	numberTokens = 1;
         farSidePort = NULL;
-	allocateBuffer(numberTokens);
+	if (t != ANYTYPE)
+		myPlasma = plasmaList.getPlasma(t);
         return *this;
 }
 
@@ -123,7 +124,7 @@ PortHole& SDFPortHole :: setPort (
 	// The number of Particles the buffer has to hold is:
 	//		numberTokens current and future Particles
 	//		delay past Particles
-	allocateBuffer(numberTokens+delay);
+	bufferSize = numberTokens + delay;
 
         return *this;
 }
@@ -176,8 +177,47 @@ MultiPortHole :: operator StringList () {
 	return out;
 }
 
+Plasma*
+PortHole :: setPlasma () {
+	// first case: my type is known
+	if (myPlasma) return myPlasma;
+	// second case: I've been told where to look for the type
+	if (typePort)
+		myPlasma = typePort->setPlasma();
+	// third case: I'm an input porthole, use type of connected
+	// output porthole.
+	// fourth case: I'm an output, and the connected input
+	// specifies a type
+	if (farSidePort && (isItInput() || farSidePort->myPlasma))
+		myPlasma = farSidePort->setPlasma();
+	if (myPlasma) return myPlasma;
+	errorHandler.error ("Can't determine type of ",readFullName());
+	return 0;
+}
+
+// Function to get plasma type for a MultiPortHole.
+// The algorithm is to use the type of the first contained PortHole
+// if typePort is null.  This means that, for an adder star, say,
+// the type of the output will be the type of the first input, which
+// may not be what is desired.
+Plasma*
+MultiPortHole :: setPlasma () {
+	if (typePort) return typePort->setPlasma();
+	// call setPlasma the first contained PortHole to get the value.
+	reset();
+	return (ports++).setPlasma();
+}
+
 void PortHole :: initialize()
 {
+	// set plasma if not set
+	setPlasma ();
+
+	// allocate buffer if not allocated or wrong size
+	if (myBuffer == NULL || bufferSize != myBuffer->size())
+		allocateBuffer ();
+
+	// initialize buffer
 	for(int i = myBuffer->size(); i>0; i--) {
 		Pointer* p = myBuffer->next();
 		// Initialize particles on the buffer, so when we
@@ -190,12 +230,10 @@ void PortHole :: initialize()
 
 void PortHole :: setMaxDelay(int delay)
 {
-	// Only need to work if maximum delay has changed
 	// This method can be used to change the maximum delay
 	// or to set it based on a parameter
 
-	if( delay+numberTokens != myBuffer->size() )
-		allocateBuffer(delay+numberTokens);
+	bufferSize = delay + numberTokens;
 }
 
 Particle& PortHole ::  operator % (int delay)
@@ -336,14 +374,29 @@ GenericPort& GenericPort :: realPort() {
 	return alias->realPort();
 }
 
+// Method to generate names for new portholes.  Names are of the
+// form "name#num", where name is the MultiPortHole name and num
+// is a sequence number.  The number equals the current number of
+// contained ports.
+char*
+MultiPortHole :: newName () {
+	char buf[512];
+	sprintf (buf, "%s#%d", readName(), ports.size());
+// save the string on the heap.  Disadvantage: multiple copies of "input#1"
+	char* newname = new char[strlen(buf)+1];
+	return strcpy (newname, buf);
+}
+
+// Add a new PortHole to the MultiPortHole.
 PortHole& MultiPortHole :: newPort() {
         PortHole* newport = new PortHole;
         ports.put(*newport);
-        parent()->addPort(newport->setPort(readName(), parent(), type));
+        parent()->addPort(newport->setPort(newName(), parent(), type));
+	newport->typePort = typePort;
         return *newport;
 }
- 
- 
+
+
 MultiPortHole& MultiSDFPort :: setPort (const char* s,
                              Block* parent,
                              dataType t = FLOAT,
@@ -352,13 +405,14 @@ MultiPortHole& MultiSDFPort :: setPort (const char* s,
         numberTokens = numTokens;
         return *this;
 }
- 
+
 PortHole& MultiInSDFPort :: newPort () {
         InSDFPort* newport = new InSDFPort;
         ports.put(*newport);
         parent()->
             addPort(newport->
-                        setPort(readName(), parent(), type, numberTokens));
+                        setPort(newName(), parent(), type, numberTokens));
+	newport->typePort = typePort;
         return *newport;
 }
  
@@ -368,7 +422,8 @@ PortHole& MultiOutSDFPort :: newPort () {
         ports.put(*newport);
         parent()->
             addPort(newport->
-                        setPort(readName(), parent(), type, numberTokens));
+                        setPort(newName(), parent(), type, numberTokens));
+	newport->typePort = typePort;
         return *newport;
 }
 
