@@ -61,7 +61,7 @@ Block* SynthTarget :: makeNew() const {
   LOG_NEW; return new SynthTarget(name(), starType(), descriptor());
 }
 
-static SynthTarget proto("Synth-VHDL", "CGStar",
+static SynthTarget proto("Synth-VHDL", "VHDLStar",
 			 "VHDL code generation target for Synopsys");
 static KnownTarget entry(proto,"Synth-VHDL");
 
