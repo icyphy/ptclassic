@@ -365,6 +365,11 @@ StringList CompileTarget::tcltkInitialize(StringList& universeName) {
 
     myCode +=
 "\n"
+"// Hide the wish window\n"
+"Tcl_Eval(ptkInterp, \"wm withdraw .\");\n";
+
+    myCode +=
+"\n"
 "// Read pigi tcl initialization files to set key bindings, colors, etc.\n"
 "const char *expandeddirname = expandPathName(\"$PTOLEMY/lib/tcl/pigilib.tcl\");\n"
 "char *fulldirname = new char[strlen(expandeddirname) + 1];\n"
