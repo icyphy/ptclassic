@@ -405,24 +405,44 @@ private:
 	BDFCluster* b;		// sink of boolean, or null
 };
 
+class DFDynScheduler;
+
 class BDFClustSched : public BDFScheduler {
-protected:
-	BDFClusterGal* cgal;
-	const char* logFile;
-	// this one does the main work.
-	int computeSchedule (Galaxy&);
-	// run schedule
-	void runOnce();
 public:
 	// constructor and destructor
-	BDFClustSched(const char* log = 0) : cgal(0),logFile(log) {}
+	BDFClustSched(const char* log = 0, int canDoDyn = TRUE);
 	~BDFClustSched();
 
 	// return the schedule
 	StringList displaySchedule();
 
+	// run the schedule
+	int run();
+
 	// Generate code using the Target to produce the right language.
 	void compileRun();
+
+	// we redefine the timing control funcs to pass the stop time
+	// along to the (optional) inner dynamic scheduler.
+	void setStopTime (double);
+	void resetStopTime (double);
+
+protected:
+	// this one does the main work.
+	int computeSchedule (Galaxy&);
+	// run schedule
+	void runOnce();
+	// handle creation of dynamic scheduler if needed and allowed
+	int handleDynamic (Galaxy&);
+private:
+	// The clustered galaxy.
+	BDFClusterGal* cgal;
+	// The dynamic scheduler
+	DFDynScheduler* dynSched;
+	// The log file name
+	const char* logFile;
+	// True if dynamic scheduling allowed.
+	int dynamicAllowed;
 };
 
 // standard iterators
