@@ -1,7 +1,7 @@
 # Makefile for CGC NOW (Networks Of Workstations) udp library
 # Version identification:
-# @(#)make.template	1.6 2/29/96
-# Copyright (c) 1990-1996 The Regents of the University of California.
+# $Id$
+# Copyright (c) 1990-%Q% The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -70,9 +70,9 @@ include $(ROOT)/mk/common.mk
 
 # sol2 and sol2.cfront
 ifneq (,$(filter sol%,$(PTARCH)))
-all: makefile $(LIBNONSHARED)
+all: makefile $(SRCS) $(LIBNONSHARED)
 
-install: makefile $(LIBDIR)/$(LIBNONSHARED)
+install: makefile $(SRCS) $(LIBDIR)/$(LIBNONSHARED)
 else
 # Non solaris platforms
 all: makefile
