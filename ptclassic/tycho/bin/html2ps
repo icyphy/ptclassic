@@ -534,7 +534,10 @@ proc html2psProcessArgs {} {
     if { $argc == 3 && $commandarg != "-d" && $commandarg != "-dag" } {
 	puts "html2ps: $commandarg not understood, it must be -d or -dag"
 	set error 1
+    } else { 	
+	set error 0
     }
+
 
     if {$error} {
 	puts "Usage: html2ps \[-d\] \[-dag\] <html file> <outputfile> \[htmldirs\]"
@@ -552,12 +555,19 @@ proc html2psProcessArgs {} {
 	3 { 
 	    if {"$commandarg" == "-dag" } {
 		html2DAG $indexfile $outputfile
+	    } else {
+		if {"$commandarg" == "-d" } {
+		    set outputfile [lindex $argv 1]
+		    set inputdirectory [lindex $argv 2]
+		    eval htmlTree2ps dummy $outputfile $inputdirectory 
+		} else {
+		    error "html2ps: don't understand $commandarg, exiting."
+		}
 	    }
-	    error "html2ps: don't understand $commandarg, exiting."
 	  }
 	default { 
 	    if {"$commandarg" != "-d" } {
-		error "html2ps: usage: html2ps -d htmlfile outputfile directories
+		error "html2ps: usage: html2ps -d htmlfile outputfile directoriese"
 	    }
 	    eval htmlTree2ps $indexfile $outputfile [lrange $argv 3 end] 
           }
