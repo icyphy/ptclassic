@@ -709,16 +709,3 @@ proc ptkColor {name {alternate {}}} {
         return $ptkColorList(black)
     }
 }
-
-###########################################################################
-# Set the default color palette to the old bisque-based colors.
-# This is included explicitly here rather than calling tk_bisque
-# to alllow for fine tuning of each color or future modification
-# of the palette.
-#
-tk_setPalette activeBackground #e6ceb1 activeForeground black \
-	background #ffe4c4 disabledForeground #b0b0b0 foreground black \
-	highlightBackground #ffe4c4 highlightColor black \
-	insertBackground black selectColor #b03060 \
-	selectBackground #e6ceb1 selectForeground black \
-	troughColor #cdb79e
