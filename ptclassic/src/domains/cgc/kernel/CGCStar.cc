@@ -1584,7 +1584,6 @@ void CGCStar::addModuleFromLibrary(
     addCompileOption(includeDirSpec);
     addLocalLinkOption(ptolemyLibDirSpec);
     addLocalLinkOption(libSpec);
-    addRemoteLinkOption(cFile);
     addRemoteFile(cPath);
     addRemoteFile(includePath);
 }
