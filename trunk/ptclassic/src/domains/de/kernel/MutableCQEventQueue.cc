@@ -3,7 +3,7 @@ static const char file_id[] = "MutableCQEventQueue.cc";
 Version identification:
 $Id$
 
-Copyright (c) 1997 The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -25,23 +25,23 @@ PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
 CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
 
-                                                PT_COPYRIGHT_VERSION_2
-                                                COPYRIGHTENDKEY
+						PT_COPYRIGHT_VERSION_2
+						COPYRIGHTENDKEY
 
- Programmer: John Davis
- Date: 5/28/97
-        The MutableCQEventQueue class parallels the CQEventQueue
-        with the addition of mutable semantics.
+ Programmer:  Soonhoi Ha
+ Date of creation: 10/11/91
+ Revisions:
 
-**************************************************************************/
+This file contains member functions for EventQueue..
 
+******************************************************************/
 
 #ifdef __GNUG__
 #pragma implementation
 #endif
 
 #include "MutableCQEventQueue.h"
-// #include "Particle.h"
+#include "Particle.h"
 
 Event* MutableCQEventQueue:: getEvent(Particle* p, PortHole* ph) {
 	Event* temp;
@@ -87,32 +87,10 @@ void MutableCQEventQueue:: putFreeLink(CqLevelLink* p) {
 	MutableCalendarQueue:: putFreeLink(p);
 }
 
-CqLevelLink * MutableCQEventQueue::createRefInDestinedEventList( CqLevelLink * link )
-{
-	// Create reference in DestinedEventList and point CqLevelLink
-	// this reference. 
-	// FIXME: Will there be problems with the semantics of this
-	// statement; i.e., circular dependencies??
-	DEStar *destinationStar = (DEStar*) (link->dest);
-/* FIXME
-	link->starPendingEventRef = 
-                destinationStar->addRefToDestinedEventList( link ); 
-*/
-	return link;
-}
-
 void MutableCQEventQueue :: initialize() {
-	int dummy = 0;
 	// first maintain free links and free events.
 	clearFreeEvents();
-	while( dummy < 10 ) {
-	    dummy++;
-	}
 	MutableCalendarQueue :: initialize();
-	dummy = 0;
-	while( dummy < 10 ) {
-	    dummy++;
-	}
 	clearParticles();
 }
 
