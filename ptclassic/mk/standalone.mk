@@ -28,7 +28,7 @@
 # Programmer:  Jose Luis Pino
 #
 # This makefile is to be used to create small, stand-alone programs
-# that use parts of Ptolemy kernel.
+# that use parts of Ptolemy kernel or just the pure mk rule definitions
 #
 # To use this, you need to construct a single <filename>.cc file 
 # that defines a main function. The usage of this mk file is:
@@ -39,13 +39,23 @@
 #
 
 ROOT=$(PTOLEMY)
-include $(ROOT)/mk/stars.mk
 
-INCL= $(foreach dir,$(CUSTOM_DIRS),-I$(ROOT)$(dir))
-
-VPATH=.
+ifndef NOPTOLEMY
+	include $(ROOT)/mk/stars.mk
+	INCL= $(foreach dir,$(CUSTOM_DIRS),-I$(ROOT)$(dir))
+endif
 
 include $(ROOT)/mk/config-$(PTARCH).mk
+
+#if we define NOPTOLEMY variable, we just want to use the pure make commands &
+#none of the PTOLEMY libs
+
+ifdef NOPTOLEMY
+	#Remove rpath which may have been defined
+	SHARED_LIBRARY_R_LIST=
+endif
+	
+VPATH=.
 
 #This definition is needed so that make won't complain w/ common.mk
 LIB=dummy
