@@ -50,7 +50,7 @@ setenv LIBRARY_PATH $PTOLEMY/gnu/$PTARCH/lib/gcc-lib:$PTOLEMY/gnu/$PTARCH/lib
 
 # This variable is needed to find the libraries
 if ($PTARCH =~ hppa*) then
-	setenv SHLIB_PATH $PTOLEMY/lib.${PTARCH}:$PTOLEMY/octtools/lib.${PTARCH}:$PTOLEMY/gnu/$PTARCH/lib:$PTOLEMY/tcltk/itcl.${PTARCH}/lib/itcl
+	setenv SHLIB_PATH $PTOLEMY/lib.${PTARCH}:$PTOLEMY/octtools/lib.${PTARCH}:$PTOLEMY/gnu/$PTARCH/lib:$PTOLEMY/tcltk/tcl.${PTARCH}/lib/itcl
 else
-	setenv LD_LIBRARY_PATH $PTOLEMY/lib.${PTARCH}:$PTOLEMY/octtools/lib.${PTARCH}:$PTOLEMY/gnu/$PTARCH/lib:$PTOLEMY/tcltk/itcl.${PTARCH}/lib/itcl
+	setenv LD_LIBRARY_PATH $PTOLEMY/lib.${PTARCH}:$PTOLEMY/octtools/lib.${PTARCH}:$PTOLEMY/gnu/$PTARCH/lib:$PTOLEMY/tcltk/tcl.${PTARCH}/lib/itcl
 endif
