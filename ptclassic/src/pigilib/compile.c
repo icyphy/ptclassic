@@ -157,7 +157,7 @@ octObject *facetPtr;
     octFreeGenerator(&netGen);
 }
 
-/* ProcessDelay  5/28/88
+/* ProcessMarker  5/28/88
 Process delay instance by attaching its delay prop to the net associated
 with the delay instance.  Same for buses and buswidth property.
 Inputs: facetPtr, instPtr
@@ -326,7 +326,7 @@ int *inN, *outN;
 static boolean
 JoinOrdinary(inTermPtr, outTermPtr, delay, width)
 octObject *inTermPtr, *outTermPtr;
-int delay, width;
+char *delay, *width;
 {
     octObject inInst, outInst, fTerm;
     boolean inIsConn, outIsConn;
@@ -345,6 +345,11 @@ int delay, width;
 	    inInst.contents.instance.name, inTermPtr->contents.term.name,
 			   delay, width)
 	);
+    } else if (*width) {
+	ErrAdd("Cannot make a bus connection between a galaxy port and its alias");
+	EssAddObj(&inInst);
+	EssAddObj(&outInst);
+	return (FALSE);
     } else if (!inIsConn && outIsConn) {
 	if (octGenFirstContainer(outTermPtr, OCT_TERM_MASK, &fTerm)
 	    != OCT_OK) {
@@ -363,7 +368,7 @@ int delay, width;
 	ERR_IF1(!KcAlias(fTerm.contents.term.name,
 	    outInst.contents.instance.name, outTermPtr->contents.term.name));
     } else {
-	ErrAdd("JoinOrdinary: cannot connect input port directly to output port");
+	ErrAdd("JoinOrdinary: cannot connect input galaxy port directly to output galaxy port");
 	EssAddObj(&inInst);
 	EssAddObj(&outInst);
 	return (FALSE);
@@ -396,14 +401,16 @@ char *nodename;
 /* 6/14/89 7/31/90
 Emits connect, input, and output statements.
 */
+#define BLEN 80
+
 static boolean
 ConnectPass(facetPtr)
 octObject *facetPtr;
 {
     octObject net, in[TERMS_MAX], out[TERMS_MAX];
-    octObject delayProp;
     octGenerator netGen;
-    int inN, outN, totalN, i, delay, width;
+    int inN, outN, totalN, i;
+    char delay[BLEN], width[BLEN];
     char *errMsg = 0;
 
     (void) octInitGenContents(facetPtr, OCT_NET_MASK, &netGen);
@@ -413,10 +420,9 @@ octObject *facetPtr;
  */
 	ERR_IF1(!CollectTerms(&net, in, &inN, out, &outN));
 	totalN = inN + outN;
-        delay = (GetByPropName(&net, &delayProp, "delay") == OCT_NOT_FOUND)
-	    ? 0 : (int) delayProp.contents.prop.value.integer;
-	width = (GetByPropName(&net, &delayProp, "buswidth") == OCT_NOT_FOUND)
-	    ? 0 : (int) delayProp.contents.prop.value.integer;
+	GetStringizedProp(&net, "delay", delay, BLEN);
+	GetStringizedProp(&net, "buswidth", width, BLEN);
+
 	if (totalN < 2) {
 	    /* bad net, delete it */
 	    ERR_IF2(octDelete(&net) != OCT_OK, octErrorString());
@@ -426,12 +432,12 @@ octObject *facetPtr;
 	else if (inN == 0 || outN == 0)
 	    errMsg = "ConnectPass: cannot match an input to an output";
 /* We only allow delay on point-to-point connections */
-	else if (delay && totalN > 2)
+	else if (*delay && totalN > 2)
 	    errMsg = "ConnectPass: delay not allowed on multi-connections";
-	else if (width && totalN > 2)
+	else if (*width && totalN > 2)
 	    errMsg = "ConnectPass: bus not allowed on multi-connections";
 	else if (totalN == 2) {
-	    if (width > 0 &&
+	    if (*width > 0 &&
 		(!TermIsMulti(&in[0]) || !TermIsMulti(&out[0])))
 		errMsg = "Bus connection only works with multiports";
 	    else if (!JoinOrdinary(&in[0], &out[0], delay, width))
@@ -442,7 +448,7 @@ octObject *facetPtr;
 	else if (inN == 1 && outN > 1) {
 	    if (TermIsMulti(&in[0])) {
 		for (i = 0; i < outN; i++) {
-		    if (!JoinOrdinary(&in[0], &out[i], 0, 0)) {
+		    if (!JoinOrdinary(&in[0], &out[i], (char*)0, (char*)0)) {
 			errMsg = "";
 			break;
 		    }
@@ -790,6 +796,7 @@ CompileInit()
     DupSheetInit(&xfered);
 }
 
+void
 CompileEnd()
 {
     /* clean up tmp file before exiting */
