@@ -111,7 +111,7 @@ if ($?printer) then
 
 # Uncomment the line below if we are using groff
 # Neal Becker suggested the groff lines below.
-set usegroff=1
+#set usegroff=1
 
 # Preview, nroff, or print it
 if ($?printer) then
