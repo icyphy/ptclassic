@@ -31,10 +31,15 @@
 # But for now, we do it by hand.
 #
 # The following makefile symbols should be defined:
-# ROOT		the root of the ptolemy tree (e.g., $PTOLEMY).  Typically
+#
+# ROOT		the root of the Ptolemy tree (e.g., $PTOLEMY).  Typically
 #		a relative path.
+# CROOT		the root of the custom Ptolemy tree used to define
+#		CUSTOM_DIRS, which is used by the mkPtolemyTree script
 # OBJDIR	the root of the object file tree for this arch.
 #		it can be either relative to current directory or absolute.
+# PTARCH	architecture of the current computer system returned
+#		by the ptarch script
 #
 # Problem with this file: it does not make clear which domains need
 # which libraries, so there may be a bit too much searching and remaking
@@ -74,25 +79,25 @@ SDFT = $(OBJDIR)/domains/sdf/targets
 VHDLT = $(OBJDIR)/domains/vhdl/targets
 
 BDFDIR = $(CROOT)/src/domains/bdf
+CGDDFDIR = $(CROOT)/src/domains/cg
+CGDIR = $(CROOT)/src/domains/cg
 CGCDIR = $(CROOT)/src/domains/cgc
 CG96DIR = $(CROOT)/src/domains/cg96
 CG56DIR = $(CROOT)/src/domains/cg56
+CPDIR = $(CROOT)/src/domains/cp
+DDFDIR = $(CROOT)/src/domains/ddf
+DEDIR = $(CROOT)/src/domains/de
+HOFDIR = $(CROOT)/src/domains/hof
+IPUSDIR = $(CROOT)/src/domains/ipus
+MDSDFDIR = $(CROOT)/src/domains/mdsdf
+MQDIR = $(CROOT)/src/domains/mq
+PNDIR = $(CROOT)/src/domains/pn
+SDFDIR = $(CROOT)/src/domains/sdf
 SILAGEDIR = $(CROOT)/src/domains/silage
 THORDIR = $(CROOT)/src/domains/thor
-CGDDFDIR = $(CROOT)/src/domains/cg
-DDFDIR = $(CROOT)/src/domains/ddf
 VHDLFDIR = $(CROOT)/src/domains/vhdlf
 VHDLBDIR = $(CROOT)/src/domains/vhdlb
 VHDLDIR = $(CROOT)/src/domains/vhdl
-MDSDFDIR = $(CROOT)/src/domains/mdsdf
-CPDIR = $(CROOT)/src/domains/cp
-PNDIR = $(CROOT)/src/domains/pn
-IPUSDIR = $(CROOT)/src/domains/ipus
-MQDIR = $(CROOT)/src/domains/mq
-DEDIR = $(CROOT)/src/domains/de
-CGDIR = $(CROOT)/src/domains/cg
-SDFDIR = $(CROOT)/src/domains/sdf
-HOFDIR = $(CROOT)/src/domains/hof
 
 # Tcl/Tk stars can be used in pigiRpc but not ptcl, for this we define TK
 
