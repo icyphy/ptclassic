@@ -45,16 +45,12 @@ provisions.
 
   codeblock (convert) {
     /* Take data from Input and put it in buffer */
-    /* Data in buffer is alternate left and right channels */
     {
-      int i, j;
-      for (i = 0; i < ($val(blockSize)/4); i ++) {
-	j = i*2;
-	$starSymbol(buffer)[j] = 
-	  (short)($ref(left,($val(blockSize)/4) -1 - i)*32768.0);
-	$starSymbol(buffer)[j+1] = 
-	  (short)($ref(right,($ref(blockSize)/4) - 1 - i)*32768.0);
-      }
+      int j;
+      j = 2*$starSymbol(counter);
+      $starSymbol(buffer)[j] = (short)($ref(left)*32767.0);
+      $starSymbol(buffer)[j+1] = (short)($ref(right)*32767.0);
+      $starSymbol(counter)++;
     }
   }
   
@@ -63,8 +59,8 @@ provisions.
   }
 
   setup {
-    left.setSDFParams(int(blockSize/4), int(blockSize/4)-1);
-    right.setSDFParams(int(blockSize/4), int(blockSize/4)-1);
+    left.setSDFParams(1);
+    right.setSDFParams(1);
   }
 
   initCode {
@@ -93,11 +89,17 @@ provisions.
 			  << "0);\n";
 	addCode(controlParameters);
       }
+    addCode("$starSymbol(counter) = 0;\n");
+
   }
+
   go {
     addCode(convert);
+    addCode("if($starSymbol(counter) == ($val(blockSize)/4)) {\n");
     addCode(setbufptr);
     addCode(write);
+    addCode("$starSymbol(counter) = 0;\n");
+    addCode("}\n");
   }
 
   wrapup {
