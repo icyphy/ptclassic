@@ -66,6 +66,10 @@ class ::tycho::Edit {
     # Open a help window.  This should be redefined in derived classes.
     method help {}
 
+    #### insertData
+    # Insert data.
+    method insertData {data}
+
     #### insertFile
     # Insert the contents of a file at the insertion cursor.
     method insertFile {}
@@ -297,6 +301,14 @@ body ::tycho::Edit::getModified {} {
 body ::tycho::Edit::help {} {
     global TYCHO
     ::tycho::File::openContext $TYCHO/kernel/doc/usersGuides/EditHelp.html
+}
+
+###################################################################
+#### insertData
+# Insert the given data into the display.
+#
+body ::tycho::Edit::insertData {data} {
+    $itk_component(text) insertString insert $data
 }
 
 ###################################################################
