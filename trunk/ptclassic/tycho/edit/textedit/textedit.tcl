@@ -65,6 +65,7 @@ if { [lsearch -exact $auto_path $env(TEXTEDIT_LIBRARY)] == -1 } {
 ::tycho::register extensions "forest" .fst
 ::tycho::register extensions "itcl" .itcl .itk
 ::tycho::register extensions "java" .java
+::tycho::register extensions "tex" .tex
 
 # .vc is for Microsoft Visual c++
 ::tycho::register extensions "makefile" .mk .template .vc
@@ -150,6 +151,15 @@ if { [lsearch -exact $auto_path $env(TEXTEDIT_LIBRARY)] == -1 } {
 	-label {Tcl Editor}  \
 	-category "text" \
 	-underline 0
+
+# HTML editor
+::tycho::register mode "tex" \
+	-command {::tycho::view EditTeX -file {%s}} \
+	-viewclass ::tycho::EditTeX \
+	-label {TeX Editor}  \
+	-category "text" \
+	-underline 0
+
 
 # Matlab console
 if {[uplevel #0 info commands matlab] != {}} {
