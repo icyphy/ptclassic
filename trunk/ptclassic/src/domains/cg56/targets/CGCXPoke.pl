@@ -50,7 +50,8 @@ codeblock(sendData,"") {
 	char* pValue = (char*) &value;
 	memcpy(++pValue,dspWord,3);
 	if (qckPoke($val(S56XFilePrefix)_dsp,"$val(VariableName)",value) == -1) { 
-	    fprintf(stderr, "$val(VariableName):Send Data Failed\n", qckErrString);
+	    fprintf(stderr, "$val(VariableName): Send Data Failed: %s\n",
+		    qckErrString);
 	    exit(1);
 	}
 	FIX_Assign($ref(buffer),24,1,dspWord);
