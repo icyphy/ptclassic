@@ -183,7 +183,7 @@ class ::tycho::EditProgram {
     proc gendoc {file}
 
     # Helper proc for gendoc.
-    proc gendocFileInternal { file genDocFile genCommand}
+    proc gendocFileInternal { file setDocCommand genCommand}
 
     ####################################################################
     ####           protected methods and variables                  ####
@@ -192,7 +192,7 @@ class ::tycho::EditProgram {
     protected method commentRegexp {}
 
     # Generate documentation.  Not all derived classes can do this.
-    protected method gendocBufferInternal { genDocFile genCommand}
+    protected method gendocBufferInternal { setDocCommand genCommand}
 
     # Initialize the menu/status/tool bars
     protected method _initializeBars {menubar statusbar toolbar}
@@ -624,7 +624,7 @@ body ::tycho::EditProgram::gendoc {file} {
 }
 
 ###################################################################
-#### gendocFile
+#### gendocFileInternal
 # Generate and display a doc file.
 # If the doc file already exists and is newer than the source file,
 # then it is simply displayed, not regenerated.
@@ -636,7 +636,7 @@ body ::tycho::EditProgram::gendoc {file} {
 # <MENU>
 # <LI> The <CODE>file</CODE> argument is the name of the file to generate
 # documentation for
-# <LI> The <CODE>setdocCommand</CODE> argument should contain the tcl
+# <LI> The <CODE>setDocCommand</CODE> argument should contain the tcl
 # command(s) to evaluate to set the <CODE>docfile</CODE> tcl variable,
 # which contains the filename of the generated doc file.
 # <LI> The <CODE>genCommand</CODE> argument should contain the tcl 
@@ -646,11 +646,10 @@ body ::tycho::EditProgram::gendoc {file} {
 #
 # In the example below, we open the makefile and then sort it.
 # <TCL><PRE>
-# set w [::tycho::EditProgram [::tycho::autoName .ep] -file makefile]
-# $w gendoc {set docfile $root.sort} {exec sort $tail > $docfile}
+#   ::tycho::EditProgram::gendocFileInternal makefile &#92
+#       {set docfile $root.sort} {exec sort $tail > $docfile}
 # </PRE></TCL>
 #
-
 body ::tycho::EditProgram::gendocFileInternal { filename setDocCommand genCommand} {
     set dir [file dirname $filename]
     set tail [file tail $filename]
@@ -710,7 +709,7 @@ body ::tycho::EditProgram::commentRegexp {} {
 #
 # This method takes two arguments, both of which are eval'd.
 # <MENU>
-# <LI> The <CODE>setdocCommand</CODE> argument should contain the tcl
+# <LI> The <CODE>setDocCommand</CODE> argument should contain the tcl
 # command(s) to evaluate to set the <CODE>docfile</CODE> tcl variable,
 # which contains the filename of the generated doc file.
 # <LI> The <CODE>genCommand</CODE> argument should contain the tcl 
@@ -718,11 +717,9 @@ body ::tycho::EditProgram::commentRegexp {} {
 # this command refers to <CODE>$tail</CODE>
 # </MENU>
 #
-# In the example below, we open the makefile and then sort it.
-# <TCL><PRE>
-# set w [::tycho::EditProgram [::tycho::autoName .ep] -file makefile]
-# $w gendoc {set docfile $root.sort} {exec sort $tail > $docfile}
-# </PRE></TCL>
+# See the <code>gendocFileInternal</code> procedure for an example
+# illustrating the use of <CODE>setDocCommand</CODE> and
+# <CODE>genCommand</CODE>.
 #
 body ::tycho::EditProgram::gendocBufferInternal {setDocCommand genCommand} {
     set filename [filename]
