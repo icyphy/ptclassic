@@ -1,14 +1,15 @@
 defstar {
 	name { Copy }
 	domain { CGC }
-	desc { copy input to output
-CGCTarget.cc says:
-"Copy" stars are added if an input/output PortHole is a host/embedded
+	desc {
+This star is required by the default target for the CGC domain which is
+implemented by the CGCTarget class.  The CGCTarget class files say that
+"'Copy' stars are added if an input/output PortHole is a host/embedded
 PortHole and the buffer size is greater than the number of Particles
-transferred.
-}
+transferred."
+	}
 	version { $Id$}
-	author { S. Ha }
+	author { Soonhoi Ha }
 	copyright {
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
@@ -49,8 +50,8 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	}
 	codeblock (complexBody) {
-	int i = 0;
-	for ( ; i < $val(numSample); i++) {
+	int i;
+	for (i = 0; i < $val(numSample); i++) {
 		$ref(output, i).real = $ref(input, i).real;
 		$ref(output, i).imag = $ref(input, i).imag;
 	}
@@ -68,4 +69,3 @@ limitation of liability, and disclaimer of warranty provisions.
 			return int(numSample);
 	}
 }
-
