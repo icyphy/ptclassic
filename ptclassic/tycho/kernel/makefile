@@ -54,6 +54,7 @@ ITCL_SRCS = \
 	AbstractGraph.itcl \
 	ButtonBox.itcl \
 	CircularList.itcl \
+	Class.itcl \
 	ColorBrowser.itcl \
 	ColorManager.itcl \
 	Compile.itcl \
@@ -90,6 +91,7 @@ ITCL_SRCS = \
 	Message.itcl \
 	Model.itcl \
 	ModelDebug.itcl \
+	ModelSchema.itcl \
 	MultiGraph.itcl \
 	Object.itcl \
 	PreferenceDialog.itcl \
