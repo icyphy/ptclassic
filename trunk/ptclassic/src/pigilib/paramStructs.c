@@ -81,7 +81,7 @@ ParamListType *pListPtr;
 
 boolean
 PStrToPList(pStr, pListPtr)
-char *pStr;
+const char *pStr;
 ParamListType *pListPtr;
 {
     int i, param_n;
