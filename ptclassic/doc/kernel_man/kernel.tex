@@ -1477,6 +1477,12 @@ void setDomain(const char* \var{dom});
 Set the domain of the galaxy (this may become a protected member
 in the future).
 
+\begin{example}
+Block* blockWithName (const char* \var{name});
+\end{example}
+
+Support blockWithName message to access internal block list.
+
 \node Galaxy protected members
 \subsection{Galaxy protected members}
 
@@ -1502,12 +1508,6 @@ void alias(MultiPortHole& \var{galPort}, MultiPortHole& \var{blockPort});
 Connect a Galaxy PortHole to a PortHole of a sub-block, or same for
 a MultiPortHole.
 
-
-\begin{example}
-Block* blockWithName (const char* \var{name});
-\end{example}
-
-Support blockWithName message to access internal block list.
 
 \begin{example}
 void initSubblocks();
