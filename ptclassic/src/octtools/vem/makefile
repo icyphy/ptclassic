@@ -55,8 +55,8 @@ VERSION=0.5-development
 	$(CPLUSPLUS) $(GPPFLAGS) $(INCL) -c $<
 
 all: vem vem.debug
-vem: include $(OBJECTS) linkvem
-vem.debug: include $(OBJECTS) linkvem.debug
+vem: include $(OBJECTS) $(LIBS) linkvem
+vem.debug: include $(OBJECTS) $(LIBS) linkvem.debug
 
 DIRS=bags buffers dialogs dispatch doc drawing drs lib main \
 	options patterns physical properties rpc schematic select strings \
@@ -115,7 +115,7 @@ OBJECTS=bags/bags.o buffers/bufinternal.o \
 	windows/trans.o windows/wininternal.o
 
 # This rule uses GNU make specific directives $(@D) $(@F) 
-$(OBJECTS):
+$(OBJECTS) $(LIBS):
 	(cd $(@D); \
 		$(MAKE) $(MFLAGS) $(MAKEVARS) \
 		VPATH=../../../../src/octtools/vem/$(@D) $(@F)  ;\
@@ -169,14 +169,14 @@ _vem:
 	done
 
 
-linkvem.debug: $(OBJECTS)
+linkvem.debug: $(OBJECTS) $(LIBS)
 	$(CC) -g -o vem.debug $(OBJECTS) $(VEMLIBS)
-linkvem: $(OBJECTS)
+linkvem: $(OBJECTS) $(LIBS)
 	$(CC) -o vem $(OBJECTS) $(VEMLIBS)
 
-linkvem.debug.gcc: $(OBJECTS)
+linkvem.debug.gcc: $(OBJECTS) $(LIBS)
 	$(LINKER) $(LINKFLAGS_D) -g -o vem.debug $(OBJECTS) $(VEMLIBS)
-linkvem.gcc: $(OBJECTS)
+linkvem.gcc: $(OBJECTS) $(LIBS)
 	$(LINKER) $(LINKFLAGS) -o vem $(OBJECTS) $(VEMLIBS)
 
 OCTBINDIR =	$(OCTTOOLS)/bin.$(ARCH)
