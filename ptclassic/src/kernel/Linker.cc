@@ -291,7 +291,8 @@ Linker::generateSharedObject(int argc, char **argv, char* objName,
   // Create the command to produce the shared object
   command << " " << objName;
 
-#ifdef USE_SHLLOAD // I don't think we need all this (neal@ctd.comsat.com)
+#if defined (USE_SHLLOAD) || defined (__linux__) && defined  (USE_DLOPEN)
+  // I  don't think we need all this (neal@ctd.comsat.com)
   for (int i = 1; i < argc; i++) {
     const char* fullObjName = expandPathName(argv[i]);
     command << " " << fullObjName;
