@@ -43,14 +43,12 @@ you situations best and follow the instructions below.
 <H3><A NAME="profile command, default TclX">Use the default TclX
 profile command</A></H3>
 
- <P>The <CODE>profile</CODE> command shipped with TclX7.5.3-a1 does
-not understand Itcl namespaces.  The file <A
+ <P>The <CODE>profile</CODE> command shipped with TclX7.6.0 has
+a bug that causes coredumps if used with Itcl.
+The file <A
 HREF="tclXprofile.c.patch"><CODE>tclXprofile.c.patch</CODE></A> is a
-patch to <CODE>tclX7.5.3-a1/tcl/generic/tclXprofile.c</CODE> that
-modifies the profile command so it understands Itcl namespaces.  The
-Profile Tcl tool will work on Itcl scripts without this patch, but you
-won't have any namespace information, so the output will be a little
-hard to understand.
+patch to <CODE>tclX7.6.0/tcl/generic/tclXprofile.c</CODE> that
+fixes the bug.  
 	
 <H3><A NAME="profile command, TclX patch">Patch the TclX profile command and Reinstall TclX</A>
 </H3>
