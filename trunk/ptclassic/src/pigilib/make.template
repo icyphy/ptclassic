@@ -79,9 +79,6 @@ HDRS	      = compile.h \
 		TclObj.h \
 		POct.h \
 		PVem.h \
-		TclStarIfc.h \
-		BarGraph.h \
-		XYPlot.h \
 		xfunctions.h \
 		pigiLoader.h \
 		pigidefine.h
@@ -104,7 +101,6 @@ LIBCSRCS      = main.c \
 		palette.c \
 		xfunctions.c \
 		options.c \
-		ptkGlobals.c \
 		ptkNet.c \
 		ptkTemplate.c \
 		ptkTclIfc.c \
@@ -116,16 +112,11 @@ LIBCPPSRCS    = kernelCalls.cc \
 		pigiLoader.cc \
 		ptkConsoleWindow.cc \
 		ptkRegisterCmds.cc \
-		ptkRunEvents.cc \
 		TclObj.cc \
 		POct.cc \
 		PVem.cc \
-		TclStarIfc.cc \
-		BarGraph.cc \
-		XYPlot.cc \
 		ganttChart.cc \
 		pigiInvokeInterp.cc
-
 
 
 SRCS = $(LIBCSRCS) $(LIBCPPSRCS)
