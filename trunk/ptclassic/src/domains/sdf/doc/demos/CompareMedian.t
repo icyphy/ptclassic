@@ -3,7 +3,6 @@
 .SD
 A universe that median filters an image.
 .DE
-.IE CompareMedian
 .SV $Revision$ "August 19, 1991"
 .AL "P. E. Haskell"
 .LO "~ptolemy/src/domains/sdf/demo"
@@ -15,9 +14,9 @@ image.
 .Ie "median filtering"
 The original image, median filtered image, and difference
 between the two are all displayed.
-.Ie "DisplayImage"
-.Ie "ReadImage"
-.Ie "MedianImage"
+.Se DisplayImage
+.Se ReadImage
+.Se MedianImage
 .SA
 DisplayImage
 ReadImage

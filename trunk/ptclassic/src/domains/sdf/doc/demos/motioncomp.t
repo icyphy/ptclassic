@@ -11,8 +11,8 @@ This universe reads images from a file and performs motion compensation
 on the image sequence.
 .Ie "motion compensation"
 .Ie "image, motion compensation"
-.Ie "MotionCmp"
-.Ie "RunLen"
+.Se MotionCmp
+.Se RunLen
 The difference-coded sequence is run-length encoded.
 .Ie "run length encoding"
 .Ie "encoding, run length"

@@ -41,7 +41,7 @@ equiripple lowpass filter designed using the optfir
 command.
 .Ir "optfir program"
 .Ie "FFT"
-.Ie "Unwrap"
+.Se Unwrap
 .SA
 FFT,
 ComplexFFT,

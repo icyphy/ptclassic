@@ -13,7 +13,7 @@ and displays the eye diagram for the in-phase part, the constellation,
 and the modulated transmit signal.
 .Ie "modulation, quadrature amplitude"
 .Ie "quadrature amplitude modulation"
-.Ie "RaisedCos"
+.Se RaisedCos
 .Ie "raised cosine pulse"
 The excess bandwidth is 100% and the carrier frequency is
 twice the symbol rate.

@@ -15,7 +15,7 @@ frequency).
 .Ie "time varying spectrum"
 .Ie "spectrum, time varying"
 .Ie "waterfall plot"
-.Ie "Waterfall
+.Se "Waterfall
 Spectral estimates are repeatedly computed using the autocorrelation method,
 and displayed using the Waterfall star.  Note that in the display, the
 first plot shows a roughly baseband spectrum, while in subsequent

@@ -3,9 +3,6 @@
 .SD
 Histogram and autocorrelation of a Gaussian noise source
 .DE
-.IE Xhistogram
-.IE Autocor
-.IE IIDGaussian
 .SV $Revision$ "October 20, 1990"
 .AL "E. A. Lee"
 .LO "~ptolemy/src/domains/sdf/demo"
@@ -19,8 +16,9 @@ Note that since the
 star does block processing, this demo should be run for one iteration.
 The number of Gaussian samples processed will be determined
 by the \fInoInputsToAvg\fR parameter of the autocorrelation block.
-.Ie "IIDGaussian"
-.Ie "Autocor"
+.Se Xhistogram
+.Se "IIDGaussian"
+.Se "Autocor"
 .Ie "Gaussian noise"
 .Ie "noise, Gaussian"
 .SA

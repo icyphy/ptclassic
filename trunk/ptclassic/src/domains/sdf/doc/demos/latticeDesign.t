@@ -27,6 +27,7 @@ star.
 .Ir "biased autocorrelation"
 The FIR and lattice predictor coefficient outputs of the
 LevDur star are plotted.
+.Se LevDur
 The FIR predictor coefficients should correspond exactly
 to the negative of all but the first coefficient in the denominator
 of $H(z)$ above.
@@ -35,8 +36,8 @@ The lattice predictor coefficients are loaded into the
 and
 .c BlockRLattice
 stars
-.Ie BlockLattice
-.Ie BlockRLattice
+.Se BlockLattice
+.Se BlockRLattice
 The BlockLattice star therefore
 has transfer function $H sup -1 (z)$.
 To verify this, the impulse response of the AR filter is fed into it,

@@ -3,7 +3,6 @@
 .SD
 A universe showing two ways to implement an all-pole filter.
 .DE
-.IE BlockAllPole
 .SV $Revision$	"%D%"
 .AL "E. A. Lee"
 .LO "~ptolemy/src/domains/sdf/demo"
@@ -18,7 +17,7 @@ filter in a feedback loop.
 The upper one uses the
 .c BlockAllPole
 star.
-.Ie BlockAllPole
+.Se BlockAllPole
 The coefficients for the
 .c BlockAllPole
 star are supplied by the

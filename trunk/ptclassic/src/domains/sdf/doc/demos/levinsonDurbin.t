@@ -23,7 +23,7 @@ H(z) ~=~ 1 over {1 ~+~ d sub 1 z sup -1 ~+~ d sub 2 z sup -2}
 where in this case $d sub 1 ~=~ -0.9$
 and $d sub 2 ~=~ 0.5$.
 The \fIlp\fR output of the
-.Ie LevDur
+.Se LevDur
 .c LevDur
 star is estimates of the negative of these parameters, as can be verified
 using the plot produced by this demo.

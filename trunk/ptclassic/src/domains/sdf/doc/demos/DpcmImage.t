@@ -16,7 +16,7 @@ The difference-coded image sequence is run-length encoded.
 .Ie "encoding, run length"
 The coded image, final image, and difference
 between the original and final images are all displayed.
-.Ie DpcmImage
+.Se DpcmImage
 .SA
 DisplayImage
 ReadImage
