@@ -190,6 +190,13 @@ body ::tycho::EditSearch::constructor {args} {
     bind $itk_component(hull) <Control-r> \
 	    "$this configure -backwards 1; $this find"
 
+    # Dusplicate these bindings in upper case since that's how this
+    # window is invoked.
+    bind $itk_component(hull) <Control-S> \
+	    "$this configure -backwards 0; $this find"
+    bind $itk_component(hull) <Control-R> \
+	    "$this configure -backwards 1; $this find"
+
     # If the findcommand option has not been set, set the default now.
     # This has to be done in the constructor rather than in the class
     # definition (as a default) because "$this" is known here.
