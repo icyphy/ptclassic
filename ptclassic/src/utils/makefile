@@ -33,7 +33,7 @@
 # maintained.
 
 
-DIRS = libgslider ptplay
+DIRS = libgslider ptplay rman-2.4 tkman-1.7.3
 PTOLEMY = ../..
 
 MAKEVARS =	\
