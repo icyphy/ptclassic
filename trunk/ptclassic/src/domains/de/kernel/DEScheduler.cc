@@ -52,8 +52,9 @@ int DEScheduler :: setup (Block& b) {
 	// initialize the SpaceWalk member
 	alanShepard.setupSpaceWalk(galaxy);
 
-	// initialize the global event queue...
+	// initialize the global event queue and process queue.
 	eventQ.initialize();
+	processQ.initialize();
 
 	// check connectivity
 	StringList msg = checkConnect (galaxy);
@@ -109,6 +110,7 @@ DEScheduler :: run (Block& galaxy) {
 		if (level > stopTime)	{
 			eventQ.levelput(terminal, level);	// push back
 			currentTime = stopTime;
+			stopBeforeDeadlocked = TRUE;  // there is extra events.
 			return 0;
 		}
 
@@ -154,6 +156,45 @@ DEScheduler :: run (Block& galaxy) {
 
 		if (haltRequestFlag) return FALSE;
 
+		// If the nextTime is greater than the currentTime,
+		// execute the processes stored in the processQ.
+		if (processQ.length() > 0 && nextTime() > currentTime) {
+		   int temp = 1;
+		   do {
+			// fetch the earliest process.
+			LevelLink* pf   = processQ.get();
+			float stamp      = pf->level;
+			DEStar* sr = (DEStar*) f->e;
+			// enforce that fire the process star at last at
+			// the currentTime.
+			if (nextTime() > stamp) {
+				currentTime = stamp;
+				sr->fire();
+			} else {
+				processQ.levelput(sr, stamp);	// push back
+				temp = 0;
+			}
+		    } while ( temp && processQ.length() > 0);
+		}
+
 	} // end of while
+
+	stopBeforeDeadlocked = FALSE;	// yes, no more events...
 	return TRUE;
+}
+
+
+	////////////////////////////
+	// Miscellanies
+	////////////////////////////
+
+int DEScheduler :: amITimed() {return TRUE ;}
+
+float DEScheduler :: nextTime() {
+        float val = stopTime;
+        eventQ.reset();
+        if (eventQ.length() > 0) {
+                val = eventQ.next()->level;
+        }
+        return (val < stopTime)? val : stopTime ; // return min(val, stopTime)
 }
