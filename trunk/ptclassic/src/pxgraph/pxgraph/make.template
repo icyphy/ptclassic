@@ -11,7 +11,7 @@ ROOT=../..
 # Where we are
 VPATH = ../../src/xgraph
 # get configuration info
-CONFIG=$(ROOT)/config-$(ARCH).mk
+CONFIG=$(ROOT)/mk/config-$(ARCH).mk
 include $(CONFIG)
 
 OBJS = xgraph.o xgX.o hard_devices.o dialog.o hpgl.o ps.o idraw.o xtb.o \
@@ -25,7 +25,7 @@ all:	makefile pxgraph
 
 pxgraph:	$(OBJS)
 	rm -f pxgraph
-	$(CC) $(X11LIBDIR) -o pxgraph $(OBJS) $(LXEXT) $(LX11) -lm
+	$(CC) -o pxgraph $(OBJS) $(X11EXT_LIBSPEC) $(X11_LIBSPEC) -lm
 
 OUT = $(BINDIR)/pxgraph
 
@@ -36,7 +36,7 @@ $(OUT):	pxgraph
 install:	makefile $(OUT)
 
 .c.o:
-	$(CC) $(CFLAGS) $(X11INCL) -c $<
+	$(CC) $(CFLAGS) $(X11_INCSPEC) -c $<
 
 # "make clean" removes .o files and other cruft
 clean:
@@ -47,7 +47,7 @@ sources:	$(SRCS) $(HDRS) make.template
 
 depend:
 		cd $(VPATH); \
-		$(DEPEND) $(X11INCL) $(SRCS)|cat make.template - > makefile.n;\
+		$(DEPEND) $(X11_INCSPEC) $(SRCS)|cat make.template - > makefile.n;\
 		mv -f makefile.n makefile
 
 makefile:	make.template
