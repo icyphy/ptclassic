@@ -648,7 +648,7 @@ body ::tycho::Slate::highlight {tag args} {
 	# by adjusting the highlight rather than recreating it.
         set class ::tycho::$itemClass($tag)
 	if { [@scope $class ::info exists methodtable(highlight)] } {
-	    return [eval [@scope $class set methodtable(highlight)]
+	    return [eval [@scope $class set methodtable(highlight)] \
 		    $tag $canvas $this \
 		    [list -width $opts(-highlightwidth) \
 		    -outline $opts(-highlightcolor) \
@@ -972,7 +972,7 @@ body ::tycho::Slate::reshapeclick {tag x y args} {
 # will be ignored.
 #
 body ::tycho::Slate::reshapedrag {tag x y args} {
-    eval shapecall $tag reshapedrag $x $y $args -reuse 1
+    eval shapecall $tag reshapedrag $x $y $args
 }
 
 #######################################################################
@@ -986,7 +986,7 @@ body ::tycho::Slate::reshapedrag {tag x y args} {
 # will be ignored.
 #
 body ::tycho::Slate::reshaperelease {tag x y args} {
-    eval shapecall $tag reshaperelease $x $y $args -reuse 1
+    eval shapecall $tag reshaperelease $x $y $args
 }
 
 #######################################################################
@@ -1193,9 +1193,6 @@ body ::tycho::Slate::shape* {tag args} {
 # <ul>
 # <li><b>*-shape*</b> _shape_: Override the item's default shape.
 # Note that this may not always behave sensibly.
-# <li><b>*-reuse*</b> _bool_: If true, use the same class as
-# last time this procedure was called with the given _tag_.
-# This is intended to optimize interaction sequences.
 # </ul>
 #
 # If the item is a complex item and its method table contains a
@@ -1205,10 +1202,9 @@ body ::tycho::Slate::shape* {tag args} {
 # correctly deal with the *-shape* option.)
 #
 body ::tycho::Slate::shapecall {tag method x y args} {
-    array set opts [concat {-shape {} -reuse 0} $args]
+    array set opts [concat {-shape {}} $args]
 
-    # Try for complex item overriding. Unfortunately, in this case
-    # we can't use the "reuse" optimization
+    # Try for complex item overriding.
     if { [string match {_[0-9]*} $tag] } {
 	set class ::tycho::$itemClass($tag)
 	if { [@scope $class ::info exists methodtable($method)] } {
@@ -1219,15 +1215,10 @@ body ::tycho::Slate::shapecall {tag method x y args} {
 	}
     }
 
-    if $opts(-reuse) {
-	eval $shapeClass($tag)::_$method $tag $canvas $this $x $y $args
-    } else {
-	# Remember the Shape class
-	set shapeClass($tag) \
-		::tycho::[::tycho::capitalize [eval shape* $tag $args]]
-	# Call the procedure
-	eval $shapeClass($tag)::_$method $tag $canvas $this $x $y $args
-    }
+    # Remember the Shape class
+    set class ::tycho::[::tycho::capitalize [eval shape* $tag $args]]
+    # Call the procedure
+    eval $class::_$method $tag $canvas $this $x $y $args
 }
 
 #######################################################################
