@@ -32,6 +32,29 @@
 
 
 #######################################################################
+## slateLoadSuper
+#
+# Compatibility proc for tcl++.
+#
+proc ::tycho::slateLoadSuper {class} {
+    global tcl_version env
+
+    if { $tcl_version >= 8.0 } {
+	namespace eval ::tycho [subst -nocommands {
+	    if { [::info classes ::tycho::$class] == "" } {
+		uplevel #0 "source $env(SLATE_LIBRARY)/${class}.itcl"
+	    }
+	}]
+    } else {
+	namespace ::tycho [subst -nocommands {
+	    if { [::info classes $class] == "" } {
+		uplevel #0 "source $env(SLATE_LIBRARY)/$class.itcl"
+	    }
+	}]
+    }
+}
+
+#######################################################################
 ## icanvas pathName args
 #
 # Create an icanvas. This procedure creates a new widget, as
@@ -320,7 +343,7 @@ class ::tycho::IncrCanvas {
     private common anothersecretcounter 0
 
     # The unique ID of the icanvas
-    private common uniqueid 0
+    private variable uniqueid 0
 }
 
 
@@ -668,7 +691,7 @@ body ::tycho::IncrCanvas::create {type args} {
 	}
 	
 	# Call the construct{} proc to create the item
-	eval ::tycho::$type::construct $id $canvas $this [list $tags] $args
+	eval ::tycho::${type}::construct $id $canvas $this [list $tags] $args
 	return $id
     }
 }
@@ -693,7 +716,7 @@ body ::tycho::IncrCanvas::create* {tags type args} {
 	    set taggedItems($t,$id) $id
 	}
 	lappend tags !$id $id
-	eval ::tycho::$type::construct $id $canvas $this [list $tags] $args
+	eval ::tycho::${type}::construct $id $canvas $this [list $tags] $args
 	return $id
     }
 }
@@ -744,7 +767,7 @@ body ::tycho::IncrCanvas::createchild* {parent ptags tags type args} {
 	}
 	set parentChild($parent,$id) [list $parent $id]
 	eval lappend tags $ptags $id
-	eval ::tycho::$type::construct $id $canvas $this [list $tags] $args
+	eval ::tycho::${type}::construct $id $canvas $this [list $tags] $args
 	return $id
     }
 }
@@ -794,7 +817,7 @@ body ::tycho::IncrCanvas::createrootchild* {parent ptags tags type args} {
 	}
 	set parentChild($parent,$id) [list $parent $id]
 	eval lappend tags $ptags !$id $id
-	eval ::tycho::$type::construct $id $canvas $this [list $tags] $args
+	eval ::tycho::${type}::construct $id $canvas $this [list $tags] $args
 	return $id
     }
 }

@@ -555,10 +555,14 @@ body ::tycho::Selector::itemclick {tag x y args} {
 	    # Select and highlight the current object
 	    _select $current
 
-	} else {
-            # It's already selected, so delegation mode is the same
-	    set post $prior
-        }
+	}
+	# FIXME: Why was this here????!!!
+	set junk {
+	    else {
+		# It's already selected, so delegation mode is the same
+		set post $prior
+	    }
+	}
     } else {
 	# Toggle the state of the clicked-on item
 	if { [$slate hastag $current "sel"] } {

@@ -31,14 +31,8 @@
 
 # Explicitly load the superclass. I don't really know why this is
 # needed, but the common arrays get upset otherwise.
-namespace ::tycho {
-    if { [::info classes IconItem] == "" } {
-	uplevel #0 {source $env(SLATE_LIBRARY)/IconItem.itcl}
-    }
-    if { [::info classes LabeledOval] == "" } {
-	uplevel #0 {source $env(SLATE_LIBRARY)/LabeledOval.itcl}
-    }
-}
+::tycho::slateLoadSuper IconItem
+::tycho::slateLoadSuper LabeledOval
 
 ########################################################################
 ## IconOval

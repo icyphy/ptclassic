@@ -31,11 +31,7 @@
 
 # Explicitly load the superclass. I don't really know why this is
 # needed, but the common arrays get upset otherwise.
-namespace ::tycho {
-    if { [::info classes ComplexItem] == "" } {
-	uplevel #0 {source $env(SLATE_LIBRARY)/ComplexItem.itcl}
-    }
-}
+::tycho::slateLoadSuper ComplexItem
 
 ##########################################################################
 ## SmartLine

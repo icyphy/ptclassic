@@ -149,19 +149,19 @@ class ::tycho::Shape {
     # Compass rotation
     private common compassTransformation
     array set compassTransformation {
-    	 cw,n e  cw,ne se  cw,e s  cw,se sw  cw,s w  cw,sw nw  cw,w n  cw,nw ne
-    	ccw,n w ccw,ne nw ccw,e n ccw,se ne ccw,s e ccw,sw se ccw,w s ccw,nw sw
-    	rev,n s rev,ne sw rev,e w rev,se sw rev,s n rev,sw ne rev,w e rev,nw se
-    	 lr,n n  lr,ne nw  lr,e w  lr,se sw  lr,s s  lr,sw se  lr,w e  lr,nw ne
-    	 ud,n s  ud,ne se  ud,e e  ud,se ne  ud,s n  ud,sw nw  ud,w w  ud,nw sw
-    	   ,n n    ,ne ne    ,e e    ,se se    ,s s    ,sw sw    ,w w    ,nw nw
+	 cw,n e  cw,ne se  cw,e s  cw,se sw  cw,s w  cw,sw nw  cw,w n  cw,nw ne
+	ccw,n w ccw,ne nw ccw,e n ccw,se ne ccw,s e ccw,sw se ccw,w s ccw,nw sw
+	rev,n s rev,ne sw rev,e w rev,se sw rev,s n rev,sw ne rev,w e rev,nw se
+	 lr,n n  lr,ne nw  lr,e w  lr,se sw  lr,s s  lr,sw se  lr,w e  lr,nw ne
+	 ud,n s  ud,ne se  ud,e e  ud,se ne  ud,s n  ud,sw nw  ud,w w  ud,nw sw
+	   ,n n    ,ne ne    ,e e    ,se se    ,s s    ,sw sw    ,w w    ,nw nw
     }
 
-   # Compass as vector
+    # Compass as vector
     private common compassToVector
     array set compassToVector {
-        n {0 -1} s {0 1} e {1 0} w {-1 0} 
-        ne {1 -1} nw {-1 -1} se {1 1} sw {1 -1}
+	n {0 -1} s {0 1} e {1 0} w {-1 0} 
+	ne {1 -1} nw {-1 -1} se {1 1} sw {1 -1}
     }
 }
 

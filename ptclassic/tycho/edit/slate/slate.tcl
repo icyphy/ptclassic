@@ -34,7 +34,9 @@
 # Based on pp 344-346 of Harrison and McClellan's "Effective Tcl/Tk
 # Programming" book
 
+package require tycho.kernel.basic
 package provide tycho.edit.slate 2.0
+
 global env auto_path
 set env(SLATE_LIBRARY) [file dirname [info script]]
 if { [lsearch -exact $auto_path $env(SLATE_LIBRARY)] == -1 } {
