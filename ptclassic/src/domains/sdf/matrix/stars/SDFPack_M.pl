@@ -37,8 +37,8 @@ filled from left to right using the first N input values.
   }
   go {
     // collect inputs and put into the matrix
-    FloatMatrix *matrix = new FloatMatrix(int(numRows),int(numCols),input);
-    output%0 << *matrix;
+    FloatMatrix& matrix = *(new FloatMatrix(int(numRows),int(numCols),input));
+    output%0 << matrix;
   }
 }
 
