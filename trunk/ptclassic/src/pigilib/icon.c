@@ -472,18 +472,9 @@ char* iconFile, *sourceFile, *domain;
 	n = numberOfDomains ();
 	for (i = 0; i < n; i++) {
 		dom = nthDomainName(i);
-		sprintf (sourceFile, "%s/%s%s.pl", dir, dom, base);
-		if (access (sourceFile, 0) == 0) break;
+		if (FindStarSourceFile(dir, dom, base, sourceFile) >= 0)
+			break;
 		dom = 0;
-	}
-	/* no .pl found, try finding a .cc */
-	if (!dom) {
-		for (i = 0; i < n; i++) {
-			dom = nthDomainName(i);
-			sprintf (sourceFile, "%s/%s%s.cc", dir, dom, base);
-			if (access (sourceFile, 0) == 0) break;
-			dom = 0;
-		}
 	}
 	if (!dom) {
 		sprintf (sourceFile, "Can't find source file for %s", base);
