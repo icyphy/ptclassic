@@ -99,7 +99,7 @@ private:
 class NamedListIter : private ListIter
 {
 public:
-    NamedListIter(NamedList& list) : ListIter(list) {}
+    NamedListIter(NamedList& l) : ListIter(l) {}
     Pointer next();
     Pointer operator ++(POSTFIX_OP) { return next(); }
     ListIter::reset;
