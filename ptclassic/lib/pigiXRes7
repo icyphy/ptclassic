@@ -19,8 +19,8 @@ vem*borderColor: red
 
 ! Ptolemy resources for xterm windows
 #ifdef COLOR
-ptolemy_code*Background:	black
-ptolemy_code*Foreground: 	yellow
+ptolemy_code*Background:	LightBlue
+ptolemy_code*Foreground: 	black
 ! the ptolemy resources below are not currently implemented
 ptolemy_sim*Background:		black
 ptolemy_sim*Foreground: 	green
