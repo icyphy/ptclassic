@@ -290,7 +290,6 @@ int ParScheduler :: scheduleManually() {
 				pf = worm->manualSchedule(s->reps());
 			}
 			while (n) {
-				n->assignProc(s->getProcId());
 				n->setProcId(s->getProcId());
 				n->withProfile(pf);
 				n = (ParNode*) n->getNextInvoc();
