@@ -144,7 +144,11 @@ inline StringList& operator << (StringList& list, int arg) {
 	return list += arg;
 }
 
-inline StringList& operator << (StringList& list, StringList& arg) {
+inline StringList& operator << (StringList& list, const StringList& arg) {
+	return list += arg;
+}
+
+inline StringList& operator << (StringList& list, unsigned arg) {
 	return list += arg;
 }
 
