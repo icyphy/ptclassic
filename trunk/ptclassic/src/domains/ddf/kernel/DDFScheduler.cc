@@ -35,7 +35,7 @@ These are the methods for the dynamic dataflow scheduler.
 	
 extern const char DDFdomainName[];
 
-void fireSource(Star&, int);
+int fireSource(Star&, int);
 
 // correct numTokens value for each EventHorizon.
 extern void renewNumTokens(Block* b, int flag);
@@ -209,9 +209,8 @@ DDFScheduler :: run (Galaxy& galaxy) {
 	   ListIter nextb(sourceBlocks);
 	   for (int i = sourceBlocks.size(); i > 0; i--) {
 		Star& s = *(Star*)nextb++;
-		fireSource(s, numStop);
+		if (!fireSource(s, numStop)) return FALSE;
 		deadlock = FALSE;
-		if (haltRequested()) break;
 	   }
 
 	   scanSize = galSize;
@@ -230,8 +229,7 @@ DDFScheduler :: run (Galaxy& galaxy) {
 		if (isRunnable(*s)) {
 			// run the star
 			do {
-				s->fire();
-				if (haltRequested()) return FALSE;
+				if (!s->fire()) return FALSE;
 				deadlock = FALSE;
 			} while (isRunnable(*s));
 
@@ -441,7 +439,7 @@ int DDFScheduler :: checkLazyEval(Star* s) {
 	return TRUE;
 }
 
-void fireSource(Star& s, int k) {
+int fireSource(Star& s, int k) {
 			
 	// check how many unused tokens are on output arcs.
 	int min = 10000;		// large enough number
@@ -470,8 +468,10 @@ void fireSource(Star& s, int k) {
 
 	// fire sources "k-min" times.
 	if (minIn > k - min) minIn = k - min;
-	for (int i = 0; i < minIn; i++) 
-		s.fire();
+	for (int i = 0; i < minIn; i++) {
+		if (!s.fire()) return FALSE;
+	}
+	return TRUE;
 }
 
 // my domain
