@@ -60,7 +60,6 @@ EXTRA_SRCS =	authors.html \
 		releasenotes0.2.1.html \
 		running.html \
 		sponsors.html \
-		tim.html \
 		troubleshooting.html \
 		tychoClasses.html \
 		tychoFaq.html \
