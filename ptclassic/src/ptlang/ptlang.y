@@ -976,7 +976,9 @@ void describePort ()
             strcat(dest,str1);
 	    sprintf(str1,"<tr>\n<td><i>%s</i> (multiple)</td><td>%s</td>\n",
                     portName,portType);
+            /* FIXME: Can't strcat to destHTML, it does not have enough space
             strcat(destHTML,str1);
+	    */
 	} else {
 	    sprintf(str1,".NE\n\\fI%s\\fR (%s)",portName,portType);
             strcat(dest,str1);
