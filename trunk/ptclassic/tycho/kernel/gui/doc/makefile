@@ -46,13 +46,7 @@ VPATH =		$(ROOT)/tycho/kernel/doc
 CONFIG =	$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
-EXTRA_SRCS =	abbreviations.html \
-		authors.html \
-		bindings.html \
-		introduction.html \
-		overview.html \
-		rationale.html \
-		running.html	
+EXTRA_SRCS =
 
 MISC_FILES =
 
