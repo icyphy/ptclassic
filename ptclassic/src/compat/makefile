@@ -38,7 +38,7 @@ DIRS = X11R4 X11R5 cfront freebsd matlab/extern/include ptolemy
 #PTOLEMY = ../..
 
 MAKEVARS =	\
-		"ARCH=$(PTARCH)" 
+		"PTARCH=$(PTARCH)" 
 
 all install clean realclean sources depend checkjunk sccsinfo:
 	@for x in $(DIRS); do \
