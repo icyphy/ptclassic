@@ -42,7 +42,7 @@ $Id$
 #include "oct.h"
 #include "rpc.h"
 
-extern boolean LookAtFile ARGS((char *fileName));
+extern boolean LookAtFile ARGS((const char* fileName));
 extern boolean MkStar ARGS((char *name, char *domain,
 			    char *dir, char *palette));
 extern int RpcMkStar ARGS((RPCSpot *spot, lsList cmdList, long userOptionWord));
