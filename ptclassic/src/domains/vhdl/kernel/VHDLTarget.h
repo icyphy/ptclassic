@@ -74,8 +74,8 @@ public:
 	virtual void registerComm(int, int, int, const char*) {};
 
 	// Redefined from CGTarget to avoid cout messages.
-	/*virtual*/ sendWormData(PortHole&);
-	/*virtual*/ receiveWormData(PortHole&);
+	/*virtual*/ int sendWormData(PortHole&);
+	/*virtual*/ int receiveWormData(PortHole&);
 
 	// redefine writeCode: default file is "code.vhd"
 	/*virtual*/ void writeCode();
