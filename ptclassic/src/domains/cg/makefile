@@ -35,7 +35,7 @@
 include ../../../mk/topdomain.mk
 
 DIRS = kernel stars parScheduler dlScheduler HuScheduler dcScheduler targets \
-	multiScheduler
+	multiScheduler macroScheduler ddfScheduler
 
 ME = cg
 
