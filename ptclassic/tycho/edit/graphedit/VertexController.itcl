@@ -488,7 +488,7 @@ body ::tycho::VertexController::release {tag} {
 #
 # Get or set the terminal style of an icon. If the _style_ argument
 # is not given, return teh current terminal style. Otherwise change
-# the terminal style to the given style, andadjust any connected
+# the terminal style to the given style, and adjust any connected
 # edges to match.
 #
 body ::tycho::VertexController::termstyle {vertex {style {}}} {
