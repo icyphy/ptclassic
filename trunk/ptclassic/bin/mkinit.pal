@@ -7,7 +7,14 @@ if ($#argv == 0 ) then
 	set pname = init.pal
 endif
 
+if (! -w . ) then
+	echo cannot create init.pal: no permission
+	exit 1
+endif
+
 mkdir $pname $pname/schematic
 
-cp ~ptolemy/lib/defaultContent "$pname/schematic/contents;"
+if ( ! $?PTOLEMY ) setenv PTOLEMY ~ptolemy
+
+cp $PTOLEMY/lib/defaultContent "$pname/schematic/contents;"
 
