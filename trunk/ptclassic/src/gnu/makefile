@@ -58,6 +58,7 @@ GNU_PREFIX=$(GNU_DEST)/common
 # $PTOLEMY/src/gnu/README and $PTOLEMY/src/gnu/INSTALL.
 # Also, check out the COLLECTOR variables in $PTOLEMY/mk/config-*.mk
 GCC_VERSION=2.7.2
+LIBGPLUSPLUS_VERSION=2.7.1
 
 # Machine dependent files
 GNU_EXEC_PREFIX=$(GNU_DEST)/$(PTARCH)
@@ -143,7 +144,12 @@ install: $(BINDIR)
 		CC=$(GNU_OBJ)/gcc/xgcc CFLAGS=-B$(GNU_OBJ)/gcc/ \
 		LDFLAGS=-B$(GNU_OBJ)/gcc/ install)
 	-(cd $(BINDIR); ln -s $(REL_GNU_BINDIR)/* .)
-	-(cd $(BINDIR); rm -f gperf unprotoize protoize hp* make-* sparc-* c++ make.old)
+	-(cd $(BINDIR); \
+	  rm -f gperf unprotoize protoize hp* make-* sparc-* c++ make.old)
+	# Make local relative links here
+	-(cd $(GNU_DEST)/$(PTARCH)/lib; rm libstdc++.so libg++.so; \
+		ln -s libg++.so.$(LIBGPLUSPLUS_VERSION) libg++.so; \
+		ln -s libstdc++.so.$(LIBGPLUSPLUS_VERSION) libstdc++.so)
 
 ############################################################
 # Build the GNU tools for HP machines
@@ -249,8 +255,11 @@ bin_dejagnu:
 
 install_dejagnu:
 	(cd $(GNU_OBJ)/dejagnu; $(MAKE) install)
+	(cd $(GNU_OBJ)/dejagnu/dejagnu; $(MAKE) install-info)
 	@echo"Move libtcl.a to dejagnu so we don't get confused later"
 	mv $(GNU_EXEC_PREFIX)/lib/libtcl.a $(GNU_EXEC_PREFIX)/lib/dejagnu
+	mkdir $(GNU_PREFIX)/include/dejagnu
+	mv $(GNU_PREFIX)/include/tcl.h $(GNU_PREFIX)/include/dejagnu
 
 ############################################################
 # Create various directories
