@@ -39,7 +39,7 @@ VPATH =		$(ROOT)/src/domains/sdf/test
 CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
-TCL_SRCS =
+TCL_SRCS = testSDFDefs.tcl
 
 # testSDFStars.tcl should be first, since it instantiates one of every star.
 SIMPLE_TESTS = \
