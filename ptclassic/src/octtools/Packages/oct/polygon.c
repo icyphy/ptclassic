@@ -34,12 +34,18 @@ static char SccsId[]="$Id$";
 #include "geo.h"
 #include "io.h"
 
+#include "bb.h"
+#include "oct_utils.h"
+
+#include "polygon.h"
+
 static octStatus polygon_bb();
 static octStatus polygon_read_fields();
 
 extern struct object_desc oct_geo_points_desc;
 static struct object_desc *super = &oct_geo_points_desc;
 
+void
 oct_polygon_desc_set(object_desc)
 struct object_desc *object_desc;
 {
