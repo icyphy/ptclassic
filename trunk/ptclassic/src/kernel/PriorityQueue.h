@@ -44,14 +44,12 @@ class LevelLink
 	LevelLink* next;
 	LevelLink* before;
 
-	float fineLevel;	// If levels are equal, we may need
-				// finerLevel which is optional.
-
 	LevelLink* setLink(Pointer a, float v, float fv, LevelLink* n, LevelLink* b);
 public:
 	Pointer e;
 	float	level;		// currently, level is "float" type.
-
+	float fineLevel;	// If levels are equal, we may need
+				// finerLevel which is optional.
 	LevelLink() {}
 };
 
