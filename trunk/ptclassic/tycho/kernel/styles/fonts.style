@@ -16,28 +16,28 @@ style default \
     chosen to be a large-ish size on high-resolution screens,
     and use the most commonly available font families.
 } {
-    parameter textFont {{Courier New} 12} \
+    parameter textFont {{Courier New} 14} \
 	    -type font \
 	    -label "Text editor font"
-    parameter labelFont {Helvetica 12} \
+    parameter labelFont {Helvetica 14} \
 	    -type font \
 	    -label "Label font"
-    parameter displayFont {Times 14} \
+    parameter displayFont {Times 16} \
 	    -type font \
 	    -label "Proportional display font"
-    parameter cwFont {{Courier New} 12} \
+    parameter cwFont {{Courier New} 14} \
 	    -type font \
 	    -label "Constant-width display font"
     parameter entryFont {Helvetica 14} \
 	    -type font \
 	    -label "Entry and listbox font"
-    parameter messageFont {Helvetica 12} \
+    parameter messageFont {Helvetica 14} \
 	    -type font \
 	    -label "Status message font"
-    parameter menuFont {Helvetica 12 bold} \
+    parameter menuFont {Helvetica 14 bold} \
 	    -type font \
 	    -label "Menu and button font"
-    parameter graphicsFont {Helvetica 14 roman} \
+    parameter graphicsFont {Helvetica 16 roman} \
 	    -type font \
 	    -label "Default graphics font"
 }
