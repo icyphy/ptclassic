@@ -55,17 +55,16 @@ limitation of liability, and disclaimer of warranty provisions.
 	    // Set parameter values that are not user settable.
 	    tcl_file =
 		"$PTOLEMY/src/domains/sdf/tcltk/stars/tkSlider.tcl";
-	    synchronous = 0;
 	    // For now, we pass the relevant parameter values to tcl
 	    // by setting global variables.  We need a better way.
 	    sprintf(buf,"%d",100*(double(value)/(double(high)-double(low))));
-	    if((Tcl_SetVar(ptkInterp, "identifier", identifier,
+	    if((Tcl_SetVar(ptkInterp, "TkSlider_identifier", identifier,
 			TCL_GLOBAL_ONLY) == NULL)
-	    || (Tcl_SetVar(ptkInterp, "low", low.initValue(),
+	    || (Tcl_SetVar(ptkInterp, "TkSlider_low", low.initValue(),
 		TCL_GLOBAL_ONLY) == NULL)
-	    || (Tcl_SetVar(ptkInterp, "high", high.initValue(),
+	    || (Tcl_SetVar(ptkInterp, "TkSlider_high", high.initValue(),
 		TCL_GLOBAL_ONLY) == NULL)
-	    || (Tcl_SetVar(ptkInterp, "value", value.initValue(),
+	    || (Tcl_SetVar(ptkInterp, "TkSlider_value", value.initValue(),
 		TCL_GLOBAL_ONLY) == NULL)) {
                 Error::abortRun(*this,"Failed to set parameter values for tcl");
                 return;
@@ -81,6 +80,12 @@ limitation of liability, and disclaimer of warranty provisions.
 	    // Hide irrelevant outputs and states.
 	    input.setAttributes(P_HIDDEN);
 	    tcl_file.clearAttributes(A_SETTABLE);
-	    synchronous.clearAttributes(A_SETTABLE);
+	}
+	destructor {
+	    Tcl_UnsetVar(ptkInterp, "TkSlider_identifier",TCL_GLOBAL_ONLY);
+	    Tcl_UnsetVar(ptkInterp, "TkSlider_low",TCL_GLOBAL_ONLY);
+	    Tcl_UnsetVar(ptkInterp, "TkSlider_high",TCL_GLOBAL_ONLY);
+	    Tcl_UnsetVar(ptkInterp, "TkSlider_value",TCL_GLOBAL_ONLY);
+	    Tcl_UnsetVar(ptkInterp, "putInCntrPan",TCL_GLOBAL_ONLY);
 	}
 }

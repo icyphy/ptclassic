@@ -11,11 +11,11 @@
 # When this file is sourced, it is assumed that the following global
 # variables have been set:
 #	uniqueSymbol
-#	numInputs
+#	TkMeter_numInputs
 #	ptkControlPanel
-#	label
-#	low
-#	high
+#	TkMeter_label
+#	TkMeter_low
+#	TkMeter_high
 # where the last three are given values corresponding to parameter values.
 
 if {![info exists putInCntrPan]} {set putInCntrPan 1}
@@ -41,9 +41,9 @@ if {![winfo exists $s]} {
 
     frame $s.f
     message $s.msg -font -Adobe-times-medium-r-normal--*-180* -width 12c \
-	-text $label
-    for {set i 0} {$i < $numInputs} {incr i} {
-    	ptkMakeMeter $s.f m$i "" $low $high
+	-text $TkMeter_label
+    for {set i 0} {$i < $TkMeter_numInputs} {incr i} {
+    	ptkMakeMeter $s.f m$i "" $TkMeter_low $TkMeter_high
     }
     pack append $s $s.msg {top expand} $s.f top
 
@@ -69,6 +69,6 @@ if {![winfo exists $s]} {
     # In the following definition, the value of uniqueSymbol and
     # numInputs is evaluated when the file is sourced.
     proc ${uniqueSymbol}callTcl {} "
-        tkMeterSetValues $uniqueSymbol $numInputs
+        tkMeterSetValues $uniqueSymbol $TkMeter_numInputs
     "
 }

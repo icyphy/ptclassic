@@ -2,38 +2,49 @@ defstar {
 	name {TclScript}
 	domain {SDF}
 	desc {
-Sends input values to a Tcl script.  Gets output values from a Tcl script.
-The star can communicate with Tcl either synchronously or asynchronously.
+Invoke a Tcl script that can optionally define a procedure that is
+invoked every time the star fires.
 	}
 	explanation {
-The star reads a file containing Tcl commands and communicates with Tcl
-via procedures defined in that file.  Those procedures can read the inputs
-to the star and set its outputs.
+.EQ
+nodelim
+.EN
+The star reads a file containing Tcl commands.
 It can be used in a huge
 variety of ways, including using Tk to animate or control a simulation.
-The Tcl file must define three Tcl procedures to communicate
-between the star and the Tcl code.  One of these reads the values of the
-inputs to the star (if any), another writes new values to the outputs (if
-any), and the third is called by Ptolemy either on every firing of
-the star (if \fIsynchronous\fR is TRUE) or on starting the simulation
-(if \fIsynchronous\fR is FALSE).
+A number of procedures and global variables will have been defined for
+use by the Tcl script by the time it is sourced.  These enable the script
+to read the inputs to the star or set output values.
+The Tcl script can optionally define a procedure to be
+called by Ptolemy on every firing of the star.
 .pp
-The names of the three procedures are different for each instance of this star.
-This allows sharing of Tcl code without name conflicts.
-These unique names are constructed by prepending a unique string to a
-constant suffix.  The suffixes for the three procedures mentioned
-above are "setOutputs", "grabInputs", and "callTcl".
-The first thing the star does is to define the Tcl variable "uniqueSymbol"
-to equal the unique string.  This string specifies the prefix that makes
-the name unique.  Thus the full name for the three procedures
-is "{uniqueSymbol}setOutputs", "{uniqueSymbol}grabInputs", and
-"{uniqueSymbol}callTcl".  The first two of these are defined internally
-by the star.  The third should be defined by the user in the Tcl file
-that the star reads.  In this star, the "uniqueSymbol" is "tclScriptN",
-where "N" is an integer.
+Much of the complexity in using this star is due to the need to use unique
+names for each instance of the star.
+These unique names are constructed using a unique string defined by
+the star.  That string is made available to the Tcl script in the form
+of a global Tcl variable \fIuniqueSymbol\fR.
+The procedure used by the Tcl script to set output values is called
+"${uniqueSymbol}setOutputs", while the procedure used to read
+input values is called "${uniqueSymbol}grabInputs".  The setOutputs procedure
+takes as many arguments as there are output ports.  The grabInputs
+procedure returns a string with as many values as there are inputs,
+separated by spaces.  The Tcl script is sourced during the startup
+phase of the star execution, so it does not make sense at this time to
+read inputs.  However, it may make sense to set output values (in order
+to initialize them).
 .pp
-Two basic mechanisms can be used to control the behavior of the star.
-In the first, X events are bound to Tcl/Tk commands that read or write
+The Tcl script can optionally define a Tcl procedure called
+"${uniqueSymbol}callTcl".  If this procedure is defined in the script,
+then it will be invoked every time the star fires.
+It takes no arguments are returns no values.
+If the callTcl procedure is defined, then the communication with
+Tcl is said to be \fIsynchronous\fR (it is synchronized to the firing
+of the star).  Otherwise, it is \fIasynchronous\fR (the Tcl script is
+responsible for setting up procedures that will interact with the star
+only when Tcl invokes them).
+.pp
+For asynchronous operation, typically
+X events are bound to Tcl/Tk commands that read or write
 data to the star.  These Tcl commands use
 ${uniqueSymbol}grabInputs, which returns
 a list containing the current value of each of the inputs, and
@@ -41,24 +52,20 @@ ${uniqueSymbol}setOutputs, which sets the value of the outputs.
 The argument list for ${uniqueSymbol}setOutputs should contain a
 floating point value for each output of the star.
 The inputs can be of any type.  The print() method of the particle
-is used to construct a string passed to tcl.
+is used to construct a string passed to Tcl.
 This mechanism is entirely asychronous, in that the Tcl/Tk script
 decides when these actions should be performed on the basis of X events.
 .pp
-In addition, the Tcl procedure ${uniqueSymbol}callTcl will be called
-by the star.  If the parameter "synchronous" is TRUE, this procedure
-will be called every time the star fires.
+In synchronous operation,
+the Tcl procedure ${uniqueSymbol}callTcl will be called
+by the star every time it fires.
 The procedure could,
-for example, grab input values and computes output values,
+for example, grab input values and compute output values,
 although it can do anything the designer wishes, even ignoring the input
-and output values.  If the parameter "synchronous" is FALSE, then the
-Tcl script "${uniqueSymbol}callTcl" is called only once during the
-initialization phase.  At that
-time, it can, for example,
-set up periodic calls to poll the inputs and set the outputs.
-.pp
-If the procedure "${uniqueSymbol}callTcl" is not defined in the given
-tcl_file, an error message results.
+and output values.
+.EQ
+delim $$
+.EN
 	}
 	version { $Id$ }
 	author { E. A. Lee }
@@ -86,12 +93,6 @@ limitation of liability, and disclaimer of warranty provisions.
 		default {"$PTOLEMY/src/domains/sdf/tcltk/stars/tkScript.tcl"}
 		desc {The file from which to read the tcl script}
 	}
-	defstate {
-		name {synchronous}
-		type{int}
-		default { TRUE }
-		desc {If TRUE, tcl procedure '${uniqueSymbol}callTcl' is called on every firing }
-	}
 	protected {
 		// A global variable used to create names that are
 		// guaranteed to be unique.  After each use, it should
@@ -106,6 +107,10 @@ limitation of liability, and disclaimer of warranty provisions.
 
 		// Use for constructing tcl commands
 		char buf[128];
+		char uniqStr[32];
+
+		// Mark whether the star is synchronous or not
+		int synchronous;
 	}
 	code {
 		// The following line initializes the member "unique"
@@ -118,21 +123,21 @@ limitation of liability, and disclaimer of warranty provisions.
 	    myUnique = unique++;
 	}
 	setup {
-	    sprintf(buf,"tclScript%d", myUnique);
-	    if(Tcl_SetVar(ptkInterp, "uniqueSymbol", buf, TCL_GLOBAL_ONLY)
+	    sprintf(uniqStr,"tclScript%d", myUnique);
+	    if(Tcl_SetVar(ptkInterp, "uniqueSymbol", uniqStr, TCL_GLOBAL_ONLY)
 			== NULL) {
 		Error::abortRun(*this, "Failed to set uniqueSymbol");
 		return;
 	    }
 
 	    if (input.numberPorts() > 0) {
-		sprintf(buf,"tclScript%dgrabInputs",myUnique);
+		sprintf(buf,"%sgrabInputs",uniqStr);
 	        Tcl_CreateCommand(ptkInterp, buf,
 		    grabInputs, (ClientData) this, NULL);
 	    }
 
 	    if (output.numberPorts() > 0) {
-		sprintf(buf,"tclScript%dsetOutputs",myUnique);
+		sprintf(buf,"%ssetOutputs",uniqStr);
 	        Tcl_CreateCommand(ptkInterp, buf,
 		    setOutputs, (ClientData) this, NULL);
 		LOG_DEL; delete [] outputValues;
@@ -158,23 +163,24 @@ limitation of liability, and disclaimer of warranty provisions.
 	        }
 	    }
 
-	    // Call Tcl if the communication is asynchronous, to start it
-	    // running.
-	    if(!int(synchronous)) {
-		sprintf(buf,"tclScript%dcallTcl",myUnique);
-	        if(Tcl_Eval(ptkInterp, buf, 0, (char **) NULL) != TCL_OK) {
-		    Tcl_Eval(ptkInterp, "ptkDisplayErrorInfo",
-					0, (char **) NULL);
-		    Error::abortRun(*this, "Failed to run callTcl procedure");
-		    return;
-	        }
-	    }
+	    // Determine whether the star is synchronous by checking to
+	    // see whether the callTcl procedure has been defined by the
+	    // Tcl script.
+	    sprintf(buf,"info procs %scallTcl",uniqStr);
+	    if(Tcl_Eval(ptkInterp, buf, 0, (char **) NULL) != TCL_OK ||
+	       strlen(ptkInterp->result) == 0) synchronous = 0;
+	    else synchronous = 1;
 	}
 
 	go {
 	    // If synchronous == TRUE, callTcl
-	    if(int(synchronous)) {
-		sprintf(buf,"tclScript%dcallTcl",myUnique);
+	    if(synchronous) {
+	        if(Tcl_SetVar(ptkInterp, "uniqueSymbol", uniqStr,
+			TCL_GLOBAL_ONLY) == NULL) {
+		    Error::abortRun(*this, "Failed to set uniqueSymbol");
+		    return;
+	        }
+		sprintf(buf,"%scallTcl",uniqStr);
 	        if(Tcl_Eval(ptkInterp, buf, 0, (char **) NULL) != TCL_OK) {
 		    Tcl_Eval(ptkInterp, "ptkDisplayErrorInfo",
 					0, (char **) NULL);
@@ -260,5 +266,14 @@ limitation of liability, and disclaimer of warranty provisions.
 		}
                 return TCL_OK;
             }
+	}
+	destructor {
+	    // Delete Tcl commands created for this star
+	    sprintf(buf,"%sgrabInputs",uniqStr);
+	    Tcl_DeleteCommand(ptkInterp, buf);
+	    sprintf(buf,"%ssetOutputs",uniqStr);
+	    Tcl_DeleteCommand(ptkInterp, buf);
+	    sprintf(buf,"%scallTcl",uniqStr);
+	    Tcl_DeleteCommand(ptkInterp, buf);
 	}
 }
