@@ -79,10 +79,10 @@ void numberAllBlocks(Galaxy&,int =0);
 void numberBlocks(Galaxy&,int =0);
 
 // reset the flag specified for all the blocks inside of the galaxy
-void resetAllFlags(Galaxy&,int =0);
+void resetAllFlags(Galaxy& galaxy,int flagLocation=0, int resetValue=0);
 
 // reset the flag specified only the top blocks inside of the galaxy
-void resetFlags(Galaxy&,int =0);
+void resetFlags(Galaxy& galaxy,int flagLocation=0, int resetValue=0);
 
 // Hopefully this implementation will be improved by having input and
 // output ports of a block stored in separate lists.  This could make
@@ -93,6 +93,16 @@ public:
     inline PortHole* next() {
 	PortHole *port;
 	while ((port = PortListIter::next()) != NULL && !port->isItOutput());
+	return port;
+    }
+    // Skip over ports that are not tagged at flag_loc by flag_value.
+    // Note that tagging both ports (ie, a port and its far()) is
+    // like tagging the arc connecting them since both SuccessorIter.next(.,.)
+    // and PredecessorIter.next(int,int) skip over them.
+    inline PortHole* next(int flag_loc, int flag_value) {
+	PortHole* port;
+	while ((port = PortListIter::next())!= NULL &&
+		(port->flags[flag_loc] != flag_value || port->isItInput()));
 	return port;
     }
     inline PortHole* operator++(POSTFIX_OP) { return BlockOutputIter::next();}
@@ -106,6 +116,17 @@ public:
     inline PortHole* next() {
 	PortHole *port;
 	while ((port = PortListIter::next()) != NULL && !port->isItInput());
+	return port;
+    }
+    // Skip over ports that are not tagged at flag_loc by flag_value.
+    // Note that tagging both ports (ie, a port and its far()) is
+    // like tagging the arc connecting them since both
+    // BlockOutputIter.next(int,int) and BlockInputIter.next(int,int)
+    // skip over them.
+    inline PortHole* next(int flag_loc, int flag_value) {
+	PortHole* port;
+	while ((port = PortListIter::next())!= NULL &&
+		(port->flags[flag_loc] != flag_value || port->isItOutput()));
 	return port;
     }
     inline PortHole* operator++(POSTFIX_OP) { return BlockInputIter::next();}
@@ -135,6 +156,14 @@ public:
 	       || (parent=port->far()->parent())==NULL));
 	return port? parent: (Block*)NULL;	
     }
+    inline Block* next(int flag_loc, int flag_val) {
+	PortHole* port;
+	Block* parent = 0;
+	while ((port=(*successorPortIter)++)!= NULL && 
+		( !port->far() || ((parent=port->far()->parent())==NULL)
+		|| parent->flags[flag_loc] != flag_val));
+	return port? parent: (Block*)NULL;	
+    }
     inline Block* operator++(POSTFIX_OP) { return next(); }
 private:
     BlockOutputIter *successorPortIter;
@@ -153,6 +182,14 @@ public:
 	Block* parent = 0;
 	while ((port=(*predecessorPortIter)++)!= NULL && (!port->far()
 	       || (parent=port->far()->parent())==NULL));
+	return port? parent: (Block*)NULL;
+    }
+    inline Block* next(int flag_loc, int flag_val) {
+	PortHole* port;
+	Block* parent = 0;
+	while ((port=(*predecessorPortIter)++)!= NULL && 
+		(!port->far() || ((parent=port->far()->parent())==NULL)
+		|| parent->flags[flag_loc] != flag_val));
 	return port? parent: (Block*)NULL;
     }
     inline Block* operator++(POSTFIX_OP) { return next(); }
