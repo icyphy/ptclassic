@@ -180,6 +180,8 @@ int DecomScheduler::topLevelSchedule(LSGraph &g)
 	return TRUE;
 }
 
+// Return the schedule as a list of schedule items.
+
 StringList DecomScheduler::displaySchedule(int depth) {
 	StringList sch;
 	SDFSchedIter next(mySchedule);
