@@ -60,11 +60,11 @@ Ptolemy Project.  Tycho is a work in progress, but others my find
 it useful as is.
 
 <DT> <A NAME="Tycho feature list"><B>1.2 What features does Tycho have?</B></A>
-<DD> The two primary features that Itcl developers will find interesting
-are the Itcl profiler and the graphical class browser.  Other features
-include:
-
+<DD>
+Tycho Feature include
 <MENU>
+
+<li> Itcl graphical class browser.
 <LI> Integrated HTML-based documentation system, including automatic
 	generation of HTML documentation from Itcl files.
 
@@ -111,7 +111,7 @@ include:
 <DT> <A NAME="itcl description"><B>1.6 What Is Itcl?</B></A>
 <DD> Itcl is short hand for [incr Tcl]which is an object
 oriented version of the Tool Command Language (tcl).  Tcl was written
-by John Ousterhout of U.C. Berkeley and Sun Labs, Itcl was written by
+by John Ousterhout, now at Scriptics, Itcl was written by
 Michael McLennan of Lucent.  For more information about Itcl,
 including a PostScript tutorial, see the Itcl homepage at <A
 HREF="http://www.tcltk.com"><CODE>http://www.tcltk.com</CODE></A>.
@@ -143,9 +143,9 @@ brief <A HREF="brahe.html">biography</A>.
 under HPUX10.20 and SunOS4.x.  Tycho should work under any Unix platform
 that Itcl runs under.
 
- <P>Tycho has been run
-under WindowsNT, but some of the features that use <CODE>exec</CODE> are
-broken.
+ <P>Tycho also works under under Windows NT, but some of the features
+that use <CODE>exec</CODE> are broken.
+
  <P> The Macintosh port requires Itcl2.2p2, the prebuilt Itcl2.2
 binaries will not work.  The Macintosh port is basically untested.
 
@@ -164,16 +164,6 @@ binaries will not work.  The Macintosh port is basically untested.
 	<LI> On the Macintosh, Tycho 0.2 requires Itcl2.2p2.
 	</MENU>
 
-	<LI> To use the Tcljava interface, you will need JDK 1.1.1, which
-	can be downloaded from <A HREF="http://www.javasoft.com"><CODE>http://www.javasoft.com</CODE></A>.  Tcljava has been built on Solaris2.5.1, 
-	and Windows NT4.0.
-
-	<LI> To use the Tcl Profiler, you will need the Tcl sources, as
-	the C file that implements the <CODE>profile</CODE> command
-	requires tclInt.h
-
-	<LI> To use TkSteal, you will need the Tk sources.  TkSteal
-	sources are not shipped with Tycho.
 	</MENU>
 
 
@@ -234,9 +224,6 @@ rather not reinvent the wheel here and write our own Java canvas.
 environment for non-programmers, which makes an interpreted language
 such as Tcl a stronger candidate than a compiled language such as
 Java.
- <P> Tycho does include a version of Sun's Tcljava interface and we are
-looking into using Tcl and Java together.  For more information, see the
-Tycho<A HREF="../java/doc/index.html">Java </A> page.
 </DL>
 
 <p>
