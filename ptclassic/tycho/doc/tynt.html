@@ -6,9 +6,7 @@
 <body bgcolor="#faf0e6">
 <HR>
 <h1>Tycho under Microsoft Windows</h1>
-The Microsoft Windows port of Tycho is fairly young, so there are
-plenty of bugs.  The only testing of this port was done under NT4.0,
-so Windows3.1 and Windows95 users may have other problems.
+
 <H2><A NAME="Windows external links (URLs)">External Windows Tcl
 places to go</A> </H2>
 <MENU>
@@ -20,12 +18,18 @@ places to go</A> </H2>
 <H2><A NAME="windows bugs">Tycho/Windows bugs</A></H2>
 <MENU>
 
+
+<li> The only testing of this port was done under NT4.0,
+so Windows3.1 and Windows95 users may have other problems.
+
 <LI> Tycho0.2.1 does not handle spaces in pathnames very well.  Tycho
 will work best if the distribution is installed in a directory that
 has a pathname that contains no spaces.
 
 <LI> It would be nice if the installation was such that a Windows user could
 just mouse on a Tycho icon and then Tycho would come up.
+<CODE>$TYCHO/doc/img/tycho32.ico</CODE> is a 32 pixel wide icon
+that can be used under Windows with a shortcut. 
 
 <LI> Don't use Itcl2.1 under Windows, it does not support removing
 files and making directories.  If you use Itcl2.1, then Tycho
