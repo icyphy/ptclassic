@@ -2,8 +2,13 @@ defstar {
 	name {MuLaw}
 	domain {SDF}
 	desc {
-This star encodes its input into an eight-bit representation
-using the non-linear companding according to a mu law definition. 
+Transform the input using a logarithmic mapping if the "compress" is
+true.  In telephony, applying the mu law to eight-bit sampled data is
+called companding, and it is used to quantize the dynamic range of 
+speech more accurately.  The transformation is defined in terms of
+the non-negative integer parameter mu:
+
+output = log ( 1 + mu | input | ) / log( 1 + mu ).
 	}
 	author { Asawaree Kalavade }
 	copyright {
@@ -12,13 +17,13 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	version {$Id$}
+	version { $Id$ }
 	explanation {
 .Id "Mu law compression"
 .Id "compression, Mu law"
 The conversion formula is
 .EQ
-y ~=~ log (1 + mu | x | ) / log( 1 ~+~ mu ) ~.
+output ~=~ log (1 + mu | input | ) / log( 1 ~+~ mu ) ~.
 .EN
 so this star always produces non-negative output.
 .UH REFERENCES
