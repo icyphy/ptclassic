@@ -112,18 +112,18 @@ defstar {
 	go {
 	   // If there is new data input, and the queue is not full, store it
 	   completionTime = arrivalTime;
-	   inData.reset();
+	   InDEMPHIter nextp(inData);
 	   for(int i=0;i<inData.numberPorts(); i++) {
-		InDEPort& p = (InDEPort&) inData();
-		if (p.dataNew) {
+		InDEPort* p = nextp++;
+		if (p->dataNew) {
 		    if (int(curSize) < int(capacity)) {
 			curSize += 1;
-			Particle& pp = p.get();
+			Particle& pp = p->get();
 			Particle* newp = pp.clone();
 			*newp = pp;
 			queue[i]->put(newp);
 		    }
-		    p.dataNew = FALSE;
+		    p->dataNew = FALSE;
 		}
 	   }
 	   // Produce outData only if the demand input is new.

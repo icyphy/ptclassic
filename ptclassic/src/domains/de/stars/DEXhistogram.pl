@@ -110,9 +110,9 @@ defstar {
 	    // If we get to this point, the data value fits within the range
 	    // Compute the index
 	    int index = int((data - lowValue)/double(binWidth));
-	    bins.reset();
+	    ListIter nextBin(bins);
 	    for (int t = index; t>=0; t--)
-	    	count = (int*)bins.next();
+	    	count = (int*)nextBin++;
 	    *count = *count + 1;
 	}
 	wrapup {
@@ -129,11 +129,11 @@ defstar {
 				    (const char*) saveFile);
 
 		// Write data from bin structure into file
-		bins.reset();
+		ListIter nextBin(bins);
 		int size = bins.size();
 		float x = lowValue + double(binWidth)/2;
 		for (int i = 1; i <= size; i++ ) {
-		   graph.addPoint(x, double(*(int*)bins.next()));
+		   graph.addPoint(x, double(*(int*)nextBin++));
 		   x += double(binWidth);
 		}
 		graph.terminate();

@@ -87,9 +87,9 @@ defstar {
 	   if((!input.dataNew) & (!outputP)) return;
 
 	   // Modify the serviceNeeded for all tokensInService.
-	   tokensInService.reset();
+	   ListIter nextTok((SequentialList&)tokensInService);
 	   for(int i = numberInService; i > 0; i--) {
-		t = (token*) tokensInService.next();
+		t = (token*) nextTok++;
 		t->serviceNeeded = t->serviceNeeded -
 			(arrivalTime - t->lastUpdate)/numberInService;
 		t->lastUpdate = arrivalTime;

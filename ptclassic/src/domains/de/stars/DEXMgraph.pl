@@ -52,16 +52,16 @@ defstar {
 				(const char*) options,
 				(const char*) title,
 				(const char*) saveFile);
-		input.reset();
 	}
 
 	go {
+	    InDEMPHIter nextp(input);
 	    for (int i = 1; i <= input.numberPorts(); i++) {
-		InDEPort& p = (InDEPort&) input();
-	    	if(p.dataNew) {
-		    graph.addPoint(i, arrivalTime, float(p.get()));
+		InDEPort* p = nextp++;
+	    	if(p->dataNew) {
+		    graph.addPoint(i, arrivalTime, float(p->get()));
 		}
-		p.dataNew = FALSE;
+		p->dataNew = FALSE;
 	    }
 	}
 

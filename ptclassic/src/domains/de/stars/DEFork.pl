@@ -33,10 +33,10 @@ defstar {
            completionTime = arrivalTime;
            if (input.dataNew) {
                 Particle& pp = input.get();
-                for(int i=output.numberPorts(); i>0; i--) {
-                        OutDEPort& p = (OutDEPort&) output();
-                        p.put(completionTime) = pp;
-                }
+		OutDEMPHIter nextp(output);
+		OutDEPort *oport;
+		while ((oport = nextp++) != 0)
+			oport->put(completionTime) = pp;
            }
 	}
 }
