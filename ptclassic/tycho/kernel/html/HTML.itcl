@@ -1232,7 +1232,7 @@ body ::tycho::HTML::upSize {} {
 # in a constructor.
 #
 body ::tycho::HTML::render {obj {html {}}} {
-    if {[info objects $obj] == {} || ![$obj isa ::tycho::HTML]} {
+    if {[infoObjects $obj] == {} || ![$obj isa ::tycho::HTML]} {
 	return
     }
     if {$html == {}} {
