@@ -255,7 +255,7 @@ proc openAllFiles {args} {
 ############################################################################
 #### doneTests
 # Call this at the bottom of each test file
-# If reallyExit exists and is not set to 1, then don't exist
+# If reallyExit exists and is not set to 1, then don't exit.
 #
 proc doneTests {args} {
     global PASSED FAILED KNOWN_FAILED NEWLY_PASSED duration reallyExit
