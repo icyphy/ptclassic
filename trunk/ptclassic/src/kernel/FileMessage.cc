@@ -49,35 +49,35 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 // Constructor: make a FileMessage with a unique filename
 FileMessage::FileMessage() {
-    filename = tempFileName();
-    dynamicFilename = 1;
-    transientFile = 1;
+    dynamicFilename = tempFileName();
+    filename = dynamicFilename;
+    transientFileFlag = TRUE;
 }
 
 // Constructor: make a FileMessage with the given filename
 FileMessage::FileMessage(const char* name) {
-    filename = name;
     dynamicFilename = 0;
-    transientFile = 0;
+    filename = name;
+    transientFileFlag = FALSE;
 }
 
 // Copy Constructor
 FileMessage::FileMessage(const FileMessage& src) {
-    filename = src.fileName();
     dynamicFilename = 0;
-    transientFile = 0;
+    filename = src.fileName();
+    transientFileFlag = FALSE;
 }
 
 // Destructor
 FileMessage::~FileMessage() {
     if (filename) {
-	if (transientFile) {
+	if (transientFileFlag) {
 	    InfString cmd = "rm -f ";
 	    cmd << filename;
 	    system(cmd);
 	}
-	if(dynamicFilename) {
-	    delete [] filename;
+	if (dynamicFilename) {
+	    delete [] dynamicFilename;
 	}
     }
 }
