@@ -27,8 +27,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 						PT_COPYRIGHT_VERSION_3
 						COPYRIGHTENDKEY
 */
- * 
- */
 /* LINTLIBRARY */
 #include "copyright.h"
 #include "port.h"
