@@ -86,9 +86,12 @@ public:
 
 	void append(Pointer a);	        // Add at tail of list
 
+	Link * appendGet(Pointer a);    // Add at tail of list
+					// and get pointer.
+
 	void put(Pointer a) {append(a);} // synonym
 
-	int remove(Pointer a);	// remove ptr: return TRUE if removed
+	int searchAndRemove(Pointer a);  // remove ptr: return TRUE if removed
 
 	Pointer getAndRemove();	// Return and remove head of list
 
@@ -113,6 +116,9 @@ public:
 
 	// is arg a member of the list? (returns TRUE/FALSE)
 	int member(Pointer arg) const;
+
+protected:
+	void remove(Link * a);	// remove ptr: return TRUE if removed
 
 private:
 	// remove a link from the list

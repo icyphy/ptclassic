@@ -69,6 +69,21 @@ void Link::remove() {
     previous->next = next;
 }
 
+void LinkedList::remove( Link * a ) {
+    Link* previous = a->previous;
+    if( lastNode == a ) {
+	 lastNode = a->previous;
+    }
+    a->remove();
+    delete a;
+    dimen--;
+    if( dimen == 0 ) {
+	 lastNode = 0;
+	 previous = 0;
+    }
+    return;
+}
+
 Link* LinkedList::removeLink(Link& a) {
     Link* previous = a.previous;
     if (lastNode == &a) lastNode = a.previous;
@@ -110,6 +125,21 @@ void LinkedList :: append(Pointer a)
 	    LOG_NEW; lastNode = new Link(a,0);
 	}
 	dimen++;
+}
+
+Link * LinkedList :: appendGet(Pointer a)
+{
+        if (dimen > 0) {        // List not empty
+            LOG_NEW;
+            lastNode = new Link(a,lastNode->next);
+        }
+        else {                  // List empty
+            LOG_NEW;
+            lastNode = new Link(a,0);
+        }
+        dimen++;
+
+        return lastNode;
 }
 
 // return and remove head of list
@@ -171,7 +201,7 @@ void LinkedList :: initialize()
 
 // This function searches for an element in a LinkedList matching
 // the argument, removing it if found.
-int LinkedList::remove (Pointer x) {
+int LinkedList::searchAndRemove (Pointer x) {
 	// case of empty list
 	if (dimen == 0) return 0;
 	// case of 1-element list
