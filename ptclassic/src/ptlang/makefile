@@ -37,12 +37,14 @@ include $(CONFIG)
 BINARY = ptlang$(BINARY_EXT)
 all:	$(BINARY)
 
+SRCS = 	ptlang.y makefile.vc
+
 ifneq (,$(filter hppa%,$(PTARCH)))
 # We ship a ptlang.c that was created under Solaris2.4
 # Unfortunately, the solaris2.4 ptlang.c will not compile
 # under hppa or hppa.cfront (alloca problems), so we
 # recreate ptlang.c by hand here.
-$(BINARY):	ptlang.y
+$(BINARY):	$(SRCS)
 	cd $(VPATH); $(YACC) $^; mv y.tab.c ptlang.c
 	rm -f $@
 	$(CC) $(VPATH)/ptlang.c -o $@ $(PTLANGLIB)
@@ -72,7 +74,7 @@ install:	$(BINDIR)/ptlang$(BINARY_EXT)
 $(BINDIR)/ptlang$(BINARY_EXT):	$(BINARY)
 		rm -f $@; ln $^ $@
 
-sources:	ptlang.y
+sources:	$(SRCS)
 
 clean:
 	rm -f ptlang.c ptlang.o ptlang ptlang.debug.*
