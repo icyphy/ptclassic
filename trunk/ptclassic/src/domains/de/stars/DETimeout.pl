@@ -13,21 +13,21 @@ defstar
     {
 	name { Set }
 	type { anyType }
-	desc { Set the timeout. }
+	desc { Start the timer from zero. }
     }
 
     input
     {
 	name { Clear }
 	type { anyType }
-	desc { Clear the timeout. }
+	desc { Stop the timer. }
     }
 
     output
     {
 	name { alarm }
 	type { float }
-	desc { Indicates that a timeout has expired. }
+	desc { Indicates that the timer has reached timeout. }
     }
 
     go
