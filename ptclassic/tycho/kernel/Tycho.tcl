@@ -228,21 +228,6 @@ if {$tclscripttosource!={} } {
 }
 unset tclscripttosource sawDashE
 
-# Check this in case we are being sourced within a interpreter where
-# argv has been unset.
-if {[info exists argv]} {
-    foreach file $argv {
-	if {$file == {-nowelcome}} {
-	    set tychoWelcomeWindow 0
-	} elseif {$file == {-noconsole}} {
-	    set tychoConsoleWindow 0
-	} else {
-	    set tychoOpenFiles 1
-	    ::tycho::File::openContext $file
-	}
-    }
-}
-
 # Retrieve binary and version info. If the two variables already exist,
 # then we must be in a tysh binary we they are set by SetVersionInfo
 # which is in TyConsole.cc. Otherwise we are being called from itkwish,
