@@ -35,7 +35,7 @@ if {[string compare test [info procs test]] == 1} then {
 } {}
 
 if {[string compare test [info procs _slate]] == 1} then { 
-    source [file join $TYCHO editors slate test defs.itcl]
+    source [file join $env(SLATE_LIBRARY) test defs.itcl]
 } {}
 
 if { ! [::info exists SHORTTIME] } {
