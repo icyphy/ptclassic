@@ -130,6 +130,10 @@ create <CODE>src/configure</CODE>.
 <DT> <CODE>src/configure</CODE>
 <DD> Users execute this file to configure the makefiles
 
+<DT> <CODE>src/makefile.in</CODE>
+<DD> The makefile template file from which the <CODE>makefile</CODE>
+is generated.
+
 <DT> <CODE>mk/java.mk.in</CODE>
 <DD> Java template makefile used by configure to create
 <CODE>obj.$PTARCH/java.mk</CODE>
@@ -149,6 +153,10 @@ HREF="../../src/configure.in"><CODE>$TYCHO/src/configure.in</CODE></A>
 and add the makefile to the <CODE>AC_OUTPUT()</CODE> macro.
  <br> The <CODE>$TYCHO/makefile</CODE> rules should automatically run
 <CODE>autoconf</CODE> and update <CODE>src/configure</CODE>.
+
+<LI> Edit <A
+HREF="../../src/makefile.in"><CODE>$TYCHO/src/makefile.in</CODE></A>
+and add your extension directory to the <CODE>DIRS</CODE> macro.
 
 <LI> Copy a <CODE>makefile.in</CODE> from another directory, such as 
 <CODE>src/profile/makefile.in</CODE> to the directory for your extension.
