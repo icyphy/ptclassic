@@ -1558,7 +1558,7 @@ int CGCStar::addRemoteFile(const char* filename) {
     CodeStream *remoteFiles;
     if ((remoteFiles = getStream("remoteFiles")) == FALSE) return FALSE;
     StringList temp = filename;
-    temp << "\n";
+    temp << " ";
     return remoteFiles->put(temp,filename);
 }
 
