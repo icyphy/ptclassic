@@ -35,41 +35,45 @@
 # inherits from Exec, with tk widgets added. This function is added
 # for fully backward compatibility with the original Exec.
 # <p>
-# <b>Simple examples on using the Monitor:</b>
+# <b>Simple examples on using the Monitor:</b><br>
+# The two are equivalent to use Monitor:
 # <tcl><pre>
-#     set win [::tycho::autoName .execExample]
-#     ::tycho::Monitor $win -command {ls -al}
-#     $win centerOnScreen
-#     ::tycho::Dialog::wait $win
-#     ::tycho::inform "We waited until the Exec window was closed"
+#   ::tycho::view Monitor -toolbar 1 -command {ls} -autostart 1
 # </pre></tcl>
-# In the above example, we bring up the Exec window and then wait  
-# until the user closes it.
+#    or
+# <tcl><pre>
+#   set win [::tycho::view Monitor -toolbar 1 -command {ls}]
+#   $win execProcess
+# </pre></tcl>
+#
+#
+# In the following example, we bring up the Monitor window and then wait  
+# until the user closes it. Note that this is set on auto destroy.
+# <tcl><pre>
+#   set win [::tycho::view Monitor -toolbar 1 -command {ls -al}]
+#   set retStatus [$win getStatusWait]
+#   ::tycho::inform "Wait until Monitor window exited '$retStatus'"
+# </pre></tcl>
 #
 # In another example, we automatically start up the subprocess, and then
 # close the window if the subprocess completed without an error
 # <tcl><pre>
-#     set win [::tycho::autoName .execExample]
-#     ::tycho::Monitor $win &#92
-#        -command {ls -al} -autostart 1 -autodestroy 1
+#   ::tycho::view Monitor -toolbar 1 &#92
+#      -command {ls -al} -autostart 1 -autodestroy 10
 # </pre></tcl>
 # If the make in the above example had returned an error, then the window
 # would not have been destroyed.
 #
 # <hr>
 # <b>There are many ways to interface with the Monitor:</b><br>
-# Examples below show how to interface with the windows.
-# This is exactly how the Compile class parses output.
-# The variable "output" now contains the exactly lines in Monitor.
-# <tcl><pre>
-#   set win [::tycho::autoName .execExample]
-#   ::tycho::Monitor $win -command {ls -al} -autostart 1 -autodestroy 0
-# </pre></tcl>
-#
 # The next set of examples show how to read in the input, parse, 
 # change screen, etc. In this particular example, we changed the
 # attribute for the file owner (ie. changing color and underline).
 # <tcl><pre> 
+# set win [::tycho::view Monitor -toolbar 1 &#92
+#             -command {ls -al} -autostart 1 -autodestroy 0]
+# $win getStatusWait                       ;# Wait until complete
+# # Now parse, underline the owner of the file.
 # set text $win.history.text
 # set output [$win.history get 0.0 end]
 # set output [split $output \n]
@@ -93,13 +97,13 @@ class ::tycho::Monitor {
     ###################################################################
     ####                            options                        ####
 
-    # If non-zero, close widget if the subprocess exits with an ok status.
+    # If non-zero, close widget after the number of seconds has passed.
     itk_option define -autodestroy autodestroy Autodestroy 0
 
-    # If non-zero, start the subprocess automatically
+    # If non-zero, start the subprocess automatically.
     itk_option define -autostart autostart Autostart 0
 
-    # If modal, then just keep waiting
+    # If modal, then just keep waiting. Currently this does nothing.
     itk_option define -modal modal Modal 0
 
     # Command to be executed.
@@ -221,9 +225,9 @@ body ::tycho::Monitor::constructor {args} {
     # Original Tk stuff here
     eval itk_initialize $args
 
-    toolbar entry commandtoexec "Command To Exec: " \
+    toolbar entry commandtoexec "Command to execute: " \
             "$itk_option(-command)" "$this execProcess cmd "
-    toolbar entry dirtoexecfrom "Directory to Exec From: " \
+    toolbar entry dirtoexecfrom "Directory to execute from: " \
             "$itk_option(-dir)"     "$this execProcess dir "
 
     toolbar button prev -text {Prev Error} \
@@ -278,6 +282,7 @@ body ::tycho::Monitor::constructor {args} {
     } else {
         # If not autostart, default is to focus in on the user command
         after 750 $this toolbar focusin commandtoexec
+        putStatus "Press ENTER to start execute"
     }
     return $this
 }
@@ -502,6 +507,7 @@ body ::tycho::Monitor::execProcess { {type {}} {line {}} } {
     }
     # Make sure everything's done, then reset the error count
     set errorCount -1
+    return
 }
 
 #######################################################################
