@@ -140,8 +140,8 @@ by the parameter "InputPrecision".
         }
         defstate {
                 name { InputPrecision }
-                type { string }
-                default { "4.14" }
+                type { precision }
+                default { 4.14 }
                 desc {
 Precision of the input in bits.
 The input particles are only cast to this precision if the parameter
@@ -150,20 +150,20 @@ The input particles are only cast to this precision if the parameter
         }
         defstate {
                 name { TapPrecision }
-                type { string }
-                default { "4.14" }
+                type { precision }
+                default { 4.14 }
                 desc { Precision of the taps in bits. }
         }
         defstate {
                 name { AccumulationPrecision }
-                type { string }
-                default { "4.14" }
+                type { precision }
+                default { 4.14 }
                 desc { Precision of the accumulation in bits. }
         }
         defstate {
                 name { OutputPrecision }
-                type { string }
-                default { "4.14" }
+                type { precision }
+                default { 4.14 }
                 desc { Precision of the output in bits. } 
         }
         protected {
