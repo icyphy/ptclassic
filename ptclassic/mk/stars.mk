@@ -191,6 +191,7 @@ ifdef CGCFULL
 	CGC = 1
 	CGFULL = 1
 	CM5 = 1
+	NOWAM = 1
 	ifdef TK
 		CGCTK = 1
 	endif
@@ -358,6 +359,23 @@ ifdef CM5
 	TARGETS += $(CGCT)/cm5/CGCcm5Send.o $(CGCT)/cm5/CGCcm5Recv.o \
 		$(CGCT)/cm5/CGCcm5Target.o $(CGCT)/cm5/CGCcm5peTarget.o
 endif
+
+ifdef NOWAM
+	CUSTOM_DIRS += $(ROOT)/src/domains/cgc/targets/NOWam/NOWam
+	CUSTOM_DIRS += $(ROOT)/src/domains/cgc/targets/NOWam/libudpam
+	CGC = 1
+	LIBS += -ludpam
+	LIBFILES += $(LIBDIR)/libudpam.$(LIBSUFFIX)
+	ifeq ($(USE_SHARED_LIBS),yes) 
+		LIBS += -lNOWam
+		LIBFILES += $(LIBDIR)/libNOWam.$(LIBSUFFIX)
+	else
+		TARGETS += $(CGCT)/NOWam/NOWam/CGCNOWamRecv.o \
+			$(CGCT)/NOWam/NOWam/CGCNOWamSend.o \
+			$(CGCT)/NOWam/NOWam/CGCNOWamTarget.o
+	endif
+endif
+
 
 ifdef CGC
 	CUSTOM_DIRS += $(CGCDIR)/stars
