@@ -32,6 +32,7 @@ $Id$
 #include <sys/stat.h>
 #include "miscFuncs.h"
 #include "SimControl.h"
+#include "StringArrayState.h"
 
 // constructor
 Target::Target(const char* nam, const char* starClass,const char* desc) :
@@ -186,6 +187,55 @@ void Target::deleteChildren() {
 	nChildren = 0;
 }
 
+// function for use by "hasResourcesFor".  Finds the StringArrayState
+// named "resources" in the given Block, if any.
+static StringArrayState* getResourceState(Block& b) {
+	State* s = b.stateWithName("resources");
+	if (!s || !s->isA("StringArrayState")) return 0;
+	return (StringArrayState*)s;
+}
+
+// determine whether this target satisfies the resource requirements
+// of the star s.
+
+int Target::hasResourcesFor(Star& s,const char* extra) {
+	// if the star requests no resources, then we have all the
+	// resources the star needs.
+
+	StringArrayState* stR = getResourceState(s);
+	if (stR == 0) return TRUE;
+
+	StringArrayState* tR = getResourceState(*this);
+
+	int stSz = stR->size();
+	StringArrayState& stateRes = *stR;
+	// check that all resources are provided by the target.  The
+	// target provides resources either through its resources state,
+	// the names of its classes and baseclasses, and "extra", which
+	// provides "2" in child target 2, for example.
+	// we return FALSE if any resource is not supplied.
+	for (int i = 0; i < stSz; i++) {
+		const char* res = stateRes[i];
+		if ((tR && tR->member(res)) || isA(res)) continue;
+		if (extra && strcmp(extra,res) == 0) continue;
+		return FALSE;
+	}
+	return TRUE;
+}
+
+// determine whether a particular child target of this Target
+// has resources to run the given star.
+
+int Target::childHasResources(Star& s,int childNum) {
+	Target* ch = proc(childNum);
+	if (ch == 0) return FALSE;
+	char numbuf[20];
+	sprintf (numbuf, "%d", childNum);
+	return ch->hasResourcesFor(s,numbuf);
+}
+      
+// set up directory for writing files associated with Target.
+
 const char* Target::writeDirectoryName(const char* dirName) {
 
    if(dirName && *dirName) {
@@ -232,5 +282,5 @@ char* Target::writeFileName(const char* fileName) {
 void Target::beginIteration(int,int) {}
 void Target::endIteration(int,int) {}
 void Target::writeFiring(Star&,int) {}
-
+const char* Target::className() const {return "Target";}
 ISA_FUNC(Target,Block);

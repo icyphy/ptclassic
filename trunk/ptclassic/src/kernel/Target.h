@@ -62,6 +62,16 @@ public:
 	// return number of processors
 	int nProcs() const { return children ? nChildren : 1;}
 
+	// determine whether this target has the necessary resources
+	// to run the given star.  virtual in case later necessary.
+	// default implemenation uses "resources" states of the target
+	// and the star.
+	virtual int hasResourcesFor(Star& s,const char* extra=0);
+
+	// determine whether a particular child target has resources
+	// to run the given star.  virtual in case later necessary.
+	virtual int childHasResources(Star& s,int childNum);
+
 	// initialize the target, given a galaxy.
 	virtual void setGalaxy(Galaxy& g); // default: { gal = &g; }
 
@@ -102,7 +112,7 @@ public:
 
 	// class identification
 	int isA(const char*) const;
-	const char* className() const {return "Target";}
+	const char* className() const;
 	Galaxy* galaxy() { return gal;}
 protected:
 
@@ -137,6 +147,9 @@ protected:
 
 	const char* writeDirectoryName(const char* dirName = 0);
 
+	// this fn returns it.
+	const char* workingDirectory() const { return dirFullName;}
+
 	// Method to set a file name for writing.
 	// Prepends dirFullName (which was set by writeDirectoryName)
 	// to fileName with "/" between.
@@ -145,9 +158,6 @@ protected:
 	// If dirFullName or fileName is NULL then it returns a
 	// pointer to a new copy of the string "/dev/null"
 	char* writeFileName(const char* fileName = 0);
-
-	// this fn returns it.
-	const char* workingDirectory() const { return dirFullName;}
 
 private:
 	// name of class of star this target supports
@@ -165,7 +175,4 @@ private:
 	// Store a directory name for writing
 	char* dirFullName;
 };
-
-
 #endif
-
