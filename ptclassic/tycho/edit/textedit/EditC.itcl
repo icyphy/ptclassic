@@ -1,6 +1,7 @@
 # Definition of a C context-sensitive editor.
 #
 # @Author: Edward A. Lee
+# @Contributor: Christopher Hylands
 #
 # @Version: $Id$
 #
@@ -121,132 +122,10 @@ body ::tycho::EditC::commentSelection {} {
 body ::tycho::EditC::evaluate {} {
     global env tycho
     saveQuery
-    set dirname [file dirname $file]
-    set basename [file rootname [file tail $file]]
-
-    ###
-    # Append a initialization procedure
-    # See the tcl load command man page for details
-    set initProcName "[string toupper\
-            [string range $basename 0 0]][string tolower\
-            [string range $basename 1 end]]_Init"
-
-    set end [$itk_component(text) search -forwards -regexp -- \
-	    $initProcName 0.0 end]
-    if {$end == ""} {
-	# The initialization procedure was not found.
-	# Ask the user if they want to append one, if they do, append it
-	# and don't load, so the user can stick in the body and re-evaluate.
-	set nm [::tycho::autoName .editCYNC]
-	::tycho::YesNoCancel $nm \
-		-text "The file $file does not have a Tcl initialization \
-		procedure named \"$initProcName\".\nIf you choose to add\
-		the initialization procedure, then be sure to reedit\
-		the file and insert calls to register your commands and\
-		reevaluate the file.\nAdd\
-		the initializaiont procedure now?"
-	
-	set response [::tycho::Dialog::wait $nm]
-    	switch $response {
-	    -1 {return}
-	    0 {}
-	    1 {
-		# Add a initialization procedure to the end of the file
-		set fd [open $file a]
-                # Check to see if we need to add #include <tcl.h>
-                set end [$itk_component(text) search -forwards -regexp -- \
-                        {#include [<"](tcl|tk|itcl).h[">]} 0.0 end]
-                if {$end == ""} {
-                    puts $fd "#ifndef _TCL\n#include <tcl.h>"
-                    puts $fd "#endif"
-                }
-
-		puts $fd "/* Tcl initialization procedure added for\
-			the Tcl load command\n */"
-		puts $fd "int ${initProcName}\(Tcl_Interp *interp)\n\{"
-		puts $fd "    /* A sample Tcl command registration. */"
-		puts $fd "    /* Tcl_CreateCommand(interp, \"$basename\",\
-			Tcl_${basename}Cmd,"
-		puts $fd "                         (ClientData) NULL,\
-			(Tcl_CmdDeleteProc*) NULL);"
-                puts $fd "     */"
-                puts $fd "    return TCL_OK;\n\}"
-		close $fd
-		reload
-                putStatus "Successfully added initialization procedure"
-		return
-	    }
-	}
-    }
-
-    
-    ###
-    # Figure out which makefile to run
-    if {[file exists [file join $dirname makefile]] || \
-	    [file exists [file join $dirname Makefile]]} {
-	# There is a makefile or a Makefile, so just call make
-        putStatus "makefile or Makefile present, so we just call make,\
-                when complete, be sure to close the Exec window to continue."
-        set win [::tycho::autoName .ceval]
-	::tycho::Exec $win -command make -dir $dirname
-        $win centerOnScreen
-        ::tycho::Dialog::wait $win
-        putStatus ""
-    } else {
-        set makefile [file join $dirname $basename.mk]
-	if ![file exists $makefile] {
-	    # Create a makefile by reading in from the template and 
-            # substituting %basename% for the value of $basename
-	    # FIXME: templateMakefile should probably be a preference.
-	    set templateMakefile \
-		    [file join $tycho editors textedit templates Cmakefile.mk]
-            set fdin [open $templateMakefile r]
-            set fdout [open $makefile w]
-            while {[gets $fdin linein] >= 0} {
-                regsub -all {%basename%} $linein $basename lineout
-                puts $fdout $lineout
-            }
-            close $fdout
-            close $fdin
-	}
-	if [info exists env(PTARCH)] {
-	    set PTARCH $env(PTARCH)
-	} else {
-	    error "Sorry, the PTARCH environment variable is not set"
-	}
-	if {![file exists [file join $tycho obj.$PTARCH tcl.mk]] || \
-		![file exists [file join $tycho obj.$PTARCH java.mk]]} {
-            putStatus "About to make tcl.mk and java.mk, when complete, be\
-                    sure to close the Exec window to continue."
-            set win [::tycho::autoName .ceval]
-	    ::tycho::Exec $win -command [ list make config_tclexts] \
-                    -dir $tycho
-            $win centerOnScreen
-            ::tycho::Dialog::wait $win
-            putStatus ""
-	}
-	# We need to wait until tcl.mk and java.mk exist
-        putStatus "About to make shared object, when complete, be sure to \
-                close the Exec window to continue."
-        set win [::tycho::autoName .ceval]
-        ::tycho::Exec $win \
-                -command \
-                "make -f $basename.mk $basename[info sharedlibextension]" \
-                -dir $dirname
-        $win centerOnScreen
-        ::tycho::Dialog::wait $win
-        putStatus ""
-    }
-    # We need to wait until the shared object exists
-    # Have to use the absolute pathname here, or loading will fail
-    if [catch {uplevel #0 \
-	    load [file join $dirname $basename[info sharedlibextension]]} \
-            errMsg] {
-        error "Failed to load\
-                [file join $dirname $basename[info sharedlibextension]]:\n\
-                $errMsg"
-    }
-    putStatus "Loaded $basename[info sharedlibextension]"
+    set compiler [::tycho::CompileCTcl [::tycho::autoName .editC]]
+    $compiler configure -view $this
+    $compiler compileAndLoad [list $file]
+    delete object $compiler
 }
 
 ###################################################################
