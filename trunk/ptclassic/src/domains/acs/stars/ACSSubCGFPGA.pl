@@ -365,7 +365,8 @@ It outputs lines of comments, instead of code.
 						   slice("a",A_bitlen-1))
 				
 			           << lang->end_statement << endl;
-		    for (int loop=0;loop < pad_A;loop++)
+                    int loop;
+		    for (loop=0;loop < pad_A;loop++)
 			statements << lang->equals(lang->slice("in_a",loop),"GND")
 			    << lang->end_statement << endl;
 			
@@ -377,13 +378,13 @@ It outputs lines of comments, instead of code.
 							   pad_B),
 					       pins->retrieve_pinname(1))
 			       << lang->end_statement << endl;
-		    for (int loop=0;loop < extend_B;loop++)
+		    for (loop=0;loop < extend_B;loop++)
 			statements << lang->equals(lang->
 						   slice("in_b",loop+b_bitlen+pad_B),
 						   lang->
 						   slice("b",b_bitlen-1))
 			           << lang->end_statement << endl;
-		    for (int loop=0;loop < pad_B;loop++)
+		    for (loop=0;loop < pad_B;loop++)
 			statements << lang->equals(lang->slice("in_b",loop),"GND")
 			           << lang->end_statement << endl;
 			

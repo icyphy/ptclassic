@@ -142,7 +142,8 @@ IntArray* IntArray::sort_hl(void)
 
   int *tmp_ints=new int[total];
   int *moved_already=new int[total];
-  for (int loop=0;loop<total;loop++)
+  int loop;
+  for (loop=0;loop<total;loop++)
     {
       tmp_ints[loop]=ints[loop];
       moved_already[loop]=0;
@@ -150,7 +151,7 @@ IntArray* IntArray::sort_hl(void)
 
   qsort(tmp_ints,total,sizeof(int),intcompare2);
 
-  for (int loop=0;loop<total;loop++)
+  for (loop=0;loop<total;loop++)
     for (int search_loop=0;search_loop<total;search_loop++)
       if ((moved_already[search_loop]==0) &&
 	  (tmp_ints[loop]==ints[search_loop]))

@@ -293,13 +293,14 @@ It outputs lines of comments, instead of code.
 			    << lang->end_statement << endl;
 
 		    //straightcopy
-		    for (int loop=1; loop <= numstraightcopys; loop++)
+                    int loop;
+		    for (loop=1; loop <= numstraightcopys; loop++)
 			out_fstr << lang->equals(lang->slice("outp",outlen-loop-numextrasignbits),
 						 lang->slice("inp",inlen-loop)) 
 			    << lang->end_statement << endl;
 
 		    //zero pad
-		    for (int loop=1; loop <= numzeropads; loop++)
+		    for (loop=1; loop <= numzeropads; loop++)
 			out_fstr << lang->equals(lang->slice("outp",
 			       outlen-loop-numextrasignbits-numstraightcopys),"GND")
 			    << lang->end_statement << endl;

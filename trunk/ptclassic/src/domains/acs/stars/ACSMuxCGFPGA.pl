@@ -106,8 +106,9 @@ This star exists only for demoing the generic CG domain.
 					UNLOCKED);
 
 		// If output is locked then fix all the input sizes accordingly
+                int loop;
 		if (pins->query_preclock(0)==LOCKED)
-		    for (int loop=1;loop<=total_count;loop++)
+		    for (loop=1;loop<=total_count;loop++)
 			pins->set_precision(loop,
 					    pins->query_bitlen(0)-1,
 					    pins->query_bitlen(0),
@@ -115,7 +116,7 @@ This star exists only for demoing the generic CG domain.
 		
 		// Test if all switchables are locked, if so set & lock output
 		int lock_type=LOCKED;
-		for (int loop=1;loop<=total_count;loop++)
+		for (loop=1;loop<=total_count;loop++)
 		    if (pins->query_preclock(loop)==UNLOCKED)
 			lock_type=UNLOCKED;
 
@@ -165,13 +166,13 @@ This star exists only for demoing the generic CG domain.
 
 		// FIX: Corona names for the output pins described here
 		char* switch_name=new char[80];
-		int line=0;
-		for (int loop=input_count+1;loop<=total_count;loop++)
+		int line=0, loop;
+		for (loop=input_count+1;loop<=total_count;loop++)
 		{
 		    sprintf(switch_name,"d%d",line++);
 		    pins->add_pin(switch_name,"output",OUTPUT_PIN_MUX_SWITCHABLE);
 		}
-		for (int loop=0;loop<input_count;loop++)
+		for (loop=0;loop<input_count;loop++)
 		{
 		    sprintf(switch_name,"d%d",line++);
 		    pins->add_pin(switch_name,"output",INPUT_PIN_MUX_SWITCHABLE);
@@ -182,7 +183,7 @@ This star exists only for demoing the generic CG domain.
 		// Control port definitions
 		control_count=(int) ceil(log((double) total_count)/log(2.0));
 		char* control_name=new char[80];
-		for (int loop=0;loop<control_count;loop++)
+		for (loop=0;loop<control_count;loop++)
 		{
 		    sprintf(control_name,"s%d",loop);
 		    int muxpin=pins->add_pin(control_name,INPUT_PIN_CTRL);
@@ -214,7 +215,8 @@ This star exists only for demoing the generic CG domain.
 		
 		    // Bidir port definitions
 		    pins->set_datatype(0,STD_LOGIC);  // o port
-		    for (int loop=1;loop<=total_count;loop++)
+                    int loop;
+		    for (loop=1;loop<=total_count;loop++)
 		    {
 			if (DEBUG_STARS)
 			    printf("Setting pin %d\n",loop);
@@ -223,7 +225,7 @@ This star exists only for demoing the generic CG domain.
 		    }
 
    		    // Control port definitions
-		    for (int loop=total_count+1;
+		    for (loop=total_count+1;
 			 loop<total_count+control_count+1;
 			 loop++)
 		    {
