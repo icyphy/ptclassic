@@ -3,7 +3,7 @@
 # $Id$
 # Author: Christopher Hylands
 #
-# Copyright (c) 1996 The Regents of the University of California.
+# Copyright (c) 1996-%Q% The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -33,7 +33,7 @@
 ROOT =		../../../..
 
 # True source directory
-VPATH =		$(ROOT)/typt/editors/doc/usersGuides
+VPATH =		$(ROOT)/typt/edit/doc/usersGuides
 
 # Get configuration info
 CONFIG =	$(ROOT)/mk/tycho.mk
