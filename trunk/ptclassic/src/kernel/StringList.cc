@@ -130,7 +130,7 @@ UserOutput& operator << (UserOutput& o, const StringList& sl) {
 
 // print a StringList on a stream
 
-ostream& operator << (ostream&o, const StringList& sl) {
+ostream& operator << (ostream&o, StringList& sl) {
 	StringListIter next(sl);
 	char* s;
 	while ((s = next++) != 0)
