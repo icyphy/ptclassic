@@ -60,6 +60,8 @@ endif
 TK=1
 OCT=1
 
+SRCS =		pigiMain.cc
+
 PT_DEPEND +=	pigiMain.o
 
 ADD_OBJS =	palettes.$(PIGI).o
@@ -70,7 +72,7 @@ PIGI_OBJS +=	pigiMain.o $(ADD_OBJS)
 LIB = foo
 
 # 'make clean' should remove these derived files
-KRUFT = $(wildcard palettes.*.c) version.c
+KRUFT = $(wildcard palettes.*.c) version.c *_linklog
 
 include $(ROOT)/mk/ptbin.mk
 
