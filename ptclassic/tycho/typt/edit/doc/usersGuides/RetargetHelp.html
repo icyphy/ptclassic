@@ -72,15 +72,20 @@ displays the forest should come up.
 
 <LI> Scroll the forest window until the <A
 HREF="$PTOLEMY/src/domains/cgc/demo/sound"><CODE>$PTOLEMY/src/domains/cgc/demo/sound</CODE></A>
-node is visible and then double click on the node. A ptcl editor
+node is visible and then double click on the node. A graphical editor
+that lists the stars in the sound universe will come up.
+
+<LI> Under the <CODE>Special</CODE>menu button of the sound Palette, select
+<CODE>Show Ptcl</CODE>. A ptcl editor
 window should come up that contains a textual description of the
 <I>sound</I> universe.
 
 <LI>  Under the <CODE>Special</CODE> menu button in the ptcl editor, select
 the <CODE>Retarget</CODE> choice, the retarget editor should come up.
 
-<LI> In the Retargetting editor, mouse on the <CODE>Change Domain A</CODE>
-button and change the domain to CGC
+<LI> In the Retargetting editor, hit the <CODE>Change Domain B</CODE>
+button and change the domain to C50.  We are going to attempt to
+regarget the domain from CGC to the Texas Instruments C50 domain.
 
 <LI> In the Retargetting editor, mouse on the <CODE>Check Universe</CODE>
 button.  After a brief wait, the Retargetting editor will display the
@@ -103,18 +108,10 @@ editor bugs</a></h2>
 come up until after the compare is done. Perhaps we need an update or a
 flush here.
 
-<li> If the user opens the retargetting editor from a ptcl editor, we should
-probably change domainA to the domain of the universe in the ptcl editor.
-
-<li> The buttons that change domainA and domainB should be menus with radio
-button choices of all the domains.  Also, the buttons don't get updated
-with the name of the new domain choice.
-
 <li> If the user is attempting to retarget a multi domain universe,
 then things could get a little confusing. Currently, the tool throws
 away the domain information of the stars in the ptcl file and just
 compares star names.
-
 
 </menu>
 
