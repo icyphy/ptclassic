@@ -1,4 +1,4 @@
-##########################################################################
+
 # @Version: $Id$
 # @Author: John Reekie
 #
@@ -150,6 +150,12 @@ class ::tycho::DataModel {
     #################################################################
     ####                   protected methods                     ####
 
+    # Delete a child item
+    protected method _delete {context name type}
+    
+    # Delete a child item without recording
+    protected method _deletenorecord {context name type}
+    
     # Return a description of a single item
     protected method _describe {name {prefix {}}}
     
@@ -298,7 +304,7 @@ body ::tycho::DataModel::add {type name args} {
 
     # Add to history
     if $recording {
-        history append "add \{$name\} $args" "delete \{$name\}"
+        history append "add $type \{$name\} $args" "delete \{$name\}"
     }
 
     # Extract contents
@@ -427,11 +433,21 @@ body ::tycho::DataModel::attrset {name args} {
 		lappend del $a
 	    }
 	}
-	history append \
-		"attrset [list $name] $args" \
-		[list _compound \
-		    "attrset [list $name] $set" \
-		    "attrdel [list $name] $del"]
+	if { $del == "" } {
+	    history append \
+		    "attrset [list $name] $args" \
+		    "attrset [list $name] $set"
+        } elseif { $set == "" } {
+	    history append \
+		    "attrset [list $name] $args" \
+		    "attrdel [list $name] $del"
+        } else {
+	    history append \
+		    "attrset [list $name] $args" \
+		    [list _compound \
+		        "attrset [list $name] $set" \
+			"attrdel [list $name] $del"]
+	}
     }
 
     # Merge the new data and return result
@@ -514,36 +530,72 @@ body ::tycho::DataModel::delete {name} {
     # Invalidate cache
     @scope $scope set [set _dataname].cachevalid 0
 
-    # Append to the history
     if $recording {
-        set cd [_describechildren $name]
-        if { $cd != "" } {
-            history append \
-                    [list delete $name] \
-                    "add $type [list $name] [attrset $name] \{\n$cd\}"
-        } else {
-            history append \
-                    [list delete $name] \
-                    "add $type [list $name] [attrset $name]"
-        }
-    }
-    # Delete children, making sure that commands are not recorded
-    if !$_leafonly($type) {
-    	set saved $recording
-    	set recording 0
+        # Mark the history
+        mark set delete
+        
+        # Delete children
         foreach t $_types($scope) {
             foreach child [match $t $name] {
-                delete [concat $name $child]
+                _delete $name [concat $name $child] $t
             }
         }
-        set recording $saved
-    }
+        # Append to it
+        history append \
+                [list delete $name] \
+                "add $type [list $name] [attrset $name]"
+    
+        # Compact the history
+        history compact delete current
 
+    } else {
+        # Delete children
+        foreach t $_types($scope) {
+            foreach child [match $t $name] {
+                _deletenorecord $name [concat $name $child] $t
+            }
+        }
+    }
     # Remove from the parent list
     @scope $scope set [set _dataname]:[set type]($context) \
             [::tycho::ldelete \
             [@scope $scope set [set _dataname]:[set type]($context)] \
             [lindex $name end]]
+
+    # Delete data
+    @scope $scope unset [set _dataname]($name)
+}
+
+# Helper method to delete children while recording
+body ::tycho::DataModel::_delete {context name type} {
+    # Delete children
+    foreach t $_types($scope) {
+        foreach child [match $t $name] {
+            _delete $name [concat $name $child] $t
+        }
+    }
+    # Append to the history
+    history append \
+            [list delete $name] \
+            "add $type [list $name] [attrset $name]"
+    
+    # Delete the parent's child list
+    @scope $scope set [set _dataname]:[set type]($context) {}
+
+    # Delete data
+    @scope $scope unset [set _dataname]($name)
+}
+
+# Helper method to delete children while not recording
+body ::tycho::DataModel::_deletenorecord {context name type} {
+    # Delete children
+    foreach t $_types($scope) {
+        foreach child [match $t $name] {
+            _deletenorecord $name [concat $name $child] $t
+        }
+    }
+    # Delete the parent's child list
+    @scope $scope set [set _dataname]:[set type]($context) {}
 
     # Delete data
     @scope $scope unset [set _dataname]($name)
