@@ -33,6 +33,7 @@ static char SccsId[]="$Id$";
 #include "copyright.h"
 #include "port.h"
 #ifndef sgi
+#define HAS_TIMEB
 #include <sys/timeb.h>
 #endif
 #include <sys/time.h>
@@ -44,8 +45,13 @@ static char SccsId[]="$Id$";
 #endif
 
 struct timestruct {
+#ifdef HAS_TIMEB
    struct timeb startElapsedTime;
    struct timeb currentElapsedTime;
+#else
+   struct timeval startElapsedTime;
+   struct timeval currentElapsedTime;
+#endif
    struct timeval startUserTime;
    struct timeval currentUserTime;
    struct timeval startSystemTime;
@@ -58,8 +64,13 @@ void
 timerReset(timer)
 struct timestruct *timer;
 {
+#ifdef HAS_TIMEB
    timer->currentElapsedTime.time = 0;
    timer->currentElapsedTime.millitm = 0;
+#else
+   timer->currentElapsedTime.tv_sec = 0;
+   timer->currentElapsedTime.tv_usec = 0;
+#endif
    timer->currentUserTime.tv_sec = 0;
    timer->currentUserTime.tv_usec = 0;
    timer->currentSystemTime.tv_sec = 0;
@@ -80,7 +91,11 @@ void
 timerContinue(timer)
 struct timestruct *timer;
 {
+#ifdef HAS_TIMEB
     struct timeb tb;
+#else
+    struct timeval tb;
+#endif
 #ifdef SYSV
     int             fd;
     char            proc[BUFSIZ];
@@ -90,9 +105,15 @@ struct timestruct *timer;
 #endif
     extern int ftime();
 
+#ifdef HAS_TIMEB
     ftime(&tb);
     timer->startElapsedTime.time = tb.time;
     timer->startElapsedTime.millitm = tb.millitm;
+#else
+    gettimeofday(&tb);
+    timer->startElapsedTime.tv_sec = tb.tv_sec;
+    timer->startElapsedTime.tv_usec = tb.tv_usec;
+#endif
 
 #ifdef SYSV
     /* For Solaris2, taken from solaris2_porting.faq */
@@ -137,7 +158,11 @@ void
 timerStop(timer)
 struct timestruct *timer;
 {
+#ifdef HAS_TIMEB
     struct timeb tb;
+#else
+    struct timeval tb;
+#endif
 #ifdef SYSV
     int             fd;
     char            proc[BUFSIZ];
@@ -147,11 +172,10 @@ struct timestruct *timer;
 #endif
     extern int ftime();
 
+#ifdef HAS_TIMEB
     ftime(&tb);
-
     timer->currentElapsedTime.time
              += (tb.time - timer->startElapsedTime.time);
-
     if (tb.millitm < timer->startElapsedTime.millitm) {
 	timer->currentElapsedTime.time--;
 	timer->currentElapsedTime.millitm
@@ -160,6 +184,19 @@ struct timestruct *timer;
 	timer->currentElapsedTime.millitm
 		 += (tb.millitm - timer->startElapsedTime.millitm);
     }
+#else /*HAS_TIMEB*/
+    gettimeofday(&tb);
+    timer->currentElapsedTime.tv_sec
+             += (tb.tv_sec - timer->startElapsedTime.tv_sec);
+    if (tb.tv_usec < timer->startElapsedTime.tv_usec) {
+	timer->currentElapsedTime.tv_sec--;
+	timer->currentElapsedTime.tv_usec
+		 += 1000000 + (tb.tv_usec - timer->startElapsedTime.tv_usec);
+    } else {
+	timer->currentElapsedTime.tv_usec
+		 += (tb.tv_usec - timer->startElapsedTime.tv_usec);
+    }
+#endif /*HAS_TIMEB*/
 
 #if defined(SYSV) && defined (__GNUC__)
     /* For Solaris2, taken from solaris2_porting.faq */
@@ -257,8 +294,13 @@ double
 timerElapsedTime(timer)
 struct timestruct *timer;
 {
+#ifdef HAS_TIMEB
     return((double) timer->currentElapsedTime.time
 	   + (double) timer->currentElapsedTime.millitm / 1000.0);
+#else
+    return((double) timer->currentElapsedTime.tv_sec
+	   + (double) timer->currentElapsedTime.tv_usec / 1000000.0);
+#endif
 }
     
 double
