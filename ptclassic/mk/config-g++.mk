@@ -81,3 +81,4 @@ OCTTOOLS_MM_LIB=
 
 # Used by cgwork.mk
 INC_LINK_FLAGS =	-fPIC
+
