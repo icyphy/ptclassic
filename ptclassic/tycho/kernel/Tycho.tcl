@@ -7,7 +7,7 @@
 #
 # @Version: $Id$
 #
-# @Copyright (c) 1995-%Q% The Regents of the University of California.
+# @Copyright (c) 1995-1996 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -361,11 +361,15 @@ if [info exists tyMacBug] {
 # option was not given, open a console window
 if {$tychoOpenFiles == 0} {
     if {$tychoConsoleWindow != 0} {
-	::tycho::_announce "About to create a TclConsole"
-	uplevel #0 {::tycho::Displayer .mainConsole -geometry +0+0 -master 1; \
-                ::tycho::TclShell .mainConsole.s \
-                -stdout 1 -text "Welcome to Tycho\n"}
-	wm deiconify .mainConsole
+	::tycho::_announce "About to create a TclShell"
+	uplevel #0 {
+	    ::tycho::view TclShell \
+		    -geometry +0+0 \
+		    -master 1 \
+		    -prefix .mainConsole \
+		    -stdout 1 \
+		    -text "Welcome to Tycho\n"
+	}
     }
 }
 
