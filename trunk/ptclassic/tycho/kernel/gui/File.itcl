@@ -795,9 +795,8 @@ body ::tycho::File::reload {} {
             set point [currentPoint]
             clear
             set fd [open $file r]
-            set data [read $fd]
+            configure -data [read $fd]
             close $fd
-            insertData $data
             seeFragment $point
             markUnmodified
             if {[file writable $file]} {
