@@ -78,13 +78,13 @@ StringList :: operator = (char c) {
 }
 
 StringList& StringList :: operator = (int i)
-{ initialize(); return *this += i;}
+{ initialize(); return *this << i;}
 
 StringList& StringList :: operator = (double d)
-{ initialize(); return *this += d;}
+{ initialize(); return *this << d;}
 
 StringList& StringList :: operator = (unsigned u)
-{initialize(); return *this += u;}
+{initialize(); return *this << u;}
 
 
 // Constructors
@@ -93,13 +93,13 @@ StringList::StringList(const char* s) {
 	put(savestring(s));
 }
 
-StringList::StringList(char c) {totalSize=0; *this += c;}
+StringList::StringList(char c) {totalSize=0; *this << c;}
 
-StringList::StringList(int i) {totalSize=0; *this += i;}
+StringList::StringList(int i) {totalSize=0; *this << i;}
 
-StringList::StringList(double d) {totalSize=0; *this += d;}
+StringList::StringList(double d) {totalSize=0; *this << d;}
 
-StringList::StringList(unsigned u) {totalSize=0; *this += u;}
+StringList::StringList(unsigned u) {totalSize=0; *this << u;}
 
 void StringList::copy(const StringList& s) {
 	StringListIter nexts(s);
@@ -117,7 +117,7 @@ StringList::StringList (const StringList& s) {
 
 // Add another StringList to the StringList
 StringList&
-StringList :: operator += (const StringList& l) {
+StringList :: operator << (const StringList& l) {
 // We always add the new argument as a single string, using newCopy.
 	if (l.totalSize > 0) {
 		char* c = l.newCopy();
@@ -129,7 +129,7 @@ StringList :: operator += (const StringList& l) {
 
 // Add in a char*
 StringList&
-StringList :: operator += (const char* s) {
+StringList :: operator << (const char* s) {
 	put(savestring(s));
 	totalSize+=strlen(s);
 	return *this;
@@ -137,41 +137,41 @@ StringList :: operator += (const char* s) {
 
 // Add in a char: uses the above method
 StringList&  
-StringList :: operator += (char c)
+StringList :: operator << (char c)
 {
         char buf[2];
         buf[0] = c;
         buf[1] = '\0';
-        return *this += buf;
+        return *this << buf;
 }
 
 // Add in an int: uses the above method
 StringList&  
-StringList :: operator += (int i)
+StringList :: operator << (int i)
 {
 	char buf[SMALL_STRING];
         sprintf(buf,"%d",i); 
-	return *this += buf;
+	return *this << buf;
 }
 
 // Add in an unsigned int
 StringList&
-StringList :: operator += (unsigned int i)
+StringList :: operator << (unsigned int i)
 {
 	char buf[SMALL_STRING];
         sprintf(buf,"%u",i); 
-	return *this += buf;
+	return *this << buf;
 }
 
 // Add in a double: uses the above method
 StringList&
-StringList :: operator += (double f)
+StringList :: operator << (double f)
 {
 	char buf[SMALL_STRING];
         sprintf(buf,"%.15g",f);
 	if (strchr(buf,'e') == NULL && strchr(buf,'.') == NULL)
 		strcat(buf,".0");
-	return *this += buf;
+	return *this << buf;
 }
 
 // Make a new (concatenated together) copy of the StringList string.

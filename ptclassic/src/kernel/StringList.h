@@ -95,12 +95,12 @@ public:
 	~StringList();
 
         // Add a thing to list
-        StringList& operator += (const char*);
-	StringList& operator += (char);
-	StringList& operator += (int);
-	StringList& operator += (unsigned int);
-	StringList& operator += (double);
-	StringList& operator += (const StringList&);
+        StringList& operator << (const char*);
+	StringList& operator << (char);
+	StringList& operator << (int);
+	StringList& operator << (unsigned int);
+	StringList& operator << (double);
+	StringList& operator << (const StringList&);
 
 	// Return first string on list
 	const char* head() const {
@@ -123,6 +123,33 @@ public:
 	// Make a copy of the StringList as a char* in dynamic memory.
 	// the user is responsible for deletion.
 	char* newCopy() const;
+
+// add objects to a StringList, old syntax
+
+	StringList& operator += (const char* arg) {
+		return *this << arg;
+	}
+
+	StringList& operator += (char arg) {
+		return *this << arg;
+	}
+
+	StringList& operator += (double arg) {
+		return *this << arg;
+	}
+
+	StringList& operator += (int arg) {
+		return *this << arg;
+	}
+
+	StringList& operator += (const StringList& arg) {
+		return *this << arg;
+	}
+
+	StringList& operator += (unsigned int arg) {
+		return *this << arg;
+	}
+
 private:
 	// copy constructor body
 	void copy(const StringList&);
@@ -145,31 +172,5 @@ public:
 
 class ostream;
 ostream& operator << (ostream& o,const StringList& sl);
-
-// add objects to a StringList, streamlike syntax
-
-inline StringList& operator << (StringList& list, const char* arg) {
-	return list += arg;
-}
-
-inline StringList& operator << (StringList& list, char arg) {
-	return list += arg;
-}
-
-inline StringList& operator << (StringList& list, double arg) {
-	return list += arg;
-}
-
-inline StringList& operator << (StringList& list, int arg) {
-	return list += arg;
-}
-
-inline StringList& operator << (StringList& list, const StringList& arg) {
-	return list += arg;
-}
-
-inline StringList& operator << (StringList& list, unsigned arg) {
-	return list += arg;
-}
 
 #endif
