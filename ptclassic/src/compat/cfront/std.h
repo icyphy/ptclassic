@@ -3,6 +3,8 @@
 #include <stdlib.h>
 #include <sys/unistd.h>
 #include "../../kernel/miscFuncs.h"
+#define random() ((long)(rand()))
+#define srandom(seed) (srand( (unsigned int)(seed))
 #else
 // Sun
 #include <stdlib.h>
