@@ -66,9 +66,6 @@ class ::tycho::JavaDocSys {
     ###################################################################
     ####                   protected methods                       ####
 
-    # Format an explanation properly (in HTML)
-    protected method formatExpl {comment {parsetags 1}}
-
     ###################################################################
     ####                   private methods                         ####
 
@@ -328,84 +325,6 @@ body ::tycho::JavaDocSys::modCheck {filename} {
     ###################################################################
     ###################################################################
     ####                     protected methods                     ####
-
-#####################################################################
-#### formatExpl
-# Format the explanation appropriately by substituting HTML tags for
-# comment conventions such as _underlines_ and *asterisks*. Include a
-# &lt;p&gt; tag for every empty line in a comment. Surround proc and
-# method names with &lt;code&gt; tags.
-#
-body ::tycho::JavaDocSys::formatExpl {comment {parsetags 1}} {
-    if {"$comment" == "\n"} {
-        return {}
-    }
-
-    # Knows: return, param, exception
-    # Ignores: since, deprecated FIXME: see
-    if {$parsetags} {
-        # Parse line by line
-        set desc ""
-        set param ""
-        set return ""
-        set exception ""
-        set docTag desc
-        set commList [split $comment "\n"]
-        
-        foreach commLine $commList {
-            if [regexp {^[ 	]*@([A-Za-z]+):*[ 	]+(.*)} \
-                    $commLine dummy docTag docValue] {
-                set commLine $docValue
-                set docTag [formatTag $docTag]
-                append $docTag "\n"
-                # puts "ct: $docTag, cl: $docValue"
-            }
-            if {$docTag == "param" || $docTag == "return"\
-                    || $docTag == "exception"} {
-                append $docTag $commLine " "
-            } else {
-                append $docTag $commLine "\n"
-            }
-        }
-
-        set comment $desc
-
-        # Parameter comments
-        if {$param != {}} {
-            set paramList [split $param "\n"]
-            append comment "\n<b>Parameters</b><ul>\n"
-            foreach par $paramList {
-                if {$par != {}} {
-                    set parname [lindex $par 0]
-                    append comment "<li><i>$parname</i> [lreplace $par 0 0]\n"
-                }
-            }
-            append comment "</ul>\n"
-        }
-
-        # Exception comments
-        if {$exception != {}} {
-            set throwList [split $exception "\n"]
-            append comment "\n<b>Throws</b><ul>\n"
-            foreach throw $throwList {
-                if {$throw != {}} {
-                    set throwname [lindex $throw 0]
-                    append comment \
-                            "<li><i>$throwname</i> [lreplace $throw 0 0]\n"
-                }
-            }
-            append comment "</ul>\n"
-        }
-        
-        # Return comment (only one?)
-        if {$return != {}} {
-            set return [string trimleft $return " \t\n"]
-            append comment "\n<b>Returns</b> $return\n"
-        }
-    }
-
-    return [chain $comment]
-}
 
     ###################################################################
     ###################################################################
