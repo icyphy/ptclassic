@@ -119,10 +119,7 @@ public:
         virtual int isItOutput () {return FALSE; }
 
 	// print info on the PortHole
-	virtual operator StringList ();
-
-	// no initialize function here
-	virtual void initialize () {}
+	operator StringList ();
 
 	// virtual function used for new connections.
 	// PortHole uses this one unchanged; MultiPortHole has to create
@@ -171,7 +168,7 @@ public:
                           dataType type = FLOAT);       // defaults to FLOAT
 
 	// Initialize when starting a simulation
-	virtual void initialize();
+	void initialize();
 
         // Indicate the real port (aliases resolved) at the far end
         // of a connection.  Initialized to NULL.
@@ -181,7 +178,7 @@ public:
         PortHole* farSidePort;
 
         // Print a description of the PortHole
-        virtual operator StringList ();
+        operator StringList ();
 
 	// set the alias
 	setAlias (PortHole& blockPort) { alias = &blockPort; }
@@ -423,10 +420,10 @@ public:
  
 class MultiInSDFPort : public MultiSDFPort {
 public:
-        virtual int isItInput () {return TRUE; }
+        int isItInput () {return TRUE; }
  
         // Add a new physical port to the MultiPortHole list
-        virtual PortHole& newPort();
+        PortHole& newPort();
 };
  
  
@@ -438,10 +435,10 @@ public:
 
 class MultiOutSDFPort : public MultiSDFPort {     
 public:
-        virtual int isItOutput () {return TRUE; }
+        int isItOutput () {return TRUE; }
 
         // Add a new physical port to the MultiPortHole list
-        virtual PortHole& newPort();
+        PortHole& newPort();
 };
 
 /**************************************************************
