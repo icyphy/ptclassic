@@ -401,7 +401,7 @@ StringList CGCTarget :: compileLine(const char* fName) {
     StringList linkArgs = getLinkOptions(TRUE);
     StringList srcFiles = getDependentCFiles(TRUE);
     StringList cmd = (const char*) compileCommand;
-    if (compileArgs.length > 0) cmd << " " << compileArgs;
+    if (compileArgs.length() > 0) cmd << " " << compileArgs;
     cmd << " " << fName;
     if (srcFiles.length() > 0) cmd << " " << srcFiles;
     if (linkArgs.length() > 0) cmd << " " << linkArgs;
