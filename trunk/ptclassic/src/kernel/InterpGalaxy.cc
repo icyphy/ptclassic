@@ -103,8 +103,8 @@ InterpGalaxy::alias(const char* galportname,const char* starname,
 // first get the portname for the contained star
 	PortHole *ph = findPortHole (starname, portname);
 	if (ph == NULL) return FALSE;
-	portname = ph->readName();// safe copy
-	starname = ph->parent()->readName();// safe copy
+	portname = savestring (portname);
+	starname = savestring (starname);
 // create new galaxy port, add to galaxy, do the alias
 	if (ph->isItInput()) {
 		actionList += "I";
