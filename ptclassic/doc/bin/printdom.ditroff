@@ -8,6 +8,8 @@
 
 # The optional argument is the directory of the domain documentation
 # The -index option generates an index only, printing nothing.
+# The -preview option causes the domain to previewed via xditview
+# (or nroff, if no DISPLAY is set) instead of being printed.
 # An implicit header file, $PTOLEMY/doc/headers/shared, is prepended.
 
 # The following files are assumed to present in the documentation directory:
@@ -35,7 +37,11 @@ set dirheader = $PTOLEMY/doc/headers
 set printcommand = ditroff
 set printoptions = "-me -tbl -eqn -P$PRINTER"
 set contentscmd = $PTOLEMY/doc/bin/contents
+set previewcommand = "xditview -"
+
+# Variables
 set indexonly = 0
+set preview = 0
 
 if (!($?ALMAGEST_INDEX)) then
 	setenv ALMAGEST_INDEX $HOME/Almagest.index
@@ -45,6 +51,10 @@ while ($#argv)
 	switch ($argv[1])
 		case -index:
 			set indexonly = 1
+			shift
+			breaksw
+		case -preview:
+			set preview = 1
 			shift
 			breaksw
 		case -*:
@@ -97,17 +107,27 @@ endif
 if ($indexonly) then
 	# if only generating index, add -t option and throw away the output
 	($printcommand $printoptions -t /tmp/pt$$ > /dev/null) >& /tmp/index$$
+else if ($preview) then
+	# if previewing, use either X windows or nroff
+	if ($?DISPLAY) then
+		$printcommand $printoptions -t /tmp/pt$$ | $previewcommand
+	else
+		(eqn /tmp/pt$$ | tbl | nroff -me > /tmp/ptnr$$) >& /dev/null
+		more /tmp/ptnr$$
+	endif
 else
+	# otherwise just print it out
 	$printcommand $printoptions /tmp/pt$$ >& /tmp/index$$
 	$contentscmd /tmp/index$$
 	$printcommand $printoptions $dirheader/shared title
+else
 endif
 cat /tmp/index$$ >>! $ALMAGEST_INDEX
-/bin/rm /tmp/pt$$ /tmp/index$$
+/bin/rm -f /tmp/pt$$ /tmp/index$$ /tmp/prnr$$
 exit 0
 
 catch:
         # prevent the "no match" error message if there are no temporary files
         set nonomatch
-        /bin/rm /tmp/pt$$ /tmp/index$$
+        /bin/rm -f /tmp/pt$$ /tmp/index$$ /tmp/prnr$$
         exit 1
