@@ -221,7 +221,7 @@ $(LIBS):: $(OBJS)
 #	$(RANLIB) $(LIBS)
 
 start.o: start.cc
-	g++ $(CFLAGS) -c $*.cc
+	$(CPLUSPLUS) $(CFLAGS) -c $*.cc
 
 cond.o: cond.c $(DEP1) mutex.h
 	$(COMP_C)
