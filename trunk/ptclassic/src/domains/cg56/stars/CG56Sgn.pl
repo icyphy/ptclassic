@@ -13,7 +13,7 @@ All rights reserved.
 See the file ~ptolemy/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-       	location { CG56 Demo Library }
+       	location { CG56 nonlinear functions library }
 	explanation { 
 This star outputs the signum of its input.
 .Id "signum"

@@ -19,7 +19,7 @@ All rights reserved.
 See the file ~ptolemy/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-    location { SDF main library }
+    location { CG56 control library }
     explanation {
 .Id "multiplex"
 .UH IMPLEMENTATION:
