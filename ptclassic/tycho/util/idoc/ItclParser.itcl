@@ -564,7 +564,6 @@ body ::tycho::ItclDocSys::parseData {data} {
     }
 }
 
-
 #####################################################################
 #### parseClass
 # This method works in much the same way as parseBody. It takes the 
@@ -581,7 +580,7 @@ body ::tycho::ItclDocSys::parseClass {class body} {
     set myClass($class) [::tycho::Class [::tycho::autoName class]]
     $myClass($class) modelconfigure -language $language
     $myClass($class) modelconfigure -name $class
-    $myClass($class) modelconfigure -source $sourceFile
+    $myClass($class) modelconfigure -source [file join .. .. $sourceFile]
 
     set lastComment {}
     set lastProtection {}
