@@ -377,6 +377,7 @@ proc htmlLinks {htmlfile {depth 0} {dagfd {}} {recurse 1}} {
 proc htmlTree2ps {indexfile psfile args} {
     global filesSeen
     set filesSeen {}
+    sets tartingDir [pwd]
 
     # If we are printing by directory, set printbydir
     set printbydir 0
@@ -425,7 +426,8 @@ proc htmlTree2ps {indexfile psfile args} {
     update
     html2ps $filesSeen
 
-    puts "\nAbout to generate concat PostScript into one file"
+    cd $startingDir
+    puts "\nAbout to generate concat PostScript into [file join [pwd] $psfile]"
     flush stdout
     update
     psConcat $psfile $pslist
