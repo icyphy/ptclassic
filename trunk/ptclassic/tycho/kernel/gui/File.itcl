@@ -1,7 +1,7 @@
 # Definition of a basic viewer widget with an interface to the file system.
 #
 # @Author: Edward A. Lee
-# @Contributors: Joel King, Farhana Sheikh
+# @Contributors: Joel King, Farhana Sheikh, Christopher Hylands
 #
 # @Version: $Id$
 #
@@ -83,7 +83,7 @@ option add *File.autoSaveInterval 5 widgetDefault
 # and <code>currentPoint</code>. These two should always be redefined
 # as a pair, since <code>currentPoint</code> is assumed to return a
 # syntax undertood by <code>seePoint</code>. Derived classes may wish
-# to redefine <code>setReadOnly</code>, for example to disable menu
+# to redefine <code>indicateReadOnly</code>, for example to disable menu
 # entries. Finally, most derived classes will want to redefine
 # <code>focusin</code> to give the focus to a key widget.
 #
@@ -138,6 +138,9 @@ class ::tycho::File {
     # Open a file and go to its internal point identified by name.
     method hyperJump {filename {point {}}}
 
+    # Specify whether or not modifications are allowed in the displayed text.
+    method indicateReadOnly {bool}
+
     # Insert the specified data.  Redefine in derived classes.
     method insertData {data}
 
@@ -176,9 +179,6 @@ class ::tycho::File {
 
     # If the file is modified, then ask the user if they want to save it
     method saveQuery {useSaveAs}
-
-    # Specify whether or not modifications are allowed in the displayed text.
-    method setReadOnly {bool}
 
     # Toggle the read-only status of a file (maybe invoking revision control).
     method toggleReadOnly {}
@@ -703,7 +703,7 @@ body ::tycho::File::markModified {} {
 #
 body ::tycho::File::markUnmodified {} {
     if $modified {
-	if {$itk_option(-readonly)} {
+	if $readOnly {
  	    statusbar configure -filestatus "readonly"	    
 	} {
 	    statusbar configure -filestatus "readwrite"
@@ -760,7 +760,7 @@ body ::tycho::File::reload {} {
         }
     } {
         # File does not exist.  Simply clear current data.
-	setReadOnly 0
+	configure -readonly 0
         clear
     }
     setClipboard $saveclipboard
@@ -878,11 +878,15 @@ body ::tycho::File::saveCrash {} {
 # If the file is marked as modified, then ask the user if they want to save it.
 # This method is especially useful if tycho is about to process a file
 # either by checking it in, or running a program on it etc.
+# If the optional argument is given and has a non-zero value,
+# then <code>saveAs</code> is used instead of <code>save</code>,
+# so that the user is prompted for a file name.
 # 
 # If the file was not modified, return a 2.
 # If the file was modified and was saved, return a 1.
 # If the file was modified, but not saved return a 0.
-# If the user hits cancel, we signal a silentError
+# If the user hits cancel, we signal a silentError, which unravels
+# the calling stack all the way to the top-level.
 #
 body ::tycho::File::saveQuery { {useSaveAs 0}} {
     if {$modified == 1} {
@@ -908,29 +912,6 @@ body ::tycho::File::saveQuery { {useSaveAs 0}} {
 }
 
 #####################################################################
-#### setReadOnly
-# Specify whether or not modifications are allowed in the displayed text.
-# Note that this is independent of whether the associated file is readonly.
-# It merely determines whether the buffer can be modified, not whether the
-# file can be modified.  To control the file, use <code>toggleReadOnly</code>.
-#
-body ::tycho::File::setReadOnly {bool} {
-
-    ::tycho::View::setReadOnly $bool
-    
-# FIXME:
-#    if [winfo exists $prefix] {
-	if {$bool} {
-            menubar disableMenuItem {Insert...} File
-            menubar disableMenuItem Save File
-	} {
-            menubar enableMenuItem {Insert...} File
-            menubar enableMenuItem Save File
-	}
-#    }
-}
-
-#####################################################################
 #### toggleReadOnly
 # Toggle the read-only status of the file.  If the file is under
 # revision control (e.g. SCCS or RCS), then check in or check out
@@ -948,7 +929,7 @@ body ::tycho::File::toggleReadOnly {} {
         # NOTE: Unix-only implementation here.
         if {![file writable [filename]]} {
             exec chmod +w [filename]
-	    setReadOnly 0
+	    configure -readonly 0
         } {
             if {$modified} {
                 if [::tycho::askuser \
@@ -958,7 +939,7 @@ body ::tycho::File::toggleReadOnly {} {
                 }
             }
             exec chmod -w [filename]
-	    setReadOnly 1
+	    configure -readonly 1
         }
     }
     focusin
@@ -1066,6 +1047,24 @@ body ::tycho::File::displayData {data filename} {
 body ::tycho::File::emergencySave {} {
     foreach obj [array names fileObjects] {
 	$obj saveCrash
+    }
+}
+
+#####################################################################
+#### indicateReadOnly
+# Indicate in the status bar and in the menus
+# whether modifications are allowed on the buffer.
+#
+body ::tycho::File::indicateReadOnly {bool} {
+
+    ::tycho::View::indicateReadOnly $bool
+    
+    if {$bool} {
+        menubar disableMenuItem {Insert...} File
+        menubar disableMenuItem Save File
+    } {
+        menubar enableMenuItem {Insert...} File
+        menubar enableMenuItem Save File
     }
 }
 
