@@ -88,6 +88,7 @@ CGCVIST = $(OBJDIR)/domains/cgc/vis/targets
 CGT = $(OBJDIR)/domains/cg/targets
 SDFT = $(OBJDIR)/domains/sdf/targets
 VHDLT = $(OBJDIR)/domains/vhdl/targets
+VHDLTCLT = $(OBJDIR)/domains/vhdl/tcltk/targets
 
 BDFDIR = $(CROOT)/src/domains/bdf
 CGDDFDIR = $(CROOT)/src/domains/cg
@@ -132,6 +133,7 @@ ifndef TK
 	FSM=
 	SDFTK=
 	SDFDFM=
+	VHDLTK=
 endif
 
 # Synchronous/Reactive domain
@@ -256,6 +258,13 @@ ifdef CGFULL
 	CGPAR = 1
 endif
 
+ifdef VHDLFULL
+	VHDL = 1
+	ifdef TK
+		VHDLTK = 1
+	endif
+endif
+
 ifdef VHDL
 	# star icons
 	PALETTES += PTOLEMY/src/domains/vhdl/icons/vhdl.pal
@@ -275,6 +284,17 @@ ifdef VHDL
 			$(VHDLT)/VHDLCReceive.o \
 			$(VHDLT)/VHDLCSend.o \
 			$(VHDLT)/VHDLCSynchComm.o
+	endif
+	# Tcl/Tk
+	ifdef VHDLTK
+		# special targets
+		CUSTOM_DIRS += $(VHDLDIR)/tcltk/targets
+		ifeq ($(USE_SHARED_LIBS),yes) 
+			LIBS += -lvhdltcltktargets
+			LIBFILES += $(LIBDIR)/libvhdltcltktargets.$(LIBSUFFIX)
+		else
+			TARGETS += $(VHDLTCLT)/TkSchedTarget.o
+		endif
 	endif
 	# kernel and stars
 	CUSTOM_DIRS += $(VHDLDIR)/kernel $(VHDLDIR)/stars
