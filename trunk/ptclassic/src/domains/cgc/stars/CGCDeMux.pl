@@ -71,7 +71,7 @@ limitation of liability, and disclaimer of warranty provisions.
 		addCode("\t{\n");
 		// control value i means port number i+1
 		for (int i = 0; i < output.numberPorts(); i++) {
-			copyData(i,i+1);
+			addCode(copyData(i,i+1));
 		}
 		addCode("\t}\n");
 	}
