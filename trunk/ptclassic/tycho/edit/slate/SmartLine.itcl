@@ -263,8 +263,13 @@ class ::tycho::SmartLine {
 	n-n e n-s w n-e s n-w n
 	s-n w s-s e s-e n s-w s
 	e-n n e-s s e-e e e-w w
-	w-n s w-s n w-e w w-w e
+	w-n n w-s s w-e w w-w e
     }
+
+    # Actually, the above is a bit of a mystery... the last line should
+    #   w-n s w-s n w-e w w-w e
+    # But this gets the wrong line shape. Later on, maybe this
+    # will show up as another bug....
 
     # An array saying how to normalize a line
     private common normalize
@@ -272,7 +277,7 @@ class ::tycho::SmartLine {
 	n {[expr -($y)] $x}
 	s {$y [expr -($x)]}
 	e {$x $y}
-	w {[expr -$x] $y}
+	w {[expr -($x)] $y}
     }
 
     # An array saying how to "un-normalize" a line
@@ -281,7 +286,7 @@ class ::tycho::SmartLine {
 	n {$y [expr -($x)]}
 	s {[expr -($y)] $x}
 	e {$x $y}
-	w {[expr -$x] $y}
+	w {[expr -($x)] $y}
     }
 
     # An array of next states. Each entry is a list of expression-
@@ -695,10 +700,10 @@ body ::tycho::SmartLine::reshaperelease {id canvas slate} {
 # Redraw the line.
 #
 body ::tycho::SmartLine::redraw {id canvas slate} {
-	# If autoshape is not on, just return
-	if !$option(autoshape$id) {
-		return
-	}
+    # If autoshape is not on, just return
+    if !$option(autoshape$id) {
+        return
+    }
     set flipped 0
     
     # Get the coordinates
@@ -720,7 +725,7 @@ body ::tycho::SmartLine::redraw {id canvas slate} {
 	set flipped 1
 	set type "s"
 	set y [expr -$y]
-    }
+   }
 
     # Get the relative coordinates
     set option(state$id) [nextstate $id $type $option(state$id) $x $y]
