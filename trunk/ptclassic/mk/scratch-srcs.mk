@@ -104,6 +104,11 @@ xv_all: xv_configure xv_bin xv_install
 
 .PHONY: xv_configure xv_bin xv_install
 
+# For hppa, undefine the following:
+#XV_RAND= RAND="-DNO_RANDOM -Drandom=rand"
+#INSTALL=bsdinst
+#CC_STATIC=-Wl,-a,archive
+
 xv_configure: $(OBJARCH)/xv \
 		$(OBJARCH)/xv/jpeg $(OBJARCH)/xv/jpeg/Makefile \
 		$(OBJARCH)/xv/tiff $(OBJARCH)/xv/tiff/Makefile	\
@@ -128,7 +133,8 @@ $(OBJARCH)/xv/tiff/Makefile:
 xv_bin: $(OBJARCH)/xv
 	(cd $(OBJARCH)/xv; \
 		$(MAKE) $(MFLAGS) \
-		EXTRA_LDOPTIONS=-Bstatic \
+		EXTRA_LDOPTIONS=$(CC_STATIC) \
+		RAND=$(XV_RAND) \
 		BINDIR=$(XV_DEST)/bin.$(ARCH) all)
 
 xv_install: $(OBJARCH)/xv
@@ -136,9 +142,9 @@ xv_install: $(OBJARCH)/xv
 		$(MAKE) $(MFLAGS) \
 		VPATH=../../src/xv \
 		EXTRA_LDOPTIONS=-Bstatic \
+		INSTALL=$(INSTALL) \
 		BINDIR=$(XV_DEST)/bin.$(ARCH)  install)
 	strip $(PTOLEMY)/bin.$(ARCH)/xv
-	ldd $(PTOLEMY)/bin.$(ARCH)/xv
 
 $(OBJARCH):
 	mkdir $@ 
