@@ -217,8 +217,7 @@ elif [ -x "/usr/bin/X11/$1" ]; then
 elif [ -x "/usr/openwin/bin/$1" ]; then
     append PATH /usr/openwin/bin
 else
-    echo "$prg: '$1' not found, exiting."
-    exit 1
+    echo "$prg: warning: '$1' not found."
 fi
     
 dbfile=/tmp/pigiXR$$
