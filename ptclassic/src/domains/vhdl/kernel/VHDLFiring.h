@@ -79,6 +79,8 @@ class VHDLFiring : public VHDLObj
   int noSensitivities;
   // Suppress output clocking.
   int noOutclocking;
+  // Firegroup serial number
+  int groupNum;
 
   // Class Idenitification.
   /* virtual */ int isA(const char*) const;
