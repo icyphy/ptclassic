@@ -57,6 +57,6 @@ S56DIR =	$(ROOT)/vendors/s56dsp
 MATLABDIR =	/usr/sww/matlab
 MATLABLIBDIR =	-L$(MATLABDIR)/extern/lib/$(ARCH)
 
-# Used by xv
-XV_CC =		gcc
+# Used to compile xv.  Use -traditional to avoid varargs problems
+XV_CC =		gcc -traditional
 
