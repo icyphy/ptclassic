@@ -24,7 +24,7 @@ For targets consisting of a single processor, we provide three different
 scheduling techniques. The user can select the most appropriate scheduler
 for a given application by setting the
 .c loopingLevel
-.Id "loopingLevel, target parameter"
+.Ir "loopingLevel, target parameter"
 target parameter.
 .pp
 In the first approach (loopingLevel = 0), which is the default SDF scheduler,
@@ -40,7 +40,7 @@ there are large sample rate changes, in which case it corresponds to
 completely unrolling all loops, so results in huge code size. 
 .pp
 The second approach we call \fIJoe's\fR scheduling. In this approach
-.Id "Joe's scheduling"
+.Ir "Joe's scheduling"
 (loopingLevel = 1), actors that have the same sample rate are merged 
 (wherever this will not cause deadlock) and loops are introduced to 
 match the sample rates. The result is a hierarchical clustering; 
@@ -52,7 +52,7 @@ Since the second approach uses a conservative approach, there are some
 cases, if rare, in which some looping possibilities are undetected. 
 By setting the loopingLevel to 2, we can choose the third approach,
 called \fISJS\fR (Shuvra-Joe-Soonhoi) scheduling after the inventor's
-.Id "SJS scheduling"
+.Ir "SJS scheduling"
 first names. After performing Joe's scheduling at the front end,
 it attacks the remaining graph with more complicated approach.
 .pp
@@ -111,12 +111,12 @@ type of schedule, and (where appropriate) to experiment with the
 effect of altering the topology or the communication 
 costs. The parameters are
 .c ignoreIPC ,
-.Id "ignoreIPC, target parameter"
+.Ir "ignoreIPC, target parameter"
 .c overlapComm ,
-.Id "overlapComm, target parameter"
+.Ir "overlapComm, target parameter"
 and 
 .c useCluster .
-.Id "useCluster, target parameter"
+.Ir "useCluster, target parameter"
 There is priority between these parameter. If the
 .c ignoreIPC
 is set to 
@@ -146,13 +146,13 @@ more communication stars than what the other schedulers would result in.
 There are another set of target parameter to direct the scheduling
 procedure. If parameter
 .c manualAssignment
-.Id "manualAssignment, target parameter"
+.Ir "manualAssignment, target parameter"
 is set to 
 .c YES ,
 the default parallel scheduler does not perform star assignment. Instead,
 it checks the processor assignment of all stars (
 .c procId
-.Id "procId, CG star state"
+.Ir "procId, CG star state"
 state of CG stars). By default, the procId state is set to -1, which is
 an illegal assignment since the child target is numbered from 0.
 If there exists any star, except
@@ -166,7 +166,7 @@ We do not support the case in which a block requires more than
 one processors to be assigned on. This option automatically sets
 the
 .c oneStarOneProc
-.Id "oneStarOneProc, target parameter"
+.Ir "oneStarOneProc, target parameter"
 state to be discussed next.
 .pp
 If there are sample rate changes, a star in the program graph
@@ -184,7 +184,7 @@ do not need
 stars, which will be discussed later.
 Also, it provides us another possibility of scheduling option:
 .c adjustSchedule .
-.Id "adjustSchedule, target parameter"
+.Ir "adjustSchedule, target parameter"
 The main disadvantage is performance loss of not exploiting parallelism.
 It is most severe if Sih's declustering algorithm is used. Therefore,
 it is not recommended to use Sih's declustering algorithm with this option.
@@ -197,7 +197,7 @@ the
 assignment, the user may want to override the scheduling decision
 manually. It can be done by setting the
 .c adjustSchedule
-.Id "adjustSchedule, target parameter"
+.Ir "adjustSchedule, target parameter"
 parameter. If that parameter is set, after the automatic scheduling
 is performed, the 
 .c procId
