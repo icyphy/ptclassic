@@ -44,7 +44,11 @@ static char SccsId[]="$Id$";
 #endif
 
 #include <sys/types.h>
+#ifndef SYS_SOCKET_H
+#define SYS_SOCKET_H		/* mips Ultrix4.3A requires this
+				   otherwise we get conflicts with compat.h */
 #include <sys/socket.h>
+#endif
 
 #ifdef SYSV
 #include <sys/time.h>
