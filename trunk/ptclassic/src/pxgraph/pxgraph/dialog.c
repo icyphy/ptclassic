@@ -1,3 +1,30 @@
+/*******************************************************************
+SCCS version identification
+$Id$
+
+Copyright (c) 1989-1994 The Regents of the University of California.
+All rights reserved.
+
+Permission is hereby granted, without written agreement and without
+license or royalty fees, to use, copy, modify, and distribute this
+software and its documentation for any purpose, provided that the above
+copyright notice and the following two paragraphs appear in all copies
+of this software.
+
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY 
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES 
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF 
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF 
+SUCH DAMAGE.
+
+THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+ENHANCEMENTS, OR MODIFICATIONS.
+							COPYRIGHTENDKEY
+*/
 /*
  * Xgraph Dialog Boxes
  *
@@ -6,13 +33,14 @@
  * in toolbox.c.
  */
 
-#include "copyright.h"
 #include "xgout.h"
 #include "xgraph.h"
 #include "hard_devices.h"
 #include "xtb.h"
 #include "params.h"
 #include <X11/Xutil.h>
+
+#include "dialog.h"
 
 void do_error();
 
@@ -58,6 +86,9 @@ typedef struct d_info {
 #define DELETE		0177
 #define CONTROL_U	0025
 #define CONTROL_X	0030
+
+/* Forward declarations */
+int getline	ARGS((char **tptr, char *lptr));
 
 /*ARGSUSED*/
 static xtb_hret df_fun(win, ch, text, val)
@@ -262,15 +293,15 @@ xtb_data info;			/* User data         */
 	    (void) xtb_bt_set(data->docu_p, 1, (xtb_data) 0, 0);
 	    break;
 	}
-	(void) sprintf(text, "%lg", hard_devices[new].dev_max_dim);
+	(void) sprintf(text, "%g", hard_devices[new].dev_max_dim);
 	xtb_ti_set(data->dimspec, text, (xtb_data) 0);
 	xtb_ti_set(data->tf_family, hard_devices[new].dev_title_font,
 		   (xtb_data) 0);
-	(void) sprintf(text, "%lg", hard_devices[new].dev_title_size);
+	(void) sprintf(text, "%g", hard_devices[new].dev_title_size);
 	xtb_ti_set(data->tf_size, text, (xtb_data) 0);
 	xtb_ti_set(data->af_family, hard_devices[new].dev_axis_font,
 		   (xtb_data) 0);
-	(void) sprintf(text, "%lg", hard_devices[new].dev_axis_size);
+	(void) sprintf(text, "%g", hard_devices[new].dev_axis_size);
 	xtb_ti_set(data->af_size, text, (xtb_data) 0);
     }
     return XTB_HANDLED;
