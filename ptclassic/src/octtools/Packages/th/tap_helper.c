@@ -35,9 +35,11 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "oh.h"
 #include "th.h"
 
-static char* defTechName = "scmos";
+static char*	defTechName = "scmos";
 static octObject *dummyFacet = 0;
-static int verbose = 0;
+static int	verbose = 0;
+
+static void	thInit ARGS((octObject *obj));
 
 void thVerbose( f )
     int f;
@@ -48,8 +50,6 @@ void thVerbose( f )
 void thTechnology( obj )
     octObject *obj;
 {
-    static void thInit();
-    
     thInit( 0 );
     if ( obj ) {
 	octGetFacet( obj, dummyFacet );
