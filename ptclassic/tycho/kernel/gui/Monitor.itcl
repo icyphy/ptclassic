@@ -147,9 +147,11 @@ body ::tycho::Monitor::constructor {args} {
     configure -queries [list \
             {line commandToExec {Command to Exec:} make } \
             {line dirToExecFrom {Directory to Exec from:} {}} \
-            {radio autoDestroy {Close window automatically:} {Yes No} No}\
-            "radio autoStart {Start execution automatically:} {Yes No} No \
-            -command \"$this saveSetting\""]
+            {check autoDestroy {Close window automatically:} 0} \
+            {check autoStart {Start execution automatically:} 0}]
+    #{radio autoDestroy {Close window automatically:} {Yes No} No}\
+            #"radio autoStart {Start execution automatically:} {Yes No} No \
+            #-command \"$this saveSetting\""
 
 
     eval itk_initialize $args
@@ -208,7 +210,7 @@ body ::tycho::Monitor::constructor {args} {
 
     # If autostart is not equal to zero, then start the subprocess
     # This should be at the end of the constructor
-    if {$itk_option(-autostart) != 0} {
+    if {$itk_option(-autostart) == 1} {
         $this execProcessInMonitor
     }
 
@@ -346,7 +348,7 @@ body ::tycho::Monitor::execProcessInMonitor {} {
     
     $this execProcess [get commandToExec] [get dirToExecFrom]
 
-    if {[get autoDestroy]=="Yes"} {
+    if {[get autoDestroy]==1} {
         # ASSERT([$this getSatusWait]!="running")       always the case
         if {[$this getStatusWait]=="normal"} {
             # If returned correctly, it's okay to exit this window
@@ -364,9 +366,9 @@ body ::tycho::Monitor::execProcessInMonitor {} {
 # status
 configbody ::tycho::Monitor::autodestroy {
     if {$itk_option(-autodestroy) == 0} {
-        insert autoDestroy No
+        insert autoDestroy 0
     } else {
-        insert autoDestroy Yes
+        insert autoDestroy 1
     }
 }
 
@@ -375,9 +377,9 @@ configbody ::tycho::Monitor::autodestroy {
 # 
 configbody ::tycho::Monitor::autostart {
     if {$itk_option(-autostart)==0} {
-        insert autoStart No
+        insert autoStart 0
     } else {
-        insert autoStart Yes
+        insert autoStart 1
     }
 }
 
