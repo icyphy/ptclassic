@@ -13,7 +13,8 @@ Routine to expand a pathname
 warning: may return a pointer to a static buffer; a second
 call may over-write this buffer.
 
-This is almost plain C except for calling Error::abortRun
+The pathname may begin with ~, ~user, or $var where var is an
+environment variable.  Variables are expanded only at the beginning.
 
 **************************************************************************/
 
@@ -25,27 +26,43 @@ This is almost plain C except for calling Error::abortRun
 const char*
 expandPathName(const char* name) {
 	static char buf[MAXLEN];
-	if (*name != '~') return name;
+	const char* value;
+
+	if (*name != '~' && *name != '$') return name;
+
+	// find first / after the env-var or the username
 
 	const char* pslash = index (name, '/');
 	if (pslash == NULL) pslash = name + strlen(name);
-	passwd* pwd;
-	if (pslash == name + 1) {
-		pwd = getpwuid(getuid());
-		if (pwd == 0) {
-			Error::abortRun ("getpwuid doesn't know you!");
-			exit (1);
-		}
+
+	// copy the username or variable name into buf.
+
+	int l = pslash - name - 1;
+	strncpy (buf, name + 1, l);
+	buf[l] = 0;
+
+	// if an environment variable, look up the value.
+	if (*name == '$') {
+		value = getenv (buf);
+		if (!value) return name;
 	}
 	else {
-		int l = pslash - name - 1;
-		strncpy (buf, name + 1, l);
-		buf[l] = 0;
-		pwd = getpwnam(buf);
-		if (pwd == 0) return name;
+		passwd* pwd;
+		if (pslash == name + 1) {
+			pwd = getpwuid(getuid());
+			if (pwd == 0) {
+				Error::abortRun ("getpwuid doesn't know you!");
+				exit (1);
+			}
+		}
+		else {
+			pwd = getpwnam(buf);
+			if (pwd == 0) return name;
+		}
+		value = pwd->pw_dir;
 	}
-	// Put in the home directory
-	strcpy (buf, pwd->pw_dir);
+	// Put in the home directory or value of variable
+	strcpy (buf, value);
 
 	// add the rest of the name
 	strcat (buf, pslash);
