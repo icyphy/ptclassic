@@ -84,7 +84,7 @@ This is useful before quantization.
 
 // Copy the data to the DCTImage.
 			copy(img.retFullSize(), img.retData(), outArr);
-			LOG_DEL; delete outArr;
+			LOG_DEL; delete [] outArr;
 		}
 	} // end { doZigZag }
 
@@ -114,7 +114,7 @@ This is useful before quantization.
 
 		DCTImage* image = (DCTImage*) inPkt.writableCopy();
 		if (image->fragmented() || image->processed()) {
-			delete image;
+			LOG_DEL; delete image;
 			Error::abortRun(*this, "Processed or fragmented.");
 			return;
 		}
