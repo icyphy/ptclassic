@@ -125,7 +125,7 @@ int directive;
 
 
 
-#if defined(ultrix) || defined(hppa) || defined(sgi) || defined(SOL2)
+#if defined(ultrix) || defined(hppa) || defined(sgi) || defined(SOL2) || defined(linux)
 #define NEED_STRICMP
 #endif
 
