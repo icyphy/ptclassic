@@ -17,7 +17,6 @@ CGDIR = $(ROOT)/src/domains/cg/kernel
 SDFDIR = $(ROOT)/src/domains/sdf/kernel
 GPPFLAGS = -g
 GNU = g++
-GNUINCLUDE = /usr/gnu/lib/g++-include
 
 .SUFFIXES: .o .cc .h .pl
 .cc.o:
@@ -37,7 +36,8 @@ SRCS= \
  CGMultiOut.pl \
  CGSource.pl \
  CGThrough.pl \
- CGSink.pl
+ CGSink.pl \
+ CGVarTime.pl
 
 # The .cc files
 CCSRCS=$(SRCS:.pl=.cc)

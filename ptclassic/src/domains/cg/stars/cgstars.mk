@@ -11,4 +11,5 @@ CGSTARS= \
  $(CG)/CGMultiOut.o \
  $(CG)/CGSource.o \
  $(CG)/CGThrough.o \
- $(CG)/CGSink.o
+ $(CG)/CGSink.o \
+ $(CG)/CGVarTime.o
