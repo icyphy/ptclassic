@@ -236,7 +236,7 @@ void XGraph :: terminate () {
         cmd += "( ";
 
         if (sf != NULL && *sf != 0) {
-            const char* saveFileName = savestring (expandPathName(sf));
+            const char* saveFileName = savestring(expandPathName(sf));
 
             // Easiest way to check to see whether the file can be
             // written is to call creat and then close the file.
@@ -259,9 +259,11 @@ void XGraph :: terminate () {
                     cmd += "; ";
                 }
             }
+
+	    delete [] saveFileName;
         }
 
-	if(dataToPlot) {
+	if (dataToPlot) {
 
 	    // The following relies on the pxgraph being in the user's path.
 	    // The path is set by the pigi script, so at least with pigi,
@@ -304,7 +306,7 @@ void XGraph :: terminate () {
 		cmd += "; /bin/rm -f ";
 		cmd += name;
 		// remove the filenames so we won't zap them later.
-		LOG_DEL; delete name;
+		LOG_DEL; delete [] name;
 		tmpFileNames[i] = 0;
         }
 	ng = 0;
