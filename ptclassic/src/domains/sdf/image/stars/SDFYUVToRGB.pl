@@ -30,10 +30,11 @@ are integer values in the range from 0 to 255 (inclusive).
 .pp
 This star supports two YUV formats--- the usual one [1] and
 the CCIR 601 standard.
-The usual YUV definition shifts the YUV values so that they fall in
+The usual YUV definition shifts the U and V values so that they fall in
 the range from 0 to 255 (inclusive).
-The CCIR 601 standard scales and then shifts the YUV values so that fall in
-the range from 0 to 255 (inclusive).
+The CCIR 601 standard scales and then shifts the Y, U, and V values so that
+Y falls in the range from 16 to 235 (inclusive) and U and V falls
+in the range from 16 to 240 (inclusive).
 The CCIR 601 standard was developed so that more of the YUV space maps into
 the RGB space.
 All RGB values, however, map into both YUV standards, so RGB to YUV conversion
@@ -76,7 +77,7 @@ standards; otherwise, the usual YUV space is meant. }
 	inline method {		// perform rounding in range [0, 255]
 		name { quant }
 		type { "unsigned char" }
-		arglist { "(float inval)" }
+		arglist { "(double inval)" }
 		access { protected }
 		code {
 			if (inval < 0.5) return ((unsigned char) 0);
@@ -146,7 +147,7 @@ standards; otherwise, the usual YUV space is meant. }
 				}
 				rvalue = yvalue + 1.4020*vvalue;
 				gvalue = yvalue - 0.3441*uvalue - 0.7141*vvalue;
-				bvalue = yvalue - 1.7720*uvalue;
+				bvalue = yvalue + 1.7720*uvalue;
 				rptr[temp2] = quant(rvalue);
 				gptr[temp2] = quant(gvalue);
 				bptr[temp2] = quant(bvalue);
