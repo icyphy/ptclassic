@@ -15,6 +15,12 @@ $Id$
  Programmer:  E. A. Lee and D. G. Messerschmitt
  Date of creation: 1/17/89
  Revisions:
+ 	3/19/90 - J. Buck
+		Make MultiPortHole a derived type of PortHole.
+		add a virtual method newConnection to get the
+		PortHole to use for a new connection (realPort
+		for PortHoles, realPort.newPort for MultiPortHoles).
+		Allow casting from MultiPortHole to PortHole.
 
 This file contains definitions relevant to connections.
 
@@ -142,6 +148,10 @@ public:
                 else return alias->realPort();
         	}
 
+	// Return the PortHole that is used for connections
+	// This is virtual so that MultiPortHole can override it
+	virtual PortHole& newConnection() { return realPort(); }
+
         // Determine whether the port is an input or output.
         // For class PortHole, it is unspecified, so both
         // functions return FALSE.
@@ -192,7 +202,6 @@ protected:
 	// Allocate new buffer
 	void allocateBuffer(int size);
 
-private:
 	// Name of this PortHole
 	char* name;
 };
@@ -245,7 +254,7 @@ public:
 // every connection to a MultiPortHole causes a new PortHole to be
 // created and connected.
  
-class MultiPortHole
+class MultiPortHole: public PortHole
 {
 public:
 	void initialize() {ports.initialize();}
@@ -256,17 +265,8 @@ public:
                           Block* parent,                // parent block pointer
                           dataType type = FLOAT);       // defaults to FLOAT
  
-        // Name is private (below) so that it can't be changed.
-        char* readName() { return name;}
  
-        // In order to trace through the topology graph, we need
-        // a pointer to the block to which the PortHole belongs.
-        Block* blockIamIn;      // The block I am in.
- 
-        // The PortHole supports only one type of particle at a time
-        dataType type;
- 
-        // Print a description of the PortHole
+        // Print a description of the MultiPortHole
         operator char* ();
  
         // The MultiPortHole can be aliased to another MultiPortHole.
@@ -277,13 +277,6 @@ public:
                 if (alias == NULL) return *this;
                 else return alias->realPort();
                 }
-
-
-        // Determine whether the port is an input or output.
-        // For class PortHole, it is unspecified, so both
-        // functions return FALSE.
-        virtual int isItInput () {return FALSE; }
-        virtual int isItOutput () {return FALSE; }
 
         // Return the number of physical port currently allocated
         int numberPorts() {return ports.size();}
@@ -297,11 +290,14 @@ public:
         // Add a new physical port to the MultiPortHole list
         virtual PortHole& newPort();
 
+	// Return a new port for connections
+	virtual PortHole& newConnection() { return realPort().newPort();}
+
+	// Also use this in casting to PortHole.  (Is this what we want?)
+	operator PortHole (){ return newConnection();}
 protected:                           
         // List of ports allocated
         PortList ports;
-private: 
-        char* name;             // Name of this PortHole
 };
 
 /*****************************************************************
