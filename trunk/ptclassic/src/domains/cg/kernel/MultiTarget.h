@@ -42,8 +42,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "CGTarget.h"
 #include "IntState.h"
 #include "IntArray.h"
-#include "CGDDFCode.h"
 
+class CGDDFCode;
 class Profile;
 class ParNode;
 class ParProcessors;

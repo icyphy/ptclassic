@@ -1,3 +1,6 @@
+#ifndef _CodeStreamList_h
+#define _CodeStreamList_h 1
+
 /****************************************************************
 SCCS version identification
 $Id$
@@ -32,8 +35,9 @@ Date: 10/2/92
 
 *******************************************************************/
 
-#ifndef _CodeStreamList_h
-#define _CodeStreamList_h 1
+#ifdef __GNUG__
+#pragma interface
+#endif
 
 #include "NamedList.h"
 #include "CodeStream.h"
