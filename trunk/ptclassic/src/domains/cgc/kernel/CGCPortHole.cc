@@ -54,7 +54,7 @@ void CGCPortHole :: finalBufSize() {
 		while ((outp = next++) != 0) {
 			CGCPortHole* inp = outp->realFarPort();
 			int temp = inp->cgGeo().getMaxNum();
-			temp += inp->cgGeo().forkDelay() - inp->numTokens();
+			temp += inp->cgGeo().forkDelay();
 			temp += inp->inBufSize() - inp->numberTokens;
 			if (temp > maxBuf) maxBuf = temp;
 		}
