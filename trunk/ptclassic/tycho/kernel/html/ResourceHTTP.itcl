@@ -1,4 +1,4 @@
-# The abstract superclass of file-like "resources"
+# Subclass of Resource
 # 
 # @Author: Kevin Chang
 #
@@ -122,20 +122,27 @@ class ::tycho::ResourceHTTP {
     ####                        protected variables                ####
 
     # The full name of the current file (or directory)
-    protected variable currentFile
+    #protected variable currentFile
 
-    # The name of the host name
+    # The name of the host name. Format is:<br>
+    # <tt>HTTP://$hostname$path:$port</tt>
     protected variable hostname {}
     
+    # The name of path in the hostname
+    protected variable path /
+
     # The name of the HTTP port. Default is 80
     protected variable port 80
 
     # The index of the get
     protected variable idx 0
 
+    # Whether we are getting the header or not (header mode or body mode)
+    protected variable isheader 1
+
     # FIXME: need to find out where to collect protocols that Tycho
     # understands:
-    set accept {text/*}
+    protected variable accept {text/*}
 
     ###################################################################
     ####                         private variables               ####
@@ -163,19 +170,19 @@ body ::tycho::ResourceHTTP::destructor {} {
 #####################################################################
 #### close
 body ::tycho::ResourceHTTP::close {} {
-    ::tycho::abstractMethod close
+    
 }
 
 #####################################################################
 #### contenttype
 body ::tycho::ResourceHTTP::contenttype {} {
-    ::tycho::abstractMethod contenttype
+
 }
 
 #####################################################################
 #### exists
 body ::tycho::ResourceHTTP::exists {[ath} {
-    ::tycho::abstractMethod exists
+
 }
 
 #####################################################################
@@ -187,13 +194,13 @@ body ::tycho::ResourceHTTP::filetype {} {
 #####################################################################
 #### gets
 body ::tycho::ResourceHTTP::gets {} {
-    ::tycho::abstractMethod gets
+
 }
 
 #####################################################################
 #### glob
 body ::tycho::ResourceHTTP::glob {path} {
-    ::tycho::abstractMethod glob
+
 }
 
 #####################################################################
@@ -227,25 +234,31 @@ body ::tycho::ResourceHTTP::open {url {mode "r"}} {
     # 
     # The following is verbatim from Surfit: vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
     if {[regexp -nocase {^http://([^/:]*)(:([^/]+))?(.*)} $url match \
-            host optport port path]} {
-        if {$hostname == {}} {set hostname $host} ;# Supply reasonable default
-        if {$port == {}} {set port 80}            ;# HTTP default service
-        if {$path == {}} {set path /}
+            hosttmp optport porttmp pathtmp]} {
+        if {$hosttmp!={}} {set hostname $hosttmp} ;# Supply reasonable default
+        if {$porttmp!={}} {set port $porttmp}     ;# HTTP default service
+        if {$pathtmp!={}} {set path $pathtmp}
     } else {
         # Recover from malformed URL
         if {![string match */* $url]} {
             # Assume only the hostname:port has been given
-            regexp {([^:]*)(:(.*))?} $url match host optport port
-            if {$host == {}} {set hostname host}
-            if {$port == {}} {set port 80}
+            regexp {([^:]*)(:(.*))?} $url match \
+                    hosttmp optport porttmp
+            if {$hosttmp != {}} {set hostname $hosttmp}
+            if {$porttmp != {}} {set port $porttmp}
             set path /
         } else {
-            return -1
-            #error "no hostname given in URL \"$url\""
+            error "no hostname given in URL \"$url\""
         }
     }
+    # Surfit ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
     set cacheFile [httpget]
-    puts "CACHE: $cacheFile"
+    ::puts "CACHE: $cacheFile"
+
+    # Read in the cache file
+    set fd [::open $cacheFile r]
+    ::gets $fd status
 
 }
 
@@ -266,7 +279,7 @@ body ::tycho::ResourceHTTP::path {} {
 #####################################################################
 #### read
 body ::tycho::ResourceHTTP::read {} {
-    ::tycho::abstractMethod read
+
 }
 
 #####################################################################
@@ -278,13 +291,13 @@ body ::tycho::ResourceHTTP::readable {{path {}}} {
 #####################################################################
 #### source
 body ::tycho::ResourceHTTP::source {{path {}}} {
-    ::tycho::abstractMethod source
+
 }
 
 #####################################################################
 #### stat
 body ::tycho::ResourceHTTP::stat {path varName} {
-    ::tycho::abstractMethod stat
+
 }
 
 #####################################################################
@@ -313,30 +326,31 @@ body ::tycho::ResourceHTTP::httpget {} {
     # Surfit starts here vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
     if {[catch {socket -async $hostname $port} fd]} {
         unset $fd
-        return -1
-        #error "Can't open $host, $port"
+        error "Can't open $host, $port"
     }
     # Surfit ends here ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
     # Wait until finished reading HTTP file
-    set tmpFile [::tycho::tmpFileName cache].html
-    set tmpfd [open $tmpFile "w"]
+    set tmpFile [::tycho::tmpFileName Cache].html
+    set tmpfd [::open $tmpFile "w"]
     set statusVariableName [::tycho::autoName httpgetStatus]
+    set isheader 1    ;# Initially we're getting the header first
     httpStatus $statusVariableName "running"
 
     # connect now!
     fconfigure $fd -blocking no -translation crlf
-    puts $fd "GET $path HTTP/1.0\
+    ::puts $fd "GET $path HTTP/1.0\
             User-Agent: Tycho Jr. Beta\
             Accept-Encoding: $accept"
-    puts $fd ""
-    flush $fd
+    ::puts $fd ""
+    ::flush $fd
     fconfigure $fd -translation auto
 
     ::tycho::safeUpdate $this
     fileevent $fd w {}
     fileevent $fd r "$this httpread $fd $tmpfd"
 
+    ::puts "File ids are $fd $tmpfd"
     # Wait until the entire http file is here on local drive
     httpwait
 
@@ -347,14 +361,52 @@ body ::tycho::ResourceHTTP::httpget {} {
 #### httpread
 # This is called by file event handler, from httpget.
 #
-body ::tycho::HTML::httpread {fd tmpfd} {
+body ::tycho::ResourceHTTP::httpread {fd tmpfd} {
     if [eof $fd] {
-	catch {close $fd}
-	catch {close $tmpfd}
+	catch {::close $fd}
+	catch {::close $tmpfd}
         httpStatus $statusVariableName "done"
     } else {
-	gets $fd line
-        puts $tmpfd $line
+        
+	::gets $fd line
+        if {$isheader==1} {
+            # Header mode
+            if {$line=={}} {
+                # End of header is denoted by an empty line
+                set isheader 0
+            } else {
+                # Parse the header information:
+                #HTTP/1.0 200 Document follows
+                #Date: Wed, 21 May 1997 00:54:29 GMT
+                #Server: NCSA/1.4.1
+                #Content-type: text/html
+                #Last-modified: Fri, 16 May 1997 21:18:58 GMT
+                #Content-length: 8215
+                #
+                #HTTP/1.0 302 Found
+                #Date: Wed, 21 May 1997 01:17:59 GMT
+                #Server: NCSA/1.4
+                #Location: http://HTTP.CS.Berkeley.EDU/~kchang/
+                #Content-type: text/html
+                # 
+                #HTTP/1.0 404 Not Found
+                #Date: Wed, 21 May 1997 01:20:18 GMT
+                #Server: NCSA/1.4
+                #Content-type: text/html
+                #Last-modified: Mon, 12 May 1997 18:46:57 GMT
+                #Content-length: 683
+
+                if {[string first "HTTP/1.0" $line]} {
+                    set status [lindex $line 1]
+                }
+                
+
+
+            }
+        } else {
+            # Body mode
+            ::puts $tmpfd $line
+        }
     }
 }
 
@@ -363,7 +415,7 @@ body ::tycho::HTML::httpread {fd tmpfd} {
 # Wait until the variable name has been changed.
 body ::tycho::ResourceHTTP::httpwait {} {
     global $statusVariableName
-    puts "status: $statusVariableName"
+    ::puts "status: $statusVariableName"
     if {[uplevel #0 "set $statusVariableName"]=="running"} {
         tkwait variable $statusVariableName
     }
