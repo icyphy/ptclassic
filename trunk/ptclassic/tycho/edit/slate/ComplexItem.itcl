@@ -298,7 +298,7 @@ body ::tycho::Picture::itemconfigure {id canvas slate scope args} {
 	    if { ! [string compare $option -tags] } {
 		# Set the tags of the complex item. This is awkward and
 		# slow... First get the tags of the item
-		set tags [$slate gettags $primary($id)]
+		set tags [$slate gettags $id]
 
 		# Process given tags to find out what to add
 		foreach tag $value {
