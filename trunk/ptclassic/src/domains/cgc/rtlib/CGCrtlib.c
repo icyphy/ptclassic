@@ -37,10 +37,13 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #include <stdio.h>
 #include <math.h>
-#include <memory.h>		/* declare memset for sun4 */
-#include <string.h>		/* declare memset for sol2 */
+#include <memory.h>		/* declare memset and memcpy for Sun 4 C */
+#include <string.h>		/* declare memset and memcpy under ANSI C */
 
 #include "CGCrtlib.h"
+
+/* Generate an integer 011111...111 with all bits turned on except sign bit */
+#define FIX_MAX_UNSIGNED ((FIX_WORD) ((1 << (FIX_BITS_PER_WORD - 1)) - 1))
 
 /* private macros */
 
@@ -50,8 +53,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 /* compute # of words in internal representation for given length (in bits) */
 #define FIX_Words(length) \
-    ((length <= FIX_BITS_PER_WORD) ? \
-	1 : pMIN(FIX_WORDS_PER_FIX, (length+FIX_BITS_PER_WORD-1)/FIX_BITS_PER_WORD))
+    (((length) <= FIX_BITS_PER_WORD) ? \
+	1 : pMIN(FIX_WORDS_PER_FIX, 1+(((length)-1)/FIX_BITS_PER_WORD)))
 
 /* private versions of the min,max,abs and dim macros */
 #define pMIN(x,y) (((x) < (y)) ? (x) : (y))
@@ -90,7 +93,7 @@ int n;
 	    for (i=FIX_WORDS_PER_FIX; i--;)
 		t[i] = (i < offset) ? mask : ref[i-offset];
 
-	    n    -= offset * FIX_BITS_PER_WORD;
+	    n -= offset * FIX_BITS_PER_WORD;
 	    msbs  = sign ? ~((1 << (FIX_BITS_PER_WORD-n))-1) : 0;
 
 	    for (i=offset; i<FIX_WORDS_PER_FIX; i++) {
@@ -235,39 +238,40 @@ double value;
     }
 }
 
-/* assign fix maximum or minimum value (if sign == 1) */
+/*
+assign fix maximum or minimum value (if sign == 1)
+Example: for a precision of 2.1 and sign = 1, the maximum value is
+1.5 which is represented as 0110 0000 0000 0000 since only the first
+2 bits are the int (in 2's complement). -ykl
+*/
 void FIX_AssignMaxValue(dst_l, dst_i, dst_r, sign)
 int dst_l;
 int dst_i;
 FIX_WORD *dst_r;
 int sign;
 {
-    if (sign) {		/* assign (negative) minimum value */
-	int i;
+    if (sign) {			/* assign (negative) minimum value */
+	int i = FIX_WORDS_PER_FIX;
 	*dst_r++ = (FIX_WORD) (1 << (FIX_BITS_PER_WORD-1));
-
-	for (i = FIX_WORDS_PER_FIX; --i;)
-	    *dst_r++ = (FIX_WORD) 0;
-
-    } else {		/* assign (positive) maxmimum value */
-	int i,j;
-	*dst_r++ = (FIX_WORD)((1 << (FIX_BITS_PER_WORD-1))-1);
+	while (--i) *dst_r++ = (FIX_WORD) 0;
+    } 
+    else {			/* assign (positive) maxmimum value */
+	int and_mask, i, j;
 	i = FIX_Words(dst_l);
 	j = FIX_WORDS_PER_FIX - i;
+	and_mask = ~(FIX_MAX_UNSIGNED >> (dst_l % FIX_BITS_PER_WORD));
 
-	while (--i > 0)
-	    *dst_r++ = (FIX_WORD) ~0;
-
-	dst_r[-1] &= ~(FIX_WORD)0 << dst_l%FIX_BITS_PER_WORD;
-
-	while (j-- > 0)
-	    *dst_r++ = (FIX_WORD) 0;
+	*dst_r++ = FIX_MAX_UNSIGNED;
+	while (--i > 0) *dst_r++ = (FIX_WORD) ~0;
+	dst_r[-1] &= and_mask;
+	while (j-- > 0) *dst_r++ = (FIX_WORD) 0;
     }
 }
 
 /* convert a fix to a double value */
 double FIX_Fix2Double(src_l,src_i,src_r)
-int src_l, src_i;
+int src_l;
+int src_i;
 CONST FIX_WORD *src_r;
 {
     double retval;
@@ -390,7 +394,7 @@ CONST FIX_WORD *op2_r;
 	dst_r[i] = (FIX_WORD)(sum & ~(mask-1));
 
     } else {
-	/* no rounding necessary because the result occupies the whole bit pattern */
+	/* no rounding necessary because result occupies whole bit pattern */
 	i = FIX_BITS_PER_WORD;
     }
 
@@ -860,7 +864,7 @@ FIX_WORD *var_r;
     }
 }
 
-/* return 1 if a fix variable represents value 0.0 */
+/* return true if a fix variable represents value 0.0, and false otherwise */
 int pFIX_IsZero(var_r)
 CONST FIX_WORD *var_r;
 {
@@ -871,7 +875,7 @@ CONST FIX_WORD *var_r;
     return 1;
 }
 
-/* return 2.0 ^ n using a lookup table for -FIX_MAXLENGTH <= n <= FIX_MAX_LENGTH */
+/* return 2.0^n using lookup table for -FIX_MAXLENGTH <= n <= FIX_MAX_LENGTH */
 double pFIX_TwoRaisedTo(n)
 int n;
 {
@@ -879,16 +883,20 @@ int n;
     static initialized = 0;
 
     if (!initialized) {
-	double d = 1.0;	 int i;
-
-	for (i=0; i<pDIM(twoRaisedTo); i++)
-	    twoRaisedTo[i] = d, d *= 2.0;
+	double d = 1.0;
+	int i = 0;
+	while (i < pDIM(twoRaisedTo)) {
+	    twoRaisedTo[i] = d;
+	    d *= 2.0;
+	    i++;
+	}
 	initialized = 1;
     }
 
     if (n >= 0)
 	return (n >= pDIM(twoRaisedTo)) ? pow(2.0,(double)n) : twoRaisedTo[n];
-   else return (n <= pDIM(twoRaisedTo)) ? pow(2.0,(double)n) : 1.0/twoRaisedTo[-n];
+    else
+	return (n <= pDIM(twoRaisedTo)) ? pow(2.0,(double)n) : 1.0/twoRaisedTo[-n];
 }
 
 int pFIX_SetPrecisionFromDouble(len_field, intb_field, d)
