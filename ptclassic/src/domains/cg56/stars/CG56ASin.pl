@@ -24,19 +24,19 @@ The output, in principal range -pi/2 to pi/2, is scaled down by pi.
 	codeblock (asinblock) {
         clr     a               $ref(input),x0
         cmp     x0,a            #.999999999,b
-        jne     l1
-	jmp	l5
-l1
+        jne     $label(l1)
+	jmp	$label(l5)
+$label(l1)
         cmp     x0,b            #-1.0,a
-        jne     l2
+        jne     $label(l2)
 	move	#0.5,a
-	jmp 	l5
-l2
+	jmp 	$label(l5)
+$label(l2)
 	cmp	x0,a
-	jne	l3
+	jne	$label(l3)
 	move	#-0.5,a
-	jmp	15
-l3
+	jmp	$label(l5)
+$label(l3)
         mpyr    x0,x0,b         #.445156695,y1
         move    #0.5,a          b,y0
         mac     y1,y0,a         #.440833333,y1
@@ -84,7 +84,7 @@ l3
         dup     3
         asl     a
         endm
-l5
+$label(l5)
          move    a,$ref(output)
 	}
 	go {
