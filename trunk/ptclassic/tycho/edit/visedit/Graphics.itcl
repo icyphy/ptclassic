@@ -450,31 +450,15 @@ body ::tycho::Graphics::constructor {args} {
 
     eval itk_initialize $args
 
+    # Modify the binding tags of the canvas so that this megawidget
+    # gets events too. This is unfortunate but appears to be necessary
+    set tl [winfo toplevel $itk_component(hull)]
+    set canvas [$slate component canvas]
+    bindtags $canvas \
+	    "$tl $itk_component(hull) $slate Slate all"
+
     # Prevent shadowing of bindings in the Displayer class.
     bind $slate <Control-x> {continue}
-    bind $slate <Control-x><0> {continue}
-    bind $slate <Control-x><k> {continue}
-    bind $slate <Control-x><o> {continue}
-    
-    bind $slate <Control-x><Control-c> {continue}
-    bind $slate <Control-x><Control-f> {continue}
-    bind $slate <Control-x><Control-r> {continue}
-    bind $slate <Control-x><Control-s> {continue}
-    bind $slate <Control-x><Control-w> {continue}
-    bind $slate <Control-x><Control-v> {continue}
-
-    # Repeat bindings for the File parent class because there seems to
-    # be no way for the slate to pass events to its containing megawidget.
-    bind $slate <Control-x><Control-f> \
-	    "$this ::tycho::File::openWinMethod; break"
-    bind $slate <Control-x><Control-s> "$this save; break"
-    bind $slate <Control-x><Control-v> "$this altFile; break"
-    bind $slate <Control-x><Control-w> "$this saveAs; break"
-    bind $slate <Control-x><Key-i> "$this insertFile; break"
-    bind $slate <Control-x><Key-p> "$this print; break"
-    bind $slate <Control-x><Control-r> "$this evaluate; break"
-    bind $slate <Control-x><Control-q> "$this toggleReadOnly; break"
-    bind $slate <Control-x><v> "$this revisionControl; break"
 
     # Allow cursor/keyboard control of slate
     bind $slate <Up> "$slate yview scroll -1 unit"
