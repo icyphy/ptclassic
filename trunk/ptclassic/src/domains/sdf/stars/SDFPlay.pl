@@ -141,5 +141,6 @@ be a parameter.
 		if (strm) fclose (strm);
 		if (delFile) unlink (fileName);
 		LOG_DEL; delete fileName;
+		fileName = 0;
 	}
 }
