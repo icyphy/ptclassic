@@ -46,31 +46,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 class Target;
 
-// class for a list of Geodesics (or nodes)
-class NodeList : private NamedObjList
-{
-	friend class NodeListIter;
-public:
-	NodeList() {}
-	~NodeList() { deleteAll();}
-	void put(Geodesic& g);
-	inline Geodesic* nodeWithName (const char* name) {
-		return (Geodesic*) NamedObjList::objWithName(name);
-	}
-	int remove(Geodesic* g);
-	// pass along baseclass methods.
-	NamedObjList::size;
-	NamedObjList::deleteAll;
-};
-
-class NodeListIter : private NamedObjListIter {
-public:
-	NodeListIter(NodeList& n) : NamedObjListIter(n) {}
-	inline Geodesic* next() { return (Geodesic*) NamedObjListIter::next();}
-	inline Geodesic* operator++(POSTFIX_OP) { return next();}
-	NamedObjListIter::reset;
-};
-
 class InterpGalaxy: public DynamicGalaxy {
 public:
 // constructor: first arg sets the class name.  Second specifies the domain.
@@ -221,7 +196,6 @@ protected:
 private:
 	StringList actionList;	// saves actions used in building galaxy
 	StringList initList;	// actions to be done by initialize()
-	NodeList nodes;
 	const char* myClassName;
 	const char* innerDomain;
 };

@@ -150,7 +150,7 @@ public:
      ******************************************************************/
     void initializeForClustering(Galaxy&);
 
-    void initTopBlocksForClustering(BlockList&,Galaxy&);
+    void initTopBlocksForClustering(Galaxy&,Galaxy&);
 
     inline virtual int flattenTest(Galaxy&) { return TRUE; }
 

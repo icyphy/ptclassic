@@ -45,6 +45,32 @@ Definition of the Galaxy class, together with the BlockList class.
 
 class Target;
 
+// class for a list of Geodesics (or nodes).
+class NodeList : private NamedObjList
+{
+	friend class NodeListIter;
+public:
+	NodeList() {}
+	~NodeList() { deleteAll();}
+	void put(Geodesic& g);
+	inline Geodesic* nodeWithName (const char* name) {
+		return (Geodesic*) NamedObjList::objWithName(name);
+	}
+	int remove(Geodesic* g);
+	// pass along baseclass methods.
+	NamedObjList::size;
+	NamedObjList::deleteAll;
+	NamedObjList::initialize;
+};
+
+class NodeListIter : private NamedObjListIter {
+public:
+	NodeListIter(NodeList& n) : NamedObjListIter(n) {}
+	inline Geodesic* next() { return (Geodesic*) NamedObjListIter::next();}
+	inline Geodesic* operator++(POSTFIX_OP) { return next();}
+	NamedObjListIter::reset;
+};
+
 	////////////////////////////////////
 	// class BlockList
 	////////////////////////////////////
@@ -179,7 +205,11 @@ public:
 
 protected:
 
-	// Add blocks to the list
+        // A list of nodes (or geodesics) of the galaxy.  This list
+        // will only contain members as class Cluster or InterpGalaxy 
+    	NodeList nodes;
+
+        // Add blocks to the list
 	inline void addBlock(Block& b) {blocks.put(b);}
 
 	// Connect sub-blocks with an initial delay values string
