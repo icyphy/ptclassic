@@ -23,11 +23,11 @@ limitation of liability, and disclaimer of warranty provisions.
 		type {float}
 	}
 	output {
-		name { amplitude }
+		name {amplitude}
 		type {float}
 	}
 	output {
-		name { stepNumber }
+		name {stepNumber}
 		type {int}
 	}
 	defstate {
@@ -50,7 +50,6 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	protected {
 		double height;
-		int number;
 	}
 	setup {
 		if (double(high) > double(low)) {
@@ -62,7 +61,7 @@ limitation of liability, and disclaimer of warranty provisions.
 		}
 	}
 	go {
-	    	double in = input%0;
+	    	double in = double(input%0);
 		double highvalue = double(high);
 		double lowvalue = double(low);
 
