@@ -40,13 +40,18 @@ CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
 EXTRA_SRCS = \
+	binding.html \
+	complex.html \
+	custom.html \
+	drawing.html \
+	features.html \
 	index.html \
-	tute-drawing.html \
-	tute-interactors.html \
-	tute-aspects.html \
-	tute-constraints.html \
-	tute-custom.html \
-	tute-widgets.html
+	interactors.html \
+	features.html \
+	tagging.html \
+	widgets.html \
+	\
+	outline.tim
 
 MISC_FILES =
 
