@@ -323,8 +323,7 @@ body ::tycho::RevControlSCCS::isUnderRevControl {} {
 # Change to the appropriate file directory, with error checks.
 # 
 body ::tycho::RevControlSCCS::cdDir {dir} {
-    if {[file isdirectory $dir] && [file executable $dir] && \
-	[file writable $dir]} {
+    if {[file isdirectory $dir] && [file executable $dir]} {
 	cd $dir
     } else {
 	error "The directory \"$dir\" is not writable."
