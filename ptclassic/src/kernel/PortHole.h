@@ -10,6 +10,7 @@
 #include "DataStruct.h"
 #include "dataType.h"
 #include "Particle.h"
+#include "Attribute.h"
 #include "type.h"
 
 /**************************************************************************
@@ -70,6 +71,14 @@ class Galaxy;
 
 class PortHole;
 
+// attribute bits for PortHoles.  Only one is defined here: PB_HIDDEN.
+// if it is true, the porthole is not visible to user interfaces, so
+// the user will not see it.  It is off by default.
+
+const bitWord PB_HIDDEN = 1;
+extern const Attribute P_HIDDEN; // make the porthole hidden
+extern const Attribute P_VISIBLE;// make the porthole visible.
+
 class GenericPort : public NamedObj
 {
 public:
@@ -120,11 +129,19 @@ public:
 	GenericPort* alias() const { return aliasedTo;}
 
 	// Constructor
-	GenericPort () : type(ANYTYPE),aliasedTo(0),typePortPtr(0),aliasedFrom(0) {}
+	GenericPort () : type(ANYTYPE),aliasedTo(0),typePortPtr(0),
+	aliasedFrom(0), attributeBits(0) {}
 
 	// Destructor
 	~GenericPort();
 	
+	// attributes
+	bitWord attributes() const { return attributeBits;}
+
+	bitWord setAttributes(const Attribute& attr) {
+		return attributeBits = attr.eval(attributeBits);
+	}
+
 protected:
 	// set up alias pointers in pairs.  Protected so derived types may
 	// restrict who can be an alias.
@@ -148,7 +165,14 @@ private:
 
 	// My type matches type of this port
 	GenericPort* typePortPtr;
+
+	// My attributes
+	bitWord attributeBits;
+
 };
+
+// predicate for a hidden porthole (or multiporthole)
+inline int hidden(GenericPort& p) { return p.attributes() & PB_HIDDEN; }
 
 
         //////////////////////////////////////////
