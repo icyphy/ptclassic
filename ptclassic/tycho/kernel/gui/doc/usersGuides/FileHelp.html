@@ -4,7 +4,7 @@
 <Title>User's Guide to the Tycho File Class</title>
 </head>
 <body>
-<h1><a name="file system interface">User's Guide to the Tycho File System Interface</a></h1>
+<h1><a name="File class user's guide">User's Guide to the Tycho File Class</a></h1>
 <p>
 The File class in Tycho is the base class for most editors.
 It provides a top-level window with a menu bar at the top.
@@ -27,28 +27,71 @@ The following commands are available in the File menu as well
 through key bindings.
 <dl COMPACT>
 <b><dt>C-x C-f</b><dd>open a file
-<b><dt>C-x i</b><dd>insert a file at the cursor
-<b><dt>C-x C-s</b><dd>save to the current file name
+<b><dt>C-x C-v</b><dd>switch to a new file in the same window
+<b><dt>C-x i</b><dd>insert a file
+<b><dt>C-x C-s</b><dd>save the current file
 <b><dt>C-x C-w</b><dd>save to some other file name
-<b><dt>C-x p</b><dd>print the contents
+<b><dt>C-x p</b><dd>print the contents (not yet implemented)
 <b><dt>C-x C-r</b><dd>evaluate a file (only valid in some derived classes)
+<b><dt>C-x v</b><dd>invoke revision control
 <b><dt>C-x k</b><dd>close the window
-<b><dt>C-x 0</b><dd>close the window
-<b><dt>C-x o</b><dd>move the focus to another window
 <b><dt>C-x C-c</b><dd>exit the program
 </dl>
 <p>
-In addition to all of the above, the File menu provides the following
-command:
+In addition to the above, the File menu provides the following
+command without any key binding:
 <dl>
 <b><dt>Revert</b>
 <dd> Revert to the previously saved version of this file.
 </dl>
 <p>
+The File class also provides the following binding with no corresponding
+menu entry:
+<dl>
+<b><dt>C-x o</b><dd>move the <a name="focus">focus</a> to another window
+</dl>
+<h3>Version Control</h3>
+<p>
+The <a name="version control">version control</a> or
+<a name="revision control">revision control</a> mechanism built into
+the File class interfaces to either <a name="SCCS">SCCS</a>,
+a Unix "source code control system", or
+<a name="RCS">RCS</a>, a public domain improvement.
+When the "Revision Control" command in the File menu is
+invoked, then if the file is already under version control
+by either SCCS or RCS, a control panel will appear that permits
+the user to check out the file (if it is not checked out),
+check in the file (if it is checked out), examine the
+version history, or unedit the file (cancel changes made since
+the file was checked out).
+The version history mechanism displays the comments that were
+filed with checkins as well as version numbers and dates.
+Double clicking on an older version will cause that version
+to be displayed in a new window.
+<p>
+If the file is not currently under revision control,
+then invoking the "Revision Control" command will query
+the user about whether the file should be placed under revision
+control.  The list of revision control systems presented to the
+user can be set as an option, but currently includes only SCCS
+and RCS, with SCCS being the default.
+<p>
+The Tycho development group uses SCCS, and has configured
+the options to follow our style.  In particular, when a file
+is put under the control of SCCS, it is required to have
+"ID keywords", which are strings like &#37W&#37 and/or &#37D&#37.
+When a file is checked in, these get converted into version numbers.
+In addition, in order to support copyright notices, &#37Q&#37
+gets converted into the current year.
+Another useful ID keyword is &#37G&#37, which gets converted
+into the current date.
+<p>
 <h2><a name="Window menu">Window Menu</a></h2>
 <p>
 File objects have a Window menu in the menu bar.
-The menu contains commands to open new, blank editors
+The menu contains commands that somewhat duplicate typical window
+manager functions, but are provided in order to have convenient key bindings.
+It also contains commands to open new, blank editors
 for any type of editor that has been registered with the File class.
 In addition, all open editors that are associated with named files
 are listed.  This makes it easier to find editors that may have been
@@ -58,6 +101,43 @@ manager, it will not appear when you issue the command in the Window
 menu.  Also, if an editor has the name "NoName" associated with it,
 it does not appear in the Window menu.  To give it a name, use SaveAs
 (in the File menu).
+<h3>Window Control Commands</h3>
+<p>
+A few window control menu commands and associated key bindings
+are provided for convenience.
+<dl>
+<b><dt>C-x 0</b><dd>iconify the window
+<b><dt>C-x 1</b><dd>full size
+<b><dt>C-x 6</b><dd>original size
+</dl>
+<p>
+Eventually, this list will be more complete, but in the current version,
+bugs in the interface to the window manager make this impossible.
+<p>
+<a name="registering an editor">
+<h3>Registering an Editor with the File Class</h3>
+</a>
+<p>
+Since Tycho is meant to be an extensible system, it is expected
+that users will create new editors.  Integrating these editors into
+Tycho is easy.  Just issue the following command:
+<pre>
+::tycho::File::registerEditor {.foo} ::tycho::EditFoo {Foo editor}
+</pre>
+The first argument, "{.foo}" gives zero or more filename extensions
+that will cause your editor to be used in place of the default editor.
+The second argument is the name of the editor class to use.
+The third argument is the text that will be inserted into the Window menu.
+With the above example, a Tycho "Open File" command on a file
+called "file.foo" will cause an instance of ::tycho::EditFoo to
+be created.  The syntax of the command that creates the instance
+will be:
+<pre>
+::tycho::EditFoo .some_name -file file.foo
+</pre>
+The name is generated automatically.  The 
+<a name="-file option">-file option</a> must (obviously)
+be understood by the editor.  But that is the only constraint on the editor.
 <p>
 <h2><a name="Help menu">Help Menu</a></h2>
 <p>
