@@ -44,6 +44,9 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "compile.h"
 #include "kernelCalls.h"
 
+/* Following template not defined anywhere above. */
+char* callParseClass();
+
 #include "mkIcon.h"
 
 #define ERRBUF_MAX 1000
@@ -388,24 +391,27 @@ Updates:
 3/6/89 = return iconFacetPtr, name change
 */
 boolean
-MkStarIcon(name, dir, iconFacetPtr)
-char *name, *dir;
+MkStarIcon(nameplus, dir, iconFacetPtr)
+char *nameplus, *dir;
 octObject *iconFacetPtr;
 {
     TermList terms;
     char buf[MSG_BUF_MAX];
-    char *fileName;
+    char *fileName, *name;
     octObject iconConFacet, prop;
     int maxNumTerms, size;
 
+    /* nameplus may have extensions for the number of ports, etc. */
+    /* Here, we find the class name. */
+    name = callParseClass(nameplus);
     sprintf(buf, "MkStarIcon: unknown star '%s' (it needs to be loaded?)",
 	    name);
     ERR_IF2(!KcIsKnown(name), buf);
     sprintf(buf, "Making star icon for '%s'", name);
     PrintDebug(buf);
-    ERR_IF1(!ConcatDirName(dir, name, &fileName));
+    ERR_IF1(!ConcatDirName(dir, nameplus, &fileName));
     ERR_IF1(!AskAboutIcon(fileName));
-    ERR_IF1(!KcGetTerms(name, &terms));
+    ERR_IF1(!KcGetTerms(nameplus, &terms));
     ERR_IF1(!MkStarConFacet(&iconConFacet, fileName, &terms));
     if(terms.in_n < terms.out_n) maxNumTerms = terms.out_n;
     else maxNumTerms = terms.in_n;
