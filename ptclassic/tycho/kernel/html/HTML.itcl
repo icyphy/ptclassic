@@ -1531,12 +1531,16 @@ proc HMrender {win tag not param text} {
             set spaces $HMinsert_space_map($not$tag)
             for {set ind $spaces} {$ind > 0} {incr ind -1} {
                 set curline [$win get "$ins linestart" "$ins lineend"]
-                set ins [$win index "$ins -1 line"]
                 if [regexp {^[ 	]*$} $curline] {
-                    incr spaces -1
+                    # If there is an embedded window, the line is not blank.
+                    if {[$win dump -window "$ins linestart" "$ins lineend"] \
+                            == {}} {
+                        incr spaces -1
+                    }
                 } {
                     break
                 }
+                set ins [$win index "$ins -1 line"]
             }
             while {$spaces > 0} {
                 incr spaces -1
