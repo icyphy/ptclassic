@@ -120,7 +120,7 @@ SDF graph, the name of the porthole.
 int isItInput();
 \end{example}
 
-Returns TRUE or FALSE based on the corresponding porthole is an
+Returns TRUE or FALSE based on whether the corresponding porthole is an
 input or not.
 
 \begin{example}
@@ -341,9 +341,9 @@ invocation.
 int root();
 \end{example}
 
-This method returns TRUE or FALSE, based on this node is a root of the
-APEG. A node is a root if it either has no ancestors, or if each arc
-in the ancestor list has enough delay on it.
+This method returns TRUE or FALSE, based on whether this node is a
+root of the APEG. A node is a root if it either has no ancestors, or
+if each arc in the ancestor list has enough delay on it.
 
 \begin{example}
 EGGate* makeArc(EGNode* \var{dest}, int \var{samples}, int \var{delay});
