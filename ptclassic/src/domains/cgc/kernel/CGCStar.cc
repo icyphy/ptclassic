@@ -31,7 +31,13 @@ ISA_FUNC(CGCStar, CGStar);
 StringList CGCStar::getRef(const char* name) {
 	registerState(name);
 	GenericPort *p = genPortWithName(name);
-	if(!p) return CGStar::getRef(name);
+	if(!p) { 
+		StringList s = ((CGCTarget*) myTarget())->correctName(*this);
+		s += ".";
+		s += name;
+		return s;
+	}
+		
 	if(p->isItMulti()) {
 		Error::abortRun(*this,
 		"Accessing MultiPortHole without identifying which port.");
@@ -91,9 +97,7 @@ StringList CGCStar::getRef2(const char* name, const char* offset) {
 			}
 
 		} else {
-			out += "[";
-			if (s) out += offVal;
-			else out += offset;
+			return out;
 		}
 	}
 
@@ -170,8 +174,15 @@ void CGCStar::fire() {
 	addCode(code);
 	CGStar::fire();
 	
-	// update the offset member
 	StringList code2;
+
+	if (amIFork()) {
+		code2 += "\t}\n";
+		addCode(code2);
+		return;
+	} 
+
+	// update the offset member
 	CGCTarget* t = (CGCTarget*) myTarget();
 
 	BlockPortIter next(*this);
@@ -185,12 +196,8 @@ void CGCStar::fire() {
 			code2 += t->offsetName(p);
 			code2 += " + ";
 			code2 += p->numberTokens;
-			if (p->wrapAround()) {
-				code2 += ") % ";
-				code2 += p->maxBufReq();
-			} else {
-				code2 += ")";
-			}
+			code2 += ") % ";
+			code2 += p->maxBufReq();
 			code2 += ";\n";
 			p->setPrevOffset();
 		}
