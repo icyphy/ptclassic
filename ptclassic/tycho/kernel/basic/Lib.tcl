@@ -79,5 +79,5 @@ namespace ::tycho {
     tycho::File::registerEditor {} EditBubbleAndArc {Base graphical editor}
     tycho::File::registerEditor {.fsm} EditFSM {Finite state machine editor}
     tycho::File::registerEditor {.std} EditMoore {State transition diagram editor}
-
+    tycho::File::registerEditor {.idx} IndexBrowser {}
 }
