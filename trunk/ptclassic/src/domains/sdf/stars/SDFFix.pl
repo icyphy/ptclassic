@@ -64,13 +64,16 @@ during the simulation.
 	wrapup {
 		if ( int(ReportOverflow) && ( overflows > 0 ) ) {
 		  StringList msg;
+		  char percentageStr[24];      // must be at least 6 chars
 		  double percentage = 0.0;
 		  if ( totalChecks > 0 )
 		    percentage = (100.0*overflows)/totalChecks;
+		  // truncate percentage to one decimal place
+		  sprintf(percentageStr, "%.1lf", percentage);
 		  msg << " experienced overflow in " << overflows 
 		      << " out of " << totalChecks
 		      << " fixed-point calculations checked ("
-		      << percentage << "%)";
+		      << percentageStr << "%)";
 		  Error::warn( *this, msg );
 		}
 	}
