@@ -85,4 +85,6 @@ struct change_record {
     octObject *old_value;
 };
 
+void oct_init_geo_desc();
+
 #endif /* OCT_GEO_H */
