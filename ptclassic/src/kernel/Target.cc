@@ -235,11 +235,7 @@ void Target::addChild(Target& newChild) {
 		p->link = &newChild;
 	}
 
-// Create child name.
-	StringList childName = "proc";
-	childName << nChildren;
-	const char* cname = hashstring(childName);
-	newChild.setNameParent(cname,this);
+	newChild.setParent(this);
 
 	newChild.link = 0;
 	nChildren++;
