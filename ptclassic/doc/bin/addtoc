@@ -1,0 +1,109 @@
+#!/bin/sh
+# $Id$
+# Author: Christopher Hylands
+# Insert Tables of Contents (TOC)s into html files
+#
+# Usage: addtoc *.doc
+# Where *.doc are _framemaker_ files and the html files are found in the
+# wmwork directory
+#
+# See http://ptolemy/~cxh/sa/quadralay.html for how to convert
+# from frame to html
+#
+# We use Quadralay wpublish to create html files, and then use htmlchek
+# to create tables of contents.  The trick is that wpublish creates headers
+# like:
+# <h2><a name="4.1   Introduction ">4.1   Introduction </a></h2>
+# and then wpublish searches for these headers and creates a temporary
+# file and we insert it into the html file.
+#
+# We generate two types of tocs, one for the chapter and one for each file
+# wpublish generates the document-wide toc.
+
+# gawk -f /usr/sww/share/lib/htmlchek-4.1/makemenu.awk toc=1 hof*.html > menu.html
+
+#tmptoc=/tmp/addtoc.$$
+#tmpfile=/tmp/addtoc.file.$$
+
+tmptoc=/tmp/addtoc
+tmpfile=/tmp/addtoc.tmp
+
+# Subroutine to insert the tmpfile as a toc into $1
+inserttoc() {
+	# Copy lines from the file until we see a <h?> line, then stop
+	awk '   {print $0}
+		$0 ~ /^<center><h.>/ {exit}
+	        $0 ~ /^<h1>/ {exit}
+	' $1 > $tmpfile
+
+	# Insert our TOC, skip the first 3 lines, stop after we see
+	# a line that contains only </ul>
+	#awk ' NR > 3 {if ($0 ~ /^<.ul>/) {
+	#		exit
+	#		} else {
+	#		print $0
+	#		}
+	#	     }
+	#' $tmptoc >> $tmpfile
+
+	cat $tmptoc >> $tmpfile
+
+	# Copy the rest of the file
+	gawk ' 	sawheader==1 { if ($0  ~ /[Nn][Aa][Mm][Ee]/) {
+					#remove any trailing space from the tag
+					tag=$0
+					gsub(/ \042>/,"\042>",tag);
+					print tag
+				} else {
+					print $0
+				}
+			     }
+		$0 ~ /^<center><h.>/ {sawheader=1}
+	 	$0 ~ /^<h1>/ {sawheader=1}
+		' $1 >> $tmpfile
+
+	#diff $1 $tmpfile
+	cp $tmpfile ../wmwork.tst/$1
+}
+filelist=$@
+
+if [ ! -d wmwork ]; then
+	echo "must be run in the directory above wmwork"
+fi
+cd wmwork
+
+# Generate the chapterwide toc and insert it
+for file in $filelist
+do
+	# Don't process the index file
+	echo "$file.html" | egrep '.*IX.*' > /dev/null
+	status=$?
+	if [ $status = 1 ]; then 
+		echo "Inserting chapterwide toc into $file.html"
+		gawk -f /users/ptdesign/doc/bin/ptmakemenu.awk \
+			title=0 toc=1 $file*.html > $tmptoc
+		inserttoc $file.html	
+	fi
+done
+
+# Generate the filewide toc and insert it
+for chapterfile in $filelist
+do
+	for file in $chapterfile*.html
+	do
+		numHdrs=`egrep '<[hH][2-6]>' $file | wc -l`
+		# skip over the foo.doc.html file, and only handle
+		# foo.doc1.html . . .
+		# Also, don't add the toc to any files that have only one
+		# header
+		if [ $file != $chapterfile.html -a $numHdrs -gt 1 ]; then
+			echo "Inserting filewide toc into $file"
+			gawk -f /users/ptdesign/doc/bin/ptmakemenu.awk \
+				skipfirstheader=1 \
+				title=0 toc=1 $file > $tmptoc
+			inserttoc $file
+		fi
+	done
+done
+
+rm -f $tmpfile $tmptoc
