@@ -8,15 +8,26 @@
 .\" Be sure you have properly checked
 .\" out this file with SCCS (the version number should not be a number below):
 .VR 0.$Revision$ $Date$
-.TI "The \*(PT Interpreter"
+.TI "The Old \*(PT Interpreter"
 .AU
 Joseph Buck
 .AE
+This document describes the old Ptolemy interpreter.  It is being
+phased out, and will not be present in future releases.  There is
+a new Ptolemy interpreter,
+.i ptcl ,
+based on the embeddable interpreter Tcl.
+.pp
 The \*(PT interpreter provides a textual interface for constructing
 systems and performing simulations.
 This interface is more convenient than the graphical interface
 when large complex universes are being created automatically
 by some other program.  It is also more convenient when using
 a symbolic debugger to debug a new piece of code linked to \*(PT.
+.pp
+However, the old interpreter described in this document does not have
+the control structures provided by the new
+.i ptcl
+interpreter, so it is less flexible.
 .so starting
 .so using
