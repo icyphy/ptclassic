@@ -23,10 +23,10 @@ if ( "$PTARCH" =~ sol?* ) then
 	setenv LM_LICENSE_FILE /opt/lm/lmgrd.key
 
 	# Synopsys needs these
-	# Old version 3.3b
-	# setenv SYNOPSYS /usr/tools/synopsys
-	# New version 3.4a
-	setenv SYNOPSYS /vol/markov/markov1/synopsys
+	# Old version 3.4a
+	# setenv SYNOPSYS /vol/markov/markov1/synopsys
+	# New version 3.4b
+	setenv SYNOPSYS /usr/tools/synopsys
 	setenv SIM_ARCH sparcOS5
 	# vhdlan which is run in utils/ptvhdlsim requires that $ARCH be set
 	setenv ARCH $PTARCH
