@@ -540,8 +540,19 @@ void SimVSSTarget :: registerCompMap(StringList label, StringList name,
 }
 
 // Method called by C2V star to place important code into structure.
-void SimVSSTarget :: registerC2V(int pairid, int numxfer) {
+void SimVSSTarget :: registerC2V(int pairid, int numxfer, const char* dtype) {
   needC2V = 1;
+
+  // Create a string with the right VHDL data type
+  StringList vtype = "";
+  if (strcmp(dtype, "INT") == 0) 
+    vtype = "INTEGER";
+  else if (strcmp(dtype, "FLOAT") == 0) 
+    vtype = "REAL";
+  else
+    Error::abortRun(*this, dtype, ": type not supported");
+  printf("Vtype is %s\n", (const char*) vtype);
+  
   // Construct unique label and signal names and put comp map in main list
   StringList label;
   StringList name;
@@ -569,7 +580,7 @@ void SimVSSTarget :: registerC2V(int pairid, int numxfer) {
 
   // Also add to port list of main.
   mainPortList.put(goName, "OUT", "STD_LOGIC");
-  mainPortList.put(dataName, "IN", "INTEGER");
+  mainPortList.put(dataName, "IN", vtype);
   mainPortList.put(doneName, "IN", "STD_LOGIC");
   // Also add to port map list of main.
   mainPortMapList.put(goName, goName);
@@ -577,13 +588,23 @@ void SimVSSTarget :: registerC2V(int pairid, int numxfer) {
   mainPortMapList.put(doneName, doneName);
   // Also add to signal list of top.
   topSignalList.put(goName, "STD_LOGIC", goName, goName);
-  topSignalList.put(dataName, "INTEGER", dataName, dataName);
+  topSignalList.put(dataName, vtype, dataName, dataName);
   topSignalList.put(doneName, "STD_LOGIC", doneName, doneName);
 }
 
 // Method called by V2C star to place important code into structure.
-void SimVSSTarget :: registerV2C(int pairid, int numxfer) {
+void SimVSSTarget :: registerV2C(int pairid, int numxfer, const char* dtype) {
   needV2C = 1;
+
+  // Create a string with the right VHDL data type
+  StringList vtype = "";
+  if (strcmp(dtype, "INT") == 0) 
+    vtype = "INTEGER";
+  else if (strcmp(dtype, "FLOAT") == 0) 
+    vtype = "REAL";
+  else
+    Error::abortRun(*this, dtype, ": type not supported");
+  
   // Construct unique label and signal names and put comp map in main list
   StringList label;
   StringList name;
@@ -611,7 +632,7 @@ void SimVSSTarget :: registerV2C(int pairid, int numxfer) {
 
   // Also add to port list of main.
   mainPortList.put(goName, "OUT", "STD_LOGIC");
-  mainPortList.put(dataName, "OUT", "INTEGER");
+  mainPortList.put(dataName, "OUT", vtype);
   mainPortList.put(doneName, "IN", "STD_LOGIC");
   // Also add to port map list of main.
   mainPortMapList.put(goName, goName);
@@ -619,7 +640,7 @@ void SimVSSTarget :: registerV2C(int pairid, int numxfer) {
   mainPortMapList.put(doneName, doneName);
   // Also add to signal list of top.
   topSignalList.put(goName, "STD_LOGIC", goName, goName);
-  topSignalList.put(dataName, "INTEGER", dataName, dataName);
+  topSignalList.put(dataName, vtype, dataName, dataName);
   topSignalList.put(doneName, "STD_LOGIC", doneName, doneName);
 }
 

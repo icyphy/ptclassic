@@ -27,7 +27,7 @@ limitation of liability, and disclaimer of warranty provisions.
   defstate {
     name {pairNumber}
     type {int}
-    default {11}
+    default {0}
   }
 setup {
   numXfer = output.numXfer();     
@@ -37,7 +37,7 @@ setup {
 // Called only once, after the scheduler is done
 begin {
   // Call method to wire up a C2V VHDL entity
-  targ()->registerC2V(int(pairNumber),numXfer);
+  targ()->registerC2V(int(pairNumber), numXfer, output.resolvedType());
 }
 
 go {

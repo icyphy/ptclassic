@@ -124,10 +124,10 @@ private:
 				     VHDLGenericMapList* genMapList);
 
 	// Method called by C2V star to place important code into structure.
-	void registerC2V(int pairid, int numxfer);
+	void registerC2V(int pairid, int numxfer, const char* dtype);
 
 	// Method called by V2C star to place important code into structure.
-	void registerV2C(int pairid, int numxfer);
+	void registerV2C(int pairid, int numxfer, const char* dtype);
 
 	int needC2V;
 	int needV2C;

@@ -27,7 +27,7 @@ limitation of liability, and disclaimer	of warranty provisions.
   defstate {
     name {pairNumber}
     type {int}
-    default {21}
+    default {0}
   }
 setup {
   numXfer = input.numXfer();
@@ -37,7 +37,7 @@ setup {
 // Called only once, after the scheduler is done
 begin {
   // Call method to wire up a V2C VHDL entity
-  targ()->registerV2C(int(pairNumber),numXfer);
+  targ()->registerV2C(int(pairNumber), numXfer, input.resolvedType());
 }
 
 go {
