@@ -821,6 +821,8 @@ const char* CGTarget::domain() {
 
 StringList destDirectoryName(const char* subdir) {
 	StringList dir = "$HOME/PTOLEMY_SYSTEMS";
-	dir << subdir;
+	if (subdir) {
+	    dir << "/" << subdir;
+	}
 	return dir;
 }
