@@ -153,7 +153,7 @@ delim off
 
 .\" String definition for the overall version number (for consistency
 .\" and easy modification)
-.ds PV 0.3
+.ds PV 0.4
 .\"
 .\" Formating directives
 .ll 6.5i
