@@ -319,7 +319,8 @@ if {$tycho_bindings == {unix}} {
     # In Itcl2.2, we have virtual events, so Control-Key-x is bound to
     #<<Cut>> in tk.tcl.  This means that we cannot have things like C-x C-r
     # bound to reload.
-    if {[namespace ::itcl {set version}] > 2.1 } {
+    global tcl_version
+    if { $tcl_version >= 8.0 || [namespaceEval ::itcl {set version}] > 2.1 } {
 	::event delete <<Cut>> <Control-Key-x>
     }
 }
