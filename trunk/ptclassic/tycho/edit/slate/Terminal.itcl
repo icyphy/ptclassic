@@ -27,24 +27,31 @@
 ##########################################################################
 
 
-# Set up the "function table." Explicitly load the superclass
-# to avoid a bizarre problem with variable scoping.
-#
-uplevel #0 {
-    if { [::info classes ::tycho::Picture] == "" } {
-	source $tychoslate/kernel/Picture.itcl
+# Explicitly load the superclass. I don't really know why this is
+# needed, but the common arrays get upset otherwise.
+namespace ::tycho {
+    if { [::info classes Picture] == "" } {
+	uplevel #0 {source $tychoslate/kernel/Picture.itcl}
     }
-
-    array set Terminal [array get Picture]
-
-    set Terminal(construct)   ::tycho::Terminal::construct
-    set Terminal(coords)      ::tycho::Terminal::coords
-    set Terminal(direction)   ::tycho::Terminal::direction
-    set Terminal(fill)        ::tycho::Terminal::fill
-    set Terminal(length)      ::tycho::Terminal::length
-    set Terminal(style)       ::tycho::Terminal::style
-    set Terminal(type)        ::tycho::Terminal::type
 }
+
+
+#
+# uplevel #0 {
+#     if { [::info classes ::tycho::Picture] == "" } {
+# 	source $tychoslate/kernel/Picture.itcl
+#     }
+
+#     array set Terminal [array get Picture]
+
+#     set Terminal(construct)   ::tycho::Terminal::construct
+#     set Terminal(coords)      ::tycho::Terminal::coords
+#     set Terminal(direction)   ::tycho::Terminal::direction
+#     set Terminal(fill)        ::tycho::Terminal::fill
+#     set Terminal(length)      ::tycho::Terminal::length
+#     set Terminal(style)       ::tycho::Terminal::style
+#     set Terminal(type)        ::tycho::Terminal::type
+# }
 
 
 ## Terminal
@@ -71,10 +78,10 @@ class ::tycho::Terminal {
     # The length of the terminal line
     common length
 
-    # The "style" of the terminal: arrow, doublearrow, blob
+    # The "style" of the terminal: "arrow," "doublearrow," or "blob"
     common style
 
-    # The type of the terminal: input or output
+    # The type of the terminal: "input" or "output"
     common type
 
 
@@ -91,8 +98,31 @@ class ::tycho::Terminal {
     ###################################################################
     ####                         protected variables               ####
 
+    # The additional item used to draw the terminal: blob or extra arrow
     common blobitem
-    common double
+
+    ###################################################################
+    ####                       class initialization                ####
+
+    #### Set method table
+    array set methodtable [array get ::tycho::Picture::methodtable]
+
+    set methodtable(construct)   ::tycho::Terminal::construct
+    set methodtable(coords)      ::tycho::Terminal::coords
+    set methodtable(direction)   ::tycho::Terminal::direction
+    set methodtable(fill)        ::tycho::Terminal::fill
+    set methodtable(length)      ::tycho::Terminal::length
+    set methodtable(style)       ::tycho::Terminal::style
+    set methodtable(type)        ::tycho::Terminal::type
+
+    #### Set option defaults
+    array set optiondefault [array get ::tycho::Picture::optiondefault]
+
+    set optiondefault(-direction) {1 0}
+    set optiondefault(-length)    25
+    set optiondefault(-type)      input
+    set optiondefault(-style)     arrow
+    set optiondefault(-fill)      black
 }
 
 
@@ -101,18 +131,8 @@ class ::tycho::Terminal {
 #
 body ::tycho::Terminal::construct {id tags canvas x0 y0 args} {
     # Initialize the options
-    if { ! [::info exists color($id)] } {
-	set defaultoptions { \
-		-direction {1 0} \
-		-length 20 \
-		-type input \
-		-style arrow \
-		-fill black \
-	    }
-
-	foreach {option value} [concat $defaultoptions $args] {
-	    set [string trimleft $option -]($id) $value
-	}
+    foreach {option value} [concat [array get optiondefault] $args] {
+	set [string trimleft $option -]($id) $value
     }
 
     # Figure the other end.
@@ -123,8 +143,10 @@ body ::tycho::Terminal::construct {id tags canvas x0 y0 args} {
     set primary($id) [$canvas create line $x0 $y0 $x1 $y1 \
 	    -tags $tags -fill $fill($id)]
 
-    # Update the style
-    style $id $canvas $style($id)
+    # Update the style, forcing an update.
+    set st $style($id)
+    set style($id) {}
+    style $id $canvas $st
 }
 
 
@@ -161,11 +183,11 @@ body ::tycho::Terminal::direction {id canvas di} {
     # Change the coordinates
     eval $canvas coords $primary($id) [lrange $coords 0 1] $x1 $y1
 
-    # If necessary, move the blob
-    if { $style($id) == "blob" && $type($id) == "output" } {
-	$canvas move $blobitem($id) [expr $x1 - [lindex $coords 0]] \
-		[expr $y1 - [lindex $coords 1]]
-    }
+    # Get the right appearance by setting the style option. Force
+    # redraw by setting style to nothing.
+    set st $style($id)
+    set style($id) {}
+    style $id $canvas $st
 }
 
 ##########################################################################
@@ -176,12 +198,7 @@ body ::tycho::Terminal::fill {id canvas fi} {
 
     $canvas itemconfigure $primary($id) -fill $fill($id)
     if { [::info exists blobitem($id)] } {
-	$canvas itemconfigure $blobitem($id) \
-		-fill $fill($id) -outline $fill($id)
-    }
-    if { [::info exists double($id)] } {
-	$canvas itemconfigure $double($id) \
-		-fill $fill($id)
+	$canvas itemconfigure $blobitem($id) -fill $fill($id)
     }
 }
 
@@ -201,21 +218,19 @@ body ::tycho::Terminal::length {id canvas le} {
     # Change the coordinates
     eval $canvas coords $primary($id) $coords $x1 $y1
 
-    # If necessary, move the blob
-    if { $style($id) == "blob" && $type($id) == "output" } {
-	$canvas move $blobitem($id) [expr $x1 - [lindex $coords 0]] \
-		[expr $y1 - [lindex $coords 1]]
-    }
+    # Get the right appearance by setting the style option. Force
+    # redraw by setting style to nothing.
+    set st $style($id)
+    set style($id) {}
+    style $id $canvas $st
 }
 
 ##########################################################################
 #### style
 #
 body ::tycho::Terminal::style {id canvas st} {
-    set style($id) $st
-
     # Check direction of arrow
-    if { $style($id) == "arrow" } {
+    if { $st == "arrow" } {
 	if { $type($id) == "input" } {
 	    $canvas itemconfigure $primary($id) -arrow first
 	} else {
@@ -225,29 +240,42 @@ body ::tycho::Terminal::style {id canvas st} {
 	    $canvas delete $blobitem($id)
 	    unset blobitem($id)
 	}
-    } elseif { $style($id) == "double" && ! [::info exists double($id)] } {
-	set coords [$canvas coords $primary($id)]
-	
-	set double($id) [$canvas create line \
-		[expr [lindex $coords 0] + [lindex $direction($id) 0] * 5] \
-		[expr [lindex $coords 1] + [lindex $direction($id) 1] * 5] \
-		[expr [lindex $coords 0] + [lindex $direction($id) 0] * 6] \
-		[expr [lindex $coords 1] + [lindex $direction($id) 1] * 6] \
-		-fill $fill($id) \
-		-tags [$canvas gettags $id]]
-
-	if { $type($id) == "input" } {
-	    $canvas itemconfigure $double($id) -arrow first
-	} else {
-	    $canvas itemconfigure $double($id) -arrow last
-	}
-
+    } elseif { $st == "doublearrow" && $style($id) != "doublearrow" } {
 	if { [::info exists blobitem($id)] } {
 	    $canvas delete $blobitem($id)
-	    unset blobitem($id)
 	}
-    } elseif { $style($id) == "blob" && ! [::info exists blobitem($id)] } {
+
+	set coords [$canvas coords $primary($id)]
+	set xdir [lindex $direction($id) 0]
+	set ydir [lindex $direction($id) 1]
+
+	if { $type($id) == "input" } {
+	    $canvas itemconfigure $primary($id) -arrow first
+	    set blobitem($id) [$canvas create line \
+		    [expr [lindex $coords 0] + $xdir * 5] \
+		    [expr [lindex $coords 1] + $ydir * 5] \
+		    [expr [lindex $coords 0] + $xdir * 6] \
+		    [expr [lindex $coords 1] + $ydir * 6] \
+		    -fill $fill($id) \
+		    -arrow first \
+		    -tags [$canvas gettags $id]]
+	} else {
+	    $canvas itemconfigure $primary($id) -arrow last
+	    set blobitem($id) [$canvas create line \
+		    [expr [lindex $coords 2] - $xdir * 5] \
+		    [expr [lindex $coords 3] - $ydir * 5] \
+		    [expr [lindex $coords 2] - $xdir * 6] \
+		    [expr [lindex $coords 3] - $ydir * 6] \
+		    -fill $fill($id) \
+		    -arrow first \
+		    -tags [$canvas gettags $id]]
+	}
+    } elseif { $st == "blob" && $style($id) != "blob" } {
 	$canvas itemconfigure $primary($id) -arrow none
+	if { [::info exists blobitem($id)] } {
+	    $canvas delete $blobitem($id)
+	}
+
 	set coords [$canvas coords $primary($id)]
 	set blobitem($id) [eval $canvas create oval \
 		[rectStretch [list \
@@ -256,12 +284,8 @@ body ::tycho::Terminal::style {id canvas st} {
 		    3] \
 		-fill $fill($id) -outline $fill($id) \
 		-tags [list [$canvas gettags $id]]]
-    
-	if { [::info exists double($id)] } {
-	    $canvas delete $double($id)
-	    unset double($id)
-	}
     }
+    set style($id) $st
 }
 
 ##########################################################################
@@ -270,20 +294,9 @@ body ::tycho::Terminal::style {id canvas st} {
 body ::tycho::Terminal::type {id canvas ty} {
     set type($id) $ty
 
-    # Check direction of arrow
-    if { $style($id) == "arrow" } {
-	if { $type($id) == "input" } {
-	    $canvas itemconfigure $primary($id) -arrow first
-	} else {
-	    $canvas itemconfigure $primary($id) -arrow last
-	}
-    } elseif { $style($id) == "double" } {
-	if { $type($id) == "input" } {
-	    $canvas itemconfigure $primary($id) -arrow first
-	    $canvas itemconfigure $double($id) -arrow first
-	} else {
-	    $canvas itemconfigure $primary($id) -arrow last
-	    $canvas itemconfigure $double($id) -arrow last
-	}
-    }
+    # Get the right appearance by setting the style option. Force
+    # redraw by setting style to nothing.
+    set st $style($id)
+    set style($id) {}
+    style $id $canvas $st
 }
