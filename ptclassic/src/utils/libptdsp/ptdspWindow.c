@@ -34,7 +34,7 @@ Version: $Id$
 #include "PTDSPWindow.h"
 
 /* Returns the window identification number from a window name as a string */
-int PTDSP_WindowNumber(const char* wn) {
+int PTDSPWindowNumber(const char* wn) {
 	int winType = DSP_WINDOW_TYPE_NULL;
 	if ( strcasecmp(wn, "Rectangle")==0 ) {
 	    winType = DSP_WINDOW_TYPE_RECTANGLE;
@@ -54,7 +54,7 @@ int PTDSP_WindowNumber(const char* wn) {
 
 /* Returns the window values */
 /* The parameters argument is accessed only for the Kaiser window */
-int PTDSP_Window(double* window, int realLen, int winType, double* parameters) {
+int PTDSPWindow(double* window, int realLen, int winType, double* parameters) {
 	double alpha = 0.0;
 	double freq1 = 0.0;
 	double freq2 = 0.0;
