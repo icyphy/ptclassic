@@ -962,7 +962,7 @@ body ::tycho::Slate::reshape {tag x y args} {
 # </ul>
 #
 body ::tycho::Slate::reshapeclick {tag x y args} {
-    shapecall $id reshapeclick $x $y $args
+    eval shapecall $tag reshapeclick $x $y $args
 }
 
 #######################################################################
@@ -975,7 +975,7 @@ body ::tycho::Slate::reshapeclick {tag x y args} {
 # will be ignored.
 #
 body ::tycho::Slate::reshapedrag {tag x y args} {
-    shapecall $id reshapedrag $x $y $args -reuse 1
+    eval shapecall $tag reshapedrag $x $y $args -reuse 1
 }
 
 #######################################################################
@@ -989,7 +989,7 @@ body ::tycho::Slate::reshapedrag {tag x y args} {
 # will be ignored.
 #
 body ::tycho::Slate::reshaperelease {tag x y args} {
-    shapecall $id reshaperelease $x $y $args -reuse 1
+    eval shapecall $tag reshaperelease $x $y $args -reuse 1
 }
 
 #######################################################################
