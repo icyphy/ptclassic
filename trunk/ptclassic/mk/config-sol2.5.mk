@@ -1,5 +1,5 @@
 # Config file to build on sun4 processor (SparcStation) running Solaris2.5x
-# with egcs-1.0.1
+# with gcc-2.95.1
 
 # $Id$
 
@@ -30,15 +30,12 @@
 #		       
 # Programmer:  Christopher Hylands
 
-# This file is set up for egcs-1.0.  gcc-2.8.0 has problems
-# compiling certain c++ files with -O -fPIC
-
 ARCHFLAGS =	-DPTSOL2_5
 
 include $(ROOT)/mk/config-sol2.mk
 
 
-CPLUSPLUS_COMPAT =  -I$(ROOT)/src/compat/cfront
+CPLUSPLUS_COMPAT =  -I$(ROOT)/src/compat/cfront -I$(ROOT)/gnu/common/include/g++-3/
 
 
 # Wildforce Directory
