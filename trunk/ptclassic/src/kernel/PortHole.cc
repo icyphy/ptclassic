@@ -417,7 +417,11 @@ PortHole :: setPlasma (Plasma* useType) {
 		// first, if far() has known type, use it
 		if (far() && far()->myPlasma != Mark &&
 		    (far()->myPlasma || far()->myType() != ANYTYPE)) {
-			myPlasma = far()->setPlasma();
+			if (!far()->myPlasma) {
+				Plasma* p = Plasma::getPlasma(far()->myType());
+				far()->myPlasma = p;
+			}
+			myPlasma = far()->myPlasma;
 		}
 		// or, far() has typePort: set far() and use it
 		else if (far() && far()->typePort()) {
