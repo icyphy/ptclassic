@@ -1,0 +1,27 @@
+#!/bin/csh -f
+# Version $Id$
+# Author:	T. M. Parks
+# Created:	16 November 1993
+# Echo the full relative path to the "src" directory
+# corresponding to the current "obj.$ARCH" directory.
+
+# Check to see if ARCH is set.
+if (! $?ARCH) then
+	echo $RCSfile$: ARCH must be set
+endif
+
+# Check to see that obj.$ARCH is part of the current path.
+if ($cwd !~ *obj.$ARCH*) then
+	echo "$RCSfile$: must be run from obj.$ARCH directory"
+	exit 1
+endif
+
+# Replace obj.$ARCH with src.
+set dir = `echo $cwd | sed -e s/.\*obj.${ARCH}/src/`
+set d = $dir
+while ("$d" != "src")
+	set dir = "../$dir"
+	set d = $d:h
+end
+set dir = "../$dir"
+echo $dir
