@@ -1,4 +1,4 @@
-# Makefile for the Tycho %Package% package, demos/ directory
+# Makefile for the Tycho %Package% package
 #
 # @Author: Christopher Hylands
 #
@@ -7,10 +7,10 @@
 %copyright%
 
 # Root of Tycho directory
-ROOT =		../../..
+ROOT =		../..
 
 # True source directory
-VPATH =		$(ROOT)/%metapkg%/%pkg%/demos
+VPATH =		$(ROOT)/%metapkg%/%pkg%
 
 # Get configuration info
 CONFIG =	$(ROOT)/mk/tycho.mk
@@ -23,9 +23,13 @@ TCL_SRCS =
 
 ITCL_SRCS = 
 
-EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS)
+EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) \
+	%pkg%.tcl \
+	README.txt \
+	makefile \
+	pkgIndex.tcl
 
-MISC_FILES = 
+MISC_FILES = adm bin demos doc test
 
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =
