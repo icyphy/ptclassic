@@ -74,31 +74,9 @@ void SDFPTclTarget::setStopTime (double limit) {
     numIters = int(floor(limit + 0.001));
 }
 
-// Generate a PTcl description for galaxy without having to execute it
-StringList SDFPTclTarget::ptclDescription(
-		Galaxy* localGalaxy, int addHeader, const char* path) const {
-    StringList ptclCode;
-    if (localGalaxy) {
-	if (addHeader) {
-	    // FIXME: Necessary to store returned StringList to ensure that
-	    // temporary variables are handled correctly.  GNU 2.7 bug.
-    	    StringList headerCode = ptclHeaderCode(localGalaxy);
-    	    ptclCode << headerCode;
-	}
-	// FIXME: Necessary to store returned StringList to ensure that
-	// temporary variables are handled correctly.  GNU 2.7 bug.
-	StringList galCode = ptclGalaxyCode(localGalaxy);
-	ptclCode << galCode;
-    }
-
-    if (path && *path) writePtclCode(ptclCode, path);
-
-    return ptclCode;
-}
-
 // Write out the header which resets the state of ptcl and declares the
 // new galaxy name
-StringList SDFPTclTarget::ptclHeaderCode(Galaxy* localGalaxy) const {
+static StringList ptclHeaderCode(Galaxy* localGalaxy) {
     StringList ptclCode = "reset\n";
     ptclCode << "newuniverse " << localGalaxy->name() << " "
 			       << localGalaxy->domain() << " \n";
@@ -141,7 +119,7 @@ StringList SDFPTclTarget::ptclExecTimeCode() {
 }
 
 // Generate PTcl code for a galaxy independent of the domain of the galaxy
-StringList SDFPTclTarget::ptclGalaxyCode(Galaxy* localGalaxy) const {
+static StringList ptclGalaxyCode(Galaxy* localGalaxy) {
     StringList ptclCode;
 
     // Iterator over the stars in the galaxy
@@ -185,6 +163,12 @@ StringList SDFPTclTarget::ptclGalaxyCode(Galaxy* localGalaxy) const {
     return ptclCode;
 }
 
+static void writePtclCode(StringList& ptclCode, const char* path) {
+    // The pt_ofstream constructor automatically expands environment variables
+    pt_ofstream ptclFile(path);
+    ptclFile << ptclCode;
+}
+
 int SDFPTclTarget::run() {
     // Call haltRequested to process pending events and check for halt
     // If the user hit the DISMISS button in the run control panel,
@@ -211,11 +195,26 @@ int SDFPTclTarget::run() {
     return TRUE;
 }
 
-void SDFPTclTarget::writePtclCode(
-		StringList& ptclCode, const char* path) const {
-    // The pt_ofstream constructor automatically expands environment variables
-    pt_ofstream ptclFile(path);
-    ptclFile << ptclCode;
+// Generate a PTcl description for galaxy without having to execute it
+StringList ptclDescription(
+		Galaxy* localGalaxy, int addHeader, const char* path) {
+    StringList ptclCode;
+    if (localGalaxy) {
+	if (addHeader) {
+	    // FIXME: Necessary to store returned StringList to ensure that
+	    // temporary variables are handled correctly.  GNU 2.7 bug.
+    	    StringList headerCode = ptclHeaderCode(localGalaxy);
+    	    ptclCode << headerCode;
+	}
+	// FIXME: Necessary to store returned StringList to ensure that
+	// temporary variables are handled correctly.  GNU 2.7 bug.
+	StringList galCode = ptclGalaxyCode(localGalaxy);
+	ptclCode << galCode;
+    }
+
+    if (path && *path) writePtclCode(ptclCode, path);
+
+    return ptclCode;
 }
 
 void SDFPTclTarget::wrapup() {
