@@ -58,6 +58,7 @@ ITCL_SRCS = \
 	ColorManager.itcl \
 	Compile.itcl \
 	CompileCTcl.itcl \
+	CompileJava.itcl \
 	DAG.itcl \
 	Dialog.itcl \
 	Digraph.itcl \
