@@ -46,6 +46,7 @@ static const char file_id[] = "TyMain.cc";
 #include "InfString.h"
 #include "TyConsole.h"
 #include <stdio.h>
+#include <iostream.h>
 #include <sys/file.h>
 #include <tcl.h>
 #include <errno.h>
@@ -94,6 +95,8 @@ may not be handled appropriately.}", NULL);
 int
 main(int argc, char **argv) {
 
+    int sigReturn;
+    
     // The following creates a Tcl interpreter, adds the ptcl and itcl 
     // extensions, and creates a top-level Tk window.
     TyConsole console(argc, argv);
@@ -106,9 +109,11 @@ main(int argc, char **argv) {
     // Initialize the incremental linking module
     Linker::init(argv[0]);
 
-    if (setSignalHandlers())
+    if ((sigReturn = setSignalHandlers()) != 0) {
+        // This will never happen. See SetHandle.cc for explanation.
         PrintSigErrorMessage();
-
+    }
+    
     Tk_MainLoop();
     console.tyExit(0);
     return 0;
