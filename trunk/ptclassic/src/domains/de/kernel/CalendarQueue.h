@@ -119,8 +119,6 @@ public:
 	virtual ~CalendarQueue();
 
 protected:
-	void enableResized()  { cq_resizeEnabled = 1;}
-	void disableResized() { cq_resizeEnabled = 0;}
 
 	LevelLink **cq_bucket;
 
