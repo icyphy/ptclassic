@@ -632,6 +632,12 @@ endif
 CUSTOM_DIRS += $(CROOT)/src/kernel $(CROOT)/src/pigiRpc $(CROOT)/src/ptcl \
 	$(CROOT)/mk $(CROOT)/src/tycho/tysh
 
+ifdef USE_CORE_STATIC_LIBS
+	LIBPTCL = $(LIBDIR)/libptcl.a
+else
+	LIBPTCL = $(LIBDIR)/libptcl.$(LIBSUFFIX)
+endif
+
 PT_DEPEND += $(LIBDIR)/libptcl.$(LIBSUFFIX) $(LIBDIR)/libptolemy.a \
 	$(LIBFILES) $(STARS) $(TARGETS)
 
