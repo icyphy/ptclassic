@@ -75,6 +75,10 @@ class ::tycho::EditItcl {
     itk_option define -filetemplate fileTemplate FileTemplate \
 	    $TYCHO/editors/textedit/templates/ItclTemplate.itcl {}
 
+    # Location of the template file
+    itk_option define -testtemplate testTemplate TestTemplate \
+	    $TYCHO/editors/textedit/templates/testTemplate.itcl {}
+
 
     ###################################################################
     ####                     public methods                        ####
@@ -126,6 +130,10 @@ body ::tycho::EditItcl::constructor {args} {
 
     menubar add "File Template" Special -underline 0 \
 	    -command "$this fileTemplate $itk_option(-filetemplate) \
+	    		\[$this getClassName\]"
+
+    menubar add "Test Template" Special -underline 0 \
+	    -command "$this fileTemplate $itk_option(-testtemplate) \
 	    		\[$this getClassName\]"
 
     menubar addSeparator Special
