@@ -22,13 +22,13 @@ Contents:
 </ul>
 <h2><a name="bugs in the kernel">Bugs in the kernel</a></h2>
 
-<h3><a href="../kernel/ColorBrowser.itcl">ColorBrowser</a></h3>
+<h3><a href="../kernel/gui/ColorBrowser.itcl">ColorBrowser</a></h3>
 <ul>
 <li>The color browser requires that you press <CODE>Apply</CODE>
 to make the change take effect -- <CODE>OK</CODE> will not work.
 </ul>
 
-<h3><a href="../kernel/MenuBar.itcl">MenuBar</a></h3>
+<h3><a href="../kernel/gui/MenuBar.itcl">MenuBar</a></h3>
 <ul>
 <li>If you add a menu with a name that already exists, and the
 existing menu is before an entry that has no -label option
@@ -41,19 +41,19 @@ and using that.
 
 </ul>
 
-<h3><a href="../kernel/File.itcl">File</a></h3>
+<h3><a href="../kernel/gui/File.itcl">File</a></h3>
 <ul>
 <li>When you open a non-existent HTML file, you probably want
 the HTML editor, not the HTML viewer. But that's what you get.
 </ul>
 
-<h3><a href="../kernel/Displayer.itcl">Displayer</a></h3>
+<h3><a href="../kernel/gui/Displayer.itcl">Displayer</a></h3>
 <ul>
 <li>The menu buttons created in MenuSupport and MenuBar may need to be
     made global (with an uplevel #0).
 </ul>
 
-<h3><a href="../kernel/Edit.itcl">Edit</a></h3>
+<h3><a href="../kernel/gui/Edit.itcl">Edit</a></h3>
 <ul>
 <li>Fill region is much too slow.
 <li>Need a "find-again" binding, and perhaps emacs-style incremental search.
@@ -69,7 +69,7 @@ one cut buffer.
  <br><B>To be fixed soon.</B>
 </ul>
 
-<h3><a href="../kernel/Glimpse.itcl">Glimpse</a></h3>
+<h3><a href="../kernel/gui/Glimpse.itcl">Glimpse</a></h3>
 <ul>
 <li>Glimpse should not freeze Tycho while running. Searching
 through say the Ptolemy tree can take a very long time.
@@ -78,7 +78,7 @@ through say the Ptolemy tree can take a very long time.
 ask the user if we want to create it.
 </ul>
 
-<h3><a href="../kernel/HTML.itcl">HTML</a></h3>
+<h3><a href="../kernel/html/HTML.itcl">HTML</a></h3>
 <H4>HTML Rendering bugs</H4>
 
 <ul>
@@ -132,7 +132,7 @@ menu in the file browser that selects the type of editor.
 
 </ul>
 
-<h3><a href="../kernel/Query.itcl">Query</a></h3>
+<h3><a href="../kernel/gui/Query.itcl">Query</a></h3>
 <ul>
 
 <li> <CODE>Control-v</CODE> in the search window inserts garbage into
@@ -140,7 +140,7 @@ the search field.
 
 </ul>
 
-<h3><a href="../kernel/RevControlRCS.itcl">RevControlRCS</a></h3>
+<h3><a href="../kernel/gui/RevControlRCS.itcl">RevControlRCS</a></h3>
 <ul>
 
 <li> Unfortunately, if RCS does not necessarily put the version
@@ -150,7 +150,7 @@ file is put in the current directory.
 
 </ul>
 
-<h3><a href="../kernel/RevControlSCCS.itcl">RevControlSCCS</a></h3>
+<h3><a href="../kernel/gui/RevControlSCCS.itcl">RevControlSCCS</a></h3>
 <ul>
 
 <li> Revision control appears to use the file permissions to test
@@ -161,7 +161,7 @@ It should check for the lock file.
 </ul>
 
 
-<h3><a href="../kernel/TclShell.itcl">TclShell</a></h3>
+<h3><a href="../kernel/gui/TclShell.itcl">TclShell</a></h3>
 <ul>
 <li> When a TclShell is displaying stdout on its last line, typed
 commands are not always interpreted correctly.
@@ -170,7 +170,7 @@ cursor at the top of the shell.  It should only put the view up there.
 It needs to run <CODE>adjustInsertionCursor</CODE>.
 </ul>
 
-<h3><a href="../kernel/WelcomeMessage.itcl">WelcomeMessage</a></h3>
+<h3><a href="../kernel/gui/WelcomeMessage.itcl">WelcomeMessage</a></h3>
 <ul>
 <li> If your ptolemy binary has a long name,
 	then the welcome window is cropped at the bottom, and there
@@ -182,12 +182,12 @@ It needs to run <CODE>adjustInsertionCursor</CODE>.
 
 <h2><a name="bugs in text editors">Bugs in text editors</a></h2>
 
-<h3><a href="../editors/textedit/EditHTML.itcl">EditHTML</a></h3>
+<h3><a href="../edit/textedit/EditHTML.itcl">EditHTML</a></h3>
 <ul>
 <li>The Check Hyperlinks command flags every http reference as an error.
 </ul>
 
-<h3><a href="../editors/textedit/EditProgram.itcl">EditProgram</a></h3>
+<h3><a href="../edit/textedit/EditProgram.itcl">EditProgram</a></h3>
 <ul>
 <li>Indent region should be undoable.
 <li>Spelling checker should ignore HTML directives in comments.
@@ -196,13 +196,13 @@ directory is not writable, the user should be asked if they want to
 create their own doc directory.
 </ul>
 
-<h3><a href="../editors/textedit/EditTcl.itcl">EditTcl</a></h3>
+<h3><a href="../edit/textedit/EditTcl.itcl">EditTcl</a></h3>
 <ul>
 <li>Indenting fails to ignore backslash on the end of a comment line.
 <li>Indenting confused by a single line with "if {" and nothing more.
 </ul>
 
-<h3><a href="../editors/textedit/EditC.itcl">EditC</a></h3>
+<h3><a href="../edit/textedit/EditC.itcl">EditC</a></h3>
 <ul>
 <li>Indenting needs a lot of work.
 </ul>
@@ -213,7 +213,7 @@ There are lots of bugs to be fixed in the visual editors, here are
 some of the biggies.
  <P>We should remove all the edit commands in the visual editors that do not 
 work.
-<h3><a href="../editors/visedit/Graphics.itcl">Graphics</a></h3>
+<h3><a href="../edit/visedit/Graphics.itcl">Graphics</a></h3>
 <ul>
 <li> Cut and paste does not work in the Graphics widget.
 <li> Moved titles new position is not saved.
@@ -221,7 +221,7 @@ work.
 <li> Most bindings in the File menu do not work.
 </ul>
 
-<h3><a href="../editors/visedit/EditDAG.itcl">EditDAG</a></h3>
+<h3><a href="../edit/visedit/EditDAG.itcl">EditDAG</a></h3>
 <ul>
 <li> addArc does not work. 
  <P>Karl-Hermann Wieners &lt;kwieners@TechFak.Uni-Bielefeld.DE&gt; writes:
@@ -261,7 +261,7 @@ work.
 </PRE>
 
 </ul>
-<h3><a href="../editors/visedit/ProfileTcl.itcl">ProfileTcl</a></h3>
+<h3><a href="../edit/visedit/ProfileTcl.itcl">ProfileTcl</a></h3>
 <ul>
 
 <LI> TclProfile should be removed pending the release of Itcl3.0
