@@ -10,18 +10,288 @@ Tycho provides a set of classes that are added to top-level
 windows to perform certain well-defined functions. There are
 currently three of these "decorator" classes.
 
+ <P>("Decorator" is perhaps a poor choice for this set of classes,
+since the meaning is very different from the <I>Decorator</I>
+object-oriented design pattern.)
+
 <h2>Contents</h2>
 <ul>
 <li><a href="#MenuBar class">MenuBar Class</a>
 <li><a href="#ToolBar class">ToolBar Class</a>
 <li><a href="#StatusBar class">StatusBar Class</a>
 </ul>
+
 <h2><a name="MenuBar class">MenuBar Class</a></h2>
 <p>
-The MenuBar class ...
+The MenuBar class is a complete application menu bar. (MenuBar
+is a subclass of the abstract class MenuSupport, which implements
+most of the menu functionality.) The Displayer
+top-level window contains a MenuBar object for each View
+packed into it. Views are responsible for maintaining their own
+menu bars: they each have a method called <code>menubar</code> which
+directs commands to its menu bar; each view subclass adds
+appropriate entries to the menubar.
+
+ <P>To illustrate the workings of the menu bar, we will just create
+a menu bar and pack it into a top-level window. To understand the
+Displayer-View machinery, see the documentation for the
+<A HREF="displayer.html">Displayer</A> and <A
+HREF="view.html">View</A> classes. Create a top-level window and
+and an empty menubar:
+
+<tcl><pre>
+::tycho::TopLevel .f
+::tycho::MenuBar .f.mb
+pack .f.mb -fill x -expand on
+.f centerOnScreen
+</pre></tcl>
+
+(The window will appear as a very small rectangle in the center of
+your screen.) Now, we'll add a couple of menus to the menu bar:
+
+<tcl><pre>
+.f.mb addMenu File
+.f.mb addMenu Help -side right -underline 0
+set bogus ""
+</pre></tcl>
+
+(Ignore the last line: that is needed to prevent a window with the
+result of the call -- which we don't want to see -- from popping up.)
+Note that the Help menu is packed to the right of the menu bar:
+stretch the window with the mouse to see this. The
+<code>-underline</code> option places an underline under the
+indicated letter of the label and enables keyboard navigation through
+menus. (Sorry, this is currently broken...)
+
+ <P>The menu bar accesses all menus and menu entries by label -- that is,
+by the string displayed in the menu bar or in the menu. To add
+entries to a menu, call <code>add</code> with the entry label, the
+name of the menu to place the entry into, and additional options.
+For example, we'll add a Close entry to the File menu and a Tycho Home
+Page entry to the Help menu:
+
+<tcl><pre>
+.f.mb add Close File -command {delete object .f}
+.f.mb add {Tycho Home Page} Help &#92
+	-command {::tycho::File::openContext &#92
+	/users/johnr/ptdesign/tycho/doc/index.html} &#92
+	-underline 0 -accelerator "C-x h"
+</tcl></pre>
+
+(Click on the File and Help menu buttons to bring down the menus.)
+Note that labels containing spaces must be bracketed as a list,
+or the menu bar will get confused -- as in <code>{Tycho Home Page}</code>.
+
+ <P>The <code>add</code> command takes any options acceptable to the
+entries of the Tk <code>menu</code> widget. Three commonly-used
+ones are illustrated above: 
+
+<ul>
+
+<li><code>-command</code> is a script which is executed in the
+global scope when the menu entry is invoked.
+
+<li><code>-underline</code> indicates the letter of the label to
+underline and enables keyboard selection of that entry.
+
+<li><code>-accelerator</code> displays a string next to the menu,
+which represents a key accelerator for the menu command. <I>The menu
+bar only displays this string: it does not actually bind the command
+to the indicated key sequence.</I> (This is an artifact of the way
+that Tk works -- we are considering making the menu bar perform the
+key bindings as well as displaying the accelerator string.)
+
+</ul>
+
+ <P> You can add a separator to a menu:
+
+<tcl><pre>
+.f.mb addSeparator Help
+.f.mb add Foo Help -command {::tycho::inform Foo!}
+</tcl></pre>
+
+ <P>Individual menu entries can be disabled and enabled:
+
+<tcl><pre>
+.f.mb disable {Tycho Home Page}
+</tcl></pre>
+
+(Pop down the Help menu: the Tycho Home Page entry is greyed
+out and cannot be invoked.) Whole menus can be disabled
+in exactly the same way:
+
+<tcl><pre>
+.f.mb disable File
+</tcl></pre>
+
+To re-enable disabled menus or entries, just call <code>enable</code>:
+
+<tcl><pre>
+.f.mb enable {Tycho Home Page}
+.f.mb enable File
+</tcl></pre>
+
+For more detailed information on menu bars, see the 
+<a href="../codeDoc/MenuBar.html">MenuBar</a> and 
+<a href="../codeDoc/MenuSupport.html">MenuSupport</a><br> class
+documentation.
+
+
+<h2><a name="StatusBar class">StatusBar Class</a></h2>
+<p>
+The StatusBar is a bar designed to be placed along the bottom
+of top-level windows. It contains a button to close the window,
+an optional field indicating file status (writable, read-only, or
+modified), and an area in which short but informative status messages
+can be displayed. Usually, the status bar is accessed from a View
+class, which has the method <code>statusbar</code> to
+direct commands to its status bar.
+
+ <P>To illustrate the operation of the status bar, we will create one
+and pack it into a top-level window with a empty frame to give the
+window some size:
+
+<tcl><pre>
+::tycho::TopLevel .f
+frame .f.f -width 300
+pack .f.f -fill x -expand on
+::tycho::StatusBar .f.sb -closecommand {delete object .f}
+pack .f.sb -fill x -expand on
+.f centerOnScreen
+</pre></tcl>
+
+The status bar just created has a command given to it via the
+<code>-closecommand</code> option, which deletes the object
+when the close button is pressed.
+The status bar has a number of other options that control its appearance.
+To add a file status display, set the <code>-filestatus</code> to
+"readonly," "writeable," or "modified":
+
+<tcl><pre>
+.f.sb configure -filestatus readonly
+</pre></tcl>
+
+Another one:
+
+<tcl><pre>
+.f.sb configure -filestatus modified
+</pre></tcl>
+
+To change the displayed text in the bar:
+
+<tcl><pre>
+.f.sb configure -closetext Quit
+</pre></tcl>
+
+To leave some space at the right side of the close button to match
+a scrollbar (presumably in some other window in the parent window):
+
+<tcl><pre>
+.f.sb configure -scrollbarpad 1
+</pre></tcl>
+
+There is really only one method of interest in the status bar:
+<code>puts</code> prints a string to the status region:
+
+<tcl><pre>
+.f.sb puts "A brief but informative message"
+</pre></tcl>
+
+To clear the display:
+
+<tcl><pre>
+.f.sb puts ""
+</pre></tcl>
+
+Often, printing a string and clearing it are bound to Tk &lt;Enter&gt;
+and &lt;Leave&gt; events -- that way the status bar can be used
+as a simple help mechanism. The toolbar, for example, to print
+information about a button when the mouse is moved over that button.
+
+
+
+<h2><a name="ToolBar class">ToolBar Class</a></h2>
+<p>
+The ToolBar is a bar designed to be placed along the top of
+top-level windows. It contains a row of buttons that make
+commonly-used functions highly visible to the inexperienced
+user. It can also display entry widgets below the buttons -- these
+are typically used when the temporary mature of the StatusBar
+display is not sufficient, or when direct user input is desired
+without popping up a dialog box (or both!).
+
+ <P>We will place the toolbar in an empty top-level window
+to illustrate its operation. Usually, the toolbar will be
+accessed through the <code>toolbar</code> method of the View class.
+We will use the same window as for the status bar -- if you have
+closed it, go bak and create another. Then:
+
+<tcl><pre>
+::tycho::ToolBar .f.tb -statusbar .f.sb
+pack .f.tb -fill x -expand on -before .f.f
+</pre></tcl>
+
+At first, the toolbar is blank, so you won't actually see anything.
+Let's add a couple of buttons to it:
+
+<tcl><pre>
+.f.tb button foo "The first button" -text "Push Me" &#92
+		-command {::tycho::post Thanks!}
+.f.tb button bar "The second button"   -text "Push Me Too" &#92
+		-command {::tycho::post {Thanks again!}}
+set bogus ""
+</pre></tcl>
+
+Notice that the button description is displayed in the
+status bar when the mouse is moved over the button. Buttons
+can be disabled:
+
+<tcl><pre>
+.f.tb disable foo
+</pre></tcl>
+
+And enabled:
+
+<tcl><pre>
+.f.tb enable foo
+</pre></tcl>
+
+To add entry widgets to the toolbar, do this:
+
+<tcl><pre>
+.f.tb entry thing "Enter something here" "Start with" {::tycho::post}
+set bogus ""
+</pre></tcl>
+
+If you press the Return key while in the entry widget, the contents of the
+widget are appended to the command (the last argument in the above
+call) and the command is executed. In this case, a window will
+display the entry widget's contents. To get all of the data
+in a toolbar, you can use <code>
+
+<tcl><pre>
+.f.tb get
+</pre></tcl>
+
+The entry widgets can be disabled if you need to prevent the user
+from altering the data (why does the appearance not change, though???):
+
+<tcl><pre>
+.f.tb disable thing
+</pre></tcl>
+
+And enabled:
+
+<tcl><pre>
+.f.tb enable thing
+</pre></tcl>
 
 
 <p>
+<a href="../codeDoc/MenuBar.html">MenuBar class documentation</a><br>
+<a href="../codeDoc/MenuSupport.html">MenuSupport class documentation</a><br>
+<a href="../codeDoc/ToolBar.html">ToolBar class documentation</a><br>
+<a href="../codeDoc/StatusBar.html">StatusBar class documentation</a><br>
 <a href="../../../doc/index.html">Tycho Home Page</a><br>
 <p>
 <HR>
