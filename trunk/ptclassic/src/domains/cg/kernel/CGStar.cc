@@ -7,7 +7,7 @@ $Id$
  Copyright (c) 1990 The Regents of the University of California.
                        All Rights Reserved.
 
- Programmer:  E. A. Lee
+ Programmer:  E. A. Lee, T. M. Parks
 
 *******************************************************************/
 
@@ -57,194 +57,144 @@ void CGStar::advance() {
 const int MAXLINELEN = 256;
 const int TOKLEN = 80;
 
-// process a CodeBlock.  This processing just substitutes for
-// macro calls. The processed code is added the target's code
-// line by line
-void CGStar::gencode(CodeBlock& cb) {
-	// Reset the local labels
-	resetCodeblockSyms();
-
-	const char* t = cb.getText();
-	// output this text
-	char line[MAXLINELEN], *o = line, c;
-	while ((c = *t++) != 0) {
-		if (c == substChar()) {
-			// two consecutive substChar values give
-			// one on the output.
-			if (*t == substChar()) {
-				*o++ = *t++;
-				continue;
-			}
-			// get the function.
-			char func[TOKLEN], *q = func;
-			while (isalnum(*t)) *q++ = *t++;
-			*q = 0;
-			// skip any whitespace
-			while (isspace(*t)) t++;
-			// must be pointing at a '('
-			if (*t++ != '(') {
-				codeblockError ("expecting '('", " after macro call");
-				return;
-			}
-			// get the identifier
-			char id[TOKLEN], arg2[TOKLEN], *p = id;
-			while (isalnum(*t)||(*t == '_') ) *p++ = *t++;
-			if (*t == '#') {
-				*p++ = *t++;
-				if (isdigit(*t)) {
-					while (isdigit(*t)) *p++ = *t++;
-				}
-				else {
-					char portNum[TOKLEN], *n = portNum;
-					while (isalnum(*t)) *n++ = *t++;
-					*n = 0;
-					const char *v =lookupVal(portNum);
-					while (*v != 0) *p++ = *v++;
-				}
-			}
-			*p = 0;
-			// skip any whitespace
-			while (isspace(*t)) t++;
-			// may be a ',' for 2nd argument
-			if (*t == ',') {
-				t++;
-				p = arg2;
-				while (isalnum(*t) || *t == '#') *p++ = *t++;
-				*p = 0;
-				// skip any whitespace
-				while (isspace(*t)) t++;
-			}
-			else arg2[0] = 0;
-			// must be pointing at a ')'
-			if (*t++ != ')') {
-				codeblockError ("expecting ')'",
-						"after macro call");
-				return;
-			}
-			// Don't know why the following two steps can't
-			// be consolidated, but if they are, the string
-			// becomes null
-			StringList tmp = processMacro(func,id,arg2);
-			const char* value = tmp;
-			if (value != 0) {
-				if (*value == 0) value = "ERROR";
-				// plug result into code.
-				while (*value) *o++ = *value++;
-			}
-		}
-		else {
-			*o++ = c;
-			if (c == '\n') {
-				*o = 0;
-				o = line;
-				addCode(line);
-			}
-		}
-	}
-	if (o > line) {
-		*o++ = '\n';
-		*o = 0;
-		addCode(line);
-	}
+// Add processed code to the Target.
+void CGStar::gencode(const char* code)
+{
+    StringList temp = processCode(code);
+    addCode(temp);
 }
 
-// process a CodeBlock.  This processing just substitutes for
-// macro calls and returns the result as a StringList
-StringList CGStar::processCode(CodeBlock& cb) {
-
-	StringList out = "";
-
-	// Reset the local labels
-	resetCodeblockSyms();
-
-	const char* t = cb.getText();
-	// output this text
-	char line[MAXLINELEN], *o = line, c;
-	while ((c = *t++) != 0) {
-		if (c == substChar()) {
-			// two consecutive substChar values give
-			// one on the output.
-			if (*t == substChar()) {
-				*o++ = *t++;
-				continue;
-			}
-			// get the function.
-			char func[TOKLEN], *q = func;
-			while (isalnum(*t)) *q++ = *t++;
-			*q = 0;
-			// skip any whitespace
-			while (isspace(*t)) t++;
-			// must be pointing at a '('
-			if (*t++ != '(') {
-				codeblockError ("expecting '('", " after macro call");
-				return "ERROR";
-			}
-			// get the identifier
-			char id[TOKLEN], arg2[TOKLEN], *p = id;
-			while (isalnum(*t)||(*t == '_') ) *p++ = *t++;
-			if (*t == '#') {
-				*p++ = *t++;
-				if (isdigit(*t)) {
-					while (isdigit(*t)) *p++ = *t++;
-				}
-				else {
-					char portNum[TOKLEN], *n = portNum;
-					while (isalnum(*t)) *n++ = *t++;
-					*n = 0;
-					const char *v =lookupVal(portNum);
-					while (*v != 0) *p++ = *v++;
-				}
-			}
-			*p = 0;
-			// skip any whitespace
-			while (isspace(*t)) t++;
-			// may be a ',' for 2nd argument
-			if (*t == ',') {
-				t++;
-				p = arg2;
-				while (isalnum(*t) || *t == '#') *p++ = *t++;
-				*p = 0;
-				// skip any whitespace
-				while (isspace(*t)) t++;
-			}
-			else arg2[0] = 0;
-			// must be pointing at a ')'
-			if (*t++ != ')') {
-				codeblockError ("expecting ')'",
-						"after macro call");
-				return "ERROR";
-			}
-			// Don't know why the following two steps can't
-			// be consolidated, but if they are, the string
-			// becomes null
-			StringList tmp = processMacro(func,id,arg2);
-			const char* value = tmp;
-			if (value == 0 || *value == 0) {
-				value = "ERROR";
-			}
-			// plug result into code.
-			while (*value) *o++ = *value++;
-		}
-		else {
-			*o++ = c;
-			if (c == '\n') {
-				*o = 0;
-				out += line;
-				o = line;
-			}
-		}
-	}
-	if (o > line) {
-		*o++ = '\n';
-		*o = 0;
-		out += line;
-	}
-	return out;
+// Add processed code to the Target.
+void CGStar::gencode(CodeBlock& block)
+{
+    StringList temp = processCode(block);
+    addCode(temp);
 }
 
-// Output a text line of code, raw, to the target architecture
-void CGStar :: addCode (const char* code) {
-	targetPtr->addCode(code);
+// Add a string to the Target code.
+void CGStar::addCode (const char* code)
+{
+	myTarget()->addCode(code);
+}
+
+// Process a CodeBlock, expanding macros.
+// Return empty StringList on error.
+StringList CGStar::processCode(CodeBlock& block)
+{
+    const char* text = block.getText();
+    return processCode(text);
+}
+
+StringList CGStar::processCode(const char* text)
+{
+    StringList out;
+    char line[MAXLINELEN], *o = line, c;
+    const char* t = text;
+
+    // Reset the local labels
+    resetCodeblockSyms();
+
+    // scan until end of text
+    while ((c = *t++) != 0)
+    {
+	if (c == substChar())	// parse macro
+	{
+	    // two consecutive substChar values give one on the output
+	    if (*t == substChar())
+	    {
+		*o++ = *t++;
+		continue;
+	    }
+
+	    // get the function name
+	    char func[TOKLEN], *q = func;
+	    while (isalnum(*t)) *q++ = *t++;
+	    *q = 0;
+
+	    // skip any whitespace
+	    while (isspace(*t)) t++;
+
+	    // must be pointing at a '('
+	    if (*t++ != '(')
+	    {
+		codeblockError ("expecting '('", " after macro call");
+		out.initialize();
+		return out;
+	    }
+
+	    // skip any white space
+	    while (isspace(*t)) t++;
+
+	    // build argument list
+	    StringList argList;
+	    while (*t != ')')
+	    {
+		char arg[TOKLEN], *p = arg;
+		arg[0] = 0;
+
+		// skip any leading white space
+		while (isspace(*t)) t++;
+
+		// copy argument
+		while (*t != 0 && *t != ',' && *t != ')') *p++ = *t++;
+
+		if (p == arg) // null arguments are not allowed
+		{
+		    codeblockError ("null argument");
+		    out.initialize();
+		    return out;
+		}
+
+		// back up to remove any trailing white space
+		while (isspace(*--p));
+
+		// terminate the string
+		*++p = 0;
+
+		argList << arg;
+
+		// skip over separator
+		if (*t == ',')
+		{
+		    t++;
+		    if (*t == ')')	// final null argument
+		    {
+		        codeblockError ("null argument");
+			out.initialize();
+		        return out;
+		    }
+		}
+	    }
+	    t++;	// skip ')' at end of argument list
+
+	    // Must save temporary value returned by expandMacro.
+	    StringList temp = expandMacro(func, argList);
+	    const char* macro = temp;
+	    if (macro != NULL)
+	    {
+		while (*macro != 0) *o++ = *macro++;
+	    }
+	}
+
+	else	// not a macro call
+	{
+	    *o++ = c;
+	    if (c == '\n')
+	    {
+		*o = 0;
+		out << line;
+		o = line;
+	    }
+	}
+    }	// reached end of text
+
+    if (o > line)
+    {
+	*o++ = '\n';
+	*o = 0;
+	out << line;
+    }
+    return out;
 }
 
 // The default substitution character is '$'.  Some assembly
@@ -253,78 +203,117 @@ void CGStar :: addCode (const char* code) {
 // that is the name of a porthole or state.
 char CGStar::substChar() const { return '$'; }
 
+// Produce an error message.
 void CGStar::codeblockError (const char* p1, const char* p2) {
 	Error::abortRun(*this, "Syntax error in codeblock: ", p1, p2);
 }
 
-// the following function is provided by the SunOS and Ultrix
-// libs; don't know how generally it is available.
-extern "C" int strcasecmp(const char* s1, const char* s2);
+// Produce an error message.
+// argList must be passed by reference so that the StringList is not consolidated.
+void CGStar::macroError(const char* func, const StringList& argList)
+{
+    StringList msg;
+    StringListIter nextArg(argList);
+    const char* arg;
 
-// handle functions
-StringList
-CGStar::processMacro(const char* func, const char* id, const char* arg2) {
+    msg << '(';
+    while ((arg = nextArg++) != NULL) msg << arg;
+    msg << ')';
+
+    arg = msg;
+
+    Error::abortRun(*this, "Unknown macro: ", func, arg);
+}
+
+// Expand macros.
+// Return empty StringList on error.
+// argList must be passed by reference so that the StringList is not consolidated.
+StringList CGStar::expandMacro(const char* func, const StringList& argList)
+{
 	StringList s;
-	if (strcasecmp(func,"ref2") == 0) {
-		if (*arg2 == 0) codeblockError("two arguments needed for ref2");
-		else {
-			s = getRef2(id,arg2);
-		}
-	}
-	// if more two-arg funcs are added, put them before here!
-	else if (*arg2 != 0) {
-		codeblockError(func, " is not a 2-argument macro");
-	}
-	else if (strcasecmp(func, "ref") == 0) {
-		s = getRef(id);
-	} else if (strcasecmp(func, "val") == 0) {
-		s = lookupVal(id);
-	} else if ((strcasecmp(func, "label") == 0) ||
-		   (strcasecmp(func, "codeblockSymbol") == 0)) {
-		s = codeblockSymbol.lookup(id);
-	} else if (strcasecmp(func, "starSymbol") == 0) {
-		s = starSymbol.lookup(id);
-	} else {
-		s = "ERROR: UNKNOWN MACRO ";
-		s += func;
-		s += "(";
-		s += id;
-		s += ")";
-	}
+	StringListIter arg(argList);
+
+	// ref2 provided for backward compatibility
+	if (matchMacro(func, argList, "ref2", 2)) s = expandRef(arg++, arg++);
+	else if (matchMacro(func, argList, "ref", 2)) s = expandRef(arg++, arg++);
+	else if (matchMacro(func, argList, "ref", 1)) s = expandRef(arg++);
+	else if (matchMacro(func, argList, "val", 1)) s = expandVal(arg++);
+	else if (matchMacro(func, argList, "size", 1)) s = expandSize(arg++);
+	else if (matchMacro(func, argList, "label", 1)) s = codeblockSymbol.lookup(arg++);
+	else if (matchMacro(func, argList, "codeblockSymbol", 1)) s = codeblockSymbol.lookup(arg++);
+	else if (matchMacro(func, argList, "starSymbol", 1)) s = starSymbol.lookup(arg++);
+	else macroError(func, argList);
+
 	return s;
 }
 
-// lookup reference
-StringList
-CGStar::getRef(const char* name) {
-	StringList s = readFullName();
-	s += ".";
-	s += name;
-	return s;
-}
+// Evaluate State used as MultiPortHole index.
+// Return unmodified copy of argument if no MultiPortHole reference is found.
+StringList CGStar::expandPortName(const char* string)
+{
+    StringList port;
+    const char* s = string;
+    char temp[TOKLEN], *t = temp;
 
-// lookup reference with offset
-StringList
-CGStar::getRef2(const char* name, const char* offset) {
-	StringList s = readFullName();
-	s += ".";
-	s += name;
-	s += "[";
-	s += offset;
-	s += "]";
-	return s;
-}
-
-// lookup value for a state
-StringList
-CGStar::lookupVal(const char* name) {
-	State* s;
-	if ((s = stateWithName(name)) != 0) {
-		StringList v = s->currentValue();
-		return v;
+    while (*s != 0 && *s != '#') *t++ = *s++;
+    if (*s == 0) port << string;
+    else	// found '#'
+    {
+	*t++ = *s++;
+	if (isdigit(*s))	// explicit port number
+	    port << string;
+	else			// lookup State value
+	{
+	    *t = 0;
+	    port << temp << expandVal(s);
 	}
-	codeblockError(name, " is not defined as a state");
-	return "ERROR";
+    }
+    return port;
+}
+
+// State or PortHole reference.
+// Return empty StringList on error.
+StringList CGStar::expandRef(const char* name)
+{
+    StringList ref;
+    StringList argList = name;
+    macroError("ref", argList);
+    return ref;
+}
+
+// State or PortHole reference with offset.
+// Return empty StringList on error.
+StringList CGStar::expandRef(const char* name, const char* offset)
+{
+    StringList ref;
+    StringList argList = name;
+    argList << offset;
+    macroError("ref", argList);
+    return ref;
+}
+
+// State value.
+// Return empty StringList on error.
+StringList CGStar::expandVal(const char* name)
+{
+    StringList val;
+    State* state = stateWithName(name);
+    if (state != NULL) val = state->currentValue();
+    else codeblockError(name, " is not defined as a state");
+    return val;
+}
+
+// Size of State or PortHole.
+StringList CGStar::expandSize(const char* name)
+{
+    StringList size;
+    StringList portName = expandPortName(name);
+    State* state = stateWithName(name);
+    CGPortHole* port = (CGPortHole*)genPortWithName(portName);
+    if (state != NULL) size << state->size();
+    else if (port != NULL) size << port->bufSize();
+    else codeblockError(name, " is not defined as a state or port");
+    return size;
 }
 
 // max Comm. time.
