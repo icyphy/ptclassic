@@ -81,10 +81,10 @@ int CGTarget::setup(Galaxy& g) {
 
 	if (!modifyGalaxy(g)) return FALSE;
 
-	if (!noSchedule) 
+	if (!noSchedule) {
 		if (!Target::setup(g)) return FALSE;
-	else
-		g.initialize();
+	}
+	else g.initialize();
 
 	initStars(g);
 
