@@ -70,7 +70,7 @@ Use this instead of VEMMSG() to get VEM prompt.
 */
 void
 PrintCon(s)
-char *s;
+const char *s;
 {
     if (VemReady()) {
 	vemMessage("\0062", MSG_DISP|MSG_NOLOG);
@@ -85,7 +85,7 @@ Print string to VEM console window and VEM log file.
 */
 void
 PrintConLog(s)
-char *s;
+const char *s;
 {
     if (VemReady()) {
 	vemMessage("\0062", MSG_DISP|MSG_NOLOG);
@@ -101,7 +101,7 @@ Change later to different color from PrintConLog().
 */
 void
 PrintErr(s)
-char *s;
+const char *s;
 {
 #ifdef OLDNEVER
     char buf[MSG_BUF_MAX];
@@ -138,9 +138,10 @@ char *s;
 Print debug info if PrintDebug is turned on.
 */
 static int printDebugState = TRUE;
+
 void
 PrintDebug(s)
-char *s;
+const char *s;
 {
 #ifdef OLDNEVER
     char buf[MSG_BUF_MAX];

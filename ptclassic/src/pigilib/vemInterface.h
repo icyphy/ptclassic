@@ -41,10 +41,10 @@ $Id$
 
 extern void ViSetErrWindows ARGS((boolean state));
 extern boolean ViGetErrWindows();
-extern void PrintCon();
-extern void PrintConLog();
-extern void PrintErr ARGS((char *s));
-extern void PrintDebug ARGS((char *s));
+extern void PrintCon ARGS((const char *s));
+extern void PrintConLog ARGS((const char *s));
+extern void PrintErr ARGS((const char *s));
+extern void PrintDebug ARGS((const char *s));
 extern void PrintDebugSet ARGS((boolean state));
 extern boolean PrintDebugGet();
 extern void ViInit ARGS((char *name));
