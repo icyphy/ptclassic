@@ -42,13 +42,25 @@
 # methods per operation, contain the full signature. For example:
 # <code>add(int,int):int</code> and <code>add(int,float):float</code>.
 #
-# The model has the following attributes:
+# The model has the following public variables:
 #
 # <dl>
+# <dt><b>-classname</b>
+# <dd>
+# The class name of the class. (i.e. ::tycho::ClassModel)
+#
+# <dt><b>-description</b>
+# <dd>
+# A short description of the class.
+#
 # <dt><b>-exceptions</b>
 # <dd>
 # Exceptions thrown by this class. An attribute
 # because exceptions don't have attributes. The default is null.
+#
+# <dt><b>-explanation</b>
+# <dd>
+# An HTML description of the class.
 #
 # <dt><b>-inherits</b>
 # <dd>
@@ -58,7 +70,7 @@
 # <dd>
 # A list of interfaces that this class implements.
 #
-# <dt><b>-interface</b>
+# <dt><b>-interfacefile</b>
 # <dd>
 # The file in which the class' interface resides.
 #
@@ -72,10 +84,6 @@
 # Other class modifiers. Possible values depend
 # on the languages. The default is null.
 #
-# <dt><b>-name</b>
-# <dd>
-# The class name of the class. (i.e. ::tycho::ClassModel)
-#
 # <dt><b>-package</b>
 # <dd>
 # The name of the package this class belongs to. 
@@ -86,7 +94,7 @@
 # The protection level of the class. Usually,
 # this includes "public" and "package". The default is "public".
 #
-# <dt><b>-source</b>
+# <dt><b>-sourcefile</b>
 # <dd>
 # The file in which the class resides.
 #
@@ -225,19 +233,17 @@
 # </dl>
 #
 # Here is an example of a class model. This creates
-# a model and loads it with a string in TIM format -- usually,
-# though, you would set the *-datafile* option and
-# call load{} (see <a href="Model.idoc">Model</a>). After
-# creating it, call the describe{} method to confirm its
+# a model and loads it with a string in TIM format. After
+# creating it, we call the describe{} method to confirm its
 # contents:
 # <pre><tcl>
 #     catch {delete object $class}
 #     set class [::tycho::ClassModel [::tycho::autoName class]]
 #     $class parse {
-#        modelconfigure -language Itcl -name ::tycho::exampleclass
-#        modelconfigure -description {An example class.}
-#        modelconfigure -explanation {This is a <i>silly</i> class.}
-#        modelconfigure -inherits ::tycho::Mommy
+#        configure -language Itcl -classname ::tycho::exampleclass
+#        configure -description {An example class.}
+#        configure -explanation {This is a <i>silly</i> class.}
+#        configure -inherits ::tycho::Mommy
 #        variable foo \
 #            -protection public \
 #            -explanation "This is a public variable."
@@ -252,17 +258,17 @@
 #
 # Return the public methods of the class:
 # <pre><tcl>
-#     $class methods -protection public
+#     $class match method -protection public
 # </tcl></pre>
 #
 # Return the explanation of a method:
 # <pre><tcl>
-#     $class get annotation bar.explanation method
+#     $class attrset method:bar -explanation
 # </tcl></pre>
 #
 # Return the arguments of a method:
 # <pre><tcl>
-#     $class arguments bar
+#     $class match argument method:bar
 # </tcl></pre>
 #
 class ::tycho::ClassModel {
@@ -274,6 +280,42 @@ class ::tycho::ClassModel {
     #################################################################
     ####                        options                          ####
     
+    # The class name of the class. (i.e. ::tycho::ClassModel)
+    public variable classname ""
+
+    # The short description of the class.
+    # public variable description ""
+
+    # Exceptions thrown by this class
+    public variable exceptions {}
+
+    # The HTML description of the class.
+    public variable explanation ""
+
+    # A list of classes from which this class inherits.
+    public variable inherits {}
+
+    # A list of interfaces that this class implements.
+    public variable implements {}
+
+    # The file in which the class' interface resides.
+    public variable interfacefile ""
+
+    # The language in which the class was written.
+    public variable language ""
+
+    # Other class modifiers.
+    public variable modifiers {}
+
+    # The name of the package this class belongs to. 
+    public variable package ""
+
+    # The protection level of the class.
+    public variable protection "public"
+
+    # The file in which the class resides.
+    public variable sourcefile
+
     #################################################################
     ####                     public methods                      ####
 
@@ -286,21 +328,19 @@ body ::tycho::ClassModel::constructor {args} {
     # Evaluate options
     eval configure $args
 
-    # Define the attributes of this model. See the class
-    # comment for information.
-    modelconfigure \
-            -interface "" \
-            -name "" \
-            -language "" \
-            -package "" \
-            -source "" \
-            -protection "public" \
-            -modifiers "" \
-            -exceptions "" \
-	    -inherits {} \
-	    -implements {} \
-	    -description "" \
-	    -explanation ""
+    # Add the new options to the "printable" list
+    lappend printable \
+            -interfacefile \
+            -classname \
+            -language  \
+            -package \
+            -sourcefile \
+            -protection \
+            -modifiers \
+            -exceptions \
+	    -inherits \
+	    -implements \
+	    -explanation 
 
     # Define the "argument" entity
     type define argument \
