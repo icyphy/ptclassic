@@ -51,7 +51,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "StringList.h"
 #include <ctype.h>
 #include "pt_fstream.h"
-#if defined(PTHPPA_CFRONT) || defined(PTSOL2) || defined(SVR4) || defined(SYSV)
+#if defined(PTHPPA_CFRONT) || defined(PTSOL2) || defined(SVR4) || defined(SYSV) || !defined(PTIRIX5_CFRONT)
 #include <fcntl.h>		// For open().
 #endif /*hppa GNUG SOL2*/
 
