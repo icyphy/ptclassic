@@ -41,6 +41,10 @@ option add Pigi.bigfont  -Adobe-Helvetica-Bold-R-Normal-*-240-*
 option add Pigi.positiveColor [ptkColor blue]
 option add Pigi.negativeColor [ptkColor red]
 
+#Define Special Button Color for Buttons that must be pressed
+option add Pigi.pressMeBg [ptkColor orange1]
+option add Pigi.pressMeActiveBg [ptkColor tan3]
+
 # set font for all message windows used in Pigi
 option add *Pigi*Message*Font [option get . mainfont Mainfont]
 
