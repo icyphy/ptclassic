@@ -89,6 +89,12 @@ platforms.  The details of file permissions on non-Unix are a little
 murky, but wrapping <CODE>catch</CODE> around the <CODE>chmod</CODE>
 call will probably make your code more robust.
 
+
+<LI> Call <CODE>::tycho::invoke</CODE> rather than just calling
+<CODE>exec</CODE>.  If there is a problem, 
+<CODE>::tycho::invoke</CODE> will bring up an error window that includes
+the command that failed to exec.
+
 </OL>
 
 <p>
