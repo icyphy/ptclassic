@@ -85,9 +85,9 @@ class Resource {
     public:
     Resource(const char*, int, DERCScheduler* );
 
-    
-    void newEventFromEventQ(DERCEvent* , double);
-    void newEventFromInterruptQ(DERCEvent*, double);
+    // returns int so it can pass along value from DEStar.run()
+    int newEventFromEventQ(DERCEvent* , double); 
+    int newEventFromInterruptQ(DERCEvent*, double);
     void intQupdate(DERCEvent*, double, double);
     int canAccessResource(DERCEvent*);
     // used to get the destination of the event as a DERC Star
