@@ -142,6 +142,9 @@ The values of the input ports will be passed as arguments to this function.
 	}
 
 	go {
+		// call the go method of the parent star
+		SDFMatlab::go();
+
 		// convert Ptolemy input matrices to Matlab matrices
 		processInputMatrices();
 
