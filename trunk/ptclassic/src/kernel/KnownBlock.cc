@@ -46,20 +46,8 @@ int KnownBlock::domainIndex (const char* myDomain, int addIfNotFound) {
 
 // Look up the domain index of a block.
 
-int KnownBlock::domainIndex (Block& block) {
-	// for galaxies, if myDomain isn't set, use domain of
-	// the first sub-block found.
-	if (!block.isItAtomic()) {
-		Galaxy& g = block.asGalaxy();
-		if (g.myDomain)
-			return domainIndex (g.myDomain, TRUE);
-		if (g.numberBlocks() == 0) {
-			// indeterminate domain
-			return -1;
-		}
-		else return domainIndex (g.nextBlock());
-	}
-	return domainIndex (block.asStar().domain(), TRUE);
+inline int KnownBlock::domainIndex (Block& block) {
+	return domainIndex (block.domain(), TRUE);
 }
 
 // Constructor.  Add a block to the appropriate known list
