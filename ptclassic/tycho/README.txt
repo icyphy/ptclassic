@@ -1,5 +1,5 @@
 $Id$
-README file for Tycho, version 0.2.1devel
+README file for Tycho, version 0.3devel
 
 Tycho is a framework for developing and running
 [incr Tcl] applications. Tycho consists of a number
@@ -11,4 +11,4 @@ which you can add your own packages.
 
 See doc/packages.html for information on how Tycho packages work.
 See doc/overview.html for more information.
-See doc/releasenotes0.2.1.html for the release notes.
+See doc/releasenotes0.3.html for the release notes.
