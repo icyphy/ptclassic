@@ -26,8 +26,8 @@
 # 						COPYRIGHTENDKEY
 #
 
-# This makefile has only been tested with Solaris2.4, SunOS4.1.3 and
-# HPUX10.20.  It may work on other platforms, but we have not tried.
+# This makefile has only been tested with Solaris2.4, and HPUX10.20.
+# It may work on other platforms, but we have not tried.
 
 # This makefile will install the GNU tools for non-hp and hp platforms.
 # hp's need GNU gas for -g to work, and they don't come with lex or yacc,
