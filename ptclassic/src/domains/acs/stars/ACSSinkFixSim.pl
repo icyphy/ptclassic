@@ -6,7 +6,7 @@ defcore {
 	desc {
 	    Discards input samples.
 	}
-	version {$Id$
+	version {$Id$}
 	author { Eric Pauer }
 	copyright {
 Copyright (c) 1999-%Q% Sanders, a Lockheed Martin Company

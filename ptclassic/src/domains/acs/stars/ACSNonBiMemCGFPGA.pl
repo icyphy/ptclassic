@@ -7,7 +7,7 @@ defcore {
 	    Converts a bidirectional memory interface into individual
 	    source/sink memory lines
 	}
-	version {$Id$
+	version {$Id$}
 	author { K. Smith}
 	copyright {
 Copyright (c) 1998-%Q% Sanders, a Lockheed Martin Company

@@ -6,7 +6,7 @@ defcore {
 	desc {
 Produces the square root of the input.
 	}
-	version {$Id$
+	version {$Id$}
 	author { K. Smith }
 	copyright {
 Copyright (c) 1998-%Q% Sanders, a Lockheed Martin Company

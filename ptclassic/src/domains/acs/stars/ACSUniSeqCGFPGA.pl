@@ -6,7 +6,7 @@ defcore {
 	desc {
 	    Core for the unirate sequencer
 	}
-	version {$Id$
+	version {$Id$}
 	author { K. Smith }
 	copyright {
 Copyright (c) 1998-%Q% The Regents of the University of California

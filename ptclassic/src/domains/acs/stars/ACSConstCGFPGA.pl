@@ -6,7 +6,7 @@ defcore {
 	desc {
 	    Generates a single delay for multiple lines
 	}
-        version { $Id$
+        version { $Id$}
         author { Ken Smith }
         copyright {
 Copyright (c) 1998-%Q% Sanders, a Lockheed Martin Company
