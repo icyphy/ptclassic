@@ -121,6 +121,21 @@ sccsinfo:
 	fi
 	@sccs check || true
 
+# Remove everytying that can be retrieved from SCCS, except files that
+# are being edited.
+sccsclean:
+ifdef DIRS
+	@for x in $(DIRS); do \
+	    if [ -w $$x ] ; then \
+		( cd $$x ; \
+		echo making $@ in $$x ; \
+		$(MAKE) $(MFLAGS) $(MAKEVARS) $@ ;\
+		) \
+	    fi ; \
+	done
+endif
+	sccs clean
+
 makefiles: makefile
 	@if [ "x$(DIRS)" != "x" ]; then \
 		set $(DIRS); \
