@@ -98,7 +98,7 @@ RPCFunction CommandArray[] = {
     {RpcEditDomain, "Edit", "edit-domain", "d", 0},
     {RpcEditTarget, "Edit", "edit-target", "T", 0},
     {RpcEditComment, "Edit", "edit-comment", ";", 0},
-    {EditAttributes, "Edit", "edit-attributes", "a", 0},
+    {EditPragmas, "Edit", "edit-pragmas", "a", 0},
     {RpcEditSeed, "Edit", "set-seed", "#", 0},
     {RpcFindName, "Edit", "find-name"},
     {ClearMarks, "Edit", "clear-marks"},
