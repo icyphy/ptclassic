@@ -35,7 +35,7 @@ as follows: (0.1,0.3).
 It is advisable to use an absolute path name as part of the file name,
 especially if you are using the graphical interface.
 This will allow the filter to work as expected regardless of
-the directory in which the ptolemy process actually runs.
+the directory in which the Ptolemy process actually runs.
 It is best to use tildes in the filename.
 .pp
 When the \fIdecimation\fP (\fIinterpolation\fP)
