@@ -80,22 +80,19 @@ proc ::tycho::tyexec { args } {
 # <code>ls -l</code> is rerun.
 #
 proc ::tycho::execModal {{command {}} {dir {}} {execWidget {}}} {
-
-
     if {$execWidget == {}} {
-        set win [::tycho::autoName .makeExec]
-        #set execWidget [::tycho::Exec $win]
-        set execWidget [::tycho::Monitor $win]
+        #set win [::tycho::autoName .makeExec]
+        set execWidget [::tycho::view Monitor -toolbar 1 \
+            -dir $dir -command $command -autostart 1 -autodestroy 5]
+    } else {
+        if {$command!={}} {
+            $execWidget configure -command $command
+        }
+        if {$dir!={}} {
+            $execWidget configure -dir $dir
+        }
+        $execWidget execProcess
     }
-
-    if {$command != {} } {
-	$execWidget configure -command $command
-    }
-    if {$dir != {} } {
-	$execWidget configure -dir $dir
-    }
-    $execWidget raiseWindow
-    $execWidget execProcessInMonitor
 
     #This is the modal mode, which we don't use anymore
     #::tycho::Dialog::wait $win
