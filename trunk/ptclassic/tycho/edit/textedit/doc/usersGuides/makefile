@@ -51,6 +51,7 @@ EXTRA_SRCS =	\
 	CommandShellHelp.html \
 	EditCHelp.html \
 	EditCppHelp.html \
+	EditEsterelHelp.html \
 	EditHTMLHelp.html \
 	EditItclHelp.html \
 	EditMakeHelp.html \
