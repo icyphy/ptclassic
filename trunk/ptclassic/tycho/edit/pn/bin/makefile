@@ -60,7 +60,7 @@ TYDOC_DESC =
 
 # Do make sources so that we ensure that the subdirectories are checked out
 all: sources $(MISC_SRCS)
-	chmod a+x pn
+	-chmod a+x pn
 
 install: all tybin_install
 
