@@ -108,7 +108,7 @@ cd ../..
 foreach x ( cg56/dsp/stars cg96/dsp/stars \
 	sdf/dsp/stars sdf/image/kernel sdf/image/stars sdf/tcltk/stars \
 	sdf/matrix/stars \
-	sdf/atm/gals sdf/atm/stars \
+	sdf/atm/stars \
 	de/atm/stars de/atm/kernel \
 	de/tcltk/stars \
 	cgc/targets/main cgc/targets/cm5 cgc/tcltk/stars cgc/tcltk/targets )
