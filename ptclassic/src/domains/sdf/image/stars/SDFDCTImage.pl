@@ -85,8 +85,8 @@ and outputs a DCTImage particle.
 	method {
 		name { doDCT }
 		type { void }
-		arglist { "(float* out, unsigned const char* in, int outw,
-				int outh, int inw, int inh)"
+		arglist {	// can't break string across lines in cfront
+"(float* out, unsigned const char* in, int outw, int outh, int inw, int inh)"
 		}
 		code {
 	register int ndx, ndx2, cntr;
