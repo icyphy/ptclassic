@@ -40,6 +40,12 @@ public:
 	// hack method to set stopping time
 	virtual void setStopTime(float limit) = 0;
 
+	// hack method to set stopping time of wormhole
+	virtual void resetStopTime(float limit) {setStopTime(limit) ;}
+
+	// set the currentTime 
+	virtual void setCurrentTime(float val) {currentTime = val ;}
+
 	// display schedule
 	virtual StringList displaySchedule() { return "not implemented\n";}
 
@@ -55,8 +61,10 @@ public:
 	// current time of the schedule
 	float currentTime;
 
-	// "timed" or "untimed" scheduler?
-	virtual int amITimed() = 0;
+	// flag set if stop before deadlocked.
+	// for untimed domain, it is always FALSE.
+	int stopBeforeDeadlocked;
+
 protected:
 	// The following member is used to visit all atomic blocks
 	// (stars and wormholes) in the galaxy exacly once each
