@@ -7,13 +7,13 @@
 #ifdef hppa
 #ifndef __GNUG__
 
-extern "C" int rand();
+extern "C" long int lrand48();
 
 // returns a random value between 0 and 1.
 
 class Random {
 protected:
-	double unif01() { return double(rand())/2147483648.0;}
+	double unif01() { return double(lrand48())/2147483648.0;}
 public:
 	virtual double operator()() = 0;
 };
