@@ -5,7 +5,7 @@
 #
 # @Version: $Id$
 #
-# @Copyright (c) 1995-1997 The Regents of the University of California.
+# @Copyright (c) 1995-%Q% The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -164,7 +164,10 @@ class ::tycho::HTML {
     method linkEnter {xpos ypos {subwindow {}} }
 
     # Process a subwindow link.
-    method linkHitSubWindow {subwindow} 
+    method linkHitSubWindow {subwindow}
+
+    # Open up a new browser, invoked by button 2
+    method openNewBrowser {win x y}
 
     # Open the source file using an HTML editor.
     method openSource {}
@@ -395,6 +398,10 @@ body ::tycho::HTML::constructor {args} {
     # Initialize the text window.  The returned value is supposed to be
     # the global variable used to store the state of the window, but isn't.
     HMinit_win $text
+    $text tag bind link <2>       "$this openNewBrowser $text %x %y"
+    $text tag bind link <Shift-1> "$this openNewBrowser $text %x %y"
+    # Override the editor's button 2 which was generating error here
+    bind $text <ButtonRelease-2> "break"
 
     # Add a binding for links to display the destination.
     $text tag bind link <Enter> "$this linkEnter %x %y"
@@ -932,6 +939,41 @@ body ::tycho::HTML::linkHitSubWindow {subwindow} {
     eval HMlink_hit $itk_component(text) \
             [lrange [$itk_component(text) bbox $subwindow] 0 1]
 }
+
+#####################################################################
+#### newbrowser
+# Open up a new browser (through middle mouse button)
+#
+body ::tycho::HTML::openNewBrowser {win x y} {
+    set point {}    ;# Take care of case of "#link"
+
+    set tags [$win tag names @$x,$y]
+    set filename [lindex $tags [lsearch -glob $tags L:*]]
+    # regsub -all {[^L]*L:([^ ]*).*}  $tags {\1} filename
+    regsub L: $filename {} filename
+
+    
+    
+    # The following is needed frequently because johnr refuses to
+    # add more intelligence to [tycho::url join]
+    if {[regexp {^#(.*)} $filename _ point]} {
+        # Case of same link using "#link" tag
+        set filename [filename]
+    } elseif {    [::tycho::url pathtype $filename] == "absolute" && \
+            [::tycho::url protocol $filename] != ""} {
+        # Case when we go from http to http absolute (and join is stupid)
+        set filename $filename
+    } elseif {[string match \$* $filename] || [string match ~* $filename]} {
+        # if it begins $PTOLEMY, $TYCHO, ~eal, etc.
+        set image [::tycho::expandPath $filename]
+    } else {
+        set filename [::tycho::url join \
+                [::tycho::url dirname [filename]] $filename]
+    }
+    set newbrowser [::tycho::File::openContext $filename]
+    after idle "$newbrowser hyperJump $filename [list $point] 1"
+}
+
 #####################################################################
 #### openSource
 # Open the source file using an editor specialized for editing HTML.
