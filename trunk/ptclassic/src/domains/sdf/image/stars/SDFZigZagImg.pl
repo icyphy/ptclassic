@@ -87,11 +87,12 @@ This is useful before quantization.
 
 // For each row and col...
 			int row, col;
+			float* tmpPtr = outArr;
 			for(row = 0; row < height; row += bSize) {
 				for(col = 0; col < width; col += bSize) {
-					zigzag(outArr, img.retData(), row, col, width,
+					zigzag(tmpPtr, img.retData(), row, col, width,
 							bSize);
-					outArr += bSize*bSize;
+					tmpPtr += bSize*bSize;
 			}	} // end for(each row and column)
 
 // Copy the data to the DCTImage.
