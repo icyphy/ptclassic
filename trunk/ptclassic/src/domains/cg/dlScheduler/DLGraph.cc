@@ -56,7 +56,6 @@ void DLGraph :: resetGraph() {
 
 	// reset the appropriate members for schedule.
 	unschedNodes = numNodes();
-	unschedWork  = ExecTotal;
 }
 
 void DLGraph :: resetNodes() {
@@ -100,45 +99,5 @@ StringList DLGraph::display() {
   	}
 
 	return out;
-}
-
-			/////////////////////
-			///  workAfterMe  ///
-			/////////////////////
-
-// compute the sum of all execution time of the descendents of the node(pd).
-int workAfter(ParNode* pd);
-
-int DLGraph :: workAfterMe(ParNode* pd)
-{
-        // reset the busy flag of the ParNode.
-        EGIter nxtNod(*this);   // Attach an iterator to the DLGraph
-        ParNode *node;
-
-        // Visit each node in the expanded graph
-        while ((node = (ParNode*)nxtNod++) != 0) {
-		node->resetVisit();
-	}
-	
-	return workAfter(pd);
-}
-
-int workAfter(ParNode* pd) {
-
-	EGGateLinkIter desciter(pd->descendants); // iterator for descs
-	EGGate *dflink;
-	ParNode* node;
-	int total = 0;
-
-	pd->beingVisited();
-
-	// iterate for descendents.
-	while ((dflink = desciter++) != 0) {
-		node = (ParNode*)dflink->farEndNode();
-		if (node->alreadyVisited()) continue;
-	        total += workAfter(node);
-	}
-	total += pd->getExTime();
-	return total;
 }
 
