@@ -39,7 +39,6 @@ PL_SRCS= \
  DETkBarGraph.pl \
  DETkButtons.pl \
  DETkMeter.pl \
- DELogicAnalyzer.pl \
  DETkPlot.pl \
  DETkShowEvents.pl \
  DETkShowValues.pl \
@@ -59,8 +58,7 @@ TCL_SRCS= \
   $(TCL_SCRIPT_DIR)/tkShowValues.tcl \
   $(TCL_SCRIPT_DIR)/tkSlider.tcl \
   tkStripChart.tcl \
-  tkText.tcl \
-  tkLogicAnalyzer.tcl
+  tkText.tcl
 
 # The .cc files
 SRCS=$(PL_SRCS:.pl=.cc)
