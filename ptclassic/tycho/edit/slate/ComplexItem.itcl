@@ -170,14 +170,11 @@ class ::tycho::Picture {
     # instantiated.
     #
     constructor {} {
-	#
 	# Initialise the hierarchy tags
-	#
-	set _htags [list $this]
+	set thistag [lindex [split $this "::"] end]
+	set _htags  [list $thistag]
 
-	#
 	# Supply the default answers.
-	#
 	set answers [list [info context]]
     }
 
@@ -186,7 +183,7 @@ class ::tycho::Picture {
     #
     destructor {
 	# Find the tags on this picture and deregister them
-	foreach t [$this tag get] {
+	foreach t $tags {
 	    $slate deregisterTag $t $this
 	}
 
@@ -203,6 +200,7 @@ class ::tycho::Picture {
     method annotation {mode name args} {}
     method aspect     {aspect}         {}
     method aspects    {args}           {}
+    method bbox       {}               {}
     method cget       {option}         {}
     method click      {x y}            {}
     method configure  {args}           {}
@@ -216,6 +214,7 @@ class ::tycho::Picture {
     method moveto     {aspect x y}     {}
     method normal     {aspect}         {}
     method parent     {args}           {}
+    method region     {args}           {}
     method release    {}               {}
     method reshape    {args}           {}
     method scale      {xscale args}    {}
@@ -246,22 +245,10 @@ class ::tycho::Picture {
     
     ## canvas, slate
     #
-    # The canvas and the slate on which pictures are drawn. These
-    # cannot be changed once set.
+    # The canvas and the slate on which pictures are drawn.
     #
-    # FIXME: These are now obsolete: use the query method.
-    #
-    public variable canvas "" {
-	error "You cannot change the -canvas option"
-    }
-
-    public variable slate "" {
-	if { $canvas == "" } {
-	    set canvas [$slate _canvas]
-	} {
-	    error "You cannot change the -slate option"
-	}
-    }
+    protected variable slate  ""
+    protected variable canvas ""
 
 
     ## active
@@ -334,9 +321,9 @@ class ::tycho::Picture {
     #
     protected method shape {} {
 	if { $shape == "" } {
-	    set shapeobject [::tycho::Noshape #auto -target $this]
+	    set shapeobject [::tycho::Noshape \#auto -target $this]
 	} elseif { $shapeobject == "" } {
-	    set shapeobject [::tycho::[capitalize $shape] #auto -target $this]
+	    set shapeobject [::tycho::[capitalize $shape] \#auto -target $this]
 	}
 	return $shapeobject
     }
@@ -362,6 +349,14 @@ class ::tycho::Picture {
 #    protected method answer {option cmd} {
 #	set answers($option) $cmd
 #    }
+
+
+
+    ## thistag
+    #
+    # The tag representing this object
+    #
+    protected variable thistag {}
 
 
     ## _etags, _htags
@@ -398,6 +393,60 @@ class ::tycho::Picture {
 
     method sh {} {
 	return [info context]::$shapeobject
+    }
+}
+
+
+## _answer
+#
+# Return some information about the picture. -1 if don't know.
+#
+body ::tycho::Picture::_answer {option} {
+    switch -exact $option {
+	"items"   {
+	    # The items contained by the picture. Not for general use.
+	    $canvas find withtag $thistag
+	}
+	"slate"   {
+	    # The slate on which this picture lives.
+	    $this slate
+	}
+	"canvas"  {
+	    # The canvas on which this picture lives. Not for general use.
+	    $this canvas
+	}
+	"bbox"    {
+	    # The bounding box of the picture.
+	    $canvas bbox $thistag
+	}
+	"outline" {
+	    # The exact outline of the picture. Defaults to the
+	    # bounding box less 2 in each direction. Must be a rectangle.
+	    rectShrink [$canvas bbox $thistag] 2
+	}
+	"region"  {
+	    # The internal region bounded by the object.
+	    # Must be a rectangle.
+	    rectShrink [$canvas bbox $thistag] 4
+	}
+	"canvasshape"   {
+	    # The "shape" of the picture, as a canvas type.
+	    return "rectangle"
+	}
+	"shapeobject"   {
+	    # The Shape object of the picture. Not for general use.
+	    return $shapeobject
+	}
+	"ghost"   {
+	    # Create and return a grey "ghost" for interactive
+	    # manipulation. Not for general use.
+	    eval $canvas create [$this query canvasshape] \
+		    [$this coords] \
+		    {-outline grey -fill ""}
+	}
+	default {
+	    return -1
+	}
     }
 }
 
@@ -477,6 +526,15 @@ body ::tycho::Picture::attach {aspects picture operation args} {
 	    set constraints($aspect) [list [list $picture $operation $args]]
 	}
     }
+}
+
+
+## bbox
+#
+# Get the bounding box of the picture
+#
+body ::tycho::Picture::bbox {} {
+    eval $canvas bbox $thistag
 }
 
 
@@ -561,7 +619,7 @@ body ::tycho::Picture::configure {args} {
  	# There are probably several ways of doing this: I have
  	# done it by trying to do a cget{}.
  	#
- 	foreachpair option value $args {
+ 	foreach {option value} $args {
  	    if { ! [catch {_cget $option}] } {
  		_configure $option $value
  	    } elseif {$shapeobject != "" } {
@@ -707,7 +765,7 @@ body ::tycho::Picture::move {mode x y args} {
 	    # A simple relative move. Move canvas items, and then
 	    # propagate constraints.
 	    #
-	    $canvas move $this $x $y
+	    $canvas move $thistag $x $y
 	    $this propagate "direct" $x $y "body"
 	}
 	"click" {
@@ -747,7 +805,7 @@ body ::tycho::Picture::move {mode x y args} {
 	    if { $ghost != "" } {
 		$canvas move "ghost" $x $y
 	    } else {
-		$canvas move $this $x $y
+		$canvas move $thistag $x $y
 		$this propagate "drag" $x $y "body"
 	    }
 	}
@@ -771,7 +829,7 @@ body ::tycho::Picture::move {mode x y args} {
 	    }
 	}
 	default {
-	    error " Invlid mode \"$mode\" to $this::mode{}"
+	    error "Invalid mode \"$mode\" to $this::mode{}"
 	}
     }
 }
@@ -919,65 +977,23 @@ body ::tycho::Picture::propagate {mode x y aspects} {
 # it asks its shape object.
 #
 # NOTE: DO NOT OVERRIDE
+#
+# FIXME: Doesn't ask the shape object yet
+#
 body ::tycho::Picture::query {option} {
-    foreach c [info heritage] {
+    foreach c [lreverse $answers] {
 	set result [$c::_answer $option]
 	if { $result != -1 } {
 	    return $result
 	}
     }
-    error "Invalid option $option
-}
-
-body ::tycho::Picture::_answer {option} {
-    switch -exact $option {
-	"items"   {
-	    # The items contained by the picture. Not for general use.
-	    $canvas find withtag $this
-	}
-	"slate"   {
-	    # The slate on which this picture lives.
-	    $this slate
-	}
-	"canvas"  {
-	    # The canvas on which this picture lives. Not for general use.
-	    $this canvas
-	}
-	"bbox"    {
-	    # The bounding box of the picture.
-	    $canvas bbox $this
-	}
-	"outline" {
-	    # The exact outline of the picture. Defaults to the
-	    # bounding box less 2 in each direction. Must be a rectangle.
-	    rectShrink [$canvas bbox $this] 2
-	}
-	"region"  {
-	    # The internal region bounded by the object.
-	    # Must be a rectangle.
-	    rectShrink [$canvas bbox $this] 4
-	}
-	"canvasshape"   {
-	    # The "shape" of the picture, as a canvas type.
-	    return "rectangle"
-	}
-	"shapeobject"   {
-	    # The Shape object of the picture. Not for general use.
-	    return $shapeobject
-	}
-	"ghost"   {
-	    # Create and return a grey "ghost" for interactive
-	    # manipulation. Not for general use.
-	    eval $canvas create [$this query canvasshape] \
-		    [$this coords] \
-		    {-outline grey -fill ""}
-	}
-	default {
-	    return -1
-	}
+    set result [[shape] query $option]
+    if { $result == -1 } {
+	error "Picture $this cannot answer $option"
+    } else {
+	return $result
     }
 }
-
 
 # FIXME: Add the following back into query...
 #
@@ -1038,9 +1054,7 @@ body ::tycho::Picture::release {} {
 # is scaled about its center.
 #
 body ::tycho::Picture::scale {xscale args} {
-    #
     # Extract arguments
-    #
     switch -exact [llength $args] {
 	0 {
 	    set yscale $xscale
@@ -1061,20 +1075,16 @@ body ::tycho::Picture::scale {xscale args} {
 	}
     }
 
-    #
     # Get new coordinates
-    #
     set result {}
     set coords [$this coords]
-    foreachpair a b $coords {
+    foreach {a b} $coords {
 	set a [expr $x + $xscale * ($a - $x)]
 	set b [expr $y + $yscale * ($b - $y)]
 	lappend result $a $b
     }
 
-    #
     # Apply scaling
-    #
     eval $this coords $result
 }
 
@@ -1083,6 +1093,7 @@ body ::tycho::Picture::scale {xscale args} {
 ## tag delete {tag}+
 ## tag get
 ## tag set {tag}+
+## tag prim
 #
 # Manipulate tags. This is a better interface than configure{} for
 # this purpose.
@@ -1214,6 +1225,26 @@ body ::tycho::Picture::transform {mode args} {
     eval [shape] transform $mode $args
 }
 
+
+
+# FIXME: move these somewwhere else...
+
+## abstractMethod class method
+#
+# Complain about an abstract method being called.
+#
+proc abstractMethod {class method} {
+    error "Method $method of $class is abstract."
+}
+
+
+## readOnlyOption class option
+#
+# Complain about an attempt to set a ``read-only'' option.
+#
+proc readOnlyOption {class option} {
+    error "Option $option of $class is read-only."
+}
 
 
 # FIXME: move these somewwhere else...

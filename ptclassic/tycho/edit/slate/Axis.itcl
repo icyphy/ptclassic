@@ -104,7 +104,7 @@ class ::tycho::Axis {
     }
 
     # The high value on the axis
-    public variable to 1.0 {
+    public variable to 100 {
 	redraw
     }
 
@@ -148,7 +148,7 @@ body ::tycho::Axis::constructor {s c x0 y0 args} {
     getopt from       args
     getopt digits     args
     getopt to         args
-    
+
     # Get and remember the font for the ticks
     set tickfont [.tychoFonts findFont {helvetica 9 medium r}]
     
@@ -157,7 +157,7 @@ body ::tycho::Axis::constructor {s c x0 y0 args} {
     
     # Create ruler line and call it "main"
     $this component create "main" line $x0 $y0 [expr $x0+$length] $y0
-    
+
     # Initialize remaining options
     eval configure $args
 }
@@ -218,36 +218,36 @@ body ::tycho::Axis::redrawTicks {x0 y0} {
     }
 
     # Delete the ticks and labels (catch in case they don't exist yet)
-    catch {$this component delete ticks}
-    catch {$this component delete labels}
+    if { [info exists component(ticks)] } {
+	$this component delete ticks
+    }
+    if { [info exists component(labels)] } {
+	$this component delete labels
+    }
     
     # Find label width -- HACK!
     set t [$canvas create text 0 0 -text [format %.${digits}f $from]]
     set labelwidth [::rectWidth [$canvas bbox $t]]
     $canvas delete $t
-    set t [$canvas create text 0 0 -text [format %.${digits}f $to]]
-    set labelwidth [max2 $labelwidth [::rectWidth [$canvas bbox $t]]]
-    $canvas delete $t
-    
+
     # Calculate axis increment locations
-    set increment [::axisIncrement $from $to $length $labelwidth 10]
-    
-    set axisValues [::rangeValues $from $to $increment]
+    set increment     [::axisIncrement $from $to $length $labelwidth 10]
+    set axisValues    [::rangeValues $from $to $increment]
     set axisLocations [::mapRange $from $to $axisValues \
 	    $x0 [expr $x0 + $length]]
 
-    # Create the tick lines: first, make a list of components
+    # Create the tick lines and text labels
     set itemspecs {}
     foreach x $axisLocations v $axisValues {
-	lappend itemspecs [list "ticks" [list line $x $y0 $x \
-		[expr $y0-$ticklength]]]
-	lappend itemspecs [list "labels" \
-		[list text $x [expr $y0-$ticklength] \
-		-font $tickfont -anchor sw \
-		-text [format %.${digits}f $v]]]
+ 	lappend itemspecs "ticks" [list line $x $y0 $x \
+ 		[expr $y0-$ticklength]]
+ 	lappend itemspecs "labels" [list \
+ 		text $x [expr $y0-$ticklength] \
+ 		-text [format %.${digits}f $v] \
+ 		-font $tickfont -anchor sw]
     }
-    
-    # Then, create the items with the multi-component create command
-    $this component create* $itemspecs
+    eval $this create untagged $itemspecs
 }
+
+
 

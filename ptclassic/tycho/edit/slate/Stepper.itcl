@@ -36,7 +36,10 @@ class ::tycho::Stepper {
 
     ## constructor
     #
-    constructor {args} {
+    constructor {s c args} {
+	set slate $s
+	set canvas $c
+
 	eval configure $args
     }
 
