@@ -41,8 +41,7 @@ include $(CONFIG)
 
 # SDFDIR is the directory containing SDF domain support
 SDFDIR = $(ROOT)/src/domains/sdf/kernel
-IMAGE = $(ROOT)/src/domains/sdf/image/kernel
-INCL = -I$(SDFDIR) -I$(KERNDIR) -I$(IMAGE)
+INCL = -I$(SDFDIR) -I$(KERNDIR)
 
 # Library name
 LIB=libsdfimagestars.$(LIBSUFFIX)
@@ -59,7 +58,6 @@ PL_SRCS= \
  SDFDCTImgCde.pl \
  SDFDCTImgCdeInv.pl \
  SDFDCTImageInv.pl \
- SDFDiffImage.pl \
  SDFDisplayImage.pl \
  SDFDisplayRGB.pl \
  SDFDisplayVideo.pl \
@@ -67,19 +65,14 @@ PL_SRCS= \
  SDFDPCMImage.pl \
  SDFDPCMImageInv.pl \
  SDFEdgeDetect.pl \
- SDFImageToMx.pl \
- SDFImageToPix.pl \
  SDFMedianImage.pl \
  SDFMotionCmp.pl \
  SDFMotionCmpInv.pl \
- SDFMxToImage.pl \
- SDFPixToImage.pl \
  SDFReadImage.pl \
  SDFReadRGB.pl \
  SDFRGBToYUV.pl \
  SDFRunLenImg.pl \
  SDFRunLenImgInv.pl \
- SDFSumImage.pl \
  SDFYUVToRGB.pl \
  SDFZigZagImg.pl \
  SDFZigZagImgInv.pl
