@@ -96,13 +96,13 @@ are read and output are 'dir.2/pic2', 'dir.3/pic3', etc.
 			return;
 		}
 
-		unsigned char* rgbfp = new unsigned char[3*width*height];
+		LOG_NEW; unsigned char* rgbfp = new unsigned char[3*width*height];
 		fread((char*)rgbfp, sizeof(unsigned char), 3*width*height, fp);
 		fclose(fp);
 
-		GrayImage* rColor = new GrayImage(width, height, int(frameId));
-		GrayImage* gColor = new GrayImage(width, height, int(frameId));
-		GrayImage* bColor = new GrayImage(width, height, int(frameId));
+		LOG_NEW; GrayImage* rColor = new GrayImage(width, height, int(frameId));
+		LOG_NEW; GrayImage* gColor = new GrayImage(width, height, int(frameId));
+		LOG_NEW; GrayImage* bColor = new GrayImage(width, height, int(frameId));
 
 
 		unsigned char* rfp = rColor->retData();
@@ -119,7 +119,7 @@ are read and output are 'dir.2/pic2', 'dir.3/pic3', etc.
 				gfp[temp2] = rgbfp[temp3+1];
 				bfp[temp2] = rgbfp[temp3+2];
 		}	}
-		delete rgbfp;
+		LOG_DEL; delete rgbfp;
 
 // Write whole frame to output here...
 		Packet pktr(*rColor);

@@ -65,14 +65,14 @@ No decimation or interpolation is supported.
 	    M = 0;
 	}
 	destructor {
-	    delete taps;
+	    LOG_DEL; delete taps;
 	}
 	start {
 	    if (int(order) != M) {
-		delete taps;
+		LOG_DEL; delete taps;
 		M = int(order);
-		taps = new double[M];
-		fdbkDelayLine = new double[M];
+		LOG_NEW; taps = new double[M];
+		LOG_NEW; fdbkDelayLine = new double[M];
 	    }
 	    // set the SDF Params to account for the block processing
 	    signalIn.setSDFParams(int(blockSize), int(blockSize)-1);

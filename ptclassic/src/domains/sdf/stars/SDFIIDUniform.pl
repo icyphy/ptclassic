@@ -42,11 +42,11 @@ This Star uses the GNU library <Uniform.h>.
 		random = NULL;
 	}
 	destructor {
-		if(random) delete random;
+		LOG_DEL; delete random;
 	}
 	start {
-		if(random) delete random;
-		random = new Uniform(double(lower),double(upper),gen);
+		LOG_DEL; delete random;
+		LOG_NEW; random = new Uniform(double(lower),double(upper),gen);
 	}
         go {
 		output%0 << (float)(*random)();

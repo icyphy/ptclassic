@@ -67,7 +67,7 @@ int inh)"
 	int ii, jj, i, j;
 
 // Do the VERTICAL transform. DCTImage to tmpbuf and copy back...
-	float* tmpbuf = new float[(inw > inh ? inw : inh)];
+	LOG_NEW; float* tmpbuf = new float[(inw > inh ? inw : inh)];
 	for(jj = 0; jj < inw; jj++) {
 		for(ii = 0; ii < inh; ii += blocksize) {
 			ndx = ii*inw + jj;
@@ -104,7 +104,7 @@ int inh)"
 		}
 	} // end for(ii)
 
-	delete tmpbuf;
+	LOG_DEL; delete tmpbuf;
 		}
 	} // end doInvDCT()
 
@@ -115,14 +115,14 @@ int inh)"
 		access { protected }
 		code {
 			blocksize = di->retBS();
-			cosData = new float[blocksize*blocksize];
+			LOG_NEW; cosData = new float[blocksize*blocksize];
 			cosSet();
 		}
 	} // end doFirst()
 
 	start { firstTime = 1; }
 
-	wrapup { delete cosData; }
+	wrapup { LOG_DEL; delete cosData; }
 
 	go {
 // Read input image.
@@ -136,7 +136,7 @@ int inh)"
 
 		if (firstTime) { doFirst(dctimage); firstTime = 0; }
 
-		GrayImage* grayout = new GrayImage((BaseImage&) *dctimage);
+		LOG_NEW; GrayImage* grayout = new GrayImage((BaseImage&) *dctimage);
 		doInvDCT(grayout->retData(), dctimage->retData(),
 				grayout->retWidth(), grayout->retHeight(),
 				dctimage->fullWidth(), dctimage->fullHeight());

@@ -106,7 +106,7 @@ will be stored there after the run has completed.
 				for (int i = 0; i < taps.size(); i++)
 					fprintf(fp, "%d %g\n", i, taps[i]);
 			fclose(fp);
-			delete saveFileName;
+			LOG_DEL; delete saveFileName;
 		}
 	}
 }

@@ -101,7 +101,7 @@ cosine transform (DCT) and outputs a DCTImage.
 
 
 // Do the VERTICAL transform. From out to tmpbuf and copy back...
-	float* tmpbuf = new float[outh];
+	LOG_NEW; float* tmpbuf = new float[outh];
 	for(jj = 0; jj < outw; jj++) {
 		for(ii = 0; ii < outh; ii+= blocksize) {
 			ndx = ii*outw + jj;
@@ -118,17 +118,17 @@ cosine transform (DCT) and outputs a DCTImage.
 		}
 	} // end for(jj)
 
-	delete tmpbuf;
+	LOG_DEL; delete tmpbuf;
 		}
 	} // end doDCT()
 
 	start {
 		blocksize = int(BlockSize);
-		cosData = new float[blocksize*blocksize];
+		LOG_NEW; cosData = new float[blocksize*blocksize];
 		cosSet();
 	}
 
-	wrapup { delete cosData; }
+	wrapup { LOG_DEL; delete cosData; }
 
 	go {
 // Read input image.
@@ -138,7 +138,7 @@ cosine transform (DCT) and outputs a DCTImage.
 		const GrayImage* image = (const GrayImage*) inPacket.myData();
 
 // Do transform.
-		DCTImage* DCT = new DCTImage(*image, blocksize);
+		LOG_NEW; DCTImage* DCT = new DCTImage(*image, blocksize);
 		doDCT(DCT->retData(), image->constData(), DCT->fullWidth(),
 				DCT->fullHeight(), image->retWidth(),
 				image->retHeight());
