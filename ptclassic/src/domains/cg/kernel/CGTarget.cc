@@ -71,8 +71,8 @@ StringList CGTarget::indent(int depth) {
 // constructor
 CGTarget::CGTarget(const char* name,const char* starclass,
 		   const char* desc, char sep)
-: Target(name,starclass,desc), schedFileName(0), noSchedule(0), inheritFlag(0),
-  defaultStream(&myCode)
+: Target(name,starclass,desc), defaultStream(&myCode), schedFileName(0), noSchedule(0), inheritFlag(0)
+  
 {
 	separator = sep;
 	targetNestedSymbol.setSeparator(separator);
