@@ -41,11 +41,21 @@ public:
 		d->src = this;
 		dests.put(d);
 	}
+
+	// Constructor
 	AsmGeodesic() : maxNumParticles(0), forkType(0), src(0), mem(0) {}
+
+	// Assign a memory and address to the geodesic
 	void assignAddr(ProcMemory& m, unsigned a) {
-		mem = &m; address = a;
+		mem = &m; addr = a;
 	}
-	unsigned addr() const { return address;}
+
+	// Return the address assigned to the geodesic.
+	unsigned address() const { return addr;}
+
+	// Return a pointer to the memory assigned to the geodesic
+	ProcMemory* memory() const { return mem; }
+	
 private:
 	int internalBufSize() const;
 	int maxNumParticles;
@@ -53,7 +63,7 @@ private:
 	AsmGeodesic *src;
 	int forkType;
 	ProcMemory* mem;
-	unsigned address;
+	unsigned addr;
 };
 
 #endif

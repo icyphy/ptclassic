@@ -11,6 +11,7 @@ $Id$
 
 *******************************************************************/
 #include "AsmStar.h"
+#include "ProcMemory.h"
 #include <ctype.h>
 
 // Attributes for code generation, all processors.
@@ -23,29 +24,62 @@ extern const Attribute A_NOINIT(AB_NOINIT,0);
 extern const Attribute A_REVERSE(AB_REVERSE,0);
 extern const Attribute A_SHARED(AB_SHARED,0);
 
+// Generate code
+void AsmStar::fire() {
+	// No need to grab data, so just go.
+	go();
+
+	// Advance the offset in the PortHoles
+	advance();
+}
+
 // The default substitution character is '$'.  Some assembly
 // languages may use this, so we allow a different character.
-char AsmStar::substChar() const { return '$'; }
-
 // What appears after the $ is a function name, with an argument
 // that is the name of a porthole or state.
-// eg $loc(name) is the location of an object.
+char AsmStar::substChar() const { return '$'; }
 
 // lookup location for a symbol (a porthole or state) in a
 // codeblock.
 StringList
-AsmStar::lookupAddress(const char* name, int update) {
+AsmStar::lookupAddress(const char* name) {
 	unsigned a;
+	StringList s;
 	AsmPortHole* p = (AsmPortHole*)portWithName(name);
-	if (p) return p->location(update);
+	if (p) s = p->location();
 	// see if it's a state
-	else if (!lookupEntry(name,a)) {
-		if (stateWithName(name))
-			Error::abortRun(*this," state ",name," does not have a memory address");
-		else Error::abortRun(*this,name," is not defined");
-		return "";
+	else if (lookupEntry(name,a)) {
+	    s = int(a);
+	} else {
+	    if (stateWithName(name))
+		Error::abortRun(*this," state ",name,
+			" does not have a memory address");
+	    else Error::abortRun(*this,name," is not defined");
+	    s = "";
 	}
-	return int(a);
+	return s;
+}
+
+// lookup memory for a symbol (a porthole or state) in a
+// codeblock.
+StringList
+AsmStar::lookupMem(const char* name) {
+	unsigned a;
+	StringList s;
+	ProcMemory* m;
+	AsmPortHole* p = (AsmPortHole*)portWithName(name);
+	if (p) s = p->memory()->readName();
+	// see if it's a state
+	else if (m = lookupEntry(name,a)) {
+	    s = m->readName();
+	} else {
+	    if (stateWithName(name))
+		Error::abortRun(*this," state ",name,
+			" does not have a memory assigned");
+	    else Error::abortRun(*this,name," is not defined");
+	    s = "";
+	}
+	return s;
 }
 
 // lookup value for a state
@@ -62,10 +96,19 @@ AsmStar::lookupVal(const char* name) {
 // handle functions
 StringList
 AsmStar::processMacro(const char* func, const char* id) {
-	if (strcmp(func,"LOC") == 0) return lookupAddress(id,0);
-	if (strcmp(func,"FETCH") == 0) return lookupAddress(id,1);
-	if (strcmp(func,"VAL") == 0) return lookupVal(id);
-	return "";
+	StringList s = "ERROR";
+	if ((strcmp(func,"ADDR") == 0) || (strcmp(func, "addr") == 0)) {
+		s = lookupAddress(id);
+	} else if ((strcmp(func,"REF") == 0) || (strcmp(func, "ref") == 0)) {
+		s = lookupMem(id);
+		s += ":";
+		s += lookupAddress(id);
+	} else if ((strcmp(func,"VAL") == 0) || (strcmp(func, "val") == 0)) {
+		s = lookupVal(id);
+	} else if ((strcmp(func,"MEM") == 0) || (strcmp(func, "mem") == 0)) {
+		s = lookupMem(id);
+	}
+	return s;
 }
 
 const int MAXLINELEN = 256;
@@ -92,7 +135,7 @@ void AsmStar::gencode(CodeBlock& cb) {
 			// skip any whitespace
 			while (isspace(*t)) t++;
 			// must be pointing at a '('
-			if (*t != '(') {
+			if (*t++ != '(') {
 				Error::abortRun (*this, synerr,"'('", syn2);
 				return;
 			}
@@ -103,13 +146,17 @@ void AsmStar::gencode(CodeBlock& cb) {
 			// skip any whitespace
 			while (isspace(*t)) t++;
 			// must be pointing at a ')'
-			if (*t != ')') {
+			if (*t++ != ')') {
 				Error::abortRun (*this, synerr,"')'", syn2);
 				return;
 			}
-			const char* value = processMacro(func,id);
-			if (value == 0) {
-				value = "???";
+			// Don't know why the following two steps can't
+			// be consolidated, but if they are, the string
+			// becomes null
+			StringList tmp = processMacro(func,id);
+			const char* value = (char*)tmp;
+			if (value == 0 || *value == 0) {
+				value = "ERROR";
 			}
 			// plug result into code.
 			while (*value) *o++ = *value++;
@@ -130,21 +177,25 @@ void AsmStar::gencode(CodeBlock& cb) {
 	}
 }
 
-// postprocessing of code.  Baseclass just does same as for CGStar::addCode.
-void AsmStar :: addCode(char* line) {
-	CGStar::addCode(line);
+// Update all PortHoles so that the offset is incremented by the
+// number of samples consumed or produced.
+void AsmStar::advance() {
+	AsmStarPortIter nextPort(*this);
+	AsmPortHole* p;
+	while ((p = nextPort++) != 0)
+		p->advance();
 }
 
 // data structure used to keep track of memory allocation for states.
 class StateAddrEntry {
 	friend class AsmStar;
-	const char* state;
+	const char* stateName;
 	ProcMemory& mem;
 	unsigned addr;
 	StateAddrEntry* link;
 	StateAddrEntry(const char* s, ProcMemory& m, unsigned a,
 		       StateAddrEntry* l = 0)
-		: state(s), mem(m), addr(a), link(l) {}
+		: stateName(s), mem(m), addr(a), link(l) {}
 };
 
 // add a new state to the table.
@@ -155,7 +206,7 @@ void AsmStar::addEntry(const State& s,ProcMemory& m, unsigned a) {
 // look up a state in the table.
 ProcMemory* AsmStar :: lookupEntry(const char* s, unsigned& a) {
 	StateAddrEntry* p = addrList;
-	while (p && strcmp(p->state,s) != 0) p = p->link;
+	while (p && strcmp(p->stateName,s) != 0) p = p->link;
 	if (p) {
 		a = p->addr;
 		return &p->mem;
@@ -181,16 +232,5 @@ AsmStar::~AsmStar() {
 // redo the list whenever remaking the scheduler.
 void AsmStar::prepareForScheduling() {
 	zapStateEntries();
+	CGStar::prepareForScheduling();
 }
-
-// fire: we execute the star, then advance all the portholes.
-void AsmStar::fire() {
-	go();
-// advance all the porthole pointers
-	AsmStarPortIter nextp(*this);
-	AsmPortHole *p;
-	while ((p = nextp++) != 0) p->advance();
-}
-
-// initial code
-void AsmStar::initCode() {}

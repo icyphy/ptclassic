@@ -30,7 +30,12 @@ class ProcMemory {
 private:
 	Attribute reqdStateAttributeBits;
 	Attribute reqdPortAttributeBits;
+	const char* name;	// my name
 public:
+	// Return the name of the memory.
+	// This is not a NamedObj because we want readName() to be virtual.
+	virtual const char* readName() { return name; }
+
 	const Attribute& reqdStateAttributes() const {
 		return reqdStateAttributeBits;
 	}
@@ -39,14 +44,19 @@ public:
 		return reqdPortAttributeBits;
 	}
 
-	ProcMemory (const Attribute& a, const Attribute& p)
-		: reqdStateAttributeBits(a), reqdPortAttributeBits(p) {}
+	// Constructor.  Specify the name, required state attributes, and
+	// required PortHole attributes for any states or ports that
+	// will be assigned this memory.
+	ProcMemory (const char* n, const Attribute& a, const Attribute& p)
+		: name(n), reqdStateAttributeBits(a), reqdPortAttributeBits(p)
+		{}
 
-	// return true if the state has the required attributes.
+	// Return true if the State has the required attributes.
 	int match(const State& s) {
 		return consistent(s.attributes(),reqdStateAttributes());
 	}
 
+	// Return true if the PortHole has the required attributes.
 	int match(const PortHole& p) {
 		return consistent(p.attributes(), reqdPortAttributes());
 	}
@@ -58,6 +68,7 @@ public:
 	virtual int performAllocation() = 0;
 };
 
+// An interval of memory
 class MemInterval {
 	friend class MemoryList;
 	unsigned addr, len;
@@ -66,6 +77,7 @@ class MemInterval {
 		addr(a), len(l), link(nxt) {}
 };
 
+// A collection of intervals of memory
 class MemoryList {
 	MemInterval* l;
 	unsigned min, max;
@@ -77,6 +89,7 @@ class MemoryList {
 	void zero();
 
 public:
+	// Constructor with starting address and length of memory.
 	MemoryList(unsigned addr,unsigned len) : min(addr), max(addr+len-1) {
 		l = new MemInterval(addr,len);
 	}
@@ -117,9 +130,11 @@ protected:
 	MConsecStateReq *consec;
 
 public:
-	LinProcMemory(const Attribute& a, const Attribute& p,unsigned addr,
-		      unsigned len)
-		: ProcMemory(a,p), mem(addr,len), consec(0) {}
+	// Constructor with name, required State attributes, required PortHole
+	// attributes, starting address, and length specified.
+	LinProcMemory(const char* n, const Attribute& a,
+		      const Attribute& p,unsigned addr, unsigned len)
+		: ProcMemory(n,a,p), mem(addr,len), consec(0) {}
 
 	~LinProcMemory() { reset();}
 	void reset();
@@ -135,6 +150,8 @@ public:
 // or go into both memory if they have the AB_SHARED attribute.
 
 class DualMemory : public LinProcMemory {
+private:
+	const char* name_y;
 protected:
 	LinProcMemory x;
 	LinProcMemory y;
@@ -143,16 +160,18 @@ protected:
 	unsigned yAddr, yLen;
 	Attribute xmemAttr;
 public:
-	DualMemory(const Attribute& st,	// attribute for states
+	// Constructor
+	DualMemory(const char* n_x,	// name of the first memory space
+		   const char* n_y,	// name of the second memory space
+		   const Attribute& st,	// attribute for states
 		   const Attribute& p,	// attribute for portholes
 		   const Attribute& a_x,// attribute for X, as opposed to
 					// Y memory.
-		      unsigned x_addr,	// start of x memory
-		      unsigned x_len,	// length of x memory
-		      unsigned y_addr,	// start of y memory
-		      unsigned y_len	// length of y memory
-		   );
-
+		   unsigned x_addr,	// start of x memory
+		   unsigned x_len,	// length of x memory
+		   unsigned y_addr,	// start of y memory
+		   unsigned y_len	// length of y memory
+	);
 	void reset();
 	~DualMemory() { reset();}
 	void allocReq(const State&);
