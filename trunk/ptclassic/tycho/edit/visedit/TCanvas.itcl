@@ -280,13 +280,16 @@ body ::tycho::TCanvas::constructor {args} {
     bind $slate <Down> "$slate yview scroll 1 unit"
     bind $slate <Left> "$slate xview scroll -1 unit"
     bind $slate <Right> "$slate xview scroll 1 unit"
+
     bind $slate <Prior> "$slate yview scroll -1 page"
+    bind $slate <Escape><v> "$slate yview scroll -1 page"
+    bind $slate <Meta-v> "$slate yview scroll -1 page" 
     bind $slate <Next> "$slate yview scroll 1 page"
+    bind $slate <Control-v> "$slate yview scroll 1 page"
+
     bind $slate <Home> "$slate xview scroll -1 page"
     bind $slate <End> "$slate xview scroll 1 page"
-    bind $slate <Control-v> "$slate yview scroll 1 page"
-    bind $slate <Meta-v> "$slate yview scroll -1 page"
-   
+
     # Bind configure events to update the display.
     # Interactivity is enabled only after the first configure event.
     bind $itk_component(bottom) <Configure> \
