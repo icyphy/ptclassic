@@ -26,7 +26,7 @@ style default \
 	    -type color \
 	    -label "Text color"
 
-    parameter selectBackground grey77 \
+    parameter selectBackground yellow \
 	    -type color \
 	    -label "Selected text background"
 
