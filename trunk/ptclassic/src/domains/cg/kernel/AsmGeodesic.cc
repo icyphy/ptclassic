@@ -14,7 +14,12 @@ $Id$
  the buffers of a fork star to be allocated as only a single buffer.
 
 *******************************************************************/
+#ifdef __GNUG__
+#pragma implementation
+#endif
+
 #include "AsmGeodesic.h"
+#include "miscFuncs.h"
 
 void AsmGeodesic :: initialize() {
 	maxNumParticles = size();

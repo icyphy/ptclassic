@@ -32,6 +32,10 @@ AsmTarget::setup(Galaxy& g) {
 	}
 	if (!mem.performAllocation()) return FALSE;
 	headerCode();
+// do all initCode methods.
+	nextStar.reset();
+	while ((s = (AsmStar*)nextStar++) != 0)
+		s->initCode();
 	return TRUE;
 }
 

@@ -12,8 +12,12 @@ $Id$
  These classes are portholes for stars that generate assembly language code.  
 
 *******************************************************************/
-
+#ifdef __GNUG__
+#pragma once
+#pragma interface
+#endif
 #include "SDFConnect.h"
+
 // portholes for AsmCodeStars and derived stars
 const bitWord PB_CIRC = 0x40;
 
@@ -34,8 +38,8 @@ public:
 	// makes myGeodesic of this type.
 	AsmGeodesic& geo() const { return *(AsmGeodesic*)myGeodesic;}
 	unsigned baseAddr() const;
-	unsigned addr() const { return baseAddr()+offset;}
-	void advance() {
+	virtual StringList location(int update);
+	virtual void advance() {
 		offset += numberTokens;
 		if (offset >= bufSize()) offset -= bufSize();
 	}

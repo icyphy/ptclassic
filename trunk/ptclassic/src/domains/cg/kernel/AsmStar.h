@@ -57,6 +57,9 @@ public:
 
 	// add state entry after memory allocation
 	void addEntry(const State&,ProcMemory&,unsigned);
+
+	// initial code (should this be rooted in CGStar?)
+	virtual void initCode();
 protected:
 	// turn a codeblock into code
 	void gencode(CodeBlock&);
@@ -70,8 +73,14 @@ protected:
 	// character that introduces a symbol in a code block
 	virtual char substChar() const;
 
-	// look up a symbol (porthole, state, or other thing) in a codeblock
-	virtual const char* lookupSymbol(const char*);
+	// look up value of state
+	StringList AsmStar::lookupVal(const char* name);
+
+	// look up address of porthole or state
+	StringList AsmStar::lookupAddress(const char* name,int update);
+
+	// process macros that are defined for this star
+	virtual StringList processMacro(const char* func, const char* id);
 
 	// reset the state entry list
 	void zapStateEntries();

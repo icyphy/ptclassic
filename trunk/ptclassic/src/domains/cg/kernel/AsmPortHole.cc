@@ -10,16 +10,28 @@ $Id$
  These classes are portholes for stars that generate assembly language code.  
 
 *******************************************************************/
+#ifdef __GNUG__
+#pragma implementation
+#endif
 #include "AsmConnect.h"
 #include "AsmGeodesic.h"
+#include "miscFuncs.h"
 
 // we require circular access either if the PB_CIRC attribute is set
 // (indicating a user request for it), or if the number of tokens
 // read each time doesn't evenly divide the buffer size.
 
-AsmPortHole::circAccess() const {
+int AsmPortHole::circAccess() const {
 	if (attributes() | PB_CIRC) return TRUE;
 	return (bufferSize % numberTokens != 0);
+}
+
+// return a string indicating the address.  This is virtual so it
+// could be handled differently by derived classes.
+StringList AsmPortHole::location(int update) {
+	int n = baseAddr() + offset;
+	if (update) advance();
+	return n;
 }
 
 Geodesic* AsmPortHole::allocateGeodesic() {
