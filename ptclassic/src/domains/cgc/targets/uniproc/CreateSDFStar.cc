@@ -49,6 +49,26 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "DynamicGalaxy.h"
 #include "Geodesic.h"
 
+
+// A simple class to compute the repetitions on a SDF graph - we need
+// this because a lot of the SDFScheduler methods are protected.
+// This class duplicates some of the functionality of
+// SDFScheduler::setup  FIXME
+
+class Repetitions:public SDFScheduler {
+public:
+    Repetitions(Galaxy& gal) {
+	invalid = FALSE;
+	setGalaxy(gal);
+        if (!checkConnectivity()) return;
+	if(!prepareGalaxy()) return;
+	if (!checkConnectivity()) return;
+	if (!checkStars()) return;
+	if(!repetitions()) return;
+	adjustSampleRates();
+    }
+};
+	
 CGCTargetWH::CGCTargetWH(const char* name,const char* starclass, const
 			 char* desc) : CGCTarget(name,starclass,desc) {
 			     addStream("starPorts",&starPorts);
@@ -83,9 +103,9 @@ void CGCTargetWH::wormPrepare() {
 int CGCTargetWH::convertWormholePorts(Galaxy& gal) {
     // FIXME - Won't work unless CGC is at top level
     if(!gal.parent()->isItWormhole()) return FALSE;
-    SDFScheduler sched;
-    sched.setGalaxy(gal);
-    sched.repetitions();
+    
+    Repetitions computeReps(gal);
+    if (SimControl::haltRequested()) return FALSE;
 
     topLevelGalaxy = &gal;
 
@@ -119,7 +139,8 @@ int CGCTargetWH::convertWormholePorts(Galaxy& gal) {
 
 	// Add the star to the inner galaxy
 	gal.addBlock(*newStar,hashstring(nm));
-
+	newStar->setTarget(this);
+	
 	source->connect(*destination,0);
 	newPort->setSDFParams(numXfer,maxDelay);
     }
