@@ -21,6 +21,7 @@ are laid out; no code is required.
 	ccinclude { "AsmGeodesic.h" }
 	constructor {
 		output.setForkBuf(input);
+		isaFork();
 	}
 	exectime {
 		return 0;
