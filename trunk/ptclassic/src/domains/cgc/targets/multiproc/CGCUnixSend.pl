@@ -87,7 +87,7 @@ Produce code for inter-process communication (send-side)
 	initCode {
 		StringList IPCproc = processCode(ipcHandler);	
 		addProcedure(IPCproc);
-		addGlobal(processCode("int $starSymbol(sId);\n"));
+		addGlobal("int $starSymbol(sId);\n");
 		addInclude("<stdio.h>");
 		addInclude("<sys/types.h>");
 		addInclude("<sys/socket.h>");
