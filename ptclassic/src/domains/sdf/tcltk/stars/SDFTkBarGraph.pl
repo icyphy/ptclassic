@@ -7,7 +7,7 @@ The first 12 input signals will be assigned distinct colors. After that,
 the colors are repeated. The colors can be controlled using X resources.
 	}
 	version { $Id$ }
-	author { E. A. Lee }
+	author { Edward A. Lee }
 	copyright {
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
@@ -68,29 +68,42 @@ limitation of liability, and disclaimer of warranty provisions.
 	        name {updateSize}
 	        type {int}
 	        default {1}
-	        desc { To speed up the display, this many bars are updated at once }
+	        desc {
+To speed up the display, this many bars are updated at once
+		}
 	}
 	protected {
 		BarGraph bar;
 		int count, batchCount;
+		char *labCopy;
+		char *posCopy;
+	}
+	constructor {
+	    labCopy = posCopy = 0;
+	}
+	destructor {
+	    delete [] labCopy;
+	    delete [] posCopy;
 	}
 	setup {
 	    if(double(top) <= double(bottom)) {
 		Error::abortRun(*this, "invalid range for the scale");
 	    }
-	    input.setSDFParams(1,(int)updateSize-1);
+	    input.setSDFParams(1, int(updateSize) - 1);
 	}
 	begin {
 	    // Need to make non-const copies of "position" and "label"
-	    InfString posCopy((const char*)position);
-	    InfString labCopy((const char*)label);
+	    delete [] posCopy;
+	    posCopy = savestring((const char*)position);
+	    delete [] labCopy;
+	    labCopy = savestring((const char*)label);
 	    bar.setup(this,
-		(char*) labCopy,
+		labCopy,
 		input.numberPorts(),
 		(int) number_of_bars,
 		(double) top,
 		(double) bottom,
-		(char*) posCopy,
+		posCopy,
 		(double) bar_graph_width,
 		(double) bar_graph_height);
 	    count = batchCount = 0;
