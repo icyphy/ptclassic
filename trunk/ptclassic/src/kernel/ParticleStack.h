@@ -70,7 +70,6 @@ public:
 	// destructor -- delete all particles
 	~ParticleStack ();
 
-protected:
 	// return all Particles to their Plasmas
 	void freeup ();
 protected:
