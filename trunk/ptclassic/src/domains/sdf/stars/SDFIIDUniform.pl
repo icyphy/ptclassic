@@ -36,15 +36,17 @@ This Star uses the GNU library <Uniform.h>.
 	}
 // declare the static random-number generator in the .cc file
 	code {
-		extern ACG gen;
+		extern ACG* gen;
 	}
 	constructor {
-		random = new Uniform(lower,upper,&gen);
+		random = NULL;
 	}
 	destructor {
-		delete random;
+		if(random) delete random;
 	}
 	start {
+		if(random) delete random;
+		random = new Uniform(lower,upper,gen);
 		random->low(double(lower));
 		random->high(double(upper));
 	}

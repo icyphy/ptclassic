@@ -38,15 +38,17 @@ given as parameters.
 	}
 // declare the static random-number generator in the .cc file
 	code {
-		extern ACG gen;
+		extern ACG* gen;
 	}
 	constructor {
-		random = new NegativeExpntl(double(meanTime),&gen);
+		random = NULL;
 	}
 	destructor {
-		delete random;
+		if(random) delete random;
 	}
 	start {
+		if(random) delete random;
+		random = new NegativeExpntl(double(meanTime),gen);
 		DERepeatStar :: start();
 		random->mean(double(meanTime));
 	}
