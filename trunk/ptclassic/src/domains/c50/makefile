@@ -42,9 +42,12 @@ CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
 # source files
-SRCS = asmc50 loadc50
+SHELL_SCRIPTS = asmc50 loadc50
 
 include $(ROOT)/mk/topdomain.mk
+
+sources:	subsources starHTML.idx $(SHELL_SCRIPTS)
+	chmod a+x $(SHELL_SCRIPTS)
 
 # Subdirectories with star directories in them
 SUBDOMAINDIRS =
