@@ -75,6 +75,7 @@ ITCL_SRCS = \
 	DirSearch.itcl \
 	Displayer.itcl \
 	Edit.itcl \
+	EditModel.itcl \
 	EditSearch.itcl \
 	EditSpell.itcl \
 	EditStack.itcl \
@@ -105,7 +106,6 @@ ITCL_SRCS = \
 	MultiPanel.itcl \
 	Object.itcl \
 	OldModel.itcl \
-	ParameterEdit.itcl \
 	PackageData.itcl \
 	PopupMenu.itcl \
 	PortedDigraph.itcl \
