@@ -1,9 +1,9 @@
-#ifndef _Universe_h
-#define _Universe_h 1
+#ifndef _SDFUniverse_h
+#define _SDFUniverse_h 1
 
 #include "type.h"
-#include "Star.h"
-#include "Scheduler.h"
+#include "SDFStar.h"
+#include "SDFScheduler.h"
 #include "Galaxy.h"
 #include "StringList.h"
 
@@ -12,13 +12,11 @@
 // $Id$
 
 /*******************************************************************
+	This file used to be named Universe.h.
 
-	Universes are defined in this file.
-	A Universe is a Star with a pointer to a component Galaxy,
-	and a Scheduler to fire the blocks in the Galaxy.
+	An SDF Universe is an SDF Star with a pointer to a component Galaxy,
+	and an SDF Scheduler to fire the blocks in the Galaxy.
 	From the outside, it looks like a Star with no PortHoles.
-
-	Currently, only an SDFUniverse is defined here.
 
 ********************************************************************/
 
@@ -37,8 +35,8 @@ public:
 	void go() {scheduler.run(*myTopology);}
 	void wrapup () {scheduler.wrapup(*myTopology);}
 
-	// Redefine char* cast
-	operator StringList ();
+	// The "full dump"
+	StringList printVerbose ();
 
 	// Display the schedule
 	StringList displaySchedule() {return scheduler.displaySchedule();}
