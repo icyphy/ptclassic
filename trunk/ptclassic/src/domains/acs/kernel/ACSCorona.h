@@ -53,7 +53,7 @@ public:
 	// This is a constructor with init core flag as argument.
 	ACSCorona::ACSCorona(int initCoreFlag_) : initCoreFlag(initCoreFlag_) { }
 	// constructor needs to know where to look for core sources.
-	virtual const char* getSrcDirectory() const = 0;
+	virtual const char* getSrcDirectory() { return NULL; }
 
 	// constructor needs a method to construct cores and add them
 	// to the coreList.

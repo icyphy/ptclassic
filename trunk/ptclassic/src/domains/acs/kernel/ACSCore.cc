@@ -35,6 +35,9 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #endif
 
 #include "ACSCore.h"
+#include "ACSCorona.h"
+
+ACSCorona	ACSCore::dummy;
 
 // constructor takes a reference to a Corona
 // ACSCore::ACSCore(ACSCorona & corona_, const char* category_) : { category = // category_;

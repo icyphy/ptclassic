@@ -42,6 +42,9 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #include "HLLTarget.h"
 #include "FloatState.h"
+#include "dataType.h"
+#include "ACSKnownCategory.h"
+#include "ACSCore.h"
 
 // Defined in ACSDomain.cc
 extern const char ACSdomainName[];
@@ -60,6 +63,8 @@ public:
 
    const char* getCoreCategory() { return coreCategory; }
 
+   virtual DataType mapType(DataType);
+
     /* virtual */ void setup();
 
     /* virtual */ void wrapup();
@@ -71,6 +76,8 @@ protected:
 
     // schedulePeriod for interface with a timed domain.
     FloatState schedulePeriod;
+
+    virtual int isFixedPoint() { return (ACSKnownCategory::find(coreCategory))->isFixedPoint(); }
 
 };
 

@@ -54,7 +54,7 @@ public:
 
 	// virtual makeNew( ACSCorona & ) defined by each core
 	// and used by Corona to build core list.
-	virtual ACSCore* makeNew( ACSCorona & ) const = 0;
+	virtual ACSCore* makeNew( ACSCorona & ) const { return (ACSCore *) NULL; }
 
 	// get core category defined in the base core class
 	// of each category.
@@ -66,8 +66,8 @@ public:
         // class identification
         int isA(const char*) const;
 
-	// pure virtual
-	void go() = 0;
+	// virtual
+	void go() {}
 
 	// adds state to Corona states list
 	// a rather odd compile problem without
@@ -79,10 +79,14 @@ public:
 		ACSStar::addState(s);
 	}
 
+	virtual int isFixedPoint() const { return FALSE; }
+
 protected:
 
+	static ACSCorona dummy;
+
 	// returns reference to the core's corona
-	virtual ACSCorona & getCorona() const = 0;
+	virtual ACSCorona & getCorona() const { return dummy; }
 
 	// category string determines core base class, implementation, etc..
 	const char *category;

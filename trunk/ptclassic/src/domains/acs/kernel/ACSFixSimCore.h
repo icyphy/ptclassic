@@ -53,6 +53,8 @@ public:
 
 	/* virtual */ void wrapup();
 
+	/* virtual */ int isFixedPoint() const { return TRUE; }
+
 //protected:
 	/* virtual */ void setup();
 	StringState OverflowHandler;

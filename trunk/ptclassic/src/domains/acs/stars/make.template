@@ -28,10 +28,16 @@ LIB=libacsstars.$(LIBSUFFIX)
 PL_SRCS= \
   ACSNop.pl \
   ACSAdd.pl		ACSPrinter.pl		ACSSub.pl \
-  ACSAddFPSim.pl		ACSPrinterFPSim.pl	ACSSubFPSim.pl \
+  ACSAddFPSim.pl ACSAddFixSim.pl		ACSPrinterFPSim.pl	ACSSubFPSim.pl \
   ACSMpy.pl		ACSRamp.pl \
-  ACSMpyFPSim.pl		ACSRampFPSim.pl \
-  ACSFork.pl	ACSForkFPSim.pl
+  ACSMpyFPSim.pl ACSMpyFixSim.pl	ACSRampFPSim.pl  ACSRampFixSim.pl \
+  ACSFork.pl	ACSForkFPSim.pl  ACSForkFixSim.pl \
+  ACSCos.pl ACSCosFPSim.pl ACSCosFixSim.pl \
+  ACSSin.pl ACSSinFPSim.pl ACSSinFixSim.pl \
+  ACSExp.pl ACSExpFPSim.pl ACSExpFixSim.pl \
+  ACSGain.pl ACSGainFPSim.pl ACSGainFixSim.pl \
+  ACSPolarToRect.pl ACSPolarToRectFPSim.pl ACSPolarToRectFixSim.pl \
+  ACSXYgraph.pl ACSXYgraphFPSim.pl ACSXYgraphFixSim.pl
 
 TMP_PL_SRCS = \
   ACSAdd.pl \
