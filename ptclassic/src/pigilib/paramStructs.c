@@ -71,11 +71,12 @@ ParamListType *pListPtr;
 {
 	if (pListPtr) {
 	    if (pListPtr->array) {
-		if (pListPtr->length > 0 && pListPtr->array->name) {
-		    free((char *)pListPtr->array->name);
-		}
 		free(pListPtr->array);
 		pListPtr->array = 0;
+	    }
+	    if (pListPtr->dynamic_memory) {
+		free(pListPtr->dynamic_memory);
+		pListPtr->dynamic_memory = 0;
 	    }
 	    pListPtr->length = 0;
 	}
@@ -93,6 +94,8 @@ ParamListType *pListPtr;
 
     /* return a pList length of 0 by default */
     pListPtr->length = 0;
+    pListPtr->array = 0;
+    pListPtr->dynamic_memory = 0;
 
     if (*pStr == '\0') {
 	/* invalid param string: star is not a member of knownstars */
@@ -169,9 +172,12 @@ ParamListType *pListPtr;
 	ErrAdd("PStrToPList: format error in param from facet");
 	free(copy);
 	free(pListPtr->array);
+	pListPtr->array = 0;
 	return(FALSE);
     }
     pListPtr->length = param_n;
+    pListPtr->dynamic_memory = copy;
+
     return(TRUE);
 }
 
