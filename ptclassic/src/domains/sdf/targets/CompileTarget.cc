@@ -149,7 +149,7 @@ void CompileTarget::wrapup() {
     if(Scheduler::haltRequested()) return;
     pt_ofstream codeFile(codeFileName);
     if (!codeFile) return;
-    writeCode(codeFile);
+    codeFile << myCode;
 
     // Invoke the compiler
     StringList cmd;
