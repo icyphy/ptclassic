@@ -45,6 +45,7 @@ include $(CONFIG)
 DIRS =	 bin demo doc test
 
 TCL_SRCS = \
+	Compat.tcl \
 	List.tcl \
 	Loader.tcl \
 	Lib.tcl \
