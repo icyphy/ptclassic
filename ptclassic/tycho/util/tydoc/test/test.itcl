@@ -91,6 +91,9 @@ class ::tycho::DocSysTest {
 	}
 }
 
+##
+#### privateProcNoArgs
+# A private proc with no args
 # Here's the body of something we declared in the class interface above
 body ::tycho::DocSysTest::privateProcNoArgs {} {
     puts "privateProcNoArgs"
