@@ -46,7 +46,7 @@ INCL = -I$(KERNDIR)
 LIB=libxxx.$(LIBSUFFIX)
 
 # Header files
-HDRS= XXXPortHole.h XXXScheduler.h XXXStar.h XXXWormhole.h
+HDRS= XXXPortHole.h XXXScheduler.h XXXStar.h XXXWormhole.h XXXGeodesic.h
 
 # Library sources
 SRCS= $(HDRS:.h=.cc) XXXDomain.cc
