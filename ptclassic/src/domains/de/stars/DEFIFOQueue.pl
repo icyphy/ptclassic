@@ -128,7 +128,6 @@ after processing all inputs is sent to the "size" output.
 		arglist { "()" }
 		type { void }
 		code {
-		    NULL;
 		    // Nothing to do
 		}
 	}
