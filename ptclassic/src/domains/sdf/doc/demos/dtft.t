@@ -10,6 +10,7 @@ Demonstrate the DTFT star.
 .IE DTFT
 .IE "discrete-time Fourier transform"
 .IE "Fourier transform"
+.pp
 This demo compares the function of the
 .c DTFT
 star to that of the
