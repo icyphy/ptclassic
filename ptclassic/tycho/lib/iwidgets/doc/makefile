@@ -57,8 +57,10 @@ DIRS =
 
 all install: $(MISC_SRCS)
 
-sources:: $(MISC_FILES)
-	mkHTML
+sources:: $(MISC_FILES) html/widgettree.n.html
+
+html/widgettree.n.html: widgettree.n
+	csh -fx mkhtml
 
 # We don't include common.mk since we don't use the compiler here
 include $(ROOT)/mk/no-compile.mk
