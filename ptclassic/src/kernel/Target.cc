@@ -100,24 +100,44 @@ void Target::setup() {
 
 // setup the galaxy, i.e. check star types and set targets pointers
 int Target::galaxySetup() {
-	if (gal == 0) {
-		Error::abortRun(*this, "Error in Target::setup() -- ",
-				" no galaxy attached to the target");
-		return FALSE;
+  if (gal == 0) {
+    Error::abortRun(*this, "Error in Target::setup() -- ",
+		    " no galaxy attached to the target");
+    return FALSE;
+  }
+
+  const char* domname = gal->domain();
+  Domain* dom = Domain::named(domname);
+  if(!dom) {
+    Error::abortRun(*gal, "Cannot figure out the domain of the galaxy");
+    return FALSE;
+  }
+
+  GalStarIter next(*gal);
+  Star* s;
+  while ((s = next++) != 0) {
+    if (!s->isA(supportedStarClass) && 
+	!s->isA(auxStarClass())) {
+      // The star is not a supported class or aux class.
+      // See whether its domain is in the subdomain list of
+      // galaxy's domain.
+      StringListIter subdomains(dom->subDomains);
+      const char* sub;
+      int flag = 0;
+      while ((sub = subdomains++) != 0) {
+	if(strcmp(sub,s->domain()) == 0) {
+	  flag = 1;
+	  break;
 	}
-	GalStarIter next(*gal);
-	Star* s;
-	while ((s = next++) != 0) {
-		if (!s->isA(supportedStarClass) && 
-		    !s->isA(auxStarClass())) {
-			Error::abortRun (*s,
-					 "wrong star type for target ",
-					 name());
-			return FALSE;
-		}
-		s->setTarget(this);
-	}
-	return TRUE;
+      }
+      if(flag == 0) {
+	Error::abortRun (*s, "wrong star type for target ", name());
+	return FALSE;
+      }
+    }
+    s->setTarget(this);
+  }
+  return TRUE;
 }
 
 // setup the scheduler
