@@ -32,67 +32,125 @@
 ##########################################################################
 #### IconLibrary
 #
-# <b>This class is under development.</b>
-#
 # The _IconLibrary_ model is a hierarchical model for a library
 # of "icons" for dataflow graphs and such.
 #
 # In addition to those in the <a href="Library.html">Library</a>
 # superclass, this model has the following types:
-# <ul>
-# <li><b>icon</b> _name_ _type_: An icon. The _type_ is the
-# actual type of Slate item that will be used to draw the icon.
-# The name cannot contain spaces.
-# Icons can have any attributes that are valid for that Slate
-# type, as well as the following:
-#   <ul>
-#   <li><b>-label</b>: The label used to display the icon in
-#    menu bars and the like. This is used because the icon name
-#    cannot contain spaces. By default, this attribute will be
-#    set to the icon name.
-#   </ul>
+# This model has the following types:
+# <dl>
+# <dt><b>icon</b>
+# <dd>
+# A description of a graphical icon. An item of this type can
+# be drawn on a Slate with the <b>draw</b> method. Items of type
+# <b>icon</b> have the following predefined attributes; in
+# addition, they can have any attributes that are legal for the
+# Slate type that will be used to draw the icon (see the
+# <b>-slatetype</b> attribute):
+#   <dl>
+#   <dt><b>-label</b> _string_
+#   <dd>
+#    The label used to display the icon in menu bars and the like.
+#    (Note that the text displayed in the icon itself is usually
+#    set by the <b>-text</b> option.)
 #
-# <li><b>port</b> _name_ _type_: A port of an icon. The _type_ is the
-# actual type of Slate item that will be used to draw the port.
-# Ports can have any attributes that are valid for that Slate
-# type. Ports can only appear inside icons. The name cannot contain
-# spaces.
+#   <dt><b>-slatetype</b> _slatetype_
+#   <dd>
+#    The Slate class that will be used to draw the icon. The default
+#    is IconRect, which is a simple rectangle with a text
+#    label and optional graphics. Other choices include IconOval
+#    and IconFrame.
 #
-# </ul>
+#   <dt><b>-termstyles</b> _stylelist_
+#   <dd>
+#    A list of terminal styles that the icon will accept. When the icon
+#    is drawn, it can be drawn with any of the termstyles given in
+#    this list. The listed termstyles must be within the same IconLibrary
+#    model.
 #
-# Here is an example of an icon model:
+#   </dl>
+#
+# <dt><b>terminal</b>
+# <dd>
+# A description of a terminal of an icon. An item of this type
+# can be drawn on a Slate as a child item of an <b>icon</b> item.
+# The <b>port</b> item type can be contained within an <b>icon</b>
+# item, in which cas it will be drawn as part of the icon, or
+# within a <b>termstyle</b> item, in which case it will be draw as
+# part of any icon that selects the containing termstyle. Items of type
+# <b>terminal</b> have the following predefined attributes; in
+# addition, they can have any attributes that are legal for the
+# Slate type that will be used to draw the terminal (see the
+# <b>-slatetype</b> attribute):
+# 
+#   <dl>
+#   <dt><b>-slatetype</b> _slatetype_
+#   <dd>
+#    The Slate class that will be used to draw the icon. The default
+#    is Terminal.
+#
+#   <dt><b>-coords</b> {_x y_}
+#   <dd>
+#    The coordinates of the terminal, relative to the icon that
+#    it become parts of.
+#
+#   </dl>
+#
+# <dt><b>termstyle</b>
+# <dd>
+# A set of terminals. Termstyles allow a single icon to have different
+# terminal appearances, and allow different icons to share definitions
+# of terminal appearance. A termstyle can appear anywhere in an IconLibrary.
+# Its name can be referred to from within any <b>-termstyle</b>
+# list. If the termstyle appears within an <b>icon</b>, then that termstyle
+# is implicitly prepended to the <b>-termstyle</b> option of the icon
+# (if it has one). A termstyle has the following attributes:
+#   <dl>
+#   <dt><b>-label</b> _string_
+#   <dd>
+#    The label used to display the termstyle in menu bars and
+#    selection lists.
+#
+#   </dl>
+#
+#
+# </dl>
+#
+# Here is an example of an icon library:
 # <pre><tcl>
 #     catch {delete object $icons}
 #     set icons [::tycho::IconLibrary [::tycho::autoName icons]]
 #     $icons parse {
-#         group sample {
-#             -label {Some sample icons}
-#             icon Add IconOval {
-#                 -fill white
-#                 -graphics {
-#                     line 20 50 80 50 -width 4
-#                     line 50 20 50 80 -width 4
-#                 }
-#                 port input-0 Terminal -anchor {0 50} &#92
-#                       -direction {-1 0} &#92
-#                       -type input -style blob -fill red
-#                 port input-1 Terminal -anchor {50 0} &#92
-#                         -direction {0 -1} &#92
-#                         -type input -style blob -fill red
-#                 port output Terminal -anchor {100 50} &#92
-#                         -direction {1 0} &#92
-#                         -type output -style arrow -fill blue
+#         termstyle 1-0-east -label "One output, east" {
+#             terminal in -coords {0 50} -direction {-1 0} -style circle
+#         }
+#         
+#         termstyle 1-0-west -label "One output, west" {
+#             terminal in -coords {100 50} -direction {1 0} &#92
+#                         -style rectangle -fill magenta
+#         }
+#         
+#         group sample -label {Sample Icons} {
+#             icon add -label Add \
+#                     -slatetype IconOval \
+#                     -fill white \
+#                     -text "" \
+#                     -termstyles {1-0-east 1-0-west} \
+#                     -graphics {
+#                 line 20 50 80 50 -width 4
+#                 line 50 20 50 80 -width 4
 #             }
-#             icon Ramp IconFrame {
-#                 -label {Ramp}
-#                 -text Ramp
-#                 -color lightgreen
-#                 -graphics {
-#                     polygon 20 80 80 80 80 20 -fill orange -outline ""
-#                 }
-#                 port output Terminal -anchor {100 50} &#92
-#                         -direction {1 0} &#92
-#                         -type output -fill blue
+#             
+#             icon foo \
+#                     -slatetype IconFrame \
+#                     -color blue \
+#                     -label {The Foo Icon} \
+#                     -text Foo \
+#                     -textanchor nw \
+#                     -termstyles {1-0-east 1-0-west} \
+#                     -graphics {
+#                 Frame 10 10 50 50 -color red
+#                 Frame 50 50 90 90 -color green -relief sunken
 #             }
 #         }
 #     }
@@ -101,20 +159,24 @@
 #
 # Create a menubar and add this index to it:
 # <tcl quiet><pre>
+#    proc select {library item} {
+#        ::tycho::inform "item $item: [$library describe $item]"
+#    }
 #    catch {delete object .mb}
 #    ::tycho::MenuBar .mb
 #    pack .mb
 #    raise .
 #    wm deiconify .
-#    .mb addMenu Foo
-#    $icons menu .mb Foo ::tycho::inform
+#    .mb addMenu foo -label Foo
+#    $icons makemenu {icon termstyle} .mb foo "select $icons"
 # </pre></tcl>
 #
 # Create a blank slate and draw the icons on it:
 # <tcl><pre>
 #     source $TYCHO/editors/slate/doc/internals/newslate.itcl
-#     $icons draw sample.Add $slate 100 100 -tags moveable
-#     $icons draw sample.Ramp $slate 200 100 -tags moveable
+#     $icons draw {sample add} $slate 100 100 -tags moveable
+#     $icons draw {sample foo} $slate 200 100 -tags moveable &#92
+#            -termstyle 1-0-west
 # </pre></tcl>
 # 
 class ::tycho::IconLibrary {
@@ -132,15 +194,6 @@ class ::tycho::IconLibrary {
 
     # Draw an icon on a given slate
     method draw {icon slate x y args}
-
-    # Add an icon
-    method icon {name value args}
-
-    # Add a port to an icon
-    method port {icon name value args}
-    
-    # Get the Slate type of an icon
-    method slatetype {name}
 }
 
 ########################################################################
@@ -152,87 +205,89 @@ body ::tycho::IconLibrary::constructor {args} {
 
     # The icon type
     type define icon \
-	    -label ""
+	    -label "" \
+            -slatetype IconRect \
+            -termstyles {}
 
-    # The port type
-    type define port \
+    # The terminal type
+    type define terminal \
 	    :leafonly 1 \
+            -slatetype Terminal \
+            -coords {0 0} \
 	    -type input
+
+    # The termstyle type
+    type define termstyle \
+            -label ""
 }
 
 ########################################################################
 #### draw
 #
-# Draw an icon on a slate at the given coordinates. Additional
-# argument are given to the icon item when created
+# Draw an icon on a slate at the given coordinates. Optional
+# arguments can be any of the following:
+# <dl>
+# <dt><b>-tags</b> _taglist_
+# <dd>
+# One or more canvas tags to give to the icon.
+#
+# <dt><b>-termstyle</b> _style_
+# <dd>
+# The terminal style to draw the icon in. The given style must be
+# one in the icons <b>termstyle</b> list or a termstyle that is
+# a child of the icon. If not supplied, the first termstyle found
+# will be used. If there are none, don't draw any terminals.
+#
+# </dl>
 #
 body ::tycho::IconLibrary::draw {icon slate x y args} {
-    set type  [slatetype $icon]
-    set attrs [attributes icon $icon]
-    set iconid [eval $slate create $type $x $y \
-            $attrs $args -name $icon]
-
-    foreach port [names port $icon] {
-        set type  [slatetype $icon.$port]
-        set attrs [attributes port $icon.$port]
-        eval $slate call $iconid terminal \
-                $icon $type 0 0 $attrs \
-                -tags [list [_itemcget port $icon $port -type]]
-
- #       eval $slate createrootchild $iconid $type 0 0 $attrs \
-#                -tags [list [_itemcget port $icon $port -type]] \
-#		-name $icon.$port
+    if ![exists $icon] {
+        error "Unknown icon \"$icon\""
     }
-}
-
-########################################################################
-#### icon
-#
-# Add a new icon. Flag an error if the icon
-# already exists. Additional arguments are the initial values
-# of icon attributes. Return the inverse command. If the
-# *-label* attribute is null, set it to the icon name.
-# Note that is the icon is in a group, it's name is
-# in the form "group.iconname".
-#
-body ::tycho::IconLibrary::icon {name value args} {
-    set splut [split $name $separator]
-    set cntxt [join [lreplace $splut end end] "."]
-    set local [lindex $splut end]
-
-    _verifynot icon $cntxt $local $name
-    _addentity icon $cntxt $local $name $value $args
-    if { [_itemcget icon $cntxt $local -label] == "" } {
-	_itemconfigure icon $cntxt $local [list -label $local]
+    if { [type get $icon] != "icon" } {
+        error "\"$icon\" is not an icon"
     }
-    list delete icon $name
-}
+    array set attrs [attrget $icon]
+    array set opts {-tags {} -termstyle {}}
+    array set opts $args
 
-########################################################################
-#### port
-#
-# Add a new port to an icon. Flag an error if the port
-# already exists. Additional arguments are the initial values
-# of port attributes. Return the inverse command.
-#
-body ::tycho::IconLibrary::port {icon port value args} {
-    _verifynot port $icon $port $icon$separator$port
-    _addentity port $icon $port $icon$separator$port $value $args
-    list delete port $icon$separator$name
-}
+    # Check and get attributes
+    set slatetype $attrs(-slatetype)
+    set termstyles {}
+    foreach t [match termstyle $icon] {
+        lappend termstyles [concat $icon $t]
+    }
+    eval lappend termstyles $attrs(-termstyles)
+    unset attrs(-slatetype)
+    unset attrs(-termstyles)
 
-########################################################################
-#### type
-#
-# Get the slate type of an icon. Flag an error if the icon does
-# not exist.
-#
-body ::tycho::IconLibrary::slatetype {name} {
-    set splut [split $name $separator]
-    set cntxt [join [lreplace $splut end end] "."]
-    set local [lindex $splut end]
+    # Check and get termstyle
+    if { $opts(-termstyle) == "" } {
+        set termstyle [lindex $termstyles 0]
+    } else {
+        set termstyle $opts(-termstyle)
+        if { [lsearch -exact $termstyles $termstyle] == -1 } {
+            error "Unknown termstyle \"$termstyle\": must be one\
+                    of $termstyles"
+        }
+    }
 
-    set t [_type $cntxt $local]
-    _verify $t $cntxt $local
-    _get $t $cntxt $local
+    # Create the icon
+    set id [eval $slate create $slatetype $x $y [array get attrs] \
+            [list -tags $opts(-tags)]]
+
+    # Create the terminals
+    foreach term [match terminal $termstyle] {
+        array set a [attrget [concat $termstyle $term]]
+        set termtype $a(-slatetype)
+        unset a(-slatetype)
+        set x [lindex $a(-coords) 0]
+        set y [lindex $a(-coords) 1]
+        unset a(-coords)
+        # FIXME: the -type tag thing is a real hack...
+        eval $slate call $id terminal \
+                $term $termtype $x $y [array get a] \
+                -tags [list $a(-type)]
+        unset a
+    }
 }
