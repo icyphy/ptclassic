@@ -112,6 +112,6 @@ void MVImage::assemble(const BaseImage* bi)
 } // end MVImage::assemble()
 
 const char* MVImage::dataType() const { return("MVImage"); }
-PacketData* MVImage::clone() const { LOG_NEW; return new MVImage(*this); }
-PacketData* MVImage::clone(int a) const { LOG_NEW; return new MVImage(*this, a); }
+Message* MVImage::clone() const { LOG_NEW; return new MVImage(*this); }
+Message* MVImage::clone(int a) const { LOG_NEW; return new MVImage(*this, a); }
 ISA_FUNC(MVImage,BaseImage);

@@ -38,10 +38,10 @@ public:
 
 	void			setSize(int);
 
-// PacketData-like stuff
+// Message-like stuff
 	virtual const char* dataType() const;
-	virtual PacketData* clone() const;
-	virtual PacketData* clone(int a) const;
+	virtual Message* clone() const;
+	virtual Message* clone(int a) const;
 	int isA(const char*) const;
 };
 

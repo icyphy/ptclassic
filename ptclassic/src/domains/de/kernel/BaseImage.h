@@ -11,7 +11,7 @@
 
 /*******************************
  This file defines a base class for all image types in Ptolemy.
- The BaseImage type is based on Ptolemy's built-in "PacketData"
+ The BaseImage type is based on Ptolemy's built-in "Message"
  type, which allows aggregate datatypes to be passed between
  Stars.
 
@@ -51,10 +51,10 @@
  from BaseImage should maintain this policy.
  ******************************/
 
-#include "Packet.h"
+#include "Message.h"
 #include <builtin.h>
 
-class BaseImage: public PacketData {
+class BaseImage: public Message {
 protected:
 	int width, height;
 	int startPos, size, fullSize;
@@ -111,10 +111,10 @@ public:
 	virtual BaseImage* fragment(int, int) const;
 	virtual void assemble(const BaseImage*);
 
-// PacketData-like stuff
+// Message-like stuff
 	virtual const char* dataType() const;
-	virtual PacketData* clone() const;
-	virtual PacketData* clone(int a) const;
+	virtual Message* clone() const;
+	virtual Message* clone(int a) const;
 	int isA(const char*) const;
 };
 
