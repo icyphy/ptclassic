@@ -486,6 +486,11 @@ bool bittrue;
 {
 /* For inputs which are NOT constants, we have to read once every sample */
 
+    int i = 0;
+    char label[STRSIZE], value[STRSIZE];
+    char *lowstr, *highstr, *strtok();
+    int low, high;
+
 if(!bittrue)
 {
     if(IsArray(edge))
@@ -511,12 +516,38 @@ if(!bittrue)
 } /* not bittrue */
 else if (bittrue)
 {
-/* ARRAY not handled yet, once see such a case, do so...*/
+    if(IsArray(edge))
+    {
+	/* to get the size of the array */
+    	sprintf(label, "index%d", i);
+    	strcpy(value, (char *)GetAttribute(edge->Arguments, label));
+	if(isnumber(value))
+		high = atoi(value) +1;
+	else
+	{	
+		lowstr = strtok(value, "..");
+		highstr = strtok(NULL, "..");
+		if (isnumber(highstr))
+		high = atoi(highstr);
+		low = atoi(lowstr);
+		if(high<low) high = low;
+	}
+
+	fprintf(CFD,"for(%s_cnt=0; %s_cnt <=  %d; %s_cnt++)\n    {\n    ",
+			Root->Name,Root->Name,high,Root->Name);
+    	GenEdgeName(edge);
+	fprintf(CFD,"[%d - %s_cnt] = r_%s_",high,Root->Name,Root->Name);
+    	GenEdgeName(edge);
+	fprintf(CFD,"[%s_cnt];\n    }\n",Root->Name);
+    }
+    else
+    {
     	GenSingleEdgeDeref(edge);
     	/*GenEdgeName(edge);*/
 	fprintf(CFD," = *r_%s_",Root->Name);
     	GenEdgeName(edge);
 	fprintf(CFD,";\n");
+    }
 } /* bittrue */
 
 }
