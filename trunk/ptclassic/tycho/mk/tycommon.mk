@@ -475,9 +475,18 @@ jsbuild:
 	$(MAKE) AUXCLASSPATH="$(CLASSPATHSEPARATOR)$(JSCLASSPATH)" jclass
 # Run the test_jsimple rule with the proper classpath  
 jstest_jsimple:
-	$(MAKE) AUXCLASSPATH="$(CLASSPATHSEPARATOR)$(JSCLASSPATH)" test_jsimple
+	$(MAKE) AUXCLASSPATH="$(CLASSPATHSEPARATOR)$(JSCLASSPATH)" \
+		test_jsimple
 	@echo "To view code coverage results, run javascope or jsreport"
 	@echo "To get a summary, run jsreport -dbsummary" 
+
+# Run the test_jsimple rule with the proper classpath  
+jstest_jgraphical:
+	$(MAKE) AUXCLASSPATH="$(CLASSPATHSEPARATOR)$(JSCLASSPATH)" \
+		test_jgraphical
+	@echo "To view code coverage results, run javascope or jsreport"
+	@echo "To get a summary, run jsreport -dbsummary" 
+
 
 # If necessary, instrument the classes, then rebuild, then run the tests
 jsall: jsoriginal
