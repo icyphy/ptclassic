@@ -184,7 +184,8 @@ octObject *destPtr, *srcPtr;
 typedef enum IconType_e
 	{pal = 0, univ, gal, star} IconType;
 static char *iconNames[] =
-	{"%iNewPal", "%iNewUniv", "%iNewGal", "%iNewStar"};
+	{PT_PERCENT"iNewPal", PT_PERCENT"iNewUniv",
+         PT_PERCENT"iNewGal", PT_PERCENT"iNewStar"};
 
 /* 8/24/89 7/27/89
 Makes an interface facet and returns it opened.  If one already exists,

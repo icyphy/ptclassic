@@ -81,5 +81,14 @@ extern char *getwd ARGS((char *));
  */
 #define NODOMAIN "NODOMAIN"
 
+/* In Ptolemy 0.7.1 and earlier, some of the facets in
+   $PTOLEMY/lib/ptolemy had the % character in their names, which
+   causes no end of trouble under NT4.0 with Cygwin 20.1.
+   In Ptolemy 0.7.1 and later, we changed the name of these
+   files and substituted in the string "percent" for the character
+   "%".
+   See also $PTOLEMY/bin/fixntpaths
+*/
+#define PT_PERCENT "percent"
 
 #endif  /* _LOCAL_H */
