@@ -434,26 +434,27 @@ InterpGalaxy::addToKnownList(const char* outerDomain) {
 	if (strcmp (outerDomain, KnownBlock::domain()) != 0) {
 		Star& s = Domain::named(outerDomain)->newWorm(*this);
 		setBlock (myName, &s);
-		KnownBlock *p = new KnownBlock(s, myName);
-		delete p;
+		KnownBlock::addEntry (s, myName, 1);
 		KnownBlock::setDomain (outerDomain);
 	}
 // If not, ordinary galaxy
 	else {
-		KnownBlock *p = new KnownBlock(*this,myName);
-		delete p;
+		KnownBlock::addEntry (*this, myName, 1);
 	}
 }
 
 // Function to allow us to use dotted names in interpreter show commands
+// It works even if a star has a dot in its name.
 Block* InterpGalaxy::blockWithDottedName (const char* dotname) {
+	Block* b = blockWithName (dotname);
+	if (b) return b;
 	char buf[256];
 	const char* p = index (dotname, '.');
-	if (p == NULL) return blockWithName (dotname);
+	if (p == NULL) return 0;
 	int n = p - dotname;
 	strncpy (buf, dotname, n);
 	buf[n] = 0;
-	Block* b = blockWithName (buf);
+	b = blockWithName (buf);
 	if (b->isItAtomic()) return NULL;
 	return ((InterpGalaxy&)b->asGalaxy()).blockWithDottedName (p + 1);
 }
