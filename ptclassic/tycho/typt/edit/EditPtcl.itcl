@@ -142,16 +142,16 @@ body ::tycho::EditPtcl::constructor {args} {
 
     menubar addMenu Special left {} -underline 0
     menubar addMenuItem "Retarget" Special -underline 0 \
-	    -command "set w \[::tycho::Retarget .rtrg#auto -edit \
-                      \[$this component text\]\]; \$w centerOnScreen"
+            -command "set w \[::tycho::Retarget .rtrg#auto -edit $this];\
+        \$w centerOnScreen"
 
     menubar addMenuItem "List Stars" Special -underline 0 \
             -command "::tycho::inform \
-        \"Stars used: \[\[$this component text\] stars\]\""
+        \"Stars used: \[$this stars\]\""
 
     menubar addMenuItem "Universe Name" Special -underline 0 \
             -command "::tycho::inform \
-            \" Universe: \[\[$this component text\] universeName\]\""
+            \" Universe: \[$this universeName\]\""
 
     menubar addMenuItem "Open Facet" File -underline 0 \
 	    -command "$this openFacet"
