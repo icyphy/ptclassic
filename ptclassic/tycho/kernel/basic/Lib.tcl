@@ -6,7 +6,7 @@
 #
 # @Version: $Id$
 #
-# Copyright (c) 1995-1997 The Regents of the University of California.
+# Copyright (c) 1995-%Q% The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -167,9 +167,10 @@ if {$tycho_bindings == {unix}} {
 # the character appears in the entry box (simply add a "break" to the
 # standard Tk binding).
 bind Entry <Key> "tkEntryInsert %W %A; break"
-
-# The following is now bound for each Edit widget
-# bind Text <Key> "tkTextInsert %W %A; break"
+bind Text <Key> "tkTextInsert %W %A; break"
+bind Text <Return> {tkTextInsert %W \n; break}
+# One exception to allow "all" to catch it (to post menus)
+bind Text <Key-F10> { }
 
 bind Entry <<ClearToStart>> {
     clipboard clear -displayof %W
