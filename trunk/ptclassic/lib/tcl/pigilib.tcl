@@ -35,7 +35,7 @@
 # If gSlowX11Link is set, do not show the mr ptolemy bitmap
 # ptkVerboseErrors controls whether we get a stack trace
 #
-if {[file exists [glob ~/.ptkrc ]]} {
+if {[file exists [glob -nocomplain ~/.ptkrc ]]} {
     global gSlowX11Link
     source ~/.ptkrc
     if {! [info exists gSlowX11Link] } {
