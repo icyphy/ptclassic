@@ -516,7 +516,8 @@ proc ptkGo {name octHandle} {
         set w .run_$octHandle
         set numIter [$w.iter.entry get]
         run $numIter
-	if {$ptkRunFlag($name) != {ABORT}} { wrapup } {
+	if {[info exists ptkRunFlag($name)] &&
+	    $ptkRunFlag($name) != {ABORT}} { wrapup } {
 	    # Mark an error if the system was aborted
 	    set ptkRunFlag($name) ERROR
 	}
