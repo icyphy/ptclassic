@@ -66,12 +66,12 @@ Link * PendingEventList::appendGet( CqLevelLink * obj )
 	return (Link *)LinkedList::appendGet( obj );
 }
 
-void PendingEventList::freeHeadAndRemove() {
+void PendingEventList::removeHeadAndFree() {
 	CqLevelLink *aboutToDieLevelLink;
 	CqLevelLink *before;
 	CqLevelLink *next;
         myQueue->decrementEventCount(); 
-	aboutToDieLevelLink = LinkedList::getHeadAndRemove();
+	aboutToDieLevelLink = getHeadAndRemove();
         if( aboutToDieLevelLink ) {
             aboutToDieLevelLink->destinationRef = 0; 
 	    before = aboutToDieLevelLink->before; 
@@ -90,6 +90,27 @@ void PendingEventList::freeHeadAndRemove() {
 CqLevelLink * PendingEventList::remove( Link * obj )
 {
 	return (CqLevelLink *)LinkedList::eraseLinkNotElement( *obj );
+}
+
+
+void PendingEventList::freeEvent( CqLevelLink * aboutToDieLevelLink ) {
+	if( aboutToDieLevelLink->destinationRef != 0 ) {
+	    Error::abortRun("Attempt to free CqLevelLink that has
+	    a non-null destinationRef!");
+	}
+	CqLevelLink *before;
+	CqLevelLink *next;
+	before = aboutToDieLevelLink->before; 
+	next = aboutToDieLevelLink->next; 
+	if( before ) { 
+	    before->next = next;
+        }
+        if( next ) {
+            next->before = before;
+        }
+
+        myQueue->decrementEventCount(); 
+	myQueue->putFreeLink(aboutToDieLevelLink); 
 }
 
 
