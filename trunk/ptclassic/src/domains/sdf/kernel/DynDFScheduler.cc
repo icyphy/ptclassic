@@ -256,7 +256,7 @@ DynDFScheduler :: run () {
 				do {
 					if (!s->run()) return FALSE;
 					deadlock = FALSE;
-				} while (isRunnable(*s), FALSE);
+				} while (isRunnable(*s, FALSE));
 
 				// reset scanSize
 				scanSize = nonSourceBlocks.size();
