@@ -21,44 +21,48 @@ and boolean-controlled dataflow
 (\pxref{BDF Domain})
 \cindex{boolean-controlled dataflow}
 \cindex{dataflow, boolean-controlled}
-models of computation.  The model of
-computation assocaited with a particular program graph is determined by
-which target is selected.  The \code{bdf-CGC} target supports the BDF
-model, while all other targets in the CGC domain support the more
-limited SDF model.  Code can be generated for single-processor machines
-and multi-processor machines.  The targets that support
-single-processors include \code{default-CGC}, \code{TclTk_Target}, and
-\code{bdf-CGC}.  The multi-processor target is \code{unixMulti_C}.
+models of computation.
+The model of computation associated with a particular program graph
+is determined by which target is selected.
+The \code{bdf-CGC} target supports the BDF model, while all other targets
+in the CGC domain support the more limited SDF model.
+Code can be generated for single-processor machines and multi-processor
+machines.
+The targets that support single-processors include \code{default-CGC},
+\code{TclTk_Target}, and \code{bdf-CGC}.
+The multi-processor target is \code{unixMulti_C}.
 
 For an overview of CGC stars and demos, please refer to the star atlas.
 
 \node CGC Single-Processor Targets
 \section{Single-Processor Targets}
 
-The single-processor targets of the CGC domain
-generate \code{C} code from dataflow program graphs.
+The single-processor targets of the CGC domain generate \code{C} code
+from dataflow program graphs.
 Code generation is controlled by the \var{host}, \var{directory}, and
-\var{file} paramteres as described in \nxref{CG Domain}.
+\var{file} paramters as described in \nxref{CG Domain}.
 \vrindex{host, parameter}
 \vrindex{directory, parameter}
 \vrindex{file, parameter}
-The command used to compile the code is determined by the
-\var{compileCommand}, \var{compileOptions}, and \var{linkOptions}
-parameters.
-Compilation and execution are controlled by the
-\var{display?}, \var{compile?}, and \var{run?}
-parameters, also described in \nxref{CG Domain}.
+The command used to compile the code is determined by the \var{compileCommand},
+\var{compileOptions}, and \var{linkOptions} parameters.
+Compilation and execution are controlled by the \var{display?},
+\var{compile?}, and \var{run?} parameters, also described in
+\nxref{CG Domain}.
 The parameters common to the CGC targets are listed below.
 
 \begin{statelist}
 \state{INT}{staticBuffering}{TRUE}
 If \samp{TRUE}, then attempt to static, compile-time addressing of data
-buffers between stars.  Otherwise, use dynamic, run-time addressing.
+buffers between stars.
+Otherwise, use dynamic, run-time addressing.
 
 \state{STRING}{funcName}{main}
-The name of the main function.  The default value of \samp{main} is suitable
-for generating stand-alone programs.  Choose another name if you wish to use
-the generated code as a procedure that is called from your own main program.
+The name of the main function.
+The default value of \samp{main} is suitable for generating standalone
+programs.
+Choose another name if you wish to use the generated code as a procedure
+that is called from your own main program.
 
 \state{STRING}{compileCommand}{cc}
 Command name of the compiler.
@@ -84,8 +88,9 @@ from a SDF program graph.
 
 This target, which is derived from the \code{default-CGC} target
 (\pxref{default-CGC}), must be used when Tcl/Tk stars are present in
-the program graph.  The parameters differ from those of the
-\code{default-CGC} target only in their default values.
+the program graph.
+The parameters differ from those of the \code{default-CGC} target only
+in their default values.
 
 \begin{statelist}
 \state{INT}{loopingLevel}{1}
@@ -108,9 +113,10 @@ the program graph.  The parameters differ from those of the
 \subsection{\protect\code{bdf-CGC}}
 
 This target supports the boolean-controlled dataflow (BDF) model of
-computation.  It must be used when BDF stars are present in the program
-graph.  It can also be used with program graphs that contain only
-synchronous dataflow (SDF) stars.
+computation.
+It must be used when BDF stars are present in the program graph.
+It can also be used with program graphs that contain only synchronous
+dataflow (SDF) stars.
 
 The \code{bdf-CGC} target has the same parameters as the \code{default-CGC}
 target (\pxref{default-CGC})
