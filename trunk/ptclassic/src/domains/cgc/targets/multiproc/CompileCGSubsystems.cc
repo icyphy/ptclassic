@@ -96,46 +96,108 @@ void CompileCGSubsystems::wormPrepare() {
     cgcWorm->convertWormholePorts(*galaxy());
 }
 
-int CompileCGSubsystems::modifyGalaxy() {
-    // Let HOF type stars do their magic
-    if (!CGSharedBus::modifyGalaxy()) return FALSE;
-    
-    GalStarIter nextStar(*galaxy());
-    CGStar* star;
-    // FIXME - This code only processes top-level wormholes
-    while ((star = (CGStar*)nextStar++) != NULL) {
-	Wormhole* worm = star->asWormhole();
-	if (!worm) continue;
-	BlockPortIter nextPort(*star);
-	PortHole* port;
-	while ((port = nextPort++) != NULL) {
-	    if (port->atBoundary()) continue;
-	    Wormhole* farWorm = ((Star*)port->far()->parent())->asWormhole();
-	    const char* farDomain = farWorm?
-		farWorm->insideDomain():port->far()->parent()->domain();
-	    const char* wormDomain = worm->insideDomain();
-	    if (strcmp(farDomain,wormDomain) != 0 &&
-		strcmp(farDomain,"CGC") != 0 && 
-		strcmp(wormDomain,"CGC") != 0) {
-		PortHole* farPort = port->far();
-		int numDelays = port->numInitDelays();
-		const char* delayValues = port->initDelayValues();
-		port->disconnect();
-		CGCFork* cgcFork = new CGCFork;
-		galaxy()->addBlock(*cgcFork,"CGCWormFork");
-		PortHole& cgcForkOutput = cgcFork->output.newConnection();
-		if (farPort->isItOutput()) {
-		    farPort->connect(cgcFork->input,numDelays, delayValues);
-		    cgcForkOutput.connect(*port,0,"");
-		}
-		else {
-		    port->connect(cgcFork->input,numDelays, delayValues);
-		    cgcForkOutput.connect(*farPort,0,"");
-		}
-	    }
+void CompileCGSubsystems::flattenWorm() {
+  // Call the parent method.
+  CGSharedBus::flattenWorm();
+
+  // NOTE: This code must come after flattening wormholes, or else you
+  // won't be able to iterate through all the stars in the universe,
+  // because wormholes act as stars and hide the stars inside them from
+  // the GalStarIter iterator.
+
+  // NOTE: This code is a partial hack to insert CGCFork stars in between
+  // CGStars that have been manually assigned different procIds because
+  // current multiprocessor scheduling can't handle splicing communication
+  // links other than simple 2-star connections.  We put in the CGCStar
+  // to force the scheduler to go through CGC because it doesn't know how
+  // to go between two non-CGC domains.
+  // This code doesn't check to see if two connected CGCStars have
+  // different procIds.
+
+  // Insert CGCFork stars in between stars with differing procIds.
+  GalStarIter nextStar(*galaxy());
+  CGStar* star;
+  while  ((star = (CGStar*) nextStar++) != NULL) {
+    BlockPortIter nextPort(*star);
+    PortHole* port;
+    while ((port = nextPort++) != NULL) {
+      PortHole* farPort = port->far();
+      if (!farPort) {
+	Error::abortRun(*port, "is not connected");
+	return;
+      }
+      else {
+	CGStar* farStar = (CGStar*) farPort->parent();
+	if (!farStar) {
+	  Error::abortRun(*farPort, "has no parent");
+	  return;
 	}
+	else {
+	  if (!star->isA("CGCStar") && !farStar->isA("CGCStar") &&
+	      star->getProcId() != farStar->getProcId()) {
+	    int numDelays = port->numInitDelays();
+	    const char* delayValues = port->initDelayValues();
+	    port->disconnect();
+	    CGCFork* cgcFork = new CGCFork;
+	    // FIXME: I assume procId should be 0 for CGC.
+	    cgcFork->setProcId(0);
+	    galaxy()->addBlock(*cgcFork,"CGCWormFork");
+	    PortHole& cgcForkOutput = cgcFork->output.newConnection();
+	    if (farPort->isItOutput()) {
+	      farPort->connect(cgcFork->input,numDelays, delayValues);
+	      cgcForkOutput.connect(*port,0,"");
+	    }
+	    else {
+	      port->connect(cgcFork->input,numDelays, delayValues);
+	      cgcForkOutput.connect(*farPort,0,"");
+	    }
+	  }
+	}
+      }
     }
-    return TRUE;
+  }
+}
+
+int CompileCGSubsystems::modifyGalaxy() {
+  // Let HOF type stars do their magic
+  if (!CGSharedBus::modifyGalaxy()) return FALSE;
+    
+  GalStarIter nextStar(*galaxy());
+  CGStar* star;
+  // FIXME - This code only processes top-level wormholes
+  while ((star = (CGStar*)nextStar++) != NULL) {
+    Wormhole* worm = star->asWormhole();
+    if (!worm) continue;
+    BlockPortIter nextPort(*star);
+    PortHole* port;
+    while ((port = nextPort++) != NULL) {
+      if (port->atBoundary()) continue;
+      Wormhole* farWorm = ((Star*)port->far()->parent())->asWormhole();
+      const char* farDomain = farWorm?
+	farWorm->insideDomain():port->far()->parent()->domain();
+      const char* wormDomain = worm->insideDomain();
+      if (strcmp(farDomain,wormDomain) != 0 &&
+	  strcmp(farDomain,"CGC") != 0 && 
+	  strcmp(wormDomain,"CGC") != 0) {
+	PortHole* farPort = port->far();
+	int numDelays = port->numInitDelays();
+	const char* delayValues = port->initDelayValues();
+	port->disconnect();
+	CGCFork* cgcFork = new CGCFork;
+	galaxy()->addBlock(*cgcFork,"CGCWormFork");
+	PortHole& cgcForkOutput = cgcFork->output.newConnection();
+	if (farPort->isItOutput()) {
+	  farPort->connect(cgcFork->input,numDelays, delayValues);
+	  cgcForkOutput.connect(*port,0,"");
+	}
+	else {
+	  port->connect(cgcFork->input,numDelays, delayValues);
+	  cgcForkOutput.connect(*farPort,0,"");
+	}
+      }
+    }
+  }
+  return TRUE;
 }
 
 DataFlowStar* CompileCGSubsystems::createSend(int from, int to, int /*num*/) {
@@ -195,7 +257,7 @@ int CompileCGSubsystems::replaceCommBlock
 }
 	
 void CompileCGSubsystems::pairSendReceive(DataFlowStar* oldSend,
-				   DataFlowStar* oldReceive) {
+					  DataFlowStar* oldReceive) {
     int from = ((DummyComm*)oldSend)->from;
     int to = ((DummyComm*)oldSend)->to;
 
@@ -212,13 +274,41 @@ void CompileCGSubsystems::pairSendReceive(DataFlowStar* oldSend,
 	newSend = pair.cgcStar;
 	newReceive = pair.cgStar;
     }
-    else {
+    else if (to == 0) {
 	pair = cgChild(from)->toCGC(*dummyPort);
 	if (SimControl::haltRequested()) return;
 	newSend = pair.cgStar;
 	newReceive = pair.cgcStar;
     }
-    
+    else {
+      if (Error::canMark()) {
+	PortHole* oldInput = oldSend->portWithName("input");
+	if (oldInput) {
+	  PortHole* oldInFar = oldInput->far();
+	  if (oldInFar) {
+	    Block* fromStar = oldInFar->parent();
+	    if (fromStar) {
+	      Error::mark(*fromStar);
+	    }
+	  }
+	}
+	PortHole* oldOutput = oldReceive->portWithName("output");
+	if (oldOutput) {
+	  PortHole* oldOutFar = oldOutput->far();
+	  if (oldOutFar) {
+	    Block* toStar = oldOutFar->parent();
+	    if (toStar) {
+	      Error::mark(*toStar);
+	    }
+	  }
+	}
+      }
+      Error::abortRun("Neither side of the comm link is a CGC star.\n",
+		      "Currently we can only communicate through CGC.\n",
+		      "Try splicing in a CGCFork star between the two sides.");
+      return;
+    }
+
     if(!replaceCommBlock(*newSend,*oldSend) ||
        !replaceCommBlock(*newReceive,*oldReceive)) {
 	delete newSend;
