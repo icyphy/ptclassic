@@ -56,31 +56,18 @@ public:
 	unsigned int length() const { return count;}
 
 	// put a particle into the queue: fails if capacity exceeded
-	int putq(Particle& p) {
-		if (full()) return FALSE;
-		else {
-			stk.putTail(p.clone());
-			count++;
-			return TRUE;
-		}
-	}
+	int putq(Particle& p);
+
 	// get a particle from the queue, copy into user-supplied particle
 	// fails if queue empty
-	int getq(Particle& p) {
-		if (empty()) return FALSE;
-		Particle* qp = stk.get();
-		count--;
-		p = *qp;
-		qp->die();
-		return TRUE;
-	}
+	int getq(Particle& p);
+
 	// modify the capacity
-	void setCapacity(int sz) {
-		if (sz < 0) maxCount = QSIZE_UNLIM;
-		else maxCount = sz;
-	}
+	void setCapacity(int sz);
+
 	// free up the queue contents
 	void initialize() { stk.freeup();}
+
 	// free up and set capacity (good for star start() methods)
 	void initialize(int n) { initialize(); setCapacity(n);}
 protected:
