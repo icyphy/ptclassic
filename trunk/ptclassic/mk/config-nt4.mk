@@ -72,7 +72,11 @@ OPTIMIZER =	#-O2
 # -Wsynth is new in g++-2.6.x
 # Under gxx-2.7.0 -Wcast-qual will drown you with warnings from libg++ includes
 WARNINGS =	-Wall -Wsynth #-Wcast-qual 
-LOCALCCFLAGS =	-g -DPTNT -DPT_NO_TIMER $(GCC_270_OPTIONS)
+
+# PT_NO_ITCL  : Used by ptcl to avoid including Itcl
+# PT_NO_TIMER : Used in ProfileTimer.cc and SimControl.cc
+
+LOCALCCFLAGS =	-g -DPTNT -DPT_NO_TIMER -DPT_NO_ITCL $(GCC_270_OPTIONS)
 GPPFLAGS =	$(OPTIMIZER) $(MEMLOG) $(WARNINGS) \
 			$(ARCHFLAGS) $(LOCALCCFLAGS) $(USERFLAGS)
 # If you are not using gcc, then you might have problems with the WARNINGS flag
