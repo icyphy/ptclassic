@@ -2,10 +2,10 @@
 \node CGC Domain
 \chapter{CGC Domain}
 
-\Author{J. Buck \\
-S. Ha \\
-E. A. Lee \\
-T. M. Parks}
+\Author{Joseph Buck \\
+Soonhoi Ha \\
+Edward A. Lee \\
+Thomas M. Parks}
 \date{$Date$}
 
 The \dfn{CGC domain} of Ptolemy generates code
@@ -17,70 +17,105 @@ This domain supports both synchronous dataflow
 (\pxref{SDF Domain})
 \cindex{synchronous dataflow}
 \cindex{dataflow, synchronous}
-and boolean-controlled dataflow
+and Boolean-controlled dataflow
 (\pxref{BDF Domain})
-\cindex{boolean-controlled dataflow}
-\cindex{dataflow, boolean-controlled}
-models of computation.  The model of
-computation assocaited with a particular program graph is determined by
+\cindex{Boolean-controlled dataflow}
+\cindex{dataflow, Boolean-controlled}
+models of computation.  The model 
+assocaited with a particular program graph is determined by
 which target is selected.  The \code{bdf-CGC} target supports the BDF
 model, while all other targets in the CGC domain support the more
-limited SDF model.  Code can be generated for single-processor machines
-and multi-processor machines.  The targets that support
-single-processors include \code{default-CGC}, \code{TclTk_Target}, and
+limited SDF model.  Code can be generated for both single-processor
+and multi-processor computers.  The targets that support
+single processors include \code{default-CGC}, \code{TclTk_Target}, and
 \code{bdf-CGC}.  The multi-processor target is \code{unixMulti_C}.
 
-For an overview of CGC stars and demos, please refer to the star atlas.
+\node CGC Targets
+\section{CGC Targets}
 
-\node CGC Single-Processor Targets
-\section{Single-Processor Targets}
-
-The single-processor targets of the CGC domain
+The targets of the CGC domain
 generate \code{C} code from dataflow program graphs.
 Code generation is controlled by the \var{host}, \var{directory}, and
-\var{file} paramteres as described in \nxref{CG Domain}.
-\vrindex{host, parameter}
-\vrindex{directory, parameter}
-\vrindex{file, parameter}
+\var{file} parameters as described in \nxref{CG Domain}.
+\vrindex{host parameter}
+\vrindex{directory parameter}
+\vrindex{file parameter}
 The command used to compile the code is determined by the
 \var{compileCommand}, \var{compileOptions}, and \var{linkOptions}
+\vrindex{compileCommand parameter}
+\vrindex{compileOptions parameter}
+\vrindex{linkOptions parameter}
 parameters.
 Compilation and execution are controlled by the
 \var{display?}, \var{compile?}, and \var{run?}
-parameters, also described in \nxref{CG Domain}.
-The parameters common to the CGC targets are listed below.
+\vrindex{display? parameter}
+\vrindex{compile? parameter}
+\vrindex{run? parameter}
+parameters, also described in \nxref{CG Domain}.  The other parameters
+common to all CGC targets are listed below.  Not all of these
+parameters are made available to the user by every target.
 
 \begin{statelist}
 \state{INT}{staticBuffering}{TRUE}
+\vrindex{staticBuffering parameter}
 If \samp{TRUE}, then attempt to static, compile-time addressing of data
 buffers between stars.  Otherwise, use dynamic, run-time addressing.
 
 \state{STRING}{funcName}{main}
+\vrindex{funcName parameter}
 The name of the main function.  The default value of \samp{main} is suitable
 for generating stand-alone programs.  Choose another name if you wish to use
 the generated code as a procedure that is called from your own main program.
 
 \state{STRING}{compileCommand}{cc}
+\vrindex{compileCommand parameter}
 Command name of the compiler.
 
 \state{STRING}{compileOptions}{}
+\vrindex{compileOptions parameter}
 Options passed to the compiler.
 
 \state{STRING}{linkOptions}{-lm}
+\vrindex{linkOptions parameter}
 Options passed to the linker.
 
 \state{STRINGARRAY}{resources}{STDIO}
+\vrindex{resources parameter}
 List of abstract resources that the host computer has.
 \end{statelist}
 
+\node CGC Single-Processor Targets
+\subsection{Single-Processor Targets}
+
 \node default-CGC
-\subsection{\protect\code{default-CGC}}
+\subsubsection{\protect\code{default-CGC}}
+\tpindex{default-CGC target}
+\tpindex{target, default-CGC}
 
 The \code{default-CGC} target generates \code{C} code for a single computer
-from a SDF program graph.
+from a SDF program graph.  The parameters available to the user are shown in
+table \ref{default-CGC-parameters}.
+See \nxref{CG Targets}, and \nxref{CGC Targets} for detailed descriptions of
+these parameters.
+
+\begin{table}
+\centering
+\c Align the text so that it will look right in the info file.
+\begin{tabular}{lll}
+    \var{compile?}      &\var{file}       &\var{Looping Level}\\
+    \var{compileCommand}&\var{funcName}   &\var{resources}\\
+    \var{compileOptions}&\var{host}       &\var{run?}\\
+    \var{directory}     &\var{linkOptions}&\var{staticBuffering}\\
+    \var{display?}      &                 &\\
+\end{tabular}
+\caption{Parameters for the \protect\code{default-CGC} target.}
+\label{default-CGC-parameters}
+\end{table}
 
 \node TclTk_Target
-\subsection{\protect\code{TclTk_Target}}
+\subsubsection{\protect\code{TclTk_Target}}
+\tpindex{TclTk_Target target}
+\tpindex{target, TclTk_Target}
 
 This target, which is derived from the \code{default-CGC} target
 (\pxref{default-CGC}), must be used when Tcl/Tk stars are present in
@@ -89,53 +124,79 @@ the program graph.  The parameters differ from those of the
 
 \begin{statelist}
 \state{INT}{loopingLevel}{1}
+\vrindex{Looping Level parameter}
 
 \state{STRING}{funcName}{go}
+\vrindex{funcName parameter}
 
 \state{STRING}{compileOptions}{-I$PTOLEMY/tcl/tk/src \\
     -I$PTOLEMY/tcl/tcl/src \\
     -I$PTOLEMY/src/domains/cgc/tcltk/lib}
+\vrindex{compileOptions parameter}
 
 \state{STRING}{linkOptions}{-L$PTOLEMY/tcl/tk/lib/$ARCH.opt \\
     -L$PTOLEMY/tcl/tcl/lib/$ARCH.opt \\
     -L$PTOLEMY/lib.$ARCH \\
     -L$PTOLEMY/tcl/tk/lib/$ARCH.opt \\
     -L/usr/X11/lib -ltk -ltcl -lptk -lXpm -lX11 -lm}
-
+\vrindex{linkOptions parameter}
 \end{statelist}
 
 \node bdf-CGC
-\subsection{\protect\code{bdf-CGC}}
+\subsubsection{\protect\code{bdf-CGC}}
+\tpindex{bdf-CGC target}
+\tpindex{target, bdf-CGC}
 
-This target supports the boolean-controlled dataflow (BDF) model of
+This target supports the Boolean-controlled dataflow (BDF) model of
 computation.  It must be used when BDF stars are present in the program
 graph.  It can also be used with program graphs that contain only
 synchronous dataflow (SDF) stars.
 
-The \code{bdf-CGC} target has the same parameters as the \code{default-CGC}
-target (\pxref{default-CGC})
-with the exception that the \var{Looping Level} parameter is absent.
+The \code{bdf-CGC} target has the same parameters as the
+\code{default-CGC} target (\pxref{default-CGC}) with the exception that
+the \var{Looping Level} parameter is absent.  This is because a
+loop-generating algorithm is always used for scheduling.
 
 \node CGC Multi-Processor Targets
-\section{Multi-Processor Targets}
+\subsection{Multi-Processor Targets}
 
-\node unixMulit_C
-\subsection{\protect\code{unixMulti_C}}
+\node unixMulti_C
+\subsubsection{\protect\code{unixMulti_C}}
 
-\node CGCcm5
-\subsection{\protect\code{CGCcm5}}
+\begin{table}
+\centering
+\c Align the text so it will look right in the info file.
+\begin{tabular}{lll}
+    \var{adjustSchedule}&\var{ignoreIPC}        &\var{overlapComm}\\
+    \var{amortizedComm} &\var{inheritProcessors}&\var{portNumber}\\
+    \var{childType}     &\var{logFile}          &\var{relTimeScales}\\
+    \var{compile?}      &\var{machineNames}     &\var{resources}\\
+    \var{directory}     &\var{manualAssignment} &\var{run?}\\
+    \var{display?}      &\var{nameSuffix}       &\var{sendTime}\\
+    \var{file}          &\var{nprocs}           &\var{userCluster}\\
+    \var{ganttChart}    &\var{oneStarOneProc}   &\\
+\end{tabular}
+\caption{Parameters for the \protect\code{unixMulti_C} target.}
+\label{unixMulti_C-parameters}
+\end{table}
 
 \node CGC Star Overview
 \section{An Overview of CGC Stars}
 
 \begin{figure}
-\begin{center}
-\ \psfig{figure=cgc-stars.ps}
-\end{center}
+\centering
+\ \psfig{figure=/users/ptdesign/src/domains/cgc/icons/main.pal.ps}
+\caption{Top-level palette of stars in the CGC domain.}
 \end{figure}
 
 \node CGC Source Stars
 \subsection{Source Stars}
+
+\begin{figure}
+\centering
+\ \psfig{figure=/users/ptdesign/src/domains/cgc/icons/sources.pal.ps}
+\caption{Source stars in the CGC domain.}
+\end{figure}
 
 \begin{description}
 \item[Const]
@@ -152,6 +213,12 @@ with the exception that the \var{Looping Level} parameter is absent.
 \node CGC Sink Stars
 \subsection{Sink Stars}
 
+\begin{figure}
+\centering
+\ \psfig{figure=/users/ptdesign/src/domains/cgc/icons/sinks.pal.ps}
+\caption{Sink stars in the CGC domain.}
+\end{figure}
+
 \begin{description}
 \item[BlackHole]
 \item[Xgraph]
@@ -166,33 +233,143 @@ with the exception that the \var{Looping Level} parameter is absent.
 \node CGC Arithmetic Stars
 \subsection{Arithmetic Stars}
 
+\begin{figure}
+\centering
+\ \psfig{figure=/users/ptdesign/src/domains/cgc/icons/arithmetic.pal.ps}
+\caption{Arithmetic stars in the CGC domain.}
+\end{figure}
+
 \node CGC Nonlinear Stars
 \subsection{Nonlinear Stars}
+
+\begin{figure}
+\centering
+\ \psfig{figure=/users/ptdesign/src/domains/cgc/icons/nonlinear.pal.ps}
+\caption{Nonlinear stars in the CGC domain.}
+\end{figure}
 
 \node CGC Control Stars
 \subsection{Control Stars}
 
+\begin{figure}
+\centering
+\ \psfig{figure=/users/ptdesign/src/domains/cgc/icons/control.pal.ps}
+\caption{Control stars in the CGC domain.}
+\end{figure}
+
 \node CGC Conversion Stars
 \subsection{Conversion Stars}
+
+\begin{figure}
+\centering
+\ \psfig{figure=/users/ptdesign/src/domains/cgc/icons/conversion.pal.ps}
+\caption{Type-conversion stars in the CGC domain.}
+\end{figure}
 
 \node CGC Signal Processing Stars
 \subsection{Signal Processing Stars}
 
+\begin{figure}
+\centering
+\ \psfig{figure=/users/ptdesign/src/domains/cgc/icons/dsp.pal.ps}
+\caption{Signal processing stars in the CGC domain.}
+\end{figure}
+
 \node CGC Dynamic Dataflow Stars
 \subsection{Dynamic Dataflow Stars}
+
+\begin{figure}
+\centering
+\ \psfig{figure=/users/ptdesign/src/domains/cgc/icons/nonsdf.pal.ps}
+\caption{Dynamic dataflow stars in the CGC domain.}
+\end{figure}
 
 \node CGC Boolean-Controlled Dataflow Stars
 \subsection{Boolean-Controlled Dataflow Stars}
 
+\begin{figure}
+\centering
+\ \psfig{figure=/users/ptdesign/src/domains/cgc/icons/bdf.pal.ps}
+\caption{Boolean-controlled dataflow stars in the CGC domain.}
+\end{figure}
+
 \node CGC Tcl/Tk Stars
 \subsection{Tcl/Tk Stars}
+
+\begin{figure}
+\centering
+\ \psfig{figure=/users/ptdesign/src/domains/cgc/tcltk/icons/tcltk.pal.ps}
+\caption{Tcl/Tk stars in the CGC domain.}
+\end{figure}
 
 \node CGC Demo Overview
 \section{An Overview of CGC Demos}
 
 \begin{figure}
-\begin{center}
-\ \psfig{figure=cgc-demo.ps}
-\end{center}
-\caption{The top-level palette for CGC demos.}
+\centering
+\ \psfig{figure=/users/ptdesign/src/domains/cgc/demo/init.pal.ps}
+\caption{Top-level palette of demos in the CGC domain.}
+\end{figure}
+
+\node CGC Basic Demos
+\subsection{Basic Demos}
+
+\begin{figure}
+\centering
+\ \psfig{figure=/users/ptdesign/src/domains/cgc/demo/basic.pal.ps}
+\caption{Basic CGC demos.}
+\end{figure}
+
+\node CGC Multirate Demos
+\subsection{Multirate Demos}
+
+\begin{figure}
+\centering
+\ \psfig{figure=/users/ptdesign/src/domains/cgc/demo/multirate.pal.ps}
+\caption{Multirate CGC demos.}
+\end{figure}
+
+\node CGC Signal Processing Demos
+\subsection{Signal Processing Demos}
+
+\begin{figure}
+\centering
+\ \psfig{figure=/users/ptdesign/src/domains/cgc/demo/dsp.pal.ps}
+\caption{Signal processing demos in the CGC domain.}
+\end{figure}
+
+\node CGC Sound-Making Demos
+\subsection{Sound-Making Demos}
+
+\begin{figure}
+\centering
+\ \psfig{figure=/users/ptdesign/src/domains/cgc/demo/sound.pal.ps}
+\caption{Sound-making demos in the CGC domain.}
+\end{figure}
+
+\node CGC Dynamic Dataflow Demos
+\subsection{Dynamic Dataflow Demos}
+
+\begin{figure}
+\centering
+\ \psfig{figure=/users/ptdesign/src/domains/cgc/demo/cgddf.pal.ps}
+\caption{Dynamic dataflow demos in the CGC domain.}
+\end{figure}
+
+\node CGC Tcl/Tk Demos
+\subsection{Tcl/Tk Demos}
+
+\begin{figure}
+\centering
+\ \psfig{figure=/users/ptdesign/src/domains/cgc/tcltk/demo/init.pal.ps}
+\caption{Tcl/Tk demos in the CGC domain.}
+\end{figure}
+
+\node CGC Boolean-Controlled Dataflow Demos
+\subsection{Boolean-Controlled Dataflow Demos}
+
+\begin{figure}
+\centering
+\ \psfig{figure=/users/ptdesign/src/domains/cgc/demo/bdf.pal.ps}
+\caption{Boolean-controlled dataflow demos in the CGC domain.}
 \end{figure}
