@@ -53,10 +53,19 @@
 # For small fonts, we just accept the Tk defaults.
 
 # Font for titles.  It is larger than the usual default Tk font.
+# The following two lines will specify the right font under HPUX
+# to draw the circle-within-circle symbol.  However these fonts might 
+# not be everywhere.
+#option add Pigi.mediumfont *-times-medium-r-normal--*-180-*-*-*-*-iso8859 startupfile
+#option add CGC.mediumfont  *-times-medium-r-normal--*-180-*-*-*-*-iso8859 startupfile
+
 option add Pigi.mediumfont *-times-medium-r-normal--*-180-* startupFile
 option add CGC.mediumfont *-times-medium-r-normal--*-180* startupFile
 
 # Font for major titles.  It is very large.
+# HPUX wants the following two lines, but we cannot specify them everywhere
+#option add Pigi.bigfont *-Helvetica-Bold-R-Normal-*-240-*-*-*-*-iso8859-*
+#option add CGC.bigfont  *-Helvetica-Bold-R-Normal-*-240-*-*-*-*-iso8859-*
 option add Pigi.bigfont  *-Helvetica-Bold-R-Normal-*-240-* startupFile
 option add CGC.bigfont  *-Helvetica-Bold-R-Normal-*-240-* startupFile
 
