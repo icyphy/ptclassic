@@ -142,6 +142,15 @@ class ::tycho::HTML {
     # Open a help window.
     method help {}
 
+    # Opening an HTTP connection. This returns the file name of the HTTP file.
+    method httpget {url}
+
+    # This is called by file event handler, from httpget.
+    method httpread {}
+
+    # This will set the global variable ready so that tycho can read it.
+    method httpclose {}
+
     # Open a file and go to its internal point identified by name.
     method hyperJump {filename {point {}} {push 1}}
 
@@ -678,6 +687,31 @@ body ::tycho::HTML::help {} {
 	    [file join $TYCHO kernel doc usersGuides HTMLHelp.html]
 }
 
+#########################################################################
+#### httpget
+# Opening an HTTP connection. This returns the file name of the HTTP file.
+#
+body ::tycho::HTML::httpget {url} {
+    #puts "Going to get url: $url"
+
+}
+
+#########################################################################
+#### httpread
+# This is called by file event handler, from httpget.
+#
+body ::tycho::HTML::httpread {} {
+
+}
+
+#########################################################################
+#### httpclose
+# This will set the global variable ready so that tycho can read it.
+#
+body ::tycho::HTML::httpclose {} {
+
+}
+
 #####################################################################
 #### hyperJump
 # Open a file and go to its internal point identified by name. If the
@@ -705,6 +739,13 @@ body ::tycho::HTML::help {} {
 #
 body ::tycho::HTML::hyperJump {filename {point {}} {push 1}} {
     if {$filename != {}} {
+        # If this is a http link, make sure to download it to our
+        # "cache" first. FIXME: Right now there's no cache, just temporary
+        # files.
+        if {[regexp -nocase {^http://} $filename]} {
+            # Translate from a http file to a local file (later cache).
+            set filename [httpget $filename]
+        }
 	# Use isRelative, not 'file pathtype' so that we handle paths
 	# that start with ~ and $.
 	if [::tycho::isRelative $filename] {
