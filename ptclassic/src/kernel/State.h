@@ -168,7 +168,7 @@ public:
 	}
 
 	// file reading error reporter
-	inline const char* State::why() {
+	const char* why() {
 	  return (errno >= 0 && errno < sys_nerr) ? sys_errlist[errno] :
 	    "Unknown error";
 	}
