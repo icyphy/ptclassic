@@ -72,7 +72,11 @@ VHDLTarget(name,starclass,desc) {
   // by socket.h, and because process ids are up to 5 digits,
   // anything more than an additional character in length will
   // fail (e.g., multiplying by 100 instead of 10).
-  pairNumber = pid * 10;
+// Maybe even mult. by 10 is too much.  :(
+//  pairNumber = pid * 10;
+// Note: removing *10 didn't seem to help on edison.
+// Still works on hubble.
+  pairNumber = pid;
 }
 
 // Clone the Target.
@@ -86,13 +90,6 @@ static KnownTarget entry(proto,"SimVSS-VHDL");
 
 void SimVSSTarget :: setup() {
   writeCom = 1;
-
-  // Generate the command to set the SIM_ARCH environment variable here.
-  StringList command = "";
-  command << "set SIM_ARCH = " << (const char*) simarch;
-  command << " ; ";
-  command << "echo SIM_ARCH = $SIM_ARCH";
-  system(command);
 
   VHDLTarget :: setup();
 }
@@ -441,10 +438,10 @@ int SimVSSTarget :: compileCode() {
   if (int(analyze)) {
     // Generate the command to analyze the VHDL code here.
     StringList command = "";
-    command << "cd " << (const char*) destDirectory;
-    command << " ; ";
-    command << "gvan " << filePrefix << ".vhdl";
-    system(command);
+    command << "gvan -nc " << filePrefix << ".vhdl";
+    StringList error = "";
+    error << "Could not compile " << filePrefix << ".vhdl";
+    return (systemCall(command, error, targetHost) == 0);
   }
   // Return TRUE indicating success.
   return TRUE;
@@ -457,25 +454,25 @@ int SimVSSTarget :: runCode() {
     StringList command = "";
     StringList sysCommand = "";
     if (int(interactive)) {
-      command << "cd " << (const char*) destDirectory;
-      command << " ; ";
-      command << "vhdldbx " << filePrefix;
-      system(command);
+      command << "vhdldbx -nc " << filePrefix;
+      StringList error = "";
+      error << "Could not compile " << filePrefix << ".vhdl";
+      (void) systemCall(command, error, targetHost);
     }
     else {
       StringList comCode = "";
       comCode << "run\n";
       comCode << "quit\n";
       writeFile(comCode, ".com", 0);
-      command << "cd " << (const char*) destDirectory;
-      command << " ; ";
-      command << "vhdlsim -i " << filePrefix << ".com " << filePrefix;
-      system(command);
+      command << "vhdlsim -nc -i " << filePrefix << ".com " << filePrefix;
+      StringList error = "";
+      error << "Could not simulate " << filePrefix << ".vhdl";
+      (void) systemCall(command, error, targetHost);
     }
-    sysCommand << "cd " << (const char*) destDirectory;
-    sysCommand << " ; ";
     sysCommand << sysWrapup;
-    system(sysCommand);
+    StringList sysError = "";
+    sysError << "Error performing sysWrapup, " << filePrefix << ".vhdl";
+    (void) systemCall(sysCommand, sysError, targetHost);
   }  
   // Return TRUE indicating success.
   return TRUE;
@@ -640,6 +637,7 @@ void SimVSSTarget :: registerCompMap(StringList label, StringList name,
 
 // Method called by C2V star to place important code into structure.
 void SimVSSTarget :: registerC2V(int pairid, int numxfer, const char* dtype) {
+  printf("registerC2V is called\n");
   // Create a string with the right VHDL data type
   StringList vtype = "";
   StringList name = "";
@@ -695,6 +693,7 @@ void SimVSSTarget :: registerC2V(int pairid, int numxfer, const char* dtype) {
 
 // Method called by V2C star to place important code into structure.
 void SimVSSTarget :: registerV2C(int pairid, int numxfer, const char* dtype) {
+  printf("registerV2C is called\n");
   // Create a string with the right VHDL data type
   StringList vtype = "";
   StringList name = "";

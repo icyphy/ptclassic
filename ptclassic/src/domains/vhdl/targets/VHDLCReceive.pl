@@ -4,7 +4,7 @@ defstar {
   desc { CGC to VHDL Receive star }
   version { $Id$ }
   author { Michael C. Williamson, Jose L. Pino }
-//  derivedFrom {CSynchComm}
+  derivedFrom {CSynchComm}
   copyright {
 Copyright (c) 1994,1993 The Regents of the University of California.
 All rights reserved.
@@ -13,26 +13,9 @@ limitation of liability, and disclaimer of warranty provisions.
 }
   location { VHDL Target Directory }
   explanation { }
-  public {
-    int numXfer;
-  }
-  protected {
-    friend class VHDLTarget;
-  }
-  hinclude { "VHDLTarget.h" }
   output {
     name {output}
     type {ANYTYPE}
-  }
-  defstate {
-    name {pairNumber}
-    type {int}
-    default {0}
-  }
-  defstate {
-    name {rtype}
-    type {string}
-    default {"type"}
   }
   setup {
     if (strcmp(output.resolvedType(), "INT") == 0) 
@@ -43,11 +26,12 @@ limitation of liability, and disclaimer of warranty provisions.
       Error::abortRun(*this, output.resolvedType(), ": type not supported");
 
     numXfer = output.numXfer();     
-//  VHDLCSynchComm::setup();      
+    VHDLCSynchComm::setup();      
   }
 
 // Called only once, after the scheduler is done
   begin {
+    printf("VHDLCReceive.pl begin method called!!\n");
     // Call method to wire up a C2V VHDL entity
     targ()->registerC2V(int(pairNumber), numXfer, output.resolvedType());
   }
@@ -63,7 +47,6 @@ limitation of liability, and disclaimer of warranty provisions.
       preSynch << ")" << " := " << "C2V" << rtype << int(pairNumber) << "_data;\n";
     }
     
-//  addCode(preSynch, "preSynch");
     addCode(preSynch);
   }
 

@@ -1,10 +1,10 @@
 defstar	{
   name { CSend }
   domain { VHDL }
-  desc { VHDL to CGC sunchronous send star }
+  desc { VHDL to CGC synchronous send star }
   version { $Id$ }
   author { Michael C. Williamson, Jose Luis Pino }
-//  derivedFrom { CSynchComm }
+  derivedFrom { CSynchComm }
   copyright {
 Copyright (c) 1994, 1993 The Regents of the University of California.
 All rights reserved.
@@ -13,26 +13,9 @@ limitation of liability, and disclaimer	of warranty provisions.
 }
   location { VHDL Target Directory }
   explanation { }
-  public {
-    int numXfer;
-  }
-  protected {
-    friend class VHDLTarget;
-  }
-  hinclude { "VHDLTarget.h" }
   input {
     name {input}
     type {ANYTYPE}
-  }
-  defstate {
-    name {pairNumber}
-    type {int}
-    default {0}
-  }
-  defstate {
-    name {rtype}
-    type {string}
-    default {"type"}
   }
   setup {
     if (strcmp(input.resolvedType(), "INT") == 0) 
@@ -43,11 +26,12 @@ limitation of liability, and disclaimer	of warranty provisions.
       Error::abortRun(*this, input.resolvedType(), ": type not supported");
 
     numXfer = input.numXfer();
-//  VHDLCSynchComm::setup();
+    VHDLCSynchComm::setup();
   }
 
 // Called only once, after the scheduler is done
   begin {
+    printf("VHDLCSend.pl begin method called!!\n");
     // Call method to wire up a V2C VHDL entity
     targ()->registerV2C(int(pairNumber), numXfer, input.resolvedType());
   }
@@ -63,7 +47,6 @@ limitation of liability, and disclaimer	of warranty provisions.
       postSynch << "wait on " << "V2C" << rtype << int(pairNumber) << "_done" << "'transaction;\n";
     }
     
-//  addCode(postSynch, "postSynch");
     addCode(postSynch);
   }
 

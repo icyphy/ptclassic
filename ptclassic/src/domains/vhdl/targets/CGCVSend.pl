@@ -29,7 +29,11 @@ defstar {
   Note: using %f in sscanf() seems to mess up.
       format = "%f";
 */
-      format = "%lf";
+// This works
+//      format = "%lf";
+
+// Try this %g:
+      format = "%g";
     else
       Error::abortRun(*this, input.resolvedType(), ": type not supported");
 

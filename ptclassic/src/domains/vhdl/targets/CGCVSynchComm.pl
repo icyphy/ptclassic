@@ -65,14 +65,17 @@ defstar {
     addGlobal("#define BUFFSIZE 32", "buffer");
     addDeclaration("
   /* Decls */
-  int $starSymbol(count) = 0;
-  int $starSymbol(intptr) = 0;
-  int $starSymbol(nbytes) = 12;
+  int $starSymbol(count);
+  int $starSymbol(intptr);
+  int $starSymbol(nbytes);
   int $starSymbol(nearsock), $starSymbol(xmitsock), $starSymbol(status);
   char $starSymbol(buffer)[BUFFSIZE];
+  char *$starSymbol(dummy);
+  char *$starSymbol(nearstring);
 ");
 
-    StringList oneLine;
+/*
+  StringList oneLine;
 
     oneLine = "  char *$starSymbol(dummy) = \"  ";
     oneLine << classname;
@@ -83,11 +86,12 @@ defstar {
     oneLine << sndrcv;
     oneLine << "$val(pairNumber)\\0\";";
     addDeclaration(oneLine);
+    */
     
     addDeclaration("  struct sockaddr $starSymbol(nearaddr), $starSymbol(xmitaddr);
-  int $starSymbol(nearnamelen) = strlen($starSymbol(nearstring));
-  int $starSymbol(xmitaddrlen) = sizeof($starSymbol(xmitaddr));
-  int $starSymbol(nearaddrlen) = sizeof($starSymbol(nearaddr));
+  int $starSymbol(nearnamelen);
+  int $starSymbol(xmitaddrlen);
+  int $starSymbol(nearaddrlen);
   int $starSymbol(i);
 ");
 
@@ -95,7 +99,7 @@ defstar {
     StringList command = "";
     command << "cd " << (const char*) destDir;
     command << " ; ";
-    command << "vhdlsim -i " << filePre << ".com " << "parts";
+    command << "vhdlsim -nc -i " << filePre << ".com " << "parts";
 
     StringList startvss = "";
     startvss << "
@@ -106,6 +110,28 @@ defstar {
     addCode(startvss, "mainInit", "startVSS");
     addCode("
   /* Init */
+  $starSymbol(count) = 0;
+  $starSymbol(intptr) = 0;
+  $starSymbol(nbytes) = 12;
+");
+    
+    StringList oneLine;
+
+    oneLine = "  $starSymbol(dummy) = \"  ";
+    oneLine << classname;
+    oneLine << " socket error\";";
+    addCode(oneLine);
+
+    oneLine = "  $starSymbol(nearstring) = \"/tmp/";
+    oneLine << sndrcv;
+    oneLine << "$val(pairNumber)\\0\";";
+    addCode(oneLine);
+
+    addCode("
+  $starSymbol(nearnamelen) = strlen($starSymbol(nearstring));
+  $starSymbol(xmitaddrlen) = sizeof($starSymbol(xmitaddr));
+  $starSymbol(nearaddrlen) = sizeof($starSymbol(nearaddr));
+
   for ($starSymbol(i)=0 ; $starSymbol(i) < BUFFSIZE ; $starSymbol(i)++) {
     $starSymbol(buffer)[$starSymbol(i)] = (char) 0;
   }
