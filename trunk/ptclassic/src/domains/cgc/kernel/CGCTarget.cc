@@ -396,29 +396,34 @@ int CGCTarget :: runCode()
 // Routines for writing code: schedulers may call these
 void CGCTarget::beginIteration(int repetitions, int depth) {
     *defaultStream << indent(depth);
-    if (repetitions == -1)          // iterate infinitely
+    if (repetitions == -1) {			// iterate infinitely
 	*defaultStream <<  "while(1) {\n";
+    } 
     else {
 	StringList iterator = symbol("sdfLoopCounter");
         *defaultStream << "{ int " << iterator << ";" << "for ("
-		       << iterator << "=0; " << iterator << " < "
+		       << iterator << " = 0; " << iterator << " < "
 		       << repetitions << "; " << iterator << "++) {\n";
     }
-    return;
 }
 
 void CGCTarget :: wormInputCode(PortHole& p) {
-	wormIn << "\t/* READ from wormhole port " 
-		<< p.fullName() << " */\n";
+    wormIn << "\t/* READ from wormhole port " 
+	   << p.fullName() << " */\n";
 }
 
 void CGCTarget :: wormOutputCode(PortHole& p) {
-	wormOut << "\t/* WRITE to wormhole port " 
-		<< p.fullName() << " */\n";
+    wormOut << "\t/* WRITE to wormhole port " 
+	    << p.fullName() << " */\n";
 }
 
-void CGCTarget :: endIteration(int /*reps*/, int depth) {
+void CGCTarget :: endIteration(int repetitions, int depth) {
+    if ( repetitions == -1 ) {
+	*defaultStream << "} /* end while, depth " << depth << "*/\n";
+    }
+    else {
 	*defaultStream << "}} /* end repeat, depth " << depth << "*/\n";
+    }
 }
 
 // clone
