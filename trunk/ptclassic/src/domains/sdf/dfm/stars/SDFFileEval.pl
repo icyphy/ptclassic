@@ -167,9 +167,9 @@ the name of the file to source is given by the second argument.
 	output.setAttributes(P_HIDDEN);
     }
     code {
-	extern "C" {
-	    #include "ptk.h"
-	}
+extern "C" {
+#include "ptk.h"
+}
     }
     // Return TRUE if evaluation is needed.
     // This occurs if:

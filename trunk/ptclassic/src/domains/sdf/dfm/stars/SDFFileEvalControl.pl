@@ -40,9 +40,9 @@ the value of the outputs will be 0.
         SDFFileEval::begin();
     }
     code {
-	extern "C" {
-	    #include "ptk.h"
-	}
+extern "C" {
+#include "ptk.h"
+}
     }
     // Redefine the base class method to first replace all references
     // to the control inputs and outputs (intin and intout).
