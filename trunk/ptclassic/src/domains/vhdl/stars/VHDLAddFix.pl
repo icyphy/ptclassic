@@ -50,6 +50,7 @@ When the value of the accumulation extends outside of the precision,
 the OverflowHandler will be called.
                 }
         }
+	hinclude { <stdio.h> }
         protected {
 		Fix fixInput, fixOutput;
         }
