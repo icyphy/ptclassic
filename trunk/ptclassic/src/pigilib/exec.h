@@ -28,7 +28,7 @@ $Id$
 */
 
 extern int RunUniverse();
-extern boolean ptkRun();
+extern int ptkRun();
 extern int RpcRun();
 extern int RpcReRun();
 extern int RpcDisplaySchedule();

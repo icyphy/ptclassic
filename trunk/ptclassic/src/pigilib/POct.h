@@ -36,6 +36,7 @@ a Tcl interpreter.
 #ifndef _POct_h
 #define _POct_h 1
 #include "tcl.h"
+#include "TclObj.h"
 #include "StringList.h"
 
 #if defined(hppa)
@@ -56,20 +57,51 @@ extern "C" {
 #pragma interface
 #endif
 
-class POct {
+class POct : TclObj {
+
+public:
+        // the active Tcl interpreter, for error reporting.
+        static Tcl_Interp* activeInterp;
+
+        POct(Tcl_Interp* interp = 0);
+        ~POct();
+
+        // the dispatcher is called by Tcl to handle all extension
+        // commands.
+        static int dispatcher(ClientData,Tcl_Interp*,int,char*[]);
+
+// the following are the Tcl-callable functions.  Each returns TCL_OK
+// or TCL_ERROR, and may set the Tcl result to return a string using
+// Tcl_SetResult, Tcl_AppendElement, POct::result or POct::staticResult.
+        int ptkCompile (int argc,char** argv);
+        int ptkGetParams (int argc,char** argv);
+        int ptkSetParams (int argc,char** argv);
+        int ptkSetFindName (int argc,char** argv);
+        int ptkGetMkStar (int argc,char** argv);
+        int ptkSetMkStar (int argc,char** argv);
+        int ptkSetRunUniverse (int argc,char** argv);
+        int ptkGetComment (int argc,char** argv);
+        int ptkSetComment (int argc,char** argv);
+        int ptkGetMkSchemIcon (int argc,char** argv);
+        int ptkSetMkSchemIcon (int argc,char** argv);
+        int ptkGetSeed (int argc,char** argv);
+        int ptkSetSeed (int argc,char** argv);
+        int ptkGetDomainNames (int argc,char** argv);
+        int ptkSetDomain (int argc,char** argv);
+        int ptkGetTargetNames (int argc,char** argv);
+        int ptkGetTargetParams (int argc,char** argv);
+        int ptkSetTargetParams (int argc,char** argv);
+        int ptkFacetContents (int argc,char** argv);
+        int ptkGetMaster (int argc,char** argv);
+        int ptkOpenFacet (int argc,char** argv);
+        int ptkIsStar (int argc,char** argv);
+        int ptkIsGalaxy (int argc,char** argv);
+        int ptkIsBus (int argc,char** argv);
+        int ptkIsDelay (int argc,char** argv);
+        int ptkGetRunLength (int argc,char** argv);
+        int ptkSetRunLength (int argc,char** argv);
 
 private:
-        // the Tcl interpreter
-        Tcl_Interp* interp;
-
-	// flag to indicate that interp is owned by me
-	short myInterp;
-
-        // FIXME:  This and a number of other functions here are 
-        //         direct copies from PTcl.  It is almost never
-        //         a good idea to duplicate code.  Must be some
-        //         way around it. - aok
-
         // these three functions are used to associate POct objects
         // with interpreters.
         static POct* findPOct(Tcl_Interp*);
@@ -78,21 +110,6 @@ private:
 
 	// function to register extensions with the Tcl interpreter
 	void registerFuncs();
-
-	// return a usage error
-	int usage(const char*);
-
-	// return the passed value (with proper cleanup) as the result
-	// of a Tcl Command
-	int result(StringList&);
-	int result(char*);
-	int result(int);
-
-	// return a "static result".  Don't give this one a stringlist!
-	int staticResult(const char*);
-
-	// append a value to the result, using Tcl_AppendElement.
-	void addResult(const char*);
 
 	// State functions to remind users of past input vaules
 	// Note that these are only to help out the user as a convenience
@@ -131,47 +148,6 @@ private:
 	// does this.
 	int MakePList( char* , ParamListType* );
 
-public:
-	// the active Tcl interpreter, for error reporting.
-	static Tcl_Interp* activeInterp;
-
-	POct(Tcl_Interp* interp = 0);
-	~POct();
-
-	// the dispatcher is called by Tcl to handle all extension
-	// commands.
-	static int dispatcher(ClientData,Tcl_Interp*,int,char*[]);
-
-// the following are the Tcl-callable functions.  Each returns TCL_OK
-// or TCL_ERROR, and may set the Tcl result to return a string using
-// Tcl_SetResult, Tcl_AppendElement, POct::result or POct::staticResult.
-	int ptkCompile (int argc,char** argv);
-	int ptkGetParams (int argc,char** argv);
-	int ptkSetParams (int argc,char** argv);
-	int ptkSetFindName (int argc,char** argv);
-	int ptkGetMkStar (int argc,char** argv);
-	int ptkSetMkStar (int argc,char** argv);
-	int ptkSetRunUniverse (int argc,char** argv);
-	int ptkGetComment (int argc,char** argv);
-	int ptkSetComment (int argc,char** argv);
-	int ptkGetMkSchemIcon (int argc,char** argv);
-	int ptkSetMkSchemIcon (int argc,char** argv);
-	int ptkGetSeed (int argc,char** argv);
-	int ptkSetSeed (int argc,char** argv);
-	int ptkGetDomainNames (int argc,char** argv);
-	int ptkSetDomain (int argc,char** argv);
-	int ptkGetTargetNames (int argc,char** argv);
-	int ptkGetTargetParams (int argc,char** argv);
-	int ptkSetTargetParams (int argc,char** argv);
-	int ptkFacetContents (int argc,char** argv);
-	int ptkGetMaster (int argc,char** argv);
-	int ptkOpenFacet (int argc,char** argv);
-	int ptkIsStar (int argc,char** argv);
-	int ptkIsGalaxy (int argc,char** argv);
-	int ptkIsBus (int argc,char** argv);
-	int ptkIsDelay (int argc,char** argv);
-	int ptkGetRunLength (int argc,char** argv);
-	int ptkSetRunLength (int argc,char** argv);
 };
 
 #endif		// _POct_h
