@@ -525,7 +525,7 @@ int MatlabIfc :: SetMatlabVariable(const char* name,
 
     // copy imag part over to new Matlab matrix (if complex)
     // Matlab stores values in column-major order like Fortran
-    if ( realOrComplex == MXCOMPLEX ) {
+    if ( realOrComplex == mxCOMPLEX ) {
 	double* imagp = mxGetPi(newMatlabMatrixPtr);
 	for ( int jcol = 0; jcol < numcols; jcol++ ) {
 	    // to convert row-major to column-major ordering use
