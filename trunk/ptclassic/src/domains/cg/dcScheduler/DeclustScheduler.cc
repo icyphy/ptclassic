@@ -1155,7 +1155,10 @@ void DeclustScheduler::FindBestCuts(DCArcList *list1, DCArcList *list2,
 		iter2.reset();
 		// If both cuts are on the same arclist, the second arc
 		// should be behind the first.
-		if (other)  while ((cut2 = iter2++) != cut1) cut2 = iter2++;
+		if (other)  {
+			while ((cut2 = iter2++) != cut1) 
+				;	// do nothing
+		}
 
 		while ((cut2 = iter2++) != 0) {
 			int finish = Merge(cut1, cut2, other);
