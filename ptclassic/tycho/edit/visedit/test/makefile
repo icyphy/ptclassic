@@ -51,7 +51,8 @@ ITCL_SRCS = $(GRAPHICAL_TESTS) \
 
 EXTRA_SRCS =	$(ITCL_SRCS)
 
-MISC_FILES =	sample.fst
+MISC_FILES =	sample.fst \
+	sample.std
 
 # Sources that may or may not be present, but if they are present, we don't
 # want make checkjunk to barf on them.
