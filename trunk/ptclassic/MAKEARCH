@@ -133,8 +133,10 @@ cd ..
 set EXPDOMAINS=(sproc silage cg56 cgc cg96 mq vhdlf vhdlb vhdl mdsdf hof \
 		ipus )
 set EXPEXTRAS=(cg56/targets cg96/targets silage/targets vhdl/targets \
-		ipus/islang ipus/cat ipus/tcltk ipus/icp)
-set EXPSUBEXTRAS=(ipus/tcltk/kernel ipus/tcltk/stars ipus/icp/kernel)
+		ipus/cat ipus/icp ipus/kernel ipus/stars ipus/tcltk)
+set EXPSUBEXTRAS=(ipus/cat/stars ipus/icp/islang ipus/icp/kernel \
+		ipus/tcltk/stars)
+
 set ALLDOMAINS=(sdf ddf de thor bdf cg $EXPDOMAINS)
 
 # If the tst directory is present, then populate it
