@@ -4,7 +4,7 @@ defstar {
 	version	{ $Id$ }
 	author	{ Paul Haskell }
         copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1995 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -12,8 +12,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	location { SDF image library }
 	desc {
 Read a sequence of images in Portable GrayMap (PGM) format from
-different files and send them out in Envelopes (containing data
-of type GrayImage).
+different files and send them out in a float matrix.
 
 If present, the character '#' in the 'fileName' state is replaced with
 the frame number to be read next.
@@ -27,9 +26,10 @@ are read are 'dir.2/pic2', 'dir.3/pic3', etc.
 .Ir "image reading"
 	}
 
-	ccinclude { "GrayImage.h", <std.h>, <stdio.h>, "miscFuncs.h", "StringList.h", "Error.h" }
+	ccinclude { "Matrix.h", <std.h>, <stdio.h>, "miscFuncs.h", "StringList.h", "Error.h" }
 
-	output { name { output } type { message } }
+	output { name { dataOutput } type { FLOAT_MATRIX_ENV } }
+	output { name { frameIdOutput } type { int } }
 
 	defstate {
 		name	{ fileName }
@@ -100,17 +100,29 @@ are read are 'dir.2/pic2', 'dir.3/pic3', etc.
 		}
 		fscanf(fp, "%*c");		// skip one whitespace char.
 
-		// Create image object and fill it with data.
-		LOG_NEW;
-		GrayImage* imgData = new GrayImage(width, height, int(frameId));
-		fread( (char*)imgData->retData(),
+		// Create an array to read into image data.
+		unsigned char* data = (unsigned char*) new char[height*width];
+		fread( (unsigned char*)data,
 		       width * sizeof(unsigned char),
 		       height,
 		       fp );
 		fclose(fp);
-		frameId = int(frameId) + 1;		// increment frame id
+
+		// Create image matrix and fill it with data.
+		LOG_NEW;
+		FloatMatrix& result = *(new FloatMatrix(height,width));
+
+		for ( int i=0; i<height; i++) 
+		  for ( int j=0; j<width; j++)
+                    result[i][j] = float(data[i*width+j]);
+
+		delete [] data;      
 
 		// Write the new frame to output...
-		Envelope envp(*imgData); output%0 << envp;
+		dataOutput%0 << result;
+		frameIdOutput%0 << int(frameId);
+
+		frameId = int(frameId) + 1;		// increment frame id
+
 	} // end go{}
 } // end defstar{ ReadImage }
