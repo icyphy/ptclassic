@@ -106,8 +106,8 @@ int options;			/* BUFMUSTEXIST or BUFSILENT   */
 	}
 	/* This is supposed to fall through */
     case OCT_OLD_FACET:
-	if (num = bufCheckRecover(newFacet->objectId, BUF_MAX_ALTERNATES,
-				  versions)) {
+	if ( (num = bufCheckRecover(newFacet->objectId, BUF_MAX_ALTERNATES,
+				    versions)) ) {
 	    recover_message(newFacet, num, versions);
 	}
 	newIntern = alloc_intern(newFacet);
@@ -149,8 +149,8 @@ int options;			/* BUFMUSTEXIST or BUFSILENT   */
 	     * all the other information about the cell like technology,
 	     * cell type,  etc.
 	     */
-	    if (num = bufCheckRecover(newFacet->objectId, BUF_MAX_ALTERNATES,
-				      versions)) {
+	    if ( (num = bufCheckRecover(newFacet->objectId, BUF_MAX_ALTERNATES,
+					versions)) ) {
 		recover_message(newFacet, num, versions);
 	    }
 	    newIntern = alloc_intern(newFacet);
@@ -219,7 +219,7 @@ int options;			/* BUFREADONLY                         */
  * only. 
  */
 {
-    intern_buffer *newIntern, *genIntern;
+    intern_buffer *newIntern=(intern_buffer*)NULL, *genIntern;
     vemStatus retCode;
     int i, found_flag;
 
