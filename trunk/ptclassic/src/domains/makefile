@@ -17,7 +17,7 @@ ifeq ($(ARCH),sun4)
 EXPDOMAINS = cp
 endif
 
-DOMAINS = sdf de ddf bdf thor cg sproc silage cgc cg56 cg96 vhdlf vhdlb \
+DOMAINS = sdf hof de ddf bdf thor cg sproc silage cgc cg56 cg96 vhdlf vhdlb \
           mq mdsdf $(EXPDOMAINS)
 
 MAKEVARS = "ARCH=$(ARCH)"
