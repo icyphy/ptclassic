@@ -47,14 +47,14 @@ class ::tycho::EditItcl {
     constructor {args} {}
     destructor {}
 
-    # Open a help window.
-    method help {}
-
     ###################################################################
-    ####                         public procs                      ####
+    ####                         public methods                    ####
 
     # Generate and display a doc file from the current buffer
     method gendoc {}
+
+    # Open a help window.
+    method help {}
 
     ###################################################################
     ####                    protected methods                      ####
@@ -64,6 +64,7 @@ class ::tycho::EditItcl {
 }
 
 ###################################################################
+#### constructor
 #
 body ::tycho::EditItcl::constructor {args} {
     addMenu Special left Window -underline 0
@@ -86,20 +87,6 @@ body ::tycho::EditItcl::constructor {args} {
     ###################################################################
     ###################################################################
     ####                      public methods                       ####
-
-###################################################################
-#### help
-# Open a window with help on the current widget.
-#
-body ::tycho::EditItcl::help {} {
-    global ::TYCHO
-    ::tycho::File::openContext \
-	    $TYCHO/editors/textedit/doc/usersGuides/EditItclHelp.html
-}
-
-    ###################################################################
-    ###################################################################
-    ####                      public procedures                    ####
 
 ###################################################################
 #### gendoc
@@ -154,3 +141,14 @@ body ::tycho::EditItcl::gendoc {} {
         ::tycho::File::openContext $fulldoc
     }
 }
+
+###################################################################
+#### help
+# Open a window with help on the current widget.
+#
+body ::tycho::EditItcl::help {} {
+    global ::TYCHO
+    ::tycho::File::openContext \
+	    $TYCHO/editors/textedit/doc/usersGuides/EditItclHelp.html
+}
+
