@@ -18,7 +18,13 @@ The coded image, final image, and difference
 between the original and final images are all displayed.
 .pp
 The DisplayVideo star needs programs from the Utah Raster Toolkit
+.EQ
+delim off
+.EN
 to be in your $path variable to work.
+.EQ
+delim $$
+.EN
 These programs are not included with Ptolemy.
 The manual page for the DisplayVideo star tells how to
 get the Utah Raster Toolkit for free.
