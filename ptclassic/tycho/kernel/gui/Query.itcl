@@ -754,7 +754,7 @@ body ::tycho::Query::mediated {tag label default command args} {
 #
 body ::tycho::Query::mediatedCommand {tag command} {
     set retval [eval $command \
-            [$itk_component(querysite).tag_$tag cget -text]]
+            [list [$itk_component(querysite).tag_$tag cget -text]]]
     if {$retval != {}} {
         $itk_component(querysite).tag_$tag configure -text $retval
     }
