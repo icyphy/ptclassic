@@ -45,14 +45,15 @@ clean:;		rm -f $(OBJS) make.out makelint.out gmon.out core $(PROGRAM)
 depend:;	@mkmf -f $(MAKEFILE) PROGRAM=$(PROGRAM) DEST=$(DEST)
 
 install:	$(PROGRAM)
-		mv $(PROGRAM) $(DEST)/$(PROGRAM)
-		chmod 755 $(DEST)/$(PROGRAM)
+		mv -f $(PROGRAM) $(DEST)/$(PROGRAM)
 
 check:;		sccs check; sccs prt -y *.f > /dev/null
 
 print:;		$(PRINT) $(HDRS) $(SRCS)
 
 program:        $(PROGRAM)
+
+sources:	$(SRCS)
 
 tags:           $(HDRS) $(SRCS); @ctags $(HDRS) $(SRCS)
 
