@@ -35,15 +35,13 @@ pack .f -fill both -expand on
 
 # The second widget illustrates how arbitrary widgets
 # can be included as leaves of the tree. The create command
-# of is set to call a proc that creates the appropriate
+# is set to call a proc that creates the appropriate
 # preference setting panel.
 
 proc createPanel {win tag} {
     switch -exact $tag {
 	"size" {
-	    $win add radiobox size.s {
-		rename -labelfont -font font Font
-	    }
+	    $win add radiobox size.s
 	    set r [$win component size.s]
 	    
 	    $r add small -text "Small"
@@ -73,10 +71,74 @@ iwidgets::scrolledframe .g \
 
 set v [.g childsite].w
 iwidgets::widgettree $v -createcommand "createPanel $v"
+$v options radiobox {
+	# usual
+	rename -labelfont -font font Font
+}
 $v add node size -text Size
 $v add node address -text Address
 grid $v -sticky nw
 
 pack .g -fill both -expand on
 
+
+# The third example is exactly the same, except that the tree
+# contents are created statically.
+
+set junk {
+catch {delete object .g}
+iwidgets::scrolledframe .g \
+        -hscrollmode dynamic -vscrollmode dynamic \
+        -height 200 -width 150
+
+set v [.g childsite].w
+
+iwidgets::widgettree $v {
+	options radiobox {
+		rename -labelfont font font Font
+	}
+	options query {
+		rename -labelfont font font Font
+	}
+	node size -text Size {
+		radiobox s
+		with s {
+			add small -text "Small"
+			add med -text "Medium"
+			add large -text "Large"
+			add xlarge -text "Biggie"
+			select med
+		}
+	}
+	node font -text Font {
+		query f {
+			group family -initial times -label "Font Family" {
+				radiobutton times -text "Times"
+				radiobutton courier -text "Courier"
+				radiobutton helvetica -text "Helvetica"
+			}
+			group style -initial roman -label "Font Style" {
+				radiobutton roman -text "Roman"
+				radiobutton italic -text "Italic"
+				radiobutton bold -text "Bold"
+			}
+		}
+	}
+	node address -text Address {
+		query a {
+			entry name -label "Name"
+			entry street -label "Street"
+			entry city -label "City, State"
+			entry email -label "E-mail"
+		}
+	}
+}
+
+grid $v -sticky nw
+
+pack .g -fill both -expand on
+}
+
 wm deiconify .
+
+
