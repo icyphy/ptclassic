@@ -448,7 +448,7 @@ static void pl_print_method( fp, node, autotick, unittime )
             fprintf( fp, "            case c%s:\n", pvarst );
             fprintf( fp, "                newEvent->dest = %s.far(); \n", pvarst); 
             /* changed */
-            fprintf( fp, "                if(!needResource) {\n");
+            fprintf( fp, "                if(!needsSharedResource) {\n");
             fprintf( fp, "                     OutDEPort* tl = ((OutDEPort*)newEvent->dest->far()); \n");
             fprintf( fp, "                     tl->dataNew = FALSE;\n");
             fprintf( fp, "                     tl->put(now+1/clkFreq) << ");
@@ -473,7 +473,7 @@ static void pl_print_method( fp, node, autotick, unittime )
     } end_foreach_net_node_fanout;
     fprintf( fp, "            default:\n                break;\n" );
     fprintf( fp, "      }\n" );
-    fprintf( fp, "      if (needResource) { \n");   
+    fprintf( fp, "      if (needsSharedResource) { \n");   
     fprintf( fp, "        emitTime = now + (delay/clkFreq); \n");
     fprintf( fp, "        newEvent->realTime = emitTime; \n");
     fprintf( fp, "        if (isDummy) { \n");
@@ -544,7 +544,7 @@ static void pl_print_method( fp, node, autotick, unittime )
     fprintf( fp, "    type { double }\n" );
     fprintf( fp, "    arglist { \"()\" }\n" );
     fprintf( fp, "    code {\n" );
-    fprintf( fp, "      if (needResource) return _delay/clkFreq;\n" );
+    fprintf( fp, "      if (needsSharedResource) return _delay/clkFreq;\n" );
     fprintf( fp, "      else return 1/clkFreq;\n");
     fprintf( fp, "    }\n}\n\n");
   
@@ -600,7 +600,7 @@ static void pl_print_code( fp, root_node, node, option, trace, autotick, unittim
     fprintf( fp, "#include \"uC_types.h\"\n\n" );
     
     /* Delay computation */
-    fprintf( fp, "#define DELAY(d) {if (%s%s_Star->needResource) {_delay += (d);}}\n", 
+    fprintf( fp, "#define DELAY(d) {if (%s%s_Star->needsSharedResource) {_delay += (d);}}\n", 
             model_name, option );
     fprintf( fp, "#define illegal_cpu() 0\n" );
     
@@ -855,12 +855,12 @@ static void pl_print_begin( fp, node, option, trace )
     fprintf( fp, "    clkFreq = Clock_freq;\n\n"); 
     fprintf( fp, "    clkFreq = (1000000)*clkFreq;\n\n");
     fprintf( fp, "    strcpy(resource, resourceName); \n" );
-    fprintf( fp, "    if (!strcmp(resource, \"HW\")) needResource = 0;\n");
-    fprintf( fp, "    else needResource = 1; \n");
+    fprintf( fp, "    if (!strcmp(resource, \"HW\")) needsSharedResource = 0;\n");
+    fprintf( fp, "    else needsSharedResource = 1; \n");
     fprintf( fp, "    %s%s_Star = this;\n", model_name, option );
     fprintf( fp, "\n    emittedEvents = new SequentialList();\n");
     fprintf( fp, "    _delay = 0.0;\n");
-    fprintf( fp, "    if ( needResource < 2 ) {\n" );
+    fprintf( fp, "    if ( needsSharedResource < 2 ) {\n" );
     
     
     /* State and output variables initialization */
@@ -897,7 +897,7 @@ static void pl_print_begin( fp, node, option, trace )
         }
     }
     
-    fprintf( fp, "      if ( needResource ) {\n" );
+    fprintf( fp, "      if ( needsSharedResource ) {\n" );
     fprintf( fp, "        strcpy( stemp, resource );\n" );
     fprintf( fp, "        if (( resourceId = (int) _cpu_%s( stemp )) == -1 ) {\n", util_map_pathname( node_name ));
     fprintf( fp, "          strcat( stemp, \": not a valid CPU\" );\n" );
@@ -912,10 +912,10 @@ static void pl_print_begin( fp, node, option, trace )
     
     /* FIXME : do we need these?  
        
-       fprintf( fp, "      saveimpl = needResource;\n" );
-       fprintf( fp, "      needResource = 0;\n" );
+       fprintf( fp, "      saveimpl = needsSharedResource;\n" );
+       fprintf( fp, "      needsSharedResource = 0;\n" );
        fprintf( fp, "      _t_%s(0,0);\n", util_map_pathname( node_name ));
-       fprintf( fp, "      needResource = saveimpl;\n" );*/
+       fprintf( fp, "      needsSharedResource = saveimpl;\n" );*/
     
     if ( trace ) {
         fprintf( fp, "      if ( debug ) {\n" );
@@ -1053,7 +1053,7 @@ static void pl_print_go( fp, node, option, trace, autotick, unittime )
     
     /* output eachh CFSM firing to the firing file */
     fprintf( fp, "\n    // write to firing file \n");
-    fprintf( fp, "    if ( fpfire && needResource) {\n" );
+    fprintf( fp, "    if ( fpfire && needsSharedResource) {\n" );
     fprintf( fp, "      sprintf( stemp, \"%%s: %%f %%d start\\n\", " );
     fprintf( fp, "(const char*) name, now, priority);\n" );
     fprintf( fp, "      Printfiring( stemp );\n" );
@@ -1063,7 +1063,7 @@ static void pl_print_go( fp, node, option, trace, autotick, unittime )
     fprintf( fp, "    min_time = -1;\n" );
     fprintf( fp, "    _delay = 0.0;\n" );
     fprintf( fp, "    _t_%s(0,0); // fire the star\n", util_map_pathname( node_name ));
-    fprintf( fp, "    if (needResource) emitEventToIntQ(0, _delay,1);// emit dummy event \n");
+    fprintf( fp, "    if (needsSharedResource) emitEventToIntQ(0, _delay,1);// emit dummy event \n");
     fprintf( fp, "    timeOfArrival = -1;// reset this as have finished this firing \n");
     if ( trace ) {
         fprintf( fp, "    if ( debug ) {\n" );
