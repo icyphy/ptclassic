@@ -163,27 +163,53 @@ AC_TRY_COMPILE([#include <time.h>], [struct tm tm; tm.tm_gmtoff;],
 #
 have_timezone=no
 AC_MSG_CHECKING([long timezone variable])
-AC_TRY_COMPILE([#include <time.h>],
-        [extern long timezone;
-         timezone += 1;
-         exit (0);],
-        [have_timezone=yes
-	 AC_DEFINE(HAVE_TIMEZONE_VAR)
-         AC_MSG_RESULT(yes)],
-         AC_MSG_RESULT(no))
+AC_TRY_RUN([
+#include <time.h>
+extern long timezone;
+int main()
+{
+timezone += 1;
+exit (0);
+}
+], [AC_DEFINE(HAVE_TIMEZONE_VAR)
+        AC_MSG_RESULT(yes)],
+        AC_MSG_RESULT(no),
+	AC_MSG_RESULT(no))
+
+#AC_TRY_COMPILE([#include <time.h>],
+#        [extern long timezone;
+#         timezone += 1;
+#         exit (0);],
+#        [have_timezone=yes
+#	 AC_DEFINE(HAVE_TIMEZONE_VAR)
+#         AC_MSG_RESULT(yes)],
+#         AC_MSG_RESULT(no))
 
 #
 # On some systems (eg IRIX 6.2), timezone is a time_t and not a long.
 #
 if test "$have_timezone" = no; then
    AC_MSG_CHECKING([time_t timezone variable])
-   AC_TRY_COMPILE([#include <time.h>],
-        [extern time_t timezone;
-         timezone += 1;
-         exit (0);],
-        [AC_DEFINE(HAVE_TIMEZONE_VAR)
-         AC_MSG_RESULT(yes)],
-         AC_MSG_RESULT(no))
+AC_TRY_RUN([
+#include <time.h>
+extern time_t timezone;
+int main()
+{
+timezone += 1;
+exit (0);
+}
+], [AC_DEFINE(HAVE_TIMEZONE_VAR)
+        AC_MSG_RESULT(yes)],
+        AC_MSG_RESULT(no),
+	AC_MSG_RESULT(no))
+
+#   AC_TRY_COMPILE([#include <time.h>],
+#        [extern time_t timezone;
+#         timezone += 1;
+#         exit (0);],
+#        [AC_DEFINE(HAVE_TIMEZONE_VAR)
+#         AC_MSG_RESULT(yes)],
+#         AC_MSG_RESULT(no))
 fi
 
 #--------------------------------------------------------------------
