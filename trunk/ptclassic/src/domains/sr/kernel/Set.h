@@ -71,6 +71,8 @@ public:
 
   Set & operator -= (Set &);
 
+  Set & operator &= (Set &);
+
   void setequal(Set &);
 
   int cardinality() const;
@@ -78,6 +80,8 @@ public:
   int onemember() const;
 
   StringList print() const;
+
+  //  static int setcount() { return numsets; }
 
 protected:
 
@@ -95,6 +99,10 @@ protected:
 
   // Array of integers used to store the bitmask
   int * words;
+
+  // private:
+  // number of active sets
+  // static int numsets;
 
 };
 

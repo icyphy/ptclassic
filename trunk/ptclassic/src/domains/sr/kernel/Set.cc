@@ -33,6 +33,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "StringList.h"
 #include <stream.h>
 
+// int Set::numsets = 0;
+
 // Allocate an empty set of the given size with given initial value
 //
 // @Description If this is a Set(i), then the indices of its contents
@@ -46,6 +48,7 @@ Set::Set(int s /* number of elements in the set */,
   for ( int i = numwords() ; --i >= 0 ; ) {
     words[i] = f ? ~0 : 0;
   }
+  // numsets++;
 }
 
 // Make a copy of a set
@@ -64,6 +67,7 @@ void Set::setequal(Set & s) {
 Set::~Set()
 {
   delete [] words;
+  // numsets--;
 }
 
 // Return the number of items in the set
@@ -109,6 +113,14 @@ Set & Set::operator -= (Set & s) {
     words[i] &= ~(s.words[i]);
   }
   return *this;
+}
+
+// AND a set with a set
+Set & Set::operator &= (Set & s) {
+  for ( int i = numwords() ; --i >= 0 ; ) {
+    words[i] &= s.words[i];
+  }
+  return *this;  
 }
 
 // Return a printed representation of a set
