@@ -35,8 +35,6 @@ proc expandEnvVars { path } {
 # Read Ptolemy color settings from the Ptolemy Library
 source [expandEnvVars \$PTOLEMY/tcl/lib/ptkColor.tcl]
 
-puts gothere
-
 # Read Ptolemy options settings from the Ptolemy Library
 source [expandEnvVars \$PTOLEMY/tcl/lib/ptkOptions.tcl]
 
