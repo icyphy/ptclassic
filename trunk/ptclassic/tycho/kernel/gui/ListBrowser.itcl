@@ -254,6 +254,9 @@ body ::tycho::ListBrowser::constructor {args} {
     set caseSensitiveCompletion \
             [::tycho::preference get dialogs caseSensitiveCompletion]
 
+    # Set the default okcommand (may be overridden by command-line args).
+    configure -okcommand "$this select \[$this get entry\]"
+
     # Process any unevaluated arguments.
     eval itk_initialize $args
 
@@ -446,10 +449,10 @@ body ::tycho::ListBrowser::help {} {
 
 ######################################################################
 #### ok
-# Select the item specified in the entry box.
+# Execute the -okcommand command but do not close the window.
 #
 body ::tycho::ListBrowser::ok {} {
-    select [get entry]
+    execCommand -okcommand
 }
 
 ######################################################################
