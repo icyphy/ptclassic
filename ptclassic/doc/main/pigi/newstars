@@ -33,7 +33,6 @@ If these restrictions are too severe, you can make your own private
 version of
 .i pigiRpc ;
 this is described in a later section.
-.sp
 .pp
 It is a simple matter to create an icon for a new star; the procedure
 is the same for dynamically linked stars as it is for statically linked
