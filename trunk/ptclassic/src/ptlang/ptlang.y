@@ -983,6 +983,21 @@ int i;
 		fprintf (fp, "%s\n\t}\n", codeBody[i]);
 }
 
+static int
+isStrnSpace( s, n)
+    char	*s;
+    int		n;
+{
+    int		c;
+
+    for (; n > 0; n--, s++) {
+	if ( c!=' ' && c!='\t' )
+	    return 0;
+    }
+
+
+    return 1;
+}
 
 
 cvtCodeBlockExpr( src, src_len, pDst)
@@ -991,11 +1006,17 @@ cvtCodeBlockExpr( src, src_len, pDst)
 {
     char *dst = *pDst;
 
-    /*IF*/ if ( src_len==6 && strncmp(src,"LBRACE",6)==0 ) {
+    /*IF*/ if ( src_len==6 && strncmp(src,"ATSIGN",6)==0 ) {
+	*dst++ = '@';		/* */
+    } else if ( src_len==6 && strncmp(src,"LBRACE",6)==0 ) {
 	*dst++ = '{';		/* } (to balance 'vi') */
     } else if ( src_len==6 && strncmp(src,"RBRACE",6)==0 ) {
 	/* { (to balance 'vi') */
 	*dst++ = '}';
+    } else if ( src_len==9 && strncmp(src,"BACKSLASH",9)==0 ) {
+	*dst++ = '\\';
+    } else if ( isStrnSpace( src, src_len) ) {
+	; /* just drop it */
     } else {
 	strcpy(dst,"\" << ("); dst += strlen(dst);
 	strncpy( dst, src, src_len); dst += src_len;
@@ -1017,6 +1038,8 @@ cvtCodeBlockExpr( src, src_len, pDst)
 	@(expr) ==> C++ expr {expr}	(expr is arbitrary with balanced parens)
         @anything_else is passed through unchanged (including the @).
     If extendB is FALSE, then none of the ``@'' process occurs.
+
+    The above list is prob. out of date.
 **/
 cvtCodeBlock( src_in, dst_in, extendB)
     char *src_in, *dst_in;
@@ -1030,9 +1053,16 @@ cvtCodeBlock( src_in, dst_in, extendB)
     for (; (c = *src++) != '\0'; ) {
 	switch ( c ) {
 	case ESC:
-	    /* one backslash in input becomes two in output */
-	    *dst++ = ESC;
-	    *dst++ = ESC;
+	    c = *src;
+	    if ( extendB && c == '\n' ) {
+		++src;	/* strip the newline */
+	    } else if ( extendB && c == '\0' ) {
+		; /* nothing */
+	    } else {
+		/* one backslash in input becomes two in output */
+		*dst++ = ESC;
+		*dst++ = ESC;
+	    }
 	    break;
 	case QUOTE:
 	    *dst++ = ESC;
@@ -1049,8 +1079,7 @@ cvtCodeBlock( src_in, dst_in, extendB)
 		break;
 	    }
 	    c = *src++;
-	    /*IF*/ if ( c == '@' ) {
-		/* this is same as default case below, but be explicit */
+	    /*IF*/ if ( c=='@' || c=='\\' || c=='{' || c=='}' ) {
 		*dst++ = c;
 	    } else if ( c == '(' ) {
 		for ( src_expr=src, parenCnt=1; parenCnt > 0; ) {
@@ -1072,6 +1101,7 @@ cvtCodeBlock( src_in, dst_in, extendB)
 		    cvtCodeBlockExpr( src_expr, src-src_expr-1, &dst);
 		    --src;	/* for() loop will advance */
 	    } else {
+	        *dst++ = '@';
 		*dst++ = c;
 	    }
 	    break;
@@ -1099,10 +1129,9 @@ genCodeBlock( fp, src, extendB)
 /**
     Convert a method body (standard (e.g., go) or custom).  Primarily
     involves processing for in-line codeblocks.
-    Lines starting with a "." will have the leading white-space striped,
+    Lines starting with a "@" will have the leading white-space striped,
     and the remainder of the line processed by cvtCodeBlock(),
     with the result added to the default code stream.
-    To avoid processing as a codeblock, use two "..".
 **/
 cvtMethod( src_in, dst_in)
     char *src_in, *dst_in;
@@ -1121,27 +1150,21 @@ cvtMethod( src_in, dst_in)
 	    ;
 	src_end = c==NEWLINE ? src : --src;
 	c_end = *src_end; *src_end = '\0';
-	if ( src_start[0] == '.' && src_start[1]!='.' ) {
+	if ( src_start[0] == '@' ) {
 	    src = src_start+1;
 	    if ( !codeblockB ) {
 		codeblockB = 1;
 	        strcpy(dst, "\t{ StringList _str_; _str_ << \n");
 		dst+=strlen(dst);
 	    }
-	    cvtCodeBlock( src, dst, 1);		dst+=strlen(dst);
+	    cvtCodeBlock( src, dst, 1, 1);		dst+=strlen(dst);
 	    *dst++ = NEWLINE;
 	} else {
 	    if ( codeblockB ) {
 	        strcpy(dst, ";\n\t addCode(_str_); }\n"); dst+=strlen(dst);
 		codeblockB = 0;
 	    }
-	    if ( src_start[0]=='.' && src_start[1]=='.' ) {
-		int n = src_start+1-src_line;
-		strncpy( dst, src_line, n);	dst += n;
-		strcpy( dst, src_start+2);	dst += strlen(dst);
-	    } else {
-	        strcpy( dst, src_line); dst += strlen(dst);
-	    }
+	    strcpy( dst, src_line); dst += strlen(dst);
 	}
 	*src_end = c_end;
 	src = src_end;
@@ -1714,6 +1737,7 @@ yylexBody(pCurChar)
     int		brace = 1;
     int		inQuote = 0;
     int		inComment = 0;
+    int		inAt = 0, inAtNext = 0;
     int		startLine = yyline;
     int		startQLine = yyline;
 
@@ -1758,11 +1782,16 @@ yylexBody(pCurChar)
 	    break;
 	default:
 	    if (!inQuote && !inComment) {
-	       if (c == '{') brace++;
-	       else if (c == '}') brace--;
+	       if ( !inAt ) {
+		   if (c == '@')	inAtNext = 1;
+	           else if (c == '{') brace++;
+	           else if (c == '}') brace--;
+	       }
 	    }
 	}
 	c = yyinput();
+	inAt = inAtNext;
+	inAtNext = 0;
     }
     /* The BODY token does not include the closing '}' though it is removed
      * from the input.
