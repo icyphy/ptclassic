@@ -1,4 +1,4 @@
-static const char file_id[] = "IntArray.cc";
+static const char file_id[] = "WFIntArray.cc";
 /**************************************************************************
 Version identification:
 $Id$
@@ -38,15 +38,15 @@ This class is used by the SDFWF4 star.
 #include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "IntArray.h"
+#include "WFIntArray.h"
 
-IntArray::IntArray(void)
+WFIntArray::WFIntArray(void)
 {
   total=0;
   ints=NULL;
 }
 
-IntArray::IntArray(int start_count)
+WFIntArray::WFIntArray(int start_count)
 {
   total=start_count;
   ints=new int[total];
@@ -54,7 +54,7 @@ IntArray::IntArray(int start_count)
     ints[loop]=666;
 }
 
-IntArray::IntArray(int start_count,int def_val)
+WFIntArray::WFIntArray(int start_count,int def_val)
 {
   total=start_count;
   ints=new int[total];
@@ -62,7 +62,7 @@ IntArray::IntArray(int start_count,int def_val)
     ints[loop]=def_val;
 }
 
-IntArray::~IntArray(void)
+WFIntArray::~WFIntArray(void)
 {
   if (ints != NULL)
     for (int loop=0;loop<total;loop++)
@@ -71,7 +71,7 @@ IntArray::~IntArray(void)
   total=0;
 }
 
-IntArray& IntArray::operator=(IntArray& rh_array)
+WFIntArray& WFIntArray::operator=(WFIntArray& rh_array)
 {
   total=rh_array.total;
   ints=new int[total];
@@ -80,7 +80,7 @@ IntArray& IntArray::operator=(IntArray& rh_array)
   return *this;
 }
 
-void IntArray::copy(IntArray* rh_array)
+void WFIntArray::copy(WFIntArray* rh_array)
 {
   total=rh_array->total;
   ints=new int[total];
@@ -88,7 +88,7 @@ void IntArray::copy(IntArray* rh_array)
     ints[loop]=rh_array->ints[loop];
 }
 
-void IntArray::fill(int default_val)
+void WFIntArray::fill(int default_val)
 {
   for (int loop=0;loop<total;loop++)
     ints[loop]=default_val;
@@ -105,9 +105,9 @@ static int intcompare(const void *i, const void *j)
     
 }
 
-IntArray* IntArray::sort_lh(void)
+WFIntArray* WFIntArray::sort_lh(void)
 {
-  IntArray* results=new IntArray(total);
+  WFIntArray* results=new WFIntArray(total);
 
   int *tmp_ints=new int[total];
   int *moved_already=new int[total];
@@ -130,9 +130,9 @@ IntArray* IntArray::sort_lh(void)
 	}
   return(results);
 }
-IntArray* IntArray::sort_hl(void)
+WFIntArray* WFIntArray::sort_hl(void)
 {
-  IntArray* results=new IntArray(total);
+  WFIntArray* results=new WFIntArray(total);
 
   int *tmp_ints=new int[total];
   int *moved_already=new int[total];
@@ -156,7 +156,7 @@ IntArray* IntArray::sort_hl(void)
   return(results);
 }
 
-void IntArray::reorder(IntArray* new_order)
+void WFIntArray::reorder(WFIntArray* new_order)
 {
   int* new_ints=new int[total];
   
@@ -168,7 +168,7 @@ void IntArray::reorder(IntArray* new_order)
 }
 
 
-void IntArray::add(void)
+void WFIntArray::add(void)
 {
   int* new_ints=new int[total+1];
   for (int loop=0;loop<total;loop++)
@@ -181,7 +181,7 @@ void IntArray::add(void)
   total++;
 }
 
-void IntArray::add(int new_int)
+void WFIntArray::add(int new_int)
 {
   int* new_ints=new int[total+1];
   for (int loop=0;loop<total;loop++)
@@ -194,7 +194,7 @@ void IntArray::add(int new_int)
   total++;
 }
 
-void IntArray::remove(int index)
+void WFIntArray::remove(int index)
 {
   int* new_ints=new int[total-1];
   for (int low_loop=0;low_loop<index;low_loop++)
@@ -207,27 +207,27 @@ void IntArray::remove(int index)
   total--;
 }
 
-int IntArray::population(void)
+int WFIntArray::population(void)
 {
   return(total);
 }
 
-int IntArray::query(int index)
+int WFIntArray::query(int index)
 {
   if (index >= total)
     {
-      printf("IntArray::query:Error, index exceeds population\n");
+      printf("WFIntArray::query:Error, index exceeds population\n");
       return(-1);
     }
   else
     return(ints[index]);
 }
 
-int IntArray::set(int index,int val)
+int WFIntArray::set(int index,int val)
 {
   if (index >= total)
     {
-      printf("IntArray::query:Error, index exceeds population\n");
+      printf("WFIntArray::query:Error, index exceeds population\n");
       return(-1);
     }
   else
@@ -239,7 +239,7 @@ int IntArray::set(int index,int val)
 
 
      
-void IntArray::print(const char* header)
+void WFIntArray::print(const char* header)
 {
   printf("%s:\n",header);
   for (int loop=0;loop<total;loop++)
