@@ -54,7 +54,7 @@ MISC_FILES =	\
 # the makefile that includes this one to use $(EXTRA_SRCS)
 # This rule should be the first rule in this makefile so that 'make'
 # will run 'make sources'.
-sources:: tclIndex subsources makefile README.files
+sources:: subsources makefile README.files
 
 # We use a subtarget here so that we do make sources in the subdirs
 # before trying to update the indices
@@ -255,7 +255,3 @@ htmlchek:
 spellcheck:
 	cat `find . -name "*.html" -print | grep -v html_library` | spell
 
-tclIndex: $(TCL_SRCS) $(ITCL_SRCS) makefile
-	@echo "Updating tclIndex"
-	rm -f $@
-	echo 'set auto_path [linsert $$auto_path 0 [info library] ]; if [catch {auto_mkindex . $(TCL_SRCS) $(ITCL_SRCS)} errMsg] {puts $$errorInfo}' | $(ITCLSH)
