@@ -21,10 +21,8 @@ $Id$
 
 ********************************************************************/
 
-BDFStar :: BDFStar() 
-: sdf(0), sdfCtx(0), dynExec(0) {}
+BDFStar :: BDFStar() : sdfCtx(0), dynExec(0) {}
 
-int BDFStar :: isSDF() const { return sdf;}
 int BDFStar :: isSDFinContext() const { return sdfCtx;}
 
 // enable dynamic execution
@@ -33,28 +31,26 @@ int BDFStar :: setDynamicExecution(int val) {
 	return TRUE;
 }
 
+// in addition to baseclass initialize, set waitPort if we have a
+// dynamic input.
 void BDFStar :: initialize() {
-	DataFlowStar::initialize();
-	// determine SDF-ness
-	BDFStarPortIter nextp(*this);
-	BDFPortHole *p;
-	sdf = TRUE;
-	int dyn = dynamicExec();
-	// see if we are dynamic.  If not, sdf will be set.  If so,
-	// and under DDF scheduler, and we have a conditional input
-	// port, set waitFor on the control port.
-	while ((p = nextp++) != 0) {
-		if (TorF(p->relType())) {
-			sdf = FALSE;
-			if (dyn && p->isItInput())
+	DynDFStar::initialize();
+	if (!isSDF() && !isSink() && dynamicExec()) {
+		// find waitPort
+		BDFStarPortIter nextp(*this);
+		BDFPortHole *p;
+
+		while ((p = nextp++) != 0) {
+			if (p->isDynamic() && p->isItInput()) {
 				waitFor(*p->assoc());
+			}
 		}
 	}
-	sdfCtx = sdf ? TRUE : dataIndependent();
+	sdfCtx = isSDF() ? TRUE : dataIndependent();
 }
 
 // the baseclass has no additional smarts for determining data-independence.
-int BDFStar::dataIndependent() { return sdf;}
+int BDFStar::dataIndependent() { return isSDF();}
 
 // The following is defined in BDFDomain.cc -- this forces that module
 // to be included if any BDF stars are linked in.
@@ -62,7 +58,7 @@ extern const char BDFdomainName[];
 
 const char* BDFStar :: domain () const { return BDFdomainName;}
 
-ISA_FUNC(BDFStar,DataFlowStar);
+ISA_FUNC(BDFStar,DynDFStar);
 
 // method called when an input port does not have enough data.
 // If we are being executed dynamically, we must make sure that there
@@ -84,7 +80,7 @@ int BDFStar :: handleWait(BDFPortHole& p) {
 // if SDF, we can use the simpler routine in DataFlowStar::run.
 
 int BDFStar :: run () {
-	if (sdf) return DataFlowStar::run();
+	if (isSDF()) return DataFlowStar::run();
 	// not SDF.
 	if (SimControl::haltRequested()) return FALSE;
 
