@@ -62,18 +62,14 @@ body ::tycho::EditHTML::constructor {args} {
 
     # Add to the format menu commands to comment and uncomment
     # the regions defined by the selection.
-    $itk_component(formatMenu) add separator
+    addMenuSeparator Format
         
-    $itk_component(formatMenu) add command \
-	    -label "Recolorize" \
-	    -underline 0 \
+    addMenuItem "Recolorize" Format -underline 0 \
 	    -command "$this component text parseRegion 1.0 end"
 
-    $itk_component(editMenu) add separator
+    addMenuSeparator Edit
         
-    $itk_component(editMenu) add command \
-	    -label "Check Links" \
-	    -underline 6 \
+    addMenuItem "Check Links" Edit -underline 6 \
 	    -command "$this component text busy checkLinks"
 }
 
