@@ -71,7 +71,8 @@ HDRS = \
 	Resource.h \
 	SeqATMCell.h
 
-SRCS = $(HDRS:.h=.cc) DEDomain.cc
+LIB_SRCS = $(HDRS:.h=.cc) DEDomain.cc
+SRCS = $(LIB_SRCS) sipdummy.cc
 
 #Library name
 LIB=libde.$(LIBSUFFIX)
@@ -80,12 +81,14 @@ LIB=libde.$(LIBSUFFIX)
 DLLDEPS =	..\..\..\kernel\libptolemy.lib
 
 # Objects:
-OBJS = $(SRCS:.cc=.o)
+OBJS = $(LIB_SRCS:.cc=.o)
 
-all: 	makefile $(LIB)
+PT_DEPEND += sipdummy.o
+
+all: 	makefile $(LIB) sipdummy.o
 
 # "make install" puts things in the official place
-install:	makefile $(LIBDIR)/$(LIB)
+install:	makefile $(LIBDIR)/$(LIB) sipdummy.o
 
 
 # include common definitions, rules
