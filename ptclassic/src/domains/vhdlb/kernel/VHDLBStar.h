@@ -81,7 +81,7 @@ protected:
 	void addMainInit(const char* decl);
 
          // access to target
-         VHDLBTarget* target() { return (VHDLBTarget*)myTarget(); }
+         VHDLBTarget* target() { return (VHDLBTarget*)target(); }
 
 
 
