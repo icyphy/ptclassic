@@ -477,7 +477,7 @@ body ::tycho::Query::line {tag label default args} {
         keep -background -cursor -font
 	rename -foreground labelcolor labelColor LabelColor
     }
-    grid $itk_component(label_$tag) -column 0 -row $numentries -sticky ne
+    grid $itk_component(label_$tag) -column 0 -row $numentries -sticky e
     
     itk_component add tag_$tag {
         eval entry $itk_component(querysite).tag_$tag \
@@ -629,7 +629,7 @@ body ::tycho::Query::mediated {tag label default command args} {
         keep -background -cursor -font
 	rename -foreground labelcolor labelColor LabelColor
     }
-    grid $itk_component(label_$tag) -column 0 -row $numentries -sticky ne
+    grid $itk_component(label_$tag) -column 0 -row $numentries -sticky e
 
     set cmd "$this mediatedCommand $tag $command"
 
