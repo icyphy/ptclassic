@@ -247,8 +247,12 @@ class ::tycho::AbstractGraph {
     #################################################################
     ####                  protected variables                    ####
 
-    # The adjacency "matrix." See the comment with adjacencyadd{}.
+    # A "cache" of structural information. All methods that modify
+    # the adjacency matrix clear this array.
     protected variable _cache
+
+    # The adjacency "matrix." See the comment with adjacencyadd{}.
+    protected variable _adjacency
 
     # The edges of the graph. The format of this structure is
     # up to the subclass.
