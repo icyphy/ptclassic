@@ -243,9 +243,15 @@ main(int argc, char **argv) {
 	if (fgets(buffer, 1000, stdin) == NULL) {
 	    if (ferror(stdin)) {
 		if (errno == EINTR) {
+#if TCL_MINOR_VERSION < 5
 		    if (tcl_AsyncReady) {
 			(void) Tcl_AsyncInvoke((Tcl_Interp *) NULL, 0);
 		    }
+#else
+		    if ( Tcl_AsyncReady() ) {
+			(void) Tcl_AsyncInvoke((Tcl_Interp *) NULL, 0);
+		    }
+#endif
 		    clearerr(stdin);
 		} else {
 		    sprintf(buffer, "exit %d", exitCode);
