@@ -204,7 +204,6 @@ $(DESTBIN):	$(BINARY) $(OCTBINDIR)
 		@echo Installing $(BINARY)
 		rm -f $(DESTBIN)
 		ln $(BINARY) $(DESTBIN)
-		-strip $(DESTBIN)
 
 $(DESTBIN_D):	$(BINARY_DEBUG) $(OCTBINDIR)
 		@echo Installing $(BINARY)
