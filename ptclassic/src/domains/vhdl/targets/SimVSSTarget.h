@@ -82,7 +82,6 @@ protected:
 	CodeStream cli_models;
 	CodeStream cli_comps;
 	CodeStream cli_configs;
-	CodeStream simWrapup;
 
 	// States.
 	StringState synopsys;
