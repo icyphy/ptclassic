@@ -40,7 +40,7 @@ state {
     name {buffer}
     type {intarray}
     default {0}
-    attributes { A_CIRC|A_YMEM|A_NOINIT|A_NONSETTABLE|A_CONSEC} 
+    attributes { A_YMEM|A_NOINIT|A_NONSETTABLE|A_CONSEC} 
 }
 
 state {
@@ -48,7 +48,7 @@ state {
     type { int }
     default { 0 }
     desc { pointer to the buffer }
-    attributes { A_NONCONSTANT|A_NONSETTABLE|A_YMEM|A_NOINIT }
+    attributes { A_CIRC|A_NONCONSTANT|A_NONSETTABLE|A_YMEM|A_NOINIT }
 }
 
 codeblock(initBuffer,"") {
