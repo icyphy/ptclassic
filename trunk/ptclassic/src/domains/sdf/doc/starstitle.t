@@ -93,8 +93,9 @@ stars dedicated to image display and processing.
 This palette contains stars and galaxies with
 communication applications.
 .pp
-In this section of the Almagest, all stars in any of these palettes are listed,
-and the only distinction made between them is their location.
+In this section of the Almagest, all stars and galaxies
+in any of these palettes are listed.
+The only distinction made between them is in the location field.
 .pp
 Note that any star library in \*(PT should be viewed as a set of
 examples, not as an all inclusive set.
