@@ -61,6 +61,7 @@
 # - The rendering is quite slow.  Needs to be speeded up.
 # - The Tcl extension should use more standard HTML syntax.
 # - Embedded windows should be supported.
+# - Save As currently saves as plain text only.
 
 # Load the HTML library, if necessary, and make adjustments.
 if {[info commands HMinit_win] == {}} {
@@ -418,24 +419,29 @@ body ::tycho::HTML::constructor {args} {
     # Scroll using cursor keys w/o waiting for invisible cursor to move.
     bind $text <Up> "$text yview scroll -1 units; break"
     bind $text <Down> "$text yview scroll 1 units; break"
+    bind $text <Home> "$text see 1.0; break"
+    bind $text <End> "$text see end-1c; break"
 
     # Double clicks normally select text, something we don't want here.
     bind $text <Double-Button-1> {break}
 
-    bind $prefix <Control-x><Key-s> "$this openSource; break"
+    bind $prefix <<OpenSource>> "$this openSource; break"
+
     # disable certain bindings
-    bind $prefix <Control-x><Control-s> {bell; break}
-    bind $prefix <Control-x><Control-w> {bell; break}
-    bind $prefix <Control-x><Control-v> {bell; break}
-    bind $prefix <Control-x><Control-q> {bell; break}
-    bind $prefix <Control-x><Key-i> {bell; break}
-    bind $prefix <Control-x><Key-v> {bell; break}
+    bind $prefix <<Save>> {bell; break}
+    bind $prefix <<SaveAs>> {bell; break}
+    bind $prefix <<AltFile>> {bell; break}
+    bind $prefix <<ToggleReadOnly>> {bell; break}
+    bind $prefix <<InsertFile>> {bell; break}
+    bind $prefix <<RevisionControl>> {bell; break}
 
     # Add bindings for forward and back
-    bind $itk_component(text) <Meta-Left> "$this back"
-    bind $itk_component(text) <Control-Left> "$this back"
-    bind $itk_component(text) <Meta-Right> "$this forward"
-    bind $itk_component(text) <Control-Right> "$this forward"
+    bind $text <Meta-Left> "$this back"
+    bind $text <Control-Left> "$this back"
+    bind $text <Alt-Left> "$this back"
+    bind $text <Meta-Right> "$this forward"
+    bind $text <Control-Right> "$this forward"
+    bind $text <Alt-Right> "$this forward"
 
     # Make the insertion cursor invisible.
     $text configure -insertofftime 0
@@ -1355,6 +1361,7 @@ body ::tycho::HTML::_initializeMenubar {menubar} {
     $menubar delete save
     $menubar delete evaluate
     $menubar delete compareto
+    $menubar delete filesep2
 
     # Remove items from Edit
     $menubar delete undoredo
@@ -1369,7 +1376,8 @@ body ::tycho::HTML::_initializeMenubar {menubar} {
 
     $menubar insert command opensource saveas \
 	    -label "Open Source" \
-            -underline 1 -accelerator {C-x s} \
+            -underline 1 \
+            -accelerator [::tycho::Shortcuts::getLabel OpenSource] \
             -command "$this openSource"
 
     # Delete entire Format menu
@@ -1378,7 +1386,8 @@ body ::tycho::HTML::_initializeMenubar {menubar} {
     # Setup Special menu
     $menubar separator specialsep1 special
     $menubar command appletviewer special \
-	    -label "Appletviewer" -underline 0 \
+	    -label "Appletviewer" \
+            -underline 0 \
             -command "$this appletViewer"
     global tcl_platform
     if {$tcl_platform(platform) == "macintosh"} {
