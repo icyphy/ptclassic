@@ -143,10 +143,10 @@ class ::tycho::Slate {
     ####                            options                        ####
 
     # The color of the highlight box
-    itk_option define -highlightcolor highlightColor HighlightColor "black"
+    itk_option define -highlightcolor highlightColor HighlightColor "cyan2"
 
     # The width of the highlight box
-    itk_option define -highlightwidth highlightWidth HighlightWidth 1
+    itk_option define -highlightwidth highlightWidth HighlightWidth 3
 
     # Export the selection if this flag is true
     itk_option define -exportselection exportSelection ExportSelection 1
@@ -394,31 +394,34 @@ body ::tycho::Slate::ghost {tag {tags {}}} {
     } elseif { [string match {_*} $tag] } {
 	# If it's a complex item and it has a ghost{} method,
 	# call that
-	if { [@scope ::tycho::$itemClass($id) \
+	if { [@scope ::tycho::$itemClass($tag) \
 		[list ::info exists methodtable(ghost)]] } {
-	    return [@scope ::tycho::$itemClass($id) \
+	    return [@scope ::tycho::$itemClass($tag) \
 		    [list eval \[set methodtable(ghost)\] \
-		    $id $canvas $this]]
+		    $tag $canvas $this]]
     	}
     }
 
     # If we get to here, tag represents a single item
     set shape [shape $tag]
-    set primary [@scope ::tycho::ComplexItem [list set primary($id)]]
+    set primary [@scope ::tycho::ComplexItem [list set primary($tag)]]
     switch -exact $shape {
 	"rectangle" -
 	"oval" -
 	"polygon" {
 	    return [eval $canvas create $shape \
-		    [$canvas coords $primary] -outline grey -tags $tags]
+		    [$canvas coords $primary] -outline grey \
+                    -tags [list $tags]]
 	}
 	"line" {
 	    return [eval $canvas create $shape \
-		    [$canvas coords $primary] -fill grey -tags $tags]
+		    [$canvas coords $primary] -fill grey -tags \
+                    -tags [list $tags]]
 	}
 	"default" {
 	    return [eval $canvas create rectangle \
-		    [region $tag] -outline grey -tags $tags]
+		    [region $tag] -outline grey \
+                    -tags [list $tags]]
 	}
     }
 }
