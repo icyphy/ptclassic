@@ -467,11 +467,13 @@ open_msg_type(msg, type)
 	wmhints.initial_state = NormalState;
 	XSetWMHints(msgDisplay, w, &wmhints);
 
-	hints.flags = PBaseSize|PPosition|USPosition;
+	hints.flags = PBaseSize|PPosition|USPosition|PSize|PMinSize;
 	hints.x = window_x;
 	hints.y = window_y;
 	hints.base_width = window_w;
 	hints.base_height = window_h;
+	hints.min_width = hints.width = window_w;
+	hints.min_height = hints.height = window_h;
 
 	XSetWMNormalHints(msgDisplay, w, &hints);
 	    
