@@ -148,7 +148,10 @@ public:
 	virtual int genSched() { return TRUE;}
 
 	// return the schedule
-	virtual StringList displaySchedule() = 0;
+	virtual StringList displaySchedule(int depth) = 0;
+
+	// generate code
+	virtual StringList genCode(Target&, int depth) = 0;
 };
 
 // define << operator to use virt fn.
@@ -179,7 +182,10 @@ public:
 	ostream& printOn(ostream&);
 
 	// print my schedule
-	StringList displaySchedule();
+	StringList displaySchedule(int depth);
+
+	// code generation
+	StringList genCode(Target&, int depth);
 };
 
 // An SDFBagScheduler is a modified SDFScheduler that lives in
@@ -193,7 +199,10 @@ protected:
 	int prepareGalaxy(Galaxy&) { return TRUE;}
 public:
 	// return the schedule
-	StringList displaySchedule();
+	StringList displaySchedule(int depth);
+
+	// code generation
+	StringList genCode(Target&, int depth);
 };
 
 // An SDFClusterBag is a composite object.  In some senses it is like
@@ -229,7 +238,10 @@ public:
 	int genSched();
 
 	// print my schedule
-	StringList displaySchedule();
+	StringList displaySchedule(int depth);
+
+	// code generation
+	StringList genCode(Target&, int depth);
 
 	// run the cluster, the number of times indicated by the loop
 	// factor.
@@ -253,7 +265,7 @@ public:
 	void initGeo();
 	SDFCluster* parentClust() { return (SDFCluster*)parent();}
 	SDFClustPort* far() { return (SDFClustPort*)PortHole::far();}
-	int numIO();
+	int numIO() const { return numberTokens;}
 	SDFClustPort* outPtr() {
 		return far() ? 0 : pOutPtr;
 	}
@@ -269,11 +281,18 @@ class SDFClustSched : public SDFScheduler {
 protected:
 	SDFClusterGal* cgal;
 	const char* logFile;
+	// this one does the main work.
 	int computeSchedule (Galaxy&);
 public:
+	// constructor and destructor
 	SDFClustSched(const char* log = 0) : cgal(0),logFile(log) {}
 	~SDFClustSched();
+
+	// return the schedule
 	StringList displaySchedule();
+
+	// Generate code using the Target to produce the right language.
+	StringList compileRun();
 };
 
 class SDFClustPortIter : public BlockPortIter {
