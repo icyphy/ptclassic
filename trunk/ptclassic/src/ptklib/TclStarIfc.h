@@ -81,7 +81,10 @@ public:
 	int wrapup ();
 
 	// Method to get inputs from myStar
-	InfString getInputs();
+     	InfString getInputs();
+    
+	// Method to get inputs from myStar
+	InfString getInputsState();
 
 	// Set or clear the new value flag for input port inNum
 	void setOneNewInputFlag(int inNum, int flag);
