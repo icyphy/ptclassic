@@ -41,6 +41,7 @@ include $(CONFIG)
 
 ITCL_SRCS = \
 	jtclsh.tcl \
+	tclblend.tcl \
 	tycho-windows.itk \
 	tyjava-windows.itk
 
