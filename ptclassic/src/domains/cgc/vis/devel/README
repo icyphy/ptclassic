@@ -1,5 +1,17 @@
 This directory contains stand-alone files used for developing
-and timing VIS code. See the various README and source files
-for more information.
+and timing VIS code. 
 
 NOTE: these files will only compile under Sun CC.
+
+To run the simulator, create or open a test universe (try the
+universe "test" in this directory):
+
+  To run, hit on Go. The simulator will pop up. Type in
+  "file test.sim". The times for a star follow the name
+  of that star; times are cumulative. No idea what the
+  units are.
+
+  The simulator documentation is at /opt/SUNWincas/manuals/INCASuserguide.ps
+
+
+
