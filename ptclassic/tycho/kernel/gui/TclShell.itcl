@@ -550,16 +550,21 @@ body ::tycho::TclShell::help {} {
 # Indicate in the status bar and in the menus
 # whether modifications are allowed on the buffer.
 # This is redefined from the base class because the Format menu has been
-# removed and the base class method refers to it.
+# removed and the base class method refers to it. Also, we don't want
+# to put a file status to the status bar, since this is bogus
+# for a console window.
 #
 body ::tycho::TclShell::indicateReadOnly {bool} {
-    ::tycho::File::indicateReadOnly $bool
     if [winfo exists $prefix] {
 	if {$bool} {
+	    menubar disable {Insert...}
+	    menubar disable Save
             menubar disable {Undo/Redo}
             menubar disable Cut
             menubar disable Paste
 	} {
+	    menubar enable {Insert...}
+	    menubar enable Save
             menubar enable {Undo/Redo}
             menubar enable Cut
             menubar enable Paste
