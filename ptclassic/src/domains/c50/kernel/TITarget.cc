@@ -74,12 +74,15 @@ void TITarget :: setup() {
 
 	GalStarIter nextStar(*galaxy());
 	AsmStar* s;
+	int	portSize;
 	while((s = (AsmStar*)nextStar++) != 0){
 	   BlockPortIter next(*s);
 	   AsmPortHole * p;
 	       while((p = (AsmPortHole*) next++) != 0) {
 		   if (p->resolvedType() == COMPLEX ){
-		       p->setSDFParams(2,1);
+			portSize = p->numXfer();
+			portSize = 2*portSize;
+			p->setSDFParams(portSize,portSize-1);
 		    }
 		}
 		
