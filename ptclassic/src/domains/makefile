@@ -20,27 +20,19 @@ include $(CONFIG)
 
 # The EXPDOMAINS environment variable can be used to build experimental domains
 # which are assumed to follow the same directory structure.
+EXPDOMAINS =
 
-# Include CP and PN domains on SunOS architectures.
-ifneq (,$(filter sun%,$(PTARCH)))
-EXPDOMAINS = pn #cp
-endif
-
-# Include PN doman for mips and Solaris.
-ifneq (,$(filter mips sol%,$(PTARCH)))
-EXPDOMAINS = pn
+ifeq ($(INCLUDE_PN_DOMAIN),yes)
+EXPDOMAINS += pn
 endif
 
 # Don't include IPUS if your are running a non GNU c++
 ifeq ($(INCLUDE_IPUS_DOMAIN),yes)
-IPUSDOMAIN = ipus
-else
-IPUSDOMAIN =
+EXPDOMAINS += ipus
 endif
 
-
 DOMAINS = sdf hof de ddf bdf thor cg cgc cg56 vhdlb \
-          vhdl mdsdf $(IPUSDOMAIN) $(EXPDOMAINS) 
+          vhdl mdsdf $(EXPDOMAINS) 
 
 MAKEVARS = "PTARCH=$(PTARCH)"
 
