@@ -51,14 +51,14 @@ $Id$
 }
 
 // size (not inline because it's virtual)
-int <T>ArrayState :: size() { return nElements;}
+int <T>ArrayState :: size() const { return nElements;}
 
 // type (not inline because it's virtual)
-const char* <T>ArrayState :: type() { return "<T>Array";}
+const char* <T>ArrayState :: type() const { return "<T>Array";}
 
 // the value as a string
 
-StringList <T>ArrayState :: currentValue() { 
+StringList <T>ArrayState :: currentValue() const { 
 	StringList s; 
 	s =  "\n";
 	for(int i = 0; i<size(); i++) {
@@ -71,7 +71,7 @@ StringList <T>ArrayState :: currentValue() {
 }
 
 // clone
-State* <T>ArrayState :: clone() { return new <T>ArrayState;}
+State* <T>ArrayState :: clone() const { return new <T>ArrayState;}
 
 // Parse initValue to set value
 void <T>ArrayState  :: initialize() {
@@ -92,9 +92,9 @@ void <T>ArrayState  :: initialize() {
 		if (t.tok == T_EOF) break;
 		switch (t.tok) {
 		case '[':
-			t = getParseToken(lexer, T_Int);
+			t = evalIntExpression(lexer);
 			if (t.tok != T_Int) {
-				parseError ("expected intval after", "[");
+				parseError ("expected integer expression after", "[");
 				err = 1;
 				break;
 			}
@@ -146,8 +146,3 @@ ParseToken <T>ArrayState :: evalExpression(Tokenizer& lexer)
 // make knownstate entry
 static <T>ArrayState proto;
 static KnownState entry(proto,"<T>Array");
-
-	 
-
-
-	 
