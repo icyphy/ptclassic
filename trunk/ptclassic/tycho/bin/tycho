@@ -15,8 +15,8 @@
 set progname = `basename $0`
 
 if ( ! $?PTOLEMY ) setenv PTOLEMY ~ptolemy
-if ( ! $?ARCH ) then
-    setenv ARCH `$PTOLEMY/bin/arch`
+if ( ! $?PTARCH ) then
+    setenv PTARCH `$PTOLEMY/bin/arch`
 endif
 if ( ! $?USER ) then
     setenv USER $LOGNAME
@@ -62,13 +62,13 @@ if ( ! $?DISPLAY ) then
     exit 1
 endif
 
-# For now, look for the executable in obj.$ARCH, rather than bin.$ARCH.
-set bindir = $PTOLEMY/obj.$ARCH
+# For now, look for the executable in obj.$PTARCH, rather than bin.$ARCH.
+set bindir = $PTOLEMY/obj.$PTARCH
 
 if ( "$progname" == "tycho.ptiny" || $?tychoptiny ) then
-    set prog = $PTOLEMY/obj.$ARCH/tycho/kernel/tycho.ptiny
+    set prog = $PTOLEMY/obj.$PTARCH/tycho/kernel/tycho.ptiny
 else
-    set prog = $PTOLEMY/obj.$ARCH/tycho/kernel/tycho
+    set prog = $PTOLEMY/obj.$PTARCH/tycho/kernel/tycho
 endif
 
 if ( $?tychodebug ) then
@@ -83,7 +83,7 @@ endif
 # FIXME: Should check starting palette/facet for validity.
 # FIXME: Should make the starting facet if needed.
 
-set path = ( $PTOLEMY/bin.$ARCH $PTOLEMY/bin $path )
+set path = ( $PTOLEMY/bin.$PTARCH $PTOLEMY/bin $path )
 
 if (! -x $prog) then
     echo "Program does not exist: $prog"
