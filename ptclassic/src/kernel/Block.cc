@@ -8,6 +8,7 @@ static const char file_id[] = "Block.cc";
 #include "ConstIters.h"
 #include "Error.h"
 #include "SimControl.h"
+#include "StringList.h"
 
 /**************************************************************************
 Version identification:
@@ -42,6 +43,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 Routines implementing class Block methods
  
 **************************************************************************/
+
+#include "KnownBlock.h"
 
 // constructor
 
@@ -153,8 +156,23 @@ int Block::run() {
 }
 
 Block* Block::clone() const {
-	Block* b = makeNew();
-	return b ? b->copyStates(*this) : 0;
+	LOG_NEW; Block* b = makeNew();
+	if (b) {
+		b->setNameParent(hashstring(name()),parent());
+		b->setDescriptor(hashstring(descriptor()));
+		b->copyStates(*this);
+		if (numberMPHs() > 0) {
+			BlockMPHIter piter(*this);
+			MultiPortHole* p;
+			while ((p = piter++) != 0) {
+				MultiPortHole* cP = b->multiPortWithName(p->name());
+				for (int i = p->numberPorts(); i > 0; i--) {
+					cP->newPort();
+				}	
+			}
+		}	
+	}
+	return b;
 }
 
 Block* Block::copyStates(const Block& src) {
@@ -162,8 +180,12 @@ Block* Block::copyStates(const Block& src) {
 	BlockStateIter nextd(*this);
 	const State* srcStatePtr;
 	State *destStatePtr;
-	while ((srcStatePtr = nexts++) != 0 && (destStatePtr = nextd++) != 0)
+	while ((srcStatePtr = nexts++) != 0 && (destStatePtr = nextd++) != 0) {
 		destStatePtr->setInitValue(srcStatePtr->initValue());
+		StringList cVal;
+		cVal << srcStatePtr->currentValue();
+		destStatePtr->setCurrentValue(hashstring(cVal));
+	}
 	return this;
 }
 
@@ -296,4 +318,7 @@ Block::~Block () {}
 // this?)
 const char* Block :: domain () const { return "UNKNOWN";}
 
+RegisterBlock:: RegisterBlock(Block& prototype, const char* classname) {
+        KnownBlock::addEntry (prototype, classname, 0);
+}
 
