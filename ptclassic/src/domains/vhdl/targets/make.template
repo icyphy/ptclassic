@@ -71,8 +71,6 @@ SRCS = \
  SynthTarget.cc \
  ArchTarget.cc \
  SynthArchTarget.cc \
- VHDLBDFTarget.cc \
- SimVSSBDFTarget.cc \
  $(PL_SRCS:.pl=.cc)
 
 HDRS = $(SRCS:.cc=.h)
