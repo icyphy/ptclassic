@@ -24,7 +24,13 @@ ENHANCEMENTS, OR MODIFICATIONS.
 */
 /* misc.c  edg
 Version identification:
-$Id$
+ $Id$
+*/
+
+/*
+        Added ShowFacetNum to show the "handle" of the current facet.
+        this function is for debugging of the tcl/tk interface.
+        - aok  2/22/93
 */
 
 /* Includes */
@@ -128,6 +134,51 @@ long userOptionWord;
     }
     ViDone();
 }
+
+
+/* ShowFacetNum prints the number of the facet to the standard out.
+   This is a helping function for the development of the TCL/TK interface
+   to Ptolemy - aok */
+int
+ShowFacetNum (spot, cmdList, userOptionWord) /* ARGSUSED */
+RPCSpot *spot;
+lsList cmdList;
+long userOptionWord;
+{
+    octObject facet, inst;
+    char FacetName[64], InstanceName[64];
+    vemStatus status;
+
+    ViInit("show facet number");
+    ErrClear();
+
+    /* Get the facet based on the "spot" */
+    facet.objectId = spot->facet;
+    if (octGetById(&facet) != OCT_OK) {
+        PrintErr(octErrorString());
+        ViDone();
+    }
+    sprintf( FacetName, "OctObj%x", (long)facet.objectId);
+
+    /* Get the instance under the cursor */
+    status = vuFindSpot(spot, &inst, OCT_INSTANCE_MASK);
+    if (status == VEM_NOSELECT) {
+        PrintCon("Aborted");
+        ViDone();
+    } else if (status != VEM_OK) {
+        /* cursor not over an instance... */
+        sprintf (InstanceName, "NIL");
+    } else {
+        /* cursor is over some type of instance... */
+        sprintf( InstanceName, "OctObj%x", (long)inst.objectId);
+    }
+
+    printf("Facet_Handle Instance_Handle: %s %s\n", FacetName, InstanceName);
+
+    ViDone();
+}
+
+
 
 
 /***********************************************************************
