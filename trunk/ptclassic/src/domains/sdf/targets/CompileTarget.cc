@@ -16,7 +16,7 @@ a universe.
 
 #include "CGTarget.h"
 #include "KnownTarget.h"
-#include "LoopScheduler.h"
+#include "SDFCluster.h"
 #include "SDFScheduler.h"
 #include "StringState.h"
 #include "IntState.h"
@@ -49,7 +49,7 @@ private:
 protected:
 	StringState destDirectory;
 	IntState loopScheduler;
-	char *graphFileName, *clusterFileName, *schedFileName;
+	char *schedFileName;
 public:
 	CompileTarget();
 	void start();
@@ -69,8 +69,8 @@ public:
 CompileTarget::CompileTarget() : CGTarget("compile-SDF","SDFStar",
 "Generate stand-alone C++ programs and compile them.  The program\n"
 "and associated makefile is written to a directory given as a Target param.\n"
-"Can use either the default SDF scheduler or Shuvra's loop scheduler."),
-graphFileName(0), clusterFileName(0), schedFileName(0), id(0)
+"Can use either the default SDF scheduler or Joe's loop scheduler."),
+schedFileName(0), id(0)
 {
 	addState(destDirectory.setState("destDirectory",this,"PTOLEMY_SYSTEMS",
 			"Directory to write to"));
@@ -84,11 +84,8 @@ void CompileTarget::start() {
     dirFullName = writeDirectoryName(destDirectory);
 
     if(int(loopScheduler)) {
-	char* schedFileName = writeFileName("schedule");
-	char* graphFileName = writeFileName("expanded-graph");
-	char* clusterFileName = writeFileName("cluster-graph");
-	LOG_NEW; setSched(new
-		LoopScheduler(schedFileName,graphFileName,clusterFileName));
+	char* schedFileName = writeFileName("schedule.log");
+	LOG_NEW; setSched(new SDFClustSched(schedFileName));
     } else {
 	LOG_NEW; setSched(new SDFScheduler);
     }
@@ -115,7 +112,7 @@ int CompileTarget::writeGalDef(Galaxy& galaxy, const StringList className) {
     UserOutput codeFile;
     if(!codeFile.fileName(codeFileName)) {
 	Error::abortRun("Can't open code file for writing: ",codeFileName);
-	return 0;
+	return FALSE;
     }
 
     StringList runCode = "// Galaxy definition file from: ";
@@ -131,6 +128,7 @@ int CompileTarget::writeGalDef(Galaxy& galaxy, const StringList className) {
     runCode += "\n#endif\n";
     codeFile << runCode;
     codeFile.flush();
+    return TRUE;
 }
 
 int CompileTarget::run() {
