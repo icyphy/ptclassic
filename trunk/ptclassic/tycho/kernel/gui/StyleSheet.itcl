@@ -147,7 +147,7 @@ ensemble ::tycho::stylesheet {
 	}
 
 	# Get it
-	$model value [$model namebystyle $style $param]
+	$model value [$model namebystyle $style $param] 1
     }
 
     # Register a stylesheet
