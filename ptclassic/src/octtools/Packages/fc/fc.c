@@ -209,11 +209,11 @@ int *span;			/* Number of common chars */
 {
     DIR *wdir;
     char *lcomp, *dir;
-#if defined(aiws) || defined(_IBMR2) || defined(SYSV)
+#ifdef USE_DIRENT_H
     struct dirent *de;
 #else
     struct direct *de;
-#endif /* aiws */
+#endif /* USE_DIRENT_H */
     struct passwd *pw;
     int spot, lspn;
     int i;
