@@ -27,6 +27,7 @@ static char SccsId[]="$Id$";
 #include "port.h"
 #include "copyright.h"
 #include "utility.h"
+#include "errtrap.h"
 #include "oct.h"
 #include "region.h"
 #include "oh.h"
@@ -36,15 +37,14 @@ static char SccsId[]="$Id$";
 #include "th.h"
 #include "pepint.h"
 
+int
 main(argc, argv)
 int argc;
 char **argv;
 {
     octObject net1, net2;
     octObject term;
-    octObject layer;
-    octObject  facet;
-    char  name[128];
+    octObject facet;
 
     errProgramName(argv[0]);
     
@@ -73,5 +73,5 @@ char **argv;
 	}
     }
     octCloseFacet(&facet);
-    exit(0);
+    return 0;
 }
