@@ -70,7 +70,7 @@ depend:		$(SRCS) $(HDRS)
                         cat make.template - > makefile.n;\
                 mv -f makefile.n makefile
 
-makefile:	make.template
+makefile:	make.template $(MDEPS)
 		cd $(VPATH); rm -f makefile; cp make.template makefile; \
 		make -f make.template sources depend
 		if [ ! -f makefile ]; then ln -s $(VPATH)/makefile makefile; fi
