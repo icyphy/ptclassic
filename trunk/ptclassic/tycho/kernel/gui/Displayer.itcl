@@ -1,45 +1,41 @@
-##########################################################################
 # Definition of a display manager
 # 
-# Author: Farhana Sheikh
-# Version: $Id$
+# @Author: Farhana Sheikh
+#
+# @Version: $Id$
 # 
-# Copyright (c)  The Regents of the University of California.
+# @Copyright (c) 1995-%Q% The Regents of the University of California.
 # All rights reserved.
-# 
+#
 # Permission is hereby granted, without written agreement and without
 # license or royalty fees, to use, copy, modify, and distribute this
-# software and its documentation for any purpose, provided that the
-# above copyright notice and the following two paragraphs appear in all
-# copies of this software.
-# 
+# software and its documentation for any purpose, provided that the above
+# copyright notice and the following two paragraphs appear in all copies
+# of this software.
+#
 # IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
 # FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
 # ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
 # THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
-# 
+#
 # THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
 # INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
 # MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
 # PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
 # CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 # ENHANCEMENTS, OR MODIFICATIONS.
-#
-#                                                COPYRIGHTENDKEY
+# 
+#                                        PT_COPYRIGHT_VERSION_2
+#                                        COPYRIGHTENDKEY
+#######################################################################
 
-# KNOWN BUGS:
-#
-
+# FIXME:
 # FEATURES TO BE ADDED:
 # (1) Add the remove menu method so that a menu can be removed
-# (2) Add method to add separators to the menus
 
-if {[info class ::tycho::Displayer] != ""} {
-    delete class ::tycho::Displayer
-}
 
-##########################################################################
+#######################################################################
 #### Displayer
 # This class defines a generic view manager that manages a view.  A view
 # may contain other views which display different kinds of visual or 
@@ -58,54 +54,81 @@ if {[info class ::tycho::Displayer] != ""} {
 # <p>
 # Here is an example:
 # <tcl><pre>
-# tycho::Displayer .dm
+# ::tycho::Displayer .dm
 # .dm centerOnScreen
 # </pre></tcl>
-
+#
 class ::tycho::Displayer {
     inherit ::tycho::Dismiss
 
     constructor {args} {}
     destructor {}
 
-    #####################################################################
-    ####                          options                            ####
+    ###################################################################
+    ####                            options                        ####
 
     # Name of displayer; appears as title of window
-
     itk_option define -name name Name ""
 
-    #####################################################################
-    ####                        public methods                       ####
+    ###################################################################
+    ####                         public methods                    ####
 
-    # methods to manipulate menus 
-    public method addMenu {name args}
-    public method removeMenu {name}
-    public method disableMenu {name}
-    public method enableMenu {name}
-    public method queryMenuState {name} {return $state}
+    # Add a menu to the displayer
+    method addMenu {name leftOrRight args}
+
+    # Add a menu item to a menu in the displayer 
+    method addMenuItem {itemName inMenu args}
     
-    # methods to manipulate menu items
-    public method addMenuItem {itemName inMenu args}
-    public method enableMenuItem {itemName inMenu}
-    public method disableMenuItem {itemName inMenu}
-    public method queryMenuItemState {itemName inMenu} {return $state}
+    # Add a separator to a menu
+    method addSeparator {inMenu}
 
-    # methods to manage a view
-    public method setView {viewName}
+    # Disable an entire menu 
+    method disableMenu {name}
 
-    #####################################################################
-    ####                       private variables                     ####
+    # Disable a menu item in a menu
+    method disableMenuItem {itemName inMenu}
 
-    private variable thisView
+    # Enable an entire menu
+    method enableMenu {name}
+
+    # Enable a menu item in a menu
+    method enableMenuItem {itemName inMenu}
+
+    # Query the state of a menu item in a menu
+    method queryMenuItemState {itemName inMenu} {return $state}
+    
+    # Query the state of an entire menu
+    method queryMenuState {name} {return $state}
+
+    # Remove a menu from the displayer
+    method removeMenu {name}
+
+    # Display the given view inside the displayer
+    method setView {viewName}
+
+    ###################################################################
+    ####                   private variables                       ####
+
+    # need a variable to keep track of number of menus added
+    private variable index 0
+
     # need a variable to keep track of menus
     private variable validMenus
-    private variable index 0
 }
 
-# --------------------------------------------------------------
-#                        CONSTRUCTOR
-# --------------------------------------------------------------
+#######################################################################
+#### -name configuration
+# Name of the display.  
+# 
+configbody ::tycho::Displayer::name {
+
+    wm title $itk_component(hull) $itk_option(-name)
+    wm iconname $itk_component(hull) $itk_option(-name)
+}
+
+#######################################################################
+#### constructor
+#
 body ::tycho::Displayer::constructor {args} {
 
     # Setup the standard menu bar for a generic view
@@ -128,7 +151,7 @@ body ::tycho::Displayer::constructor {args} {
 
     # Add the File menu which is probably going to be required for
     # all displays
-    $this addMenu File -underline 0
+    $this addMenu File left -underline 0
 
     # reset the text of the dismiss button
     $itk_component(dismiss) configure -text "DISMISS"
@@ -140,44 +163,25 @@ body ::tycho::Displayer::constructor {args} {
     eval itk_initialize $args
 }
 
-# --------------------------------------------------------------
-#                        DESTRUCTOR
-# --------------------------------------------------------------
+#######################################################################
+#### destructor
+#
 body ::tycho::Displayer::destructor {} {
 }
 
-# --------------------------------------------------------------
-#                             OPTIONS
-# --------------------------------------------------------------
-# --------------------------------------------------------------
-# OPTION: -name
+    ###################################################################
+    ###################################################################
+    ####                      public methods                       ####
+
+
+#######################################################################
+#### addMenu
+# Allows a view to add a menu to its displayer.  The arguments to the
+# method are the name of the menu to be added and the specification of
+# extra options for the menu buttom besides the text and menu options.
+# An argument to pack menus on the left or right is also required.
 #
-# Name of the display.  
-# --------------------------------------------------------------
-configbody ::tycho::Displayer::name {
-
-    wm title $itk_component(hull) $itk_option(-name)
-    wm iconname $itk_component(hull) $itk_option(-name)
-}
-
-# ---------------------------------------------------------------
-#                        PUBLIC METHODS
-# ---------------------------------------------------------------
-
-# ---------------------------------------------------------------
-# METHOD: addMenu
-#
-# ARGUMENTS:
-# name: name of the menu to be added
-# args: specification of extra options for menu button besides 
-#       text and menu
-# 
-# This method provides a means for a view to add a menu to the 
-# displayer
-# FIXME: Need to add an argument so that the menubuttons can be
-# packed either on the left or right. 
-# ---------------------------------------------------------------
-body ::tycho::Displayer::addMenu {name args} {
+body ::tycho::Displayer::addMenu {name leftOrRight args} {
     
     # check if name is already used 
     foreach i [array names validMenus] {
@@ -202,7 +206,7 @@ body ::tycho::Displayer::addMenu {name args} {
 		-highlightcolor
     }
 
-    pack $itk_component(menu_$name) -side left
+    pack $itk_component(menu_$name) -side "$leftOrRight"
 
     # New menu contents
     itk_component add menuList_$name {
@@ -214,26 +218,72 @@ body ::tycho::Displayer::addMenu {name args} {
 
 }
 
-# ---------------------------------------------------------------
-# METHOD: removeMenu
+#####################################################################
+#### addMenuItem
+# Add a menu item to the end of a menu.
+# The method takes the name of the menu item, the name of the menu
+# in which the menu item is to be added and other menu item options
+# including the command option.
 #
-# ARGUMENTS:
-# name: name of the menu to be removed
-# 
-# This method provides a means for a view to remove a menu 
-# ---------------------------------------------------------------
-body ::tycho::Displayer::removeMenu {name} {
+body ::tycho::Displayer::addMenuItem {itemName inMenu args} {
+    
+    set found 0
+
+    # check for valid inMenu
+    foreach i [array names validMenus] {
+	if {$validMenus($i) == $inMenu} {
+	    set found 1
+	}
+    }
+    if {$found == 0} {
+	error "Menu $inMenu does not exist."
+    }
+    
+    # check if itemName does not already exists
+    if [catch {set check [$itk_component(menuList_$inMenu) \
+	    index "$itemName"] } ] {
+	
+	# create a new menu item 
+	eval $itk_component(menuList_$inMenu) add command \
+		[list -label "$itemName"] \
+		$args
+	
+    } {
+	# if it does then link it to cmd
+	eval $itk_component(menuList_$inMenu) entryconfigure "$itemName" \
+		$args
+    }
 }
 
-# ---------------------------------------------------------------
-# METHOD: disableMenu
+
+#####################################################################
+#### addSeparator
+# Add a separator to a menu.
+# The method takes the name of the menu as an argument.
 #
-# ARGUMENTS:
-# name: name of the menu to be disabled
-# 
+body ::tycho::Displayer::addSeparator {inMenu} {
+
+    set found 0
+
+    # check for valid inMenu
+    foreach i [array names validMenus] {
+	if {$validMenus($i) == $inMenu} {
+	    set found 1
+	}
+    }
+    if {$found == 0} {
+	error "Menu $inMenu does not exist."
+    }
+
+    $itk_component(menuList_$inMenu) add separator
+}
+
+#######################################################################
+#### disableMenu
 # This method provides a way for the view to disable an entire menu in
-# the displayer
-# ---------------------------------------------------------------
+# its displayer.  The name of the menu to be disabled is the only
+# argument.
+#
 body ::tycho::Displayer::disableMenu {name} {
     
     set found 0
@@ -259,14 +309,40 @@ body ::tycho::Displayer::disableMenu {name} {
     }
 }
 
-# ---------------------------------------------------------------
-# METHOD: enableMenu
+#####################################################################
+#### disableMenuItem
+# Disable the menu item in the specified menu.  The menu item name 
+# and the name of the menu that contains the item are the required
+# arguments.
 #
-# ARGUMENTS:
-# name: name of the menu to be enabled
+body ::tycho::Displayer::disableMenuItem {itemName inMenu} {
+    set found 0
+
+    # check for valid inMenu
+    foreach i [array names validMenus] {
+	if {$validMenus($i) == $inMenu} {
+	    set found 1
+	}
+    }
+    if {$found == 0} {
+	error "Menu $inMenu does not exist."
+    }
+    
+    # check if itemName exists
+    if [catch {set check [$itk_component(menuList_$inMenu) \
+	    index "$itemName"] } ] {
+	error "Menu item $itemName does not exist."
+    } {
+	$itk_component(menuList_$inMenu) entryconfigure "$itemName" \
+		-state disabled
+    }
+}
+
+#####################################################################
+#### enableMenu
+# Enable an entire menu that has been previously disabled.  The name
+# of the menu of the menu to be enabled is the only argument.
 #
-# Allows a view to enable an entire menu that has been disabled previosly
-# ---------------------------------------------------------------
 body ::tycho::Displayer::enableMenu {name} {
 
     set found 0
@@ -292,19 +368,76 @@ body ::tycho::Displayer::enableMenu {name} {
     }
 }
 
-# ---------------------------------------------------------------
-# METHOD: queryMenuState
+#####################################################################
+#### enableMenuItem
+# Enable the menu item in the specified menu. Required arguments are
+# the name of the menu item and the name of the menu that contains
+# the item.
 #
-# ARGUMENTS:
-# name: name of the menu
-# 
-# RETURNS: 
-# state: current state of the menu: 0 if all entries are disabled, 
-#                                   1 if all entries are enabled,
-#                                   2 otherwise
-# 
-# Query the current state of the menu
-# ----------------------------------------------------------------
+body ::tycho::Displayer::enableMenuItem {itemName inMenu} {
+
+    set found 0
+
+    # check for valid inMenu
+    foreach i [array names validMenus] {
+	if {$validMenus($i) == $inMenu} {
+	    set found 1
+	}
+    }
+    if {$found == 0} {
+	error "Menu $inMenu does not exist."
+    }
+    
+    # check if itemName exists
+    if [catch {set check [$itk_component(menuList_$inMenu) \
+	    index "$itemName"] } ] {
+	error "Menu item $itemName does not exist."
+    } {
+	$itk_component(menuList_$inMenu) entryconfigure "$itemName" \
+		-state normal
+    }
+}
+
+######################################################################
+#### queryMenuItemState
+# This method allows a view to query the state of a menu item.
+# The required arguments are the name of the menu item and the name
+# of the menu that contains it.  The method returns the state of the
+# menu item: normal, disabled, or active.
+#
+body ::tycho::Displayer::queryMenuItemState {itemName inMenu} {
+
+    set found 0
+
+    # check for valid inMenu
+    foreach i [array names validMenus] {
+	if {$validMenus($i) == $inMenu} {
+	    set found 1
+	}
+    }
+    if {$found == 0} {
+	error "Menu $inMenu does not exist."
+    }
+    
+    # check if itemName exists
+    if [catch {set check [$itk_component(menuList_$inMenu) \
+	    index "$itemName"] } ] {
+	error "Menu item $itemName does not exist."
+    } {
+	set currentState [$itk_component(menuList_$inMenu) \
+		entrycget "$itemName" -state]
+    }
+
+    return $currentState
+}
+
+#####################################################################
+#### queryMenuState
+# Query the current state of the menu. The only required argument is
+# the name of the menu.  The method returns 0 if all the items in
+# the menu are disabled, 1 if all the entries are enabled, and 
+# 2 otherwise.
+#
 body ::tycho::Displayer::queryMenuState {name} {
     set found 0
 
@@ -352,161 +485,26 @@ body ::tycho::Displayer::queryMenuState {name} {
     }
 }
 
-# ----------------------------------------------------------------
-# METHOD: addMenuItem
+#######################################################################
+#### removeMenu
+# Allows a view to remove a menu from its displayer.  It takes the
+# the name of the menu to be removed as an argument.
 #
-# ARGUMENTS:
-# itemName: name of the menu item
-# inMenu:   name of the menu in which menu item is to be added to
-# args:     other menu item options including the command
-#
-# Adds a menu item to the end of a menu 
-# ----------------------------------------------------------------
-body ::tycho::Displayer::addMenuItem {itemName inMenu args} {
-    
-    set found 0
-
-    # check for valid inMenu
-    foreach i [array names validMenus] {
-	if {$validMenus($i) == $inMenu} {
-	    set found 1
-	}
-    }
-    if {$found == 0} {
-	error "Menu $inMenu does not exist."
-    }
-    
-    # check if itemName does not already exists
-    if [catch {set check [$itk_component(menuList_$inMenu) \
-	    index "$itemName"] } ] {
-	
-	# create a new menu item 
-	eval $itk_component(menuList_$inMenu) add command \
-		[list -label "$itemName"] \
-		$args
-	
-    } {
-	# if it does then link it to cmd
-	eval $itk_component(menuList_$inMenu) entryconfigure "$itemName" \
-		$args
-    }
+body ::tycho::Displayer::removeMenu {name} {
 }
 
-# ----------------------------------------------------------------
-# METHOD: enableMenuItem 
-#
-# ARGUMENTS: 
-# itemName: name of the menu item
-# inMenu: name of the menu that contains the item
-#
-# Enables the menu item in the specified menu
-# ----------------------------------------------------------------
-body ::tycho::Displayer::enableMenuItem {itemName inMenu} {
 
-    set found 0
-
-    # check for valid inMenu
-    foreach i [array names validMenus] {
-	if {$validMenus($i) == $inMenu} {
-	    set found 1
-	}
-    }
-    if {$found == 0} {
-	error "Menu $inMenu does not exist."
-    }
-    
-    # check if itemName exists
-    if [catch {set check [$itk_component(menuList_$inMenu) \
-	    index "$itemName"] } ] {
-	error "Menu item $itemName does not exist."
-    } {
-	$itk_component(menuList_$inMenu) entryconfigure "$itemName" \
-		-state normal
-    }
-}
-
-# ----------------------------------------------------------------
-# METHOD: disableMenuItem 
+#######################################################################
+#### setView
+# Display the given view inside the displayer.  The required argument
+# is the name of the view widget.
 #
-# ARGUMENTS: 
-# itemName: name of the menu item
-# inMenu: name of the menu that contains the item
-#
-# Disables the menu item in the specified menu
-# ----------------------------------------------------------------
-body ::tycho::Displayer::disableMenuItem {itemName inMenu} {
-    set found 0
-
-    # check for valid inMenu
-    foreach i [array names validMenus] {
-	if {$validMenus($i) == $inMenu} {
-	    set found 1
-	}
-    }
-    if {$found == 0} {
-	error "Menu $inMenu does not exist."
-    }
-    
-    # check if itemName exists
-    if [catch {set check [$itk_component(menuList_$inMenu) \
-	    index "$itemName"] } ] {
-	error "Menu item $itemName does not exist."
-    } {
-	$itk_component(menuList_$inMenu) entryconfigure "$itemName" \
-		-state disabled
-    }
-}
-
-# ----------------------------------------------------------------
-# METHOD: queryMenuItemState 
-#
-# ARGUMENTS: 
-# itemName: name of the menu item
-# inMenu: name of the menu that contains the item
-#
-# RETURNS:
-# state: the current state of the menu item: normal, disabled, active
-#
-# This method allows the view to query the state of a menu item.
-# ----------------------------------------------------------------
-body ::tycho::Displayer::queryMenuItemState {itemName inMenu} {
-
-    set found 0
-
-    # check for valid inMenu
-    foreach i [array names validMenus] {
-	if {$validMenus($i) == $inMenu} {
-	    set found 1
-	}
-    }
-    if {$found == 0} {
-	error "Menu $inMenu does not exist."
-    }
-    
-    # check if itemName exists
-    if [catch {set check [$itk_component(menuList_$inMenu) \
-	    index "$itemName"] } ] {
-	error "Menu item $itemName does not exist."
-    } {
-	set currentState [$itk_component(menuList_$inMenu) \
-		entrycget "$itemName" -state]
-    }
-
-    return $currentState
-}
-
-# ----------------------------------------------------------------
-# METHOD: setView
-#
-# ARGUMENTS: 
-# viewName: name of the view widget
-#
-# Displays the given view inside the displayer
-# ----------------------------------------------------------------
 body ::tycho::Displayer::setView {viewName} {
 
-    # pack into the view frame in the window childsite
-    pack $viewName -in $itk_component(viewFrame) -expand true -fill both
     # install view menus
     $viewName addMyMenus
+    # pack into the view frame in the window childsite
+    pack $viewName -in $itk_component(viewFrame) -expand true -fill both
 }
+
+
