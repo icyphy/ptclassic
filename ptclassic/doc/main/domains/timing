@@ -79,7 +79,7 @@ time, it seems not only awkward but infeasible to assign any
 execution delay to the inner domain.  Instead, we can simulate
 any desired time delay of the inner domain by attaching a
 .c Delay
-star in the outer domain to the inputs and outputs of the wormhole.
+star in the outer domain to the inputs or outputs of the wormhole.
 The decoupling of the delay and the functionality of a 
 block in a timed domain
 is the basic technique we use in a timed domain like DE.
@@ -108,9 +108,8 @@ and copied to the \fIcurrentTime\fR of the
 inner domain.  The \fIcurrentTime\fR of the inner domain
 proceeds as the wormhole
 is executed until the stopping condition is met.  After the execution 
-finishes, the \fIcurrentTime\fR of the inner domain is scaled
-by the inverse of the \fItimeScale\fR and assigned to the output data
-packets.
+finishes, the \fIcurrentTime\fR of the inner domain is scaled again
+by the inverse of the \fItimeScale\fR and informed to the outer domain.
 A user can change the value of the
 scale factor by defining a 
 .c FloatState
@@ -162,7 +161,8 @@ until the next earliest event in the outer domain.
 When the
 wormhole
 is to be executed, we check the \fIexpected\fR next global time by examining
-the next earliest event in the outer domain.  The stopping condition
+the next earliest event in the event queue of the outer domain.  
+The stopping condition
 of the inner timed domain is set with the stop time equal to the
 expected next global time.  As long as the
 wormhole
@@ -200,8 +200,8 @@ until the actual (not expected) next global time in the outer domain.
 This proves the correctness of our solution.
 But, if there are more than one, say two, timed
 wormholes,
-this approach also fails to work.  We have to compare the
-time stamps of the output events from the
+this approach also fails.  We have to compare the
+time stamps of the output events from both
 wormholes to detect the actual next global time. 
 While we are executing a 
 wormhole,
@@ -209,43 +209,57 @@ it is not possible to determine the actual next global
 time since it is unknown before executing the other
 wormhole.
 .pp
-Finally, we have developed the following solution.  At the beginning of
-the execution, we set the stop time of the
-wormhole
-to the current global time of the outer domain.
-This forces the inner domain to be scheduled
-only until the current global time.
-The wormhole
-acts exactly like a functional star without delay.
-According to the scheme, the
-wormhole
-may finish the execution even before the current event is completely
-processed (the domain is not deadlocked).  
-Then, the wormhole
-should be invoked again to finish the previous execution. 
-The trick is to decide when we invoke the wormhole again,
-since it may not receive any further events.
-At the end of the execution of the
+Finally, we have developed the following solution.  
+When a wormhole is fired, its stopping time is set equal to the
+external global time. Generally that external global time must be equal to
+the time stamp of the event that triggered the firing of the
+wormhole. Thus, the stopping time is equal to the time stamp of the
+event that triggered the firing of the wormhole.
+Thus, generally speaking the wormhole cannot advance in time at
+all. The wormhole looks like a functional star without delay.
+The wormhole processes this single input event and any simultaneous
+internal events, sets its global time to
+the oldest (stalest) event on its event queue, and returns control.
+The external domain must invoke this wormhole again at this internal
+global time, or earlier if another event on its own event queue triggers
+the wormhole earlier. Thus, in effect the external domain must
+store an event on its event queue at the internal global time for the wormhole;
+in effect, the outer event queue is storing the stalest event on the
+inner domain event queue. This event triggers the firing of the
+wormhole at that proper time.
+Therefore, at the end of the execution of the
 wormhole,
 we determine the next event time of the inner domain and copy it to
 \fIcurrentTime\fR of the inner scheduler.
 We also set a flag, \fIstopBeforeDeadlocked\fR, if the inner domain
 is not deadlocked.
-Then, the outer 
-.c Scheduler
-checks the flag and invokes the wormhole
-at the next event time of the inner domain, or at the arrival time
-of a new event to the wormhole.
-Even though a new event arrives before the next event time of the inner
-domain, the inner scheduler
-can process the incoming event without hazards since
-the actual current time of the inner domain is less than the arrival time
-of the new event.  When the outer global clock indicates the
-next event time of the inner domain, the 
-wormhole is executed again at the current global time, and
-the operation is repeated.
+If the flag is set, 
+Then, the outer scheduler
+stores a triggering event of the inner domain
+in the event queue
+at the scaled \fIcurrentTime\fR of the inner scheduler.
 .pp
-In this approach, the inner domain can never overtake the the
+In this approach, the total system event queue consists of the outer
+domain event queue and the wormhole event queues. These event queues
+are coordinated by storing the stalest event of the inner domains
+on the outer domain event queue in order to invoke the wormholes
+at the proper time.
+Each time a wormhole is fired, it processes one event, either
+an external triggering event or an internal event queue event.
+If there are multiple events with the same time stamp, they can
+all be processed.
+.pp
+An important exception occurs when the outer domain knows that
+future events are constrained in the earliest time they can occur.
+For this case, the outer domain can set a stopping time equal to
+that "earliest next event". This will be more efficient because
+generally the wormhole can process more than just the external
+triggering event, it can also process some internally generated and
+consumed events. This exception would occur for an SDF outer domain,
+which when it invokes the wormhole can set the stopping time equal
+to the next sample time for the wormhole.
+.pp
+In summary, the inner domain can never overtake the the
 outer domain in time, which proves the correctness of the approach
 regardless of the number of timed
 wormholes involved.  The timed

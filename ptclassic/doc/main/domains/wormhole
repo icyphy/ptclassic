@@ -2,8 +2,8 @@
 .H1 "The Wormhole Class"
 .pp
 .IE "wormhole design"
-A wormhole for a domain is much like star belonging to that domain,
-but it can contain pointers to a subsystem that operates in a different
+A wormhole for a domain is much like a star belonging to that domain,
+but it contains pointers to a subsystem that operates in a different
 domain.  The interface to that other domain is through a "universal
 event horizon".
 .IE "universal event horizon"
@@ -15,7 +15,7 @@ The base
 .c Wormhole
 class is derived from class
 .c Runnable ,
-just like the base class
+just like the class
 .c Universe .
 Every member of the
 .c Runnable
@@ -65,16 +65,16 @@ The
 .c Scheduler 
 executes a star by calling its \fIgo()\fR method.
 Before the execution of a star
-data packets (
-.c Particles )
+data packets 
+.c (Particles )
 are delivered to the 
 .c Star
-via \fIgrabData()\fR method of the input ports.
+by \fIgrabData()\fR method of the input ports.
 .IE "grabData()"
 After its execution, the 
 .c Star
 sends particles to other stars
-via the \fIsendData()\fR method of the output ports.
+by \fIsendData()\fR method of the output ports.
 .IE "sendData()"
 Thus, the
 .c Scheduler
@@ -112,10 +112,10 @@ the
 first synchronize the inner domain with the outer domain.
 The \fIcurrentTime\fR of the inner 
 .IE "currentTime, scheduler"
-scheduler is set to equal the arrival time of the data packets
+scheduler is set to the arrival time of the data packets
 .c (arrivalTime) .
 Since the SDF domain is untimed, decision on the arrival time of the
-data packets is trivial, as explained above.
+data packets is trivial.
 The next step is to call the \fIrun()\fR method of the base
 .c Wormhole\ class .
 Here is a part of the definition\** of the base 

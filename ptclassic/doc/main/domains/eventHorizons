@@ -78,7 +78,7 @@ calling the \fIgrabData()\fR of the
 .c ToEventHorizon
 first, and calling the \fIsendData()\fR of the
 .c FromEventHorizon 
-next, regardless of whether they are input ports or output ports
+next, regardless of whether it happens at an input port or an output port
 of the wormhole.
 .pp
 If data transfer were the sole purpose of the
@@ -93,7 +93,7 @@ perform the domain-specific operations.  First, We may optimize each domain
 interface by defining a 
 .c EventHorizon
 class for each pair of domains.  This approach is not attractive
-given the highly modularized and easily expandable design of \*(PT.
+for the highly modularized and easily expandable design of \*(PT.
 If we have $N$ domains, we would need to define $N sup 2$ 
 .c EventHorizon s.
 To make matters worse, if a user wants to add a new domain into \*(PT,
