@@ -370,11 +370,14 @@ proc ptkSetOrClearDebug { name octHandle } {
 # Procedure to update the iteration count portion of the control panel
 #
 proc ptkUpdateCount { name octHandle } {
-    global ptkDebug
+    global ptkDebug ptkRunFlag
     set win .run_$octHandle.debug.left.runcount.cnt
-    if {[info exists ptkDebug($name)] && $ptkDebug($name) } {
-	catch {$win configure -text [schedtime]}
-	after 200 ptkUpdateCount $name $octHandle
+    # only update again if there is an active debug run in progress
+    #   This prevents a huge pile up of ptkUpdateCounts due to stepping
+    #   or pause-go-pause etc.
+    if {[info exists ptkDebug($name)] && $ptkDebug($name) && [info exists ptkRunFlag($name)] && [regexp {^ACTIVE$} $ptkRunFlag($name)] } {
+        catch {$win configure -text [schedtime]}
+        after 200 ptkUpdateCount $name $octHandle
     }
 }
 
