@@ -820,19 +820,11 @@ Block* CGTarget::spliceStar(PortHole* p, const char* name,
 
 	if (p->atBoundary() && p->isItOutput()) {
 	    addTo = (Galaxy*) pfar->parent()->parent();
-	    if (pfar->aliasFrom()) {
-		GenericPort* galPort = pfar->aliasFrom();
-		pfar->clearAliases();
-		galPort->setAlias(*op);
-	    }
+	    pfar->moveMyAliasesTo(*op);
 	}
 	else {
 	    addTo = (Galaxy*) p->parent()->parent();
-	    if (p->aliasFrom()) {
-		GenericPort* galPort = p->aliasFrom();
-		p->clearAliases();
-		galPort->setAlias(*ip);
-	    }
+	    p->moveMyAliasesTo(*ip);
 	}
 	
 	addTo->addBlock(*newb,hashstring(newname));
