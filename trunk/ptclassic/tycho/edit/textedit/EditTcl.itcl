@@ -165,7 +165,7 @@ body ::tycho::EditTcl::help {} {
 #
 body ::tycho::EditTcl::parseNow {start stop} {
 
-    EditProgram::parseNow $start $stop
+    chain $start $stop
     set text $itk_component(text)
 
     # Remove tags first, if necessary

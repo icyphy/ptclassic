@@ -330,7 +330,7 @@ body ::tycho::EditItcl::help {} {
 #
 body ::tycho::EditItcl::parseNow {start stop} {
     
-    EditTcl::parseNow $start $stop
+    chain $start $stop
     set text $itk_component(text)
     
     # Remove tags first, if necessary
