@@ -200,7 +200,7 @@ _topFmtParse( char *fmt, TOPFmtInfo *pInfo) {
     pInfo->typeFmt = fmt;
     pInfo->CvtType = *(fmt++) & 0377;
 
-    if ( *fmt != NULL )
+    if ( *fmt != (char)NULL )
 	return TOP_FALSE;
 
     return TOP_TRUE;
