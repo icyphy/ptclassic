@@ -55,7 +55,7 @@ public:
 	~DCParProcs();
 
 	// Returns a pointer to the proper UniProc
-	DCUniProc *getSchedule(int num) { return &(schedules[pId[num]]); }
+	DCUniProc *getSchedule(int num) { return &(schedules[num]); }
 	UniProcessor* getProc(int num);
 
 	// return the amount of the IPC.
