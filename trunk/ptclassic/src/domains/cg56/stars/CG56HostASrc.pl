@@ -24,12 +24,10 @@ in all cases.  More work must be done to identify the safe cases.
 On each firing of the star, the \fIvalue\fP state is output.
 The host may modify the \fIvalue\fP state asyncronously.  Currently
 the value state is referenced by explicit memory location; however,
-we might want to generate a symbolic name
+we might want to generate a symbolic name.
 .LP
 Currently only scalors may be output (not waveforms).  This should
 be improved.
-.LP
-Currently derived stars
     }
     seealso { CG56HostSlider, CG56HostButton }
     output {
@@ -50,7 +48,7 @@ Currently derived stars
 	    attributes { A_NONCONSTANT|A_NONSETTABLE|A_XMEM }
     }
     codeblock(cbGenericAio) {
-generic $ref(value) $fullname() "$val(label)"
+aio_generic $ref(value) $fullname() "$val(label)"
     }
     codeblock (cbCopyToOutput) {
 	move	$ref(value),x0		; move value to output
