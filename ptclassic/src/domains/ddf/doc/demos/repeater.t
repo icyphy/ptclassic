@@ -5,7 +5,13 @@ This is a simple illustration of the
 .c Repeater
 star, used in an SDF wormhole.
 .DE
+.EQ
+delim off
+.EN
 .LO "$PTOLEMY/src/domains/ddf/demo"
+.EQ
+delim $$
+.EN
 .SV $Revision$ $Date$
 .AL "E. A. Lee"
 .LD

@@ -8,7 +8,13 @@ The top level schematic represents an SDF system, while the
 inside schematic represents a DDF system (implementing an
 if-then-else).
 .DE
+.EQ
+delim off
+.EN
 .LO "$PTOLEMY/src/domains/ddf/demo"
+.EQ
+delim $$
+.EN
 .SV $Revision$ $Date$
 .AL "E. A. Lee"
 .LD

@@ -12,7 +12,13 @@ stars.
 The inside system (in the SDF domain) multiplies the data value
 by a ramp.
 .DE
+.EQ
+delim off
+.EN
 .LO "$PTOLEMY/src/domains/ddf/demo"
+.EQ
+delim $$
+.EN
 .SV 1.6 12/16/92
 .AL "E. A. Lee"
 .LD

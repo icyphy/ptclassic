@@ -7,7 +7,13 @@ In this case, the system performs baud-rate timing
 recovery using an approximate minimum mean-square-error
 (MMSE) technique.
 .DE
+.EQ
+delim off
+.EN
 .LO "$PTOLEMY/src/domains/ddf/demo"
+.EQ
+delim $$
+.EN
 .SV $Revision$ $Date$
 .AL "E. A. Lee"
 .LD
