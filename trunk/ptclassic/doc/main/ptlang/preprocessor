@@ -50,8 +50,9 @@ start with an example, the file
 ident {
 /*  Anything put here will appear verbatim in the .cc and .h files
     so please note that comments must be delimited, as done here.
-    Normally, this directive is used to define constants, as in: */
-#define DUMMY 0
+    This feature is no longer used by the Ptolemy group; its use
+    is deprecated.
+*/
 }
 defstar {
 	name { FloatRect }
@@ -137,12 +138,7 @@ section is inserted, uninterpreted, at the beginning of the
 .c .h
 and
 .c .cc
-files;
-it is normally used to insert #define statements in all
-.c .h
-and
-.c .cc
-files generated from a particular source file (the naming is
+files (the naming is
 historical; this section was originally used to generate identifying
 information in the output files, but it is no longer needed for
 this purpose).
