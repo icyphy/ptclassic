@@ -64,6 +64,8 @@ public:
 	// for untimed domain, it is always FALSE.
 	int stopBeforeDeadlocked;
 
+	// identify itself
+	virtual const char* domain() const { return "UnDecided" ;}
 protected:
 
 	// request flag for halting -- schedulers must poll and reset
