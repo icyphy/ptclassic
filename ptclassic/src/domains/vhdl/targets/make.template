@@ -47,7 +47,9 @@ VHDLSIM = $(ROOT)/src/utils/ptvhdlsim
 SYNCOMPAT = $(ROOT)/src/compat/synopsys
 
 INCL = -I$(VHDLKERNEL) -I$(VHDLSTARS) -I$(SDFKERNEL) \
- -I$(KERNDIR) -I$(CGKERNEL) -I$(CGCKERNEL) -I$(VHDLSIM) -I$(SYNCOMPAT)
+ -I$(KERNDIR) -I$(CGKERNEL) -I$(CGCKERNEL) -I$(VHDLSIM) -I$(SYNCOMPAT) \
+ -I$(PTOLEMY)/tcltk/tcl/include \
+ -I/usr/openwin/include
 
 PL_SRCS = \
  CGCVSynchComm.pl \
@@ -60,8 +62,11 @@ PL_SRCS = \
 EXTRA_SRCS = $(PL_SRCS)
 
 SRCS = \
+ TkSchedTarget.cc \
  StructTarget.cc \
+ ArchTarget.cc \
  SynthTarget.cc \
+ SynthArchTarget.cc \
  SimVSSTarget.cc \
  SimMTTarget.cc \
  $(PL_SRCS:.pl=.cc)
