@@ -19,7 +19,7 @@ $Id$
 #include "KnownTarget.h"
 #include "SDFScheduler.h"
 #include "CG56Connect.h"
-#include "CG56Geodesic.h"
+#include "AsmForkNode.h"
 #include "ProcMemory.h"
 
 // for error messages (temporary, until wormholes exist):
@@ -64,7 +64,7 @@ public:
 	}
 
 	// new node (geodesic)
-	Geodesic& newNode() { LOG_NEW; return *new CG56Geodesic;}
+	Geodesic& newNode() { LOG_NEW; return *new AsmForkNode;}
 
 	// constructor
 	CG56Domain() : Domain("CG56") {}
