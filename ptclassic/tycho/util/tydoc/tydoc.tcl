@@ -90,6 +90,7 @@ proc tydoc {args} {
 
     set generateIndex 1
     set errorInfo ""
+    set retval ""
     if [catch {set retval [::tycho::HTMLDocSys::generateHTML $verbose $debug \
 	    $generateIndex $title \
 	    [lrange $args $switchCount end]]} err ] {
