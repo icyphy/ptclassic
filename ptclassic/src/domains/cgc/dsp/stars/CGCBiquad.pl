@@ -14,7 +14,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CGC dsp library }
 	explanation {
-This two-pole, two-zero IIR filter.
+A two-pole, two-zero IIR filter.
 	}
 	input {
 	  name{input}
@@ -24,39 +24,39 @@ This two-pole, two-zero IIR filter.
 	  name{output}
 	  type{float}
 	}
-        defstate {
+        state {
                 name {d1}
                 type { float }
                 default { "-1.1430" }
         }
-        defstate {
+        state {
                 name {d2}
                 type { float }
                 default { "0.41280" }
         }
-        defstate {
+        state {
                 name {n0}
                 type { float }
                 default { "0.067455" }
         }
-        defstate {
+        state {
                 name {n1}
                 type { float }
                 default { "0.135" }
         }
-        defstate {
+        state {
                 name {n2}
                 type { float }
                 default { "0.067455" }
         }
-	defstate {
+	state {
 	  name {state1}
 	  type { float }
 	  default { "0.0" }
 	  desc { internal state. }
 	  attributes { A_NONCONSTANT|A_NONSETTABLE }
 	}
-	defstate {
+	state {
 	  name {state2}
 	  type { float }
 	  default { "0.0" }
