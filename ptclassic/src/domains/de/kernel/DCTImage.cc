@@ -96,6 +96,7 @@ void DCTImage::assemble(const BaseImage* bi)
 // Are we set up to merge yet?
 	if (size != fullSize) {
 		float* tmpPtr = new float[fullSize];
+		for(int t = 0; t < fullSize; t++) { tmpPtr[t] = 0.0; }
 		copy(size, tmpPtr+startPos, DCTData);
 		delete DCTData;
 		DCTData = tmpPtr;
