@@ -59,8 +59,8 @@ namespace ::tycho {
 # to save work.
 #
 rename ::exit ::tclexit
-proc ::exit {} {
-    ::tycho::TopLevel::exitProgram
+proc ::exit {{queryUser 1}} {
+    ::tycho::TopLevel::exitProgram $queryUser
 }
 
 ##########################################################################
@@ -128,7 +128,7 @@ class ::tycho::TopLevel {
 
     #### exitProgram
     # Exit the program
-    public proc exitProgram {} {}
+    public proc exitProgram {{queryUser 1}} {}
 
     #### exitWhenNoMoreWindows
     # If the argument is zero, disable exiting when the last window
@@ -365,9 +365,14 @@ body ::tycho::TopLevel::raiseWindow {} {
 # it will return 0 if the user canceled the exit, and 1 if the exit
 # is in progress.
 #
-body ::tycho::TopLevel::exitProgram {} {
+body ::tycho::TopLevel::exitProgram {{queryUser 1}} {
+    if {$queryUser == 1} {
+	set response [askuser "OK to exit the program?"]
+    } else {
+	set response 1
+    }
     if {$exitconfirmed} {return 1}
-    if [askuser "OK to exit the program?"] {
+    if {$response} {
 	set exitconfirmed 1
 	# Need to delete all Toplevel objects first to make sure destructors
 	# are invoked before the exit process begins.  Catch errors here
