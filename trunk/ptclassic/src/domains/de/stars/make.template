@@ -24,6 +24,7 @@ INCL = -I$(DEDIR) -I$(KERNDIR) -I$(NETWK)
 PL_SRCS= \
 DEAnd.pl \
 DEArbitrate.pl \
+DEBarGraph.pl \
 DEBeep.pl \
 DEBlackHole.pl \
 DECellLoad.pl \
