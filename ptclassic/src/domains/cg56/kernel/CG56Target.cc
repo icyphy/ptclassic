@@ -21,14 +21,10 @@ $Id$
 #include "FixState.h"
 
 void CG56Target :: headerCode () {
-        MotorolaTarget::headerCode();
-	const char* path = expandPathName("~ptolemy/lib/cg56");
-	StringList inc = "\tinclude '";
-	inc += path;
-	inc += "/intequlc.asm'\n\tinclude '";
-	inc += path;
-	inc += "/ioequlc.asm'\n";
-	addCode(inc);
+    MotorolaTarget::headerCode();
+    const char* path = expandPathName("~ptolemy/lib/cg56");
+    myCode << "\tinclude '" << path << "/intequlc.asm'\n\tinclude '"
+	   << path << "/ioequlc.asm'\n";
 }
 
 void CG56Target :: setup() {
@@ -49,9 +45,8 @@ Block* CG56Target :: makeNew () const {
 }
 
 void CG56Target::writeFloat(double val) {
-	StringList out = "; WARNING: the M56000 does not support floating point!\n";
-	out += "; perhaps this state was meant to be type FIX?\n";
-	addCode(out);
+	myCode << "; WARNING: the M56000 does not support floating point!\n";
+	myCode << "; perhaps this state was meant to be type FIX?\n";
 	MotorolaTarget::writeFloat(val);
 }
 

@@ -29,12 +29,22 @@ public:
 };
 
 class MotorolaTarget : public AsmTarget {
-private:
-	void initStates();
+public:
+	MotorolaTarget(const char* nam, const char* desc, const char* stype);
+	// copy constructor
+	MotorolaTarget(const MotorolaTarget&);
+	Block* makeNew() const;
+	void setup();
+	void beginIteration(int repetitions, int depth);
+	void endIteration(int repetitions, int depth);
+	virtual double limitFix(double val);
+	/*virtual*/ StringList comment(const char*,const char*,const char*,const char*);
+	~MotorolaTarget();
 protected:
 	StringState xMemMap;
 	StringState yMemMap;
 
+	/*virtual*/ void tailerCode();
 	void codeSection();
 	void orgDirective(const char* memName, unsigned addr);
 	void writeInt(int);
@@ -46,18 +56,8 @@ protected:
 	void restoreProgramCounter();
 
 	int inProgSection;
-public:
-	MotorolaTarget(const char* nam, const char* desc, const char* stype);
-	// copy constructor
-	MotorolaTarget(const MotorolaTarget&);
-	Block* makeNew() const;
-	void setup();
-	void wrapup();
-	void beginIteration(int repetitions, int depth);
-	void endIteration(int repetitions, int depth);
-	const char* className() const;
-	virtual double limitFix(double val);
-	~MotorolaTarget();
+private:
+	void initStates();
 };
 
 #endif
