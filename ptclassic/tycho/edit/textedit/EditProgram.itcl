@@ -202,7 +202,6 @@ class ::tycho::EditProgram {
 body ::tycho::EditProgram::constructor {args} {
     
     eval itk_initialize $args
-    eval preference excludeoptions $this $args
 
     # Subscribe to the preference set
     preference subscribeoptions $this \
