@@ -53,6 +53,14 @@ StringList :: operator = (const char* s) {
 	return *this;
 }
 
+// Assignment operator, char assignment
+StringList&
+StringList :: operator = (char c) {
+	char buf[2];
+	buf[0] = c; buf[1] = 0;
+	return *this += buf;
+}
+
 // Constructors
 StringList::StringList(const char* s) {
 	totalSize=strlen(s);
