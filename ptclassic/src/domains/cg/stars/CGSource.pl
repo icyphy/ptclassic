@@ -1,6 +1,7 @@
 defstar {
 	name { Source }
 	domain { CG }
+	derivedFrom { CGVarTime }
 	desc {
 Generic code generator source star.
 	}

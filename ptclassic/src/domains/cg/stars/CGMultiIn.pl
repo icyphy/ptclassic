@@ -1,6 +1,7 @@
 defstar {
 	name { MultiIn }
 	domain { CG }
+	derivedFrom { CGVarTime }
 	desc {
 Takes multiple inputs and produces one output.
 	}
