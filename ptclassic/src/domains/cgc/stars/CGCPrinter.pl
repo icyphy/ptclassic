@@ -22,7 +22,7 @@ the same line, separated by tabs.
 	}
 	inmulti {
 		name { input }
-		type { ANYTYPE }
+		type { float }
 	}
 	state {
 		name { fileName }
