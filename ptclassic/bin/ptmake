@@ -34,4 +34,4 @@ if ($cwd != $objdir) then
 endif
 
 # Make sure we are in the right place (just in case the cd failed).
-if ($cwd == $objdir) gmake $*
+if ($cwd == $objdir) make $*
