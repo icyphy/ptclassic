@@ -97,52 +97,59 @@ State :: getParseToken(Tokenizer& lexer, int stateType) {
 		return t;
 	}
 
-reparse:
-// note: we can get a minus if we goto reparse and the value of the
+// we stay in this while loop only if a scalar state value is substituted
+// for, otherwise we return immediately.
+	while (1) {
+// note: we can get a minus if 2nd time in loop and the value of the
 // substituted state was negative.
-        if (isdigit(*token) || *token == '.' || *token == '-' )  {
+		if (isdigit(*token) || *token == '.' || *token == '-' )  {
 // possible scientific notation if ending in e or E.  Elim + and - as
 // special if so, and append to token.  Ugly hack.
-		int l = strlen(token);
-		if (token[l-1] == 'e' || token[l-1] == 'E') {
-			const char* tc = lexer.setSpecial("*()/[],^");
-			lexer >> token + l;
-			lexer.setSpecial(tc);
+			int l = strlen(token);
+			if (token[l-1] == 'e' || token[l-1] == 'E') {
+				const char* tc = lexer.setSpecial("*()/[],^");
+				lexer >> token + l;
+				lexer.setSpecial(tc);
+			}
+			if (stateType == T_Float) {
+				t.tok = T_Float;
+				t.doubleval = atof(token);
+				return t;
+			}
+			else {
+				t.tok = T_Int;
+				t.intval = atoi(token);
+				return t;
+			}
 		}
-		if (stateType == T_Float) {
-                        t.tok = T_Float;
-                        t.doubleval = atof(token);
-			return t;
-                }
-                else {
-                        t.tok = T_Int;
-                        t.intval = atoi(token);
-			return t;
+		if (is_idchar(*token)) {
+			const State* s = lookup(token,parent()->parent());
+			if (!s) {
+				parseError ("undefined symbol", token);
+				t.tok = T_ERROR;
+				return t;
+			}
+			if (strcmp(s->type(), "COMPLEX") == 0 ||
+			    s->size() != 1) {
+				t.tok = T_ID;
+				t.s = s;
+				return t;
+			}
+			// for int, float states we substitute their values
+			// here and reparse (stay in while loop)
+			else if (s->size() == 1) {
+				StringList value = s->currentValue();
+				strncpy (token, value, TOKSIZE-1);
+				// (re-execute the loop)
+			}
 		}
-	}
-	if (is_idchar(*token)) {
-                const State* s = lookup(token,parent()->parent());
-		if (!s) {
-			parseError ("undefined symbol", token);
+		else {
+			// if we get here, next token is bogus
+			parseError ("unexpected token", token);
 			t.tok = T_ERROR;
 			return t;
 		}
-		if (strcmp(s->type(), "COMPLEX") == 0 || s->size() != 1) {
-			t.tok = T_ID;
-			t.s = s;
-			return t;
-		}
-// for int, float states we substitute their values here and reparse
-		else if (s->size() == 1) {
-			StringList value = s->currentValue();
-			strncpy (token, value, TOKSIZE-1);
-			goto reparse;
-		}
 	}
-// if we get here, next token is bogus
-	parseError ("unexpected token", token);
-	t.tok = T_ERROR;
-	return t;
 }
 
 const State* State :: lookup (char* name, const Block* blockIAmIn) const {
