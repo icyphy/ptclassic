@@ -33,7 +33,7 @@
 # maintained.
 
 
-DIRS = X11R4 X11R5 cfront ptolemy nt.vc
+DIRS = X11R4 X11R5 cfront ptolemy nt nt.vc
 DEEPDIRS = matlab/extern/include mathematica/Source/Includes \
 	nt.vc/sys
 
