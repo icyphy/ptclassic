@@ -19,6 +19,14 @@ group source -label {Source Stars} {
         attribute Value -default 1.0 -type number -label Value
         port output -datatype float
     }
+    star impulse \
+            -class {Impulse} \
+            -label {Impulse} \
+            -icon {edit/cts/icons.tim#source.impulse} {
+        attribute Amplitude -default 1.0 -type number -label Value
+        attribute AtTime -default 0.0 -type number -label Value
+        port output -datatype float
+    }
     star squarewave \
             -class {SquareWave} \
             -label {SquareWave} \
@@ -28,6 +36,7 @@ group source -label {Source Stars} {
         attribute Frequency -default 1.0 -type number -label Value
         port output -datatype float
     }
+    
 }
 
 group sink -label {Sink Stars} {
