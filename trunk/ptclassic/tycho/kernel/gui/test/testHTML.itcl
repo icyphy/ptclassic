@@ -59,15 +59,14 @@ test HTML-1.1 {Test the HTML widget by viewing many different HTML pages} {
     # Open a HTML viewer
     set displayer [::tycho::File::openContext [file join $TYCHO doc index.html]]
 
-    # This is the delay in ms between pages
-    set delay 3000
-    set time 0
     set dirs [list \
-            [file join $PTOLEMY doc users_man wmwork] \
+            [file join $PTOLEMY doc html install] \
             [file join $PTOLEMY src domains sdf stars] \
             [file join $PTOLEMY public_html] \
             [file join $TYCHO doc ] \
-            [file join $TYCHO kernel doc codeDoc ]]
+            [file join $TYCHO doc itclhtml tcl7.6] \
+            [file join $TYCHO kernel doc codeDoc ] \
+	    ]
     
     foreach dir $dirs {
         if [ file isdirectory $dir ] {
@@ -77,9 +76,10 @@ test HTML-1.1 {Test the HTML widget by viewing many different HTML pages} {
                 puts "@@@ Now entering $dir"
                 foreach file $files {
                     if [file readable $file] {
-                        incr time $delay
                         puts $file
-                        after $time $displayer hyperJump [file join $dir $file]
+			# Use after idle so that the entire page is displayed
+			# if we are on a slow link
+                        after idle $displayer hyperJump [file join $dir $file]
                         update
                     }
                 }
