@@ -39,9 +39,9 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "xgout.h"
 #include "plotter.h"
 #include <math.h>
+
 #define MAX(a,b) ( ((a)>(b)) ? (a) : (b) )
 #define MIN(a,b) ( ((a)<(b)) ? (a) : (b) )
-char *malloc();
 
 static void hpglText();
 static void hpglSeg();

@@ -52,7 +52,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include <math.h>
 #define MAX(a,b) ( ((a)>(b)) ? (a) : (b) )
 #define MIN(a,b) ( ((a)<(b)) ? (a) : (b) )
-char *malloc();
 
 static void mifText();
 static void mifSeg();
