@@ -1315,7 +1315,9 @@ body ::tycho::File::disableMenuItem {itemName inMenu} {
     
     # check if itemName exists
     if [catch {set check [$itk_component(menu$inMenu) index "$itemName"] } ] {
-	error "Menu item $itemName does not exist."
+        global ::errorInfo
+        set saveInfo $errorInfo
+	error "Menu item $itemName does not exist." $saveInfo
     } {
 	$itk_component(menu$inMenu) entryconfigure "$itemName" -state disabled
     }
@@ -1333,7 +1335,9 @@ body ::tycho::File::enableMenuItem {itemName inMenu} {
     
     # check if itemName exists
     if [catch {set check [$itk_component(menu$inMenu) index "$itemName"] } ] {
-	error "Menu item $itemName does not exist."
+        global ::errorInfo
+        set saveInfo $errorInfo
+	error "Menu item $itemName does not exist." $saveInfo
     } {
 	$itk_component(menu$inMenu) entryconfigure "$itemName" -state normal
     }
@@ -1359,7 +1363,9 @@ body ::tycho::File::insertMenuItem {itemName before inMenu args} {
 
     # Check validity of the "before" argument.
     if [catch {set check [$itk_component(menu$inMenu) index "$before"]}] {
-        error "Menu item $before does not exist."
+        global ::errorInfo
+        set saveInfo $errorInfo
+        error "Menu item $before does not exist." $saveInfo
     }
 
     # check if itemName does not already exists
@@ -1401,7 +1407,9 @@ body ::tycho::File::removeMenuItem {itemName inMenu} {
     
     # check if itemName exists
     if [catch {set check [$itk_component(menu$inMenu) index "$itemName"] } ] {
-	error "Menu item $itemName does not exist."
+        global ::errorInfo
+        set saveInfo $errorInfo
+	error "Menu item $itemName does not exist." $saveInfo
     } {
 	$itk_component(menu$inMenu) delete "$itemName"
     }
