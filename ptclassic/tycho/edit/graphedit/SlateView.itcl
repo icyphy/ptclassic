@@ -76,8 +76,11 @@ class ::tycho::SlateView {
     # Manipulate models 
     method model {mode args}
 
-    # Handle change notification from the layout model
+    # Handle data change notification from the layout model
     method notify {method args}
+
+    # Handle event notification from the layout model
+    method notifyevent {event args}
 
     # Get the slate id of an item given its name
     method slateid {name}
@@ -86,55 +89,55 @@ class ::tycho::SlateView {
     ####                  protected methods                      ####
 
     # Add a new item
-    method _add {_ name args}
+    protected method _add {_ name args}
 
     # Change attributes of an item
-    method _attrset {name args}
+    protected method _attrset {name args}
 
     # Add a tag to all indicated items.
-    method _addtag {tag args}
+    protected method _addtag {tag args}
 
     # Set or get the coordinates of an item
-    method _coords {name args}
+    protected method _coords {name args}
 
     # Clear data from this editor
-    method _clear {}
+    protected method _clear {}
 
     # Delete an item
-    method _delete {name}
+    protected method _delete {name}
 
     # Delete a tag from all items.
-    method _dtag {tag {delete {}}}
+    protected method _dtag {tag {delete {}}}
 
     # Configure an item
-    method _itemconfigure {name args}
+    protected method _itemconfigure {name args}
     
     # Move an item
-    method _move {tag x y}
+    protected method _move {tag x y}
 
     # Start moving an item
-    method _moveclick {tag x y args}
+    protected method _moveclick {tag x y args}
 
     # Continue moving an item
-    method _movedrag {tag x y}
+    protected method _movedrag {tag x y}
 
     # Stop moving an item
-    method _moverelease {tag}
+    protected method _moverelease {tag}
 
     # Reshape an item
-    method _reshape {name x y args}
+    protected method _reshape {name x y args}
 
     # Start reshaping an item
-    method _reshapeclick {name x y args}
+    protected method _reshapeclick {name x y args}
 
     # Continue reshaping an item
-    method _reshapedrag {name x y}
+    protected method _reshapedrag {name x y}
 
     # Stop reshaping an item
-    method _reshaperelease {name}
+    protected method _reshaperelease {name}
 
     # Manipulate the the selection
-    method _select {mode {name {}}}
+    protected method _select {mode {name {}}}
 
     #################################################################
     ####                  protected variables                    ####
@@ -186,12 +189,25 @@ body ::tycho::SlateView::constructor {args} {
     # Evaluate options
     eval itk_initialize $args
 
-
     # Subscribe to the style parameters
     stylesheet subscribe \
 	    -canvasheight graphedit canvasHeight \
 	    -canvaswidth  graphedit canvasWidth \
 	    -canvascolor  graphedit canvasColor
+
+    # Create the layout model.
+    # FIXME: this needs to be settable externally so layouts can be shared.
+    set _layout [uplevel \#0 ::tycho::Layout [::tycho::autoName layout]]
+    model add layout $_layout
+
+    # Subscribe to the layout
+    $_layout subscribe data $this "$this notify"
+    $_layout subscribe event $this "$this notifyevent"
+
+    # In addition, subscribe to the layout model as a "view". This
+    # is necessary because the Layout model sometimes needs to get
+    # data from a real Tk canvas...
+    $_layout subscribe view $this
 }
 
 ########################################################################
@@ -527,18 +543,53 @@ body ::tycho::SlateView::model {mode args} {
 ########################################################################
 #### notify
 #
-# Notify on a change to the layout model. This method simply
-# prepends an underscore to the command name and evaluates the
+# Handle data change notification from the layout model. This method
+# simply prepends an underscore to the command name and evaluates the
 # protected method with that name.
 #
 body ::tycho::SlateView::notify {method args} {
     # puts "$this notify $method"
     eval _$method $args
 
-    # Assume any notification means a modification...
-    # (This is too agrresive -- even selecting an item
-    # causes the view to be marked modified...)
+    # We used to place the mark for modification in here.
+    # This was too agressive, as it marked the data modified
+    # even if an item was clicked on (but not moved). Now, the
+    # call to markModified takes place only in response to a
+    # "modified" event notification from the layout model. These
+    # events are geenrated by vertex and edge controllers.
     # markModified
+}
+
+########################################################################
+#### notifyevent
+#
+# Handle event notification from the layout model. This processes
+# the event in a switch. Subclasses may choose to override and
+# chain any unrecognized events.
+#
+body ::tycho::SlateView::notifyevent {event args} {
+    switch -exact $event {
+	"clear" {
+	    # Clear all items from the slate
+	    catch {unset _itemid}
+	    catch {unset _nameof}
+	    $_slate delete all
+	}
+	"modified" {
+	    # The data has changed
+	    # puts !Modified
+	    markModified
+	}
+	"saved" {
+	    # The data has been saved by some other view
+	    # puts !Saved
+	    markUnmodified
+	}
+	default {
+	    puts "Unrecognized event \"$event\" from \
+		    [$_layout cget -modelname]"
+	}
+    }
 }
 
 ########################################################################
@@ -566,6 +617,7 @@ body ::tycho::SlateView::slateid {name} {
 # Add a new item to the view.
 #
 body ::tycho::SlateView::_add {_ name args} {
+    # Extract item type and coordinates
     array set opts $args
     set type $opts(-slatetype)
     set coords $opts(-coords)
@@ -573,6 +625,7 @@ body ::tycho::SlateView::_add {_ name args} {
     unset opts(-coords)
     set args [array get opts]
 
+    # Create a top-level or child item
     if { [llength $name] == 1 } {
 	# Root item
 	set id [eval $_slate create $type $coords $args]
@@ -604,17 +657,6 @@ body ::tycho::SlateView::_addtag {tag args} {
 #
 body ::tycho::SlateView::_attrset {name args} {
     eval $_slate itemconfigure $_itemid($name) $args
-}
-
-########################################################################
-#### _clear
-#
-# Clear all items from the slate.
-#
-body ::tycho::SlateView::_clear {} {
-    catch {unset _itemid}
-    catch {unset _nameof}
-    $_slate delete all
 }
 
 ########################################################################
