@@ -52,7 +52,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 class StructTarget : public SimVSSTarget {
 public:
-	StructTarget(const char* name, const char* starclass, const char* desc);
+	StructTarget(const char*, const char*, const char*);
 	/*virtual*/ Block* makeNew() const;
 
 	// Class identification.
@@ -95,10 +95,6 @@ public:
 	// Return the assignment operators for States and PortHoles.
 	/*virtual*/ const char* stateAssign();
 	/*virtual*/ const char* portAssign();
-
-//  	// The only reason for redefining this from HLLTarget
-// 	// is to change the separator from "." to "_".
-// 	/*virtual*/ StringList sanitizedFullName(const NamedObj&) const;
 
 protected:
 	/*virtual*/ void begin();
@@ -175,13 +171,10 @@ private:
 	VHDLPortVarList ctlerVarPortList;
 
 	// Method called by C2V star to place important code into structure.
-        /*virtual*/ void registerC2V(int pairid, int numxfer, const char* dtype);
+        /*virtual*/ void registerC2V(int, int, const char*);
 
 	// Method called by V2C star to place important code into structure.
-	/*virtual*/ void registerV2C(int pairid, int numxfer, const char* dtype);
-
-//	// Assign names for each geodesic according to port connections.
-//	void setGeoNames(Galaxy&);
+	/*virtual*/ void registerV2C(int, int, const char*);
 
 	// Merge the Star's signal list with the Target's signal list.
 	void mergeSignalList(VHDLSignalList*);
