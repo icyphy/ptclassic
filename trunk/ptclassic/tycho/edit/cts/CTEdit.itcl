@@ -88,10 +88,22 @@ body ::tycho::CTEdit::constructor {args} {
 # Open the control panel for running the simulation.
 #
 body ::tycho::CTEdit::openControlPanel {graph} {
-    if { [info which -command $this.runwindow] != "" } {
-	raise [component hull].runwindow
+    set tl [[displayer] component hull].runwindow
+
+    if { [info which -command $tl] != "" } {
+	raise $tl
     } else {
-	::tycho::CTRunWindow [component hull].runwindow -graph $graph
+	# Generate a "random" port number. This is awful!
+	set str [clock clicks]
+	set len [string length $str]
+	set portnum 1[string range $str [expr $len-4] end]
+	puts "Portnum = $portnum"
+
+	# Create a simulation run control panel
+	set rw [::tycho::view CTRunWindow -name $tl -debug 1]
+
+	# Create a simulation object
+	set sim [$rw simulation create -debug 1 -portnum $portnum]
     }
 }
 

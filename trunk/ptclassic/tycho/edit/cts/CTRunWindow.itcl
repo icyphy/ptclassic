@@ -28,22 +28,47 @@
 # 						COPYRIGHTENDKEY
 ##########################################################################
 
+# We need to make sure that the simulation support package
+# is loaded
+package require tycho.util.ptsim
 
 ##########################################################################
 #### CTRunWindow
 #
 # Run window for CT domain.
 #
-class ::tycho::CTSControlPanel {
+class ::tycho::CTRunWindow {
+    inherit ::tycho::RunWindow
 
     constructor {args} {}
     destructor {}
+
+    method simulation {mode args}
 }
 
 ########################################################################
 #### constructor
 #
-body ::tycho::EditCTS::constructor {args} {
+body ::tycho::CTRunWindow::constructor {args} {
+    puts "CTRunWindow $this $args"
+
     # Initialize options
     eval itk_initialize $args
 }
+
+########################################################################
+#### simulation
+#
+body ::tycho::CTRunWindow::simulation {mode args} {
+    switch -exact $mode {
+	"create" {
+	    # Create a new simulation.
+	    set _simulation [uplevel #0 ::tycho::CTSimulation #auto $args]
+	    return $_simulation
+	}
+	default {
+	    eval chain $args
+	}
+    }
+}
+
