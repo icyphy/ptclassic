@@ -74,10 +74,13 @@ public:
 	ParProcessors* myProcs() { return parProcs; }
 
 	// create subGals for each processor
-	virtual int createSubGals();
+	int createSubGals(Galaxy&);
 
 	// set up processors
 	virtual void setUpProcs(int num);
+
+	// map targets of processors
+	void mapTargets(IntArray* a = 0) { parProcs->mapTargets(a); }
 
         // main body of the schedule. 
 	int mainSchedule();
@@ -89,7 +92,7 @@ public:
 ////////// Methods for wormholes ////////////////
 
 	// finialize the schedule of wormholes.
-	void finalSchedule();
+	int finalSchedule();
 
 	// set the scheduled result into a designated profile
 	void setProfile(Profile* profile);
@@ -99,9 +102,6 @@ public:
 	// Global schedule should be added in the derived class.
 	// Look at the DLSchedule for example.
 	StringList displaySchedule();
-
-	// sort Processors with finish time.
-	void sortProcessors() { parProcs->sortWithFinishTime(); }
 
 protected:
 	const char* logFile;
@@ -139,9 +139,6 @@ protected:
 	int assignManually() { return mtarget->assignManually(); }
 	int overrideSchedule() { return mtarget->overrideSchedule(); }
 
-	// old version of runOnce();
-	void oldRun();
-
 	// use a modified critical path algorithm to schedule the graphs
 	// with given number of processors.
 	int computeSchedule(Galaxy& g);
@@ -149,13 +146,16 @@ protected:
 	// virtual methods: prepare scheduling. By default, do nothing
 	virtual int preSchedule();
 
+	// check whether the galaxy contains a data-parallel star or not.
+	int withParallelStar();
+
 private:
 	// set the procId of stars after scheduling with OSOP option
 	// is executed. Prepare for adjustment.
 	void saveProcIds();
-	
-	// temporary hack to get around the CG-DDF limitation.
-	int oldRoutine;
+
+	// set the flag when the expanded graph is created.
+	int EGcreated;
 };
 
 #endif
