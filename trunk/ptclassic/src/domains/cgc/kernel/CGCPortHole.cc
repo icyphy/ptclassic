@@ -20,10 +20,21 @@ $Id$
 #include "SDFStar.h"
 #include "Error.h"
 
+void CGCPortHole :: initialize() {
+	CGPortHole :: initialize();
+
+	// member initialize.
+	myType = NA;
+	hasStaticBuf = TRUE;
+	asLinearBuf = TRUE;
+	manualFlag = FALSE;
+	maxBuf = 1;
+}
+
 void CGCPortHole::setFlags() {
-	if (asLinearBuf && (maxBuf % numXfer() != 0))
+	if (bufSize() % numXfer() != 0)
 		asLinearBuf = FALSE;
-	if (!asLinearBuf || (numXfer() * parentReps()) % maxBuf != 0)
+	if ((numXfer() * parentReps()) % bufSize() != 0)
 		hasStaticBuf = FALSE; 
 }
 
@@ -57,7 +68,7 @@ int CGCPortHole :: initOffset() {
 // is achieved or not.
 // return 1 if on the wormhole boundary
 int CGCPortHole :: maxBufReq() const {
-	if (atBoundary()) return 1;
+	if (atBoundary()) return maxBuf;
 	return isItOutput()? maxBuf: realFarPort()->maxBufReq();
 }
 
@@ -67,49 +78,21 @@ int CGCPortHole :: maxBufReq() const {
 void CGCPortHole :: finalBufSize(int statBuf) {
 	if (isItInput()) return;
 
-	int reqSize = cgGeo().getMaxNum();
-	int staticSize = localBufSize();
-
 	if (far()->isItOutput()) {
-		maxBuf = staticSize;
-		return;	// check wormhole boundary.
+		maxBuf = localBufSize();
+		return; // check wormhole boundary.
 	}
 
-	if (bufferSize > numXfer()) {
+	// Try best to realize Linear or static buffering.
+	// Look at CGGeodesic.cc to see the actual code for buffer size
+	// determination.
+	if (usesOldValues()) {
+		// if past values are used. give up linear buffering.
 		asLinearBuf = FALSE;
-		if (reqSize < bufferSize) reqSize = bufferSize;
+		statBuf = 0;
 	}
-
-	CGCPortHole* p = realFarPort();
-	if (p->fork()) {
-		// determine the maximum offset.
-		ForkDestIter next(p);
-		CGCPortHole* outp;
-		while ((outp = next++) != 0) {
-			CGCPortHole* inp = outp->realFarPort();
-			int myTry = TRUE;
-			// access to the past Particles
-			int temp = inp->inBufSize() - inp->numXfer();
-			if (temp) myTry = FALSE;
-			// delays
-			temp += inp->cgGeo().forkDelay();
-			if (temp % inp->numXfer() != 0) myTry = FALSE;
-
-			temp += inp->cgGeo().getMaxNum();
-			if (temp > reqSize) reqSize = temp;
-
-			// determine whether p can be of static buffering
-			if (!myTry) {
-				inp->asLinearBuf = FALSE;
-			}
-		}
-	} else {
-		int temp = p->inBufSize() - p->numXfer();
-		if (temp || (p->numTokens() % p->numXfer() != 0)) { 
-			p->asLinearBuf = FALSE;
-		}
-		reqSize += temp;
-	}
+	geo().preferLinearBuf(statBuf);
+	int reqSize = localBufSize();
 
 	// check whether this size is set manually or not.
 	// If yes, range check.
@@ -118,20 +101,18 @@ void CGCPortHole :: finalBufSize(int statBuf) {
 			Error::warn(*this, "buffer request is too small.");
 			maxBuf = reqSize;
 		}
-	} else if (statBuf == 0) {
-		maxBuf = reqSize;
 	} else { // static buffering option.
-		if (asLinearBuf && (reqSize % staticSize != 0)) {
-			maxBuf = ((reqSize/staticSize)+1) * staticSize;
+		if (asLinearBuf && (reqSize % numXfer() != 0)) {
+			// for maximum chance of linear buffering.
+			maxBuf = ((reqSize/numXfer())+1) * numXfer();
 		} else {
 			maxBuf = reqSize;
 		}
 	}
 
-	// set the static buffering option and offserReq flag
+	// set the flags
 	setFlags();
-
-	// confirm the asLinearBuf flag of fork-destination ports
+	CGCPortHole* p = realFarPort();
 	if (p->fork()) {
 		// determine the maximum offset.
 		ForkDestIter next(p);
@@ -139,9 +120,17 @@ void CGCPortHole :: finalBufSize(int statBuf) {
 		while ((outp = next++) != 0) {
 			CGCPortHole* inp = outp->realFarPort();
 			inp->setFlags();
+			// access to the past Particles
+			if (inp->usesOldValues() ||
+				(inp->numTokens() % inp->numXfer() != 0))
+				inp->asLinearBuf = FALSE;
 		}
 	} else {
 		p->setFlags();
+		if (p->usesOldValues() ||
+			(p->numTokens() % p->numXfer() != 0)) {
+			p->asLinearBuf = FALSE;
+		}
 	}
 }
 
