@@ -196,15 +196,27 @@ problems have been fixed in 0.7.2devel
 <li> You may need to do:
 <pre>
 cd $PTOLEMY
-chmod -R a+w
+chmod -R a+w .
+chown -R <I>yourlogin</I> .
 </pre>
-I'm not sure why.
+Where <CODE><I>yourlogin</I></CODE> is your NT login, which should
+also be present in <CODE>/etc/passwd</CODE>, which was created
+in the <CODE>mkpasswd</CODE> step above.
+
+ <p>The chown works around a problem where the configure scripts have
+problems with the write permissions on directories.  If you don't
+chown the tree, then you may see messages like
+<pre>
+not updating unwritable cache config.cache.
+</pre>
+We are not sure of the cause of this problem, hopefully it will be fixed
+in a future release.
+
 
 <li> Building Itcl, Octtools and Ptolemy will require about 470Mb of
 space for the sources, build directories and installation directories.
 To save space, you can build and install Itcl and Octtools separately
 and then do
-
 <pre>
 rm -rf $PTOLEMY/obj.nt4/tcltk $PTOLEMY/obj.nt4/octtools
 </pre>
@@ -279,25 +291,6 @@ like
 making install in kernel
 ../../mk/compile.mk:95: *** missing separator.  Stop.
 </pre>
-
-
-<li> Chown the tree to yourself.
-<pre>
-chown -R <I>yourlogin</I> $PTOLEMY
-</pre>
-Where <CODE><I>yourlogin</I></CODE> is your NT login, which should
-also be present in <CODE>/etc/passwd</CODE>, which was created
-in the <CODE>mkpasswd</CODE> step above.
-
- <p>The chown works around a problem where the configure scripts have
-problems with the write permissions on directories.  If you don't
-chown the tree, then you may see messages like
-
-<pre>
-not updating unwritable cache config.cache.
-</pre>
-We are not sure of the cause of this problem, hopefully it will be fixed
-in a future release.
 
 <li> To do the actual build, do
 <pre>
