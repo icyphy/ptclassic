@@ -27,7 +27,10 @@ $Id$
 // constructor
 BaseMultiTarget::BaseMultiTarget(const char* name,const char* starclass,
 		   const char* desc) : CGTarget(name,starclass,desc),
-	nChildrenAlloc(0), curChild(0), iters(0) {
+	nChildrenAlloc(0), curChild(0), iters(0)
+{
+	// loop scheduler makes no sense for a multitarget
+	loopScheduler.setAttributes(A_NONSETTABLE);
         addState(nprocs.setState("nprocs",this,"2","number of processors"));
         addState(inheritProcessors.setState(
 	     "inheritProcessors",this,"NO","If yes, inherit child targets"));
@@ -36,9 +39,7 @@ BaseMultiTarget::BaseMultiTarget(const char* name,const char* starclass,
 }
 
 int BaseMultiTarget :: run() {
-	// Sorry about the following horrible cast.
-	// Design of kernel Scheduler makes it very difficult to avoid
-	iters = ((SDFScheduler*)mySched())->getStopTime();
+	iters = (int)mySched()->getStopTime();
 	mySched()->setStopTime(1);
 	int i = Target::run();
 	return i;
