@@ -43,7 +43,7 @@ limitation of liability, and disclaimer of warranty provisions.
 		noInternalState();
 	}
 	codeblock(readIdx) {
-	move	#$addr(values),r0		; table address in y memory
+	move	#$addr(values),r0			; table address in y memory
 	move	$ref(input),n0			; table index
 	nop				; account for pipelining delay
 	}
@@ -52,7 +52,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	codeblock(lookup) {
 	move	y:(r0)+n0,x0		; read table value
-	move	x0,$ref(output)		; write table value to output
+	move	x0,$ref(output)			; write table value to output
 	}
 	go {
 		addCode(readIdx);
