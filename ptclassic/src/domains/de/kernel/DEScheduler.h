@@ -67,10 +67,10 @@ public:
 
 	// The setup function initialize the global event queue
 	// and notify the blockes of the queue name.
-	int setup(Block& galaxy);
+	int setup(Galaxy& galaxy);
 
 	// The run function resumes the run where it was left off.
-	int run(Block& galaxy);
+	int run(Galaxy&);
 
 	// Display the static schedule for SDF wormholes...
 	StringList displaySchedule(); 
