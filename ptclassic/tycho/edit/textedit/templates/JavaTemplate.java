@@ -30,12 +30,12 @@ package MyPackageName;
 //////////////////////////////////////////////////////////////////////////
 //// ClassName
 /** 
- * Description of the class
- * @author
- * @version $Id$
- * @see classname
- * @see full-classname
- */
+Description of the class
+@author
+@version $Id$
+@see classname
+@see full-classname
+*/
 public class ClassName {
     /** Constructor
      * @see full-classname/method-name
