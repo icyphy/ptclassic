@@ -1,0 +1,22 @@
+# $Id$
+#
+# Makefile for domain sections
+#
+
+PTOLEMY       = /usr/users/ptolemy
+PRINTER       = lw
+PRINTSEC      = $(PTOLEMY)/doc/bin/printsec
+HEADER        = $(PTOLEMY)/doc/headers/together $(PTOLEMY)/doc/headers/sogod
+MAINSEC	      = overall
+TMPFILE	      = tmp_print
+STARDIRS      = stars
+DEMODIRS      = demos
+
+MAKEVARS =	\
+		"PTOLEMY=$(PTOLEMY)" \
+		"PRINTER=$(PRINTER)" \
+		"PRINTSEC=$(PRINTSEC)" \
+		"HEADER=$(HEADER)"
+
+print:
+	$(PTOLEMY)/doc/bin/printdom
