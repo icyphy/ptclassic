@@ -289,18 +289,12 @@ CGTarget* CGCostTarget::findCodeGenTarget(const char* userTargetName) {
     return (CGTarget*) 0;
 }
 
-// Write out the equivalent Ptcl code for the galaxy
+// Write out the equivalent Ptcl code for the galaxy to the file
+// destDirectory/galaxyName.pt, and also write out a PTcl header
 int CGCostTarget::convertGalaxyToPtcl(Galaxy* localGalaxy) {
-    SDFPTclTarget* ptclTarget =
-	(SDFPTclTarget*) KnownTarget::find("SDF-to-PTcl");
-    if (ptclTarget == 0) return FALSE;
-    ptclTarget->clearGalaxy();
-    localGalaxy->setDomain("SDF");
-    ptclTarget->setGalaxy(*localGalaxy);
-    ptclTarget->setState("loopScheduler(DEF,CLUST,ACYLOOP)", loopingLevel);
-    ptclTarget->setState("directory", destDirectory);
-    ptclTarget->ptclDescription(localGalaxy, TRUE);
-    ptclTarget->clearGalaxy();
+    StringList ptclFileName;
+    ptclFileName << destDirectory << "/" << localGalaxy->name() << ".pt";
+    ptclDescription(localGalaxy, TRUE, ptclFileName);
     return TRUE;
 }
 
