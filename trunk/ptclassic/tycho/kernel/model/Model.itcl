@@ -138,7 +138,8 @@
 #          index, where the additional arguments describe how to create
 #          the data. This method is appropriate for models of graphical
 #          diagrams. <i>See note below regarding returned values.</i>
-#     <li>*dataconfigure* _index_ ?_option_? ?_value_? ...: Configure options of
+#     <li>*dataconfigure* _index_ ?_option_? ?_value_? ...: Configure
+#          options of
 #          data at the given index. This method is appropriate in any 
 #          model in which some data can be given additional attributes.
 #          It is often renamed according to the model: entryconfigure{},
@@ -192,6 +193,9 @@ class ::tycho::Model {
     #################################################################
     ####                        options                          ####
 
+    # If true, options are checked, otherwise any are allowed
+    public variable checkoptions 1
+
     # The name of this data object
     public variable dataname ""
 
@@ -221,6 +225,9 @@ class ::tycho::Model {
     #################################################################
     ####                     public methods                      ####
 
+    # Add a new type of association to the model
+    method association {type vcount acount args}
+    
     # Clear the undo history
     method clearHistory {args}
     
@@ -233,6 +240,9 @@ class ::tycho::Model {
     # Describe the data in the model, in the same format as write{}
     method describe {{prefix {}}}
 
+    # Add a new type of entity to the model
+    method entity {type count args}
+    
     # Externalize the model into a state file
     method externalize {fd {nohistory {}}}
     
@@ -245,9 +255,6 @@ class ::tycho::Model {
     # Get or set a mark in the undo history
     method mark {{markname {}} {position current}}
 
-    # Parse data into the model
-    method parse {type context data}
-    
     # Publish a change in data
     method publish {command index args}
 
@@ -281,23 +288,47 @@ class ::tycho::Model {
     #################################################################
     ####                  protected methods                      ####
 
-    # Return the children of an entity
-    protected method _children {index args}
+    # Parse arguments of an item
+    protected method _args {class type context defaults data}
+    
+    # Add a new association to the model
+    protected method _association {type name args}
+
+    # Get all attributes of an entity or association
+    protected method _attributes {class index}
+
+    # Get an attribute of an entity or association
+    protected method _cget {class index attr}
+
+    # Return the children of an entity and a given type
+    protected method _children {index type}
+
+    # Configure attributes of an entity or association
+    protected method _configure {class type index args}
+
+    # Add a new entity to the model
+    protected method _entity {type name args}
 
     # Return the parent of the entry
-    protected method _parent {index type}
+    protected method _parent {index}
+    
+    # Parse data into the model
+    protected method _parse {class type context defaults data}
     
     # Return the root of the entry
-    protected method _root {index type}
+    protected method _root {index}
     
     # Return the root entities of the given types.
-    protected method _roots {args}
+    protected method _roots {type}
 
     # Return the type of the named entity
     protected method _type {index}
 
+    # Return a description of an associations
+    protected method describeAssociation {type index prefix}
+
     # Return a description of an entity
-    protected method describeEntity {index type prefix}
+    protected method describeEntity {type index prefix}
 
     # Notify the subscribers of a change in data
     protected method notify {subscriber command pattern args}
@@ -305,17 +336,35 @@ class ::tycho::Model {
     #################################################################
     ####                  protected variables                    ####
 
-    # The types of association in  this model
-    protected variable associationTypes {}
-    
-    
-    # The types of entity in this model
-    protected variable entityTypes {}
-    
+    # The value of associations
+    protected variable _assnvalue
+
+    # The options of associations
+    protected variable _assnattrs
+
+    # The links of associations
+    protected variable _assnlinks
+
+    # The value of entities
+    protected variable _entyvalue
+
+    # The options of entities
+    protected variable _entyattrs
+
+    # The type of an entity or association
+    protected variable _type
+
+    # For each association, the value, link count, and default options
+    protected variable _associations
+
+    # For each entity, the value count, and default options
+    protected variable _entities
+
     # The marks in the redo/undo history
     protected variable historyMark
     
-    # The array of flags indicating whether an undo/redo command was published
+    # The array of flags indicating whether an undo/redo command
+    # was published
     protected variable publishable
     
     # The array of subscriptions. Each array index is a pair of
@@ -373,6 +422,23 @@ body ::tycho::Model::destructor {} {
     #    if { $persistent && $modified } {save}
 }
 
+########################################################################
+#### association
+#
+# Add a new type of association to the model. The first argument
+# is the type name of the association; the second argument is
+# zero or one, indicating whether the association has a value;
+# the third argument is the number of entities it links.
+# Following arguments are option names and their default values.
+#
+body ::tycho::Model::association {type vcount acount args} {
+    if { [::info exists _associations($type)] } {
+	error "Association type $type already exists"
+    }
+
+    set _associations($type) [concat $vcount $acount $args]
+}
+    
 ########################################################################
 #### clearHistory
 #
@@ -473,7 +539,9 @@ body ::tycho::Model::clearHistory {{from first} {to last}} {
 # "to" mark: an error will be flagged if it is not.
 # If either mark does not exist, then an error will be generated.
 #
-body ::tycho::Model::compactHistory {from to publish {command {}} {inverse {}}} {
+body ::tycho::Model::compactHistory \
+	{from to publish {command {}} {inverse {}}} {
+
     # Get the indexes corresponding to the marks
     if { ! [info exists historyMark($from)] } {
 	error "Unknown mark $from in $dataname"
@@ -544,18 +612,46 @@ body ::tycho::Model::compareMarks {mark1 operator mark2} {
 body ::tycho::Model::describe {{prefix {}}} {
     set string ""
 
-    foreach type $entityTypes {
-	lappend string "configure -[set type]options
-	[set [set type]options]"
-	append string "\n"
-    }
     if { $separator != "" } {
 	append string "configure -separator $separator\n"
     }
-    foreach {r t} [_roots] {
-	append string [describeEntity $r $t $prefix]
+    foreach type [array names _entities] {
+	append string $prefix
+	append string "entity $type $_entities($type)"
+	append string "\n"
+    }
+    foreach type [array names _associations] {
+	append string $prefix
+	append string "association $type $_associations($type)"
+	append string "\n"
+    }
+    foreach type [array names _entities] {
+	foreach r [_roots $type] {
+	    append string [describeEntity $type $r $prefix]
+	}
+    }
+    foreach type [array names _associations] {
+	foreach r [_roots $type] {
+	    append string [describeAssociation $type $r $prefix]
+	}
     }
     return $string
+}
+
+########################################################################
+#### entity
+#
+# Add a new type of entity to the model. The first argument
+# is the type name of the entity; the second argument is
+# zero or one, indicating whether the entity has a value.
+# Following arguments are option names and their default values.
+#
+body ::tycho::Model::entity {type count args} {
+    if { [::info exists _entities($type)] } {
+	error "Entity type $type already exists"
+    }
+
+    set _entities($type) [concat $count $args]
 }
 
 ########################################################################
@@ -583,6 +679,23 @@ body ::tycho::Model::externalize {fd {nohistory {}}} {
 	puts $fd "array set publishable  [list [array get publishable]]\n"
 	puts $fd "array set historyMark  [list [array get historyMark]]\n"
     }
+
+    # Write the model's data to the file
+    puts $fd "\n\n# Entity and association types\n\n"
+    puts $fd "array set _type \{[array get _type]\}\n"
+
+    puts $fd "\n\n# Entity values\n\n"
+    puts $fd "array set _entyvalue \{[array get _entyvalue]\}\n"
+    puts $fd "\n\n# Entity attributes\n\n"
+    puts $fd "array set _entyattrs \{[array get _entyattrs]\}\n"
+
+    puts $fd "\n\n# Associationvalues\n\n"
+    puts $fd "array set _assnvalue \{[array get _assnvalue]\}\n"
+    puts $fd "\n\n# Association attributes\n\n"
+    puts $fd "array set _assnattrs \{[array get _assnattrs]\}\n"
+    puts $fd "\n\n# Association links\n\n"
+    puts $fd "array set _assnlinks \{[array get _assnlinks]\}\n"
+
     return ""
 }
 
@@ -692,8 +805,17 @@ body ::tycho::Model::load {args} {
             read "file" $file
         }
         "/-statefile" {
-            # Load the model from the state file
-            internalize "file" $file
+            # Load the model from the state file. If there's an error,
+	    # and we're loading the default files, try again with the
+	    # datafile.
+            if [catch {internalize "file" $file}] {
+		if { ! [::info exists temp(-statefile)] } {
+		    set savedstatefile $statefile
+		    set statefile ""
+		    load
+		    set statefile $savedstatefile
+		}
+	    }
         }
     }
 }
@@ -753,81 +875,6 @@ body ::tycho::Model::mark {{markname {}} {position current}} {
 	}
 	# Set a mark
 	set historyMark($mark) $historyMark($position)
-    }
-}
-
-########################################################################
-#### parse
-#
-# Parse a string which represents a complete entity. This 
-# method is here to support hierarchical models. Attributes are first,
-# and can be one or more per line. Entities and associations follow. The
-# syntax parsed is
-# <pre>
-#   entity     = {attribute value ["\n"]} {entitydecl "\n"}
-#   entitydecl = type name value "{" entity "}"
-#              | type name value {attribute value}
-# </pre>
-#
-# (FIXME: This doesn't allow for associations yet.)
-#
-# The _type_ argument is the type of entity: for example, "entry"
-# or "vertex." _context_ is its assigned name, and is used to place
-# nested entities in the correct context in the model being built.
-# _string_ is the string being parsed.
-#
-body ::tycho::Model::parse {type context data} {
-    # Remove leading white space
-    regsub "^\[ \t\n\]*" $data {} data
-
-    # Scan the string by dropping lines.
-    while { $data != "" } {
-	if { [string match {#*} $data] } {
-	    # Discard comment line and white space
-	    regsub "^\[^\n\]*\[ \t\n\]*" $data {} data
-
-	} elseif { [string match {-*} $data] } {
-	    # Process a single attribute
-	    set attribute [lindex $data 0]
-	    set value [lindex $data 1]
-	    set data [lreplace $data 0 1]
-	    $this [set type]configure $context $attribute $value
-	    
-	    # Skip white space
-	    regsub "^\[ \t\n\]*" $data {} data
-
-	} else {
-	    # The line is an entity creation command. Figure out if 
-	    # it's hierarchical. First get a line.
-	    regexp "^\[^\n\]*" $data line
-	    set type [lindex $line 0]
-	    set name [lindex $line 1]
-	    set value [lindex $line 2]
-
-	    # Need a catch here since the line may have more open braces
-	    # than close braces.
-	    if { ! [catch {llength $line}] && ([llength $line] == 3 \
-		    || ( [llength $line] > 3 \
-		    && [string index [lindex $line 3] 0] == "-" )) } {
-
-		# Not hierarchical: evaluate this line
-		eval [list $this $type $context$separator$name $value] \
-			[lreplace $line 0 2]
-
-		# Dump the line and following white space
-		regsub "^\[^\n\]*\[ \t\n\]*" $data {} data
-
-	    } else {
-
-		# Must be hierarchical. Get the nested stuff using list
-		# indexing
-		$this $type $context$separator$name $value [lindex $data 3]
-
-		# Drop the first four elements and skip white space
-		set data [lreplace $data 0 3]
-		regsub "^\[ \t\n\]*" $data {} $data
-	    }
-	}
     }
 }
 
@@ -1171,15 +1218,24 @@ body ::tycho::Model::update {subscriber command index args} {
 # attributes to the output.
 #
 body ::tycho::Model::write {fd {prefix {}}} {
-    foreach type $entityTypes {
-	puts $fd "configure -[set type]options [set [set type]options]"
-    }
     if { $separator != "" } {
 	puts $fd "configure -separator $separator"
     }
-
-    foreach {r t} [_roots] {
-	puts $fd [describeEntity $r $t $prefix]
+    foreach type [array names _entities] {
+	puts $fd "${prefix}entity $type $_entities($type)"
+    }
+    foreach type [array names _associations] {
+	puts $fd "${prefix}association $type $_associations($type)"
+    }
+    foreach type [array names _entities] {
+	foreach r [_roots $type] {
+	    puts $fd [describeEntity $type $r $prefix]
+	}
+    }
+    foreach type [array names _associations] {
+	foreach r [_roots $type] {
+	    puts $fd [describeAssociation $type $r $prefix]
+	}
     }
 }
 
@@ -1189,65 +1245,322 @@ body ::tycho::Model::write {fd {prefix {}}} {
 
 
 ########################################################################
+#### _args
+#
+# Process optional arguments of a declaration.
+#
+body ::tycho::Model::_args {class type name defaults args} {
+    # Figure out whether this is a nested entity or not
+    if { $args == "" || [string index [lindex $args 0] 0] == "-" } {
+	# This just has a simple attribute list, so set the
+	# options here
+	if { ! $checkoptions } {
+	    # If checking is turned off, don't even remove duplicates
+	    # from the option list. It won't matter, since the
+	    # option handling code all works anyway.
+	    set _[set class]attrs($name) [concat $defaults $args]
+	} else {
+	    # Get defaults as an array
+	    array set temp $defaults
+
+	    # Set given options. Flag an error
+	    # if a given option is not in the defaults
+	    foreach {attribute value} $args {
+		if { ! [::info exists temp($attribute)] } {
+		    # Error: clean up before exit
+		    catch {unset _type($name)}
+		    catch {unset _[set class]value($name)}
+		    catch {unset _[set class]links($name)}
+		    error "Unknown attribute $attribute in $dataname"
+		}
+		set temp($attribute) $value
+	    }
+	    set _[set class]attrs($name) [array get temp]
+	}
+    } else {
+	# Otherwise, it's a nested entity, so call the _parse
+	# routine to process it
+	_parse $class $type $name $defaults [lindex $args 0]
+    }
+}
+
+########################################################################
+#### _association
+#
+# Add a new association to the graph. The first of the optional arguments
+# is a value if the association has been declared to have a value
+# associated with it (with association{}). This method will usually
+# be called by subclasses that define methods for each particular
+# type of association. It performs no checking.
+#
+body ::tycho::Model::_association {type name args} {
+    set descriptor $_entities($type)
+
+    # Remember its type
+    set _type($name) $type
+
+    # Look in the entity description to see if it has a value
+    if { [lindex $descriptor 0] } {
+	# Yes: set it
+	set _assnvalue($name) [lindex $args 0]
+	set args [lreplace $args 0 0]
+    }
+
+    # Look in the entity description to see how many links to read
+    set numlinks [lindex $descriptor 1]
+    if { $numlinks == 1 } {
+	# One. Unusual! (Impossible?)
+	set _assnlinks($name) [lindex $args 0]
+	set args [lreplace $args 0 0]
+    } elseif { $numlinks > 1 } {
+	# Several
+	set _assnlinks($name) [lreplace $args $numlinks end]
+	set args [lrange $args $numlinks end]
+    }
+
+    # Call the shared _args routine to process remaining arguments
+    eval [list _args "assn" $type $name [lreplace $descriptor 0 1]] $args
+
+    # Return the undo command
+    return [list delete$type $name]
+}
+
+########################################################################
+#### _attributes
+#
+# Return a list containing the options of the entity or
+# association as a flat option-value list.
+#
+body ::tycho::Model::_attributes {class index} {
+    return [set _[set class]optns($index)]
+}
+
+########################################################################
+#### _cget
+#
+# Get an attribute of an entity or association. Assumes the
+# item exists. _class_ is either "assn" or "enty".
+#
+body ::tycho::Model::_cget {class index attr} {
+    array set temp [set _[set class]attrs($index)]
+    if { ! [::info exists temp($attr)] } {
+	error "Unknown attribute $attr in $dataname"
+    }
+    return $temp($attr)
+}
+
+########################################################################
 #### _children
 #
-# Return the children of the entry of the given entity 
-# types. Note that this includes all
-# children, not just the ones that are nodes of the tree. 
-# The returned list alternates the child's name with its 
-# entity type. Some subclasses may choose to make a version
-# of this method publically available.
+# Return the children of the given entity which have the given type.
+# (Note: associations cannot be hierarchical!)
 #
-body ::tycho::Model::_children {index args} {
-    # First check if index is null, and if so, return roots
-    if { $index == "" } {
-	eval roots $args
+body ::tycho::Model::_children {parent type} {
+    # First check if parent is null, and if so, return roots
+    if { $parent == "" } {
+	eval roots $type
     }
     # If there's no separator, noone has any children
     if { $separator == "" } {
 	return ""
     }
-    set result {}
     
-    foreach type $args {
-	set len [expr [llength [split $index $separator]] + 1]
-	
-	# Find descendents and select out the children
-	foreach entity [array names _[set type]value $index$separator*] {
-	    if { [llength [split $entity $separator]] == $len } {
-		lappend children $entity $type
-	    }
+    # Find descendents and select out the children based on the
+    # length of their "path" and their type
+    set children {}
+    set len [expr [llength [split $parent $separator]] + 1]
+    foreach item [array names _type $parent$separator*] {
+	if { [llength [split $item $separator]] == $len \
+		&& $_type($item) == $type } {
+	    lappend children [lindex [split $item $separator] 1]
 	}
     }
     return $children
 }
 
 ########################################################################
+#### _configure
+#
+# Configure the given item.  The argument list
+# is a flat list of option-value pairs. If there are arbitrary
+# options, the undo command will not delete options
+# that have not already been set, although it will change
+# back existing options that are changed. Assumes that the
+# item exists.
+#
+body ::tycho::Model::_configure {class type index args} {
+    set inverse [list [set type]configure $index]
+    if { $class == "enty" } {
+	set defaults [lrange $_entities($type) 1 end]
+    } else {
+	set defaults [lrange $_associations($type) 1 end]
+    }
+
+    if { ! $checkoptions } {
+	# If checking is turned off, don't even remove duplicates
+	# from the option list. It won't matter, since the
+	# option handling code all works anyway.
+	lappend _[set class]attrs($name) $args
+    } else {
+	# Get defaults as an array
+	array set temp $defaults
+
+	# Set given attributes. Flag an error
+	# if a given attribute is not in the defaults
+	foreach {attribute value} $args {
+	    if { ! [::info exists temp($attribute)] } {
+		# Error
+		error "Unknown attribute $attribute in $dataname"
+	    }
+	    set temp($attribute) $value
+	}
+    }
+    return $inverse
+}
+
+########################################################################
+#### _entity
+#
+# Add a new entity to the graph. The first of the optional arguments
+# is a value if the entity has been declared to have a value
+# associated with it (with entity{}). This method will usually
+# be called by subclasses that define methods for each particular
+# type of entity. It performs no checking.
+#
+body ::tycho::Model::_entity {type name args} {
+    set descriptor $_entities($type)
+
+    # Remember its type
+    set _type($name) $type
+
+    # Look in the entity description to see if it has a value
+    if { [lindex $descriptor 0] } {
+	# Yes: set it
+	set _entyvalue($name) [lindex $args 0]
+	set args [lreplace $args 0 0]
+    }
+
+    # Call the shared _args routine to process remaining arguments
+    eval [list _args "enty" $type $name [lreplace $descriptor 0 0]] $args
+
+    # Return the undo command
+    return [list delete$type $name]
+}
+
+########################################################################
 #### _parent
 #
-# Return the parent of the entry. The type must be specified.
+# Return the parent of the entry.
 # To get the type of the parent, use type{}.
 #
-body ::tycho::Model::_parent {index type} {
+body ::tycho::Model::_parent {index} {
     if { $separator == "" } {
-	error "This model is not hierarchical"
+	error "Model $dataname is not hierarchical"
     }
-    if { ! [::info exists _[set type]value($index)] } {
+    if { ! [::info exists _type($index)] } {
 	error "Unknown entry $index in $dataname"
     }
     join [lreplace [split $index $separator] end end]
 }
 
 ########################################################################
+#### _parse
+#
+# Parse a string which represents a complete entity. This 
+# method is here to support hierarchical models. Attributes are first,
+# and can be one or more per line. Entities and associations follow. The
+# syntax parsed is
+# <pre>
+#   entity     = {attribute value ["\n"]} {entitydecl "\n"}
+#   entitydecl = type name value "{" entity "}"
+#              | type name value {attribute value}
+# </pre>
+#
+# (FIXME: This doesn't allow for associations yet.)
+#
+# The _type_ argument is the type of entity: for example, "entry"
+# or "vertex." _context_ is its assigned name, and is used to place
+# nested entities in the correct context in the model being built.
+# _string_ is the string being parsed.
+#
+body ::tycho::Model::_parse {class type context defaults data} {
+    # Remove leading white space
+    regsub "^\[ \t\n\]*" $data {} data
+
+    # Get the default options in an array
+    array set temp $defaults
+
+    # Scan the string by dropping lines.
+    while { $data != "" } {
+	if { [string match {#*} $data] } {
+	    # Discard comment line and white space
+	    regsub "^\[^\n\]*\[ \t\n\]*" $data {} data
+
+	} elseif { [string match {-*} $data] } {
+	    # Collect a attributes
+	    set attribute [lindex $data 0]
+	    set value [lindex $data 1]
+	    set data [lreplace $data 0 1]
+	    if { $checkoptions && ! [::info exists temp($attribute)] } {
+		# Error: clean up before exit
+		catch {unset _type($name)}
+		catch {unset _[set class]value($name)}
+		catch {unset _[set class]links($name)}
+		error "Unknown attribute $attribute in $dataname"
+	    } else {
+		set temp($attribute) $value
+	    }
+
+	    # Skip white space
+	    regsub "^\[ \t\n\]*" $data {} data
+
+	} else {
+	    # The line is an entity creation command. Figure out if 
+	    # it's hierarchical. First get a line.
+	    regexp "^\[^\n\]*" $data line
+	    set type [lindex $line 0]
+	    set name [lindex $line 1]
+	    set value [lindex $line 2]
+
+	    # Need a catch here since the line may have more open braces
+	    # than close braces.
+	    if { ! [catch {llength $line}] && ([llength $line] == 3 \
+		    || ( [llength $line] > 3 \
+		    && [string index [lindex $line 3] 0] == "-" )) } {
+
+		# Not hierarchical: evaluate this line
+		eval [list $this $type $context$separator$name $value] \
+			[lreplace $line 0 2]
+
+		# Dump the line and following white space
+		regsub "^\[^\n\]*\[ \t\n\]*" $data {} data
+
+	    } else {
+
+		# Must be hierarchical. Get the nested stuff using list
+		# indexing
+		$this $type $context$separator$name $value [lindex $data 3]
+
+		# Drop the first four elements and skip white space
+		set data [lreplace $data 0 3]
+		regsub "^\[ \t\n\]*" $data {} $data
+	    }
+	}
+    }
+    # Set the collected attributes
+    set _[set class]attrs($context) [array get temp]
+}
+
+########################################################################
 #### _root
 #
-# Return the root of the entry. The type must be specified.
+# Return the root of the entry.
 #
-body ::tycho::Model::_root {index type} {
+body ::tycho::Model::_root {index} {
     if { $separator == "" } {
-	error "This model is not hierarchical"
+	error "Model $dataname is not hierarchical"
     }
-    if { ! [::info exists _[set type]value($index)] } {
+    if { ! [::info exists _type($index)] } {
 	error "Unknown entry $index in $dataname"
     }
     lindex [split $index $separator] 0
@@ -1256,27 +1569,23 @@ body ::tycho::Model::_root {index type} {
 ########################################################################
 #### _roots
 #
-# Return the root entities of the given types.
+# Return the root entities of the given type.
 #
-body ::tycho::Model::_roots {args} {
+body ::tycho::Model::_roots {type} {
     set roots {}
     if { $separator == "" } {
-	# All entities are roots
-	foreach type $args {
-	    eval lappend roots \
-		    [@scope [info class] \
-		    evalInSpecificContext array names _[set type]value]
+	# No separator, so all entities are roots
+	foreach item [array names _type] {
+	    if { $_type($item) == $type } {
+		lappend roots $item
+	    }
 	}
     } else {
 	# Entities are roots only if they have no separator
-	foreach type $args {
-	    puts _[set type]value
-	    puts [array names _[set type]value]
-	    foreach entity [@scope [info class] \
-		    evalInSpecificContext array names _[set type]value] {
-		if { [llength [split $entity $separator]] == 1 } {
-		    lappend roots $entity $type
-		}
+	foreach item [array names _type] {
+	    if { [llength [split $item $separator]] == 1 \
+		    && $_type($item) == $type } {
+		lappend roots $item
 	    }
 	}
     }
@@ -1290,12 +1599,51 @@ body ::tycho::Model::_roots {args} {
 # exist.
 #
 body ::tycho::Model::_type {index} {
-    foreach type $entityTypes {
-	if { [::info exists _[set type]value($index)] } {
-	    return $type
+    if { ! [::info exists _type($index)] } {
+	error "Unknown item $index in $dataname"
+    }
+    return $_type($index)
+}
+
+########################################################################
+#### describeAssociation
+#
+# Return a string describing the association of type _type_ named 
+# _index_. The _prefix_ is prepended to each line.
+#
+body ::tycho::Model::describeAssociation {type index prefix} {
+    # Get default options
+    set hasvalue [lindex $_associations($type) 0]
+    set numlinks [lindex $_associations($type) 1]
+    set defaults [lrange $_associations($type) 2 end]
+    array set dflt $defaults
+
+    # Start string with type
+    set string "$prefix $type"
+
+    # Append the tail of the name
+    if { $separator == "" } {
+    	lappend string $index
+    } else {
+    	lappend string [lindex [split $index $separator] end]
+    }
+
+    # If this type has a value, append that
+    if { $hasvalue } {
+	lappend string $_assnvalue($index)
+    }
+
+    # Append the associations
+    eval lappend string $_assnlinks($index)
+
+    # Because associations have no children, print attributes only
+    # FIXME: Later, we may want to make this better formatted.
+    foreach {opt val} $_assnattrs($index) {
+	if { ! [::info exists dflt($opt)] || $dflt($opt) != $val } {
+	    lappend string $opt $val
 	}
     }
-    error "Unknown entity $index in $dataname"
+    return $string"\n"
 }
 
 ########################################################################
@@ -1304,51 +1652,67 @@ body ::tycho::Model::_type {index} {
 # Return a string describing the entity of type _type_ named 
 # _index_. The _prefix_ is prepended to each line.
 #
-body ::tycho::Model::describeEntity {index type prefix} {
-    array set default ${type}options
-    set string ""
+body ::tycho::Model::describeEntity {type index prefix} {
+    # Get default options
+    set hasvalue [lindex $_entities($type) 0]
+    set defaults [lrange $_entities($type) 1 end]
+    array set dflt $defaults
 
-    # Output my type, name, and value
-    set value $_[set type]value($index)
-    append string $prefix $type
+    # Start string with type
+    set string "$prefix $type"
+
+    # Append the tail of the name
     if { $separator == "" } {
-    	lappend string $index $value
+    	lappend string $index
     } else {
-    	lappend string [lindex [split $index $separator] end] $value
+    	lappend string [lindex [split $index $separator] end]
     }
 
-    # Figure out if I have children
-    set children [_children $index $entityTypes]
-    
-    # If not, print my attributes only
-    if { $children == "" } {
-	foreach {opt val} $_[set type]optns($index) {
-	    if { ! [::info exists default($opt)] || $default($opt) != $val } {
+    # If this type has a value, append that
+    if { $hasvalue } {
+	lappend string $_entyvalue($index)
+    }
+
+    # If I have no children, print my attributes only
+    if { [array names _type $index$separator*] == "" } {
+	foreach {opt val} $_entyattrs($index) {
+	    if { ! [::info exists dflt($opt)] || $dflt($opt) != $val } {
        	        lappend string $opt $val
 	    }
 	}
     } else {
-	# If I have, then print enclosing braces, then attributes,
-	# then each child
+	# If I have children, then print enclosing braces, then
+	# attributes, then each child
 	set childprefix $prefix
 	append childprefix "    "
 	append string " \{"
-	
+
 	# Output attributes
-	foreach {opt val} $_[set type]optns($index) {
-	    if { ! [::info exists default($opt)] || $default($opt) != $val } {
-       	        append string "\n"$childprefix
+	foreach {opt val} $_entyattrs($index) {
+	    if { ! [::info exists dflt($opt)] || $dflt($opt) != $val } {
+       	        append string "\n" $childprefix
        	        lappend string $opt $val
             }
-            # Output children
-            foreach {t c} $children {
+	}
+	# Output children: entities
+	foreach etype [array names _entities] {
+	    foreach child [_children $index $etype] {
             	append string \
-            		"\n"[describeEntity $index$separator$c $t $childprefix]
+            		"\n" [describeEntity \
+			       $etype $index$separator$child $childprefix]
             }
-            append string "\n\}"
-        }
+	}
+	# Output children: associations
+	foreach atype [array names _associations] {
+	    foreach child [_children $index $atype] {
+            	append string \
+            		"\n" [describeAssociation \
+			       $atype $index$separator$child $childprefix]
+            }
+	}
+	append string "\n\}\n"
     }
-    return $string\n
+    return $string
 }
 
 ########################################################################
