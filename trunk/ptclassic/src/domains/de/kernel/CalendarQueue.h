@@ -1,6 +1,6 @@
 /**************************************************************************
 Version identification:
-$Id$ $Revision$
+$Id$
 
 
 Copyright (c) 1990-%Q% The Regents of the University of California.
@@ -50,10 +50,13 @@ extern const double __infinity;
 #define HUGE_VAL MAXDOUBLE
 #endif
 
+#include "Block.h"
+#include "LinkedList.h"
 #include "DataStruct.h"
-#include "DEStar.h"
 #include "PriorityQueue.h"
 
+class Star;
+class DEStar;
 
 #define MAX_BUCKET     1024*4
 #define QUEUE_SIZE     (MAX_BUCKET*3)/2
@@ -81,7 +84,12 @@ public:
 	unsigned long absEventNum;   // all of the above the same, we still
 				     // need to have events sorted by the order 
 				     // that they arrived
-	CqLevelLink() {}
+	CqLevelLink() { destinationRef = 0; }
+
+	Link *destinationRef;   
+				// This pointer allows the CqLevelLink 
+				// to reference the corresponding 
+				// Link within PendingEventList
 
 	CqLevelLink* next;
 	CqLevelLink* before;
@@ -92,6 +100,7 @@ public:
 			   Star* d, unsigned long abs, 
 			   CqLevelLink* n, CqLevelLink* b);
 };
+
 
 	//////////////////////////////////////
 	// class CalendarQueue
