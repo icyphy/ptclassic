@@ -38,6 +38,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 // get size_t definition
 #include <sys/types.h>
 #include "compat.h"		/* Pickup PTSOL2 etc. */
+#include <sys/stat.h>		/* Pickup chmod for hppa */
 
 // #ifdef PTALPHA
 // #define LINKING_NOT_SUPPORTED
@@ -199,8 +200,11 @@ const int linkingNotSupported =
 #endif
 
 // hp-ux does not provide this function; may need to be changed
-#ifdef PTHPPA
+#if defined(PTHPPA)
+#if ! defined(PTHPUX10)
+// Under HPUX-10.20, getpagesize is defined in /usr/include/sys/unistd.h
 inline size_t getpagesize() { return 4096;}
+#endif
 #else
 #if defined(PTLINUX) || defined(PTALPHA) || defined(PTNBSD_386) || defined(PTFREEBSD)
 #include <unistd.h>
