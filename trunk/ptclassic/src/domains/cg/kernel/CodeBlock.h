@@ -21,11 +21,9 @@ $Id$
 	////////////////////////////////////
 	// class CodeBlock
 	////////////////////////////////////
-
-// This class should be replaced with a derived class for each specific
-// code generator.  The constructor XXXCodeBlock, where XXX is the domain
-// name, will normally process the input code in some way.
-
+// NOTE:  When text is sent to a CodeBlock, the text pointer is stored.
+// Make sure the text that the pointer points to lives as long as the
+// codeblock is to be used.
 class CodeBlock {
 public:
 	// Constructor for the default case just stores the code
@@ -34,6 +32,7 @@ public:
 	void setText(char* line) {text = line;}
 	const char* getText() {return text;}
 	void printCode ();
+	operator const char*() {return text;}
 private:
 	const char* text;
 };
