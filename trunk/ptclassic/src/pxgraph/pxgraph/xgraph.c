@@ -5,6 +5,11 @@
  * University of California,  Berkeley
  * 1986, 1987, 1988, 1989
  *
+ * Modified by J. Buck to correct geometry argument bugs, handle Inf/Nan
+ * on input, and support a special binary format, 1992.
+ *
+ * $Id$
+ *
  * Please see copyright.h concerning the formal reproduction rights
  * of this software.
  */
@@ -210,6 +215,7 @@ static char *inFileNames[MAXSETS]; 	/* File names              */
 /* Total number of active windows */
 static int Num_Windows = 0;
 static char *Prog_Name;
+static int binaryInputFormat = 0;
 
 
 
@@ -235,6 +241,10 @@ char *argv[];
 
     /* Open up new display */
     Prog_Name = argv[0];
+    /* "binxgraph" means input is in binary format */
+    if (strcmp (Prog_Name, "binxgraph") == 0)
+	binaryInputFormat = 1;
+
     disp_name = "";
     for (idx = 1;  idx < argc-1;  idx++) {
 	if (strcmp(argv[idx], "-display") == 0) {
@@ -1096,6 +1106,12 @@ int do_it;
     idx = 1;
     while (idx < argc) {
 	if (argv[idx][0] == '-') {
+	    /* Flag to say whether input is in binary format */
+	    if (strcmp(argv[idx], "-binary") == 0) {
+		binaryInputFormat = 1;
+		idx++;
+		continue;
+	    }
 	    /* Check to see if its a data set name */
 	    if (sscanf(argv[idx], "-%d", &set) == 1) {
 		/* The next string is a set name */
@@ -1441,8 +1457,8 @@ FILE *stream;
 char *filename;
 {
 	/* we support two data formats */
-    return Prog_Name[0] == 'b'  ? ReadBinaryData(stream, filename)
-				: ReadAsciiData(stream, filename);
+    return binaryInputFormat  ? ReadBinaryData(stream, filename)
+			      : ReadAsciiData(stream, filename);
 }
 
 int ReadAsciiData(stream, filename)
