@@ -37,6 +37,88 @@
 # The auto-save interval in minutes.  A value of zero means no auto-save.
 option add *File.autoSaveInterval 5 widgetDefault
 
+########################################################################
+#### expandPath
+# Expand a filename, returning an absolute filename with the complete path.
+# The argument might begin with an environment variable, a
+# global Tcl variable, or a reference to a user's home directory. If
+# the argument begins with a dollar sign ($), then everything up to
+# the first slash is taken to be a variable name.  If an environment
+# variable exists with that name, then the dollar sign and the variable
+# name are replaced with the value of the environment variable. For
+# example, if the value of of the environment variable TYCHO is
+# /usr/tools/tycho, then
+# <pre>
+#     ::tycho::expandPath \$TYCHO/tmp
+# </pre>
+# returns /usr/tools/tycho/tmp. If there is no such environment
+# variable, but a global Tcl variable with the given name exists, then
+# the value of that variable is substituted. If no such variable is
+# defined as well, then the argument is taken to be a literal filename,
+# and the current working directory is assumed to be its location.
+# Similarly, "~user/foo" will be expanded (on Unix systems) to
+# "/users/user/foo", assuming that "user" has his or her home directory
+# at "/users/user". If there is no user named "user", or we are not on
+# a Unix system, then "~user/foo" will be returned with the current
+# working directory prepended.  In all cases, any extra spaces at the
+# beginning or the end of the given path are removed.  Moreover,
+# filenames are normalized before being returned.  Symbolic links
+# are followed, as are fields in the path like "/../".  Thus, any
+# two references to the same path should return the same string.
+#
+proc ::tycho::expandPath { path } {
+    set path [string trim $path]
+    if {[string first \$ $path] == 0} {
+        global ::env
+        set slash [string first / $path]
+        if {$slash > 0} {
+            set envvar [string range $path 1 [expr {$slash-1}]]
+        } {
+            set envvar [string range $path 1 end]
+        }
+        if [info exists env($envvar)] {
+            set envval $env($envvar)
+        } elseif [uplevel #0 info exists $envvar] {
+            global $envvar
+            set envval [set $envvar]
+        } else {
+            # No such variable.  Use the original form.
+            set envval "\$$envvar"
+        }
+        if {$slash > 0} {
+            set path [format "%s%s" $envval [string range $path $slash end]]
+        } {
+            set path $envval
+        }
+    } elseif {[string first ~ $path] == 0} {
+        if {[catch {
+            set dir [file dirname $path]
+            set np [glob $dir]
+        }] == 0} {
+            # glob succeeded
+            set path [format "%s/%s" $np [file tail $path]]
+        }
+    }
+    # If the result is not absolute, prepend the current working directory.
+    if {[string first "/" $path] != 0} {
+        set path [format "%s/%s" [pwd] $path]
+    }
+    
+    # Get a consistent filename using "cd".  Note that this may not work
+    # on non-Unix machines.  The catch is in case the directory does not
+    # exist.
+    catch {
+        set savedir [pwd]
+        cd [file dirname $path]
+        set path [format "%s/%s" [pwd] [file tail $path]]
+    }
+    return $path
+}
+
+# COMPATIBILITY procedure.  Use <code>::tycho::expandPath</code>.
+proc ::ptkExpandEnvVar { path } {::tycho::expandPath $path}
+
+
 #######################################################################
 #### File
 # This class defines a window that contains a menu bar with associated
@@ -120,9 +202,6 @@ class ::tycho::File {
     # In derived classes, clear the data being displayed or edited.
     method clear {} {}
 
-    # In derived classes, return the current point in a form usable by seePoint.
-    method currentPoint {} {return {}}
-
     # Query the user for a filename, then evaluate its contents as Tcl commands.
     method evaluate {}
 
@@ -134,6 +213,9 @@ class ::tycho::File {
 
     # Open a help window.  Redefine in derived classes.
     method help {}
+
+    # Open a file and go to its internal point identified by name.
+    method hyperJump {filename point}
 
     # Insert the specified data.  Redefine in derived classes.
     method insertData {data}
@@ -168,17 +250,20 @@ class ::tycho::File {
     # Save data to a crash recovery file.
     method saveCrash {}
 
-    # Find and make visible a point in the file.
-    method seePoint {point}
-
     # Toggle the read-only status of a file (maybe invoking revision control).
     method toggleReadOnly {}
+
+    # Add me to the window menus of all open File objects.
+    method windowMenuAddAll {label}
 
     # Append a file editor to the window menu.
     method windowMenuAppend {obj label}
 
     # Remove the name of an open file from the Window menu.
     method windowMenuRemove {filename}
+
+    # Remove a filename from the window menus of all open File objects.
+    method windowMenuRemoveAll {filename}
 
     ##########################################################################
     ####                         public procedures                        ####
@@ -191,9 +276,6 @@ class ::tycho::File {
 
     # Call the saveCrash method for all File objects.
     proc emergencySave {} {}
-
-    # Open a file and go to its internal point identified by name.
-    proc hyperJump {filename point} {}
 
     # Open a new editor of the specified class.
     proc newEditor {editor} {}
@@ -208,12 +290,6 @@ class ::tycho::File {
     proc registerEditor {extensions editorClass {description {}} \
 	    {baseFilename {}}} {}
 	
-    # Add a file editor object to the window menus of all open File objects.
-    proc windowMenuAddAll {obj label} {}
-
-    # Remove a filename from the window menus of all open File objects.
-    proc windowMenuRemoveAll {filename} {}
-
     ##########################################################################
     ####                         protected variables                      ####
 
@@ -294,10 +370,16 @@ configbody ::tycho::File::data {
 #### -file configuration
 # Set or change the name of the file being edited and load the
 # contents. Set the window title and icon name to match, and set the
-# protected "file" variable equal to the file name.
+# protected "file" variable equal to the file name.  The filename
+# is expanded into an absolute filename, resolving any references
+# environment variables, user home directories, etc.  See
+# <code>::tycho::expandPath</code> for details about how this is done.
 #
 configbody ::tycho::File::file {
     set file $itk_option(-file)
+    if {$itk_option(-file) != {NoName}} {
+        set file [::tycho::expandPath $file]
+    }
     if {[winfo exists $prefix]} {
 	wm iconname $prefix [file tail $file]
         configure -title "$file"
@@ -320,11 +402,8 @@ configbody ::tycho::File::file {
 	}
     }
     if {$file != "NoName"} {
-	# If there is already an entry for this filename, do not overwrite it.
-	if {![info exists filesOpen($file)]} {
-	    # Add the current object to the menu entries in all open editors.
-	    windowMenuAddAll $this $file
-	}
+        # Add the current object to the menu entries in all open editors.
+        windowMenuAddAll $file
 	set previousfile $file
     }
 }
@@ -679,6 +758,34 @@ body ::tycho::File::help {} {
 }
 
 #####################################################################
+#### hyperJump
+# Open a file and go to its internal point identified by name. If the
+# filename is the empty string, just call <code>seePoint</code>,
+# passing it the second argument. If the filename is relative (does not
+# begin with "/", "~", or "$"), then prepend the directory of the file
+# currently being edited or viewed. Then, expand the filename using
+# <code>::tycho::expandPath</code> and open the resulting file with
+# <code>::tycho::File::openContext</code>, which will choose an editor
+# based on the filename extension. Finally, invoke
+# <code>seePoint</code> to view the specified point within the file.
+# The format for the <i>point</i> argument depends on the type of file
+# being opened. For HTML files, it will normally be the name of an
+# anchor in the file. For text files, it will normally be either "{line
+# <i>linenumber</i>}" or "{range <i>start</i> <i>end</i>}", where
+# <i>start</i> and <i>end</i> have the form
+# <i>linenumber.characternumber</i>.
+#
+body ::tycho::File::hyperJump {filename point} {
+    if {$filename != {}} {
+        set char [string index $filename 0]
+        if {$char != "/" && $char != "~" && $char != "\$"} {
+            set filename [format "%s/%s" [file dirname $file] $filename]
+        }
+    }
+    ::tycho::TopLevel::hyperJump $filename $point
+}
+
+#####################################################################
 #### insertData
 # Insert the specified data.
 # In this base class, trigger an error.
@@ -900,16 +1007,6 @@ body ::tycho::File::saveCrash {} {
 }
 
 #####################################################################
-#### seePoint
-# In derived classes, this method will go to the point in a file
-# identified by the name argument.  What this means depends on what
-# type of data is contained in the file.  In this base class, do
-# nothing.
-#
-body ::tycho::File::seePoint {point} {
-}
-
-#####################################################################
 #### toggleReadOnly
 # Toggle the read-only status of the file.  If the file is under
 # revision control (e.g. SCCS or RCS), then check in or check out
@@ -943,6 +1040,22 @@ body ::tycho::File::toggleReadOnly {} {
 }
 
 #####################################################################
+#### windowMenuAddAll
+# Add me to all "Window" menus of all current file objects.
+# The argument, normally a file name, gives the menu label.
+# If a menu entry already exists with the given label, leave it alone
+# and ignore the call.
+#
+body ::tycho::File::windowMenuAddAll {label} {
+    if {![info exists filesOpen($file)]} {
+        set filesOpen($label) $this
+        foreach fileobj [array names fileObjects] {
+            catch {$fileobj windowMenuAppend $this $label}
+        }
+    }
+}
+
+#####################################################################
 #### windowMenuAppend
 # Append the name of an open file editor to the "Window" menu.
 # The second argument, normally a filename, gives the menu label.
@@ -962,6 +1075,25 @@ body ::tycho::File::windowMenuAppend {obj label} {
 #
 body ::tycho::File::windowMenuRemove {filename} {
     $itk_component(windowMenu) delete $filename
+}
+
+#####################################################################
+#### windowMenuRemoveAll
+# Remove the specified filename from the Window menu of all open
+# <code>File</code> objects.  The specified filename must match
+# exactly the label given in the call to <code>windowMenuAddAll</code>
+# that created the entry in the first place, and the object referenced
+# by the menu must be this one.
+#
+body ::tycho::File::windowMenuRemoveAll {filename} {
+    if {[info exists filesOpen] && \
+            [info exists filesOpen($filename)] && \
+            $filesOpen($filename) == $this} {
+	unset filesOpen($filename)
+	foreach fileobj [array names fileObjects] {
+	    catch {$fileobj windowMenuRemove $filename}
+	}
+    }
 }
 
 #########################################################################
@@ -1017,20 +1149,6 @@ body ::tycho::File::emergencySave {} {
 }    
 
 #####################################################################
-#### hyperJump
-# Given a filename and a point within the file, open
-# the corresponding file, and call "seePoint $point".
-#
-body ::tycho::File::hyperJump {filename point} {
-    set obj [uplevel #0 [list ::tycho::File::openContext $filename]]
-    if {$point != {}} {
-	# The seePoint call is postponed to give time for the widget
-	# to be created. The catch is in case it is immediately deleted.
-	after idle [list catch [list $obj seePoint $point]]
-    }
-}
-
-#####################################################################
 #### newEditor
 # Open a new editor of the specified class at the global scope and
 # map it to the screen.
@@ -1061,8 +1179,11 @@ body ::tycho::File::openWin {} {
 # Otherwise, just open a plain text editor.  Return the name of the 
 # editor object. If a window already exists editing this file, simply
 # raise it instead. New windows are always opened at the global scope.
+# File names are expanded using <code>::tycho::expandPath</code>,
+# making them absolute and unique.
 #
 body ::tycho::File::openContext {filename} {
+    set filename [::tycho::expandPath $filename]
     if {[info exists filesOpen] && \
 	    [info exists filesOpen($filename)]} {
 	$filesOpen($filename) raiseWindow
@@ -1113,35 +1234,6 @@ body ::tycho::File::registerEditor {extensions editorClass {description {}} \
     }
     if {$description != {}} {
 	lappend windowMenuEntries [list $editorClass $description]
-    }
-}
-
-#####################################################################
-#### windowMenuAddAll
-# If the argument is the name of a current <code>File</code> object, then that
-# object is added to all "Window" menus of all current file objects.
-# The second argument, normally a file name, gives the menu label.
-#
-body ::tycho::File::windowMenuAddAll {obj label} {
-    set filesOpen($label) $obj
-    foreach fileobj [array names fileObjects] {
-	catch {$fileobj windowMenuAppend $obj $label}
-    }
-}
-
-#####################################################################
-#### windowMenuRemoveAll
-# Remove the specified filename from the Window menu of all open
-# <code>File</code> objects.  The specified filename must match
-# exactly the label given in the call to <code>windowMenuAddAll</code>
-# that created the entry in the first place.
-#
-body ::tycho::File::windowMenuRemoveAll {filename} {
-    if {[info exists filesOpen] && [info exists filesOpen($filename)]} {
-	unset filesOpen($filename)
-	foreach fileobj [array names fileObjects] {
-	    catch {$fileobj windowMenuRemove $filename}
-	}
     }
 }
 
