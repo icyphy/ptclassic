@@ -14,6 +14,7 @@ Programmer: E. Goei, J. Buck
 #include "InterpUniverse.h"
 #include "StringList.h"
 #include "miscFuncs.h"
+#include "Domain.h"
 
 static InterpUniverse *universe = NULL;  // Universe to execute
 static InterpGalaxy *currentGalaxy = NULL;  // current galaxy to make things in
@@ -425,6 +426,9 @@ KcProfile (char* name) {
 		return FALSE;
 	}
 	clr_accum_string ();
+	// if dynamically linked, say so
+	if (KnownBlock::isDynamic (b->readName()))
+		accum_string ("Dynamically linked ");
 	if (b->isItAtomic ()) {
 		accum_string ("Star: ");
 		accum_string (name);
