@@ -13,7 +13,7 @@ itk::Widget <- Labeledwidget <- Scrolledwidget <- Widgettree
 .ta 4c 8c 12c
 \fBactiveBackground\fR	\fBactiveForeground\fR	\fBbackground\fR	\fBborderWidth\fR
 \fBcursor\fR	\fBdisabledForeground\fR	\fBforeground\fR	\fBhighlightColor\fR
-\fBhighlightThickness\fR	\fBrelief\fR	\fBselectBackground\fR	\fBselectForeground\fR
+\fBhighlightThickness\fR	\fBrelief\fR	
 .fi
 .LP
 See the "options" manual entry for details on the standard options.
@@ -92,33 +92,6 @@ or \fB-openedbitmap\fR makes an open-close button wider than the
 specified indent, that width will be used instead. (There is no
 reasonable way to avoid this, since that's how Tk's grid manager
 works.) The default value is 24 pixels.
-.LP
-.nf
-Name:	\fBheight\fR
-Class:	\fBHeight\fR
-Command-Line Switch:	\fB-height\fR
-.fi
-.IP
-Specifies the height of the widgettree as an entire unit.
-The value may be specified in any of the forms acceptable to 
-\fBTk_GetPixels\fR.  Any additional space needed to display the other
-components such as labels, margins, and scrollbars force the widgettree
-to be compressed.  A value of zero along with the same value for 
-the width causes the value given for the visibleitems option 
-to be applied which administers geometry constraints in a different
-manner.  The default height is zero.
-.LP
-.nf
-Name:	\fBiconCommand\fR
-Class:	\fBCommand\fR
-Command-Line Switch:	\fB-iconcommand\fR
-.fi
-.IP
-Specifies a command to be executed upon user selection via mouse button
-one of any additional icons given in the values returned by the command
-associated with the -querycommand option.  If this command contains "%n", 
-it is replaced with the name of the node the icon belongs to.  Should it 
-contain "%i" then the icon name is  substituted.
 .LP
 .nf
 Name:	\fBnodeIcon\fR
