@@ -53,7 +53,7 @@ public:
 	virtual void initialize() {}
 
 	// method to dump all info, must be redefined
-	virtual operator StringList () = 0;
+	virtual StringList printVerbose () = 0;
 };
 
 #endif
