@@ -432,7 +432,7 @@ configbody ::tycho::File::file {
                 "File $file is already open for writing.  Proceed anyway? \
                 (The new window will not appear in the Windows menu.)"]} {
             # Exit by triggering an error.
-            error "Cancelled."
+            ::tycho::silentError
         }
     }
     if {[winfo exists $prefix]} {
@@ -1016,7 +1016,7 @@ body ::tycho::File::saveAsFile {filename} {
             }
 	} {
             focusin
-	    error {Did not save file}
+            ::tycho::silentError
 	}
     } {
 	removeBackupFiles
