@@ -185,10 +185,6 @@ class ::tycho::TopLevel {
     # Prevent destruction of this object while evaluating the arguments.
     protected method safeEval {args}
 
-    # Access the preferences associated with this widget -- override
-    # to get different preferences.
-    protected method preference {mode args}
-
     #################################################################
     ####                  protected variables                    ####
 
@@ -205,11 +201,14 @@ class ::tycho::TopLevel {
     #################################################################
     ####                  private variables                      ####
 
+    # An array of subscribed style-sheets
+    private variable _styleSheets
+
     # An array of options subscribed by "stylesheet subscribe"
     private variable _subscribedOptions
 
     # An array of options overridden by itk_initialize or configure
-    private variable _overiddenOptions
+    private variable _overriddenOptions
 
     # Avoid self-destructing recursively -- FIXME: is this needed???
     private variable alreadyexiting 0
@@ -376,6 +375,10 @@ body ::tycho::TopLevel::destructor {} {
     # already run, assume that all data has been successfully
     # saved if necessary, and remove the window from the list
     # of top-level windows.
+
+    # Delete myself from stylesheets
+    stylesheet remove
+
     if {[info exists topLevelWindows] && \
 	    [info exists prefix] && \
 	    [info exists exitflag]} {
@@ -471,9 +474,8 @@ body ::tycho::TopLevel::centerOnScreen {} {
 # Configure a widget. This method overrides the default in itk::Archetype.
 # Any given options are unsubscribed from any style sheets that they
 # are subscribed to. This ensures that the widget keeps the value
-# set by this method rather than reverting to the value decided by
-# the preferences manager -- that is, setting options with this method
-# "overrides" the preferences.
+# set by this method -- that is, setting options with this method
+# "overrides" the style preferences.
 #
 # This is actually rather slow, since every time a megawidget
 # creates a component that is a megawidget, this method
@@ -485,17 +487,6 @@ body ::tycho::TopLevel::centerOnScreen {} {
 # *itk_initialize{} method, and the same methods in ::tycho::TWidget.
 #
 body ::tycho::TopLevel::configure {args} {
-    # FIXME: Delete this obsolete stuff
-    set temp {}
-    foreach {option arg} $args {
- 	lappend temp $option
-    }
-    if { $temp != "" } {
- 	eval preference unsubscribeoptions $this $temp
-    }
-
-    # Good stuff starts here:
-
     # If any options are subscribed, unsubscribe them
     foreach {option _} $args {
 	if [::info exists _subscribedOptions($option)] {
@@ -614,6 +605,15 @@ body ::tycho::TopLevel::raiseWindow {} {
 # Color and font values are converted to raw X values
 # before returning.
 # 
+# <dt><b>list</b>
+# <dd>
+# Return a list of subscribed stylesheets.
+#
+# <dt><b>remove</b>
+# <dd>
+# Remove myself from all stylesheets. To be called prior
+# to destruction.
+#
 # <dt><b>subscribe</b> ?_option_ _stylesheet_ _parameter_ ...?
 # <dd>
 # Subscribe each names _option_ to the given _stylesheet_
@@ -631,10 +631,18 @@ body ::tycho::TopLevel::stylesheet {mode args} {
 	    set param [lindex $args 1]
 		    
             # Get my style
-            set style [::tycho::stylesheet style $this $sheet]
+            set style [::tycho::profile getstyle $sheet $this]
 
             # Get the value
             ::tycho::stylesheet get $sheet $style $param
+        }
+        "list" {
+	    array names _styleSheets
+        }
+        "remove" {
+	    foreach sheet [array names _styleSheets] {
+		::tycho::stylesheet style $sheet $this "delete"
+	    }
         }
 	"subscribe" {
 	    # Pre-digest arguments
@@ -656,10 +664,12 @@ body ::tycho::TopLevel::stylesheet {mode args} {
 	    }
 	    # Call the stylesheets to do the work
 	    foreach {sheet opts} [array get lists] {
-		# Tell the style manager what style I prefer -- FIXME
-		::tycho::stylesheet style $this $sheet \
-			[::tycho::profile getstyle $sheet $this]
-		
+		# Tell the style manager what style I prefer
+		if ![::info exists _styleSheets($sheet)] {
+		    set style [::tycho::profile getstyle $sheet $this]
+		    ::tycho::stylesheet style $sheet $this $style
+		    set _styleSheets($sheet) $sheet
+		}		
 		# Subscribe to it
 		eval ::tycho::stylesheet subscribe $this $sheet $opts
 	    }
@@ -686,7 +696,7 @@ body ::tycho::TopLevel::stylesheet {mode args} {
 #
 body ::tycho::TopLevel::exitProgram { {exitWithNoConfirmation 0}} {
     if { $exitWithNoConfirmation == 0 && \
-	    [::tycho::preference get misc confirmOnExit] } {
+	    [::tycho::stylesheet get interaction confirmOnExit] } {
 	set response [::tycho::askuser "OK to exit the program?"]
     } else {
 	set response 1
@@ -805,17 +815,6 @@ body ::tycho::TopLevel::confirmDestruct {} {
 # *configure{} method, and the same methods in ::tycho::TWidget.
 #
 body ::tycho::TopLevel::itk_initialize {args} {
-    # FIXME: Delete this obsolete stuff
-    set temp {}
-    foreach {option value} $args {
-	lappend temp $option
-    }
-    if { $temp != "" } {
-	eval ::tycho::preference excludeoptions dummy $this $temp
-    }
-
-    # Good stuff starts here:
-
     # If any options are subscribed, unsubscribe them
     foreach {option _} $args {
 	if [::info exists _subscribedOptions($option)] {
@@ -854,19 +853,6 @@ body ::tycho::TopLevel::safeEval {args} {
     }
     set disableDestruction 0
     return $retval
-}
-
-#####################################################################
-#### preference
-# Access the preferences associated with this window. By default,
-# all widgets access the "global" preference set; some windows will,
-# however, need to access a different preference set, and they
-# must indicate so by overriding this method.
-#
-# <b>OBSOLETE</b>
-#
-body ::tycho::TopLevel::preference {mode args} {
-    eval ::tycho::preference $mode "global" $args
 }
 
     #################################################################
