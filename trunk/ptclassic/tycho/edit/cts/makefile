@@ -47,7 +47,8 @@ DIRS =	bin demo doc test
 TCL_SRCS = 
 
 ITCL_SRCS = \
-	EditCTS.itcl
+	CTEdit.itcl \
+	CTRunWindow.itcl
 
 EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) \
 	cts.tcl \
