@@ -302,7 +302,11 @@ public:
 
     // If we set this state 0, no looping. 1, Joe's looping.
     // If set to 2, Shuvra and Ha's extensive looping.
-    IntState loopingLevel;
+    // If set to 3, Praveen and Shuvra's looping for buffer minimization.
+    // Also, now DEF = 0, CLUST = 1, SJS = 2, ACYLOOP = 3 where "=" means
+    // corresponds.
+    StringState loopingLevel;
+
 
     // Routines to construct CG wormholes, using the
     // $PTOLEMY/src/domains/cgc/targets/main/CGWormTarget
@@ -318,6 +322,10 @@ public:
 					  CGTarget& pokeTarget);
 
 protected:
+
+    // choose the correct scheduler
+    virtual void chooseScheduler();
+
     // Initialization for code generation.
     // The default version does nothing.
     virtual int codeGenInit();
