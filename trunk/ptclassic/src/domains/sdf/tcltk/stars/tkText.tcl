@@ -23,6 +23,8 @@ if {![winfo exists $s]} {
         wm title $win "Text Display"
         wm iconname $win "Text Display"
 
+	tkwait visibility $win
+
         frame $win.f
         message $win.msg -width 12c -text $label
 
