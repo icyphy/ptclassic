@@ -56,8 +56,9 @@ provisions.
     int i;
     for (i=0; i <($val(blockSize)/2); i++) {
       /* Convert from floating point [-1.0,1.0] to 16-bit sample */
-     $starSymbol(buffer)[i] = ceil($ref(input, i)*32768.0);
-    }	
+     $starSymbol(buffer)[$val(blockSize)/2-1-i] 
+	= (short)($ref(input, i)*32767.0);
+    }
   }}
   
   codeblock (convertUlaw) {{
@@ -65,7 +66,7 @@ provisions.
     int i;
     for(i = 0; i < $val(blockSize); i++) {
       /* Convert from floating point [-1.0,1.0] to 16-bit sample */
-      int sample16 = (int)($ref(input,i) * 32768.0);
+      short sample16 = (short)($ref(input,i) * 32767.0);
       /* Convert 16-bit sample to PCM mu-law */
       $starSymbol(buffer)[$val(blockSize)-1-i] = 
 	      Ptdsp_LinearToPCMMuLaw(sample16);
