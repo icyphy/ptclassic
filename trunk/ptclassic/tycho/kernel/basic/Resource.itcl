@@ -295,7 +295,6 @@ ensemble ::tycho::resource {
 # these methods are in addition to those defined in this superclass.
 #
 # <br><br>
-# <hr>
 # <b>Tutorial on reading HTTP objects</b><br>
 # Create a new HTTP object pointing to Ptolemy homepage<br>
 # <tcl><pre>set obj [::tycho::resource new "http://ptolemy.eecs.berkeley.edu/"]
@@ -308,7 +307,7 @@ ensemble ::tycho::resource {
 # ::tycho::inform $ret
 # </pre></tcl>
 #
-# <hr>
+# <p> 
 # <b>Tutorial on reading/writing local objects</b><br>
 # Create a new file, open, write, close.
 # <tcl><pre>set filename [::tycho::tmpFileName Testfile]
@@ -327,7 +326,7 @@ ensemble ::tycho::resource {
 # ::tycho::inform $ret
 # </pre></tcl>
 #
-# <hr>
+# <p>
 # <b>Tutorial on using mail object</b><br>
 # Create a new destination, write, close.
 # <tcl><pre>::tycho::Query .bb
@@ -345,41 +344,6 @@ ensemble ::tycho::resource {
 #     $obj close
 # }
 # </pre></tcl>
-#
-#
-#
-# <hr>
-# <b>Streamable resource interface</b>
-#
-# <dl>
-# <dt><b>flush</b>
-# <dd> Flush any buffered output to the physical resource device.
-# <dt><b>gets</b> ?_varName_?
-# <dd> Read a line from the file. If the _varName_ argument is
-# supplied and not null, write the line into that variable
-# and return the number of characters read.
-# <dt><b>puts</b> string
-# <dd> Write the string to the file and append a newline character.
-# <dt><b>read</b>
-# <dd> Read the whole contents of the resource and return it.
-# <dt><b>write</b> _string_
-# <dd> Write the string to the file, without appending a newline character.
-# </dl>
-#
-# <b>Non-streamable resource interface</b>
-# (Still being worked out.)
-# <dl>
-# <dt><b>flush</b>
-# <dd>
-# <dt><b>load</b>
-# <dd> 
-# <dt><b>read</b>
-# <dd> 
-# <dt><b>save</b>
-# <dd> 
-# <dt><b>write</b>
-# <dd> 
-# </dl>
 #
 class ::tycho::Resource {
     inherit ::tycho::Object
