@@ -340,7 +340,8 @@ if ( $?noconsole ) set prog = ($prog -noconsole)
 if ( $tclscript != "") set prog = ($prog -e $tclscript)
 
 # If selectPtolemy is set then we are just running itkwish
-if ($?selectPtolemy ) then
+# If the user has used -debug, then don't check, the user must be a god :-) 
+if ($?selectPtolemy && ! $?tychodebug) then
 	# Can't use && here, as since if we are running just 'tycho'
 	# then the program name will be 'itkwish' which is not necessarily
 	# executable.
