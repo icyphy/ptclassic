@@ -1,6 +1,7 @@
 # $Id$
 # Match all lines
 /^/ {
+	printf ".br\n";
 	for (i=2; i<=NF ; ++i) printf "%s ", $i;
 	printf "   \a\t %s", $1;
 	printf "\n";
