@@ -232,9 +232,8 @@ body ::tycho::TWidget::configure {args} {
     # If any options are subscribed, unsubscribe them
     foreach {option _} $args {
 	if [::info exists _subscribedOptions($option)] {
-	    regexp {^([^\.]+)\.(.+)$} \
-		    $_subscribedOptions($option) _ sheet param 
-	    ::tycho::stylesheet unsubscribe $this $sheet $option
+	    ::tycho::stylesheet unsubscribe $this \
+		    $_subscribedOptions($option) $option
 	    unset _subscribedOptions($option)
 	}
     }
@@ -341,22 +340,19 @@ body ::tycho::TWidget::seeFragment {point} {
 # forms, depending on the value of the _mode_ argument:
 #
 # <dl>
-# <dt><b>get</b> _parameter_
+# <dt><b>get</b> _stylesheet_ _parameter_
 # <dd>
-# Get the value of the given _parameter_, where _parameter_
-# is in the form specified for the <b>subscribe</b> option.
+# Get the value of the given _parameter_ of _stylesheet_,
+# where _parameter_ is parameter name with a style of the
+# style-sheet. The style user is the correct style for this
+# particular widget, based upon user's style prefeernces.
 # Color and font values are converted to raw X values
 # before returning.
 # 
-# <dt><b>subscribe</b> ?_option_ _parameter_ ...?
+# <dt><b>subscribe</b> ?_option_ _stylesheet_ _parameter_ ...?
 # <dd>
-# Subscribe each names _option_ to the given _parameter_. The
-# _parameter_ name must be constructed as a dot-separated name,
-# beginning with the name of the stylesheet model and followed
-# by the parameter name, with intevening group names if
-# appropriate. For example, the name <b>fonts.textFont</b>
-# means the <b>textFont</b> parameter of the <b>fonts</b>
-# stylesheet. Each _option_ that has not been explicitly
+# Subscribe each names _option_ to the given _stylesheet_
+# _parameter_. Each _option_ that has not been explicitly
 # overridden by supplying a value to the widget's constructor
 # will be set to the current value of _parameter_, and any
 # future changes to _parameter_ will update the option.
@@ -366,9 +362,8 @@ body ::tycho::TWidget::seeFragment {point} {
 body ::tycho::TWidget::stylesheet {mode args} {
     switch -exact $mode {
         "get" {
-            # Separate sheet name and param name
-            set name [lindex $args 0]
-            regexp {^([^\.]+)\.(.+)$} $name _ sheet param 
+	    set sheet [lindex $args 0]
+	    set param [lindex $args 1]
 		    
             # Get my style
             set style [::tycho::stylesheet style $this $sheet]
@@ -378,24 +373,20 @@ body ::tycho::TWidget::stylesheet {mode args} {
         }
 	"subscribe" {
 	    # Pre-digest arguments
-	    foreach {option parameter} $args {
+	    foreach {option sheet param} $args {
 		if ![::info exists _overriddenOptions($option)] {
-		    # Separate sheet name and param name
-		    regexp {^([^\.]+)\.(.+)$} $parameter _ sheet param 
-		    
 		    # Make lists of options per sheet
 		    lappend lists($sheet) $option $param
 
 		    # If an option is already subscribed, then
 		    # remove that subscription so the new one will work
 		    if [::info exists _subscribedOptions($option)] {
-			regexp {^([^\.]+)\.(.+)$} \
-				$_subscribedOptions($option) _ s p 
-			::tycho::stylesheet unsubscribe $this $s $option
+			::tycho::stylesheet unsubscribe $this \
+				$_subscribedOptions($option) $option
 		    }
 
 		    # Remember the subscribed options
-		    set _subscribedOptions($option) $parameter
+		    set _subscribedOptions($option) $sheet
 		}
 	    }
 	    # Call the stylesheets to do the work
@@ -510,9 +501,8 @@ body ::tycho::TWidget::itk_initialize {args} {
     # If any options are subscribed, unsubscribe them
     foreach {option _} $args {
 	if [::info exists _subscribedOptions($option)] {
-	    regexp {^([^\.]+)\.(.+)$} \
-		    $_subscribedOptions($option) _ sheet param 
-	    ::tycho::stylesheet unsubscribe $this $sheet $option
+	    ::tycho::stylesheet unsubscribe $this \
+		    $_subscribedOptions($option) $option
 	    unset _subscribedOptions($option)
 	}
     }
