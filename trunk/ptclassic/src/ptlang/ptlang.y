@@ -43,6 +43,7 @@ Programmer: J. T. Buck and E. A. Lee
 #include <time.h>
 #include <malloc.h>
 #include <stdlib.h>
+#include <unistd.h> /* for getcwd() */
 
 /* Symbols for special characters*/
 #define LPAR '('
@@ -1447,8 +1448,7 @@ void genDef ()
 	char descriptString[MEDBUFSIZE];
         char *derivedSimple;
 	char *startp, *copyrightStart; 
-	char *srcDirectory;
-		
+	char srcDirectory[SMALLBUFSIZE];
 
 /* temp, until we implement this */
 	if (galDef) {
@@ -1666,7 +1666,9 @@ void genDef ()
 	fprintf (fp, "\nconst char *star_nm_%s = \"%s\";\n", fullClass, fullClass);
 /* Corona keeps source directory for loading cores. */
 	if ( coronaDef == 1 ) { 
-		srcDirectory = getenv("PWD");
+		if (getcwd(srcDirectory, SMALLBUFSIZE) == NULL) {
+			perror("ptlang: getcwd() error"); exit(2);
+		}
 		fprintf (fp, "\nconst char *src_dir_%s = \"%s\";\n", fullClass, srcDirectory);
 		fprintf (fp, "\nconst char* %s :: getSrcDirectory() const { return src_dir_%s; }\n", fullClass, fullClass);
 	}
