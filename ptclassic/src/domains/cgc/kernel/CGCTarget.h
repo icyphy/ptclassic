@@ -43,7 +43,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "IntState.h"
 
 class CGCPortHole;
-class EventHorizon;
 class CGCStar;
 class SDFScheduler;
 
@@ -94,17 +93,12 @@ public:
 	}
 	void putStream(const char* n, CodeStream* cs) { addStream(n, cs); }
 	
-	// return TRUE if a function is being defined.
-	int makingFunc() { return (getStream("mainInit") != &mainInit); }
-
 	// Splice in stars.
 	/*virtual*/ int modifyGalaxy();
 
 protected:
 
 	/*virtual*/ void setup();
-
-	char *schedFileName;
 
 	// code strings
 	// "mainClose" is separated because when we insert a galaxy code
