@@ -39,12 +39,13 @@ extern int RpcDisplaySchedule(RPCSpot *spot, lsList cmdList, long userOptionWord
 
 /* FIXME:  The following function is not in exec.c */
 extern int ParallelSched();
-#else
+#else /* __cplusplus */
 extern int RunUniverse();
 extern int ptkRun();
 extern int RpcRun();
 extern int RpcDisplaySchedule();
 extern int ParallelSched();
+extern void PigiMark(/* char *objname */);
 #endif /* __cplusplus */
 
 #endif /* EXEC_H */
