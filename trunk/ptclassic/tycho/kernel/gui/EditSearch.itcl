@@ -184,9 +184,9 @@ body ::tycho::EditSearch::constructor {args} {
     eval itk_initialize $args
 
     bind $itk_component(hull) <Control-s> \
-	    "$this configure -backwards 0; $this find"
+	    "code $this configure -backwards 0; code $this find"
     bind $itk_component(hull) <Control-r> \
-	    "$this configure -backwards 1; $this find"
+	    "code $this configure -backwards 1; code $this find"
 
     # If the findcommand option has not been set, set the default now.
     # This has to be done in the constructor rather than in the class
@@ -213,7 +213,7 @@ body ::tycho::EditSearch::constructor {args} {
 	addButton changeandfind -text {Change&Find} \
 		-command "$this execCommand -chfindcommand"
 
-	bind $itk_component(hull) <Meta-percent> "$this change"
+	bind $itk_component(hull) <Meta-percent> "code $this change"
 
 	# Add an option to change all matches
 	itk_component add changeall {
