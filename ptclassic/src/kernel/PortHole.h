@@ -557,11 +557,11 @@ public:
         //////////////////////////////////////////
 
 // An iterator for PortLists, non-const version
-class PortListIter : private NamedObjListIter {
+class PortListIter : public NamedObjListIter {
 public:
 	PortListIter(PortList& plist) : NamedObjListIter (plist) {}
-	inline PortHole* next() { return (PortHole*)NamedObjListIter::next();}
-	inline PortHole* operator++(POSTFIX_OP) { return next();}
+	inline PortHole* next() { return (PortHole*)ListIter::next();}
+	inline PortHole* operator++(POSTFIX_OP) { return (PortHole*)ListIter::next();}
 	NamedObjListIter::reset;
 	NamedObjListIter::remove;
 };
