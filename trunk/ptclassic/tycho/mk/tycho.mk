@@ -39,6 +39,11 @@
 JAVAHOME = 	/usr/java
 # JAVAHOME = 	/opt/jdk1.2latest
 
+# Java CLASSPATH separator
+CLASSPATHSEPARATOR = :
+# For NT
+#CLASSPATHSEPARATOR = ;
+
 # The home of the most recent JDK, possibly experimental or prerelease.
 LATEST_JAVAHOME = /opt/jdk1.2latest
 
