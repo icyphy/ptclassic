@@ -123,24 +123,7 @@ ATM_LIBFILES = $(LIBDIR)/libmq.$(LIBSUFFIX) $(LIBDIR)/libmqstars.$(LIBSUFFIX) \
 	$(LIBDIR)/libsdfatmstars.$(LIBSUFFIX) $(LIBDIR)/libatm.$(LIBSUFFIX)
 
 # Matlab settings
-# Matlab is installed if the matlabRootDir script returns an non-empty string
-# -- If Matlab is not installed, then set MATLABDIR to
-#    $(ROOT)/src/compat/matlab and do not set MATLABLIBDIR
-# -- If Matlab is installed, then set MATLABDIR accordingly
-#    and set MATLABEXT_LIB to the external library directory
-MATLABDIR := 	$(shell $(ROOT)/bin/matlabRootDir)
-ifeq ("$(MATLABDIR)","")
-MATLABDIR= 		$(ROOT)/src/compat/matlab
-MATLABSTAR_LIBFILE=	$(LIBDIR)/libsdfnomatlabstars.$(LIBSUFFIX) 
-MATLABSTAR_LIB=		-lsdfnomatlabstars
-MATLABSTARS_DOT_O=	$(LIBDIR)/sdfnomatlabstars.o
-else
-MATARCH := $(shell $(ROOT)/bin/matlabArch $(ARCH))
-MATLABEXT_LIB = 	-L$(MATLABDIR)/extern/lib/$(MATARCH) -lmat
-MATLABSTAR_LIBFILE=	$(LIBDIR)/libsdfmatlabstars.$(LIBSUFFIX) 
-MATLABSTAR_LIB=		-lsdfmatlabstars
-MATLABSTARS_DOT_O=	$(LIBDIR)/sdfmatlabstars.o
-endif
+include $(ROOT)/mk/matlab.mk
 
 # CG-DDF no longer supported
 #$(LIBDIR)/libcgddfstars.$(LIBSUFFIX) $(LIBDIR)/libcgddf.$(LIBSUFFIX)  \
