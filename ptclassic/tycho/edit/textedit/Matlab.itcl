@@ -53,6 +53,12 @@ class ::tycho::Matlab {
     # Open a help window.
     method help {}
 
+    ###################################################################
+    ####                        protected methods                  ####
+
+    # Initialize the menu/status/tool bars associated with this widget.
+    protected method initialize {{menubar {}} {statusbar {}} {toolbar {}}}
+
     ##########################################################################
     ####                          common members                          ####
     
@@ -89,8 +95,6 @@ body ::tycho::Matlab::constructor {args} {
     incr consoleCount 
   
     eval itk_initialize $args
-
-    displayer configure -title "Matlab Shell"
 }
 
 ###################################################################
@@ -159,4 +163,23 @@ body ::tycho::Matlab::help {} {
     ::tycho::File::openContext \
         [file join $TYCHO editors textedit doc usersGuides \
 	    EditMatlabHelp.html]
+}
+
+    ###################################################################
+    ###################################################################
+    ####                     protected methods                     ####
+
+#####################################################################
+#### initialize
+# Set myDisplayer if I'm in a displayer, and initialize the menu, status, 
+# and toolbars associated with this widget.
+#
+# This functionality used to be in the constructor, however that design
+# was not flexible and didn't fit with the notion of multiple views.
+#
+body ::tycho::Matlab::initialize {{menubar {}} \
+        {statusbar {}} {toolbar {}}} {
+    chain $menubar $statusbar $toolbar
+   
+    displayer configure -title "Matlab Shell"
 }
