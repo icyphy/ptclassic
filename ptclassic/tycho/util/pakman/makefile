@@ -56,7 +56,6 @@ EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) pakman.tcl pkgIndex.tcl
 
 MISC_FILES =  $(DIRS) \
 	README.txt \
-	adm \
 	template.simple \
 	template.tycho \
 	tclIndex
