@@ -227,6 +227,17 @@ $(LIBDIR)/$(LIB_DEBUG):	$(LIBDIR)/$(LIB)
 
 # Build all the Java class files.
 jclass:	$(JSRCS) $(JCLASS) 
+	@if [ "x$(DIRS)" != "x" ]; then \
+		set $(DIRS); \
+		for x do \
+		    if [ -w $$x ] ; then \
+			( cd $$x ; \
+			echo making $@ in $$x ; \
+			$(MAKE) $(MFLAGS) $(MAKEVARS) $@ ;\
+			) \
+		    fi ; \
+		done ; \
+	fi
 
 # Build the Java documentation.
 javadocs: doc/codeDoc/tree.html
