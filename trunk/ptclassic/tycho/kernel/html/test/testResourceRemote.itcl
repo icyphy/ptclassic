@@ -98,3 +98,18 @@ test remote-procs {Make sure that the interface to procs are intact!} {
     }
     list $status
 } {{{is abstract} non 1}}
+
+# The assumption here is that HTTP works. Now see if the base
+# method "forward" works or not.
+test remote-forward1 {Connect to the ptolemy site, see if it forwards} {
+    # forward http://ptolemy --> http://ptolemy/
+    # NOTE: This is HTTP server dependent!
+    set site "http://ptolemy.EECS.berkeley.edu/~kchang"
+    set httpobj [::tycho::autoName httptest]
+    ::tycho::ResourceHTTP $httpobj
+    $httpobj connect $site
+    $httpobj open r
+    catch {delete object $httpobj}
+    ::tycho::ResourceRemote::forward $site
+} {http://ptolemy.eecs.berkeley.edu/~kchang/}
+
