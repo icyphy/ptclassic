@@ -57,6 +57,7 @@ extern boolean IsUnivFacet();
 extern boolean IsBus();
 extern boolean MyOpenMaster();
 extern boolean OpenFacet();
+extern boolean IsPalFacet();
 
 
 /* FIXME: These Functions are NOT defined in octIfc.c */
