@@ -28,7 +28,7 @@ PT_COPYRIGHT_VERSION_2
 COPYRIGHTENDKEY
 
 Programmer:  E. A. Lee
-Based on: PTcl design by Joe Buck
+Loosely based on: PTcl design by Joe Buck
 Date of creation: 2/97
 
 This file implements a class that adds Ptolemy-specific Itcl
@@ -60,6 +60,7 @@ static const char file_id[] = "PITcl.cc";
 #include "ConstIters.h"
 #include "Scheduler.h"
 #include "InfString.h"
+#include "Wormhole.h"
 
 #include "ptclDescription.h"
 
@@ -550,10 +551,14 @@ int PTcl::defGalaxy(int argc,char ** argv) {
                 curdomain, curtarget);
         InfString cmd = "namespace ::pitcl {";
         cmd << argv[3] << "}";
+        int saveMonitor = monitorFlag;
+        // Prevent doubly reporting commands.
+        monitorFlag=0;
         if ((status = Tcl_Eval(interp, (char*)cmd)) != TCL_OK) {
             Tcl_AppendResult(interp, 
                     "Error in defining galaxy ", galname, (char*)NULL);
         }
+        monitorFlag=saveMonitor;
     }
     curgalaxy = prevgal;
     curtarget = prevtarget;
@@ -570,7 +575,9 @@ int PTcl::defGalaxy(int argc,char ** argv) {
 // the wormhole. This is the domain within which the wormhole can be
 // used. The third argument is the internal domain of the wormhole.
 // This can be the same as the outer domain, and a wormhole will still
-// be created. The fourth argument is a set of galaxy building
+// be created. The fourth argument is the name of the target.  If this is
+// an empty string, then the default target for the inner domain will be
+// used.  The final (optional) argument is a set of galaxy building
 // commands. If it is not given, an empty wormhole is defined.
 // Otherwise, the commands are executed in the ::pitcl namespace to
 // construct the wormhole. Note that if errors occur during the
@@ -583,9 +590,9 @@ int PTcl::defGalaxy(int argc,char ** argv) {
 // wormholes.
 //
 int PTcl::defWormhole(int argc,char ** argv) {
-    if (argc < 4 || argc > 5) {
+    if (argc < 5 || argc > 6) {
         return usage(
-            "defWormhole <wormname> <outerdomain> <innerdomain> ?{<galaxy-building-commands>}?");
+            "defWormhole <wormname> <outerdomain> <innerdomain> <target> ?{<galaxy-building-commands>}?");
     }
     // Prevent recursive calls.
     if (definingGal) {
@@ -625,9 +632,17 @@ int PTcl::defWormhole(int argc,char ** argv) {
             // Create the inside galaxy.
             curgalaxy = new InterpGalaxy(galname,curdomain);
             curgalaxy->setBlock (galname, 0);   // Null parent
-            // Create a default target.
-            curtarget =
-                   KnownTarget::clone(KnownTarget::defaultName(curdomain));
+
+            // Create a target.
+            const char* tname;
+            if (*argv[4]==0) {
+                // use default target
+                tname = KnownTarget::defaultName(curdomain);
+            } else {
+                tname = argv[4];
+            }
+            curtarget = KnownTarget::clone(tname);
+
             // Register the new wormhole on the knownBlocks list.
             // The fact that a target is specified here forces
             // a wormhole to be made.
@@ -636,11 +651,15 @@ int PTcl::defWormhole(int argc,char ** argv) {
 
             // Execute the galaxy construction commands, if any.
             InfString cmd = "namespace ::pitcl {";
-            cmd << argv[4] << "}";
+            cmd << argv[5] << "}";
+            int saveMonitor = monitorFlag;
+            // Prevent doubly reporting commands.
+            monitorFlag = 0;
             if ((status = Tcl_Eval(interp, (char*)cmd)) != TCL_OK) {
                 Tcl_AppendResult(interp, 
                         "Error in defining galaxy ", galname, (char*)NULL);
             }
+            monitorFlag = saveMonitor;
         }
     }
     curgalaxy = prevgal;
@@ -752,17 +771,33 @@ int PTcl::getDescriptor(int argc,char** argv) {
 /////////////////////////////////////////////////////////////////////////////
 //// getDomain
 // Return the domain of the specified block, or if none is
-// specified, of the current galaxy.
+// specified, of the current galaxy.  The domain returned by default is
+// the one within which the block is designed to work.  Thus, for a wormhole,
+// it will not be the inside domain, but rather the outside domain.  To get
+// the inside domain of a wormhole, use the -inside option.  This option
+// is ignored if the block is not a wormhole.
 //
 int PTcl::getDomain(int argc,char** argv) {
-    if (argc > 2) return usage("getDomain ?<blockname>?");
+    int inside=0;
+    char* blockname=NULL;
+    for (int i=1; i < argc; i++) {
+        if (strcmp(argv[i],"-inside") == 0) inside = 1;
+        else if (blockname != NULL) {
+            return usage("getDomain ?-inside? ?<blockname>?");
+        } else blockname = argv[i];
+    }
     const Block* b;
-    if (argc == 1)
+    if (blockname == NULL) {
         b = getBlock("this");
-    else
-        b = getBlock(argv[1]);     
+    } else {
+        b = getBlock(blockname);
+    }
     if (!b) return TCL_ERROR;
-    return result(b->domain());
+    if (inside && b->isItWormhole()) {
+        return result(((Star*)b)->asWormhole()->insideDomain());
+    } else {
+        return result(b->domain());
+    }
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -819,13 +854,63 @@ int PTcl::getParent(int argc,char** argv) {
     }
 }
 
-// FIXME: Need a way to invoke the begin, go, wrapup methods.
+/////////////////////////////////////////////////////////////////////////////
+//// getTarget
+// Given a block, return the name of its target. This procedure is most
+// useful for blocks that are universes and wormholes when the -inside
+// option is given. In this case, it returns the name of the target
+// that controls the invocation of the blocks inside the universe or
+// wormhole. Without the -inside option, it returns the name of the target
+// that controls the invocation of the specified block (its outside target).
+// However, this name will always be a null string before the universe has
+// been initialized.
+//
+int PTcl::getTarget(int argc,char ** argv) {
+    int inside=0;
+    char* blockname=NULL;
+    for (int i=1; i < argc; i++) {
+        if (strcmp(argv[i],"-inside") == 0) inside = 1;
+        else if (blockname != NULL) {
+            return usage("getTarget ?-inside? ?<blockname>?");
+        } else blockname = argv[i];
+    }
+    const Block* b;
+    if (blockname == NULL) {
+        b = getBlock("this");
+    } else {
+        b = getBlock(blockname);
+    }
+    if (!b) return TCL_ERROR;
+    Target *t;
+    if (inside && b->isItWormhole()) {
+        t = ((Star*)b)->asWormhole()->myTarget();
+    } else if (inside && b->isA("InterpUniverse")) {
+        t = ((InterpUniverse*)b)->myTarget();
+    } else {
+        t = b->target();
+    }
+    if (t) staticResult(t->name());
+    return TCL_OK;
+}
+
+// FIXME: Need a way to invoke the go, wrapup methods.
 // FIXME: Also need a method to initialize portholes.
 
 /////////////////////////////////////////////////////////////////////////////
 //// initBlock
-// Initialize a block.  This causes the states and portholes to be
-// initialized and the setup method to be run.
+// Initialize a block. This causes the states and portholes to be
+// initialized and the setup method to be run. In addition, if the
+// block is a universe or a wormhole, then the target is initialized
+// and the begin method of all the blocks is invoked. In statically
+// scheduled domains, initializing the target causes the schedule to be
+// computed. If a halt is requested or an error occurs during the
+// initialization, then return an error (so that no script continues
+// assuming the block has been initialized).
+//
+// NOTE:  This really should be broken down into finer grain operations.
+// For example, it should not run the begin methods.  But fixing this would
+// require significant changes to the Ptolemy kernel, so it stays as-is for
+// now.
 //
 int PTcl::initBlock(int argc, char** argv) {
     if (argc != 2) return usage("initBlock <blockname>");
@@ -835,8 +920,7 @@ int PTcl::initBlock(int argc, char** argv) {
         Tcl_AppendResult(interp, "No block named ", argv[1], (char*)NULL);
         return TCL_ERROR;
     }
-    s->initialize();
-    return TCL_OK;
+    return initBlockInternal(s);
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -917,8 +1001,7 @@ int PTcl::isWormhole (int argc,char ** argv) {
 // domain is given) the current domain.
 //
 int PTcl::knownBlocks (int argc,char** argv) {
-    if (argc > 2)
-    return usage ("knownBlocks ?<domain>?");
+    if (argc > 2) return usage ("knownBlocks ?<domain>?");
     const char* dom = curdomain;
     if (argc == 2) {
         dom = argv[1];
@@ -949,6 +1032,32 @@ int PTcl::knownDomains(int argc,char **) {
 }
 
 /////////////////////////////////////////////////////////////////////////////
+//// knownTargets
+// Return a list of targets for the specified domain. (if no
+// domain is given) the current domain.
+//
+int PTcl::knownTargets(int argc,char** argv) {
+    if (argc > 2) return usage("knownTargets ?<domain>?");
+    const char* domain;
+    if (argc == 2) {
+        domain = argv[1];
+        if (!KnownBlock::validDomain(domain)) {
+            Tcl_AppendResult(interp, "No such domain: ", domain,
+            (char *) NULL);
+            return TCL_ERROR;
+        }
+    } else {
+        domain = curdomain;
+    }
+    // NOTE: Maximum number of targets.
+    const int MAX_NAMES = 40;
+    const char *names[MAX_NAMES];
+    int n = KnownTarget::getList (domain, names, MAX_NAMES);
+    for (int i = 0; i < n; i++) addResult(names[i]);
+    return TCL_OK;
+}
+
+/////////////////////////////////////////////////////////////////////////////
 //// knownUniverses
 // Return a list of the names of the known universes.
 // Each name begins with a dot, and hence is absolute.
@@ -964,9 +1073,6 @@ int PTcl::knownUniverses(int argc,char **) {
     return TCL_OK;
 }
 
-/////////////////////////////////////////////////////////////////////////////
-//// mathematica
-// FIXME: Documentation.
 // we make mathematicatcl a static instance of the MathematicaTcl class
 // instead of a data member of the PTcl class because other libraries,
 // e.g. pigilib, rely on the PTcl class but do not use the "mathematica"
@@ -976,25 +1082,134 @@ int PTcl::knownUniverses(int argc,char **) {
 
 static MathematicaTcl mathematicatcl;
 
+/////////////////////////////////////////////////////////////////////////////
+//// mathematica
+//
+// Usage: mathematica <command> ?<arg> ...? 
+//
+// Manage a Mathematica session. Mathematica is a commercial program for
+// symbolic mathematics. This command will only work if your version
+// of the executable has been built with an interface to Mathematica.
+// Possible commands and their arguments are given below:
+// <pre>
+//   terminate session:             end
+//   evaluate Mathematica command:  eval <script>
+//   get expression in Tcl form:    get <name> ?<script>?
+//   evaluate Mathematica command:  send <script>
+//   start a session:               start ?<identifier>?
+//   Tcl/Mathematica status:        status
+// </pre>
+//  
+// The "mathematica send" command will not return output generated by
+// Mathematica (unless an error occurs), "mathematica eval" will return
+// it as a single string, and "mathematica get" sends the script for
+// evaluation and returns the value of the variable name.  For example,
+// "<tcl>mathematica send {Plot[Sin[2 Pi x], {x, 0, 1}]}</tcl>" will
+// create a simple plot, and "<tcl>mathematica eval {?Plot}</tcl>"
+// will return help information about the Plot command.
+//  
+// The "mathematica status" command returns 0 if the Tcl/Mathematica
+// connection is open and Mathematica is running, and non-zero
+// otherwise. A -1 indicates that the connection is not open, whereas 1
+// means that Mathematica is not running.
+//  
+// Note that Mathematica syntax uses square brackets to denote function
+// calls, parenthesis to group algebraic expressions, and curly braces
+// to denote vectors and matrices.  If Tcl tries to evaluate a string
+// containing any of these special characters, then Tcl will flag an error.
+// 
 int PTcl::mathematica(int argc,char** argv) {
     mathematicatcl.SetTclInterpreter(interp);
     return mathematicatcl.mathematica(argc, argv);
 }
 
-/////////////////////////////////////////////////////////////////////////////
-//// matlab
-// FIXME: Documentation.
 // we make matlabtcl a static instance of the MatlabTcl class instead of
 // a data member of the PTcl class because other libraries, e.g. pigilib,
 // rely on the PTcl class but do not use the "matlab" ptcl command, so
-// false dependencies would otherwise be automatically created by make depend
+// false dependencies would otherwise be automatically created by make depend.
 #include "MatlabTcl.h"
 
 static MatlabTcl matlabtcl;
 
+/////////////////////////////////////////////////////////////////////////////
+//// matlab
+//
+// Usage: matlab <command> ?<arg> ...? 
+//
+// Manage a Matlab session. This command will only work if your version
+// of the executable has been built with Matlab. Possible commands and
+// their arguments are given below:
+// <pre>
+//   terminate session:           end
+//   evaluate Matlab script:      eval <script>
+//   get matrix as Tcl lists:     get <name> ?<script>?
+//   get matrix as ordered pairs: getpairs <name> ?<script>?
+//   evaluate Matlab script:      send <script>
+//   set matrix as Tcl lists:     set <name> <rows> <cols> <real> ?<imag>?
+//   start a session:             start ?<identifier>? ?<start_command>?
+//   Tcl/Matlab status:           status
+//   unset a matrix:              unset
+// </pre>
+//  
+// The "matlab send" command will not return output from by Matlab (unless
+// an error occurs), "matlab eval" will return output as a single string, and
+// "matlab get" sends the script for evaluation and returns the value of
+// the variable name. For example, "<tcl>matlab send {plot( [1 2 3] )}</tcl>"
+// will create a simple plot, and "<tcl>matlab eval {help plot}</tcl>" will
+// return help information about the plot command.
+//
+// The "matlab status" command returns 0 if the Tcl/Matlab connection is
+// open and Matlab is running, and non-zero otherwise.  A return value of
+// -1 indicates that the connection is not open, whereas 1 means that
+// Matlab is not running.
+//  
+// The "matlab start" command will launch an interface to Matlab.  If the
+// MATLAB_SERVER_HOSTNAME environment variable is set, then Matlab will
+// be started on that machine.
+// The <start_command> argument specifies how to start Matlab.
+//  
+// Note that Matlab syntax uses square brackets to denote vectors and matrices,
+// which will cause errors if Tcl tries to evaluate a string containing them.
+//
 int PTcl::matlab(int argc,char** argv) {
     matlabtcl.SetTclInterpreter(interp);
     return matlabtcl.matlab(argc, argv);
+}
+
+// static member -- tells whether monitoring is on or off
+int PTcl::monitorFlag = 0;
+
+/////////////////////////////////////////////////////////////////////////////
+//// monitor
+// Turn on or off the monitoring of ptcl commands.  When monitoring is on,
+// then every time a ptcl command is called, the full text of the command
+// is passed to the "monitorPtcl" procedure.  By default, that procedure
+// prints out the command using the Tcl puts procedure, but that procedure
+// may be overridden.
+// 
+int PTcl::monitor(int argc, char ** argv) {
+    if (argc != 2) return usage("monitor on|off");
+    if (strcmp(argv[1],"on") == 0) monitorFlag = 1;
+    else monitorFlag=0;
+    return TCL_OK;
+}
+
+/////////////////////////////////////////////////////////////////////////////
+//// monitorPtcl
+// When monitoring is turned on, this procedure is called each time a Ptcl
+// procedure is invoked.  The full text of the command is passed as arguments.
+// This method may be overridden, but the default method prints the command
+// using the Tcl puts procedure.
+//
+// FIXME: This does not work for defGalaxy commands.  Why????
+//
+int PTcl::monitorPtcl(int argc,char **argv) {
+    InfString cmd = "puts [list ";
+    for (int i = 1; i < argc-1; i++) {
+        cmd << "[list " << argv[i] << "] ";
+    }
+    cmd << "[list " << argv[argc-1] << "]]";
+    return Tcl_Eval(interp, (char*)cmd);
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -1159,6 +1374,60 @@ int PTcl::remove(int argc,char** argv) {
 }
 
 /////////////////////////////////////////////////////////////////////////////
+//// run
+// Run a universe until the specified stop time.  What this time means
+// depends on the domain.  In SDF, for example, it gives the number of
+// iterations of a complete schedule.  In DE, it gives the simulated time
+// after which no more events will be processed.  If no argument is given,
+// then the stop time is taken to be unity.  As a side effect, the current
+// galaxy is set to the universe being run.
+//
+int PTcl::run(int argc,char ** argv) {
+    if (argc < 2 || argc > 3) return usage("run <univname> ?<stoptime>?");
+    
+    // Cast away the const.
+    Block* s = (Block*) getBlock(argv[1]);
+    if (!s) {
+        Tcl_AppendResult(interp, "No block named ", argv[1], (char*)NULL);
+        return TCL_ERROR;
+    }
+    if (!s->isA("InterpUniverse")) {
+        Tcl_AppendResult(interp, "Run supported only for universes, and ",
+               argv[1], " is not a universe.", (char*)NULL);
+        return TCL_ERROR;
+    }
+
+    // We need to set stopTime first, so that the
+    // "stoptime" command can work in the setup,
+    // begin, and go methods of the stars.
+    // FIXME: Shouldn't these be stored on a per-universe basis???
+    stopTime = 1.0;  // default value of the stop time
+    lastTime = 1.0;
+    if (argc == 3) {
+        double d;
+        if (Tcl_GetDouble(interp, argv[2], &d) != TCL_OK)
+        return TCL_ERROR;
+        stopTime = d;
+        lastTime = d;
+    }
+    
+    // Set the current universe
+    universe = (InterpUniverse*)s;
+    curgalaxy = universe;
+    curdomain = universe->domain();
+    curtarget = universe->myTarget();
+
+    if (initBlockInternal(s) != TCL_OK) return TCL_ERROR;
+
+    // universe->setStopTime has to be called after initBlockInternal
+    // because that initialization resets the stop time.
+    universe->setStopTime(stopTime);
+    universe->run();
+    
+    return checkErrorAbort();
+}
+
+/////////////////////////////////////////////////////////////////////////////
 //// setState
 // Set the initial value of the specified state.  For this to affect the
 // current value you must invoke *initState*.
@@ -1178,6 +1447,49 @@ int PTcl::setState(int argc,char ** argv) {
     // list (so that it will be reflected when the block is cloned).
     if (!gal->setState(b->name(),rootName(argv[1]),argv[2])) return TCL_ERROR;
     return TCL_OK;
+}
+
+/////////////////////////////////////////////////////////////////////////////
+//// setTarget
+// Change the target for the specified block. Currently, the block must
+// be a universe, although eventually it may be allowed to be a
+// wormhole. If no block is specified, assume the current galaxy (which
+// again must be a universe).  The targets for the all the constituent
+// blocks are immediately updated (no need to initialize).
+//
+int PTcl::setTarget(int argc,char ** argv) {
+    const char* blockname;
+    const char* ttname;
+    if (argc == 2) {
+        blockname = "this";
+        ttname = argv[1];
+    } else if (argc == 3) {
+        blockname = argv[1];
+        ttname = argv[2];
+    } else {
+        return usage("setTarget ?<blockname>? <targetname>");
+    }
+
+    const Block* b = getBlock(blockname);
+    if (!b) return TCL_ERROR;
+
+    // NOTE: Because wormholes do not support dynamic selection of targets...
+    if (!b->isA("InterpUniverse")) {
+        InfString msg = "setTarget only supports universes. ";
+        msg << blockname << " is not a universe.";
+        result((char*)msg);
+        return TCL_ERROR;
+    }
+
+    const char* tname = hashstring(ttname);
+    if (!legalTarget(curdomain, tname)) {
+        Tcl_AppendResult(interp, tname,
+              " is not a legal target for domain ", curdomain,
+              (char*) NULL);
+        return TCL_ERROR;
+    }
+    if (((InterpUniverse*)b)->newTarget(tname)) return TCL_OK;
+    else return TCL_ERROR;
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -1297,6 +1609,8 @@ void PTcl::addResult(const char* value) {
 // each block.
 //
 void PTcl::galTopBlockIter(const Block* b, int deep, int fullname) {
+    if (b->isItWormhole()) b = 
+           &(((Block*)b)->asStar().asWormhole()->insideGalaxy());
     if (b->isItAtomic()) return;
     CGalTopBlockIter nextb(b->asGalaxy());
     const Block* bb;
@@ -1601,6 +1915,25 @@ int PTcl::usage(const char* msg) {
 ////                         private methods                            ////
 
 /////////////////////////////////////////////////////////////////////////////
+//// checkErrorAbort
+// Check the error/abort status of the SimControl object and return either
+// TCL_ERROR or TCL_OK depending on whether what occurred was fatal.
+//
+int PTcl::checkErrorAbort() {
+    // If aborted, override any existing result
+    // (the Tcl result may contain some random command's result,
+    // so we don't want to return it)
+    unsigned int flags = SimControl::flagValues();
+    if (flags & SimControl::abort) {
+        Tcl_SetResult(interp, "Aborted", TCL_STATIC);
+        return TCL_ERROR;
+    }
+    // Else check the error flag bit.
+    // If it is set, we assume the result has been set to an error message.
+    return (flags & SimControl::error) ? TCL_ERROR : TCL_OK;
+}
+
+/////////////////////////////////////////////////////////////////////////////
 //// getFarPorts
 // Add to the Tcl result a list of ports connected to the given port.
 // This method assumes aliases have been resolved on this port, so we
@@ -1628,9 +1961,10 @@ int PTcl::getFarPorts(PortHole* ph, int deep) {
 // Return NULL if the block does not exist within the given galaxy.
 //
 const Block* PTcl::getSubBlock(const char* name, const Block* gal) {
-    if (gal->isItAtomic()) {
-        return NULL;
-    }
+    if (gal->isItWormhole()) gal =
+           &(((Block*)gal)->asStar().asWormhole()->insideGalaxy());
+    if (gal->isItAtomic()) return NULL;
+
     // Cast is safe now
     InterpGalaxy* galaxy = (InterpGalaxy*)gal;
 
@@ -1665,6 +1999,53 @@ const Block* PTcl::getSubBlock(const char* name, const Block* gal) {
     }
     return b;
 }
+
+/////////////////////////////////////////////////////////////////////////////
+//// initBlockInternal
+// Initialize a universe or wormhole and return TCL_OK or TCL_ERROR.
+//
+int PTcl::initBlockInternal(Block* s) {
+    SimControl::clearHalt();
+    if (s->isA("Runnable")) {
+        // NOTE: initTarget invokes begin!
+        if (s->isItWormhole()) {
+            ((Star*)s)->asWormhole()->initTarget();
+        } else if (s->isA("InterpUniverse")) {
+            ((InterpUniverse*)s)->initTarget();
+        }
+    } else {
+        s->initialize();
+    }
+    unsigned int flags = SimControl::flagValues();
+    if (flags & SimControl::abort) {
+        // If aborted, override any existing result.
+        // The Tcl result may contain the result from some random command,
+        // so we don't want to return it.
+        Tcl_SetResult(interp, "Aborted", TCL_STATIC);
+        return TCL_ERROR;
+    }
+    if (flags & (SimControl::error | SimControl::halt)) {
+        Tcl_AppendResult(interp,"Error setting up the schedule",(char*)NULL);
+        return TCL_ERROR;
+    }
+    return TCL_OK;
+}
+
+/////////////////////////////////////////////////////////////////////////////
+//// legalTarget
+// Return true if the target targetName is a legal target for
+// the domain domName.
+//
+int PTcl::legalTarget(const char* domName, const char* targetName) {
+    const int MAX_NAMES = 40;
+    const char *names[MAX_NAMES];
+    int n = KnownTarget::getList (domName, names, MAX_NAMES);
+    for (int i = 0; i < n; i++)
+    if (strcmp(names[i], targetName) == 0) return TRUE;
+    return FALSE;
+}
+
+
 
 
 
@@ -1702,22 +2083,6 @@ int PTcl::disconnect(int argc,char ** argv) {
     if(! curgalaxy->disconnect(argv[1],argv[2]))
     return TCL_ERROR;
     return TCL_OK;
-}
-
-int PTcl::computeSchedule() {
-    SimControl::clearHalt();
-    universe->initTarget();
-    unsigned int flags = SimControl::flagValues();
-    if (flags & SimControl::abort) {
-        Tcl_SetResult(interp, "Aborted", TCL_STATIC);
-        return FALSE;
-    }
-    if (flags & (SimControl::error | SimControl::halt)) {
-        Tcl_SetResult(interp, "Error in setting up the schedule",
-        TCL_STATIC);
-        return FALSE;
-    }
-    return TRUE;
 }
 
 int PTcl::schedule(int argc,char **) {
@@ -1771,49 +2136,6 @@ int PTcl::schedtime(int argc,char **argv) {
         Tcl_AppendResult(interp,"0",(char*)NULL);
         return TCL_OK;
     }
-}
-
-int PTcl::run(int argc,char ** argv) {
-    if (argc > 2)
-    return usage("run ?<stoptime>?");
-    
-    // We need to set stopTime first, so that the
-    // "stoptime" command can work in the setup,
-    // begin, and go methods of the stars.
-    stopTime = 1.0;  // default value of the stop time
-    lastTime = 1.0;
-    if (argc == 2) {
-        double d;
-        if (Tcl_GetDouble(interp, argv[1], &d) != TCL_OK)
-        return TCL_ERROR;
-        stopTime = d;
-        lastTime = d;
-    }
-    
-    if (!computeSchedule())
-    return TCL_ERROR;
-    // universe->setStopTime has to be called after computeSchedule
-    // because computeSchedule resets the stop time.
-    universe->setStopTime(stopTime);
-    universe->run();
-    
-    return checkErrorAbort();
-}
-
-// function to check error/abort status
-// common code for run, cont, wrapup
-int PTcl::checkErrorAbort() {
-    // If aborted, override any existing result
-    // (the Tcl result may contain some random command's result,
-    // so we don't want to return it)
-    unsigned int flags = SimControl::flagValues();
-    if (flags & SimControl::abort) {
-        Tcl_SetResult(interp, "Aborted", TCL_STATIC);
-        return TCL_ERROR;
-    }
-    // Else check the error flag bit.
-    // If it is set, we assume the result has been set to an error message.
-    return (flags & SimControl::error) ? TCL_ERROR : TCL_OK;
 }
 
 int PTcl::cont(int argc,char ** argv) {
@@ -1909,71 +2231,6 @@ int PTcl::reset(int argc,char** argv) {
     return TCL_OK;
 }
 
-// Return true if the target targetName is a legal target for
-// the domain domName.
-
-static int legalTarget(const char* domName, const char* targetName) {
-    const int MAX_NAMES = 40;
-    const char *names[MAX_NAMES];
-    int n = KnownTarget::getList (domName, names, MAX_NAMES);
-    for (int i = 0; i < n; i++)
-    if (strcmp(names[i], targetName) == 0) return TRUE;
-    return FALSE;
-}
-
-// display or change the target
-// NOTE: This can only change the target of a universe.
-// If it changes the target of a galaxy, the galaxy may fail to be
-// converted into a wormhole.
-int PTcl::target(int argc,char ** argv) {
-    if (argc == 1) {
-        const char *targName = "No target";
-        if (curtarget) targName = curtarget->name();
-        return staticResult(targName);
-    }
-    else if (argc > 2) {
-        return usage("target ?<targetname>?");
-    }
-    else {
-        const char* tname = hashstring(argv[1]);
-        if (!legalTarget(curdomain, tname)) {
-            Tcl_AppendResult(interp, tname,
-            " is not a legal target for domain ", curdomain,
-            (char*) NULL);
-            return TCL_ERROR;
-        }
-        int status;
-        if (!definingGal) {
-            status = universe->newTarget(tname);
-            curtarget = universe->myTarget();
-        } else {
-            LOG_DEL; delete curtarget;
-            curtarget = KnownTarget::clone(tname);
-            status = (curtarget != 0);
-        }
-        return status ? TCL_OK : TCL_ERROR;
-    }
-}
-
-int PTcl::targets(int argc,char** argv) {
-    if (argc > 2) return usage("targets ?<domain>?");
-    const char* domain;
-    if (argc == 2) {
-        domain = argv[1];
-        if (!KnownBlock::validDomain(domain)) {
-            Tcl_AppendResult(interp, "No such domain: ", domain,
-            (char *) NULL);
-            return TCL_ERROR;
-        }
-    } else
-    domain = curdomain;
-    const int MAX_NAMES = 40;
-    const char *names[MAX_NAMES];
-    int n = KnownTarget::getList (domain, names, MAX_NAMES);
-    for (int i = 0; i < n; i++)
-    addResult(names[i]);
-    return TCL_OK;
-}
 
 // set (change) or return value of target parameter
 int PTcl::targetparam(int argc,char ** argv) {
@@ -2096,32 +2353,6 @@ int PTcl::halt(int /*argc*/, char ** /*argv*/) {
 // Request an abortive halt of a running universe
 int PTcl::abort(int /*argc*/, char ** /*argv*/) {
     SimControl::declareAbortHalt();
-    return TCL_OK;
-}
-
-// Added to support tycho - eal
-// Monitor commands to ptcl.  The third, monitorPtcl can be redefined.
-// The default method prints the command to the standard output using cout.
-
-// static member -- tells whether monitoring is on or off
-int PTcl::monitor = 0;
-
-int PTcl::monitorOn(int /*argc*/, char ** /*argv*/) {
-    monitor = 1;
-    return TCL_OK;
-}
-
-int PTcl::monitorOff(int /*argc*/, char ** /*argv*/) {
-    monitor = 0;
-    return TCL_OK;
-}
-
-int PTcl::monitorPtcl(int argc,char **argv) {
-    for (int i = 1; i < argc; i++) {
-        cout << argv[i];
-        cout << " ";
-    }
-    cout << "\n";
     return TCL_OK;
 }
 
@@ -2270,12 +2501,11 @@ struct InterpTableEntry {
 #define ENTRY2(verb,action) { quote(verb), PTcl::action }
 
 // Here is the table.  Make sure it ends with "0,0"
-// CAUTION: the dispatcher treats the first three entries specially
+// CAUTION: the dispatcher treats the first two entries specially
 // for monitor support.
 static InterpTableEntry funcTable[] = {
     ENTRY(monitorPtcl),
-    ENTRY(monitorOn),
-    ENTRY(monitorOff),
+    ENTRY(monitor),
     ENTRY(abort),
     ENTRY(addBlock),
     ENTRY(addState),
@@ -2301,6 +2531,7 @@ static InterpTableEntry funcTable[] = {
     ENTRY(getDomain),
     ENTRY(getFullName),
     ENTRY(getParent),
+    ENTRY(getTarget),
     ENTRY(halt),
     ENTRY(initBlock),
     ENTRY(initState),
@@ -2309,6 +2540,7 @@ static InterpTableEntry funcTable[] = {
     ENTRY(isWormhole),
     ENTRY(knownBlocks),
     ENTRY(knownDomains),
+    ENTRY(knownTargets),
     ENTRY(knownUniverses),
     ENTRY(link),
     ENTRY(matlab),
@@ -2331,11 +2563,10 @@ static InterpTableEntry funcTable[] = {
     ENTRY(schedule),
     ENTRY(seed),
     ENTRY(setState),
+    ENTRY(setTarget),
     ENTRY(states),
     ENTRY(stateValue),
-    ENTRY(target),
     ENTRY(targetparam),
-    ENTRY(targets),
     ENTRY(wrapup),
     { 0, 0 }
 };
@@ -2369,18 +2600,16 @@ int PTcl::dispatcher(ClientData which,Tcl_Interp* interp,int argc,char* argv[])
     Tcl_Interp* save = activeInterp;
     activeInterp = interp;
     
-    // Added to support tycho - eal
     // If the flag monitor is set, call monitorPtcl to monitor commands.
-    // Avoid the call if the command is "monitorPtcl", "monitorOn",
-    // or "monitorOff".
-    if (monitor && i>2) {
+    // Avoid the call if the command is "monitorPtcl" or "monitor".
+    if (monitorFlag && i>=2) {
         // Call monitorPtcl with the arguments being the
         // Ptcl command that we are executing and its arguments
-        InfString cmd = "monitorPtcl ";
-        for(int j = 0; j < argc; j++) {
-            cmd += argv[j];
-            cmd += " ";
+        InfString cmd = "::pitcl::monitorPtcl ";
+        for(int j = 0; j < argc-1; j++) {
+            cmd << "[list " << argv[j] << "] ";
         }
+        cmd << "[list " << argv[argc-1] << "]";
         Tcl_Eval(interp, (char*)cmd);
     }
     
