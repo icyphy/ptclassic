@@ -59,14 +59,3 @@ test openContext-1.1 {openContext} {
 	    sample.gfk \
 	    \$TYCHO/doc/tychoClasses.dag
 } {}
-
-
-############################################################################
-#### openContext
-# Open up a Ptolemy editor. This should be moved to the typt package.
-if ![catch {package require tycho.typt.editors}] {
-    test openContext-1.2 {openContext, Ptolemy facet} {
-	openAllFiles \
-		\$PTOLEMY/src/domains/sdf/demo/basic.pal
-    } {}
-}
