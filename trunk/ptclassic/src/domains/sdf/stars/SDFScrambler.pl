@@ -49,6 +49,7 @@ cease to produce random-looking output, and will output a constant.
 For example, if the input is all zeros, and the initial state of the
 scrambler is zero, then the outputs will be all zero, hardly random.
 This is easily avoided by initializing the scrambler to some non-zero state.
+That is why the default value for the \fIshiftReg\fR is set to $1$.
 .pp
 The \fIpolynomial\fR must be carefully chosen. It must represent a
 \fIprimitive polynomial\fR, which is one that cannot be factored into two
@@ -145,7 +146,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	defstate {
 	  name { shiftReg }
 	  type { int }
-	  default { 0 }
+	  default { 1 }
 	  desc { the shift register }
 	}
 	protected {
@@ -161,21 +162,26 @@ limitation of liability, and disclaimer of warranty provisions.
 			"Sorry, the polynomial must be a positive integer.");
 	    return;
 	  }
+	  if (!(mask & 1)) {
+	    Error::warn(*this,
+			"The low-order bit of the polynomial is not set.",
+			"Input will have no effect on the shift register.");
+	  }
 	}
 	go {
 	  int reg = int(shiftReg) << 1;
 	  int masked = mask & reg;
-	  // Now we need to find the parity of "masked".
+	  // Now we need to find the parity of "masked"
 	  int parity = 0;
-	  // Calculate the parity of the masked word.
+	  // Calculate the parity of the masked word
 	  while (masked > 0) {
 	    // toggle parity if the low-order bit is one
 	    parity = parity ^ (masked & 1);
 	    masked = masked >> 1;
 	  }
 	  // Exclusive-or with the input
-	  // nonzero input: exclusive or with 0x01
-	  // zero input: no exclusive or
+	  //   nonzero input: exclusive or with 0x01
+	  //   zero input: no exclusive or
 	  if ( int(input%0) ) {
 	    parity = parity ^ 0x01;
 	  }
