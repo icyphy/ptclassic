@@ -43,9 +43,14 @@ EGKERNEL = $(ROOT)/src/domains/sdf/expgraph
 PARDIR = $(ROOT)/src/domains/cg/parScheduler
 CGTARDIR = $(ROOT)/src/domains/cg/targets
 CGCTARGMAINDIR = $(ROOT)/src/domains/cgc/targets/uniproc
+PIGIDIR = $(ROOT)/src/pigilib
+PTKLIB = $(ROOT)/src/ptklib
+PTCLDIR = $(ROOT)/src/ptcl
 
 INCL=-I$(CGCKERNEL) -I$(CGKERNEL) -I$(SDFKERNEL) -I$(KERNDIR) -I$(EGKERNEL) \
-	-I$(PARDIR) -I$(CGTARDIR) -I$(CGCTARGMAINDIR) -I$(CGCSTARS)
+	-I$(PARDIR) -I$(CGTARDIR) -I$(CGCTARGMAINDIR) -I$(CGCSTARS) \
+	-I$(PIGIDIR) -I$(PTKLIB) -I$(PTCLDIR) \
+	-I$(TCL_INCDIR) -I$(TK_INCDIR) $(X11_INCSPEC)
 
 PLSRC = $(PL_SRCS:.pl=.cc)
 
