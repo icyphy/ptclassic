@@ -22,16 +22,30 @@ include $(CONFIG)
 
 # SDF support directory
 SDFDIR=$(ROOT)/src/domains/sdf/kernel
-# Dynamic constructs support directory
-DYCONDIR=$(ROOT)/src/domains/ddf/constructs
 
-INCL = -I$(DYCONDIR) -I$(SDFDIR) -I$(KERNDIR)
+INCL = -I$(SDFDIR) -I$(KERNDIR)
 
 # Library name
 LIB=libddf.a
 
-# Header files
-HDRS= DDFPortHole.h DDFScheduler.h DDFStar.h DDFWormhole.h DDFTarget.h
+# .h files with corresponding .cc files
+HDRS = \
+ Case.h \
+ CaseScheduler.h \
+ DDFPortHole.h \
+ DDFScheduler.h \
+ DDFStar.h \
+ DDFTarget.h \
+ DDFWormhole.h \
+ DoWhile.h \
+ DoWhileScheduler.h \
+ DyConstruct.h \
+ DyConScheduler.h \
+ For.h \
+ ForScheduler.h \
+ Recur.h \
+ RecurScheduler.h \
+ defConstructs.h
 
 # Library sources
 SRCS= $(HDRS:.h=.cc) DDFDomain.cc DDFAutoWorm.cc
