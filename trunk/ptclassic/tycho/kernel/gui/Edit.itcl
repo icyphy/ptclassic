@@ -409,8 +409,9 @@ body ::tycho::Edit::constructor {args} {
     bind $itk_component(text) <Map> "$this focusin; break"
 
     # Set the bindings that clear the status bar
-    bind EditClearStatus <KeyPress> "%Q putStatus {}"
-    bind EditClearStatus <ButtonPress> "%Q putStatus {}"
+    # NOTE: These are much too aggressive.
+    # bind EditClearStatus <KeyPress> "%Q putStatus {}"
+    # bind EditClearStatus <ButtonPress> "%Q putStatus {}"
 
     # Put the insertion cursor at the top
     $itk_component(text) mark set insert @0,0
