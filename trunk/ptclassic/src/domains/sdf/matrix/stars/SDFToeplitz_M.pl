@@ -10,14 +10,22 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
     }
     location    { SDF matrix library }
-    descriptor	{
-Generate a floating-point data matrix X, with dimensions (numRows,numCols),
-from a stream of numRows + numCols - 1 input particles.
+    desc        {
+Put a sequence of real-valued samples into a rectangular Toeplitz matrix.
+    }
+    explanation {
+.Ir "Toeplitz matrix"
+Generate a floating-point data matrix X, with dimensions
+\fInumRows\fR x \fInumCols\fR, from a stream of
+\fInumRows\fR + \fInumCols\fR - 1 input particles.
 The data matrix is a Toeplitz matrix such that the first row is
 [ x(M-1) x(M-2) ... x(0) ], the second row is [ x(M) x(M-1) x(M-2) ... x(1) ],
 and so forth until the last row, which is [ x(N-1) x(N-2) ... x(N-M) ], where
-numRows = N-M+1 and numCols = M.
-This is the form of the matrix that is required by the SVD_M star,
+\fInumRows\fR = $N-M+1$ and \fInumCols\fR = $M$.
+.Ir "singular-value decomposition"
+This is the form of the matrix that is required by the singular-value
+decomposition star
+.c SVD_M ,
 among others.
     } 
     defstate {
