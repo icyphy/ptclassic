@@ -31,11 +31,9 @@ The HTML widget in Tycho is based on the
 <a href="../lib/html_library/html/help.html">HTML library</a>
 written by Stephen Uhler of Sun Microsystems, which supports all the
 features of HTML 2.0.
-There is currently no support in Tycho for
-<a name="HTTP">HTTP</a> hyperlink references, so you cannot
+Tycho can read
+<a name="HTTP">HTTP</a> hyperlink references, so you can
 read documents that reside on non-local filesystems from within Tycho.
-(However under Unix, Tycho can start use <code>netscape</code> to
-view Internet documents).
 A <a href="../lib/html_library/html/sample.html">sample document</a>
 illustrates the HTML tags that are supported.
 <p>
@@ -118,7 +116,7 @@ then remote users will be able to view the documentation.
 </MENU>
 
 <P> The text that makes up a HTML link should be on one line, as some of the
-HTML tools such as <CODE>htmlchek</CODE>
+HTML tools such as <CODE>htmlcheck</CODE>
 will not process HTML <CODE>&lt;A HREF="..."&gt;...&lt;/A&gt;</CODE>
 links that are split over multiple lines.
 

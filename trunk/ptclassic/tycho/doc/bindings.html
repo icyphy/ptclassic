@@ -166,25 +166,47 @@ The following shortcuts work in the HTML viewer:
 <dt><code> Shift+Button-1 </code><dd> on a hypertext link, open in a new window </tr>
 <dt><code> Control+Left arrow </code><dd> back to previous page </tr>
 <dt><code> Control+Right arrow </code><dd> forward to next page </tr>
-<dt><CODE> Control+Tab</CODE><dd> shift the focus to the toolbar
+<dt><CODE> Control+Tab</CODE><dd> shift the focus to the toolbar and back
 </dl>
-
+<p>
 In addition, the toolbar buttons in the HTML viewer have underlined
 characters that can be used as shortcuts to invoke the buttons.
 
 <h2><a name="dialog box shortcuts">Bindings for Dialogs</a></h2>
 <p>
+Most dialog boxes have a button that is surrounded by an extra sunken
+or highlighted ring that can be invoked by typing Return.
+In addition, dialogs can be dismissed without invoking any buttons
+by typing Escape.
+<p>
 <dl COMPACT>
 <dt><CODE>Escape</CODE><dd>dismiss the dialog, cancelling the command
 <dt><CODE>Return</CODE><dd>dismiss the dialog, completing the command
-<dt><CODE>M-Return</CODE><dd>dismiss the dialog, completing the command (used when
-the dialog needs <CODE>Return</CODE> for text entries)
-<dt><CODE>Space</CODE><dd>invoke a button
+</dl>
+<p>
+In addition, buttons generally have an underlined character. Typing
+that character will invoke the button, unless the focus is in a text
+entry box.  The focus can be move out of a text entry box using
+any of the following mechanisms:
+<p>
+<dl COMPACT>
 <dt><CODE>Tab</CODE><dd>move from one item to another
 <dt><CODE>Control+Tab</CODE><dd>move from one item to another
+<dt><CODE>Control+Shift+Tab</CODE><dd>move from one item to another in the
+reverse direction.
 </dl>
-
-
+<p>
+Note that in multi-line text entry boxes, <code>Tab</code> simply inserts
+a tab character, so you must use <CODE>Control+Tab</CODE>.
+<p>
+Some dialog boxes have checkbuttons.  To change the state of these
+from the keyboard, move the focus to the checkbutton and type
+<code>Space</code>.
+<p>
+<dl COMPACT>
+<dt><CODE>Space</CODE><dd>invoke a button
+</dl>
+<p>
 <h2><a name="Windows shortcuts">Windows shortcuts</a></h2>
 <p>
 <ul>
@@ -483,7 +505,7 @@ also inserts the selection."
 <a href="index.html">Tycho Home Page</a><br>
 <p>
 <HR>
-Copyright &#169 1996-1997, The Regents of the University of California.
+Copyright &#169 1996-%Q%, The Regents of the University of California.
 All rights reserved.
 <br>
 Last updated: $Date$,
