@@ -145,6 +145,11 @@ class ::tycho::HTML {
     # Open a file and go to its internal point identified by name.
     method hyperJump {filename {point {}} {push 1}}
 
+    # This is used to distinguish between 1) hyperjump an absolute location
+    # (ie. /icons/file.xbm) within a HTML file and 2) user's hyperjump to
+    # absolute local file location (ie. /usrs/eal)
+    method hyperJumpUser {filename} {hyperJump $filename _}
+
     # Insert the specified data.
     method insertData {data}
 
@@ -659,18 +664,23 @@ body ::tycho::HTML::hyperJump {filename {point {}} {push 1}} {
             # Push 0 means back, so filename is always absolute!
             set filename $filename
         } elseif { [::tycho::url pathtype $filename] == "absolute" && \
-                [::tycho::url protocol $filename] != ""} {
-            # exception2: join /tmp/tarsky http://ptolemy] = http://ptolemy
-            # exception2: join http://weld http://ptolemy] = http://ptolemy
+                ([::tycho::url protocol $filename] != "" || $point == "_")} {
+            # Exception 2-- from the context of a remote file:
+            #   [join /tmp/tarsky http://ptolemy] = http://ptolemy
+            #   [join http://weld http://ptolemy] = http://ptolemy
+            #   [join http://weld /icons/file]    = http://weld/file
+            #
+            # Exception 3-- from the context of the user input:
+            #   [join http://ptolemy /usrs/eal]   = /usrs/eal
+            #
             # We need to take care of this case because it's impossible
-            # to make "::tycho::url join" sensibly take care of it
-            # without considerable cost to all other clients, regardless
-            # of what Kevin thinks.
+            # to make "::tycho::url join" sensibly take care of it.
             set filename $filename
         } elseif {[string match \$* $filename] || [string match ~* $filename]} {
             # if it begins $PTOLEMY, $TYCHO, ~eal, etc.
             set filename [::tycho::expandPath $filename]
         } else {
+            # Default behavior is to join the paths
             set filename [::tycho::url join \
                     [::tycho::url dirname [filename]] $filename]
         }
@@ -1448,7 +1458,7 @@ body ::tycho::HTML::initializeToolbar {toolbar} {
             -text Stop -command "$this stopRendering"
 
     # Add the entry widget displaying the current page
-    $toolbar entry location Location [filename] "$this hyperJump"
+    $toolbar entry location Location [filename] "$this hyperJumpUser"
 }
 
 #####################################################################
