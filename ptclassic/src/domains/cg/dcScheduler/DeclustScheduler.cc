@@ -745,8 +745,6 @@ int DeclustScheduler::pulldown(ClusterList *combClusts, ClusterList *Cleft) {
 	schedA->initialize();
 	mtarget->clearCommPattern();
 
-	// initially, all nodes are assigned to a single processor
-	combClusts->firstClust()->assignP(0);
 	int bestPeriod = schedA->listSchedule(myGraph);
 	int bestComm = schedA->commAmount();
 
@@ -875,6 +873,14 @@ int DeclustScheduler::ClusterUp(ClusterList& Nclusts) {
 		Clusts.insertSorted(combined);
 		Nclusts.insert(combined);
 	}
+
+	// initially, all nodes are assigned to a single processor
+	if (EClusts.listSize() < 2) {
+		EClusts.firstClust()->assignP(0);
+	} else {
+		Nclusts.firstClust()->assignP(0);
+	}
+
 	return TRUE;
 }
 
