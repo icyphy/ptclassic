@@ -60,8 +60,7 @@ HDRS	      = compile.h \
 		TclStarIfc.h \
 		BarGraph.h \
 		XYPlot.h \
-		pigidefine.h \
-		compat.h
+		pigidefine.h
 
 LIBCSRCS      = main.c \
 		util.c \
