@@ -64,6 +64,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 static const char* lastName = 0;
 
 inline const char* expand(const char * name) {
+	delete [] lastName;
 	return lastName = expandPathName(name);
 }
 
