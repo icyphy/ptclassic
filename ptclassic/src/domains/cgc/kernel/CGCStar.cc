@@ -46,6 +46,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "FixState.h"
 #include "FixArrayState.h"
 #include "PrecisionState.h"
+#include <stdio.h>              // sprintf(), sscanf()
 #include <ctype.h>
 
 
