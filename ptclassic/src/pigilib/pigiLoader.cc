@@ -266,15 +266,14 @@ static char* genObjDir (const char* srcDirStr) {
 	int len = strlen(srcDirStr);
 	char* srccopy = savestring(srcDirStr);
 	char* objDirStr = srccopy;
-	int found = FALSE;
 
 	// Search for a sub-directory named "src"
 	if ( len >= 4 ) {
 
 	  // 1. Check for src sub-directory at end of directory name
 	  int i = len - 4;
-	  char *srcloc = &srccopy[i];
-	  found = ( strcmp(srcloc, "/src") == 0 );
+	  char* srcloc = &srccopy[i];
+	  int found = ( strcmp(srcloc, "/src") == 0 );
 
 	  // 2. If not found, check for src sub-directory in directory name
 	  if ( ! found ) {
@@ -289,12 +288,16 @@ static char* genObjDir (const char* srcDirStr) {
 
 	  // 3. If found, substitute "/src" subdirectory with "/obj.$PTARCH"
 	  if ( found ) {
-	    *srcloc = 0;
+	    char tmpChar = *srcloc;
+	    *srcloc = 0;		// temporarily null terminate srcloc
 	    StringList temp = srccopy;
+	    *srcloc = tmpChar;
 	    temp << "/obj." << PTARCH;	// replace "/src" with "/obj.$PTARCH"
 	    temp << &srcloc[4];		// copy rest of source directory
-	    objDirStr = savestring(temp);
-	    delete [] srccopy;
+	    if ( exists(temp) ) {
+		objDirStr = savestring(temp);
+		delete [] srccopy;
+	    }
 	  }
 	}
 
