@@ -118,8 +118,8 @@ private:
 	}
 
 	// initialization functions for info structures.
-	void initInfo (Star&);
-	void commonPortInfo (PortHole&);
+	void initInfo (DataFlowStar&);
+	void commonPortInfo (DFPortHole&);
 
 	// compute # of tokens to be moved on each arc, based on booleans
 	void computeTokens (const Star&, int useKnownBools = TRUE);
