@@ -238,7 +238,8 @@ void Cluster::addGalaxy(Galaxy* g,PortHole** newPorts) {
 void Cluster::addCluster(Cluster* c) {
     gal.addBlock(c->star(),c->star().name());
     c->star().setParent(&gal);
-    c->star().setTarget(star().target());
+    if (star().target()) 
+	c->star().setTarget(star().target());
 }
 
 void Cluster::initMaster() {
