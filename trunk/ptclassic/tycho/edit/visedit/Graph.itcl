@@ -279,7 +279,7 @@ body ::tycho::Graph::clear {} {
 #######################################################################
 #### contents
 # Return the contents of a cell of the forest.
-# The contents can be any arbirary Tcl string or list.
+# The contents can be any arbitrary Tcl string or list.
 #
 body ::tycho::Graph::contents {nodename} {
     verify $nodename
