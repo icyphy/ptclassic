@@ -50,12 +50,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 	//////////////////////////////
 
 class DEWormhole : public Wormhole, public DEStar {
-
 public:
-
-	void setup();
 	void begin() { Wormhole::begin(); }
-	void go();
 	void wrapup();
 
 	// prepare for a new phase of firing
@@ -93,6 +89,9 @@ public:
 	void initState() { gal.initState(); }
 
 protected:
+	void setup();
+	void go();
+
 	// redefine getStopTime() : 
 	// return the currentTime if syncMode of the scheduler is set (default)
 	// otherwise return the stopTime.
