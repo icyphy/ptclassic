@@ -49,7 +49,7 @@ CGDDFDIR =	$(ROOT)/src/domains/cg/ddfScheduler
 CGCT =		$(ROOT)/src/domains/cgc/targets
 
 # Include directories
-INCL= -I$(CGCT)/uniprocessor -I$(CGCKERNEL) -I$(CGKERNEL) -I$(BDFKERNEL) \
+INCL= -I$(CGCT)/uniproc -I$(CGCKERNEL) -I$(CGKERNEL) -I$(BDFKERNEL) \
  -I$(SDFKERNEL) -I$(KERNDIR) -I$(PARDIR) -I$(CGTARDIR) -I$(CGCSTARS) \
  -I$(DLDIR) -I$(MACRODIR) -I$(CGDDFDIR)
 
