@@ -40,7 +40,7 @@ CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
 # Sub directories to run make in.
-DIRS =			coding demo packages
+DIRS =		coding packages #demo
 
 EXTRA_SRCS =	\
 		abbreviations.html \
