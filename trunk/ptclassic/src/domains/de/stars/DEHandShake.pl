@@ -5,16 +5,14 @@ defstar
     descriptor
     {
 This star cooperates with a (possibly preemptive) arbitrator.
-A "request" TRUE is generated in response to new "input" particles,
-which are queued internally.  If the queue ever becomes empty,
-a "request" FALSE is generated and the star reverts back to its
-initial state.
-
-When a "grant" TRUE is received in response to a "request",
-an "output" particle is sent.  This must be acknowledged by an
-"ackIn" particle before the next "output" can be sent. Any "ackIn"
-particle which is received in response to an "output" is sent to
-"ackOut".  All other "ackIn" particles are discarded.
+A "request" TRUE is generated in response to new "input" particles.
+If no new "input" is available when it comes time to send the next
+"output", a "request" FALSE is generated.  When a "grant" TRUE is
+received in response to a "request", an "output" particle is sent.
+This must be acknowledged by an "ackIn" particle before the next
+"output" can be sent.  Any "ackIn" particle which is received in
+response to an "output" is sent to "ackOut".  All other "ackIn"
+particles are discarded.
     }
     version { $Id$ }
     author { T.M. Parks }
@@ -51,7 +49,7 @@ particle which is received in response to an "output" is sent to
     {
 	name { request }
 	type { int }
-	desc { Indicates presence or absence of queued "input" particles. }
+	desc { Indicates presence or absence of "input" particles. }
     }
 
     input
@@ -61,25 +59,11 @@ particle which is received in response to an "output" is sent to
 	desc { Enables and disables sending of "output" particles. }
     }
 
-    defstate
-    {
-	name { capacity }
-	type { int }
-	default { 0 }
-	desc
-	{
-Capacity of internal queue. Specify capacity <= 0 for unbounded queueing.
-	}
-    }
-
-    ccinclude { "DataStruct.h" }
-
     protected
     {
 	int req : 1;	// request has been issued
 	int open : 1;	// output is enabled
 	int wait : 1;	// waiting for acknowledge
-	Queue queue;
     }
 
     start
@@ -92,45 +76,31 @@ Capacity of internal queue. Specify capacity <= 0 for unbounded queueing.
 	if (grant.dataNew)	// new control received
 	{
 	    open = int(grant.get());	// enable or disable output
-	    if (req && open && !wait && queue.length() > 0)	// send data
+	    if (req && open && !wait && input.dataNew)	// send data
 	    {
 		wait = TRUE;
-		output.put(arrivalTime) = *(Particle*)queue.get();
-		ackIn.dataNew = FALSE;	// clear out any old particles
+		output.put(arrivalTime) = input.get();
+		ackIn.dataNew = FALSE;	// discard any old particle
 	    }
 	}
 
-	if (input.dataNew)	// new data received
+	if (input.dataNew && !req)	// new data received
 	{
-	    Particle& pp = input.get();
-	    if (int(capacity) <= 0 || queue.length() < int(capacity))
-	    {
-		queue.put(pp.clone());	// put data in queue
-		if (!req)		// generate request
-		{
-		    request.put(arrivalTime) << (req = TRUE);
-		}
-		else if (open && !wait)	// send data
-		{
-		    wait = TRUE;
-		    output.put(arrivalTime) = *(Particle*)queue.get();
-		    ackIn.dataNew = FALSE;	// clear out any old particles
-		}
-	    }
+	    request.put(arrivalTime) << (req = TRUE);
 	}
 
 	if (ackIn.dataNew && wait)	// acknowledge received
 	{
 	    wait = FALSE;
-	    ackOut.put(arrivalTime) = ackIn.get();	// pass data through
-	    if (queue.length() == 0)	// release
+	    ackOut.put(arrivalTime) = ackIn.get();
+	    if (!input.dataNew)		// release
 	    {
 		request.put(arrivalTime) << (req = FALSE);
 	    }
-	    else if (open)	// send data
+	    else if (open)		// send data
 	    {
 		wait = TRUE;
-		output.put(arrivalTime) = *(Particle*)queue.get();
+		output.put(arrivalTime) = input.get();
 	    }
 	}
     }
