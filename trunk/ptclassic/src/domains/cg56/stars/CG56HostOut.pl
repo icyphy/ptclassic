@@ -14,7 +14,8 @@ limitation of liability, and disclaimer of warranty provisions.
 	location { CG56 library }
 	explanation {
 Output data from DSP to host via host port synchronously.
-.SH IMPLEMENTATION
+.UH IMPLEMENTATION:
+.pp
 We distiguish between single word transfers and multiword transfers.
 The single word case is much simple in that we can use the \fIref\fP macro to
 access the value.  The multiword case requires a loop.  Currently
