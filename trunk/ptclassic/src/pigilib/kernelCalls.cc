@@ -20,6 +20,7 @@ Programmer: E. Goei, J. Buck
 #include "KnownTarget.h"
 #include "Animate.h"
 #include "ConstIters.h"
+#include "UserOutput.h"
 #include <ACG.h>
 #include <signal.h>
 
@@ -31,9 +32,17 @@ static InterpGalaxy *saveGalaxy = NULL;  // used to build galaxies
 static Target *galTarget = NULL;	 // target for a galaxy
 
 // Define a stream for logging -- log output to pigiLog.pt
-#include <stream.h>
 
-ostream LOG("pigiLog.pt", "w");
+UserOutput LOG;
+
+extern "C" boolean
+KcInitLog(const char* file) {
+	if (!LOG.fileName(file)) {
+		LOG.fileName("/dev/null");
+		return FALSE;
+	}
+	return TRUE;
+}
 
 // Write a string to the log file
 extern "C" void KcLog(const char* str) { LOG << str; }
@@ -254,6 +263,18 @@ KcEndDefgalaxy(const char* outerDomain) {
 	return TRUE;
 }
 
+static char dummyDesc[] =
+"Galaxy created by VEM\nTo set the descriptor for this galaxy, do look-inside, then edit-comment";
+
+// set the descriptor of the current galaxy.
+extern "C" void
+KcSetDesc(const char* desc) {
+	if (desc && *desc) {
+		currentGalaxy->setDescriptor(savestring(desc));
+	}
+	else currentGalaxy->setDescriptor(dummyDesc);
+}
+
 // Run the universe
 extern "C" boolean
 KcRun(int n) {
@@ -410,9 +431,9 @@ realGetParams(const Block* block, ParamListType* pListPtr)
 	    if (!tempArray) {  // Out of memory error
 		return FALSE;
 	    }
-	    BlockStateIter nexts(*block);
+	    CBlockStateIter nexts(*block);
 	    for (int i = 0; i < n; i++) {
-		    State& s = *nexts++;
+		    const State& s = *nexts++;
 		    // Only return settable states
 		    if (s.attributes() & AB_SETTABLE) {
 		        tempArray[j].name = s.readName();
@@ -525,7 +546,7 @@ KcProfile (char* name) {
 		accum_string (")\n");
 	}
 	else {
-		accum_string ("Compiled-in galaxy: ");
+		accum_string ("Galaxy: ");
 		accum_string (name);
 		accum_string (" (");
 		accum_string (b->asGalaxy().myDomain);
@@ -567,8 +588,8 @@ KcProfile (char* name) {
 
 static void displayStates(const Block *b) {
 	if (b->numberStates()) accum_string ("States:\n");
-	BlockStateIter nexts(*b);
-	State *s;
+	CBlockStateIter nexts(*b);
+	const State *s;
 	while ((s = nexts++) != 0) {
 		accum_string ("   ");
 		accum_string (s->readName());
