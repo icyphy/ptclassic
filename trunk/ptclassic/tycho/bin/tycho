@@ -105,9 +105,6 @@ while ($#argv)
 			set tychojava
 			breaksw
 		case -nowelcome:
-			echo "To permanently disable the welcome window,"
-			echo "edit your ~/.Tycho/tychorc.tcl file and add:"
-			echo "set tychoWelcomeWindow 0"
 			set nowelcome
 			breaksw
 		case -noconsole:
