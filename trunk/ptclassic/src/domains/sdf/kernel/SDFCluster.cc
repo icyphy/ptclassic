@@ -108,8 +108,7 @@ SDFClusterGal::SDFClusterGal(Galaxy& gal, ostream* log)
 		if (!out || out->isItInput()) continue;
 		SDFClustPort* in = ptable[out->real().far()->index()];
 		int numDelays = out->real().numInitDelays();
-		const char* initDelays = out->real().initDelayValues();
-		out->connect(*in,numDelays,initDelays);
+		out->connect(*in,numDelays);
 		out->initGeo();
 	}
 	LOG_DEL; delete ptable;
@@ -654,9 +653,8 @@ void SDFClusterBag::absorb(SDFCluster* c,SDFClusterGal* par) {
 			// zap it and connect directly.
 			SDFClustPort* p = pFar->inPtr();
 			int numDelays = cp->numInitDelays();
-			const char* initDelays = cp->initDelayValues();
 			LOG_DEL; delete pFar;
-			cp->connect(*p, numDelays, initDelays);
+			cp->connect(*p, numDelays);
 			cp->initGeo();
 		}
 		else {
@@ -748,10 +746,9 @@ SDFClusterBag::merge(SDFClusterBag* b,SDFClusterGal* par) {
 		SDFClustPort* near = p->inPtr();
 		SDFClustPort* far = p->far()->inPtr();
 		int numDelays = p->numInitDelays();
-		const char* initDelays = p->initDelayValues();
 		LOG_DEL; delete p->far();
 		LOG_DEL; delete p;
-		near->connect(*far, numDelays, initDelays);
+		near->connect(*far, numDelays);
 		near->initGeo();
 	}
 	// now we simply combine the remaining bagports and clusters into this.
@@ -1076,9 +1073,8 @@ void SDFClustPort::makeExternLink(SDFClustPort* bagPort) {
 	SDFClustPort* pFar = far();
 	if (pFar) {
 		int numDelays = numInitDelays();
-		const char* initDelays = initDelayValues();
 		disconnect();
-		bagPort->connect(*pFar,numDelays,initDelays);
+		bagPort->connect(*pFar,numDelays);
 		bagPort->initGeo();
 	}
 }
