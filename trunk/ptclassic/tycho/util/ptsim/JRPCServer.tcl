@@ -30,7 +30,6 @@
 #                                        COPYRIGHTENDKEY
 #######################################################################
 
-
 # The procs in this file implement the server side of a simple interface
 # between two Tcl interpreters running as separate processes.
 # We use this to communicate between Itcl2.2 and Tcl Blend.  We
@@ -92,19 +91,17 @@ proc _JRPCServer_ReadOrClose {fd} {
     global _JRPC_command_
 
     set line [gets $fd]
-    puts !$line
+    # puts !$line
     # puts "_JRPCServer_ReadOrClose: $line"
 
     # Check for cookie and execute command if one was got
     if { $line == "_JRPC_EndCommand_Cookie_" } {
-        puts "Executing \"$_JRPC_command_\""
+        puts "JRPCServer: Executing \"$_JRPC_command_\""
 
         if [catch {uplevel #0 $_JRPC_command_} result] {
-            puts "Returning [list 1 $result]"
             puts $fd [list 1 $result]
             flush $fd
         } else {
-            puts "Returning [list 0 $result]"
             puts $fd [list 0 $result]
             flush $fd
         }
