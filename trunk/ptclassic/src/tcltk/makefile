@@ -47,7 +47,7 @@ BINDIR=$(PTOLEMY)/bin.$(ARCH)
 # Version numbers
 TCL_VERSION =	tcl7.3
 TK_MAJOR_VERSION = 	tk3.6
-TK_VERSION =	tk3.6p1-TkPixmap3.6e
+TK_VERSION =	tk3.6p1
 
 # Location of the tcl source
 TCL_SRC =	$(TCLTK_SRC)/$(TCL_VERSION)
@@ -109,7 +109,7 @@ $(TCL_OBJ)/libtcl.a: $(TCL_OBJ)
 install_tcl: $(TCL_DEST)/lib/libtcl.a $(BINDIR)/tclsh
 $(TCL_DEST)/lib/libtcl.a: $(TCL_OBJ)/libtcl.a $(TCLTK_DEST) $(TCL_DEST) $(TCL_DEST)/lib $(TCL_INDEPENDENT_DEST)
 	(cd  $(TCL_OBJ); $(MAKE) install)
-	
+
 $(TCLTK_DEST):
 	mkdir $(TCLTK_DEST)
 
