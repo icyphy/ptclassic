@@ -278,27 +278,24 @@ int rcpCopyFile(const char* hname, const char* dir, const char* filePath,
     }
     return !rshSystem("localhost",(const char*)command);
 }
-    
+ 
+// Open a pipe to the Unix command "hostname" and read the result
 int onHostMachine(const char* hname) {
 	if (hname==NULL||*hname=='\0'||(strcmp(hname,"localhost")==0))
 		return TRUE;
+	int retval = FALSE;
 	FILE* fp = popen("hostname", "r");
 	if (fp == NULL) {
-		Error::warn("popen error");
-	} else {
-		char line[40];
-		if (fgets(line, 40, fp) != NULL) {
-			char* myHost = makeLower(line);
-			char* temp = makeLower((const char*) hname);
-			if (strncmp(myHost, temp, strlen(temp)) == 0) {
-				return TRUE;
-		   	}
-			LOG_DEL; delete [] temp;
-			LOG_DEL; delete [] myHost;
-		}
+	    Error::warn("popen error");
+	}
+	else {
+	    char line[40];
+	    if (fgets(line, 40, fp) != NULL) {
+		retval = ( strncasecmp(line, hname, strlen(hname)) == 0 );
+	    }
 	}
 	pclose(fp);
-	return FALSE;
+	return retval;
 }
 
 
