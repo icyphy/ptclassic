@@ -2,7 +2,7 @@
 #
 # @Author: John Reekie
 #
-# @Version: @(#)main.tcl	1.4 02/11/98
+# @Version: $Id$
 #
 # @Copyright (c) 1998 The Regents of the University of California.
 # All rights reserved.
@@ -70,7 +70,18 @@ proc ::pakman {{subcommand {}} args} {
 	    eval ::pakman::sccs [list $path] $opts
 	}
 	"mirror" {
-	    puts "Not implemented yet"
+	    set path [lindex $args 0]
+	    set mirror [lindex $args 1]
+	    set args [lreplace $args 0 1]
+	    set opts [::pakman::getopt -flags {
+		-debug -help -silent
+	    } -options {
+		-include {} -exclude {} -command {}
+	    } -aliases {
+		-d -debug -s -silent -p -path
+	    } -arguments $args]
+
+	    eval ::pakman::mirror [list $path $mirror] $opts
 	}
 	"version" {
 	    puts "Not implemented yet"
