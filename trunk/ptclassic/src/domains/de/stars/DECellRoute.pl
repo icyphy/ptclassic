@@ -60,7 +60,7 @@ sources and routes them to the appropriate output.
 
 				outPtr->put(completionTime) << theEnvp;
 
-				inptr->getSimulEvent();
+				inPtr->getSimulEvent();
 		}	}
 	} // end go{}
 } //end defstar { CellRoute }
