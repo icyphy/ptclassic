@@ -47,7 +47,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 ********************************************************************/
 
 DEStar :: DEStar()
-: delayType(FALSE), mode(SIMPLE), arrivalTime(0.0), completionTime(0.0) {}
+: completionTime(0.0), arrivalTime(0.0), delayType(FALSE), mode(SIMPLE) {}
 
 // initialize DE-specific members.
 void DEStar :: initialize() {
