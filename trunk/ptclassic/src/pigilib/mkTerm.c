@@ -96,7 +96,7 @@ Shape boxShape = {
 
 static octObject *facetPtr, wiringLayer;
 static octObject floatColorLayer, intColorLayer, complexColorLayer,
-		 anytypeColorLayer, packetColorLayer;
+		 anytypeColorLayer, packetColorLayer, fixColorLayer;
 
 /* terminalPath 12/21/91 - by Edward A. Lee
 */
@@ -132,6 +132,7 @@ octObject *CurrentFacetPtr;
     CK_OCT(ohGetOrCreateLayer(facetPtr, &complexColorLayer, "complexColor"));
     CK_OCT(ohGetOrCreateLayer(facetPtr, &anytypeColorLayer, "anytypeColor")); 
     CK_OCT(ohGetOrCreateLayer(facetPtr, &packetColorLayer, "packetColor")); 
+    CK_OCT(ohGetOrCreateLayer(facetPtr, &fixColorLayer, "fixColor")); 
     CK_OCT(ohGetOrCreateLayer(facetPtr, &wiringLayer, "WIRING"));
     return(TRUE);
 }
@@ -214,8 +215,7 @@ int totalNumber;
     } else if (strcmp(type, "message") == 0 || strcmp(type, "MESSAGE") == 0) {
 	layerPtr = &packetColorLayer;
     } else if (strcmp(type, "fix") == 0 || strcmp(type, "FIX") == 0) {
-	    /* temporary, should get own color */
-	layerPtr = &floatColorLayer;
+	layerPtr = &fixColorLayer;
     } else {
 	/* print error message, unknown datatype */
 	ErrAdd("Unknown datatype for terminal");
