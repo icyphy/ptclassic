@@ -49,7 +49,9 @@ class Block;
 class StringList;
 
 class PTcl {
-private:
+
+// Used in pigilib's kernel calls, so must be public - aok
+public:
 	// the Ptolemy universe
 	InterpUniverse* universe;
 
@@ -62,6 +64,8 @@ private:
 	// the current domain
 	const char* curDomain;
 
+// These are not used outside PTcl. -aok
+private:
 	// the Tcl interpreter
 	Tcl_Interp* interp;
 
@@ -78,7 +82,9 @@ private:
 	// function to register extensions with the Tcl interpreter
 	void registerFuncs();
 
-protected:
+// This are public for testing.  should be returned to private. - aok
+// protected:
+public:
 	// these three functions are used to associate PTcl objects
 	// with interpreters.
 	static PTcl* findPTcl(Tcl_Interp*);
