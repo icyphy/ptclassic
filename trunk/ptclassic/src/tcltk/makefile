@@ -64,11 +64,11 @@ ENABLE_GCC =		--enable-gcc
 ENABLE_SHARED =		--enable-shared
 
 # Used to find the itcl source directory
-ITCL_VERSION =		itcl2.1
-ITCL_TCL_MAJOR_VERSION_NUMBER =	7.5
-ITCL_TK_MAJOR_VERSION_NUMBER =	4.1
-ITCL_MAJOR_VERSION_NUMBER =	2.1
-IWIDGETS_MAJOR_VERSION_NUMBER =	2.1.0
+ITCL_VERSION =		itcl2.2
+ITCL_TCL_MAJOR_VERSION_NUMBER =	7.6
+ITCL_TK_MAJOR_VERSION_NUMBER =	4.2
+ITCL_MAJOR_VERSION_NUMBER =	2.2
+IWIDGETS_MAJOR_VERSION_NUMBER =	2.2.0
 
 # TclX
 TCLX_VERSION =		tclX7.5.3-a1
@@ -86,10 +86,14 @@ TCLDEBUG_SRC =		$(TCLTK_SRC)/$(ITCL_VERSION).$(TCLX_VERSION)/$(TCLDEBUG_VERSION)
 TCLDEBUG_OBJ =		$(TCLTK_OBJ)/$(ITCL_VERSION)/$(TCLDEBUG_VERSION)
 
 # Location of the itcl source
-ITCL_SRC =	$(TCLTK_SRC)/$(ITCL_VERSION).$(TCLX_VERSION)
+#ITCL_SRC =	$(TCLTK_SRC)/$(ITCL_VERSION).$(TCLX_VERSION)
+ITCL_SRC =	$(TCLTK_SRC)/$(ITCL_VERSION)
 
 # Location of the itcl only object files
 ITCL_OBJ =	$(TCLTK_OBJ)/$(ITCL_VERSION)
+TCL_OBJ =	$(ITCL_OBJ)/tcl$(ITCL_TCL_MAJOR_VERSION_NUMBER)
+TK_OBJ =	$(ITCL_OBJ)/tk$(ITCL_TK_MAJOR_VERSION_NUMBER)
+IWIDGETS_OBJ =	$(ITCL_OBJ)/iwidgets$(IWIDGETS_MAJOR_VERSION_NUMBER)
 
 # Destination of itcl only machine dependent files
 ITCL_DEST_BASE =	itcl.$(PTARCH)
@@ -122,7 +126,8 @@ realclean:	clean_itcl
 
 # Configure itcl
 $(ITCL_OBJ)/config.status: config_itcl
-config_itcl: $(TCLTK_OBJ) $(ITCL_OBJ)
+
+config_itcl: $(TCLTK_OBJ) $(ITCL_OBJ)  $(TCL_OBJ) $(TK_OBJ) $(ITCL_OBJ)/itcl $(ITCL_OBJ)/itk $(IWIDGETS_OBJ)
 	@echo "Configuring itcl"
 	(cd $(ITCL_OBJ); PWD=$(ITCL_OBJ); export PWD; \
 	$(ITCL_SRC)/configure \
@@ -137,6 +142,20 @@ $(TCLTK_OBJ):
 $(ITCL_OBJ): $(TCLTK_OBJ)
 	@if [ ! -d $@ ]; then echo "Making $@"; mkdir $@; fi
 
+$(TCL_OBJ): $(ITCL_OBJ)
+	@if [ ! -d $@ ]; then echo "Making $@"; mkdir $@; fi
+
+$(TK_OBJ): $(ITCL_OBJ)
+	@if [ ! -d $@ ]; then echo "Making $@"; mkdir $@; fi
+
+$(ITCL_OBJ)/itcl: $(ITCL_OBJ)
+	@if [ ! -d $@ ]; then echo "Making $@"; mkdir $@; fi
+
+$(ITCL_OBJ)/itk: $(ITCL_OBJ)
+	@if [ ! -d $@ ]; then echo "Making $@"; mkdir $@; fi
+
+$(IWIDGETS_OBJ): $(ITCL_OBJ)
+	@if [ ! -d $@ ]; then echo "Making $@"; mkdir $@; fi
 
 itcl: $(ITCL_OBJ) $(ITCL_OBJ)/libitcl.a 
 $(ITCL_OBJ)/libitcl.a: $(ITCL_OBJ) 
@@ -171,9 +190,15 @@ fixlinks:
 	#@echo " where itcl2.0 lib files were"
 	#-(cd $(ITCL_DEST)/lib; ln -s itcl/* .)
 	-(cd $(ITCL_DEST)/lib/itcl; \
-		ln -s libtcl$(ITCL_TCL_MAJOR_VERSION_NUMBER)i.so libtcl.so)
+		ln -s libtcl$(ITCL_TCL_MAJOR_VERSION_NUMBER)i.so libtcl.so; \
+		ln -s libtk$(ITCL_TK_MAJOR_VERSION_NUMBER)i.so libtk.so; \
+		ln -s libitcl$(ITCL_MAJOR_VERSION_NUMBER).so libitcl.so; \
+		ln -s libitk$(ITCL_MAJOR_VERSION_NUMBER).so libitk.so)
 	@echo "Create a links for itclsh to ish"
-	-(cd $(ITCL_DEST)/bin; ln -s ish tclsh)
+	-(cd $(ITCL_DEST)/bin; rm -f tclsh itkwish)
+	-(cd $(ITCL_DEST)/bin; ln -s ish$(ITCL_TCL_MAJOR_VERSION_NUMBER) tclsh)
+	-(cd $(ITCL_DEST)/bin; \
+		ln -s itkwish$(ITCL_MAJOR_VERSION_NUMBER) itkwish)
 	@echo "Create links so Ptolemy can find tcl.h and tk.h easily"
 	-(cd $(TCLTK_DEST); mkdir tcl tk; \
 		cd tcl; ln -s ../itcl/include/itcl include; \
