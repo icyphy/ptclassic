@@ -1278,14 +1278,7 @@ proc HMx_font {family size weight style {adjust_size 0}} {
     # I don't know why.  We have to handle that situation.
     if {$size == {}} {return fixed}
     incr size $adjust_size
-    set size [::tycho::.tychoFonts getValidSize $size]
-    # We try hard to find a reasonable font.
-    set result [::tycho::.tychoFonts findFont [list \
-	    [list $family $size $weight $style] \
-	    [list $family $size medium $style] \
-	    [list $family $size medium r] \
-            [list times 14 medium r] \
-        ]]
+    set result [::tycho::xfont $family $size $weight $style]
     set HMx_font_cache($cachename) $result
     return $result
 }
