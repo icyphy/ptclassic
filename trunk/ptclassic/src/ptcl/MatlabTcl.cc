@@ -30,9 +30,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
  Programmer:  B. L. Evans
  Date of creation: 11/17/95
 
-This file implements a class that adds Ptolemy-specific Tcl commands to
-a Tcl interpreter.  Commands are designed to resemble those of the earlier
-interpreter.
+This file implements a class that adds Matlab-specific Tcl commands to
+a Tcl interpreter.
 
 **************************************************************************/
 static const char file_id[] = "MatlabTcl.cc";
