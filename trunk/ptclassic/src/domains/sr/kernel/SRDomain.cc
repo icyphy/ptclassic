@@ -23,9 +23,6 @@ CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
                                                         COPYRIGHTENDKEY
 
-
- Programmer:  J. T. Buck
- Date of creation: 7/2/90
  Version: $Id$
 
  A device to produce the correct portholes, wormholes, event horizons,
@@ -38,11 +35,13 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "Galaxy.h"
 #include "Geodesic.h"
 #include "KnownTarget.h"
+#include "StringState.h"
 #include "SRScheduler.h"
 #include "SRStaticScheduler.h"
 #include "SRRecursiveScheduler.h"
 #include "SRWormhole.h"
 #include "SRGeodesic.h"
+#include "SRParter.h"
 
 extern const char SRdomainName[] = "SR";
 
@@ -115,26 +114,26 @@ static SRDomain proto;
  **********************************************************************/
 class SRTarget : public Target {
 public:
-	// Constructor
-	SRTarget() : Target("default-SR", "SRStar", "default SR target",
-			    SRdomainName) {}
+  // Constructor
+  SRTarget() : Target("default-SR", "SRStar", "default SR target",
+		      SRdomainName) {}
 
-	// Destructor
-	~SRTarget() { delSched(); }
+  // Destructor
+  ~SRTarget() { delSched(); }
 
-	// Return a copy of itself
-	/*virtual*/ Block* makeNew() const { LOG_NEW; return new SRTarget;}
+  // Return a new SRTarget
+  Block * makeNew() const { LOG_NEW; return new SRTarget;}
 
 protected:
-	void setup() {
-		if (!scheduler()) { LOG_NEW; setSched(new SRScheduler); }
-		Target::setup();
-	}
+  void setup() {
+    if (!scheduler()) { LOG_NEW; setSched(new SRScheduler); }
+    Target::setup();
+  }
+
 };
 
 static SRTarget defaultSRtarget;
 static KnownTarget entry(defaultSRtarget,"default-SR");
-
 
 /**********************************************************************
 
@@ -145,22 +144,22 @@ static KnownTarget entry(defaultSRtarget,"default-SR");
  **********************************************************************/
 class SRStaticTarget : public Target {
 public:
-	// Constructor
-	SRStaticTarget() : Target("static-SR", "SRStar",
-				  "SR target with static scheduling",
-				  SRdomainName) {}
+  // Constructor
+  SRStaticTarget() : Target("static-SR", "SRStar",
+			    "SR target with static scheduling",
+			    SRdomainName) {}
 
-	// Destructor
-	~SRStaticTarget() { delSched(); }
+  // Destructor
+  ~SRStaticTarget() { delSched(); }
 
-	// Return a copy of itself
-	Block* makeNew() const { LOG_NEW; return new SRStaticTarget;}
+  // Return a new SRStaticTarget
+  Block * makeNew() const { LOG_NEW; return new SRStaticTarget;}
 
 protected:
-	void setup() {
-		if (!scheduler()) { LOG_NEW; setSched(new SRStaticScheduler); }
-		Target::setup();
-	}
+  void setup() {
+    if (!scheduler()) { LOG_NEW; setSched(new SRStaticScheduler); }
+    Target::setup();
+  }
 };
 
 static SRStaticTarget staticSRtarget;
@@ -170,28 +169,49 @@ static KnownTarget secondEntry(staticSRtarget,"static-SR");
 
   The recursive scheduler target for the SR domain
 
-  @Description This uses the recursive scheduler
+  @Description This uses the recursive scheduler.
+
+  <P> It has a parameter "partScheme" which selects which partitioning
+  scheme (one of the SRPart-derived classes) to use.
 
  **********************************************************************/
 class SRRecursiveTarget : public Target {
 public:
-	// Constructor
-	SRRecursiveTarget() : Target("recursive-SR", "SRStar",
-				  "SR target with recursive scheduling",
-				  SRdomainName) {}
+  // Constructor
+  SRRecursiveTarget() : Target("recursive-SR", "SRStar",
+			       "SR target with recursive scheduling",
+			       SRdomainName) {
+    addState( partScheme.setState( "partScheme", this, "sweep",
+				   "Partitioning scheme:\n"
+				   "sweep : Greedy kernel sweep\n"
+				   "one : Single-vertex partitions only\n"
+				   "exact : Exact -- consider all partitions\n"
+				   "inout : Greedy minimum indegree/outdegree\n" ));
+  };
 
-	// Destructor
-	~SRRecursiveTarget() { delSched(); }
+  // Destructor
+  ~SRRecursiveTarget() { delSched(); }
 
-	// Return a copy of itself
-	Block* makeNew() const { LOG_NEW; return new SRRecursiveTarget;}
+  // Return a new SRRecursiveTarget
+  Block * makeNew() const { LOG_NEW; return new SRRecursiveTarget;}
 
 protected:
-	void setup() {
-		if (!scheduler()) { LOG_NEW; setSched(new SRRecursiveScheduler); }
-		Target::setup();
-	}
+  void setup() {
+
+    if (!scheduler()) { LOG_NEW; setSched(new SRRecursiveScheduler); }
+
+    // Select the partitioning scheme
+
+    SRParter::setParter(partScheme);
+
+    Target::setup();
+  }
+
+  // Selects which partitioning scheme to use
+  StringState partScheme;
 };
 
 static SRRecursiveTarget recursiveSRtarget;
 static KnownTarget thirdEntry(recursiveSRtarget,"recursive-SR");
+
+

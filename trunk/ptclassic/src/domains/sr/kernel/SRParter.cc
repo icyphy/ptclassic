@@ -46,6 +46,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 //SRPartType SRParter::parter = SRPartExactT;
 SRPartType SRParter::parter = SRPartSweepT;
 
+int SRPart::ignoreSimpleFlag = 0;
+
 // Empty virtual destructor
 SRPart::~SRPart() {}
 
@@ -73,6 +75,22 @@ SRParter::SRParter( Set & s, SRDependencyGraph & g )
 
   mypart->init();
 
+}
+
+// Select the partitioning scheme by name
+void SRParter::setParter( const char * p )
+{
+  if ( strcmp( p, "sweep" ) == 0 ) {
+    parter = SRPartSweepT;
+  } else if ( strcmp( p, "one" ) == 0 ) {
+    parter = SRPartOneT;
+  } else if ( strcmp( p, "exact" ) == 0 ) {
+    parter = SRPartExactT;
+  } else if ( strcmp( p, "inout" ) == 0 ) {
+    parter = SRPartInOutT;
+  } else {
+    parter = SRPartSweepT;
+  }
 }
 
 void SRPartOne::init()
@@ -248,7 +266,7 @@ SRPartExact::next( int bound )
     (*s) |= vertex[vindex[i]];
   }
 
-  // cout << "Generated Partition " << s->print() << "\n";
+  // cout << "Part: " << s->print() << "\n";
 
   int current = partsize - 1;
 
@@ -260,7 +278,9 @@ SRPartExact::next( int bound )
     for ( i = current+1 ; i < partsize ; i++) {
       vindex[i] = vindex[i-1]+1;
     }
-    current--;
+    if ( vindex[partsize-1] >= maxpart ) {
+      current--;
+    }
 
   } while ( vindex[partsize-1] >= maxpart && current >= 0 );
 

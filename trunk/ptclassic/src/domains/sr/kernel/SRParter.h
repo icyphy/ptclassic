@@ -52,6 +52,17 @@ typedef enum SRPartTypeEnum {
 
 **********************************************************************/
 class SRPart {
+protected:
+
+  // The set being partitioned
+  Set * partSet;
+
+  // The associated dependency graph
+  SRDependencyGraph * dgraph;
+
+  // Flag indicating when partitions giving only one SCC should be ignored
+  static int ignoreSimpleFlag;
+
 public:
 
   SRPart( Set & s, SRDependencyGraph & g ) { partSet = &s; dgraph = &g; }
@@ -65,14 +76,8 @@ public:
   // returned set.
   virtual Set * next( int ) = 0;
 
-protected:
-
-  // The set being partitioned
-  Set * partSet;
-
-  // The associated dependency graph
-  SRDependencyGraph * dgraph;
-  
+  // Return whether partitions giving a single SCC should be ignored
+  static int ignoreSimple() { return ignoreSimpleFlag; }
 };
 
 /**********************************************************************
@@ -85,7 +90,10 @@ protected:
 class SRPartOne : public SRPart {
 public:
 
-  SRPartOne( Set & s, SRDependencyGraph & g ) : SRPart(s,g) {};
+  SRPartOne( Set & s, SRDependencyGraph & g ) : SRPart(s,g) {
+    ignoreSimpleFlag = 0;
+  };
+
   void init();
   Set * next( int );
 
@@ -107,6 +115,7 @@ class SRPartInOut : public SRPart {
 public:
   SRPartInOut( Set & s, SRDependencyGraph & g ) : SRPart(s,g) {
     minset = 0;
+    ignoreSimpleFlag = 0;
   };
   ~SRPartInOut();
   void init();
@@ -130,6 +139,7 @@ class SRPartExact : public SRPart {
 public:
   SRPartExact( Set & s, SRDependencyGraph & g ) : SRPart(s,g) {
     vertex = vindex = 0;
+    ignoreSimpleFlag = 1;
   };
   ~SRPartExact();
   void init();
@@ -163,6 +173,7 @@ public:
   SRPartSweep( Set & s, SRDependencyGraph & g ) : SRPart(s,g) {
     kernel = 0;
     sgIter = 0;
+    ignoreSimpleFlag = 1;
   };
 
   ~SRPartSweep();
@@ -195,6 +206,9 @@ private:
   // The partitioning iteration routine
   SRPart * mypart;
 
+  // Which part routine to use
+  static SRPartType parter;
+
 public:
 
   SRParter( Set &, SRDependencyGraph & );
@@ -212,8 +226,7 @@ public:
     return mypart->next(b);
   }
 
-  // Which part routine to use
-  static SRPartType parter;
+  static void setParter( const char * );
 
 };
 
