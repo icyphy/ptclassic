@@ -52,14 +52,16 @@ SIMPLE_TESTS = \
 	testStack.itcl
 
 GRAPHICAL_TESTS = \
-	testBuilderDialog.itcl \
 	testExec.itcl \
-	testFile.itcl \
 	testIndexBrowser.itcl \
 	testMenuSupport.itcl \
 	testRevControl.itcl \
 	testToolBar.itcl \
 	testWidgets.itcl \
+	testFile.itcl
+
+	# Removed until test levels are implemented
+	# testBuilderDialog.itcl
 
 ITCL_SRCS =	\
 	$(SIMPLE_TESTS) $(GRAPHICAL_TESTS) \
