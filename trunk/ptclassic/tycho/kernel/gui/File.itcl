@@ -469,7 +469,13 @@ body ::tycho::File::constructor {args} {
 
 
     # Bindings.
-    # <Control-x><Control-f> is bound in TopLevel, so don't rebind it here.
+    # <Control-x><Control-f> is bound in TopLevel to open the file
+    # browser. Here. however, we want <Control-x><Control-f> to open
+    # the file open mini-buffer, and <Control-x><Control-F> to open
+    # the file browser.
+    bind [winfo toplevel $prefix] <Control-x><Control-f> {}
+    bind $prefix <Control-x><Control-f> "$this openWinMinibuffer; break"
+    bind $prefix <Control-x><Control-F> "::tycho::File::openWin %W; break"
     bind $prefix <Control-x><Control-s> "$this save; break"
     bind $prefix <Control-x><Control-v> "$this altFile; break"
     bind $prefix <Control-x><Control-w> "$this saveAs; break"
@@ -478,8 +484,7 @@ body ::tycho::File::constructor {args} {
     bind $prefix <Control-x><Control-r> "$this evaluate; break"
     bind $prefix <Control-x><Control-q> "$this toggleReadOnly; break"
     bind $prefix <Control-x><v> "$this revisionControl; break"
-    bind $prefix <Control-x><Control-F> "$this openWinMinibuffer; break"
-
+ 
     # The following initialize options and then invoke any
     # configuration options, assuming there are options specified.
     eval itk_initialize $args
@@ -808,11 +813,13 @@ body ::tycho::File::openWinMinibuffer {} {
         }
 	append default [::tycho::directorySeparator]
 
-	# FIXME: Supply the -tabcommand option in order to
-	# make tab-completion work
-        statusbar entry "Open File:" \
+        set caseSensitive \
+                [stylesheet get interaction caseSensitiveCompletion]
+	
+        # Call the statusbar to create the minibuffer
+        statusbar fileentry "Open File:       " \
                 -default $default \
-                -command "::tycho::openContext %%; $this statusbar puts {}"
+                -casesensitive $caseSensitive
     }
 }
 
@@ -1415,10 +1422,11 @@ body ::tycho::File::_initializeMenubar {menubar} {
     $menubar addMenu help   -label Help -side right -underline 0
 
     # File menu contents
-    # Note that <Control-x><Control-f> is actually bound in TopLevel.
+    # Note that we have removed the binding to <Control-x><Control-f>
+    # made in TopLevel.
     $menubar command open file \
 	    -label "Open..." -underline 0 \
-	    -accelerator "C-x C-f" -command "$this openWinMethod"
+	    -accelerator "C-x C-F" -command "$this openWinMethod"
     
     $menubar command switchfile file \
 	    -label "Switch File..." -underline 4 \
