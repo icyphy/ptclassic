@@ -26,7 +26,7 @@ CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
                                                         COPYRIGHTENDKEY
 
- Programmer: J. Buck and J. Pino
+ Programmer: J. Buck, J. Pino, T. M. Parks
 
  Base target for Motorola DSP assembly code generation.
 
@@ -37,13 +37,14 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #endif
 
 #include "MotorolaTarget.h"
+#include "MotorolaAttributes.h"
 
 const Attribute ANY = {0,0};
 
 // a MotorolaMemory represents the X and Y memories of a 56000 or 96000.  
 // It is derived from DualMemory.
 MotorolaMemory :: MotorolaMemory(const char* x_map, const char* y_map) :
-	DualMemory("x",A_XMEM,ANY,x_map,"y",A_YMEM,ANY,y_map)
+	DualMemory("l","x",A_XMEM,ANY,x_map,"y",A_YMEM,ANY,y_map)
 {}
 
 MotorolaTarget :: MotorolaTarget (const char* nam, const char* desc,
@@ -57,6 +58,8 @@ void MotorolaTarget :: initStates() {
  	mem = 0;
 	addState(xMemMap.setState("xMemMap",this,"0-4095","X memory map"));
 	addState(yMemMap.setState("yMemMap",this,"0-4095","Y memory map"));
+	addState(subFire.setState("subroutines?",this,"-1",
+	    "Write star firings as subroutine calls."));
 }
 
 void MotorolaTarget :: setup() {
@@ -153,4 +156,63 @@ StringList MotorolaTarget::comment(const char* msg, const char* begin,
 const char* end, const char* cont) {
 	if (begin==NULL) return CGTarget::comment(msg,"; ");
 	else return CGTarget::comment(msg,begin,end,cont);
+}
+
+/* Determine whether or not the star firing can be implemented with
+   static code which could be enclosed in a loop or subroutine.
+*/
+int staticCode(CGStar& star)
+{
+    BlockPortIter nextPort(star);
+    CGPortHole* port;
+
+    // Test the parameters of all ports.
+    while ( (port = (CGPortHole*)nextPort++) != NULL)
+    {
+	/* If the buffer size is not the same as the number of
+	   particles transferred in one firing, then each firing must
+	   read from a different location.
+	*/
+	if (port->numXfer() != port->bufSize())
+	{
+	    if ((port->attributes() & PB_CIRC) == 0) return FALSE;
+	}
+    }
+    return TRUE;
+}
+
+void MotorolaTarget::writeFiring(Star& s, int level)
+{
+    CGStar& star = (CGStar&)s;
+    int threshold = (int)subFire;
+
+    if (threshold >= 0 && star.reps() > threshold && staticCode(star))
+    {
+	if (star.index() < 0) setStarIndices(*galaxy());
+
+	StringList label;
+	label << star.className() << separator << star.index();
+
+	// Generate procedure definition.
+	if (procedures.put("",label))
+	{
+	    procedures << label << '\n';
+
+	    switchCodeStream(&star, &procedures);
+	    AsmTarget::writeFiring(star, level);
+	    switchCodeStream(&star, &mainLoop);
+
+	    // Some instructions are not allowed to preceed rts
+	    // so insert a nop to be safe.
+	    procedures << "	nop\n";
+	    procedures << "	rts\n";
+	}
+
+	// Invoke procedure.
+	mainLoop << "	jsr " << label << '\n';
+    }
+    else
+    {
+	AsmTarget::writeFiring(s,level);
+    }
 }
