@@ -134,8 +134,7 @@ VEMLIBS = rpc/librpcserver.a dialogs/libdialogs.a \
 	-lharpoon -lfang -lregion -lkd -lgu -lda -llist -loh -ltap \
 	-loptions -loct -ltr -lst -lxpa -lfb -ldds -lMaxport -lTable \
 	-lTgl -lutility -lport -lerrtrap -luprintf -lst $(OCTTOOLS_MM_LIB)  \
-	$(X11_LIBSPEC) -lXaw -lXt -lXmu -lXext -lX11 -lm
-
+	$(X11_LIBSPEC) -lXaw -lXt -lXmu -lXext $(SYSLIBS)
 
 INC_FILES = \
 	../bags/bags.h \
