@@ -1,0 +1,48 @@
+% Version $Id$
+% Author:	T. M. Parks
+% Created:	11 February 1994
+
+\documentstyle[12pt,psfig,elisp,ptinfo,Almagest]{book}
+\typein[\fileName]{}
+\typeout{\fileName .tex}
+\typein[\otherInclude]{}
+\typeout{\otherInclude}
+\typein[\chapterNumber]{}
+\typeout{\chapterNumber}
+\includeonly{\fileName,\otherInclude}
+\batchmode
+\pssilent	% Suppress messages from psfig.
+
+\newcommand{\PTOLEMY}{/users/ptdesign}
+\newcommand{\FIGURES}{\PTOLEMY/doc/figures}
+
+\newindex{cp}
+\newindex{pg}
+\newindex{fn}
+\newindex{vr}
+\newindex{tp}
+\newindex{ky}
+
+% The \syncodeindex command does not work, so use \synindex instead.
+\synindex{pg}{cp}
+\synindex{vr}{cp}
+\synindex{ky}{cp}
+
+% Keep the data type and function index entries separate.
+% \synindex{fn}{cp}
+% \synindex{tp}{cp}
+
+\begin{document}
+
+\include{front}
+
+\pagenumbering{Chapter}
+
+\setcounter{chapter}{\chapterNumber}
+\addtocounter{chapter}{-1}
+\include{\fileName}
+\cleardoublepage
+
+\include{other}
+
+\end{document}
