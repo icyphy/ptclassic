@@ -708,6 +708,21 @@ void PortHole :: initialize()
 		myGeodesic->initialize();
 }
 
+// Similar to initialize() but still keep its infrastructure.
+void PortHole :: resetBufferValues() {
+	// initialize buffer
+	for(int i = myBuffer->size(); i>0; i--) {
+		Particle** p = myBuffer->next();
+		if (*p)	(*p)->initialize();
+		else *p = myPlasma->get();
+	}
+
+	// If this is an output PortHole (or connected to an
+	// input porthole), reset myGeodesic
+	if (far() && myGeodesic && (isItOutput() || (!asEH() && atBoundary())))
+		myGeodesic->resetBufferValues();
+}
+
 Particle& PortHole ::  operator % (int delay)
 {
 	// use the much faster "here" method if delay = 0

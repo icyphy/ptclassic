@@ -98,6 +98,9 @@ public:
 	// also calls initialize() for each of those Particles
 	virtual void initialize();
 
+	// Similar to initialize() but still keep its infrastructure.
+	virtual void resetBufferValues();
+
 	// Put a Particle into the Geodesic.  Note that this is not
 	// virtual but slowPut is virtual.
 	inline void put(Particle* p) {

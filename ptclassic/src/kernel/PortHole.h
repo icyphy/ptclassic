@@ -366,6 +366,9 @@ public:
 	// Initialize when starting a simulation
 	virtual void initialize();
 
+	// Similar to initialize() but still keep its infrastructure.
+	virtual void resetBufferValues();
+
 	// Remove a connection, and optionally attempt to delete
 	// the geodesic.  Arg is set to zero only when called from
 	// the geodesic's destructor.  We do not delete "persistent"
