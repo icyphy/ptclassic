@@ -7,15 +7,10 @@
 <H1>Ptolemy NT Overview</H1>
 These pages describe the Ptolemy port to Windows NT4.0.
  <P>
-The port is by no means complete.  Currently, under NT4.0 with
-<A HREF="http://www.cygnus.com/gnu-win32">Cygnus GNU-win32</A> (version b18)
-we can build a working <CODE>ptcl.ptrim</CODE> binary that has
-the SDF, DE, HOF, BDF, DDF and CGC domains.
- <p>By using X11R6 libraries built for Cygnus GNU-win32 it is possible
-to build <CODE>vem</CODE> and <CODE>pigiRpc.ptrim</CODE> binaries that
-start up.  However, running a simulation under NT4 that uses
-<CODE>vem</CODE> does not work.  Also, some of the tests in
-<a href="../../src/octtools/Packages/oct"><CODE>$PTOLEMY/src/octtools/Packages/oct</CODE></a> fail.
+The NT port works, but has not been tested extensively.
+Currently, under NT4.0 with
+<A HREF="http://www.cygnus.com/gnu-win32">Cygnus GNU-win32</A> (version b19.1), prebuilt Cygnwin32 X11R6 binaries and an X server, we can run 
+<CODE>pigi</CODE>, the Ptolemy Interactive Graphical Interface.
 
  <P>
 There are two NT ports: <CODE>nt4</CODE> and <CODE>nt4.vc</CODE>.
@@ -39,13 +34,9 @@ has not been built recently, and probably does not work.
 
 <H2>Questions</H2>
 <DL>
-<DT> Will these ports work under Windows 95?
-<DD> Probably, but they have not been tested.
-
-<DT> Will <CODE>pigi</CODE> ever work under NT4?
-<DD> We hope to get <CODE>vem</CODE> and <CODE>pigiRpc</CODE>
-to work soon.  The changes that will be necessary are probably
-fairly small, so they could appear in a patch
+<DT> Will these ports work under Windows '95?
+<DD> We were unable to compile Ptolemy under Windows '95 and Cygwin32 b19.1
+without hanging Windows '95 and forcing a reboot.  
 
 <DT> When will the <CODE>nt4.vc</CODE> port be completed?
 <DT> The <CODE>nt4</CODE> port has higher priority, so after
@@ -56,7 +47,7 @@ work on the <CODE>nt4.vc</CODE> port.
 
 <HR>
 <A HREF="index.html">Up to the Ptolemy under NT page</A> -
-<A HREF="ptnthints.html">Forward to Ptolemy NT Bugs</A>
+<A HREF="ptnthints.html">Forward to Ptolemy NT Hints</A>
 <HR>
 Copyright &#169 1997-1998, The Regents of the University of California.
 All rights reserved.
