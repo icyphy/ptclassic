@@ -180,7 +180,7 @@ bin_libg++:
 			CC=$(GNU_OBJ)/gcc/xgcc CFLAGS=-B$(GNU_OBJ)/gcc/ \
 			LDFLAGS=-B$(GNU_OBJ)/gcc/ )
 
-install: install_make install_gcc install_gcc_links libstdc++
+install: install_make install_gcc install_gcc_links #libstdc++
 libstdc++: configure_libstdc++ bin_libstdc++ install_libstdc++
 
 ####################
