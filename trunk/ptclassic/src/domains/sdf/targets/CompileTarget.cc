@@ -378,14 +378,15 @@ StringList CompileTarget::tcltkSetup() {
     myCode += "\n";
     myCode += "// Tcl/Tk commands\n";
     myCode += "// halt command -- ptkStop defined as synonym\n";
-    myCode += "static int halt_Cmd(ClientData clientData,\n";
-    myCode += "        Tcl_Interp *interp,\n";
-    myCode += "        int argc,\n";
-    myCode += "        char *argv[])\n";
+    myCode += "// we comment out unused parameters to prevent warnings\n";
+    myCode += "static int halt_Cmd(ClientData /*clientData*/,\n";
+    myCode += "        Tcl_Interp* /*interp*/,\n";
+    myCode += "        int /*argc*/,\n";
+    myCode += "        char** /*argv*/)\n";
     myCode += "{\n";
     myCode += "    SimControl::requestHalt();\n";
     myCode += "    return TCL_OK;\n";
-    myCode += "}\n";
+    myCode += "}\n\n";
 
     return myCode;
 }
@@ -471,7 +472,7 @@ StringList CompileTarget::galDef(Galaxy* galaxy,
     myCode += "// GALAXY DECLARATION\n";
     myCode += "class ";
     myCode += className;
-    if(level==0) myCode += " : public CompiledUniverse {\npublic:\n";
+    if (level == 0) myCode += " : public CompiledUniverse {\npublic:\n";
     else myCode += " : public Galaxy {\npublic:\n";
     next.reset();
     while ((b = next++) != 0) {
