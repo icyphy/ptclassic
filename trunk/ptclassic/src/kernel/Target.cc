@@ -60,7 +60,7 @@ int Target::setup(Galaxy& g) {
 	while ((s = next++) != 0) {
 		if (!s->isA(supportedStarClass)) {
 			Error::abortRun (*s,
-					 "wrong star type for target, not a",
+					 "wrong star type for target, not a ",
 					 supportedStarClass);
 			return FALSE;
 		}
