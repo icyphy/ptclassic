@@ -10,7 +10,7 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { CG56 nonlinear functions library }
+	location { CG56 main library }
         explanation {
 This star computes the base two logarithm of its input divided by 32,
 using polynomial approximation with eight bits of accuracy.
@@ -31,6 +31,9 @@ The coefficients of the polynomial are given by \fId\fR.
                 default { "0.9981958 -0.3372223 -0.6626105" }
                 attributes { A_ROM|A_YMEM|A_NONSETTABLE }
         }
+	constructor {
+		noInternalState();
+	}
 
 	codeblock(std) {
         move            m7,r7

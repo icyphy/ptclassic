@@ -27,6 +27,9 @@ limitation of liability, and disclaimer of warranty provisions.
 		name { output }
 		type { COMPLEX }
 	}
+	constructor {
+		noInternalState();
+	}
 	codeblock (convert) {
 	move 	$ref(real),x1
 	move 	$ref(imag),x0

@@ -10,7 +10,7 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
     }
-    location { CG56 arithmetic library }
+    location { CG56 main library }
     explanation {
 .Id "bit shifter"
 Scale by shifting left \fIleftShifts\fR bits.
@@ -43,6 +43,9 @@ Arithmetic shifts are used.
 	    type { string }
 	    default { "YES" }
 	    desc { If true, use saturation arithmetic }
+    }
+    constructor {
+	noInternalState();
     }
     protected {
 	int doSat;

@@ -23,6 +23,9 @@ limitation of liability, and disclaimer of warranty provisions.
 		name {imag}
 		type {FIX}
 	}
+	constructor {
+		noInternalState();
+	}
 	codeblock (convert){
 	move 	L:$addr(input),x
 	move 	x1,$ref(real)

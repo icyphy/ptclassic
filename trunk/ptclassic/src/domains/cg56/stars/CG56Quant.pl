@@ -1,7 +1,8 @@
 defstar {
 	name { Quant }
 	domain { CG56 }
-	desc { The star quantizes the input to one of N+1 possible output levels
+	desc {
+The star quantizes the input to one of N+1 possible output levels
 using N thresholds.
 	}
 	version { $Id$ }
@@ -12,7 +13,7 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { CG56 nonlinear functions library }
+	location { CG56 main library }
 	explanation {
 The star quantizes the input to one of $N+1$ possible output levels
 using $N$ thresholds.
@@ -53,6 +54,9 @@ of \fIthresholds\fR.
                 desc { internal }
                 attributes { A_NONCONSTANT|A_NONSETTABLE }
         }
+	constructor {
+		noInternalState();
+	}
 
 	codeblock (main) {
         move    #<$addr(thresholds),r0

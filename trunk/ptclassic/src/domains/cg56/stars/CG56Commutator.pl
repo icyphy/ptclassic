@@ -12,7 +12,7 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { CG56 control library }
+	location { CG56 main library }
 	explanation {
 .Ir "interleaving data streams"
 .Ir "combining data streams"
@@ -43,6 +43,9 @@ the next B particles from the next input, etc.
 		input.setSDFParams(bs,bs-1);
 		output.setSDFParams(n*bs,n*bs-1);
         }
+	constructor {
+		noInternalState();
+	}
  	codeblock(loadOutputAddress) {
         move    #>$addr(output),r1
         }

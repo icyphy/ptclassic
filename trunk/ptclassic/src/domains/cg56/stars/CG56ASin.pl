@@ -10,7 +10,7 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { CG56 nonlinear functions library }
+	location { CG56 main library }
 	explanation {
 .Id "arcsine"
 .Id "sine, inverse"
@@ -30,6 +30,9 @@ The output, in principal range -pi/2 to pi/2, is scaled down by pi.
 	output {
 		name {output}
 		type {FIX}
+	}
+	constructor {
+		noInternalState();
 	}
 	codeblock (asinblock) {
         clr     a               $ref(input),x0

@@ -10,7 +10,7 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { CG56 arithmetic library }
+	location { CG56 main library }
 	explanation {
 The inputs are added and the result is written on the output.
 	}
@@ -27,6 +27,9 @@ The inputs are added and the result is written on the output.
 		type { int }
 		default { "YES" }
 		desc { If true, use saturation arithmetic }
+	}
+	constructor {
+		noInternalState();
 	}
 	codeblock (std) {
 	move	$ref(input#1),x0	; 1st input -> x0

@@ -10,7 +10,7 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { CG56 arithmetic library }
+	location { CG56 main library }
 	explanation {
 .PP
 Output the \fIpos\fR minus all \fIneg\fR inputs.
@@ -34,6 +34,9 @@ Output the \fIpos\fR minus all \fIneg\fR inputs.
                 desc { input#() }
                 attributes { A_NONCONSTANT|A_NONSETTABLE }
         }
+	constructor {
+		noInternalState();
+	}
         codeblock(main) {
         move    $ref(pos),a
         }

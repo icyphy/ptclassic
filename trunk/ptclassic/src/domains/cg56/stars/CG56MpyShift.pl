@@ -10,7 +10,7 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-    location { CG56 arithmetic library }
+    location { CG56 main library }
     explanation {
 .Id "multiplication with shifting"
 Multiply inputs \fIfactor1\fP and \fIfactor2\fP together, and shift the
@@ -32,6 +32,9 @@ or positive; right (negative) shifts are not supported.
     output {
 	name {output}
 	type {FIX}
+    }
+    constructor {
+	noInternalState();
     }
     go {
 	addCode(cbMulShift);

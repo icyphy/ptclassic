@@ -10,7 +10,7 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
     }
-    location { CG56 conversion library }
+    location { CG56 main library }
     input {
 	name {input}
 	type {FIX}
@@ -18,6 +18,9 @@ limitation of liability, and disclaimer of warranty provisions.
     output {
 	name {output}
 	type {INT}
+    }
+    constructor {
+	noInternalState();
     }
     codeblock(convert) {
 	move	$ref(input),x1

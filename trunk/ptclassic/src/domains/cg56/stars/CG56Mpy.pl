@@ -10,7 +10,7 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { CG56 arithmetic library }
+	location { CG56 main library }
 	explanation {
 .Id "multiplication"
 The inputs are multiplied and the result is written on the output.
@@ -30,6 +30,9 @@ The inputs are multiplied and the result is written on the output.
                 desc { input#() }
                 attributes { A_NONCONSTANT|A_NONSETTABLE }
         }
+	constructor {
+		noInternalState();
+	}
 	codeblock (std) {
 	move	$ref(input#1),x0	 ; 1st input -> x0
         move	$ref(input#2),y0         ; 2nd input -> y0
