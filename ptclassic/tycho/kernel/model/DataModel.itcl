@@ -1110,9 +1110,9 @@ body ::tycho::DataModel::_describe {name {prefix {}}} {
     set type [set ${ns}::_type_($name)]
 
     # If override is on for this type, call its method
-    # FIXME
     if $_override($type) {
-        return [namespace eval $ns "_describe$type $name $prefix"]
+        return [namespace eval [$ns info class] \
+                [list $ns _describe$type $name $prefix]]
     }
 
     # Start string with type followed by local name
@@ -1279,7 +1279,6 @@ body ::tycho::DataModel::_mkparseproc {type} {
     }
     # If the override option is set, call a method on the
     # object instead of generating code to load its data.
-    # FIXME
     if $_override($type) {
 	append proc {
 	    namespace eval [$ns info class] \
