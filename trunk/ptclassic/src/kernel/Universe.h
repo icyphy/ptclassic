@@ -80,6 +80,7 @@ public:
 	// in the Block classes
 	Target* myTarget() const { return pTarget; }
 
+	int isA(const char*) const;
 protected:
 	// run, until stopping condition
 	int run();

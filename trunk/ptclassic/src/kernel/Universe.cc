@@ -72,6 +72,11 @@ StringList Runnable :: displaySchedule() {
 	return myTarget()->displaySchedule();
 }
 
+// isa
+int Runnable :: isA(const char* cname) const {
+    return (strcmp(cname,"Runnable") == 0);
+}
+
 Scheduler* Universe :: scheduler() const {
 	return (myTarget() ? myTarget()->scheduler() : 0);
 }
@@ -105,4 +110,10 @@ void Universe :: initTarget() {
 }
 
 // isa
-ISA_FUNC(Universe,Galaxy);
+int Universe :: isA(const char* cname) const {
+    if (strcmp(cname,"Universe") == 0) {
+        return TRUE;
+    } else {
+        return (Galaxy::isA(cname) || Runnable::isA(cname));
+    }
+}
