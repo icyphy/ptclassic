@@ -29,6 +29,9 @@
 # 						PT_COPYRIGHT_VERSION_2
 # 						COPYRIGHTENDKEY
 
+# Pick up ::tycho::expandPath
+source $TYCHO/kernel/Path.tcl
+
 # FIXME: This is a temporary hack.  tydoc should generate this info.
 
 #### tychoMkClassGraph
@@ -94,7 +97,10 @@ proc tychoStandardDAG {} {
     set dirs [list \
             kernel \
             [file join editors textedit] \
-            [file join editors visedit]]
+            [file join editors visedit] \
+            [file join typt editors ] \
+            [file join typt kernel ] \
+    ]
 
     foreach dir $dirs {
         eval lappend files [glob [file join $dir {*.itcl}]]
@@ -102,6 +108,6 @@ proc tychoStandardDAG {} {
     foreach file $files {
         lappend filesenv [file join "\$TYCHO" $file]
     }
-    eval tychoMkClassGraph {{Tycho Class Hierarchy}} tychoClasses.dag $filesenv
+    eval tychoMkClassGraph {{Tycho Class Hierarchy}} doc/tychoClasses.dag $filesenv
     cd $olddir
 }
