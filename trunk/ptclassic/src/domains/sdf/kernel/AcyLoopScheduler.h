@@ -51,102 +51,204 @@ Kluwer Academic Publishers, 1996
 
 *******************************************************************/
 
+/****
 
-class Matrix {
+This is a simple integer matrix class designed to just hold things.
+
+@Author Praveen K. Murthy
+****/
+class SimpleIntMatrix {
 public:
-	int **m;
-	int nrows, ncols;
-	Matrix (int nr=1, int nc=1) : nrows(nr), ncols(nc) {
-	    m = new int *[nr];
-	    for (int i=0; i<nr; i++) {
-		m[i] = new int[nc];
-		for (int j=0; j<nc; j++) m[i][j] = 0;
-	    }
-	}
-	~Matrix() {
-	    for(int i=0;i<nrows;i++) delete [] m[i];
-	    delete m;
-	}
-	Matrix& operator=(const Matrix& a) {
-	    for(int i=0; i<nrows; i++) delete m[i];
-	    delete m;
-	    m = new int *[nrows=a.nrows];
-	    ncols=a.ncols;
-	    for (i=0; i<nrows; i++) {
-		m[i] = new int[ncols];
-		for (int j=0; j<ncols; j++) m[i][j] = a.m[i][j];
-	    }
-	    return *this;
-	}
+    // m is the actual array, kept public for simplicity
+    int **m;
 
-	Matrix(const Matrix& a) {
-	    m = new int *[nrows=a.nrows];
-	    ncols=a.ncols;
-	    for(int i=0;i<nrows;i++) {
-		m[i] = new int[ncols];
-		for(int j=0;j<ncols;j++) m[i][j]=a.m[i][j];
-	    }
+    // number of rows and number of columns
+    int nrows; int ncols;
+
+    // Constructor
+    SimpleIntMatrix (int nr=1, int nc=1) : nrows(nr), ncols(nc) {
+	m = new int *[nr];
+	for (int i=0; i<nr; i++) {
+	    m[i] = new int[nc];
+	    for (int j=0; j<nc; j++) m[i][j] = 0;
+        }
+    }
+
+    // Destructor
+    ~SimpleIntMatrix() {
+	for(int i=0;i<nrows;i++) delete [] m[i];
+	delete m;
+    }
+
+    // Resize the matrix
+    void resize(int nr, int nc) {
+	SimpleIntMatrix tmp(nr,nc);
+	*this = tmp;
+    }
+
+    // equality operator
+    SimpleIntMatrix& operator=(const SimpleIntMatrix& a) {
+	for(int i=0; i<nrows; i++) delete m[i];
+	delete m;
+	m = new int *[nrows=a.nrows];
+	ncols=a.ncols;
+	for (i=0; i<nrows; i++) {
+	    m[i] = new int[ncols];
+	    for (int j=0; j<ncols; j++) m[i][j] = a.m[i][j];
 	}
-    };
+	return *this;
+    }
+
+    // Copy constructor
+    SimpleIntMatrix(const SimpleIntMatrix& a) {
+	m = new int *[nrows=a.nrows];
+	ncols=a.ncols;
+	for(int i=0;i<nrows;i++) {
+	    m[i] = new int[ncols];
+	    for(int j=0;j<ncols;j++) m[i][j]=a.m[i][j];
+	}
+    }
+};
+
+
 /////////////////////////
 // class AcyLoopScheduler //
 /////////////////////////
 /****
 
-AcyLoopScheduler is a loop scheduler to optimize for buffer sizes
+AcyLoopScheduler is a loop scheduler to optimize for buffer sizes.
 <a name="ClassAcyLoopScheduler">
 @Description Implements algorithms and heuristics described in Chapters 6,7 of 
-<a href="ptolemy.eecs.berkeley.edu/~murthy/book.html">
+<a href="http://ptolemy.eecs.berkeley.edu/~murthy/book.html">
 	<em>"Software Synthesis from Dataflow Graphs",</em></a> by
-
-Shuvra S. Bhattacharyya, Praveen K. Murthy, and Edward A. Lee,
+<p>
+Shuvra S. Bhattacharyya, 
+<a href="http://ptolemy.eecs.berkeley.edu/~murthy/">
+Praveen K. Murthy</a>
+, and Edward A. Lee,
 Kluwer Academic Publishers, Norwood, MA, 1996
+<p>
+This scheduler generates single appearance looped schedules for acyclic
+graphs.
 </a>
+
+@Author Praveen K. Murthy
 ****/
 class AcyLoopScheduler : public SDFScheduler {
 public:
 
+	// constructor
 	AcyLoopScheduler();
-	~AcyLoopScheduler(); // destructor
+
+	// destructor
+	~AcyLoopScheduler();
+
 	// the main routine
 	int computeSchedule(Galaxy& g);
+
 	// return TRUE if graph is well-ordered
 	void isWellOrdered(Galaxy* g, SequentialList& topsort);
-	int DPPO();		// compute optimal loop hierarchy
-	int RPMC(AcyCluster* gr);	// generate top-sort using RPMC
-	int APGAN(Galaxy* gr);	// generate top-sort using APGAN
 
-	virtual StringList displaySchedule();
-	virtual void compileRun();
+	// compute optimal loop hierarchy
+	int DPPO();
+
+	// generate top-sort using RPMC
+	int RPMC(AcyCluster* gr);
+
+	// generate top-sort using APGAN
+	int APGAN(Galaxy* gr);
+
+	// A routine called by schedule command in ptcl or display-schedule
+	// in pigi
+	/* virtual */ StringList displaySchedule();
+
+	// run method for code-generation targets
+	/* virtual */ void compileRun();
+
+	// Set the buffer sizes after schedule has been computed
 	void fixBufferSizes(int i, int j);
+
+	// A hack to do a pre-pass on all the spliced-in stars
 	int clusterSplicedStars(AcyCluster*);
 	
 protected:
-	void genCode(Target& t, int depth, int i, int j, int g);
+	// This one actually does the work for displaySchedule()
 	StringList dispNestedSchedules(int depth, int i, int j, int g);
+
+	// This one does the work for compileRun
+	void genCode(Target& t, int depth, int i, int j, int g);
+
+	// This one is called from AcyScheduler::runOnce and does the
+	// actual work
 	void runOnce(int i, int j, int g);
+
+	// Create the incMatrix and delMatrix
 	void createIncidenceMatrix(Galaxy& gal);
+
+	// Create reachMatrix
 	void createReachabilityMatrix(Galaxy& gal);
-	virtual void runOnce();
+
+	// Called from SDFScheduler::run
+	/* virtual */ void runOnce();
+
+	// Build up the top. sort after APGAN clustering process.
 	int buildAPGANTopsort(AcyCluster* gr, int ti);
+
+	// create edgelist; called by APGAN
 	void createEdgelist(Galaxy* gr);
+
+	// propagate flag values at specified location to the cluster
+	// wrappers after galaxy has been initialized to a clustering
+	// hierarchy.
 	void copyFlagsToClusters(Galaxy* gr, int flagLocation);
+
+	// To keep top level a cluster also, we just have one cluster
+	// inside the galaxy after initializeForClustering.
 	int addTopLevelCluster(Galaxy* gal);
+
 private:
-	Matrix* incMatrix;	// Incidence matrix
-	Matrix* delMatrix;  // delay matrix to hold delays on arcs
-	Matrix* reachMatrix; //Reachability matrix
-	Matrix* costMatrix;
-	Matrix* splitMatrix;
-	Matrix* gcdMatrix;
-	int graphSize;  // Graph size that we are dealing with
+
+	// Incidence matrix
+	SimpleIntMatrix incMatrix;
+
+	// delay matrix to hold delays on arcs
+	SimpleIntMatrix delMatrix;
+
+	//Reachability matrix
+	SimpleIntMatrix reachMatrix;
+
+	// Cost matrix for schedule; generated by DPPO()
+	SimpleIntMatrix costMatrix;
+
+	// This matrix holds the schedule info; generated by DPPO()
+	SimpleIntMatrix splitMatrix;
+
+	// This matrix holds the gcds of sub-schedules; generated by DPPO()
+	SimpleIntMatrix gcdMatrix;
+
+	// Graph size that we are dealing with
+	int graphSize;
+
+	// topSort points to either RPMCTopSort or APGANTopSort
 	int* topSort;
+
+	// This is allocated as an array to hold the indices of nodes in
+	// topological order; used by RPMC
 	int* RPMCTopSort;
+
+	// This is allocated as an array to hold the indices of nodes in
+	// topological order; used by APGAN
 	int* APGANTopSort;
+
+	// Inverse topSort array (i.e, topSort(topInvSort[i]) = i)
 	int* topInvSort;
+
+	// an array containing pointers of all stars in the universe
 	DataFlowStar** nodelist;
+
+	// a list of all the edges in the graph; this list is used and
+	// modeified by APGAN
 	SequentialList edgelist;
-	AcyCluster* graph;
 };
 
 #endif
