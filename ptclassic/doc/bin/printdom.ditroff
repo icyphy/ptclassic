@@ -1,6 +1,6 @@
 #! /bin/csh -f
 # $Id$
-
+#
 # Print documentation for a Ptolemy domain.
 # Assumed script is started in the "doc" sub-directory of a domain.
 #
@@ -57,7 +57,8 @@ set psincludecommand = $PTOLEMY/doc/bin/ditpsinc
 set tempdir = /tmp
 set tempTroffFile = $tempdir/pt$$.t
 set tempIndexFile = $tempdir/index$$
-set tempPrintFile = $tempdir/prnr$$
+set tempNroffFile = $tempdir/pt$$.n
+set tempPSFile = $tempdir/pt$$.ps
 set troffFileNames = "*.t"
 
 # Variables
@@ -156,14 +157,14 @@ else if ($preview) then
 	if ($?DISPLAY) then
 		$printcommand $printoptions -t $tempTroffFile | $previewcommand
 	else
-		(eqn $tempTroffFile | tbl | nroff -me > /tmp/ptnr$$) >& /dev/null
-		more /tmp/ptnr$$
+		(eqn $tempTroffFile | tbl | nroff -me > $tempNroffFile) >& /dev/null
+		more $tempNroffFile
 	endif
 else if ($icons) then
 	# printing icons -- generates postscript
 	($printcommand $printoptions -t $tempTroffFile | $psincludecommand > \
-		/tmp/pt.$$.ps) >& $tempIndexFile
-	echo "printdom: generated postscript in /tmp/pt.$$.ps"
+		$tempPSFile) >& $tempIndexFile
+	echo "printdom: generated postscript in $tempPSFile"
 else
 	# otherwise just print it out
 	$printcommand $printoptions $tempTroffFile >& $tempIndexFile
@@ -171,11 +172,11 @@ else
 	$printcommand $printoptions $dirheader/shared title
 endif
 if (-r $tempIndexFile) cat $tempIndexFile >>! $ALMAGEST_INDEX
-/bin/rm -f $tempTroffFile $tempIndexFile $tempPrintFile
+/bin/rm -f $tempTroffFile $tempIndexFile $tempNroffFile
 exit 0
 
 catch:
         # prevent the "no match" error message if there are no temporary files
         set nonomatch
-	/bin/rm -f $tempTroffFile $tempIndexFile $tempPrintFile
+	/bin/rm -f $tempTroffFile $tempIndexFile $tempNroffFile
         exit 1
