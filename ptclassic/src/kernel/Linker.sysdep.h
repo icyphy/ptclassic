@@ -78,7 +78,7 @@ const int linkingNotSupported =
 #if defined(PTSOL2) || defined(PTALPHA)
 #define DLOPEN_FLAGS RTLD_NOW
 #else
-#ifdef PTLINUX
+#if defined(PTLINUX) && defined(__ELF__)
 // Neal Becker says:
 //   I am pleased to note that on linux-ELF systems the RTLD_GLOBAL flag is
 //   now supported.  You need the package ld.so-1.7.12 or later.
