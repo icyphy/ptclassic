@@ -23,7 +23,7 @@ class CGCPortHole;
 
 class CGCTarget : public BaseCTarget {
 public:
-	CGCTarget();
+	CGCTarget(const char* name, const char* starclass, const char* desc);
 	// copy constructor
 	CGCTarget(const CGCTarget&);
 	Block* clone() const;
