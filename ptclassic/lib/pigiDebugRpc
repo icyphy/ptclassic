@@ -8,7 +8,7 @@
 #                       All Rights Reserved.
 
 if (! ($?PIGIRPC)) then
-	setenv PIGIRPC ~ptolemy/obj.$ARCH/pigiRpc/pigiRpc
+	setenv PIGIRPC ~ptolemy/obj.$PTARCH/pigiRpc/pigiRpc
 endif
 
 setenv DISPLAY unix:0
