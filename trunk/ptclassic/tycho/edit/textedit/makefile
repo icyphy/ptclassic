@@ -41,7 +41,8 @@ VPATH =		$(ROOT)/edit/textedit
 CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
-TCL_SRCS =
+TCL_SRCS = \
+	genVCMakefile.tcl
   
 ITCL_SRCS = \
 	EditC.itcl \
