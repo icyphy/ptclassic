@@ -209,7 +209,7 @@ class ::tycho::Model {
     method configureLinkType {type args}
     
     # Define the attributes of the model
-    method defineAttributes {args}
+    method defineModelAttributes {args}
     
     # Add a new type of entity to the model
     method defineEntityType {type args}
@@ -398,7 +398,7 @@ body ::tycho::Model::constructor {args} {
 
     # All models share a standard set of attributes. Subclasses
     # can add additional attributes.
-    defineAttributes -title {} -author {} -version {}
+    defineModelAttributes -title {} -author {} -version {}
 }
 
 ########################################################################
@@ -657,12 +657,12 @@ body ::tycho::Model::configureLinkType {type args} {
 }
 
 ########################################################################
-#### defineAttributes
+#### defineModelAttributes
 #
 # Add new attributes to the model. See the comment for
 # _defineattribute{} in the Interchange class.
 #
-body ::tycho::Model::defineAttributes {args} {
+body ::tycho::Model::defineModelAttributes {args} {
     eval _defineattributes $args
 }
 
@@ -672,7 +672,7 @@ body ::tycho::Model::defineAttributes {args} {
 # Add a new type of entity to the model. The first argument
 # is the type name of the entity.
 # Following arguments are attribute names and their default values.
-# The special attribute <b>-valued</b> is a flag that states
+# The special attributes <b>-valued</b> is a flag that states
 # whether an entity has a value (default is zero); the special attribute
 # <b>-ordered</b> sets the flag that states whether instances of
 # this type of entity are ordered; <b>-leaf</b> sets the flag that
@@ -698,25 +698,17 @@ body ::tycho::Model::defineEntityType {type args} {
 #### defineLinkType
 #
 # Add a new type of link to the model. The first argument
-# is the type name of the link; the second argument is
-# zero or one, indicating whether the link has a value;
-# the third argument is the number of entities it links.
+# is the type name of the link.
 # Following arguments are option names and their default values.
-# The special attributes <b>-named</b> is a flag
-# that states whether an entity has a name (default is zero);
-# the special entity <b>-order</b> sets the number of entities linked
-# by this link type (default is two).
 # Flag an error if the given type already exists (either as an
 # entity or a link). This method is not undoable or pubishable.
 # 
 body ::tycho::Model::defineLinkType {type args} {
-    array set temp {-named 0 -order 2}
+    array set temp {-ordered 0}
     array set temp $args
-    set named  $temp(-named)
-    set order $temp(-order)
-    unset temp(-named)
-    unset temp(-order)
-    _definelink $type $named $order $args
+    set ordered $temp(-ordered)
+    unset temp(-ordered)
+    _definelink $type $ordered $args
 }
 
 ########################################################################
