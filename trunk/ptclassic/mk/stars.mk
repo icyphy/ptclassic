@@ -406,14 +406,6 @@ ifdef CGC
 		STARS += $(LIBDIR)/cgcvisstars.o
 		LIBS += -lcgcvisstars
 		LIBFILES += $(LIBDIR)/libcgcvisstars.$(LIBSUFFIX)
-		# CGC VIS targets
-		CUSTOM_DIRS += $(CGCDIR)/vis/targets
-		ifeq ($(USE_SHARED_LIBS),yes)
-			LIBS += -lcgcvistargets
-			LIBFILES += $(LIBDIR)/libcgcvistargets.$(LIBSUFFIX)
-		else
-			TARGETS += $(CGCVIST)/CGCVISTarget.o
-		endif
 	endif
 	CGCLIB = 1
 	CG = 1
