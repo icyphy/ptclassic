@@ -64,9 +64,6 @@ public:
 	// return a copy of itself
 	/*virtual*/ Block* makeNew() const;
 
-	// return the domain of the galaxy if it exists and "C50" otherwise
-	/*virtual*/ const char* domain();
-
 	void setup();
 	void headerCode();
 	void beginIteration(int repetitions, int depth);
