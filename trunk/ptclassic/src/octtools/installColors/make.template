@@ -59,7 +59,7 @@ installColors:	$(OBJS)
   		-o installColors \
 		$(LIBS) $(X11_LIBSPEC) -lm 
 
-DEST = $(BINDIR)/installColors
+DEST = $(OCTTOOLS)/bin.$(ARCH)/installColors
 
 $(DEST):	installColors
 		@echo Installing installColors
