@@ -470,8 +470,11 @@ genState ()
 	sprintf (str1,"\t%s %s;\n", stateClass, stateName);
 	sprintf (str2,"\taddState(%s.setState(\"%s\",this,%s,%s",
 		 stateName, stateName, stateDef, stateDesc);
-	if (stateAttrib) sprintf (str2, "\n%s", stateAttrib);
-	sprintf (str2, "))\n");
+	if (stateAttrib) {
+		strcat (str2, ",\n");
+		strcat (str2, stateAttrib);
+	}
+	strcat (str2, "));\n");
 	strcat (protectedMembers, str1);
 	strcat (consStuff, str2);
 }
