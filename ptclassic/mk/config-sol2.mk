@@ -70,7 +70,7 @@ OPTIMIZER =	-O2
 WARNINGS =	-Wall -Wsynth #-Wcast-qual 
 # Define PTSOL2_4 if you are on Solaris2_4.  config-sol2.5.mk defines ARCHFLAGS
 # Under gcc-2.7.0, you will need -fno-for-scope for LOCALCCFLAGS
-LOCALCCFLAGS =	-g -DPTSOL2_4 -D_REENTRANT -pipe $(GCC_270_OPTIONS)
+LOCALCCFLAGS =	-g -DPTSOL2_4 -D_REENTRANT -pipe #$(GCC_270_OPTIONS)
 GPPFLAGS =	$(OPTIMIZER) $(MEMLOG) $(WARNINGS) \
 			$(ARCHFLAGS) $(LOCALCCFLAGS) $(USERFLAGS)
 # If you are not using gcc, then you might have problems with the WARNINGS flag
