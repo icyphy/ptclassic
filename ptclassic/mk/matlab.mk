@@ -63,7 +63,9 @@ ifdef NEED_MATLABDIR
 	ifeq ($(INCLUDE_MATLAB),no)
 		MATLABDIR= 		$(ROOT)/src/compat/matlab
 	else
-		MATLABDIR := $(shell $(ROOT)/bin/matlabRootDir)
+		ifndef MATLABDIR
+			MATLABDIR := $(shell $(ROOT)/bin/matlabRootDir)
+		endif
 		ifeq ("$(MATLABDIR)","")
 		MATLABDIR= 		$(ROOT)/src/compat/matlab
 		else
