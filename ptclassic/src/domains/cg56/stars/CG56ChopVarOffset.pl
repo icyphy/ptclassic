@@ -7,10 +7,10 @@ This star has the same functionality as the
 Chop star except now the offset parameter is
 determined at run time through a control input.
 	}
-	version { $Id$ }
+	version { @(#)CG56ChopVarOffset.pl	1.2	2/27/96 }
 	author { Luis Javier Gutierrez }
 	copyright{
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990- The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, an ddisclaimer of warranty provisions.
@@ -24,63 +24,83 @@ limitation of liability, an ddisclaimer of warranty provisions.
 
 	constructor {
 		offset.setAttributes(A_NONCONSTANT | A_NONSETTABLE);
-		use_past_inputs.setAttributes(A_NONCONSTANT | A_NONSETTABLE);
+		// nread and nwrite need to be allocated in memory.  one can't use
+		// move #$val(nwrite),{x0,a,b} since this puts an 8 bit constant(the value of nwrite)
+		// into the 8 MOST significant bits of {x0,a,b}. move $ref(nwrite),x0 
+		//does the right thing.  
+		nread.setAttributes(A_CONSTANT|A_YMEM);
+		nwrite.setAttributes(A_CONSTANT|A_YMEM);
+		use_past_inputs.setAttributes(A_NONCONSTANT|A_NONSETTABLE);
 		use_past_inputs = FALSE;
 	}
 
 	// Inherit the setup method from the Chop star
-
-	codeblock(init_range) {
-; compute hiLim, index, and padding
-	}
-
-	codeblock(chop) {
-; Register usage
-; x0 = offset
-; x1 = 1
-; y0 = nread
-; y1 = address of input buffer
-; r5 = address of output buffer
-; r0 = y1 + nread - 1
-	move	$ref(offset),b
-	clr	a	b,x0		; B=X0=offset	  
-	neg	b	#$addr(output),r5		; B=-offset
-	cmp	x0,a	$ref(nread),y0			; Y0=nread
-	tgt	a,b			; if (offset > 0) B=0
-	jle	$label(skip_padding)		; do does at least 1
-	do	x0,$label(skip_padding)		; iteration so if offset
-	move	a,$mem(output):(r5)+		; is 0 one most skip this
-$label(skip_padding) 
-	add	x0,a	$ref(one),x1		; A=offset X1=1
-; Register usage change: x0 = nwrite
-	add	y0,a	$ref(nwrite),x0		; A=offset+readn=hiLim X0=nwrite
-	cmp	x0,a	$addr(input),y1
-	tlt	x0,a			; if nwrite < hiLim, hiLim = nwrite
-	cmp	y0,b
-	jgt	$label(index_ok)		; if (index >= nread)
-	move	y0,b			; index = nread-1
-	sub	x1,b
-$label(index_ok)
-	add	y1,b
-	move	b,r0
-	do	a,$label(input_to_output)
-	move	$mem(input):(r0+n0)+,x1		; copy input to output
-	move	x1,$mem(output):(r5)+
-$label(input_to_output)
-	sub	x0,a			; A = hiLim-nwrite B=0
-	tst	a			; if (hiLim-nwrite < 0)
-	jge	$label(skip_end_padding)
-	neg	a			; A = nwrite-hiLim
-	do	a,$label(skip_end_padding)
-	move	b,$mem(output):(r5)+	   
-$label(skip_end_padding)
-	}
-
-        go {
+	go{
+		addCode(init_range);
 		addCode(chop);
 	}
 
-	exectime {
-		return CG56Chop::myExecTime() + 8;
+	codeblock(init_range) {
+; at the end of this block:  
+; x0= # of 0's at begining; x1 = # of inputs written to output
+; b = # of 0's at the end; r0 = address of first input written to output
+; r5=address of first output
+; if offset < 0 and |offset| > nread no inputs will be written
+	move $ref(offsetCntrl),a
+	move #0,x0
+	move $ref(nread),x1                   ; X1=nread
+	neg a         a,b                     ; A=-offset b=offset
+	tst a         $ref(nwrite),y0         ;
+	tlt x0,a                              ; if offset > 0 A=0 
+	tgt x0,b                              ; if offset < 0 b=0 
+	cmp x1,a                              ; check to see if num of inputs to skip > nread;
+	tgt x1,a                              ; if so, num of inputs to skip = nread
+	cmp y0,b     a,y1                     ; check to see if padding > nwrite --  Y1=num of inputs to skip
+	tgt y0,b                              ; if so, padding = nwrite
+	move b,x0                             ; x0=num of 0's to pad at beginning
+; A=Y1=num of inputs to skip 
+	move x1,b                             
+	sub y1,b     y1,n0                    ; B=num of inputs that can be read(nread-num of inputs to skip)
+; n0=num of inputs to skip
+	move $ref(nwrite),a
+	sub x0,a  (r0)+n0                     ; A=number of outputs that weren't padded with 0's(i.e writeable)
+; r0=address of first input written to output
+	cmp b,a     
+	tge b,a                               ; A=number of inputs to read
+	add x0,a     a,x1                     ; A=number of inputs to read + number of padding 0's
+; X1= number of inputs to read
+	move $ref(nwrite),b                   ; B=nwrite
+	sub a,b      #$addr(output),r5         ; B=nwrite - num of inputs to be read - number of padding 0's
+; = number of paddding 0's at the end	
+	}
+	
+	codeblock(chop) {
+; zero is stored in a
+	clr a
+	cmp x0,a     b,y0
+	jge $label(skip_initial_padding)    ; do loops execute 1->65536 times but not 0
+	do  x0,$label(skip_initial_padding) ; if x0 were 0 the loop would execute 65536 times!
+	move a,$mem(output):(r5)+           ; insert 0's
+$label(skip_initial_padding)
+	cmp x1,a                            ; can't have x1 = 0 for same reason as above
+	jge $label(skip_copying_input_to_output)
+	do  x1,$label(skip_copying_input_to_output)
+	move $mem(input):(r0)+,y1
+	move y1,$mem(output):(r5)+
+$label(skip_copying_input_to_output)
+	cmp y0,a
+	jge $label(skip_padding_at_end)
+	do y0,$label(skip_padding_at_end)
+	move a,$mem(output):(r5)+
+$label(skip_padding_at_end)
+	}
+
+	exectime{
+	//can't determine the execution time since the offset is variable
+        //return the time to do condition checking(which is fixed) +
+	//time to execute chop assuming no padding is done and (nwrite) inputs
+	// are written
+		return (21 + 13 + (int(nwrite)*2));
 	}
 }
+
