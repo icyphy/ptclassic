@@ -77,7 +77,7 @@ char *desc;
     
     switch (mode&~OCT_REVERT) {
     case OCT_READ:
-	umode = FSYS_READABLE;
+	umode = FSYS_READABLE|FSYS_EXISTS;
 	break;
     case OCT_OVER_WRITE:
 	umode = FSYS_WRITABLE;
@@ -92,6 +92,9 @@ char *desc;
 
     fmode = fsys_resolve(desc);
     
+    /* If the file does not exist, then check to see if we
+     * can create it.
+     */
     if (!(fmode&FSYS_EXISTS)) {
 	if (fmode&FSYS_CREATABLE) {
 	    if (umode&FSYS_WRITABLE) {
