@@ -54,9 +54,9 @@
 # <li><b>-color</b>:
 # The color of the item. This is a "generic" color as implemented by
 # the <a href="../codeDoc/Shades.html">Shades</a> class -- this will
-# soon be replaced by an enhanced version of <a
-# href="../../../../kernel/doc/codeDoc/ColorManager.html">ColorManager</a>. By
-# default, the color is the same as the standard Tk background color
+# soon be replaced by an enhanced version of
+# <a href="../../../../kernel/gui/doc/codeDoc/ColorManager.html">ColorManager</a>.
+# By default, the color is the same as the standard Tk background color
 # ("grey85").
 #
 # <li><b>-relief</b>:
