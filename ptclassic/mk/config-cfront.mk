@@ -40,4 +40,6 @@ LINKFLAGS_D=-L$(LIBDIR)
 X11_INCSPEC = -I/usr/X11/include
 X11_LIBSPEC = -lX11
 
-S56DIR= $(ROOT)/vendors/s56dsp
+# Ptolemy will not build the s56dsp files under cfront 
+#S56DIR= $(ROOT)/vendors/s56dsp
+S56DIR=
