@@ -21,7 +21,7 @@ input interpreted as the x-axis data, and the other input as y-axis data.
 <a name="graph, X-Y"></a>
 <a name="pxgraph program"></a>
 	}
-	seealso {Xgraph XMgraph pxgraph Xhistogram}
+	seealso {Xgraph XMgraph $PTOLEMY/src/pxgraph/pxgraph.htm Xhistogram}
 	input {
 		name { xInput }
 		type { anytype }
