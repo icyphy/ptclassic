@@ -41,6 +41,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "EventHorizon.h"
 #include "Error.h"
 #include "InfString.h"
+#include "Wormhole.h"
 #include "utilities.h"
 
 	//////////////////////////////////////////
@@ -49,6 +50,10 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 FSMScheduler::FSMScheduler() {
     currentTime = 0;
+    
+    curState = NULL;
+    nextState = NULL;
+    preState = NULL;
 }
 
 // Destructor.
@@ -97,6 +102,17 @@ int FSMScheduler::checkStars() {
     }
 
     return TRUE;
+}
+
+double FSMScheduler::nextFiringTime() {
+    // This is supposed to be invoked after run(),
+    // so let the slave of previous state to decide.
+
+    if (preState == NULL) return FALSE; // preState is NULL in first run.
+
+    Wormhole* slaveWorm = preState->slaveAsWorm();
+    if (slaveWorm == NULL) return FALSE;
+    else return slaveWorm->myTarget()->nextFiringTime();
 }
 
 int FSMScheduler::receiveData() {
@@ -181,6 +197,9 @@ int FSMScheduler::run() {
 	return FALSE;
     }
 
+    // Keep a copy of previous state.
+    preState = curState;
+
     // Set the next state to be current state for next iteration.
     curState = nextState;
 
@@ -190,6 +209,17 @@ int FSMScheduler::run() {
     return !SimControl::haltRequested();
 }
 
+int FSMScheduler::selfFiringRequested() {
+    // This is supposed to be invoked after run(),
+    // so let the slave of previous state to decide.
+
+    if (preState == NULL) return FALSE; // preState is NULL in first run.
+
+    Wormhole* slaveWorm = preState->slaveAsWorm();
+    if (slaveWorm == NULL) return FALSE;
+    else return slaveWorm->myTarget()->selfFiringRequested();
+}
+	
 int FSMScheduler::sendData() {
     PortHole* p;
     BlockPortIter next(*galaxy());
@@ -231,9 +261,9 @@ void FSMScheduler::setup() {
     // After galaxy()->initialize(), check all stars.
     if (!checkStars()) return;
 
-    // Set current state to be the initial state.
     curState = initialState;
     curEntryType = 1;
+    preState = NULL;
 
     // Set the outerDomain.
     // galaxy() points to FSM galaxy;
