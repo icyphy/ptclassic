@@ -25,6 +25,7 @@ $Id$
 #include "SDFCluster.h"
 #include "CGDisplay.h"
 #include "miscFuncs.h"
+#include <stream.h>
 
 // Return a string for indenting to the given depth
 StringList CGTarget::indent(int depth) {
@@ -45,6 +46,7 @@ CGTarget::CGTarget(const char* name,const char* starclass,
 	addState(destDirectory.setState("destDirectory",this,"PTOLEMY_SYSTEMS",
 			"Directory to write to"));
 	addState(loopScheduler.setState("loopScheduler",this,"NO",
+
 			"Specify whether to use loop scheduler."));
 }
 
@@ -87,7 +89,28 @@ int CGTarget::setup(Galaxy& g) {
 	// choose sizes for buffers and allocate memory, if needed
 	if(!allocateMemory(g)) return FALSE;
 
-	return codeGenInit(g);
+	if(!codeGenInit(g)) return FALSE;
+
+	// if inside a wormhole, proceed to generate and download
+	// code now.
+	if(g.parent()) {
+		BlockPortIter nextPort(g);
+		PortHole* p;
+		beginIteration(-1,0);
+		// generate wormhole inputs
+		while ((p = nextPort++) != 0) {
+			if (p->isItInput()) wormInputCode(p->newConnection());
+		}
+		mySched()->compileRun();
+		nextPort.reset();
+		// generate wormhole outputs
+		while ((p = nextPort++) != 0) {
+			if (p->isItOutput()) wormOutputCode(p->newConnection());
+		}
+		endIteration(-1,0);
+		return wormLoadCode();
+	}
+	return TRUE;
 }
 
 void CGTarget :: start() {
@@ -106,11 +129,28 @@ void CGTarget :: start() {
 }
 
 int CGTarget :: run() {
-	// Note that stopTime in an SDF scheduler is always integral
-	int iters = (int)mySched()->getStopTime();
-	beginIteration(iters,0);
-	mySched()->compileRun();
-	endIteration(iters,0);
+	// if a wormhole, setup already generated code.
+	// We must do the transfer of data to and from the target.
+	if(gal->parent()) {
+		BlockPortIter nextPort(*gal);
+		PortHole* p;
+		while ((p = nextPort++) != 0) {
+			if (p->isItInput() &&
+			    !sendWormData(p->newConnection())) return FALSE;
+		}
+		nextPort.reset();
+		while ((p = nextPort++) != 0) {
+			if (p->isItOutput() &&
+			    !receiveWormData(p->newConnection())) return FALSE;
+		}
+	}
+	else {
+		// Note that stopTime in an SDF scheduler is always integral
+		int iters = (int)mySched()->getStopTime();
+		beginIteration(iters,0);
+		mySched()->compileRun();
+		endIteration(iters,0);
+	}
 	return !Scheduler::haltRequested();
 }
 
@@ -136,6 +176,41 @@ void CGTarget :: beginIteration(int reps, int depth) {
 
 void CGTarget :: endIteration(int reps, int depth) {
 	myCode << "} /* end repeat, depth " << depth << "*/\n";
+}
+
+void CGTarget :: wormInputCode(PortHole& p) {
+	myCode << "READ from wormhole port " << p.readFullName() << "\n";
+}
+
+void CGTarget :: wormOutputCode(PortHole& p) {
+	myCode << "WRITE to wormhole port " << p.readFullName() << "\n";
+}
+
+int CGTarget :: sendWormData(PortHole& p) {
+	CGPortHole& cp = *(CGPortHole*)&p;
+	cout << "sending " << cp.bufSize() << " values to worm port " << cp.readFullName() << "\n";
+	cout.flush();
+	// data are discarded
+	cp.forceGrabData();
+	return TRUE;
+}
+
+int CGTarget :: receiveWormData(PortHole& p) {
+	CGPortHole& cp = *(CGPortHole*)&p;
+	int size = cp.bufSize();
+	cout << "receiving " << size <<
+		" values from worm port " << p.readFullName() << "\n";
+	cout.flush();
+	// insert zero-valued particles onto cp's geodesic
+	for (int i = 0; i < size; i++)
+		cp%i << 0;
+	cp.forceSendData();
+	return TRUE;
+}
+
+int CGTarget :: wormLoadCode() {
+	display(myCode);
+	return TRUE;
 }
 
 void CGTarget :: writeFiring(Star& s,int) { // depth parameter ignored

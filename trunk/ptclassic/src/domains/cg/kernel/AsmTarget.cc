@@ -114,10 +114,11 @@ int
 AsmTarget::allocReq(AsmStar& star) {
 // first, allocate for portholes.  We only allocate memory for input ports;
 // output ports share the same buffer as the input port they are connected to.
+// (We do, however, allocate memory for output event horizon ports).
 	AsmStarPortIter nextPort(star);
 	AsmPortHole* p;
 	while ((p = nextPort++) != 0) {
-		if (p->isItOutput()) continue;
+		if (p->isItOutput() && p->far()->isItInput()) continue;
 		if (!mem->allocReq(*p)) {
 			Error::abortRun(*p,
 			  "memory allocation failed for porthole buffer:",
@@ -365,6 +366,24 @@ void AsmTarget::saveProgramCounter() {
 
 void AsmTarget::restoreProgramCounter() {
 	outputComment("Restore program counter");
+}
+
+// dummies to do code generation for wormhole data motion.  These
+// produce comments.
+void AsmTarget :: wormInputCode(PortHole& p) {
+	AsmPortHole *ap = (AsmPortHole*)&p;
+	StringList msg = "Xfer ";
+	msg << ap->bufSize() << " values from host to location ";
+	msg << ap->location();
+	outputComment(msg);
+}
+
+void AsmTarget :: wormOutputCode(PortHole& p) {
+	AsmPortHole *ap = (AsmPortHole*)&p;
+	StringList msg = "Xfer ";
+	msg << ap->bufSize() << " values from location ";
+	msg << ap->location() << " to host";
+	outputComment(msg);
 }
 
 void AsmTarget :: wrapup() {

@@ -79,7 +79,13 @@ protected:
 	// To augment these 
 	StringList runCmds;
 	StringList miscCmds;
-	
+
+	// methods for generating code for reading and writing
+	// wormhole ports.  Argument is the "real port" of the interior
+	// star that is attached to an event horizon.
+	void wormInputCode(PortHole&);
+	void wormOutputCode(PortHole&);
+
 public:
 	AsmTarget(const char* nam, const char* desc,
 		  const char* stype, ProcMemory* m = 0) :
