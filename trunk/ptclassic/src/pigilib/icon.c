@@ -93,7 +93,7 @@ static char *q1 = "Cannot find star definition.  Define a new star?";
     char *iconDir;
     
     if (!KcIsKnown(name)) {
-	ErrAdd("Unknown star");
+	ErrAdd("Unknown star in current domain");
 	return (FALSE);
 /*
 The following code is excluded until Ptolemy kernel issues have been
@@ -165,6 +165,11 @@ static dmTextItem items[] = {
 
     ViInit("make-star");
     ErrClear();
+
+    if(setCurDomainS(spot) == NULL) {
+	PrintErr("Domain error in facet.");
+	ViDone();
+    }
 
     if (items[1].value == NULL) {
 	if ((pwent = getpwuid(getuid())) == NULL) {
