@@ -46,7 +46,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 ********************************************************************/
 
-CGWormBase* CGCWormhole :: myWormhole() { return selfWorm; }
+CGWormBase* CGCWormhole :: myWormhole() { return this; }
 
 // Constructor
 CGCWormhole :: CGCWormhole(Galaxy& g, Target* t) : CGWormBase(*this,g,t)
