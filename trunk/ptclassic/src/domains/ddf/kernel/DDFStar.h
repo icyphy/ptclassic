@@ -56,7 +56,7 @@ public:
 	// is it recursion star?
 	virtual int isItSelf();
 
-	virtual const char* readClassName();
+	virtual const char* readClassName() const;
 };
 
 #endif

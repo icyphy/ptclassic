@@ -67,6 +67,6 @@ const char* DDFStar :: domain () const { return DDFdomainName;}
 
 int DDFStar :: isItSelf() { return FALSE ;}
 
-const char* DDFStar :: readClassName () { return "unspecified method";}
+const char* DDFStar :: readClassName () const { return "unspecified method";}
 
 ISA_FUNC(DDFStar,DataFlowStar);
