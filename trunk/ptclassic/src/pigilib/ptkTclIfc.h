@@ -30,6 +30,8 @@ Version identification:
 $Id$
 */
 
+#include "tcl.h"
+
 /* Register various Tcl functions used by pigi */
 extern void registerTclFns ARGS((Tcl_Interp *interp));
 
