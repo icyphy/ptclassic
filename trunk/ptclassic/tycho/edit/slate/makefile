@@ -44,6 +44,8 @@ TCL_SRCS =
   
 ITCL_SRCS = \
 	Alonger.itcl \
+	AsLine.itcl \
+	AsRectangle.itcl \
 	Axis.itcl \
 	Bounder.itcl \
 	Editor.itcl \
@@ -57,6 +59,7 @@ ITCL_SRCS = \
 	Repeater.itcl \
 	Selector.itcl \
 	Shades.itcl \
+	Shape.itcl \
 	Slate.itcl \
 	Slider.itcl \
 	Solid.itcl \
