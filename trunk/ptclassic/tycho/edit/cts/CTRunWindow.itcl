@@ -43,6 +43,18 @@ class ::tycho::CTRunWindow {
     constructor {args} {}
     destructor {}
 
+    ###################################################################
+    ####                            options                        ####
+    
+    ###################################################################
+    ####                         public methods                    ####
+    
+    # Set simulation time parameters and start
+    method start {}
+
+    ###################################################################
+    ####                      protected methods                    ####
+
     # Tell the class to use for the simulation.
     protected method _simulationClass {}
 }
@@ -78,6 +90,24 @@ body ::tycho::CTRunWindow::constructor {args} {
 
     # Initialize options
     eval itk_initialize $args
+}
+
+#####################################################################
+#### start
+# Set simulation time parameters and start
+#
+body ::tycho::CTRunWindow::start {} {
+    set starttime [$itk_component(time) get main.start]
+    set stoptime [$itk_component(time) get main.stop]
+    set timestep [$itk_component(time) get main.step]
+
+    # FIXME: call through parameter est method of Simulation
+    $_simulation send "\$exec setStartTime $starttime"
+    $_simulation send "\$exec setStopTime $stoptime"
+    $_simulation send "\$exec setStepSize $timestep"
+
+    # Do main start method
+    chain
 }
 
 #####################################################################
