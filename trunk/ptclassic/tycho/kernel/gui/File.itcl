@@ -93,6 +93,12 @@ proc ::tycho::openContext {filename {mode {}}} {
         if { [resource exists $filename] && \
                 ![resource isdirectory $filename] } {
             set mode [::tycho::readFileHeader $filename junk]
+
+            # If a mode was read from the header but we don't understand
+            # it, just ignore it
+            if ![::tycho::registry modeexists $mode] {
+                set mode ""
+            }
         }
         # If there was no header, get the default mode
         if { $mode == "" } {
