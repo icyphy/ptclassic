@@ -96,7 +96,7 @@ class ::tycho::EditDiff {
     ####           protected methods and variables                  ####
     
     # Initialize the menu/status/tool bars
-    protected method initialize {{menubar {}} {statusbar {}} {toolbar {}}}
+    protected method _initializeBars {menubar statusbar toolbar}
 
     # Keep track of the type of the diff
     private common difftypeName
@@ -138,7 +138,7 @@ class ::tycho::EditDiff {
     ####                     private methods                        ####
 
     # Initialize the toolbar
-    private method initializeToolbar {toolbar}
+    private method _initializeToolbar {toolbar}
 }
 
 ######################################################################
@@ -526,16 +526,13 @@ body ::tycho::EditDiff::hyperJump {filename line} {
 ####                    protected methods                       ####
 
 #####################################################################
-#### initialize
+#### _initializeBars
 # Initialize the menu, status, and toolbars associated with this widget.
-# The root (view) class sets up the menubar methods in it's initialize
-# via the chain command, which should always be the first command in
-# this method.
-# 
-# This method is called by it's displayer when attachView is called (usually
-# in ::tycho::view
+# If any of these arguments is null, the associated bar does not
+# exist and must be ignored. This method is called from within
+# the attachDisplayer{} method.
 #
-body ::tycho::EditDiff::initialize {{menubar {}} {statusbar {}} {toolbar {}}} {
+body ::tycho::EditDiff::_initializeBars {menubar statusbar toolbar} {
     chain $menubar $statusbar $toolbar
 
     configure -readonly 1
@@ -545,7 +542,7 @@ body ::tycho::EditDiff::initialize {{menubar {}} {statusbar {}} {toolbar {}}} {
     if {$toolbar != {}} {
         # We have to qualify the call to this supposed-ly private
         # method because Itcl (2.2) has virtual private methods!
-        ::tycho::EditDiff::initializeToolbar $toolbar
+        ::tycho::EditDiff::_initializeToolbar $toolbar
     }
 
     if {$menubar != {}} {
@@ -582,10 +579,10 @@ body ::tycho::EditDiff::initialize {{menubar {}} {statusbar {}} {toolbar {}}} {
 }
 
 #####################################################################
-#### initializeToolbar
+#### _initializeToolbar
 # Initialize the tool bar. Adds entries specific to this class.
 #
-body ::tycho::EditDiff::initializeToolbar {toolbar} {
+body ::tycho::EditDiff::_initializeToolbar {toolbar} {
 
     $toolbar button prevdiff \
             -text {Prev Difference} \

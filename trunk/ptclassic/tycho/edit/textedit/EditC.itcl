@@ -85,13 +85,13 @@ class ::tycho::EditC {
     ####                         protected methods                 ####
 
     # Initialize the menu/status/tool bars
-    protected method initialize {{menubar {}} {statusbar {}} {toolbar {}}}
+    protected method _initializeBars {menubar statusbar toolbar}
 
     ##########################################################################
     ####                         private methods                          ####
     
     # Initialize the menu bar.
-    private method initializeMenubar {menubar}
+    private method _initializeMenubar {menubar}
     
     private variable compiler {}
 }
@@ -329,22 +329,19 @@ body ::tycho::EditC::uncommentSelection {} {
 ####                    protected methods                       ####
 
 #####################################################################
-#### initialize
+#### _initializeBars
 # Initialize the menu, status, and toolbars associated with this widget.
-# The root (view) class sets up the menubar methods in it's initialize
-# via the chain command, which should always be the first command in
-# this method.
-# 
-# This method is called by it's displayer when attachView is called (usually
-# in ::tycho::view
+# If any of these arguments is null, the associated bar does not
+# exist and must be ignored. This method is called from within
+# the attachDisplayer{} method.
 #
-body ::tycho::EditC::initialize {{menubar {}} {statusbar {}} {toolbar {}}} {
+body ::tycho::EditC::_initializeBars {menubar statusbar toolbar} {
     chain $menubar $statusbar $toolbar
 
     if {$menubar != {}} {
         # We have to qualify the call to this supposed-ly private
         # method because Itcl (2.2) has virtual private methods!
-        ::tycho::EditC::initializeMenubar $menubar
+        ::tycho::EditC::_initializeMenubar $menubar
     }
 }
 
@@ -353,10 +350,10 @@ body ::tycho::EditC::initialize {{menubar {}} {statusbar {}} {toolbar {}}} {
 ####                     private methods                             ####
 
 #####################################################################
-#### initializeMenubar
+#### _initializeMenubar
 # Initialize the menu bar.  Adds entries specific to this class.
 #
-body ::tycho::EditC::initializeMenubar {menubar} {
+body ::tycho::EditC::_initializeMenubar {menubar} {
 
     # Add menu entries for templates
     $menubar separator specialsep1 special

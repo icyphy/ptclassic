@@ -161,7 +161,7 @@ class ::tycho::TclShell {
     protected method evalTextEntry {}
 
     # Initialize the menu/status/tool bars associated with this widget.
-    protected method initialize {{menubar {}} {statusbar {}} {toolbar {}}}
+    protected method _initializeBars {menubar statusbar toolbar}
 
     # Insert text and apply one or more tags to that text.
     protected method insertWithTags {text args}
@@ -814,16 +814,13 @@ body ::tycho::TclShell::evalTextEntry {} {
 }
 
 #####################################################################
-#### initialize
+#### _initializeBars
 # Initialize the menu, status, and toolbars associated with this widget.
-# The root (view) class sets up the menubar methods in it's initialize
-# via the chain command, which should always be the first command in
-# this method.
-# 
-# This method is called by it's displayer when attachView is called (usually
-# in ::tycho::view
+# If any of these arguments is null, the associated bar does not
+# exist and must be ignored. This method is called from within
+# the attachDisplayer{} method.
 #
-body ::tycho::TclShell::initialize {{menubar {}} {statusbar {}} {toolbar {}}} {
+body ::tycho::TclShell::_initializeBars {menubar statusbar toolbar} {
     chain $menubar $statusbar $toolbar
 
     # Change the default title. If this is a master window, display

@@ -195,7 +195,7 @@ class ::tycho::EditProgram {
     protected method gendocBufferInternal { genDocFile genCommand}
 
     # Initialize the menu/status/tool bars
-    protected method initialize {{menubar {}} {statusbar {}} {toolbar {}}}
+    protected method _initializeBars {menubar statusbar toolbar}
 
     # Change this to 0 in derived classes if keywords are not case sensitive.
     protected variable caseSensitiveKeywords 1
@@ -204,7 +204,7 @@ class ::tycho::EditProgram {
     ####                     private variables and methods                ####
 
     # Initialize the menubar
-    private method initializeMenubar {menubar}
+    private method _initializeMenubar {menubar}
 }
 
 ###################################################################
@@ -769,17 +769,13 @@ body ::tycho::EditProgram::gendocBufferInternal {setDocCommand genCommand} {
 }
 
 #####################################################################
-#### initialize
+#### _initializeBars
 # Initialize the menu, status, and toolbars associated with this widget.
-# The root (view) class sets up the menubar methods in it's initialize
-# via the chain command, which should always be the first command in
-# this method.
-# 
-# This method is called by it's displayer when attachView is called (usually
-# in ::tycho::view
+# If any of these arguments is null, the associated bar does not
+# exist and must be ignored. This method is called from within
+# the attachDisplayer{} method.
 #
-body ::tycho::EditProgram::initialize \
-        {{menubar {}} {statusbar {}} {toolbar {}}} {
+body ::tycho::EditProgram::_initializeBars {menubar statusbar toolbar} {
     chain $menubar $statusbar $toolbar
 
     # Insert items in the menu bar. This is faster in a seperate
@@ -787,7 +783,7 @@ body ::tycho::EditProgram::initialize \
     if {$menubar != {}} {
         # We have to qualify the call to this supposed-ly private
         # method because Itcl (2.2) has virtual private methods!
-        ::tycho::EditProgram::initializeMenubar $menubar
+        ::tycho::EditProgram::_initializeMenubar $menubar
     }
 }
 
@@ -796,10 +792,10 @@ body ::tycho::EditProgram::initialize \
 ####                       private methods                       ####
 
 #####################################################################
-#### initializeMenubar
+#### _initializeMenubar
 # Initialize the menu bar. Adds entries specific to this class.
 #
-body ::tycho::EditProgram::initializeMenubar {menubar} {
+body ::tycho::EditProgram::_initializeMenubar {menubar} {
     # Add to the format menu commands to comment and uncomment
     # the regions defined by the selection.
     $menubar add separator formatsep3 format

@@ -63,9 +63,6 @@ class ::tycho::EditEsterel {
     ###################################################################
     ####                         protected methods                 ####
 
-    # Initialize the menu/status/tool bars
-    protected method initialize {{menubar {}} {statusbar {}} {toolbar {}}}
-
     ###################################################################
     ####                         private methods                   ####
 
@@ -240,22 +237,6 @@ body ::tycho::EditEsterel::indentLine {} {
 #####################################################################
 #####################################################################
 ####                    protected methods                        ####
-
-#####################################################################
-#### initialize
-# Initialize the menu, status, and toolbars associated with this widget.
-# The root (view) class sets up the menubar methods in it's initialize
-# via the chain command, which should always be the first command in
-# this method.
-# 
-# This method is called by it's displayer when attachView is called (usually
-# in ::tycho::view
-#
-body ::tycho::EditEsterel::initialize \
-        {{menubar {}} {statusbar {}} {toolbar {}}} {
-    chain $menubar $statusbar $toolbar
-
-}
 
 #####################################################################
 #####################################################################

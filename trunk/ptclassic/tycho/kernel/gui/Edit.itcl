@@ -302,7 +302,7 @@ class ::tycho::Edit {
     protected method incSearch {key}
     
     # Initialize the menu/status/tool bars
-    protected method initialize {{menubar {}} {statusbar {}} {toolbar {}}}
+    protected method _initializeBars {menubar statusbar toolbar}
 
     # Reset the undo buffer.
     protected method resetUndo {} {}
@@ -317,7 +317,7 @@ class ::tycho::Edit {
     private method columnNumber {}
 
     # Initialize the menubar
-    private method initializeMenubar {menubar}
+    private method _initializeMenubar {menubar}
 
     # Number of characters from the selection to the next word.
     private method nextWord {}
@@ -382,7 +382,7 @@ configbody ::tycho::Edit::scrollbar {
 	$itk_component(text) configure -yscrollcommand {}
 
 	# Remove scrollbar packing from statusbar
-	# This is also done in initialize{}.
+	# This is also done in _initializeBars{}.
 	statusbar configure -scrollbarpad 0
     } {
 	#
@@ -408,7 +408,7 @@ configbody ::tycho::Edit::scrollbar {
 		-yscrollcommand "$itk_component(scroll) set"
 	}
 	# Add scrollbar packing to statusbar
-	# This is also done in initialize{}.
+	# This is also done in _initializeBars{}.
 	statusbar configure -scrollbarpad 1
     }
 }
@@ -2342,16 +2342,13 @@ body ::tycho::Edit::incSearch {key} {
 
 
 #####################################################################
-#### initialize
+#### _initializeBars
 # Initialize the menu, status, and toolbars associated with this widget.
-# The root (view) class sets up the menubar methods in it's initialize
-# via the chain command, which should always be the first command in
-# this method.
+# If any of these arguments is null, the associated bar does not
+# exist and must be ignored. This method is called from within
+# the attachDisplayer{} method.
 #
-# This functionality used to be in the constructor, however that design
-# was not flexible and didn't fit with the notion of multiple views.
-#
-body ::tycho::Edit::initialize {{menubar {}} {statusbar {}} {toolbar {}}} {
+body ::tycho::Edit::_initializeBars {menubar statusbar toolbar} {
     chain $menubar $statusbar $toolbar
 
     # Insert items in the menu bar. This is faster in a seperate
@@ -2359,7 +2356,7 @@ body ::tycho::Edit::initialize {{menubar {}} {statusbar {}} {toolbar {}}} {
     if {$menubar != {}} {
         # We have to qualify the call to this supposed-ly private
         # method because Itcl (2.2) has virtual private methods!
-        ::tycho::Edit::initializeMenubar $menubar
+        ::tycho::Edit::_initializeMenubar $menubar
     }
     # Set the statusbarpadding according to the -scrollbar option
     statusbar configure -scrollbarpad $itk_option(-scrollbar)
@@ -2400,10 +2397,10 @@ body ::tycho::Edit::columnNumber {} {
 }
 
 #####################################################################
-#### initializeMenubar
+#### _initializeMenubar
 # Initialize the menu bar. Adds entries specific to this class.
 #
-body ::tycho::Edit::initializeMenubar {menubar} {
+body ::tycho::Edit::_initializeMenubar {menubar} {
     global tcl_platform
 
     # Insert items in the menu bar.

@@ -211,7 +211,7 @@ class ::tycho::HTML {
     ####                     protected methods                     ####
 
     # Initialize the menu/status/tool bars associated with this widget.
-    protected method initialize {{menubar {}} {statusbar {}} {toolbar {}}}
+    protected method _initializeBars {menubar statusbar toolbar}
 
     # Configure the popup menu depending on the current context
     protected method configureContextMenu {}
@@ -235,10 +235,10 @@ class ::tycho::HTML {
     }
 
     # Initialize the menubar.
-    private method initializeMenubar {menubar}
+    private method _initializeMenubar {menubar}
 
     # Initialize the toolbar.
-    private method initializeToolbar {toolbar}
+    private method _initializeToolbar {toolbar}
 
     # Push a new file onto the stack.
     private method pushNextHTMLFile {}
@@ -1285,30 +1285,26 @@ body ::tycho::HTML::render {obj {html {}}} {
 ####                    protected methods                            ####
 
 #####################################################################
-#### initialize
+#### _initializeBars
 # Initialize the menu, status, and toolbars associated with this widget.
-# The root (view) class sets up the menubar methods in it's initialize
-# via the chain command, which should always be the first command in
-# this method.
+# If any of these arguments is null, the associated bar does not
+# exist and must be ignored. This method is called from within
+# the attachDisplayer{} method.
 #
-# This functionality used to be in the constructor, however that design
-# was not flexible and didn't fit with the notion of multiple views.
-#
-body ::tycho::HTML::initialize {{menubar {}} \
-        {statusbar {}} {toolbar {}}} {
+body ::tycho::HTML::_initializeBars {menubar statusbar toolbar} {
     chain $menubar $statusbar $toolbar
      
     if {$toolbar != {}} {
         # We have to qualify the call to this supposed-ly private
         # method because Itcl (2.2) has virtual private methods!
-        ::tycho::HTML::initializeToolbar $toolbar
+        ::tycho::HTML::_initializeToolbar $toolbar
     }      
 
     # Modify the menu commands appropriately.
     if {$menubar != {}} {
         # We have to qualify the call to this supposed-ly private
         # method because Itcl (2.2) has virtual private methods!
-        ::tycho::HTML::initializeMenubar $menubar
+        ::tycho::HTML::_initializeMenubar $menubar
     }
 
     configure -readonly 1
@@ -1345,10 +1341,10 @@ body ::tycho::HTML::configureContextMenu {} {
 ####                     private methods                             ####
 
 #####################################################################
-#### initializeMenubar
+#### _initializeMenubar
 # Initialize the menu bar.  Adds entries specific to this class.
 #
-body ::tycho::HTML::initializeMenubar {menubar} {
+body ::tycho::HTML::_initializeMenubar {menubar} {
     # Remove items from File
     $menubar delete reload
     $menubar delete switchfile
@@ -1391,10 +1387,10 @@ body ::tycho::HTML::initializeMenubar {menubar} {
 }
 
 #####################################################################
-#### initializeToolbar
+#### _initializeToolbar
 # Initialize the tool bar.  Adds entries specific to this class.
 #
-body ::tycho::HTML::initializeToolbar {toolbar} {
+body ::tycho::HTML::_initializeToolbar {toolbar} {
     # Add buttons to the toolbar, if it exists.
     # FIXME: should the user be allowed to change the home window?
     

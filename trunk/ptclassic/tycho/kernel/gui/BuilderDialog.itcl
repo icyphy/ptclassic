@@ -72,18 +72,18 @@ class ::tycho::BuilderDialog {
     ####                  protected methods                         ####
 
     # Initialize the menu/status/tool bars associated with this widget.
-    protected method initialize {{menubar {}} {statusbar {}} {toolbar {}}}
+    protected method _initializeBars {menubar statusbar toolbar}
 
     ####################################################################
     ####                  private methods                           ####
 
-    private method initializeMenubar {menubar}
+    private method _initializeMenubar {menubar}
     
     # Initialize a test menu submenu will all the .itcl files in that dir.
     private method initializeTestSubmenu {menubar menuname dir}
 
     # Initialize the toolbar.
-    private method initializeToolbar {toolbar}
+    private method _initializeToolbar {toolbar}
 }
 
 #######################################################################
@@ -196,24 +196,20 @@ body ::tycho::BuilderDialog::checkFiles { {displayOKMessage 0}} {
 ####                         protected methods                       ####
 
 #####################################################################
-#### initialize
+#### _initializeBars
 # Initialize the menu, status, and toolbars associated with this widget.
-# The root (view) class sets up the menubar methods in it's initialize
-# via the chain command, which should always be the first command in
-# this method.
-# 
-# This method is called by it's displayer when attachView is called (usually
-# in ::tycho::view
+# If any of these arguments is null, the associated bar does not
+# exist and must be ignored. This method is called from within
+# the attachDisplayer{} method.
 #
-body ::tycho::BuilderDialog::initialize {{menubar {}} \
-        {statusbar {}} {toolbar {}}} {
+body ::tycho::BuilderDialog::_initializeBars {menubar statusbar toolbar} {
     chain $menubar $statusbar $toolbar
 
     if {$toolbar != {}} {
         # We have to qualify the call to this supposed-ly private
         # method because Itcl (2.2) has virtual private methods!
-        ::tycho::BuilderDialog::initializeToolbar $toolbar
-    }      
+        ::tycho::BuilderDialog::_initializeToolbar $toolbar
+    }
     toolbar disable stop
 
     # Insert items in the menu bar. This is faster in a seperate
@@ -221,7 +217,7 @@ body ::tycho::BuilderDialog::initialize {{menubar {}} \
     if {$menubar != {}} {
         # We have to qualify the call to this supposed-ly private
         # method because Itcl (2.2) has virtual private methods!
-        ::tycho::BuilderDialog::initializeMenubar $menubar
+        ::tycho::BuilderDialog::_initializeMenubar $menubar
     }
 
 }
@@ -231,10 +227,10 @@ body ::tycho::BuilderDialog::initialize {{menubar {}} \
 ####                          private methods                        ####
 
 #####################################################################
-#### initializeMenubar
+#### _initializeMenubar
 # Initialize the menu bar.  Adds entries specific to this class.
 #
-body ::tycho::BuilderDialog::initializeMenubar {menubar} {
+body ::tycho::BuilderDialog::_initializeMenubar {menubar} {
     global TYCHO tcl_platform
 
     displayer configure -title "Tycho Build Manager" \
@@ -376,10 +372,10 @@ body ::tycho::BuilderDialog::initializeTestSubmenu {menubar menuname dir} {
 }
 
 #####################################################################
-#### initializeToolbar
+#### _initializeToolbar
 # Initialize the tool bar.  Adds entries specific to this class.
 #
-body ::tycho::BuilderDialog::initializeToolbar {toolbar} {
+body ::tycho::BuilderDialog::_initializeToolbar {toolbar} {
     # Add buttons to the toolbar, if it exists.
     # FIXME: should the user be allowed to change the home window?
     

@@ -57,7 +57,7 @@ class ::tycho::Matlab {
     ####                        protected methods                  ####
 
     # Initialize the menu/status/tool bars associated with this widget.
-    protected method initialize {{menubar {}} {statusbar {}} {toolbar {}}}
+    protected method _initializeBars {menubar statusbar toolbar}
 
     ##########################################################################
     ####                          common members                          ####
@@ -170,15 +170,13 @@ body ::tycho::Matlab::help {} {
     ####                     protected methods                     ####
 
 #####################################################################
-#### initialize
-# Set myDisplayer if I'm in a displayer, and initialize the menu, status, 
-# and toolbars associated with this widget.
+#### _initializeBars
+# Initialize the menu, status, and toolbars associated with this widget.
+# If any of these arguments is null, the associated bar does not
+# exist and must be ignored. This method is called from within
+# the attachDisplayer{} method.
 #
-# This functionality used to be in the constructor, however that design
-# was not flexible and didn't fit with the notion of multiple views.
-#
-body ::tycho::Matlab::initialize {{menubar {}} \
-        {statusbar {}} {toolbar {}}} {
+body ::tycho::Matlab::_initializeBars {menubar statusbar toolbar} {
     chain $menubar $statusbar $toolbar
    
     displayer configure -title "Matlab Shell"
