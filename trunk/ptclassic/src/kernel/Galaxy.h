@@ -76,9 +76,10 @@ protected:
 	void addBlock(Block& b,const char* bname) {addBlock(b.setBlock(bname,this));}
 
 	// Connect sub-blocks with a delay (default to zero delay)
-	// Returns a reference to the Geodesic it created.
-	Geodesic& connect(GenericPort& source, GenericPort& destination,
-			  int numberDelays = 0);
+	void connect(GenericPort& source, GenericPort& destination,
+			  int numberDelays = 0) {
+		source.connect(destination,numberDelays);
+	}
 
 	// TO BE DONE:
 	// Allow delays to be initialized to something reasonable.
@@ -115,7 +116,7 @@ public:
 	Block& nextBlock() {return blocks++;}
 
 	// Print a description of the galaxy
-	virtual operator StringList ();
+	StringList printVerbose();
 
 	// Method replies FALSE to indicate that component blocks
 	// can be seen from outside.
