@@ -8,9 +8,9 @@ The number of outputs should not exceed the wordsize of an integer.
 	}
 	author { Asawaree Kalavade }
 	copyright {
-Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
+Copyright (c) 1990-1994 The Regents of the University of California.
 All rights reserved.
-See the file ~ptolemy/copyright for copyright notice,
+See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	version { $Id$ }

@@ -9,9 +9,9 @@ once.  The default value is 0.1 0.2 0.3 0.4.
 	version { $Id$ }
 	author { Chih-Tsung Huang, ported from Gabriel }
 	copyright {
-Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
+Copyright (c) 1990-1994 The Regents of the University of California.
 All rights reserved.
-See the file ~ptolemy/copyright for copyright notice,
+See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CG56 signal sources library }

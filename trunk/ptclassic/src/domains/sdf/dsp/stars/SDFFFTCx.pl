@@ -12,9 +12,9 @@ The parameter "direction" (default 1) is 1 for the forward and
 	version {$Id$}
 	author { J. T. Buck }
 	copyright {
-Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
+Copyright (c) 1990-1994 The Regents of the University of California.
 All rights reserved.
-See the file ~ptolemy/copyright for copyright notice,
+See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { SDF dsp library }
