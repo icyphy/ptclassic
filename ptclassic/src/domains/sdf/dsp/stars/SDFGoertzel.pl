@@ -68,13 +68,17 @@ which is a function of k and N
 		attributes { A_NONCONSTANT|A_NONSETTABLE }
 	}
 	setup {
+		// check parameter values and compute theta
 		SDFGoertzelBase::setup();
+
 		negWnReal = -cos(theta);
 		negWnImag = -sin(theta);
 	}
 	go {
-		// Discard all but the last sample and calculate final value
-		// Note that acc contains the value of state1
+		// Discard all but the last sample
+		SDFGoertzelBase::go();
+
+		// Final value is function of two real IIR state values
 		double s1 = state1;
 		double s2 = state2;
 		Complex o(s1 + s2 * double(negWnReal), s2 * double(negWnImag));
