@@ -311,7 +311,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	      // parameter value. Use Tcl to do this, since it has
 	      // such convenient string manipulation functions.
 
-	      command = "regsub instance_number {";
+	      command = "regsub -all instance_number {";
 	      command += parameter_value;
 	      command += "} ";
 	      command += instanceno;
