@@ -457,12 +457,12 @@ void VHDLBTarget :: setup () {
 
     Galaxy* gal = galaxy();
     codeGenInit();
+
     // Initializations
     galId = 0;
     include << "";
     mainDeclarations << "";
     mainInitialization << "";
-//    unique = 0;
 
     galaxyList.initialize();
     includeFiles.initialize();
@@ -501,10 +501,7 @@ void VHDLBTarget :: setup () {
         codeFile << myCode;
         codeFile.flush();
 
-// Display the code
-//	Error::message(vhdlCode);
-//        writeFile(vhdlCode, codeFileName);
-
+        // Display the code
         writeFile(vhdlCode, "", 1);
 }
 
@@ -571,9 +568,7 @@ void VHDLBTarget :: setGeoNames(Galaxy& galaxy) {
 	  gn = p;
 	  while(gp = gn->aliasFrom()) gn = gp;
 	  StringList s = sanitizedShortName(*gn);
-	  const char *cs = (const char*) s; /* new struct keeps separate */
-//	  p->setGeoName(savestring(s));
-	  p->setGeoName(savestring(cs));
+	  p->setGeoName(savestring(s));
 	}
       }
     }
@@ -586,9 +581,7 @@ void VHDLBTarget :: setGeoNames(Galaxy& galaxy) {
 	  gn = p;
 	  while(gp = gn->aliasFrom()) gn = gp;
 	  StringList s = sanitizedShortName(*gn);
-	  const char *cs = (const char*) s; /* new struct keeps separate */
-//	  p->setGeoName(savestring(s));
-	  p->setGeoName(savestring(cs));
+	  p->setGeoName(savestring(s));
 	}
       }
     }
