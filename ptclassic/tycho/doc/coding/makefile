@@ -45,6 +45,7 @@ EXTRA_SRCS =	directories.html \
 		index.html \
 		performance.html \
 		scope.html \
+		style.html \
 		template.html \
 		update.html
 MISC_FILES =
