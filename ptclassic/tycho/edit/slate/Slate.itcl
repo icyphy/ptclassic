@@ -349,7 +349,6 @@ class ::tycho::Slate {
 # use the procedure ::tycho::slate{}.
 #
 body ::tycho::Slate::constructor {args} {
-puts $this
     # Create the canvas and pack it
     itk_component add canvas {
 	# Create at the global scope to avoid calls to unknown{}
