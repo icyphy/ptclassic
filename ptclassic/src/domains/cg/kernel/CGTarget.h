@@ -73,15 +73,18 @@ public:
     // Otherwise, conditionally display, compile, load, and run the code.
     /*virtual*/ void wrapup();
 
+    // Generate code.
+    virtual void generateCode();
+
+    // Save the generated code to a file.
+    virtual void writeCode(const char* fileName = NULL);
+
     // Methods used in stages of a run.
     // The default versions do nothing.
     // Return FALSE on error.
     virtual int compileCode();
     virtual int loadCode();
     virtual int runCode();
-
-    // Generate code.
-    virtual void generateCode();
 
     // Generate code for a Star firing.
     // The default version simply fires the star.
@@ -121,8 +124,6 @@ public:
     virtual int sendWormData(PortHole&);
     virtual int receiveWormData(PortHole&);
 
-    // Save the generated code to a file.
-    virtual void writeCode(const char* fileName = NULL);
 
     // Provided for convenience and backward compatibility.
     static int haltRequested() {return SimControl::haltRequested();}
@@ -134,7 +135,7 @@ public:
     // Multi-line comments are supported if a continuation string is specified.
     // Defaults to shell-style comments.
     virtual StringList comment(const char* cmt, const char* begin=NULL, 
-            const char* end="",const char* cont=NULL);
+            const char* end=NULL ,const char* cont=NULL);
 
     // Return a StringList detailing the user name, time, date, and
     // target type.
@@ -222,7 +223,15 @@ protected:
     // to the appropriate code stream.
     void switchCodeStream(Block* b, CodeStream* s);
 
+    // Host machine on which to compile or assemble code.
+    StringState targetHost;
+
+    // Directory to store code files in.
     StringState destDirectory;
+
+    // Prefix for file names.
+    StringState filePrefix;
+
     // If we set this state 0, no looping. 1, Joe's looping.
     // If set to 2, Shuvra and Ha's extensive looping.
     IntState loopingLevel;
