@@ -144,7 +144,7 @@ public:
 	StringList displaySubUniv() { return subGal->print(1); }
 
 	// write Gantt chart
-	int writeGantt(const char* universe, int numProcs, int span);
+	int writeGantt(ostream& out, const char* universe, int numProcs, int span);
 
 	// get the total idle time including the idle time at the end.
 	// This method should be called after "display" method.
