@@ -62,9 +62,16 @@ int ivGetLine
 #include "minusPush.bitmap.11"
 
 #ifndef MAXFLOAT
+#ifdef HUGE
 #define MAXFLOAT HUGE
-#endif
-
+#else
+#ifdef HUGE_VAL
+/* The Cygwin-32 nt4 port uses this */
+#define MAXFLOAT HUGE_VAL
+#define HUGE HUGE_VAL
+#endif /* HUGE_VAL */
+#endif /* HUGE */
+#endif /* MAXFLOAT */
 
 #ifndef MAXINT
 #define MAXINT 2147483647  /* Assuming 32 bit architecture */
