@@ -97,40 +97,6 @@ proc ptkImportantMessage {w text} {
 }
 
 ###################################################################
-# Procedure to open a text window with a scroll bar window and grab
-# the focus.
-# The user cannot do anything until the window is dismissed.
-#
-proc ptkImportantText {w text} {
-    ptkSafeDestroy $w
-    toplevel $w
-    wm title $w "Ptolemy Message"
-    wm iconname $w "Ptolemy Message"
-
-    button $w.ok -text "OK <Return>" -command "ptkSafeDestroy $w"
-    text $w.t -width 80 -yscrollcommand "$w.s set"
-    scrollbar $w.s -relief flat -command "$w.t yview"
-    $w.t insert 0.0 "$text"
-    $w.t configure -state disabled
-    pack append $w \
-      $w.ok {bottom fillx} \
-      $w.s {right filly } \
-      $w.t {expand fill}
-
-    wm geometry $w +200+200
-    tkwait visibility $w
-    bind $w <Key> "ptkSafeDestroy $w"
-    bind $w <ButtonPress> "ptkSafeDestroy $w"
-    bind $w.t <Button> "ptkSafeDestroy $w"
-    set prevFocus [focus]
-    focus $w
-    grab $w
-    tkwait window $w
-    focus $prevFocus
-}
-
-
-###################################################################
 # Procedure to open a message window and leave it open until dismissed
 #
 set ptkMessageWindowNum 0
@@ -242,7 +208,7 @@ proc ptkDisplayCopyright {} {
     global ptolemy
     set fileID [open $ptolemy/copyright r]
     set text [read $fileID]
-    ptkImportantText .copyright $text
+    ptkImportantMessage .copyright $text
     close $fileID
 }
 
