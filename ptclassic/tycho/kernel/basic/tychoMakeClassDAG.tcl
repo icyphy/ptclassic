@@ -242,7 +242,7 @@ proc tychoStandardDAG {} {
     foreach file $files {
         lappend filesenv [file join "\$TYCHO" $file]
     }
-    set retval [eval tychoMkClassGraph {{Tycho Class Hierarchy}} doc/tychoClasses.dag $filesenv ]
+    set retval [eval tychoMkClassGraph {{Tycho Class Hierarchy}} [file join doc tychoClasses.dag] $filesenv ]
     cd $olddir
     return $retval
 }
