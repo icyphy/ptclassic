@@ -47,9 +47,6 @@ namespace ::tycho {
 # <p><a name="options"></a><b>Options</b>
 #
 # <ul>
-# <li><b>-anchor</b>:
-# <b>Deprecated</b>. (Use *-textanchor* instead.)
-#
 # <li><b>-font</b>:
 # The font to use for the label. Currently, this must be a valid X font.
 #
@@ -110,9 +107,6 @@ class ::tycho::LabeledItem {
     ###################################################################
     ####                            options                        ####
 
-    # Update the *-anchor* option
-    proc _anchor {id canvas slate anchor}
-    
     # Update the *-font* option
     proc _font {id canvas slate font}
 
@@ -146,7 +140,6 @@ class ::tycho::LabeledItem {
     #### Set method table
     array set methodtable [array get ::tycho::ComplexItem::methodtable]
 
-    set methodtable(_anchor)     ::tycho::LabeledItem::_anchor
     set methodtable(_font)       ::tycho::LabeledItem::_font
     set methodtable(_graphics)   ::tycho::LabeledItem::_graphics
     set methodtable(_text)       ::tycho::LabeledItem::_text
@@ -155,21 +148,10 @@ class ::tycho::LabeledItem {
     #### Set option defaults
     array set optiondefault [array get ::tycho::ComplexItem::optiondefault]
 
-    set optiondefault(-anchor)	   "center"
     set optiondefault(-font)	   [::tycho::font Helvetica 12]
     set optiondefault(-graphics)   ""
     set optiondefault(-text)	   ""
     set optiondefault(-textanchor) "center"
-}
-
-##########################################################################
-## -anchor option configuration
-#
-# <b>Deprecated</b>
-#
-body ::tycho::LabeledItem::_anchor {id canvas slate anchor} {
-    set option(anchor$id) $anchor
-    _textanchor $id $canvas $slate $anchor
 }
 
 ##########################################################################
@@ -224,7 +206,7 @@ body ::tycho::LabeledItem::_graphics {id canvas slate graphics args} {
     
     # Move the label outside the item if necessary
     if { $graphics != "" && $option(text$id) != "" } {
-    	 _anchor $id $canvas $slate $option(anchor$id)
+    	 _textanchor $id $canvas $slate $option(textanchor$id)
     }
 }
 
@@ -284,6 +266,10 @@ body ::tycho::LabeledItem::_textanchor {id canvas slate textanchor args} {
                 set textanchor "s"
                 eval $canvas coords $component(label$id) \
 			[eval ::tycho::Rectangle::aspect $args $textanchor]
+            } elseif { $textanchor == "e" } {
+                set textanchor w
+            } elseif { $textanchor == "w" } {
+                set textanchor e
             }
             $canvas itemconfigure $component(label$id) \
                     -anchor [::tycho::Shape::compass $textanchor "ud"]
@@ -307,8 +293,4 @@ body ::tycho::LabeledItem::coords {id canvas slate a0 b0 a1 b1 x0 y0 x1 y1} {
     $slate scale graphics.$id $x0 $y0 \
     		[expr double($x1-$x0)/($a1-$a0)] \
     		[expr double($y1-$y0)/($b1-$b0)]
- 
-    # FIXME: Inefficient because graphics are redrawn each time!
-#    eval [list _graphics $id $canvas $slate $option(graphics$id)] $args
-#    eval [list _textanchor $id $canvas $slate $option(textanchor$id)] $args
 }
