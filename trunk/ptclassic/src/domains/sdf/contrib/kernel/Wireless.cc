@@ -80,7 +80,7 @@ void WirelessChannel::Setup( const ChannelParameters channelparams )
 
 	// Define Pointer To Uniform Distribution
 	delete random;
-	random = new Uniform( -0.5 * PI, 0.5 * PI, gen );
+	random = new Uniform( -0.5 * M_PI, 0.5 * M_PI, gen );
 }
 
 
@@ -138,17 +138,17 @@ void WirelessChannel::CorruptData()
 	     // Distance Between Tx and Rx Antennas.
 	     new_phase += (*random)();
 
-	     // Is There A Modulo 2*PI Function?
-	     if( new_phase > PI/2.0 )
-	     {
-		  new_phase = ( new_phase/(PI/2.0) - floor(new_phase/(PI/2.0)) ) 
-			* PI - PI/2.0;
+	     // Is There A Modulo 2 PI Function?
+	     if( new_phase > (M_PI/2.0) ) {
+		new_phase = ( new_phase/(M_PI/2.0) -
+			      floor(new_phase/(M_PI/2.0)) ) * M_PI - M_PI/2.0;
 	     }
 
-	     corrupt_symbols[ path ] 
-		= PhasorToRectangular( new_phase, abs( orig_symbols[ path ] ) );
+	     corrupt_symbols[ path ] =
+	        PhasorToRectangular( new_phase, abs( orig_symbols[ path ] ) );
 
-	     corrupt_symbols[ path ] = SetPathLoss( path, corrupt_symbols[ path ] );
+	     corrupt_symbols[ path ] =
+	        SetPathLoss( path, corrupt_symbols[ path ] );
 	}
 }
 
