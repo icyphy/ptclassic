@@ -28,8 +28,6 @@ LIB=libfsmstars.$(LIBSUFFIX)
 PL_SRCS= \
 FSMDataIn.pl \
 FSMDataOut.pl \
-FSMMoore.pl \
-FSMMealy.pl \
 FSMMixed.pl
 
 # The .cc files
