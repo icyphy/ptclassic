@@ -131,6 +131,9 @@ public:
         // States initialize
         virtual void initState();
 
+        // PortHoles initialize
+        virtual void initPorts();
+
 	// Return the number of blocks in the galaxy.
 	int numberBlocks() const {return blocks.size();}
 
@@ -187,6 +190,9 @@ protected:
 
 	// initialize states in subblocks only.
 	void initStateSubblocks();
+
+	// initialize portholes in subblocks only.
+	void initPortsSubblocks();
 
 	// delete sub-blocks
 	void deleteAllBlocks() { blocks.deleteAll();}
