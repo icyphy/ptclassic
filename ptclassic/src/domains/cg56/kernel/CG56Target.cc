@@ -114,7 +114,7 @@ void CG56Target::writeInt(int val) {
 
 void CG56Target::writeFix(double val) {
 	StringList out = "\tdc\t";
-	out += val;
+	out += CG56Star::printFixedPointValue(val);
 	out += "\n";
 	addCode(out);
 }
