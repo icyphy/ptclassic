@@ -35,7 +35,7 @@ util_csystem(s)
 char *s;
 {
     register SIGNAL_FN (*istat)(), (*qstat)();
-#ifdef WAIT_RETURNS_INT
+#ifdef WAIT_TAKES_INT_STAR
     int status;    
 #else
     union wait status;
@@ -56,7 +56,7 @@ char *s;
     if (w == -1) {		/* check for no children ?? */
 	retval = -1;
     } else {
-#ifdef WAIT_RETURNS_INT 
+#ifdef WAIT_TAKES_INT_STAR
 	retval = status;
 #else
 	retval = status.w_status;
