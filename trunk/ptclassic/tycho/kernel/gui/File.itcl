@@ -1312,7 +1312,7 @@ body ::tycho::File::openContext {filename} {
 	# Check to see if $filename/schematic/contents; exists, if it
 	# does, then open either the paletted editor or the ptlang editor.
 	if [file exists [file join $filename schematic "contents;"]] {
-	    if [regexp {*.pal} $file] {
+	    if {[file extension $filename] == ".pal" } {
 		set name [uplevel #0 [list \
 		    ::tycho::EditPalette [::tycho::autoName .file] \
 		    -facet $filename]]
