@@ -49,6 +49,8 @@ character is ready, the output is made absent.  }
   }
 
   setup {
+    char rate[20];
+
     if ( fileDescriptor != -1 ) {
       close( fileDescriptor );
     }
@@ -83,7 +85,6 @@ character is ready, the output is made absent.  }
     case 19200: bbits = B19200; break;
     case 38400: bbits = B38400; break;
     default:
-      char rate[20];
       sprintf(rate,"%d",int(baudRate));
       Error::abortRun( *this, "Unknown baud rate", rate );
     }
