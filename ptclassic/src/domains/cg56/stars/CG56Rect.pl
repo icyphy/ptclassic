@@ -49,8 +49,8 @@ limitation of liability, and disclaimer of warranty provisions.
 ; y1 = height
 ; a = output value
 ; b = width
-	clr	a	$ref(count),x1		; a = 0, x1 = count
-	move	#$val(width),b1			; b = width
+	clr	b	$ref(count),x1		; a = 0, x1 = count, b = 0
+	clr	a	#$val(width),b1		; b1 = width
 	move	a,x0	$ref(height),y1		; x0 = 0, y1 = height
 	cmp	x1,b	#1,b1		; if (count < width)
 	tgt	y1,a			; then a = height
