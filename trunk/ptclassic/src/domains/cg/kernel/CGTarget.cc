@@ -92,7 +92,10 @@ CGTarget::CGTarget(const char* name,const char* starclass,
 	starTypes += "HOFStar";
 	starTypes += "AnyCGStar";
 
-	StringList destDirName = destDirectoryName(CGdomainName);
+	// The value of the destination directory must be stored in a data
+	// member.  If it were a local variable, then its contents would be
+	// deleted when the constructor finishes.
+	destDirName = destDirectoryName(CGdomainName);
 
 	addState(targetHost.setState("host", this, "",
 	    "Host machine to compile or assemble code on."));
