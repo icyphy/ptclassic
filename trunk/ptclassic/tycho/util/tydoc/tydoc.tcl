@@ -34,10 +34,49 @@
 # Based on pp 344-346 of Harrison and McClellan's "Effective Tcl/Tk
 # Programming" book
 
+package require tycho.kernel.gui
+package require tycho.kernel.html
+
 package provide tycho.util.tydoc 2.0
+
 global env auto_path
 set env(TYDOC_LIBRARY) [file dirname [info script]]
 if { [lsearch -exact $auto_path $env(TYDOC_LIBRARY)] == -1 } {
     lappend auto_path $env(TYDOC_LIBRARY)
 }
+
+
+########### special viewing modes
+# FIXME: .idoc should bring up "generic" class viewer.
+# Language-specific cases are handled by the mode variable
+# in the header string.
+# ::tycho::register extensions "idoc" .idoc
+# ::tycho::register extensions "itclclass" .itclclass
+# ::tycho::register extensions "javaclass" .javaclass
+
+::tycho::register stylesheet "tydoc" \
+	[file join {$TYCHO} lib tydoc tydoc.style] \
+	[file join ~ .Tycho styles tydoc.style]
+
+# Cliff's IDoc viewer (still under construction)
+#::tycho::register mode "idoc" \
+#	-command {::tycho::view IDoc -file {%s}} \
+#	-viewclass ::tycho::IDoc \
+#	-label {IDoc Viewer}  \
+#	-category "html" \
+#	-underline 0
+
+::tycho::register mode "itclclass" \
+	-command {::tycho::view ItclViewer -file {%s}} \
+	-viewclass ::tycho::ItclViewer \
+	-label {Itcl Class Viewer}  \
+	-category "html" \
+	-underline 0
+
+::tycho::register mode "javaclass" \
+	-command {::tycho::view JavaViewer -file {%s}} \
+	-viewclass ::tycho::JavaViewer \
+	-label {Java Class Viewer}  \
+	-category "html" \
+	-underline 0
 
