@@ -12,6 +12,10 @@ Methods for the KnownBlock class.  See KnownBlock.h for a full
 description.
 
 *******************************************************************/
+#ifdef __GNUG__
+#pragma implementation
+#endif
+
 #include "KnownBlock.h"
 #include "Error.h"
 #include <string.h>

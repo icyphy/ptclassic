@@ -15,6 +15,11 @@ used for X window displays, such as classes that invoke xgraph.
 #ifndef _Display_h
 #define _Display_h 1
 
+#ifdef __GNUG__
+#pragma once
+#pragma interface
+#endif
+
 #include "type.h"
 #include "miscFuncs.h"
 #include <stdio.h>

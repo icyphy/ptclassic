@@ -19,6 +19,11 @@ $Id$
 #ifndef _Domain_h
 #define _Domain_h 1
 
+#ifdef __GNUG__
+#pragma once
+#pragma interface
+#endif
+
 #include "StringList.h"
 
 class Scheduler;

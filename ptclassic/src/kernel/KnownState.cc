@@ -12,6 +12,10 @@ Methods for the KnownState class.  See KnownState.h for a full
 description.
 
 *******************************************************************/
+#ifdef __GNUG__
+#pragma implementation
+#endif
+
 #include "KnownState.h"
 #include "Error.h"
 #include "string.h"

@@ -1,6 +1,11 @@
 #ifndef _<T>State_h
 #define _<T>State_h 1
 
+#ifdef __GNUG__
+#pragma once
+#pragma interface
+#endif
+
 #include "State.h"
 #include "KnownState.h"
 

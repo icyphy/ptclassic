@@ -10,6 +10,10 @@ $Id$
 
 Methods for class Galaxy
 ***************************************************************************/
+#ifdef __GNUG__
+#pragma implementation
+#endif
+
 #include "Star.h"
 #include "StringList.h"
 #include "Galaxy.h"

@@ -1,6 +1,11 @@
 #ifndef _Galaxy_h
 #define _Galaxy_h 1
 
+#ifdef __GNUG__
+#pragma once
+#pragma interface
+#endif
+
 #include "type.h"
 #include "Connect.h"
 #include "Block.h"

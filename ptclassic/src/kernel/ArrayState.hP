@@ -1,6 +1,11 @@
 #ifndef _<T>ArrayState_h
 #define _<T>ArrayState_h 1
 
+#ifdef __GNUG__
+#pragma once
+#pragma interface
+#endif
+
 #include "State.h"
 #include "<T>State.h"
 #include "KnownState.h"

@@ -15,6 +15,10 @@ $Id$
  as cloned.
 
 *******************************************************************/
+#ifdef __GNUG__
+#pragma implementation
+#endif
+
 #include "InterpGalaxy.h"
 #include "StringList.h"
 #include "Error.h"

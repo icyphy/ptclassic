@@ -1,3 +1,7 @@
+#ifdef __GNUG__
+#pragma implementation
+#endif
+
 #include <std.h>
 #include "Block.h"
 #include "StringList.h"

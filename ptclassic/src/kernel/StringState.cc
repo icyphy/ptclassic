@@ -1,3 +1,7 @@
+#ifdef __GNUG__
+#pragma implementation
+#endif
+
 #include <std.h>
 #include "StringState.h"
 #include "miscFuncs.h"

@@ -13,6 +13,10 @@ $Id$
  PacketSample is a type of Particle that transports Packets.
 
 ***************************************************************/
+#ifdef __GNUG__
+#pragma implementation
+#endif
+
 #include "Packet.h"
 #include "Particle.h"
 #include "Plasma.h"

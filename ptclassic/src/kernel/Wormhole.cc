@@ -12,6 +12,10 @@ $Id$
  Date of modification: 6/13/90
 
 *******************************************************************/
+#ifdef __GNUG__
+#pragma implementation
+#endif
+
 #include "Wormhole.h"
 #include "Scheduler.h"
 #include "StringList.h"

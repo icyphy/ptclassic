@@ -1,6 +1,11 @@
 #ifndef _Block_h
 #define _Block_h 1
 
+#ifdef __GNUG__
+#pragma once
+#pragma interface
+#endif
+
 #include "NamedObj.h"
 #include "Connect.h"
 #include "State.h"

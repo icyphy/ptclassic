@@ -1,3 +1,7 @@
+#ifdef __GNUG__
+#pragma implementation
+#endif
+
 #include "Connect.h"
 #include "CircularBuffer.h"
 #include "Block.h"

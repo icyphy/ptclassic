@@ -14,6 +14,10 @@ $Id$
 
 *******************************************************************/
 
+#ifdef __GNUG__
+#pragma implementation
+#endif
+
 #include "Domain.h"
 #include "Star.h"
 #include "Galaxy.h"

@@ -12,6 +12,10 @@ $Id$
 at every level.
 
 **************************************************************************/
+#ifdef __GNUG__
+#pragma implementation
+#endif
+
 #include "GalIter.h"
 
 // This private class is a stack of GalTopBlockIter iterators.

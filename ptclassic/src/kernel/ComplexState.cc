@@ -1,4 +1,8 @@
 
+#ifdef __GNUG__
+#pragma implementation
+#endif
+
 #include <std.h>
 #include "ComplexState.h"
 #include "FloatState.h"

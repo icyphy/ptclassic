@@ -1,5 +1,10 @@
 #ifndef _ParticleQueue_h
 #define _ParticleQueue_h
+
+#ifdef __GNUG__
+#pragma once
+#pragma interface
+#endif
 /***************************************************************
 Version identification:
 $Id$

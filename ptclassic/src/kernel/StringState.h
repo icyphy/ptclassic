@@ -1,6 +1,11 @@
 #ifndef _StringState_h
 #define _StringState_h 1
 
+#ifdef __GNUG__
+#pragma once
+#pragma interface
+#endif
+
 #include "State.h"
 #include "KnownState.h"
 
