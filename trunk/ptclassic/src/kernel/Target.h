@@ -147,8 +147,16 @@ public:
 protected:
 
 	// initialization for the target (called by initialize)
+	// we here run the checkStars() and the computeSchedule() methods
 	virtual void setup();
 
+	// setup the galaxy, i.e. check star types and set target pointers
+	virtual int galaxySetup();
+
+	// setup the scheduler
+	virtual int schedulerSetup();
+
+	// check
 	// The following sets the scheduler and tells it which target belongs
 	void setSched(Scheduler* sch);
 
