@@ -1,7 +1,7 @@
 #ifndef lint
 static char SccsId[]="$Id$";
 #endif /*lint*/
-/* Copyright (c) 1990-1993 The Regents of the University of California.
+/* Copyright (c) 1990-1994 The Regents of the University of California.
  * All rights reserved.
  * 
  * Permission is hereby granted, without written agreement and without
@@ -558,7 +558,7 @@ vemStatus rpcSignalCmd(spot, cmdList)
     int appNum;			/* Application number (internal index for vem) */
     Pointer pointer;
     /* HP-UX does not support siglist */
-#ifndef hpux
+#if !defined(hpux) && !defined(SYSV)
     extern char *sys_siglist[];
 #endif
 
@@ -618,7 +618,7 @@ vemStatus rpcSignalCmd(spot, cmdList)
 	return VEM_CORRUPT;
     }
     if ( app->user == NIL(char) && !strcmp(app->host, localhost )) {
-#ifdef hpux
+#if defined(hpux) || defined(SYSV)
 	sprintf( buf, "Signal %d to RPC app. (direct)...\n", signal_number);
 #else
 	sprintf( buf, "Signal %d(%s) to RPC app. (direct)...\n", signal_number,
@@ -641,7 +641,7 @@ vemStatus rpcSignalCmd(spot, cmdList)
 		app->host, remoteUser,
 		signal_number, app->pid );
     
-#ifdef hpux
+#if defined(hpux) || defined(SYSV)
 	sprintf(buf, "Signal %d to RPC app. (via rsh)...\n", signal_number);
 #else
 	sprintf(buf, "Signal %d(%s) to RPC app. (via rsh)...\n", signal_number,
