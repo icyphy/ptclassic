@@ -1,5 +1,6 @@
 // Animation functions for text interfaces
 // $Id$
+/*
 Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
 All rights reserved.
 
@@ -22,6 +23,7 @@ PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
 CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
 							COPYRIGHTENDKEY
+*/
 //
 // Programmer: J. Buck
 
