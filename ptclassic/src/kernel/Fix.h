@@ -83,7 +83,14 @@ access to the flag.
 class ostream;
 class Precision;
 typedef unsigned short uint16;
+
+#if defined(PTALPHA)
+typedef unsigned int uint32;
+typedef int int32;
+#else
 typedef unsigned long  uint32;
+#endif // PTALPHA
+
 typedef unsigned char  uchar;
 typedef long int32;
 
