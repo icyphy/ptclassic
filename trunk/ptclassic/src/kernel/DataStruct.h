@@ -43,8 +43,6 @@ public:
 	SingleLinkList() { lastNode = 0; }
 	SingleLinkList(Pointer);
 
-protected:
-
 	void insert(Pointer a);	// Add at head of list
 	void append(Pointer a);	// Add at tail of list
 	Pointer getAndRemove();	// Return and remove head of list
@@ -171,7 +169,7 @@ Each element of the vector is a Pointer....so arbitrary objects
 
 class Vector : SingleLinkList
 {
-protected:
+public:
 	// Add element to the vector
         void put(Pointer p) {append(p); ++dimen;}
 
@@ -241,7 +239,7 @@ to access the next element of the list
 
 class SequentialList : SingleLinkList
 {
-protected:
+public:
 	// Add element to the list
         void put(Pointer p) {append(p); ++dimen;}
 
@@ -249,11 +247,11 @@ protected:
 	int size() const {return dimen;}
 
 	// Return next element on the list
-	Pointer next() {return SingleLinkList::next();}
+	SingleLinkList::next;
 
 	// Reset, so that the next access will be the
 	// first element that was added to the list
-	void reset() {SingleLinkList::reset();}
+	SingleLinkList::reset;
 
 	// Clear the data structure
 	void initialize() {SingleLinkList::initialize(); dimen=0;}
@@ -277,7 +275,7 @@ to the bottom of the stack.
 
 class Stack : SingleLinkList
 {
-protected:
+public:
 	// Add element at the top of the stack
 	void pushTop(Pointer p) {insert(p);++dimen;}
 
