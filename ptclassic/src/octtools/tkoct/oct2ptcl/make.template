@@ -26,9 +26,10 @@ MISC_FILES =	Policy README
 
 all:		makefile oct2ptcl
 
-OCT2PTCL_LIBS = 	-L../top -ltop -L$(OCTLIBDIR) \
-		-lregion -lkd -lgu -loh -loptions -loct -ltr -lst \
-		-lutility -lerrtrap -luprintf -lport $(TCL_LIBSPEC)
+OCT2PTCL_LIBS =        -L../top -ltop $(TCL_LIBSPEC) \
+               -L$(OCTLIBDIR) \
+               -loptions -lregion -lkd -lgu -loh  -loct -ltr -lst \
+               -lutility -lerrtrap -luprintf -lport
 
 # top is a package used by OCT2PTCL and oct2ptcl
 TOPDIR = 	$(VPATH)/../top
