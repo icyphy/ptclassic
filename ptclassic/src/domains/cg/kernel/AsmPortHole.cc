@@ -55,10 +55,13 @@ Geodesic* AsmPortHole::allocateGeodesic() {
 // initialize.  Main job here is to set up the offset.
 void AsmPortHole::initialize() {
 	PortHole::initialize();
-	if (isItOutput()) offset = 0;
-	else {
+	if (isItOutput()) {
 		offset = numTokens();
 		while (offset > numberTokens) offset -= numberTokens;
+	}
+	else {
+		offset = -geo().forkDelay();
+		while (offset < 0) offset += numberTokens;
 	}
 }
 
@@ -76,6 +79,23 @@ unsigned AsmPortHole::baseAddr() const {
 
 ProcMemory* AsmPortHole::memory() const {
 	return geo().memory();
+}
+
+// processing for each port added to a fork buffer
+// call this from OutXXX
+void MultiAsmPort :: forkProcessing (AsmPortHole& p) {
+	if (forkSrc) {
+		p.setForkSource(forkSrc);
+	}
+}
+
+// destructor: remove forklist references.
+AsmPortHole :: ~AsmPortHole() {
+	ListIter next(forkDests);
+	OutAsmPort* p;
+	while ((p = (OutAsmPort*)next++) != 0) p->setForkSource(0);
+	if (forkSrc)
+		forkSrc->remEntry(this);
 }
 
 int InAsmPort :: isItInput() const {return TRUE; }

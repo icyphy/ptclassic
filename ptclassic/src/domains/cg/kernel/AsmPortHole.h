@@ -31,9 +31,19 @@ class AsmGeodesic;
 // PortHole class specific to assembly code generation.
 // It contains methods for allocating memory for inputs and outputs.
 class AsmPortHole : public SDFPortHole {
+	friend class AsmGeodesic;
 protected:
 	int offset;
+	int forkIn;
+// Stuff to support fork buffers
+protected:
+	SequentialList forkDests;
+	AsmPortHole* forkSrc;
 public:
+	AsmPortHole() : offset(0), forkIn(0), forkSrc(0) {}
+
+	~AsmPortHole();
+
 	// Allocate a geodesic and give it a name
 	virtual Geodesic* allocateGeodesic();
 
@@ -79,8 +89,16 @@ public:
 		return offset + numberTokens > bufSize();
 	}
 
+	// Mark me as a fork input port
+	void makeForkBuf() { forkIn = 1;}
 	// Initialize
 	void initialize();
+public:
+	int fork() const { return forkDests.size() > 0;}
+	void remEntry(AsmPortHole* p) { forkDests.remove(p);}
+	AsmPortHole* forkSource() { return forkSrc;}
+	void setForkSource(AsmPortHole* p) { forkSrc = p;}
+
 };
 
 class InAsmPort : public AsmPortHole {
@@ -91,10 +109,19 @@ public:
 class OutAsmPort : public AsmPortHole {
 public:
 	int isItOutput() const;
+
 };
 
-// Since MultiAsmPort is no different from MultiSDFPort, we just use an alias
-#define MultiAsmPort MultiSDFPort
+class MultiAsmPort : public MultiSDFPort {
+protected:
+	AsmPortHole* forkSrc;
+public:
+	void setForkBuf(AsmPortHole& p) { forkSrc = &p;}
+
+	// this function should be called by installPort for
+	// all derived output multiporthole classes.
+	void forkProcessing(AsmPortHole&);
+};
 
 class MultiInAsmPort : public MultiAsmPort {
 public:
