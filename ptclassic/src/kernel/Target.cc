@@ -131,6 +131,14 @@ int Target::schedulerSetup() {
 	return TRUE;
 }
 
+// invoke begin methods
+void Target::begin() {
+   	if (!gal) return;
+	GalStarIter nextStar(*gal);
+	Star *s;
+	while ((s = nextStar++) != 0) s->begin();
+}
+
 // default run: run the scheduler
 int Target::run() {
 	return sched->run();
