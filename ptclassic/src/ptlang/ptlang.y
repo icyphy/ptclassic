@@ -1610,7 +1610,8 @@ void genDef ()
 		genStdProto(fp,i);
 	if (publicMembers[0])
 		fprintf (fp, "%s\n", publicMembers);
-	fprintf (fp, "protected:\n");
+	if ( coronaDef != 1 )
+		fprintf (fp, "protected:\n");
 	if ( coreDef == 1 ) {
 		fprintf(fp, "\n\t%s%s& corona;\n", domain, objName );
 		fprintf(fp, "\n\t/* virtual */ %sCorona& getCorona() const { return (%sCorona&)corona; }\n", domain, domain );
@@ -1708,7 +1709,7 @@ void genDef ()
 /* prefix code and constructor */
 /* Core constructor takes corona as argument. */
 	if ( coreDef == 1 ) {
-		fprintf (fp, "\n%s::%s() { }\n\n%s%s::%s ( %sCorona & corona_) : corona((%s%s&)corona_)", fullClass, fullClass, ccCode, fullClass, fullClass, domain, domain, objName);
+		fprintf (fp, "\n%s::%s() { }\n\n%s%s::%s ( %sCorona & corona_) : %s%sCore(corona_), corona((%s%s&)corona_)", fullClass, fullClass, ccCode, fullClass, fullClass, domain, domain, coreCategory, domain, objName);
 /* Corona takes do core init flag and calls parent constructor. */
 	} else if ( coronaDef == 1 ) {
 		fprintf (fp, "\n%s%s::%s (int doCoreInitFlag) : %sCorona(0)", ccCode, fullClass, fullClass, domain);
