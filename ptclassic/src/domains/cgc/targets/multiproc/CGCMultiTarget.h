@@ -100,10 +100,6 @@ protected:
 	int sendWormData(PortHole&);
 	int receiveWormData(PortHole&);
 
-	// C++ "hiding rule" requires these.  Boo, hiss!
-	int sendWormData() { return CGSharedBus::sendWormData();}
-	int receiveWormData() { return CGSharedBus::receiveWormData();}
-
 	// The following method downloads code for the inside of a wormhole
 	// and starts it executing.
 	int wormLoadCode();
