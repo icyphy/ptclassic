@@ -127,11 +127,6 @@ public:
         const char* domain() const;
 
 protected:
-        // This method checks to see whether a domain name is supported
-        // by the scheduler.  When a new domain is created that uses
-        // this scheduler, simply redefine this function
-        virtual int isDomainSupported(const char* domainName);
-
 	// Flag for errors detected while computing the schedule
 	int invalid;
 
@@ -216,9 +211,12 @@ private:
 	// The next function contains the code for deferred firing
 	int deferIfWeCan(SDFStar& atom);
 
+	// Put a block on the deferred list.
+	void defer(Block* b);
+
 	// Determine whether a star can be run (checking the
-	// numInitialParticles
-	// member of the geodesic and the noTimes member of the block).
+	// number of tokens in the portholes
+	// and the noTimes member of the block).
 	// Returns 0 if the star is runnable, 1 if not, but has not
 	// been run the number of times given by repetitions, and 2 if
 	// it has been run the number of times given by repetitions.
