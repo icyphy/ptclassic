@@ -27,6 +27,28 @@
 # 						PT_COPYRIGHT_VERSION_2
 # 						COPYRIGHTENDKEY
 
+#######################################################################
+# Procedure to start Tycho, if it hasn't already started.
+#
+proc ptkStartTycho { } {
+    # If the TYCHO global variable does not exist, then tycho
+    # has not been loaded.
+    uplevel #0 {
+	if {![info exists TYCHO]} {
+	    # Disable the standard welcomes.
+	    set tychoConsoleWindow 0
+	    set tychoWelcomeWindow 0
+	    set tychoExitWhenNoMoreWindows 0
+	    set tychoShouldWeDoRegularExit 0
+	    if [info exists env(TYCHO)] {
+		set path $env(TYCHO)
+	    } else {
+		set path $ptolemy/tycho
+	    }
+	    source $path/kernel/Tycho.tcl
+	}
+    }
+}
 
 #######################################################################
 # Procedure to expand a filename that might begin with
