@@ -1,6 +1,8 @@
-# Generate an IDoc file (a representation of a ::tycho::Class) from source
+# Generate an IDoc file (a representation of a ::tycho::Class) from source.
 #
 # @Author: Cliff Cordeiro
+#
+# @Contributor: Christopher Hylands
 #
 # @Version: $Id$
 #
@@ -33,13 +35,8 @@
 
 #######################################################################
 #### IDocSys
-# Description of class.
+# 
 #
-# <p>
-# Here is an example of how to use the IDocSys:
-# <tcl><pre>
-#     ::tycho::IDocSys .x ...
-# </pre></tcl>
 #
 class ::tycho::IDocSys {
     inherit ::tycho::TyDoc
@@ -48,43 +45,33 @@ class ::tycho::IDocSys {
     destructor {}
     
     ###################################################################
-    ####                            options                        ####
-
-    # One line description of xxxx option; listed in alphabetical order
-
-
-    ###################################################################
     ####                         public methods                    ####
 
     # Generate the IDocumentation for a single Itcl file.
-    method generateIDoc {filename}
+    method generateSingleFileIDoc {filename}
 
-    # One line description of the method
-
+    # Generate an index of the IDocumentation (in HTML)
+    method generateIDocIndex { {title {"Index of classes"}}}
 
     ###################################################################
     ####                      public procs                         ####
 
-    # One line description procedure; listed in alphabetical order
-
-
-    ###################################################################
-    ####                   protected methods                       ####
-
-    # One line description of the method; listed in alphabetical order
-
+    public proc generateIDoc {debug generateIndex title filelist}
 
     ###################################################################
     ####                   protected variables                     ####
 
+    # The author of the current source file
+    protected variable author ""
 
-    protected variable Author ""
+    # The contributor(s) to the current source file
+    protected variable contributor ""
 
-    protected variable Contributor ""
+    # The version of the current source file
+    protected variable version ""
 
-    protected variable Version ""
-
-    protected variable Copyright ""
+    # The first line of the copyright information from the current source file
+    protected variable copyright ""
 
     # language for the current file
     protected variable language
@@ -92,58 +79,80 @@ class ::tycho::IDocSys {
     # an array of ::tycho::Class objects for this file
     protected variable myClass
 
-    protected variable sourceFile
+    # true if there is outside class information
+    protected variable relatedModified
 
-    protected variable relClass
+    # The current source file name
+    protected variable sourceFile
 
 
     ###################################################################
     ####                   private methods                         ####
 
+    # Read the current file, return formatted data
     private method readFile {filename}
-  
+
+    # Parse the data for a single file, creating and modifying classes as needed
     private method parseData {data}
 
+    # Parse the data within a class definition
     private method parseClass {class body}
 
+    # Add the class comment by formatting it into HTML.
     private method addClassComment {class expl}
 
+    # Uncapitalize and unpluralize a docTag (Authors -> author)
+    private method formatTag {docTag}
+
+    # Format and add the arguments in a form the class model understands
     private method addArgs {class entityName arguments}
 
+    # Add the constructor to the class model
     private method addConstructor {class arguments desc}
 
+    # Add the destructor to the class model
     private method addDestructor {class desc}
 
+    # Add an itk_option to the class model
     private method addItk_Option {class switchName desc {default {}}}
     
+    # Add a common proc to the class model
     private method addCommon {class commonName protection desc {default {}}}
     
+    # Add a variable to the class model
     private method addVariable {class varName protection desc {default {}}}
 
+    # Add a proc to the class model
     private method addInsideProc {class procName arguments protection desc}
     
+    # Add a method to the class model
     private method addMethod {class methodName protection arguments desc} 
 
+
+    # Attach body information to the appropriate entity in the class model
     private method addBody {bodyName arguments expl}
 
+    # Attach configbody information to the appropriate entity in the class model
     private method addConfigBody {configName expl}
 
+    # Add a non-class procedure to the related class model
     private method addOutsideProc {procName arguments expl}
 
-
+    
+    # Format a description properly
     private method formatDesc {comment}
 
+    # Format an explanation properly (in HTML)
     private method formatExpl {comment}
 
+    # FIXME: not implemented. May move to viewer.
     private method getSourceFile {classname}
 
+    # FIXME: not implemented. May move to viewer.
     private method getDocFile {classname}
 
     ###################################################################
     ####                   private variables                       ####
-
-    # A comment before one or a group of private variables;
-    private variable myFilename
 
     # Keywords that can appear in a class definition
     private common keywords "# variable common itk_option method proc constructor destructor public private protected inherit set array"
@@ -163,59 +172,111 @@ body ::tycho::IDocSys::constructor {args} {
 #####################################################################
 #### generateIDoc
 # Generate an IDoc (::tycho::Class) representation of the given Itcl
-# file. 
+# file. The classes are then written to disk.
 #
-body ::tycho::IDocSys::generateIDoc {filename} {
-
-    set filename [::tycho::expandPath $filename]
+body ::tycho::IDocSys::generateSingleFileIDoc {filename} {
 
     if {[file type $filename] != "file"} {
-        error "::tycho::IDocSys::generateIDoc processes single files only"
+        error "generateSingleFileIDoc processes single files only"
     }
 
-    # check extension (only itk, itcl supported as yet)
+    # check extension (only tcl/tk, itk, itcl supported as yet)
     set ext [file extension $filename]
     switch $ext {
+        .tk {
+            set language Itcl
+        }
+        .tcl {
+            set language Itcl
+        }
         .itcl {
             set language Itcl
         }
         .itk {
-            set language Itk
+            set language Itcl
         }
         default {
             error "::tycho::IDocSys does not support $ext files"
         }
     }
-    
-    set myClass(related) [::tycho::Class [::tycho::autoName class]]
 
+    # setup related model for outside class information
+    set myClass(related) [::tycho::Class [::tycho::autoName class]]
+    set modifiedRelated 0
+
+    # open and format the file
     set data [readFile $filename]
+
+    # distill class data from the file
     parseData $data
 
+    cd doc/codeDoc
+    # output class model data
     foreach class [array names myClass] {
-        puts $class
-         puts [$myClass($class) describe]
-         if {$class != "related"} {
-             set dis [::tycho::Displayer [::tycho::autoName .displayer]]
-             set id [::tycho::IDoc $dis.idoc]
-             
-             $dis centerOnScreen
-             $dis showView $id
-             $id insertData [$myClass($class) describe]
-         }
+        # puts $class
+        # puts [$myClass($class) describe
+        if {$class != "related"} {
+            set fd [open [info namespace tail $class].idoc "w"]
+            $myClass($class) write $fd
+            close $fd
+            delete object $myClass($class)
+        } else {
+            if {$modifiedRelated} {
+                set fd [open $filename_rel.idoc "w"]
+                $myClass(related) write $fd
+                close $fd
+            }
+            delete object $myClass(related)
+        }
     }
+    cd ../..
 }
 
+#####################################################################
+#### generateIDocIndex
+# Fixme!
+#
+body ::tycho::IDocSys::generateIDocIndex { {title {"Index of classes"}}} {
+# FIXME: FIXME: FIXME!
+}
 
     ###################################################################
     ###################################################################
     ####                      public procedures                    ####
 
-
-    ###################################################################
-    ###################################################################
-    ####                      protected methods                    ####
-
+#####################################################################
+#### generateIDoc
+# Generate IDoc files for all the files named in filelist, placing the
+# output in the doc/codeDoc subdirectory.
+#
+body ::tycho::IDocSys::generateIDoc {debug generateIndex title filelist} {
+    set IDocSys [::tycho::IDocSys [::tycho::autoName .IDocSys]]
+    
+    if ![file isdirectory doc/codeDoc] {
+        exec mkdir -p doc/codeDoc
+    }
+    set retval ""
+    foreach filename $filelist {
+        if $debug {
+            puts "$filename"
+        }
+        if ![file readable $filename] {
+            set retval "$retval\nWarning: generateIDoc: $filename is not readable"
+        } else {
+            if [catch {$IDocSys generateSingleFileIDoc $filename} errMsg] {
+                set retval "$retval\nWarning: $errMsg"
+            }
+        }
+    }
+    if {$generateIndex == 1} {
+        cd doc/codeDoc
+        if [catch {$IDocSys generateIDocIndex $title} errMsg] {
+            set retval "$retval\nWarning: $errMsg"
+        }
+    }
+    delete object $IDocSys
+    return $retval
+}
 
 
     ###################################################################
@@ -224,13 +285,12 @@ body ::tycho::IDocSys::generateIDoc {filename} {
 
 #####################################################################
 #### readFile 
-# 
+# Read in a file line by line, identify comments, merge multi-line comments
+# into one line, bracket protect the comment contents, and append to a 
+# variable. Returns that variable.
 #
 body ::tycho::IDocSys::readFile {filename} {
     
-    # Read in the file line by line, identify comments, bracket protect 
-    # the comment contents and then append to a variable.
-
     # NOTE: simplify the filename?
     set sourceFile $filename
     set inEscapedComments ""
@@ -295,13 +355,26 @@ body ::tycho::IDocSys::readFile {filename} {
         append inEscapedComments "# " $currentComment "\n"
     }
     close $fd
-
+    
     return "$inEscapedComments"
 }
 
+#####################################################################
+#### parseData
 # Expects a modified source file, with adjacent comments all on one line,
-# useless comments removed. NOTE: @ tags are only recognized in the class
-# comment, the comment that appears before the class definition.
+# useless comments removed. This data is then gone through as a list,
+# looking for toplevel keywords, such as "class" "proc" "configbody" and 
+# "body". These are parsed according to Itcl's syntax and information
+# of note is added to the class model.
+#
+# Comments are saved until the next keyword and are assumed to belong to
+# that entity. The class comment, then, must be the comment directly
+# preceding the class definition, ignoring initialization code that 
+# IDocSys does not recognize.
+#
+# NOTE: @ tags are only recognized in the class comment, the comment 
+# that appears before the class definition.
+#
 body ::tycho::IDocSys::parseData {data} {
     set inComment 0
     set inOutsideProc 0
@@ -435,6 +508,19 @@ body ::tycho::IDocSys::parseData {data} {
     }
 }
 
+
+#####################################################################
+#### parseClass
+# This method works in much the same way as parseBody. It takes the 
+# contents of the class definition and looks for keywords (see 
+# $keywords). These are then parsed according to Itcl syntax, relevant
+# information added to the class model for this class. 
+#
+# Because there may be multiple classes in one itcl file, each class
+# model is stored in an array which is indexed by the name of the class
+# the class models are created in this procedure while parsing the class
+# definition.
+#
 body ::tycho::IDocSys::parseClass {class body} {
     set myClass($class) [::tycho::Class [::tycho::autoName class]]
     $myClass($class) modelconfigure -language $language
@@ -661,21 +747,32 @@ body ::tycho::IDocSys::parseClass {class body} {
     }
 }
 
+#####################################################################
+#### addClassComment
+# Add a class comment to the class model. This method parses the 
+# comment preceding the class definition, formatting it into HTML,
+# removing the copyright, and creating the footer with tagged 
+# information, including the first line of the copyright, the author,
+# the contributors, and the version of the source file.
+#
+# If more than one class occupies a file, this information is
+# saved. That is, if the tags are not redefined for a new class,
+# the old information is used.
+#
 body ::tycho::IDocSys::addClassComment {class expl} {
     set classModel $myClass($class)
-    #FIXME: implement!!
-    # initialize possible tags
-
-    # strip leading spaces
+ 
+    # Parse line by line
     set explList [split $expl "\n"]
     set docTag desc
     foreach explLine $explList {
         if [regexp {^ @([A-Za-z]+):*[ 	]+(.*)} \
 		$explLine dummy docTag docValue] {
 	    set explLine $docValue
+            set docTag [formatTag $docTag]
 	    # puts "ct: $docTag, cl: $docValue"
 	}
-	if {$docTag == "Copyright"} {
+	if {$docTag == "copyright"} {
 	    if {[set $docTag] == "" } {
 		# We save only the first line of the copyright
 		append $docTag $explLine "\n"
@@ -692,27 +789,51 @@ body ::tycho::IDocSys::addClassComment {class expl} {
     
     set expl [formatExpl $desc]
     
-    # setup footer
+    # Append the footer
     append expl <hr>
-    if {$Author != ""} {
-        append expl "<br>Author: $Author"
-    }
-    if {$Contributor != ""} {
-        if {[llength $Contributor] == 1} {
-            append expl "<br>Contributor: $Contributor"
+    if {$author != ""} {
+        if {[llength $author] == 1} {
+            append expl "<br>Author: $author"
         } {
-            append expl "<br>Contributors: $Contributor"
+            append expl "<br>Authors: $author"
         }
     }
-    if {$Version != ""} {
-        append expl "<br>Version: $Version"
+    if {$contributor != ""} {
+        if {[llength $contributor] == 1} {
+            append expl "<br>Contributor: $contributor"
+        } {
+            append expl "<br>Contributors: $contributor"
+        }
     }
-    if {$Copyright != ""} {
-        append expl "<br>Copyright: $Copyright"
+    if {$version != ""} {
+        append expl "<br>Version: $version"
+    }
+    if {$copyright != ""} {
+        append expl "<br>Copyright: $copyright"
     }
     $classModel annotation explanation "$expl"
 }
 
+#####################################################################
+#### formatTag
+# Uncapitalize and singularize a docTag so that it can be added to the
+# standard protected variables: copyright, author, contributor, version
+# Do the same to strange ones (lowercase and remove trailing s's). 
+# The error is encountered in the caller if it is an error.
+#
+body ::tycho::IDocSys::formatTag {docTag} {
+    set docTag [string tolower $docTag]
+    set docTag [string trimright $docTag "s"]
+    return $docTag
+}
+
+#####################################################################
+#### addArgs
+# Add the arguments to a proc or method to its associated entity in
+# the class model. This involves reformatting from Itcl:
+# <code>add {num1 {num2 0}}</code> to the class model's preferred
+# format: <code>parameter num1; parameter num2 -optional 1 -default 0</code>
+#
 body ::tycho::IDocSys::addArgs {class entityName arguments} {
     set classModel $myClass($class)
     foreach arg $arguments {
@@ -727,6 +848,11 @@ body ::tycho::IDocSys::addArgs {class entityName arguments} {
     }
 }
 
+#####################################################################
+#### addConstructor
+# Add the constructor, its arguments, and associated description to
+# the class model for $class.
+#
 body ::tycho::IDocSys::addConstructor {class arguments desc} {
     set classModel $myClass($class)
     $classModel Constructor constructor
@@ -735,6 +861,11 @@ body ::tycho::IDocSys::addConstructor {class arguments desc} {
     addArgs $class constructor $arguments    
 }
 
+#####################################################################
+#### addDestructor
+# Add the destructor, its arguments, and associated description to
+# the class model for $class.
+#
 body ::tycho::IDocSys::addDestructor {class desc} {
     set classModel $myClass($class)
     $classModel Destructor destructor
@@ -742,6 +873,11 @@ body ::tycho::IDocSys::addDestructor {class desc} {
     $classModel annotation destructor.description $desc
 }
 
+#####################################################################
+#### addItk_Option
+# Add the itk_option, its associated description, and its default (if 
+# any) to the class model for $class.
+#
 body ::tycho::IDocSys::addItk_Option {class switchName desc {default {}}} {
     # Itk_options have the modifier flag set to itk_option in Itcl
     set classModel $myClass($class)
@@ -751,6 +887,11 @@ body ::tycho::IDocSys::addItk_Option {class switchName desc {default {}}} {
     $classModel annotation $switchName.description $desc
 }
 
+#####################################################################
+#### addCommon 
+# Add a common proc at the given protection, its associated description,
+# and its default (if any) to the class model for $class.
+#
 body ::tycho::IDocSys::addCommon {class commonName protection \
         desc {default {}}} {
     # Commons are variables of classwide scope in Itcl
@@ -761,6 +902,10 @@ body ::tycho::IDocSys::addCommon {class commonName protection \
     $classModel annotation $commonName.description $desc
 }
 
+#####################################################################
+#### addVariable 
+# Add a variable at the given protection, its associated description,
+# and its default (if any) to the class model for $class.
 body ::tycho::IDocSys::addVariable {class varName protection \
         desc {default {}}} {
     # Variables are variables of instance scope in Itcl
@@ -771,6 +916,11 @@ body ::tycho::IDocSys::addVariable {class varName protection \
     $classModel annotation $varName.description $desc
 }
 
+#####################################################################
+#### addInsideProc
+# Add a proc which is part of a class at the given protection, its
+# associated description, and arguments to the class model for $class.
+#
 body ::tycho::IDocSys::addInsideProc {class procName protection \
         arguments desc} {
     # Procs are methods of classwide scope in Itcl
@@ -781,6 +931,11 @@ body ::tycho::IDocSys::addInsideProc {class procName protection \
     addArgs $class $procName $arguments
 }    
 
+#####################################################################
+#### addMethod 
+# Add a method at the given protection, its arguments, and associated
+# description to the class model for $class.
+#
 body ::tycho::IDocSys::addMethod {class methodName protection arguments desc} {
     # Methods are methods of instance scope in Itcl
     set classModel $myClass($class)
@@ -790,6 +945,15 @@ body ::tycho::IDocSys::addMethod {class methodName protection arguments desc} {
     addArgs $class $methodName $arguments
 }
 
+#####################################################################
+#### addBody 
+# Add the information from a body structure to the class model. The body
+# name contains the information necessary to decide which class it 
+# belongs to and which entity its information is applicable to. At 
+# present, it just ignores the $arguments argument because those are
+# added when the entity is first parsed. It adds the explanation to
+# the given entity in the proper class.
+#
 body ::tycho::IDocSys::addBody {bodyName arguments expl} {
     # assumes the method or proc already exists
     set class [info namespace qualifiers $bodyName]
@@ -802,6 +966,14 @@ body ::tycho::IDocSys::addBody {bodyName arguments expl} {
     }
 }
 
+#####################################################################
+#### addConfigBody 
+# Add the information from a configbody structure to the class model.
+# the config name contains the information necessary to decide which
+# class it belongs to and which entity its information is applicable
+# to. It adds the explanation to the proper entity in the proper
+# class model.
+#
 body ::tycho::IDocSys::addConfigBody {configName expl} {
     # assumes the itk_option already exists
     set class [info namespace qualifiers $configName]
@@ -813,6 +985,12 @@ body ::tycho::IDocSys::addConfigBody {configName expl} {
     } 
 }
 
+#####################################################################
+#### addOutsideProc
+# Add the proc given to the related class model. This model contains
+# all procs which are not defined within a specific class namespace
+# yet are found in the current file.
+#
 body ::tycho::IDocSys::addOutsideProc {procName arguments expl} {
     # add to $myClass(related)
     set class $myClass(related)
@@ -821,19 +999,40 @@ body ::tycho::IDocSys::addOutsideProc {procName arguments expl} {
     if {$expl != {}} {
         $classModel annotation $procName.explanation $expl
     }
+    set modifiedRelated 1
 }
 
+#####################################################################
+#### formatDesc 
+# Format the description appropriately by removing carriage returns
+# and returning a filler value if no description is found. (The IDoc
+# viewer requires a description.)
+#
 body ::tycho::IDocSys::formatDesc {comment} {
     # remove carriage returns
     set commentList [split $comment "\n"]
     set comment [join $commentList " "]
+    set comment [string trim $comment " "]
+
     if {$comment == {}} {
         # IDoc assumes all entities have a description
         set comment "No description given."
     }
+
+    # Catch comments that don't have a terminating period (or other
+    # suitable mark)
+    regsub "\(\[^\.?!>\]\)\[ \t\]*\$" $comment {\1.} comment
+
     return $comment
 }
 
+#####################################################################
+#### formatExpl
+# Format the explanation appropriately by substituting HTML tags for
+# comment conventions such as _underlines_ and *asterisks*. Include a
+# &lt;p&gt; tag for every empty line in a comment. Surround proc and
+# method names with &lt;code&gt; tags.
+#
 body ::tycho::IDocSys::formatExpl {comment} {
     if {"$comment" == "\n"} {
         return {}
@@ -863,9 +1062,6 @@ body ::tycho::IDocSys::formatExpl {comment} {
     regsub -all {([a-zA-Z0-9_-]+)\{\}} $comment \
            {<code>\1</code>} comment
 
-    # Catch comments that don't have a terminating period (or other
-    # suitable mark)
-    regsub "\(\[^\.?!>\]\)\[ \t\]*\$" $comment {\1.} comment
 
     return "$comment"
 }
