@@ -282,7 +282,7 @@ ifdef VHDL
 			$(VHDLT)/SimMTTarget.o \
 			$(VHDLT)/SimVSSTarget.o \
 			$(VHDLT)/StructTarget.o \
-			$(VHDLT)/SynthAtchTarget.o \
+			$(VHDLT)/SynthArchTarget.o \
 			$(VHDLT)/SynthTarget.o \
 			$(VHDLT)/VHDLCReceive.o \
 			$(VHDLT)/VHDLCSend.o \
