@@ -53,15 +53,15 @@ class ::tycho::RevControl {
 
     #### checkIn
     # Check in the file associated with this class.
-    method checkIn {} {enableButton checkout}
+    method checkIn {} 
 
     #### checkOut
     # Check out the file associated with this class.
-    method checkOut {} {enableButton checkin}
+    method checkOut {} 
 
     #### initializeRevControl
     # Put the file under revision control.
-    method initializeRevControl {} {}
+    method initializeRevControl {} 
 
     #### unedit
     # Unedit the file associated with this class.
@@ -85,6 +85,10 @@ class ::tycho::RevControl {
     #### isUnderRevControl
     # Return 1 if the file is under revision control, 0 otherwise.
     protected method isUnderRevControl {} {return 0}
+
+    #### cdDir
+    # Change to the given directory with appropriate error checks.
+    protected method cdDir {dir}
 
     ###################################################################
     ####                  protected variables                      ####
@@ -114,7 +118,6 @@ configbody ::tycho::RevControl::object {
     }
     set file [$object cget -file]
     configure -title "Revision control for $file"
-    configure -text "Revision control for $file"    
     if {![isUnderRevControl]} {
 	if {![askuser "This file is not currently under revision control.\
 		Do you want it placed under revision control?"]} {
@@ -144,6 +147,31 @@ body ::tycho::RevControl::constructor {args} {
 	   [code "$this nextWindow; delete object $this"]
 
     bind $itk_component(hull) <Escape> [code $this invoke cancel]
+}
+
+###################################################################
+#### checkIn
+# Check in the file associated with this class.
+#
+body ::tycho::RevControl::checkIn {} {
+    if {$file == {}} {
+	error "Revision control: no file specified"
+    }
+    if [$object isModified] {
+	if [askuser "Save modifications before checking in?"] {
+	    $object save 
+	}
+    }
+}
+
+###################################################################
+#### checkOut
+# Check out the file associated with this class.
+#
+body ::tycho::RevControl::checkOut {} {
+    if {$file == {}} {
+	error "Revision control: no file specified"
+    }
 }
 
 ###################################################################
@@ -177,6 +205,31 @@ body ::tycho::RevControl::enableButton {button} {
 	$itk_component(bbox) buttonconfigure checkout -state normal
 	default checkout
 	$itk_component(bbox) buttonconfigure checkin -state disabled
+    }
+}
+
+###################################################################
+#### initializeRevControl 
+# Do various checks before placing file under revision control. 
+#
+body ::tycho::RevControl::initializeRevControl {} {
+    if {$file == {}} {
+	error "Revision control: no file specified"
+    }
+}
+
+    ###################################################################
+    ####                   protected methods                       ####
+
+#####################################################################
+#### cdDir
+# Change to the appropriate file directory, with error checks.
+# 
+body ::tycho::RevControl::cdDir {dir} {
+    if {[file isdirectory $dir] && [file executable $dir]} {
+	cd $dir
+    } else {
+	error "The directory \"$dir\" is not writable."
     }
 }
 
