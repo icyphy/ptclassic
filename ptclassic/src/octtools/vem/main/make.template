@@ -66,6 +66,8 @@ SRCS = $(LIBCSRCS)
 
 OBJS = $(LIBCSRCS:.c=.o)
 
+LIB =		libmain.a
+
 VERSION=8-2
 CFLAGS="-DCUR_DATE=\"`date`\"" -DCUR_VER=\"$(VERSION)\" -g
 

@@ -62,6 +62,8 @@ SRCS = $(LIBCSRCS)
 
 OBJS = $(LIBCSRCS:.c=.o)
 
+LIB =		libwindows.a
+
 # common makefile file for vem binary
 VEMBINCONFIG=../../vem-bin.mk
 include $(VEMBINCONFIG)
