@@ -105,6 +105,10 @@ void Geodesic :: initialize()
 	// initialized to specific values
 }
 
+// simulated run bookkeeping
+void Geodesic :: incCount(int n) { sz += n;}
+void Geodesic :: decCount(int n) { sz -= n;}
+
 // destructor
 Geodesic :: ~Geodesic () {
 	// free all particles (return them to Plasma)
@@ -114,3 +118,6 @@ Geodesic :: ~Geodesic () {
 	if (originatingPort) originatingPort->disconnect(0);
 	if (destinationPort) destinationPort->disconnect(0);
 }
+
+// isa
+ISA_FUNC(Geodesic,NamedObj);
