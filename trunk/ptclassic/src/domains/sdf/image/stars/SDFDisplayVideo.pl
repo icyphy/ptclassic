@@ -88,10 +88,8 @@ These instructions are appropriate as of December 1992 but
 may have changed.
 	}
 
-	hinclude { "GrayImage.h" }
+	hinclude { "GrayImage.h", "StringList.h" }
 	ccinclude { <std.h> , <stdio.h> }
-
-// INPUT AND STATES.
 
 	input { name { inData } type { message } }
 
