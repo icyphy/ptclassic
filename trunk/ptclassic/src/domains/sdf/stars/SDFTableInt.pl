@@ -36,9 +36,12 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	go {
 		int i = int(input%0);
-		if (i < 0 || i >= values.size())
-			Error::abortRun(*this, ": input index is out of bounds for the table");
-		else
-			output%0 << values[i];
+		if (i < 0 || i >= values.size()) {
+			StringList msg = "input index  ";
+			msg << i << " is out of bounds for the table";
+			Error::abortRun(*this, msg);
+			return;
+		}
+		output%0 << values[i];
 	}
 }
