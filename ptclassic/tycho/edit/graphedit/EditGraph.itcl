@@ -81,7 +81,7 @@ class ::tycho::EditGraph {
     method newdrag {item x y}
 
     # Stop moving a new edge
-    method newrelease {x y}
+    method newrelease {ignore x y}
 
     # Handle change notification from the graph layout model
     method notify {method args}
@@ -264,11 +264,13 @@ body ::tycho::EditGraph::constructor {args} {
 
     # Enable selection with button 1; shift-click toggles
     $slate selector bind click vertex -button 1
-    $slate selector bind click vertex -button 1 -modifiers shift -toggle
+    $slate selector bind click vertex -button 1 \
+            -modifiers shift -toggle 1
 
     # Enable drag-selection with button 1; shift-click toggles
     $slate selector bind drag "#background" -button 1
-    $slate selector bind drag "#background" -button 1 -modifiers shift -toggle
+    $slate selector bind drag "#background" -button 1 \
+            -modifiers shift -toggle 1
 
     # Create the interactor to move selected items
     set follower [$slate interactor Follower]
@@ -298,9 +300,9 @@ body ::tycho::EditGraph::constructor {args} {
     $dropper configure \
 	    -halo 6 \
 	    -targettags input \
-	    -activatecommand "$this newclick %1 %2 %3" \
-	    -dragcommand "$this newdrag %1 %2 %3" \
-	    -deactivatecommand "$this newrelease %2 %3"
+	    -activatecommand "$this newclick" \
+	    -dragcommand "$this newdrag" \
+	    -deactivatecommand "$this newrelease"
 
     # Is this needed?
     $slate configure -exportselection 0
@@ -431,10 +433,10 @@ body ::tycho::EditGraph::newdrag {item x y} {
 #### newrelease
 #
 # Release the item. If we are currently over a target input terminal,
-# make a conneciton in the graph. If not, just delete the line,
+# make a connection in the graph. If not, just delete the line,
 # since connection failed.
 #
-body ::tycho::EditGraph::newrelease {x y} {
+body ::tycho::EditGraph::newrelease {ignore x y} {
     set line $_scratch(line)
     if { $_scratch(dest) == "" } {
 	$slate delete $line
