@@ -56,13 +56,13 @@ EXTRA_SRCS =	abbreviations.html \
 		sponsors.html \
 		troubleshooting.html
 
-MISC_FILES =		coding img tychoClasses.dag
+MISC_FILES =		coding img lib tychoClasses.dag
 
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =	tychoClasses.dag
 
 # Sub directories to run make in.
-DIRS =			coding
+DIRS =			coding lib
 
 all: tychoClasses.dag
 
