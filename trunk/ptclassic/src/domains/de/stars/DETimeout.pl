@@ -3,12 +3,20 @@ defstar
     name { Timeout }
     derivedFrom { TimeoutStar }
     domain { DE }
-    descriptor { Detect a time-out condition and generate an alarm. }
+    descriptor
+    {
+This star detects time-out conditions and generates an alarm if too
+much time elapses before resetting or stopping the timer.  Events
+arriving on the "Set" input reset and start the timer.  Events arriving
+on the "Clear" input stop the timer.  If no "Set" or "Clear" events
+arrive within "timeout" time units of the most recent "Set", then that
+"Set" event is sent out the "alarm" output.
+    }
     version { $Id$ }
     author { T. M. Parks }
     copyright
     {
-Copyright 1992 The Regents of the University of California.
+Copyright (C) 1992-1994 The Regents of the University of California.
 All rights reserved.
 See the file ~ptolemy/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -33,8 +41,11 @@ limitation of liability, and disclaimer of warranty provisions.
     {
 	name { alarm }
 	type { = Set }
-	desc { Indicates that the timer has reached time-out, and that
-	       its value is equal to the event which last started the timer. }
+	desc
+	{
+Indicates that the duration of the time-out has elapsed.
+The event which last started the timer is output.
+	}
     }
 
     go
