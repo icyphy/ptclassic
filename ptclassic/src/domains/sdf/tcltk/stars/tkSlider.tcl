@@ -36,10 +36,12 @@ if {![winfo exists $s]} {
 
     frame $s.f
     set position [expr \
-	{100*([set ${starID}(value)]-[set ${starID}(low)])/ \
-	([set ${starID}(high)]-[set ${starID}(low)])}]
+	{round(100*([set ${starID}(value)]-[set ${starID}(low)])/ \
+	([set ${starID}(high)]-[set ${starID}(low)]))}]
     ptkMakeScale $s.f m [set ${starID}(identifier)] $position setOut_$starID
     pack append $s $s.f top
+
+    tkwait visibility $s
 }
 
 # Initialize the output
