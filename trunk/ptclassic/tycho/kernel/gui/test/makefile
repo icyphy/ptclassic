@@ -83,7 +83,7 @@ ITCL_SRCS =	\
 
 EXTRA_SRCS =	$(TCL_SRCS) $(ITCL_SRCS) \
 	chktycho \
-	dltest.htm
+	dltest.html
 
 # Files or directories that are present, but that 'make checkjunk' 
 # should not complain about
