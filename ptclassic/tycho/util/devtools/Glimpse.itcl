@@ -209,13 +209,26 @@ body tycho::Glimpse::glimpseSearch {} {
     set glimpseOut [busy exec glimpse -y -n -H "$glimpseIndexDir" $pattern]
     set listGlimpseOut [split $glimpseOut '\\\n']
     foreach glimpseItem $listGlimpseOut {
-        regexp {(^[^ :]*): ([0-9]*):(.*)} $glimpseItem dummy \
+        # FIXME: we substitute $TYCHO for any pathname that starts with
+        # */tycho/. Since we have paths like tycho/java/tycho, we need to
+        # substitute the _first_ /tycho/ or we will get a bogus path.
+        # We could use ::tycho::simplifyPath here, except we
+        # want to be able to use the glimpse index created by a user
+        # other than the user running glimpse, so we need to substitute
+        # in the user's $TYCHO so that they can edit the files that
+        # glimpse points to.  Note that simplifyPath will not do the
+        # proper substitution here, since the user's $TYCHO is not
+        # necessarily the same as the $TYCHO of the user who created
+        # the glimpse index.  
+        regsub {^[^t][^y][^c][^h][^o]*/tycho/(.*)} $glimpseItem \
+                {$TYCHO/\1} shortGlimpseItem
+        regexp {(^[^ :]*): ([0-9]*):(.*)} $shortGlimpseItem dummy \
                 filename linenum patternline
         if ![info exists filename] {
-            error "Internal Glimpse error: regexp `$glimpseItem' failed!\n\
+            error "Internal Glimpse error: regexp `$shortGlimpseItem' failed!\n\
+                    line was: `$glimpseItem'\n\
                     glimpse command returned: $glimpseOut" 
         }
-        set filename [::tycho::simplifyPath $filename]
         puts $fd "{[list "$filename $patternline"] $filename {line $linenum}}"
     }
     puts $fd "}\n# >"
