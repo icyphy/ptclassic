@@ -354,7 +354,7 @@ static void cleanupSharedObjects(int linkSeqNum)
 }
 
 #else // USE_DLOPEN
-static char *
+char *
 Linker::generateSharedObject(int argc, char **argv, char* objName, int maxsize)
 {
 }
