@@ -12,7 +12,7 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { CG56 Motorola Sim I/O library }
+	location { CG56 main library }
 	htmldoc {
 The input signal is plotted using the <i>pxgraph</i> program.
 The <i>title</i> parameter specifies a title for the plot.

@@ -12,7 +12,7 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { CG56 control library }
+	location { CG56 main library }
 	htmldoc {
 A star to stall the flow of data for parameter cycles to waste cycles.
 	}

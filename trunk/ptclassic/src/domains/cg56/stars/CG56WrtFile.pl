@@ -12,7 +12,7 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { CG56 io library }
+	location { CG56 main library }
 	htmldoc {
 <a name="simulator, Motorola DSP56000"></a>
 <a name="Motorola DSP56000 simulator"></a>

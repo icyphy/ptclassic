@@ -6,15 +6,15 @@ defstar {
     version { $Id$ }
     author { Kennard White }
     acknowledge { Based on CG56HostSldrGX }
-	copyright {
+    copyright {
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
-	}
-    location { CG56 io library }
+    }
+    location { CG56 main library }
     hinclude { <minmax.h> }
-	htmldoc {
+    htmldoc {
 <a name="slider bar"></a>
 <a name="scale"></a>
 This is an asynchronous source star (like the Const star) with

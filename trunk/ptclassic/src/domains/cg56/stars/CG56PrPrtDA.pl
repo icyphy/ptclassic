@@ -11,7 +11,7 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { CG56 io library }
+	location { CG56 main library }
 	htmldoc {
 <p>
 This star is an interrupt driven D/A star for the Ariel Proport board.

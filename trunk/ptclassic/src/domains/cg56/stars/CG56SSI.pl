@@ -11,8 +11,8 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
     }
-    location { CG56 io library }
-	htmldoc {
+    location { CG56 main library }
+    htmldoc {
 <p>
 This star is a generic star to provide input/output for the 560001's
 SSI (Synchronous Serial Interface) port.

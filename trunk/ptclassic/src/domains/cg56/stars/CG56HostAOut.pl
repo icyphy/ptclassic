@@ -4,15 +4,15 @@ defstar {
     desc { Asynchronous host output. }
     version { $Id$ }
     author { Kennard White }
-	copyright {
+    copyright {
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
-	}
-    location { CG56 io library }
-	htmldoc {
-Output data from DSP to host via host port asynchronously.
+    }
+    location { CG56 main library }
+    htmldoc {
+Output data from the DSP to host via host port asynchronously.
     }
     input {
 	name { input }

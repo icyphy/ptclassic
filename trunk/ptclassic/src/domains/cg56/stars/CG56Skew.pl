@@ -10,8 +10,8 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
     }
-    location { CG56 library }
-	htmldoc {
+    location { CG56 main library }
+    htmldoc {
 The <i>error</i> input is accumulated.
 Normally the constant 0.0 is output.
 However, when overflow occurs, <i>overVal</i> is output, 
