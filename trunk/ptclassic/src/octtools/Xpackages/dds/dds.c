@@ -102,6 +102,7 @@ ddsData data;			/* Fields for component        */
 		 "Unknown component type: %d", (int) type);
     }
     /*NOTREACHED*/
+    return (ddsHandle)NULL;
 }
 
 
@@ -333,7 +334,7 @@ int *ax, *ay;
 {
     int tx, ty, x, y, sx, sy;
     unsigned int w, h, bdr, tw, th, tbdr, sw, sh, sbdr, dp, nchild;
-    Window root, target, parent, *children, child;
+    Window root, target, parent, *children;
 
     /* Begin by finding top level window to compenstate for decoration */
     *ax = *ay = 0;
@@ -416,7 +417,6 @@ ddsHandle component;		/* Component of dialog */
  */
 {
     ddsInternal *item = (ddsInternal *) component;
-    Widget w;
 
     return XtWindow(_dds_find_top(item)->composite.top_info->top_shell);
 }
@@ -485,7 +485,8 @@ ddsEvtHandler *other;		/* Function for handling other events */
 	    if ((XtDispatchEvent(&evt) == False) &&
 		(other != (ddsEvtHandler *) 0) &&
 		(other->other_handler != (int (*)()) 0)) {
-		if (status = (*other->other_handler)(&evt, other->user_data)) {
+		if ((status =
+		     (*other->other_handler)(&evt, other->user_data)) ) {
 		    return status;
 		}
 	    }
@@ -496,6 +497,7 @@ ddsEvtHandler *other;		/* Function for handling other events */
 	/*NOTREACHED*/
     }
     /*NOTREACHED*/
+    return 0;
 }
 
 
@@ -521,7 +523,8 @@ ddsEvtHandler *other;		/* Function for handling other events */
 	    if ((XtDispatchEvent(&evt) == False) &&
 		(other != (ddsEvtHandler *) 0) &&
 		(other->other_handler != (int (*)()) 0)) {
-		if (status = (*other->other_handler)(&evt, other->user_data)) {
+		if ( (status =
+		      (*other->other_handler)(&evt, other->user_data)) ) {
 		    return status;
 		}
 	    }
@@ -533,6 +536,7 @@ ddsEvtHandler *other;		/* Function for handling other events */
 	/*NOTREACHED*/
     }
     /*NOTREACHED*/
+    return 0;
 }
 
 
@@ -598,4 +602,5 @@ ddsBoolean must_exist_p;	/* If True, must exist */
 		 "Package must be initialized using dds_initialize()");
 	/*NOTREACHED*/
     }
+    return (ddsInternal*)NULL;
 }
