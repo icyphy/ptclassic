@@ -2,9 +2,10 @@ defstar {
 	name {TkBarGraph}
 	domain {CGC}
 	desc { 
-Dynamically display the value of any number of input signals in bar-chart form.
-The first 12 input signals will be assigned distinct colors. After that,
-the colors are repeated. The colors can be controlled using X resources.
+Dynamically display the value of any number of input signals in bar-chart
+form.  The first 12 input signals will be assigned distinct colors.  After
+that, the colors are repeated. The colors can be controlled using X
+resources.
 	}
 	version { $Id$ }
 	author { Edward A. Lee and Jose Luis Pino }
@@ -102,7 +103,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	    addCode(procDefs(input.numberPorts()),"procedure");
 	    addCode("$starSymbol(count) = 0;");
 	    addCode("$starSymbol(batchCount) = 0;");
-	    addInclude("\"ptkBarGraph.h\"");
+	    addModuleFromLibrary("ptkBarGraph", "src/ptklib", "ptk");
 	}
 	go {
 	  for (int i = 0; i < input.numberPorts(); i++) {
