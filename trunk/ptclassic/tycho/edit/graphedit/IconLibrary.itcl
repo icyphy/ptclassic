@@ -205,7 +205,7 @@ body ::tycho::IconIndex::constructor {args} {
     defineEntityType icon -valued 1 -ordered 1 -label ""
 
     # The port entity type
-    defineEntityType port -valued 1 -ordered 1 -leaf 1
+    defineEntityType port -valued 1 -ordered 1 -leaf 1 -type input
 }
 
 ########################################################################

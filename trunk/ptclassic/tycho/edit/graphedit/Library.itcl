@@ -319,8 +319,7 @@ body ::tycho::Library::menu {menubar menuname prefix {context {}}} {
     if { $context == "" } {
 	foreach g [names group] {
             $menubar add cascade $g $menuname \
-                    -label [_itemcget group $context $g -label] \
-                    -tearoff 1
+                    -label [_itemcget group $context $g -label]
 	    menu $menubar $g $prefix $g
 	}
         foreach i [names item] {
@@ -331,8 +330,7 @@ body ::tycho::Library::menu {menubar menuname prefix {context {}}} {
     } else {
 	foreach g [names group $context] {
             $menubar add cascade $g $menuname \
-                    -label [_itemcget group $context $g -label] \
-                    -tearoff 1
+                    -label [_itemcget group $context $g -label]
 	    menu $menubar $g $prefix $context.$g
 	}
 	foreach i [names item $context] {
