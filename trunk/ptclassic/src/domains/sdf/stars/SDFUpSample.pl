@@ -51,7 +51,7 @@ defstar {
 		desc { "fill value" }
 	}
 	start {
-		input.setSDFParams(int(factor),int(factor)-1);
+		output.setSDFParams(int(factor),int(factor)-1);
 		if (int(phase) >= int(factor))
 			Error::abortRun(*this, ": phase must be < factor");
 	}
