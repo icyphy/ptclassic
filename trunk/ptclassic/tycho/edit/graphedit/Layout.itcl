@@ -338,7 +338,7 @@ body ::tycho::Layout::itemget {item} {
 #
 body ::tycho::Layout::itemin {context item value args} {
     _verifynot item $context $item $context.$item
-    _addentity item $context $item $context.$item $value $args]
+    _addentity item $context $item $context.$item $value $args
 }
 
 ########################################################################
