@@ -3,7 +3,7 @@ static const char file_id[] = "CGCTarget.cc";
 Version identification:
 $Id$
 
-Copyright (c) 1990-1994 The Regents of the University of California.
+Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -160,7 +160,8 @@ void CGCTarget :: initCodeStrings() {
 	mainClose.initialize();
 }
 	
-static char* complexDecl = 
+
+static char* complexDecl =
 "\n#if !defined(COMPLEX_DATA)\n#define COMPLEX_DATA 1"
 "\n typedef struct complex_data { double real; double imag; } complex; \n"
 "#endif\n";
@@ -172,6 +173,7 @@ static char* fixDecl =
 
 void CGCTarget::trailerCode()
 {
+    include << fixDecl << complexDecl;
     declareGalaxy(*galaxy());
     if (!SimControl::haltRequested())
 	HLLTarget::trailerCode();
@@ -192,7 +194,7 @@ void CGCTarget :: frameCode ()
     // main function, declarations must appear before any code.
 
     StringList code = headerComment();
-    code << include << fixDecl << complexDecl << globalDecls << procedures
+    code << include << globalDecls << procedures
 	 << comment("main function")
 	 << (const char*)funcName << "() {\n"
 	 << mainDecls << commInit << mainInit;
@@ -210,32 +212,28 @@ void CGCTarget :: frameCode ()
 void CGCTarget :: writeCode()
 {
     writeFile(myCode,".c",displayFlag);
+    if (!onHostMachine(targetHost)) {
+	const char* header = "$PTOLEMY/src/domains/cgc/rtlib/CGCrtlib.h";
+	const char* source = "$PTOLEMY/src/domains/cgc/rtlib/CGCrtlib.c";
+	rcpCopyFile(targetHost, destDirectory, header);
+	rcpCopyFile(targetHost, destDirectory, source);
+    }
 }
 
 int CGCTarget::compileCode()
 {
-    StringList path;
-
-    // build symbolic links to the CGC runtime library files
-    // NOTE: this will only work on the local host
-    path << expandPathName(destDirectory) << '/' << "CGCrtlib.h";
-
-    if (access(path,R_OK) == -1) {
-	// unlink a possibly invalid symbolic link
-	unlink(path);
-	symlink(expandPathName("$PTOLEMY/lib/cgc/CGCrtlib.h"), path);
-    }
-
-    path.initialize();
-    path << expandPathName(destDirectory) << '/' << "CGCrtlib.c";
-    if (access(path,R_OK) == -1) {
-	unlink(path);
-	symlink(expandPathName("$PTOLEMY/lib/cgc/CGCrtlib.c"), path);
-    }
-
     // invoke the compiler
-    StringList file, cmd, error;
-    file << filePrefix << ".c";
+    StringList file, cmd, error, rtlib;
+    if (onHostMachine(targetHost)) {
+	StringList ptolemy;
+	ptolemy << getenv("PTOLEMY");
+	rtlib << "-I" << ptolemy << "/src/domains/cgc/rtlib -lCGCrtlib -L" 
+	      << ptolemy << "/lib." << getenv("ARCH");
+    }
+    else {
+	rtlib << "CGCrtlib.c";
+    }
+    file << filePrefix << ".c " << rtlib;
     cmd << compileLine(file) << " -o " << filePrefix;
     error << "Could not compile " << file;
     return (systemCall(cmd, error, targetHost) == 0);
@@ -454,32 +452,23 @@ int CGCTarget :: codeGenInit() {
 	return FALSE;
     }
 
-/* SunOS4.1.3 cfront can't handle initializing arrays that contain
-   typedefs, the error message is:
-   "sorry, not implemented: general initializer in initializer list"
-   So instead of using COMPLEX, INT and ANYTYPE of type DataType, we
-   converted them to "COMPLEX" etc.
-   This is a terrible bogosity, but no worse than the rest of cfront.
- */  
-
 struct cnv_tb {
   /*DataType src, dst;*/
   const char *src, *dst, *star;
 };
 static struct cnv_tb cnv_table[7] = {
-  {  "COMPLEX", "FIX", 		"CxToFix"	},
-  {  "COMPLEX", "ANYTYPE",	"CxToFloat"	},
-  {  "FIX",     "COMPLEX",	"FixToCx"	},
-  {  "FIX",	"FIX",		"FixToFix"	},
-  {  "FIX",	"ANYTYPE",	"FixToFloat"	},
-  {  "ANYTYPE", "COMPLEX",	"FloatToCx"	},
-  {  "ANYTYPE", "FIX",		"FloatToFix"	}
+  {  COMPLEX, 	FIX, 		"CxToFix"	},
+  {  COMPLEX, 	ANYTYPE,	"CxToFloat"	},
+  {  FIX,	COMPLEX,	"FixToCx"	},
+  {  FIX,	FIX,		"FixToFix"	},
+  {  FIX,	ANYTYPE,	"FixToFloat"	},
+  {  ANYTYPE, 	COMPLEX,	"FloatToCx"	},
+  {  ANYTYPE, 	FIX,		"FloatToFix"	}
 };
 
 
 
-int CGCTarget::modifyGalaxy()
-{
+int CGCTarget::modifyGalaxy() {
 
     extern int warnIfNotConnected (Galaxy&);
 
@@ -493,21 +482,17 @@ int CGCTarget::modifyGalaxy()
 
     if (warnIfNotConnected(gal)) return FALSE;
 
-    while ((star = starIter++) != NULL)
-    {
+    while ((star = starIter++) != NULL) {
 	BlockPortIter portIter(*star);
 	CGCPortHole* port;
-	while ((port = (CGCPortHole*)portIter++) != NULL)
-	{
+	while ((port = (CGCPortHole*)portIter++) != NULL) {
 	    // Splice in type conversion stars.
-	    if (needsSpliceStar(port))
-	    {
+	    if (needsSpliceStar(port)) {
 		// Avoid re-initializing the Galaxy, which will break
 		// things if this is a child in a MultiTarget. (Why? See
 		// comments for CGTarget::setup() method.)  Initialize it
 		// only if there is no resolved type.
-		if (port->resolvedType() == NULL)
-		{
+		if (port->resolvedType() == NULL) {
 		    gal.initialize();
 		    if (SimControl::haltRequested()) return FALSE;
 		    if (!needsSpliceStar(port)) continue;
@@ -518,31 +503,18 @@ int CGCTarget::modifyGalaxy()
 		PortHole* input = port->far();	// destination input PortHole
 
 		for (int i=0; i < sizeof(cnv_table)/sizeof(*cnv_table); i++) {
-/*
- * SunOS4.1.3 cfront can't handle initializing arrays that contain
- * typedefs (see above)
- */  
-		    if (((!strcmp(port->type(),cnv_table[i].src)) ||
-			 (!strcmp(cnv_table[i].src,ANYTYPE))) &&
-			((!strcmp(port->resolvedType(),cnv_table[i].dst)) ||
-			 (!strcmp(cnv_table[i].dst,ANYTYPE))) ){
-
-#ifdef NEVER
 		    if (((port->type() == cnv_table[i].src) ||
-				  (cnv_table[i].src == ANYTYPE)) &&
+			 (cnv_table[i].src == ANYTYPE)) &&
 		        ((port->resolvedType() == cnv_table[i].dst) ||
-				  (cnv_table[i].dst == ANYTYPE))) {
-#endif
-			    if (!(s = (Star*)spliceStar(input, cnv_table[i].star, TRUE, domain)))
-				return FALSE;
-			  break;
+			 (cnv_table[i].dst == ANYTYPE))) {
+			s = (Star*) spliceStar(
+			    input, cnv_table[i].star, TRUE, domain);
+			if (!s ) return FALSE;
+			break;
 		    }
 		}
-
-		if (s)
-		{
-		    s->setTarget(this);
-		}
+		
+		if (s) s->setTarget(this);
 	    }
 	}
     }
