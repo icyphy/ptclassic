@@ -112,7 +112,6 @@ LIBCPPSRCS    = kernelCalls.cc \
 		POct.cc \
 		PVem.cc \
 		ganttChart.cc \
-		pigiInvokeInterp.cc \
 		ptkRegisterCmds.cc 
 
 HDRS = $(CHDRS) $(CCHDRS) 
