@@ -3,7 +3,9 @@ defcore {
     domain { ACS }
     coreCategory { FixSim }
     corona { Ramp } 
-    desc { Output the product of the inputs, as a floating-point value. }
+    desc { Generate a ramp signal, starting at "value" (default 0) and
+incrementing by step size "step" (default 1) on each firing.
+    }
     version { $Id$ }
     author { James Lundblad }
     copyright {
@@ -25,7 +27,7 @@ limitation of liability, and disclaimer of warranty provisions.
 		type { Fix }
 		default { 0.0 }
 		desc { Initial (or latest) value output by Ramp. }
-		attributes { A_SETTABLE|A_NONCONSTANT }
+		attributes { A_SETTABLE | A_NONCONSTANT }
 	}
         defstate {
                 name { OutputPrecision }
