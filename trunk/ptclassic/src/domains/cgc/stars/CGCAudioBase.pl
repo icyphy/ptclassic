@@ -2,15 +2,15 @@ defstar
 {
     name { PCM }
     domain { CGC }
-	copyright {
+    desc { Base class for reading and writing mu-law encoded PCM data. }
+    version { $Id$ }
+    author { T. M. Parks }
+    copyright {
 Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
 All rights reserved.
 See the file ~ptolemy/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
-	}
-    desc { Base class for reading and writing mu-law encoded PCM data. }
-    version { $Id$ }
-    author { T. M. Parks }
+    }
 
     state
     {
@@ -18,6 +18,14 @@ limitation of liability, and disclaimer of warranty provisions.
 	type { string }
 	default { "/dev/audio" }
 	desc { File for PCM data.  If blank, use standard IO. }
+    }
+
+    state
+    {
+	name { blockSize }
+	type { int }
+	default { 128 }
+	desc { Number of samples to read or write. }
     }
 
     protected
@@ -61,14 +69,14 @@ limitation of liability, and disclaimer of warranty provisions.
 
     codeblock (declarations)
     {
-	FILE* $starSymbol(stream);
-	unsigned char $starSymbol(byte);
+	int $starSymbol(file);
+	unsigned char $starSymbol(buf)[$val(blockSize)];
     }
 
     codeblock (closeFile)
     {
 	/* Close file. */
-	if (fclose($starSymbol(stream)) != 0)
+	if (close($starSymbol(file)) != 0)
 	{
 	    perror("$val(fileName)");
 	    exit(1);
@@ -78,7 +86,6 @@ limitation of liability, and disclaimer of warranty provisions.
     initCode
     {
 	addInclude("<math.h>");
-	addInclude("<stdio.h>");
 	addDeclaration(declarations);
 	if (addGlobal(sharedDeclarations, "$sharedSymbol(PCM,PCM)"))
 	    addCode(sharedInit);
