@@ -124,14 +124,8 @@ The variables will be of the form output name + port number, e.g. "Pmm1".
 
 		// allocate Matlab input matrices and generate their names
 		if ( numInputs > 0 ) {
-		  if ( matlabInputMatrices != 0 ) {
-		    for ( int k = 0; k < numInputs; k++ ) {
-		      if ( matlabInputMatrices[k] != 0 ) {
-			mxFreeMatrix(matlabInputMatrices[k]);
-		      }
-		    }
-		    LOG_DEL; delete [] matlabInputMatrices;
-		  }
+		  freeMatlabMatrices(matlabInputMatrices, numInputs);
+		  LOG_DEL; delete [] matlabInputMatrices;
 		  LOG_NEW; matlabInputMatrices = new MatrixPtr[numInputs];
 		  for ( int k = 0; k < numInputs; k++ ) {
 		    matlabInputMatrices[k] = 0;
@@ -145,14 +139,8 @@ The variables will be of the form output name + port number, e.g. "Pmm1".
 
 		// allocate Matlab output matrices and generate their names
 		if ( numOutputs > 0 ) {
-		  if ( matlabOutputMatrices != 0 ) {
-		    for ( int k = 0; k < numOutputs; k++ ) {
-		      if ( matlabOutputMatrices[k] != 0 ) {
-			mxFreeMatrix(matlabOutputMatrices[k]);
-		      }
-		    }
-		    LOG_DEL; delete [] matlabOutputMatrices;
-		  }
+		  freeMatlabMatrices(matlabOutputMatrices, numOutputs);
+		  LOG_DEL; delete [] matlabOutputMatrices;
 		  LOG_NEW; matlabOutputMatrices = new MatrixPtr[numOutputs];
 		  for ( int k = 0; k < numOutputs; k++ ) {
 		    matlabOutputMatrices[k] = 0;
@@ -179,14 +167,20 @@ The variables will be of the form output name + port number, e.g. "Pmm1".
 		// convert Ptolemy input matrices to Matlab matrices
 		processInputMatrices();
 
-		// evaluate the Matlab command (returns non-zero on error)
-		if ( evaluateMatlabCommand(matlabCommand) ) {
+		// evaluate the Matlab command (non-zero means error)
+		int mstatus = evaluateMatlabCommand(matlabCommand);
+		if ( mstatus ) {
+		  freeMatlabMatrices(matlabInputMatrices, numInputs);
+		  freeMatlabMatrices(matlabOutputMatrices, numOutputs);
 		  Error::abortRun( *this,
 				   "Matlab could not evaluate the command.");
 		}
 		else {
 		  // convert Matlab matrices to Ptolemy matrices
-		  if ( processOutputMatrices() ) {	// non-zero means error
+		  int ostatus = processOutputMatrices();
+		  freeMatlabMatrices(matlabInputMatrices, numInputs);
+		  freeMatlabMatrices(matlabOutputMatrices, numOutputs);
+		  if ( ostatus ) {			// non-zero means error
 		    Error::abortRun( *this, "Could not convert the Matlab ",
 				     "output matrices to Ptolemy matrices" );
 		  }
@@ -200,6 +194,23 @@ The variables will be of the form output name + port number, e.g. "Pmm1".
 		LOG_DEL; delete [] matlabInputNames;
 		LOG_DEL; delete [] matlabOutputNames;
 		LOG_DEL; delete [] matlabCommand;
+	}
+
+	method {
+	  name { freeMatlabMatrices }
+	  access { protected }
+	  type { void }
+	  arglist { "(MatrixPtr *matlabMatrices, int numMatrices)" }
+	  code {
+		if ( matlabMatrices != 0 ) {
+		  for ( int k = 0; k < numMatrices; k++ ) {
+		    if ( matlabMatrices[k] != 0 ) {
+		      mxFreeMatrix(matlabMatrices[k]);
+		      matlabMatrices[k] = 0;
+		    }
+		  }
+		}
+	  }
 	}
 
 	method {
