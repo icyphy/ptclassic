@@ -310,7 +310,7 @@ _clean
 
 test IncrCanvas-create.1 {Test create and delete of simple items} {
     image create photo .img \
-	    -file [::tycho::expandPath $TYCHO/editors/slate/img/mantra.gif]
+	    -file [::tycho::expandPath $TYCHO/edit/slate/img/mantra.gif]
     set result 1
     # FIXME: Add other item types
     foreach item {
