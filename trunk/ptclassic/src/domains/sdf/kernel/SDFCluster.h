@@ -194,9 +194,6 @@ public:
 	void setVisit(int i) { visitFlag = i; }
 	int  visited() { return visitFlag; }
 
-	// repetitions value
-	int reps() const { return repetitions.num();}
-
 	// return loop count
 	int loop() const { return pLoop;}
 
