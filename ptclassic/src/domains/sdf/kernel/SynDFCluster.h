@@ -1,7 +1,7 @@
 #ifndef _SynDFCluster_h
 #define _SynDFCluster_h 1
 #ifdef __GNUG__
-#pragma implementation
+#pragma interface
 #endif
 
 #include "Cluster.h"
