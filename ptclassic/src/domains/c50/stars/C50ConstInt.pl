@@ -2,8 +2,8 @@ defstar {
 	name { ConstInt }
 	domain { C50 }
 	desc { Constant source }
-	version { @(#)C50ConstInt.pl	1.1	2/8/96 }
-	author { Luis Gutierrez, Brian L. Evans, Edward A. Lee, Jose Luis Pino, Joseph T. Buck }
+	version { $Id$ }
+	author { Luis Gutierrez, Brian L. Evans, Edward A. Lee, Jose Luis Pino, and Joseph T. Buck }
 	copyright {
 Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.

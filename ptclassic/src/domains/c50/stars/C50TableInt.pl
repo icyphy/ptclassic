@@ -6,7 +6,7 @@ Implements an integer lookup table.  The "values" state contains the
 values to output; its first element is element zero.  An error occurs if
 an out of bounds value is received.
 	}
-	version { @(#)C50Table.pl	1.5	2/10/96 }
+	version { $Id$ }
 	author { Luis Gutierrez, based on CG56 version}
 	copyright {
 Copyright (c) 1990-1996 The Regents of the University of California.

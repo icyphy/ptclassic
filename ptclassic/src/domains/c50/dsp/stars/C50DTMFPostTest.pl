@@ -1,7 +1,7 @@
 defstar{
 	name { DTMFPostTest }
 	domain { C50 }
-	version { @(#)C50DTMFPostTest.pl	1.7	5/29/96 }
+	version { $Id$ }
 	desc { 
 Returns whether or not a valid dual-tone modulated-frequency has
 been correctly detected based on the last three detection results.
@@ -103,5 +103,3 @@ is set to an integer that does not represent a DTMF digit.
 	// Return an execution estimate in pairs of cycles
 	exectime{ return 11; }
 }
-
-
