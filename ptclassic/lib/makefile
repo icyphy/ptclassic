@@ -46,7 +46,7 @@ EXTRA_SRCS = CompileMake.template README \
 
 MISC_FILES = 	Vem Vem-8.1 Vem-8.2 app-defaults bw_patterns \
 		cg56 cg96 cgc cm5 colors defaultContent \
-		matlab rename tcl tech technology vem
+		mathematica matlab rename tcl tech technology vem
 
 # We don't include common.mk since we don't use the compiler here
 include $(ROOT)/mk/no-compile.mk
