@@ -31,14 +31,17 @@
 ##########################################################################
 
 
-##########################################################################
-#### exit
-# Redefine the Tcl exit procedure to cleanly exit, querying the user
-# to save work.
-#
-rename ::exit ::tclexit
-proc ::exit {{queryUser 1}} {
-    ::tycho::TopLevel::exitProgram $queryUser
+# FIXME: this is for debugging on the mac
+if { "$tcl_platform(platform)" != "mac"} {
+    ##########################################################################
+    #### exit
+    # Redefine the Tcl exit procedure to cleanly exit, querying the user
+    # to save work.
+    #
+    rename ::exit ::tclexit
+    proc ::exit {{queryUser 1}} {
+	::tycho::TopLevel::exitProgram $queryUser
+    }
 }
 
 ##########################################################################
