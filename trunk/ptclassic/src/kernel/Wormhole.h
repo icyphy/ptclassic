@@ -48,10 +48,16 @@ public:
 	StringList printVerbose() { return print(0);}
 	StringList printRecursive() { return print(1);}
 
-	void setup() { initSched(); }
+	void setup() { initSched(); 
+		       scheduler->stopBeforeDeadlocked = FALSE ;}
 
 	void run() { if (!checkReady()) return;
-		     Runnable :: run(); }
+		     setStopTime();
+		     Runnable :: run(); 
+		     sumUp();}
+
+	// redefine setStopTime()
+	void setStopTime() { scheduler->resetStopTime(getStopTime()) ;}
 
 	// constructor.  We never use plain Wormholes, we always have
 	// class SDFWormhole : public Wormhole, public SDFStar
@@ -68,6 +74,13 @@ public:
 	~Wormhole ();
 
 protected :
+	// get the stopping condition for the inner domain.
+	// SHOULD be redefined in the derived class.
+	virtual float getStopTime();
+
+	// arrange things after run if necessary
+	virtual void sumUp();
+
 	StringList print (int recursive);
 
 private :
@@ -79,6 +92,7 @@ private :
 
 	// check ready
 	int checkReady();
+
 };
 
 #endif

@@ -13,6 +13,7 @@ $Id$
 
 *******************************************************************/
 #include "Wormhole.h"
+#include "Scheduler.h"
 #include "StringList.h"
 #include "Output.h"
 #include "Domain.h"
@@ -133,12 +134,24 @@ StringList Wormhole :: print (int recursive) {
 // check input EventHorizons.
 int Wormhole :: checkReady() {
 	int flag = TRUE;
+
+	// check each porthole whether it is ready.
 	for (int i = selfStar.numberPorts(); i > 0; i--) {
 		EventHorizon& p = (EventHorizon&) selfStar.nextPort();
 		if (p.isItInput()) {
 			FromEventHorizon* fp = (FromEventHorizon*) p.ghostPort;
-			if (!(fp->ready())) flag = FALSE;
+			if (!(fp->ready())) { flag = FALSE;
+					      return flag ;}
 		}
 	}
+
 	return flag;
 }
+
+// arrange things after run
+void Wormhole :: sumUp() {}
+
+// should be redefined in the derived classes.  But, we can not
+// use abstract virtual method by some strange reason (compiler bug!) 
+// for now.
+float Wormhole :: getStopTime() { return 0 ;}
