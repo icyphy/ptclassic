@@ -232,6 +232,11 @@ public:
 
 	// generate code using target methods
 	virtual void genCode(Target&, int depth) = 0;
+
+	// generate code for loop beginning and ending
+	// by default, no code.
+	virtual void genLoopInit(Target&, int reps) {}
+	virtual void genLoopEnd(Target&) {}
 };
 
 // define << operator to use virt fn.
@@ -270,6 +275,10 @@ public:
 
 	// code generation
 	void genCode(Target&, int depth);
+
+	// code generation for loop beginning and end.
+	void genLoopInit(Target&,int reps);
+	void genLoopEnd(Target&);
 private:
 	DataFlowStar& pStar;
 };

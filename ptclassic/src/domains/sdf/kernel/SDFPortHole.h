@@ -97,6 +97,9 @@ public:
 	virtual PortHole& setSDFParams(unsigned numTokens = 1,
 				       unsigned maxPctValue=0);
 
+	// is the port dynamic? (default: return 0)
+	virtual int isDynamic() const;
+
         // The setPort function is redefined to take one more optional
         // argument, the number of Particles consumed/generated
         PortHole& setPort(const char* portName,

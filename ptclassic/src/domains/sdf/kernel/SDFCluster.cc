@@ -1119,15 +1119,29 @@ void SDFClustSched::compileRun() {
 
 void SDFAtomCluster::genCode(Target& t, int depth) {
 	if (loop() > 1) {
+		t.genLoopInit(real(), loop());
 		t.beginIteration(loop(), depth);
 		t.writeFiring(real(), depth+1);
 		t.endIteration(loop(), depth);
+		t.genLoopEnd(real());
 	}
 	else t.writeFiring(real(), depth);
 }
 
+void SDFAtomCluster::genLoopInit(Target& t, int reps) {
+	t.genLoopInit(real(), reps);
+}
+
+void SDFAtomCluster::genLoopEnd(Target& t) {
+	t.genLoopEnd(real());
+}
+
 void SDFClusterBag::genCode(Target& t, int depth) {
+	SDFClusterBagIter nextClust(*this);
+	SDFCluster* c;
 	if (loop() > 1) {
+		while ((c = nextClust++) != 0)
+			c->genLoopInit(t,loop());
 		t.beginIteration(loop(), depth);
 		depth++;
 	}
@@ -1135,6 +1149,9 @@ void SDFClusterBag::genCode(Target& t, int depth) {
 	if (loop() > 1) {
 		depth--;
 		t.endIteration(loop(), depth);
+		nextClust.reset();
+		while ((c = nextClust++) != 0)
+			c->genLoopEnd(t);
 	}
 }
 

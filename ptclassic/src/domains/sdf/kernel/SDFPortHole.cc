@@ -48,6 +48,8 @@ PortHole* DFPortHole :: assocPort() { return 0;}
 
 int DFPortHole :: assocRelation() const { return -1;}
 
+int DFPortHole :: isDynamic() const { return FALSE;}
+
 int InSDFPort :: isItInput () const { return TRUE;}
 
 void InSDFPort :: receiveData () { getParticle();}

@@ -67,6 +67,10 @@ void DataFlowStar :: initialize() {
 	Star :: initialize();
 	repetitions = 0;
 	noTimes = 0;
+	initPortCounts();
+}
+
+void DataFlowStar :: initPortCounts() {
 	BlockPortIter nextp(*this);
 	PortHole* p;
 	while ((p = nextp++) != 0)
@@ -86,6 +90,15 @@ int DataFlowStar :: run() {
 	return status;
 }
 
+// functions for use with the loop scheduler
+void DataFlowStar::beginLoop(int reps,DFPortHole* cond=0,int relation=0) {}
+void DataFlowStar::endLoop() {}
+
+// functions for dynamic execution
+int DataFlowStar::setDynamicExecution(int) { return TRUE;}
+DFPortHole* DataFlowStar::waitPort() const { return 0;}
+int DataFlowStar::waitTokens() const { return 0;}
+
 // The following is defined in SDFDomain.cc -- this forces that module
 // to be included if any SDF stars are linked in.
 extern const char SDFdomainName[];
@@ -95,12 +108,12 @@ const char* SDFStar :: domain () const { return SDFdomainName;}
 // isA functions
 ISA_FUNC(DataFlowStar,Star);
 ISA_FUNC(SDFStar,DataFlowStar);
+ISA_FUNC(DynDFStar,DataFlowStar);
 
-inline int wormEdge(PortHole& p) {
-	PortHole* f = p.far();
-	if (!f) return TRUE;
-	else return p.atBoundary();
-}
+// small DynDFStar functions.
+DynDFStar::DynDFStar() : myWaitPort(0), myWaitCount(0) {}
+DFPortHole* DynDFStar::waitPort() const { return myWaitPort;}
+int DynDFStar::waitTokens() const { return myWaitCount;}
 
 	////////////////////////////
 	// notRunnable
@@ -124,7 +137,7 @@ int DataFlowStar :: notRunnable () {
 	// there is enough data on the inputs
 	while ((p = nextp++) != 0) {
 		// worm edges always have enough data
-		if (wormEdge(*p)) continue;
+		if (p->atBoundary()) continue;
 		if (p->isItInput() && p->numTokens() < p->numXfer())
 			// not enough data
 			return 1;
@@ -167,7 +180,7 @@ int DataFlowStar :: simRunStar (int deferFiring) {
 		port = nextp++;
 
 		// On the wormhole boundary, skip.
-		if (wormEdge(*port)) continue;
+		if (port->atBoundary()) continue;
 
 		if( port->isItInput() )
 			// OK to update size for input PortHole
@@ -203,7 +216,7 @@ int DataFlowStar :: deferrable () {
 		// Look at the next port in the list
 		port = nextp++;
 		// cannot be deferred if on the boundary of wormhole.
-		if (wormEdge(*port)) return FALSE;
+		if (port->atBoundary()) return FALSE;
 
 		SDFStar& dest = (SDFStar&) port->far()->parent()->asStar();
 
