@@ -71,10 +71,9 @@ Pointer PendingEventList::getHeadAndRemove() {
 	return LinkedList::getHeadAndRemove();
 }
 
-void PendingEventList::remove( Link * obj )
+CqLevelLink * PendingEventList::remove( Link * obj )
 {
-	LinkedList::removeLink( *obj );
-	return;
+	return (CqLevelLink *)LinkedList::eraseLinkNotElement( *obj );
 }
 
 
