@@ -1548,6 +1548,8 @@ void genDef ()
 	}
 
 /* Include files */
+	if ( coreDef == 1 )
+		fprintf(fp, "#include \"%s%s.h\"\n", domain, objName);
 	fprintf (fp, "#include \"%s.h\"\n", baseClass);
 	for( i = 0; i < nAlsoDerivedFrom; i++ ) {
 		fprintf (fp, "#include \"%s.h\"\n", alsoDerivedFrom[i] );
@@ -1608,6 +1610,10 @@ void genDef ()
 	if (publicMembers[0])
 		fprintf (fp, "%s\n", publicMembers);
 	fprintf (fp, "protected:\n");
+	if ( coreDef == 1 ) {
+		fprintf(fp, "\n\t%s%s& corona;\n", domain, objName );
+		fprintf(fp, "\n\t/* virtual */ %sCorona& getCorona() const { return (%sCorona&)corona; }\n", domain, domain );
+	}
 	for (i = C_SETUP; i < N_FORMS; i++)
 		genStdProto(fp,i);
 	if (protectedMembers[0])
@@ -1646,6 +1652,8 @@ void genDef ()
 		fprintf (fp, "%s\n", idBlock);
 /* include files */
 	fprintf (fp, "#include \"%s.h\"\n", fullClass);
+	if ( coreDef == 1 )
+		fprintf(fp, "#include \"%s%s.h\"\n", domain, objName);
 	for (i = 0; i < nCcInclude; i++)
 		fprintf (fp, "#include %s\n", ccInclude[i]);
 /* generate className and (optional) makeNew function */
@@ -1670,7 +1678,7 @@ void genDef ()
 /* makeNew() for cores takes a corona as argument. */
 		if ( coreDef ) {
 			fprintf (fp, "\n%sCore* %s :: makeNew( %sCorona & corona_) const { LOG_NEW; return new %s(corona_); }\n",
-			 domain, fullClass, domain, fullClass);
+			 domain, fullClass, domain, fullClass );
 /* Corona constructor takes do core init argument. */
 		} else if ( coronaDef == 1 ) {
 			fprintf (fp, "\nBlock* %s :: makeNew() const { LOG_NEW; return new %s(1);}\n",
@@ -1699,7 +1707,7 @@ void genDef ()
 /* prefix code and constructor */
 /* Core constructor takes corona as argument. */
 	if ( coreDef == 1 ) {
-		fprintf (fp, "\n%s::%s() { }\n\n%s%s::%s ( %sCorona & corona_) : %s(corona_)", fullClass, fullClass, ccCode, fullClass, fullClass, domain, baseClass);
+		fprintf (fp, "\n%s::%s() { }\n\n%s%s::%s ( %sCorona & corona_) : corona((%s%s&)corona_)", fullClass, fullClass, ccCode, fullClass, fullClass, domain, domain, objName);
 /* Corona takes do core init flag and calls parent constructor. */
 	} else if ( coronaDef == 1 ) {
 		fprintf (fp, "\n%s%s::%s (int doCoreInitFlag) : %sCorona(0)", ccCode, fullClass, fullClass, domain);
