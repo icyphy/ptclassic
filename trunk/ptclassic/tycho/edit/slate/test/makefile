@@ -44,8 +44,6 @@ TCL_SRCS =
   
 ITCL_SRCS = \
 	$(GRAPHICAL_TESTS) \
-	alltests.itcl \
-	all.itcl \
 	defs.itcl
 
 EXTRA_SRCS =	$(TCL_SRCS) $(ITCL_SRCS)
@@ -80,20 +78,25 @@ GRAPHICAL_TESTS = \
 	testBounder.itcl \
 	testTute.itcl
 
+
+# Scripts that are generated
+TEST_SCRIPTS =  alltests.itcl all.itcl
+
 # make checkjunk should not complain about the OLD directory
-OPTIONAL_FILES = OLD
+OPTIONAL_FILES = OLD $(TEST_SCRIPTS)
 
 # 'make realclean' should remove tclIndex
-REALCLEAN_STUFF =
+REALCLEAN_STUFF = $(TEST_SCRIPTS)
 
 tests:: test_graphics
 
 # These tests do not require a graphics terminal
-test_simple: $(TCL_SRCS) $(ITCL_SRCS)
+test_simple: $(TCL_SRCS) $(ITCL_SRCS) $(TEST_SCRIPTS)
+
 	tytestsh $(SIMPLE_TESTS)
 
 # These tests require a graphics terminal
-test_graphics: alltests.itcl all.itcl $(TCL_SRCS) $(ITCL_SRCS)
+test_graphics: alltests.itcl all.itcl $(TCL_SRCS) $(ITCL_SRCS) $(TEST_SCRIPTS)
 	tytest $(GRAPHICAL_TESTS)
 
 
