@@ -179,7 +179,7 @@ class ::tycho::IndexBrowser {
 # method to cause the listbox to reload the data from the new file.
 #
 configbody ::tycho::IndexBrowser::file {
-    set file $itk_option(-file)
+    set file [::tycho::expandPath $itk_option(-file)]
     if [ file readable $file.fst ] {
         # Add a button that will bring up a forest browser.
 	$itk_component(bbox) add browse \
@@ -189,7 +189,7 @@ configbody ::tycho::IndexBrowser::file {
     }
 
     # Read the first non-blank line of the model.
-    set fd [open $itk_option(-file) r]
+    set fd [open $file r]
     set firstline [gets $fd]
     while { [regexp {^[ \t]*$} $firstline] && ! [eof $fd] } {
 	set firstline [gets $fd]
@@ -240,7 +240,7 @@ configbody ::tycho::IndexBrowser::file {
     # Remember the directory of the file because the
     # files in the hyperlink index might be relative to this
     # directory.
-    set CWD [file dirname $itk_option(-file)]
+    set CWD [file dirname $file]
 }
 
 ######################################################################
