@@ -21,18 +21,21 @@ limitation of liability, and disclaimer of warranty provisions.
     }
     constructor { noInternalState(); }
 
-    go { addCode(doMath); }
+    go { 
+	addCode(startOp);
+	int i;
+	for (i=1;i<=input.numberPorts();i++) 
+	    addCode(doOp(i)); 
+    }
 
-    codeblock(doMath) {
+    codeblock(startOp) {
 	$ref(output).real = 0;
 	$ref(output).imag = 0;
-    	{
-	    int i;
-	    for (i=1; i<=$size(input); i++) {
-		$ref(output).real += $ref(input,i).real;
-		$ref(output).imag += $ref(input,i).imag;
-	    }
-	}
+    }
+
+    codeblock(doOp,"int i") {
+	$ref(output).real += $ref(input#@i).real;
+	$ref(output).imag += $ref(input#@i).imag;
     }
 
     exectime {return 2*input.numberPorts();}
