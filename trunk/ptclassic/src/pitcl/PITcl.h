@@ -96,6 +96,7 @@ public:
 // or TCL_ERROR, and may set the Tcl result to return a string using
 // Tcl_SetResult, Tcl_AppendElement, PTcl::result or PTcl::staticResult.
 	int alias(int argc,char** argv);
+	int animation(int argc,char** argv);
 	int busconnect(int argc,char** argv);
 	int connect(int argc,char** argv);
 	int cont(int argc,char** argv);
@@ -106,6 +107,7 @@ public:
 	int disconnect(int argc,char** argv);
 	int domain(int argc,char** argv);
 	int domains(int argc,char** argv);
+	int exit(int argc,char** argv);
 	int knownlist(int argc,char** argv);
 	int link(int argc,char** argv);
 	int newstate(int argc,char** argv);
