@@ -42,6 +42,10 @@ public:
 
 	// display schedule
 	virtual StringList displaySchedule() { return "not implemented\n";}
+
+	// return a new scheduler
+	virtual Scheduler* clone() = 0;
+
 protected:
 	// The following member is used to visit all atomic blocks
 	// (stars and wormholes) in the galaxy exacly once each
