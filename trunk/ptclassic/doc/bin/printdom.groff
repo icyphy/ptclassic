@@ -187,7 +187,7 @@ else if ($preview) then
 		$printcommand $printoptions -TX75 $tempTroffFile
 	else
 		($printcommand $printoptions -Tascii $tempTroffFile > $tempNroffFile) >& /dev/null
-		more /tmp/$tempNroffFile
+		more $tempNroffFile
 	endif
 else
 	# otherwise just print it out
