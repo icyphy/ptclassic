@@ -39,16 +39,31 @@ class SingleLink
 class SingleLinkList
 {
 public:
+	// destructor
 	~SingleLinkList()  { initialize(); }
+	// constructor
 	SingleLinkList() { lastNode = 0; }
-	SingleLinkList(Pointer);
+	// constructor, with argument
+	SingleLinkList(Pointer a)
+	{
+		lastNode= new SingleLink(a,0);
+		lastNode->next=lastNode;
+		lastReference = lastNode;
+	}
 
 	void insert(Pointer a);	// Add at head of list
 	void append(Pointer a);	// Add at tail of list
 	Pointer getAndRemove();	// Return and remove head of list
-	Pointer getNotRemove(); // Return head, do not remove
-	Pointer next();		// Return next node on list, relative to
+	Pointer getNotRemove()  // Return head, do not remove
+	{
+		return lastNode->next->e;
+	}
+	Pointer next()		// Return next node on list, relative to
 				// last reference
+	{
+		lastReference = lastReference->next;
+		return lastReference->e;
+	}
 	Pointer elem(int);	// Return arbitary node of list
 	void initialize();	// Remove all links
 
@@ -66,95 +81,6 @@ private:
         // access the list
         SingleLink *lastReference;
 };
-
-inline SingleLinkList :: SingleLinkList(Pointer a)
-{
-	lastNode= new SingleLink(a,0);
-	lastNode->next=lastNode;
-	lastReference = lastNode;
-}
-
-inline void SingleLinkList :: insert(Pointer a)
-{
-	if (lastNode)	// List not empty
-
-		lastNode->next = new SingleLink(a,lastNode->next);
-
-	else	{	// List empty
-
-		lastNode = new SingleLink(a,0);
-		lastNode->next = lastNode;
-		lastReference = lastNode;
-		}
-}
-inline void SingleLinkList :: append(Pointer a)
-{
-	if (lastNode) 	// List not empty
-
-		lastNode = lastNode->next = new SingleLink(a,lastNode->next);
-
-	else {		// List empty
-
-		lastNode = new SingleLink(a,0);
-		lastNode->next = lastNode;
-		lastReference = lastNode;
-		}
-}
-inline Pointer SingleLinkList :: getAndRemove()
-{
-	SingleLink *f = lastNode->next;	// Head of list
-	Pointer r = f->e;
-
-	if (f == lastNode) lastNode = 0; // List now empty
-	else lastNode->next = f->next;
-
-	delete f;
-	return r;
-}
-
-inline Pointer SingleLinkList :: getNotRemove()
-{
-        return lastNode->next->e;
-}
-
-inline Pointer SingleLinkList :: next()
-{
-	// TO BE DONE:
-	// Check for empty list and invoke an error.
-	// Should this be done throughout this file?
-	lastReference = lastReference->next;
-	return lastReference->e;
-}
-
-inline Pointer SingleLinkList :: elem(int i)
-{
-	SingleLink *f = lastNode->next;	// Head of list
-	for( int t = i; t > 0; t-- )
-		f = f->next;
-	lastReference = f;
-	return f->e;
-}
-
-inline void SingleLinkList :: initialize()
-{
-	if (lastNode == 0) return;	// List already empty
-
-	// Point to the first element in the list
-	SingleLink *l = lastNode->next;
-
-	// As long as the first element is not also the last, delete it
-	while (l != lastNode ) {
-		SingleLink *ll=l;
-		l = l->next;
-		delete ll;
-	}
-
-	// Delete the last node in the list
-	delete lastNode;
-
-	// and mark the list empty
-	lastNode = 0;
-}
 
 	/////////////////////////////////////
 	// class Vector
