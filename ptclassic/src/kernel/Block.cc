@@ -116,7 +116,7 @@ void Block::setScope(Scope* s) { scp = s; }
 	StringList out;
 	if(scope() != NULL)
 		out << scope()->fullName() << ".";
-	out << name();
+	out << NamedObj::fullName();
 	return out;
 }
 
