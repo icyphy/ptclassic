@@ -111,7 +111,7 @@ necessary.
 		Block *b = this;
 		do {
 		    b = b->parent();
-		    if (!b) {
+		    if (!b || (b->isA("InterpUniverse"))) {
 			msg += "Unmatched name ";
 			msg += (const char*)recurGal;
 			msg += " for recursion construct\n";
@@ -124,7 +124,7 @@ necessary.
 			return;
 		    }
 		    masterGal = (InterpGalaxy*)b;
-		} while (strcmp(masterGal->className(), (const char*)recurGal)
+		} while (strcmp(masterGal->className(), recurGal.currentValue())
 			!= 0);
 
 		// match portholes.
