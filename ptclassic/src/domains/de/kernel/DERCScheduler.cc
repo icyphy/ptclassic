@@ -1,7 +1,7 @@
 static const char file_id[] = "DERCScheduler.cc";
 /******************************************************************** 
 Version identification:
-@(#)DERCScheduler.cc	@(#)DERCScheduler.cc	$Id$
+@(#)DERCScheduler.cc	$Id$
  
 Author: Mudit Goel
         Neil Smyth
@@ -115,7 +115,7 @@ SequentialList* DERCScheduler :: getResources() {
     SequentialList* resList = new SequentialList();
     while ((star = (DEStar*) nextStar++) != 0) {
 	if (star->isRCStar) {
-	    rcStar = (DERCStar*)s;
+	    rcStar = (DERCStar*)star;
 	    newResourceName = rcStar->resource;; 	
 	    rcStar->interruptQ = (DERCEventQ*)interruptQueue();
 	    if (strcmp(newResourceName, "HW")) {	 //Not a HW star
@@ -170,8 +170,7 @@ int DERCScheduler :: run () {
     }
 
     double level = 0;
-    int dummyFlag = -1;
-    
+       
     while (TRUE) {      
         int qFlag = -1;
 	int bFlag = FALSE;  // flag = TRUE when the terminal is on the
@@ -185,7 +184,7 @@ int DERCScheduler :: run () {
 	// Choosing the one with the lowest level
 	if ((ev == NULL) && (interr == NULL)) break;
 	else if ((ev != NULL) && (interr != NULL)) {
- 	    if (( ev->level) < (it->level)) {
+ 	    if (( ev->level) < (interr->level)) {
                 f = ev;
 		ev = NULL;
                 interruptQ.pushBack(interr);
@@ -243,7 +242,7 @@ int DERCScheduler :: run () {
             pStar->resourcePointer->newEventFromInterruptQ(pEvent,currentTime); 
 	}
         //A new event, never seen before
-	else if (f->dest->isRCStar) {
+	else if (((DEStar*)f->dest)->isRCStar) {
 	    DERCEvent* pEvent = (DERCEvent*)(f->e);
 	    DERCStar* pStar = (DERCStar*)(f->dest);
             pStar->arrivalTime = level;
