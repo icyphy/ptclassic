@@ -30,6 +30,23 @@ MemInterval::~MemInterval() {
 	LOG_DEL; delete link;;
 }
 
+StringList MemoryList::print () {
+	MemInterval* p = l;
+	StringList out = "max=";
+	out += int(max);
+	out += ", min=";
+	out += int(min);
+	while (p) {
+		out += " [";
+		out += int(p->addr);
+		out += ":";
+		out += int(p->addr+p->len-1);
+		out += "]";
+		p = p->link;
+	}
+	return out;
+}
+
 int MemoryList::firstFitAlloc(unsigned reqSize, unsigned &reqAddr) {
 	MemInterval* p = l;
 	// skip through the list of blocks until we find one that is
@@ -130,19 +147,13 @@ void MemoryList::reset() {
 
 // stuff for LinProcMemory
 
-void LinProcMemory::record(MReq* request, unsigned addr) {
-	AsmPortHole* p = request->port();
-	const State* s = request->state();
-	// Determine the type
-	DataType type;
-	if(p) type = p->myType();
-	else if (s) type = s->type();
-	else type = "UNKNOWN";
+LinProcMemory::LinProcMemory(const char* n, const Attribute& a,
+			     const Attribute& p,unsigned addr, unsigned len)
+: ProcMemory(n,a,p), mem(addr,len), consec(0) {}
 
+void LinProcMemory::record(MReq* request, unsigned addr) {
 	// Append the allocation to the memory map
-	map.appendSorted(addr,request->size(),
-			 request->state(), p,
-			 request->circ(), type);
+	map.appendSorted(addr,*request);
 }
 
 void LinProcMemory::reset() {
@@ -200,7 +211,8 @@ int LinProcMemory::performAllocation() {
 	while ((r = nextCirc++) != 0) {
 		unsigned addr;
 		if (!mem.circBufAlloc(r->size(),addr)) {
-			Error::abortRun("Memory allocation failure!");
+			StringList m = r->print();
+			Error::abortRun("Memory allocation failure (circ): ", m);
 			return FALSE;
 		}
 		r->assign(*this,addr);
@@ -210,7 +222,8 @@ int LinProcMemory::performAllocation() {
 	while ((r = nextLin++) != 0) {
 		unsigned addr;
 		if (!mem.firstFitAlloc(r->size(),addr)) {
-			Error::abortRun("Memory allocation failure!");
+			StringList m = r->print();
+			Error::abortRun("Memory allocation failure: ", m);
 			return FALSE;
 		}
 		r->assign(*this,addr);
@@ -225,32 +238,19 @@ static unsigned share_len(unsigned xa,unsigned ya,unsigned xl,unsigned yl) {
 	return max(end,s) - s;
 }
 
-StringList LinProcMemory::printMemMap(char* startString, char* endString) {
+StringList LinProcMemory::printMemMap(const char* startString, const char* endString) {
 	StringList l = "";
 	MemMapIter nextItem(map);
 	MemAssignment *mem;
 	while((mem = nextItem++) != 0) {
 	    l += startString;
 	    l += " Loc ";
-	    l += mem->start;
+	    l += int(mem->addr());
 	    l += ", length ";
-	    l += mem->length;
-	    if(mem->port) {
-		l += ", ";
-		l += mem->port->parent()->readFullName();
-		l += "(";
-		l += mem->port->readName();
-		l += ")";
-	    }
-	    if(mem->state) {
-		l += ", ";
-		l += mem->state->parent()->readFullName();
-		l += "(";
-		l += mem->state->readName();
-		l += ")";
-	    }
-	    // Should print out the type here, but I don't know how.
-	    if(mem->circular)
+	    l += mem->length();
+	    l += ", ";
+	    l += mem->print();
+	    if(mem->circ())
 		l += " (circular)";
 	    l += endString;
 	    l += "\n";
@@ -258,7 +258,7 @@ StringList LinProcMemory::printMemMap(char* startString, char* endString) {
 	return l;
 }
 
-StringList DualMemory::printMemMap(char* startString, char* endString) {
+StringList DualMemory::printMemMap(const char* startString, const char* endString) {
 	StringList l = startString;
 	l += " --------------------- Shared memory map: ";
 	l += endString;
@@ -297,8 +297,12 @@ DualMemory:: DualMemory(const char* n_x,     // name of the first memory space
 	) : 
 	sAddr(max(x_addr,y_addr)),
 	sLen(share_len(x_addr,y_addr,x_len,y_len)),
-	LinProcMemory("shared",(st_x&st_y)|A_SHARED,(p_x&p_y)|A_SHARED,
-			sAddr,sLen),
+	// set up the shared memory part
+	LinProcMemory("shared",
+		      (st_x&st_y)|A_SHARED,
+		      (p_x&p_y)|A_SHARED,
+		      max(x_addr,y_addr),
+		      share_len(x_addr,y_addr,x_len,y_len)),
 	x(n_x,st_x,p_x,0,0),
 	y(n_y,st_y,p_y,0,0), 
 	xAddr(x_addr),xLen(x_len),
@@ -321,6 +325,7 @@ int DualMemory::allocReq(const State& s) {
 
 int DualMemory::performAllocation() {
 // first do all the shared memory.
+
 	if (!LinProcMemory::performAllocation()) return FALSE;
 // now make the remaining-memory-lists for the others.
 	MemoryList newMem = mem;
