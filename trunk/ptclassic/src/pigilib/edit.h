@@ -31,7 +31,7 @@ $Id$
 
 extern int RpcFindName(RPCSpot *spot, lsList cmdList, long userOptionWord);
 extern int EditParams();
-extern int EditAttributes();
+extern int EditPragmas();
 extern int EditFormalParams();
 extern int RpcOpenPalette();
 extern boolean OpenPaletteInit();
