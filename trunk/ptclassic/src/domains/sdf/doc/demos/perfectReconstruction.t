@@ -1,4 +1,4 @@
-.\" @(#)perfectReconstruction.t $Date$ $Id$
+.\" $Date$ $Id$
 .NA perfectReconstruction 
 .SD
 This universe implements an eight-channel perfect reconstruction one-dimensional
@@ -8,7 +8,7 @@ delim off
 .EN
 .LO "$PTOLEMY/src/domains/sdf/demo"
 .DM SDF Universe
-.SV $Date$ $Id$ 
+.SV $Revision$ $Id$ 
 .AL "William Chen"
 .LD
 .EQ
