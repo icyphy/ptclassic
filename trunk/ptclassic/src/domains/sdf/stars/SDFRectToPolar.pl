@@ -1,7 +1,10 @@
 defstar {
 	name { RectPolar }
 	domain { SDF }
-	desc { Convert two numbers to magnitude and phase.  }
+	desc {
+Convert two numbers to magnitude and phase.
+The phase output is in the range -PI to PI.
+	}
 	version {$Id$}
 	author { E. A. Lee }
 	copyright { 1991 The Regents of the University of California }
