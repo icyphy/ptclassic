@@ -38,7 +38,7 @@ This will allow the filter to work as expected regardless of
 the directory in which the Ptolemy process actually runs.
 It is best to use tildes in the filename.
 <p>
-When the <i>decimation\fP (<i>interpolation\fP)
+When the <i>decimation</i> (<i>interpolation</i>)
 state is different from unity, the filter behaves exactly
 as it were followed (preceded) by a DownSample (UpSample) star.
 However, the implementation is much more efficient than
@@ -60,7 +60,7 @@ then the filter stopband should begin before f/2.
 If the interpolation ratio is i, then f/2 is a fraction 1/2i
 of the sample rate at which you must design your filter.
 <p>
-The <i>decimationPhase\fP parameter is somewhat subtle.
+The <i>decimationPhase</i> parameter is somewhat subtle.
 It is exactly equivalent the phase parameter of the DownSample star.
 Its interpretation is as follows; when decimating,
 samples are conceptually discarded (although a polyphase structure
