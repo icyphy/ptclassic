@@ -38,7 +38,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include <X11/Xresource.h>	/* Pick up XrmUniqueQuark() for sol2 */
 
 #include <malloc.h>
-#include "compat.h"		/* Pick up common decls (sprintf() etc) */
 
 #define VERSION_STRING	"11.3.3 November 1994"
 
