@@ -33,12 +33,16 @@ static char SccsId[]="$Id$";
 #include "internal.h"
 #include "geo.h"
 #include "io.h"
+#include "io_procs.h"
+
+#include "box.h"
 
 static int box_write_fields(), box_read_fields(), box_fix_fields();
 
 extern struct object_desc oct_geo_desc;
 static struct object_desc *super = &oct_geo_desc;
 
+void
 oct_box_desc_set(object_desc)
 struct object_desc *object_desc;
 {
