@@ -129,4 +129,19 @@ public:
 
 };
 
+
+        //////////////////////////////////////////
+        // class WormMultiPort
+        //////////////////////////////////////////
+
+class WormMultiPort : public MultiPortHole {
+	Wormhole* worm;
+public:
+	WormMultiPort(Wormhole* w, GenericPort& a): worm(w) {setAlias(a);}
+	int isItInput() const;
+	int isItOutput() const;
+
+	PortHole& newPort();
+};
+
 #endif

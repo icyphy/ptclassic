@@ -10,6 +10,7 @@
 #include "Particle.h"
 #include "Plasma.h"
 #include "CircularBuffer.h"
+#include "Domain.h"
  
 /**************************************************************************
 Version identification:
@@ -181,3 +182,60 @@ void FromEventHorizon :: initialize()
 }
 
 int FromEventHorizon :: ready() { return TRUE ;}
+
+/**************************************************************************
+
+	methods for WormMultiPort
+
+**************************************************************************/
+
+int WormMultiPort :: isItInput() const { return alias()->isItInput(); }
+int WormMultiPort :: isItOutput() const { return alias()->isItOutput(); }
+
+extern const char* ghostName(const GenericPort&);
+
+PortHole& WormMultiPort :: newPort() {
+
+	// identify domain
+	Domain* inSideDomain = Domain::named(worm->insideDomain());
+	Domain* outSideDomain = Domain::named(parent()->domain());
+
+	// make real porthole
+	GalMultiPort* galp = (GalMultiPort*) alias();
+	PortHole& realP = galp->newConnection();
+
+	// build eventHorizon
+        DataType type = realP.myType();
+        int numToken = realP.numberTokens;
+// separate rules for connecting inputs and outputs.
+        if (galp->isItInput()) {
+                EventHorizon& to = outSideDomain->newTo();
+                EventHorizon& from = inSideDomain->newFrom();
+                to.setPort(in, galp->readName(), worm, (Star*) parent(),
+                	type, numToken);
+                parent()->addPort(to);
+		ports.put(to);
+                from.setPort(in, ghostName(*galp), worm, (Star*) parent(),
+                	type, numToken);
+                to.ghostConnect (from);
+                from.inheritTypeFrom (realP);
+                to.inheritTypeFrom (from);
+                from.connect(realP,0);
+		return to;
+        } else {
+                EventHorizon& to = inSideDomain->newTo();
+                EventHorizon& from = outSideDomain->newFrom();
+                from.setPort(out, galp->readName(), worm, (Star*) parent(),
+                                     type, numToken);
+                parent()->addPort(from);
+		ports.put(from);
+                to.setPort(out, ghostName(*galp), worm, (Star*) parent(),
+                                   type, numToken);
+                to.ghostConnect (from);
+                to.inheritTypeFrom (realP);
+                from.inheritTypeFrom (to);
+                realP.connect(to,0);
+		return from;
+        }
+}
+
