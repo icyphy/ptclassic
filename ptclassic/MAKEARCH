@@ -35,11 +35,11 @@ end
 cd ..
 
 # EXPDOMAINS = experimental domains
-# EXPDOMAINS = capsim thor bdf
+# EXPDOMAINS = capsim bdf
 set EXPDOMAINS=
 
 cd domains
-foreach x (sdf ddf de $EXPDOMAINS)
+foreach x (sdf ddf de thor $EXPDOMAINS)
 	mkdir $x
 	cd $x
 	ln -s ../../../src/domains/$x/makefile .
@@ -51,6 +51,12 @@ foreach x (sdf ddf de $EXPDOMAINS)
 	end
 	cd ..
 end
+
+# special case: thor/pepp
+mkdir thor/pepp
+cd thor/pepp
+ln -s ../../../../src/domains/thor/pepp/{make.template,makefile} .
+cd ../..
 
 # This is for the makefile
 cd ../..
