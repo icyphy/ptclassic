@@ -39,7 +39,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #include "CGStar.h"
 #include "CGGeodesic.h"
-#include "CGWormBase.h"
 #include "CGTarget.h"
 #include "StringList.h"
 #include "CodeStream.h"
@@ -573,11 +572,10 @@ void CGStar :: forkInit(CGPortHole& input,CGPortHole& output) {
 	}
 }
 
-// return NULL
-CGWormBase* CGStar :: myWormhole() { return NULL; }
-
 // return the profile
 Profile* CGStar :: getProfile(int) { return profile; }
+
+const char* CGStar :: readTypeName() { return "unspecfied"; }
 
 // The following is defined in CGDomain.cc -- this forces that module
 // to be included if any CG stars are linked in.
