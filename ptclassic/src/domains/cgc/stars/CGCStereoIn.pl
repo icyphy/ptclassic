@@ -34,7 +34,7 @@ provisions.
       name { blockSize }
       type { int }
       default { 8180 }
-      desc { Number of samples to read. }
+      desc { Number of bytes to read. }
     }
 
     defstate {
@@ -96,7 +96,7 @@ provisions.
 
     codeblock (declarations) {
       int $starSymbol(file);
-      int $starSymbol(buffer)[$val(blockSize)*2];
+      short $starSymbol(buffer)[$val(blockSize)/2];
       int $starSymbol(counter);
     }
     
@@ -185,16 +185,19 @@ provisions.
     
     codeblock (read) {
       /* Read data from a file */
-      read($starSymbol(file), $starSymbol(buffer), $val(blockSize));
+      if (read($starSymbol(file), $starSymbol(buffer),
+	       $val(blockSize)) != $val(blockSize)) {
+	perror("Error reading from file: $val(fileName)");
+	exit(1);
+      }
     }
     
     codeblock (convert) {
       /* Convert data in buffer to Output format */
-      /* $ref(output) = $starSymbol(buffer);     */
-      for ($starSymbol(counter)=0; $starSymbol(counter) < ($val(blockSize)*2); $starSymbol(counter)++) {
-	$ref(output,$starSymbol(counter)) = $starSymbol(buffer)[$starSymbol(counter)]/32768.0;
-      }
 
+      for ($starSymbol(counter)=0; $starSymbol(counter) < ($val(blockSize)/2); $starSymbol(counter)++) {
+	$ref(output,$starSymbol(counter)) = $starSymbol(buffer)[$starSymbol(counter)] /32768.0;
+      }
     }
     
     codeblock (closeFile) {
@@ -217,7 +220,7 @@ provisions.
     setup {
       fileName.clearAttributes(A_SETTABLE);
       standardInput = (strcmp(fileName,"") == 0);
-      output.setSDFParams(2*int(blockSize), 2*int(blockSize)-1);
+      output.setSDFParams(int(blockSize/2), int(blockSize/2)-1);
     }
       
     initCode {
