@@ -78,6 +78,11 @@ public:
 	/*virtual*/ int runCode();
 
 protected:
+	// CodeStreams.
+	CodeStream cli_models;
+	CodeStream cli_comps;
+	CodeStream cli_configs;
+
 	// States.
 	StringState synopsys;
 	StringState arch;
@@ -105,9 +110,6 @@ protected:
 	/*virtual*/ void initVHDLObjLists();
 
 private:
-	CodeStream cli_models;
-	CodeStream cli_comps;
-	CodeStream cli_configs;
 	CodeStream top_uses;
 	CodeStream top_entity;
 	CodeStream top_architecture;
@@ -121,10 +123,10 @@ private:
 	VHDLCompMapList topCompMapList;
 
 	// Method called by C2V star to place important code into structure.
-	void registerC2V(int pairid, int numxfer, const char* dtype);
+	virtual void registerC2V(int pairid, int numxfer, const char* dtype);
 
 	// Method called by V2C star to place important code into structure.
-	void registerV2C(int pairid, int numxfer, const char* dtype);
+	virtual void registerV2C(int pairid, int numxfer, const char* dtype);
 
 	int pairNumber;
 	int writeCom;
