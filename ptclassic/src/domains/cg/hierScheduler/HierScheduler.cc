@@ -59,21 +59,29 @@ Programmer: Jose Luis Pino
     StringList schedule;
     schedule << "J.L. Pino's Hierarchical Scheduler\n\t["
 	     << sdfStars << " SDF Nodes]\t[" << dagNodes()
-	     << " Precedence DAG Nodes]\n\tTop-level "
-	     << topScheduler.displaySchedule(); 
-    GalStarIter nextStar(*galaxy());
+	     << " Precedence DAG Nodes]\n"
+	     << "\t\t\t__________________\n\n"
+	     << "Top-level Scheduler:  "
+	     << topScheduler.displaySchedule()
+	     << "_______________________________________"
+	     << "_______________________________________\n\n";
+    GalStarIter nextStar(wormholes);
     DataFlowStar* star;
     while ((star = (DataFlowStar*) nextStar++) != NULL)
-	if (star->isItWormhole()) {
-	    schedule << "Cluster \"" << star->fullName() << "\" using\n\t"
+	schedule << "Cluster \"" << star->fullName() << "\" using\n\t"
 		     << star->scheduler()->displaySchedule()
 		     << "_______________________________________"
 		     << "_______________________________________\n\n";
-	}
     return schedule;
 }   
 
-/*virtual*/ int HierScheduler::run() { return topScheduler.run(); }
+int HierScheduler::run() { return topScheduler.run(); }
+
+ParProcessors* HierScheduler::setUpProcs(int num) {
+     parProcs = topScheduler.setUpProcs(num);
+     parProcs->moveStars = TRUE;
+     return parProcs;
+}
 
 int HierScheduler::dagNodes() const {
     return topScheduler.dagNodes();
@@ -165,22 +173,8 @@ void HierScheduler :: setup () {
     HierCluster temp;
     temp.initializeForClustering(*galaxy());
 
-    StringList clusterdot, dot, textDescription;
-
-    clusterdot << printClusterDot(*galaxy());
-    // mtarget->writeFile(clusterdot,".cdot1");
-    clusterdot.initialize();
-    
     // clusterChains(*galaxy());
     
-    clusterdot << printClusterDot(*galaxy());
-    dot << printDot(*galaxy());
-    textDescription << galaxy()->print(FALSE);
-
-    mtarget->writeFile(dot,".dot");
-    mtarget->writeFile(clusterdot,".cdot");
-    mtarget->writeFile(textDescription,".desc");
-
     // We may want to promote this code into a Cluster method if
     // others going to need to convert their clusters into wormholes.
     // If so, we'll have to convert the ClusterIter into a
@@ -239,9 +233,27 @@ void HierScheduler :: setup () {
     // Compute top-level schedule
     topScheduler.setGalaxy(*galaxy());
     topScheduler.setup();
-    StringList schedule;
-    schedule << displaySchedule();
-    mtarget->writeFile(schedule,".sched");
+
+    // Now explode the wormholes in the subgalaxies
+    // This code doesn't handle nested CGWormholes - FIXME
+    // This code doesn't handle parallel CGWormholes - FIXME
+    int i;
+    for (i=0; i < parProcs->size() ; i++) {
+	Galaxy* subGalaxy = parProcs->getProc(i)->myGalaxy();
+	GalStarIter stars(*subGalaxy);
+	Star* star;
+	while ((star = stars++) != NULL) {
+	    Wormhole* worm = ((CGStar*)star)->asWormhole();
+	    if (worm) {
+		stars.remove();
+		// Sets all the internal stars and the scheduler to
+		// the correct target
+		worm->insideGalaxy().setTarget(star->target());
+		subGalaxy->addBlock(*worm->explode(),star->name());
+	        wormholes.addBlock(*star,star->name());
+	    }
+	}
+    }
 
     // Set all looping levels for child targets > 0.  Targets might
     // have to do different style buffering (ie. CGC)
@@ -249,10 +261,6 @@ void HierScheduler :: setup () {
     CGTarget* child;
     while ((child = mtarget->cgChild(childNum++)))
 	child->loopingLevel = 3;
-    
-    mtarget->requestReset();
-    Error::abortRun("Sorry, but the rest of the scheduler is not implemented");
-    return;
 }
 
 void HierScheduler :: compileRun() {
