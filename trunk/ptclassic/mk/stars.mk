@@ -90,6 +90,7 @@ SDFT = $(OBJDIR)/domains/sdf/targets
 VHDLT = $(OBJDIR)/domains/vhdl/targets
 VHDLTCLT = $(OBJDIR)/domains/vhdl/tcltk/targets
 
+ACSDIR = $(CROOT)/src/domains/acs
 BDFDIR = $(CROOT)/src/domains/bdf
 CGDDFDIR = $(CROOT)/src/domains/cg
 CGDIR = $(CROOT)/src/domains/cg
@@ -102,7 +103,6 @@ HOFDIR = $(CROOT)/src/domains/hof
 IPUSDIR = $(CROOT)/src/domains/ipus
 MDSDFDIR = $(CROOT)/src/domains/mdsdf
 PNDIR = $(CROOT)/src/domains/pn
-RTGDIR = $(CROOT)/src/domains/rtg
 SDFDIR = $(CROOT)/src/domains/sdf
 SRDIR = $(CROOT)/src/domains/sr
 VHDLBDIR = $(CROOT)/src/domains/vhdlb
@@ -383,15 +383,15 @@ ifdef PN
 	SDFLIB = 1
 endif
 
-ifdef RTG
+ifdef ACS
 	# star icons
-	PALETTES += PTOLEMY/src/domains/rtg/icons/rtg.pal
+	PALETTES += PTOLEMY/src/domains/acs/icons/acs.pal
 	# kernel and stars
-	CUSTOM_DIRS += $(RTGDIR)/kernel $(RTGDIR)/stars
-	STARS +=  $(LIBDIR)/rtgstars.o
-	LIBS += -lrtgstars -lrtg
-	LIBFILES += $(LIBDIR)/librtgstars.$(LIBSUFFIX) \
-		$(LIBDIR)/librtg.$(LIBSUFFIX)
+	CUSTOM_DIRS += $(ACSDIR)/kernel $(ACSDIR)/stars
+	STARS +=  $(LIBDIR)/acsstars.o
+	LIBS += -lacsstars -lacs
+	LIBFILES += $(LIBDIR)/libacsstars.$(LIBSUFFIX) \
+		$(LIBDIR)/libacs.$(LIBSUFFIX)
 endif
 
 ifdef DDF

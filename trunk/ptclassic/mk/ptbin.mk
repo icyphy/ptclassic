@@ -82,17 +82,17 @@ ifdef FULL
 	IPUS =		1
 	MDSDF =		1
 	PN =		1
-	RTG =		1
+	ACS =		1
 	SDFFULL =	1
 	SR =		1
 	VHDLFULL =	1
 	VHDLB =		1
 endif
 
-ifdef RTINY
-	PIGI=		$(BASENAME).rtiny
-	VERSION_DESC =	'With Retarget domain (RTG) only'
-	RTG =		1
+ifdef ACS
+	PIGI=		$(BASENAME).acs
+	VERSION_DESC =	'With Adaptive Computing System (ACS) Domain only'
+	ACS =		1
 endif
 
 ifdef PTINY
@@ -133,8 +133,8 @@ PIGI_BINARIES = 	$(PIGI) $(PIGI).debug $(PIGI).debug.purify \
 			$(PIGI).debug.quantify $(PIGI).debug.purecov
 
 EVERY_BINARY= $(PIGI_BINARIES) \
-		$(PIGI).rtiny $(PIGI).rtiny.debug $(PIGI).rtiny.debug.purify \
-		$(PIGI).rtiny.debug.quantify $(PIGI).rtiny.debug.purecov \
+		$(PIGI).acs $(PIGI).acs.debug $(PIGI).acs.debug.purify \
+		$(PIGI).acs.debug.quantify $(PIGI).acs.debug.purecov \
 		$(PIGI).ptiny $(PIGI).ptiny.debug $(PIGI).ptiny.debug.purify \
 		$(PIGI).ptiny.debug.quantify $(PIGI).ptiny.debug.purecov \
 		$(PIGI).ptrim $(PIGI).ptrim.debug $(PIGI).ptrim.debug.purify \
@@ -224,7 +224,7 @@ $(BINDIR)/$(PIGI): $(PIGI)
 else
 
 INSTALL += $(BINDIR)/$(BASENAME) $(BINDIR)/$(BASENAME).ptrim \
-		$(BINDIR)/$(BASENAME).ptiny $(BINDIR)/$(BASENAME).rtiny
+		$(BINDIR)/$(BASENAME).ptiny $(BINDIR)/$(BASENAME).acs
 
 
 .PHONY: $(BASENAME).ptrim $(BASENAME).ptiny \
@@ -232,9 +232,9 @@ INSTALL += $(BINDIR)/$(BASENAME) $(BINDIR)/$(BASENAME).ptrim \
 	$(BASENAME).ptrim.debug.purify $(BASENAME).ptiny.debug.purify \
 	$(BASENAME).ptrim.debug.quantify $(BASENAME).ptiny.debug.quantify \
 	$(BASENAME).ptrim.debug.purecov $(BASENAME).ptiny.debug.purecov
-	$(BASENAME).rtiny $(BASENAME).rtiny.debug \
-	$(BASENAME).rtiny.debug.purify $(BASENAME).rtiny.debug.quantify \
-	$(BASENAME).rtiny.debug.purecov
+	$(BASENAME).acs $(BASENAME).acs.debug \
+	$(BASENAME).acs.debug.purify $(BASENAME).acs.debug.quantify \
+	$(BASENAME).acs.debug.purecov
 
 # The .ptrim and .ptiny files below should not depend on $(PT_DEPEND), or
 # else we must have all the libs installed to build ptrim and ptiny, even
@@ -249,9 +249,9 @@ $(BASENAME).ptrim:
 $(BASENAME).ptiny:
 	$(MAKE) PTINY=1 BASENAME=$(BASENAME) $(BASENAME).ptiny
 
-$(BASENAME).rtiny:
-	$(MAKE) RTINY=1 BASENAME=$(BASENAME) DEFAULT_DOMAIN=RTG \
-		$(BASENAME).rtiny 
+$(BASENAME).acs:
+	$(MAKE) ACS=1 BASENAME=$(BASENAME) DEFAULT_DOMAIN=ACS \
+		$(BASENAME).acs 
 
 $(BASENAME).debug: $(PT_DEPEND)
 	$(MAKE) FULL=1 BASENAME=$(BASENAME) $(BASENAME).debug
@@ -262,9 +262,9 @@ $(BASENAME).ptrim.debug:
 $(BASENAME).ptiny.debug: 
 	$(MAKE) PTINY=1 BASENAME=$(BASENAME) $(BASENAME).ptiny.debug
 
-$(BASENAME).rtiny.debug: 
-	$(MAKE) RTINY=1 BASENAME=$(BASENAME) DEFAULT_DOMAIN=RTG \
-		$(BASENAME).rtiny.debug
+$(BASENAME).acs.debug: 
+	$(MAKE) ACS=1 BASENAME=$(BASENAME) DEFAULT_DOMAIN=ACS \
+		$(BASENAME).acs.debug
 
 
 $(BASENAME).debug.purify: $(PT_DEPEND)
@@ -277,9 +277,9 @@ $(BASENAME).ptrim.debug.purify:
 $(BASENAME).ptiny.debug.purify:
 	$(MAKE) PTINY=1 BASENAME=$(BASENAME) $(BASENAME).ptiny.debug.purify
 
-$(BASENAME).rtiny.debug.purify:
-	$(MAKE) RTINY=1 BASENAME=$(BASENAME) DEFAULT_DOMAIN=RTG \
-		$(BASENAME).rtiny.debug.purify
+$(BASENAME).acs.debug.purify:
+	$(MAKE) ACS=1 BASENAME=$(BASENAME) DEFAULT_DOMAIN=ACS \
+		$(BASENAME).acs.debug.purify
 
 
 $(BASENAME).debug.quantify: $(PT_DEPEND)
@@ -292,9 +292,9 @@ $(BASENAME).ptrim.debug.quantify:
 $(BASENAME).ptiny.debug.quantify: 
 	$(MAKE) PTINY=1 BASENAME=$(BASENAME) $(BASENAME).ptiny.debug.quantify
 
-$(BASENAME).rtiny.debug.quantify: 
-	$(MAKE) RTINY=1 BASENAME=$(BASENAME) DEFAULT_DOMAIN=RTG \
-		$(BASENAME).rtiny.debug.quantify
+$(BASENAME).acs.debug.quantify: 
+	$(MAKE) ACS=1 BASENAME=$(BASENAME) DEFAULT_DOMAIN=ACS \
+		$(BASENAME).acs.debug.quantify
 
 
 $(BASENAME).debug.purecov: $(PT_DEPEND)
@@ -307,9 +307,9 @@ $(BASENAME).ptrim.debug.purecov:
 $(BASENAME).ptiny.debug.purecov: 
 	$(MAKE) PTINY=1 BASENAME=$(BASENAME) $(BASENAME).ptiny.debug.purecov
 
-$(BASENAME).rtiny.debug.purecov: 
-	$(MAKE) RTINY=1 BASENAME=$(BASENAME) DEFAULT_DOMAIN=RTG \
-		$(BASENAME).rtiny.debug.purecov
+$(BASENAME).acs.debug.purecov: 
+	$(MAKE) ACS=1 BASENAME=$(BASENAME) DEFAULT_DOMAIN=ACS \
+		$(BASENAME).acs.debug.purecov
 
 
 $(BINDIR)/$(BASENAME): $(BASENAME) 
@@ -321,9 +321,9 @@ $(BINDIR)/$(BASENAME).ptrim: $(BASENAME).ptrim
 $(BINDIR)/$(BASENAME).ptiny: $(BASENAME).ptiny 
 	$(MAKE) PTINY=1 BASENAME=$(BASENAME) $(BINDIR)/$(BASENAME).ptiny
 
-$(BINDIR)/$(BASENAME).rtiny: $(BASENAME).rtiny 
-	$(MAKE) RTINY=1 BASENAME=$(BASENAME) DEFAULT_DOMAIN=RTG \
-		$(BINDIR)/$(BASENAME).rtiny
+$(BINDIR)/$(BASENAME).acs: $(BASENAME).acs 
+	$(MAKE) ACS=1 BASENAME=$(BASENAME) DEFAULT_DOMAIN=ACS \
+		$(BINDIR)/$(BASENAME).acs
 
 endif #ALLBINARIES
 
@@ -333,7 +333,7 @@ PTDEPEND:
 install: $(INSTALL)
 
 # Build four binaries
-all: makefile $(LIB) $(PIGI) $(PIGI).rtiny $(PIGI).ptiny $(PIGI).ptrim
+all: makefile $(LIB) $(PIGI) $(PIGI).acs $(PIGI).ptiny $(PIGI).ptrim
 
 # Print the names of all the binaries that can be produced
 echo_every_binary:
