@@ -27,11 +27,14 @@ ENHANCEMENTS, OR MODIFICATIONS.
 						PT_COPYRIGHT_VERSION_2
 						COPYRIGHTENDKEY
 */
+
 /* err.h  edg
 Version identification:
 $Id$
 Header for error handing routines.
 */
+
+#include "compat.h"
 
 #define ERR_IF1(cond) \
     if (cond) { \

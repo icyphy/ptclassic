@@ -33,6 +33,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
    $Id$
 */
 
+#include "compat.h"
+
 extern void win_msg ARGS((const char *omsg));
 extern void accum_string ARGS((const char *string));
 extern void clr_accum_string();
