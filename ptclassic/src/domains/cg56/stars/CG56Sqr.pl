@@ -1,9 +1,7 @@
 defstar {
 	name { Sqr }
 	domain { CG56 }
-	desc {
-The Output is Squared.
-}
+	desc { Square function.}
 	version { $Id$ }
 	author { Chih-Tsung Huang, ported from Gabriel }
 	copyright {
@@ -13,9 +11,7 @@ See the file ~ptolemy/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CG56 demo library }
-	explanation {
-The input is squared.
-	}
+	explanation {The output is the square of the input.}
 	execTime {
 		return 3;
 	}
