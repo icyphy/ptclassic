@@ -292,7 +292,7 @@ struct term *term;
     
     (void) oct_attach_content((generic *)inst, (generic *)copy, 0);
     inst->facet->object_count++;
-	RECORD_ATTACH((generic *)inst, (generic *)copy, retval);
+	RECORD_ATTACH(((generic *)inst), ((generic *)copy), retval);
     return OCT_OK;
 }
 		
