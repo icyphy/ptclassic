@@ -41,6 +41,9 @@ public:
 	// initialize DDF-specific members, plus std initialize
 	void initialize();
 
+	// bypass the DataflowStar :: run method
+	int run();
+
 	// class identification
 	int isA(const char*) const;
 

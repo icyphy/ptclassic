@@ -28,9 +28,9 @@ $Id$
 
 // initialize DDF specific members
 void DDFStar :: initialize() {
-	DataFlowStar::initialize();
 	waitPort = NULL;
 	waitNum = 0;
+	DataFlowStar::initialize();
 	// special care for DDFSelf star (recursion)
 	// adjust numberTokens
 	if (isItSelf()) {
@@ -59,6 +59,7 @@ void DDFStar :: waitFor(PortHole& p, int num) {
 	}
 }
 			
+int DDFStar :: run() { return Star :: run(); }
 		
 // The following is defined in DDFDomain.cc -- this forces that module
 // to be included if any DDF stars are linked in.
