@@ -52,6 +52,12 @@ S56WH_LIBDIR= -L$(S56DIR)/lib
 S56WH_O= $(CG56T)/S56XTargetWH.o 
 endif
 
+# if MATLABDIR is defined, then compile with Matlab external interface library
+ifdef MATLABDIR
+MATLABEXT_LIB= -lmat
+MATLABEXT_LIBDIR= -Lextern/lib/$(ARCH)
+endif
+
 # Library files reqd by stars.  Note that libptolemy.a is not included.
 STAR_LIBFILES=\
 $(LIBDIR)/libcgcstars.a $(LIBDIR)/libcgctcltk.a $(LIBDIR)/libcgc.a \
@@ -96,6 +102,7 @@ STAR_LIBS=\
 -ldestars -lde \
 -lbdfstars -lbdf \
 -lsdfimagestars -lImage -lsdfdspstars -lsdfstars -lLS -lsdf -lsdfmatrixstars \
+$(MATLABEXT_LIBDIR) $(MATLABEXT_LIB) \
 -lvhdlfstars -lvhdlf \
 -lvhdlbstars -lvhdlb \
 -lmdsdfstars -lmdsdf
