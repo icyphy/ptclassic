@@ -160,7 +160,7 @@ void PriorityQueue :: pushBack(LevelLink* a) {
 		lastNode = a;
 	} else {
 		a->next = lastNode->next;
-		if (numberNodes == 1) lastNode->before = a;
+		lastNode->next->before = a;
 	}
 	a->before = lastNode;
 	lastNode->next = a;
