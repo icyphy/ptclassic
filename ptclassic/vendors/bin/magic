@@ -1,0 +1,4 @@
+#!/bin/sh
+# $Id$ 
+cd $PTOLEMY/vendors/magic/sys
+exec `dirname $0`/vendorexec magic/bin/magic -T~ptolemy/vendors/magic/sys/scmos $*
