@@ -32,8 +32,8 @@
 #### SimpleView
 #
 # SimpleView is a view that illustrates the model-view architecture.
-# It is a display of the contents of an instance of the#
-# <a href="SimpleModel">SimpleModel</a> class.
+# It is a display of the contents of an instance of the
+# <a href="SimpleModel.html">SimpleModel</a> class.
 #
 # Here are some examples illustrating the model-view architecture.
 # Firstly, create the model and give it some data:
@@ -52,6 +52,7 @@
 #             item y -bar far
 #         }
 #     }
+#     $model describe
 # </tcl></pre>
 #
 # Now, create two instances of the SimpleView class.
@@ -98,9 +99,25 @@
 # to "all" data, both will have their <b>notify</b> methods called
 # with (in this case) the arguments <b>item:a attrset -foo Yeehah!</b>.
 # The notify method of SimpleView must take appropriate action --
-# in this case, changing the displayed value.
+# in this case, changing the displayed value. You can enter data into
+# either window, and clicking on the "Apply" button will
+# update the model with the new data, and both views will change.
 #
-# Change data in one view and click on the other to see this.
+# Any other data-modifying command can be recorded. Delete an
+# item:
+# <pre><tcl>
+#     $model publish delete item:a
+# </tcl></pre>
+# 
+# Delete an attribute:
+# <pre><tcl>
+#     $model publish attrdel {item:c item:y} -bar
+# </tcl></pre>
+# 
+# Use the redo and undo buttons to go forwards and backwards
+# through the command history. (Note: there is a bug apparent
+# here: the command history does not preserve the ordering
+# of items. Is this important?)
 #
 class ::tycho::SimpleView {
     inherit ::itk::Widget
@@ -114,12 +131,31 @@ class ::tycho::SimpleView {
     constructor {args} {}
     destructor {}
 
-    method _initialize {{context {}} {row 0}}
-    method notify {type command name args}
+    #################################################################
+    ####                     public methods                      ####
 
+    # Apply changed data to the model
     method apply {{context {}}}
-    method undo {}
+
+    # Process notification from the model
+    method notify {type command name args}
+    
+    # Redo one command
     method redo {}
+
+    # Undo one command
+    method undo {}
+
+    #################################################################
+    ####                  private methods                        ####
+
+    private method _initialize {}
+    private method _additem {item}
+    private method _delitem {item}
+    private method _addattr {item attr value {row {}}}
+    private method _delattr {item attr}
+    private method _hasattr {item attr}
+    private method _setattr {item attr value}
 }
 
 ########################################################################
@@ -156,96 +192,35 @@ body ::tycho::SimpleView::constructor {args} {
 }
 
 ########################################################################
-#### _initialize
-# Initialize the display from a model.
-#
-body ::tycho::SimpleView::_initialize {{context {}} {row 0}} {
-    # Get the containing widget
-    set p {}
-    foreach seg $context {
-        regexp {.*:(.*)} $seg _ nm
-        lappend p $nm
-    }
-    set name [join $p .]
-    set path [string trimright $itk_component(data).$name .]
-
-    # Add items
-    foreach i [$model match item $context] {
-        # Create a frame for this item
-        set nm [string trimleft $name.$i .]
-        itk_component add $nm {
-            frame $path.$i
-        }
-        grid $path.$i -row $row -column 2 -sticky nsew
-
-        # Column 1 contains attribute labels: allow it to expand
-        grid columnconfigure $path.$i 1 -weight 1
-
-        # Create its label
-        itk_component add $nm.label {
-            label $path.$i.label -text $i 
-        }
-        grid $path.$i.label -row 0 -column 0
-
-        # Process each attribute
-        set attrrow 0
-        foreach {attr val} [$model attrset [concat $context item:$i]] {
-            # Create a label
-            itk_component add $nm.label$attr {
-                label $path.$i.label$attr -text $attr -foreground blue
-            }
-            grid $path.$i.label$attr -row $attrrow -column 1 -sticky e
-
-            # Create an entry widget
-            itk_component add $nm.entry$attr {
-                entry $path.$i.entry$attr
-            }
-            $path.$i.entry$attr insert 0 $val
-            grid $path.$i.entry$attr -row $attrrow -column 2
-
-            incr attrrow
-        }
-        # Process nested items. Repeat after me: I love
-        # recursion, I love...
-        if { [$model match item [concat $context item:$i]] != "" } {
-            _initialize [concat $context item:$i] $attrrow
-            incr attrrow
-        }
-
-        # Add space at the end
-        # grid rowconfigure $path.$i $attrrow -minsize 12
-
-        # Next row
-        incr row
-    }
-}
-
-########################################################################
 #### apply
 #
+# Compare every entry widget with the value obtained from
+# the model, and if the entry widget is different, update
+# the model.
+#
 body ::tycho::SimpleView::apply {{context {}}} {
-    # Get the containing widget
-    set p {}
-    foreach seg $context {
-        regexp {.*:(.*)} $seg _ nm
-        lappend p $nm
+   # Strip types from the name
+    regsub -all {[^: ]+:} $context {} tails
+    if { $tails != "" } {
+        set path $itk_component([join $tails .])
+    } else {
+        set path $itk_component(data)
     }
-    set name [join $p .]
 
     # Process items
     foreach i [$model match item $context] {
-        set nm [string trimleft $name.$i .]
+        set item [concat $context item:$i]
+
         # Process each attribute
-        foreach {attr val} [$model attrset [concat $context item:$i]] {
-             if { $val != [$itk_component($nm.entry$attr) get] } {
+        foreach {attr val} [$model attrget $item] {
+            if { $val != [$path.$i.entry$attr get] } {
                 # Different value, so update the model
-                $model publish attrset [concat $context item:$i] \
-                        -attr [$itk_component($nm.entry$attr) get]
+                $model publish attrset $item $attr [$path.$i.entry$attr get]
             }
         }
-        # Process nested items.
-        if { [$model match item [concat $context item:$i]] != "" } {
-            apply [concat $context item:$i]
+        # Process nested items recursively.
+        if { [$model match item $item] != "" } {
+            apply $item
         }
     }
 }
@@ -254,47 +229,38 @@ body ::tycho::SimpleView::apply {{context {}}} {
 #### notify
 # Process a notification from the model.
 #
-body ::tycho::SimpleView::notify {command name args} {
-    puts [list notify $command $name $args]
-
-    # Figure out the containing widget name
-    set p {}
-    foreach seg $name {
-        regexp {.*:(.*)} $seg _ nm
-        lappend p $nm
-    }
-    set name [join $p .]
-    set path [string trimright $itk_component(data).$name .]
-
-    # Now switch on the command
+body ::tycho::SimpleView::notify {command item args} {
+    # Switch on the command
     switch -exact -- $command {
+        "add" {
+            # Item was added
+            _additem $item
+        }
+        "delete" {
+            # Item was deleted
+            _delitem $item
+        }
         "attrset" {
             # Attributes changed
-            foreach {attr val} $args {
-                if [::info exists itk_component($nm.entry$attr)] {
-                    # Attribute already exists
-                    $itk_component($name.entry$attr) delete 0 end
-                    $itk_component($name.entry$attr) insert 0 $val
+            foreach {attr value} $args {
+                if [_hasattr $item $attr] {
+                    _setattr $item $attr $value
                 } else {
-                    set row [lindex [grid size $path] 1]
-
-                    # Attribute added. Create a label
-                    itk_component add $name.label$attr {
-                        label $path.label$attr -text $attr -foreground blue
-                    }
-                    grid $path.label$attr -row $row -column 1 -sticky e
-                    
-                    # Create an entry widget
-                    itk_component add $name.entry$attr {
-                        entry $path.entry$attr
-                    }
-                    $path.entry$attr insert 0 $val
-                    grid $path.entry$attr -row $row -column 2
+                    _addattr $item $attr $value
                 }
             }
         }
-        "assign" {
-            # Change all item attributes
+         "attrdel" {
+            # Attributes deleted. For each, call exists{} (in case
+            # the attribute has a default, in which case we don't
+            # really want to delete it.)
+            foreach attr $args {
+                if [$model exists $item $attr] {
+                    _setattr $item $attr [$model attrget $item $attr]
+                } else {
+                    _delattr $item $attr
+                }
+            }
         }
     }               
 }
@@ -321,5 +287,140 @@ body ::tycho::SimpleView::redo {} {
     #    $itk_component(redo) configure -state disabled
     #}
     #$itk_component(redo) configure -state normal
+}
+
+
+########################################################################
+########################################################################
+####                       private methods                        ####
+
+########################################################################
+#### _initialize
+# Initialize the display from a model.
+#
+body ::tycho::SimpleView::_initialize {} {
+    foreach n [$model match item] {
+        _additem item:$n
+    }
+}
+
+########################################################################
+#### _additem
+#
+body ::tycho::SimpleView::_additem {item} {
+    # Strip types from the name
+    regsub -all {[^: ]+:} $item {} tails
+    set name [join $tails .]
+    set path $itk_component(data).$name
+
+    # Create a frame for this item
+    itk_component add $name {
+        frame $path
+    }
+    set row [lindex [grid size [winfo parent $path]] 1]
+    grid $path -row $row -column 2 -sticky nsew
+
+    # Column 1 contains attribute labels: allow it to expand
+    grid columnconfigure $path 1 -weight 1
+
+    # Create its label
+    itk_component add $name.label {
+        label $path.label -text [lindex $tails end]
+    }
+    grid $path.label -row 0 -column 0
+
+    # Process each attribute
+    set i 0
+    foreach {attr val} [$model attrget $item] {
+        _addattr $item $attr $val $i
+        incr i
+    }
+
+    # Process nested items. Repeat after me: I love recursion, I love...
+    foreach n [$model match item $item] {
+        _additem [concat $item item:$n]
+    }
+}
+
+########################################################################
+#### _delitem
+#
+body ::tycho::SimpleView::_delitem {item} {
+    # Strip types from the name
+    regsub -all {[^: ]+:} $item {} tails
+    set name [join $tails .]
+
+    destroy $itk_component($name)
+    unset itk_component($name)
+}
+
+########################################################################
+#### _addattr
+#
+body ::tycho::SimpleView::_addattr {item attr value {row {}}} {
+    # Strip types from the name
+    regsub -all {[^: ]+:} $item {} tails
+    set name [join $tails .]
+    set path $itk_component($name)
+
+    # Get the row, if not provided
+    if { $row == "" } {
+        set row [lindex [grid size $path] 1]
+    }
+
+    # Create the attribute label
+    itk_component add $name.label$attr {
+        label $path.label$attr -text $attr -foreground blue
+    }
+    grid $path.label$attr -row $row -column 1 -sticky e
+
+    # Create the entry widget
+    itk_component add $name.entry$attr {
+        entry $path.entry$attr
+    }
+    $path.entry$attr insert 0 $value
+    grid $path.entry$attr -row $row -column 2
+}
+
+########################################################################
+#### _delattr
+#
+body ::tycho::SimpleView::_delattr {item attr} {
+    # Strip types from the name
+    regsub -all {[^: ]+:} $item {} tails
+    set name [join $tails .]
+    set path $itk_component($name)
+
+    # Delete it
+    destroy $itk_component($name.label$attr)
+    destroy $itk_component($name.entry$attr)
+    unset itk_component($name.label$attr)
+    unset itk_component($name.entry$attr)
+}
+
+########################################################################
+#### _setattr
+#
+body ::tycho::SimpleView::_setattr {item attr value} {
+    # Strip types from the name
+    regsub -all {[^: ]+:} $item {} tails
+    set name [join $tails .]
+    set path $itk_component($name)
+
+    # Change the value
+    $itk_component($name.entry$attr) delete 0 end
+    $itk_component($name.entry$attr) insert 0 [$model attrget $item $attr]
+}
+
+########################################################################
+#### _hasattr
+#
+body ::tycho::SimpleView::_hasattr {item attr} {
+    # Strip types from the name
+    regsub -all {[^: ]+:} $item {} tails
+    set name [join $tails .]
+
+    # Test if it exists
+    ::info exists itk_component($name.entry$attr)
 }
 
