@@ -35,7 +35,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "itk.h"
 #include "itcl.h"
 
-#include "compat.h"
 
 /*
  * Ty_TimerPeriod
