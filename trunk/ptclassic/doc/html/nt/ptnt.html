@@ -22,6 +22,8 @@ to Windows.  <CODE>nt4</CODE> is easier to port because Cygwin
 allows us to use the Unix GNU makefiles in the regular distribution.
  <P>The <CODE>nt4</CODE> port requires that Cygwin be present.
 The port was done with version <CODE>b20.1</CODE> of Cygwin
+ <p>The two biggest problems with the <CODE>nt4</CODE> port is
+that it is slow, and incremental linking of stars is not supported.
 
 <H2><CODE>nt4.vc</CODE></H2>
 If <CODE>PTARCH</CODE> is set to <CODE>nt4.vc</CODE>, then we use
@@ -31,6 +33,10 @@ usually <CODE>makefile</CODE>s.
  <P> The <CODE>nt4.vc</CODE> port does not yet work, there
 are problems creating dlls.  The <CODE>nt4.vc</CODE> port
 has not been built recently, and probably does not work.
+ <P> Currently, we can only compile <CODE>ptcl.ptiny</CODE>
+using MSVC++.  This port is substantially incomplete.
+See <CODE>$PTOLEMY/mk/config-nt4.vc.mk.vc</CODE> for
+<CODE>nt4.vc</CODE> installation instructions.
 
 <H2>Questions</H2>
 <DL>
