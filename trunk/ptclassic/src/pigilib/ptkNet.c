@@ -161,7 +161,7 @@ loop:
 /* fprintf(stderr, "client here: finished the demon\n"); */
 
                     /* clean up */
-                    st_delete(RPCDemonTable, (char **) &id, &ptr);
+                    st_delete(RPCDemonTable, (char **) &id, (char **)&ptr);
                 } 
 /*
                 else {
