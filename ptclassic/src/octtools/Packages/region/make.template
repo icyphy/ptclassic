@@ -1,6 +1,7 @@
+# Octtools region - geometric oct query package
 # Version Identification:
 # $Id$
-# Copyright (c) 1990-1993 The Regents of the University of California.
+# Copyright (c) 1990-1994 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -44,9 +45,12 @@ HDRS		= reg_internal.h \
 		region.h
 
 LIBCSRCS	= hilevel.c \
-		reg_test.c \
 		region.c \
 		rerror.c
+
+OTHERSRCS	= reg_test.c
+
+OTHEROBJS	= $(OTHERSRCS:.c=.o)
 
 SRCS =		$(LIBCSRCS)
 
@@ -56,9 +60,21 @@ LIB = 		libregion.$(LIBSUFFIX)
 
 EXPHDR =	region.h
 
+DRIVER =	reg_test
+
+KRUFT =		$(DRIVER)
+
+DRVROBJ =	reg_test.o
+
+DRVRLIBS =	-lregion -loh -lvov -lgu -loct -ltr -lkd -lport -lutility -lport -lerrtrap -luprintf -lst -lm
+
 # common makefile file for vem libraries
 VEMLIBCONFIG=../../vem-lib.mk
 include $(VEMLIBCONFIG)
+
+tests:: $(DRIVER) 
+	$(DRIVER) $(VPATH)/region_test:physical $(VPATH)/test_std_1
+	$(DRIVER) $(VPATH)/region_inst:physical $(VPATH)/test_std_2
 
 # include common definitions, rules
 include $(ROOT)/mk/common.mk

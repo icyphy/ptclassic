@@ -1,6 +1,7 @@
+# Octtools list - Doubly-linked list package
 # Version Identification:
 # $Id$
-# Copyright (c) 1990-1993 The Regents of the University of California.
+# Copyright (c) 1990-1994 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -55,9 +56,21 @@ LIB = 		liblist.$(LIBSUFFIX)
 
 EXPHDR =	list.h
 
+DRIVER =	list_test
+
+KRUFT =		$(DRIVER) ltest.out
+
+DRVROBJ =	ltest.o
+
+DRVRLIBS = 	 -lport -lerrtrap -luprintf
+
 # common makefile file for vem libraries
 VEMLIBCONFIG=../../vem-lib.mk
 include $(VEMLIBCONFIG)
+
+tests:: $(DRIVER)
+	$(DRIVER) < $(VPATH)/test_input > ltest.out 
+	diff $(VPATH)/test_output ltest.out
 
 # include common definitions, rules
 include $(ROOT)/mk/common.mk

@@ -1,6 +1,7 @@
+# Octtools st - Symbol Table Package
 # Version Identification:
 # $Id$
-# Copyright (c) 1990-1993 The Regents of the University of California.
+# Copyright (c) 1990-1994 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -44,6 +45,7 @@ HDRS		= st.h
 
 LIBCSRCS	= st.c 
 
+OTHERSRCS	= st_test.c
 
 SRCS =		$(LIBCSRCS)
 
@@ -53,9 +55,20 @@ LIB = 		libst.$(LIBSUFFIX)
 
 EXPHDR =	st.h
 
+DRIVER =	st_test
+
+KRUFT =		$(DRIVER)
+
+DRVROBJ =	$(DRIVER).o
+
+DRVRLIBS =  	-lport -lutility -lerrtrap -luprintf 
+
 # common makefile file for vem libraries
 VEMLIBCONFIG=../../vem-lib.mk
 include $(VEMLIBCONFIG)
+
+tests:: $(DRIVER)
+	$(DRIVER) < $(VPATH)/test_input | cmp -s - $(VPATH)/test_output
 
 # include common definitions, rules
 include $(ROOT)/mk/common.mk

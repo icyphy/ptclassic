@@ -1,3 +1,4 @@
+# Octtools fc - file completion package
 # Version Identification:
 # $Id$
 # Copyright (c) 1990-1994 The Regents of the University of California.
@@ -43,6 +44,7 @@ include $(CONFIG)
 HDRS		= fc.h
 
 LIBCSRCS	= fc.c
+
 OTHERSRCS	= fc_test.c
 
 SRCS =		$(LIBCSRCS)
@@ -53,9 +55,21 @@ LIB = 		libfc.$(LIBSUFFIX)
 
 EXPHDR =	fc.h
 
+DRIVER =	fc_test
+
+KRUFT =		$(DRIVER) 
+
+DRVROBJ =	fc_test.o
+
+DRVRLIBS = 	-lutility -lport -lerrtrap -luprintf -lst -lm
+DRVRDIR =	sample
+
 # common makefile file for vem libraries
 VEMLIBCONFIG=../../vem-lib.mk
 include $(VEMLIBCONFIG)
+
+tests:: $(DRIVER) $(DRVRDIR)
+	$(DRIVER) sample/c_r | cmp -s - $(VPATH)/test_output
 
 # include common definitions, rules
 include $(ROOT)/mk/common.mk

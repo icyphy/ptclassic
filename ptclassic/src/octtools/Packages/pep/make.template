@@ -1,3 +1,4 @@
+# Octtools pep - Parasitics Extraction Package
 # Version Identification:
 # $Id$
 # Copyright (c) 1990-1993 The Regents of the University of California.
@@ -49,8 +50,9 @@ LIBCSRCS	= capac.c \
 		models.c \
 		pepUtil.c \
 		resist.c \
-		termCap.c \
-		test.c \
+		termCap.c\
+
+OTHERSRCS =	test.c \
 		test1.c
 
 SRCS =		$(LIBCSRCS)
@@ -61,9 +63,25 @@ LIB = 		libpep.$(LIBSUFFIX)
 
 EXPHDR =	pep.h
 
+DRIVER =	pep_test
+
+KRUFT =		$(DRIVER) pep_test1
+
+DRVROBJ =	test.o
+
+DRVRLIBS =	-lth -lregion -lkd -lgu -loh -ltap -lvov -loptions -loct -ltr -lst -llist -lport -lutility -lerrtrap -luprintf -lm
+
 # common makefile file for vem libraries
 VEMLIBCONFIG=../../vem-lib.mk
 include $(VEMLIBCONFIG)
+
+tests:: pep_test pep_test1
+	@echo "Neither of these tests work right now"
+	-pep_test
+	-pep_test1
+
+pep_test1: test1.o $(OBJS) 
+	$(LINKER) $(LINKFLAGS) $^ -o $@ -L$(OCTLIBDIR) $(DRVRLIBS)
 
 # include common definitions, rules
 include $(ROOT)/mk/common.mk

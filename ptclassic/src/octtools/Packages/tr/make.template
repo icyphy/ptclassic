@@ -1,3 +1,4 @@
+# Octtools tr - Translation Package
 # Version Identification:
 # $Id$
 # Copyright (c) 1990-1993 The Regents of the University of California.
@@ -42,8 +43,9 @@ include $(CONFIG)
 
 HDRS		= tr.h
 
-LIBCSRCS	= tr.c \
-		tr_test.c
+LIBCSRCS	= tr.c
+
+OTHERSRCS	= tr_test.c
 
 SRCS =		$(LIBCSRCS)
 
@@ -53,9 +55,21 @@ LIB = 		libtr.$(LIBSUFFIX)
 
 EXPHDR =	tr.h
 
+DRIVER =	tr_test
+
+KRUFT = 	$(DRIVER)
+
+DRVROBJ =	$(DRIVER).o
+
+DRVRLIBS =	-lport -lerrtrap -luprintf -lm
+
 # common makefile file for vem libraries
 VEMLIBCONFIG=../../vem-lib.mk
 include $(VEMLIBCONFIG)
+
+tests:: $(DRIVER)
+	@echo "There is no test suite for tr_test, but you can start it up"
+	@echo "and type commands at it"
 
 # include common definitions, rules
 include $(ROOT)/mk/common.mk

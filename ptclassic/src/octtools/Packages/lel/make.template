@@ -1,6 +1,7 @@
+# Octtools lel - Label Evaluation Package
 # Version Identification:
 # $Id$
-# Copyright (c) 1990-1993 The Regents of the University of California.
+# Copyright (c) 1990-1994 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -42,10 +43,11 @@ include $(CONFIG)
 
 HDRS		= lel.h
 
-LIBCSRCS	= driver.c \
-		label.c \
+LIBCSRCS	= label.c \
 		lang.c \
 		prop.c
+
+OTHERSRCS	= driver.c
 
 SRCS =		$(LIBCSRCS)
 
@@ -55,9 +57,27 @@ LIB = 		liblel.$(LIBSUFFIX)
 
 EXPHDR =	lel.h
 
+DRIVER =	lel_test
+
+KRUFT =		$(DRIVER) test.out
+
+DRVROBJS =	driver.o
+
+DRVRLIBS =	-loh -lvov -ltap -loptions -loh -loct -ltr -llist -lutility -lport -lerrtrap -luprintf -lst -lm 
+
+DRVRDIR =	tst
+
 # common makefile file for vem libraries
 VEMLIBCONFIG=../../vem-lib.mk
 include $(VEMLIBCONFIG)
+
+tests::	$(DRIVER) tst
+	csh -c "setenv OCTTOOLS $(PTOLEMY); $(DRIVER) -c -p ptolemy schematic" > test.out 2>&1
+	diff $(VPATH)/test.old test.out 
+	@echo "These are from the original octtools source, but they "
+	@echo " don't seem to work"
+	#(cd tst; ../$(DRIVER) sample:physical)
+	#(cd tst; ../$(DRIVER) hi-sample:physical)
 
 # include common definitions, rules
 include $(ROOT)/mk/common.mk

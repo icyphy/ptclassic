@@ -119,15 +119,18 @@ DRVROBJ =	regress.o
 
 DRVRLIBS = -ltr -lport -lutility -lerrtrap -luprintf -lst -lm
 
-tests:: $(DRIVER) tst
-	cd tst; ../$(DRIVER) 
-
-regress.o: regress.c
-	$(CC) $(C_SHAREDFLAGS) $(CFLAGS) -DCADROOT=\"$(PTOLEMY)/obj.$(ARCH)/octtools/Packages\" -g $^ -c $(C_INCL) 
+DRVRDIR =	tst
 
 # common makefile file for vem libraries
 VEMLIBCONFIG=../../vem-lib.mk
 include $(VEMLIBCONFIG)
+
+tests:: $(DRIVER) tst
+	@echo "Note: $$PTOLEMY is hard coded into the test binary"
+	cd tst; ../$(DRIVER) 
+
+regress.o: regress.c
+	$(CC) $(C_SHAREDFLAGS) $(CFLAGS) -DCADROOT=\"$(PTOLEMY)/obj.$(ARCH)/octtools/Packages\" -g $^ -c $(C_INCL) 
 
 # include common definitions, rules
 include $(ROOT)/mk/common.mk

@@ -1,3 +1,4 @@
+# Octtools tap - technology access package
 # Version Identification:
 # $Id$
 # Copyright (c) 1990-1993 The Regents of the University of California.
@@ -52,8 +53,9 @@ LIBCSRCS	= cachepalette.c \
 		palette.c \
 		prop.c \
 		quantize.c \
-		tap-print.c \
-		tap.c \
+		tap.c
+
+OTHERSRCS =	tap-print.c \
 		tapvempat.c
 
 SRCS =		$(LIBCSRCS)
@@ -64,9 +66,22 @@ LIB = 		libtap.$(LIBSUFFIX)
 
 EXPHDR =	tap.h
 
+DRIVER =	tap-print
+
+KRUFT =		$(DRIVER)  tapvempat 
+
+DRVROBJ =	tap-print.o
+
+DRVRLIBS = 	-ltap -llist -loh -lvov -loptions -lgu -loct -ltr -lkd -lutility -lport -lerrtrap -luprintf -lst -lm
+
 # common makefile file for vem libraries
 VEMLIBCONFIG=../../vem-lib.mk
 include $(VEMLIBCONFIG)
+
+tests:: $(DRIVER) tapvempat
+
+tapvempat: tapvempat.o $(OBJS) 
+	$(LINKER) $(LINKFLAGS) $^ -o $@ -L$(OCTLIBDIR) $(DRVRLIBS)
 
 # include common definitions, rules
 include $(ROOT)/mk/common.mk

@@ -1,6 +1,7 @@
+# Octtools vov - C version of the VOV libraries.
 # Version Identification:
 # $Id$
-# Copyright (c) 1990-1993 The Regents of the University of California.
+# Copyright (c) 1990-1994 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -45,7 +46,7 @@ HDRS		= vov.h
 LIBCSRCS	= lib.c \
 		vovoct.c
 
-MISCSRCS	= test.c
+OTHERSRCS	= test.c
 
 SRCS =		$(LIBCSRCS)
 
@@ -55,9 +56,21 @@ LIB = 		libvov.$(LIBSUFFIX)
 
 EXPHDR =	vov.h
 
+# Has to be named vov-test, for it calls itself
+DRIVER =	vov-test
+
+KRUFT =		$(DRIVER)
+
+DRVROBJ =	test.o
+
+DRVRLIBS =	-loct -ltr -lutility -lerrtrap -luprintf -lst -lm 
+
 # common makefile file for vem libraries
 VEMLIBCONFIG=../../vem-lib.mk
 include $(VEMLIBCONFIG)
+
+tests:: $(DRIVER)
+	$(DRIVER)
 
 # include common definitions, rules
 include $(ROOT)/mk/common.mk

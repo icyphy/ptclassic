@@ -1,3 +1,4 @@
+# Octtools da - dynamic array package
 # Version Identification:
 # $Id$
 # Copyright (c) 1990-1993 The Regents of the University of California.
@@ -42,8 +43,8 @@ include $(CONFIG)
 
 HDRS		= da.h
 
-LIBCSRCS	= da.c \
-		da_example.c
+LIBCSRCS	= da.c
+OTHERSRCS	= da_example.c
 
 SRCS =		$(LIBCSRCS)
 
@@ -53,9 +54,21 @@ LIB = 		libda.$(LIBSUFFIX)
 
 EXPHDR =	da.h
 
+DRIVER =	da_test
+
+KRUFT =		$(DRIVER) run_out
+
+DRVROBJ =	da_example.o
+
+DRVRLIBS =	-lport -lerrtrap -luprintf
+
 # common makefile file for vem libraries
 VEMLIBCONFIG=../../vem-lib.mk
 include $(VEMLIBCONFIG)
+
+tests:: $(DRIVER)
+	$(DRIVER) < $(VPATH)/test_input > run_out
+	diff $(VPATH)/test_output run_out
 
 # include common definitions, rules
 include $(ROOT)/mk/common.mk

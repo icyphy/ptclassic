@@ -1,3 +1,4 @@
+# Octtools avl - AVL Tree Package
 # Version Identification:
 # @(#)make.template	1.2	1/22/94
 # Copyright (c) 1990-1993 The Regents of the University of California.
@@ -42,8 +43,8 @@ include $(CONFIG)
 
 HDRS		= avl.h
 
-LIBCSRCS	= avl.c \
-		test.c
+LIBCSRCS	= avl.c
+OTHERSRCS	= test.c
 
 SRCS =		$(LIBCSRCS)
 
@@ -53,9 +54,19 @@ LIB = 		libavl.$(LIBSUFFIX)
 
 EXPHDR =	avl.h
 
+DRIVER =	avl_test
+KRUFT =		$(DRIVER) 
+
+DRVROBJ =	test.o
+
+DRVRLIBS =	-lport -lerrtrap -luprintf
+
 # common makefile file for vem libraries
 VEMLIBCONFIG=../../vem-lib.mk
 include $(VEMLIBCONFIG)
+
+tests:: $(DRIVER)
+	$(DRIVER)
 
 # include common definitions, rules
 include $(ROOT)/mk/common.mk
