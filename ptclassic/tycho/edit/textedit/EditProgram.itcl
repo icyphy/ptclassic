@@ -96,7 +96,7 @@ body ::tycho::EditProgram::constructor {args} {
 	    -label "Indent Region" \
 	    -accelerator "Esc C-\\" \
 	    -underline 1 \
-	    -command "$this component text indentSelection"
+	    -command "$this component text busy indentSelection"
     
     $itk_component(formatMenu) add command \
 	    -label "Tab" \
