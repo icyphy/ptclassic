@@ -235,10 +235,12 @@ At first, the toolbar is blank, so you won't actually see anything.
 Let's add a couple of buttons to it:
 
 <tcl quiet><pre>
-$fr.tb button foo "The first button" -text "Push Me" &#92
-		-command {::tycho::post Thanks!}
-$fr.tb button bar "The second button"   -text "Push Me Too" &#92
-		-command {::tycho::post {Thanks again!}}
+$fr.tb button foo -description "The first button" &#92
+       -text "Push Me" &#92
+       -command {::tycho::post Thanks!}
+$fr.tb button bar -description "The second button"   &#92
+       -text "Push Me Too" &#92
+       -command {::tycho::post {Thanks again!}}
 set bogus ""
 </pre></tcl>
 
