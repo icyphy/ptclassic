@@ -61,6 +61,8 @@ Programmer: J. T. Buck and E. A. Lee
 #define FLEN 256
 /* number of include files */
 #define NINC 30
+/* Number of classes we can derive from */
+#define NDERIVED 10
 /* number of see alsos */
 #define NSEE 30
 #define NSTR 20
@@ -175,7 +177,6 @@ char* objHTMLdoc;		/* long explanation for HTML formatting */
 char* objLocation;		/* location string */
 int   galDef;			/* true if obj is a galaxy */
 char* domain;			/* domain of object (if star) */
-char* derivedFrom;		/* class obj is derived from */
 char* portName;			/* name of porthole */
 char* portType;			/* dataType of porthole */
 char* portInherit;		/* porthole for inheritTypeFrom */
@@ -252,6 +253,8 @@ char* hInclude[NINC];		/* include files in .h file */
 int   nHInclude;		/* number of such files */
 char* ccInclude[NINC];		/* include files in .cc file */
 int   nCcInclude;		/* number of such files */
+char* derivedFrom[NDERIVED];	/* classes obj is derived from */
+int   nDerivedFrom;		/* number of such files */
 char* seeAlsoList[NSEE];	/* list of pointers to other manual sections */
 int   nSeeAlso;			/* number of such pointers */
 
@@ -492,7 +495,7 @@ version:
 staritem:
 	sgitem
 |	DOMAIN '{' ident '}'		{ domain = $3;}
-|	DERIVED '{' ident '}'		{ derivedFrom = $3;}
+|	DERIVED '{' derivedlist '}'	{ }
 |	portkey '{' portlist '}'	{ genPort();
 					  describePort(); }
 |	CODEBLOCK '(' ident cbargs ')' '{'
@@ -508,6 +511,11 @@ staritem:
 		BODY	 		{ codeBlocks[numBlocks++]=$8;
 					  codeMode = 0;
 					}
+;
+
+/* include files */
+derivedlist:	IDENTIFIER		{ derivedFrom[nDerivedFrom++] = $1; }
+|	derivedlist ',' IDENTIFIER	{ derivedFrom[nDerivedFrom++] = $3; }
 ;
 
 cbargs: /*nothing*/		{ $$ = (char*)0; }
@@ -731,7 +739,7 @@ int g;
 	int i;
 	for (i = 0; i < NSTATECLASSES; i++) stateMarks[i] = 0;
 	galDef = g;
-	objName = objVer = objDesc = domain = derivedFrom =
+	objName = objVer = objDesc = domain = 
 		objAuthor = objCopyright = objExpl = objHTMLdoc =
                 objLocation = NULL;
 	consStuff[0] = ccCode[0] = hCode[0] = consCalls[0] = 0;
@@ -740,7 +748,7 @@ int g;
 	stateDescriptions[0] = 0;
 	inputDescHTML[0] = outputDescHTML[0] = inoutDescHTML[0] = 0;
 	stateDescHTML[0] = 0;
-	nCcInclude = nHInclude = nSeeAlso = 0;
+	nCcInclude = nDerivedFrom = nHInclude = nSeeAlso = 0;
 	pureFlag = 0;
 	for (i = 0; i < N_FORMS; i++) {
 		codeBody[i] = 0;
@@ -1360,14 +1368,14 @@ void genDef ()
 /* The base class */
 /* For stars, we append the domain name to the beginning of the name,
    unless it is already there */
-	if (derivedFrom) {
+	if (derivedFrom[0]) {
 		if (domain &&
-		    strncmp (domain, derivedFrom, strlen (domain)) != 0) {
+		    strncmp (domain, derivedFrom[0], strlen (domain)) != 0) {
 			sprintf (baseClass, "%s%s", galDef ? "" : domain,
-				 derivedFrom);
+				 derivedFrom[0]);
 		}
 		else
-			(void) strcpy (baseClass, derivedFrom);
+			(void) strcpy (baseClass, derivedFrom[0]);
 	}
 /* Not explicitly specified: baseclass is Galaxy or XXXStar */
 	else if (galDef)
@@ -1391,6 +1399,16 @@ void genDef ()
 	fprintf (fp, "%s\n", hCode);
 /* The class template */
 	fprintf (fp, "class %s : public %s\n{\n", fullClass, baseClass);
+	fprintf (fp, "class %s : public %s ", fullClass, baseClass);
+	for( i = 1; i < nDerivedFrom; i++ ) {
+	    if (domain &&
+		strncmp (domain, derivedFrom[i], strlen (domain)) != 0) {
+		fprintf( fp, ", %s%s", galDef ? "" : domain, derivedFrom[i]);
+	    } else 
+		fprintf( fp, ", %s", derivedFrom[i] );
+        }
+	fprintf( fp, "\n{\n" );
+
 	sprintf (destNameBuf, "~%s", fullClass);
 	fprintf (fp, "public:\n\t%s();\n", fullClass);
 /* The makeNew function: only if the class isn't a pure virtual */
@@ -1554,18 +1572,23 @@ void genDef ()
 /* base class and domain */
 	/* For stars, we append the domain name to the beginning of the name,
 	   unless it is already there */
-	if (derivedFrom) {
-		if (domain &&
-		    strncmp (domain, derivedFrom, strlen (domain)) != 0) {
-			sprintf (baseClass, "%s%s", galDef ? "" : domain,
-				 derivedFrom);
-                        derivedSimple = derivedFrom;
-		} else {
-			(void) strcpy (baseClass, derivedFrom);
-                        derivedSimple = derivedFrom + strlen(domain);
-                }
+	if (nDerivedFrom > 0) {
                 /* Put in a hyperlink to the domain index */
-                fprintf (fp, "<b>Derived from:</b> <a href=\"$PTOLEMY/src/domains/%s/domain.idx#%s \">%s</a><br>\n", cvtToLower(domain), derivedSimple, baseClass);
+                fprintf (fp, "<b>Derived from:</b>");
+		for( i = 0; i < nDerivedFrom; i++ ) {
+		    if (domain &&
+			strncmp (domain, derivedFrom[i],
+			    strlen (domain)) != 0) {
+			    sprintf (baseClass, "%s%s", galDef ? "" : domain,
+				 derivedFrom[i]);
+                            derivedSimple = derivedFrom[i];
+		    } else {
+			(void) strcpy (baseClass, derivedFrom[i]);
+                        derivedSimple = derivedFrom[i] + strlen(domain);
+	            }
+		    if (i>0) fprintf(fp,", ");
+	            fprintf (fp, "<a href=\"$PTOLEMY/src/domains/%s/domain.idx#%s \">%s</a><br>\n", cvtToLower(domain), derivedSimple, baseClass);
+		}
 	}
 	/* Not explicitly specified: baseclass is Galaxy or XXXStar */
 	else if (galDef) {
