@@ -57,7 +57,7 @@ cutoff frequency at about 1/3 of the Nyquist frequency.
 		default {1}
 		desc {Decimation ratio.}
 	}
-        defstate {
+        state {
 		name {decimationPhase}
 		type {int}
 		default {0}
@@ -75,9 +75,7 @@ cutoff frequency at about 1/3 of the Nyquist frequency.
 		default {0}
 		desc {internal}
 		// removed A_CONSEQ flag -- kennard
-                attributes {
-               A_CIRC|A_NONCONSTANT|A_NONSETTABLE|A_XMEM|A_NOINIT
-	        }
+                attributes {A_CIRC|A_NONCONSTANT|A_NONSETTABLE|A_XMEM|A_NOINIT}
 	}
         state {
                 name {oldsampleStart}
@@ -122,6 +120,28 @@ cutoff frequency at about 1/3 of the Nyquist frequency.
                 attributes {A_NONCONSTANT|A_NONSETTABLE}
         }	    
 
+        method {
+	    name {CheckParameterValues}
+	    arglist { "()" }
+	    type { void }
+	    code {
+		StringList msg = "Filter taps ";
+		int numTaps = taps.size();
+		int errorFlag = FALSE;
+		for (int i = 0; i < numTaps; i++) {
+		    double tapvalue = double(taps[i]);
+		    if ( tapvalue < -1 || tapvalue > 1 ) {
+			errorFlag = TRUE;
+			msg << i << " ";
+		    }
+		}
+		if (errorFlag) {
+		    msg << " are outside the range of [-1,1]";
+		    Error::warn(*this, msg);
+		}
+	    }
+	}
+
 	setup {
 	      if ( int(decimationPhase) != 0 ) {
 		  Error::warn(*this,
@@ -142,12 +162,13 @@ cutoff frequency at about 1/3 of the Nyquist frequency.
               if (decimt>1 && interp>1) 
 	              Error::abortRun (*this, ": Cannot both interpolate and decimate.");
 	      
-              int modtemp=tapsNum%interp;
-              if (modtemp !=0) {
+              int modtemp = tapsNum%interp;
+              if (modtemp != 0) {
 	             taps.resize(tapsNum+interp-modtemp);
 		     tapsNum=taps.size();
 	      }
         }
+
         initCode {
 	    int interp = interpolation;
 	    int i = 0;
@@ -170,7 +191,7 @@ cutoff frequency at about 1/3 of the Nyquist frequency.
         }
         
 	go {
-                tp= int(tapsNum/interpolation);
+                tp = int(tapsNum/interpolation);
                 dec = tp;
                 if (tp > decimation) dec=decimation;
 		adjust = (int)decimation - (int)tp;
