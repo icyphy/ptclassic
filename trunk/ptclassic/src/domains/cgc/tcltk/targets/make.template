@@ -42,7 +42,7 @@ CGCSTARS = $(ROOT)/src/domains/cgc/stars
 EGKERNEL = $(ROOT)/src/domains/sdf/expgraph
 PARDIR = $(ROOT)/src/domains/cg/parScheduler
 CGTARDIR = $(ROOT)/src/domains/cg/targets
-CGCTARGMAINDIR = $(ROOT)/src/domains/cgc/targets/main
+CGCTARGMAINDIR = $(ROOT)/src/domains/cgc/targets/uniprocessor
 
 INCL=-I$(CGCKERNEL) -I$(CGKERNEL) -I$(SDFKERNEL) -I$(KERNDIR) -I$(EGKERNEL) \
 	-I$(PARDIR) -I$(CGTARDIR) -I$(CGCTARGMAINDIR) -I$(CGCSTARS)
