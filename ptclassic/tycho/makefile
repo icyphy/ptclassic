@@ -53,7 +53,9 @@ makefiles all clean depend realclean checkjunk sccsinfo itcldocs \
 	    fi ; \
 	done
 
-install: subinstall $(INDICES)
+# We make itcldocs twice because they use the codeDoc.idx index, which
+# is created from the itcldocs
+install: subinstall itcldocs indices itcldocs
 subinstall:
 	@for x in $(DIRS); do \
 	    if [ -w $$x ] ; then \
@@ -135,4 +137,4 @@ htmlchek:
 	ls `egrep '\.html' htmlchekout.HREF | grep -v http`
 
 spellcheck:
-	cat `find . -name "*.html" -print` | spell
+	cat `find . -name "*.html" -print | grep -v html_library` | spell
