@@ -107,12 +107,17 @@ body ::tycho::Follower::activate {t x y args} {
     # with -activatecommand if desired.
     target $t
 
-    # Set up the bindings.
+    # Set up the bindings. Do not use the modifiers to the
+    # motion and release events, so that the interactor still
+    # works if the keys are released...
+    array set opts $args
+    catch {unset opts(-modifiers)}
+
     $slate bind $target \
-	    [eval ::tycho::Interactor::event Motion $args] \
+	    [eval ::tycho::Interactor::event Motion [array get opts]] \
 	    "$this drag %x %y; update idletasks"
     $slate bind $target \
-	    [eval ::tycho::Interactor::event Release $args] \
+	    [eval ::tycho::Interactor::event Release [array get opts]] \
 	    "$this release; $this deactivate $args"
 
     # Execute the user-specified activation command
@@ -131,11 +136,14 @@ body ::tycho::Follower::activate {t x y args} {
 # by the script bound to the release event.
 # 
 body ::tycho::Follower::deactivate {args} {
+    array set opts $args
+    catch {unset opts(-modifiers)}
+
     # Remove bindings from the current tag
     $slate bind $target \
-            [eval ::tycho::Interactor::event Motion $args] {}
+            [eval ::tycho::Interactor::event Motion [array get opts]] {}
     $slate bind $target \
-	    [eval ::tycho::Interactor::event Release $args] {}
+	    [eval ::tycho::Interactor::event Release [array get opts]] {}
 
     if { $deactivatecommand != "" } {
         uplevel #0 $deactivatecommand $target
