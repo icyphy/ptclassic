@@ -41,9 +41,12 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #endif
 
 
-#if defined(sun) && defined(__svr4__)
-/* Solaris2.3 defines type boolean as an enum.
+#if (defined(sun) && (defined(__svr4__) || defined(SVR4) || defined(SYSV)))
+/* Solaris2.3 defines type boolean as an enum, which is a no no
  * See also octtools/include/port/port.h
+ * We can't just include "port.h", or we will need to add
+ * -I$(OCTTOOLS)/include in a lot of places.  The tcltk stars include
+ * pigilib header files.
  */
 #define boolean sun_boolean
 #include <sys/types.h>
