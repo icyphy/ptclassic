@@ -373,7 +373,6 @@ body ::tycho::Dialog::invoke {args} {
 # then this auto-raise feature is disabled.
 #
 body ::tycho::Dialog::wait {instance {autoraise 1}} {
-    global testsuite
     if ![$instance isa ::tycho::Dialog] {
         error "wait expects a Dialog but got: $instance"
     }
@@ -398,12 +397,20 @@ body ::tycho::Dialog::wait {instance {autoraise 1}} {
             # If the user moves the mouse in another window, raise
             bind $instance <Motion> "+raise $instance"
         }
-        # This is slightly evil, but if we are running the test suite
-        # then we need to return a value here.
-	if [info exists testsuite] {
-	    return $instance
+        # This is very evil, but if we are running the test suite
+        # then we need to return a value here, so that we can
+	# make the tests press buttons and stuff
+        global TY_TESTING TY_TEST_SCRIPT
+	if { [info exists TY_TESTING] && $TY_TESTING == 1 } {
+            if { [info exists TY_TEST_SCRIPT] } {
+                regsub -all %0 $TY_TEST_SCRIPT $instance temp_script
+                uplevel #0 $temp_script
+            } else {
+                return $instance
+            }
 	} else {
-	    # We wait here for the window to be deleted.
+	    # Normally, wait for the window to be deleted
+	    # and then return.
 	    tkwait window $instance
 	}
         
