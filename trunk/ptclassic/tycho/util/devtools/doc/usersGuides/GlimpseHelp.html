@@ -15,6 +15,12 @@ shipped with the Tycho sources, you can get <CODE>glimpse</CODE> sources from
 In Tycho, <a href="../../../makefile">$TYCHO/makefile</a> contains
 a <code>glimpse</code> rule that will update <code>$TYCHO/.glimpse_index</code>
 if <code>glimpse</code> is installed.
+
+<p> Note that the Glimpse browser uses the tcl <CODE>exec</CODE>
+command, which is unavailable on the Macintosh, so the Glimpse browser
+is not present on that platform.  Note further that we have not tested
+the Glimpse browser under Windows.
+
 <p>
 The Glimpse browser is a window that prompts for a pattern to search
 for.  Clicking the <code>Find</code> button passes the pattern to the
