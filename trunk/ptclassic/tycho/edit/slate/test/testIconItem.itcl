@@ -178,24 +178,20 @@ _update
 #
 _item
 test IconItem-terminal-1 "Create a terminal and access as component" {
-    .s call $f terminal input-1 Terminal 0 0 \
-            -anchor {50 0} \
+    .s call $f terminal input-1 Terminal 50 0 \
             -direction {0 -1} \
             -length 20 \
-            -type input \
-            -style doublearrow
+            -style doublearrowin
     # Test: just make sure we get something
     expr { [.s component $f input-1] != "" }
 } {1}
 _update
 
 test IconItem-terminal-2 "Create a terminal and get coordinates" {
-    .s call $f terminal input-2 Terminal 0 0 \
-            -anchor {0 50} \
+    .s call $f terminal input-2 Terminal 0 50 \
             -direction {-1 0} \
             -length 30 \
-            -type input \
-            -style blob -fill blue
+            -style circle -fill blue
     # Test: get the two ends of both terminals
     list \
             [.s aspect [.s component $f input-1] origin terminal] \
