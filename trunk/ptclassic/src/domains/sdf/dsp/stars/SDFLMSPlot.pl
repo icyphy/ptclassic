@@ -3,6 +3,7 @@ defstar {
 	domain { SDF }
 	derivedFrom { LMS }
 	desc {
+OBSOLETE: THIS STAR IS REPLACED BY SDF LMSTkPlot.
 Adaptive filter using LMS adaptation algorithm.  In addition,
 the tap coefficients are plotted using the xgraph program, with a
 separate plot for the magnitude and phase.  If "trace" is NO, only the
