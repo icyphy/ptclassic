@@ -357,13 +357,13 @@ body ::tycho::Interactor::enable {} {
 
 #######################################################################
 #### execute
-# Execute a script, by applying it to the interactor, the target, and
-# the current _x_ and _y_ coordinates.
+# Execute a script, by applying it to the interactor, the target,
+# the current _x_ and _y_ coordinates, and any options.
 #
 body ::tycho::Interactor::execute {script {x {}} {y {}} {options {}}} {
     if { $script != "" } {
 	uplevel \#0 ::tycho::apply \
-		[list $script] $this $target $x $y $options
+		[list $script] $this $target $x $y [list $options]
     }
 }
 
