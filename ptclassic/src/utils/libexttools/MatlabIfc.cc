@@ -67,11 +67,11 @@ MatlabIfc :: MatlabIfc() {
     matlabStarsCount++;
     scriptDirectory = 0;
     deleteFigures = FALSE;
-    matlabOutputBuffer[0] = 0;
     matlabFigureHandle = "PtolemyMatlabIfc";
     matlabFigureHandle << matlabStarsCount;
     matlabOutputBuffer = defaultMatlabBuffer;
     matlabOutputBufferLen = MATLAB_BUFFER_LEN;
+    matlabOutputBuffer[0] = 0;
 }
 
 // destructor
