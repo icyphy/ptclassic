@@ -18,10 +18,10 @@ limitation of liability, and disclaimer of warranty provisions.
     }
     location { DE main library }
 	htmldoc {
-The <i>set\fP method resets and starts a timer.
-Invoking <i>set\fP again will reset the timer and restart it.
-Invoking <i>clear\fP stops the timer.
-The <i>expired\fP method indicates whether or not the timer
+The <i>set</i> method resets and starts a timer.
+Invoking <i>set</i> again will reset the timer and restart it.
+Invoking <i>clear</i> stops the timer.
+The <i>expired</i> method indicates whether or not the timer
 has reached <i>time-out</i></b>.
     }
 
