@@ -9,11 +9,17 @@ own pigiRpc executable.  To use the executable, set the environment
 variable PIGIRPC to the full path of your personal pigiRpc executable.
 
 To build your own pigiRpc, you should create a working directory, and
-copy the makefile and defpalettes.c from this directory to your working
-directory.  Edit defpalettes.c to reflect the default domain and list
-of palettes that you desire, and edit the makefile to modify what stars
-and libraries are linked into the executable.  Then run "make" and you're
-in business.
+copy the makefile, pigiMain.cc, and defpalettes.c from this directory
+to your working directory.  Edit defpalettes.c to reflect the default
+domain and list of palettes that you desire, and edit the makefile to
+modify what stars and libraries are linked into the executable.  You
+may also need (or want) to edit the variables ROOT, OBJDIR, and VERSION
+in the makefile.  Then run "make" and you're in business.
+
+To make a version of pigi that has debugging enabled, do "make pigiRpc.debug"
+and start things up with "pigiDebug" instead of pigi.  Warning: if you
+don't have a lot of memory on your workstation, this will be extremely
+slow.
 
 WARNING: make sure to modify the place where "make install" puts the
 completed executable, or it will attempt to overwrite the official
