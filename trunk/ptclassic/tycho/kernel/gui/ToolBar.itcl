@@ -94,8 +94,8 @@ class ::tycho::ToolBar {
     # Test if a button or an entry exists
     method exists {tag}
 
-    # Focus in the tag. Currently works only for entry tag
-    method focusin {tag}
+    # Focus on the toolbar or on an entry within it
+    method focusin {{tag {}}}
 
     # Get the current value of the widgets (or one widget). Ignored for buttons.
     method get {{tag {}}}
@@ -342,13 +342,17 @@ body ::tycho::ToolBar::exists {tag} {
 }
 
 #####################################################################
-#### focus
-# This needs to be redefined because focusing in on an entire toolbar
-# does not do anything. Currently this is reconfigured to focus on
-# entries.
+#### focusin
+# Redefine to take an optional argument that specified the tag of an
+# entry into which to focus. If there is no such entry the command
+# is ignored. 
 #
-body ::tycho::ToolBar::focusin {tag} {
-    focus $itk_component(entrysite).tag_$tag
+body ::tycho::ToolBar::focusin {{tag {}}} {
+    if {$tag != {}} {
+        focus $itk_component(entrysite).tag_$tag
+    } else {
+        chain
+    }
 }
 
 
