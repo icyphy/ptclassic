@@ -5,10 +5,10 @@
 .(b C
 .sp 1.5i
 .S 200
-\f66
+\f67
 .S 80
 .sp 2i
-CG
+CGC
 .sp 1i
 Domain
 .sp 1i
