@@ -1,0 +1,75 @@
+# Makefile for Ptolemy tcl/tk library (used primarily for 'make sources')
+
+# Version Identification:
+# $Id$
+# Copyright (c) 1990-%Q% The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the
+# above copyright notice and the following two paragraphs appear in all
+# copies of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+# 						PT_COPYRIGHT_VERSION_2
+# 						COPYRIGHTENDKEY
+
+# Important!  Do not run this makefile while in ~ptolemy/lib/tcltk.  Instead
+# run in from ~ptolemy/obj.$ARCH (through the symbolic link) -- that
+# way a separate directory containing, say, Sun-3 and Sun-4 objects can be
+# maintained.
+
+ROOT = ../..
+VPATH = $(ROOT)/lib/tcl
+
+# get configuration info
+CONFIG=$(ROOT)/mk/config-$(ARCH).mk
+include $(CONFIG)
+
+EXTRA_SRCS = esterel2pl.tcl \
+	mathexpr.tcl message.tcl pigilib.tcl ptcl.tcl ptcl_help.tcl \
+	ptkBarGraph.tcl ptkBind.tcl ptkColor.tcl ptkControl.tcl \
+	ptkDialog.tcl ptkGantt.tcl ptkLogicAnalyzer.itcl \
+	ptkOptions.tcl ptkParams.tcl \
+	ptkPrfacet.tcl ptkRunAllDemos.tcl ptkRunDesignMaker.tcl \
+	ptkStarIndex.tcl tkoct.tcl topgetopt.tcl utilities.tcl
+
+MISC_FILES = Ptolemy.xbm left.xbm ptolemySmall.gif ptolemyWelcome.gif \
+	right.xbm
+
+# common.mk wants this, otherwise we get multiple targets for $(LIBDIR)/$(LIB)
+LIB = foo
+
+
+# We don't include common.mk since we don't use the compiler here
+# include common definitions, rules
+#include $(ROOT)/mk/common.mk
+
+all install:
+	@echo "nothing to be done in this directory"
+
+sources:	$(EXTRA_SRCS) $(MISC_FILES) makefile
+
+depend:
+	@echo "no dependencies in tkman directory (contributed code)"
+
+sccsinfo:
+	sccs info
+checkjunk:
+	@checkextra -v $(EXTRA_SRCS) $(MISC_FILES) makefile SCCS
+
+clean:
+	rm -f *~
