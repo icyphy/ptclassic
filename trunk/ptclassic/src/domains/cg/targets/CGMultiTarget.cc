@@ -175,12 +175,14 @@ void CGMultiTarget :: prepareChildren() {
 	    addChild(*t);
 	    tname.initialize();
 	    tname << filePrefix << i;
-	    t->setNameParent(hashstring(tname),this);
+	    const char* childFilePrefix = hashstring(tname);
+	    t->setNameParent(childFilePrefix,this);
 	    if (cgChild(i)) {
-		t->stateWithName("file")->setInitValue(tname);
-		t->stateWithName("directory")->setInitValue(destDirectory);
-		const char* display = displayFlag.initValue();
-		t->stateWithName("display?")->setInitValue(display);
+		t->stateWithName("file")->setInitValue(childFilePrefix);
+		t->stateWithName("directory")
+		 ->setInitValue(destDirectory.initValue());
+		t->stateWithName("display?")
+                 ->setInitValue(displayFlag.initValue());
 	    }
 	}
 	resourceInfo();
