@@ -55,23 +55,20 @@ void DERepeatStar::initialize() {
 	if (feedbackIn == NULL) {
 		LOG_NEW; feedbackIn = new InDEPort;
 		addPort(feedbackIn->setPort("feedbackIn", this));
+		// hide the feedback connections from user interfaces
+		feedbackIn->setAttributes(P_HIDDEN);
 	}
 
 	if (feedbackOut == NULL) {
 		LOG_NEW; feedbackOut = new OutDEPort;
 		addPort(feedbackOut->setPort("feedbackOut", this));
+		feedbackOut->setAttributes(P_HIDDEN);
 	}
 
 	if (feedbackOut->far() == NULL)
 	{
-	    // make a feedback connection
-	    feedbackOut->connect(*feedbackIn, 0);
-	    feedbackIn->triggers();
-	    feedbackIn->depth = MINDEPTH;
-
-	    // hide the feedback connections from user interfaces
-	    feedbackOut->setAttributes(P_HIDDEN);
-	    feedbackIn->setAttributes(P_HIDDEN);
+	    // make a feedback connection with a delay marker
+	    feedbackOut->connect(*feedbackIn, 1);
 	}
 
 	// Do the rest of the initialization.
