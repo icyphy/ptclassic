@@ -74,6 +74,9 @@ public:
 
 	// constructor
 	CGDomain() : Domain("CG") {}
+
+	// require CGTarget
+	const char* requiredTarget() { return "CGTarget";}
 };
 
 // declare a prototype
