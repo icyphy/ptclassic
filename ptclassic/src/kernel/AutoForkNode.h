@@ -31,6 +31,10 @@ public:
 	PortHole* setDestPort (GenericPort &);
 	AutoForkNode () : forkStar(0), forkOutput(0) {}
 	~AutoForkNode();
+
+	// class identification
+	int isA(const char*) const;
+
 private:
 	// pointers to the Fork star and its output multiporthole, if it exists
 	Block* forkStar;

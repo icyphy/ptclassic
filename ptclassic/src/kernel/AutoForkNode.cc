@@ -118,3 +118,6 @@ AutoForkNode::~AutoForkNode () {
 //	delete forkStar;
 	// remaining stuff handled by baseclass destructor
 }
+
+// class id
+ISA_FUNC(AutoForkNode,Geodesic);

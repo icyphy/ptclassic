@@ -126,6 +126,9 @@ public:
 	// return my type
 	dataType myType () const { return type;}
 
+	// class identification
+	int isA(const char*) const;
+
 	GenericPort* alias() const { return aliasedTo;}
 
 	// Constructor
@@ -214,6 +217,9 @@ public:
 	void setAlias (PortHole& blockPort) {
 		GenericPort::setAlias (blockPort);
 	}
+
+	// class identification
+	int isA(const char*) const;
 
 	// Can be used for things like inputing and output
 	//  Particles.  These are currently do-nothing functions
@@ -355,6 +361,9 @@ public:
 	// virtual function to identify multi-ness
 	int isItMulti() const; // {return TRUE;}
 
+	// class identification
+	int isA(const char*) const;
+
         // Every MultiPortHole must be initialized with the setPort function
         // Arguments are the name and type (see type.h for supported types).
         MultiPortHole& setPort(const char* portName,
@@ -424,11 +433,5 @@ class MPHIter : public PortListIter {
 public:
 	MPHIter(const MultiPortHole& mph) : PortListIter (mph.ports) {}
 };
-
-/***********************************************************
-Plasma and Particle
-
-See Particle.h for a definition of the Plasma and Particle
-************************************************************/
 
 #endif
