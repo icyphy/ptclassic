@@ -120,7 +120,7 @@ class ::tycho::ListBrowser {
     method scroll {num what}
 
     # Select the item specified in the argument.
-    method select {name}
+    method selectItem {name}
 
     ##################################################################
     ####                   protected methods                      ####
@@ -216,7 +216,7 @@ body ::tycho::ListBrowser::constructor {args} {
     bind $itk_component(tag_entry) <Tab> {%Q complete; break}
 
     # Mouse bindings
-    bind $itk_component(listbox) <Double-1> {%Q select [%Q get entry]; break}
+    bind $itk_component(listbox) <Double-1> {%Q selectItem [%Q get entry]; break}
     bind $itk_component(listbox) <1> {%Q chooseItem %W %y}
 
     # Navigation bindings
@@ -452,7 +452,7 @@ body ::tycho::ListBrowser::help {} {
 # Select the item specified in the entry box.
 #
 body ::tycho::ListBrowser::ok {} {
-    select [get entry]
+    selectItem [get entry]
 }
 
 ######################################################################
@@ -466,11 +466,11 @@ body ::tycho::ListBrowser::reload {} {
 }
 
 ######################################################################
-#### select
+#### selectItem
 # Invoke <code>processItem</code> on the item specified in the argument,
 # then self-destruct.
 #
-body ::tycho::ListBrowser::select {name} {
+body ::tycho::ListBrowser::selectItem {name} {
     # This method might be in the middle of being processed already.
     # If so, return.
     if {$closing} {return}
