@@ -323,7 +323,7 @@ body ::tycho::TopLevel::constructor {args} {
             "$this nextWindow; delete object $this; break"
     bind $prefix <Control-x><Control-f> \
             {::tycho::File::openWin %W; break}
-    bind $prefix <Control-x><o> \
+    bind $prefix <Control-x><O> \
             "$this nextWindow 1; break"
     
     # To prevent handled characters from appearing in Entry windows,
