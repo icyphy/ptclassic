@@ -1,8 +1,8 @@
-static const char file_id[] = "XXXStar.cc";
+static const char file_id[] = "$RCSfile$";
 
 /*  Version $Id$
 
-Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
+Copyright (c) 1990-1994 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -24,8 +24,8 @@ PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
 CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
 
-    Programmer:		T.M. Parks
-    Date of creation:	5 January 1992
+    Author:	T.M. Parks
+    Created:	5 January 1992
 
 */
 
@@ -44,9 +44,4 @@ ISA_FUNC(XXXStar,Star);
 const char* XXXStar::domain() const
 {
     return XXXdomainName;
-}
-
-// Domain-specific initialization.
-void XXXStar::prepareForScheduling()
-{
 }
