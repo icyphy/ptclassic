@@ -68,6 +68,10 @@ all:	makefile $(LIBNONSHARED)
 # "make install" puts things in the official place
 install:	makefile $(LIBDIR)/$(LIBNONSHARED)
 
+# matlab.mk and mathematica.mk check these vars before traversing the path
+NEED_MATLABDIR = 	1
+NEED_MATHEMATICADIR = 	1
+
 # Include common make definitions
 include $(ROOT)/mk/common.mk
 
