@@ -40,7 +40,7 @@ CG56MultiSimTarget::CG56MultiSimTarget(const char* name,const char* starclass,
 	sharedMem = 0;
 	addState(sMemMap.setState("sMemMap",this,"4096-4195",
 		"shared memory map"));
-	destDirectory.setValue("~/DSPcode");
+	destDirectory.setInitValue("~/DSPcode");
 }
 
 // -----------------------------------------------------------------------------
