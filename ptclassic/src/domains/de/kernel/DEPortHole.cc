@@ -87,11 +87,8 @@ void OutDEPort :: sendData ()
 		dp->eventQ->levelput(farSidePort, timeStamp, float(dp->depth));
 	} else {
 		EventHorizon* p = (EventHorizon *) farSidePort;
-		p->timeStamp = timeStamp;
-		// stop the DE scheduler if "stopAfterOutput" flag
-		// is set.
 		DEScheduler* sr = (DEScheduler*) parent()->mySched();
-		if (sr->stopAfterOutput) sr->setStopTime(timeStamp);
+		p->timeStamp = timeStamp / sr->relTimeScale;
 	}
 	
 	dataNew = FALSE;
