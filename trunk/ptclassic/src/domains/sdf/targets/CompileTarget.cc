@@ -161,7 +161,7 @@ void CompileTarget::wrapup() {
     cmd += "( echo make.template already exists) ";
     cmd += " else ";
     cmd += "( cp ";
-    const char* templName = expandPathName("~ptolemy/lib/CompileMake.template");
+    const char* templName = expandPathName("$PTOLEMY/lib/CompileMake.template");
     cmd += templName;
     cmd += " make.template ) ";
     cmd += "fi";

@@ -22,7 +22,7 @@ $Id$
 
 void CG56Target :: headerCode () {
     MotorolaTarget::headerCode();
-    const char* path = expandPathName("~ptolemy/lib/cg56");
+    const char* path = expandPathName("$PTOLEMY/lib/cg56");
     myCode << "\tinclude '" << path << "/intequlc.asm'\n\tinclude '"
 	   << path << "/ioequlc.asm'\n";
 }
