@@ -42,6 +42,7 @@ include $(CONFIG)
 EXTRA_SRCS =	\
 	BuilderDialogHelp.html \
 	ColorBrowserHelp.html \
+	DirSearchHelp.html \
 	EditHelp.html \
 	ExecHelp.html \
 	FileBrowserHelp.html \
