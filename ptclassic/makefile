@@ -48,6 +48,7 @@ sources depend TAGS: obj.$(PTARCH)
 	cd src; $(MAKE) $(MFLAGS) makefiles $@
 	cd lib; $(MAKE) $(MFLAGS) makefiles $@
 	cd lib/tcl; $(MAKE) $(MFLAGS) makefiles $@
+	cd lib/cgc; $(MAKE) $(MFLAGS) makefiles $@
 	cd tycho; $(MAKE) $(MFLAGS) makefiles $@
 
 obj.$(PTARCH) obj.$(PTARCH)/octtools: MAKEARCH
