@@ -208,6 +208,7 @@ fi
 
 # Check to see whether xrdb is in the path
 set $xrdb
+# Note that under Cygwinb19.1 /bin/sh.exe does not have the 'type' command 
 if type "$1" >/dev/null 2>&1; then
     :
 elif [ -x "/usr/X11/bin/$1" ]; then
