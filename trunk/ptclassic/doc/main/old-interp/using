@@ -690,6 +690,8 @@ units, and
 .i n
 may be a floating point number (default 1.0).  If this
 command is repeated, the simulation is started from the beginning.
+If animation is enabled, the full name of each star will be
+printed to the standard output when the star fires.
 Syntax:
 .(c
 (run)
@@ -723,6 +725,26 @@ The syntax is
 .(c
 (wrapup)
 .)c
+.H3 "Animating a Simulation"
+.pp
+The
+.c animation
+.IE "animation"
+command can be used to display on the standard output the name
+of each star as it runs.  The syntax
+.(c
+(animation on)
+.)c
+enables animation, while
+.(c
+(animation off)
+.)c
+disables it.
+The syntax
+.(c
+(animation)
+.)c
+simply tells you whether animation is enabled or disabled.
 .H2 "Undoing what you've done"
 .pp
 The commands in this section remove part or all of the structure you
