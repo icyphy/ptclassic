@@ -1,3 +1,4 @@
+static const char file_id[] = "DDFDomain.cc";
 /**********************************************************************
 Version identification:
 $Id$
@@ -28,23 +29,23 @@ class DDFDomain : public Domain {
 public:
 	// new wormhole
 	Star& newWorm(Galaxy& innerGal,Target* innerTarget)  {
-		return *new DDFWormhole(innerGal,innerTarget);
+		LOG_NEW; return *new DDFWormhole(innerGal,innerTarget);
 	}
 
 	// new input porthole
-	PortHole& newInPort() { return *new InDDFPort;}
+	PortHole& newInPort() { LOG_NEW; return *new InDDFPort;}
 
 	// new output porthole
-	PortHole& newOutPort() { return *new OutDDFPort;}
+	PortHole& newOutPort() { LOG_NEW; return *new OutDDFPort;}
 
 	// new fromUniversal EventHorizon
-	EventHorizon& newFrom() { return *new DDFfromUniversal;}
+	EventHorizon& newFrom() { LOG_NEW; return *new DDFfromUniversal;}
 
 	// new toUniversal EventHorizon
-	EventHorizon& newTo() { return *new DDFtoUniversal;}
+	EventHorizon& newTo() { LOG_NEW; return *new DDFtoUniversal;}
 
 	// new Geodesic (Node)
-	Geodesic& newNode() { return *new AutoForkNode;}
+	Geodesic& newNode() { LOG_NEW; return *new AutoForkNode;}
 
 	// make all galaxy as wormholes
 	int isGalWorm()	{return TRUE;}
@@ -62,13 +63,13 @@ class DDFTarget : public Target {
 public:
 	DDFTarget() : Target("default-DDF", "DataFlowStar",
 			     "default DDF target") {
-		setSched(new DDFScheduler);
+		LOG_NEW; setSched(new DDFScheduler);
 	}
 	Block* clone() const;
 };
 
 Block* DDFTarget::clone() const {
-	return new DDFTarget;
+	LOG_NEW; return new DDFTarget;
 }
 
 static DDFTarget defaultDDFtarget;
