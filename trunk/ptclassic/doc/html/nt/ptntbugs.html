@@ -42,6 +42,103 @@ export MAKE_MODE
 <a href="../../src/octtools/Packages/oct"><CODE>$PTOLEMY/src/octtools/Packages/oct</CODE></a> fail.
 
 
+<li> Compiling <CODE>octtools/tkoct/top</CODE> fails.
+The top library is use only by the <CODE>oct2ptcl</CODE> binary, which
+is used to convert Oct facets to ptcl scripts.  If you don't need
+<CODE>oct2ptcl</CODE>, then you can ignore this error and move on.
+(Reported by
+Sascha Schwarz <CODE>&lt;saschas@natasha.auslabs.lucent.com&gt;</CODE>).
+
+<li> <CODE>octtools/Xpackages/iv</CODE> fails to compile
+<pre>
+../../../../src/octtools/Xpackages/iv/ivGetLine.c: In function `ivTextInit':
+../../../../src/octtools/Xpackages/iv/ivGetLine.c:98: storage size of `tty'
+isn't known
+../../../../src/octtools/Xpackages/iv/ivGetLine.c:100: warning: implicit
+declaration of function `ioctl'
+../../../../src/octtools/Xpackages/iv/ivGetLine.c:100: `TIOCGETC' undeclared
+(first use this function)
+../../../../src/octtools/Xpackages/iv/ivGetLine.c:100: (Each undeclared
+identifier is reported only once
+../../../../src/octtools/Xpackages/iv/ivGetLine.c:100: for each function it
+appears in.)
+</pre>
+There are also problems compiling <CODE>timer.c</CODE>
+
+ <p>The <CODE>iv</CODE> package is used to change values of variables
+interactively.  I believe that these errors can be ignored, <CODE>iv</CODE>
+is not used in <CODE>vem</CODE> or <CODE>pigiRpc</CODE>
+(Reported by
+Sascha Schwarz <CODE>&lt;saschas@natasha.auslabs.lucent.com&gt;</CODE>).
+
+
+<li> Problems compiling <CODE>octtools/attache/io.c</CODE>:
+<pre>
+../../../src/octtools/attache/io.c:39: curses.h: No such file or directory
+</pre>
+<CODE>attache</CODE> is used to edit Octtools facets by hand.
+Most users never need this functionality, so you can probably skip
+this error and move on.  <CODE>curses.h</CODE> is the include
+file for the curses system, which is a cursor based ascii windowing
+package.  To fix this bug, it would be necessary to find
+a Cygwin32 curses library and .h file.
+
+(Reported by
+Sascha Schwarz <CODE>&lt;saschas@natasha.auslabs.lucent.com&gt;</CODE>).
+
+
+<li> Problems compiling <CODE>src/tysh/SigHandle.cc</CODE>:
+<pre>
+../../src/tysh/SigHandle.cc: In function `int setHandlers(void (*)(int))':
+../../src/tysh/SigHandle.cc:109: `SIGIOT' undeclared (first use this
+function)
+</pre>
+The <CODE>tysh</CODE> binary is used when <CODE>tycho -pigi</CODE>
+is started up.  In the short term, this error can be ignored.
+(Reported by
+Sascha Schwarz <CODE>&lt;saschas@natasha.auslabs.lucent.com&gt;</CODE>).
+
+
+<li> Tydoc fails:
+<pre>
+"set retval [::tycho::HTMLDocSys::generateHTML $verbose $debug
+$generateIndex $title  [lrange $args $switchCount end]]..."
+can't read "retval": no such variable
+    while executing
+"if {$retval != ""} {
+	puts "tydoc returned $retval\n$errorInfo"
+	exit 3
+    }"
+    (procedure "tydoc" line 43)
+    invoked from within
+"tydoc -d testDefs.tcl"
+    ("eval" body line 1)
+    invoked from within
+"eval tydoc $argv"
+    (file "../../util/tydoc/bin/tydoc" line 72)
+make[3]: *** [itcldocs] Error 1
+
+</pre>
+The fix is to edit <CODE>$PTOLEMY/tycho/util/tydoc/tydoc.tcl</CODE>
+and add <CODE>set retval ""</CODE> before the catch:
+<pre>
+    set retval ""
+    if [catch {set retval [::tycho::HTMLDocSys::generateHTML $verbose $debug \
+	    $generateIndex $title \
+	    [lrange $args $switchCount end]]} err ] {
+	puts "tydoc: $err\n$errorInfo"
+	
+    }
+    if {$retval != ""} {
+	puts "tydoc returned $retval\n$errorInfo"
+	exit 3
+    }
+}
+
+</pre>
+(Reported by
+Sascha Schwarz <CODE>&lt;saschas@natasha.auslabs.lucent.com&gt;</CODE>).
+
 </MENU>
 
 
@@ -78,6 +175,30 @@ upgrade to Cygwinb19.1.
 RPC Error: can not fdopen for write in application
 RPC Error: cannot connect to the server
 </pre>
+
+
+<li> Locally we use Hummingbird's Exceed X server.  Sascha Schwarz
+<CODE>&lt;saschas@natasha.auslabs.lucent.com&gt;</CODE>, reported font
+problems with the MicroImages X server that were solved by using
+Exceed.  If you have font problems, you might try the following:
+
+	<ol>
+	<li> Be sure that another X client starts up before starting
+	<CODE>pigi</CODE>.  The <CODE>pigi</CODE> script attempts
+	to start <CODE>xclock</CODE> by hand if <CODE>xrdb -query</CODE>
+	return no resources.  Be sure that <CODE>pigi</CODE>
+	successfully starts <CODE>xclock</CODE>, or start it
+	by hand before running <CODE>pigi</CODE>
+
+	<li> Add the following line to your <CODE>.Xdefaults</CODE>
+	file:
+	<pre>
+	Vem.label.fonts: 9x15
+	</pre>
+	then do <CODE>xrdb -merge ~/.Xdefaults</CODE>
+	</ol>
+
+
 </menu>
 
 <h2>Problems Running Ptolemy</h2>
@@ -89,6 +210,17 @@ the <a href="ptntinstall.html#pxgraph">Ptolemy NT Installation page</a>,
 and <a href="../../../src/pxgraph/README.txt"><CODE>$PTOLEMY/src/pxgraph/README.txt</CODE></a>
 
 <li> The SDF Butterfly demo gives a bogus graph
+The problem here is that the temporary plot data files were not
+being opened in binary mode, so they were being truncated.
+ <p>The file to change is <CODE>src/kernel/Display.cc</CODE>.
+The change to make is to change:
+<pre>
+ 	    if ((strm[i] = fopen(tmpFileNames[i], "w")) == NULL) {
+</pre>
+To
+<pre>
+ 	    if ((strm[i] = fopen(tmpFileNames[i], "wb")) == NULL) {
+</pre>
 
 <li> The Matlab and Mathematica stars do not work.
 
@@ -105,8 +237,13 @@ InvokeInterp :: interpreter(const char* expression) {
     return NULL;
 }
 </pre>
-My guess is that this has to do with the fact that there are multiple
+The problem here is that there are multiple
 definitions of this method in the kernel, pigilib and ptcl.
+
+ <p>Wolfgang Reimer created a patch that solves this problem, see:
+<a href="http://ptolemy.eecs.berkeley.edu/pt0.7.1/ptolemy0.7.1/html/reimer0898/pt0.7.1p1.ptclInvokeInterp.patch.gz"><CODE>http://ptolemy.eecs.berkeley.edu/pt0.7.1/ptolemy0.7.1/html/reimer0898/pt0.7.1p1.ptclInvokeInterp.patch.gz</CODE></a>
+
+
 </MENU>
 
 <HR>
