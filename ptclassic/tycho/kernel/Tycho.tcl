@@ -287,8 +287,8 @@ if {![info exists tychoConsoleWindow]} {
 set tychoOpenFiles 0
 
 
-# Source ~/.Tycho/tychorc.tcl if it exists.
-set tychostartfile [glob -nocomplain [file join $env(HOME) .Tycho tychorc.tcl]]
+# Source ~/.tycho/tychorc.tcl if it exists.
+set tychostartfile [glob -nocomplain [file join $env(HOME) .tycho tychorc.tcl]]
 if {$tychostartfile != {} && \
 	[file exists $tychostartfile] && \
 	[file readable $tychostartfile]} {
