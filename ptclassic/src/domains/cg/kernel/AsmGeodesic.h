@@ -17,7 +17,6 @@ $Id$
 
 *******************************************************************/
 #ifdef __GNUG__
-#pragma once
 #pragma interface
 #endif
 
@@ -53,9 +52,7 @@ public:
 	int forkDelay() const;
 
 	// Assign a memory and address to the geodesic
-	void assignAddr(ProcMemory& m, unsigned a) {
-		mem = &m; addr = a;
-	}
+	void assignAddr(ProcMemory& m, unsigned a);
 
 	// Return the address assigned to the geodesic.
 	// if I am a fork destination, my address is that of my source.
