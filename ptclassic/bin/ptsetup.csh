@@ -58,6 +58,10 @@ endif
 
 setenv TCL_LIBRARY $PTOLEMY/tcltk/tcl/lib/tcl
 setenv TK_LIBRARY $PTOLEMY/tcltk/tk/lib/tk
+setenv ITCL_LIBRARY $PTOLEMY/tcltk/itcl/lib/itcl
+setenv ITK_LIBRARY $PTOLEMY/tcltk/itcl/lib/itk
+setenv IWIDGETS_LIBRARY $PTOLEMY/tcltk/itcl/lib/itk
+
 setenv PTPWD `pwd`
 
 set path = ( $PTOLEMY/bin.$PTARCH $PTOLEMY/bin $path )
