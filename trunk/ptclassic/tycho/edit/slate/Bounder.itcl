@@ -121,9 +121,6 @@ class ::tycho::Bounder {
     # Continue interaction sequence
     method drag {x y}
 
-    # Terminate interaction sequence
-    method release {x y}
-
     ###################################################################
     ####                    private variables                      ####
 
@@ -233,14 +230,4 @@ body ::tycho::Bounder::drag {x y} {
     } else {
 	chain $actualX $actualY
     }
-}
-
-#######################################################################
-#### drag
-#
-# Override the superclass so that the scripts (if any) get the
-# last moved-to coordinates, not the coordinates pushed by the mouse.
-#
-body ::tycho::Bounder::release {x y} {
-    chain $actualX $actualY
 }

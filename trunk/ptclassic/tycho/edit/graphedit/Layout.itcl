@@ -90,7 +90,7 @@ class ::tycho::Layout {
     method movedrag {tag x y}
 
     # Stop moving an item
-    method moverelease {tag x y}
+    method moverelease {tag}
 
     # Get the names of items
     method names {{context {}}}
@@ -108,7 +108,7 @@ class ::tycho::Layout {
     method reshapedrag {name x y}
 
     # Stop reshaping an item
-    method reshaperelease {name x y}
+    method reshaperelease {name}
 
     # Manipulate the selection
     method selection {args}
@@ -367,6 +367,8 @@ body ::tycho::Layout::moveclick {tag x y} {
 #
 body ::tycho::Layout::movedrag {tag x y} {
     # puts "::tycho::Layout::movedrag $tag $x $y"
+    set _scratch($tag.currentx) $x
+    set _scratch($tag.currenty) $y
     return ""
 }
 
@@ -379,12 +381,13 @@ body ::tycho::Layout::movedrag {tag x y} {
 # Note: coords{} must be called (but not via publish{})
 # after calling this to keep the model itself up-to-date.
 #
-body ::tycho::Layout::moverelease {tag x y} {
-    # puts "::tycho::Layout::moverelease $tag $x $y"
-    set deltax [expr $x - $_scratch($tag.startx)]
-    set deltay [expr $y - $_scratch($tag.starty)]
+body ::tycho::Layout::moverelease {tag} {
+    set deltax [expr $_scratch($tag.currentx) - $_scratch($tag.startx)]
+    set deltay [expr $_scratch($tag.currenty) - $_scratch($tag.starty)]
     unset _scratch($tag.startx)
     unset _scratch($tag.starty)
+    unset _scratch($tag.currentx)
+    unset _scratch($tag.currenty)
 
     # Only construct the inverse if the "recording" flag is set.
     # This should never happen, but we check just to make sure.
@@ -492,7 +495,8 @@ body ::tycho::Layout::reshapeclick {name x y args} {
 # Continue reshaping an item specified by name.
 #
 body ::tycho::Layout::reshapedrag {name x y} {
-    # puts "::tycho::Layout::reshapedrag $name $x $y"
+    set _scratch($tag.currentx) $x
+    set _scratch($tag.currenty) $y
     return ""
 }
 
@@ -505,13 +509,16 @@ body ::tycho::Layout::reshapedrag {name x y} {
 # Note: coords{} must be called (but not via publish{})
 # after calling this to keep the model itself up-to-date.
 #
-body ::tycho::Layout::reshaperelease {name x y} {
+body ::tycho::Layout::reshaperelease {name} {
     # puts "::tycho::Layout::reshaperelease $name $x $y"
-    set deltax [expr $x - $_scratch($name.startx)]
-    set deltay [expr $y - $_scratch($name.starty)]
+    set deltax [expr $_scratch($tag.currentx) - $_scratch($tag.startx)]
+    set deltay [expr $_scratch($tag.currenty) - $_scratch($tag.starty)]
+    unset _scratch($tag.startx)
+    unset _scratch($tag.starty)
+    unset _scratch($tag.currentx)
+    unset _scratch($tag.currenty)
+
     set aspects $_scratch($name.aspects)
-    unset _scratch($name.startx)
-    unset _scratch($name.starty)
     unset _scratch($name.aspects)
 
     # Only construct the inverse if the "recording" flag is set.

@@ -67,7 +67,7 @@
 #
 # <dt><b>-deactivatecommand</b>
 # <dd>If not null, this is a script which is evaluated with the
-# current target and coordinates appended. 
+# current target appended. 
 #
 # <dt><b>-clickprefix</b>
 # <dd>If not null, this is a script which has the target and coordinates
@@ -86,7 +86,7 @@
 # It is propagated to a cascaded interactor. 
 #
 # <dt><b>-releaseprefix</b>
-# <dd>If not null, this is a script which has the target and coordinates
+# <dd>If not null, this is a script which has the target
 # appended and evaluated in the release{} method. This is typically used
 # if the mouse interaction is not going directly to a Slate.
 # It is propagated to a cascaded interactor. 
@@ -156,7 +156,7 @@ class ::tycho::Interactor {
     method click {x y args}
 
     # Remove my bindings
-    method deactivate {x y args}
+    method deactivate {args}
 
     # Unbind a single item from the interactor
     method debind {id}
@@ -174,7 +174,7 @@ class ::tycho::Interactor {
     method rebind {id}
 
     # Terminate the interaction sequence
-    method release {x y}
+    method release {}
 
     # Set or get the target object
     method target {args}
@@ -379,7 +379,7 @@ body ::tycho::Interactor::click {x y args} {
 # <i>Abstract method</i>.
 # Make this interactor inactive. In other words, remove my bindings.
 #
-body ::tycho::Interactor::deactivate {x y args} {
+body ::tycho::Interactor::deactivate {args} {
     ::tycho::abstractMethod Interactor deactivate
 }
 
@@ -492,21 +492,17 @@ body ::tycho::Interactor::rebind {id} {
 # interactor has a cascaded interactor,
 # then it calls the release{} method of the cascaded; if there is
 # no cascaded but the *-releaseprefix* option is not null, then it
-# appends the current target and _x_ and _y_ coordinates and
-# evaluates it.  Sub-classes that over-ride
-# this method should always call this implementation to forward
-# the release action.
-# The _x_ and _y arguments to this method should be the coordinates
-# of the cursor when it is released -- they will usually (always?)
-# be the same as the coordinates given to the last call to drag{}.
+# appends the current target and evaluates it.  Sub-classes
+# that over-ride this method should always call this
+# implementation to forward the release action.
 #
-body ::tycho::Interactor::release {x y} {
+body ::tycho::Interactor::release {} {
     if { $cascaded != "" } {
-	$cascaded release $x $y
+	$cascaded release
     } elseif { $releaseprefix != "" } {
-        uplevel #0 $releaseprefix $target $x $y
+        uplevel #0 $releaseprefix $target
     } else {
-	$slate moverelease $target $x $y
+	$slate moverelease $target
     }
 }
 
@@ -546,7 +542,7 @@ body ::tycho::Interactor::target {args} {
 body ::tycho::Interactor::unbind {t args} {
     # Make sure that the interactor is deactivated first
     if { $target != "" } {
-        deactivate $target 0 0 $args
+        deactivate $target $args
     }
 
     # Forget the target

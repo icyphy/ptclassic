@@ -86,7 +86,7 @@ class ::tycho::Shape {
     ####                         public procs                      ####
 
     # Get one or more aspects of an item
-    proc _aspect {id canvas slate x y args}
+    proc _aspect {id canvas slate args}
 
     # Attach a set of grapples to an item
     proc _grapple {id canvas slate interactor args}
@@ -98,7 +98,7 @@ class ::tycho::Shape {
     proc _movedrag {id canvas slate x y}
 
     # Terminate a move interaction sequence
-    proc _moverelease {id canvas slate x y}
+    proc _moverelease {id canvas slate}
 
     # Reshape one or more aspects of an item
     proc _reshape {id canvas slate x y args}
@@ -110,7 +110,7 @@ class ::tycho::Shape {
     proc _reshapedrag {id canvas slate x y}
 
     # Terminate a reshape interaction sequence
-    proc _reshaperelease {id canvas slate x y}
+    proc _reshaperelease {id canvas slate}
 
     # Get a compass point transformed in some way
     proc compass {compass transformation}
@@ -160,7 +160,7 @@ class ::tycho::Shape {
 #
 # _Abstract procedure._
 #
-body ::tycho::Shape::_aspect {id canvas slate x y args} {
+body ::tycho::Shape::_aspect {id canvas slate args} {
     error "Abstract procedure"
 }
 
@@ -219,7 +219,7 @@ body ::tycho::Shape::_movedrag {id canvas slate x y} {
 #######################################################################
 #### _moverelease
 #
-body ::tycho::Shape::_moverelease {id canvas slate x y} {
+body ::tycho::Shape::_moverelease {id canvas slate} {
     set unique $id.[$slate uniqueid]
 
     # If there's a ghost, move the complex item to its
@@ -227,7 +227,9 @@ body ::tycho::Shape::_moverelease {id canvas slate x y} {
     if $scratch(ghost.$unique) {
 	::tycho::assign a b $scratch(start.$unique)
 
-	$slate move $id [expr $x - $a] [expr $y - $b]
+	$slate move $id \
+                [expr $scratch(prevX.$unique) - $a] \
+                [expr $scratch(prevY.$unique) - $b]
 	$slate delete ghost.$id
 
 	unset scratch(start.$unique)
@@ -285,7 +287,7 @@ body ::tycho::Shape::_reshapedrag {id canvas slate x y} {
 # and the ghost is deleted. Note: A release must be used to terminate
 # the click-drag-release sequence, even if not ghosting the item.
 #
-body ::tycho::Shape::_reshaperelease {id canvas slate x y} {
+body ::tycho::Shape::_reshaperelease {id canvas slate} {
     error "Abstract procedure"
 }
 

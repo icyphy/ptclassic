@@ -87,7 +87,7 @@ class ::tycho::SlateView {
     method movedrag {tag x y}
 
     # Stop moving an item
-    method moverelease {tag x y}
+    method moverelease {tag}
 
     # Get or set the name of an item given its id
     method name {id {name {}}}
@@ -105,7 +105,7 @@ class ::tycho::SlateView {
     method reshapedrag {name x y}
 
     # Stop reshaping an item
-    method reshaperelease {name x y}
+    method reshaperelease {name}
 
     # Manipulate the the selection
     method selection {mode {name {}}}
@@ -301,11 +301,11 @@ body ::tycho::SlateView::movedrag {tag x y} {
 ########################################################################
 #### moverelease
 #
-body ::tycho::SlateView::moverelease {tag x y} {
+body ::tycho::SlateView::moverelease {tag} {
     if { [::info exists _itemID($tag)] } {
-        $slate moverelease $_itemID($tag) $x $y
+        $slate moverelease $_itemID($tag)
     } else {
-        $slate moverelease $tag $x $y
+        $slate moverelease $tag
     }
 }
 
@@ -380,8 +380,8 @@ body ::tycho::SlateView::reshapedrag {name x y} {
 ########################################################################
 #### reshaperelease
 #
-body ::tycho::SlateView::reshaperelease {name x y} {
-    $slate reshaperelease $_itemID($name) $x $y
+body ::tycho::SlateView::reshaperelease {name} {
+    $slate reshaperelease $_itemID($name)
 }
 
 ########################################################################

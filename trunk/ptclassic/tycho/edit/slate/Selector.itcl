@@ -159,7 +159,7 @@ class ::tycho::Selector {
     method click {x y args}
 
     # Remove the interactor from drag-selecting
-    method deactivate {x y args}
+    method deactivate {args}
 
     # Specify a delegate interactor to operate on selected items
     method delegate {interactor tag args}
@@ -265,7 +265,7 @@ body ::tycho::Selector::activate {tag x y args} {
 	    "$this drag %x %y; update idletasks"
     $slate bind $tag \
 	    [eval ::tycho::Interactor::event Release $args] \
-	    "$this release; $this deactivate %x %y $args"
+	    "$this release; $this deactivate $args"
 
     # Start the interaction sequence
     eval click $x $y $args
@@ -378,7 +378,7 @@ body ::tycho::Selector::click {x y args} {
 #######################################################################
 #### deactivate
 #
-body ::tycho::Selector::deactivate {x y args} {
+body ::tycho::Selector::deactivate {args} {
     # Remove bindings
     $slate bind $target \
 	    [eval ::tycho::Interactor::event Motion $args] {}

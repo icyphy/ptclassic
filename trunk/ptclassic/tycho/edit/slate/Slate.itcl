@@ -195,7 +195,7 @@ class ::tycho::Slate {
     method movedrag {id x y}
 
     # Terminate a move interaction sequence
-    method moverelease {id x y}
+    method moverelease {id}
 
     # Move to an absolute location
     method moveto {tag x y aspect args}
@@ -213,10 +213,10 @@ class ::tycho::Slate {
     method reshapeclick {tag x y args}
 
     # Continue a reshape interaction sequence
-    method reshapedrag {tag x y args}
+    method reshapedrag {tag x y}
 
     # Terminate a reshape interaction sequence
-    method reshaperelease {tag x y args}
+    method reshaperelease {tag}
 
     # Reshape by moving an aspect to an absolute location
     method reshapeto {tag x y aspect args}
@@ -258,7 +258,7 @@ class ::tycho::Slate {
     protected method claimSelection {}
 
     # Call a method based on an item's shape
-    protected method shapecall {tag method x y args}
+    protected method shapecall {tag method args}
 
     ###################################################################
     ####                   protected variables                     ####
@@ -458,11 +458,11 @@ body ::tycho::Slate::animate {mode {tagOrID {}} {x {}} {y {}} args} {
 body ::tycho::Slate::aspect {id args} {
     set t [lsearch -exact $args -shape]
     if { $t != -1 } {
-        shapecall $id aspect 0 0 \
+        shapecall $id aspect \
                 -aspects [lreplace $args $t [expr $t+1]] \
                 -shape [lindex $args [expr $t+1]]
     } else {
-        shapecall $id aspect 0 0 -aspects $args
+        shapecall $id aspect -aspects $args
     }
 }
 
@@ -743,13 +743,10 @@ body ::tycho::Slate::movedrag {id x y} {
 #######################################################################
 #### moverelease
 #
-# Terminate the interaction sequence at 
-# coordinates (_x_, _y_), _x_ and _y_ will usually be the same as
-# the last coordinates passed to the drag mode. There are no additional
-# arguments supplied.
+# Terminate the interaction sequence.
 #
-body ::tycho::Slate::moverelease {id x y} {
-    eval ::tycho::Shape::_moverelease $id $canvas $this $x $y
+body ::tycho::Slate::moverelease {id} {
+    eval ::tycho::Shape::_moverelease $id $canvas $this
 }
 
 #######################################################################
@@ -971,22 +968,19 @@ body ::tycho::Slate::reshapeclick {tag x y args} {
 # is used instead of the item's actual shape. Other options
 # will be ignored.
 #
-body ::tycho::Slate::reshapedrag {tag x y args} {
-    eval shapecall $tag reshapedrag $x $y $args
+body ::tycho::Slate::reshapedrag {tag x y} {
+    eval shapecall $tag reshapedrag $x $y
 }
 
 #######################################################################
 #### reshaperelease
 #
-# Terminate the interaction sequence at 
-# coordinates (_x_, _y_), _x_ and _y_ will usually be the same as
-# the last coordinates passed to the drag mode.  If the arguments
+# Terminate the interaction sequence.  If the arguments
 # contain the *-shape* option, its value
-# is used instead of the item's actual shape. Other options
-# will be ignored.
+# is used instead of the item's actual shape.
 #
-body ::tycho::Slate::reshaperelease {tag x y args} {
-    eval shapecall $tag reshaperelease $x $y $args
+body ::tycho::Slate::reshaperelease {tag} {
+    eval shapecall $tag reshaperelease
 }
 
 #######################################################################
@@ -1188,12 +1182,17 @@ body ::tycho::Slate::shape* {tag args} {
 #
 # Call a procedure in a Shape or ComplexItem class based on the
 # item's shape. The procedure name is obtained by prepending an
-# underscore to the _method_ argument. The following arguments
+# underscore to the _method_ argument. The arguments
 # can contain the following options:
 # <ul>
 # <li><b>*-shape*</b> _shape_: Override the item's default shape.
 # Note that this may not always behave sensibly.
 # </ul>
+#
+# (Note that many calls to shapcall{} include an x and y coordinate
+# as the first of the optional args. This is fine, and they will be
+# passed onto the procedure in the correct shape class. However,
+# there must always be an even number of arguments.)
 #
 # If the item is a complex item and its method table contains a
 # procedure with the right name, that procedure is called instead,
@@ -1201,7 +1200,7 @@ body ::tycho::Slate::shape* {tag args} {
 # (Note that it is the responsibility of the overriding method to
 # correctly deal with the *-shape* option.)
 #
-body ::tycho::Slate::shapecall {tag method x y args} {
+body ::tycho::Slate::shapecall {tag method args} {
     array set opts [concat {-shape {}} $args]
 
     # Try for complex item overriding.
@@ -1218,7 +1217,7 @@ body ::tycho::Slate::shapecall {tag method x y args} {
     # Remember the Shape class
     set class ::tycho::[::tycho::capitalize [eval shape* $tag $args]]
     # Call the procedure
-    eval $class::_$method $tag $canvas $this $x $y $args
+    eval $class::_$method $tag $canvas $this $args
 }
 
 #######################################################################

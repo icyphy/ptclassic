@@ -176,7 +176,7 @@ class ::tycho::TextItemEdit {
     method dbclick {}
 
     # Remove the interactor from the current item
-    method deactivate {x y args}
+    method deactivate {args}
 
     # Drag the mouse to select.
     method drag {x y}
@@ -220,7 +220,7 @@ class ::tycho::TextItemEdit {
 body ::tycho::TextItemEdit::activate {t x y args} {
     # If already editing another item, deactivate from it first
     if { $target != "" } {
-	deactivate 0 0
+	deactivate
     }
 
     # "Debind" from this item
@@ -324,7 +324,7 @@ body ::tycho::TextItemEdit::dbclick {} {
 # Deactivate the interactor from the target. This method must be called
 # by the script bound to the release event.
 # 
-body ::tycho::TextItemEdit::deactivate {x y args} {
+body ::tycho::TextItemEdit::deactivate {args} {
     # Remove the focus
     $slate focus ""
     ::bind $slate <Key> {}
@@ -356,7 +356,7 @@ body ::tycho::TextItemEdit::deactivate {x y args} {
 
     # Call the deactivation command. This must follow the above bindings!
     if { $deactivatecommand != "" } {
-        uplevel #0 $deactivatecommand $target $x $y
+        uplevel #0 $deactivatecommand $target
     }
 
     # Clear the target

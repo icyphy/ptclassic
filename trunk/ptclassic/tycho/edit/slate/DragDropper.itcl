@@ -132,7 +132,7 @@ class ::tycho::DragDropper {
     method over {x y}
 
     # Terminate interaction sequence
-    method release {x y}
+    method release {}
 
     ###################################################################
     ####                   protected variables                     ####
@@ -213,7 +213,7 @@ body ::tycho::DragDropper::leave {} {
 #
 # Let go of the mouse. This method just deletes highlights.
 #
-body ::tycho::DragDropper::release {x y} {
+body ::tycho::DragDropper::release {} {
     $slate delete highlight
 }
 

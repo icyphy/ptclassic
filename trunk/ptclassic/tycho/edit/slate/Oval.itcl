@@ -92,7 +92,7 @@ class ::tycho::Oval {
     ####                         public procs                      ####
 
     # Get one or more aspects of an item
-    proc _aspect {id canvas slate x y args}
+    proc _aspect {id canvas slate args}
 
     # Attach a set of grapples to an item
     proc _grapple {id canvas slate interactor args}
@@ -104,10 +104,10 @@ class ::tycho::Oval {
     proc _reshapeclick {id canvas slate x y args}
 
     # Continue a reshape interaction sequence
-    proc _reshapedrag {id canvas slate x y args}
+    proc _reshapedrag {id canvas slate x y}
 
     # Terminate a reshape interaction sequence
-    proc _reshaperelease {id canvas slate x y args}
+    proc _reshaperelease {id canvas slate}
 
     # Convert a rectangle into an (x,y,a,b) representation
     proc fromRect {x0 y0 x1 y1}
@@ -130,7 +130,7 @@ class ::tycho::Oval {
 # "vradius," "center," or <code>circumference-</code><i>x-y</i>, where
 # (_x_, _y_) is a vector from the center.
 #
-body ::tycho::Oval::_aspect {id canvas slate x y args} {
+body ::tycho::Oval::_aspect {id canvas slate args} {
     ::tycho::assign x0 y0 x1 y1 [$slate coords $id]
     set result {}
 
@@ -219,7 +219,7 @@ body ::tycho::Oval::_reshapeclick {id canvas slate x y args} {
 #######################################################################
 #### _reshapedrag
 #
-body ::tycho::Oval::_reshapedrag {id canvas slate x y args} {
+body ::tycho::Oval::_reshapedrag {id canvas slate x y} {
     set unique $id.[$slate uniqueid]
 
     # Get the current coordinates
@@ -255,7 +255,7 @@ body ::tycho::Oval::_reshapedrag {id canvas slate x y args} {
 #######################################################################
 #### _reshaperelease
 #
-body ::tycho::Oval::_reshaperelease {id canvas slate x y args} {
+body ::tycho::Oval::_reshaperelease {id canvas slate} {
     set unique $id.[$slate uniqueid]
 
     # If there's a ghost, reshape the item to its shape
