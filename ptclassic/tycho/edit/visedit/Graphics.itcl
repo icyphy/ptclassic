@@ -606,7 +606,7 @@ body ::tycho::Graphics::clear {} {
 # <code>dependenceUpdate</code> is called, if any of the items in the
 # "below" list have moved, then this item will be moved. The fourth
 # argument specifies the color. Any color name accepted by
-# <code>ptkColor</code> will work. The fifth argument specifies the
+# <code>::tycho::color</code> will work. The fifth argument specifies the
 # font in a form accepted by the <code>findFont</code> method of the
 # <code>FontManager</code> class. If the color and font are not
 # specified, then the text is black using the default variable font.
@@ -646,7 +646,7 @@ body ::tycho::Graphics::centeredText \
         } {
             set usefont [::tycho::font helvetica]
         }
-        set usecolor [ptkColor $color]
+        set usecolor [::tycho::color $color]
         set id [$slate create text $xcoord $top \
                 -width $cwidth \
                 -justify center \
