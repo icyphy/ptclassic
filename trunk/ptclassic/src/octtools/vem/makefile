@@ -173,9 +173,9 @@ _vem:
 
 
 linkvem.debug: $(VEMOBJECTS)
-	$(CC) -g -o vem.debug $(OBJECTS) $(VEMLIBS)
+	$(CC) $(CC_STATIC) -g -o vem.debug $(OBJECTS) $(VEMLIBS)
 linkvem: $(VEMOBJECTS)
-	$(CC) -o vem $(OBJECTS) $(VEMLIBS)
+	$(CC) $(CC_STATIC) -o vem $(OBJECTS) $(VEMLIBS)
 
 linkvem.debug.gcc: $(VEMOBJECTS)
 	$(LINKER) $(LINKFLAGS_D) -g -o vem.debug $(OBJECTS) $(VEMLIBS)
