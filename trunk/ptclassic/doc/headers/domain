@@ -116,21 +116,23 @@ delim off
 
 .de IH
 .\" input information
-.nr Fe 0
+.nr Fe 1
 .lp
 .ta 1.0i
 .in +1.5i
 .ti -1.5i
+.mk
 \\f\\n(SXINPUTS:\\fR
 ..
 
 .de OH
 .\" output information
-.nr Fe 0
+.nr Fe 1
 .lp
 .ta 1.0i
 .in +1.5i
 .ti -1.5i
+.mk
 \\f\\n(SXOUTPUTS:\\fR
 ..
 
@@ -141,24 +143,26 @@ delim off
 
 .de SH
 .\" state information
-.nr Fe 0
+.nr Fe 1
 .lp
 .ta 1.0i
 .in +1.5i
 .ti -1.5i
+.mk
 \\f\\n(SXSTATES:\\fR
 ..
 
 .de NE
 .\" new entry for states, inputs, or outputs
-.if \\n(Fe .br
-.if \\n(Fe .ti -0.5i
-.nr Fe 1
-\t
+.br
+.ti -0.5i
+.if \\n(Fe .rt
+.nr Fe 0
 ..
 
 .de DF
 .\" defaults (up to 9 separate strings are handled)
+.br
 \fBDefault\fR = \\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9
 ..
 
