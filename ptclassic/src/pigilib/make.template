@@ -4,7 +4,6 @@
 #
 # Copyright (c) 1989,1990,1991 The Regents of the University of California.
 #			All Rights Reserved.
-# Originally written by: E. Goei
 # Date of creation: 5/23/90
 # Current version by J. Buck
 #
@@ -18,21 +17,14 @@
 ROOT	      = ../..
 # VPATH points to the "real" source directory
 VPATH         = $(ROOT)/src/pigilib
-# Octtools root directory
-OCTTOOLS      = $(ROOT)/octtools
-# Ptolemy kernel directory
-KERNDIR	      = $(ROOT)/src/kernel
-# C compiler variables
-CFLAGS        = -g
 
-# Rule for making .o file from .c file (the Gnu-make default rule breaks
-# on Vaxes running older versions of Ultrix)
+# get configuration info
+CONFIG=$(ROOT)/config-$(ARCH).mk
+include $(CONFIG)
+
+# Rule for making .o file from .c file
 .c.o:
 	$(CC) $(CFLAGS) -I$(OCTTOOLS)/include -c $<
-
-# C++ compiler variables
-GNU	      = g++
-GPPFLAGS      = -g
 
 HDRS	      = compile.h \
 		edit.h \
@@ -87,7 +79,7 @@ libpigi.a:	$(LIBOBJS)
 	ar cq libpigi.a $(LIBOBJS)
 	ranlib libpigi.a
 
-DESTLIB = $(ROOT)/lib.$(ARCH)/libpigi.a
+DESTLIB = $(LIBDIR)/libpigi.a
 
 $(DESTLIB):	libpigi.a
 		@echo Installing pigi library
@@ -106,8 +98,8 @@ sources:	$(SRCS) $(HDRS) make.template
 
 depend:
 		cd $(VPATH); \
-		g++ -MM -I$(KERNDIR) -I$(OCTTOOLS)/include $(SRCS)|\
-			cat make.template - > makefile.n
+		$(DEPEND) -I$(KERNDIR) -I$(OCTTOOLS)/include $(SRCS)|\
+			cat make.template - > makefile.n;\
 		mv -f makefile.n makefile
 	
 makefile:	make.template
