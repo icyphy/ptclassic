@@ -71,7 +71,7 @@ setup {
 
     StringList outVar;
     if ((int)blockSize > 1)
-	outVar << "$starSymbol(buffer)[i]";
+	outVar << (txType==FIX?"24,1,":"") << "$starSymbol(buffer)[i]";
     else
 	outVar << "$ref(output)";
 
