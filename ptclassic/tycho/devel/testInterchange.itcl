@@ -1,4 +1,4 @@
-# Test suite for the Inter class.
+# Test suite for the NewInterchange class.
 #
 # @Authors: John Reekie
 #
@@ -37,9 +37,9 @@ if {[string compare test [info procs test]] == 1} then {
 ############################################################################
 # constructor{}
 #
-test Inter-constructor-1 {Create Inter object} {
+test NewInterchange-constructor-1 {Create NewInterchange object} {
     catch {delete object ic}
-    ::tycho::Inter ic -errorname foo
+    ::tycho::NewInterchange ic -errorname foo
 } {ic}
 
 
@@ -48,12 +48,12 @@ test Inter-constructor-1 {Create Inter object} {
 ##### Data access methods
 
 ########################################################################
-#### defineType{}, typecget{}, typeconfigure{}
+#### newtype{}, typecget{}, typeconfigure{}
 #
 catch {delete object ic}
-test Inter-defineType-1 {Define a type: special option defaults} {
-    ::tycho::Inter ic -errorname Tester
-    ic defineType foo
+test NewInterchange-newtype-1 {Define a type: special option defaults} {
+    ::tycho::NewInterchange ic -errorname Tester
+    ic newtype foo
     # Check default values
     set result {}
     foreach {opt val} \
@@ -64,10 +64,10 @@ test Inter-defineType-1 {Define a type: special option defaults} {
 } {0 0 0 1 0 0}
 
 catch {delete object ic}
-test Inter-defineType-2 {Define a type: set special options} {
-    ::tycho::Inter ic -errorname Tester
+test NewInterchange-newtype-2 {Define a type: set special options} {
+    ::tycho::NewInterchange ic -errorname Tester
     # Check by setting nonsense values
-    ic defineType foo \
+    ic newtype foo \
             -valued a -ordered b -leafonly c -strict d -nonroot e -rootonly f
     set result {}
     foreach {opt val} \
@@ -78,16 +78,16 @@ test Inter-defineType-2 {Define a type: set special options} {
 } {a b c d e f}
 
 catch {delete object ic}
-test Inter-defineType-3 {Define a type: other options} {
-    ::tycho::Inter ic -errorname Tester
-    ic defineType foo -foo Foo -bar Bar
+test NewInterchange-newtype-3 {Define a type: other options} {
+    ::tycho::NewInterchange ic -errorname Tester
+    ic newtype foo -foo Foo -bar Bar
     list [ic typecget foo -foo] [ic typecget foo -bar]
 } {Foo Bar}
 
 catch {delete object ic}
-test Inter-defineType-4 {Configure a type: special options} {
-    ::tycho::Inter ic -errorname Tester
-    ic defineType foo
+test NewInterchange-newtype-4 {Configure a type: special options} {
+    ::tycho::NewInterchange ic -errorname Tester
+    ic newtype foo
     # Check by setting nonsense values
     ic typeconfigure foo \
             -valued a -ordered b -leafonly c -strict d -nonroot e -rootonly f
@@ -100,37 +100,37 @@ test Inter-defineType-4 {Configure a type: special options} {
 } {a b c d e f}
 
 catch {delete object ic}
-test Inter-defineType-5 {Define a type: other options} {
-    ::tycho::Inter ic -errorname Tester
-    ic defineType foo -foo Foo -bar Bar
+test NewInterchange-newtype-5 {Define a type: other options} {
+    ::tycho::NewInterchange ic -errorname Tester
+    ic newtype foo -foo Foo -bar Bar
     ic typeconfigure foo -foo zaz -bar baz
     list [ic typecget foo -foo] [ic typecget foo -bar]
 } {zaz baz}
 
 ########################################################################
-#### add{}, value{} options{}, clear{}, exists{}
+#### add{}, value{}, clear{}, exists{}
 #
 catch {delete object ic}
-::tycho::Inter ic -errorname Tester
-ic defineType root -color red -rootonly 1
-ic defineType branch -color brown -nonroot 1
-ic defineType leaf -color green -nonroot 1 -leafonly 1 -valued 1
+::tycho::NewInterchange ic -errorname Tester
+ic newtype root -color red -rootonly 1
+ic newtype branch -color brown -nonroot 1
+ic newtype leaf -color green -nonroot 1 -leafonly 1 -valued 1
 
-test Inter-add-1 {Add root items} {
+test NewInterchange-add-1 {Add root items} {
     ic add root Bo
     ic add root Peep -color pink
     list \
-            [ic options root Bo] [ic options root Peep] \
+            [ic itemcget root Bo] [ic itemcget root Peep] \
             [ic exists root Bo] [ic exists branch Peep] [ic exists root Sheep]
 } {{-color red} {-color pink} 1 0 0}
 
-test Inter-add-2 {Add non-root items} {
+test NewInterchange-add-2 {Add non-root items} {
     ic add {root branch} {Bo Bo}
     ic add {root leaf} {Peep Peep} Hello -color blue
     list \
-            [ic options {root branch} {Bo Bo}] \
+            [ic itemcget {root branch} {Bo Bo}] \
             [ic value {root leaf} {Peep Peep}] \
-            [ic options {root leaf} {Peep Peep}] \
+            [ic itemcget {root leaf} {Peep Peep}] \
             [ic exists {root branch} {Bo Bo}] \
             [ic exists {root leaf} {Peep Peep}] \
             [ic exists {root leaf} {Bo Bo}] \
@@ -138,7 +138,7 @@ test Inter-add-2 {Add non-root items} {
 		
 } {{-color brown} Hello {-color blue} 1 1 0 0}
 
-test Inter-exists-1 {Test for existence} {
+test NewInterchange-exists-1 {Test for existence} {
     list \
             [ic exists root Bo] \
             [ic exists root Peep] \
@@ -151,7 +151,7 @@ test Inter-exists-1 {Test for existence} {
     
 } {1 1 0 0 1 1 0 0}
 
-test Inter-clear-1 {Clear data} {
+test NewInterchange-clear-1 {Clear data} {
     ic clear
     list \
             [ic exists root Bo] \
@@ -164,7 +164,7 @@ test Inter-clear-1 {Clear data} {
 		
 } {0 0 0 0 0 0 0 0}
 
-test Inter-add-3 {Add using nested syntax} {
+test NewInterchange-add-3 {Add using nested syntax} {
     ic clear
     ic add root Bo {
         branch Bo
@@ -174,11 +174,11 @@ test Inter-add-3 {Add using nested syntax} {
         leaf Peep Hello -color blue
     }
     list \
-            [ic options root Bo] \
-            [ic options root Peep] \
-            [ic options {root branch} {Bo Bo}] \
+            [ic itemcget root Bo] \
+            [ic itemcget root Peep] \
+            [ic itemcget {root branch} {Bo Bo}] \
             [ic value {root leaf} {Peep Peep}] \
-            [ic options {root leaf} {Peep Peep}] \
+            [ic itemcget {root leaf} {Peep Peep}] \
             [ic exists root Bo] \
             [ic exists root Peep] \
             [ic exists branch Peep] \
@@ -194,11 +194,11 @@ test Inter-add-3 {Add using nested syntax} {
 #### assign{}, value{}
 #
 catch {delete object ic}
-::tycho::Inter ic -errorname Tester
-ic defineType valued -valued 1
-ic defineType nonvalued -valued 0
+::tycho::NewInterchange ic -errorname Tester
+ic newtype valued -valued 1
+ic newtype nonvalued -valued 0
 
-test Inter-assign-1 {Assign a value} {
+test NewInterchange-assign-1 {Assign a value} {
     ic add valued Bo Hello
     set result [ic value valued Bo]
     ic assign valued Bo Goodbye
@@ -210,10 +210,10 @@ test Inter-assign-1 {Assign a value} {
 #### delete{}
 #
 catch {delete object ic}
-::tycho::Inter ic -errorname Tester
-ic defineType root -color red -rootonly 1
-ic defineType branch -color brown -nonroot 1
-ic defineType leaf -color green -nonroot 1 -leafonly 1 -valued 1
+::tycho::NewInterchange ic -errorname Tester
+ic newtype root -color red -rootonly 1
+ic newtype branch -color brown -nonroot 1
+ic newtype leaf -color green -nonroot 1 -leafonly 1 -valued 1
 ic add root Bo {
     branch Bo
 }
@@ -222,12 +222,12 @@ ic add root Peep {
     leaf Peep Hello -color blue
 }
 
-test Inter-delete-1 {Delete leaf} {
+test NewInterchange-delete-1 {Delete leaf} {
     set result [list [ic delete {root branch} {Bo Bo}]]
     lappend result [ic exists root Bo] [ic exists {root branch} {Bo Bo}]
 } {{-color brown} 1 0}
 
-test Inter-delete-2 {Delete root -- leaf stays} {
+test NewInterchange-delete-2 {Delete root -- leaf stays} {
     set result [list [ic delete root Peep]]
     lappend result [ic exists root Peep] [ic exists {root leaf} {Peep Peep}]
 } {{-color pink} 0 1}
@@ -236,9 +236,9 @@ test Inter-delete-2 {Delete root -- leaf stays} {
 #### get
 #
 catch {delete object ic}
-::tycho::Inter ic -errorname Tester
-ic defineType foo -color red -valued 1
-ic defineType bar
+::tycho::NewInterchange ic -errorname Tester
+ic newtype foo -color red -valued 1
+ic newtype bar
 ic add foo a A {
     foo b B -color blue
     foo c C
@@ -247,15 +247,15 @@ ic add foo a A {
 ic add foo f F
 ic add bar y
 
-test Inter-get-1 {Get root items} {
+test NewInterchange-get-1 {Get root items} {
     ic get foo
 } {a {A -color red} f {F -color red}}
 
-test Inter-get-2 {Get root items again} {
+test NewInterchange-get-2 {Get root items again} {
     ic get bar
 } {y {}}
 
-test Inter-get-3 {Get nested items} {
+test NewInterchange-get-3 {Get nested items} {
     ic get {foo foo} a
 } {c {C -color red} b {B -color blue}}
 
@@ -263,29 +263,29 @@ test Inter-get-3 {Get nested items} {
 #### itemcget{}, itemconfigure{}
 #
 catch {delete object ic}
-::tycho::Inter ic -errorname Tester
-ic defineType foo -color red -font Times -valued 1
+::tycho::NewInterchange ic -errorname Tester
+ic newtype foo -color red -font Times -valued 1
 ic add foo a A {
     foo b B -color blue -font Lucida
     foo c C
 }
 
-test Inter-itemcget-1 {Get options of root item} {
+test NewInterchange-itemcget-1 {Get options of root item} {
     list [ic itemcget foo a -color] [ic itemcget foo a -font] 
 } {red Times}
 
-test Inter-itemcget-2 {Get options of nested item} {
+test NewInterchange-itemcget-2 {Get options of nested item} {
     list \
 	    [ic itemcget {foo foo} {a b} -color] \
 	    [ic itemcget {foo foo} {a b} -font]
 } {blue Lucida}
 
-test Inter-itemconfigure-1 {Configure options of root item} {
+test NewInterchange-itemconfigure-1 {Configure options of root item} {
     ic itemconfigure foo a -color pink -font Zap
     list [ic itemcget foo a -color] [ic itemcget foo a -font] 
 } {pink Zap}
 
-test Inter-itemconfigure-2 {Configure options of nested item} {
+test NewInterchange-itemconfigure-2 {Configure options of nested item} {
     ic itemconfigure {foo foo} {a b} -color yellow -font Magic
     list \
 	    [ic itemcget {foo foo} {a b} -color] \
@@ -296,9 +296,9 @@ test Inter-itemconfigure-2 {Configure options of nested item} {
 #### names
 #
 catch {delete object ic}
-::tycho::Inter ic -errorname Tester
-ic defineType foo -color red -valued 1
-ic defineType bar
+::tycho::NewInterchange ic -errorname Tester
+ic newtype foo -color red -valued 1
+ic newtype bar
 ic add foo a A {
     foo b B -color blue
     foo c C
@@ -307,35 +307,35 @@ ic add foo a A {
 ic add foo f F
 ic add bar y
 
-test Inter-names-1 {Get root items} {
+test NewInterchange-names-1 {Get root items} {
     ic names foo
 } {a f}
 
-test Inter-names-2 {Get root items again} {
+test NewInterchange-names-2 {Get root items again} {
     ic names bar
 } {y}
 
-test Inter-names-3 {Get nested items} {
+test NewInterchange-names-3 {Get nested items} {
     ic names {foo foo} a
 } {c b}
 
 ########################################################################
-#### options
+#### itemcget
 #
 catch {delete object ic}
-::tycho::Inter ic -errorname Tester
-ic defineType foo -color red -font Times -valued 1
+::tycho::NewInterchange ic -errorname Tester
+ic newtype foo -color red -font Times -valued 1
 ic add foo a A {
     foo b B -color blue -font Lucida
     foo c C
 }
 
-test Inter-options-1 {Get options of root item} {
-    ic options foo a
+test NewInterchange-itemcget-1 {Get options of root item} {
+    ic itemcget foo a
 } {-color red -font Times}
 
-test Inter-options-2 {Get options of nested item} {
-    ic options {foo foo} {a b}
+test NewInterchange-itemcget-2 {Get options of nested item} {
+    ic itemcget {foo foo} {a b}
 } {-color blue -font Lucida}
 
 ########################################################################
@@ -346,18 +346,18 @@ test Inter-options-2 {Get options of nested item} {
 #### value
 #
 catch {delete object ic}
-::tycho::Inter ic -errorname Tester
-ic defineType foo -color red -font Times -valued 1
+::tycho::NewInterchange ic -errorname Tester
+ic newtype foo -color red -font Times -valued 1
 ic add foo a A {
     foo b B -color blue -font Lucida
     foo c C
 }
 
-test Inter-value-1 {Get value of root item} {
+test NewInterchange-value-1 {Get value of root item} {
     ic value foo a
 } {A}
 
-test Inter-value-2 {Get value of nested item} {
+test NewInterchange-value-2 {Get value of nested item} {
     ic value {foo foo} {a b}
 } {B}
 
@@ -375,13 +375,13 @@ test Inter-value-2 {Get value of nested item} {
 #
 
 ########################################################################
-#### describe{}, describeItem{}
+#### describe{}
 #
 catch {delete object ic}
-::tycho::Inter ic -errorname Tester
-ic defineType root -color red -rootonly 1
-ic defineType branch -color brown -nonroot 1
-ic defineType leaf -color green -nonroot 1 -leafonly 1 -valued 1
+::tycho::NewInterchange ic -errorname Tester
+ic newtype root -color red -rootonly 1
+ic newtype branch -color brown -nonroot 1
+ic newtype leaf -color green -nonroot 1 -leafonly 1 -valued 1
 ic add root Bo {
     branch Bo -color green
 }
@@ -391,27 +391,23 @@ ic add root Peep {
 }
 ic add root Sheep -color pink
 
-test Inter-describeitem-1 {Describe non-valued root} {
-    ic describeItem root Sheep
+test NewInterchange-describe-1 {Describe non-valued root} {
+    ic describe root Sheep
 } "root Sheep -color pink\n"
 
-test Inter-describeitem-2 {Describe non-valued nested item} {
-    ic describeItem {root branch} {Bo Bo}
+test NewInterchange-describe-2 {Describe non-valued nested item} {
+    ic describe {root branch} {Bo Bo}
 } "branch Bo -color green\n"
 
-test Inter-describeitem-3 {Describe valued item} {
-    ic describeItem {root leaf} {Peep Peep}
+test NewInterchange-describe-3 {Describe valued item} {
+    ic describe {root leaf} {Peep Peep}
 } "leaf Peep Hello -color blue\n"
 
-test Inter-describeitem-4 {Describe nested item} {
-    ic describeItem root Peep
+test NewInterchange-describe-4 {Describe nested item} {
+    ic describe root Peep
 } "root Peep \{\n\ \ \ \ -color pink\n\ \ \ \ leaf Peep Hello -color blue\n\}\n"
 
-test Inter-describeitem-5 {Describe nested item with string prefix} {
-    ic describeItem root Peep {!}
-} "!root Peep \{\n!\ \ \ \ -color pink\n!\ \ \ \ leaf Peep Hello -color blue\n!\}\n"
-
-test Inter-describe-5 {Describe whole model} {
+test NewInterchange-describe-6 {Describe whole model} {
     llength [ic describe]
 } [llength {
 root Bo {
@@ -429,7 +425,7 @@ root Sheep -color pink
 #
 
 ########################################################################
-#### internalize
+#### NewInterchangenalize
 #
 
 ########################################################################
