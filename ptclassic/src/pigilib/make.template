@@ -24,7 +24,7 @@ include $(CONFIG)
 
 # Rule for making .o file from .c file
 .c.o:
-	$(CC) $(CFLAGS) -I$(OCTTOOLS)/include -c $<
+	$(CC) $(CFLAGS) -I$(OCTTOOLS)/include $(X11INCL) -c $<
 
 HDRS	      = compile.h \
 		edit.h \
@@ -98,8 +98,8 @@ sources:	$(SRCS) $(HDRS) make.template
 
 depend:
 		cd $(VPATH); \
-		$(DEPEND) -I$(KERNDIR) -I$(OCTTOOLS)/include $(SRCS)|\
-			cat make.template - > makefile.n;\
+		$(DEPEND) -I$(KERNDIR) -I$(OCTTOOLS)/include $(X11INCL) \
+			$(SRCS)| cat make.template - > makefile.n;\
 		mv -f makefile.n makefile
 	
 makefile:	make.template
