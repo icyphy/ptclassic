@@ -46,24 +46,36 @@ for a complete explanation of the options.
 		default { 0 }
 		desc { Number of initial values to ignore.}
 	}
+	defstate {
+		name {xUnits}
+		type {float}
+		default { 1.0 }
+		desc { For labeling, horizontal increment between samples. }
+	}
+	defstate {
+		name {xInit}
+		type {float}
+		default { 0.0 }
+		desc { For labeling, horizontal value of the first sample. }
+	}
 	protected {
 		XGraph graph;
-		int index;
+		double index;
 	}
 	hinclude { "Display.h" }
 
 	start {
 		graph.initialize(this, input.numberPorts(),
 			options, title, saveFile, ignore);
-		index = 0;
+		index = xInit;
 	}
 
 	go {
 		MPHIter nexti(input);
 		for (int i = 1; i <= input.numberPorts(); i++) {
-			graph.addPoint(i, float(index), float((*nexti++)%0));
+			graph.addPoint(i, index, float((*nexti++)%0));
 		}
-		index++;
+		index += double(xUnits);
 	}
 	wrapup {
 		graph.terminate();

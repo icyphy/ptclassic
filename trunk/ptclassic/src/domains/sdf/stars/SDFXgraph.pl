@@ -45,17 +45,32 @@ for a complete explanation of the options.
 		default { 0 }
 		desc { Number of initial values to ignore.}
 	}
+	defstate {
+		name {xUnits}
+		type {float}
+		default { 1.0 }
+		desc { For labeling, horizontal increment between samples. }
+	}
+	defstate {
+		name {xInit}
+		type {float}
+		default { 0.0 }
+		desc { For labeling, horizontal value of the first sample. }
+	}
 	hinclude { "Display.h" }
 	protected {
 		XGraph graph;
+		double index;
 	}
 
 	start {
 		graph.initialize(this, 1, options, title, saveFile, ignore);
+		index = xInit;
 	}
 
 	go {
-		graph.addPoint(float(input%0));
+		graph.addPoint(1,index,float(input%0));
+		index += double(xUnits);
 	}
 	wrapup {
 		graph.terminate();
