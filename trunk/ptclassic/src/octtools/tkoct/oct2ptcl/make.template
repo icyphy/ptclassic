@@ -46,10 +46,12 @@ HDRS = 		oct2ptcl.h
 
 MISC_FILES =	Policy README BUGS
 
+BINARY =	oct2ptcl$(BINARY_EXT)
+
 # common.mk wants this, otherwise we get multiple targets for $(LIBDIR)/$(LIB)
 LIB = foo
 
-all:		makefile oct2ptcl
+all:		makefile $(BINARY)
 
 # Include tk stuff because under sol2.cfront  ../top/libtop has undefined
 # references to it. 
@@ -65,14 +67,11 @@ TOPDIR = 	$(VPATH)/../top
 
 C_INCL = 	-I$(OCTTOOLS)/include -I$(TOPDIR) -I$(TCL_INCDIR) $(PTCOMPAT_INCSPEC) $(X11_INCSPEC)
 
-# Use the $(CLINKER) so the binary is statically linked for distribution.
-# On suns, cc takes -Bstatic, gcc takes -static, so we can't just add a flag
-# here.
-oct2ptcl:	$(OBJS)
+$(BINARY):	$(OBJS)
 	rm -f $@
 	$(CLINKER) $(LINKFLAGS) -o $@ $(OBJS) $(OCT2PTCL_LIBS) $(X11EXT_LIBSPEC) $(X11_LIBSPEC) $(CSYSLIBS)
 
-oct2ptcl.debug:	$(OBJS)
+oct2ptcl.debug$(BINARY_EXT):	$(OBJS)
 	rm -f $@
 	$(CLINKER) $(LINKFLAGS_D) -o $@ $(OBJS) $(OCT2PTCL_LIBS) $(X11EXT_LIBSPEC) $(X11_LIBSPEC) $(CSYSLIBS)
 
@@ -81,11 +80,11 @@ oct2ptcl.debug.purify: $(OBJS)
 	$(PURIFY) $(CLINKER) $(LINKFLAGS_D) -o $@ $(OBJS) $(OCT2PTCL_LIBS) $(X11EXT_LIBSPEC) $(X11_LIBSPEC) $(CSYSLIBS)
 
 
-OUT =		$(BINDIR)/oct2ptcl
+DEST = $(OCTTOOLS)/bin.$(PTARCH)/$(BINARY)
 
-$(OUT):	oct2ptcl
-	rm -f $(OUT)
-	ln oct2ptcl $(OUT)
+$(DEST): $(BINARY)
+	@echo Installing $(BINARY)
+	rm -f $(DEST);  ln $^ $@
 
 install:	makefile $(OUT)
 
