@@ -44,7 +44,7 @@ proc ptkStartTycho { } {
 		set path $env(TYCHO)
 	    } else {
 		# FIXME: Temporary
-		set path $ptolemy/tycho0.2.1devel
+		set path $ptolemy/tycho
 	    }
 	    source $path/kernel/Tycho.tcl
 	}
