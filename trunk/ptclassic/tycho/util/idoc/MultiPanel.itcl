@@ -89,17 +89,29 @@ class ::tycho::MultiPanel {
     # Reinitialize the multipanel
     method clear {}
 
-    # Returns the subpanel names as a list/return info on element.
-    method elementinfo {args}
+    # Returns the subpanel/label names as a list
+    method elements {}
 
-    # Remove a subpanel
+    # Return the label names as a list
+    method labels {}
+ 
+    # Return the subpanel names as a list
+    method panels {}
+
+    # Remove a subpanel/label
     method remove {element}
   
-    # cget for subpanels
+    # cget for subpanels/labels
     method subcget {element args}
     
-    # configure for subpanels
+    # configure for subpanels/labels
     method subconfig {element args}
+
+    ###################################################################
+    ####                      private methods                      ####
+
+    # Return info on element.
+    private method elementinfo {args}
 
     ###################################################################
     ####                      private variables                    ####
@@ -253,22 +265,41 @@ body ::tycho::MultiPanel::clear {} {
 
 #####################################################################
 #### elements
-# Return the widget name of a subpanel or label.
-# With no args, return the elements of the internal list of subpanels/labels.
-# FIXME: Move widget name portion to private after fully tested.
+# Return the elements of the internal list of subpanels/labels.
 #
-body ::tycho::MultiPanel::elementinfo {args} {
+body ::tycho::MultiPanel::elements {} {
 
-    if {$args == ""} {
-        return [$myList elements]
-    }
-    set temp ""
-    foreach element $args {
-        if {[catch {lappend temp $myData($element)}] == 1} {
-            error "MultiPanel::elementinfo: Can't find element: $element"
+    return [$myList elements]
+}
+
+#####################################################################
+#### labels
+# Return the elements of the internal list which are labels
+#
+body ::tycho::MultiPanel::labels {} {
+
+    set labels {}
+    foreach element [$myList elements] {
+        if {[winfo class [elementinfo $element]] == "Label"} {
+            lappend labels $element
         }
     }
-    return "$temp"
+    return "$labels"
+}
+
+#####################################################################
+#### panels
+# Return the elements of the internal list which are subpanels
+#
+body ::tycho::MultiPanel::panels {} {
+
+    set panels {}
+    foreach element [$myList elements] {
+        if {[winfo class [elementinfo $element]] == "Subpanel"} {
+            lappend panels $element
+        }
+    }
+    return "$panels"
 }
 
 #####################################################################
@@ -307,4 +338,17 @@ body ::tycho::MultiPanel::subconfig {element args} {
     ###################################################################
     ####                      private methods                      ####
 
+#####################################################################
+#### elementinfo
+# Return the widget name of a subpanel or label.
+#
+body ::tycho::MultiPanel::elementinfo {args} {
 
+    set temp ""
+    foreach element $args {
+        if {[catch {lappend temp $myData($element)}] == 1} {
+            error "MultiPanel::elementinfo: Can't find element: $element"
+        }
+    }
+    return "$temp"
+}
