@@ -33,12 +33,12 @@
 # The documentation consists of a concatenation of the following files:
 #
 #   $PTOLEMY/doc/headers/shared - macro definitions
-#   overall - introduction to the domain
-#   targettitle - title page for the target section
+#   overall.t - introduction to the domain
+#   targettitle.t - title page for the target section
 #   targets/*.t - target troff documentation
-#   startitle - title page for the stars section
+#   startitle.t - title page for the stars section
 #   stars/*.t - star troff documentation files
-#   demotitle - title page for the demo section
+#   demotitle.t - title page for the demo section
 #   demos/*.t- demo troff documentation.
 #
 # Any troff file may include other troff files with the .so command
@@ -65,6 +65,7 @@ set tempdir = /tmp
 set tempTroffFile = $tempdir/pt$$.t
 set tempIndexFile = $tempdir/index$$
 set tempNroffFile = $tempdir/pt$$.n
+set tempFiles = $tempTroffFile $tempIndexFile $tempNroffFile
 
 # Variables
 set indexonly = 0
@@ -122,7 +123,7 @@ endif
 
 
 gsoelim $dirheader/groff-fix $dirheader/shared $dirheader/domain \
-	init overall > $tempTroffFile
+	init.t overall.t > $tempTroffFile
 
 # Set icon printing flag: 0 if not printing icons, 1 if printing them.
 if ($icons) then
@@ -132,10 +133,10 @@ else
 endif
 
 if ( -d targets ) then
-        if (-e targettitle) then
+        if (-e targettitle.t) then
                 # set type for this section
                 echo '.ds TY "target"' >> $tempTroffFile
-                cat targettitle >> $tempTroffFile
+                cat targettitle.t >> $tempTroffFile
         endif
         cd targets
         # print all targets
@@ -144,10 +145,10 @@ if ( -d targets ) then
 endif
 
 if ( -d stars ) then
-	if (-e starstitle) then
+	if (-e starstitle.t) then
 		# set type for this section
 		echo '.ds TY "star"' >> $tempTroffFile
-		cat starstitle >> $tempTroffFile
+		cat starstitle.t >> $tempTroffFile
 	endif
 	cd stars
 	# print all stars
@@ -156,10 +157,10 @@ if ( -d stars ) then
 endif
 
 if ( -d demos ) then
-	if (-e demotitle) then
+	if (-e demotitle.t) then
 		# set type for this section
 		echo '.ds TY "demo"' >> $tempTroffFile
-		cat demotitle >> $tempTroffFile
+		cat demotitle.t >> $tempTroffFile
 	endif
 	cd demos
 	# print all demos
@@ -192,12 +193,12 @@ else
 	# otherwise just print it out
 	($printcommand $printoptions $tempTroffFile | lpr ) >& $tempIndexFile
 	$contentscmd $tempIndexFile
-	if (-r title) $printcommand $printoptions $dirheader/shared title
+	if (-r title.t) $printcommand $printoptions $dirheader/shared title.t
 else
 endif
 
 if (-r $tempIndexFile) cat $tempIndexFile >>! $ALMAGEST_INDEX
-/bin/rm -f $tempTroffFile $tempIndexFile $tempNroffFile
+/bin/rm -f $tempFiles
 # XXX we'll enable this later
 #if (!($icons_norm)) /bin/rm -f ../icons/*.ps ../*/icons/*.ps
 exit 0
@@ -205,7 +206,7 @@ exit 0
 catch:
         # prevent the "no match" error message if there are no temporary files
         set nonomatch
-	/bin/rm -f $tempTroffFile $tempIndexFile $tempNroffFile
+	/bin/rm -f $tempFiles
 	# XXX we'll enable this later, too.
 	#if (!($icons_norm)) /bin/rm -f ../icons/*.ps ../*/icons/*.ps
         exit 1
