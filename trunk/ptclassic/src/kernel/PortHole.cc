@@ -172,8 +172,8 @@ int GalMultiPort :: isItInput() const { return alias()->isItInput();}
 int GalMultiPort :: isItOutput() const { return alias()->isItOutput();}
 
 // create a new porthole in a GalMultiPort
-GalMultiPort :: newPort() () {
-	PortHole& newAliasPort = alias()->newPort();
+PortHole& GalMultiPort :: newPort() {
+	PortHole& newAliasPort = ((MultiPortHole*)alias())->newPort();
 	return installPort(*new GalPort(newAliasPort));
 }
 
