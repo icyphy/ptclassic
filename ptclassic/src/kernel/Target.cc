@@ -167,13 +167,13 @@ int Target::run() {
 	}
 }
 
-// default wrapup: call wrapup on all stars and galaxies
+// default wrapup: call wrapup on the galaxy
 void Target::wrapup () {
 	if (!gal) return;
-	GalTopBlockIter next(*gal);
-	Block* b;
-	while ((b = next++) != 0) b->wrapup();
-	return;
+	// Note: we can't simply say "gal->wrapup()" below because 
+	// wrapup is a virtual method and if gal points to an 
+	// InterpUniverse then we will get into infinite recursion.
+	gal->Galaxy::wrapup();
 }
 
 int Target :: commTime(int,int,int,int) { return 0;}
