@@ -50,43 +50,53 @@ void ComplexState  :: initialize() {
 	const  char* specialChars =  "*+-/(),";
 	Tokenizer lexer(initValue,specialChars);
 
-	double realval;
-	double imagval;
 	ParseToken t =getParseToken(lexer);
+
+	// possibility one: a galaxy ComplexState name
+
 	if (t.tok == T_ID) {
 		if (!t.s->isA("ComplexState")) {
 			parseError ("invalid state type: ", t.s->readFullName());
 			return;
 		}
 		val = ((ComplexState*)t.s)->val;
-		return;
 	}
+	// possibility two:
 	// if it does not begin with '(', assume a purely real value.
-	if (t.tok != '(') {
+	// this may be any valid floating expression.
+	else if (t.tok != '(') {
 		pushback = t;
 		t = evalFloatExpression(lexer);
-		if (t.tok == T_Float) {
-			realval = t.doubleval;
-			imagval = 0.0;
+		if (t.tok == T_Float) val = t.doubleval;
+		// if wrong type, evalFloatExpression has already complained
+		else return;
+	}
+	// possibility three: ( exp , exp )
+	// where each exp is a floating expression.
+	else {
+		// get real , imag
+		t =  evalFloatExpression(lexer);
+		if (t.tok != T_Float) return;
+		double realval = t.doubleval;
+		t = getParseToken(lexer);
+		if (t.tok != ',') {
+			parseError ("expected a comma");
+			return;
 		}
-		return;
+		t =  evalFloatExpression(lexer);
+		if (t.tok != T_Float) return;
+		double imagval = t.doubleval;
+		val = Complex(realval,imagval);
+		t = getParseToken (lexer);
+		if (t.tok != ')') {
+			parseError ("expected )");
+			return;
+		}
 	}
-	// get real , imag
-	t =  evalFloatExpression(lexer);
-	if (t.tok != T_Float) return;
-	realval = t.doubleval;
-	t = getParseToken(lexer);
-	if (t.tok != ',') {
-		parseError ("expected a comma");
-		return;
-	}
-	t =  evalFloatExpression(lexer);
-	if (t.tok != T_Float) return;
-	imagval = t.doubleval;
-	val = Complex(realval,imagval);
-	t = getParseToken (lexer);
-	if (t.tok != ')')
-		parseError ("expected )");
+	// check for extra cruft (this also eats up any pushback token)
+	ParseToken t2 = getParseToken (lexer);
+	if (t2.tok != T_EOF)
+		parseError ("extra text after valid expression");
 	return;
 }
 
