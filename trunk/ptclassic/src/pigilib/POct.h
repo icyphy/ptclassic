@@ -48,14 +48,14 @@ a Tcl interpreter.
 #include "StringList.h"
 
 #if defined(hppa)
-/* Include math.h outside of extern "C", other wise we get errors with
-   pow() g++2.5.8 */
+/* Include math.h outside of extern "C" */
+/* Otherwise, we get errors with pow() g++2.5.8 */
 #include <math.h>
 #endif
 
 extern "C" {
 #define Pointer screwed_Pointer
-#include "oct.h"  /* Oct Pointer Structure */
+#include "oct.h"			/* Oct Pointer Structure */
 #include "paramStructs.h"
 #include "ganttIfc.h"
 #undef Pointer
@@ -163,4 +163,3 @@ private:
 };
 
 #endif		// _POct_h
-
