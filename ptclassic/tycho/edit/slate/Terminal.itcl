@@ -147,6 +147,9 @@ class ::tycho::Terminal {
     # Update the *-style* option
     proc _style {id canvas slate length}
     
+    # Update the *-type* option
+    proc _type {id canvas slate type}
+    
     # Update the *-width* option
     proc _width {id canvas slate width}
 
@@ -178,6 +181,7 @@ class ::tycho::Terminal {
     set methodtable(_fill)       ::tycho::Terminal::_fill
     set methodtable(_length)     ::tycho::Terminal::_length
     set methodtable(_style)      ::tycho::Terminal::_style
+    set methodtable(_type)       ::tycho::Terminal::_type
     set methodtable(_width)      ::tycho::Terminal::_width
 
     set methodtable(aspect)      ::tycho::Terminal::aspect
@@ -195,6 +199,7 @@ class ::tycho::Terminal {
     set optiondefault(-length)    25
     set optiondefault(-shape)     point
     set optiondefault(-style)     arrowin
+    set optiondefault(-type)      input
     set optiondefault(-width)     1
 }
 
@@ -356,6 +361,14 @@ body ::tycho::Terminal::_style {id canvas slate style} {
             error "Invalid style \"$style\""
         }
     }
+}
+
+##########################################################################
+#### -type option configuration
+#
+body ::tycho::Terminal::_type {id canvas slate type} {
+    set option(type$id) type
+   $canvas itemconfigure $primary($id) -type $type
 }
 
 ##########################################################################
