@@ -138,6 +138,9 @@ void do_main(int argc, char *argv[], VHDLFiringList* theFiringList) {
     fprintf(stderr, "%s\n", interp->result);
     exit(1);
   }
+  fprintf(stderr, "SetAppName: %s\n", Tk_SetAppName(mainWindow,
+						    "TkScheduler"));
+
   Tk_CreateErrorHandler(Tk_Display(mainWindow), -1, -1, -1,
 			XErrorProc, (ClientData)mainWindow);
   if (debug) {
@@ -284,7 +287,7 @@ int SetProcCmd(ClientData clientData,
       return error;
     }
   }
-  //  printf("Setting procNum for %s to %d\n", firingName, procNum);
+  printf("Setting procNum for %s to %d\n", firingName, procNum);
 
   VHDLFiring* firing = new VHDLFiring;
   firing = ourFiringList->vhdlFiringWithName(firingName);
