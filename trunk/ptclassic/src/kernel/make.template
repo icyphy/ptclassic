@@ -35,6 +35,7 @@ LIB=libptolemy.a
 
 CCS_WITH_H_FILES=\
  Animate.cc \
+ AutoFork.cc \
  AutoForkNode.cc \
  Block.cc \
  Code.cc \
