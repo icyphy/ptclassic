@@ -66,7 +66,7 @@ boolean
 ManPage(starName)
 char *starName;
 {
-    char buf[612];
+    char buf[512];
 
     sprintf(buf, "ptman -x %s &", starName);
     PrintDebug(buf);
@@ -159,7 +159,8 @@ long userOptionWord;
 {
     octObject facet = {OCT_UNDEFINED_OBJECT},
 	      inst = {OCT_UNDEFINED_OBJECT};
-    char FacetName[15], InstanceName[15];
+    char FacetName[POCT_FACET_HANDLE_LEN],
+	 InstanceName[POCT_FACET_HANDLE_LEN];
     vemStatus status;
 
     ViInit("show facet number");
@@ -181,7 +182,7 @@ long userOptionWord;
         ViDone();
     } else if (status != VEM_OK) {
         /* cursor not over an instance... */
-        sprintf (InstanceName, "NIL");
+        strcpy(InstanceName, "NIL");
     } else {
         /* cursor is over some type of instance... */
 	ptkOctObj2Handle ( &inst, InstanceName );
@@ -251,10 +252,10 @@ long userOptionWord;
     ViInit("equirriple FIR design");
     ErrClear();
     sprintf(buf, "xterm -display %s -name Equirriple_FIR_design -e optfir &",
-                xDisplay);
+            xDisplay);
     PrintDebug(buf);
     if (util_csystem(buf)) {
-        sprintf(buf, "Error invoking optfir program.");
+        strcpy(buf, "Error invoking optfir program.");
 	PrintErr(buf);
     }
     ViDone();
@@ -271,7 +272,7 @@ long userOptionWord;
     ViInit("window FIR design");
     ErrClear();
     sprintf(buf, "xterm -display %s -name Equirriple_FIR_design -e wfir &",
-                xDisplay);
+            xDisplay);
     PrintDebug(buf);
     if (util_csystem(buf)) {
         PrintErr("Error invoking wfir program.");

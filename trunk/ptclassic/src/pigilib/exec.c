@@ -60,7 +60,7 @@ RunUniverse(name)
 char* name;
 {
 	octObject facet = {OCT_UNDEFINED_OBJECT};
-        char facetHandle[16];
+        char facetHandle[POCT_FACET_HANDLE_LEN];
 
 	ViInit(name);
 	ErrClear();
@@ -100,7 +100,7 @@ octObject *facetPtr;
 boolean now;
 {
     char* name;
-    char octHandle[16];
+    char octHandle[POCT_FACET_HANDLE_LEN];
 
     lastFacet = *facetPtr;
     ptkOctObj2Handle(facetPtr,octHandle);

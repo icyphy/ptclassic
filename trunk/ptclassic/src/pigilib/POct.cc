@@ -112,7 +112,7 @@ extern void KcSetEventLoop(int on);
 // Converts an oct Facet Pointer into a string "handle" that
 // can be used by a TCL interpreter
 // To use this function, you must declare space for a char array that
-// is at least 15 chars long.
+// is at least 15 chars long (use POCT_FACET_HANDLE_LEN)
 extern "C" void ptkOctObj2Handle( octObject *objPtr, char *stringValue )
 {
         sprintf(stringValue, "OctObj%-.8lx", (long)objPtr->objectId);
@@ -1356,7 +1356,7 @@ int POct::ptkFacetContents (int aC, char** aV) {
     Tcl_AppendResult(interp, " { ", NULL );
     octGenerator gen;
     octObjectClass contentObj;
-    char contentStr[16];
+    char contentStr[POCT_FACET_HANDLE_LEN];
     octInitGenContents(facet, mask, &gen);
     while (octGenerate(&gen, contentObj) == OCT_OK) {
 	ptkOctObj2Handle(contentObj, contentStr);
@@ -1398,7 +1398,7 @@ int POct::ptkOpenMaster (int aC, char** aV) {
         return TCL_ERROR;
     }
 
-    char facetStr[16];
+    char facetStr[POCT_FACET_HANDLE_LEN];
     ptkOctObj2Handle(facet, facetStr);
     Tcl_AppendResult(interp, facetStr, NULL);
 
@@ -1459,7 +1459,7 @@ int POct::ptkOpenFacet (int aC, char** aV) {
     }
 
     // Convert the new Facet into a string Oct ID Handle
-    char facetHandle[16];
+    char facetHandle[POCT_FACET_HANDLE_LEN];
     ptkOctObj2Handle(facet, facetHandle);
     Tcl_AppendResult(interp, facetHandle, " ", NULL );
 

@@ -352,7 +352,7 @@ lsList cmdList;
 long userOptionWord;
 {
     octObject facet = {OCT_UNDEFINED_OBJECT};
-    char facetHandle[16];
+    char facetHandle[POCT_FACET_HANDLE_LEN];
 
     ViInit("make-schem-icon");
     ErrClear();
