@@ -34,7 +34,14 @@ static char SccsId[]="$Id$";
 #include "harpoon.h"
 
 char *optProgName;
+void usage
+	ARGS((char *name));
+void demo
+	ARGS((octObject *facetPtr, int edgeIncr, octObject *outFacetPtr));
+void buildFrame
+	ARGS((octObject *layerPtr, int nPoints, struct octPoint *pointList));
 
+int
 main(argc, argv)
 int argc;
 char *argv[];
@@ -65,17 +72,17 @@ char *argv[];
 	exit(1);
     }
 
-    exit(0);
+    return 0;
 }
 
-usage(name)
+void usage(name)
 char *name;
 {
     (void) fprintf(stderr, "usage: %s minedge cell:view\n", name);
     exit(1);
 }
 
-demo(facetPtr, edgeIncr, outFacetPtr)
+void demo(facetPtr, edgeIncr, outFacetPtr)
 octObject *facetPtr;		/* the facet whose frame you want */
 int edgeIncr;			/* edge length increment in smoothed frame */
 octObject *outFacetPtr;		/* the facet to put the frame into */
@@ -145,7 +152,7 @@ octObject *outFacetPtr;
     }
 }
 
-buildFrame(layerPtr, nPoints, pointList)
+void buildFrame(layerPtr, nPoints, pointList)
 octObject *layerPtr;		/* the layer to put the frame into */
 int nPoints;			/* number of points in polygon */
 struct octPoint *pointList;	/* vector of points in polygon */
