@@ -72,7 +72,7 @@ proc listApplyExpression {tclexpr thelist} {
 
 add_to_help makeOrderedPairs {<x-values> ?<y-values>?} {
 Converts two lists, <x-values> and <y-values>, into ordered pairs; e.g.,
-makeOrderedPairs "1 2 3" "3 2 1" returns "(1, 3) (2, 2) (3, 1)".
+makeOrderedPairs "1 2 3" "3 2 1" returns "(1,3) (2,2) (3,1)".
 If <y-values> is omitted, then <x-values> is returned.  This procedure
 returns a string.
 }
