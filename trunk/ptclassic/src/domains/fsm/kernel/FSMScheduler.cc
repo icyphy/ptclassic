@@ -68,8 +68,7 @@ void FSMScheduler::resetStopTime(double) {
 extern int warnIfNotConnected (Galaxy&);
 
 // Check all stars.
-// (1) Check if StateStar has the right type.
-// (2) Check if there is only one initial state.
+// (1) Check if there is only one initial state.
 int FSMScheduler::checkStars() {
     int check = 0; // To check if only one initial state exists.
     GalTopBlockIter next(*galaxy());
@@ -77,14 +76,6 @@ int FSMScheduler::checkStars() {
     FSMStateStar *s;
     while ((bl = next++) != 0) {
       if (bl->isA("FSMStateStar")) {
-          InfString buf = "FSM";
-	  buf << evaluationType;
-	  if ( !bl->isA(buf) ) {
-	    Error::abortRun("FSMScheduler: \"", bl->name(),
-                            "\" does not belong to this type of machine.");
-	    return FALSE;  
-	  }
-
 	  s = (FSMStateStar *)bl;
 	  if (s->isInit()) {
 	    initialState = s;
@@ -108,6 +99,36 @@ int FSMScheduler::checkStars() {
     return TRUE;
 }
 
+int FSMScheduler::receiveData() {
+    PortHole* p;
+    BlockPortIter next(*galaxy());
+    while ((p = next++) != NULL)
+      if (p->isItInput()) {
+	// For input port, update the data in Tcl interp.
+
+	// Set p point to its real port.
+	p = (PortHole *)p->alias();
+
+	// Register new input from PortHole to Tcl Interp.
+	if (!port2interp(p, myInterp, outerDomain)) return FALSE;
+
+      } else {
+	// For output port, clear the data in Tcl interp.
+	
+	// Set p point to its real port.
+	p = (PortHole *)p->alias();
+
+	// Set both status and value to 0 in Tcl interp.
+	InfString buf = p->name();
+	buf << "(s)";
+	Tcl_SetVar(myInterp,buf,"0",TCL_GLOBAL_ONLY);
+	buf = p->name();
+	buf << "(v)";
+	Tcl_SetVar(myInterp,buf,"0",TCL_GLOBAL_ONLY);
+      }
+        
+    return TRUE;
+}
 
 void FSMScheduler::resetInitState() {
     // Reset current state to be the initial state.
@@ -116,6 +137,70 @@ void FSMScheduler::resetInitState() {
     curEntryType = 1; // By "Initial" entry.
 }
 
+// Run (or continue) the simulation.
+int FSMScheduler::run() {
+    if (SimControl::haltRequested() || !galaxy()) {
+	Error::abortRun("FSMScheduler has no galaxy to run");
+	return FALSE;
+    }
+
+    // For highlighting star in graphic debug mode.
+    if (!SimControl::doPreActions(curState)) return FALSE;
+
+    // Grab input data and get internal events.
+    if (!receiveData()) return FALSE;
+
+    int transNum;
+    // Find the next state by examining the preemptive arcs.
+    if (!(nextState = curState->nextState(transNum,1)))    return FALSE;
+    if (transNum == -1) {
+      // If not found, then execute the slave process if it exists.
+      if (!curState->execSlave(curEntryType))    return FALSE;
+
+      // Find the next state by examining the NOT preemptive arcs.
+      if (!(nextState = curState->nextState(transNum,0)))  return FALSE;
+    }
+    // Do the action for the next transition corresponding to "transNum".
+    if (!curState->execAction(transNum))    return FALSE;
+
+    // Send output data.
+    if (!sendData())    return FALSE;
+
+    if (transNum == -1) {
+      // If implicit transition is triggered,
+      // entry type would be always 0 (history entry).
+      curEntryType = 0;
+    } else {
+      // If explicit transition is triggered,
+      // update the entry type to depend on that transition.
+      if ((curEntryType = curState->getEntryType(transNum)) == -1)
+	return FALSE;
+    }
+
+    // Set the next state to be current state for next iteration.
+    curState = nextState;
+
+    // For highlighting star in graphic debug mode.
+    if (!SimControl::doPreActions(curState)) return FALSE;
+
+    return !SimControl::haltRequested();
+}
+
+int FSMScheduler::sendData() {
+    PortHole* p;
+    BlockPortIter next(*galaxy());
+    while ((p = next++) != NULL)
+      if (p->isItOutput()) {
+	// Set p point to its real port.
+	p = (PortHole *)p->alias();
+
+	// Send output from Tcl Interp to PortHole.
+	if (!interp2port(myInterp, p, outerDomain)) return FALSE; 
+
+      } // end of if (p->isItOutput())
+
+  return TRUE;
+}
 
 // Initialization.
 void FSMScheduler::setup() {
@@ -200,119 +285,7 @@ int FSMScheduler::setupTclInterp() {
     return TRUE;
 }
 
-// isA
-ISA_FUNC(FSMScheduler,Scheduler);
-
-
-
-	//////////////////////////////////////////
-	// Methods for StrictSched
-	//////////////////////////////////////////
-
-StrictSched::StrictSched() {
-}
-
-// Destructor.
-StrictSched::~StrictSched() {
-}
-
-int StrictSched::receiveData() {
-    PortHole* p;
-    BlockPortIter next(*galaxy());
-    while ((p = next++) != NULL)
-      if (p->isItInput()) {
-	// For input port, update the data in Tcl interp.
-
-	// Set p point to its real port.
-	p = (PortHole *)p->alias();
-
-	// Register new input from PortHole to Tcl Interp.
-	if (!port2interp(p, myInterp, outerDomain)) return FALSE;
-
-      } else {
-	// For output port, clear the data in Tcl interp.
-	
-	// Set p point to its real port.
-	p = (PortHole *)p->alias();
-
-	// Set both status and value to 0 in Tcl interp.
-	InfString buf = p->name();
-	buf << "(s)";
-	Tcl_SetVar(myInterp,buf,"0",TCL_GLOBAL_ONLY);
-	buf = p->name();
-	buf << "(v)";
-	Tcl_SetVar(myInterp,buf,"0",TCL_GLOBAL_ONLY);
-      }
-        
-    return TRUE;
-}
-
-// Run (or continue) the simulation.
-int StrictSched::run() {
-    if (SimControl::haltRequested() || !galaxy()) {
-	Error::abortRun("FSMScheduler has no galaxy to run");
-	return FALSE;
-    }
-
-    // For highlighting star in graphic debug mode.
-    if (!SimControl::doPreActions(curState)) return FALSE;
-
-    // Grab input data and get internal events.
-    if (!receiveData()) return FALSE;
-
-    int transNum;
-    // Find the next state by examining the preemptive arcs.
-    if (!(nextState = curState->nextState(transNum,1)))    return FALSE;
-    if (transNum == -1) {
-      // If not found, then execute the slave process if it exists.
-      if (!curState->execSlave(curEntryType))    return FALSE;
-
-      // Find the next state by examining the NOT preemptive arcs.
-      if (!(nextState = curState->nextState(transNum,0)))  return FALSE;
-    }
-    // Do the action for the next transition corresponding to "transNum".
-    if (!curState->execAction(transNum))    return FALSE;
-
-    // Send output data.
-    if (!sendData())    return FALSE;
-
-    if (transNum == -1) {
-      // If implicit transition is triggered,
-      // entry type would be always 0 (history entry).
-      curEntryType = 0;
-    } else {
-      // If explicit transition is triggered,
-      // update the entry type to depend on that transition.
-      if ((curEntryType = curState->getEntryType(transNum)) == -1)
-	return FALSE;
-    }
-
-    // Set the next state to be current state for next iteration.
-    curState = nextState;
-
-    // For highlighting star in graphic debug mode.
-    if (!SimControl::doPreActions(curState)) return FALSE;
-
-    return !SimControl::haltRequested();
-}
-
-int StrictSched::sendData() {
-    PortHole* p;
-    BlockPortIter next(*galaxy());
-    while ((p = next++) != NULL)
-      if (p->isItOutput()) {
-	// Set p point to its real port.
-	p = (PortHole *)p->alias();
-
-	// Send output from Tcl Interp to PortHole.
-	if (!interp2port(myInterp, p, outerDomain)) return FALSE; 
-
-      } // end of if (p->isItOutput())
-
-  return TRUE;
-}
-
-void StrictSched::printTclVar() {
+void FSMScheduler::printTclVar() {
     PortHole* p;
     BlockPortIter next(*galaxy());
     while ((p = next++) != NULL) {
@@ -335,4 +308,9 @@ void StrictSched::printTclVar() {
 }
 
 // isA
-ISA_FUNC(StrictSched,FSMScheduler);
+ISA_FUNC(FSMScheduler,Scheduler);
+
+
+
+
+
