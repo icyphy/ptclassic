@@ -176,10 +176,20 @@ public:
 	// want to restrict who can alias
 	void setAlias (GenericPort& gp);
 
+        // Return a PortHole.  For single portholes, it just returns
+	// a reference to itself.  For multiporthole, it creates a new one.
+        virtual PortHole& newPort() { return (PortHole&)(*this); }
+
+	// Remove me from a chain of aliases
+	void clearAliases();
 protected:
 
 	// Translate aliases, if any.
 	GenericPort* translateAliases();
+
+	// Used to prevent infinite loops.  The resolved type
+	// in the constituent portholes is used to determine particle types.
+	DataType myResolvedType;
 
 private:
 	// datatype of particles in this porthole
@@ -265,13 +275,7 @@ public:
         int numberPorts() const {return ports.size();}
 
         // Add a new physical port to the MultiPortHole list
-        virtual PortHole& newPort();
-
-	MultiPortHole& realPort() {
-	// my apologies for this horrible cast.  It is safe because
-	// alias for a MultiPortHole is always a MultiPortHole.
-		return *(MultiPortHole *)translateAliases();
-	}
+        /* virtual */ PortHole& newPort();
 
 	// set alias for MultiPortHole
 	void setAlias (MultiPortHole &blockPort) {
@@ -304,6 +308,7 @@ protected:
 	void delPorts();
 
 private:
+
 	// peer multiporthole in a bus connection
 	MultiPortHole* peerMPH;
 
@@ -494,8 +499,6 @@ protected:
 	void allocateBuffer();
 
 private:
-	// resolved type for the connection
-	DataType myResolvedType;
 
 	// index value, for making scheduler tables
 	int indexValue;
@@ -571,7 +574,7 @@ public:
 
 	// when making a new port, create it both locally and in the
 	// alias and connect the two together.
-	PortHole& newPort();
+	/* virtual */ PortHole& newPort();
 };
 
 
