@@ -61,19 +61,18 @@ ITCL_SRCS = \
 EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) \
 	devtools.tcl \
 	README.txt \
-	makefile \
 	pkgIndex.tcl
 
 MISC_FILES = adm bin demo doc test tclIndex
 
 # 'make realclean' should remove tclIndex
-REALCLEAN_STUFF =
+REALCLEAN_STUFF = tclIndex
 
 # Title for the tydoc index page
 TYDOC_DESC =
 
 # Do make sources so that we ensure that the subdirectories are checked out
-all install: sources $(MISC_SRCS)
+all install: sources $(MISC_SRCS) tclIndex
 
 # We don't include common.mk since we don't use the compiler here
 include $(ROOT)/mk/no-compile.mk
