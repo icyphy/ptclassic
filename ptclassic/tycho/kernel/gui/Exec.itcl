@@ -72,6 +72,12 @@ class ::tycho::Exec {
     method readOrClose {fd}
 
     ###################################################################
+    ####                         public procs                       ####
+
+    # Return 1 if the Exec widget will work on the current platform
+    proc execWidgetIsSupported {} 
+
+    ###################################################################
     ####                         private variables                 ####
 
     # The value of the cursor before we set it to the busy cursor.
@@ -140,7 +146,6 @@ body ::tycho::Exec::destructor {} {
         $itk_component(history) markUnmodified
     }
 }
-
 
     ###################################################################
     ###################################################################
@@ -241,5 +246,30 @@ body ::tycho::Exec::readOrClose {fd} {
     if [eof $fd] {
         config -cursor $oldCursor
         close $fd
+    }
+}
+
+
+    ###################################################################
+    ###################################################################
+    ####                      public procs                          ####
+
+#####################################################################
+#### execWidgetIsSupported
+# Return 1 if the Exec widget will work on the current platform, otherwise
+# return 0
+body ::tycho::Exec::execWidgetIsSupported {} {
+    global tcl_platform
+    global tcl_platform
+    switch $tcl_platform(platform) {
+	macintosh {
+	    return 0
+	}
+	unix {
+	    return 1
+	}
+	windows {
+	    return 0
+	}
     }
 }
