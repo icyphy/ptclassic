@@ -78,6 +78,13 @@ int MatlabTcl::error(const char* msg) {
     return TCL_ERROR;
 }
 
+// convert the Tcl interpreter pointer to a unique string identifier
+void MatlabTcl::sethandle() {
+    char handle[32];
+    sprintf(handle, "MatlabTcl%-.8lx", (long)tclinterp);
+    matlabInterface.SetFigureHandle(handle);
+}
+
 // evaluate the Tcl command "matlab"
 int MatlabTcl::matlab(int argc, char** argv) {
 
@@ -131,6 +138,7 @@ int MatlabTcl::end(int argc, char** /*argv*/) {
 // evaluate a Matlab command
 int MatlabTcl::eval(int argc, char** argv) {
     if (argc != 3) return usage("matlab eval <matlab_command>");
+    sethandle();
     matlabInterface.AttachMatlabFigureIds();
     int merror = matlabInterface.EvaluateOneCommand(argv[2]);
     Tcl_AppendResult(tclinterp, matlabInterface.GetOutputBuffer(), 0);
@@ -147,6 +155,7 @@ int MatlabTcl::get(int argc, char** /*argv*/) {
 // evaluate a Matlab command
 int MatlabTcl::send(int argc, char** argv) {
     if (argc != 3) return usage("matlab send <matlab_command>");
+    sethandle();
     matlabInterface.AttachMatlabFigureIds();
     int merror = matlabInterface.EvaluateOneCommand(argv[2]);
     if ( merror ) return TCL_ERROR;
@@ -197,3 +206,4 @@ int MatlabTcl::unset(int argc, char** /*argv*/) {
     if (argc != 3) return usage("matlab unset <matrix_name>");
     return TCL_OK;
 }
+
