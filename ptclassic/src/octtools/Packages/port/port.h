@@ -30,6 +30,24 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #ifndef PORT_H
 #define PORT_H
 
+/* port.h is found in several places in the Ptolemy distribution:
+ * $PTOLEMY/octtools/include/port.h - The Ptolemy build looks here for port.h
+ * $PTOLEMY/src/octtools/include/port.h - The Octtools build looks here
+ * $PTOLEMY/src/octtools/Packages/port/port.h - This fileis the base
+ *  file that gets copied to the other two locations.
+ *
+ * The reason that this file is in three places is because not
+ * everyone downloads the octtools sources to build Ptolemy, so not everyone
+ * has $PTOLEMY/src/octtools/include/port.h.
+ * Octttools is configured to install its header files, so each
+ * package contains the master copy of the appropriate header files.
+ *
+ * If you need to make changes to port.h, edit the file at
+ * $PTOLEMY/src/octtools/Packages/port/port.h, and do 'make header'
+ * to update $PTOLEMY/src/octtools/include.
+ * Then cd to $PTOLEMY/obj.$PTARCH/octtools/Packages/port and do 
+ * 'make install' to update $PTOLEMY/octtools/include.
+ */
 /* 
  * Take care of the new ULTRIX 4.2 ansi_compat.h, in case we also
  * use gcc or g++. (Aug 17 1991)
@@ -205,6 +223,7 @@ typedef int int16;
 
 #ifdef linux
 #include <ansidecl.h>
+#include <unistd.h>
 #endif
 
 #include <stdio.h>
