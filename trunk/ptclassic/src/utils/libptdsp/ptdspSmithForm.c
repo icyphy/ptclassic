@@ -4,7 +4,7 @@
 
   PackageName [ ptdsp ]
 
-  Synopsis    [ Functions for decompostion of matrices to their Smith Forms ]
+  Synopsis    [ Functions for decompostion of matrices to their Smith forms ]
 
   Author      [ Brian Evans ]
 
@@ -58,9 +58,13 @@ ENHANCEMENTS, OR MODIFICATIONS.
 /* Definition of internal functions                                          */
 /*---------------------------------------------------------------------------*/
 
-/* Swap two rows in a matrix the slow but safe way */
-void intSwapRows( int *mat, int row1, int row2, int numRows, int
-		  numCols ) {
+/**Function*******************************************************************
+  Synopsis    [ Swap two rows in a matrix the slow but safe way. ]
+  SideEffects [ The integer array mat is modified. ]
+  SeeAlso     [ intSwapCols ]
+******************************************************************************/
+void 
+intSwapRows( int *mat, int row1, int row2, int numRows, int numCols ) {
   int temp, col;
 
   if ( row1 != row2 ) {
@@ -71,9 +75,13 @@ void intSwapRows( int *mat, int row1, int row2, int numRows, int
   return;
 }
 
-/* Swap two columns in a matrix the slow but safe way */
-void intSwapCols( int *mat, int col1, int col2, int numRows, int
-		  numCols ) {
+/**Function*******************************************************************
+  Synopsis    [ Swap two columns in a matrix the slow but safe way. ]
+  SideEffects [ The integer array mat is modified. ]
+  SeeAlso     [ intSwapRows ]
+******************************************************************************/
+void 
+intSwapCols( int *mat, int col1, int col2, int numRows, int numCols ) {
   int temp, row;
 
   if ( col1 != col2 ) {
@@ -84,15 +92,19 @@ void intSwapCols( int *mat, int col1, int col2, int numRows, int
   return;
 }
 
+
 /* FIXME
    The two functions below, identity and mul, may prove useful in the
    future for other functions or more functions may be added for
    manipulating a matrix. In that case, these two functions, together
    with those new functions, should be placed in a file of their own. */
 
-/* sets mat to be an identity matrix */
-void identity (int * mat, int numRows, int numCols) {
-
+/**Function*******************************************************************
+  Synopsis    [ Sets matrix to be an identity matrix ]
+  SideEffects [ The integer array mat is modified. ]
+******************************************************************************/
+void 
+identity (int * mat, int numRows, int numCols) {
   int row, col;
 
   for ( row = 0; row < numRows; row++)
@@ -113,8 +125,21 @@ void identity (int * mat, int numRows, int numCols) {
    copying to the outMatrix if the outMatrix is equal to the
    source. Thus this allows
              X = X * Y   */
-int mul (int * outMatrix, const int * src1, const int nRows1, const
-	 int nCols1, const int * src2, const int nRows2, const int nCols2) {
+/**Function*******************************************************************
+  Synopsis    [ Matrix multiplcation ]
+  Description [         outMatrix = src1 * src2 <BR>
+                This is a fairly fast algorithm, especially when
+		optimized by the  compiler. <BR>
+		Returns 1 if error, ie nCols1 != nRows2. <BR>
+		This function writes the output to a separate vector
+		before copying to the outMatrix if the outMatrix is
+		equal to either of the  sources. Thus this allows <BR>
+		        X = X * Y ]
+  SideEffects [ The integer array outMatrix is modified. ]
+******************************************************************************/
+int 
+mul (int * outMatrix, const int * src1, const int nRows1, const int nCols1, 
+     const int * src2, const int nRows2, const int nCols2) {
 
   int temp, i, j, k;
   int dup = 0;
@@ -272,10 +297,10 @@ Ptdsp_SmithForm(const int * inputMat, int * d, int * u, int * v,
 /**Function*******************************************************************
   Synopsis    [ Put the Smith form into canonical form ]
   Description [ This function takes the result of D, U, and V of a
-                SmithForm decomposition, whereby D is not unique, and
-		puts them into the canonical form, whereby D is
+                SmithForm decomposition, and puts them into the
+		canonical form. The result is that D is now
 		unique. Note, however, that U and V are still not
-		unique. This is done by : <BR>
+		unique. The processes carried out are : <BR>
 		(1) pulling out negative signs <BR>
 		(2) sorting diagonal entries <BR>
 		(3) shuffling factors along diagonal by iteratively finding
