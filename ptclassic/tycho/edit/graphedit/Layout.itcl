@@ -1,4 +1,4 @@
-##########################################################################
+#########################################################################
 # Version: $Id$
 # Author: John Reekie
 #
@@ -52,12 +52,15 @@ class ::tycho::Layout {
 
     # Add a tag to specified items
     method addtag {tag args}
-	
-    # Get child items
-    method children {item}
-	
-    # Set the coordinates of an item
+    
+    # Return all attributes of an item
+    method attributes {item}
+
+    # Get or set the coordinates of an item
     method coords {item args}
+
+    # Delete an item
+    method delete {item}
 
     # Describe the layout
     method describe {{prefix {}}}
@@ -65,32 +68,14 @@ class ::tycho::Layout {
     # Delete a tag from all items
     method dtag {tag}
 
-    # Remove an item from the selection
-    method deselect {item}
-
-    # Get the coordinates of an item
-    method getcoords {item}
-
     # Add a top-level item to the layout
     method item {item spec args}
-
-    # Return all attributes of an item
-    method itemattrs {item}
 
     # Configure an item
     method itemconfigure {item args}
 
     # Get an attribute of an item
     method itemcget {item args}
-
-    # Delete an item
-    method itemdelete {item}
-
-    # Get the type and coordinates of an item
-    method itemget {item}
-
-    # Add a nested item
-    method itemin {context item spec args}
 
     # Move an item
     method move {tag x y}
@@ -104,6 +89,9 @@ class ::tycho::Layout {
     # Stop moving an item
     method moverelease {tag x y}
 
+    # Get the (full) names of items
+    method names {{context {}}}
+
     # Reshape an item
     method reshape {name x y args}
 
@@ -116,18 +104,18 @@ class ::tycho::Layout {
     # Stop reshaping an item
     method reshaperelease {name x y}
 
-    # Add an item to the selection
-    method select {item}
+    # Manipulate the selection
+    method selection {args}
 
-    # Clear the selection
-    method selectionclear {foo}
+    # Add a nested item
+    method subitem {context item spec args}
 
     # Get the type of an item
-    method type {foo}
+    method type {item}
 
     #################################################################
     ####                  protected methods                      ####
-   
+    
     # Add a nested item -- parser call
     protected method _item {context item spec args}
 
@@ -166,23 +154,28 @@ body ::tycho::Layout::addtag {tag args} {
 }
 
 ########################################################################
-#### children
+#### attributes
 #
-# Get the children of an item.
+# Return a list containing the attributes of the item as a flat
+# attribute-value list. Flag an error if the item does not exist.
 #
-body ::tycho::Layout::children {item} {
+body ::tycho::Layout::attributes {item} {
     set splut [split $item "."]
     set cntxt [lreplace $splut end end]
     set local [lindex $splut end]
 
-    _verifynot item $cntxt $local $item
-    _children item $cntxt $local
+    _verify item $cntxt $local
+    _attributes item $cntxt $local
 }
 
 ########################################################################
 #### coords
 #
-# Set the coordinates of an item.
+# With no arguments, get the coordinates of an item, with arguments,
+# set the coordinates and return the undo command. Note: this
+# must be called after a call to move{}, release{}, etc, in order
+# to update the model itself, since those calls do not actually
+# keep the coordinates up-to-date.
 #
 body ::tycho::Layout::coords {item args} {
     set splut [split $item "."]
@@ -190,7 +183,32 @@ body ::tycho::Layout::coords {item args} {
     set local [lindex $splut end]
 
     _verify item $cntxt $local
-    _assign item $cntxt $local [concat [list [lindex $_value($item) 0]] $args]
+    if { $args == "" } {
+	lreplace $_value($item) 0 0
+    } else {
+	set inverse "coords $item [lreplace $_value($item) 0 0]"
+    	_assign item $cntxt $local \
+    		[linsert $args 0 [lindex $_value($item) 0]]
+    	return $inverse
+    }
+}
+
+########################################################################
+#### delete
+#
+# Delete an item from the model.
+#
+body ::tycho::Layout::delete {item} {
+    set splut [split $item "."]
+    set cntxt [lreplace $splut end end]
+    set local [lindex $splut end]
+
+    _verify $type $cntxt $local
+    set info [_delete $type $cntxt $local]
+    
+    # Return inverse command.
+    # FIXME: does not work with nested entities yet!
+    concat item $item $info
 }
 
 ########################################################################
@@ -218,30 +236,6 @@ body ::tycho::Layout::describe {{prefix {}}} {
 }
 
 ########################################################################
-#### deselect
-#
-# Remove an item from the selection. Does not return an inverse
-# command, since selection and deselection are not undoable commands.
-#
-body ::tycho::Layout::deselect {name} {
-    return ""
-}
-
-########################################################################
-#### getcoords
-#
-# Get the coordinates of an item.
-#
-body ::tycho::Layout::getcoords {item} {
-    set splut [split $item "."]
-    set cntxt [lreplace $splut end end]
-    set local [lindex $splut end]
-
-    _verify item $cntxt $local
-    lreplace $_value($item) 0 0
-}
-
-########################################################################
 #### item
 #
 # Add a new item to the model and return the inverse command. The
@@ -254,21 +248,6 @@ body ::tycho::Layout::item {item spec args} {
 
     _verifynot item $cntxt $local $item
     _addentity item $cntxt $local $item $spec $args
-}
-
-########################################################################
-#### itemattrs
-#
-# Return a list containing the attributes of the item as a flat
-# attribute-value list. Flag an error if the item does not exist.
-#
-body ::tycho::Layout::itemattrs {item} {
-    set splut [split $item "."]
-    set cntxt [lreplace $splut end end]
-    set local [lindex $splut end]
-
-    _verify item $cntxt $local
-    _attributes item $cntxt $local
 }
 
 ########################################################################
@@ -300,53 +279,14 @@ body ::tycho::Layout::itemconfigure {item args} {
 }
 
 ########################################################################
-#### itemdelete
-#
-# Delete an item from the model.
-#
-body ::tycho::Layout::itemdelete {item} {
-    set splut [split $item "."]
-    set cntxt [lreplace $splut end end]
-    set local [lindex $splut end]
-
-    _verify $type $cntxt $local
-    set info [_delete $type $cntxt $local]
-    
-    # Return inverse command.
-    # FIXME: does not work with nested entities yet!
-    concat item $item $info
-}
-
-########################################################################
-#### itemget
-#
-# Get the type and coordinates of an item
-#
-body ::tycho::Layout::itemget {item} {
-    set splut [split $item "."]
-    set cntxt [lreplace $splut end end]
-    set local [lindex $splut end]
-
-    _verify item $cntxt $local
-    _get item $cntxt $local
-}
-
-########################################################################
-#### itemin
-#
-# Add a nested item.
-#
-body ::tycho::Layout::itemin {context item value args} {
-    _verifynot item $context $item $context.$item
-    _addentity item $context $item $context.$item $value $args
-}
-
-########################################################################
 #### move
 #
 # Move an item by name, or a set of items by tag.
+# Note: coords{} must be called (but not via publish{})
+# after calling this to keep the model itself up-to-date.
 #
 body ::tycho::Layout::move {tag x y} {
+    # puts "::tycho::Layout::move $tag $x $y"
     # Only construct the inverse if the "recording" flag is set.
     # This is not for efficiency, but because the command may
     # need to generate its own redo command.
@@ -378,7 +318,8 @@ body ::tycho::Layout::move {tag x y} {
 # specified by tag.
 #
 body ::tycho::Layout::moveclick {tag x y} {
-	# Just remember where we are, and don't record in the history
+    # puts "::tycho::Layout::moveclick $tag $x $y"
+    # Just remember where we are, and don't record in the history
     set _scratch($tag.startx) $x
     set _scratch($tag.starty) $y
     return ""
@@ -391,7 +332,8 @@ body ::tycho::Layout::moveclick {tag x y} {
 # specified by tag.
 #
 body ::tycho::Layout::movedrag {tag x y} {
-	return ""
+    # puts "::tycho::Layout::movedrag $tag $x $y"
+    return ""
 }
 
 ########################################################################
@@ -400,8 +342,11 @@ body ::tycho::Layout::movedrag {tag x y} {
 # Terminate movement of an item specified by name, or a set of items 
 # specified by tag. Record a single move command (for the whole
 # sequence since the call to moveclick{}) in the history.
+# Note: coords{} must be called (but not via publish{})
+# after calling this to keep the model itself up-to-date.
 #
 body ::tycho::Layout::moverelease {tag x y} {
+    # puts "::tycho::Layout::moverelease $tag $x $y"
     set deltax [expr $x - $_scratch($tag.startx)]
     set deltay [expr $y - $_scratch($tag.starty)]
     unset _scratch($tag.startx)
@@ -411,7 +356,7 @@ body ::tycho::Layout::moverelease {tag x y} {
     # This should never happen, but we check just to make sure.
     if { $recording } {
 	if { [::info exists _value($tag)] } {
-	    # This is an item, so use simple commands
+	    # This is an item, so use simple command
 	    set undo [list move $tag [expr -$deltax] [expr -$deltay]]
 	    set redo [list move $tag $deltax $deltay]
 	} else {
@@ -443,11 +388,24 @@ body ::tycho::Layout::moverelease {tag x y} {
 }
 
 ########################################################################
+#### names
+#
+# Get the names of items. If the context argument is
+# given, get items within that context; if not, get root items.
+#
+body ::tycho::Layout::names {{context {}}} {
+    _children item $context
+}
+
+########################################################################
 #### reshape
 #
 # Reshape an item by name.
+# Note: coords{} must be called (but not via publish{})
+# after calling this to keep the model itself up-to-date.
 #
 body ::tycho::Layout::reshape {name x y args} {
+    # puts "::tycho::Layout::reshape $name $x $y $args"
     if { ! [::info exists _value($name)] } {
     	error "Item \"$name\" does not exists in [_dataname]"
     }
@@ -460,13 +418,15 @@ body ::tycho::Layout::reshape {name x y args} {
 # Start moving an item specified by name.
 #
 body ::tycho::Layout::reshapeclick {name x y args} {
+    # puts "::tycho::Layout::reshapeclick $name $x $y $args"
     if { ! [::info exists _value($name)] } {
     	error "Item \"$name\" does not exist in [_dataname]"
     }
     # Just remember where we are, and don't record in the history
     set _scratch($name.startx) $x
     set _scratch($name.starty) $y
-    set _scratch($name.aspects) $args
+    array set opts $args
+    set _scratch($name.aspects) $opts(-aspects)
     return ""
 }
 
@@ -476,7 +436,8 @@ body ::tycho::Layout::reshapeclick {name x y args} {
 # Continue reshaping an item specified by name.
 #
 body ::tycho::Layout::reshapedrag {name x y} {
-	return ""
+    # puts "::tycho::Layout::reshapedrag $name $x $y"
+    return ""
 }
 
 ########################################################################
@@ -485,8 +446,11 @@ body ::tycho::Layout::reshapedrag {name x y} {
 # Terminate reshaping of an item specified by name. Record a
 # single reshape command (for the whole sequence since the call
 # to reshapeclick{}) in the history.
+# Note: coords{} must be called (but not via publish{})
+# after calling this to keep the model itself up-to-date.
 #
 body ::tycho::Layout::reshaperelease {name x y} {
+    # puts "::tycho::Layout::reshaperelease $name $x $y"
     set deltax [expr $x - $_scratch($name.startx)]
     set deltay [expr $y - $_scratch($name.starty)]
     set aspects $_scratch($name.aspects)
@@ -509,29 +473,31 @@ body ::tycho::Layout::reshaperelease {name x y} {
 }
 
 ########################################################################
-#### select
+#### selection
 #
-# Add an item to the selection. Does not return an inverse
-# command, since selection and deselection are not undoable commands.
+# Manipulate the selection. This command is here only because
+# it needs to be propagated to multiple subscribers. Does not
+# return an inverse command, since selection and deselection
+# are not undoable commands.
 #
-body ::tycho::Layout::select {name} {
+body ::tycho::Layout::selection {mode {name {}}} {
     return ""
 }
 
 ########################################################################
-#### selectionclear
+#### subitem
 #
-# Clear the selection. Does not return an inverse
-# command, since selection and deselection are not undoable commands.
+# Add a nested item.
 #
-body ::tycho::Layout::selectionclear {foo} {
-    return ""
+body ::tycho::Layout::subitem {context item value args} {
+    _verifynot item $context $item $context.$item
+    _addentity item $context $item $context.$item $value $args
 }
 
 ########################################################################
 #### type
 #
-# Get the type of an item
+# Get the Slate type of an item
 #
 body ::tycho::Layout::type {item} {
     set splut [split $item "."]
