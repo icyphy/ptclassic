@@ -79,7 +79,10 @@ struct varray {
 
 #define varray_array(varray) (varray)->array
 
-static void varray_grow(varray, x, y)
+/* varray_grow must return an int, since we use it in a ':' statement
+ * and with cfront, both args of : must have the same type
+ */
+static int varray_grow(varray, x, y)
 struct varray *varray;
 int x, y;
 {
@@ -94,6 +97,7 @@ int x, y;
 		  (unsigned) varray->length*sizeof(struct octPoint));
     }
     varray_add(varray, x,y);
+    return 0;
 }
 
 #define add(x,y) varray_add(&out, x, y)
