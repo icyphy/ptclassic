@@ -59,6 +59,9 @@ class ::tycho::Compile {
     # Compile and load in each file in the list of filenames.
     method compileAndLoad { filenames}
 
+    # Compile and run in each file in the list of filenames.
+    method compileAndRun { filenames}
+
     ###################################################################
     ####                         public methods                    ####
 
@@ -75,11 +78,17 @@ class ::tycho::Compile {
     # Create a makefile.
     protected method createMakefile {}
 
+    # Initialize variables from the filename list.
+    protected method initialize {filenames}
+
     # Run make and then load the result back into Tycho.
     protected method loadFiles {}
 
     # Determine the name of the makefile.
     protected method makefileName {}
+
+    # Access the "misc" preferences
+    protected method preference {mode args}
 
     # Print status messages to the controlling widget, if any.
     protected method putStatus {msg}
@@ -126,22 +135,22 @@ body ::tycho::Compile::destructor {} {
 # Compile and load in each file in the list of filenames.
 #
 body ::tycho::Compile::compileAndLoad {filenames} {
-    if {[llength $filenames] == 0} {
-	error "::tycho::Compile::compileAndLoad must be passed a list of files"
-    }
-    set filenameList $filenames
-    set firstFile [lindex $filenameList 0]
-    set dirname [file dirname $firstFile]
-    set basename [file rootname [file tail $firstFile]]
-
-    # Should we check that thie files exist here?
-
+    initialize $filenames
+    # Should we check that the files exist here?
     checkSourceFiles
     set makefile [makefileName]
     createMakefile
     compileFiles
     loadFiles
 }
+#######################################################################
+#### compileAndRun
+# Compile and load in each file in the list of filenames.
+#
+body ::tycho::Compile::compileAndRun {filenames} {
+    initialize $filenames
+}
+
 
     ###################################################################
     ###################################################################
@@ -176,6 +185,20 @@ body ::tycho::Compile::createMakefile {} {
 }
 
 #######################################################################
+#### initialize
+# Initialize the some protected variables from the list of filenames.
+# 
+body ::tycho::Compile::initialize {filenames} {
+    if {[llength $filenames] == 0} {
+	error "::tycho::Compile::compileAndLoad must be passed a list of files"
+    }
+    set filenameList $filenames
+    set firstFile [lindex $filenameList 0]
+    set dirname [file dirname $firstFile]
+    set basename [file rootname [file tail $firstFile]]
+}
+
+#######################################################################
 #### loadFiles
 # Run load the shared objects back into Tycho.
 # In the Compile baseclass, this method is a noop.
@@ -205,6 +228,16 @@ body ::tycho::Compile::makefileName {} {
     } else {
 	set makefile $basename.mk
     }
+}
+
+#####################################################################
+#### preference
+# Access the preferences associated with this widget. This method
+# overrides the default method in ::tycho::TWidget to access the
+# "misc" preferences.
+#
+body ::tycho::Compile::preference {mode args} {
+    eval ::tycho::preference $mode "misc" $args
 }
 
 #######################################################################
