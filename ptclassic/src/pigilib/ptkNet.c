@@ -73,9 +73,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #include <netinet/in.h>
 #include <netdb.h>
-#include <errno.h>
-
-extern int errno;
+#include <errno.h>		/* define errno */
 
 #include "list.h"		/* define lsList */
 #include "rpc.h"		/* define remote procedure calls */
