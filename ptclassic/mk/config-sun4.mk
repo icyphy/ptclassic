@@ -48,7 +48,7 @@ ITCL_VERSION_NUM=	30
 # when loading in the star.
 
 # Combined -L and -l options to link with tcl library.
-TCL_LIBSPEC=-L$(TCL_ROOT)/itcl.$(PTARCH)/lib/itcl \
+TCL_LIBSPEC=-L$(TCL_ROOT)/tcl.$(PTARCH)/lib \
 	-ltcl$(TCL_VERSION_NUM)
 
 # Directory containing Tk include files
@@ -56,20 +56,17 @@ TK_INCDIR=$(TCL_ROOT)/itk/include
 
 # Combined -L and -l options to link with tk library.  Can add
 # addtional -L and/or -l options to support tk extensions.
-TK_LIBSPEC=-L$(TCL_ROOT)/itcl.$(PTARCH)/lib/itcl \
+TK_LIBSPEC=-L$(TCL_ROOT)/tcl.$(PTARCH)/lib \
 	 -ltk$(TK_VERSION_NUM) #-lXpm
 
 # Directory containing itcl include files
-ITCL_INCDIR=$(TCL_ROOT)/$(ITCL_VERSION)/include
-ITCL_LIBSPEC=-L$(TCL_ROOT)/$(ITCL_VERSION).$(PTARCH)/lib/itcl \
+ITCL_INCDIR=$(TCL_ROOT)/tcl/include
+ITCL_LIBSPEC=-L$(TCL_ROOT)/tcl.$(PTARCH)/lib \
 	-litcl$(ITCL_VERSION_NUM)
 
-ITK_INCDIR=$(TCL_ROOT)/$(ITCL_VERSION)/include
-ITK_LIBSPEC=-L$(TCL_ROOT)/$(ITCL_VERSION).$(PTARCH)/lib/itcl \
+ITK_INCDIR=$(TCL_ROOT)/tcl/include
+ITK_LIBSPEC=-L$(TCL_ROOT)/tcl.$(PTARCH)/lib \
 	-litk$(ITCL_VERSION_NUM)
-
-# Location of the ish binary (tcl + namespaces)
-ISH=$(ROOT)/tcltk/$(TCL_VERSION).$(PTARCH)/bin/ish
 
 # Location of the itcl library, needed for itcl_mkindex
 ITCL_LIBDIR=$(ROOT)/tcltk/tcl/lib/itcl

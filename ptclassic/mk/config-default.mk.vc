@@ -101,8 +101,6 @@ X11EXT_LIBSPEC = -lXext
 #X11EXT_LIBSPEC = -L\usr\X11\lib -lXext
 
 TCL_ROOT=$(ROOT)\tcltk
-ITCL_VERSION=itcl
-
 
 # Directory containing Tcl include files
 TCL_INCDIR=$(TCL_ROOT)\itcl\include
@@ -122,19 +120,16 @@ TK_INCDIR=$(TCL_ROOT)\itk\include
 TK_LIBSPEC=-L$(TCL_ROOT)\itcl.$(PTARCH)\lib\itcl -ltk$(TK_VERSION_NUM) #-lXpm
 
 # Directory containing itcl include files
-ITCL_INCDIR=$(TCL_ROOT)\$(ITCL_VERSION)\include
-ITCL_LIBSPEC=-L$(TCL_ROOT)\$(ITCL_VERSION).$(PTARCH)\lib\itcl \
+ITCL_INCDIR=$(TCL_ROOT)\itcl\include
+ITCL_LIBSPEC=-L$(TCL_ROOT)\itcl.$(PTARCH)\lib\itcl \
 	-litcl$(ITCL_VERSION_NUM)
 
-ITK_INCDIR=$(TCL_ROOT)\$(ITCL_VERSION)\include
-ITK_LIBSPEC=-L$(TCL_ROOT)\$(ITCL_VERSION).$(PTARCH)\lib\itcl \
+ITK_INCDIR=$(TCL_ROOT)\itcl\include
+ITK_LIBSPEC=-L$(TCL_ROOT)\itcl.$(PTARCH)\lib\itcl \
 	-litk$(ITCL_VERSION_NUM)
 
-# Location of the ish binary (tcl + namespaces)
-ISH=$(ROOT)\tcltk\$(ITCL_VERSION).$(PTARCH)\bin\ish
-
 # Location of the itcl library, needed for itcl_mkindex
-ITCL_LIBDIR=$(ROOT)\tcltk\$(ITCL_VERSION)\library
+ITCL_LIBDIR=$(ROOT)\tcltk\itcl\library
 
 #-----------------------------------------------------------------------
 # 		Global options to use
