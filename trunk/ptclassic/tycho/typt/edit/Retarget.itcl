@@ -55,8 +55,13 @@ class ::tycho::Retarget {
 
     # Update domainA
     method changeDomainA {}
+
     # Update domainB
     method changeDomainB {}
+
+    # Look for conflicts in the current universe
+    method checkUniverse {}
+
     ###################################################################
     ####                         public procedures                 ####
 
@@ -74,6 +79,12 @@ class ::tycho::Retarget {
     ####                         private variables                 ####
     private variable domainA {CG56}
     private variable domainB {C50}
+
+    # If we need to run compareDomains, then set this variable to 1
+    private variable dirtyCompareDomains 1
+
+    # List of stars that clash, arranged by categories into sublists
+    private variable clashList
 }
 
 #######################################################################
@@ -85,6 +96,9 @@ body ::tycho::Retarget::constructor {args} {
             -command "$this changeDomainA"
     addTool domainBButton -text "Change Domain B: $domainB" \
             -command "$this changeDomainB"
+
+    addTool checkUniverse -text {Check Universe} \
+	    -command "$this checkUniverse"
 
     eval itk_initialize $args
     modifyAfterDomainChange
@@ -106,11 +120,13 @@ body ::tycho::Retarget::changeDomainA {} {
         set [lindex $arg 0] [lindex $arg 1]
     }
     clear
+    set dirtyCompareDomains 1
     catch {delete object component graphics}
     #addTool domainAButton -text "Change Domain A: $domainA" 
     #        -command "$this changeDomainA"
     modifyAfterDomainChange
 }
+
 #######################################################################
 #### changeDomainB
 # Change the name of one of the domains that we are going to compare
@@ -123,11 +139,27 @@ body ::tycho::Retarget::changeDomainB {} {
         set [lindex $arg 0] [lindex $arg 1]
     }
     clear
+    set dirtyCompareDomains 1
     catch {delete object component graphics}
     #addTool domainBButton -text "Change Domain B: $domainB" \
     #        -command "$this changeDomainB"
     modifyAfterDomainChange
 }
+
+#######################################################################
+#### checkUniverse
+# Change the name of one of the domains that we are going to compare
+#
+body ::tycho::Retarget::checkUniverse {} {
+    clear
+    if {!$dirtyCompareDomains} {
+	putStatus "Regenerating Domain Information, please wait."
+	compareDomains
+	putStatus ""
+    }
+    
+}
+
 #######################################################################
 #### compareDomains
 # Determine what stars are in two domains and compare them by plotting
@@ -168,6 +200,7 @@ body ::tycho::Retarget::compareDomains {} {
             [llength [knownlist $domainA]]
 
     component graphics redrawGraph
+    set dirtyCompareDomains 0
 }
 
     ###################################################################
