@@ -46,7 +46,7 @@ int Interval::doesIntersect(Interval *i1) {
 		 (i1->origin <= origin < i1->end()) );
 }
 
-Interval& Interval::operator=(Interval *il) {
+Interval& Interval::operator=(Interval *i1) {
 	origin = i1->origin;
 	length = i1->length;
 	next = i1->next;
@@ -54,15 +54,15 @@ Interval& Interval::operator=(Interval *il) {
 }
 	
 Interval& Interval::operator&=(Interval *i1) {
-	unsigned end = min(i1->end(),end());
-	origin = max(origin,i1->origin);
-	length = max(end-origin,0);
+	unsigned end = MIN(i1->end(),this->end());
+	origin = MAX(origin,i1->origin);
+	length = MAX(end-origin,0);
 	return this;
 }
 
-Interval Interval::operator&(Interval* i1,Interval* i2) {
-	Interval intersection = Interval(i1->;
-	i1 &= i2;
+Interval operator&(Interval& i1,Interval& i2) {
+	Interval intersection = Interval(i1);
+	i1 &= &i2;
 	return intersection;
 }
 
@@ -113,16 +113,17 @@ void IntervalList::zero() {
 	Interval* q = head;
 	while (q) {
 		p = q->next;
-		q.~Interval();
+		q->~Interval();
 		q = p;
 	}
 }
 
-IntervalList& IntervalList::operator|=(unsigned origin, unsigned length) {
+IntervalList& IntervalList::operator|=(Interval* i1) {
 	Interval* current = this->head;
 	Interval* previous = NULL;
 	Interval* input;
-	LOG_NEW; input = new Interval(origin,length);
+	LOG_NEW; input = new Interval(i1);
+	input->next = NULL;
 	while (input->isAfter(current) && current != NULL) {
 		previous = current;
 		current++;
@@ -138,24 +139,24 @@ IntervalList& IntervalList::operator|=(unsigned origin, unsigned length) {
 			input->next = current;
 		}
 		while (!input->endsBefore(current) && current != NULL) {
-			input->length = 
-				max(input->end(),current->end())-origin;
+			input->length = MAX(input->end(),current->end()) - 
+					i1->origin;
 			input->next = current->next;
 			current->~Interval();
 			current = input->next;
 		}
 	}	
-	return this;
+	return *this;
 }
  
 IntervalList& IntervalList::operator|=(IntervalList& src) {
-	Interval* current==src->head;
-	while (current++ != NULL) this |= current;
-	return this;
+	Interval* current=src.head;
+	while (current++ != NULL) operator|=(current);
+	return *this;
 }
 
-IntervalList operator|(IntervalList& src1,IntervalList& src2) {
-	IntervalList union = src1;
-	union |= src2;
-	return union;
+IntervalList operator|(IntervalList& src1, IntervalList& src2) {
+	IntervalList u = IntervalList(src1);
+	u |= src2;
+	return u;
 }
