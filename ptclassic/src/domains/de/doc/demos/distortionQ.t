@@ -2,8 +2,9 @@
 .NA distortionQ
 .SD
 This demo is very similar to the distortion demo.
-The only difference is in the reorderQ wormhole,
-which introduces queueing.
+The only difference is in the
+.c reorderQ
+wormhole, which introduces queueing.
 .DE
 .LO "$PTOLEMY/src/domains/de/demo"
 .SV $Revision$ $Date$
@@ -18,8 +19,7 @@ demo, this one has a
 .c Queue
 before the
 .c Sampler.
-After transients have died out,
-the queue greatly reduces the
+After transients have died out, the queue greatly reduces the
 likelihood of distortion due to ``reuse'',
 described in the explanation of the distortion demo.
 The cost is a small increased delay in the output.
@@ -29,7 +29,7 @@ a far better signal than that in the distortion demo.
 The ``reorder'' distortion is still present.
 .SA
 distortion,
-Router,
 ExpDelay,
+Router,
 Sampler.
 .ES

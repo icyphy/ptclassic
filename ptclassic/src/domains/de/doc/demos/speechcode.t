@@ -51,5 +51,5 @@ Sun SparcStations typically contain this program.
 The "play" program must be in a user's search path for the audio
 data to be output.
 .SA
-LMSLeak
+LMSLeak.
 .ES

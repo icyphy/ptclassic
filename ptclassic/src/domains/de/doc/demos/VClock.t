@@ -39,5 +39,5 @@ H. Zhang and S. Keshav,
 \fIACM SIGCOMM Conference\fR,
 vol. 21, no. 4, Sep. 1991, pp. 113-121.
 .SA
-VirtClock
+VirtClock.
 .ES

@@ -11,7 +11,7 @@ and available in the user's path.
 .DE
 .LO "$PTOLEMY/src/domains/de/demo"
 .SV $Revision$ $Date$
-.AL "Paul Haskell, Greg Walter."
+.AL "Paul Haskell and Greg Walter."
 .LD
 .Ir "video processing"
 .Ir "speech processing"
@@ -43,15 +43,15 @@ be able read mu-law encoded audio and play the audio over a speaker.
 Sun SparcStations typically contain this program.
 The video display galaxy requires "getx11" and several other
 programs from the Utah Raster Toolkit.
- This toolkit is not included with Ptolemy, but it is available free
+This toolkit is not included with Ptolemy, but it is available free
 of charge via anonymous ftp.
- See the manual page for the SDF DisplayVideo star to find out how to
+See the manual page for the SDF DisplayVideo star to find out how to
 obtain the Utah Raster Toolkit.
 .Ir "Utah Raster Toolkit"
- The "play" program and the Utah Raster Toolkit programs must be in the
+The "play" program and the Utah Raster Toolkit programs must be in the
 user's search-path for the audio and video data to be output.
 .SA
-DisplayVideo
-Switch4x4
-PseudoCell
+DisplayVideo,
+PseudoCell,
+Switch4x4.
 .ES
