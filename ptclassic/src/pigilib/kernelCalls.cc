@@ -59,9 +59,8 @@ extern "C" {
 extern ACG* gen;
 extern char DEFAULT_DOMAIN[];
 
-// This variable is only used by the KcDefGalaxy and KcEndDefgalaxay
-// functions.  These two functions are called in order from compile.c
-// Thus, this is not a state worth worrying about. - aok
+// "InterpGalaxy" is used as a temporary variable to hold a value
+// between a call to KcDefGalaxy and KcEndDefgalaxay.  
 static InterpGalaxy *saveGalaxy = NULL;  // used to build galaxies
 
 ///////////////////////////////////////////////////////////////////////
