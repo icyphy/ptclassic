@@ -17,6 +17,7 @@ Initialization code for pigiRpc.
 #include "misc.h"
 #include "ganttIfc.h"
 #include "options.h"
+#include "utilities.h"
 
 /* Global Vars */
 
@@ -89,8 +90,10 @@ RPCFunction CommandArray[] = {
     {RpcLoadStar, "Extend", "load-star", "L", 0},
     {ERFilterDesign, "Filter", " equirriple FIR", "<", 0},
     {WFilterDesign, "Filter", " window FIR", ">", 0},
-    {PlotSignal, "Utilities", "plot signal", "~", 0},
-    {MagDFT, "Utilities", "magnitude DFT", "^", 0},
+    {RpcPlotSignal, "Utilities", "plot signal", "~", 0},
+/*  {RpcPlotCxSignal, "Utilities", "plot Cx signal", "-", 0}, */
+    {RpcDFT, "Utilities", "DFT", "^", 0},
+/*  {RpcDFTCx, "Utilities", "DFT of Cx signal", "_", 0}, */
     {Man, "Other", "man"},
     {Profile, "Other", "profile", ",", 0},
     {PrintFacet, "Other", "print facet"},
