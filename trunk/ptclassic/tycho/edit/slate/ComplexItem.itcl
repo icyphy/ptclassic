@@ -57,6 +57,18 @@
 # following those three are arguments that would be passed to 
 # methods if these classes implemented objects in the normal way.
 #
+# <p><b>Options</b>:
+# 
+# <ul>
+# <li><b>-name</b>. An arbitrary "name" for this item. This is useful for
+# many graphical editing applications, to related canvas items with
+# symbolc names used by an editor. Unfortunately, placing name here
+# in ComplexItem means that simple items cannot have names; however,
+# this is not likely to be too much of a limitation, since if we
+# are expecting items to have names then the editor is probably
+# reasonably complex and liekly to be using complex items anyway...
+# <ul>
+#
 # <a href="../internals/howtoread.html">Reading <i>ComplexItem</i> documentation</a>.
 #
 class ::tycho::ComplexItem {
@@ -70,6 +82,9 @@ class ::tycho::ComplexItem {
 
     ###################################################################
     ####                         public procs                      ####
+
+    # Update the *-name* option
+    proc _name {id canvas slate name}
 
     # Get or set the coordinates of the item
     proc coords {id canvas slate args}
@@ -105,7 +120,7 @@ class ::tycho::ComplexItem {
     # This array implements "inheritance": if a method is not implemented
     # in a given class, then the array contains the name of a procedure
     # in one of its superclasses.
-    protected common methodtable
+    common methodtable
 
     # The options of each item. Note: subclasses are _not_ to create their own 
     # copy of this variable.
@@ -114,7 +129,7 @@ class ::tycho::ComplexItem {
     # Default values of this item's options. Every class must create
     # its own copy of this array and initialize it with the default 
     # values of the item's options.
-    protected common optiondefault
+    common optiondefault
 
     # Every ComplexItem class must create exactly one primitive canvas item
     # and place its ID into this array indexed by the complex item ID.
@@ -140,12 +155,23 @@ class ::tycho::ComplexItem {
     ####                       class initialization                ####
 
     #### Set method table
+    set methodtable(_name)         ::tycho::ComplexItem::_name
     set methodtable(construct)     ::tycho::ComplexItem::construct
     set methodtable(coords)        ::tycho::ComplexItem::coords
     set methodtable(itemcget)      ::tycho::ComplexItem::itemcget
     set methodtable(itemconfigure) ::tycho::ComplexItem::itemconfigure
+
+    #### Set option defaults
+    set optiondefault(-name) ""
 }
 
+
+##########################################################################
+#### -name option configuration
+#
+body ::tycho::ComplexItem::_name {id canvas slate name} {
+    set option(name$id) $name
+}
 
 ##########################################################################
 #### construct
