@@ -40,10 +40,12 @@ PL_SRCS= \
  DETkButtons.pl \
  DETkMeter.pl \
  DELogicAnalyzer.pl \
+ DETkPlot.pl \
  DETkShowEvents.pl \
  DETkShowValues.pl \
  DETkSlider.pl \
- DETkText.pl
+ DETkText.pl \
+ DETkXYPlot.pl
 
 # DELMSTkPlot.pl \
 # DELMSCxTkPlot.pl \
