@@ -98,19 +98,17 @@ void UniProcessor :: createSubGal() {
 			smallest = (ParNode*) smallest->getNextInvoc();
 
 		DataFlowStar* copyS;
-		// if cluster, we do some magic!
+		// FIXME if cluster, we use stars from original graph
 		
 		if (n->myMaster()->asCluster()) {
 		    copyS = n->myMaster();
-		    Block* master = copyS->asCluster()->masterBlock();/* =
-			((CGCluster*)n->myMaster())->createSubGal();*/
+		    Block* master = copyS->asCluster()->masterBlock();
 		    Block* parentBlock = master->parent();
+		    parentBlock->asGalaxy().removeBlock(*master);
 		    subGal->addBlock(*master, master->name());
-		    // FIXME
-		    // The blocks should still have the same parent
-		    // as before
-		    master->setParent(parentBlock);
 		    master->setTarget(targetPtr);
+		    // FIXME Not needed if we use new scope scheme
+		    master->setParent(parentBlock);  
 		    Scheduler* clusterSched = copyS->asCluster()->innerSched();
 		    if (clusterSched) clusterSched->setTarget(*targetPtr);
 		}
