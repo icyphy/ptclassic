@@ -142,6 +142,15 @@ class ::tycho::Digraph {
     # Get the roots of the graph
     method roots {}
 
+    # Get the edges within a subgraph
+    method subgraphEdges {args}
+
+    # Get the input edges to a subgraph
+    method subgraphInputs {args}
+
+    # Get the output edges from a subgraph
+    method subgraphOutputs {args}
+
     #################################################################
     ####                   protected methods                     ####
 
@@ -162,7 +171,7 @@ class ::tycho::Digraph {
 #
 body ::tycho::Digraph::constructor {args} {
     # Define the "edge" link: no name, two links
-    defineLink edge \
+    defineLinkType edge \
 	    -named 0 \
 	    -lcount 2 \
 	    -description ""
@@ -263,18 +272,18 @@ body ::tycho::Digraph::delete {vertex} {
     _verify vertex $vertex
 
     # Start inverse command
-    set inverse ""
+    set inverse [list sequence]
 
     # Delete outward edges
     foreach {src tgt} [edges $vertex *] {
-	append inverse "\n" [edgedelete $src $tgt]
+		lappend inverse [edgedelete $src $tgt]
     }
     # Delete inward edges
     foreach {src tgt} [edges * $vertex] {
-	append inverse "\n" [edgedelete $src $tgt]
+		lappend inverse [edgedelete $src $tgt]
     }
     # Delete the vertex. (NB: This must follow the edge deletion.)
-    append inverse "\n" [vertexdelete $vertex]
+    lappend inverse [vertexdelete $vertex]
 
     # Return the inverse command
     return $inverse
@@ -403,4 +412,71 @@ body ::tycho::Digraph::parents {vertex} {
 #
 body ::tycho::Digraph::roots {} {
     _graphroots
+}
+
+########################################################################
+#### subgraphEdges
+#
+# Return the edges within a sub-graph. The arguments are the vertices
+# of the subgraph. The returned list of edges are source-target pairs
+# (not a flat list as in some other methods). This is to make graph
+# editors more generic.
+#
+body ::tycho::Digraph::subgraphEdges {args} {
+    set result {}
+    foreach u $args {
+        foreach v $args {
+            foreach quad [array names _info [list edge * * [list $u $v]]] {
+                lappend result [lindex $quad 3]
+            }
+            foreach quad [array names _info [list edge * * [list $v $u]]] {
+                lappend result [lindex $quad 3]
+            }
+        }
+    }
+    return $result
+}
+
+########################################################################
+#### subgraphInputs
+#
+# Return the input edges to a sub-graph. The arguments are the vertices
+# of the subgraph. The returned list of edges are source-target pairs
+# (not a flat list as in some other methods). This is to make graph
+# editors more generic.
+#
+body ::tycho::Digraph::subgraphInputs {args} {
+    set result {}
+    set vertices [array names _vertices]
+    foreach v $args {
+        foreach quad [array names _info [list edge * * [list * $v]]] {
+            set edge [lindex $quad 3]
+            if { [lsearch -exact $vertices [lindex $edge 0]] < 0 } {
+                lappend result $edge
+            }
+        }
+    }
+    return $result
+}
+
+########################################################################
+#### subgraphOutputs
+#
+# Return the output edges from a sub-graph. The arguments are the vertices
+# of the subgraph. The returned list of edges are source-target pairs
+# (not a flat list as in some other methods). This is to make graph
+# editors more generic.
+#
+body ::tycho::Digraph::subgraphOutputs {args} {
+    set result {}
+    set vertices [array names _vertices]
+    foreach v $args {
+        foreach quad [array names _info [list edge * * [list $v *]]] {
+            set edge [lindex $quad 3]
+            if { [lsearch -exact $vertices [lindex $edge 1]] < 0 } {
+                lappend result $edge
+            }
+        }
+    }
+    return $result
 }
