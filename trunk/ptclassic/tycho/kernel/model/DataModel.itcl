@@ -1112,14 +1112,11 @@ body ::tycho::DataModel::_describe {name {prefix {}}} {
     # eval lappend string [@scope $scope set [set _dataname]($name)]
     #
     # This looks better:
-    # FIXME: We really want the line-breaking to be more intelligent:
-    # if the whole item fits on a line, there is no need
-    # to put in line breaks.
-    array set attrs [@scope $scope set [set _dataname]($name)]
-    foreach attr [lsort [array names attrs]] {
-        append string " \\\n$prefix        "
-        lappend string $attr $attrs($attr)
-    }
+    append string " " [string trimleft [::tycho::breakLines \
+            [@scope $scope set [set _dataname]($name)] \
+            -length 60 \
+            -substring " -" \
+            -prefix $prefix] " "]
 
     # Print children if I have any
     if !$_leafonly($type) {
