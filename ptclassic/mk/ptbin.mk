@@ -96,9 +96,11 @@ ifdef PTINY
 	DE =		1
 	HOF =		1
 	SDF =		1
-	SDFTK =		1
+	ifdef TK
+		SDFTK =		1
+		SDFDFM =	1
+	endif
 	SDFDSP =	1
-	SDFDFM =	1
 	SDFMATRIX =	1
 	SDFMATLAB =	1
 endif
