@@ -92,6 +92,7 @@ PL_SRCS= \
  C50ReadFile.pl \
  C50ReadFileInt.pl \
  C50Rect.pl \
+ C50RectToCx.pl \
  C50Repeat.pl \
  C50Reverse.pl \
  C50Rotate.pl \
