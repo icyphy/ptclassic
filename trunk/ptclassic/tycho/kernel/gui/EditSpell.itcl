@@ -102,6 +102,9 @@ class ::tycho::EditSpell {
     ###################################################################
     ####                      private methods                      ####
 
+    # Make a ~/.tycho directory, if doesn't already exist.
+    private method makeTychoDir {}
+
     # Read items from the personal dictionary.
     private method readDictionary {}
 
@@ -188,7 +191,8 @@ body ::tycho::EditSpell::clearSpellMatch {} {
 # to the user.
 # 
 body ::tycho::EditSpell::dictionary {} {
-    ::tycho::File::openContext "~/.tychodictionary.lst"
+    makeTychoDir
+    ::tycho::File::openContext "~/.tycho/tychodict.lst"
     ::tycho::post {You must save your changes and \
 	    recheck for them to take effect}
 }
@@ -317,13 +321,39 @@ body ::tycho::EditSpell::replace {} {
 ####                       private methods                       ####
 
 #####################################################################
+#### makeTychoDir
+# If the directory ~/.tycho does not exist, make it.
+# If there is a file by that name, replace it with a directory after
+# checking with the user.
+# 
+body ::tycho::EditSpell::makeTychoDir {} {
+    set home [glob ~]
+    if {![file exists "$home/.tycho"]} {
+        exec mkdir "$home/.tycho"
+    } {
+        if {![file isdirectory "$home/.tycho"]} {
+            if [::tycho::askuser \
+                    {Ok to move your ~/.tycho file to the new place: \
+                    ~/.tycho/tychorc.tcl?}] {
+                exec mv $home/.tycho $home/.tycho.save
+                exec mkdir $home/.tycho
+                exec mv $home/.tycho.save $home/.tycho/tychorc.tcl
+            } {
+                error "Cannot create ~/.tycho directory"
+            }
+        }
+    }
+}
+
+#####################################################################
 #### readDictionary
 # Read the personal dictionary file and return the list of entries.
 # If there is no personal dictionary, return the empty list.  If the
 # file exists, but is not readable, issue a warning.
 # 
 body ::tycho::EditSpell::readDictionary {} {
-    set dictfile {~/.tychodictionary.lst}
+    makeTychoDir
+    set dictfile {~/.tycho/tychodict.lst}
     if {[file exists $dictfile]} {
 	if {[file readable $dictfile]} {
 	    set fd [open $dictfile]
@@ -331,7 +361,7 @@ body ::tycho::EditSpell::readDictionary {} {
 	    close $fd
 	    return $dict
 	} {
-	    ::tycho::warn "Personal dictionary file, ~/.tychodictionary.lst, \
+	    ::tycho::warn "Personal dictionary file, ~/.tycho/tychodict.lst, \
 		    is not readable"
 	}
     }
@@ -345,7 +375,8 @@ body ::tycho::EditSpell::readDictionary {} {
 # personal dictionary trigger an error.
 # 
 body ::tycho::EditSpell::writeDictionary {dict} {
-    set dictfile {~/.tychodictionary.lst}
+    makeTychoDir
+    set dictfile {~/.tycho/tychodict.lst}
     set fd [open $dictfile w]
     set sorted [lsort $dict]
     foreach item $sorted {
