@@ -94,9 +94,7 @@ public:
         // Synchronous Dataflow Graphs onto Heterogeneous Multiprocessors," 
         // Proc. of IEEE Asilomar Conf. on Signals, Systems, and Computers, 
         // Pacific Grove, CA, Oct. 31 - Nov. 2, 1994.
-	virtual int createPeekPoke(
-	    PortHole& peekPort, PortHole& pokePort,
-	    CGStar*& peek, CGStar*& poke);
+	virtual AsynchCommPair createPeekPoke(int peekProcId, int pokeProcId);
 
 	// get the OSOP requirement flag : all invocations of a star
 	// should be assigned to the same processor

@@ -112,60 +112,21 @@ void MultiTarget :: pairSendReceive(DataFlowStar* send, DataFlowStar* receive) {
 	if (output->type() == ANYTYPE) output->inheritTypeFrom(*input);
 }
 
-int MultiTarget :: createPeekPoke(PortHole& peekPort, PortHole& pokePort,
-				   CGStar*& peek, CGStar*& poke) {
-    if (peek == NULL || poke == NULL) {
-	Error::abortRun(*this,"this target does not support peek/poke actors");
-	return FALSE;
-    }
+AsynchCommPair MultiTarget::createPeekPoke(int peekProcId,
+					     int pokeProcId) {
+    AsynchCommPair pair;
+    CGTarget* peekChild = cgChild(peekProcId);
+    CGTarget* pokeChild = cgChild(pokeProcId);
+    pair = peekChild->createPeekPoke(*peekChild,*pokeChild);
+    if (pair.peek != NULL && pair.poke != NULL) return pair;
+    pair = pokeChild->createPeekPoke(*peekChild,*pokeChild);
+    if (pair.peek != NULL && pair.poke != NULL) return pair;
 
-    PortHole* input = poke->portWithName("input");
-    if (!input) {
-	Error::abortRun(*this,poke->name(),
-			": Peek star does not have a porthole named 'input'");
-	return FALSE;
-    }	
-
-    PortHole* output = peek->portWithName("output");
-    if (!output) {
-	Error::abortRun(*this,peek->name(),
-			": Peek star does not have a porthole named 'output'");
-	return FALSE;
-    }	
-
-    if (output->type() == ANYTYPE) input->inheritTypeFrom(*output);
-
-    int numInitDelays;
-    Galaxy* parentGal;
-    StringList starName, linkName;
-    linkName << symbol("Link");
-    // FIXME - we do not support initial delays on peek/poke arcs
-    // The peekPort and pokePort are in a disconnected state here.
-    // numInitDelays = peekPort.numInitDelays();
-    numInitDelays = 0;
-    peekPort.disconnect();
-    output->connect(peekPort,numInitDelays);
-    parentGal = (Galaxy*) peekPort.parent()->parent();
-    starName.initialize();
-    starName << "Peek_" << linkName ;
-    if (peekPort.parent()->target()) 
-	peek->setTarget(peekPort.parent()->target());
-    parentGal->addBlock(*peek,hashstring(starName));
-
-    // FIXME - we do not support initial delays on peek/poke arcs
-    // The peekPort and pokePort are in a disconnected state here.
-    // numInitDelays = pokePort.numInitDelays();
-    numInitDelays = 0;
-    pokePort.disconnect();
-    pokePort.connect(*input,numInitDelays);
-    parentGal = (Galaxy*) pokePort.parent()->parent();
-    starName.initialize();
-    starName << "Poke_" << linkName;
-    if (pokePort.parent()->target()) 
-	poke->setTarget(pokePort.parent()->target());
-    parentGal->addBlock(*poke,hashstring(starName));
-
-    return TRUE;
+    StringList message;
+    message << "this target does not support peek/poke actors from "
+	    << peekChild->name() << " to " << pokeChild->name();
+    Error::abortRun(*this,message);
+    return pair;
 }
 
 void MultiTarget :: prepareCodeGen() {}
