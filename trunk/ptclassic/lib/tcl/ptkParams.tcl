@@ -5,7 +5,7 @@
 # Copyright (c) 1990-1993 The Regents of the University of California.
 # All rights reserved.
 #
-# Numerous suggestions from Prof. Edward Lee and Alan Kamas
+# With numerous contributions from Prof. Edward Lee and Alan Kamas
 #
 # For storage, there exist two global array--one which stores lists of
 # current parameter-type-value triplets and the other which (upon
@@ -31,9 +31,13 @@ set ed_ToplevelNumbers(ed_Num) 0
 # **ed_RestoreParam
 # Discards all changes
 
-proc ed_RestoreParam {facet number} {
+proc ed_RestoreParam {facet number args} {
     global paramBAKArray
-    ptkSetParams $facet $number $paramBAKArray($facet,$number)
+    if {$args != "Target"} {
+	ptkSetParams $facet $number $paramBAKArray($facet,$number)
+    } else {
+	ptkSetTargetParams $facet $number $paramBAKArray($facet,$number)
+    }
 }
 
 # **proc ed_SetEntryButtons
@@ -165,16 +169,21 @@ proc ed_UpdateParam {facet number name args} {
 		} else { set type [lindex $param 1] }
 		if {$okay} {
 		 set param [lreplace $param 1 2 $type $value]
-#                 puts "**$paramArray($facet,$number)\n$count $count $param"
 		 set paramArray($facet,$number) \
                  [lreplace $paramArray($facet,$number) $count $count "$param"]
-                 ptkSetParams $facet $number $paramArray($facet,$number)
+		 if {$args != "Target"} {
+                   ptkSetParams $fact $number $paramArray($facet,$number)
+		 } else {
+		   ptkSetTargetParams $fact $number \
+			$paramArray($facet,$number)
+		 }
 		}
                 return
 	}
         incr count
    }
 }
+
 
 # **ed_AddParamDialog 
 # Creates the dialog box to add parameters
@@ -322,7 +331,6 @@ proc ed_AddParam {facet number name type value} {
     } else {
 	lappend paramArray($facet,$number) [list "$name" "$type" "$value"]
 	ptkSetParams $facet $number $paramArray($facet,$number)
-#            puts "**$paramArray($facet,$number)\n$count"
     }
 }
 
@@ -438,8 +446,10 @@ proc ed_Remove {facet number winName} {
 # To make sure that parentheses organized as ``}{''  are treated as ``} {''
 #  a substitution is made.
 
-proc ptkEditParams {facet number} {
+proc ptkEditParams {facet number args} {
+
     global ed_MaxEntryLength ed_ToplevelNumbers
+
     if {[info exists ed_ToplevelNumbers($facet,$number)] && \
 	[winfo exists .o$ed_ToplevelNumbers($facet,$number)]} {
 	ptkImportantMessage .error \
@@ -454,30 +464,39 @@ proc ptkEditParams {facet number} {
     global paramArray paramBAKArray
     set top .o$num
 
-    set ed_GetResult [ptkGetParams $facet $number]
 
-#    regsub -all {(\})(\{)} $ed_GetResult {\1 \2} ed_GetResult
-    if {$ed_GetResult == ""} {
-#	ptkImportantMessage .error "ed_GetParams returns {}"
-	return
+    if {$args == ""} {
+	# number is target instance
+	set ed_GetResult [ptkGetParams $facet $number]
+    } else {
+	# number is target name
+	set ed_GetResult [ptkGetTargetParams $facet $number]
     }
-    if {$ed_GetResult == "NIL"} {
-        # This instance cannont have parameters
+
+    if {$ed_GetResult == "" || $ed_GetResult == "NIL"} {
+        # This facet/instance cannot have parameters
         return
     }
+
+    if {$args == "Target"} {
+	set ed_GetResult "{Edit Target} [list $ed_GetResult]"
+    }
+
     set editType [lindex $ed_GetResult 0]
     if {[string compare [lindex $editType 0] Edit]} {
-	ptkImportantMessage .error \
-	  "For OctInstanceHandle: \"$number\", \"$editType\" unrecognized"
+	  ptkImportantMessage .error \
+	   "For OctInstanceHandle: \"$number\", \"$editType\" unrecognized"
 	return
     }
 
-    if {[ptkIsBus $number]} {
+    if {$args == "Target"} {
+	set editType "Target \"$number\""
+    } elseif {[ptkIsBus $number]} {
 	set editType "Bus Width"
     } elseif {[ptkIsDelay $number]} {
-	set editType Delay
+	  set editType Delay
     } else {
-	set editType "Parameters"
+	  set editType "Parameters"
 #	set editType "[lindex $editType 1] Parameters"
     }
 
@@ -504,6 +523,25 @@ proc ptkEditParams {facet number} {
     pack append $top.f $u {bottom fillx} \
 		$c {bottom expand fill}
 
+    if {$args == "Target"} {
+    pack append $u \
+	   [frame $u.okfr -relief sunken -bd 2] \
+		{left expand fillx} \
+	   [button $u.apply -text "     Apply     " -command \
+		"ed_Apply $facet $number Target"] \
+		{left expand fillx} \
+	   [button $u.close -text "     Close      " \
+		-command "catch \"unset paramArray($facet,$number) \
+			      paramArrayBAK($facet,$number\"; destroy $top"] \
+		{left expand fillx} \
+	   [button $u.q -text "     Cancel      " -command \
+	        "ed_RestoreParam $facet $number Target; $u.close invoke"] \
+		{left expand fillx}
+    pack append $u.okfr \
+	[button $u.okfr.ok -text "       OK       " -relief raised \
+		-command "ed_Apply $facet $number Target
+				$u.close invoke"] {expand fill}
+    } else {
     pack append $u \
 	   [frame $u.okfr -relief sunken -bd 2] \
 		{left expand fillx} \
@@ -517,15 +555,15 @@ proc ptkEditParams {facet number} {
 	   [button $u.q -text "     Cancel      " -command \
 	        "ed_RestoreParam $facet $number; $u.close invoke"] \
 		{left expand fillx}
-
     pack append $u.okfr \
 	[button $u.okfr.ok -text "       OK       " -relief raised \
 		-command "ed_Apply $facet $number
 				$u.close invoke"] {expand fill}
+    }
 
 # Joe Buck's fix <jbuck@Synopsys.com> 11/93
 
-    if {$number == "NIL"} {
+    if {$number == "NIL" && $args != "Target"} {
 	pack append $u \
 	   [button $u.add -text " Add parameter " -command \
 		"ed_AddParamDialog $facet $number"] \
@@ -593,27 +631,39 @@ proc ptkEditParams {facet number} {
     set mm [winfo fpixels $c 1m]
 #    bind $c <Configure> "ed_ConfigFrame $top"
 
-    ptkRecursiveBind $top <Return> "ed_Apply $facet $number
-                                $u.close invoke"
 #    ptkRecursiveBind $top <Return> "ed_UpdateOnMReturn $facet $number
 #		catch \"unset paramArray($facet,$number) \
 #			      paramArrayBAK($facet,$number\"
 #					    destroy $top"
-    ptkRecursiveBind $top <M-Delete> \
+
+    if {$args != "Target"} {
+        ptkRecursiveBind $top <M-Delete> \
 	        "ed_RestoreParam $facet $number
 		catch \"unset paramArray($facet,$number) \
 		paramArrayBAK($facet,$number\"; destroy $top"
+        ptkRecursiveBind $top <Return> "ed_Apply $facet $number
+                                $u.close invoke"
 
-# For the bindings to work outside the entry widgets
-#    ptkRecursiveBind $top <Any-Enter> {focus %W}
-
-    if {!([ptkIsBus $number] || [ptkIsDelay $number] || [ptkIsStar $number])} {
-	ptkRecursiveBind $top <M-a> "ed_AddParamDialog $facet $number"
-	ptkRecursiveBind $top <M-r> \
+        if {!([ptkIsBus $number] || [ptkIsDelay $number] || \
+	      [ptkIsStar $number])} {
+	    ptkRecursiveBind $top <M-a> "ed_AddParamDialog $facet $number"
+	    ptkRecursiveBind $top <M-r> \
 		"$u.remove config -relief sunken
 		ed_RemoveParam $facet $number $top $u
 		$u.remove config -relief raised"
+	}
+
+    } else {
+        ptkRecursiveBind $top <M-Delete> \
+	        "ed_RestoreParam $facet $number Target
+		catch \"unset paramArray($facet,$number) \
+		paramArrayBAK($facet,$number\"; destroy $top"
+        ptkRecursiveBind $top <Return> "ed_Apply $facet $number Target
+                                $u.close invoke"
     }
+
+# For the bindings to work outside the entry widgets
+#    ptkRecursiveBind $top <Any-Enter> {focus %W}
 
 
     wm withdraw $top
@@ -621,8 +671,6 @@ proc ptkEditParams {facet number} {
     ed_ConfigCanvas $top $facet $number
     $top.f.c config -bg [lindex [$top.f.c.f config -bg] 4]
     wm deiconify $top
-#    puts [winfo reqheight $u]
-#    puts [winfo reqheight $top.header]
     update
     bind $f.par <Configure> "ed_ConfigCanvas $top $facet $number"
 
@@ -644,7 +692,7 @@ proc ed_UpdateOnMReturn {facet number} {
     }
 }
 
-proc ed_Apply {facet number} {
+proc ed_Apply {facet number args} {
     global ed_ToplevelNumbers paramArray
     set changeFlag 0
     set top .o$ed_ToplevelNumbers($facet,$number)
@@ -655,7 +703,7 @@ proc ed_Apply {facet number} {
 	{ $curr < $ed_ToplevelNumbers($facet,$number,count)} \
 	{ incr curr } {
 	    if [winfo exists $w.f$curr.entry] {
-		set name [list $ed_ToplevelNumbers($facet,$number,$curr)]
+		set name $ed_ToplevelNumbers($facet,$number,$curr)
 		set contents [list [$w.f$curr.entry get]]
 		if {[llength $contents] == 2} {
 		    set value [lindex $contents 1]
@@ -687,7 +735,11 @@ proc ed_Apply {facet number} {
 	}
 
    if $changeFlag {
-	ptkSetParams $facet $number $newParamArray
+        if {$args != "Target"} {
+		ptkSetParams $facet $number $newParamArray
+	} else {
+		ptkSetTargetParams $facet $number $newParamArray
+	}
 	set paramArray($facet,$number) $newParamArray
    }
 }
@@ -746,20 +798,6 @@ proc ed_PrevEntry {current w facet number} {
 			}
 	}
 }
-
-## **ed_ConfigFrame
-## Attempts to resize according to user-requested resizing of toplevel window
-## Not extremely successful..  Will require some more work.
-#
-#proc ed_ConfigFrame {top} {
-##puts "CONFIG_FRAME"
-#    set c $top.f.c
-#    set f $c.f
-#    set mm [winfo fpixels $c 1m]
-#    set width [expr [winfo width $c]-2*$mm]
-#    set height [winfo height $f]
-#    $c itemconfigure frameWindow -width $width -height $height
-#}
 
 # **ed_Dummy
 # Because entry widgets refuse to accept empty arguments for xscroll
@@ -861,3 +899,76 @@ proc ed_ConfigCanvas {top facet number} {
     wm geometry $top ${intWidth}x${intHeight}
 
 }
+
+
+#############################################################################
+#
+# Radiobutton selections for Target Params and Edit-Domain
+# Authors: Wei-Jen Huang and Alan Kamas
+
+# General-purpose option selector
+# One caveat, options cannot contain certain characters, notably '.'
+# Executes a command string suitable for formatting
+
+# Right now, ptkChooseOne generates a unique toplevel window name
+#  using the global unique variable.
+#  FIXME: Pass ptkChooseOne a window name as the first argument
+#	and in the cases of Edit-Target Params and Edit-Domain
+#	the window name can be generated from the facet-id
+
+proc ptkChooseOne {
+    optionList
+    command 
+    {direction "Choose one:"} } {
+
+    global unique
+
+#    if [winfo exist $w] {
+#	ptkImportantMessage .error \
+#		"Already editing target parameters for this facet"
+#	return
+#    }
+
+    set w .ptkChooseOne$unique
+    incr unique
+
+    toplevel $w
+
+    set b $w.buttonFrame
+
+    label $w.label -text $direction -anchor w
+    frame $w.optFrame -bd 3 -relief sunken
+    frame $b -bd 3
+
+    foreach opt $optionList {
+       pack [radiobutton $w.optFrame.opt$opt -text $opt -var selVar$w \
+		-value $opt -anchor w]\
+	-side top -expand 1 -fill x
+    }
+
+   $w.optFrame.opt[lindex $optionList 0] invoke
+
+   pack [frame $b.f -bd 2 -relief sunken] -side left -expand 1
+   pack [button $b.cancel -text Cancel \
+	-command "destroy $w; uplevel #0 \"unset selVar$w\""] \
+        -side left -padx 3m -pady 3m -ipadx 1m -ipady 1m -expand 1
+
+   pack [button $b.f.ok -text OK -command \
+	"ptkFormatCmd \"$command\" selVar${w}; destroy $w"] \
+	-padx 1m -pady 1m -ipadx 1m -ipady 1m
+
+   pack $w.label -side top -fill x -expand 1
+   pack $w.optFrame -side top -expand 1 -fill x
+   pack $b -side top -expand 1 -fill x
+
+}
+
+# Formats 'cmd'
+
+proc ptkFormatCmd {cmd radioVarName} {
+   upvar $radioVarName radioVar
+   eval [format $cmd $radioVar]
+}
+
+#
+#############################################################################
