@@ -37,18 +37,12 @@ falseOutput.
 		falseOutput.setBDFParams(1, control, BDF_FALSE, 0);
 	}
 	go {
-		// get Particles from Geodesic
-		control.receiveData();
-		input.receiveData();
-
 		// read control value, and route input
 		// to output depending on it.
 		if ((int) (control%0)) {
 			trueOutput%0 = input%0;
-			trueOutput.sendData();
 		} else {
 			falseOutput%0 = input%0;
-			falseOutput.sendData();
 		}
 	}
 }

@@ -35,21 +35,15 @@ is copied to the output; otherwise, falseInput is.
 		falseInput.setBDFParams(1,control,BDF_FALSE);
 	}
 	go {
-	// get control Particles from Geodesic
-		control.receiveData();	
-		
 		// read control value, and route input to output
 		// depending on it.
 		if ((int) (control%0)) {
 			// route true-side to the output
-			trueInput.receiveData();
 			output%0 = trueInput%0;
 		} else {
 			// route false-side to the output
-			falseInput.receiveData();
 			output%0 = falseInput%0;
 		}
-		output.sendData();
 	}
 }
 
