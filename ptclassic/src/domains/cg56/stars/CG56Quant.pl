@@ -58,51 +58,68 @@ of \fIthresholds\fR.
 		noInternalState();
 	}
 
-	codeblock (main) {
-        move    #<$addr(thresholds),r0
+	codeblock(main) {
+; Register usage
+; r0 = pointer into the array of thresholds
+; r4 = pointer into the array of threshold levels
+; r5 = address of the array of threshold levels (used by QuantIdx star)
+; a = current threshold
+; b = current threshold level
+; x0 = input value
         move    #>$addr(levels),r4
-        move    $ref(input),x0
+        move    #<$addr(thresholds),r0
+        move    $ref(input),x0		r4,r5
         move    x:(r0)+,a    y:(r4)+,b
-        do      #$val(X)-1,$label(lab)
+        do      #$val(X)-1,$label(lab)		; begin loop
         cmp	x0,a
         jlt	$label(again)
-        enddo
-        jmp     $label(term)
+        enddo				; jump out of loop
+        jmp     $label(term)			; b is right threshold level
 $label(again)
         move    x:(r0)+,a    y:(r4)+,b
-$label(lab)
-        cmp	x0,a
-        jge	$label(term)
-        move    y:(r4),b
+$label(lab)				; end loop
+        cmp	x0,a			; if input > threshold, then
+	jge	$label(term)
+	move    y:(r4)+,b
 $label(term)
-        move    b,$ref(output)
+        move    b,$ref(output)		; output threshold level
 	}
 
-        codeblock(other) {
-        move    #<$addr(thresholds),r0
-        move    #>$addr(levels),r4
+        codeblock(oneThreshold) {
+; Register usage
+; a = threshold			x0 = input
+; b = first level value		y0 = second level value
+	move	$ref(thresholds),a
+	move	$ref(levels),b
         move    $ref(input),x0
-        move    x:(r0),a     y:(r4)+,b
-        cmp	x0,a
-        jge	$label(term)
-        move    y:(r4),b
-$label(term)
+	cmp	x0,a	$ref(levels)+1,y0	; compare input to threshold
+	tge	y0,b		; if input >= threshold, update threshold
         move    b,$ref(output)
         }
+
         setup {
-             if(levels.size() != thresholds.size()+1)
-                 Error::abortRun (*this,
-		 ": Must have 1 more level than threshold to quantize.");
+                int n = thresholds.size();
+
+                if (levels.size() == 0) {       // set to default: 0, 1, 2...
+                        levels.resize(n + 1);
+                        for (int i = 0; i <= n; i++)
+                                levels[i] = i;
+                }
+                else if (levels.size() != n+1) {
+                        Error::abortRun (*this,
+                              "must have one more level than thresholds");
+                }
         }
 	go {
                  X=thresholds.size();
 
-                 if(thresholds.size()>1) 
+                 if (thresholds.size()>1) 
                      addCode(main);
 		 else
-	             addCode(other);
+	             addCode(oneThreshold);
 	}
 	exectime {
-	        return 7+4*int(thresholds.size());
+		if ( thresholds.size() == 1 ) return 6;
+	        return 12 + 4*int(thresholds.size());
 	}
 }
