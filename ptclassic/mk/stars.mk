@@ -193,7 +193,7 @@ ifdef CG56
 			$(CG56T)/CG56XCSynchComm.o \
 			$(CG56T)/CGCXAsynchComm.o \
 			$(CG56T)/CG56XCAsynchComm.o \
-			$(CG56T)/CGCXBase.o  $(CG56T)/CGCS56XTarget.o
+			$(CG56T)/CGCXBase.o  
 	endif
 	# Window star in cg56/dsp/stars needs the Cephes Library
 	CEPHESLIB = 1
@@ -428,8 +428,8 @@ ifdef CGC
 				$(CGCT)/main/CGCSDFSend.o \
 				$(CGCT)/main/CGCSDFReceive.o \
 				$(CGCT)/main/CGCSDFBase.o \
-				$(CGCT)/main/CGCTargetWH.o \
-				$(CGCT)/main/CGWormTarget.o
+				$(CGCT)/main/CreateSDFStar.o \
+				$(CGCT)/main/CompileCGSubsystems.o
 		endif
 	endif
 	PALETTES += PTOLEMY/src/domains/cgc/icons/cgc.pal
