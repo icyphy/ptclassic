@@ -35,19 +35,19 @@ Version: $Id$
 
 /* Returns the window identification number from a window name as a string */
 int PTDSPWindowNumber(const char* wn) {
-	int winType = DSP_WINDOW_TYPE_NULL;
+	int winType = PTDSP_WINDOW_TYPE_NULL;
 	if ( strcasecmp(wn, "Rectangle")==0 ) {
-	    winType = DSP_WINDOW_TYPE_RECTANGLE;
+	    winType = PTDSP_WINDOW_TYPE_RECTANGLE;
 	} else if ( strcasecmp(wn, "Bartlett")==0 ) {
-	    winType = DSP_WINDOW_TYPE_BARTLETT;
+	    winType = PTDSP_WINDOW_TYPE_BARTLETT;
 	} else if ( strcasecmp(wn, "Hanning")==0 ) {
-	    winType = DSP_WINDOW_TYPE_HANNING;
+	    winType = PTDSP_WINDOW_TYPE_HANNING;
 	} else if ( strcasecmp(wn, "Hamming")==0 ) {
-	    winType = DSP_WINDOW_TYPE_HAMMING;
+	    winType = PTDSP_WINDOW_TYPE_HAMMING;
 	} else if ( strcasecmp(wn, "Blackman")==0 ) {
-	    winType = DSP_WINDOW_TYPE_BLACKMAN;
+	    winType = PTDSP_WINDOW_TYPE_BLACKMAN;
 	} else if ( strcasecmp(wn, "SteepBlackman")==0 ) {
-	    winType = DSP_WINDOW_TYPE_STEEPBLACKMAN;
+	    winType = PTDSP_WINDOW_TYPE_STEEPBLACKMAN;
 	}
 	return winType;
 }
@@ -75,28 +75,28 @@ int PTDSPWindow(double* window, int realLen, int winType, double* parameters) {
 	 *  Processing, Second Ed, chap 7.
 	 */
 	switch ( winType ) {
-	  case DSP_WINDOW_TYPE_RECTANGLE:
+	  case PTDSP_WINDOW_TYPE_RECTANGLE:
 	    scale0 = 1;
 	    break;
-	  case DSP_WINDOW_TYPE_BARTLETT:
+	  case PTDSP_WINDOW_TYPE_BARTLETT:
 	    scale0 = 0;		scale1 = 2.0/realLen;
 	    break;
-	  case DSP_WINDOW_TYPE_HANNING:
+	  case PTDSP_WINDOW_TYPE_HANNING:
 	    scale0 = .5;	scale1 = -.5;	freq1 = 2*base_w;
 	    break;
-	  case DSP_WINDOW_TYPE_HAMMING:
+	  case PTDSP_WINDOW_TYPE_HAMMING:
 	    scale0 = .54;	scale1 = -.46;	freq1 = 2*base_w;
 	    break;
-	  case DSP_WINDOW_TYPE_BLACKMAN:
+	  case PTDSP_WINDOW_TYPE_BLACKMAN:
 	    /* This is a special case of SteepBlackman */
 	    d = -.16;		/* scale0 = .42, scale1 = -.5, scale2=.08 */
 	    /* FALLTHROUGH */
-	  case DSP_WINDOW_TYPE_STEEPBLACKMAN:
+	  case PTDSP_WINDOW_TYPE_STEEPBLACKMAN:
 	    /* See Jackson 2ed, eqns 7.3.6 through 7.3.10 */
 	    scale0 = (d+1)/2;	scale1 = -.5;	freq1 = 2*base_w;
 	    scale2 = -d/2;	freq2 = 4*base_w;
 	    break;
-	  case DSP_WINDOW_TYPE_KAISER:
+	  case PTDSP_WINDOW_TYPE_KAISER:
 	    alpha = ((double)(realLen-1))/2.0;
 	    norm = fabs(i0(parameters[0]));
 	    break;
@@ -105,7 +105,7 @@ int PTDSPWindow(double* window, int realLen, int winType, double* parameters) {
 	}
 
 	switch ( winType ) {
-	  case DSP_WINDOW_TYPE_BARTLETT:
+	  case PTDSP_WINDOW_TYPE_BARTLETT:
 	    for (i = 0; i < realLen/2; i++) {
 		window[i] = scale1 * (i+1);
 	    }
@@ -113,7 +113,7 @@ int PTDSPWindow(double* window, int realLen, int winType, double* parameters) {
 		window[i] = scale1 * (realLen-(i+1));
 	    }
 	    break;
-	  case DSP_WINDOW_TYPE_KAISER:
+	  case PTDSP_WINDOW_TYPE_KAISER:
 	    for (i = 0; i < realLen; i++){
 		double squared = pow(((i - alpha)/alpha), 2);
 		double entry = parameters[0] * sqrt(1-squared);
