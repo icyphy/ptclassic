@@ -890,7 +890,7 @@ body ::tycho::AbstractGraph::traverse3 {} {
 #
 body ::tycho::AbstractGraph::vertices {{pattern *}} {
     if { $pattern == "*" } {
-        listing vertex
+        match vertex
     } else {
         set result ""
         foreach vertex [names vertex:$pattern] {
