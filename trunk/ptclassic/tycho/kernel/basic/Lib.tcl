@@ -256,6 +256,15 @@
 	-category "tool" \
 	-underline 6
 
+# Directory Search
+::tycho::register mode "dirsearch" \
+        -command {set w [::tycho::autoName .dirsearch]; \
+        ::tycho::DirSearch $w -geometry +0+0;\
+	    wm deiconify $w} \
+	    -label {Directory Search}  \
+	    -category "tool" \	
+            -underline 0
+
 # Itcl class list and class diagram generator
 ::tycho::register mode "itclclasslist" \
 	-command {::tycho::view ItclClassList -file {%s} -toolbar 1} \
