@@ -145,6 +145,9 @@ REALCLEAN_STUFF =	$(EVERY_BINARY)
 
 INSTALL += makefile $(BINDIR)/$(PIGI)
 
+PTDEPEND:
+	echo $(PT_DEPEND)
+
 ifndef ALLBINARIES
 # This is the default target
 $(PIGI): $(PT_DEPEND) $(ADD_OBJS)
