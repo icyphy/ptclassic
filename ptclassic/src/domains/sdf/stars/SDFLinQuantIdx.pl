@@ -2,17 +2,11 @@ defstar {
 	name { NewQuant }
 	domain { SDF }
 	desc {
-Quantizes input to one of N+1 possible output values using N thresholds.
-For an input less than or equal to the n-th threshold, but larger than 
-all previous thresholds, the output will be the n-th level.  
-If the input is greater than all thresholds, the output is the N+1-th level.
-There must be one more level than thresholds.
-It asks for the number f values to be quantized to (255) and also
-the range of values to quantize within. It will compute the step of
-the quantizer.
-Besides the quantized value being output, it will also output the level
-number that it corresponds to for the purpose of converison to an
-integer and then output serially to the Thor domain stars.
+The input is quantized to "levels" number of levels for a specified
+signal ranging between "low" and "high". On the "amplitude" port, the
+quantized output is generated, while the "stepNumber" output is the
+quantization level. This integer output is particularly needed for
+the Thor stars that need an integer input.
 	}
 	author { Asawaree Kalavade }
 	copyright { 1991 The Regents of the University of California }
@@ -56,37 +50,37 @@ integer and then output serially to the Thor domain stars.
 	start {
 		int i;
 		
-		height= (double(high)-double(low)) /(int(levels)-1);
-		thresholds[0]=double(low)+double(height);
-		values[0]=double(low);
+		height		= (high-low) /(levels-1);
+		thresholds[0]	= low+height;
+		values[0]	= low;
 
-	for(i=1;i<int(levels);i++) {
-	values[i]=values[i-1]+double(height);
-	thresholds[i]=thresholds[i-1]+double(height);
-			      }
+		for(i=1;i<int(levels);i++) 
+		{
+			values[i]=values[i-1]+height;
+			thresholds[i]=thresholds[i-1]+height;
+		}
 
-	number= int ((-1)*( int(levels))* (0.5));
+		number= (-1)*(levels)* (0.5);
 		}
 	
 	go {
-		int i;
-		
+	    int i;
 
-	    number= int ((-1)*( int(levels))* (0.5));
+	    float in = input%0;
 
-	    float in = float(input%0);
-	    for(i = 0; i < int (levels); i++) {
-		// if( in <= thresholds[i] ) 
+	    if( in >= high) {
+		    amplitude%0 << high;
+                    stepNumber%0 << (-1*number) -1 ;
+		    return;
+		}
+	
+	    for(i = 0; i < levels; i++) {
 		if( in < thresholds[i] ) {
 		    amplitude%0 << values[i];
-		    // stepNumber%0 << i;
-		    stepNumber%0 << int(number);
+		    stepNumber%0 << number;
 		    return;
 		}
 		number++;
-	//	output%0 << values[levels-1];
-	//	output%0 << values[thresholds.size()];
-        //	output%0 = values[levels-1];
 	    }
 	}
 }
