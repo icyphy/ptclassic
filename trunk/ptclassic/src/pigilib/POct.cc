@@ -347,14 +347,15 @@ int POct::ptkCompile (int aC,char** aV) {
     if (aC != 2) return usage ("ptkCompile <OctObjectHandle>");
 
     if (ptkHandle2OctObj(aV[1], &facet) == 0) {
-        Error::error("Bad or Stale Facet Handle passed to ", aV[0]);
+	Tcl_AppendResult(interp, "Bad or Stale Facet Handle passed to ", aV[0], 
+                         (char *) NULL);
         return TCL_ERROR;
     }
 
     if (CompileFacet(&facet)){
 	return TCL_OK;
     } else {
-	Error::error("Unable to compile facet");
+        Tcl_AppendResult(interp, ErrGet(), (char *) NULL);
         return TCL_ERROR;
     }
 
@@ -390,7 +391,8 @@ int POct::ptkGetParams (int aC,char** aV) {
     }
 
     if (ptkHandle2OctObj(aV[1], &facet) == 0) {
-        Error::error("Bad or Stale Facet Handle passed to ", aV[0]);
+        Tcl_AppendResult(interp, "Bad or Stale Facet Handle passed to ", aV[0],
+                         (char *) NULL);
         return TCL_ERROR;
     }
 
@@ -399,19 +401,22 @@ int POct::ptkGetParams (int aC,char** aV) {
         // If there is no instance, then this must be a Galaxy or Universe
         if (IsGalFacet(&facet) || IsUnivFacet(&facet)) {
             if (!GetFormalParams(&facet, &pList)) {
-                Error::error("Error getting Formal parameters");
+		Tcl_AppendResult( interp, "Error getting Formal parameters. ",
+		                  ErrGet(), (char *)NULL );
                 return TCL_ERROR;
             }
             sprintf(title, "Edit Formal Parameters");
             // Result string will be built below
         } else {
-            Error::error("Not a Star, Galaxy, or Universe");
+            Tcl_AppendResult( interp, "Not a Star, Galaxy, or Universe",
+	                      (char*) NULL );
             return TCL_ERROR;
         }
     } else {
         // There was a valid instance passed
         if (ptkHandle2OctObj(aV[2], &instance) == 0) {
-	    Error::error("Bad or Stale Instance Handle passed to ", aV[0]);
+            Tcl_AppendResult(interp, "Bad or Stale Facet Handle passed to ", 
+		aV[0], (char *) NULL);
  	    return TCL_ERROR;
 	}
 
@@ -439,13 +444,17 @@ int POct::ptkGetParams (int aC,char** aV) {
 	    // Must be a star or Galaxy
 	    // FIXME:  Do I need to check domain here??? - aok
 	    if (!GetOrInitSogParams(&instance, &pList)) {
-                Error::error("Error getting Star or Galaxy parameters");
+		Tcl_AppendResult(interp, 
+                                 "Error Getting Star or Galaxy parameters.  ", 
+                                  ErrGet(), (char *) NULL);
                 return TCL_ERROR;
             }
             sprintf(title, "Edit Actual Parameters");
             // Build results string below.
         } else {
-            Error::error("Not a star, galaxy, bus, or delay instance");
+	    Tcl_AppendResult(interp, 
+                             "Not a star, galaxy, bus, or delay instance",
+                             ErrGet(), (char *) NULL);
             return TCL_ERROR;
         }
     }
@@ -491,13 +500,15 @@ int POct::ptkSetParams (int aC,char** aV) {
           "ptkSetParams <OctFacetHandle> <OctInstnceHandle> <Parameter_List>");
 
     if (ptkHandle2OctObj(aV[1], &facet) == 0) {
-        Error::error("Bad or Stale Facet Handle passed to ", aV[0]);
+        Tcl_AppendResult(interp, "Bad or Stale Facet Handle passed to ", aV[0],
+                         (char *) NULL);
         return TCL_ERROR;
     }
 
     // Covert the parameter List string in the pList structure.
     if (MakePList(aV[3], &pList) == 0) {
-	Error::error("Unable to parse parameter list ", aV[3] );
+        Tcl_AppendResult(interp, "Unable to parse parameter list: ",
+                         aV[3], (char *) NULL);
         return TCL_ERROR;
     }
 
@@ -511,32 +522,40 @@ int POct::ptkSetParams (int aC,char** aV) {
             // Set Formal Parameters
             if (SetFormalParams(&facet, &pList) == 0) {
                 ErrorFound = 1;
-		Error::error( aV[0]," Could not save parameters to Oct");
+                Tcl_AppendResult(interp, aV[0],
+                                 " Could not save parameters to Oct. ",
+                                 ErrGet(), (char *) NULL);
             }
         } else {
             ErrorFound = 1;
-	    Error::warn("Not a Star, Galaxy, or Universe");
+            Tcl_AppendResult(interp,
+                             "Not a Star, Galaxy, Universe.",
+                             (char *) NULL);
         }
     } else {
         // There was a valid instance passed
         if (ptkHandle2OctObj(aV[2], &instance) == 0) {
             // No way to go on if the handle is bad.  Clean up and exit.
             DeletePList(&pList);
-            Error::error("Bad or Stale Instance Handle passed to ", aV[0]);
+            Tcl_AppendResult(interp, "Bad or Stale Facet Handle passed to ", 
+		aV[0], (char *) NULL);
             return TCL_ERROR;
         }
         if ( IsDelay(&instance) ) {
             // Set Delay Parameters from the pList
             if (SetDelayParams(&instance,&pList) == 0) {
                 ErrorFound = 1;
-                Error::error( aV[0]," Could not save parameters to Oct.");
+		Tcl_AppendResult(interp, aV[0], 
+				 " Could not save parameters to Oct. ",
+                                 ErrGet(), (char *) NULL);
             }
-
         } else if (IsBus(&instance)) {
             // Set Bus Parameters from the pList
             if (SetBusParams(&instance, &pList) == 0) {
                 ErrorFound = 1;
-                Error::error( aV[0]," Could not save parameters to Oct.");
+		Tcl_AppendResult(interp, aV[0], 
+                                 " Could not save parameters to Oct. ",
+                                 ErrGet(), (char *) NULL);
             }
 
         } else if (IsGal(&instance) || IsStar(&instance)) {
@@ -544,12 +563,16 @@ int POct::ptkSetParams (int aC,char** aV) {
             // Set Star or Galaxy params from the pList
             if (SetSogParams(&instance, &pList) == 0) {
                 ErrorFound = 1;
-                Error::error( aV[0]," Could not save parameters to Oct.");
+		Tcl_AppendResult(interp, aV[0],
+                                 " Could not save parameters to Oct. ",
+                                 ErrGet(), (char *) NULL);
             }
 
         } else {
             ErrorFound = 1;
-            Error::warn("Not a star, galaxy, bus, or delay instance.");
+            Tcl_AppendResult(interp, 
+                             "Not a star, galaxy, bus, or delay instance.",
+                             (char *) NULL);
         }
     }
 
@@ -569,7 +592,8 @@ int POct::ptkIsStar (int aC,char** aV) {
     if (strcmp(aV[1],"NIL")==0)  return result(0);
 
     if (ptkHandle2OctObj(aV[1], &facet) == 0) {
-        Error::error("Bad or Stale Facet Handle passed to ", aV[0]);
+        Tcl_AppendResult(interp, "Bad or Stale Facet Handle passed to ", aV[0],
+                         (char *) NULL);
         return TCL_ERROR;
     }
 
@@ -586,7 +610,8 @@ int POct::ptkIsGalaxy (int aC,char** aV) {
     if (strcmp(aV[1],"NIL")==0)  return result(0);
 
     if (ptkHandle2OctObj(aV[1], &facet) == 0) {
-        Error::error("Bad or Stale Facet Handle passed to ", aV[0]);
+        Tcl_AppendResult(interp, "Bad or Stale Facet Handle passed to ", aV[0],
+                         (char *) NULL);
         return TCL_ERROR;
     }
 
@@ -603,7 +628,8 @@ int POct::ptkIsBus (int aC,char** aV) {
     if (strcmp(aV[1],"NIL")==0)  return result(0);
 
     if (ptkHandle2OctObj(aV[1], &facet) == 0) {
-        Error::error("Bad or Stale Facet Handle passed to ", aV[0]);
+        Tcl_AppendResult(interp, "Bad or Stale Facet Handle passed to ", aV[0],
+                         (char *) NULL);
         return TCL_ERROR;
     }
 
@@ -620,7 +646,8 @@ int POct::ptkIsDelay (int aC,char** aV) {
     if (strcmp(aV[1],"NIL")==0)  return result(0);
 
     if (ptkHandle2OctObj(aV[1], &facet) == 0) {
-        Error::error("Bad or Stale Facet Handle passed to ", aV[0]);
+        Tcl_AppendResult(interp, "Bad or Stale Facet Handle passed to ", aV[0],
+                         (char *) NULL);
         return TCL_ERROR;
     }
 
@@ -637,7 +664,8 @@ int POct::ptkGetRunLength (int aC,char** aV) {
     if (aC != 2) return usage ("ptkGetRunLength <OctObjectHandle>");
 
     if (ptkHandle2OctObj(aV[1], &facet) == 0) {
-        Error::error("Bad or Stale Facet Handle passed to ", aV[0]); 
+        Tcl_AppendResult(interp, "Bad or Stale Facet Handle passed to ", aV[0],
+                         (char *) NULL);
         return TCL_ERROR;
     }
 
@@ -657,7 +685,8 @@ int POct::ptkSetRunLength (int aC,char** aV) {
     }
 
     if (ptkHandle2OctObj(aV[1], &facet) == 0) {
-        Error::error("Bad or Stale Facet Handle passed to ", aV[0]);
+        Tcl_AppendResult(interp, "Bad or Stale Facet Handle passed to ", aV[0],
+                         (char *) NULL);
         return TCL_ERROR;
     }
 
