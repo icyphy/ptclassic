@@ -54,9 +54,6 @@ class ::tycho::ResourceWELD {
     # Close the resource
     method close {}
 
-    # Return the content type of the resource
-    method contenttype {}
-
     # Return the end of file status
     method eof {}
 
@@ -89,6 +86,9 @@ class ::tycho::ResourceWELD {
 
     # Change the permissions of a resource
     proc chmod {path permissions}
+
+    # Return the content type of the resource
+    proc contenttype {path}
 
     # Delete a resource
     proc delete {path}
@@ -143,6 +143,11 @@ class ::tycho::ResourceWELD {
 	    [uplevel #0 \
 	    ::java::new weld.persistent.TclWeldDirectory \
 	    [::tycho::autoName weldDir]]
+
+    # DEBUG
+    method debug {} {
+	$javaDirectory debug
+    }
 }
 
 
@@ -157,7 +162,6 @@ body ::tycho::ResourceWELD::constructor {args} {
 	    [uplevel #0 \
 	    ::java::new weld.persistent.TclWeldFile \
 	    [::tycho::autoName weldFile]]
-    ::puts "$javaDirectory $javaFile"
 }
 
 #######################################################################
@@ -178,67 +182,48 @@ body ::tycho::ResourceWELD::destructor {} {
 #####################################################################
 #### close
 body ::tycho::ResourceWELD::close {} {
-    if { $fileid != "" } {
-	::close $fileid
-    }
     set fileIsOpen 0
 }
 
 #####################################################################
 #### contenttype
 # Return the content type of the open file.
-body ::tycho::ResourceWELD::contenttype {} {
-    if !$fileIsOpen {
-	error "File \"$this\" is not open"
+body ::tycho::ResourceWELD::contenttype {path} {
+    if {[isdirectory $path]} {
+        return "directory"
     }
-    # For now, just return "text/plain". Later on, look at the
-    # file extension and/or contents.
-    return "text/plain"
+    # Look at file extension and/or contents.
+    return [::tycho::Resource::contenttype $path]
 }
 
 #####################################################################
 #### flush
 body ::tycho::ResourceWELD::flush {} {
-    if !$fileIsOpen {
-	error "File \"$this\" is not open"
-    }
-    ::flush $fileid
+    error "Not implemented"
 }
 
 #####################################################################
 #### eof
 body ::tycho::ResourceWELD::eof {} {
-    if !$fileIsOpen {
-	error "File \"$this\" is not open"
-    }
-    $javaFile eof
+    error "Not implemented"
 }
 
 #####################################################################
 #### gets
 body ::tycho::ResourceWELD::gets {{varName {}}} {
-    if !$fileIsOpen {
-	error "File \"$this\" is not open"
-    }
-    if { $varName == "" } {
-	$javaFile gets
-    } else {
-	upvar $varName v
-	set v [$javaFile gets]
-	llength $v
-    }
+    error "Not implemented"
 }
 
 #####################################################################
 #### open
 body ::tycho::ResourceWELD::open {{mode "r"}} {
-    set wrl [path]
-    if { ! [exists $wrl] } {
-	error "File $wrl does not exist"
+    set path [path]
+    if { $mode == "r" && ! [exists $path] } {
+	error "File $path does not exist"
     }
-
     set fileIsOpen 1
-    $javaFile open $mode
+
+    # That's it -- we only access Java to read the file
 }
 
 #####################################################################
@@ -250,10 +235,7 @@ body ::tycho::ResourceWELD::isopen {} {
 #####################################################################
 #### puts
 body ::tycho::ResourceWELD::puts {string} {
-    if !$fileIsOpen {
-	error "File \"$this\" is not open"
-    }
-    $javaFile puts $string
+    error "Not implemented"
 }
 
 #####################################################################
@@ -262,7 +244,7 @@ body ::tycho::ResourceWELD::read {} {
     if !$fileIsOpen {
 	error "File \"$this\" is not open"
     }
-    $javaFile read
+    $javaDirectory read [::tycho::url path [path]]
 }
 
 #####################################################################
@@ -277,7 +259,10 @@ body ::tycho::ResourceWELD::write {data} {
     if !$fileIsOpen {
 	error "File \"$this\" is not open"
     }
-    $javaFile write $data
+    set result [$javaDirectory write [::tycho::url path [path]] $data]
+    if { $result } {
+	::puts "error: $result"
+    }
 }
 
 
@@ -325,7 +310,10 @@ body ::tycho::ResourceWELD::exists {path} {
 #####################################################################
 #### mkdir
 body ::tycho::ResourceWELD::mkdir {path} {
-    error "Not implemented"
+    set result [$javaDirectory mkdir [::tycho::url path $path]]
+    if { $result } {
+	::puts "error: $result"
+    }
 }
 
 #####################################################################
@@ -367,7 +355,7 @@ body ::tycho::ResourceWELD::query {path option} {
 	}
 	"writable" {
 	    # FIXME: for now
-	    return 0
+	    return 1
 	}
 	default {
 	    error "Unknown option \"$option\" on $path"
