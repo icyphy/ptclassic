@@ -738,7 +738,7 @@ body ::tycho::ResourceHTTP::httpget {url type} {
     # Create the cache file if getting the whole file.
     if { $type == "file" && $fileid == "" } {
 	set filename [::tycho::tmpFileName httpCache]
-	set fileid [::open $filename "w"]
+	set fileid [::open $filename "w+"]
 	debugputs "Cache file $filename on $fileid"
     }
     uplevel #0 "set _httpstatus header"  ;# Initially we're getting the header
@@ -812,13 +812,20 @@ body ::tycho::ResourceHTTP::httpread {} {
     # overflow.)
     ::fileevent $socketid readable {}
 
-    # Get a line
-    ::gets $socketid line
-
     # Currently reading header or body?
     if { [uplevel #0 "set _httpstatus"] == "header" } {
+        # Get a line
+        ::gets $socketid line
 	# Header mode, the information about this http get.
-	if { $line == {} } {
+	if { $line != {} } {
+	    debugputs "            <- $line"
+	    # Parse the possible header fields (see comment for this method)
+	    regexp {^HTTP/[0-9]+.[0-9]+ ([0-9]+)} $line match status
+	    regexp -nocase {^Last-modified: (.+)} $line match lastmodified
+	    regexp -nocase {^Content-type: (.+)} $line match contenttype
+	    regexp -nocase {^Location: (.+)} $line match forwardlocation
+	    regexp -nocase {^Content-length: ([0-9]+)} $line match contentlength
+	} else {
 	    # End of header is denoted by an empty line
 	    debugputs "            <-"
 	    uplevel #0 "set _httpstatus body"
@@ -838,23 +845,32 @@ body ::tycho::ResourceHTTP::httpread {} {
 	    } elseif { $requestMode == "header" } {
 		# If in header-only mode, we're done!
 		httpdone
-	    }
-	} else {
-	    debugputs "            <- $line"
-	    # Parse the possible header fields (see comment for
-	    # this method)
-	    regexp {^HTTP/[0-9]+.[0-9]+ ([0-9]+)} $line match status
-	    regexp -nocase {^Last-modified: (.+)} $line match lastmodified
-	    regexp -nocase {^Content-type: (.+)} $line match contenttype
-	    regexp -nocase {^Location: (.+)} $line match forwardlocation
-	    regexp -nocase {^Content-length: ([0-9]+)} $line match contentlength
+	    } else {
+                # Going to get body next
+                fconfigure $socketid -translation lf
+                fconfigure $fileid -translation lf
+            }
 	}
     } elseif { [uplevel #0 "set _httpstatus"] == "body" } {
 	# Body mode (content of http get), write to the cache file.
 	# Note that we only do this if the status _is_ "body," in
 	# case an abort is in progress.
-	set contentloaded [expr $contentloaded + [string length $line] + 1]
-	::puts $fileid $line
+
+        # Method of get will depend on the content type.
+        if {[string match *text* $contenttype]} {
+            ::gets $socketid line
+            ::puts $fileid $line
+            set contentloaded [expr $contentloaded + [string length $line] + 1]
+        } else {
+            set contentloaded 0  ;# Binary file can't use Resource's "gets"
+            set readsize 0
+            # This is using unsupported call! This is to make sure that
+            # binary (8-bit clean) format is correctly downloaded in a
+            # perfect byte-to-byte format.
+            catch {unsupported0 $socketid $fileid} readsize
+            ::seek $fileid -$readsize end
+            set line [::read -nonewline $fileid]
+        }
     }
     # Update client-specified command and reconnect the file handler
     if { $notifycommand != "" } {
