@@ -1,5 +1,5 @@
 /**********************************************************************
-Copyright (c) 1999 Sanders, a Lockheed Martin Company
+Copyright (c) 1999-%Q% Sanders, a Lockheed Martin Company
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -25,7 +25,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
  Programmers:  Ken Smith
  Date of creation: 3/23/98
- Version: @(#)Arch.cc      1.0     06/16/99
+ Version: $Id$
 ***********************************************************************/
 #include "Arch.h"
 
