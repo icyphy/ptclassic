@@ -6,6 +6,7 @@
 
 set file=$argv[1]
 set temp=/tmp/ps2gif$$.ps
+set options
 
 onintr clean
 
@@ -20,7 +21,14 @@ END-CAT
 cat $file >> $temp
 
 # Convert from PostScript to full-color PPM.
-gs -q -dNODISPLAY pstoppm.ps << END-GS >& /dev/null
+# Use X11 fonts if possible because they look better than PostScript fonts
+# at this resolution.
+if (! $?DISPLAY) then
+	echo "WARNING:  No X11 display specified."
+	echo "          Font quality may be compromized."
+	set options = "-dNODISPLAY $options"
+endif
+gs $options pstoppm.ps << END-GS >& /dev/null
 (${temp:r}) ppm24run
 END-GS
 
