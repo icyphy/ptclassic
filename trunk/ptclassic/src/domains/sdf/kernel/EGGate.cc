@@ -50,8 +50,9 @@ StringList EGGate::printMe() {
 void EGGate::allocateArc(EGGate* dest, int no_samples, int no_delays) {
 	far = dest;
 	dest->far = this;
-	LOG_DEL; delete arc;
-	LOG_NEW; arc = new EGArc(no_samples, no_delays);
+	LOG_DEL; delete dynarc;
+	LOG_NEW; dynarc = new EGArc(no_samples, no_delays);
+	arc = dynarc;
 	dest->arc = arc; 
 }
 
@@ -65,12 +66,12 @@ EGGate::~EGGate()
     far->arc = 0;
     far = 0;
   }
-  LOG_DEL; delete arc; 
+  LOG_DEL; delete dynarc; 
 }
 
 void EGGate::hideMe(int flag) {
 	if (!flag) far->hideMe(1);
-	myLink->removeMeFromList();
+	if (myLink) myLink->removeMeFromList();
 	parent->hiddenGates.insertGate(this, 0);
 }
 
@@ -87,7 +88,8 @@ int EGGate :: farEndInvocation() {
 ////////////////////////////
 
 void EGGateLink :: removeMeFromList() { 
-	if (myList) myList->removeLink(this); }
+	if (myList) myList->removeLink(this);
+}
 
 // This routine searches the precedence list for the first
 // gate belonging to "master". A pointer to the first
@@ -96,7 +98,7 @@ void EGGateLink :: removeMeFromList() {
 EGGate* EGGateList::findMaster(DataFlowStar *master) {
 	EGGateLinkIter iter(*this);  
 	EGGate *q;
-	while ((q=iter++)!=0) {
+	while ((q = iter++)!=0) {
 		if (q->farEndMaster() == master) break;
 	}
 	return q;
@@ -112,6 +114,8 @@ EGGate* EGGateList::findMaster(DataFlowStar *master) {
 
 EGGateLink* EGGateList::findInsertPosition (EGNode *node, int delay, int& ret)
 {
+	if (node == 0) return 0;
+
 	DataFlowStar* master = node->myMaster();
 	int invocation = node->invocationNumber();
 
@@ -211,11 +215,14 @@ void EGGateList :: insertGate(EGGate* pgate, int update)
 		// because it is redundant. If we're updating now,
 		// save the arc -- we'll use it to insert the other
 		// endpoint (this is our convention).
+		// FIXME: Memory leak. pgate should be deleted, but it
+		// can't be due to the way EGNode::makeArc is written
 		else if (update) {
 			p->gate()->addSamples(pgate->samples());
-			LOG_DEL; delete pgate;
 			LOG_DEL; delete temp;
 		}
+		// FIXME: Memory leak. pgate should be deleted, but it
+		// can't be due to the way the makeArc method is written
 		else {
 			LOG_DEL; delete pgate;
 			LOG_DEL; delete temp;
