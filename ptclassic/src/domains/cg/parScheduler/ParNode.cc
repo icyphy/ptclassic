@@ -31,6 +31,7 @@ ParNode::ParNode(SDFStar* s, int invoc_no) : EGNode(s, invoc_no)
 	exTime = s->myExecTime();
 	waitNum = 0;
 	origin = 0;
+	partner = 0;
 }
 
 // Alternate constructor for idle nodes and communication nodes
@@ -45,6 +46,7 @@ ParNode::ParNode(int t) : EGNode(0,0) {
 	exTime = 0;
 	waitNum = 0;
 	origin = 0;
+	partner = 0;
 }
 
                            ///////////////
