@@ -69,9 +69,12 @@ PTLANG_IN_OBJ=$(PTLANG_OBJ_DIR)/ptlang
 PTLANG_VPATH=../../src/ptlang
 
 # Use either the ptlang binary in the obj directory or just use ptlang
-PTLANG= `if [ -f $(PTLANG_IN_OBJ) ]; \
-	then echo $(PTLANG_IN_OBJ) ; \
-	else echo ptlang; fi`
+PTLANG= `if [ ! -f $(PTLANG_IN_OBJ) ]; \
+	then (cd $(PTLANG_OBJ_DIR) ; \
+		  $(MAKE) ptlang VPATH=$(PTLANG_VPATH) >/dev/null 2>&1); fi; \
+	 if [ ! -f $(PTLANG_IN_OBJ) ]; \
+	 then echo ptlang; \
+	 else echo $(PTLANG_IN_OBJ); fi`
 
 # Build the ptlang binary if necessary
 $(PTLANG_IN_OBJ):
@@ -141,14 +144,14 @@ STARDOCRULE=if [ ! -d `dirname $(STARDOCDIR)` ]; then \
 	cd $(VPATH); $(PTLANG) $< 
 	@$(STARDOCRULE)
 	-if [ -w $(STARDOCDIR) ] ; then \
-		 ( cd $(VPATH); mv -f $*.t $(STARDOCDIR)/. ) \
+		 ( cd $(VPATH); mv -f $*.t $*.htm $(STARDOCDIR)/. ) \
 	fi ;
 
 .pl.h: $(PTLANG_IN_OBJ) $(STARDOCDIR)
 	cd $(VPATH); $(PTLANG) $< 
 	@$(STARDOCRULE)
 	-if [ -w $(STARDOCDIR) ] ; then \
-		( cd $(VPATH); mv -f $*.t $(STARDOCDIR)/. ) \
+		( cd $(VPATH); mv -f $*.t $*.htm $(STARDOCDIR)/. ) \
 	fi ;
 
 # Rules for running the islang processor
