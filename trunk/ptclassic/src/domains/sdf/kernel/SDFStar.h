@@ -96,7 +96,7 @@ public:
 	virtual int simRunStar(int deferFiring);
 
 	// move data and execute the go function
-	void fire();
+	int fire();
 
 	// class identification
 	int isA(const char*) const;
