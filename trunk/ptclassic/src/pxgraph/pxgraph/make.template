@@ -72,7 +72,13 @@ clean:
 		rm -f *.o core *~ *.bak *#
 
 # "make sources" will do SCCS get on anything where SCCS file is newer.
-sources:	$(SRCS) $(HDRS) make.template
+# Don't add pxgraph.htm, since rman might not be built yet
+sources:	$(SRCS) $(HDRS) make.template #pxgraph.htm
+
+# Convert to html using rman
+pxgraph.htm: pxgraph.man
+	nroff -man $^ | rman -f HTML > $@
+
 
 depend:
 		cd $(VPATH); \
@@ -86,11 +92,10 @@ makefile:	make.template
 		exit 1
 
 # Rule for detecting junk files
-
 checkjunk:
 	@checkextra -v $(SRCS) $(HDRS) $(OBJS) \
 		ORIGINAL README.ANNOUNCE README.GENERAL README.HARDCOPY \
-		README.INSTALL TAGS bitmaps examples xgraph.man \
+		README.INSTALL TAGS bitmaps examples pxgraph.man \
 		makefile make.template SCCS
 
 sccsinfo:
