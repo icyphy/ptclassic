@@ -18,20 +18,19 @@ $Id$
 
 #include "CGCTarget.h"
 #include "CGDisplay.h"
-#include "FloatArrayState.h"
 #include "CGCStar.h"
 #include "GalIter.h"
 #include "miscFuncs.h"
 #include "dataType.h"
 #include "WormConnect.h"
 
-const Attribute ANY = {0,0};
-
-const char* whichType(DataType);
+extern const char* whichType(DataType);
 
 // constructor
 CGCTarget::CGCTarget(const char* name,const char* starclass,
                    const char* desc) : BaseCTarget(name,starclass,desc) {
+	addState(staticBuffering.setState("staticBuffering",this,"YES",
+                        "static buffering is enforced between portholes."));
 	addState(funcName.setState("funcName",this,"main",
                         "function name to be created."));
 	addState(compileCommand.setState("compileCommand",this,"cc",
@@ -47,11 +46,11 @@ CGCTarget::CGCTarget(const char* name,const char* starclass,
 StringList CGCTarget :: sectionComment(const StringList s) {
 	StringList out = "\n/****** ";
 	out += s;
-	out += " ******/\n\n";
+	out += " ******/\n";
 	return out;
 }
 
-StringList CGCTarget::offsetName(CGCPortHole* p) {
+StringList CGCTarget::offsetName(const CGCPortHole* p) {
         StringList out = sanitizedFullName(*p);
         out += "_ix";
         return out;
@@ -65,104 +64,47 @@ void CGCTarget :: headerCode () {
 }
 
 
-int CGCTarget :: galDataStruct(Galaxy& galaxy, int level) {
-    GalTopBlockIter next(galaxy);
-    Block* b;
-    while ((b = next++) != 0) {
-	if(!b->isItAtomic()) {
-	    staticDeclarations += indent(level);
-	    staticDeclarations += "struct {\n";
-	    galDataStruct(b->asGalaxy(), level+1);
-	    staticDeclarations += indent(level);
-	    staticDeclarations += "} ";
-	    staticDeclarations += sanitize(b->readName());
-	    staticDeclarations += ";\n";
-	} else {
-	    CGCStar* s = (CGCStar*) b;
-	    if (!s->amIFork()) starDataStruct(*b, level);
-	}
+int CGCTarget :: galDataStruct(Galaxy& galaxy, int) {
+    GalStarIter next(galaxy);
+    CGCStar* b;
+    while ((b = (CGCStar*) next++) != 0) {
+	if (!b->isItFork()) starDataStruct(b);
     }
     return TRUE;
 }
 
-int CGCTarget :: starDataStruct(Block& block, int level) {
-    int emptyFlag = TRUE;
-    StringList out = indent(level);
-    out += "struct {\n";
+int CGCTarget :: starDataStruct(CGCStar* block, int) {
+    
+    StringList tmp = "Star: ";
+    tmp += block->readFullName();
+
+    StringList out = sectionComment(tmp);
 
     // Start with the PortHoles
-    BlockPortIter nextPort(block);
+    BlockPortIter nextPort(*block);
     CGCPortHole* p;
     while ((p = (CGCPortHole*) nextPort++) != 0) {
-	// Define variables only for each output port, except outputs of forks
-	if (p->isItOutput()) {
-	   	int dimen = ((CGCPortHole*)p)->maxBufReq();
-		out += indent(level+1);
-		out += whichType(p->myType());
-		out += " ";
-		out += sanitizedName(*p);
-		if(dimen > 1) {
-		    out += "[";
-		    out += dimen;
-		    out += "]";
-		}
-		out += ";\n";
-		emptyFlag = FALSE;
-	}
-	// store offsets too.
-	if (p->maxBufReq() > 1) {
-		emptyFlag = FALSE;
-		out += indent(level+1);
-		out += "int ";
-		out += sanitizedName(*p);
-		out += "_ix";		// suffix to indicate the offset.
-		out += ";\n";
-	}
+	out += block->declarePortHole(p);	// declare porthole
+	out += block->declareOffset(p);	// declare offset
     }
 
     // Continue with the referenced state variables
-    StateListIter nextState(((CGCStar&)block).referencedStates);
+    StateListIter nextState(block->referencedStates);
     const State* s;
     while ((s = nextState++) != 0) {
-	out += indent(level+1);
-	out += whichType(s->type());
-	out += " ";
-	out += sanitizedName(*s);
-	if (s->size() > 1) {
-		out += "[";
-		out += s->size();
-		out += "]";
-	}
-	out += ";\n";
-	emptyFlag = FALSE;
+	out += block->declareState(s);	// declare state
 
 	// Initialize the state
-	if (s->size() > 1) {
-		FloatArrayState* fs = (FloatArrayState*) s;
-		for (int i = 0; i < s->size(); i++) {
-			mainInitialization += "    ";
-			mainInitialization += sanitizedFullName(*s);
-			mainInitialization += "[";
-			mainInitialization += i;
-			mainInitialization += "] = ";
-			mainInitialization += (*fs)[i];
-			mainInitialization += ";\n";
-		}
-	} else {
-		mainInitialization += indent(1);
-		mainInitialization += sanitizedFullName(*s);
-		mainInitialization += " = ";
-		mainInitialization += s->getInitValue();
-		mainInitialization += ";\n";
-	}
+	mainInitialization += block->initializeState(s);	
     }
 
-    out += indent(level);
-    out += "} ";
-    out += sanitizedName(block);
-    out += ";\n";
-    if (!emptyFlag) staticDeclarations += out;
+    if (block->emptyFlag == 0) staticDeclarations += out;
     return(TRUE);
+}
+
+void CGCTarget :: start() {
+	galId = 0;
+	CGTarget :: start();
 }
 
 int CGCTarget :: setup (Galaxy& g) {
@@ -177,6 +119,8 @@ int CGCTarget :: setup (Galaxy& g) {
     includeFiles.initialize();
     globalDecls.initialize();
 
+    setStarIndices(g); 
+
     return CGTarget::setup(g);
 }
 
@@ -187,11 +131,7 @@ void CGCTarget :: frameCode () {
     leader += gal->readFullName();
     staticDeclarations += sectionComment(leader);
     staticDeclarations += sectionComment("Data structure declations");
-    staticDeclarations += "struct {\n";
     galDataStruct(*gal,1);
-    staticDeclarations += "} ";
-    staticDeclarations += sanitize(gal->readName());
-    staticDeclarations += ";\n";
 
     // Assemble all the code segments
     StringList runCode = include;
@@ -211,7 +151,6 @@ void CGCTarget :: frameCode () {
 StringList CGCTarget :: generateCode(Galaxy& g) {
 	setup(g);
 	run();
-	myCode +=  indent(1);
 	myCode += "}\n";
 	return myCode;
 }
@@ -386,11 +325,11 @@ int CGCTarget :: allocateMemory(Galaxy& g) {
 	GalStarIter nextStar(g);
 	CGCStar* s;
 	while ((s = (CGCStar*)nextStar++) != 0) {
-		if (s->amIFork()) continue;
+		if (s->isItFork()) continue;
 		BlockPortIter next(*s);
 		CGCPortHole* p;
 		while ((p = (CGCPortHole*) next++) != 0) {
-			p->finalBufSize();
+			p->finalBufSize(useStaticBuffering());
 		}
 	}
 
@@ -401,7 +340,7 @@ void CGCTarget :: setupForkDests(Galaxy& g) {
 	GalStarIter nextStar(g);
 	CGCStar* s;
 	while ((s = (CGCStar*)nextStar++) != 0) {
-		if (!s->amIFork()) continue;
+		if (!s->isItFork()) continue;
 		BlockPortIter next(*s);
 		CGCPortHole* p = (CGCPortHole*) next++;
 		if (p->isItOutput()) p = p->getForkSrc();
@@ -435,7 +374,7 @@ int CGCTarget :: codeGenInit(Galaxy& g) {
 
 	nextStar.reset();
 	while ((s = (CGCStar*) nextStar++) != 0) {
-		if (s->amIFork()) continue;
+		if (s->isItFork()) continue;
 		s->initBufPointer();
 		s->initCode();
 	}
@@ -443,8 +382,19 @@ int CGCTarget :: codeGenInit(Galaxy& g) {
         return TRUE;
 }
 
+StringList CGCTarget :: sanitizedFullName (const NamedObj& obj) const {
+	StringList out;
+	out << 'g' << galId << '_';
+	Star* s = (Star*) obj.parent();
+	out += sanitizedName(*s);
+	out << '_' << s->index() << '_';
+	out += sanitizedName(obj);
+	return out;
+}
+
 const char* whichType(DataType s) {
-	if (strcmp(s, INT) == 0) return "int";
+	if ((strcmp(s, INT) == 0) || (strcmp(s, "INTARRAY") == 0)) 
+		return "int";
 	else if (strcmp(s, "STRING") == 0) return "char*";
 	return "double";
 }
