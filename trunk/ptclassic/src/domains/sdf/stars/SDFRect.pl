@@ -3,7 +3,8 @@ defstar {
 	domain { SDF }
 	desc {
 Generates a rectangular pulse of height "height" (default 1.0).
-with width "width" (default 8).
+and width "width" (default 8).  If "period" is greater than zero,
+then the pulse is repeated with the given period.
 	}
 	version {$Id$}
 	author { J. T. Buck }
@@ -26,6 +27,12 @@ with width "width" (default 8).
 		desc { Width of the rectangular pulse. }
 	}
 	defstate {
+		name { period }
+		type { int }
+		default { 0 }
+		desc { If greater than zero, the period of the pulse stream. }
+	}
+	defstate {
 		name { count }
 		type { int }
 		default { 0 }
@@ -35,8 +42,9 @@ with width "width" (default 8).
 	go {
 		double t = 0.0;
 		if (int(count) < int(width)) t = height;
-		count = int(count) + 1;
 		output%0 << t;
+		count = int(count) + 1;
+		if (int(period) > 0 && int(count) >= int(period)) count = 0;
 	}
 }
 
