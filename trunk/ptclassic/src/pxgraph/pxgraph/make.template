@@ -23,7 +23,7 @@ all:	makefile xgraph
 
 xgraph:	$(OBJS)
 	rm -f xgraph
-	cc $(X11LIBDIR) -o xgraph $(OBJS) $(LXEXT) $(LX11) -lm
+	$(CC) $(X11LIBDIR) -o xgraph $(OBJS) $(LXEXT) $(LX11) -lm
 
 OUT = $(BINDIR)/xgraph
 
