@@ -57,7 +57,7 @@ class ::tycho::ParametricEq {
     itk_option define -to to To 10000
 
     # The stars to control
-    itk_option define -star stars Stars {left right}
+    itk_option define -stars stars Stars {left right}
 
     ###################################################################
     ####                         public methods                    ####
@@ -76,44 +76,43 @@ class ::tycho::ParametricEq {
 #### -from option configuration
 #
 configbody ::tycho::ParametricEq::from {
-    updateRange $itk_option(-from) $itk_option(-to)
+    _range $itk_option(-from) $itk_option(-to)
 }
 
 #######################################################################
 #### -to option configuration
 #
 configbody ::tycho::ParametricEq::to {
-    updateRange $itk_option(-from) $itk_option(-to)
+    _range $itk_option(-from) $itk_option(-to)
 }
 
 #######################################################################
 #### constructor
 #
 body ::tycho::ParametricEq::constructor {args} {
-	# Create the entry boxes for frequency limits
- 	itk_component add entries {
- 	    frame $itk_interior.entries
- 	} {}
- 	pack $itk_component(entries) -side left -anchor nw
-
- 	itk_component add high {
- 	    entry $itk_component(entries).high -width 5
- 	} {}
- 	pack $itk_component(high) -side top
-
- 	itk_component add low {
- 	    entry $itk_component(entries).low -width 5
- 	} {}
- 	pack $itk_component(low) -side top
-
-	# Create the bindings to update the frequency slider ranges
- 	bind $itk_component(high) <Return> \
- 	    "$this configure -to \[$itk_component(high) get\]"
-
- 	bind $itk_component(low) <Return> \
- 	    "$this configure -from \[$itk_component(low) get\]"
-    }
-
+    # Create the entry boxes for frequency limits
+    itk_component add entries {
+        frame $itk_interior.entries
+    } {}
+    pack $itk_component(entries) -side left -anchor nw
+    
+    itk_component add high {
+        entry $itk_component(entries).high -width 5
+    } {}
+    pack $itk_component(high) -side top
+    
+    itk_component add low {
+        entry $itk_component(entries).low -width 5
+    } {}
+    pack $itk_component(low) -side top
+    
+    # Create the bindings to update the frequency slider ranges
+    bind $itk_component(high) <Return> \
+            "$this configure -to \[$itk_component(high) get\]"
+    
+    bind $itk_component(low) <Return> \
+            "$this configure -from \[$itk_component(low) get\]"
+    
     # Create a frame so we can have nice reliefs
     itk_component add frame {
         frame $itk_interior.frame \
@@ -124,24 +123,24 @@ body ::tycho::ParametricEq::constructor {args} {
     
     # Create the bank of sliders for low, mid, and high gain
     foreach {tag init opts} {
-    		freq 100 {-label Freq}
-    		bw 1     {-label BW -from 0.1 -to 4 -resolution 0.1 -digits 1}
-    		gain 0   {-label "Gain" -from -10 -to 10 -resolution 1 -digits 0}
+        freq 100 {-label Freq}
+        bw 1     {-label BW -from 0.1 -to 4 -resolution 0.1 -digits 1}
+        gain 0   {-label "Gain" -from -10 -to 10 -resolution 1 -digits 0}
     } {
-    	itk_component add $tag {
- 	       eval ::tycho::Slider $itk_interior.$tag $opts
-    	} {
-        	keep -cursor -background
-    	}
-    	$itk_component($tag) set $init
-    	pack $itk_component($tag) -side left -in $itk_component(frame)
-	}
-
+        itk_component add $tag {
+            eval ::tycho::Slider $itk_interior.$tag $opts
+        } {
+            keep -cursor -background
+        }
+        $itk_component($tag) set $init
+        pack $itk_component($tag) -side left -in $itk_component(frame)
+    }
+    
     # Initialise options.
     eval itk_initialize $args
-
-	# Call method to update frequency slider
-	_range $itk_option(-from) $itk_option(-to)
+    
+    # Call method to update frequency slider
+    _range $itk_option(-from) $itk_option(-to)
 }
 
 ######################################################################
@@ -150,9 +149,46 @@ body ::tycho::ParametricEq::constructor {args} {
 # Make the connection to the stars given by *-stars*.
 #
 body ::tycho::ParametricEq::requestConnect {} {
-	foreach star $itk_option(-stars) {
-		connect freq $star.freq
-		connect bw   $star.bw
-		connect gain $star.gain
-	}
+    foreach star $itk_option(-stars) {
+        connect freq $star.freq
+        connect bw   $star.bw   10.0
+        connect gain $star.gain 10.0
+    }
 }
+
+#####################################################################
+#### _range 
+# Update the widget for a new frequency range
+#
+# FIXME: Really want a logarithmic frequency scale.
+#
+body ::tycho::ParametricEq::_range {from to} {
+    set resolution [expr ($to - $from) / 100]
+    set resolution [::tycho::axisRoundUp $resolution]
+    if { $resolution < 1 } {
+        set digits [llength [lindex [split $resolution "."] 1]]
+    } else {
+        set digits 0
+    }
+
+    # Adjust the range to within limits. This _should_
+    # change the number of digits, but noone will notice...
+    set from [::tycho::roundTo $from $resolution]
+    set to   [::tycho::roundTo $to   $resolution]
+
+    set itk_option(-from) $from
+    set itk_option(-to)   $to
+
+    $itk_component(low) delete 0 end
+    $itk_component(low) insert 0 [format %.${digits}f $from]
+
+    $itk_component(high) delete 0 end
+    $itk_component(high) insert 0 [format %.${digits}f $to]
+
+    $itk_component(freq) configure \
+            -from $from \
+            -to $to \
+            -resolution $resolution \
+            -digits $digits
+}
+

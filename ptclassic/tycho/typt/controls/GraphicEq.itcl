@@ -32,15 +32,15 @@
 
 
 #######################################################################
-#### ParametricEq
-# A small panel that contains ten sliders for parametric
+#### GraphicEq
+# A small panel that contains ten sliders for graphic
 # equalisation. The names of the stars controlled can be set by the
 # *-stars* option -- each entry in this list is the prefix of a
 # set of star names, where the rest of the names are in the list
 # *{31 63 125 250 500 1k 2k 4k 8k 16k}*. This must be set before
 # calling the control panel add{} method. The default is *{left right}*.
 #
-class ::tycho::ParametricEq {
+class ::tycho::GraphicEq {
     inherit ::tycho::ControlSubpanel
 
     constructor {args} {}
@@ -50,7 +50,7 @@ class ::tycho::ParametricEq {
     ####                            options                       ####
 
     # The prefix of the stars to control
-    itk_option define -star stars Stars {left right}
+    itk_option define -stars stars Stars {left right}
 
     ###################################################################
     ####                         public methods                    ####
@@ -62,7 +62,7 @@ class ::tycho::ParametricEq {
 #######################################################################
 #### constructor
 #
-body ::tycho::ParametricEq::constructor {args} {
+body ::tycho::GraphicEq::constructor {args} {
     # Create a frame so we can have nice reliefs
     itk_component add frame {
         frame $itk_interior.frame \
@@ -73,18 +73,19 @@ body ::tycho::ParametricEq::constructor {args} {
     
     # Create the sliders for each band
     foreach {freq} {31 63 125 250 500 1k 2k 4k 8k 16k} {
-    	itk_component add $freq {
- 	      	eval ::tycho::Slider $itk_interior.$tag \
- 	      		-label $freq \
- 	    		-from -10 \
- 	    		-to 10 \
- 	    		-resolution 1 \
- 	    		-digits 0
-    	} {
-        	keep -cursor -background
+        itk_component add $freq {
+            eval ::tycho::Slider $itk_interior.$freq \
+                    -label $freq \
+                    -from -10 \
+                    -to 10 \
+                    -resolution 1 \
+                    -digits 0
+        } {
+            keep -cursor -background
     	}
-    	pack $itk_component($freq) -side left -in $itk_component(frame)
-	}
+        $itk_component($freq) set 0
+        pack $itk_component($freq) -side left -in $itk_component(frame)
+    }
     # Initialise options.
     eval itk_initialize $args
 }
@@ -94,10 +95,10 @@ body ::tycho::ParametricEq::constructor {args} {
 #
 # Make the connection to the stars with prefixes given by *-stars*.
 #
-body ::tycho::ParametricEq::requestConnect {} {
-	foreach star $itk_option(-stars) {
-		foreach freq {31 63 125 250 500 1k 2k 4k 8k 16k} {
-	    	connect $freq star$freq gain
-		}
-	}
+body ::tycho::GraphicEq::requestConnect {} {
+    foreach star $itk_option(-stars) {
+        foreach {freq} {31 63 125 250 500 1k 2k 4k 8k 16k} {
+            connect $freq $star$freq.gain 10.0
+        }
+    }
 }
