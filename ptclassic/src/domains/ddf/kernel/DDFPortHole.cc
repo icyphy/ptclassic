@@ -44,7 +44,7 @@ Code for DDF-type portholes and multiportholes.
 
 **************************************************************************/
 
-int DDFPortHole :: moveData() {}
+int DDFPortHole :: moveData() { return 0;}
 
 int InDDFPort :: isItInput () const { return TRUE;}
 
