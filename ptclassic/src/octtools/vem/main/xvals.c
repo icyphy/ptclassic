@@ -95,6 +95,7 @@ Display *xv_disp()
 	errRaise(xv_pkg_name, XV_NOT_SET, "Display value not set");
 	/*NOTREACHED*/
     }
+    return (Display *)0;
 }
 
 
@@ -124,6 +125,7 @@ int xv_scrn()
 	errRaise(xv_pkg_name, XV_NOT_SET, "Screen value not set");
 	/*NOTREACHED*/
     }
+    return 0;
 }
 
 
@@ -153,6 +155,7 @@ Visual *xv_vis()
 	errRaise(xv_pkg_name, XV_NOT_SET, "Screen value not set");
 	/*NOTREACHED*/
     }
+    return (Visual*)0;
 }
 
 
@@ -182,6 +185,7 @@ Colormap xv_cmap()
 	errRaise(xv_pkg_name, XV_NOT_SET, "Colormap value not set");
 	/*NOTREACHED*/
     }
+    return (Colormap)0;
 }
 
 
@@ -210,6 +214,7 @@ Drawable xv_drw()
 	errRaise(xv_pkg_name, XV_NOT_SET, "Drawable value not set");
 	/*NOTREACHED*/
     }
+    return (Drawable)0;
 }
 
 
@@ -238,6 +243,7 @@ int xv_depth()
 	errRaise(xv_pkg_name, XV_NOT_SET, "Depth value not set");
 	/*NOTREACHED*/
     }
+    return 0;
 }
 
 
@@ -267,4 +273,5 @@ Widget xv_topw()
 	errRaise(xv_pkg_name, XV_NOT_SET, "Top level widget not set");
 	/*NOTREACHED*/
     }
+    return (Widget)0;
 }
