@@ -3,7 +3,7 @@ defstar {
 	derivedFrom { Xgraph }
 	domain { CGC }
 	desc {
-Generates an X-Y plot with the xgraph program.
+Generates an X-Y plot with the pxgraph program.
 The X data is on "xInput" and the Y data is on "input".
 	}
 	version {$Id$}
@@ -16,12 +16,12 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CGC main library }
 	explanation {
-The input signal is plotted using the \fIxgraph\fR program, with one
+The input signal is plotted using the \fIpxgraph\fR program, with one
 input interpreted as the x-axis data, and the other input as y-axis data.
 .Id "graph, X-Y"
-.Ir "xgraph program"
+.Ir "pxgraph program"
 	}
-	seealso {Xgraph XMgraph xgraph Xhistogram}
+	seealso {Xgraph XMgraph pxgraph Xhistogram}
 	input {
 		name { xInput }
 		type { anytype }
