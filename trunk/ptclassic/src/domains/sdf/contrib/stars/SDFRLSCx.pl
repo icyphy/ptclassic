@@ -7,13 +7,15 @@ Note that the internal tap weight vector is the complex conjugate
 of the true tap weights when used in an ordinary FIR filter. We
 account for that in the initialization and the wrapup file saving.
         }
-	version {@(#)SDFRLSCx.pl	1.0 9/24/96}
-	author { U. Trautwein , A. Richter}
+	version { $Id$ }
+	author { U. Trautwein and A. Richter }
 	copyright {
-Copyright (c) 1996 Technical University of Ilmenau.
+Copyright (c) 1996-1997 Technical University of Ilmenau.
 All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { SDF main library }
+	location { SDF contribution library }
 	input {
 		name {input}
 		type {complex}

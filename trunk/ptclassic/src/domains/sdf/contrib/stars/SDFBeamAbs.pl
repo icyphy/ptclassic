@@ -1,17 +1,19 @@
 defstar {
 	name {BeamAbs}
 	domain {SDF}
-	version {@(#)SDFBeamAbs.pl	1.8 3/2/95}
+	version { $Id$ }
 	desc {
 Outputs the magnitude of the antenna array beam pattern with respect to the 
 antenna positions and the actual steering vector.
 	}
-	author { A. Richter, U. Trautwein }
+	author { A. Richter and U. Trautwein }
 	copyright {
-Copyright (c) 1996 Technical University of Ilmenau.
+Copyright (c) 1996-1997 Technical University of Ilmenau.
 All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { SDF main library }
+	location { SDF contribution library }
 	explanation {
 	}
 	ccinclude { "ComplexSubset.h" }

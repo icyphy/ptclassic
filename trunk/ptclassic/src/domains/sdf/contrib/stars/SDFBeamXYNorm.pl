@@ -1,18 +1,20 @@
 defstar {
 	name {BeamXYNorm}
 	domain {SDF}
-	version {@(#)SDFBeamXYNorm.pl	1.0 9/1/96}
+	version { $Id$ }
 	desc {
 Outputs the magnitude of the antenna array beam pattern with respect to the
 antenna positions and the actual steering vector. The output is in polar
 coordinates suitable for display with the TkXYPlot Star.
 	}
-	author { A. Richter, U. Trautwein }
+	author { A. Richter and U. Trautwein }
 	copyright {
-Copyright (c) 1996 Technical University of Ilmenau.
+Copyright (c) 1996-1997 Technical University of Ilmenau.
 All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { SDF main library }
+	location { SDF contribution library }
 	explanation {
 	}
 	ccinclude { "ComplexSubset.h" }
