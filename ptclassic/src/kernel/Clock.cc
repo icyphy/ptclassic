@@ -81,11 +81,12 @@ TimeVal Clock::elapsedTime() const
 int Clock::sleepUntil(const TimeVal& time) const
 {
     TimeVal elapsed = elapsedTime();
-    if (time > elapsed)	// Sleep only if not running late.
+    if (time < elapsed) return FALSE;	// Sleep only if not running late.
+    while (time > elapsed)		// select() could return early.
     {
 	TimeVal delay = time - elapsed;
 	select(0, NULL, NULL, NULL, &delay);
-	return TRUE;
+	elapsed = elapsedTime();
     }
-    else return FALSE;
+    return TRUE;
 }
