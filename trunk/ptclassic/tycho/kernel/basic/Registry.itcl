@@ -132,6 +132,12 @@ ensemble ::tycho::deregister {
 # See <a href="Registry.html#registerProtocol proc of ::tycho::Registry class">
 # ::tycho::Registry::registerProtocol</a>.
 #
+# <dt><b>stylesheet</b> _stylename_ _filename_
+# <dd>
+# Register a new stylesheet. The _stylename_ is the name of the
+# style that will be registered, and _filename_ is a file containing
+# the stylesheet model.
+#
 # <dt><b>window</b> _window_ _tag_ ?_option value_ ...?
 # <dd>
 # Register a viewer widget.
@@ -168,6 +174,9 @@ ensemble ::tycho::register {
     }
     option protocol {protocol args} {
 	eval ::tycho::Registry::registerProtocol $protocol $args
+    }
+    option stylesheet {stylename basefile userfile} {
+	::tycho::stylesheet register $stylename $basefile $userfile
     }
     option window {window tag args } {
 	eval [list ::tycho::Registry::registerWindow $window $tag] $args
