@@ -75,6 +75,11 @@ limitation of liability, and disclaimer of warranty provisions.
       attributes { A_GLOBAL }
     }	  
 
+    protected {
+	int standardIO:1;
+    }
+
+
     codeblock(declarations, "const char* datatype, int size") {
       @datatype $starSymbol(buffer)[@size];
       @datatype *$starSymbol(bufferptr);
@@ -82,6 +87,11 @@ limitation of liability, and disclaimer of warranty provisions.
 
     codeblock(globals) {
       int $starSymbol(file);
+    }
+
+    codeblock(noOpen) {
+	/* Use standard input for reading. */
+	$starSymbol(file) = 0;
     }
 
     codeblock(openFileForReading) {
