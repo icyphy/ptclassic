@@ -77,3 +77,8 @@ void Scheduler :: compileRun() {
 	Error :: abortRun ("This scheduler doesn't know how to compile.");
 }
 
+// isa
+int Scheduler :: isA(const char* cname) const
+{
+        return (strcmp(cname,"Scheduler") == 0);
+}
