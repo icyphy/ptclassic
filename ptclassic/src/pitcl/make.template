@@ -25,10 +25,10 @@ include $(CONFIG)
 
 # The following variables will eventually be in the config file
 # Directory containing Tcl/Tk include files
-TCL_H_DIR=/usr/tools/tcl/tcl/lib
+TCL_H_DIR=/usr/tools/tcl/include
 
 # Directory containing Tcl/Tk libraries
-TCL_LIBDIR=/usr/tools/tcl/tcl/lib
+TCL_LIBDIR=/usr/tools/tcl/lib
 
 INCL=-I$(KERNDIR) -I$(TCL_H_DIR)
 # Rule for compiling C++ programs
