@@ -109,10 +109,6 @@ public:
 	// If Spread, redefine to return -1, if Collect, return 1, otherwise 0.
 	virtual int amISpreadCollect() {return 0; }
 
-	// include a module from the Ptolemy DSP library
-	void addModuleFromLibrary(const char* basename,
-		const char* subdirectory, const char* libraryname);
-
 protected:
 	// main routine.
 	int runIt();
@@ -197,6 +193,10 @@ protected:
 
 	// construct symbolic precision for state or port with given name
 	Precision newSymbolicPrecision(int length,int intBits, const char* name);
+
+	// include a module from a C library in the Ptolemy tree
+	void addModuleFromLibrary(const char* basename,
+		const char* subdirectory, const char* libraryname);
 
 	// add the fixed-point supporting routines
 	void addFixedPointSupport();
