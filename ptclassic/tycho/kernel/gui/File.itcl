@@ -1284,7 +1284,7 @@ body ::tycho::File::openContext {filename {mode {}}} {
 #
 # The optional argument is the name of the widget that this proc
 # is being invoked from.  Usually, openWin is called from a
-# keystroke binding, and the megaeidget argument is %W.  See
+# keystroke binding, and the megawidget argument is %W.  See
 # TopLevel for an example. (Note: do not use %Q as the argument:
 # Itk puts in a "???" if the binding is matched by a
 # megawidget hull instead of one of its components.)
