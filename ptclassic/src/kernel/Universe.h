@@ -7,9 +7,10 @@
 /*******************************************************************
 	The generic Universe class.
 
-	A Universe contains a Galaxy and a Scheduler.
-	From the outside, it looks like a Star with no PortHoles.
-
+	A Universe is a Galaxy with a Scheduler.
+	From the outside, it looks like a Galaxy with no PortHoles.
+	(note that the portlist is still there because WormHoles,
+	 inherited from Universe, can have PortHoles.
 ********************************************************************/
 
 	//////////////////////////////
@@ -21,16 +22,19 @@
 #include "Scheduler.h"
 #include "StringList.h"
 
-class Universe : public Star {
+class Universe : virtual public Galaxy {
 public:
 	// generate the schedule and/or initialize scheduler
-	void initialize() {scheduler->setup(*myTopology);}
+	void initialize() {
+		initState();
+		scheduler->setup(*this);
+	}
 
 	// run the simulation
-	void go() {scheduler->run(*myTopology);}
+	void go() {scheduler->run(*this);}
 
 	// wrap up the simulation
-	void wrapup() {scheduler->wrapup(*myTopology);}
+	void wrapup() {scheduler->wrapup(*this);}
 
 	// set the stopping condition.  A hack.
 	void setStopTime(float limit) {scheduler->setStopTime(limit);}
@@ -43,22 +47,17 @@ public:
 	StringList displaySchedule() {return scheduler->displaySchedule();}
 
 	// constructor
-	Universe(Scheduler* s,const char* typeDesc, Galaxy* g) :
-		scheduler(s), type(typeDesc), myTopology(g) {}
+	Universe(Scheduler* s,const char* typeDesc) :
+		scheduler(s), type(typeDesc) {}
 
-	// destructor.  Note that myTopology is NOT destroyed and
-	// that scheduler is.  This is arbitrary but works with our
-	// current setup.
+	// destructor.  Destroys scheduler.
 	virtual ~Universe() { delete scheduler;}
 protected:
 	// print, possibly recursively
 	StringList print(int recursive);
-	// This should be called only once, with a reference to
-	// the component galaxy specified.
-	void addBlock(Block& g) {myTopology = (Galaxy*)&g;}
-private:
-	Scheduler* scheduler;
-	Galaxy* myTopology;
+
 	const char* type;
+
+	Scheduler* scheduler;
 };
 #endif

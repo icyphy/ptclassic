@@ -20,8 +20,8 @@ Universe :: print (int recursive) {
 	out += "CONTENTS:\n";
 
 	if (recursive)
-		out += myTopology->printRecursive();
+		out += Galaxy::printRecursive();
 	else
-		out += myTopology->printVerbose();
+		out += Galaxy::printVerbose();
 	return out;
 }
