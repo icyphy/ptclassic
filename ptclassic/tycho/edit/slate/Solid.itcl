@@ -93,6 +93,11 @@ class ::tycho::Solid {
 
     common colorObject
 
+    #### Set option defaults
+    set optiondefault(-color)       background
+    set optiondefault(-borderwidth) 2
+    set optiondefault(-relief)      raised
+
     ###################################################################
     ####                        private procs                      ####
 
@@ -174,9 +179,7 @@ body ::tycho::Solid::construct {id tags canvas args} {
     getalloptions options args
 
     # Initialize the options
-    set defaultoptions {-color background -borderwidth 2 -relief raised}
-
-    foreach {option value} [concat $defaultoptions $options] {
+    foreach {option value} [concat [array get optiondefault] $options] {
 	set [string trimleft $option -]($id) $value
     }
 
