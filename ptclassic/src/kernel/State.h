@@ -241,6 +241,7 @@ public:
 	NamedObjList::size;
 	NamedObjList::initElements;
 	NamedObjList::deleteAll;
+        NamedObjList::initialize;
 };
 
 ///////////////////////////////////////////
