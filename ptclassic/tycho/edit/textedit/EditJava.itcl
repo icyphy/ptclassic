@@ -121,6 +121,9 @@ body ::tycho::EditJava::constructor {args} {
     set fillPrefix "//"
     menubar addMenu Special left {} -underline 0
 
+    menubar addMenuItem "Appletviewer" Special -underline 0 \
+            -command "$this execProcess appletviewer"
+
     menubar addMenuItem "Generate doc" Special -underline 0 \
             -command "$this gendoc"
 
