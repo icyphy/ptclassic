@@ -1,7 +1,6 @@
 #ifndef _SDFWormhole_h
 #define _SDFWormhole_h 1
 #ifdef __GNUG__
-#pragma once
 #pragma interface
 #endif
 
