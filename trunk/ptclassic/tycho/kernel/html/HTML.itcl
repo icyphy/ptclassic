@@ -870,8 +870,9 @@ body ::tycho::HTML::insertDirectoryContents {dirname} {
     # so that we can align the text properly.
     set spaceString "                   "
 
-    set dirFiles [lsort \
-            [::tycho::resource dirlist [::tycho::url join $dirname *]]]
+    # Don't need to add [tycho::url join $dirname *], the "*" is implied.
+    set dirFiles [lsort [::tycho::resource dirlist $dirname]]
+
     foreach dirFile $dirFiles {
         # If the filename is over 20 chars long, truncate it and add ...
         set shortName [::tycho::url tail $dirFile]
