@@ -138,6 +138,12 @@ class ::tycho::EdgeController {
     # Set if we are currently moving
     protected variable _moving 0
 
+    # The previous x
+    protected variable _prevx
+
+    # The previous y
+    protected variable _prevy
+
     # The interactor to split edges
     protected variable _splitter
 
@@ -455,6 +461,10 @@ body ::tycho::EdgeController::release {args} {
 	# subscriber to the graph
 	$graph notify event "modified"
     }
+    # FIXME FIXME: Force the edge to be "dirty", just so that
+    # saving works properly
+    $layout publish reshape $_edgename 0 0 end
+
     _cleanup
 
     # Finally, if we get to here then the edge has moved, even
