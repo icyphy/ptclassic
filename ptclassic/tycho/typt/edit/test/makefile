@@ -41,15 +41,21 @@ include $(CONFIG)
 
 SIMPLE_TESTS =
 GRAPHICAL_TESTS = \
-	testRetarget.itcl
+	testEditPtcl.itcl \
+	testEditPtlang.itcl
 
 ITCL_SRCS = \
 	$(SIMPLE_TESTS) $(GRAPHICAL_TESTS) \
-	alltests.itcl all.itcl
+	alltests.itcl all.itcl \
+	testRetarget.itcl
 
 EXTRA_SRCS =	$(ITCL_SRCS)
 
-MISC_FILES =	
+MISC_FILES = \
+	SDFMyRamp.pl
+
+OPTIONAL_FILES = \
+	SDFMyRamp.htm
 
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =
@@ -58,12 +64,12 @@ tests:: test_graphics
 
 # These tests do not require a graphics terminal
 test_simple: $(TCL_SRCS) $(ITCL_SRCS)
-	echo "foreach i [list $(SIMPLE_TESTS)] {puts \$$i; source \$$i}" | \
-		$(ITCLSH)
+	tytestsh $(SIMPLE_TESTS)
 
 # These tests require a graphics terminal
 test_graphics: alltests.itcl all.itcl $(TCL_SRCS) $(ITCL_SRCS)
-	tycho -ptiny -noconsole -e alltests.itcl
+	tytest $(GRAPHICAL_TESTS)
+	tycho -pigi -e testRetarget.itcl
 
 # We don't include common.mk since we don't use the compiler here
 include $(ROOT)/mk/no-compile.mk
