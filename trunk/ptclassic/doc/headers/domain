@@ -123,7 +123,7 @@ delim off
 .eh '''\\n(AS-%'
 .oh '''\\n(AS-%'
 .bp
-.eh '\\f\\n(HX\\$1''\\n(AS-%'
+.eh '\\f\\n(HXUC Berkeley, EECS''\\n(AS-%'
 .oh '\\f\\n(HX\\$1''\\n(AS-%'
 .nr S1 0 1 \" Initialize number register for major section numbers
 .nr SN +1 \" Increment section number
