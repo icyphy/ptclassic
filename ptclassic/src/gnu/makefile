@@ -65,6 +65,7 @@ all: configure bin install
 
 MACH=`$(GNU_SRC)/gcc/config.guess`
 
+SHAREDLIB_CONFIGURE_FLAGS = --enable-shared
 # Minor fixes to the configure procedure.  These changes
 # are necessary if you are using SunOS make.  If you already have
 # GNU make, then these changes are not necessary, but they won't
@@ -72,25 +73,29 @@ MACH=`$(GNU_SRC)/gcc/config.guess`
 configure: $(GNU_OBJ)
 	(cd $(GNU_OBJ); \
 	$(GNU_SRC)/configure -v --srcdir=$(GNU_SRC) \
-		--prefix=$(GNU_PREFIX) --exec-prefix=$(GNU_EXEC_PREFIX) )
+		--prefix=$(GNU_PREFIX) --exec-prefix=$(GNU_EXEC_PREFIX) \
+		$(SHAREDLIB_CONFIGURE_FLAGS))
 	@echo "Now reconfiguring gcc directory so we set up gcc/cp right."
 	rm -rf $(GNU_OBJ)/gcc
 	mkdir $(GNU_OBJ)/gcc
 	(cd $(GNU_OBJ)/gcc; \
 	$(GNU_SRC)/gcc/configure --srcdir=$(GNU_SRC)/gcc \
-		--prefix=$(GNU_PREFIX) --exec-prefix=$(GNU_EXEC_PREFIX) )
-
+		--prefix=$(GNU_PREFIX) --exec-prefix=$(GNU_EXEC_PREFIX) \
+		$(SHAREDLIB_CONFIGURE_FLAGS))
 	-(cd $(GNU_OBJ)/make; ln -s $(GNU_SRC)/make/*.c .)
 	-(cd $(GNU_OBJ)/make/glob; ln -s $(GNU_SRC)/make/glob/*.h .)
 	-(cd $(GNU_OBJ)/make/glob; ln -s $(GNU_SRC)/make/glob/*.c .)
-	-(cd $(GNU_OBJ)/libio; ln -s $(GNU_SRC)/libio/*.c* .)
+	# libio is not present in libg++-2.7.1
+	#-(cd $(GNU_OBJ)/libio; ln -s $(GNU_SRC)/libio/*.c* .)
 	-(cd $(GNU_OBJ)/libiberty; ln -s $(GNU_SRC)/libiberty/*.c* .)
 	-(cd $(GNU_OBJ)/gcc; ln -s $(GNU_SRC)/gcc/*.c .)
 	# Don't link the .h files, or cp/call.c won't compile
 	#-(cd $(GNU_OBJ)/gcc; ln -s $(GNU_SRC)/gcc/*.h .)
-	-(cd $(GNU_OBJ)/libg++/src; ln -s $(GNU_SRC)/libg++/src/*.c* .)
-	-(cd $(GNU_OBJ)/libg++/src; ln -s $(GNU_SRC)/libg++/src/*.h .)
-	-(cd $(GNU_OBJ)/libg++/gperf/src; ln -s $(GNU_SRC)/libg++/gperf/src/*.c* .)
+	#
+	# Looks like we need not make these links either in libg++-2.7.1
+	#-(cd $(GNU_OBJ)/libg++/src; ln -s $(GNU_SRC)/libg++/src/*.c* .)
+	#-(cd $(GNU_OBJ)/libg++/src; ln -s $(GNU_SRC)/libg++/src/*.h .)
+	#-(cd $(GNU_OBJ)/libg++/gperf/src; ln -s $(GNU_SRC)/libg++/gperf/src/*.c* .)
 	-mkdir $(GNU_OBJ)/gcc/objc
 	-(cd $(GNU_OBJ)/gcc/objc; ln -s $(GNU_SRC)/gcc/objc/*.c .)
 	-(cd $(GNU_OBJ)/gcc/objc; ln -s $(GNU_SRC)/gcc/objc/*.h .)
@@ -98,9 +103,11 @@ configure: $(GNU_OBJ)
 	-(cd $(GNU_OBJ)/gcc/cp; ln -s $(GNU_SRC)/gcc/cp/*.c .)
 	# gcc-2.7.0 needs this for make bootstrap
 	-(cd $(GNU_OBJ)/gcc/cp; ln -s $(GNU_SRC)/gcc/cp/*.h .)
-	-(cd $(GNU_OBJ)/librx; ln -s $(GNU_SRC)/librx/*.c .)
+	# In libg++-2.7.1, librx is not standalone
+	#-(cd $(GNU_OBJ)/librx; ln -s $(GNU_SRC)/librx/*.c .)
 	-(cd $(GNU_OBJ)/libstdc++; ln -s $(GNU_SRC)/libstdc++/*.cc .)
-	-(cd $(GNU_OBJ)/libstdc++/stl; ln -s $(GNU_SRC)/libstdc++/stl/*.cc .)
+	# No longer necessary in libg++-2.7.1
+	#-(cd $(GNU_OBJ)/libstdc++/stl; ln -s $(GNU_SRC)/libstdc++/stl/*.cc .)
 
 
 $(GNU_OBJ): $(OBJ_DIR) 
@@ -117,15 +124,28 @@ GMAKE= `if [ -f $(GNU_OBJ)/make/make ]; \
 	 else echo make; fi`
 
 
+# libg++-2.7.1 is supposed to be able to build shared libraries for
+# libstdc++ out of the box.  It can't.  The problem is that libiberty is
+# getting compiled with cc, before gcc is compiled.  Then when we try to
+# build libstdc++, we use the libiberty files that were built with cc,
+# which results in missing symbols when we try to create libstdc++.so
+#
+# So we build gcc first, then clean out libiberty and then rebuild
 bin:
-	echo $$PATH
-	(cd $(GNU_OBJ); $(MAKE) $(MFLAGS) CC="$(CC)" MAKE=$(GMAKE) )
+	@echo $$PATH
 	#	(cd $(GNU_OBJ); $(MAKE) $(MFLAGS) CC="$(CC)" MAKE=$(GMAKE) )
+	@echo "Build gcc first, so we can build shared libiberty.so"
+	(cd $(GNU_OBJ); $(MAKE) $(MFLAGS) CC="$(CC)" MAKE=$(GMAKE) all-gcc)
+	@echo "Cleaning libiberty"
+	(cd $(GNU_OBJ)/libiberty; $(MAKE) clean)
+	@echo "Building libiberty and g++"
+	(cd $(GNU_OBJ); $(MAKE) $(MFLAGS) CC=$(GNU_OBJ)/gcc/xgcc MAKE=$(GMAKE))
 
 $(BINDIR):
 	mkdir $(BINDIR)
 install: $(BINDIR) 
-	(cd $(GNU_OBJ); $(MAKE) CC="$(CC)" MAKEINFO="$(MAKEINFO)" install)
+	#(cd $(GNU_OBJ); $(MAKE) CC="$(CC)" MAKEINFO="$(MAKEINFO)" install)
+	(cd $(GNU_OBJ); $(MAKE) CC=$(GNU_OBJ)/gnu/gcc MAKEINFO="$(MAKEINFO)" install)
 	-(cd $(BINDIR); ln -s $(REL_GNU_BINDIR)/* .)
 	-(cd $(BINDIR); rm -f gperf unprotoize protoize hp* dec* c++ make.old)
 
