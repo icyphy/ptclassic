@@ -43,10 +43,11 @@ RANLIB =	ranlib
 CC =		gcc
 
 OPTIMIZER =	-O2
-#-Wsynth is new in g++-2.6.x
-WARNINGS =	-Wall -Wcast-qual -Wsynth
+# -Wsynth is new in g++-2.6.x
+# Under gxx-2.7.0 -Wcast-qual will drown you with warnings from libg++ includes
+WARNINGS =	-Wall -Wsynth #-Wcast-qual 
 # Under gcc-2.7.0, you will need -fno-for-scope for GPPFLAGS
-GPPFLAGS =	-g $(MEMLOG) $(WARNINGS) $(OPTIMIZER)
+GPPFLAGS =	-g $(MEMLOG) $(WARNINGS) $(OPTIMIZER) -fno-for-scope
 # If you are not using gcc, then you might have problems with the WARNINGS flag
 CFLAGS =	-g $(MEMLOG) $(WARNINGS) $(OPTIMIZER)
 

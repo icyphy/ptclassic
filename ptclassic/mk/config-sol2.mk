@@ -64,12 +64,13 @@ CC =		gcc
 #endif
 
 OPTIMIZER =	-O2
-#-Wsynth is new in g++-2.6.x
-WARNINGS =	-Wall -Wcast-qual -Wsynth
+# -Wsynth is new in g++-2.6.x
+# Under gxx-2.7.0 -Wcast-qual will drown you with warnings from libg++ includes
+WARNINGS =	-Wall -Wsynth #-Wcast-qual 
 MULTITHREAD =	-D_REENTRANT
 # Define PTSOL2_4 if you are on Solaris2_4
-LOCALFLAGS =	-DPTSOL2_4 -pipe
 # Under gcc-2.7.0, you will need -fno-for-scope for GPPFLAGS
+LOCALFLAGS =	-DPTSOL2_4 -pipe -fno-for-scope
 GPPFLAGS =	-g $(MEMLOG) $(WARNINGS) $(OPTIMIZER) $(MULTITHREAD) $(LOCALFLAGS)
 # If you are not using gcc, then you might have problems with the WARNINGS flag
 CFLAGS =	-g $(MEMLOG) $(WARNINGS) $(OPTIMIZER) $(MULTITHREAD) $(LOCALFLAGS)
