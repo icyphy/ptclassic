@@ -68,7 +68,9 @@ namespace ::tycho {
     ::tycho::File::registerEditor {} ::tycho::Edit {Plain text editor}
     ::tycho::File::registerEditor {.sched .c .y} ::tycho::EditC {C editor}
     ::tycho::File::registerEditor {.C .cc .h .H} ::tycho::EditCpp {C++ editor}
+    ::tycho::File::registerEditor {.dag} ::tycho::EditDAG {DAG editor}
     ::tycho::File::registerEditor {.strl} ::tycho::EditEsterel {Esterel editor}
+    ::tycho::File::registerEditor {.fst} ::tycho::EditForest {Forest editor}
     ::tycho::File::registerEditor {} ::tycho::EditHTML {HTML editor}
     ::tycho::File::registerEditor {.itcl .itk} ::tycho::EditItcl {Itcl editor}
     ::tycho::File::registerEditor .tcl ::tycho::EditTcl {Tcl editor}
