@@ -74,9 +74,6 @@ class ::tycho::EditMake {
     # Initialize the menu/status/tool bars
     protected method initialize {{menubar {}} {statusbar {}} {toolbar {}}}
 
-    # Access the "editmake" preferences
-    protected method preference {mode args}
-
     ###################################################################
     ####                      private methods                      ####
 
@@ -211,13 +208,13 @@ body ::tycho::EditMake::parseNow {start stop} {
     
     # Set the visual characteristics of the tagged text
     $text tag configure rule -foreground \
-	    [preference get ruleColor]
+	    [stylesheet get makefile ruleColor]
     $text tag configure include -foreground \
-	    [preference get includeColor]
+	    [stylesheet get makefile includeColor]
     $text tag configure variable -foreground \
-	    [preference get variableColor]
+	    [stylesheet get makefile variableColor]
     $text tag configure refvar -foreground \
-	    [preference get refvarColor]
+	    [stylesheet get makefile refvarColor]
 
     $text tag lower rule comment
     $text tag lower include comment
@@ -318,16 +315,6 @@ body ::tycho::EditMake::initialize {{menubar {}} {statusbar {}} {toolbar {}}} {
         # method because Itcl (2.2) has virtual private methods!
         ::tycho::EditMake::initializeMenubar $menubar
     }
-}
-
-#####################################################################
-#### preference
-# Access the preferences associated with this widget. This method
-# overrides the default method in ::tycho::TWidget to access the
-# "editmake" preferences.
-#
-body ::tycho::EditMake::preference {mode args} {
-    eval ::tycho::preference $mode "editmake" $args
 }
 
 #########################################################################

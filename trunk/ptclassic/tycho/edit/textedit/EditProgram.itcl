@@ -213,16 +213,16 @@ body ::tycho::EditProgram::constructor {args} {
     
     eval itk_initialize $args
 
-    # Subscribe to the preference set
-    preference subscribeoptions $this \
-	    -stringcolor stringColor \
-	    -commentcolor commentColor \
-	    -fixmecolor fixmeColor \
-	    -keywordcolor keywordColor \
-	    -classcolor classColor \
-	    -methodcolor methodColor \
-	    -variablecolor variableColor \
-	    -proccolor procColor
+    # Subscribe to the style parameters
+    stylesheet subscribe \
+	    -stringcolor   editcolors stringColor \
+	    -commentcolor  editcolors commentColor \
+	    -fixmecolor    editcolors fixmeColor \
+	    -keywordcolor  editcolors keywordColor \
+	    -classcolor    editcolors classColor \
+	    -methodcolor   editcolors methodColor \
+	    -variablecolor editcolors variableColor \
+	    -proccolor     editcolors procColor
 
     # The default fill prefix works for Tcl and shell scripts.
     set fillPrefix "#"

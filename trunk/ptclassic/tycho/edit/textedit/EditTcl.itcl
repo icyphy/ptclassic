@@ -283,7 +283,7 @@ body ::tycho::EditTcl::tagLinks {} {
 		set stop "$next +[lindex $key 1] char +1 char"
 		$text tag add hyperlink$hypcount $start $stop
 		$text tag configure hyperlink$hypcount \
-			-foreground [preference get procColor]
+			-foreground [stylesheet get editcolors procColor]
 		$text tag configure hyperlink$hypcount \
 			-underline 1
 		

@@ -187,7 +187,7 @@ body ::tycho::EditPtlang::parseNow {start stop} {
     }
 
     $text tag configure ptkeyword -foreground \
-	    [preference get ptlangKeywordColor]
+	    [stylesheet get editcolors ptlangKeywordColor]
 
     # To get C++ parsing
     EditCpp::parseNow $start $stop

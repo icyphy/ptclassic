@@ -106,9 +106,6 @@ class ::tycho::EditHTML {
 
     # Given an HTML anchor, return the filename and point within the file.
     protected method parseLink {dest}
-
-    # Access the "edithtml" preferences
-    protected method preference {mode args}
 }
 
 ###################################################################
@@ -116,11 +113,11 @@ class ::tycho::EditHTML {
 body ::tycho::EditHTML::constructor {args} {
     eval itk_initialize $args
 
-    # Subscribe to the preference set
-    preference subscribeoptions $this \
-	    -commandcolor commandColor \
-	    -pointercolor pointerColor \
-	    -destcolor destColor
+    # Subscribe to the stylesheet parameters
+    stylesheet subscribe \
+	    -commandcolor edithtml commandColor \
+	    -pointercolor edithtml pointerColor \
+	    -destcolor    edithtml destColor
 }
 
 #####################################################################
@@ -307,7 +304,7 @@ body ::tycho::EditHTML::parseNow {start stop} {
     
     # Set the visual characteristics of the tagged commands
     $text tag configure command -foreground \
-	    [preference get commandColor]
+	    [stylesheet get edithtml commandColor]
 
     # Scan the text for hypertext pointers.
     set upto $start
@@ -323,7 +320,7 @@ body ::tycho::EditHTML::parseNow {start stop} {
     
     # Set the visual characteristics of the tagged commands
     $text tag configure pointer -foreground \
-	    [preference get pointerColor]
+	    [stylesheet get edithtml pointerColor]
 
     # for testing
     # $text tag configure text -foreground red
@@ -344,7 +341,7 @@ body ::tycho::EditHTML::parseNow {start stop} {
     
     # Set the visual characteristics of the tagged commands
     $text tag configure dest -foreground \
-	    [preference get destColor]
+	    [stylesheet get edithtml destColor]
 }
 
 #####################################################################
@@ -395,7 +392,7 @@ body ::tycho::EditHTML::fixLink {link start end err} {
     # as normal.
     $itk_component(text) tag raise sel badlink
     $itk_component(text) tag configure badlink \
-	    -background [preference get targetColor]
+	    -background [stylesheet get edithtml targetColor]
 
     set nm [::tycho::autoName .entry]
     ::tycho::Query $nm \
@@ -697,14 +694,3 @@ body ::tycho::EditHTML::parseLink {dest} {
     }
     return {}
 }
-
-#####################################################################
-#### preference
-# Access the preferences associated with this widget. This method
-# overrides the default method in ::tycho::TWidget to access the
-# "edithtml" preferences.
-#
-body ::tycho::EditHTML::preference {mode args} {
-    eval ::tycho::preference $mode "edithtml" $args
-}
-
