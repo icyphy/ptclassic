@@ -139,7 +139,8 @@ setup {
     if (!(peekPort && pokePort)) return;
 
     AsynchCommPair 
-	pair = ((MultiTarget*)target)->createPeekPoke(procId,Poke_procId);
+	pair = ((MultiTarget*)target)
+	    ->createPeekPokeProcId(procId,Poke_procId);
 
     CGStar *peek = pair.peek, *poke = pair.poke;
 
