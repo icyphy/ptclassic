@@ -1,0 +1,40 @@
+% Style option to make LaTeX output look more like
+% the FrameMaker version of the Almagest.
+%
+% Version $Id$
+% Author:	T. M. Parks
+% Created:	7 January 1994
+
+%
+% Use PostScript fonts.
+%
+\input{times.sty}
+
+%
+% Adjust margins to fit more on a page.
+%
+\setlength{\textwidth}{6.25in}
+\setlength{\oddsidemargin}{0.25in}
+\setlength{\evensidemargin}{0in}
+\addtolength{\textheight}{\topmargin}
+\addtolength{\textheight}{1.0in}
+\setlength{\topmargin}{-0.5in}
+
+%
+% Redefine the "headings" page style.
+%
+\newcommand{\Volume}{1}
+\def\ps@headings{\let\@mkboth\markboth
+    \def\@oddfoot{\footnotesize \sf Ptolemy \hfill Last updated: \@date}
+    \def\@evenfoot{\footnotesize \sf UC Berkeley \hfill Department of EECS}
+    \def\@oddhead{\footnotesize \sf \leftmark \hfill \Volume-\thepage}
+    \def\@evenhead{\footnotesize \sf \Volume-\thepage \hfill \rightmark}
+    \def\leftmark{The Almagest}
+    \def\chaptermark##1{\markright{##1}}
+    \def\sectionmark##1{} }
+%
+% Redefine the "plain" page style to be the same as "headings".
+%
+\let\ps@plain\ps@headings
+
+\pagestyle{headings}
