@@ -71,6 +71,17 @@ export MAKE_MODE
 <a href="../../src/octtools/Packages/oct"><CODE>$PTOLEMY/src/octtools/Packages/oct</CODE></a> fail.
 
 
+<li> If tcltk gets a message about cross compiling, 
+Be sure that the system control panel includes the directory that
+contains gcc.  or try:
+<pre>
+cd $PTOLEMY/src/tcltk
+make CC="/Cygnus/B19/H-i386-cygwin32/bin/gcc -v"
+</pre>
+The problem seems to be that <CODE>/bin/sh.exe</CODE> can't find
+<CODE>gcc</CODE> <CODE>make SHELL=bash</CODE> also works
+
+
 <li> Compiling <CODE>octtools/tkoct/top</CODE> fails.
 The top library is use only by the <CODE>oct2ptcl</CODE> binary, which
 is used to convert Oct facets to ptcl scripts.  If you don't need
