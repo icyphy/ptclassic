@@ -67,6 +67,11 @@ public:
 	// i.e., it is true for stars and wormholes, false for galaxies.
 	virtual int isItAtomic () const; // {return TRUE;}
 
+	// Method to reply "true" if the block is a wormhole
+	// (contains a sub-universe of a different domain inside)
+	// and false otherwise.
+	virtual int isItWormhole () const; // {return FALSE;}
+
 	// virtual method to make a new object of the same type.
 	// Stars and galaxies should redefine it as, say
 	//
@@ -116,7 +121,7 @@ public:
         StringList printStates(const char* type) const;
 
         // Retrieve the State with the given name
-        State *stateWithName(const char* name) const;
+        virtual State *stateWithName(const char* name) const;
 
         // Re-Define State
         setState(const char* stateName, const char* expression) {
