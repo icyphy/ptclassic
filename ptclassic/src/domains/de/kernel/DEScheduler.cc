@@ -268,14 +268,16 @@ DEScheduler :: run (Block& galaxy) {
 // fetch an event on request.
 void DEScheduler :: fetchEvent(InDEPort* p, float timeVal) {
 
-	int first = 0;
-	p->moreData = 0;
 	eventQ.reset();
 	int l = eventQ.length();
 	while (l > 0) {
 		l--;
 		LevelLink* h = eventQ.next();
-		if (h->level > timeVal)	return;
+		if (h->level > timeVal)	{
+			Error :: abortRun (*p, " has no more data.");
+			p->moreData = 0;
+			return;
+		}
 		InDEPort* tl = 0;
 		if (h->fineLevel != 0) {
 			Event* ent = (Event*) h->e;
@@ -283,13 +285,10 @@ void DEScheduler :: fetchEvent(InDEPort* p, float timeVal) {
 
 			// if same destination star with same time stamp..
 			if (tl == p) {
-			    if (!first) {
 				tl->grabData(ent->p);
 				eventQ.extract(h);
-				first++;
-			    } else {
-				p->moreData++;
-			    }
+				p->moreData--;
+				return;
 			}
 		} 
 	}
