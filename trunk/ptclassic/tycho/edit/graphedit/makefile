@@ -83,7 +83,11 @@ REALCLEAN_STUFF =	tclIndex
 # Title for the tydoc index page
 TYDOC_DESC =		Index of classes in tycho/kernel/graph
 
-all install: $(MISC_SRCS) tclIndex 
+all: sources $(MISC_SRCS) tclIndex 
+
+install: all subinstall
+
+.PHONY: all install subinstall
 
 # We don't include common.mk since we don't use the compiler here
 include $(ROOT)/mk/no-compile.mk
