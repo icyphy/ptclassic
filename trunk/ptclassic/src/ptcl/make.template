@@ -76,7 +76,7 @@ LIB_SRCS =	MatlabTcl.cc MathematicaTcl.cc PTcl.cc ptclInit.cc \
 		ptclDescription.cc
 LIB_CSRCS = 	displayFile.c
 NON_LIB_SRCS =	ptclAppInit.cc
-SRCS =		$(LIB_SRCS) $(NON_LIB_SRCS)
+SRCS =		$(LIB_SRCS) $(LIB_CSRCS) $(NON_LIB_SRCS)
 
 # Header files
 HDRS =		displayFile.h \
