@@ -72,7 +72,7 @@ class ::tycho::EditDiff {
     method diffReport {} {}
 
     # the command to execute after pressing enter on the entry
-    method entryCommand {entrynum junk} {}
+    method entryCommand {{entrynum {}} {junk {}}} {}
 
     # Open a help window.  This should be redefined in derived classes.
     method help {}
@@ -84,7 +84,7 @@ class ::tycho::EditDiff {
     method insertSelectedFileName {num} {}
 
     # The attribute for each text could be either "common", "new", or "old".
-    method insertString {index str status} {}
+    method insertString {index str {status {common}}} {}
 
     # Jump to the next difference
     method jumpDifference {{direction {forward}}} {}
