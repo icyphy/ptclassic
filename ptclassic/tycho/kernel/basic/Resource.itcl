@@ -61,10 +61,10 @@ class ::tycho::Resource {
     method contenttype {}
 
     # Make a duplicate of the contents of this resource
-    method copy {target}
+    method copy {source target args}
 
-    # Delete this resource
-    method delete {}
+    # Delete a resource
+    method delete {path}
 
     # Test if a given resource exists
     method exists {path}
@@ -79,7 +79,7 @@ class ::tycho::Resource {
     method gets {}
 
     # Return files at a given path
-    method glob {path}
+    method glob {pattern}
 
     # Return true if a given path is a file
     method isfile {path}
@@ -97,7 +97,7 @@ class ::tycho::Resource {
     method path {}
 
     # Write a string to a streamable resource 
-    method puts {}
+    method puts {string}
 
     # Return a string containing the data in a streamable resource 
     method read {}
@@ -115,10 +115,10 @@ class ::tycho::Resource {
     method streamable {}
 
     # Return true if a resource is writable
-    method writeable {{path {}}}
+    method writable {{path {}}}
 
     # Write a string to a streamable resource
-    method write {}
+    method write {data}
 
     ###################################################################
     ####                           public procs                    ####
@@ -178,19 +178,19 @@ body ::tycho::Resource::contenttype {} {
 
 #####################################################################
 #### copy
-body ::tycho::Resource::copy {} {
-    ::tycho::abstractMethod clocopyse
+body ::tycho::Resource::copy {source target args} {
+    ::tycho::abstractMethod copy
 }
 
 #####################################################################
 #### delete
-body ::tycho::Resource::delete {} {
+body ::tycho::Resource::delete {path} {
     ::tycho::abstractMethod delete
 }
 
 #####################################################################
 #### exists
-body ::tycho::Resource::exists {[ath} {
+body ::tycho::Resource::exists {path} {
     ::tycho::abstractMethod exists
 }
 
@@ -214,7 +214,7 @@ body ::tycho::Resource::gets {} {
 
 #####################################################################
 #### glob
-body ::tycho::Resource::glob {path} {
+body ::tycho::Resource::glob {pattern} {
     ::tycho::abstractMethod glob
 }
 
