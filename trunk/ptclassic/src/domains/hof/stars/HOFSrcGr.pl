@@ -5,7 +5,7 @@ defstar {
 	desc {
 Create one or more instances of the named block to produce the
 required number of output stream(s).
-This is implemented by replacing the SrcGr star with the named block
+This is implemented by replacing the SrcGr star with the example block
 at setup time.
 The replacement block(s) are connected as illustrated by the example
 block that is connected.
@@ -24,13 +24,10 @@ limitation of liability, and disclaimer of warranty provisions.
 See the explanation for the
 <tt>MapGr</tt>
 star, from which this is derived.
-The only difference is that this star forces the number of inputs to zero
-and output datatype to float.
-It also hides the input ports and the <i>input_map</i> parameter.
+The only difference is that this star forces the number of inputs to zero.
+It hides the input port and the example output port. 
 	}
 	constructor {
-	  output.setPort("output", this, FLOAT);
-	  exin.setPort("exin", this, FLOAT);
 	  input.setAttributes(P_HIDDEN);
 	  exout.setAttributes(P_HIDDEN);
 	}
