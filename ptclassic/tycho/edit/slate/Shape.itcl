@@ -118,6 +118,9 @@ class ::tycho::Shape {
     # Get a compass point from a vector
     proc compassFromVector {x y}
 
+     # Convert a compass point into a vector
+    proc compassToVector {c}
+
     # Convert radians into degrees
     proc degrees {r}
 
@@ -152,6 +155,13 @@ class ::tycho::Shape {
     	 lr,n n  lr,ne nw  lr,e w  lr,se sw  lr,s s  lr,sw se  lr,w e  lr,nw ne
     	 ud,n s  ud,ne se  ud,e e  ud,se ne  ud,s n  ud,sw nw  ud,w w  ud,nw sw
     	   ,n n    ,ne ne    ,e e    ,se se    ,s s    ,sw sw    ,w w    ,nw nw
+    }
+
+   # Compass as vector
+    private common compassToVector
+    array set compassToVector {
+        n {0 -1} s {0 1} e {1 0} w {-1 0} 
+        ne {1 -1} nw {-1 -1} se {1 1} sw {1 -1}
     }
 }
 
@@ -333,6 +343,17 @@ body ::tycho::Shape::compassFromVector {x y} {
 	set v n
     }
     join [list $v $h] ""
+}
+
+#######################################################################
+#### compassToVector
+#
+# Given a compass point, generate two _x_ and _y_ values representing
+# a unit vector in that direction.
+# For example, the compass point ne will return <code>{1 -1}</code>.
+# 
+body ::tycho::Shape::compassToVector {c} {
+    return $compassToVector($c)
 }
 
 ##########################################################################
