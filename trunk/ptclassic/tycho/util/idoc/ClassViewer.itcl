@@ -824,7 +824,7 @@ body ::tycho::ClassViewer::_bindDesc {class item label} {
         set class ""
     }
 
-    set desc [$classModel attrset $item -description]
+    set desc [$classModel attrget $item -description]
     if { $desc != "" } {
         $itk_component(contents) bind $label <Enter> \
                 "$this putStatus \{$class$desc\}"
