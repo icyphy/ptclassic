@@ -19,51 +19,49 @@ repeated, or the file contents can be padded with zeros.
     hinclude { "streamCompat.h" }
     ccinclude { "SimControl.h" }
 
-    output
-    {
+    output {
 	name { output }
 	type { float }
     }
 
-    defstate
-    {
+    defstate {
 	name { fileName }
 	type { string }
 	default { "/dev/null" }
 	descriptor { Input file. }
     }
 
-    defstate
-    {
+    defstate {
 	name { haltAtEnd }
 	type { int }
 	default { "NO" }
 	descriptor { Halt the run at the end of the input file. }
     }
 
-    defstate
-    {
+    defstate {
 	name { periodic }
 	type { int }
 	default { "YES" }
 	descriptor { Make output periodic or zero-padded. }
     }
 
-    protected
-    {
+    protected {
 	istream* input;
     }
 
-    setup
-    {
+    constructor {
+	input = 0;
+    }
+
+    setup {
 	// open input file
+	LOG_DEL; delete input;
 	LOG_NEW; input = new ifstream(expandPathName(fileName));
 	if (!(*input))
 		Error::abortRun(*this, "can't open file ", fileName);
     }
 
-    go
-    {
+    go {
 	double x = 0.0;
 
 	if (input->eof())
@@ -75,7 +73,7 @@ repeated, or the file contents can be padded with zeros.
 		LOG_DEL; delete input;
                 LOG_NEW; input = new ifstream(expandPathName(fileName));
          	if (!(*input)) {
-		    Error::abortRun(*this, "can't re-open file ", fileName);
+		    Error::abortRun(*this, "cannot re-open file ", fileName);
 		    return;
 		}
 		(*input) >> x;		// get next value
@@ -90,8 +88,7 @@ repeated, or the file contents can be padded with zeros.
 	output%0 << x;
     }
 
-    wrapup
-    {
+    destructor {
 	LOG_DEL; delete input;
     }
 }
