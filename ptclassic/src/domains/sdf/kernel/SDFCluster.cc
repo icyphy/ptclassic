@@ -69,6 +69,7 @@ static const char file_id[] = "SDFCluster.cc";
 #include "Target.h"
 #include "pt_fstream.h"
 #include "Error.h"
+#include <stdio.h>              // sprintf()
 
 // indent by depth tabs
 const char* tab(int depth) {

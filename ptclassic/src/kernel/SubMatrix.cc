@@ -43,6 +43,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "SubMatrix.h"
 #include "Plasma.h"
 #include "Error.h"
+#include <stdio.h>              // sprintf()
 
 // Must be greater than the maximum number of characters in the %22.15g format
 #define SMALL_STRING_SIZE 32
