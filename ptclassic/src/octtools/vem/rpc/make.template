@@ -44,7 +44,11 @@ include $(CONFIG)
 HDRS		= bits.h \
 		rpcApp.h \
 		rpcInternal.h \
-		rpcServer.h
+		rpcServer.h \
+		serverNet.h \
+		serverUtils.h \
+		serverVem.h \
+		vemRPC.h
 
 LIBCSRCS	= bits.c \
 		rpc.c \
