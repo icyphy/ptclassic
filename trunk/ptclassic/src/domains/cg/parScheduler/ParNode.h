@@ -45,7 +45,7 @@ private:
 	ParNode* firstNode;	// the earliest invoc. assigned.
 	int numCopied;		// number of invoc. assigned
 	EGGate* origin;		// Send and Receive star only.
-				// kind of hack.
+	ParNode* partner;	// comm. node partner
 
 protected:
 	// Length of the longest execution time path to an endnode 
@@ -99,7 +99,7 @@ public:
 	// Is it correponds to a atomic CG star?
 	CGStar* myStar() { return (CGStar*) myMaster(); }
 
-	// Functions for assigning and obtaining the StaticLevel and processor
+	// Functions for assigning and obtaining the StaticLevel.
 	void assignSL( int SL ) { StaticLevel = SL; }
 	int getSL() { return StaticLevel; }
 	virtual int getLevel() { return StaticLevel; }
@@ -143,6 +143,8 @@ public:
 	// Send or Receive star only
 	void setOrigin(EGGate* g) { origin = g; }
 	EGGate* getOrigin() { return origin; }
+	void setPartner(ParNode* n) { partner = n; n->partner = this; }
+	ParNode* getPartner() { return partner; }
 
 	// print outs.
 	StringList print();	// Prints star name and invocation
