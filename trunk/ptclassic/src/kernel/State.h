@@ -79,6 +79,9 @@ public:
 	// set the initial value
 	setValue(const char*  s) { initValue = s;}
 
+	// get the initial value
+	const char* getInitValue () const { return initValue;}
+
         // return the parameter type (for use in GUI, interpreter)
         virtual char* type() { return "STRING";}
 
