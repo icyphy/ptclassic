@@ -64,7 +64,9 @@ ifdef NEED_MATHEMATICADIR
 		MATHEMATICA_INCSPEC =	-I$(MATHEMATICADIR)/Source/Includes
 		MATHEMATICAEXT_LIB = 	-lptmathematica
 	else
-		MATHEMATICADIR := $(shell $(ROOT)/bin/mathRootDir)
+		ifndef MATHEMATICADIR
+			MATHEMATICADIR := $(shell $(ROOT)/bin/mathRootDir)
+		endif
 		MATHEMATICA_INCSPEC =	-I$(MATHEMATICADIR)/Source/Includes
 		ifeq ("$(MATHEMATICADIR)","")
 		MATHEMATICADIR= 	$(ROOT)/src/compat/mathematica
