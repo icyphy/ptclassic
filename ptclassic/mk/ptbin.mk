@@ -77,8 +77,7 @@ ifdef FULL
 	CGCFULL =	1
 	DDF =		1
 	DE =		1
-# FSM breaks tysh, so we comment it out temporarily
-#	FSM = 		1
+	FSM = 		1
 	HOF =		1
 	IPUS =		1
 	MDSDF =		1
