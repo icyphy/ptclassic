@@ -130,8 +130,6 @@ static const char file_id[] = "PITcl.cc";
 const int MAX_PTCL = 10;
 static PTcl* ptable[MAX_PTCL];
 
-XXXx
-
 /////////////////////////////////////////////////////////////////////////////
 //// DEFAULT_DOMAIN
 // The default domain.  This must be defined somewhere else.
