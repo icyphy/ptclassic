@@ -39,10 +39,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
     a new Tcl callable function is added to the GUI.
 */
 
-extern "C" {
-#include "ptk.h"
-}
-
 #include "ptcl.h"
 #include "poct.h"
 #include "pvem.h"
@@ -52,6 +48,11 @@ extern "C" {
 extern "C" {
 #include "ptkRegisterCmds.h"
 #include "ptkTclIfc.h"
+
+// We must include ptk.h last because ptk.h includes tk.h which 
+// eventually includes X11/X.h, which on Solaris2.4 
+// there is a #define Complex 0, which causes no end of trouble.
+#include "ptk.h"
 }
 
 

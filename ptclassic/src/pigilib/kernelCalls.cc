@@ -54,22 +54,23 @@ Programmer: J. Buck, E. Goei, E. A. Lee
 #include <signal.h>
 #include <ctype.h>
 
+// Include the global ptcl object (contains the universe) - aok
+#include "ptcl.h"
+
 extern "C" {
 #define Pointer screwed_Pointer         /* rpc.h and type.h define Pointer */
 #include "err.h"
-#include "ptk.h"
-#include "xfunctions.h"
 #include "icon.h"			/* define LookAtFile */
+#include "xfunctions.h"
+// Although kernelCalls.cc is a C++ file, kernelCalls.h is a C include file
+#include "kernelCalls.h"		/* define functions prefixed by Kc */
+
+// We must include ptk.h last because ptk.h includes tk.h which 
+// eventually includes X11/X.h, which on Solaris2.4 
+// there is a #define Complex 0, which causes no end of trouble.
+#include "ptk.h"
 #undef Pointer
 }
-
-// Although kernelCalls.cc is a C++ file, kernelCalls.h is a C include file
-extern "C" {
-#include "kernelCalls.h"		/* define functions prefixed by Kc */
-}
-
-// Include the global ptcl object (contains the universe) - aok
-#include "ptcl.h"
 
 extern ACG* gen;
 extern char DEFAULT_DOMAIN[];
