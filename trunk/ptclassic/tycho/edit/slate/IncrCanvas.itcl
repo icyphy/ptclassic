@@ -371,6 +371,11 @@ body ::tycho::IncrCanvas::addtag {add mode args} {
 		$canvas addtag $add withtag !$id
 	    } else {
 		# Add to a non-root: add to all simple items
+		# Note: this should be used only for finding
+		# items -- if a binding is made to this tag
+		# then the IncrCanvas will probably misbehave.
+		# Unfortunately I can think of no efficient way
+		# of checking for this correct usage.
 		$canvas addtag $add withtag $id
 	    }
 	    set taggedItems($add,$id) $id
