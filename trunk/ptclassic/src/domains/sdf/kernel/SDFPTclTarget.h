@@ -39,9 +39,14 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #pragma interface
 #endif
 
-#include "SDFTarget.h"
+// Ptolemy kernel includes
+#include "Galaxy.h"
 #include "GalIter.h"
+#include "StringList.h"
 #include "StringState.h"
+
+// Ptolemy domain includes
+#include "SDFTarget.h"
 
 class StarProfile {
 public:
@@ -118,10 +123,4 @@ private:
     int numIters;
     StarProfiles starProfiles;
 };
-
-// Generate the Ptcl description of a galaxy
-StringList ptclDescription(Galaxy* localGalaxy, const char* path = 0,
-			   int addHeader = FALSE, const char* preamble = 0,
-			   const char* epilog = 0);
-
 #endif
