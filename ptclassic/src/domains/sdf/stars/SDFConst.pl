@@ -2,7 +2,7 @@ defstar {
 	name {FloatDC}
 	domain {SDF}
 	desc { Output a constant signal with value level (default 0.0).  }
-	version {$Revision$ $Date$}
+	version {$Id$}
 	author { J. T. Buck }
 	copyright { 1991 The Regents of the University of California }
 	location { SDF main library }

@@ -2,7 +2,7 @@ defstar {
 	name { FloatDiff }
 	domain { SDF }
 	desc { Output the "pos" input minus all "neg" inputs. }
-	version {$Revision$ $Date$}
+	version {$Id$}
 	author { E. A. Lee }
 	copyright { 1991 The Regents of the University of California }
 	location { SDF main library }

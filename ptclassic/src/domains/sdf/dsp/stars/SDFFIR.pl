@@ -8,7 +8,7 @@ Default coefficients give an 8th order, linear phase lowpass
 filter. To read coefficients from a file, replace the default
 coefficients with "<fileName".
 	}
-	version {$Revision$ $Date$}
+	version {$Id$}
 	author { E. A. Lee }
 	copyright { 1991 The Regents of the University of California }
 	location { SDF main library }

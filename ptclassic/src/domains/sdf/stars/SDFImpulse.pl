@@ -6,7 +6,7 @@ Generates a stream of impulses of size "level" (default 1.0).
 The period is given by "period" (default 0).
 If period = 0 then only one impulse is generated.
 	}
-	version {$Revision$ $Date$}
+	version {$Id$}
 	author { J. T. Buck }
 	copyright { 1991 The Regents of the University of California }
 	location { SDF main library }

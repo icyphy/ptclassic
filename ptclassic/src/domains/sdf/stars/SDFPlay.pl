@@ -10,7 +10,7 @@ When the wrapup method is called, a file of 8-bit mu-law
 samples is handed to a program named "play" which plays
 the file.
 	}
-	version {$Revision$ $Date$}
+	version {$Id$}
 	author { J. T. Buck }
 	copyright { 1991 The Regents of the University of California }
 	location { SDF main library }

@@ -6,7 +6,7 @@ Prints out one sample from each input port per line
 If "fileName" is not equal to "cout" (the default), it
 specifies the filename to write to.
 	}
-	version {$Revision$ $Date$}
+	version {$Id$}
 	author { D. G. Messerschmitt and J. Buck }
 	copyright { 1991 The Regents of the University of California }
 	location { SDF main library }

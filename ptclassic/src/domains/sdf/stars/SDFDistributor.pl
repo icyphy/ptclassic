@@ -1,7 +1,7 @@
 defstar {
 	name { Distributor }
 	domain { SDF }
-	version {$Revision$ $Date$}
+	version {$Id$}
 	desc {
 Takes one input stream and synchronously splits it into n output streams.
 	}

@@ -5,7 +5,7 @@ defstar {
 This star computes the signum of its input.
 The output is +- 1.
 	}
-	version {$Revision$ $Date$}
+	version {$Id$}
 	author { E. A. Lee }
 	copyright { 1991 The Regents of the University of California }
 	location { SDF main library }

@@ -2,7 +2,7 @@ defstar {
 	name { Xgraph }
 	domain { SDF }
 	desc { Generate a plot with the xgraph program. }
-	version {$Revision$ $Date$}
+	version {$Id$}
 	author { J. T. Buck }
 	copyright { 1991 The Regents of the University of California }
 	location { SDF main library }

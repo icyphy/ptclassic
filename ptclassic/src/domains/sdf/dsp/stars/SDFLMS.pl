@@ -10,7 +10,7 @@ lowpass filter.  To read default coefficients from a file,
 replace the default coefficients with "<fileName".
 Supports decimation, but not interpolation.
 	}
-	version {$Revision$ $Date$}
+	version {$Id$}
 	author { E. A. Lee }
 	copyright { 1991 The Regents of the University of California }
 	location { SDF main library }

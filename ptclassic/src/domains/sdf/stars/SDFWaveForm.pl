@@ -7,7 +7,7 @@ Output a waveform as specified by the array state
 specified for the state value.  If "periodic" is YES then
 the waveform is periodic; otherwise zeros come after the end.
 	}
-	version {$Revision$ $Date$}
+	version {$Id$}
 	author { J. T. Buck }
 	copyright { 1991 The Regents of the University of California }
 	location { SDF main library }

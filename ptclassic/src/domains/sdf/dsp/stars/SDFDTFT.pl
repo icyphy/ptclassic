@@ -2,7 +2,7 @@ defstar {
 	name {DTFT}
 	domain {SDF}
 	desc { Discrete-time Fourier transform. }
-	version {$Revision$ $Date$}
+	version {$Id$}
 	author { E. A. Lee }
 	copyright { 1991 The Regents of the University of California }
 	location { SDF dsp library }

@@ -2,7 +2,7 @@ defstar {
 	name {FloatProduct}
 	domain {SDF}
 	desc { Output the product of the inputs, as a float value. }
-	version {$Revision$ $Date$}
+	version {$Id$}
 	author { J. T. Buck }
 	copyright { 1991 The Regents of the University of California }
 	location { SDF main library }

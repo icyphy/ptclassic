@@ -6,7 +6,7 @@ defstar {
 Generates an X-Y plot with the xgraph program.
 The X data is on "xInput" and the Y data is on "input".
 	}
-	version {$Revision$ $Date$}
+	version {$Id$}
 	author { J. T. Buck }
 	copyright { 1991 The Regents of the University of California }
 	location { SDF main library }
