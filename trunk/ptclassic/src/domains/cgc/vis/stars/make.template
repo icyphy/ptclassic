@@ -63,6 +63,8 @@ PL_SRCS= \
  CGCVISMpySh.pl \
  CGCVISPackSh.pl \
  CGCVISStereoBiquad.pl \
+ CGCVISInterleaveIn.pl \
+ CGCVISInterleaveOut.pl \
  CGCVISStereoIn.pl \
  CGCVISStereoOut.pl \
  CGCVISSubSh.pl \
