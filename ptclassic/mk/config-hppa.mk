@@ -39,8 +39,20 @@ include $(ROOT)/mk/config-g++.mk
 
 # Get the g++ definitions for shared libraries; we override some below.
 # Comment the next line out if you don't want shared libraries.
-# gcc-2.7.2 cannot produce shared libraries under hpux 10, so we can't do this
-#include $(ROOT)/mk/config-g++.shared.mk
+include $(ROOT)/mk/config-g++.shared.mk
+
+# gcc-2.7.2 under hpux10 requires '-shared -fPIC' to produce shared
+# libraries, '-shared' by itself won't work, so we override these three
+# variables from config-g++.shared.mk
+
+# Command to build C++ shared libraries
+SHARED_LIBRARY_COMMAND = g++ -shared $(CC_SHAREDFLAGS) $(SHARED_COMPILERDIR_FLAG) -o
+
+# Command to build C shared libraries
+CSHARED_LIBRARY_COMMAND = gcc -shared $(C_SHAREDFLAGS) $(SHARED_COMPILERDIR_FLAG) -o
+
+# Used by cgwork.mk
+INC_LINK_FLAGS =	-shared $(CC_SHAREDFLAGS) $(SHARED_COMPILERDIR_FLAG)
 
 # Note that hppa does support shl_load() style dynamic linking, see
 # $(PTOLEMY)/src/kernel/Linker.sysdep.h for more information.
@@ -63,7 +75,7 @@ OPTIMIZER =	-O2
 # Under gxx-2.7.0 -Wcast-qual will drown you with warnings from libg++ includes
 WARNINGS =	-Wall -Wsynth #-Wcast-qual 
 # Misc. flags for OS version
-MISCCFLAGS =	-DPTHPUX10
+MISCCFLAGS =	-DPTHPUX10 -DUSE_SHLLOAD
 # Under gcc-2.7.0, you will need to add -fno-for-scope to GPPFLAGS
 GPPFLAGS =	-DUSG -g $(MEMLOG) $(WARNINGS) $(OPTIMIZER) -fno-for-scope \
 		$(MISCCFLAGS)
