@@ -315,6 +315,8 @@ body ::tycho::HTML::constructor {args} {
         $myMenubar delete "Fill Region"
         $myMenubar delete "Right Fill Column"
         $myMenubar delete "Set Fill Prefix"
+        $myMenubar delete "Lower Case"
+        $myMenubar delete "Upper Case"
 
         $myMenubar insert "Open Source" "Switch File..." \
                 -underline 1 -accelerator {C-x s} \
