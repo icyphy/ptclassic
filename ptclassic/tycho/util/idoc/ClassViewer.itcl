@@ -111,6 +111,9 @@ class ::tycho::IDoc {
     # Insert HTML into myHtml(Top or Bottom) widget
     public method putHtml {data {top 1}}
 
+    # Resize the appropriate frame.
+    public method resizeFrame {horizontal pixels}
+
     ###################################################################
     ####                      protected variables                  ####
   
@@ -128,6 +131,9 @@ class ::tycho::IDoc {
 
     # Language of current myClass
     protected variable language
+
+    # Location where mouse button was pressed.
+    protected variable lastPress
 
     ###################################################################
     ####                      private methods                      ####
@@ -149,6 +155,9 @@ class ::tycho::IDoc {
 
     # Format the explanation of the given item in HTML.
     private method formatexpl {item}
+
+    # Setup the resizing handles to behave properly.
+    private method setupHandles {}
     
 }
 
@@ -242,7 +251,7 @@ body ::tycho::IDoc::constructor {args} {
     pack $itk_component(html1) -side top -expand 1 -fill both \
             -anchor n -in $itk_interior.htmlFrame
 
-    pack $itk_component(updown) -side top -expand 1 -fill x \
+    pack $itk_component(updown) -side top -fill x \
             -in $itk_interior.htmlFrame
 
     pack $itk_component(html2) -side top -expand 1 -fill both \
@@ -279,8 +288,7 @@ body ::tycho::IDoc::constructor {args} {
             -htmlwidth textWidth
 
     # Configure the handles
-    $itk_component(updown) config -cursor sb_v_double_arrow -height 3
-    $itk_component(leftright) config -cursor sb_h_double_arrow -width 3
+    setupHandles
 
     # Something annoying inherited insists on creating this thing
     pack forget $itk_interior.childsite
@@ -331,6 +339,31 @@ body ::tycho::IDoc::putHtml {data {top 1}} {
             $myHtmlBottom clear
             $myHtmlBottom insertData $data
         }
+    }
+}
+
+#####################################################################
+#### resizeFrame
+# Resize the frame after a mouse event involving either handle.
+#
+body ::tycho::IDoc::resizeFrame {horizontal pixels} {
+    if {$horizontal} {
+        set cWidth [winfo pixels . [$this cget -contentswidth]]
+        set hWidth [winfo width $itk_component(html1)]
+        # get ratio of width/pixels because HTML is "special"
+        set hRatio [expr $hWidth.0 / [$this cget -htmlwidth]]
+        $this config -contentswidth [expr $cWidth - $pixels]
+        $this config -htmlwidth [expr int(($hWidth + $pixels)/$hRatio)]
+    } {
+        set tHeight [winfo height $itk_component(html1)]
+        set bHeight [winfo height $itk_component(html2)]
+        if {$tHeight > $bHeight} {
+            set ratio [expr $tHeight.0 / [$this cget -topheight]]
+        } {
+            set ratio [expr $bHeight.0 / [$this cget -bottomheight]]
+        }
+        $this config -topheight [expr int(($tHeight - $pixels)/$ratio)]
+        $this config -bottomheight [expr int(($bHeight + $pixels)/$ratio)]
     }
 }
 
@@ -589,4 +622,25 @@ body ::tycho::IDoc::formatexpl {item} {
         }
     }
     set html "$item $paramlist\n $expl"
+}
+
+#####################################################################
+#### setupHandles
+# Setup the resizing handles to behave properly: configure the cursor,
+# bind the behaviours. Called by the constructor.
+#
+body ::tycho::IDoc::setupHandles {} {
+    set updown $itk_component(updown)
+    set leftright $itk_component(leftright)
+
+    $updown config -cursor sb_v_double_arrow -height 3
+    $leftright config -cursor sb_h_double_arrow -width 3
+    
+    bind $updown <1> {set lastPress "%y"}
+    bind $updown <ButtonRelease-1> {%Q resizeFrame 0 [expr $lastPress - %y]}
+    bind $leftright <1> {set lastPress "%x"}
+    bind $leftright <ButtonRelease-1> {%Q resizeFrame 1 [expr $lastPress - %x]}
+
+
+
 }
