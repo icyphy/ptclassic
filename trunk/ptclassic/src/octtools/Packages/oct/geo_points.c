@@ -28,6 +28,10 @@ static char SccsId[]="$Id$";
 #include "port.h"
 #include "internal.h"
 #include "geo.h"
+#include "geo_points.h"
+#include "bb.h"
+#include "change_record.h"
+#include "io_procs.h"
 
   /* 
    * This implements shared operations for objects that have points.
@@ -42,6 +46,7 @@ static int geo_points_create(), geo_points_delete(), geo_points_undelete(), geo_
 static int geo_points_read_fields(), geo_points_write_fields();
 
 
+void
 oct_init_geo_points_desc()
 {
     oct_geo_points_desc = *super;
