@@ -160,6 +160,7 @@ to the last named block outputs according to output_map.
 
 		// The previous block is now fully connected.  Initialize it.
 		if(!setParams(block, instno)) return;
+		block->setTarget(target());
 		block->initialize();
 
 		block = newblock;
@@ -182,6 +183,7 @@ to the last named block outputs according to output_map.
 
 	    // The last block is now fully connected.  Initialize it.
 	    if(!setParams(block, (int)chain_length)) return;
+	    block->setTarget(target());
 	    block->initialize();
 
 	    mom->deleteBlockAfterInit(*this);

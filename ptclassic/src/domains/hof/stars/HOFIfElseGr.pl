@@ -123,6 +123,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	      (myblock = dest->parent()) &&
 	      (myblock->isA("HOFDelayedMap"))) {
 	    destgp = findTopGenericPort(dest);
+	    destgp->parent()->setTarget(target());
 	    destgp->parent()->initialize();
 	    ((HOFDelayedMap*)myblock)->substitute();
 	  }
@@ -161,6 +162,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	    return;
 	  }
 
+	  myblock->setTarget(target());
 	  myblock->initialize();
 	  myblock = 0;
 
