@@ -12,8 +12,7 @@ require</code> with the package name as argument. However, things are not
 quite that simple, as a) the package has to be known to Tcl, and b)
 you have to make sure that you are requiring the right package.
 Mostly, this is tricky only if you are writing stand-alone
-applications that use portions of Tycho. If you
-need to know more, read on!
+applications that use portions of Tycho.
 
 <h2>Packages that need packages, are the happiest packages...</h2>
 
@@ -49,21 +48,24 @@ that used an HTML viewer and the Slate canvas package. Your
 package load file would in that case contain:
 <pre>
   package require tycho.kernel.html
-  package require slate
+  package require tycho.edit.slate
 </pre>
 
-<p>You don't always have to do this in your package load file.  For
-example, you may have a package that has non-graphical <i>and</i>
-graphical functionality. In this case, your package load file should
-require, say, <code>tycho.kernel.basic</code> (which is
-non-graphical), and <code>tycho.kernel.gui</code> should be required
-<i>only in the files that require GUI functionality</i>. This allows
-the non-graphical part of your package to run in a non-graphical
-shell. If you required <code>tycho.kernel.gui</code> in your package
-load file, then your package would fail to load if used within a
-non-graphical shell such as <code>itclsh</code>. (Because
-<code>tycho.kernel.gui</code> requires Tk, which cannot be loaded into
-<code>itclsh</code>.
+ <P> If your package contains optional GUI functionality but might be
+run from a non-graphical Tcl shell, then you can use something like
+this:
+
+<pre>
+  # Only load the graphical packages only if running with Tk
+  if [info exists tk_version] {
+      package require tycho.kernel.gui
+      package require tycho.kernel.html
+  } else {
+      package require tycho.kernel.basic
+  }
+</pre>
+
+<!-- We never got this working -- johnr
 
 <h2>Packages that require Tycho proper</h2>
 
@@ -85,27 +87,34 @@ can simply go
 before calling  <code>::tycho::start</code>, and every single
 package installed in your Tycho installation will be loaded.
 
-<h2>Startup scripts</h2>
+-->
 
-Startup scripts that work are a little tricky, because Tcl
-has such a lame package mechanism. The problem is that, in
-order to find a package, Tcl has to know what directories
-to look for packages in -- and what it does is look in
-the directories in the <code>auto_path</code> variable.
+<h2>Command-line scripts</h2>
 
-<p>So how does <code>auto_path</code> get set? Why, by your Tcl code...
-Actually, it isn't that bad, but because there is no standard
-way of telling Tcl where to look for packages, shell scripts
-that run Tcl need to go through some contortions to find
-the packages they need.
+Command-line scripts are a little tricky, because Tcl has such a lame
+package mechanism. The problem is that, in order to find a package,
+Tcl has to know what directories to look for packages in -- and what
+it does is look in the directories in the <code>auto_path</code>
+variable.
+
+<p>So how does <code>auto_path</code> get set? Why, by your Tcl
+code...  Actually, it isn't that bad, but because there is no standard
+way of telling Tcl where to look for packages, shell scripts that run
+Tcl need to go through some contortions to find the packages they
+need.
 
 <p>The first and simplest way of having Tcl find packages is to
 install the package in the Tcl library directory. Tcl knows where that
-is, at least, and initializes <code>auto_path</code> to contain it. If you
-can't install there, then you have to rely on environment variables
-(see <a href="install.html">How to install a package</a>). Here is
-what we recommend a startup script looks like for a stand-alone
-application:
+is, at least, and initializes <code>auto_path</code> to contain it. If
+you can't install there (because you don't have directory write
+access, for example), then you have to rely on environment variables
+(see <a href="install.html">Where to install a package</a>). Here is a
+typical startup script; in the following, <I>pkg</I> is the package
+tail in lowercase, <I>PKG</I> is the package tail in uppercase and
+<I>Package</I> is the full package name. For example, if the package
+is <CODE>tycho.util.tydoc</CODE>, then <I>pkg</I> is
+<CODE>tydoc</CODE>, <I>PKG</I> is <CODE>TYDOC</CODE>, and
+<I>Package</I> is <CODE>tycho.util.tydoc</CODE>.
 
 <pre>
 #! /bin/sh
@@ -166,7 +175,7 @@ if [catch {package require <I>Package</I>} err] {
 	    2. Install <I>Package</I> in the directory given by the \
 	    TCL_PACKAGES variable\n\
 	    3. Set the <I>PKG</I>_LIBRARY variable to point to the \
-	    <I>PKG</I> directory\n\
+	    <I>pkg</I> directory\n\
 	    4. Set the TYCHO variable to point to your \
 	    Tycho installation\n\
 	    5. Set the PTOLEMY variable to point to your \
@@ -178,7 +187,7 @@ if [catch {package require <I>Package</I>} err] {
 puts "<I>Package</I>, version 1.0"
 
 # Run the main procedure
-eval <I>PKG</I> $argv
+eval <I>pkg</I> $argv
 
 # Done
 </pre>

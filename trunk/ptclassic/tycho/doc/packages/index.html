@@ -7,37 +7,19 @@
 <h1>Tycho's Package System</a></h1>
 <p>
 
-Tycho is structured as a set of independently installable and
-releasable packages. The package mechanism is a simple extension to
-the Tcl package mechanism to support nested packages.  The mechanism
-is designed to allow installation and loading of arbitrary subsets of
-Tycho. Tycho can thus be used as:
-
-<ul>
-
-<li>A "stand-alone" application, with its own console and feature
-support. Other packages can be easily added to Tycho.
-
-<li>An application framework for other stand-alone applications. Some
-of Tycho's packages implement dedicated applications that use Tycho in
-this way.
-
-<li>A utility library for existing [incr Tcl] applications.
-
-<li>A package management framework for other [incr Tcl] applications.
-
-</ul>
-
-Tycho has a standard package structure, and a standard directory
-structure for a full Tycho installation. However, the package system
-is flexible enough to allow you to use Tycho to manage your own
-packages, if you wish. 
+Tycho is structured as a set of Tcl packages. The package system is a
+simple extension to the Tcl package mechanism to support nested
+packages.  It is intended to make extending Tycho easier (by adding a
+new package) and creating custom subsets possible (by removing
+unwanted packages). If desired, Tycho can also be used as an
+environment for creating independently-releasable and installable
+packages.
 
 <p>
 More information can be found here:
 
 <ul>
-<li><a href="install.html">How to install packages</a>
+<li><a href="install.html">Where to install packages</a>
 <li><A HREF="use.html">How to use packages</A>
 <li><A HREF="create.html">How to create a new package</A>
 <li><A HREF="structure.html">The package directory structure</A>

@@ -6,32 +6,22 @@
 <body bgcolor="#faf0e6">
 <h1>Tycho's default layout</a></h1>
 <p>
-
-This is the standard layout of a full Tycho installation.  If you
-install Tycho together with a number of packages, then you will get a
-subset of this layout. You can also install the Tycho meta-package
-only, and then add individual packages to the directory as you see
-fit. In this case, you can place packages anywhere you like, as long
-as the package searcher can find them.
-
-<p>In the standard installation, packages are not installed in the
-top-level directory, but underneath sub-directories called
-<code>kernel/</code>, <code>edit/</code>, <code>util/</code>. This
-provides for manageable growth in the number of packages.  The
-structure of each package is given in <a href="structure.html">Package
-structure</a>.
+This is the standard layout of a full Tycho installation.  In the
+standard installation, packages are not installed directly in the
+top-level Tycho directory, but underneath meta-package sub-directories
+called <code>kernel/</code>, <code>edit/</code>, and
+<code>util/</code>. This provides for manageable growth in the number
+of packages.  The structure of each package is given in <a
+href="structure.html">Package structure</a>.
 
 <p>By convention, each package that is a proper part of Tycho has a
-name such as <code>tycho.kernel.gui</code>, to mimic the Java convention of
-placing packages by directory. The Tcl package system, of course, does
-not understand this convention, so in a non-standard installation you
-can place the packages anywhere you please. Some packages in the
-<code>util</code> directory are completely stand-alone, and so have simple
-names such as <code>notmake</code>.
-
-<P>Note that you do not need to install the Tycho framework to use
-Tycho packages. As long as you have all the packages you require, you
-can install them in your own directories in any way you choose.
+name such as <code>tycho.kernel.gui</code>, to mimic the Java
+convention of placing packages by directory. The Tcl package system,
+of course, does not understand this convention, so in a custom
+installation you can place the packages anywhere you please. Some
+packages in the <code>util</code> directory are completely
+stand-alone, and so have simple names such as <code>pakman</code>
+instead of, say, <CODE>tycho.util.pakman</CODE>.
 
  <P>
 <dl>
@@ -44,7 +34,7 @@ can install them in your own directories in any way you choose.
 	<dt><CODE>adm/</CODE> 
 	<dd> The admin directory, containing release
 	notes, announcements, and so on. This directory is not
-	shipped with the rest of the distribution
+	shipped with the rest of the distribution.
 		<dl>
 		<dt> <CODE>dist/</CODE>
 		<dd> The distribution directory. The contents of this
@@ -78,18 +68,18 @@ can install them in your own directories in any way you choose.
 
 	<dt><a href="../../edit"><CODE>edit/</CODE></a>
 	<dd> A meta-package containing packages of
-	textual and graphical editors and viewers.
+	textual and graphical editors and viewers
 		<dl>
 		<dt><a href="../../edit/makefile"><CODE>makefile</CODE></a>
 		<br><a href="../../edit/pkgIndex.tcl"><CODE>pkgIndex.tcl</CODE></a>
 
 		<dd> 
 		<dt><a href="../../edit/textedit"><CODE>textedit/</CODE></a>
-		<dd> a collection of syntax-sensitive text editors.
+		<dd> A collection of syntax-sensitive text editors
 		<dt><a href="../../edit/visedit"><CODE>visedit/</CODE></a>
-		<dd> a collection of graphical editors.
+		<dd> A collection of graphical editors
 		<dt><a href="../../edit/slate"><CODE>slate/</CODE></a>
-		<dd> an [incr Tcl] megawidget layered over the Tcl/Tk canvas.
+		<dd> An [incr Tcl] megawidget layered over the Tcl/Tk canvas
 		</dl>
 
 
@@ -102,26 +92,24 @@ can install them in your own directories in any way you choose.
 
 
 	<dt> <a href="../../kernel"><CODE>kernel/</CODE></a>
-	<dd> A meta-package containing the complete Tycho kernel. 
+	<dd> A meta-package containing the complete Tycho kernel
 		<dl>
 		<dt> <a href="../../kernel/makefile"><CODE>makefile</CODE></a>
 		<dt> <a href="../../kernel/basic"><CODE>basic/</CODE></a>
-		<dd> the minimal set of classes that is used
-		 by any non-graphical Tycho program, and includes Tcl
+		<dd> The minimal set of classes that is used
+		 by any non-graphical Tycho program. It includes Tcl
 		 procedures that could be used anywhere, such as list and
-		 string manipulation. Its <code>bin/</code> directory contains
-		 scripts that know how to start Tycho up in various graphical
-		 and non-graphical configurations.
+		 string manipulation.
 		<dt> <a href="../../kernel/gui"><CODE>gui/</CODE></a>
-		<dd> the Tycho graphical kernel, which is used by all graphical
-		applications.
+		<dd> The Tycho graphical kernel, which is used by all graphical
+		applications
 		<dt> <a href="../../kernel/html"><CODE>html/</CODE></a>
-		<dd> contains the HTML viewer and support
-		classes such as HTTP access and network support.
+		<dd>  The HTML viewer and support
+		classes such as HTTP access and network support
 
 		<dt> <a href="../../kernel/model"><CODE>model/</CODE></a>
-		<dd> is a package that forms the model part
-		of the model-view architecture used in parts of Tycho.
+		<dd> The model part
+		of the model-view architecture used in parts of Tycho
 		</dl>
 
 
@@ -143,7 +131,7 @@ can install them in your own directories in any way you choose.
 	<dd> Directories containing platform dependent libraries and
 	object files. <CODE>make tclexts</CODE> builds these.
 	For more information, see
-	<a href="../coding/buildtclexts.html">Building Tcl Extensions</a>
+	<a href="../coding/buildtclexts.html">Building Tcl Extensions</a>.
 
 
 	<dt> <a href="../../src"><CODE>src/</CODE></a>
@@ -152,7 +140,7 @@ can install them in your own directories in any way you choose.
 
 	<dt> <a href="../../util"><CODE>util/</CODE></a>
 	<dd>  A meta-package containing packages of general
-	utility. Most of these are not part of Tycho proper, but are
+	utility. Many of these are not part of Tycho proper, but are
 	useful stand-alone tools.
 		<dl>
 		<dt> <a href="../../util/makefile"><CODE>makefile</CODE></a>
@@ -168,7 +156,8 @@ can install them in your own directories in any way you choose.
 		It can generate plain HTML as well as its own format.
 
 		<dt><a href="../../util/tytest/"><CODE>tytest/</CODE></a>
-		<dd> Framework for testing C programs.
+		<dd> The Tcl testing framework used in the tests for
+		     all Tycho packages.
 		</dl>
 	</dl>
 </dl>
