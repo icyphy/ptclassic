@@ -21,8 +21,9 @@ MEMLOG = -DMEMORYLOG
 # CPLUSPLUS shows our bias?
 GNU = CC -I$(ROOT)/src/compat/cfront
 
-# flags for C++ compilation
-GPPFLAGS = -g $(MEMLOG)
+# flags for C++ compilation.  -DPOSTFIX_OP= is needed for cfront 2.1; it
+# is not needed for 3.0.
+GPPFLAGS = -g $(MEMLOG) -DPOSTFIX_OP=
 # flags for C compilation
 CFLAGS = -g
 
