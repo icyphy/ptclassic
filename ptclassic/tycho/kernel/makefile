@@ -51,6 +51,7 @@ ITCL_SRCS = \
 	Console.itcl \
 	ConsoleText.itcl \
 	DialogWindow.itcl \
+	DirectedAcyclicGraph.itcl \
 	Dismiss.itcl \
 	Edit.itcl \
 	EditText.itcl \
@@ -64,6 +65,7 @@ ITCL_SRCS = \
 	FileBrowser.itcl \
 	FontManager.itcl \
 	Forest.itcl \
+	Graph.itcl \
 	HTML.itcl \
 	HTMLMessage.itcl \
 	HTMLText.itcl \
