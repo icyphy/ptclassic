@@ -62,7 +62,8 @@ LIB_HDRS = \
  ptdspRaisedCosine.h \
  ptdspWindow.h \
  ptdspMuLaw.h \
- ptdspRunLength.h
+ ptdspRunLength.h \
+ ptdspZigZag.h
 
 HDRS = ptdsp.h ptdspcephes.h $(LIB_HDRS)
 
