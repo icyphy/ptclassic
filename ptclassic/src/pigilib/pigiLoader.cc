@@ -225,7 +225,8 @@ static int compile (const char* name, const char* idomain, const char* srcDir,
 	// 2. build up the include path
 	//    -- don't forget to add a space after each -I directive
         //    -- if running under cfront, include -I$PTOLEMY/src/compat/cfront 
-#ifndef __GNUG__
+        //    -- if running under egcs, include -I$PTOLEMY/src/compat/cfront
+#if !defined(__GNUG__) || ( defined(__GNUG__) && defined(PT_EGCS))
 	cmd << "-I" << ptSrcDir << "/compat/cfront ";
 #endif
 	cmd << "-I" << ptDomainDir << "/kernel ";
