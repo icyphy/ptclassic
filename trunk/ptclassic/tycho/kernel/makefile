@@ -90,6 +90,9 @@ DIRS =			doc
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =	tclIndex
 
+# Title for the tydoc index page
+TYDOC_DESC =	"Index of classes in tycho/kernel"
+
 # Include information on all stars and targets.
 include $(ROOT)/mk/stars.mk
 
