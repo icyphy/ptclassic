@@ -29,6 +29,13 @@ static char SccsId[]="$Id$";
 #include <sys/time.h>
 #include <signal.h>
 
+#ifdef linux
+#define sigvec		sigaction
+#define sv_mask		sa_mask
+#define sv_flags	sa_flags
+#define sv_handler	sa_handler
+#endif
+
 #ifdef sequent
 
 int  ignoreAlarm( sig, code, scp)
