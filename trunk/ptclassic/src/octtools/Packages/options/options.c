@@ -52,7 +52,7 @@ char OPT_CONT[] = "c";		/* continues description */
 char *optProgName = "unknown program";
 char *optarg;
 
-#ifdef SYSV
+#if defined(SYSV) || defined(PTLINUX)
 /*
  * rjjt - it seems that SYSV has getopt which uses optind
  * this might only be specific to Solaris 2.x
