@@ -46,6 +46,8 @@ catch {delete class ::tycho::File}
 # given by the -autosaveinterval option. If the compiled version of
 # Tycho is used (for example, running it with Ptolemy), then crash
 # recovery files are also automatically created if the program crashes.
+# Unfortunately, there appears to be no way to accomplish this when using
+# a standard itkwish.
 # <p>
 # If the parent window is a Displayer object, then the menu bar of the
 # Displayer object is populated with three menus. The "File" menu
@@ -321,56 +323,54 @@ configbody ::tycho::File::data {
 
 #########################################################################
 #### -file configuration
-# Set or change the name of the file being edited and load the
-# contents. Set the window title and icon name to match, and set the
+# Set or change the name of the file being edited.
+# Set the window title and icon name to match, and set the
 # protected "file" variable equal to the file name.  The filename
 # is expanded into an absolute filename, resolving any references
 # environment variables, user home directories, etc.  See
 # <code>::tycho::expandPath</code> for details about how this is done.
+# Note that the file is not actually loaded.  Call <code>reload</code>
+# after configuring this option to accomplish that (the constructor does
+# this automatically)
 #
 configbody ::tycho::File::file {
     set file $itk_option(-file)
-    if {$itk_option(-file) != {NoName}} {
-        set file [::tycho::expandPath $file]
-    }
-    if {[info exists filesOpen($file)] \
-	    && ![$filesOpen($file) getReadOnly]} {
-        $filesOpen($file) raiseWindow
-        if {![safeEval ::tycho::askuser \
-                "File $file is already open for writing.  Proceed anyway? \
-                (The new window will not appear in the Windows menu.)"]} {
-            # Exit by triggering an error.
-            ::tycho::silentError
+    if {$file != $previousfile} {
+        if {$itk_option(-file) != {NoName}} {
+            set file [::tycho::expandPath $file]
         }
-    }
-    displayer configure -title "$file"
-
-    # We assume that all the checking about modification has been done
-    # now, so in case the file is still marked modified,
-    markUnmodified
-    reload
-    # In case the reloading marks the buffer modified as a side effect.
-    markUnmodified
-
-    # Keep track of which files are open by name.
-    # This is used to avoid opening the same file twice.
-    # It is also used to maintain the Window menu entries.
-    if {$previousfile != {}} {
-	windowMenuRemoveAll $previousfile
-	# unmap the revcontrol window.
-	set topwin $itk_component(hull)
-	if {[winfo exists $topwin.revcontrol]} {
-	    wm withdraw $topwin.revcontrol
-	}
-	# unmap the search window.
-	if {[winfo exists $topwin.search]} {
-	    wm withdraw $topwin.search
-	}
-    }
-    if {$file != "NoName"} {
-        # Add the current object to the menu entries in all open editors.
-        windowMenuAddAll $file
-	set previousfile $file
+        if {[info exists filesOpen($file)] \
+                && ![$filesOpen($file) getReadOnly]} {
+            $filesOpen($file) raiseWindow
+            if {![safeEval ::tycho::askuser \
+                    "File $file is already open for writing. \
+                    Proceed anyway?"]} {
+                # Exit by triggering an error.
+                ::tycho::silentError
+            }
+        }
+        displayer configure -title "$file"
+        
+        # Keep track of which files are open by name.
+        # This is used to avoid opening the same file twice.
+        # It is also used to maintain the Window menu entries.
+        if {$previousfile != {}} {
+            windowMenuRemoveAll $previousfile
+            # unmap the revcontrol window.
+            set topwin $itk_component(hull)
+            if {[winfo exists $topwin.revcontrol]} {
+                wm withdraw $topwin.revcontrol
+            }
+            # unmap the search window.
+            if {[winfo exists $topwin.search]} {
+                wm withdraw $topwin.search
+            }
+        }
+        if {$file != "NoName"} {
+            # Add the current object to the menu entries in all open editors.
+            windowMenuAddAll $file
+            set previousfile $file
+        }
     }
     focusin
 }
@@ -548,6 +548,9 @@ body ::tycho::File::constructor {args} {
     # Identify the object for crash recovery
     set fileObjects($this) $this
 
+    # This is deferred so that it runs after constructors are done.
+    after idle [code evalIfExists $this reload]
+
     # Initiate the auto-save loop
     autoSave
 
@@ -599,13 +602,8 @@ body ::tycho::File::destructor {} {
 # using the current editor.
 #
 body ::tycho::File::altFile {} {
-    if {$modified} {
-	if [safeEval ::tycho::askuser \
-		"Save modifications before opening the new file?"] {
-	    # uptmpfile changes since last save
-	    save
-	}
-    }
+    saveQuery
+
     set prevfile $itk_option(-file)
 
     set filename [safeEval ::tycho::queryfilename {Alternate file to load:}]
@@ -613,8 +611,10 @@ body ::tycho::File::altFile {} {
     if {$filename != {}} {
 	configure -file $filename
 	windowMenuRemoveAll $prevfile
+        markUnmodified
+        reload
     }
-    after 1 "$this focusin"
+    after 1 [code evalIfExists $this focusin]
 }
 
 #####################################################################
@@ -802,7 +802,6 @@ body ::tycho::File::reload {} {
             configure -data [read $fd]
             close $fd
             seeFragment $point
-            markUnmodified
             if {[file writable $file]} {
 		configure -readonly 0
             } else {
@@ -817,6 +816,8 @@ body ::tycho::File::reload {} {
         clear
     }
     setClipboard $saveclipboard
+    # In case the reloading marks the buffer modified as a side effect.
+    markUnmodified
 }
 
 ###################################################################
