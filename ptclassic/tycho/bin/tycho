@@ -1,7 +1,7 @@
 #! /bin/csh -f
 # tycho - Ptolemy Tycho Brahe Graphical Interface
 #
-# Author: Edward Lee
+# Authors: Edward Lee, Christopher Hylands
 # Version: $Id$
 #
 # Copyright (c) 1994-%Q% The Regents of the University of California.
@@ -9,7 +9,7 @@
 # See the file $PTOLEMY/copyright for copyright notice,
 # limitation of liability, and disclaimer of warranty provisions.
 
-# usage: tycho [-debug] [-ptiny] [script_file]
+set usagestring = "usage: tycho [-debug] [-ptiny] [-bin tychobin] [-bak] [scriptfile]"
 
 # If 'tycho.ptiny' is a link to this script, then we just use tycho.ptiny
 set progname = `basename $0`
@@ -42,7 +42,12 @@ endif
 while ($#argv)
 	switch ($argv[1])
 		case -help:
-			echo "usage: tycho [-debug] [-ptiny] [script_file]"
+			echo "$usagestring"
+			echo " -debug         Bring up in debug mode"
+			echo " -ptiny         Smaller version, fewer domains"
+			echo " -bin tychobin  Run the binary 'tychobin'"
+			echo " -bak           Run a .bak binary"
+			echo " scriptfile     Exec itcl(?) script"
 			exit 0
 		case -debug:
 			set tychodebug
@@ -50,9 +55,16 @@ while ($#argv)
 		case -ptiny:
 			set tychoptiny
 			breaksw
+		case -bin:
+			set prog = $argv[2]
+			shift
+			breaksw
+		case -bak:
+			set tychobak
+			breaksw
 		case -*:
 			echo Bad option: $argv[1]
-			echo "usage: tycho [-debug] [-ptiny] [script_file]"
+			echo "$usagestring"
 			exit 1
 			breaksw
 		case *:
@@ -70,14 +82,18 @@ endif
 # For now, look for the executable in obj.$PTARCH, rather than bin.$ARCH.
 set bindir = $PTOLEMY/obj.$PTARCH
 
-if ( "$progname" == "tycho.ptiny" || $?tychoptiny ) then
-    set prog = $PTOLEMY/obj.$PTARCH/tycho/kernel/tycho.ptiny
-else
-    set prog = $PTOLEMY/obj.$PTARCH/tycho/kernel/tycho
-endif
-
-if ( $?tychodebug ) then
-    set prog = $prog.debug
+if ( ! $?prog ) then
+	if ( "$progname" == "tycho.ptiny" || $?tychoptiny ) then
+	    set prog = $PTOLEMY/obj.$PTARCH/tycho/kernel/tycho.ptiny
+	else
+	    set prog = $PTOLEMY/obj.$PTARCH/tycho/kernel/tycho
+	endif
+	if ( $?tychodebug ) then
+	    set prog = $prog.debug
+	endif
+	if ( $?tychobak ) then
+	    set prog = $prog.bak
+	endif
 endif
 
 if ( "$1" =~ "-*" ) then
