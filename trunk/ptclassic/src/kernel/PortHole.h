@@ -5,7 +5,17 @@
 #include "Particle.h"
 #include "type.h"
 
-/******************************************************************
+/**************************************************************************
+Version identification:
+$Id$
+
+ Copyright (c) 1990 The Regents of the University of California.
+                       All Rights Reserved.
+
+ Programmer:  E. A. Lee and D. G. Messerschmitt
+ Date of creation: 1/17/89
+ Revisions:
+
 This file contains definitions relevant to connections.
 
 A connection between Blocks consists of:
@@ -310,12 +320,12 @@ public:
 };
 
         //////////////////////////////////////////
-        // class MultiSDFInPort
+        // class MultiInSDFPort
         //////////////////////////////////////////
         
-// MultiSDFInPort is an SDF input MultiPortHole
+// MultiInSDFPort is an SDF input MultiPortHole
  
-class MultiSDFInPort : public MultiSDFPort {
+class MultiInSDFPort : public MultiSDFPort {
 public:
         virtual int isItInput () {return TRUE; }
  
@@ -325,12 +335,12 @@ public:
  
  
         //////////////////////////////////////////
-        // class MultiSDFOutPort
+        // class MultiOutSDFPort
         //////////////////////////////////////////
 
-// MultiSDFOutPort is an SDF output MultiPortHole  
+// MultiOutSDFPort is an SDF output MultiPortHole  
 
-class MultiSDFOutPort : public MultiSDFPort {     
+class MultiOutSDFPort : public MultiSDFPort {     
 public:
         virtual int isItOutput () {return TRUE; }
 
