@@ -68,7 +68,11 @@ and $i( tau )$ is the data input.
 		default {"0.0"}
 		desc { State of the filter as of the latest input event. }
 	}
-
+	constructor {
+		// data input does not produce an immediate output
+		data.triggers();
+		data.before(clock);
+	}
 	go {
 	   // If the data input is new, update the state.
 	   if (data.dataNew) {

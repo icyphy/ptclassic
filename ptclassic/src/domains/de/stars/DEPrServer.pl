@@ -40,6 +40,7 @@ defstar {
 	constructor {
 		priority(input1, 1);
 		priority(input2, 2);
+		delayType = TRUE;
 	}
 	defstate {
 		name {serviceTime}

@@ -82,7 +82,10 @@ after processing the input is sent to the \fIsize\fR output.
 		default {"10"}
 		desc { Maximum total number of particles stored. }
 	}
-
+	constructor {
+		inData.triggers(size);
+		inData.before(demand);
+	}
 	start {
 	   if (inData.numberPorts() > NUMINPUTS) {
 		Error::abortRun(*this, "Too many input ports.");

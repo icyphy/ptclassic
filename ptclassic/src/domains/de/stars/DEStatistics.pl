@@ -41,6 +41,10 @@ an output is produced before the calculations are restarted.
 		float previous;
 		float startTime;
 	}
+	constructor {
+		input.triggers();
+		reset.triggers();
+	}
 	start {
 		previous = 0;
 		sum = 0;
@@ -70,7 +74,7 @@ an output is produced before the calculations are restarted.
 			sum = 0; squareSum = 0; previous = 0;
 		}
 		// on normal input
-		if (input.dataNew) {
+		while (input.dataNew) {
 			if (startTime < 0) {
 			      startTime = arrivalTime;
 			} else {
@@ -79,6 +83,9 @@ an output is produced before the calculations are restarted.
 			     	squareSum += previous * previous * span;
 			}
 			previous = float(input.get());
+			input.getSimulEvent();
+			// renew the completionTime
+			completionTime = arrivalTime;
 		}
 		// renew the completionTime
 		completionTime = arrivalTime;

@@ -62,6 +62,13 @@ more intricate control structures.
 	int rel : 1;	// release is pending
     }
 
+    constructor {
+	requestA.triggers(requestOut);
+	requestB.triggers(requestOut);
+	grantIn.triggers(grantA);
+	grantIn.triggers(grantB);
+	grantIn.before(requestA);
+    }
     start
     {
 	idle = TRUE;

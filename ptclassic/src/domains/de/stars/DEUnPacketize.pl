@@ -32,6 +32,10 @@ data value from the current input packet is output.
 		FloatVecData* currentPacket;
 		float lastOutput;
 	}
+	constructor {
+		data.triggers();
+		data.before(demand);
+	}
 	start {
 		idx = 0;
 		currentPacket = 0;

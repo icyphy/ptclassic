@@ -25,6 +25,10 @@ the last received control input.
 		name {false}
 		type {=input}
 	}
+	constructor {
+		control.triggers();
+		control.before(input);
+	}
 	go {
 	   if (input.dataNew) {
 	   	completionTime = arrivalTime;

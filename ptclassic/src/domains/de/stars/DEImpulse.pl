@@ -17,6 +17,9 @@ defstar {
 		default {"1.0"}
 		desc { The value of sample generated. }
 	}
+	constructor {
+		delayType = TRUE;
+	}
 	go {
 	   // Generate the output event
 	   // (Recall that the first event comes out at time 0).

@@ -80,6 +80,14 @@ ackOut.\fP
 	int wait : 1;	// waiting for acknowledge
     }
 
+    constructor {
+	ackIn.triggers(output);
+	ackIn.triggers(ackOut);
+	grant.triggers();
+	input.triggers();
+	grant.before(input);
+	input.before(ackIn);
+    }
     start
     {
 	idle = TRUE;
