@@ -1,4 +1,4 @@
-static const char *file_id = "StringList.cc";
+static const char file_id[] = "StringList.cc";
 /**************************************************************************
 Version identification:
 $Id$
@@ -35,10 +35,13 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #ifdef __GNUG__
 #pragma implementation
+// implement related InfString class as well.
+#pragma implementation "InfString.h"
 #endif
 
 #include <stream.h>
 #include "StringList.h"
+#include "InfString.h"
 #include "miscFuncs.h"
 
 
@@ -191,14 +194,16 @@ StringList :: newCopy () const {
 }
 
 // This method consolidates all strings into one string and returns the
-// memory.  It is used in the cast to const char*.
-const char*
+// memory.  It is used in the cast to const char* and in the chars()
+// method (which gives write access to the store).
+
+char*
 StringList :: consolidate () {
 	// Handle empty StringList
 	if (size() == 0) return 0;
 
 	// If already one segment, handle it w/o work
-	if (size() == 1) return head();
+	if (size() == 1) return (char *)SequentialList::head();
 	// Allocate new memory
 	char* s = newCopy();
 
