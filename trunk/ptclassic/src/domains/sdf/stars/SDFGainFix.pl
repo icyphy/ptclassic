@@ -15,11 +15,12 @@ fixed-point number with the default precision which has a total length
 of 24 bits with the number of range bits as required by the value.
 For example, the default value 1.0 creates a fixed-point object with
 precision 2.22, and a value like 0.5 would create one with precision
-1.23 and etc.  The alternative way of specifying the value and the
-precision of this parameter is to use the paranthesis notation which will be
-interpreted as (value, precision).  For example, filling the dialog
-box of this parameter by let's say (2.546, 3.5) would create a fixed-point
-object by casting the double 2.546 to the precision 3.5. }
+1.23.  An alternative way of specifying the value and the
+precision of this parameter is to use the parenthesis notation 
+of (value, precision).  For example, filling the dialog
+box for the gain parameter with (2.546, 3.5) would create a fixed-point
+object formed by casting the double-precision floating-point number
+2.546 to a fixed-point number with a precision of 3.5. }
 	input {
 		name { input }
 		type { fix }
@@ -47,7 +48,7 @@ precision specified by the parameter "InputPrecision" otherwise. }
                 type { string }
                 default { "2.14" }
                 desc {
-Precision of the input in bits.  The input particles are only casted
+Precision of the input in bits.  The input particles are only cast
 to this precision if the parameter "ArrivingPrecision" is set to NO.}
         }
         defstate {
