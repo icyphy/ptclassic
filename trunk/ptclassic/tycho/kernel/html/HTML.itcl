@@ -363,6 +363,7 @@ body ::tycho::HTML::hyperJump {filename point {push 1}} {
             if {$point != {}} {
                 after 200 [list $this seePoint $point]
             }
+            configure -readonly 1
             return
         }
     } {
