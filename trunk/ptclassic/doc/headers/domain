@@ -83,10 +83,10 @@ delim off
 ..
 
 .de SD
-.ne 2i
 .S \\n(BX
 .ta 1.0i
 .lp
+.ne 2i
 .hl
 \\f\\n(SXNAME:\t\\f(\\*F\\*(NM\\fR
 .lp
@@ -121,7 +121,7 @@ delim off
 .ta 1.0i
 .in +1.5i
 .ti -1.5i
-\\f\\n(SXINPUTS:\\fR\t
+\\f\\n(SXINPUTS:\\fR \t
 ..
 
 .de OH
@@ -131,7 +131,7 @@ delim off
 .ta 1.0i
 .in +1.5i
 .ti -1.5i
-\\f\\n(SXOUTPUTS:\\fR\t
+\\f\\n(SXOUTPUTS:\\fR \t
 ..
 
 .de PE
@@ -146,7 +146,7 @@ delim off
 .ta 1.0i
 .in +1.5i
 .ti -1.5i
-\\f\\n(SXSTATES:\\fR\t
+\\f\\n(SXSTATES:\\fR \t
 ..
 
 .de NE
