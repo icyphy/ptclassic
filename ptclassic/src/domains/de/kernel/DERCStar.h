@@ -35,6 +35,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #pragma interface
 #endif
 
+#include <stdio.h>              // Needed for FILE
 #include "Particle.h"
 #include "DERepeatStar.h"
 #include "Resource.h"
