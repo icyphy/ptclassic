@@ -53,7 +53,8 @@ EXTRA_SRCS =	\
 	index.html \
 	introduction.html \
 	messageclasses.html \
-	toplevel.html
+	toplevel.html \
+	view.html
 
 MISC_FILES =
 
