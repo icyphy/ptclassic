@@ -44,6 +44,13 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "GalIter.h"
 #include "SimControl.h"
 
+#ifdef PT_PTCL_WITH_TK
+
+#include <tk.h>
+int & tkUpdate() { static int doUpdate = 0; return doUpdate; }
+
+#endif // PT_PTCL_WITH_TK
+
 /*******************************************************************
 
 	class Star methods
@@ -71,6 +78,13 @@ void Star :: go () {}
 int Star :: run() {
 	if (!SimControl::doPreActions(this)) return FALSE;
 	go();
+
+#ifdef PT_PTCL_WITH_TK
+	// Perform update of Tk if desired
+	if( tkUpdate() )
+		while (Tcl_DoOneEvent(TK_DONT_WAIT|TK_ALL_EVENTS));
+#endif // PT_PTCL_WITH_TK
+
 	return SimControl::doPostActions(this);
 }
 
