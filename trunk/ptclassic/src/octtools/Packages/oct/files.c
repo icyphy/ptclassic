@@ -30,6 +30,8 @@ static char SccsId[]="$Id$";
 #include "internal.h"
 #include "io_internal.h"
 #include "fsys.h"
+#include "oct_files.h"
+#include "oct_utils.h"
 
 octStatus
 oct_make_key(user_facet, file_desc, parent, location)
@@ -68,7 +70,7 @@ struct octFacet *user_facet;
 int mode;
 char *desc;
 {
-    int umode, fmode;
+    int umode = 0, fmode;
     
     switch (mode&~OCT_REVERT) {
     case OCT_READ:
