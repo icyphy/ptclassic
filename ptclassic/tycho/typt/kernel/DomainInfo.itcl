@@ -289,6 +289,9 @@ body ::tycho::DomainInfo::print {starName domain} {
 #### queryDomain
 # Bring up ListBox with all the domains, return the user's choice.
 # This public proc is very similar to ::tycho::queryfilename.
+# <tcl><pre>
+# ::tycho::DomainInfo::queryDomain {Which domain is your favorite?} {SDF}
+# </pre></tcl>
 #
 body ::tycho::DomainInfo::queryDomain { {msg "Choose a Domain:"} \
         {default {}} } {
