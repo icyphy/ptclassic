@@ -58,11 +58,14 @@ OCT_CC =        gcc -fwritable-strings
 #OPTIMIZER =   -O2
 OPTIMIZER =
 WARNINGS =     -Wall -Wcast-qual
-GPPFLAGS =     -g -DUSG -mminimal-toc $(CC_STATIC) $(MEMLOG) $(WARNINGS) 
-$(OPTIMIZER)
+# If you set debugging, the expect long link times ~10 hours and large binaries
+DEBUGFLAG =	#-g
+
+GPPFLAGS =     $(DEBUGFLAG) -DUSG -mminimal-toc $(CC_STATIC) \
+			$(MEMLOG) $(WARNINGS) $(OPTIMIZER)
 # If you are not using gcc, then you might have problems with the WARNINGS flag
-CFLAGS =  -g -DPOSIX -DUSG -mminimal-toc $(CC_STATIC) $(MEMLOG) $(WARNINGS) 
-$(OPTIMIZER)
+CFLAGS =	$(DEBUGFLAGS) -DPOSIX -DUSG -mminimal-toc \
+			$(CC_STATIC) $(MEMLOG) $(WARNINGS) $(OPTIMIZER)
 
 #
 # Variables for the linker
