@@ -54,6 +54,7 @@ SRCS= \
  SDFCxLMSPlot.pl \
  SDFCxRaisedCos.pl \
  SDFCxTable.pl \
+ SDFCxWaveForm.pl \
  SDFDB.pl \
  SDFDTFT.pl \
  SDFDeMux.pl \
