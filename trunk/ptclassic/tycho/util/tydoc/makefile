@@ -46,7 +46,7 @@ TYPACKAGE = 	tycho.util.tydoc
 TYPACKAGE_ROOTDIR = $(ROOT)/..
 TYPACKAGE_DIR = tycho/util/tydoc
 # If you change JVERSION, modify the version numbers in tydoc.tcl
-TYVERSION =	2.0
+TYVERSION =	2.1
 TYDIST =	$(TYPACKAGE)$(TYVERSION)
 TYZIP =		$(TYPACKAGE_DIR)/$(TYPACKAGE).zip
 TYJARFILE =
