@@ -59,8 +59,17 @@ static char SccsId[] = "$Id$";
 
 #include "oct2ptcl.h"
 
+
 /*global*/ char _OtpPackage[] = "otp";
 #define SPKG _OtpPackage
+
+/* Warn if we have some sort of error*/
+#define OCTPTCL_OH_WARN(fct, why, offending_object) \
+	    ((ohLastStatus = fct) >= OCT_OK) ? 0 : \
+		fprintf(stderr, \
+		"Oct assertion failed: file %s at line %d\n%s: %s\n%s",\
+ 		__FILE__, __LINE__, \
+		why, ohFormatName(offending_object), octErrorString())
 
 /****************************************************************************
  			oct2ptcl
@@ -261,7 +270,7 @@ _otpGetPortFlags( octObject *pTerm, OTPNetInfo *pNetInfo) {
 #endif
 	flags |= OTP_PifFormal;
     } else {
-	OH_FAIL(ohFindFormal( &fterm, pTerm),
+	OCTPTCL_OH_WARN(ohFindFormal( &fterm, pTerm),
 	  "interface formal term from contents actual(2)", pTerm);
     }
     if ( ohGetByPropName( &fterm, &prop, "input") == OCT_OK )
