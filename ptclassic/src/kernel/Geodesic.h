@@ -89,7 +89,7 @@ public:
 	int size() const {return sz;}
 
 	// Information printing
-	StringList printVerbose();
+	StringList printVerbose() const;
 
         // A connection may require some initial particles.
         // Note that the SDFScheduler manipulates this number directly, but
