@@ -14,6 +14,7 @@ VPATH = $(ROOT)/src/domains/sdf/stars
 KERNDIR = $(ROOT)/src/kernel
 # SDFDIR is the directory containing SDF domain support
 SDFDIR = $(ROOT)/src/domains/sdf/kernel
+IMAGE = $(ROOT)/src/domains/sdf/image
 GPPFLAGS = -g
 GNU = g++
 GNULIB = /usr/gnu/lib
@@ -21,7 +22,7 @@ GNUINCLUDE = $(GNULIB)/g++-include
 
 .SUFFIXES: .o .cc .h .pl
 .cc.o:
-	$(GNU) $(GPPFLAGS) -I$(SDFDIR) -I$(KERNDIR) -I$(VPATH) -c  $<
+	$(GNU) $(GPPFLAGS) -I$(SDFDIR) -I$(KERNDIR) -I$(IMAGE) -I$(VPATH) -c  $<
 
 # Make sure we always run the preprocessor in the source directory
 .pl.cc:
@@ -58,7 +59,8 @@ SRCS= \
  SDFDB.pl \
  SDFDTFT.pl \
  SDFDeMux.pl \
- SDFDiffImg.pl \
+ SDFDiffImage.pl \
+ SDFDisplayImage.pl \
  SDFDistributor.pl \
  SDFDownSample.pl \
  SDFExp.pl \
@@ -79,7 +81,6 @@ SRCS= \
  SDFHilbert.pl \
  SDFIIDGaussian.pl \
  SDFIIDUniform.pl \
- SDFImgFromFile.pl \
  SDFIntRamp.pl \
  SDFIntTable.pl \
  SDFIntToBits.pl \
@@ -89,14 +90,14 @@ SRCS= \
  SDFLevDur.pl \
  SDFLimit.pl \
  SDFLog.pl \
- SDFMedian.pl \
+ SDFMedianImage.pl \
  SDFMux.pl \
- SDFPGMDisplay.pl \
  SDFPlay.pl \
  SDFPolarRect.pl \
  SDFPrinter.pl \
  SDFQuantizer.pl \
  SDFRaisedCos.pl \
+ SDFReadImage.pl \
  SDFRealComplex.pl \
  SDFReciprocal.pl \
  SDFRectPolar.pl \
@@ -136,7 +137,7 @@ clean:
 		rm -f *.o core *~ *#
 depend:
 		cd $(VPATH); \
-		g++ -MM -I$(SDFDIR) -I$(KERNDIR) $(CCSRCS) |\
+		g++ -MM -I$(SDFDIR) -I$(KERNDIR) -I$(IMAGE) $(CCSRCS) |\
 			 cat make.template - > makefile.n; \
 		mv -f makefile.n makefile
 
