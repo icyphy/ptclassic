@@ -643,6 +643,10 @@ double asp;			/* Aspect ratio       */
     sizehints.width = width;
     sizehints.height = height;
 
+    geo_mask = XParseGeometry(PM_STR("Geometry"), &sizehints.x, &sizehints.y,
+				  (unsigned int *) &sizehints.width,
+				  (unsigned int *) &sizehints.height);
+
     new_window = XCreateWindow(disp, RootWindow(disp, screen),
 			       sizehints.x, sizehints.y,
 			       (unsigned int) sizehints.width,
@@ -663,9 +667,6 @@ double asp;			/* Aspect ratio       */
 	wmhints.initial_state = NormalState;
 	XSetWMHints(disp, new_window, &wmhints);
 
-	geo_mask = XParseGeometry(PM_STR("Geometry"), &sizehints.x, &sizehints.y,
-				  (unsigned int *) &sizehints.width,
-				  (unsigned int *) &sizehints.height);
 	if (geo_mask & (XValue | YValue)) {
 	    sizehints.flags = (sizehints.flags & ~PPosition) | USPosition;
 	}
@@ -1407,7 +1408,18 @@ LineInfo *result;		/* Returned result */
 		    result->type = SETPARAM;
 		} else if (sscanf(first, "%lf", &result->val.pnt.xval) == 1) {
 		    /* DRAWPNT */
-		    if (sscanf(line+1, "%lf", &result->val.pnt.yval) == 1) {
+		    if ((line[1] == 'I' || line[1] == '-') &&
+			(strncmp(line+1, "Inf", sizeof ("Inf")-1) == 0 ||
+			 strncmp(line+1, "-Inf", sizeof ("-Inf")-1) == 0)) {
+				result->type = ERROR;
+				result->val.str = "Inf/-Inf in input data";
+		    } else if ((line[1] == 'N' || line[1] == '-') &&
+			(strncmp(line+1, "NaN", sizeof ("NaN")-1) == 0 ||
+			 strncmp(line+1, "-NaN", sizeof ("-NaN")-1) == 0)) {
+				result->type = ERROR;
+				result->val.str = "NaN/-NaN in input data";
+		    } else if (sscanf(line+1, "%lf", &result->val.pnt.yval)
+				== 1) {
 			result->type = DRAWPNT;
 		    } else {
 			result->type = ERROR;
@@ -1452,7 +1464,7 @@ char *filename;
 		       "Too many data sets - extra data ignored");
 	return -1;
     }
-    while (fgets(buffer, MAXBUFSIZE, stream)) {
+    while (!errors && fgets(buffer, MAXBUFSIZE, stream)) {
 	line_count++;
 	switch (parse_line(buffer, &info)) {
 	case EMPTY:
