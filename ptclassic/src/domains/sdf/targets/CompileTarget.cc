@@ -31,6 +31,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
  Programmer:  E. A. Lee
  Date of creation: 12/8/91
 
+WTC/BLE: Tcl/Tk initialization and invocation of begin methods 8/1/95
+
 This Target produces and compiles a standalone C++ program for
 a universe.
 
@@ -130,7 +132,10 @@ int CompileTarget::run() {
 
     myCode += "// INCLUDE FILES\n";
     myCode += "#include \"CompiledUniverse.h\"\n";
+    myCode += "#include \"GalIter.h\"\n";
     myCode += galDef(galaxy(), universeClassName, 0);
+
+    myCode += tcltkSetup();
 
     myCode += "\n";
     myCode += "// MAIN FUNCTION\n";
@@ -153,12 +158,22 @@ int CompileTarget::run() {
     myCode += universeName;
     myCode += ".parseCommandLine(argc, argv, &iterations);\n";
 
+    myCode += tcltkInitialize(universeName);
+
     myCode += "\n// INITIALIZE CODE\n";
     myCode += universeName;
     myCode += ".initialize();\n";
 
-    myCode += "\n";
-    myCode += "// MAIN LOOP\n";
+    myCode += "\n// BEGIN CODE\n";
+    myCode += "{";
+    myCode += "GalStarIter nextStar(";
+    myCode += universeName;
+    myCode += ");\n";
+    myCode += "Star *s;";
+    myCode += "while ((s = nextStar++) != 0) s->begin();\n";
+    myCode += "}\n";
+
+    myCode += "\n// MAIN LOOP\n";
     myCode += "while(iterations-- > 0) {\n";
     scheduler()->compileRun();
     myCode += "}\n";
@@ -277,6 +292,68 @@ StringList CompileTarget::quoteQuotationMarks(const char* str) {
 	ret += piece;
     }
     return ret;
+}
+
+// Define the routines necessary for Tcl/Tk (Wan-Teh Chang and Brian Evans)
+StringList CompileTarget::tcltkSetup() {
+    StringList myCode;
+    myCode.initialize();
+    myCode += "// Tcl/Tk include files\n";
+    myCode += "#include <iostream.h>\n";
+    myCode += "#include \"SimControl.h\"\n";
+    myCode += "\n";
+    myCode += "// Tcl/Tk commands\n";
+    myCode += "// halt command -- ptkStop defined as synonym\n";
+    myCode += "static int halt_Cmd(ClientData clientData,\n";
+    myCode += "        Tcl_Interp *interp,\n";
+    myCode += "        int argc,\n";
+    myCode += "        char *argv[])\n";
+    myCode += "{\n";
+    myCode += "    SimControl::requestHalt();\n";
+    myCode += "    return TCL_OK;\n";
+    myCode += "}\n\n";
+
+    return myCode;
+}
+
+// Initialize the Tcl/Tk interpreter (Wan-Teh Chang and Brian Evans)
+StringList CompileTarget::tcltkInitialize(StringList& universeName) {
+    StringList myCode;
+    myCode.initialize();
+
+    myCode +=
+"\n// Initialize the Tcl interpreter\n\
+ptkInterp = Tcl_CreateInterp();\n\
+ptkW = Tk_CreateMainWindow(ptkInterp, NULL, \"standalone\", \"Pigi\");\n\
+if (Tcl_Init(ptkInterp) == TCL_ERROR) {\n\
+    cerr << \"Tcl_Init\n\";\n\
+    exit(1);\n\
+}\n";
+
+    myCode +=
+"\n// Define halt and ptkStop Tcl commands, and initialize Tk\n\
+Tcl_CreateCommand(ptkInterp, \"halt\", halt_Cmd, 0, 0);\n\
+Tcl_CreateCommand(ptkInterp, \"ptkStop\", halt_Cmd, 0, 0);\n\
+if (Tk_Init(ptkInterp) == TCL_ERROR) {\n\
+    cerr << \"Tk_Init\n\";\n\
+    exit(1);\n\
+}";
+
+    myCode +=
+"\n// Read pigi tcl initialization files to set key bindings, colors, etc.\n\
+if (Tcl_EvalFile(ptkInterp, \"$PTOLEMY/lib/tcl/pigilib.tcl\") != TCL_OK) {\n\
+    cerr << \"pigilib.tcl\n\";\n\
+    exit(1);\n\
+}\n;";
+
+    myCode += "// Some tcl/tk stars use these ptcl commands.\n";
+    myCode += "Tcl_Eval(ptkInterp, \"proc curuniverse {} { return ";
+    myCode += universeName;
+    myCode += " }\");\n";
+    myCode += "extern int runEventsOnTimer();\n";
+    myCode += "SimControl::setPollAction(runEventsOnTimer);\n";
+
+    return myCode;
 }
 
 // Define a galaxy
