@@ -54,7 +54,8 @@ variable $starSymbol(icount): integer := 0;
 	    filedecl << "\n";
 	  addCode(filedecl, "mainDecls");
 	  addCode(init, "mainDecls");
-	  StringList cmd = "";
+/*
+  StringList cmd = "";
 	  cmd << "/bin/rm -f ";
 	  cmd << "$starSymbol(xgraph)";
 	  cmd << ".dat";
@@ -75,6 +76,7 @@ variable $starSymbol(icount): integer := 0;
 	    cmd << ").dat";
 	    cmd << "; ";
 	  addCode(cmd, "sysWrapup");
+	  */
 	  addCode(graph, "sysWrapup");
 	}
 }
