@@ -46,8 +46,7 @@ Target& Scheduler::getTarget() {
 
 // Return a StringList with code that can be executed to
 // effect a run.  In the base class, this just causes an error.
-StringList Scheduler::compileRun() {
+void Scheduler::compileRun() {
 	Error::abortRun ("This scheduler doesn't know how to compile.");
-	return "\nERROR: This scheduler doesn't know how to compile.\n";
 }
 
