@@ -35,7 +35,10 @@
 # less of a drain on the computation time if the star is set to
 # operate asynchronously.
 
-set s .${uniqueSymbol}field
+# The run control window will be the parent window with the following
+# choice of name.  The effect of this is that when the control window
+# is deleted, so are all the children windows.
+set s .run_[curuniverse].${uniqueSymbol}field
 
 # If the window doesn't already exist, create it.
 # If the window does exist, assume it was created by a previous run
@@ -76,7 +79,7 @@ if {![winfo exists $s] || ![info exists ${uniqueSymbol}ballId]} {
 
     proc ${uniqueSymbol}callTcl {} "
         global ${uniqueSymbol}ballId
-        set s .${uniqueSymbol}field
+        set s .run_[curuniverse].${uniqueSymbol}field
         set c \$s.f.pad
         set ballRadius 0.5
         set inputVals \[${uniqueSymbol}grabInputs]
