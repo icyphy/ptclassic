@@ -58,4 +58,6 @@ inline float    max(float a, float b)       {return (a > b ? a : b);}
 inline int      max(int a, int b)           {return (a > b ? a : b);}
 inline unsigned max(unsigned a, unsigned b) {return (a > b ? a : b);}
 
+int pow(int base,int exp);
+
 #endif
