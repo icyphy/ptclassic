@@ -85,7 +85,7 @@ int CGCTclTkTarget :: codeGenInit() {
     // Define variables needed by the tcl init file.
     globalDecls << "char *name = \"" << galaxy()->name() << "\";\n"
 		<< "int numIterations = "
-		<< (int)scheduler()->getStopTime() << ";\n"
+		<< int(scheduler()->getStopTime()) << ";\n"
 		<< "#include \"tkMain.c\"\n\n";
 
     // If the system is paused, wait until Go is hit again
@@ -112,9 +112,9 @@ CodeStream CGCTclTkTarget::mainLoopBody() {
     // Need specialized code instead of the beginIterations method
     // so that the value can be changed each time the function is run.
     // and infinite iterations can be supported
-    StringList iterator= symbol("sdfIterationCounter");
+    StringList iterator = symbol("sdfIterationCounter");
     body << "{\n\tint " << iterator<< ";\n"
-	 << iterator << "=0;\n"
+	 << iterator << " = 0;\n"
 	 << "while (" << iterator << "++ != numIterations) {\n"
 	 << mainLoopInit << mainLoop << "}} /* MAIN LOOP END */\n"
 	 << mainLoopTerm;
@@ -132,4 +132,3 @@ static CGCTclTkTarget targ("TclTk_Target","CGCStar",
 "Target for Tcl/Tk C code generation");
 
 static KnownTarget entry(targ,"TclTk_Target");
-
