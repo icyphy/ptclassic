@@ -179,3 +179,4 @@ body ::tycho::RevControl::enableButton {button} {
 	$itk_component(bbox) buttonconfigure checkin -state disabled
     }
 }
+
