@@ -30,16 +30,6 @@
 #                                        COPYRIGHTENDKEY
 #######################################################################
 
-# FIXME: Currently use one single global status flag
-# for the non-blocking download. Need to make one per URL
-# (and non-global?)
-#
-# The current status of an http get. This is a common array
-# so that tkwait can access it. Can be "header," "body,"
-# "abort," or "done".
-## DO NOT USE THIS VARIABLE DIRECTLY! Use method httpset instead.
-set _httpstatus(http://127.0.0.1) done
-
 ######################################################################
 #### ResourceHTTP
 #
@@ -117,16 +107,13 @@ set _httpstatus(http://127.0.0.1) done
 # ::tycho::inform $line</pre></tcl>
 # </ul>
 class ::tycho::ResourceHTTP {
-    inherit ::tycho::Resource
+    inherit ::tycho::ResourceRemote
 
     constructor {args} {}
     destructor {}
 
     #####################################################################
     ####                          options                            ####
-
-    # Debugging flag
-    public variable debug 0
 
     # Command to execute on each line received. It need not invoke
     # any kind of updates to keep the user interface "live", but
@@ -136,18 +123,6 @@ class ::tycho::ResourceHTTP {
     ###################################################################
     ####                         public methods                    ####
 
-    # Close the resource.
-    method close {}
-
-    # Return the end of file status
-    method eof {}
-
-    # Read a string from a streamable resource
-    method gets {{varName {}}}
-
-    # Test if the file is currently open
-    method isopen {}
-
     # Open the resource
     method open {{mode "r"}}
 
@@ -155,20 +130,8 @@ class ::tycho::ResourceHTTP {
     # Can't write into HTTP file! Read permission of off
     method puts {string}
 
-    # Return a string containing the data in a streamable resource 
-    method read {}
-
-    # Return 1 if this resource is streamable
-    method streamable {}
-
-    # Return the progess indicator, as a decimal number. 1.0 is full.
-    method progress {}
-
     # Write to the file
     method write {data}
-
-    # Get a cached copy of the data
-    method cachefile {}
 
     ###################################################################
     ####                      public procedures                    ####
@@ -176,8 +139,8 @@ class ::tycho::ResourceHTTP {
     # Change the permissions of a resource
     proc chmod {permissions path}
 
-    # Return the content type of the current file
-    proc contenttype {path}
+    # Return the content type of the open file.
+    proc contenttype {url}
 
     # Delete a resource
     proc delete {path}
@@ -187,14 +150,6 @@ class ::tycho::ResourceHTTP {
 
     # Test if a given resource exists
     proc exists {path}
-
-    # Get a file name, and forward automatically.
-    # NOTE: This exists ONLY in this class.
-    proc forward {url}
-
-    # reset all the internal variable such as _exists
-    # and _forwarding. NOTE: This exists ONLY in this class.
-    proc initialize {}
 
     # Create a new directory
     proc mkdir {path}
@@ -214,17 +169,14 @@ class ::tycho::ResourceHTTP {
     ###################################################################
     ####                         protected methods                 ####
 
-    # Puts a string to console of the debug option is set
-    protected method debugputs {string}
-
     # Used by proc contenttype, and mostly exists
     protected method getcontenttype {} {return $contenttype}
 
     # Used by exists
-    protected method getsize {} {return $contentlength}
+    protected method getdate {} {return $lastmodified}
 
     # Used by exists
-    protected method getdate {} {return $lastmodified}
+    protected method getsize {} {return $contentlength}
 
     # Abort an HTTP GET
     protected method httpabort {}
@@ -236,16 +188,10 @@ class ::tycho::ResourceHTTP {
     protected method httpdone {}
 
     # Initiate an HTTP get. Type is file or header.
-    protected method httpget {url type}
+     method httpget {url type}
 
     # The file event handler
     protected method httpread {}
-
-    # Set or read the http status. If newvalue is {}, then just return
-    protected method httpstatus {newvalue}
-
-    # Wait until an HTTP GET completes.
-    protected method httpwait {}
 
     # FIXME
     method info {} {
@@ -261,30 +207,13 @@ class ::tycho::ResourceHTTP {
     ###################################################################
     ####                        protected commons                  ####
 
-    # A flag tagging whether a given URL exists in this current session
-    # of Tycho. Used with method "exists" to check whether this session's
-    # file date, size, and contenttype are the same or not.
-    protected common _exists
-
-    # A forwarding address associated with some URLs
-    protected common _forwarding
-
     ###################################################################
     ####                        protected variables                ####
-
-    # The url this object is accessing
-    protected variable currentURL {}
 
     # The get mode: "file" or "header"
     protected variable requestMode {}
 
-    # The name of the cache file associated with this HTTP
-    protected variable filename {}
-
-    # This is the cache file id, used for [$this gets] and [$this eof]
-    protected variable fileid {}
-
-    # The id of the http socket
+   # The id of the http socket
     protected variable socketid {}
 
     # Returning status of a http get. 200 by default is "normal"
@@ -311,19 +240,7 @@ class ::tycho::ResourceHTTP {
 
     ###################################################################
     ####                         private variables               ####
-    
-    # True if the file is open
-    private variable fileIsOpen 0
-}
 
-
-#######################################################################
-#### constructor
-#
-# For each HTTP GET, an object is created and destroyed.
-#
-body ::tycho::ResourceHTTP::constructor {args} {
-    eval configure $args
 }
 
 #######################################################################
@@ -331,9 +248,8 @@ body ::tycho::ResourceHTTP::constructor {args} {
 #
 body ::tycho::ResourceHTTP::destructor {} {
     # If we're still loading, forget it
-    set brokencode {
+    if {0} {
 	if [httpbusy] {
-	    ::puts httpabort
 	    httpabort
 	}
     }
@@ -342,99 +258,6 @@ body ::tycho::ResourceHTTP::destructor {} {
 #########################################################################
 #########################################################################
 ####                      public methods                             ####
-
-#####################################################################
-#### cachefile
-# Get a cached copy of the contents of the file. This is provided
-# to work around Tcl's lack of binary data handling.
-#
-body ::tycho::ResourceHTTP::cachefile {} {
-    set url [forward [path]]
-    debugputs "Cachefile, seeking at $url"
-
-    #if ![::info exists _cachefile($url)] {}
-    if ![::tycho::cache exists $url] {
-        # If cache doesn't exist, go fetch the information
-	if ![isopen] {
-	    open "r"
-	    read
-	    close
-	} else {
-	    read
-	}
-    }
-
-    return [::tycho::cache getcachefile $url]
-    #return $_cachefile($url)
-}
-
-#####################################################################
-#### close
-body ::tycho::ResourceHTTP::close {} {
-    if !$fileIsOpen {
-	openerror "File \"$this\" is not open (close)"
-    }
-    set fileIsOpen 0
-    if { $fileid != "" } {
-        ::close $fileid
-        set fileid ""
-    }
-}
-
-#####################################################################
-#### eof
-body ::tycho::ResourceHTTP::eof {} {
-    if !$fileIsOpen {
-	openerror "File \"$this\" is not open (eof)"
-    }
-    ::eof $fileid
-}
-
-#####################################################################
-#### forward
-# Get a file name, and forward it automatically.
-# Used with _forward to forward the right location. For example,<br>
-# <tt>http://ptolemy/~eal   -->   http://ptolemy/~eal/</tt>
-#
-body ::tycho::ResourceHTTP::forward {url} {
-    while {[::info exists _forwarding($url)] && $_forwarding($url)!=$url} {
-	set url $_forwarding($url)
-    }
-    return $url
-}
-
-#####################################################################
-#### initialize
-# Reset all the internal variables such as _forwarding
-# and _exists. Called during the initial setup, or during debugging.
-#
-body ::tycho::ResourceHTTP::initialize {} {
-    catch {unset _exists}
-    catch {unset _forwarding}
-}
-
-#####################################################################
-#### gets
-# If the HTTP file is a text file, then perform the exact
-# same task that the base method gets does.
-#
-body ::tycho::ResourceHTTP::gets {{varName {}}} {
-    if !$fileIsOpen {
-	openerror "File \"$this\" is not open (gets)"
-    }
-    if { $varName == "" } {
-	::gets $fileid
-    } else {
-	upvar $varName v
-	uplevel ::gets $fileid v
-    }
-}
-
-#####################################################################
-#### isopen
-body ::tycho::ResourceHTTP::isopen {} {
-    return $fileIsOpen
-}
 
 #####################################################################
 #### open
@@ -456,7 +279,7 @@ body ::tycho::ResourceHTTP::open {{mode "r"}} {
     if {![::tycho::cache exists $url]} {
 	# Get it if not already
 	httpget $url "file"
-	httpwait
+	remotewait
     }
 
     # We could potentially get a forwarded location
@@ -468,21 +291,8 @@ body ::tycho::ResourceHTTP::open {{mode "r"}} {
                 is not accessible"
     }
     # Open the cache file
-    #set fileid [::open $_cachefile($url) "r"]
-    set fileid [::open [::tycho::cache getcachefile $url] "r"]
+    set cachefileid [::open [::tycho::cache getcachefile $url] "r"]
     set fileIsOpen 1
-}
-
-#########################################################################
-#### progress
-# Get the current progress of a non-blocking read. Won't make sense
-# if not called during a non-blocking read.
-#
-body ::tycho::ResourceHTTP::progress {} {
-    if {$contentlength==0} {
-        return 0
-    }
-    expr $contentloaded / $contentlength.0
 }
 
 #####################################################################
@@ -492,28 +302,10 @@ body ::tycho::ResourceHTTP::puts {string} {
 }
 
 #####################################################################
-#### read
-body ::tycho::ResourceHTTP::read {} {
-    if !$fileIsOpen {
-	openerror "File \"$this\" is not open (read)"
-    }
-    ::read $fileid
-}
-
-#####################################################################
-#### streamable
-body ::tycho::ResourceHTTP::streamable {} {
-    return 1
-}
-
-#####################################################################
 #### write
 body ::tycho::ResourceHTTP::write {string} {
     error "HTTP files are not writable"
 }
-
-
-
 
 #########################################################################
 #########################################################################
@@ -538,12 +330,6 @@ body ::tycho::ResourceHTTP::contenttype {url} {
     } else {
         error "URL $url does not exist"
     }
-    #set resource [new $url]
-    #$resource httpget $url "file"
-    #$resource httpwait
-    #set contenttype [$resource getcontenttype]
-    #::delete object $resource
-    #return $contenttype
 }
 
 #####################################################################
@@ -630,23 +416,24 @@ body ::tycho::ResourceHTTP::exists {url} {
     # Otherwise create an new HTTP object, and get the information.
     set resource [new $url]
     $resource httpget $url "header"
-    $resource httpwait
+    $resource remotewait
     # Remember the latest size, and see if it matches with the cache database.
     set newsize        [$resource getsize]
     set newdate        [$resource getdate]
     set newcontenttype [$resource getcontenttype]
-    ::delete object $resource
+    after idle "::delete object $resource"
 
     # If necessary, cache the file if it doesn't already exists.
-    # If cached, but remote file has been modified, then fetch and catch again.
+    # If cached, but remote file has been modified, then fetch and
+    # cache again.
     set url [forward $url]
     if {![::tycho::cache exists $url] || \
             ([::tycho::cache exists $url] && \
             ![tycho::cache same $url $newdate $newsize $newcontenttype])} {
         set resource [new $url]
         $resource httpget $url "file"
-        $resource httpwait
-        ::delete object $resource
+        $resource remotewait
+        after idle "::delete object $resource"
     }
 
     set url [forward $url]
@@ -665,8 +452,7 @@ body ::tycho::ResourceHTTP::mkdir {dir} {
 #
 body ::tycho::ResourceHTTP::new {path args} {
     #::puts "::tycho::ResourceHTTP::new $path $args"
-    uplevel #0 ::tycho::ResourceHTTP [::tycho::autoName resourcehttp] \
-	    $args -debug 0
+    uplevel #0 ::tycho::ResourceHTTP [::tycho::autoName resourcehttp] $args
 }
 
 #####################################################################
@@ -766,25 +552,12 @@ body ::tycho::ResourceHTTP::stat {url varName} {
                 [list url   $url]]
 
         array set v $statinfo
-        #array set v $_statinfo($url)
     }
 }
-
-
 
 #########################################################################
 #########################################################################
 ####                     protected methods                           ####
-
-#########################################################################
-#### debugputs
-# Puts a string to the console if the *-debug* option is set.
-#
-body ::tycho::ResourceHTTP::debugputs {string} {
-    if $debug {
-	::puts $string
-    }
-}
 
 #########################################################################
 #### httpabort
@@ -794,7 +567,7 @@ body ::tycho::ResourceHTTP::debugputs {string} {
 #
 body ::tycho::ResourceHTTP::httpabort {} {
     # Set the status so that httpdone knows what to do
-    httpstatus _httpstatus "abort"
+    remotestatus _remotestatus "abort"
 
     # Terminate with httpdone. This will enable any
     # threads hanging off tkwait to continue.
@@ -806,13 +579,13 @@ body ::tycho::ResourceHTTP::httpabort {} {
 # Return true if the HTTP GET is still running.
 #
 body ::tycho::ResourceHTTP::httpbusy {} {
-    global _httpstatus
+    global _remotestatus
 
-    debugputs "httpbusy{} returns [expr { [::info exists _httpstatus] \
-	    && ! [string compare $_httpstatus done] }]"
+    debugputs "httpbusy{} returns [expr { [::info exists _remotestatus] \
+	    && ! [string compare $_remotestatus done] }]"
 
-    expr { [::info exists _httpstatus] \
-	    && ! [string compare [httpstatus] done] }
+    expr { [::info exists _remotestatus] \
+	    && ! [string compare [remotestatus] done] }
 }
 
 #########################################################################
@@ -827,9 +600,9 @@ body ::tycho::ResourceHTTP::httpdone {} {
 
     # Close cache file
     if { $requestMode == "file" } {
-	debugputs "Closing $fileid"
-	::close $fileid
-	set fileid ""
+	debugputs "Closing $cachefileid"
+	::close $cachefileid
+	set cachefileid -1
     }
 
     # Update length
@@ -848,7 +621,7 @@ body ::tycho::ResourceHTTP::httpdone {} {
                     $lastmodified \
                     $contentlength \
                     $contenttype \
-                    $filename
+                    $cachefilename
         }
     }
     # To be picky, let's check that the content size is the
@@ -856,19 +629,19 @@ body ::tycho::ResourceHTTP::httpdone {} {
     # Unfortunately, this is bogus, since our httpread{}
     # is putting an additional end-of-line at the end of the file.
     set junkcode {
-	if { [httpstatus] != "abort" && $requestMode == "file" } {
-	    if { [::file size $filename] != $contentlength } {
+	if { [remotestatus] != "abort" && $requestMode == "file" } {
+	    if { [::file size $cachefilename] != $contentlength } {
 		if $debug {
 		    # debugputs "Received HTTP file size ([::file size \
-			    $filename]) \
+			    $cachefilename]) \
 			    is not the same as content length ($contentlength)"
 		}
 	    }
 	}
     }
     # Set the status
-    #uplevel #0 "set _httpstatus done"
-    httpstatus "done"
+    #uplevel #0 "set _remotestatus done"
+    remotestatus "done"
     
     # One last update of notifycommand
     if { $notifycommand != "" } {
@@ -897,14 +670,14 @@ body ::tycho::ResourceHTTP::httpget {url type} {
     debugputs "Connect $hostname:$port on $socketid"
 
     # Create the cache file if getting the whole file.
-    if { $type == "file" && $fileid == "" } {
-        set filename [::tycho::cache tmpCacheName $url]
-        #[::tycho::tmpFileName httpCache][::tycho::url extension $url]
-        set fileid [::open $filename "w+"]
-	debugputs "Cache file $filename on $fileid"
+    if { $type == "file" && $cachefileid <= 0 } {
+        set cachefilename [::tycho::cache tmpCacheName $url]
+        #[::tycho::tmpcachefilename httpCache][::tycho::url extension $url]
+        set cachefileid [::open $cachefilename "w+"]
+	debugputs "Cache file $cachefilename on $cachefileid"
     }
 
-    httpstatus "header"
+    remotestatus "header"
     set status -1                   ;# Initial status - ?
     set requestMode $type           ;# header or file
     set contentloaded 0             ;# how much is loaded
@@ -978,7 +751,7 @@ body ::tycho::ResourceHTTP::httpread {} {
     }
 
     # Currently reading header or body?
-    if { [httpstatus] == "header" } {
+    if { [remotestatus] == "header" } {
         # Get a line
         ::gets $socketid line
 	# Header mode, the information about this http get.
@@ -993,8 +766,8 @@ body ::tycho::ResourceHTTP::httpread {} {
 	} else {
 	    # End of header is denoted by an empty line
 	    debugputs "            <-"
-            #uplevel #0 "set _httpstatus body"
-            httpstatus "body"
+            #uplevel #0 "set _remotestatus body"
+            remotestatus "body"
 
 	    # Check status codes
 	    if {$status>=300 && $status<=399} {
@@ -1025,10 +798,10 @@ body ::tycho::ResourceHTTP::httpread {} {
 	    } else {
                 # Going to get body next
                 fconfigure $socketid -translation lf
-                fconfigure $fileid -translation lf
+                fconfigure $cachefileid -translation lf
             }
 	}
-    } elseif { [httpstatus] == "body" } {
+    } elseif { [remotestatus] == "body" } {
 	# Body mode (content of http get), write to the cache file.
 	# Note that we only do this if the status _is_ "body," in
 	# case an abort is in progress.
@@ -1036,7 +809,7 @@ body ::tycho::ResourceHTTP::httpread {} {
         # Method of get will depend on the content type.
         if {[string match *text* $contenttype]} {
             ::gets $socketid line
-            ::puts $fileid $line
+            ::puts $cachefileid $line
             set contentloaded [expr $contentloaded + [string length $line] + 1]
         } else {
             set contentloaded 0  ;# Binary file can't use Resource's "gets"
@@ -1046,35 +819,18 @@ body ::tycho::ResourceHTTP::httpread {} {
             # perfect byte-to-byte format.
 
             # In Tcl8, this should be called "fcopy"
-            catch {unsupported0 $socketid $fileid} readsize
-            ::seek $fileid -$readsize end
-            set line [::read -nonewline $fileid]
+            catch {unsupported0 $socketid $cachefileid} readsize
+            ::seek $cachefileid -$readsize end
+            set line [::read -nonewline $cachefileid]
         }
     }
     # Update client-specified command and reconnect the file handler
     if { $notifycommand != "" } {
-	uplevel #0 $notifycommand
+        uplevel #0 $notifycommand
     }
     after idle [list ::fileevent $socketid readable \
-	    [list catch [list @scope ::tycho::ResourceHTTP \
+            [list catch [list @scope ::tycho::ResourceHTTP \
             [list $this httpread]]]]
-}
-
-#########################################################################
-#### httpstatus
-# A procedure that handles set and read of the status.
-#
-body ::tycho::ResourceHTTP::httpstatus {{value {}}} {
-    if {$value!={}} {
-        uplevel #0 "set _httpstatus($currentURL) $value"
-    }
-
-    if ![uplevel #0 "::info exists _httpstatus($currentURL)"] {
-        error "ASSERTION FAILED: _httpstatus($currentURL) does not exist!"
-    }
-
-    # Return the value
-    uplevel #0 "set _httpstatus($currentURL)"
 }
 
 #########################################################################
@@ -1109,20 +865,6 @@ body ::tycho::ResourceHTTP::splitURL {url} {
     }
     return [list $_hostname $_port $_path]
 }
-
-#########################################################################
-#### httpwait
-# Wait until the current GET completes
-body ::tycho::ResourceHTTP::httpwait {} {
-    # Wait until the status becomes "done"
-    #::puts -nonewline ">Waiting (($socketid) $currentURL?" ; flush stdout
-    while { [httpstatus] != "done" } {
-        uplevel #0 "tkwait variable _httpstatus($currentURL)"
-    }
-    #::puts "([::tycho::url tail $currentURL]) ok<" ; flush stdout
-    return
-}
-
 
 
 
