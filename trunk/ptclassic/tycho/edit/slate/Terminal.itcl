@@ -161,7 +161,7 @@ body ::tycho::Terminal::_direction {id canvas slate direction} {
     # redraw by setting style to nothing.
     set style $_style($id)
     set _style($id) {}
-    _style $id $canvas $style
+    _style $id $canvas $slate $style
 }
 
 ##########################################################################
@@ -196,7 +196,7 @@ body ::tycho::Terminal::_length {id canvas slate length} {
     # redraw by setting style to nothing.
     set style $_style($id)
     set _style($id) {}
-    _style $id $canvas $style
+    _style $id $canvas $slate $style
 }
 
 ##########################################################################
@@ -272,7 +272,7 @@ body ::tycho::Terminal::_type {id canvas slate type} {
     # redraw by setting style to nothing.
     set style $_style($id)
     set _style($id) {}
-    _style $id $canvas $style
+    _style $id $canvas $slate $style
 }
 
 ##########################################################################
@@ -320,7 +320,7 @@ body ::tycho::Terminal::construct {id canvas slate tags x0 y0 args} {
     # Update the style, forcing an update.
     set style $_style($id)
     set _style($id) {}
-    _style $id $canvas $style
+    _style $id $canvas $slate $style
 }
 
 ##########################################################################
