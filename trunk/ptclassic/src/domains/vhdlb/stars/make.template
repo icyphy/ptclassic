@@ -38,7 +38,7 @@ ROOT = ../../../..
 VPATH = $(ROOT)/src/domains/vhdlb/stars
 
 # get configuration info
-CONFIG=$(ROOT)/mk/config-$(ARCH).mk
+CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
 # VHDLBDIR is the directory containing VHDLB domain support
