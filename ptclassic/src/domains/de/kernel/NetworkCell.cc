@@ -39,21 +39,22 @@ static const char file_id[] = "NetworkCell.cc";
 NetworkCell::NetworkCell(Message& a, const int pri,
 		const int dest, const int sz, const int src, const float ct,
 		const float et):
-		priority(pri), destAddr(dest), mySize(sz), srcAddr(src),
-		createTime(ct), expireTime(et)
+		createTime(ct), expireTime(et), destAddr(dest), 
+		srcAddr(src), mySize(sz), priority(pri)
 { Envelope tmp(a); ourData = tmp; }
 
 
 NetworkCell::NetworkCell(const int pri, const int dest, const int sz,
 		const int src, const float ct, const float et):
-		priority(pri), destAddr(dest), mySize(sz), srcAddr(src),
-		createTime(ct), expireTime(et)
+		createTime(ct), expireTime(et),
+		destAddr(dest), srcAddr(src), mySize(sz), priority(pri)
 { Envelope tmp; ourData = tmp; }
 
 
-NetworkCell::NetworkCell(const NetworkCell& vc): priority(vc.priority),
-		destAddr(vc.destAddr), mySize(vc.mySize), srcAddr(vc.srcAddr),
-		createTime(vc.createTime), expireTime(vc.expireTime)
+NetworkCell::NetworkCell(const NetworkCell& vc):
+		createTime(vc.createTime), expireTime(vc.expireTime),
+		destAddr(vc.destAddr), srcAddr(vc.srcAddr), mySize(vc.mySize), 
+  		priority(vc.priority)
 { ourData = vc.ourData; }
 
 
