@@ -104,7 +104,7 @@
 # in which they were added to the model. To change the ordering,
 # use <b>reorder</b>:
 # <pre><tcl>
-#     $model reorder item {d b c a}
+#     $model reorder item {d c b a}
 #     $model match item
 # </tcl></pre>
 #
@@ -125,31 +125,30 @@
 #     $model match item -color green
 # </tcl></pre>
 #
-# To get the attribute list of an item:
+# To get the value of an attribute:
 # <pre><tcl>
-#     $model assign item:d
+#     $model attrget item:d -foo
 # </tcl></pre>
 #
-# Note that the list does not include the attribute <b>-foo</b>,
-# because item <b>d</b> has not changed it from the default.
-# To change the attribute list wholesale:
+# To get the complete attribute list of an item:
 # <pre><tcl>
-#     $model assign item:d -foo "I am changed!" -color purple
-#     $model assign item:d
+#     $model attrget item:d
 # </tcl></pre>
 #
-# Attributes can also be queried individually:
+# Note that the list includes the default value of the attribute
+# <b>-foo</b>. If you really want only attributes that have
+# been explicitly set, use <b>attrset</b>:
 # <pre><tcl>
-#     $model attrset item:d -foo "I am changed again!"
-#     $model attrset item:d -foo
+#     $model attrset item:d
 # </tcl></pre>
 #
-# Note that this method, unlike <b>assign</b> will include attributes
-# with default values in the result list:
+# This method, <b>attrset</b> is actually there so you can change
+# attributes:
 # <pre><tcl>
-#     $model attrset item:a
+#     $model attrset item:d -foo "I am changed!" -color purple
+#     $model attrget item:d
 # </tcl></pre>
-# 
+#
 # SimpleModel is a subclass of <a href="Model.html">Model</a>, and therefore
 # inherits its publish-and-subscribe and history mechanisms. For
 # a working example of the subscription mechanism, see
