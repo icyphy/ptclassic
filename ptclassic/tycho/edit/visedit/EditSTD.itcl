@@ -53,9 +53,6 @@ class ::tycho::EditSTD {
     # Clear all previous highlight states.
     method clearHighlightState {}
 
-    # Draw the visual syntax of an arc based on preemptiveness and entry type
-    method drawArcAttribute {arc}
-
     method editArc {arc} 
     method editArcDone {arc w}
 
@@ -216,13 +213,6 @@ body ::tycho::EditSTD::clearHighlightState {} {
     }
 }
 
-################################################################
-#### drawArcAttribute
-# Draw the visual syntax of an arc based on preemptiveness and entry type
-#
-body ::tycho::EditSTD::drawArcAttribute {arc} {
-}
-
 ###################################################################
 #### editArc and editArcDone
 # Edit an arc.
@@ -278,12 +268,14 @@ body ::tycho::EditSTD::editArcDone {arc w} {
     set newPreemptive [string trim [$w get preemptive]]
     if {$edgeInfo($arc,preemptive) != $newPreemptive} {
 	set edgeInfo($arc,preemptive) $newPreemptive
+        $slate itemconfigure $arc -preempt [string tolower $newPreemptive]
 	$this markModified	
     }
 
     set newEntryType [string trim [$w get entryType]]
     if {$edgeInfo($arc,entryType) != $newEntryType} {
 	set edgeInfo($arc,entryType) $newEntryType
+        $slate itemconfigure $arc -entry [string tolower $newEntryType]
 	$this markModified	
     }
 }
@@ -1197,10 +1189,32 @@ body ::tycho::EditSTD::saveText {} {
     # Step through all the arcs in the canvas.
     append text "\n### Creating the arcs\n"
     foreach arc [$slate find withtag arc] {
-	set smooth [$slate itemcget $arc -smooth]
-	append text "set arc \[\$slate create line\
-		[$slate coords $arc] -arrow last -tags arc -fill black\
-		-smooth $smooth\]\n"
+        set coords  [$slate coords $arc]
+	set smooth  [$slate itemcget $arc -smooth]
+
+        # To be compatible with old codes, we have to
+        # use "data structure" instead of "graphic structure"
+        #set oangle  [$slate itemcget $arc -oangle]
+        #set iangle  [$slate itemcget $arc -iangle]
+        #set preempt [$slate itemcget $arc -preempt]
+        #set entry   [$slate itemcget $arc -entry]
+        set oangle  [slope_to_angle $edgeInfo($arc,outSlope)\
+                $edgeInfo($arc,outXneg)]
+        set iangle  [slope_to_angle $edgeInfo($arc,inSlope)\
+                $edgeInfo($arc,inXneg)]
+	if {![info exists edgeInfo($arc,preemptive)]} {
+            set edgeInfo($arc,preemptive) NO
+	}
+        set preempt [string tolower $edgeInfo($arc,preemptive)]
+	if {![info exists edgeInfo($arc,entryType)]} {
+            set edgeInfo($arc,entryType) History
+        }
+        set entry [string tolower $edgeInfo($arc,entryType)]
+
+	append text "set arc \[\$slate create Transition $coords\
+                -oangle $oangle -preempt $preempt -iangle $iangle\
+                -entry $entry -smooth $smooth\
+                -arrow last -tags arc -fill black\]\n"
 	# Set up the corresponding nodeInfo and edgeInfo entries.
 	set src $edgeInfo($arc,src)
 	append text "set edgeInfo(\$arc,src) \$node$src\n"
@@ -1243,16 +1257,12 @@ body ::tycho::EditSTD::saveText {} {
 		$edgeInfo($arc,label_deltay)\n"
 
 	# Preemptive.
-	if [info exists edgeInfo($arc,preemptive)] {
-	    append text "set edgeInfo(\$arc,preemptive)\
-		    $edgeInfo($arc,preemptive)\n"
-	}
+        append text "set edgeInfo(\$arc,preemptive)\
+                $edgeInfo($arc,preemptive)\n"
 	
 	# Entry type. 
-	if [info exists edgeInfo($arc,entryType)] {
-	    append text "set edgeInfo(\$arc,entryType)\
-		    $edgeInfo($arc,entryType)\n"
-	}
+        append text "set edgeInfo(\$arc,entryType)\
+                $edgeInfo($arc,entryType)\n"
 
 	append text "\n"
     }
