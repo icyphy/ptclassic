@@ -42,6 +42,7 @@ PL_SRCS= \
  SDFFIRCx.pl \
  SDFFIRFix.pl \
  SDFGAL.pl SDFGGAL.pl \
+ SDFGLA.pl \
  SDFHilbert.pl \
  SDFIIR.pl \
  SDFIIRFix.pl \
@@ -58,9 +59,12 @@ PL_SRCS= \
  SDFPattMatch.pl \
  SDFRLattice.pl \
  SDFRaisedCosine.pl \
+ SDFSGVQCodebk.pl \
+ SDFSGVQCoder.pl \
  SDFSinc.pl \
  SDFSVD_M.pl \
  SDFUnwrap.pl \
+ SDFVQCoder.pl \
  SDFWindow.pl
 
 # The .cc files
