@@ -67,6 +67,8 @@ LIB = 		librpc.$(LIBSUFFIX)
 
 EXPHDR =	rpc.h
 
+MISC_FILES =	rpc.doc
+
 # pigilib needs rpcApp.h
 header:: $(OCTTOOLS)/include/rpcApp.h $(OCTTOOLS)/include/rpcInternal.h \
 	../../include/rpcApp.h 	../../include/rpcInternal.h

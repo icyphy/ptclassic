@@ -53,6 +53,8 @@ LIB = 		libMaxport.$(LIBSUFFIX)
 
 EXPHDR =	Maxport.h
 
+MISC_FILES =	Maxport.doc
+
 # common makefile file for vem libraries
 VEMLIBCONFIG=../../vem-lib.mk
 include $(VEMLIBCONFIG)

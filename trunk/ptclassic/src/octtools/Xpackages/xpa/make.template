@@ -63,6 +63,8 @@ DRVROBJ = 	xpa_test.o
 
 DRVRLIBS =	-lxpa -lport -lerrtrap -luprintf -lX11
 
+MISC_FILES = 	arrow xpa.doc
+
 # common makefile file for vem libraries
 VEMLIBCONFIG=../../vem-lib.mk
 include $(VEMLIBCONFIG)

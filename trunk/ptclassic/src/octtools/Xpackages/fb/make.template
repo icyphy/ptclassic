@@ -65,6 +65,8 @@ DRVROBJ =	br_test.o
 
 DRVRLIBS =	-lMaxport -lutility -lst -lerrtrap -luprintf -lport $(X11_LIBSPEC)  $(X11EXT_LIBSPEC) -lXt -lXaw -lXmu -lX11
 
+MISC_FILES =	br_test.resources default.bm fb.doc file.bm folder.bm
+
 # common makefile file for vem libraries
 VEMLIBCONFIG=../../vem-lib.mk
 include $(VEMLIBCONFIG)

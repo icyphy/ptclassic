@@ -70,6 +70,10 @@ DRVROBJ = 	iv_test.o
 
 DRVRLIBS =	-lport -lerrtrap -luprintf $(X11_LIBSPEC) $(X11EXT_LIBSPEC)
 
+MISC_FILES =	button.bitmap.11 cursor.bitmap.11 iv.3 minus.bitmap.11 \
+		minusPush.bitmap.11 plus.bitmap.11 plusPush.bitmap.11 \
+		pushed.bitmap.11
+
 # common makefile file for vem libraries
 VEMLIBCONFIG=../../vem-lib.mk
 include $(VEMLIBCONFIG)
