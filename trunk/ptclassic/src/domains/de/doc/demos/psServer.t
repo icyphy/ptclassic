@@ -3,8 +3,9 @@
 .SD
 Demonstrate the processor-sharing server.
 Unlike other servers, this server accepts new inputs at any time,
-regardless of how busy it is.  Accepting a new input, however,
-slows down the service to all particles currently being served.
+regardless of how busy it is.
+Accepting a new input, however, slows down the service to all
+particles currently being served.
 .DE
 .LO "$PTOLEMY/src/domains/de/demo"
 .SV $Revision$ $Date$
@@ -12,8 +13,8 @@ slows down the service to all particles currently being served.
 .LD
 A regular stream of particles, spaced at intervals of 0.8,
 is sent to a
-.c PSServer,
-or processor-sharing server star.
+.c PSServer
+star, or processor-sharing server star.
 .IE PSServer
 .IE "processor-sharing server"
 In this demo, the nominal service time is 1.0,

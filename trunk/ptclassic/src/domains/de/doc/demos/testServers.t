@@ -8,8 +8,8 @@ service times (uniform and exponential).
 .SV $Revision$ $Date$
 .AL "E. A. Lee"
 .LD
-.IE Sampler
-This rather trivial demo feeds a regular stream of events to the
+.IR Sampler
+This demo feeds a regular stream of events to the
 .c UniServer
 and
 .c ExpServer.

@@ -1,9 +1,11 @@
 .\" $Id$
 .NA merge
 .SD
-This rather trivial demo demonstrates the Merge star.
+This demo illustrates the
+.c Merge
+star.
 It is fed two streams of regular arrivals,
-one a ramp beginning at 10.0, and one a ramp beginning at 0.0.
+one is a ramp beginning at 10.0, and one is a ramp beginning at 0.0.
 The two streams are merged into one, in chronological order,
 with simultaneous events appearing in arbitrary order.
 .DE

@@ -13,7 +13,7 @@ The
 .c Poisson
 and
 .c FloatRamp
-blocks provide a randomly spaced stream of increasing numbers
+stars provide a randomly spaced stream of increasing numbers
 to the
 .c FlushQueue
 galaxy.
@@ -31,8 +31,10 @@ The
 galaxy graphs its queue length vs. time.
 .pp
 Users may wish to compare this queue service discipline to other
-queue service disciplines, using Poisson and other types of sources.
+queue service disciplines, using
+.c Poisson
+and other types of sources.
 .SA
-Poisson
-FlushQueue
+FlushQueue,
+Poisson.
 .ES

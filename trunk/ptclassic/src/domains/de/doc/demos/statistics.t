@@ -1,9 +1,14 @@
 .\" $Id$
 .NA statistics
 .SD
-Compute the mean and variance of a random process using the Statistics star.
+Compute the mean and variance of a random process using the
+.c Statistics
+star.
 The mean and variance are sent to the standard output when the simulation
-stops.  This action is triggered by an event produced by the StopTimer star.
+stops.
+This action is triggered by an event produced by the
+.c StopTimer
+star.
 .DE
 .LO "$PTOLEMY/src/domains/de/demo"
 .SV $Revision$ $Date$
@@ -26,7 +31,7 @@ star when an event is sent to the demand input of the
 star.
 The
 .c Printer
-can write the data to a file, or send it to the standard output.
+star can write the data to a file, or send it to the standard output.
 The latter is the default.
 In this demo, these statistics are printed only at the
 end of the simulation run.  The
@@ -54,9 +59,8 @@ We can use the
 block to obtain the statistics of the queue size in a queueing system.
 The
 .c StopTimer 
-block might be used to specify when to
-sample the output data of the DE domain if the DE domain
-resides in a 
+block might be used to specify when to sample the output data of
+the DE domain if the DE domain resides in a 
 .c Wormhole
 of a untimed domain like SDF.
 .IE StopTimer

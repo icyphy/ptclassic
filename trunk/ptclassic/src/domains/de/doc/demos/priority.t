@@ -1,8 +1,12 @@
 .\" $Id$
 .NA priority
 .SD
-Demonstrates the use of the PriorityQueue block together with a Server.
-The upper input to the PriorityQueue has priority over the lower input.
+Demonstrates the use of the
+.c PriorityQueue
+block together with a Server.
+The upper input to the
+.c PriorityQueue
+has priority over the lower input.
 Thus, when the queue overflows, data is lost from the lower input.
 .DE
 .LO "$PTOLEMY/src/domains/de/demo"
@@ -19,7 +23,7 @@ is used instead of a regular
 .c FIFOQueue.
 The
 .c PriorityQueue
-block can take any number of inputs (two in this example),
+star can take any number of inputs (two in this example),
 and the inputs are prioritized from top to bottom.
 Each input has its own queue.
 When a demand event arrives, an output will be produced
@@ -35,18 +39,20 @@ Notice on the output plot that high priority arrivals always pass to the
 output within the service time, or 1.0 time unit.
 The server is not preempted.
 .pp
-The \fIcapacity\fR parameter of the PriorityQueue star gives the total
-storage limit of the star.  When the storage limit is exceeded,
-the lowest priority items are removed from the queue sent to the
-\fIoverflow\fR output.  Hence, a high priority arrival can displace
-a lower priority item that had previously arrived and been queued.
-In the demo, the capacity is set to 6.  Once this capacity is reached,
-each time a high priority event arrives, a low priority event
-will be bumped to the \fIoverflow\fR output.
+The \fIcapacity\fR parameter of the
+.c PriorityQueue
+star gives the total storage limit of the star.
+When the storage limit is exceeded, the lowest priority items are
+removed from the queue sent to the \fIoverflow\fR output.
+Hence, a high priority arrival can displace a lower priority item that
+had previously arrived and been queued.
+In the demo, the capacity is set to 6.
+Once this capacity is reached, each time a high priority event arrives,
+a low priority event will be bumped to the \fIoverflow\fR output.
 .SA
 delayVsServer,
+FIFOQueue,
 qAndServer,
 queue,
-FIFOQueue,
 Server.
 .ES

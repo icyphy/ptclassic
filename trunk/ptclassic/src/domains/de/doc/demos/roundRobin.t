@@ -1,8 +1,8 @@
 .\" $Id$
 .NA "roundRobin"
 .SD
-This is a high-level simulation of a shared
-memory with round-robin arbitration.
+This is a high-level simulation of a shared memory with
+round-robin arbitration.
 .SE
 .LO "$PTOLEMY/src/domains/de/demo"
 .SV $Revision$ $Date$
@@ -21,8 +21,8 @@ graphed.
 One graph shows the data traffic on the shared bus, while the other graphs
 monitor each output to verify that responses have been routed properly.
 .SA
+prioritized,
 Poisson,
-roundRobin4,
 rom,
-prioritized.
+roundRobin4.
 .ES

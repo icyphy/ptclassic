@@ -13,10 +13,10 @@ reading the items in the packet one by one.
 When five sequential values of the ramp appear at the output,
 then an entire packet has been received and deconstructed.
 After an entire packet has been deconstructed, it is possible
-for the last value to get repeated.  This occurs if no new packet
-has arrived by the time the outputs are requested.
-In addition, a portion of each packet may be lost.  This occurs
-if a new packet arrives before a previously arrived packet has been 
-completely deconstructed.
-.SA
+for the last value to get repeated.
+This occurs if no new packet has arrived by the time the outputs
+are requested.
+In addition, a portion of each packet may be lost.
+This occurs if a new packet arrives before a previously arrived
+packet has been completely deconstructed.
 .ES

@@ -1,8 +1,9 @@
 .\" $Id$
 .NA shave
 .SD
-Demonstrate the Synchronize star to generate a beeping sound
-with a real-time rhythm.
+Demonstrate the
+.c Synchronize
+star to generate a beeping sound with a real-time rhythm.
 .DE
 .LO "$PTOLEMY/src/domains/de/demo"
 .SV $Revision$ $Date$

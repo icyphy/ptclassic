@@ -1,10 +1,12 @@
 .\" $Id$
 .NA sampler
 .SD
-This rather trivial system demonstrates the Sampler star.
+This demo tests the
+.c Sampler
+star.
 A counting process with regular arrivals at intervals of 5.0
-is sampled at regular intervals of 1.0.  As expected, this
-produces 5 samples for each level of the counting process.
+is sampled at regular intervals of 1.0.
+As expected, this produces 5 samples for each level of the counting process.
 .DE
 .LO "$PTOLEMY/src/domains/de/demo"
 .SV $Revision$ $Date$

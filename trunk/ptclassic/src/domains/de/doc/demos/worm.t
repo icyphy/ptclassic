@@ -11,8 +11,12 @@ SDF wormhole, where Gaussian noise is added to the samples.
 .AL "E. A. Lee"
 .LD
 The overall delay of the SDF wormhole is zero, so the result
-is simply Poisson arrivals of Gaussian noise samples.
+is simply
+.c Poisson
+arrivals of
+.c Gaussian
+noise samples.
 .SA
-Poisson,
-IIDGaussian.
+IIDGaussian,
+Poisson.
 .ES

@@ -1,8 +1,12 @@
 .\" $Id$
 .NA switch
 .SD
-This simple system demonstrates the use of the Switch
-star.  A Poisson counting process is sent to one output
+This system tests the
+.c Switch
+star.
+A
+.c Poisson
+counting process is sent to one output
 of the switch for the first 10 time units, and to the other
 output of the switch for the remaining time.
 .DE
@@ -10,6 +14,7 @@ output of the switch for the remaining time.
 .SV $Revision$ $Date$
 .AL "E. A. Lee"
 .LD
+.IR "Poisson counting process"
 A Poisson counting process is sent through one path (the "false" path)
 until time 10.0, and through another path (the "true" path) after that.
 The
@@ -31,6 +36,5 @@ A control input of zero routes input events through the lower ("false")
 output, while any other control input routes events through the upper
 ("true") path.
 .SA
-Poisson counting process,
 Switch.
 .ES

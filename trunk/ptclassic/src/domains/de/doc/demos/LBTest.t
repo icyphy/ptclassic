@@ -2,9 +2,8 @@
 .NA LBTest
 .SD
 Simulate leaky bucket network rate controllers.
-These controllers moderate the flow of packets
-to keep them within specified rate and burstiness
-bounds.
+These controllers moderate the flow of packets to keep them within
+specified rate and burstiness bounds.
 .DE
 .LO "$PTOLEMY/src/domains/de/demo"
 .SV $Revision$ $Date$
@@ -14,13 +13,12 @@ The
 .c Poisson
 and
 .c FloatRamp
-blocks provide a randomly-spaced increasing sequence of numbers.
+stars provide a randomly-spaced increasing sequence of numbers.
 This demonstration shows how leaky bucket controllers
 discard input samples that violate the leaky buckets'
 rate and burstiness bounds.
 .pp
-Networks
-that use asynchronous transfer mode (ATM) transmission
+Networks that use asynchronous transfer mode (ATM) transmission
 such as the broadband integrated services digital network (BISDN)
 can carry variable-rate traffic.
 However, for a network to guarantee its service quality,
@@ -34,8 +32,7 @@ not transmit data too quickly.
 The leaky bucket acts much like a queue with deterministic service.
 Without actually enqueueing any data,
 the leaky bucket counts how many data cells \fIwould be\fR
-in a queue with a specified capacity and deterministic service
-rate.
+in a queue with a specified capacity and deterministic service rate.
 With multiple leaky buckets, several rate and burstiness bounds
 can be enforced at once.
 .pp
@@ -46,6 +43,6 @@ vs. time.
 Users may wish to see how these graphs change with different
 leaky bucket parameters or with non-Poisson data traffic.
 .SA
-LeakBucket
-Poisson
+LeakBucket,
+Poisson.
 .ES
