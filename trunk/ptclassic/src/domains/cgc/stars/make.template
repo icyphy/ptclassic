@@ -52,13 +52,13 @@ PL_SRCS= \
  CGCBitsToInt.pl \
  CGCBlackHole.pl \
  CGCBusFork.pl \
+ CGCChop.pl \
+ CGCChopVarOffset.pl \
  CGCCollect.pl  \
  CGCCommutator.pl \
  CGCConst.pl \
  CGCCopy.pl \
  CGCCos.pl \
- CGCCut.pl \
- CGCCutVarOffset.pl \
  CGCCxToFix.pl \
  CGCCxToFloat.pl \
  CGCCxToRect.pl \
