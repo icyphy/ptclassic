@@ -103,7 +103,7 @@ void ptReleaseSig (int SigNum) {};
 
 #else 
 #if defined(PTHPPA)
-void ptSafeSig( int SigNum ) { /* to avoid warning */ int a = SigNum;};
+void ptSafeSig( int ) {}
 long signalmask;
 void ptBlockSig( int SigNum ) {
 	signalmask = sigblock(sigmask(SigNum));
