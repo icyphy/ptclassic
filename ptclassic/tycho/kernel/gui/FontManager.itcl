@@ -333,9 +333,8 @@ abcdefghijklmnopqrstuvwxyz
     itk_component add fontname {
 	label $itk_component(childsite).label
     } {
-	keep -highlightthickness -background \
+	keep -font -highlightthickness -background \
 		-foreground -highlightbackground
-	rename -font -samplerfont samplerFont SamplerFont
     }
     pack $itk_component(fontname) -fill both -expand yes    
 
