@@ -24,8 +24,7 @@ const char SDFstring[] = "SYNCHRONOUS DATAFLOW";
 	
 class SDFUniverse : public Universe {
 public:
-	SDFUniverse(Galaxy& g) : Universe(new SDFScheduler,SDFstring,&g) {}
-	SDFUniverse() : Universe(new SDFScheduler,SDFstring,0) {}
+	SDFUniverse() : Universe(new SDFScheduler,SDFstring) {}
 };
 
 #endif
