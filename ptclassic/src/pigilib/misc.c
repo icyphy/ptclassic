@@ -178,13 +178,37 @@ long userOptionWord;
 #define ITEMS_N sizeof(items) / sizeof(dmTextItem)
     octObject facet, prop;
     octStatus status;
+    RPCArg *theArg;
     Window newWindow;  /* the vem window looking at facet */
     octBox bbox;  /*  an argument to octBB, return value not used */
     void AdjustScalePan(); /* this function is right after RpcOpenFacet */
 
     ViInit("open-facet");
     ErrClear();
-    if (dmMultiText("open-facet", ITEMS_N, items) != VEM_OK) {
+
+    /* see if the facet name was given as a Vem argument */
+    if ((lsLastItem(cmdList, (lsGeneric *) &theArg, LS_NH) == VEM_OK) &&
+	(theArg->argType == VEM_TEXT_ARG)) {
+	/* set default values */
+	facet.contents.facet.view = "schematic";
+	facet.contents.facet.facet = "contents";
+	if (ohUnpackFacetName(&facet, theArg->argData.string) != OCT_OK) {
+	    PrintErr("Cannot parse window specification");
+	    ViDone();
+	}
+	else {
+	    char buf[512];
+	    items[0].value = facet.contents.facet.cell;
+	    items[1].value = facet.contents.facet.view;
+	    items[2].value = facet.contents.facet.facet;
+	    sprintf (buf, "opening %s:%s:%s", items[0].value, items[1].value,
+		     items[2].value);
+	    PrintDebug (buf);
+	    sleep(1);
+	}
+    }
+    /* not on command line, prompt for it */
+    else if (dmMultiText("open-facet", ITEMS_N, items) != VEM_OK) {
 	PrintCon("Aborted entry");
 	ViDone();
     }
@@ -276,7 +300,10 @@ long userOptionWord;
 
     ViInit("load-star");
     /* set the current domain */
-    setCurDomainS(spot);
+    if (!setCurDomainS(spot)) {
+        PrintErr("Invalid domain found");
+	ViDone();
+    }
     /* get name of instance under cursor */
     status = vuFindSpot(spot, &inst, OCT_INSTANCE_MASK);
     if (status == VEM_NOSELECT) {
