@@ -38,9 +38,12 @@
 #
 # The Builder class is primarily for use on platforms such as the Mac
 # that do not have 'make'
+
+# The procs in this class should be named such that similar procs 
+# share similar prefixes so that they are grouped together.  For example,
+# testAll and testDir.
 #
-# See the BuilderDialog class for a graphical interface
-#
+# See the BuilderDialog class for a graphical interface.
 #
 # FIXME: it would be nice if we could parse makefiles to get variables.
 #
@@ -49,9 +52,6 @@
 class ::tycho::Builder {
     inherit ::tycho::Uninstantiable
 
-    constructor {args} {}
-    destructor {}
-    
     ###################################################################
     ####                         public procs                      ####
 
@@ -63,6 +63,12 @@ class ::tycho::Builder {
 
     # Create the class diagram. 
     proc classDiagram {}
+
+    # Create a Full Tycho distribution.
+    proc distFull {}
+
+    # Return the directory where the distribution is built.
+    proc getDistBuildDir {} {return $distbuilddir}
 
     # Create glimpse files.
     proc glimpse {}
@@ -85,6 +91,9 @@ class ::tycho::Builder {
     ###################################################################
     ####                   protected variables                     ####
 
+    # Location of the directory where the distribution is built
+    protected common distbuilddir [file join $TYCHO adm gen-$tycho_version]
+
     # List of directories that contain Itcl sources.
     protected common itcldirs [list \
 	    [file join \$TYCHO kernel] \
@@ -95,20 +104,6 @@ class ::tycho::Builder {
 	    [file join \$TYCHO typt editors]]
 }
 
-#######################################################################
-#### constructor
-#
-body ::tycho::Builder::constructor {args} {
-}
-
-
-#######################################################################
-#### destructor
-#
-body ::tycho::Builder::destructor {} {
-}
-
-
     ###################################################################
     ###################################################################
     ####                      public procs                       ####
@@ -116,7 +111,8 @@ body ::tycho::Builder::destructor {} {
 
 #######################################################################
 #### build
-# Do what ever is necessary to build Tycho
+# Do what ever is necessary to build the documentation, indices and other
+# files from Tycho source files.
 #
 body ::tycho::Builder::build {} {
     global TYCHO
@@ -131,16 +127,16 @@ body ::tycho::Builder::build {} {
 
 #######################################################################
 #### buildSubDirectories
-# Run build in subdirectories
+# Run build in subdirectories.
 #
 body ::tycho::Builder::buildSubDirectories {} {
     # FIXME: buildSubDirectories is not implemented yet
-    error "Running buildSubDirectories"
+    error "buildSubDirectories is not implemented yet."
 }
 
 #######################################################################
 #### classDiagram
-# Create the Tycho class diagram
+# Create the Tycho class diagram.
 #
 body ::tycho::Builder::classDiagram {} {
     global TYCHO
@@ -160,8 +156,27 @@ body ::tycho::Builder::classDiagram {} {
 }
 
 #######################################################################
+#### distFull
+# Create a Full Tycho distribution for redistribution off-site.
+# 
+body ::tycho::Builder::distFull {} {
+    global TYCHO
+
+    if ![file writable $distbuilddir] {
+        error "Cannot build Tycho distribution, the\ndirectory\
+                '$distbuilddir' either does not exist or is not writable."
+    }
+    set win [::tycho::autoName .distFullExec]
+    ::tycho::Monitor $win \
+            -command {make clean all} \
+            -dir $distbuilddir \
+            -autostart 1 -autodestroy 1
+
+}
+
+#######################################################################
 #### glimpse
-# Create glimpse files
+# Create glimpse files.
 #
 body ::tycho::Builder::glimpse {} {
     ::tycho::Glimpse::updateTychoDatabase
@@ -169,7 +184,7 @@ body ::tycho::Builder::glimpse {} {
 
 #######################################################################
 #### indices
-# Create the concept and code Indices
+# Create the concept and code indices.
 #
 body ::tycho::Builder::indices {} {
     global TYCHO
@@ -190,8 +205,8 @@ body ::tycho::Builder::indices {} {
 
 #######################################################################
 #### itcldocs
-# Create itcldocs in the subdirectories
-# See $TYCHO/lib/tydoc/tydoc
+# Create itcldocs in the subdirectories.
+# See $TYCHO/lib/tydoc/tydoc for more information.
 #
 body ::tycho::Builder::itcldocs {} {
     global TYCHO
@@ -220,6 +235,7 @@ body ::tycho::Builder::itcldocs {} {
 #######################################################################
 #### testAll
 # Run all the Tycho tests.
+# See $TYCHO/doc/coding/testing.html for more information.
 #
 body ::tycho::Builder::testAll {} {
     global TYCHO
@@ -236,8 +252,8 @@ body ::tycho::Builder::testAll {} {
 body ::tycho::Builder::testDir { dir {testfile alltests.itcl}} {
     global TYCHO
     set savedir [pwd]
-    cd dir
-    source $testfile
+    cd $dir
+    uplevel #0 source $testfile
     cd $savedir
 }
 
