@@ -57,13 +57,16 @@ export MAKE_MODE
 is unlikely to build and has not been tested.
 </MENU>
 
-<H2>Ptcl bugs</H2>
-<MENU>
-<LI> The Matlab and Mathematica stars do not work.
-</MENU>
 
-<h2>Running Ptolemy bugs</h2>
+<h2>Problems Starting Ptolemy</h2>
 <menu>
+
+<li> <CODE>$PTOLEMY/bin/pigi</CODE> prints warning messages about
+not being able to find <CODE>xrdb</CODE>.  This is because
+<CODE>/bin/sh.exe</CODE> does not have a working <CODE>type</CODE>
+command.  One workaround would be to copy <CODE>bash.exe</CODE>
+to <CODE>/bin/sh.exe</CODE>, though this will result in slower compiles.
+
 <li> If you see the following message, then you may need to 
 upgrade to Cygwinb19.1.
 <pre>
@@ -72,6 +75,26 @@ RPC Error: cannot connect to the server
 </pre>
 </menu>
 
+<h2>Problems Running Ptolemy</h2>
+<MENU>
+<LI> The Matlab and Mathematica stars do not work.
+
+<li> The SDF Gaussian demo fails with:
+<pre>
+Error: no interpreter to evaluate 'expr 1024/8'
+</pre>
+This message comes from <CODE>kernel/InvokeInterp.cc</CODE>:
+<pre>
+// send a string to an external interpreter for evaluation
+const char*
+InvokeInterp :: interpreter(const char* expression) {
+    Error::error("no interpreter to evaluate '", expression, "'.");
+    return NULL;
+}
+</pre>
+My guess is that this has to do with the fact that there are multiple
+definitions of this method in the kernel, pigilib and ptcl.
+</MENU>
 
  <HR>
 <A HREF="index.html">Up to the Ptolemy under NT page</A> -
