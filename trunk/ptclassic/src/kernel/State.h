@@ -147,6 +147,7 @@ public:
 
 	// class identification
 	int isA(const char*) const;
+	const char* readClassName() const {return "State";}
 
 protected:
 	// string used to set initial value by initialize()

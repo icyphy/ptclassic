@@ -48,6 +48,7 @@ public:
 
 	// class identification
 	int isA(const char*) const;
+	const char* readClassName() const {return "FixArrayState";}
 
 	State* clone () const; // { return new FixArrayState;}
 };
