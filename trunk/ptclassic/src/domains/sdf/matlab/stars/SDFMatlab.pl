@@ -152,7 +152,7 @@ extern "C" {
 	  name { evaluateMatlabCommand }
 	  access { protected }
 	  type { int }
-	  arglist { "(char *matlabCommand, int abortOnError)" }
+	  arglist { "(char *matlabCommand)" }
 	  code {
 		// change directories to one containing the Matlab command
 		static InfString lastdirname = " ";
@@ -201,12 +201,7 @@ extern "C" {
 		  errstr = "\nThe Matlab command `";
 		  errstr << matlabCommand;
 		  errstr << "'\ngave the following error message:\n";
-		  if ( abortOnError ) {
-		    Error::abortRun( *this, errstr, matlabOutputBuffer );
-		  }
-		  else {
-		    Error::warn( *this, errstr, matlabOutputBuffer );
-		  }
+		  Error::warn(*this, (const char *) errstr, matlabOutputBuffer);
 		}
 
 		return(mstatus);
