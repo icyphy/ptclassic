@@ -1443,7 +1443,7 @@ body ::tycho::Edit::incSearchMinibuffer {{backward 0}} {
         search
     } else {
         statusbar entry "i-search:"\
-                -default $searchText \
+                -default "" \
                 -command "$incSearch end" \
                 -keycommand "$incSearch %A"
 
