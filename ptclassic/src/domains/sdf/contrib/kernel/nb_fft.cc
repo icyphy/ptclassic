@@ -7,7 +7,7 @@ const NEXTMX = 12;
 
 const int prime[ NEXTMX ] = { 2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37 };
 
-Complex* fft::Compute( Complex* z1, Complex* z2 ) {
+Complex* nb_fft::Compute( Complex* z1, Complex* z2 ) {
   int before = N;
   int after = 1;
   int next = 0;
@@ -36,7 +36,7 @@ Complex* fft::Compute( Complex* z1, Complex* z2 ) {
   return ( inzee == 1 ) ? z1 : z2 ;
 }
 
-void fft::fftstp( Complex* zin, int after, int now, int before, Complex* zout ) {
+void nb_fft::fftstp( Complex* zin, int after, int now, int before, Complex* zout ) {
   double angle = ( Inverse ? -Pi2 : Pi2 ) / ( now * after );
   Complex omega = Complex( cos( angle ), -sin( angle ) );
   Complex arg = 1;
