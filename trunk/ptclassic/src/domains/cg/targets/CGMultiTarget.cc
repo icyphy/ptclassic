@@ -61,9 +61,9 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "HierScheduler.h"
 #include "Cluster.h"
 
-CGMultiTarget::CGMultiTarget(const char* name,const char* sClass,
-			     const char* desc) :
-MultiTarget(name,sClass,desc), modifiedGalaxy(0), rm(0)
+CGMultiTarget::CGMultiTarget(const char* name, const char* sClass,
+			     const char* desc, const char* assocDomain) :
+MultiTarget(name,sClass,desc,assocDomain), modifiedGalaxy(0), rm(0)
 {
     addState(childType.setState("childType", this, "default-CG",
 	"child proc types"));
@@ -98,7 +98,8 @@ CGMultiTarget::~CGMultiTarget() {
 }
 
 Block* CGMultiTarget::makeNew() const {
-    LOG_NEW; return new CGMultiTarget(name(), starType(), descriptor());
+    LOG_NEW; return new CGMultiTarget(name(), starType(), descriptor(),
+				      getAssociatedDomain());
 }
 
 // setup
@@ -737,8 +738,9 @@ int CGMultiTarget :: childIsA(const char* type) const {
     return Target::childIsA(type);
 }
 
-static CGMultiTarget targ("FullyConnected","CGStar",
-			  "Fully-connected targets for parallel scheduling");
+static CGMultiTarget targ("FullyConnected", "CGStar",
+			  "Fully-connected targets for parallel scheduling",
+			  CGdomainName);
 
 static KnownTarget entry(targ,"FullyConnected");
 

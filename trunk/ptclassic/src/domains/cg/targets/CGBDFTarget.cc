@@ -43,15 +43,16 @@ static const char file_id[] = "CGBDFTarget.cc";
 #include "KnownTarget.h"
 
 CGBDFTarget::CGBDFTarget(const char* name, const char* starclass,
-			 const char* desc)
-: CGTarget(name,starclass,desc)
+			 const char* desc, const char* assocDomain) :
+CGTarget(name,starclass,desc,assocDomain)
 {
 	// make loopingLevel invisible
 	loopingLevel.clearAttributes(A_SETTABLE);
 }
 
 Block* CGBDFTarget::makeNew() const {
-	LOG_NEW; return new CGBDFTarget(name(),starType(),descriptor());
+	LOG_NEW; return new CGBDFTarget(name(),starType(),descriptor(),
+					getAssociatedDomain());
 }
 
 void CGBDFTarget::setup() {

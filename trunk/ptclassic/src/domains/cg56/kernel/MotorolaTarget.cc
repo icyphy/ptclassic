@@ -62,7 +62,9 @@ MotorolaMemory :: MotorolaMemory(const char* x_map, const char* y_map) :
 {}
 
 MotorolaTarget :: MotorolaTarget (const char* nam, const char* desc,
-	const char* stype): AsmTarget(nam,desc,stype)
+				  const char* stype,
+				  const char* assocDomain) :
+AsmTarget(nam,desc,stype,assocDomain)
 {
 	initStates();
 }
@@ -134,7 +136,7 @@ MotorolaTarget :: ~MotorolaTarget () {
 
 // copy constructor
 MotorolaTarget :: MotorolaTarget (const MotorolaTarget& src) :
-AsmTarget(src.name(),src.descriptor(),src.starType())
+AsmTarget(src.name(),src.descriptor(),src.starType(),src.getAssociatedDomain())
 {
 	initStates();
 	copyStates(src);
