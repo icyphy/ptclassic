@@ -199,21 +199,20 @@ $(ITCL_OBJ)/libitcl.a: $(ITCL_OBJ)
 # In Itcl3.0, itk.h includes itclInt.h which includes 
 # tclInt.h and tclRegexp.h
 install_itcl: $(ITCL_DEST_LIB)/libitcl.a fixlinks \
-			$(ITCL_INDEPENDENT_DEST)/include/tclInt.h \
-			$(ITCL_INDEPENDENT_DEST)/include/tclRegexp.h
-
+			$(TCL8_INDEPENDENT_DEST)/include/tclInt.h \
+			$(TCL8_INDEPENDENT_DEST)/include/tclRegexp.h
 	-(cd $(BINDIR); ln -s $(REL_ITCL_BINDIR)/* .)
 
-$(ITCL_INDEPENDENT_DEST)/include/tclInt.h:
+$(TCL8_INDEPENDENT_DEST)/include/tclInt.h:
 	if [ ! -f $@ ]; then \
 		echo "Copying tclInt.h"; \
-		cp $(ITCL_SRC)/tcl$(ITCL_TCL_MAJOR_VERSION_NUMBER)/generic/tclInt.h $@; \
+		cp $(TCL8_SRC)/../generic/tclInt.h $@; \
 	fi
 
-$(ITCL_INDEPENDENT_DEST)/include/tclRegexp.h:
+$(TCL8_INDEPENDENT_DEST)/include/tclRegexp.h:
 	if [ ! -f $@ ]; then \
 		echo "Copying tclRegexp.h"; \
-		cp $(ITCL_SRC)/tcl$(ITCL_TCL_MAJOR_VERSION_NUMBER)/generic/tclRegexp.h $@; \
+		cp $(TCL8_SRC)/../generic/tclRegexp.h $@; \
 	fi
 
 $(ITCL_DEST_LIB): $(TCL8_DEST)
