@@ -397,7 +397,8 @@ include \samp{$(CP_LIBS)} after \samp{$(STAR_LIBS)} and
 proper libraries to be searched when \code{ptcl} is built.
 
 \begin{example}
-LIBS= $(STAR_LIBS) $(CP_LIBS) -lptolemy $(LWP_LIBS) $(TCL_LIBSPEC) $(SYSLIBS)
+LIBS= $(STAR_LIBS) $(CP_LIBS) -lptolemy $(LWP_LIBS) \back
+      $(TCL_LIBSPEC) $(SYSLIBS)
 \end{example}
 
 Modify the definition of \code{LIBFILES} to include
@@ -407,7 +408,7 @@ be considered out-of-date if any of the required library files are more
 recent.
 
 \begin{example}
-LIBFILES= $(STAR_LIBFILES) $(CP_LIBFILES) $(LWP_LIBFILES) \
+LIBFILES= $(STAR_LIBFILES) $(CP_LIBFILES) $(LWP_LIBFILES) \back
 	  $(LIBDIR)/libptolemy.a
 \end{example}
 
@@ -422,9 +423,11 @@ ALLSTARS = $(CPSTARS) $(THORSTARS) $(DESTARS)
 ALLTARGETS =
 \end{example}
 
-Once these changes have been made, simply issue the command
-\samp{make} in the \file{$PTOLEMY/obj.$ARCH/ptcl} directory.  Your special
-version of \code{ptcl} is ready for use.
+\begin{sloppypar}
+Once these changes have been made, simply issue the command \samp{make}
+in the \file{$PTOLEMY/obj.$ARCH/ptcl} directory.  Your special version
+of \code{ptcl} is ready for use.
+\end{sloppypar}
 
 \node References
 \unnumberedsec{References}
