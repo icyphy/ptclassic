@@ -48,14 +48,6 @@ extern void set_X();		/* Initializes X device    */
 #define SOL2
 #endif
 
-
-#ifdef USG
-extern int sprintf();
-#else
-#if !defined(sgi) && !defined(SOL2) && !defined(ultrix) && !defined(linux) && !defined(SVR4) && !defined(SYSV)
-extern char *sprintf();
-#endif
-#endif
 extern char *strcpy();
 extern char *strcat();
 extern char *strrchr();
