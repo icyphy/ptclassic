@@ -139,14 +139,14 @@ Particle& MDSDFPortHole::operator % (int) {
 
 int InMDSDFPort::isItInput() const { return TRUE; }
 
-inline PtMatrix* InMDSDFPort::getInput(int rowDelay, int colDelay) { 
+PtMatrix* InMDSDFPort::getInput(int rowDelay, int colDelay) { 
   int rowIndex = ((MDSDFStar*)parent())->rowIndex;
   int colIndex = ((MDSDFStar*)parent())->colIndex;
   return ((MDSDFGeodesic*)myGeodesic)->getInput(rowIndex, colIndex,
 						rowDelay, colDelay);
 }
 
-inline double InMDSDFPort::getFloatInput(int rowDelay, int colDelay) {
+double InMDSDFPort::getFloatInput(int rowDelay, int colDelay) {
   int rowIndex = ((MDSDFStar*)parent())->rowIndex;
   int colIndex = ((MDSDFStar*)parent())->colIndex;
   return ((MDSDFGeodesic*)myGeodesic)->getFloatInput(rowIndex, colIndex,
@@ -159,13 +159,13 @@ inline double InMDSDFPort::getFloatInput(int rowDelay, int colDelay) {
 
 int OutMDSDFPort::isItOutput() const { return TRUE; }
 
-inline PtMatrix* OutMDSDFPort::getOutput() { 
+PtMatrix* OutMDSDFPort::getOutput() { 
   int rowIndex = ((MDSDFStar*)parent())->rowIndex;
   int colIndex = ((MDSDFStar*)parent())->colIndex;
   return ((MDSDFGeodesic*)myGeodesic)->getOutput(rowIndex, colIndex);
 }
 
-inline double& OutMDSDFPort::getFloatOutput() {
+double& OutMDSDFPort::getFloatOutput() {
   int rowIndex = ((MDSDFStar*)parent())->rowIndex;
   int colIndex = ((MDSDFStar*)parent())->colIndex;
   return ((MDSDFGeodesic*)myGeodesic)->getFloatOutput(rowIndex,colIndex);
