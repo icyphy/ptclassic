@@ -37,9 +37,6 @@ StringList CGTarget::indent(int depth) {
 	return out;
 }
 
-int CGTarget :: decideBufSize(Galaxy& g) { return TRUE; }
-int CGTarget :: codeGenInit(Galaxy& g) { return TRUE; }
-
 // constructor
 CGTarget::CGTarget(const char* name,const char* starclass,
 		   const char* desc, char sep = '_')
@@ -58,29 +55,40 @@ CGTarget::~CGTarget() {
 	LOG_DEL; delete schedFileName;
 }
 
-void CGTarget :: initialize() {
-	myCode.initialize();
-	Target::initialize();
-}
+// dummy functions that perform parts of setup.
+int CGTarget :: modifyGalaxy(Galaxy&) { return TRUE; }
+int CGTarget :: allocateMemory(Galaxy&) { return TRUE; }
+int CGTarget :: codeGenInit(Galaxy&) { return TRUE; }
 
-int CGTarget::setup(Galaxy& g) {
-	// reset the label counter
-	numLabels = 0 ;
+void CGTarget :: initStars(Galaxy& g) {
 	CGStar* s;
 	GalStarIter next(g);
 	while ((s = (CGStar*)next++) != 0 ) {
 		s->codeblockSymbol.setTarget(this);
 		s->starSymbol.setTarget(this);
 	}
+}
+
+// the main guy.
+int CGTarget::setup(Galaxy& g) {
+	// reset the label counter
+	numLabels = 0 ;
+	gal = &g;
+
+	if (!modifyGalaxy(g)) return FALSE;
+
 	if (!Target::setup(g)) return FALSE;
 
-	// decide the buffer size
-	if(!decideBufSize(g)) return FALSE;
+	initStars(g);
+
+	// choose sizes for buffers and allocate memory, if needed
+	if(!allocateMemory(g)) return FALSE;
 
 	return codeGenInit(g);
 }
 
 void CGTarget :: start() {
+	myCode.initialize();
 	LOG_DEL; delete dirFullName;
 	dirFullName = writeDirectoryName(destDirectory);
 	if (!mySched() && !parent()) {
