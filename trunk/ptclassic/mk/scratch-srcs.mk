@@ -207,7 +207,7 @@ xv_bin: $(OBJARCH)/xv
 		BINDIR=$(XV_DEST)/bin.$(PTARCH) all)
 
 xv_install: $(OBJARCH)/xv $(XV_DEST)/bin.$(PTARCH)
-	(cd $(OBJARCH)/xv; cp xv $(XV_DEST)/bin.$(PTARCH))
+	(cd $(OBJARCH)/xv; cp xv $(XV_DEST)/bin.$(PTARCH)/xv)
 	chmod a+rx $(PTOLEMY)/bin.$(PTARCH)/xv
 	strip $(PTOLEMY)/bin.$(PTARCH)/xv
 
