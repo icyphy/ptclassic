@@ -619,6 +619,7 @@ proc ptkEditParams {facet number} {
     wm withdraw $top
     update
     ed_ConfigCanvas $top $facet $number
+    $top.f.c config -bg [lindex [$top.f.c.f config -bg] 4]
     wm deiconify $top
 #    puts [winfo reqheight $u]
 #    puts [winfo reqheight $top.header]
