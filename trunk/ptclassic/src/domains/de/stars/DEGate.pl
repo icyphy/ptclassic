@@ -6,37 +6,11 @@ defstar {
 	copyright { 1991 The Regents of the University of California }
 	location { DE main library }
 	desc {
-Initially, all "input" particles are passed to the output (gate is open).
-When a TRUE (non-zero) is received on the "control" input, the gate is closed.
-A FALSE (zero) particle on the "control" input re-opens the gate.
-While the gate is closed, "input" particles are either discarded
-(if "discard" = TRUE) or ignored (if "discard" = FALSE).
-Ignoring the inputs has the effect of queueing them on the input geodesic.
+If the gate is open, particles pass from "input" to "output".
+When the gate is closed, "input" particles are ignored.
+If "input" particles arrive while the gate is closed, the most
+recent one will be passed to "output" when the gate is re-opened.
 	}
-	explanation {
-When \fIdiscard\fR is FALSE, and the gate is closed for a while,
-its behavior when re-opened is a little subtle.  Upon re-opening,
-an output is immediately produced, if any particle was arrived
-during the time the gate was closed.  The time stamp of the output
-will be that of the \fIcontrol\fR particle that re-opened the gate.
-Subsequently,
-each time it receives an \fIinput\fR, it will produce an output with the
-same time stamp as the input.  But if more than one particle was received
-while the gate was closed, then
-the value of the output will be that of some past sample.
-In particular, the second output after re-opening the gate has
-the value of the second input received while the gate was closed,
-and occurs at the time of the first input received after the gate
-is re-opened.
-.pp
-Note that if the predecessor star is a
-.c Queue,
-then it is easy to prevent the arrival of more than one input
-while the gate is closed.
-This is demonstrated in the
-\fIblockage\fR demo.
-	}
-	seealso { blockage Discard }
 	input {
 		name { input }
 		type { ANYTYPE }
@@ -44,49 +18,52 @@ This is demonstrated in the
 	input {
 		name { control }
 		type { int }
-		desc { Controls whether gate is open or closed. }
+		desc { Opens and closes the gate. }
 	}
 	output {
 		name { output }
-		type { ANYTYPE }
+		type { = input }
 	}
 	defstate {
-		name { discard }
+		name { initPosition }
+		type { string }
+		default { "open" }
+		desc { Initial gate position:  open (o,O) or closed (c,C). }
+	}
+	defstate {
+		name { controlLogic }
 		type { int }
-		default { TRUE }
-		desc { Determines what happens to inputs when gate is closed. }
+		default { FALSE }
+		desc { Control value which opens the gate. }
 	}
 	private {
-		int blocked;
-	}
-	constructor {
-		input.inheritTypeFrom(output);
+		int open;
 	}
 	start {
-		blocked = FALSE;
+		// set initial position of the gate
+		switch(*initPosition.getInitValue()) {
+		    case 'o':
+		    case 'O':
+			open = TRUE;
+			break;
+		    case 'c':
+		    case 'C':
+			open = FALSE;
+			break;
+		    default:
+			Error::abortRun(*this, "invalid initial position.");
+			break;
+		}
 	}
 
 	go {
-		// get input
-		completionTime = arrivalTime;
-
-		// accept blockRequest or blockRelease input
-		if (control.dataNew) {
-			if (int(control.get()) == TRUE) {
-				blocked = TRUE;
-			} else {
-				blocked = FALSE;
-			}
-		}	
+		// open gate if control input matches controlLogic
+		if (control.dataNew)
+		    open = ( (int(control.get()) && int(controlLogic))
+			|| (!int(control.get()) && !int(controlLogic)) );
 
 		// receive the normal input
-		if (input.dataNew) {
-		    if (blocked == FALSE) { // process the input
-			output.put(completionTime) = input.get();
-		    } else
-			if (discard == TRUE)
-			    input.get();
-		}
+		if (input.dataNew && open)
+		    output.put(arrivalTime) = input.get();
 	}
 }
-
