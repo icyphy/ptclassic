@@ -1,8 +1,9 @@
 static const char file_id[] = "CalendarQueue.cc";
 /**************************************************************************
 Version identification:
-@(#)CalendarQueue.cc	1.18	11/25/92
+$Id$ $Revision$
 
+WANRNING experimental version
 Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
 All rights reserved.
 
@@ -153,27 +154,27 @@ void CalendarQueue :: InsertEventInBucket(CqLevelLink **bucket, CqLevelLink *lin
 // This is not in the paper, but you have to check if the new event
 // actually has the smallest timestamp, if so, "cq_lastTime" should
 // be reset
-    if (cq_eventNum) {
-	save_resizeEnabled = cq_resizeEnabled;
-	cq_resizeEnabled = 0;
-	least_link = NextEvent();
-	i = (int) (least_link->level/cq_interval);
-	i = i% cq_bucketNum;
-	if (cq_bucket[i]) {
-	    least_link->next = cq_bucket[i];
-	    least_link->before = NULL;
-	    cq_bucket[i]->before = least_link;
-	} else 
-	    least_link->next = least_link->before = NULL;
-	cq_bucket[i]= least_link;
-	cq_resizeEnabled = save_resizeEnabled;
-	cq_eventNum++;
-    }
-    if ((least_link) && (link->level < least_link->level)) {
-	cq_lastTime = link->level;
-	virtualBucket = (int)(cq_lastTime/cq_interval);
-	cq_lastBucket = virtualBucket%cq_bucketNum;
-	cq_bucketTop = (virtualBucket+1.5)*cq_interval;
+    // I am overriding Hui's patch with mine which checks for the
+    // condition on which the bucket needs to be set based on the
+    // present bucket position and the new event, rather than the
+    // youngest event previously in the queue. This is faster because
+    // we do not need to fetch the event. I am inserting an assert
+    // in NextEvent which should check for the correctness of this
+    // way of doing things. - Anindo Banerjea
+    // Explanation: (cq_bucketTop - 1.5*cq_interval ) 
+    //              is the bottom of the bucket in time units.
+    //              as such if the new event is before it it should
+    //		    cause an adjustment of the lastBucket variable.
+
+    if( link->level < (cq_bucketTop - 1.5*cq_interval )) {
+	// I should never cause the cq_lastTime to increase.
+	// This is actually assured from the previous 'if', but still
+	// we assert that modulo floating point imprecisions :
+	assert(link->level <= (cq_lastTime * 1.0000001) );
+        cq_lastTime = link->level;
+        virtualBucket = (int)(cq_lastTime/cq_interval);
+        cq_lastBucket = virtualBucket%cq_bucketNum;
+        cq_bucketTop = (virtualBucket+1.5)*cq_interval;
     }
     if (*bucket) {
 	current = *bucket;
@@ -247,12 +248,22 @@ CqLevelLink* CalendarQueue :: NextEvent()
     register int i, virtualBucket;
     int year;
     CqLevelLink *result;
+
     
     if (cq_eventNum == 0) return(NULL);
   again:
     for (i = cq_lastBucket;;) {       /* search buckets */
 	if (reg_cq_bucket[i] && reg_cq_bucket[i]->level < cq_bucketTop) {
 	    result = reg_cq_bucket[i];
+	    // This checks for my tweak which sets the lastBucket stuff
+	    // in InsertEventInBucket. If this fails this means that the
+	    // lastBucket stuff was not correctly set because we have
+	    // found an event from the past still lying around.
+            // (cq_bucketTop - 1.5*cq_interval ) 
+            // is the bottom of the lastBucket in time units.
+	    // We use 1.6 here to account for rounding off errors which
+	    // might cause a event to look bad if it was just on the border.
+	    assert(result->level >= ( cq_bucketTop- 1.6*cq_interval ));
 	    cq_lastTime = result->level;	
 	    if (reg_cq_bucket[i] = reg_cq_bucket[i]->next) 
 		reg_cq_bucket[i]->before = NULL;
@@ -465,4 +476,3 @@ CalendarQueue :: ~CalendarQueue () {
 	initialize();
 	clearFreeList();
 }
-	
