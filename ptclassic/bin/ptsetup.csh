@@ -63,11 +63,21 @@ else
 endif
 
 
-setenv TCL_LIBRARY $PTOLEMY/tcltk/tcl/lib/tcl
-setenv TK_LIBRARY $PTOLEMY/tcltk/tk/lib/tk
-setenv ITCL_LIBRARY $PTOLEMY/tcltk/itcl/lib/itcl
-setenv ITK_LIBRARY $PTOLEMY/tcltk/itcl/lib/itk
-setenv IWIDGETS_LIBRARY $PTOLEMY/tcltk/itcl/lib/iwidgets
+if ( -f $PTOLEMY/tcltk/itcl/lib/itcl/itcl/itcl.tcl ) then
+	# Itcl2.1
+	setenv TCL_LIBRARY $PTOLEMY/tcltk/itcl/lib/itcl/tcl
+	setenv TK_LIBRARY $PTOLEMY/tcltk/itcl/lib/itcl/tk
+	setenv ITCL_LIBRARY $PTOLEMY/tcltk/itcl/lib/itcl/itcl
+	setenv ITK_LIBRARY $PTOLEMY/tcltk/itcl/lib/itcl/itk
+	setenv IWIDGETS_LIBRARY $PTOLEMY/tcltk/itcl/lib/itcl/iwidgets
+else
+	# Itcl2.0, which was shipped with Ptolemy0.6
+	setenv TCL_LIBRARY $PTOLEMY/tcltk/tcl/lib/tcl
+	setenv TK_LIBRARY $PTOLEMY/tcltk/tk/lib/tk
+	setenv ITCL_LIBRARY $PTOLEMY/tcltk/itcl/lib/itcl
+	setenv ITK_LIBRARY $PTOLEMY/tcltk/itcl/lib/itk
+	setenv IWIDGETS_LIBRARY $PTOLEMY/tcltk/itcl/lib/iwidgets
+endif
 
 setenv PTPWD `pwd`
 
