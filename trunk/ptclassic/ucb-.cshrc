@@ -34,7 +34,8 @@ if ( "$PTARCH" =~ sol?* ) then
 	# Get Synopsys in path
 	set path = ( $path \
 		$SYNOPSYS/$SIM_ARCH/syn/bin \
-                $SYNOPSYS/$SIM_ARCH/sim/bin )
+                $SYNOPSYS/$SIM_ARCH/sim/bin \
+                $SYNOPSYS/$SIM_ARCH/sge/bin )
 
 	# Only include /usr/tools/bin in our path if we are running under
 	# Solaris otherwise the sun4 build will fail because
