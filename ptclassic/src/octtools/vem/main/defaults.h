@@ -148,6 +148,8 @@ extern void dfGetString ARGS((STR name, STR *value));
   /* Gets useful values for defaults of type (String)     */
 extern void dfGetFloat ARGS((STR name, float *value));
   /* Gets useful values for defaults of type (float)      */
+extern void dfGetDouble ARGS((STR name;	double *value));
+  /* Gets useful values for defaults of type (double)      */
 extern void dfGetCol ARGS((STR name, XColor **value));
   /* Gets the color structure for a color (XColor *)      */
 extern void dfGetPixel ARGS((STR name, XColor **value));
