@@ -245,14 +245,12 @@ $(ITCL_SHARED_OBJ)/itcl/libitcl.so:
 	       CFLAGS="$(CFLAGS) $(WRITABLE_STRINGS_CFLAGS) $(C_SHAREDFLAGS)" \
 		X11_INCLUDES="$(X11_INCSPEC)" \
 		X11_LIB_SWITCHES="$(X11_LIBSPEC)" \
-	        SHLIB_LD=ld \
 		shared)
 $(ITCL_SHARED_OBJ)/itk/libitk.so: 
 	(cd  $(ITCL_SHARED_OBJ)/itk; $(MAKE) \
 	       CFLAGS="$(CFLAGS) $(WRITABLE_STRINGS_CFLAGS) $(C_SHAREDFLAGS)" \
 		X11_INCLUDES="$(X11_INCSPEC)" \
 		X11_LIB_SWITCHES="$(X11_LIBSPEC)" \
-	        SHLIB_LD=ld \
 		shared)
 
 # Install itcl
