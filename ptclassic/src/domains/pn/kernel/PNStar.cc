@@ -7,7 +7,6 @@ static const char file_id[] = "$RCSfile$";
 
     Programmer:		T.M. Parks
     Date of creation:	7 February 1992
-
 */
 
 #ifdef __GNUG__
@@ -15,6 +14,7 @@ static const char file_id[] = "$RCSfile$";
 #endif
 
 #include "MTDFStar.h"
+#include "ConstIters.h"
 
 extern const char MTDFdomainName[];
 
@@ -30,5 +30,17 @@ const char* MTDFStar::domain() const
 // Domain-specific initialization.
 void MTDFStar::prepareForScheduling()
 {
-    numTimes = 0;
+}
+
+// Identify Star as a source.
+int MTDFStar::isItSource() const
+{
+    CBlockPortIter port(*this);
+    const PortHole* p;
+
+    while ((p = port++) != NULL)
+    {
+	if (p->isItInput()) return FALSE;
+    }
+    return TRUE;
 }
