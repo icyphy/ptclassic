@@ -428,7 +428,6 @@ int st_strhash(string, modulus)
   while ((c = *string++) != '\0') {
     val = val*997 + c;
   }
-  printf("val: %d\n", val);
 
   /* shachind@cadence.com writes:
 
