@@ -50,7 +50,7 @@ TYZIP =         $(TYPACKAGE_DIR)/$(TYPACKAGE).zip
 TYJARFILE =
 
 # Sub directories to run make in.
-DIRS =		test doc demo compat
+DIRS =		bin test doc demo compat
 
 TCL_SRCS =
   
