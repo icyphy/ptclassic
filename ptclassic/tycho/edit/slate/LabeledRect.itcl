@@ -39,7 +39,7 @@
 # <i>LabeledRect</i> is a rectangle with a text label and graphics.
 # In all other respects, it can be treated like any other rectangle item.
 #
-# <p><a name="#options"></a><b>Options</b>
+# <p><a name="#Slate LabeledRect class Options"></a><b>Options</b>
 #
 # See also <a href="LabeledItem.html#options">LabeledItem</a>.
 #

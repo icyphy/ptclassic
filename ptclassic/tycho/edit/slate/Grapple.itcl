@@ -39,7 +39,7 @@
 # A Grapple is a small item that serves as a grab handle for manipulating
 # graphical objects.
 #
-# <p><a name="#options"></a><b>Options</b>
+# <p><a name="#Slate Grapple class Options"></a><b>Options</b>
 #
 # <ul>
 # <li><b>-aspect</b>:
