@@ -114,7 +114,8 @@ int ivKeyOk(keyEventPtr)
     char xTextPtr[10], c;
     KeySym keysym;
 
-    if (debugXEvents) xFormatEvent( display, keyEventPtr);
+    /* Is the (XEvent *) cast right? */
+    if (debugXEvents) xFormatEvent( display, (XEvent *)keyEventPtr);
 
     XLookupString( keyEventPtr, xTextPtr , 1, &keysym, NULL);
     if ( IsCursorKey( keysym ) || IsModifierKey( keysym ) || IsFunctionKey( keysym) ) {
