@@ -133,9 +133,9 @@ proc ed_MkEntryButton {frame label} {
     global ptolemy ed_MaxEntryLength
     pack append [frame $frame -bd 2] \
 	   [label $frame.label -text "$label:  " -anchor w] left \
-		[button $frame.right -bitmap @$ptolemy/tcl/lib/right.xbm \
+		[button $frame.right -bitmap @$ptolemy/lib/tcl/right.xbm \
 			-command ed_Dummy -relief flat] right \
-		[button $frame.left -bitmap @$ptolemy/tcl/lib/left.xbm \
+		[button $frame.left -bitmap @$ptolemy/lib/tcl/left.xbm \
 			-command ed_Dummy -relief flat] right
     $frame.right config -fg [lindex [$frame.right config -bg] 4]
     $frame.left config -fg [lindex [$frame.left config -bg] 4]
