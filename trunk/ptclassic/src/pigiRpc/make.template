@@ -58,32 +58,13 @@ endif
 endif
 
 TK=1
-ifdef CODESIGN
-	DMM = 1
-endif
-ifdef DMM
-	OTHER_PIGI = $(ROOT)/obj.$(PTARCH)/pigilib/ptkDMMRegisterCmds.o
-endif
-ifndef DMM
-	OTHER_PIGI = $(ROOT)/obj.$(PTARCH)/pigilib/ptkRegisterCmds.o
-endif
+OCT=1
 
 PT_DEPEND +=	pigiMain.o
 
 ADD_OBJS =	palettes.$(PIGI).o
 
 PIGI_OBJS +=	pigiMain.o $(ADD_OBJS)
-
-LIBS += 	-L$(OCTLIBDIR) $(OTHER_PIGI) -lpigi \
-			-lrpc -loh -lvov -lrpc -llist \
-			-ltr -lutility -lst -lerrtrap -luprintf -lport
-
-LIBFILES += $(LIBDIR)/libpigi.$(LIBSUFFIX) $(OCTLIBDIR)/librpc.$(LIBSUFFIX)  \
-	$(OCTLIBDIR)/liboh.$(LIBSUFFIX) $(OCTLIBDIR)/libvov.$(LIBSUFFIX) \
-	$(OCTLIBDIR)/liblist.$(LIBSUFFIX) \
-	$(OCTLIBDIR)/libtr.$(LIBSUFFIX) $(OCTLIBDIR)/libutility.$(LIBSUFFIX) \
-	$(OCTLIBDIR)/libst.$(LIBSUFFIX) $(OCTLIBDIR)/liberrtrap.$(LIBSUFFIX) \
-	$(OCTLIBDIR)/libuprintf.$(LIBSUFFIX) $(OCTLIBDIR)/libport.$(LIBSUFFIX)
 
 # common.mk wants this, otherwise we get multiple targets for $(LIBDIR)/$(LIB)
 LIB = foo
