@@ -45,12 +45,11 @@
 # Whenever you add or delete an #include line in one of your files,
 # type "make depend" to regenerate the dependencies in the makefile.
 #
-
+#
 # It is assumed that your PTOLEMY environment variable is defined and
 # points to the root of the Ptolemy tree.  This makefile uses GNU make
 # extensions.
-
-
+#
 # How to build your own pigiRpc with your own stars
 #
 # 1) Build a vanilla pigiRpc.  pigiRpc depends on .o files under 
@@ -87,11 +86,12 @@ VPATH =		$(ROOT)/src/pigiExample
 # get configuration info
 CONFIG =	$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
+
 #############################################################################
 # Most of your editing will occur in this section
 
 # Feel free to change the VERSION to something meaningful
-VERSION = 	"pigiExample Demonstration"
+VERSION =	"pigiExample Demonstration"
 
 # Star objects in this directory.  Add your own here.
 # You probably don't want the toy SDFMyStar star in your binary
@@ -117,7 +117,7 @@ INCL =	-I$(ROOT)/src/domains/sdf/kernel -I$(KERNDIR)
 # make changes.  For example, rather than editing this file, we could
 # create an override.mk file that set the VERSION, LOCAL_OBJS, and PL_SRCS
 # variables
--include override.mk
+-include $(VPATH)/override.mk
 
 # If override.mk did not set BASENAME and PIGI, then we do that now.
 ifndef BASENAME
@@ -131,6 +131,8 @@ endif
 # read these makefile variables
 TK=1
 OCT=1
+
+INCL += -I$(ROOT)/src/pigilib $(PTCOMPAT_INCSPEC)
 
 SRCS =		pigiMain.cc
 
@@ -177,4 +179,6 @@ include $(ROOT)/mk/mathematica.mk
 # However, since we are including userstars.mk above, we don't include it
 #include $(ROOT)/mk/common.mk
 
+# Don't add anything after the next line; makedepend will zap it.
+# DO NOT DELETE THIS LINE -- make depend depends on it.
 
