@@ -1,6 +1,6 @@
 ! $Id$
 ! VEM options for Pigi:
-vem.bindings:	~ptolemy/lib/vem.bindings.8-0
+vem.bindings:	~ptolemy/lib/vem.bindings.7-3
 vem.deftechname:	ptolemy
 vem.grid.major.units:	100
 vem.grid.minor.units:	10
