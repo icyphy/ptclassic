@@ -106,18 +106,20 @@ proc ::tycho::execModal {{command {}} {dir {}} {execWidget {}}} {
 # Here is a quick mini-tutorial to get familiar with this 
 # non-graphical Exec:<br>
 # <ol>
-# <li>Create a name, then create object<tcl><pre>
+# <li>Create a name, then create object
+# <tcl><pre>
 #   set execName [::tycho::autoName execObject]
 #   ::tycho::Exec $execName
-# </tcl></pre>
+# </pre></tcl>
 #
 # <li>Execute process, and check for return type. Return
-# could be either "abnormal" or "normal".<tcl><pre>
+# could be either "abnormal" or "normal".
+# <tcl><pre>
 #   $execName execProcess {ls -al} {~}
 #   set status [$execName getStatusWait]
 #   tycho::inform "The return status is \"$status\""
 #   tycho::inform "The output is [$execName getHistory]"
-# </tcl></pre>
+# </pre></tcl>
 #
 # <li>Alternatively, there are asynchronous calls to use
 # (ie. getStatusNow can immediately return the status of the 
@@ -128,7 +130,7 @@ proc ::tycho::execModal {{command {}} {dir {}} {execWidget {}}} {
 #   tycho::inform "The immediate status is \"[$execName getStatusNow]\""
 #   # By now, the process has probably exited with a status.
 #   tycho::inform "The immediate status is \"[$execName getStatusNow]\""
-# </tcl></pre>
+# </pre></tcl>
 #
 # <li>A process is killed with <i>killProcess</i>.
 # <tcl><pre>
@@ -147,11 +149,11 @@ proc ::tycho::execModal {{command {}} {dir {}} {execWidget {}}} {
 #
 # <li>The following commands are used frequently, especially
 # by the Monitor class. Feel free to experiment:
-# <tcl><pre>$execName execProcess</tcl></pre>
-# <tcl><pre>$execName clearHistory</tcl></pre>
-# <tcl><pre>$execName getHistory</tcl></pre>
-# <tcl><pre>$execName getStatusWait</tcl></pre>
-# <tcl><pre>$execName getStatusNow</tcl></pre>
+# <tcl><pre>$execName execProcess</pre></tcl>
+# <tcl><pre>$execName clearHistory</pre></tcl>
+# <tcl><pre>$execName getHistory</pre></tcl>
+# <tcl><pre>$execName getStatusWait</pre></tcl>
+# <tcl><pre>$execName getStatusNow</pre></tcl>
 # </ol>
 class ::tycho::Exec {
     inherit ::tycho::Object
