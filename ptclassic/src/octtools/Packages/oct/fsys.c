@@ -165,6 +165,9 @@ char *mode;
 {
     struct desc *desc = (struct desc *) c_desc;
     char *file_name = desc->file_name;
+#ifdef PTNT
+    char tmode[5];
+#endif
     IOFILE *stream;
 #if !defined(MCC_DMS) && !defined(TDMS)
     char *ptr, *cell_dir, *view_dir;
@@ -199,8 +202,14 @@ char *mode;
     *view_dir = PND_CHAR;
 #endif /* !defined(MCC_DMS) && !defined(TDMS) */
     
+#ifdef PTNT
+    /* Add a b to the fopen call so we read in binary mode. */
+    strncpy(tmode, mode, 5);
+    strncat(tmode,"b",5-strlen(tmode));
+    stream = IOfopen(file_name, tmode);
+#else
     stream = IOfopen(file_name, mode);
-    
+#endif    
     if (stream == NULL) {
 	(void) sprintf(fsys_error_buf, "Cannot open %s: %s", file_name, sys_msg());
     }
