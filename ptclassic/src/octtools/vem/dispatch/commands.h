@@ -46,7 +46,7 @@
 
 #include "ansi.h"
 #include "port.h"
-#include "X11/Xlib.h"
+#include <X11/Xlib.h>
 #include "general.h"
 #include "buffer.h"
 #include "oct.h"

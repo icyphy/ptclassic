@@ -51,7 +51,7 @@ static char SccsId[]="$Id$";
  */
 
 #include "fill_pat.h"		/* Self declaration        */
-#include "X11/Xutil.h"		/* X11 Utility functions   */
+#include <X11/Xutil.h>		/* X11 Utility functions   */
 
 typedef struct fill_record {
     int rows, cols;		/* Size of fill pattern           */

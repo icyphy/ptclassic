@@ -38,7 +38,7 @@ static char SccsId[]="$Id$";
  */
 
 #include "attributes.h"		/* Self-declaration          */
-#include "X11/Xutil.h"		/* X11 utility functions     */
+#include <X11/Xutil.h>		/* X11 utility functions     */
 #include "list.h"		/* List management           */
 #include "message.h"		/* Message output            */
 #include "vemUtil.h"		/* General utilities         */
