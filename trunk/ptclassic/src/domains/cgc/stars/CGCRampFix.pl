@@ -66,12 +66,28 @@ The precision of this state is the precision of the accumulation.
 		attributes { A_SETTABLE|A_NONCONSTANT }
 	}
 
+        defstate {
+                name { StepPrecision }
+                type { precision }
+                default { 2.14 }
+                desc {
+Precision of the step in bits.
+         defstate {
+                name { ValuePrecision }
+                type { precision }
+                default { 2.14 }
+                desc {
+Precision of the value in bits.
+                }
+
         setup {
 		CGCFix::setup();
 		// if the user specified an invalid precision string, the error
 		// will be automatically reported in the initialize method of
 		// class PrecisionState
 		output.setPrecision(OutputPrecision);
+		value.setPrecision(ValuePrecision);
+		step.setPrecision(StepPrecision);
         }
 
 	go {
