@@ -28,7 +28,7 @@
 # 						COPYRIGHTENDKEY
 
 ROOT = ../../..
-VPATH = $(ROOT)/src/compat/cfront
+VPATH = $(ROOT)/src/compat/X11R4
 
 # get configuration info
 CONFIG=$(ROOT)/mk/config-$(ARCH).mk
