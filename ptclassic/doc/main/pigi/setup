@@ -23,13 +23,17 @@ of each of these files.
 .H2 "Hosts"
 .pp
 Pigi runs as two separate processes, one of which is started using
-an rsh.  In order for the second process to start properly, you
+.i rsh 
+(remote shell).  In order for the second process to start properly, you
 may need to have a file in your home directory called ``.rhosts''
 with the line
 .(c
 machine_name user_name
 .)c
-where these names depend on who you are and what your machine is called.
+where these names depend on who you are and what your machine is
+called.  If rsh is not granted permission, you will receive an
+uninformative message saying ``Permission denied.''  If you see this,
+it means you must fix your .rhosts file.
 .H2 "Environment Variables"
 .pp
 The most basic requirement
@@ -40,7 +44,7 @@ because RPC applications are started as separate processes,
 and new processes do not examine the .login file.
 .pp
 The ~ptolemy/.cshrc file defines the path variable to include the appropriate
-bin directories to run ptolemy.
+bin directories to run \*(PT.
 .IE "cshrc file"
 The pertinent lines read:
 .EQ
@@ -66,7 +70,7 @@ If you plan to print out any \*(PT documents, you will need to set
 the PRINTER environment variable.  In ~ptolemy/.cshrc the pertinent
 line reads:
 .(c
-set PRINTER = lw
+setenv PRINTER lw
 .)c
 You should replace
 .c "lw"

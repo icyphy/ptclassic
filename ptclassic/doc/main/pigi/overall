@@ -8,7 +8,7 @@
 .\" If you edit this document, PLEASE BE SURE TO MANUALLY CHANGE THE DATE
 .\" BELOW, to indicate a new version.  Be sure you have properly checked
 .\" out this file with SCCS (the version number should not be a number below):
-.VR 0.$Revision$ "October 10, 1990"
+.VR 0.$Revision$ "October 24, 1990"
 .\"
 .TI "The \*(PT Interactive Graphical Interface"
 .AU
@@ -29,8 +29,4 @@ David G. Messerschmitt
 .so moreinfo
 .so references
 .so pigiCommands
-
-Add something like (to lead into next section):
-Hence we will study alternatives like the use of multiple subcarriers,
-each carrying a narrowband signal.
 .so vemCommands

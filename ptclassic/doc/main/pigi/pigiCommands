@@ -175,7 +175,7 @@ Display a section of the Almagest.
 Not functional at this time.
 T}
 .sp 0.5
-profile		T{
+profile	,	T{
 Execute the Ptolemy profile command on the object under the
 cursor.
 The information currently appears in the VEM command window.
