@@ -252,192 +252,30 @@ test Path-8.1 {Test out expandPathSplit} {
 
 
 #######################################################################
-# Test ::tycho::url. This is a foreach loop that generated a whole
-# series of tests on different names and for different cases. For
-# each name, the following options are called, in this order:
-#   dirname
-#   extension
-#   path
-#   pathtype
-#   protocol
-#   rootname
-#   server
-#   split
-#   tail
+#### ::tycho::parseFileHeader
 #
-# Some additional tests for the "join" and "aslocal" options follow.
-#
-set _count 0
-foreach _name {
-    foo.bar
-    /users/ptolemy/foo.bar
-    file:/users/ptolemy/foo.bar
-    http://ptolemy.eecs
-    http://ptolemy.eecs/~ptdesign
-    http://ptolemy.eecs/~ptdesign/index.html
-} _result {
-    {
-	.
-	.bar
-	foo.bar
-	relative
-	{}
-	foo
-	{}
-	foo.bar
-	foo.bar
-    }
-    {
-	/users/ptolemy
-	.bar
-	/users/ptolemy/foo.bar
-	absolute
-	{}
-	/users/ptolemy/foo
-	{}
-	{/ users ptolemy foo.bar}
-	foo.bar
-    }
-    {
-	file:/users/ptolemy
-	.bar
-	/users/ptolemy/foo.bar
-	absolute
-	file
-	file:/users/ptolemy/foo
-	{}
-	{file: {} users ptolemy foo.bar}
-	foo.bar
-    }
-    {
-	http://ptolemy.eecs
-	{}
-	/
-	absolute
-	http
-	http://ptolemy.eecs
-	ptolemy.eecs
-	{http: ptolemy.eecs}
-	{}
-    }
-    {
-	http://ptolemy.eecs
-	{}
-	/~ptdesign
-	absolute
-	http
-	http://ptolemy.eecs/~ptdesign
-	ptolemy.eecs
-	{http: ptolemy.eecs ~ptdesign}
-	~ptdesign
-    }
-    {
-	http://ptolemy.eecs/~ptdesign
-	.html
-	/~ptdesign/index.html
-	absolute
-	http
-	http://ptolemy.eecs/~ptdesign/index
-	ptolemy.eecs
-	{http: ptolemy.eecs ~ptdesign index.html}
-	index.html
-    }
+set i 0
+foreach {c t} {
+	"Mode only, no spaces" {-*-themode-*-}
+	"Mode only, with spaces" {-*- themode -*-}
+	"Mode only, with tabs" "-*-\tthemode\t-*-"
+	"Variables, no spaces" {-*-mode:themode;other:theother-*-}
+	"Variables, with spaces" {-*- mode : themode ; other : theother -*-}
+	"Variables, with tabs" {-*-\tmode\t:\tthemode\t;\tother\t:\ttheother\t-*-}
+	"Variables, extra semicolon" {-*- mode: themode; other: theother ; -*-}
+} r {
+	{mode themode}
+	{mode themode}
+	{mode themode}
+	{mode themode other theother}
+	{mode themode other theother}
+	{mode themode other theother}
+	{mode themode other theother}
 } {
-    foreach _test {
-	dirname
-	extension
-	path
-	pathtype
-	protocol
-	rootname
-	server
-	split
-	tail
-    } _rslt $_result {
-	test Path-::tycho::url-$_count [list ::tycho::url $_test $_name] {
-            incr _count
-            update ;# so results can be seen while running
-	    ::tycho::url $_test $_name
-	} $_rslt
-    }
+	incr i
+	test Path-::tycho::parseFileHeader-$i "Parse file header: $c" {
+		::tycho::parseFileHeader $t arr
+		array get arr
+	} $r
 }
-
-# Test the join option
-foreach _name {
-    foo.bar
-    {ptolemy foo bar}
-    {/ users ptolemy foo.bar}
-    {/users/ptolemy foo.bar}
-    {file: {} users ptolemy foo.bar}
-    {http: ptolemy.eecs}
-    http://ptolemy.eecs
-    http://ptolemy.eecs/
-    {http: ptolemy.eecs ~ptdesign}
-    {http://ptolemy.eecs ~ptdesign}
-    {http://ptolemy.eecs ~ptdesign/}
-    {http: ptolemy.eecs ~ptdesign index.html}
-    {http: ptolemy.eecs/ ~ptdesign index.html}
-    {http://ptolemy.eecs ~ptdesign/index.html}
-    {http://ptolemy.eecs/ ~ptdesign/index.html}
-    {http://ptolemy.eecs/~ptdesign index.html}
-    {http://ptolemy.eecs/~ptdesign/ index.html}
-    {ftp://ptolemy.eecs/ /design}
-    {ftp://ptolemy.eecs/design /schematic}
-    {ftp://ptolemy.eecs/design /schematic/drawing and.wir}
-    {ftp://ptolemy.eecs/design/ /schematic/drawing and.wir}
-    {ftp://ptolemy.eecs/design/ /schematic/drawing and.wir /~ptdesign}
-    {ftp://ptolemy.eecs/eal a b /c ~d}
-    {ftp://ptolemy.eecs/eal ../../../cxh}
-} _result {
-    foo.bar
-    ptolemy/foo/bar
-    /users/ptolemy/foo.bar
-    /users/ptolemy/foo.bar
-    file:/users/ptolemy/foo.bar
-    http://ptolemy.eecs/
-    http://ptolemy.eecs/
-    http://ptolemy.eecs/
-    http://ptolemy.eecs/~ptdesign
-    http://ptolemy.eecs/~ptdesign
-    http://ptolemy.eecs/~ptdesign
-    http://ptolemy.eecs/~ptdesign/index.html
-    http://ptolemy.eecs/~ptdesign/index.html
-    http://ptolemy.eecs/~ptdesign/index.html
-    http://ptolemy.eecs/~ptdesign/index.html
-    http://ptolemy.eecs/~ptdesign/index.html
-    http://ptolemy.eecs/~ptdesign/index.html
-    ftp://ptolemy.eecs/design
-    ftp://ptolemy.eecs/schematic
-    ftp://ptolemy.eecs/schematic/drawing/and.wir
-    ftp://ptolemy.eecs/schematic/drawing/and.wir
-    ftp://ptolemy.eecs/~ptdesign
-    ftp://ptolemy.eecs/~d
-    ftp://ptolemy.eecs/eal/../../../cxh
-} {
-    test Path-::tycho::url-$_count [list ::tycho::url join $_name] {
-        incr _count
-        update ;# so results can be seen while running
-        eval ::tycho::url join $_name
-    } $_result
-}
-
-# Test the aslocal option
-foreach _name {
-    foo/bar
-    /foo/bar
-    /foo:/bar:
-} _result {
-    foo/bar
-    /foo/bar
-    /foo:/bar:
-} {
-    test Path-::tycho::url-$_count [list ::tycho::url aslocal $_name] {
-        incr _count
-        update ;# so results can be seen while running
-        eval ::tycho::url aslocal $_result
-    } $_result
-}
-
-
-
 
