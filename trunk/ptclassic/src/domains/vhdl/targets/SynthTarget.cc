@@ -41,6 +41,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "SynthTarget.h"
 #include "KnownTarget.h"
 #include "paths.h"
+#include <unistd.h>             // cuserid()
 
 // Constructor.
 SynthTarget :: SynthTarget(const char* name,const char* starclass,
