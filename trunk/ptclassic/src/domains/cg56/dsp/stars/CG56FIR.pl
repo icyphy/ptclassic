@@ -162,7 +162,7 @@ Decimation parameters > 1 reduces sample rate.
                      gencode(interpmust);
 	             if(taps>2) {
                           gencode(greater);
-		          if(interpolation-1 > 1) gencode(gfullLoop);
+		          if(interpolation-1 > 1) gencode(greaterloop);
 		          if(interpolation-1 ==1) gencode(gone);
 			  if(taps-2==2) {
 		              gencode(grep);
@@ -213,6 +213,9 @@ Decimation parameters > 1 reduces sample rate.
         }
 
         codeblock(first) {
+; taps: $val(taps)
+; interpolation : $val(interpolation)
+; dec: $val(dec)
         move    #<$val(taps)*$val(interpolation)+$addr(coef)-1,r0
         }
         codeblock(old) {
@@ -281,13 +284,13 @@ $label(loop)
         codeblock(greater) {
         clr   a         x:(r5)+,x1      y:(r0)-,y1
         }
-        codeblock(gfullLoop) {
-        do    #$val(interpolation-1),$label(gLoop)
+        codeblock(greaterloop) {
+        do    #$val(interpolation)-1,$label(looparound)
         rep   #$val(taps)-1
         mac   x1,y1,a   x:(r5)+,x1      y:(r0)-,y1
         macr  x0,y1,a                   y:(r0)-,y1
         clr   a         a,x:(r6)+
-$label(gLoop)   
+$label(looparound)   
         }
         codeblock(gone) {
         rep   #$val(taps)-1
