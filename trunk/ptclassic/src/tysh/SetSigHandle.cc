@@ -49,16 +49,27 @@ Sets up the signal handlers for Tycho.
 #include "SigHandle.h"
 #include "SetSigHandle.h"
 
-/****************************************************************************/
-
-/***** This function sets up the signal handlers and, makes sure that *******/
-/***** RLIMIT is not 0 (if in development mode) which would prevent a *******/
-/***** core file from being generated. The environmental variable     *******/
-/***** PT_DEVELOP when set to a non-zero value, or not set at all,    *******/
-/***** will cause the core to be dumped, and the debugger to be run.  *******/
+// setSignalHandlers
+//
+// This function sets up the signal handlers and, makes sure that 
+// RLIMIT is not 0 (if in development mode) which would prevent a 
+// core file from being generated. The environmental variable     
+// PT_DEVELOP when set to a non-zero value, or not set at all,    
+// will cause the core to be dumped, and the debugger to be run.  
 
 int setSignalHandlers(void) 
 {
+
+#if !defined(PTHPPA) && !defined(PTSOL2) && !defined(PTSUN4) \
+&& !defined(PTIRIX5)
+
+    // We only handle the above four cases. For the others do nothing.
+    // FIX-ME: handle other UNIX platforms and minimum ANSI C signal set
+    // for PC and MAC platforms.
+    return 0; 
+
+#endif
+
     // get environment variable PT_DEVELOP
     char *isDevelop = getenv("PT_DEVELOP");
     int returnValue = 0;
@@ -67,26 +78,28 @@ int setSignalHandlers(void)
         setCoreLimitRelease();
         if (setHandlers((SIG_PF) signalHandlerRelease) != 0)
 	    returnValue = 1;
+	setReleaseStrings();
     }
     else {
         setCoreLimitDebug();
         if (setHandlers((SIG_PF) signalHandlerDebug) != 0)
 	    returnValue = 2;
+	setDebugStrings();
     }
 
     return returnValue;
 
 }
 
-/****************************************************************************/
-
-/****** This function sets the value of the maximum size of core file *******/
-/****** allowed.                                                      *******/
+// setCoreLimitDebug
+//
+// This function sets the value of the maximum size of core file 
+// allowed.                                                      
 
 int setCoreLimitDebug(void) 
 {
 
-#ifndef PTHPPA
+#if !defined(PTHPPA)
 
     struct rlimit coreLimit;
 
@@ -111,16 +124,15 @@ int setCoreLimitDebug(void)
   
 }
 
-/****************************************************************************/
-
-
-/****** This function sets the value of the maximum size of core file *******/
-/****** allowed.                                                      *******/
+// setCoreLimitRelease
+//
+// This function sets the value of the maximum size of core file 
+// allowed.                                                     
 
 int setCoreLimitRelease(void) 
 {
 
-#ifndef PTHPPA
+#if !defined(PTHPPA)
 
     struct rlimit coreLimit;
 
@@ -142,5 +154,4 @@ int setCoreLimitRelease(void)
   
 }
 
-/****************************************************************************/
 
