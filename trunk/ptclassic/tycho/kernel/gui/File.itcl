@@ -1317,11 +1317,11 @@ body ::tycho::File::openWin {{megawidget {}}} {
 # otherwise, return an empty string.
 #
 body ::tycho::File::winGetByRootName {rootname} {
-    set arrayNm [array names filesOpen]
-    foreach filename $arrayNm {
+    set filenames [::tycho::registry files]
+    foreach filename $filenames {
         set name [::tycho::url rootname [::tycho::url tail $filename]]
         if {$name == $rootname} {
-            return $filesOpen($filename)
+            return [::tycho::registry windows $filename]
         }
     }
     return ""
