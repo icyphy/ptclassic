@@ -72,6 +72,12 @@ protected:
 	// writes initial code
 	virtual void headerCode();
 
+	// method for supervising all code generation for the case of
+	// a wormhole.  The default implementation generates an infinite
+	// loop that reads input wormholes, runs the schedule, and writes
+	// output wormholes, forever.
+	virtual int wormCodeGenerate(Galaxy&);
+
 	// methods for generating code for reading and writing
 	// wormhole ports.  Argument is the "real port" of the interior
 	// star that is attached to an event horizon.
