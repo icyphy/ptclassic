@@ -123,7 +123,7 @@ for all:V2Creal use entity work.V2Creal(CLI); end for;
   begin {
 //    printf("VHDLCSend.pl begin method called!!\n");
     // Call method to wire up a V2C VHDL entity
-    targ()->registerV2C(int(pairNumber), numXfer, input.resolvedType());
+    //    targ()->registerV2C(int(pairNumber), numXfer, input.resolvedType());
 
     if (strcmp(input.resolvedType(), "INT") == 0) {
       addCode(V2Cinteger, "cli_models", "v2cint");
@@ -140,17 +140,20 @@ for all:V2Creal use entity work.V2Creal(CLI); end for;
   }
 
   go {
+    // Added this in here instead of in begin().
+    targ()->registerV2C(int(pairNumber), numXfer, input.resolvedType());
+
     // Add code to synch at end of main.
-    StringList postSynch;
+    StringList dataSynch;
     for (int i = 0 ; i < numXfer ; i++) {
-      postSynch << "V2C" << rtype << int(pairNumber) << "_data" << " <= " << "$ref(input,";
-      postSynch << -i;
-      postSynch << ")" << ";\n";
-      postSynch << "V2C" << rtype << int(pairNumber) << "_go" << " <= " << "'0';\n";
-      postSynch << "wait on " << "V2C" << rtype << int(pairNumber) << "_done" << "'transaction;\n";
+      dataSynch << "V2C" << rtype << int(pairNumber) << "_data" << " <= " << "$ref(input,";
+      dataSynch << -i;
+      dataSynch << ")" << ";\n";
+      dataSynch << "V2C" << rtype << int(pairNumber) << "_go" << " <= " << "'0';\n";
+      dataSynch << "wait on " << "V2C" << rtype << int(pairNumber) << "_done" << "'transaction;\n";
     }
     
-    addCode(postSynch);
+    addCode(dataSynch);
   }
 
 }

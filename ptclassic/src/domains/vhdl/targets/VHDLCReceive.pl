@@ -121,7 +121,7 @@ for all:C2Vreal use entity work.C2Vreal(CLI); end for;
   begin {
 //    printf("VHDLCReceive.pl begin method called!!\n");
     // Call method to wire up a C2V VHDL entity
-    targ()->registerC2V(int(pairNumber), numXfer, output.resolvedType());
+    //    targ()->registerC2V(int(pairNumber), numXfer, output.resolvedType());
 
     if (strcmp(output.resolvedType(), "INT") == 0) {
       addCode(C2Vinteger, "cli_models", "c2vint");
@@ -138,17 +138,20 @@ for all:C2Vreal use entity work.C2Vreal(CLI); end for;
   }
 
   go {
+    // Added this in here instead of in begin().
+    targ()->registerC2V(int(pairNumber), numXfer, output.resolvedType());
+
     // Add code to synch at beginning of main.
-    StringList preSynch;
+    StringList dataSynch;
     for (int i = 0 ; i < numXfer ; i++) {
-      preSynch << "C2V" << rtype << int(pairNumber) << "_go" << " <= '0';\n";
-      preSynch << "wait on " << "C2V" << rtype << int(pairNumber) << "_done" << "'transaction;\n";
-      preSynch << "$ref(output,";
-      preSynch << -i;
-      preSynch << ")" << " := " << "C2V" << rtype << int(pairNumber) << "_data;\n";
+      dataSynch << "C2V" << rtype << int(pairNumber) << "_go" << " <= '0';\n";
+      dataSynch << "wait on " << "C2V" << rtype << int(pairNumber) << "_done" << "'transaction;\n";
+      dataSynch << "$ref(output,";
+      dataSynch << -i;
+      dataSynch << ") $assign(output) " << "C2V" << rtype << int(pairNumber) << "_data;\n";
     }
     
-    addCode(preSynch);
+    addCode(dataSynch);
   }
 
 }
