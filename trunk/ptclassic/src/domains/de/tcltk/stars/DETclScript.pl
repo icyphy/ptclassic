@@ -103,52 +103,51 @@ delim $$
 		name{ processInputs }
 		type{ void }
 		access{ public }
-		arglist{ "(TclStarIfc *tclp, MultiInDEPort *inputp)" }
+		arglist{ "()" }
 		code{
 		  // Reset newInputFlags and newOutputFlags in the Tcl object
-		  tclp->setAllNewInputFlags(FALSE);
-		  tclp->setAllNewOutputFlags(FALSE);
+		  tcl.setAllNewInputFlags(FALSE);
+		  tcl.setAllNewOutputFlags(FALSE);
 
 		  // Check the input values to see which ones are new
 		  // and set the flags for the affected output ports
-		  InDEMPHIter nextp(*inputp);
+		  InDEMPHIter nextp(input);
 		  InDEPort* iportp;
 		  int alloutflag = FALSE;
 		  int portnum = 0;
 		  while ((iportp = nextp++) != 0) {
 		    if ( iportp->dataNew ) {
 		      // set proper entry of newInputFlags of the Tcl object
-		      tclp->inputNewFlags[portnum] = TRUE;
+		      tcl.inputNewFlags[portnum] = TRUE;
 
 		      // see which outputs are affected by the new input
 		      if ( ! alloutflag ) {
 		        if ( iportp->complete ) {
-			  tclp->setAllNewOutputFlags(TRUE);
+			  tcl.setAllNewOutputFlags(TRUE);
 			  alloutflag = TRUE;
 			} else {
-			// walk down triggerList to find the affected output ??
+			// walk down triggerList to find affected outputs ??
 
 			}
 		      }
 		    }
 		    portnum++;
-		  }
-		  // output.put(completionTime) = iportp->get(); ??
-		}
+		 }
+	       }
 	}
 	method {
 		name{ processOutputs }
 		type{ void }
 		access{ public }
-		arglist{ "(TclStarIfc *tclp, MultiOutDEPort *outputp)" }
+		arglist{ "()" }
 		code {
 		  // Output values (computed by Tcl) from the local tcl buffer
-		  OutDEMPHIter nextp(*outputp);
+		  OutDEMPHIter nextp(output);
 		  OutDEPort *oportp;
 		  int portnum = 0;
 		  while ((oportp = nextp++) != 0) {
-		    if ( tclp->outputNewFlags[portnum] ) 
-		      oportp->put(completionTime) = tclp->outputValues[portnum];
+		    if ( tcl.outputNewFlags[portnum] ) 
+		      oportp->put(completionTime) = tcl.outputValues[portnum];
 		    portnum++;
 		  }
 		}
@@ -157,13 +156,13 @@ delim $$
 	   completionTime = arrivalTime;
 
 	   // Process the inputs to see which ones are new
-	   processInputs( &tcl, &input );
+	   processInputs();
 
 	   // Invoke the Tcl script (Tcl will call back to get input values)
 	   tcl.go();
 
 	   // Send the outputs which are new through the output portholes
-	   processOutputs( &tcl, &output );
+	   processOutputs();
 
 	}
 }
