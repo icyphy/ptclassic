@@ -27,25 +27,12 @@
 ##########################################################################
 
 
-# Set up the "function table." Explicitly load the superclass
-# to avoid a bizarre problem with variable scoping.
-#
-uplevel #0 {
-    if { [::info classes ::tycho::Picture] == "" } {
-	source $tychoslate/kernel/Picture.itcl
+# Explicitly load the superclass. I don't really know why this is
+# needed, but the common arrays get upset otherwise.
+namespace ::tycho {
+    if { [::info classes Picture] == "" } {
+	uplevel #0 {source $tychoslate/kernel/Picture.itcl}
     }
-
-    array set Node [array get Picture]
-
-    set Node(construct)   ::tycho::Node::construct
-    set Node(coords)      ::tycho::Node::coords
-    set Node(icontype)    ::tycho::Node::icontype
-    set Node(inputs)      ::tycho::Node::inputs
-    set Node(intype)      ::tycho::Node::intype
-    set Node(name)        ::tycho::Node::name
-    set Node(outputs)     ::tycho::Node::outputs
-    set Node(outtype)     ::tycho::Node::outtype
-    set Node(update)      ::tycho::Node::update
 }
 
 
@@ -66,26 +53,26 @@ class ::tycho::Node {
     ###################################################################
     ####                            options                        ####
 
-    # The type of item to use for the icon
-    common icontype
-
     # The font to use to display the icon name
     common font
 
-    # The name to display on the icon
-    common name
-
-    # The type of item and options to use for the input ports
-    common intype
+    # The type of item to use for the icon
+    common icontype
 
     # The positions of the input ports
     common inputs
 
-    # The type of item and options to use for the output ports
-    common outtype
+    # The type of item and options to use for the input ports
+    common intype
+
+    # The name to display on the icon
+    common name
 
     # The positions of the output ports
     common outputs
+
+    # The type of item and options to use for the output ports
+    common outtype
 
     ###################################################################
     ####                         public procs                      ####
@@ -103,7 +90,16 @@ class ::tycho::Node {
     ###################################################################
     ####                         protected variables               ####
 
-    common icon
+    # All methods are looked up through a table
+    common methodtable
+
+    # All options have a default value
+    common optiondefault
+
+    # The item used as the node's icon
+    common iconitem
+
+    # The label attached to the icon
     common textitem
     
     # The "direction" of the input ports
@@ -124,6 +120,35 @@ class ::tycho::Node {
 
     proc redrawinputs  {id canvas positions}
     proc redrawoutputs {id canvas positions}
+
+
+    ###################################################################
+    ####                       class initialization                ####
+
+    #### Set method table
+    array set methodtable [array get ::tycho::Picture::methodtable]
+
+    set methodtable(construct)   ::tycho::Node::construct
+    set methodtable(coords)      ::tycho::Node::coords
+    set methodtable(icontype)    ::tycho::Node::icontype
+    set methodtable(inputs)      ::tycho::Node::inputs
+    set methodtable(intype)      ::tycho::Node::intype
+    set methodtable(name)        ::tycho::Node::name
+    set methodtable(outputs)     ::tycho::Node::outputs
+    set methodtable(outtype)     ::tycho::Node::outtype
+    set methodtable(update)      ::tycho::Node::update
+
+    #### Set option defaults
+    array set optiondefault [array get ::tycho::Picture::optiondefault]
+
+    set optiondefault(-name)     "NoName"
+    set optiondefault(-icontype) {Frame -color green}
+    set optiondefault(-intype)   {Terminal -type input}
+    set optiondefault(-outtype)  {Terminal -type output}
+    # FIXME: use .tychoFonts
+    set optiondefault(-font)     -Adobe-Helvetica-Bold-R-Normal--*-120-*-*-*-*-*-*
+    set optiondefault(-inputs)   1
+    set optiondefault(-outputs)  1
 }
 
 
@@ -134,16 +159,7 @@ body ::tycho::Node::construct {id tags canvas x0 y0 x1 y1 args} {
     set slate [canvasslate $canvas]
 
     # Initialize the options
-    set defaultoptions { \
-	    -name "NoName" \
-	    -icontype {Frame -color green} \
-	    -intype {Terminal -type input} \
-	    -outtype {Terminal -type output} \
-	    -font -Adobe-Helvetica-Bold-R-Normal--*-120-*-*-*-*-*-* \
-	    -inputs 1 \
-	    -outputs 1 }
-
-    foreach {option value} [concat $defaultoptions $args] {
+    foreach {option value} [concat [array get optiondefault] $args] {
 	set [string trimleft $option -]($id) $value
     }
 
@@ -151,8 +167,8 @@ body ::tycho::Node::construct {id tags canvas x0 y0 x1 y1 args} {
     set primary($id) [$canvas create rectangle $x0 $y0 $x1 $y1 \
 	    -tags $tags]
 
-    # Create the icon
-    set icon($id) [eval $slate create [lindex $icontype($id) 0] \
+    # Create the iconitem
+    set iconitem($id) [eval $slate create [lindex $icontype($id) 0] \
 	    $x0 $y0 $x1 $y1 [lrange $icontype($id) 1 end] \
 	    -tags [list $tags]]
 
@@ -183,8 +199,8 @@ body ::tycho::Node::coords {id canvas args} {
     set coords $args
     eval $canvas coords $primary($id) $coords
 
-    # Move the icon
-    eval $slate coords $icon($id) $coords
+    # Move the iconitem
+    eval $slate coords $iconitem($id) $coords
 
     # Perform a generic update
     update $id $canvas
@@ -242,12 +258,12 @@ body ::tycho::Node::icontype {id canvas it} {
     set icontype($id) $it
     set slate [canvasslate $canvas]
 
-    $slate delete $icon($id)
-    set icon($id) [eval $slate create [lindex $icontype($id) 0] \
+    $slate delete $iconitem($id)
+    set iconitem($id) [eval $slate create [lindex $icontype($id) 0] \
 	    [$canvas coords $primary($id)] [lrange $icontype($id) 1 end] \
 	    -tags [list [$slate gettags $id]]]
 
-    $slate lower $icon($id) $textitem($id)
+    $slate lower $iconitem($id) $textitem($id)
 }
 
 ##########################################################################
