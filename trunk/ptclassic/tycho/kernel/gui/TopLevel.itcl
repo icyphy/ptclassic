@@ -65,16 +65,25 @@ proc ::tkMbLeave {arg} {
 # name of the object you are calling from ($this). If after the call to
 # update the object no longer exists, then a silent error is triggered.
 # This unwinds the calling stack to the top level, preventing this
-# procedure from returning.
+# procedure from returning.  Note that if this is inside a "catch", then
+# all bets are off.  You could get a core dump if after returning from
+# the catch the object no longer exists.  The object name given in the
+# argument must be visible at the global scope.
+# <p>
+# Unfortunately, currently the "info" command in Itcl, used here to
+# check whether the object still exists, is broken.  It will claim that
+# the object does not exist even if it does.  As a temporary workaround,
+# pass as an argument the name of the window of widget associated with
+# the object.  If there is none, then you are on your own.  Argue with
+# the Itcl designers to get "info" fixed.
 #
 proc ::tycho::safeUpdate {obj} {
     update
-    if {[info objects $obj] != {}} {
+    if {[uplevel #0 info objects $obj] == {}} {
         ::tycho::silentError
     }
     return 0
 }
-
 
 ##########################################################################
 #### TopLevel
