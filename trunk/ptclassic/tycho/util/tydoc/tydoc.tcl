@@ -35,7 +35,57 @@
 # Programming" book
 
 package provide tycho.util.tydoc 2.0
-package require tycho.kernel.basic
+
+# Don't include 'package require tycho.kernel.basic', you will break
+# the standalone tydoc distribution.  Instead, we define namespaceTail,
+# namespaceQualifiers and  infoWhichCommand locally
+#package require tycho.kernel.basic
+
+### Start of code duplicated from tycho/kernel/basic/Compat.tcl
+
+##########################################################################
+#### namespaceTail
+# 
+# Use this instead of "namespace tail" or "info namespace tail"
+#
+proc namespaceTail {n} {
+    global tcl_version
+    if { $tcl_version >= 8.0 && ${itcl::version} >= 3.0 } {
+	return [namespace tail $n]
+    } else {
+	return [info namespace tail $n]
+    }
+}
+
+##########################################################################
+#### namespaceQualifiers
+# 
+# Use this instead of "info namespace qualifiers"
+#
+proc namespaceQualifiers {n} {
+    global tcl_version
+    if { $tcl_version >= 8.0 && ${itcl::version} >= 3.0 } {
+	return [namespace qualifiers $n]
+    } else {
+	return [info namespace qualifiers $n]
+    }
+}
+
+##########################################################################
+#### infoWhichCommand
+# 
+# Use this instead of "info which -command foo" or "info commands foo."
+#
+proc infoWhichCommand {c} {
+    global tcl_version
+    if { $tcl_version >= 8.0 && ${itcl::version} >= 3.0 } {
+	uplevel info commands $c
+    } else {
+	uplevel info which -command $c
+    }
+}
+
+### End of code duplicated from tycho/kernel/basic/Compat.tcl
 
 global env auto_path
 set env(TYDOC_LIBRARY) [file dirname [info script]]
