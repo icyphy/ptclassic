@@ -393,8 +393,9 @@ test File-save-7 {Save a NoName auto-save file} {
     # Script to select a filename
     set TY_TEST_MODAL {
         {
+	    %0 clear
             set result1 [%0 get entry]
-            %0 insert entry $foo
+            %0 insert entry [file tail $foo]
             update
             _update
             %0 ok
@@ -402,6 +403,8 @@ test File-save-7 {Save a NoName auto-save file} {
     }
     # Save it
     set result2 [.f save]
+    update
+    _update
     list $result1 $result2 [_rdfile $foo]
 } {{} 1 {Mmmm... donuts}}
 
