@@ -75,7 +75,12 @@ void CGCPortHole::setFlags() {
 	
 	// BufferSize might not be set - bufSize class error abort run
 	if (SimControl::haltRequested()) return;
-       
+
+	if (!bufSize()) {
+	    Error::abortRun(*this," Buffer size has not been set.  Has the galaxy been scheduled?");
+	    return;
+	}
+
 	if ((numXfer() * parentReps()) % bufSize() != 0)
 		hasStaticBuf = FALSE; 
 }
