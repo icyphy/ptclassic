@@ -194,7 +194,7 @@ Block* Block::copyStates(const Block& src) {
 	CBlockStateIter nexts(src);
 	BlockStateIter nextd(*this);
 	const State* srcStatePtr;
-	State *destStatePtr;
+	State *destStatePtr = (State *)NULL;
 	while ((srcStatePtr = nexts++) != 0 && (destStatePtr = nextd++) != 0) {
 		destStatePtr->setInitValue(srcStatePtr->initValue());
 		StringList cVal;
