@@ -361,7 +361,7 @@ body ::tycho::ButtonBox::buttoncget {tag option} {
 
     # Get the option locally
     if { [::tycho::lmember $localoptions $option] } {
-	return [set _[string range $opt 1 end]($tag)]
+	return [set _[string range $option 1 end]($tag)]
     }
 
     # Get the option from the button
