@@ -128,6 +128,7 @@ protected:
 	CodeStream loopCloser;
 	CodeStream useLibs;
 	CodeStream sysWrapup;
+	CodeStream simWrapup;
 
 	// Keep this at the top of this file to please the compiler.
 	// Add code to the beginning of a CodeStream instead of the end.

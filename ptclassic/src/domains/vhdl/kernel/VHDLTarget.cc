@@ -715,6 +715,7 @@ void VHDLTarget :: addCodeStreams() {
   addStream("loopCloser", &loopCloser);
   addStream("useLibs", &useLibs);
   addStream("sysWrapup", &sysWrapup);
+  addStream("simWrapup", &simWrapup);
 }
 
 // Initialize codeStreams.
@@ -728,6 +729,7 @@ void VHDLTarget :: initCodeStreams() {
   loopCloser.initialize();
   useLibs.initialize();
   sysWrapup.initialize();
+  simWrapup.initialize();
 }
 
 // Initialize VHDLObjLists.
