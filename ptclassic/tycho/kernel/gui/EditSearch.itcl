@@ -38,51 +38,68 @@ option add *EditSearch.entryBackground \
 
 ##########################################################################
 #### EditSearch class.
-# Create a dialog box for searching for text in a TyEdit object.
+# Create a dialog box for searching for text in a Edit object.
 # This dialog box should be child window of the Edit object so that it
 # is removed when the parent is removed.  To do this, just give it a
 # name that is the name of the Edit window with an additional field
-# appended.
+# appended after a period. For example, if the name of the Edit object
+# is ".file0", the search object could be ".file0.search".
 #
 class ::tycho::EditSearch {
     inherit ::tycho::EntryQuery
 
     constructor {args} {}
 
+    #################################################################
+    ####                        options                          ####
+
+    #### -backwards option
     # The option to specify backwards search.
     itk_option define -backwards backwards Backwards 0
 
+    #### -chfindcommand option
     # The command to execute on a change and find command.
     itk_option define -chfindcommand chfindcommand ChangeAndFindCommand ""
 
+    #### -edittext option
     # The associated EditText object.
     itk_option define -edittext edittext EditText ""
 
+    #### -findcommand option
     # The command to execute on a find command.
     itk_option define -findcommand findcommand FindCommand ""
 
+    #### -nochange option
     # If this option value is non-zero, do not permit changes.
     itk_option define -nochange nochange NoChange 0
 
+    ##################################################################
+    ####                     public methods                       ####
+
+    #### change
     # Change the selection, replacing it with the replacement string.
     method change {}
 
+    #### changeAndFind
     # Change the text in the selection to the value in the Change To box.
     method changeAndFind {}
 
+    #### clearFindMatch
+    # Clear the find-match marks on the associated text window.
+    method clearFindMatch
+
+    #### find
     # Find the specified pattern. Return 1 if it is found, 0 otherwise.
     method find {}
+
+    ###################################################################
+    ####                      protected variables                  ####
 
     # Remember the last search pattern and change string
     protected common lastSearchPattern ""
     protected common lastChangeString ""
 
     # Keep common configuration information
-    # FIXME: These should probably be common, but making them common
-    # causes itcl (2.0-beta) to dump core.  Purify might help fix it.
-    # Adding a default value (as done below) may also help.
-    # It is possible that without a default value, itcl thinks they
-    # are arrays.
     protected common casesw 0
     protected common backwardssw 0
     protected common regexpsw 0
@@ -92,6 +109,29 @@ class ::tycho::EditSearch {
     # a particular string.  This is used to avoid repeatedly finding
     # the same string.
     protected variable myLastSearchPattern ""
+}
+
+#####################################################################
+#### -backwards option
+# Set or change the configuration for forwards or backwards search.
+# 
+configbody ::tycho::EditSearch::backwards {
+    if {$itk_option(-backwards)} \
+	    {$itk_component(backwards) select} \
+	    {$itk_component(backwards) deselect}
+}
+
+#####################################################################
+#### -edittext option
+# Verify that the specified edittext option is valid.
+# 
+configbody ::tycho::EditSearch::edittext {
+    if {$itk_option(-edittext) == {} || \
+	    [::info objects $itk_option(-edittext)] == {} || \
+	    ![$itk_option(-edittext) isa ::tycho::EditText]} {
+	error "EditSearch::find: Invalid -edittext option: \
+		$itk_option(-edittext)"
+    }
 }
 
 #####################################################################
@@ -140,7 +180,6 @@ body ::tycho::EditSearch::constructor {args} {
     }
 
     eval itk_initialize $args
-    eval configure $args
 
     bind $itk_component(hull) <Control-s> \
 	    "$this configure -backwards 0; $this find"
@@ -157,6 +196,9 @@ body ::tycho::EditSearch::constructor {args} {
     $itk_component(bbox) buttonconfigure ok \
 	    -text {Find <Ret>} \
 	    -command "$this execCommand -findcommand"
+
+    addButton clearfind -text {Clear Marks} \
+	    -command "$this clearFindMatch"
 
     if {$itk_option(-nochange) == 0} {
 
@@ -193,31 +235,47 @@ body ::tycho::EditSearch::constructor {args} {
     }
 }
 
-#####################################################################
-#### -backwards option
-# Set or change the configuration for forwards or backwards search.
-# 
-configbody ::tycho::EditSearch::backwards {
-    if {$itk_option(-backwards)} \
-	    {$itk_component(backwards) select} \
-	    {$itk_component(backwards) deselect}
-}
+##################################################################
+####                     public methods                       ####
 
 #####################################################################
-#### -edittext option
-# Verify that the specified edittext option is valid.
+#### change
+# Change the text in the selection to the value in the "Change To" box.
 # 
-configbody ::tycho::EditSearch::edittext {
-    if {$itk_option(-edittext) == {} || \
-	    [::info objects $itk_option(-edittext)] == {} || \
-	    ![$itk_option(-edittext) isa ::tycho::EditText]} {
-	error "EditSearch::find: Invalid -edittext option: \
-		$itk_option(-edittext)"
+body ::tycho::EditSearch::change {} {
+    set editWindow $itk_option(-edittext)
+
+    set changeto [get change]
+    if {$changeallsw} {
+	# Change all tagged text.  Note that we have to have done
+	# a search, or we will get an error message.
+	$editWindow replaceAll $changeto
+    } {
+	# Change only one
+	$editWindow deleteRange sel.first sel.last
+	$editWindow insertString insert $changeto
     }
+    set lastChangeString $changeto
 }
 
-# FIXME: Should have a configbody for the nochange option that
-# permits altering the window configuration.
+#####################################################################
+#### changeAndFind
+# Change the text in the selection to the value in the "Change To" box
+# and find the next instance that matches the pattern.
+# 
+body ::tycho::EditSearch::changeAndFind {} {
+    change
+    find
+}
+
+#####################################################################
+#### clearFindMatch
+# Clear the highlighting in the search window due to a search.
+# 
+body ::tycho::EditSearch::clearFindMatch {} {
+    set tw $itk_option(-edittext)
+    $tw clearFindMatch
+}
 
 #####################################################################
 #### find
@@ -269,32 +327,3 @@ body ::tycho::EditSearch::find {} {
     }
 }
 
-#####################################################################
-#### change
-# Change the text in the selection to the value in the Change To box.
-# 
-body ::tycho::EditSearch::change {} {
-    set editWindow $itk_option(-edittext)
-
-    set changeto [get change]
-    if {$changeallsw} {
-	# Change all tagged text.  Note that we have to have done
-	# a search, or we will get an error message.
-	$editWindow replaceall $changeto
-    } {
-	# Change only one
-	$editWindow deleteRange sel.first sel.last
-	$editWindow insertString insert $changeto
-    }
-    set lastChangeString $changeto
-}
-
-#####################################################################
-#### changeAndFind
-# Change the text in the selection to the value in the Change To box
-# and find the next instance that matches the pattern.
-# 
-body ::tycho::EditSearch::changeAndFind {} {
-    change
-    find
-}

@@ -60,7 +60,7 @@ namespace ::tycho {
 #
 rename ::exit ::tclexit
 proc ::exit {} {
-    ::tycho::TopLevel::exitprogram
+    ::tycho::TopLevel::exitProgram
 }
 
 ##########################################################################
@@ -73,9 +73,13 @@ proc ::exit {} {
 #
 class ::tycho::TopLevel {
 
-    inherit itk::Toplevel
+    inherit ::itk::Toplevel
 
-    #### geometry option
+    #### -before option
+    # Position the window in the list of windows before the given one.
+    itk_option define -before before Before {}
+
+    #### -geometry option
     # By default, the geometry option is set to the
     # null string, deferring to the window manager the control over
     # position. It can be set alternatively to a string of the
@@ -89,35 +93,97 @@ class ::tycho::TopLevel {
 	wm geometry $itk_component(hull) $itk_option(-geometry)
     }
 
-    # An array of top-level windows is kept here and supported by
-    # the <Control-x><o> binding, which switches the focus to the
-    # next window in the list.  The order of the windows in the list
-    # is arbitrary.  The value of each array element will be the name
-    # of the window that has the focus when the new window is created.
-    # If this window still exists when a window is deleted, then
-    # the focus will revert to this window.
-    private common topLevelWindows
-
-    # The prefix will be set to either $this or "".  The latter
-    # is used if the window name is ".".  Thus, it is always
-    # safe to refer to a widget within the window as $prefix.name,
-    # where "name" is the name of the widget.
-    protected variable prefix
-
     constructor {args} {}
     destructor {}
 
+    #################################################################
+    ####                     public methods                      ####
+
+    #### centerOnScreen
     # Center the window on the screen.
     method centerOnScreen {}
 
+    #### focusin
+    # Give the window or a subwindow the focus.
+    method focusin {}
+
+    #### freezeWindowSize
     # Prevent interactive resizing of the window.
     method freezeWindowSize {}
 
-    # Shift the focus ot the next window in the topLevelWindows list.
-    method nextWindow {}
+    #### nextWindow
+    # Shift the focus to the next window in the topLevelWindows list.
+    method nextWindow {{raise 0}}
 
+    #### windowName
+    # Return the name of my top-level window.
+    method windowName {} {return $itk_component(hull)}
+
+    #### raiseWindow
+    # Raise the window.
+    method raiseWindow {}
+
+    #################################################################
+    ####                   public procedures                     ####
+
+    #### exitProgram
     # Exit the program
-    public proc exitprogram {}
+    public proc exitProgram {}
+
+    #### exitWhenNoMoreWindows
+    # If the argument is zero, disable exiting when the last window
+    # is closed.
+    public proc exitWhenNoMoreWindows {bool}
+
+    #################################################################
+    ####                  protected variables                    ####
+
+    #### prefix variable
+    # The prefix is just a shorthand for $itk_component(hull).
+    # It is the name of the top-level window.
+    protected variable prefix
+
+    #################################################################
+    ####                  private variables                      ####
+
+    # A circular list of top-level windows is kept here and supported by
+    # the <Control-x><o> binding, which switches the focus to the
+    # next window in the list.  The order of the windows in the list
+    # is determined as follows: If a window in this application has the
+    # focus when a new window is created, then the new window is put in
+    # the list right before the one with the focus.  Otherwise, it is
+    # put at the beginning of the list.  Thus, the first entry in the list
+    # list is always the one to most recently have the focus.
+    private common topLevelWindows
+
+    # To ensure that we ask the user only once for confirmation
+    # on exiting the program, we use this variable.
+    private common exitconfirmed 0
+
+    # If this is non-zero, then when the last window is closed,
+    # the program will be exited.
+    private common exitflag 1
+}
+
+#####################################################################
+#### -before option
+# By default, a top-level window is inserted in the beginning of the
+# list of top-level windows.  Thus, scrolling through windows
+# using the "C-x o" binding will visit the windows in the reverse order
+# in which they are created.  However, sometimes, we wish to
+# place a window in a particular place in this order.  If the
+# value of the -before option is non-null, it is taken to be
+# the window name of a top-level window that currently exists,
+# and the new window is placed in the window order before that one.
+#
+configbody ::tycho::TopLevel::before {
+    set tl $itk_option(-before)
+    if {$tl != {} &&  \
+	    [uplevel #0 info objects $tl] != {} && \
+	    [$tl isa ::tycho::TopLevel]} {
+	$topLevelWindows remove $prefix
+	$topLevelWindows insert $prefix $tl
+    }
 }
 
 #####################################################################
@@ -128,40 +194,73 @@ body ::tycho::TopLevel::constructor {args} {
     set prefix $itk_component(hull)
     wm withdraw $prefix
     
+    # Create a single common instance of the topLevelWindows list.
+    if {![info exists topLevelWindows]} {
+	set topLevelWindows [CircularList #auto]
+    }
+    
     # Support for switching the focus from one window to the next.
-    # The value of the array element is not used for anything currently.
-    set topLevelWindows($prefix) [focus -displayof $prefix]
-    bind $prefix <Control-x><o> "$this nextWindow; break"
+    # We put the new window at the beginning of the list.  It may be
+    # later moved using the -before option.
+    $topLevelWindows insert $prefix
+
+    bind $prefix <Control-x><o> "$this nextWindow 1; break"
     
     # To prevent the "o" from appearing in Entry windows,
     bind Entry <Control-x><o> { }
-    
+
     # Explicitly handle configs that may have been ignored earlier.
     eval itk_initialize $args
+
+    # Grab the focus when the window gets mapped.
+    bind $itk_component(hull) <Map> "$this focusin; break"
 }
 
 #####################################################################
 #### Destructor
-# Destroy the window containing the widget When a window that has the
-# focus is deleted, we return the focus to the window that had the
-# focus when it was created, if this window still exists. Otherwise,
-# the focus goes to the next window in the topLevelWindows list. Note
-# that if the mouse is not over a window belonging to this application
-# after a window is deleted, the focus will be given up entirely by the
-# application.
+# Destroy the window containing the widget. If there are no remaining
+# top-level windows that are mapped, then exit the program. The latter functionality can be
+# disabled by calling ::tycho::TopLevel::exitWhenNoMoreWindows with the
+# argument "0". Normally, you should call nextWindow before destroying
+# any top-level that has the focus. This puts the focus into the next
+# logical window in the window sequence. Note that if the mouse is not
+# over a window belonging to this application after a window is
+# deleted, the focus will be given up entirely by the application.
+#
+# NOTE: It would be better if the user were queried for confirmation
+# about exiting the program, but this appears to be impossible with the
+# current Itcl version.  A call to askuser in this destructor leads to
+# very strange behavior, often a core dump. Also, the window is getting
+# unmapped before we get to this point, so in effect, there will be no
+# remaining open windows even if the user tries to cancel the close.
 #
 body ::tycho::TopLevel::destructor {} {
-    set prev $topLevelWindows($prefix)
-    unset topLevelWindows($prefix)
-    
-    if {[focus] != {} && [winfo toplevel [focus]] == $prefix} {
-	if {$prev != "" && [winfo exists $prev]} {
-	    focus $prev
-	} else {
-	    nextWindow
+    # NOTE: It would be nice to call nextWindow here, rather than
+    # having to call it each time before invoking the destructor.
+    # However, this produces very erratic behavior.  Often, the
+    # application has lost the focus by the time the destructor
+    # gets invoked. Tk gets into a weird state.
+    $topLevelWindows remove $prefix
+
+    # Check to see whether this is the last open window.
+    # If so, exit the program.
+    if $exitflag {
+	set noMore 1
+	foreach win [$topLevelWindows elements] {
+	    if {[winfo exists $win] && [winfo ismapped $win]} {
+		set noMore 0
+		break
+	    }
+	}
+	if $noMore {
+	    after 100 {::tclexit}
 	}
     }
 }
+
+#################################################################
+#################################################################
+####                     public methods                      ####
 
 #####################################################################
 #### centerOnScreen
@@ -199,6 +298,15 @@ body ::tycho::TopLevel::centerOnScreen {} {
     wm deiconify $prefix
 }
 
+#########################################################################
+#### focusin
+# Grab the focus.  This should be redefined in derived classes to give
+# the focus to the appropriate subwindow.
+#
+body ::tycho::TopLevel::focusin {} {
+    focus $itk_component(hull)
+}
+
 #####################################################################
 #### freezeWindowSize
 # This method freezes the window at its current size, prohibiting
@@ -211,56 +319,75 @@ body ::tycho::TopLevel::freezeWindowSize {} {
 #####################################################################
 #### nextWindow
 # Switch the focus to the next window listed in the array topLevelWindows.
+# If an argument is given, and is non-zero, then raise the window as well.
 #
-body ::tycho::TopLevel::nextWindow {} {
-    
-    # Since there is a recursive call here, as an extra cautious
-    # safety check, if the array size gets to zero, just return,
-    # doing nothing.  This should never happen.
-    if {[array size topLevelWindows] <= 0} {return}
-    
-    set searchID [array startsearch topLevelWindows]
-    set first ""
-    while {[set next [array nextelement topLevelWindows $searchID]] != ""} {
-	if {$first == ""} {set first $next}
-	if {$next == $prefix} {break}	    
-    }
-    set next [array nextelement topLevelWindows $searchID]
-    if {$next == ""} {
-	set fw [focus -lastfor $first]
-	set next $first
-    } {
-	set fw [focus -lastfor $next]
-    }
-    # If the identified window does not exist for some reason
-    # (this could happen if an error occurred while it was being
-    # constructed), then delete it from the list and recursively
-    # invoke this function.
-    if [winfo exists $fw] {
-	focus $fw
-	raise $next
-    } else {
-	unset topLevelWindows($next)
-	nextWindow
+body ::tycho::TopLevel::nextWindow {{raise 0}} {
+    foreach win [$topLevelWindows elements $prefix] {
+	if {$win == $prefix} {continue}
+	if {[winfo exists $win] && \
+		[winfo ismapped $win] && \
+		[uplevel #0 info objects $win] != {} && \
+		[$win isa ::tycho::TopLevel]} {
+	    $win focusin
+	    if {$raise != 0} {$win raiseWindow}
+	    break
+	}
     }
 }
 
 #####################################################################
-#### exitprogram
-# Confirm exit with a dialog, then quit. The destructors will query
-# for save of any windows with modified data.
+#### raiseWindow
+# Bring the corresponding window to the foreground, and make sure it
+# is deiconified.
 #
-body ::tycho::TopLevel::exitprogram {} {
+body ::tycho::TopLevel::raiseWindow {} {
+    wm deiconify $itk_component(hull)
+    raise $itk_component(hull)
+    focusin
+}
+
+#################################################################
+#################################################################
+####                   public procedures                     ####
+
+#####################################################################
+#### exitProgram
+# Confirm exit with a dialog, then quit. The destructors will query
+# for save of any windows with modified data.  If this routine returns,
+# it will return 0 if the user canceled the exit, and 1 if the exit
+# is in progress.
+#
+body ::tycho::TopLevel::exitProgram {} {
+    if {$exitconfirmed} {return 1}
     if [askuser "OK to exit the program?"] {
+	set exitconfirmed 1
 	# Need to delete all Toplevel objects first to make sure destructors
-	# are invoked before the exit process begins.
-	foreach obj [::info objects] {
-	    # A second check for object instance is necessary, because the
-	    # object may have been deleted earlier in the loop.
-	    if {[::info objects $obj] != {} && [$obj isa ::tycho::TopLevel]} {
-		delete object $obj
+	# are invoked before the exit process begins.  Catch errors here
+	# because an error means that the exit was aborted.
+	if {[catch {
+	    foreach obj [::info objects] {
+		# A second check for object instance is necessary, because the
+		# object may have been deleted earlier in the loop.
+		if {[::info objects $obj] != {} && \
+			[$obj isa ::tycho::TopLevel]} {
+		    delete object $obj
+		}
 	    }
+	}] == 0} {
+	    ::tclexit
+	} {
+	    set exitconfirmed 0
 	}
-	::tclexit
     }
+    return 0
+}
+
+#####################################################################
+#### exitWhenNoMoreWindows
+# If the argument is zero, then disable the feature (which is enabled
+# by default) that when the last window is removed, the program is
+# exited (after confirmation).
+#
+body ::tycho::TopLevel::exitWhenNoMoreWindows {bool} {
+    set exitflag $bool
 }

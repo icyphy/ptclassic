@@ -41,7 +41,7 @@
 # is -1, while yes is 1 and no is 0.
 #
 class ::tycho::YesNoCancel {
-    inherit YesNoQuery
+    inherit ::tycho::YesNoQuery
 
     # The command to execute on a yes response.
     itk_option define -cancelcommand cancelcommand CancelCommand \
@@ -57,7 +57,9 @@ body ::tycho::YesNoCancel::constructor {args} {
 
     # Pack the cancel button
     addButton cancel -text "Cancel <Esc>" \
-	    -command "$this execCommand -cancelcommand; delete object $this"
+	    -command "$this execCommand -cancelcommand; \
+	    $this nextWindow;
+	    delete object $this"
 
     # Change the keyboard accelerator for the No button.
     $itk_component(bbox) buttonconfigure no -text "No <Del>"

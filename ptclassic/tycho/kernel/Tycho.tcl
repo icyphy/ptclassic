@@ -29,7 +29,6 @@
 # ENHANCEMENTS, OR MODIFICATIONS.
 #                                                         COPYRIGHTENDKEY
 
-
 # We don't use the toplevel window called ".", so withdraw it.
 wm withdraw .
 
@@ -108,5 +107,8 @@ uplevel #0 {
 }
 
 # FIXME: The following should be optional, depending on command-line args.
-::tycho::Console .mainConsole -text "Welcome to Tycho\n" -geometry +0+0
+uplevel #0 {::tycho::Console .mainConsole \
+	-master 1 -text "Welcome to Tycho\n" -geometry +0+0}
 wm deiconify .mainConsole
+
+::tycho::welcomeMessage

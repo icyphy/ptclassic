@@ -78,7 +78,7 @@ proc ptkInform {win text} {::tycho::inform $text}
 # "$name centerOnScreen", where "$name" is the name of the object.
 #
 class ::tycho::Message {
-    inherit DialogWindow
+    inherit ::tycho::DialogWindow
 
     constructor {args} {}
 }
@@ -93,14 +93,10 @@ body ::tycho::Message::constructor {args} {
     # call below I do "delete object $this", then a tkwait on this
     # window never returns.  Perhaps "delete object" does not fully
     # inform tk that the window is gone?
-    addButton ok -text "OK <Ret>" -command "destroy $itk_component(hull)"
+    addButton ok -text "OK <Ret>" -command \
+	    "$this nextWindow; delete object $this"
     default ok
-
-    bind $prefix <Return> "$this invoke ok"
 
     # Explicitly handle configs that may have been ignored earlier.
     eval itk_initialize $args
-
-    # Grab the focus.
-    focus $prefix
 }

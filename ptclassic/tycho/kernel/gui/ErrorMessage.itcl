@@ -1,4 +1,4 @@
-# Message window.
+# Error message window.
 #
 # $Id$
 # Author: Edward A. Lee
@@ -38,12 +38,30 @@
 # namespace and within classes it should be sufficient to simply
 # call the Tcl command "error".
 #
-proc tkerror {msg} {
+proc ::tkerror {msg} {
     # Handle the blank message case
     if {$msg == ""} {set msg "Tcl reports an error"}
 
     ::tycho::DialogWindow::newModal ErrorMessage [::tycho::autoName .error] \
 	    -text $msg -bitmap error
+}
+
+##########################################################################
+#### showStack
+# This utility displays the stack in a window. Insert it in code for
+# debugging. The argument is displayed on the first line, and can be
+# used to give additional information or distinguish between distinct
+# instances of the procedure.
+#
+proc ::tycho::showStack {args} {
+    # From Ousterhout
+    append trace "Stack: $args"
+    set level [info level]
+    for {set i 1} {$i < $level} {incr i} {
+	append trace "\n"
+        append trace "$level $i: [info level $i]"
+    }
+    post $trace
 }
 
 # COMPATIBILITY procedures.  The following procedures emulate the behavior
@@ -67,11 +85,11 @@ proc ptkDisplayErrorInfo {} {
 # the window is destroyed.
 #
 class ::tycho::ErrorMessage {
-    inherit Message
+    inherit ::tycho::Message
 
     constructor {args} {}
 
-    # Show the stack trace, if there is one.
+    # Show the stack trace in a window, if there is one.
     method stackTrace {} {}
 }
 
@@ -98,7 +116,7 @@ body ::tycho::ErrorMessage::constructor {args} {
 
 ##########################################################################
 #### stackTrace
-# Show the stack trace, if there is one.
+# Show the stack trace in a window, if there is one.
 #
 body ::tycho::ErrorMessage::stackTrace {} {
     global errorInfo
@@ -107,5 +125,6 @@ body ::tycho::ErrorMessage::stackTrace {} {
     } {
 	warn "No stack trace found"
     }
+    nextWindow
     delete object $this
 }

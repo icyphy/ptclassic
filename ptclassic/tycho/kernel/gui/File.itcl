@@ -52,7 +52,7 @@ option add *File.autoSaveInterval 5 widgetDefault
 # method that can take an optional filename argument.
 #
 class ::tycho::File {
-    inherit Dismiss
+    inherit ::tycho::Dismiss
 
     #### autoSaveInterval option
     # Defines the interval (in minutes) between auto-save operations.
@@ -81,20 +81,20 @@ class ::tycho::File {
     ####                         public methods                           ####
 
     #### evaluate
-    # Evaluate the data. The default behavior is an error.
+    # Query the user for a filename, then evaluate its contents as Tcl commands.
     method evaluate {}
+
+    #### filename
+    # Return the name of the file associated with the object.
+    method filename {} {return $file}
+
+    #### help
+    # Open a help window.  This should be redefined in derived classes.
+    method help {}
 
     #### insertFile
     # Insert the contents of a file at the insertion cursor.
     method insertFile {}
-
-    #### keyBindingsHelp
-    # Open a help window with the key bindings for this class.
-    method keyBindingsHelp {}
-
-    #### keybindings
-    # Return a string with the keybindings supported by this base class
-    method keybindings {}
 
     #### markModified
     # Mark the window as containing modified data.
@@ -104,17 +104,9 @@ class ::tycho::File {
     # Mark the window as not containing modified data.
     method markUnmodified {}
 
-    #### mouseBindingsHelp
-    # Open a window with help on mouse bindings.
-    method mouseBindingsHelp {}
-
     #### mousebindings
     # Return a string with the mouse bindings.
     method mousebindings {}
-
-    #### new
-    # Create a new window of the same class.
-    method new {}
 
     #### print
     # Print the contents of the file. The default behavior is an error.
@@ -141,15 +133,23 @@ class ::tycho::File {
     # Save data to a crash recovery file.
     method saveCrash {}
 
-    #### seename
+    #### seeName
     # Find the point in the file identified by "name". The default
     # implementation is an error.
-    method seename {name}
+    method seeName {name}
 
     #### source
     # Source a file and if the returned value is an itcl object,
     # attempt to set its file option.
     method source {filename}
+
+    #### windowMenuAppend
+    # Append a file editor to the window menu.
+    method windowMenuAppend {obj label}
+
+    #### windowMenuRemove
+    # Remove a filename from the window menu.
+    method windowMenuRemove {filename}
 
     ##########################################################################
     ####                         public procedures                        ####
@@ -166,29 +166,39 @@ class ::tycho::File {
     # Open a file and go to its internal point identified by name.
     proc hyperjump {filename point}
 
+    #### newEditor
+    # Open a new editor of the specified class.
+    proc newEditor {editor}
+
     #### openwin
     # Open a file browser, and then open an editor for the file.
     proc openwin {}
-
-    #### opentext
-    # Open a file browser, and then open a simple editor for the file.
-    proc opentext {}
 
     #### openContext
     # Open an editor to edit the file.
     # Which editor is determined by the file extension.
     proc openContext {file}
 
-    # Register a file extension and an associated editor class.
-    proc registerEditor {extension editorClass}
+    # Register file extensions and an associated editor class.
+    proc registerEditor {extensions editorClass {description {}}}
 	
-    # Save and close all open windows.
-    proc saveAndCloseAll {}
-	
+    #### windowMenuAddAll
+    # Add a file editor object to the window menus of all open File objects.
+    proc windowMenuAddAll {obj label}
+
+    #### windowMenuRemoveAll
+    # Remove a filename from the window menus of all open File objects.
+    proc windowMenuRemoveAll {filename}
+
     ##########################################################################
     ####                         protected variables                      ####
 
-    # This array stores window names indexed by file names so that
+    #### file variable
+    # FIXME: This should be removed when we itk is fixed to understand
+    # public variables.
+    protected variable file "NoName"
+
+    # This array stores object names indexed by file names so that
     # if the same file is opened a second time, we can just raise the window.
     protected common filesOpen
 
@@ -197,16 +207,6 @@ class ::tycho::File {
     # last saved.
     protected variable modified 0    
 
-    #### editors variable
-    # This is used to register context-sensitive editors
-    # that are indexed by the file extension.
-    protected common editors
-
-    #### file variable
-    # FIXME: This should be removed when we itk is fixed to understand
-    # public variables.
-    protected variable file "NoName"
-
     # This is used to recall the previous filename associated with
     # the window in case the name is changed.
     protected variable previousfile
@@ -214,44 +214,43 @@ class ::tycho::File {
     ##########################################################################
     ####                  protected methods and procedures                ####
 
+    #### addWindowMenuEditor
+    # Add an entry to the window menu.
+    protected method addWindowMenuEditor {desc command}
+
     #### autoSave
     # Save a backup file and arrange to be called again later.
-    protected method autoSave {} {}
-
-    #### removeBackupFiles
-    # Remove auto-save and crash-recovery files, if they exist.
-    protected method removeBackupFiles {} {}
+    protected method autoSave {}
 
     #### checkForAutoSaveFiles
     # Check for auto-save or crash-recovery files, and return the file to open.
-    protected proc checkForAutoSaveFiles {filename} {}
+    protected proc checkForAutoSaveFiles {filename}
+
+    #### removeBackupFiles
+    # Remove auto-save and crash-recovery files, if they exist.
+    protected method removeBackupFiles {}
 
     ##########################################################################
     ####                         private variables                        ####
+
+    #### editors variable
+    # This is used to register context-sensitive editors
+    # that are indexed by the file extension.
+    private common editors
 
     # This array stores the names of all currently active objects
     # of type File.  This is used to create crash recovery files.
     private common fileObjects
 
+    #### windowMenuEntries
+    # This variable keeps track of registered editors to put them into
+    # the Window menu.
+    private common windowMenuEntries {}
 }
 
 #########################################################################
-#### readonly option configuration
-# Change the window header to indicate that the file is read only.
-# FIXME: we should also note this in the dismiss button region.
-# 
-configbody ::tycho::File::readonly {
-    set bool $itk_option(-readonly)
-    set file $itk_option(-file)
-    if [winfo exists $prefix] {
-	set lowercase [string tolower $bool]
-	if {$lowercase != 0 && $lowercase != "no" && $lowercase != "false"} {
-	    $this configure -title "$file (read only)"
-	} {
-	    $this configure -title "$file"
-	}
-    }
-}
+#########################################################################
+####                          option configure                       ####
 
 #########################################################################
 #### file configuration
@@ -277,14 +276,43 @@ configbody ::tycho::File::file {
 
     # Keep track of which files are open by name.
     # This is used to avoid opening the same file twice.
+    # It is also used to maintain the Window menu entries.
     if {[info exists previousfile] && [info exists filesOpen($previousfile)]} {
 	unset filesOpen($previousfile)
+	windowMenuRemoveAll $previousfile
     }
     if {$file != "NoName"} {
-	set filesOpen($file) $prefix
-	set previousfile $file
+	# If there is already an entry for this filename, do not overwrite it.
+	if {![info exists filesOpen($file)]} {
+	    set filesOpen($file) $this
+	    # Add the current object to the menu entries in all open editors.
+	    windowMenuAddAll $this $file
+	    set previousfile $file
+	}
     }
 }
+
+#########################################################################
+#### readonly option configuration
+# Change the window header to indicate that the file is read only.
+# FIXME: we should also note this in the dismiss button region.
+# 
+configbody ::tycho::File::readonly {
+    set bool $itk_option(-readonly)
+    set file $itk_option(-file)
+    if [winfo exists $prefix] {
+	set lowercase [string tolower $bool]
+	if {$lowercase != 0 && $lowercase != "no" && $lowercase != "false"} {
+	    $this configure -title "$file (read only)"
+	} {
+	    $this configure -title "$file"
+	}
+    }
+}
+
+#########################################################################
+#########################################################################
+####                      constructor & destructor                   ####
 
 ###################################################################
 #
@@ -312,6 +340,18 @@ body ::tycho::File::constructor {args} {
 		-highlightcolor
     }
     
+    # Next a window menu
+    itk_component add windowMenuButton {
+	menubutton $itk_component(menuFrame).window \
+		-text Window \
+		-underline 0 \
+		-menu $itk_component(menuFrame).window.menu
+    } {
+	keep -font -activebackground -cursor -activeforeground \
+		-background -foreground -highlightbackground \
+		-highlightcolor
+    }
+    
     # Next, the help menu.
     itk_component add helpMenuButton {
 	menubutton $itk_component(menuFrame).help \
@@ -326,6 +366,7 @@ body ::tycho::File::constructor {args} {
     
     # Arrangement of menu items
     pack $itk_component(fileMenuButton) -side left
+    pack $itk_component(windowMenuButton) -side left
     pack $itk_component(helpMenuButton) -side right
     
     ##################################################################
@@ -339,20 +380,10 @@ body ::tycho::File::constructor {args} {
     }
     
     $itk_component(fileMenu) add command \
-	    -label New \
-	    -underline 0 \
-	    -command "$this new"
-    
-    $itk_component(fileMenu) add command \
 	    -label Open\
 	    -underline 0 \
 	    -accelerator "C-x C-f" \
 	    -command "File::openwin"
-    
-    $itk_component(fileMenu) add command \
-	    -label {Open Text}\
-	    -underline 5 \
-	    -command "File::opentext"
     
     $itk_component(fileMenu) add command \
 	    -label {Insert}\
@@ -395,18 +426,46 @@ body ::tycho::File::constructor {args} {
 	    -label Close \
 	    -underline 0 \
 	    -accelerator "C-x k" \
-	    -command "delete object $this"
+	    -command "$this nextWindow; delete object $this"
     
     $itk_component(fileMenu) add command \
 	    -label Quit \
 	    -underline 0 \
 	    -accelerator "C-x C-c" \
-	    -command "::tycho::TopLevel::exitprogram"
+	    -command "::tycho::TopLevel::exitProgram"
     
     # Undo the binding in the base class, where Return dismisses
     # the window.
     bind $prefix <Return> {}
     
+    ##################################################################
+    # Window menu contents
+    #
+    itk_component add windowMenu {
+	menu $itk_component(windowMenuButton).menu -tearoff 0
+    } {
+	keep -font -activebackground -cursor -activeforeground \
+		-background -foreground
+    }
+    
+    # Use the editors variable to construct menu entries for registered
+    # editors.
+    foreach entry $windowMenuEntries {
+	set editor [lindex $entry 0]
+	set desc [lindex $entry 1]
+	addWindowMenuEditor $desc "::tycho::File::newEditor $editor"
+    }
+    $itk_component(windowMenu) add separator
+
+    # use the filesOpen variable to contruct menu entries for all open
+    # files.
+    foreach filename [array names filesOpen] {
+	# FIXME: Temporary check for Itcl bug.
+	if {$filename != {junktychofileforitclbogosity}} {
+	    windowMenuAppend $filesOpen($filename) $filename
+	}
+    }
+
     ##################################################################
     # Help menu contents
     #
@@ -421,17 +480,12 @@ body ::tycho::File::constructor {args} {
 	    -label "About Tycho" \
 	    -underline 0 \
 	    -command \
-	    {File::openContext $TYCHO/tycho/kernel/doc/introduction.html}
+	    {::tycho::welcomeMessage}
     
     $itk_component(helpMenu) add command \
-	    -label "Key Bindings" \
+	    -label "User's Guide" \
 	    -underline 0 \
-	    -command "$this keyBindingsHelp"
-    
-    $itk_component(helpMenu) add command \
-	    -label "Mouse Bindings" \
-	    -underline 0 \
-	    -command "$this mouseBindingsHelp"
+	    -command "$this help"
     
     # Bindings
     bind $prefix <Control-x><Control-f> "File::openwin"
@@ -444,16 +498,15 @@ body ::tycho::File::constructor {args} {
     # The following initialize options and then invoke any
     # configuration options, assuming there are options specified.
     eval itk_initialize $args
-    eval configure $args
+
+    # Identify the object for crash recovery
+    set fileObjects($this) $prefix
 
     # Change the label on the dismiss button.
     $itk_component(dismiss) configure -text "DISMISS"
 
     # Initiate the auto-save loop
     autoSave
-
-    # Identify the object for crash recovery
-    set fileObjects($this) $prefix
 
     # FIXME: Because of some itcl bogosity, filesOpen finds itself
     # not settable as an array.  Here we force it to be an array
@@ -484,15 +537,100 @@ body ::tycho::File::destructor {} {
 	    save
 	}
     }
-    
-    if [info exists filesOpen($file)] {
-	catch {unset filesOpen($file)}
+    if {[info exists filesOpen($file)] && \
+	    ($filesOpen($file) == $this || \
+	    "::$filesOpen($file)" == $this || \
+	    $filesOpen($file) == "::$this") } {
+	unset filesOpen($file)
+	windowMenuRemoveAll $file
     }
 
     unset fileObjects($this)
     
     # Get rid of the backup file.
     removeBackupFiles
+}
+
+#########################################################################
+#########################################################################
+####                          public methods                         ####
+
+#####################################################################
+#### evaluate
+# Query the user for a filename, then evaluate its contents as Tcl commands.
+#
+body ::tycho::File::evaluate {} {
+    set filename [DialogWindow::newModal FileBrowser [autoName .fileBrowser] \
+	    -text "Tcl file to evaluate:"]
+    if {$filename != {}} {
+	source $filename
+    }
+}
+
+#########################################################################
+#### help
+# Open a window with help on the current widget.
+# This should be redefined in derived classes.
+#
+body ::tycho::File::help {} {
+    ::tycho::File::openContext doc/FileHelp.html
+}
+
+#####################################################################
+#### insertFile
+# Open a file browser to query the user for a filename, and then
+# insert the contents of that file at the insertion cursor.
+#
+body ::tycho::File::insertFile {} {
+    error "Sorry, insert file not implemented yet."
+}
+
+#####################################################################
+#### markModified
+# Mark the window as containing modified data.
+#
+body ::tycho::File::markModified {} {
+    if {!$modified} {
+	$itk_component(dismiss) configure -text "DISMISS (modified)"
+	set modified 1
+    }
+}
+
+#####################################################################
+#### markUnmodified
+# Mark the window as containing unmodified data.
+#
+body ::tycho::File::markUnmodified {} {
+    if {$modified} {
+	$itk_component(dismiss) configure -text "DISMISS"
+	set modified 0
+    }
+}
+
+#########################################################################
+#### mousebindings
+# Return a string with the mouse bindings
+#
+body ::tycho::File::mousebindings {} {
+    return {
+There are no meaningful mouse bindings in this class.
+    }
+}
+
+#####################################################################
+#### print
+# Print the data.  The default behavior is an error.
+#
+body ::tycho::File::print {} {
+    error "Sorry, print not implemented yet."
+}
+
+#####################################################################
+#### revert
+# Revert to previously saved file.
+#
+body ::tycho::File::revert {} {
+    error "Sorry, revert not implemented yet."
 }
 
 #####################################################################
@@ -522,7 +660,7 @@ body ::tycho::File::save {{name ""}} {
 	# For this base class, this method cannot actually save anything.
 	# Thus, we issue a warning.
 	warn "Tried to save to file: $filename.\nSave not implemented yet."
-	return 1
+	return 0
     }
 }
 
@@ -536,6 +674,9 @@ body ::tycho::File::save {{name ""}} {
 body ::tycho::File::saveAs {} {
     set filename [DialogWindow::newModal FileBrowser [autoName .fileBrowser] \
 	    -text "Save As File:"]
+    if {$filename == {NoName}} {
+	error "Cannot use name NoName"
+    }
     # Ignore if the user cancels
     if {$filename != {}} {
 	return [saveAsFile $filename]
@@ -559,8 +700,14 @@ body ::tycho::File::saveAsFile {filename} {
 	}
     } {
 	removeBackupFiles
+	set oldname $itk_option(-file)
 	configure -file $filename
-	return [save]
+	if [save] {
+	    return 1
+	} {
+	    configure -file $oldname
+	    return 0
+	}
     }
 }
 
@@ -579,79 +726,13 @@ body ::tycho::File::saveCrash {} {
 }
 
 #####################################################################
-#### markModified
-# Mark the window as containing modified data.
-#
-body ::tycho::File::markModified {} {
-    if {!$modified} {
-	$itk_component(dismiss) configure -text "DISMISS (modified)"
-	set modified 1
-    }
-}
-
-#####################################################################
-#### markUnmodified
-# Mark the window as containing unmodified data.
-#
-body ::tycho::File::markUnmodified {} {
-    if {$modified} {
-	$itk_component(dismiss) configure -text "DISMISS"
-	set modified 0
-    }
-}
-
-#####################################################################
-#### new
-# Create a new window of the same class as whatever I am (which is
-# normally derived from File).
-#
-body ::tycho::File::new {} {
-    set name [autoName .file]
-    [$this info class] $name
-    wm deiconify $name
-}
-
-#####################################################################
-#### insertFile
-# Open a file browser to query the user for a filename, and then
-# insert the contents of that file at the insertion cursor.
-#
-body ::tycho::File::insertFile {} {
-    error "Sorry, insert file not implemented yet."
-}
-
-#####################################################################
-#### print
-# Print the data.  The default behavior is an error.
-#
-body ::tycho::File::print {} {
-    error "Sorry, print not implemented yet."
-}
-
-#####################################################################
-#### evaluate
-# Evaluate the data.  The default behavior is an error.
-#
-body ::tycho::File::evaluate {} {
-    error "Don't know how to evaluate."
-}
-
-#####################################################################
-#### revert
-# Revert to previously saved file.
-#
-body ::tycho::File::revert {} {
-    error "Sorry, revert not implemented yet."
-}
-
-#####################################################################
-#### seename
+#### seeName
 # In derived classes, this method will go to the point in a file
 # identified by the name argument.  What this means depends on what
 # type of data is contained in the file.
 #
-body ::tycho::File::seename {name} {
-    error "Sorry, seename not implemented. Don't know how to find point $name"
+body ::tycho::File::seeName {name} {
+    error "Sorry, seeName not implemented. Don't know how to find point $name"
 }
 
 #####################################################################
@@ -667,145 +748,31 @@ body ::tycho::File::source {filename} {
     }
 }
 
-#########################################################################
-#### keyBindingsHelp
-# Open a window with help on the key bindings.
-# FIXME: We need a better help mechanism.
+#####################################################################
+#### windowMenuAppend
+# Append the name of an open file editor to the Window menu.
+# The second argument, normally a filename, gives the menu label.
 #
-body ::tycho::File::keyBindingsHelp {} {
-    DialogWindow::new Message [autoName .tyMessage] \
-	    -geometry "-10+0" \
-	    -text "[$this keybindings]"
-}
-
-#########################################################################
-#### keybindings
-# Return a string with the keybindings supported by this base class
-#
-body ::tycho::File::keybindings {} {
-    return {
-Tycho uses emacs and shell style key bindings (mostly):
-
-Notation:
-	C-x	control-x
-	M-x	meta-x
-	Esc-x	escape followed by x
-
-In general, the sequence Esc-x will be equivalent to M-x.
-
-Commands:
-	C-x C-f	  Open file
-	C-x i     Insert file
-	C-x C-s	  Save
-	C-x C-w	  Save As
-	C-x p     Print
-	C-x C-r	  Evaluate
-	C-x k	  Close the window
-	C-x 0	  Close the window
-	C-x o	  Skip to the next window
-	C-x C-c	  Exit the program
-
-Keyboard traversal of the menu:
-
-   The menus can be invoked using the Alt key (sometimes
-   "Alt Graph") together with the underlined character
-   in the menu title.  Once the menu is posted, typing
-   the underlined character in a menu item will invoke it.
-   The F10 key will post the "File" menu.
-   }
-}
-
-#########################################################################
-#### mouseBindingsHelp
-# Open a help window with mouse bindings.
-#
-body ::tycho::File::mouseBindingsHelp {} {
-    DialogWindow::new Message [autoName .tyMessage] \
-	    -geometry "-10+0" \
-	    -text "[$this mousebindings]"
-}
-
-#########################################################################
-#### mousebindings
-# Return a string with the mouse bindings
-#
-body ::tycho::File::mousebindings {} {
-    return {
-There are no meaningful mouse bindings in this class.
+body ::tycho::File::windowMenuAppend {obj label} {
+    # Avoid entries with empty names or NoName
+    if {$label != {NoName} && $label != {}} {
+	$itk_component(windowMenu) add command \
+		-label $label \
+		-command "$obj raiseWindow"
     }
 }
 
 #####################################################################
-#### openwin
-# Open a file browser, and then open an editor for the file.
-# The editor is chosen based on the file extension, if the extension
-# is recognized.  Otherwise, the TyEdit class is used to open an
-# ordinary text editor.
+#### windowMenuRemove
+# Remove the name of an open file from the Window menu.
 #
-body ::tycho::File::openwin {} {
-    DialogWindow::new FileBrowser [autoName .fileBrowser] \
-	    -command "File::openContext " \
-	    -text "Open File:"
+body ::tycho::File::windowMenuRemove {filename} {
+    $itk_component(windowMenu) delete $filename
 }
 
-#####################################################################
-#### opentext
-# Open a file browser, and then open a simple editor for the file,
-# ignoring the file extension.  Return the name of the editor object.
-#
-body ::tycho::File::opentext {} {
-    set filename [DialogWindow::newModal FileBrowser [autoName .fileBrowser] \
-	    -text "Open Text File:"]
-    set filename [checkForAutoSaveFiles $filename]
-    set objname [Edit [autoName .edit] -file $filename]
-    wm deiconify $objname
-    return $objname
-}
-
-#####################################################################
-#### openContext
-# If a context-sensitive editor has been registered for the file
-# extension that is given, use it to open the file.  Otherwise, just
-# open a plain text editor.  Return the name of the editor object.
-# If a window already exists editing this file, simply raise it instead.
-# New windows are always opened at the global scope.
-#
-body ::tycho::File::openContext {filename} {
-    if {[info exists filesOpen] && \
-	    [info exists filesOpen($filename)] && \
-	    [winfo exists $filesOpen($filename)]} {
-	wm deiconify $filesOpen($filename)
-	raise $filesOpen($filename)
-	return $filesOpen($filename)
-    } {
-	#check for existing autosave files
-	set filename [checkForAutoSaveFiles $filename]
-	set ext [file extension $filename]
-	if {[info exists editors] && [info exists editors($ext)]} {
-	    set name [uplevel #0 $editors($ext) [autoName .file] \
-		    -file $filename]
-	} {
-	    set name [uplevel #0 Edit [autoName .edit] -file $filename]
-	}
-	# FIXME: Should call update here, but this causes a segfault.
-	wm deiconify $name
-	raise $name
-	return $name
-    }
-}
-
-#####################################################################
-#### registerEditor
-# Register a context-sensitive editor by file extension. This means
-# means that on open-file command (via the openContext procedure in
-# this class) will recognize the file extension and open the specified
-# editor. The editor is assumed to be a class derived from File, or at
-# least to have a -file option. Note that the leading period is
-# considered part of the extension, as in ".itcl".
-#
-body ::tycho::File::registerEditor {extension editorClass} {
-    set editors($extension) $editorClass
-}
+#########################################################################
+#########################################################################
+####                          public procedures                      ####
 
 #####################################################################
 #### callAutoSave
@@ -823,7 +790,7 @@ body ::tycho::File::callAutoSave {obj} {
 # Call the saveCrash method for all existing objects that are of
 # class File, or are derived from class File.
 #
-body ::tycho::File::emergencySave {} {		
+body ::tycho::File::emergencySave {} {
     foreach obj [array names fileObjects] {
 	$obj saveCrash
     }
@@ -832,14 +799,128 @@ body ::tycho::File::emergencySave {} {
 #####################################################################
 #### hyperjump
 # Given a filename and a point within the file, open
-# the corresponding file, and call "seename $point".
+# the corresponding file, and call "seeName $point".
 #
 body ::tycho::File::hyperjump {filename point} {
-    set win [uplevel #0 File::openContext $filename]
-    tkwait visibility $win
+    set obj [uplevel #0 File::openContext $filename]
+    tkwait visibility [$obj windowName]
     if {$point != {}} {
-	uplevel #0 $win seename $point
+	uplevel #0 $obj seeName $point
     }
+}
+
+#####################################################################
+#### newEditor
+# Open a new editor of the specified class at the global scope and
+# map it to the screen.
+#
+body ::tycho::File::newEditor {editor} {
+    set name [autoName .file]
+    uplevel #0 $editor $name
+    wm deiconify $name
+}
+
+#####################################################################
+#### openwin
+# Open a file browser, and then open an editor for the file.
+# The editor is chosen based on the file extension, if the extension
+# is recognized.  Otherwise, the TyEdit class is used to open an
+# ordinary text editor.
+#
+body ::tycho::File::openwin {} {
+    DialogWindow::new FileBrowser [autoName .fileBrowser] \
+	    -command "File::openContext " \
+	    -text "Open File:"
+}
+
+#####################################################################
+#### openContext
+# If a context-sensitive editor has been registered for the file
+# extension that is given, use it to open the file.  Otherwise, just
+# open a plain text editor.  Return the name of the editor object.
+# If a window already exists editing this file, simply raise it instead.
+# New windows are always opened at the global scope.
+#
+body ::tycho::File::openContext {filename} {
+    if {[info exists filesOpen] && \
+	    [info exists filesOpen($filename)]} {
+	$filesOpen($filename) raiseWindow
+	return $filesOpen($filename)
+    } {
+	#check for existing autosave files
+	set filename [checkForAutoSaveFiles $filename]
+	set ext [file extension $filename]
+	if {[info exists editors] && [info exists editors($ext)]} {
+	    set name [uplevel #0 $editors($ext) [autoName .file] \
+		    -file $filename]
+	} {
+	    set name [uplevel #0 Edit [autoName .edit] -file $filename]
+	}
+	# FIXME: Should call update here, but this causes a segfault.
+	# Cannot call TopLevel::raiseWindow here because the Tk raise
+	# command, for some reason, causes the window to be prematurely
+	# mapped (before all its insides are present).
+	wm deiconify $name
+	return $name
+    }
+}
+
+#####################################################################
+#### registerEditor
+# Register a context-sensitive editor by file extension(s). This means
+# means that on open-file command (via the openContext procedure in
+# this class) will recognize the file extension and open the specified
+# editor. The editor is assumed to be a class derived from File, or at
+# least to have a -file option. Note that the leading period is
+# considered part of the extension, as in ".itcl".  If a third
+# argument is given, then the editor will be added to the Window menu
+# of all File objects opened in the future using the value of the
+# third argument as the menu label.
+#
+body ::tycho::File::registerEditor {extensions editorClass {description {}}} {
+    foreach extension $extensions {
+	set editors($extension) $editorClass
+    }
+    if {$description != {}} {
+	lappend windowMenuEntries [list $editorClass $description]
+    }
+}
+
+#####################################################################
+#### windowMenuAddAll
+# If the argument is the name of a current File object, then that
+# object is added to all Window menus of all current file objects.
+# The second argument, normally a file name, gives the manu label.
+#
+body ::tycho::File::windowMenuAddAll {obj label} {
+    foreach fileobj [array names fileObjects] {
+	catch {$fileobj windowMenuAppend $obj $label}
+    }
+}
+
+#####################################################################
+#### windowMenuRemoveAll
+# Remove the specified filename from the Window menu of all open
+# File objects.
+#
+body ::tycho::File::windowMenuRemoveAll {filename} {
+    foreach fileobj [array names fileObjects] {
+	catch {$fileobj windowMenuRemove $filename}
+    }
+}
+
+#########################################################################
+#########################################################################
+####                          protected methods                      ####
+
+#####################################################################
+#### addWindowMenuEditor
+# Add the specified file to the window menu entry.
+#
+body ::tycho::File::addWindowMenuEditor {desc command} {
+    $itk_component(windowMenu) add command \
+	    -label $desc \
+	    -command $command
 }
 
 #####################################################################
@@ -863,17 +944,6 @@ body ::tycho::File::autoSave {} {
     if {$interval != 0} {
 	after $interval "File::callAutoSave $this"
     }
-}
-
-#####################################################################
-#### removeBackupFiles
-# Remove the backup file that gets automatically created periodically.
-#
-body ::tycho::File::removeBackupFiles {} {
-    set savefile [format "%s/#auto#%s" [file dirname $file] [file tail $file]]
-    exec rm -f $savefile
-    set savefile [format "%s/#crash#%s" [file dirname $file] [file tail $file]]
-    exec rm -f $savefile
 }
 
 #####################################################################
@@ -910,5 +980,16 @@ body ::tycho::File::checkForAutoSaveFiles {filename} {
 
     # The original file is the file to open.
     return $filename
+}
+
+#####################################################################
+#### removeBackupFiles
+# Remove the backup file that gets automatically created periodically.
+#
+body ::tycho::File::removeBackupFiles {} {
+    set savefile [format "%s/#auto#%s" [file dirname $file] [file tail $file]]
+    exec rm -f $savefile
+    set savefile [format "%s/#crash#%s" [file dirname $file] [file tail $file]]
+    exec rm -f $savefile
 }
 

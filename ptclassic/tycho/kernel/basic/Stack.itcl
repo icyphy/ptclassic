@@ -73,10 +73,10 @@ body ::tycho::Stack::pop {} {
     if {[llength $data] > 0} {
 	set retval [lindex $data 0]
 	set data [lreplace $data 0 0]
-	return $retval
     } {
-	return {}
+	set retval {}
     }
+    return $retval
 }
 
 #####################################################################

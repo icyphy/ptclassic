@@ -29,30 +29,42 @@
 # 						COPYRIGHTENDKEY
 ##########################################################################
 
+#### FIXME - known bugs
+#
+# - This uses the buttonbox widget by Mark Ulferts.  This widget defers
+# mapping the buttons, and thus the size of the window is not known
+# until the window has been mapped.  This results in two artifacts:
+# the window is not properly centered on the screen by the centerOnScreen
+# method, and when using interactive placement, the initial window outline
+# is smaller than the window will finally end up being.  We need to
+# rewrite this buttonbox megawidget.
 
 ##########################################################################
 #### DialogWindow class.
 # This is a top-level dialog window to which buttons and other widgets
 # are added in the derived classes. The message window contains an
 # optional bitmap, a message, and a separator. In the derived classes,
-# buttons are added below the separator using the syntax:
-# <pre>
-#        addButton name -text "label" -command "command to execute"
-# </pre>
+# buttons are added below the separator using the addButton method.
+# For example,
+# <tcl><pre>
+# ::tycho::DialogWindow .m -text {A dialog with a single customized pushbutton}
+# .m addButton pushme -text {Push Me} -command {post thanks; delete object .m}
+# wm deiconify .m
+# </pre></tcl>
 # A childsite is provided for additional widgets below the label and
 # above the separator.  It is a frame with name $itk_component(childsite).
-#
+# <p>
 # Two procedures are provided for conveniently creating both modal and
 # non-modal dialogs.  The "newModal" procedure will create the named widget
 # and return only after that widget has been destroyed.  It centers the
 # widget on the screen and freezes its size.  If the widget sets
 # a result in the common variable commandResult, then that result
 # will be returned.  Otherwise, an empty string will be returned.
-#
+# <p>
 # This design is fashioned somewhat after the DialogShell widget by
 # by Mark L. Ulferts. A major difference is that instead of mapping
 # and unmapping this window, the window is destroyed when it is dismissed.
-#
+# <p>
 # This window starts out in the withdrawn state. To be visible, it must
 # be mapped using the "wm deiconify" command or the "centerOnScreen"
 # method. The reason for deferring the mapping is to avoid the visually
@@ -60,46 +72,73 @@
 # in.
 #
 class ::tycho::DialogWindow {
-    inherit TopLevel
+    inherit ::tycho::TopLevel
     constructor {args} {}
 
-    #### bitmap option
+    #####################################################################
+    ####                          options                            ####
+
+    #### -bitmap option
     # The bitmap to display to the left of the message.
     # Typical values are "error", "warning", "info", "hourglass", or
     # "questhead".  The default is a null string, which means no bitmap.
     itk_option define -bitmap bitmap Bitmap ""
 
-    #### text option
+    #### -height option
+    # The height of the embedded HTML in characters.
+    itk_option define -height height Height 15
+
+    #### -html option
+    # Embedded HTML can be used for the message.
+    itk_option define -html html HTML ""
+
+    #### -image option
+    # An image to display to the left of the message.
+    itk_option define -image image Image ""
+
+    #### -text option
     # The message to display at the top of the widget.
     itk_option define -text text Text ""
 
-    #### title option
-    # The title for the window.
-    itk_option define -title title Title "Tycho"
+    #### -width option
+    # The width of the embedded HTML in characters.
+    itk_option define -width width Width 50
+
+    #####################################################################
+    ####                        public methods                       ####
 
     #### addButton
     # Add a button to the set of buttons at the bottom.
-    method addButton {args} {}
+    method addButton {args}
 
     #### default
     # Specify the default button.
-    method default {id} {}
+    method default {id}
 
     #### invoke
     # Invoke a button.
-    method invoke {args} {}
+    method invoke {args}
 
-    # Create an object instance and return the name.
-    proc new {class instance args} {}
-
-    # Create an object instance and return its result when it is destroyed.
-    proc newModal {class instance args} {}
-
-    # Execute a command given by an option and set commandResult.
-    protected method execCommand {option args} {}
+    #####################################################################
+    ####                        public procedures                    ####
 
     # This procedure simply returns its argument.  Used for default commands.
     proc answer {value} {return $value}
+
+    # Create an object instance and return the name.
+    proc new {class instance args}
+
+    # Create an object instance and return its result when it is destroyed.
+    proc newModal {class instance args}
+
+    #####################################################################
+    ####                       protected methods                     ####
+
+    # Execute a command given by an option and set commandResult.
+    protected method execCommand {option args}
+
+    #####################################################################
+    ####                       protected variables                   ####
 
     # Instances created by newModal should put their return value in this
     # array, with the array index being the name of the instance.
@@ -128,6 +167,72 @@ configbody ::tycho::DialogWindow::bitmap {
 }
 
 #########################################################################
+#### -height option configuration
+# The desired height of the embedded HTMLText widget in characters
+# (note that these are average-sized characters for the text widget,
+# which may differ considerably from the size of the characters in
+# the HTMLText widget).
+# 
+configbody ::tycho::DialogWindow::height {
+    if {[info exists itk_component(html)] && $itk_option(-height) != {}} {
+	$itk_component(html) configure -height $itk_option(-height)
+    }
+}
+
+#########################################################################
+#### -html option configuration
+# If a non-null html option is given, take it to be
+# HTML source to insert in the message window.
+# The -width and -height option of the parent DialogWindow
+# specify the size of the resulting HTML window in characters.
+# 
+configbody ::tycho::DialogWindow::html {
+    if {$itk_option(-html) != ""} {
+	if [info exists itk_component(html)] {
+	    # Component already exists, so we just configure it.
+	    $itk_component(html) configure -text $itk_option(-text)
+	} {
+	    # Create the message window.
+	    itk_component add html {
+		HTMLText $itk_interior.top.html \
+			-simple 1 \
+			-html $itk_option(-html)
+	    } {
+		keep -background -cursor -foreground \
+			-width -height
+	    }
+	    pack $itk_component(html) -side right -fill both
+	}
+	# Since <Return> exits the window, remove it as a binding
+	# for the HTMLText widget.
+	bind $itk_component(html) <Return> {}
+    }
+}
+    
+#########################################################################
+#### -image option configuration
+# If a non-null image option is given, insert the image left of the text.
+# The value of the option is assumed to be the name of an image that has
+# been created with the Tk "image create" command.
+# 
+configbody ::tycho::DialogWindow::image {
+    if {$itk_option(-image) != ""} {
+	if [info exists itk_component(image)] {
+	    # Component already exists, so we just configure it.
+	    $itk_component(image) configure -image $itk_option(-image)
+	} {
+	    # Component does not exist, so we create it.
+	    itk_component add image {
+		label $itk_component(top).image -image $itk_option(-image)
+	    } {
+		keep -background -cursor -foreground -background
+	    }
+	    pack $itk_component(image) -side left
+	}
+    }
+}
+
+#########################################################################
 #### -text option configuration
 # If a non-null text option is given, insert the text.
 # 
@@ -150,14 +255,18 @@ configbody ::tycho::DialogWindow::text {
 	}
     }
 }
-    
+
 #########################################################################
-#### -title option configuration
-# Set the window manager title and icon name.
-#
-configbody ::tycho::DialogWindow::title {
-    wm title $prefix $itk_option(-title)
-    wm iconname $prefix $itk_option(-title)
+#### -width option configuration
+# The desired width of the embedded HTMLText widget in characters
+# (note that these are average-sized characters for the text widget,
+# which may differ considerably from the size of the characters in
+# the HTMLText widget).
+# 
+configbody ::tycho::DialogWindow::width {
+    if {[info exists itk_component(html)] && $itk_option(-width) != {}} {
+	$itk_component(html) configure -width $itk_option(-width)
+    }
 }
 
 #####################################################################
@@ -214,19 +323,16 @@ body ::tycho::DialogWindow::constructor {args} {
 
     # Process any unevaluated arguments.
     eval itk_initialize $args
-    eval configure $args
 }
 
-#########################################################################
-#### title configuration
-# 
-configbody ::tycho::DialogWindow::title {
-    wm title $prefix $itk_option(-title)
-}
+######################################################################
+######################################################################
+####                         public methods                       ####
 
 #########################################################################
 #### addButton
-# Add a button to the button box at the bottom. The most useful options
+# Add a button to the button box at the bottom. The arguments are
+# options understood by the Tk button command. The most useful options
 # are -command, which specified the command to execute, -text, which
 # specifies the label in the button, and -width, which specifies the
 # desired width of the button.
@@ -239,11 +345,11 @@ body ::tycho::DialogWindow::addButton {args} {
 #### default
 # Specify the default button (the one invoked by the Return key).
 # This button will have an extra frame around it.  It can be specified
-# either by the path name or a unique text or bitmap name.
+# either by the path name or a unique text(its label) or bitmap name.
 #
 body ::tycho::DialogWindow::default {id} {
     eval [list $itk_component(bbox) default $id]
-    bind $itk_component(hull) <Return> "$prefix invoke $id"
+    bind $itk_component(hull) <Return> "$prefix invoke $id; break"
 }
 
 #########################################################################
@@ -252,21 +358,113 @@ body ::tycho::DialogWindow::default {id} {
 # specified, then the current default button is invoked. Otherwise,
 # the argument is expected to be a list of buttons to invoke. Each
 # button can be specified either by the path name or a unique text
-# or bitmap name.
+# (its label) or bitmap name.
 #
 body ::tycho::DialogWindow::invoke {args} {
     eval [list $itk_component(bbox) invoke $args]
 }
 
 ######################################################################
+######################################################################
+####                         public procedures                    ####
+
+######################################################################
+#### new
+# This procedure creates an instance of the named class at the global
+# scope with the given instance name. The class must be derived from
+# this one (DialogWindow). The window is centered on the screen and its
+# size is frozen. The procedure returns immediately, returning the
+# instance name. A typical call would be:
+# <pre>
+#    DialogWindow::new YesNoQuery .y -text "Are you sure"
+# </pre>
+# The arguments after the class and instance names are just passed
+# directly to the constructor of the class.
+# The class is assumed to be defined in namespace ::tycho, so the
+# string "::tycho::" is prepended to the class name.
+#
+body ::tycho::DialogWindow::new {class instance args} {
+    # FIXME: Should check to make sure the class is derived from this.
+    uplevel #0 ::tycho::$class $instance $args
+    $instance centerOnScreen
+    $instance freezeWindowSize
+    $instance focusin
+    if [info exists commandResult($instance)] {
+	unset commandResult($instance)
+    }
+    return $instance
+}
+
+######################################################################
+#### newModal
+# This procedure creates an instance of the named class at the global
+# scope with the given instance name. The class must be derived from
+# this one (DialogWindow). The window is centered on the screen and its
+# size is frozen. The procedure returns only after the object has been
+# destroyed. If the object sets a value in $commandResult($name), then
+# that value is returned. Otherwise, a null string is returned. A
+# typical call would be:
+# <pre>
+#    DialogWindow::newModal YesNoQuery .y -text "Are you sure"
+# </pre>
+# This will return 0 or 1.  The arguments after the class and instance
+# names are just passed directly to the constructor of the class.
+# The class is assumed to be defined in namespace ::tycho, so the
+# string "::tycho::" is prepended to the class name.
+#
+body ::tycho::DialogWindow::newModal {class instance args} {
+    # FIXME: Should check to make sure the class is derived from this.
+    set commandResult($instance) ""
+    # If some window has the focus, put the modal dialog in the
+    # list of windows before the one with the focus.
+    set fc [focus]
+    set before {}
+    if {$fc != {}} {
+	set tl [winfo toplevel $fc]
+	if {$tl != {} && \
+		[uplevel #0 info objects $tl] != {} && \
+		[$tl isa ::tycho::TopLevel]} {
+	    set before $tl
+	}
+    }
+    if {$before != {}} {
+	uplevel #0 ::tycho::$class $instance -before $before $args
+    } {
+	uplevel #0 ::tycho::$class $instance $args
+    }
+    $instance centerOnScreen
+    $instance freezeWindowSize
+    $instance focusin
+    # Do not continue in this thread until the window is dismissed.
+    grab set $instance
+    tkwait window $instance
+    set returnVal $commandResult($instance)
+    unset commandResult($instance)
+    return $returnVal
+}
+
+######################################################################
+######################################################################
+####                         protected methods                    ####
+
+######################################################################
 #### execCommand
-# Execute the command given by the $option option, if it has been
-# defined, and set the commandResult to the value returned by that
-# command. Any arguments beyond the option name to use are passed to
-# the command as arguments. Notice that normally, the option argument
-# begins with a dash "-".  The command is executed in the ::tycho scope.
-# If you need to access a method in a class derived from DialogWindow,
-# the following sequence in the constructor will work, for example:
+# Execute the command given by an option, if it has been
+# defined. The first argument gives the name of the option, including
+# the leading minus sign.  For example, several of the derived classes
+# have a -okcommand option, which specifies the command to invoke in
+# response to pressing the "OK" button.  This command is invoked
+# as follows:
+# <pre>
+#    $this execCommand -okcommand
+# </pre>
+# The execCommand method sets the commandResult to the value returned
+# by the command executed. Any arguments beyond the option name to use
+# are passed to the command as arguments. Notice that the option name
+# argument begins with a dash "-". The command is executed in the
+# global scope. If you need to access a method in a class derived from
+# DialogWindow, the following sequence in the constructor will work,
+# for example:
 # <pre>
 #     $this configure -okcommand "[scope $this] mymethod"
 #     addButton b -text "Push Me" -command "$this execCommand -okcommand"
@@ -282,8 +480,7 @@ body ::tycho::DialogWindow::execCommand {option args} {
 
 	# Intercept any errors in the command and issue a message.
 	if {[catch {set retval \
-		[namespace ::tycho \
-		[concat $itk_option($option) $args]]} errcode] != 0} {
+		[uplevel #0 $itk_option($option) $args]} errcode] != 0} {
 	    error "Failed to execute command in the $option option:\n$errcode" \
 		    $errorInfo
 	}
@@ -291,59 +488,3 @@ body ::tycho::DialogWindow::execCommand {option args} {
     set commandResult($prefix) $retval
 }
 
-######################################################################
-#### newModal
-# This procedure creates an instance of the named class with the given
-# instance name. The class must be derived from this one
-# (DialogWindow). The window is centered on the screen and its size
-# is frozen. The procedure returns only after the object has been
-# destroyed. If the object sets a value in $commandResult($name), then
-# that value is returned. Otherwise, a null string is returned. A
-# typical call would be:
-# <pre>
-#    DialogWindow::newModal YesNoQuery .y -text "Are you sure"
-# </pre>
-# This will return 0 or 1.  The arguments after the class and instance
-# names are just passed directly to the constructor of the class.
-# The class is assumed to be defined in namespace ::tycho, so the
-# string "::tycho::" is prepended to the class name.
-#
-body ::tycho::DialogWindow::newModal {class instance args} {
-    # FIXME: Should check to make sure the class is derived from this.
-    set commandResult($instance) ""
-    eval ::tycho::$class $instance $args
-    $instance centerOnScreen
-    $instance freezeWindowSize
-    # Do not continue in this thread until the window is dismissed.
-    grab set $instance
-    tkwait window $instance
-    set returnVal $commandResult($instance)
-    unset commandResult($instance)
-    return $returnVal
-}
-
-######################################################################
-#### new
-# This procedure creates an instance of the named class with the given
-# instance name. The class must be derived from this one
-# (DialogWindow). The window is centered on the screen and its size
-# is frozen. The procedure returns immediately, returning the
-# instance name. A typical call would be:
-# <pre>
-#    DialogWindow::new YesNoQuery .y -text "Are you sure"
-# </pre>
-# The arguments after the class and instance names are just passed
-# directly to the constructor of the class.
-# The class is assumed to be defined in namespace ::tycho, so the
-# string "::tycho::" is prepended to the class name.
-#
-body ::tycho::DialogWindow::new {class instance args} {
-    # FIXME: Should check to make sure the class is derived from this.
-    eval ::tycho::$class $instance $args
-    $instance centerOnScreen
-    $instance freezeWindowSize
-    if [info exists commandResult($instance)] {
-	unset commandResult($instance)
-    }
-    return $instance
-}

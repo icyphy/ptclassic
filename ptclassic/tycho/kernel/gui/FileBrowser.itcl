@@ -80,21 +80,22 @@ option add *FileBrowser.textBackground \
 # as an argument.
 #
 class ::tycho::FileBrowser {
-    inherit DialogWindow
+    inherit ::tycho::DialogWindow
 
     # The command to execute on a file when one is identified
     itk_option define -command command Command "DialogWindow::answer"
 
     constructor {args} {}
 
+    #### focusin
+    # Grab the focus for the entry box.
+    method focusin {}
+
     # Open the file or directory specified in the entry box.
     method ok {} {}
 
     # Open the file or directory specified in the argument.
     method open {name} {}
-
-    # Raise the window to the foreground.
-    method raise {} {}
 
     # Copy filename from listbox to entry.
     protected method selectFile {lb ypos} {}
@@ -192,7 +193,8 @@ body ::tycho::FileBrowser::constructor {args} {
 
     # Buttons.
     addButton ok -text "OK <Ret>" -command "$this ok"
-    addButton cancel -text "Cancel <Esc>" -command "delete object $this"
+    addButton cancel -text "Cancel <Esc>" -command \
+	    "$this nextWindow; delete object $this"
     default ok
     
     ###################################################################
@@ -205,14 +207,19 @@ body ::tycho::FileBrowser::constructor {args} {
     bind $itk_component(hull) <Return> \
 	    "$this ok; break"
     bind $itk_component(hull) <Escape> \
-	    "delete object $this"
+	    "$this nextWindow; delete object $this"
     
-    bind $itk_component(hull) <Any-Enter> "focus $itk_component(entry)"
+    bind $itk_component(hull) <Any-Enter> "$this focusin"
     
     # Process any unevaluated arguments.
     eval itk_initialize $args
+}
 
-    # Grab the focus.
+#########################################################################
+#### focusin
+# Hand the focus to the entry window.
+#
+body ::tycho::FileBrowser::focusin {} {
     focus $itk_component(entry)
 }
 
@@ -225,24 +232,13 @@ body ::tycho::FileBrowser::ok {} {
 }
 
 ######################################################################
-#### raise
-# Raise the window so it is visible.  This should be called if a
-# dialog box already exists, rather than creating a new one.
-#
-body ::tycho::FileBrowser::raise {} {
-    if {[winfo exists $prefix] && [winfo ismapped $prefix]} {
-	wm deiconify $prefix
-	raise $prefix
-    }
-}
-
-######################################################################
 #### open
 # Open a file or directory.
 #
 body ::tycho::FileBrowser::open {name} {
     update idletasks
     if [checkFile $name] {
+	nextWindow
 	delete object $this
     }
 }
