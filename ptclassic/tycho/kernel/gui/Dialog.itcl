@@ -235,13 +235,14 @@ body ::tycho::Dialog::constructor {args} {
 	    -after $itk_component(childsite)
     
     # Create a button box, and pack it with a bit of space
-    # around it.
+    # around it. Give the buttons some spacing too.
     itk_component add bbox {
-	::tycho::ButtonBox $itk_component(hull).bbox
+	::tycho::ButtonBox $itk_component(hull).bbox \
+		-spacingx 6 -spacingy 2
     } {
 	keep -background -cursor -font -padx -pady
     }
-    pack $itk_component(bbox) -expand no -padx 6 -pady 4\
+    pack $itk_component(bbox) -expand no -padx 2 -pady 4\
 	    -after $itk_component(separator)
     
     # FIXME: In itcl2.0-beta, the following silliness appears to be
