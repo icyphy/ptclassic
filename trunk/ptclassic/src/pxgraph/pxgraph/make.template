@@ -80,7 +80,7 @@ depend:
 		mv -f makefile.n makefile
 
 makefile:	make.template
-		cd $(VPATH); make -f make.template sources depend
+		cd $(VPATH); $(MAKE) -f make.template sources depend
 		if [ ! -f makefile ]; then ln -s $(VPATH)/makefile makefile; fi
 		@echo makefile remade -- you must rerun make.
 		exit 1
