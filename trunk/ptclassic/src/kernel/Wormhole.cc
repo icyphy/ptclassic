@@ -58,8 +58,8 @@ extern Error errorHandler;
 // SDFWormhole::SDFWormhole(Galaxy&g) : Wormhole(g,this)
 // { buildEventHorizons();}
 
-Wormhole::Wormhole(Star& s,Galaxy& g,const char* targetName) : selfStar(s),
-	Runnable(targetName,g.domain(),&g), gal(g)
+Wormhole::Wormhole(Star& s,Galaxy& g,const char* targetName) : gal(g),
+        selfStar(s), Runnable(targetName,g.domain(),&g)
 {
 	// set up the parent pointer of inner Galaxy
 	g.setNameParent(g.name(), &s);
@@ -67,8 +67,8 @@ Wormhole::Wormhole(Star& s,Galaxy& g,const char* targetName) : selfStar(s),
 	dynamicHorizons = FALSE;
 }
 
-Wormhole::Wormhole(Star& s,Galaxy& g,Target* innerTarget) : selfStar(s),
-	Runnable(innerTarget,g.domain(),&g), gal(g)
+Wormhole::Wormhole(Star& s,Galaxy& g,Target* innerTarget) : gal(g),
+        selfStar(s), Runnable(innerTarget,g.domain(),&g)
 {
 	// set up the parent pointer of inner Galaxy
 	g.setNameParent(g.name(), &s);
