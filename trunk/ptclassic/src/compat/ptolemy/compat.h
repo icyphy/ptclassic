@@ -296,7 +296,11 @@ extern int listen(int, int);
 #if defined(PTNBSD_386) || defined(PTFREEBSD)
 extern off_t lseek();		/* octtools/vem/serverVem.c uses lseek(). */
 #else
+#if defined(PTHPPA) && !defined(PTHPPA_CFRONT) && defined(PTHPUX10)
+/* Under HPUX-10.20 and gcc-2.7.2, don't define lseek */
+#else
 extern long lseek();
+#endif /* PTHPPA && ! PTHPPA_CFRONT */
 #endif /* PTNBSD_386 || PTFREEBSD */
 
 extern int pclose(FILE *);
