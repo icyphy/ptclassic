@@ -80,7 +80,7 @@ the range (-1.0, 1.0).  The parameter <i>phase</i> is in degrees
 		// fn to round to nearest int.  Done this way because
 		// truncation of negative values to integers is machine
 		// dependent in C/C++.
-		inline int round(double x) {
+		inline int CG56Sin_round(double x) {
 			return (x >= 0) ? int(x+0.5) : -int(0.5-x);
 		}
 	}
@@ -93,7 +93,7 @@ the range (-1.0, 1.0).  The parameter <i>phase</i> is in degrees
 			int n = (int) floor(ph / 360.0);
 			ph -= 360.0 * n;
 		}
-		phaseOffset = round(ph/360.0*256.0);
+		phaseOffset = CG56Sin_round(ph/360.0*256.0);
 	}
 	go {
 		addCode(cbPrepare);
