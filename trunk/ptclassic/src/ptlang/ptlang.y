@@ -193,6 +193,7 @@ char* objCopyright;		/* copyright */
 char* objExpl;			/* long explanation for troff formatting */
 char* objHTMLdoc;		/* long explanation for HTML formatting */
 char* objLocation;		/* location string */
+char* coronaName;		/* name of the Corona of this Core */
 int   galDef;			/* true if obj is a galaxy */
 char* domain;			/* domain of object (if star) */
 char* portName;			/* name of porthole */
@@ -285,7 +286,8 @@ typedef char * STRINGVAL;
 
 %}
 
-%token DEFSTAR GALAXY NAME DESC DEFSTATE DOMAIN NUMPORTS NUM VIRTUAL
+%token DEFSTAR DEFCORONA DEFCORE GALAXY
+%token NAME DESC DEFSTATE CORONA DOMAIN NUMPORTS NUM VIRTUAL
 %token DERIVED ALSODERIVED CONSTRUCTOR DESTRUCTOR STAR ALIAS INPUT OUTPUT
 %token INOUT ACCESS INMULTI OUTMULTI INOUTMULTI
 %token TYPE DEFAULT CLASS BEGIN SETUP GO WRAPUP TICK CONNECT ID
@@ -307,6 +309,8 @@ full_file:
 file:
 	/* nothing */
 |	file stardef
+|	file coronadef
+|	file coredef
 |	file galdef
 |	id BODY				{ idBlock = $2; bodyMode = 0;}
 ;
@@ -319,6 +323,24 @@ stardef:
 		'{' starlist '}'	{ genDef();}
 ;
 
+
+coronadef:
+	DEFCORONA { clearDefs(0);}
+		'{' coronalist '}'	{ genDef();}
+;
+
+
+coredef:
+	DEFCORE { clearDefs(0);}
+		'{' corelist '}'	{ /* Make sure that corona was set */
+					  if (coronaName == (char *)NULL) {
+						yyerror("All cores must have"
+							" a corona directive");
+					  }
+					  genDef();
+					}
+;
+
 galdef:	GALAXY { clearDefs(1);}
 		'{' gallist '}'		{ genDef();}
 ;
@@ -326,6 +348,11 @@ galdef:	GALAXY { clearDefs(1);}
 starlist:staritem		
 |	starlist staritem
 ;
+
+corelist:coreitem		
+|	corelist coreitem
+;
+
 
 gallist:galitem			
 |	gallist galitem
@@ -540,7 +567,6 @@ version:
 |	error				{ yyerror("Illegal version format");}
 ;
 
-
 /* star items */
 staritem:
 	sgitem
@@ -617,6 +643,22 @@ protkey:PUBLIC
 |	PRIVATE
 ;
 
+coronalist:coronaitem		
+|	coronalist coronaitem
+;
+
+
+coronaitem:
+	sgitem
+;
+
+/* core items */
+coreitem:
+	sgitem
+	CORONA '{' ident '}'		{ coronaName = $3;}
+;
+	
+
 /* galaxy items */
 galitem:
 	sgitem
@@ -627,6 +669,8 @@ galitem:
 |	NUMPORTS '{' numportlist '}'	{ genNumPort();}
 */
 ;
+
+
 
 /* porthole info */
 portkey:
@@ -755,7 +799,8 @@ ident:	keyword
 ;
 
 /* keyword in identifier position */
-keyword:	DEFSTAR|GALAXY|NAME|DESC|DEFSTATE|DOMAIN|NUMPORTS|DERIVED
+keyword:	DEFSTAR|DEFCORONA|DEFCORE|GALAXY
+|NAME|DESC|DEFSTATE|DOMAIN|NUMPORTS|DERIVED
 |ALSODERIVED|CONSTRUCTOR|DESTRUCTOR|STAR|ALIAS
 |INPUT|OUTPUT|INOUT|INMULTI|OUTMULTI|INOUTMULTI
 |TYPE
@@ -790,7 +835,7 @@ int g;
 	int i;
 	for (i = 0; i < NSTATECLASSES; i++) stateMarks[i] = 0;
 	galDef = g;
-	objName = objVer = objDesc = domain = derivedFrom =
+	objName = objVer = objDesc = coronaName = domain = derivedFrom =
 		objAuthor = objCopyright = objExpl = objHTMLdoc =
                 objLocation = NULL;
 	consStuff[0] = ccCode[0] = hCode[0] = consCalls[0] = 0;
@@ -1781,7 +1826,10 @@ struct tentry keyTable[] = {
 	{"consCalls", CONSCALLS},
 	{"constructor", CONSTRUCTOR},
 	{"copyright", COPYRIGHT},
+	{"corona", CORONA},
 	{"default", DEFAULT},
+	{"defcore", DEFCORE},
+	{"defcorona", DEFCORONA},
 	{"defstar", DEFSTAR},
 	{"defstate", DEFSTATE},
 	{"derived", DERIVED},
