@@ -2161,27 +2161,21 @@ int AM_Poll(eb_t bundle)
 	    UnlockEP(endpoint);
 	  }
 	  else { 
-	    /* This nasty cast is necessary under Solaris2.5 cc 4.0,
-	       or we get: 
-	        cannot do pointer arithmetic on operand of unknown size 
-             */
-	    /*memcpy(endpoint->start_addr + packetPtr->dest_offset, 
-		   packetPtr->data, packetPtr->nbytes);
-		   */
-	    memcpy((void *)((int)endpoint->start_addr +
-			    packetPtr->dest_offset),
+	    /* For sol2.5 cc4.0:
+	     * The compiler just needs to know what '+' means.
+	     * Recall that in pointer arithmetic, ptr + int means
+	     * ptr + int*sizeof(*ptr).  It needs to know what the
+	     * size is.  This is why ptr++ always works right in C.
+	     */
+	    memcpy((char *)endpoint->start_addr + packetPtr->dest_offset, 
 		   packetPtr->data, packetPtr->nbytes);
 	    endpoint->translation_table[sourceEndpoint].wsize++;
 	    RemoveTimeout(endpoint, &(endpoint->txpool[packetPtr->buf_id]));
 	    Enqueue(endpoint, &(endpoint->txpool[packetPtr->buf_id])); 
-	    /* This nasty cast is necessary under Solaris2.5 cc 4.0,
-	       or we get: 
-	       cannot do pointer arithmetic on operand of unknown size 
-             */
 	    ((HandlerGet4)(endpoint->handler_table[packetPtr->handler]))(
                             (void *)&token,
-			    (void *) ((int)endpoint->start_addr + 
-				      packetPtr->dest_offset),
+			    (char *)endpoint->start_addr + 
+				   packetPtr->dest_offset,
                             packetPtr->nbytes,
                             packetPtr->arg0, packetPtr->arg1, packetPtr->arg2, 
 			    packetPtr->arg3);
@@ -2208,15 +2202,13 @@ int AM_Poll(eb_t bundle)
 	    UnlockEP(endpoint);
 	  }
 	  else { 
-	    /* This nasty cast is necessary under Solaris2.5 cc 4.0,
-	       or we get: 
-	        cannot do pointer arithmetic on operand of unknown size 
-             */
-	    /* memcpy(endpoint->start_addr + packetPtr->dest_offset, 
-		   packetPtr->data, packetPtr->nbytes);
-		   */
-	    memcpy((void *)((int)endpoint->start_addr +
-			    packetPtr->dest_offset),
+	    /* For sol2.5 cc4.0:
+	     * The compiler just needs to know what '+' means.
+	     * Recall that in pointer arithmetic, ptr + int means
+	     * ptr + int*sizeof(*ptr).  It needs to know what the
+	     * size is.  This is why ptr++ always works right in C.
+	     */
+	    memcpy((char *)endpoint->start_addr + packetPtr->dest_offset, 
 		   packetPtr->data, packetPtr->nbytes);
 	    endpoint->translation_table[sourceEndpoint].wsize++;
 	    RemoveTimeout(endpoint, &(endpoint->txpool[packetPtr->buf_id]));
