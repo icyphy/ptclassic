@@ -44,7 +44,7 @@ private:
 	const char *whitespace;	// list of whitespace characters
 	istream *strm;		// associated input stream
 	TokenContext* stack;	// stack for include files
-	const char* curfile;	// current input file name
+	char* curfile;		// current input file name
 	int depth;		// depth of nesting
 	int line_num;		// current line number
 	char comment_char;	// character for comments

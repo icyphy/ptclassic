@@ -39,6 +39,7 @@ Tokenizer::init() {
 	stack = NULL;
 	depth = 0;
 	ungot = 0;
+	curfile = 0;
 	line_num = 1;
 	comment_char = '#';
 	quote_char = '\"';
@@ -50,7 +51,6 @@ Tokenizer::Tokenizer(istream& input,const char *spec, const char* w) {
 	special = spec;
 	strm = &input;
 	whitespace = w;
-	curfile = "?";
 	init ();
 }
 
@@ -62,7 +62,6 @@ Tokenizer::Tokenizer(const char* buffer,const char* spec,const char* w) {
 // is not changed.  A cast to get around this.
 	char* p = (char*) buffer;
 	strm = new istream(strlen(p), p);
-	curfile = "<mem>";
 	init ();
 }
 
@@ -71,7 +70,6 @@ Tokenizer::Tokenizer() {
 	special = "()";
 	strm = &cin;
 	whitespace = defWhite;
-	curfile = "<stdin>";
 	init ();
 }
 
@@ -117,7 +115,7 @@ Tokenizer::pop() {
 	if (depth == 0) return;
 	TokenContext* t = stack;
 	delete strm;
-	delete (char*)curfile;
+	delete curfile;
 	strm = t->savestrm;
 	curfile = t->filename;
 	line_num = t->line_num;
