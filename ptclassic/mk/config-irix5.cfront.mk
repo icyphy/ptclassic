@@ -85,13 +85,48 @@ CPLUSPLUS = 	CC -I$(ROOT)/src/compat/cfront
 
 # Plain C compiler
 CC = cc
-# C compiler flags.  Defined by the arch-config mk.
-CFLAGS =
 
 # OCT_CC is used in src/octtools/vem-{lib,bin}.mk
 OCT_CC = cc -D_BSD_SIGNALS
 # BSD_SIGNALS needed *only* for src/octtools/Xpackages/iv/timer.c, 
 # but put it here for yuks
+
+# In config-$PTARCH.mk, we set the following variables.  We need to 
+# use only the following variables so that we can use them elsewhere, say
+# for non-optimized compiles.
+# OPTIMIZER - The setting for the optimizer, usually -O2.
+# MEMLOG    - Formerly used to log memory allocation and deallocation.
+# WARNINGS  - Flags that print warnings.
+# ARCHFLAGS - Architecture dependent flags, useful for determining which
+#	      OS we are on.  Often of the form -DPTSOL2_4.
+# LOCALCCFLAGS - Other architecture dependent flags that apply to all releases
+#	      of the OS for this architecture for c++
+# LOCALCFLAGS - Other architecture dependent flags that apply to all releases
+#	      of the OS for this architecture for c++
+# USERFLAGS - Ptolemy makefiles should never set this, but the user can set it.
+
+OPTIMIZER = -O2
+# debug info uses too much disk space
+WARNINGS  =
+
+# Use -D_BSD_SIGNALS for src/kernel/SimControl.cc
+#  see /usr/include/sys/signals.h for more info.
+# Use -D_BSD_TIME for src/kernel/Clock.cc, see /usr/include/sys/time.h
+# dpwe: -G 0 is to disable accessing data off 'the global pointer' 
+# (according to man CC); this is known to result in global space 
+# overflow in large programs;  (man CC also suggests that 
+# unless -nonshared is also specified, it is ignored anyway.)
+## -xgot is the SGI hack to avoid overflows in the GOT by allowing 
+# 32 bit offsets, or something.
+GOTFLAG = 	-G 0 -xgot
+LOCALCCFLAGS =	$(GOTFLAG) -D_BSD_SIGNALS -D_BSD_TIME
+
+GPPFLAGS =	$(OPTIMIZER) $(MEMLOG) $(WARNINGS) \
+			$(ARCHFLAGS) $(LOCALCCFLAGS) $(USERFLAGS)
+#     -cckr   The traditional K&R/Version7 C with SGI extensions
+LOCALCFLAGS = 	$(GOTFLAG) -cckr
+CFLAGS =	$(OPTIMIZER) $(MEMLOG) $(WARNINGS) \
+			$(ARCHFLAGS) $(LOCALCFLAGS) $(USERFLAGS)
 
 # command to generate dependencies (cfront users can try CC -M)
 ##DEPEND=g++ -MM
@@ -103,40 +138,9 @@ RANLIB = 	true
 # linker to use for pigi and interpreter.
 LINKER=CC
 # system libraries (libraries from the environment)
-SYSLIBS=-lm
+SYSLIBS=-lm -lmld
 # system libraries for linking .o files from C files only
 CSYSLIBS = $(SYSLIBS)
-
-OPTIMIZER = -O2
-# -g
-# debug info uses too much disk space
-##WARNINGS =	-Wall -Wcast-qual
-WARNINGS  =
-
-# Use -D_BSD_SIGNALS for src/kernel/SimControl.cc
-#  see /usr/include/sys/signals.h for more info.
-# Use -D_BSD_TIME for src/kernel/Clock.cc, see /usr/include/sys/time.h
-MISC_DEFINES =	-D_BSD_SIGNALS -D_BSD_TIME
-
-
-# dpwe: -G 0 is to disable accessing data off 'the global pointer' 
-# (according to man CC); this is known to result in global space 
-# overflow in large programs;  (man CC also suggests that 
-# unless -nonshared is also specified, it is ignored anyway.)
-#GOTFLAG = -G 0
-# -xgot is the SGI hack to avoid overflows in the GOT by allowing 
-# 32 bit offsets, or something.
-GOTFLAG = -G 0 -xgot
-
-GPPFLAGS =	$(GOTFLAG) $(MEMLOG) $(WARNINGS) $(MISC_DEFINES) $(OPTIMIZER)
-
-#     -cckr   The traditional K&R/Version7 C with SGI extensions
-CFLAGS =	$(GOTFLAG) -cckr $(OPTIMIZER)
-
-#
-# Variables for the linker
-#
-SYSLIBS =	-lm -lmld
 
 # -s strips out debugging information, otherwise we get a 30Mb pigiRpc
 # Unfortunately, -s causes the dreaded "Fatal error in c++patch" under 5.3 

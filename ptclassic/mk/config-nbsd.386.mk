@@ -47,6 +47,20 @@ CC =		gcc
 OCTTOOLS_MM_LIB=
 OCT_CC =	gcc -traditional $(OCTTOOLS_MM_LIB)
 
+# In config-$PTARCH.mk, we set the following variables.  We need to 
+# use only the following variables so that we can use them elsewhere, say
+# for non-optimized compiles.
+# OPTIMIZER - The setting for the optimizer, usually -O2.
+# MEMLOG    - Formerly used to log memory allocation and deallocation.
+# WARNINGS  - Flags that print warnings.
+# ARCHFLAGS - Architecture dependent flags, useful for determining which
+#	      OS we are on.  Often of the form -DPTSOL2_4.
+# LOCALCCFLAGS - Other architecture dependent flags that apply to all releases
+#	      of the OS for this architecture for c++
+# LOCALCFLAGS - Other architecture dependent flags that apply to all releases
+#	      of the OS for this architecture for c++
+# USERFLAGS - Ptolemy makefiles should never set this, but the user can set it.
+
 # Since NetBSD supports various architectures i386 needs to be specified
 # Other people might port Ptolemy to netbsd_sun, netbsd_amiga, netbsd_mac,
 # etc. Use EXTRA_OPTIMIZER so optimization can be turned off in kernel
@@ -55,16 +69,18 @@ OCT_CC =	gcc -traditional $(OCTTOOLS_MM_LIB)
 # is upgraded from libg++.2.5.3 to libg++.2.5. ., or when some ports the Ptolemy
 # gnu-distribution. At any rate this new varibale should have no effect on any
 # of the other ports, since it is not defined in any of the other config files.
-SYSTEMDEF=	-Dnetbsd_i386
-OPTIMIZER=	-m486 -pipe
-EXTRA_OPTIMIZER=-O2
-#OPTIMIZER=	-O2 -m486 -fomit-frame-pointer -pipe
+OPTIMIZER=	-m486 -pipe -O2 # -fomit-frame-pointer -pipe
+ARCHFLAGS=	-Dnetbsd_i386
 
 WARNINGS =	-Wall -Wcast-qual -Wcast-align
-# Under gcc-2.7.0, you will need -fno-for-scope for GPPFLAGS
-GPPFLAGS =	$(SYSTEMDEF) $(WARNINGS) $(EXTRA_OPTIMIZER) $(OPTIMIZER) $(MEMLOG)
-CFLAGS =	$(SYSTEMDEF) $(WARNINGS) $(EXTRA_OPTIMIZER) $(OPTIMIZER) $(MEMLOG) \
-		-fwritable-strings
+# Under gcc-2.7.0, you will need -fno-for-scope for LOCALCCFLAGS
+LOCALCCFLAGS =	-fno-for-scope
+GPPFLAGS =	$(OPTIMIZER) $(MEMLOG) $(WARNINGS) \
+			$(ARCHFLAGS) $(LOCALCCFLAGS) $(USERFLAGS)
+LOCALCFLAGS =	-fwritable-strings
+CFLAGS =	$(OPTIMIZER) $(MEMLOG) $(WARNINGS) \
+			$(ARCHFLAGS) $(LOCALCFLAGS) $(USERFLAGS)
+
 GNULIB =	/usr/lib
 
 #

@@ -50,15 +50,33 @@ CPLUSPLUS =	g++ -I$(ROOT)/src/compat/freebsd
 OCTTOOLS_MM_LIB=
 OCT_CC =	gcc $(OCTTOOLS_MM_LIB)
 
-SYSTEMDEF=	-Dfreebsd
+# In config-$PTARCH.mk, we set the following variables.  We need to 
+# use only the following variables so that we can use them elsewhere, say
+# for non-optimized compiles.
+# OPTIMIZER - The setting for the optimizer, usually -O2.
+# MEMLOG    - Formerly used to log memory allocation and deallocation.
+# WARNINGS  - Flags that print warnings.
+# ARCHFLAGS - Architecture dependent flags, useful for determining which
+#	      OS we are on.  Often of the form -DPTSOL2_4.
+# LOCALCCFLAGS - Other architecture dependent flags that apply to all releases
+#	      of the OS for this architecture for c++
+# LOCALCFLAGS - Other architecture dependent flags that apply to all releases
+#	      of the OS for this architecture for c++
+# USERFLAGS - Ptolemy makefiles should never set this, but the user can set it.
+
 OPTIMIZER=	-O2 -m486 -pipe
 #OPTIMIZER=	-O2 -m486 -fomit-frame-pointer -pipe
 
 # Under gcc-2.7.0, you will need to add -fno-for-scope to $WARNINGS
 WARNINGS =	-Wall -Wcast-align #-Wcast-qual 
-GPPFLAGS =	$(SYSTEMDEF) $(WARNINGS) $(EXTRA_OPTIMIZER) $(OPTIMIZER) $(MEMLOG)
-CFLAGS =	$(SYSTEMDEF) $(WARNINGS) $(EXTRA_OPTIMIZER) $(OPTIMIZER) $(MEMLOG) \
-		-fwritable-strings
+ARCHFLAGS=	-Dfreebsd
+LOCALCFLAGS =	-fwritable-strings
+
+GPPFLAGS =	$(OPTIMIZER) $(MEMLOG) $(WARNINGS) \
+			$(ARCHFLAGS) $(LOCALCCFLAGS) $(USERFLAGS)
+CFLAGS =	$(OPTIMIZER) $(MEMLOG) $(WARNINGS) \
+			$(ARCHFLAGS) $(LOCALCFLAGS) $(USERFLAGS)
+
 GNULIB =	/usr/lib
 
 #

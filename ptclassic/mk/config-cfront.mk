@@ -1,4 +1,6 @@
 # Configuration makefile for Sun-4 running Cfront.
+# This is not a complete config; it only overrides those options
+# specific to using non-g++ compilers
 #
 # $Id$
 # Copyright (c) 1990-%Q% The Regents of the University of California.
@@ -44,15 +46,30 @@ RANLIB =	ranlib
 # C++ compiler to use.
 CPLUSPLUS = 	CC -I$(ROOT)/src/compat/cfront
 
+# In config-$PTARCH.mk, we set the following variables.  We need to 
+# use only the following variables so that we can use them elsewhere, say
+# for non-optimized compiles.
+# OPTIMIZER - The setting for the optimizer, usually -O2.
+# MEMLOG    - Formerly used to log memory allocation and deallocation.
+# WARNINGS  - Flags that print warnings.
+# ARCHFLAGS - Architecture dependent flags, useful for determining which
+#	      OS we are on.  Often of the form -DPTSOL2_4.
+# LOCALCCFLAGS - Other architecture dependent flags that apply to all releases
+#	      of the OS for this architecture for c++
+# LOCALCFLAGS - Other architecture dependent flags that apply to all releases
+#	      of the OS for this architecture for c++
+# USERFLAGS - Ptolemy makefiles should never set this, but the user can set it.
+
 # If you turn on debugging (-g) with cfront, expect ptcl and pigiRpc to be
 # about 70Mb each.
-GPPDEBUGFLAGS =
-CDEBUGFLAGS =
 
-# flags for C++ compilation.  -DPOSTFIX_OP= is needed for cfront 2.1; it
-# is not needed for 3.0.
-GPPFLAGS =	$(GPPDEBUGFLAGS) $(MEMLOG) -DPOSTFIX_OP=
-CFLAGS = 	$(CDEBUGFLAGS)
+# -DPOSTFIX_OP= is needed for cfront 2.1; it is not needed for 3.0.
+LOCALCCFLAGS =	-DPOSTFIX_OP=
+GPPFLAGS =	$(OPTIMIZER) $(MEMLOG) $(WARNINGS) \
+			$(ARCHFLAGS) $(LOCALCCFLAGS) $(USERFLAGS)
+CFLAGS =	$(OPTIMIZER) $(MEMLOG) $(WARNINGS) \
+			$(ARCHFLAGS) $(LOCALCFLAGS) $(USERFLAGS)
+
 DEPEND =	CC -M
 
 #

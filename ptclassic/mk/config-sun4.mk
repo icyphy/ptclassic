@@ -42,14 +42,30 @@ RANLIB =	ranlib
 # Use gcc everywhere including in octtools
 CC =		gcc
 
+# In config-$PTARCH.mk, we set the following variables.  We need to 
+# use only the following variables so that we can use them elsewhere, say
+# for non-optimized compiles.
+# OPTIMIZER - The setting for the optimizer, usually -O2.
+# MEMLOG    - Formerly used to log memory allocation and deallocation.
+# WARNINGS  - Flags that print warnings.
+# ARCHFLAGS - Architecture dependent flags, useful for determining which
+#	      OS we are on.  Often of the form -DPTSOL2_4.
+# LOCALCCFLAGS - Other architecture dependent flags that apply to all releases
+#	      of the OS for this architecture for c++
+# LOCALCFLAGS - Other architecture dependent flags that apply to all releases
+#	      of the OS for this architecture for c++
+# USERFLAGS - Ptolemy makefiles should never set this, but the user can set it.
+
 OPTIMIZER =	-O2
 # -Wsynth is new in g++-2.6.x
 # Under gxx-2.7.0 -Wcast-qual will drown you with warnings from libg++ includes
 WARNINGS =	-Wall -Wsynth #-Wcast-qual 
-# Under gcc-2.7.0, you will need -fno-for-scope for GPPFLAGS
-GPPFLAGS =	-g $(MEMLOG) $(WARNINGS) $(OPTIMIZER) -fno-for-scope
-# If you are not using gcc, then you might have problems with the WARNINGS flag
-CFLAGS =	-g $(MEMLOG) $(WARNINGS) $(OPTIMIZER)
+# Under gcc-2.7.0, you will need -fno-for-scope for LOCALCCFLAGS
+LOCALCCFLAGS =	-fno-for-scope
+GPPFLAGS =	$(OPTIMIZER) $(MEMLOG) $(WARNINGS) \
+			$(ARCHFLAGS) $(LOCALCCFLAGS) $(USERFLAGS)
+CFLAGS =	$(OPTIMIZER) $(MEMLOG) $(WARNINGS) \
+			$(ARCHFLAGS) $(LOCALCFLAGS) $(USERFLAGS)
 
 #
 # Variables for the linker

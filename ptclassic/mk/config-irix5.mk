@@ -44,28 +44,40 @@ CC =		gcc
 # OCT_CC is used in src/octtools/vem-{lib,bin}.mk
 OCT_CC =	gcc -fwritable-strings
 
+# In config-$PTARCH.mk, we set the following variables.  We need to 
+# use only the following variables so that we can use them elsewhere, say
+# for non-optimized compiles.
+# OPTIMIZER - The setting for the optimizer, usually -O2.
+# MEMLOG    - Formerly used to log memory allocation and deallocation.
+# WARNINGS  - Flags that print warnings.
+# ARCHFLAGS - Architecture dependent flags, useful for determining which
+#	      OS we are on.  Often of the form -DPTSOL2_4.
+# LOCALCCFLAGS - Other architecture dependent flags that apply to all releases
+#	      of the OS for this architecture for c++
+# LOCALCFLAGS - Other architecture dependent flags that apply to all releases
+#	      of the OS for this architecture for c++
+# USERFLAGS - Ptolemy makefiles should never set this, but the user can set it.
+
 OPTIMIZER =	-O2
-#-Wsynth is new in g++-2.6.x
+# -Wsynth is new in g++-2.6.x
 # Under gxx-2.7.0 -Wcast-qual will drown you with warnings from libg++ includes
 WARNINGS =	-Wall -Wsynth #-Wcast-qual 
 
 # Use -D_BSD_SIGNALS for src/kernel/SimControl.cc
 #  see /usr/include/sys/signals.h for more info.
 # Use -D_BSD_TIME for src/kernel/Clock.cc, see /usr/include/sys/time.h
-MISC_DEFINES =	-D_BSD_SIGNALS -D_BSD_TIME
-
 # Under gcc-2.5.8 on Irix5.2, -g is not supported unless you have gas-2.5
-# Under gcc-2.7.0, you will need -fno-for-scope for GPPFLAGS
-GPPFLAGS =	-G 0 $(MEMLOG) $(WARNINGS) $(MISC_DEFINES) $(OPTIMIZER) -fno-for-scope
+# Under gcc-2.7.0, you will need -fno-for-scope for LOCALCCFLAGS
+LOCALCCFLAGS =	-G 0 -D_BSD_SIGNALS -D_BSD_TIME -fno-for-scope
+GPPFLAGS =	$(OPTIMIZER) $(MEMLOG) $(WARNINGS) \
+			$(ARCHFLAGS) $(LOCALCCFLAGS) $(USERFLAGS)
+LOCALCFLAGS =	-G 0 -cckr
+CFLAGS =	$(OPTIMIZER) $(MEMLOG) $(WARNINGS) \
+			$(ARCHFLAGS) $(LOCALCFLAGS) $(USERFLAGS)
 
-#     -cckr  The traditional K&R/Version7 C with SGI extensions
-# Note that -cckr will not work with gcc
-#CFLAGS =	-G 0 -cckr $(OPTIMIZER)
-CFLAGS =	-G 0 $(MEMLOG) $(WARNINGS) $(MISC_DEFINES) $(OPTIMIZER)
 #
 # Variables for the linker
 #
-
 
 # system libraries for linking .o files from C files only
 CSYSLIBS = 	-lm -lmld

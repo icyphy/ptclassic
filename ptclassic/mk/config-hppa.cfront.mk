@@ -46,15 +46,34 @@ CDEBUGFLAGS =
 # Used in octtools/vem/makefile
 OCT_DEBUG_FLAGS =
 
+# In config-$PTARCH.mk, we set the following variables.  We need to 
+# use only the following variables so that we can use them elsewhere, say
+# for non-optimized compiles.
+# OPTIMIZER - The setting for the optimizer, usually -O2.
+# MEMLOG    - Formerly used to log memory allocation and deallocation.
+# WARNINGS  - Flags that print warnings.
+# ARCHFLAGS - Architecture dependent flags, useful for determining which
+#	      OS we are on.  Often of the form -DPTSOL2_4.
+# LOCALCCFLAGS - Other architecture dependent flags that apply to all releases
+#	      of the OS for this architecture for c++
+# LOCALCFLAGS - Other architecture dependent flags that apply to all releases
+#	      of the OS for this architecture for c++
+# USERFLAGS - Ptolemy makefiles should never set this, but the user can set it.
+
 # flags for C++ compilation.  -DPOSTFIX_OP= is needed for cfront 2.1; it
 # is not needed for 3.0.  Apparently -DPOSTFIX_OP= is needed for HPPA CC 3.20,
 # but it is unneeded for HPPA CC 3.50.  You can use 'what /usr/bin/CC'
 # to find out what version of HPPA CC you are using.
-GPPFLAGS =	-DUSG $(GPPDEBUGFLAGS) $(MEMLOG)
+ARCHFLAGS =	-DUSG $(GPPDEBUGFLAGS)
+GPPFLAGS =	$(OPTIMIZER) $(MEMLOG) $(WARNINGS) \
+			$(ARCHFLAGS) $(LOCALCCFLAGS) $(USERFLAGS)
+
 # -Aa turns on ansi c, needed for tkoct
 # The cc man page says that defining _HPUX_SOURCE gives the same name space
 # compatibility as -Ac
-CFLAGS =	-DUSG $(CDEBUGFLAGS) -Aa -D_HPUX_SOURCE
+LOCALCFLAGS =	-DUSG $(CDEBUGFLAGS) -Aa -D_HPUX_SOURCE
+CFLAGS =	$(OPTIMIZER) $(MEMLOG) $(WARNINGS) \
+			$(ARCHFLAGS) $(LOCALCFLAGS) $(USERFLAGS)
 
 # CC on HPs does not know the "-M" option as given in DEPEND.
 # makedepend is part of X11

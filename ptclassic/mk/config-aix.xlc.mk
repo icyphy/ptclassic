@@ -47,23 +47,41 @@ DEPEND = xlC -M -+ -Daix -Daix_xlC -I$(ROOT)/src/compat/cfront
 # C++ compiler to use.
 CPLUSPLUS =     xlC -+ -I$(ROOT)/src/compat/cfront
 
+
+# In config-$PTARCH.mk, we set the following variables.  We need to 
+# use only the following variables so that we can use them elsewhere, say
+# for non-optimized compiles.
+# OPTIMIZER - The setting for the optimizer, usually -O2.
+# MEMLOG    - Formerly used to log memory allocation and deallocation.
+# WARNINGS  - Flags that print warnings.
+# ARCHFLAGS - Architecture dependent flags, useful for determining which
+#	      OS we are on.  Often of the form -DPTSOL2_4.
+# LOCALCCFLAGS - Other architecture dependent flags that apply to all releases
+#	      of the OS for this architecture for c++
+# LOCALCFLAGS - Other architecture dependent flags that apply to all releases
+#	      of the OS for this architecture for c++
+# USERFLAGS - Ptolemy makefiles should never set this, but the user can set it.
+
 OPTIMIZER =	-O2
 #WARNINGS =	-Wall -Wcast-qual
 WARNINGS =
-GPPFLAGS =	 -qlanglvl=compat -Daix -Daix_xlC $(MEMLOG) $(WARNINGS) $(OPTIMIZER)
-# If you are not using gcc, then you might have problems with the WARNINGS flag
-CFLAGS =	 -Daix -Daix_xlC $(MEMLOG) $(WARNINGS) $(OPTIMIZER)
+LOCALCCFLAGS =	 -qlanglvl=compat -Daix -Daix_xlC
+GPPFLAGS =	$(OPTIMIZER) $(MEMLOG) $(WARNINGS) \
+			$(ARCHFLAGS) $(LOCALCCFLAGS) $(USERFLAGS)
+LOCALCFLAGS =	-Daix -Daix_xlC
+CFLAGS =	$(OPTIMIZER) $(MEMLOG) $(WARNINGS) \
+			$(ARCHFLAGS) $(LOCALCFLAGS) $(USERFLAGS)
 
-SYSLIBS= -L/usr/lpp/xlC/lib -lC -lm -lc -lbsd
+SYSLIBS =	-L/usr/lpp/xlC/lib -lC -lm -lc -lbsd
 
 # system libraries for linking .o files from C files only
-CSYSLIBS = $(SYSLIBS)
+CSYSLIBS = 	$(SYSLIBS)
 
 #
 # Variables for the linker
 #
-LINKER= xlC 
-LINKFLAGS=-L$(LIBDIR) -bnso -bI:/lib/syscalls.exp
+LINKER =	xlC 
+LINKFLAGS =	-L$(LIBDIR) -bnso -bI:/lib/syscalls.exp
 LINKFLAGS_D =	-L$(LIBDIR) -bnso -bI:/lib/syscalls.exp
 # Flag that gcc expects to create statically linked binaries.
 # Binaries that are shipped should be statically linked.
@@ -104,4 +122,4 @@ OCT_CC =        gcc  -fwritable-strings
 TERMLIB_LIBSPEC = -ltermcap
 
 # Matlab architecture
-MATARCH = aix
+MATARCH =	aix

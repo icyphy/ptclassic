@@ -107,24 +107,37 @@ RANLIB	= 	ranlib
 # domains/ipus/islang uses BISONFLEXLIBS
 BISONFLEXLIB =	-fl
 
-# debug version
-LINUXDEF =	-Dlinux #-D_GNU_SOURCE -D_BSD_SOURCE
+# In config-$PTARCH.mk, we set the following variables.  We need to 
+# use only the following variables so that we can use them elsewhere, say
+# for non-optimized compiles.
+# OPTIMIZER - The setting for the optimizer, usually -O2.
+# MEMLOG    - Formerly used to log memory allocation and deallocation.
+# WARNINGS  - Flags that print warnings.
+# ARCHFLAGS - Architecture dependent flags, useful for determining which
+#	      OS we are on.  Often of the form -DPTSOL2_4.
+# LOCALCCFLAGS - Other architecture dependent flags that apply to all releases
+#	      of the OS for this architecture for c++
+# LOCALCFLAGS - Other architecture dependent flags that apply to all releases
+#	      of the OS for this architecture for c++
+# USERFLAGS - Ptolemy makefiles should never set this, but the user can set it.
+
 #	Don't use -pipe, it makes life worse on small-memory systems.
 #	Don't use -m486, it's the default, except for those with the
 #	Pentium optimized compiler; for them -m486 makes things worse.
 #OPTIMIZER =	-g #-m486 -pipe
-
-#
-# 'production' version with optimization
 OPTIMIZER =	-O2 #-fomit-frame-pointer #-m486 -pipe
-#LINUXDEF =	-Dlinux -DNO_RAND_OPTIMIZE #-D_GNU_SOURCE -D_BSD_SOURCE
-
 # -Wsynth is new in g++-2.6.x, however 2.5.x does not support it
 # Slackware is using 2.5.x, so we leave -Wsynth out for the time being.
 WARNINGS =	-Wall -Wcast-align -Wsynth # -Wcast-qual 
-# Under gcc-2.7.0, you will need -fno-for-scope for GPPFLAGS
-GPPFLAGS =	$(LINUXDEF) -fno-for-scope $(WARNINGS) $(OPTIMIZER) $(MEMLOG)
-CFLAGS =	$(LINUXDEF) $(OPTIMIZER) -fwritable-strings
+ARCHFLAGS =	-Dlinux #-D_GNU_SOURCE -D_BSD_SOURCE -DNO_RAND_OPTIMIZE
+# Under gcc-2.7.0, you will need -fno-for-scope for LOCALCCFLAGS
+LOCALCCFLAGS =	-fno-for-scope
+GPPFLAGS =	$(OPTIMIZER) $(MEMLOG) $(WARNINGS) \
+			$(ARCHFLAGS) $(LOCALCCFLAGS) $(USERFLAGS)
+LOCALCFLAGS =	-fwritable-strings
+CFLAGS =	$(OPTIMIZER) $(MEMLOG) $(WARNINGS) \
+			$(ARCHFLAGS) $(LOCALCFLAGS) $(USERFLAGS)
+
 
 #
 # Variables for the linker

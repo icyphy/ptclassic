@@ -63,6 +63,21 @@ SHARED_LIBRARY_COMMAND =	CC -G -o
 CSHARED_LIBRARY_COMMAND =	cc -G -o
 #endif
 
+# In config-$PTARCH.mk, we set the following variables.  We need to 
+# use only the following variables so that we can use them elsewhere, say
+# for non-optimized compiles.
+# OPTIMIZER - The setting for the optimizer, usually -O2.
+# MEMLOG    - Formerly used to log memory allocation and deallocation.
+# WARNINGS  - Flags that print warnings.
+# ARCHFLAGS - Architecture dependent flags, useful for determining which
+#	      OS we are on.  Often of the form -DPTSOL2_4.
+# LOCALCCFLAGS - Other architecture dependent flags that apply to all releases
+#	      of the OS for this architecture for c++
+# LOCALCFLAGS - Other architecture dependent flags that apply to all releases
+#	      of the OS for this architecture for c++
+# USERFLAGS - Ptolemy makefiles should never set this, but the user can set it.
+
+OPTIMIZER =
 # If you turn on debugging (-g) with cfront, ptcl and pigiRpc could be
 # about 70Mb each.  Also, with -g you will need at least 250Mb for the .o
 # files, even before linking
@@ -73,13 +88,18 @@ CSHARED_LIBRARY_COMMAND =	cc -G -o
 GPPDEBUGFLAGS = -g
 CDEBUGFLAGS =	-g
 
-# flags for C++ compilation.  -DPOSTFIX_OP= is needed for cfront 2.1; it
-# is not needed for 3.0.
-OPTIMIZER =
+# -DPOSTFIX_OP= is needed for cfront 2.1; it is not needed for 3.0.
+
 # Define PTSOL2_4 if you are on Solaris2_4
-LOCALFLAGS =	-DPTSOL2_4
-GPPFLAGS =	-DSYSV -DSOL2 $(OPTIMIZER) $(GPPDEBUGFLAGS) $(MEMLOG) -DPOSTFIX_OP= $(LOCALFLAGS)
-CFLAGS = 	-DSYSV -DSOL2 $(OPTIMIZER) $(CDEBUGFLAGS) $(LOCALFLAGS)
+ARCHFLAGS =	-DPTSOL2_4
+
+LOCALCCFLAGS =	$(GPPDEBUGFLAGS) -DSYSV -DSOL2
+GPPFLAGS =	$(OPTIMIZER) $(MEMLOG) $(WARNINGS) \
+			$(ARCHFLAGS) $(LOCALCCFLAGS) $(USERFLAGS)
+# If you are not using gcc, then you might have problems with the WARNINGS flag
+LOCALCFLAGS =	$(CDEBUGFLAGS) -DSYSV -DSOL2
+CFLAGS =	$(OPTIMIZER) $(MEMLOG) $(WARNINGS) \
+			$(ARCHFLAGS) $(LOCALCFLAGS) $(USERFLAGS)
 
 # CC does not recognize the "-M" option.
 # "makedepend" is part of X11
