@@ -234,8 +234,9 @@ public:
     int getParent(int argc,char** argv);
     int halt(int argc,char** argv);
     int initialize(int argc,char** argv);
-    int isgalaxy(int argc,char** argv);
-    int iswormhole(int argc,char** argv);
+    int isGalaxy(int argc,char** argv);
+    int isMultiPort(int argc,char** argv);
+    int isWormhole(int argc,char** argv);
     int knownlist(int argc,char** argv);
     int link(int argc,char** argv);
     int listobjs(int argc,char** argv);
@@ -255,6 +256,7 @@ public:
     int pragmaDefaults(int argc,char** argv);
     int print(int argc,char** argv);
     int ports(int argc,char** argv);
+    int portsContained(int argc,char** argv);
     int remove(int argc,char** argv);
     int renameuniv(int argc,char** argv);
     int registerAction(int argc,char** argv);
