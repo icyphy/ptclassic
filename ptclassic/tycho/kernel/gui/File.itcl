@@ -245,6 +245,10 @@ class ::tycho::File {
     # public variables.
 
     # The current file name.
+    # FIXME: This variable should be renamed to "completeFilePath"
+    # or something similar. As it is, the name "file" is too easy
+    # to use somewhere in a subclass and then spend three hours
+    # chasing a very bizarre bug (don't ask me how I know this! -- hjr).
     protected variable file "NoName"
 
     # This array stores object names indexed by file names so that
