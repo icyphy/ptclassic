@@ -12,7 +12,7 @@
 
 include ../../../mk/topdomain.mk
 
-DIRS = kernel stars
+DIRS = kernel stars tcltk
 
 ME = de
 
