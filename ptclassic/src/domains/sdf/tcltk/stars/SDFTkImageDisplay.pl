@@ -4,6 +4,7 @@ defstar {
 	derived { TclScript }
 	version { $Id$ }
 	author { Mei Xiao }
+	acknowledge { Brian L. Evans }
 	copyright {
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
@@ -23,6 +24,8 @@ star treats the matrices as given the red, green, blue intensities,
 respectively, of a color image.
 	}
 	hinclude { "Matrix.h", "InfString.h" }
+	// ptkImage.h pulls in tcl.h, tk.h, and ptk.h and defines
+	// the new ptimage image Tk object
 	header {
 extern "C" {
 #include "ptkImage.h"
