@@ -106,14 +106,14 @@ TCL_INCDIR=$(TCL_ROOT)/tcl.$(TCL_VERSION)/include
 TCL_LIBSPEC=-L$(TCL_ROOT)/tcl.$(TCL_VERSION).$(PTARCH)/lib -ltcl
 
 # Directory containing Tk include files
-TK_INCDIR=$(TCL_ROOT)/tk/include
+TK_INCDIR=$(TCL_ROOT)/tk.$(TK_VERSION)/include
 
 # Combined -L and -l options to link with tk library.  Can add
 # addtional -L and/or -l options to support tk extensions.
 TK_LIBSPEC=-L$(TCL_ROOT)/tk.$(TK_VERSION).$(PTARCH)/lib -ltk #-lXpm
 
 # Location of the itcl_sh binary
-ITCL_SH=$(ROOT)/tcltk/itcl.$(TK_VERSION).$(PTARCH)/bin/itcl_sh
+ITCL_SH=$(ROOT)/tcltk/itcl.$(PTARCH)/bin/itcl_sh
 
 # Location of the itcl library, needed for itcl_mkindex
 ITCL_LIBDIR=$(ROOT)/tcltk/itcl/library
