@@ -137,9 +137,6 @@ body ::tycho::EditItcl::constructor {args} {
 
     menubar addMenuItem "Generate doc" Special -underline 0 \
 	    -command "$this gendoc"
-
-    menubar addMenuItem "Run Make" Special -underline 4 \
-	    -command "$this make"
 }
 
 ###################################################################
