@@ -55,42 +55,33 @@ class ::tycho::EditSearch {
     #################################################################
     ####                        options                          ####
 
-    #### -backwards option
     # The option to specify backwards search.
     itk_option define -backwards backwards Backwards 0
 
-    #### -chfindcommand option
     # The command to execute on a change and find command.
     itk_option define -chfindcommand chfindcommand ChangeAndFindCommand ""
 
-    #### -edittext option
     # The associated EditText object.
     itk_option define -edittext edittext EditText ""
 
-    #### -findcommand option
     # The command to execute on a find command.
     itk_option define -findcommand findcommand FindCommand ""
 
-    #### -nochange option
     # If this option value is non-zero, do not permit changes.
     itk_option define -nochange nochange NoChange 0
 
     ##################################################################
     ####                     public methods                       ####
 
-    #### change
     # Change the selection, replacing it with the replacement string.
     method change {}
 
-    #### changeAndFind
     # Change the text in the selection to the value in the Change To box.
     method changeAndFind {}
 
-    #### clearFindMatch
     # Clear the find-match marks on the associated text window.
     method clearFindMatch
 
-    #### find
     # Find the specified pattern. Return 1 if it is found, 0 otherwise.
     method find {{start {}}}
 

@@ -84,7 +84,6 @@ class ::tycho::FontManager {
     ##########################################################################
     ####                            options                               ####
 
-    #### -initialfont option
     # Specify the initial font displayed in the window.
     itk_option define -initialfont initialFont InitialFont {9x15}
 
@@ -94,44 +93,34 @@ class ::tycho::FontManager {
     ##########################################################################
     ####                         public methods                           ####
 
-    #### clearFont
     # Clear commandResult variable so that no font is identified.
     method clearFont {} {set commandResult($prefix) {}}
 
-    #### defaultFont
     # Get a preferred font from a list of possibilities given by an option
     method defaultFont {optionName}
 
-    #### findFont
     # Return a valid font, using the given prioritized specifications.
     method findFont {specs}
 
-    #### fontValid
     # Return 1 if the specified font is valid, otherwise return 0.
     method fontValid {font}
 
-    #### getCurrentFont
     # Return the current font displayed by the font manager.
     method getCurrentFont {}
 
-    #### getFont
     # Given a font specification, return a font name or an empty string.
     method getFont {family {size 14} {weight medium} {style r}}
 
-    #### getValidSize
     # Return the next size larger than the argument in the sizes list,
     # or the largest value in the sizes list.
     method getValidSize {proposed}
 
-    #### help
     # Open a help window.
     method help {}
 
-    #### setCurrentFont
     # Attempt to set the font specified by the menu radio buttons.
     method setCurrentFont {}
 
-    #### tryFont
     # Attempt to set a specific font.
     method tryFont {font}
 

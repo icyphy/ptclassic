@@ -89,55 +89,45 @@ class ::tycho::ListBrowser {
     ##################################################################
     ####                     public methods                       ####
 
-    #### breakCompleteSequence
     # Break the interpretation of a sequence of Tabs as scrolling over matches.
     method breakCompleteSequence {}
 
-    #### chooseItem
     # Copy an item from the listbox to the entry box.
     method chooseItem {lb ypos}
 
-    #### clearselection
     # Clear any selections made by item completion.
     method clearselection {}
 
-    #### complete
     # Complete the partially entered item.
     method complete {}
 
-    #### goto
     # Goto the specified item in the listbox.
     method goto {item}
 
-    #### help
     # Open a help window.
     method help {}
 
-    #### ok
     # Select the item specified in the entry box.
     method ok {}
 
-    #### scroll
     # Move up or down a number of pages or units in the listbox or selection.
     method scroll {num what}
 
-    #### select
     # Select the item specified in the argument.
     method select {name}
 
     ##################################################################
     ####                   protected methods                      ####
 
-    #### processItem
     # Process an item selection.  Return 1 to destroy the window.
     protected method processItem {item}
 
-    #### updateListbox
     # Fill the listbox with items.
     protected method updateListbox {}
 
     ##################################################################
     ####                   private variables                      ####
+
     private variable closing 0
     private variable scrollposition 0
     private variable uselastpattern 0

@@ -48,61 +48,49 @@ class ::tycho::RevControlRCS {
     ###################################################################
     ####                      public methods                       ####
 
-    #### checkIn
     # Checkin the file associated with this class.
     method checkIn {}
 
-    #### checkOut
     # Checkout the file associated with this class.
     method checkOut {}
 
-    #### getRlog
     # Get rlog information about the current file and check for the 
     # existance of the locks field.
     method getRlog {}
 
-    #### initializeRevControl
     # Put the file under revision control.
     method initializeRevControl {}
 
-    #### retrieveVersion
     # Get the specified version and open the file.
     method retrieveVersion {version}
 
-    #### unedit
     # Unedit the file associated with this class.
     method unedit {}
 
-    #### viewHistory
     # View or close the version control history.
     method viewHistory {}
 
     ###################################################################
     ####                      public procs                         ####
 
-    #### isUnderRevControl
     # Return 1 if the given file is under revision control, 0 otherwise.
     proc isUnderRevControl {file} {}
 
     ###################################################################
     ####                   protected methods                       ####
 
-    #### getComments
     # Get the users comments.
     protected method getComments {} 
 
-    #### isCheckedOut
     # Return 1 if the file is checked out, 0 otherwise.
     protected method isCheckedOut {}
 
     ###################################################################
     ####                   private methods                         ####
 
-    #### parseHistory
     # Parse the history information and insert a synopsis into the text window.
     private method parseHistory {history text}
 
-    #### updateHistory
     # Update the history information, if it is on display.
     private method updateHistory {}
 }

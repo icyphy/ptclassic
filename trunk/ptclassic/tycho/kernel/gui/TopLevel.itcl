@@ -117,11 +117,9 @@ class ::tycho::TopLevel {
 
     inherit ::itk::Toplevel
 
-    #### -before option
     # Position the window in the list of windows before the given one.
     itk_option define -before before Before {}
 
-    #### -geometry option
     # By default, the geometry option is set to the
     # null string, deferring to the window manager the control over
     # position. It can be set alternatively to a string of the
@@ -141,46 +139,36 @@ class ::tycho::TopLevel {
     #################################################################
     ####                     public methods                      ####
 
-    #### busy
     # Change the cursor to the "watch" and execute the arguments.
     method busy {args} {}
 
-    #### centerOnScreen
     # Center the window on the screen.
     method centerOnScreen {}
 
-    #### focusin
     # Give the window or a subwindow the focus.
     method focusin {}
 
-    #### freezeWindowSize
     # Prevent interactive resizing of the window.
     method freezeWindowSize {}
 
-    #### nextWindow
     # Shift the focus to the next window in the topLevelWindows list.
     method nextWindow {{raise 0}}
 
-    #### windowName
     # Return the name of my top-level window.
     method windowName {} {return $itk_component(hull)}
 
-    #### raiseWindow
     # Raise the window.
     method raiseWindow {}
 
     #################################################################
     ####                   public procedures                     ####
 
-    #### exitProgram
     # Exit the program
     public proc exitProgram {{queryUser 1}} {}
 
-    #### returnExitCon
     # Return the value of the exitconfirmed variable.
     public proc returnExitCon {} {}
 
-    #### exitWhenNoMoreWindows
     # If the argument is zero, disable exiting when the last window
     # is closed.
     public proc exitWhenNoMoreWindows {bool} {}
@@ -188,7 +176,6 @@ class ::tycho::TopLevel {
     #################################################################
     ####                  protected variables                    ####
 
-    #### prefix variable
     # The prefix is just a shorthand for $itk_component(hull).
     # It is the name of the top-level window.
     protected variable prefix

@@ -53,38 +53,30 @@ class ::tycho::EditSpell {
     #################################################################
     ####                        options                          ####
 
-    #### -edittext option
     # The associated EditText object.
     itk_option define -edittext edittext EditText {}
 
-    #### -nochange option
     # Check spelling, but do not allow changes.
     itk_option define -nochange nochange NoChange 0
 
     ##################################################################
     ####                     public methods                       ####
 
-    #### clearFindMatch
     # Clear the spelling error marks on the associated text window.
     method clearFindMatch
 
-    #### dictionary
     # Open the personal dictionary for editing.
     method dictionary {}
 
-    #### learn
     # Add to the personal dictionary the word currently in the misspell window.
     method learn {}
 
-    #### next
     # Find the next misspelling and query the user for a replacement.
     method next {}
 
-    #### recheck
     # Check the spelling from the beginning.
     method recheck {}
 
-    #### replace
     # Replace the selection with the contents of the entry query.
     method replace {}
 

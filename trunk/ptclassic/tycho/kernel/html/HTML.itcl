@@ -45,53 +45,42 @@ class ::tycho::HTML {
     ###################################################################
     ####                       options                             ####
 
-    #### -sizeadjustment option
     # Offset from 14 points for the font sizes.
     itk_option define -sizeadjustment sizeAdjustment SizeAdjustment 2
 
     ###################################################################
     ####                       public methods                      ####
 
-    #### altFile
     # Prompt the user for a file name and load in place of the current file.
     method altFile {}
 
-    #### focusin
     # Call this to give the text subwindow the focus.
     method focusin {}
 
-    #### help
     # Open a help window.
     method help {}
 
-    #### openSource
     # Open the HTML source
     method openSource {}
 
-    #### raiseWindow
     # raise the HTML broswer window and the source window (if any).
     method raiseWindow {}
 
-    #### reload
     # Clear the current text and reload from the source file.
     method reload {}
 
-    #### seeName
     # Goto a named point within the file.
     method seeName {name}
 
-    #### switchFile
     # Switch to a different HTML file.
     method switchFile {filename}
 
     #########################################################################
     ####                   protected methods                             ####
 
-    #### addTool
     # Add a button to the toolbar.
     method addTool {name label command}
 
-    #### textWidget
     # Return the name of the type of text widget to use.
     protected method textWidget {} {return ::tycho::HTMLText}
 
@@ -104,7 +93,6 @@ class ::tycho::HTML {
     # Keep track of the current source window for the current file.
     private variable sourcewin {}
 
-    #### sourcewinIsMine
     # Return 1 if the sourcewin window is a valid source window.
     private method sourcewinIsMine {}
 }

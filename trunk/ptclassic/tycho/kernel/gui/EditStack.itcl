@@ -44,14 +44,12 @@ class ::tycho::EditStack {
     constructor {args} {}
     destructor {}
 
-    #### help
     # Open a help window.  This should be redefined in derived classes.
     method help {}
 
     ###################################################################
     ####                  protected methods                        ####
 
-    #### textWidget
     # Return the name of the type of text widget to use.
     method textWidget {} {return ::tycho::EditStackText}
 }
