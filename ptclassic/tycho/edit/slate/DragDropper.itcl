@@ -119,6 +119,12 @@ class ::tycho::DragDropper {
     # Continue interaction sequence
     method drag {x y}
 
+    # Move mouse over a bound item
+    method enter {}
+
+    # Move mouse away from a bound item
+    method leave {}
+
     # Test if the mouse is over a target item
     method over {x y}
 
@@ -142,9 +148,9 @@ body ::tycho::DragDropper::bind {t args} {
     # First do the superclass thing
     eval chain $t $args
 
-    # Add bindings for Enter and Leave
-    $slate bind $t <Enter> "$slate highlight \[$slate find withtag current\]" 
-    $slate bind $t <Leave> "$slate unhighlight \[$slate find withtag current\]" 
+    # Add bindings for Enter
+    $slate bind $t <Enter> "$this enter"
+    $slate bind $t <Leave> "$this leave"
 }
 
 #######################################################################
@@ -180,6 +186,26 @@ body ::tycho::DragDropper::drag {x y} {
 	uplevel \#0 ::tycho::apply \
 		[list $dragcommand $this $item $x $y]
     }
+}
+
+#######################################################################
+#### enter
+#
+# Move over a bound item. Highlight the item.
+#
+body ::tycho::DragDropper::enter {} {
+    set current [$slate find withtag current]
+    $slate highlight $current
+}
+
+#######################################################################
+#### leave
+#
+# Move mouse away from a bound item.
+#
+body ::tycho::DragDropper::leave {} {
+    set current [$slate find withtag current]
+    $slate unhighlight $current
 }
 
 #######################################################################
