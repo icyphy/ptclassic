@@ -32,11 +32,8 @@ of a Select gate.
 		output.setBDFParams(1,control,BDF_TRUE, 0);
 	}
 	go {
-		control.receiveData();
 		if (int(control%0)) {
-			input.receiveData();
 			output%0 = input%0;
-			output.sendData();
 		}
 	}
 }
