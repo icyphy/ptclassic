@@ -321,13 +321,8 @@ proc tychoMergeIndices {title outputfilename args} {
 
 	set CWD [file dirname $file]
 	
-#	puts "$file: $contents"
-#	if {[llength $contents] == 0} {
-#	    # If we had a comment, then contents could be zero length
-#	    continue
-#	}
 	if {[llength $contents] != 2} {
-	    error "Syntax error in index file $file \
+	    error "Syntax error in index file $file \n\
 		    Should contain the form: name { items }, instead we got\n\
 	            '$contents'"
 	}
@@ -343,7 +338,6 @@ proc tychoMergeIndices {title outputfilename args} {
 	    if {[llength $item] == 2 } {
 		# Two entry index items are recursive items
 		set subindex [lindex [lindex $item 1] 1]
-		puts "subindex: $subindex"
 		set subentries {}
 		foreach subitem $subindex {
 		    lappend subentries [_tychoAdjustIndexItem $CWD $subitem]
