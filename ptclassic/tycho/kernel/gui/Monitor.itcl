@@ -405,7 +405,10 @@ body ::tycho::Monitor::insertLine {line} {
     $history configure -readonly 1
 
     # Now, if we have to, modify the line (ie. change color, etc)
-    if {[regexp {^([^:]+):([0-9]+): (.+)$} $line tmp fname editorLine msg] \
+    # The first regexp is for GNU make,the second for MS VC++ nmake.
+    if {([regexp {^([^:]+):([0-9]+): (.+)$} $line tmp fname editorLine msg] \
+            || [regexp {^([^(]+)\(([0-9]+)\) : (.+)$} $line \
+            tmp fname editorLine msg] ) \
             && $previousErrorLine!=$editorLine} {
         set previousErrorLine $editorLine
 
