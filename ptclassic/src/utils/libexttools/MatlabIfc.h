@@ -34,7 +34,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
  Revisions:
 
  Base class for an external interface to Matlab.
- Only one Matlab process is run and is shared by all of Ptolemy.
+ Only one Matlab process is run and is shared.
 
 **************************************************************************/
 
@@ -51,9 +51,9 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 // Matlab limits filenames to 20 characters (base name + ".m")
 // Therefore, Matlab functions must have 18 or fewer characters
-#define PTOLEMY_MATLAB_DIRECTORY "$PTOLEMY/lib/matlab"
-#define MATLAB_SET_FIGURES       "PtSetStarFigures"
-#define MATLAB_CLOSE_FIGURES     "PtCloseStarFigures"
+#define MATLAB_SCRIPT_DIR     "$PTOLEMY/lib/matlab"
+#define MATLAB_SET_FIGURES    "PtSetStarFigures"
+#define MATLAB_CLOSE_FIGURES  "PtCloseStarFigures"
 
 class MatlabIfc {
 public:
@@ -113,7 +113,6 @@ public:
 
 	// Methods not using any data members but serve at C++ wrappers
 
-	// A. not specific to Ptolemy
 	//    1. generate a list of names for Matlab matrices
 	//       use FreeStringArray to deallocate matNames
 	void NameMatlabMatrices(char *matNames[],
