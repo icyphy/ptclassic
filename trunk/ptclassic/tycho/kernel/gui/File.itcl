@@ -326,8 +326,8 @@ configbody ::tycho::File::file {
 	    set filesOpen($file) $this
 	    # Add the current object to the menu entries in all open editors.
 	    windowMenuAddAll $this $file
-	    set previousfile $file
 	}
+	set previousfile $file
     }
 }
 
