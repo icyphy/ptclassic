@@ -263,6 +263,25 @@ used.  The special name "target" may be used to list the states in the
 target.
 }
 
+add_to_help cancelAction {<action_handle>} {
+Cancel a pre- or post-action previously registered using the command
+registerAction.  The argument must be the action_handle previously returned
+by the registerAction command.
+}
+
+add_to_help registerAction {[pre or post] <tcl_command>} {
+Register a tcl command to be executed before or after the firing of any star.
+The function takes two arguments, the first of which must be "pre" or "post".
+This argument indicates whether the action should occur before or after
+the firing of a star.  The second argument is a string giving a tcl command.
+Before this command is invoked, however, the name of the star that triggered
+the action will be appended as an argument.  For example:
+	registerAction pre puts
+will result in the name of a star being printed on the standard output
+before it is fired.  The value returned by registerAction is an
+"action_handle", which must be used to cancel the action using cancelAction.
+}
+
 proc help {args} {
 	case [llength $args] in {
 		0 {set cmd help}
