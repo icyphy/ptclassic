@@ -3,7 +3,7 @@ defstar {
 	domain {SDF}
 	desc {
 A complex Finite Impulse Response (FIR) filter.
-Coefficients are in the 'taps' state variable.
+Coefficients are in the "taps" state variable.
 Default coefficients give an 8th order, linear phase, lowpass filter.
 To read coefficients from a file, use the syntax: "<fileName".
 Real and imaginary parts should be paired with parentheses, e.g. (1.0, 0.0).
