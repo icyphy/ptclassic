@@ -25,8 +25,6 @@ Code for functions declared in DEConnect.h
 
 **************************************************************************/
 
-extern Error errorHandler;
-
 /**********************************************************
 
  Member functions for DEPortHoles..

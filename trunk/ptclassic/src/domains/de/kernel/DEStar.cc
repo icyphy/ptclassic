@@ -15,8 +15,6 @@ $Id$
 #include "Output.h"
 #include "PriorityQueue.h"
 
-extern  Error errorHandler;
-
 /*******************************************************************
 
 	class DEStar methods
