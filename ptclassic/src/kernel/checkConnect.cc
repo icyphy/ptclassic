@@ -53,9 +53,9 @@ StringList checkConnect (Galaxy& g) {
 
 int warnIfNotConnected (Galaxy& g) {
 	StringList msg = checkConnect (g);
-	char* str = msg;	// cast to char*
+	const char* str = msg;	// cast to char*
 	// check for non-zero-length message
-	if (str) {
+	if (str && *str) {
 		Error::error (str);
 		return 1;
 	}
