@@ -145,7 +145,7 @@ protected:
 // new parameter value for PrecisionState::getParseToken
 const int T_Precision = 500;
 
-class PrecisionState : public State, public Precision
+class PrecisionState :  public Precision, public State
 {
 
 public:
@@ -163,12 +163,15 @@ public:
 	const char* type() const; // { return "PRECISION"; }
 
         // the value as a string
-	StringList currentValue() const {return (const char*)*this;}
+	//StringList currentValue() const {return (const char*)*this;}
+	StringList currentValue() const;
 
         // assignment from a string
         PrecisionState& operator = (const char*);
 	// assignment from another PrecisionState
 	PrecisionState& operator = (const PrecisionState&);
+	// assignment from a Precision
+	//PrecisionState& operator = (const Precision&);
 
         // casting to a string
         operator const char* () const { return val ? val:""; }
