@@ -42,9 +42,7 @@ include $(CONFIG)
 TCL_SRCS = 	
 
 GRAPHICAL_TESTS = \
-	testForest.itcl \
-	testGraph.itcl \
-	testDigraph.itcl
+
 
 ITCL_SRCS = $(GRAPHICAL_TESTS) \
 	alltests.itcl all.itcl
