@@ -1,19 +1,8 @@
-/**CFile***********************************************************************
+/*
+Version identification:
+$Id$
 
-  FileName    [ ptdspWindow.c ]
-
-  PackageName [ ptdsp ]
-
-  Synopsis    [ Functions for standard window function ]
-
-  Description [ Contains function for specifying standard window
-                functions and  for generating them ]
-
-  Author      [ Kennard White and Brian Evans ]
-
-  Copyright   [
-
-Copyright (c) 1990-1996 The Regents of the University of California.
+Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -37,9 +26,28 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 					PT_COPYRIGHT_VERSION_2
 					COPYRIGHTENDKEY
-  ]
 
-  Version     [ $Id$ ]
+ Programmer: Kennard White and Brian Evans
+
+*/
+
+/**CFile***********************************************************************
+
+  FileName    [ ptdspWindow.c ]
+
+  PackageName [ ptdsp ]
+
+  Synopsis    [ Functions for standard window function ]
+
+  Description [ Contains function for specifying standard window
+                functions and  for generating them ]
+
+  Copyright   [
+
+Copyright (c) 1990-%Q% The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions. ]
 
 ******************************************************************************/
 

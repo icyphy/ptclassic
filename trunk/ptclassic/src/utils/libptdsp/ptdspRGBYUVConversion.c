@@ -1,16 +1,8 @@
-/**CFile***********************************************************************
+/*
+Version identification:
+$Id$
 
-  FileName    [ ptdspRGBYUVConversion.c ]
-
-  PackageName [ ptdsp ]
-
-  Synopsis    [ Routines for conversion from RGB format images to YUV and back ]
-
-  Author      [ Sun-Inn Shih, Brian L. Evans, and T. J. Klausutis ]
-
-  Copyright   [ 
-
-Copyright (c) 1990-1996 The Regents of the University of California.
+Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -34,9 +26,25 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 					PT_COPYRIGHT_VERSION_2
 					COPYRIGHTENDKEY
- ]
 
-  Version     [ $Id$ ]
+ Programmer: Sun-Inn Shih, Brian L. Evans, and T. J. Klausutis
+
+*/
+
+/**CFile***********************************************************************
+
+  FileName    [ ptdspRGBYUVConversion.c ]
+
+  PackageName [ ptdsp ]
+
+  Synopsis    [ Routines for conversion from RGB format images to YUV and back ]
+
+  Copyright   [ 
+
+Copyright (c) 1990-%Q% The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions. ]
 
 ******************************************************************************/
 
