@@ -14,6 +14,8 @@ $Id$  (<T>Domain.cc)
 ***********************************************************************/
 
 #include "Domain.h"
+#include "Target.h"
+#include "KnownTarget.h"
 #include "<T>Scheduler.h"
 #include "<T>Wormhole.h"
 #include "<T>Connect.h"
@@ -24,12 +26,9 @@ extern const char <T>domainName[] = "<T>";
 
 class <T>Domain : public Domain {
 public:
-	// new scheduler
-	Scheduler& newSched() { return *new <T>Scheduler;}
-
 	// new wormhole
-	Star& newWorm(Galaxy& innerGal)  {
-		return *new <T>Wormhole(innerGal);
+	Star& newWorm(Galaxy& innerGal,Target* innerTarget)  {
+		return *new <T>Wormhole(innerGal,innerTarget);
 	}
 
 	// new input porthole
@@ -53,3 +52,16 @@ public:
 
 // declare a prototype
 static <T>Domain proto;
+
+// declare the default Target object
+
+class <T>Target : public Target {
+public:
+	<T>Target() : Target("default-<T>","<T>Star",0,"default <T> target"){}
+	void start() { if (!sched) sched = new <T>Scheduler;}
+	Block* clone() const { return new <T>Target;}
+	~<T>Target() { delete sched;}
+};
+
+static <T>Target default<T>target;
+static KnownTarget entry(default<T>target,"default-<T>");
