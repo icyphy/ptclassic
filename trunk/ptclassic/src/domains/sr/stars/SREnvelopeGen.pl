@@ -73,15 +73,15 @@ limitation of liability, and disclaimer of warranty provisions.
   state {
     name { amplitudeScale }
     type { float }
-    desc { Scale factor for the amplitude -- affected by velocity }
+    desc { Scale factor for amplitude (controlled by note velocity) }
     default { "1.0" }
   }
 
   state {
     name { attackRate }
     type { float }
-    desc { Rate of attack (constant added in each cycle, scale added in ) }
-    default { "0.1" }
+    desc { Rate of attack (constant added in each cycle, scale added in) }
+    default { "0.5" }
   }
 
   state {
@@ -95,22 +95,30 @@ limitation of liability, and disclaimer of warranty provisions.
     name { sustainLevel }
     type { float }
     desc { Aympototic level of sustain (0.0 - 1.0) }
-    default { "0.3" }
+    default { "0.2" }
   }
 
   state {
     name { releaseRate }
     type { float }
     desc { Rate of release (constant subtracted in each cycle) }
-    default { "0.01" }
+    default { "0.04" }
   }
 
   state {
     name { indexScale }
     type { float }
     desc { Scaling factor for modulation index versus envelope }
-    default { "1.0" }
+    default { "9.0" }
   }
+
+  defstate {
+    name { debug }
+    type { string }
+    default { "NO" }
+    desc { Print real-time event messages }
+  }
+
 
   public {
 
@@ -135,6 +143,25 @@ limitation of liability, and disclaimer of warranty provisions.
 
   }
 
+  ccinclude { <stream.h> }
+
+  protected {
+    // Flag indicating whether debugging messages should be printed
+    int printDebugging;
+  }
+
+  constructor {
+    printDebugging = 0;
+  }
+
+  begin {
+    if ( strcmp((const char *) debug, "YES" ) == 0 ) {
+      printDebugging = 1;
+    } else {
+      printDebugging = 0;
+    }
+  }
+
   go {
     if ( !amplitude.known() ) {
       // Do this only if we haven't figured out the amplitude
@@ -148,21 +175,36 @@ limitation of liability, and disclaimer of warranty provisions.
 	
 	if ( ctrl == controllers[attackController] ) {
 	  attackRate = 10.0 / (val+1);
+	  if ( printDebugging ) {
+	    cout << "Changed attackRate to " << attackRate << '\n';
+	  }
 	}
 
 	if ( ctrl == controllers[decayController] ) {
 	  decayRate = val / 127.0;
+	  if ( printDebugging ) {
+	    cout << "Changed decayRate to " << decayRate << '\n';
+	  }
 	}
 
 	if ( ctrl == controllers[sustainController] ) {
+	  if ( printDebugging ) {
+	    cout << "Changed sustainLevel to " << sustainLevel << '\n';
+	  }
 	  sustainLevel = val / 127.0;
 	}
 	
 	if ( ctrl == controllers[releaseController] ) {
+	  if ( printDebugging ) {
+	    cout << "Changed releaseRate to " << releaseRate << '\n';
+	  }
 	  releaseRate = 1.0 / (val+1);
 	}
 
 	if ( ctrl == controllers[indexController] ) {
+	  if ( printDebugging ) {
+	    cout << "Changed indexScale to " << indexScale << '\n';
+	  }
 	  indexScale = val / 8.0;
 	}
 
