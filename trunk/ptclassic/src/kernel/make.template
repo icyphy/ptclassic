@@ -38,13 +38,13 @@ HELPDIR=~ptolemy/lib
 LIB=libptolemy.a
 
 # Library sources
-LIBCCSRCS=Animate.cc Architecture.cc AutoForkNode.cc \
+LIBCCSRCS=Animate.cc AutoForkNode.cc \
  Block.cc Code.cc Connect.cc ComplexArrayState.cc ComplexState.cc \
- DataStruct.cc Display.cc Domain.cc Error.cc \
- Fraction.cc Galaxy.cc GalIter.cc Geodesic.cc Histogram.cc InterpGalaxy.cc \
- InterpUniverse.cc Interpreter.cc Linker.cc KnownBlock.cc NamedObj.cc \
+ DataStruct.cc Display.cc Domain.cc Error.cc Fraction.cc Galaxy.cc \
+ GalIter.cc Geodesic.cc Histogram.cc InterpGalaxy.cc InterpUniverse.cc \
+ Interpreter.cc Linker.cc KnownBlock.cc KnownTarget.cc NamedObj.cc \
  Packet.cc Particle.cc PriorityQueue.cc Scheduler.cc Star.cc StringList.cc \
- Tokenizer.cc Universe.cc UserOutput.cc Wormhole.cc WormConnect.cc \
+ Target.cc Tokenizer.cc Universe.cc UserOutput.cc Wormhole.cc WormConnect.cc \
  checkConnect.cc expandPath.cc \
  FloatArrayState.cc FloatState.cc IntArrayState.cc IntState.cc \
  KnownState.cc State.cc StringState.cc \
@@ -56,14 +56,14 @@ LIBSRCS = $(LIBCCSRCS) $(LIBCSRCS)
 SRCS=$(LIBSRCS) interpmain.cc
 
 # Header files
-HDRS= Animate.h Architecture.h Attribute.h AutoForkNode.h \
+HDRS= Animate.h Attribute.h AutoForkNode.h \
  Block.h CircularBuffer.h Code.h ComplexSubset.h Connect.h \
  DataStruct.h Display.h Domain.h Error.h Fraction.h Galaxy.h \
- GalIter.h Geodesic.h Histogram.h InterpGalaxy.h \
- InterpUniverse.h Interpreter.h KnownBlock.h Linker.h Linker.sysdep.h \
+ GalIter.h Geodesic.h Histogram.h InterpGalaxy.h InterpUniverse.h \
+ Interpreter.h KnownBlock.h KnownTarget.h Linker.h Linker.sysdep.h \
  NamedObj.h Output.h Packet.h Particle.h ParticleQueue.h ParticleStack.h \
- Plasma.h PriorityQueue.h Scheduler.h Star.h StringList.h Tokenizer.h \
- Universe.h UserOutput.h WormConnect.h Wormhole.h \
+ Plasma.h PriorityQueue.h Scheduler.h Star.h StringList.h Target.h \
+ Tokenizer.h Universe.h UserOutput.h WormConnect.h Wormhole.h \
  dataType.h miscFuncs.h type.h isa.h \
  ComplexArrayState.h ComplexState.h FloatState.h FloatArrayState.h \
  IntArrayState.h IntState.h KnownState.h State.h StringState.h \
