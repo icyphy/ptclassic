@@ -22,7 +22,7 @@ to load required packages:
 <ol>
 <li>Require the packages. This will work if packages have
 been installed into the Tcl library directory.
-To see what directory this is, simply start <b>itclsh</b>
+To see what directory this is, simply start <code>itclsh</code>
 and enter
 
 <pre>
@@ -31,18 +31,18 @@ and enter
 
 <p>
 <li>Search the sub-directories of the directory given by the
-environment variable <b><i>PACKAGE</i>_LIBRARY</b>, where
-<b><i>PACKAGE</i></b> is the name of the package in upper-case.
+environment variable <code><i>PACKAGE</i>_LIBRARY</code>, where
+<code><i>PACKAGE</i></code> is the name of the package in upper-case.
 This is generally only useful for small, self-contained
 packages.
 
 <p>
 <li>Search the sub-directories of the directories given
-by the environment variables <b>TCL_PACKAGES</b>. Again,
+by the environment variables <code>TCL_PACKAGES</code>. Again,
 this is mostly useful for small, self-contained packages.
 
 <p><li>Search the sub-directories of the directories given
-by the environment variables <b>TYCHO</b>. Assuming that this
+by the environment variables <code>TYCHO</code>. Assuming that this
 directory points to an installation of Tycho, this will cause
 every single package in the Tycho tree to be located.
 
@@ -53,11 +53,12 @@ what kind of packages you are installing, and what you already have.
 Here are the two main scenarios:
 
 <ul>
+
 <li>The package is a graphical application, and you already have a
-Tycho installation and your TYCHO environment variable is set. Just
-install it into the Tycho directory, either at the top level, or into
-one of the subdirectories <b>kernel</b>, <b>editors</b>, or
-<b>utils</b>, as appropriate.
+Tycho installation and your <CODE>TYCHO</CODE> environment variable is
+set. Just install it into the Tycho directory, either at the top
+level, or into one of the subdirectories <code>kernel</code>,
+<code>editors</code>, or <code>utils</code>, as appropriate.
 
 <p>
 <li>The package is a stand-alone application and
@@ -66,9 +67,9 @@ startup time is important. Either:
 <ol>
 <li>Install it into the Tcl library directory (described above), or
 <li>Install it into the directory pointed to by your
-<b>TCL_PACKAGES</b> environment variable, or
+<code>TCL_PACKAGES</code> environment variable, or
 <li>Install is anywhere you like and set the environment variable
-<b><i>PACKAGE</i>_LIBRARY</b> to point to it.
+<code><i>PACKAGE</i>_LIBRARY</code> to point to it.
 
 </ol>
 </ul>
@@ -80,7 +81,7 @@ installing it. This will give you a Tycho directory in which
 to install packages.
 
 <p>Alternatively, you can simply install all packages into the
-directory pointed to by TCL_PACKAGES. For some Tycho applications,
+directory pointed to by <CODE>TCL_PACKAGES</CODE>. For some Tycho applications,
 you will need the Tycho framework package anyway.
 
 <p>The reason why stand-alone comand-line applications are better
