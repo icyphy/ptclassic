@@ -119,7 +119,6 @@ void GenericPort :: connect(GenericPort& destination,int numberDelays)
 	PortHole* realSource = &newConnection();
 	Geodesic* geo = realSource->allocateGeodesic();
 	geo->setSourcePort(*realSource);
-	PortHole* realDest = geo->setDestPort(destination);
 
 	// Set the number of delays
 	geo->numInitialParticles = numberDelays;
