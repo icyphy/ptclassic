@@ -27,7 +27,7 @@
 # 						PT_COPYRIGHT_VERSION_2
 # 						COPYRIGHTENDKEY
 
-# Please don't use GNU make extensions in this file, such as 'ifdef'.
+# Please don't use GNU make extensions in this file, such as 'ifdef' or '%'.
 # If you really must use an GNU make extension, please label it.
 
 # This file should not include any Ptolemy specific rules, such as rules
@@ -183,22 +183,19 @@ $(LIBDIR)/$(LIB):	$(LIB) $(EXP)
 ##############
 # Java rules
 
-# I think %.class is a GNU extension
 .SUFFIXES: .class .java
-%.class: %.java
+.java.class:
 	CLASSPATH=$(CLASSPATH) $(JAVAC) $(JFLAGS) $<
 
 # Build all the Java class files.
 jclass:	$(JSRCS) $(JCLASS) 
 
 # Build the Java documentation.
-jhtml:	$(JSRCS)
-	if [ ! -d html ]; then mkdir html; fi
-	CLASSPATH=$(CLASSPATH) $(JAVADOC) $(JDOCFLAGS) -d html $(JCLASSES)
-	perl -pi \
-	-e "s|<a href=\"java|<a href=\"$(JAVAHOME)/doc/api/java|g;" \
-	-e "s|<img src=\"images/|<img src=\"$(JAVAHOME)/doc/api/images/|g;" \
-	html/*.html
+jhtml: doc/codeDoc/tree.html
+doc/codeDoc/tree.html:	$(JSRCS) 
+	if [ ! -d doc/codeDoc ]; then mkdir -p doc/codeDoc; fi
+	(cd doc/codeDoc; rm -f images; ln -s ../../$(ROOT)/lib/java/images .)
+	CLASSPATH=$(CLASSPATH):$(JAVAHOME)/lib/classes.zip $(JAVADOC) $(JDOCFLAGS) -d doc/codeDoc $(JSRCS)
 
 # Bring up the appletviewer on a test file.
 jtest: $(JTESTHTML) $(JCLASS)
