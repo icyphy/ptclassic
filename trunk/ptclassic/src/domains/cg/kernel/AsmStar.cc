@@ -95,20 +95,32 @@ AsmStar::lookupVal(const char* name) {
 	return "";
 }
 
+// the following function is provided by the SunOS and Ultrix
+// libs; don't know how generally it is available.
+extern "C" int strcasecmp(const char* s1, const char* s2);
+
 // handle functions
 StringList
 AsmStar::processMacro(const char* func, const char* id) {
-	StringList s = "ERROR";
-	if ((strcmp(func,"ADDR") == 0) || (strcmp(func, "addr") == 0)) {
+	StringList s;
+	if (strcasecmp(func,"addr") == 0) {
 		s = lookupAddress(id);
-	} else if ((strcmp(func,"REF") == 0) || (strcmp(func, "ref") == 0)) {
+	} else if (strcasecmp(func, "ref") == 0) {
 		s = lookupMem(id);
 		s += ":";
 		s += lookupAddress(id);
-	} else if ((strcmp(func,"VAL") == 0) || (strcmp(func, "val") == 0)) {
+	} else if (strcasecmp(func, "val") == 0) {
 		s = lookupVal(id);
-	} else if ((strcmp(func,"MEM") == 0) || (strcmp(func, "mem") == 0)) {
+	} else if (strcasecmp(func, "mem") == 0) {
 		s = lookupMem(id);
+	} else if (strcasecmp(func, "fullname") == 0) {
+		s = readFullName();
+	} else {
+		s = "ERROR: UNKNOWN MACRO ";
+		s += func;
+		s += "(";
+		s += id;
+		s += ")";
 	}
 	return s;
 }
@@ -236,3 +248,4 @@ void AsmStar::prepareForScheduling() {
 	zapStateEntries();
 	CGStar::prepareForScheduling();
 }
+
