@@ -255,7 +255,9 @@ hp_bin:
 	@echo "Building libiberty and g++"
 	(PATH=$(GNU_OBJ)/gas:$(PATH) ;echo $$PATH; \
 		cd $(GNU_OBJ); $(MAKE) $(MFLAGS) \
-		CC=$(GNU_OBJ)/gcc/xgcc CFLAGS=-B$(GNU_OBJ)/gcc/ MAKE=$(GMAKE))
+		CC=$(GNU_OBJ)/gcc/xgcc CFLAGS=-B$(GNU_OBJ)/gcc/ \
+		LDFLAGS=-B$(GNU_OBJ)/gcc/ \
+		MAKE=$(GMAKE))
 
 # In gcc-2.5.8, collect2 is not automagically installed.  The symptom
 # of this is that ptcl says that there is no SDF domain, and that perhaps
