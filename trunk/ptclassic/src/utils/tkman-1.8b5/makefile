@@ -50,7 +50,7 @@ LIB = foo
 # include common definitions, rules
 #include $(ROOT)/mk/common.mk
 
-WISH=$(PTOLEMY)/bin.$(PTARCH)/wish
+WISH=$(PTOLEMY)/bin.$(PTARCH)/iwish
 
 all:	makefile  tkman
 tkman:
