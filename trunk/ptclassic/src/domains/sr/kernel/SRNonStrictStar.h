@@ -46,7 +46,10 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
   Non-strict "template" star for the SR domain
 
-  @Description A non-strict star can fire if some of its inputs are unknown.
+  @Description A non-strict star can always fire, not just when all its
+  inputs are known.  Strict stars (i.e., those derived from the SRStar class)
+  are easier to code and use, but may cause deadlock when placed in
+  zero-delay feedback loops.
 
   @SeeAlso SRStrictStar
 
