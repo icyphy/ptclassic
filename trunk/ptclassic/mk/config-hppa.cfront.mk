@@ -25,7 +25,12 @@ CDEBUGFLAGS =
 # is not needed for 3.0.
 GPPFLAGS =	-DUSG $(GPPDEBUGFLAGS) $(MEMLOG) -DPOSTFIX_OP=
 CFLAGS =	-DUSG $(CDEBUGFLAGS) 
-DEPEND =	CC -M
+
+# CC on HPs does not know the "-M" option as given in DEPEND.
+# makedepend is part of X11
+DEPEND =	makedepend
+# common.mk look for USE_MAKEDEPEND
+USE_MAKEDEPEND = 	yes
 
 #
 # Variables for the linker
@@ -59,10 +64,10 @@ SYSLIBS =	-lm /usr/lib/end.o
 # whether a binary is dynamically or statically linked)
 
 # link flags
-LINKFLAGS =	-L$(LIBDIR)
+LINKFLAGS =	+A -L$(LIBDIR) 
 # link flags if debugging symbols are to be left
 # In cfront, this will result in a 69Mb pigiRpc
-LINKFLAGS_D =	-L$(LIBDIR) -g
+LINKFLAGS_D =	+A -L$(LIBDIR) -g
 
 #
 # Directories to use
