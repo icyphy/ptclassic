@@ -104,6 +104,16 @@ extern "C" {
 #define PTNBSD_386
 #endif
 
+#if defined(i386) && (defined(__svr4__) || defined(__SVR4))
+/* Intelx86 PC running Solaris2.x, SunC++ or g++ */
+#ifndef SOL2
+#define SOL2
+#endif
+ 
+#define PTSOL2
+#define PTSOL2PC
+#endif
+
 #if defined(sparc) && (defined(__svr4__) || defined(__SVR4))
 /* Sun SPARC running Solaris2.x, SunC++ or g++ */
 #ifndef SOL2
@@ -445,7 +455,7 @@ extern int errno;
 /* Decide whether to include dirent.h or sys/dir.h.
  * octtools/Packages/fc.h uses this
  */
-#if defined(aiws) || defined(_IBMR2) || defined(SYSV) || defined(PTALPHA)
+#if defined(aiws) || defined(_IBMR2) || defined(SYSV) || defined(PTALPHA) || defined(PTSOL2PC)
 #define USE_DIRENT_H
 #endif
 
@@ -477,12 +487,12 @@ extern int errno;
 #endif
 
 /* Do we have termios.h?  See octtools/Xpackages/iv/ivGetLine.c */
-#if defined(PTHPPA) || defined(SYSV) || defined(PTIRIX5) || defined(PTLINUX) || defined(PTFREEBSD) || defined(PTNBSD_386)
+#if defined(PTHPPA) || defined(SYSV) || defined(PTIRIX5) || defined(PTLINUX) || defined(PTFREEBSD) || defined(PTNBSD_386) || defined(PTSOL2PC)
 #define HAS_TERMIOS
 #endif
 
 /* Is sys_siglist[] present?  See octtools/vem/rpc/vemRPC.c */
-#if defined(PTHPPA) || defined(SYSV) || defined(PTLINUX) || defined(PTFREEBSD) || defined(PTNBSD_386)
+#if defined(PTHPPA) || defined(SYSV) || defined(PTLINUX) || defined(PTFREEBSD) || defined(PTNBSD_386) || defined(PTSOL2PC)
 #define NO_SYS_SIGLIST
 #endif 
 
