@@ -372,6 +372,13 @@ body ::tycho::IncrCanvas::constructor {args} {
 # and following arguments. The search criterion is the same
 # as for the find{} method.
 #
+# Note: do not use this method to try and set the "current"
+# tag -- this will cause a failure later! If you really
+# need to do that (for testing, say ... :-/), use
+# <pre>
+#    $slate addtag current withtag [$slate primary $item]
+# <pre>
+#
 body ::tycho::IncrCanvas::addtag {add mode args} {
     # Find all items using find{}, and then
     # add the tag to each
