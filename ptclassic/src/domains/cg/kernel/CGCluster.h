@@ -43,7 +43,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 class CGClusterPort : public CGPortHole, public ClusterPort{
 public:
-    CGClusterPort(const PortHole* master, Star* parent);
+    CGClusterPort(PortHole* master, Star* parent);
     /*virtual*/ int isItInput() const {
 	return ClusterPort::isItInput();
     }
@@ -66,7 +66,7 @@ public:
 
     /*virtual*/ void setMasterBlock(Block*,PortHole** = NULL);
 
-    /*virtual*/ PortHole* clonePort(const PortHole* master, Star* parent);
+    /*virtual*/ PortHole* clonePort(PortHole* master, Star* parent);
     
     /*virtual*/ Cluster* newCluster(Block* = NULL,const char* = NULL) const;
 
