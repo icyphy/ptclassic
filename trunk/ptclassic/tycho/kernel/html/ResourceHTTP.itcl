@@ -50,7 +50,7 @@ class ::tycho::ResourceHTTP {
     ####                         public methods                    ####
 
     # Close the resource.
-    method close {} {::close $cachefd; set cachefd -1}
+    method close {} {}
 
     # Return the content type of the current file
     method contenttype {} {return $contenttype}
@@ -100,7 +100,7 @@ class ::tycho::ResourceHTTP {
 
     # Return true if a given resource is readable
     # If the HTTP file exists, then it's readable.
-    method readable {path} {return [exists]}
+    method readable {path} {}
 
     # Source a streamable resource as a Tcl script
     method source {{path {}}} {source $cachefile}
@@ -124,10 +124,13 @@ class ::tycho::ResourceHTTP {
     ####                         protected methods                 ####
 
     # Opening an HTTP connection and return the tmp HTTP cache file name.
-    method httpget {}
+    method httpget {httpgettype}
 
-    # This is called by file event handler, from httpget.
-    method httpread {fd tmpfd}
+    # This is called by file event handler, from httpget (entire file).
+    method httpread {fd cachefd}
+
+    # This is called by file event handler, from httpget (header only).
+    method httpreadheader {fd}
 
     # Parse url and decode the names into protected variables
     method httpparse {url}
@@ -208,14 +211,37 @@ body ::tycho::ResourceHTTP::destructor {} {
 #####################################################################
 #### close
 body ::tycho::ResourceHTTP::close {} {
-    
+    set tmp $cachefd
+    set cachefd -1
+    return [expr ![catch {::close $tmp}]]
 }
 
 #####################################################################
 #### exists
-body ::tycho::ResourceHTTP::exists {path} {
-    return 1
-    #expr ($status>=200 && $status<300)
+# Check if the file is readable or not on the network. This is
+# almost identical to "open"
+body ::tycho::ResourceHTTP::exists {{url {}}} {
+    # Parse the url into separated variables
+    httpparse $url
+    
+    # One status variable per open
+    set httpGlobalStatus [::tycho::autoName httpgetStatus]
+    global $httpGlobalStatus
+    httpSetStatus $httpGlobalStatus "running"
+
+    # Note that httpget could potentially call itself recursively
+    # until we get the correct HTTP file.
+    httpget header
+
+    # Wait until we have the file
+    httpwait
+
+    # If the get status is not within 200-299 then get isn't successful
+    if {$status>=400 && $status<500} {
+        return 0
+    } else {
+        return 1
+    }
 }
 
 #####################################################################
@@ -276,16 +302,37 @@ body ::tycho::ResourceHTTP::open {url {mode "r"}} {
     # One status variable per open
     set httpGlobalStatus [::tycho::autoName httpgetStatus]
     global $httpGlobalStatus
-    #uplevel #0 "set $httpGlobalStatus running"
     httpSetStatus $httpGlobalStatus "running"
+
+    # Setup a file without extension. After getting the file, then
+    # rename to the proper extension.
+    set cachefile [::tycho::tmpFileName Cache]
+    set cachefd [::open $cachefile "w"]
+    ::puts "cache file = $cachefile"
 
     # Get the cache file associated with the above URL.
     # Note that httpget could potentially call itself recursively
     # until we get the correct HTTP file.
-    httpget
+    httpget "entirefile"
 
     # Wait until the entire http file is here on local drive
     httpwait
+
+    # At this point, we know what file type we have,
+    # so setup cache file
+    if {[regexp {^text} $contenttype] && \
+            [file extension [path]]=={}} {
+        # This is type html (probably index.html)
+        file rename -force $cachefile $cachefile.html
+        set cachefile $cachefile.html
+    } else {
+        # Use old default type
+        file rename -force $cachefile $cachefile[file extension [path]]
+        set cachefile $cachefile[file extension [path]]
+    }
+    ::puts "cache file = $cachefile"
+    catch {::close $cachefd}
+
 
     # If the get status is not within 200-299 then get isn't successful
     if {$status>=200 && $status<300} {
@@ -302,9 +349,9 @@ body ::tycho::ResourceHTTP::open {url {mode "r"}} {
 #### path
 body ::tycho::ResourceHTTP::path {} {
     if {$port==80} {
-        return "HTTP://$hostname$path"
+        return "http://$hostname$path"
     } else {
-        return "HTTP://$hostname$path:$port"
+        return "http://$hostname$path:$port"
     }
 }
 
@@ -316,8 +363,12 @@ body ::tycho::ResourceHTTP::read {} {
 
 #####################################################################
 #### readable
-body ::tycho::ResourceHTTP::readable {{path {}}} {
-    return 1
+body ::tycho::ResourceHTTP::readable {{url {}}} {
+    if {$url=={}} {
+        return [exists [$this path]]
+    } else {
+        return [exists $url]
+    }
 }
 
 #####################################################################
@@ -356,7 +407,7 @@ body ::tycho::ResourceHTTP::httpparse {url} {
     # Reset the status from the header of HTTP protocol
     set cachefile {}
     set port 80
-    set status 200
+    set status 403
     set lastmodified {}
     set contenttype {}
     set forwardlocation {}
@@ -386,11 +437,11 @@ body ::tycho::ResourceHTTP::httpparse {url} {
 
 #########################################################################
 #### httpget
-# Opening an HTTP connection. This returns the file name of the 
-# temporary HTTP file (later on cache). This method assumes that
-# hostname, port, and path are set.
+# Opening an HTTP connection, and set the right fileevent depending on
+# argument, which can be either "entirefile" or "header". 
+# This method assumes that hostname, port, and path are set.
 #
-body ::tycho::ResourceHTTP::httpget {} {
+body ::tycho::ResourceHTTP::httpget {httpgettype} {
     # Surfit starts here vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
     if {[catch {socket -async $hostname $port} fd]} {
         catch {unset $fd}
@@ -398,7 +449,7 @@ body ::tycho::ResourceHTTP::httpget {} {
     }
     # Surfit ends here ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-    # connect now!
+    set isheader 1    ;# Initially we're getting the header first
     fconfigure $fd -blocking no -translation crlf
     ::puts $fd "GET $path HTTP/1.0\n\
             User-Agent: Tycho Jr. Beta\n\
@@ -407,80 +458,114 @@ body ::tycho::ResourceHTTP::httpget {} {
     ::flush $fd
     fconfigure $fd -translation auto
 
-    # Wait until finished reading HTTP file
-    set cachefile [::tycho::tmpFileName Cache].html
-    set tmpfd [::open $cachefile "w"]
-    set isheader 1    ;# Initially we're getting the header first
-
     ::tycho::safeUpdate $this
+
     fileevent $fd w {}
-    fileevent $fd r "$this httpread $fd $tmpfd"
+    if {$httpgettype=="entirefile"} {
+        fileevent $fd r "$this httpread $fd $cachefd"
+    } else {
+        fileevent $fd r "$this httpreadheader $fd"
+    }
 }
 
 #########################################################################
 #### httpread
-# This is called by file event handler, from httpget.
+# This is called by file event handler, from httpget. This will get
+# the entire remote file, and save it to a temporary cache file.
 #
-body ::tycho::ResourceHTTP::httpread {fd tmpfd} {
+# Parse the possible header information:
+#HTTP/1.0 200 Document follows
+#Date: Wed, 21 May 1997 00:54:29 GMT
+#Server: NCSA/1.4.1
+#Content-type: text/html
+#Last-modified: Fri, 16 May 1997 21:18:58 GMT
+#Content-length: 8215
+#
+#HTTP/1.0 302 Found
+#Date: Wed, 21 May 1997 01:17:59 GMT
+#Server: NCSA/1.4
+#Location: http://HTTP.CS.Berkeley.EDU/~kchang/
+#Content-type: text/html
+# 
+#HTTP/1.0 404 Not Found
+#Date: Wed, 21 May 1997 01:20:18 GMT
+#Server: NCSA/1.4
+#Content-type: text/html
+#Last-modified: Mon, 12 May 1997 18:46:57 GMT
+#Content-length: 683
+body ::tycho::ResourceHTTP::httpread {fd cachefd} {
     global $httpGlobalStatus
-    if [::eof $fd] {
-        # Got the HTTP file, now check to see if everything's valid.
-	catch {::close $fd}
-	catch {::close $tmpfd}
-
-        # If returning status is 300-399, then we need to automatically
-        # forward the HTTP location. This is done under all the smart
-        # browsers such as Internet Explorer and Netscape, and is almost
-        # always done transparent to the user.
-        if {$status>=300 && $status<=399} {
-            # Need to determine the new location.
-            httpparse "$forwardlocation"
-            # Second attempt to get the file
-            after idle "$this httpget"
-            return
-        }
-        httpSetStatus $httpGlobalStatus done
-        #uplevel #0 "set $httpGlobalStatus done"
-    } else {
-	::gets $fd line
+    if ![::eof $fd] {
+        ::gets $fd line
         if {$isheader==1} {
             # Header mode, the information about this http get.
             if {$line=={}} {
                 # End of header is denoted by an empty line
                 set isheader 0
+                # If returning status is 300-399, then we need to 
+                # automatically forward the HTTP location. This is done 
+                # under all the smart browsers such as Internet Explorer 
+                # and Netscape, and is almost always done transparent to the
+                # user.
+                if {$status>=300 && $status<=399} {
+                    catch {::close $fd}
+                    # Need to determine the new location.
+                    httpparse "$forwardlocation"
+                    # Second attempt to get the file
+                    after idle "$this httpget entirefile"
+                }
+
+                fconfigure $fd      -translation lf
+                fconfigure $cachefd -translation lf
+
                 return
             } else {
-                # Parse the possible header information:
-                #HTTP/1.0 200 Document follows
-                #Date: Wed, 21 May 1997 00:54:29 GMT
-                #Server: NCSA/1.4.1
-                #Content-type: text/html
-                #Last-modified: Fri, 16 May 1997 21:18:58 GMT
-                #Content-length: 8215
-                #
-                #HTTP/1.0 302 Found
-                #Date: Wed, 21 May 1997 01:17:59 GMT
-                #Server: NCSA/1.4
-                #Location: http://HTTP.CS.Berkeley.EDU/~kchang/
-                #Content-type: text/html
-                # 
-                #HTTP/1.0 404 Not Found
-                #Date: Wed, 21 May 1997 01:20:18 GMT
-                #Server: NCSA/1.4
-                #Content-type: text/html
-                #Last-modified: Mon, 12 May 1997 18:46:57 GMT
-                #Content-length: 683
+                # Parse the above possible messages (in comments)
                 regexp {^HTTP/1.0 ([0-9]+)} $line match status
                 regexp {^Last-modified: (.+)} $line match lastmodified
                 regexp {^Content-type: (.+)} $line match contenttype
                 regexp {^Location: (.+)} $line match forwardlocation
+                regexp {^Content-length: ([0-9]+)} $line match contentlength
             }
         } else {
             # Body mode (content of http get), write to the cache file.
-            ::puts $tmpfd $line
+            ::puts $cachefd $line
         }
+    } else {
+        # Got the HTTP EOF, now check to see if everything's valid.
+	catch {::close $fd}
+        httpSetStatus $httpGlobalStatus done
     }
 }
+
+
+#########################################################################
+#### httpreadheader
+# This is a miniature version of httpread. This will only read the
+# header file, and close http connection. This method is used by
+# fileexist or readable, in order to determine the status of the file.
+#
+body ::tycho::ResourceHTTP::httpreadheader {fd} {
+    global $httpGlobalStatus
+    if ![::eof $fd] {
+	::gets $fd line
+        if {$line=={}} {
+            # End of header is denoted by an empty line
+            catch {::close $fd}
+            httpSetStatus $httpGlobalStatus done
+            return
+        } else {
+            # Keep parsing header
+            regexp {^HTTP/1.0 ([0-9]+)} $line match status
+        }
+    } else {
+        # Got the HTTP EOF. This shouldn't be here if
+        # fd is already close from the above header, but just in case...
+	catch {::close $fd}
+        httpSetStatus $httpGlobalStatus done
+    }
+}
+
 
 #########################################################################
 #### httpwait
