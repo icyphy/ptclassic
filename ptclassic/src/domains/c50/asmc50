@@ -4,7 +4,7 @@
 # 	All Rights Reserved.
 #
 # asmc50
-# Bash script to assemble files with TI's DSK assembler(dsk5a.exe)
+# script to assemble files with TI's DSK assembler(dsk5a.exe)
 # Uses dosemu to run dsk5a.exe.  The person running it must be root to
 # mount/unmount the dos partition.
 # This script was tested on a machine running linux(red-hat 3.0.3 
@@ -45,8 +45,14 @@ dsk5a.exe  $1:t
 exitemu
 xxxx
 cd $homedir
+
+# Unmount DOS partition to run dosemu
 umount $dospartition
 dos > /dev/null
+
+# Mount DOS partition after running dosemu
 mount -t msdos /dev/sda1 $dospartition
+
+# Restore autoexec.emu
 cd $dospartition
 mv -f $dospartition/$autoexecsave  $dospartition/autoexec.emu
