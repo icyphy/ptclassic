@@ -52,70 +52,40 @@ class ::tycho::EditGraph {
     ####                     public methods                      ####
 
     # Remove an item from the selection
-    method _deselect {id}
+    method deselect {id}
+
+    # Load a new layout
+    method loadLayout {}
 
     # Add a vertex to the selection
-    method _select {id}
+    method select {id}
 
     # Clear the selection
-    method _selectionclear {}
-
-    # Add a tag to all indicated vertices and edges.
-    method addtag {tag args}
+    method selectionclear {}
 
     # Create another editor.
     method clone {}
 
-    # Remove an item from the selection
-    method deselect {name}
-
-    # Delete a tag from all items.
-    method dtag {tag}
-
     # Call the model
     method model {method args}
-
-    # Move an item
-    method move {tag x y}
-
-    # Start moving an item
-    method moveclick {tag x y args}
-
-    # Continue moving an item
-    method movedrag {tag x y}
-
-    # Stop moving an item
-    method moverelease {tag x y}
 
     # Handle change notification from the graph layout model
     method notify {method args}
 
-    # Reshape an item
-    method reshape {name x y args}
-
-    # Start reshaping an item
-    method reshapeclick {name x y args}
-
-    # Continue reshaping an item
-    method reshapedrag {name x y args}
-
-    # Stop reshaping an item
-    method reshaperelease {name x y args}
-
-    # Add a vertex to the selection
-    method select {name}
-
-    # Clear the selection
-    method selectionclear {foo}
-
     # Update the layout model
     method updateLayout {}
 
-    # Add a new vertex to the view
-    method vertex {name coords args}
+    # Make a new vertex
+    method vertex {name x y}
 
-    # Configure a vertex
-    method vertexconfigure {name args}
+    # Start moving a vertex
+    method vertexclick {tag x y args}
+
+    # Continue moving a vertex item
+    method vertexdrag {tag x y}
+
+    # Stop moving a vertex
+    method vertexrelease {tag x y}
 
     # Return the vertices and edges with a given tag.
     method withtag {tag}
@@ -123,6 +93,54 @@ class ::tycho::EditGraph {
     #################################################################
     ####                  protected methods                      ####
     
+    # Add a tag to all indicated vertices and edges.
+    protected method _addtag {tag args}
+
+    # Clear data from this editor (Note: not the viewer)
+    method _clear {}
+
+    # Remove an item from the selection
+    protected method _deselect {name}
+
+    # Delete a tag from all items.
+    protected method _dtag {tag}
+
+    # Move an item
+    protected method _move {tag x y}
+
+    # Start moving an item
+    protected method _moveclick {tag x y args}
+
+    # Continue moving an item
+    protected method _movedrag {tag x y}
+
+    # Stop moving an item
+    protected method _moverelease {tag x y}
+
+    # Reshape an item
+    protected method _reshape {name x y args}
+
+    # Start reshaping an item
+    protected method _reshapeclick {name x y args}
+
+    # Continue reshaping an item
+    protected method _reshapedrag {name x y args}
+
+    # Stop reshaping an item
+    protected method _reshaperelease {name x y args}
+
+    # Add a vertex to the selection
+    protected method _select {name}
+
+    # Clear the selection
+    protected method _selectionclear {foo}
+
+    # Add a new vertex to the view
+    protected method _vertex {name coords args}
+
+    # Configure a vertex
+    protected method _vertexconfigure {name args}
+
     #################################################################
     ####                 protected variables                     ####
     
@@ -146,6 +164,10 @@ configbody ::tycho::EditGraph::layout {
     if { $itk_option(-layout) != "" } {
         $itk_option(-layout) subscribe $this all
     }
+    # If the graph model already exists, load the layout
+    if { $itk_option(-graph) != "" } {
+        loadLayout
+    }
 }
 
 ########################################################################
@@ -154,10 +176,16 @@ configbody ::tycho::EditGraph::layout {
 body ::tycho::EditGraph::constructor {args} {
     # Add to menus
     menubar addMenu Devel
-    menubar command {Foo} Devel \
-	    -command "$this model publish vertex foo {100 100} -color green -tags vertex"
-    menubar command {Bar} Devel \
-	    -command "$this model publish vertex bar {150 150} -color red -tags vertex"
+    menubar command {Foo} Devel -command "$this vertex foo 70 70"
+    menubar command {Bar} Devel -command "$this vertex bar 200 120"
+    menubar command {Baz} Devel -command "$this vertex baz 100 200"
+
+    menubar addSeparator Devel
+
+    menubar command {Clone} Devel \
+            -command "$this clone"
+
+    menubar addSeparator Devel
 
     menubar command {Show layout} Devel \
 	    -command "::tycho::post \[\[$this cget -layout\] describe\]"
@@ -182,6 +210,9 @@ body ::tycho::EditGraph::constructor {args} {
                 -graph $itk_option(-graph)]
     }
 
+    # Make a more pronounced highlight
+    $slate configure -highlightcolor cyan3 -highlightwidth 3
+
     # Enable selection with button 1; shift-click toggles
     $slate selector bind click vertex -button 1
     $slate selector bind click vertex -button 1 -modifiers shift -toggle
@@ -201,55 +232,19 @@ body ::tycho::EditGraph::constructor {args} {
     # the interaction to the model, rather than to the slate.
     # Give it the right "prefixes":
     $follower configure \
-            -clickprefix \
-            "$itk_option(-layout) vertexclick \[$follower target\]" \
-            -dragprefix \
-            "$itk_option(-layout) vertexdrag \[$follower target\]" \
-            -releaseprefix \
-            "$itk_option(-layout) vertexrelease \[$follower target\]"
+            -clickprefix "$this vertexclick" \
+            -dragprefix "$this vertexdrag" \
+            -releaseprefix "$this vertexrelease"
 
     # More tricky stuff: the selector sends selection events
     # to the model:
     $slate selector configure \
-	    -clearprefix "$this _selectionclear" \
-	    -deselectprefix "$this _deselect" \
-	    -selectprefix "$this _select"
-	    
+	    -clearprefix "$this selectionclear" \
+	    -deselectprefix "$this deselect" \
+	    -selectprefix "$this select"
+
     # Try this:
     $slate configure -exportselection 0
-}
-
-########################################################################
-#### _deselect
-#
-body ::tycho::EditGraph::_deselect {id} {
-    $itk_option(-layout) publish deselect $_itemname($id)
-}
-
-########################################################################
-#### _select
-#
-body ::tycho::EditGraph::_select {id} {
-    $itk_option(-layout) publish select $_itemname($id)
-}
-
-########################################################################
-#### _selectionclear
-#
-body ::tycho::EditGraph::_selectionclear {} {
-    $itk_option(-layout) publish selectionclear foo
-}
-
-########################################################################
-#### addtag
-#
-# Add a tag to all indicated vertices and names.
-#
-body ::tycho::EditGraph::addtag {tag args} {
-puts "$this addtag $tag $args"
-    foreach name $args {
-	$slate addtag $tag withtag $_itemID($name)
-    }
 }
 
 ########################################################################
@@ -258,31 +253,38 @@ puts "$this addtag $tag $args"
 # Create another editor -- for demos only.
 #
 body ::tycho::EditGraph::clone {} {
-    ::tycho::view EditGraph \
+    set clone [::tycho::view EditGraph \
             -layout $itk_option(-layout) \
-            -graph $itk_option(-graph)
+            -graph $itk_option(-graph)]
+    $clone loadLayout
 }
 
 ########################################################################
 #### deselect
 #
-# Remove an item from the selection.
-#
-body ::tycho::EditGraph::deselect {name} {
-puts "EditGraph $this: deselect $name ($_itemID($name))"
-    $slate select remove $_itemID($name)
+body ::tycho::EditGraph::deselect {id} {
+    $itk_option(-layout) publish deselect $_itemname($id)
 }
 
 ########################################################################
-#### dtag
+#### loadLayout
 #
-# Delete a tag from all items.
+# Load a new layout into the editor.
 #
-body ::tycho::EditGraph::dtag {tag} {
-puts "$this dtag $tag"
-    $slate dtag $tag
-}
+body ::tycho::EditGraph::loadLayout {} {
+    # Clear all data here
+    _clear
 
+    # Make sure the layout is up to date
+    updateLayout
+
+    # Get vertices and edges and create
+    foreach vertex [$itk_option(-graph) vertices] {
+        eval [list _vertex \
+                [$itk_option(-layout) vertexget $vertex]] \
+                [$itk_option(-layout) vertexget $vertex]
+    }
+}
 
 ########################################################################
 #### model
@@ -298,92 +300,30 @@ body ::tycho::EditGraph::model {method args} {
 }
 
 ########################################################################
-#### move
-#
-body ::tycho::EditGraph::move {tag x y} {
-    $slate move $tag $x $y
-}
-
-########################################################################
-#### moveclick
-#
-body ::tycho::EditGraph::moveclick {tag x y} {
-    eval $slate moveclick $tag $x $y args
-}
-
-########################################################################
-#### movedrag
-#
-body ::tycho::EditGraph::movedrag {tag x y} {
-    $slate movedrag $tag $x $y
-}
-
-########################################################################
-#### moverelease
-#
-body ::tycho::EditGraph::moverelease {tag x y} {
-    $slate moverelease $tag $x $y
-}
-
-########################################################################
 #### notify
 #
 body ::tycho::EditGraph::notify {method args} {
-    eval $method $args
-}
-
-########################################################################
-#### reshape
-#
-body ::tycho::EditGraph::reshape {name x y args} {
-    eval $slate reshape $name $x $y $args
-}
-
-########################################################################
-#### reshapeclick
-#
-body ::tycho::EditGraph::reshapeclick {name x y args} {
-    eval $slate reshapeclick $name $x $y $args
-}
-
-########################################################################
-#### reshapedrag
-#
-body ::tycho::EditGraph::reshapedrag {name x y args} {
-    $slate reshapedrag $name $x $y
-}
-
-########################################################################
-#### reshaperelease
-#
-body ::tycho::EditGraph::reshaperelease {name x y args} {
-    $slate reshaperelease $name $x $y
+    eval _$method $args
 }
 
 ########################################################################
 #### select
 #
-# Add an item to the selection.
-#
-body ::tycho::EditGraph::select {name} {
-puts "EditGraph $this: select $name ($_itemID($name))"
-    $slate select add $_itemID($name)
+body ::tycho::EditGraph::select {id} {
+    $itk_option(-layout) publish select $_itemname($id)
 }
 
 ########################################################################
 #### selectionclear
 #
-# Clear the selection.
-#
-body ::tycho::EditGraph::selectionclear {foo} {
-    $slate select clear
+body ::tycho::EditGraph::selectionclear {} {
+    $itk_option(-layout) publish selectionclear foo
 }
 
 ########################################################################
 #### updateLayout
 #
-# Add a new vertex to the view. This method must be called only
-# by the model.
+#  Update the layout with current coordinates.
 #
 body ::tycho::EditGraph::updateLayout {} {
     foreach vertex [array names _itemID] {
@@ -393,27 +333,65 @@ body ::tycho::EditGraph::updateLayout {} {
 }
 
 ########################################################################
-#### vertex
+#### vertexclick
 #
-# Add a new vertex to the view. This method must be called only
-# by the model.
-#
-body ::tycho::EditGraph::vertex {name coords args} {
-    # set id [eval $slate create text $coords $args]
-    set id [eval $slate create Frame [eval ::tycho::Rectangle::stretch \
-	    $coords $coords 20] $args]
-    set _itemID($name) $id
-    set _itemname($id) $name
+body ::tycho::EditGraph::vertex {name x y} {
+    # Add a vertex to the graph
+    $itk_option(-graph) publish vertex $name
+
+    # Add a vertex to the layout model
+    if { $name == "foo" } {
+	$this model publish vertex foo [list IconFrame $x $y] \
+		-inputs {0 50 50 0} \
+		-outputs {100 50 50 100} \
+		-text Foo \
+                -anchor nw \
+                -graphics {Frame 10 10 50 50 -color red; Frame 50 50 90 90 -color green -relief sunken} \
+		-color green \
+		-tags vertex \
+		-intype {Terminal -type input -style blob -fill red -tags input} \
+		-outtype {Terminal -type output -style doublearrow -fill blue -tags output}
+    } elseif { $name == "bar" } {
+	$this model publish vertex bar [list IconFrame $x $y] \
+		-inputs 2 \
+		-outputs 1 \
+		-text Bar \
+		-color lightsteelblue \
+		-tags vertex \
+		-intype {Terminal -type input} \
+		-outtype {Terminal -type output -fill green2}
+    } else {
+        $this model publish vertex baz [list IconOval $x $y] \
+                -inputs {0 50 50 0} \
+                -outputs 1 \
+                -fill green \
+                -graphics {line 20 50 80 50 -width 4; \
+                    line 50 20 50 80 -width 4} \
+                -tags vertex \
+                -intype {Terminal -type input -style blob -fill red} \
+                -outtype {Terminal -type output -style doublearrow -fill blue}
+    }
 }
 
 ########################################################################
-#### vertexconfigure
+#### vertexclick
 #
-# Configure a vertex. This method must be called only
-# by the model.
+body ::tycho::EditGraph::vertexclick {tag x y args} {
+    eval $itk_option(-layout) vertexclick $tag $x $y $args
+}
+
+########################################################################
+#### vertexdrag
 #
-body ::tycho::EditGraph::vertexconfigure {name args} {
-    eval $slate itemconfigure $_itemID($name) $args
+body ::tycho::EditGraph::vertexdrag {tag x y} {
+    $itk_option(-layout) vertexdrag $tag $x $y
+}
+
+########################################################################
+#### vertexrelease
+#
+body ::tycho::EditGraph::vertexrelease {tag x y} {
+    $itk_option(-layout) vertexrelease $tag $x $y
 }
 
 ########################################################################
@@ -428,3 +406,144 @@ body ::tycho::EditGraph::withtag {tag} {
     }
     return $result
 }
+
+###################################################################
+###################################################################
+####                      protected methods                    ####
+
+########################################################################
+#### _addtag
+#
+# Add a tag to all indicated vertices and names.
+#
+body ::tycho::EditGraph::_addtag {tag args} {
+    foreach name $args {
+	$slate addtag $tag withtag $_itemID($name)
+    }
+}
+
+########################################################################
+#### _clear
+#
+# Celar the displayed graph.
+#
+body ::tycho::EditGraph::_clear {} {
+    catch {unset _itemname}
+    catch {unset _itemID}
+    $slate delete all
+}
+
+########################################################################
+#### _deselect
+#
+# Remove an item from the selection.
+#
+body ::tycho::EditGraph::_deselect {name} {
+    $slate select remove $_itemID($name)
+}
+
+########################################################################
+#### _dtag
+#
+# Delete a tag from all items.
+#
+body ::tycho::EditGraph::_dtag {tag} {
+    $slate dtag $tag
+}
+
+########################################################################
+#### _move
+#
+body ::tycho::EditGraph::_move {tag x y} {
+    $slate move $tag $x $y
+}
+
+########################################################################
+#### _moveclick
+#
+body ::tycho::EditGraph::_moveclick {tag x y} {
+    eval $slate moveclick $tag $x $y args
+}
+
+########################################################################
+#### _movedrag
+#
+body ::tycho::EditGraph::_movedrag {tag x y} {
+    $slate movedrag $tag $x $y
+}
+
+########################################################################
+#### _moverelease
+#
+body ::tycho::EditGraph::_moverelease {tag x y} {
+    $slate moverelease $tag $x $y
+}
+
+########################################################################
+#### _reshape
+#
+body ::tycho::EditGraph::_reshape {name x y args} {
+    eval $slate reshape $name $x $y $args
+}
+
+########################################################################
+#### _reshapeclick
+#
+body ::tycho::EditGraph::_reshapeclick {name x y args} {
+    eval $slate reshapeclick $name $x $y $args
+}
+
+########################################################################
+#### _reshapedrag
+#
+body ::tycho::EditGraph::_reshapedrag {name x y args} {
+    $slate reshapedrag $name $x $y
+}
+
+########################################################################
+#### _reshaperelease
+#
+body ::tycho::EditGraph::_reshaperelease {name x y args} {
+    $slate reshaperelease $name $x $y
+}
+
+########################################################################
+#### _select
+#
+# Add an item to the selection.
+#
+body ::tycho::EditGraph::_select {name} {
+    $slate select add $_itemID($name)
+}
+
+########################################################################
+#### _selectionclear
+#
+# Clear the selection.
+#
+body ::tycho::EditGraph::_selectionclear {foo} {
+    $slate select clear
+}
+
+########################################################################
+#### _vertex
+#
+# Add a new vertex to the view. This method must be called only
+# by the model.
+#
+body ::tycho::EditGraph::_vertex {name spec args} {
+    set id [eval $slate create $spec $args]
+    set _itemID($name) $id
+    set _itemname($id) $name
+}
+
+########################################################################
+#### _vertexconfigure
+#
+# Configure a vertex. This method must be called only
+# by the model.
+#
+body ::tycho::EditGraph::_vertexconfigure {name args} {
+    eval $slate itemconfigure $_itemID($name) $args
+}
+
