@@ -47,7 +47,7 @@ else
 	if ( ! $?LD_LIBRARY_PATH ) then
 		# Save the LD_LIBRARY_PATH in case we are called with -bak
 		setenv S_LD_LIBRARY_PATH yes
-		setenv LD_LIBRARY_PATH $PTOLEMY/lib.${PTARCH}:$PTOLEMY/octtools/lib.${PTARCH}:$PTOLEMY/gnu/$PTARCH/lib:${PTX11DIR}/lib
+		setenv LD_LIBRARY_PATH $PTOLEMY/lib.${PTARCH}:$PTOLEMY/octtools/lib.${PTARCH}:$PTOLEMY/gnu/$PTARCH/lib:/usr/X11/lib:/usr/openwin/lib:/usr/local/X11/lib
 	endif
 endif
 
