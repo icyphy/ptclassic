@@ -29,7 +29,7 @@ sequence
 		type { fixarray }
 		desc { list of values. }
 		default { "0.1 0.2 0.3 0.4" }
-                attributes { A_YMEM }
+                attributes { A_NONCONSTANT|A_YMEM }
         }
         state  {
                 name { dataCount }
