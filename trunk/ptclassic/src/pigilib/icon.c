@@ -133,7 +133,7 @@ static void startTycho() {
 	"uplevel #0 {if {![info exists TYCHO]} {",
 	"   set tychoConsoleWindow 0\n",
 	"   set tychoWelcomeWindow 0\n",
-	"   set tychoRegExit 0\n",
+	"   set tychoExitWhenNoMoreWindows 0\n",
 	"   source $ptolemy/tycho/kernel/Tycho.tcl",
 	"}}\n",
 	(char *)NULL) );
