@@ -36,6 +36,12 @@ the star would simply add a semicolon at the end.
 Before the command is passed to Matlab, the pound '#' characters are replaced
 with underscore '_' characters.
 The pound characters are used to maintain compatibility with Ptolemy syntax.
+<p>
+When Ptolemy invokes a new instance of Matlab, it will launch
+a remote Matlab process on the machine give by the value of the
+<code>MATLAB_SERVER_HOSTNAME</code> environment variable if it
+is set; otherwise, Ptolemy will launch a Matlab process on the
+local workstation.
 	}
 	inmulti {
 		name { input }
@@ -52,7 +58,7 @@ The pound characters are used to maintain compatibility with Ptolemy syntax.
 		desc {
 The Matlab command to execute during the begin method of the Matlab star.
 During the begin procedure, there is no data passing into or out of the star.
-}
+		}
 	}
 	defstate {
 		name { MatlabFunction }
@@ -63,7 +69,7 @@ The Matlab command to execute each time the star fires.
 The values of the input and output ports may be accessed using the
 Ptolemy notation input#i and output#i, where i is the port number,
 as explained above.
-}
+		}
 	}
 	defstate {
 		name { MatlabWrapUp }
@@ -72,7 +78,7 @@ as explained above.
 		desc {
 The Matlab command to execute during the wrapup procedure of the Matlab star.
 During the wrapup procedure, there is no data passing into or out of the star.
-}
+		}
 	}
 
 	// Ptolemy kernel includes
