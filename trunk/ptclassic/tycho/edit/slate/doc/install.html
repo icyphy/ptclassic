@@ -1,0 +1,192 @@
+<!-- The $Id$ -->
+<html>
+<head>
+<title>Installation</title>
+</head>
+<body bgcolor="#faf0e6">
+<blockquote>
+<H1>Installation</H1>
+<br>
+If you are running the Slate from within Tycho,
+then you shouldn't need to do anything more. Otherwise,
+read on. We assume that you already have [incr Tcl] 3.0
+or Tcl 8.0 installed and know how to run it.
+
+<p>
+Note that the Slate has been tested only under Solaris
+and Windows NT. It should work as advertised on other platforms,
+but we haven't tried it.
+
+ <ul>
+<li><a href="#download">Download</a>
+<li><a href="#install">Install</a>
+<li><a href="#check">Check</a>
+</ul>
+
+<p>
+<HR>
+ <P>
+<a name="download">
+<B>Download</B>
+</a>
+
+<p>
+If you are running [incr Tcl] 3.0, you only need the
+<b>slate</b> package itself. If you are running Tcl 8.0,
+you also need to get the <b>obstcl</b> package.
+
+
+<dl>
+
+<dt><b>slate</b>
+
+<dd>This is the slate package itself. It contains everything
+you need if you are running [incr Tcl] 3.0.
+
+<ul>
+
+<li><A
+HREF="dist/slate.zip"><code>slate.zip</code></A>
+
+<li><A
+HREF="dist/slate.tar.gz"><code>slate.tar.gz</code></A>
+
+</ul>
+
+ <P>
+<dt><b>obstcl</b>
+
+<dd><b>obstcl</b> is a simple Tcl-only object-oriented layer
+for Tcl. You need this to run the Slate with Tcl 8.0.
+
+<ul>
+<li><A HREF="../obstcl/dist/obstcl.zip"><code>obstcl.zip</code></A>
+<li><A HREF="../obstcl/dist/obstcl.tar.gz"><code>obstcl.tar.gz</code></A>
+</ul>
+
+</dl>
+
+
+<P>
+<a name="install">
+<B>Install</B>
+</a>
+
+ <P>These instructions assume that you do not already have
+Tycho installed.
+
+<ol>
+
+<li>Download the packages you need into a suitable directory.  This is
+either the <b>lib</b> directory of your Tcl or [incr Tcl]
+installation, or some other directory where you put Tcl packages. To
+see what the lib directory is, start <b>itclsh</b> or <b>tclsh</b> and
+type:
+
+<pre>
+    file dirname [info library]
+</pre>
+
+ <P>
+<li>Change to that directory and do either:
+
+<pre>
+    unzip -a slate.zip
+    unzip -a obstcl.zip
+</pre>
+
+ <P>or
+
+<pre>
+    gzcat slate.tar.gz | tar -xf -
+    gzcat obstcl.tar.gz | tar -xf -
+</pre>
+
+ <P>If you are running under windows and have WinZip
+installed, you can also double-click on the files.
+
+ <P> <li> Make sure that the Tcl package loader will be able to find
+these packages. If you didn't install them in the <b>lib</b> directory of
+your Tcl installation, then I suggest that you set an environment
+variable TCL_PACKAGES to the directory containing the two packages.
+(This is needed for the demo and test scripts.)
+
+<p>
+<li> Fix the demo and test startup scripts. The second line
+of these scripts will say something like
+<pre>
+    exec itkwish3.0 "$0" "$@"
+</pre>
+
+(Windows users: the following assumes you have <b>bash</b>
+from Cygwin installed. If not, and you need a DOS batch file, send
+me email).
+
+<p>
+Change the <b>itkwish3.0</b> to:
+
+<ul>
+<li><b>wish80</b>, to run Tcl 8.0 on Windows
+<li><b>wish8.0</b>, to run Tcl 8.0 on Unix
+<li><b>itkwish30</b>, to run [incr Tcl] 3.0 on Windows
+<li><b>itkwish3.0</b>, to run [incr Tcl] 3.0 on Unix
+</ul>
+
+or to whatever alias or symbolic link you have for running
+wish or itkwish.
+
+</ol>
+
+
+<p>
+<a name="check">
+<b>Check</b>
+</a>
+
+  <P>To verify the installation, start <b>wish</b> 8.0
+or <b>itkwish</b> 3.0. If the Slate is not in your Tcl library
+directory, go:
+
+<pre>
+  lappend auto_path $env(TCL_PACKAGES)
+</pre>
+
+Then go:
+<pre>
+  package require slate
+</pre>
+
+You should get "3.0". Then try:
+<pre>
+    ::tycho::slate .s
+    pack .s
+    raise .
+    .s create Frame 50 50 100 100 -color green
+</pre>
+    
+Any problems, send me email.
+
+<P> Now you can try out the demos or run the tutorial.
+When you use the Slate in your own programs, just be sure
+to do
+
+<pre>
+    package require slate
+</pre>
+
+ <P>before trying to create a new Slate. 
+
+<p>(Note to Tycho users: in Tycho, the
+Slate package is called <b>tycho.edit.slate</b>.)
+
+ <P>
+<HR>
+Copyright &#169 1998, The Regents of the University of California.
+All rights reserved.
+<br>
+Last updated: $Date$,
+comments to: <A HREF="mailto:johnr@eecs.berkeley.edu"><author>johnr@eecs.berkeley.edu</author></A>
+
+</blockquote>
+</body>
+</html>

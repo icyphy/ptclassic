@@ -1,0 +1,195 @@
+
+<!-- $Id$ -->
+<html>
+<head>
+<meta name="generator" content="Tycho, ::outline::htmlOutline,  Fri Jul 24 18:40:36 PDT 1998">
+  <title>User-defined item types</title>
+   <!--header-->
+  
+  <!-- <LINK href="style.css" rel="stylesheet" type="text/css"> -->
+
+  <!--/header-->
+</head>
+<div class="body">
+<blockquote>
+<body bgcolor=#faf0e6 bgcolor=#faf0e6>
+
+<h1>User-defined item types</h1>
+
+In an earlier section, we saw how a complex item can have other
+items added to it. You can also create new complex item types, 
+which can be then created with the <I>create</I> method of the slate.
+This section goes through the process by creating a
+new type that consists of an oval with a text label in the center
+of it.
+
+ <P>
+Firstly, write the class definition:
+<tcl quiet><pre>
+class ::tycho::AnItem {
+    inherit ::tycho::ComplexItem
+
+    # "Methods"
+    proc construct {id canvas slate tags x0 y0 x1 y1 args}
+    proc coords    {id canvas slate args}
+
+    # "Options"
+    proc _text     {id canvas slate tx}
+
+    # Method and option tables
+    private common methodtable
+    private common optiondefault
+}
+</pre></tcl>
+
+<p>
+This class inherits from the ComplexItem base class. Note
+that the class contains procedures only, and no methods -- subclasses
+of ComplexItem are never actually instantiated into objects.
+The first three arguments to each procedure are always <i>id</i> (the item
+ID), <i>canvas</i> (the canvas widget inside the Slate we are drawing
+on) and <i>slate</i> (the Slate widget). Every ComplexItem
+subclass must have the common variables
+<b>methodtable</b> and <b>optiondefault</b>.
+
+ <P>
+To initialize the method and option tables, we do the following:
+<tcl quiet><pre>
+namespace eval ::tycho::AnItem {
+    array set methodtable [array get ::tycho::ComplexItem::methodtable]
+    set methodtable(construct) ::tycho::AnItem::construct
+    set methodtable(coords)    ::tycho::AnItem::coords
+    set methodtable(_text)     ::tycho::AnItem::_text
+
+    array set optiondefault [array get ::tycho::ComplexItem::optiondefault]
+    set optiondefault(-shape) oval
+    set optiondefault(-text) ""
+}
+</pre></tcl>
+
+What this does is copy the tables from the superclass, and then set
+additional entries. In our example, we have the methods
+<B>construct</B> and <B>coords</B> and the option <B>-text</B>.  We
+also must supply the method <B>_text</B>, which is called when the
+<B>-text</B> option is changed. (In [incr Tcl], this code can go
+inside the class definition -- the Slate always puts it outside,
+however, so it can work with vanilla Tcl.)
+
+ <P>
+The <B>construct</B> procedure creates a new item:
+
+<tcl quiet><pre>
+body ::tycho::AnItem::construct {id canvas slate tags x0 y0 x1 y1 args} {
+    # Initialize the options
+    foreach {opt val} [concat [array get optiondefault] $args] {
+        set option([string trimleft $opt -]$id) $val
+    }
+
+    # Create the primary component. This is the displayed oval.
+    set primary($id) [$canvas create oval $x0 $y0 $x1 $y1 &#92
+	    -tags $tags]
+
+    # Create the text label
+    set component(label$id) [$canvas create text &#92
+	    [expr ($x0+$x1)/2] [expr ($y0+$y1)/2] &#92
+	    -text $option(text$id) -tags $tags]
+}
+</pre></tcl>
+
+<p> This procedure starts by setting the options (first three lines of
+code).  Then it creates the <I>primary</I> component and puts it into
+the <B>primary</B> array. Every complex item must have a primary
+component, as it is used by the Slate to get the coordinates of the
+complex item.  (In addition, the primary component must be a simple
+canvas item.)  In this example, the primary item is also displayed; in
+other cases, it may not be).  Finally, creates the text label item and
+remember its ID in the <B>component</B> array.
+
+<p>When the <b>-text</b> option is configured, the slate calls 
+the <B>_text</B> procedure:
+
+<tcl quiet><pre>
+body ::tycho::AnItem::_text {id canvas slate text} {
+    set option(text$id) $text
+    $canvas itemconfigure $component(label$id) -text $text
+}
+</pre></tcl>
+
+<p> Finally, we provide a special implementation of the <b>coords</b>
+procedure to handle a change in the coordinates.  (In this example, it
+is not strictly necessary: the Slate provides a default behavior based
+on item scaling that will be adequate for many complex items.)
+
+<tcl><pre>
+body ::tycho::AnItem::coords {id canvas slate args} {
+    if { $args == "" } {
+        return [$canvas coords $primary($id)]
+    }
+    ::tycho::assign x0 y0 x1 y1 $args
+
+    # Move the oval
+    $canvas coords $primary($id) $x0 $y0 $x1 $y1
+
+    # Move the text item
+    $canvas coords $component(label$id) &#92
+        [expr ($x0+$x1)/2] [expr ($y0+$y1)/2]
+}
+</pre></tcl>
+
+<p>To try out your new item type, just call the Slate as before:
+
+<tcl quiet><pre>
+  package require slate.demo
+  set slate [::demo::newslate "A AnItem user-defined item"]
+  set item [$slate create AnItem 100 100 160 180 -text Foo]
+</pre></tcl>
+
+<p>Move it:
+
+<tcl quiet><pre>
+  $slate move $item 10 10
+</pre></tcl>
+
+<p>Change its coordinates:
+
+<tcl><pre>
+  $slate coords $item 10 10 90 90
+</pre></tcl>
+
+<p>Change its label:
+
+<tcl quiet><pre>
+  $slate itemconfigure $item -text Bar
+</pre></tcl>
+
+ <P>
+
+<center>
+<div class="navigation">
+<br>
+<a href="index.html">  <img  border=0  src="../img/BTN_Top.gif"  alt="Top: The Slate Tutorial"></a>
+<a href="features.html">  <img  border=0  src="../img/BTN_Prev.gif"  alt="Previous: Features"></a>
+<a href="widgets.html">  <img  border=0  src="../img/BTN_Next.gif"  alt="Next: Creating custom widgets"></a>
+
+<br>
+</div class="navigation">
+</center>
+
+<div class="footer">
+  
+<p>
+<HR>
+Copyright 1996-%Q%, The Regents of the University of California.
+All rights reserved.
+<br>
+Last updated: $Date$,
+comments to: <author>johnr@eecs.berkeley.edu</author>
+
+  </div class="footer">
+</body>
+</blockquote>
+</div>
+</html>
+
+
+
