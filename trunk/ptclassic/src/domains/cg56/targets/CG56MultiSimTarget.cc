@@ -49,6 +49,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "FixState.h"
 #include "pt_fstream.h"
 #include "SimControl.h"
+#include "ParScheduler.h"
 
 // ----------------------------------------------------------------------------	
 CG56MultiSimTarget::CG56MultiSimTarget(const char* name,const char* starclass,
