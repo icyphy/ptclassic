@@ -67,7 +67,7 @@ PL_SRCS= \
  CG56LMSOscDet.pl \
  CG56LMSRx.pl \
  CG56LMSGanged.pl \
- CG56RaisedCos.pl \
+ CG56RaisedCosine.pl \
  CG56Sinc.pl \
  CG56Window.pl
 
