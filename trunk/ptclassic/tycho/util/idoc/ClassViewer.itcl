@@ -72,7 +72,7 @@ option add *Idoc.textWidth 32 widgetDefault
 # ::tycho::Idoc .u.i
 # .u showView .u.i
 # .u centerOnScreen
-# .u.i configure -file ~cliffc/idoc/doc/codeDoc/Idoc.idoc
+# .u.i configure -file  $TYCHO/lib/TyDoc/test/Idoc.idoc
 # .u.i reload
 # </tcl></pre>
 #
@@ -102,6 +102,15 @@ class ::tycho::Idoc {
 	$itk_component(text) tag configure private \
 		-foreground $itk_option(-privatecolor)
     }
+
+    # The default head font -- currently an X font, but should
+    # be made symbolic in Tk 8.0
+    itk_option define -headfont headFont Font [::tycho::font \
+            {New Century Schoolbook} 18 Roman]
+
+    # The default body font -- currently an X font, but should
+    # be made symbolic in Tk 8.0
+    itk_option define -bodyfont bodyFont Font [::tycho::font Hevetica 12 Bold]
 
     constructor {args} {}
     destructor {}
@@ -146,7 +155,29 @@ class ::tycho::Idoc {
     private method verifycontents {contents}
 
 }
+#########################################################################
+#### -headfont configuration
+# Parse the given X font to figure out what font family, size,
+# and style to use for the display font
+#
+configbody ::tycho::Idoc::headfont {
 
+    set f $itk_option(-headfont)
+    $myText tag configure head -font $f
+}
+#########################################################################
+#### -bodyfont configuration
+# Parse the given X font to figure out what font family, size,
+# and style to use for the display font
+#
+configbody ::tycho::Idoc::bodyfont {
+
+    set f $itk_option(-bodyfont)
+    $myText tag configure protected -font $f
+    $myText tag configure private -font $f
+    $myText tag configure optionname -font $f
+    $myText tag configure public -font $f
+}
 ###################################################################
 #
 body ::tycho::Idoc::constructor {args} {
@@ -203,7 +234,7 @@ body ::tycho::Idoc::constructor {args} {
     }
 
     # Create standard text tags
-    $myText tag configure head -font -*-Helvetica-Bold-R-Normal--*-180-*
+    #$myText tag configure head -font -*-Helvetica-Bold-R-Normal--*-180-*
 
     # We don't want a cursor or a selection in the text widget
     bind $myText <Double-Button-1> {break}
@@ -212,6 +243,11 @@ body ::tycho::Idoc::constructor {args} {
     bind $myText <Button-2> {break}
 
     eval itk_initialize $args
+
+    # Subscribe to the preference set
+    preference subscribeoptions $this \
+            -headfont displayFont \
+            -bodyfont entryFont
 
     # Something annoying inherited insists on creating this thing
     pack forget $itk_interior.childsite
