@@ -17,7 +17,6 @@ $Id$
 #include "Particle.h"
 #include "DataStruct.h"
 #include "Code.h"
-#include "Architecture.h"
 
 
 	////////////////////////////////////
@@ -47,6 +46,7 @@ protected:
 
 	// Output lines of code
 	void gencode(CGCodeBlock& block);
+	void addCode(const char*);
 };
 
 /*
