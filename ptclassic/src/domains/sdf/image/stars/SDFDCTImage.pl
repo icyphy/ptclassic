@@ -29,13 +29,28 @@ cosine transform (DCT) and outputs a DCTImage.
 		desc	{ Block size of the DCT transform. }
 	}
 
-// CODE
+////// CODE
 	hinclude { <math.h>, "GrayImage.h" ,"DCTImage.h", "Error.h" }
 
 	protected {
 		float* cosData;
 		int blocksize;
 	}
+
+	constructor { cosData = (float*) NULL; }
+
+	setup {
+		wrapup();
+
+		blocksize = int(BlockSize);
+		LOG_NEW; cosData = new float[blocksize*blocksize];
+		cosSet();
+	}
+
+	wrapup { LOG_DEL; delete [] cosData; cosData = (float*) NULL; }
+
+	destructor { wrapup(); }
+
 
 	method {
 		name { cosSet } // Fill DCT BASIS matrix
@@ -56,6 +71,7 @@ cosine transform (DCT) and outputs a DCTImage.
 		}
 	} // end cosSet()
 
+
 	inline method {
 		name { fwdD }
 		type { float }
@@ -63,6 +79,7 @@ cosine transform (DCT) and outputs a DCTImage.
 		access { protected }
 		code { return (cosData[a*blocksize+b]); }
 	} // end fwdD()
+
 
 	method {
 		name { doDCT }
@@ -125,13 +142,6 @@ cosine transform (DCT) and outputs a DCTImage.
 		}
 	} // end doDCT()
 
-	setup {
-		blocksize = int(BlockSize);
-		LOG_NEW; cosData = new float[blocksize*blocksize];
-		cosSet();
-	}
-
-	wrapup { LOG_DEL; delete [] cosData; }
 
 	go {
 // Read input image.

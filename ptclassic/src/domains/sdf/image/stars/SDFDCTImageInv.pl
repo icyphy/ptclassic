@@ -25,7 +25,7 @@ discrete cosine transform (DCT) coding and outputs a GrayImage.
 	input { name { input } type { message } }
 	output { name { output } type { message } }
 
-// CODE
+////// CODE
 	hinclude { <math.h>, "GrayImage.h", "DCTImage.h", "Error.h" }
 
 	protected {
@@ -33,6 +33,15 @@ discrete cosine transform (DCT) coding and outputs a GrayImage.
 		float* cosData;
 		int blocksize;
 	}
+
+	constructor { cosData = (float*) NULL; }
+
+	setup { wrapup(); firstTime = 1; }
+
+	wrapup { LOG_DEL; delete [] cosData; cosData = (float*) NULL; }
+
+	destructor { wrapup(); }
+
 
 	method {
 		name { cosSet } // SAME as fwd DCT BASIS matrix.
@@ -52,6 +61,7 @@ discrete cosine transform (DCT) coding and outputs a GrayImage.
 		}
 	} // end cosSet()
 
+
 	inline method { // Inverse DCT basis values (note transpose).
 		name { invD }
 		type { float }
@@ -59,6 +69,7 @@ discrete cosine transform (DCT) coding and outputs a GrayImage.
 		access { protected }
 		code { return (cosData[b*blocksize+a]); }
 	} // end invD()
+
 
 	method {
 		name { doInvDCT }
@@ -114,6 +125,7 @@ discrete cosine transform (DCT) coding and outputs a GrayImage.
 		}
 	} // end doInvDCT()
 
+
 	method {
 		name { doFirst }
 		type { void }
@@ -126,9 +138,6 @@ discrete cosine transform (DCT) coding and outputs a GrayImage.
 		}
 	} // end doFirst()
 
-	setup { firstTime = 1; }
-
-	wrapup { LOG_DEL; delete [] cosData; }
 
 	go {
 // Read input image.
