@@ -31,6 +31,8 @@ BINDIR = $(ROOT)/bin.$(ARCH)
 CONFIG=$(ROOT)/mk/config-$(ARCH).mk
 include $(CONFIG)
 
+SRCS = 	ptplay.sun4 ptplay.irix5 ptplay.hppa
+
 all:	ptplay
 
 ptplay: ptplay.$(ARCH) 
@@ -71,6 +73,6 @@ checkjunk:
 sccsinfo:
 	@sccs check || true
 
-
+sources: $(SRCS) 
 
 
