@@ -8,7 +8,7 @@ like the standard raised cosine used in digital communications.
 See the SDFRaisdCos star for more information.
 	}
 	version { $Id$ }
-	author { J. T. Buck, Kennard White }
+	author { J. T. Buck and Kennard White }
 	copyright {
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
@@ -22,7 +22,7 @@ See the
 star.
 	}
 	seealso {FIR}
-	ccinclude { "PTDSPRaisedCosine.h" }
+	ccinclude { "ptdspRaisedCosine.h" }
 	defstate {
 		name { length }
 		type { int }
@@ -67,10 +67,10 @@ star.
 		int center = int(length)/2;
 		for (int i = 0; i < int(length); i++) {
 		    if (int(square_root))
-			taps[i] = PTDSPSqrtRaisedCosine(i - center,
+			taps[i] = Ptdsp_SqrtRaisedCosine(i - center,
 					int(symbol_interval), int(excessBW));
 		    else
-			taps[i] = PTDSPRaisedCosine(i - center,
+			taps[i] = Ptdsp_RaisedCosine(i - center,
 					int(symbol_interval), int(excessBW));
 		}
 		CG56FIR :: setup();

@@ -71,7 +71,7 @@ A number between 0 to 1. When equal to 0, the resulting codebook will satisfy th
 		default { "" }
 		desc { File to save the final codebook. }
 	}
-	ccinclude { "Matrix.h", "PTDSPNearestNeighbor.h", "WriteASCIIFiles.h" }
+	ccinclude { "Matrix.h", "ptdspNearestNeighbor.h", "WriteASCIIFiles.h" }
 
 	protected {
 		double* codebook;
@@ -206,10 +206,10 @@ A number between 0 to 1. When equal to 0, the resulting codebook will satisfy th
 		double distortion = 0;
 
 		for (i = 0; i < int(sizeTrnSet); i++) {
-		    PTDSPNearestNeighbor(&index, &distance,
-					 &trnSet[i*int(dimension)],
-					 codebook, halfCodewordPower,
-					 int(sizeCodebook), int(dimension));
+		    Ptdsp_NearestNeighbor(&index, &distance,
+					  &trnSet[i*int(dimension)],
+					  codebook, halfCodewordPower,
+					  int(sizeCodebook), int(dimension));
 		    (numPart[index])++;
 		    distortion += distance;
 		    for (int j = 0; j < int(dimension); j++) {
@@ -270,10 +270,11 @@ A number between 0 to 1. When equal to 0, the resulting codebook will satisfy th
 		    // find the average distortion for the codebook. Then, find
 		    // centroid of each partitioned cluster set.
 		    for (i = 0; i < int(sizeTrnSet); i++) {
-			PTDSPNearestNeighbor(&index, &distance,
-					     &(trnSet[i*int(dimension)]),
-					     codebook, halfCodewordPower,
-					     int(sizeCodebook), int(dimension));
+			Ptdsp_NearestNeighbor(&index, &distance,
+					      &(trnSet[i*int(dimension)]),
+					      codebook, halfCodewordPower,
+					      int(sizeCodebook),
+					      int(dimension));
 			(numPart[index])++;
 			distortion += distance;
 			int t_rowloc = i * int(dimension);

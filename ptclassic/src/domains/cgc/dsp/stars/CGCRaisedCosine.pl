@@ -20,7 +20,7 @@ limitation of liability, and disclaimer of warranty provisions.
 See the SDFRaisedCos star.
 	}
 	seealso { FIR, Window }
-	ccinclude { "PTDSPRaisedCosine.h" }
+	ccinclude { "ptdspRaisedCosine.h" }
 	defstate {
 		name { length }
 		type { int }
@@ -60,10 +60,10 @@ See the SDFRaisedCos star.
 		int center = int(length)/2;
 		for (int i = 0; i < int(length); i++) {
 		    if (int(square_root))
-			taps[i] = PTDSPSqrtRaisedCosine(i - center,
+			taps[i] = Ptdsp_SqrtRaisedCosine(i - center,
 					int(symbol_interval), int(excessBW));
 		    else
-			taps[i] = PTDSPRaisedCosine(i - center,
+			taps[i] = Ptdsp_RaisedCosine(i - center,
 					int(symbol_interval), int(excessBW));
 		}
 		CGCFIR :: setup();

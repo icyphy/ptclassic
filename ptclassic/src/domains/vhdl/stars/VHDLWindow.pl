@@ -41,7 +41,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { VHDL main library }
 
-	ccinclude { <string.h>, <math.h>, "PTDSPWindow.h" }
+	ccinclude { <string.h>, <math.h>, "ptdspWindow.h" }
 
 	output {
 		name { output }
@@ -100,7 +100,7 @@ the window.
 
 	setup {
 		const char* wn = name;
-		int winType = PTDSPWindowNumber(wn);
+		int winType = Ptdsp_WindowNumber(wn);
 		if (winType == PTDSP_WINDOW_TYPE_NULL) {
 		    Error::abortRun(*this, "Unknown window name ", wn);
 		    return;
@@ -120,12 +120,11 @@ the window.
 
 		delete [] windowTaps;
 		windowTaps = new double[realLen];
-		int validWindow = PTDSPWindow(windowTaps, realLen, winType,
+		int validWindow = Ptdsp_Window(windowTaps, realLen, winType,
 					      (double *) WindowParameters);
 		if (! validWindow) {
-		    delete [] windowTaps;
 		    Error::abortRun(*this, "Could not compute the taps for a ",
-				    wn, " window: PTDSPWindow failed.");
+				    wn, " window: Ptdsp_Window failed.");
 		    return;
 		}
 	}
