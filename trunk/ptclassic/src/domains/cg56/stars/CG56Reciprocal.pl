@@ -18,9 +18,13 @@ Find the reciprocal of a fraction in terms of a fraction and some left shifts.
 		name {input}
 		type {FIX}
 	}
-	outmulti {
-		name {output}
-		type {int}
+	output {
+		name { f }
+		type { fix }
+	}
+	output {
+		name { s }
+		type { fix }
 	}
 	state {
 		name {Nf}
@@ -32,7 +36,7 @@ Find the reciprocal of a fraction in terms of a fraction and some left shifts.
                 name {X}
 	        type {int}
 	        default {15}
-	        attributes { A_NONSETTABLE }
+	        attributes { A_NONCONSTANT|A_NONSETTABLE }
         }
 	codeblock (Rblock) {
         move    $ref(input),a
@@ -47,10 +51,10 @@ $label(start)
         and     #$$fe,ccr
         rep     #$val(Nf)
         div     x0,a                    ;quotient (f) in Nf LSBs of a
-        asl     a	b,$ref(output#2)
+        asl     a	b,$ref(s)
         rep     #$val(X)
         asl     a
-        move    a0,$ref(output#1)
+        move    a0,$ref(f)
  	}
  	go {
                  X=23-int(Nf);
