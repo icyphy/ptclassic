@@ -551,7 +551,7 @@ void DDFScheduler :: makeWormholes (Galaxy& galaxy) {
 	    if (strcmp(s->domain(), DDFdomainName) || 
 		 (!strcmp(s->mySched()->domain(), "SDF"))) {
 
-		if (s->parent() != (Block*) &galaxy) continue; 
+		if (!strncmp(s->parent()->readName(), "!worm",5)) continue; 
 
 		Galaxy* newG = new Galaxy;
 		sdfWorms.put(newG);
