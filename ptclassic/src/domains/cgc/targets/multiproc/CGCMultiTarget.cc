@@ -109,7 +109,7 @@ CodeBlock ipcConnectHandler (
 "int ipcConnectHandler(hostPort, hostAddr) \n"
 "	int hostPort; \n"
 "	char* hostAddr; {\n"
-"	int sId, timeout, localLoop;\n"
+"	int sId, timeout;\n"
 "	struct sockaddr_in addr;\n"
 "\n"
 "	/* connect to the server */\n"
