@@ -144,7 +144,3 @@ body ::tycho::Loader::loadIfNotPresent {command package} {
 	}
     }
 }
-
-::tycho::Loader .x
-.x loadIfNotPresent fooprofile tclxfoo
-
