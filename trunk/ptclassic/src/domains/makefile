@@ -13,11 +13,15 @@
 # The EXPDOMAINS environment variable can be used to build experimental domains
 # which are assumed to follow the same directory structure.
 
-ifeq ($(ARCH),sun4)
+ifneq (,$(filter sun%,$(ARCH)))
 EXPDOMAINS = cp pn
 endif
 
-ifeq ($(ARCH),mips)
+ifeq (cfront,$(ARCH))
+EXPDOMAINS = cp
+endif
+
+ifeq (mips,$(ARCH))
 EXPDOMAINS = pn
 endif
 

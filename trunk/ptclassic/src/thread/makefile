@@ -11,8 +11,12 @@
 
 DIRS =
 
-ifneq (,$(filter sun% cfront,$(ARCH)))
+ifneq (,$(filter sun%,$(ARCH)))
 DIRS = Awesime awe lwp
+endif
+
+ifeq (cfront,$(ARCH))
+DIRS = lwp
 endif
 
 ifeq (mips,$(ARCH))
