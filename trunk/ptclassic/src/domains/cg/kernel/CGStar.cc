@@ -92,7 +92,7 @@ void CGStar::advance() {
 }
 
 const int MAXLINELEN = 1024;
-const int TOKLEN = 80;
+const int TOKLEN = 1024;
 
 
 // Create a new CodeStream called 'name' if it doesn't exist.  Return it's 
@@ -177,23 +177,37 @@ StringList CGStar::processCode(CodeBlock& block)
     return processCode(text);
 }
 
+// Parse text expanding macros
 StringList CGStar::processCode(const char* text)
 {
     StringList out="";
     if (text == NULL) return out;
-    char line[MAXLINELEN], *o = line, c;
-    const char* t = text;
-
     // Reset the local labels
     resetCodeblockSyms();
 
     // scan until end of text
-    while ((c = *t++) != 0)
+    while (*text != 0)
     {
-	if (c == substChar())	// parse macro
+	// parse eventually nested macro invocations
+	out << processMacro(text);
+    }
+    return out;
+}
+
+// Parse macro including macro header and arguments;
+// update text pointer t to point after the end of the argument list.
+StringList CGStar::processMacro(const char*& t)
+{
+    StringList out="";
+    char line[MAXLINELEN], *o = line;
+
+    // copy any character before the macro header unchanged
+    while (*t != '\0') {
+
+	if (*t == substChar())	// parse macro
 	{
 	    // two consecutive substChar values give one on the output
-	    if (*t == substChar())
+	    if (t++, *t == substChar())
 	    {
 		*o++ = *t++;
 		continue;
@@ -229,7 +243,29 @@ StringList CGStar::processCode(const char* text)
 		while (isspace(*t)) t++;
 
 		// copy argument
-		while (*t != 0 && *t != ',' && *t != ')') *p++ = *t++;
+		int level=1;
+		while (*t != '\0') {
+
+		    if ((level == 1) && (*t == ',' || *t == ')'))
+			break;   // reached end of argument
+
+	       else if (*t == substChar()) {
+			if (t[1] == substChar())
+			    t++; // skip this character, copy next
+			else {
+			    // nested macro invocation
+			    StringList list = processMacro(t);
+			    const char* s = list;
+			    while (*s)  *p++ = *s++;
+			}
+		     } else {
+			 // adapt nesting level
+			if (*t == '(')  level++;
+		   else if (*t == ')')  level--;
+
+			*p++ = *t++;
+		     }
+		}
 
 		if (p == arg) // null arguments are not allowed
 		{
@@ -252,9 +288,9 @@ StringList CGStar::processCode(const char* text)
 		    t++;
 		    if (*t == ')')	// final null argument
 		    {
-		        codeblockError ("null argument");
+			codeblockError ("null argument");
 			out.initialize();
-		        return out;
+			return out;
 		    }
 		}
 	    }
@@ -264,22 +300,22 @@ StringList CGStar::processCode(const char* text)
 	    StringList temp = expandMacro(func, argList);
 	    const char* macro = temp;
 	    if (macro != NULL)
-	    {
-		while (*macro != 0) *o++ = *macro++;
-	    }
-	}
+		while ((*o++ = *macro++) != 0);
+	    else
+		*o++ = '\0';
 
+	    return out << line;
+	}
 	else	// not a macro call
 	{
-	    *o++ = c;
-	    if (c == '\n')
+	    if ((*o++ = *t++) == '\n')
 	    {
 		*o = 0;
 		out << line;
 		o = line;
 	    }
 	}
-    }	// reached end of text
+    }
 
     if (o > line)
     {
