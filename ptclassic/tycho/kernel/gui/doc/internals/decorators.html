@@ -55,18 +55,18 @@ $f.mb addMenu File
 $f.mb addMenu Help -side right -underline 0
 </pre></tcl>
 
-Note that the Help menu is packed to the right of the menu bar:
+Note that the <CODE>Help</CODE> menu is packed to the right of the menu bar:
 stretch the window with the mouse to see this. The
 <code>-underline</code> option places an underline under the
 indicated letter of the label and enables keyboard navigation through
 menus. (Sorry, this is currently broken...)
 
- <P>The menu bar accesses all menus and menu entries by label -- that is,
-by the string displayed in the menu bar or in the menu. To add
+ <P>The menu bar accesses all menus and menu entries by label -- that
+is, by the string displayed in the menu bar or in the menu. To add
 entries to a menu, call <code>add</code> with the entry label, the
-name of the menu to place the entry into, and additional options.
-For example, we'll add a Close entry to the File menu and a Tycho Home
-Page entry to the Help menu:
+name of the menu to place the entry into, and additional options.  For
+example, we'll add a <CODE>Close</CODE> menu choice to the <CODE>File</CODE>
+menu and a Tycho Home Page entry to the <CODE>Help</CODE> menu:
 
 <tcl quiet><pre>
 $f.mb add Close File -command {delete object $f}
@@ -76,9 +76,10 @@ $f.mb add {Tycho Home Page} Help &#92
 	-underline 0 -accelerator "C-x h"
 </pre></tcl>
 
-(Click on the File and Help menu buttons to bring down the menus.)
-Note that labels containing spaces must be bracketed as a list,
-or the menu bar will get confused -- as in <code>{Tycho Home Page}</code>.
+(Click on the <CODE>File</CODE> and <CODE>Help</CODE> menu buttons to
+bring down the menus.)  Note that labels containing spaces must be
+bracketed as a list, or the menu bar will get confused -- as in
+<code>{Tycho Home Page}</code>.
 
  <P>The <code>add</code> command takes any options acceptable to the
 entries of the Tk <code>menu</code> widget. Three commonly-used
@@ -114,9 +115,9 @@ $f.mb add Foo Help -command {::tycho::inform Foo!}
 $f.mb disable {Tycho Home Page}
 </pre></tcl>
 
-(Pop down the Help menu: the Tycho Home Page entry is greyed
-out and cannot be invoked.) Whole menus can be disabled
-in exactly the same way:
+(Pop down the <CODE>Help</CODE> menu: the <CODE>Tycho Home Page</CODE>
+entry is greyed out and cannot be invoked.) Whole menus can be
+disabled in exactly the same way:
 
 <tcl quiet><pre>
 $f.mb disable File

@@ -44,12 +44,13 @@ interleaving of these two tasks:
 <P><code>::tycho::timer</code> is a Tcl procedure that manipulates and
 queries the real-time timer.  To ensure that it is in the
 <code>::tycho</code> namespace, always load the tyEvent package with
-<a
-href="../../kernel/doc/codeDoc/Loader.html"><code>::tycho::loadIfNotPresent</code></a>. It
-accepts the following argument formats:
+
+<a href="../../kernel/doc/codeDoc/Loader.html"><code>::tycho::loadIfNotPresent</code></a>.
+
+It accepts the following argument formats:
 
 <dl>
- <P><dt><b>::tycho::timer elapsed</b>
+ <P><dt><code>::tycho::timer elapsed</code>
 
 <dd>Return 1 if the timer is not running. Note that, if the timer
 has not been started, 1 will be returned anyway. A Tcl script can use
@@ -58,20 +59,20 @@ for a Tcl script to be notified asynchronously: it <I>must</I> use this
 procedure to query the timer. The overhead is very low -- lower than
 reading the value of a Tcl variable, in fact!
 
- <P><dt><b>::tycho::timer period</b> <I>?period?</I>
+ <P><dt><code>::tycho::timer period <I>?period?</I></code>
 
-<dd>Get or set the timer period. If <I>period</I> is given, the timer
-period is set to <I>period</I> milli-seconds; if not, the current
-period is returned.
+<dd>Get or set the timer period. If <CODE><I>period</I></CODE> is
+given, the timer period is set to <CODE><I>period</I></CODE>
+milli-seconds; if not, the current period is returned.
 
- <P><dt><b>::tycho::timer start</b> <I>?period?</I>
+ <P><dt><code>::tycho::timer start <I>?period?</I></code>
 
-<dd>Start the timer. If <I>period</I> is given, the timer
-period is set to <I>period</I> milli-seconds; otherwise, the
+<dd>Start the timer. If <CODE><I>period</I></CODE> is given, the timer
+period is set to <CODE><I>period</I></CODE> milli-seconds; otherwise, the
 previously set value if used. When the package is first loaded, the
 period is set to 20 ms.
 
- <P><dt><b>::tycho::timer stop</b>
+ <P><dt><code>::tycho::timer stop</code>
 
 <dd>Stop the timer. This should be called by a Tcl task that
 finishes it processing before its time is up.
@@ -89,37 +90,37 @@ through its loop, check whether the timer has elapsed. When it
 has, it must return. See the Scheduler documentation.
 
 <dl>
- <P><dt>void <b>Ty_TimerPeriod</b> ( int <I>period</I> )
+ <P><dt>void <code>Ty_TimerPeriod ( int <I>period</I> )</code>
 
-<dd>Set the timer period, where <I>period</I> is in milli-seconds.
+<dd>Set the timer period, where <CODE><I>period</I></CODE> is in milli-seconds.
 When the package is loaded, the period is set to 20 ms. C tasks
 should not normally set the period.
 
- <P><dt>void <b>Ty_TimerStart</b> ( )
+ <P><dt>void <code>Ty_TimerStart ( )</code>
 
 <dd>Start the timer running. The timer will elapse with the period
 previously set.
 
- <P><dt>void <b>Ty_TimerStop</b> ( )
+ <P><dt>void <code>Ty_TimerStop ( )</code>
 
 <dd>Stop the timer running. This should be called by a task
 that terminates before its given time is up.
 
- <P><dt>int <b>Ty_TimerElapsed</b> ( )
+ <P><dt>int <code>Ty_TimerElapsed ( )</code>
 
 <dd>Return 1 if the timer has elapsed, or 0 if it has not. Tasks
 should call this once each time through their "loop" to
 test whether their time is up.
 
- <P><dt>void <b>Ty_DoAllEvents</b> ( )
+ <P><dt>void <code>Ty_DoAllEvents ( )</code>
 
-<dd>If the timer has elapsed, process all pending Tk events.
-This is provided for C programs that are structured as a
-single loop that runs forever or until completion, without
-regard to the Tycho scheduler. Such a program should periodically
-call Ty_DoAllEvents to ensure that Tk events are processed. This
-style of C module is strongly discouraged, since it will not
-allow the Tycho scheduler to operate.
+<dd>If the timer has elapsed, process all pending Tk events.  This is
+provided for C programs that are structured as a single loop that runs
+forever or until completion, without regard to the Tycho
+scheduler. Such a program should periodically call
+<CODE>Ty_DoAllEvents</CODE> to ensure that Tk events are
+processed. This style of C module is strongly discouraged, since it
+will not allow the Tycho scheduler to operate.
 
 </dl>
 
