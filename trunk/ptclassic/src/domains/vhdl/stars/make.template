@@ -38,6 +38,7 @@ PL_SRCS = \
  VHDLBlackHole.pl \
  VHDLConst.pl \
  VHDLConstInt.pl \
+ VHDLConstCx.pl \
  VHDLImpulse.pl \
  VHDLRect.pl \
  VHDLWaveForm.pl \
@@ -57,9 +58,11 @@ PL_SRCS = \
  VHDLIntegrator.pl \
  VHDLFIR.pl \
  VHDLFIRInt.pl \
+ VHDLLMS.pl \
  VHDLInhomogeneous.pl \
  VHDLDistributor.pl \
- VHDLLMS.pl \
+ VHDLUpSample.pl \
+ VHDLDownSample.pl \
  VHDLCos.pl \
  VHDLSin.pl \
  VHDLExp.pl \
@@ -67,15 +70,12 @@ PL_SRCS = \
  VHDLCxToRect.pl \
  VHDLRectToPolar.pl \
  VHDLPolarToRect.pl \
+ VHDLCxToFloat.pl \
+ VHDLFloatToCx.pl \
  VHDLQuant.pl \
- VHDLUpSample.pl \
- VHDLDownSample.pl \
  VHDLXgraph.pl \
  VHDLXMgraph.pl \
  VHDLXYgraph.pl \
- VHDLConstCx.pl \
- VHDLCxToFloat.pl \
- VHDLFloatToCx.pl \
 
 # The .cc files
 SRCS =	$(PL_SRCS:.pl=.cc)
