@@ -7,14 +7,14 @@
 # usage: tychoSend tychoCommand
 
 set tclProgs [winfo interps]
-if { [expr ![regexp {Tycho\.tcl} $tclProgs]] } {
+if { [expr ![regexp {tycho} $tclProgs]] } {
     exec tycho &
-    while { [expr ![regexp {Tycho\.tcl} $tclProgs]] } {
+    while { [expr ![regexp {tycho} $tclProgs]] } {
 	set tclProgs [winfo interps]
     }
 }
 foreach prog $tclProgs {
-    if {[regexp {Tycho\.tcl} $prog]} {
+    if {[regexp {tycho} $prog]} {
 	break
     }
 }
