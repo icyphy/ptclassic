@@ -49,7 +49,7 @@ SYNCOMPAT = $(ROOT)/src/compat/synopsys
 INCL = -I$(VHDLKERNEL) -I$(VHDLSTARS) -I$(SDFKERNEL) \
  -I$(KERNDIR) -I$(CGKERNEL) -I$(CGCKERNEL) -I$(VHDLSIM) -I$(SYNCOMPAT) \
  -I$(PTOLEMY)/tcltk/tcl/include \
- -I$(X11_INCSPEC)
+ $(X11_INCSPEC)
 
 PL_SRCS = \
  CGCVSynchComm.pl \
