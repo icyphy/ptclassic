@@ -58,7 +58,7 @@ protected:
 	int codeGenInit();
 	
 	// Parse variable declarations to add "static"
-        void addStaticDecls( StringList result, const char *string );
+        void addStaticDecls( StringList &, const char * );
 	
         CodeStream mainLoopTerm;
 
