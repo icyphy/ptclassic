@@ -90,8 +90,8 @@ delim off
 .uh "\\f\\n(SXNAME:\\f(\\*F \\*(NM"
 .br
 .in +0.65i
-.tm headerU \\n(AS-\\n% \\*(NM \"Output for table of contents
-.tm index \\n(AS-\\n% \\*(NM \"Output for index
+.tm headerU \\n(AS-\\n% \\*(NM
+.tm index_star_def \\n(AS-\\n% \\*(NM (\\*(DO \\*(TY)
 ..
 
 .de SE
