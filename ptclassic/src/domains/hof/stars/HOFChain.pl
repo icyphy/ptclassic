@@ -129,7 +129,9 @@ to the last named block outputs according to output_map.
 	    if(!mom) return;
 
 	    // Create the first block
-	    Block* block = createBlock(*mom);
+	    Block* block = createBlock(*mom,
+				       (const char*)blockname,
+				       (const char*)where_defined);
 	    if (!block) return;
 
 	    // Connect the inputs to the first block
@@ -150,7 +152,10 @@ to the last named block outputs according to output_map.
 	    // Create the rest of the blocks and the internal connections
 	    for (int instno = 1; instno < (int)chain_length; instno++) {
 		Block* newblock;
-		if(!(newblock = createBlock(*mom))) return;
+		if(!(newblock = createBlock(*mom,
+				       (const char*)blockname,
+				       (const char*)where_defined)))
+		   return;
 		if(!(connectInternal(block,newblock))) return;
 
 		// The previous block is now fully connected.  Initialize it.

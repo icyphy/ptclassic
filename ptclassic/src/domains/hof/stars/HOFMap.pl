@@ -180,7 +180,9 @@ to the named block outputs according to output_map.
 		}
 	      }
 
-	      Block* block = createBlock(*mom);
+	      Block* block = createBlock(*mom,
+					 (const char*)blockname,
+					 (const char*)where_defined);
 	      if (!block) return 0;
 
 	      int i;
