@@ -21,7 +21,7 @@
 # CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 # ENHANCEMENTS, OR MODIFICATIONS.
 #		       
-# Programmer:  J. T. Buck
+# Programmers:  J. T. Buck, Christopher Hylands
 #
 # The ARCH environment variable must be set.
 # $Id$
@@ -45,6 +45,12 @@ sources depend: obj.$(ARCH)
 
 obj.$(ARCH) obj.$(ARCH)/octtools: MAKEARCH
 	csh -f MAKEARCH
+
+# This rule builds and installs everything but the gnu tools
+# tcltk and octtools source are distributed as a separate tar file
+everything: obj.$(ARCH) install_tcltk install_octtools install_xv install
+
+everything_clean: clean_tcltk clean_octtools clean_xv clean
 
 # This rule builds and installs gcc and tcl/tk from scratch, then octtools,
 # then everything else.
