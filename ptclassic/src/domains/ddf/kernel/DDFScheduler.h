@@ -112,6 +112,7 @@ public:
 	// Timing control funcs
 	void setStopTime (float limit);
 	void resetStopTime (float v);
+	float getStopTime() { return float(stopTime);}
 
 	// scheduler Period : interface with timed domain.
 	float schedulePeriod;
