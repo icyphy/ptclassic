@@ -59,7 +59,13 @@ public:
 	virtual ~ParScheduler();
 
 	// redefine "compileRun"
-	void compileRun();
+        /*virutal*/ void compileRun();
+
+        /*virutal*/ void setup();
+
+	// prepare code generation for each processing element:
+	// galaxy initialize, copy schedule, and simulate the schedule.
+	virtual void prepareCodeGen();
 
 	// reset the flag; to be called inside a wormhole.
 	void ofWorm() { inUniv = FALSE; }
