@@ -333,7 +333,7 @@ if {![info exists TychoBinaryInfo]} {
     set TychoBinaryInfo itkwish
 }
 if {![info exists TychoVersionInfo]} {
-    set TychoVersionInfo "Version 0.1.2devel,\
+    set TychoVersionInfo "Version 0.2devel,\
 	    running under Itcl ${itcl::version}, Tcl$tcl_patchLevel,\
 	    Tk$tk_version, \$TYCHO = $TYCHO"
 }
