@@ -291,7 +291,7 @@ CqLevelLink* CalendarQueue :: NextEvent()
 	    // might cause a event to look bad if it was just on the border.
 	    assert(result->level >= ( cq_bucketTop- 1.6*cq_interval ));
 	    cq_lastTime = result->level;	
-	    if (reg_cq_bucket[i] = reg_cq_bucket[i]->next) 
+	    if ( (reg_cq_bucket[i] = reg_cq_bucket[i]->next) ) 
 		reg_cq_bucket[i]->before = NULL;
 	    cq_lastBucket = i;
 	    cq_eventNum--;
