@@ -67,9 +67,15 @@ extern int errno;
 #include <errno.h>
 #include <stdio.h>
 #else
+#if defined(PTNT)
+#include <errno.h>
+extern char *sys_errlist[];
+extern int sys_nerr;
+#else
 extern int sys_nerr;
 extern char *sys_errlist[];
 extern int errno;
+#endif /* PTNT */
 #endif /* __GLIBC__ */
 #endif /* PT_SYS_NERR_STDLIB */
 #endif /* freebsd */
@@ -233,9 +239,9 @@ protected:
 	InvokeInterp interp;
 
 	// support one character directives
-	mergeFileContents(Tokenizer& lexer, char* token);
-	sendToInterpreter(Tokenizer& lexer, char* token);
-	getParameterName(Tokenizer& lexer, char* token);
+	int mergeFileContents(Tokenizer& lexer, char* token);
+	int sendToInterpreter(Tokenizer& lexer, char* token);
+	int getParameterName(Tokenizer& lexer, char* token);
 
 private:
 	// pushback token, for use in parsing
