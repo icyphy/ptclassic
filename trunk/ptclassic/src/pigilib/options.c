@@ -32,13 +32,16 @@ $Id$
 /* Includes */
 
 /* Standard includes */
-#include "local.h"			/* include "ansi.h" and "compat.h" */
+#include "local.h"		/* include compat.h, sol2compat.h, ansi.h */
 #include <stdio.h>
 
-/* Include sol2compat.h, oct.h, list.h, and rpc.h */
-/* Defines boolean, octObject, lsList, and RPC data structures, respectively */
-#include "options.h"
+/* Octtools includes */
+#include "oct.h"
+#include "list.h"		/* define lsList */
+#include "rpc.h"		/* define remote procedure calls */
 
+/* Pigilib includes */
+#include "options.h"
 #include "vemInterface.h"
 #include "edit.h"
 #include "exec.h"

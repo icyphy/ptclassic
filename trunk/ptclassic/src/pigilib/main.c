@@ -30,16 +30,20 @@ $Id$
 Initialization code for pigiRpc.
 */
 
-/* Includes */
-#include "local.h"			/* include "ansi.h" and "compat.h" */
+/* Standard includes */
+#include "local.h"		/* include compat.h, sol2compat.h, ansi.h */
 #include <stdio.h>
 #include <stdlib.h>
 
-/* Include sol2compat.h, oct.h, list.h, and rpc.h */
-/* Defines boolean, octObject, lsList, and RPC data structures, respectively */
-#include "main.h"
+/* Octtools includes */
+#include "oct.h"
+#include "list.h"		/* define lsList */
+#include "rpc.h"		/* define remote procedure calls */
 
+/* Pigilib includes */
+#include "main.h"
 #include "vemInterface.h"
+#include "utilities.h"
 #include "compile.h"
 #include "edit.h"
 #include "exec.h"
@@ -48,7 +52,6 @@ Initialization code for pigiRpc.
 #include "misc.h"
 #include "ganttIfc.h"
 #include "options.h"
-#include "utilities.h"
 #include "err.h"
 #include "xfunctions.h"
 #include "pigiLoader.h"

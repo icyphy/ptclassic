@@ -30,20 +30,22 @@ Version identification:
 $Id$
 */
 
-/* Includes */
-
-#include "local.h"			/* include "ansi.h" and "compat.h" */
+/* Standard includes */
+#include "local.h"		/* include compat.h, sol2compat.h, ansi.h */
 #include <stdio.h>
 #include <string.h>
 
-/* Include sol2compat.h, oct.h, list.h, and rpc.h */
-/* Defines boolean, octObject, lsList, and RPC data structures, respectively */
-#include "exec.h"
+/* Octtools includes */
+#include "oct.h"		/* define octObject */
+#include "list.h"		/* define lsList */
+#include "rpc.h"		/* define RPC data structures */
+#include "oh.h"
 
+/* Pigilib includes */
+#include "exec.h"
 #include "vemInterface.h"
 #include "compile.h"
 #include "octIfc.h"
-#include "oh.h"
 #include "edit.h"
 #include "err.h"
 #include "util.h"

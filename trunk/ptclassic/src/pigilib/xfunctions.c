@@ -35,18 +35,16 @@ Converted to Tcl/Tk by Kennard White and Edward Lee.
 */
 
 /* Standard includes */
-#include "local.h"			/* include "ansi.h" and "compat.h" */
+#include "local.h"		/* include sol2compat.h, ansi.h, compat.h */
 #include <stdlib.h>
 #include <stdio.h>
-#include <sys/types.h>
-#include <unistd.h>			/* Pick up getpid() */
-
-#include "tcl.h"
+#include <unistd.h>		/* Pick up getpid() */
+#include "tcl.h"		/* define Tcl_XXX routines */
 
 /* Pigilib includes */
+#include "xfunctions.h"
 #include "ptk.h"
 #include "vemInterface.h"
-#include "xfunctions.h"
 
 /*******************************************************************
 
@@ -95,7 +93,7 @@ void
 accum_string(string)
 const char *string;
 {
-    Tcl_SetVar(ptkInterp, "ptkProfileString", string,
+    Tcl_SetVar(ptkInterp, "ptkProfileString", (char *)string,
 	       TCL_APPEND_VALUE | TCL_GLOBAL_ONLY);
 }
 
