@@ -33,6 +33,7 @@ CGC=$(OBJDIR)/domains/cgc/stars
 CG56=$(OBJDIR)/domains/cg56/stars
 CG56DSP=$(OBJDIR)/domains/cg56/dsp/stars
 CG96=$(OBJDIR)/domains/cg96/stars
+CG96DSP=$(OBJDIR)/domains/cg96/dsp/stars
 
 # The following symbols point to the directories containing the source
 # code for the stars of each domain.
@@ -49,6 +50,7 @@ CGC_SRC=$(ROOT)/src/domains/cgc/stars
 CG56_SRC=$(ROOT)/src/domains/cg56/stars
 CG56DSP_SRC=$(ROOT)/src/domains/cg56/dsp/stars
 CG96_SRC=$(ROOT)/src/domains/cg96/stars
+CG96DSP_SRC=$(ROOT)/src/domains/cg96/dsp/stars
 
 
 # These include files define makefile symbols which list the
@@ -67,8 +69,9 @@ include $(CG_SRC)/cgstars.mk			# CG -> CGSTARS
 include $(CGDDF_SRC)/cgddfstars.mk		# CGDDF -> CGDDFSTARS
 include $(CGC_SRC)/cgcstars.mk			# CGC -> CGCSTARS
 include $(CG56_SRC)/cg56stars.mk		# CG56 -> CG56STARS
-include $(CG56DSP_SRC)/cg56dspstars.mk		# CG56DSP -> CG56STARS
+include $(CG56DSP_SRC)/cg56dspstars.mk		# CG56DSP -> CG56DSP_STARS
 include $(CG96_SRC)/cg96stars.mk		# CG96 -> CG96STARS
+include $(CG96_SRC)/cg96dspstars.mk		# CG96DSP -> CG96DSP_STARS
 
 # Extra targets
 SDFT = $(OBJDIR)/domains/sdf/targets
