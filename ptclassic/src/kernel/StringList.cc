@@ -21,6 +21,7 @@ $Id$
 #include <stream.h>
 #include "StringList.h"
 #include "UserOutput.h"
+#include <string.h>
 
 #define SMALL_STRING 20
 
@@ -125,6 +126,8 @@ StringList :: operator += (double f)
 {
 	char buf[SMALL_STRING];
         sprintf(buf,"%g",f);
+	if (strchr(buf,'e') == NULL && strchr(buf,'.') == NULL)
+		strcat(buf,".0");
 	return *this += buf;
 }
 
