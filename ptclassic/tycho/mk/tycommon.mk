@@ -297,7 +297,7 @@ $(LIBDIR)/$(LIBR_DEBUG):	$(LIBDIR)/$(LIBR)
 .SUFFIXES: .class .java
 .java.class:
 	rm -f `basename $< .java`.class
-	CLASSPATH=$(CLASSPATH)$(AUXCLASSPATH) $(JAVAC) $(JFLAGS) $<
+	CLASSPATH="$(CLASSPATH)$(AUXCLASSPATH)" $(JAVAC) $(JFLAGS) $<
 
 # Build all the Java class files.
 # Run in the subdirs first in case the subpackages need to be compiled first.
@@ -328,7 +328,7 @@ doc/codeDoc/tree.html:	$(JSRCS) $(OPTIONAL_JSRCS)
 	else \
 	if [ ! -d doc/codeDoc ]; then mkdir -p doc/codeDoc; fi; \
 	rm -f doc/codeDoc/*.html; \
-	CLASSPATH=$(CLASSPATH):$(JAVAHOME)/lib/classes.zip$(AUXCLASSPATH) \
+	CLASSPATH="$(CLASSPATH)$(CLASSPATHSEPARATOR)$(JAVAHOME)/lib/classes.zip$(AUXCLASSPATH)" \
 	   $(JAVADOC) $(JDOCFLAGS) -d doc/codeDoc $(JSRCS) $(OPTIONAL_JSRCS); \
 	for x in doc/codeDoc/*.html; do \
 		echo "Fixing paths in $$x"; \
@@ -341,10 +341,10 @@ doc/codeDoc/tree.html:	$(JSRCS) $(OPTIONAL_JSRCS)
 
 # Bring up the appletviewer on a test file.
 jtest: $(JTESTHTML) $(JCLASS)
-	CLASSPATH=$(CLASSPATH) appletviewer $(TESTHTML)
+	CLASSPATH="$(CLASSPATH)" appletviewer $(TESTHTML)
 
 htest-netscape: $(JTESTHTML) $(JCLASS)
-	CLASSPATH=$(CLASSPATH) netscape $(TESTHTML)
+	CLASSPATH="$(CLASSPATH)" netscape $(TESTHTML)
 
 # Create a zip file of the .class files
 # We cd up one level so that the zip file has the proper package name
@@ -472,12 +472,13 @@ jsrestore:
 
 # Compile the instrumented Java classes and include JavaScope.zip
 jsbuild:
-	$(MAKE) AUXCLASSPATH=:$(JSCLASSPATH) jclass
+	$(MAKE) AUXCLASSPATH="$(CLASSPATHSEPARATOR)$(JSCLASSPATH)" jclass
 # Run the test_jsimple rule with the proper classpath  
 jstest_jsimple:
-	$(MAKE) AUXCLASSPATH=:$(JSCLASSPATH) test_jsimple
+	$(MAKE) AUXCLASSPATH="$(CLASSPATHSEPARATOR)$(JSCLASSPATH)" test_jsimple
 	@echo "To view code coverage results, run javascope or jsreport"
 	@echo "To get a summary, run jsreport -dbsummary" 
+
 # If necessary, instrument the classes, then rebuild, then run the tests
 jsall: jsoriginal
 	$(MAKE) clean
