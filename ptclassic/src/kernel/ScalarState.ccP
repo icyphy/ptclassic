@@ -12,10 +12,11 @@ $Id$
                        All Rights Reserved.
 
  Programmer: I. Kuroda and J. T. Buck
- Date of creation: 6/15/89
+ Date of creation: 6/15/90
  Revisions:
 
- Functions for class <T>State
+ This file includes member functions for class <T>State, and also
+ those functions of the baseclass, State, that parse <T> expressions.
 
 **************************************************************************/
 /*************************************************************************
@@ -25,19 +26,19 @@ $Id$
 **************************************************************************/
 
 // return the type
-const char* <T>State :: type() { return "<T>";}
+const char* <T>State :: type() const { return "<T>";}
 
 // the value as a string
-StringList <T>State :: currentValue() { StringList s; s = val; return s;}
+StringList <T>State :: currentValue() const { StringList s; s = val; return s;}
 
 // clone
-State* <T>State :: clone () { return new <T>State;}
+State* <T>State :: clone () const { return new <T>State;}
 
 void <T>State  :: initialize() {
 	const  char* specialChars =  "*+-/()";
 	Tokenizer lexer(initValue,specialChars);
 
-	ParseToken t = evalExpression(lexer);
+	ParseToken t = eval<T>Expression(lexer);
 	if (t.tok != T_ERROR && t.tok != T_EOF)
 		val = t.<C>val;
 	ParseToken t2 = getParseToken (lexer, T_<T>);
@@ -45,13 +46,18 @@ void <T>State  :: initialize() {
 		parseError ("extra text after valid expression");
 }
 
-ParseToken <T>State :: evalExpression(Tokenizer& lexer) {
-	ParseToken t1 = evalTerm(lexer);
+// Baseclass parsing functions
+
+// an expression is either a term or a series of terms with intervening
+// '+' or '-' signs.
+
+ParseToken State :: eval<T>Expression(Tokenizer& lexer) {
+	ParseToken t1 = eval<T>Term(lexer);
 	if (t1.tok != T_<T>) return;
 	while (1) {
 		ParseToken t2 = getParseToken(lexer, T_<T>);
 		if (t2.tok == '+' || t2.tok == '-') {
-			ParseToken t3 = evalTerm(lexer);
+			ParseToken t3 = eval<T>Term(lexer);
 			if (t3.tok == T_EOF) {
 				parseError ("unexpected end of string");
 				return t3;
@@ -69,13 +75,16 @@ ParseToken <T>State :: evalExpression(Tokenizer& lexer) {
 	}
 } 
 
-ParseToken <T>State :: evalTerm(Tokenizer& lexer) {
-	ParseToken t1 = evalFactor(lexer);
+// a term is either a factor or a series of factors with intervening
+// '*' or '/' signs.
+
+ParseToken State :: eval<T>Term(Tokenizer& lexer) {
+	ParseToken t1 = eval<T>Factor(lexer);
 	if (t1.tok != T_<T>) return;
 	while (1) {
 		ParseToken t2 = getParseToken(lexer, T_<T>);
 		if (t2.tok == '*' || t2.tok == '/') {
-			ParseToken t3 = evalFactor(lexer);
+			ParseToken t3 = eval<T>Factor(lexer);
 			if (t3.tok == T_EOF) {
 				parseError ("unexpected end of string");
 				return t3;
@@ -93,8 +102,10 @@ ParseToken <T>State :: evalTerm(Tokenizer& lexer) {
 	}
 } 
 
+// a factor is any number of optional minus signs, followed
+// by either a parenthesized expression or a <T> value.
 
-ParseToken <T>State :: evalFactor(Tokenizer& lexer) {
+ParseToken State :: eval<T>Factor(Tokenizer& lexer) {
 	
 	<C> signflag = 1;
         ParseToken t = getParseToken(lexer, T_<T>);
@@ -107,7 +118,7 @@ ParseToken <T>State :: evalFactor(Tokenizer& lexer) {
 	case EOF:
 		break;
 	case '(':
-		ParseToken t1 = evalExpression(lexer);
+		ParseToken t1 = eval<T>Expression(lexer);
 		if (t1.tok != T_<T>) return t1;
 		t = getParseToken(lexer, T_<T>);
 		if (t.tok == ')') {
@@ -133,8 +144,3 @@ ParseToken <T>State :: evalFactor(Tokenizer& lexer) {
 // make knownstate entry
 static <T>State proto;
 static KnownState entry(proto,"<C>");
-
-	 
-
-
-	 

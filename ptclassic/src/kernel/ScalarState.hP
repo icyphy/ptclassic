@@ -34,10 +34,10 @@ public:
         void initialize();
 
         // the type
-	const char* type(); // { return "<T>";}
+	const char* type() const; // { return "<T>";}
 
         // the value as a string
-	StringList currentValue();
+	StringList currentValue() const;
 
         // assignment from a <C>
         <C> operator=(<C> rvalue) { return val = rvalue;}
@@ -45,13 +45,9 @@ public:
         // casting to a <C>
         operator <C>() { return val;}
 
-	State* clone (); //  {return new <T>State;}
+	State* clone () const; //  {return new <T>State;}
 
 private:
-	// Evaluate expression  in string
-	ParseToken evalExpression(Tokenizer& lexer);
-	ParseToken evalTerm(Tokenizer& lexer);
-	ParseToken evalFactor(Tokenizer& lexer);
 
 	friend class <T>ArrayState;
 
