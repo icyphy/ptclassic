@@ -274,15 +274,20 @@ ifdef VHDL
 		LIBS += -lvhdltargets
 		LIBFILES += $(LIBDIR)/libvhdltargets.$(LIBSUFFIX)
 	else
-		TARGETS += $(VHDLT)/CGCVReceive.o \
+		TARGETS += $(VHDLT)/ArchTarget.o \
+			$(VHDLT)/CGCVReceive.o \
 			$(VHDLT)/CGCVSend.o \
 			$(VHDLT)/CGCVSynchComm.o \
+			$(VHDLT)/SimLFTarget.o \
 			$(VHDLT)/SimMTTarget.o \
 			$(VHDLT)/SimVSSTarget.o \
 			$(VHDLT)/StructTarget.o \
+			$(VHDLT)/SynthAtchTarget.o \
 			$(VHDLT)/SynthTarget.o \
 			$(VHDLT)/VHDLCReceive.o \
 			$(VHDLT)/VHDLCSend.o \
+			$(VHDLT)/VHDLLFCReceive.o \
+			$(VHDLT)/VHDLLFCSend.o \
 			$(VHDLT)/VHDLCSynchComm.o
 	endif
 	# Tcl/Tk
