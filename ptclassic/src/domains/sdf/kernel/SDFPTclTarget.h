@@ -41,6 +41,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #include "SDFTarget.h"
 #include "GalIter.h"
+#include "StringState.h"
 
 class StarProfile {
 public:
@@ -92,12 +93,36 @@ private:
 
 class SDFPTclTarget : public SDFTarget {
 public:
-    /*virtual*/ int run();
-    /*virtual*/ void wrapup ();
+    // Constructor
     /*virtual*/ SDFPTclTarget(const char*, const char*);
+
+    /*virtual*/ int run();
+
+    /*virtual*/ void wrapup();
+
+    // Return a new copy of the target
     /*virtual*/ Block* makeNew() const;
+
     /*virtual*/ void writeFiring(Star&,int);
+
     /*virtual*/ void setStopTime(double);
+
+    // Directory 
+    StringState destDirectory;
+
+    // Generate the Ptcl description of a galaxy
+    StringList ptclDescription(Galaxy* localGalaxy, int addHeader);
+
+protected:
+    // Generate the Ptcl header code for a galaxy
+    StringList ptclHeaderCode(Galaxy* localGalaxy);
+
+    // Generate Ptcl description of a galaxy
+    StringList ptclGalaxyCode(Galaxy* localGalaxy);
+
+    // Generate Ptcl code specifying the execution time estimates
+    StringList ptclExecTimeCode();
+
 private:
     int numIters;
     StarProfiles starProfiles;

@@ -49,14 +49,15 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "ProfileTimer.h"
 
 // Constructor
-SDFPTclTarget::SDFPTclTarget(const char* nam,const char* desc)
-: SDFTarget(nam,desc), numIters(0) {
+SDFPTclTarget::SDFPTclTarget(const char* nam,const char* desc) :
+SDFTarget(nam,desc), numIters(0) {
+    addState(destDirectory.setState("directory", this,
+	"$HOME/PTOLEMY_SYSTEMS/ptcl", "Directory to write to"));
 }
 
 Block* SDFPTclTarget::makeNew() const {
-	LOG_NEW; return new SDFPTclTarget(name(), descriptor());
+    LOG_NEW; return new SDFPTclTarget(name(), descriptor());
 }
-
 
 void  SDFPTclTarget::writeFiring(Star& s, int) {
     ProfileTimer firingTimer;
@@ -64,55 +65,64 @@ void  SDFPTclTarget::writeFiring(Star& s, int) {
     starProfiles.lookup(s)->addTime(firingTimer.elapsedCPUTime());
 }
 
-// We really shouldn't have to do this.  There should not be a
+// FIXME: We really shouldn't have to do this.  There should not be a
 // compileRun method for the scheduler, just a run.  In the compile
 // mode the scheduler()->setStopTime(1) (to print out one iteration) -
 // in the simulation mode the stop time should be set to the number of
-// iterations.  For now, code duplication is done FIXME.
+// iterations.  For now, code duplication is done.
 void SDFPTclTarget::setStopTime (double limit) {
     numIters = int(floor(limit + 0.001));
 }
 
-int SDFPTclTarget::run() {
-
-    // CallltRequested to process pending events and check for halt
-    // If the user hit the DISMISS button in the run control panel,
-    // then the universe referenced by galaxy() will return a null pointer
-    int haltFlag = SimControl::haltRequested();
-    if (! galaxy() || haltFlag) {
-        Error::abortRun("SDF PTcl target has no galaxy to run");
-        return FALSE;
-    }
-
-    starProfiles.set(*galaxy());
-    int numItersSoFar=0;
-    while (numItersSoFar++ < numIters && !SimControl::haltRequested())
-	scheduler()->compileRun();
+// Generate a PTcl description for galaxy without having to execute it
+StringList SDFPTclTarget::ptclDescription(Galaxy* localGalaxy, int addHeader) {
     StringList ptclCode;
-    ptclCode << "reset\nnewuniverse " << galaxy()->name() << " SDF\n";
+    if (localGalaxy) {
+	if (addHeader) {
+	    // Necessary to store returned StringList to ensure that
+	    // temporary variables are handled correctly.  GNU 2.7 bug.
+    	    StringList headerCode = ptclHeaderCode(localGalaxy);
+    	    ptclCode << headerCode;
+	}
+	// Necessary to store returned StringList to ensure that
+	// temporary variables are handled correctly.  GNU 2.7 bug.
+	StringList galCode = ptclGalaxyCode(localGalaxy);
+	ptclCode << galCode;
+    }
+    return ptclCode;
+}
+
+StringList SDFPTclTarget::ptclHeaderCode(Galaxy* localGalaxy) {
+    StringList ptclCode;
+    ptclCode << "reset\n"
+	     << "newuniverse " << localGalaxy->name() << " SDF\n";
+    return ptclCode;
+}
+
+// Generate the PTcl code describing the run-time estimates collected
+// by repeated runs of the galaxy in the CGC domain 
+StringList SDFPTclTarget::ptclExecTimeCode() {
+    StringList ptclCode;
+
+    // Iterate over the stars in the galaxy
     GalStarIter nextStar(*galaxy());
     Star* star;
-    int nports = setPortIndices(*galaxy());
-    int* portNumber = new int[nports];
     while ((star = nextStar++) != NULL) {
 	StringList starName;
-        starName << " \"" << star->fullName() << "\" ";
+	starName << " \"" << star->fullName() << "\" ";
 	StringList setstate;
 	setstate << "\tsetstate" << starName;
 	ptclCode << "\n\tstar" << starName << "CGCMultiInOut\n"
 		 << setstate << "name " << star->className() << "\n"
 		 << setstate << "execTime "
 		 << starProfiles.lookup(*star)->avgTime() << "\n";
-	int input=1;
-	int output=1;
 	StringList inputParams, outputParams;
 	inputParams << setstate << "inputParams \"{ ";
 	outputParams << setstate << "outputParams \"{ ";
 	BlockPortIter nextPort(*star);
 	DFPortHole* port;
 	while ((port = (DFPortHole*)nextPort++) != NULL) {
-	    portNumber[port->index()] = (port->isItInput()?input++:output++);
-	    (port->isItInput()? inputParams: outputParams)
+	    (port->isItInput() ? inputParams: outputParams)
 		<< "(" << port->numXfer() << "," << port->maxDelay() << ") ";
 	}
 	inputParams << "}\"\n"; 
@@ -120,7 +130,32 @@ int SDFPTclTarget::run() {
 	ptclCode << inputParams << outputParams;
     }
     ptclCode << '\n';
+
+    return ptclCode;
+}
+
+StringList SDFPTclTarget::ptclGalaxyCode(Galaxy* localGalaxy) {
+    StringList ptclCode;
+
+    // Iterator over the stars in the galaxy
+    GalStarIter nextStar(*localGalaxy);
+    Star* star;
+
+    // Create table of connections between ports of different stars
+    int nports = setPortIndices(*localGalaxy);
+    int* portNumber = new int[nports];
+    while ((star = nextStar++) != NULL) {
+	int input = 1;
+	int output = 1;
+	BlockPortIter nextPort(*star);
+	DFPortHole* port;
+	while ((port = (DFPortHole*)nextPort++) != NULL) {
+	    portNumber[port->index()] = (port->isItInput()?input++:output++);
+	}
+    }
     nextStar.reset();
+
+    // Generate the Ptcl code for the galaxy
     while ((star = nextStar++) != NULL) {
 	StringList starName;
 	starName << " \"" << star->fullName() << "\" ";
@@ -138,15 +173,37 @@ int SDFPTclTarget::run() {
 	}
     }
     delete [] portNumber;
+
+    return ptclCode;
+}
+
+int SDFPTclTarget::run() {
+    // Call haltRequested to process pending events and check for halt
+    // If the user hit the DISMISS button in the run control panel,
+    // then the universe referenced by galaxy() will return a null pointer
+    int haltFlag = SimControl::haltRequested();
+    if (! galaxy() || haltFlag) {
+	Error::abortRun("SDF PTcl target has no galaxy to run");
+	return FALSE;
+    }
+
+    starProfiles.set(*galaxy());
+    int numItersSoFar = 0;
+    while (numItersSoFar++ < numIters && !SimControl::haltRequested())
+	scheduler()->compileRun();
+
+    StringList ptclCode = ptclHeaderCode(galaxy());
+    ptclCode << ptclExecTimeCode() << ptclGalaxyCode(galaxy());
+
     StringList ptclFileName;
-    char* path = expandPathName("$HOME/PTOLEMY_SYSTEMS/ptcl");
+    char* path = expandPathName(destDirectory);
     ptclFileName << path << "/" << galaxy()->name() << ".pt";
     delete [] path;
     pt_ofstream ptclFile(ptclFileName);
     ptclFile << ptclCode;
+
     return TRUE;
 }
 
 void SDFPTclTarget::wrapup() {
 };
-
