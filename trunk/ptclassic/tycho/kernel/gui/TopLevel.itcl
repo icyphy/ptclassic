@@ -511,8 +511,10 @@ body ::tycho::TopLevel::nextWindow {{raise 0}} {
 		[uplevel #0 info which -command $win] != {} && \
 		[$win isa ::tycho::TopLevel]} {
             # Deferred version overrides wm focus change due to window
-            # exposure.  FIXME: There must be a better way...
-            after 200 "$win focusin"
+            # exposure.
+	    # Use a catch in case the window has been deleted. (Why
+	    # does this happen? -- hjr )
+            after 200 [list catch "$win focusin"]
 	    $win focusin
 	    if {$raise != 0} {$win raiseWindow}
 	    break
