@@ -5,7 +5,7 @@ defstar {
 	version { @(#)CG56RampInt.pl	1.2	2/27/96 }
 	author { Luis Javier Gutierrez and David G. Messerschmitt }
 	copyright{
-Copyright (c) 1990-1996 The Regents of the University of California.
+Copyright (c) 1996-%Q% The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, an disclaimer of warranty provisions.
