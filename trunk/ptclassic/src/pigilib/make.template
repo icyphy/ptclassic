@@ -68,7 +68,6 @@ CHDRS	      = compile.h \
 		poct.h \
 		ptcl.h \
 		pthreadsCompat.h \
-		ptk.h \
 		ptkNet.h \
 		ptkRegisterCmds.h \
 		ptkTclIfc.h \
