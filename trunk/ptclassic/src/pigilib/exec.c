@@ -134,5 +134,5 @@ void
 PigiErrorMark(objName)
 char *objName;
 {
-    FindAndMarkError(lastFacet, objName);
+    FindAndMarkError(&lastFacet, objName);
 }
