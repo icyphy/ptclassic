@@ -34,10 +34,13 @@
 # for the non-blocking download. Need to make one per URL
 # (and non-global?)
 #
-# DO NOT USE THIS VARIABLE DIRECTLY! Use method httpset instead.
+# The current status of an http get. This is a common array
+# so that tkwait can access it. Can be "header," "body,"
+# "abort," or "done".
+## DO NOT USE THIS VARIABLE DIRECTLY! Use method httpset instead.
 set _httpstatus(http://127.0.0.1) done
 
-#######################################################################
+######################################################################
 #### ResourceHTTP
 #
 # This provides an abstraction of remote files for anything that
@@ -45,32 +48,31 @@ set _httpstatus(http://127.0.0.1) done
 # from functionalities which include: cache, updating cache, HTTP
 # protocol, socket error, etc.
 #
-# Here is a quick mini-tutorial to get familiar with this class. You
-# can also take a look at the global procedure "::tycho::resource"
-# to see how it interacts with this class.<br>
+# Here is a quick mini-tutorial to get familiar with this class. These
+# should be executed sequentially. Please look at the global procedure 
+# "::tycho::resource" to see how it interacts with this class.<br>
 # <ul>
-# <li><b>Select the site to see...</b>
-# <tcl>1:<pre>  set site "http://ptolemy.eecs.berkeley.edu"</pre></tcl>
-# <tcl>2:<pre>  set site "http://www.eecs.berkeley.edu"</pre></tcl>
-# <tcl>3:<pre>  set site "http://www.cs.berkeley.edu"</pre></tcl>
-# <tcl>4:<pre>  set site "http://http.cs.berkeley.edu"</pre></tcl>
+# <li><b>Select one of the following sites to see...</b><br>
+# <tcl><pre>set site "http://ptolemy.eecs.berkeley.edu"</pre></tcl>
+# <tcl><pre>set site "http://www.eecs.berkeley.edu"</pre></tcl>
+# <tcl><pre>set site "http://www.cs.berkeley.edu"</pre></tcl>
+# <tcl><pre>set site "http://http.cs.berkeley.edu"</pre></tcl>
+# <tcl><pre>set site "http://www-inst.eecs.berkeley.edu"</pre></tcl>
+# <tcl><pre>set site "http://www.berkeley.edu"</pre></tcl>
 #
 # <li><b>See if the object exists or not</b><tcl>
 # <pre>  ::tycho::ResourceHTTP::exists $site
 # </pre></tcl>
 #
-# <li><b>Create a new HTTP object</b><tcl>
+# <li><b>Create a new HTTP object, and set the pathname</b><tcl>
 # <pre>  set httpobj [::tycho::autoName httpdemo]
 #   ::tycho::ResourceHTTP $httpobj
-# </tcl></pre>
-#
-# <li><b>Set the pathname, in our case, the site</b><tcl>
-# <pre>  $httpobj connect $site
-# </tcl></pre>
+#   $httpobj connect $site
+# </pre></tcl>
 #
 # <li><b>Open for reading</b><tcl>
 # <pre>  $httpobj open r
-# </tcl></pre>
+# </pre></tcl>
 #
 # <li><b>Print out first 50 lines in this HTML file</b><tcl>
 # <pre>  set i 0
@@ -79,7 +81,42 @@ set _httpstatus(http://127.0.0.1) done
 #     lappend line [$httpobj gets]
 #   }
 #   ::tycho::inform $line
-# </tcl></pre>
+# </pre></tcl>
+# </ul>
+#
+# <hr><!-- ************************************************ -->
+# <br>
+# Here is another demo that demonstrates simultaneous download
+# of HTTP files:
+# <ul>
+# <li><b>Setup the sites to download</b><tcl>
+# <pre>set site1 "http://ptolemy.eecs.berkeley.edu"
+# set site2 "http://www.eecs.berkeley.edu"
+# set site3 "http://www.berkeley.edu"</pre></tcl>
+#
+# <li><b>Create objects that correspond with these sites</b><tcl>
+# <pre>set httpobj1 [::tycho::autoName httpdemo]
+# set httpobj2 [::tycho::autoName httpdemo]
+# set httpobj3 [::tycho::autoName httpdemo]
+# ::tycho::ResourceHTTP $httpobj1
+# ::tycho::ResourceHTTP $httpobj2
+# ::tycho::ResourceHTTP $httpobj3
+# $httpobj1 connect $site1
+# $httpobj2 connect $site2
+# $httpobj3 connect $site3</pre></tcl>
+#
+# <li><b>Open up connection, download:</b><tcl>
+# <pre>$httpobj1 open r
+# $httpobj2 open r
+# $httpobj3 open r</pre></tcl>
+#
+# <li><b>Read in the lines (you can press multiple times)</b><tcl>
+# <pre>set line {}
+# lappend line [list &#92
+#   "site1 returns:\n[$httpobj1 gets]\n\n" &#92
+#   "site2 returns:\n[$httpobj2 gets]\n\n" &#92
+#   "site3 returns:\n[$httpobj3 gets]\n\n"]
+# ::tycho::inform $line</pre></tcl>
 # </ul>
 class ::tycho::ResourceHTTP {
     inherit ::tycho::Resource
@@ -228,13 +265,6 @@ class ::tycho::ResourceHTTP {
 
     # The status info obtained from a given URL
     protected common _statinfo
-
-    # The current status of an http get. This is a common array
-    # so that tkwait can access it. Can be "header," "body,"
-    # "abort," or "done".
-    #
-    # DO NOT USE THIS VARIABLE! Instead, use the method httpset
-    #protected common _httpstatus
 
     ###################################################################
     ####                        protected variables                ####
@@ -880,11 +910,6 @@ body ::tycho::ResourceHTTP::httpget {url type} {
 # </pre>
 #
 body ::tycho::ResourceHTTP::httpread {} {
-    # If at eof, we're done
-    if [::eof $socketid] {
-	httpdone
-	return
-    }
     # Disconnect the file handler. It gets reconnected again
     # at the end of this method. This is the only way
     # I can find of keeping the user interface live when
@@ -893,6 +918,12 @@ body ::tycho::ResourceHTTP::httpread {} {
     # gets called recursively and Tcl bombs out with a stack
     # overflow.)
     ::fileevent $socketid readable {}
+
+    # If at eof, we're done
+    if [::eof $socketid] {
+	httpdone
+	return
+    }
 
     # Currently reading header or body?
     if { [httpstatus] == "header" } {
@@ -1022,12 +1053,12 @@ body ::tycho::ResourceHTTP::splitURL {url} {
 # Wait until the current GET completes
 body ::tycho::ResourceHTTP::httpwait {} {
     # Wait until the status becomes "done"
-    #::puts -nonewline ">>>>Waiting ($currentURL=" ; flush stdout
+    #::puts -nonewline ">>>>Waiting (($socketid) $currentURL?" ; flush stdout
     while { [httpstatus] != "done" } {
         uplevel #0 "tkwait variable _httpstatus($currentURL)"
         #tkwait variable _httpstatus
     }
-    #::puts "=$currentURL) DONE<<<<" ; flush stdout
+    #::puts "[::tycho::url tail $currentURL]<<<<" ; flush stdout
     return
 }
 
