@@ -1297,9 +1297,11 @@ int masterCmp(a,b)
      CONST char *a;
      CONST char *b;
 {
-    struct octInstance *one = &((CONST octObject *) a)->contents.instance,
-		       *two = &((CONST octObject *) b)->contents.instance;
-    int retval=0;
+  CONST struct octInstance *one = &((CONST octObject *) a)->contents.instance,
+ 	  	           *two = &((CONST octObject *) b)->contents.instance;
+
+
+  int retval=0;
 
 	/* SUPPRESS 255 */
     (void)((retval = strcmp(one->master, two->master)) ||
