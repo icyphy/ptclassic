@@ -332,10 +332,11 @@ body ::tycho::Exec::execProcess { {cmd {}} {dir {}} {maxline {999999}} } {
     if { $dirToExecFrom != {} } {
         set saveDir [pwd]
         cd "$dirToExecFrom"
+        # Add command to history log...
+        addHistory "<<Running: $commandToExec in $dirToExecFrom>>\n"
+    } else {
+        addHistory "<<Running: $commandToExec in [pwd]>>\n"
     }
-
-    # Add command to history log...
-    addHistory "<<Running: $commandToExec in $dirToExecFrom>>\n"
 
     #set continue 0
     #after 1000 set continue 1
@@ -363,10 +364,11 @@ body ::tycho::Exec::execProcess { {cmd {}} {dir {}} {maxline {999999}} } {
 	if [catch {set fd [open \
 		[concat "|$commandToExec |& cat"] {RDONLY NONBLOCK}]} \
 		errMsg] {
+	    set $statusVariableName "abnormal"
 	    addHistory "$errMsg\n"
             # The following will hang Monitor
 	    #error "$errMsg"
-            ::tycho::inform "$errMsg"
+            i::tycho::inform "$errMsg"
             return
         }
 	# Execution is okay, so register our file event handler
