@@ -184,7 +184,7 @@ checkjunk:
 		done ; \
 	fi
 
-CRUD=*.o *.so core *~ *.bak ,* LOG* $(KRUFT) 
+CRUD=*.o *.so core *~ *.bak ,* LOG* *.class $(KRUFT)  
 
 clean:
 	rm -f $(CRUD)
