@@ -30,7 +30,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 static char SccsId[] = "$Id$";
 #endif
 
-#define NEED_SYS_ERRLIST	// compat.h uses this.
+#define NEED_SYS_ERRLIST	/* compat.h uses this. */
 #include "topFixup.h"
 #include "topStd.h"
 #include "topMem.h"
