@@ -118,7 +118,6 @@ proc ptkGantt_DualMove { chartName dir args } {
 }
 
 proc ptkGantt_Zoom { universe num_procs period dir } {
-puts "Hi!"
 
     set chartName .gantt_${universe}
 
@@ -127,9 +126,9 @@ puts "Hi!"
     #
     set zoomFactor [lindex [$chartName.mbar.zoomindex configure -text] 4]
 
-    if {$dir == "out" && $zoomFactor <= 1.0} {
-	return
-    }
+#    if {$dir == "out" && $zoomFactor <= 1.0} {
+#	return
+#    }
 
     set ganttFont -adobe-courier-medium-r-normal--10-100-75-75-m-60-iso8859-1
     if {$dir == "in"} {
@@ -142,22 +141,16 @@ puts "Hi!"
     $chartName.mbar.zoomindex configure -text $zoomFactor
 
 
-    # Figure out the new width of the canvas
-
-    set new_width [expr [expr [lindex [$chartName.mbar.zoomindex configure \
-	    -text] 4] * $period] + 2]
-
-    # delete labels and bar then scale boxes
+    # delete star name labels and vertical bar
     ptkClearHighlights
     $chartName.chart.graph delete slabel bar
-    $chartName.chart.graph scale box 1c 0 $scale 1.0
 
     # Delete the tick marks and labels and redraw them
 
     $chartName.chart.ruler delete tick label
     set rulerLow   [winfo pixels $chartName 1c]
     set rulerWidth [winfo pixels $chartName [expr $zoomFactor * $period]c]
-    set rulerHigh [expr $rulerLow + $rulerWidth]
+    set rulerHigh  [expr $rulerLow + $rulerWidth]
 
     set labelWidth [gantt_measureLabel $chartName.chart.ruler $period]
     set increment  [axisIncrement 0 $period $rulerWidth $labelWidth 10]
@@ -176,8 +169,27 @@ puts "Hi!"
     }
     ${chartName}.chart.ruler create line 1c 1c $rulerHigh 1c -tags tick
 
+    # move the boxes
+
+    foreach box [$chartName.chart.graph find withtag box] {
+	assign x0 y0 x1 y1 [$chartName.chart.graph coords $box]
+
+	set tags [$chartName.chart.graph gettags $box]
+	scan  [lindex $tags [lsearch $tags _start*]] _start%d start
+	scan  [lindex $tags [lsearch $tags _finish*]] _finish%d fin
+
+	set startPixel [winfo pixel $chartName [expr $start*$zoomFactor + 1]c]
+	set finPixel   [winfo pixel $chartName [expr $fin  *$zoomFactor + 1]c]
+
+	${chartName}.chart.graph coords $box $startPixel $y0 $finPixel $y1
+    }
+
+    #    $chartName.chart.graph scale box 1c 0 $scale 1.0
+
 
     # set new scrollregion
+    set new_width [expr $zoomFactor * $period + 2]
+
     $chartName.chart.graph configure -scrollregion \
 	    "0 0 ${new_width}c ${num_procs}i"
     $chartName.chart.ruler configure -scrollregion "0 0 ${new_width}c 1.5c"
@@ -210,7 +222,6 @@ proc ptkGantt_DrawProc { universe num_procs period proc star_name start fin } {
     set chartName .gantt_${universe}
     set ganttFont -adobe-courier-medium-r-normal--10-100-75-75-m-60-iso8859-1
 
-
     if ![winfo exists ${chartName}.chart] {
 
 	# first we add the zoom buttons...not done earlier because we need
@@ -220,38 +231,83 @@ proc ptkGantt_DrawProc { universe num_procs period proc star_name start fin } {
 	button $chartName.mbar.zoomout -text "Zoom Out" -command \
 		"ptkGantt_Zoom $universe $num_procs $period out"
 	label $chartName.mbar.zoomlabel -text "   Zoom factor: "
-	label $chartName.mbar.zoomindex -text "1.0" -relief sunken 
+	label $chartName.mbar.zoomindex -text "1.0"
 	pack $chartName.mbar.zoomin $chartName.mbar.zoomout \
 		$chartName.mbar.zoomlabel $chartName.mbar.zoomindex -side left
 
+	# Figure out what zoom factor to use to make the chart
+	# fit in a reasonable sized screen.
+
+	set minWidth 12
+	set zoomFactor [expr double($period) / $minWidth]
+	set zoomFactor [expr 1.0 / [roundDownTwo $zoomFactor]]
+
+	$chartName.mbar.zoomindex configure -text $zoomFactor
+
+	set chartWidth [expr $period*$zoomFactor]
+
 	# Here we create the ruler
+	
+ 	canvas ${chartName}.chart
+ 	pack ${chartName}.chart
+ 
+ 	canvas ${chartName}.chart.ruler -width [expr $chartWidth + 2]c \
+ 		-height 1.5c -xscrollcommand "${chartName}.xscroll set" \
+ 		-scrollregion "0i 0i [expr $chartWidth + 2]c 1.5c"
+ 	pack ${chartName}.chart.ruler -in ${chartName}.chart
 
-	canvas ${chartName}.chart
-	pack ${chartName}.chart
+	# Draw the ruler and labels
 
-	canvas ${chartName}.chart.ruler -width [expr $period + 2]c \
-		-height 1.5c -xscrollcommand "${chartName}.xscroll set" \
-		-scrollregion "0i 0i [expr $period + 2]c 1.5c"
-	pack ${chartName}.chart.ruler -in ${chartName}.chart
-	${chartName}.chart.ruler create line 1c 0.5c 1c 1c  \
-		[expr $period + 1]c 1c [expr $period + 1]c \
-		0.5c -tags tick
-	for { set i 0 } { $i < $period } { incr i } {
-	    set x [expr $i + 1]
-	    ${chartName}.chart.ruler create line ${x}c 0.5c ${x}c 1c -tags tick
-	    ${chartName}.chart.ruler create text $x.15c .75c -text $i \
+	set rulerLow   [winfo pixels $chartName 1c]
+	set rulerWidth [winfo pixels $chartName ${chartWidth}c]
+	set rulerHigh  [expr $rulerLow + $rulerWidth]
+	
+	set labelWidth [gantt_measureLabel $chartName.chart.ruler $period]
+	set increment  [axisIncrement 0 $period $rulerWidth $labelWidth 10]
+	if { $increment < 1 } {
+	    set increment 1
+	}
+	set values  [rangeValues 0 $period $increment]
+	set tickPos [mapRange    0 $period $values $rulerLow $rulerHigh]
+	
+	foreach* x $tickPos i $values {
+	    ${chartName}.chart.ruler create line $x 0.5c $x 1c -tags tick
+	    ${chartName}.chart.ruler create text \
+		    [expr $x + [winfo pixels $chartName .15c]] .75c \
+		    -text [format {%.0f} $i] \
 		    -anchor sw -tags label
 	}
-	${chartName}.chart.ruler create text [expr $period + 1].15c \
-		.75c -text $period -anchor sw -tags label
+	${chartName}.chart.ruler create line 1c 1c $rulerHigh 1c -tags tick
+
+
+# 	canvas ${chartName}.chart
+# 	pack ${chartName}.chart
+# 
+# 	canvas ${chartName}.chart.ruler -width [expr $period + 2]c \
+# 		-height 1.5c -xscrollcommand "${chartName}.xscroll set" \
+# 		-scrollregion "0i 0i [expr $period + 2]c 1.5c"
+# 	pack ${chartName}.chart.ruler -in ${chartName}.chart
+# 	${chartName}.chart.ruler create line 1c 0.5c 1c 1c  \
+# 		[expr $period + 1]c 1c [expr $period + 1]c \
+# 		0.5c -tags tick
+# 	for { set i 0 } { $i < $period } { incr i } {
+# 	    set x [expr $i + 1]
+# 	    ${chartName}.chart.ruler create line ${x}c 0.5c ${x}c 1c -tags tick
+# 	    ${chartName}.chart.ruler create text $x.15c .75c -text $i \
+# 		    -anchor sw -tags label
+# 	}
+# 	${chartName}.chart.ruler create text [expr $period + 1].15c \
+# 		.75c -text $period -anchor sw -tags label
+#
+
 
 	# Now we create the chart
 
-	canvas ${chartName}.chart.graph -width [expr $period + 2]c \
+	canvas ${chartName}.chart.graph -width [expr $chartWidth + 2]c \
 		-height ${num_procs}i -xscrollcommand \
 		"${chartName}.xscroll set" -yscrollcommand  \
 		"${chartName}.yscroll set" -bg black -scrollregion \
-		"0i 0i [expr $period + 2]c ${num_procs}i"
+		"0i 0i [expr $chartWidth + 2]c ${num_procs}i"
 	pack ${chartName}.chart.graph -in ${chartName}.chart
 
 	# Now we create the label for the processors
@@ -276,24 +332,54 @@ proc ptkGantt_DrawProc { universe num_procs period proc star_name start fin } {
 		$chartName x" -orient horizontal
 	pack ${chartName}.xscroll -fill x -before ${chartName}.chart -side \
 		bottom
-
     }
+
+    # Draw a single box. In order that rounding errors don't mess
+    # up box positions if there are lots of them, I put the start
+    # and finish times in the tags of the box... -- hjr
+
     if {$start < $fin} {
-	set tags_list [list box star_$star_name p$proc]
-	${chartName}.chart.graph create rectangle [expr $start + 1]c \
-	[expr $proc - 1]i [expr $fin + 1]c \
-		${proc}i -fill [lindex $ptkGantt_Colors \
-		[expr $proc - 1]] -outline black -tags $tags_list
+	set zoomFactor [lindex [$chartName.mbar.zoomindex configure -text] 4]
+
+	set startPixel [winfo pixel $chartName [expr $start*$zoomFactor + 1]c]
+	set finPixel   [winfo pixel $chartName [expr $fin  *$zoomFactor + 1]c]
+	set tags_list  [list box star_$star_name p$proc _start$start _finish$fin]
+
+	${chartName}.chart.graph create rectangle \
+		$startPixel [expr $proc - 1]i \
+		$finPixel ${proc}i \
+		-fill [lindex $ptkGantt_Colors [expr $proc - 1]] \
+		-outline black \
+		-tags $tags_list
+
 	if {[expr [string length $star_name] * 10] <= [expr \
-		($fin - $start)*28.3] } {
-	    ${chartName}.chart.graph create text [expr $start + 1]c \
-		    [expr $proc -1]i -width [expr $fin - $start]i \
+		$finPixel - $startPixel] } {
+	    ${chartName}.chart.graph create text $startPixel \
+		    [expr $proc -1]i -width [expr $finPixel - $startPixel] \
 		    -text $star_name -font $ganttFont -anchor nw -fill white \
 		    -tags "slabel"
 	}
 	pack ${chartName}.chart.graph
     }
+
+#     if {$start < $fin} {
+# 	set tags_list [list box star_$star_name p$proc]
+# 	${chartName}.chart.graph create rectangle [expr $start + 1]c \
+# 	[expr $proc - 1]i [expr $fin + 1]c \
+# 		${proc}i -fill [lindex $ptkGantt_Colors \
+# 		[expr $proc - 1]] -outline black -tags $tags_list
+# 	if {[expr [string length $star_name] * 10] <= [expr \
+# 		($fin - $start)*28.3] } {
+# 	    ${chartName}.chart.graph create text [expr $start + 1]c \
+# 		    [expr $proc -1]i -width [expr $fin - $start]i \
+# 		    -text $star_name -font $ganttFont -anchor nw -fill white \
+# 		    -tags "slabel"
+# 	}
+# 	pack ${chartName}.chart.graph
+#     }
+
 }
+
 
 # Here is the ptkGanttHighlight proc to highlight the stars
 
@@ -606,6 +692,20 @@ proc y1 {xy} {
 
 
 #
+# Given a number, round up or down to the nearest power of two.
+#
+proc roundUpTwo {x} {
+    set exp [expr ceil (log($x)/log(2))]
+    set x   [expr pow(2,$exp)]
+}
+
+proc roundDownTwo {x} {
+    set exp [expr floor (log($x)/log(2))]
+    set x   [expr pow(2,$exp)]
+}
+
+
+#
 # Given a number, round up to the nearest power of ten
 # times 1, 2, or 5.
 #
@@ -631,17 +731,9 @@ proc axisRoundUp {x} {
 # the field increment so they will fit.
 #
 proc axisIncrement {low high space width padding} {
-puts "axisIncrement $low $high $space $width $padding"
-
     set maxnum   [expr $space / ($width+$padding)]
-puts "maxnum = $maxnum"
-
     set estimate [expr (double($high) - $low) / ($maxnum)]
-puts "estimate = $estimate"
-
     set estimate [axisRoundUp $estimate]
-
-puts "estimate = $estimate"
 
     return $estimate
 }
@@ -793,6 +885,22 @@ proc readopt {option listname} {
 	return $v
     }
     return ""
+}
+
+
+#
+# assign
+#
+# Assign elements of a list to multiple variables. Doesn't
+# care if the list is longer than the number of variables, ot
+# the list is too short. (Should probably at least put an assertion
+# in here...)
+#
+proc assign {args} {
+    foreach* var [linit $args] val [llast $args] {
+	upvar $var v
+	set v $val
+    }
 }
 
 
