@@ -360,9 +360,14 @@ Place the cursor over the ramp icon and execute
 that shows the current parameters of the ramp.
 .IE edit-params
 .LE
-Replace the value of ``step'' with ``0.0628''.
+Replace the value of ``step'' with ``PI/50''.
 (You can use control-k to erase the old value.)
 Finally, click the ``OK'' button to store the new parameters.
+This is an example of Ptolemy's parameter expression syntax.
+This syntax supports addition, subtraction, multiplication,
+and division, written exactly as they would be in C or Fortran
+(exponentiation is not supported).  The built-in symbol PI has
+the value 3.14... as you would expect.
 .in -0.5i
 .BU
 Run the simulation again using 100 iterations.  This time the output
