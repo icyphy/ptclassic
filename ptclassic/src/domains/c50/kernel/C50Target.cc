@@ -44,20 +44,24 @@ Base target for TI 320C5x assembly code generation.
 #include "FixState.h"
 
 int C50Target :: compileCode() {
-        StringList assembleCmds;
-        assembleCmds << "assembl " << filePrefix << ".asm";
-        if (systemCall(assembleCmds,"Errors in assembly")!=0)
-                return FALSE;
-        return TRUE;
+
+      StringList assembleCmds;
+      assembleCmds << "assembl " << filePrefix << ".asm";
+      if (systemCall(assembleCmds,"Errors in assembly")!=0)
+              return FALSE;
+      return TRUE;
 }
 
 void C50Target :: headerCode () {
+
+// code starts at address 1AC0h so that splits the SARAM chip in C50 into
+// two sections, one for program and one for data, each roughly 4400 words
+// long.
+
     TITarget::headerCode();
     myCode << "\t.mmregs\t		; Include memory map reg\n"
-	   << "\t.ps	00a00h		; initialize PC\n"
-	   << "\t.entry\n"
-	   << "\t.ds	0030h\n"
-	   << "COUNT	.set	30h\n";
+	   << "\t.ps	01AC0h		; initialize PC\n"
+	   << "\t.entry\n";
     TITarget::disableInterrupts();	   
     myCode<< "START	setc	SXM		; set sign extension mode\n"
 	   << "\tldp	#0		; set data page pointer\n"
@@ -66,6 +70,7 @@ void C50Target :: headerCode () {
 	   << "\tsamm	CWSR		; set Wait State Control Register\n"
 	   << "\tsamm	PDWSR		; for 0 waits in pgm & data memory\n"
 	   << "\tclrc	OVM		\n";
+
 }
 
 
@@ -99,3 +104,10 @@ void C50Target::writeFloat(double val) {
 const char* C50Target::className() const { return "C50Target";}
 
 ISA_FUNC(C50Target,TITarget);
+
+
+
+
+
+
+
