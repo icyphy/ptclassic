@@ -42,7 +42,7 @@ include $(CONFIG)
 MISC_FILES =	README README.files copyright .glimpse_exclude
 
 makefiles all clean depend realclean checkjunk sccsinfo itcldocs \
-extraclean:
+	tests extraclean:
 	@for x in $(DIRS); do \
 	    if [ -w $$x ] ; then \
 		( cd $$x ; \
