@@ -8,7 +8,7 @@ like the standard raised cosine used in digital communications.
 See the SDFRaisdCos star for more information.
 	}
 	version { $Id$ }
-	author { J. T. Buck, Kennard }
+	author { J. T. Buck, Kennard White }
 	copyright { 1991 The Regents of the University of California }
 	location { CG56 dsp library }
 	explanation {

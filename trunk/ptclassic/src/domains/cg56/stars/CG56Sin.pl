@@ -7,7 +7,8 @@ Calculation by table lookup.  Input range of (-1,1) scaled by pi.
 output is sin(pi*input)
 	}
 	version { $Id$ }
-	author { Chih-Tsung Huang }
+	acknowledge { Gabriel version by Maureen O'Reilly }
+	author { Chih-Tsung Huang, ported from Gabriel }
 	copyright { 1992 The Regents of the University of California }
 	location { CG56 demo library }
 	explanation {

@@ -3,6 +3,7 @@ defstar {
 	domain { CG56 }
 	desc { Two input integer multiplier }
 	version { $Id$ }
+	acknowledge { Gabriel version by Martha Fratt }
 	author { Chih-Tsung Huang, ported from Gabriel }
 	copyright { 1992 The Regents of the University of California }
 	location { CG56 demo library }

@@ -3,6 +3,7 @@ defstar {
 	domain { CG56 }
 	desc { A combined input/output star for the Magnavox CD player. }
 	version { $Id$ }
+	acknowledge { Gabriel version by Jeff Bier, Phil Lapsley }
 	author { Chih-Tsung Huang, ported from Gabriel }
 	copyright { 1992 The Regents of the University of California }
 	location { CG56 demo library }

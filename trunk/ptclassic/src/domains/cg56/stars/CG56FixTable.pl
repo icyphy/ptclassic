@@ -3,12 +3,12 @@ defstar {
 	domain { CG56 }
 	desc { Table Lookup }
 	version { $Id$ }
-	author { Chih-Tsung Huang }
+	author { Chih-Tsung Huang, ported from Gabriel }
 	copyright { 1992 The Regents of the University of California }
 	location { CG56 demo library }
         explanation {
 .PP
-The input accesses a lookup table.  More generally, 56lookup defines
+The input accesses a lookup table.  More generally, this star defines
 a function which maps input values between -1 and +1-2^-23 into
 user-specified output values.
 .PP

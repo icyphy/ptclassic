@@ -6,7 +6,7 @@ Generate pseudo-IID-uniform random variables.  The values range from
 -range to range where range is a parameter.
 	}
 	version { $Id$ }
-	author { ported from Gabriel by J. Buck }
+	author { J. Buck, ported from Gabriel }
 	copyright { 1992 The Regents of the University of California }
 	location { CG56 demo library }
 	explanation {
