@@ -105,7 +105,8 @@ starHTML.idx: doc/stars/starHTML.idx
 		( cd $$x ; \
 		  echo making $@ in domains/$$x ; \
 		  $(MAKE) -f make.template $(MFLAGS) $(MAKEVARS) \
-			VPATH=../../../src/domains/$$x doc/stars/starHTML.idx ; \
+			VPATH=../../../src/domains/$$x \
+			doc/stars/starHTML.idx ; \
 		) \
 	    fi ; \
 	done
@@ -113,7 +114,8 @@ starHTML.idx: doc/stars/starHTML.idx
 	rm -f $@
 	echo "set TYCHO $(PTOLEMY)/tycho; \
 		source $(PTOLEMY)/tycho/lib/idx/tychoMakeIndex.tcl; \
-		tychoMergeIndices \"All Ptolemy $(ME) stars\" \
-			$@ $(STARIDXFILES) \
+		tychoMergeIndices \"All Ptolemy $(ME) stars\" $@ \
+			$(addsuffix /doc/stars/starHTML.idx, \
+					$(SUBDOMAINDIRS)) \
 			doc/stars/starHTML.idx" | itclsh
 
