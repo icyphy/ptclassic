@@ -1,5 +1,5 @@
 # Configuration makefile to make on an HPUX9 and HPUX10 machine
-# using the egcs compiler.  This file is setup for HPUX10, and would
+# using the gcc-2.95.1 compiler.  This file is setup for HPUX10, and would
 # require some editing for HPUX9
 
 # $Id$
@@ -35,8 +35,8 @@
 # --------------------------------------------------------------------
 include $(ROOT)/mk/config-default.mk
 
-# Get the egcs definitions; we override some below.
-include $(ROOT)/mk/config-egcs.mk
+# Get the g++ definitions; we override some below.
+include $(ROOT)/mk/config-g++.mk
 
 # The HPUX9/HPUX10 dependencies are below here
 
@@ -204,7 +204,7 @@ X11EXT_LIBSPEC=-lXext -lSM -lICE
 #X11EXT_LIBSPEC=-lXext
 
 # Variables for Pure Inc tools (purify, purelink, quantify)
-COLLECTOR = 	-collector=$(ROOT)/gnu/$(PTARCH)/lib/gcc-lib/$(PTARCH)/egcs-2.90.27/ld
+COLLECTOR =
 
 # Purelink is not available on hppa
 PURELINK =
