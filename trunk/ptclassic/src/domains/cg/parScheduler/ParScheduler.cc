@@ -336,8 +336,8 @@ int ParScheduler :: preSchedule() {
 /////////////////////////////
 
 void ParScheduler :: compileRun() {
-	// If 0, be special.
-	if (numProcs == 0) {
+	// If 1, be special.
+	if (numProcs == 1) {
 		SDFScheduler :: compileRun();
 		return;
 	}
