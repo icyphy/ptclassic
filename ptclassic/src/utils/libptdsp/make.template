@@ -49,16 +49,15 @@ include $(CONFIG)
 C_INCL = $(PTCOMPAT_INCSPEC)
 
 LIB_HDRS = \
-  PTDSPfft_rif.h \
-  PTDSPNearestNeighbor.h \
-  PTDSPPartitionCodebook.h \
-  PTDSPRaisedCosine.h \
-  PTDSPWindow.h \
-  PTDSPMuLaw.h
+  ptdspfft_rif.h \
+  ptdspNearestNeighbor.h \
+  ptdspPartitionCodebook.h \
+  ptdspRaisedCosine.h \
+  ptdspWindow.h
 
-HDRS = PTDSP.h PTDSPcephes.h $(LIB_HDRS)
+HDRS = ptdsp.h ptdspcephes.h $(LIB_HDRS)
 
-LIBCSRCS = PTDSPchbevl.c PTDSPi0.c $(LIB_HDRS:.h=.c)
+LIBCSRCS = ptdspchbevl.c ptdspi0.c $(LIB_HDRS:.h=.c)
 
 SRCS = $(LIBCSRCS)
 
