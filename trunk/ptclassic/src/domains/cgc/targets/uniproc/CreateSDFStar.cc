@@ -1,7 +1,7 @@
 static const char file_id[] = "CreateSDFStar.cc";
 /******************************************************************
 Version identification:
-@(#)CreateSDFStar.cc	1.23 3/25/96
+$Id$
 
 Copyright (c) 1991-1996  The Regents of the University of California.
 All Rights Reserved.
