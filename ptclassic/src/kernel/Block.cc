@@ -175,6 +175,7 @@ int Block::run() {
 Block* Block::clone() const {
 	LOG_NEW; Block* b = makeNew();
 	if (b) {
+		if(target()) b->setTarget(target());
 		b->setNameParent(hashstring(name()),parent());
 		b->setDescriptor(hashstring(descriptor()));
 		b->copyStates(*this);
