@@ -43,7 +43,10 @@
 # as we have for file suffixes and the like.
 #
 proc ::tycho::resourceClass {path {procname {}} args} {
+    # ::puts $path
+    # ::puts [regexp {^([a-z]+:/+)} $path protocol]
     if { ! [regexp {^([a-z]+:/+)} $path protocol] } {
+	# puts $path
 	set rclass ::tycho::ResourceFile
     } else {
 	switch -exact -- $protocol {
@@ -132,7 +135,7 @@ ensemble ::tycho::resource {
     # Test if a resource path is relative
     option isrelative {path} {
 	# FIXME: Won't work on Macintosh
-	if [regexp {^[a-z]:} $path] {
+	if [regexp {^[a-z]+:} $path] {
 	    return 0
 	}
 	regsub {^file:} $path {} path
