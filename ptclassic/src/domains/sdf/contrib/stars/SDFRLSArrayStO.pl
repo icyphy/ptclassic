@@ -15,7 +15,7 @@ which can be used e.g. for beam pattern calculation.
 	version { $Id$ }
 	author { U. Trautwein and A. Richter }
 	copyright {
-Copyright (c) 1996-1997 Technical University of Ilmenau.
+Copyright (c) 1996-%Q% Technical University of Ilmenau.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -70,6 +70,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	        name {StO}
 		type {complex}
 	}
+	ccinclude { <stdio.h> }
 	protected {
 		int cyclecounter;
 		int NumberElements;
