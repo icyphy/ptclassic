@@ -32,6 +32,7 @@ void DeclustScheduler :: setUpProcs(int num) {
 	LOG_DEL; delete schedB;
 	LOG_NEW; schedA = new DCParProcs(num, mtarget);
 	LOG_NEW; schedB = new DCParProcs(num, mtarget);
+	parProcs = schedA;	// temporal set for manual scheduling.
 }
 
 // destructor
