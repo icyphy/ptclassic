@@ -99,17 +99,22 @@ sample-tmp:
 sample2-tmp:
 	cp -r $(VPATH)/sample2 $@
 
-DEST = $(ROOT)/octtools/bin.$(PTARCH)/oct2ps
+$(BINARY): $(OBJS)
+	$(CLINKER) $(LINKFLAGS) $(OBJS) \
+		-o $@ \
+		$(LIBS) $(CSYSLIBS) 
 
-$(DEST):	oct2ps
-		@echo Installing oct2ps
-		rm -f $(DEST)
-		ln oct2ps$(BINARY_EXT) $(DEST)
+DEST = $(OCTTOOLS)/bin.$(PTARCH)/$(BINARY)
 
-install: makefile $(DEST) $(ROOT)/lib/oct2ps.pro $(BINDIR)/oct2ps
+$(DEST): $(BINARY)
+		@echo Installing $(BINARY)
+		rm -f $(DEST);  ln $^ $@
 
-$(BINDIR)/oct2ps:
-	(cd $(BINDIR); rm -f oct2ps; ln -s ../octtools/bin.$(PTARCH)/oct2ps .)
+install: makefile $(DEST) $(BINDIR)/$(BINARY) $(ROOT)/lib/oct2ps.pro
+
+$(BINDIR)/$(BINARY):
+	(cd $(BINDIR); rm -f $(BINARY); ln -s ../octtools/bin.$(PTARCH)/$(BINARY) .)
+
 
 $(ROOT)/lib/oct2ps.pro: $(VPATH)/oct2ps.pro
 	rm -f $@
