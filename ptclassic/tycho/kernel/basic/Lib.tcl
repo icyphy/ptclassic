@@ -71,4 +71,5 @@ namespace ::tycho {
     tycho::File::registerEditor {} Console {Tcl console}
     tycho::File::registerEditor {} Matlab {Matlab console}
     tycho::File::registerEditor .html HTML {}
+    tycho::File::registerEditor {.cir .sp} EditSpice {Spice editor}
 }
