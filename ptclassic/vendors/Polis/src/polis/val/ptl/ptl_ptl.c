@@ -250,10 +250,8 @@ static void pl_print_public( fp, node, option )
     fprintf( fp, "    double now;\n" );
     fprintf( fp, "    double clkFreq; /* perhaps make private ? */\n");
     fprintf( fp, "    int resourceId;\n");
-    /*  fprintf( fp, "    int needResource;\n"); */
+    fprintf( fp, "    int schedPolicy;\n");
     fprintf( fp, "    // Pointers to the event queues of the PolisScheduler controlling the simulation;\n");
-    fprintf( fp, "    PolisEventQ* waitingQ;\n");
-    fprintf( fp, "    PolisEventQ* interruptQ;\n");
     
     /* should this be here??? 
        fprintf( fp, "\n    static DE%s%s* ", model_name, option );
@@ -802,6 +800,10 @@ static void pl_print_begin( fp, node, option, trace )
     fprintf( fp, "    InfString name;\n\n" );
     /* set variables which reflect Star parameters, and others*/
     fprintf( fp, "    /* set variables which reflect Star parameters*/ \n");
+    fprintf( fp, "    if(!strcmp(\"RoundRobin\", scheduler)) schedPolicy = 0;\n");
+    fprintf( fp, "    else if(!strcmp(\"Preemptive\", scheduler)) schedPolicy = 2;\n"
+);
+    fprintf( fp, "    else schedPolicy = 1; \n");
     fprintf( fp, "    priority = Priority;\n");
     fprintf( fp, "    clkFreq = Clock_freq;\n\n"); 
     fprintf( fp, "    clkFreq = (1000000)*clkFreq;\n\n");
