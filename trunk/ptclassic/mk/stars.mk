@@ -426,7 +426,7 @@ ifdef TK
 		-loh -lvov -lrpc -llist -ltr -lutility -lst \
 		-lerrtrap -luprintf -lport \
 		 $(ITK_LIBSPEC) $(TK_LIBSPEC) $(X11_LIBSPEC) 
-	PT_DEPEND += pigiMain.o $(OCTLIBDIR)/librpc.$(LIBSUFFIX) \
+	PT_DEPEND += $(OCTLIBDIR)/librpc.$(LIBSUFFIX) \
 		$(LIBDIR)/libpigi.$(LIBSUFFIX) \
 		$(LIBDIR)/libptk.a \
 		$(LIBDIR)/libgantt.$(LIBSUFFIX) \
