@@ -134,6 +134,7 @@ $(LIBDIR)/libsdf.$(LIBSUFFIX) \
 $(LIBDIR)/libvhdlfstars.$(LIBSUFFIX) $(LIBDIR)/libvhdlf.$(LIBSUFFIX) \
 $(LIBDIR)/libvhdlbstars.$(LIBSUFFIX) $(LIBDIR)/libvhdlb.$(LIBSUFFIX) \
 $(LIBDIR)/libmdsdfstars.$(LIBSUFFIX) $(LIBDIR)/libmdsdf.$(LIBSUFFIX) \
+$(LIBDIR)/libicp.$(LIBSUFFIX) \
 $(LIBDIR)/libipusstars.$(LIBSUFFIX) $(LIBDIR)/libipus.$(LIBSUFFIX) \
 $(THREAD_STAR_LIBFILES) \
 $(MATLABSTARS_LIBFILE)
@@ -204,7 +205,7 @@ $(MATLABSTAR_LIB) $(MATLABEXT_LIB) \
 -lvhdlfstars -lvhdlf \
 -lvhdlbstars -lvhdlb \
 -lmdsdfstars -lmdsdf \
--lipusstars -lipus \
+-licp -lipusstars -lipus \
 $(THREAD_STAR_LIBS)
 
 # Extra targets
