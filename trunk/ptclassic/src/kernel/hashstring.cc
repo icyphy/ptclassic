@@ -34,10 +34,9 @@ This module keeps a hash table of strings.
 
 **************************************************************************/
 const int HASH_TABLE_SIZE = 601;
-#include "logNew.h"
 
-extern "C" int strcmp(const char*,const char*);
-extern "C" char *strcpy(char*,const char*);
+#include "logNew.h"
+#include <string.h>
 
 struct hent {
 	char *txt;
