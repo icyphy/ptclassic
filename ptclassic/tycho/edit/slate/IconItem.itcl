@@ -215,27 +215,30 @@ body ::tycho::IconItem::_vsize {id canvas slate vsize} {
 #########################################################################
 ## adjust
 #
-# Adjust item after changing coordinates.
+# Adjust item after changing hsize or vsize
 #
 body ::tycho::IconItem::adjust {id canvas slate} {
-    set coords [$canvas coords $primary($id)]
+    ::tycho::assign x0 y0 x1 y1 [$canvas coords $primary($id)]
+ 
+    # Remember the anchor point
+    ::tycho::assign a b [::tycho::Rectangle::aspect \
+            $x0 $y0 $x1 $y1 $option(anchor$id)]
 
-    # Remember the anchor
-    ::tycho::assign x y [eval ::tycho::Rectangle::aspect \
-            $coords $option(anchor$id)]
+    # Get the anchor point after adjusting size
+    set m1 [expr $x0 + $option(hsize$id)]
+    set n1 [expr $y0 + $option(vsize$id)]
+    ::tycho::assign x y [::tycho::Rectangle::aspect \
+            $x0 $y0 $m1 $n1 $option(anchor$id)]
 
-    # Scale the item according to the change in size
-    ::tycho::assign x0 y0 x1 y1 $coords
+    # Resize the main graphic
     [@scope ::tycho::[$slate type $id] set methodtable(_coords)] \
-            $id $canvas $slate $x0 $y0 \
-	    [expr $x0 + $option(hsize$id)] [expr $y0 + $option(vsize$id)]
+            $id $canvas $slate $x0 $y0 $m1 $n1
 
     # Move the terminals
-    eval adjustterminals $id $canvas $slate \
-            $x0 $y0 $x1 $y1 [$canvas coords $primary($id)]
+    eval adjustterminals $id $canvas $slate $x0 $y0 $x1 $y1 $x0 $y0 $m1 $n1
 
-    # Adjust the anchor
-    _anchor $id $canvas $slate $option(anchor$id) $x $y
+    # Move the whole lot back to the anchor point
+    $canvas move $id [expr $a - $x] [expr $b - $y]
 }
 
 ##########################################################################
@@ -277,12 +280,24 @@ body ::tycho::IconItem::coords {id canvas slate {x {}} {y {}}} {
 # coordinates do not match the type of the primary component.
 #
 body ::tycho::IconItem::region {id canvas slate args} {
+    set coords [$canvas coords $primary($id)]
+
     if { $args == "" } {
-        $canvas coords $primary($id)
+        return $coords
     } else {
-        set option(hsize$id) [expr [lindex $args 2] - [lindex $args 0]]
-        set option(vsize$id) [expr [lindex $args 3] - [lindex $args 1]]
-        adjust $id $canvas $slate
+        ::tycho::assign a0 b0 a1 b1 $coords
+        ::tycho::assign x0 y0 x1 y1 $args
+ 
+        # Resize the main graphic
+        [@scope ::tycho::[$slate type $id] set methodtable(_coords)] \
+                $id $canvas $slate $x0 $y0 $x1 $y1
+
+        # Move the terminals
+        eval adjustterminals $id $canvas $slate $a0 $b0 $a1 $b1 $x0 $y0 $x1 $y1
+
+        # Remember the width and height
+        set option(hsize$id) [expr $x1-$x0]
+        set option(vsize$id) [expr $y1-$y0]
     }
 }
 
