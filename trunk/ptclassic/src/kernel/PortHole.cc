@@ -470,8 +470,6 @@ PortHole& MultiPortHole :: newPort() {
 // unconnected PortHole.  If there are none, we make a new one.
 
 PortHole& MultiPortHole :: newConnection() {
-	// resolve aliases
-	if (alias()) return realPort().newConnection();
 
 	// find an unconnected porthole
 	MPHIter next(*this);
