@@ -59,12 +59,15 @@ test mail-badaddress0 {Mailing to a bad address that doesn't exists} {
 #
 test mail-badreceiver0 {Mailing to a bad user name that doesn't exist} {
     set mailobj [::tycho::resource new \
-            mailto:nopersonhere@ptolemy.eecs.berkeley.edu]
+            mailto:test_bounced_mail@ptolemy.eecs.berkeley.edu]
     $mailobj open
-    $mailobj puts "Subject: Auto Test 2, erase me."
+    $mailobj puts "Subject: Auto Test 2, ***** ERASE ME *****"
     $mailobj puts ""
-    $mailobj puts "This is an automated test of ResourceMail.itcl"
-    $mailobj puts "Please ignore this message, as it is generated"
+    $mailobj puts "You have just ran Tycho's automated test."
+    $mailobj puts "This bounced mail is a result of testMail.itcl"
+    $mailobj puts "to test ResourceMail.itcl."
+    $mailobj puts ""
+    $mailobj puts "Please erase this message, as it is generated"
     $mailobj puts "automatically within the test suite."
     set msg {}
     catch {$mailobj close} msg
