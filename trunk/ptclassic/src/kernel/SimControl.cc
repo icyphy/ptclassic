@@ -219,8 +219,13 @@ void SimControl::catchInt(int signo, int always) {
 	if (signo == -1) signo = SIGINT;
 	if (!always) {
 		// we don't catch signals if they are being ignored now
+#ifdef sgi
+		SignalHandler tmp = signal(signo, SIG_IGN);
+		if (tmp == SIG_IGN) return;
+#else
 		SIG_PF tmp = signal(signo, SIG_IGN);
 		if (tmp == SIG_IGN) return;
+#endif sgi
 	}
 	flags &= ~interrupt;
 	signal(signo, (SIG_PF)SimControl::intCatcher);
