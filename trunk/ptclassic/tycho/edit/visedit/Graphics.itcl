@@ -1774,18 +1774,20 @@ body ::tycho::Graphics::_initializeMenubar {menubar} {
     
     $menubar separator editsep1 edit
     
-    $menubar command cut edit \
-	    -label "Cut" -underline 0 -accelerator "C-w" \
-	    -command "$this cut"
+    if ![::tycho::stylesheet get interaction viseditViewOnly] {
+	# Cut, Copy and Paste do not work
+	$menubar command cut edit \
+		-label "Cut" -underline 0 -accelerator "C-w" \
+		-command "$this cut"
+	$menubar command copy edit \
+		-label "Copy" -underline 1 -accelerator "M-w" \
+		-command "$this copy"
     
-    $menubar command copy edit \
-	    -label "Copy" -underline 1 -accelerator "M-w" \
-	    -command "$this copy"
-    
-    $menubar command paste edit \
-	    -label "Paste" -underline 0 -accelerator "C-y" \
-	    -command "$this paste"
-    
+	$menubar command paste edit \
+		-label "Paste" -underline 0 -accelerator "C-y" \
+		-command "$this paste"
+    }
+
     $menubar separator editsep2 edit
     
     $menubar command title edit \
