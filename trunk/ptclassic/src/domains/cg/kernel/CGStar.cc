@@ -39,6 +39,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #include "CGStar.h"
 #include "CGGeodesic.h"
+#include "CGWormBase.h"
 #include "CGTarget.h"
 #include "StringList.h"
 #include "CodeStream.h"
@@ -571,6 +572,9 @@ void CGStar :: forkInit(CGPortHole& input,CGPortHole& output) {
 		output.far()->parent()->initialize();
 	}
 }
+
+// return NULL
+Wormhole* CGStar :: asWormhole() { return NULL; }
 
 // return the profile
 Profile* CGStar :: getProfile(int) { return profile; }
