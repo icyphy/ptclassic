@@ -56,6 +56,8 @@ is used.
 #pragma interface
 #endif
 
+#include "DataStruct.h"
+
 const int WORDBUF_SIZE = 256;
 
 class TokenContext;
@@ -76,6 +78,11 @@ private:
 	char escape_char;	// behave like the " \ " in C
 	char c;			// last char read
 	char ungot;
+
+	struct {		// variables for pushback buffer
+	   char* ptr;
+	   int index, size;
+	} pb_buffer;
 
 	// this is the common part of all constructors
 	void init ();
@@ -112,6 +119,10 @@ public:
 
 	// get next token
 	Tokenizer& operator >> (char * s);
+
+	// push back a token;
+	// there is no limit to the number of tokens pushed back
+	void pushBack(const char* s);
 
 	// EOF check
 	int eof() const;
@@ -154,4 +165,3 @@ public:
 
 #endif
 
-		
