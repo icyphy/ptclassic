@@ -12,4 +12,3 @@ $PTOLEMY/src/domains/bdf/icons/bdf.pal.
 .EQ
 delim $$
 .EN
-.bp
