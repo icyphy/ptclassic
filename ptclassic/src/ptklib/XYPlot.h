@@ -39,6 +39,11 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #pragma interface
 #endif
 
+/* Do the right thing for sol2 boolean defs.  sol2compat.h must be included
+ * first so sys/types.h is included correctly.  See octtools/include/port.h
+ */
+#include "sol2compat.h"
+
 #include "Block.h"
 #include "InfString.h"
 extern "C" {
