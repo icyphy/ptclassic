@@ -116,7 +116,9 @@ HDRS= $(SRCS:.cc=.h)
 
 all:		$(SRCS) makefile $(OBJS)
 
-EXTRA_SRCS=cg56stars.mk $(PL_SRCS)
+STAR_MK=cg56stars.mk
+DOMAIN=CG56
+EXTRA_SRCS= $(STAR_MK) $(PL_SRCS)
 
 # nothing to install -- use it where it lies
 install:	all
@@ -124,8 +126,6 @@ install:	all
 
 LIB=none	# required by common.mk
 
-STAR_MK=cg56stars.mk
-DOMAIN=CG56
 
 # include common definitions, rules
 include $(ROOT)/common.mk
