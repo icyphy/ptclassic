@@ -41,7 +41,7 @@ two's complement addition.
 
 	codeblock(addStart) {
 	move	$ref(input#1),x0			; x0 = input#1
-	move	$ref(input#2),a0			; a0 = input#2
+	move	$ref(input#2),a				; a = input#2
 	}
 
 	codeblock(add,"int i") {
@@ -50,7 +50,7 @@ two's complement addition.
 
 	codeblock(addEnd) {
 	add	x0,a
-	move	a0,$ref(output)
+	move	a,$ref(output)
 	}
 
 	go {
