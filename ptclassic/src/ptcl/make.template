@@ -23,13 +23,6 @@ VPATH = $(ROOT)/src/ptcl
 CONFIG=$(ROOT)/config-$(ARCH).mk
 include $(CONFIG)
 
-# The following variables will eventually be in the config file
-# Directory containing Tcl/Tk include files
-TCL_H_DIR=$(ROOT)/tcl/include
-
-# Directory containing Tcl/Tk libraries
-TCL_LIBDIR=$(ROOT)/tcl/lib.$(ARCH)
-
 INCL=-I$(KERNDIR) -I$(TCL_H_DIR)
 
 SDF=$(OBJDIR)/domains/sdf/stars
