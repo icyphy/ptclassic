@@ -680,28 +680,33 @@ set ptkColorList(grey100) #ffffff
 set tyMonochrome 0
 
 ###########################################################################
-# ptkColor
-# looks up a color name in the ptkColorList.  If it exists, returns
-# the rgb value of the color.  If it does not exist, returns black.
+#### ptkColor
+# Look up a color name in the ptkColorList.  If it exists, return
+# the rgb value of the color.  If it does not exist, look up the value
+# of the second argument, which should normally be "black" or "white".
 # All names are converted to lower case before looking them up.
 # If the global variable tyMonochrome is set, then use the second
 # argument (if it is present).
 #
-proc ptkColor {name args} {
+proc ptkColor {name {alternate {}}} {
+    if {[regexp {^#.*} $name]} {return $name}
     set usename $name
     global tyMonochrome
     # If the color model is monochrome, use the second argument
     if {$tyMonochrome} {
-	if {$args != ""} {
+	if {$alternate != ""} {
 	    set usename [lindex $args 0]
 	}
     }
     set lname [string tolower $usename]
+    set aname [string tolower $alternate]
     global ptkColorList
     if [info exists ptkColorList($lname)] {
         return $ptkColorList($lname)
+    } elseif [info exists ptkColorList($aname)] {
+        return $ptkColorList($aname)
     } else {
-        return $ptkColorList(black)
+        return $ptkColorList($black)
     }
 }
 
