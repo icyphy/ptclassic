@@ -1,4 +1,4 @@
--*-Mode:text-*- -[Wed Aug  1 23:19:27 2001 by cxh]-
+-*-Mode:text-*- -[Fri Nov 16 17:51:43 2001 by cxh]-
 Version: $Id$
 
 src/gnu/README
@@ -79,7 +79,7 @@ GNU make
 	all have a makefile conditional that checks the value of
 	$(USE_SHARED_LIBS).
 	
-	We had to modify make-3.79.1/Makefile.in:n
+	We had to modify make-3.79.1/Makefile.in:
 
 
 
@@ -113,6 +113,10 @@ ptuser@maury 65% diff -c Makefile.in Makefile.in.dist
   	@echo "$(POTFILES)" > $@
   
   install-exec-local:
+
+
+        i18n/Makefile.in was modified so that it will work with
+        Solaris8 /usr/ccs/bin/make
 
 HP
 --
