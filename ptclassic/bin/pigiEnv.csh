@@ -31,6 +31,7 @@ set resfile = pigiXRes9
 
 setenv TCL_LIBRARY $PTOLEMY/tcltk/tcl/lib/tcl
 setenv TK_LIBRARY $PTOLEMY/tcltk/tk/lib/tk
+setenv PTPWD `pwd`
 
 while ($#argv)
 	switch ($argv[1])
@@ -132,6 +133,7 @@ if ( ! $?nocmdfile ) then
     echo "PATH=$PATH"					>> $cmdfile
     echo "TCL_LIBRARY=$TCL_LIBRARY"			>> $cmdfile
     echo "TK_LIBRARY=$TK_LIBRARY"			>> $cmdfile
+    echo "PTPWD=$PTPWD"					>> $cmdfile
     if ( $?pigiconsole ) then
         echo "TAILARGS=-console"			>> $cmdfile
     endif
