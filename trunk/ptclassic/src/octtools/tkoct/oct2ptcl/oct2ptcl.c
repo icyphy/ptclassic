@@ -71,6 +71,16 @@ static char SccsId[] = "$Id$";
  		__FILE__, __LINE__, \
 		why, ohFormatName(offending_object))
 
+/* In Ptolemy 0.7.1 and earlier, some of the facets in
+   $PTOLEMY/lib/ptolemy had the % character in their names, which
+   causes no end of trouble under NT4.0 with Cygwin 20.1.
+   In Ptolemy 0.7.1 and later, we changed the name of these
+   files and substituted in the string "percent" for the character
+   "%".
+   See also $PTOLEMY/bin/fixntpaths
+*/
+#define PT_PERCENT "percent"
+
 /****************************************************************************
  			oct2ptcl
  
@@ -433,7 +443,7 @@ _otpGetNetInfo( OTPFacetInfo *pFInfo, octObject *pNet, OTPNetInfo *pNInfo) {
     POH_LOOP_CONTENTS_BEGIN( pNet, OCT_INSTANCE_MASK, theMarker) {
 	octObject	prop;
 	OTPFacetInfo	*pMaster = otpGetMasterInfo( pFInfo, &theMarker);
-	if ( strcmp(pMaster->facetName,"%dDelay")==0 ) {
+	if ( strcmp(pMaster->facetName, PT_PERCENT "dDelay")==0 ) {
 	    OH_FAIL(ohGetByPropName(&theMarker,&prop,"delay"),
 	      "delay property", &theMarker);
 	    if ( pNInfo->delayExpr != NULL ) {
@@ -441,7 +451,7 @@ _otpGetNetInfo( OTPFacetInfo *pFInfo, octObject *pNet, OTPNetInfo *pNInfo) {
 		return OCT_ERROR;
 	    }
 	    pNInfo->delayExpr = otpCvtPropToStrDelay( &prop);
-	} else if ( strcmp(pMaster->facetName,"%dDelay2")==0 ) {
+	} else if ( strcmp(pMaster->facetName, PT_PERCENT "dDelay2")==0 ) {
 	    OH_FAIL(ohGetByPropName(&theMarker,&prop,"delay2"),
 	      "delay property", &theMarker);
 	    if ( pNInfo->delayExpr != NULL ) {
@@ -450,7 +460,7 @@ _otpGetNetInfo( OTPFacetInfo *pFInfo, octObject *pNet, OTPNetInfo *pNInfo) {
 	    }
 	    /* Even though this is a Delay2, we don't treat it like a Delay*/
 	    pNInfo->delayExpr = otpCvtPropToStr( &prop);
-	} else if ( strcmp(pMaster->facetName,"%dBus")==0 ) {
+	} else if ( strcmp(pMaster->facetName, PT_PERCENT "dBus")==0 ) {
 	    OH_FAIL(ohGetByPropName(&theMarker,&prop,"buswidth"),
 	      "bus width property", &theMarker);
 	    if ( pNInfo->widthExpr != NULL ) {
@@ -604,7 +614,8 @@ _otpXlateInstName( OTPFacetInfo *pCxt, octObject *pInst, char *masterName) {
     if ( instName==NULL || instName[0]=='\0' || strcmp(instName,"*")==0 ) {
 	char	buf[OTP_NAMELEN];
 	TOPStrLenType	len;
-	if ( masterName[0]=='%' )	masterName += 2;
+        if ( strncmp(masterName, PT_PERCENT, strlen(PTPERCENT)) == 0)
+                masterName += strlen(PTPERCENT);
 	len = (dotPtr = strchr(masterName,'.')) == NULL ? strlen(masterName)
 	  : dotPtr - masterName;
 	strncpy(buf,masterName,len);
@@ -731,10 +742,10 @@ otpXlateInsts( OTPFacetInfo *pFInfo, octObject *pFacet, Tcl_DString *pStr) {
 	Tcl_HashEntry	*instEntry;
 	int		newB;
 
-	if ( mInfo->facetName[0]=='%' ) {
-	    if ( strcmp(mInfo->facetName,"%dDelay")==0
-		|| strcmp(mInfo->facetName,"%dDelay2")==0
-		|| strcmp(mInfo->facetName,"%dBus")==0 ) {
+        if ( strncmp(mInfo-facetName, PT_PERCENT, strlen(PTPERCENT)) == 0) {
+	    if ( strcmp(mInfo->facetName, PT_PERCENT "dDelay")==0
+		|| strcmp(mInfo->facetName, PT_PERCENT "dDelay2")==0
+		|| strcmp(mInfo->facetName, PT_PERCENT "dBus")==0 ) {
 		/* these are pure-geometry, no terminals.  must x,y search */
 		_otpProcessMarker( pFInfo, pFacet, &theInst);
 	    }
@@ -828,7 +839,7 @@ _otpSetFacetType( OTPFacetInfo *pInfo, octObject *pXface, octObject *pConts) {
     char	*cellbase;
 
     cellbase = topBasename( pXface->contents.facet.cell);
-    if ( cellbase[0] == '%' ) {
+    if ( strncmp(cellBase, PT_PERCENT, strlen(PTPERCENT)) == 0) {
 	pInfo->type = OTP_FtMarker;
 	return;
     }
