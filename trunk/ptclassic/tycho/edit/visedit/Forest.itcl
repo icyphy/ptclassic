@@ -79,8 +79,8 @@ class ::tycho::Forest {
     # Delete a node from the forest.
     method delete {nodename}
 
-    # Return a list that describes the forest.
-    method describe {}
+    # Return a list that describes the forest or a subtree with the given root.
+    method describe {{root {}}}
 
     # Initialize the forest from a description
     method init {description}
@@ -91,6 +91,9 @@ class ::tycho::Forest {
     # Return a list of names of the roots of the trees in the forest.
     method roots {}
 
+    # Set a new name and contents for the specified node.
+    method setNode {oldname newname contents}
+
     ###################################################################
     ####                   protected methods                       ####
 
@@ -100,8 +103,8 @@ class ::tycho::Forest {
     ###################################################################
     ####                   private methods                         ####
 
-    # Return a list describing the subtree with the given root.
-    private method describetree {root}
+    # In listname, remove the olditem and append the newitem.
+    private method listreplace {listname olditem newitem}
 
     ###################################################################
     ####                   private variables                       ####
@@ -191,7 +194,7 @@ body ::tycho::Forest::delete {nodename} {
         set rootnames [lreplace $rootnames $ind $ind]
     } {
         # Remove node from the list of children in the parent
-        set ind [lsearch -exact $nodename $childrennames($parent)]
+        set ind [lsearch -exact $childrennames($parent) $nodename]
         set childrennames($parent) [lreplace $childrennames($parent) $ind $ind]
     }
     # Redirect the parent point of each child
@@ -199,6 +202,8 @@ body ::tycho::Forest::delete {nodename} {
         set parentname($child) $parent
         if {$parent == {}} {
             lappend rootnames $child
+        } {
+            lappend childrennames($parent) $child
         }
     }
     # Finally, remove from the database.
@@ -209,17 +214,29 @@ body ::tycho::Forest::delete {nodename} {
 
 #######################################################################
 #### describe
-# Return a list that describes the forest. The list contains one
-# element for each tree in the forest. Each tree is described by a list
-# of nodes. Each node is described itself as a list with three
-# elements: the node name, the contents, and the parent (or a null
-# string). The nodes are described in such an order that parents are
-# always described before their children.
+# Return a list that describes a subtree with the given root, of if no
+# root is given the forest. The returned list contains one element for
+# each tree in the forest, sorted alphabetically by name. Each tree is
+# described by a list of nodes, again sorted. Each node is described
+# itself as a list with three elements: the node name, the contents,
+# and the parent (or a null string). The nodes are described in such an
+# order that parents are always described before their children.
 #
-body ::tycho::Forest::describe {} {
+body ::tycho::Forest::describe {{root {}}} {
     set result {}
-    foreach root $rootnames {
-        lappend result [describetree $root]
+    if {$root == {}} {
+        foreach root [lsort $rootnames] {
+            lappend result [describe $root]
+        }
+    } {
+        verify $root
+        set result [list [list \
+                $root \
+                $contentsstring($root) \
+                $parentname($root)]]
+        foreach child [lsort $childrennames($root)] {
+            set result [concat $result [describe $child]]
+        }
     }
     return $result
 }
@@ -269,6 +286,35 @@ body ::tycho::Forest::roots {} {
     return $rootnames
 }
 
+#######################################################################
+#### setNode
+# Set a new name and contents for the specified node.
+# It is an error if the new name is alredy the name of another node.
+#
+body ::tycho::Forest::setNode {oldname newname contents} {
+    if {![info exists contentsstring($oldname)]} {
+        error "No such node: $oldname"
+    }
+    if {$newname != $oldname && [info exists contentsstring($newname)]} {
+        error "Duplicate node name in forest: $newname"
+    }
+    set parent $parentname($oldname)
+    if {$parent == {}} {
+        listreplace rootnames $oldname $newname
+    } {
+        verify $parent
+        listreplace childrennames($parent) $oldname $newname
+    }
+    set parentname($newname) $parent
+    set childrennames($newname) $childrennames($oldname)
+    set contentsstring($newname) $contents
+    if {$oldname != $newname} {
+        unset parentname($oldname)
+        unset childrennames($oldname)
+        unset contentsstring($oldname)
+    }
+}
+
 
     ###################################################################
     ###################################################################
@@ -291,22 +337,18 @@ body ::tycho::Forest::verify {nodename} {
     ####                      private methods                      ####
 
 #######################################################################
-#### describetree
-# Returns a list describing the subtree with the given root. The root
-# need not be a root of a tree (it may have parents, although its
-# parents will be ignored). The list returned has one element for each
-# node in the tree. Each element is described itself as a list, with
-# its name first, then its parent (or a null string), and finally its
-# contents.
+#### listreplace
+# For the list <i>listname</i>, remove the <i>olditem</i> and append
+# the <i>newitem</i>.  The items are strings, and <i>olditem</i> must
+# match exactly a string in the list.
+# Issue a warning <i>olditem</i> is not present in the list.
 #
-body ::tycho::Forest::describetree {root} {
-    verify $root
-    set result [list [list \
-            $root \
-            $contentsstring($root) \
-            $parentname($root)]]
-    foreach child $childrennames($root) {
-        set result [concat $result [describetree $child]]
+body ::tycho::Forest::listreplace {listname olditem newitem} {
+    set idx [lsearch -exact [set $listname] $olditem]
+    if {$idx < 0} {
+        ::tycho::warn "Missing item in list $listname: $olditem"
+    } {
+        set $listname [lreplace [set $listname] $idx $idx]
     }
-    return $result
+    lappend $listname $newitem
 }
