@@ -334,7 +334,6 @@ int MatlabIfc :: EvaluateOneCommand(char* command) {
 // if the environment variable PTMATLAB_REMOTE_HOST is set, or
 // (3) "matlab".
 int MatlabIfc :: StartMatlab(char* userCommand) {
-    int remoteFlag = FALSE;
     const char* matlabServer = 0;
 
     KillMatlab();
@@ -350,8 +349,6 @@ int MatlabIfc :: StartMatlab(char* userCommand) {
 	if (matlabServer) {
 	    const char* display = getenv("DISPLAY");
 	    const char* username = getenv("USER");
-
-	    remoteFlag = TRUE;
 
 	    // See the {Matlab External Interface Guide For Unix Workstations},
 	    // 1993, page 2-14, under the explanation of the engOpen command.
@@ -375,7 +372,7 @@ int MatlabIfc :: StartMatlab(char* userCommand) {
     // start the Matlab engine which starts Matlab
     matlabEnginePtr = MatlabEngineOpen(command);
     if ( ! MatlabIsRunning() ) {
-	if ( remoteFlag ) {
+	if ( matlabServer ) {
 	    errorString = "Could not start Matlab remotely on ";
 	    errorString << matlabServer << " using '";
 	    errorString << command << "'.";
