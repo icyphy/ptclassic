@@ -80,7 +80,7 @@
 # foreach line $output {
 #     incr lineno
 #     # Typical format of a file:
-#     # lrwxrwxrwx  5 root 28 Feb 25 18:33 README -> /users/README
+#     # lrwxrwxrwx  5 root 28 Feb 25 18:33 README -&gt; /users/README
 #     if {[regexp {([-a-zA-Z]+) +([0-9]+) +([a-zA-Z]+).*} $line match &#92
 #             perm lnk usr]} {
 #         set strstart [string first $usr $line]
