@@ -325,14 +325,14 @@ void CGCTarget :: frameCode () {
     	   << setargFunc << "\t}\n}\n\n";			
     }								
 
-
     myCode << comment("main function")				
-	 << (const char*)funcName << "(int argc, char *argv[]) {\n"
+	 << "int " << (const char*)funcName << "(int argc, char *argv[]) {\n"
 	 << mainDecls;							
     if ((cmdargStruct.length() != 0))					
       myCode << "set_arg_val(argv);\n";					
 
-    myCode << commInit << mainInit << mainLoopBody() << mainClose << "\n}\n";
+    myCode << commInit << mainInit << mainLoopBody()
+	   << mainClose << "\nreturn 1;\n}\n";
 
     // after generating code, initialize code strings again.
     initCodeStrings();
