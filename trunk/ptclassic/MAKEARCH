@@ -71,9 +71,9 @@ cd ..
 cd $PTOLEMY/obj.$PTARCH
 optlink ../src makefile
 
-dirs="domains ptcl pitcl kernel thread thread/posix \
+dirs="domains ptcl pitcl kernel thread \
 	tysh pigiRpc pigilib ptlang ptklib \
-	octtools pigiExample "
+	octtools pigiExample"
 for x in $dirs
 do
 	optmkdir $x
@@ -107,6 +107,21 @@ do
 	cd $PTOLEMY/obj.$PTARCH/filters
 done
 cd $PTOLEMY/obj.$PTARCH
+
+cd thread
+dirs="posix"
+for x in $dirs
+do
+	optmkdir $x
+	cd $x
+	optlink ../../../src/thread/$x makefile
+	if [ -r ../../../src/thread/$x/make.template ]; then
+		optlink ../../../src/thread/$x make.template
+	fi
+	cd $PTOLEMY/obj.$PTARCH/thread
+done
+cd $PTOLEMY/obj.$PTARCH
+
 
 cd utils
 dirs="libptdsp libexttools libgslider libptmatlab libptmathematica \
