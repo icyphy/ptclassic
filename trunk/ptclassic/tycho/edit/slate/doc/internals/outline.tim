@@ -49,14 +49,13 @@ comments to: <author>johnr@eecs.berkeley.edu</author>
 }
 
 section overview -inline 0 -title "Class overview"
-section tagging -inline 0 -title "How tagging works"
-section shapes -inline 0 -title "Shape classes"
 section items -inline 0 -title "Item classes" {
 	section c-3d -inline 0 -title "Pseudo-3D items"
 	section c-boxarrow -inline 0 -title "Box-and-arrow items"
 	section c-graphing -inline 0 -title "Graphing items"
 	section c-labeled -inline 0 -title "Labeled items"
 }
+section shapes -inline 0 -title "Shape classes"
 section interactors -inline 0 -title "Interactors" {
     section i-work -inline 0 -title "How interactors work"
     section i-classes -inline 0 -title "An overview of interactor classes"
@@ -66,4 +65,5 @@ section user -inline 0 -title "Writing user-defined items" {
 	section u-checklist -inline 0 -title "Checklist"	
 	section u-methods -inline 0 -title "Methods"
 }
+section tagging -inline 0 -title "How tagging works"
 section faq -inline 0 -title "FAQ: tricks and pitfalls"
