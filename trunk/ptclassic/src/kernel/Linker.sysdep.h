@@ -59,8 +59,11 @@ const int linkingNotSupported =
 //
 // dlopen() style linking works under sun4, but if you try and load a
 // star that has undefined symbols, pigiRpc or ptcl will exit.
+#if defined(PTLINUX) && defined(__ELF__)
+#define PTLINUX_ELF
+#endif
 
-#if defined(PTIRIX5) || defined(PTSOL2)  || defined(PTALPHA)
+#if defined(PTIRIX5) || defined(PTSOL2)  || defined(PTALPHA) || defined(PTLINUX_ELF)
 #include <dlfcn.h>
 #include <sys/stat.h>
 #define USE_DLOPEN
@@ -72,7 +75,7 @@ const int linkingNotSupported =
 #define DLOPEN_FLAGS RTLD_NOW
 #endif // PTIRIX5
 
-#if defined(PTSOL2) || defined(PTSUN4) || defined(PTALPHA)
+#if defined(PTIRIX5) || defined(PTSOL2)  || defined(PTALPHA) || defined(PTLINUX_ELF)
 #define DLOPEN dlopen
 #if defined(PTSOL2) || defined(PTALPHA)
 #define DLOPEN_FLAGS RTLD_NOW
@@ -83,7 +86,7 @@ const int linkingNotSupported =
 #endif // PTSOL2 || PTSUN4
 
 #ifdef __GNUG__
-#if defined(PTSOL2) || defined (PTIRIX5)
+#if defined(PTSOL2) || defined (PTIRIX5) || defined (PTLINUX_ELF)
 #define SHARED_OBJECT_COMMAND "g++ -shared -o"
 #else
 #ifdef PTSUN4
@@ -231,8 +234,8 @@ extern "C" size_t getpagesize(void);
 // Prefix for constructor-calling symbols
 // This is an attempt to support both g++ and cfront.
 #ifdef __GNUG__
-#if defined(mips) || defined(PTHPPA)
-#if defined(PTIRIX5) && __GNUC_MINOR__ < 7
+#if defined(mips) || defined(PTHPPA) || defined(PTLINUX_ELF)
+#if (defined(PTIRIX5) && __GNUC_MINOR__ < 7  ) || defined(PTLINUX_ELF)
 #define CONS_PREFIX "_GLOBAL_.I."
 #define CONS_LENGTH 11
 #else
