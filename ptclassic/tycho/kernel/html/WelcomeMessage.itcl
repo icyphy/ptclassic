@@ -69,7 +69,7 @@ proc ptkStartupMessage {version executable} {
 
 ##########################################################################
 #### WelcomeMessage
-# Display the Ptolemy startup message.
+# Display the startup message.
 #
 class ::tycho::WelcomeMessage {
     inherit ::tycho::Message
@@ -88,8 +88,8 @@ class ::tycho::WelcomeMessage {
 
     constructor {args} {}
 
-    # Indicator of whether the Ptolemy gif image has been created.
-    private variable ptolemygifexists 0
+    # Indicator of whether the gif image has been created.
+    private variable tychogifexists 0
 }
 
 ##########################################################################
@@ -100,11 +100,11 @@ body ::tycho::WelcomeMessage::constructor {args} {
     global TYCHO
     # An option -palette 3/3/2 below restricts the palette,
     # but it is better to restrict it in the source.
-    if {!$ptolemygifexists} {
-	image create photo ptolemygif \
+    if {!$tychogifexists} {
+	image create photo tychogif \
 		-file $TYCHO/kernel/img/tychologo.gif
     }
-    configure -image ptolemygif
+    configure -image tychogif
 
     # Pack the copyright button.
     addButton copyright -text "Copyright" -command \
@@ -130,7 +130,7 @@ body ::tycho::WelcomeMessage::constructor {args} {
     }
     if {$itk_option(-executable) != {}} {
 	append html \
-		{<p>Ptolemy executable you are running:<br>} \
+		{<p>Executable you are running:<br>} \
 		$itk_option(-executable)
     }
     append html "<p>" \
