@@ -66,14 +66,14 @@ KRUFT =		$(DRIVER)
 
 DRVROBJ = 	iv_test.o
 
-DRVRLIBS =	-lkd -lport -lerrtrap -luprintf -lX11
+DRVRLIBS =	-lport -lerrtrap -luprintf $(X11_LIBSPEC) $(X11EXT_LIBSPEC)
 
 # common makefile file for vem libraries
 VEMLIBCONFIG=../../vem-lib.mk
 include $(VEMLIBCONFIG)
 
 tests:: $(DRIVER)
-	@echo "run $(DRIVER)"
+	@echo "run $(DRIVER) by hand."
 
 # include common definitions, rules
 include $(ROOT)/mk/common.mk
