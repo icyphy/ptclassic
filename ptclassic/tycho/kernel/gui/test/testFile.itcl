@@ -679,6 +679,9 @@ _update
 # things. They assume that at least the plain text and Itcl editor
 # modes are installed.
 #
+# Some of these tests require the Itcl editor...
+package require tycho.edit.textedit
+
 test File-openContext-1 {Open a plain text file} {
     _mkfile $foo {Nuts. Just plain nuts.}
     set w [::tycho::openContext $foo]
@@ -757,6 +760,16 @@ test File-openContext-8 {Try opening a directory} {
             [$w info class] \
             [$w component text get 0.0 {end - 1 char}]
 } {::tycho::Edit {}}
+_update
+catch "delete object [$w displayer]"
+
+test File-openContext-9 {Open a file and override with bogus mode} {
+    _mkfile $foo {The fine art of roasting}
+    set w [::tycho::openContext $foo "bogus"]
+    list \
+            [$w info class] \
+            [$w component text get 0.0 {end - 1 char}]
+} {::tycho::Edit {The fine art of roasting}}
 _update
 catch "delete object [$w displayer]"
 
