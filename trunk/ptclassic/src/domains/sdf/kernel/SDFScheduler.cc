@@ -25,8 +25,6 @@ $Id$
 #include "FloatState.h"
 #include "GalIter.h"
 #include "Target.h"
-#include "Geodesic.h"
-#include <std.h>
 
 extern const char SDFdomainName[];
 
@@ -93,10 +91,9 @@ void SDFScheduler :: runOnce () {
    // Adjust the schedule pointer to point to the beginning of the schedule.
 	SDFSchedIter nextStar(mySchedule);
 	SDFStar* star;
-	while ((star = nextStar++) != 0) {
+	while ((star = nextStar++) != 0 && !invalid) {
 		// Fire the next star in the list
-		star->fire();
-		if (haltRequested()) { invalid = TRUE; return;}
+		invalid = !star->fire();
 	}
 }
 
@@ -249,20 +246,6 @@ int SDFScheduler::computeSchedule(Galaxy& galaxy)
 
 	if (passValue == 1) reportDeadlock(nextStar);
 
-	// debug: make sure all geos are the right size.
-	nextStar.reset();
-	while ((s = nextStar++) != 0) {
-		BlockPortIter nextPort(*s);
-		PortHole* p;
-		while ((p = nextPort++) != 0) {
-			if (p->isItInput() || wormEdge(*p)) continue;
-			Geodesic* g = p->myGeodesic;
-			if (g->size() != g->numInit()) {
-				Error::abortRun(*p,"geodesic error!");
-				invalid = TRUE;
-			}
-		}
-	}
 	return !invalid;
 }
 
