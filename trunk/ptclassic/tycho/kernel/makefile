@@ -101,7 +101,7 @@ ITCL_SRCS = \
 	Object.itcl \
 	PackageData.itcl \
 	PopupMenu.itcl \
-	PortedDigraph.itcl \
+	PortedGraph.itcl \
 	StyleChooser.itcl \
 	StyleEditor.itcl \
 	Query.itcl \
