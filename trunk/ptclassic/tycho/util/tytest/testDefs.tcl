@@ -190,7 +190,8 @@ proc doneTests {args} {
 	    "Total: [expr $PASSED + $FAILED] (Passed: $PASSED Failed: $FAILED)"
     flush stderr
     update
-    after [expr {2 * $duration}] ::tycho::TopLevel::exitProgram 0
+    ::preference assign misc confirmOnExit 0
+    after [expr {2 * $duration}] ::tycho::TopLevel::exitProgram
     #after [expr {2 * $duration}] ::tclexit
 }
 
