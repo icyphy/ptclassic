@@ -1,3 +1,5 @@
+#ifndef PALETTE_H
+#define PALETTE_H
 /* palette.h  edg
 Version identification:
 $Id$
@@ -28,7 +30,17 @@ ENHANCEMENTS, OR MODIFICATIONS.
 							COPYRIGHTENDKEY
 */
 
+#ifdef __cplusplus
+#include "oct.h" /* for octObject */
+
+extern boolean MkPalIconInPal(octObject *facetPtr, char *dir, char *palName);
+extern boolean MkUnivIconInPal(octObject *facetPtr, char *dir, char *palName);
+extern boolean MkGalIconInPal(octObject *galFacetPtr, char *dir, char *palName);
+extern boolean MkStarIconInPal(char *starName, char *dir, char *palName);
+#else
 extern boolean MkPalIconInPal();
 extern boolean MkUnivIconInPal();
 extern boolean MkGalIconInPal();
 extern boolean MkStarIconInPal();
+#endif /*__cplusplus*/
+#endif /* PALETTE_H */

@@ -38,6 +38,22 @@ Header file for util.c
 
 extern char DEFAULT_DOMAIN[];
 
+#ifdef __cplusplus
+extern boolean UMalloc(char **outPtr, int bytes);
+extern boolean StrDup(char **outPtr, char *in);
+extern char *DupString(char *string);
+extern void TildeExpand(char *input, char *buffer);
+extern char *SkipWhite(char *s);
+extern char *BaseName(char *name);
+extern boolean ConcatDirName(char *dir,char *baseName, char **outPtr);
+extern boolean UGetFullTechDir(char **strPtr);
+extern boolean YesNoToBoolean(char *str);
+extern char *BooleanToYesNo(boolean bit);
+extern boolean UniqNameInit();
+extern char *UniqNameGet(char *s);
+extern boolean IsBalancedParen(); /* FIXME: this funct not in util.c */
+extern char *DirName(char *buf);
+#else
 extern boolean UMalloc();
 extern boolean StrDup();
 extern char *DupString();
@@ -52,12 +68,25 @@ extern boolean UniqNameInit();
 extern char *UniqNameGet();
 extern boolean IsBalancedParen();
 extern char *DirName();
+#endif /* __cplusplus*/
 
 typedef struct DupSheetNode_s {
     char *info;
     struct DupSheetNode_s *next;
 } DupSheetNode;
 typedef DupSheetNode *DupSheet;
+
+#ifdef __cplusplus
+#include "rpc.h"     /* needed to define "RPCSpot" */
+
+extern boolean DupSheetInit(DupSheet *ds);
+extern boolean DupSheetClear(DupSheet *ds);
+extern boolean DupSheetAdd(DupSheet *ds, char *item);
+extern boolean DupSheetIsDup(DupSheet *ds, char *item);
+extern char* setCurDomainS(RPCSpot *spot);
+extern char* setCurDomainF(octObject *facetPtr);
+extern char* setCurDomainInst(octObject *instPtr);
+#else
 extern boolean DupSheetInit();
 extern boolean DupSheetClear();
 extern boolean DupSheetAdd();
@@ -68,3 +97,4 @@ extern char* getDomainInst();
 extern char* setCurDomainS();
 extern char* setCurDomainF();
 extern char* setCurDomainInst();
+#endif /* __cplusplus */

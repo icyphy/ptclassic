@@ -1,3 +1,5 @@
+#ifndef ICON_H
+#define ICON_H 1
 /* 
 Copyright (c) 1990-1994 The Regents of the University of California.
 All rights reserved.
@@ -27,6 +29,20 @@ Version identification:
 $Id$
 */
 
+#ifdef __cplusplus
+#include "rpc.h"     /* needed to define "RPCSpot" */
+
+extern int RpcMkStar(RPCSpot *spot, lsList cmdList, long userOptionWord);
+extern int MkStar(char *name, char *domain, char *dir, char *palette);
+extern int RpcMkSchemIcon(RPCSpot *spot, lsList cmdList, long userOptionWord);
+extern int RpcLookInside(RPCSpot *spot, lsList cmdList, long userOptionWord);
+extern int RpcEditIcon(RPCSpot *spot, lsList cmdList, long userOptionWord);
+extern int IconFileToSourceFile(char *iconFile, char *sourceFile, char *domain);
+extern int AbsPath(char *path, char *abs_path);
+extern int ptMkStar(char* name, char* domain, char* dir, char* palette);
+                     /* used by POct - SetMkSchemIcon */
+extern int GetTildePath(octObject *facetPtr, char *tPath);
+#else
 extern int RpcMkStar();
 extern int MkStar();
 extern int RpcMkSchemIcon();
@@ -34,3 +50,6 @@ extern int RpcLookInside();
 extern int RpcShowName();
 extern int RpcEditIcon();
 extern int GetTildePath();  /* used by POct - SetMkSchemIcon */
+#endif /* __cplusplus */
+
+#endif /* ICON_H */
