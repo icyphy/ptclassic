@@ -107,10 +107,10 @@ body ::tycho::ItclViewer::docFile {classname} {
     set docname "[info namespace tail $classname].idoc"
     
     lappend dirs {$TYCHO/kernel}
-    lappend dirs {$TYCHO/editors/textedit}
-    lappend dirs {$TYCHO/editors/slate}
-    lappend dirs {$TYCHO/editors/visedit}
-    lappend dirs {$TYCHO/lib/tydoc}
+    lappend dirs {$TYCHO/edit/textedit}
+    lappend dirs {$TYCHO/edit/slate}
+    lappend dirs {$TYCHO/edit/visedit}
+    lappend dirs {$TYCHO/util/tydoc}
     
     foreach dir $dirs {
 	set findfile [file join $dir doc codeDoc $docname]

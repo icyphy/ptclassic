@@ -67,7 +67,7 @@
 # GRAPHICAL_TESTS	Itcl tests that do require a graphical front end
 #
 # Scripts:
-# TYDOC		The Tycho Tydoc script, see $TYCHO/lib/tydoc.
+# TYDOC		The Tycho Tydoc script, see $TYCHO/util/tydoc.
 # ITCLSH	The Itcl 'itclsh' binary 
 #
 # C and C++ Compiler variables:
