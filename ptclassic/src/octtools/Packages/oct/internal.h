@@ -245,10 +245,6 @@ struct object_desc {
     octStatus (*write_func)();
 };
 
-extern int errno;
-extern int sys_nerr;
-extern char *sys_errlist[];
-
 #define sys_msg() (errno < sys_nerr ? sys_errlist[errno] : "Unknown error")
 
 extern struct object_desc oct_object_descs[];
