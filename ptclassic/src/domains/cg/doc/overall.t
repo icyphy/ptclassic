@@ -11,8 +11,8 @@ Edward A. Lee
 Jos\o"e\'" Pino
 .AE
 .so introduction
-.so writestars
-.so writetargets
+.so stardoc
+.so targetdoc 
 .so multitarget
 .so schedulers
 .UH "References"
