@@ -44,9 +44,19 @@ include $(CONFIG)
 # Sub directories to run make in.
 DIRS =	
 
-TCL_SRCS = 
+TCL_SRCS = \
+	JRPCServer.tcl
 
-ITCL_SRCS = 
+ITCL_SRCS = \
+	Compile.itcl \
+	CompileCTcl.itcl \
+	CompileJava.itcl \
+	DirSearch.itcl \
+	EditDiff.itcl \
+	Glimpse.itcl \
+	ItclClassList.itcl \
+	JRPC.itcl
+
 
 EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) \
 	devtools.tcl \
