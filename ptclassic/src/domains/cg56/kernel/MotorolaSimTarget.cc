@@ -75,10 +75,10 @@ int MotorolaSimTarget::loadCode() {
 	// Start the simulation
 	cmdFile << "go $" << startAddress << "\n";
 
-	// Saves the simulator state so that we can extract the number
-	// of cycles executed
+	// Save the simulator state so that we can extract the number of
+	// cycles executed (-O always overwrites the .sim if it exists)
 	if (int(reportMemoryUsage)) {
-	    cmdFile << "save s " << filePrefix << ".sim\n";
+	    cmdFile << "save s " << filePrefix << ".sim -O\n";
 	}
 
 	// Quit the interaction with the simulator
@@ -92,24 +92,25 @@ void MotorolaSimTarget::writeCode() {
     if (!parent()) {
 	StringList realcmds = "#!/bin/sh\n";
 	realcmds << headerComment("# ");
-	realcmds << "# Remove all of the CG56WriteFile output files\n";
+	realcmds << "\n# Remove all of the CG56WriteFile output files\n";
 	realcmds << "/bin/rm -f /tmp/cgwritefile*\n";
-	realcmds << "# Run the simulator\n";
+	realcmds << "\n# Run the simulator\n";
 	if (int(interactiveFlag))
-		realcmds << "(xterm -e sim";
+		realcmds << "xterm -e sim";
 	else 
-		realcmds << "(sim";
-	realcmds << dspType << " " << filePrefix << ".cmd" << ">/dev/null)\n";
-	realcmds << "\n# Display the results\n";
-	realcmds << shellCmds;
+		realcmds << "sim";
+	realcmds << dspType << " " << filePrefix << ".cmd" << " >/dev/null\n";
 	if (int(reportMemoryUsage)) {
 		// Search the simulation state file for the pattern 'cyc:' e.g.
 		// ^Break #1 pc>=$ff0 h ;dev:0 pc:0ff0 cyc:439131
-		realcmds << "\n\n# Extract the number of cycles executed\n";
+		realcmds << "\n# Extract the number of cycles executed\n";
+		realcmds << "/bin/rm -f " << filePrefix << ".cyc\n";
 		realcmds << "grep 'cyc:' " << filePrefix << ".sim | "
 			 << "sed -e 's/^.*cyc:\\([0-9]*\\)$/\\1/' >"
 			 << filePrefix << ".cyc\n";
 	}
+	realcmds << "\n# Display the results\n";
+	realcmds << shellCmds;
 	if (!writeFile(realcmds, "", FALSE, 0755)) {
 	    Error::abortRun(*this, "Failed to write the shell command file");
 	    return;
@@ -120,43 +121,77 @@ void MotorolaSimTarget::writeCode() {
     MotorolaTarget:: writeCode();
 }
 
+// Run the Motorola assembly code through the simulator.
+// If the user has requested to see the execution time, then
+// we cannot run the simulation in the background because
+// we must wait for the simulation to end before we can
+// retrieve the execution time.
 int MotorolaSimTarget::runCode() {
 	StringList runCmd;
-	runCmd << "./" << filePrefix << " &";
+	runCmd << "./" << filePrefix;
+
+	if ( int(reportMemoryUsage) ) {
+	    StringList msg = "In order to extract the execution time of the ";
+	    msg << filePrefix
+		<< " system, user interaction will be frozen"
+		<< " until the simulation completes.";
+	    Error::message(*this, msg);
+	}
+	else {
+	    runCmd << " &";
+	}
+
+	// Run the simulation
 	int valid = !systemCall(runCmd, "Error running code in the simulator");
 
-	// Extract the number of cycles executed
-	if (valid && int(reportMemoryUsage) && computeImplementationCost()) {
+	// Extract the number of cycles executed if reportMemoryUsage is true
+	if (valid && int(reportMemoryUsage)) {
+	    computeImplementationCost();
 	    Error::message(*this, printImplementationCost());
 	}
 
 	return valid;
 }
 
+#define MAXLINE 128
+
 int MotorolaSimTarget::computeImplementationCost() {
 	// Compute memory usage
 	if (! MotorolaTarget::computeImplementationCost()) return FALSE;
 
-        // Figure out where the .cyc file is
+	// Figure out where the .cyc file is
 	// If it is on a remote machine, then copy it over
 	int deleteFlag = FALSE;
 	StringList cycleFileName;
 	cycleFileName << filePrefix << ".cyc";
-        StringList loadpathname =
-                findLocalFileName(targetHost, destDirectory,
-                                  cycleFileName, deleteFlag);
-        if ( loadpathname.length() == 0 ) return FALSE;
+	StringList loadpathname =
+		findLocalFileName(targetHost, destDirectory,
+				  cycleFileName, deleteFlag);
+	if ( loadpathname.length() == 0 ) return FALSE;
 
 	// Update the execution time
-	// Open the local copy of the .cyc file
+	// Open the local copy of the .cyc file and read in the first
+	// word as the number of cycles executed
 	int retval = FALSE;
 	FILE* fp = fopen(loadpathname, "r");
 	if (fp) {
+	    char buffer[MAXLINE];
 	    int numCycles = 0;
 	    ImplementationCost* costInfoPtr = implementationCost();
-	    retval = ( fscanf(fp, "%d", &numCycles) == 1 );
+	    if ( fgets(buffer, MAXLINE, fp) != 0 ) {
+		buffer[MAXLINE - 1] = 0;	// null terminate string
+		retval = ( sscanf(buffer, "%d", &numCycles) == 1 );
+	    }
 	    fclose(fp);
 	    costInfoPtr->setExecutionTime(numCycles);
+	}
+
+	if ( deleteFlag ) {
+	    StringList removeCommand = "rm ";
+	    removeCommand << loadpathname;
+	    StringList errmsg = "Could not remove ";
+	    errmsg << loadpathname;
+	    systemCall(removeCommand, errmsg);
 	}
 
 	return retval;
