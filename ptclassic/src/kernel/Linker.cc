@@ -130,7 +130,7 @@ void DebugMessage(char *str1, char *str2)
 }
 // Use this macro for debugging.
 #define D(x) x
-#else DEBUG
+#else //DEBUG
 #define D(x)
 #endif //DEBUG
 
