@@ -42,9 +42,20 @@ Each node on the list has an associated name.
 #include "DataStruct.h"
 #include "type.h"
 
-class NamedNode;
+class NamedNode {
+public:
+    NamedNode(Pointer object, const char* name);
+    ~NamedNode();
+    char* name() { return nm; }
+    Pointer object() { return obj; }
+private:
+    friend class NamedList;
+    friend class NamedListIter;
+    char* nm;
+    Pointer obj;
+};
 
-class NamedList : private SequentialList
+class NamedList : public SequentialList
 {
     friend class NamedListIter;
 public:
@@ -82,6 +93,7 @@ private:
     NamedNode* getNamedNode(const char* name = NULL) const;
 };
 
+// This iterator returns the pointers to the objects
 class NamedListIter : private ListIter
 {
 public:
