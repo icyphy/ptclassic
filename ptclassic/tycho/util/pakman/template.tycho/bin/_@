@@ -8,7 +8,7 @@
 # Create the tycho namespace
 namespace ::tycho
 
-# Set up the auto_path. WHat we do here is simply append
+# Set up the auto_path. What we do here is simply append
 # paths to the auto_path in the order that is likely to
 # be most rapid for finding the needed packages. Note that
 # it is important to append all possible paths before doing
@@ -29,7 +29,7 @@ if [info exists env(TCL_PACKAGES)] {
     }
 }
 
-# Try TYCHO, or PTOLEMY if there is not TYCHO
+# Try TYCHO, or PTOLEMY if there is no TYCHO
 if ![info exists env(TYCHO)] {
     if [info exists env(PTOLEMY)] {
 	# TYCHO is not set, but PTOLEMY is.
