@@ -58,6 +58,7 @@ PL_SRCS = \
  VHDLFIR.pl \
  VHDLFIRInt.pl \
  VHDLInhomogeneous.pl \
+ VHDLDistributor.pl \
  VHDLLMS.pl \
  VHDLCos.pl \
  VHDLSin.pl \
