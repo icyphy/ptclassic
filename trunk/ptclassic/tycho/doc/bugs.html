@@ -10,7 +10,6 @@ Other places to go locally
 <li><a href="troubleshooting.html">Troubleshooting Tycho</a>
 <li><a href="tymac.html#macintosh bugs">Tycho/Macintosh bugs</a>
 <li><a href="tynt.html#windows bugs">Tycho/Windows bugs</a>
-<li><a href="../lib/tydoc/doc/bugs.html">Tydoc bugs</a>
 </ul>
 Contents:
 <ul>
@@ -20,6 +19,7 @@ Contents:
 <li><a href="#bugs in gendoc">Bugs in the documentation generator</a>
 <li><a href="#bugs in java">Bugs in the Tycho/Java environment</a>
 <li><a href="#bugs in Ptolemy/Tycho">Ptolemy/Tycho bugs</a>
+<li><a href="#bugs in Tydoc">Bugs in Tydoc</a>
 </ul>
 <h2><a name="bugs in the kernel">Bugs in the kernel</a></h2>
 
@@ -57,16 +57,17 @@ the HTML editor, not the HTML viewer. But that's what you get.
 <h3><a href="../kernel/Edit.itcl">Edit</a></h3>
 <ul>
 <li>Fill region is much too slow.
-<li>The undo in the text widgets is only one level deep.
 <li>Need a "find-again" binding, and perhaps emacs-style incremental search.
+<li>The undo in the text widgets is only one level deep.
 <li>Selecting text does not automatically put it into the clipboard.
 After it's deselected, then it cannot be "stuffed" elsewhere from the
-clipboard.
-</ul>
-
-<h3><a href="../kernel/File.itcl">File</a></h3>
-<ul>
-<li>Crash recovery code does not work.
+clipboard.  
+ <br>One workaround for this problem and the one level undo would be
+to make it so that deleting text does not automatically put it into the
+cut buffer, instead it goes into a separate undo buffer.  Using emacs
+kill rings would be nice here, but most apps these days have only
+one cut buffer.
+ <br><B>To be fixed soon.</B>
 </ul>
 
 <h3><a href="../kernel/Glimpse.itcl">Glimpse</a></h3>
@@ -185,7 +186,6 @@ It needs to run <CODE>adjustInsertionCursor</CODE>.
 <h3><a href="../editors/textedit/EditHTML.itcl">EditHTML</a></h3>
 <ul>
 <li>The Check Hyperlinks command flags every http reference as an error.
-Since it can't do HTTP yet, it should ignore these.
 </ul>
 
 <h3><a href="../editors/textedit/EditProgram.itcl">EditProgram</a></h3>
@@ -212,6 +212,8 @@ create their own doc directory.
 <h2><a name="bugs in visual editors">Bugs in visual editors</a></h2>
 There are lots of bugs to be fixed in the visual editors, here are 
 some of the biggies.
+ <P>We should remove all the edit commands in the visual editors that do not 
+work.
 <h3><a href="../editors/visedit/Graphics.itcl">Graphics</a></h3>
 <ul>
 <li> Cut and paste does not work in the Graphics widget.
@@ -223,7 +225,7 @@ some of the biggies.
 <h3><a href="../editors/visedit/EditDAG.itcl">EditDAG</a></h3>
 <ul>
 <li> addArc does not work. 
- <P>Karl-Hermann Wieners &lt;kwieners@TechFak.Uni-Bielefeld.DE&gt; writes"
+ <P>Karl-Hermann Wieners &lt;kwieners@TechFak.Uni-Bielefeld.DE&gt; writes:
 <PRE>
     Problem is, if I have selected a node with
     slate/canvas id 54 as parent and item 52 as child, addArc simply calls
@@ -262,6 +264,9 @@ some of the biggies.
 </ul>
 <h3><a href="../editors/visedit/ProfileTcl.itcl">ProfileTcl</a></h3>
 <ul>
+
+<LI> TclProfile should be removed pending the release of Itcl3.0
+
 <li> The TclProfile probably won't work under Windows unless TclX is
 installed by hand.  The <CODE>lib/profile</CODE> directory probably
 won't help much.
@@ -270,24 +275,18 @@ won't help much.
 </ul>
 
 
-<h2><a name="bugs in gendoc">Bugs in the documentation generator</a></h2>
-
-<ul>
-<li>The <CODE>gendoc</CODE> command leaves a huge number of
-    <CODE>::tycho::DocClass</CODE>
-    objects around after completing.  Do <CODE>info objects</CODE> after
-    running <CODE>gendoc</CODE> to see them.
-
-</ul>
-
 <H2><a name="bugs in java">Bugs in the Tycho/Java environment</a></H2>
 <OL>
 
 <LI> In the Java editor,
-he <CODE>Compile</CODE> and <CODE>Compile and Load</CODE>
+The <CODE>Compile</CODE> and <CODE>Compile and Run</CODE>
 menu choices under the <CODE>File</CODE> menu do exactly the same thing,
 they compile <B>and</B> run the Java code.
+ <br><B>To be fixed soon.</B>
 
+<LI> In the Java editor, the following needs work:
+indenting, filling, commenting coloring
+ <br><B>To be fixed soon.</B>
 <LI> The prebuilt Itcl binaries will only work with TclJava
 if they are installed in <CODE>/users/ptolemy/tcltk</CODE>.
 
@@ -310,6 +309,21 @@ operating systems such as Solaris and HPUX.  This workaround is to
 start <CODE>tycho -ptiny &gt;/dev/null &amp;</CODE>
 
 </OL>
+
+<H2><a name="#bugs in Tydoc">Bugs in Tydoc</a></H2>
+<MENU>
+<li><a href="../lib/tydoc/doc/bugs.html">Tydoc bugs</a>
+</MENU>
+<OL>
+<LI> Generating the codedoc files takes far too long.
+We should either ship them, or reimplement tydoc in java
+ <br><B>To be fixed soon.</B>
+<LI> Viewing the code index takes too long.  We should either
+reduce the amount of data, or speed it up.
+ <br><B>To be fixed soon.</B>
+</OL>
+
+
 
 <p>
 <a href="index.html">Tycho Home Page</a><br>
