@@ -84,7 +84,11 @@ REALCLEAN_STUFF =
 TYDOC_DESC =
 
 # Do make sources so that we ensure that the subdirectories are checked out
-all install: sources $(MISC_SRCS)
+all: sources $(MISC_SRCS)
+
+install: all subinstall
+
+.PHONY: all install subinstall
 
 # We don't include common.mk since we don't use the compiler here
 include $(ROOT)/mk/no-compile.mk
