@@ -38,7 +38,7 @@ VPATH         = $(ROOT)/src/octtools/installColors
 CONFIG=$(ROOT)/mk/config-$(ARCH).mk
 include $(CONFIG)
 
-HDRS = 		clean_tap.h \
+HDRS = 		cleantap.h \
 		fill_pat.h \
 		general.h \
 		message.h \
