@@ -7,6 +7,14 @@ const NEXTMX = 12;
 
 const int prime[ NEXTMX ] = { 2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37 };
 
+				// AIX-4.1 under gcc-2.7.2 can't
+  				// handle having the definition of
+  				// getW in the .h file, so we move it here.
+Complex nb_fft::getW( int m, int n ) {
+    double angle = ( Pi2 * m ) / n;
+    return Complex( cos( angle ), sin( angle ) );
+}
+
 Complex* nb_fft::Compute( Complex* z1, Complex* z2 ) {
   int before = N;
   int after = 1;
