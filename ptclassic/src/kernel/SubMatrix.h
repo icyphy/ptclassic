@@ -96,8 +96,9 @@ class ComplexSubMatrix: public ComplexMatrix {
   // Necessary for gcc-2.6.xx -Wsynth
   ComplexSubMatrix& operator = (const ComplexSubMatrix& src);
   ComplexSubMatrix& operator = (Complex value);
-  /*virtual*/ int operator == (const PtMatrix& src);
-  /*virtual*/ int operator != (const PtMatrix& src) { return(!(*this == src)); }
+  /*virtual*/ int operator == (const PtMatrix& src) const;
+  /*virtual*/ int operator != (const PtMatrix& src) const {
+                                       return(!(*this == src)); }
   /*virtual*/ Complex* operator [] (int row) { 
                                        return &data[row*parent->numCols()]; }
   /*virtual*/ const Complex* operator[] (int row) const {
@@ -157,8 +158,9 @@ class FixSubMatrix: public FixMatrix {
   // Necessary for gcc-2.6.xx -Wsynth
   FixSubMatrix& operator = (const FixSubMatrix& src);
   FixSubMatrix& operator = (Fix value);
-  /*virtual*/ int operator == (const PtMatrix& src);
-  /*virtual*/ int operator != (const PtMatrix& src) { return(!(*this == src)); }
+  /*virtual*/ int operator == (const PtMatrix& src) const;
+  /*virtual*/ int operator != (const PtMatrix& src) const {
+                                        return(!(*this == src)); }
   /*virtual*/ Fix* operator [] (int row) { 
                                         return &data[row*parent->numCols()]; }
   /*virtual*/ const Fix* operator[] (int row) const {
@@ -219,8 +221,9 @@ class FloatSubMatrix: public FloatMatrix {
   // Necessary for gcc-2.6.xx -Wsynth
   FloatSubMatrix& operator = (const FloatSubMatrix& src);
   FloatSubMatrix& operator = (double value);
-  /*virtual*/ int operator == (const PtMatrix& src);
-  /*virtual*/ int operator != (const PtMatrix& src) { return(!(*this == src)); }
+  /*virtual*/ int operator == (const PtMatrix& src) const;
+  /*virtual*/ int operator != (const PtMatrix& src) const {
+                                        return(!(*this == src)); }
   /*virtual*/ double* operator [] (int row) { 
                                       return &data[row*parent->numCols()]; }
   /*virtual*/ const double* operator[] (int row) const { 
@@ -280,11 +283,13 @@ class IntSubMatrix: public IntMatrix {
   // Necessary for gcc-2.6.xx -Wsynth
   IntSubMatrix& operator = (const IntSubMatrix& src);
   IntSubMatrix& operator = (int value);
-  /*virtual*/ int operator == (const PtMatrix& src);
-  /*virtual*/ int operator != (const PtMatrix& src) { return(!(*this == src)); }
-  /*virtual*/ int* operator [] (int row) { return &data[row*parent->numCols()]; }
+  /*virtual*/ int operator == (const PtMatrix& src) const;
+  /*virtual*/ int operator != (const PtMatrix& src) const {
+                                       return(!(*this == src)); }
+  /*virtual*/ int* operator [] (int row) {
+                                       return &data[row*parent->numCols()]; }
   /*virtual*/ const int* operator[] (int row) const {
-                                             return &data[row*parent->numCols()]; }
+                                       return &data[row*parent->numCols()]; }
 
   void operator << (IntArrayState& src);
 
