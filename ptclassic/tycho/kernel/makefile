@@ -85,7 +85,7 @@ ITCL_SRCS = \
 	ErrorMessage.itcl \
 	File.itcl \
 	FileBrowser.itcl \
-	Font.itcl \
+	FontManager.itcl \
 	Graphics.itcl \
 	HTML.itcl \
 	HTMLText.itcl \

@@ -52,7 +52,7 @@ uplevel #0 {
     source $tychokernel/Color.tcl
     source $tychokernel/TopLevel.itcl
     source $tychokernel/Dismiss.itcl
-    source $tychokernel/Font.itcl
+    source $tychokernel/FontManager.itcl
     source $tychokernel/Options.tcl
     source $tychokernel/DialogWindow.itcl
     source $tychokernel/Message.itcl
