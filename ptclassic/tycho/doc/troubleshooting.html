@@ -137,6 +137,16 @@ to create a new one.  <CODE>tylndir</CODE> is documented in <A
 HREF="coding/directories.html#tylndir and private trees"><CODE>$TYCHO/doc/coding/directories.html</CODE></A>
 
 </OL>
+<H3>Color problems under Windows</H3>
+Under Itcl2.2 on Windows, some colors in bitmaps might be rendered
+incorrectly.  An example of this is the parts of 
+bitmap in the Tycho Welcome Window will be yellow instead grey.
+ <P>One workaround is to use the Color Palette settings and change the
+number of colors.  To get to this control panel, right click on the
+background, select <CODE>Properties</CODE>, which will bring up the
+<CODE>Display Properties</CODE> window.  In that window, select the 
+<CODE>Settings</CODE> tab and then change the Color Palette setting.
+
 <H3>Problems starting <CODE>tycho -java</CODE></H3>
 See 
 <A HREF="../java/tycho/doc/internals/tcljava.html#CLASSPATH">The TclJava Package</A>
