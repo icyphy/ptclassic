@@ -907,6 +907,18 @@ int BDFCluster::matchNeighborRates() {
 	return TRUE;
 }
 
+// This is a special function that determines whether a cluster may
+// be looped by a constant factor even though there is a condition mismatch.
+// It is OK to do so if the port being used is unconditional and there
+// is only one neighbor (so the merged-in cluster is a "leaf").
+
+static int loopOKanyway(BDFClustPort* p, BDFClustPort* pFar) {
+	if (TorF(p->relType())) return FALSE;
+	BDFCluster* me = p->parentClust();
+	BDFCluster* peer = pFar->parentClust();
+	return onlyNeighbor(me,peer);
+}
+
 // This function determines a constant loop factor for a cluster.
 // We attempt to find a factor to repeat the loop by that will make
 // it better match the sample rate of its neighbors.
@@ -925,8 +937,10 @@ int BDFCluster::loopFactor() {
 			return 0;
 		// don't loop if peer should loop first
 		if (myIO > peerIO) return 0;
-		// try looping if things go evenly.
-		if (peerIO % myIO == 0 && condMatch(p,pFar)) {
+		// try looping if things go evenly.  Either conditions
+		// must match, or special conditions must hold.
+		if (peerIO % myIO == 0 && 
+		    (condMatch(p,pFar) || loopOKanyway(p,pFar))) {
 			int possFactor = peerIO / myIO;
 			// choose the smallest possible valid loopfactor;
 			// if retval is zero we have not found one yet.
@@ -1615,13 +1629,11 @@ BDFAtomCluster::~BDFAtomCluster() {
 
 // print functions.
 ostream& BDFCluster::printBrief(ostream& o) {
-	if (pType == DO_ITER) {
-		if (pLoop > 1)
-			o << pLoop << "*";
-	}
-	else {
+	if (pType != DO_ITER) {
 		o << do_conds[pType] << pCond->name() << ")";
 	}
+	if (pLoop > 1)
+		o << pLoop << "*";
 	return o << name();
 }
 
