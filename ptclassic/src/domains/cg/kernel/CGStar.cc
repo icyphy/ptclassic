@@ -561,9 +561,6 @@ void CGStar :: forkInit(CGPortHole& input,CGPortHole& output) {
 	}
 }
 
-// return NULL
-Wormhole* CGStar :: asWormhole() { return NULL; }
-
 // return the profile
 Profile* CGStar :: getProfile(int) { return profile; }
 
