@@ -29,6 +29,7 @@ static char SccsId[]="$Id$";
 #include "utility.h"
 #include "mm.h"
 #include "errtrap.h"
+#include "ansi.h"
 #include "options.h"
 
 #ifndef MM_TRACE
@@ -61,15 +62,18 @@ static char *scanPtr;
 
 
 static int doUnivOption();
-static int usageSummary();
-static int usageDetailed();
-static int formatInit();
-static int formatFlush();
-static int formatString();
-static int formatChar();
-static int formatTab();
-static int formatOptChoice();
-
+static void usageSummary();
+static void usageDetailed();
+static void formatInit();
+static void formatFlush();
+static void formatString
+	ARGS((char *string));
+static void formatChar
+	ARGS((int ch));
+static void formatTab
+	ARGS((int position));
+static void formatOptChoice
+	ARGS((char *optChars));
 
 #define HARD_SP		'\0'	/* A space we don't allow to split lines */
 
@@ -96,6 +100,7 @@ static int exitBad = 1;
 static char *expandOptChar();
 /*LINTLIBRARY*/
 
+int
 optGetOption(argc, argv)
 int argc;
 char *argv[];
@@ -280,6 +285,7 @@ int optChar;
 	errRaise(OPT_PKG_NAME, 0, "unknown universal option `%c'", optChar);
 	/*NOTREACHED*/
     }
+    return 0;
 }
 
 #ifdef notdef
@@ -339,7 +345,7 @@ char *optUsageString()
 				    inGroup = 0;			\
 				}
 
-static usageSummary()
+static void usageSummary()
 {
     struct optGroup *optGrpPtr;
     optionStruct *optPtr;
@@ -383,7 +389,7 @@ static usageSummary()
     FINISH_OPTION_GROUP();
 }
 
-static usageDetailed()
+static void usageDetailed()
 {
     struct optGroup *optGrpPtr;
     optionStruct *optPtr;
@@ -422,14 +428,14 @@ static int curColumn = 0;
 static int indent;
 static char lineBuffer[LINEWIDTH];
 
-static formatInit(contIndent)
+static void formatInit(contIndent)
 int contIndent;
 {
     if (curColumn > 0) formatFlush();
     indent = contIndent;
 }
 
-static formatFlush()
+static void formatFlush()
 {
     int i;
 
@@ -443,13 +449,13 @@ static formatFlush()
     curColumn = 0;
 }
 
-static formatString(string)
+static void formatString(string)
 char *string;
 {
     while (*string != '\0') formatChar(*string++);
 }
 
-static formatChar(ch)
+static void formatChar(ch)
 int ch;
 {
     if (ch == '\n') {
@@ -481,7 +487,7 @@ int ch;
     }
 }
 
-static formatTab(position)
+static void formatTab(position)
 int position;
 {
     if (position >= LINEWIDTH) position = LINEWIDTH - 1;
@@ -489,7 +495,7 @@ int position;
     while (curColumn < position) formatChar(' ');
 }
 
-static formatOptChoice(optChars)
+static void formatOptChoice(optChars)
 char *optChars;
 {
     int firstFlag = 1;
