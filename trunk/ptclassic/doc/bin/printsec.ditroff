@@ -72,7 +72,7 @@ while ($#argv)
 end
 
 soelim $dirheader/shared $files > /tmp/pt$$
-$printcommand $printoptions /tmp/pt$$ >& /tmp/index$$
+
 if ($indexonly) then
 	# if only generating index, add -t option and throw away the output
 	($printcommand $printoptions -t /tmp/pt$$ > /dev/null) >& /tmp/index$$
