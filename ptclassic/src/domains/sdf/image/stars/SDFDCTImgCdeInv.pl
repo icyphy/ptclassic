@@ -1,5 +1,5 @@
 defstar {
-	name		{ DCTImageCodeInv }
+	name		{ DCTImgCdeInv }
 	domain		{ SDF }
 	version		{ $Id$ }
 	author		{ Paul Haskell }
@@ -168,4 +168,4 @@ This one works on DCTImages, not GrayImages.
 		Envelope temp(*hiImage);
 		output%0 << temp;
 	}
-} // end defstar{ DctCodeInv }
+} // end defstar{ DctImgCdeInv }
