@@ -127,12 +127,16 @@ body ::tycho::Retarget::constructor {args} {
     }
 
     eval itk_initialize $args
-puts "Editor: $editor"
     if { $editor != "" && [$editor info commands domains] == "domains"} {
         # Call the domains method of the Ptcl editor to get the list of domains
-        set domainA [lindex [$editor domains] 0]
+        set domains [$editor domains]
+        if {[llength $domains] > 1 } {
+            set domainA [lindex [$editor domains] 0]
+        } else {
+            set domainA $domains
+	}
         if { [lsearch $domainList $domainA] == -1 } {
-            ::tycho::warn "Sorry, the Universe contains '$domainA',\
+            error "Sorry, the Universe contains '$domainA',\
                     which is not present\
                     in this version of Tycho.\nThis version of Tycho contains\
                     the following domains: $domainList.\nTo run a version of\
@@ -372,7 +376,7 @@ body ::tycho::Retarget::printStars { starName relation domainA domainB} {
         }
     "
 
-    ::tycho::htmlmessage "
+    set hmsg [::tycho::htmlmessage "
         <H1>$starName star in domains $domainA and $domainB</H1>
         $relationMessage
 
@@ -392,7 +396,8 @@ body ::tycho::Retarget::printStars { starName relation domainA domainB} {
         <pre>
         $domainBPrint
         </pre>
-    "
+    "]
+    return $hmsg
 }
     ###################################################################
     ###################################################################
@@ -410,25 +415,32 @@ body ::tycho::Retarget::modifyAfterDomainChange { {universeName {}} \
             "Number of stars that have the same name, but different multiports."
     addInfo diffStates {States} $states 3 \
             "Number of stars that have the same name, but different states."
-    addInfo domainBOnly "$domainB Only" $aOnly 3 \
+    addInfo domainBOnly "$domainB Only" $bOnly 3 \
             "Number of stars that are only in $domainA."
-    addInfo domainAOnly "$domainA Only" $bOnly 3 \
+    addInfo domainAOnly "$domainA Only" $aOnly 3 \
             "Number of stars that are only in $domainB."
 
     addInfo commonStars {Common} $bothAandB 3 \
             "Number of stars that are in both domains and have the same ports, multiports and states."
 
-    addInfo domainBCount "$domainB" $aTotal 3 \
+    addInfo domainBCount "$domainB" $bTotal 3 \
             "Total number of stars in $domainB."
-    addInfo domainACount "$domainA" $bTotal 3 \
+    addInfo domainACount "$domainA" $aTotal 3 \
             "Total number of stars in $domainA."
 
     if {$universeName != {}} {
         $this modify titleSet title \
-                "Retargetting $universeName from $domainA domain to $domainB domain"
+                "Retargeting $universeName from $domainA domain to $domainB domain"
+	displayer configure -title "$universeName: $domainA vs. $domainB" 
     } else {
         $this modify titleSet title \
                 "Comparison of $domainA and $domainB domains"
+	displayer configure -title "$domainA vs. $domainB" 
     }
+
+    # Mark the graph as unmodified so that we do not get asked if
+    # we want to save until we have actually written a graph
+    markUnmodified
+
     set dirtyCompareDomains 1
 }
