@@ -178,13 +178,12 @@ avoid FAT partitions and placing the sources on a NTFS partition.
 
 <LI> If you have not yet done so, download the Ptolemy <CODE>src</CODE>
 zip file from
-<a href="http://ptolemy.eecs.berkeley.edu/pt0.7.1/download.html"><CODE>http://ptolemy.eecs.berkeley.edu/pt0.7.1/download.html</CODE></a>
-and then use GNU tar of Winzip to extract the file
-winzip to unzip them.
- <br>Note that if you use Winzip, then you may see messages about
-overwriting files with the same name.  These messages occur because
-two files have the same name, but the names are made up of letters
-that have different cases.
+<a href="http://ptolemy.eecs.berkeley.edu/pt0.7.2/download.html"><CODE>http://ptolemy.eecs.berkeley.edu/pt0.7.2/download.html</CODE></a>
+and then use GNU tar to extract the files.  
+ <br> Do <B>not</B> use Winzip to extract the tar files.
+These tar files contain Cygwin symbolic links, which Winzip cannot
+handle.
+
  <br>Note that Ptolemy 0.7.1p1 and earlier had problems with
 <a href="ptntbugs.html#tar">problem with <CODE>$PTOLEMY/colors/ptolemy/con</CODE></a> and file names that contained percent characters.  These
 problems have been fixed in 0.7.2devel
