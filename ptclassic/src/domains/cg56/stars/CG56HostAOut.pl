@@ -29,7 +29,7 @@ blah
         input.setSDFParams(int(blockSize),int(blockSize)-1);
     }
     codeblock(cbAio) {
-graph $ref(input,0) $fullname() "$val(label)"
+graph $ref(input,0) $fullname() "$val(label)" $val(blockSize)
     }
     initCode {
 	addCode(cbAio,"aioCmds");
