@@ -188,8 +188,8 @@ proc ptlangTroffToHTML {args} {
         }
 	close $infile
 	close $tmpfile
-        exec rm -f $file.bak
-        exec mv $file $file.bak
-        exec mv "/tmp/$file" $file
+#        exec rm -f $file.bak
+#        exec mv $file $file.bak
+#        exec mv "/tmp/$file" $file
     }
 }
