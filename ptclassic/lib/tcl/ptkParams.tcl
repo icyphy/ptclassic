@@ -463,7 +463,7 @@ proc ed_RemoveParam {facet number top button} {
 
 proc ed_Remove {facet number winName} {
     global ed_EntryDestroyFlag paramArray ed_ToplevelNumbers
-    regsub {^(.*\.f[^\.]+)((\.entry)|)$} $winName {\1} window
+    regsub {^(.*\.f[^\.]+)((\.entry|\.label)|)$} $winName {\1} window
     destroy $window
     regsub {^.*\.f([^\.]+)$} $window {\1} countd
     set name $ed_ToplevelNumbers($facet,$number,$countd)
@@ -489,9 +489,9 @@ proc ptkEditParams {facet number args} {
 
     if {[info exists ed_ToplevelNumbers($facet,$number)] && \
 	[winfo exists .o$ed_ToplevelNumbers($facet,$number)]} {
-	ptkImportantMessage .error \
-	    "Already editing the parameters for this object."
-	return
+	    # Window exists.  Raise.
+	    raise .o$ed_ToplevelNumbers($facet,$number)
+	    return
     }
     set ed_ToplevelNumbers($facet,$number,count) 0
 
