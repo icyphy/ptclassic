@@ -133,8 +133,8 @@ int MathematicaIfc::CloseStaticMathLink() {
 // printPacketType
 // prints out the type of packet stored in packetType
 static void printPacketType(int packetType, int currentFlag) {
-  char *wordString = (currentFlag) ? "Current" : "Last";
-  char *packetString = 0;
+  const char* wordString = (currentFlag) ? "Current" : "Last";
+  const char* packetString = 0;
 
   switch (packetType) {
     case ILLEGALPKT:
