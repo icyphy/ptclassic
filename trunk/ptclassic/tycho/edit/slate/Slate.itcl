@@ -402,7 +402,8 @@ body ::tycho::Slate::ghost {tag args} {
 	}
 	"line" {
 	    return [eval $canvas create $shape \
-		    [$canvas coords $primary] -fill grey -tags \
+		    [$canvas coords $primary] -fill grey \
+		    -arrow [$canvas itemcget $primary -arrow] \
                     -tags [list $tags]]
 	}
 	"default" {
