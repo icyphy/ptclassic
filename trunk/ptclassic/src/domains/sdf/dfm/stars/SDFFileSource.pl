@@ -8,7 +8,8 @@ defstar
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
+limitation of liabi
+lity, and disclaimer of warranty provisions.
     }
     location { SDF dmm library }
     descriptor {
@@ -16,11 +17,11 @@ Output the given file name on each firing.
 If no name is given, then output a unique name of a temporary file
 on each firing.
     }
-    ccinclude { "FileMessage.h" }
+    ccinclude { "FileMessage.h" <iostream.h> }
 
     output {
 	name { output }
-	type { message }
+	type { filemsg }
     }
 
     defstate {

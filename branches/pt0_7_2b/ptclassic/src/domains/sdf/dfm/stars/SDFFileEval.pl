@@ -105,7 +105,7 @@ the name of the file to source is given by the second argument.
     ccinclude { "FileMessage.h" }
     outmulti {
 	name {out}
-	type {message}
+	type {filemsg}
 	desc {Output files for the results}
     }
     defstate {
