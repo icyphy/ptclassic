@@ -53,7 +53,7 @@ class ::tycho::RevControlSCCS {
     method checkOut {}
 
     #### createComment
-    # Create the comment from the list returned by the EntryQuery class.
+    # Create the comment from the list returned by getComments.
     method createComment {list} 
 
     #### getComments
@@ -75,6 +75,7 @@ class ::tycho::RevControlSCCS {
     #### viewHistory
     # View the prior comments and other information about the 
     # associated file.
+    # FIXME: This is not yet implemented.
     method viewHistory {}
 
     ###################################################################
@@ -85,16 +86,10 @@ class ::tycho::RevControlSCCS {
     # control.
     protected method checkRevControl {}
 
-    ###################################################################
-    ####                    protected variable                     ####
-
-    protected variable comment ""
-
 }
 
 ###################################################################
 # constructor
-# Create the revision control dialog.
 #
 body ::tycho::RevControlSCCS::constructor {args} {
     eval itk_initialize $args 
@@ -108,15 +103,15 @@ body ::tycho::RevControlSCCS::destructor {} {
 
 #####################################################################
 #### createComment
-# 
+# Create a single string from the list returned by getComments.
+#
 body ::tycho::RevControlSCCS::createComment {list} {
     if {$list == ""} {
-	set comment ""
-	return
+	return ""
     }
     set summary [lindex [lindex $list 0] 1]
     set body [lindex [lindex $list 1] 1]
-    set comment [format "SUMMARY: %s BODY: %s" $summary $body]
+    return [format "SUMMARY: %s BODY: %s" $summary $body]
 }
 
 #####################################################################
@@ -127,7 +122,7 @@ body ::tycho::RevControlSCCS::getComments {} {
 	    -queries {{first {Comment Summary:} {}} \
 	    {second {Comment Body:} {}}}  \
 	    -entrywidth 60]
-    $this createComment $list
+    return [$this createComment $list]
 }
 
 #####################################################################
@@ -151,7 +146,7 @@ body ::tycho::RevControlSCCS::checkIn {} {
 		resides in."
 	return 
     }
-    $this getComments
+    set comment [$this getComments]
     if {$comment == ""} {
 	return
     }
