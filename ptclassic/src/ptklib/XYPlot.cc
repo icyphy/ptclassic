@@ -84,8 +84,8 @@ int XYPlot::setup (Block* star,         // The star I am in
 		   char*  yTitle,       // Title for Y-axis
 		   double yMin,	        // minimum Y range value
 		   double yMax,         // max Y range value 
-		   int    numSets = 1,  // number of datasets
-		   int    style = 0)    // plot style
+		   int    numSets/* = 1*/,  // number of datasets
+		   int    style/*= 0*/ )    // plot style
 {
 
   const char * XYPlot_window_base = ".xyPlot";
@@ -115,7 +115,7 @@ int XYPlot::setup (Block* star,         // The star I am in
   return TRUE;
 }
 
-int XYPlot::addPoint(double x, double y, int set = 1) {
+int XYPlot::addPoint(double x, double y, int set /*= 1*/) {
   if (!ptkPlotPoint(ptkInterp, &plot, set, x, y)) {
     Error::abortRun(ptkPlotErrorMsg());
     return 0;
@@ -123,7 +123,7 @@ int XYPlot::addPoint(double x, double y, int set = 1) {
   return 1;
 }
 
-int XYPlot::breakPlot(int set = 1) {
+int XYPlot::breakPlot(int set /* = 1*/) {
   if (!ptkPlotBreak(ptkInterp, &plot, set)) {
     Error::abortRun(ptkPlotErrorMsg());
     return 0;
