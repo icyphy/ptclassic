@@ -80,10 +80,9 @@ Cluster* Star::asCluster() { return NULL; }
 const Cluster* Star::asCluster() const { return NULL; }
 
 // make a duplicate Star.  This will call Block::clone 
-// and then set Star specific data members such as the target pointer.
+// and then set Star specific data members
 /* virtual */ Block* Star::clone () const {
 	Star* star = (Star*)Block::clone();
-	if (star && star->target()) star->setTarget(target());
 	return star;
 }
 
