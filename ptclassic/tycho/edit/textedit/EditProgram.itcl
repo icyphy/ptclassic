@@ -747,7 +747,13 @@ body ::tycho::EditProgram::gendocBufferInternal {setDocCommand genCommand} {
         } {
             set savedir [pwd]
             cd $dir
-            set retval [eval $genCommand]
+            if [catch {eval $genCommand} retval] {
+                # Doc generation threw an error. Recover and rethrow.
+                cd $savedir
+                putStatus ""
+                global errorInfo
+                error $retval $errorInfo
+            }
             cd $savedir
         }
     }
