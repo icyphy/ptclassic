@@ -7,21 +7,21 @@ array parameter "value" (default "1 -1"). This array can periodically
 repeat with any period, and you can halt a simulation when the end of
 the array is reached. The following table summarizes the capabilities:
 <pre>
-<b>haltAtEnd   periodic   period    operation <br>
+<b>haltAtEnd    periodic    period      operation
 -----------------------------------------------------------------------</b>
     NO          YES        0         The period is the length of the array 
-    NO          YES        N&gt;0       The period is N 
+    NO          YES        N>0       The period is N 
     NO          NO         anything  Output the array once, then zeros 
     YES         anything   anything  Stop after outputting the array once 
 </pre>
 <p>
 The first line of the table gives the default settings.
 The array may be read from a file by simply setting value to something
-of the form "&lt; filename".
+of the form "&lt;filename".
 	}
 	htmldoc {
 This star may be used to read a file by simply setting "value" to
-something of the form "&lt; filename".  The file will be read completely
+something of the form "&lt;filename".  The file will be read completely
 and its contents stored in an array.  The size of the array is currently
 limited to 20,000 samples.
 <a name="file read"></a>
