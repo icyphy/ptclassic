@@ -52,12 +52,13 @@ variable.
 
 **********************************************************************/
 
+#include <stream.h>             // gcc-3.0: This include should be first
 #include "Fix.h"
 #include "Error.h"
 #include "type.h"
 #include "PrecisionState.h"
 #include "compat.h"		// PT_NT4VC: pickup strcasecmp
-#include <stream.h>
+
 #include <std.h>
 #include <string.h>
 #include <math.h>
