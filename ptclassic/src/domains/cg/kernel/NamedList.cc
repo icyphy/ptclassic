@@ -1,4 +1,4 @@
-static const char *file_id = "NameList.cc";
+static const char *file_id = "$RCSfile$";
 /**************************************************************************
 Version identification:
 $Id$
@@ -12,86 +12,127 @@ Programmer: J. Pino
 #pragma implementation
 #endif
 
-#include <stream.h>
-#include "NameList.h"
+#include "NamedList.h"
 #include "miscFuncs.h"
+#include <stream.h>
 
-NameNode :: NameNode(const char* nm, Pointer a) 
+// Hidden class used by NamedList.
+class NamedNode
 {
-    object=a;
+    friend class NamedList;
+    friend class NamedListIter;
+
+    NamedNode(Pointer object, const char* name);
+    ~NamedNode();
+    char* name;
+    Pointer object;
+};
+
+NamedNode::NamedNode(Pointer obj, const char* nm) 
+{
+    object = obj;
     name = savestring(nm);
 }
 
-NameNode :: ~NameNode()
+NamedNode::~NamedNode()
 {
-    LOG_DEL ; delete(name);
+    LOG_DEL; delete name;
 }
 
-//Add a new name, object pair
-int NameList :: add(const char* name, Pointer object)
+Pointer NamedListIter::next()
 {
-	NameNode* foo = getNameNode(name);
-	if (foo) {
-		if (foo->object != object) 
-			return FALSE;
-		else
-			return TRUE;
-	}
-	LOG_NEW; NameNode* node = new NameNode(name,object);
-    	put(node);
-   	return TRUE;
+    NamedNode* node = (NamedNode*)ListIter::next();
+    if (node != NULL) return node->object;
+    else return NULL;
 }
 
-// Lookup object by name, if one doesn't exist, return NULL
-Pointer NameList::get(const char* name) 
+// Put a named object in the list.
+// Return FALSE on error.
+int NamedList::append(Pointer object, const char* name)
 {
-	NameNode* foo = getNameNode(name);
-	if (foo) return foo->object;
-	return NULL;
+    NamedNode* node = getNamedNode(name);
+    if (node != NULL)
+    {
+	// Adding two objects with the same name is not allowed.
+	if (node->object != object) return FALSE;
+
+	// Adding the same object twice is allowed. Only one copy is kept.
+	else return TRUE;
+    }
+    LOG_NEW; node = new NamedNode(object, name);
+    SequentialList::put(node);
+    return TRUE;
 }
 
-// remove object by name, if object doesn't exist, return FALSE
-int NameList::remove(const char* name)
+
+// Put a named object at the head of the list.
+// Return FALSE on error.
+int NamedList::prepend(Pointer object, const char* name)
 {
-	NameNode* foo = getNameNode(name);
-	if (foo) 
+    NamedNode* node = getNamedNode(name);
+    if (node != NULL)
+    {
+	// Adding two objects with the same name is not allowed.
+	if (node->object != object) return FALSE;
+
+	// Adding the same object twice is allowed. Only one copy is kept.
+	else return TRUE;
+    }
+    // Put the node at the head so that the list can be used as a stack.
+    LOG_NEW; node = new NamedNode(object, name);
+    SequentialList::tup(node);
+    return TRUE;
+}
+
+// Get a named object from the list.
+// Return NULL on error.
+Pointer NamedList::get(const char* name) const
+{
+    NamedNode* node = getNamedNode(name);
+    if (node != NULL) return node->object;
+    else return NULL;
+}
+
+// Remove a named object from the list.
+// Return FALSE on error.
+int NamedList::remove(const char* name)
+{
+    NamedNode* node = getNamedNode(name);
+    if (node != NULL) 
+    {
+	LOG_DEL; delete node;
+	return SequentialList::remove(node);
+    }
+    else return FALSE;
+}
+
+// Delete all the nodes in the list.
+void NamedList::deleteNodes()
+{
+    ListIter node(*this);
+    NamedNode* n;
+    while ((n = (NamedNode*)node++) != NULL)
+    {
+	LOG_DEL; delete n;
+    }
+}
+
+// Get the NamedNode for a named object in the list.
+// Return NULL on error.
+NamedNode* NamedList::getNamedNode(const char* name) const
+{
+    NamedNode* n;
+    if (name == NULL)
+    {
+	n = (NamedNode*)SequentialList::head();
+    }
+    else
+    {
+	ListIter node(*this);
+	while ((n = (NamedNode*)node++) != NULL)
 	{
-		remove(foo);
-		return TRUE;
+	    if(strcmp(name, n->name) == 0) break;
 	}
-	return FALSE;
-}
-
-	
-void NameList::initialize() 
-{
-    ListIter next(*this);
-    for (int i=size(); i > 0; i--) 
-    {
-        NameNode* p = (NameNode*)next++;
-        LOG_DEL; delete p;
     }
-    SequentialList::initialize();
-}
-
-// destructor -- a subset of initialize since baseclass will do the
-// rest.
-NameList::~NameList() 
-{
-    ListIter next(*this);
-    for (int i=size(); i > 0; i--) 
-    {
-		NameNode* p = (NameNode*)next++;
-		LOG_DEL; delete p;
-    }
-}
-
-// private method - return the NameNode pointer named 'name'
-NameNode* NameList:: getNameNode(const char* name)
-{
-	ListIter next(*this);
-	NameNode* p;
-    while ((p = (NameNode*)next++) != 0)
-    	if(!strcmp(name,p->name)) return p;
-	return NULL;
+    return n;
 }
