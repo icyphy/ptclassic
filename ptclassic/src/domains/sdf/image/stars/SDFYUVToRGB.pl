@@ -11,6 +11,12 @@ Read three packets that describe a color image in YUV format, and output
 three packets that describe an image in RGB format.
 The inputs and outputs are packets of type GrayImage.
 	}
+	explanation {
+.Id "format conversion, YUV to RGB"
+.Id "image format conversion, YUV to RGB"
+.Ir "image format, RGB"
+.Ir "image format, YUV"
+	}
 
 	ccinclude { "GrayImage.h", "Error.h" }
 

@@ -9,6 +9,14 @@ The phase output is in the range -PI to PI.
 	author { E. A. Lee }
 	copyright { 1991 The Regents of the University of California }
 	location { SDF main library }
+	explanation {
+.Id "rectangular to polar format conversion"
+.Id "format conversion, rectangular to polar"
+.Ir "magnitude"
+.Ir "phase"
+.Ir "Cartesian coordinates"
+.Ir "polar coordinates"
+	}
 	input {
 		name { x }
 		type { float }

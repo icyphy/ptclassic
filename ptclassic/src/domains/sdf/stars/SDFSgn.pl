@@ -9,6 +9,9 @@ Note that 0.0 maps into 1.
 	author { E. A. Lee }
 	copyright { 1991 The Regents of the University of California }
 	location { SDF main library }
+	explanation {
+.Id "signum"
+	}
 	input {
 		name{input}
 		type{float}

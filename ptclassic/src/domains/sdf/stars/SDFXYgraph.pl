@@ -13,6 +13,8 @@ The X data is on "xInput" and the Y data is on "input".
 	explanation {
 The input signal is plotted using the \fIxgraph\fR program, with one
 input interpreted as the x-axis data, and the other input as y-axis data.
+.Id "graph, X-Y"
+.Ir "xgraph program"
 	}
 	seealso {Xgraph XMgraph xgraph Xhistogram}
 	input {

@@ -12,6 +12,12 @@ three packets that describe an image in YUV format. No downsampling
 is done on the U and V signals.
 The inputs and outputs are packets of type GrayImage.
 	}
+	explanation {
+.Id "format conversion, RGB to YUV"
+.Id "image format conversion, RGB to YUV"
+.Ir "image format, RGB"
+.Ir "image format, YUV"
+	}
 
 	ccinclude { "GrayImage.h", "Error.h" }
 

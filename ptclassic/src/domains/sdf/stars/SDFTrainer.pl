@@ -11,6 +11,11 @@ purposes.
 	author { J. T. Buck }
 	copyright { 1991 The Regents of the University of California }
 	location { SDF main library }
+	explanation {
+.Id "DFE training"
+.Id "decision feedback equalizer training"
+.Id "equalizer, decision feedback, training"
+	}
 	defstate {
 		name { trainLength }
 		type { int }

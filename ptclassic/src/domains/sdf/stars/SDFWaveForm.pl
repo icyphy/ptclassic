@@ -24,10 +24,11 @@ limited to 20,000 samples.  To read longer files, use the
 .c ReadFile
 star.  This latter star reads one sample at a time, and hence also
 uses less storage.
-.IE "file read"
-.IE "waveform from file"
-.IE "reading from a file"
-.IE "halting a simulation"
+.Id "file read"
+.Id "waveform from file"
+.Id "reading from a file"
+.Ir "halting a simulation"
+.Ir "simulation, halting"
 	}
 	version {$Id$}
 	author { J. T. Buck }

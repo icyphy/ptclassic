@@ -9,6 +9,12 @@ defstar {
 Accept a GrayImage and inverse run-length encode it.
 Check to make sure we don't write past unallocated memory.
 	}
+	explanation {
+.Id "decompression, run length"
+.Id "decoding, run length"
+.Id "run length decoding"
+.Id "image, run length decoding"
+	}
 	seealso { RunLen }
 
 	hinclude { "GrayImage.h", "Error.h" }

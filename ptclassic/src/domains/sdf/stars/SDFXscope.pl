@@ -24,6 +24,9 @@ state to a nonzero value.  In this case, a new plot (starting at
 x value zero) is started every \fItraceLength\fR samples.  The
 first \fIignore\fR samples are not plotted; this is useful for letting
 transients die away.
+.Ir "xgraph program"
+.Id "oscilloscope, X window"
+.Id "graph, X window, multi-trace"
 	}
 	defstate {
 		name {traceLength}
