@@ -74,6 +74,7 @@ CCS_WITH_H_FILES=\
  Particle.cc \
  ParticleQueue.cc \
  PriorityQueue.cc \
+ PtGate.cc \
  Scheduler.cc \
  SimControl.cc \
  Star.cc \
