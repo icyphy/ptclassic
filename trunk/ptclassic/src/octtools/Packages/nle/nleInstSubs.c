@@ -32,6 +32,10 @@ static char SccsId[]="$Id$";
 #include "oh.h"
 #include "nle.h"
 #include "nleCommon.h"
+#include "ansi.h"
+
+int nleIOequivalent
+	ARGS((octObject *FacetA, octObject *FacetB));
 
 /*   Routines to determine if two facets are equivalent */
 #define NLE_NULL 0
