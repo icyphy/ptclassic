@@ -74,7 +74,7 @@ giving the time at which the particle should be sent to the output.
 		    Error::warn(*this,"Overwriting previously received data");
 		recdData = data.clone();
 		refireAtTime(firingTime);
-		feedbackOut.sendData();
+		feedbackOut->sendData();
 		dataValid = 1;
 	    }
 	}
