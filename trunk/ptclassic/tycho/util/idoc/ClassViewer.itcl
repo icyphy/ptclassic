@@ -219,11 +219,31 @@ body ::tycho::IDoc::constructor {args} {
 
     set myContents $itk_component(contents)
 
+    # add handle to resize frames vertically
+    itk_component add updown {
+        frame $itk_interior.updown
+    } {
+        usual
+    }
+    
+    # add handle to resize frames horizontally
+    itk_component add leftright {
+        frame $itk_interior.leftright
+    } {
+        usual
+    }
+
     pack $itk_component(contents) -side left -anchor w -fill y \
+            -in $itk_interior
+
+    pack $itk_component(leftright) -side left -fill y \
             -in $itk_interior
 
     pack $itk_component(html1) -side top -expand 1 -fill both \
             -anchor n -in $itk_interior.htmlFrame
+
+    pack $itk_component(updown) -side top -expand 1 -fill x \
+            -in $itk_interior.htmlFrame
 
     pack $itk_component(html2) -side top -expand 1 -fill both \
             -anchor n -in $itk_interior.htmlFrame
@@ -257,6 +277,10 @@ body ::tycho::IDoc::constructor {args} {
             -bodyfont entryFont \
             -height textHeight \
             -htmlwidth textWidth
+
+    # Configure the handles
+    $itk_component(updown) config -cursor sb_v_double_arrow -height 3
+    $itk_component(leftright) config -cursor sb_h_double_arrow -width 3
 
     # Something annoying inherited insists on creating this thing
     pack forget $itk_interior.childsite
