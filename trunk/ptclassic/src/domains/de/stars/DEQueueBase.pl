@@ -61,7 +61,7 @@ Arrival data that can not be queued due to capacity limit.
 		// by inData or demand inputs.
 		inData.triggers(size);
 		demand.triggers(size);
-		inData.triffers(overflow);
+		inData.triggers(overflow);
 
 		// Following the general rule that if an input can trigger
 		// an output with the same time stamp, we should identify
