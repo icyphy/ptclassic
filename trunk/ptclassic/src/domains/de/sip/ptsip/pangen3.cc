@@ -217,7 +217,8 @@ comwork(FILE *fd, Lextok *now, int m)
 	case NEMPTY:	putname(fd, "nempty(", now->lft, m, ")");
 			break;
 
-	case 's':	putname(fd, "", now->lft, m, now->val?"!!":"!");
+	case 's':	putname(fd, "", now->lft, m, 
+                               (char *) (now->val ? "!!" : "!"));
 			for (v = now->rgt, i=0; v; v = v->rgt, i++)
 			{	if (v != now->rgt) fprintf(fd,",");
 				if (!symbolic(fd, v->lft))
@@ -239,7 +240,8 @@ comwork(FILE *fd, Lextok *now, int m)
 			if (now->val >= 2)
 				fprintf(fd, ">");
 			break;
-	case 'R':	putname(fd, "", now->lft, m,  now->val?"??[":"?[");
+	case 'R':	putname(fd, "", now->lft, m,
+                              (char *) (now->val ? "??[" : "?["));
 			for (v = now->rgt, i=0; v; v = v->rgt, i++)
 			{	if (v != now->rgt) fprintf(fd,",");
 				if (!symbolic(fd, v->lft))
