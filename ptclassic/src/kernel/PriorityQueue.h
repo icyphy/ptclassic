@@ -83,6 +83,9 @@ public:
 	// Add element to the queue sorted by its level...
 	void levelput(Pointer a, float v, float fv = 1.0);
 
+	// append the link to the end of the queue (ignore levels).
+	void put(Pointer a, float v = 0);
+
 	// Push back the link just gotten.
 	void pushBack(LevelLink*);
 

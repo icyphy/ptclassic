@@ -177,3 +177,25 @@ PriorityQueue :: ~PriorityQueue () {
 	clearFreeList();
 }
 	
+void PriorityQueue :: put (Pointer a, float v = 0)
+
+{
+        // place at end of queue regardless of "number stamp" 
+
+        numberNodes++;
+
+        if (lastNode)  {
+          // list not empty
+          lastNode->next = getFreeLink()->setLink (a, v, 1.0, lastNode->next,
+                                                 lastNode);
+          lastNode = lastNode->next;
+          lastNode->next->before = lastNode;
+        }
+        else  {
+          // list empty
+          lastNode = getFreeLink()->setLink (a, v, 1.0, 0, 0);
+          lastNode->next = lastNode->before = lastNode;
+        }
+        lastReference = lastNode;
+}
+
