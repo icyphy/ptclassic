@@ -74,7 +74,7 @@ static ddsComposite lbl_top_data = { "Label Editor", DDS_VERTICAL, 4 };
 
 static void change_height();
 static ddsNumber lbl_height_data = {
-    "Text Height (lambda)", 1.0, 100, 1.0, 10.0, "%3.0lf",
+    "Text Height (lambda)", 1.0, 30, 1.0, 10.0, "%3.0lf",
     change_height, (ddsData) 0
 };
 
