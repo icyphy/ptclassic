@@ -2,6 +2,7 @@
 # by Mark Ulferts and Sue Yockey.
 # 
 # @Author: Farhana Sheikh
+# @Contributors: Mark Ulferts and Sue Yockey
 #
 # @Version: $Id$
 # 
@@ -103,7 +104,7 @@ class ::tycho::SlateView {
     ###################################################################
     ####                         public methods                    ####
 
-    # Add slate view menus to Displayer
+    # Set up my menus and menuitems
     method addMyMenus {}
 
     # Get a handle to the slate drawing surface
@@ -126,6 +127,9 @@ class ::tycho::SlateView {
 
     # Scroll the slate
     method scrollSlate {wid first last}
+
+    # Quit for slate view
+    method quit {}
 
     # Zoom the contents of the slate view
     # method zoom {inOrOut}
@@ -494,25 +498,28 @@ body ::tycho::SlateView::destructor {} {
 #
 body ::tycho::SlateView::addMyMenus {} {
 
-    # First add commands to the existing File menu which is standard on
+    # Add File menu
+    $myMenubar addMenu File left {} -underline 0
+
+    # Add commands to the existing File menu which is standard on
     # the displayer
-    $myDisplayer addMenuItem {Open} File \
+    $myMenubar addMenuItem {Open} File \
 	    -command {error "Sorry not implemented yet"} \
 	    -state normal 
-    $myDisplayer addMenuItem {Save} File \
+    $myMenubar addMenuItem {Save} File \
 	    -command {error "Sorry not implemented yet"} \
 	    -state normal 
-    $myDisplayer addMenuItem {Save As...} File \
+    $myMenubar addMenuItem {Save As...} File \
 	    -command {error "Sorry not implemented yet"} \
 	    -state normal 
 
-    $myDisplayer addSeparator File
+    $myMenubar addMenuSeparator File
 
-    $myDisplayer addMenuItem {Close} File \
+    $myMenubar addMenuItem {Close} File \
 	    -command {error "Sorry not implemented yet"} \
 	    -state normal
-    $myDisplayer addMenuItem {Quit} File \
-	    -command "$myDisplayer nextWindow; delete object $myDisplayer" \
+    $myMenubar addMenuItem {Quit} File \
+	    -command "$this quit" \
 	    -state normal 
 }
 
@@ -526,14 +533,31 @@ body ::tycho::SlateView::childsite {} {
     return $itk_component(slateview)
 }
 
+#########################################################################
+#### focusin
+# Grab the focus.
+#
+body ::tycho::View::focusin {} {
+    focus $itk_component(slateview)
+}
+
 #######################################################################
 #### insertInDisplay
 # Insert view in the display
 #
 body ::tycho::SlateView::insertInDisplay {} {
     
-   # insert the view into the displayer
-   $myDisplayer setView $itk_component(hull)
+    # set up menus
+    addMyMenus
+
+    # insert the view into the displayer
+    $myDisplayer setView $viewLabel
+
+    # grab focus each time we enter the slate widget
+    ::bind $itk_component(slateview) <Enter> \
+	    "$myDisplayer configure \
+	    -menubar [$myDisplayer menubar $viewLabel]; \
+	    focus %W"
 }
 
 #######################################################################
@@ -576,6 +600,18 @@ body ::tycho::SlateView::scrollSlate {wid first last} {
     }
 }
 
+#######################################################################
+#### quit
+# Quit from slate view
+#
+body ::tycho::SlateView::quit {} {
+
+    # Remove binding to enter event
+    ::bind $itk_component(slateview) <Enter> {}
+    
+    # Remove myself from my displayer
+    $myDisplayer removeView $viewLabel
+}
     ###################################################################
     ###################################################################
     ####                      protected  methods                   ####
