@@ -67,13 +67,13 @@ public:
 class MultiInAsmPort : public MultiAsmPort {
 public:
 	int isItInput() const;
-	PortHole& newPort();
+	// PortHole& newPort();
 };
 
 class MultiOutAsmPort : public MultiAsmPort {
 public:
 	int isItOutput() const;
-	PortHole& newPort();
+	// PortHole& newPort();
 };
 
 #endif
