@@ -54,6 +54,7 @@ ITCL_SRCS = \
 	AbstractGraph.itcl \
 	ButtonBox.itcl \
 	Build.itcl \
+	BuildDialog.itcl \
 	CircularList.itcl \
 	Class.itcl \
 	ColorBrowser.itcl \
