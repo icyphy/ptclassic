@@ -1148,7 +1148,7 @@ body ::tycho::Slate::shape {id {method {}} {region 0}} {
             set shape point
         }
     } else {
-	set shape [@scope ::tycho::$itemClass($id) [list set shape]]
+	set shape [itemcget $id -shape]
     }
 
     # Return just the shape

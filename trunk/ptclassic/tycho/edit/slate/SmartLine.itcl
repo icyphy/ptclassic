@@ -207,12 +207,6 @@ class ::tycho::SmartLine {
     proc coords {id canvas slate args}
 
     ###################################################################
-    ####                         protected variables               ####
-
-    # SmartLines are shaped like... lines
-    protected common shape "line"
-
-    ###################################################################
     ####                         private variables                 ####
 
     # The virtual "method" table
@@ -455,6 +449,7 @@ class ::tycho::SmartLine {
     set optiondefault(-beta)	  30
     set optiondefault(-end)	  "e"
     set optiondefault(-fill)	  black
+    set optiondefault(-shape)     line
     set optiondefault(-smooth)    off
     set optiondefault(-start) 	  "e"
     set optiondefault(-state) 	  0

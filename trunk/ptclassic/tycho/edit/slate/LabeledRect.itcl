@@ -133,12 +133,6 @@ class ::tycho::LabeledRect {
     proc coords {id canvas slate args}
     
     ###################################################################
-    ####                         protected variables               ####
-
-    # Labeled rectangles are rectangular in shape
-    common shape "rectangle"
-
-    ###################################################################
     ####                         private variables                 ####
 
     # The virtual "method" table
@@ -165,6 +159,7 @@ class ::tycho::LabeledRect {
 
     set optiondefault(-fill)    ""
     set optiondefault(-outline) "black"
+    set optiondefault(-shape)   rectangle
     set optiondefault(-width)   "1"
 }
 

@@ -148,12 +148,6 @@ class ::tycho::Solid {
     proc coords {id canvas slate args}
 
     ###################################################################
-    ####                         protected variables               ####
-
-    # The "shape" of items of this class
-    protected common shape "polygon"
-
-    ###################################################################
     ####                         private variables                 ####
 
     # All methods are looked up through a table
@@ -187,6 +181,7 @@ class ::tycho::Solid {
     set optiondefault(-color)       background
     set optiondefault(-borderwidth) 2
     set optiondefault(-relief)      raised
+    set optiondefault(-shape)       polygon
 }
 
 ##########################################################################
