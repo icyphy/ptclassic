@@ -41,7 +41,7 @@ extern "C" {
 class ACG {
 public:
 	ACG(unsigned seed = 1) {srand48(seed);}
-	asLong() {return (unsigned long)mrand48();}
+	unsigned long asLong() {return (unsigned long)mrand48();}
 };
 #endif /* !__GNUG__ || PT_EGCS */
 #else /* hppa ...*/
