@@ -31,6 +31,6 @@
 #		       
 # Programmer:  Christopher Hylands
 
-ARCHFLAGS =	-DPTSOL2_5
+ARCHFLAGS =	-DPTSOL2_5 -DPT_EGCS
 
 include $(ROOT)/mk/config-sol2.mk
