@@ -440,22 +440,84 @@ body ::tycho::Slate::bbox {args} {
 # given aspect.
 #
 # The aspects supported depends on the type (or more specifically,
-# the shape type -- see the type{} method) of the picture. All picture
-# support at least the aspects _c_ or _center_, and the eight compass
-# points: _n_, _s_, _e_, _w_, _ne_, _nw_, _se_, and _sw_. If the picture
-# is not rectangular, then these eight aspects will denote the corners
+# the shape type -- see the type{} method) of the picture. Some
+# item types will support a more complex set of aspects. If the
+# picture is rectangular, is supports at least the aspects _c_ or
+# _center_, and the eight compass
+# points: _n_, _s_, _e_, _w_, _ne_, _nw_, _se_, and _sw_. If the
+# *-region* option is given, these aspects will be assumed regardless
+# of teh picture's actual shape, and will denote the corners
 # of the picture's _region_ (see the region{} method).
 #
 # If there are no arguments, return the list of valid aspects for
 # this picture.
 #
-# FIXME: Currently only the center and compass aspects are supported.
-#
 body ::tycho::Slate::aspect {id args} {
-    if { $args == "" } {
-	return {c n s e w ne nw se sw}
+    getflag region args
+
+    # If the -region flag is given, treat the picture as a rectangle
+    if { $region } {
+	if { $args == "" } {
+	    return {c n s e w ne nw se sw}
+	} else {
+	    return [eval rectAspect [list [$this region $id]] $args]
+	}
+    }
+
+    # If this is a picture id, and there's a method defined for it,
+    # call the method
+    if { [string match {_*} $id] } {
+	if { [@scope ::tycho::$picttype($id) [list \
+		::info exists methodtable(aspect)]] } {
+		    return [@scope ::tycho::$picttype($id) [list \
+		    eval \[set methodtable(aspect)\] $id $canvas $args]]
+	}
+    }
+
+    # There's no method defined or this is a canvas item,
+    # so process according to the shape type of the item
+    if { [string match {[0-9]*} $id] } {
+	set shape [$canvas type $id]
     } else {
-	return [eval rectAspect [list [$this region $id]] $args]
+	set shape [@scope ::tycho::$picttype($id) [list set shape]]
+    }
+    switch -exact $shape {
+	"oval" -
+	"rectangle" {
+	    if { $args == "" } {
+		return {c n s e w ne nw se sw}
+	    } else {
+		return [eval \
+			rectAspect [list [$this coords $id]] $args]
+	    }
+	}
+	"line" -
+	"polygon" {
+	    if { $args == "" } {
+		# Generate the legal aspects
+		set result {}
+		foreach n [interval 0 \
+			[expr [llength [$this coords $id]] / 2 - 1]] {
+		    lappend result "vertex-$n"
+		}
+		return $result
+	    } else {
+		return [eval \
+			lineAspect [list [$this coords $id]] $args]
+	    }
+	}
+	"text" -
+	"point" {
+	    if { $args == "" } {
+		# Generate the legal aspects
+		return "origin"
+	    } else {
+		return [$this coords $id]
+	    }
+	}
+	default {
+	    error "Unsupported item shape $shape"
+	}
     }
 }
 
