@@ -63,7 +63,15 @@ if ( ! $?S56DSP ) then
 	setenv S56DSP /users/ptdesign/vendors/s56dsp
 endif
 
-setenv TMPLD_LIBRARY_PATH $PTOLEMY/lib.${PTARCH}:$PTOLEMY/octtools/lib.${PTARCH}:$PTOLEMY/gnu/$PTARCH/lib:$PTOLEMY/tcltk/itcl.${PTARCH}/lib/itcl
+setenv TMPLD_LIBRARY_PATH $PTOLEMY/lib.${PTARCH}:$PTOLEMY/octtools/lib.${PTARCH}:$PTOLEMY/gnu/${PTARCH}/lib:$PTOLEMY/tcltk/itcl.${PTARCH}/lib/itcl
+
+# Matlab settings
+set matlabdir = `$PTOLEMY/bin/matlabRootDir`
+if (-x "$matlabdir/bin/util/arch.sh") then
+	set matlabarch = `echo 'echo $Arch' | cat $matlabdir/bin/util/arch.sh - | /bin/sh`
+	set matlablibdir = "$matlabdir/extern/lib/$matlabarch"
+	setenv TMPLD_LIBRARY_PATH ${TMPLD_LIBRARY_PATH}:${matlablibdir}
+endif
 
 if ($PTARCH =~ hppa*) then
 	if ( ! $?SHLIB_PATH ) then
