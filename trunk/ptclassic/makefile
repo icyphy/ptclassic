@@ -56,5 +56,5 @@ install_oct_and_vem: obj.$(ARCH)
 # then everything else.  gcc and tcl/tk source are usually distributed as a
 # separate tar file 
 bootstrap:
-	$(MAKE) -f ~ptdesign/mk/scratch-srcs.mk
+	$(MAKE) -f mk/scratch-srcs.mk
 	$(MAKE) $(MFLAGS) install_oct_and_vem install
