@@ -1,0 +1,102 @@
+#
+# $Id$
+#
+# The "textcolors" master style-sheet
+#
+modelconfigure -label "Text colors"
+modelconfigure -description {
+    This style contains settings text widgets.
+    It contains universal coloring settings such
+    as foreground and background, cursor and selection
+    colors, and so on.
+}
+
+style default \
+	-label "Default" \
+	-description {
+    The default text colors. This style provides
+    colors for black-on-white text.
+} {
+    parameter textForeground black \
+	    -type color \
+	    -label "Text color"
+
+    parameter textBackground grey93 \
+	    -type color \
+	    -label "Text background color"
+
+    parameter insertBackground black \
+	    -type color \
+	    -label "Cursor color"
+ 
+    parameter selectColor lightyellow \
+	    -type color \
+	    -label "Selected text highlight"
+
+    parameter answerForeground blue \
+	    -type color \
+	    -label "Color of result text"
+
+    parameter promptForeground firebrick \
+	    -type color \
+	    -label "Color of prompt text"
+
+    parameter hyperlinkColor lightskyblue \
+	    -type color \
+	    -label "Color of hyperlinks"
+
+    parameter underlineLinks 1 \
+	    -type boolean \
+	    -label "Underline hyperlinks?"
+
+    parameter activeColor cyan4 \
+	    -type color \
+	    -label "Color of active text"
+
+    group search \
+	    -label "Search and replace colors" {
+	parameter background forestGreen \
+		-type color  \
+		-label "Background color of matched search text"
+
+	parameter foreground white \
+		-type color  \
+		-label "Foreground color of matched search text"
+    }
+
+    group spell \
+	    -label "Spell-check colors" {
+	parameter background red \
+		-type color  \
+		-label "Background color of matched spell-check text"
+
+	parameter foreground white \
+		-type color  \
+		-label "Foreground color of matched spell-check text"
+    }
+}
+
+style console \
+	-label "Console" \
+	-description {
+    Text colors for console windows.
+} {
+    parameter textBackground grey93
+    parameter textBackground grey93
+    parameter insertBackground black
+    parameter selectColor lightyellow
+
+    parameter answerForeground blue
+    parameter promptForeground firebrick
+}
+
+style html \
+	-label "HTML" \
+	-description {
+    Text colors for HTML viewers.
+} {
+    parameter textBackground LightGrey
+    parameter textBackground black
+    parameter insertBackground black
+    parameter selectColor lightyellow
+}
