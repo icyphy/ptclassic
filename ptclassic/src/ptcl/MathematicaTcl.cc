@@ -85,8 +85,10 @@ int MathematicaTcl::error(const char* msg) {
 
 // Start a Mathematica process if one is not running
 int MathematicaTcl::init() {
+    // Start a connection to Mathematica called MathematicaTcl in which
+    // Mathematica starts up in a private namespace (context) "MathematicaTcl`"
     if (mathematicaInterface == 0) {
-	mathematicaInterface = new MathematicaIfc;
+	mathematicaInterface = new MathematicaIfc("MathematicaTcl", TRUE);
     }
 
     if (! mathematicaInterface->MathematicaIsRunning()) {
@@ -100,7 +102,7 @@ int MathematicaTcl::init() {
 
 // Evaluate a Mathematica command
 int MathematicaTcl::evaluate(char* command, int outputBufferFlag) {
-    int retval = mathematicaInterface->EvaluateOneCommand(command);
+    int retval = mathematicaInterface->EvaluateUserCommand(command);
     if (outputBufferFlag || ! retval) {
 	Tcl_AppendResult(tclinterp, 
 			 mathematicaInterface->GetOutputBuffer(), 
@@ -167,8 +169,8 @@ int MathematicaTcl::end(int argc, char** argv) {
     char* id = (argc == 3) ? argv[2] : 0;
     Pointer key = manager.makeInstanceName(tclinterp, id);
     if (! manager.exists(key) ) {
-        StringList msg = "the Tcl/Mathematica interface has not been initialized";
-        if (id) msg << " for " << id;
+        StringList msg = "the Tcl/Mathematica interface has not been started";
+        msg << " for " << (id ? id : "that instance");
         return error(msg);
     }
     manager.remove(key);
