@@ -113,6 +113,9 @@ class ::tycho::DataModel {
     # Configure options of the model object
     method configure {{option {}} args}
 
+    # Define a new item typer, or override an existsing one
+    method define {name args}
+
     # Delete an item
     method delete {name}
 
@@ -138,10 +141,14 @@ class ::tycho::DataModel {
     method reorder {type {context {}} {list {}}}
 
     # Search for items with regexp or glob-style matching
+    # DELETED
     method search {args}
 
-    # Define or configure item types
-    method type {mode {type {}} args}
+    # Get the type of an item
+    method type {name}
+
+    # Return the types defined by this model
+    method types {{type {}}}
 
     # Get a unique id
     method uniqueid {prefix}
@@ -523,6 +530,81 @@ body ::tycho::DataModel::configure {{option {}} args} {
 }
 
 ########################################################################
+#### define
+#
+# Define a new item type. A model must have one or more types
+# defined with <b>define</b> before it can be useful. Each
+# type has a set of type properties and a set of type defaults.
+# The type properties specify information about all instances
+# of that type, and have names beginning with a colon.
+# Type properties apply to the definition of a type, and so changing
+# a type property will affect _all_ models in the same class.
+# The following type properties are recognized:
+#
+# <dl>
+# <dt><b>:leafonly</b> _bool_
+# <dd>
+# If true, items of this type most be a leaf item -- that is,
+# they cannot contain nested items. This should be set in any
+# situation where a type can only be a leaf, since parsing is more
+# efficient. The default is false.
+#
+# <dt><b>:override</b> _bool_
+# <dd>
+# If true, items of this type will be parsed by calling a method
+# named <b>_add</b>_type_, and printed by calling a method named
+# <b>_describe</b>_type_. This is used if models need to do
+# additional processing when items are loaded or printed.
+#
+# </dl>
+#
+# Type defaults have names that do not begin with a colon. Each
+# type default gives the name and default value of an attribute
+# that will be given to instances of that type. By convention,
+# attributes have names beginning with a leading dash, but
+# this is not required. Type defaults apply to individual models,
+# and so can be changed without affecting other models of the same class.
+#
+# This calling syntax is:
+# 
+# <b>define</b> _type_ ?_name_ _value_... ?
+#
+# Each _name_ is the name of a type property
+# or type default. If the type has already been defined for this
+# model then the type definition will be updated accordingly.
+# For example, the call
+# <pre>
+#     $datamodel define foo :leafonly 1 -bar hello
+# </pre>
+# will create the type <b>foo</b> and declare it to always be a
+# leaf item. In addition, any item of type <b>foo</b> will have
+# an attribute <b>-bar</b> with the default value "hello."
+#
+body ::tycho::DataModel::define {type args} {
+    # Remember or update the attribute defaults for this object
+    if [::info exists _defaults($type)] {
+	array set t $_defaults($type)
+    } else {
+	array set t $defaulttypeconfig
+    }
+    array set t $args
+    set _defaults($type) {}
+    foreach {opt val} [array get t] {
+	if ![string match {:*} $opt] {
+	    lappend _defaults($type) $opt $val
+	} else {
+	    set _[string trimleft $opt :]($type) $val
+	}
+    }
+	    
+    # Create and define the parsing proc
+    namespace eval $ns [_mkparseproc $type]
+    
+    # Link the proc into the safe interpreter
+    $_safeinterp alias ${ns}::$type ${ns}::__parse_$type
+}
+
+########################################################################
 #### delete
 #
 # Delete the item given by _name_. Raise an error if
@@ -566,7 +648,7 @@ body ::tycho::DataModel::delete {name} {
     # Remove from the parent list
     set ${ns}::_children_:[set type]($context) \
             [::tycho::ldelete \
-            [set ${ns}:_children_:[set type]($context)] \
+            [set ${ns}::_children_:[set type]($context)] \
             [lindex $name end]]
 
     # Delete data
@@ -972,220 +1054,27 @@ body ::tycho::DataModel::search {mode defaults args} {
 ########################################################################
 #### type
 #
-# Manipulate item types. A model must have one or more types
-# defined with <b>type define</b> before it can be useful. Each
-# type has a set of type properties and a set of type defaults.
-# The type properties specify information about all instances
-# of that type, and have names beginning with a colon.
-# Type properties apply to the definition of a type, and so changing
-# a type property will affect _all_ models in the same class.
-# The following type properties are recognized:
+# Return the type of an item. Throw an error of the item does
+# not exist.
 #
-# <dl>
-# <dt><b>:leafonly</b> _bool_
-# <dd>
-# If true, items of this type most be a leaf item -- that is,
-# they cannot contain nested items. This should be set in any
-# situation where a type can only be a leaf, since parsing is more
-# efficient. The default is false.
-#
-# <dt><b>:override</b> _bool_
-# <dd>
-# If true, items of this type will be parsed by calling a method
-# named <b>_add</b>_type_, and printed by calling a method named
-# <b>_describe</b>_type_. This is used if models need to do
-# additional processing when items are loaded or printed.
-#
-# </dl>
-#
-# Type defaults have names that do not begin with a colon. Each
-# type default gives the name and default value of an attribute
-# that will be given to instances of that type. By convention,
-# attributes have names beginning with a leading dash, but
-# this is not required. Type defaults apply to individual models,
-# and so can be changed without affecting other models of the same class.
-#
-# This command has several forms, depending on the _mode_ argument:
-#
-# <dl>
-# <dt><b>configure</b> _type_ ?_name_? ?_value_? ?_name_ _value_ ...? 
-# <dd>
-# Set or get a type property or a type default. If only the _type_
-# argument is supplied, return a list of type properties and
-# type defaults. If a single _name_ is supplied, return
-# the value of that type property or type default. If additional
-# arguments are supplied, change the given type properties
-# or type defaults. Note that changing type properties should
-# be done very carefully, as this change will affect _all_
-# models of the same Itcl class. (Type defaults, however, are 
-# changed on a per-model basis.)
-#
-# <dt><b>define</b> _type_ ?_name_ _value_... ?
-# <dd>
-# Define a new type. Each _name_ is the name of a type property
-# or type default. If the type has already been defined for this
-# class, but the type properties in this call are different,
-# then the type definition will be changed for all models of this
-# class. If the type has already been defined for this class,
-# then the type defaults for this model only will be set to the
-# given values. For example, the call
-# <pre>
-#     $datamodel type define foo :leafonly 1 -bar hello
-# </pre>
-# will create the type <b>foo</b> and declare it to always be a
-# leaf item. In addition, any item of type <b>foo</b> will have
-# an attribute <b>-bar</b> with the default value "hello."
-#
-# <dt><b>exists</b> _type_
-# <dd>
-# Test if a given type exists. Return one if _type_ has been
-# defined, and zero if it hasn't.
-#
-# <dt><b>get</b> _item_
-# <dd>
-# Return the type of _item_. This will raise an obscure error if the
-# item doesn't exist.
-#
-# <dt><b>names</b>
-# <dd>
-# Return a list of defined types.
-#
-# </dl>
-#
-body ::tycho::DataModel::type {mode {type {}} args} {
-    switch -exact $mode {
-	"configure" {
-            if ![::info exists _defaults($type)] {
-                error "Unknown type: \"$type\""
-            }
-	    if { [llength $args] <= 1 } {
-		array set attrs $_typeconfig($scope:$type)
-		array set attrs $_defaults($type)
-		if { $args == "" } {
-		    # Return whole list
-		    array get attrs
-		} else {
-		    # Return single item
-		    return $attrs([lindex $args 0])
-		}
-	    } else {
-		# Configure properties and defaults
-		array set opts $args
-		if { [array names opts :*] != "" } {
-		    # Reconfigure type properties. This is expensive.
-		    eval type define $type $args
-		}
-		# Configure type defaults
-		array set attrs $_defaults($type)
-		array set attrs $args
-		set _defaults($type) [array get attrs]
-	    }
-	}
-	"define" {
-            # Remember or update the attribute defaults for this object
-            if [::info exists _defaults($type)] {
-                array set t $_defaults($type)
-            } else {
-		array set t $defaulttypeconfig
-	    }
-            array set t $args
-            set _defaults($type) {}
-            foreach {opt val} [array get t] {
-                if ![string match {:*} $opt] {
-                    lappend _defaults($type) $opt $val
-                } else {
-		    set _[string trimleft $opt :]($type) $val
-		}
-            }
-	    
-	    # Create and define the parsing proc
-	    namespace eval $ns [_mkparseproc $type]
-
-	    # Link the proc into the safe interpreter
-	    $_safeinterp alias ${ns}::$type ${ns}::__parse_$type
-
-	    return
-
-	    set OLDVERSION {
-	    # Regenerate the parsing proc if this is true
-	    set regenerate 0
-
-	    if { ![::info exists _typeconfig($scope:$type)] } {
-		# This is the first time this type has been defined in this
-		# scope. Get default type options.
-		array set opts $defaulttypeconfig
-		array set opts $args
-
-		# Remember the type and the type configuration
-		lappend _types($scope) $type
-		set _typeconfig($scope:$type) [array get opts :*]
-		set regenerate 1
-	    } else {
-		# This type has previously been defined. Get default
-		# type options and default attributes from before.
-		array set opts $_typeconfig($scope:$type)
-		array set opts $args
-
-		# If the type configuration differs, update it
-		set config [array get opts :*]
-		if { [lsort $_typeconfig($scope:$type)] != [lsort $config] } {
-		    set _typeconfig($scope:$type) $config
-		    set regenerate 1
-		}
-	    }
-            # Remember or update the attribute defaults for this object
-            if [::info exists _defaults($type)] {
-                array set t _defaults($type)
-            } else {
-		array set opts $defaulttypeconfig
-	    }
-            array set t $args
-            set _defaults($type) {}
-            foreach {opt val} [array get t] {
-                if ![string match {:*} $opt] {
-                    lappend _defaults($type) $opt $val
-                } else {
-		    set _[string trimleft $opt :]($type) $val
-		}
-            }
-
-            # Local copies of configuration
-            foreach {cfg val} $_typeconfig($scope:$type) {
-                set _[string trimleft $cfg :]($type) $val
-            }
-
-	    # Regenerate the parsing procedure if configuration changed
-	    if $regenerate {
-		# Create and define the parsing proc
-                @scope $scope eval [_mkparseproc $type]
-
-		# Link the proc into the safe interpreter
-		$safeinterp alias ${scope}::$type ${scope}::__parse_$type
-	    }
-	}
-	}
-	"exists" {
-	    if { $type == "" } {
-		return 0
-	    }
-	    # Test for single type
-	    ::tycho::lmember [array names $_defaults($type)] $type
-	}
-	"get" {
-            set name $type
-            _verify $name
-            set ${ns}::_type_($name)
-        }
-	"names" {
-            return [array names _defaults]
-        }
-	default {
-	    error "unknown option: must be one of \
-		    \"configure, define, exists, get, or names\""
-        }
-    }
+body ::tycho::DataModel::type {name} {
+    _verify $name
+    set ${ns}::_type_($name)
 }
 
+########################################################################
+#### types
+#
+# Return the list of types defined by this model. If an argument is
+# given, return that type if it is defined, or null if it is not.
+#
+body ::tycho::DataModel::types {{type {}}} {
+    if { $type != "" } {
+	::tycho::lmember [array names $_defaults($type)] $type
+    } else {
+	array names _defaults
+    }
+}
 
 ########################################################################
 #### uniqueid
