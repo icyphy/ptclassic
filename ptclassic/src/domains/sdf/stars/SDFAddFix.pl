@@ -34,7 +34,7 @@ precision specified by the parameter "InputPrecision". }
         defstate {
                 name { InputPrecision }
                 type { string }
-                default { "4.14" }
+                default { "2.14" }
                 desc { 
 Precision of the input in bits.
 The input particles are only cast to this precision if the
@@ -44,7 +44,7 @@ parameter "ArrivingPrecision" is set to NO.
         defstate {
                 name { OutputPrecision }
                 type { string }
-                default { "4.14" }
+                default { "2.14" }
                 desc {
 Precision of the output in bits and precision of the accumulation.
 When the value of the accumulation extends outside of the precision,

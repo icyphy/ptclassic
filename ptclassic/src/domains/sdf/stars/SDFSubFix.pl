@@ -40,7 +40,7 @@ parameter "InputPrecision".
         defstate {
                 name { InputPrecision }
                 type { string }
-                default { "4.14" }
+                default { "2.14" }
                 desc {
 Precision of the "neg" input in bits.
 The input particles are only cast to this precision if the
@@ -50,7 +50,7 @@ parameter "ArrivingPrecision" is set to NO.
         defstate {
                 name { OutputPrecision }
                 type { string }
-                default { "4.14" }
+                default { "2.14" }
                 desc {
 Precision of the output in bits.
 This is the precision that will hold the result of the difference

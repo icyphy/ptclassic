@@ -33,7 +33,7 @@ to the precision specified by the parameter "InputPrecision".
 	defstate {
 	        name { InputPrecision }
 	        type { string }
-	        default { "4.14" }
+	        default { "2.14" }
 	        desc {
 Sets the precision of the input in bits.
 The input particles are only cast to this precision if the
@@ -43,7 +43,7 @@ parameter "ArrivingPrecision" is set to NO.
 	defstate {
 	        name { OutputPrecision }
 	        type { string }
-	        default { "4.14" }
+	        default { "2.14" }
 	        desc {
 Sets the precision of the output in bits.
 This is the precision that will hold the result of the product of the inputs.

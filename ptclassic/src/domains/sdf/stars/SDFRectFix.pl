@@ -57,7 +57,7 @@ number with 1 sign bit, 1 integer bit, and 22 fractional bits.
         defstate {
                 name { OutputPrecision }
                 type { string }
-                default { "4.14" }
+                default { "2.14" }
                 desc {
 Precision of the output in bits.
 The value of the "height" parameter is cast to this precision and then output.
