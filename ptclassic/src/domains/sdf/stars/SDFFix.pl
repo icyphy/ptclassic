@@ -65,7 +65,7 @@ Otherwise, truncation will be used.
 			return overflag;
 		}
 	}
-        begin {
+        setup {
 		overflows = 0;
 		totalChecks = 0;
 	}
