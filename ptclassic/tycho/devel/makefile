@@ -49,6 +49,7 @@ ITCL_SRCS = \
 	Preferences.itcl \
 	Runcontrol.itcl \
 	VSM.itcl \
+	Strip.itcl \
 	SlateView.itcl 
 
 EXTRA_SRCS =		$(TCL_SRCS) $(ITCL_SRCS)
