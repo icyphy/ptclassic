@@ -31,26 +31,34 @@
 
 DIRS = kernel editors lib domains #bin doc 
 
-makefiles all install clean sources depend realclean checkjunk sccsinfo:
-	@for x in $(DIRS); do \
-	    if [ -w $$x ] ; then \
-		( cd $$x ; \
-		echo making $@ in tycho/$$x ; \
-		$(MAKE) $(MFLAGS) $(MAKEVARS) $@ ;\
-		) \
-	    fi ; \
-	done
+# Root of Ptolemy directory
+ROOT =		..
 
-.PHONY:	TAGS
-TAGS:
-	@for x in $(DIRS); do \
-	    if [ -w $$x ] ; then \
-		( cd $$x ; \
-		echo making $@ in tycho/$$x ; \
-		$(MAKE) $(MFLAGS) $(MAKEVARS) $@ ; \
-		) \
-	    fi ; \
-	done
-	-cat -s $(DOMAINS:%=%/TAGS) > $@
+# get configuration info
+CONFIG =	$(ROOT)/mk/config-$(PTARCH).mk
+include $(CONFIG)
 
+tycho.idx: kernel/tychoMakeIndex.tcl \
+	    $(wildcard kernel/doc/*.html \
+		    kernel/doc/usersGuides/*.html \
+		    kernel/doc/codeDoc/*.html \
+		    kernel/doc/internals/*.html \
+		    editors/textedit/doc/*.html \
+		    editors/textedit/doc/usersGuides/*.html)
+	@echo "Updating $@"
+	rm -f $@
+	@if [ "$(TYCHO)" = "" ]; then \
+		echo "TYCHO is not set so we assume we are part of PTOLEMY"; \
+		echo "Running $(ITCL2_0_SH)"; \
+		echo "set TYCHO $(PTOLEMY)/tycho; source kernel/tychoMakeIndex.tcl; tychoStandardIndex" | $(ITCL2_0_SH); \
+	else \
+		echo "Running $(ITCL2_0_SH)"; \
+		echo "set TYCHO $(TYCHO); source kernel/tychoMakeIndex.tcl; tychoStandardIndex" | $(ITCL2_0_SH); \
+	fi
 
+# We don't include common.mk since we don't use the compiler here
+include $(ROOT)/mk/no-compile.mk
+
+# This rule must be after include no-compile.mk so that get any sources
+# in the subdirs before generating the index
+sources:: tycho.idx
