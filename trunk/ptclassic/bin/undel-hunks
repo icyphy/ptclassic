@@ -2,8 +2,18 @@
 #
 #	$Id$
 #
-
-/usr/tools/gnu/bin/gawk '$1 == "new" {
+# 
+# This script can be used to track down memory leaks in Ptolemy.  In
+# theory if MEMORYLOG is defined during compile time, then LOG_NEW and
+# LOG_DEL should produce memory usage log messages.  To define
+# MEMORYLOG, add -DMEMORYLOG to GPPFLAGS in
+# $PTOLEMY/mk/config-$PTARCH.
+#
+# At UC Berkeley, we use purify so we have not tested this script
+# in sometime.  Note further that this script uses GNU awk, which
+# is not part of the Ptolemy distribution.
+# 
+gawk '$1 == "new" {
 	if ($3 == "Top") tag = $2 ":" $4;
 	else tag = $2 ":" $3 ":" $4;
 	where[$6] = tag;
