@@ -50,7 +50,7 @@ falseOutput.
 		// to output depending on it.
 		PortHole& out = *(int(control%0) ? &trueOutput : &falseOutput);
 		for (int i = int(N)-1; i >= 0; i--)
-			out%0 = input%0;
+			out%i = input%i;
 	}
 }
 

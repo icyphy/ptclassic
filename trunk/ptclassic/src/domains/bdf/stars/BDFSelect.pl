@@ -48,7 +48,7 @@ N tokens from falseInput are copied to the output.
 		// depending on it.
 		PortHole& input = *(int(control%0) ? &trueInput : &falseInput);
 		for (int i = int(N)-1; i >= 0; i--)
-			output%0 = input%0;
+			output%i = input%i;
 	}
 }
 
