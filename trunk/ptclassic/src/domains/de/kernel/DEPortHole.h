@@ -46,7 +46,7 @@ public:
 	// The setPort function is redefined to set DE-specific members.
 	PortHole& setPort(const char* portName,
 			  Block* parent,
-			  dataType type = FLOAT);
+			  DataType type = FLOAT);
 
 	// DEPortHole has a "timeStamp" attribute.
 	float timeStamp;
