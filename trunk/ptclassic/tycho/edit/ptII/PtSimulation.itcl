@@ -140,6 +140,11 @@ class ::tycho::PtSimulation {
 	return $_ports($name)
     }
 
+    # Test if a port with the given name exists
+    method hasPort {name} {
+	return [info exists _ports($name)]
+    }
+
     # Instantiate composite actors that haven't already been
     method instantiateComposites {}
 
@@ -290,7 +295,6 @@ class ::tycho::PtSimulation {
 #### -isToplevel
 #
 configbody ::tycho::PtSimulation::isToplevel {
-    puts "tycho::PtSimulation::isToplevel = $isToplevel"
     if { $_toplevelActor != "" } {
 	if $isToplevel {
 	    if { $_manager == "" } {
@@ -338,7 +342,7 @@ body ::tycho::PtSimulation::addActor {name uniqueName} {
     set actor [$domainLibrary createActor $_domain $_toplevelActor \
 	    $name $uniqueName]
     if { $actor != "" } {
-	puts "actor: $actor ([$actor toString])"
+	#puts "actor: $actor ([$actor toString])"
 	set _actors($uniqueName) $actor
     }
 }
@@ -355,7 +359,7 @@ body ::tycho::PtSimulation::addCompositeActor {name uniqueName} {
 	    $uniqueName]
 
     # Remember it
-    puts "actor: $actor ([$actor toString])"
+   puts "composite actor: $actor ([$actor toString])"
     set _actors($uniqueName) $actor
 }
 
@@ -476,22 +480,18 @@ body ::tycho::PtSimulation::instantiateComposites {} {
                         ::tycho::PtSimulation #auto \
                         -isToplevel 0 \
                         -domainLibrary $domainLibrary]
-		$subactor setToplevelActor $_toplevelActor
+		$subactor setToplevelActor $a
 
-		# Get its url -- fingers crossed
+                # Get its url -- fingers crossed
 		set suburl [$graph attrget $actor -url]
 		set myurl $sourceURL
 
-puts $myurl
-puts $suburl
 		regsub {^file:/+} $myurl {} file
 		regsub {/[^/]*$} $file {} file
-		puts "file = $file"
 		set schematicURL "file:/$file/$suburl"
 
 		# Load the data
 		set schematic [::tycho::PtSchematic #auto]
-		puts "$schematic"
 		$schematic parseURL $schematicURL
 		$schematic constructComposite $subactor \
 			"MyName" \
@@ -589,23 +589,11 @@ body ::tycho::PtSimulation::resume {} {
 # Set the director of the simulation
 #
 body ::tycho::PtSimulation::setDirector {director} {
-    puts "::tycho::PtSimulation::setDirector $director"
-
     if ![ string match {java*} $director] {
 	error "Bad director!!!"
     }
 
     set _director $director
-
-    set JUNK {
-	set dir [$domainLibrary getDirector $_domain $director]
-	set class [$dir getAttribute "class"]
-	set _javaDirector [java::new $class [lindex [split $class] end]]
-
-	puts "Got director [$_javaDirector toString]"
-	puts "[$_toplevelActor getName] ($_toplevelActor) \
-		setDirector [$_javaDirector getName] ($_javaDirector)"
-    }
     $_toplevelActor setDirector $_director
 }
 

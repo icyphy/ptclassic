@@ -178,8 +178,6 @@ body ::tycho::PtButtonPanel::resume {} {
 # Start the simulation.
 #
 body ::tycho::PtButtonPanel::start {} {
-    puts "PtButtonPanel::start \"$simulation\""
-
     # Call the simulation
     if { $simulation != "" } {
 	$simulation start

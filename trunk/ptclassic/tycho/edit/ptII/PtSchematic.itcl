@@ -128,7 +128,7 @@ body ::tycho::PtSchematic::getText {} {
 # Load the schematic from a simulation, a graph, and a layout model
 #
 body ::tycho::PtSchematic::load {simulation graph layout name} {
-    puts "PtSimulation::load $simulation $graph $layout $name"
+    # puts "PtSimulation::load $simulation $graph $layout $name"
 
     # The name
     $_schematic setAttribute name $name
@@ -170,7 +170,7 @@ body ::tycho::PtSchematic::load {simulation graph layout name} {
 
     # The actors
     foreach a [$simulation actors] {
-	puts "Actor $a"
+	# puts "Actor $a"
 	set actor [$simulation getActor $a]
 	set xmlelt [java::new ptolemy.schematic.SchematicEntity]
 	$xmlelt setAttribute name $a
@@ -200,7 +200,7 @@ body ::tycho::PtSchematic::load {simulation graph layout name} {
 
     # The ports
     foreach a [$simulation ports] {
-	puts "Port $a"
+	# puts "Port $a"
 	set actor [$simulation getPort $a
 ]
 	set xmlelt [java::new ptolemy.schematic.SchematicEntity]
@@ -231,7 +231,7 @@ body ::tycho::PtSchematic::load {simulation graph layout name} {
 
     # The relations
     foreach r [$simulation relations] {
-	puts "Relation $r"
+	# puts "Relation $r"
 	set relation [$simulation getRelation $r]
 	set xmlelt [java::new ptolemy.schematic.SchematicRelation]
 	$xmlelt setAttribute name $r
@@ -251,16 +251,12 @@ body ::tycho::PtSchematic::load {simulation graph layout name} {
 	}
 	foreach e [$simulation edges $r] {
 	    set from [$graph attrget $e -from]
-            puts $from
 	    if [string match {junction*} $from] {
 		set from [list $from [$layout attrget $e -fromfeature]]
-                puts !$from
 	    }
 	    set to [$graph attrget $e -to]
-            puts $to
 	    if [string match {junction*} $to] {
 		set to [list $to [$layout attrget $e -tofeature]]
-                puts !$to
 	    }
 	    set xe [java::new ptolemy.schematic.SchematicLayout]
 	    $xe setAttribute name $e
@@ -298,7 +294,7 @@ body ::tycho::PtSchematic::load {simulation graph layout name} {
 # Parse from the given text data
 #
 body ::tycho::PtSchematic::parse {text} {
-    puts "PtSimulation::parse"
+    # puts "PtSimulation::parse"
 
     # Screw around to deal with Tycho's bogus i/o mechanism
     set tmpFile [::tycho::tmpFileName schematic]
@@ -318,7 +314,7 @@ body ::tycho::PtSchematic::parse {text} {
     set ptmlParser [java::new ptolemy.schematic.PTMLParser]
     puts "Parsing $url with $ptmlParser"
     set _schematic [$ptmlParser parse $url]
-    puts "Schematic is: [$_schematic toString]"
+    # puts "Schematic is: [$_schematic toString]"
 }
 
 ########################################################################
@@ -327,12 +323,10 @@ body ::tycho::PtSchematic::parse {text} {
 # Parse from the given URL
 #
 body ::tycho::PtSchematic::parseURL {url} {
-    puts "PtSimulation::parseURL $url"
-
     set ptmlParser [java::new ptolemy.schematic.PTMLParser]
     puts "Parsing $url with $ptmlParser"
     set _schematic [$ptmlParser parse $url]
-    puts "Schematic is: [$_schematic toString]"
+    # puts "Schematic is: [$_schematic toString]"
 }
 
 ########################################################################
@@ -342,22 +336,18 @@ body ::tycho::PtSchematic::parseURL {url} {
 #
 body ::tycho::PtSchematic::construct {simulation graph layout name \
 	domainPanel vertexcontroller edgecontroller} {
-    puts "PtSimulation::construct $simulation $graph $layout $name"
+    # puts "PtSimulation::construct $simulation $graph $layout $name"
 
     # Configure for top-level
     set isToplevel [$_schematic getChildElement parameter isToplevel]
-    puts ####[$isToplevel toString]
-    #puts [$domain toString]
     $simulation configure -isToplevel [$isToplevel getAttribute value]
 
     # Get the domain
     set domain [$_schematic getChildElement parameter domain]
-    #puts [$domain toString]
     $domainPanel setDomain [$domain getAttribute value]
 
     # Get the director
     set director [$_schematic getChildElement parameter director]
-    #puts [$director toString]
     $domainPanel setDirector [$director getAttribute value]
     set javaDir [$simulation getDirector]
 
@@ -395,7 +385,6 @@ body ::tycho::PtSchematic::construct {simulation graph layout name \
 
 	# The relation
 	set xmlelt [$_schematic getChildElement "relation" $i]
-	#puts [$xmlelt toString]
 	set name [$xmlelt getAttribute name]
 	
 	# Create the relation
@@ -418,7 +407,6 @@ body ::tycho::PtSchematic::construct {simulation graph layout name \
 	set elts [$xmlelt childElements "layout"]
 	while { [$elts hasMoreElements] } {
 	    set l [$elts nextElement]
-            puts [$l toString]
 	    if { [$l getAttribute type] == "junction" } {
 		set coords [$l getAttribute coords]
 		set junctionname [$l getAttribute name]
@@ -438,13 +426,10 @@ body ::tycho::PtSchematic::construct {simulation graph layout name \
 	set elts [$xmlelt childElements "layout"]
 	while { [$elts hasMoreElements] } {
 	    set l [$elts nextElement]
-            puts [$l toString]
 	    if { [$l getAttribute type] == "edge" } {
 		set edgename [$l getAttribute name]
 		set from [$l getAttribute from]
 		set to [$l getAttribute to]
-                puts "from = $from"
-                puts "to = $to"
                 
 		set opts {}
 		if { [string match {junction*} [lindex $from 0]] } {
@@ -503,18 +488,14 @@ body ::tycho::PtSchematic::constructComposite {simulation name composite} {
 
     # Configure for top-level
     set isToplevel [$_schematic getChildElement parameter isToplevel]
-    puts ####[$isToplevel toString]
-    #puts [$domain toString]
     $simulation configure -isToplevel [$isToplevel getAttribute value]
 
     # Get the domain
     set domain [$_schematic getChildElement parameter domain]
-    puts "domain = [$domain toString]"
     $simulation setDomain [$domain getAttribute value]
 
     # Get the director
     set xmlDirector [$_schematic getChildElement parameter director]
-    puts "xmlDirector = [$xmlDirector toString]"
     set class [$xmlDirector getAttribute "class"]
     set javaDirector [java::new $class]
     $simulation setDirector $javaDirector
@@ -543,7 +524,6 @@ body ::tycho::PtSchematic::constructComposite {simulation name composite} {
 	#set coords [$xmlelt getAttribute "coords"]
 
 	set type [$xmlelt getChildElement entitytype]
-	puts [$type toString]
 	set realname [$type getAttribute "name"]
 	set etype [$type getAttribute "type"]
 	set uniqueName [::tycho::autoName $realname]
@@ -551,9 +531,12 @@ body ::tycho::PtSchematic::constructComposite {simulation name composite} {
 	switch -exact $etype {
 	    "actor" {
 		$simulation addActor $realname $uniqueName
+                puts [[$simulation getActor $uniqueName] toString]
 	    }
 	    "port" {
-		$simulation addPort $realname $uniqueName
+                if ![$simulation hasPort $uniqueName] {
+                    $simulation addPort $realname $uniqueName
+                }
 	    }
 	    "composite" {
 		$simulation addCompositeActor $realname $uniqueName
@@ -566,15 +549,15 @@ body ::tycho::PtSchematic::constructComposite {simulation name composite} {
 		    set port [java::new ptolemy.actor.TypedIOPort \
 			    $actor \
 			    [$p getAttribute name]]
-		    puts "Created port [$port toString]"
 		    
 		    if { [$p getAttribute input] == "false" } {
 			$port setOutput 1
 		    }
 		}
-	    }
-	}
-    }
+            }
+            puts [[$simulation getActor $uniqueName] toString]
+        }
+   }
 
     # Create the relations
     set iterator [$_schematic relationNames]

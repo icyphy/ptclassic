@@ -183,7 +183,6 @@ class ::tycho::PtGraphEditor {
 
     protected variable isToplevelVar 1
     method _toggleToplevel {} {
-	puts "Toggling top-level: $isToplevelVar"
 	$this configure -isToplevel $isToplevelVar
     }
 }
@@ -193,7 +192,6 @@ class ::tycho::PtGraphEditor {
 #
 configbody ::tycho::PtGraphEditor::isToplevel {
     if [info exists itk_component(runWindow)] {
-	puts "$itk_component(runWindow) configure -isToplevel $isToplevel"
 	$itk_component(runWindow) configure -isToplevel $isToplevel
     }
     if { $_simulation != "" } {
@@ -684,7 +682,7 @@ body ::tycho::PtGraphEditor::clear {} {
         $_graph notify event clear
     }
     layout clear
-    puts "Simulation is \"$_simulation\""
+    # puts "Simulation is \"$_simulation\""
     if { $_simulation != "" } {
         $_simulation clear
     }
@@ -695,8 +693,6 @@ body ::tycho::PtGraphEditor::clear {} {
 # Insert the specified data.
 #
 body ::tycho::PtGraphEditor::insertData {data} {
-    puts insertData
-    
     if { $_simulation == "" } {
 	return
     }
@@ -706,7 +702,6 @@ body ::tycho::PtGraphEditor::insertData {data} {
 
     # Load the data
     set schematic [::tycho::PtSchematic #auto]
-    puts "$schematic"
     $schematic parse $data
     $schematic construct $_simulation $_graph $_layout "MyName" \
 	    [$itk_component(runWindow) component domain] \
@@ -722,7 +717,6 @@ body ::tycho::PtGraphEditor::insertData {data} {
     } else {
         set url "file:$url"
     }
-    puts "$_simulation configure -sourceURL $url"
     $_simulation configure -sourceURL $url
 }
 
