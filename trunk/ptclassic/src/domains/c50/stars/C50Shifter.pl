@@ -30,12 +30,19 @@ Arithmetic shifts are used.
 		default { 1 }
 		desc { Number of left shifts. }
 	}
-
+	state {
+	    name { saturation }
+	    type { int }
+	    default { "YES" }
+	    desc { If true, use saturation arithmetic }
+	}
 	codeblock(shift,""){
+	clrc	sxm
 	mar	*,ar1
 	lar	ar1,#$addr(input)
 	lar	ar2,#$addr(output)
 	lacc	*,@(int(shifts)),ar2
+	setc	sxm
 	}
 	
 	codeblock(storeHigh){
@@ -46,6 +53,22 @@ Arithmetic shifts are used.
 	sacl	*,0
 	}	
 
+	codeblock(saturateShift,""){
+	setc	ovm	; set overflow mode
+	splk	#@(int(leftShifts)-1),brcr
+	mar	*,ar1
+	lar	ar1,#$addr(input)
+	lar	ar2,#$addr(output)
+	lacc	*,16,ar2
+	sacb
+	rptb	$starSymbol(shft)
+	addb	; shift left by 1
+$starSymbol(shft)
+	sacb
+	sach	*,0
+	clr	ovm
+	}
+
 	constructor {
 		noInternalState();
 	}
@@ -55,8 +78,14 @@ Arithmetic shifts are used.
 	}
 
 	setup {
-		if ((int(leftShifts) > 15) || (int(leftShifts) < -15)) {
+		if (int(leftShifts) < -15 ) {
+//more than 15 right shifts is the same as outputing 0
 			shifts = 0;
+			return;
+		}
+		if ((int(leftShifts) > 15)){
+//more than 15 left shifts and no sat. is equiv. to shifting 16 times
+			shifts = 16;
 			return;
 		}
 		if (int(leftShifts) < 0 ) {
@@ -67,7 +96,13 @@ Arithmetic shifts are used.
 	}
 
 	go {
-		addCode(shift());
+		if (int(saturation) && (int(leftShifts) >0)){
+// only need to worry about saturation with left shifts > 0
+			addCode(saturateShift());
+			return;
+		} else {
+			addCode(shift());
+		}
 		if (int(leftShifts) >= 0) 
 			addCode(storeLow);
 		else
