@@ -215,10 +215,11 @@ fixlinks:
 	-(cd $(ITCL_DEST)/bin; \
 		ln -s itclsh$(ITCL_MAJOR_VERSION_NUMBER) itclsh)
 	@echo "Create links so Ptolemy can find tcl.h and tk.h easily"
-	-(cd $(TCLTK_DEST); mkdir tcl tk; \
+	-(cd $(TCLTK_DEST); rm -rf tcl tk; mkdir tcl tk; \
 		cd tcl; ln -s ../itcl/include/itcl include; \
 		cd ../tk; ln -s ../itcl/include/itcl include; \
-		cd ../itcl/include; ln -s itcl/*.h .)
+		cd ../itcl/include; \
+		rm -f `cd itcl && echo *.h`; ln -s itcl/*.h .)
 
 ######################################################
 # TclX rules
