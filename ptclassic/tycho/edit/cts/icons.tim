@@ -5,54 +5,54 @@
 # Test icon library for CT domain
 
 termstyle 3-1-east {
-    terminal in-0 -coords {0 50} -direction w -style circle
-    terminal in-1 -coords {50 0} -direction n -style circle
-    terminal in-2 -coords {50 100} -direction s -style circle
-    terminal out -coords {100 50} -direction e \
+    terminal input-0 -coords {0 50} -direction w -style circle
+    terminal input-1 -coords {50 0} -direction n -style circle
+    terminal input-2 -coords {50 100} -direction s -style circle
+    terminal output -coords {100 50} -direction e \
             -style arrowout \
             -tags output
 }
 
 termstyle 2-1-north-east {
-    terminal in-0 -coords {0 50} -direction w -style circle
-    terminal in-1 -coords {50 0} -direction n -style circle
-    terminal out -coords {100 50} -direction e \
+    terminal input-0 -coords {0 50} -direction w -style circle
+    terminal input-1 -coords {50 0} -direction n -style circle
+    terminal output -coords {100 50} -direction e \
             -style arrowout \
             -tags output
 }
 
 termstyle 2-1-north-west {
-    terminal in-0 -coords {100 50} -direction e -style circle
-    terminal in-1 -coords {50 0} -direction n -style circle
-    terminal out -coords {0 50} -direction w \
+    terminal input-0 -coords {100 50} -direction e -style circle
+    terminal input-1 -coords {50 0} -direction n -style circle
+    terminal output -coords {0 50} -direction w \
             -style arrowout \
             -tags output
 }
 
 termstyle 2-1-east {
-    terminal in-0 -coords {0 25} -direction w -style circle
-    terminal in-1 -coords {0 75} -direction w -style circle
-    terminal out -coords {100 50} -direction e \
+    terminal input-0 -coords {0 25} -direction w -style circle
+    terminal input-1 -coords {0 75} -direction w -style circle
+    terminal output -coords {100 50} -direction e \
             -style arrowout -fill green2 -tags output
 }
 
 termstyle 1-0-east {
-    terminal in -coords {0 50} -direction w -style circle
+    terminal input -coords {0 50} -direction w -style circle
 }
 
 termstyle 0-1-east {
-    terminal out -coords {100 50} \
+    terminal output -coords {100 50} \
             -direction e \
             -style arrowout \
             -tags output
 }
 
 termstyle multi_1-0-east {
-    terminal in -coords {0 50} -direction w -style circle -slash 1
+    terminal input -coords {0 50} -direction w -style circle -slash 1
 }
 
 termstyle 0-multi_1-east {
-    terminal out -coords {100 50} \
+    terminal output -coords {100 50} \
             -direction e \
             -style arrowout \
             -tags output \
@@ -60,22 +60,22 @@ termstyle 0-multi_1-east {
 }
 
 termstyle 1-0-west {
-    terminal in -coords {100 50} -direction e -style circle
+    terminal input -coords {100 50} -direction e -style circle
 }
 
 termstyle 0-1-west {
-    terminal out -coords {0 50} \
+    terminal output -coords {0 50} \
             -direction w \
             -style arrowout \
             -tags output
 }
 
 termstyle multi_1-0-west {
-    terminal in -coords {100 50} -direction e -style circle -slash 1
+    terminal input -coords {100 50} -direction e -style circle -slash 1
 }
 
 termstyle 0-multi_1-west {
-    terminal out -coords {0 50} \
+    terminal output -coords {0 50} \
             -direction w \
             -style arrowout \
             -tags output \
@@ -83,39 +83,39 @@ termstyle 0-multi_1-west {
 }
 
 termstyle 1-1-east {
-    terminal in -coords {0 50} -direction w -style circle
-    terminal out -coords {100 50} -direction e \
+    terminal input -coords {0 50} -direction w -style circle
+    terminal output -coords {100 50} -direction e \
             -style arrowout \
             -tags output
 }
 
 termstyle 1-1-west {
-    terminal in -coords {100 50} -direction e -style circle
-    terminal out -coords {0 50} -direction w \
+    terminal input -coords {100 50} -direction e -style circle
+    terminal output -coords {0 50} -direction w \
             -style arrowout \
             -tags output
 }
 
 termstyle 1_multi-1-east {
-    terminal in -coords {0 50} -direction w -style circle -slash 1
-    terminal out -coords {100 50} -direction e \
+    terminal input -coords {0 50} -direction w -style circle -slash 1
+    terminal output -coords {100 50} -direction e \
             -style arrowout \
             -tags output
 }
 
 termstyle 1_multi-1-west {
-    terminal in -coords {100 50} -direction e -style circle -slash 1
-    terminal out -coords {0 50} -direction w \
+    terminal input -coords {100 50} -direction e -style circle -slash 1
+    terminal output -coords {0 50} -direction w \
             -style arrowout \
             -tags output
 }
 
 termstyle 2-2-east {
-    terminal in-0 -coords {0 25} -direction w -style circle
-    terminal in-1 -coords {0 75} -direction w -style circle
-    terminal out-0 -coords {100 25} -direction e \
+    terminal input-0 -coords {0 25} -direction w -style circle
+    terminal input-1 -coords {0 75} -direction w -style circle
+    terminal output-0 -coords {100 25} -direction e \
             -style arrowout -fill green2 -tags output
-    terminal out-1 -coords {100 75} -direction e \
+    terminal output-1 -coords {100 75} -direction e \
             -style arrowout -fill green2 -tags output
 }
 
