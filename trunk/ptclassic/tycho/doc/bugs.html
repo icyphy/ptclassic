@@ -12,6 +12,13 @@
 </ul>
 <h1><a name="bugs in the kernel">Bugs in the kernel</a></h1>
 
+<h3><a href="$TYCHO/kernel/Glimpse.itcl">Glimpse</a></h3>
+<ul>
+<li>Glimpse should not freeze Tycho while running. Searching
+through say the Ptolemy tree can take a very long time.
+<li>Glimpse.itcl should probably not be in the kernel.
+</ul>
+
 <h3><a href="$TYCHO/kernel/Edit.itcl">Edit</a></h3>
 <ul>
 <li>Fill region is much too slow.
@@ -91,6 +98,11 @@ page. It should just print a status message.
 .bb choice chips {Chips:} {None Potato Plantain} None
 ::tycho::Dialog::wait .bb
     </pre></tcl>
+
+ <P> (This "bug" is because of the auto-raise behavior of
+::tycho::Dialog::wait, which raises the dialog window above
+the popup menu. You can turn it off by supplying an extra
+"0" argument to ::tycho::Dialog::wait.)
 
 </ul>
 
