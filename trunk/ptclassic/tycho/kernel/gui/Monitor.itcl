@@ -123,16 +123,21 @@ body ::tycho::Monitor::constructor {args} {
 	    -text {Exec <Ret>} \
             -command "$this execProcessInMonitor"
 
+    $itk_component(hull) addButton next \
+            -text {Next Error} \
+            -command {}
+
     $itk_component(hull) addButton stop \
             -text {Stop} \
             -command "$this killProcess"
     
-    $itk_component(bbox) buttonconfigure cancel \
-	    -text {Close <Esc>}
-
     $itk_component(bbox) add help \
 	    -text "Help" \
 	    -command "$this help"
+
+    $itk_component(bbox) buttonconfigure cancel \
+	    -text {Close <Esc>}
+
     if {![info exists itk_component(history)] || \
             ![winfo exists $itk_component(history)]} {
         # We have not yet created the history window, so do so now.
