@@ -16,10 +16,21 @@ $Id$
 
 **************************************************************************/
 
-#include <builtin.h>
-#include "int.Vec.h"
-
 inline int round(double x) { return x > 0 ? int(x+0.5) : -int(0.5-x); }
+
+// a simple integer vector class
+class intVec {
+private:
+	int* data;
+	int xsize;
+public:
+	intVec() : xsize(0), data(0) {}
+	~intVec() { delete data; }
+	int& elem(int i) { return data[i];}
+	int& operator[](int i) { return elem(i);}
+	int capacity() const { return xsize;}
+	void resize(int newSize);
+};
 
 class Histogram {
 public:
@@ -78,10 +89,16 @@ public:
 	void addPoint(float y);
 
 	void terminate();
+
+	// access to Histogram methods
+	int numCounts() const { return hist->numCounts();}
+	double mean() const { return hist->mean();}
+	double variance() const { return hist->variance();}
+
 private:
 	XGraph *display;
 	Histogram *hist;
-	const char *optstring;
+	char *optstring;
 };
 
 #endif
