@@ -113,8 +113,10 @@ void CGCTclTkTarget :: mainLoopCode() {
 	myCode << indent(1);
 	mainDecls << indent(1)
 		  << "int " << targetNestedSymbol.push("i") << ";\n";
-	myCode << targetNestedSymbol.get() << "=0; " << "while ("
-	       << targetNestedSymbol.pop() << "++ != " << "numIterations"
+	StringList tmp1;
+	tmp1 = targetNestedSymbol.pop();
+	myCode << tmp1 << "=0; " << "while ("
+	       << tmp1 << "++ != " << "numIterations"
 	       << ") {\n";
 	myCode += wormIn;
 
