@@ -97,7 +97,8 @@ public:
 		halt = 1,
 		error = 2,
 		interrupt = 4,
-		poll = 8 };
+		poll = 8,
+		abort = 16 };
 
 	inline static int haltRequested () {
 		if ( flagValues() | getPollFlag() ) processFlags();
@@ -146,6 +147,7 @@ public:
 
 	static void requestHalt ();
 	static void declareErrorHalt ();
+ 	static void declareAbortHalt ();
 	static void clearHalt ();
 
 	static void catchInt(int signo = -1, int always = 0);
