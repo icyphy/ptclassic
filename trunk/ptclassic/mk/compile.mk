@@ -162,7 +162,7 @@ realclean:
 	rm -f $(CRUD) $(LIB) $(CLIB) \
 		$(PL_SRCS:.pl=.h) $(PL_SRCS:.pl=.cc) \
 		$(PL_SRCS:.pl=.htm) \
-		TAGS \
+		TAGS starHTML.idx starHTML.idx.fst\
 		$(REALCLEAN_STUFF)
 
 # The depend, makefile and makefiles rules are duplicated in
