@@ -10,6 +10,7 @@ $Id$
 *******************************************************************/
 
 #include "CGStar.h"
+#include "Target.h"
 
 /*******************************************************************
 
@@ -35,7 +36,12 @@ void CGStar :: gencode (CGCodeBlock& block) {
 	// In this generic code generator, the block of code
 	// is simply written verbatim to the Architecture
 	// A more specific code generator would probably do more.
-	target->addCode(block.getText());
+	targetPtr->addCode(block.getText());
+}
+
+// Output a text line of code, raw, to the target architecture
+void CGStar :: addCode (const char* code) {
+	targetPtr->addCode(code);
 }
 
 // The following is defined in CGDomain.cc -- this forces that module
