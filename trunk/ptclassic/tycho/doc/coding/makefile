@@ -40,7 +40,8 @@ VPATH =		$(ROOT)/doc/coding
 CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
-EXTRA_SRCS =	directories.html \
+EXTRA_SRCS =	buildingtclexts.html \
+		directories.html \
 		fileheader.html \
 		index.html \
 		itclfilebody.html \
