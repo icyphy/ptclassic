@@ -12,6 +12,7 @@
 .TI "\*(PT Documentation"
 .AU
 Edward A. Lee
+Joseph T. Buck
 .AE
 .H1 "Introduction
 .pp
@@ -27,18 +28,37 @@ have been used.
 Furthermore, all shell scripts and Makefiles are supplied
 along with the documentation so that they can be modified if
 necessary.
-The formating is with ditroff (device independent troff)
+The formating is with
+.i ditroff
+(device independent troff)
 .Ir "ditroff program"
 .Ir "troff program"
 .Ir "eqn program"
 .Ir "tbl program"
-with the -me macros, eqn, and tbl.  In addition, some custom macros
+with the -me macros,
+.i eqn ,
+and
+.i tbl .
+In addition, some custom macros
 .Ir "me troff macros"
 have been supplied in order to enforce a consistent look
 across all \*(PT documents.
 These macros and their use are explained here.
 The -me macros will not be covered, since they are adequately
 documented elsewhere.
+.pp
+Since not all Unix systems have
+.i ditroff ,
+we also provide scripts for printing and previewing the documentation
+using
+.i groff ,
+.Ir "groff program"
+.Ir "Gnu groff program"
+the freely redistributable replacement for
+.i troff
+from the Free Software Foundation.  If you wish to use
+.i groff ,
+follow the installation instructions at the end of this section.
 .H1 "Printing the manual"
 .pp
 .Id "printing the Ptolemy manual"
@@ -58,7 +78,7 @@ where
 is replaced with whatever name your printer has.
 .pp
 All kernel documentation and utilities for printing documentation
-are contained in the directory ~ptolemy/doc.
+are contained in the directory ``~ptolemy/doc''.
 It is divided into sections as follows:
 .ip "main:" 1i
 This directory documents the \*(PT kernel and user interfaces.
@@ -69,7 +89,7 @@ The troff header files are here.
 .lp
 Domains are documented where their source code resides.
 For instance, the documentation for the SDF domain is
-in ~ptolemy/src/domains/sdf/doc.
+in ``~ptolemy/src/domains/sdf/doc''.
 Each directory with documentation has a Makefile.
 Printing subsections of the manual can be
 accomplished by typing "make print" in the appropriate directory.
@@ -90,13 +110,17 @@ You can preview the document on the screen.  For instance,
 % make preview
 .)c
 .Ir "previewing documents"
-You can pass options to ditroff.  For instance, suppose you wish
+You can pass options to
+.i ditroff .
+For instance, suppose you wish
 to print only pages 48 through the end of section 1.
 Then use
 .(c
 make OPTIONS=-o48- print
 .)c
-Any set of ditroff options may be passed this way.
+Any set of
+.i ditroff
+options may be passed this way.
 .Ir "ditroff options"
 To print only the pigi document,
 .(c
@@ -138,8 +162,8 @@ it yourself.
 .pp
 An example of a basic document is this one,
 covering \*(PT documentation.
-The source for this document is in ~ptolemy/doc/main/documents.
-The macros it uses are defined in ~ptolemy/doc/headers.
+The source for this document is in ``~ptolemy/doc/main/documents''.
+The macros it uses are defined in ``~ptolemy/doc/headers''.
 In that directory, it uses macros defined in the file called
 ``shared'', and in either the file called ``standalone'' or ``together'',
 depending on whether the document is printed by itself
@@ -168,7 +192,9 @@ into a version number for the document, looking something like:
 .(c
 	.\\\\\&" @(#)filename 1.1     10/14/90
 .)c
-This is interpreted by troff as a comment, and hence has no
+This is interpreted by
+.i ditroff
+as a comment, and hence has no
 affect on the output.
 The version number that will appear on the output
 is specified by the .VR macro.
@@ -196,8 +222,8 @@ A table of contents will be generated using these headers.
 .H2 "Adding to main"
 .pp
 If you are adding a new document to the ``main'' part of the \*(PT
-documentation, contained in ~ptolemy/doc/main, then you must
-edit the Makefile in ~ptolemy/main.
+documentation, contained in ``~ptolemy/doc/main'', then you must
+edit the Makefile in ``~ptolemy/main''.
 Simply add your new directory name to the definitions of the variables
 .c DIRS
 and
@@ -217,17 +243,7 @@ in their own file, with a corresponding ``.so'' entry in ``overall''.
 .pp
 Your new directory should also itself contain a Makefile, used
 for printing the document in standalone form.  A copy of the Makefile
-in ~ptolemy/doc/main/documents should work fine.
-.H2 "Restricted filenames in doc/main"
-.pp
-In any documentation directory, when the documentation is printed,
-a file named ``index'' will be created.
-.Id "files, restricted, in doc/main"
-.Id "doc/main directory restricted files"
-.Id "index, file"
-If there already is such a file, and you have write permission,
-it will be clobbered.
-Hence, you should not store document sections in a file called ``index''.
+in ``~ptolemy/doc/main/documents'' should work fine.
 .H2 "Index entries"
 .pp
 The documentation scripts for \*(PT will automatically
@@ -400,7 +416,9 @@ In both cases, the syntax of the document source files is as follows:
 	List of pointers to other entries in the manual
 	.ES \" Every entry must end with this call
 .)c
-The first line is again a troff comment, containing the sccs version ID.
+The first line is again a
+.i ditroff
+comment, containing the SCCS version ID.
 The second line defines how the version ID and date should be printed
 when the manual is printed.
 The version number %\&I\&% and date %\&G\&%
@@ -591,3 +609,53 @@ Makefile
 .)c
 Complete documentation of a domain contains all of these,
 plus possibly other files sourced using .so.
+.H1 "Configuring your system to use the Gnu groff program"
+.pp
+If you do not have
+.i ditroff ,
+you may preview and print the documents by configuring your system
+to use
+.i groff
+instead.  The
+.i groff
+package is a set of tools from the Free Software Foundation that
+provide a freely redistributable, mostly-compatible replacement
+for
+.i troff ,
+.i nroff ,
+and related programs.
+.pp
+Since the command line interface to
+.i groff
+is quite different and some adjustments are required, different
+scripts are provided.  To install them as the official document-printing
+scripts, do the following (you must have appropriate write permission):
+.(c
+% cd ~ptolemy/doc/bin
+% USE_GROFF
+.)c
+.Ir "USE_GROFF"
+This command will install the
+.i groff
+scripts as the official scripts.
+.pp
+Since
+.i groff
+is a replacement for the old
+.i troff
+rather than for
+.i ditroff ,
+it cannot handle as many fonts; therefore the scripts for using
+.i groff
+cause some of the fancier fonts used in the manuals to print in bold
+face instead.  There may be other glitches as well; however, the
+resulting manuals are usable and even look pretty good.
+.pp
+The
+.i groff
+program can be obtained from many FTP sites;
+.Ir "obtaining Gnu groff"
+the Free Software Foundation
+will also send a copy of it to you on tape for a reasonable fee.  Write
+to ``gnu@prep.ai.mit.edu'' for more information on obtaining FSF software.
+
