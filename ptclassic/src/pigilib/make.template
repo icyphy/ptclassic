@@ -80,8 +80,7 @@ LIBCPPSRCS    = kernelCalls.cc \
 		XError.cc \
 		pigiLoader.cc \
 		ptkConsoleWindow.cc \
-		ptkRegisterCmds.cc \
-		reg.cc
+		ptkRegisterCmds.cc
 
 
 SRCS = $(LIBCSRCS) $(LIBCPPSRCS)
