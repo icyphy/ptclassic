@@ -799,6 +799,7 @@ ifdef TK
 endif
 
 CUSTOM_DIRS += $(CROOT)/src/kernel $(CROOT)/src/pigiRpc $(CROOT)/src/ptcl \
+	$(CROOT)/src/pitcl \
 	$(CROOT)/mk $(CROOT)/src/tysh $(CROOT)/src/pigiExample
 
 ifdef PITCL
