@@ -66,7 +66,7 @@ Block* SimMTTarget :: makeNew() const {
   LOG_NEW; return new SimMTTarget(name(), starType(), descriptor());
 }
 
-static SimMTTarget proto("SimMT-VHDL", "CGStar",
+static SimMTTarget proto("SimMT-VHDL", "VHDLStar",
 			 "VHDL code generation target for MTI simulation");
 
 static KnownTarget entry(proto,"SimMT-VHDL");
