@@ -48,10 +48,6 @@ public:
 	// The run function resumes the run where it was left off.
 	int run(Block& galaxy);
 
-	// The wrapup function runs the termination routines of all the
-	// atomic blocks
-	int wrapup(Block& galaxy);
-
 	// Display the static schedule for SDF wormholes...
 	StringList displaySchedule(Block& galaxy); 
 
