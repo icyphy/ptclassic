@@ -30,7 +30,7 @@
 # Date of creation: 10/13/96
 # Author: Christopher Hylands
 
-makefiles all install clean sources depend realclean checkjunk sccsinfo \
+all makefiles install clean sources depend realclean checkjunk sccsinfo \
 itcldocs extraclean tests weblint:
 	@for x in $(DIRS); do \
 	    if [ -w $$x ] ; then \
