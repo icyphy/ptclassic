@@ -136,7 +136,7 @@ public:
 	int isItInput () const ; // {return TRUE; }
 
 	// Get Particles from input Geodesic
-	void grabData();
+	void receiveData();
 
         // Services of PortHole that are often used: 
         // setPort(DataType d); 
@@ -156,7 +156,7 @@ public:
 
 	// Move the current Particle in the input buffer -- this
 	// method is invoked by the BDFScheduler before go()
-	void grabData();
+	void receiveData();
 
 	// Put the Particles that were generated into the
 	// output Geodesic -- this method is invoked by the

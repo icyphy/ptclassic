@@ -26,17 +26,21 @@ class BDFCluster;
 
 #include "BDFPortHole.h"
 
+const int BCP_ATOM = 0;
+const int BCP_BAG = 1;
+const int BCP_DUP = 2;
+const int BCP_DUP_IN = 3;
+
 class BDFClustPort : public BDFPortHole {
 public:
-	BDFClustPort(DFPortHole& p,BDFCluster* parent = 0,int bagp = 0);
+	BDFClustPort(DFPortHole& p,BDFCluster* parent = 0,int bagp = BCP_ATOM);
 	~BDFClustPort();
 
 	// return what is inside me
 	DFPortHole& real() { return pPort;}
 
-	// these are passthrough functions
-	int isItInput() const { return pPort.isItInput();}
-	int isItOutput() const { return pPort.isItOutput();}
+	int isItInput() const { return inFlag;}
+	int isItOutput() const { return !inFlag;}
 
 	// set/return the control bit
 	int isControl() const { return ctlFlag;}
@@ -77,7 +81,8 @@ public:
 
 	void makeExternLink(BDFClustPort* val);
 
-	int isBagPort() const { return bagPortFlag;}
+	int isBagPort() const { return bagPortFlag == BCP_BAG;}
+	int isDupPort() const { return bagPortFlag == BCP_DUP;}
 
 	BDFClustPort* inPtr() {
 		return bagPortFlag ? (BDFClustPort*)&pPort : 0;
@@ -98,6 +103,8 @@ private:
 	// the external link
 	BDFClustPort* pOutPtr;
 
+	// true if I am an input
+	unsigned char inFlag;
 	// true if I am a bag port
 	unsigned char bagPortFlag;
 

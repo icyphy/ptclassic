@@ -55,6 +55,16 @@ inline int wormEdge(PortHole& p) {
 	else return (p.isItInput() == f->isItInput());
 }
 
+// run function: if sdf, we will handle the grabData and sendData
+// calls so the user need not.  Otherwise, the go method of the
+// star must do them.
+int BDFStar :: run () {
+	if (sdf)
+		return DataFlowStar::run();
+	else
+		return Star::run();
+}
+
 int BDFStar :: notRunnable () {
 	if (isSDFinContext()) {
 		return DataFlowStar::notRunnable();

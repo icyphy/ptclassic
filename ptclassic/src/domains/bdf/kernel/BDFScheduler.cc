@@ -150,8 +150,8 @@ int BDFScheduler::prepareGalaxy() {
 int BDFScheduler::checkStars() {
 // Allocate space for the SchedInfo structures.  Check the stars
 // for BDF-ness or SDF-ness, and set up the structures.
-	LOG_DEL; delete starInfo;
-	LOG_DEL; delete portInfo;
+	LOG_DEL; delete [] starInfo;
+	LOG_DEL; delete [] portInfo;
 	LOG_NEW; starInfo = new BDFStarSchedInfo[galSize];
 	LOG_NEW; portInfo = new BDFPortSchedInfo[nPorts];
 
@@ -790,10 +790,13 @@ void BDFScheduler::initInfo(Star& star) {
 void BDFScheduler::commonPortInfo(PortHole& port) {
 	BDFPortSchedInfo& pinfo = info(port);
 	pinfo.num = port.numXfer();
+	pinfo.inFlag = port.isItInput();
 	BDFPortSchedInfo& farInfo = info(*(port.far()));
 	// create the simulated geodesic, or attach to the existing one.
 	if (farInfo.geo) pinfo.geo = farInfo.geo;
-	else pinfo.geo = new SimGeo (FALSE,port.numTokens());
+	else {
+		LOG_NEW; pinfo.geo = new SimGeo (FALSE,port.numTokens());
+	}
 }
 
 // this function traces all the assocPort()s and relations back
@@ -828,13 +831,13 @@ void BDFPortSchedInfo::traceBack (DFPortHole& port) {
 }
 
 BDFPortSchedInfo::~BDFPortSchedInfo() {
-	delete geo;
+	if (inFlag) {LOG_DEL; delete geo;}
 }
 
 BDFScheduler::~BDFScheduler() {
-	delete mySchedule;
-	delete starInfo;
-	delete portInfo;
+	LOG_DEL; delete mySchedule;
+	LOG_DEL; delete [] starInfo;
+	LOG_DEL; delete [] portInfo;
 }
 
 // static debug flag
