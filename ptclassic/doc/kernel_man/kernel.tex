@@ -72,12 +72,15 @@ TO PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
 This section describes some basic classes and low-level concepts that
 are used throughout Ptolemy.  There are a number of iterator classes,
 all with the same interface.  A basic linked list class called
-SequentialList is heavily used.  Finally, many of the significant
+SequentialList is heavily used.  States and Portholes can have
+@emph{attributes}; these are particularly important in code generation.
+Finally, many of the significant
 classes in Ptolemy -- functional blocks, portholes to implement
 connections, parameters -- are derived from NamedObj, the basic object
 for implementing a named object that lives in a hierarchy.
 
 @menu
+* Language subset::             The C++ Subset Used In Ptolemy
 * Iterators::                   Iterators
 * Generic Data Structures::     Generic Data Structures
 * class SequentialList::        class SequentialList
@@ -85,9 +88,27 @@ for implementing a named object that lives in a hierarchy.
 * Other containers::            Other generic container classes
 * class NamedObj::              class NamedObj
 * class NamedObjList::          class NamedObjList
+* Attributes::                  Attributes
 @end menu
 
-@node Iterators, Generic Data Structures, Basic concepts, Basic concepts
+@node Language subset, Iterators, Basic concepts, Basic concepts
+@section The C++ Subset Used In Ptolemy
+
+The Ptolemy system has grown up with the C++ language, so it does not
+use all the latest features in the newest compilers or every nook and
+cranny of Ellis and Stroustrup's Annotated Reference Manual, because
+of unimplemented features or lack of stability of implementation.
+Instead, we focused on stability.  Accordingly, Ptolemy builds under
+the Gnu C++ compiler, version 2.2.2, with version 2.2 of the library
+@code{libg++}; it also build under Sun C++ 2.1, a port of the AT&T
+@file{cfront} compiler to the Sun.
+
+This means, for one thing, that templates are not used.  In addition,
+some features that do not work that well yet under g++, such as
+nested classes, are also avoided.  Nested enumerations, however,
+are used in several places.
+
+@node Iterators, Generic Data Structures, Language subset, Basic concepts
 @section Iterators
 
 Iterators are a very basic and widely used concept in Ptolemy, and are
@@ -131,9 +152,7 @@ been modified (user-written iterators should preserve this property).
 @node Generic Data Structures, class SequentialList, Iterators, Basic concepts
 @section Generic Data Structures
 
-Ptolemy does not use templates, since many compilers still do not support them
-and since the implementations of templates that we do have available
-are still unstable.  Therefore our generic lists use the generic pointer
+As Ptolemy does not use templates, our generic lists use the generic pointer
 technique, with
 
 @example
@@ -325,9 +344,9 @@ The constructor for class Stack builds an empty stack.  The following
 functions move pointers onto or off of the stack:
 
 @example
-void pushTop(Pointer p);
+void pushTop(Pointer @var{p});
 Pointer popTop();
-pushBottom(Pointer p);
+pushBottom(Pointer @var{p});
 @end example
 
 @code{pushTop} and @code{popTop} are the functions traditionally
@@ -482,7 +501,7 @@ void setDescriptor(const char* @var{desc});
 The descriptor is set to @var{desc}.  The string pointed to by
 @var{desc} must live as long as the NamedObj does.
 
-@node class NamedObjList,  , class NamedObj, Basic concepts
+@node class NamedObjList, Attributes, class NamedObj, Basic concepts
 @section Class NamedObjList
 
 Class NamedObjList is simply a list of objects of class NamedObj.
@@ -567,6 +586,93 @@ pointers; the former requires non-const NamedObjList objects and
 returns non-const NamedObj pointers.  They obey the standard iterator
 interface (and are privately derived from class ListIter).
 
+@node Attributes,  , class NamedObjList, Basic concepts
+@section Attributes
+
+Attributes represent logical properties that an object may or may
+not have.  A parameter may or may not be settable by the user;
+an assembly-language buffer may be allocated in ROM or RAM, fast
+memory or slow memory, etc.
+
+The set of attributes of an object is stored in an entity called
+a bitWord.  At present, a bitWord is represented as an unsigned
+long, which restricts the number of distinct attributes to 32;
+this may be changed in future releases.
+
+An Attribute object represents a request to turn certain attributes of
+an object off, and to turn other attributes on.  As a rule, constants of
+class Attribute are used to represent attributes, and users have no need
+to know whether a given property is represented by a true or false
+bit in the bitWord.
+
+Although we would prefer to have a constructor for Attribute objects
+of the form
+
+@example
+Attribute(bitWord @var{bitsOn}, bitWord @var{bitsOff});
+@end example
+
+it has turned out that doing so presents severe problems with order of
+construction, since a number of global Attribute objects are used and
+there is no simple, portable way of guarantteeing that these objects
+are constructed before any use.  As a result, the @code{bitsOn} and
+@code{bitsOff} members are public, but we forbid use of that fact
+except in one place: constant Attribute objects can be initialized
+by the C ``aggregate form'', as in the following example:
+
+@example
+extern const Attribute P_HIDDEN = @{PB_HIDDEN, 0@};
+@end example
+
+The first word specified is the @code{bitsOn} field, and the second
+word specified is the @code{bitsOff} field.  Other than to initialize
+objects, we pretend that these data members are private.
+
+@menu
+* Attribute member functions::  Attribute member functions
+@end menu
+
+@node Attribute member functions,  , Attributes, Attributes
+@subsection Attribute member functions
+
+@example
+Attribute& operator |= (const Attribute& @var{arg});
+Attribute& operator &= (const Attribute& @var{arg});
+@end example
+
+These operations combine attributes, by applying the @code{|=} and
+@code{&=} operators to the bitsOn and bitsOff fields.  The first
+operation, as attributes are commonly used, represents a requirement
+that two sets of attributes be met, so it has been argued that it
+really should be the ``and'' operation.   However, the current scheme
+has the virtue of consistency.
+
+@example
+bitWord eval(bitWord @var{defaultVal}) const;
+@end example
+
+Evaluate an attribute given a default value.  Essentially, bits
+corresponding to bitsOn are turned on, and then bits corresponding
+to bitsOff are turned off.
+
+@example
+bitWord clearAttribs(bitWord @var{defaultVal}) const;
+@end example
+
+This method essentially applies the attribute backwards, reversing
+the roles of bitsOn and bitsOff in @code{eval}.
+
+@example
+bitWord on() const;
+bitWord off() const;
+@end example
+
+Retrieve the bitsOn and bitsOff values, respectively.
+
+Inline definitions of operators @code{&} and @code{|} are also defined
+to implement nondestructive forms of the @code{&=} and @code{|=}
+operations.
+
 @node Block and related classes, Control of execution, Basic concepts, Top
 @chapter Block and related classes
 
@@ -615,11 +721,11 @@ which makes a more exact duplicate (with the same values for states,
 for example).
 
 @menu
-* Block constructors and destructors::
-* Block public "information" members::
-* other Block public members::
-* Block protected members::
-* Block iterator classes::
+* Block constructors and destructors::  
+* Block public "information" members::  
+* other Block public members::  
+* Block protected members::     
+* Block iterator classes::      
 @end menu
 
 @node Block constructors and destructors, Block public "information" members, class Block, class Block
@@ -1700,8 +1806,10 @@ this on to the scheduler.
 virtual void resetStopTime(double @var{when});
 @end example
 
-Reset the stopping condition.  The default implementation just passes
-this on to the scheduler.  (FIXME: explain distinction).
+Reset the stopping condition for the wormhole containing this Target.
+The default implementation just passes this on to the scheduler.  In
+addition to the action performed by @code{setStopTime}, this function
+also does any synchronization required by wormholes.
 
 @example
 virtual void setCurrentTime(double @var{now});
@@ -1801,10 +1909,16 @@ void addChild(Target& @var{child});
 Add @var{child} as a child target.
 
 @example
-void inheritChildren(Target* @var{father}, int @var{start}, int @var{stop});
+void inheritChildren(Target* @var{parent}, int @var{start}, int @var{stop});
 @end example
 
-FIXME: Need an explanation of this.
+This method permits two different Target objects to share child Targets.
+The child targets numbered @var{start} through @var{stop} of the Target
+pointed to by @var{parent} become the children of this Target (the one
+on which this method is called).  Its primary use is in multi-processor
+scheduling or code generation, in which some construct is assigned to
+a group of processors.  It has a big disadvantage; the range of child
+targets must be continuous.
 
 @example
 void remChildren();
@@ -1920,9 +2034,10 @@ Retrieve the stop time.
 virtual void resetStopTime(double @var{limit});
 @end example
 
-FIXME: Soonhoi says: hack method to set stopping time of wormhole.
+Reset the stopping condition for the wormhole containing this Scheduler.
 The default implementation simply calls @code{setStopTime} with
-the same argument.  When is this different from @code{setStopTime}?
+the same argument.  For some derived types of schedulers, additional
+actions will be performed as well by derived Scheduler classes.
 
 @example
 virtual int run() = 0;
@@ -3380,10 +3495,11 @@ time.
 ~ParticleStack();
 @end example
 
-The destructor deletes all Particles EXCEPT for the last one; we do
-not delete the last one because it is the ``reference'' particle (for
-Plasma) and is normally not dynamically created [ this should be the
-Plasma destructor, as this behavior is needed for Plasma ].
+The destructor deletes all Particles EXCEPT for the last one; we do not
+delete the last one because it is the ``reference'' particle (for
+Plasma) and is normally not dynamically created (this code may be moved
+in a future release to the Plasma destructor, as this behavior is needed
+for Plasma and not for other types of ParticleStack).
 
 @example
 void put(Particle* @var{p});
@@ -5503,17 +5619,17 @@ ports to other compilers (e.g. cfront) easier.
 The following non-member functions take Complex arguments:
 
 @example
-Complex conj(const Complex&);
-double real(const Complex&);
-double imag(const Complex&);
-double abs(const Complex&);
+Complex conj(const Complex& @var{arg});
+double real(const Complex& @var{arg});
+double imag(const Complex& @var{arg});
+double abs(const Complex& @var{arg});
 @end example
 
 Return the conjugate, real part, imaginary part, or absolute value,
 respectively.
 
 @example
-double arg(const Complex&);
+double arg(const Complex& @var{arg});
 @end example
 
 Return the angle between the X axis and the vector made by the argument.
@@ -5526,25 +5642,25 @@ abs(z)*exp(Complex(0.,1.)*arg(z))
 is in theory always equal to z.
 
 @example
-double norm(const Complex&);
+double norm(const Complex& @var{arg});
 @end example
 
 return the absolute value squared.
 
 @example
-Complex sin(const Complex&);
-Complex cos(const Complex&);
-Complex exp(const Complex&);
-Complex log(const Complex&);
-Complex sqrt(const Complex&);
+Complex sin(const Complex& @var{arg});
+Complex cos(const Complex& @var{arg});
+Complex exp(const Complex& @var{arg});
+Complex log(const Complex& @var{arg});
+Complex sqrt(const Complex& @var{arg});
 @end example
 
 Standard mathematical functions.  @code{log} returns the principal
 logarithm.
 
 @example
-Complex pow(double base,const Complex& expon);
-Complex pow(const Complex& base, const Complex& expon);
+Complex pow(double @var{base},const Complex& @var{expon});
+Complex pow(const Complex& @var{base}, const Complex& @var{expon});
 @end example
 
 Raise base to expon power.
@@ -5601,8 +5717,11 @@ There is also an << operator to print a Fraction on an ostream.
 @node class IntervalList, Clock and TimeVal, Mathematical classes, Misc
 @section Class IntervalList
 
-The IntervalList class represents a set of integers, represented
+The IntervalList class represents a set of unsigned integers, represented
 as a series of intervals of integers that belong to the set.
+
+It is built on top of a class Interval that represents a single
+interval.
 
 There is also a text representation for IntervalLists.  This
 representation can be used to read or write IntervalList objects
@@ -5613,7 +5732,7 @@ Usenet newsgroup (which is where we got it from; thank you, Larry
 Wall).
 
 In the text representation, an IntervalList is specified as one
-or more Intervals, separated by commas.  An interval is either
+or more Intervals, separated by commas.  An Interval is either
 an unsigned integer or two unsigned intervals with an intervening
 minus sign.  Here is one possible IntervalList specification:
 
@@ -5626,7 +5745,201 @@ but if they are not, they are changed to "canonical form", in which
 any overlapping intervals are merged and the intervals are sorted
 to appear in increasing order.
 
-FIXME: describe methods.
+An IntervalList is best thought of as a set of unsigned integers.
+Its methods in many cases perform set operations: forming the
+union, intersection, or set difference of two IntervalLists.
+
+@menu
+* class Interval::              class Interval and methods
+* IntervalList public members::  IntervalList public members
+* IntervalList iterators::      IntervalList iterator classes.
+@end menu
+
+@node class Interval, IntervalList public members, class IntervalList, class IntervalList
+@subsection class Interval and methods
+
+The Interval class is in some ways simply an implementation detail of
+class IntervalList, but since its existence is exposed by public
+methods, it is documented here.
+
+An Interval has an @var{origin} and a @var{length}, and represents the
+set of @var{length} unsigned integers beginning with @var{origin}.  It
+also has a pointer that can point to another Interval.
+
+The constructor
+
+@example
+Interval(unsigned @var{origin}=0, unsigned @var{length}=0,
+    Interval* @var{nxt} = 0);
+@end example
+
+permits all these members to be set.  The copy constructor copies
+the origin and length values but always sets the next pointer to null.
+A third constructor
+
+@example
+Interval(const Interval& @var{i1},Interval* @var{nxt});
+@end example
+
+permits a combination of a copy and a next-pointer initialization.
+
+The members
+
+@example
+unsigned origin() const;
+unsigned length() const;
+@end example
+
+return the origin and length values.
+
+@example
+unsigned end() const;
+@end example
+
+The @code{end} function returns the last unsigned integer that is a
+member of the Interval; 0 is returned for empty Intervals.
+
+There are a number of queries that are valuable for building a set
+class out of Intervals:
+
+@example
+int isAfter(const Interval &@var{i1}) const;
+@end example
+
+@code{isAfter} returns true if this Interval begins after the end of
+interval @var{i1}
+.
+@example
+int endsBefore(const Interval &@var{i1}) const;
+@end example
+
+@code{endsBefore} returns true if this Interval ends strictly before
+the origin of interval i1.
+
+@example
+int completelyBefore(const Interval &@var{i1}) const;
+@end example
+
+@code{completelyBefore} returns true if @code{endsBefore} is true and there
+is space between the intervals (they cannot be merged).
+
+@example
+int mergeableWith(const Interval& @var{i1}) const;
+@end example
+
+@code{mergeableWith} returns true if two intervals overlap or are
+adjacent, so that their union is also an interval.
+
+@example
+int intersects(const Interval& @var{i1}) const;
+@end example
+
+@code{intersects} returns true if two intervals have a non-null
+intersection.
+
+@example
+int subsetOf(const Interval& @var{i1}) const;
+@end example
+
+@code{subsetOf} returns true if the argument is a subset of this interval.
+
+@example
+void merge(const Interval& @var{i1});
+@end example
+
+@code{merge} alters the interval to the result of merging it with @var{i1}.
+It is assumed that @code{mergeableWith} is true.
+
+@example
+Interval& operator&=(const Interval& @var{i1});
+@end example
+
+This Interval is changed to the intersection of itself and of @var{i1}.
+
+@node IntervalList public members, IntervalList iterators, class Interval, class IntervalList
+@subsection IntervalList public members
+
+@example
+IntervalList();
+@end example
+
+The default constructor produces the empty IntervalList.
+
+@example
+IntervalList(unsigned @var{origin},unsigned @var{length});
+@end example
+
+This constructor creates an IntervalList containing @var{length}
+integers starting with @var{origin}.
+
+@example
+IntervalList(const char* @var{definition});
+@end example
+
+This constructor takes a definition of the IntervalList from the
+string in @var{definition}, parses it, and creates the list of
+intervals accordingly.
+
+There is also a copy constructor, an assignment operator, and a
+destructor.
+
+@example
+int contains(const Interval& @var{i1}) const;
+@end example
+
+The @code{contains} method returns 0 if no part of @var{i1} is in the
+IntervalList, 1 if @var{i1} is completely contained in the IntervalList,
+and -1 if @var{i1} is partially contained (has a non-null intersection).
+
+@example
+IntervalList& operator|=(const Interval& @var{src});
+IntervalList& operator|=(const IntervalList& @var{src});
+@end example
+
+The @code{|=} operators sets the IntervalList to the union of itself and
+the Interval, or the IntervalList, @var{src}.
+
+@example
+IntervalList operator&(const IntervalList& @var{arg}) const;
+@end example
+
+The binary @code{&} operator returns the intersection of its arguments,
+which are not changed.
+
+@example
+IntervalList& subtract(const Interval& @var{i1});
+IntervalList& operator-=(const Interval& @var{i1});
+@end example
+
+Subtract the Interval @var{i1} from the list.  That is, any intersection
+is removed from the set.  Both the @code{subtract} and @code{-=} forms
+are equivalent.
+
+@example
+IntervalList& operator-=(const IntervalList &@var{arg});
+@end example
+
+This one subtracts the argument @var{arg} from the list (removes any
+intersection).
+
+@example
+int empty() const;
+@end example
+
+Return TRUE (1) for an empty IntervalList, otherwise FALSE (0).
+
+@node IntervalList iterators,  , IntervalList public members, class IntervalList
+@subsection IntervalList iterator classes.
+
+There are two iterator classes associated with IntervalList,
+IntervalListIter and CIntervalListIter.  The only difference is that
+the latter iterator can be used with const IntervalList objects and
+returns pointers to const Interval objects; the former requires a
+non-const IntervalIList and returns pointers to Interval.
+
+These objects obey the standard iterator interface; the @code{next()}
+or @code{++} function returns a pointer to the next contained Interval;
+@code{reset} goes back to the beginning.
 
 @node Clock and TimeVal,  , class IntervalList, Misc
 @section Classes for interacting with the system clock
@@ -5660,10 +5973,10 @@ operator double() const;
 This returns the interval value as a double.
 
 @example
-TimeVal operator +(const TimeVal&) const;
-TimeVal operator -(const TimeVal&) const;
-TimeVal& operator +=(const TimeVal&);
-TimeVal& operator -=(const TimeVal&);
+TimeVal operator +(const TimeVal& @var{arg}) const;
+TimeVal operator -(const TimeVal& @var{arg}) const;
+TimeVal& operator +=(const TimeVal& @var{arg});
+TimeVal& operator -=(const TimeVal& @var{arg});
 @end example
 
 These operators do simple addition and subtraction of TimeVals.
