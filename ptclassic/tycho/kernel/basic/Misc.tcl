@@ -420,6 +420,14 @@ proc loop {args} {
 # This is very inefficient, of course, and should be one of the
 # first things recoded in C when things need speeding up.
 #
+# FIXME: This procedure ignores the last element if it is an empty
+# list. Depending on how you look at it, the problem is either in the
+# way that Tcl handles lists, which is totally brain-dead, or in the
+# definition of lnull{}. A work-around
+# is to ensure that, if the last
+# element is an empty list, that it is followed by a space before
+# the terminating brace. Really, this should be fixed properly.
+#
 proc foreach* {args} {
     set c 0
 
@@ -568,6 +576,9 @@ proc filter {v l body} {
 #    apply* x {1 2 3} y {4 5 6} -counter i {
 #        list $i [expr $x * $y]
 #    }
+#
+# FIXME: apply*{} has the same bug with an empty list element at the end
+# of the list as foreach*{}.
 #
 proc apply* {args} {
 
