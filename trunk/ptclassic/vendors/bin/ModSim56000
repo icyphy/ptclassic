@@ -1,0 +1,3 @@
+#!/bin/sh
+#$Id$ 
+exec `dirname $0`/vendorexec motorola/ucb/bin/ModSim56000 $*
