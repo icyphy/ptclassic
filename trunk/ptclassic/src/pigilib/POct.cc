@@ -59,6 +59,7 @@ extern "C" {
 #include "compile.h"
 #include "octIfc.h"
 #include "octMacros.h"    // For GetOrCreatePropStr
+void win_msg(const char*);  // for error dialog box.  FIXME: formalize this
 #undef Pointer
 }
 #include "miscFuncs.h"
@@ -414,9 +415,8 @@ int POct::ptkGetParams (int aC,char** aV) {
             sprintf(title, "Edit Formal Parameters");
             // Result string will be built below
         } else {
-            Tcl_AppendResult( interp, "Not a Star, Galaxy, or Universe",
-	                      (char*) NULL );
-            return TCL_ERROR;
+	    win_msg ("Not a Star, Galaxy, or Universe");
+            return TCL_OK;
         }
     } else {
         // There was a valid instance passed
@@ -458,10 +458,8 @@ int POct::ptkGetParams (int aC,char** aV) {
             sprintf(title, "Edit Actual Parameters");
             // Build results string below.
         } else {
-	    Tcl_AppendResult(interp, 
-                             "Not a star, galaxy, bus, or delay instance",
-                             ErrGet(), (char *) NULL);
-            return TCL_ERROR;
+	    win_msg("Not a star, galaxy, bus, or delay instance");
+            return TCL_OK;
         }
     }
 
