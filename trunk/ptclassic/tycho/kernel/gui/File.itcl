@@ -43,7 +43,7 @@
 # and unique.
 #
 proc ::tycho::openContext {filename args} {
-    eval ::tycho::File::openContext $filename $args
+    eval [list ::tycho::File::openContext $filename] $args
 }
 
 #######################################################################
