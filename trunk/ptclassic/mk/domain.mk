@@ -43,7 +43,8 @@ endif
 # Generic rule to produce a starHTML.idx file.  This rule depends
 # on all the .htm files in the directory where the starHTML.idx file
 # is to be built
-$(ALLSTARIDXS): $(wildcard $(dir $@)/*.htm)
+$(ALLSTARIDXS): $(wildcard $(dir $@)/*.htm) \
+		$(PTOLEMY)/tycho/lib/idx/tychoMakeIndex.tcl
 	@echo "Updating $@";
 	@rm -f $@;
 	@echo "set TYCHO $(PTOLEMY)/tycho; \
@@ -54,7 +55,8 @@ $(ALLSTARIDXS): $(wildcard $(dir $@)/*.htm)
 		| itclsh
 
 # Star index of all the star index files
-starHTML.idx: $(ALLSTARIDXS)
+starHTML.idx: $(ALLSTARIDXS) $(PTOLEMY)/tycho/lib/idx/tychoMakeIndex.tcl
+
 	@echo "Merging $(VPATH)/$@"
 	@rm -f $(VPATH)/$@
 	@(cd $(VPATH); \
@@ -68,22 +70,24 @@ starHTML.idx: $(ALLSTARIDXS)
 # star/demo recursive index
 STARDEMOIDXS = 	$(VPATH)/starDemo.idx
 
+$(STARDEMOIDXS) demo.idx: $(wildcard $(dir $@)/schematic/contents\;) \
+		$(PTOLEMY)/lib/tcl/starindex.tcl
+	@echo "Updating $@"
+	@(cd $(VPATH); \
+	 echo "source $(PTOLEMY)/lib/tcl/starindex.tcl; \
+		starindex_WriteDemoIndex $(ME) " | itclsh)
 
-demo.idx: starDemo.idx
-
-# This rule also produces demo.idx
-$(STARDEMOIDXS): $(wildcard $(dir $@)/schematic/contents\;)
-	echo "source $(PTOLEMY)/lib/tcl/starindex.tcl; \
-		starindex_WriteDemoIndex $(ME) " | itclsh
-
-domain.idx: $(STARDEMOIDXS) starHTML.idx
+domain.idx: $(STARDEMOIDXS) starHTML.idx \
+		$(PTOLEMY)/tycho/lib/idx/tychoMakeIndex.tcl
 	@echo "Merging $(VPATH)/$@"
 	@rm -f $(VPATH)/$@
 	@(cd $(VPATH); \
 	 echo "set TYCHO $(PTOLEMY)/tycho; \
 		source $(PTOLEMY)/tycho/lib/idx/tychoMakeIndex.tcl; \
 		tychoVpathMergeIndices \"$(ME) stars and demos\" \
-			 $(VPATH)/$@ $(VPATH)/ $^ demo.idx" | itclsh)
+			$(VPATH)/$@ $(VPATH)/ \
+			$(STARDEMOIDXS) starHTML.idx \
+			 " | itclsh)
 
 clean_indices:
 	rm -f $(ALLSTARIDXS) starHTML.idx starHTML.idx.fst $(STARDEMOIDXS)
