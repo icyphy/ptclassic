@@ -271,37 +271,53 @@ bool bittrue;
         CASE(PLUS) { 
 	    Indent();
    	    if (AllEdgesInt(Node)) GenBinaryInt(Node, "+");
-	    else if (AllEdgesFixed(Node)) GenBinaryFixed(Node, "Plus");
+	    else if (AllEdgesFixed(Node))	
+			if(pl_flag && bittrue)	CastAndGenFixed(Node, "Plus");
+			else 		GenBinaryFixed(Node, "Plus");
 	    else printmsg(NULL, "Node: %s, type-mismatch\n", Node->Name);
         }
         CASE(MINUS) { 
 	    Indent();
    	    if (AllEdgesInt(Node)) GenBinaryInt(Node, "-");
-	    else if (AllEdgesFixed(Node)) GenBinaryFixed(Node, "Minus");
+	    else if (AllEdgesFixed(Node))	
+			if(pl_flag && bittrue)	CastAndGenFixed(Node, "Minus");
+			else 		GenBinaryFixed(Node, "Minus");
+		/* temporary hack for ptolemy  */
+		/* when loop iterators are used in calculation, there
+		   is no precision information, added a int_to_fix()
+  		   to do this conversion for compilation */
 	    else printmsg(NULL, "Node: %s, type-mismatch\n", Node->Name);
         }
         CASE(_MIN) { 
 	    Indent();
    	    if (AllEdgesInt(Node)) GenMinMaxInt(Node, "_Min");
-	    else if (AllEdgesFixed(Node)) GenBinaryFixed(Node, "Min");
+	    else if (AllEdgesFixed(Node))	
+			if(pl_flag && bittrue)	CastAndGenFixed(Node, "Min");
+			else 		GenBinaryFixed(Node, "Min");
 	    else printmsg(NULL, "Node: %s, type-mismatch\n", Node->Name);
         }
         CASE(_MAX) { 
 	    Indent();
    	    if (AllEdgesInt(Node)) GenMinMaxInt(Node, "_Max");
-	    else if (AllEdgesFixed(Node)) GenBinaryFixed(Node, "Max");
+	    else if (AllEdgesFixed(Node))	
+			if(pl_flag && bittrue)	CastAndGenFixed(Node, "Max");
+			else 		GenBinaryFixed(Node, "Max");
 	    else printmsg(NULL, "Node: %s, type-mismatch\n", Node->Name);
         }
         CASE(MULT) { 
 	    Indent();
    	    if (AllEdgesInt(Node)) GenBinaryInt(Node, "*");
-	    else if (AllEdgesFixed(Node)) GenBinaryFixed(Node, "Mult");
+	    else if (AllEdgesFixed(Node))	
+			if(pl_flag && bittrue)	CastAndGenFixed(Node, "Mult");
+			else 		GenBinaryFixed(Node, "Mult");
 	    else printmsg(NULL, "Node: %s, type-mismatch\n", Node->Name);
         }
         CASE(DIV) { 
 	    Indent();
    	    if (AllEdgesInt(Node)) GenBinaryInt(Node, "/");
-	    else if (AllEdgesFixed(Node)) GenBinaryFixed(Node, "Div");
+	    else if (AllEdgesFixed(Node))	
+			if(pl_flag && bittrue)	CastAndGenFixed(Node, "Div");
+			else 		GenBinaryFixed(Node, "Div");
 	    else printmsg(NULL, "Node: %s, type-mismatch\n", Node->Name);
         } 
 	CASE(LSH) {
@@ -324,20 +340,26 @@ bool bittrue;
 	    Indent();
    	    if (AllEdgesInt(Node)) GenBinaryInt(Node, "&");
    	    else if (AllEdgesBool(Node)) GenBinaryInt(Node, "&&");
-	    else if (AllEdgesFixed(Node)) GenBinaryFixed(Node, "And");
+	    else if (AllEdgesFixed(Node))	
+			if(pl_flag && bittrue)	CastAndGenFixed(Node, "And");
+			else 		GenBinaryFixed(Node, "And");
 	    else printmsg(NULL, "Node: %s, type-mismatch\n", Node->Name);
         }
         CASE(OR) { 
 	    Indent();
    	    if (AllEdgesInt(Node)) GenBinaryInt(Node, "|");
    	    else if (AllEdgesBool(Node)) GenBinaryInt(Node, "||");
-	    else if (AllEdgesFixed(Node)) GenBinaryFixed(Node, "Or");
+	    else if (AllEdgesFixed(Node))	
+			if(pl_flag && bittrue)	CastAndGenFixed(Node, "Or");
+			else 		GenBinaryFixed(Node, "Or");
 	    else printmsg(NULL, "Node: %s, type-mismatch\n", Node->Name);
         }
         CASE(EXOR) { 
 	    Indent();
    	    if (AllEdgesInt(Node)) GenBinaryInt(Node, "^");
-	    else if (AllEdgesFixed(Node)) GenBinaryFixed(Node, "Xor");
+	    else if (AllEdgesFixed(Node))	
+			if(pl_flag && bittrue)	CastAndGenFixed(Node, "Xor");
+			else 		GenBinaryFixed(Node, "Xor");
 	    else printmsg(NULL, "Node: %s, type-mismatch\n", Node->Name);
         }
         CASE(NOT) { 
@@ -350,37 +372,50 @@ bool bittrue;
  	CASE(EQ) {
 	    Indent();
 	    if (AllInEdgesInt(Node)) GenBinaryInt(Node, "==");
-	    else if (AllInEdgesFixed(Node)) GenBinaryFixed(Node, "EQ");
+	    else if (AllInEdgesFixed(Node))	
+			if(pl_flag && bittrue)	CastAndGenFixed(Node, "EQ");
+			else 		GenBinaryFixed(Node, "EQ");
 	    else printmsg(NULL, "Node: %s, type-mismatch\n", Node->Name);
         }
  	CASE(NTE) {
 	    Indent();
 	    if (AllInEdgesInt(Node)) GenBinaryInt(Node, "!=");
-	    else if (AllInEdgesFixed(Node)) GenBinaryFixed(Node, "NTE");
+	    else if (AllInEdgesFixed(Node))	
+			if(pl_flag && bittrue)	CastAndGenFixed(Node, "NTE");
+			else 		GenBinaryFixed(Node, "NTE");
 	    else printmsg(NULL, "Node: %s, type-mismatch\n", Node->Name);
         }
  	CASE(GT) {
 	    Indent();
 	    if (AllInEdgesInt(Node)) GenBinaryInt(Node, ">");
-	    else if (AllInEdgesFixed(Node)) GenBinaryFixed(Node, "GT");
+	    else if (AllInEdgesFixed(Node))	
+			if(pl_flag && bittrue)	CastAndGenFixed(Node, "GT");
+			else 		GenBinaryFixed(Node, "GT");
 	    else printmsg(NULL, "Node: %s, type-mismatch\n", Node->Name);
         }
  	CASE(GTE) {
 	    Indent();
 	    if (AllInEdgesInt(Node)) GenBinaryInt(Node, ">=");
-	    else if (AllInEdgesFixed(Node)) GenBinaryFixed(Node, "GTE");
+	    else if (AllInEdgesFixed(Node))	
+			if(pl_flag && bittrue)	CastAndGenFixed(Node, "GTE");
+			else 		GenBinaryFixed(Node, "GTE");
 	    else printmsg(NULL, "Node: %s, type-mismatch\n", Node->Name);
         }
  	CASE(LT) {
 	    Indent();
 	    if (AllInEdgesInt(Node)) GenBinaryInt(Node, "<");
+	    else if (AllInEdgesFixed(Node))	
+			if(pl_flag && bittrue)	CastAndGenFixed(Node, "LT");
+			else 		GenBinaryFixed(Node, "LT");
 	    else if (AllInEdgesFixed(Node)) GenBinaryFixed(Node, "LT");
 	    else printmsg(NULL, "Node: %s, type-mismatch\n", Node->Name);
         }
  	CASE(LTE) {
 	    Indent();
 	    if (AllInEdgesInt(Node)) GenBinaryInt(Node, "<=");
-	    else if (AllInEdgesFixed(Node)) GenBinaryFixed(Node, "LTE");
+	    else if (AllInEdgesFixed(Node))	
+			if(pl_flag && bittrue)	CastAndGenFixed(Node, "LTE");
+			else 		GenBinaryFixed(Node, "LTE");
 	    else printmsg(NULL, "Node: %s, type-mismatch\n", Node->Name);
         }
  	CASE(BIT) {
@@ -508,6 +543,9 @@ if(!bittrue)
     }
     if(pl_flag)
     {
+	if(IsArray(edge))
+	fprintf(CFD,",r_%s_",Root->Name);
+	else
 	fprintf(CFD,",*r_%s_",Root->Name);
 /* NEED & HERE? */
     	GenEdgeName(edge);
@@ -536,7 +574,8 @@ else if (bittrue)
 	fprintf(CFD,"for(%s_cnt=0; %s_cnt <=  %d; %s_cnt++)\n    {\n    ",
 			Root->Name,Root->Name,high,Root->Name);
     	GenEdgeName(edge);
-	fprintf(CFD,"[%d - %s_cnt] = r_%s_",high,Root->Name,Root->Name);
+	fprintf(CFD,"[%s_cnt] = r_%s_",Root->Name,Root->Name);
+	/*fprintf(CFD,"[%d - %s_cnt] = r_%s_",high,Root->Name,Root->Name);*/
     	GenEdgeName(edge);
 	fprintf(CFD,"[%s_cnt];\n    }\n",Root->Name);
     }
@@ -603,6 +642,81 @@ char *op;
     if (IsFixedType(out))
         GenFixedType(out);
     fprintf(CFD, ");\n"); 
+}
+
+
+CastAndGenFixed(node, op)
+NodePointer node;
+char *op;
+{
+    EdgePointer in1, in2, out;
+    char str[STRSIZE];
+    char* value;
+    bool in1_changed, in2_changed;
+
+    in1_changed = 0; in2_changed = 0;
+
+    in1 = EP(node->InEdges);
+    in2 = EP(node->InEdges->Next);
+    out = EP(node->OutEdges);
+ 
+/* constant and attribute value is not a number */
+/* for now make the simple(wrong?) assumption that if both are 
+in this class, they are iterators, and then types are fix<5,0> */
+
+   if( IsConstantEdge(in1) && HasAttribute(in1->Attributes,"value")) 
+   {
+	value = (char*)GetAttribute(in1->Attributes,"value");
+	if(!isnumber(value)) in1_changed = 1;
+   }
+   if( IsConstantEdge(in2) && HasAttribute(in2->Attributes,"value")) 
+   {
+	value = (char*)GetAttribute(in2->Attributes,"value");
+	if(!isnumber(value)) in2_changed = 1;
+   }
+
+	if(in1_changed)
+	{
+		fprintf(CFD,"int_to_fix(");
+		GenOperand(in1);
+		fprintf(CFD,",&");
+		fprintf(CFD,"in1_conv");
+		if(!in2_changed) GenFixedType(in2);	
+		else fprintf(CFD,",5,0");
+		fprintf(CFD,");\n");
+	}
+	if(in2_changed)
+	{
+		fprintf(CFD,"int_to_fix(");
+		GenOperand(in2);
+		fprintf(CFD,",&");
+		fprintf(CFD,"in2_conv");
+		if(!in1_changed) GenFixedType(in1);	
+		else fprintf(CFD,",5,0");
+		fprintf(CFD,");\n");
+	}
+	if(!in1_changed && !in2_changed) GenBinaryFixed(node, op);
+	else
+	{
+		Indent();
+    		fprintf(CFD, "Fix%s (", op);
+		if(in1_changed) fprintf(CFD, "in1_conv"); 
+		else GenOperand(in1);
+		if(!in1_changed) GenFixedType(in1); 
+		else if(!in2_changed) GenFixedType(in2);
+		else fprintf(CFD,",5,0");
+		fprintf(CFD, ", "); 
+		if(in2_changed) fprintf(CFD, "in2_conv"); 
+    		else GenOperand(in2);  
+		if(!in2_changed) GenFixedType(in2); 
+		else if(!in1_changed) GenFixedType(in1);
+		else fprintf(CFD,",5,0");
+		fprintf(CFD, ", "); 
+    		GenOperand(out);
+    		if (IsFixedType(out))
+        	GenFixedType(out);
+    		fprintf(CFD, ");\n"); 
+	}
 }
 
 GenUnaryInt(node, op)
