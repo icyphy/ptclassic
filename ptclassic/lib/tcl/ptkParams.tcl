@@ -39,10 +39,25 @@
 #
 #---------------------------------------------------------------------------
 #
+# "Visible parameters" feature: in a universe facet, parameters can be
+# marked "visible", which means they appear in the universe's run control
+# window as well as in the edit-parameters window.  Currently, this code
+# allows galaxy formal parameters to be marked and unmarked as well,
+# but the marking has no function if the facet is not a universe.
+# Marking info is stored in the facet's string property "VisibleParameters",
+# as an unordered Tcl list of the names of parameters that are to be visible.
+#
+#---------------------------------------------------------------------------
+#
 # For storage, there exist two global arrays
 #   ed_Parameters      stores lists of current parameter-type-value triplets
 #   ed_ParametersCopy  stores the original triplet values as back-ups.
-# The latter is defined upon the invocation of an edit-parameters command.
+# The latter is set upon the invocation of an edit-parameters command.
+#
+# A similar pair of arrays ed_VisibleParameters and ed_VisibleParametersCopy
+# store the current and backup lists of visible parameters; note that only
+# edit dialogs for universe/galaxy facet formal parameters will have entries
+# in those arrays.
 #
 # Entry bindings specific to the edit-parameters box include:
 #         Focus on next entry
@@ -67,8 +82,12 @@ set ed_ToplevelNumbers(WindowNumber) 0
 # This procedure is called when the Cancel button is invoked and discards
 # changes previously applied.
 proc ed_RestoreParam {facet number {args ""}} {
-  global ed_ParametersCopy
+  global ed_ParametersCopy ed_VisibleParametersCopy
   ed_WriteParam $ed_ParametersCopy($facet,$number) $facet $number $args
+  if {$args == "" && [info exists ed_VisibleParametersCopy($facet,$number)]} {
+    ptkSetStringProp $facet "VisibleParameters" \
+	    $ed_VisibleParametersCopy($facet,$number)
+  }
 }
 
 # Write and read parameters
@@ -215,16 +234,27 @@ proc ed_ShiftButtonViewRight {button entry} {
 
 # Given a frame name, this procedure creates a frame containing
 # a label, an entry widget and two bitmap "arrow" buttons.
+# If a third parameter is supplied, a visibility checkbox is created too.
 
-proc ed_MkEntryButton {frame label} {
+proc ed_MkEntryButton {frame label {visible ""}} {
   global ptolemy ed_MaxEntryLength
 
-  pack append [frame $frame -bd 2] \
+  frame $frame -bd 2
+  if {$visible != ""} {
+    # the checkbox's state variable has the same name as the widget itself
+    global $frame.visible
+    set $frame.visible $visible
+    pack append $frame \
+      [checkbutton $frame.visible -variable $frame.visible \
+		-takefocus 0] {right}
+    bind $frame.visible <Destroy> "unset {$frame.visible}"
+  }
+  pack append $frame \
     [label $frame.label -text "$label:  " -anchor w] left \
     [button $frame.right -bitmap @$ptolemy/lib/tcl/right.xbm \
-            -command ed_Dummy -relief flat] right \
+            -command ed_Dummy -relief flat -takefocus 0] right \
     [button $frame.left -bitmap @$ptolemy/lib/tcl/left.xbm \
-            -command ed_Dummy -relief flat] right
+            -command ed_Dummy -relief flat -takefocus 0] right
   # initially configure the buttons as deactivated.
   ed_SetEntryButtons $frame 0 1
   pack before $frame.left \
@@ -392,7 +422,7 @@ proc ed_AddParam {facet number askwin} {
   # }
   #}
 
-  ed_MkEntryButton $f.par.f$count $name
+  ed_MkEntryButton $f.par.f$count $name 0
   bind $f.par.f$count <Return> \
     "ed_Apply $facet $number
      $top.b.close invoke"
@@ -506,7 +536,7 @@ proc ed_Remove {facet number winName} {
   # Update the display by destroying the subframe that displays the parameter
   regsub {^(.*\.f[^\.]+)((\.entry|\.label)|)$} $winName {\1} window
   destroy $window
-  # Now find the parameter in ed_Parameters, and remove it
+  # Find the parameter in ed_Parameters, and remove it
   regsub {^.*\.f([^\.]+)$} $window {\1} countd
   set name $ed_ToplevelNumbers($facet,$number,$countd)
   set count 0
@@ -528,16 +558,13 @@ proc ed_Remove {facet number winName} {
 # This procedure unsets global information relevant to an oct facet and number
 
 proc ed_ClearOctEntryGlobals {facet number} {
-  uplevel #0 \
-    "if { [info exists ed_Parameters($facet,$number)] } {
-       unset ed_Parameters($facet,$number)
-     }
-     if { [info exists ed_ParametersCopy($facet,$number)] } {
-       unset ed_ParametersCopy($facet,$number)
-     }
-     if { [info exists ed_ToplevelNumbers($facet,$number)] } {
-       unset ed_ToplevelNumbers($facet,$number)
-     }"
+    global ed_Parameters ed_ParametersCopy ed_ToplevelNumbers
+    global ed_VisibleParameters ed_VisibleParametersCopy
+    catch { unset ed_Parameters($facet,$number) }
+    catch { unset ed_ParametersCopy($facet,$number) }
+    catch { unset ed_ToplevelNumbers($facet,$number) }
+    catch { unset ed_VisibleParameters($facet,$number) }
+    catch { unset ed_VisibleParametersCopy($facet,$number) }
 }
 
 # This procedure is called to open up an edit-parameters dialog box.
@@ -572,6 +599,7 @@ proc ptkEditParams {facet number args} {
   incr ed_ToplevelNumbers(WindowNumber)
   set ed_ToplevelNumbers($facet,$number) $num
   global ed_Parameters ed_ParametersCopy
+  global ed_VisibleParameters ed_VisibleParametersCopy
   set top .o$args$num
 
   # Retrieve parameter settings 
@@ -618,55 +646,68 @@ proc ptkEditParams {facet number args} {
   wm title $top "Edit $editType"
   wm iconname $top "Edit $editType"
   bind $top <Destroy> \
-    "ed_ClearOctEntryGlobals $facet $number
-     destroy %W"
+    "if {\"%W\" == \"$top\"} { ed_ClearOctEntryGlobals $facet $number }"
   frame $top.f -relief raised -bd 2
-  label $top.header -font -Adobe-times-medium-r-normal--*-180* \
-        -relief raised -text "Edit $editType"
+#  label $top.header -font -Adobe-times-medium-r-normal--*-180* \
+#        -relief raised -text "Edit $editType"
+  frame $top.header -bd 0
 
   pack append $top $top.header {top fillx} $top.f {top expand fill}
   set c $top.f.c
-  canvas $c
+  canvas $c -highlightthickness 0
   set u $top.b
   frame $u -bd 5
   pack append $top.f $u {bottom fillx} $c {bottom expand fill}
 
   # Build edit-parameters buttons: OK | Apply | Close | Cancel
-  pack append $u \
+  frame $u.row1
+  pack append $u $u.row1 {top expand fillx filly}
+  pack append $u.row1 \
        [frame $u.okfr -relief sunken -bd 2] \
        {left expand fillx} \
-       [button $u.apply -text "     Apply     " \
+       [button $u.apply -text "Apply" -width 8 \
                -command "ed_Apply $facet $number $args"] \
        {left expand fillx} \
-       [button $u.close -text "     Close      " \
+       [button $u.close -text "Close" -width 8 \
                -command "destroy $top"] \
        {left expand fillx} \
-       [button $u.q -text "     Cancel      " \
+       [button $u.q -text "Cancel" -width 8 \
                -command "ed_RestoreParam $facet $number $args
                          $u.close invoke"] \
        {left expand fillx}
   pack append $u.okfr \
-       [button $u.okfr.ok -text "       OK       " -relief raised \
+       [button $u.okfr.ok -text "OK" -width 8 -relief raised \
                -command "ed_Apply $facet $number $args
                          $u.close invoke"] \
        {expand fill}
 
+  catch { unset ed_VisibleParameters($facet,$number) }
+  catch { unset ed_VisibleParametersCopy($facet,$number) }
+  set useVisible 0
+  set visibleList {}
+
   # Joe Buck's fix <jbuck@Synopsys.com> 11/93
 
   if {$number == "NIL" && $args == ""} {
-    pack append $u \
-      [button $u.add -text " Add parameter " -command \
+    frame $u.row2
+    pack append $u $u.row2 {top expand fillx filly}
+    pack append $u.row2 \
+      [button $u.add -text "Add parameter" -width 16 -command \
         "ed_AddParamDialog $facet $number"] \
         {left expand fillx} \
-      [button $u.remove -text "Remove parameter" -command \
+      [button $u.remove -text "Remove parameter" -width 16 -command \
         "$u.remove config -relief sunken
         ed_RemoveParam $facet $number $top $u
-        $u.remove config -relief raised"] {left padx 2m}
+        $u.remove config -relief raised"] {left expand fillx}
+    set useVisible 1
+    set visibleList [ptkGetStringProp $facet "VisibleParameters"]
+    set ed_VisibleParameters($facet,$number) $visibleList
+    set ed_VisibleParametersCopy($facet,$number) $visibleList
   }
 
   set f $c.f
   frame $f
-  frame $f.par -bd 10
+  frame $f.par -bd 5
   pack append $f \
   $f.par {left expand fill}
 
@@ -701,7 +742,12 @@ proc ptkEditParams {facet number args} {
     set ed_ToplevelNumbers($facet,$number,$count) $name
     set value [lindex $param 2]
 
-    ed_MkEntryButton $f.par.f$count $name
+    if {$useVisible} {
+      set visible [expr [lsearch -exact $visibleList $name] >= 0]
+      ed_MkEntryButton $f.par.f$count $name $visible
+    } else {
+      ed_MkEntryButton $f.par.f$count $name
+    }
 #   bind $f.par.f$count.entry <Any-Leave> \
 #        "ed_UpdateParam $facet $number [list $name] \[%W get\]"
     bind $f.par.f$count.entry <Tab> \
@@ -761,13 +807,16 @@ proc ptkEditParams {facet number args} {
 # This procedure is called to set current values
 
 proc ed_Apply {facet number args} {
-  global ed_ToplevelNumbers ed_Parameters
+  global ed_ToplevelNumbers ed_Parameters ed_VisibleParameters
   set changeFlag 0
   set top .o$args$ed_ToplevelNumbers($facet,$number)
   set w $top.f.c.f.par
 
   set paramdata $ed_Parameters($facet,$number)
   set newParamArray {}
+
+  set newVisibleList {}
+
   for { set curr 0 } \
       { $curr < $ed_ToplevelNumbers($facet,$number,count) } \
       { incr curr } {
@@ -788,11 +837,21 @@ proc ed_Apply {facet number args} {
       }
       lappend newParamArray $param
     }
+    if { [winfo exists $w.f$curr.visible] } {
+	global $w.f$curr.visible
+	if {[set $w.f$curr.visible]} { lappend newVisibleList $name }
+    }
   }
 
   if { $changeFlag } {
     set ed_Parameters($facet,$number) $newParamArray
     ed_WriteParam $ed_Parameters($facet,$number) $facet $number $args
+  }
+  if { $number == "NIL" && $args == "" } {
+    if { $ed_VisibleParameters($facet,$number) != $newVisibleList } {
+      set ed_VisibleParameters($facet,$number) $newVisibleList
+      ptkSetStringProp $facet "VisibleParameters" $newVisibleList
+    }
   }
 }
 
