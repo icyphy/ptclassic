@@ -53,7 +53,13 @@ static char SccsId[]="$Id$";
 #include <fcntl.h>
 #include <sys/file.h>
 #include <sys/types.h>
+
+#ifndef SYS_SOCKET_H
+#define SYS_SOCKET_H		/* mips Ultrix4.3A requires this
+				   otherwise we get conflicts with compat.h */
 #include <sys/socket.h>
+#endif
+
 
 extern struct RPCApplication *RPCApplication;
 
