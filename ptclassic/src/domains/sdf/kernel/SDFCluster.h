@@ -288,6 +288,9 @@ public:
 	void go() { run();}
 	int myExecTime();
 
+	// Support resetPortBuffers
+	void resetPortBuffers() { pStar.resetPortBuffers(); }
+
 	// set buffer sizes of the real star.
 	void fixBufferSizes(int);
 
@@ -371,6 +374,9 @@ public:
 
 	// a synonym
 	void go() { run();}
+
+	// Support resetPortBuffers
+	void resetPortBuffers() { gal->resetPortBuffers(); }
 
 	// do additional clustering on internal cluster (merge parallel
 	// loops, for example)
