@@ -44,14 +44,11 @@ provisions.
   codeblock (convert) {
     /* Convert data in buffer to Output format */
     {
-      int i, j;
-      for (i=0; i <($val(blockSize)/4); i++) {
-	j = 2*i;
-	$ref(left,($val(blockSize)/4) - 1 - i) = 
-	  $starSymbol(buffer)[j] /32768.0;
-	$ref(right,($val(blockSize)/4) - 1 - i) = 
-	  $starSymbol(buffer)[j+1] /32768.0;
-      }
+      int j;
+      j = 2*(($val(blockSize)/4) - $starSymbol(counter));
+      $ref(left) = $starSymbol(buffer)[j]/32767.0;
+      $ref(right) = $starSymbol(buffer)[j+1]/32767.0;
+      $starSymbol(counter)--;
     }
   }
   
@@ -60,8 +57,8 @@ provisions.
   }
 
   setup {
-    left.setSDFParams(int(blockSize/4), int(blockSize/4)-1);
-    right.setSDFParams(int(blockSize/4), int(blockSize/4)-1);
+    left.setSDFParams(1);
+    right.setSDFParams(1);
   }
 
   initCode {
@@ -90,10 +87,15 @@ provisions.
 			  << "1);\n";
 	addCode(controlParameters);
       }
+    addCode("$starSymbol(counter) = 0;\n");
+
   }
   go {
+    addCode("if ($starSymbol(counter) == 0) {\n");
     addCode(setbufptr);
     addCode(read);
+    addCode("$starSymbol(counter) = ($val(blockSize)/4);\n");
+    addCode("}\n");
     addCode(convert);
   }
 
