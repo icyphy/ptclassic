@@ -68,13 +68,6 @@ REALCLEAN_STUFF = tclIndex
 # Title for the tydoc index page
 TYDOC_DESC =
 
-# Do make sources so that we ensure that the subdirectories are checked out
-all: sources $(MISC_SRCS)
-	chmod a+x samples
-	chmod a+x complexitem
-
-install: all
-
 # We don't include common.mk since we don't use the compiler here
 include $(ROOT)/mk/tycommon.mk
 
