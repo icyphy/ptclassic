@@ -108,7 +108,7 @@ octObject *second;		/* Second net */
  *       available, the first net will be preserved.
  */
 {
-    octObject *result;
+    octObject *result = (octObject *)NULL;
     if ( octIdsEqual( first->objectId, second->objectId ) ) {
 	return first;		/* Ids are equal, no need to merge. */
     }
@@ -218,7 +218,7 @@ int warn_p;			/* Issue broken net warning */
     int rv;
 
     visited = st_init_table(st_numcmp, st_numhash);
-    if (rv = visit_object(obj, net, new_net, visited)) {
+    if ( (rv = visit_object(obj, net, new_net, visited)) ) {
 	/* Undo attachments, ask for reversal of sense */
 	SYMCK(octInitGenContents(new_net, OCT_ALL_MASK, &gen));
 	while (octGenerate(&gen, &n_obj) == OCT_OK) {
@@ -470,7 +470,7 @@ octObject *net;			/* Returned net      */
 {
     octObject net_or_path;
     octGenerator gen;
-    int ret;
+    int ret = 0;
 
     if (obj->type == OCT_TERM) {
 	SYMCK(octInitGenContainers(obj, OCT_NET_MASK|OCT_PATH_MASK, &gen));
