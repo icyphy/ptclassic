@@ -27,9 +27,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
  Programmer:  Soonhoi Ha, based on S.  Bhattacharyya's code.
  
-Now EGNode class is derived from the SDFAtomCluster, which is 
-derived from SDFStar class. 
-
 *******************************************************************/
 #ifndef _EGNode_h
 #define _EGNode_h
