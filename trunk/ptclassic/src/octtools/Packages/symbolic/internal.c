@@ -45,7 +45,10 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include <varargs.h>
 #endif
 
+/* This really should be IN port, don't you think? - SK  */
+#ifndef PTSVR4
 #define _VA_LIST
+#endif /* ! PTSVR4 */
 #include "port.h"
 
 #include "uprintf.h"
