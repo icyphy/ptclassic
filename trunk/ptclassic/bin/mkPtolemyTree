@@ -32,6 +32,12 @@
 # for mkPtolemyTree
 #
 PTOLEMY=${PTOLEMY:-~/ptolemy}
+if [ ! -f $PTOLEMY/bin/ptarch ]; then
+    echo "mkPtolemyTree: $PTOLEMY/bin/ptarch does not exist"
+    echo " Perhaps you need to set $PTOLEMY to the master Ptolemy tree,"
+    echo " which might be located at /users/ptolemy or /users/ptdesign"
+    exit 3
+fi
 PTARCH=`$PTOLEMY/bin/ptarch`
 mkPtolemyTreescript=$PTOLEMY/bin/mkPtolemyTree.tcl
 ptolemytcl=$PTOLEMY/tcltk/itcl.$PTARCH/bin/ish
