@@ -63,23 +63,29 @@ class ::tycho::RevControl {
     # Check out the file and update revision control information.
     method checkOutAndUpdate {}
 
+    # Get the specified version checked from the checkbuttons and open the file.
+    method compareVersion {} {}
+
+    # Diff the most recent files. This is just a macro (quick button)
+    method diffRecent {text} {}
+
     # Put the file under revision control.
     method initializeRevControl {} 
 
     # Unedit the file, reverting to the previously checked in version.
     method unedit {}
 
-    # Get the specified version.
-    method retrieveVersion {version} {error "Not in base class!"}
-
     # Shortcut to use retrieveVersion and openContext on it
     method openVersion {version} {}
 
-    # Get the specified version and open the file.
-    method compareVersion {} {}
+    # Open the file corresponding to the check buttons.
+    method openFile {} {}
 
-    # Diff the most recent files
-    method diffRecent {text} {}
+    # Takes a format as input, and outputs a version number
+    method returnVersion {line} {}
+
+    # Get the specified version.
+    method retrieveVersion {version} {error "Not in base class!"}
 
     ###################################################################
     ####                      public procs                         ####
@@ -164,6 +170,9 @@ class ::tycho::RevControl {
 
     # The stack of files to diff.
     protected variable difflist {}
+
+    # This is used to represent the most current version
+    protected variable INFINITY {99999}
 }
 
 #########################################################################
@@ -207,18 +216,64 @@ body ::tycho::RevControl::constructor {args} {
             "$this nextWindow; delete object $this"
 
 
+    itk_component add historyframe {
+        frame $itk_component(hull).historyframe
+    } {
+        #FIXME: Which ones do I keep?
+    }
+    
     itk_component add history {
-        ::tycho::Edit $itk_component(hull).history -textheight 30
+        ::tycho::Edit $itk_component(historyframe).history -textheight 20
     } {
         keep -readonly -textwidth -background \
                 -highlightbackground -highlightcolor -selectforeground \
-                -cursor -insertbackground -textforeground -textfont \
+                -cursor -insertbackground -textforeground \
                 -textbackground
+        # textfont
     }
     $itk_component(history) configure -readonly 1
+
+
+    itk_component add historybutton {
+        ::tycho::ButtonBox $itk_component(historyframe).historybutton
+    } {
+        #FIXME: Which ones do I keep?
+    }
+    $itk_component(historybutton) add startdiff -text "Diff Two Files" \
+            -command "$this compareVersion"
+    $itk_component(historybutton) add diffrecent -text \
+            "Diff Recent" \
+            -command "$this diffRecent [$itk_component(history) textWinName]"
+    $itk_component(historybutton) add openfile -text "Open File(s)" \
+            -command "$this openFile"
+
+
+    itk_component add historyinstruction {
+        ::tycho::Edit $itk_component(historyframe).historyinstruction
+    } {
+        keep -textwidth -background \
+                -highlightbackground -highlightcolor -selectforeground \
+                -cursor -insertbackground -textforeground \
+                -textbackground
+    }
+    set text \
+            " To diff two files, check the buttons to the left of the file\n\
+            version, then press Diff Two Files to compare them. To diff\n\
+            the most recent files, press Diff Recent. To open the file(s)\n\
+            corresponding to the check buttons, press OpenFile."
+    $itk_component(historyinstruction) configure -textheight \
+            [llength [split $text \n]]
+    $itk_component(historyinstruction) insertData $text
+    $itk_component(historyinstruction) configure -readonly 1
+    $itk_component(historyinstruction) markUnmodified
+    
+
+    pack $itk_component(historybutton) $itk_component(historyinstruction) \
+            $itk_component(history)
+
     #pack $itk_component(history) -expand yes -fill both
-    ::tycho::Subpanel $itk_component(hull).pan -text "HISTORY" \
-            -childwidget $itk_component(hull).history \
+    ::tycho::Subpanel $itk_component(hull).pan -text "View History" \
+            -childwidget $itk_component(historyframe) \
             -execute "$this viewHistory"
     pack $itk_component(hull).pan -anchor nw
 
@@ -262,41 +317,6 @@ body ::tycho::RevControl::checkOutAndUpdate {} {
 }
 
 ###################################################################
-#### initializeRevControl 
-# Put the file under revision control.
-#
-body ::tycho::RevControl::initializeRevControl {} {
-    if {$file == {}} {
-	error "Revision control: no file specified"
-    }
-    $object saveQuery
-}
-
-###################################################################
-#### unedit
-# Query the user for confirmation, then unedit the file, reverting to
-# the previously checked in version.  This base class method
-# only does the query.  If the user does not confirm, exit with
-# a silent error.
-#
-body ::tycho::RevControl::unedit {} {
-    if {$file == {}} {
-	error "Revision control: no file specified"
-    }
-}
-
-###################################################################
-#### openVersion
-# Uses children's retrieveVersion (SCCS or RCS) to get the
-# file, then do a openContext on the file. This is used as
-# a shortcut by the button bindings (see parseHistory).
-body ::tycho::RevControl::openVersion {version} {
-    set tmpFile [$this retrieveVersion $version]
-    set myView [::tycho::File::openContext $tmpFile]
-    $myView configure -tmpfile 1
-}
-
-###################################################################
 #### compareVersion
 # Compare versions set by the button boxes.
 #
@@ -317,36 +337,25 @@ body ::tycho::RevControl::compareVersion {} {
             [file rootname $basefile] \
             [file extension $basefile]]
     # We originally have the formal UNIQUEID+12345_678
-    # Now parser into 12345.678
-    regexp {.*\+(.*)} [lindex $difflist 0] match version1
-    regexp {.*\+(.*)} [lindex $difflist 1] match version2
-    set version1 [join [split $version1 _] .]
-    set version2 [join [split $version2 _] .]
+    set version1 [returnVersion [lindex $difflist 0]]
+    set version2 [returnVersion [lindex $difflist 1]]
 
-    # Note: VERSION 0.0 indicates the latest original file.
+    # Note: VERSION $INFINITY.$INFINITY indicates the latest original file.
     # Now, sort the version number. The first file should be the higher
     # version number so that EditDiff will place it on top. However, if it
-    # is verison 0.0, then it has precedence.
-    set versions [lsort -real [list $version1 $version2]]
-    if {$version1==0.0} {
-        # Do nothing, version 0.0 has precedence (top)
-    } elseif {$version2==0.0} {
-        set version1 [lindex $versions 0]  ;# version1 is the original, top
-        set version2 [lindex $versions 1]
-    } else {
-        # We're comparing two old versions
-        set version1 [lindex $versions 1]  ;# version1 is the highest number
-        set version2 [lindex $versions 0]
-    }
+    # is verison $INFINITY.$INFINITY, then it has precedence.
+    set versions [lsort -real -decreasing [list $version1 $version2]]
+    set version1 [lindex $versions 0]
+    set version2 [lindex $versions 1]
 
-    # Now make sure that version 0.0 is the original file
-    if {$version1==0.0} {
+    # Now make sure that version $INFINITY.$INFINITY is the original file
+    if {$version1=="$INFINITY.$INFINITY"} {
         set tmpFile1 $file
     } else {
         set tmpFile1 [retrieveVersion $version1]
     }
 
-    if {$version2==0.0} {
+    if {$version2=="$INFINITY.$INFINITY"} {
         set tmpFile2 $file
     } else {
         set tmpFile2 [retrieveVersion $version2]
@@ -375,6 +384,86 @@ body ::tycho::RevControl::diffRecent {text} {
         $text.[lindex $filelist 2] invoke
     }
     compareVersion
+}
+
+###################################################################
+#### initializeRevControl 
+# Put the file under revision control.
+#
+body ::tycho::RevControl::initializeRevControl {} {
+    if {$file == {}} {
+	error "Revision control: no file specified"
+    }
+    $object saveQuery
+}
+
+###################################################################
+#### unedit
+# Query the user for confirmation, then unedit the file, reverting to
+# the previously checked in version.  This base class method
+# only does the query.  If the user does not confirm, exit with
+# a silent error.
+#
+body ::tycho::RevControl::unedit {} {
+    if {$file == {}} {
+	error "Revision control: no file specified"
+    }
+}
+
+
+###################################################################
+#### openVersion
+# Open the version corresponding to the checkbuttons clicked
+#
+body ::tycho::RevControl::openFile {} {
+    if {[llength $difflist]==0} {
+        ::tycho::Dialog::inform \
+                "You need to select which file to open first."
+        return
+    }
+    set version1 [returnVersion [lindex $difflist 0]]
+    set version2 [returnVersion [lindex $difflist 1]]
+    
+    if {$version1 != {}} {
+        if {$version1 == "$INFINITY.$INFINITY"} {
+            ::tycho::File::openContext [$object filename]
+        } else {
+            openVersion $version1
+        }
+    }
+    if {$version2 != {}} {
+        if {$version2 == "$INFINITY.$INFINITY"} {
+            ::tycho::File::openContext [$object filename]
+        } else {
+            openVersion $version2
+        }
+    }
+}
+
+###################################################################
+#### openVersion
+# Uses children's retrieveVersion (SCCS or RCS) to get the
+# file, then do a openContext on the file. This is used as
+# a shortcut by the button bindings (see parseHistory).
+body ::tycho::RevControl::openVersion {version} {
+    set tmpFile [$this retrieveVersion $version]
+    set myView [::tycho::File::openContext $tmpFile]
+    $myView configure -tmpfile 1
+}
+
+###################################################################
+#### returnVersion
+# Takes input in the following format:
+# UNIQUEID+NUMBER1+NUMER2 and outputs as the following format:
+# NUMBER1.NUMER2
+# This is used because each of the check boxes have a unique
+# name associated with it.
+#
+body ::tycho::RevControl::returnVersion {line} {
+    set version {}
+    regexp {.*\+(.*)} $line match version
+    set version [join [split $version _] .]
+    return $version
 }
 
 
@@ -592,9 +681,16 @@ body ::tycho::RevControl::getComments {} {
 # History contains the entire "sccs prs" or "rlog" history list.
 # Info contains the status of the current file (empty means not checked out).
 body ::tycho::RevControl::parseHistory {history text} {
+    # FIXME: oldCursor is empty from [$itk_component(history) config -cursor]
+    set oldCursor xterm
+    set newCursor dot
+    
     set file [$object filename]
     set basefile [file tail $file]
     set lines [split $history "\n"]
+
+    $itk_component(history) configure -readonly 0
+    $itk_component(history) clear
 
     # Clear up all the checked files (with check button)
     resetDiff
@@ -620,28 +716,9 @@ body ::tycho::RevControl::parseHistory {history text} {
 
     set background [$text cget -background]
 
-    $text insert insert "To diff two files, check the buttons to the\
-            left of the file\nversion, then press: "
-    # Create the START DIFF button
-    set version STARTDIFF
-    set buttonName $uniqueID$version
-    button $text.$buttonName -text "Start Diff" -command "$this compareVersion"
-    $text window create end -window $text.$buttonName
-    $text insert insert " to compare the two files.\n\n"
-
-    # Create the START DIFF RECENT button
-    set version DIFFRECENT
-    set buttonName $uniqueID$version
-    button $text.$buttonName -text "Diff Recent" -command \
-            "$this diffRecent $text"
-    $text insert insert "To diff the most recent files, press: "
-    $text window create end -window $text.$buttonName
-    $text insert insert "\n\n"
-
-
     # Create a line entry for the original file
     # The original file could be compared with
-    set version 0_0
+    set version $INFINITY\_$INFINITY
     set start [$text index insert]
     set buttonName $uniqueID$version
     checkbutton $text.$buttonName -variable $buttonName \
@@ -659,6 +736,10 @@ body ::tycho::RevControl::parseHistory {history text} {
     $text tag configure v$version -foreground $versionColor -underline 1
     $text tag bind v$version <Double-Button-1> \
             "::tycho::File::openContext $file"
+    $text tag bind v$version <Enter> \
+            "$itk_component(history) configure -cursor $newCursor"
+    $text tag bind v$version <Leave> \
+            "$itk_component(history) configure -cursor $oldCursor"
 
 
     lappend filelist $buttonName
@@ -694,6 +775,12 @@ body ::tycho::RevControl::parseHistory {history text} {
 	    $text tag configure v$version -foreground $versionColor -underline 1
             $text tag bind v$version <Double-Button-1> \
                     "$this openVersion $version"
+            $text tag bind v$version <Enter> \
+                    "$itk_component(history) configure -cursor $newCursor"
+            $text tag bind v$version <Leave> \
+                    "$itk_component(history) configure -cursor $oldCursor"
+
+
 	} elseif [regexp {MRs:|COMMENTS:} $line] {
 	    # ignore
 	} else {
@@ -705,6 +792,8 @@ body ::tycho::RevControl::parseHistory {history text} {
 	    $text tag configure comment -lmargin2 0.5c
 	}
     }
+    $itk_component(history) configure -readonly 1
+    $itk_component(history) markUnmodified
 }
 
     ###################################################################
