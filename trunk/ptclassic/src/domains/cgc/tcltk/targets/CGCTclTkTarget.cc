@@ -73,26 +73,14 @@ CGCTclTkTarget::CGCTclTkTarget(const char* name,const char* starclass,
 
 // Modify the compile line
 StringList CGCTclTkTarget :: compileLine(const char* fName) {
-  StringList cmd = (const char*) compileCommand;
-
-  // If the appropriate environment variable is defined,
-  // include the location of the X11 directories.
-  char *x11dirstring = getenv("PTX11DIR");
-  if (x11dirstring) {
-    cmd << " -I" << x11dirstring << "/include";
-  }
-  cmd << " " << (const char*) compileOptions << " ";
-
-  cmd << fName << " ";
-
-  // Again, include the X11 directories.
-  // Note that this comes first, so it can only be overridden
-  // with the environment variable.
-  if (x11dirstring) {
-    cmd << " -L" << x11dirstring << "/lib ";
-  }
-  cmd << (const char*) linkOptions;
-  return cmd;
+    // If the appropriate environment variable is defined,	
+    // include the location of the X11 directories.
+    char *x11dirstring = getenv("PTX11DIR");
+    if (x11dirstring) {
+	compileOptionsStream << " -I" << x11dirstring << "/include ";
+	linkOptionsStream << " -L" << x11dirstring << "/lib ";
+    }
+    return CGCTarget::compileLine(fName);
 }
 
 void CGCTclTkTarget :: initCodeStrings() {
