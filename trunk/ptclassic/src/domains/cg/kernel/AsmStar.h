@@ -143,10 +143,6 @@ protected:
 	// Reset the state entry list.
 	void zapStateEntries();
 
-	// permit access to the target's "basename": base for filenames.
-	// null if star's target pointer is not set.
-	const char* targetBaseName();
-
 private:
 	// State entry list.  This stores the addresses allocated to each
 	// State.

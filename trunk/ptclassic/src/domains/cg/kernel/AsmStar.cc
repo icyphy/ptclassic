@@ -234,13 +234,6 @@ void AsmStar :: zapStateEntries() {
 	}
 }
 
-// return ptr to target's "base name": root for generated filenames, if
-// defined.
-const char* AsmStar::targetBaseName() {
-	AsmTarget* asmTargetPtr = (AsmTarget*)targetPtr;
-	return asmTargetPtr ? asmTargetPtr->baseName() : 0;
-}
-
 // destructor
 AsmStar::~AsmStar() {
 	zapStateEntries();
