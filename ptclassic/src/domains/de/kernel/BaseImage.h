@@ -90,7 +90,7 @@ protected:
 
 public:
 	BaseImage(int a, int b, int c, int d):
-			width(a), height(b), frameId(c), fullSize(d)
+			width(a), height(b), fullSize(d), frameId(c) 
 			{ startPos = 0; size = fullSize; }
 
 	BaseImage(int a, int b, int c):
@@ -98,8 +98,10 @@ public:
 			{ startPos = 0; size = fullSize = width*height; }
 
 	BaseImage(const BaseImage& bi, int = 0):
-			width(bi.width), height(bi.height), frameId(bi.frameId),
-			startPos(bi.startPos), size(bi.size), fullSize(bi.fullSize)
+			width(bi.width), height(bi.height),
+			startPos(bi.startPos), size(bi.size),
+	                fullSize(bi.fullSize),
+			frameId(bi.frameId)
 			{ }
 
 	virtual ~BaseImage() { }
