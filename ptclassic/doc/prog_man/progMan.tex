@@ -2,40 +2,53 @@
 % Author:	T. M. Parks
 % Created:	17 January 1993
 
-\documentstyle[12pt,elisp,ptinfo,Almagest]{book}
+\documentstyle[12pt,psfig,colordvi,Ptolemy,Almagest]{book}
 % The volume number is used in the page headings.
-\def\Volume{2}
-
-\newindex{cp}
-\newindex{pg}
-\newindex{fn}
-\newindex{vr}
-\newindex{tp}
-\newindex{ky}
-
-% The \syncodeindex command does not work, so use \synindex instead.
-\synindex{pg}{cp}
-\synindex{fn}{cp}
-\synindex{vr}{cp}
-\synindex{tp}{cp}
-\synindex{ky}{cp}
+\batchmode	% Suppress output messages during processing.
+\pssilent	% Suppress messages from psfig.
+\setcounter{volume}{2}
+\htmldirectory{.}
+\htmlname{progMan}
+\htmltitle{Ptolemy Programmer's Manual}
+\htmldepth{2}
+\htmlautomenu{6}
 
 \begin{document}
 
-\alwaysrefill
-\setfilename{progMan.info}
+\date{$Date$}
 
-\node Top
+\topnode{The Almagest \\ Volume 3:  Ptolemy 0.5 Programmer's Manual}
 
-\begin{ifinfo}
-\title{The Almagest\\
-A Programmer's Guide to \Ptolemy}
-\author{}
-\maketitle
-\end{ifinfo}
+\begin{iftex}
+\begin{titlepage}
+
+\comment \psfig{figure=../figures/PtolemySmall.epsi,rheight=6in,width=\textwidth,clip=}
+
+\begin{center}
+\Huge\sf
+\White{The Almagest, Volume \thevolume} \\
+\White{A Programmer's Guide to Ptolemy 0.5}
+\end{center}
+\end{titlepage}
+
+\clearpage
+\pagestyle{empty}
+\vspace*{\fill}
+\input{copyright.tex}
+
+\clearpage
+\pagestyle{headings}
+\pagenumbering{roman}
+\tableofcontents
+\listoffigures
+\listoftables
+
+\clearpage
+\pagenumbering{arabic}
+\end{iftex}
 
 \include{start}
-
-\include{../../src/domains/cgc/doc/CGCProg}
+\include{cgc}
+\include{cp}
 
 \end{document}

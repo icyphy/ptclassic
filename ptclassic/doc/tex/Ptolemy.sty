@@ -1,74 +1,111 @@
-% Style option for Ptolemy documentation.
+% Document class for Ptolemy documentation.
 % Version $Id$
-% Author:	T. M. Parks
-% Created:	23 November 1993
+% Author:       T. M. Parks
+% Created:      23 November 1993
 
 %
-% Use LaTeXinfo as the base style.
+% Not quite ready for LaTeX2e.
 %
-\input{latexinfo.sty}
+%\NeedsTeXFormat{LaTeX2e}
+%\ProvidesClass{Ptolemy}[19$Date$ v$Revision$ Ptolemy document class]
+%\ProvidesClass{Ptolemy}[1994/12/20 v2.1 Ptolemy document class]
+
+%\DeclareOption{Almagest}{\AtEndOfClass{\input{Almagest.clo}}}
+%\DeclareOption*{\PassOptionsToClass{\CurrentOption}{book}}
+%\ProcessOptions
+
+%\LoadClass{book}
+%\RequirePackage{hyperlatex}[1994/12/09]
+
+\input{book.sty}
+\input{hyperlatex.sty}
 
 %
 % Commands for listing authors and contributors of a chapter.
 %
 % Names should be listed one per line, separated by \\.
 %
-\def\Author#1{
+\newcommand{\Author}[1]{
     \noindent
     \makebox[1.5in][l]{\em Authors:}
     \parbox[t]{4in}{\em #1} \par
     \vspace{\baselineskip} }
-\def\Contrib#1{
+\newcommand{\Contrib}[1]{
     \noindent
     \makebox[1.5in][l]{\em Other Contributors:}
     \parbox[t]{4in}{\em #1} \par
     \vspace{\baselineskip} }
 
 %
+% Commands for making index entries.
+% Definitions, references, and examples.
+%
+
+%\newcommand{\tt@Bold}[1]{{\ttfamily\bfseries{#1}}}
+%\newcommand{\tt@Italic}[1]{{\ttfamily\itshape{#1}}}
+
+% Font changing commands for index page numbers.
+\newcommand{\ixDef}[1]{{#1}}
+\newcommand{\ixRef}[1]{{#1}}
+\newcommand{\ixEx}[1]{{#1}}
+\newcommand{\ixStarDef}[1]{{#1}}
+\newcommand{\ixStarRef}[1]{{#1}}
+\newcommand{\ixStarEx}[1]{{#1}}
+
+\newcommand{\indexDef}[1]{\index{#1|ixDef}}
+\newcommand{\indexRef}[1]{\index{#1|ixRef}}
+\newcommand{\indexEx}[1]{\index{#1|ixEx}}
+
+\newcommand{\indexStarDef}[1]{\index{#1|ixStarDef}}
+\newcommand{\indexStarRef}[1]{\index{#1|ixStarRef}}
+\newcommand{\indexStarEx}[1]{\index{#1|ixStarEx}}
+
+%
 % A list environment for making index entries.
 % Different item types will use \@indexKey differently.
 %
+\newcommand{\@indexKey}{}
 \newenvironment{indexlist}[1]%
-    {\begin{description}\def\@indexKey{#1}}%
+    {\begin{description}\renewcommand{\@indexKey}{#1}}%
     {\end{description}}
 
 % A list item for functions.
 % \@indexKey is used as an optional suffix.
 % \function{type}{name}{args}
-\newcommand{\function}[3]{\item[\code{#1 #2}\fnindexbold{#2\@indexKey}]
+\newcommand{\function}[3]{\item[\code{#1 #2}\indexDef{#2\@indexKey}]
     \code{#3}\hspace*{\fill}\\}
 
 % A list item for variables.
 % \@indexKey is used as an optional suffix.
 % \variable{type}{name}
-\newcommand{\variable}[2]{\item[\code{#1 #2}\vrindexbold{#2\@indexKey}]
+\newcommand{\variable}[2]{\item[\code{#1 #2}\indexDef{#2\@indexKey}]
     \hspace*{\fill}\\}
 
 % A list item for C++ class member functions (methods).
 % \@indexKey is used as the class name.
 % \method{type}{name}{args}
-\newcommand{\method}[3]{\item[\code{#1 #2}\fnindexbold{#2!\@indexKey\space method}\fnindexbold{\@indexKey\space class!#2 method}]
+\newcommand{\method}[3]{\item[\code{#1 #2}\indexDef{#2!\@indexKey\space method}\indexDef{\@indexKey\space class!#2 method}]
     \code{#3}\hspace*{\fill}\\}
 
 % A list item for C++ class data members.
 % \@indexKey is used as the class name.
 % \member{type}{name}
-\newcommand{\member}[2]{\item[\code{#1 #2}\vrindexbold{#2!\@indexKey\space member}\vrindexbold{\@indexKey\space class!#2 member}]
+\newcommand{\member}[2]{\item[\code{#1 #2}\indexDef{#2!\@indexKey\space member}\indexDef{\@indexKey\space class!#2 member}]
     \hspace*{\fill}\\}
 
 % A list item for blocks (stars, galaxies, universes).
 % \@indexKey is used as an optional suffix.
 % \block{name}
-\newcommand{\block}[1]{\item[\code{#1}\tpindexbold{#1\@indexKey}]}
+\newcommand{\block}[1]{\item[\code{#1}\indexStarDef{#1\@indexKey}]}
 
 % A list item for states.
 % \@indexKey is used as an optional suffix.
 % \state{type}{name}{default}
-\newcommand{\state}[3]{\item[\var{#2}\vrindexbold{#2\@indexKey}](\code{#1})
+\newcommand{\state}[3]{\item[\var{#2}\indexDef{#2\@indexKey}](\code{#1})
     Default = \samp{#3}\hspace*{\fill}\\}
 
 % A list item for ports.
 % \@indexKey is used as an optional suffix.
 % \port{type}{name}
-\newcommand{\port}[2]{\item[\var{#2}\vrindexbold{#2\@indexKey}]
+\newcommand{\port}[2]{\item[\var{#2}\indexDef{#2\@indexKey}]
     (\code{#1})\hspace*{\fill}\\}
