@@ -354,10 +354,10 @@ static void pl_print_state( fp, node, compat, unittime )
     fprintf( fp, "    desc { resource to be used for simulation }\n" );
     fprintf( fp, "  }\n" );
     fprintf( fp, "  state {\n" );
-    fprintf( fp, "    name { scheduler }\n" );
+    fprintf( fp, "    name { schedulingPolicy }\n" );
     fprintf( fp, "    type { string }\n" );
-    fprintf( fp, "    default { \"{NonPremptive}\" }\n" );
-    fprintf( fp, "    desc { Scheduler to be used for simulation }\n" );
+    fprintf( fp, "    default { \"NonPreemptive\" }\n" );
+    fprintf( fp, "    desc {Scheduling Policy to be used for simulation }\n" );
     fprintf( fp, "    attributes { A_NONSETTABLE }\n" );
     fprintf( fp, "  }\n" );
     fprintf( fp, "  state {\n" );
@@ -451,10 +451,10 @@ static void pl_print_method( fp, node, autotick, unittime )
             fprintf( fp, "            case c%s:\n", pvarst );
             fprintf( fp, "                newEvent->dest = %s.far(); \n", pvarst); 
             /* changed */
-            fprintf( fp, "                newEvent->outputPort = c%s;\n", pvarst );
             fprintf( fp, "                if(!needResource) {\n");
-            fprintf( fp, "                     ((OutDEPort*)newEvent->dest->far())");
-            fprintf( fp, "->put(now+1/clkFreq) << ");           
+            fprintf( fp, "                     OutDEPort* tl = ((OutDEPort*)newEvent->dest->far()); \n");
+            fprintf( fp, "                     tl->dataNew = FALSE;\n");
+            fprintf( fp, "                     tl->put(now+1/clkFreq) << ");
             assoc_var = net_var_assoc_var( var );
             if ( assoc_var == NIL(net_var_t)) {
                 fprintf( fp, "1;\n" );
@@ -466,8 +466,11 @@ static void pl_print_method( fp, node, autotick, unittime )
                     fprintf( fp, "%s;\n", util_make_valid_name( assoc_var ));
                 }
             }
+            fprintf( fp, "                     tl->sendData();\n");
             fprintf( fp, "                     newEvent->~PolisEvent();\n");
             fprintf( fp, "                }\n");
+            fprintf( fp, "                else newEvent->outputPort = ");
+            fprintf( fp, "c%s;\n", pvarst);
             fprintf( fp, "                break;\n" );
         }
     } end_foreach_net_node_fanout;
@@ -848,10 +851,14 @@ static void pl_print_begin( fp, node, option, trace )
     fprintf( fp, "    InfString name;\n\n" );
     /* set variables which reflect Star parameters, and others*/
     fprintf( fp, "    /* set variables which reflect Star parameters*/ \n");
-    fprintf( fp, "    if(!strcmp(\"RoundRobin\", scheduler)) schedPolicy = 0;\n");
-    fprintf( fp, "    else if(!strcmp(\"Preemptive\", scheduler)) schedPolicy = 2;\n"
-);
-    fprintf( fp, "    else schedPolicy = 1; \n");
+    fprintf( fp, "    strcpy( stemp, schedulingPolicy); \n");
+    fprintf( fp, "    if(!strcmp(\"RoundRobin\", stemp)) schedPolicy = 0;\n");
+    fprintf( fp, "    else if(!strcmp(\"NonPreemptive\", stemp)) schedPolicy = 1;\n"); 
+    fprintf( fp, "    else if(!strcmp(\"Preemptive\", stemp)) schedPolicy = 2;\n");
+    fprintf( fp, "    else {\n");
+    fprintf( fp, "        strcat( stemp, \": not a valid scheduling Policy\" );\n");
+    fprintf( fp, "        Error::abortRun( stemp );\n");
+    fprintf( fp, "    }\n");
     fprintf( fp, "    priority = Priority;\n");
     fprintf( fp, "    clkFreq = Clock_freq;\n\n"); 
     fprintf( fp, "    clkFreq = (1000000)*clkFreq;\n\n");
