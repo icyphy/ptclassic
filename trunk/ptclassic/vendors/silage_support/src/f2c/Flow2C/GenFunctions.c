@@ -22,12 +22,32 @@ GenFunctions(pl_flag)
 bool pl_flag;
 {
     register GraphPointer Graph;
+    register GraphPointer ReverseGraph,tmp;
     bool IsLoop();
 
-    for (Graph = Root; Graph != NULL; Graph = Graph->Next) {
-        if (!IsLoop(Graph))
-	    GenFunc(Graph,pl_flag);
+    if(!pl_flag)
+    {
+    for (Graph = Root; Graph != NULL; Graph = Graph->Next) 
+	{
+        	if (!IsLoop(Graph))
+	    	GenFunc(Graph,pl_flag);
+	}
     }
+/* Need to generate in the reverse order for declaration purposes */
+    if(pl_flag)
+    {
+	tmp = (GraphPointer) malloc (sizeof(Graph));
+	tmp = NULL;
+
+	while(tmp != Root) 
+	{
+		for(Graph = Root; Graph->Next != tmp; Graph = Graph->Next);
+		fprintf(stderr,"Graph->name %s \n",Graph->Name);
+		tmp = Graph;
+        	if (!IsLoop(Graph))
+	    	GenFunc(Graph,pl_flag);
+	} /* while */
+    } /*  pl_flag */
 }
 
 GenFunc(Graph,pl_flag)
@@ -43,10 +63,16 @@ bool pl_flag;
    struct listOfIO inputList[10];       /* max num of inputs */
    struct listOfIO outputList[10];      /* max num of outputs */
    int numIn, numOut, numberIn, numberOut, k ;
-    bool GenFormalParams(), GenFormalConParams(), comma = false;
+   bool GenFormalParams(), GenFormalConParams(), comma = false;
+   bool GenDeclFormalParams();
+   bool topLevel,mycomma;
 
    numIn = 0; numOut = 0;
+   topLevel = false;
 
+if( pl_flag && (Graph == Root) )
+{
+   topLevel = true;
    strcpy(fInName,Graph->Name); strcat(fInName,".inputs");
    strcpy(fOutName,Graph->Name); strcat(fOutName,".outputs");
    fp = fopen(fInName,"r");
@@ -61,7 +87,7 @@ bool pl_flag;
    while( fscanf(fq,"%s",outputName) == 1)
    { strcpy(outputList[numOut].name,outputName); numOut++; }
    numberOut = numOut;
-
+}
     indexlevel++;
     Edgetable[indexlevel] = st_init_table(strcmp, st_strhash);
 
@@ -74,13 +100,17 @@ bool pl_flag;
 	        comma = true;
 	    if(!pl_flag)    fprintf(CFD, "pST");
     }
+/* this will generate only names of this list for regular case
+   while for the .pl file, it should also have the type of signal */
+if (!pl_flag)
+{
     ListOfParams = (ListPointer) NULL;
     comma = GenFormalParams(Graph->InEdges, comma);
     comma = GenFormalConParams(Graph->InControl, comma);
     comma = GenFormalParams(Graph->OutEdges, comma);
     comma = GenFormalConParams(Graph->OutControl, comma);
-    if(!pl_flag) 	fprintf(CFD, ")\n");
-
+    fprintf(CFD, ")\n");
+}
 /* Generate declarations for the formal params, fixedtype and int  */
     if(!pl_flag)
     {
@@ -90,25 +120,55 @@ bool pl_flag;
 	    fprintf(CFD, " *pST;\n");
     	}
     }
-   if(pl_flag)
-   {
-	GenDelayStructName(Graph);
-	fprintf(CFD,"* pST");
-   	for( k=0; k<numberIn; k++)
-   	{ fprintf(CFD, ", float* r_%s_%s",Graph->Name,inputList[k].name); }
-   	for( k=0; k<numberOut; k++)
-   	{ fprintf(CFD, ", float* s_%s_%s",Graph->Name,outputList[k].name); }
-    	fprintf(CFD, ")\n");
-   }
 
+if(!pl_flag)
+{
     ClearList(ListOfParams);
     ListOfParams = (ListPointer) NULL;
-    GenDeclFormalParams(Graph->InEdges);
-    GenDeclFormalParams(Graph->InControl);
-    GenDeclFormalParams(Graph->OutEdges);
-    GenDeclFormalParams(Graph->OutControl);
+    mycomma = false;
+    GenDeclFormalParams(Graph->InEdges,pl_flag,mycomma);
+    GenDeclFormalParams(Graph->InControl,pl_flag,mycomma);
+    GenDeclFormalParams(Graph->OutEdges,pl_flag,mycomma);
+    GenDeclFormalParams(Graph->OutControl,pl_flag,mycomma);
     ClearList(ListOfParams);
     fprintf(CFD, "{\n");
+}
+
+/* now is the special case where we generate the signal type
+along with the signalname in the function declaration,
+also in case of the pl_flag and the top level, we also need
+to pass the data type to the signal */
+   mycomma = false;
+   if(pl_flag)
+   {
+	if (GE(Graph)->HasDelay) 
+	{
+		GenDelayStructName(Graph);
+		fprintf(CFD,"* pST");
+		mycomma = true;
+	}
+/* here will be the other formal parameters along with the data types */
+	ClearList(ListOfParams);
+    	ListOfParams = (ListPointer) NULL;
+   mycomma = GenDeclFormalParams(Graph->InEdges,pl_flag,mycomma);
+   mycomma = GenDeclFormalParams(Graph->InControl,pl_flag,mycomma);
+   mycomma = GenDeclFormalParams(Graph->OutEdges,pl_flag,mycomma);
+   mycomma = GenDeclFormalParams(Graph->OutControl,pl_flag,mycomma);
+    	ClearList(ListOfParams);
+   } /* pl_flag */
+
+   if(topLevel)
+   {
+		if(mycomma == true) fprintf(CFD,",");
+   	for( k=0; k< (numberIn-1) ; k++)
+   	{ fprintf(CFD, "float* r_%s_%s, ",Graph->Name,inputList[k].name); }
+   	fprintf(CFD, "float* r_%s_%s",Graph->Name,inputList[numberIn-1].name);
+	if(numberOut>0) fprintf(CFD,",");
+   	for( k=0; k< (numberOut-1) ; k++)
+   	{ fprintf(CFD, "float* s_%s_%s,",Graph->Name,outputList[k].name); }
+   	fprintf(CFD, "float* s_%s_%s",Graph->Name,outputList[numberOut-1].name);
+   } /* topLevel */
+if(pl_flag) fprintf(CFD, ")\n{\n");
 
 /* Generate declarations for local delay variables used */
     GenDeclDelayVars(Graph);
@@ -126,7 +186,7 @@ bool pl_flag;
 
 /* Generate the body of the function */
     fprintf(CFD, "\n/* statements of function body */\n");
-    GenStatements(Graph);
+    GenStatements(Graph,pl_flag);
 
 /* Generate statements to display requested signals */
     GenDisplays(Graph,Graph->EdgeList,pl_flag);
@@ -210,32 +270,67 @@ EdgePointer edge;
     }
 }
           
-GenDeclFormalParams(List)
+bool GenDeclFormalParams(List,pl_flag,mycomma)
 ListPointer List;
+bool pl_flag;
+bool mycomma;
 {
     register ListPointer ptr;
     register EdgePointer edge;
-
+    int c;
+if(List == NULL ) return(mycomma);
+if( mycomma == false ) c = 0;
+else if (mycomma == true) c = 1;
     for(ptr = List; ptr != NULL; ptr = ptr->Next) {
+	if(pl_flag) 
+	{ 
+		if(c == 1)
+		{
+			fprintf(CFD, ", ");    
+			c = 0;
+		}
+	}
 	edge = EP(ptr);
         if (IsMemberOfList(DeclName(edge), CharNode, ListOfParams)) continue;
 	if (IsFixedType(edge)) {
-	    fprintf(CFD, "Sig_Type ");
-	    if (IsArray(edge) == false)
-	        fprintf(CFD, "*p_");
+		if(!pl_flag)
+		{
+			fprintf(CFD, "Sig_Type ");
+	    		if (IsArray(edge) == false)
+	        	fprintf(CFD, "*p_");
+		}
+		else if(pl_flag)
+		{
+			fprintf(CFD, "Sig_Type* ");
+	    		if (IsArray(edge) == false)
+	        	fprintf(CFD, "p_");
+		}
 	}
 	else {
-	    fprintf(CFD, "int ");
-	    if (IsOutput(edge))
-	        fprintf(CFD, "*p_");
+		if(!pl_flag)
+		{
+	    		fprintf(CFD, "int ");
+	    		if (IsOutput(edge))
+	        	fprintf(CFD, "*p_");
+		}
+		else if(pl_flag)
+		{
+	    		fprintf(CFD, "int* ");
+	    		if (IsOutput(edge))
+	        	fprintf(CFD, "p_");
+		}
         }
 	GenEdgeName(edge);
 	GenEdgeMaxIndex(edge);
-	fprintf(CFD, ";\n");    
+	if(!pl_flag) fprintf(CFD, ";\n");    
+	if(pl_flag) c = 1; 
         st_insert(Edgetable[indexlevel], DeclName(edge), 0);
 	ListOfParams = ListAppend(new_list(CharNode, DeclName(edge)), 
 					ListOfParams);
     }
+	if( c==1) mycomma = true;
+	else if ( c==0) mycomma = false;
+return(mycomma);
 }
 
 GenDeclLocalVars(Graph)

@@ -657,7 +657,6 @@ bool pl_flag;
     if(pl_flag)
     {
     	GenFunctions(pl_flag);  /*  Process all hierarchy  */
-    	/*GenPtMain(); */
 	fprintf(CFD,"} // end code \n");
 	GenPtSetup();
 	GenPtGo();
@@ -1161,16 +1160,6 @@ GenMain()
     fprintf(CFD, "}\n\n");
 }
 
-GenPtMain()
-{
-    extern int NrOfCycles;
-
-    fprintf(CFD, "void %s (** put i/o here )",Root->Name);
-    fprintf(CFD, " {\n");	
-    GenPtProcessCall();
-    fprintf(CFD, "}\n\n");
-}
-
 GenPtSetup()
 {
     fprintf(CFD, "\t setup { \n");
@@ -1180,7 +1169,7 @@ GenPtSetup()
         fprintf(CFD, "\n\t\t/*  Delay Initialization goes here... */\n");
         fprintf(CFD, "\t\tInit_%s (&SigTab);\n", Root->Name);
         }
-    fprintf(CFD, "\t } // setup \n\n");
+    fprintf(CFD, "\n \t } // setup \n\n");
 }
 
 GenPtGo()
@@ -1229,12 +1218,18 @@ GenPtGo()
    fprintf(CFD, "\t\tSim_%s (", Root->Name);
 	if (GE(Root)->HasDelay) {
 	fprintf(CFD, "&SigTab");
+	if(numberIn>0) fprintf(CFD,",");
+	if(numberIn==0 && numberOut>0) fprintf(CFD,",");
         }
-   for( k=0; k<numberIn; k++)
-   { fprintf(CFD, ", &%s_%s",Root->Name,inputList[k].name); }
+   for( k=0; k< (numberIn-1) ; k++)
+   { fprintf(CFD, "&%s_%s, ",Root->Name,inputList[k].name); }
+   fprintf(CFD, "&%s_%s",Root->Name,inputList[numberIn-1].name); 
 
-   for( k=0; k<numberOut; k++)
-   { fprintf(CFD, ", &%s_%s",Root->Name,outputList[k].name); }
+   if(numberOut>0) fprintf(CFD,", ");
+
+   for( k=0; k< (numberOut-1) ; k++)
+   { fprintf(CFD, "&%s_%s, ",Root->Name,outputList[k].name); }
+   fprintf(CFD, "&%s_%s ",Root->Name,outputList[numberOut-1].name); 
 
     fprintf(CFD, ");\n");
 
