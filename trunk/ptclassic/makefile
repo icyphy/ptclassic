@@ -37,8 +37,8 @@ makefiles:		obj.$(ARCH)
 all install:	sources obj.$(ARCH)
 	cd obj.$(ARCH); $(MAKE) $(MFLAGS) $@
 
-clean:
-	cd obj.$(ARCH); $(MAKE) $(MFLAGS) clean
+clean realclean:
+	cd obj.$(ARCH); $(MAKE) $(MFLAGS) $@
 
 sources depend:
 	cd src; $(MAKE) $(MFLAGS) makefiles $@
@@ -46,7 +46,7 @@ sources depend:
 obj.$(ARCH):		MAKEARCH
 	csh -f MAKEARCH
 
-# Usually rebuilding vem and the octtools library is not done everytime
+# Usually rebuilding vem and the octtools library is not done everytime.
 oct_and_vem: obj.$(ARCH)
 	cd obj.$(ARCH)/vem; $(MAKE) $(MFLAGS) all
 install_oct_and_vem: obj.$(ARCH)
@@ -54,7 +54,7 @@ install_oct_and_vem: obj.$(ARCH)
 
 # This rule builds and installs gcc and tcl/tk from scratch, then octtools,
 # then everything else.  gcc and tcl/tk source are usually distributed as a
-# separate tar file 
+# separate tar file. 
 bootstrap:
 	$(MAKE) -f mk/scratch-srcs.mk
 	$(MAKE) $(MFLAGS) install_oct_and_vem install
