@@ -1,8 +1,8 @@
 ##########################################################################
-# Version: $Id$
-# Author: H. John Reekie
+# @Version: $Id$
+# @Author: H. John Reekie
 #
-# Copyright (c) %Q% The Regents of the University of California.
+# @Copyright (c) %Q% The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -27,9 +27,31 @@
 ##########################################################################
 
 
-## Interactor
+#######################################################################
+### Interactor
 #
-# The abstract superclass for all interactor classes.
+# The abstract superclass of all interactor classes. <i>Interactors</i>
+# are a mechanism originally developed in Brad Meyer's Garnet system.
+# The key idea is to abstract various forms of user interaction into
+# objects, so that a) user interaction code can be reused easily and
+# b) more complex interactions can be built from simpler ones. The
+# interactors implemented in this set of classes fulfills both of these
+# goals, although they are much smaller, lighter, and more numerous
+# than the interactors in Garnet.
+# <p>
+# Each sub-class of <i>Interactor</i> implements a particular kind of
+# user interaction. Each is based on the observation that most user
+# interactions can be broken into a sequence: a <i>click</i>, some number
+# of <i>drags</i>, and a <i>release</i>. Note that each of these
+# <i>actions</i> is abstract, and they do not necessarily correspond to
+# to physical mouse clicks, drags, and releases.
+# <p>
+# Interactors can be combined to make more complex interactions: several
+# interactors can be <i>bound</i> to the same picture; they can be
+# <i>cascaded</i> to modify each other's effects. Actions eventually
+# end up being given to a <a href="../../../kernel/doc/codeDoc/Picture.html">
+# <i>Picture</i> object, which then reacts according to its current
+# ``behavior.''
 #
 class ::tycho::Interactor {
 
@@ -74,7 +96,7 @@ class ::tycho::Interactor {
     ## ``Bind'' an interactor to a picture.
     method bind {t args} {}
 
-    # Forward interaction commands to a proxy.
+    # Forward actions to a proxy.
     method cascade {that} {}
 
     # Set or get the target object
@@ -83,7 +105,7 @@ class ::tycho::Interactor {
     # Remove a binding from the interactor to the target.
     method unbind {t} {}
 
-    # Stop cascading interaction commands to a delegate object.
+    # Stop cascading actions to a proxy.
     method uncascade {} {}
 
 
@@ -127,22 +149,19 @@ class ::tycho::Interactor {
     ###################################################################
     ####                   protected variables                     ####
 
-    # The canvas on which this interactor resides
+    # The canvas on which this interactor resides.
     protected variable canvas ""
 
-    # Set if the proxy and the target are the same
-    private variable chained 0
-
-    # The slate on which this interactor resides
+    # The slate on which this interactor resides.
     protected variable slate ""
 
-    # The tag to which this interactor is currently bound
+    # The tag to which this interactor is currently bound.
     protected variable tag ""
 
-    # The picture to operate on
+    # The picture that this interactor is operating on.
     protected variable target ""
 
-    # The picture to forward interaction commands to
+    # An interactor to forward actions to.
     protected variable proxy ""
 }
 
@@ -176,7 +195,7 @@ body ::tycho::Interactor::bind {t args} {
 #######################################################################
 #### cascade proxy
 #
-# Forward interaction commands to a proxy interactor instead of directly
+# Forward actions to a proxy interactor instead of directly
 # to the target object. This used when further modification of the
 # interaction can be provided by another interaactor -- for example,
 # a <a href="Stepper.html><i>Stepper</i></a> interactor can be used
@@ -270,8 +289,8 @@ body ::tycho::Interactor::execute {script x y} {
 #######################################################################
 #### proxy
 #
-# Set or get the interactor to which interaction commands
-# are forwarded. If null, commands are sent straight to the target.
+# Set or get the interactor to which actions
+# are forwarded. If null, actions are sent straight to the target.
 #
 body ::tycho::Interactor::proxy {args} {
     if { $args == "" } {
@@ -306,8 +325,13 @@ body ::tycho::Interactor::release {} {
 # Set or get the picture that this interactor is currently
 # operating on. With no argument, returns the current target;
 # with an argument, sets the target picture to that value. This
-# method is for use only within activation commands -- the target
-# is not valid until the interactor has been activated.
+# method is for use only within actions -- the target is not valid
+# until the interactor has been activated. If you're careful about it,
+# you can use this method to have the picture being operated on
+# set to a different picture to the one being moused on, which is
+# very useful in some situations -- see
+# <a href="../../../../lib/widgets/doc/codeDoc/Slider.html">
+# <i>Slider</i></a> for an example.
 #
 body ::tycho::Interactor::target {args} {
     if { $args == "" } {
@@ -339,7 +363,7 @@ body ::tycho::Interactor::unbind {t} {
 #######################################################################
 #### uncascade
 #
-# Stop forwarding interaction commands to a proxy interactor.
+# Stop forwarding actions to a proxy interactor.
 #
 body ::tycho::Interactor::uncascade {} {
     $this proxy {}
