@@ -226,7 +226,20 @@ char **argv;
         while (optind < argc) {
 	    octObject facet;
 
+	    subst = 0;
+
 	    input_name = argv[optind++];
+
+	    /*
+	     * Perform preliminary check for validity of the name
+	     */
+	    strcpy(filename,input_name);
+	    strcat(filename,"/schematic/interface;");
+	    if(access(expandPathName(filename),4)) {
+		printf("Skipping %s (invalid facet)\n",input_name);
+		continue;
+	    } else
+		printf("Running masters on %s\n",input_name);
     
             /*
              *  Get the input and output facet names
