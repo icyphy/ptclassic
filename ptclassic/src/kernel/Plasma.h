@@ -44,50 +44,104 @@ A Plasma is a collection of currently unused Particles
 Particles no longer needed are added to the Plasma; any
 OutPortHoles needing a Particle gets it from the Plasma
 
-There is precisely one instance of Plasma for each
+There is precisely one global instance of Plasma for each
 Particle type needed -- this common pool makes more
 efficient use of memory.  The static member plasmaList
-is a list of all Plasmas.  Each Plasma is a node on the
-linked list plasmaList.
+is a list of all global Plasmas.  Each global Plasma is a
+node on the linked list plasmaList.
+
+There may also be any number of local Plasmas of each type, which
+permit separate pools to be used for a given subsystem.  When a
+local Plasma runs out of particles, it obtains them from the
+corresponding global Plasma.  The advantage of local Plasmas
+is for multithreading: if both ends of the local Plasma are in
+the same thread, no lock is needed.
 
 ***************************************************************/
 
 #include "ParticleStack.h"
+#include "PtGate.h"
 
 	////////////////////////////////////////
 	// class Plasma
 	////////////////////////////////////////
 
 class Plasma : public ParticleStack {
+    friend class PlasmaGate;
 public:
+	// constructor.  By default, we make global Plasmas.  If globalP
+	// is non-null, we are making a local Plasma and globalP is the
+	// corresponding global Plasma.
+	Plasma(Particle& p,Plasma* globalP = 0);
+
 	// Put a Particle into the Plasma
-	// (inherited, uses ParticleStack::put)
+	void put(Particle* p) {
+		if (gate == 0)
+			ParticleStack::put(&(p->initialize()));
+		else slowPut(p);
+	}
 
 	// Get a Particle from the Plasma, creating a
-	// new one if necessary.  Never give away last Particle
-	Particle* get() { 
-		if (moreThanOne()) {
-			Particle* p = ParticleStack::get();
-			p->initialize();
-			return p;
-		}
-		else return head()->useNew();
-	}
-	DataType type() { return head()->type();}
-
-// constructor -- all objs built are added to the static linked list.
-	Plasma(Particle& p) : ParticleStack(&p), nextPlasma(plasmaList) {
-		plasmaList = this;
+	// new one if necessary.  We do it inline for the fastest
+	// case.
+	Particle* get() {
+		return (moreThanOne() && gate == 0) ? ParticleStack::get()
+			: slowGet();
 	}
 
-// get the appropriate Plasma object given a type
+	// type of the Plasma
+	DataType type() const { return head()->type();}
+
+	// is Plasma local?
+	int isLocal() const { return localFlag;}
+
+	// get the appropriate global Plasma object given a type
 	static Plasma* getPlasma (DataType t);
+
+	// create a local Plasma object given a type
+	static Plasma* makeNew (DataType t);
+
+	// create a lock for the Plasma, because it crosses
+	// thead boundaries.  A do-nothing for global plasmas.
+	void makeLock(const PtGate& master);
+
+	// delete lock for the Plasma.  No effect on global plasmas.
+	void delLock();
+
+	// inc reference count, when adding reference from PortHole to
+	// a local Plasma.  New count is returned.  Global Plasmas
+	// pretend their count is always 1.
+	short incCount() { return localFlag ? ++refCount : 1;}
+
+	// dec reference count, when removing reference from PortHole to
+	// a local Plasma.  New count is returned.  Idea is we can
+	// delete it if it drops to zero.  Global Plasmas pretend
+	// their count is always 1.
+	short decCount() { return localFlag ? --refCount : 1;}
+	
+protected:
+	// general implementation of "get"
+	virtual Particle* slowGet();
+	// same for "put"
+	virtual void slowPut(Particle*);
+
 private:
-// The global list of Plasmas (points to head of list)
+// The global list of Plasmas (points to head of chain of Plasmas)
 	static Plasma* plasmaList;
 // pointer to next Plasma on the list
 	Plasma* nextPlasma;
+// gate for locking
+	PtGate* gate;
+// flag, true if local
+	short localFlag;
+// reference count for local Plasmas.
+	short refCount;
+};
 
+// a type of GateKeeper that can read Plasma's gate.
+class PlasmaGate : public GateKeeper {
+public:
+	PlasmaGate(Plasma& plas) : GateKeeper(plas.gate) {}
 };
 
 #endif
