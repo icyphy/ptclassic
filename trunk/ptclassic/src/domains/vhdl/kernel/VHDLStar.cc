@@ -385,99 +385,10 @@ void VHDLStar :: initialize() {
 int VHDLStar :: run() {
   int status = 0;
   firing++;
-/*
-  firingPortList.initialize();
-  firingGenericList.initialize();
-  firingVariableList.initialize();
-  firingPortMapList.initialize();
-  firingGenericMapList.initialize();
-  */
   status = targ()->runIt(this);
   updateOffsets();
   return status;
 }
-
-/*
-// Register port reference for use by target.
-void VHDLStar :: registerPort(StringList ref, StringList direction,
-			      StringList type) {
-  if (firingPortList.inList(ref)) return;
-
-  // Allocate memory for a new VHDLPort and put it in the list.
-  VHDLPort* newport = new VHDLPort;
-  newport->name = ref;
-  newport->direction = direction;
-  newport->type = type;
-  firingPortList.put(*newport);
-}
-*/
-/*
-// Register generic reference for use by target.
-void VHDLStar :: registerGeneric(StringList ref, StringList type,
-				 StringList defaultVal) {
-  if (firingGenericList.inList(ref)) return;
-
-  // Allocate memory for a new VHDLGeneric and put it in the list.
-  VHDLGeneric* newgen = new VHDLGeneric;
-  newgen->name = ref;
-  newgen->type = type;
-  newgen->defaultVal = defaultVal;
-  firingGenericList.put(*newgen);
-}
-*/
-/*
-// Register variable reference for use by target.
-void VHDLStar :: registerVariable(StringList ref, StringList type,
-				  StringList initVal) {
-  if (firingVariableList.inList(ref)) return;
-  
-  // Allocate memory for a new VHDLVariable and put it in the list.
-  VHDLVariable* newvar = new VHDLVariable;
-  newvar->name = ref;
-  newvar->type = type;
-  newvar->initVal = initVal;
-  firingVariableList.put(*newvar);
-}
-*/
-/*
-// Register the signal mapped to for use by target.
-void VHDLStar :: registerSignal(StringList name, StringList type,
-			    	StringList from, StringList to) {
-  if (firingSignalList.inList(name)) return;
-  
-  // Allocate memory for a new VHDLGenericMap and put it in the list.
-  VHDLSignal* newSignal = new VHDLSignal;
-  newSignal->name = name;
-  newSignal->type = type;
-  newSignal->from = from;
-  newSignal->to = to;
-  firingSignalList.put(*newSignal);
-}
-*/
-/*
-// Register port mapping for use by target.
-void VHDLStar :: registerPortMap(StringList ref, StringList mapping) {
-  if (firingPortMapList.inList(ref)) return;
-  
-  // Allocate memory for a new VHDLPortMap and put it in the list.
-  VHDLPortMap* newPortMap = new VHDLPortMap;
-  newPortMap->name = ref;
-  newPortMap->mapping = mapping;
-  firingPortMapList.put(*newPortMap);
-}
-*/
-/*
-// Register generic mapping for use by target.
-void VHDLStar :: registerGenericMap(StringList ref, StringList mapping) {
-  if (firingGenericMapList.inList(ref)) return;
-  
-  // Allocate memory for a new VHDLGenericMap and put it in the list.
-  VHDLGenericMap* newGenericMap = new VHDLGenericMap;
-  newGenericMap->name = ref;
-  newGenericMap->mapping = mapping;
-  firingGenericMapList.put(*newGenericMap);
-}
-*/
 
 // Update the offset read and write pointers to the porthole queues.
 void VHDLStar :: updateOffsets() {

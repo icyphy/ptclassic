@@ -60,9 +60,9 @@ public:
 	// Main routine.
 	virtual int runIt(VHDLStar*);
 
-//	// Redefined from CGTarget to avoid cout messages.
-//	/*virtual*/ sendWormData(PortHole&);
-//	/*virtual*/ receiveWormData(PortHole&);
+	// Redefined from CGTarget to avoid cout messages.
+	/*virtual*/ sendWormData(PortHole&);
+	/*virtual*/ receiveWormData(PortHole&);
 
 	// redefine writeCode: default file is "code.vhd"
 	/*virtual*/ void writeCode();
@@ -97,6 +97,9 @@ public:
 	// Return the VHDL type corresponding to the State type.
 	virtual StringList stateType(const State* st);
 
+	// Return the VHDL type corresponding to the given const char*.
+	virtual StringList sanitizeType(const char*);
+
 	// Register the temporary storage reference.
 	virtual void registerTemp(const char*, const char*);
 
@@ -106,8 +109,8 @@ public:
 	// Register PortHole reference.
 	virtual void registerPortHole(VHDLPortHole*, int=-1);
 
-	// Register each variable in the star variable list.
-	virtual void registerVariableList(VHDLVariableList*);
+	// Merge the Star's variable list with the Target's variable list.
+	virtual void mergeVariableList(VHDLVariableList*);
 
   	// The only reason for redefining this from HLLTarget
  	// is to change the separator from "." to "_".
