@@ -118,6 +118,31 @@
 #
 # 9. To build, run:
 #	nmake -f $PTOLEMY/mk/build-nt4.vc.mk.vc all
+#
+# 10. To test ptcl, put the ptcl code below into a file,
+#     start up ptcl.exe and source the file
+# --start--
+# reset
+# newuniverse sampler
+#    domain DE
+#    star Clock1 Clock
+#        setstate Clock1 interval 5.0
+#        setstate Clock1 magnitude 1.0
+#    star Sampler1 Sampler
+#    star Clock2 Clock
+#        setstate Clock2 interval 1.0
+#        setstate Clock2 magnitude 1.0
+#    star Printer1 Printer
+#    star FloatRamp1 Ramp
+#        setstate FloatRamp1 step 1.0
+#        setstate FloatRamp1 value 0.0
+#    connect Clock1 output FloatRamp1 input
+#    connect Clock2 output Sampler1 clock
+#    connect Sampler1 output Printer1 input
+#    connect FloatRamp1 output Sampler1 input
+# run 50
+# wrapup
+# --end--
 #    
 
 # BUGS
