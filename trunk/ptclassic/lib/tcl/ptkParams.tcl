@@ -55,8 +55,8 @@ set ed_EntryDestroyFlag 0
 # Global variable containing the number for a toplevel window
 set ed_ToplevelNumbers(ed_Num) 0
 
-# **ed_RestoreParam
-# Discards all changes
+# This procedure is called when the Cancel button is invoked and discards
+#  changes previously applied
 
 proc ed_RestoreParam {facet number args} {
     global paramBAKArray
@@ -67,11 +67,18 @@ proc ed_RestoreParam {facet number args} {
     }
 }
 
-# **proc ed_SetEntryButtons
-# Procedure to make buttons function in the same manner as the scrollbar
-#  widget.  Configures the buttons according to the position and view in the
-#  entry widget.  Takes a frame containing the entry and buttons as the first
-#  argument.
+#############################################################################
+#
+# The following enclosed procedures create and manipulate the
+#  button-scrollable entry frames.
+#
+
+#
+# This procedure makes buttons function in the same manner as the scrollbar
+#  widget.  It configures the buttons according to the position and view in
+#  the entry widget and checks for overflow.  This procedure takes as the
+#  first argument a frame containing the entry and buttons created by
+#  ed_MkEntryButton
 
 proc ed_SetEntryButtons {frame numStor numPossVis leftIdx rightIdx} {
 	$frame.left config -fg black
@@ -99,12 +106,18 @@ proc ed_SetEntryButtons {frame numStor numPossVis leftIdx rightIdx} {
     }
 }
 
+# This procedure is called when the left bitmap button is pressed
+#  to shift the view in the entry
+
 proc ed_ShiftButtonViewLeft {button entry} {
     if {[lindex [$button config -relief] 4] == "sunken"} {
 	$entry view [expr [$entry index @0]-1]
 	after 50 "ed_ShiftButtonViewLeft $button $entry"
     }
 }
+
+# This procedure is called when the right bitmap button is pressed
+#  to shift the view in the entry
 
 proc ed_ShiftButtonViewRight {button entry} {
     if {[lindex [$button config -relief] 4] == "sunken"} {
@@ -113,9 +126,12 @@ proc ed_ShiftButtonViewRight {button entry} {
     }
 }
 
+# Given an empty frame, this procedure creates an entry widget and two
+#  bitmap "arrow" buttons within.
+
 proc ed_MkEntryButton {frame label} {
-	global ptolemy ed_MaxEntryLength
-	pack append [frame $frame -bd 2] \
+    global ptolemy ed_MaxEntryLength
+    pack append [frame $frame -bd 2] \
 	   [label $frame.label -text "$label:  " -anchor w] left \
 		[button $frame.right -bitmap @$ptolemy/tcl/lib/right.xbm \
 			-command ed_Dummy -relief flat] right \
@@ -132,17 +148,17 @@ proc ed_MkEntryButton {frame label} {
     bind $frame.left <ButtonRelease-1> "catch {tk_butUp %W}"
     bind $frame.right <ButtonRelease-1> "catch {tk_butUp %W}"
 	pack before $frame.left \
-	   [entry $frame.entry -scroll "ed_SetEntryButtons $frame" \
+	   [entry $frame.entry -scroll "ed_SetEntryButtons \"$frame\"" \
 		-relief sunken -width $ed_MaxEntryLength] {right}
 
-# Try a percentage:
-#
-#	bind $frame.right <3> \
-#	     "$frame.entry view \[expr \[$frame.entry index @0\]+1\]"
-#	bind $frame.left <3> \
-#	     "$frame.entry view \[expr \[$frame.entry index @0\]-1\]"
-
 }
+                                                                            #
+                                                                            #
+#############################################################################
+
+# This procedure tests for list equality; ie., whether two lists, list1 and
+#  list2 contain precisely the same number of elements and the same elements
+#  in the same same order.
 
 proc listEq {list1 list2} {
     set max [llength $list1]
@@ -171,9 +187,9 @@ proc listEq {list1 list2} {
     return 1
 }
 
-# **ed_UpdateParam
-# Compares with previous parameter types and values; if they differ,
-#  then the new values are written.
+# This procedure compares with previous parameter types and values; if they
+#  differ, then the new values are written.
+#  ## Possibly, a REMOVEME
 
 proc ed_UpdateParam {facet number name args} {
    global paramArray
@@ -212,8 +228,7 @@ proc ed_UpdateParam {facet number name args} {
 }
 
 
-# **ed_AddParamDialog 
-# Creates the dialog box to add parameters
+# This procedure creates the dialog box to add parameters
 
 proc ed_AddParamDialog {facet number} {
     global ed_MaxEntryLength ed_ToplevelNumbers
@@ -270,9 +285,9 @@ proc ed_AddParamDialog {facet number} {
     focus $ask.fname.entry
 }
 
-# **ed_YesNoDialog
 # Queries given mesg and returns to caller the user-response (ie., '1'
 #  for an affirmative response and '0' otherwise).
+# ## Possibly, a REMOVEME
 
 proc ed_YesNoDialog {mesg} {
     global result
@@ -304,9 +319,9 @@ proc ed_YesNoDialog {mesg} {
     return $result
 }
 
-# **ed_AddParam
 # The procedure calls ptkSetParams to add a parameter.
-#  Checks to make sure that parameters with the same name aren't overwritten
+#  It checks to make sure that parameters with the same name aren't
+#  overwritten
 
 proc ed_AddParam {facet number name type value} {
     upvar 1 localNum localNum
@@ -362,10 +377,9 @@ proc ed_AddParam {facet number name type value} {
 }
 
 
-# **ed_ChangeCursor
-# Recursively changes the cursor in a window and it's children
-# Stores the old cursors in the global variable ed_PrevCursor
-# Note that Tcl_Eval recursions cannot exceed a certain depth;
+# This procedure recursively changes the cursor in a window and it's
+#  children.  It stores the old cursors in the global variable
+#  ed_PrevCursor.  Note that Tcl_Eval recursions cannot exceed a certain depth;
 #  consequently, window arguments to ed_ChangeCursor cannot have sub-children
 #  of children beyond the same depth.  (In any event, sub-windows beyond five
 #  levels are unlikely.)
@@ -382,9 +396,9 @@ proc ed_ChangeCursor {w cursor} {
    }
 }
 
-# **ed_RestoreCursor
-# Recursively restores the former cursors as stored in the global variable
-#  ed_PrevCursor
+# This procedure recursively restores the former cursors as stored in the
+#  global variable ed_PrevCursor
+
 proc ed_RestoreCursor w {
    global ed_PrevCursor
    $w config -cursor $ed_PrevCursor($w)
@@ -397,11 +411,10 @@ proc ed_RestoreCursor w {
    }
 }
 
-# **ed_RemoveParam
-# Removes a parameter by rebinding the entries, labels and scrollbars
-# Loops to check whether an entry has been destroyed.
+# This procedure removes a parameter by rebinding the entries, labels and
+#  scrollbars.  It loops to check whether an entry has been destroyed.
 # Focus has been eliminated during removal so the evident operation is
-#  to click the mouse to select a parameter to remove
+#  to click the mouse to select a parameter to remove.
 # Buttons in the same window as "Remove Parameter" button are rebound
 #  to have cancellation as the top priority.
 
@@ -443,9 +456,8 @@ proc ed_RemoveParam {facet number top button} {
     set ed_EntryDestroyFlag 0
 }
 
-# **ed_Remove
-# Removes the relevant parameter
-# Signals that removal has occurred by setting ed_EntryDestroyFlag to 1
+# This procedure removes the relevant parameter
+# It signals that removal has occurred by setting ed_EntryDestroyFlag to 1
 
 proc ed_Remove {facet number winName} {
     global ed_EntryDestroyFlag paramArray ed_ToplevelNumbers
@@ -467,11 +479,7 @@ proc ed_Remove {facet number winName} {
 }
 
 
-# **ptkEditParams
-# Formerly, ptkShowFacetNum
-# Currently, under the above name, opens up an edit-parameters dialog box.
-# To make sure that parentheses organized as ``}{''  are treated as ``} {''
-#  a substitution is made.
+# This procedure is called to open up an edit-parameters dialog box.
 
 proc ptkEditParams {facet number args} {
 
@@ -524,11 +532,14 @@ proc ptkEditParams {facet number args} {
 	  set editType Delay
     } else {
 	  set editType "Parameters"
-#	set editType "[lindex $editType 1] Parameters"
+
+	# Uncomment the following if differentiation between
+	# Formal and Actual Parameters is desired.
+	# set editType "[lindex $editType 1] Parameters"
+
     }
 
     toplevel $top
-#    wm title $top "Edit Params: $number"
     wm title $top "Edit Params"
     wm iconname $top "Edit Params"
 
@@ -626,7 +637,6 @@ proc ptkEditParams {facet number args} {
 			return
 		} else { 
 			set paramArray($facet,$number) {}
-#			wm title $top "Edit Params: $facet"
 			break
 		}
 	}
@@ -656,7 +666,6 @@ proc ptkEditParams {facet number args} {
     if [winfo exists $f.par.f0.e] { focus $f.par.f0.e }
     $c create window 0 0 -anchor nw -window $f -tags frameWindow
     set mm [winfo fpixels $c 1m]
-#    bind $c <Configure> "ed_ConfigFrame $top"
 
 #    ptkRecursiveBind $top <Return> "ed_UpdateOnMReturn $facet $number
 #		catch \"unset paramArray($facet,$number) \
@@ -689,10 +698,6 @@ proc ptkEditParams {facet number args} {
                                 $u.close invoke"
     }
 
-# For the bindings to work outside the entry widgets
-#    ptkRecursiveBind $top <Any-Enter> {focus %W}
-
-
     wm withdraw $top
     update
     ed_ConfigCanvas $top $facet $number
@@ -703,6 +708,7 @@ proc ptkEditParams {facet number args} {
 
 }
 
+# Possibly, a REMOVEME
 proc ed_UpdateOnMReturn {facet number} {
     global ed_ToplevelNumbers
     set top .o$ed_ToplevelNumbers($facet,$number)
@@ -718,6 +724,8 @@ proc ed_UpdateOnMReturn {facet number} {
 		[$focus get]
     }
 }
+
+# This procedure is called to set current values
 
 proc ed_Apply {facet number args} {
     global ed_ToplevelNumbers paramArray
@@ -771,8 +779,7 @@ proc ed_Apply {facet number args} {
    }
 }
 
-# **ed_NextEntry
-# Procedure for moving from one entry to the next in the edit parameters box
+# This procedure moves the focus from one entry to the next.
 
 proc ed_NextEntry {current w facet number} {
     global ed_ToplevelNumbers
@@ -798,8 +805,7 @@ proc ed_NextEntry {current w facet number} {
 	}
 }
 
-# **ed_PrevEntry
-# Procedure for moving from one entry to the next in the edit parameters box
+# This procedure moves the focus from one entry to the previous entry.
 
 proc ed_PrevEntry {current w facet number} {
     global ed_ToplevelNumbers
@@ -826,41 +832,21 @@ proc ed_PrevEntry {current w facet number} {
 	}
 }
 
-# **ed_Dummy
 # Because entry widgets refuse to accept empty arguments for xscroll
 # commands, this dummy procedure serves as a nop scrollbar widget command
 
 proc ed_Dummy args {}
 
-# **ed_AddScroll
 # Adds a scrollbar to an entry widget with window extension ``.e''
 # If the scrollbar exists, then it is removed; however, the positioning
 #  is different.
 # Assumes existence of label with extension ``.l''
 
-proc ed_AddScroll {entry} {
-    set common [file root $entry]
-    if [winfo exists $common.s] {
-	destroy $common.s
-	$entry config -scroll ed_Dummy
-	pack append $common \
-		$common.l {left expand fillx} \
-		$common.e right
-    } else {
-	scrollbar $common.s -relief sunken -orient horiz \
-		-command "$entry view"
-        $entry config -scroll "$common.s set"
-        pack append $common \
-		$common.s {bottom fillx} \
-		$common.l {top expand fillx} \
-		$common.e {right expand fillx}
-    }
-}
-
 # **ed_configCanvas
 # An attempt at resizing the canvas widget to fit the actual size
 #  of the overall frame containing all the other windows
 # Will likely require a cooperative effort with ed_ConfigFrame
+# Sometimes scrollbars appear even when they are unnecessary.
 
 proc ed_ConfigCanvas {top facet number} {
 
@@ -868,10 +854,10 @@ proc ed_ConfigCanvas {top facet number} {
     set f $c.f
 
     set mm [winfo fpixels $c 1m]
-#    set maxWidth [winfo fpixels $c 5.5i]
-#    set maxHeight [winfo fpixels $c 7.5i]
-    set maxWidth [winfo fpixels $c 7.5i]
-    set maxHeight [winfo fpixels $c 8.5i]
+#    set maxWidth [winfo fpixels $c 2.5i]
+#    set maxHeight [winfo fpixels $c 8.5i]
+    set maxWidth [expr [winfo screenwidth $top]*8/10]
+    set maxHeight [expr [winfo screenheight $top]*8/10]
     set scrollWidth [expr [winfo reqwidth $f]+2*$mm]
     set scrollHeight [expr [winfo reqheight $f]+2*$mm]
     set canvWidth $scrollWidth
@@ -879,17 +865,7 @@ proc ed_ConfigCanvas {top facet number} {
     set existh [winfo exist $top.f.hscroll]
     set existv [winfo exist $top.f.vscroll]
 
-    if {$scrollWidth > $maxWidth} {
-#	if {! $existh} {
-#		scrollbar $top.f.hscroll -orient horiz -relief sunken \
-#			-command "$c xview"
-#		$c config -xscroll "$top.f.hscroll set"
-#		pack before $c $top.f.hscroll {bottom fillx}
-#	}
-#	set canvWidth $maxWidth
-#    } else {
-		set scrollWidth 0
-    }
+    if {$scrollWidth > $maxWidth} { set scrollWidth 0 }
     if {$scrollHeight > $maxHeight} {
 	if {! $existv} {
 		scrollbar $top.f.vscroll -relief sunken -command "$c yview"
@@ -942,30 +918,23 @@ proc ed_ConfigCanvas {top facet number} {
 #  FIXME: Pass ptkChooseOne a window name as the first argument
 #	and in the cases of Edit-Target Params and Edit-Domain
 #	the window name can be generated from the facet-id
+#  FIXME: Check for whether a target parameter window is already open
 
 proc ptkChooseOne {
     optionList
     command 
-    {direction "Choose one:"} } {
+    {instruction "Choose one:"} } {
 
     global unique
-
-#    if [winfo exist $w] {
-#	ptkImportantMessage .error \
-#		"Already editing target parameters for this facet"
-#	return
-#    }
 
     set w .ptkChooseOne$unique
     incr unique
 
     toplevel $w
 
-    set b $w.buttonFrame
-
-    label $w.label -text $direction -anchor w
+    label $w.label -text $instruction -anchor w
     frame $w.optFrame -bd 3 -relief sunken
-    frame $b -bd 3
+    set b [frame $w.buttonFrame -bd 3]
 
     foreach opt $optionList {
        pack [radiobutton $w.optFrame.opt$opt -text $opt -var selVar$w \
@@ -975,27 +944,103 @@ proc ptkChooseOne {
 
    $w.optFrame.opt[lindex $optionList 0] invoke
 
-   pack [frame $b.f -bd 2 -relief sunken] -side left -expand 1
-   pack [button $b.cancel -text Cancel \
-	-command "destroy $w; uplevel #0 \"unset selVar$w\""] \
-        -side left -padx 3m -pady 3m -ipadx 1m -ipady 1m -expand 1
-
-   pack [button $b.f.ok -text OK -command \
-	"ptkFormatCmd \"$command\" selVar${w}; destroy $w"] \
-	-padx 1m -pady 1m -ipadx 1m -ipady 1m
+   ptkOkCancelButtons $b \
+	"ptkFormatCmd \"$command\" selVar${w}; destroy $w" \
+	"destroy $w; uplevel #0 \"unset selVar$w\""
 
    pack $w.label -side top -fill x -expand 1
    pack $w.optFrame -side top -expand 1 -fill x
    pack $b -side top -expand 1 -fill x
 
+# FIXME? Restore old focus?
+   ptkRecursiveBind $w <Any-Enter> {focus %W}
+   ptkRecursiveBind $w <Return> "$b.f.ok invoke"
 }
 
-# Formats 'cmd'
+# The following procedure executes format on its arguments
 
 proc ptkFormatCmd {cmd radioVarName} {
    upvar $radioVarName radioVar
    eval [format $cmd $radioVar]
 }
 
-#
+# Given a list of name-value arguments, this procedure lets the
+# user modify values.
+
+# The argument "instr" is a label (anchored west) used to decorate the
+#  top of the window and can be used as an instruction.
+# The argument "args" is a list of (a list of) name-value pairs.
+#  eg., {name1 value1} {name2 value2}
+# If a name-value pair consists of only one element, then the value is
+#  initialized to the null string (which is the entry widget contents
+#  default)
+# Above caveat holds: names of name-value pairs will be used in window
+#  names; as such, names may not start with '.'
+
+proc ptkEditValues {instr cmd args} {
+   global unique
+   
+   set w .ptkEditValues$unique
+   incr unique
+
+   toplevel $w
+
+   #FIXME: Have more informative title and icon decorations
+   wm title $w ptolemyWindow
+   wm iconname $w ptolemyWindow
+
+   set nmFrame [frame $w.f -bd 3 -relief raised]
+   pack [label $w.label -text $instr -relief raised \
+	-font [option get . mediumfont Pigi]] \
+	-side top -fill x -expand 1
+   foreach name_value $args {
+    set name [lindex $name_value 0]
+    ed_MkEntryButton $nmFrame.name_$name $name
+    $nmFrame.name_$name.entry config -width 32
+    if {[llength $name_value] == 2} {
+	$nmFrame.name_$name.entry insert 0 [lindex $name_value 1]
+    }
+    pack $nmFrame.name_$name -side top -fill x -expand 1
+   }
+   pack $nmFrame -side top -fill x -expand 1
+
+   ptkOkCancelButtons [frame $w.okcancel -bd 1] \
+	"ed_RetrieveAndExecute \"$cmd\" $nmFrame $args; destroy $w"\
+	"destroy $w"
+   pack $w.okcancel -side top -fill x
+
+
+# For the widget bindings to take effect, the focus must be within
+# FIXME? Restore old focus?
+
+   ptkRecursiveBind $w <Any-Enter> {focus %W}
+   ptkRecursiveBind $w <Return> "$w.okcancel.f.ok invoke"
+}
+
+# This procedure is used within ptkEditValues for retrieving values
+#  given a list of names.
+
+proc ed_RetrieveAndExecute {cmd frame args} {
+   set newList ""
+   foreach arg $args {
+	set name [lindex $arg 0]
+	lappend newList \
+		"[list $name] [list [$frame.name_$name.entry get]]"
+   }
+   eval [format $cmd $newList]
+}
+
+# This procedure creates the ok and cancel buttons inside a frame
+
+proc ptkOkCancelButtons {frame okCmd cancelCmd} {
+
+   pack [frame $frame.f -bd 2 -relief sunken] -side left -expand 1
+   pack [button $frame.cancel -text Cancel -command $cancelCmd] \
+	-side left -padx 3m -pady 3m -ipadx 1m -ipady 1m -expand 1
+   pack [button $frame.f.ok -text OK -command $okCmd] \
+	-padx 1m -pady 1m -ipadx 1m -ipady 1m
+
+}
+                                                                            #
+                                                                            #
 #############################################################################
