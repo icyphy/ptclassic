@@ -27,6 +27,10 @@ static char SccsId[]="$Id$";
 #include "copyright.h"
 #include "port.h"
 #include "internal.h"
+#include "bb.h"
+#include "master.h"
+#include "oct_utils.h"
+
 /* 
  * bb.c : implements the various functions that keep the facet 
  * bounding box up to date, as well as the functions to access the 
@@ -40,8 +44,6 @@ static char SccsId[]="$Id$";
  * difficult. See master.c for more details
  */
   
-octStatus oct_bb_get();
-
 octStatus
 octBB(object, box)
 octObject *object;
@@ -100,6 +102,7 @@ struct octBox *box;
  * bounding box recalculation if the old bb touched the facet 
  * perimeter AND the new bb doesn't.
  */
+octStatus
 oct_bb_modify(object, old, new)
 generic *object;
 struct octBox *old, *new;
