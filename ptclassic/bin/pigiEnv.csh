@@ -207,7 +207,8 @@ endif
 if ( $?pigidebug ) then
 	switch ($PTARCH)
 		case hppa.cfront:
-	                setenv COMMAND $PTOLEMY/lib/pigiRpcDebug.xdb
+			#setenv COMMAND $PTOLEMY/lib/pigiRpcDebug.xdb
+			setenv COMMAND $PTOLEMY/lib/pigiRpcDebug.dde
 			breaksw
 		case sol2.cfront:
 		case sol2.5.cfront:
