@@ -54,39 +54,27 @@
 # ::tycho::Class</a> model. The model is in turn generated from the code.
 # 
 # IDoc supports any language that can be encoded into a ::tycho::Class
-# representation. Currently, keywords are only correct for Itcl. However,
-# the default behaviour will allow browsing of any language, though certain
-# information may be left out in the current implementation.
+# representation. Currently, keywords are correct for Itcl as well as Java.
+# However, the default behaviour will allow browsing of any language,
+# though certain information may be left out in the current implementation.
 #
 # To add a new language to IDoc, modify the displayMeth (chooses the names 
 # and ordering for methods and procs in the MultiPanel), displayVar 
 # (chooses the names and ordering for variables in the MultiPanel), and 
 # formatExpl (formats the explanations of variables and methods in HTML) 
-# methods.
+# methods. An easier way is to search for <code>switch $language</code>.
 #  
-# I am currently working on the generation of ::Class files and then the
-# importation of ancestors...I think it's important that the documentation
-# have the ability to be flattened. That is, a developer or user needs to know
-# which variables and methods have been inherited from the parents. Switching
-# back and forth is time consuming, confusing, and downright frustrating.
-#
-# Here's an example of how to use this class:
-#
-# <tcl><pre>
-# catch {destroy .u}
-# ::tycho::Displayer .u
-# ::tycho::IDoc .u.i
-# .u showView .u.i
-# .u centerOnScreen
-# .u.i configure -file  $TYCHO/lib/tydoc/test/IDoc.idoc
-# .u.i reload
-# </tcl></pre>
+# To use this class, go to the Special menu in either the Itcl or Java editors
+# and select _Generate IDoc Documentation_. 
 #
 class ::tycho::IDoc {
     inherit ::tycho::File
 
     ##########################################################################
     ####                            options                               ####
+
+    # Whether or not to generate verbose HTML
+    itk_option define -verbose verbose Verbose 0
 
     # The color of inherited entities.
     itk_option define -inheritcolor inheritColor InheritColor grey
@@ -154,7 +142,7 @@ class ::tycho::IDoc {
     public method generateDAG {}
 
     # Generate an HTML representation of the current class.
-    public method generateHTML {}
+    public method generateHtml {}
 
     # Place a ghost handle a certain number of pixels from the actual one.
     public method ghostHandle {horizontal pixels}
@@ -169,7 +157,7 @@ class ::tycho::IDoc {
     public method insertData {data}
     
     # Insert HTML into myHtml(Top or Bottom) widget
-    public method putHtml {class data {top 1} {show 1}}
+    public method putHtml {class data {top 1}}
 
     # Return the filename of the relative documentation of the given class.
     public method relFile {classname}
@@ -218,6 +206,9 @@ class ::tycho::IDoc {
     # Location where mouse button was pressed.
     protected variable lastPress
 
+    # The levels of protection the current language supports. Set in display.
+    protected variable protections
+
     ###################################################################
     ####                     protected methods                     ####
 
@@ -257,16 +248,28 @@ class ::tycho::IDoc {
     private method displayVar {protection}
     
     # Format the explanation of the given item in HTML.
-    private method formatExpl {class item type}
+    private method formatExpl {class item type {extern 0}}
+
+    # Create the body of an HTML document describing the current mainClass.
+    private method generateHtmlBody {}
+
+    # Create the internal links for an HTML output of the class model. 
+    private method generateHtmlContents {}
 
     # Format the given item as an HTML link
     private method hyperLink {class item type {text {}} {itemtype {}}}
 
     # Initialize the menu bar.
     private method initializeMenubar {menubar}
-    
+
+    # Perform an info namespace qualifiers, Java style.
+    private method javaNamespaceQual {className}
+
+    # Perform an info namespace tail, Java style.
+    private method javaNamespaceTail {className}
+
     # Calculate a new -relwidth parameter (doesn't reset it)
-    private method newRelWidth {pizxls}
+    private method newRelWidth {pixels}
 
     # Calculate a new -relheight parameter (doesn't reset it)
     private method newRelHeight {pixels}
@@ -522,8 +525,7 @@ body ::tycho::IDoc::docFile {classname} {
         }
         Java {
             # Shorten the full classname
-            set docname $classname
-            regexp {[.]([^.]+)$} $docname dmy docname
+            set docname [javaNamespaceTail $classname]
             
             # Add the idoc extension
             set docname "$docname.idoc"
@@ -595,18 +597,54 @@ body ::tycho::IDoc::generateDAG {} {
     puts $myDAG
     foreach entry $DAGinfo {
         eval "$myDAG $entry"
-    }
-    
+    }    
 }
 
 #####################################################################
-#### generateHTML
+#### generateHtml
 # Output the class data in HTML form. 
 #
-body ::tycho::IDoc::generateHTML {} {
+body ::tycho::IDoc::generateHtml {} {
+    set verbose $itk_option(-verbose)
+    set classModel $myClass($mainClass)
+    set className [$classModel modelcget -name]
     
+    set html "<!-- Automatically generated by the Tycho IDoc viewer -->\
+            \n<html>\
+            \n<title>Class $className</title>\
+            \n</head>\
+            \n<body bgcolor=\"$itk_option(-background)\">\
+            \n<h1> Class "
 
-}    
+    switch $language {
+        Itcl {
+            append html "\
+                    <a name = \"[info namespace tail $className] \
+                    class documentation ([info namespace qualifiers \
+                    $className] namespace)\">\
+                    $className</a></h1>\n"
+        }
+        Java {
+            append html "\
+                    <a name = \"[javaNamespaceTail $className] \
+                    class documentation ([javaNamespaceQual \
+                    $className] namespace)\">\
+                    $className</a></h1>\n"
+          }
+      }
+      
+      append html [generateHtmlContents]
+      append html [generateHtmlBody]
+      append html "</body>\n</html>\n"
+      
+      # Save it as blah_i.html where the current file is blah.idoc
+      set htmlFile [file root [docFile $mainClass]]_i.html
+      set fp [open $htmlFile w]
+      puts $fp $html
+      close $fp
+      ::tycho::File::openContext $htmlFile 
+}
+
 #####################################################################
 #### ghostHandle
 # Control the ghost handle (for lack of a standard name), which is the
@@ -636,10 +674,8 @@ body ::tycho::IDoc::ghostHandle {horizontal pixels} {
 
             place $itk_component(vGhost) -anchor e -relx 1.0 -rely $newRelY \
                     -relwidth $hw -height 4 -in $itk_interior
-        }
-        
+        }   
     }
-
 }
 
 #########################################################################
@@ -736,10 +772,10 @@ body ::tycho::IDoc::insertData {data} {
 # show is true, reload the data in the HTML widget. Show is set to false 
 # when generating HTML for output to a file.
 #
-body ::tycho::IDoc::putHtml {class data {top 1} {show 1}} {
+body ::tycho::IDoc::putHtml {class data {top 1}} {
     switch $top {
         1 {
-            set myTopData " 
+            set myTopData "
                <head>
                <title>Class [$myClass($class) modelcget -name]</title>
                </head>
@@ -750,7 +786,7 @@ body ::tycho::IDoc::putHtml {class data {top 1} {show 1}} {
                </body>
                </html>"
             resetHtml 1
-            $myHtmlTop config -file [docFile $class].base
+            $myHtmlTop config -file [docFile $class]
         }
         0 {
             set myBottomData "
@@ -760,10 +796,11 @@ body ::tycho::IDoc::putHtml {class data {top 1} {show 1}} {
                </body>
                </html>"
             resetHtml 0
-            $myHtmlBottom config -file [docFile $class].base
+            $myHtmlBottom config -file [docFile $class]
         }
     }
 }
+
 
 #####################################################################
 #### relFile
@@ -867,8 +904,8 @@ body ::tycho::IDoc::initialize {{menubar {}} {statusbar {}} {toolbar {}}} {
             -packagecolor packageColor \
             -privatecolor privateColor \
             -optioncolor optionColor  \
-            -inheritcolor inheritColor 
-
+            -inheritcolor inheritColor \
+            -verbose verboseHtml
 }
 
 #####################################################################
@@ -1681,7 +1718,10 @@ body ::tycho::IDoc::displayVar {protection} {
 # bound to a button 1 click on an item in the contents widget.
 # An item may not have an explanation, but _must_ have a description.
 # 
-body ::tycho::IDoc::formatExpl {class item type} {
+# If extern is set (it's to be externally viewed), follow the Tydoc
+# style of formatting. If unset, follow the IDoc style.
+#
+body ::tycho::IDoc::formatExpl {class item type {extern 0}} {
     set classModel $myClass($class)
 
     if [catch {set expl [$classModel get annotation $item.explanation $type]}] {
@@ -1722,7 +1762,12 @@ body ::tycho::IDoc::formatExpl {class item type} {
             set item [hyperLink $class $item $type]
             
             # Format HTML
-            set html "<b>$item</b> <i>$other</i><p> $expl"
+            if {$extern} {
+                set html "<dt><code>$item $other</code>\
+                        \n<dd>$expl"
+            } else {
+                set html "<b>$item</b> <i>$other</i><p> $expl"
+            }
 
             # Add footer for inherited items
             if {$class != $mainClass && $class != "related"} {
@@ -1785,12 +1830,26 @@ body ::tycho::IDoc::formatExpl {class item type} {
             
             # Format HTML
             if {$modifiers != {} || $itemtype != {}} {
-                set html "$modifiers $itemtype <b>$shortname</b> "
+                if {$extern} {
+                    set html "<dt><code>$modifiers $itemtype $shortname"
+                } else {
+                    set html "$modifiers $itemtype <b>$shortname</b> "
+                }
             } {
-                set html "<b>$shortname</b> "
+                if {$extern} {
+                    set html "<code>$shortname"
+                } else {
+                    set html "<b>$shortname</b> "
+                }
             }
-            append html "<i>$other</i> $exceptions<p> $expl"            
-    
+            
+            if {$extern} {
+                append html "$other $exceptions</code>\
+                        \n<dd>$expl"
+            } else {
+                append html "<i>$other</i> $exceptions<p> $expl"            
+            }
+
             # Add footer for inherited items
             if {$class != $mainClass && $class != "related"} {
                 append html "<br><br><br><hr>\
@@ -1798,6 +1857,440 @@ body ::tycho::IDoc::formatExpl {class item type} {
             }
         }
     }
+    return $html
+}
+
+#####################################################################
+#### generateHtmlContents
+# Create the internal links for an HTML output of the class model. 
+# If verbose is unset, only output Constructors and Destructors if 
+# they have a non-blank description, and only do not output private
+# entities. Verbose outputs everything.
+#
+body ::tycho::IDoc::generateHtmlContents {} {
+    set classModel $myClass($mainClass)
+    set verbose $itk_option(-verbose)
+    
+    # Remove "private" from the protection list if non-verbose
+    if {$verbose} {
+        set tempprotect $protections
+    } else {
+        set tempprotect [lreplace $protections end end]
+    }
+        
+    switch $language {
+        Itcl {
+            set html "<HR>\n"
+            set parents [$classModel parents]
+            if {$parents != {}} {
+                append html "Inherits: "
+                foreach parent $parents {
+                    append html "<a href=\"[::tycho::relativePath\
+                            [file dirname [docFile $mainClass]]\
+                            [docFile $parent]]\">"
+                    append html "<code>$parent</code></a> -\n"
+                }
+            }
+            append html "<a href=\"[$classModel modelcget -source]\">Source\
+                    File</a> -\n"
+            append html "Contents:\n"
+            
+            set of_class "of [info namespace tail [$classModel modelcget\
+                    -name]] class"
+            
+            # Check for itk_options
+            if {[$classModel variables -protection public \
+                    -modifiers itk_option]!= {}} {
+                append html "<a href=\"#itk_options $of_class\"\
+                        >itk_options</a> -\n"
+            }
+            
+            # Check for constructor
+            set constructor [$classModel Constructors]
+            if {$constructor != {}} {
+                if {$verbose || !$verbose && [$classModel get annotation \
+                        $constructor.description Constructor] != { }} {
+                    append html "<a href=\"#constructor $of_class\"\
+                            >constructor</a> -\n"
+                }
+            }
+            
+            # Check for destructor
+            set destructor [$classModel Destructors]
+            if {$destructor != {}} {
+                if {$verbose || !$verbose && [$classModel get annotation \
+                        $destructor.description Destructor] != { }} {
+                    append html "<a href=\"#destructor $of_class\"\
+                            >destructor</a> -\n"
+                }
+            }
+            
+            # Check for methods/procs/variables/commons by protection
+            foreach protection $tempprotect {
+                # Check for methods
+                if {[$classModel methods -protection $protection \
+                        -scope instance] != {}} {
+                    append html "<a href=\"#$protection methods\
+                            $of_class\">$protection methods</a> -\n"
+                }
+                # Check for procs
+                if {[$classModel methods -protection $protection \
+                        -scope class] != {}} {
+                    append html "<a href=\"#$protection procs\
+                            $of_class\">$protection procs</a> -\n"
+                }
+                # Check for variables
+                if {[$classModel variables -protection $protection \
+                        -scope instance -modifiers {}] != {}} {
+                    append html "<a href=\"#$protection variables\
+                            $of_class\">$protection variables</a> -\n"
+                }
+                # Check for commons
+                if {[$classModel variables -protection $protection \
+                        -scope class] != {}} {
+                    append html "<a href=\"#$protection commons\
+                            $of_class\">$protection commons</a> -\n"
+                }
+            }
+            set html "[string trimright $html "- \n"]\n<HR>\n"      
+        }
+        Java {
+            set html "<HR>"
+            set extends [$classModel parents -inheritance implementation]
+            if {$extends != {}} {
+                append html "Extends: "
+                append html "<a href=\"[::tycho::relativePath\
+                        [file dirname [docFile $mainClass]]\
+                        [docFile $extends]]\">"
+                append html "<code>$extends</code></a>- "
+            }
+            
+            set implements [$classModel parents -inheritance interface]
+            if {$implements != {}} {
+                append html "Implements: "
+                foreach parent $implements {
+                    append html "<a href=\"[::tycho::relativePath\
+                            [file dirname [docFile $mainClass]]\
+                            [docFile $parent]]\">"
+                    append html "<code>$parent</code></a>- "
+                }
+            }
+            append html "<a href=\"[$classModel modelcget -source]\">Source\
+                    File</a> - "
+            append html "Contents:\n"
+            
+            set of_class "of [javaNamespaceTail $mainClass] class"
+            
+            # Check for constructors
+            if {[$classModel Constructors] != {}} {
+                append html "<a href=\"#constructor $of_class\">constructor</a>\
+                        - "
+            }
+            
+            # Check for destructor
+            set destructor [$classModel Destructors]
+            if {$destructor != {}} {
+                if {$verbose || !$verbose && [$classModel get annotation \
+                        $destructor.description Destructor] != { }} {
+                    append html "<a href=\"#finalizer $of_class\"\
+                            >finalizer</a> - "
+                }
+            }
+            
+            # Check for methods/procs/variables/commons by protection
+            foreach protection $tempprotect {
+                # Check for methods
+                if {[$classModel methods -protection $protection \
+                        -scope instance] != {}} {
+                    append html "<a href=\"#$protection methods\
+                            $of_class\">$protection methods</a> - "
+                }
+                # Check for static methods
+                if {[$classModel methods -protection $protection \
+                        -scope class] != {}} {
+                    append html "<a href=\"#$protection static methods\
+                            $of_class\">$protection static methods</a> - "
+                }
+                # Check for variables
+                if {[$classModel variables -protection $protection \
+                        -scope instance] != {}} {
+                    append html "<a href=\"#$protection variables\
+                            $of_class\">$protection variables</a> - "
+                }
+                # Check for static variables
+                if {[$classModel variables -protection $protection \
+                        -scope class] != {}} {
+                    append html "<a href=\"#$protection static variables\
+                            $of_class\">$protection static variables</a> - "
+                }
+            }
+            set html "[string trimright $html "- \n"]\n<HR>\n"      
+        }
+        default {
+            set html {}
+        }
+    }
+    return $html
+}
+
+#####################################################################
+#### generateHtmlBody
+# Create the body of an HTML document describing the current mainClass.
+# Similar to display. 
+#
+# If verbose is unset, only output Constructors and Destructors if 
+# they have a non-blank description, and only do not output private
+# entities. Verbose outputs everything.
+#
+# We could pull this information from the contents
+# widget, however, we might have to reload if it contains inherited data,
+# which we do not document in the HTML (yet). 
+#
+# It may be desireable to generate "flattened" documentation, listing all
+# methods/variables available to a class. This is a FIXME for future versions.
+#
+body ::tycho::IDoc::generateHtmlBody {} {
+    set classModel $myClass($mainClass)
+    set verbose $itk_option(-verbose)
+
+    # Remove "private" from the protection list if non-verbose
+    if {$verbose} {
+        set tempprotect $protections
+    } else {
+        set tempprotect [lreplace $protections end end]
+    }
+    
+    set html [$classModel get annotation explanation]
+    # Remove footer
+    regexp {^(.*<hr>)(<br>[^:]+:.*)$} $html dmy html footer
+    
+    switch $language {
+        Itcl {
+            set of_class "of [info namespace tail $mainClass] class"
+            
+            # Check for itk_options
+            set itk_options [$classModel variables -protection public \
+                    -modifiers itk_option]
+            if {$itk_options != {}} {
+                append html "<H2><a name=\"itk_options $of_class\">\
+                        Itk_options</a></H2>\n<dl>"
+                foreach option $itk_options {
+                    set nodash [string trimleft $option "-"]
+                    append html "<a name = \"$nodash \
+                            itk_option $of_class\">"
+                    append html "[formatExpl $mainClass $option variable 1]</a>"
+                }
+                append html "</dl>"
+            }
+            
+            # Check for constructor
+            set constructor [$classModel Constructors]
+            if {$constructor != {}} {
+                if {$verbose || !$verbose && [$classModel get annotation \
+                        $constructor.description Constructor] != { }} {
+                    append html "<H2><a name=\"constructor $of_class\"\
+                            >Constructor</a></H2>\n<dl>"
+                    append html "<a name = \"constructor of $mainClass class\">"
+                    append html "[formatExpl $mainClass\
+                            $constructor Constructor 1]"
+                    append html "</a></dl>"
+                }
+            }
+            
+            # Check for destructor
+            set destructor [$classModel Destructors] 
+            if {$destructor != {}} {
+                if {$verbose || !$verbose && [$classModel get annotation \
+                        $destructor.description Destructor] != { }} {
+                    append html "<H2><a name=\"destructor $of_class\"\
+                            >Destructor</a></H2>\n<dl>"
+                    append html "<a name = \"destructor of $mainClass class\">"
+                    append html "[formatExpl $mainClass\
+                            $destructor Destructor 1]"
+                    append html "</a></dl>"
+                }     
+            }
+            
+            # Check for methods/procs/variables/commons by protection
+            foreach protection $tempprotect {
+                set Protection [::tycho::capitalize $protection]
+                set temp {}
+
+                # Check for methods
+                set methods [$classModel methods -protection $protection \
+                        -scope instance]
+                if {$methods != {}} {
+                    append temp "<H3><a name=\"$protection methods\
+                            $of_class\">$Protection Methods</a></H3><dl>"
+                    foreach method $methods {
+                        append temp "<a name = \"$method method of $mainClass\
+                                class\">"
+                        append temp "[formatExpl $mainClass\
+                                $method method 1]</a>"
+                    }
+                    append temp "</dl>"
+                }
+                                
+                # Check for procs
+                set procs [$classModel methods -protection $protection \
+                        -scope class]
+                if {$procs != {}} {
+                    append temp "<H3><a name=\"$protection procs\
+                            $of_class\">$Protection Procs</a></H3><dl>"
+                    foreach proc $procs {
+                        append temp "<a name = \"$proc proc of $mainClass\
+                                class\">"
+                        append temp "[formatExpl $mainClass\
+                                $proc method 1]</a>"
+                    }
+                    append temp "</dl>"
+                }
+
+                # Check for variables
+                set variables [$classModel variables -protection $protection \
+                        -scope instance -modifiers {}]
+                if {$variables != {}} {
+                    append temp "<h3><a name=\"$protection variables\
+                            $of_class\">$Protection Variables</a></h3><dl>"
+                    foreach variable $variables {
+                        append temp "<a name = \"$variable variable of\
+                                $mainClass class\">"
+                        append temp "[formatExpl $mainClass\
+                                $variable variable 1]</a>"
+                    }
+                    append temp "</dl>"
+                }
+
+                # Check for commons
+                set commons [$classModel variables -protection $protection \
+                        -scope class]
+                if {$commons != {}} {
+                    append temp "<h3><a name=\"$protection commons\
+                            $of_class\">$Protection Commons</a></h3><dl>"
+                    foreach common $commons {
+                        append temp "<a name = \"$common common of $mainClass\
+                                class\">"
+                        append temp "[formatExpl $mainClass\
+                                $common variable 1]</a>"
+                    }
+                    append temp "</dl>"
+                }
+                
+                if {$temp != {}} {
+                    append html "<h2>$Protection constructs</h2>"
+                    append html "$temp\n<HR>"
+                }
+            }
+        }
+        Java {
+            set of_class "of [javaNamespaceTail $mainClass] class"
+            
+            # Check for constructors
+            set constructors [$classModel Constructors]
+            if {$constructors != {}} {
+                append html "<h2><a name=\"constructor $of_class\"\
+                        >Constructor</a></h2><dl>"
+                foreach constructor $constructors {
+                    append html "<a name = \"constructor of $mainClass\
+                            class\">"
+                    append html "[formatExpl $mainClass\
+                            $constructor Constructor 1]"
+                    append html "</a>"                
+                }
+                append html "</dl>"
+            }
+            
+            # Check for destructors
+            set destructors [$classModel Destructors]
+            set destructor [$classModel Destructors]
+            if {$destructor != {}} {
+                if {$verbose || !$verbose && [$classModel get annotation \
+                        $destructor.description Destructor] != { }} {
+                    append html "<h2><a name=\"finalizer $of_class\"\
+                            >Finalizer</a></h2><dl>"
+                    append html "<a name = \"finalizer of $mainClass class\">"
+                    append html "[formatExpl $mainClass\
+                            $destructor Destructor 1]"
+                    append html "</a></dl>"
+                }
+            }
+            
+            # Check for methods/variables by protection
+            foreach protection $tempprotect {
+                set Protection [::tycho::capitalize $protection]
+                set temp {}
+                
+                # Check for methods
+                set methods [$classModel methods -protection $protection \
+                        -scope instance] 
+                if {$methods != {}} {
+                    append temp "<h3><a name=\"$protection methods\
+                            $of_class\">$Protection Methods</a></h3><dl>"
+                    foreach method $methods {
+                        append temp "<a name = \"$method method of $mainClass\
+                                class\">"
+                        append temp "[formatExpl $mainClass $method method 1]\
+                                </a>"
+                    }
+                    append temp "</dl>"
+                }
+
+                # Check for static methods
+                set smethods [$classModel methods -protection $protection \
+                        -scope class]
+                if {$smethods != {}} {
+                    append temp "<h3><a name=\"$protection static methods\
+                            $of_class\">$Protection Static Methods</a></h3><dl>"
+                    foreach smethod $smethods {
+                        append temp "<a name = \"$smethod static method\
+                                of $mainClass class\">"
+                        append temp "[formatExpl $mainClass $smethod method 1]\
+                                </a>"
+                    }
+                    append temp "</dl>"
+                }
+
+                # Check for variables
+                set variables [$classModel variables -protection $protection \
+                        -scope instance]
+                if {$variables != {}} {
+                    append temp "<h3><a name=\"$protection variables\
+                            $of_class\">$Protection Variables</a></h3><dl>"
+                    foreach variable $variables {
+                        append temp "<a name = \"$variable variable of\
+                                $mainClass class\">"
+                        append temp "[formatExpl $mainClass $variable\
+                                variable 1]</a>"
+                    }
+                    append temp "</dl>"
+                }
+
+                # Check for static variables
+                set svariables [$classModel variables -protection $protection \
+                        -scope class]
+                if {$svariables != {}} {
+                    append temp "<h3><a name=\"$protection static variables\
+                            $of_class\">$Protection Static Variables</a>\
+                            </h3><dl>"
+                    foreach svariable $svariables {
+                        append temp "<a name = \"$svariable static variable of\
+                                $mainClass class\">"
+                        append temp "[formatExpl $mainClass $svariable\
+                                variable 1]</a>"
+                    }
+                    append temp "</dl>"
+                }
+                
+                if {$temp != {}} {
+                    append html "<h2>$Protection constructs</h2>"
+                    append html "$temp\n<HR>"
+                }
+            }                
+        }
+        default {
+        }
+    }
+    append html $footer
     return $html
 }
 
@@ -1829,8 +2322,8 @@ body ::tycho::IDoc::hyperLink {class item type {text {}} {itemtype {}}} {
             } else {
                 # It's an itk_option, link to the itk_option define
                 set text "<a href = \
-                    \"[$classModel modelcget -source]#itk_option define $item\">\
-                    $text</a>"
+                    \"[$classModel modelcget -source]#itk_option\
+                    define $item\">$text</a>"
             }  
 
         }
@@ -1894,9 +2387,34 @@ body ::tycho::IDoc::initializeMenubar {menubar} {
             -label Inherit \
             -underline 0 -command "$this inheritAll"
     
+    $menubar command generateHtml special \
+            -label "Generate HTML" \
+            -underline 0 -command "$this generateHtml"
+    
     # FIXME: add in when generalized place is working in displayer
     #        $menubar command GenDAG Special \
     #                -underline 0 -command "$this generateDAG"
+}
+
+#####################################################################
+#### javaNamespaceQual
+# Perform an info namespace qualifiers, Java style
+#
+body ::tycho::IDoc::javaNamespaceQual {classname} {
+    if [regexp {^(.+)[.][^.]+$} $classname dmy classname] {
+        return $classname
+    } else {
+        return {}
+    }
+}
+
+#####################################################################
+#### javaNamespaceTail
+# Perform an info namespace tail, Java style
+#
+body ::tycho::IDoc::javaNamespaceTail {classname} {
+    regexp {[.]([^.]+)$} $classname dmy classname
+    return $classname
 }
 
 #####################################################################
@@ -2000,7 +2518,6 @@ body ::tycho::IDoc::setupHandles {} {
 # foo (int, int)
 #
 body ::tycho::IDoc::fixName {name {short 1}} {
-
     if {$short} {
         regexp {^(.*)[(]} $name dmy name
         return $name
