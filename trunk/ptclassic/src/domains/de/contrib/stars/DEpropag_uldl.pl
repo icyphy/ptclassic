@@ -20,7 +20,8 @@ defstar {
         This is not a generic path-loss-model for any AutoCad-enviroment !!!
         }
        	hinclude { <stdio.h>, <string.h>, <fstream.h>,
-		  <complex.h>, <math.h>, <stdlib.h>, <iomanip.h>}
+		  <complex.h>, <math.h>, <stdlib.h>, <iomanip.h>, 
+		  "pt_fstream.h" }
         input 	{
             name { MS_Position }
             type { Complex }
@@ -33,6 +34,13 @@ defstar {
             name { C_dBm }  
             type { float }
         }
+	defstate {
+		name { fileName }
+		type { string }
+		default { "$PTOLEMY/src/domains/de/contrib/stars/topo.dxf" }
+		descriptor { File describing topology }
+	}
+
  	private {
 	enum Umgebung { Fenster, Fenster1, Fenster2, Tuer, Tuer2, Metall_Tuer, Metall_Tuer1,
  			Glas_Tuer, Glas_Doppel_Tuer, Doppel_Tuer, Doppel_Tuer2, Fahrstuhltuer,
@@ -240,9 +248,11 @@ method {
    double 	Tuerbog[5];
    
   
-   ifstream in("$PTOLEMY/src/domains/de/contrib/stars/topo.dxf");
+   pt_ifstream in;
+   in.close();
+   in.open(fileName);
    if (!in) {
-	Error::abortRun(*this, "can't open dxf-file");
+	Error::abortRun(*this, "can't open dxf-file  ", fileName);
 	}
    else
    {
