@@ -143,7 +143,9 @@ The input particles are only cast to this precision if the parameter
 		Fix fixIn, fdbckAccum, fwdAccum, out;
         }
 	constructor {
-		fdbckCoefs = fwdCoefs = state = NULL;
+		fdbckCoefs = 0;
+		fwdCoefs = 0;
+		state = 0;
 	}
 	destructor {
 	    LOG_DEL; delete [] fdbckCoefs;
@@ -190,8 +192,8 @@ The input particles are only cast to this precision if the parameter
 	    if ( st.invalid() )
 	      Error::abortRun( *this, "Invalid StatePrecision" );
 
-	    coef.set_rounding( ((int) RoundFix) );
-	    st.set_rounding( ((int) RoundFix) );
+	    coef.set_rounding( int(RoundFix) );
+	    st.set_rounding( int(RoundFix) );
 
 	    // Set up the state and coefficient vectors
 	    // The first location in state and fdbckCoefs is wasted.
@@ -227,10 +229,10 @@ The input particles are only cast to this precision if the parameter
 	    out.set_ovflow( OverflowHandler );
 
 	    // Set all fixed-point assignments/computations to use rounding
-            fixIn.set_rounding( ((int) RoundFix) );
-	    fdbckAccum.set_rounding( ((int) RoundFix) );
-	    fwdAccum.set_rounding( ((int) RoundFix) );
-	    out.set_rounding( ((int) RoundFix) );
+            fixIn.set_rounding( int(RoundFix) );
+	    fdbckAccum.set_rounding( int(RoundFix) );
+	    fwdAccum.set_rounding( int(RoundFix) );
+	    out.set_rounding( int(RoundFix) );
 	}
         go {
             if ( numState == 1 ) {
