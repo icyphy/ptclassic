@@ -71,6 +71,7 @@ CCS_WITH_H_FILES=\
  KnownTarget.cc \
  Linker.cc \
  Matrix.cc \
+ MatrixParticle.cc \
  Message.cc \
  NamedObj.cc \
  Particle.cc \
@@ -85,6 +86,7 @@ CCS_WITH_H_FILES=\
  StringArrayState.cc \
  StringList.cc \
  StringState.cc \
+ SubMatrix.cc \
  Target.cc \
  TimeVal.cc \
  Tokenizer.cc \
