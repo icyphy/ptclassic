@@ -13,8 +13,15 @@
 
 typedef char Engine;
 
+Engine *engOpenPtError()
+{
+	Error::abortRun( "The external interface to Matlab has not been ",
+			 "compiled into Ptolemy." );
+	return( (Engine *) 0 );
+}
+
 #define engEvalString(ep,string)	1
-#define engOpen(s)			0
+#define engOpen(s)			engOpenPtError()
 #define engClose(ep)			1
 #define engGetMatrix(ep,name)		0
 #define engPutMatrix(ep,mp)		1
