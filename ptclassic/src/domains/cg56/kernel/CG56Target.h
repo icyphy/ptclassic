@@ -33,7 +33,6 @@ private:
 	NestedSymbol targetNestedSymbol;
 	void initStates();
 protected:
-	StringList cmds;
 	StringState xMemMap;
 	StringState yMemMap;
 
@@ -47,20 +46,33 @@ protected:
 	void saveProgramCounter();
 	void restoreProgramCounter();
 
-	char* uname;
 	IntState disCode;
+	IntState runCode;
 	int inProgSection;
+	StringState targetHost;
+	char* uname;
+
+	virtual void initializeCmds();
+	virtual char downloadCmdFlag() const{return '!';}
+	virtual char miscCmdFlag() const{return '@';}
+	StringList downloadCmds;
+	StringList assembleCmds;
+	StringList miscCmds;
+	virtual const char* asmSuffix() const {return ".asm";}
 public:
 	CG56Target (const char* nam, const char* desc);
 	// copy constructor
 	CG56Target(const CG56Target&);
 	Block* clone() const;
 	void headerCode();
+	int setup(Galaxy &g);
 	void wrapup();
-	int setup(Galaxy&);
 	void beginIteration(int repetitions, int depth);
 	void endIteration(int repetitions, int depth);
 	void addCode(const char*);
+	virtual int assembleCode();
+	virtual int downloadCode();
+	const char* readClassName() const{return "CG56Target";}
 	~CG56Target();
 };
 

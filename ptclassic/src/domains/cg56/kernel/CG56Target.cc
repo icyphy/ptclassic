@@ -18,7 +18,8 @@ $Id$
 
 #include "CG56Target.h"
 #include "CG56Star.h"
-#include <ctype.h>
+#include "CGUtilities.h"
+#include "miscFuncs.h"
 
 const Attribute ANY = {0,0};
 
@@ -38,44 +39,54 @@ void CG56Target :: initStates() {
 	inProgSection = 0;
 	uname = 0;
 	mem = 0;
-	addState(xMemMap.setState("xMemMap",this,"0-4095","X memory map",
-		A_NONSETTABLE|A_NONCONSTANT));
-	addState(yMemMap.setState("yMemMap",this,"0-4095","Y memory map",
-		A_NONSETTABLE|A_NONCONSTANT));
+	StringList hostPrompt = readClassName();
+	StringList hostDescription = "Host on which ";
+	hostPrompt += " host?";
+	hostDescription += readClassName();
+	hostDescription += " hardware is installed";
+	StringList runPrompt = "Execute on ";
+	StringList runDescription = "Download and run on ";
+	runPrompt += readClassName();
+	runPrompt += "?";
+	runDescription += readClassName();
+	addState(xMemMap.setState("xMemMap",this,"0-4095","X memory map"));
+	addState(yMemMap.setState("yMemMap",this,"0-4095","Y memory map"));
 	addState(disCode.setState("Display code?",this,"YES",
 	                          "display code if YES."));
+	addState(runCode.setState(savestring(runPrompt),this,"NO",
+		savestring(runDescription), A_NONSETTABLE|A_NONCONSTANT));
+	addState(targetHost.setState(savestring(hostPrompt),this, 
+		"localhost", savestring(hostDescription), 
+		A_NONSETTABLE|A_NONCONSTANT));
 	// change default value of destDirectory
 	destDirectory.setValue("~/DSPcode");
 }
 
 void CG56Target :: addCode(const char* code) {
-	if (code[0] == '!')
-		cmds += (code + 1);
+	if (code[0] == downloadCmdFlag())
+		downloadCmds += (code + 1);
+	else if (code[0] == miscCmdFlag())
+		miscCmds += (code + 1);
 	else CGTarget::addCode(code);
 }
 
-char* makeLower(const char* name) {
-	LOG_NEW; char* newp = new char[strlen(name)+1];
-	char *o = newp;
-	while (*name) {
-		char c = *name++;
-		if (isupper(c)) *o++ = tolower(c);
-		else *o++ = c;
-	}
-	*o = 0;
-	return newp;
-}
-
 int CG56Target :: setup(Galaxy& g) {
+	assembleCmds.initialize();
+	downloadCmds.initialize();
+	miscCmds.initialize();
 	LOG_DEL; delete mem; mem = 0;
 	LOG_DEL; delete uname; uname = 0;
-	cmds.initialize();
 	LOG_NEW; mem = new CG56Memory(xMemMap,yMemMap);
 	uname = makeLower(g.readName());
 	targetNestedSymbol.initialize();
 	targetNestedSymbol.setTarget(this);
-	if (!AsmTarget::setup(g)) return FALSE;
-	return TRUE;
+	initializeCmds();
+	return AsmTarget::setup(g);
+}
+
+void CG56Target :: initializeCmds() {
+	downloadCmds = "cd ";downloadCmds+=dirFullName;downloadCmds += "\n";
+	assembleCmds = downloadCmds;
 }
 
 void CG56Target :: headerCode () {
@@ -95,9 +106,36 @@ void CG56Target :: headerCode () {
 void CG56Target :: wrapup () {
 	StringList map = mem->printMemMap(";","");
 	addCode (map);
-// put the stuff into the files.
-	if (!genFile(myCode, uname, ".asm")) return;
-	if (int(disCode)) CGTarget::wrapup();
+	Target::wrapup();
+	if (int(disCode))
+		if (!genDisFile(myCode,uname,asmSuffix())) return;
+	else
+		if (!genFile(myCode,uname,asmSuffix())) return;
+	if (int(runCode))
+		if (assembleCode()) downloadCode();
+}
+
+int CG56Target :: assembleCode() {
+	if (rshSystem(targetHost,assembleCmds) != 0 ) {
+		StringList asmError ="Errors in assembly of ";
+		asmError += uname; 
+		asmError += " universe";
+		Error::abortRun(asmError);
+		return FALSE;
+	}
+	return TRUE;
+}
+
+int CG56Target :: downloadCode() {
+	if (rshSystem(targetHost,downloadCmds) != 0 ) {
+		StringList dError = "Errors in loading ";
+		dError += uname;
+		dError += " universe on ";
+		dError += readClassName();
+		Error::abortRun (dError);
+		return FALSE;
+	}
+	return TRUE;
 }
 
 CG56Target :: ~CG56Target () {
