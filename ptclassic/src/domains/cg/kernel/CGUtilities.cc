@@ -60,7 +60,7 @@ static const char defaultDisplay[] = "xedit -name ptolemy_code %s";
 // Make a writeable local or remote directory.  Returns 0 on success
 // and -1 on failure.  If a writeable directory already exists, it
 // returns 0.
-static int makeDirectory(const char* hname, const char* directory) {
+int makeWriteableDirectory(const char* hname, const char* directory) {
     // For the mkdir Unix command, the -p flag is necessary to handle a
     // nested directory where one of the parent directories does not exist
     // The -p option works on the machines that Ptolemy runs on.
@@ -70,6 +70,8 @@ static int makeDirectory(const char* hname, const char* directory) {
     if (onHostMachine(hname)) {
 	// Create a new directory if a writeable directory of the same
 	// name does not exist
+	// FIXME: The access command only detects that a file exists
+	// and is writeable.  It does not check to see if it is a directory
 	if (access(directory, W_OK) == -1) retval = rshSystem(hname, command);
     }
     else {
@@ -178,7 +180,7 @@ int rshSystem(const char* hname, const char* cmd, const char* dir) {
 }
 
 // Write a string to a file in a specified directory on a given host.  If
-// the direcory does not exit, it will be created.  The code can be
+// the directory does not exit, it will be created.  The code can be
 // optionally displayed.  If host is not the localhost, then this method
 // will use rcp to copy it.  If mode is not null, will execute a
 // chmod on the file with the given mode.  Returns TRUE if successful.
@@ -203,42 +205,30 @@ int rcpWriteFile(const char* hname, const char* dir, const char* file,
     fileName << directory << "/" << file;
 
     // create the directory if necessary
-    makeDirectory(hname, directory);
+    makeWriteableDirectory(hname, directory);
 
     cout << "rcpWriteFile: writing file " << file << "\n";
     cout.flush();
 
-    //  write file to local machine 
+    // write file to local machine 
     // cfront1.0 barfs because there is not StringList ? operand, so
     // don't use it.  However, this is a poor solution.
-    if (tmpFile) {
-      pt_ofstream o(tmpFile);
-      if (o) {
+    const char* outputFileName = tmpFile ? tmpFile : fileName.chars();
+    pt_ofstream o(outputFileName);
+    if (o) {
 	if (text != NULL) o << text;  // if text is null create empty file
 	o.flush();
-      }
-      else {
-	if (tmpFile) {LOG_DEL; delete [] tmpFile;}
-		return FALSE;
-      }
-    } else {
-      pt_ofstream o(fileName.chars());
-      if (o) {
-	if (text != NULL) o << text;  // if text is null create empty file
-	o.flush();
-      }
-      else {
+    }
+    else {
 	if (tmpFile) {LOG_DEL; delete [] tmpFile;}
 	return FALSE;
     }
 
-    }
-
-//  chmod to appropriate mode.  Since we use the -p flag on rcp
-//  the mode settings will be copied as well if we are writing to
-//  a external host
+    //  chmod to appropriate mode.  Since we use the -p flag on rcp
+    //  the mode settings will be copied as well if we are writing to
+    //  a external host
     if (mode != -1) {
-        if(tmpFile)
+        if (tmpFile)
 	  chmod((const char*)tmpFile,mode);
 	else
 	  chmod((const char*)fileName,mode);
@@ -306,7 +296,7 @@ int rcpCopyFile(const char* hname, const char* dir, const char* filePath,
     delete [] expandedDirName;
 
     // Create the directory
-    if (makeDirectory(hname, directory) == -1) return FALSE;
+    if (makeWriteableDirectory(hname, directory) == -1) return FALSE;
 
     // Conditionally delete the old file name
     StringList rmOldFile;
@@ -331,7 +321,7 @@ int rcpCopyMultipleFiles(const char* hname, const char* dir,
     delete [] expandedDirName;
 
     // Create the directory
-    if (makeDirectory(hname, directory) == -1) return FALSE;
+    if (makeWriteableDirectory(hname, directory) == -1) return FALSE;
 
     // Walk through the list of files
     char* fileList = expandPathName(filePathList);

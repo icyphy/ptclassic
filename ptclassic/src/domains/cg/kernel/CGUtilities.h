@@ -41,6 +41,9 @@ Misc CG routines.
 
 #include "StringList.h"
 
+// Create a writeable directory on either a remote or local machine
+int makeWriteableDirectory(const char* hname, const char* directory);
+
 // Return a dynamically allocated string that is a lower-case version of name.
 char* makeLower(const char* name);
 
