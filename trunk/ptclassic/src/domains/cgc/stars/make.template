@@ -73,6 +73,7 @@ PL_SRCS= \
  CGCPCM.pl \
  CGCPCMread.pl \
  CGCPCMwrite.pl \
+ CGCPcwzLinear.pl \
  CGCPolarToRect.pl \
  CGCPrinter.pl \
  CGCQuant.pl \
@@ -87,6 +88,7 @@ PL_SRCS= \
  CGCReverse.pl \
  CGCTrainer.pl \
  CGCSGIAudio.pl CGCSGIAudioIn.pl CGCSGIAudioOut.pl \
+ CGCSgn.pl \
  CGCSin.pl \
  CGCSleep.pl \
  CGCSqrt.pl \
