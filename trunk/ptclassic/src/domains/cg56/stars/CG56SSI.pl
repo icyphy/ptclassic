@@ -581,14 +581,17 @@ $label(tx_done)
     //
     ////////////////////////////////////////////////////////////////////////
 
+begin {
+	doRecv1 = doRecv2 = TRUE;
+	doXmit1 = doXmit2 = TRUE;
+}
+
     setup {
         saveReg.resize(3);
 
 	doSymmetric = int(symmetricBuffers);
 	dualbufFlag = !doSymmetric;
 
-	doRecv1 = doRecv2 = TRUE;
-	doXmit1 = doXmit2 = TRUE;
 
 	doIntr = reps() > 1;
 	if ( int(queueSize) != 0 )
