@@ -452,7 +452,7 @@ body ::tycho::SlateView::layout {mode args} {
 # to access the liibrary in future calls to this method. If none
 # is supplied, the name will be the root of the file name -- for
 # example, the library "stars.tim" will be accessible as library
-# "stars." An error wil be generated if there is alaready a
+# "stars." An error will be generated if there is already a
 # library with the specified or default name.
 #
 # <dt><b>unload</b> ?_libname_ ...?

@@ -152,7 +152,7 @@ configbody ::tycho::Simulation::debug {
 #
 # Update the port number used for talking to the simulation.
 # This trashes the old process and creates a new one.
-# FIXME: this is bogus beacuse of the way that itk_options
+# FIXME: this is bogus because of the way that itk_options
 # are initialized twice...
 #
 configbody ::tycho::Simulation::portnum {

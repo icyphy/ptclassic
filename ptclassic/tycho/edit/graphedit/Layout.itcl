@@ -505,7 +505,7 @@ body ::tycho::Layout::reshaperelease {item} {
 # methods with model item names as arguments: <b>coords</b>,
 # and <b>find</b>. A layout model requires at least one
 # subscriber that nominates itself as a view if items coordinates
-# are being manipulated. This is bceause this model does not actually
+# are being manipulated. This is because this model does not actually
 # store current item coordinates, as to do so would require duplicating
 # too much of the functionality of the Tk canvas, meaning that
 # we would need to write a lot code and it would run way
