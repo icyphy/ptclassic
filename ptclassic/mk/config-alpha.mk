@@ -1,5 +1,5 @@
 #
-# Config file to build on an Alpha AXP running DEC OSF/1,
+# Config file to build on an Alpha AXP running DEC OSF/1, V3.2
 # 
 # Derived from config file for mips processor (DECstation) running Ultrix 4.x
 #
