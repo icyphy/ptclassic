@@ -139,8 +139,6 @@ This star uses the Matrix classs.
     (input%0).getMessage(pkt1);
     const FloatMatrix& inputVector = *(const FloatMatrix *)pkt1.myData();
 
-    inputVector = 1;
-
     (StateTransitionMatrixAtTimeN%0).getMessage(pkt2);
     const FloatMatrix& stateTransitionMatrix = *(const FloatMatrix *)pkt2.myData();
 
