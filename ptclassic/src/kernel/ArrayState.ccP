@@ -89,6 +89,7 @@ void <T>ArrayState  :: initialize() {
 
 	int i = 0, err = 0;
 	int numRepeats;
+	int sSiz;
 	<C> saveValue = 0;
 	while(!lexer.eof() && i < MAXLEN && err == 0) {
 		ParseToken t = evalExpression(lexer);
@@ -144,7 +145,7 @@ void <T>ArrayState  :: initialize() {
 				err = 1;
 				break;
 			}
-			int sSiz = t.s->size();
+			sSiz = t.s->size();
 			if (i + sSiz > MAXLEN) {
 				parseError ("too many elements!");
 				break;

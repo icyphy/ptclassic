@@ -71,6 +71,7 @@ void ComplexArrayState  :: initialize() {
 	nElements = 0;
 
 	int i = 0;
+	int sSiz;
 	while(!lexer.eof() && i < MAXLEN) {
 		ParseToken t =getParseToken(lexer);
 		switch (t.tok) {
@@ -120,7 +121,7 @@ void ComplexArrayState  :: initialize() {
 				parseError ("bad state type in initValue","");
 				return;
 			}
-			int sSiz = t.s->size();
+			sSiz = t.s->size();
 			if (i + sSiz > MAXLEN) {
 				parseError ("too many elements!");
 				break;
