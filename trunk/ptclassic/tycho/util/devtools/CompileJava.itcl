@@ -121,11 +121,13 @@ body ::tycho::CompileJava::constructor {args} {
 body ::tycho::CompileJava::destructor {} {
     if {$compileWidget != {} && \
             [info object ::tycho::$compileWidget] != {}} {
-        delete object $compileWidget
+        $compileWidget markUnmodified
+        catch {delete object $compileWidget}
     }
     if {$appletviewerWidget != {} && \
             [info object ::tycho::$appletviewerWidget] != {}} {
-        delete object $appletviewerWidget
+        $appletviewerWidget markUnmodified
+        catch {delete object $appletviewerWidget}
     }
 }
 
@@ -148,7 +150,6 @@ body ::tycho::CompileJava::compileAndRun {filenames} {
         set env(CLASSPATH) $classPath
     }
     ::tycho::Compile::compileAndRun $filenames
-
     foreach javaFile $filenameList {
         lappend classNameList [file tail [file rootname $javaFile]]
     }
@@ -164,9 +165,11 @@ body ::tycho::CompileJava::compileAndRun {filenames} {
     }
 
     # Compile.  If we already have a compileWidget, reuse it. 
-    if {$compileWidget == {} || \
-        [info object ::tycho::$compileWidget] == {} } {
-        set retList [::tycho::execModal $compileString $dirname]
+    if {![winfo exists $compileWidget] && \
+            [info object $compileWidget] == {}} {
+        set compileWidget [$this cget -view].compile
+        ::tycho::Exec $compileWidget
+        set retList [::tycho::execModal $compileString $dirname $compileWidget]
     } else {
         set retList [::tycho::execModal {} {} $compileWidget]
     }
@@ -178,10 +181,13 @@ body ::tycho::CompileJava::compileAndRun {filenames} {
     if {$runAppletViewer == 1 && $execStatus == "normal"} {
         set appletFile [file rootname $firstFile]
         if [file exists $appletFile.html] {
-            if {$appletviewerWidget == {} || \
-                    [info object ::tycho::$appletviewerWidget] == {}} {
+            if {![winfo exists $appletviewerWidget] && \
+                    [info object $appletviewerWidget] == {}} {
+                set appletviewerWidget [$this cget -view].appletviewer
+                ::tycho::Exec $appletviewerWidget
                 set retList [::tycho::execModal \
-                        "appletviewer $appletFile.html" $dirname]
+                        "appletviewer $appletFile.html" $dirname \
+                        $appletviewerWidget]
             } else {
                 set retList [::tycho::execModal {} {} $appletviewerWidget]
             }
