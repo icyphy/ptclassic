@@ -34,12 +34,19 @@ BINDIR = $(ROOT)/bin.$(ARCH)
 CONFIG=$(ROOT)/mk/config-$(ARCH).mk
 include $(CONFIG)
 
-SRCS = 	ptplay.sun4 ptplay.irix5 ptplay.hppa ptplay.linux
-EXTRA_DESTS =	ptplay.cfront ptplay.sol2 ptplay.sol2.cfront ptplay.irix4 \
+SRCS = 	ptplay.sol2.c
+
+EXTRA_DESTS =	ptplay.sun4 ptplay.irix5 ptplay.hppa ptplay.linux \
+	ptplay.cfront ptplay.sol2 ptplay.sol2.cfront ptplay.irix4 \
 	ptplay.hppa.cfront
+KRUFT = ptplay.sol2 ptplay	
 
-all:	ptplay
+all:	makefile ptplay
 
+ifeq ($(ARCH),sol2)
+ptplay: ptplay.sol2
+	cp ptplay.sol2 ptplay
+else
 ptplay: ptplay.$(ARCH) 
 	@if [ $(ARCH) = "mips" ]; then \
 		echo "mips architecture does not have a ptplay (yet)."; \
@@ -49,10 +56,11 @@ ptplay: ptplay.$(ARCH)
 		cp $^ $@; \
 		chmod a+x $@; \
 	fi
+endif
 
 install:	$(BINDIR)/ptplay
 
-ptplay.cfront ptplay.sol2 ptplay.sol2.cfront: ptplay.sun4
+ptplay.cfront:  ptplay.sun4
 	ln -s $^ $@ 
 ptplay.irix4: ptplay.irix5
 	ln -s $^ $@ 
@@ -60,6 +68,9 @@ ptplay.hppa.cfront: ptplay.hppa
 	ln -s $^ $@ 
 ptplay.mips:
 	@echo "mips architecture does not have a ptplay (yet)."
+
+C_INCL =	$(PTCOMPAT_INCSPEC)
+ptplay.sol2 ptplay.sol2.cfront: ptplay.sol2.o
 
 $(BINDIR)/ptplay:	ptplay
 	@if [ $(ARCH) = "mips" ]; then \
@@ -69,19 +80,26 @@ $(BINDIR)/ptplay:	ptplay
 		rm -f $(BINDIR)/ptplay; ln ptplay $(BINDIR); \
 	fi
 
-clean:
-	rm -f ptplay
+#clean:
+#	rm -f ptplay
+#
+#depend:
+#	echo no dependencies to make in this directory
+#
+#checkjunk:
+#	@checkextra -v $(SRCS) $(HDRS) $(EXTRA_SRCS) \
+#		$(EXTRA_DESTS) makefile SCCS
+#
+#sccsinfo:
+#	@sccs check || true
+#
+#sources: $(SRCS) 
 
-depend:
-	echo no dependencies to make in this directory
+# include common definitions, rules
+include $(ROOT)/mk/common.mk
 
-checkjunk:
-	@checkextra -v $(SRCS) $(HDRS) $(EXTRA_SRCS) \
-		$(EXTRA_DESTS) makefile SCCS
 
-sccsinfo:
-	@sccs check || true
-
-sources: $(SRCS) 
+# Don't add anything after the next line; makedepend will zap it.
+# DO NOT DELETE THIS LINE -- make depend depends on it.
 
 
