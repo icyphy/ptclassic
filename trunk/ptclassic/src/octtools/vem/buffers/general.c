@@ -94,7 +94,7 @@ char *arg;			/* User supplied data       */
     trace_struct trace_data;
     intern_buffer *realBuf;
 
-    if (realBuf = _bufFindBuffer(fctId)) {
+    if ( (realBuf = _bufFindBuffer(fctId)) ) {
 	trace_data.func = func;
 	trace_data.retCode = VEM_OK;
 	trace_data.data = arg;
@@ -117,7 +117,7 @@ bdTable *theBinding;		/* Binding table (return)    */
 {
     intern_buffer *realBuf;
 
-    if (realBuf = _bufFindBuffer(fctId)) {
+    if ( (realBuf = _bufFindBuffer(fctId)) ) {
 	*theBinding = realBuf->mainTable;
 	return VEM_OK;
     } else {
@@ -139,7 +139,7 @@ octId fctId;			/* Facet of associated buffer */
 {
     intern_buffer *realBuf;
 
-    if (realBuf = _bufFindBuffer(fctId)) {
+    if ( (realBuf = _bufFindBuffer(fctId)) ) {
 	if (realBuf->bufBits & WRITE_PROTECT) {
 	    /* Attempt to turn it off */
 	    if (realBuf->bufBits & READ_ONLY) return VEM_ACCESS;
@@ -170,7 +170,7 @@ octId fctId;			/* Facet of associated buffer */
 {
     intern_buffer *realBuf;
 
-    if (realBuf = _bufFindBuffer(fctId)) {
+    if ( (realBuf = _bufFindBuffer(fctId)) ) {
 	if (realBuf->bufBits & FACET_CORRUPT) return VEM_CORRUPT;
 	if (realBuf->bufBits & WRITE_PROTECT) return VEM_FALSE;
 	bufMarkActive( fctId );	/* If the question is asked, then we are about to change this buffer. Mark it as active */
@@ -192,7 +192,7 @@ octId fctId;			/* Facet of associated buffer */
 {
     intern_buffer *realBuf;
 
-    if (realBuf = _bufFindBuffer(fctId)) {
+    if ( (realBuf = _bufFindBuffer(fctId)) ) {
 	return realBuf->bufBits & TYPE_MASK;
     } else {
 	return BUF_NO_TYPE;
@@ -212,7 +212,7 @@ octId fctId;			/* Facet of associated buffer */
 {
     intern_buffer *realBuf;
 
-    if (realBuf = _bufFindBuffer(fctId)) {
+    if ( (realBuf = _bufFindBuffer(fctId)) ) {
 	if (realBuf->change_count > 0) return VEM_OK;
 	else return VEM_FALSE;
     } else {
@@ -231,7 +231,7 @@ tkHandle *tech;			/* Returned technology handle */
 {
     intern_buffer *realBuf;
 
-    if (realBuf = _bufFindBuffer(fctId)) {
+    if ( (realBuf = _bufFindBuffer(fctId)) ) {
 	*tech = realBuf->tech;
 	return VEM_OK;
     } else {
