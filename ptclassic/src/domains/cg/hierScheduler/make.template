@@ -25,7 +25,7 @@ HDRS =  MultiScheduler.h
 
 OBJS = $(SRCS:.cc=.o)
 
-LIB = libMultiSched.$(LIBSUFFIX)
+LIB = libMSH.$(LIBSUFFIX)
 
 all:	makefile $(LIB)
 
