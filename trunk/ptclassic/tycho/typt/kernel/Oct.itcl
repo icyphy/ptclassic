@@ -40,6 +40,7 @@
 # with Octtools
 #
 class ::tycho::Oct {
+    inherit ::tycho::Object
 
     constructor {args} {}
     destructor {}

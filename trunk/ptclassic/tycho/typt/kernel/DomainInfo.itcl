@@ -47,6 +47,7 @@ catch {delete class DomainInfo}
 # </pre></tcl>
 #
 class ::tycho::DomainInfo {
+    inherit ::tycho::Object
 
     constructor {args} {}
     destructor {}
