@@ -19,13 +19,10 @@ $Id$
 #include "KnownTarget.h"
 #include "CGCConnect.h"
 #include "CGCForkNode.h"
+#include "CGCWormConnect.h"
 
 // for error messages (temporary, until wormholes exist):
 #include "Error.h"
-
-// For the hacks below to avoid doing wormholes:
-
-#include "WormConnect.h"
 
 extern const char CGCdomainName[] = "CGC";
 
@@ -47,18 +44,12 @@ public:
 
 	// new fromUniversal EventHorizon
 	EventHorizon& newFrom() {
-		// return *new CGfromUniversal;
-		Error::abortRun("No CGC EventHorizon implemented yet");
-		// Following is a hack
-		LOG_NEW; return *(new EventHorizon);
+		LOG_NEW; return *(new CGCfromUniversal);
 	}
 
 	// new toUniversal EventHorizon
 	EventHorizon& newTo() {
-		// return *new CGtoUniversal;
-		Error::abortRun("No CGC EventHorizon implemented yet");
-		// Following is a hack
-		LOG_NEW; return *(new EventHorizon);
+		LOG_NEW; return *(new CGCtoUniversal);
 	}
 
 	// new node (geodesic)
