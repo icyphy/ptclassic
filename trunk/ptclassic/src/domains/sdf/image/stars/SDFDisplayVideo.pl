@@ -63,7 +63,7 @@ complete filename of the displayed images.
 		code {
 			LOG_NEW; char* cmd = new char[20 + strlen(allFileNames)];
 			sprintf(cmd, "rm -f %s", temp1); system(cmd);
-			if ((allFileNames[0]) && int(Save)) {
+			if ((allFileNames[0]) && !int(Save)) {
 				sprintf(cmd, "rm -f %s", allFileNames);
 				system(cmd);
 			}
