@@ -1,6 +1,7 @@
 defstar {
 	name { VISPackSh }
 	domain { CGC }
+	derivedFrom { VISBase }
 	version { $Id$ } 
 	author { William Chen }
 	copyright {
@@ -9,14 +10,14 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { CGC vis library }
+	location { CGC Visual Instruction Set library }
 	desc { 
-	  Pack four floating point numbers into a single floating
-	  point number.  Each input floating point number is first
-	  down cast into a 16 bit short and then packed into a series of
-	  four shorts.  The four shorts can be packed with the either
-	  the most current value leading or trailing but make sure 
-	  that you pack and unpack with the same endian setting. }
+Pack four floating point numbers into a single floating point number.
+The input floating point numbers are first down cast into a 16-bit short
+integers and then concatenated to form a 64-bit floating number.
+The four shorts can be packed with the either the most current value
+leading or trailing but make sure that you pack and unpack with the
+same endian setting. }
 	input {
 		name { in }
 		type { float }
@@ -38,9 +39,9 @@ limitation of liability, and disclaimer of warranty provisions.
 	        name { forward }
 		type { int }
 		default { FALSE }
-		desc { forward = TRUE unpacks with most current sample at
-		       position 0; forward = FALSE unpacks with most
-		       current sample at position 3 }
+		desc {
+TRUE unpacks with most current sample at position 0;
+FALSE unpacks with most current sample at position 3 }
 		attributes { A_CONSTANT|A_SETTABLE }
 	}
 	code{
@@ -59,6 +60,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	  } $starSymbol(packedout);
 	}
 	initCode{
+	  CGCVISBase::initCode();
 	  addDeclaration(mainDecl);
 	  addInclude("<vis_types.h>");
 	}
@@ -89,4 +91,3 @@ limitation of liability, and disclaimer of warranty provisions.
 	    addCode(packforwards);
 	}
 }
-
