@@ -49,6 +49,20 @@ proc ::tkerror {msg} {
 }
 
 ##########################################################################
+#### silentError
+# This utility triggers an error silently.
+# It does this by redefining tkerror temporarily, then invoking the
+# Tcl error command.  This can be used when cancelling a command where
+# the only clean way to unwind the stack is to use the Tcl error facility,
+# but where there is no point in informing the user about the error.
+#
+proc ::tycho::silentError {} {
+    set savetkerror [info body ::tkerror]
+    proc ::tkerror {msg} "proc ::tkerror {msg} [list $savetkerror]"
+    error silent
+}
+
+##########################################################################
 #### showStack
 # This utility displays the stack in a window. Insert it in code for
 # debugging. The argument is displayed on the first line, and can be
