@@ -72,14 +72,17 @@ attache:	$(OBJS)
 	$(LINKER) $(LINKFLAGS) $(OBJS) \
 		-o attache $(LIBS) -lcurses -ltermlib -lm 
 
-DESTBIN = $(BINDIR)/attache
+DESTBIN = $(OCTTOOLS)/bin.$(ARCH)/attache
 
 $(DESTBIN):	attache
 		@echo Installing attache
 		rm -f $(DESTBIN)
 		ln attache $(DESTBIN)
 
-install: makefile $(DESTBIN)
+install: makefile $(DESTBIN) $(BINDIR)/attache
+
+$(BINDIR)/attache:
+	(cd $(BINDIR); ln -s ../octtools/bin.$(ARCH)/attache .)
 
 # "make sources" will do SCCS get on anything where SCCS file is newer.
 sources:	
