@@ -26,7 +26,6 @@ labeled "Yes" and "No".  For example:
 ::tycho::YesNoQuery .y -text {Are you awake?} &#92
     -yescommand {::tycho::inform {You said yes!}} &#92
     -nocommand {::tycho::inform {Then how did you click on the No button?}}
-.y centerOnScreen
 </pre></tcl>
 The options <a name="yescommand option"><i>-yescommand</i></a> and
 <a name="nocommand option"><i>-nocommand</i></a> specify scripts to be executed
@@ -115,7 +114,6 @@ Text entry boxes can be created using the
 ::tycho::Query .bb -okcommand {::tycho::inform [.bb get]}
 .bb line month {Enter Month} Jan
 .bb line day {Enter Day} Mon
-.bb centerOnScreen
 </pre></tcl>
 <p>
 Here, a non-modal dialog is created, and the result of the dialog
@@ -277,7 +275,6 @@ Here is an example that creates one of each of the types of queries:
      } &#92
     -okcommand {::tycho::inform "Result of a get:\n[.z get]"} &#92
     -cancelcommand {::tycho::inform "You canceled"}
-.z centerOnScreen
 </pre></tcl>
 <p>
 The <code><a name="disable query">disable</a></code> method
@@ -333,7 +330,6 @@ For example,
     -title "Query Widget" &#92
     -okcommand {::tycho::inform "Result of a get: [.aa get]"} &#92
     -cancelcommand {::tycho::inform "You canceled"}
-.aa centerOnScreen
 </pre></tcl>
 <p>
 The order of the -bitmap and -text options relative to the -queries
@@ -384,7 +380,7 @@ for further information about the Color browser.
 <p>
 Note that you should not directly use color names.
 Instead, you should pass them to the procedure
-<a name="color procedure"><code>::tycho::color</code>, as in the
+<a name="color procedure"><code>::tycho::color</code></a>, as in the
 following example:
 <tcl><pre>
 ::tycho::ColorBrowser .f
