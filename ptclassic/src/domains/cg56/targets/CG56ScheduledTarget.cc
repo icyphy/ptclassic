@@ -68,46 +68,40 @@ void CG56ScheduledTarget :: initStates() {
 }
 
 void CG56ScheduledTarget :: setup() {
-	FILE* fp;
+	// Generate the schedule file name
 	StringList schedFileName;
-	schedFileName << expandPathName((const char*)destDirectory) << "/";
-	schedFileName << (const char*)schedLoadFile;	
-	fp = fopen(schedFileName,"r");
+	char* pathName = expandPathName(destDirectory);
+	schedFileName << pathName << "/" << schedLoadFile;	
+	delete [] pathName;
+
+	// Open the file name
+	FILE* fp = fopen(schedFileName, "r");
 	if(fp == NULL)
 	{
 		Error::abortRun("Can't read schedule file.");
 		return;
 	}
 	SDFSchedule sched;
-	char starName[200];
-	int len;
-	char* name;
-	int numStars;
-	CG56Star* star;
-	fscanf(fp,"%d",&numStars); 
-	for(int i=0; i< numStars; i++)
+	int numStars = 0;
+	fscanf(fp, "%d", &numStars); 
+	for(int i=0; i < numStars; i++)
 	{
-		fscanf(fp,"%s",starName);
-		len = strlen(starName);
-		name= (char*) malloc(len);
-		if(name== NULL) 	
-		{
-			Error::abortRun("Error reading schedule file.");
-			return;
-		}
-		starName[len] = '\0';
-		strcpy(name,starName);
-		star = (CG56Star*)starWithFullName(name);
+		char starName[256];
+		fscanf(fp, "%s", starName);
+		starName[255] = 0;
+		CG56Star* star = (CG56Star*)starWithFullName(starName);
 		if(star == NULL)
 		{
-			Error::abortRun("No star ", name, " found in universe");
+			Error::abortRun("The star '", starName,
+					"' was not found in universe");
 			return;
 		}
 		sched.append(*star);
 	}
 	setSched(new SDFScheduler);
 	galaxySetup();
-	/* schedulerSetup(); */
+
+	// schedulerSetup();
 	SDFScheduler* sch = (SDFScheduler*)scheduler();
 	sch->setGalaxy(*galaxy());
 	copySchedule(sched);
@@ -119,12 +113,9 @@ CG56Star* CG56ScheduledTarget::starWithFullName(const char* name)
 	Galaxy* gal = galaxy();
 	GalStarIter nextStar(*gal);
 	CG56Star* star;
-	while( (star = (CG56Star*)nextStar++) != 0)
+	while( (star = (CG56Star*)nextStar++) != 0 )
 	{
-		if(strcmp(star->fullName(),name)==0)
-		{
-			return star;
-		}
+		if(strcmp(star->fullName(), name) == 0) return star;
 	}
 	return 0;
 }
