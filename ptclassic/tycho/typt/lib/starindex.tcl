@@ -160,6 +160,7 @@ proc starindex_SwapPairsInList { facetpairs } {
 # recursively search for all facet directories in the directory tree pathname
 # use "catch" in case the exec command causes an error
 proc starindex_FindOctFacetDirs { pathname } {
+  puts -nonewline "Finding Oct Facet Directories . . . "
   # recursively find all schematic sub-directories (success if retval is 0)
   set retval [catch "exec find $pathname -follow -name \"schematic\" -print" \
                     schematicFiles]
@@ -171,7 +172,8 @@ proc starindex_FindOctFacetDirs { pathname } {
       lappend facetdirlist [starindex_StripSubDir $sfile]
     }
   }
-  #puts "dbg: starindex_FindOctFacetDirs $pathname [llength $schematicFiles]"
+  #puts "dbg: starindex_FindOctFacetDirs $pathname $facetdirlist"
+  puts "[llength $facetdirlist] directories found."
   return $facetdirlist
 }
 
@@ -180,7 +182,7 @@ proc starindex_FindOctFacetDirs { pathname } {
 # use "catch" in case the exec command causes an error
 proc starindex_ReadOctFacetDirs { facetdirlist } {
   set facetpairlist ""
-  puts -nonewline "Directory Count: "
+  puts -nonewline "Reading Oct Facets, Directory Count: "
   foreach facetdir $facetdirlist {
     puts -nonewline "."
     flush stdout
@@ -235,6 +237,7 @@ proc starindex_MakeStarDemoIndex { pathname } {
   set tripletlist \
       [lsort [starindex_FacetPairsToTriplets [starindex_ReadAllFacetPairs $pathname]]]
   set numelements [llength $tripletlist]
+  puts "Done sorting triplet list, $numelements elements."
   set demolist ""
   set laststarname ""
   set firsttimeflag 1
@@ -375,29 +378,55 @@ proc starindex_WriteDemoIndex { domainname } {
     if { ! [info exists env(PTOLEMY)] } return
    
     set lcdomainname [string tolower $domainname]
-    set ucdomainname [string toupper $domainname]
-    set pathname "$env(PTOLEMY)/src/domains/$lcdomainname/demo"
+    # If we add 'demo' to this pathname, then we don't get the palettes
+    set pathname "$env(PTOLEMY)/src/domains/$lcdomainname"
 
-    set header "Stars, galaxies, and universes in the $ucdomainname domain"
+    set header "$lcdomainname stars/demo cross reference"
     set starlist [starindex_MakeStarDemoIndex $pathname]
 
-    puts $fd "\{\{$header\}\}\n \{"
+    #puts "dbg: starlist: $starlist"
+
+    puts -nonewline " About to generate $outfile. . ."
+    puts $fd "\{$header\}\n \{"
     set numelements [llength $starlist]
     for { set i 0 } { $i < $numelements } { incr i } {
 	set treelist [lindex $starlist $i]
 	set starname [lindex $treelist 0]
 	
 	if { [llength $treelist ] > 2} {
+	    # We have a recursive index, that is an index that has
+	    # one key, and multiple entries.
 	    puts $fd "\{\{$starname\} \{"
 	    puts $fd " \{Users of $starname\} \{"
-	    foreach demo [lrange $treelist 2 end]  {
+	    foreach demo [lrange $treelist 1 end]  {
+		# Keep track of each demo we see for the demo.idx
+		set demoArray($demo) 1
 		puts $fd "  \{$demo $demo \{\}\} "
 	    }
 	    puts $fd "  \}\n \}\n\}"
+	} else {
+	    # We have a simple index entry, a key and a value
+	    puts $fd "\{$starname [lindex $treelist 1] \{\}\}"
+   	    set demoArray([lindex $treelist 1]) 1
 	}
     }
     puts $fd "\}"
     close $fd
+
+    # Generate the demo.idx file, which is an index file that lists
+    # all the demos
+    set outfile demo.idx
+    puts -nonewline " About to generate $outfile. . ."
+    set fd [open $outfile w]
+    set header "$lcdomainname demos"
+    puts $fd "\{$header\}\n \{"
+    foreach el [lsort [array names demoArray]] {
+	puts $fd "{[file tail $el] $el {}}"
+    }
+
+    puts $fd "\}"
+    close $fd
+    puts "Done."
     return 1
 }
 
