@@ -17,6 +17,8 @@
 
 */
 
+#include "StringList.h"
+
 // The following class is defined so that Euclid's algorithm
 // can return both the least common multiple and greatest common
 // divisor.
@@ -24,8 +26,11 @@
 // The only way to build a GcdLcm is to start with a fraction: the
 // constructor builds one.
 
+// I changed data members back to public to support the ugly SDF scheduler,
+// which insists on violating information hiding.
 class GcdLcm {
 	friend class Fraction;
+public:
 	int gcd;
 	int lcm;
 	GcdLcm(const Fraction& f);
@@ -34,9 +39,9 @@ class GcdLcm {
 class Fraction
 {
 	friend class GcdLcm;
+public:
 	int numerator;
 	int denominator;
-public:
 	// Constructors
 	Fraction () : numerator(0), denominator(1) { }
 
@@ -62,13 +67,15 @@ public:
 	friend int operator == (const Fraction&,const Fraction&);
 
 	// Print operator
-	operator char* () const;
+	operator StringList () const;
 
 	// Simplify the fraction (compute an equivalent fraction with
 	// numerator and denominator relatively prime).
 	// The simplified fraction replaces the original.
 	void simplify();
 
+	// Compute gcd,lcm of numerator, denominator
+	GcdLcm computeGcdLcm() { return GcdLcm(*this);}
 };
 
 // Notice: these functions don't have to be friends!
