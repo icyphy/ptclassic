@@ -29,7 +29,7 @@ optmkdir octtools/bin.$ARCH
 
 cd obj.$ARCH
 optlink ../src makefile
-foreach x (domains interp ptcl kernel pigiRpc pigilib libgantt ptlang xgraph ptklib vem)
+foreach x (domains interp ptcl kernel pigiRpc pigilib libgantt ptlang xgraph ptklib utils vem)
 	optmkdir $x
 	cd $x
 	optlink ../../src/$x makefile
@@ -118,6 +118,16 @@ foreach x ( cg56/dsp/stars cg96/dsp/stars \
 	optlink ../../../../../src/domains/$x make.template
 	optlink ../../../../../src/domains/$x makefile
 	cd ../../..
+end
+
+# Start of utils section
+cd ../utils
+foreach x ( installColors libgslider masters octfix octls)
+	optmkdir $x
+	cd $x
+	optlink ../../../src/utils/$x make.template
+	optlink ../../../src/utils/$x makefile
+	cd ..
 end
 
 # Start of vem section
