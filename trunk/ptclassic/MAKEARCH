@@ -129,9 +129,9 @@ cd ..
 # EXPSUBEXTRAS: sub-dirs of non-standard sub-dirs of experimental domains
 # Experimental domains not included: capsim cgdsp3
 
-set EXPDOMAINS=(sproc silage cg56 cgc cg96 mq vhdlf vhdlb mdsdf hof ipus \
-				dmm codesign)
-set EXPEXTRAS=(cg56/targets cg96/targets silage/targets \
+set EXPDOMAINS=(sproc silage cg56 cgc cg96 mq vhdlf vhdlb vhdl mdsdf hof \
+		ipus dmm codesign)
+set EXPEXTRAS=(cg56/targets cg96/targets silage/targets vhdl/targets \
 		ipus/cat ipus/tcltk ipus/icp)
 set EXPSUBEXTRAS=(ipus/tcltk/kernel ipus/tcltk/stars ipus/icp/kernel)
 set ALLDOMAINS=(sdf ddf de thor bdf cg $EXPDOMAINS)
