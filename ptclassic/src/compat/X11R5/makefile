@@ -36,7 +36,7 @@ include $(CONFIG)
 
 HDRS = 	X.h Xfuncproto.h Xlib.h Xos.h Xosdefs.h Xutil.h cursorfont.h
 
-MISC_FILES = README
+MISC_FILES =
 
 # We don't include common.mk since we don't use the compiler here
 include $(ROOT)/mk/no-compile.mk
