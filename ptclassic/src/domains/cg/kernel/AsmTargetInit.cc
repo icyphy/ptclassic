@@ -43,6 +43,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "FloatArrayState.h"
 #include "FixArrayState.h"
 #include "ProcMemory.h"
+#include "AsmPortHole.h"
 
 // code to do initialiation for a star
 
@@ -122,6 +123,25 @@ void AsmTarget::doInitialization(CGStar& cgStar) {
 		else {
 			Error::abortRun (*this, "can't write state of type ",
 					 s->type());
+		}
+	}
+	AsmPortHole* p;
+	AsmStarPortIter nextPort(star);
+	while ((p = nextPort++) != 0) {
+		StringList pmsg;
+		pmsg.initialize();
+                if (p->isItOutput() && p->far()->isItInput()) continue;
+		if (!p->bufSize() ) continue;
+		if ( (p->attributes() & PB_NOINIT) || 
+		     (p->far()->attributes() & PB_NOINIT)) continue;
+		pmsg << "initialization for porthole " << p->fullName();
+		myCode << comment(pmsg);
+                orgDirective(p->memory()->name(), p->baseAddr());
+		for (int i=0 ; i < p->bufSize() ; i++ ) {
+			DataType pType = p->resolvedType();
+			if (strcmp(pType,INT)==0)  writeInt(0);
+			else if (strcmp(pType,FIX)==0) writeFix(0);
+			else writeFloat(0);
 		}
 	}
 	codeSection();
