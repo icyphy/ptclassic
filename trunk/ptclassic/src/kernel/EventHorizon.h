@@ -75,7 +75,8 @@ public:
 	// SDFfromUniversal: public FromUniversal, public OutSDFPort
 	// SDFToUniversal::SDFToUniversal() : ToEventHorizon(this) {...}
 
-	EventHorizon(PortHole* self): selfPort(self) {}
+	EventHorizon(PortHole* self): selfPort(self), ghostPort(0), wormhole(0)
+		 {}
 
 	// virtual destructor
 	virtual ~EventHorizon();
