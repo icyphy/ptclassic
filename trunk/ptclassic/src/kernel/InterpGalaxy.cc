@@ -71,11 +71,11 @@ InterpGalaxy::InterpGalaxy(const char* c, const char* dom) {
 
 static void noInstance(const char* star,const char* gal) {
 	StringList msg;
-	msg = "No instance of \"";
+	msg = "No instance of ";
 	msg += star;
-	msg += "\" in \"";
+	msg += " in ";
 	msg += gal;
-	msg += "\"\n";
+	msg += "\n";
 	Error::abortRun (msg);
 }
 
