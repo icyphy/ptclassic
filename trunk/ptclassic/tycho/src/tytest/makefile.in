@@ -66,7 +66,7 @@ HDRS =		tyTest.h
 
 EXTRA_SRCS =	makefile.in test.tcl
 
-OBJS =		tyTest.o
+OBJS =		tyTest.o tyTimerTest.o
 
 # `make realclean` removes these files
 REALCLEAN_STUFF = makefile
