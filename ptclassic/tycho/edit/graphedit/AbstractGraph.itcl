@@ -4,7 +4,7 @@
 #
 # @Version: $Id$
 #
-# @Copyright (c) 1995-%Q% The Regents of the University of California.
+# @Copyright (c) 1995-1996 The Regents of the University of California.
 # All rights reserved.
 #
 # Permission is hereby granted, without written agreement and without
@@ -55,14 +55,6 @@
 # graphs, the most common case seems to be that the edge has
 # no value and requiring that a value be specified would clutter the
 # interface. A "value" can always be given as an option.)
-#
-# This abstract class is structured to support what I have dubbed a
-# "weld": a named connection between an edge and a vertex. A weld
-# is a combination of a vertex name and a "key" that uniquely identifies
-# an edge connected to the vertex. Welds are very useful in applications
-# like dataflow and so on. If the concrete subclass supports welds,
-# then edges join two welds rather than two vertices. A weld is
-# assumed to have the syntax _vertex_._key_.
 #
 # The methods in the graph classes are selectively "lenient." For 
 # example, an edge can be added between two vertices that do not
@@ -255,6 +247,10 @@ body ::tycho::AbstractGraph::add {vertex value args} {
     # set value
     set _vertices($vertex) $value
 
+    # Initialize parent-child links
+    set _adjacency($vertex.children) {}
+    set _adjacency($vertex.parents) {}
+
     # Set options
     array set temp [concat $vertexoptions $args]
     set _vertexoptions($vertex) [array get temp]
@@ -280,8 +276,12 @@ body ::tycho::AbstractGraph::add {vertex value args} {
 #
 body ::tycho::AbstractGraph::adjacency {{pattern1 *} {pattern2 *}} {
     set result {}
-    foreach e [array names _adjacency $pattern1^$pattern2] {
-	eval lappend result [split $e "^"]
+    foreach v [array names _vertices $pattern1] {
+    	foreach c $_adjacency($v.children) {
+    		if { [string match $pattern2 $c] } {
+    			lappend result $v $c
+    		}
+    	}
     }
     return $result
 }
@@ -331,7 +331,13 @@ body ::tycho::AbstractGraph::delete {vertex} {
     set modified 1
 
     set inverse [list add $vertex $_vertices($vertex) $_vertexoptions($vertex)]
+
+    # Clear value
     unset _vertices($vertex)
+
+    # Clear parent-child links
+    unset _adjacency($vertex.children)
+    unset _adjacency($vertex.parents)
 
     # Clear any cached structural information
     catch {unset _cache}
@@ -597,35 +603,43 @@ body ::tycho::AbstractGraph::deleteedge {vertex1 vertex1} {
 # do nothing.
 #
 # This and the associated method adjacencydelete{} build the
-# internal topology of
-# the graph independent of complexities associated with 
-# hyperedges or keyed connections. It is an array indexed as
-# "vertex1^vertex2" with value {vertex1 vertex2}. In future,
-# the representation may change to use parent-child lists
-# instead of adjacency lists, in which case some subclasses
-# will have to be modified. The parent-child representation
-# is more efficient for traversing the graph, but rather more
-# tedious to maintain in the presence of graph alterations.
-# <b>Note:</b> Preliminary tests using the depthsort{} method
-# indicate that the efficiency overhead using this representation
-# is only about 20%. It may be more critical if we can make
-# depthSort{} and similar algorithms fully non-recursive. (Or
-# less, depending on how you look at it...)
+# internal topology of the graph independent of complexities
+# associated with hyperedges or keyed connections. There are two
+# key structures we could use:
+#
+# <ul>
+# <li>The "edges" representation: the adjacency array is indexed as
+# _vertex1_^_vertex2_ with value {_vertex1_ _vertex2_}.
+# <li>The "parent-child" representation: the adjacency array is indexed
+# as _vertex_<b>.parents</b> and _vertex_<b>.children</b>, with each
+# element being a list of parents or children of that vertex.
+# </ul>
+#
+# The former is faster and more convenient to build and maintain, but
+# is slower to find adjacent vertices. We have decided to use the
+# second representation to make the graph traversal algorithms
+# as fast as possible.
 #
 body ::tycho::AbstractGraph::adjacencyadd {vertex1 vertex2} {
-    #
-    # The adjacency matrix is stored as
-    #
-    #     _adjacency: source^target |-> {source target}
-    # 
-    set _adjacency($vertex1^$vertex2) [list $vertex1 $vertex2]
+    if { [lsearch -exact $_adjacency($vertex1.children) $vertex2] == -1 } {
+	lappend _adjacency($vertex1.children) $vertex2
+	lappend _adjacency($vertex2.parents)  $vertex1
+    }
 }
 
 ########################################################################
 #### adjacencydelete
 #
-# Delete an edge from the adjacency matrix.
+# Delete an edge from the adjacency matrix. If it doesn't exist, do
+# nothing.
 #
 body ::tycho::AbstractGraph::adjacencydelete {vertex1 vertex2} {
-    unset _adjacency($vertex1^$vertex2)
+    set pindex [lsearch -exact $_adjacency($vertex1.children) $vertex2]
+    set cindex [lsearch -exact $_adjacency($vertex2.parents)  $vertex1]
+    if {$pindex >= 0 && $cindex >= 0} {
+        set _adjacency($vertex1.children) \
+                [lreplace $_adjacency($vertex1.children) $pindex $pindex]
+        set _adjacency($vertex2.parents) \
+                [lreplace $_adjacency($vertex2.parents $cindex $cindex]
+    }
 }
