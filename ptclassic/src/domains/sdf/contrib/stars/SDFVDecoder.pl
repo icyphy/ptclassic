@@ -31,14 +31,14 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	hinclude { "Decoder.h" }
 	private {
-	    Decoder D;
+	    Decoder decoder;
 	}
-	conscalls{ D(int(Gain)) }
+	conscalls{ decoder(int(Gain)) }
 	setup {
-	    D.Reset();
-	    D.SetGain( int(Gain) );
+	    decoder.Reset();
+	    decoder.SetGain( int(Gain) );
 	}
 	go {
-	    out%0 << D( int(I%0), int(Q%0) );
+	    out%0 << decoder(int(I%0), int(Q%0));
 	}
 }
