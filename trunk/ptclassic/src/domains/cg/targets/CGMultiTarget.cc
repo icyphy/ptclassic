@@ -256,13 +256,14 @@ void CGMultiTarget :: generateCode() {
 
 	if (parent()) setup();		// check later whether this is right.
 
-        beginIteration(-1,0);
+	int iterations = inWormHole()? -1 : (int)scheduler()->getStopTime();
+        beginIteration(iterations,0);
 	if (inWormHole()) {
 		wormInputCode();
 		wormOutputCode();	// note the change of calling order.
 	}
 	scheduler()->compileRun();
-        endIteration(-1,0);
+        endIteration(iterations,0);
 }
 	
 void CGMultiTarget :: wormInputCode() {
