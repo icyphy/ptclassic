@@ -44,6 +44,7 @@ TCL_SRCS = \
 	tychoSend.tcl
   
 ITCL_SRCS = \
+	Curriculum.itcl \
 	EditLattice.itcl \
 	GanttView.itcl \
 	GanttDF.itcl \
