@@ -59,6 +59,43 @@
 # following those three are arguments that would be passed to 
 # methods if these classes implemented objects in the normal way.
 #
+# This class contains a number of common arrays that must be used
+# in the expected ways by subclasses. The following protected
+# common arrays are used by all subclasses:
+# <ul>
+# <li><b>component</b>: Subclasses should store canvas items
+# they create in this array, indexed by the component name
+# followed by the item ID. For example, a subclass that creates
+# text label would store the id of that text item as
+# <code>component(label$id)</code>.
+#
+# <li><b>option</b>: Each option of an item is stored in this array,
+# indexed by <code>option(<i>name</i>$id)</code>, where _name_ does not
+# include the leading dash.
+#
+# <li><b>primary</b>: Each item must create exactly one simple
+# canvas item called its "primary" component, and store it in this
+# array indexed by the item ID. (It does not also need to be
+# stored in the *component* array.)
+#
+# <li><b>variable</b>: Variables created by the item that need
+# to be kept around. These are stored in this array instead of in
+# individual arrays in order to make it possible to mimic
+# multiple inheritance.
+#
+# </ul>
+#
+# The following private
+# common arrays must be redeclared by all subclasses:
+# <ul>
+# <li><b>methodtable</b>: An array of procedure names indexed by
+# the "methoid" name. This is used to simulate method calls
+# on complex items.
+# <li><b>optiondefault</b>: An array of values indexed by the
+# option name (including the leading dash), giving the default
+# values of the item's options.
+# </ul>
+#
 # <p><b>Options</b>:
 # 
 # <ul>
@@ -68,10 +105,12 @@
 # in ComplexItem means that simple items cannot have names; however,
 # this is not likely to be too much of a limitation, since if we
 # are expecting items to have names then the editor is probably
-# reasonably complex and liekly to be using complex items anyway...
-# <ul>
+# reasonably complex and likely to be using complex items anyway...
+# </ul>
 #
 # <a href="../internals/howtoread.html">Reading <i>ComplexItem</i> documentation</a>.
+# <br>
+# <a href="../internals/items.html">Complex item classes</a>.
 #
 class ::tycho::ComplexItem {
     inherit ::tycho::Uninstantiable
@@ -113,6 +152,34 @@ class ::tycho::ComplexItem {
     # are _not_ to create their own copy of this variable.
     protected common component
 
+    # The options of each item. Note: subclasses are _not_ to
+    # create their own copy of this variable.
+    protected common option
+
+    # Every ComplexItem class must create exactly one primitive canvas item
+    # and place its ID into this array indexed by the complex item ID.
+    # The Slate uses this component to manipulate the coordinates of
+    # complex items. Note: subclasses are _not_ to create their own 
+    # copy of this variable.
+    protected common primary
+
+    # The "shape" of items of this type. Every ComplexItem class
+    # that has a shape different to its superclass must create its
+    # own copy of this variable and set it to a type that indicates
+    # what shape the complex item is: point, line, polygon, rectangle,
+    # or oval.
+    protected common shape "rectangle"
+
+    # The instance variables of each item. Each subclass should place
+    # all local variables into this array, instead of creating
+    # their own common arrays. This makes it much easier to build
+    # complex items out of existing complex items. Note: subclasses
+    # are _not_ to create their own copy of this variable.
+    protected common variable
+
+    ###################################################################
+    ####                         private variables                 ####
+
     # The virtual "method" table. This is a common array indexed by
     # method name, with contents being the actual procedure to call
     # to implement the method. Every subclass of ComplexItem must create
@@ -122,36 +189,12 @@ class ::tycho::ComplexItem {
     # This array implements "inheritance": if a method is not implemented
     # in a given class, then the array contains the name of a procedure
     # in one of its superclasses.
-    common methodtable
-
-    # The options of each item. Note: subclasses are _not_ to create their own 
-    # copy of this variable.
-    protected common option
+    private common methodtable
 
     # Default values of this item's options. Every class must create
     # its own copy of this array and initialize it with the default 
     # values of the item's options.
-    common optiondefault
-
-    # Every ComplexItem class must create exactly one primitive canvas item
-    # and place its ID into this array indexed by the complex item ID.
-    # The Slate uses this component to manipulate the coordinates of
-    # complex items. Note: subclasses are _not_ to create their own 
-    # copy of this variable.
-    protected common primary
-
-    # The instance variables of each item. Each subclass should place
-    # all local variables into this array, instead of creating
-    # their own common arrays. This makes it much easier to build
-    # complex items out of existing complex items. Note: subclasses
-    # are _not_ to create their own copy of this variable.
-    protected common variable
-
-    # The "shape" of items of this type. Every ComplexItem class must create
-    # its own copy of this variable and set it to a type that indicates
-    # what shape the complex item is: point, line, polygon, rectangle,
-    # or oval.
-    protected common shape "rectangle"
+    private common optiondefault
 
     ###################################################################
     ####                       class initialization                ####
