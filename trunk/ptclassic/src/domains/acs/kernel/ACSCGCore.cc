@@ -34,7 +34,7 @@ The ACS CG Core class provides a base class for all derived CG Core category cla
 #ifdef __GNUG__
 #pragma implementation
 #endif
-
+#include "Attribute.h"
 #include "ACSCGCore.h"
 #include "ACSPortHole.h"
 #include "FixState.h"
@@ -564,7 +564,7 @@ StringList ACSCGCore::cmdargStates(Attribute a)
   StateListIter stateIter(referencedStates);
   while ((state = stateIter++) != NULL)
     {
-      if (state->attributes() == a.eval(0))
+   if (state->attributes() == a)
 	struct_mem << cmdargState(state);
     }
 
@@ -580,7 +580,7 @@ StringList ACSCGCore::cmdargStatesInits(Attribute a)
   StateListIter stateIter(referencedStates);
   while ((state = stateIter++) != NULL)
     {
-      if (state->attributes() == a.eval(0))
+    if (state->attributes() ==  a)
 	struct_init << cmdargStatesInit(state);
     }
 
@@ -597,7 +597,7 @@ StringList ACSCGCore::setargStates(Attribute a)
   StateListIter stateIter(referencedStates);
   while ((state = stateIter++) != NULL)
     {
-      if (state->attributes() == a.eval(0))
+     if (state->attributes() == a)
 	setarg_proc << setargState(state);
     }
 
@@ -614,7 +614,7 @@ StringList ACSCGCore::setargStatesHelps(Attribute a)
   StateListIter stateIter(referencedStates);
   while ((state = stateIter++) != NULL)
     {
-      if (state->attributes() == a.eval(0))
+     if (state->attributes() == a)
 	arg_help << setargStatesHelp(state);
     }
 
@@ -630,7 +630,7 @@ StringList ACSCGCore::initCodeStates(Attribute a)
     StateListIter stateIter(referencedStates);
     while ((state = stateIter++) != NULL)
     {
-	if (state->attributes() == a.eval(0))
+	if (state->attributes() ==  a)
 	    code << initCodeState(state);
     }
 
@@ -643,10 +643,10 @@ StringList ACSCGCore::declarePortHoles(Attribute a)
     StringList dec;	// declarations
 
     ACSPortHole* port;
-    BlockPortIter portIter(*this);
+    BlockPortIter portIter(getCorona());
     while ((port = (ACSPortHole*)portIter++) != NULL)
     {
-	if (port->attributes() == a.eval(0))
+	if (port->attributes() == a)
 	{
 	    dec << declareBuffer(port);
 	    dec << declareOffset(port);
@@ -662,10 +662,10 @@ StringList ACSCGCore::initCodePortHoles(Attribute a)
     StringList code;	// initialization code
 
     ACSPortHole* port;
-    BlockPortIter portIter(*this);
+    BlockPortIter portIter(getCorona());
     while ((port = (ACSPortHole*)portIter++) != NULL)
     {
-	if (port->attributes() == a.eval(0))
+	if (port->attributes() ==  a)
 	{
 	    code << initCodeBuffer(port);
 	    code << initCodeOffset(port);
@@ -684,7 +684,7 @@ StringList ACSCGCore::declareStates(Attribute a)
     StateListIter stateIter(referencedStates);
     while ((state = stateIter++) != NULL)
     {
-	if (state->attributes() == a.eval(0))
+    if (state->attributes() == a)
 	    dec << declareState(state);
     }
 
@@ -711,7 +711,7 @@ Precision ACSCGCore :: newSymbolicPrecision(int length,int intBits, const char* 
 void ACSCGCore :: moveDataBetweenShared() {
 	StringList code;
 
-	BlockPortIter next(*this);
+	BlockPortIter next(getCorona());
 	ACSPortHole* p;
 	while ((p = (ACSPortHole*) next++) != 0) {
 		// consider output only

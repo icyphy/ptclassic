@@ -351,7 +351,7 @@ StringList ACSCGCCore::setargStates(Attribute a)
   StateListIter stateIter(getReferencedStates());
   while ((state = stateIter++) != NULL)
     {
-      if (state->attributes() == a.eval(0))
+    //  if (state->attributes() == a)
 	setarg_proc << setargState(state);
     }
 
@@ -362,7 +362,7 @@ int ACSCGCCore::runIt() {
 	StringList code = "\t{  /* star ";
 	code << fullName() << " (class " << className() << ") */\n";
 	addCode(code);
-	int status = ACSCGCore::run();
+	int status = CGStar::run();
 	if (!status) return status;
 
 	if (isItFork()) {

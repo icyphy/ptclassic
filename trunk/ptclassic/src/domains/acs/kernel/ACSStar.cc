@@ -34,6 +34,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #endif
 
 #include "ACSStar.h"
+#include "ACSTarget.h"
 
 extern const char ACSdomainName[];
 
@@ -45,3 +46,5 @@ const char* ACSStar::domain() const
 {
     return ACSdomainName;
 }
+
+int ACSStar::run() { if ( ((ACSTarget*)(target()))->isCG() ) return(runCG()); else return(DataFlowStar::run()); } // FIXME

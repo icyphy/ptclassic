@@ -1,9 +1,9 @@
 #ifndef _ACSStar_h
 #define _ACSStar_h
 
-/*  Version $Id$
+/*  Version @(#)ACSStar.h	1.7 04/01/98
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1998 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -68,10 +68,9 @@ public:
 
     // For simulation we just call the base-class simulation star.
     // for code-generation we call something else.
-    int run() { return(DataFlowStar::run()); } // FIXME
-
-	 // main routine.
-	 virtual int runIt() { return FALSE; }
+    //int run() { if ( ((ACSTarget*)(target()))->isCG() ) return(CGStar::run()); else return(DataFlowStar::run()); } // FIXME
+    int run(); // { return(DataFlowStar::run()); } // FIXME
+    virtual int runCG() { return FALSE; }
 
     // add a splice star to the spliceClust list.  If atEnd
     // is true, append it to the end, otherwise prepend it.
@@ -101,6 +100,9 @@ public:
 	SymbolList& getStarSymbol() { return starSymbol; }
 
 	virtual StringList BufferIndex(const ACSPortHole * port, const char * name, const char * offset) { if ( port || name || offset ) return StringList(""); return StringList(""); }
+
+    // main routine.
+    virtual int runIt() { return FALSE; }
 
 
 };

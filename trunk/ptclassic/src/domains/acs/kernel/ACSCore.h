@@ -88,6 +88,16 @@ public:
 	// of simulation.
 	virtual int isCG() const { return FALSE; }
 
+	// Retrieve the PortHole with the given name
+	// The first method returns a generic port, the second returns
+	// a real PortHole with all aliases resolved
+	GenericPort *genPortWithName (const char* name) { return ((Block&)getCorona()).genPortWithName(name); }
+	const GenericPort *genPortWithName (const char* name) const { return ((Block&)getCorona()).genPortWithName(name); }
+	PortHole *portWithName(const char* name) const { return  ((Block&)getCorona()).portWithName(name); }
+
+	/* virtual */ State *stateWithName(const char* name);
+
+
 protected:
 
 	// dummy corona for virtual getCorona()

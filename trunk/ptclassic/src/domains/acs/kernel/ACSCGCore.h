@@ -82,6 +82,9 @@ public:
     	/* virtual */ StringList declareStates(Attribute a=ANY);
     	/* virtual */ StringList initCodeStates(Attribute a=ANY);
 
+	// We're now in CG core territory.
+	/* virtual */ int isCG() const { return TRUE; }
+
 
 protected:
 
@@ -155,6 +158,24 @@ protected:
 
 	virtual StringList arrayStateIndexRef(const State *, const char*) = 0;
 
+	// Add declarations, to be put at the beginning of the main section
+	int addDeclaration(const char* decl, const char* name = NULL) {
+		if (!name) name = decl;
+		return addCode(decl, "mainDecls", name);
+	}
+
+	// Add global declarations, to be put ahead of the main section
+	int addGlobal(const char* decl, const char* name = NULL) {
+		if (!name) name = decl;
+		return addCode(decl, "globalDecls", name);
+	}
+
+	// Add main initializations, to be put at the beginning of the main 
+	// section. By giving the name, you can have only one initialization
+	// routine among all star instances.
+	int addMainInit(const char* decl, const char* name = NULL) {
+		return addCode(decl, "mainInit", name);
+	}
 
 private:
 
@@ -167,6 +188,11 @@ private:
 
 
 };
+
+inline int operator ==(bitWord b, Attribute a)
+{
+    return b == a.eval(b);
+}
 
 
 #endif // _ACSCGCore_h

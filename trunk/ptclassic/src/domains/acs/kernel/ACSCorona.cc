@@ -139,6 +139,28 @@ void ACSCorona::initialize() {
 	}
 }
 
+int ACSCorona::setTarget(Target* t) {
+	ACSStar::setTarget(t);
+	ACSTarget* tp = (ACSTarget*)target();
+  	ListIter iterator(coreList);
+  	ACSCore* ptr;
+  	while ( (ptr = (ACSCore*)(iterator++)) != 0 ) {
+		ptr->setTarget(t);
+  	}
+	if(!setCore(tp->getCoreCategory())) {
+		Error::abortRun(*this,"setTarget(Target* t): could not set core.");
+		return FALSE;
+	}
+	if ( currentCore ) {
+		return(currentCore->setTarget(t));
+	} else {
+		Error::abortRun(*this,"setTarget(Target* t): currentCore not set.");
+	}
+	return FALSE;
+}
+	
+	
+
 // virtual go() called by run, calls current core go() method.
 void ACSCorona::go() {
 	if ( currentCore ) {
@@ -186,4 +208,116 @@ void ACSCorona :: addSpliceStar(ACSStar* s, int atEnd) {
 	} else {
 Error::abortRun(*this, className(), ".addSpliceStar(ACSStar* s, int atEnd): currentCore not set.");
 	}
+}
+
+// Generate declaration, initialization and function codes for
+// command-line arguments
+StringList ACSCorona :: cmdargStates(Attribute a)
+{
+	if ( currentCore ) {
+		return currentCore->cmdargStates(a);
+	} else {
+Error::abortRun(*this, className(), ".cmdargStates(Attribute a=ANY): currentCore not set.");
+	}
+	return StringList("");
+}
+
+StringList ACSCorona :: cmdargStatesInits(Attribute a)
+{
+	if ( currentCore ) {
+		return currentCore->cmdargStatesInits(a);
+	} else {
+Error::abortRun(*this, className(), ".cmdargStatesInits(Attribute a): currentCore not set.");
+	}
+	return StringList("");
+}
+
+StringList ACSCorona :: setargStates(Attribute a)
+{
+	if ( currentCore ) {
+		return currentCore->setargStates(a);
+	} else {
+Error::abortRun(*this, className(), ".setargStates(Attribute a): currentCore not set.");
+	}
+	return StringList("");
+}
+
+StringList ACSCorona :: setargStatesHelps(Attribute a)
+{
+	if ( currentCore ) {
+		return currentCore->setargStatesHelps(a);
+	} else {
+Error::abortRun(*this, className(), ".setargStatesHelps(Attribute a=ANY): currentCore not set.");
+	}
+	return StringList("");
+}
+
+// Generate declarations and initialization code for PortHoles
+StringList ACSCorona :: declarePortHoles(Attribute a)
+{
+	if ( currentCore ) {
+		return currentCore->declarePortHoles(a);
+	} else {
+Error::abortRun(*this, className(), ".declarePortHoles(Attribute a=ANY): currentCore not set.");
+	}
+	return StringList("");
+}
+
+StringList ACSCorona :: initCodePortHoles(Attribute a)
+{
+	if ( currentCore ) {
+		return currentCore->initCodePortHoles(a);
+	} else {
+Error::abortRun(*this, className(), ".initCodePortHoles(Attribute a=ANY): currentCore not set.");
+	}
+	return StringList("");
+}
+
+// Generate declarations and initialization code for States
+StringList ACSCorona :: declareStates(Attribute a)
+{
+	if ( currentCore ) {
+		return currentCore->declareStates(a);
+	} else {
+Error::abortRun(*this, className(), ".declareStates(Attribute a=ANY): currentCore not set.");
+	}
+	return StringList("");
+}
+
+StringList ACSCorona :: initCodeStates(Attribute a)
+{
+	if ( currentCore ) {
+		return currentCore->initCodeStates(a);
+	} else {
+Error::abortRun(*this, className(), ".initCodeStates(Attribute a=ANY): currentCore not set.");
+	}
+	return StringList("");
+}
+
+StringList ACSCorona :: BufferIndex(const ACSPortHole * port, const char * name, const char * offset) {
+	if ( currentCore ) {
+		return currentCore->BufferIndex(port, name, offset);
+	} else {
+Error::abortRun(*this, className(), ".BufferIndex(const ACSPortHole * port, const char * name, const char * offset): currentCore not set.");
+	}
+	return StringList("");
+}
+
+
+int ACSCorona::isItFork() { 
+	if ( currentCore ) {
+		return currentCore->isItFork();
+	} else {
+Error::abortRun(*this, className(), ".isItFork(): currentCore not set.");
+	}
+	return 0;
+}
+
+int ACSCorona :: runCG() {
+	if ( currentCore ) {
+		return currentCore->run();
+	} else {
+		Error::abortRun(*this, className(), ".runCG(): currentCore not set.");
+	}
+	return 0;
 }

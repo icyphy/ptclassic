@@ -120,7 +120,7 @@ void ACSTarget::setup() {
 }
 
 
-void ACSTarget::wrapup() { Target::wrapup(); }  // FIXME: Code generation define something different here.
+void ACSTarget::wrapup() { if ( isCG() ) HLLTarget::wrapup(); else Target::wrapup(); }  // FIXME: Code generation define something different here.
 
 Block* ACSTarget::makeNew() const {
     LOG_NEW; return new ACSTarget(name(),starType(),descriptor());

@@ -54,3 +54,11 @@ char* ACSGeodesic::getBufName() const {
 // allocation control heuristic
 double ACSGeodesic :: wasteFactor() const { return myWaste; }
 
+
+/*	ACSPortHole* ACSGeodesic::src() {
+		return ((ACSPortHole*)originatingPort)->getForkSrc();
+	}
+	const ACSPortHole* ACSGeodesic::src() const {
+		return ((const ACSPortHole*)originatingPort)->getForkSrc();
+	}
+*/
