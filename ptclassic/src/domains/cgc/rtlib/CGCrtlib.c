@@ -897,7 +897,7 @@ double pFIX_TwoRaisedTo(n)
 int n;
 {
     static double twoRaisedTo[FIX_MAX_LENGTH+1];
-    static initialized = 0;
+    static int initialized = 0;
 
     if (!initialized) {
 	double d = 1.0;
