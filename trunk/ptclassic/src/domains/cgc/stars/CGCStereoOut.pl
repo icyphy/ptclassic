@@ -34,6 +34,14 @@ provisions.
     desc { Right channel input }
   }
   
+  defstate {
+    name { homogeneous }
+    type { int }
+    default { 0 }
+    desc { If set to 1, the star receives 2 samples of data per
+	     firing }
+  }
+
   constructor {
     encodingType.setAttributes(A_NONCONSTANT|A_NONSETTABLE);
     encodingType.setInitValue("linear16");
@@ -43,8 +51,9 @@ provisions.
 
   }
 
-  codeblock (convert) {
+  codeblock (homogeneousConvert) {
     /* Take data from Input and put it in buffer */
+    /* this code writes 2 samples per star firing to the write buffer */
     {
       int j;
       j = 2*$starSymbol(counter);
@@ -54,14 +63,35 @@ provisions.
     }
   }
   
+  codeblock (convert) {
+    /* Take data from Input and put it in buffer */
+    /* Data in buffer is alternate left and right channels */
+    {
+      int i, j;
+      for (i = 0; i < ($val(blockSize)/4); i ++) {
+	j = i*2;
+	$starSymbol(buffer)[j] = 
+	  (short)($ref(left,($val(blockSize)/4) -1 - i)*32768.0);
+	$starSymbol(buffer)[j+1] = 
+	  (short)($ref(right,($ref(blockSize)/4) - 1 - i)*32768.0);
+      }
+    }
+  }
+
   codeblock (setbufptr) {
     $starSymbol(bufferptr) = $starSymbol(buffer);
   }
 
   setup {
-    left.setSDFParams(1);
-    right.setSDFParams(1);
-  }
+    if(homogeneous == 1) {
+      left.setSDFParams(1);
+      right.setSDFParams(1);
+    }
+    else {
+      left.setSDFParams(int(blockSize/4), int(blockSize/4)-1);
+      right.setSDFParams(int(blockSize/4), int(blockSize/4)-1);
+    }
+  }  
 
   initCode {
     CGCAudioBase::initCode();
@@ -94,13 +124,20 @@ provisions.
   }
 
   go {
-    addCode(convert);
-    addCode("if($starSymbol(counter) == ($val(blockSize)/4)) {\n");
-    addCode(setbufptr);
-    addCode(write);
-    addCode("$starSymbol(counter) = 0;\n");
-    addCode("}\n");
-  }
+    if(homogeneous == 1) {
+      addCode(homogeneousConvert);
+      addCode("if($starSymbol(counter) == ($val(blockSize)/4)) {\n");
+      addCode(setbufptr);
+      addCode(write);
+      addCode("$starSymbol(counter) = 0;\n");
+      addCode("}\n");
+    }
+    else {
+      addCode(convert);
+      addCode(setbufptr);
+      addCode(write);
+    }
+  }  
 
   wrapup {
     CGCAudioBase::wrapup();
