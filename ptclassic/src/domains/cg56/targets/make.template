@@ -36,7 +36,7 @@ INCL=-I$(CG56DIR) -I$(CGDIR) -I$(SDFDIR) -I$(KERNDIR)
 	$(GNU) $(GPPFLAGS) $(INCL) -c $<
 
 # objects to make
-OBJS=	Sim56Target.o
+OBJS=	Sim56Target.o Sub56Target.o
 
 SRCS=	$(OBJS:.o=.cc)
 
