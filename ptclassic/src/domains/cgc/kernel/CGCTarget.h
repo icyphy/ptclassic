@@ -31,7 +31,7 @@ public:
 	int setup(Galaxy&);
 	int run();
 	void wrapup();
-	StringList beginIteration(int repetitions, int depth);
+	void beginIteration(int repetitions, int depth);
 
 	// Method available to stars to add to lines that are
 	// put at the beginning of the code file.

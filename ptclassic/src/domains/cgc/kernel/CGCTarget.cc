@@ -240,27 +240,26 @@ void CGCTarget :: wrapup () {
 }
 
 // Routines for writing code: schedulers may call these
-StringList CGCTarget::beginIteration(int repetitions, int depth) {
-        StringList out;
-        out = indent(depth);
+void CGCTarget::beginIteration(int repetitions, int depth) {
+	myCode << indent(depth);
         if (repetitions == -1)          // iterate infinitely
-                out += "while(1) {\n";
+                myCode += "while(1) {\n";
         else {
                 mainDeclarations += indent(1);
                 mainDeclarations += "int i";
                 mainDeclarations += unique;
                 mainDeclarations += ";\n";
-                out += "for (i";
-                out += unique;
-                out += "=0; i";
-                out += unique;
-                out += " < ";
-                out += repetitions;
-                out += "; i";
-                out += unique++;
-                out += "++) {\n";
+                myCode += "for (i";
+                myCode += unique;
+                myCode += "=0; i";
+                myCode += unique;
+                myCode += " < ";
+                myCode += repetitions;
+                myCode += "; i";
+                myCode += unique++;
+                myCode += "++) {\n";
         }
-        return out;
+        return;
 }
 
 void CGCTarget :: addInclude(const char* inc) {
