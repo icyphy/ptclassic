@@ -40,6 +40,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #include <string.h>
 #include <ctype.h>
+#include <stream.h>
 #include "CGCTychoTarget.h"
 #include "CGCStar.h"
 #include "KnownTarget.h"
@@ -81,10 +82,16 @@ int CGCTychoTarget :: compileCode() {
   cmd << "::tycho::compileC "
       << expandPathName(destDirectory) << "/" << filePrefix << ".c"
       << " -autostart 1 -autodestroy 1 -modal 1";
-
-  Tcl_Eval( PTcl::activeInterp, cmd.chars() );
-
-  // Always return 1 -- what else can we do?
+  
+  if (Tcl_Eval(PTcl::activeInterp, cmd.chars()) != TCL_OK) {
+      StringList message;
+      message << "CGCTychoTarget::compileCode(): Tcl command:\n" <<
+          cmd.chars() << " failed:\n " <<
+          Tcl_GetVar(PTcl::activeInterp,"errorInfo",TCL_GLOBAL_ONLY) << "\n";
+      cerr << message;
+      Error::abortRun(*this,message);
+      return 0;
+  }
   return 1;
 }
 
