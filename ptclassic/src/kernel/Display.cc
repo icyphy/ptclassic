@@ -13,8 +13,8 @@ These are methods used by classes defined in Display.h that
 are too large to efficiently inline.
 
 The XGraph class wants to talk to a modified version of the xgraph
-program called "binxgraph", which accepts input in binary form.  This
-is much faster than the ASCII form used by standard xgraph.
+program that accepts input in binary form (indicated by the -binary
+flag).  This is much faster than the ASCII form used by standard xgraph.
 
 The following commands may appear in binxgraph input
 
@@ -193,7 +193,7 @@ void XGraph :: terminate () {
 	   }
         StringList cmd;
     
-        cmd += "( binxgraph ";
+        cmd += "( xgraph -binary ";
 
 	// put title on command line
         if (ttl && *ttl) {
