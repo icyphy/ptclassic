@@ -37,6 +37,7 @@ PL_SRCS= \
  SDFLMSTkPlot.pl \
  SDFLMSCxTkPlot.pl \
  SDFMap.pl \
+ SDFMap2.pl \
  SDFTclScript.pl \
  SDFTkBarGraph.pl \
  SDFTkMeter.pl \
