@@ -76,7 +76,11 @@ char *argv[];
     
     pat_file = prompt("Name of the color pattern file", "colors.pat");
     tech_spec = "schematic";
-    root_dir = prompt("Directory in which ptolemy technology is installed",
+    if(getenv("PTOLEMY"))
+        root_dir = prompt("Directory in which ptolemy technology is installed",
+		"$PTOLEMY/lib/colors");
+    else
+        root_dir = prompt("Directory in which ptolemy technology is installed",
 		"~ptolemy/lib/colors");
     out_tech = "ptolemy";
     out_view = tech_spec;
