@@ -36,6 +36,7 @@ a Tcl interpreter.
 #ifndef _POct_h
 #define _POct_h 1
 #include "tcl.h"
+#include "StringList.h"
 
 typedef int boolean;
 extern "C" {
@@ -48,8 +49,6 @@ extern "C" {
 #ifdef __GNUG__
 #pragma interface
 #endif
-
-class StringList;
 
 class POct {
 
@@ -90,7 +89,15 @@ private:
 	void addResult(const char*);
 
 	// State functions to remind users of past input vaules
-        int OldRandomSeed;
+	// Note that these are only to help out the user as a convenience
+	//
+	// For ptkSetSeed and ptkGetSeed
+        int OldRandomSeed; 	
+	// For ptkGetMkStar and ptkSetMkStar
+	StringList MkStarName; 
+        StringList MkStarDomain; 
+	StringList MkStarDir; 
+	StringList MkStarPalette;
 
 	// Helper Functions that are not TCL callable directly
 
@@ -133,6 +140,8 @@ public:
 	int ptkGetParams (int argc,char** argv);
 	int ptkSetParams (int argc,char** argv);
 	int ptkSetFindName (int argc,char** argv);
+	int ptkGetMkStar (int argc,char** argv);
+	int ptkSetMkStar (int argc,char** argv);
 	int ptkGetComment (int argc,char** argv);
 	int ptkSetComment (int argc,char** argv);
 	int ptkGetSeed (int argc,char** argv);

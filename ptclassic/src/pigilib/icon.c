@@ -136,17 +136,12 @@ Inputs:
     name = name of star
     domain = domain of star
     dir = src directory of star, which contains .pl file
+    palette = directory to store the star's icon into
 */
-static boolean
-MkStar(name, domain, dir)
-char *name, *domain, *dir;
+boolean
+MkStar(name, domain, dir, palette)
+char *name, *domain, *dir, *palette;
 {
-static dmTextItem item = {"Palette", 1, DM_WIDTH, "./user.pal", NULL};
-
-/* the next two static vars are not used, so I (wtc) comment them out. 
-static dmTextItem itTemplate = {"Template", 1, DM_WIDTH, NULL, NULL};
-static char *q1 = "Cannot find star definition.  Define a new star?";
-*/
     char *iconDir;
 
     if (!KcSetKBDomain(domain)) {
@@ -169,10 +164,8 @@ static char *q1 = "Cannot find star definition.  Define a new star?";
 	    return FALSE;
         }
     }
-    ERR_IF2(dmMultiText("Enter pathname of palette", 1, &item) != VEM_OK,
-	"Aborted entry");
     ERR_IF1(!CodeDirToIconDir(dir, &iconDir));
-    ERR_IF1(!MkStarIconInPal(name, iconDir, item.value));
+    ERR_IF1(!MkStarIconInPal(name, iconDir, palette));
     return (TRUE);
 }
 
@@ -184,15 +177,6 @@ RPCSpot *spot;
 lsList cmdList;
 long userOptionWord;
 {
-static dmTextItem items[] = {
-    {"Star name", 1, DM_WIDTH, NULL, NULL},
-    {"Domain", 1, DM_WIDTH, DEFAULT_DOMAIN, NULL},
-    {"Star src directory", 1, DM_WIDTH, NULL, NULL}
-};
-#define ITEMS_N sizeof(items) / sizeof(dmTextItem)
-    struct passwd *pwent;
-    char buf[64];
-
     ViInit("make-star");
     ErrClear();
 
@@ -201,37 +185,12 @@ static dmTextItem items[] = {
 	ViDone();
     }
 
-    /* Initialize star src directory to the home directory of the user */
-    if (items[2].value == NULL) {
-	if ((pwent = getpwuid(getuid())) == NULL) {
-	    PrintErr("Cannot get password entry");
-	    ViDone();
-	}
-	sprintf(buf, "~%s/", pwent->pw_name);
-	items[2].value = buf;
-    }
-    if (dmMultiText(ViGetName(), ITEMS_N, items) != VEM_OK) {
-	PrintCon("Aborted entry");
-	ViDone();
-    }
-    /* Note that only need to test if item[2].value starts with '~'
-       so that the user may enter something like "~/work/stars" where
-       '~' stands for user's own home directory.  Comment out the 
-       test for items[2].value[1]. (wtc, 12/12/90)
-       OLDTEST: if (*items[2].value != '~' || !isalpha(items[2].value[1]) ) {
-
-       allow $PTOLEMY (kennard, Oct92)
-    */
-    if (items[2].value[0] != '~' && items[2].value[0] != '$') {
-	PrintErr("Star src directory must begin with '~user' or '$variable'");
-	ViDone();
-    }
-    if (!MkStar(items[0].value, items[1].value, items[2].value)) {
-	PrintErr(ErrGet());
-	ViDone();
-    }
+    TCL_CATCH_ERR( Tcl_VarEval(ptkInterp,"ptkEditStrings ",
+                   " \"Make Star\" ",
+                   " \"ptkSetMkStar %s \" ",
+                   " [ptkGetMkStar]",
+                   (char *)NULL) )
     ViDone();
-#undef ITEMS_N
 }
 
 

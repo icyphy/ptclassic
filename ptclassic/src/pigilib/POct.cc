@@ -50,6 +50,7 @@ static const char file_id[] = "POct.cc";
 extern "C" {
 #define Pointer screwed_Pointer
 #include "oct.h"  /* Oct Pointer Structure */
+#include <pwd.h> /* Used for Make Star */
 #include "pigidefine.h" /* Constants used by pigi functions */
 #include "octIfc.h" 
 #include "local.h"
@@ -67,7 +68,7 @@ char* KcDefTarget();
 int numberOfDomains();
 char* nthDomainName();
 /* Declare the functions in kernelCalls used by ptkSetSeed */
-KcEditSeed();
+void KcEditSeed();
 #undef Pointer
 }
 #include "miscFuncs.h"
@@ -155,8 +156,15 @@ POct::POct(Tcl_Interp* i) : interp(i)
         myInterp = FALSE;
         makeEntry();
 	registerFuncs();
-	// Initialize Seed State
-        OldRandomSeed = 1;
+
+	// Initialize the states that remind Users of previous inputs
+	// for ptkSetSeed
+        OldRandomSeed = 1;   
+	// for ptkSetMkStar
+	MkStarName = "";
+	MkStarDomain = DEFAULT_DOMAIN;
+	MkStarDir = "NIL";
+	MkStarPalette = "./user.pal";
 }
 
 // destructor
@@ -647,8 +655,9 @@ int POct::ptkSetFindName (int aC,char** aV) {
 
     // Get the Name String out of the Name List
     if (Tcl_SplitList( interp, nameList, &nameC, &nameV ) != TCL_OK){
-        Error::error("Cannot parse name list: ", nameList);
-        return 0;
+        Tcl_AppendResult(interp, "Cannot parse name list: ", nameList,
+                         (char *) NULL);
+        return TCL_ERROR;
     }
 
     if (nameC != 2) {
@@ -737,8 +746,9 @@ int POct::ptkSetComment (int aC,char** aV) {
 
     // Get the Comment Value out of the Comment List
     if (Tcl_SplitList( interp, commentList, &commentC, &commentV ) != TCL_OK){
-        Error::error("Cannot parse comment list: ", commentList);
-        return 0;
+        Tcl_AppendResult(interp, "Cannot parse comment list: ", commentList,
+                         (char *) NULL);
+        return TCL_ERROR;
     }
 
     if (commentC != 2) {
@@ -760,6 +770,88 @@ int POct::ptkSetComment (int aC,char** aV) {
 
     return TCL_OK;
 
+}
+
+// ptkGetMkStar
+// returns the past values of the MkStar Command
+//
+// Return format is as follows:
+// {"Star Name" StarNameValue} {Domain DomainValue} ...
+// Written by Alan Kamas  1/94
+// 
+int POct::ptkGetMkStar (int aC,char** aV) {
+
+    char buf[64];
+    struct passwd *pwent;
+
+    if (aC != 1) return  usage ("ptkGetMkStar");
+    
+    // Initialize star src directory to the home directory of the user
+    const char* directory = MkStarDir;
+    if (strcmp( directory, "NIL" ) == 0) {
+        if ((pwent = getpwuid(getuid())) == NULL) {
+            Tcl_AppendResult(interp, "Cannot get password entry",
+                         (char *) NULL);
+            return TCL_ERROR;
+        }
+        sprintf(buf, "~%s/", pwent->pw_name);
+        MkStarDir = buf;
+    }
+
+    // Note: if any of the titles (ie "Star name") change, that
+    //       change must be reflected in ptkSetMkStar
+    Tcl_AppendResult(interp, 
+                     "{{Star name} {", (char *)MkStarName, "}} ",
+                     "{{Domain} {", (char *)MkStarDomain, "}} ",
+                     "{{Star src directory} {", (char *)MkStarDir, "}} ", 
+                     "{{Pathname of Palette} {", (char *)MkStarPalette, "}}", 
+                     (char *) NULL);
+    return TCL_OK;
+}
+
+// ptkSetMkStar <StarNameList> <DomainList> <SrcDirList> <PaleteDirList>
+//
+// Makes a new star 
+// This procedure was written to work with ptkEditValues
+// Each "List" entry is of the form "Title Value" as in "Domain SDF"
+//    The titles are used to determine which entry is which.
+//
+// Written by Alan Kamas  1/94
+//
+int POct::ptkSetMkStar (int aC,char** aV) {
+
+    int i;
+    int elementC;
+    char **elementV;
+
+    if (aC != 5) return 
+        usage ("ptkSetMkStar <StarName> <Domain> <SrcDir> <PaleteDir>");
+    
+    // Store these values for the next time MkStar is called
+    MkStarName = aV[1];
+    MkStarDomain = aV[2];
+    MkStarDir = aV[3];
+    MkStarPalette = aV[4];
+
+    /* Note that only need to test if MkStarDir starts with '~'
+       so that the user may enter something like "~/work/stars" where
+       '~' stands for user's own home directory.  -wtc
+       allow $PTOLEMY (kennard, Oct92)
+    */
+
+    if (aV[3][0] != '~' && aV[3][0] != '$') {
+        Tcl_AppendResult(interp, 
+                 "Star src directory must begin with '~user' or '$variable'",
+                         (char *) NULL);
+           return TCL_ERROR;
+    }
+
+    if (!MkStar( aV[1], aV[2], aV[3], aV[4] ) ){
+        Tcl_AppendResult(interp, ErrGet(), (char *) NULL);
+        return TCL_ERROR;
+    }
+
+    return TCL_OK;
 }
 
 
@@ -806,8 +898,9 @@ int POct::ptkSetSeed (int aC,char** aV) {
 
     // Get the Seed String out of the Seed List
     if (Tcl_SplitList( interp, seedList, &seedC, &seedV ) != TCL_OK){
-        Error::error("Cannot parse comment list: ", seedList);
-        return 0;
+        Tcl_AppendResult(interp, "Cannot parse seed list: ", seedList,
+                         (char *) NULL);
+        return TCL_ERROR;
     }
 
     if (seedC != 2) {
@@ -842,7 +935,6 @@ int POct::ptkSetSeed (int aC,char** aV) {
     OldRandomSeed = seed;
     
     return TCL_OK;
-KcEditSeed();
 }
 
 // ptkGetDomainNames <facet-id>
@@ -1460,6 +1552,8 @@ static InterpTableEntry funcTable[] = {
 	ENTRY(ptkGetParams),
 	ENTRY(ptkSetParams),
 	ENTRY(ptkSetFindName),
+	ENTRY(ptkGetMkStar),
+	ENTRY(ptkSetMkStar),
 	ENTRY(ptkGetComment),
 	ENTRY(ptkSetComment),
 	ENTRY(ptkGetSeed),
