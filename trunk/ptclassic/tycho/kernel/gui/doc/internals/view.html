@@ -20,11 +20,28 @@ top-level window, this functionality is not yet used anywhere
 within Tycho. The rest of this description will only place a single
 view into each displayer.
 
+<H2>Views</H2>
+<P>The <A NAME="view proc"><CODE>::tycho::view</CODE></A>
+proc is a shortcut procedure to open a Displayer/View combination.
+ <P>The following command will create a Displayer that contains
+a View with a Edit widget inside it.
+<tcl><pre>
+set myview [::tycho::view Edit]
+</pre></tcl>
+To close the Displayer, use
+<tcl><pre>
+delete object [$myview displayer]
+</pre></tcl>
+See the <A HREF="../codeDoc/Displayer_rel.html">view</A> documentation
+for further information.
+
+<H2>Displayers</H2>
 <p>Creating a new Displayer is the same as creating any other
 widget:
 <tcl><pre>
-::tycho::Displayer .d
-.d centerOnScreen
+set myDisplayer [::tycho::autoName .myDisplayer]
+::tycho::Displayer $myDisplayer
+$myDisplayer centerOnScreen
 </pre></tcl>
 
 You will see an empty displayer containing a
@@ -32,22 +49,22 @@ You will see an empty displayer containing a
 A view is created as a child of the displayer; for example,
 we can create a text editor and place it into its displayer:
 <tcl quiet><pre>
-::tycho::Edit .d.e
-.d showView .d.e
+::tycho::Edit $myDisplayer.e
+$myDisplayer showView $myDisplayer.e
 </pre></tcl>
 
 The Edit widget has placed itself into the Displayer and
 configured its menubar. To better illustrate this, we'll
 just use an empty View. First delete the Edit view:
 <tcl><pre>
-.d destroyView .d.e
+$myDisplayer destroyView $myDisplayer.e
 </pre></tcl>
 
 
 <p>Finally, deleting a Displayer and the Views contained
 in it is the same as deleting any other widget:
 <tcl><pre>
-delete object .d
+delete object $myDisplayer
 </pre></tcl>
 
 
