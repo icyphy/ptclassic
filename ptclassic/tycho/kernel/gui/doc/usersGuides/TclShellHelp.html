@@ -39,6 +39,19 @@ This page documents the additional features provided.
 <b><dt>C-p</b><dd>up one command
 <b><dt>C-u</b><dd>erase the current command (save to clipboard)
 </dl>
+These bindings can be used to scroll back to previous commands,
+edit them, and re-execute them.  The bindings are designed to
+be maximally convenient for single line commands, however
+they can still be used if the commands themselves
+have multiple lines.  But it takes some getting used to.
+In particular, Contol-p will not move the insertion cursor up one
+line a multi-line command, but rather will erase the current command
+altogether and replace it with the previous command in the command
+history.  Similarly, Control-n will not move down one line in
+a multi-line command.  To edit a multi-line command, use Control-b
+and Control-f or Meta-b and Meta-f to move around within the command.
+Note also that Control-k does not delete to the end of the current
+line, but rather deletes to the end of the command.
 <p>
 <h2><a name="console window, special features">Special Features</a></h2>
 <p>
