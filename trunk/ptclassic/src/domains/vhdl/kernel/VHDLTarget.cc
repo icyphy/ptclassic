@@ -38,6 +38,9 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #include "VHDLTarget.h"
 #include "VHDLStar.h"
+#include "FloatArrayState.h"
+#include "IntArrayState.h"
+#include "ComplexArrayState.h"
 
 // Constructor
 VHDLTarget :: VHDLTarget(const char* name, const char* starclass,
@@ -264,10 +267,12 @@ void VHDLTarget :: beginIteration(int repetitions, int depth) {
 
 // Generate code to end an iterative procedure
 void VHDLTarget :: endIteration(int /*reps*/, int depth) {
-    myCode << indent(depth)
-	   << "end loop;     -- end repeat, depth " << depth << "\n";
+  myCode << indent(depth) << "wait for 1 ns;" << "\n";
+  myCode << indent(depth)
+	 << "end loop;     -- end repeat, depth " << depth << "\n";
 }
 
+// code generation init routine; compute offsets, generate initCode
 int VHDLTarget :: codeGenInit() {
   // Set the names of all geodesics.
   setGeoNames(*galaxy());
@@ -407,22 +412,42 @@ void VHDLTarget :: wrapAround(StringList* codeList) {
 }
 
 // Register the State reference.
-void VHDLTarget :: registerState(State* state, int offset/*=-1*/,
+void VHDLTarget :: registerState(State* state, int thisFiring/*=-1*/,
 				 int pos/*=-1*/) {
   StringList temp = sanitizedFullName(*state);
   StringList ref = sanitize(temp);
   StringList initVal;
 
   if (pos >= 0) {
-    ref << "_P" << pos;
-    // WARNING: The following is dangerous unless you know
-    // that state has a big enough array and that pos is valid!
-//    initVal = state[pos].initValue();
+    if (!(state->isArray())) {
+      Error::error(*state, " reference of non-arrayState as an arrayState");
+    }
+    else {
+      if (pos >= state->size()) {
+	Error::error(*state, " attempt to reference arrayState past its size");
+      }
+      else {
+	state->initialize();
+	ref << "_P" << pos;
+	if (state->isA("FloatArrayState")) {
+//          initVal = state[pos].initValue();
+	  initVal << (*((FloatArrayState *) state))[pos];
+	}
+	else if (state->isA("IntArrayState")) {
+	  initVal << (*((IntArrayState *) state))[pos];
+	}
+	else {
+	  Error::error(*state, "is not a Float or Int ArrayState");
+	}
+      }
+    }
   }
   else {
-//    initVal = state->initValue();
+    initVal = state->initValue();
   }
   
+  ref << "_" << thisFiring;
+
   if (firingVariableList.inList(ref)) return;
   
   // Allocate memory for a new VHDLVariable and put it in the list.
@@ -434,8 +459,14 @@ void VHDLTarget :: registerState(State* state, int offset/*=-1*/,
 }
 
 // Register PortHole reference.
-void VHDLTarget :: registerPortHole(VHDLPortHole* port, int offset/*=-1*/) {
+void VHDLTarget :: registerPortHole(VHDLPortHole* port, int tokenNum/*=-1*/) {
   StringList ref = port->getGeoName();
+  if (tokenNum >= 0) {
+    ref << "_" << tokenNum;
+  }
+  else { /* (tokenNum < 0) */
+    ref << "_N" << (-tokenNum);
+  }
 
   if (firingVariableList.inList(ref)) return;
   
@@ -443,7 +474,7 @@ void VHDLTarget :: registerPortHole(VHDLPortHole* port, int offset/*=-1*/) {
   VHDLVariable* newvar = new VHDLVariable;
   newvar->name = ref;
   newvar->type = port->dataType();
-  (newvar->initVal).initialize();
+  newvar->initVal.initialize();
   firingVariableList.put(*newvar);
 }
 
@@ -459,6 +490,18 @@ void VHDLTarget :: registerTemp(const char* temp, const char* type) {
   newvar->type = sanitizeType(type);
   newvar->initVal.initialize();
   firingVariableList.put(*newvar);
+}
+
+// Return the assignment operator for States.
+const char* VHDLTarget :: stateAssign() {
+  const char* assign = ":=";
+  return assign;
+}
+
+// Return the assignment operator for PortHoles.
+const char* VHDLTarget :: portAssign() {
+  const char* assign = ":=";
+  return assign;
 }
 
 // Return the VHDL type corresponding to the State type.

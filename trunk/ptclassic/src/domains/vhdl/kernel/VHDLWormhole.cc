@@ -45,6 +45,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 ********************************************************************/
 
+/*
 void VHDLWormhole :: setup() {
 //	profile = myProfile;
 
@@ -57,8 +58,9 @@ void VHDLWormhole :: setup() {
 
 void VHDLWormhole :: go() {
 }
+*/
 
-CGWormBase* VHDLWormhole :: myWormhole() { return selfWorm; }
+// CGWormBase* VHDLWormhole :: myWormhole() { return selfWorm; }
 
 //Profile* VHDLWormhole :: getProfile(int pNum) {
 //	return CGWormBase :: getProfile(pNum);

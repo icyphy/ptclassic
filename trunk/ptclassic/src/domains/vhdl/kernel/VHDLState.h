@@ -56,6 +56,8 @@ class VHDLState : public VHDLObj {
   StringList initVal;
   // Type.
   StringList type;
+  // Is it constant? 1 if TRUE.
+  int constant;
 
   // Last firing to access this state.
   int lastFiring;

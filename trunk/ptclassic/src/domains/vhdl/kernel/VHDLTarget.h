@@ -46,16 +46,8 @@ public:
 	VHDLTarget(const char* name, const char* starclass, const char* desc);
 	/*virtual*/ Block* makeNew() const;
 
-	// Keep this at the top of this file to please the compiler.
-	// Add code to the beginning of a CodeStream instead of the end.
-	void prepend(StringList, CodeStream&);
-
 	// Class identification.
 	/*virtual*/ int isA(const char*) const;
-
-	// The following is for keeping track of variables.
-	VHDLVariableList firingVariableList;
-	VHDLVariableList variableList;
 
 	// Main routine.
 	virtual int runIt(VHDLStar*);
@@ -91,15 +83,6 @@ public:
 	// Generate code for writing to a wormhole output port.
 	/*virtual*/ void wormOutputCode(PortHole&);
 
-	// Assign names for each geodesic according to port connections.
-	void setGeoNames(Galaxy&);
-
-	// Return the VHDL type corresponding to the State type.
-	virtual StringList stateType(const State* st);
-
-	// Return the VHDL type corresponding to the given const char*.
-	virtual StringList sanitizeType(const char*);
-
 	// Register the temporary storage reference.
 	virtual void registerTemp(const char*, const char*);
 
@@ -109,8 +92,9 @@ public:
 	// Register PortHole reference.
 	virtual void registerPortHole(VHDLPortHole*, int=-1);
 
-	// Merge the Star's variable list with the Target's variable list.
-	virtual void mergeVariableList(VHDLVariableList*);
+	// Return the assignment operators for States and PortHoles.
+	virtual const char* stateAssign();
+	virtual const char* portAssign();
 
   	// The only reason for redefining this from HLLTarget
  	// is to change the separator from "." to "_".
@@ -122,11 +106,12 @@ protected:
 	CodeStream variable_declarations;
 	CodeStream architecture_body_closer;
 
-	// virtual function to add additional codeStreams.
-	virtual void addCodeStreams();
+	// Keep this at the top of this file to please the compiler.
+	// Add code to the beginning of a CodeStream instead of the end.
+	void prepend(StringList, CodeStream&);
 
-	// virtual function to initialize codeStreams.
-	virtual void initCodeStreams();
+	// Return the VHDL type corresponding to the State type.
+	virtual StringList stateType(const State* st);
 
 	/*virtual*/ void setup();
 
@@ -140,10 +125,29 @@ protected:
 	// Combine all sections of code;
 	/*virtual*/ void frameCode();
 
+private:
+	// The following is for keeping track of variables.
+	VHDLVariableList firingVariableList;
+	VHDLVariableList variableList;
+
+	// Assign names for each geodesic according to port connections.
+	void setGeoNames(Galaxy&);
+
+	// Return the VHDL type corresponding to the given const char*.
+	virtual StringList sanitizeType(const char*);
+
+	// Merge the Star's variable list with the Target's variable list.
+	virtual void mergeVariableList(VHDLVariableList*);
+
+	// virtual function to add additional codeStreams.
+	virtual void addCodeStreams();
+
+	// virtual function to initialize codeStreams.
+	virtual void initCodeStreams();
+
 	// Clean up the code by wrapping around long lines as separate lines.
 	void wrapAround(StringList*);
 
-private:
 };
 
 #endif

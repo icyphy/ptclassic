@@ -350,12 +350,14 @@ StringList VHDLStar :: expandAssign(const char* name) {
   
   // Check if it's a State reference.
   if ((state = stateWithName(name)) != 0) {
-    assign << ":=";
+//    assign << ":=";
+    assign << targ()->stateAssign();
   }
 
   // Check if it's a PortHole reference.
   else if ((port = (VHDLPortHole*) genPortWithName(portName)) != 0) {
-    assign << "<=";
+//    assign << "<=";
+    assign << targ()->portAssign();
   }
 
   // Error:  couldn't find a State or a PortHole with given name.
