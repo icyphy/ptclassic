@@ -30,8 +30,8 @@ STARDOCDIR = ../../doc/stars
 PL_SRCS= \
  SDFAddMotionVecs.pl \
  SDFDCTImage.pl \
- SDFDCTImageCode.pl \
- SDFDCTImageCodeInv.pl \
+ SDFDCTImgCde.pl \
+ SDFDCTImgCdeInv.pl \
  SDFDCTImageInv.pl \
  SDFDiffImage.pl \
  SDFDisplayImage.pl \
@@ -50,12 +50,12 @@ PL_SRCS= \
  SDFReadImage.pl \
  SDFReadRGB.pl \
  SDFRGBToYUV.pl \
- SDFRunLenImage.pl \
- SDFRunLenImageInv.pl \
+ SDFRunLenImg.pl \
+ SDFRunLenImgInv.pl \
  SDFSumImage.pl \
  SDFYUVToRGB.pl \
- SDFZigZagImage.pl \
- SDFZigZagImageInv.pl
+ SDFZigZagImg.pl \
+ SDFZigZagImgInv.pl
 
 # The .cc files
 SRCS=$(PL_SRCS:.pl=.cc)
