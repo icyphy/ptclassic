@@ -123,8 +123,10 @@ limitation of liability, and disclaimer of warranty provisions.
 	    if (setupRun == 0 || !bg.windowExists()) {
 		setupRun = 1;
 
-	        if(bg.setup(this,(char*)identifier,2,taps.size(),
-		    double(fullScale), - double(fullScale), (char*)geometry,
+		InfString idCopy((const char*)identifier);
+		InfString geoCopy((const char*)geometry);
+	        if(bg.setup(this,(char*)idCopy,2,taps.size(),
+		    double(fullScale), - double(fullScale), (char*)geoCopy,
 		    double(width), double(height)) == 0) {
 			Error::abortRun(*this, "Cannot create bar chart");
 			return;
@@ -238,13 +240,13 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	code {
 	    static int
-	    reset(ClientData star, Tcl_Interp *interp, int argc, char **argv)
+	    reset(ClientData star, Tcl_Interp*, int, char*[])
 	    {
 		((SDFLMSCxTkPlot*)star)->resetTaps();
 		return TCL_OK;
 	    }
 	    static int
-	    setStep(ClientData star, Tcl_Interp *interp, int argc, char **argv)
+	    setStep(ClientData star, Tcl_Interp*, int, char *argv[])
 	    {
 		((SDFLMSCxTkPlot*)star)->setStepSize(argv[1]);
 		return TCL_OK;

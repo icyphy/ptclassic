@@ -72,16 +72,16 @@ limitation of liability, and disclaimer of warranty provisions.
 	    if(float(top) <= float(bottom)) {
 		Error::abortRun(*this, "invalid range for the scale");
 	    }
-	    // the cast on the string state label and position must
-	    // be (const char *) because a (char *) cast has not been
-	    // defined for string states but bar.setup wants (char *)
+	    // Need to make non-const copies of "position" and "label"
+	    InfString posCopy((const char*)position);
+	    InfString labCopy((const char*)label);
 	    bar.setup(this,
-		(const char *) label,
+		(char*) labCopy,
 		input.numberPorts(),
 		(int) number_of_bars,
 		(float) top,
 		(float) bottom,
-		(const char *) position,
+		(char*) posCopy,
 		(float) bar_graph_width,
 		(float) bar_graph_height);
 	    count = 0;
