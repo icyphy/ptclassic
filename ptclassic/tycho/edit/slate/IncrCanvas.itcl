@@ -253,6 +253,9 @@ class ::tycho::IncrCanvas {
     # Return the item type
     method type {id}
 
+    # Return the unique ID number of this icanvas
+    method uniqueid {}
+
     # Set the horizontal view for scrolling
     method xview {args}
 
@@ -312,6 +315,12 @@ class ::tycho::IncrCanvas {
     # all icanvases -- because ComplexItem classes use common arrays
     # indexed by ID.
     private common secretcounter 0
+
+    # Unique IDs for Icanvases are generated with this counter
+    private common anothersecretcounter 0
+
+    # The unique ID of the icanvas
+    private common uniqueid 0
 }
 
 
@@ -322,6 +331,10 @@ class ::tycho::IncrCanvas {
 # use the procedure ::tycho::icanvas{}.
 #
 body ::tycho::IncrCanvas::constructor {args} {
+    # Create a unique (and short!) id for this icanvas
+    set uniqueid $anothersecretcounter
+    incr anothersecretcounter
+
     # Create the canvas and pack it
     itk_component add canvas {
 	# Create at the global scope to avoid calls to unknown{}
@@ -1377,6 +1390,18 @@ body ::tycho::IncrCanvas::type {id} {
     } else {
 	error "$id is not a valid item ID"
     }
+}
+
+#######################################################################
+#### uniqueid
+#
+# Return an ID unique to this icanvas. This is used by Shape
+# classes that need a unique ID for each slate to distinguish
+# items stored in common arrays. Although the widget name itself
+# could be used, it is unnecessarily long...
+#
+body ::tycho::IncrCanvas::uniqueid {} {
+    return $uniqueid
 }
 
 #######################################################################
