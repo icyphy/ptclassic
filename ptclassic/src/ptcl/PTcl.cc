@@ -401,8 +401,8 @@ int PTcl::schedtime(int argc,char **argv) {
 		return TCL_OK;
 	}
 	else {
-		strcpy (interp->result, "no scheduler!");
-		return TCL_ERROR;
+		Tcl_AppendResult(interp,"0",(char*)NULL);
+		return TCL_OK;
 	}
 }
 
