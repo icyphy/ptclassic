@@ -15,12 +15,12 @@ cat > /tmp/$$.hdr << EOF
 EOF
 
 pp=ZZZ
-if [ $# > 1 ]
+if [ $# -gt 1 ]
 then pp=$2
 fi
 
 d3=ZZZ
-if [ $# > 2 ]
+if [ $# -gt 2 ]
 then d3=$3
 fi
 
