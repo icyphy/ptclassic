@@ -174,7 +174,7 @@ body ::tycho::Rectangle::_aspect {id canvas slate args} {
     array set opts $args
     
     if { $opts(-aspects) == "" } {
-	return {c n s e w ne nw se sw}
+	return {n s e w ne nw se sw}
     } else {
 	set region [$slate region $id]
 	set result {}

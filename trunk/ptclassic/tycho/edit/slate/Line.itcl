@@ -117,7 +117,7 @@ body ::tycho::Line::_aspect {id canvas slate args} {
     set coords [$slate coords $id]
 
     if { $opts(-aspects) == "" } {
-	set result {length start end}
+	set result {}
 	foreach n [::tycho::linterval 0 \
 		[expr [llength $coords] / 2 - 1]] {
 	    lappend result "vertex-$n"
