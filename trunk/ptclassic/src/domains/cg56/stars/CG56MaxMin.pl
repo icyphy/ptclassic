@@ -12,11 +12,11 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CG56 demo library }
 	explanation {
-If \fIcmpareMagnitude\fR is "no",
-the star finds from among the \finput\fR inputs the one with
-the maximum or minimum value; else it finds from among the \finput\fR inputs
+If \fIcmpareMagnitude\fR is ``no'',
+the star finds from among the \fIinput\fR inputs the one with
+the maximum or minimum value; else it finds from among the \fIinput\fR inputs
 the one with the maximum or minimum magnitude.
-if \fIoutputMagnitude\fR is "yes",
+if \fIoutputMagnitude\fR is ``yes'',
 the magnitude of the result is written to the output,
 else the result itself is written to the output.
 Returns maximum value among N (default 10) samples.
