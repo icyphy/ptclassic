@@ -206,6 +206,9 @@ class ::tycho::SmartLine {
     # Set or get the lines's coordinates
     proc coords {id canvas slate args}
 
+    # Highlight the line
+    proc highlight {id canvas slate args}
+
     ###################################################################
     ####                         private variables                 ####
 
@@ -440,6 +443,7 @@ class ::tycho::SmartLine {
 
     set methodtable(construct)  ::tycho::SmartLine::construct
     set methodtable(coords)     ::tycho::SmartLine::coords
+    set methodtable(highlight)  ::tycho::SmartLine::highlight
 
     #### Set option defaults
     array set optiondefault [array get ::tycho::ComplexItem::optiondefault]
@@ -569,6 +573,24 @@ body ::tycho::SmartLine::coords {id canvas slate args} {
 
     # Call redraw to do the work
     redraw $id $canvas $slate
+}
+
+##########################################################################
+#### highlight
+#
+# Highlight the Smartline. We have to provide this because the
+# default Slate highlighting draws the highlight between
+# the two end points...
+#
+body ::tycho::SmartLine::highlight {id canvas slate args} {
+    array set opts $args
+    set line $component(segments$id)
+    eval $canvas create line [$canvas coords $line] [list \
+            -arrow [$canvas itemcget $line -arrow] \
+            -width [expr $opts(-highlightwidth) * 2] \
+            -fill $opts(-highlightcolor) \
+            -tags $opts(-tags)]
+    $canvas lower highlight.$id $id
 }
 
 
