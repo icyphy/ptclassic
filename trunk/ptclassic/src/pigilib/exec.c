@@ -13,6 +13,7 @@ $Id$
 #include "compile.h"
 #include "octIfc.h"
 #include "err.h"
+#include "util.h"
 
 /* The vars below store the state of the last run command for re-runs */
 static int lastIterate;
@@ -78,6 +79,12 @@ long userOptionWord;
 	PrintErr("Schematic is not a universe");
         ViDone();
     }
+
+    if((! KcSetKBDomain(DEFAULT_DOMAIN)) || (setCurDomainF(&facet) == NULL)) {
+        PrintErr("Domain error in universe.");
+        ViDone();
+    }
+
     if (!Run(&facet)) {
 	PrintErr(ErrGet());
         ViDone();
