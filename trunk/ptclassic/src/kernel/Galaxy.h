@@ -167,6 +167,14 @@ public:
 	// Remove a block from the list
 	inline int removeBlock(Block& b) { return blocks.remove(&b);}
 
+	// Allow blocks to be looked up by name --- const and non-const forms
+	inline Block* blockWithName (const char* name) {
+		return blocks.blockWithName(name);
+	}
+	inline const Block* blockWithName (const char* name) const {
+		return blocks.blockWithName(name);
+	}
+
 	// Get the head of the blocks list--useful when there
 	// are Clusters with only one star in them.  By default, when
 	// a cluster hierarchy is created, every star is a Cluster.
@@ -248,15 +256,6 @@ protected:
 	// Overload to alias MultiPortHoles
 	inline void alias(MultiPortHole& galPort, MultiPortHole& blockPort) {
 		galPort.setAlias(blockPort);
-	}
-
-	// support blockWithName message to access internal block list
-	inline const Block* blockWithName (const char* name) const {
-		return blocks.blockWithName(name);
-	}
-
-	inline Block* blockWithName (const char* name) {
-		return blocks.blockWithName(name);
 	}
 
 	// initialize subblocks only.
