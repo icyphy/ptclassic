@@ -104,9 +104,16 @@ EGGate* EGNode::makeArc(EGNode *dest, int samples, int delay)
 	LOG_NEW; EGGate* destnode = new EGGate(dest);
 	LOG_NEW; EGGate* srcnode = new EGGate(this);
 	srcnode->allocateArc(destnode, samples, delay);
-	descendants.insertGate(srcnode,1);
-	dest->ancestors.insertGate(destnode,0);
-	return srcnode;
+
+	// Insert the srcnode
+	if (descendants.insertGate(srcnode, 1)) {
+		dest->ancestors.insertGate(destnode,0);
+		return srcnode;
+	}
+
+	delete srcnode;
+	delete destnode;
+	return 0;
 }
 
 // Determine whether this node is a root of the expanded
