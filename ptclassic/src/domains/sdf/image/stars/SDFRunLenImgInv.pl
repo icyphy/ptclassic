@@ -79,7 +79,7 @@ Check to make sure we don't write past unallocated memory.
 			for(; indx1 < fullFrame; indx1++) {
 				ptr1[indx1] = (unsigned char) 0;
 			}
-			LOG_DEL; delete ptr2;
+			LOG_DEL; delete [] ptr2;
 		} // end { invRunLen }
 	}
 
@@ -92,7 +92,7 @@ Check to make sure we don't write past unallocated memory.
 // Do processing and send out.
 		GrayImage* inImage = (GrayImage*) inEnvp.writableCopy();
 		if (inImage->fragmented()) {
-			delete inImage;
+			LOG_DEL; delete inImage;
 			Error::abortRun(*this,
 					"Need unfragmented input image.");
 			return;

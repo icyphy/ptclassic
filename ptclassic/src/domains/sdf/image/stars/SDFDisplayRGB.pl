@@ -118,8 +118,8 @@ to produce the full filename of the displayed image.
 		unsigned const char* gdata = imgG->constData();
 		unsigned const char* bdata = imgB->constData();
 
-		LOG_NEW; unsigned char* rgbfp =
-				new unsigned char[3*Width*Height];
+		LOG_NEW;
+		unsigned char* rgbfp = new unsigned char[3*Width*Height];
 
 		int i, j, temp1, temp2, temp3;
 		for (i = 0; i < Height; i++) {
@@ -138,7 +138,7 @@ to produce the full filename of the displayed image.
 				unsigned(3*Width*Height), fptr);
 		fclose(fptr);
 
-		LOG_DEL; delete rgbfp;
+		LOG_DEL; delete [] rgbfp;
 
 		char buf[256];
 		sprintf (buf, "(%s %s", (const char*) command, fileName);

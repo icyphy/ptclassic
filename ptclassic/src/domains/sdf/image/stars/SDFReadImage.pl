@@ -112,10 +112,10 @@ are read are 'dir.2/pic2', 'dir.3/pic3', etc.
 		fscanf(fp, "%*c"); // skip one whitespace char.
 
 // Create image object and fill it with data.
-		LOG_NEW; GrayImage* imgData = new GrayImage(width, height,
-				int(frameId));
-		fread((char*)imgData->retData(), sizeof(unsigned char),
-				unsigned(width*height), fp);
+		LOG_NEW;
+		GrayImage* imgData = new GrayImage(width, height, int(frameId));
+		fread( (char*)imgData->retData(), sizeof(unsigned char),
+		       unsigned(width*height), fp );
 		fclose(fp);
 		frameId = int(frameId) + 1; // increment frame id
 

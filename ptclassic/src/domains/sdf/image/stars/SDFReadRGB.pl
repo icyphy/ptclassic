@@ -142,7 +142,7 @@ are read are 'dir.2/pic2', 'dir.3/pic3', etc.
 				gfp[temp2] = rgbfp[temp3+1];
 				bfp[temp2] = rgbfp[temp3+2];
 		}	}
-		LOG_DEL; delete rgbfp;
+		LOG_DEL; delete [] rgbfp;
 
 // Write whole frame to output here...
 		Envelope envpr(*rColor);

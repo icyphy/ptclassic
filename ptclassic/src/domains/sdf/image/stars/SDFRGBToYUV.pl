@@ -107,7 +107,8 @@ to the usual YUV definition.
 		if ( redI->fragmented() || redI->processed() ||
 		     greenI->fragmented() || greenI->processed() ||
 		     blueI->fragmented() || blueI->processed()) {
-			LOG_DEL; delete redI; LOG_DEL; delete greenI;
+			LOG_DEL; delete redI;
+			LOG_DEL; delete greenI;
 			LOG_DEL; delete blueI;
 			Error::abortRun(*this,
 					"Can't handle fragmented or processed inputs.");
@@ -119,7 +120,8 @@ to the usual YUV definition.
 		    (greenI->retHeight() != height) ||
 		    (blueI->retWidth() != width) ||
 		    (blueI->retHeight() != height)) {
-			LOG_DEL; delete redI; LOG_DEL; delete greenI;
+			LOG_DEL; delete redI;
+			LOG_DEL; delete greenI;
 			LOG_DEL; delete blueI;
 			Error::abortRun(*this,
 					"Input image sizes don't match.");
