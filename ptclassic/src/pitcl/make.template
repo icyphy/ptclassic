@@ -130,7 +130,7 @@ docs: doc/codeDoc/pitcl.html
 doc/codeDoc/pitcl.html: PITcl.cc gendoc.tcl
 	@echo "Generating html documentation from PITcl.cc"
 	(cd $(VPATH); \
-	  echo "set PTOLEMY $(PTOLEMY); source $(VPATH)/gendoc.tcl" | $(ISH))
+	  echo "set PTOLEMY $(PTOLEMY); source $(VPATH)/gendoc.tcl" | $(ITCLSH))
 
 updatetychodocs: docs
 	cp doc/codeDoc/pitcl.html ../../tycho/typt/doc/internals
