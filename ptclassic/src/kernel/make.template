@@ -16,8 +16,14 @@ GNUINCLUDE = /usr/gnu/lib/g++-include
 .cc.o:
 	$(GNU) $(GFLAGS) -c  $<
 
+# Root of Ptolemy directory
+ROOT=/usr/tools/ptolemy
+
 # Where to install the libraries
-DESTDIR=/usr/tools/ptolemy/lib
+DESTDIR=$(ROOT)/lib
+
+# Where to install the help file(s)
+HELPDIR=$(ROOT)/help
 
 # Library name
 LIB=libptolemy.a
@@ -45,8 +51,14 @@ $(LIB):	$(LIBOBJS)
 	ranlib $(LIB)
 
 # "make install" puts things in the official place
-install:	makefile $(TOMAKE)
+install:	makefile $(TOMAKE) ins_help
 		mv -f $(TOMAKE) $(DESTDIR)
+
+ins_help:	$(HELPDIR)/interpreter.help
+# install the help file
+$(HELPDIR)/interpreter.help:	interpreter.help
+		rm -f $(HELPDIR)/interpreter.help
+		cp interpreter.help $(HELPDIR)
 
 # "make clean" removes .o files and other cruft
 clean:
@@ -64,6 +76,10 @@ makefile:	make.template
 		makedepend -I$(GNUINCLUDE) $(SRCS)
 		@echo makefile remade -- you must rerun make.
 		exit 1
+
+# Need to define LIBDIR for the interpreter
+Interpreter.o:	Interpreter.cc
+		$(GNU) $(GFLAGS) -DHELPDIR=\"$(HELPDIR)\" -c Interpreter.cc
 
 # Don't add anything after the next line; makedepend will zap it.
 # DO NOT DELETE THIS LINE -- make depend depends on it.
