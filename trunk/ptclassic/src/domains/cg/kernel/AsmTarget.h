@@ -57,19 +57,7 @@ public:
 	// output a directive that switches to the code section
 	virtual void codeSection() = 0;
 
-	// generate file of stuff named base.suffix.
-	int genFile(const char* stuff, const char* base,const char* suffix=NULL);
-
-	// generate file of stuff named base.suffix and display it.
-	int genDisFile(const char* stuff,const char* base,const char* suffix=NULL);
-  
-	// Return full file name including path.  
-	// NOTE: User must delete the char* returned after use.
-	char* fullFileName(const char* base, const char* suffix=NULL);
-
-	char* baseName() { return filePrefix; }
-
-	/*virtual*/ void writeCode(const char* name = NULL);
+	/*virtual*/ void writeCode();
 
 	// output an "org" directive that switches to the specified
 	// memory and address
@@ -83,16 +71,7 @@ public:
 
 	// output a floating-point value.
 	virtual void writeFloat (double) {}
-/*
-	// output a comment.  Default form uses "outputLineOrientedComment"
-	// to make comments beginning with semicolons.
-	void outputComment (const char*);
 
-	// useful function for comment generation
-	void outputLineOrientedComment(const char* prefix,
-				       const char* msg,
-				       int lineLen);
-*/
 	//Disable interrupts
 	virtual void disableInterrupts();
 
@@ -127,10 +106,6 @@ protected:
 	int modifyGalaxy();
 
 	virtual void doInitialization(CGStar&);
-
-	// The filename for the assembly code produced is specified 
-	// by 'filePrefix'asmSuffix().
-	virtual const char* asmSuffix() const {return ".asm";}
 
 	// methods for generating code for reading and writing
 	// wormhole ports.  Argument is the "real port" of the interior
