@@ -1455,7 +1455,7 @@ genDef ()
 
 /* inouts */
 	if (strlen(inoutDescriptions) > 0)
-		fprintf (fp, ".OH\n%s.PE\n", inoutDescriptions);
+		fprintf (fp, ".BH\n%s.PE\n", inoutDescriptions);
 
 /* states */
 	if (strlen(stateDescriptions) > 0)
