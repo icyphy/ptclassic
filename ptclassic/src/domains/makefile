@@ -35,15 +35,9 @@ endif
 DOMAINS = sdf hof de ddf bdf thor cg cgc c50 cg56 vhdlb \
           vhdl mdsdf $(EXPDOMAINS) 
 
-# Remove thor, add starHTML.idx, add the VPATH.
-ALLDOMAINIDXS =	$(addprefix $(VPATH)/, \
-			$(addsuffix /domain.idx, \
-				$(filter-out thor, $(DOMAINS))))
-
-
 MAKEVARS = "PTARCH=$(PTARCH)"
 
-makefiles all install clean depend realclean clean_indices checkjunk sccsinfo domain.idx:
+makefiles all install clean depend realclean clean_indices checkjunk sccsinfo:
 	@for x in $(DOMAINS); do \
 	    if [ -w $$x ] ; then \
 		( cd $$x ; \
@@ -55,7 +49,8 @@ makefiles all install clean depend realclean clean_indices checkjunk sccsinfo do
 
 # We have a separate target for sources so that we can build starHTML.idx
 # after ptlang has been run on the star .pl files
-sources: subsources starHTML.idx
+# Don't include domain.idx, it takes 30 minutes to rebuild
+sources: subsources starHTML.idx #starDemo.idx domain.idx
 subsources:
 	@for x in $(DOMAINS); do \
 	    if [ -w $$x ] ; then \
@@ -66,25 +61,29 @@ subsources:
 	    fi ; \
 	done
 
+#####
+# star index
 # Remove thor, add starHTML.idx, add the VPATH.
 ALLSTARHTMLIDXS =	$(addprefix $(VPATH)/, \
 			$(addsuffix /starHTML.idx, \
 				$(filter-out thor, $(DOMAINS))))
 
 # Star index of all the star index files
-$(VPATH)/starHTML.idx: domainstarHTML
-	@echo "Merging $@"
-	@rm -f $@
-	@echo "set TYCHO $(PTOLEMY)/tycho; \
+starHTML.idx: domainstarHTML $(PTOLEMY)/tycho/lib/idx/tychoMakeIndex.tcl
+	@echo "Merging $(VPATH)/$@"
+	@rm -f $(VPATH)/$@
+	@(cd $(VPATH); \
+	 echo "set TYCHO $(PTOLEMY)/tycho; \
 		source $(PTOLEMY)/tycho/lib/idx/tychoMakeIndex.tcl; \
-		tychoVpathMergeIndices {} $@ $(VPATH)/ $(ALLSTARHTMLIDXS)" \
-		| itclsh
+		tychoVpathMergeIndices {} $(VPATH)/$@ $(VPATH)/ \
+			$(ALLSTARHTMLIDXS)" \
+		| itclsh)
 
 domainstarHTML:
 	@for x in $(DOMAINS); do \
 	    if [ -w $$x/ ] ; then \
 		( cd $$x ; \
-		  echo making doc/stars/starHTML.idx in domains/$$x ; \
+		  echo making starHTML.idx in domains/$$x ; \
 		  $(MAKE) $(MFLAGS) $(MAKEVARS) \
 			VPATH=../../../src/domains/$$x 	\
 			starHTML.idx ; \
@@ -92,25 +91,29 @@ domainstarHTML:
 	    fi ; \
 	done
 
+#####
+# star/demo xref index 
 # Remove thor, add starHTML.idx, add the VPATH.
 ALLDEMOIDXS =	$(addprefix $(VPATH)/, \
 			$(addsuffix /starDemo.idx, \
 				$(filter-out thor, $(DOMAINS))))
 
 # Star index of all the star index files
-$(VPATH)/starDemo.idx: domainstardemoidx
-	@echo "Merging $@"
-	@rm -f $@
-	@echo "set TYCHO $(PTOLEMY)/tycho; \
+starDemo.idx: domainstardemoidx $(PTOLEMY)/tycho/lib/idx/tychoMakeIndex.tcl
+	@echo "Merging $(VPATH)/$@"
+	@rm -f $(VPATH)/$@
+	@(cd $(VPATH); \
+	 echo "set TYCHO $(PTOLEMY)/tycho; \
 		source $(PTOLEMY)/tycho/lib/idx/tychoMakeIndex.tcl; \
-		tychoVpathMergeIndices {} $@ $(VPATH)/ $(ALLDEMOIDXS)" \
-		| itclsh
+		tychoVpathMergeIndices {} $(VPATH)/$@ $(VPATH)/ \
+			$(ALLDEMOIDXS)" \
+		| itclsh)
 
 domainstardemoidx:
 	@for x in $(DOMAINS); do \
 	    if [ -w $$x/ ] ; then \
 		( cd $$x ; \
-		  echo making demo/demo.idx in domains/$$x ; \
+		  echo making $@ in domains/$$x ; \
 		  $(MAKE) $(MFLAGS) $(MAKEVARS) \
 			VPATH=../../../src/domains/$$x 	\
 			starDemo.idx ; \
@@ -118,7 +121,49 @@ domainstardemoidx:
 	    fi ; \
 	done
 
-.PHONY:	TAGS
+#####
+# Master Index for all indices in a domain
+# Remove thor, add starHTML.idx, add the VPATH.
+# Remove thor, add starHTML.idx, add the VPATH.
+ALLDOMAINIDXS =	$(addprefix $(VPATH)/, \
+			$(addsuffix /domain.idx, \
+				$(filter-out thor, $(DOMAINS))))
+
+.PHONY:	TAGS domain.idx force
+
+# Star index of all the star index files
+domain.idx:  $(ALLDOMAINIDXS) $(PTOLEMY)/tycho/lib/idx/tychoMakeIndex.tcl
+	@echo "Merging $(VPATH)/$@"
+	@rm -f $(VPATH)/$@
+	@(cd $(VPATH); \
+	 echo "set TYCHO $(PTOLEMY)/tycho; \
+		source $(PTOLEMY)/tycho/lib/idx/tychoMakeIndex.tcl; \
+		tychoVpathMergeIndices {} $(VPATH)/$@ $(VPATH)/ \
+			$(ALLDOMAINIDXS)" \
+		| itclsh)
+
+$(ALLDOMAINIDXS): force
+	@if [ -w `basename $(@D)` ] ; then \
+		( cd `basename $(@D)` ; \
+		  echo making $@ in domains/`basename $(@D)` ; \
+		  $(MAKE) $(MFLAGS) $(MAKEVARS) \
+			VPATH=../../../src/domains/`basename $(@D)` \
+			domain.idx ; \
+		) \
+	fi	
+
+#domainidx:
+#	@for x in $(DOMAINS); do \
+#	    if [ -w $$x/ ] ; then \
+#		( cd $$x ; \
+#		  echo making $@ in domains/$$x ; \
+#		  $(MAKE) $(MFLAGS) $(MAKEVARS) \
+#			VPATH=../../../src/domains/$$x 	\
+#			domain.idx ; \
+#		) \
+#	    fi ; \
+#	done
+
 TAGS:
 	@for x in $(DOMAINS); do \
 	    if [ -w $$x ] ; then \
@@ -131,7 +176,7 @@ TAGS:
 	done
 	-cat -s $(DOMAINS:%=%/TAGS) > $@
 
-starindex:
+starindex: $(PTOLEMY)/lib/tcl/starindex.tcl
 	-mkdir $(ROOT)/doc
 	-mkdir $(ROOT)/doc/star-demo-index
 	mkStarIndex "$(sort $(DOMAINS))" $(ROOT)/doc/star-demo-index
