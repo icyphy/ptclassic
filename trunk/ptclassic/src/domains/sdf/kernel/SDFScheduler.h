@@ -7,8 +7,8 @@
 #include "Scheduler.h"
 #include "Galaxy.h"
 #include "GalIter.h"
-#include "SDFStar.h"
-#include "SDFPortHole.h"
+#include "DataFlowStar.h"
+#include "DFPortHole.h"
 #include "DataStruct.h"
 
 /**************************************************************************
@@ -82,7 +82,7 @@ public:
 	DFGalStarIter(Galaxy& g) 
 	: GalStarIter(g) {}
 	DataFlowStar* next() { return (DataFlowStar*)GalStarIter::next();}
-	DataFlowStar* operator++() { return next();}
+	DataFlowStar* operator++(POSTFIX_OP) { return next();}
 	GalStarIter::reset;
 	// need a public destructor because of private derivation
 	~DFGalStarIter() {}
@@ -244,7 +244,7 @@ public:
 	SDFSchedIter(const SDFSchedule& s) : ListIter(s) {}
 	SDFSchedIter(SDFScheduler& sch) : ListIter(sch.mySchedule) {}
 	DataFlowStar* next() { return (DataFlowStar*)ListIter::next();}
-	DataFlowStar* operator++() { return next();}
+	DataFlowStar* operator++(POSTFIX_OP) { return next();}
 	ListIter::reset;
 };
 
