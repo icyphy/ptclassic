@@ -41,7 +41,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #endif
 #include <sys/time.h>
 #include <sys/resource.h>
-#ifdef PTSOL2
+#if defined(PTSOL2) || defined(PTSVR4)
 #include <fcntl.h>
 /* sys/rusage.h is in Solaris2.3, but not Solaris2.4 */
 /*#include <sys/rusage.h>*/
@@ -105,11 +105,15 @@ struct timestruct *timer;
 #else
     struct timeval tb;
 #endif
-#ifdef PTSOL2
+#if defined(PTSOL2) || defined(PTSVR4)
     int             fd;
     char            proc[BUFSIZ];
+#ifdef PTSOL2
     prusage_t       rst;
 #else
+#else 
+    prstatus_t      rst;
+#endif /* PTSOL2 */
     struct rusage rst;
 #endif
     extern int ftime();
@@ -130,18 +134,23 @@ struct timestruct *timer;
     timer->startElapsedTime.tv_usec = tb.tv_usec;
 #endif
 
-#ifdef PTSOL2
+#if defined(PTSOL2) || defined(PTSVR4)
     /* For Solaris2, taken from solaris2_porting.faq */
     sprintf(proc,"/proc/%d", (int)getpid());
     if ((fd = open(proc, O_RDONLY)) == -1)
       perror("timerContinue(): open");
+#ifdef PTSOL2
     if (ioctl(fd, PIOCUSAGE, &rst) == -1)
       perror("timerContinue(): ioctl");
-#else /* PTSOL2 */
-    (void) getrusage(0, &rst);
+#else
+    if (ioctl(fd, PIOCSTATUS, &rst) == -1)
+      perror("timerContinue(): ioctl");
 #endif /* PTSOL2 */
+#else /* PTSOL2 || PTSVR4 */
+    (void) getrusage(0, &rst);
+#endif /* PTSOL2 || PTSVR4 */
 
-#ifdef PTSOL2
+#if defined(PTSOL2) || defined(PTSVR4)
     timer->startUserTime.tv_sec = rst.pr_utime.tv_sec;
     timer->startUserTime.tv_usec = rst.pr_utime.tv_nsec/1000;
     timer->startSystemTime.tv_sec = rst.pr_stime.tv_sec;
@@ -177,10 +186,15 @@ struct timestruct *timer;
 #else
     struct timeval tb;
 #endif
-#ifdef PTSOL2
+#if defined(PTSOL2) || defined(PTSVR4)
     int             fd;
     char            proc[BUFSIZ];
+#ifdef PTSOL2
     prusage_t       rst;
+#else
+    prstatus_t       rst;
+#endif /* PTSOL2 */
+
 #else
     struct rusage rst;
 #endif
@@ -218,13 +232,18 @@ struct timestruct *timer;
     }
 #endif /*HAS_TIMEB*/
 
-#if defined(PTSOL2)
+#if defined(PTSOL2) || defined(PTSVR4)
     /* For Solaris2, taken from solaris2_porting.faq */
     sprintf(proc,"/proc/%d", (int)getpid());
     if ((fd = open(proc,O_RDONLY)) == -1)
       perror("util_cpu_time(): open");
+#ifdef PTSOL2
     if (ioctl(fd, PIOCUSAGE, &rst) == -1)
       perror("util_cpu_time(): ioctl");
+#else
+    if (ioctl(fd, PIOCSTATUS, &rst) == -1)
+      perror("util_cpu_time(): ioctl");
+#endif /* PTSOL2 */
 
     timer->currentUserTime.tv_sec
              += (rst.pr_utime.tv_sec - timer->startUserTime.tv_sec);
@@ -239,7 +258,7 @@ struct timestruct *timer;
 		 += (rst.pr_utime.tv_nsec*1000 - timer->startUserTime.tv_usec);
     }
 
-#else /*PTSOL2*/
+#else /*PTSOL2|| PTSVR4 */
     (void) getrusage(0, &rst);
 
     timer->currentUserTime.tv_sec
@@ -267,7 +286,7 @@ struct timestruct *timer;
 	timer->currentSystemTime.tv_usec
 		 += (rst.ru_stime.tv_usec - timer->startSystemTime.tv_usec);
     }
-#endif /*PTSOL2*/
+#endif /*PTSOL2|| PTSVR4 */
     return;
 }
 
