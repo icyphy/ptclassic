@@ -26,6 +26,7 @@ SDF_DSP_SRC=$(ROOT)/src/domains/sdf/dsp/stars
 SDF_IMAGE_SRC=$(ROOT)/src/domains/sdf/image/stars
 
 SDFKERSRC=$(ROOT)/src/domains/sdf/kernel
+SDFLOOP=$(ROOT)/src/domains/sdf/loopScheduler
 
 # libraries
 LIBS=-lsdfstars -lsdfdspstars -lsdfimagestars \
@@ -44,7 +45,7 @@ SRCS=code.cc
 # Rule for compiling with C++ programs
 .SUFFIXES: .cc
 .cc.o:
-	$(GNU) $(GPPFLAGS) -I$(KERNDIR) -I$(SDFSRC) -I$(SDFKERSRC) -c  $<
+	$(GNU) $(GPPFLAGS) -I$(KERNDIR) -I$(SDFSRC) -I$(SDFKERSRC) -I$(SDFLOOP) -c  $<
 
 all:		makefile code
 
