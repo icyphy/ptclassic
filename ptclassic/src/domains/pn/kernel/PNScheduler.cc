@@ -87,6 +87,7 @@ void PNScheduler::setup()
 
     setCurrentTime(0.0);
     iteration = 0;
+    PNGeodesic::resetFull();
 
     enableLocking();
     createThreads();
@@ -109,10 +110,11 @@ int PNScheduler::run()
 	    iteration++;
 	    start->notifyAll();
 	}
-	threads->run();
-	while (increaseBuffers() && !SimControl::haltRequested())
+	PNThread::runAll();
+	while (PNGeodesic::blockedOnFull() > 0 && !SimControl::haltRequested())
 	{
-	    threads->run();
+	    increaseBuffers();
+	    PNThread::runAll();
 	}
 	currentTime += schedulePeriod;
     }
@@ -166,7 +168,7 @@ void PNScheduler::createThreads()
     GalStarIter nextStar(*galaxy());
     DataFlowStar* star;
 
-    LOG_NEW; threads = new PNThreadList;
+    LOG_NEW; threads = new ThreadList;
 
     // Create Threads for all the Stars.
     while((star = (DataFlowStar*)nextStar++) != NULL)
