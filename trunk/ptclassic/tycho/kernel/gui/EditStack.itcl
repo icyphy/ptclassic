@@ -47,6 +47,9 @@ class ::tycho::EditStack {
     # Open a help window.
     method help {}
 
+    # openContext a file, then jump to the line
+    method hyperJump {filename method line} {}
+
     # Color the stack information in a region.
     method parseNow {start stop}
 
@@ -97,6 +100,27 @@ body ::tycho::EditStack::help {} {
 
 }
 
+#######################################################################
+#### hyperJump
+# This will open file context, and jump to entry number.
+#
+body ::tycho::EditStack::hyperJump {filename method line} {
+    # Name of our editor/viewer
+    set editorName [::tycho::File::openContext $filename]
+    set editorName [string trim $editorName :]
+
+    set methodline 0
+    set methodline [$editorName findOne 0 0 0 0 $method 1.0 end {}]
+    # Return in the following format: "23.53 53"
+    # FIXME: after idle doesn't work!!! So added the following hack.
+    if {$methodline=={}} {return}
+
+    set methodline [lindex $methodline 0]
+    set methodline [lindex [split $methodline .] 0]
+    set methodline [expr $methodline + $line - 1]
+    after 250 $editorName seeFragment "\"line $methodline\""
+}
+
 #####################################################################
 #### parseNow
 # Parse the stack information, coloring it for better readability.
@@ -130,14 +154,38 @@ body ::tycho::EditStack::parseNow {start stop} {
 	if [$text compare $point >= end] {break}
     }
 
-    # Eventually the following will be hyperlinks, I hope.
-    set links {\([^\)]* body line [0-9]*\)|\(procedure [^\)]*\)}
+    # The following will be hyperlinks to the error.
+    set linkcount 0
+    set linkmatch {\([^\)]* body line [0-9]*\)|\(procedure [^\)]*\)}
     set point $start
-    while {[set st [$text search -count cnt -regexp $links $point $stop]] \
+
+    while {[set st [$text search -count cnt -regexp $linkmatch $point $stop]] \
 	    != {}} {
 	set end [$text index "$st + $cnt chars"]
-	$text tag add link $st "$st + $cnt chars"
+	$text tag add link$linkcount $st "$st + $cnt chars"
 	set point $end
+
+        set line [$text get $st $end]
+        # Parse the above line, and determine the action.
+        # If the message has the format:
+        #    (....... method "<method name>" body line <line>
+        #    then open $auto_index(<method name>) then go to <line>
+        # If the message has the format:
+        #    (... line <line>)
+        #    then open previous file, then go to <line>
+        $text tag configure link$linkcount -foreground \
+                [preference get linkColor] -underline 1
+        if {[regexp {((method)|(class)) "([^"]+)" body line ([0-9]+)} \
+                $line match junk1 junk2 junk3 meth lnum]} {
+            # WARNING: This is TclIndex dependent.
+            set fname [lindex [uplevel #0 "set auto_index($meth)"] 1]
+            $text tag bind link$linkcount <Double-Button-1> \
+                    "$this hyperJump $fname $meth $lnum"
+        } else {
+            # Unknown error message to us, so no hyperlink.
+            $text tag configure link$linkcount -underline 0
+        }
+        incr linkcount
     }
     
     # Set the visual characteristics of the tagged text
@@ -145,8 +193,6 @@ body ::tycho::EditStack::parseNow {start stop} {
 	    [preference get errorColor]
     $text tag configure comment -foreground \
 	    [preference get commentColor]
-    $text tag configure link -foreground \
-	    [preference get linkColor]
 }
 
 
