@@ -26,7 +26,7 @@ const Attribute ANY(0,0);
 
 CG56Memory :: CG56Memory(unsigned x_addr, unsigned x_len, unsigned y_addr,
 			 unsigned y_len) :
-	DualMemory(A_MEMORY,ANY,A_XMEM,x_addr,x_len,y_addr,y_len)
+	DualMemory("x","y",A_MEMORY,ANY,A_XMEM,x_addr,x_len,y_addr,y_len)
 {}
 
 CG56Target :: CG56Target(const char* nam, const char* desc,
