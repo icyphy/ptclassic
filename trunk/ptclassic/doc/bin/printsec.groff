@@ -33,6 +33,12 @@ set printoptions = "-me -t -e"
 set contentscmd = $PTOLEMY/doc/bin/contents.groff
 set files = ""
 
+# Temporary files
+set tempdir = /tmp
+set tempTroffFile = $tempdir/pt$$.t
+set tempIndexFile = $tempdir/index$$
+set tempNroffFile = $tempdir/pt$$.n
+
 # Variables
 set indexonly = 0
 set preview = 0
@@ -71,34 +77,34 @@ while ($#argv)
 end
 
 
-gsoelim $dirheader/groff-fix $dirheader/shared $files > /tmp/pt$$
+gsoelim $dirheader/groff-fix $dirheader/shared $files > $tempTroffFile
 
 if ($indexonly) then
 	# if only generating index, add -t option and throw away the output
-	($printcommand $printoptions -t /tmp/pt$$ > /dev/null) >& /tmp/index$$
+	($printcommand $printoptions -t $tempTroffFile > /dev/null) >& $tempIndexFile
 else if ($preview) then
 	# if previewing, use either X windows or nroff
 	if ($?DISPLAY) then
-		$printcommand $printoptions -TX75 /tmp/pt$$
+		$printcommand $printoptions -TX75 $tempTroffFile
 	else
-		($printcommand $printoptions -Tascii /tmp/pt$$ > /tmp/ptnr$$) >& /dev/null
-		more /tmp/ptnr$$
+		($printcommand $printoptions -Tascii $tempTroffFile > $tempNroffFile) >& /dev/null
+		more $tempNroffFile
 	endif
 else
 	# otherwise just print it out
-	($printcommand $printoptions /tmp/pt$$ | lpr ) >& /tmp/index$$
-	$contentscmd /tmp/index$$
+	($printcommand $printoptions $tempTroffFile | lpr ) >& $tempIndexFile
+	$contentscmd $tempIndexFile
 	if (-r title) $printcommand $printoptions $dirheader/shared title
 else
 endif
 
-if (-r /tmp/index$$ ) cat /tmp/index$$ >>! $ALMAGEST_INDEX
-/bin/rm -f /tmp/pt$$ /tmp/index$$
+if (-r $tempIndexFile ) cat $tempIndexFile >>! $ALMAGEST_INDEX
+/bin/rm -f $tempTroffFile $tempIndexFile $tempNroffFile
 
 exit 0
 
 catch:
         # prevent the "no match" error message if there are no temporary files
         set nonomatch
-        /bin/rm -f /tmp/pt$$ /tmp/index$$
+        /bin/rm -f $tempTroffFile $tempIndexFile $tempNroffFile
         exit 1
