@@ -258,7 +258,7 @@ ifdef VHDL
 	# star icons
 	PALETTES += PTOLEMY/src/domains/vhdl/icons/vhdl.pal
 	# special targets
-	CUSTOM_DIRS += $(VHDLDIR)/targets
+	CUSTOM_DIRS += $(VHDLDIR)/targets $(CROOT)/src/utils/ptvhdlsim
 	ifeq ($(USE_SHARED_LIBS),yes) 
 		LIBS += -lvhdltargets
 		LIBFILES += $(LIBDIR)/libvhdltargets.$(LIBSUFFIX)
