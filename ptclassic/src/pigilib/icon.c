@@ -424,10 +424,7 @@ long userOptionWord;
     startTycho();
 
     TCL_CATCH_ERR( Tcl_VarEval(ptkInterp,
-	"set tychoconsole [::tycho::autoName .console]\n",
-	"::tycho::Displayer $tychoconsole -geometry +0+0\n",
-	"::tycho::TclShell  $tychoconsole.s -text {Welcome to Tycho in Pigi\n}\n",
-	"wm deiconify $tychoconsole",
+	"::tycho::view TclShell -geometry +0+0 -text {Welcome to Tycho in Pigi\n}\n",
 	(char *)NULL) );
 
     ViDone();
