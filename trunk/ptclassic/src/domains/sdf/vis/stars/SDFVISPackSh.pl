@@ -16,12 +16,12 @@ limitation of liability, and disclaimer of warranty provisions.
 	  down cast into a 16 bit short and then packed into a series of
 	  four shorts.}
 	input {
-		name { In }
+		name { in }
 		type { float }
 		desc { Input float type }
 	}
 	output {
-		name { Out }
+		name { out }
 		type { float }
 		desc { Output float type }
 	}
@@ -40,26 +40,22 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	protected{
 	  short *packedout;
-	  int allocflag;
 	}
 	constructor{
 	  packedout = 0;
-	  allocflag = 0;
 	}
 	destructor{
 	  free(packedout);
-	  allocflag = 0;
 	}
         setup {
-	  if (allocflag == 0){
-	    packedout = (short *)
-	      memalign(sizeof(double),sizeof(double));
-	    allocflag = 1;
-	  }
-	  In.setSDFParams(NumIn,NumIn);
+	  in.setSDFParams(NumIn,NumIn-1);
+	}
+	begin {
+	  free(packedout);
+	  packedout = (short *) memalign(sizeof(double),sizeof(short)*NumIn);
         }
 	go {
-
+	  
 	  int index;
 	  double invalue;
 	  double *outvalue;
@@ -67,17 +63,17 @@ limitation of liability, and disclaimer of warranty provisions.
 	  //scale input, check bounds of the input, 
 	      //  and cast each float to short
 	      for (index=0;index<NumIn;index++){
-		invalue = (double) scale * double(In%(index));
+		invalue = (double) scale * double(in%(index));
 		if (invalue <= (double) LowerBound)
 		  packedout[index] = (short) LowerBound;
 		else if (invalue >= (double) UpperBound)
 		  packedout[index] = (short) UpperBound;
 		else 
 		  packedout[index] = (short) invalue;
-	      }
+	      }	
 
 	  /*output packed double*/	  
 	  outvalue = (double *) packedout;
-	  Out%0 << *outvalue;
+	  out%0 << *outvalue;
 	}
 }
