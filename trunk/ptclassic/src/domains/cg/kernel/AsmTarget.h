@@ -30,7 +30,8 @@ protected:
 
 	int allocMem(AsmStar&);
 public:
-	AsmTarget(char*nam, char* desc, const char* stype, ProcMemory& m) :
+	AsmTarget(const char* nam, const char* desc,
+		  const char* stype, ProcMemory& m) :
 		CGTarget(nam,stype,desc), mem(m) {}
 
 	Block* clone() const = 0;
