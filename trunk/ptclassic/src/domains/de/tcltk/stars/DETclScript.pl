@@ -106,7 +106,11 @@ delim $$
 		tcl.setup( this,
 			   input.numberPorts(),
 			   output.numberPorts(),
-			   (const char*)tcl_file );
+			   (const char*) tcl_file );
+		if ( input.numberPorts() == 0 ) {
+		  Error::warn( *this, "Tcl/Tk source stars are not yet ",
+			       "supported yet in the DE domain." );
+		}
 	}
 	method {
 		name{ processInputs }
