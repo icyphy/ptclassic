@@ -161,16 +161,13 @@ class ::tycho::AbstractGraph {
     # Alternative depth-sort
     method depthSort2 {{roots {}}}
 
-    # Externalize the model into a state file
-    method externalize {fd {mode all}}
-    
     # Layout the vertices on a grid
     method gridLayout {}
 
     # Layout the vertices on a grid, better for tree-like graphs
     method gridLayoutLeft {}
 
-   # Return the number of edges in the graph
+    # Return the number of edges in the graph
     method numberofedges {}
 
     # Return the number of vertices in the graph
@@ -220,6 +217,9 @@ class ::tycho::AbstractGraph {
 
     # Delete an edge from the adjacency matrix
     protected method _adjacencydelete {vertex1 vertex2}
+
+    # Externalize data into the state file
+    protected method _externalize {fd}
 
     # Get the "leaves" of the graph
     protected method _graphleaves {}
@@ -886,19 +886,18 @@ puts !$v=$_cache($v,visited)
 }
 
 ########################################################################
-#### externalize
+#### _externalize
 #
-# Write the class-dependent description of the data to a file.
+# Write data to the state file.
 #
-body ::tycho::AbstractGraph::externalize {fd {mode all}} {
+body ::tycho::AbstractGraph::_externalize {fd} {
     # Chain the superclass' method
     chain $fd $mode
 
     # Write additional data to the file
-    if { $mode != "historyonly" } {
-	puts $fd "array set _vertices [list [array get _vertices]]\n"
-	puts $fd "array set _cache    [list [array get _cache]]\n"
-    }
+    puts $fd "array set _vertices [list [array get _vertices]]\n"
+    puts $fd "array set _cache    [list [array get _cache]]\n"
+
     return ""
 }
 
