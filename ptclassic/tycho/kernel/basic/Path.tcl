@@ -688,17 +688,27 @@ ensemble ::tycho::url {
     }
     # Return the platform-dependent path name from the arguments.
     option join {name args} {
-	if [regexp {^[a-z]+:$} $name] {
-	    # Network name
-            set server [lindex $args 0]
-            set path [join [lreplace $args 0 0] /]
+	if [regexp {^[a-z]+:} $name] {
+	    # Network name -- we need to figure out how much
+            # if the name also contains server and path parts
+	    regexp {^([a-z]+:)(//[^/]*)?(.*)$} $name _ protocol server path
+            if { $server == "" && $path == "" } {
+                if { [lindex $args 0] != "" } {
+                    set server //[lindex $args 0]
+                }
+                set path [join [lreplace $args 0 0] /]
+            } elseif { $server != "" && $path == "" } {
+                set path [join $args /]
+            } elseif { $server != "" && $path != "" } {
+                set path [join [concat [list $path] $args] /]
+            }
             if { $path != "" } {
                 set path /$path
             }
             if { $server == "" } {
-                return $name$path
+                return $protocol$path
             } else {
-                return $name//$server$path
+                return $protocol$server$path
             }
 	} else {
 	    # Local name
@@ -803,4 +813,5 @@ ensemble ::tycho::url {
 	}
     }
 }
+
 
