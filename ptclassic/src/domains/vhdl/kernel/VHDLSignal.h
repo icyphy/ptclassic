@@ -110,6 +110,10 @@ class VHDLSignalList : public VHDLTypedObjList
 
   // Allocate memory for a new VHDLSignal and put it in the list.
   void put(StringList, StringList, VHDLPort* =NULL);
+
+  // Allocate memory for a new VHDLSignal and put it in the list.
+  // Also, return a pointer to the new VHDLSignal.
+  VHDLSignal* add(StringList, StringList, VHDLPort* =NULL);
 };
 
 class VHDLSignalListIter : public VHDLTypedObjListIter {
