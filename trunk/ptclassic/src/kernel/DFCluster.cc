@@ -77,5 +77,18 @@ int DFNebula::isSDFinContext() const {
 	this->repetitions = ((DataFlowStar*)master)->repetitions;
 }
 
-
+/*virtual*/ int DFNebula::generateSchedule() {
+    if (isNebulaAtomic()) return TRUE;
+    if (!Nebula::generateSchedule()) return FALSE;
+    // Now we must adjust all external Nebula porthole parameters
+    BlockPortIter nebulaPorts(*this);
+    DFNebulaPort* port;
+    while((port = (DFNebulaPort*) nebulaPorts++) != NULL) {
+	DFNebulaPort* realPort=(DFNebulaPort*)port->asNebulaPort()->nebAlias();
+	DFNebula* star = (DFNebula*) realPort->parent();
+	int reps = star->reps();
+	port->setSDFParams(realPort->numXfer()*reps,realPort->maxDelay()*reps);
+    }
+    return TRUE;
+}
 

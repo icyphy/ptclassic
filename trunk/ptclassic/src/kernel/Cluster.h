@@ -68,7 +68,7 @@ public:
     Galaxy* galaxy() { return &gal;}
 
     // Generate the schedules of the nested Nebulas recursively.
-    int generateSchedule();
+    virtual int generateSchedule();
 
     int isNebulaAtomic() const;
     
@@ -108,9 +108,6 @@ protected:
     Scheduler* sched;
 
 private:
-    Star* sourceNebula;
-    Star* sinkNebula;
-
     // Connect two Nebula PortHoles together
     void connect(PortHole* source, PortHole* destination);
 };
