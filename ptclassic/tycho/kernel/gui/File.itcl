@@ -591,8 +591,9 @@ body ::tycho::File::destructor {} {
 	    # This is a temporary file, if it is modified, as the user
 	    # if they want to save it.  If they do, call saveAs
 	    set useSaveAs 1
+            set copyFilename $file
 	    saveQuery $useSaveAs
-            ::tycho::rm $file
+            ::tycho::rm $copyFilename
 	} else {
 	    saveQuery 
 	}
