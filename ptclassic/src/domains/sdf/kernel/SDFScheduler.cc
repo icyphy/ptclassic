@@ -624,3 +624,32 @@ int SDFScheduler :: notRunnable (SDFStar& atom) {
 
 const char* SDFScheduler::domain() const { return SDFdomainName;}
 
+// display the schedule
+
+StringList SDFScheduler::displaySchedule() {
+	return mySchedule.printVerbose();
+}
+
+// constructor -- initialize members
+
+SDFScheduler::SDFScheduler () {
+	repeatedFiring = TRUE;
+	deferredFiring = TRUE;
+	numItersSoFar = 0;
+	numIters = 1;
+	invalid = 1;
+	schedulePeriod = 10000.0;
+}
+
+// setStopTime, for compatibility with DE scheduler.
+// for now, we assume each schedule interation takes 1.0
+// time units.  (Argh).  Deal with roundoff problems.
+void SDFScheduler::setStopTime (float limit) {
+	numIters = int(limit + 0.001);
+}
+
+// timing control for wormholes
+
+void SDFScheduler::resetStopTime (float v) {
+	numIters = 1; numItersSoFar = 0;
+}

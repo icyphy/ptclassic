@@ -111,23 +111,14 @@ public:
 	// execution time of the scheduler.
 	int deferredFiring;
 
-	StringList displaySchedule() {return mySchedule.printVerbose();}
+	StringList displaySchedule();
 
 	// Constructor sets default options
-	SDFScheduler () {
-		repeatedFiring = TRUE;
-		deferredFiring = TRUE;
-		numItersSoFar = 0;
-		numIters = 1;
-		invalid = 1;
-		schedulePeriod = 10000.0;
-	}
+	SDFScheduler ();
 
-	// setStopTime, for compatibility with DE scheduler.
-	// for now, we assume each schedule interation takes 1.0
-	// time units.  (Argh).  Deal with roundoff problems.
-	void setStopTime (float limit) { numIters = int(limit + 0.001);}
-	void resetStopTime (float v) { numIters = 1; numItersSoFar = 0;}
+	// timing/interation control
+	void setStopTime (float limit);
+	void resetStopTime (float v);
 
 	// scheduler Period : used when interfaced with timed domain.
 	float schedulePeriod;
