@@ -31,7 +31,7 @@ ROOT = ..
 VPATH = $(ROOT)/lib
 
 # get configuration info
-CONFIG=$(ROOT)/mk/config-$(ARCH).mk
+CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
 EXTRA_SRCS = CompileMake.template README gantt.me \
