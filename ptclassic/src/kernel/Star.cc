@@ -3,7 +3,7 @@
 
 
 // SCCS version identification
-// $Id$
+// @(#)Star.cc	1.4	1/14/90
 
 Star :: operator char* () {
 	StringList out;

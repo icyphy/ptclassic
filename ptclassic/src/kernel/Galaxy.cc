@@ -5,7 +5,7 @@
 
 
 // SCCS version identification
-// $Id$
+// @(#)Galaxy.cc	1.7	1/14/90
 
 	////////////////////////////////////
 	// connect

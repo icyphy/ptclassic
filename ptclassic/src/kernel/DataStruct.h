@@ -3,10 +3,6 @@
 
 #include "type.h"
 
-// SCCS version identification
-// $Id$
-
-
 /**************************************************************
 This header file contains basic container class data structures
 used widely. Each container class stores a set of void*'s,
@@ -18,8 +14,6 @@ deallocating memory for the objects, etc.
 Programmer: D.G. Messerschmitt
 	    U.C. Berkeley
 Date: Jan 10, 1990
-
-$Id$
 **************************************************************/
 
 	//////////////////////////////////////

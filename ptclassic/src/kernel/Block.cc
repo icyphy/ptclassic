@@ -2,7 +2,7 @@
 #include "StringList.h"
 
 // SCCS version identification
-// $Id$
+// @(#)Block.cc	1.5	1/14/90
 
 char* Block :: readFullName () {
 	StringList out;

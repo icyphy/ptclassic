@@ -8,7 +8,7 @@
 
 
 // SCCS version identification
-// $Id$
+// @(#)Galaxy.h	1.7	1/14/90
 
 	////////////////////////////////////
 	// class BlockList
