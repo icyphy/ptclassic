@@ -9,7 +9,7 @@ Programmer: J. Pino, T. M. Parks
 Date: 10/1/92
 
 NamedList is container list class.
-Each node on the list has an associated unique name.
+Each node on the list has an associated name.
 *******************************************************************/
 
 #ifndef _NamedList_h
@@ -29,17 +29,8 @@ class NamedList : private SequentialList
     friend class NamedListIter;
 public:
     NamedList() {}
-
-    ~NamedList()
-    {
-	deleteNodes();
-    }
-
-    void initialize()
-    {
-	deleteNodes();
-	SequentialList::initialize();
-    }
+    ~NamedList() { deleteNodes(); }
+    void initialize() { deleteNodes(); SequentialList::initialize(); }
 
     // Put an object called "name" at the end of the list.
     // If a different object with that name is already
@@ -47,7 +38,9 @@ public:
     int append(Pointer object, const char* name);
 
     // Put an object called "name" at the beginning of the list.
-    int prepend(Pointer object, const char* name);
+    // Multiple objects with the same "name" are allowed.
+    // Only the most recently prepened object with "name" is visible.
+    void prepend(Pointer object, const char* name);
 
     // Get the object called "name" from the list.
     // With no name, get the first object in the list.
@@ -65,7 +58,7 @@ private:
 
     // Get the NamedNode for the object called "name".
     // If no name is specified, get the first node in the list.
-    // If the named object is not in the list, return NULL.
+    // If the named node is not in the list, return NULL.
     NamedNode* getNamedNode(const char* name = NULL) const;
 };
 
@@ -73,10 +66,8 @@ class NamedListIter : private ListIter
 {
 public:
     NamedListIter(NamedList& list) : ListIter(list) {}
-
     Pointer next();
     Pointer operator ++() { return next(); }
-
     ListIter::reset;
 };
 
