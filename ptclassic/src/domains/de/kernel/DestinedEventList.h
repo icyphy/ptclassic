@@ -1,4 +1,4 @@
-#ifdef _DestinedEventList_h
+#ifndef _DestinedEventList_h
 #define _DestinedEventList_h 1
 /**************************************************************************
 Version identification:
@@ -49,19 +49,19 @@ class DestinedEventList : public LinkedList {
 
 public:
 	// Constructor 
-	DestinedEventList() : lastNode(0), dimen(0) { intialize(); }
-
-	// Return the size of the list
-	LinkedList::size;
-
-	// Remove an element from the list
-	int remove( Link * obj ) { return LinkedList::removeLink( obj ); }
+	DestinedEventList(); 
 
 	// Append to tail and return pointer to element
-	Link * appendGet( Link * obj ) { return LinkedList::appendGet( obj ); }
+	Link * appendGet( Link * obj ); 
 
 	// Clear list
 	void clearList() { LinkedList::initialize(); }
+
+	// Remove an element from the list
+	void remove( Link * obj ); 
+
+	// Return the size of the list
+	LinkedList::size;
 
 };
 

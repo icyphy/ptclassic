@@ -43,6 +43,20 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "DestinedEventList.h"
 
 
+DestinedEventList::DestinedEventList() {}
+
+Link * DestinedEventList::appendGet( Link * obj ) 
+{
+	return (Link *)LinkedList::appendGet( obj );
+}
+
+void DestinedEventList::remove( Link * obj )
+{
+	LinkedList::directRemove( obj );
+	return;
+}
+
+
 
 
 

@@ -56,72 +56,86 @@ deallocating memory for the objects, etc.
 #include "type.h"
 
 	//////////////////////////////////////
-	// class Link
+	// Class Link
 	//////////////////////////////////////
 
 class Link {
-friend class LinkedList;
+	friend class LinkedList;
 protected:
-    Link *next,*previous;
-    Pointer e;
-    Link(Pointer,Link*);
-    void remove();
+	Link *next,*previous; 
+	Pointer e; 
+	Link(Pointer,Link*); 
+	void remove();
 };
+
+	//////////////////////////////////////
+	// Class Linked List
+	//////////////////////////////////////
 
 class LinkedList
 {
 public:
-	// destructor
+	// Destructor
 	~LinkedList()  { initialize(); }
 
-	// constructor
+	// Constructor
 	LinkedList() : lastNode(0), dimen(0) {}
 
-	// constructor, with argument
+	// Constructor, with argument
 	LinkedList(Pointer a);
 
+	// Return the size of the list.
 	inline int size() const { return dimen;}
 	
-	void prepend(Pointer a);	// Add at head of list
+	// Add at head of list
+	void prepend(Pointer a);	
 
-	void append(Pointer a);	        // Add at tail of list
+	// Add at tail of list
+	void append(Pointer a);	        
 
-	Link * appendGet(Pointer a);    // Add at tail of list
-					// and get pointer.
+	// Synonym for append()
+	void put(Pointer a) {append(a);} 
 
-	void put(Pointer a) {append(a);} // synonym
+	// Add at tail of list and get pointer.
+	Link * appendGet(Pointer a);    
 
-	int searchAndRemove(Pointer a);  // remove ptr: return TRUE if removed
+	// Remove pointer to link directly without searching
+	void directRemove(Link * a);	
 
-	Pointer getAndRemove();	// Return and remove head of list
+	// Remove pointer by searching; return TRUE if removed
+	int searchAndRemove(Pointer a);  
 
-        Pointer getTailAndRemove();     // Return and remove tail of list
+	// Return and remove head of list
+	Pointer getAndRemove();	
 
-	inline Pointer head() const  // Return head, do not remove
+	// Return and remove tail of list
+        Pointer getTailAndRemove();     
+
+	// Return head, do not remove
+	inline Pointer head() const  
 	{
 		return lastNode ? lastNode->next->e : 0;
 	}
 	
-	inline Pointer tail() const {	// return tail, do not remove
+	// Return tail, do not remove
+	inline Pointer tail() const {	
 		return lastNode ? lastNode->e : 0;
 	}
 	
-	Pointer elem(int) const;// Return arbitary node of list
+	// Return arbitary node of list
+	Pointer elem(int) const;
 
-	void initialize();	// Remove all links
+	// Remove all links
+	void initialize();	
 
-	// predicates
-	// is list empty?
+	// Return TRUE if the list empty; return FALSE otherwise.
 	inline int empty() const { return (lastNode == 0);}
 
-	// is arg a member of the list? (returns TRUE/FALSE)
+	// Return TRUE if arg is a member of the list; return FALSE otherwise. 
 	int member(Pointer arg) const;
 
-protected:
-	void remove(Link * a);	// remove ptr: return TRUE if removed
-
 private:
-	// remove a link from the list
+	// Remove a link from the list
         Link* removeLink(Link&);
 
         // Store head of list, so that there is a notion of 
