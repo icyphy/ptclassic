@@ -123,6 +123,29 @@ all: $(PIGI) $(PIGI).ptiny $(PIGI).ptrim
 #
 # The depend, makefile and makefiles rules are from compile.mk
 
+ifeq ($(strip $(LIB)),)
+LIB=dummylib
+endif
+
+# Rule for building a C++ library
+# We use a GNU make conditional here
+$(LIB):	$(OBJS)
+ifeq ($(USE_SHARED_LIBS),yes) 
+	rm -f $@
+	$(SHARED_LIBRARY_COMMAND) $@ $(OBJS) 
+	# HPUX wants shared libraries to be 555 for performance reasons
+	chmod 555 $@
+else
+	rm -f $@
+	$(AR) cq $@ $(OBJS)
+	$(RANLIB) $@
+endif
+
+
+# AIX used EXP for export lists
+$(EXP): $(LIB)
+
+
 DEPEND_INCL=$(INCL) $(C_INCL) $(SYSTEM_DEPEND_INCL)
 
 depend:		$(SRCS) $(HDRS)
