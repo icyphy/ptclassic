@@ -31,13 +31,16 @@ static const char file_id[] = "GrayImage.cc";
 #include "GrayImage.h"
 #include <minmax.h>
 
-const char* GrayImage::dataType() const { return "GrayImage";}
-Message* GrayImage::clone() const { LOG_NEW; return new GrayImage(*this);}
-Message* GrayImage::clone(int a) const { LOG_NEW; return new GrayImage(*this,a);}
+const char* GrayImage::dataType() const { return "GrayImage"; }
+Message* GrayImage::clone() const { LOG_NEW; return new GrayImage(*this); }
+Message* GrayImage::clone(int a) const {LOG_NEW; return new GrayImage(*this,a);}
 ISA_FUNC(GrayImage,BaseImage);
 
 void GrayImage::init()
-{ LOG_NEW; grayData = new unsigned char[fullSize]; }
+{
+	size = fullSize = width*height;
+	LOG_NEW; grayData = new unsigned char[fullSize];
+}
 
 
 GrayImage::GrayImage(int a, int b, int c, int d):
@@ -55,7 +58,7 @@ GrayImage::GrayImage(const BaseImage& bi):
 GrayImage::GrayImage(const GrayImage& gi, int a):
 		BaseImage(gi)
 {
-	init();
+	LOG_NEW; grayData = new unsigned char[fullSize];
 	if (!a) { copy(size, grayData, gi.grayData); }
 } // end GrayImage::GrayImage()
 
