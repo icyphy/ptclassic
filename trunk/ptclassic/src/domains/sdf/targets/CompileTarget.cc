@@ -32,6 +32,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
  Date of creation: 12/8/91
 
 WTC/BLE: Tcl/Tk initialization and invocation of begin methods 8/1/95
+BLE: Updated code generation to reflect changes in sanitizing star names
 
 This Target produces and compiles a standalone C++ program for
 a universe.
@@ -42,6 +43,8 @@ a universe.
 #endif
 
 #include "CompileTarget.h"
+#include "miscFuncs.h"
+#include "Scope.h"
 #include "LoopScheduler.h"
 #include "KnownTarget.h"
 #include "Galaxy.h"
@@ -170,7 +173,7 @@ int CompileTarget::run() {
     myCode += "\n";
     myCode += "// set default value for number of iterations\n";
     myCode += "iterations = ";
-    myCode += (int)(scheduler()->getStopTime());
+    myCode += int(scheduler()->getStopTime());
     myCode += ";\n";
 
     myCode += universeName;
@@ -194,11 +197,11 @@ int CompileTarget::run() {
     myCode += "}\n";
 
     myCode += "\n// MAIN LOOP\n";
-    myCode += "while(iterations-- > 0) {\n";
+    myCode += "while (iterations-- > 0) {\n";
     scheduler()->compileRun();
     myCode += "}\n";
 
-    myCode += "// WRAPUP CODE\n";
+    myCode += "\n// WRAPUP CODE\n";
     myCode += universeName;
     myCode += ".wrapup();\n";
 
@@ -266,9 +269,39 @@ void CompileTarget::wrapup() {
     system(cmd);
 }
 
+// Make the string origstr a valid C++ data structure specification
+// by replacing characters that are neither alpha-numeric nor a period
+// with an underscore character.  -BLE
+static StringList mySanitize(const char *origstr) {
+    char* cleanstr = savestring(origstr);
+    char* strp = cleanstr;
+    while ( *strp ) {
+	if ( !isalnum(*strp) && *strp != '.' ) *strp = '_';
+	strp++;
+    }
+    StringList out = cleanstr;
+    delete [] cleanstr;
+    return out;
+}
 
 void CompileTarget::writeFiring(Star& s, int depth) {
-	myCode << indent(depth) << sanitizedFullName(s) << ".run();\n";
+    // Generate the C++ version of the star name.
+    // If we use sanitizedFullName(s), then we get code such as
+    // sinMod_singen1_Ramp1 instead of sinMod.singen1.Ramp1.
+    // So, we sanitize each field in the star name and leave the periods
+    // between the fields since the periods access data members in
+    // the universe class.  -BLE
+    StringList starName;
+    if ( s.scope() ) {
+	starName << mySanitize(s.scope()->fullName()) << ".";
+    }
+    if ( s.parent() ) {
+	starName << mySanitize(s.parent()->fullName()) << ".";
+    }
+    starName << sanitize(s.name());
+
+    // Generate code for this star firing
+    myCode << indent(depth) << starName << ".run();\n";
 }
 
 const GenericPort* CompileTarget::findMasterPort(const PortHole* p) const {
