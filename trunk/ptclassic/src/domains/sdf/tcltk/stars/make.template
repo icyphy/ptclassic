@@ -33,6 +33,7 @@ STARDOCDIR = ../../doc/stars
 # source files for all stars, using preprocessor
 # note that SDFTclScript must be made before stars that depend on it
 PL_SRCS= \
+ SDFChain.pl \
  SDFLMSTkPlot.pl \
  SDFLMSCxTkPlot.pl \
  SDFMap.pl \
