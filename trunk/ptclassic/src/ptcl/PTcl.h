@@ -176,6 +176,9 @@ private:
 	// function to register extensions with the Tcl interpreter
 	void registerFuncs();
 
+	// function to check error/abort status
+	int checkErrorAbort();
+
 	// This is added to support tycho - eal
 	// The following flag determines whether ptcl will call the tcl
 	// procedure monitorPtcl every time a ptcl command is invoked.
@@ -184,10 +187,8 @@ private:
 	static int monitor;
 
 protected:
-
-	// these three functions are used to associate PTcl objects
+	// these two functions are used to associate PTcl objects
 	// with interpreters.
-	static PTcl* findPTcl(Tcl_Interp*);
 	void makeEntry();
 	void removeEntry();
 
@@ -219,6 +220,10 @@ protected:
 	int computeSchedule();
 
 public:
+	// This function is used to associate PTcl objects
+	// with interpreters.
+	static PTcl* findPTcl(Tcl_Interp*);
+
 	// the active Tcl interpreter, for error reporting.
 	static Tcl_Interp* activeInterp;
 
@@ -231,6 +236,7 @@ public:
 // the following are the Tcl-callable functions.  Each returns TCL_OK
 // or TCL_ERROR, and may set the Tcl result to return a string using
 // Tcl_SetResult, Tcl_AppendElement, PTcl::result or PTcl::staticResult.
+	int abort(int argc,char** argv);
 	int alias(int argc,char** argv);
 	int animation(int argc,char** argv);
 	int busconnect(int argc,char** argv);
