@@ -238,18 +238,6 @@ body ::tycho::EditSTD::editArc {arc} {
 		-okcommand [list catch $cmd]
 
 	if {$machineType == "Mixed"} {
-	    if "![info exists edgeInfo($arc,preemptive)]" {
-		set edgeInfo($arc,preemptive) NO
-	    } 
-	    $w addRadioQuery preemptive {Preemptive} {NO YES}\
-		    $edgeInfo($arc,preemptive)
-
-	    if "![info exists edgeInfo($arc,entryType)]" {
-		set edgeInfo($arc,entryType) History
-	    } 
-	    $w addRadioQuery entryType {Entry Type} {History Default}\
-		    $edgeInfo($arc,entryType)
-
 	    foreach outName $portNames(out) {
 		if "![info exists edgeInfo($arc,output,$outName)]" {
 		    set edgeInfo($arc,output,$outName) 0
@@ -267,6 +255,17 @@ body ::tycho::EditSTD::editArc {arc} {
 			$edgeInfo($arc,action,$internalName)
 	    }
 
+	    if "![info exists edgeInfo($arc,preemptive)]" {
+		set edgeInfo($arc,preemptive) NO
+	    } 
+	    $w addRadioQuery preemptive {Preemptive:} {NO YES}\
+		    $edgeInfo($arc,preemptive)
+
+	    if "![info exists edgeInfo($arc,entryType)]" {
+		set edgeInfo($arc,entryType) History
+	    } 
+	    $w addRadioQuery entryType {Entry Type:} {History Default}\
+		    $edgeInfo($arc,entryType)
 	}
 
 	$w centerOnScreen
