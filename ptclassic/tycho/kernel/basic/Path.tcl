@@ -377,7 +377,7 @@ proc ::tycho::isRelative {pathname} {
 #
 proc ::tycho::mkdir { args } {
     global ::itcl::version tcl_platform
-    if {[namespace ::itcl {set ::itcl::version} ] >= 2.2} {
+    if {[namespaceEval ::itcl {set ::itcl::version} ] >= 2.2} {
 	eval file mkdir $args
     } else {
 	if { $tcl_platform(platform) == "unix" } { 
