@@ -120,9 +120,6 @@ set tychokernel [file join $tycho kernel]
 global ::tycholib
 set tycholib [file join $tycho lib]
 
-global ::tychoslate
-set tychoslate [file join $tycho slate]
-
 global ::tychoeditors
 set tychoeditors [file join $tycho editors]
 
@@ -204,11 +201,8 @@ if [file isdirectory [file join $PTOLEMY tcltk itcl lib]] {
 uplevel #0 {
     set ::auto_path [linsert $auto_path 0 [file join $tychoeditors textedit ] ]
     set ::auto_path [linsert $auto_path 0 [file join $tychoeditors visedit ] ]
-    set ::auto_path [linsert $auto_path 0 [file join $tychoslate kernel ] ]
-    set ::auto_path [linsert $auto_path 0 [file join $tychoslate pictures ] ]
-    set ::auto_path [linsert $auto_path 0 [file join $tychoslate shapes ] ]
-    set ::auto_path [linsert $auto_path 0 [file join $tychoslate interactors ] ]
-    set ::auto_path [linsert $auto_path 0 [file join $tychoslate combinators ] ]
+    set ::auto_path [linsert $auto_path 0 [file join $tychoeditors slate ] ]
+
     set ::auto_path [linsert $auto_path 0 [file join $tycholib widgets ] ]
     set ::auto_path [linsert $auto_path 0 [file join $tycholib tydoc ] ]
     set ::auto_path [linsert $auto_path 0 [file join $tycholib util ] ]

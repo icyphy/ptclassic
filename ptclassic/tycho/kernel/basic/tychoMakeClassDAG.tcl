@@ -105,11 +105,9 @@ proc tychoStandardDAG {} {
             kernel \
             [file join editors textedit] \
             [file join editors visedit] \
+            [file join editors slate] \
             [file join typt editors ] \
             [file join typt kernel ] \
-            [file join slate kernel ] \
-            [file join slate pictures ] \
-            [file join slate interactors ] \
             [file join lib tydoc ] \
     ]
 
