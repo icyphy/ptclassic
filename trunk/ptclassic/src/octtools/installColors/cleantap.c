@@ -4,8 +4,9 @@ don't understand.  */
 #include <stdio.h>
 #include "oct.h"
 #include "oh.h"
+#include "cleantap.h"
 
-cleantap(tapName)
+void cleantap(tapName)
 char *tapName;
 {
     octObject tapFacet, designBag, minBag;

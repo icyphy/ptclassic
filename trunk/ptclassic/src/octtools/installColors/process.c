@@ -9,9 +9,12 @@
 #include "tech.h"
 #include "tap.h"
 
+#include "process.h"
+
 #define FPRINTF	(void) fprintf
 
-process(pat_file, tech_spec, root_dir, out_tech, out_view, out_disp, chroma)
+void process(pat_file, tech_spec, root_dir, out_tech, out_view,
+	     out_disp, chroma) 
 char *pat_file;			/* Name of patterns file            */
 char *tech_spec;		/* Technology spec in patterns file */
 char *root_dir;			/* Tap root directory               */

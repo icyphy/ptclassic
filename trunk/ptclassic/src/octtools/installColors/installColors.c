@@ -16,6 +16,8 @@
 #include <X11/Xlib.h>
 #include "oct.h"
 #include "tap.h"
+#include "cleantap.h"
+#include "process.h"
 
 char *strnolen = "";
 
@@ -53,6 +55,7 @@ char *def;			/* Default value */
 
 
 
+int
 main(argc, argv)
 int argc;
 char *argv[];
