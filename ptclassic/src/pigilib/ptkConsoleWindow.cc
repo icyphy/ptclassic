@@ -241,7 +241,12 @@ done:
 
 void ptkConsoleWindow() {
   Tcl_DStringInit(&command);
+#if TCL_MAJOR_VERSION < 8
   Tcl_CreateFileHandler(Tcl_GetFile((0),TCL_UNIX_FD),
 			TK_READABLE, _ptkStdinProc, (ClientData) 0);
+#else
+  Tcl_CreateChannelHandler(Tcl_GetStdChannel(TCL_STDIN),
+          TCL_READABLE, _ptkStdinProc, (ClientData) 0);
+#endif
   _ptkPrompt(ptkInterp,0);
 }
