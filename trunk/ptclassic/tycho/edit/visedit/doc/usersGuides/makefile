@@ -43,7 +43,6 @@ EXTRA_SRCS =	\
 	EditBubbleAndArcHelp.html \
 	EditDAGHelp.html \
 	EditForestHelp.html \
-	EditPaletteHelp.html \
 	EditSTDHelp.html \
 	GraphicsHelp.html \
 	index.html
