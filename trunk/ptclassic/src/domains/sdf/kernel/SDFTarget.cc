@@ -57,7 +57,7 @@ Target("default-SDF","SDFStar",
 			"Log file to write to (none if empty)"));
 	addState(loopScheduler.setState("loopScheduler",this,"NO",
 			"Specify whether to use loop scheduler."));
-	addState(schedulePeriod.setState("schedulePeriod",this,"10000.0",
+	addState(schedulePeriod.setState("schedulePeriod",this,"0.0",
 		"schedulePeriod for interface with a timed domain."));
 }
 
