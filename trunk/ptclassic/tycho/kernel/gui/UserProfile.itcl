@@ -72,7 +72,6 @@ ensemble ::tycho::profile {
     # Register a user profile
     option register {filename} {
 	set filename [::tycho::expandPath $filename]
-
 	# Create the object
 	set profile [uplevel #0 ::tycho::UserProfile #auto \
 		[list \
@@ -84,6 +83,12 @@ ensemble ::tycho::profile {
 	    set fd [open $filename]
 	    $profile parse [read $fd]
 	    close $fd
+	} else {
+	    # Initialize the maps
+	    $profile add map:title
+	    $profile add map:class
+	    $profile add unmap:title
+	    $profile add unmap:class
 	}
 
 	# Remember the profile object
@@ -210,12 +215,6 @@ body ::tycho::UserProfile::constructor {args} {
     # Define the "unmap" type
     type define unmap :leafonly 1
 
-    # Initialize the maps
-    add map:title
-    add map:class
-    add unmap:title
-    add unmap:class
-
     # Evaluate options
     eval configure $args
 }
@@ -224,8 +223,10 @@ body ::tycho::UserProfile::constructor {args} {
 #### destructor
 #
 body ::tycho::UserProfile::destructor {} {
-    # Save myself to the profile file
-    if ![catch {set fd [open $filename]}] {
+    # Save myself to the profile file.
+    # For some reason, the destructor is not called when you
+    # exit the program the the value of this code is dubious...
+    if ![catch {set fd [open $filename "w"]}] {
 	puts $fd [describe]
 	close $fd
     }
@@ -295,6 +296,13 @@ body ::tycho::UserProfile::registerstyle \
     }
     # Add the preference
     itemconfigure $name -$stylesheet $style
+
+    # Save the profile file. This appears to be necessary because
+    # the destructor is not called when we exit.
+    if ![catch {set fd [open $filename "w"]}] {
+	puts $fd [describe]
+	close $fd
+    }
 }
 
 #####################################################################
