@@ -1,5 +1,5 @@
 defstar {
-	name { RaisedCos }
+	name { RaisedCosine }
 	domain { C50 }
 	derivedFrom { FIR }
 	desc {
@@ -8,7 +8,7 @@ like the standard raised cosine or square-root raised cosine
 used in digital communications.
 	}
 	version { $Id$ }
-	author { A.Baensch }
+	author { A. Baensch }
 	copyright {
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
