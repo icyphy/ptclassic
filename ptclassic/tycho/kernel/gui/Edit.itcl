@@ -1880,6 +1880,11 @@ body ::tycho::Edit::writeSpellText {filename} {
 # this method enables the hyperlink entries and the evaluate
 # entry if there is a selection, and disables them otherwise.
 #
+# FIXME: The code scans the code index file to find the selected
+# word. This is so slow as to be almost useless, and need to be
+# fixed! In addition, hyperjumps into code do not work because
+# the needed information is not in the index files.
+#
 body ::tycho::Edit::configureContextMenu {} {
     if { [$itk_component(text) tag ranges sel] == "" } {
 	# No selection, so disable entries
