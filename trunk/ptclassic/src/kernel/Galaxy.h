@@ -87,6 +87,12 @@ protected:
 	// support blockWithName message to access internal block list
 	Block* blockWithName (const char* name);
 
+	// initialize subblocks only.
+	void initSubblocks();
+
+	// initialize states in subblocks only.
+	void initStateSubblocks();
+
 public:
 
 	// Constructor
@@ -121,8 +127,7 @@ public:
 	int removeBlock(Block& b) { return blocks.remove(&b);}
 
         // States initialize
-        void initState();
-
+        virtual void initState();
 	// Return the number of blocks in the galaxy.
 	int numberBlocks() const {return blocks.size();}
 
