@@ -268,7 +268,7 @@ loop:
        probably shooting ourselves in the foot here.
      */
     while ((nfound = select(32, 
-			    (fd_set *)&rmask,(fd_set *)&wmask,(fd_set *)&emask,
+			    FDS_TYPE &rmask, FDS_TYPE &wmask, FDS_TYPE &emask,
 			    RPCNIL(struct timeval))) >= 0) {
 
 	/* timeout or error */
