@@ -50,7 +50,7 @@ EXTRA_SRCS =	\
 	ListBrowserHelp.html \
 	LoaderHelp.html \
 	TclShellHelp.html \
-	PreferenceHelp.html \
+	PreferencesHelp.html \
 	index.html
 
 MISC_FILES =
