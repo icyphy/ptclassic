@@ -33,7 +33,7 @@
 
 #######################################################################
 #### Shortcuts
-# This non-intantiable class manages shortcuts (key bindings) in Tycho.
+# This non-instantiable class manages shortcuts (key bindings) in Tycho.
 # Only the core set of shortcuts supported by the kernel are dealt with
 # here.  The class provides both standard and emacs-like bindings,
 # associating them with virtual events.
