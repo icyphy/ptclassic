@@ -449,25 +449,16 @@ body ::tycho::Edit::constructor {args} {
     }
     pack $itk_component(text) -side left -expand yes -fill both
 
-    # Modify the Tk bindings: Add a new tag
-    # to the list, which is used to clear the status bar as soon
-    # as the user performs the next action.
+    # Modify the Tk binding tags.
     # NOTE: This used to reverse the order of the text widget and
     # the top level.  This appears to be no longer necessary.
-
     set tl [winfo toplevel $itk_component(hull)]
     bindtags $itk_component(text) \
-	    "EditClearStatus $tl $itk_component(hull) \
-            $itk_component(text) Text all"
+	    "$tl $itk_component(hull) $itk_component(text) Text all"
 
     # NOTE: This used to be bound to the hull of TopLevel, which caused
     # focusin to be called a very large number of times.
     bind $itk_component(text) <Map> "$this focusin; break"
-
-    # Set the bindings that clear the status bar
-    # NOTE: These are much too aggressive.
-    # bind EditClearStatus <KeyPress> "%Q putStatus {}"
-    # bind EditClearStatus <ButtonPress> "%Q putStatus {}"
 
     # Put the insertion cursor at the top
     $itk_component(text) mark set insert @0,0
@@ -1452,7 +1443,7 @@ body ::tycho::Edit::incSearchMinibuffer {{backward 0}} {
         search
     } else {
         statusbar entry "i-search:"\
-                -default "" \
+                -default $searchText \
                 -command "$incSearch end" \
                 -keycommand "$incSearch %A"
 
@@ -2080,12 +2071,8 @@ body ::tycho::Edit::undo {} {
 # is called, then another sequence of characters is entered, only
 # the second sequence of characters will be undone by the undo command.
 #
-# This method also clears the status bar: any changes that affect the
-# undo must also clear the status.
-#
 body ::tycho::Edit::undoBoundary {} {
     set lastUndo ""
-    putStatus ""
 }
 
 #####################################################################
@@ -2143,7 +2130,7 @@ body ::tycho::Edit::writeSpellText {filename} {
     set fd [open $filename w+]
     set tags [spellCheckTags]
     if {$tags == {}} {
-	puts -nonewline $fd [get 1.0 {end -1 char}]
+	<s -nonewline $fd [get 1.0 {end -1 char}]
     } {
 	foreach tag $tags {
 	    set upto 1.0
@@ -2335,9 +2322,9 @@ body ::tycho::Edit::incSearch {key} {
     
     # Update statusbar
     if {$status != {}} {
-        statusbar entry "i-search($status):"
+        statusbar _label "i-search($status):"
     } else {
-        statusbar entry "i-search:"
+        statusbar _label "i-search:"
     }
 }
 
