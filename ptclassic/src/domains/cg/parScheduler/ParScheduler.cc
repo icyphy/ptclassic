@@ -101,7 +101,9 @@ int ParScheduler :: computeSchedule(Galaxy& galaxy)
 }
 
 ParScheduler :: ~ParScheduler() {
-	LOG_DEL; delete logstrm;
+	if (logstrm != &cerr) {
+		LOG_DEL; delete logstrm;
+	}
 }
 
 /////////////////////////////

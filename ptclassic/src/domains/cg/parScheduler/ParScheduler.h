@@ -88,7 +88,7 @@ protected:
 public:
   	// Constructor
   	ParScheduler(BaseMultiTarget* t, const char* log = 0) : mtarget(t),
-		logFile(log), exGraph(0) { inUniv = TRUE; }
+		logstrm(0), logFile(log), exGraph(0) { inUniv = TRUE; }
 
 	virtual ~ParScheduler();
 
