@@ -157,10 +157,13 @@ void CGMultiTarget::setup() {
     if (inWormHole()) {
 	adjustSampleRates();
 	generateCode();
-	if (compileCode())
-	{
-	    if (loadCode())
-	    {
+	writeCode();
+	if (SimControl::haltRequested()) {
+	    Error::abortRun(*this, "could not write code!");
+	    return;
+	}
+	if (compileCode()) {
+	    if (loadCode()) {
 		if (!runCode())
 		    Error::abortRun(*this, "could not run!");
 	    }
@@ -468,7 +471,7 @@ void CGMultiTarget::wrapup() {
     MultiTarget::wrapup();
 }
 
-/*virtual*/ void CGMultiTarget :: writeCode() {
+void CGMultiTarget :: writeCode() {
     for (int i = 0 ; i < nChildrenAlloc ; i++) {
 	if (child(i)->isA("CGTarget")) {
 	    ((CGTarget*)child(i))->writeCode();
