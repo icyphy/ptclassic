@@ -94,10 +94,15 @@ class ::tycho::MultiPanel {
 
     # Remove a subpanel
     method remove {element}
- 
+  
+    # cget for subpanels
+    method subcget {element args}
+    
+    # configure for subpanels
+    method subconfig {element args}
 
     ###################################################################
-    ####                   private variables                       ####
+    ####                      private variables                    ####
 
     private variable myData
     private variable myFrame
@@ -138,7 +143,7 @@ body ::tycho::MultiPanel::destructor {} {
 
 #######################################################################
 #### append
-# Description.
+# Add a subpanel to the bottom of the MultiPanel.
 #
 body ::tycho::MultiPanel::append {element {children} args} {
 
@@ -174,7 +179,7 @@ body ::tycho::MultiPanel::append {element {children} args} {
 
 #####################################################################
 #### appendlabel
-# Add a label to the bottom of the multipanel.
+# Add a label to the bottom of the MultiPanel.
 #
 body ::tycho::MultiPanel::appendlabel {element args} {
 
@@ -194,10 +199,7 @@ body ::tycho::MultiPanel::appendlabel {element args} {
 #
 body ::tycho::MultiPanel::bind {element args} {
 
-    # get name of widget from internal array
-    if {[catch {set elname $myData($element)}] == 1} {
-        error "MultiPanel::bind: Can't find element: $element"
-    } 
+    set elname [elementinfo $element]
     # bind the subpanel/label
     uplevel "bind $elname $args"
 }
@@ -218,6 +220,7 @@ body ::tycho::MultiPanel::clear {} {
 #### elements
 # Return the widget name of a subpanel or label.
 # With no args, return the elements of the internal list of subpanels/labels.
+# FIXME: Move widget name portion to private after fully tested.
 #
 body ::tycho::MultiPanel::elementinfo {args} {
 
@@ -235,19 +238,36 @@ body ::tycho::MultiPanel::elementinfo {args} {
 
 #####################################################################
 #### remove 
-# Remove an element.
+# Remove an element. FIXME: Children of subpanels are not removed yet 
+# will no longer be seen or useful.
 #
 body ::tycho::MultiPanel::remove {element} {
 
-    # get name of widget from internal array
-    if {[catch {set elname $myData($element)}] == 1} {
-        error "MultiPanel::remove: Can't find element: $element"
-    }
+    set elname [elementinfo $element]
     unset myData($element)
     $myList remove $element
     destroy $elname    
 }
 
+#####################################################################
+#### subcget 
+# cget on an individual subpanel.
+#
+body ::tycho::MultiPanel::subcget {element args} {
+
+    set elname [elementinfo $element]
+    uplevel "$elname cget $args"
+}
+
+#####################################################################
+#### subconfigure 
+# configure on an individual subpanel.
+#
+body ::tycho::MultiPanel::subconfig {element args} {
+    
+    set elname [elementinfo $element]
+    uplevel "$elname configure $args"
+}
     ###################################################################
     ###################################################################
     ####                      private methods                      ####
