@@ -32,8 +32,8 @@
 # Explicitly load the superclass. I don't really know why this is
 # needed, but the common arrays get upset otherwise.
 namespace ::tycho {
-    if { [::info classes Iconic] == "" } {
-	uplevel #0 {source $tychoslate/Iconic.itcl}
+    if { [::info classes IconItem] == "" } {
+	uplevel #0 {source $tychoslate/IconItem.itcl}
     }
     if { [::info classes LabeledOval] == "" } {
 	uplevel #0 {source $tychoslate/LabeledOval.itcl}
@@ -49,24 +49,19 @@ namespace ::tycho {
 # 
 # <p><b>Options</b>:
 # 
-# _IconOval_ has all options of <a href="Iconic.html">Iconic</a>
-# and <a href="LabeledOval">LabeledOval</a>. In addition, it has the options:
-#
-# <ul>
-# <li><b>-vsize</b>
-# The height of the oval, in pixels.
-# <li><b>-hsize</b>
-# The width of the oval, in pixels.
+# _IconOval_ has all options of <a href="IconItem.html">IconItem</a>
+# and <a href="LabeledOval.html">LabeledOval</a>. In addition, each
+# terminal is a component.
 #
 # </ul>
 # 
 # <p><b>Components</b>
 #
-# _IconOval_ has all components of <a href="Iconic.html">Iconic</a>
+# _IconOval_ has all components of <a href="IconItem.html">IconItem</a>
 # and <a href="LabeledOval">LabeledOval</a>.
 # 
 # <p><b>Bugs</b>: If the input and output terminals are not positioned
-# at the compas points then the terminal doesn't connect to the oval.
+# at the compass points then the terminal doesn't connect to the oval.
 # 
 # <p><b>Example</b>: Create an icon:
 # <tcl quiet><pre>
@@ -78,13 +73,13 @@ namespace ::tycho {
 #       -graphics {line 20 50 80 50 -width 4
 #                  line 50 20 50 80 -width 4} &#92
 #       -tags moveable]
-#   $slate createchild $icon Terminal 0 0 &#92
+#   $slate call $icon terminal input Terminal 0 0 &#92
 #       -anchor {0 50} &#92
 #       -direction {-1 0} &#92
 #       -type input &#92
 #       -style blob &#92
 #       -fill red
-#   $slate createchild $icon Terminal 0 0 &#92
+#   $slate call $icon terminal output Terminal 0 0 &#92
 #       -anchor {100 50} &#92
 #       -type output &#92
 #       -style doublearrow  &#92
@@ -102,31 +97,16 @@ namespace ::tycho {
 # </ul>
 #
 class ::tycho::IconOval {
-    inherit ::tycho::Iconic
+    inherit ::tycho::IconItem
 
     ###################################################################
     ####                         public procs                      ####
 
-    # Update the *-vsize* option
-    proc _vsize {id canvas slate vsize}
-
-    # Update the *-hsize* option
-    proc _hsize {id canvas slate hsize}
-
     # Create a new item
     proc construct {id canvas slate tags x y args}
 
-    # Get or set the coordinates of the IconOval's icon
-    proc coords {id canvas slate args}
-    
     # Draw a highlight around the oval
     proc highlight {id canvas slate args}
-    
-    ###################################################################
-    ####                           protected procs                 ####
-
-    # Update the coordinates
-    proc _coords {id canvas slate x y}
     
     ###################################################################
     ####                         private variables                 ####
@@ -141,55 +121,25 @@ class ::tycho::IconOval {
     ####                       class initialization                ####
 
     #### Set method table
-    array set methodtable [array get ::tycho::Iconic::methodtable]
     array set methodtable [@scope ::tycho::LabeledOval array get methodtable]
-
-    set methodtable(_vsize)   ::tycho::IconOval::_vsize
-    set methodtable(_hsize)    ::tycho::IconOval::_hsize
+    array set methodtable [array get ::tycho::IconItem::methodtable]
+ 
+    set methodtable(_coords)     ::tycho::LabeledOval::coords
 
     set methodtable(construct)   ::tycho::IconOval::construct
-    set methodtable(coords)      ::tycho::IconOval::coords
     set methodtable(highlight)   ::tycho::IconOval::highlight
 
     #### Set option defaults
-    array set optiondefault [array get ::tycho::Iconic::optiondefault]
     array set optiondefault [@scope ::tycho::LabeledOval \
             array get optiondefault]
-    set optiondefault(-vsize) 50
-    set optiondefault(-text)  ""
+    array set optiondefault [array get ::tycho::IconItem::optiondefault]
+ 
+    # Make it round
     set optiondefault(-hsize) 50
+    set optiondefault(-vsize) 50
 }
 
-##########################################################################
-## -vsize option configuration
-#
-body ::tycho::IconOval::_vsize {id canvas slate vsize} {
-    set option(vsize$id) $vsize
-    eval _coords $id $canvas $slate [coords $id $canvas $slate]
-}
-
-##########################################################################
-## -hsize option configuration
-#
-body ::tycho::IconOval::_hsize {id canvas slate hsize} {
-    set option(hsize$id) $hsize
-    eval _coords $id $canvas $slate [coords $id $canvas $slate]
-}
-
-##########################################################################
-#### _coords
-#
-body ::tycho::IconOval::_coords {id canvas slate x y} {
-    # Alter the coordinates of the oval
-    set coords [eval ::tycho::Rectangle::stretch $x $y $x $y \
-        [expr $option(hsize$id)/2] [expr $option(vsize$id)/2]]
-    eval ::tycho::Oval::coords $id $canvas $slate $coords
-
-    # Move the inputs and outputs
-    eval ::tycho::Iconic::coords $id $canvas $slate $coords
-}
-
-##########################################################################
+#########################################################################
 #### construct
 #
 body ::tycho::IconOval::construct {id canvas slate tags x y args} {
@@ -197,32 +147,15 @@ body ::tycho::IconOval::construct {id canvas slate tags x y args} {
     foreach {opt val} [concat [array get optiondefault] $args] {
 	set option([string trimleft $opt -]$id) $val
     }
+    set anchor $option(anchor$id)
+    set option(anchor$id) nw
+ 
+    # Create the oval.
+    eval [list ::tycho::LabeledOval::_construct $id $canvas $slate $tags] \
+            $x $y [expr $x + $option(hsize$id)] [expr $y + $option(vsize$id)]
 
-    # Figure out the coordinates of the bounding Oval
-    set coords [::tycho::Rectangle::stretch $x $y $x $y \
-        [expr $option(hsize$id)/2] [expr $option(vsize$id)/2]]
-
-    # Create the Oval.
-    eval ::tycho::LabeledOval::_construct \
-	    $id $canvas $slate [list $tags] $coords
-
-    # Create the input and output ports
-    # ::tycho::Iconic::_inputs  $id $canvas $slate $option(inputs$id)
-    # ::tycho::Iconic::_outputs $id $canvas $slate $option(outputs$id)
-}
-
-##########################################################################
-#### coords
-#
-body ::tycho::IconOval::coords {id canvas slate args} {
-    # No args: just return coordinates
-    if { $args == "" } {
-        ::tycho::assign x0 y0 x1 y1 [$canvas coords $primary($id)]
-        return [list [expr ($x0+$x1)/2] [expr ($y0+$y1)/2]]
-    }
-
-    # Alter the coordinates of the oval
-    eval _coords $id $canvas $slate $args
+    # Adjust anchor
+    _anchor $id $canvas $slate $anchor
 }
 
 ##########################################################################

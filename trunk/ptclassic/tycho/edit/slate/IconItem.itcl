@@ -32,8 +32,8 @@
 # Explicitly load the superclass. I don't really know why this is
 # needed, but the common arrays get upset otherwise.
 namespace ::tycho {
-    if { [::info classes ComplexItem] == "" } {
-	uplevel #0 {source $tychoslate/ComplexItem.itcl}
+    if { [::info classes LabeledItem] == "" } {
+	uplevel #0 {source $tychoslate/LabeledItem.itcl}
     }
 }
 
@@ -42,47 +42,50 @@ namespace ::tycho {
 ## IconItem
 #
 # <i>IconItem</i> is an abstract class for items that can have
-# things connected to them with terminals.
-# The appearance of its terminals if given by configuration options. 
-# For a specific application, you may prefer to write a subclass
-# dedicated to the application.
-# 
-# <p><b>Options</b>:
-# 
+# things connected to them with terminals. It is a subclass of
+# LabeledItem, because it inherits the text label and the
+# internal scaled graphics options. It extends LabeledItem
+# in two ways:
 # <ul>
-# <li><b>-inputs</b>.  The positions of the input connections.  This is a 
-# flat list of <i>x</i> and <i>y</i> coordinates, as percentages of the 
-# icon size and with the origin at the top left of the icon.  By default, 
-# this is <code>{0 50}</code>, meaning that there is a single input 
-# halfway up the left edge of the icon.  If a single integer is given when 
-# setting this option, the option is set to a list such that that number 
-# of inputs are evely spaced along the left edge of the icon.  For 
-# example, setting <code>-inputs 2</code> will result in the 
-# <code>-inputs</code> being set to <code>{0 25 0 75}</code>.
+# <li>By having a single pair of coordinates, and options that control
+# the icon width and height (instead of required the coordinates
+# of the bounding rectangle.
+# <li>By supporting active child items that are used to "connect"
+# lines to the item.
+# </ul>
 # 
-# <li><b>-intype</b>.  A list containing the item type to use to draw the 
-# input terminals, followed by options of the item.  The item must accept 
-# exactly two coordinates.  The default is <code>{Terminal -type 
-# input}</code>.
+# <p><a name=#"options"><b>Options</b>:
 # 
-# <li><b>-outputs</b>.  The positions of the output connections.  This is 
-# must the same as the <code>inputs</code> option, except that output 
-# terminals are by default placed at the right-hand side of the node icon.
-# 
-# <li><b>-outtype</b>.  A list containing the item type to use to draw the 
-# output terminals, followed by options of the item.  The default is 
-# <code>{Terminal -type output}</code>.
-# 
+# See also <a href="LabeledItem.html#options">LabeledItem</a>.
+#
+# <ul>
+# <li><b>-anchor</b>:
+# The anchor point of the item relative to its origin. This option
+# is valid only if the *-shape* option is set to "point." Otherwise
+# it will read the previously set value and will cause an
+# error if set. Default is "center."
+#
+# <li><b>-hsize</b>:
+# The horizontal size of the item. If the *-shape* option is "point<"
+# then this option sets the horizontal size of the item; otherwise
+# it will read zero and will cause an error if set. (This option
+# should have been called "width," but that is already used for
+# the width of the outline in Tk.)
+#
+# <li><b>-vsize</b>:
+# The vertical size of the item. If the *-shape* option is "point,"
+# then this option sets the vertical size of the item; otherwise
+# it will read zero and will cause an error if set. (This option
+# should have been called "height," but since "width" cannot be used
+# then neither can "height.")
+#
 # </ul>
 # 
 # <p><b>Components</b>
 #
-# <ul>
-# <li><b>inports</b>:
-# The input ports.
-# <li><b>outports</b>:
-# The output ports.
-# </ul>
+# IF a *-name* option is supplied to the terminal{}
+# proc, then the terminal is registered as a component
+# with that name.
 #
 # <p><b>Enhancements</b>: In an earlier version of the Slate,
 # IconItem items had primary and secondary "directions," so that
@@ -94,44 +97,41 @@ namespace ::tycho {
 #
 # <a href="../internals/howtoread.html">Reading <i>ComplexItem</i> documentation</a>.
 #
-# <b>Note</b>: This is an experimental class. Most of the support
-# for positioning inputs and outputs has been made redundant
-# by the *-anchor* option of the Terminal class. We need to figure
-# out whether any of this is still needed at all...
+# <b>Note</b>: This is an experimental class.
 #
 class ::tycho::IconItem {
-    inherit ::tycho::ComplexItem
+    inherit ::tycho::LabeledItem
 
     ###################################################################
     ####                         public procs                      ####
 
-    # Update the *-inputs* option
-    proc _inputs {id canvas slate inputs}
-    
-    # Update the *-intype* option
-    proc _intype {id canvas slate intype}
-    
-    # Update the *-outputs* option
-    proc _outputs {id canvas slate outputs}
-    
-    # Update the *-outtype* option
-    proc _outtype {id canvas slate outtype}
+    # Update the *-anchor* option
+    proc _anchor {id canvas slate anchor {x {}} {y {}}}
 
-    # Get an aspect
-    proc aspect {id canvas slate args}
-    
-    # Access a component
-    proc component {id canvas slate {name {}}}
+    # Update the *-hsize* option
+    proc _hsize {id canvas slate hsize}
 
+    # Update the *-vsize* option
+    proc _vsize {id canvas slate vsize}
+
+    # Change coordinates
+    proc coords {id canvas slate {x {}} {y {}}}
+    
     # Get the region of the icon
     proc region {id canvas slate args}
+
+    # Add a terminal to the icon
+    proc terminal {id canvas slate name type x y args}
 
     ###################################################################
     ####                          protected procs                  ####
 
-    # Update the inputs and output because of change in coordinates
-    protected proc coords {id canvas slate x0 y0 x1 y1}
-    
+    # Adjust sizes after changing coordinates
+    protected proc adjust {id canvas slate}
+
+    # Adjust terminals after changing coordinates
+    protected proc adjustterminals {id canvas slate a0 b0 a1 b1 x0 y0 x1 y1}
+
     ###################################################################
     ####                         private variables                 ####
 
@@ -140,6 +140,9 @@ class ::tycho::IconItem {
 
     # All options have a default value
     private common optiondefault
+
+    # An array of lists of terminal components, indexed by id
+    private common terminals
 
     ###################################################################
     ####                           private procs                   ####
@@ -151,297 +154,115 @@ class ::tycho::IconItem {
     ####                       class initialization                ####
 
     #### Set method table
-    array set methodtable [array get ::tycho::ComplexItem::methodtable]
+    array set methodtable [array get ::tycho::LabeledItem::methodtable]
 
-    set methodtable(_inputs)     ::tycho::IconItem::_inputs
-    set methodtable(_intype)     ::tycho::IconItem::_intype
-    set methodtable(_outputs)    ::tycho::IconItem::_outputs
-    set methodtable(_outtype)    ::tycho::IconItem::_outtype
+    set methodtable(_anchor)     ::tycho::IconItem::_anchor
+    set methodtable(_hsize)      ::tycho::IconItem::_hsize
+    set methodtable(_vsize)      ::tycho::IconItem::_vsize
 
-    set methodtable(aspect)      ::tycho::IconItem::aspect
-    set methodtable(component)   ::tycho::IconItem::component
-    set methodtable(region)      ::tycho::IconItem::region
+    set methodtable(coords)    ::tycho::IconItem::coords
+    set methodtable(region)    ::tycho::IconItem::region
+    set methodtable(terminal)  ::tycho::IconItem::terminal
 
     #### Set option defaults
-    array set optiondefault [array get ::tycho::ComplexItem::optiondefault]
-
-    # set optiondefault(-inputs)   1
-    # set optiondefault(-intype)   {Terminal -type input}
-    # set optiondefault(-outputs)  1
-    # set optiondefault(-outtype)  {Terminal -type output}
+    array set optiondefault [array get ::tycho::LabeledItem::optiondefault]
+    set optiondefault(-anchor)	"center"
+    set optiondefault(-hsize)   60
+    set optiondefault(-shape)   "point"
+    set optiondefault(-text)    "NoName"
+    set optiondefault(-vsize)   40
 }
 
 ##########################################################################
-#### -inputs option configuration
+## -anchor option configuration
 #
-# The option representing the positions of the input connections.
-# Each of these is a list of connection positions, in % and relative
-# to the top-left corner of the item's outline. Each position
-# is a pair, with each number the percentage distance along
-# the horizontal and vertical axis respectively. For example,
-# a single point in the center of the left edge is *{0 50}*;
-# two points along the bottom edge could be *{25 100 75 100}*.
+# Adjust the anchor position. If optional arguments are given,
+# these are coordinates to anchor to.
 #
-# By default, there is one input on the left edge and one output
-# on the right edge.
-#
-# Setting this configuration option supports a handy shortcut:
-# A single number sets the list to evenly spaced positions
-# along the left (input) or right (output) edges. For example,
-# the option *-inputs 2* to the constructor will result in
-# the -inputs variable being set to *{0 25 0 75}*.
-#
-body ::tycho::IconItem::_inputs {id canvas slate inputs} {
-    # Set up coordinates
-    ::tycho::assign x0 y0 x1 y1 [$canvas coords $primary($id)]
-    set xscale [expr ($x1-$x0)/100.0]
-    set yscale [expr ($y1-$y0)/100.0]
-    set positions {}
-
-    # If the argument is an integer, generate evenly-spaced points
-    # along the left axis.
-    if { [llength $inputs] == 1 && [string match {[0-9]*} $inputs] } {
-	set option(inputs$id) {}
-	set variable(indirn$id) {}
-
-	# If it's zero, then delete ports and we're done
-	if { $inputs == 0 } {
-	    if { [::info exists component(inports$id)] } {
-		foreach p $component(inports$id) {
-		    $slate delete $p
-		}
-	    }
-	    return
-	}
-	foreach y [::tycho::spread $inputs 0 100 -indented] {
-	    lappend option(inputs$id) 0 $y
-	    lappend variable(indirn$id) -1 0
-	    lappend positions $x0 [expr $y0 + $yscale * $y]
-	}
-    } else {
-	# The argument has the correct format
-	set option(inputs$id) $inputs
-	set variable(indirn$id) {}
-	foreach {x y} $inputs {
-	    if { $x == 0 } {
-		lappend variable(indirn$id) -1 0
-		lappend positions $x0 [expr $y0 + $yscale * $y]
-	    } elseif { $x == 100 } {
-		lappend variable(indirn$id) 1 0
-		lappend positions $x1 [expr $y0 + $yscale * $y]
-	    } elseif { $y == 0 } {
-		lappend variable(indirn$id) 0 -1
-		lappend positions [expr $x0 + $xscale * $x] $y0
-	    } elseif { $y == 100 } {
-		lappend variable(indirn$id) 0 1
-		lappend positions [expr $x0 + $xscale * $x] $y1
-	    } else {
-		error "Invalid coordinates $x $y"
-	    }
-	}
+body ::tycho::IconItem::_anchor {id canvas slate anchor {x {}} {y {}}} {
+    if { $x == "" } {
+        ::tycho::assign x y [eval ::tycho::Rectangle::aspect \
+                [$canvas coords $primary($id)] $option(anchor$id)]
     }
-    # Now move/draw the terminals
-    redrawinputs $id $canvas $slate $positions
+    # Move the item
+    $slate moveto $id $x $y $anchor -shape rectangle
+
+    # Remember the option
+    set option(anchor$id) $anchor
+}
+
+###########################################################################
+## -hsize option configuration
+#
+body ::tycho::IconItem::_hsize {id canvas slate hsize} {
+    set option(hsize$id) $hsize
+    adjust $id $canvas $slate
 }
 
 ##########################################################################
-#### -intype option configuration
+## -vsize option configuration
 #
-body ::tycho::IconItem::_intype {id canvas slate intype} {
-    set option(intype$id) $intype
-    foreach p $component(inports$id) {
-	$slate delete $p
-    }
-    set component(inports$id) {}
+body ::tycho::IconItem::_vsize {id canvas slate vsize} {
+    set option(vsize$id) $vsize
+    adjust $id $canvas $slate
+}
 
-    _inputs $id $canvas $option(inputs$id)
+#########################################################################
+## adjust
+#
+# Adjust item after changing coordinates.
+#
+body ::tycho::IconItem::adjust {id canvas slate} {
+    set coords [$canvas coords $primary($id)]
+
+    # Remember the anchor
+    ::tycho::assign x y [eval ::tycho::Rectangle::aspect \
+            $coords $option(anchor$id)]
+
+    # Scale the item according to the change in size
+    ::tycho::assign x0 y0 x1 y1 $coords
+    [@scope ::tycho::[$slate type $id] set methodtable(_coords)] \
+            $id $canvas $slate $x0 $y0 \
+	    [expr $x0 + $option(hsize$id)] [expr $y0 + $option(vsize$id)]
+
+    # Move the terminals
+    eval adjustterminals $id $canvas $slate \
+            $x0 $y0 $x1 $y1 [$canvas coords $primary($id)]
+
+    # Adjust the anchor
+    _anchor $id $canvas $slate $option(anchor$id) $x $y
 }
 
 ##########################################################################
-#### -outputs option configuration
+#### adjustterminals
 #
-# See _inputs{} for comments.
+# Move the terminals...
 #
-body ::tycho::IconItem::_outputs {id canvas slate outputs} {
-    # Set up coordinates
-    ::tycho::assign x0 y0 x1 y1 [$canvas coords $primary($id)]
-    set xscale [expr ($x1-$x0)/100.0]
-    set yscale [expr ($y1-$y0)/100.0]
-    set positions {}
-    
-    # If the argument is an integer, generate evenly-spaced points
-    # along the right axis.
-    if {  [llength $outputs] == 1 && [string match {[0-9]*} $outputs] } {
-	set option(outputs$id) {}
-	set variable(outdirn$id) {}
-
-	# If it's zero, then delete ports and we're done
-	if { $outputs == 0 } {
-	    if { [::info exists component(outports$id)] } {
-		foreach p $component(outports$id) {
-		    $slate delete $p
-		}
-	    }
-	    return
-	}
-	foreach y [::tycho::spread $outputs 0 100 -indented] {
-	    lappend option(outputs$id) 100 $y
-	    lappend variable(outdirn$id) 1 0
-	    lappend positions $x1 [expr $y0 + $yscale * $y]
-	}
-    } else {
-	# The argument has the correct format
-	set option(outputs$id) $outputs
-	set variable(outdirn$id) {}
-	foreach {x y} $outputs {
-	    if { $x == 0 } {
-		lappend variable(outdirn$id) -1 0
-		lappend positions $x0 [expr $y0 + $yscale * $y]
-	    } elseif { $x == 100 } {
-		lappend variable(outdirn$id) 1 0
-		lappend positions $x1 [expr $y0 + $yscale * $y]
-	    } elseif { $y == 0 } {
-		lappend variable(outdirn$id) 0 -1
-		lappend positions [expr $x0 + $xscale * $x] $y0
-	    } elseif { $y == 100 } {
-		lappend variable(outdirn$id) 0 1
-		lappend positions [expr $x0 + $xscale * $x] $y1
-	    } else {
-		error "Invalid coordinates $x $y"
-	    }
-	}
-    }
-    # Now move/draw the terminals
-    redrawoutputs $id $canvas $slate $positions
-}
-
-##########################################################################
-#### -outtype option configuration
-#
-body ::tycho::IconItem::_outtype {id canvas slate outtype} {
-    set option(outtype$id) $outtype
-    foreach p $component(outports$id) {
-	$slate delete $p
-    }
-    set component(outports$id) {}
-    _outputs $id $canvas $option(outputs$id)
-}
-
-##########################################################################
-#### aspect
-#
-# Return aspects of a node. Aspects are of the form *input-*_n_
-# or $output-*_n_.
-#
-# FIXME: Make more efficient.
-#
-# FIXME: Do we really need this? Terminal positions can be found
-# more easily by using component and then calling aspects on those.
-# Plus it doesn't assume that the ports have an aspect called
-# "terminal."
-#
-body ::tycho::IconItem::aspect {id canvas slate args} {
-    set result {}
-
-    # If there are no args, return a list of aspect names
-    if { $args == "" } {
-	foreach n [interval 0 [expr [llength $component(inports$id)] - 1]] {
-	    lappend result input-$n
-	}
-	foreach n [interval 0 [expr [llength $$component(outports$id)] - 1]] {
-	    lappend result output-$n
-	}
-	return $result
-    }
-    
-    # If there are args, return the aspect coordinates
-    foreach aspect $args {
-	set splut [split $aspect "-"]
-	switch -exact [lindex $splut 0] {
-	    "input" {
-		set result [concat $result \
-			[$slate aspect \
-			[lindex $component(inports$id) [lindex $splut 1]] "terminal"]]
-	    }
-	    "output" {
-		set result [concat $result \
-			[$slate aspect \
-			[lindex $component(outports$id) [lindex $splut 1]] "terminal"]]
-	    }
-	    default {
-		error "unknown aspect $aspect"
-	    }
-	}
-    }
-    return $result
-}
-
-##########################################################################
-#### component
-#
-# Return a component of a node. Component names are of the form *input-*_n_
-# or $output-*_n_.
-#
-body ::tycho::IconItem::component {id canvas slate {name {}}} {
-    # If there is no component argument, return a list of components
-    if { $name == "" } {
-	return [aspect $id $canvas]
-    }
-    
-    # Otherwise, get the specified component
-    set splut [split $name "-"]
-    switch -exact [lindex $splut 0] {
-	"input" {
-	    return [lindex $component(inports$id) [lindex $splut 1]]
-	}
-	"output" {
-	    return [lindex $component(outports$id) [lindex $splut 1]]
-	}
-	default {
-	    error "unknown component $name"
-	}
+body ::tycho::IconItem::adjustterminals \
+        {id canvas slate a0 b0 a1 b1 x0 y0 x1 y1} {
+    set xscale [expr ($x1-$x0)/($a1-$a0)]
+    set yscale [expr ($y1-$y0)/($b1-$b0)]
+    if [::info exists terminals($id)] {
+        foreach t $terminals($id) {
+            ::tycho::assign a b [$slate aspect $component($t$id) origin]
+            set x [expr $x0 + ($a-$a0) * $xscale]
+            set y [expr $y0 + ($b-$b0) * $yscale]
+            $slate move $component($t$id) [expr $x-$a] [expr $y-$b]
+        }
     }
 }
 
 ##########################################################################
 #### coords
 #
-# Move the inputs and outputs to match the coordinates of the
-# primary component
-#
-body ::tycho::IconItem::coords {id canvas slate x0 y0 x1 y1} {
-    set xscale [expr ($x1-$x0)/100.0]
-    set yscale [expr ($y1-$y0)/100.0]
-
-    # Move inputs
-    set positions {}
-    foreach {x y} $option(inputs$id) {
-	if { $x == 0 } {
-	    lappend positions $x0 [expr $y0 + $yscale * $y]
-	} elseif { $x == 100 } {
-	    lappend positions $x1 [expr $y0 + $yscale * $y]
-	} elseif { $y == 0 } {
-	    lappend positions [expr $x0 + $xscale * $x] $y0
-	} elseif { $y == 100 } {
-	    lappend positions [expr $x0 + $xscale * $x] $y1
-	}  
+body ::tycho::IconItem::coords {id canvas slate {x {}} {y {}}} {
+    # No args: just return coordinates
+    if { $x == "" } {
+        return [eval ::tycho::Rectangle::aspect \
+                [$canvas coords $primary($id)] $option(anchor$id)]
+    } else {
+        adjust $id $canvas $slate
     }
-    redrawinputs $id $canvas $slate $positions
-
-    # Move outputs
-    set positions {}
-    foreach {x y} $option(outputs$id) {
-	if { $x == 0 } {
-	    lappend positions $x0 [expr $y0 + $yscale * $y]
-	} elseif { $x == 100 } {
-	    lappend positions $x1 [expr $y0 + $yscale * $y]
-	} elseif { $y == 0 } {
-	    lappend positions [expr $x0 + $xscale * $x] $y0
-	} elseif { $y == 100 } {
-	    lappend positions [expr $x0 + $xscale * $x] $y1
-	}  
-    }
-    redrawoutputs $id $canvas $slate $positions
 }
 
 ##########################################################################
@@ -454,55 +275,12 @@ body ::tycho::IconItem::region {id canvas slate args} {
 }
 
 ##########################################################################
-#### redrawinputs
+#### terminal
 #
-body ::tycho::IconItem::redrawinputs {id canvas slate positions} {
-    if { ! [::info exists component(inports$id)] } {
-	set component(inports$id) {}
-    }
-    set tags [$canvas gettags $id]
-    foreach {x y} $positions {a b} \
-	    $variable(indirn$id) \
-	    p $component(inports$id) {
-	if { $p == "" } {
-	    lappend component(inports$id) [eval $slate createrootchild $id \
-		    [lindex $option(intype$id) 0] \
-		    $x $y \
-		    [lrange $option(intype$id) 1 end] \
-		    -direction [list [list $a $b]] \
-		    -tags input]
-	} else {
-	    $slate coords $p $x $y
-	    # Should be able to optimise this out
-	    $slate itemconfigure $p \
-		    -direction [list $a $b]
-	}
-    }
-}
-
-##########################################################################
-#### redrawoutputs
+# Create a terminal and register as a component.
 #
-body ::tycho::IconItem::redrawoutputs {id canvas slate positions} {
-    if { ! [::info exists component(outports$id)] } {
-	set component(outports$id) {}
-    }
-    set tags [$canvas gettags $id]
-    foreach {x y} $positions \
-	    {a b} $variable(outdirn$id) \
-	    p $component(outports$id) {
-	if { $p == "" } {
-	    lappend component(outports$id) [eval $slate createrootchild $id \
-		    [lindex $option(outtype$id) 0] \
-		    $x $y \
-		    [lrange $option(outtype$id) 1 end] \
-		    -direction [list [list $a $b]] \
-		    -tags output]
-	} else {
-	    $slate coords $p $x $y
-	    # Should be able to optimise this out
-	    $slate itemconfigure $p \
-		    -direction [list $a $b]
-	}
-    }    
+body ::tycho::IconItem::terminal {id canvas slate name type x y args} {
+    set component($name$id) \
+	    [eval $slate createrootchild $id $type $x $y $args]
+    lappend terminals($id) $name
 }

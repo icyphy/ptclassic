@@ -32,8 +32,8 @@
 # Explicitly load the superclass. I don't really know why this is
 # needed, but the common arrays get upset otherwise.
 namespace ::tycho {
-    if { [::info classes Iconic] == "" } {
-	uplevel #0 {source $tychoslate/Iconic.itcl}
+    if { [::info classes IconItem] == "" } {
+	uplevel #0 {source $tychoslate/IconItem.itcl}
     }
     if { [::info classes LabeledFrame] == "" } {
 	uplevel #0 {source $tychoslate/LabeledFrame.itcl}
@@ -50,24 +50,19 @@ namespace ::tycho {
 # 
 # <p><b>Options</b>:
 # 
-# _IconFrame_ has all options of <a href="Iconic.html">Iconic</a>
-# and <a href="LabeledFrame.html">LabeledFrame</a>. In addition, it
-# has the options:
-#
-# <ul>
-# <li><b>-height</b>
-# The height of the icon frame, in pixels.
-# <li><b>-width</b>
-# The width of the icon frame, in pixels.
+# _IconFrame_ has all options of <a href="IconItem.html">IconItem</a>
+# and <a href="LabeledFrame.html">LabeledFrame</a>.
 #
 # </ul>
 # 
 # <p><b>Components</b>
 #
-# _IconFrame_ has all components of <a href="Iconic.html">Iconic</a>
-# and <a href="LabeledFrame">LabeledFrame</a>.
+# _IconFrame_ has all components of <a href="IconItem.html">IconItem</a>
+# and <a href="LabeledFrame.html">LabeledFrame</a>. In addition, each
+# terminal is a component.
 # 
-# <p><b>Bugs</b>: (none)
+# <p><b>Bugs</b>: If a terminal is highlighted and the icon
+# is resized, the highlight moves the wrong way...
 # 
 # <p><b>Example</b>: Create an icon:
 # <tcl quiet><pre>
@@ -75,15 +70,45 @@ namespace ::tycho {
 #   set icon [$slate create IconFrame 100 100 &#92
 #       -color green &#92
 #       -graphics {line 20 20 80 80} &#92
+#       -text {A Sample Icon} &#92
 #       -tags moveable]
-#   $slate createchild $icon Terminal 0 0 &#92
+# </pre></tcl>
+#
+# When first created, the icon has no terminals.
+# To create, call the terminal{} method:
+# <tcl quiet><pre>
+#   $slate call $icon terminal input-1 Terminal 0 0 &#92
 #       -anchor {50 0} &#92
 #       -direction {0 -1} &#92
 #       -type input &#92
 #       -style doublearrow
+#   $slate call $icon terminal input-2 Terminal 0 0 &#92
+#       -anchor {0 50} &#92
+#       -direction {-1 0} &#92
+#       -type input &#92
+#       -style blob -fill blue
 # </pre></tcl>
 # 
-# <p><b>Enhancements</b>: Would a <b>-anchor</b> option be useful?
+# The actual terminal items can be queried with the slate's
+# component{} method:
+# <tcl quiet><pre>
+#   $slate highlight [$slate component $icon input-1]
+# </pre></tcl>
+#
+# The icon's size can be changed with the *-hsize* and *-vsize*
+# options:
+# <tcl quiet><pre>
+#   $slate itemconfigure $icon -hsize 80 -vsize 30
+# </pre></tcl>
+#
+# It can also have an anchor other than the default (the center):
+# <tcl quiet><pre>
+#   $slate itemconfigure $icon -anchor nw
+#   update; after 500
+#   $slate itemconfigure $icon -hsize 60
+# </pre></tcl>
+#
+# <p><b>Enhancements</b>: (none)
 #
 # <p><b>Links</b>
 # 
@@ -94,33 +119,18 @@ namespace ::tycho {
 # </ul>
 #
 class ::tycho::IconFrame {
-    inherit ::tycho::Iconic
+    inherit ::tycho::IconItem
 
     ###################################################################
     ####                         public procs                      ####
 
-    # Update the *-height* option
-    proc _height {id canvas slate height}
-
-    # Update the *-width* option
-    proc _width {id canvas slate width}
-
     # Create a new item
     proc construct {id canvas slate tags x y args}
 
-    # Get or set the coordinates of the IconFrame's icon
-    proc coords {id canvas slate args}
-    
     # Draw a highlight around the frame
     proc highlight {id canvas slate args}
     
     ###################################################################
-    ####                           protected procs                 ####
-
-    # Update the coordinates
-    proc _coords {id canvas slate x y}
-    
-   ###################################################################
     ####                         private variables                ####
 
     # All methods are looked up through a table
@@ -133,52 +143,18 @@ class ::tycho::IconFrame {
     ####                       class initialization                ####
 
     #### Set method table
-    array set methodtable [array get ::tycho::Iconic::methodtable]
     array set methodtable [@scope ::tycho::LabeledFrame array get methodtable]
+    array set methodtable [array get ::tycho::IconItem::methodtable]
 
-    set methodtable(_height)   ::tycho::IconFrame::_height
-    set methodtable(_width)    ::tycho::IconFrame::_width
+    set methodtable(_coords)     ::tycho::LabeledFrame::coords
 
     set methodtable(construct)   ::tycho::IconFrame::construct
-    set methodtable(coords)      ::tycho::IconFrame::coords
     set methodtable(highlight)   ::tycho::IconFrame::highlight
 
     #### Set option defaults
-    array set optiondefault [array get ::tycho::Iconic::optiondefault]
     array set optiondefault [@scope ::tycho::LabeledFrame \
             array get optiondefault]
-    set optiondefault(-height) 40
-    set optiondefault(-text)   "NoName"
-    set optiondefault(-width)  60
-}
-
-##########################################################################
-## -height option configuration
-#
-body ::tycho::IconFrame::_height {id canvas slate height} {
-    set option(height$id) $height
-    eval _coords $id $canvas $slate [coords $id $canvas $slate]
-}
-
-##########################################################################
-## -width option configuration
-#
-body ::tycho::IconFrame::_width {id canvas slate width} {
-    set option(width$id) $width
-    eval _coords $id $canvas $slate [coords $id $canvas $slate]
-}
-
-##########################################################################
-#### _coords
-#
-body ::tycho::IconFrame::_coords {id canvas slate x y} {
-    # Alter the coordinates of the frame
-    set coords [eval ::tycho::Rectangle::stretch $x $y $x $y \
-        [expr $option(width$id)/2] [expr $option(height$id)/2]]
-    eval ::tycho::Frame::coords $id $canvas $slate $coords
-
-    # Move the inputs and outputs
-    eval ::tycho::Iconic::coords $id $canvas $slate $coords
+    array set optiondefault [array get ::tycho::IconItem::optiondefault]
 }
 
 ##########################################################################
@@ -189,32 +165,15 @@ body ::tycho::IconFrame::construct {id canvas slate tags x y args} {
     foreach {opt val} [concat [array get optiondefault] $args] {
 	set option([string trimleft $opt -]$id) $val
     }
-
-    # Figure out the coordinates of the bounding Frame
-    set coords [::tycho::Rectangle::stretch $x $y $x $y \
-        [expr $option(width$id)/2] [expr $option(height$id)/2]]
+    set anchor $option(anchor$id)
+    set option(anchor$id) nw
 
     # Create the Frame.
-    eval ::tycho::LabeledFrame::_construct \
-	    $id $canvas $slate [list $tags] $coords
+    ::tycho::LabeledFrame::_construct $id $canvas $slate $tags \
+            $x $y [expr $x + $option(hsize$id)] [expr $y + $option(vsize$id)]
 
-    # Create the input and output ports
-    # ::tycho::Iconic::_inputs  $id $canvas $slate $option(inputs$id)
-    # ::tycho::Iconic::_outputs $id $canvas $slate $option(outputs$id)
-}
-
-##########################################################################
-#### coords
-#
-body ::tycho::IconFrame::coords {id canvas slate args} {
-    # No args: just return coordinates
-    if { $args == "" } {
-        ::tycho::assign x0 y0 x1 y1 [$canvas coords $primary($id)]
-        return [list [expr ($x0+$x1)/2] [expr ($y0+$y1)/2]]
-    }
-
-    # Alter the coordinates of the frame
-    eval _coords $id $canvas $slate $args
+    # Adjust anchor
+    _anchor $id $canvas $slate $anchor
 }
 
 ##########################################################################
