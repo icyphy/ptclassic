@@ -124,6 +124,9 @@ class ::tycho::FileBrowser {
     # Set the global current working directory.
     proc setCWD {cwd} {set CWD $cwd}
 
+    # Set the global filename that appears by default.
+    proc setLastFile {name} {set fileLastOpened $name}
+
     ##################################################################
     ####                   protected methods                      ####
 
