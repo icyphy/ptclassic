@@ -169,7 +169,7 @@ realclean:
 extraclean: realclean
 	@if [ -d SCCS ]; then \
 		echo "SCCS dir present, removing sources"; \
-		rm -f $(SRCS) $(HDRS); \
+		rm -f $(PL_SRCS) $(SRCS) $(HDRS) $(SCRIPTS); \
 	else \
 		echo "SCCS dir not present, _not_ removing sources"; \
 	fi
