@@ -120,7 +120,7 @@ State :: getParseToken(Tokenizer& lexer, int stateType) {
 			}
 			else {
 				t.tok = T_Int;
-				t.intval = atoi(token);
+				t.intval = strtol(token,0,0);
 				return t;
 			}
 		}
