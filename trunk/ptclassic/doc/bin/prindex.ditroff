@@ -6,15 +6,20 @@
 if ( ! $?PTOLEMY ) setenv PTOLEMY ~ptolemy
 
 set preview = 0
+set ps = 0
 set printoptions = "-me -P$PRINTER"
 set printcommand = "ditroff"
-set dircmds = $PRINTER/doc/bin/
-set dirheader = $PRINTER/doc/headers/
+set dircmds = $PTOLEMY/doc/bin/
+set dirheader = $PTOLEMY/doc/headers/
 
 while ($#argv)
 	switch ($argv[1])
 	case -preview:
 		set preview = 1
+		shift
+		breaksw
+	case -ps:
+		set ps = 1
 		shift
 		breaksw
 	case -*:
@@ -26,7 +31,7 @@ while ($#argv)
 	endsw
 end
 if ($#argv < 1) then
-	echo "usage: $0 [-preview] [troff options] index_file [...]"
+	echo "usage: $0 [-preview] [-ps] [troff options] index_file [...]"
 	exit 1
 endif
 
@@ -48,8 +53,12 @@ awk -f ${dircmds}awk.index /tmp/ptc$$ > /tmp/ptinf$$
 if ($preview) then
 	$printcommand $printoptions -t ${dirheader}index /tmp/ptinf$$ \
 		| xditview -
-else
-	$printcommand $printoptions ${dirheader}index /tmp/ptinf$$
+else if ($ps) then
+        $printcommand $printoptions -t ${dirheader}index /tmp/ptinf$$ \
+                | psdit > /tmp/ptinf$$.ps
+        echo postcript file is in /tmp/ptinf$$.ps
+else 
+        $printcommand $printoptions ${dirheader}index /tmp/ptinf$$
 endif
 
 /bin/rm /tmp/ptc$$ /tmp/ptinf$$
