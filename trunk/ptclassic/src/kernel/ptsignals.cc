@@ -141,6 +141,20 @@ void ptReleaseSig( int SigNum ) {
 }
 
 #else
+#if defined (PTNT)
+void ptSafeSig( int ) {}
+sigset_t signalmask = 0;
+void ptBlockSig( int SigNum ) {
+        sigaddset(&signalmask, SigNum);
+        sigprocmask(SIG_BLOCK, &signalmask, NULL);
+
+}
+void ptReleaseSig( int SigNum ) {
+    /* remove this signal from the signal mask */
+        sigdelset(&signalmask, SigNum);
+        sigprocmask(SIG_UNBLOCK, &signalmask, NULL);
+}
+#else
 #if defined(PTSUN4)
 void ptBlockSig(int) {};
 void ptReleaseSig(int) {};
@@ -153,5 +167,6 @@ void ptReleaseSig (int SigNum) {};
 void ptSafeSig( int SigNum ) {};
 
 #endif /* PTSUN4 */
+#endif /* PTNT */
 #endif /* PTHPPA */
 #endif /* PTSOL2  PTIRIX5  PTLINUX PTALPHA PTAIX SA_RESTART */
