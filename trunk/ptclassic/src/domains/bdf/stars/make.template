@@ -16,12 +16,10 @@ VPATH = $(ROOT)/src/domains/bdf/stars
 CONFIG=$(ROOT)/config-$(ARCH).mk
 include $(CONFIG)
 
-# SDFDIR is the directory containing SDF domain support
-SDFDIR = $(ROOT)/src/domains/sdf/kernel
 # BDFDIR is the directory containing BDF domain support
 BDFDIR = $(ROOT)/src/domains/bdf/kernel
 
-INCL = -I$(BDFDIR) -I$(SDFDIR) -I$(KERNDIR)
+INCL = -I$(BDFDIR) -I$(KERNDIR)
 
 # stars library
 LIB=libbdfstars.a
