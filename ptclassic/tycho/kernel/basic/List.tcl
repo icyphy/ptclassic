@@ -224,6 +224,52 @@ proc ldistr {list item} {
 }
 
 
+## lchop list n
+#
+# Split a list into a list of sub-lists, each sub-list containing
+# _n_ consecutive elements of the input list. If the length of
+# the list is not evenly divded by _n_, then the final incomplete
+# sublist is discarded. For example,
+#
+#     lchop {1 2 3 4 5 6 7} 3
+#
+# returns {{1 2 3} {4 5 6}}.
+#
+proc lchop {list n} {
+    set result {}
+
+    while { [llength $list] >= $n } {
+	lappend result [ltake $list $n]
+	set list [ldrop $list $n]
+    }
+    return $result
+}
+
+
+## lpairs list
+#
+# Split a list into a list of pairs, each pair containing two
+# consecutive elements of the input list. If the list contains
+# an odd number of elements, the last element is discarded.
+# For example,
+#
+#     lpairs {1 2 3 4 5 6 7}
+#
+# returns {{1 2} {3 4} {5 6}}.
+#
+proc lpairs {list} {
+    set result {}
+
+    while { [llength $list] > 1 } {
+	behead x list
+	behead y list
+	
+	lappend result [list $x $y]
+    }
+    return $result
+}
+
+
 ## zip list list [{list}]
 #
 # ``Zip'' two or more lists into a list of sub-lists. If the lists
