@@ -49,6 +49,10 @@ class ::tycho::EditTcl {
     # in the global context.
     method evaluate {}
 
+    #### help
+    # Open a help window.
+    method help {}
+
     constructor {args} {}
     destructor {}
 
@@ -79,11 +83,8 @@ body ::tycho::EditTcl::constructor {args} {
     # option will not have been processed by the time the base class
     # constructor is executed.
     if {$file != {NoName}} {
-	set savereadonly [$itk_component(text) cget -readonly]
-	$itk_component(text) configure -readonly 0
-	$itk_component(text) readFile $file
+	$itk_component(text) initFile $file
 	markUnmodified
-	$itk_component(text) configure -readonly $savereadonly
     }
 }
 
@@ -94,4 +95,14 @@ body ::tycho::EditTcl::constructor {args} {
 #
 body ::tycho::EditTcl::evaluate {} {
     return [$itk_component(text) evaluate]
+}
+
+###################################################################
+#### help
+# Open a window with help on the current widget.
+#
+body ::tycho::EditTcl::help {} {
+    global TYCHO
+    ::tycho::File::openContext \
+	    $TYCHO/editors/textedit/doc/usersGuides/EditTclHelp.html
 }
