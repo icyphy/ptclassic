@@ -77,9 +77,9 @@ void SDFTarget::setup() {
 	delSched();
 	SDFScheduler *s;
 
-	const char* sname = loopScheduler;
+	const char* tmpname = loopScheduler;
 
-	if (strcasecmp(sname,"ACYLOOP") == 0) {
+	if (strcasecmp(tmpname,"ACYLOOP") == 0) {
 	    // Determine if the graph is acyclic.  It not, use
 	    // another loop scheduler.
 	    // FIXME:
@@ -102,6 +102,7 @@ void SDFTarget::setup() {
 		}
 	    }
 	}
+	const char* sname = loopScheduler;
 	if (strcasecmp(sname,"DEF")==0 || strcmp(sname,"0")==0 || 
 		strcasecmp(sname,"NO") == 0) {
 	    s = new SDFScheduler;
