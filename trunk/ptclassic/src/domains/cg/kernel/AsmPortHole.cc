@@ -7,6 +7,7 @@ $Id$
                        All Rights Reserved.
 
  Programmer: J. Buck
+ Modified by: E. A. Lee
 
  These classes are portholes for stars that generate assembly language code.  
 
@@ -55,42 +56,6 @@ Geodesic* AsmPortHole::allocateGeodesic() {
 	return g;
 }
 
-// initialize the offset member.  If there is no fork involved, input
-// portholes start reading from offset 0, and output portholes start
-// writing just after any delay tokens.
-
-// if there are forks, outputs are done the same way, and input pointers
-// are backed up to handle the "forkDelay".
-int AsmPortHole::initOffset() {
-	int bsiz = bufSize();
-	if (isItOutput()) {
-		offset = numTokens();
-		// the following error is already reported by bufSize()
-	        if (offset > bsiz) return FALSE;
-		if (offset == bsiz) offset = 0;
-	}
-	else {
-		offset = -geo().forkDelay();
-		if (offset < 0) offset += bsiz;
-		// if still < 0, forkDelay is larger than we can handle
-		if (offset < 0) {
-			Error::abortRun(*this,
-				" sorry, forkDelay is larger\n",
-				"than the current implementation can handle");
-			return FALSE;
-		}
-	}
-	return TRUE;
-}
-
-int AsmPortHole::bufSize() const {
-	return geo().bufSize();
-}
-
-int AsmPortHole::localBufSize() const {
-	return geo().localBufSize();
-}
-
 void AsmPortHole::assignAddr(ProcMemory& m, unsigned a) {
 	geo().assignAddr(m,a);
 }
@@ -101,31 +66,6 @@ unsigned AsmPortHole::baseAddr() const {
 
 ProcMemory* AsmPortHole::memory() const {
 	return geo().memory();
-}
-
-// processing for each port added to a fork buffer
-// call this from OutXXX
-void MultiAsmPort :: forkProcessing (AsmPortHole& p) {
-	if (forkSrc) {
-		p.setForkSource(forkSrc);
-	}
-}
-
-// destructor: remove forklist references.
-AsmPortHole :: ~AsmPortHole() {
-	ListIter next(forkDests);
-	OutAsmPort* p;
-	while ((p = (OutAsmPort*)next++) != 0) p->setForkSource(0);
-	if (forkSrc)
-		forkSrc->forkDests.remove(this);
-}
-
-// make me a fork destination; set my source.
-void AsmPortHole::setForkSource(AsmPortHole * p) {
-	forkSrc = p;
-	if (!p) return;
-	// add me as one of forkSrc's destinations
-	forkSrc->forkDests.put(this);
 }
 
 int InAsmPort :: isItInput() const {return TRUE; }

@@ -24,8 +24,6 @@ int AsmTarget::setup(Galaxy& g) {
 // clear the memory
 	if (mem == 0) return FALSE;
 	mem->reset();
-// reset the label counter
-	numLabels = 0 ;
 // initialize proc ptrs and create schedule
 	if (!Target::setup(g)) return FALSE;
 	GalStarIter nextStar(g);

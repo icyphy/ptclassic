@@ -26,7 +26,9 @@ $Id$
 
 // code to do initialiation for a star
 
-void AsmTarget::doInitialization(AsmStar& star) {
+void AsmTarget::doInitialization(CGStar& cgStar) {
+	// Cast to AsmStar
+	AsmStar &star = (AsmStar&)cgStar;
 	BlockStateIter nextState(star);
 	State* s;
 	while ((s = nextState++) != 0) {
@@ -85,6 +87,6 @@ void AsmTarget::doInitialization(AsmStar& star) {
 		}
 	}
 	codeSection();
-	star.initCode();
+	CGTarget::doInitialization(cgStar);
 }
 

@@ -17,6 +17,8 @@ $Id$
 #endif
 
 #include "CGTarget.h"
+#include "CGStar.h"
+#include "GalIter.h"
 #include "Error.h"
 #include "UserOutput.h"
 #include "SDFScheduler.h"
@@ -32,6 +34,10 @@ StringList CGTarget::indent(int depth) {
 	return out;
 }
 
+// code to do initialiation for a star
+void CGTarget::doInitialization(CGStar& cgStar) {
+	cgStar.initCode();
+}
 
 // constructor
 CGTarget::CGTarget(const char* name,const char* starclass,
@@ -40,6 +46,30 @@ CGTarget::CGTarget(const char* name,const char* starclass,
 void CGTarget :: initialize() {
 	myCode.initialize();
 	Target::initialize();
+}
+
+int CGTarget::setup(Galaxy& g) {
+	// reset the label counter
+	numLabels = 0 ;
+
+	if (!Target::setup(g)) return FALSE;
+
+	// It is not clear whether the following is correct.
+	// AsmTarget has to bypass it, needing to do something with
+	// memory allocation first.
+
+	// initialize the porthole offsets, and do all initCode methods.
+	GalStarIter nextStar(g);
+	CGStar* s;
+	while ((s = (CGStar*)nextStar++) != 0) {
+		BlockPortIter next(*(Block*)s);
+		PortHole* p;
+                while ((p = next++) != 0) {
+                        if (!((CGPortHole*)p)->initOffset()) return FALSE;
+                }
+                doInitialization(*s);
+        }
+        return TRUE;
 }
 
 void CGTarget :: start() {
@@ -67,7 +97,7 @@ Block* CGTarget :: clone() const {
 }
 
 void CGTarget :: addCode(const char* code) {
-	myCode += code;
+	if(code) myCode += code;
 }
 
 void CGTarget :: headerCode () {
