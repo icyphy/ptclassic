@@ -40,15 +40,9 @@
 # this class by providing concrete methods for creating, modifying,
 # and accessing specific types of graph.
 #
-# AbstractGraph is a subclass of Model: vertices are entities
+# AbstractGraph is a subclass of Model: vertices and edges are items
 # with no value and no default attributes (these can be added with
-# the entityconfigure{} method) and edges are links with no
-# name and no default attributes. Edges do not require that vertices
-# already exist, as this can occur when graphs are automatically
-# generated; once all vertices and edges have been added, the graph
-# can be checked for correctness and "repaired" with the verify{}
-# and repair{} methods. It also makes graph construction somewhat
-# faster as there is less error-checking.
+# the attrconfigure{} method).
 #
 # Here are some examples illustrating the methods in this class.
 # Because an AbstractGraph can't actually do anything useful, we'll
@@ -66,8 +60,8 @@
 # Now load the graph with some data:
 # <pre><tcl>
 #     $graph parse {
-#         vertex b -label "Second vertex"
 #         vertex a -label "First vertex"
+#         vertex b -label "Second vertex"
 #         vertex c
 #         edge a b
 #         edge b c
@@ -174,9 +168,6 @@ class ::tycho::AbstractGraph {
     # Traverse the graph: recursive simulation
     method traverse3 {}
 
-    # Test whether a graph is correctly constructed
-    method verify {}
-
     # Add a vertex with attributes to the graph
     method vertex {vertex args}
 
@@ -186,7 +177,7 @@ class ::tycho::AbstractGraph {
     # Configure the vertex with one or more attributes
     method vertexconfigure {vertex args}
 
-   # Remove a vertex (but not adjacent edges) from the graph
+   	# Remove a vertex (but not adjacent edges) from the graph
     method vertexdelete {vertex}
 
     # Return vertices matching a pattern
@@ -202,10 +193,10 @@ class ::tycho::AbstractGraph {
     protected variable _edges ""
 
     # An array of cached lists of vertex parents
-    protected variable _parents
+    protected variable _parents ""
 
     # An array of cached lists of vertex children
-    protected variable _children
+    protected variable _children ""
 
     # A cached list of vertex names
     protected variable _vertices ""
@@ -834,25 +825,6 @@ body ::tycho::AbstractGraph::traverse3 {} {
 }
 
 ########################################################################
-#### verify
-#
-# Test whether a graph is properly constructed. This method
-# provides a default implementation that tests for invalid edges; however,
-# subclasses may choose to override this method for efficiency, because
-# it doesn't work with the subclass, or to perform additional tests.
-#
-body ::tycho::AbstractGraph::verify {} {
-    _update
-
-    foreach {src tgt} [adjacency] {
-        if { ! [exists vertex:$src] || ! [exists vertex:$tgt] } {
-	    return 0
-	}
-    }
-    return 1
-}
-
-########################################################################
 #### vertex
 #
 # Add a new vertex to the graph and return the undo command.
@@ -906,12 +878,17 @@ body ::tycho::AbstractGraph::vertexdelete {vertex} {
 #
 # Return a list containing the vertices of the graph whose names match 
 # a pattern. If the pattern is not given, all vertices are returned.
-# To test for the presence of a single vertex, provide its name
-# as the argument and compare the result with the empty list.
 #
 body ::tycho::AbstractGraph::vertices {{pattern *}} {
-    _update
-    return $_vertices
+    if { $pattern == "*" } {
+        listing vertex
+    } else {
+        set result ""
+        foreach vertex [names vertex:$pattern] {
+            lappend result [lindex [split $vertex :] 1]
+        }
+        return $result
+    }
 }
 
 #####################################################################
