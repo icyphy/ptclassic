@@ -5,7 +5,7 @@
 // SCCS version identification
 // $Id$
 
-SDFUniverse :: operator char* () {
+SDFUniverse :: operator StringList () {
 	StringList out;
 	out = "SYNCHRONOUS DATAFLOW UNIVERSE: ";
 	out += readFullName ();
@@ -15,7 +15,7 @@ SDFUniverse :: operator char* () {
 	out += "\n";
 	out += "CONTENTS:\n";
 
-	out += *myTopology;
+	out += StringList(*myTopology);
 
 	return out;
 }
