@@ -53,12 +53,15 @@ STARDOCDIR = ../../doc/stars
 # source files for all stars, using preprocessor, listing base stars first
 PL_SRCS= \
  CG56FIR.pl \
+ CG56GoertzelBase.pl \
  CG56Allpass.pl \
  CG56Biquad.pl \
  CG56BiquadDSPlay.pl \
  CG56Comb.pl \
  CG56DTMFPostTest.pl \
  CG56FFTCx.pl \
+ CG56Goertzel.pl \
+ CG56GoertzelPower.pl \
  CG56LMS.pl \
  CG56LMSRx.pl \
  CG56LMSGanged.pl \
