@@ -56,7 +56,8 @@ by powers of two.
 		int regValue = 0x02;		// 2, 4, 8, ...
 		int mask = 0x01;		// 1, 3, 7, ...
 		int modValue = int(modulo);
-		for (int i = 1; i < 16; i++) {
+		int i;
+		for (i = 1; i < 16; i++) {
 		    if ( modValue == regValue ) break;
 		    mask = (mask << 1) | 0x01;
 		    regValue <<= 1;

@@ -102,6 +102,7 @@ Prentice-Hall: Englewood Cliffs, NJ, 1989.
 	attributes { A_NONCONSTANT|A_NONSETTABLE|A_UMEM}
     }
     protected {
+	int i;
 	int numState;
 	StringList coeffs;
 	int numDenom,numNumer;
@@ -138,7 +139,7 @@ Prentice-Hall: Englewood Cliffs, NJ, 1989.
 	scaleDenom = 1.0 / b0;
 	scaleNumer = scaleDenom * double(gain);
 	delays.resize(numState+1);
-	for (int i = numState-1; i > 0; i--){
+	for (i = numState-1; i > 0; i--){
             if ( i < numDenom ) {
                 double temp = scaleDenom * -(double(denominator[i]));
                 if ((temp >= 1) || (temp < -1)) {

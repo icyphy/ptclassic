@@ -101,6 +101,7 @@ error samples.
 		int	muAsInt;
 		int	length;
 		StringList cfs;
+		int	i; 
 	}
 
 
@@ -133,7 +134,7 @@ error samples.
 		char buf[32];
 		cfs.initialize();
 		cfs<<"$starSymbol(lmss)\n";
-		for (int i = 0; i< numTaps-1; i++){
+		for (i = 0; i< numTaps-1; i++){
 			temp = double(coef[i]);
 			sprintf(buf,"%.15f",temp);
 			cfs<<"\t.q15\t"<<buf<<"\n";
