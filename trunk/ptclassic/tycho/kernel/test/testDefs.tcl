@@ -193,7 +193,12 @@ proc openAllFiles {args} {
 	    set win [::tycho::File::openContext $testfile]
 	    #	wm deiconify $win
 	    puts "testDefs.tcl: openAllFiles{}: win = $win"
-	    after [expr {2 * $duration}] removeobj [$win displayer windowName]
+	    if [catch {$win displayer windowName}] {
+		after [expr {2 * $duration}] removeobj $win
+	    } else {
+		after [expr {2 * $duration}] removeobj \
+			[$win displayer windowName]
+	    }
 	    update
 	}
     }
@@ -211,8 +216,12 @@ proc doneTests {args} {
 	    "Total: [expr $PASSED + $FAILED] (Passed: $PASSED Failed: $FAILED)"
     flush stderr
     update
-    if {[info exists reallyExit] && $reallyExit == 1} {
+    if ![info exists reallyExit] {
 	after [expr {2 * $duration}] ::tycho::TopLevel::exitProgram 1
 	#after [expr {2 * $duration}] ::tclexit
+    } else {
+	if {$reallyExit == 1} {
+	    after [expr {2 * $duration}] ::tycho::TopLevel::exitProgram 1
+	}
     }
 }
