@@ -35,9 +35,6 @@
 # used to collect profile information before displaying:
 set ptkProfileString ""
 
-# flag whether Tcl errors should be poped up in windows
-set REPORT_TCL_ERRORS 1
-
 # increment on each use to get unique window names
 set unique 0
 
@@ -46,10 +43,8 @@ set unique 0
 # procedure to issue an error message from any internal tk error
 #
 proc tkerror message {
-    ptkImportantMessage .error "Background error in Tk"
-    global REPORT_TCL_ERRORS
-    if {$REPORT_TCL_ERRORS == 1 && $message != ""} \
-        {ptkImportantMessage .error $message}
+    ptkImportantMessage .error "Tcl reports an error"
+    if {$message != ""} {ptkImportantMessage .error $message}
 }
 
 
