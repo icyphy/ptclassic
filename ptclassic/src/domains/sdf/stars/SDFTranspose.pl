@@ -9,7 +9,12 @@ of "samplesInaRow" and "numberOfRows".
 	}
 	version {$Id$}
 	author { E. A. Lee }
-	copyright { 1991-%Q% The Regents of the University of California }
+	copyright {
+Copyright (c) 1990-%Q% The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+}
 	location { SDF main library }
 	input {
 		name { input }
