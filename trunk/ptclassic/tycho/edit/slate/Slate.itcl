@@ -520,7 +520,9 @@ body ::tycho::Slate::dtag {id {delete {}}} {
 	    set delete $id
 	}
 	$canvas dtag $id $delete
-	set tagged($delete) [lsubtract $tagged($delete) $tagged($id)]
+	if { [::info exists tagged($delete)] } {
+	    set tagged($delete) [lsubtract $tagged($delete) $tagged($id)]
+	}
     }
 }
 
