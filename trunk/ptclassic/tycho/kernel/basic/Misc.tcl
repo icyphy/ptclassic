@@ -71,6 +71,8 @@ proc assign {args} {
 #
 # Hey, it's not my fault, _I_ didn't design the language!
 #
+# FIXME: This doesn't work outside tycho!
+#
 proc assert {expr args} {
     if { ! [uplevel "expr $expr"] } {
 	if { $args != "" } {
@@ -104,6 +106,9 @@ proc assert {expr args} {
 #
 # the variable fred is set to "nerks" and args is set to "1 2 3 4".
 #
+# FIXME: Make listname an optional argument. By default, this proc
+# should use "args."
+#
 proc getopt {option listname} {
 
     upvar $listname l
@@ -136,6 +141,9 @@ proc getopt {option listname} {
 # Note that readopt{} does not make getopt{} redundant, since getopt{]
 # does not change the option variable if the option is not present.
 #
+# FIXME: Make listname an optional argument. By default, this proc
+# should use "args."
+#
 proc readopt {option listname} {
 
     upvar $listname l
@@ -156,6 +164,9 @@ proc readopt {option listname} {
 #
 # Like getopt{}, but sets the option variable to all arguments
 # following the option flag up to the next option flag.
+#
+# FIXME: Make listname an optional argument. By default, this proc
+# should use "args."
 #
 proc getoption {option listname} {
 
@@ -187,6 +198,9 @@ proc getoption {option listname} {
 # Like readopt{}, but returns all arguments
 # following the option flag up to the next option flag.
 #
+# FIXME: Make listname an optional argument. By default, this proc
+# should use "args."
+#
 proc readoption {option listname} {
 
     upvar $listname l
@@ -216,6 +230,9 @@ proc readoption {option listname} {
 # Like getopt{}, but set the option variable to 1 if the
 # option flag is there, else 0. Delete the option flag 
 # from the argument list.
+#
+# FIXME: Make listname an optional argument. By default, this proc
+# should use "args."
 #
 proc getflag {option listname} {
 
