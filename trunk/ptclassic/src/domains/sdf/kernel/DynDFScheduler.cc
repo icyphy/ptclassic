@@ -126,7 +126,7 @@ int DynDFScheduler::checkBlocks() {
 	// (for example, SDF, DDF).  Also compute the size.
 	DataFlowStar* s;
 	while ((s = nextStar++) != 0) {
-		if (!s->isA("DataFlowStar")) {
+		if (!s->isA("DataFlowStar") && !s->isA("HOFStar")) {
 			Error::abortRun (*s, " is not a dataflow star");
 			return FALSE;
 		}
