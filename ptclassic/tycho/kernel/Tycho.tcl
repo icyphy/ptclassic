@@ -350,7 +350,8 @@ if {![info exists TychoBinaryInfo]} {
     set TychoBinaryInfo itkwish
 }
 # Builder uses tycho_version.
-# If you change ::tycho_version, then update $TYCHO/README.txt.
+# If you change ::tycho_version, then update $TYCHO/README.txt and
+# $TYCHO/lib/windows/tycho-windows.itk
 global ::tycho_version
 set tycho_version 0.3devel
 
