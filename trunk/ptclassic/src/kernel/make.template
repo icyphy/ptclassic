@@ -80,7 +80,8 @@ CCS_WITH_H_FILES=\
  Universe.cc \
  UserOutput.cc \
  WormConnect.cc \
- Wormhole.cc
+ Wormhole.cc \
+ logNew.cc
 
 # The complete list of .cc files used in the library
 LIBCCSRCS=$(CCS_WITH_H_FILES) \
