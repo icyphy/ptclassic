@@ -166,8 +166,9 @@ makefile:	make.template $(MDEPS)
 
 makefiles:	makefile
 
+# Convert relative VPATH to an absolute path.
 TAGS:		$(HDRS)
-		etags++ -b $(HDRS:%=$(PWD)/%)
+		etags++ -b $(HDRS:%=$(VPATH:$(ROOT)%=$(PTOLEMY)%)/%)
 
 # Rule for detecting junk files
 
