@@ -29,20 +29,15 @@ have been started, i.e., if only one instance of this base star exists.
 		type { string }
 		default { "" }
 		desc {
-.EQ
-delim @@
-.EN
-An optional pathname specifying where to find any custom Matlab files.
-The pathname may not contain the tilde (~) character (use $HOME instead).
-Before the Matlab command defined by this star is evaluated,
-Matlab will change directories to this one.
-.EQ
-delim $$
-.EN
+An optional directory specifying where to find any custom Matlab files.
+If specified, Matlab will change directories to this directory
+before the Matlab command defined by this star is evaluated by Matlab,
+You may use tilde characters and environment variables in the directory name.
 }
 	}
 
-	// matrix.h and engine.h are provided with Matlab
+	hinclude { <sys/types.h>, "miscFuncs.h" }
+
 	header{
 // Matlab interface library and Matlab data types (clash with COMPLEX)
 extern "C" {
@@ -132,37 +127,66 @@ extern "C" {
 	  name { evaluateMatlabCommand }
 	  access { protected }
 	  type { int }
-	  arglist { "(char *matlabCommand)" }
+	  arglist { "(char *matlabCommand, int abortOnError)" }
 	  code {
-		// change directories to one containing the command
-		char *pathname = (char *) where_defined;
-		if ( pathname[0] != '\0' ) {
-		  char *changeDirCommand = new char[strlen(pathname) + 4];
-		  strcpy(changeDirCommand, "cd ");
-		  strcat(changeDirCommand, pathname);
-		  int cdstatus =
-		    engEvalString(matlabEnginePtr, changeDirCommand);
-		  char numstr[64];
-		  sprintf(numstr,
-		  	  "Matlab returned %d indicating that it could not ",
-			  cdstatus);
-		  if ( cdstatus != 0 ) {
-		    Error::warn( *this,
-				 numstr,
-				 "change directories using the command ",
-				 changeDirCommand );
+		// change directories to one containing the Matlab command
+		static StringList lastdirname = " ";
+
+		// Matlab does not return an error if a change directory,
+		// directory, or path command fails, so we must check
+		// existence of the directory given in where_defined state
+		const char *dirname = (const char *) where_defined;
+		if ( dirname[0] != 0 ) {
+		  char *fulldirname = savestring( expandPathName(dirname) );
+		  struct stat stbuf;
+		  if ( stat(fulldirname, &stbuf) == -1 ) {
+		    if ( strcmp((char *) lastdirname, fulldirname) != 0 ) {
+		      Error::warn( *this,
+				   "Cannot access the directory ",
+				   fulldirname );
+		      lastdirname = fulldirname;
+		    }
 		  }
-		  delete [] changeDirCommand;
+		  else {
+		    char *changeDirCommand = new char[strlen(fulldirname) + 4];
+		    strcpy(changeDirCommand, "cd ");
+		    strcat(changeDirCommand, fulldirname);
+		    engEvalString(matlabEnginePtr, changeDirCommand);
+		    delete [] changeDirCommand;
+		  }
+		  delete [] fulldirname;
 		}
 
 		int mstatus = engEvalString( matlabEnginePtr, matlabCommand );
-		if ( mstatus != 0 ) {
+		if ( ( mstatus != 0 ) && abortOnError ) {
 		  char numstr[64];
 		  sprintf(numstr, "Matlab returned %d indicating ", mstatus);
 		  Error::abortRun( *this, numstr,
 				   "an error in the Matlab command ",
 				   matlabCommand );
 		}
+
+		return(mstatus);
+	  }
+	}
+
+	method {
+	  name { getMatlabMatrix }
+	  access { protected }
+	  type { "Matrix *" }
+	  arglist { "(char *name)" }
+	  code {
+		return( engGetMatrix(matlabEnginePtr, name) );
+	  }
+	}
+
+	method {
+	  name { putMatlabMatrix }
+	  access { protected }
+	  type { int }
+	  arglist { "(Matrix *matlabMatrix)" }
+	  code {
+		return( engPutMatrix(matlabEnginePtr, matlabMatrix) );
 	  }
 	}
 
