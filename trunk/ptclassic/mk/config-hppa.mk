@@ -38,6 +38,9 @@ include $(ROOT)/mk/config-default.mk
 # Get the g++ definitions; we override some below.
 include $(ROOT)/mk/config-g++.mk
 
+# Override what is in config-g++.mk
+CPLUSPLUS = g++
+
 # The HPUX9/HPUX10 dependencies are below here
 
 # Get the g++ definitions for shared libraries; we override some below.
