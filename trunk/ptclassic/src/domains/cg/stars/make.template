@@ -54,17 +54,18 @@ all:		$(CCSRCS) makefile $(OBJS)
 install:	all
 		@echo Installation complete.
 
-sources:	$(SRCS) $(CCSRCS) $(HDRS) make.template
+sources:	$(SRCS) $(CCSRCS) $(HDRS) make.template cgstars.mk
 
 clean:
 		rm -f *.o core *~ *#
 depend:
-		makedepend -I$(CGDIR) -I$(SDFDIR) -I$(KERNDIR) \
-			-I$(GNUINCLUDE) $(CCSRCS)
+		cd $(VPATH); \
+		g++ -MM -I$(CGDIR) -I$(KERNDIR) -I$(SDFDIR) $(CCSRCS)|\
+			cat make.template - > makefile.n
+		mv -f makefile.n makefile
 
 makefile:	make.template
-		cd $(VPATH); rm -f makefile; cp make.template makefile; \
-		make -f make.template sources depend
+		cd $(VPATH); make -f make.template sources depend
 		if [ ! -f makefile ]; then ln -s $(VPATH)/makefile makefile; fi
 		@echo makefile remade -- you must rerun make.
 		exit 1
