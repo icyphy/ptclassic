@@ -4,7 +4,7 @@
 #
 # @Version: $Id$
 #
-# @Copyright (c)  The Regents of the University of California.
+# @Copyright (c) 1998 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -45,10 +45,12 @@ include $(CONFIG)
 DIRS =	
 
 TCL_SRCS =
+
 ITCL_SRCS = 
+
 EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) _index.html
 
-MISC_FILES = 
+MISC_FILES = $(DIRS) img
 
 REALCLEAN_STUFF =
 
