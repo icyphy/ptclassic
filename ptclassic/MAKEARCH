@@ -146,8 +146,8 @@ end
 foreach x (thor/pepp cg/targets sdf/image sdf/targets \
 	sdf/loopScheduler sdf/tcltk de/tcltk cg/parScheduler thor/analyzerX11 \
 	cg/dlScheduler cg/HuScheduler cg/dcScheduler cgc/targets cgc/tcltk \
-	cg56/dsp cg96/dsp sdf/dsp sdf/image sdf/matrix sdf/atm mdsdf/tcltk \
-	de/atm cg/multiScheduler $EXPEXTRAS )
+	cg56/dsp cg96/dsp sdf/contrib sdf/dsp sdf/image sdf/matrix \
+	sdf/atm mdsdf/tcltk de/atm cg/multiScheduler $EXPEXTRAS )
 	optmkdir $x
 	cd $x
 	optlink ../../../../src/domains/$x make.template
