@@ -1,6 +1,6 @@
 # Makefile for all of Ptolemy source
 #
-# Copyright (c) 1990 The Regents of the University of California.
+# Copyright (c) 1990-1994 The Regents of the University of California.
 #                       All Rights Reserved.
 #		       
 # Programmer:  J. T. Buck
@@ -11,13 +11,13 @@
 # way a separate directory containing, say, Sun-3 and Sun-4 objects can be
 # maintained.
 
-DIRS = kernel ptlang domains ptcl pigilib libgantt ptklib pigiRpc xgraph filters
+DIRS = kernel ptlang domains ptcl pigilib libgantt ptklib pigiRpc xgraph filters utils/libgslider
 
 # "leaf" directories with a make.template
 MTDIRS = kernel pigilib libgantt xgraph ptcl ptklib
 
 # "leaf" directories with no make.template
-LDIRS = ptlang pigiRpc filters
+LDIRS = ptlang pigiRpc filters utils/libgslider
 
 # directories with subtrees
 SDIRS = domains thread
