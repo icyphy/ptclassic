@@ -3,113 +3,87 @@ defstar {
 	domain { CG56 }
 	desc { Rectangular Pulse Generator }
 	version { $Id$ }
-	author { Chih-Tsung Huang }
+	author { Brian L. Evans and Chih-Tsung Huang }
 	copyright {
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { CG56 signal sources library }
-	explanation {
-Rectangular Pulse generator.
-	}
+	location { CG56 main library }
 	output {
 		name {output}
 		type {fix}
 	}
-        state {
-                name {height}
-	        type {fix}
-	        desc { height of rectangular pulse. }
-	        default { ONE }
-        }
-        state {
-                name {width}
-	        type {int}
-	        desc { width of rectangular pulse. }
-	        default { 1 }
-        }
-        state {
-                name {period}
-	        type {int}
-	        desc { period of pulse }
-	        default { 10 }
-        }
-        state {
-                name {periodCounter}
-	        type {int}
-	        desc { internal }
-	        default { 0 }
-                attributes {A_YMEM|A_NONCONSTANT|A_NONSETTABLE}
-        }
-        state {
-                name {durationCounter}
-	        type {int}
-	        desc { internal }
-	        default { 0 }
-                attributes {A_YMEM|A_NONCONSTANT|A_NONSETTABLE}
-        }
-        state {
-                name {amp}
-	        type {fix}
-	        desc { internal }
-	        default { 0 }
-                attributes {A_YMEM|A_NONCONSTANT|A_NONSETTABLE}
-        }
+	state {
+		name {height}
+		type {fix}
+		desc { height of rectangular pulse }
+		default { ONE }
+		attributes { A_YMEM }
+	}
+	state {
+		name {width}
+		type {int}
+		desc { width of rectangular pulse }
+		default { 1 }
+	}
+	state {
+		name {period}
+		type {int}
+		desc { period of pulse }
+		default { 10 }
+	}
+	state {
+		name { count }
+		type { int }
+		desc { internal counting state }
+		default { 0 }
+	}
 
-        codeblock(main) {
-        move    $ref(durationCounter),a
-        move	#$val(width),b
-        cmp	a,b
-        jneq	<$label(val)
-        move	$ref(periodCounter),a
-        move    #$val(period)-1,b
-        cmp     a,b
-        jeq	<$label(restart)
-        move    #1,x0
-        add     x0,a
-        move	a,$ref(periodCounter)
-        jmp	<$label(zero)
-$label(val)
-        move    #1,x0
-        add     x0,a
- 	move	a,$ref(durationCounter)
-        move    $ref(periodCounter),b
-        move    #1,x0
-        add     x0,b
-        move	b,$ref(periodCounter)
-        move    $ref(amp),a
-        move    a,$ref(output)
-        jmp     <$label(end)
-$label(restart)
-        clr     a
-        move	a,$ref(durationCounter)
-        move    a,$ref(periodCounter)
-$label(zero)
-        clr     a
-        move    a,$ref(output)
-$label(end)
-        }
+	codeblock(sendOutput) {
+; Register usage:
+; x0 = 1
+; x1 = width
+; y0 = period
+; y1 = height
+; a = output value
+; b = count
+	clr	a	move	$ref(count),b	; a = 0, b = count
+	move	#$val(width),x1			; x1 = width
+	move	$ref(height),y1			; y1 = height
+	cmp	x1,b	#1,x0		; if (width > count)
+	tgt	y1,a			; then a = height
+	move	a,$ref(output)			; output = a
+	}
 
-        setup {
-		 int w=width;
-		 int p=period;
-		 amp=height;
+	codeblock(updateCounter) {
+	add	x0,b	$ref(period),y0		; b++, y0 = period
+	cmp	y0,b	#0,a		; if (period <= count)
+	tle	a,b
+	move	b,$ref(count)			; count = b
+	}
 
-		 if(w<1) 
-		     Error::abortRun(*this, ": Invalid width value.");
-		 if(p<1)    
-		     Error::abortRun(*this, ": Invalid period value.");
-		 if(p<=w)
-		     Error::abortRun(*this,
-		              "Period must be greater than width");
-        }			      
+	setup {
+		int w = int(width);
+		int p = int(period);
+
+		if (w < 1) {
+			Error::abortRun(*this, "Invalid width value.");
+		}
+		else if (p < 1) {
+			Error::abortRun(*this, "Invalid period value.");
+		}
+		else if (p <= w) {
+			Error::abortRun(*this,
+					"Period must be greater than width");
+		}
+	}			      
 	go {
-                addCode(main);
+		addCode(sendOutput);
+		addCode(updateCounter);
 	}
 	execTime {
-		return 26;
+		return 10;
 	}
-
 }
