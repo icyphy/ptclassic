@@ -83,6 +83,7 @@ ITCL_SRCS = \
 	Subpanel.itcl \
 	TopLevel.itcl \
 	Tycho.tcl \
+	TychoWidget.itcl \
 	WelcomeMessage.itcl \
 	YesNoCancel.itcl \
 	YesNoQuery.itcl
