@@ -44,7 +44,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 ////////////////////
 
 EGNode :: EGNode(DataFlowStar* s, int n) : invocation(n), pStar(s), next(0) {
-	stickyFlag = 0;
+	stickyFlag = FALSE;
 	if (n == 1) s->setMaster(this);
 }
 
@@ -54,40 +54,32 @@ void EGNode :: deleteInvocChain() {
 	if (next) {
 		next->deleteInvocChain();
 		LOG_DEL; delete next;
+		next = 0;
 	}
 }
 
 StringList EGNode :: printMe() {
 	StringList out;
-	out += printShort();
-	out += "-- ANCESTORS --\n";
-	out += ancestors.printMe();
-	out += "\n -- DESCENDANTS --\n";
-	out += descendants.printMe();
+	out << printShort() << "-- ANCESTORS --\n" << ancestors.printMe()
+	    << "\n -- DESCENDANTS --\n" << descendants.printMe();
 	return out;
 }
 
 StringList EGNode :: printShort() {
-	StringList out;
-	out += "Star: name = ";
-	if (pStar)
-		out += pStar->name();
-	else
-		out += "noName";
-	out += " (invocation # ";
-	out += invocation;
-	out += ")\n";
+	StringList out = "Star: name = ";
+	if (pStar) out << pStar->name();
+	else out << "noName";
+	out += " (invocation # " << invocation << ")\n";
 	return out;
 }
 
 StringList EGNodeList :: print() {
-	StringList out;
-	out += "\n<Node lists>\n";
+	StringList out = "\n<Node lists>\n";
 
 	EGNodeListIter nlist(*this);
 	EGNode* n;
 	while ((n = nlist++) != 0)
-		out += n->printShort();
+		out << n->printShort();
 	return out;
 }
 	
@@ -98,7 +90,7 @@ EGNode* EGNode::getInvocation(int i) {
 	else if (next) return next->getInvocation(i);
 	else return 0;
 }
-		
+
 EGGate* EGNode::makeArc(EGNode *dest, int samples, int delay) 
 {
 #if ARCTRACE
@@ -106,11 +98,11 @@ EGGate* EGNode::makeArc(EGNode *dest, int samples, int delay)
 	print();
 	printf(" to ");
 	dest->print();
-	printf(" (nsam=%d,delay=%d).\n",samples,delay);
+	printf(" (nsam=%d,delay=%d).\n", samples, delay);
 #endif
 
-	LOG_NEW; EGGate *destnode = new EGGate(dest);
-	LOG_NEW; EGGate *srcnode = new EGGate(this);
+	LOG_NEW; EGGate* destnode = new EGGate(dest);
+	LOG_NEW; EGGate* srcnode = new EGGate(this);
 	srcnode->allocateArc(destnode, samples, delay);
 	descendants.insertGate(srcnode,1);
 	dest->ancestors.insertGate(destnode,0);
@@ -123,10 +115,9 @@ EGGate* EGNode::makeArc(EGNode *dest, int samples, int delay)
 int EGNode::root() {
 	EGGateLinkIter nextAncestor(ancestors);
 	EGGate *p;
-	while((p=nextAncestor++)!=0) {
+	while((p = nextAncestor++) != 0) {
 		if ((p->delay() < p->samples()) || (p->samples() == 0))
 			return FALSE;
 	}
 	return TRUE;    
 }
-
