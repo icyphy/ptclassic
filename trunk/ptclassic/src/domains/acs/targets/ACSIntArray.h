@@ -1,5 +1,5 @@
 /**********************************************************************
-Copyright (c) 1999-%Q% Sanders, a Lockheed Martin Company
+Copyright (c) 1999 Sanders, a Lockheed Martin Company
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -25,7 +25,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
  Programmers:  Ken Smith
  Date of creation: 3/23/98
- Version: $Id$
+ Version: @(#)IntArray.h      1.0     06/16/99
 ***********************************************************************/
 #ifndef ACSINTARRAY_H
 #define ACSINTARRAY_H
@@ -44,13 +44,17 @@ class ACSIntArray
   ACSIntArray& operator=(ACSIntArray&);
   void ACSIntArray::incr(int);
   void ACSIntArray::copy(ACSIntArray*);
-  void ACSIntArray::fill(int);
+  void ACSIntArray::cat(ACSIntArray*);
+  void ACSIntArray::fill(const int);
+  void ACSIntArray::fill(const int, const int);
   ACSIntArray* ACSIntArray::sort_lh(void);
   ACSIntArray* ACSIntArray::sort_hl(void);
   void ACSIntArray::reorder(ACSIntArray*);
   void ACSIntArray::add(void);
   void ACSIntArray::add(int);
+  int ACSIntArray::add_unique(int);
   void ACSIntArray::remove(int);
+  void ACSIntArray::remove_all(void);
   int ACSIntArray::population(void);
   int ACSIntArray::query(int);
   int ACSIntArray::get(int);
@@ -60,6 +64,7 @@ class ACSIntArray
   int ACSIntArray::find_index(const int);
   int ACSIntArray::full(const int);
   int ACSIntArray::pop(void);
+  int ACSIntArray::tail(void);
 };
 
 #endif

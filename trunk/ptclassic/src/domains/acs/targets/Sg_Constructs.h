@@ -1,5 +1,5 @@
 /**********************************************************************
-Copyright (c) 1999-%Q% Sanders, a Lockheed Martin Company
+Copyright (c) 1999 Sanders, a Lockheed Martin Company
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -25,7 +25,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
  Programmers:  Ken Smith
  Date of creation: 3/23/98
- Version: $Id$
+ Version: @(#)Sg_Constructs.h      1.0     06/16/99
 ***********************************************************************/
 #ifndef SG_CONSTRUCTS_H
 #define SG_CONSTRUCTS_H
@@ -35,7 +35,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include <stdio.h>
 #include <stdlib.h>
 #include "KnownBlock.h"
-#include "SymbolList.h"
+//#include "SymbolList.h"
+#include "CoreList.h"
 #include "ACSCGFPGACore.h"
 #include "Fpga.h"
 #include "Pin.h"
@@ -43,76 +44,121 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 class ACSCGFPGACore;
 class Fpga;
-
-static const int DEBUG_CONSTRUCTS=0;
+class CoreList;
 
 class Sg_Constructs
 {
+  static const int DEBUG_CONSTRUCTS=0;
+  static const int DEBUG_BWBALANCE=0;
+  static const int DEBUG_SGDECODER=0;
+  static const int DEBUG_MATCHPINS=0;
+
 public:
   int valid;
   Fpga* target_fpga;
-  int target_device;
   int* free_id;
+  int* free_netid;
   char* design_directory;
 public:
-  Sg_Constructs::Sg_Constructs(int*,char*);
+  Sg_Constructs::Sg_Constructs(int*, char*);
+  Sg_Constructs::Sg_Constructs(int*, int*, char*);
   Sg_Constructs::Sg_Constructs(int*,
 			       char*,
-			       Fpga*,
-			       const int);
+			       Fpga*);
   Sg_Constructs::~Sg_Constructs();
 
   void Sg_Constructs::validate(void);
 
-  void Sg_Constructs::set_targetdevice(Fpga*,
-				       const int);
+  void Sg_Constructs::set_targetdevice(Fpga*);
 
   ACSCGFPGACore* Sg_Constructs::add_buffer(const int,
-					   SequentialList*);
+					   CoreList*);
   ACSCGFPGACore* Sg_Constructs::add_ioport(const int,
-					   SequentialList*);
+					   CoreList*);
   ACSCGFPGACore* Sg_Constructs::add_mux(const int,
 					const int,
-					SequentialList*);
+					CoreList*);
   ACSCGFPGACore* Sg_Constructs::add_mux(const int,
 					const int,
 					const int,
-					SequentialList*);
+					CoreList*);
+  ACSCGFPGACore* Sg_Constructs::add_unpacker(const int,
+					     CoreList*);
+  ACSCGFPGACore* Sg_Constructs::add_packer(const int,
+					   CoreList*);
   ACSCGFPGACore* Sg_Constructs::add_const(int,
 					  const int,
-					  SequentialList*);
+					  CoreList*);
   ACSCGFPGACore* Sg_Constructs::add_const(long,
 					  const int,
-					  SequentialList*);
+					  CoreList*);
   ACSCGFPGACore* Sg_Constructs::add_const(double,
 					  const int,
-					  SequentialList*);
+					  CoreList*);
   ACSCGFPGACore* Sg_Constructs::add_adder(const int,
-					  SequentialList*);
+					  CoreList*);
   ACSCGFPGACore* Sg_Constructs::add_subtracter(const int,
-					       SequentialList*);
+					       CoreList*);
   ACSCGFPGACore* Sg_Constructs::add_delay(const int,
-					  SequentialList*);
+					  CoreList*);
+  ACSCGFPGACore* Sg_Constructs::add_counter(const int,
+					    const int,
+					    const int,
+					    CoreList*);
+  ACSCGFPGACore* Sg_Constructs::add_counter(const int,
+					    const int,
+					    ACSIntArray*,
+					    CoreList*);
+  ACSCGFPGACore* Sg_Constructs::add_timer(const int,
+					  CoreList*);
+  ACSCGFPGACore* Sg_Constructs::add_timer(const int,
+					  ACSIntArray*,
+					  CoreList*);
+  ACSCGFPGACore* Sg_Constructs::add_timer(ACSIntArray*,
+					  CoreList*);
+  ACSCGFPGACore* Sg_Constructs::add_timer(ACSIntArray*,
+					  ACSIntArray*,
+					  CoreList*);
+  ACSCGFPGACore* Sg_Constructs::add_phaser(const int,
+					   CoreList*);
+  ACSCGFPGACore* Sg_Constructs::add_phaser(const int,
+					   const int,
+					   CoreList*);
+  ACSCGFPGACore* Sg_Constructs::add_decoder(const int,
+					    const int,
+					    const int,
+					    ACSIntArray*,
+					    ACSIntArray**,
+					    CoreList*);
+  ACSCGFPGACore* Sg_Constructs::add_decoder(const int,
+					    const int,
+					    ACSIntArray*,
+					    ACSIntArray**,
+					    CoreList*);
 
 
+  ACSCGFPGACore* Sg_Constructs::add_sg(char*,
+				       int,
+				       int,
+				       CoreList*);
   ACSCGFPGACore* Sg_Constructs::add_sg(char*,
 				       char*,
 				       char*,
 				       int,
 				       int,
-				       SequentialList*);
+				       CoreList*);
   ACSCGFPGACore* Sg_Constructs::add_sg(char*,
 				       char*,
 				       char*,
 				       int,
-				       SequentialList*);
+				       CoreList*);
   ACSCGFPGACore* Sg_Constructs::add_sg(char*, 
 				       char*, 
 				       char*,
 				       int,
 				       int,
 				       int,
-				       SequentialList*);
+				       CoreList*);
   ACSCGFPGACore* Sg_Constructs::add_sg(char*, 
 				       char*, 
 				       char*,
@@ -120,7 +166,7 @@ public:
 				       int,
 				       int,
 				       int,
-				       SequentialList*);
+				       CoreList*);
   ACSCGFPGACore* Sg_Constructs::add_sg_core1(char*,
 					     char*,
 					     char*,
@@ -128,7 +174,7 @@ public:
 					     int);
 
   ACSCGFPGACore* Sg_Constructs::add_sg_core2(ACSCGFPGACore*,
-					     SequentialList*);
+					     CoreList*);
 
   int Sg_Constructs::insert_sg(ACSCGFPGACore*,
 			       ACSCGFPGACore*,
@@ -170,12 +216,23 @@ public:
   int Sg_Constructs::connect_sg(ACSCGFPGACore*,int,int,int,
 				Pin*,int,int,int,
 				int);
+  int Sg_Constructs::connect_sg(ACSCGFPGACore*,
+				ACSCGFPGACore*);
+  int Sg_Constructs::connect_sg(ACSCGFPGACore*,
+				const int,
+				ACSCGFPGACore*);
+  int Sg_Constructs::connect_sg(ACSCGFPGACore*,
+				ACSCGFPGACore*,
+				const int);
   int Sg_Constructs::connect_sg(ACSCGFPGACore*,int,
 				ACSCGFPGACore*,int);
+  int Sg_Constructs::connect_sg(ACSCGFPGACore*,int,
+				ACSCGFPGACore*,int,
+				const int);
   int Sg_Constructs::connect_sg(ACSCGFPGACore*,int,int,
 				ACSCGFPGACore*,int,int,
 				int);
-  int Sg_Constructs::connect_sg(SequentialList*,
+  int Sg_Constructs::connect_sg(CoreList*,
 				int*,
 				int*,
 				ACSCGFPGACore*,
@@ -191,7 +248,7 @@ public:
 				int,
 				int,
 				int);
-  int Sg_Constructs::connect_sg(SequentialList*,
+  int Sg_Constructs::connect_sg(CoreList*,
 				int*,
 				int*,
 				int,
@@ -200,7 +257,12 @@ public:
 				int,
 				int,
 				int);
-
+  void Sg_Constructs::assign_netlist(Pin*, const int,
+				     Pin*, const int);
+  void Sg_Constructs::match_pins(Pin*,int,int&,
+				 Pin*,int,int&);
+  void Sg_Constructs::balance_bw(CoreList*);
+  int Sg_Constructs::bit_sizer(const int);
 };
 
 #endif

@@ -1,6 +1,6 @@
 static const char file_id[] = "ACSCGFPGATarget.cc";
 /**********************************************************************
-Copyright (c) 1998-%Q% The Regents of the University of California.
+Copyright (c) 1998 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -24,9 +24,9 @@ ENHANCEMENTS, OR MODIFICATIONS.
                                                         COPYRIGHTENDKEY
 
 
- Programmers:  Eric Pauer (Sanders), Christopher Hylands, Edward A. Lee
+ Programmers:  Ken Smith (Sanders), Eric Pauer (Sanders), Christopher Hylands, Edward A. Lee
  Date of creation: 1/15/98
- Version: $Id$
+ Version: @(#)ACSCGCTarget.cc	1.4 05/15/98
 
 ***********************************************************************/
 
@@ -78,8 +78,8 @@ ACSCGFPGATarget::ACSCGFPGATarget(const char* name, const char* starclass,
   Block::addState(word_state.setState("Export and pause for wordlength analysis",
 				      this,"Yes",
 				      "Yes/No, to allow netlist to be exported"));
-  Block::addState(vlen_state.setState("Number of words to process",this,"1",
-				      "Numeric entry for total number of iterations"));
+  Block::addState(vlen_state.setState("Number of words to process",this,"-1",
+				      "Numeric entry for total number of iterations, default setting will automatically calculate this value"));
 
   if (DEBUG_TOPLEVEL)
     printf("ACSCGFPGATarget:ACSCGFPGATarget constructor invoked\n");
@@ -107,6 +107,7 @@ void ACSCGFPGATarget::setup() {
   /////////////////////////
   printf("Initializing...");
   HWinitialize();
+  construct=new Sg_Constructs(&free_acsid,&free_netlist_id,design_directory->retrieve_extended());
   printf("Done\n");
  
   myCode.initialize();
@@ -150,41 +151,46 @@ void ACSCGFPGATarget::setup() {
   // Precedence determined, conduct queries and generate internal representation
   //////////////////////////////////////////////////////////////////////////////
   printf("Interpreting algorithm from Ptolemy graph....");
-  int rc_aq=HWalg_query();
+  int rc_aq=HWalg_query(smart_generators);
   if (rc_aq==0)
     return;
   if (haltRequested()) return;
   printf("Done.\n");
 
+  if (DEBUG_TOPLEVEL)
+    HWdisplay_connectivity("after alg_query",smart_generators);
+
   ////////////////////////////////////////////////////////////////
   // Allocate local core storage, assign default settings and pins
   ////////////////////////////////////////////////////////////////
   printf("Setting up algorithm....");
-  HWalg_setup();
+//  HWmacro(smart_generators);
+  HWalg_setup(smart_generators);
   printf("Done.\n");
   if (haltRequested()) return;
   if (DEBUG_TOPLEVEL)
     HWdisplay_connectivity("after alg_setup",smart_generators);
  
-  ///////////////////////////////////////////////////
-  // Allocate resources and initially schedule inputs
-  ///////////////////////////////////////////////////
-  HWassign_devices();
-  if (haltRequested()) return;
-  if (DEBUG_TOPLEVEL)
-    HWdisplay_connectivity("after assign_memory",smart_generators);
-
   //////////////////////////////////////
   // Revise word lengths (if applicable)
   //////////////////////////////////////
   if (do_wordlength)
     {
+      printf("Exporting netlist for wordlength analysis....");
       HWnetlist_export();
+      printf("Done.\n");
       int rc=HWpause_for_wordgui();
       if (rc==0)
-	HWrevise();
+	{
+	  printf("Revising precisions and schedule....");
+	  HWrevise(smart_generators);
+	  printf("Done\n");
+	}
       if (rc!=0)
-	do_vhdlbuild=0;
+	{
+	  do_vhdlbuild=0;
+	  fprintf(stderr,"Build cancelled\n");
+	}
 
       if (haltRequested()) return;
     }
@@ -192,28 +198,30 @@ void ACSCGFPGATarget::setup() {
     return;
 
   if (DEBUG_ASSIGNMENTS)
-    HWtest_assignments();
+    arch->print_arch("after wordlength analysis");
+
+  ///////////////////////////////////////////////////
+  // Allocate resources and initially schedule inputs
+  ///////////////////////////////////////////////////
+  printf("Revising algorithm to device mapping....");
+  HWassign_devices(smart_generators);
+  printf("Done.\n");
+  if (haltRequested()) return;
+  if (DEBUG_TOPLEVEL)
+    HWdisplay_connectivity("after assign_memory",smart_generators);
 
   /////////////////
   // Add partitions
   /////////////////
-  printf("Segmenting algorithm into individual fpgas (if applicable)\n");
-  construct=new Sg_Constructs(&free_acsid,design_directory->retrieve_extended());
-  HWsegment_alg();
+  printf("Segmenting algorithm into individual fpgas (if applicable)....");
+//  construct=new Sg_Constructs(&free_acsid,&free_netlist_id,design_directory->retrieve_extended());
+  HWsegment_alg(smart_generators);
   printf("Done.\n");
+  if (DEBUG_TOPLEVEL)
+    HWdisplay_connectivity("after HWsegment_alg",smart_generators);
 
   if (DEBUG_ASSIGNMENTS)
-    HWtest_assignments();
-
-  /////////////////////////////////////////////
-  // Add requested or implicit support hardware
-  /////////////////////////////////////////////
-  printf("Adding supportive hardware components....");
-  HWadd_support();
-  printf("Done.\n");
-
-  if (DEBUG_ASSIGNMENTS)
-    HWtest_assignments();
+    arch->print_arch("after HWsegment_alg");
 
   ///////////////////////
   // Test for contentions
@@ -226,23 +234,37 @@ void ACSCGFPGATarget::setup() {
   // Smart generator info derived, now schedule
   // FIX: Not needed, once wordgui supports scheduling
   ////////////////////////////////////////////////////
-  printf("Scheduling algorithm....");
-  HWunirate_sched();
-  printf("Done.\n");
-  if (haltRequested()) return;
-  if (DEBUG_TOPLEVEL)
-    HWdisplay_connectivity("after unirate_sched",smart_generators);
+  if (!multirate)
+    {
+      printf("Scheduling algorithm....");
+      HWunirate_sched();
+      printf("Done.\n");
+      if (haltRequested()) return;
+      if (DEBUG_TOPLEVEL)
+	HWdisplay_connectivity("after unirate_sched",smart_generators);
+    }
+//  else
+//    HWset_wordcount(smart_generators);
+
+  /////////////////////////////////////////////////////////////////////////
+  // Detect for smart generators that are memory-based and prepare them for
+  // proper phase execution
+  /////////////////////////////////////////////////////////////////////////
+  HWmultirate_sg(smart_generators);
 
   ////////////////////////////////////////////////////
   // Check for I/O conflicts and adjust
   // FIX: Not needed, once wordgui supports scheduling
   ////////////////////////////////////////////////////
-  printf("Scheduling IO....");
-  HWio_sched();
-  printf("Done.\n");
-  if (haltRequested()) return;
-  if (DEBUG_TOPLEVEL)
-    HWdisplay_connectivity("after io_sched",smart_generators);
+  if (!multirate)
+    {
+      printf("Scheduling IO....");
+      HWio_sched();
+      printf("Done.\n");
+      if (haltRequested()) return;
+      if (DEBUG_TOPLEVEL)
+	HWdisplay_connectivity("after io_sched",smart_generators);
+    }
 
   //////////////////////////////////////////////////////////////////////
   // Scheduling completed, now align algorithm with pipe delays
@@ -256,7 +278,22 @@ void ACSCGFPGATarget::setup() {
     HWdisplay_connectivity("after synth_pipealigns",smart_generators);
 
   if (DEBUG_ASSIGNMENTS)
-    HWtest_assignments();
+    arch->print_arch("after HWsynth_pipealigns");
+
+  /////////////////////////////////////////////////////////////////////////////
+  // Look for any opportunities to pack bits in order to reduce overall latency
+  // REVISIT:Currently wordgui tool will not accomodate port packing
+  /////////////////////////////////////////////////////////////////////////////
+  printf("Examining IO ports for bit packing constraints....");
+  int rc_overload=HWpack_ports(smart_generators);
+  if (rc_overload==0)
+    {
+      printf("IO port overloaded, cannot complete code generation\n");
+      return;
+    }
+  printf("Done.\n");
+  if (DEBUG_TOPLEVEL)
+    HWdisplay_connectivity("after HWpack_ports",smart_generators);
 
   ////////////////////
   // Plot the schedule
@@ -269,7 +306,7 @@ void ACSCGFPGATarget::setup() {
   // FIX: Merge with HWadd_support(), once wordgui directs additional HW
   //////////////////////////////////////////////////////////////////////
   printf("Adding IO elements....");
-  int rc_ioadd=HWio_add();
+  int rc_ioadd=HWio_add(smart_generators);
   if (rc_ioadd==0)
     return;
   if (haltRequested()) return;
@@ -278,7 +315,7 @@ void ACSCGFPGATarget::setup() {
     HWdisplay_connectivity("after_io_add",smart_generators);
 
   if (DEBUG_ASSIGNMENTS)
-    HWtest_assignments();
+    arch->print_arch("after HWio_add");
 
   ///////////////////////
   // Test for contentions
@@ -292,31 +329,32 @@ void ACSCGFPGATarget::setup() {
   // again
   /////////////////////////////////////////////////////////////////////////
   galaxySetup();
-  HWalg_setup();
+  HWmacro(smart_generators);
+  HWalg_setup(smart_generators);
   if (haltRequested()) return;
 
   /////////////////////////////////////////////
   // Generate sequencers for each utilized FPGA
   /////////////////////////////////////////////
-  printf("Generating sequencer VHDL....");
-  for (int fpga_no=0;fpga_no<arch->fpga_count;fpga_no++)
-    {
-      Fpga* fpga_elem=arch->get_fpga_handle(fpga_no);
-      if (fpga_elem->usage_state==FPGA_USED)
-	{
-	  if (DEBUG_TOPLEVEL)
-	    printf("Adding unirate sequencer for fpga %d\n",fpga_no);
-	  HWunirate_sequencer(fpga_elem,fpga_no);
-	}
-    }
+  // FIX:Simply adds a sequencer core, should reduce
+  HWadd_support();
+
+  if (DEBUG_ASSIGNMENTS)
+    arch->print_arch("after HWadd_support");
+
+  printf("Generating sequencer HW....");
+  HWsequencer();
   printf("Done.\n");
   if (haltRequested()) return;
+  if (DEBUG_TOPLEVEL)
+    HWdisplay_connectivity("after HWunirate_sequencer",smart_generators);
 
   ///////////////////////////////////////////////////////////////////////////////
   // Since stars have been dynamically added, we need to setup the Universe again
   ///////////////////////////////////////////////////////////////////////////////
   galaxySetup();
-  HWalg_setup();
+  HWmacro(smart_generators);
+  HWalg_setup(smart_generators);
   if (haltRequested()) return;
 
   ///////////////////////////
@@ -341,10 +379,14 @@ void ACSCGFPGATarget::setup() {
   if (DEBUG_TOPLEVEL)
     HWdisplay_connectivity("pre-resolver",smart_generators);
   printf("Resolving all unconnected signals....");
-  HWalg_resolver();
+  HWalg_resolver(smart_generators);
   printf("Done.\n");
   if (haltRequested()) return;
 //  schedulerSetup();
+  if (DEBUG_TOPLEVEL)
+    HWdisplay_connectivity("post-resolver",smart_generators);
+
+//  return;
 
   /////////////////////
   // Now build all code
@@ -359,7 +401,7 @@ void ACSCGFPGATarget::setup() {
 	{
 	  printf("\nBuilding FPGA %d\n",fpga_no);
 	  HWalg_create(fpga_no);
-	  HWalg_integrate(fpga_no);
+//	  HWalg_integrate(fpga_no);
 	}
       else
 	printf("\nNot building FPGA %d\n",fpga_no);

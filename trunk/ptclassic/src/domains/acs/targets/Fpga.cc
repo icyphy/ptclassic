@@ -1,5 +1,5 @@
 /**********************************************************************
-Copyright (c) 1999-%Q% Sanders, a Lockheed Martin Company
+Copyright (c) 1999 Sanders, a Lockheed Martin Company
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -25,14 +25,16 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
  Programmers:  Ken Smith
  Date of creation: 3/23/98
- Version: $Id$
+ Version: @(#)Fpga.cc      1.0     06/16/99
 ***********************************************************************/
 #include "Fpga.h"
 
 Fpga::Fpga() 
-: root_filename(NULL),
+: fpga_id(-1),
+  root_filename(NULL), io_filename(NULL),
   usage_state(FPGA_UNUSED),
-  part_make(NULL), part_tech(NULL), part_name(NULL), part_pack(NULL), 
+  part_make(NULL), part_tech(NULL), 
+  part_name(NULL), part_pack(NULL), 
   speed_grade(0),
   child_cores(NULL),
   sequencer(NULL), mem_count(0), mem_connected(NULL),
@@ -40,18 +42,44 @@ Fpga::Fpga()
   addr_signal_id(NULL), 
   separate_rw(0), read_signal_id(NULL), write_signal_id(NULL), enable_signal_id(NULL),
   fpga_count(0), fpga_connected(NULL), 
-  ifpga_signal_id(NULL), ifpga_enable_id(NULL),  ifpga_timing(NULL)
+  ifpga_signal_id(NULL), ifpga_enable_id(NULL),  ifpga_timing(NULL),  part_type(UNKNOWN_DEVICE)
 {
   ext_signals=new Pin;
   data_signals=new Pin;
   ctrl_signals=new Pin;
   constant_signals=new Pin;
   arch_bindlist=new StringArray;
+
+  root_filename=new char[MAX_PARTNAME];
+  io_filename=new char[MAX_PARTNAME];
+
+  part_make=new char[MAX_PARTNAME];
+  part_tech=new char[MAX_PARTNAME];
+  part_name=new char[MAX_PARTNAME];
+  part_pack=new char[MAX_PARTNAME];
+
+  // This is generalized for constant signals
+  constant_signals->add_pin("VCC",1.0,STD_LOGIC,OUTPUT_PIN_VCC);
+  constant_signals->add_pin("GND",1.0,STD_LOGIC,OUTPUT_PIN_GND);
+
+  tmp_seqpins=new ACSIntArray;
+
+  synthesis_libname=new StringArray;
+  synthesis_path=new StringArray;
+  synthesis_files=new StringArray;
+  preamble_path=new StringArray;
+  preamble_files=new StringArray;
+  preamble_origin=new ACSIntArray;
+  postamble_path=new StringArray;
+  postamble_files=new StringArray;
+  postamble_origin=new ACSIntArray;
 }
 
 Fpga::~Fpga()
 {
+  fpga_id=-1;
   delete []root_filename;
+  delete []io_filename;
 
   usage_state=FPGA_UNUSED;
 
@@ -84,17 +112,38 @@ Fpga::~Fpga()
   delete ifpga_signal_id;
   delete ifpga_enable_id;
   delete []ifpga_timing;
+
+  delete tmp_seqpins;
+
+  delete synthesis_libname;
+  delete synthesis_path;
+  delete synthesis_files;
+  delete preamble_path;
+  delete preamble_files;
+  delete preamble_origin;
+  delete postamble_path;
+  delete postamble_files;
+  delete postamble_origin;
+}
+
+void Fpga::set_acsdevice(const int id)
+{
+  fpga_id=id;
+}
+
+int Fpga::retrieve_acsdevice(void)
+{
+  return(fpga_id);
 }
 
 void Fpga::set_rootfilename(char* supplied_name)
 {
-  if (root_filename!=NULL)
-    strcpy(root_filename,supplied_name);
-  else
-    {
-      root_filename=new char[MAX_PARTNAME];
-      strcpy(root_filename,supplied_name);
-    }
+  strcpy(root_filename,supplied_name);
+}
+
+void Fpga::set_iofilename(char* supplied_name)
+{
+  strcpy(io_filename,supplied_name);
 }
 
 char* Fpga::retrieve_rootfilename(void)
@@ -107,75 +156,48 @@ char* Fpga::retrieve_rootfilename(void)
 
 void Fpga::set_part(char* part_mk,
 		    char* part_th,
-		    char* part_type,
+		    char* part_tp,
 		    char* part_pk,
 		    int mx_speed)
 {
-  if (part_make!=NULL)
-    strcpy(part_make,part_mk);
-  else
-    {
-      part_make=new char[MAX_PARTNAME];
-      strcpy(part_make,part_mk);
-    }
-
-  if (part_tech!=NULL)
-    strcpy(part_tech,part_th);
-  else
-    {
-      part_tech=new char[MAX_PARTNAME];
-      strcpy(part_tech,part_th);
-    }
-
-  if (part_name!=NULL)
-    strcpy(part_name,part_type);
-  else
-    {
-      part_name=new char[MAX_PARTNAME];
-      strcpy(part_name,part_type);
-    }
-
-  if (part_pack!=NULL)
-    strcpy(part_pack,part_pk);
-  else
-    {
-      part_pack=new char[MAX_PARTNAME];
-      strcpy(part_pack,part_pk);
-    }
-
+  strcpy(part_make,part_mk);
+  strcpy(part_tech,part_th);
+  strcpy(part_name,part_tp);
+  strcpy(part_pack,part_pk);
   speed_grade=mx_speed;
 }
 
-// FIX: This should be generalized, but for now it is fixed for the
-// Annapolis
-void Fpga::set_control_pins(void)
+void Fpga::set_control_pins(const char* pin_name,
+			    const char* bind_name,
+			    const int bitlen,
+			    const int pin_type,
+			    const int pin_assert)
 {
-  // This is generalized for constant signals
-  constant_signals->add_pin("VCC",1.0,STD_LOGIC,OUTPUT_PIN_VCC);
-  constant_signals->add_pin("GND",1.0,STD_LOGIC,OUTPUT_PIN_GND);
+  int sig_id=ext_signals->add_pin(pin_name,bitlen-1,bitlen,
+				  STD_LOGIC,pin_type,pin_assert);
+  tmp_seqpins->add(sig_id);
+  
+  arch_bindlist->add(bind_name);
+}
 
-  ext_signals->add_pin("Clock",0,1,STD_LOGIC,INPUT_PIN_CLK);
-  ext_signals->add_pin("Reset",0,1,STD_LOGIC,INPUT_PIN_RESET);
-  //  ext_signals->add_pin("XbarData_InReg",35,36,STD_LOGIC,
-  //			    INPUT_PIN_EXTCTRL);
-  ext_signals->add_pin("Go",0,1,STD_LOGIC,INPUT_PIN_EXTCTRL);
-  ext_signals->add_pin("MemBusGrant_n",0,1,STD_LOGIC,INPUT_PIN_MEMOK);
-  ext_signals->add_pin("MemBusReq_n",0,1,STD_LOGIC,OUTPUT_PIN_MEMREQ);
-  ext_signals->add_pin("Done",0,1,STD_LOGIC,OUTPUT_PIN_DONE);
+void Fpga::set_synthesis_file(const char* libname, const char* path, const char* filename)
+{
+  synthesis_libname->add(libname);
+  synthesis_path->add(path);
+  synthesis_files->add(filename);
+}
 
-  // Ordered list of architecture signals that the ext_signals will
-  // be bound to
-  arch_bindlist->add("PE_Pclk");
-  arch_bindlist->add("PE_RESET");
-  arch_bindlist->add("PE_CPE_Bus_In(0)");
-  arch_bindlist->add("PE_MemBusGrant_n");
-  arch_bindlist->add("PE_MemBusReq_n");
-  arch_bindlist->add("PE_CPE_Bus_Out(1)");
-  arch_bindlist->add("PE_MemData_InReg");
-  arch_bindlist->add("PE_MemData_OutReg");
-  arch_bindlist->add("PE_MemAddr_OutReg");
-  arch_bindlist->add("PE_MemWriteSel_n");
-  arch_bindlist->add("PE_MemStrobe_n");
+void Fpga::set_preamble_file(const char* path, const char* filename, const int origin)
+{
+  preamble_path->add(path);
+  preamble_files->add(filename);
+  preamble_origin->add(origin);
+}
+void Fpga::set_postamble_file(const char* path, const char* filename, const int origin)
+{
+  postamble_path->add(path);
+  postamble_files->add(filename);
+  postamble_origin->add(origin);
 }
 
 void Fpga::add_memory(const int memory_count)
@@ -225,7 +247,11 @@ void Fpga::set_memory_pins(const int memory_no,
 						     STD_LOGIC,OUTPUT_PIN));
   
   // Define memory control signals
-  separate_rw=0;
+  if (rw_control_separate)
+    read_signal_id->set(memory_no,ext_signals->add_pin(memread_name,
+						       0,1,
+						       STD_LOGIC,OUTPUT_PIN_RAMG));
+  
   write_signal_id->set(memory_no,ext_signals->add_pin(memwrite_name,
 						      0,1,
 						      STD_LOGIC,OUTPUT_PIN_RAMW));
@@ -239,10 +265,11 @@ void Fpga::set_memory_pins(const int memory_no,
   // referenced via the write_signal_id structure and read_signal_id is null
   ext_signals->set_pinpriority(write_signal_id->query(memory_no),memory_no);
 
-  if (separate_rw)
+  if (rw_control_separate)
     ext_signals->set_pinpriority(read_signal_id->query(memory_no),memory_no);
 }
 
+// FIX: do not rely on a single signal to a given fpga!!
 void Fpga::add_interconnect(const int total_fpgas)
 {
   fpga_count=total_fpgas;
@@ -289,16 +316,16 @@ void Fpga::set_interconnect_pins(const int fpga_no,
 void Fpga::set_child(ACSCGFPGACore* child_core)
 {
   if (child_cores==NULL)
-    child_cores=new SequentialList;
+    child_cores=new CoreList;
 
   // Duplicates are not needed
   int duplicate=0;
-  for (int loop=1;loop<=child_cores->size();loop++)
+  for (int loop=0;loop<child_cores->size();loop++)
     {
       ACSCGFPGACore* current_core=(ACSCGFPGACore*) child_cores->elem(loop);
       if (child_core->acs_id==current_core->acs_id)
 	{
-	  printf("Dup sg %s found not adding\n",child_core->comment_name()); 
+	  printf("Fpga::set_child:Warning:Dup sg %s found not adding\n",child_core->comment_name()); 
 	  duplicate=1;
 	  break;
 	}
@@ -307,11 +334,11 @@ void Fpga::set_child(ACSCGFPGACore* child_core)
   if (!duplicate)
     {
 //      printf("Adding core %s\n",child_core->comment_name());
-      child_cores->append((Pointer) child_core);
+      child_cores->append(child_core);
     }
 }
 
-SequentialList* Fpga::get_childcores_handle(void)
+CoreList* Fpga::get_childcores_handle(void)
 {
   if (child_cores==NULL)
     fprintf(stderr,"Fpga::get_childcores_handle:I hope you know what your doing, because your getting a NULL ptr\n");
@@ -329,17 +356,26 @@ int Fpga::test_route(const int dest_fpga)
     return(0);
 }
 
-//////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
 // Establish the timing information for the inter-fpga communication paths
-//////////////////////////////////////////////////////////////////////////
-int Fpga::add_timing(const int fpga_no, 
+// Note: Since this is an ioport, the concept of vector length is irrelevant
+////////////////////////////////////////////////////////////////////////////
+int Fpga::add_timing(const int fpga_no,
 		     const int read_time, 
 		     const int write_time)
 {
   if (read_time != 0)
-    ifpga_timing[fpga_no].add_read(0,0,0,read_time,0,0,0);
+    {
+      ifpga_timing[fpga_no].add_read(0,0,0,-1,0,read_time,0,0,0);
+      if (DEBUG_TIMING)
+	printf("fpga %d, adding read, count=%d\n",fpga_no,ifpga_timing[fpga_no].count);
+    }
   else
-    ifpga_timing[fpga_no].add_write(0,0,0,0,write_time,0,0);
+    {
+      ifpga_timing[fpga_no].add_write(0,0,0,-1,0,0,write_time,0,0);
+      if (DEBUG_TIMING)
+	printf("fpga %d, adding write, count=%d\n",fpga_no,ifpga_timing[fpga_no].count);
+    }
 
   // Return happy condition
   return(1);
@@ -351,8 +387,13 @@ int Fpga::add_timing(const int fpga_no,
 ////////////////////////////////////////////////////////
 int Fpga::query_mode(const int fpga_no)
 {
+  if (DEBUG_TIMING)
+    printf("query mode for %d\n",fpga_no);
   if (ifpga_timing[fpga_no].count==0)
     return(UNASSIGNED);
+
+  if (DEBUG_TIMING)
+    printf("return %d\n",ifpga_timing[fpga_no].get_memtype(0));
 
   // FIX:Should only be one entry for now
   return(ifpga_timing[fpga_no].get_memtype(0));
@@ -363,7 +404,7 @@ void Fpga::print_children(void)
   if (child_cores==NULL)
     printf("None\n");
   else
-    for (int loop=1;loop<=child_cores->size();loop++)
+    for (int loop=0;loop<child_cores->size();loop++)
       {
 	ACSCGFPGACore* current_core=(ACSCGFPGACore*) child_cores->elem(loop);
 	printf("child:%s\n",current_core->comment_name()); 
@@ -378,6 +419,189 @@ void Fpga::mode_dump(void)
     }
 }
 
+int Fpga::query_memconnect(const int mem_index)
+{
+  if (mem_connected->query(mem_index)==MEMORY_AVAILABLE)
+    return(1);
+  else
+    return(0);
+}
+
+
+/////////////////////////////////////////////////////////////////////////////////////////
+// Completion time will refer to the phaser that the interface shall be sensitive towards
+// for interruption generation
+/////////////////////////////////////////////////////////////////////////////////////////
+void Fpga::set_completiontime(const int the_time)
+{
+  completion_time=the_time;
+}
+
+
+/////////////////////////////////////////////////////////////////////////////////////////
+// Populate the generic sequencer smart generator with fpga-specific interface constructs
+// FIX:Taken from the old unirate sequencer model, information here should be obtainable
+//     from local structures, rather than the hardcodings observed here.
+/////////////////////////////////////////////////////////////////////////////////////////
+void Fpga::generate_sequencer(void)
+{
+  //
+  // Generate local handles
+  //
+  if (DEBUG_SEQUENCER)
+    {
+      ext_signals->print_pins("ext_signals at generate_sequencer");
+      tmp_seqpins->print("relevant pins");
+    }
+
+  ACSCGFPGACore* seq_core=sequencer->seq_sg;
+  Pin* seq_pins=seq_core->pins;
+  Pin* seq_ctrl_signals=seq_core->ctrl_signals;
+//  Pin* seq_constant_signals=seq_core->constant_signals;
+
+  //
+  // Define general purpose architecture signals
+  //
+  seq_pins->copy_pins(ext_signals,tmp_seqpins);
+  if (DEBUG_SEQUENCER)
+    seq_pins->print_pins("copied pins");
+
+  //
+  // Define common external signals
+  //
+/*
+  seq_pins->add_pin("Clock",0,1,STD_LOGIC,INPUT_PIN_CLK);
+  seq_pins->add_pin("Reset",0,1,STD_LOGIC,INPUT_PIN_RESET,AH);
+  seq_pins->add_pin("Go",0,1,STD_LOGIC,INPUT_PIN_EXTCTRL,AH);
+  seq_pins->add_pin("MemBusGrant_n",0,1,STD_LOGIC,INPUT_PIN_MEMOK,AL);
+  seq_pins->add_pin("MemBusReq_n",0,1,STD_LOGIC,OUTPUT_PIN_MEMREQ);
+  seq_pins->add_pin("Done",0,1,STD_LOGIC,OUTPUT_PIN_DONE);
+  */
+
+  seq_pins->add_pin("Alg_Start",0,1,STD_LOGIC,OUTPUT_PIN_START);
+  seq_pins->add_pin("Alg_Done",0,1,STD_LOGIC,INPUT_PIN_STOP);
+  seq_pins->add_pin("ADDR_CLR",0,1,STD_LOGIC,OUTPUT_PIN_ADDRCLR);
+  seq_pins->add_pin("Seq_Reset",0,1,STD_LOGIC,OUTPUT_PIN_SEQRESET);
+
+  //
+  // Define internal signals
+  //
+  seq_ctrl_signals->add_pin("Go_Addr",0,1,STD_LOGIC,INTERNAL_PIN);
+  seq_ctrl_signals->add_pin("Addr_Addr_CE",0,1,STD_LOGIC,INTERNAL_PIN);
+  seq_ctrl_signals->add_pin("Addr_Ring_CE",0,1,STD_LOGIC,INTERNAL_PIN);
+  seq_ctrl_signals->add_pin("Go_Ring",0,1,STD_LOGIC,INTERNAL_PIN);
+
+  //
+  // Define constant signals
+  //
+//  seq_constant_signals->add_pin("VCC",1.0,STD_LOGIC,OUTPUT_PIN_VCC);
+//  seq_constant_signals->add_pin("GND",1.0,STD_LOGIC,OUTPUT_PIN_GND);
+
+  // Set the completion time for the Alg_Done pin
+  seq_pins->set_pinpriority(seq_core->find_hardpin(INPUT_PIN_STOP),completion_time);
+
+  //
+  // Add fpga interconnect pins
+  //
+  // FIX:Need to coordinate pin priorities with the set_interconnect_pins method!!!
+  int right_port=UNASSIGNED;
+  int left_port=UNASSIGNED;
+  int right_index=UNASSIGNED;
+  int left_index=UNASSIGNED;
+  for (int loop=0;loop<ifpga_enable_id->population();loop++)
+    {
+      int index=ifpga_enable_id->query(loop);
+      if (index != UNASSIGNED)
+	{
+	  seq_pins->copy_pin(ext_signals,index);
+	  if ((ext_signals->query_pinpriority(index))==1)
+	    {
+	      right_port=query_mode(fpga_id+1);
+	      right_index=index;
+	    }
+	  else
+	    {
+	      left_port=query_mode(fpga_id-1);
+	      left_index=index;
+	    }
+	}
+    }
+
+/*
+  int right_port=UNASSIGNED;
+  int left_port=UNASSIGNED;
+  if (fpga_id != 4)
+    {
+      int enable_pin=seq_pins->add_pin("Right_OE",0,36,STD_LOGIC,
+				       OUTPUT_PIN_INTERCONNECT_ENABLE);
+      seq_pins->set_pinpriority(enable_pin,1);
+      right_port=query_mode(fpga_id+1);
+    }
+  if (fpga_id != 1)
+    {
+      int enable_pin=seq_pins->add_pin("Left_OE",0,36,STD_LOGIC,
+				       OUTPUT_PIN_INTERCONNECT_ENABLE);
+      seq_pins->set_pinpriority(enable_pin,0);
+      left_port=query_mode(fpga_id-1);
+    }
+    */
+
+  if (DEBUG_SEQUENCER)
+    for (int qloop=0;qloop<5;qloop++)
+      printf("query_mode(%d)=%d, fpga_id=%d\n",qloop,query_mode(qloop),fpga_id);
+
+  // Load the code for the sequencer's I/O interface and kickoff
+  // and transfer for use in the main body of the master sequencer
+  // FIX: Language-independency testing needed?
+  ostrstream declare_filename;
+  ostrstream body_filename;
+  declare_filename << io_filename << "_declaratives.vhd" << ends;
+  body_filename << io_filename << "_mainbody.vhd" << ends;
+
+  ifstream declare_file(declare_filename.str());
+  ifstream body_file(body_filename.str());
+
+  char* char_buf=new char[MAX_STR];
+  while (declare_file.getline(char_buf,MAX_STR))
+    seq_core->sg_declarative << char_buf << endl;
+  seq_core->sg_declarative << ends;
+
+  // Determine inter-FPGA connections and set the systolic bus controls appropriately
+  // FIX: Remove once inter-FPGA control has been de-centralized
+  if (right_port == SOURCE)
+    seq_core->sg_body << ext_signals->query_pinname(right_index) 
+	     << " <= (others => '1');" << endl;
+  else
+    if (fpga_id != 4)
+      seq_core->sg_body << ext_signals->query_pinname(right_index) 
+	<< " <= (others => '0');" << endl;
+  if (left_port == SOURCE)
+    seq_core->sg_body << ext_signals->query_pinname(left_index) 
+	     << " <= (others => '1');" << endl;
+  else
+    if (fpga_id != 1)
+      seq_core->sg_body << ext_signals->query_pinname(left_index)
+	       << " <= (others => '0');" << endl;
+
+/*
+  if (right_port == SOURCE)
+    seq_core->sg_body << "Right_OE <= (others => '1');" << endl;
+  else
+    if (fpga_id != 4)
+      seq_core->sg_body << "Right_OE <= (others => '0');" << endl;
+  if (left_port == SOURCE)
+    seq_core->sg_body << "Left_OE <= (others => '1');" << endl;
+  else
+    if (fpga_id != 1)
+      seq_core->sg_body << "Left_OE <= (others => '0');" << endl;
+      */
+
+  while (body_file.getline(char_buf,MAX_STR))
+    seq_core->sg_body << char_buf << endl;
+  seq_core->sg_body << ends;
+
+  delete []char_buf;
+}
 
 
 void Fpga::print_fpga(void)

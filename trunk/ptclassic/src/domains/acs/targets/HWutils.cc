@@ -1,7 +1,7 @@
 static const char file_id[] = "HWutils.cc";
 
 /**********************************************************************
-Copyright (c) 1999-%Q% Sanders, a Lockheed Martin Company
+Copyright (c) 1999 Sanders, a Lockheed Martin Company
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -27,7 +27,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
  Programmers:  Ken Smith
  Date of creation: 10/20/99
- Version: $Id$
+ Version: @(#)HWutils.cc      1.0     10/20/99
 ***********************************************************************/
 #include "HWutils.h"
 
@@ -126,14 +126,113 @@ ACSCGFPGACore* ACSCGFPGATarget::HWfind_star(int acs_id)
   return(NULL);
 }
 
+void ACSCGFPGATarget::HWset_wordcount(CoreList* sg_list)
+{
+  if (DEBUG_WORDCOUNT)
+    printf("\n\nHWset_wordcount:started\n");
 
+  int runaway=0;
+  int done=0;
+  while (!done)
+    if (HWall_wordset(sg_list))
+      {
+	if (DEBUG_WORDCOUNT)
+	  printf("HWset_wordcount: Wordcount growth complete\n");
+	done=1;
+      }
+  else
+    {
+      for (int loop=0;loop<sg_list->size();loop++)
+	{
+	  ACSCGFPGACore* unset_sg=(ACSCGFPGACore*) sg_list->elem(loop);
+	  Fpga* dirty_fpga=arch->get_fpga_handle(unset_sg->acs_device);
+	  Pin* dirty_pins=unset_sg->pins;
+	  if (DEBUG_WORDCOUNT)
+	    printf("Examining smart generator for word count%s\n",unset_sg->comment_name());
+
+	  // Find an unset smart generator
+	  if (unset_sg->word_count==UNASSIGNED)
+	    {
+	      if (DEBUG_WORDCOUNT)
+		printf("Smart generator %s needs to be word count updated\n",
+		       unset_sg->comment_name());
+		
+	      // Determine connections and update BW accordingly
+	      for (int pin_loop=0;pin_loop<dirty_pins->query_pincount();pin_loop++)
+		{
+		  if (DEBUG_WORDCOUNT)
+		    printf("testing pin %d of %d, word_count=%d\n",
+			   pin_loop,
+			   dirty_pins->query_pincount(),
+			   dirty_pins->query_wordcount(pin_loop));
+		  if (dirty_pins->query_pintype(pin_loop)==INPUT_PIN)
+		    {
+		      Connectivity* dirty_connects=dirty_pins->query_connection(pin_loop);
+		      for (int node_loop=0;node_loop < dirty_connects->node_count;node_loop++)
+			{
+			  int nodetype=dirty_connects->query_pintype(node_loop);
+			  Pin* origin_pins=NULL;
+			  ACSCGFPGACore* conn_star=NULL;
+			  switch (nodetype)
+			    {
+			    case DATA_NODE:
+			      conn_star=HWfind_star(dirty_connects->query_acsid(node_loop));
+			      origin_pins=conn_star->pins;
+			      break;
+			    case EXT_NODE:
+			      origin_pins=dirty_fpga->ext_signals;
+			      break;
+			    case CONSTANT_NODE:
+			      origin_pins=dirty_fpga->constant_signals;
+			      break;
+			    case CTRL_NODE:
+			      origin_pins=dirty_fpga->ctrl_signals;
+			      break;
+			    default:
+			      if (DEBUG_WORDCOUNT)
+				{
+				  printf("Pin %d, node %d ",
+					 pin_loop,
+					 node_loop);
+				  printf("is connected to unknown signal\n");
+				}
+			    }
+
+			  // Fetch new BW from source
+			  int origin_node=dirty_connects->query_pinid(node_loop);
+			  int src_wordcount=origin_pins->query_wordcount(origin_node);
+			
+			  if (DEBUG_WORDCOUNT)
+			    printf("remote connection: word_count=%d\n",src_wordcount);
+
+			  // Set new BW
+			  // ASSUMPTION:Star-level wordcount value is uninteresting other than being set
+			  dirty_pins->set_wordcount(pin_loop,src_wordcount);
+			  unset_sg->word_count=src_wordcount;
+
+			} // for (int node_loop=0;
+		    } // if (((dirty_pins->pintype(pin_loop)==INPUT_PIN) ||
+		}  //for (int pin_loop=0;pin_loop<(unset_sg->pins)->pin_count;pin_loop++)
+	    } // if (unset_sg->word_count)
+	} // for (int loop=0;loop<sg_list->size();loop++)
+
+      // DEBUG
+      runaway++;
+      if (runaway>RUNAWAY_BW)
+	{
+	  done=1;
+	  if (DEBUG)
+	    printf("HWset_wordcount:Runaway iterator!\n");
+	}
+    } // if (!HWset_wordcount(sg_list))
+}
 
 ////////////////////////////////////////////////////////////////////////
 // This will examine an internal netlist and propogate bitwidths so that 
 // all sources and sinks match in terms of bit-sizes.  Limited feedback
 // is handled
 ////////////////////////////////////////////////////////////////////////
-void ACSCGFPGATarget::HWset_bw(SequentialList* sg_list)
+void ACSCGFPGATarget::HWset_bw(CoreList* sg_list)
 {
   if (DEBUG_BW)
     printf("\n\nHWset_bw:started\n");
@@ -156,82 +255,30 @@ void ACSCGFPGATarget::HWset_bw(SequentialList* sg_list)
 	    ACSCGFPGACore* unset_sg=(ACSCGFPGACore*) sg_list->elem(loop);
 	    Fpga* dirty_fpga=arch->get_fpga_handle(unset_sg->acs_device);
 	    Pin* dirty_pins=unset_sg->pins;
-	    
 	    if (DEBUG_BW)
-	      printf("Examining smart generator %s\n",
-		     unset_sg->comment_name());
+	      printf("Examining smart generator %s\n",unset_sg->comment_name());
 
-	    for (int pin_loop=0;
-		 pin_loop < dirty_pins->query_pincount();
-		 pin_loop++)
-	      {
-		int update=0;
-		int src_bitlen=dirty_pins->query_bitlen(pin_loop);
-		int max_bit=dirty_pins->query_maxbitlen(pin_loop);
-		int min_bit=dirty_pins->query_minbitlen(pin_loop);
-
-		if (DEBUG_BW)
-		  printf("pin %d, bitlen=%d, min=%d, max=%d\n",
-			 pin_loop,
-			 src_bitlen,
-			 min_bit,
-			 max_bit);
-
-		// Check for minimum requirements
-		if (src_bitlen < min_bit)
-		  {
-		    src_bitlen=min_bit;
-		    update=1;
-		    if (DEBUG_BW)
-		      printf("Pin %d, does not meet minimum (%d) reqs.\n",
-			     pin_loop,
-			     min_bit);
-		  }
-
-		// Check for maximum requirements
-		if (src_bitlen > max_bit)
-		  {
-		    src_bitlen=max_bit;
-		    update=1;
-		    if (DEBUG_BW)
-		      printf("Pin %d, exceeds maximum (%d) thres.\n",
-			     pin_loop,
-			     max_bit);
-		  }
-		
-		// Set new BW
-		if (update)
-		  {
-		    int src_mbit=dirty_pins->query_majorbit(pin_loop);
-		    int lock_type=dirty_pins->query_preclock(pin_loop);
-
-		    // Correct the precision
-		    dirty_pins->set_precision(pin_loop,src_mbit,src_bitlen,lock_type);
-
-		    // Change all precision-dependant factors
-		    unset_sg->update_resources(lock_type);
-		  }
-	      }
+	    // Make sure that minimum and maximum bitwidth constraints are met
+	    HWset_requirements(unset_sg);
 
 	    // Find an unset smart generator
 	    if (unset_sg->bw_dirty)
 	      {
 		if (DEBUG_BW)
-		  printf("Smart generator %s needs to be BW updated\n",
-			 unset_sg->comment_name());
+		  printf("Smart generator %s acs_id=%d needs to be BW updated\n",unset_sg->comment_name(),
+			 unset_sg->acs_id);
 		
 		// Determine connections and update BW accordingly
 		int skip_update=0;
-                for (int pin_loop=0;
-		     pin_loop < dirty_pins->query_pincount();
-		     pin_loop++)
+                for (int pin_loop=0;pin_loop<dirty_pins->query_pincount();pin_loop++)
 		  {
 		    if (DEBUG_BW)
-		      printf("testing pin %d of %d, size (%d,%d)\n",
+		      printf("testing pin %d of %d, size (%d,%d) lock=%d\n",
 			     pin_loop,
 			     dirty_pins->query_pincount(),
 			     dirty_pins->query_majorbit(pin_loop),
-			     dirty_pins->query_bitlen(pin_loop));
+			     dirty_pins->query_bitlen(pin_loop),
+			     dirty_pins->query_preclock(pin_loop));
 		    if ((dirty_pins->query_pinassigned(pin_loop)==ASSIGNED) &&
 			(dirty_pins->query_preclock(pin_loop)==UNLOCKED) &&
 			((dirty_pins->pin_classtype(pin_loop)==INPUT_PIN) ||
@@ -286,8 +333,7 @@ void ACSCGFPGATarget::HWset_bw(SequentialList* sg_list)
 			    int src_bitlen=origin_pins->query_bitlen(origin_node);
 
 			    if (lock_type!=LOCKED)
-			      lock_type=origin_pins->
-				query_preclock(origin_node);
+			      lock_type=origin_pins->query_preclock(origin_node);
 			
 			if (DEBUG_BW)
 			  {
@@ -299,11 +345,15 @@ void ACSCGFPGATarget::HWset_bw(SequentialList* sg_list)
 			// Set new BW
 			if (!exempt)
 			  {
+			    if (DEBUG_BW)
+			      printf("updating precision on pin %d, to (%d.%d) lock=%d\n",
+				     pin_loop,src_mbit,src_bitlen,lock_type);
+
 			    // Correct the precision
 			    dirty_pins->set_precision(pin_loop,src_mbit,src_bitlen,lock_type);
 
 			    // Change all precision-dependant factors
-			    unset_sg->update_resources(lock_type);
+			    unset_sg->update_sg(lock_type,UNLOCKED);
 			  }
 			  } // for (int node_loop=0;
 		      } // if (((dirty_pins->pintype(pin_loop)==INPUT_PIN) ||
@@ -313,7 +363,9 @@ void ACSCGFPGATarget::HWset_bw(SequentialList* sg_list)
 		// Are all applicable connections set?
 		if (!skip_update)
 		  {
-		    unset_sg->update_resources(LOCKED);
+//		    unset_sg->update_resources(LOCKED);
+//		    unset_sg->update_resources(UNLOCKED);
+		    unset_sg->update_sg(UNLOCKED,UNLOCKED);
 		    unset_sg->bw_dirty=0;
 
 		    // Flag neighboring smart generators as dirty
@@ -334,6 +386,63 @@ void ACSCGFPGATarget::HWset_bw(SequentialList* sg_list)
 	      printf("HWset_bw:Runaway iterator!\n");
 	  }
       } // if (!HWset_bw(sg_list))
+}
+
+void ACSCGFPGATarget::HWset_requirements(ACSCGFPGACore* unset_sg)
+{
+  Pin* unset_pins=unset_sg->pins;
+  for (int pin_loop=0;pin_loop<unset_pins->query_pincount();pin_loop++)
+    {
+      int update=0;
+      int src_bitlen=unset_pins->query_bitlen(pin_loop);
+      int max_bit=unset_pins->query_maxbitlen(pin_loop);
+      int min_bit=unset_pins->query_minbitlen(pin_loop);
+
+      if (DEBUG_BW)
+	printf("Core:%s, pin %d, bitlen=%d, min=%d, max=%d\n",
+	       unset_sg->comment_name(),
+	       pin_loop,
+	       src_bitlen,
+	       min_bit,
+	       max_bit);
+      
+      // Check for minimum requirements
+      if (src_bitlen < min_bit)
+	{
+	  src_bitlen=min_bit;
+	  update=1;
+	  if (DEBUG_BW)
+	    printf("Pin %d, does not meet minimum (%d) reqs.\n",
+		   pin_loop,
+		   min_bit);
+	}
+
+      // Check for maximum requirements
+      if (src_bitlen > max_bit)
+	{
+	  src_bitlen=max_bit;
+	  update=1;
+	  if (DEBUG_BW)
+	    printf("Pin %d, exceeds maximum (%d) thres.\n",
+		   pin_loop,
+		   max_bit);
+	}
+		
+      // Set new BW
+      if (update)
+	{
+	  // Maintain current majorbit and lock type
+	  int src_mbit=unset_pins->query_majorbit(pin_loop);
+	  int lock_type=unset_pins->query_preclock(pin_loop);
+
+	  // Correct the precision
+	  unset_pins->set_precision(pin_loop,src_mbit,src_bitlen,lock_type);
+
+	  // Change all precision-dependant factors
+//	  unset_sg->update_resources(lock_type);
+	  unset_sg->update_sg(UNLOCKED,UNLOCKED);
+	}
+    }
 }
 
 Pin* ACSCGFPGATarget::HWfind_origin(int nodetype,int acs_id)
@@ -385,11 +494,11 @@ Pin* ACSCGFPGATarget::HWfind_origin(int nodetype,int acs_id)
 // For now, only test for loops that span only a single star
 // FIX:Not working, this should iterate over connections looking for loops to the
 // root acs_id;
-SequentialList* ACSCGFPGATarget::HWfind_loop(ACSCGFPGACore* starting_sg)
+CoreList* ACSCGFPGATarget::HWfind_loop(ACSCGFPGACore* starting_sg)
 {
   static int root_id=starting_sg->acs_id;
   Pin* starting_pins=starting_sg->pins;
-  SequentialList* connected_sg=NULL;
+  CoreList* connected_sg=NULL;
   ACSIntArray* onodes=starting_pins->query_onodes();
   for (int onode_loop=0;onode_loop<onodes->population();onode_loop++)
     if (starting_pins->query_pinassigned(onode_loop)!=UNASSIGNED)
@@ -399,15 +508,15 @@ SequentialList* ACSCGFPGATarget::HWfind_loop(ACSCGFPGACore* starting_sg)
 	if (src_pin != -1)
 	  {
 	    if (connected_sg==NULL)
-	      connected_sg=new SequentialList;
-	    connected_sg->append((Pointer) starting_sg);
+	      connected_sg=new CoreList;
+	    connected_sg->append(starting_sg);
 	  }
       }
   return(connected_sg);
 }
 
 
-int ACSCGFPGATarget::HWall_bwset(SequentialList* sg_list)
+int ACSCGFPGATarget::HWall_bwset(CoreList* sg_list)
 {
   for (int loop=0;loop<sg_list->size();loop++)
     {
@@ -415,6 +524,17 @@ int ACSCGFPGATarget::HWall_bwset(SequentialList* sg_list)
       if (unset_sg->bw_exempt)
 	unset_sg->bw_dirty=0;
       if (unset_sg->bw_dirty)
+	return(0);
+    }
+  return(1);
+}
+
+int ACSCGFPGATarget::HWall_wordset(CoreList* sg_list)
+{
+  for (int loop=0;loop<sg_list->size();loop++)
+    {
+      ACSCGFPGACore* unset_sg=(ACSCGFPGACore*) sg_list->elem(loop);
+      if (unset_sg->word_count==0)
 	return(0);
     }
   return(1);
@@ -477,8 +597,7 @@ void ACSCGFPGATarget::HWset_dirty(ACSCGFPGACore* updated_sg)
 	      }
 	    // Check for source-only smart generators
 	    else if ((dest_sg->bw_dirty) && 
-		     (dest_pins->query_pincount()) == 
-		      (dest_onodes->population()))
+		     (dest_pins->query_pincount()) == (dest_onodes->population()))
 	      {
 		if (DEBUG_BW)
 		  printf("This is a driving-only smart generator and is upto date\n");
@@ -501,7 +620,7 @@ void ACSCGFPGATarget::HWset_dirty(ACSCGFPGACore* updated_sg)
 // FIX:What it lacks in elegance, makes up for the tenancity it
 //     evidences;)
 ////////////////////////////////////////////////////////////////////
-int ACSCGFPGATarget::bselcode(int value, int bit_pos)
+int ACSCGFPGATarget::bselcode_old(int value, int bit_pos)
 {
   int bit_power=(int) pow(2.0,bit_pos);
 
@@ -542,31 +661,15 @@ int ACSCGFPGATarget::bselcode(int value, int bit_pos)
 }
 
 ////////////////////////////////////////////////////////////////////////////
-// Return the total number of bits needed to represent this value (UNSIGNED)
-////////////////////////////////////////////////////////////////////////////
-int ACSCGFPGATarget::HWbit_sizer(const int value)
-{
-  int abs_value=(int) abs(value);
-  int bit_count=0;
-  if (abs_value==0)
-    bit_count=1;
-  else
-    bit_count=(int) ceil(log(abs_value+1.0)/log(2.0));
-
-  return(bit_count);
-}
-
-////////////////////////////////////////////////////////////////////////////
 // Display all information regarding stars and connectivity with the galaxy.
 ////////////////////////////////////////////////////////////////////////////
 void ACSCGFPGATarget::HWdisplay_connectivity(char* title,
-					     SequentialList* sg_list)
+					     CoreList* sg_list)
 {
   printf("\n\n----------------------------------------\n");
   printf("\t\t%s\n",title);
   printf("\n----------------------------------------\n");
   
-
   // Loop over all the smart generators
   for (int loop=0;loop<sg_list->size();loop++)
     {
@@ -602,9 +705,18 @@ void ACSCGFPGATarget::HWdisplay_connectivity(char* title,
 
       printf("Acs id=%d\n",fpga_core->acs_id);
 
-      printf("Acs device=%d, Acs Outdevice=%d\n",
-	     fpga_core->acs_device,
-	     fpga_core->acs_outdevice);
+      if (fpga_core->acs_type==IOPORT)
+	{
+	  ACSIntArray* device_nums=fpga_core->sg_get_privaledge();
+	  int acs_indevice=device_nums->query(0);
+	  int acs_outdevice=device_nums->query(1);
+	  printf("Acs device=%d, Acs Indevice=%d, Acs Outdevice=%d\n",
+		 fpga_core->acs_device,
+		 acs_indevice,
+		 acs_outdevice);
+	}
+      else
+	printf("Acs device=%d\n",fpga_core->acs_device);
       printf("Acs delay=%d, Alg delay=%d, pipe delay=%d\n",
 	     fpga_core->acs_delay,
 	     fpga_core->alg_delay,
@@ -612,6 +724,14 @@ void ACSCGFPGATarget::HWdisplay_connectivity(char* title,
       printf("SG has %d associated delay stars\n",fpga_core->acsdelay_count);
       printf("SG will receive its data at time %d\n",fpga_core->act_input);
       printf("SG will assert its data at time %d\n",fpga_core->act_output);
+      printf("SG will process %d words\n",fpga_core->word_count);
+      printf("SG launch rate is %d, completing at %d\n",fpga_core->act_launch,
+	     fpga_core->act_complete);
+      printf("SG bitstrategy=");
+      if (fpga_core->bitslice_strategy==PRESERVE_LSB)
+	printf("LSB");
+      else
+	printf("MSB");
 
       HWdisplay_connects(fpga_core->pins);
 
@@ -625,7 +745,7 @@ void ACSCGFPGATarget::HWdisplay_connectivity(char* title,
     } //   for (int loop=0;loop<sg_list->size();loop++)
 
   // Display fpga connectivity info
-//  arch->print_arch(title);
+  arch->print_arch(title);
 }
 
 
@@ -638,14 +758,15 @@ void ACSCGFPGATarget::HWdisplay_connects(Pin* localp)
       printf("Pins:\n");
       for (int loop=0;loop<localp->query_pincount();loop++)
 	{
-	  printf("%s of pin type %d, bw of (%d,%d), lock(%d), netlistid(%d), pin_assigned=%d\n",
+	  printf("%s of pin type %d, bw of (%d,%d), lock(%d), netlistid(%d), pin_assigned=%d, priority=%d\n",
 		 localp->query_pinname(loop),
 		 localp->query_pintype(loop),
 		 localp->query_majorbit(loop),
 		 localp->query_bitlen(loop),
 		 localp->query_preclock(loop),
 		 localp->query_netlistid(loop),
-		 localp->query_pinassigned(loop));
+		 localp->query_pinassigned(loop),
+		 localp->query_pinpriority(loop));
 	  Connectivity* localc=localp->query_connection(loop);
 	  for (int loop=0;loop<localc->node_count;loop++)
 	    {
@@ -656,8 +777,9 @@ void ACSCGFPGATarget::HWdisplay_connects(Pin* localp)
 		case DATA_NODE:
 		  conn_sg=HWfind_star(localc->query_acsid(loop));
 		  if (conn_sg != NULL)
-		    printf("DATA_NODE to sg %s and signal %d\n",
+		    printf("DATA_NODE to sg %s acs_id=%d and signal %d\n",
 			   conn_sg->comment_name(),
+			   localc->query_acsid(loop),
 			   localc->query_pinsignal(loop));
 		  else
 		    printf("DATA_NODE to unknown sg and signal %d\n",
@@ -715,7 +837,7 @@ int ACSCGFPGATarget::HWtest_contentions(void)
       if (fpga_device->usage_state==FPGA_USED)
 	{
 	  // Check all child smart generators to this fpga
-	  SequentialList* fpga_cores=fpga_device->get_childcores_handle();
+	  CoreList* fpga_cores=fpga_device->get_childcores_handle();
 	  for (int core_loop=0;core_loop<fpga_cores->size();core_loop++)
 	    {
 	      ACSCGFPGACore* fpga_core=

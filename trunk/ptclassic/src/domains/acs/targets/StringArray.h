@@ -1,5 +1,5 @@
 /**********************************************************************
-Copyright (c) 1999-%Q% Sanders, a Lockheed Martin Company
+Copyright (c) 1999 Sanders, a Lockheed Martin Company
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -25,7 +25,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
  Programmers:  Ken Smith
  Date of creation: 3/23/98
- Version: $Id$
+ Version: @(#)StringArray.h      1.0     06/16/99
 ***********************************************************************/
 #ifndef STRINGARRAY_H
 #define STRINGARRAY_H
@@ -41,6 +41,7 @@ class StringArray
  StringArray::~StringArray(void);
  int StringArray::population(void);
  int StringArray::add(const char*);
+ void StringArray::set(const int,const char*);
  char* StringArray::get(int);
  int StringArray::prefix(const char*);
 };

@@ -1,5 +1,5 @@
 /**********************************************************************
-Copyright (c) 1999-%Q% Sanders, a Lockheed Martin Company
+Copyright (c) 1999 Sanders, a Lockheed Martin Company
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -25,7 +25,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
  Programmers:  Ken Smith
  Date of creation: 3/23/98
- Version: $Id$
+ Version: @(#)Pipealign.h      1.0     06/16/99
 ***********************************************************************/
 #ifndef PIPEALIGN_H
 #define PIPEALIGN_H
@@ -37,10 +37,11 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "ACSIntArray.h"
 #include "acs_starconsts.h"
 
-static const int DEBUG_PIPEALIGN=0;
 
 class Pipealign
 {
+  static const int DEBUG_PIPEALIGN=0;
+ 
  public:
   int delays_needed;   // Boolean, should this smart generator require some
                        // delays on it's input chain
@@ -56,14 +57,14 @@ class Pipealign
   Pipealign::Pipealign(void);
   Pipealign::~Pipealign(void);
   int Pipealign::start_over(void);
-  int Pipealign::add_src(int,
-                         int,
-                         int);
+  int Pipealign::add_src(const int,
+                         const int,
+                         const int);
   int Pipealign::calc_netdelays(void);
-  int Pipealign::calc_netdelays(int);
+  int Pipealign::calc_netdelays(const int);
   int Pipealign::update_delays(void);
   int Pipealign::revise_delays(void);
-  int Pipealign::find_pin(int);
+  int Pipealign::find_pin(const int);
   void Pipealign::print_delays(void);
 };
 

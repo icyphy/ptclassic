@@ -1,5 +1,5 @@
 /**********************************************************************
-Copyright (c) 1999-%Q% Sanders, a Lockheed Martin Company
+Copyright (c) 1999 Sanders, a Lockheed Martin Company
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -25,7 +25,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
  Programmers:  Ken Smith
  Date of creation: 3/23/98
- Version: $Id$
+ Version: @(#)StringArray.cc      1.0     06/16/99
 ***********************************************************************/
 #include <sys/types.h>
 #include <unistd.h>
@@ -61,6 +61,11 @@ int StringArray::add(const char* new_string)
   delete strings;
   strings=new_strings;
   return(total++);
+}
+
+void StringArray::set(const int index, const char* new_string)
+{
+  strcpy(strings[index],new_string);
 }
 
 char* StringArray::get(int index)

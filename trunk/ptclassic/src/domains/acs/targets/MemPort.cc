@@ -1,5 +1,5 @@
 /**********************************************************************
-Copyright (c) 1999-%Q% Sanders, a Lockheed Martin Company
+Copyright (c) 1999 Sanders, a Lockheed Martin Company
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -25,7 +25,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
  Programmers:  Ken Smith
  Date of creation: 3/23/98
- Version: $Id$
+ Version: @(#)MemPort.cc      1.0     06/16/99
 ***********************************************************************/
 #ifdef __GNUG__
 #pragma implementation
@@ -34,7 +34,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "MemPort.h"
 
 MemPort::MemPort() 
-: total_sgs(0), controller_fpga(-1),
+: total_sgs(0), controller_fpga(-1), source_cores(NULL), sink_cores(NULL),
   dataimux_star(NULL), dataomux_star(NULL), data_size(0), 
   addrmux_star(NULL), addrgen_star(NULL),  addrbuf_star(NULL),  
   addr_size(0), addr_lo(0), addr_hi(0),
@@ -43,9 +43,7 @@ MemPort::MemPort()
   current_act(0), pt_count(0), mem_timing(NULL), 
   total_latency(0)
 {
-  source_stars=new SequentialList;
-  sink_stars=new SequentialList;
-  const_stars=new SequentialList;
+  const_stars=new CoreList;
 }
 
 
@@ -53,8 +51,8 @@ MemPort::~MemPort()
 {
   total_sgs=0;
   controller_fpga=-1;
-  delete source_stars;
-  delete sink_stars;
+  delete source_cores;
+  delete sink_cores;
   delete dataimux_star;
   delete dataomux_star;
   delete addrmux_star;
@@ -98,6 +96,27 @@ int MemPort::fetch_pt(int index)
 }  
 
 
+/////////////////////////////////////////
+// Start the core assignment process over
+/////////////////////////////////////////
+int MemPort::reset_cores()
+{
+  total_sgs=0;
+  delete source_cores;
+  delete sink_cores;
+
+  if (portuse!=MEMORY_RESERVED)
+    portuse=MEMORY_UNUSED;
+
+  source_cores=new CoreList;
+  sink_cores=new CoreList;
+  current_act=0;
+
+  // Return happy condition
+  return(1);
+}
+
+
 //////////////////////////////////////////////////////////////////////////////
 // Each memory port is tasked to keep track of all source and sink stars that 
 // are associated with it.  Additionally, the memory port will conduct 
@@ -121,7 +140,7 @@ int MemPort::assign_srccore(ACSCGFPGACore* fpga_core)
     }
 
   // Track sources
-  source_stars->append((Pointer) fpga_core);
+  source_cores->append(fpga_core);
 
   // Assign activation time
   fpga_core->act_input=current_act;
@@ -150,12 +169,14 @@ int MemPort::assign_snkcore(ACSCGFPGACore* fpga_core,int act)
 	printf("Port has been used, using next available clock period\n");
     }
 
-  sink_stars->append((Pointer) fpga_core);
+  sink_cores->append(fpga_core);
   
   // Assign activation time
   fpga_core->act_input=act-write_skew;
   fpga_core->act_output=act;
-      
+  
+  if (fpga_core->act_output > total_latency)
+    total_latency=fpga_core->act_output;
       
   // Return happy condition
   return(1);

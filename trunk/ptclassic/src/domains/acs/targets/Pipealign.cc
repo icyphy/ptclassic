@@ -1,5 +1,5 @@
 /**********************************************************************
-Copyright (c) 1999-%Q% Sanders, a Lockheed Martin Company
+Copyright (c) 1999 Sanders, a Lockheed Martin Company
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -25,7 +25,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
  Programmers:  Ken Smith
  Date of creation: 3/23/98
- Version: $Id$
+ Version: @(#)Pipealign.cc      1.0     06/16/99
 ***********************************************************************/
 #include "Pipealign.h"
 
@@ -66,9 +66,9 @@ int Pipealign::start_over(void)
   return(1);
 }
 
-int Pipealign::add_src(int snk_pin,
-		   int src_act,
-		   int src_id)
+int Pipealign::add_src(const int snk_pin,
+		       const int src_act,
+		       const int src_id)
 {
   if (DEBUG_PIPEALIGN)
     printf("add src id %d, time %d for snk_pin %d\n",src_id,src_act,snk_pin);
@@ -102,10 +102,10 @@ int Pipealign::calc_netdelays(void)
   return(1);
 }  
 
-// This version should only be called on sink smart generators
-// whose scheduling is constrained by memory rather than driving
-// smart generators
-int Pipealign::calc_netdelays(int new_act)
+// If the activation time of the core is fixed, then pipe alignment delays are implicit
+// and are not derived from its connections.  Set this activation time and determine what
+// these delays truely are.
+int Pipealign::calc_netdelays(const int new_act)
 {
   max_nodeact=new_act;
 
@@ -114,7 +114,10 @@ int Pipealign::calc_netdelays(int new_act)
 	   src_acts->population(),
 	   max_nodeact);
 
-  revise_delays();
+  if (src_acts->population() != new_delays->population())
+    update_delays();
+  else
+    revise_delays();
 
   // Return happy condition
   return(1);
@@ -126,7 +129,7 @@ int Pipealign::update_delays(void)
   for (int loop=0;loop<src_acts->population();loop++)
     {
       int src_act=src_acts->query(loop);
-      if (src_act!=NONSCHEDULED)
+      if ((src_act!=NONSCHEDULED) && (src_act!=UNASSIGNED))
 	{
 	  new_delays->add(max_nodeact - src_acts->query(loop));
 	  if (DEBUG_PIPEALIGN)
@@ -144,6 +147,7 @@ int Pipealign::update_delays(void)
   // Return happy condition
   return(1);
 }
+
 
 int Pipealign::revise_delays(void)
 {
@@ -164,7 +168,7 @@ int Pipealign::revise_delays(void)
   return(1);
 }
 
-int Pipealign::find_pin(int ref_pin)
+int Pipealign::find_pin(const int ref_pin)
 {
   for (int loop=0;loop<snk_pins->population();loop++)
     if (snk_pins->query(loop)==ref_pin)

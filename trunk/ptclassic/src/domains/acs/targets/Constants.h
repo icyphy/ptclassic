@@ -1,5 +1,5 @@
 /**********************************************************************
-Copyright (c) 1999-%Q% Sanders, a Lockheed Martin Company
+Copyright (c) 1999 Sanders, a Lockheed Martin Company
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -25,7 +25,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
  Programmers:  Ken Smith
  Date of creation: 3/23/98
- Version: $Id$
+ Version: @(#)Constants.h      1.0     06/16/99
 ***********************************************************************/
 #ifndef CONSTANTS_H
 #define CONSTANTS_H
@@ -49,15 +49,20 @@ static const int CLONG=1;
 static const int CFLOAT=2;
 static const int CDOUBLE=3;
 
+// Sign convention
+// ASSUMPTION:In sync with acs_starconsts.h conventions!!!!
+
 class Constants 
 {
 public:
   int count;
+  int sign_convention;
   void** storage;
   ACSIntArray* types;
 
 public:
  Constants::Constants(void);
+ Constants::Constants(const int);
  Constants::~Constants(void);
  void Constants::add_double(double);
  void Constants::add_float(float);
@@ -77,7 +82,8 @@ public:
  char* Constants::query_str(int,
 			    int,
 			    int);
- int Constants::query_bitsize(int);
+ int Constants::query_bitsize(const int, const int);
+ int Constants::query_bitsize_float(const int, const int);
 };
 
 #endif
