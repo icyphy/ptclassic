@@ -58,7 +58,7 @@
 # is not generated.
 #
 class ::tycho::ClassParser {
-    inherit ::tycho::TyDoc
+    inherit ::tycho::Object
 
     constructor {args} {}
     destructor {}
@@ -112,31 +112,31 @@ class ::tycho::ClassParser {
     ####                   protected variables                     ####
 
     # The author of the current source file
-    protected variable author ""
+    protected variable _author ""
 
     # The contributor(s) to the current source file
-    protected variable contributor ""
+    protected variable _contributor ""
 
     # The package the current source file belongs to
-    protected variable package ""
+    protected variable _package ""
     
     # The version of the current source file
-    protected variable version ""
+    protected variable _version ""
 
     # The first line of the copyright information from the current source file
-    protected variable copyright ""
+    protected variable _copyright ""
 
     # language for the current file
-    protected variable language
+    protected variable _language
 
     # an array of ::tycho::Class objects for this file
-    protected variable myClass
+    protected variable _classmodels
 
     # true if there is outside class information
-    protected variable relatedModified
+    protected variable _relatedModified
 
     # The current source file name
-    protected variable sourceFile
+    protected variable _sourceFile
 }
 
 #######################################################################
@@ -362,17 +362,17 @@ body ::tycho::ClassParser::tydocUpdate {obj} {
 #
 body ::tycho::ClassParser::formatClassComment {expl} {
     # save old information
-    set oldauthor $author
-    set oldcontrib $contributor
-    set oldversion $version
-    set oldcopyright $copyright
+    set oldauthor $_author
+    set oldcontrib $_contributor
+    set oldversion $_version
+    set oldcopyright $_copyright
 
     # clear it
-    set author {}
-    set contributor {}
-    set version {}
-    set copyright {}
-    set desc {}
+    set _author {}
+    set _contributor {}
+    set _version {}
+    set _copyright {}
+    set _desc {}
 
     # Parse line by line
     set explList [split $expl "\n"]
@@ -381,17 +381,17 @@ body ::tycho::ClassParser::formatClassComment {expl} {
         if [regexp {^[ 	]*@([A-Za-z]+):*[ 	]+(.*)} \
 		$explLine dummy docTag docValue] {
 	    set explLine $docValue
-            set docTag [formatTag $docTag]
+            set docTag _[formatTag $docTag]
 	    # puts "ct: $docTag, cl: $docValue"
 	}
-	if {$docTag == "copyright"} {
+	if {$docTag == "_copyright"} {
 	    if {[set $docTag] == "" } {
 		# We save only the first line of the copyright
 		append $docTag $explLine "\n"
             } else {
                 if {[regexp {COPYRIGHTENDKEY} $explLine]} {
                     # ignore until the key
-                    set docTag desc
+                    set docTag _desc
                 }
             }
         } else {
@@ -399,35 +399,35 @@ body ::tycho::ClassParser::formatClassComment {expl} {
         }
     }
     
-    set expl [formatExpl $desc]
+    set expl [formatExpl $_desc]
 
     # Restore old information if necessary
-    if {$author == {}} { set author $oldauthor }
-    if {$contributor == {}} { set contributor $oldcontrib }
-    if {$version == {}} { set version $oldversion }
-    if {$copyright == {}} { set copyright $oldcopyright }
+    if {$_author == {}} { set _author $oldauthor }
+    if {$_contributor == {}} { set _contributor $oldcontrib }
+    if {$_version == {}} { set _version $oldversion }
+    if {$_copyright == {}} { set _copyright $oldcopyright }
 
     # Append the footer
     append expl <hr>
-    if {$author != ""} {
-        if {[llength $author] <= 2} {
-            append expl "<br>Author: $author"
+    if {$_author != ""} {
+        if {[llength $_author] <= 2} {
+            append expl "<br>Author: $_author"
         } {
-            append expl "<br>Authors: $author"
+            append expl "<br>Authors: $_author"
         }
     }
-    if {$contributor != ""} {
-        if {[llength $contributor] == 1} {
-            append expl "<br>Contributor: $contributor"
+    if {$_contributor != ""} {
+        if {[llength $_contributor] == 1} {
+            append expl "<br>Contributor: $_contributor"
         } {
-            append expl "<br>Contributors: $contributor"
+            append expl "<br>Contributors: $_contributor"
         }
     }
-    if {$version != ""} {
-        append expl "<br>Version: $version"
+    if {$_version != ""} {
+        append expl "<br>Version: $_version"
     }
-    if {$copyright != ""} {
-        append expl "<br>Copyright: $copyright"
+    if {$_copyright != ""} {
+        append expl "<br>Copyright: $_copyright"
     }
 
     return $expl
@@ -447,7 +447,7 @@ body ::tycho::ClassParser::formatTag {docTag} {
 }
 
 #####################################################################
-#### formatDesc 
+#### formatDesc
 # Format the description appropriately by removing carriage returns
 # and returning a filler value if no description is found. (The IDoc
 # viewer requires a description.)

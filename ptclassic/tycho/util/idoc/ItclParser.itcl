@@ -38,8 +38,8 @@
 #"../../../../kernel/doc/codeDoc/Class.idoc">::tycho::Class</a>
 # models for each class found, and outputs those to the proper
 # files. The most convenient interface
-# is from ::tycho::IDocSys::generateIDoc which will also generate Java
-# documentation if necessary.
+# is from <code>::tycho::ClassParser::generateIDoc</code>
+# which will also generate Java documentation.
 #
 # The parsing is done in three main procedures. <code>readFile</code>
 # reads in a file line by line and formats the comments in such a way
@@ -66,7 +66,7 @@
 # Finally, the classes are output as files by calling their write methods.
 #
 class ::tycho::ItclParser {
-    inherit ::tycho::IDocSys
+    inherit ::tycho::ClassParser
 
     constructor {args} {}
     destructor {}
@@ -170,31 +170,31 @@ body ::tycho::ItclParser::constructor {args} {
 #
 body ::tycho::ItclParser::readFile {filename} {
     # Initialize single file data
-    set author ""
-    set contributor ""
-    set version ""
-    set copyright ""
+    set _author ""
+    set _contributor ""
+    set _version ""
+    set _copyright ""
 
-    catch {unset myClass}
+    catch {unset _classmodels}
 
     # check extension (only tcl/tk, itk, itcl supported here)
     set ext [file extension $filename]
     switch $ext {
         .tk {
-            set language Itcl
+            set _language Itcl
         }
         .tcl {
-            set language Itcl
+            set _language Itcl
         }
         .itcl {
-            set language Itcl
+            set _language Itcl
         }
         .itk {
-            set language Itcl
+            set _language Itcl
         }
         "" {
             # Fix for files such as tycho-mac, tydoc, idoc
-            set language Itcl
+            set _language Itcl
         }
         default {
             error "::tycho::ItclParser does not support $ext files"
@@ -202,10 +202,10 @@ body ::tycho::ItclParser::readFile {filename} {
     }
 
     # setup related model for outside class information
-    set myClass(related) [::tycho::Class [::tycho::autoName class]]
-    set relatedModified 0
+    set _classmodels(related) [::tycho::Class [::tycho::autoName class]]
+    set _relatedModified 0
 
-    set sourceFile $filename
+    set _sourceFile $filename
     set inEscapedComments ""
     set currentComment {}
     set currentLongLine {}
@@ -276,21 +276,21 @@ body ::tycho::ItclParser::readFile {filename} {
 #
 body ::tycho::ItclParser::generateSingleFileIDoc {filename} {
     # output class model data
-    foreach class [array names myClass] {
+    foreach class [array names _classmodels] {
         # puts $class
-        # puts [$myClass($class) describe]
+        # puts [$_classmodels($class) describe]
         if {$class != "related"} {
             set docFile [info namespace tail $class].itclclass
             ::tycho::rmIfNotWritable $docFile
             set fd [open $docFile "w"]
-            $myClass($class) write $fd
+            $_classmodels($class) write $fd
             close $fd
-            delete object $myClass($class)
+            delete object $_classmodels($class)
         } else {
-            if {$relatedModified} {
+            if {$_relatedModified} {
                 # NOTE: goes by the filename, not the class name, for
                 # related documentation
-                if {[array size myClass] == 1} {
+                if {[array size _classmodels] == 1} {
                     # Not related, ONLY docs
                     set relFile [file root $filename].itclclass
                 } else {
@@ -299,10 +299,10 @@ body ::tycho::ItclParser::generateSingleFileIDoc {filename} {
                 }
                 ::tycho::rmIfNotWritable $relFile
                 set fd [open $relFile "w"]
-                $myClass(related) write $fd
+                $_classmodels(related) write $fd
                 close $fd
             }
-            delete object $myClass(related)
+            delete object $_classmodels(related)
         }
     }
 }
@@ -321,7 +321,7 @@ body ::tycho::ItclParser::generateSingleFileIDoc {filename} {
 # This is approximate, they must be declared before the first class 
 # in a file or after a body within a file, which is only decent coding
 # style. It can be fooled by declaring a proc within a body, which is
-# done in IDocSys.itcl and TyDoc.itcl
+# done in ClassParser.itcl and TyDoc.itcl
 #
 body ::tycho::ItclParser::getClassesInSource {filename} {
     set inClass 0
@@ -383,7 +383,7 @@ body ::tycho::ItclParser::modCheck {filename} {
 
     # Check to see if the generator itself has been changed.
     set itclGenTime [file mtime [file join $TYCHO lib tydoc ItclParser.itcl]]
-    set idocGenTime [file mtime [file join $TYCHO lib tydoc IDocSys.itcl]]
+    set idocGenTime [file mtime [file join $TYCHO lib tydoc ClassParser.itcl]]
     if {$itclGenTime > $idocGenTime} {
         set genTime $itclGenTime
     } {
@@ -631,10 +631,10 @@ body ::tycho::ItclParser::parseData {data} {
 # definition.
 #
 body ::tycho::ItclParser::parseClass {class body} {
-    set myClass($class) [::tycho::Class [::tycho::autoName class]]
-    $myClass($class) modelconfigure -language $language
-    $myClass($class) modelconfigure -name $class
-    $myClass($class) modelconfigure -source [file join .. .. $sourceFile]
+    set _classmodels($class) [::tycho::Class [::tycho::autoName class]]
+    $_classmodels($class) modelconfigure -language $_language
+    $_classmodels($class) modelconfigure -name $class
+    $_classmodels($class) modelconfigure -source [file join .. .. $_sourceFile]
 
     set lastComment {}
     set lastProtection {}
@@ -804,7 +804,7 @@ body ::tycho::ItclParser::parseClass {class body} {
         }
         if {$inInherit} {
             if {[string range $construct 0 1] == "::"} {
-                $myClass($class) parent $construct
+                $_classmodels($class) parent $construct
                 continue
             }
             # No more parents, parse this.
@@ -862,7 +862,7 @@ body ::tycho::ItclParser::parseClass {class body} {
 # Add a class comment to the class model. 
 #
 body ::tycho::ItclParser::addClassComment {class expl} {
-    set classModel $myClass($class)
+    set classModel $_classmodels($class)
     set expl [formatClassComment $expl]
     $classModel annotation explanation "$expl"
 }
@@ -875,7 +875,7 @@ body ::tycho::ItclParser::addClassComment {class expl} {
 # format: <code>parameter num1; parameter num2 -optional 1 -default 0</code>
 #
 body ::tycho::ItclParser::addArgs {class entityName arguments} {
-    set classModel $myClass($class)
+    set classModel $_classmodels($class)
     foreach arg $arguments {
         set default [lindex $arg 1]
         # check the length in case the default is {}
@@ -894,7 +894,7 @@ body ::tycho::ItclParser::addArgs {class entityName arguments} {
 # the class model for $class.
 #
 body ::tycho::ItclParser::addConstructor {class arguments desc} {
-    set classModel $myClass($class)
+    set classModel $_classmodels($class)
     $classModel Constructor constructor
     set desc [formatDesc $desc]
     $classModel annotation constructor.description $desc Constructor
@@ -907,7 +907,7 @@ body ::tycho::ItclParser::addConstructor {class arguments desc} {
 # the class model for $class.
 #
 body ::tycho::ItclParser::addDestructor {class desc} {
-    set classModel $myClass($class)
+    set classModel $_classmodels($class)
     $classModel Destructor destructor
     set desc [formatDesc $desc]
     $classModel annotation destructor.description $desc Destructor
@@ -920,7 +920,7 @@ body ::tycho::ItclParser::addDestructor {class desc} {
 #
 body ::tycho::ItclParser::addItk_Option {class switchName desc {default {}}} {
     # Itk_options have the modifier flag set to itk_option in Itcl
-    set classModel $myClass($class)
+    set classModel $_classmodels($class)
     $classModel variable $switchName \
             -protection public -modifiers itk_option -default $default
     set desc [formatDesc $desc]
@@ -935,7 +935,7 @@ body ::tycho::ItclParser::addItk_Option {class switchName desc {default {}}} {
 body ::tycho::ItclParser::addCommon {class commonName protection \
         desc {default {}}} {
     # Commons are variables of classwide scope in Itcl
-    set classModel $myClass($class)
+    set classModel $_classmodels($class)
     $classModel variable $commonName \
             -protection $protection -scope class -default $default
     set desc [formatDesc $desc]
@@ -949,7 +949,7 @@ body ::tycho::ItclParser::addCommon {class commonName protection \
 body ::tycho::ItclParser::addVariable {class varName protection \
         desc {default {}}} {
     # Variables are variables of instance scope in Itcl
-    set classModel $myClass($class)
+    set classModel $_classmodels($class)
     $classModel variable $varName \
             -protection $protection -scope instance -default $default
     set desc [formatDesc $desc]
@@ -964,7 +964,7 @@ body ::tycho::ItclParser::addVariable {class varName protection \
 body ::tycho::ItclParser::addInsideProc {class procName protection \
         arguments desc} {
     # Procs are methods of classwide scope in Itcl
-    set classModel $myClass($class)
+    set classModel $_classmodels($class)
     $classModel method $procName -protection $protection -scope class
     set desc [formatDesc $desc]
     $classModel annotation $procName.description $desc method
@@ -978,7 +978,7 @@ body ::tycho::ItclParser::addInsideProc {class procName protection \
 #
 body ::tycho::ItclParser::addMethod {class methodName protection arguments desc} {
     # Methods are methods of instance scope in Itcl
-    set classModel $myClass($class)
+    set classModel $_classmodels($class)
     $classModel method $methodName -protection $protection -scope instance
     set desc [formatDesc $desc]
     $classModel annotation $methodName.description $desc method
@@ -1000,12 +1000,12 @@ body ::tycho::ItclParser::addBody {bodyName arguments expl} {
     set bodyName [info namespace tail $bodyName]
 
     # Tcl allows either tycho::crap or ::tycho::crap
-    if ![info exists myClass($class)] {
+    if ![info exists _classmodels($class)] {
         set class "::$class"
     }
 
-    if [info exists myClass($class)] {
-        set classModel $myClass($class)
+    if [info exists _classmodels($class)] {
+        set classModel $_classmodels($class)
         # Insert the explanation
         set expl [formatExpl "$expl"]
         if {$expl != {}} {
@@ -1028,12 +1028,12 @@ body ::tycho::ItclParser::addConfigBody {configName expl} {
     set configName [info namespace tail $configName]
  
     # Tcl allows either tycho::crap or ::tycho::crap
-    if ![info exists myClass($class)] {
+    if ![info exists _classmodels($class)] {
         set class "::$class"
     }
 
-    if [info exists myClass($class)] {
-        set classModel $myClass($class) 
+    if [info exists _classmodels($class)] {
+        set classModel $_classmodels($class) 
         set expl [formatExpl "$expl"]
         if {$expl != {}} {
             $classModel annotation $configName.explanation $expl variable
@@ -1048,8 +1048,8 @@ body ::tycho::ItclParser::addConfigBody {configName expl} {
 # yet are found in the current file.
 #
 body ::tycho::ItclParser::addOutsideProc {procName arguments expl} {
-    # add to $myClass(related)
-    set classModel $myClass(related)
+    # add to $_classmodels(related)
+    set classModel $_classmodels(related)
     $classModel method $procName -protection public -scope class
     set expl [formatExpl "$expl"]
     if {$expl != {}} {
@@ -1058,5 +1058,5 @@ body ::tycho::ItclParser::addOutsideProc {procName arguments expl} {
     set desc [shortDesc "$expl"]
     $classModel annotation $procName.description $desc method
    
-    set relatedModified 1
+    set _relatedModified 1
 }
