@@ -4,7 +4,7 @@
 
   PackageName [ ptdsp ]
 
-  Synopsis    [  ]
+  Synopsis    [ Functions for zig-zag scan and inverse zig-zag scan of an image ]
 
   Author      [ Paul Haskell ]
 
@@ -50,7 +50,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
   Synopsis    [ Zig-zag scans an image ]
   Description [ This function zig-zag scans a matrix representing an
                 image stored in inImg and  returns the result in
-		"outImg".This is useful before quantizing a DCT
+		outImg.This is useful before quantizing a DCT
 		transformed image. ]
   SideEffects []
   SeeAlso     [ Ptdsp_ZigZagInverse ]
@@ -109,3 +109,55 @@ Ptdsp_ZigZagScan (const double * inImg, double * outImg, int width,
   }
 }
 
+/**Function*******************************************************************
+  Synopsis    [ Inverts zig-zag scan ]
+  Description [ This function inverse zig-zag scans an image, stored
+                in inImg as a double array, and outputs the result in
+		outImg ]
+  SideEffects []
+  SeeAlso     [ Ptdsp_ZigZagScan ]
+******************************************************************************/
+void
+Ptdsp_ZigZagInverse (const double * inImg, double * outImg,
+		     int width, int height,  int bSize) {    
+
+  int k, indx, l, row, col;
+  int displace = 0;
+  for( row = 0; row < height; row += bSize) {
+    for( col = 0; col < width; col += bSize) {
+      /* Invert the zigzag. */
+      /* k is length of current (semi)diagonal; l is iteration on
+	 diag. */
+      k = 0; indx = displace;
+      for(k = 1; k < bSize; k++) { /* Top triangle */
+	for(l = 0; l < k; l++) { /* down */
+	  outImg[col + (row+l)*width + (k-l-1)] = inImg[indx++];
+	}
+	k++;						/* NOTE THIS! */
+	for(l = 0; l < k; l++) {			/* back up */
+	  outImg[col + (row+k-l-1)*width + l] = inImg[indx++];
+	}
+      }
+
+      /* If bSize an odd number, start with diagonal, else one down. */
+      if (bSize % 2) { k = bSize; }
+      else { k = bSize-1; }
+      
+      for(; k > 1; k--) {			/* Bottom triangle */
+	for(l = 0; l < k; l++) { /* down */
+	  outImg[col + (row+bSize-k+l)*width +
+		(bSize-l-1)] = inImg[indx++];
+	}
+	k--; /* NOTE THIS! */
+	for(l = 0; l < k; l++) {		/* back up */
+	  outImg[col + (row+bSize-l-1)*width +
+		bSize-k+l] = inImg[indx++];
+	}
+      }
+
+      /* Have to do last element. */
+      outImg[col + (row + bSize - 1) * width + bSize - 1] = inImg[indx];
+      displace += bSize * bSize;;
+    }
+  }
+}
