@@ -99,7 +99,7 @@ REL_ITCL_BINDIR =	../tcltk/$(TCL8_DEST_BASE)/bin
 ITCL_DEST_LIB = $(TCL8_DEST)/lib
 
 # Itcl contains its own custom tcltk
-all: 		configure_tcltk8 tcltk8 install_
+all: 		configure_tcltk8 tcltk8 install_itcl
 configure:	$(PTOLEMY)/src/tcltk/tcl_shared \
 			$(ITCL_OBJ)/config.status $(TCLTK_OBJ)/makefile
 bin:		itcl
