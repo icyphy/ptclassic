@@ -44,6 +44,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "dataType.h"
 #include "EventHorizon.h"
 #include "SDFScheduler.h"
+#include "compat.h"		// Pickup symlink()
 
 // Utility functions.
 extern const char* whichType(DataType);
@@ -160,6 +161,11 @@ static char* complexDecl =
 "\n#if !defined(COMPLEX_DATA)\n#define COMPLEX_DATA 1"
 "\n typedef struct complex_data { double real; double imag; } complex; \n"
 "#endif\n";
+static char* fixDecl =
+"\n#if !defined(NO_FIX_SUPPORT)"
+"\n/* include definitions for the fix runtime library */"
+"\n#include \"CGCrtlib.h\""
+"\n#endif\n";
 
 void CGCTarget::trailerCode()
 {
@@ -183,7 +189,7 @@ void CGCTarget :: frameCode ()
     // main function, declarations must appear before any code.
 
     StringList code = headerComment();
-    code << include << complexDecl << globalDecls << procedures
+    code << include << fixDecl << complexDecl << globalDecls << procedures
 	 << comment("main function")
 	 << (const char*)funcName << "() {\n"
 	 << mainDecls << commInit << mainInit;
@@ -205,6 +211,26 @@ void CGCTarget :: writeCode()
 
 int CGCTarget::compileCode()
 {
+    StringList path;
+
+    // build symbolic links to the CGC runtime library files
+    // NOTE: this will only work on the local host
+    path << expandPathName(destDirectory) << '/' << "CGCrtlib.h";
+
+    if (access(path,R_OK) == -1) {
+	// unlink a possibly invalid symbolic link
+	unlink(path);
+	symlink(expandPathName("$PTOLEMY/lib/cgc/CGCrtlib.h"), path);
+    }
+
+    path.initialize();
+    path << expandPathName(destDirectory) << '/' << "CGCrtlib.c";
+    if (access(path,R_OK) == -1) {
+	unlink(path);
+	symlink(expandPathName("$PTOLEMY/lib/cgc/CGCrtlib.c"), path);
+    }
+
+    // invoke the compiler
     StringList file, cmd, error;
     file << filePrefix << ".c";
     cmd << compileLine(file) << " -o " << filePrefix;
@@ -364,6 +390,67 @@ int CGCTarget :: codeGenInit() {
 
 // Splice in stars.
 // Return FALSE on error.
+
+    static int needsSpliceStar(CGCPortHole* port)
+    {
+	if (port->isItOutput() && (port->type() != ANYTYPE)) {
+
+	    // splice conversion star if type of output port does not
+	    // match the type of the data connection
+	    if (port->type() != port->resolvedType())
+		return TRUE;
+
+	    // check for ports of type FIX;
+	    // splice a FixToFix star if the precisions do not match or
+	    // one or both side uses precision variables that can change at
+	    // runtime
+	    if (port->type() == FIX) {
+
+		Precision p1, p2;
+
+		// if this or the far side is a multiporthole, refer to the
+		// multiport rather than to the normal porthole itself;
+		// this is because when deriving a new port from the multiport,
+		// the precision of the multiport may not have been set yet
+		// (cf. MultiInCGCPort::newPort)
+
+		MultiCGCPort* myMultiPort  = (MultiCGCPort*)port->getMyMultiPortHole();
+		MultiCGCPort* farMultiPort = (MultiCGCPort*)port->far()->getMyMultiPortHole();
+
+		GenericPort* thisSide = port;
+		GenericPort* farSide  = port->far();
+
+		// get the precision assigned to the two connected ports without
+		// using the precision() method directly, since it would eventually
+		// pass the precision of the peer port
+
+		if (myMultiPort && myMultiPort->validPrecision())
+			p1 = myMultiPort->precision(),
+			thisSide = myMultiPort;
+	   else if (port->validPrecision())
+			p1 = port->precision();
+
+		if (farMultiPort && farMultiPort->validPrecision())
+			p2 = farMultiPort->precision(),
+			farSide = farMultiPort;
+	   else if (((CGCPortHole*)port->far())->validPrecision())
+			p2 = ((CGCPortHole*)port->far())->precision();
+
+		// if at least one of the connected ports uses variable
+		// precisions and the other side defines its own precision,
+		// we need a FixToFix star
+		if (((thisSide->attributes() & AB_VARPREC) && p2.isValid()) ||
+		    ((farSide->attributes()  & AB_VARPREC) && p1.isValid()))
+			return TRUE;
+
+		// otherwise check whether the precisions differ
+		if (p1.isValid() && p2.isValid() && (p1 != p2))
+			return TRUE;
+	    }
+	}
+	return FALSE;
+    }
+
 int CGCTarget::modifyGalaxy()
 {
     extern int warnIfNotConnected (Galaxy&);
@@ -378,13 +465,11 @@ int CGCTarget::modifyGalaxy()
     while ((star = starIter++) != NULL)
     {
 	BlockPortIter portIter(*star);
-	PortHole* port;
-	while ((port = portIter++) != NULL)
+	CGCPortHole* port;
+	while ((port = (CGCPortHole*)portIter++) != NULL)
 	{
 	    // Splice in type conversion stars.
-	    if (port->isItOutput()
-		&& (port->type() != ANYTYPE)
-		&& (port->type() != port->resolvedType()) )
+	    if (needsSpliceStar(port))
 	    {
 		PortHole* input = port->far();	// destination input PortHole
 
@@ -396,20 +481,38 @@ int CGCTarget::modifyGalaxy()
 		{
 		    gal.initialize();
 		    if (SimControl::haltRequested()) return FALSE;
-		    if (port->type() == port->resolvedType()) continue;
+		    if (!needsSpliceStar(port)) continue;
 		}
 
 		Star* s = 0;
 
-		if (port->type() == COMPLEX)
-		{
-		    if (!(s = (Star*)spliceStar(input, "CxToFloat", TRUE, domain)))
-			return FALSE;
-		}
-		else if (port->resolvedType() == COMPLEX)
-		{
-		    if (!(s = (Star*)spliceStar(input, "FloatToCx", TRUE, domain)))
-			return FALSE;
+		// type conversion table;
+		// procession takes place in chronological order
+
+		static struct {
+			DataType src, dst;
+			const char* star;
+		} cnv_table[] = {
+			{  COMPLEX, FIX, 	"CxToFix"	},
+			{  COMPLEX, ANYTYPE,	"CxToFloat"	},
+			{  FIX,	    COMPLEX,	"FixToCx"	},
+			{  FIX,	    FIX,	"FixToFix"	},
+			{  FIX,	    ANYTYPE,	"FixToFloat"	},
+			{  ANYTYPE, COMPLEX,	"FloatToCx"	},
+			{  ANYTYPE, FIX,	"FloatToFix"	}
+		};
+
+		for (int i=0; i < sizeof(cnv_table)/sizeof(*cnv_table); i++) {
+
+		    if (((port->type() == cnv_table[i].src) ||
+				  (cnv_table[i].src == ANYTYPE)) &&
+		        ((port->resolvedType() == cnv_table[i].dst) ||
+				  (cnv_table[i].dst == ANYTYPE))) {
+
+			    if (!(s = (Star*)spliceStar(input, cnv_table[i].star, TRUE, domain)))
+				return FALSE;
+			  break;
+		    }
 		}
 
 		if (s)
@@ -601,6 +704,8 @@ const char* whichType(DataType s) {
 		return "int";
 	else if ((strcmp(s, COMPLEX) == 0) || (strcmp(s, "COMPLEXARRAY") == 0)) 
 		return "complex";
+	else if ((strcmp(s, FIX) == 0) || (strcmp(s, "FIXARRAY") == 0)) 
+		return "fix";
 	else if (strcmp(s, "STRING") == 0) return "char*";
 	return "double";
 }
