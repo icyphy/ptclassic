@@ -62,8 +62,7 @@ CGMultiTarget::CGMultiTarget(const char* name,const char* sClass,
 	"define the specific resources of child targets (separated by ;)"));
 	addState(relTimeScales.setState("relTimeScales",this,"1",
 		"define the relative time scales of child targets"));
-	addState(filePrefix.setState("filePrefix",this,"code_proc",
-				    "prefix for output code files"));
+	filePrefix.setAttributes(A_SETTABLE);
         addState(ganttChart.setState("ganttChart",this,"YES",
                                      "if true, display Gantt chart"));
         addState(logFile.setState("logFile",this,"",
@@ -91,13 +90,21 @@ Block* CGMultiTarget::makeNew() const {
 }
 
 	/////////////////////////
-	// setup, wrapup
+	// setup
 	/////////////////////////
 
 void CGMultiTarget::setup() {
+	// if the filePrefix is not set, set it to the galaxy name.
+	if (filePrefix.null()) filePrefix = galaxy()->name();		
+
 	// prepare child targets
 	prepareChildren();
 	if (SimControl :: haltRequested()) return;
+
+	// This will be phased out.  Use either CGTarget::writeFile
+	// or CGUtilities.h rpcWriteFile.
+	writeDirectoryName(destDirectory);
+
 
 	// check whether communication can be amortized or not.
 	// If YES, setup the  Reachability matrix.
@@ -122,7 +129,6 @@ void CGMultiTarget::setup() {
 	canProcs.create(nChildrenAlloc);
 
 	// CG stuff
-	writeDirectoryName(destDirectory);
 	myCode.initialize();
 
 	if (galaxy()->parent()) {
@@ -150,32 +156,38 @@ void CGMultiTarget::setup() {
 }
 
 void CGMultiTarget :: prepareChildren() {
-	if (!inherited()) {
-		deleteChildren();
-		nChildrenAlloc = nprocs;
-		if (childType.size() > nChildrenAlloc) {
-			Error :: warn("too many child types are",
-			  " sepcified: look at [nprocs] parameter");
-		}
-		if (childType.size() != relTimeScales.size()) {
-			Error :: warn("unmatched number of parameters: ",
-			"[childType] and [relTimeScales].\n",
-			"By default, we assume the same time scale, 1");
-		}
-		StringList tname;
-		for (int i = 0; i < nChildrenAlloc; i++) {
-			Target* t = createChild(i);
-			if (!t) return;
-			addChild(*t);
-			tname.initialize();
-			tname << (const char*) filePrefix << i;
-			t->setNameParent(hashstring(tname),this);
-		}
-		resourceInfo();
-	   	for (i = 0; i < nChildrenAlloc; i++) {
-			child(i)->initialize();
-	   	}
+    if (!inherited()) {
+	deleteChildren();
+	nChildrenAlloc = nprocs;
+	if (childType.size() > nChildrenAlloc) {
+	    Error :: warn("too many child types are",
+	      " specified: look at [nprocs] parameter");
 	}
+	if (childType.size() != relTimeScales.size()) {
+	    Error :: warn("unmatched number of parameters: ",
+	    "[childType] and [relTimeScales].\n",
+	    "By default, we assume the same time scale, 1");
+	}
+	StringList tname;
+	for (int i = 0; i < nChildrenAlloc; i++) {
+	    Target* t = createChild(i);
+	    if (!t) return;
+	    addChild(*t);
+	    tname.initialize();
+	    tname << filePrefix << i;
+	    t->setNameParent(hashstring(tname),this);
+	    if (cgChild(i)) {
+		t->stateWithName("file")->setInitValue(tname);
+		t->stateWithName("directory")->setInitValue(destDirectory);
+		const char* display = displayFlag.initValue();
+		t->stateWithName("display?")->setInitValue(display);
+	    }
+	}
+	resourceInfo();
+	for (i = 0; i < nChildrenAlloc; i++) {
+	    child(i)->initialize();
+	}
+    }
 }
 
 Target* CGMultiTarget :: createChild(int i) {
@@ -332,23 +344,13 @@ void CGMultiTarget::writeSchedule() {
         }
 }
 
-void CGMultiTarget::wrapup() {
-
-	StringList logMsg;
+// This is not used *yet*
+void CGMultiTarget::writeCode() {
 	for (int i = 0; i < nProcs(); i++) {
 		// write out generated code.
-		StringList name = (const char*)filePrefix;
-		name += i;
 		CGTarget* nextChild = (CGTarget*)child(i);
-		nextChild->writeCode(name);
-		logMsg += "code for ";
-		logMsg += nextChild->fullName();
-		logMsg += " written to ";
-		logMsg += (const char*)filePrefix;
-		logMsg += i;
-		logMsg += "\n";
+		nextChild->writeCode();
 	}
-	Error::message(logMsg);
 }
 
 	/////////////////////
