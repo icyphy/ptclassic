@@ -33,11 +33,13 @@ LIB=libcg.a
 
 # Header files
 HDRS= CGConnect.h CGGeodesic.h CGStar.h CGTarget.h \
+ CGWormhole.h CGWormConnect.h IntArray.h Profile.h BaseMultiTarget.h \
 AsmTarget.h AsmConnect.h AsmGeodesic.h AsmStar.h ProcMemory.h MReq.h MemMap.h
  
 
 # Library objects
 OBJS= CGConnect.o CGStar.o CGDomain.o CGTarget.o \
+ CGWormhole.o IntArray.o Profile.o BaseMultiTarget.o \
  AsmTarget.o AsmConnect.o AsmGeodesic.o AsmStar.o ProcMemory.o MReq.o MemMap.o
 
 # Library sources
