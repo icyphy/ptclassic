@@ -32,7 +32,7 @@ GNUINCLUDE    = /usr/gnu/lib/g++-include
 # Linker variables
 LINKER        = g++
 LDFLAGS	      = -L$(OCTTOOLS)/lib -L$(PTOLEMY)/lib.$(ARCH)
-LIBS	      = -lptolemy -lg++ -loh -lrpc -llist -ltr -lutility -lst \
+LIBS	      = -lsdf -lptolemy -lg++ -loh -lrpc -llist -ltr -lutility -lst \
 		-lerrtrap -luprintf -lport -lX11 -lm
 
 HDRS	      = compile.h \
@@ -97,7 +97,7 @@ all:	$(TARGET)
 
 $(TARGET): makefile $(OBJS) $(PTOLEMY)/lib.$(ARCH)/libptolemy.a 
 	$(LINKER) $(LDFLAGS) $(OBJS) \
-	    $(PTOLEMY)/obj.$(ARCH)/stars/sdf/*.o \
+	    ../stars/sdf/*.o \
 	    $(LIBS) -o $(TARGET)
 
 INSTALLED     = $(PTOLEMY)/bin.$(ARCH)/$(TARGET)
