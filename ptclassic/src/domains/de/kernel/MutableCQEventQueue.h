@@ -40,6 +40,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 class Particle;
 class PortHole;
+class DEStar;
 
         //////////////////////////////////////////
         // class Event and EventQueue
@@ -82,11 +83,22 @@ public:
 	     } else {
 		 dest = (Star*) a;
 	     }
-	     return MutableCalendarQueue::levelput(a, v, fv, dest);
+	     return levelput(a, v, fv, dest);
 	}
 
 	CqLevelLink* levelput(Pointer a, double v, double fv, Star* dest) {
-	    return MutableCalendarQueue::levelput(a, v, fv, dest);
+	    CqLevelLink* link; 
+	    
+	    link = MutableCalendarQueue::levelput(a, v, fv, dest);
+	    if( dest->isA("DEStar") ) {
+		DEStar* deStarDestination = (DEStar *)dest;
+		if( deStarDestination->isMutable() ) {
+		    link->destinationRef = 
+			    deStarDestination->addToPendingEventList(link);
+		}
+	    }
+
+	    return link;
 	}
 
 	void putFreeLink(CqLevelLink* p); // virtual
