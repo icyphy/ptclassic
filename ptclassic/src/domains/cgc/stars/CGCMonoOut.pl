@@ -83,8 +83,11 @@ provisions.
   
   initCode {
     CGCAudioBase::initCode();
-    /* variable for the sync codeblock below */
+
+    /* variable for the sync codeblock below and its initialization */
     addDeclaration(syncCounter);
+    addCode("$starSymbol(count) = 0;");
+      
     /* Declare buffer type and size depending on the encoding */
     if (strcasecmp(encodingType, "linear16") == 0){
       addDeclaration(declarations("short", int(blockSize)/2));
