@@ -81,6 +81,9 @@ test.  This ensures that the first test result will always be TRUE.
 #define GTID ">"
 #define GEID ">="
 	}
+        constructor {
+		noInternalState();
+	}
 	setup {
 		const char* cn = condition;
 		if ( strcasecmp(cn, "EQ") == 0) test = EQID;
@@ -101,8 +104,8 @@ test.  This ensures that the first test result will always be TRUE.
 		$ref(prevResult) = result;
 	}
 	go {
-		StringList compare = "$ref(left) ";
-		compare << test << " $ref(right);\n";
+		StringList compare = "$ref(upper) ";
+		compare << test << " $ref(lower);\n";
 
 		if ( int(crossingsOnly) ) {
 			addCode(decl);

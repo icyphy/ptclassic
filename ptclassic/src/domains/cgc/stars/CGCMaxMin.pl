@@ -61,6 +61,19 @@ This star is based on the MaxMin star in the CG56 domain.
 		desc {default is not to output magnitude}
 	}    
 
+	constructor {
+		noInternalState();
+	}
+
+	setup {
+		if ( int(N) <= 0 ) {
+		    Error::abortRun(*this,
+				    "Number of samples, N, must be positive.");
+		    return;
+		}
+		input.setSDFParams(int(N), int(N)-1);
+	}
+
 	codeblock(macros) {
 #define FABS(a)	( ((a) > 0.0) ? (a) : -(a) )
 	}
@@ -108,15 +121,6 @@ This star is based on the MaxMin star in the CG56 domain.
 
 	/* Adjust the index due to the LIFO nature of input data */
 	$ref(index) = $val(N) - valueIndex - 1;
-	}
-
-	setup {
-		if ( int(N) <= 0 ) {
-		    Error::abortRun(*this,
-				    "Number of samples, N, must be positive.");
-		    return;
-		}
-		input.setSDFParams(int(N), int(N)-1);
 	}
 
  	go {

@@ -63,6 +63,9 @@ non-zero integer (not necessarily 1).
 	private {
 		int test;
 	}
+        constructor {
+		noInternalState();
+	}
 	setup {
 		const char* cn = logic;
 		if ( strcasecmp(cn, "NOT") == 0) {
