@@ -38,14 +38,16 @@ unsigned SDFStar :: runCost() {
 }
 
 // firing SDF star
-void SDFStar :: fire() {
+int SDFStar :: fire() {
 	BlockPortIter next(*this);
 	for(int i = numberPorts(); i > 0; i--)
 		(next++)->grabData();
-	Star::fire();
+	int status = Star::fire();
+	// we send the data even on error
 	next.reset();
 	for(i = numberPorts(); i > 0; i--)
 		(next++)->sendData();
+	return status;
 }
 
 // return execution time: define a default time of 5.
