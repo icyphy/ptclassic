@@ -6,8 +6,10 @@
 # variable PRINTER.
 #
 
-set path = ( ~ptolemy/octtools/bin.$ARCH $path )
+if ( ! $?PTOLEMY ) setenv PTOLEMY ~ptolemy
+
+set path = ( $PTOLEMY/octtools/bin.$ARCH $path )
 if (!($?OCTTOOLS)) then
-	setenv OCTTOOLS ~ptolemy
+	setenv OCTTOOLS $PTOLEMY
 endif
-oct2ps -=T ~ptolemy/lib/bw_patterns -f interface $*\:schematic | lpr -P$PRINTER
+oct2ps -=T $PTOLEMY/lib/bw_patterns -f interface $*\:schematic | lpr -P$PRINTER
