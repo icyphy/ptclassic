@@ -75,7 +75,7 @@ main()
   static char input[STRSIZE];
   static char fname[STRSIZE];
   static int nfmax, nfilt, idist;
-  extern /* Subroutine */ remez_();
+  extern int remez_();
   static int jtype;
   static double svrip;
   static float change;
