@@ -52,17 +52,20 @@ class ::tycho::SlateView {
     # Find items.
     method find {mode args}
 
-    # Get the id of an item given its name
-    method id {name}
+    # Get the slate id of an item given its name
+    method slateid {name}
 
     # Manipulate the layout model
     method layout {mode args}
 
-    # Manipulate libraries for placed items 
+    # Manipulate libraries 
     method library {mode args}
 
-    # Get or set the name of an item given its id
-    method name {id}
+    # Manipulate models 
+    method model {mode args}
+
+    # Get the name of an item given its slate id
+    method itemname {slateid}
 
     # Handle change notification from the layout model
     method notify {method args}
@@ -71,7 +74,7 @@ class ::tycho::SlateView {
     ####                  protected methods                      ####
 
     # Add a new item
-    method _add {name args}
+    method _add {_ name args}
 
     # Add a tag to all indicated items.
     method _addtag {tag args}
@@ -139,6 +142,9 @@ class ::tycho::SlateView {
     # The loaded libraries
     private variable _library
 
+    # The loaded models
+    private variable _model
+
     # The mapping from item names to item IDs
     private variable _itemid
 
@@ -189,18 +195,17 @@ body ::tycho::SlateView::find {mode tag} {
     return $result
 }
 
-########################################################################
-#### id
+#########################################################################
+#### itemname
 #
-# Return the slate id of an item given its name. If the id is unknown,
-# return the argument on the assumption that it's a valid canvas
-# tag.
+# Get the name of an item from its slate id. If the argument is
+# not a valid id, return it on the assumption that it's a tag.
 #
-body ::tycho::SlateView::id {name} {
-    if [::info exists _itemid($name)] {
-        return $_itemid($name)
+body ::tycho::SlateView::itemname {slateid} {
+    if ![::info exists _nameof($slateid)] {
+        return $slateid
     } else {
-        return $name
+        return $_nameof($slateid)
     }
 }
 
@@ -350,7 +355,7 @@ body ::tycho::SlateView::library {mode args} {
             }
             if { $opts(-entities) == "" } {
                 set opts(-entities) [::tycho::lsubtract \
-                        [$lib type configure] {attribute group xref}]
+                        [$lib type names] {attribute group xref}]
             }
             # Add to menubar
             set mb [menubar]
@@ -392,13 +397,83 @@ body ::tycho::SlateView::library {mode args} {
     }
 }
 
-#########################################################################
-#### name
+########################################################################
+#### model
 #
-# Get the name of an item from its slate id.
+# Manipulate models. Typically SlateView subclasses manipulate
+# one or more models containing data. This method serves as a
+# common (across subclasses) repository for these models and
+# also allows external clients access to them. This method has
+# several forms, depending on the value of the _mode_ argument:
+# <dl>
+# <dt><b>access</b> _name_ ?_method_? ?_arg_ ...?
+# <dd>
+# Get access to a model. If _method_ is supplied, then it is the
+# name of a method on the model to call, and additional
+# arguments are supplied to the call. Otherwise, the namd of the
+# model is returned.
 #
-body ::tycho::SlateView::name {id} {
-    return $_itemid($name)
+# <dt><b>add</b> _name_ _object_
+# <dd>
+# Add a model to the list of known models. Note that _object_
+# must be a globally-accessible object. To ensure this, clients
+# must either create the model using <b>uplevel #0</b>, or
+# use <b>info which -command _object_</b> before calling this
+# method.
+#
+# <dt><b>delete</b> _name_
+# <dd>
+# Delete a model from the list of known models. Note that the
+# model will not be destroyed.
+#
+# <dt><b>names</b>
+# <dd>
+# Return a list of known models.
+#
+# </dl>
+#
+body ::tycho::SlateView::model {mode args} {
+    switch -exact $mode {
+        "access" {
+            # Extract args
+            set name [lindex $args 0]
+            if ![::info exists _model($name)] {
+                error "Unknown model \"$name\""
+            }
+            if { [llength $args] > 1 } {
+                eval $_model($name) [lreplace $args 0 0]
+            } else {
+                return $_model($name)
+            }
+        }
+        "add" {
+            # Extract args
+            set name [lindex $args 0]
+            set object [lindex $args 1]
+            if { [::info which -command $object] == "" } {
+                error "Model $name ($object) is not accessible in this scope"
+            }
+            if [::info exists _model($name)] {
+                error "Model \"$model\" has already been registered"
+            }
+            set _model($name) $object
+        }
+        "delete" {
+            # Extract args
+            set name [lindex $args 0]
+            if ![::info exists _model($name)] {
+                error "Unknown model \"$name\""
+            }
+            unset _model($name)
+        }
+        "names" {
+            array names _model
+        }
+        default {
+            error "Invalid mode \"$mode\": should be one of\
+                    access, add, delete, or names"
+        }
+    }
 }
 
 ########################################################################
@@ -409,7 +484,28 @@ body ::tycho::SlateView::name {id} {
 # protected method with that name.
 #
 body ::tycho::SlateView::notify {method args} {
+    # puts "$this notify $method"
     eval _$method $args
+
+    # Assume any notification means a modification...
+    # (This is too agrresive -- even selecting an item
+    # causes the view to be marked modified...)
+    # markModified
+}
+
+########################################################################
+#### slateid
+#
+# Return the slate id of an item given its name. If the id is unknown,
+# return the argument on the assumption that it's a valid canvas
+# tag.
+#
+body ::tycho::SlateView::slateid {name} {
+    if [::info exists _itemid($name)] {
+        return $_itemid($name)
+    } else {
+        return $name
+    }
 }
 
 #####################################################################
@@ -421,11 +517,11 @@ body ::tycho::SlateView::notify {method args} {
 #
 # Add a new item to the view.
 #
-body ::tycho::SlateView::_add {name args} {
+body ::tycho::SlateView::_add {_ name args} {
     array set opts $args
-    set type $opts(-type)
+    set type $opts(-slatetype)
     set coords $opts(-coords)
-    unset opts(-type)
+    unset opts(-slatetype)
     unset opts(-coords)
     set args [array get opts]
 

@@ -194,6 +194,9 @@ class ::tycho::IconLibrary {
 
     # Draw an icon on a given slate
     method draw {icon slate x y args}
+
+    # Instantiate an icon into a layout model
+    method instantiate {item layout args}
 }
 
 ########################################################################
@@ -224,19 +227,22 @@ body ::tycho::IconLibrary::constructor {args} {
 ########################################################################
 #### draw
 #
-# Draw an icon on a slate at the given coordinates. Optional
-# arguments can be any of the following:
+# Draw an icon on a slate at the given coordinates, and return the slate
+# id of the slate item. Optional arguments can be any of the following:
 # <dl>
-# <dt><b>-tags</b> _taglist_
-# <dd>
-# One or more canvas tags to give to the icon.
-#
 # <dt><b>-termstyle</b> _style_
 # <dd>
 # The terminal style to draw the icon in. The given style must be
 # one in the icons <b>termstyle</b> list or a termstyle that is
-# a child of the icon. If not supplied, the first termstyle found
-# will be used. If there are none, don't draw any terminals.
+# a child of the icon. If not supplied, the terminals drawn will be
+# either the first termstyle found, or, if the icon contains
+# <b>terminal</b> items within it, then those terminals will be
+# drawn.
+#
+# <dt><b>-_attribute_</b> _value_
+# <dd>
+# Any other attribute will be added to the attribute list of the
+# created slate item.
 #
 # </dl>
 #
@@ -247,11 +253,13 @@ body ::tycho::IconLibrary::draw {icon slate x y args} {
     if { [type get $icon] != "icon" } {
         error "\"$icon\" is not an icon"
     }
-    array set attrs [attrget $icon]
-    array set opts {-tags {} -termstyle {}}
+    array set opts {-termstyle {}}
     array set opts $args
+    set termstyle $opts(-termstyle)
+    unset opts(-termstyle)
 
     # Check and get attributes
+    array set attrs [attrget $icon]
     set slatetype $attrs(-slatetype)
     set termstyles {}
     foreach t [match termstyle $icon] {
@@ -261,33 +269,168 @@ body ::tycho::IconLibrary::draw {icon slate x y args} {
     unset attrs(-slatetype)
     unset attrs(-termstyles)
 
-    # Check and get termstyle
-    if { $opts(-termstyle) == "" } {
-        set termstyle [lindex $termstyles 0]
+    # Create the icon
+    set id [eval $slate create $slatetype $x $y \
+            [array get attrs] \
+            [array get opts]]
+
+    # Check and get termstyle and terminals
+    if { $termstyle == "" } {
+        # Try for nested terminals
+        set terminals [match terminal $icon]
+        if { $terminals != "" } {
+            set termstyle $icon
+        } else {
+            # Try for a default termstyle
+            set termstyle [lindex $termstyles 0]
+            if { $termstyle != "" } {
+                set terminals [match terminal $termstyle]
+            }
+        }
     } else {
-        set termstyle $opts(-termstyle)
         if { [lsearch -exact $termstyles $termstyle] == -1 } {
             error "Unknown termstyle \"$termstyle\": must be one\
                     of $termstyles"
         }
+        set terminals [match terminal $termstyle]
     }
 
-    # Create the icon
-    set id [eval $slate create $slatetype $x $y [array get attrs] \
-            [list -tags $opts(-tags)]]
-
-    # Create the terminals
-    foreach term [match terminal $termstyle] {
+    # Create the terminals. If there were no termstyles or terminals
+    # found for the icon, then terminals will be empty and none
+    # will be drawn 
+    foreach term $terminals {
         array set a [attrget [concat $termstyle $term]]
         set termtype $a(-slatetype)
         unset a(-slatetype)
         set x [lindex $a(-coords) 0]
         set y [lindex $a(-coords) 1]
         unset a(-coords)
-        # FIXME: the -type tag thing is a real hack...
+        # FIXME: the -type to -tags thing is a real hack...
         eval $slate call $id terminal \
                 $term $termtype $x $y [array get a] \
                 -tags [list $a(-type)]
         unset a
     }
+    return $id
+}
+
+########################################################################
+#### instantiate
+#
+# Instantiate an icon into a layout model. This method overrides the
+# method in ::tycho::Library to:
+# <ul>
+# <li>Remove the <b>-termstyles</b> attributes, which Layout
+# doesn't understand.
+# <li>Choose the right terminals to create as subitems, based on
+# the termstyle.
+# </ul>
+#
+# Optional arguments accepted are the following:
+#
+# <dl>
+# <dt><b>-itemname</b> _name_
+# <dd>
+# The name of the item to instantiate in the layout model. If not
+# given, a name will be generated.
+#
+# <dt><b>-itemcontext</b> _context_
+# <dd>
+# The context within which to generate the new item. If not given,
+# the item will be generated at the top level. Note, however, that
+# <b>-itemname</b> may be a list -- in this case, the full name of
+# the item is the concatenation of <b>-context</b> and <b>-itemname</b>.
+# 
+# <dt><b>-termstyle</b> _style_
+# <dd>
+# The terminal style to draw the icon in. The given style must be
+# one in the icons <b>termstyle</b> list or a termstyle that is
+# a child of the icon. If not supplied, the terminals drawn will be
+# either the first termstyle found, or, if the icon contains
+# <b>terminal</b> items within it, then those terminals will be
+# drawn.
+#
+# <dt><b>-_attribute_</b> _value_
+# <dd>
+# Any other attribute will be added to the attribute list of the
+# created item.
+#
+# </dl>
+#
+# The return value is the name of the top-level item. Each item is added
+# via the publish{} method of the Model class, so that subscribers will
+# be notified of the new data.
+#
+body ::tycho::IconLibrary::instantiate {icon layout args} {
+    if ![exists $icon] {
+        error "unknown item \"$icon\""
+    }
+    # Extract options
+    array set opts {-termstyle {} -itemname {} -itemcontext {}}
+    array set opts $args
+
+    set termstyle $opts(-termstyle)
+    unset opts(-termstyle)
+
+    set itemname $opts(-itemname)
+    unset opts(-itemname)
+
+    set itemcontext $opts(-itemcontext)
+    unset opts(-itemcontext)
+
+    # Get the full name
+    if { $itemname == "" } {
+        set itemname [::tycho::autoName $itemtype]
+    }
+    set itemname [concat $itemcontext $itemname]
+
+    # Check and get attributes
+    array set attrs [attrget $icon]
+    set slatetype $attrs(-slatetype)
+     set slatetype $attrs(-slatetype)
+    set termstyles {}
+    foreach t [match termstyle $icon] {
+        lappend termstyles [concat $icon $t]
+    }
+    eval lappend termstyles $attrs(-termstyles)
+    unset attrs(-termstyles)
+
+    # Add the icon item
+    eval [list $layout publish add item $itemname] \
+            [array get attrs] \
+            [array get opts]
+
+    # Check and get termstyle and terminals
+    if { $termstyle == "" } {
+        # Try for nested terminals
+        set terminals [match terminal $icon]
+        if { $terminals != "" } {
+            set termstyle $icon
+        } else {
+            # Try for a default termstyle
+            set termstyle [lindex $termstyles 0]
+            if { $termstyle != "" } {
+                set terminals [match terminal $termstyle]
+            }
+        }
+    } else {
+        if { [lsearch -exact $termstyles $termstyle] == -1 } {
+            error "Unknown termstyle \"$termstyle\": must be one\
+                    of $termstyles"
+        }
+        set terminals [match terminal $termstyle]
+    }
+
+    # Create the terminals. If there were no termstyles or terminals
+    # found for the icon, then terminals will be empty and none
+    # will be drawn 
+    foreach term $terminals {
+        # FIXME: the -type to -tags thing is a real hack...
+        array set a [attrget [concat $termstyle $term]]
+        eval [list $layout publish add item [concat $itemname $term]] \
+                [attrget [concat $termstyle $term]] -tags [list $a(-type)]
+    }
+    
+    # Return the item name
+    return $itemname
 }

@@ -43,7 +43,7 @@ proc ::tycho::editdfg {file} {
     # $nm loadIcons [::tycho::expandPath {$TYCHO/editors/graphedit/icons.tim}]
 
     $nm library load editors/graphedit/stars.tim
-    $nm library addtomenu stars stars -command puts
+    $nm library addtomenu stars stars -command "$nm newstar stars"
     return $nm
 }
 
@@ -71,9 +71,6 @@ class ::tycho::EditDFG {
     # Edit parameters of the given vertices
     method editparameters {args}
 
-    # Select an icon -- for menubar use only
-    method iconselect {name}
-
     # Start creating a new edge
     method newclick {item x y}
 
@@ -83,8 +80,14 @@ class ::tycho::EditDFG {
     # Stop moving a new edge
     method newrelease {ignore}
 
-    # Handle change notification from the graph layout model
-    method notify {method args}
+    # Place a star
+    method newstar {libname starname}
+
+    # Handle change notification from the graph model
+    method notifygraph {method args}
+
+    # Place an icon
+    method placeicon {iconlib iconname starname}
 
     # Move mouse over a port
     method portenter {}
@@ -94,15 +97,9 @@ class ::tycho::EditDFG {
 
     # Redo the most recent command
     method redo {}
-
-    # Manipulate the selection
-    method selection {mode {id {}}}
     
     # Undo the most recent command
     method undo {}
-
-    # Make a new vertex
-    method vertex {name x y}
 
     # Start moving a vertex
     method vertexclick {tag x y args}
@@ -151,33 +148,31 @@ class ::tycho::EditDFG {
 
     #################################################################
     ####                  FIXME FIXME FIXME                      ####
-
-    # FIXME: temporary
-
-    # Load a star library
-    method loadStars {file}
-
-    # Load an icon library
-    method loadIcons {file}
-
-    # The icon library
-    private variable iconLibrary
-
-    # The star library
-    private variable starLibrary
-
-    #################################################################
-    ####                  FIXME FIXME FIXME                      ####
     
     # Position used to place new icons
-    private variable iconx 10
-    private variable icony 10
- }
+    private variable iconx 50
+    private variable icony 50
+}
 
 ########################################################################
 #### constructor
 #
 body ::tycho::EditDFG::constructor {args} {
+
+    # Create the models. The graph model has a special notify{} method
+    set _graph [uplevel #0 ::tycho::PortedDigraph [::tycho::autoName graph]]
+    model add graph $_graph
+    $_graph subscribe data $this "$this notifygraph"
+
+    # The layout model uses notify{} inherited from SlateView
+    set _layout [uplevel #0 ::tycho::Layout [::tycho::autoName layout]]
+    model add layout $_layout
+    $_layout subscribe data $this
+
+    # In addition, subscribe to the layout model as a "view". This
+    # is necessary because the Layout model sometimes needs to get
+    # data from a real Tk canvas...
+    $_layout subscribe view $this
 
     # Evaluate options
     eval itk_initialize $args
@@ -210,10 +205,10 @@ body ::tycho::EditDFG::constructor {args} {
 
     # More tricky stuff: the selector sends selection events
     # to the model:
-    $_slate selector configure \
-	    -clearprefix "$this selection clear" \
-	    -deselectprefix "$this selection remove" \
-	    -selectprefix "$this selection add"
+    #$_slate selector configure \
+	#    -clearprefix "$this selection clear" \
+	#    -deselectprefix "$this selection remove" \
+	#    -selectprefix "$this selection add"
 
     # Create a DragDropper to join terminals
     set dropper [$_slate interactor DragDropper]
@@ -253,29 +248,6 @@ body ::tycho::EditDFG::editparameters {args} {
 }
 
 ########################################################################
-#### iconselect
-#
-# Process an icon selection.
-#
-body ::tycho::EditDFG::iconselect {name} {
-    # Figure out where to put the icon. First check if topleft is free
-    if { [$_slate find overlapping 10 10 10 10] == "" } {
-        set iconx 10
-        set icony 10
-    }
-    # Create the icon
-    set v [vertex $name 0 0]
-    set id [id $v]
-
-    # Move its nw corner to the right position
-    $_slate moveto $id $iconx $icony "nw" -shape rectangle
-
-    # Advance place position
-    incr iconx 10
-    incr icony 10
-}
-
-########################################################################
 #### newclick
 #
 # Start creating a new edge. Create the edge item and remember
@@ -284,7 +256,8 @@ body ::tycho::EditDFG::iconselect {name} {
 body ::tycho::EditDFG::newclick {item x y} {
     # First we make sure that we clear the selection, since the
     # DragDropper is too dumb to do this...
-    selection clear
+    # FIXME: Should this be an event?
+    $_layout notify data selection clear
 
     # Create the connection line
     set coords [$_slate aspect $item terminal]
@@ -346,41 +319,111 @@ body ::tycho::EditDFG::newrelease {ignore} {
 	$_slate delete $line
     } else {
 	# Get the vertices and ports being connected
-	set srcpar [name [$_slate parent $_scratch(source)]]
-	set source [name $_scratch(source)]
-	set dstpar [name [$_slate parent $_scratch(dest)]]
-	set dest [name $_scratch(dest)]
+	set source [itemname $_scratch(source)]
+	set target [itemname $_scratch(dest)]
 
 	# Add an edge to the graph
-	$_graph publish edge $srcpar $source $dstpar $dest
+        set edgename [join $source .]^[join $target .]
+	$_graph publish add edge $edgename
 
-	# Give the edge a name
-	set name [list $srcpar $source $dstpar $dest]
-        # FIXME!!!
-	name $line $name
-
-	# Add an edge to the layout model, 
-	# and inform all views _except_ the slate-view
-	$_layout update item \
-		[list $srcpar $source $dstpar $dest] \
-		[concat [$_slate type $line] [$_slate coords $line]] \
+	# Add an edge to the layout model.
+	$_layout publish add item $edgename \
+                -slatetype [$_slate type $line] \
+                -coords [$_slate coords $line] \
 		-start [$_slate itemcget $line -start] \
 		-end [$_slate itemcget $line -end]
 	
+        # Now delete the edge I originally
+        # created so I don't end up with two of them
+        $_slate delete $line
+
 	# Update the layout model's coordinates
-	eval $_layout coords $name [$_slate coords $line]
+        # ???
+	# eval $_layout coords $name [$_slate coords $line]
     }
 }
 
 ########################################################################
-#### notify
+#### newstar
 #
-body ::tycho::EditDFG::notify {method args} {
-    # eval $_method $args
+body ::tycho::EditDFG::newstar {libname starname} {
+    set lib [library access $libname]
+
+    # Instantiate the star as a vertex of the graph
+    set starname [$lib instantiate $starname $_graph -itemtype vertex]
+
+    # Find the icon of the star
+    if [$_graph exists $starname -icon] {
+        set iconpath [$_graph attrget $starname -icon]
+        set splat [split $iconpath #]
+        set iconlib [lindex $splat 0]
+        set iconname [lindex $splat 1]
+
+        # FIXME: Need a shorter way of doing this...
+        set libpath [::tycho::model load $iconlib]
+        # FIXME: key cannpt be reused, hence the autoname...
+        set iconmodel [::tycho::model link $libpath [::tycho::autoName $this]]
+
+        # See if the icon has a dot-separated name
+        if ![$iconmodel exists $iconname] {
+            if [$iconmodel exists [split $iconname .]] {
+                set iconname [split $iconname .]
+            } else {
+                error "Unknown icon \"$iconname\" in $iconlib"
+            }
+        }
+        # Place the icon
+        placeicon $iconmodel $iconname $starname
+    } else {
+        # FIXME
+        error "No icon for $starname"
+    }
+}
+
+########################################################################
+#### notifygraph
+#
+body ::tycho::EditDFG::notifygraph {method args} {
+    # puts "$this notifygraph $method"
+    # eval _$method $args
+
     # Assume any notification means a modification...
     # (This is too agrresive -- even selecting an item
     # causes the view to be marked modified...)
-    markModified
+    # markModified
+}
+
+########################################################################
+#### placeicon
+#
+# Place an icon into the layout model. Currently, this just guesses
+# at a good location to put the icon. Later on, it should do some
+# kind of grab and place or drag-and-drop.
+#
+body ::tycho::EditDFG::placeicon {iconlib iconname starname} {
+    # Figure out where to put the icon. First check if topleft is free
+    if { [$_slate find overlapping 10 10 10 10] == "" } {
+        set iconx 10
+        set icony 10
+    }
+    # Place the icon into the layout model, giving it the
+    # same name as the vertex in the graph.
+    $iconlib instantiate $iconname $_layout \
+            -itemname $starname \
+            -coords [list $iconx $icony] \
+            -tags vertex
+
+    # Move its nw corner to the right position. Find the position
+    # from my slate, and then move by publishing to the model
+    # $_slate moveto $id $iconx $icony "nw" -shape rectangle
+    set current [$_layout forward aspect $starname "nw" -shape "rectangle"]
+    set x [expr $iconx - [lindex $current 0]]
+    set y [expr $icony - [lindex $current 1]]
+    $_layout publish move $starname $x $y
+
+    # Advance place position
+    incr iconx 10
+    incr icony 10
 }
 
 ########################################################################
@@ -394,20 +437,6 @@ body ::tycho::EditDFG::redo {} {
 }
 
 ########################################################################
-#### selection
-#
-# Manipulate the selection
-#
-body ::tycho::EditDFG::selection {mode {id {}}} {
-    if { $id != {} } {
-        set name [name $id]
-    } else {
-        set name {}
-    }
-    eval $_layout publish selection $mode $name
-}
-
-########################################################################
 #### undo
 #
 # Undo the most recent command
@@ -416,78 +445,6 @@ body ::tycho::EditDFG::undo {} {
     set foo [eval $_layout undo]
     set bar [eval $_graph undo]
 }
-
-########################################################################
-#### vertex
-#
-# Create a new vertex using the given name to find
-# its icon and parameters. Return the name of the new vertex.
-#
-body ::tycho::EditDFG::vertex {star x y} {
-    set name [::tycho::autoName vertex]
-    set stars $starLibrary
-    set icons $iconLibrary
-
-    # Mark the graph and the layout
-    $_graph mark vertex
-    $_layout mark vertex
-
-    # Add a vertex to the graph
-    $_graph publish vertex $name -type $star
-
-    # Get its parameters and add them as attributes
-    foreach parm [$stars names parameter $star] \
-	    parm2 [$stars names* parameter $star] {
-        $_graph vertexconfigure $name -$parm [$stars get parameter $parm2]
-    }
-
-    # Add a vertex to the layout model
-    set type  [$icons type $star]
-    set attrs [$icons attributes icon $star]
-    set undo [eval [list $_layout publish item \
-	    $name [list $type $x $y]] $attrs \
-	    -tags vertex]
-
-    # Remember the undo commands. FIXME!!!
-    set undograph [$_graph getUndo current]
-    set undolayout [$_layout getUndo current]
-
-    # Add ports to the graph.
-    foreach port [$icons names port $star] {
-        $_graph publish key $name $port
-    }
-
-    # Add the ports to the layout model
-    foreach port [$icons names port $star] {
-        set type  [$icons type $star.$port]
-        set attrs [$icons attributes port $star.$port]
-		
-        # When creating the port item, give it a tag which is the same
-        # as its type -- that is, "input" or "output". Give it a
-        # name which is the same as its name in the icon model.
-        #set cmd [concat [list subitem $name $port [list $type 0 0]] $attrs \
-        #        -tags [$icons portcget $icon.$port -type] \
-        #        -name $port]
-        #eval $_layout $cmd
-        #eval $_layout notify $cmd
-	eval [list $_layout publish subitem $name $port $type] \
-		$attrs \
-                -tags [list [$icons itemcget port $star.$port -type]] \
-		-name $port
-    }
-
-    # Compact the commands into a single one
-    $_graph compactHistory vertex current 1
-    $_layout compactHistory vertex current 1
-
-    # Do this kludge to overwrite the undo command
-    $_graph setUndo current $undograph
-    $_layout setUndo current $undolayout
-
-    # Return its name
-    return $name
-}
-
 
 ########################################################################
 #### vertexclick
@@ -501,10 +458,10 @@ body ::tycho::EditDFG::vertex {star x y} {
 #
 body ::tycho::EditDFG::vertexclick {tag x y args} {
     # Get the vertices, and start a move sequence on them
-    set vertices [withtag $tag]
+    set vertices [find withtag $tag]
 
     # Get the item name or the same tag
-    set name [name $tag]
+    set name [itemname $tag]
     set _scratch(movetag) $name
 
     # Notify views that these items are about to move
@@ -517,7 +474,7 @@ body ::tycho::EditDFG::vertexclick {tag x y args} {
     
     # Start a move or reshape sequence on found edges
     if { $_scratch(moveedges) != "" } {
-	eval $_layout publish addtag $this.edge $_scratch(moveedges)
+	eval $_layout notify data addtag $this.edge $_scratch(moveedges)
 	$_layout publish moveclick $this.edge $x $y
     }
     foreach edge $_scratch(inputedges) {
@@ -575,7 +532,7 @@ body ::tycho::EditDFG::vertexdrag {tag x y} {
 	$_layout publish reshapedrag $edge $x $y
     }
     foreach edge $_scratch(outputedges) {
-	$_layou publish reshapedrag $edge $x $y
+	$_layout publish reshapedrag $edge $x $y
     }
 }
 
@@ -588,7 +545,7 @@ body ::tycho::EditDFG::vertexdrag {tag x y} {
 body ::tycho::EditDFG::vertexrelease {tag} {
     # Because the following will record a bunch of commands that we
     # want merged into a single undo/redo command, set a mark
-    $_layout mark vertex
+    $_layout mark set vertex
 
     # Terminate move of vertices
     $_layout publish moverelease $_scratch(movetag)
@@ -596,7 +553,7 @@ body ::tycho::EditDFG::vertexrelease {tag} {
     # Terminate move of fully-connected edges
     if { $_scratch(moveedges) != "" } {
         $_layout publish moverelease $this.edge
-        $_layout publish dtag $this.edge
+        $_layout notify data dtag $this.edge
     }
 
     # Terminate the reshape of partially-connected edges
@@ -608,11 +565,11 @@ body ::tycho::EditDFG::vertexrelease {tag} {
     }
 
     # Now merge all those commands into a single one
-    $_layout compactHistory vertex current 1
+    $_layout history compact vertex current
 
     # Finally (and importantly!), add a null command to the graph
     # model to match this command
-    $_graph appendHistory {} {} 0
+    $_graph history append {} {}
 }
 
 ###################################################################
@@ -661,15 +618,11 @@ body ::tycho::EditDFG::clear {} {
 # be cleared too.
 #
 body ::tycho::EditDFG::insertData {data} {
+puts [list insertData $data]
+
     # Delete all data
     clear
-    # Create the models if they don't exist
-    if { $_graph == "" } {
-        set _graph [::tycho::KeyedDigraph [::tycho::autoName graph]]
-    }
-    if { $_layout == "" } {
-        set _layout [::tycho::Layout [::tycho::autoName layout]]
-    }
+
     # Load the data into the models
     $_graph parse [lindex $data 0]
     $_layout parse [lindex $data 1]
@@ -743,7 +696,7 @@ body ::tycho::EditDFG::_initializeMenubar {menubar} {
     $menubar command editparameters stars \
             -label "Edit Parameters..." \
             -underline 5 \
-            -command "eval $this editparameters \[$this withtag sel\]"
+            -command "eval $this editparameters \[$this find withtag sel\]"
 
     $menubar separator starsep1 stars
 
@@ -754,58 +707,24 @@ body ::tycho::EditDFG::_initializeMenubar {menubar} {
 
     $menubar command showlayout devel \
 	    -label "Show layout" \
-            -command "::tycho::post \[\[$this cget -layout\] describe\]"
+            -command "set _nm_ \[::tycho::view EditTcl\]; \
+        \$_nm_ insertData \[$this model access layout describe\]"
 
     $menubar command showgraph devel \
 	    -label "Show graph" \
-            -command "::tycho::post \[\[$this cget -graph\] describe\]"
+            -command "set _nm_ \[::tycho::view EditTcl\]; \
+        \$_nm_ insertData \[$this model access graph describe\]"
 
     $menubar add separator develsep2 devel
 
-    $menubar command runptolemy devel \
-	    -label "Run Ptolemy" \
-            -command "$this runPtolemy"
+    $menubar command showlayouthistory devel \
+	    -label "Show layout history" \
+            -command "set _nm_ \[::tycho::view EditTcl\]; \
+        \$_nm_ insertData \[$this model access layout history get\]"
 
-    $menubar command runremoteptolemy devel \
-	    -label "Run Remote Ptolemy" \
-            -command "$this runRemotePtolemy"
+    $menubar command showgraphhistory devel \
+	    -label "Show graph history" \
+            -command "set _nm_ \[::tycho::view EditTcl\]; \
+        \$_nm_ insertData \[$this model access graph history get\]"
 
-    $menubar command generatescript devel \
-	    -label "Generate Ptolemy Script" \
-            -command "$this writePitcl"
-
-    $menubar command showscript devel \
-	    -label "Show Ptolemy Script" \
-            -command "::tycho::post \[$this createPitcl\]"
-}
-
-
-#########################################################################
-#########################################################################
-####                            TEMPORARY                          ####
-
-
-#####################################################################
-#### loadIcons
-# Load an icon library.
-#
-body ::tycho::EditDFG::loadIcons {file} {
-    set icons [uplevel #0 ::tycho::IconIndex \
-	    [::tycho::autoName icons] \
-	    -datafile $file]
-    $icons load
-    set iconLibrary $icons
-}
-    
-#####################################################################
-#### loadStars
-# Load a star library.
-#
-body ::tycho::EditDFG::loadStars {file} {
-    set stars [uplevel #0 ::tycho::StarLibrary \
-	    [::tycho::autoName stars] \
-	    -datafile $file]
-    $stars load
-    $stars menu [menubar] stars "$this iconselect"
-    set starLibrary $stars
 }
