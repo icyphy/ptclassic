@@ -4,7 +4,7 @@
 # 	All Rights Reserved.
 #
 # loadc50
-# Bash script to load files with TI's DSK loader(dsk5l.exe)
+# script to load files with TI's DSK loader(dsk5l.exe)
 # Uses xdos to run dsk5l.exe.  The person running it must be root to
 # mount/unmount the dos partition.
 # This script was tested on a machine running linux(red-hat 3.0.3 
@@ -45,8 +45,14 @@ dsk5l.exe  $1:t
 exitemu
 xxxx
 cd $homedir
+
+# Unmount DOS partition to run xdos
 umount $dospartition
 xdos
+
+# After running xdos mount DOS partition
 mount -t msdos /dev/sda1 $dospartition
+
+# Restore autoexec.emu
 cd $dospartition
 mv -f $dospartition/$autoexecsave  $dospartition/autoexec.emu
