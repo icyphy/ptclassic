@@ -16,6 +16,7 @@ $Id$
 
 ***************************************************************/
 #include "Particle.h"
+#include "StringList.h"
 
 extern const dataType PACKET;
 
@@ -29,15 +30,16 @@ public:
 	// constructor.  Reference count is zero.
 	PacketData() : refCount(0) {}
 
+	// destructor.
+	virtual ~PacketData();
+
 	// functions that may be specified by specific packets.
 	virtual int asInt() const;
 	virtual float asFloat() const;
 	virtual Complex asComplex() const;
 
-	// the type.  Function should always return the same pointer
-	// so that, to test for a type match, you can simply say
-	// if (pd1.dataType() == pd2.dataType()) cout << "Type match!\n"
-
+	// type of the PacketData.  When overriding, be SURE
+	// that the prototype matches (don't forget the const keywords)
 	virtual const char* dataType() const;
 
 	// specify how to print the packet.
@@ -50,9 +52,15 @@ public:
 class Packet {
 private:
 	static PacketData dummyPacket;
+
+	// a pointer to my real data
 	PacketData* d;
+
+	// bookkeeping function to zap the PacketData when done
+	// have to handle dummyPacket specially (it cannot be deleted)
 	void unlinkData() {
-		if (--d->refCount == 0 && d != &dummyPacket)
+		d->refCount--;
+		if (d != &dummyPacket && d->refCount == 0)
 			delete d;
 	}
 public:
@@ -77,6 +85,17 @@ public:
 	~Packet() {
 		unlinkData();
 	}
+	// dataType() : pass through
+	const char* dataType() const { return d->dataType();}
+
+	// type check: checks PacketData type
+	int typeCheck(const char* type) const {
+		return strcmp(dataType(), type) == 0;
+	}
+
+	// type error message generation
+	StringList typeError(const char* expected) const;
+
 	// interfaces to PacketData functions
 	int asInt() const { return d->asInt();}
 	float asFloat() const { return d->asFloat();}
