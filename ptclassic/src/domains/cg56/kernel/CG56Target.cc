@@ -17,9 +17,8 @@ $Id$
 #endif
 
 #include "CG56Target.h"
-#include "CG56Star.h"
-#include "CGUtilities.h"
-#include "miscFuncs.h"
+
+StringList CG56ONE = double(1.0 - 1.0/double(1<<23));
 
 void CG56Target :: headerCode () {
         MotorolaTarget::headerCode();
@@ -30,6 +29,12 @@ void CG56Target :: headerCode () {
 	inc += path;
 	inc += "/ioequlc.asm'\n";
 	addCode(inc);
+}
+
+int CG56Target :: setup(Galaxy& g) {
+	g.addState(ONE.setState("ONE",this,CG56ONE,
+		"Max Fix point value",A_NONSETTABLE|A_CONSTANT));
+	return MotorolaTarget :: setup(g);
 }
 
 // clone
