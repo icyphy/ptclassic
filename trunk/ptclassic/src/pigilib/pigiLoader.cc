@@ -48,8 +48,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include <ctype.h>
 #include "pt_fstream.h"
 
-#FIXME: required to fix a bug in the Sun4 errno.h file
-#       remove when Sun fixes it.
+// FIXME: required to fix a bug in the Sun4 errno.h file
+//      remove when Sun fixes it.
 extern char *sys_errlist[];
 
 
