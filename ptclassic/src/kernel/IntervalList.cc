@@ -20,7 +20,8 @@ and they always have gaps between them.
 **************************************************************************/
 #include "IntervalList.h"
 #include <minmax.h>
-#include <iostream.h>
+#include "streamCompat.h"
+#include "miscFuncs.h"
 
 int Interval::isAfter(const Interval &i1) const { 
 	return (pOrigin >= i1.end()); 
@@ -37,6 +38,10 @@ int Interval::completelyBefore(const Interval &i1) const {
 int Interval::mergeableWith(const Interval& i1) const {
 	return (pOrigin <= i1.end() + 1 &&
 		i1.pOrigin <= end() + 1);
+}
+
+int Interval::subsetOf(const Interval& i1) const {
+	return pOrigin >= i1.pOrigin && end() <= i1.end();
 }
 
 // form the union of the two intervals, assuming that they overlap or
@@ -80,14 +85,22 @@ unsigned Interval::end() const {
 
 // I/O functions: read and write intervals.
 
+// write an Interval.
 ostream& operator<<(ostream& o,const Interval& ival) {
-	if (ival.length() <= 0)
+	if (ival.length() == 0) {
 		o << "<empty>";
+		return o;
+	}
 	o << ival.origin();
 	if (ival.length() > 1)
 		o << "-" << ival.end();
 	return o;
 }
+
+// Read an Interval.
+// an interval either has the form "n" or "m-n".  No spaces are
+// allowed between m and "-" in the latter form.  Space is allowed
+// AFTER the "-" because it is not ambiguous.
 
 istream& operator>>(istream& s,Interval& ival) {
 	char ch;
@@ -95,8 +108,10 @@ istream& operator>>(istream& s,Interval& ival) {
 		s.clear(ios::failbit);
 		return s;
 	}
-	s >> ws;
-	s >> ch;
+	// we do not permit whitespace between the first value and
+	// a "-" sign.  If we now see a whitespace character, we assume
+	// that we have the single-value form.
+	if (!s.get(ch)) return s;
 	if (ch == '-') {
 		int eval;
 		s >> eval;
@@ -117,8 +132,10 @@ istream& operator>>(istream& s,Interval& ival) {
 
 // I/O functions.
 
+// Write an IntervalList.
 ostream& operator<<(ostream& o,const IntervalList& l) {
-	o << "[";
+	if (l.empty())
+		o << "<>";
 	CIntervalListIter next(l);
 	const Interval* p;
 	while ((p = next++) != 0) {
@@ -126,54 +143,65 @@ ostream& operator<<(ostream& o,const IntervalList& l) {
 		p = p->next;
 		if (p) o << ",";
 	}
-	o << "]";
 	return o;
 }
 
+// Read an IntervalList.
 // the reading function allows intervals to be specified in any order;
 // the interpretation is that we form the union of all intervals specified.
 // The resulting list is in the proper internal form (sorted, gaps, no
-// null intervals)
+// null intervals).
+// The form is a sequence of comma-separated intervals, e.g.
+//
+// 1,3-8,10,12-14
+//
+// No spaces are permitted before a comma; that's how we know when we
+// have the end of the IntervalList.  Spaces are permitted before any
+// number, but not after.
+// We allow the list to be surrounded by "<>".  In this form, spaces
+// may appear before commas.
+
 istream& operator>>(istream& s,IntervalList &l) {
 	char ch;
+	int braceflag = 0;
 	Interval ival;
+
 	l.zero();
 	if (!s.ipfx(0)) {
 		s.clear(ios::failbit);
 		return s;
 	}
-	s >> ws;
-	s.get(ch);
-	if (ch == '[') {
-		if (!(s >> ival)) return s;
-		LOG_NEW; l.head = new Interval(ival);
-		Interval* current = l.head;
-		s >> ws;
-		s.get(ch);
-		while (ch == ',') {
-			s >> ival;
-			if (ival.length() == 0) {
-				// nothing, ignore.
-			}
-			else if (ival.completelyBefore(*current)) {
-				// specified out of order, use union operator
-				// to insert starting at head
-				l |= ival;
-			}
-			else if (ival.mergeableWith(*current))
-				current->merge(ival);
-			else {
-				LOG_NEW; current->next = new Interval(ival);
-				current = current->next;
-			}
-			s >> ws;
-			s.get(ch);
+
+	if (!(s >> ch)) return s;
+	if (ch == '<') braceflag++;
+	else s.putback(ch);
+
+	if (!(s >> ival)) return s;
+	LOG_NEW; l.head = new Interval(ival);
+	Interval* current = l.head;
+	if (braceflag) s >> ws;
+	if (!s.get(ch)) return s;
+	while (ch == ',') {
+		s >> ival;
+		if (ival.length() == 0) {
+			// nothing, ignore.
 		}
-		if (ch != ']') {
-			s.putback(ch);
-			s.clear(ios::failbit);
+		else if (ival.completelyBefore(*current)) {
+			// specified out of order, use union operator
+			// to insert starting at head
+			l |= ival;
 		}
+		else if (ival.mergeableWith(*current))
+			current->merge(ival);
+		else {
+			LOG_NEW; current->next = new Interval(ival);
+			current = current->next;
+		}
+		if (braceflag) s >> ws;
+		if (!s.get(ch)) return s;
 	}
+	// if we get here, ch is not a comma.  put it back
+	if (!braceflag || ch != '>') s.putback(ch);
 // fix up head slot: if it's null, delete it and attach the next one.
 	if (l.head->length() == 0) {
 		Interval* p = l.head;
@@ -228,7 +256,7 @@ int IntervalList::contains(const Interval& i1) const {
 	if (p == 0 || i1.endsBefore(*p)) return 0;
 	// neither ends before the other, we have overlap.
 	// see if it is complete.
-	if (p->origin() <= i1.origin() && p->end() >= i1.end())
+	if (i1.subsetOf(*p))
 		return 1;
 	else return -1;
 }
@@ -281,6 +309,71 @@ IntervalList& IntervalList::operator|=(const IntervalList& toAdd) {
 	return *this;
 }
 
+// subtract an interval from the list
+IntervalList& IntervalList::subtract(const Interval& i1) {
+	Interval* current = head;
+	Interval* prev = 0;
+	while (current && current->endsBefore(i1)) {
+		prev = current;
+		current = current->next;
+	}
+	// return immediately if no overlap
+	if (current == 0 || i1.endsBefore(*current))
+		return *this;
+	while (1) {
+		// delete any intervals on list that are completely contained
+		// in i1.
+		while (current && current->subsetOf(i1)) {
+			if (prev == 0) {
+				head = current->next;
+				LOG_DEL; delete current;
+				current = head;
+			}
+			else {
+				prev->next = current->next;
+				LOG_DEL; delete current;
+				current = prev->next;
+			}
+		}
+		// return if we are now done, because nothing left or
+		// next interval comes after
+		if (current == 0 || i1.endsBefore(*current))
+			return *this;
+		// partial overlap between current node and i1.
+		// see if we must split the node in two.
+		if (i1.origin() > current->origin() &&
+		    i1.end() < current->end()) {
+			LOG_NEW; Interval *i = new Interval(i1.end()+1,
+						   current->end()-i1.end());
+			current->pLength = i1.origin() - current->origin();
+			i->next = current->next;
+			current->next = i;
+		}
+		// one-sided overlap, two cases.
+		else if (i1.origin() > current->origin())
+			current->pLength = i1.origin() - current->origin();
+		else {
+			unsigned tEnd = current->end();
+			current->pOrigin = i1.end() + 1;
+			current->pLength = tEnd - current->pOrigin + 1;
+		}
+		prev = current;
+		current = current->next;
+		// continue because next interval may overlap or
+		// be contained in i1.
+	}
+}
+
+// subtraction of a list (could be faster)
+IntervalList& IntervalList::operator-=(const IntervalList& toSub) {
+	const Interval* p = toSub.head;
+	while (p) {
+		subtract(*p);
+		p = p->next;
+	}
+	return *this;
+}
+
 // intersection.
 IntervalList IntervalList::operator&(const IntervalList& bL) const {
 	IntervalList tmp;
@@ -306,5 +399,22 @@ IntervalList IntervalList::operator&(const IntervalList& bL) const {
 		LOG_NEW; out->next = new Interval(*a);
 		*(out->next) &= *b;
 		out = out->next;
+	}
+}
+
+// constructor reads an argString from a string using stream functions.
+// We must copy the argString because istrstream wants a char (and
+// presumably putback writes stuff back into the buffer?)
+
+IntervalList::IntervalList(const char* argString) : head(0) {
+	const int BUFLEN = 80;
+	char buf[BUFLEN], *p = buf;
+	int l = strlen(argString);
+	if (l >= BUFLEN) p = savestring(argString);
+	else strcpy(buf,argString);
+	istrstream strm(p, l);
+	strm >> *this;
+	if (l >= BUFLEN) {
+		LOG_DEL; delete p;
 	}
 }
