@@ -42,6 +42,10 @@
 # calculating dependencies on the fly and creating a makefile, which
 # probably means that we are compiling.
 
+# Provide an initial value for LIB_DEBUG so we don't get messages about
+# multiply defined rules for $(LIB)/$(LIB_DEBUG) if LIB_DEBUG is empty.
+LIB_DEBUG =	libdummy_g
+
 all install TAGS: $(EXTRA_SRCS) $(HDRS) $(MISC_FILES)
 	@echo "Nothing to be done in this directory"
 
