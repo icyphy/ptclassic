@@ -104,8 +104,9 @@ TyConsole::TyConsole(int argc, char **argv) {
   char *pt = getenv("PTOLEMY");
   InfString command = pt ? pt : "~ptolemy";
 #if ITCL_MAJOR_VERSION
+  // itcl-2.0
   command << "/tycho/kernel_itk/Lib.tcl";
-#endif
+#else
   command << "/tycho/kernel/Lib.tcl";
 #endif
   if (Tcl_EvalFile(interp, (char*)command) != TCL_OK) {
