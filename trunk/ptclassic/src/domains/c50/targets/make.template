@@ -1,0 +1,77 @@
+# Makefile for extra C50 domain targets
+#
+# Version identification:
+# $Id$
+# Programmer: Andreas Baensch
+# Date of creation: 19 February 1992
+#
+# If this file's name is "make.template" and there is no makefile in
+# this directory, do
+#	cp make.template makefile
+#	make depend
+# This will add the dependencies to the makefile.
+
+# Root of Ptolemy directory
+ROOT=../../../..
+# True source directory
+VPATH = $(ROOT)/src/domains/c50/targets
+
+# get configuration info
+CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
+include $(CONFIG)
+
+# SDF directory
+SDFDIR=$(ROOT)/src/domains/sdf/kernel
+
+# CG directory
+CGDIR=$(ROOT)/src/domains/cg/kernel
+CGSTARDIR=$(ROOT)/src/domains/cg/stars
+
+# CGC directory
+# CGCDIR=$(ROOT)/src/domains/cgc/kernel
+
+# C50 kernel support
+C50DIR=$(ROOT)/src/domains/c50/kernel
+C50STARDIR=$(ROOT)/src/domains/c50/stars
+
+PARDIR = $(ROOT)/src/domains/cg/parScheduler
+CGTARDIR = $(ROOT)/src/domains/cg/targets
+
+INCL=-I$(C50DIR) -I$(CGDIR) -I$(CGSTARDIR) -I$(SDFDIR) -I$(KERNDIR) \
+     -I$(PARDIR) -I$(CGTARDIR) -I$(C50STARDIR)
+
+# objects to make
+SRCS=	DSKC50Target.o
+
+HDRS=	$(SRCS:.cc=.h)
+
+OBJS=	$(SRCS:.cc=.o)
+
+ifeq ($(USE_SHARED_LIBS),yes) 
+
+# If we are building shared libraries, then we can put all the targets in
+# a shared library.
+LIB = 		libc50targets.$(LIBSUFFIX)
+all:		$(SRCS) makefile $(OBJS) $(LIB)
+install:	all $(LIBDIR)/$(LIB)
+
+else
+
+# We are not building a shared library, so we link in .o files.
+all:	$(SRCS) makefile $(OBJS)
+install:	all
+	@echo Installation complete.
+LIB=none	# required by common.mk
+
+endif
+
+all:	$(SRCS) makefile $(OBJS)
+
+install:	all
+	@echo Installation complete.
+
+# include common definitions, rules
+include $(ROOT)/mk/common.mk
+
+# Don't add anything after the next line; makedepend will zap it.
+# DO NOT DELETE THIS LINE -- make depend depends on it.
