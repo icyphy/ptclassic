@@ -96,7 +96,7 @@ TARGETS = $(OBJDIR)/domains/sdf/loopScheduler/LoopTarget.o \
 	$(CGCONTARGETS) $(CGT)/CGQuasiTarget.o $(CGT)/QS_SharedBus.o
 
 # Sources
-SRCS= PTcl.cc ptclMain.cc
+SRCS= PTcl.cc ptclMain.cc ptclError.cc
 
 # Header files
 HDRS= PTcl.h
