@@ -49,7 +49,7 @@ static SDFScheduler sdfSched;
 
 static char* err0 = " lies in an inconsistent DDF system : \n";
 static char* err1_1 = "First check DELAY-FREE LOOP or ";
-static char* err1_2 = "The auto-wormholization procedure will create an \
+static char* err1_2 = "The auto-wormholization procedure may create an \
 artificial deadlock.\n";
 static char* err1_3 = "You can disable the procedure by defining a IntState \
 (restructure) and \nsetting 0 in the DDF galaxy.";
@@ -205,7 +205,6 @@ int
 DDFScheduler :: run (Block& block) {
 
 	msg.initialize();
-	msg += err0;
 
 	if (haltRequestFlag) {
 		Error::abortRun(block, ": Can't continue after run-time error");
@@ -234,6 +233,7 @@ DDFScheduler :: run (Block& block) {
 	GalStarIter nextStar(galaxy);
 
 	int scanSize = galSize;		// how many not-runnable stars scanned
+	int deadlock = TRUE;		// deadlock detection.
 
 	while (numFiring < stopTime && !haltRequestFlag) {
 
@@ -251,6 +251,7 @@ DDFScheduler :: run (Block& block) {
 	   for (int i = sourceBlocks.size(); i > 0; i--) {
 		Star& s = *(Star*)nextb++;
 		fireSource(s, numStop);
+		deadlock = FALSE;
 		if (haltRequestFlag) break;
 	   }
 
@@ -272,6 +273,7 @@ DDFScheduler :: run (Block& block) {
 			do {
 				s->fire();
 				if (haltRequestFlag) exit(1);
+				deadlock = FALSE;
 			} while (isRunnable(*s));
 
 			// reset scanSize
@@ -281,6 +283,7 @@ DDFScheduler :: run (Block& block) {
 		}
 		// some geodesic is full 
 		if (overFlow)  { 
+			msg += err0;
 			msg += err2_1;
 			msg += maxToken;
 			msg += err2_2;
@@ -292,6 +295,7 @@ DDFScheduler :: run (Block& block) {
 		}
 		// there is a deadlock condition.
 		if (lazyDepth > galSize) {
+			msg += err0;
 			msg += err1_1;
 			msg += err2_3;
 			msg += err1_2;
@@ -301,6 +305,15 @@ DDFScheduler :: run (Block& block) {
 		}
 
 	   } /* inside while */
+
+	   if (deadlock == TRUE) {
+		msg += err1_1;
+		msg += err2_3;
+		msg += err1_2;
+		msg += err1_3;
+		Error :: abortRun(msg);
+		return FALSE;
+	   }
 
 	   currentTime += schedulePeriod;
 
