@@ -60,6 +60,7 @@ ITCL_SRCS = \
 	Compile.itcl \
 	CompileCTcl.itcl \
 	CompileJava.itcl \
+	ControlPanel.itcl \
 	Dialog.itcl \
 	Digraph.itcl \
 	Displayer.itcl \
