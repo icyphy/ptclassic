@@ -51,7 +51,7 @@ all install clean  realclean checkjunk sccsinfo:
 	    fi ; \
 	done
 
-sources: subsources doc/stars/starHTML.idx
+sources: subsources starHTML.idx
 subsources:
 	@for x in $(DIRS); do \
 	    if [ -w $$x ] ; then \
