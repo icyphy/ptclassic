@@ -21,9 +21,16 @@ INCL= -I$(PNDIR) -I$(SDFDIR) -I$(THREADDIR) -I$(AWESIME) -I$(KERNDIR) -I$(VPATH)
 LIB= lib$(STAR_MK).a
 
 # source files for all stars, using preprocessor
+# base classes must be listed before derived classes
 PL_SRCS= \
+ PNSplice.pl \
+ PNCommutator.pl \
+ PNDelayInt.pl \
+ PNDistributor.pl \
  PNEndCase.pl \
- PNLastOfN.pl
+ PNFilter.pl \
+ PNLastOfN.pl \
+ PNSift.pl
 
 # The .cc files
 SRCS= $(PL_SRCS:.pl=.cc)
