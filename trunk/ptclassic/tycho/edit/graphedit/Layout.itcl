@@ -57,6 +57,9 @@ class ::tycho::GraphLayout {
     # Remove a vertex from the selection
     method deselect {vertex}
 
+    # Add a port to a vertex
+    method portin {context port coords args}
+
     # Add a vertex to the selection
     method select {vertex}
 
@@ -93,6 +96,11 @@ class ::tycho::GraphLayout {
     #################################################################
     ####                  protected methods                      ####
     
+    # Ports cannot be added at the top level
+    method port {port coords args} {
+	_toplevelerror port $port
+    }
+
     #################################################################
     ####                 protected variables                     ####
     
@@ -118,6 +126,9 @@ body ::tycho::GraphLayout::constructor {args} {
 
     # The vertex entity has a value (its type and coords)
     defineEntityType vertex -valued 1
+
+    # The port entity has a value (its type and proportional coords)
+    defineEntityType port -valued 1
 
     # The edge entity also a value (its type and coords)
     defineEntityType edge -valued 1
@@ -145,6 +156,17 @@ body ::tycho::GraphLayout::describe {{prefix {}}} {
 #
 body ::tycho::GraphLayout::deselect {name} {
     return ""
+}
+
+########################################################################
+#### portin
+#
+# Add a port to a vertex.
+#
+body ::tycho::GraphLayout::portin {context port value args} {
+puts "GraphLayout::portin $context $port $value $args"
+    _verifynotin port $context $port
+    _entity port $context $port [concat [list $value] $args]
 }
 
 ########################################################################
