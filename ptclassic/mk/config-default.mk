@@ -103,8 +103,10 @@ ITCL_VERSION=itcl
 # Directory containing Tcl include files
 TCL_INCDIR=$(TCL_ROOT)/itcl/include
 
+TCL_VERSION=7.6i
+
 # Combined -L and -l options to link with tcl library.
-TCL_LIBSPEC=-L$(TCL_ROOT)/itcl.$(PTARCH)/lib/itcl -ltcl7.6i
+TCL_LIBSPEC=-L$(TCL_ROOT)/itcl.$(PTARCH)/lib/itcl -ltcl$(TCL_VERSION)
 
 # Directory containing Tk include files
 TK_INCDIR=$(TCL_ROOT)/itk/include
@@ -128,7 +130,8 @@ ISH=$(ROOT)/tcltk/$(ITCL_VERSION).$(PTARCH)/bin/ish
 ITCL_LIBDIR=$(ROOT)/tcltk/$(ITCL_VERSION)/library
 
 # For shared libraries, if we use them
-TCL_SHARED_LIBSPEC=-L$(TCL_ROOT)/$(ITCL_VERSION).$(PTARCH)/lib/itcl -ltcl
+TCL_SHARED_LIBSPEC=-L$(TCL_ROOT)/$(ITCL_VERSION).$(PTARCH)/lib/itcl \
+	-ltcl$(TCL_VERSION)
 TK_SHARED_LIBSPEC=-L$(TCL_ROOT)/$(ITCL_VERSION).$(PTARCH)/lib/itcl -ltk
 ITCL_SHARED_LIBSPEC=-L$(TCL_ROOT)/$(ITCL_VERSION).$(PTARCH)/lib/itcl -litcl
 
