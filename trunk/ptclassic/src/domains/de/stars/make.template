@@ -33,6 +33,7 @@ DEFilter.pl \
 DEFloatDC.pl \
 DEFloatRamp.pl \
 DEFork.pl \
+DEge.pl \
 DEHandShake.pl \
 DEImpulse.pl \
 DEIntPacketize.pl \
