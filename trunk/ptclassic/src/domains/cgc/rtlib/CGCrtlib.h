@@ -1,6 +1,6 @@
 /**************************************************************************
 Version identification:
-$Id$
+@(#)CGCrtlib.h	1.1 24/10/94
 
 Copyright (c) 1990-1994 The Regents of the University of California.
 All rights reserved.
