@@ -1,5 +1,5 @@
 /* 
-Copyright (c) 1990-1994 The Regents of the University of California.
+Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -35,34 +35,38 @@ static const char file_id[] = "$RCSfile$";
 #include "PNScheduler.h"
 #include "DataFlowStar.h"
 #include "PNThread.h"
-#include "PNCondition.h"
 #include "GalIter.h"
 
 extern const char PNdomainName[];
 
-// Stack size for Wormhole threads.
-const unsigned int wormStackSize = 16 * defStackSize;
-
 // Constructor.
-PNScheduler::PNScheduler() : monitor()
+PNScheduler::PNScheduler()
 {
-    start = 0;
+    threads = NULL;
+    monitor = NULL;
+    start = NULL;
+
     schedulePeriod = 1.0;
     setStopTime(0.0);
     setCurrentTime(0.0);
 }
 
+
 // Destructor.
 PNScheduler::~PNScheduler()
 {
+    deleteThreads();
     LOG_DEL; delete start;
+    LOG_DEL; delete monitor;
 }
+
 
 // Domain identification.
 const char* PNScheduler::domain() const
 {
     return PNdomainName;
 }
+
 
 // Initialization.
 void PNScheduler::setup()
@@ -73,12 +77,78 @@ void PNScheduler::setup()
 	return;
     }
 
-    // Any threads from the previous run that blocked on start
-    // will be deleted at this point.
-    LOG_DEL; delete start;
-    LOG_NEW; start = new PNCondition(monitor);
+    // Any threads from the previous run will be deleted at this point.
+    deleteThreads();
 
     galaxy()->initialize();
+
+    enableLocking();
+
+    createThreads();
+
+    setCurrentTime(0.0);
+}
+
+
+// Run (or continue) the simulation.
+int PNScheduler::run()
+{
+    if (SimControl::haltRequested())
+    {
+	Error::abortRun(*galaxy(), " cannot continue.");
+	return FALSE;
+    }
+
+    // Allow threads to start.
+    threads->run();
+
+    while((currentTime < stopTime) && !SimControl::haltRequested())
+    {
+	// Notify all threads to continue.
+	{
+	    CriticalSection region(start->monitor());
+	    start->notifyAll();
+	}
+	threads->run();
+	currentTime += schedulePeriod;
+    }
+
+    return !SimControl::haltRequested();
+}
+
+
+// Create threads (dataflow pocesses).
+void PNScheduler::createThreads()
+{
+    GalStarIter nextStar(*galaxy());
+    DataFlowStar* star;
+
+    LOG_NEW; threads = new PNThreadScheduler;
+
+    // Create Threads for all the Stars.
+    while((star = (DataFlowStar*)nextStar++) != NULL)
+    {
+	LOG_NEW; threads->add(new SyncDataFlowProcess(*star, *start));
+    }
+}
+
+
+// Delete threads.
+void PNScheduler::deleteThreads()
+{
+    LOG_DEL; delete threads;
+    threads = NULL;
+}
+
+
+// Enable locking.
+void PNScheduler::enableLocking()
+{
+    LOG_DEL; delete start;
+    LOG_DEL; delete monitor;
+
+    LOG_NEW; monitor = new PNMonitor;
+    LOG_NEW; start = new PNCondition(*monitor);
 
     // Enable locking on all portholes.
     GalStarIter nextStar(*galaxy());
@@ -92,57 +162,11 @@ void PNScheduler::setup()
             // Any threads from the previous run that are blocked
             // will be deleted at this point.
             port->disableLocking();
-            port->enableLocking(monitor);
+            port->enableLocking(*monitor);
         }
     }
-
-    PNThread::initialize();
-    createThreads();
-    setCurrentTime(0.0);
 }
 
-// Run (or continue) the simulation.
-int PNScheduler::run()
-{
-    if (SimControl::haltRequested())
-    {
-	Error::abortRun(*galaxy(), " cannot continue.");
-	return FALSE;
-    }
-
-    // Allow threads to start.
-    PNThread::runAll();
-
-    while((currentTime < stopTime) && !SimControl::haltRequested())
-    {
-	// Notify all threads to continue.
-	{
-	    CriticalSection region(start->monitor());
-	    start->notifyAll();
-	}
-	PNThread::runAll();
-	currentTime += schedulePeriod;
-    }
-
-    return !SimControl::haltRequested();
-}
-
-// Create threads (Kahn Processes).
-void PNScheduler::createThreads()
-{
-    GalStarIter nextStar(*galaxy());
-    DataFlowStar* star;
-    PNThread* thread;
-
-    // Create Threads for all the Stars.
-    while((star = (DataFlowStar*)nextStar++) != NULL)
-    {
-	unsigned int stackSize = star->isItWormhole() ?
-	    wormStackSize : defStackSize;
-
-	LOG_NEW; thread = new SyncDataFlowProcess(*star, *start, stackSize);
-    }
-}
 
 // Get the stopping time.
 double PNScheduler::getStopTime()
