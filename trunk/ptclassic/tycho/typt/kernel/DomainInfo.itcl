@@ -299,9 +299,8 @@ body ::tycho::DomainInfo::print {starName domain} {
 body ::tycho::DomainInfo::queryDomain { {msg "Choose a Domain:"} \
         {default {}} } {
     set nm [::tycho::autoName .queryDomain]
-    uplevel #0 ::tycho::ListBrowser $nm \
-            -text [list $msg] \
-            -items [list [::tycho::DomainInfo::domains]]
+    uplevel #0 ::tycho::ListBrowser $nm -text [list $msg]
+    $nm appendItems [::tycho::DomainInfo::domains]
     if {$default != {} } {
         $nm configure -default $default
     }
