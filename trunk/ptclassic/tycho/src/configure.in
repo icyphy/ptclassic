@@ -228,9 +228,7 @@ else
 
 
 	case "`uname -s" in
-		HP-UX) TMP_JAVA_ARCH_INCLUDE=$JAVAHOME/include/osfport
-		echo "To build tcljava under HPUX, see tyjava/tcljava/makefile"
-		;;
+		HP-UX) TMP_JAVA_ARCH_INCLUDE=$JAVAHOME/include/hp-ux;;
 		Linux) TMP_JAVA_ARCH_INCLUDE=$JAVAHOME/include/linux;;
 		SunOS) TMP_JAVA_ARCH_INCLUDE=$JAVAHOME/include/solaris;;
 		*)TMP_JAVA_ARCH_INCLUDE=$JAVAHOME/include/idontknow;;
@@ -251,11 +249,10 @@ else
 	fi
 
 	case "`uname -s" in
-		HP-UX) TMP_JAVA_ARCH_LIB=$JAVAHOME/lib/hp700_ux100
-			JAVA_ARCH_LIB_CHK=libjpeg.sl
-		echo "To build tcljava under HPUX, see tyjava/tcljava/makefile"
+		HP-UX) TMP_JAVA_ARCH_LIB=$JAVAHOME/lib/PA_RISC/green_threads
+			JAVA_ARCH_LIB_CHK=libjava.sl
 			;;
-		Linux) TMP_JAVA_ARCH_LIB=$JAVAHOME/lib/linux
+		Linux) TMP_JAVA_ARCH_LIB=$JAVAHOME/lib/linux/green_threads
 			JAVA_ARCH_LIB_CHK=libjava.so
 			;;
 		SunOS) TMP_JAVA_ARCH_LIB=$JAVAHOME/lib/sparc/green_threads
