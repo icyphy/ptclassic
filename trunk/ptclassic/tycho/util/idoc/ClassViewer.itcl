@@ -50,7 +50,7 @@
 # This class defines a combination of an HTML widget and a text widget
 # which will eventually be used for more efficient class browsing.
 #  
-# Data is stored in a <a href="$TYCHO/kernel/doc/codeDoc/Class.idoc">
+# Data is stored in a <a href="../../../../kernel/doc/codeDoc/Class.idoc">
 # ::tycho::Class</a> model. The model is in turn generated from the code.
 # 
 # IDoc supports any language that can be encoded into a ::tycho::Class
@@ -88,9 +88,6 @@ class ::tycho::IDoc {
     ##########################################################################
     ####                            options                               ####
 
-    # The background color of the HTML documents.
-    itk_option define -bgcolor bgColor BgColor white
-
     # The color of inherited entities.
     itk_option define -inheritcolor inheritColor InheritColor grey
 
@@ -120,7 +117,7 @@ class ::tycho::IDoc {
     itk_option define -width width Width "30 c"
 
     # The relative width of the contents widget compared to the entire window.
-    itk_option define -relwidth relWidth RelWidth 0.2
+    itk_option define -relwidth relWidth RelWidth 0.22
 
     # The relative height of the top HTML widget. (The bottom is 1-relheight). 
     itk_option define -relheight relHeight RelHeight 0.6
@@ -144,11 +141,14 @@ class ::tycho::IDoc {
     # Make the fonts in all FIMXE: widgets smaller.
     public method downSize {}
 
+    # Generate a DAG for the current class and it's parents.
+    public method generateDAG {}
+
     # Place a ghost handle a certain number of pixels from the actual one.
     public method ghostHandle {horizontal pixels}
 
     # Import the main class' parents, the parents' parents, etc.
-    public method inheritAll {}
+    public method inheritAll {{redisplay 1}}
 
     # Insert the specified data.
     public method insertData {data}
@@ -185,8 +185,8 @@ class ::tycho::IDoc {
     # Internal contents widget
     protected variable myContents
 
-    # My displayer window
-    protected variable myDisplayer
+    # My class diagram
+    protected variable myDAG
 
     # Internal HTML widget for class-wide documentation
     protected variable myHtmlTop
@@ -208,6 +208,9 @@ class ::tycho::IDoc {
 
     ###################################################################
     ####                     protected methods                     ####
+
+    # Initialize the menu/status/tool bars
+    protected method initialize {{menubar {}} {statusbar {}} {toolbar {}}}
 
     protected method preference {mode args}
 
@@ -238,6 +241,9 @@ class ::tycho::IDoc {
     # Format the explanation of the given item in HTML.
     private method formatExpl {class item type}
 
+    # Initialize the menu bar.
+    private method initializeMenubar {menubar}
+    
     # Calculate a new -relwidth parameter (doesn't reset it)
     private method newRelWidth {pizels}
 
@@ -260,10 +266,10 @@ configbody ::tycho::IDoc::headfont {
 
     set f $itk_option(-headfont)
     foreach panel [$myContents panels] {
-        $myContents subconfig $panel -font $f
+        $myContents itemconfig $panel -font $f
     }
     # must be caught because class may not exist
-    catch {$myContents subconfig class -font $f}
+    catch {$myContents itemconfig class -font $f}
 }
 
 #########################################################################
@@ -276,7 +282,7 @@ configbody ::tycho::IDoc::bodyfont {
     set f $itk_option(-bodyfont)
     foreach label [$myContents labels] {
         if {$label != "class"} {    
-            $myContents subconfig $label -font $f
+            $myContents itemconfig $label -font $f
         }
     }
 }
@@ -286,7 +292,7 @@ configbody ::tycho::IDoc::bodyfont {
 # Height of the compound widget must be passed to the displayer.
 #
 configbody ::tycho::IDoc::height {
-    $myDisplayer config -height $itk_option(-height)
+    displayer config -height $itk_option(-height)
 }
 
 #########################################################################
@@ -294,7 +300,7 @@ configbody ::tycho::IDoc::height {
 # Width of the compound widget must be passed to the displayer.
 #
 configbody ::tycho::IDoc::width {
-    $myDisplayer config -width $itk_option(-width)
+    displayer config -width $itk_option(-width)
 }
 
 #########################################################################
@@ -352,6 +358,8 @@ configbody ::tycho::IDoc::relwidth {
 #### constructor
 #
 body ::tycho::IDoc::constructor {args} {
+    # Set the view "type" for the Window menu
+    set viewType "graphics"
 
     itk_component add html1 {
         ::tycho::HTML $itk_interior.html1
@@ -381,14 +389,14 @@ body ::tycho::IDoc::constructor {args} {
     itk_component add updown {
         frame $itk_interior.updown
     } {
-        usual
+        keep -cursor
     }
     
     # add handle to resize frames horizontally
     itk_component add leftright {
         frame $itk_interior.leftright
     } {
-        usual
+        keep -cursor
     }
 
     # add ghost handles which move with the mouse
@@ -406,69 +414,10 @@ body ::tycho::IDoc::constructor {args} {
 
     # NOTE: placing of widgets occurs in the configbody of -relheight/-relwidth
 
-    # Insert items in the menubar, if there is one.
-    if {$myMenubar != {}} {
-        $myMenubar disable {Undo/Redo}
-        $myMenubar disable {Cut}
-        $myMenubar disable {Paste}
-        $myMenubar disable "Font..."
-        $myMenubar delete "Fill Region"
-        $myMenubar delete "Right Fill Column"
-        $myMenubar delete "Set Fill Prefix"
-        $myMenubar delete "Lower Case"
-        $myMenubar delete "Upper Case"
-        $myMenubar delete "Capitalize"
-        $myMenubar delete "Insert..."
-        $myMenubar delete "Save"
-        $myMenubar delete "SaveAs..."
-        $myMenubar delete "Evaluate"
-        $myMenubar delete "Revision Control..."
-        
-        $myMenubar addMenu Format -after Window -underline 0
-        # Add font size control
-        $myMenubar command "Bigger Font" Format -underline 0\
-                -accelerator "C-+" -command "$this upSize"
-        
-        $myMenubar command "Smaller Font" Format -underline 0\
-                -accelerator "C--" -command "$this downSize"
-        
-        $myMenubar addMenu Special -after Format -underline 0
-        # Add a way to get the text description.
-        $myMenubar command Describe Special \
-                -underline 0 -command "::tycho::inform \[$this describe\]"
-
-        $myMenubar command Inherit Special \
-                -underline 0 -command "$this inheritAll"
-       
-    }
-
-    set myDisplayer [[$this displayer] windowName]
-
     eval itk_initialize $args
 
-    # Subscribe to the preference set
-    preference subscribeoptions $this \
-            -headfont displayFont \
-            -bodyfont entryFont \
-            -bgcolor bgColor \
-            -height height \
-            -width width \
-            -publiccolor publicColor \
-            -protectedcolor protectedColor \
-            -privatecolor privateColor \
-            -optioncolor optionColor  \
-            -inheritcolor inheritColor
-
-    # Bindings
-    # font size control
-    bind $myDisplayer <Control-equal> "$this upSize; break"
-    bind $myDisplayer <Control-plus> "$this upSize; break"
-    bind $myDisplayer <Control-minus> "$this downSize; break"
-    
     # Configure the handles
     setupHandles
-
-    pack propagate $myDisplayer 0
 
     # Something annoying inherited insists on creating this thing
     pack forget $itk_interior.childsite
@@ -499,6 +448,37 @@ body ::tycho::IDoc::downSize {} {
     resetHtml 2
 }
 
+#####################################################################
+#### generateDAG
+# Generate the DAG for the current class and its parents.
+#
+body ::tycho::IDoc::generateDAG {} {
+    if {$myHeritage == {}} {
+        inheritAll 0
+    }
+    if ![info exists myDAG] {
+        set myDAG [::tycho::EditDAG $this.[::tycho::autoName dag]]
+        set myDAG [info namespace tail $myDAG]
+        # FIXME: does not place anywhere!
+    }
+    foreach parent "$mainClass $myHeritage" {
+        set docfile [docFile $parent]
+        set source [$myClass($parent) modelcget -source]
+        set sourcedir [::tycho::expandPath [file join \
+                [file dirname $docfile] .. ..]]
+        set source [file join $sourcedir $source]
+        set parents [$myClass($parent) parents]
+        lappend DAGinfo "add $parent \{label [info namespace tail $parent] \
+                link $source altlink $docfile\} \{$parents\}"
+    }
+    $myDAG clear
+    puts $myDAG
+    foreach entry $DAGinfo {
+        eval "$myDAG $entry"
+    }
+    
+}
+    
 #####################################################################
 #### ghostHandle
 # Control the ghost handle (for lack of a standard name), which is the
@@ -542,7 +522,7 @@ body ::tycho::IDoc::ghostHandle {horizontal pixels} {
 # _must_ of course be the same language as the current class. This is not
 # explicitly checked here.)
 #
-body ::tycho::IDoc::inheritAll {} {
+body ::tycho::IDoc::inheritAll {{redisplay 1}} {
     set classModel $myClass($mainClass)
 
     # clear inherited classes
@@ -577,9 +557,11 @@ body ::tycho::IDoc::inheritAll {} {
             putStatus "$parent idoc file not found."
         }
     }
-    putStatus "Redisplaying contents."
-    update idletasks
-    display
+    if {$redisplay} {
+        putStatus "Redisplaying contents."
+        update idletasks
+        display
+    }
     putStatus ""
 }
 
@@ -604,7 +586,7 @@ body ::tycho::IDoc::insertData {data} {
         set myClass(related) [::tycho::Class [::tycho::autoName class]]
         $myClass(related) read file $relfile
     }
-
+    
     display
     putHtml $mainClass [$tempClass get annotation explanation]
 }
@@ -621,7 +603,7 @@ body ::tycho::IDoc::putHtml {class data {top 1}} {
                <head>
                <title>Class [$myClass($class) modelcget -name]</title>
                </head>
-               <body bgcolor=\"$itk_option(-bgcolor)\">
+               <body bgcolor=\"$itk_option(-background)\">
                <h1>Class [$myClass($class) modelcget -name]</h1>
                $data
                </body>
@@ -632,7 +614,7 @@ body ::tycho::IDoc::putHtml {class data {top 1}} {
         0 {
             set myBottomData "
                <html>
-               <body bgcolor=\"$itk_option(-bgcolor)\">
+               <body bgcolor=\"$itk_option(-background)\">
                $data
                </body>
                </html>"
@@ -698,7 +680,9 @@ body ::tycho::IDoc::docFile {classname} {
 #####################################################################
 #### relFile
 # FIXME: this is a hack and not valid under all (many) cases 
-#
+# This should use the class model -source option and modify that
+# to get the _rel.idoc name.
+# 
 body ::tycho::IDoc::relFile {classname} {
     set relname "[info namespace tail $classname]_rel.idoc"
 
@@ -723,6 +707,53 @@ body ::tycho::IDoc::relFile {classname} {
     ###################################################################
     ####                     protected methods                     ####
 
+#####################################################################
+#### initialize
+# Initialize the menu, status, and toolbars associated with this widget.
+# The root (view) class sets up the menubar methods in it's initialize
+# via the chain command, which should always be the first command in
+# this method.
+# 
+# This method is called by it's displayer when attachView is called (usually
+# in ::tycho::view)
+#
+body ::tycho::IDoc::initialize {{menubar {}} {statusbar {}} {toolbar {}}} {
+    chain $menubar $statusbar $toolbar
+
+    if {$menubar != {}} {
+        # We have to qualify the call to this supposed-ly private
+        # method because Itcl (2.2) has virtual private methods!
+        ::tycho::IDoc::initializeMenubar $menubar
+    }
+
+    # Bindings
+    # font size control
+    set myDisplayer [info namespace tail [displayer]]
+    if {$myDisplayer != {}} {
+        bind $myDisplayer <Control-equal> "$this upSize; break"
+        bind $myDisplayer <Control-plus> "$this upSize; break"
+        bind $myDisplayer <Control-minus> "$this downSize; break"   
+        pack propagate $myDisplayer 0
+        $myDisplayer attachView $itk_component(html1) -menubar 0
+        $itk_component(html1) forgetDisplayer
+        $myDisplayer attachView $itk_component(html2) -menubar 0
+        $itk_component(html2) forgetDisplayer
+    }
+
+    # Subscribe to the preference set
+    preference subscribeoptions $this \
+            -headfont displayFont \
+            -bodyfont entryFont \
+            -background bgColor \
+            -height height \
+            -width width \
+            -publiccolor publicColor \
+            -protectedcolor protectedColor \
+            -privatecolor privateColor \
+            -optioncolor optionColor  \
+            -inheritcolor inheritColor 
+
+}
 
 #####################################################################
 #### preference
@@ -851,11 +882,11 @@ body ::tycho::IDoc::display {} {
                 "$this putStatus {}"]
     }
 
+    # FIXME in general, insert class parameters here
+
     if [info exists myClass(related)] {
         displayRel
     } 
-
-    # FIXME in general, insert class parameters here
 
     # insert each type (Protected Method, etc.) by protection order
     foreach protection {public protected private} {
@@ -1200,6 +1231,39 @@ body ::tycho::IDoc::formatExpl {class item type} {
     }
 
     return $html
+}
+
+#####################################################################
+#### initializeMenubar
+# Initialize the menu bar.  Adds entries specific to this class.
+#
+body ::tycho::IDoc::initializeMenubar {menubar} {
+    $menubar delete "Compare To..."
+    $menubar delete "Insert..."
+    $menubar delete "Save"
+    $menubar delete "SaveAs..."
+    $menubar delete "Evaluate"
+    $menubar delete "Revision Control..."
+    
+    $menubar addMenu Format -after Window -underline 0
+    # Add font size control
+    $menubar command "Bigger Font" Format -underline 0\
+            -accelerator "C-+" -command "$this upSize"
+        
+    $menubar command "Smaller Font" Format -underline 0\
+            -accelerator "C--" -command "$this downSize"
+    
+    $menubar addMenu Special -after Format -underline 0
+    # Add a way to get the text description.
+    $menubar command Describe Special \
+            -underline 0 -command "::tycho::inform \[$this describe\]"
+    
+    $menubar command Inherit Special \
+            -underline 0 -command "$this inheritAll"
+    
+    # FIXME: add in when generalized place is working in displayer
+    #        $menubar command GenDAG Special \
+    #                -underline 0 -command "$this generateDAG"
 }
 
 #####################################################################
