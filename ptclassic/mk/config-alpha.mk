@@ -73,6 +73,10 @@ GPPFLAGS =	-g $(MEMLOG) $(WARNINGS) $(OPTIMIZER)
 # If you are not using gcc, then you might have problems with the WARNINGS flag
 CFLAGS =	-g $(MEMLOG) $(WARNINGS) $(OPTIMIZER)
 
+# system libraries (libraries from the environment)
+# -lots is needed to resolve _OtsDivide64Unsigned which is in the Matlab lib.
+SYSLIBS=-lg++ -lots -lm 
+
 #
 # Variables for the linker
 #
