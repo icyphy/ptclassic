@@ -18,7 +18,6 @@ limitation of liability, and disclaimer of warranty provisions.
   }
   protected {
     friend class VHDLTarget;
-    friend class CGCTargetWH;
   }
   hinclude { "VHDLTarget.h" }
   output {
