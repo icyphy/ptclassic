@@ -117,7 +117,7 @@ ITCL_LIBSPEC=-L$(TCL_ROOT)/$(ITCL_VERSION).$(PTARCH)/lib -litcl
 
 ITK_INCDIR=$(TCL_ROOT)/$(ITCL_VERSION)/include
 # Uncomment the next line for itcl-2.0b2
-#ITK_LIBSPEC=-L$(TCL_ROOT)/$(ITCL_VERSION).$(PTARCH)/lib -litk
+ITK_LIBSPEC=-L$(TCL_ROOT)/$(ITCL_VERSION).$(PTARCH)/lib -litk
 
 # Location of the itcl_sh binary
 ITCL_SH=$(ROOT)/tcltk/$(ITCL_VERSION).$(PTARCH)/bin/itcl_sh
