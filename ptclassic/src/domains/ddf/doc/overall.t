@@ -60,7 +60,7 @@ blocks, and also expects a particular behavior on the part of stars
 within the \*(DO domain.
 In this section, we describe the operation of the \*(DO scheduler.
 .Id "DDF scheduler"
-.Id "scheudler, DDF"
+.Id "scheduler, DDF"
 .pp
 The basic operation of the DDF scheduler
 is to repeatedly scan the list of stars
@@ -617,7 +617,7 @@ DDF scheduler.
 .pp
 .Id "DDFtoUniversal EventHorizon"
 The
-.c DDFtoUniveral\ EventHorizon
+.c DDFtoUniversal\ EventHorizon
 transfers the incoming data packets from the DDF domain
 to the paired
 .c FromEventHorizon
