@@ -75,7 +75,7 @@ public:
         { this->val=rhs.val; return *this;}
 
         // casting to a <C>
-        operator <C>() { return val;}
+        operator <C>() const { return val;}
 
 	// set initvalue, with a <C> argument
 	void setInitValue(<C>);
