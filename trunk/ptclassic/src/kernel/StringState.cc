@@ -41,8 +41,7 @@ const char* StringState :: type() const { return "STRING";}
 
 void StringState  :: initialize() {
 	char buf[2048];
-	// cast is because cfront doesn't want to delete pointers to const
-	LOG_DEL; delete val;
+	LOG_DEL; delete []val;
 	const char* p = initValue();
 	char *q = buf;
 	while (*p) {
@@ -63,7 +62,7 @@ void StringState  :: initialize() {
 			p++;	// skip the '}' character
 			const State* st = lookup(statename, parent()->parent());
 			if (!st) {
-				parseError ("undefined symbol", statename);
+				parseError ("undefined symbol: ", statename);
 				return;
 			}
 			StringList sl = st->currentValue();
@@ -95,7 +94,7 @@ State* StringState :: clone() const {
 }
 
 StringState :: ~StringState() {
-	delete val;
+	LOG_DEL; delete []val;
 }
 
 // make known state entry
