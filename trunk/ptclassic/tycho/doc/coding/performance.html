@@ -11,7 +11,7 @@
 <LI> <A HREF="#performance hints">Performance Hints</A>
 </ol>
 <p>
-<H3><A NAME="performance tools">Performance Tools</A></H3>
+<H2><A NAME="performance tools">Performance Tools</A></H2>
 In a stock Tcl binary, you can use the <CODE>time</CODE> command
 to measure the execution time of a command.  The
 format of the command is: <CODE>time</CODE> <I>tcl_command</I> <I>optional_repetition_count</I>.  For example:
@@ -38,7 +38,7 @@ Tcl Profiler</A>.
 The hints below were taken from <A
 HREF="http://www.sunlabs.com/people/brent.welch/book/index.html"><CITE>Practical
 Programming in Tcl and Tk</CITE></A>, by 
-<A NAME="Welch, B."><author>Brent B. Welch</author></A>, page 87.
+<A NAME="Welch, B.">Brent B. Welch</A>, page 87.
 
 <BLOCKQUOTE>
 <MENU>
@@ -66,9 +66,10 @@ are not removed, they are parsed each time the interpreter iterates
 through a loop or executes a procedure.
 
 </MENU>
+</MENU>
 </BLOCKQUOTE>
 
-
+<MENU>
 <LI> If you are using <CODE>exec</CODE>, then you may want to reconsider.
 <OL>
 <LI> The Tcl <CODE>exec</CODE> is not portable to non-unix platforms.
