@@ -26,7 +26,7 @@ static char SccsId[]="$Id$";
  */
 
 #include "iv.h"
-#include "stdio.h"
+#include <stdio.h>
 
 static Display* ivBufDisplay;
 
