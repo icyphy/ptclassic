@@ -345,6 +345,7 @@ body ::tycho::RevControl::setup {editorWin editorObj} {
 	bind $dlg <Escape> \
                 [code "$dlg nextWindow; delete object $dlg"]
 	::tycho::Dialog::wait $dlg
+	puts "bar"
     } else {
 	::tycho::RevControl::makeRev $revclass $editorWin $editorObj
     }
