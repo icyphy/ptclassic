@@ -114,6 +114,23 @@ configbody ::tycho::Retarget::edit {
 #### constructor
 #
 body ::tycho::Retarget::constructor {args} {
+    set domainList [::tycho::DomainInfo::domains]
+    eval itk_initialize $args
+
+    if { $editor != "" } {
+        # Call the domains method of the Ptcl editor to get the list of domains
+        set domainA [lindex [$editor domains] 0]
+        if { [lsearch $domainList $domainA] == -1 } {
+            error "Sorry, the Universe contains $domainA, which is not present \
+                    in this version of Tycho.\nThis version of Tycho contains \
+                    the following domains: $domainList.\nTo run a version of \
+                    Tycho that has all the domains, run 'tycho -pigi'."
+        }
+    } else {
+        set domainA [lindex $domainList 0]
+    }
+    set domainB [lindex $domainList end]
+
     toolbar button newDomains {Compare Domains} \
             -text {Compare Domains} -command "$this compareDomains"
     toolbar button domainAButton "Change Domain A: $domainA" \
@@ -124,7 +141,6 @@ body ::tycho::Retarget::constructor {args} {
     toolbar button checkUniverse {Check Universe} \
 	    -text {Check Universe} -command "$this checkUniverse"
 
-    eval itk_initialize $args
     modifyAfterDomainChange
 }
 
@@ -137,7 +153,14 @@ body ::tycho::Retarget::constructor {args} {
 # Change the name of one of the domains that we are going to compare
 #
 body ::tycho::Retarget::changeDomainA {} {
-    set domainA [::tycho::queryinfo "Domain A" $domainA]
+    set tmpDomain [lindex [::tycho::query "Domain A" \
+            [list \
+            [list radio domainName {Domain A} \
+            [::tycho::DomainInfo::domains] \
+            $domainA]]] 1 ]
+    if {$tmpDomain != ""} {
+        set domainA $tmpDomain
+    }
     clear
     set dirtyCompareDomains 1
     catch {delete object [graph]}
@@ -150,7 +173,14 @@ body ::tycho::Retarget::changeDomainA {} {
 # Change the name of one of the domains that we are going to compare
 #
 body ::tycho::Retarget::changeDomainB {} {
-    set domainB [::tycho::queryinfo "Domain B" $domainB]
+    set tmpDomain [lindex [::tycho::query "Domain B" \
+            [list \
+            [list radio domainName {Domain B} \
+            [::tycho::DomainInfo::domains] \
+            $domainB]]] 1 ]
+    if {$tmpDomain != ""} {
+        set domainB $tmpDomain
+    }
     clear
     set dirtyCompareDomains 1
     catch {delete object [graph]}
