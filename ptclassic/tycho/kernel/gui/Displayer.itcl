@@ -220,21 +220,17 @@ body ::tycho::Displayer::constructor {args} {
     # This is needed for the window manager ops to work correctly.
     itk_option add hull.width hull.height
 
-    # Emacs-like bindings.
-    bind $prefix <Control-x><k> "$this nextWindow; \
-	    delete object $this; break"
-    bind $prefix <Control-x><Control-f> {::tycho::File::openWin; break}
-    
-    # Window manager interface bindings.
-    bind $prefix <Control-x><0> "$this nextWindow; \
-	    wm iconify $itk_component(hull); break"
+    # Fashioned after emacs bindings, the following bindings control
+    # placement and size on the screen.
     bind $prefix {<Control-x><Key 1>} "$this fullScreen; break"
     # FIXME: Doesn't quite work yet.  Window manager bugs?
-    # bind $prefix {<Control-x><Key 2>} "$this halfHeight; break"
+    bind $prefix {<Control-x><Key 2>} "$this halfHeight; break"
     bind $prefix {<Control-x><Key 6>} "$this originalSize; break"
 
     # Again following emacs convention, the following will exit the
     # program if in normal exit mode.
+    # NOTE: This should probably be promoted to TopLevel, along with
+    # normalexit.
     if {$normalexit == 1} {
 	bind $prefix <Control-x><Control-c> {::tycho::TopLevel::exitProgram}
     } else {
