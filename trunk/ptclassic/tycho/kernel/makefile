@@ -103,6 +103,7 @@ ITCL_SRCS = \
 	PreferenceEditor.itcl \
 	PopupMenu.itcl \
 	Query.itcl \
+	Resource.itcl \
 	RevControl.itcl \
 	RevControlSCCS.itcl \
 	RevControlRCS.itcl \
