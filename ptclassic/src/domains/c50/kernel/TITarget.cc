@@ -65,8 +65,9 @@ AsmTarget(nam,desc,stype,assocDomain)
 }
 
 void TITarget :: initStates() {
+	// mem is dynamically allocated by the AsmTarget constructor
+ 	delete mem; mem = 0;
 	inProgSection = 0;
- 	mem = 0;
 	addState(bMemMap.setState("bMemMap",this,"768-1279","B memory map"));
 	addState(uMemMap.setState("uMemMap",this,"2432-6848","UD memory map"));
 	addState(subFire.setState("subroutines?",this,"-1",
