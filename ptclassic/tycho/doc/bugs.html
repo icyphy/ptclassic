@@ -20,6 +20,15 @@
     Answering yes to both causes a core dump.
 <li>Need multiple undo.
 <li>Meta-f, Meta-d do not skip over white space.
+<li>Copy and paste using the left and middle mouse buttons
+does not work.
+</ul>
+
+<h3><a href="$TYCHO/kernel/TclShell.itcl">TclShell</a></h3>
+<ul>
+<li>The cursor moves to the start of the line if you select text
+anywhere else in the console window. This makes copying and pasting
+parts of commands a nightmare..
 </ul>
 
 <h3><a href="$TYCHO/kernel/EditSearch.itcl">EditSearch</a></h3>
@@ -50,7 +59,15 @@
 &lt;dt&gt;&lt;a href="http://ptolemy.eecs.berkeley.edu/~sunil"&gt;Sunil Bhave&lt;/A&gt;
 &lt;dt&gt;&lt;a href="http://ptolemy.eecs.berkeley.edu/~wtc"&gt;Wan-Teh Chang&lt;/a&gt;
 </pre>
-
+<li>    If I have two HTML viewers open and if in one of them I click on
+    a link that references the file open in the other, the other
+    one is brought to the font and the one I am looking at doesn't
+    change. This isn't what you'd expect.
+<li>    If you click on a link to a non-existent file you get a blank
+page. It should just print a status message.
+<li>    There should be a menu entry to hide the toolbar and location.
+<li>    All toolbar commands are not available from menus.
+<li>    There are no key bindings for toolbar commands.
 </ul>
 
 <h3><a href="$TYCHO/kernel/ListBrowser.itcl">ListBrowser</a></h3>
@@ -58,6 +75,11 @@
 <li>Select an item, then scroll down one page and select another item.
     Instead of replacing the original item with the new one, the new item
     and a "\n" are appended to the previous item.
+</ul>
+
+<h3><a href="$TYCHO/kernel/FileBrowser.itcl">FileBrowser</a></h3>
+<ul>
+<li>Name completion does not work through directories.
 </ul>
 
 <h3><a href="$TYCHO/kernel/Query.itcl">Query</a></h3>
@@ -77,7 +99,7 @@
 <li> Mike Williamson pointed out that if your pigi binary has a long name,
 	then the welcome window is cropped at the bottom, and there
 	is no scrollbar.
-<ul>
+</ul>
 
 <h1><a name="bugs in text editors">Bugs in text editors</a></h1>
 
