@@ -32,9 +32,19 @@
 # link) -- that way a separate directory containing, say, Sun-3 and Sun-4
 # objects can be maintained.
 
-include ../../../mk/topdomain.mk
+ME = cgc
+ROOT = ../../..
+VPATH = $(ROOT)/src/domains/$(ME)
 
+# get configuration info
+CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
+include $(CONFIG)
+
+include $(ROOT)/mk/topdomain.mk
+
+# Subdirectories with star directories in them
 SUBDOMAINDIRS = dsp tcltk
+
 DIRS = kernel stars targets rtlib $(SUBDOMAINDIRS)
 
 # Only build the CGC UltraSparc VIS subdomain on Solaris machines
@@ -43,5 +53,4 @@ ifneq ("$(filter sol% ,$(PTARCH))","")
 	SUBDOMAINDIRS += vis
 endif
 
-ME = cgc
-
+include $(ROOT)/mk/domain.mk

@@ -32,9 +32,19 @@
 # link) -- that way a separate directory containing, say, Sun-3 and Sun-4
 # objects can be maintained.
 
-include ../../../mk/topdomain.mk
-
-DIRS = kernel stars
-
 ME = hof
+ROOT = ../../..
+VPATH = $(ROOT)/src/domains/$(ME)
 
+# get configuration info
+CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
+include $(CONFIG)
+
+include $(ROOT)/mk/topdomain.mk
+
+# Subdirectories with star directories in them
+SUBDOMAINDIRS =
+
+DIRS = kernel stars $(SUBDOMAINDIRS)
+
+include $(ROOT)/mk/domain.mk
