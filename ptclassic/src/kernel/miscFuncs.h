@@ -28,6 +28,7 @@ char*     strncat(char*, const char*, int);
 int       strncmp(const char*, const char*, int);
 char*     strncpy(char*, const char*, int);
 char*     strrchr(const char*, int);
+double	  pow(double,double);
 }
 
 #ifdef USG
@@ -58,6 +59,10 @@ inline float    max(float a, float b)       {return (a > b ? a : b);}
 inline int      max(int a, int b)           {return (a > b ? a : b);}
 inline unsigned max(unsigned a, unsigned b) {return (a > b ? a : b);}
 
-int pow(int base,int exp);
+// I would prefer to make this int pow(int,int), but g++ gets confused
+// because other func is extern "C".
+
+int power(int base,int exp);
+double power(double base,double exp) { return pow(base,exp);}
 
 #endif
