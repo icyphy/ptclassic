@@ -43,6 +43,7 @@ include $(CONFIG)
 EXTRA_SRCS =	directories.html \
 		fileheader.html \
 		index.html \
+		itclfilebody.html \
 		performance.html \
 		scope.html \
 		style.html \
