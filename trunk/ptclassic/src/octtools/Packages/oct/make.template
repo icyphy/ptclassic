@@ -41,17 +41,51 @@ VPATH         = $(ROOT)/src/octtools/Packages/oct
 CONFIG=$(ROOT)/mk/config-$(ARCH).mk
 include $(CONFIG)
 
-HDRS		= fsys.h \
+HDRS		= attach.h \
+		bag.h \
+		bb.h \
+		box.h \
+		chain.h \
+		change_list.h \
+		change_record.h \
+		circle.h \
+		create.h \
+		default.h \
+		edge.h \
+		facet.h \
+		facet_info.h \
+		fsys.h \
 		geo.h \
+		geo_points.h \
+		get.h \
+		inst.h \
 		internal.h \
 		io.h \
 		io_internal.h \
+		io_procs.h \
+		label.h \
+		layer.h \
 		macros.h \
+		mark.h \
 		master.h \
+		modify.h \
+		net.h \
 		oct-big-id.h \
 		oct.h \
+		oct_files.h \
+		oct_id.h \
+		oct_utils.h \
+		path.h \
+		point.h \
+		polygon.h \
+		prop.h \
+		ref.h \
 		str.h \
+		term.h \
+		term_update.h \
+		translate.h \
 		xid.h
+
 
 LIBCSRCS	= attach.c \
 		bag.c \
