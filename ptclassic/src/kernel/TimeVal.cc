@@ -35,6 +35,17 @@ static const char file_id[] = "$RCSfile$";
 
 #include "TimeVal.h"
 
+/* TV_USEC_TYPE and TV_SEC_TYPE are defined in compat.h, but we
+ * include these defs for robustness
+ */
+#ifndef TV_USEC_TYPE
+#define TV_USEC_TYPE	long int
+#endif
+
+#ifndef TV_SEC_TYPE
+#define TV_SEC_TYPE	long int
+#endif
+
 TimeVal::TimeVal()
 {
     tv_sec = tv_usec = 0;
@@ -42,8 +53,8 @@ TimeVal::TimeVal()
 
 TimeVal::TimeVal(double seconds)
 {
-    tv_sec = seconds;
-    tv_usec = 1.0e6 * (seconds - (double)tv_sec);
+    tv_sec = (TV_SEC_TYPE)seconds;
+    tv_usec = (TV_USEC_TYPE)(1.0e6 * (seconds - (double)tv_sec));
     normalize();
 }
 
