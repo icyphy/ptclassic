@@ -74,7 +74,10 @@ static ddsComposite lbl_top_data = { "Label Editor", DDS_VERTICAL, 4 };
 
 static void change_height();
 static ddsNumber lbl_height_data = {
-    "Text Height (lambda)", 1.0, 30, 1.0, 10.0, "%3.0lf",
+  /* Increased Max Height from 30 to 80, otherwise we get dds errs
+   * See vem/308: Vem Edit Label Bug
+   */ 
+    "Text Height (lambda)", 1.0, 80, 1.0, 10.0, "%3.0lf",
     change_height, (ddsData) 0
 };
 
