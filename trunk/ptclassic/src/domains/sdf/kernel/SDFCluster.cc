@@ -104,6 +104,10 @@ int SDFClusterGal::clusterCore(int& urate) {
                 if (status) change = TRUE;
                 else break;
 	}
+	if (!urate) {
+		// try doing the tree-structure nonintegral loop pass
+		if (tryTreeLoop()) urate = change = TRUE;
+	}
 	if (numberClusts() == 1) {
 		if (logstrm)
 			*logstrm << "Reduced to one cluster\n";
@@ -370,7 +374,7 @@ int SDFClusterGal::loopPass() {
 	if (numberClusts() <= 1) return FALSE;
 
 	if (numberClusts() == 2) 
-		return nonIntegralLoopPass();
+		return loopTwoClusts();
 	int changes = integralLoopPass(0);
 	if (!changes) changes = integralLoopPass(1);
 	if (logstrm && !changes)
@@ -378,7 +382,7 @@ int SDFClusterGal::loopPass() {
 	return changes;
 }
 
-int SDFClusterGal::nonIntegralLoopPass() {
+int SDFClusterGal::loopTwoClusts() {
 	// this assumes there are only two clusters.
 	// We can ignore feedforward delays.
 	// We can ignore feedback delays if large enough.
@@ -406,6 +410,32 @@ int SDFClusterGal::nonIntegralLoopPass() {
 			 << r2 << "\n";
 	return TRUE;
 }
+
+int SDFClusterGal::tryTreeLoop() {
+	if (!isTree()) {
+		if (logstrm)
+			*logstrm <<
+			"structure is not a tree, cannot do TreeLoop\n";
+		return FALSE;
+	}
+	// we loop all the clusters so that the resulting repetitions is 1.
+	// 
+	if (logstrm)
+		*logstrm << "Doing TreeLoop\n";
+	SDFClusterGalIter nextClust(*this);
+	SDFCluster* c;
+	while ((c = nextClust++) != 0) {
+		int r = c->reps();
+		if (logstrm)
+			*logstrm << "looping " << c->name() << " by "
+				 << r << "\n";
+		c->loopBy(r);
+	}
+	if (logstrm)
+		*logstrm << "TreeLoop successful\n";
+	return TRUE;
+}
+		
 
 int SDFClusterGal::integralLoopPass(int doAnyLoop) {
 	SDFClusterGalIter nextClust(*this);
@@ -605,6 +635,63 @@ void SDFClusterBag::absorb(SDFCluster* c,SDFClusterGal* par) {
 			cp->makeExternLink(np);
 			addPort(*np);
 		}
+	}
+}
+
+// This method tests whether a SDFClusterGal is a tree structure or not.
+// It uses the visit flags.
+
+int SDFClusterGal::isTree() {
+	SDFClusterGalIter nextClust(*this);
+	SDFCluster* c;
+	int num = numberClusts();
+
+	// clear visit flags.
+	while ((c = nextClust++) != 0) {
+		c->setVisit(0);
+	}
+
+	if (logstrm)
+		*logstrm << "isTree: " << num << " clusters\n";
+
+	// for each pass, we "lop off"
+	// clusters with their visit flags set.  So, for example, a
+	// cluster that is fed only by source stars is now considered
+	// a source star.  We keep doing this until we either eliminate
+	// everything or there is a loop and we shrink no more.
+
+	int passNum = 0;
+	while (1) {
+		int prevNum = num;
+		num = 0;
+		nextClust.reset();
+		while ((c = nextClust++) != 0) {
+			if (c->visited()) continue;
+			int nI = 0, nO = 0;
+			SDFClustPortIter nextPort(*c);
+			SDFClustPort* p;
+			while ((p = nextPort++) != 0) {
+				if (p->far()->parentClust()->visited())
+					continue;
+				if (p->isItInput()) nI++;
+				else nO++;
+			}
+			// nI is the number of inputs that talk to
+			// non-visited nodes, nO is the number of
+			// outputs that talk to non-visited nodes.
+			// if either is zero, this node is the root
+			// of a tree and can be chopped.
+			if (nI == 0 || nO == 0)
+				c->setVisit(1);
+			else num++;
+		}
+		passNum++;
+		if (logstrm)
+			*logstrm << "After pass " << passNum << ": "
+				 << num << " non-source/non-sink clusters\n";
+		if (num <= 1) return TRUE;
+		// pass changed nothing: there is a loop.
+		else if (num == prevNum) return FALSE;
 	}
 }
 
