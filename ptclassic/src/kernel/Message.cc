@@ -29,9 +29,12 @@ ENHANCEMENTS, OR MODIFICATIONS.
  Programmer:  J. T. Buck
  Date of creation: 2/20/91
 
- This file defines the Envelope implementation of Ptolemy.  A Envelope is
- an envelope for passing objects derived from type EnvelopeData around.
- A  MessageParticle is a type of Particle that transports Envelopes.
+ This file defines the implementation of the heterogeneous message
+ interface of Ptolemy.  A Envelope is an envelope for passing objects
+ derived from type Message around.
+
+ A  MessageParticle is a type of Particle whose data field is an
+ Envelope and that can therefore transmit Messages.
 
 ***************************************************************/
 #ifdef __GNUG__
@@ -71,14 +74,14 @@ int Message::isA(const char*) const {
 }
 
 StringList Message::print() const {
-	StringList out = "<";
+	StringList out = "Message class <";
 	out += dataType();
 	out += ">: no print method";
 	return out;
 }
 
 int Message::errorConvert(const char* arg) const {
-	StringList msg = "Envelope type '";
+	StringList msg = "Message type '";
 	msg += dataType();
 	msg += "': invalid conversion to ";
 	msg += arg;
@@ -119,7 +122,7 @@ Envelope::~Envelope() {
 // Envelope error message generation.  The message is in a static buffer.
 const char* Envelope::typeError(const char* expected) const {
 	static char buf[80];
-	sprintf (buf, "Expected Envelope type '%s', got '%s'",expected,dataType());
+	sprintf (buf, "Expected Message type '%s', got '%s'",expected,dataType());
 	return buf;
 }
 
