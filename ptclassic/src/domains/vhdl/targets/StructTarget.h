@@ -46,6 +46,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "VHDLState.h"
 #include "VHDLCluster.h"
 #include "VHDLFiring.h"
+#include "VHDLDependency.h"
 #include "Attribute.h"
 
 class StructTarget : public SimVSSTarget {
@@ -98,6 +99,10 @@ public:
 	/*virtual*/ const char* portAssign() { return "<=" ; }
 
 protected:
+	// Members to support dependency graph construction.
+	VHDLFiringList firingList;
+	VHDLDependencyList dependencyList;
+
 	/*virtual*/ void begin();
 
 	/*virtual*/ void setup();
@@ -134,6 +139,9 @@ protected:
 	/*virtual*/ void registerComm(int, int, int, const char*);
 
 private:
+	// Pointer to keep track of current firing.
+	VHDLFiring *currentFiring;
+
 	// A list of clocks to trigger in order.
 	StringList clockList;
 

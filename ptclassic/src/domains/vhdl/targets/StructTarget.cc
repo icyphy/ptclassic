@@ -96,22 +96,10 @@ void StructTarget :: setup() {
 
 // Main routine.
 int StructTarget :: runIt(VHDLStar* s) {
-  // Change the default stream temporarily.
-  defaultStream = &firingAction;
-  // Initialize lists for new firing.
-  initFiringLists();
-  // Process action; running star modifies myCode.
-  int status = ((CGStar*) s)->CGStar::run();
-  // Change the default stream back.
-  defaultStream = &myCode;
-
-  // Do not create firing data for forks.
-  if (s->isItFork()) {
-    return status;
-  }
-
   // Create a new VHDLFiring to load up.
   VHDLFiring* fi = new VHDLFiring;
+  // Set the current firing to point to this firing.
+  currentFiring = fi;
 
   // Begin constructing the components of the firing's code.
   StringList tempName = s->fullName();
@@ -129,6 +117,25 @@ int StructTarget :: runIt(VHDLStar* s) {
     tempName << "_F" << s->firingNum();
   }
   StringList fiName = sanitize(tempName);
+
+  fi->setName(fiName);
+
+  // Name is set -- now add the firing to the list of firings
+  firingList.put(*fi);
+
+  // Change the default stream temporarily.
+  defaultStream = &firingAction;
+  // Initialize lists for new firing.
+  initFiringLists();
+  // Process action; running star modifies myCode.
+  int status = ((CGStar*) s)->CGStar::run();
+  // Change the default stream back.
+  defaultStream = &myCode;
+
+  // Do not create firing data for forks.
+  if (s->isItFork()) {
+    return status;
+  }
 
   // Search for a firing in the list with the same name as this one.
   // We're trying to find repeated firings of the same send/receive stars
@@ -165,7 +172,6 @@ int StructTarget :: runIt(VHDLStar* s) {
   }
 
   if (!foundFiring) {
-    fi->setName(fiName);
     fi->starClassName = s->className();
     fi->genericList = firingGenericList.newCopy();
     fi->portList = firingPortList.newCopy();
@@ -606,6 +612,7 @@ void StructTarget :: registerPortHole(VHDLPortHole* port, const char* dataName,
     newPort->setName(ref);
     newPort->setType(port->dataType());
     newPort->setDirec(port->direction());
+    newPort->setFire(currentFiring);
 
     // If it's an input port, find the signal generating the data.
     if (!strcmp(newPort->direction,"IN")) {
@@ -614,6 +621,29 @@ void StructTarget :: registerPortHole(VHDLPortHole* port, const char* dataName,
       if (mySignal) {
 	// mySignal exists with ref as name, so connect to it.
 	newPort->connect(mySignal);
+
+	// Register a new VHDLDependency.
+	VHDLDependency* dep = new VHDLDependency;
+	// Port is IN, so source is mySignal's port's firing.
+	VHDLPort* sourcePort = mySignal->getSource();
+	if(!sourcePort) {
+	  Error::abortRun(mySignal->name, "has NULL sourcePort");
+	}
+	VHDLFiring* sourceFiring = sourcePort->getFire();
+	if(!sourceFiring) {
+	  Error::abortRun(sourcePort->name, "has NULL sourceFiring");
+	}
+	dep->source = sourceFiring;
+
+	// Port is IN, so sink is currentFiring.
+	dep->sink = currentFiring;
+
+	// Need dep to have unique name before putting into list.
+	StringList depName = "";
+	depName << sourceFiring->name << "," << currentFiring->name;
+	dep->setName(depName);
+	dependencyList.put(*dep);
+
       }
       else {
 	// tokenNum is negative, so create a signal to connect to.
