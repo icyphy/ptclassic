@@ -45,9 +45,7 @@ This Star uses the GNU library <Normal.h>
 	}
 	start {
 		if(random) delete random;
-		random = new Normal(mean,variance,gen);
-		random->mean(double(mean));
-		random->variance(double(variance));
+		random = new Normal(double(mean),double(variance),gen);
 	}
         go {
 		output%0 << (float)(*random)();

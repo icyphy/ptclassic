@@ -46,9 +46,7 @@ This Star uses the GNU library <Uniform.h>.
 	}
 	start {
 		if(random) delete random;
-		random = new Uniform(lower,upper,gen);
-		random->low(double(lower));
-		random->high(double(upper));
+		random = new Uniform(double(lower),double(upper),gen);
 	}
         go {
 		output%0 << (float)(*random)();
