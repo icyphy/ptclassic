@@ -21,11 +21,7 @@ iwidgets::scrolledframe .f \
 set w [.f childsite].w
 iwidgets::widgettree $w -createcommand "createQuery $w" \
 	-font "-Adobe-Helvetica-Medium-R-Normal--*-120-*-*-*-*-*-*"
-$w options labeledgrid {
-	usual
-	rename -labelfont -font font Font
-}
-
+	
 foreach tag {simple double mixed boxed separated} label {
     "A labeledgrid with a single column of widgets"
     "A labeledgrid with two labeled columns of widgets"
@@ -44,7 +40,7 @@ raise .
 # This is the proc that create the queries when panels are opened.
 
 proc createQuery {win tag} {
-    # So we can play the widgets later
+    # So we can play with the widgets later
     global a b c d e
     switch -exact $tag {
         "simple" {
@@ -77,7 +73,7 @@ proc createQuery {win tag} {
             $a add radiobutton gee.f -text "A longer name" -value loo
         }
         "double" {
-            $win add labeledgrid double.q -columnspan 8 -childcolumnspan 4 \
+            $win add labeledgrid double.q -columnspan 8 -childcolumnspan 3 \
 		    -labelforeground blue
             set b [$win component double.q]
 
@@ -102,24 +98,24 @@ proc createQuery {win tag} {
         }
         "mixed" {
             # Layout from page 164 of Mullet and Sano
-            $win add labeledgrid mixed.q -columnspan 4 -childcolumnspan 2 \
+            $win add labeledgrid mixed.q -columnspan 4 -childcolumnspan 1 \
 		    -labelforeground blue
 	    set c [$win component mixed.q]
 
-            $c add entry name -label "Name:" -columnspan 4
-            $c add entry street -label "Street:" -columnspan 4
-            $c add entry city -label "City/State:" -columnspan 3
-            $c add entry state -style plain -columnspan 1
+            $c add entry name -label "Name:" -columnspan 3
+            $c add entry street -label "Street:" -columnspan 3
+            $c add entry city -label "City/State:" -columnspan 2
+            $c add entry state -style plain
             $c add entry zip -label "ZIP:"
             $c vskip
             $c add entry phone -label "Phone/FAX:"
-            $c add entry fax -style plain -columnspan 1
+            $c add entry fax -style plain
             $c vskip
-            $c add entry email -label "E-mail:" -columnspan 3
+            $c add entry email -label "E-mail:" -columnspan 2
             $c vskip
             $c vskip -minsize 12
 
-            $c group interests -label "Interests:" -columnspan 4
+            $c group interests -label "Interests:" -columnspan 3
             $c add checkbutton interests.compilers -text "Compilers"
             $c add checkbutton interests.databases -text "Databases" \
                     -initial 1
@@ -130,19 +126,19 @@ proc createQuery {win tag} {
             $c add checkbutton interests.networking -text "Networking"
         }
         "boxed" {
-            $win add labeledgrid boxed.q -columnspan 8 -childcolumnspan 5 \
+            $win add labeledgrid boxed.q -columnspan 8 -childcolumnspan 3 \
                     -childstyle boxed -labelforeground blue
             set d [$win component boxed.q]
 
-            $d group entries -label "Enter here" -rowspan 4 \
-                    -childcolumnspan 3 -childstyle simple
+            $d group entries -label "Enter here" -rowspan 2 \
+                    -childcolumnspan 2 -childstyle simple
 
             $d add entry entries.foo -label "An entry" \
                     -initial "Some text"
             $d add entry entries.oof -label "Another entry" \
                     -initial "Some more text"
 
-            $d group checks -label "Check here" -rowspan 4 -columnspan 3
+            $d group checks -label "Check here" -rowspan 2 -columnspan 1
             $d add checkbutton checks.a -label "A checkbutton" \
                     -onvalue On -offvalue Off \
                     -initial On -text "Check me!"
@@ -161,7 +157,7 @@ proc createQuery {win tag} {
             $d add radiobutton gee.b.a -text Goo -value goo
             $d add radiobutton gee.b.b -text Boo -value boo
 
-            $d group radio -label "Radio here" -rowspan 4 -columnspan 3 \
+            $d group radio -label "Radio here" -rowspan 4 -columnspan 1 \
                     -initial M
             $d add radiobutton radio.a -value M -text "Mars calling"
             $d add radiobutton radio.b -value E -text "Earth calling"

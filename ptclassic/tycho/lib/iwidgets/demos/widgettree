@@ -6,6 +6,10 @@
 #\
 	exec itkwish -f "$0" ${1+"$@"}
 
+catch {source ../generic/labeledwidget.itk}
+catch {source ../generic/scrolledwidget.itk}
+catch {source ../generic/scrolledframe.itk}
+
 catch {delete class iwidgets::Widgettree}
 source ../generic/widgettree.itk
 
@@ -30,7 +34,8 @@ set w [.f childsite].w
 iwidgets::widgettree $w -createcommand "expand $w"
 $w add node foo -text foo
 $w add node bar -text bar
-grid $w -sticky nw
+# grid $w -sticky nw
+pack $w -fill both -expand on
 
 pack .f -fill both -expand on
 
@@ -72,10 +77,7 @@ iwidgets::scrolledframe .g \
 
 set v [.g childsite].w
 iwidgets::widgettree $v -createcommand "createPanel $v"
-$v options radiobox {
-	# usual
-	rename -labelfont -font font Font
-}
+
 $v add node size -text Size
 $v add node address -text Address
 grid $v -sticky nw
@@ -87,57 +89,51 @@ pack .g -fill both -expand on
 # contents are created statically.
 
 set junk {
-catch {delete object .g}
-iwidgets::scrolledframe .g \
-        -hscrollmode dynamic -vscrollmode dynamic \
-        -height 200 -width 150
+    catch {delete object .g}
+    iwidgets::scrolledframe .g \
+	    -hscrollmode dynamic -vscrollmode dynamic \
+	    -height 200 -width 150
 
-set v [.g childsite].w
+    set v [.g childsite].w
 
-iwidgets::widgettree $v {
-	options radiobox {
-		rename -labelfont font font Font
-	}
-	options query {
-		rename -labelfont font font Font
-	}
+    iwidgets::widgettree $v {
 	node size -text Size {
-		radiobox s
-		with s {
-			add small -text "Small"
-			add med -text "Medium"
-			add large -text "Large"
-			add xlarge -text "Biggie"
-			select med
-		}
+	    radiobox s
+	    with s {
+		add small -text "Small"
+		add med -text "Medium"
+		add large -text "Large"
+		add xlarge -text "Biggie"
+		select med
+	    }
 	}
 	node font -text Font {
-		query f {
-			group family -initial times -label "Font Family" {
-				radiobutton times -text "Times"
-				radiobutton courier -text "Courier"
-				radiobutton helvetica -text "Helvetica"
-			}
-			group style -initial roman -label "Font Style" {
-				radiobutton roman -text "Roman"
-				radiobutton italic -text "Italic"
-				radiobutton bold -text "Bold"
-			}
+	    query f {
+		group family -initial times -label "Font Family" {
+		    radiobutton times -text "Times"
+		    radiobutton courier -text "Courier"
+		    radiobutton helvetica -text "Helvetica"
 		}
+		group style -initial roman -label "Font Style" {
+		    radiobutton roman -text "Roman"
+		    radiobutton italic -text "Italic"
+		    radiobutton bold -text "Bold"
+		}
+	    }
 	}
 	node address -text Address {
-		query a {
-			entry name -label "Name"
-			entry street -label "Street"
-			entry city -label "City, State"
-			entry email -label "E-mail"
-		}
+	    query a {
+		entry name -label "Name"
+		entry street -label "Street"
+		entry city -label "City, State"
+		entry email -label "E-mail"
+	    }
 	}
-}
+    }
 
-grid $v -sticky nw
+    grid $v -sticky nw
 
-pack .g -fill both -expand on
+    pack .g -fill both -expand on
 }
 
 wm deiconify .
