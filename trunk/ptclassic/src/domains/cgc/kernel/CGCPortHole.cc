@@ -142,7 +142,7 @@ int CGCPortHole :: initOffset() {
 
 // return the buffer requirements. Indicates whether static buffering
 // is achieved or not.
-// return 1 if on the wormhole boundary
+// return 1 if on the boundary
 int CGCPortHole :: maxBufReq() const {
 	if (switched()) {
 		CGCPortHole* cp = (CGCPortHole*) cgGeo().sourcePort();
@@ -164,7 +164,7 @@ void CGCPortHole :: finalBufSize(int statBuf) {
 
 	if (far()->isItOutput()) {
 		maxBuf = localBufSize();
-		return; // check wormhole boundary.
+		return; // check boundary.
 	}
 
 	// Try best to realize Linear or static buffering.
@@ -233,8 +233,8 @@ void CGCPortHole :: setupForkDests() {
 	ForkDestIter next(this);
 	CGCPortHole *outp, *inp;
 	while ((outp = next++) != 0) {
-		//  check wormhole boundary
-		if (outp->far()->isItOutput()) continue;
+		//  check boundary
+		if (!outp->far() || outp->far()->isItOutput()) continue;
 
 		inp = outp->realFarPort();
 		if (inp->fork()) temp.put(inp);
@@ -250,7 +250,6 @@ void CGCPortHole :: setupForkDests() {
 	}
 }
 
-// Need modification if we allow wormholes!!
 CGCPortHole* CGCPortHole :: realFarPort() {
 	CGCPortHole* p = (CGCPortHole*) far();
 	if (p->getForkSrc()) return p->getForkSrc()->realFarPort();
