@@ -1,0 +1,451 @@
+##########################################################################
+# Version: @(#)ModelSchema.itcl	1.1 02/19/97
+# Author: John Reekie
+#
+# Copyright (c) 1997 The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the above
+# copyright notice and the following two paragraphs appear in all copies
+# of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+#                                                         COPYRIGHTENDKEY
+##########################################################################
+
+
+##########################################################################
+#### ModelSchema
+#
+# The _ModelSchema_ class is the "meta-data" of a model -- it represents
+# all models of a given class. This class has a number of purposes:
+# it can be used to verify a description of a model; it can be used
+# to generate models that match a schema; it is used by the generic
+# model-viewing classes; and it can be used to generate source code
+# templates for models. The model has the following attributes:
+# <ul>
+#   <li><b>-modelclass</b>: The class that implements this kind of model.
+# </ul>
+#
+# The model has the following entities:
+# <ul>
+# <li><b>entity</b> _type_: An entity. Entities can appear only
+# at the top level. They have the following attributes:
+#   <ul>
+#   <li><b>-valued</b>: If true, the entity has a value; if not, it
+#        doesn't. False (zero) by default.
+#   <li><b>-toplevel</b>: If true, the entity can reside at the top
+#        level of a model. True (one) by default.
+#   <li><b>-nestable</b>: If true, the entity can be nested inside
+#        other entities. False (zero) by default.
+#   </ul>
+#
+# <li><b>link</b> _type_: A link between entities. Links can appear only
+# at the top level. They have the following attributes:
+#   <ul>
+#   <li><b>-named</b>: If true, links of this type have a name that
+#        is used together with the linked entities to distinguish it.
+#        False (zero) by default.
+#   <li><b>-lcount</b>: The number of entities linked by this type
+#        of link. Two by default.
+#   <li><b>-toplevel</b>: If true, the link can reside at the top
+#        level of a model. True (one) by default.
+#   <li><b>-nestable</b>: If true, the link can be nested inside
+#        entities. False (zero) by default.
+#   </ul>
+#
+# <li><b>attribute</b> _name_ _default_: An attribute. At the top
+# level, this represents an attribute of the model itself;
+# nested inside a link or an entity, this represents an attribute
+# of that link or entity. Attributes have no attributes.
+# (<b>FIXME</b>: The attributes of a model should be modified so
+# that they are distinct from Itcl public variables. This
+# would be very useful in making nested models possible.)
+#
+# Examples. Create a schema model:
+# <pre><tcl quiet>
+#     catch {delete object $schema}
+#     set schema [::tycho::ModelSchema [::tycho::autoName schema]]
+# </tcl></pre>
+#
+# Now load the schema with some data. This is the schema for the
+# model schema.
+# in TIM format -- usually, you would set the *-datafile* option and
+# call load{} (see <a href="Model.html">Model</a>):
+# <pre><tcl quiet>
+#     $schema read string {
+#        configure -modelclass ModelSchema
+#        attribute -modelclass ""
+#        entity entity {
+#            -valued 0
+#            -toplevel 1
+#            -nestable 0
+#            attribute valued 0
+#            attribute toplevel 1
+#            attribute nestable 0
+#        }
+#        entity link {
+#            -valued 0
+#            -toplevel 1
+#            -nestable 0
+#            attribute named 0
+#            attribute lcount 2
+#            attribute toplevel 1
+#            attribute nestable 0
+#        }
+#        entity attribute {
+#            -valued 1
+#            -toplevel 1
+#            -nestable 1
+#        }
+#     }
+# </tcl></pre>
+#
+# Display a TIM representation of the schema:
+# <pre><tcl>
+#     $schema describe
+# </tcl></pre>
+#
+# Return the entities:
+# <pre><tcl>
+#     $schema entities
+# </tcl></pre>
+#
+# Return the links:
+# <pre><tcl>
+#     $schema links
+# </tcl></pre>
+#
+# Return the attributes of links:
+# <pre><tcl>
+#     $schema attributes link
+# </tcl></pre>
+#
+# Generate a template model file and write it to "foo.tim":
+# <pre><tcl>
+#     $schema template "foo.tim"
+# </tcl></pre>
+#
+class ::tycho::ModelSchema {
+    inherit ::tycho::Model
+
+    constructor {args} {}
+    destructor {}
+    
+    #################################################################
+    ####                        options                          ####
+
+    # The class that implements this model 
+    public variable modelclass ""
+    
+    #################################################################
+    ####                     public methods                      ####
+
+    # Add a top-level attribute with attributes to the class
+    method attribute {name string args}
+
+    # Get an attribute or attributes of an attribute
+    method attributecget {name option}
+
+    # Configure the attribute with one or more attributes
+    method attributeconfigure {name args}
+
+    # Remove an attribute to the class
+    method attributedelete {name}
+
+	# Get the value of an attribute
+    method attributeget {name}
+    
+    # Add a nested attribute with attributes to the class
+    method attributein {context name string args}
+
+    # Get attributes of an entity or link
+    method attributes {name}
+
+    # Add a method with attributes to the class
+    method entity {name args}
+
+    # Get an attribute or attributes of a entity
+    method entitycget {name option}
+
+    # Configure the entity with one or more attributes
+    method entityconfigure {name args}
+
+    # Remove a entity from the class
+    method entitydelete {name}
+
+    # Get the entities of this model
+    method entities {}
+
+    # Add a top-level link with attributes to the class
+    method link {name args}
+
+    # Get an attribute or attributes of an link
+    method linkcget {name option}
+
+    # Configure the link with one or more attributes
+    method linkconfigure {name args}
+
+    # Remove an link from the class
+    method linkdelete {name}
+
+    # Get the links of the model
+    method links {}
+
+    # Write a template of this model to a file
+    method template {filename}
+
+    # Verify that a model matches this schema
+    method verify {model}
+
+    #################################################################
+    ####                  protected methods                      ####
+    
+    # Entities cannot be nested
+    method entityin {context name args} {
+    	_nesterror entity $context $name
+    }
+
+    # Links cannot be nested
+    method linkin {context name args} {
+    	_nesterror link $context $name
+    }
+
+    #################################################################
+    ####                   private methods                       ####
+    
+    # Evaluate code in this object's context
+    private method evalInSpecificContext {args} {eval $args}
+}
+
+########################################################################
+#### constructor
+#
+body ::tycho::ModelSchema::constructor {args} {
+    # Evaluate options
+    eval configure $args
+
+    # Define the "attribute" entity
+    defineEntity attribute \
+	    -valued 1 \
+	    -toplevel 1 \
+	    -nestable 1 \
+
+    # Define the "entity" entity
+    defineEntity entity \
+	    -valued 0 \
+	    -toplevel 1 \
+	    -nestable 0 \
+
+    # Define the "link" entity
+    defineEntity link \
+	    -valued 0 \
+	    -toplevel 1 \
+	    -nestable 0 \
+	}
+
+########################################################################
+#### attribute
+#
+# Add a new attribute and return the inverse command.
+# Additional arguments are a flat attribute-value list for the
+# attribute. Flag an error if the attribute already exists. 
+#
+body ::tycho::ModelSchema::attribute {name value args} {
+    _verifynot attribute name
+    _entity attribute {} $name [concat [list $value] $args]
+}
+
+########################################################################
+#### attributedelete
+#
+# Delete a attribute and return the inverse command. Flag an error if
+# the attribute does not exist.
+#
+body ::tycho::ModelSchema::attributedelete {name} {
+    _verify attribute $name
+    _delete attribute $name
+}
+
+########################################################################
+#### attributeget
+#
+# Return the default value of an attribute. Flag an error if
+# the attribute does not exist.
+#
+body ::tycho::ModelSchema::attributeget {name} {
+    _verify attribute $name
+    _get attribute $name
+}
+
+########################################################################
+#### attributein
+#
+# Add a nested attribute and return the inverse command.
+# Additional arguments are a flat attribute-value list for the
+# attribute. Flag an error if the attribute already exists. 
+#
+body ::tycho::ModelSchema::attributein {context name value args} {
+    _verifynotin attribute $context name
+    _entity attribute $context $name [concat [list $value] $args]
+}
+
+########################################################################
+#### attributes
+#
+# Get the attributes of an entity or link as a flat option-value
+# pair. Flag an error if the entity or link does not exist.
+#
+body ::tycho::ModelSchema::attributes {context} {
+    _verify [_type $context] $context
+    set result {}
+    foreach a [_children attribute $context] {
+    	lappend result -$a [attributeget $context$separator$a]
+    }
+    return $result
+}
+
+########################################################################
+#### entity
+#
+# Add a new entity and return the inverse command.
+# Additional arguments are a flat attribute-value list for the
+# entity. Flag an error if the entity already exists. 
+#
+body ::tycho::ModelSchema::entity {name args} {
+    _verifynot entity $name
+    _link entity $name $args
+}
+
+########################################################################
+#### entitycget
+#
+# Get an attribute of a entity. Flag an error if the entity does
+# not exist.
+#
+body ::tycho::ModelSchema::entitycget {name option} {
+    _verify entity $name
+    _cget entity $name $option
+}
+
+########################################################################
+#### entityconfigure
+#
+# Configure the entity and return the inverse command. The argument list
+# is a flat list of attribute-value pairs. Flag an error if the
+# entity does not exist.
+#
+body ::tycho::ModelSchema::entityconfigure {name args} {
+    _verify entity $name
+    _configure entity $name $args
+}
+
+########################################################################
+#### entitydelete
+#
+# Delete a entity and return the inverse command. Flag an error if
+# the entity does not exist.
+#
+body ::tycho::ModelSchema::entitydelete {name} {
+    _verify entity $name
+    _delete entity $name
+}
+
+########################################################################
+#### entities
+#
+# Get the entities of the model.
+#
+body ::tycho::ModelSchema::entities {} {
+    _roots entity
+}
+
+########################################################################
+#### link
+#
+# Add a new link and return the inverse command.
+# Additional arguments are a flat attribute-value list for the
+# link. Flag an error if the link already exists. 
+#
+body ::tycho::ModelSchema::link {name args} {
+    _verifynot link $name
+    _entity link {} $name $args
+}
+
+########################################################################
+#### linkcget
+#
+# Get an attribute of an link. Flag an error if the link does
+# not exist.
+#
+body ::tycho::ModelSchema::linkcget {name option} {
+    _verify link $name
+    _cget link $name $option
+}
+
+########################################################################
+#### linkconfigure
+#
+# Configure the link and return the inverse command. The argument list
+# is a flat list of attribute-value pairs. Flag an error if the
+# link does not exist.
+#
+body ::tycho::ModelSchema::linkconfigure {name args} {
+    _verify link $name
+    _configure link $name $args
+}
+
+########################################################################
+#### linkdelete
+#
+# Delete a link and return the inverse command. Flag an error if
+# the link does not exist.
+#
+body ::tycho::ModelSchema::linkdelete {name} {
+    _verify link $name
+    _delete link $name
+}
+
+########################################################################
+#### links
+#
+# Get the links of the model.
+#
+body ::tycho::ModelSchema::links {} {
+    _roots link
+}
+
+########################################################################
+#### template
+#
+# Produce a template for this model. The argument is the name
+# of the file to write to.
+#
+body ::tycho::ModelSchema::template {filename} {
+    error "Not implemented yet"
+}
+
+########################################################################
+#### verify
+#
+# Verify that a model matches this schema. This can be used
+# to verify that an implementation of a model matches its
+# declared schema.
+#
+body ::tycho::ModelSchema::verify {model} {
+    error "Not implemented yet"
+}
+
