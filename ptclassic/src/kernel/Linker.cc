@@ -481,6 +481,7 @@ int Linker::multiLink (int argc, char** argv) {
 
 	if ( (dlhandle = DLOPEN(objName, DLOPEN_FLAGS)) == NULL) {
 	  dynLinkFlag = FALSE;
+	  activeFlag = FALSE;
 	  StringList msg = "Error linking file";
 	  msg << objName << " dlopen: " << dlerror();
 	  Error::abortRun(msg);
