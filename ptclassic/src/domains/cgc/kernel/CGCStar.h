@@ -56,25 +56,25 @@ protected:
 	void registerState(const char* name);
 
 	// Add lines to be put at the beginning of the code file
-	void addInclude(const char* decl);
+	int addInclude(const char* decl);
 
 	// Add declarations, to be put at the beginning of the main section
-	void addDeclaration(const char* decl, const char* name = NULL) {
+	int addDeclaration(const char* decl, const char* name = NULL) {
 		if (name == NULL) name = decl;
-		addCode(decl, "mainDecls", name);
+		return addCode(decl, "mainDecls", name);
 	}
 
 	// Add global declarations, to be put ahead of the main section
-	void addGlobal(const char* decl, const char* name = NULL) {
+	int addGlobal(const char* decl, const char* name = NULL) {
 		if (name == NULL) name = decl;
-		addCode(decl, "globalDecls", name);
+		return addCode(decl, "globalDecls", name);
 	}
 
 	// Add main initializations, to be put at the beginning of the main 
 	// section. By giving the name, you can have only one initialization
 	// routine among all star instances.
-	void addMainInit(const char* decl, const char* name = NULL) {
-		addCode(decl, "mainInit", name);
+	int addMainInit(const char* decl, const char* name = NULL) {
+		return addCode(decl, "mainInit", name);
 	}
 
 	// After each firing, update the offset pointers
