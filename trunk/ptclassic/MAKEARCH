@@ -203,7 +203,7 @@ foreach x ( cg56/dsp/stars cg96/dsp/stars \
 	mdsdf/tcltk/stars \
 	de/atm/stars \
 	de/tcltk/stars \
-	cgc/targets/main cgc/targets/cm5 \
+	cgc/targets/main cgc/targets/cm5 cgc/targets/NOWam \
 	cgc/tcltk/stars cgc/tcltk/targets \
 	$EXPSUBEXTRAS )
 	optmkdir $x
@@ -213,6 +213,7 @@ foreach x ( cg56/dsp/stars cg96/dsp/stars \
 	cd ../../..
 end
 
+# directories that are deep
 foreach x ( cgc/targets/NOWam/NOWam cgc/targets/NOWam/libudpam )
 	optmkdir $x
 	cd $x
