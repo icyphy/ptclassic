@@ -77,8 +77,11 @@ StringList BaseCTarget :: sanitize(const char* s) const {
 StringList BaseCTarget :: sanitizedFullName (const NamedObj& obj) const {
         StringList out;
         if(obj.parent() != NULL) {
-                out = sanitizedFullName(*obj.parent());
-                out += ".";
+		Block* b = obj.parent();
+		if (b->isItWormhole() == 0) {
+                	out = sanitizedFullName(*obj.parent());
+                	out += ".";
+		}
                 out += sanitizedName(obj);
         } else {
                 out = sanitizedName(obj);
