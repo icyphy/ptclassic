@@ -1491,8 +1491,17 @@ body ::tycho::HTML::initializeToolbar {toolbar} {
 	    [::tycho::url join \$TYCHO doc index.html]"
     
     $toolbar button reload \
-	    -description {Reload and reparse from the file} \
+            -description {Reload and reparse from the file} \
             -text Reload -command "$this reload"
+
+    # FIXME: The following is a hack into the toolbar because it doesn't
+    # support the SHIFT-B1 binding... just simple button.
+    catch {
+        bind $toolbar.buttonsite.inside.buttonreload <Shift-Button-1> \
+                "::tycho::ResourceHTTP::initialize"
+        bind $toolbar.buttonsite.inside.buttonreload <Control-Button-1> \
+                "::tycho::ResourceHTTP::initialize"
+    }
     
     $toolbar button open \
 	    -description {Open a new file} \
@@ -1989,12 +1998,13 @@ proc HMset_image {win handle src} {
             if {$ext==".jpg" || $ext==".jpeg"} {
                 # when we're not on UNIX, error is caught
                 set oldcachefile [::tycho::resource cachefile $image]
-                set ext [::tycho::url extension $oldcachefile]
+                set ext [string tolower [::tycho::url extension $oldcachefile]]
                 # If the cache has not been remapped to a GIF file,
                 # then convert, then remap.
                 if {$ext==".jpg" || $ext==".jpeg"} {
                     # Take out extension (.jpg, .jpeg, etc)...
-                    regsub $ext $oldcachefile {} newcachefile
+                    regsub [::tycho::url extension $oldcachefile] \
+                            $oldcachefile {} newcachefile
                     set newcachefile "$newcachefile.gif"
                     eval exec convert -quality 5 $oldcachefile $newcachefile
                     #file delete $cachefile
