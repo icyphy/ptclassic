@@ -1,22 +1,27 @@
 #
 # Makefile for load56
 #
-# $Id$
+# Copyright (c) 1991, Berkeley Camera Engineering, All Rights Reserved.
+#	$Id$
+#
 
 S56DSP = /usr/local/s56dsp
 
 CFLAGS = -O2 -I$(S56DSP)/include
 
-all: load56
+all:	load56
+	mv -f load56 $(S56DSP)/bin
 
-install: all
-	mv load56 $(S56DSP)/bin
+test:	load56
 
 load56: load56.o
 	$(CC) -o load56 load56.o $(S56DSP)/lib/libqckMon.a
 
 clean:
-	rm -f load56 *.o make*.out *.lod *.lst
+	rm -f *.o make*.out *.lst
+
+distribution:	clean
+	rm -f load56 $(S56DSP)/bin/load56 *.lod
 
 check:
 	sccs check; sccs prt -y *.[ch] > /dev/null
