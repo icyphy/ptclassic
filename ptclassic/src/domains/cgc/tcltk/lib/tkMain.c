@@ -65,14 +65,14 @@ char *message;
     cmd = command;
     cmd += strlen(command);
     if (msg != NULL)
-      while (*msg != 0) {
+      while (*msg != NULL) {
           if (cmd - command > COMMANDSIZE - 5) break;
           if ((*msg == '{') || (*msg == '}')) *cmd++ = '\\';
           *cmd++ = *msg++;
       }
     *cmd++ = ' ';
     *cmd++ = '}';
-    *cmd = 0;
+    *cmd = NULL;
 
     if(Tcl_Eval(interp, command) != TCL_OK)
         fprintf(stderr, "%s\n", msg);
