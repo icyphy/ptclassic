@@ -103,13 +103,16 @@ int displayFile(const char *fileName,
   char buf[1024];
   genDispCommand(buf, fileName);
   if (*buf == '\0') {
+    /* If the user has not set PT_DISPLAY, then we start up Tycho. */
     if (debugFuncPtr != (void (*)(const char *))NULL )    
       (debugFuncPtr)("Invoking Tycho editor");
     startTycho();
-    if (( Tcl_VarEval(ptkInterp,
-		      "::tycho::File::openContext ",
-		      fileName,
-		      (char *)NULL) ) != TCL_OK) {
+    /* If Tk is not present, start up Tycho as a separate process. */
+    sprintf(buf, "if { [info exists tk_version] } {\n"
+            "    ::tycho::File::openContext %s\n"
+            "} else {\n"
+            "    exec tycho %s &}\n", fileName, fileName); 
+    if (( Tcl_VarEval(ptkInterp, buf, (char *)NULL) ) != TCL_OK) {
       if ( ptkInterp == NULL ) {
 	sprintf(buf, "Cannot invoke Tycho editor for '%s':\nptkInterp==NULL",
 		fileName);
