@@ -121,6 +121,11 @@ if {![info exists tychoConsoleWindow]} {
     # If tychoWelcomeWindow is 0, then no console window is opened.
     set tychoConsoleWindow 1
 }
+if {![info exists tychoNoRegExit]} {
+    # If tychoNoRegExit is 1, then regular methods of exiting are
+    # disabled.
+    set tychoNoRegExit 0
+}
 set tychoOpenFiles 0
 
 # Source ~/.tycho if it exists.  ~/.tycho contains user modifications.
@@ -174,5 +179,6 @@ if {$tychoOpenFiles == 0} {
 
 unset tychoWelcomeWindow
 unset tychoConsoleWindow
+unset tychoNoRegExit
 unset tychoOpenFiles
 
