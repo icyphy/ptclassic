@@ -824,8 +824,8 @@ int fd;
     /* read until EOF, EWOULDBLOCK or an error */
     for (;;) {
 	count = read(socket, buffer, sizeof(buffer));
-	if ((count == 0) && (errno == EWOULDBLOCK)) return;
-	if (count <= 0) {
+ 	if ((count == 0) || (count < 0 && errno == EWOULDBLOCK)) return;
+ 	if (count < 0) {
 	    (void) close(fd);
 	    (void) close(socket);
 	    RPC_FD_CLR(socket, RPCFileRequest);
