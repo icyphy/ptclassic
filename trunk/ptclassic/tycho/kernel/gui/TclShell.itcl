@@ -31,8 +31,7 @@
 #######################################################################
 
 # FIXME: To do:
-# - The console should support sessions in separate interpreters or
-#   different namespaces.
+# - The console should support sessions in separate interpreters.
 # - Control-e goes to the end of a line.  It should probably (for
 #   consistency) go the end of a command.
 
@@ -128,6 +127,9 @@ class ::tycho::TclShell {
     # Execute the current command.
     method processReturn {}
 
+    # Set the namespace within which commands will be run.
+    method queryNamespace {}
+
     # Display a command and add to the history, but do not execute it.
     method recordCommand {cmd}
 
@@ -166,6 +168,9 @@ class ::tycho::TclShell {
 
     # The command history.
     protected variable commandList ""
+
+    # Namespace in which to evaluate commands.
+    protected variable evalInNamespace {::}
 
     # How far back we've scrolled through the command history.
     protected variable historypos 0
@@ -318,6 +323,9 @@ body ::tycho::TclShell::constructor {args} {
 
     menubar add "Clear history" Special -underline 0 \
 	    -command "$this clearHistory"
+
+    menubar add "Set namespace" Special -underline 0 \
+	    -command "$this queryNamespace"
 
     printPrompt ""
 
@@ -653,6 +661,21 @@ body ::tycho::TclShell::processReturn {} {
     evalTextEntry
 }
 
+#########################################################################
+#### queryNamespace
+# Query the user for a namespace within which commands will be run.
+#
+body ::tycho::TclShell::queryNamespace {} {
+    set response [::tycho::query {Namespace in which to evaluate commands} \
+            [list [list line n {namespace} $evalInNamespace]]]
+    if {$response != {}} {
+        set ns [lindex $response 1]
+        # In case an error occurs, we have a little test command
+        namespace $ns [list puts "switching namespace to $ns"]
+        set evalInNamespace $ns
+    }
+}
+
 ###################################################################
 #### recordCommand
 # Display a command and add it to the history, but do not execute it.
@@ -759,7 +782,7 @@ body ::tycho::TclShell::stuff {} {
 body ::tycho::TclShell::evalCommand {com} {
     # To be sure a prompt gets printed even if an error occurs,
     # catch errors here
-    if {[catch {uplevel #0 $com} retval] != 0} {
+    if {[catch {namespace $evalInNamespace $com} retval] != 0} {
 	tkerror $retval
     }
     return $retval
