@@ -29,7 +29,8 @@ HELPDIR=$(ROOT)/help
 LIB=libptolemy.a
 
 # Library sources
-LIBSRCS=Block.cc Connect.cc Fraction.cc Galaxy.cc \
+LIBSRCS=Block.cc Connect.cc ComplexArrayState.cc ComplexState.cc \
+ Fraction.cc Galaxy.cc \
  InterpGalaxy.cc Interpreter.cc KnownBlock.cc NamedObj.cc Output.cc \
  Particle.cc PriorityQueue.cc SpaceWalk.cc Star.cc StringList.cc \
  Tokenizer.cc Universe.cc expandPath.cc \
@@ -44,7 +45,9 @@ LIBSRCS=Block.cc Connect.cc Fraction.cc Galaxy.cc \
 SRCS=$(LIBSRCS) interpmain.cc SDFDomain.cc DEDomain.cc
 
 # Header files
-HDRS=Block.h Connect.h DataStruct.h Domain.h FloatState.h \
+HDRS=Block.h Connect.h \
+ ComplexArrayState.h ComplexState.h \
+ DataStruct.h Domain.h FloatState.h \
  Fraction.h Galaxy.h IntState.h InterpGalaxy.h Interpreter.h \
  KnownBlock.h KnownState.h NamedObj.h Output.h Particle.h PriorityQueue.h \
  Scheduler.h SpaceWalk.h Star.h State.h StringList.h StringState.h \
@@ -55,7 +58,7 @@ HDRS=Block.h Connect.h DataStruct.h Domain.h FloatState.h \
  DEConnect.h DEScheduler.h DEStar.h DEUniverse.h
 
 # Library objects
-LIBOBJS=Block.o Connect.o Fraction.o Galaxy.o \
+LIBOBJS=Block.o Connect.o ComplexArrayState.o ComplexState.o Fraction.o Galaxy.o \
  InterpGalaxy.o Interpreter.o KnownBlock.o NamedObj.o Output.o Particle.o \
  PriorityQueue.o SpaceWalk.o Star.o StringList.o Tokenizer.o Universe.o \
  expandPath.o \
@@ -105,6 +108,21 @@ makefile:	make.template
 Interpreter.o:	Interpreter.cc
 		$(GNU) $(GPPFLAGS) -DHELPDIR=\"$(HELPDIR)\" -c Interpreter.cc
 
+FloatState.h FloatState.cc : ScalarState.hP ScalarState.ccP
+	genclass -2 Float val double val ScalarState;
+	sed 's/"Float"/"FLOAT"/' Float.double.ScalarState.h > FloatState.h;
+	sed 's/"Float"/"FLOAT"/;s/"double"/"float"/' Float.double.ScalarState.cc > FloatState.cc;
+	rm Float.double.ScalarState.h;
+	rm Float.double.ScalarState.cc;
+
+IntState.h IntState.cc : ScalarState.hP ScalarState.ccP
+	genclass -2 Int val int val ScalarState;
+	sed 's/"Int"/"INT"/' Int.int.ScalarState.h > IntState.h;
+	sed 's/"Int"/"INT"/' Int.int.ScalarState.cc > IntState.cc;
+	rm Int.int.ScalarState.h;
+	rm Int.int.ScalarState.cc;
+
+
 FloatArrayState.h FloatArrayState.cc : ArrayState.hP ArrayState.ccP
 	genclass -2 Float val double val ArrayState; 
 	mv Float.double.ArrayState.h FloatArrayState.h;
@@ -114,7 +132,7 @@ FloatArrayState.h FloatArrayState.cc : ArrayState.hP ArrayState.ccP
 IntArrayState.h IntArrayState.cc : ArrayState.hP ArrayState.ccP
 	genclass -2 Int val int val ArrayState;
 	mv Int.int.ArrayState.h IntArrayState.h;
-	sed 's/"Int"/"INT"/;s/dval/ival/g' Int.int.ArrayState.cc > IntArrayState.cc;
+	sed 's/"Int"/"INT"/' Int.int.ArrayState.cc > IntArrayState.cc;
 	rm Int.int.ArrayState.cc;
 
 # Don't add anything after the next line; makedepend will zap it.
