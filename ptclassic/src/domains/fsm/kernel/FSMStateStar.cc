@@ -279,7 +279,7 @@ FSMStateStar * FSMStateStar::nextState (int& condNum, int preemption) {
 	// Return the next state.
 	MPHIter nextp(stateOut);
 	PortHole* oport = 0;
-	for (int i=0; i<=condNum; i++)  {
+	for (i=0; i<=condNum; i++)  {
 	  oport=nextp++;
 	}
 	
