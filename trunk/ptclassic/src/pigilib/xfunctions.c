@@ -57,20 +57,21 @@ Converted to Tcl/Tk by Kennard White and Edward Lee.
 
 void
 win_msg(omsg)
-char * omsg;
+const char* omsg;
 {
 	int numChars;
 	int flags;
 	char *dst;
 
-	/* The message in omsg is a C string.  Need to convert it to
-	   a Tcl string, adding braces and backslashes if necessary. */
+	/* The message in omsg is a C string.  Need to convert it to */
+	/* a Tcl string, adding braces and backslashes if necessary. */
+	/* omsg is not altered, but the Tcl prototypes want char*    */
 	numChars = Tcl_ScanElement(omsg, &flags) + 1;
 	dst = (char *) malloc(numChars);
 	Tcl_ConvertElement(omsg, dst, flags);
 
 	if (Tcl_VarEval(ptkInterp, "ptkImportantMessage .ptkMessage ",
-	  dst, NULL) != TCL_OK) {
+			dst, NULL) != TCL_OK) {
 		puts(omsg);
 		fflush(stdout);
 	}
