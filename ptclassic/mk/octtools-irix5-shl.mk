@@ -51,6 +51,6 @@ SHARED_LIBRARY_COMMAND =	ld -shared -exports -all -o
 
 
 # Fiendishly evil hack to get change the LIB from libfoo.a to libfoo.so
-TMPLIB := 		$(LIB)
-LIB = 			$(basename $(TMPLIB)).$(LIBSUFFIX)
+TMPLIB := 		$(PTLIB)
+PTLIB = 			$(basename $(TMPLIB)).$(LIBSUFFIX)
 

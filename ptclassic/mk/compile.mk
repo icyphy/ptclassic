@@ -82,8 +82,8 @@ UNOPTIMIZED_COMPILE_RULE = 	$(CPLUSPLUS) $(CC_SHAREDFLAGS) $(WARNINGS) \
 					$(ARCHFLAGS) $(LOCALCCFLAGS) \
 					$(USERFLAGS) -I$(VPATH) $(INCL) -c 
 
-ifeq ($(strip $(LIB)),)
-LIB=dummylib
+ifeq ($(strip $(PTLIB)),)
+PTLIB=dummylib
 endif
 
 ifeq ($(strip $(LIB_DEBUG)),)
@@ -92,7 +92,7 @@ endif
 
 # Rule for building a C++ library
 # We use a GNU make conditional here
-$(LIB):	$(OBJS)
+$(PTLIB):	$(OBJS)
 ifeq ($(USE_SHARED_LIBS),yes) 
 	rm -f $@
 	$(SHARED_LIBRARY_COMMAND) $@ $(OBJS) 
@@ -134,12 +134,12 @@ $(LIBDIR)/$(LIBNONSHARED):	$(LIBNONSHARED) $(EXP)
 	ln $(LIBNONSHARED) $(LIBDIR)
 
 # AIX used EXP for export lists
-$(EXP): $(LIB)
+$(EXP): $(PTLIB)
 
 # Rule for installing a C++ library
-$(LIBDIR)/$(LIB):	$(LIB) $(EXP)
+$(LIBDIR)/$(PTLIB):	$(PTLIB) $(EXP)
 		rm -f $@
-		ln $(LIB) $(LIBDIR)
+		ln $(PTLIB) $(LIBDIR)
 
 # Rule for installing a C library
 $(LIBDIR)/$(CLIB):	$(CLIB) $(EXP)
@@ -160,7 +160,7 @@ clean:
 # Make things "even cleaner".  Removes libraries, generated .cc and .h
 # files from preprocessor, etc.
 realclean:
-	rm -f $(CRUD) $(LIB) $(CLIB) \
+	rm -f $(CRUD) $(PTLIB) $(CLIB) \
 		$(PL_SRCS:.pl=.h) $(PL_SRCS:.pl=.cc) \
 		$(PL_SRCS:.pl=.htm) \
 		TAGS starHTML.idx starHTML.idx.fst\
@@ -224,7 +224,7 @@ TAGS:		$(HDRS) $(SRCS)
 # Rule for detecting junk files
 checkjunk:
 	@checkextra -v $(SRCS) $(HDRS) $(EXTRA_SRCS) $(OTHERSRCS) \
-		$(OBJS) $(LIB) $(PL_SRCS:.pl=.htm) \
+		$(OBJS) $(PTLIB) $(PL_SRCS:.pl=.htm) \
 		$(STAR_MK).o $(STAR_MK).mk $(EXTRA_DESTS) \
 		$(MISC_FILES) makefile make.template SCCS TAGS
 
