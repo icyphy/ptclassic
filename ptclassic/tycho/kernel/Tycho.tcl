@@ -356,11 +356,10 @@ if { $tychoWelcomeWindow \
     && [::tycho::preference get misc welcomeWindow] \
     && ! [::tycho::preference get misc slowNetwork] } {
     ::tycho::_announce "About to create a welcome message"
-    uplevel #0 {
-	source [file join $tychokernel ButtonBox.itcl]
-
-
-    }
+    # Don't source ButtonBox here, tycho foo.html will fail
+    # uplevel #0 {
+    #	source [file join $tychokernel ButtonBox.itcl]
+    # }
     ::tycho::welcomeMessage $TychoBinaryInfo $TychoVersionInfo
     ::tycho::_announce "Done creating a welcome message"
 
