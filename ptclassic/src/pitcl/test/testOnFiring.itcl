@@ -110,4 +110,28 @@ test onfiring-6 {Check getData} {
     list $data
 } {{0.0 1.0 0.0 3.0 2.0}}
 
+# Procedure that actually monitors the inputs
+proc monitorInput2 {star} {
+    global ::data
+    # NOTE: Errors here are not handled correctly
+    set data [concat $data [::pitcl::getData $star.input]]
+}
+
+test onfiring-7 {create a multirate test universe} {
+    namespace ::pitcl {
+        addUniverse x SDF
+        addBlock a Ramp
+        addBlock b Average
+        addBlock c BlackHole
+        connect .x.a.output .x.b.input
+        connect .x.b.output .x.c.input
+        onFiringCancel all
+        onFiring .x.b {monitorInput2}   
+        set data {}
+        run .x 2
+        wrapup .x
+        list $data
+    }
+} {{0.0 1.0 2.0 3.0 4.0 5.0 6.0 7.0 8.0 9.0 10.0 11.0 12.0 13.0 14.0 15.0}}
+
 doneTests
