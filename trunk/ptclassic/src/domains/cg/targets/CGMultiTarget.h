@@ -32,6 +32,7 @@ public:
 	CGFullConnect(const char* name,const char* sClass,const char* desc);
 	~CGFullConnect();
 	void start();
+	int run();
 	int setup(Galaxy&);
 	void wrapup();
 
@@ -73,8 +74,6 @@ public:
 	// redefine 
 	SDFStar* createSend(int from, int to, int num);
 	SDFStar* createReceive(int from, int to, int num);
-	SDFStar* createSpread();
-	SDFStar* createCollect();
 
 	// display Gantt chart
 	void displaySchedule(ParScheduler* );
@@ -98,6 +97,14 @@ protected:
 	// By default, it clones from KnownTarget list with "chile-type" state.
 	virtual Target* createChild();
  
+	// redefine the top-level iterations to do nothing
+	void beginIteration(int repetitions, int depth);
+	void endIteration(int repetitions, int depth);
+
+	// Redefine: call wormOutputCode after scheduling and sub-galaxy
+	// generation is done and before each processor generates code.
+	int wormCodeGenerate(Galaxy&);
+
 	// parallel processors
 	ParProcessors* parProcs;
 
