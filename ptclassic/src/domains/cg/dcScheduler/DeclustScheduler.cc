@@ -191,7 +191,7 @@ static void assignNodes(DCNodeList &list, int proc) {
 	DCNodeListIter iter(list);
 	DCNode *n;
 	while ((n = iter++) != 0) {
-		n->assignProc(proc);
+		n->setProcId(proc);
 	}
 }
 
