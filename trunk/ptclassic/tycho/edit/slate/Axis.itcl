@@ -63,190 +63,193 @@
 # $axis configure -length 50
 #
 class ::tycho::Axis {
-    inherit ::tycho::Primitive
+    inherit ::tycho::Picture
 
-    constructor {s c x0 y0 args} {}
-    destructor {}
+    proc construct {id tags canvas x0 y0 args}
+    proc destruct  {id canvas}
+
 
     ###################################################################
     ####                            options                        ####
 
     # The number of significant digits to display
-    public variable digits 0 {
-	redraw
-    }
+    common digits
 
     # The low value on the axis
-    public variable from 0.0 {
-	redraw
-    }
-
-    # The style of labelling: "none", "ends", or "every".
-    # FIXME: Does nothing.
-    public variable labelstyle "every" {
-	;#
-    }
+    common from
 
     # The length of the axis in pixels.
-    public variable length 200 {
-	redraw
-    }
-
-    # Vertical or horizontal orientation
-    # FIXME: Doesn't work
-    public variable orient horizontal {
-	;#
-    }
+    common length
 
     # The length of the tick marks in pixels
-    public variable ticklength 6 {
-	redraw
-    }
+    common ticklength
 
     # The high value on the axis
-    public variable to 100 {
-	redraw
-    }
+    common to
+
 
     ###################################################################
-    ####                         public methods                    ####
+    ####                         public procs                      ####
 
     # Get or set the (base) coordinates of the axis.
-    method coords {args} {}
+    proc coords {id canvas args}
+
+    # Option update
+    proc digits {id canvas val} {
+	set digits($id) $val
+	redraw $id $canvas
+    }
+
+    proc from {id canvas val} {
+	set from($id) $val
+	redraw $id $canvas
+    }
+
+    proc length {id canvas val} {
+	set length($id) $val
+	redraw $id $canvas
+    }
+
+    proc ticklength {id canvas val} {
+	set ticklength($id) $val
+	redraw $id $canvas
+    }
+
+    proc to {id canvas val} {
+	set to($id) $val
+	redraw $id $canvas
+    }
 
     ###################################################################
     ####                         protected variables               ####
 
     # The font to use for the tick labels
-    protected variable tickfont ""
+    protected common tickfont
+
+    # The rule baseline
+    protected common baseline
 
     ###################################################################
-    ####                         private methods                   ####
+    ####                         private procs                     ####
   
     # Redraw myself
-    private method redraw {}
+    private proc redraw {id canvas}
 
     # Redraw the ticks and labels on the axis. Requires the base coordinate.
-    private method redrawTicks {x0 y0} 
+    private proc redrawTicks {id canvas x0 y0}
 
 }
+
+array set Axis [array get Picture]
+
+set Axis(coords) ::tycho::Axis::coords
+
 
 #######################################################################
-#### constructor
+#### construct
 #
-body ::tycho::Axis::constructor {s c x0 y0 args} {
+body ::tycho::Axis::construct {id tags canvas x0 y0 args} {
+    # Initialize the options
+    set defaultoptions {-digits 0 -length 200 -from 0 -ticklength 6 -to 100}
 
-    # Set the slate and canvas variables.
-    set slate  $s
-    set canvas $c
-
-    # Grab some options now to save redrawing when the options
-    # are initialized.
-    getopt length     args
-    getopt ticklength args
-    getopt orient     args
-    getopt from       args
-    getopt digits     args
-    getopt to         args
+    foreach {option value} [concat $defaultoptions $args] {
+	set [string trimleft $option -]($id) $value
+    }
 
     # Get and remember the font for the ticks
-    set tickfont [.tychoFonts findFont {helvetica 9 medium r}]
-    
-    # Draw the ticks and the labels
-    redrawTicks $x0 $y0
-    
-    # Create ruler line and call it "main"
-    $this component create "main" line $x0 $y0 [expr $x0+$length] $y0
+    if { ! [::info exists tickfont] } {
+	set tickfont [.tychoFonts findFont {helvetica 9 medium r}]
+    }
 
-    # Initialize remaining options
-    eval configure $args
+    # Create the ruler baseline
+    set baseline($id) [$canvas create line \
+	    $x0 $y0 [expr $x0+$length($id)] $y0 \
+	    -tags $tags]
+
+    # Draw the ticks and the labels
+    redrawTicks $id $canvas $x0 $y0
 }
-    
-    ###################################################################
-    ###################################################################
-    ####                      public methods                       ####
+
 
 #######################################################################
 #### coords
 # Get or set the (base) coordinates of the axis.
 #
-body ::tycho::Axis::coords {args} {
+body ::tycho::Axis::coords {id canvas args} {
 
     # If no arguments specified then we return the current 
     # coordinates of the base of the axis otherwise move
     # the axis to the new coordinates
     if { $args == "" } {
-	return [lrange [$canvas coords $component(main)] 0 1]
+	return [lrange [$canvas coords $baseline($id)] 0 1]
     } else {
-	assign x y [$canvas coords $component(main)]
+	assign x y [$canvas coords $baseline($id)]
 	assign a b $args
-	
-	$this move direct [expr $a - $x] [expr $b - $y]
+
+	# Do the move. FIXME: should this call the slate?
+	$canvas move $id [expr $a - $x] [expr $b - $y]
     }
 }
 
-    ###################################################################
-    ###################################################################
-    ####                      private methods                      ####
 
 ########################################################################
 #### redraw
 # Redraw myself
 #
-body ::tycho::Axis::redraw {} {
+body ::tycho::Axis::redraw {id canvas} {
   
     # Get the base coordinates
-    assign x0 y0 [$canvas coords $component(main)]
+    assign x0 y0 [$canvas coords $baseline($id)]
     
     # Redraw ticks and labels
-    redrawTicks $x0 $y0
+    redrawTicks $id $canvas $x0 $y0
     
-    # Move the ruler line
-    $canvas coords $component(main) $x0 $y0 [expr $x0+$length] $y0
+    # Move the baseline
+    $canvas coords $baseline($id) $x0 $y0 [expr $x0+$length($id)] $y0
 }
 
 #######################################################################
 #### redrawTicks
 # Redraw the ticks and the labels. Requires the base coordinate.
 #
-body ::tycho::Axis::redrawTicks {x0 y0} {
+body ::tycho::Axis::redrawTicks {id canvas x0 y0} {
 
     # Test the range -- assume that if -from is not less than -to, that
     # this is temporary and will be fixed by the next option.
-    if { $from >= $to } {
+    if { $from($id) >= $to($id) } {
 	return
     }
 
-    # Delete the ticks and labels (catch in case they don't exist yet)
-    if { [info exists component(ticks)] } {
-	$this component delete ticks
-    }
-    if { [info exists component(labels)] } {
-	$this component delete labels
-    }
+    # Get the unique tags
+    set tags [$canvas gettags $baseline($id)]
+
+    # Delete the ticks and labels
+    $canvas delete $id.tick $id.label
     
     # Find label width -- HACK!
-    set t [$canvas create text 0 0 -text [format %.${digits}f $from]]
+    set t [$canvas create text 0 0 -text [format %.$digits($id)f $from($id)]]
     set labelwidth [::rectWidth [$canvas bbox $t]]
     $canvas delete $t
 
     # Calculate axis increment locations
-    set increment     [::axisIncrement $from $to $length $labelwidth 10]
-    set axisValues    [::rangeValues $from $to $increment]
-    set axisLocations [::mapRange $from $to $axisValues \
-	    $x0 [expr $x0 + $length]]
+    set increment [::axisIncrement $from($id) $to($id) $length($id) \
+	    $labelwidth 10]
+    set axisValues [::rangeValues $from($id) $to($id) $increment]
+    set axisLocations [::mapRange $from($id) $to($id) $axisValues \
+	    $x0 [expr $x0 + $length($id)]]
 
     # Create the tick lines and text labels
-    set itemspecs {}
+    set ticktags [concat $tags $id.tick]
+    set labeltags [concat $tags $id.label]
+
     foreach x $axisLocations v $axisValues {
- 	lappend itemspecs "ticks" [list line $x $y0 $x \
- 		[expr $y0-$ticklength]]
- 	lappend itemspecs "labels" [list \
- 		text $x [expr $y0-$ticklength] \
- 		-text [format %.${digits}f $v] \
- 		-font $tickfont -anchor sw]
+	$canvas create line $x $y0 $x [expr $y0-$ticklength($id)] \
+		-tags $ticktags
+	$canvas create text $x [expr $y0-$ticklength($id)] \
+ 		-text [format %.$digits($id)f $v] \
+ 		-font $tickfont -anchor sw \
+		-tags $labeltags
     }
-    eval $this create untagged $itemspecs
 }
 
 
