@@ -106,11 +106,9 @@ void ParScheduler::runOnce() {
 	int iters = mtarget->getIters();
 	for (int i = 0; i < mtarget->nProcs(); i++) {
 		mtarget->setCurChild(i);
-		StringList startIter = mtarget->beginIteration(iters,i);
-		mtarget->addCode(startIter);
+		mtarget->beginIteration(iters,i);
 		parProcs->getProc(i)->run();
-		StringList endIter = mtarget->endIteration(iters,i);
-		mtarget->addCode(endIter);
+		mtarget->endIteration(iters,i);
 	}
 }
 
