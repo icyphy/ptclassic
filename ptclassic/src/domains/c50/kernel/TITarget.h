@@ -52,10 +52,21 @@ public:
 
 class TITarget : public AsmTarget {
 public:
+	// constructor
 	TITarget(const char* nam, const char* desc, const char* stype);
+
 	// copy constructor
 	TITarget(const TITarget&);
-	Block* makeNew() const;
+
+	// destructor
+	~TITarget();
+
+	// return a copy of itself
+	/*virtual*/ Block* makeNew() const;
+
+	// return the domain of the galaxy if it exists and "C50" otherwise
+	/*virtual*/ const char* domain();
+
 	void setup();
 	void headerCode();
 	void beginIteration(int repetitions, int depth);
@@ -64,23 +75,15 @@ public:
 	/*virtual*/ StringList comment(const char*,const char*,const char*,const char*);
 	/*virtual*/ void writeFiring(Star&,int);
 
-//FIXME
-//#ifdef __GNUG__
-	// Workaround a bug in gcc-2.6.0.  Otherwise DSK320Target.cc 
-	// won't compile
-	//void trailerCode() { CGTarget::trailerCode();}
-//#endif
-
-	~TITarget();
 protected:
 	StringState bMemMap;
 	StringState uMemMap;
 
-
 	// Write star firings as subroutine calls.
 	IntState subFire;
-        // loop counter
-        int loopCounter;
+
+	// loop counter
+	int loopCounter;
 
 #ifdef __GNUG__
 	// Workaround a bug in gcc-2.6.0.  Otherwise DSK320Target.cc 
@@ -98,6 +101,13 @@ protected:
 	void enableInterrupts();
 	void frameCode();
 	int inProgSection;
+
+	// maximum value in fixed-point format
+	double maxFixedPointValue;
+
+	// minimum value in fixed-point format 
+	double minFixedPointValue;
+
 private:
 	void initStates();
 };
