@@ -624,9 +624,9 @@ int POct::ptkGetTargetNames (int aC,char** aV) {
     int nTargets, nChoices, i;
 
     if (aC != 2) return  
-            usage ("ptkFacetContents <OctObjectHandle>");
+            usage ("ptkGetTargetNames <OctObjectHandle>");
 
-    if (strcmp(aV[1],"NIL")==0)  return result("{}");
+    if (strcmp(aV[1],"NIL")==0)  return result("NIL");
 
     if (ptkHandle2OctObj(aV[1], &facet) == 0) {
         Tcl_AppendResult(interp, "Bad or Stale Facet Handle passed to ", aV[0],
@@ -653,9 +653,12 @@ int POct::ptkGetTargetNames (int aC,char** aV) {
     /* for a galaxy, add "<parent>" as an option */
     if (IsGalFacet(&facet)) {
             targetNames[nTargets] = defaultTarget = "<parent>";
-	    nChoices = ++nTargets;
+	    nChoices = nTargets + 1;
     }
-    else defaultTarget = KcDefTarget();
+    else {
+            defaultTarget = KcDefTarget();
+	    nChoices = nTargets;
+    }
 
     // Return the list with the current target first
 
@@ -689,6 +692,132 @@ int POct::ptkGetTargetNames (int aC,char** aV) {
     return TCL_OK;
 }
 
+// ptkGetTargetParams <facet-id> <target_name>
+// Returns a list of lists of the target parameters of a facet (if any).
+// The command returns a list in the following format:
+// { parameter_list }
+// where parameter list is of the form:
+//    {name1 type1 value1} {name2 type2 value2} ...
+//
+//
+// Written by Alan Kamas  12/93
+//
+int POct::ptkGetTargetParams (int aC,char** aV) {
+    octObject facet;
+    char *target ;
+
+    if (aC != 3) return
+            usage ("ptkGetTargetParams <OctObjectHandle> <TargetName>");
+
+    if (strcmp(aV[1],"NIL")==0)  return result("NIL");
+
+    target = aV[2];
+
+    if (ptkHandle2OctObj(aV[1], &facet) == 0) {
+        Tcl_AppendResult(interp, "Bad or Stale Facet Handle passed to ", aV[0],
+                         (char *) NULL);
+        return TCL_ERROR;
+    }
+
+    if (!setCurDomainF(&facet)) {
+        Tcl_AppendResult(interp,
+                         "Unknown domain found; correct the domain first",
+                         (char *) NULL);
+        return TCL_ERROR;
+    }
+
+    // Set the target to the passed target name
+    if (!SetTargetProp(&facet, target)) {
+	Tcl_AppendResult(interp, ErrGet(), (char *) NULL);
+        return TCL_ERROR;
+    }
+
+    // Now (finally) get the Target Parameters
+
+    // No target parameters to get if the target is "<parent>"
+    if (strcmp(target,"<parent>")==0)  return result("NIL");
+
+    // Get the pList form
+    ParamListType pList;
+    if (!GetTargetParams(target, &facet, &pList)) {
+	Tcl_AppendResult(interp, ErrGet(), (char *) NULL);
+        return TCL_ERROR;
+    }
+
+    // Convert the pList form into a Tcl list
+    if (pList.length == 0) return result("NIL");
+    for (int i=0; i<pList.length; i++) {
+	Tcl_AppendResult(interp, "{", (char *) NULL);
+        Tcl_AppendElement(interp, pList.array[i].name);
+        Tcl_AppendElement(interp, pList.array[i].type);
+        Tcl_AppendElement(interp, pList.array[i].value);
+	Tcl_AppendResult(interp, " } ", (char *) NULL);
+    }
+
+    return TCL_OK;
+}
+
+// ptkSetTargetParams <facet-id> <target_name> <parameter_list>
+// saves the values of the Target parameter_list into the Oct data base
+//
+// The command should be called as follows:
+// command_name FacetHandle Target_Name { parameter_list }
+// where parameter_list is of the form:
+//    {name1 type1 value1} {name2 type2 value2} ...
+//
+// Written by Alan Kamas  12/93
+//
+int POct::ptkSetTargetParams (int aC,char** aV) {
+    octObject facet;
+    char *target ;
+
+    if (aC != 4) return
+      usage ("ptkSetTargetParams <OctObjectHandle> <TargetName> <parameterList>");
+
+    target = aV[2];
+
+    if (ptkHandle2OctObj(aV[1], &facet) == 0) {
+        Tcl_AppendResult(interp, "Bad or Stale Facet Handle passed to ", aV[0],
+                         (char *) NULL);
+        return TCL_ERROR;
+    }
+
+    if (!setCurDomainF(&facet)) {
+        Tcl_AppendResult(interp,
+                         "Unknown domain found; correct the domain first",
+                         (char *) NULL);
+        return TCL_ERROR;
+    }
+
+    // Set the target to the passed target name
+    if (!SetTargetProp(&facet, target)) {
+	Tcl_AppendResult(interp, ErrGet(), (char *) NULL);
+        return TCL_ERROR;
+    }
+
+    // Covert the parameter List string into the pList structure.
+    ParamListType pList;
+    if (MakePList(aV[3], &pList) == 0) {
+        Tcl_AppendResult(interp, "Unable to parse parameter list: ",
+                         aV[3], (char *) NULL);
+        return TCL_ERROR;
+    }
+    // Now that the pList has been made, it should be freed before returning.
+
+    // Now (finally) set the Target Parameters
+    if (pList.length > 0 ) {
+        if (!SetTargetParams(&facet, &pList)) {
+	    Tcl_AppendResult(interp, ErrGet(), (char *) NULL);
+            return TCL_ERROR;
+        }
+    }
+    
+    // Free up the pList as it is no longer needed
+    DeletePList (&pList);
+
+    return TCL_OK;
+}
+
 
 // ptkFacetContents <facet-id> <list_of_types>
 // where <facet-id> is the string Handle of the Oct ID.
@@ -715,7 +844,7 @@ int POct::ptkFacetContents (int aC,char** aV) {
     if (aC != 3) return  
             usage ("ptkFacetContents <OctObjectHandle> <List_of_Types>");
 
-    if (strcmp(aV[1],"NIL")==0)  return result(" { } ");
+    if (strcmp(aV[1],"NIL")==0)  return result("NIL");
 
     if (ptkHandle2OctObj(aV[1], &facet) == 0) {
         Tcl_AppendResult(interp, "Bad or Stale Facet Handle passed to ", aV[0],
@@ -1009,6 +1138,8 @@ static InterpTableEntry funcTable[] = {
 	ENTRY(ptkGetParams),
 	ENTRY(ptkSetParams),
 	ENTRY(ptkGetTargetNames),
+	ENTRY(ptkGetTargetParams),
+	ENTRY(ptkSetTargetParams),
 	ENTRY(ptkFacetContents),
 	ENTRY(ptkGetMaster),
 	ENTRY(ptkOpenFacet),
