@@ -2,9 +2,9 @@
 # 
 # @Author: Farhana Sheikh and Edward A. Lee
 #
-# @Version: $Id$
+# @Version: @(#)View.itcl	1.21 01/29/97
 # 
-# @Copyright (c) 1995-%Q% The Regents of the University of California.
+# @Copyright (c) 1995-1996 The Regents of the University of California.
 # All rights reserved.
 #
 # Permission is hereby granted, without written agreement and without
@@ -30,9 +30,6 @@
 #                                        COPYRIGHTENDKEY
 #######################################################################
 
-# For easier debugging.
-catch {delete class ::tycho::View}
-
 # FIXME:
 # FEATURES TO BE ADDED:
 # (1) Add subview functionality
@@ -42,12 +39,16 @@ catch {delete class ::tycho::View}
 #### View
 # This class is the base class for most graphical and textual widgets
 # in Tycho. It is designed to be inserted into a <a href="Displayer.html">
-# Displayer</a>
-# window, although it can be used alone as an ordinary widget.
+# Displayer</a> # window, although it can be used alone as an ordinary widget.
 # Subclasses of the View class display text or graphics, and may
 # choose to contain "subviews" within themselves. (The protocols
 # and functionality needed to properly implemented nested views
 # has not yet been developed.)
+#
+# The displayer of a view is specified with the -displayer option:
+# if this is set in the constructor, the view attaches itself to
+# its displayer. <i>Note that the displayer should be specified
+# before other arguments.</i>
 #
 # The displayer of a view provides it with a menu bar, a status bar,`
 # and a tool bar. The View class provides methods that issue commands
@@ -74,9 +75,6 @@ class ::tycho::View {
     ###################################################################
     ####                            options                        ####
 
-    # A symbolic name to use for the view in its Displayer.
-    itk_option define -name name Name {}
-
     # Specify whether modifications will be permitted on the data.
     itk_option define -readonly readonly ReadOnly 0
 
@@ -87,7 +85,7 @@ class ::tycho::View {
     method currentPoint {} {return {}}
 
     # Invoke a command on the Displayer, if it exists.
-    method displayer {args}
+    method displayer {{method {}} args}
     
     # Give the window or a subwindow the focus and set the menu bar (if any).
     method focusin {}
@@ -113,13 +111,23 @@ class ::tycho::View {
     ###################################################################
     ####                         protected methods                 ####
 
-    # Indicate whether or not modifications are allowed in the displayed text.
+    # Indicate whether or not modifications are allowed in the
+    # displayed text.
     protected method indicateReadOnly {bool}
 
     ###################################################################
     ####                         protected variables               ####
 
-    # Name of this view's Displayer
+    # Indicate whether modifying the text is allowed.
+    protected variable readOnly 0
+
+    # "Type" of this view, used for placing windows in the Window menu
+    protected variable viewType {}
+
+    ###################################################################
+    ####                         protected variables               ####
+
+    # Name of my displayer
     protected variable myDisplayer {}
 
     # Name of my menubar
@@ -130,24 +138,6 @@ class ::tycho::View {
 
     # Name of my toolbar
     protected variable myToolbar {}
-
-    # Indicate whether modifying the text is allowed.
-    protected variable readOnly 0
-
-    # List of subviews
-    protected variable subviewList {} 
-
-    # Name of this view; unique for each view in a displayer.
-    protected variable viewName {}
-
-    # "Type" of this view, used for placing windows in the Window menu
-    protected variable viewType {}
-
-    ###################################################################
-    ####                         private variables                 ####
-
-    # Used to create unique view names.
-    private common count 0
 }
 
 #########################################################################
@@ -161,16 +151,15 @@ configbody ::tycho::View::readonly {
     set readOnly $itk_option(-readonly)
     # Delay to ensure that all constructors (including derived class
     # constructors) have completed.
-    after idle [code $this indicateReadOnly $itk_option(-readonly)]
+    after idle [code catch "$this indicateReadOnly $itk_option(-readonly)"]
 }
 
 #######################################################################
 #### constructor
 #
 body ::tycho::View::constructor {args} {
-
     # Figure out whether I'm in a displayer, and if so, set myDisplayer.
-    set top [winfo parent $prefix]
+    set top [winfo toplevel $prefix]
     set cmd [winfo command $top]
     if ![catch {set disp [$cmd isa ::tycho::Displayer]}] {
         if $disp {
@@ -181,20 +170,14 @@ body ::tycho::View::constructor {args} {
     eval itk_initialize $args
     eval preference exclude $this $args
 
-    # Create a unique name, if none was specified.
-    if {$itk_option(-name) == {}} {
-        set viewName "view[incr count]"
-    } {
-        set viewName $itk_option(-name)
-    }
-
-    # Identify my menu bar, if there is one.
-    set bars [displayer attachView $prefix $viewName]
-    # The "code" prevents triggering "unknown".
+    # Attach myself to the displayer and get back my menu bar, status
+    # bar, and tool bar. The view won't
+    # actually be displayed: the caller must do that later with
+    # the Displayer method showView.
+    set bars [displayer attachView $this]
     set myMenubar [lindex $bars 0]
     set myStatusbar [lindex $bars 1]
     set myToolbar [lindex $bars 2]
-    insertInDisplay
 }
 
 #######################################################################
@@ -213,15 +196,24 @@ body ::tycho::View::destructor {} {
 
 #########################################################################
 #### displayer
-# If there is a Displayer associated with this view, use the arguments
-# as a command to issue to the Displayer, and return whatever is returned
-# by the command.  Otherwise, return an empty string.
+# If no arguments are given, return the displayer; if there is none,
+# return null. If arguments are given and there is a Displayer, execute
+# ths command on the displayer and return the result. If there are args
+# but no displayer, do nothing and return null.
 #
-body ::tycho::View::displayer {args} {
-    if {$myDisplayer != {}} {
-        return [eval $myDisplayer $args]
-    } {
-        return {}
+body ::tycho::View::displayer {{method {}} args} {
+    if { $method != "" } {
+	if {$myDisplayer != {}} {
+	    return [eval $myDisplayer $method $args]
+	} {
+	    return {}
+	}
+    } else {
+	if {$myDisplayer != {}} {
+	    return $myDisplayer
+	} {
+	    return {}
+	}
     }
 }
 
@@ -242,15 +234,6 @@ body ::tycho::View::focusin {} {
 #
 body ::tycho::View::getReadOnly {} {
     return $readOnly
-}
-
-#######################################################################
-#### insertInDisplay
-# Insert view in the display.  This method can be redefined in
-# derived classes to get different positioning of the view.
-# 
-body ::tycho::View::insertInDisplay {} {
-    displayer showView $viewName -fill both -expand true -side bottom
 }
 
 #########################################################################
