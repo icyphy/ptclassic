@@ -70,7 +70,7 @@ CFLAGS =	$(LINUXDEF) $(OPTIMIZER) -fwritable-strings
 # system libraries (libraries from the environment)
 SYSLIBS=-lg++ -lieee -lm
 
-LINKFLAGS=-L$(LIBDIR) -Xlinker -S -Xlinker #-x -static
+LINKFLAGS=-L$(LIBDIR) -Xlinker -S -Xlinker -x # -static
 LINKFLAGS_D=-L$(LIBDIR) -g -static
 
 # octtools/attache uses this
