@@ -404,10 +404,12 @@ StringList ParProcessors :: display (NamedObj* galaxy) {
  ****************************************************************/
 
 // sort the processor ids with available times.
-void ParProcessors :: sortWithAvailTime(int guard) {
 
+void ParProcessors :: sortWithAvailTime(int guard) {
+	int i;
 	// initialize indices
-	for (int i = 0; i < numProcs; i++) {
+
+	for (i = 0; i < numProcs; i++) {
 		pIndex[i] = i;
 	}
 
@@ -416,35 +418,43 @@ void ParProcessors :: sortWithAvailTime(int guard) {
 	// that are available at "guard" time and before the processors
 	// busy.
 
-        for (i = 1; i < numProcs; i++) {
-                int j = i - 1;
-		UniProcessor* up = getProc(i);
-                int x = up->getAvailTime();
-                int temp = pIndex[i];
-		if (x == 0) {	// If the processor is idle.
-                	while (j >= 0) {
-			   	if (guard < getProc(j)->getAvailTime()) 
-					break;
-				pIndex[j+1] = pIndex[j];
-                        	j--;
+       	for (i = 1; i < numProcs; i++) {
+               	int j = i;
+		int temp1 = pIndex[i];
+		UniProcessor* up = getProc(temp1);
+               	int x1 = up->getAvailTime();
+		int temp2 = pIndex[j-1];
+		int x2 = getProc(temp2)->getAvailTime();
+		if (x1 == 0) {	// unused processors
+               		while (j > 0 && x2 > guard) {
+		 		pIndex[j] = pIndex[j-1];
+                       		j--;
+				if (j > 0) {
+					temp2 = pIndex[j-1];
+					x2 = getProc(temp2)->getAvailTime();
+               			}
 			}
-                } else if (x > guard) {
-			while (j >= 0) {
-				if(x < getProc(j)->getAvailTime()) break;
-                        	pIndex[j+1] = pIndex[j];
+               	} else if (x1 > guard) { // busy processors
+			while (j > 0 && x1 < x2 && x2 > guard) {
+				pIndex[j] = pIndex[j-1];
                         	j--;
-                	}
-		} else {
-			int temp = getProc(j)->getAvailTime();
-			while (j >= 0 && (x < temp || temp == 0)) {
-                        	pIndex[j+1] = pIndex[j];
-                        	j--;
-				if (j >=0)
-					temp = getProc(j)->getAvailTime();
-                	}
+				if (j > 0) {
+					temp2 = pIndex[j-1];
+					x2 = getProc(temp2)->getAvailTime();
+                		}
+			}
+             	
+		} else {	// available processors
+			while (j > 0 && (x1 < x2 || x2 == 0)) {
+                       		pIndex[j] = pIndex[j-1];
+                       		j--;
+				if (j > 0) {
+					temp2 = pIndex[j-1];
+					x2 = getProc(temp2)->getAvailTime();
+                		}
+			}
 		}
-                j++;
-                pIndex[j] = temp;
+                pIndex[j] = temp1;
         }
 }
 
