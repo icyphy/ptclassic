@@ -24,7 +24,7 @@ SRCS=AdaptFilter.cc FIR.cc FloatFork.cc FloatPrinter.cc FloatRamp.cc \
 
 OBJS=AdaptFilter.o FIR.o FloatFork.o FloatPrinter.o FloatRamp.o \
 	Fork.o Gaussian.o IIR.o IntFork.o IntPrinter.o IntRamp.o Printer.o \
-	CheatGain.o Sin.o Xgraph.cc
+	CheatGain.o Sin.o Xgraph.o
 
 all:		$(OBJS)
 
