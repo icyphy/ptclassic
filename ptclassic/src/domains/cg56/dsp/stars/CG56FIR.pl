@@ -360,19 +360,19 @@ $label(fullLoop)
               	    if (tapsNum=1) 
 		            b=3;
 	            else
-		            b=5+tp;
+		            b=5+tapsNum;
                 }
-	        else if (tp==dec+1) {
-	            if (dec==1)
+	        else if (taps==decimation+1) {
+	            if (decimation==1)
 		            b=4;
 	            else
-		            b=5+dec;
+		            b=5+decimation;
 	        }
                 else {
-	            if (dec==1)
-		            b=8+tp-dec;
+	            if (decimation==1)
+		            b=8+tapsNum-decimation;
 	            else
-		            b=10+2*int(dec);	            
+		            b=10+2*int(decimation);	            
                }
                return a+b;
       }
