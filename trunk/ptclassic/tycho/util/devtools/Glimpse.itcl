@@ -73,6 +73,9 @@ class ::tycho::Glimpse {
     # Bring up help for this widget
     method help {}
 
+    # Update the glimpse_index entry widget
+    method updateGlimpseIndex {}
+
     # Update the Tycho glimpse database
     method updateTychoDatabase {}
 
@@ -85,11 +88,11 @@ class ::tycho::Glimpse {
 #### constructor
 #
 body ::tycho::Glimpse::constructor {args} {
-    global PTOLEMY
-    global TYCHO
+    global PTOLEMY TYCHO tcl_library
+
     configure -queries [list \
 	{pattern {Search pattern:} {}} \
-	[list glimpse_index {Glimpse Index} \
+	[list glimpse_index {Glimpse Index:} \
                 [file join $TYCHO .glimpse_index]] \
     ]
 
@@ -107,6 +110,9 @@ body ::tycho::Glimpse::constructor {args} {
 	    -text {Find <Ret>} \
 	    -command "$this execCommand -findcommand"
 
+    $this insert glimpse_index [file join $TYCHO .glimpse_index]
+
+    set buttonList {Tycho}
     # If the $PTOLEMY environment variable is set and 
     # $PTOLEMY/src/.glimpse_index exists, then offer two buttons,
     # one to set the index to use $PTOLEMY/src/.glimpse_index,
@@ -114,13 +120,20 @@ body ::tycho::Glimpse::constructor {args} {
     if {[info exists PTOLEMY] && \
             [file exists [::tycho::expandPath \
             [file join $PTOLEMY src .glimpse_index]]]} {
-        addButton ptolemy -text "Search Ptolemy" -command \
-                "$this clear glimpse_index; \
-                $this insert glimpse_index \
-                [file join $PTOLEMY src .glimpse_index]"
-        addButton tycho -text "Search Tycho" -command \
-                "$this clear glimpse_index; \
-                $this insert glimpse_index [file join $TYCHO .glimpse_index]"
+        lappend buttonList {Ptolemy}
+    }
+    if [file exists /usr/sww/doc/faq] {
+        lappend buttonList {SwwFaqs}
+    }
+    if [file exists [file join \
+            [file dirname [file dirname [file dirname $tcl_library]]] \
+            man .glimpse_index]] {
+        lappend buttonList {Tcl}
+    }
+    if {$buttonList != {Tycho}} {
+        lappend buttonList {Clear}
+        addRadioQuery defaultIndex {Default Index:} $buttonList \
+                Tycho -command "$this updateGlimpseIndex"
     }
 
     addButton update -text "Update Tycho DB" \
@@ -208,6 +221,33 @@ body ::tycho::Glimpse::help {} {
     global ::TYCHO
     ::tycho::File::openContext \
 	    [file join $TYCHO kernel doc usersGuides GlimpseHelp.html]
+}
+
+#####################################################################
+#### updateGlimpseIndex
+# Update the glimpse_index entry from the value of the 
+# Tycho/Ptolemy index buttons.  This method is public only because
+# of the way Tk handles radiobutton -command options.
+#
+body ::tycho::Glimpse::updateGlimpseIndex {} {
+    global TYCHO PTOLEMY tcl_library
+
+    clear glimpse_index
+
+    # In alphabetical order
+    switch [get defaultIndex] {
+        Clear {}
+        Ptolemy {insert glimpse_index [file join $PTOLEMY src .glimpse_index]}
+        SwwFaqs {insert glimpse_index \
+                [file join /usr sww doc faq .glimpse_index]}
+        Tcl {insert glimpse_index [file join \
+                [file dirname [file dirname [file dirname $tcl_library]]] \
+                man .glimpse_index]}
+        Tycho {insert glimpse_index [file join $TYCHO .glimpse_index]}
+
+        default {error \
+        "updateGlimpseIndex: Don't understand `[get defaultIndex]'"}
+    }
 }
 
 #####################################################################
