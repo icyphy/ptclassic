@@ -97,7 +97,7 @@ compress/quick.c"
 for file in $files
 do
 	echo $file
-	sed 's/"r"/"rb"/' $file | sed 's/"w"/"wb"/' > t.c
+	sed 's/"r"/"rb"/' $file | sed 's/"w"/"wb"/' &gt; t.c
 	mv t.c $file
 done
 </pre>
@@ -164,7 +164,7 @@ until the first <code>Control-Z</code> character.
             fclose(fout);
         }
 #else
-        sprintf(s, "%s '%s/%s' >> '%s/%s'\n", SYSTEM_CAT, escapesinglequote(INDEX_DIR, es1), I2, escapesinglequote(INDEX_DIR, es2), INDEX_FILE);
+        sprintf(s, "%s '%s/%s' &gt;&gt; '%s/%s'\n", SYSTEM_CAT, escapesinglequote(INDEX_DIR, es1), I2, escapesinglequote(INDEX_DIR, es2), INDEX_FILE);
         system(s);
 #endif _WIN32
 </pre>
@@ -177,7 +177,6 @@ fflush(TIMEFILE)
 fclose(TIMEFILE)
 </pre>
 above the <code>fflush(MESSAGEFILE) line</code>in <code>main()</code>.
-</dl>
 This gets rid of <code>glimpseindex</code> messages about
 
 <pre>
@@ -223,7 +222,7 @@ index/partition.c"index/io.c"
 for file in $files
 do
 	echo $file
-	sed 's/"exec /" /' $file > t.c
+	sed 's/"exec /" /' $file &gt; t.c
 	mv t.c $file
 done
 </pre>
