@@ -49,7 +49,7 @@ We eliminate ourselves from the circuit in that case.
 	codeblock (cbStd) {
 	move	$ref(input),x1
 	move	#$val(gain),y1
-	mpyr	x1,y1,a
+	mpyr	y1,x1,a
 	move	a,$ref(output)
 	}
 	codeblock(cbZero) {
