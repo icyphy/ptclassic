@@ -76,6 +76,11 @@ oct2ptcl.debug:	$(OBJS)
 	rm -f $@
 	$(CLINKER) $(LINKFLAGS_D) -o $@ $(OBJS) $(OCT2PTCL_LIBS) $(X11EXT_LIBSPEC) $(X11_LIBSPEC) $(CSYSLIBS)
 
+oct2ptcl.debug.purify: $(OBJS)
+	rm -f $@
+	$(PURIFY) $(CLINKER) $(LINKFLAGS_D) -o $@ $(OBJS) $(OCT2PTCL_LIBS) $(X11EXT_LIBSPEC) $(X11_LIBSPEC) $(CSYSLIBS)
+
+
 OUT =		$(BINDIR)/oct2ptcl
 
 $(OUT):	oct2ptcl
