@@ -47,8 +47,8 @@ public class ClassName {
     public ClassName() {
     }
 
-    //////////////////////////////////////////////////////////////////////////
-    ////                         public methods                           ////
+    ////////////////////////////////////////////////////////////////////////
+    ////                         public methods                         ////
 
     /** Description
      * @see full-classname#method-name()
@@ -62,8 +62,8 @@ public class ClassName {
     }
 
 
-    //////////////////////////////////////////////////////////////////////////
-    ////                         protected methods                        ////
+    ////////////////////////////////////////////////////////////////////////
+    ////                         protected methods                      ////
 
     /** Description
      * @see full-classname#method-name()
@@ -76,14 +76,14 @@ public class ClassName {
         return 1;
     }
 
-    //////////////////////////////////////////////////////////////////////////
-    ////                         protected variables                      ////
+    ////////////////////////////////////////////////////////////////////////
+    ////                         protected variables                    ////
 
     /** Description */
     protected int _aprotectedvariable;
 
-    //////////////////////////////////////////////////////////////////////////
-    ////                         private methods                          ////
+    ////////////////////////////////////////////////////////////////////////
+    ////                         private methods                        ////
 
     // Private methods should not have doc comments, they should
     // have regular C++ comments.
@@ -91,8 +91,8 @@ public class ClassName {
         return 1;
     }
 
-    //////////////////////////////////////////////////////////////////////////
-    ////                         private variables                        ////
+    ////////////////////////////////////////////////////////////////////////
+    ////                         private variables                      ////
 
     // Private variables should not have doc comments, they should
     // have regular C++ comments.
