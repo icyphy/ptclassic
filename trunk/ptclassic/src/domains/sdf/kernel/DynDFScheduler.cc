@@ -410,35 +410,36 @@ int DynDFScheduler :: checkLazyEval(DataFlowStar* s) {
 }
 
 static int fireSource(Star& s, int k) {
-			
-	// check how many unused tokens are on output arcs.
-	int min = 1000000;		// large enough number
-	int minIn = 1000;
-	BlockPortIter nextp(s);
-	for (int j = s.numberPorts(); j > 0; j--) {
-		PortHole& port = *nextp++;
+    int min = -1;
+    int minIn = -1;
+    BlockPortIter nextp(s);
+    for (int j = s.numberPorts(); j > 0; j--) {
+	PortHole& port = *nextp++;
 
-	  	if (port.numXfer() == 0) {
-		    Error::abortRun(s,
-		          ": output port requires undefined number of tokens");
-		    return FALSE;
-		}
-		int r = port.numTokens()/port.numXfer();
-		if (port.isItOutput()) {
-			if (r < min) min = r;
-		} else {
-			if (minIn > r) minIn = r;
-		}
+	if (port.numXfer() == 0) {
+	    Error::abortRun(port, " requires undefined number of tokens");
+	    return FALSE;
 	}
 
-	if (s.numberPorts() == 0) min = 0;
-
-	// fire sources "k-min" times.
-	if (minIn > k - min) minIn = k - min;
-	for (int i = 0; i < minIn; i++) {
-		if (!s.run()) return FALSE;
+	// For inputs, r = number of firings enabled.
+	// For outputs, r = effective number of firings already complete.
+	// Find the minimum over all inputs (minIn) and outputs (min).
+	int r = port.numTokens()/port.numXfer();
+	if (port.isItOutput()) {
+	    if (min < 0 || r < min) min = r;
 	}
-	return TRUE;
+	else {
+	    if (minIn < 0 || r < minIn) minIn = r;
+	}
+    }
+
+    // fire sources "k-min" times.
+    if (min < 0) min = 0;
+    if (minIn < 0 || minIn > k - min) minIn = k - min;
+    for (int i = 0; i < minIn; i++) {
+	if (!s.run()) return FALSE;
+    }
+    return TRUE;
 }
 
 // constructor: set default options
