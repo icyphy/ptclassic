@@ -59,6 +59,9 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "checkConnect.h"
 #include <time.h>
 
+// Defined in CGDomain.cc
+extern const char CGdomainName[];
+
 extern const char* CODE = "code";
 extern const char* PROCEDURE = "procedure";
 
@@ -809,3 +812,6 @@ int CGTarget::needsTypeConversionStar(PortHole& port) {
     return FALSE;
 }
 
+const char* CGTarget::domain() {
+      return galaxy() ? galaxy()->domain() : CGdomainName;
+}
