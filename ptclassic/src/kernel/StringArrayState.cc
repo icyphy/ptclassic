@@ -107,10 +107,13 @@ void StringArrayState  :: initialize() {
 	val = 0;
 	nElements = 0;
 
+	// handle empty value
+	const char* inival = initValue();
+	if (inival == 0 || *inival == 0) return;
 	char* buf[MAXLEN];
 	char tokbuf[MAXSTRINGLEN];
 	const char* specialChars = "{[]}";
-	Tokenizer lexer(initValue(),specialChars);
+	Tokenizer lexer(inival,specialChars);
 
 	int i = 0, err = 0;
 	int numRepeats;
@@ -119,7 +122,7 @@ void StringArrayState  :: initialize() {
 	while(!lexer.eof() && i < MAXLEN && err == 0) {
 		lexer >> tokbuf;
 		char c = tokbuf[0];
-		if (tokbuf[1]) c = 0;
+		if (c != 0 && tokbuf[1]) c = 0;
 		switch (c) {
 		case '[':
 			t = evalIntExpression(lexer);
