@@ -70,43 +70,26 @@ body ::tycho::EditProgram::constructor {args} {
 
     # Add to the format menu commands to comment and uncomment
     # the regions defined by the selection.
-    $itk_component(formatMenu) add separator
+    addMenuSeparator Format
     
-    $itk_component(formatMenu) add command \
-	    -label "Comment Out Region" \
-	    -underline 0 \
+    addMenuItem "Comment Out Region" Format -underline 0 \
 	    -command "$this component text commentSelection"
     
-    $itk_component(formatMenu) add command \
-	    -label "Uncomment Region" \
-	    -underline 0 \
+    addMenuItem "Uncomment Region" Format -underline 0 \
 	    -command "$this component text uncommentSelection"
     
-    # Add to the format menu a command to recolorize.
-    $itk_component(formatMenu) add separator
+    addMenuSeparator Format
     
-    $itk_component(formatMenu) add command \
-	    -label "Recolorize" \
-	    -accelerator "S-C-l" \
-	    -underline 0 \
+    addMenuItem "Recolorize" Format -underline 0 -accelerator "S-C-l" \
 	    -command "$this component text parseRegion 1.0 end"
     
-    $itk_component(formatMenu) add command \
-	    -label "Indent Line" \
-	    -accelerator "Tab" \
-	    -underline 0 \
+    addMenuItem "Indent Line" Format -underline 0 -accelerator "Tab" \
 	    -command "$this component text indentLine"
 
-    $itk_component(formatMenu) add command \
-	    -label "Indent Region" \
-	    -accelerator "Esc C-\\" \
-	    -underline 1 \
+    addMenuItem "Indent Region" Format -underline 1 -accelerator "Esc C-\\" \
 	    -command "$this component text busy indentSelection"
     
-    $itk_component(formatMenu) add command \
-	    -label "Tab" \
-	    -accelerator "C-q Tab" \
-	    -underline 0 \
+    addMenuItem "Tab" Format -underline 0 -accelerator "C-q Tab" \
 	    -command "$this component text insertString insert {\t}"
 }
 
