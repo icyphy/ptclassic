@@ -95,6 +95,8 @@ X11EXT_LIBSPEC = -lXext
 #X11EXT_LIBSPEC = -L/usr/X11/lib -lXext
 
 TCL_ROOT=$(ROOT)/tcltk
+ITCL_VERSION=itcl
+
 
 # Directory containing Tcl include files
 TCL_INCDIR=$(TCL_ROOT)/tcl/include
@@ -109,11 +111,34 @@ TK_INCDIR=$(TCL_ROOT)/tk/include
 # addtional -L and/or -l options to support tk extensions.
 TK_LIBSPEC=-L$(TCL_ROOT)/tk.$(PTARCH)/lib -ltk #-lXpm
 
+# Directory containing itcl include files
+ITCL_INCDIR=$(TCL_ROOT)/$(ITCL_VERSION)/include
+ITCL_LIBSPEC=-L$(TCL_ROOT)/$(ITCL_VERSION).$(PTARCH)/lib -litcl
+
+ITK_INCDIR=$(TCL_ROOT)/$(ITCL_VERSION)/include
+# Uncomment the next line for itcl-2.0b2
+#ITK_LIBSPEC=-L$(TCL_ROOT)/$(ITCL_VERSION).$(PTARCH)/lib -litk
+
 # Location of the itcl_sh binary
-ITCL_SH=$(ROOT)/tcltk/itcl.$(PTARCH)/bin/itcl_sh
+ITCL_SH=$(ROOT)/tcltk/$(ITCL_VERSION).$(PTARCH)/bin/itcl_sh
 
 # Location of the itcl library, needed for itcl_mkindex
-ITCL_LIBDIR=$(ROOT)/tcltk/itcl/library
+ITCL_LIBDIR=$(ROOT)/tcltk/$(ITCL_VERSION)/library
+
+# For shared libraries, if we use them
+TCL_SHARED_LIBSPEC=-L$(TCL_ROOT)/tcl.$(PTARCH)/lib/shared -ltcl
+TK_SHARED_LIBSPEC=-L$(TCL_ROOT)/tk.$(PTARCH)/lib/shared -ltk
+ITCL_SHARED_LIBSPEC=-L$(TCL_ROOT)/$(ITCL_VERSION).$(PTARCH)/lib/shared -litcl
+
+# Uncomment these to override the above for itcl-2.0
+#TCL_INCDIR=$(TCL_ROOT)/$(ITCL_VERSION)/include
+#TCL_LIBSPEC=-L$(TCL_ROOT)/$(ITCL_VERSION).$(PTARCH)/lib -ltcl
+#TK_INCDIR=$(TCL_ROOT)/$(ITCL_VERSION)/include
+#TK_LIBSPEC=-L$(TCL_ROOT)/$(ITCL_VERSION).$(PTARCH)/lib -ltk
+#TCL_SHARED_LIBSPEC=-L$(TCL_ROOT)/$(ITCL_VERSION).$(PTARCH)/lib/shared -ltcl
+#TK_SHARED_LIBSPEC=-L$(TCL_ROOT)/$(ITCL_VERSION).$(PTARCH)/lib/shared -ltk
+#ITCL_SHARED_LIBSPEC=-L$(TCL_ROOT)/$(ITCL_VERSION).$(PTARCH)/lib/shared -litcl
+
 
 #-----------------------------------------------------------------------
 # 		Global options to use
