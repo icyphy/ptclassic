@@ -33,11 +33,11 @@ void fireSource(Star&, int);
 int isSource(const Star& s) {
 	BlockPortIter nextp(s);
 	PortHole* p;
-	int flag = 0;
 
 	while ((p = nextp++) != 0) {
 		if (p->isItInput()) {
-			if (!(p->myGeodesic->numInitialParticles))
+			int numP = p->myGeodesic->numInitialParticles;
+			if (!numP || p->numTokens() > numP)
 				return FALSE;
 		}
 	}
@@ -203,8 +203,8 @@ int DDFScheduler :: isRunnable(Star& s) {
 		if (p->waitPort != NULL) {
 			int req = p->waitNum - p->waitPort->numTokens();
 			while (req > 0) {
-			   // if # tokens are static, return FASE.
-			   // if on wormhole boundary, return FASE.
+			   // if # tokens are static, return FALSE.
+			   // if on wormhole boundary, return FALSE.
 			   DDFPortHole* po = (DDFPortHole*) p->waitPort;
 			   if (po->isDynamic() && po->far()->isItOutput()) {
 				// if dynamic, enable lazy evaluation.
@@ -282,10 +282,13 @@ int DDFScheduler :: checkLazyEval(Star* s) {
 
 			Star* str = (Star*) p.far()->parent();
 			if (strcmp (str->domain(), DDFdomainName) == 0) {
+			   // check if wormhole...
+			   if (str->mySched() == (Scheduler*) this) {
 				// check dynamic port for ddf star.
 			   	DDFPortHole* po = (DDFPortHole*) p.far();
 			   	if (req > 0 && po->isDynamic())
 					return FALSE;
+			   }
 			}
 
 			while (req > 0) {
