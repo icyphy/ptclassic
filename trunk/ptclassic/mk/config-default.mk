@@ -216,6 +216,7 @@ USER_CC_SHAREDFLAGS =	$(CC_SHAREDFLAGS)
 
 # Libraries are of the form libfoo.$(LIBSUFFIX) 
 LIBSUFFIX = 	a
+LIBNONSHAREDSUFFIX = a
 
 # Flag for cc to statically link binaries (hppa and sun4 currently use this)
 CC_STATIC=
