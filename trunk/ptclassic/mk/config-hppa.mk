@@ -14,22 +14,22 @@
 # --------------------------------------------------------------------
 include $(ROOT)/mk/config-default.mk
 
-
-RANLIB =	ranlib
-
 # Get the g++ definitions; we override some below.
 include $(ROOT)/mk/config-g++.mk
 
-GPPFLAGS=-DUSG -g $(MEMLOG)
+RANLIB =	ranlib
 
 # Use gcc
 # Note that you cannot compile vem with gcc, you must use cc.
 # Hopefully, this will go away sometime soon
-CC=gcc
-CFLAGS=-DUSG -g
+CC =		gcc
+OPTIMIZER =	-O2
+GPPFLAGS =	-DUSG -g -Wall -Wcast-qual -Wcast-align $(MEMLOG) $(OPTIMIZER)
+# If you don't use gcc, then these Warning options probably won't work
+CFLAGS =	-DUSG -g -Wall -Wcast-qual -Wcast-align $(OPTIMIZER)
 
-LINKFLAGS=-L$(LIBDIR) -Xlinker -x -static
-LINKFLAGS_D=-L$(LIBDIR) -g -Xlinker -x -static
+LINKFLAGS = -L$(LIBDIR) -Xlinker -x -static
+LINKFLAGS_D = -L$(LIBDIR) -g -Xlinker -x -static
 X11_INCSPEC = -I$(ROOT)/src/compat
 X11_LIBSPEC = -L/usr/lib/X11R5 -lX11
 
@@ -39,8 +39,8 @@ X11_LIBSPEC = -L/usr/lib/X11R5 -lX11
 CC_STATIC = -Wl,-a,archive
 
 # Used by xv
-XV_RAND= RAND="-DNO_RANDOM -Drandom=rand"
-XV_INSTALL=bsdinst
+XV_RAND = RAND="-DNO_RANDOM -Drandom=rand"
+XV_INSTALL = bsdinst
 
 # Used to flush the cache on the hppa.  (source is in the kernel/ directory)
 FLUSH_CACHE = flush_cache.o
