@@ -367,7 +367,7 @@ they erase a word at a time.  In addition, the following bindings apply:
 <dt><CODE>M-C</CODE><dd>capitalize the selection or the current word
 <dt><CODE>C-d</CODE><dd>delete the next character
 <dt><CODE>M-d</CODE><dd>forward erase one word
-<dt><CODE>C-k</CODE><dd>erase to the end of the line (save to clipboard)
+<dt><CODE>C-k</CODE><dd>erase to the end of the line.
 <dt><CODE>C-o</CODE><dd>open a line of text above the insert cursor
 <dt><CODE>C-x u</CODE><dd>undo the last change
 <dt><CODE>M-l</CODE><dd>make the selection or current word lower case
@@ -380,10 +380,8 @@ they erase a word at a time.  In addition, the following bindings apply:
 <dt><CODE>C-&#92;</CODE><dd>clear any selection
 </dl>
 <p>
-Commands that delete characters will save them to the
-clipboard, so they can be recovered with <CODE>C-y</CODE>.
 Any set of contiguous character deletions are collected
-in the clipboard.
+into a single undo action.
 <p>
 
 <h3><a name="filling text, Unix shortcuts">Filling Text</a></h3>
