@@ -66,26 +66,6 @@ PL_SRCS= \
 	SRStringToInt.pl \
 	SRSynthControl.pl \
 	SRWhen.pl
-# hack: waiting to be ported to Itcl3.0, Itcl stars are temporarily deactivated
-#	SRItclCounter.pl \
-	SRItclDisplay.pl \
-	SRItclDatabase.pl \
-	SRItclEditor.pl \
-	SRItclIn.pl \
-	SRItclInOut.pl \
-	SRItclModeSelect.pl \
-	SRItclOut.pl
-
-# Itcl star script files
-SCRIPTS = \
-	SRCounter.itcl \
-	SRDatabase.itcl \
-	SRDisplay.itcl \
-	SREditor.itcl \
-	SRItclStar.itcl \
-	SRKeyboard.itcl \
-	SRLatch.itcl \
-	SRModeSelect.itcl
 
 # The .cc files
 SRCS=$(PL_SRCS:.pl=.cc)
@@ -98,7 +78,7 @@ HDRS= $(SRCS:.cc=.h)
 
 STAR_MK=srstars
 DOMAIN=SR
-EXTRA_SRCS=$(STAR_MK).c $(PL_SRCS) $(SCRIPTS)
+EXTRA_SRCS=$(STAR_MK).c $(PL_SRCS)
 
 all:		makefile stars_all
 
