@@ -1,7 +1,7 @@
 .\" $Id$
 .NA multimed
 .SD
-A network that transports video, audio, and data.
+ A network that transports video, audio, and data.
 .DE
 .LO "~ptolemy/src/domains/de/demo"
 .SV $Revision$ $Date$
@@ -10,6 +10,8 @@ A network that transports video, audio, and data.
  This demo feeds data from several types of sources into a single network.
  Within the network, the various data streams are routed from switch to switch.
  One video stream and one audio stream are decoded and played.
+.Ir "video processing"
+.Ir "speech processing"
  Data losses may occur within the network which reduce the final quality
 of the presented video and audio streams.
 .pp
@@ -30,7 +32,9 @@ stars attached to their inputs fire.
  The video coder combines motion compensation, the discrete
 cosine transform (DCT), and run-length coding to compress
 the video from 8 bits per pixel to about 1 bit per pixel.
+.Ir "DCT"
  The audio coder uses simple PCM coding to cut the audio bit-rate in half.
+.Ir "PCM"
  Users may wish to experiment with other network configurations,
 other distributions for the data traffic, or other types of traffic altogether.
 .UH "Necessary Software"
@@ -43,6 +47,7 @@ programs from the Utah Raster Toolkit.
 of charge via anonymous ftp.
  See the manual page for the SDF DisplayVideo star to find out how to
 obtain the Utah Raster Toolkit.
+.Ir "Utah Raster Toolkit"
  The "play" program and the Utah Raster Toolkit programs must be in the
 user's search-path for the audio and video data to be output.
 .SA
