@@ -8,10 +8,10 @@ state specifies the file to be written; the special names
 &lt;stdout&gt; and &lt;cout&gt;, which specify the standard output
 stream, and &lt;stderr&gt; and &lt;cerr&gt;, which specify the
 standard error stream, are also supported. }
-    version { @(#)ACSPrinterFixSim.pl	1.6 09/08/99}
+    version{ $Id$ }
     author { James Lundblad, Eric Pauer }
     copyright {
-Copyright (c) 1998-1999 The Regents of the University of California
+Copyright (c) 1998-%Q% The Regents of the University of California
 and Sanders, a Lockheed Martin Company
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,

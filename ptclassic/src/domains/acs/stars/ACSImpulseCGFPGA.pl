@@ -6,10 +6,10 @@ defcore {
 	desc {
 	    Generic code generator source star.
 	}
-        version {@(#)ACSImpulseCGFPGA.pl	1.2 09/08/99}
+        version{ $Id$ }
         author { Eric K. Pauer }
         copyright {
-Copyright (c) 1998-1999 The Regents of the University of California
+Copyright (c) 1998-%Q% The Regents of the University of California
 and Sanders, a Lockheed Martin Company
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
