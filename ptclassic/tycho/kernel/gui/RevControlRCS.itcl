@@ -106,9 +106,9 @@ body ::tycho::RevControlRCS::constructor {args} {
 body ::tycho::RevControlRCS::initializeRevControl {} {
     ::tycho::RevControl::initializeRevControl
     set dir [file dirname $file]
-    set revdir [format "%s/RCS" $dir]
+    set revdir [file join $dir RCS]
     set basefile [file tail $file]
-    if [file exists [format "%s/%s,v" $revdir $basefile]] {
+    if [file exists [file join $revdir $basefile,v]] {
 	return
     }
     set olddir [eval pwd]
@@ -140,12 +140,23 @@ body ::tycho::RevControlRCS::retrieveVersion {version} {
     set olddir [eval pwd]
     cdDir $dir
 
-    catch {exec co -p$version $file > #tycho#rcsrevcontroltempfile} output
-    set fd [open #tycho#rcsrevcontroltempfile r]
-    set text [read $fd]
-    close $fd
-    catch {exec rm -f #tycho#rcsrevcontroltempfile}
-    ::tycho::File::displayData $text $file 
+    # Generate a temporary file name that has the same extension as the file
+    # we are working on.
+    set tmpFile [::tycho::tmpFileName \
+            [file rootname $basefile] \
+            [file extension $basefile]]
+    # In co, -q means be quite, -p determines which version
+    if [catch {exec co -q -p$version $basefile > $tmpFile} output ] {
+        error "Problem executing:\n\
+                `cp -q -p$version $basefile > $tmpFile':\n\ $output"
+    }
+
+    set myView [::tycho::File::openContext $tmpFile]
+
+    # FIXME: we should be able to set tmpfile without knowning that
+    # openContext returns a window that has a .v in it.
+    $myView.v configure -tmpfile 1
+
     cd $olddir
 }
 
@@ -194,7 +205,7 @@ body ::tycho::RevControlRCS::viewHistory {} {
 	set basefile [file tail $file]
 	set olddir [eval pwd]
 	
-	if {![file exists [format "%s/RCS/$basefile,v" $dir]]} {
+	if {![file exists [file join $dir RCS ${basefile},v]]} {
 	    error "The file \"$file\" is not under RCS control."
 	}
 	cdDir $dir
@@ -319,9 +330,9 @@ body ::tycho::RevControlRCS::checkOut {object} {
 # 
 body ::tycho::RevControlRCS::isUnderRevControl {file} {
     set dir [file dirname $file]
-    set revdir [format "%s/RCS" $dir]
+    set revdir [file join $dir RCS]
     set basefile [file tail $file]
-    if {![file exists [format "%s/%s,v" $revdir $basefile]]} {
+    if {![file exists [file join $revdir $basefile,v]]} {
 	return 0
     }
     return 1
