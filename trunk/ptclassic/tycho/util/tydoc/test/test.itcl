@@ -95,6 +95,12 @@ class ::tycho::DocSysTest {
 #### privateProcNoArgs
 # A private proc with no args
 # Here's the body of something we declared in the class interface above
+# This comment has { curly brackets } and " double quotes"
+# We should preserve the new lines in the following text
+# <tcl><pre>
+# Console .c -text "A fresh Tcl console\n"
+# .c centerOnScreen
+# </pre></tcl>
 body ::tycho::DocSysTest::privateProcNoArgs {} {
     puts "privateProcNoArgs"
 }
@@ -173,7 +179,8 @@ source ../DocSys.itcl
 # Run the doc system on this file
 testHTMLDocSysThisFile
 
-# testHTMLDocSys /users/cxh/pt/tycho/kernel/DialogWindow.itcl
+# testHTMLDocSys /users/cxh/pt/tycho/kernel/RevControlSCCS.itcl
+# testHTMLDocSys /users/cxh/pt/tycho/editors/textedit/EditCppText.itcl
 # testHTMLDocSys /users/cxh/pt/tycho/lib/tydoc/DocSys.itcl
-#testHTMLDocSysKernelFiles
+# testHTMLDocSysKernelFiles
 
