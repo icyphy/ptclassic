@@ -68,6 +68,10 @@ public:
 		DynDFScheduler::resetFlags();
 	}
 
+	// Turn on or off the feature where the scheduler runs in one
+	// iteration until it deadlocks.
+	void deadlockIteration(int flag) {runUntilDeadlock = flag;}
+
 protected:
 	// Create SDF clusters.
 	void initStructures();
@@ -123,16 +127,20 @@ private:
 	// actor. If yes, deferrable.
 	int isOutputDeferrable(SDFCluster*);
 
-	// Check to see whether a hint is registered for the star associated
-	// with an atomic cluster.  If so, parse that hint and store it in
-	// the star.  Also, add a pointer to the star to the hintStars list.
-	int hintRegistered(SDFAtomCluster* as);
+	// Check to see whether a pragma is registered for the star associated
+	// with an atomic cluster.  If so, parse that pragma and store it in
+	// the star.  Also, add a pointer to the star to the pragmaStars list.
+	int pragmaRegistered(SDFAtomCluster* as);
 
-	// List used to store pointers to the stars that have hints
+	// List used to store pointers to the stars that have pragmas
 	// registered.  This allows for efficient access at runtime.
 	// Note that every element appended to this list must be a
 	// DataFlowStar*.
-	SequentialList hintStars;
+	SequentialList pragmaStars;
+
+	// This flag indicates whether an iteration should consist
+	// of running until deadlock.  By default, it is FALSE.
+	int runUntilDeadlock;
 };
 
 #endif
