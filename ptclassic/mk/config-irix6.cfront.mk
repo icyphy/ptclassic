@@ -94,7 +94,7 @@ OCT_CC =	cc -32
 # LOCALCCFLAGS - Other architecture dependent flags that apply to all releases
 #	      of the OS for this architecture for c++
 # LOCALCFLAGS - Other architecture dependent flags that apply to all releases
-#	      of the OS for this architecture for c++
+#	      of the OS for this architecture for c
 # USERFLAGS - Ptolemy makefiles should never set this, but the user can set it.
 
 OPTIMIZER =	-g
@@ -115,10 +115,16 @@ ARCHFLAGS =	-DIRIX5 -DIRIX6
 ## -xgot is the SGI hack to avoid overflows in the GOT by allowing 
 # 32 bit offsets, or something.
 GOTFLAG =       -G 0 -xgot
+# WTC: Warning 3262 is 'unused variable'.  SGI compilers complain
+# about the static variable file_id in every source file.
+# Warning 3920: overriding virtual functions.
+# You might want to turn these warnings off.
+WOFF_FLAG = -woff 3262,3920
+LOCALCCFLAGS =  $(GOTFLAG) $(WOFF_FLAG) -D_BSD_SIGNALS -D_BSD_TIME
 LOCALCCFLAGS =  $(GOTFLAG) -D_BSD_SIGNALS -D_BSD_TIME
 GPPFLAGS =      $(OPTIMIZER) $(MEMLOG) $(WARNINGS) \
 $(ARCHFLAGS) $(LOCALCCFLAGS) $(USERFLAGS)
-LOCALCFLAGS =   $(GOTFLAG) #-cckr
+LOCALCFLAGS =   $(GOTFLAG) $(WOFF_FLAG) #-cckr
 CFLAGS =        $(OPTIMIZER) $(MEMLOG) $(WARNINGS) \
 $(ARCHFLAGS) $(LOCALCFLAGS) $(USERFLAGS)
 
