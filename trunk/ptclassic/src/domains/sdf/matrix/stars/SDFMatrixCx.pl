@@ -3,9 +3,10 @@ defstar {
   domain    { SDF }
   desc      {
 Produces a matrix with complex entries. The entries are
-read from the array state ComplexMatrixContents in rasterized order:
+read from the array parameter "ComplexMatrixContents" in rasterized order:
 i.e. for a MxN matrix, the first row is filled from left to right
-using the first N values from the array. }
+using the first N values from the array.
+  }
   version   { $Id$ }
   author    { Mike J. Chen }
   copyright { 1993 The Regents of the University of California }
