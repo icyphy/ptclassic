@@ -1,0 +1,466 @@
+# Definition of an editable text window.
+#
+# Author: Edward A. Lee
+#
+# Version: $Id$
+#
+# Copyright (c) 1990-%Q% The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the
+# above copyright notice and the following two paragraphs appear in all
+# copies of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+# 						PT_COPYRIGHT_VERSION_2
+# 						COPYRIGHTENDKEY
+
+#######################################################################
+# FIXME: Known bugs
+#
+# If this undo reverts to the previously saved version, we
+# should mark the buffer unmodified.
+
+#######################################################################
+# Edit
+# This is a window that contains arbitrary text and allows editing of
+# this text using emacs bindngs plus mouse movements. Some improvements
+# are made over emacs, such as in the search mechanism and the undo.
+# Note that this object should not really define a top-level window. It
+# really should instead define a widget that can be used in place of
+# the Text widget in Tk, in much the same way. This will happen
+# eventually.
+#
+class tycho::Edit {
+    inherit File
+
+    #### save
+    # Save text to a file (by default, the file given by the -file option).
+    method save {{name ""}} {}
+
+    #### insertFile
+    # Insert the contents of a file at the insertion cursor.
+    method insertFile {} {}
+
+    #### revert
+    # Revert to previously saved file contents.
+    method revert {} {}
+
+    #### keybindings
+    # Access documentation about key bindings.
+    method keybindings {} {}
+
+    #### mousebindings
+    # Access documentation about mouse bindings.
+    method mousebindings {} {}
+
+    constructor {args} {}
+    destructor {}
+}
+
+###################################################################
+#
+body tycho::Edit::constructor {args} {
+
+    # The text widget.
+    itk_component add text {
+	EditText $itk_component(childsite).text \
+		-markmodified "$this markModified"
+    } {
+	# FIXME: add all pertinent options from EditText
+	keep -text -readonly -font
+    }
+    # Frame for text window.
+    pack $itk_component(text) -expand yes -fill both
+    
+    # Add an Edit menu
+    itk_component add editMenuButton {
+	menubutton $itk_component(menuFrame).edit \
+		-text Edit \
+		-underline 0 \
+		-menu $itk_component(menuFrame).edit.menu
+    } {
+	keep -font -activebackground -cursor -activeforeground \
+		-background -foreground -highlightbackground \
+		-highlightcolor
+    }
+    pack $itk_component(editMenuButton) -side left
+    
+    # Edit menu contents
+    itk_component add editMenu {
+	menu $itk_component(editMenuButton).menu -tearoff 0
+    } {
+	keep -font -activebackground -cursor -activeforeground \
+		-background -foreground
+    }
+    
+    $itk_component(editMenu) add command \
+	    -label {Undo/Redo} \
+	    -accelerator "C-x u" \
+	    -underline 0 \
+	    -command "$itk_component(text) undo"
+    
+    $itk_component(editMenu) add separator
+    
+    $itk_component(editMenu) add command \
+	    -label Cut \
+	    -underline 0 \
+	    -accelerator "C-w" \
+	    -command "$itk_component(text) cut"
+    
+    $itk_component(editMenu) add command \
+	    -label Copy \
+	    -underline 1 \
+	    -accelerator "M-w" \
+	    -command "$itk_component(text) copy"
+    
+    $itk_component(editMenu) add command \
+	    -label Paste \
+	    -underline 0 \
+	    -accelerator "C-y" \
+	    -command "$itk_component(text) paste"
+    
+    $itk_component(editMenu) add separator
+    
+    $itk_component(editMenu) add command \
+	    -label "Select All" \
+	    -underline 0 \
+	    -accelerator "C-/" \
+	    -command "$itk_component(text) selectall"
+    
+    $itk_component(editMenu) add command \
+	    -label "Unselect" \
+	    -underline 0 \
+	    -accelerator "C-\\" \
+	    -command "$itk_component(text) unselectall"
+    
+    $itk_component(editMenu) add command \
+	    -label "Find/Change..." \
+	    -underline 0 \
+	    -accelerator "C-s" \
+	    -command "$itk_component(text) search"
+    
+    # Add a Format menu
+    itk_component add formatMenuButton {
+	menubutton $itk_component(menuFrame).format \
+		-text Format \
+		-underline 1 \
+		-menu $itk_component(menuFrame).format.menu
+    } {
+	keep -font -activebackground -cursor -activeforeground \
+		-background -foreground -highlightbackground \
+		-highlightcolor
+    }
+    pack $itk_component(formatMenuButton) -side left
+    
+    # Format menu contents
+    itk_component add formatMenu {
+	menu $itk_component(formatMenuButton).menu -tearoff 0
+    } {
+	keep -font -activebackground -cursor -activeforeground \
+		-background -foreground
+    }
+    
+    $itk_component(formatMenu) add command \
+	    -label "Fill Region" \
+	    -accelerator "M-q" \
+	    -underline 2 \
+	    -command "$itk_component(text) fillRegion"
+    
+    $itk_component(formatMenu) add command \
+	    -label "Right Fill Column" \
+	    -accelerator "C-x f" \
+	    -underline 2 \
+	    -command "$itk_component(text) queryFillColumn"
+    
+    $itk_component(formatMenu) add command \
+	    -label "Set Fill Prefix" \
+	    -accelerator "C-x ." \
+	    -underline 1 \
+	    -command "$itk_component(text) queryFillPrefix"
+    
+    # The following initialize options and then invoke any
+    # configuration options, assuming there are options specified.
+    eval itk_initialize $args
+    eval configure $args
+
+    # Read contents from the specified file, unless the name is "NoName".
+    if {$file != {NoName}} {
+	$itk_component(text) readFile $file
+	markUnModified
+    }
+}
+
+#####################################################################
+#### save
+# Save text to a file. If no argument is given, the filename is
+# taken from the -file option for the class. If the value of the
+# -file option is "NoName" (the default), then saveAs is invoked.
+# Remove backup files (auto-save or crash-recovery). If an argument
+# is supplied, save the current data to a file with the given name
+# and do not remove the backup files. In either case, if the
+# specified file is not writable, trigger an error. Return 1 if the
+# write succeeds, 0 otherwise.
+#
+body tycho::Edit::save {{name ""}} {
+    if {$name == ""} {
+	set filename $file
+    } {
+	set filename $name
+    }
+    if {$filename != "" && $filename != "NoName"} {
+	set fd [open $filename w+]
+	puts -nonewline $fd [$itk_component(text) get 1.0 {end -1 char}]
+	close $fd
+    } {	
+	# The file has not been specified.  Invoke saveAs
+	if {[saveAs] == 0} {return 0}
+    }
+    if {$name == ""} {
+	removeBackupFiles
+    }
+    markUnmodified
+    return 1
+}
+
+#####################################################################
+#### insertFile
+# Open a file browser to query the user for a filename, and then
+# insert the contents of that file at the insertion cursor.
+#
+body tycho::Edit::insertFile {} {
+    set filename [DialogWindow::newModal FileBrowser [autoName .filebr] \
+	    -text {File to Insert}]
+    $itk_component(text) readFile $filename
+    markModified
+}
+
+#####################################################################
+#### revert
+# Revert to previously saved file contents after obtaining confirmation.
+# This command does nothing if either the text is not modified or
+# no file has been specified by the -file option.
+#
+body tycho::Edit::revert {} {
+    if {[isModified] && $file != "NoName" && $file != ""} {
+	if [askuser "OK to discard changes in [file tail $file]?"] {
+	    $itk_component(text) deleteRange 1.0 end
+	    $itk_component(text) readFile $file
+	    markUnmodified
+	}
+    }
+}
+
+#########################################################################
+#### keybindings
+# Append more information to the keybindings returned by the base class.
+# FIXME: This should be an HTML document, separate from this file.
+#
+body tycho::Edit::keybindings {} {
+    append helpstring \
+	    [TyFile::keybindings] \
+	    {
+
+Emacs-style cursor motion:
+
+	C-a	go to the beginning of the line
+	C-b	backward one character
+	M-b	backward one word
+	C-e	go to the end of the line
+	C-f	forward one character
+	M-f	forward one word
+	C-l	center the insert cursor on the screen
+	C-r	search backwards
+	C-s	search forwards
+	C-v	forward one page
+	M-v	backward one page
+	M-<	move to the top of the document
+	M->	move to the bottom of the document
+
+Modifying text:
+
+Delete, C-h, and Backspace all erase the previous character,
+unless there is a selection, in which case they erase the selection.
+M-Delete, M-C-h, and M-BackSpace behave the same way, except that
+they erase a word at a time.
+
+	C-d	delete the next character
+	M-d	forward erase one word
+	C-k	erase to the end of the line (save to cliboard)
+	C-o	open a line of text at the insert cursor
+	C-n	down one line
+	C-p	up one line
+	C-w	erase the selection
+	M-w	copy the selection to the clipboard
+	C-y	yank from the clipboard
+	C-/	selects the entire contents
+	C-\	clears any selection
+
+	C-x u	undo the last command
+
+Commands that delete characters will save them to the
+clipboard, so they can be recovered with C-y.
+
+The "Fill Region" command fills text so that the lines
+are approximately of equal length and line breaks occur
+on word boundaries.  It can optionally add a prefix to
+each filled line (for example a comment character), and
+typically does so in language-specific editors. If a
+region of text has been selected, then it fills that
+region.  Otherwise, it fills the paragraph that contains
+the insertion cursor. The following commands are relevant:
+
+	M-q	fill selected region or current paragraph
+	C-x f	change the right column used for the fill
+	C-x .	change the prefix characters
+
+Arrow and page control keys:
+
+The  Left  and Right keys move the insertion cursor one
+character to the left or right;  they  also  clear  any
+selection  in the text.  If Left or Right is typed with
+the Shift key down, then the insertion cursor moves and
+the selection is extended to include the new character.
+Control-Left and Control-Right move the insertion  cur-
+sor  by  words,  and  Control-Shift-Left  and  Control-
+Shift-Right move the insertion cursor by words and also
+extend  the  selection.
+
+The Up and Down keys move the insertion cursor one line
+up or down and clear any selection in the text.  If  Up
+or  Right  is  typed  with the Shift key down, then the
+insertion cursor moves and the selection is extended to
+include the new character.  Control-Up and Control-Down
+move the insertion  cursor  by  paragraphs  (groups  of
+lines  separated  by blank lines), and Control-Shift-Up
+and Control-Shift-Down move  the  insertion  cursor  by
+paragraphs  and  also  extend the selection.
+
+The  Next (Page up) and Prior (Page down) keys move the
+insertion cursor forward or backwards by one  screenful
+and clear any selection  in the text.  If the Shift key
+is  held  down  while  Next or Prior is typed, then the
+selection  is  extended to include  the new  character.
+Control-Next and Control-Prior scroll the view right or
+left by one page without moving the insertion cursor or
+affecting the selection.
+
+Home  and  Control-a  move  the insertion cursor to the
+beginning of its line and clear any  selection  in  the
+widget.   Shift-Home  moves the insertion cursor to the
+beginning of the line and also extends the selection to
+that point.
+
+End  and Control-e move the insertion cursor to the end
+of the line and clear  any  selection  in  the  widget.
+Shift-End  moves  the cursor to the end of the line and
+extends the selection to that point.
+
+Control-Home  and  Meta-<  move the insertion cursor to
+the beginning of the text and clear  any  selection  in
+the  widget.   Control-Shift-Home  moves  the insertion
+cursor to the beginning of the text  and  also  extends
+the selection to that point.
+
+Control-End and Meta-> move the insertion cursor to the
+end of the text and clear any selection in the  widget.
+Control-Shift-End  moves  the  cursor to the end of the
+text and extends the selection to that point.
+
+The F16 key (labelled Copy on many Sun workstations) or
+Meta-w copies the selection in the widget to the  clip-
+board, if there is a selection.
+
+The  F20 key (labelled Cut on many Sun workstations) or
+Control-w copies the selection in  the  widget  to  the
+clipboard  and  deletes  the selection.  If there is no
+selection in the widget then these keys have no effect.
+
+The  F18  key (labelled Paste on many Sun workstations)
+or Control-y inserts the contents of the  clipboard  at
+the position of the insertion cursor.
+
+The  Delete  key deletes the selection, if there is one
+in the widget.  If there is no  selection,  it  deletes
+the character to the right of the insertion cursor.
+
+Backspace  and Control-h delete the selection, if there
+is one in the widget.  If there is no  selection,  they
+delete  the character to the left of the insertion cur-
+sor.
+
+Dialog boxes:
+
+Most of the line oriented commands above work exactly the
+same way for entry boxes (the text entries in dialog boxes),
+but in addition, in dialog boxes in general, there are:
+
+	C-u	clear a text entry box
+	Tab	move from one item to another
+	Space	invoke a button
+
+Note that any of these bindings  may  be  overridden by
+settings in your window manager.
+    }
+}
+
+#########################################################################
+#### mousebindings
+#
+body tycho::Edit::mousebindings {} {
+    return {
+Pressing mouse button 1 in an text positions the inser-
+tion  cursor  just  before the character underneath the
+mouse cursor and sets the input focus to this widget.
+Dragging with mouse button 1 strokes  out  a  selection
+between  the  insertion  cursor and the character under
+the mouse.
+
+If you double-click mouse button 1 then the word  under
+the mouse cursor will be selected, the insertion cursor
+will be positioned at the beginning of  the  word,  and
+dragging  the  mouse  will stroke out a selection whole
+words at a time.
+
+If you triple-click mouse button 1 then the line  under
+the mouse cursor will be selected, the insertion cursor
+will be positioned at the beginning of  the  line,  and
+dragging  the  mouse  will stroke out a selection whole
+line at a time.
+
+The ends of the selection can be adjusted  by  dragging
+with  mouse button 1 while the shift key is down;  this
+will adjust the end of the selection that  was  nearest
+to  the mouse cursor when button 1 was pressed.  If the
+button is double-clicked before dragging then the selec-
+tion will be adjusted in units of whole words; if it is
+triple-clicked, then the selection will be adjusted  in
+units of whole lines.
+
+Clicking  mouse button 1 with the Control key down will
+reposition the insertion cursor without  affecting  the
+selection.
+
+The view in the widget can be adjusted by dragging with
+mouse button 2.  If mouse button 2 is  clicked  without
+moving the mouse, the selection is copied into the text
+at the position of the insertion cursor. The Insert key
+also inserts the selection.
+
+>> Modified from man page for Tk, by John Ousterhout <<
+    }
+}

@@ -1,0 +1,131 @@
+# Test the Line shape
+#
+# @Author: John Reekie
+# 
+# @Version: $Id$
+#
+# @Copyright (c) 1997 The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the
+# above copyright notice and the following two paragraphs appear in all
+# copies of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+# 						PT_COPYRIGHT_VERSION_2
+# 						COPYRIGHTENDKEY
+#######################################################################
+
+if {[string compare test [info procs test]] == 1} then { 
+    source [file join $TYCHO kernel test testDefs.tcl]
+} {}
+
+if {[string compare test [info procs _slate]] == 1} then { 
+    source [file join $TYCHO editors slate test defs.itcl]
+} {}
+
+if { ! [::info exists SHORTTIME] } {
+    set SHORTTIME 50
+}
+#set VERBOSE 1
+
+
+#######################################################################
+#### Define a proc to create a simple line
+proc _line {} {
+    global l
+    _clean
+    set l [.s create line 50 50 150 50 150 150 50 150 \
+	    -arrow last -width 2 \
+	    -tags foo]
+}
+
+#######################################################################
+#### _aspect
+
+#######################################################################
+#### _grapple
+
+#######################################################################
+#### _reshape
+
+#######################################################################
+#### _reshapeclick
+#### _reshapedrag
+#### _reshaperelease
+#
+# These methods are tested as a set.
+#
+set delta 40
+_line
+set coords {}
+foreach a {vertex-0 vertex-1 vertex-2 vertex-3 start end} {
+    lappend coords \
+	    [_finally2 ::tycho::Line::reshape $l 1 1 $delta $a]
+}
+test Line-_reshapeclick.1 {Reshape a simple item, no ghosting} {
+    set result {}
+    foreach a {vertex-0 vertex-1 vertex-2 vertex-3 start end} {
+	.s coords $l 50 50 150 50 150 150 50 150
+	lappend result \
+		[_interact ::tycho::Line::_reshape $l 1 1 $delta $a]
+    }
+    set result
+} $coords
+
+test Line-_reshapeclick.2 {Reshape a simple item by tag, with ghosting} {
+    set result {}
+    foreach a {vertex-0 vertex-1 vertex-2 vertex-3 start end} {
+	.s coords $l 50 50 150 50 150 150 50 150
+	lappend result \
+		[_interact ::tycho::Line::_reshape foo 1 1 $delta $a -ghost 1]
+    }
+    set result
+} $coords
+
+_line
+test Line-_reshapeclick.4 {Reshape multiple aspects, no ghosting} {
+    _interact ::tycho::Line::_reshape $l 1 1 $delta vertex-0 vertex-2
+} [_finally2 ::tycho::Line::reshape $l 1 1 $delta vertex-0 vertex-2]
+
+_line
+test Line-_reshapeclick.5 {Reshape multiple aspects, with ghosting} {
+    _line
+    _interact ::tycho::Line::_reshape $l 1 1 $delta vertex-1 end -ghost 1
+} [_finally2 ::tycho::Line::reshape $l 1 1 $delta vertex-1 end]
+
+
+##########################################################################
+#### aspect
+
+#######################################################################
+#### center
+
+#######################################################################
+#### reshape
+
+##########################################################################
+#### reverse
+
+##########################################################################
+#### flip
+
+##########################################################################
+#### flop
+
+##########################################################################
+#### rotate

@@ -1,0 +1,79 @@
+<!--$Id$ -->
+
+Welcome to the prototype parametric equaliser control panel! This is a
+single-band stereo equaliser, which we are using to get the parametric
+controls set up right. Once that's done, we'll probably just make this
+into a four-band parametric, and try and add some sensible
+dynamic range limiting as well.
+
+ <P>
+<b>General information</b>
+
+ <P> As for the other audio IO demos, this application controls
+the Sun Audio device. By default, the Ptolemy universe that created it
+configures the device to run stereo at 44.1 kHz with 16-bit linear
+encoding. 
+
+ <P>
+There is a single band of parametric equalisation, with control over
+the band frequency, band width, and band gain. The frequency range is
+settable; in the future, it will also be possible to select low-pass,
+band-pass, or high-pass filtering as well.
+
+ <P>
+<b>Controls</b>
+
+<dl>
+
+<dt>Input and output selectors
+
+<dd>The input and output selectors do the obvious thing. Or, at least,
+they would if they worked.
+
+<dt>Rec
+
+<dd>Controls the gain on the input. For CD source, this should really
+be down quite low to avoid clipping.
+
+<dt>Bal
+
+<dd>Controls the balance of the output signal. Negative numbers are
+left, positive are right.
+
+<dt>Gain
+
+<dd>Controls the output gain. Again, if it's too high or there's too
+much gain in a filter, you'll get nasty
+noises.  This is why we need dynamic range control :-)
+
+<dt>Freq
+
+<dd> Controls the center frequency of the filter, in Hz. The two entry
+boxes at the top left of the filter set the range of adjustment. You
+may notice a couple of funnies of you use this -- we re working on
+logarithmic scaling for the slider, which should fix things.
+
+<dt>BW
+
+<dd> Controls the band-width of the filter, in <i>octaves</i>. This is
+measured at the <i>half-gain</i> (in dB) point. A typical ten-band
+graphic equaliser, for example, has a band-width of one active.
+
+<dt>Gain
+
+<dd> Controls the peak gain of the filter, in dB. At maximum gain, the
+filter sometimes craps out, which is a mystery. (Bill?)
+
+
+</dl>
+
+ <P>
+<b>Shortcuts</b>
+
+<ul>
+<li>Start -- Control-g
+<li>Pause -- Control-p
+<li>Resume -- Control-r
+<li>Stop -- Control-s
+<li>Close -- Control-x k
+</ul>

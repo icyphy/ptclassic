@@ -1,0 +1,18 @@
+# $Id$
+
+catch {delete object ff}
+::tycho::Forest ff
+ff add a aa
+ff add b bb
+ff add c cc a
+ff add d dd a
+ff roots
+ff add e {e e} b
+set descr [ff describe]
+
+
+# {{a {} {c d} aa} {c a {} cc} {d a {} dd}} {{b {} e bb} {e b {} {e e}}}
+
+catch {delete object .x}
+::tycho::EditForest .x -forest ff
+wm deiconify .x

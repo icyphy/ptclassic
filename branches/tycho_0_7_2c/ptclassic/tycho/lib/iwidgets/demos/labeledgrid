@@ -1,0 +1,36 @@
+#!/bin/sh
+# ----------------------------------------------------------------------
+#  DEMO: Query Widget in [incr Widgets]
+# $Id$
+# ----------------------------------------------------------------------
+#\
+	exec itkwish -f "$0" ${1+"$@"}
+
+source query.itk
+
+
+catch {delete class iwidgets::Query}
+source query.itk
+
+catch {delete object .q}
+iwidgets::query .q -columnspan 6 -childspan 3
+
+.q add entry foo -label "An entry" -initial "Some text!"
+.q add entry oof -label "Another entry" -initial "Some more text!"
+
+.q add hline bar -label !!!
+.q vskip
+
+.q add checkbutton baz -label "A checkbutton" \
+        -onvalue On -offvalue Off \
+        -initial On -text "Check me!"
+.q add radiobutton maz -label "A radiobutton" \
+        -initial Foo -value yes -text "Radio me?"
+
+.q add group gee -label "Groupies" -initial foo
+.q add radiobutton gee.a -text Foo -value foo
+.q add radiobutton gee.b -text Bar -value bar
+.q add radiobutton gee.c -text Baz -value baz
+
+pack .q -fill both -expand on
+raise .

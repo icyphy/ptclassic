@@ -1,0 +1,690 @@
+##########################################################################
+# Version: $Id$
+# Author: H. John Reekie
+#
+# Copyright (c) %Q% The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the above
+# copyright notice and the following two paragraphs appear in all copies
+# of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+#                                                         COPYRIGHTENDKEY
+##########################################################################
+
+
+## README
+#
+# This is the primary interface to the Slate widget, and the whole
+# of the Visual Language Toolkit. Sooner or later, large parts of
+# the VL Toolkit will be recoded in "something else." When that happens,
+# the picture classes will no longer be directly accessible. To
+# ensure future compatibility, use the slate interface to the
+# picture classes _only_. There will be, of course, some speed
+# penalty, but not that much considering what you have to pay anyway...
+#
+# This is, of course, also the reason why some of the methods on
+# the slate seem just like useless wrappers around picture methods --
+# the picture methods will cease to exist one day.
+#
+
+
+## slate pathName args
+#
+# A procedure to create a new widget, as recommended on the
+# itk web pages. This turns out to be useful to have anyway,
+# since we need to muck about with the binding order for the
+# widget, and itk doesn't seem to like having $this referenced
+# in the constructor...
+#
+proc ::tycho::slate {pathName args} {
+    #
+    # Create the widget
+    #
+    uplevel ::tycho::Slate $pathName $args
+
+    #
+    # Now muck about with the bindings in order to
+    # make events on the canvas appear to be on the mega-widget.
+    # This simply sets the bindtags for the canvas to be the
+    # the same as those for the megawidget, effectively removing
+    # the canvas itself from the event chain. It has the side-effect
+    # of causing some events to occur twice, but so far this appears
+    # to happen only with Enter and Leave events.
+    #
+    bindtags [$pathName component canvas] [concat \
+	    [list lhead [bindtags [$pathName component canvas]]] \
+	    [ltail [bindtags $pathName]]]
+
+    return $pathName
+}
+
+
+
+#######################################################################
+#### Slate
+#
+# A canvas mega-widget. The slate supports complex
+# canvas items, moving and dragging, connection between objects,
+# and constraints.
+#
+class ::tycho::Slate {
+    inherit itk::Widget
+
+    constructor {args} {}
+    destructor {}
+
+    ###################################################################
+    ## Methods dealing with pictures
+
+    method addtag   {tag searchSpec args} {}
+    method bbox     {args}                {}
+    method bind     {tagOrID args}        {}
+    method create   {class args}          {}
+    method delete   {picts}               {}
+    method deform   {x y args}            {}
+    method find     {searchSpec args}     {}
+    method lower    {args}                {}
+    method move     {picts args}          {}
+    method raise    {args}                {}
+    method roots    {picts}               {}
+
+
+    ###################################################################
+    ## Thin wrappers for methods dealing with pictures
+
+    method coords {pict args} {eval $pict coords $args}
+
+
+
+    ###################################################################
+    ## Thin wrappers around canvas operations
+
+    method postscript {args} {
+	eval $itk_component(canvas) postscript $args
+    }
+
+    method xview {args} {
+	eval $itk_component(canvas) xview $args
+    }
+
+    method yview {args} {
+	eval $itk_component(canvas) yview $args
+    }
+
+
+
+    ###################################################################
+    ## Restricted access
+
+    ## slatePictures
+    #
+    # A list of all pictures created on the slate. This may need to be
+    # modified in future to record only top-level pictures (?).
+    #
+    private variable slatePictures {}
+
+
+    ## itemdict
+    #
+    # The mapping from canvas items to pictures.
+    #
+    private variable itemdict
+
+
+    ## tagdict
+    #
+    # The mapping from tags to pictures.
+    #
+    private variable tagdict
+
+
+    ## registerItem  pict item
+    ## registerItems pict items
+    #
+    # Register a picture with one or more items. For use by the
+    # Primitive class only.
+    #
+    # -- pict: The picture object to set as the owner of the items.
+    # -- item: A single canvas item.
+    # -- items: A list of canvas items.
+    #
+    method registerItem {pict item} {
+	set itemdict($item) $pict
+    }
+
+    method registerItems {pict items} {
+	foreach i $items {
+	    set itemdict($i) $pict
+	}
+    }
+
+
+    ## deregisterItem  item
+    ## deregisterItems items
+    #
+    # Cancel the registration of a picture with an item.
+    # For use by the Primitive class only.
+    #
+    # -- item: A single canvas item.
+    # -- items: A list of canvas items.
+    #
+    method deregisterItem {item} {
+	unset itemdict($item)
+    }
+
+    method deregisterItems {items} {
+	foreach i $items {
+	    unset itemdict($i)
+	}
+    }
+
+
+    ## registerTag tag pict
+    #
+    # Register a tag as belonging to a picture. For use by the
+    # Picture class only.
+    #
+    # -- tag: The tag we're adding.
+    # -- pict: A picture to tag.
+    #
+    method registerTag {tag pict} {
+	if { ! [info exists tagdict($tag)] } {
+	    set tagdict($tag) [list $pict]
+	} else {
+	    lappend tagdict($tag) $pict
+	}
+    }
+
+
+    ## deregisterTag tag pict
+    #
+    # Cancel the registration of tags to pictures.
+    # For use by the Picture class only.
+    #
+    # -- tag: The tag we're adding.
+    # -- pict: A picture to tag.
+    #
+    method deregisterTag {tag pict} {
+	set tagdict($tag) [ldelete $tagdict($tag) $pict]
+	
+	if { $tagdict($tag) == "" } {
+	    unset tagdict($tag)
+	}
+    }
+
+
+    ## _canvas
+    #
+    # Return the internal canvas. This is used by the picture classes
+    # and it not intended for general access.
+    #
+    # NOTE: This was called canvas{}, but apparently itk sees this
+    # in the same namespace as its component widgets.
+    #
+    method _canvas {} {
+	return $itk_component(canvas)
+    }
+}
+
+
+## constructor
+#
+body ::tycho::Slate::constructor {args} {
+    #
+    # Create the canvas and pack it
+    #
+    itk_component add canvas {
+	canvas $itk_interior.canvas
+    } {
+	keep -background -cursor -relief \
+		-height -width -borderwidth \
+		-xscrollcommand -yscrollcommand \
+		-scrollregion
+    }
+
+    pack $itk_component(canvas) -fill both -expand yes
+
+
+    #
+    # Initialise options
+    #
+    eval itk_initialize $args
+}
+
+
+## addtag tag all
+## addtag tag withtag     tag
+## addtag tag overlapping x0 x1 y0 y1
+## addtag tag enclosed    x0 x1 y0 y1
+#
+# Add a tag to picts. The searchSpec and args is the same
+# as for the find{} method.
+#
+body ::tycho::Slate::addtag {tag searchSpec args} {
+    foreach i [eval $this find $searchSpec $args] {
+	$i addtag $tag
+    }
+}
+
+
+## bbox {pictOrTag}+
+#
+# Return the bounding box of any number of picts. Each argument
+# can be a picture ID or a tag.
+#
+body ::tycho::Slate::bbox {args} {
+
+    set picts {}
+    foreach p $args {
+	if { [isObject $p] } {
+	    lappend picts $p
+	} else {
+	    lappend picts $tagdict($p)
+	}
+    }
+
+    return [eval $itk_component(canvas) bbox [eval concat $picts]]
+}
+
+
+## bind tagOrID [event [command]]
+#
+# Bind a command to an object or to all objects with a given tag.
+#
+# -- tagOrID: A valid pict ID, canvas item ID, or any string
+#    that represents a possible tag.
+#
+# -- event: If present, is the mouse event to be queried or to which
+#    a command is bound. If not present, then this method returns
+#    events for which there are bindings.
+#
+# -- command: If present, the command to bind to the object or tag.
+#    If not present, then return the binding(s) for the object or tag.
+#
+# Note: This command can only be used if the slate is being used
+# in ``binding'' mode. If it is being used in ``action'' mode
+# then the actions perform the bindings, and adding your own will
+# just ruin everything.
+#
+# Caveat: The bind command is not properly developed yet. There are
+# some interactions with canvas bindings, multiple bindings on the
+# same tag/object, and hierarchical pictures that need to be
+# explored and clarified.
+#
+# FIXME: Doesn't work properly if resetting bindings (event tags
+# not reset).
+#
+# FIXME: This code is very slow (25 ms on denon): can it be
+# improved?
+#
+body ::tycho::Slate::bind {tagOrID args} {
+
+    if { $args == "" } {
+	return [$itk_component(canvas) bind $tagOrID]
+    }
+
+    behead sequence args
+    if { $args == "" } {
+	return [$itk_component(canvas) bind $tagOrID $sequence]
+    }
+
+    behead command args
+
+    #
+    # From here on, treat four cases separately, according to whether
+    # a) the binding is to a tag or an object, and b) whether the
+    # command is blank (i.e. deleting a binding) or not.
+    #
+    if { [isObject $tagOrID] && $command != "" } {
+	#
+	# Binding to an object. This means the picture is "self-bound."
+	# If the picture is not marked, then mark it and set the event
+	# tags to _$tagOrID. If it is marked but doesn't have that
+	# event tag, then add it.
+	#
+	if { [$tagOrID cget -mark] == "" } {
+	    $tagOrID configure -mark 1
+	    $tagOrID _etag set [list _$tagOrID] -force
+	} elseif { ! [lmember [$tagOrID _etag get] _$tagOrID] } {
+	    $tagOrID _etag add _$tagOrID -force
+	}
+
+	#
+	# Bind the command to the event tag.
+	#
+	$itk_component(canvas) bind $tagOrID $sequence $command
+
+
+    } elseif { [isObject $tagOrID] && $command == "" } {
+	#
+	# Remove a binding from an object. First remove the binding
+	# for the specified sequence. Then, check if the event tag
+	# has any other bindings; if not, remove it from the event
+	# bindings.
+	#
+	$itk_component(canvas) bind $tagOrID $sequence {}
+
+	if { [$itk_component(canvas) bind _$tagOrID] == "" } {
+	    $tagOrID _etag delete _$tagOrID -force
+
+	    #
+	    # If that was the last event tag, then the picture is
+	    # no longer able to respond to events. So unmark it.
+	    #
+	    if { [$tagOrID _etag get] == "" } {
+		$tagOrID configure -mark ""
+	    }
+	}
+
+    } elseif { ! [isObject $tagOrID] && $command != "" } {
+	#
+	# Binding to an tag. There are potentially a whole bunch
+	# of pictures, so get the list of them.
+	#
+	if { [info exists tagdict($tagOrID)] } {
+	    set pictures $tagdict($tagOrID)
+	} else {
+	    set pictures {}
+	}
+
+	#
+	# For each picture, test if it is marked. If not, then mark it
+	# and set its event tags to its user tags. (If it is already
+	# marked, then all user tags will already have been propagated
+	# to its active components, so there is no need to do anything.)
+	#
+	foreach p $pictures {
+	    if { [$p cget -mark] == "" } {
+		$p configure -mark 1
+		$p _etag set [$p cget -tags] -force
+	    }
+	}
+
+	#
+	# Bind the command to the event tag.
+	#
+	$itk_component(canvas) bind $tagOrID $sequence $command
+
+
+    } elseif { ! [isObject $tagOrID] && $command == "" } {
+	#
+	# Remove a binding from a tag. Firstly, find the pictures.
+	#
+	$itk_component(canvas) bind $tagOrID $sequence {}
+
+	if { [info exists tagdict($tagOrID)] } {
+	    set pictures $tagdict($tagOrID)
+	} else {
+	    set pictures {}
+	}
+
+	#
+	# Now we have to check whether a picture needs to be
+	# unmarked: check the bindings for each of its event
+	# tags, and, if they are all empty, then there are no
+	# bindings on that picture any more and the picture
+	# must be unmarked and its event tags either cleared
+	# (if the picture has no parent) or set to its parent's
+	# event tags.
+	#
+	foreach p $pictures {
+	    set unmark 1
+	    foreach t [$p _etag get] {
+		if { [$itk_component(canvas) bind $t] != "" } {
+		    set unmark 0
+		    break
+		}
+	    }
+	    if { $unmark } {
+		$p configure -mark ""
+		if { [$p parent] != "" } {
+		    eval $p _etag set [[$p parent] _etag get] -force
+		} else {
+		    $p _etag set {} -force
+		}
+	    }
+	}
+    }
+}
+
+
+## create class args
+#
+# Create a new picture of type *class*.
+#
+# -- class: The class of the picture. This can be any sub-class
+#    of the _Picture_ class.
+#
+# -- args: The arguments to the constructor of the specified
+#    class, _but without the object name or the canvas option_.
+#
+body ::tycho::Slate::create {class args} {
+    #
+    # Create the pict object
+    #
+    # For some reason, $this puts a `::'in front of this object's
+    # name, which mucks things up later on. So get rid of it...
+    #
+    set pict [info context]::[eval ::tycho::$class \#auto \
+	    $args -slate [string trimleft $this ":"]]
+
+    #
+    # Keep a record of all picts created on the canvas.
+    # NB. we make sure that this is a sub-class of Picture, as
+    # other non-picture classes can also be created on the slate.
+    #
+    if { [lmember [$pict info heritage] "::tycho::Picture"] } {
+	lappend slatePictures $pict
+    }
+
+    #
+    # Return it
+    #
+    return $pict
+}
+
+
+## delete picts
+#
+# Delete one or more picts. If picts is the string "all" then
+# delete all objects from the canvas.
+#
+body ::tycho::Slate::delete {picts} {
+    if { $picts == "all" } {
+	set picts $slatePictures
+    }
+
+    foreach i $picts {
+	::delete object $i
+	set slatePictures [ldelete $slatePictures $i]
+    }
+}
+
+
+## find all
+## find withtag     tag
+## find overlapping x0 x1 y0 y1
+## find enclosed    x0 x1 y0 y1
+#
+# Find an pict or picts given by the searchSpec. The picts returned are
+# always the top-most active pict: lower-level picts are not returned
+# if it makes sense for a higher-level one to be returned.
+#
+# Note that find{} will return pictures at multiple levels of the hierarchy
+# is that's what it finds! To remove component pictures, use the method
+# roots{}. In some cases, the top-elvel will need to be removed -- this can
+# easily be done with ldelete{}.
+#
+body ::tycho::Slate::find {searchSpec args} {
+    set result {}
+    switch -exact $searchSpec {
+	"all" {
+	    #
+	    # Finding all picts simply requires returning the list
+	    #  kept in slatePictures.
+	    #
+	    set result $slatePictures
+	}
+
+	"withtag" {
+	    #
+	    # Finding picts with a given tag depends on whether the tag
+	    # is "current" or not. If it's current, then I have to query
+	    # the canvas to find the current pict, since the current tag
+	    # is dynamically altered by the canvas itself. If there
+	    # is one, then return the active picture of that pict.
+	    #
+	    # If the tag is anything else, then just look up the tag
+	    # dictionary to find pictures with that tag.
+	    #
+	    if { $args == "current" } {
+		set current [$itk_component(canvas) find withtag current]
+		if { $current != "" } {
+		    set result [$itemdict($current) active]
+		}
+	    } else {
+		if { [info exists tagdict([lindex $args 0])] } {
+		    set result $tagdict([lindex $args 0])
+		} else {
+		    set result {}
+		}
+	    }
+	}
+
+	"overlapping" {
+	    #
+	    # Finding overlapping picts is fairly simple. First, use the
+	    # canvas to get overlapping canvas items. For each item, add
+	    # its picture to the result list, but avoid duplicates,
+	    #
+	    set canvasItems [eval $itk_component(canvas) \
+		    find overlapping $args]
+
+	    foreach i $canvasItems {
+		set p [$itemdict($i) active]
+		if { ! [lmember $result $p] } {
+		    lappend result $p
+		}
+	    }
+	}
+
+	"enclosed" {
+	    #
+	    # Finding enclosed picts is more difficult. For each canvas
+	    # item, find the corresponding picture, and add it to
+	    # the result list only if all of its elements are in the
+	    # enclosed canvas items.
+	    #
+	    # This is not really quite what I want: I really want the
+	    # subset test to include only the active picts in the picture...
+	    #
+	    set canvasItems [eval $itk_component(canvas) \
+		    find overlapping $args]
+
+	    foreach i $canvasItems {
+		set p [$itemdict($i) active]
+		if { ! [lmember $result $p] } {
+		    if { [lsubset [$canvas find withtag $p] $canvasItems] } {
+			lappend result $p
+		    }
+		}
+	    }
+	}
+    }
+    return $result
+}
+
+
+## lower tagOrID {belowThis}
+#
+# Lower the specified picture or item picture to the bottom, or below
+# a specified picture or tag in the display list.
+#
+# -- tagOrID: The item to lower. This can be a slate picture,
+#    a raw canvas item, or a tag.
+#
+# -- belowThis: If specified, the item or tag above which the picture
+#    is raised.
+#
+body ::tycho::Slate::lower {tagOrID args} {
+    eval $itk_component(canvas) lower $tagOrID $args
+}
+
+
+## move tagOrID x y
+#
+## move tagOrID "click" x y [-ghost]
+## move tagOrID "drag"  x y
+## move tagOrID "release"
+#
+# Move one or picts the specified amount. The first argument
+# can either be a tag or a picture. (This command is more useful if
+# it is a tag, otherwise, it is the same as calling move{} on the
+# picture directly.)
+#
+body ::tycho::Slate::move {tagOrID args} {
+
+    if { [isObject $tagOrID] } {
+	set pictures $tagOrID
+    } else {
+	set pictures [$this roots [$this find withtag $tagOrID]]
+    }
+
+    foreach p $pictures {
+	eval $p move $args
+    }
+}
+
+
+## raise tagOrID {aboveThis}
+#
+# Raise the specified picture or item picture to the top, or above
+# a specified picture or tag in the display list.
+#
+# -- item: The item to raise. This can be a slate picture,
+#    a raw canvas item, or a tag.
+#
+# -- aboveThis: If specified, the item or tag above which the picture
+#    is raised.
+#
+body ::tycho::Slate::raise {tagOrID args} {
+    eval $itk_component(canvas) raise $tagOrID $args
+}
+
+
+## roots {pict}+
+#
+# Give a list of pictures, return only the root pictures in that list.
+# This is useful in various kinds of `find' operations.
+#
+body ::tycho::Slate::roots {picts} {
+    set result {}
+    foreach p $picts {
+	set ok 1
+	foreach q [ldelete $picts $p] {
+	    if { [$p ancestor $q] } {
+		set ok 0
+		break
+	    }
+	}
+	if { $ok } {
+	    lappend result $p
+	}
+    }
+    return $result
+}

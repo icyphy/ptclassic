@@ -1,0 +1,66 @@
+<!-- $Id$ -->
+
+Welcome to the three band ToneControl panel! The tonecontrol
+demo consists of one high-pass, one band-pass and one low-pass
+filter.
+
+<P>
+<b>General information</b>
+
+ <P> As for the other audio demos, this application controls
+the Sun Audio device. By default, the Ptolemy universe that created it
+configures the device to run stereo at 44.1 kHz with 16-bit linear
+encoding.
+
+<P> The demo consists of one each of high, band and low-pass filters. 
+There is a single control panel, with control over the band gain for each
+filter. The frequency ranges for the filters can be set using the 
+"edit parameters" (e) feature of Ptolemy.
+
+<P>
+<b>Controls</b>
+
+<dl>
+
+<dt>Input and output selectors
+
+<dd>The input and output selectors do the obvious thing. Or, at least,
+they would if they worked.
+
+<dt>Rec
+
+<dd>Controls the gain on the input. For CD source, this should really
+be down quite low to avoid clipping.
+
+<dt>Bal
+
+<dd>Controls the balance of the output signal. Negative numbers are
+left, positive are right.
+
+<dt>Low
+
+<dd>Controls the output gain of the low-pass filter. Again, If the gain
+ too high or there's too much gain in the filter, you'll hear clipping.
+
+<dt>Mid
+
+<dd>Controls the output gain of the band-pass filter. Again, If the gain
+ too high or there's too much gain in the filter, you'll hear clipping.
+
+<dt>High
+
+<dd>Controls the output gain of the high-pass filter. Again, If the gain
+ too high or there's too much gain in the filter, you'll hear clipping.
+
+</dl>
+
+ <P>
+<b>Shortcuts</b>
+
+<ul>
+<li>Start -- Control-g
+<li>Pause -- Control-p
+<li>Resume -- Control-r
+<li>Stop -- Control-s
+<li>Close -- Control-x k
+</ul>

@@ -1,0 +1,363 @@
+# Itcl interface to the Ptolemy InterpGalaxy class.
+#
+# @Author: Edward A. Lee
+#
+# @Version: $Id$
+#
+# @Copyright (c) 1997 The Regents of the University of California.
+# All rights reserved.
+#
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the above
+# copyright notice and the following two paragraphs appear in all copies
+# of this software.
+#
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+#
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+#                                        PT_COPYRIGHT_VERSION_2
+#                                        COPYRIGHTENDKEY
+#######################################################################
+
+# For easier debugging
+catch {delete class ::ptolemy::Galaxy}
+
+# Create the namespace if it doesn't exist
+namespace ::ptolemy {}
+
+#######################################################################
+#### Galaxy
+# This class defines an Itcl interface to the Ptolemy *InterpGalaxy*
+# class. When first constructed, it creates an empty galaxy with the
+# name being the same as the name of this object, without the namespace
+# information. The galaxy can be filled in either by explicitly adding
+# blocks and making connections, or by subscribing to a *KeyedDigraph*
+# object.
+#
+# Here is an example of how to use the Galaxy:
+# <tcl><pre>
+#     catch {delete object Xgal}
+#     ::ptolemy::Galaxy Xgal {}
+#     Xgal addBlock a Ramp
+#     Xgal addPort out a output
+# </pre></tcl>
+# This creates an empty Ptolemy galaxy class called "Xgal", and then adds
+# one block, a *Ramp* named *a*.  The output of the *Ramp* is made the output
+# of the galaxy, renamed _out_. This galaxy cannot
+# be used directly in a Ptolemy application.  It must be instantiated,
+# for example by including it in a Universe as follows:
+# <tcl><pre>
+#     catch {delete object x}
+#     ::ptolemy::Universe x {}
+#     x addBlock b Xgal
+#     x addBlock c Xgraph
+#     x connect b.out c.input
+#     x run 100
+#     x wrapup
+# </pre></tcl>
+# The class *Universe* is derived from *Galaxy*, so _x_ is also a galaxy.
+#
+# Various informational methods are provided for *Galaxy*.  Using the
+# universe created above as a galaxy, we can for example query for
+# the blocks it contains:
+# <tcl><pre>
+#      x getBlocks
+# </pre></tcl>
+# If we wish to get a list only of *Stars* in the galaxy, with all
+# internal galaxies expanded, we can do:
+# <tcl><pre>
+#      x getStars
+# </pre></tcl>
+# Notice that the first of these commands returns {b c}, where "b"
+# is an internal galaxy, while the second returns {a c}, all stars.
+#
+# If the _-cloneblocks_ option is non-zero (the default), then when an
+# instance of class *Block* is created inside the galaxy using the
+# *addBlock* method, a new Itcl object is constructed. This may be
+# expensive, since for large applications many Itcl objects will be
+# created, and it is not always be needed, so it can be disabled by
+# giving the value zero for the _-cloneblocks_ option.
+#
+class ::ptolemy::Galaxy {
+    inherit ::ptolemy::Block
+
+    constructor {master args} {::ptolemy::Block::constructor $master} {}
+    destructor {}
+    
+    ###################################################################
+    ####                   public variables                        ####
+
+    # If zero, disable cloning of internal blocks.
+    public variable cloneblocks 1
+
+    ###################################################################
+    ####                         public methods                    ####
+
+    # Add a block to the galaxy.
+    method addBlock {newblockname blockclass}
+
+    # Add a parameter to the galaxy.
+    method addParam {statename stateclass statevalue}
+
+    # Create a galaxy port and connect it to the port of an inside block.
+    method addPort {galport block blockport}
+
+    # Connect two ports with an optional annotation.
+    method connect {srcport dstport {anot {}}}
+
+    # Return a list of the names of the blocks in the galaxy.
+    method getBlocks {}
+
+    # Return the names of the stars, with all internal galaxies flattened.
+    method getStars {}
+
+    # Set the short description of the galaxy.
+    method setDescriptor {dtext}
+
+    # Set the domain of the galaxy (there must be no stars).
+    method setDomain {domain}
+
+    ###################################################################
+    ####                   protected methods                       ####
+
+    # Create a new Galaxy and clone its interior.
+    protected method clone {blockclass newname}
+
+    # Create an empty galaxy with the current galaxy name.
+    protected method createBlock {ptblockname master}
+
+    # Execute the args with this galaxy being the current galaxy.
+    protected method localEval {args}
+
+    ###################################################################
+    ####                   protected variables                     ####
+
+    ###################################################################
+    ####                   private methods                         ####
+
+    ###################################################################
+    ####                   private variables                       ####
+}
+
+#######################################################################
+#### constructor
+#
+body ::ptolemy::Galaxy::constructor {master args} {
+    eval configure $args
+}
+
+
+#######################################################################
+#### destructor
+#
+body ::ptolemy::Galaxy::destructor {} {
+    # Remove all internal blocks.  Ignore errors.
+    catch {
+        foreach block [::pitcl::blocks -fullname $fullname] {
+            delete object $block
+        }
+    }
+}
+
+
+    ###################################################################
+    ###################################################################
+    ####                      public methods                       ####
+
+#######################################################################
+#### addBlock
+# Add a block (star or galaxy) to the galaxy. Return the full name of
+# the block, which is a concatenation of the full galaxy name, a period
+# (".") and the block name. If the _-cloneblocks_ option is non-zero,
+# then create an Itcl object for the block as well as the Ptolemy
+# block. That object is created at the global scope and has as its name
+# the full name of the block. If _blockclass_ is an Itcl class in the ptolemy
+# namespace, then create an instance of this class. If it
+# is the name of an Itcl object of class ::ptolemy::Block or some
+# derived class, then create a new instance of the same class.
+#
+# Note that if a *Galaxy* object is created this mechanism, then
+# further changes to the master (the object with name _blockclass_)
+# will have no effect on the new object. To get all galaxies with the
+# same master to be affected by changes, the changes should be made in
+# a *KeyedDigraph* object, and the master galaxy should subscribe to
+# that class. All cloned galaxies will also be automatically
+# subscribed.
+#
+# FIXME: Instead of creating clones at the global scope, this method
+# should create them in the whatever namespace this object is in.
+# How do we find this out?
+#
+body ::ptolemy::Galaxy::addBlock {newblockname blockclass} {
+    # FIXME: Deal with a recursive reference here?
+
+    set newname $fullname.$newblockname
+    if {$cloneblocks} {
+        catch [list uplevel #0 delete object $newname]
+        if {[namespace ::ptolemy "info classes $blockclass"] != {}} {
+            return [uplevel #0 $blockclass $newname $blockclass]
+        }
+        if {[info which -command $blockclass] != {} && \
+                [$blockclass isa ::ptolemy::Block]} {
+            # Clone the specified galaxy.
+            clone $blockclass $newname
+            return $newname
+        }
+        # If none of the above worked, then create a simple Block.
+        return [uplevel #0 ::ptolemy::Block $newname $blockclass]
+    } {
+        # No Itcl object is to be created, so we just create
+        # the Ptolemy block.
+        ::pitcl::addBlock $newname $blockclass
+        return $newname
+    }
+}
+
+#####################################################################
+#### addParam
+# Add a parameter to the galaxy.  This is implemented in Ptolemy as
+# a member of the *State* class.
+#
+body ::ptolemy::Galaxy::addParam {statename stateclass statevalue} {
+    localEval ::pitcl::newstate $statename $stateclass $statevalue
+}
+
+#####################################################################
+#### addPort
+# Create a galaxy port and connect it to the port of an inside block.
+#
+body ::ptolemy::Galaxy::addPort {galport block blockport} {
+    localEval ::pitcl::alias $galport $block $blockport
+}
+
+#####################################################################
+#### connect
+# Connect two ports.  The final argument, which is optional, is an
+# annotation on the arc.  This is used, for example, to specify initial
+# values on the arc in a dataflow domain.
+#
+body ::ptolemy::Galaxy::connect {srcport dstport {anot {}}} {
+    localEval ::pitcl::connect -note $anot $srcport $dstport
+}
+
+#####################################################################
+#### getBlocks
+# Return a list of the names of the blocks in the galaxy.
+#
+body ::ptolemy::Galaxy::getBlocks {} {
+    return [::pitcl::blocks -fullname $fullname]
+}
+
+#####################################################################
+#### getStars
+# Return a list of the names of the stars in the galaxy, including those
+# stars inside internal galaxies.  If a *Wormhole*, which is both a *Star*
+# and a *Galaxy*, is encountered, then its name is returned.  Its internal
+# structure is not revealed.
+#
+body ::ptolemy::Galaxy::getStars {} {
+    return [localEval ::pitcl::blocks -deep]
+}
+
+#######################################################################
+#### setDescriptor
+# Set the short description of the galaxy.
+#
+body ::ptolemy::Galaxy::setDescriptor {dtext} {
+    localEval ::pitcl::setDescriptor $dtext
+}
+
+#######################################################################
+#### setDomain
+# Set the galaxy domain.  It is an error to change the domain
+# if the galaxy contains any stars.
+#
+body ::ptolemy::Galaxy::setDomain {domain} {
+    localEval ::pitcl::domain $domain
+}
+
+
+    ###################################################################
+    ###################################################################
+    ####                      public procedures                    ####
+
+    ###################################################################
+    ###################################################################
+    ####                      protected methods                    ####
+
+#####################################################################
+#### clone
+# Create a new Galaxy with the specified name by cloning in Ptolemy
+# the specified master and creating an Itcl object for each block inside
+# the galaxy.
+#
+body ::ptolemy::Galaxy::clone {blockclass newname} {
+    localEval [$blockclass info class] $newname $blockclass
+    puts "need to copy contents of $blockclass:\n[$blockclass getBlocks]"
+}
+
+#####################################################################
+#### createBlock
+# Create a Ptolemy galaxy with the specified name by cloning the
+# specified master galaxy (the _master_). If there is no master, then
+# create a new empty galaxy.
+#
+body ::ptolemy::Galaxy::createBlock {ptblockname master} {
+    if {[llength $master] == 1} {
+        # A master galaxy is specified from which we should clone.
+        # Defer to the parent class to create the instance.
+        chain $ptblockname $master
+    } {
+        # No master is specified.  Create an new empty galaxy, then
+        # fill it in if commands to do so have been supplied.
+        # Can't use localeval here because the galaxy doesn't exist yet.
+        set savegal [::pitcl::curgalaxy]
+
+        # Create an empty galaxy
+        ::pitcl::defgalaxy $ptblockname {}
+
+        # Fill it in.
+        if {$master != {}} {
+            eval $master
+        }
+
+        # Restore the current galaxy
+        ::pitcl::curgalaxy $savegal
+    }
+}
+
+#######################################################################
+#### localEval
+# Make this the current galaxy, then execute the args in the global
+# namespace.  Restore the current galaxy to whatever it was before.
+#
+body ::ptolemy::Galaxy::localEval {args} {
+    # The current galaxy and current universe may not be the same.
+    set savegal [::pitcl::curgalaxy]
+    ::pitcl::curgalaxy $fullname
+puts "executing $args, with curgalaxy [::pitcl::curgalaxy]"
+    if {[catch {set result [uplevel #0 $args]} msg] != 0} {
+        global ::errorInfo
+        set saveInfo $errorInfo
+        ::pitcl::curgalaxy $savegal
+        error $msg $saveInfo
+    }
+    ::pitcl::curgalaxy $savegal
+    return $result
+}
+
+    ###################################################################
+    ###################################################################
+    ####                      private methods                      ####
+

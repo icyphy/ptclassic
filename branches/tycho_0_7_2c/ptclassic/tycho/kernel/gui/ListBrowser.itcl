@@ -1,0 +1,485 @@
+# List browser.
+#
+# Author: Edward A. Lee
+#
+# Version: $Id$
+#
+# Copyright (c) 1990-%Q% The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the
+# above copyright notice and the following two paragraphs appear in all
+# copies of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+# 						PT_COPYRIGHT_VERSION_2
+# 						COPYRIGHTENDKEY
+#######################################################################
+
+# Options from the derived class
+option add *ListBrowser*entryWidth 30 widgetDefault
+option add *ListBrowser*entryBackground \
+	[ptkColor antiqueWhite white] widgetDefault
+option add *ListBrowser*textBackground \
+	[ptkColor antiqueWhite white] widgetDefault
+option add *ListBrowser.textForeground \
+	[ptkColor black black] widgetDefault
+option add *ListBrowser.entryfont \
+	[.tychoFonts defaultFont fixed] widgetDefault
+
+##########################################################################
+#### ListBrowser
+# Create a list browser window that consists of a scrolled list box. If
+# the -command option is specified, then the value of the option is
+# taken as a command to execute when the user has selected an item from
+# the list. Before executing the command, the item selected by the user
+# is appended to the command as an argument. If no -command option is
+# specified, then the default behavior is to return the selected item
+# when the ListBrowser is created by a ::tycho::DialogWindow::newModal
+# procedure.
+#
+# When the user has selected an item, the processItem protected method
+# is consulted.  If this method return 1, then the ListBrowser is
+# destroyed.  However, this method could change the contents of the
+# ListBrowser and return 0, in which case the user must make another
+# selection.
+# 
+# For example, the following command will query the user to select an
+# item from a list, and then post that item in top-level window:
+# <tcl><pre>
+# ListBrowser .w -command post -items {a b c d}
+# .w centerOnScreen
+# </pre></tcl>
+#
+# The ListBrowser object performs automatic completion of partial entries
+# and pattern matching on entries.  See the
+# <a href="doc/ListBrowserHelp.html">help page</a>.
+#
+class ::tycho::ListBrowser {
+    inherit ::tycho::EntryQuery
+
+    # The command to execute on a file when one is identified
+    itk_option define -command command Command "::tycho::DialogWindow::answer"
+
+    # The list to display
+    itk_option define -items items Items {}
+
+    constructor {args} {}
+
+    ##################################################################
+    ####                     public methods                       ####
+
+    #### breakCompleteSequence
+    # Break the interpretation of a sequence of Tabs as scrolling over matches.
+    method breakCompleteSequence {}
+
+    #### chooseItem
+    # Copy an item from the listbox to the entry box.
+    method chooseItem {lb ypos}
+
+    #### clearselection
+    # Clear any selections made by item completion.
+    method clearselection {}
+
+    #### complete
+    # Complete the partially entered item.
+    method complete {}
+
+    #### goto
+    # Goto the specified item in the listbox.
+    method goto {item}
+
+    #### help
+    # Open a help window.
+    method help {}
+
+    #### ok
+    # Select the item specified in the entry box.
+    method ok {}
+
+    #### scroll
+    # Move up or down a number of pages or units in the listbox or selection.
+    method scroll {num what}
+
+    #### select
+    # Select the item specified in the argument.
+    method select {name}
+
+    ##################################################################
+    ####                   protected methods                      ####
+
+    #### processItem
+    # Process an item selection.  Return 1 to destroy the window.
+    protected method processItem {item}
+
+    #### updateListbox
+    # Fill the listbox with items.
+    protected method updateListbox {}
+
+    ##################################################################
+    ####                   private variables                      ####
+    private variable closing 0
+    private variable scrollposition 0
+    private variable uselastpattern 0
+}
+
+#########################################################################
+#### -items option configuration
+# We simply call updateListbox, which iserts the items in the listbox.
+# 
+configbody ::tycho::ListBrowser::items {
+    updateListbox
+}
+
+######################################################################
+#
+body ::tycho::ListBrowser::constructor {args} {
+    
+    # To make things more compact
+    component hull configure -borderwidth 0
+    
+    # Entry box for entering items directly.
+    addQuery entry {} {}
+    
+    # Frame for listbox for listing items.
+    itk_component add listscroll {
+	frame $itk_interior.childsite.listscroll
+    } {
+	keep -background -cursor
+    }
+    pack $itk_component(listscroll) -side top \
+	    -expand yes -fill both -padx 5
+    
+    # Listbox for items.
+    itk_component add listbox {
+	listbox $itk_component(listscroll).listbox -relief sunken \
+		-yscroll "$itk_component(listscroll).scroll set" \
+		-setgrid 1 \
+		-selectmode single
+    } {
+	keep -background -cursor -foreground -font -height -width
+	rename -background -textbackground textBackground Background
+	rename -foreground -textforeground textForeground Foreground
+    }
+    pack $itk_component(listbox) -side left -expand yes -fill both
+    
+    # Scrollbar for items.
+    itk_component add scroll {
+	scrollbar $itk_component(listscroll).scroll \
+		-command "$itk_component(listscroll).listbox yview" \
+		-relief sunken
+    } {
+	keep -background -cursor
+    }
+    pack $itk_component(scroll) -side right -fill y
+
+    # Extra buttonbox above the usual DialogWindow button box.
+    itk_component add buttons {
+	buttonbox $itk_interior.childsite.buttons
+    } {
+	keep -background -cursor
+    }
+    pack $itk_component(buttons) -expand no
+
+    $itk_component(buttons) add help -text "Help" \
+	    -command [code $this help]
+
+    ###################################################################
+    # bindings
+    # NOTE: The Escape bindings below don't work because Escape is used
+    # to close the window.
+    #
+    # Any key breaks a sequence of Tabs
+    bind $itk_component(hull) <KeyPress> \
+	    [code {%Q breakCompleteSequence}]
+    bind $itk_component(hull) <Tab> { }
+    bind $itk_component(entry_entry) <Tab> \
+	    [code {%Q complete; break}]
+
+    # Mouse bindings
+    bind $itk_component(listbox) <Double-1> \
+	    [code {%Q select [%Q get entry]; break}]
+    bind $itk_component(listbox) <1> \
+	    [code %Q chooseItem %W %y]
+
+    # Navigation bindings
+    bind $itk_component(hull) <Meta-v> [code %Q scroll -1 pages]
+    # Escape removed the window, so it doesn't work as an alternative to meta.
+    # bind $itk_component(hull) <Escape><v> [code %Q scroll -1 pages]
+
+    bind $itk_component(hull) <Control-v> [code %Q scroll 1 pages]
+    bind $itk_component(hull) <Control-backslash> [code %Q clearselection]
+    bind $itk_component(hull) <Control-p> [code %Q scroll -1 selection]
+    bind $itk_component(hull) <Control-n> [code %Q scroll 1 selection]
+
+    # Special keys for moving about.
+    bind $itk_component(hull) <Prior> [code %Q scroll -1 pages]
+    bind $itk_component(hull) <Next> [code %Q scroll 1 pages]
+    bind $itk_component(hull) <End> [code %Q goto end]
+    bind $itk_component(hull) <Meta-greater> [code %Q goto end]
+    # bind $itk_component(hull) <Escape><greater> [code %Q goto end]
+    bind $itk_component(hull) <Up> [code %Q scroll -1 selection]
+    bind $itk_component(hull) <Down> [code %Q scroll 1 selection]
+    bind $itk_component(hull) <Home> [code %Q goto 0]
+    bind $itk_component(hull) <Meta-less> [code %Q goto 0]
+    # bind $itk_component(hull) <Escape><less> [code %Q goto 0]
+    
+    # We have gotten some reported problems about these keys
+    # being undefined on some machines.  But they also seem
+    # be needed for other machines.  Hence the catch.
+    catch {
+	bind $itk_component(hull) <KP_Prior> [code %Q scroll -1 pages]
+	bind $itk_component(hull) <KP_Next> [code %Q scroll 1 pages]
+	bind $itk_component(hull) <KP_End> [code %Q goto end]
+	bind $itk_component(hull) <KP_Up> [code %Q scroll -1 selection]
+	bind $itk_component(hull) <KP_Down> [code %Q scroll 1 selection]
+	bind $itk_component(hull) <KP_Home> [code %Q goto 0]
+    }
+    # Process any unevaluated arguments.
+    eval itk_initialize $args
+
+    wm resizable $prefix 1 1
+    # NOTE: There seems to be no way to find out the actual window size at this
+    # point.  The commands "wm reqwidth" and "wm width" return 1, even after
+    # a "tkwait visibility" and an "update".  So we just set some reasonable
+    # minimum size.
+    wm minsize $prefix 10 10
+}
+
+
+    ##################################################################
+    ##################################################################
+    ####                     public methods                       ####
+
+######################################################################
+#### breakCompleteSequence
+# Break the interpretation of a sequence of Tabs as scrolling through
+# matching items.  This is bound to any key other than Tab.
+#
+body ::tycho::ListBrowser::breakCompleteSequence {} {
+    set uselastpattern 0
+}
+
+######################################################################
+#### chooseItem
+# Determine the item name in the listbox lb that is closest to the
+# mouse position ypos and insert its name in the entry box.
+#
+body ::tycho::ListBrowser::chooseItem {lb ypos} {
+    $lb selection clear @0,0 end
+    $lb selection set [$lb nearest $ypos]
+    clear entry
+    insert entry [selection get]
+}
+
+######################################################################
+#### clearselection
+# Clear any selections made by item completion.
+#
+body ::tycho::ListBrowser::clearselection {} {
+    $itk_component(listbox) selection clear 0 end
+}
+
+######################################################################
+#### complete
+# Complete a partially entered item.  On the first invocation,
+# this method finds an entry in the listbox that has the contents of
+# the entry box as a prefix.  Glob-style rules are used, so the entry
+# can be a pattern (* for any substring, ? for any single character,
+# [chars] for a set of characters, or \x for a single character.
+# If there is more than one matching entry, then all matching entries
+# are selected in the listbox.  The selected entries can then be
+# scrolled with the up and down arrow keys.
+# If the method is invoked again without an intervening invocation
+# of breakCompleteSequence, then it scrolls through the selected entries
+# as if the down arrow had been pressed.
+#
+body ::tycho::ListBrowser::complete {} {
+    if {$uselastpattern} {
+	scroll 1 selection
+	return
+    }
+    set pattern "[get entry]*"
+    set index 0
+    set foundone 0
+    set firstone -1
+    set foundtwo 0
+    $itk_component(listbox) selection clear 0 end
+    foreach name [$itk_component(listbox) get 0 end] {
+	if [string match $pattern $name] {
+	    if $foundone {
+		set foundtwo 1
+	    }
+	    set foundone 1
+	    if {$firstone == -1} {set firstone $index}
+	    $itk_component(listbox) selection set $index
+	}
+	incr index
+    }
+    if {$foundone == 0} {
+	# No match found.
+	bell
+	return
+    }
+    if {$foundtwo == 0} {
+	# Found exactly one match.  Replace the entry contents.
+	clear
+	insert entry [selection get]
+    } {
+	# Found more than one.  Alert user that entry is not complete.
+	set uselastpattern 1
+	bell
+    }
+    $itk_component(listbox) see $firstone
+    if {$firstone > 0} {
+	set scrollposition [expr $firstone-1]
+    } {
+	set scrollposition 0
+    }	
+}
+
+######################################################################
+#### goto
+# Goto the specified item in the listbox.  The item identifier can
+# be an integer (starting with 0), the word "end", or any of the index
+# forms understood by the Tk listbox widget.
+#
+body ::tycho::ListBrowser::goto {item} {
+    $itk_component(listbox) see $item
+    clear
+    insert entry [$itk_component(listbox) get $item]
+    set idx [$itk_component(listbox) index $item]
+    set scrollposition $idx
+}
+
+######################################################################
+#### help
+# Open a help window.
+#
+body ::tycho::ListBrowser::help {} {
+    global TYCHO
+    ::tycho::File::openContext $TYCHO/kernel/doc/ListBrowserHelp.html
+}
+
+######################################################################
+#### ok
+# select the item specified in the entry box.
+#
+body ::tycho::ListBrowser::ok {} {
+    select [get entry]
+}
+
+######################################################################
+#### select
+# Select the item specified by the argument.
+#
+body ::tycho::ListBrowser::select {name} {
+    # This method might be in the middle of being processed already.
+    # If so, return.
+    if {$closing} {return}
+    set closing 1
+    update idletasks
+    if [processItem $name] {
+	# nextWindow not used because focus goes to the new window.
+	delete object $this
+	return
+    }
+    set closing 0
+}
+
+######################################################################
+#### scroll
+# Move up or down a number of pages or units in the listbox or
+# selection. The first argument is an integer (negative means to move
+# up). If the second argument is "pages", then scrolling is by
+# screenfulls. If it is "units", then scrolling is by individual items.
+# If it is "selection", then we move up or down by individual items
+# within the selected items, if any items are selected.  If there are
+# no items selected, then we move up and down as if the value of
+# second argument were "units".
+#
+body ::tycho::ListBrowser::scroll {num what} {
+    clear
+    if {$what == "pages"} {
+	$itk_component(listbox) yview scroll $num $what
+	set scrollposition [$itk_component(listbox) nearest 0]
+    } elseif {$what == "units"} {
+	incr scrollposition $num
+	set size [$itk_component(listbox) size]
+	if {$scrollposition < 0} {
+	    set scrollposition 0
+	} elseif {$scrollposition >= $size} {
+	    set scrollposition [incr size -1]
+	}
+    } elseif {$what == "selection"} {
+	set indexes [$itk_component(listbox) curselection]
+	if {$indexes == {}} {
+	    scroll $num units
+	    return
+	}
+	foreach idx $indexes {
+	    if {$idx > $scrollposition} {
+		goto $idx
+		return
+	    }
+	}
+	# Need to wrap around to the start.
+	goto [lindex $indexes 0]
+	return
+    } else {
+	error "Unrecognized argument: $what.  \
+		Should be units, pages, or selection"
+    }
+    insert entry [$itk_component(listbox) get $scrollposition]
+}
+
+
+    ##################################################################
+    ##################################################################
+    ####                   protected methods                      ####
+
+######################################################################
+#### processItem
+# This procedure checks and processes the user selection. If it return 1,
+# then the ListBrowser is destroyed.  If it returns 0, then it is not
+# destroyed.
+#
+body ::tycho::ListBrowser::processItem {item} {
+    execCommand -command $item
+    return 1
+}
+
+######################################################################
+#### updateListbox
+# This procedure fills the listbox with items. By default, it just
+# uses the -items option.
+#
+body ::tycho::ListBrowser::updateListbox {} {
+    
+    # clear the list box
+    $itk_component(listbox) delete 0 end
+    
+    # Get a list of items in the -items option.
+    set items $itk_option(-items)
+
+    # Insert items into the listbox
+    foreach item $items {
+	$itk_component(listbox) insert end "$item"
+    }
+    
+    clear entry
+}

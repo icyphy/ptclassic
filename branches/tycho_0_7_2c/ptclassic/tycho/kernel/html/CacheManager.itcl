@@ -1,0 +1,134 @@
+# The abstract superclass of file-like "resources"
+# 
+# @Author: Kevin Chang
+#
+# @Version: $Id$
+# 
+# @Copyright (c) %Q% The Regents of the University of California.
+# All rights reserved.
+#
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the above
+# copyright notice and the following two paragraphs appear in all copies
+# of this software.
+#
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+#
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+#                                        PT_COPYRIGHT_VERSION_2
+#                                        COPYRIGHTENDKEY
+#######################################################################
+
+#######################################################################
+#### ::tycho::cache
+# A shortcut to use ::tycho::CacheManager::<method>.
+#
+ensemble ::tycho::cache {
+    # The following returns information regarding the path (url).
+    # If exists, return the physical file name associated with this path.
+    option cachefile {path} {
+    }
+    option contenttype {path} {
+    }
+    option date {path} {
+    }
+    # Get the size
+    option size {path} {
+    }
+
+    # The following are used directly by Resource<protocol>
+    # Test if a resource exists.
+    option exists {path} {
+    }
+    # True if path still has the same information
+    option same {path date size contenttype} {
+    }
+    option update {path newphysicalfile} {
+    }
+}
+
+#######################################################################
+#### CacheManager
+#
+#
+class ::tycho::CacheManager {
+    constructor {args} {}
+    destructor {}
+
+    #####################################################################
+    ####                          options                            ####
+
+    
+    ###################################################################
+    ####                         public methods                    ####
+
+    ###################################################################
+    ####                           public procs                    ####
+
+    proc cachefile {path} {incr _forward; puts _forward}
+    proc contenttype {path} {set _forward 0}
+    proc date {path}
+    # Get the size
+    proc size {path}
+
+    # The following are used directly by Resource<protocol>
+    # Test if a resource exists.
+    proc exists {path}
+
+    # True if path still has the same information
+    proc same {path date size contenttype}
+    proc update {path newphysicalfile}
+
+    ###################################################################
+    ####                         protected methods                 ####
+
+    ###################################################################
+    ####                        protected commons                  ####
+
+    # The cache file associated with URLs
+    protected common _forward
+
+    ###################################################################
+    ####                        protected variables                ####
+
+    ###################################################################
+    ####                         private variables               ####
+}
+
+
+#######################################################################
+#### constructor
+#
+body ::tycho::CacheManager::constructor {args} {
+    eval configure $args
+}
+
+#######################################################################
+#### destructor
+#
+body ::tycho::CacheManager::destructor {} {
+
+}
+
+#########################################################################
+#########################################################################
+####                      public methods                             ####
+
+#####################################################################
+#### cachefile
+# Get a cached copy of the contents of the file. This is provided
+# to work around Tcl's lack of binary data handling.
+body ::tycho::CacheManager::cachefile {path} {
+
+}

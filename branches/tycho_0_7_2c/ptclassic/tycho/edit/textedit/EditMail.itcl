@@ -1,0 +1,614 @@
+# Definition of a text editor with facilities for editing programs
+# in various languages.
+#
+# @Author: Kevin Chang
+#
+# @Version: $Id$
+#
+# @Copyright (c) 1995-%Q% The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the
+# above copyright notice and the following two paragraphs appear in all
+# copies of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+# 						PT_COPYRIGHT_VERSION_2
+# 						COPYRIGHTENDKEY
+#######################################################################
+
+#######################################################################
+# FIXME: Known bugs
+#
+
+#######################################################################
+#### EditDiff
+# This class defines a widget that provides an emacs-like editor
+# specialized for diffing program files. It colorizes the code,
+# identifying new and old file lines.
+#
+
+class ::tycho::EditDiff {
+    inherit ::tycho::Edit
+
+    constructor {args} {}
+    destructor {}
+
+    ##########################################################################
+    ####                            options                               ####
+
+    # The type of diff we want to perform. Not implemented yet.
+    itk_option define -difftype difftype Difftype 0
+
+    # When a new instance is created, -filename1 and -filename2 are
+    # passed onto the entry lines.
+    itk_option define -filename1 filename1 Filename1 ""
+
+    # Same as above.
+    itk_option define -filename2 filename2 Filename2 ""
+
+    ##########################################################################
+    ####                         public methods                           ####
+
+    # Compare files
+    method compareFile {} {}
+
+    # This will return the info line entry from the UNIX diff program
+    # (ie. 12,32c53,3    3d5,6    etc)
+    method diffReport {} {}
+
+    # the command to execute after pressing enter on the entry
+    method entryCommand {entrynum junk} {}
+
+    # Open a help window.  This should be redefined in derived classes.
+    method help {}
+
+    # openContext a file, then jump to the line
+    method hyperJump {filename line} {}
+
+    # Put in the file name in the list entry
+    method insertFileName {num nameAndPath} {}
+
+    # insert filename into $numth line
+    method insertSelectedFileName {num} {}
+
+    # The attribute for each text could be either "common", "new", or "old".
+    method insertString {index str status} {}
+
+    # Jump to the next difference
+    method jumpDifference {incrdecr idx} {}
+
+    ####################################################################
+    ####           protected methods and variables                  ####
+    
+    # Initialize the menu/status/tool bars
+    protected method initialize {{menubar {}} {statusbar {}} {toolbar {}}}
+
+    # Keep track of the type of the diff
+    private common difftypeName
+
+    # Instance of the Exec which calls UNIX's diff utility
+    private variable execDiff {}
+
+    # This keeps a list of diffs, output from UNIX's diff
+    public variable diffResult {}
+
+    # Used with diffResult, this is a counter to keep track where in diff
+    public variable diffResultLineCount 0
+    
+    # Keep track of where exactly differences occured.
+    public variable differenceList {}
+
+    # Keep track of where in the error we are now.
+    public variable differenceListCount -1
+
+    ####################################################################
+    ####                     other variables                        ####
+    # File names that are being diffed.
+
+    # Used by insertLine-- update for every n number of times
+    # to speed up loading time.
+    private variable okaytoupdate 0
+
+    # Color for old and new text. FIXME: This should be in preference!
+    public variable linecolor1 {{} {}}
+
+    # Color for old and new text. FIXME: This should be in preference!
+    public variable linecolor2 {{} {}}
+
+    # Keep track where we can insert in the text. This is added for
+    # concurency with seeFragment during insertion.
+    public variable textLineCount 1
+    
+    ####################################################################
+    ####                     private methods                        ####
+
+    # Initialize the toolbar
+    private method initializeToolbar {toolbar}
+}
+
+######################################################################
+#### -filename1 configuration
+#
+configbody ::tycho::EditDiff::filename1 {
+    # toolbar exists will return {} if there is no toolbar
+    if {[toolbar exists filename1] == 1} {
+        toolbar clear filename1
+        toolbar insert filename1 $itk_option(-filename1)
+    }
+}
+
+######################################################################
+#### -filename2 configuration
+#
+configbody ::tycho::EditDiff::filename2 {
+    # toolbar exists will return {} if there is no toolbar
+    if {[toolbar exists filename2] == 1} {
+        toolbar clear filename2
+        toolbar insert filename2 $itk_option(-filename2)
+    }
+}
+
+###################################################################
+#
+body ::tycho::EditDiff::constructor {args} {
+    # FIXME: Currently, we'd like to change the default colors
+
+    set linecolor1 [list blue {}]
+    set linecolor2 [list red {}]
+
+    set execDiff ""
+
+    eval itk_initialize $args
+
+    # Center the screen.
+    bind $itk_component(text) <Control-L> "$this compareFile"
+}
+
+
+###################################################################
+#### compareFile
+# This is the entry point to comparing files. It first clears up the
+# text buffer, read in UNIX's diff, and then compare.
+#
+body ::tycho::EditDiff::compareFile {} {
+    # Make sure that all the files are legal to begin with. Otherwise, exit.
+    set errorflag 0
+    foreach i {1 2} {
+        # eval set filename$i
+        if {[toolbar get filename$i]=="" || \
+                [toolbar get filename$i]=="NoName"} {
+            safeEval ::tycho::warn \
+                    "File name $i invalid: [toolbar get filename$i]"
+            set errorflag 1
+        }
+        if {![file exists [toolbar get filename$i]]} {
+            safeEval ::tycho::warn \
+                    "File name $i does not exist: [toolbar get filename$i]"
+            set errorflag 1
+        } elseif {![file readable [toolbar get filename$i]]} {
+            safeEval ::tycho::warn "File not readable: [toolbar get filename$i]"
+            set errorflag 1
+        }
+    }
+    if {$errorflag==1} {return}
+
+    # Initialize variables
+    set text $itk_component(text)
+
+    configure -readonly 0
+    clear
+
+    set textLineCount 1
+    $text config -cursor left_ptr
+    set differenceList {}
+    set differenceListCount -1
+
+
+    # Create an exec instance
+    if {[info object $execDiff ]==""} {
+        # Doesn't exist yet, create one
+        set execDiff [::tycho::Exec [::tycho::autoName execDiff]]
+    }
+    $execDiff execProcess \
+            "diff [toolbar get filename1] [toolbar get filename2]\
+            |& grep -v \"^<\" |& grep -v \"^<\""
+    # Wait until execution is done
+    $execDiff getStatusWait
+    set diffResult [$execDiff getHistory]
+
+    set diffResult [split $diffResult \n]
+    # Reset the line to read from beginning
+    set diffResultLineCount 0
+    
+
+    # Open up files 
+    set fd1 [open [toolbar get filename1] r]
+    set fd2 [open [toolbar get filename2] r]
+    set fileLineCount1 1
+    set fileLineCount2 1
+    
+    # Entry point to reading the actual files and outputting to text
+    while {[set diffInfo [diffReport]] != "done"} {
+
+        set info [lindex $diffInfo 0]
+        set n1 [lindex $diffInfo 1]
+        set n2 [lindex $diffInfo 2]
+        set n3 [lindex $diffInfo 3]
+        set n4 [lindex $diffInfo 4]
+        
+        set tag [llength $differenceList]
+        $text tag bind l0$tag <Button-1> \
+                "$this jumpDifference {} [expr [llength $differenceList] -1]"
+
+        # Output common lines. Also increment
+        # file1 and file2 pointer
+        while {$fileLineCount1 < $n1} {
+            # Increment file1 until difference seen.
+            insertString BOGUS [gets $fd1]\n l0$tag
+            incr fileLineCount1
+        }
+        while {$fileLineCount2 < $n3} {
+            # Increment file2 until difference seen.
+            gets $fd2
+            incr fileLineCount2
+        }
+
+        # If changed (character c), delete (d), or added (a)
+        set differenceBlock {}
+        if {$info=="c" || $info=="d" || $info=="a"} {
+            #lappend differenceBlock [$text index insert]
+            lappend differenceBlock $textLineCount
+        }
+        # Setup tag bindings for either file
+        $text tag configure l1$tag -foreground [lindex $linecolor1 0]
+        $text tag bind l1$tag <Enter> \
+                "$this putStatus \
+            \"[toolbar get filename1],\
+            diff #[expr [llength $differenceList]+1]\""
+        $text tag bind l1$tag <Leave> "$this putStatus \"\""
+        $text tag bind l1$tag <Double-Button-1> \
+                "$this hyperJump [toolbar get filename1] $fileLineCount1"
+        $text tag bind l1$tag <Button-1> \
+                "$this jumpDifference {} [llength $differenceList]"
+
+        $text tag configure l2$tag -foreground [lindex $linecolor2 0]
+        $text tag bind l2$tag <Enter> \
+                "$this putStatus \
+            \"[toolbar get filename2],\
+            diff #[expr [llength $differenceList]+1]\""
+        $text tag bind l2$tag <Leave> "$this putStatus \"\""
+        $text tag bind l2$tag <Double-Button-1> \
+                "$this hyperJump [toolbar get filename2] $fileLineCount2"
+        $text tag bind l2$tag <Button-1> \
+                "$this jumpDifference {} [llength $differenceList]"
+
+        # Setup coloring
+        if {$info=="c"} {
+            # Output differences
+            while {$fileLineCount1 <= $n2} {
+                insertString BOGUS [gets $fd1]\n l1$tag
+                incr fileLineCount1
+            }
+
+            while {$fileLineCount2 <= $n4} {
+                insertString BOGUS [gets $fd2]\n l2$tag
+                incr fileLineCount2
+            }
+            # Continue...
+        } elseif {$info=="d"} {
+            # Output the added lines
+            while {$fileLineCount1 <= $n2} {
+                insertString BOGUS [gets $fd1]\n l1$tag
+                incr fileLineCount1
+            }
+        } elseif {$info=="a"} {
+            while {$fileLineCount2 <= $n4} {
+                insertString BOGUS [gets $fd2]\n l2$tag
+                incr fileLineCount2
+            }
+        }
+        if {$info=="c" || $info=="d" || $info=="a"} {
+            #lappend differenceBlock [$text index insert]
+            lappend differenceBlock $textLineCount
+            lappend differenceList $differenceBlock
+        }
+    }
+
+    # Read and output the rest of the common lines until EOF
+    while {![eof $fd1]} {
+        insertString BOGUS [gets $fd1]\n l0$tag
+    }
+    close $fd1
+    close $fd2
+
+    markUnmodified
+    configure -readonly 1
+    return
+}
+
+#####################################################################
+#### diffReport
+# parse the output of the UNIX's diff utility
+#
+body ::tycho::EditDiff::diffReport {} {
+    #The normal output contains lines of these forms:
+    #n1 a n3,n4
+    #n1,n2 d n3
+    #n1,n2 c n3,n4
+
+    # Reinitialize n1 through n4 to 0
+    foreach i {3 4} {
+        set n$i 0
+    }
+    
+    # Keep going until we hit the end of line
+    while {$diffResultLineCount < [llength $diffResult]} {
+        set line [lindex $diffResult $diffResultLineCount]
+        # FIXME:
+        # This is an expensive operation! Regex is the bottleneck if
+        # there are many differences.
+        if {[regexp \
+                {(^[0-9]+)(,[0-9]+)?(c|a|d)([0-9]+)(,[0-9]+)?$} $line match \
+                n1 n2 command n3 n4]} {
+            # Get rid of leading comma for n2 and n4
+            regexp {,([0-9]+)} $n2 match n2
+            regexp {,([0-9]+)} $n4 match n4
+            
+            # If it's a single line, make sure the second line (now 0)
+            # corresponds to the first line (with a value)
+            if {$n2<$n1} {set n2 $n1}
+            if {$n4<$n3} {set n4 $n3}
+            
+            incr diffResultLineCount
+            return "$command $n1 $n2 $n3 $n4"
+        }
+	incr diffResultLineCount
+    }
+    return done
+}
+
+#####################################################################
+#### entryCommand
+# The command to execute after pressing enter on the entry line
+#
+body ::tycho::EditDiff::entryCommand {{entrynum {}} {junk {}}} {
+    # Setting from entry list name -> $itk_option(-filename)
+    if {$entrynum==1} {
+        # jump to the next line
+        toolbar focusin filename2
+    } else {
+        compareFile
+    }
+}
+
+###################################################################
+#### help
+# Open a window with help on the current widget.
+#
+body ::tycho::EditDiff::help {} {
+    global ::TYCHO
+
+    ::tycho::File::openContext \
+        [file join $TYCHO editors textedit doc usersGuides \
+	    EditDiffHelp.html]
+}
+
+###################################################################
+#### insertString
+# modified to handle cases
+#
+body ::tycho::EditDiff::insertString {bogusIndex str {status {common}}} {
+    # The following line is added because of stupid File class that is
+    # persistently adding junk to text whenever it is created.
+    if {$bogusIndex == "insert"} {return}
+
+    $itk_component(text) insert $textLineCount.0 $str $status
+    incr textLineCount
+    if {[expr [incr okaytoupdate] % 75]==0} {
+        # This is here as an attempt to speed up responce time.
+        # increase number to increase overall speed.
+        # decrease number to increase responce time.
+        ::tycho::safeUpdate $this
+    }
+}
+
+###################################################################
+#### insertFileName
+# Put in the file name in the list entry
+#
+body ::tycho::EditDiff::insertFileName {num nameAndPath} {
+    $this toolbar clear filename$num
+    $this toolbar insert filename$num $nameAndPath
+}
+
+###################################################################
+#### insertSelectedFileName
+# insert filename into $numth line
+#
+body ::tycho::EditDiff::insertSelectedFileName {num} {
+    set nameAndPath [::tycho::queryfilename {File to compare:}]
+    # Only change when user explicitly changed. Otherwise, leave as default
+    if {$nameAndPath != {}} {
+        insertFileName $num $nameAndPath
+    }
+}
+
+
+###################################################################
+#### jumpDifference
+# Jump to the next difference. This is called by buttons.
+#
+body ::tycho::EditDiff::jumpDifference {{incrdecr 1} {idx {}}} {
+    # No difference, return
+    if {[llength $differenceList]==0} {
+        ::tycho::inform {There is no difference!}
+        return
+    }
+    
+    if {$idx=={}} {
+        # Choose to incr or decr
+        incr differenceListCount $incrdecr
+        # Overflow! Warning:
+        if {$differenceListCount==[llength $differenceList]} {
+            incr differenceListCount -1
+            if {[tycho::askuser {Not found, search again at the top?}]} {
+                set differenceListCount -1
+                jumpDifference 1
+            }
+            return
+        }
+        if {$differenceListCount==-1} {
+            incr differenceListCount 1
+            if {[tycho::askuser {Not found, search again at the bottom?}]} {
+                set differenceListCount [llength $differenceList]
+                jumpDifference -1
+            }
+            return
+        }
+    } elseif {$idx!={}} {
+        set differenceListCount $idx
+        return
+    } else {
+        error "Passing empty params to jumpDifference"
+    }
+    
+    # Extract begin and ending block numbers
+    set diffBlock [lindex $differenceList $differenceListCount]
+    set differenceBegin [lindex $diffBlock 0]
+    
+    # Highlight just the beginning of the difference.
+    # Previously, highlighting the entire block is too annoying.
+    $this seeFragment "line [expr $differenceBegin]"
+}
+
+#######################################################################
+#### hyperJump
+# This will open file context, and jump to entry number.
+#
+body ::tycho::EditDiff::hyperJump {filename line} {
+    # FIXME: directory could potentially be anywhere, specified in Makefile.
+    # Name of our editor/viewer
+    set editorName [::tycho::File::openContext $filename]
+    set editorName [string trim $editorName :]
+
+    # Jump to the line in editor
+    $editorName seeFragment "line $line"
+    # THe following is added because if a file has not been opened,
+    # then seeFragment will be called too quickly, thus no line
+    # will be selected.
+    after 1000 "$editorName seeFragment \"line $line\""
+}
+
+
+####################################################################
+####################################################################
+####                    public procedures                       ####
+
+
+
+####################################################################
+####################################################################
+####                    protected methods                       ####
+
+#####################################################################
+#### initialize
+# Initialize the menu, status, and toolbars associated with this widget.
+# The root (view) class sets up the menubar methods in it's initialize
+# via the chain command, which should always be the first command in
+# this method.
+# 
+# This method is called by it's displayer when attachView is called (usually
+# in ::tycho::view
+#
+body ::tycho::EditDiff::initialize {{menubar {}} {statusbar {}} {toolbar {}}} {
+    chain $menubar $statusbar $toolbar
+
+    configure -readonly 1
+
+    # Insert items in the tool bar. This is faster in a seperate
+    # method.
+    if {$toolbar != {}} {
+        # We have to qualify the call to this supposed-ly private
+        # method because Itcl (2.2) has virtual private methods!
+        ::tycho::EditDiff::initializeToolbar $toolbar
+    }
+
+    if {$menubar != {}} {
+        $menubar disable {Compare To...}
+        $menubar disable {Undo/Redo}
+        $menubar disable {Cut}
+        $menubar disable {Paste}
+        $menubar disable "Font..."
+        # Delete all in Edit
+        $menubar delete "Undo/Redo"
+        $menubar delete "Cut"
+        $menubar delete "Paste"
+        # Delete all the formats
+        $menubar delete "Fill Region"
+        $menubar delete "Right Fill Column"
+        $menubar delete "Set Fill Prefix"
+        $menubar delete "Lower Case"
+        $menubar delete "Upper Case"
+        $menubar delete "Capitalize"
+
+        $menubar delete "Insert..."
+        $menubar delete "Save"
+        $menubar delete "SaveAs..."
+        $menubar delete "Evaluate"
+        $menubar delete "Revision Control..."
+        $menubar delete "Toggle Read-Only"
+    }
+
+    if {$itk_option(-filename1) != {}} {
+        insertFileName 1 $itk_option(-filename1)
+    }
+    if {$itk_option(-filename2) != {}} {
+        insertFileName 2 $itk_option(-filename2)
+    }
+    displayer configure -title "File Differ"
+}
+
+#####################################################################
+#### initializeToolbar
+# Initialize the tool bar. Adds entries specific to this class.
+#
+body ::tycho::EditDiff::initializeToolbar {toolbar} {
+
+    $toolbar button prevdiff \
+            -text {Prev Difference} \
+            -description {Jump to the previous difference} \
+            -command "$this jumpDifference -1"
+
+    $toolbar button nextdiff \
+            -text {Next Difference} \
+            -description {Jump to the next difference} \
+            -command "$this jumpDifference 1"
+
+    $toolbar button compare \
+            -text Compare \
+            -description {Read in both files, and start parsing} \
+            -command "$this compareFile"
+
+    $toolbar entry filename1 "File 1 name: " {} "$this entryCommand 1 " \
+            -foreground [lindex $linecolor1 0] \
+            -command "$this insertSelectedFileName 1"
+           
+    $toolbar entry filename2 "File 2 name: " {} "$this entryCommand 2 " \
+            -foreground [lindex $linecolor2 0] \
+            -command "$this insertSelectedFileName 2"
+}

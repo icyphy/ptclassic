@@ -1,0 +1,9 @@
+# $Id$
+catch {delete object foo}
+::tycho::Forest foo
+foo add a aa
+foo add c cc a
+foo add d dd a
+::tycho::post [foo describe]
+
+# Should post: {{a aa {} {c d}} {c cc a {}} {d dd a {}}}

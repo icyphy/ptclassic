@@ -1,0 +1,179 @@
+##########################################################################
+# @Version: $Id$
+# @Author: H. John Reekie
+#
+# @Copyright (c) 1996 The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the above
+# copyright notice and the following two paragraphs appear in all copies
+# of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+#                                                         COPYRIGHTENDKEY
+##########################################################################
+
+
+#######################################################################
+#### Selector
+#
+# An interactor that selects canvas items in the usual fashion: click
+# selects an item and deselelts any other items, shift-click toggles
+# an item, dragging selects items in a region, shift-dragging toggles
+# items in a region.
+#
+# Selected items are marked with the tag "sel." Do not use this tag
+# for any other purpose.
+#
+# Currently, selected items are highlights by drawing a rectangle
+# around them -- later this might be made more sophisticated.
+#
+# By default, selected items do not move when the mouse is dragged.
+# To make them move, cascade a proxy that moves items.
+#
+#
+class ::tycho::Selector {
+    inherit ::tycho::Interactor
+
+    constructor {{s {}} {c {}} args} {
+	set slate $s
+	set canvas $c
+
+	eval configure $args
+    }
+    destructor {}
+
+    ###################################################################
+    ####                         public methods                    ####
+
+    # Bind the interactor to a picture or tag
+    method bind {t args} {}
+
+    ## Remove the binding of an interactor to a picture or tag
+    method unbind {t} {}
+
+
+    ###################################################################
+    ####                        protected methods                  ####
+
+    # Attach the interactor to the current picture
+    protected method activate {t x y} {}
+
+    # Remove the interactor from the current picture
+    protected method deactivate {} {}
+}
+
+
+#######################################################################
+#### activate target x y
+#
+# Add a picture object to the selected objects. Motion and release events
+# are bound to the tag "sel" so that the selected objects can be dragged.
+#
+body ::tycho::Selector::activate {t x y} {
+
+    # Deselect all currently selected objects, delete highlights
+    $slate dtag sel
+    $slate delete selectionBox
+
+    # Get the current object
+    set current [$slate find withtag current]
+
+    # Tag it
+    $slate addtag "sel" withtag $current
+
+    # Draw a box around it
+    eval $canvas create rectangle [$slate bbox $current] -width 2 \
+	    -tags [list [concat selectionBox [$slate gettags $current]]]
+
+    # Set the target to "sel"
+    target "sel"
+
+    # Set up the movement bindings on the "sel" tag.
+    foreach b $button {
+	$slate bind "sel" \
+		[::tycho::Interactor::event Motion -button $b] \
+		[list @scope [info class] "$this drag %x %y; update idletasks"]
+	$slate bind "sel" \
+		[::tycho::Interactor::event Release -button $b] \
+		[list @scope [info class] "$this release %x %y"]
+    }
+
+    # If there's a proxy, give it the "sel" tag as its target
+    if { $proxy != "" } {
+	$proxy target "sel"
+    }
+
+    # Execute the user-specified activation command
+    execute $activatecommand $x $y
+
+    # Start the interaction sequence
+    eval click $x $y $options
+}
+
+
+#######################################################################
+#### bind target
+#
+# Bind button-press events to the specified object or tag, so that
+# clicking on one of those pictures calls activate{}. The configuration
+# options *-button* and *-modifiers* determine the actual events.
+#
+body ::tycho::Selector::bind {t args} {
+    foreach b $button {
+	$slate bind $t \
+		[::tycho::Interactor::event Press -button $b ] \
+		[list @scope [info class] "$this activate $t %x %y"]
+	$slate bind $t \
+		[::tycho::Interactor::event Press \
+		-button $b -modifiers Shift] \
+		[list @scope [info class] "$this altactivate $t %x %y"]
+    }
+}
+
+
+#######################################################################
+#### deactivate
+#
+# Deactivate the interactor from the target. This method must be called
+# by the script bound to the release event.
+# 
+body ::tycho::Selector::deactivate {} {
+    # Remove bindings from the selection tag
+    foreach b $button {
+	$slate bind "sel" \
+		[::tycho::Interactor::event Motion -button $b] {}
+	$slate bind "sel" \
+		[::tycho::Interactor::event Release -button $b] {}
+    }
+
+    # Execute the user-specified de-activation command
+    execute $deactivatecommand
+}
+
+
+#######################################################################
+#### unbind target
+#
+# Remove the bindings to the specified object or tag. The specified 
+# pictures will no longer respond to the mouse.
+#
+body ::tycho::Selector::unbind {t} {
+    foreach b $button {
+	$slate bind $t \
+		[::tycho::Interactor::event Press -button $b] {}
+    }
+}

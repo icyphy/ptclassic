@@ -1,0 +1,131 @@
+# A tool bar for use with various editors and viewers.
+#
+# @Version: $Id$
+# @Author: E. A. Lee
+#
+# @Copyright (c) %Q% The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the above
+# copyright notice and the following two paragraphs appear in all copies
+# of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+#                                                         COPYRIGHTENDKEY
+##########################################################################
+
+
+#######################################################################
+#### ToolBar
+# A very simple tool bar display, for putting at the
+# top of a Displayer.
+#
+class ::tycho::ToolBar {
+    inherit itk::Widget
+
+    constructor {args} {}
+    destructor {}
+
+    ###################################################################
+    ####                            options                        ####
+
+    # The command to call when the Close button is pressed
+    itk_option define -statusbar statusBar StatusBar {}
+
+    ###################################################################
+    ####                         public methods                    ####
+
+    # Add a button to the toolbar.
+    method addButton {name label command args}
+
+    ###################################################################
+    ####                         protected methods                 ####
+
+    # Add a button to the toolbar.
+    protected method putStatus {string}
+}
+
+#######################################################################
+#### constructor
+#
+body ::tycho::ToolBar::constructor {args} {
+
+    # A tiny bit of padding to the left of the status bar.
+    itk_component add leftpacking {
+	frame $itk_interior.leftpacking -width 2
+    } {
+	keep -background -cursor
+    }
+    pack $itk_component(leftpacking) -side left
+
+    # Initialize options
+    eval itk_initialize $args
+}
+
+#########################################################################
+#########################################################################
+####                      public methods                             ####
+
+#####################################################################
+#### addButton
+# Add a button to the toolbar at the top. The required arguments are a
+# name for the button and itk_component and a description. The
+# description will appear in the status bar, if there is one, whenever
+# the mouse is moved into the button. Any additional arguments are
+# passed to the Tk <code>button</code> command.
+# For example,
+# <pre>
+#    addButton foo "a button" -text "Push Me" -command "::tycho::post Thanks"
+# </pre>
+# will create a button with label "Push Me" and the specified command.
+# To use a bitmap instead, something like the following will work:
+# <pre>
+#    global ::TYCHO
+#    addButton foo "a button" -bitmap @$TYCHO/kernel/img/back.xbm -command ...
+# </pre>
+# Note that buttons appear in the order they are added, from left to
+# right.
+#
+body ::tycho::ToolBar::addButton {name description args} {
+    itk_component add $name {
+	eval button $itk_interior.$name $args
+    } {
+	keep -background -font -activebackground -cursor \
+		-highlightthickness -activeforeground \
+		-foreground -highlightcolor -highlightbackground
+    }
+    pack $itk_component($name) -side left
+
+    # Bind description output.
+    bind $itk_component($name) <Enter> [code [list %Q putStatus $description]]
+    bind $itk_component($name) <Leave> [code "%Q putStatus {}"]
+}
+
+#########################################################################
+#########################################################################
+####                     protected methods                           ####
+
+#######################################################################
+#### putStatus
+# Put an arbitrary string to the status bar. To enforce
+# wrap-around, set the wrap-length of the label to its current width.
+#
+body ::tycho::ToolBar::putStatus {string} {
+    set sb $itk_option(-statusbar)
+    if {$sb != {}} {
+        $sb puts $string
+    }
+}

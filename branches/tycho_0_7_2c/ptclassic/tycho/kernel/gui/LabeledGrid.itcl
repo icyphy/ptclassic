@@ -1,0 +1,1260 @@
+#
+# Query
+# ----------------------------------------------------------------------
+# The Query class provides support a grid of widgets useful for user input,
+# such as entry fields, radiobuttons and checkbuttons, option menus, and
+# so on. It provides a simple mechanism designed to easily produce good
+# layouts, based on the principles described on pp 162 - 167 of Mullet
+# and Sano, "Designing Visual Interfaces: Communication Oriented
+# Techniques", SunSoft Press, 1995. Query uses the Tk grid{} geometry
+# manager for its underlying geometry management.
+#
+## WISH LIST:
+#   This section lists possible future enhancements.  
+#
+#   1) Although labels on the left produces simple and clear layouts,
+#      labeled bounding boxes are very popular these days. It might
+#      be possible to introduce a "labelmode" option that selects
+#      either labels on the left or a labeled box. The option needs
+#      to be specifiable individually for each group. Mullet and Sano's
+#      comment: "While the practice is encouraged by many environments,
+#      it should be used with restraint, since explicit structure is
+#      a very poor substitue for effective spatial segregation." (p110).
+#   2) The Tk grid is fantastic, but its huge failing is that doesn't
+#      allow you to say "make columns 3 to 5 all the same width."
+#      This support should be added here, perhaps using the techniques
+#      in ButtonBox.
+#
+# ----------------------------------------------------------------------
+#  AUTHOR: H. John Reekie              EMAIL: johnr@eecs.berkeley.edu
+#
+#  Based heavily on the tycho::Query widget by Edward A. Lee of UC Berkeley.
+#  The iwidgets::Query widget makes the widget an itk::Widget instead of an
+#  itk::Toplevel, makes grid placement more structured, and adds the notion
+#  of allowing arbitrary child widget types. Additional conrtibutions
+#  by Joel R. King, Bilung Lee, Christopher Hylands, Seehyun Kim, and
+#  Mark L. Ulferts. Query is contributed to [incr Widgets] by the Tycho
+#  project at UC Berkeley: http://ptolemy.eecs.berkeley.edu/tycho.
+#
+#  $Id$
+# ----------------------------------------------------------------------
+#
+# Copyright (c) 1995-1997 The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the
+# above copyright notice and the following two paragraphs appear in all
+# copies of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+# 						PT_COPYRIGHT_VERSION_2
+# 						COPYRIGHTENDKEY
+#######################################################################
+
+#
+# Usual options.
+#
+itk::usual Query {
+    keep -disabledforeground -highlightthickness -borderwidth \
+	    -font -highlightcolor -background \
+	    -foreground -activebackground -cursor -activeforeground 
+}
+
+# ------------------------------------------------------------------
+##                            GRIDDEDITEMS
+# ------------------------------------------------------------------
+#
+# The Query class provides support a grid of widgets useful for user input,
+# such as entry fields, radiobuttons and checkbuttons, option menus, and
+# so on. It provides a simple mechanism designed to easily produce goo
+# layouts, based on the principles described on pp 162 - 167 of Mullet
+# and Sano, <i>Designing Visual Interfaces: Communication Oriented
+# Techniques</i>, SunSoft Press, 1995.
+#
+# Mullet and Sano propose that widget layouts use a "canonical grid"
+# which is basically a 12-column grid that divides the window
+# into one, two, three, four, or six columns. A single window can use
+# combinations of numbers of columns in different rows (for example,
+# some rows may be divided into three columns, and some into six).
+# They use the left-most column for the label describing the purpose
+# of a widget or group of widgets -- this can either be the left
+# column of the chosen grid size or an additional column to the left
+# of the grid.
+#
+# Query requires that each label in the left column corresponds
+# to either a single widget (entry, checkbutton, and so on), or to
+# a "group" of widgets. When the Query widget is created,
+# the number of columns is specified as the <b>-columnspan</b> option.
+# (The default is four.) Widgets and groups are added with the <b>add</b>
+# method. By default, Query places a label for each
+# widget in column zero, and the widget itself spanning columns
+# one to three. If the first argument to <b>add</b> is
+# "group," then the label applies to a group of widgets, each of
+# which spans a single column. For example, one could create a
+# group and then add six "child" checkbuttons to that group, and
+# Query will neatly place them in two rows of three.
+#
+# The default behaviour makes it easy to construct common layouts,
+# and is very much the same sort of behaviour as implemented in the
+# Tycho Query dialog upon which this is based. More flexible
+# layout can be achieved in a number of ways. Firstly, <b>-columnspan</b>
+# can be set to a value other than the default. Secondly, the
+# <b>-childspan</b> option could be set to a non-zero value, forcing
+# GriddedOptions to use that span for each new widget. For example,
+# setting <b>-columnspan</b> to six and <b>-childspan</b> to 2 will cause
+# widgets to be placed into four layout columns (labels in
+# columns 0 and 3, widgets spanning columns 1-2 and 4-5), with groups
+# being divided each into two columns.
+#
+# Individual items also have options that affect layout. The
+# <b>-columnspan</b> item option controls the number of columns
+# that a widget crosses, and if set, overrides the default given
+# by <b>-childspan</b> <b>-rowspan</b> does likewise for rows (although
+# this should be used very sparingly). Every item also has <b>-row</b> and
+# <b>-column</b> options, which specify the placement of the item label:
+# the widget or group is always placed in the column to the right
+# of the label.
+#
+# Query supports a set of operations on widgets irrespective
+# of widget type: setting the current value, reading the current
+# value, and enabling and disabling user input. This
+# makes accessing the results from a modal dialog (for example)
+# very simple: a single method call returns a list of tag-value
+# pairs that can be set into an array and read as required!
+# Individual widgets can also be accessed directly for more
+# detailed configuration. 
+#
+# Query provides a useful set of widgets for placing into
+# a layout, including entry and text fields, radio buttons and
+# check buttons, and option menus. However, since the number
+# of different kinds of widget that could be placed into a
+# Query window is potentially unlimited, the Query
+# class can have new widget types added to its collection of
+# known widget types by calling the <b>addtype</b> procedure, together
+# with options that tell it how to create and access widgets of
+# that type.
+#
+# <h2>Item types</h2>
+#
+# By default, Query recognises a number of widget types. Unless
+# indicated otherwise, these all accept any options valid
+# for the corresponding Tk widget type, and the following:
+# <ul>
+# <li><b>-label</b> _string_: The text to place in the
+# label that appears at the left of the widget. The default is null.
+#
+# <li><b>-column</b> _int_: The column of the grid in which to place
+# the label. The widget will be placed in the column after this one.
+# If there are two or more columns available in the currect row,
+# the default is the first column available. Otherwise the default is
+# column zero.
+#
+# <li><b>-columnspan</b> _int_: The number of columns spanned by the
+# label and the created widget. The default is the <b>-childspan</b>
+# option of the Query widget or the number of columns remaining
+# in this row, whichever is smallest.
+#
+# <li><b>-initial</b> _value_: The initial value assigned to
+# this widget.
+#
+# <li><b>-row</b> _int_: The row of the grid in which to place the label
+# and widget. If there are two or more columns available in the current
+# row, the default is the current row. Otherwise the default is column zero.
+#
+# <li><b>-rowspan</b> _int_: The number of rows spanned by the
+# created widget. The default is one.
+#
+# <li><b>-sticky</b> _string_: The "stickiness" of the widget within
+# its alloted boxes.
+# </ul>
+#
+# The known widget types are as follows. (Note that additional types
+# can be defined with the <b>newtype</b> procedure, and that unrecognised
+# types can also be created -- see below.)
+#
+# <dl>
+# <dt><b>entry</b>
+# <dd>
+# A Tk entry widget.
+#
+# <dt><b>checkbutton</b>
+# <dd>
+# A Tk checkbutton. Checkbuttons can usefully be placed into groups,
+# as well as being a labeled item.
+#
+# <dt><b>frame</b>
+# <dd>
+# A Tk frame. Frames are useful for creating an area in which
+# additional layout can be performed. They can also be used
+# to create a "blank" area in the grid which can be filled
+# in later. (The difference to creating a frame and using the
+# <b>hskip</b> or <b>vskip</b> method is that with a frame,
+# the assigned row and column can be queried at a later time.)
+#
+# <dt><b>group</b> _tag_ ?_option value_...? ?contents?
+# <dd>
+# A group of items. A group has a label, and contains a set of
+# items within it. See <i>Item Groups</b> below.
+# The <b>group</b> command also accepts a declarative
+# specification of its contents -- see <i>Declarative Syntax</b>.
+#
+# <dt><b>hline</b> _tag_ ?_option value_...?
+# <dd>
+# A horizontal line. Horizontal lines will not respond
+# to methods like <b>get</b>, <b>assign</b>, <b>disable</b>, and
+# so on. Legal options are the same as for general items, and
+# the following:
+# <ul>
+# <li><b>-pad</b> _int_: The vertical padding of the line. This option
+# overrides the <b>-linepad</b> option of the widget.
+# <li><b>-relief</b> _relief_: The relief of the line. This option
+# overrides the <b>-linerelief</b> option of the widget.
+# </ul>
+#
+# Any unrecognised options will be passed directly to the constructor
+# of a Tk <b>frame</b> widget, but are probably of limited use.
+# (Note there is no <b>vline</b> option. I considered adding it but,
+# for start, it would have the internals more complicated for everything
+# else -- you have to skip a column with a line in it -- and in any case,
+# vertical lines are likely to produce bad layouts.)
+#
+# <dt><b>radiobutton</b>
+# <dd>
+# A Tk radiobutton. Radiobuttons are usually used only within
+# a shared item group.
+#
+# <dt><b>text</b>
+# <dd>
+# A Tk text widget.
+#
+# <dt><b>_type_</b>
+# <dd>
+# A widget of some other type. New types can be added to the Query
+# class with the <b>newtype</b> procedure, and can then be created
+# in the same way as the built-in item types.
+#
+# </dl>
+#
+# <h2>Item groups</h2>
+#
+# The item type <b>group</b> creates a label and then allocates
+# space for a group of items. Items within a group have hierarchical
+# tags, constructed as for Tk widgets. Groups accept the following
+# options:
+#
+# <ul>
+# <li><b>-childspan</b> _int_: The default value of <b>-columnspan</b>
+# for the group's children.
+#
+# <li><b>-column</b> _int_: The start column of the group. The
+# group label will be placed in this column, and group members
+# in columns to the right.
+# If there are two or more columns available in the currect row,
+# the default is the first column available. Otherwise the default is
+# column zero.
+#
+# <li><b>-columnspan</b> _int_: The number of columns spanned by the
+# group, including the label. The default is the <b>-childspan</b>
+# option of the Query widget or the number of columns remaining
+# in this row, whichever is smallest.
+#
+# <li><b>-initial</b> _value_: If not null, the initial value of a
+# variable created for the whole group. In this case, all members of
+# the group are given a shared variable rather than individual ones.
+# This is most useful for radiobutton groups. The value of the group will
+# be the value of this single variable. If this option is null,
+# each member will get its own variable and the value of the
+# group will be a list of the values of each group member.
+#
+# <li><b>-label</b> _string_: The text to place in the
+# label that appears at the left of the widget. The default is null.
+#
+# <li><b>-row</b> _int_: The start row of the group.
+# If there are two or more columns available in the current row,
+# the default is the current row. Otherwise the default is
+# column zero.
+#
+# <li><b>-rowspan</b> _int_: The number of rows spanned by the
+# group. If zero, the group expands until the next top-level
+# item is added. If not zero, that many rows are reserved for
+# the group and unfilled positions are available for later use.
+# The default is zero.
+# </ul>
+#
+# Any options not recognised become default options which will be
+# passed to the constructor of each member of the group.
+# Items can be added to a group in one of two ways.
+# The first is to add items to a group later by using
+# hierarchical tags, as in:
+# <pre>
+#   $items add group foo -initial a
+#   $items add radiobutton foo.a -text A
+#   $items add radiobutton foo.b -text B
+# </pre>
+#
+# The second is to add a list of widget commands at the end
+# of the options when creating the group. For example,
+# <pre>
+#   $items add group foo -initial a {
+#       radiobutton a -text A
+#       radiobutton b -text B
+#   }
+# </pre>
+# See <i>Declarative Syntax</i> below.
+# 
+# Groups cannot be nested, so tags of the form <code>a.b.c</code>
+# cannot be passed to the <b>add</b> method. (This restriction
+# may be relaxed in future -- there's no fundamental reason
+# not to have arbitrary nesting.) Items added to a group
+# accept any options valid for their widget type, and the
+# following:
+# <ul>
+# <li><b>-column</b> _int_: The column in which to place the member, relative
+# to the group's start column. Default is the next column, or the
+# first column of the group if the end of the group's span
+# has been reached.
+#
+# <li><b>-columnspan</b> _int_: The number of columns spanned by
+# this member. The default is one.
+#
+# <li><b>-initial</b> _value_: The initial value of the variable
+# created for this member.
+#
+# <li><b>-row</b> _int_:  The row in which to place the member, relative
+# to the group's start row. The default is the same row, or the
+# next row if the end of the group's span has been reached.
+#
+# <li><b>-rowspan</b> _int_: The number of columns spanned by
+# this member. The default is one. If this option is not zero, then
+# all subsequent members may have
+# to have explicit <b>row</b> and <b>column</b> options given to prevent
+# collision of this item with subsequent items.
+# </ul>
+#
+# Note that individual items within a group are not labeled.
+#
+# <h2>Control Scripts</h>
+#
+# Query provides a fairly straight-forward mechanism for defining
+# new item types. For each of the operations it supports on
+# its items, it has a small script that it evaluates to
+# perform this action. If you use Query only with the predefined
+# item types (which is adequate for most common applications),
+# then you do not need to read about control scripts. If,
+# however, you need to add a new widget type, then call the
+# <b>newtype</b> procedure. This procedure accepts a number
+# of options that specify the scripts that Query evaluates
+# to perform operations on items of the new type.
+#
+# Before evaluating a script, Query performs the following
+# substitutions:
+# <ul>
+# <li><code>%a</code> is substituted with additional arguments.
+# <li><code>%t</code> is substituted with the item tag.
+# <li><code>%v</code> is substituted with the control variable.
+# <li><code>%w</code> is substituted with the widget path.
+# <li><code>%Q</code> is substituted with the Query widget.
+# </ul>
+#
+# The options accepted by <b>newtype</b> are:
+# <ul>
+# <li><b>-assign</b>: Set a value to the item. If null, an attempt
+# to assign a value will raise an error.
+# The default is <code>{set %v %a}</code>.
+# <li><b>-create</b>: Create an item. An error will be raised
+# of this option is not specified.
+# <li><b>-delete</b>: Delete the item.
+# The default is <code>{destroy %w}</code>.  If null,
+# the widget cannot be deleted, and an error will be raised
+# on an attempt to do so.
+# <li><b>-disable</b>: Disable user input to the item. If null,
+# the widget cannot be disabled.
+# The default is <code>{%w configure -state disabled}</code>.
+# <li><b>-enable</b>: Enable user input to the item. If null,
+# the widget cannot be disabled.
+# The default is <code>{%w configure -state normal}</code>.
+# <li><b>-get</b>: Get the item's value. If null, an attempt
+# to get the item's value will return null.
+# The default is <code>{set %v}</code>.
+# <li><b>-options</b>: This is not a control script, but will
+# be passed as the second argument to <b>itk_component add</b>,
+# to control option propagation.
+# The default is <code>{usual}</code>.
+# </ul>
+#
+# <h2>Declarative Syntax</b>
+#
+# The Query class supports a recursive declarative syntax for
+# creating Query widgets and groups within Query widgets. For
+# example, a Query widget and its contents can be created like
+# this:
+# <pre>
+#   iwidgets::query .foo -columnspan 5 {
+#       entry first -label First -initial "The first entry"
+#       entry second -label Second -initial "The second entry"
+#       group checks {
+#           checkbutton a -text $labelOfA
+#           checkbutton b -text $labelOfB -onvalue foo -offvalue bar
+#       }
+#   }
+# </pre>
+#
+# The string following the options of the constructor is
+# substituted in the caller's context with the Tcl <b>subst</b>
+# command, and each command within the string is then appended
+# to a call to the <b>add</b> command. In addition, the
+# keywords <b>hskip</b> and <b>vskip</b> will be recognised and
+# a vertical or horizontal skip performed by calling the
+# <b>hskip</b> and <b>vskip</b> method. This syntax is supported
+# in the lowercase widget creation command, the <b>group</b>
+# option of the <b>add</b> method, and directly by the <b>parse</b>
+# method.
+# 
+class iwidgets::Query {
+	inherit itk::Widget
+
+    constructor {args} {}
+    destructor {}
+    
+    public variable columnspan 4
+    public variable childspan 1
+
+    itk_option define -linepad linePad LinePad 4
+    itk_option define -linerelief lineRelief LineRelief sunken
+
+    itk_option define -labelfont labelFont Font 8x13
+    itk_option define -labelcolor labelColor Foreground black
+    itk_option define -labelanchor labelAnchor LabelAnchor nw
+
+	itk_option define -padx padX PadX 0
+	itk_option define -pady padY PadY 0
+
+    method add {type tag args}
+    method assign {tag value}
+    method delete {tag}
+    method disable {tag}
+    method enable {tag}
+    method exists {tag}
+    method get {{pattern {}}}
+    method hskip {{columns 1}}
+    method itemcget {tag option}
+    method itemconfigure {tag {option {}} args}
+    method parse {contents {parent {}} {level 1}}
+    method vskip {{rows 1}}
+    
+    proc newtype {type args}   ;# add a new type
+
+	private method _cmd {mode tag}
+	private method _group {mode tag args}
+	private method _hline {path args}
+
+	private common _knowntypes {
+		checkbutton
+		entry
+		group
+		radiobutton
+	}
+    private common _assign     ;# assign to a widget
+    private common _create     ;# create a new widget
+    private common _disable    ;# disable a widget
+    private common _enable     ;# enable a widget
+    private common _get        ;# get a widget's value
+    private common _options    ;# options for itk_component add
+
+	private common uniqueCounter 0   ;# counter to generate unique numbers
+	private variable unique          ;# unique for each widget
+	
+	private variable _row           ;# item row
+	private variable _column        ;# item column
+	private variable _rowspan       ;# item row span
+	private variable _columnspan    ;# item column span
+	private variable _curcol        ;# current grid column
+	private variable _currow        ;# current grid row
+	private variable _childspan     ;# default span of child widgets
+	private variable _rowheight     ;# The height of each item row
+	private variable _type          ;# the type of each item
+	private variable _children      ;# the children of each group
+
+	# Initialize common arrays
+	array set _assign {
+		default     {set %v {%a}}
+		entry       {%w clear; %w insert 0 {%a}}
+		group       {_group assign {%a}}
+		hline       {}
+	}
+	array set _create {
+		default     {}
+		checkbutton {::checkbutton %w -variable %v %a}
+		entry       {::entry %w -textvariable %v %a}
+		hline       {_hline %t %a}
+		radiobutton {::radiobutton %w -variable %v %a}
+	}
+	array set _delete {
+		default     {destroy %w}
+		group       {_group delete %t}
+	}
+	array set _disable {
+		default     {%w configure -state disabled}
+		group       {_group disable %t}
+		hline       {}
+	}	
+	array set _enable {
+		default     {%w configure -state normal}
+		group       {_group enable %t}
+		hline       {}
+	}	
+	array set _get {
+		default     {set %v}
+		group       {_group get %t}
+		hline       {}
+	}
+	array set _options {
+		default {usual}
+		entry {
+			usual
+			rename -background -entrybackground -entryBackground Background
+		}
+	}
+	foreach mode {assign create delete disable enable get options} {
+		foreach type $_knowntypes {
+			if ![::info exists _[set mode]($type)] {
+				set _[set mode]($type) _[set mode]($default)
+			}
+		}
+	}
+    method debug {args} {
+        eval $args
+    }
+}
+
+#
+# Use option database to override default resources.
+#
+# option add *Query.thickness 3 widgetDefault ???
+
+#
+# Provide a lowercase access method for the Query class.
+# If an additional argument is given after the option-value list,
+# this will be passed to the <b>parse</b> method. This gives
+# an declarative and convenient syntax for creating query
+# widgets with a single call.
+#
+proc ::iwidgets::query { path args } {
+	if { [llength $args] & 1 } {
+		set script [lindex $args end]
+		set args [lreplace $args end end]
+	} else {
+		set contents {}
+	}
+	# Create widget
+    uplevel ::iwidgets::Query $path $args
+    
+    # Evaluate script if present. Note that substitution is
+    # in caller's context.
+    if { $contents != "" } {
+	    $path parse $contents {} 2
+	}
+}
+
+# ------------------------------------------------------------------
+##                        CONSTRUCTOR
+# ------------------------------------------------------------------
+body iwidgets::Query::constructor {args} {
+	set _row() 0
+	set _column() 0
+	set _currow() 0
+	set _curcol() 0
+	set _rowheight(,0) 1
+
+	set unique [incr uniqueCounter]
+	
+	# Evaluate options
+	eval configure $args
+}
+
+
+# ------------------------------------------------------------------
+##                             OPTIONS
+# ------------------------------------------------------------------
+
+# ----------------------------------------------------------------------
+## OPTION -columnspan
+#
+# The number of columns in the grid. The default is four. Changing
+# this option only affects the layout of items subsquently added
+# to the grid, not of items already added.
+# ----------------------------------------------------------------------
+configbody iwidgets::Query::columnspan {
+	set _columnspan() $itk_option(-columnspan)
+}
+
+# ----------------------------------------------------------------------
+## OPTION -childspan
+#
+# The default column span of top-level groups. If zero, the item will
+# span all remaining columns of the grid. The default is zero.
+# Changing this option only affects the default column span of
+# groups subsequently added to the grid, not of items already added. 
+# ----------------------------------------------------------------------
+configbody iwidgets::Query::childspan {
+	set _childspan() $itk_option(-childspan)
+}
+
+# ----------------------------------------------------------------------
+## OPTION -linerelief
+#
+# The default relief of grouping and separator lines. Recommended settings
+# are <b>raised</b> or <b>sunken</b>. The default is <b>sunken</b>.
+# ----------------------------------------------------------------------
+configbody iwidgets::Query::linerelief {
+}
+
+# ----------------------------------------------------------------------
+## OPTION -linepad
+#
+# The default padding of grouping and separator lines. The default is
+# four.
+# ----------------------------------------------------------------------
+configbody iwidgets::Query::linepad {
+}
+
+# ----------------------------------------------------------------------
+## OPTION -labelanchor
+#
+# The default anchoring of the text labels. The value of this option
+# is passed directly to the <b>-sticky</b> option of the Tk <b>grid</b>
+# command. It can be overridden for individual widgets and labels
+# by calling the <b>grid configure</b>command with the Tk widget
+# path as argument.
+# ----------------------------------------------------------------------
+configbody iwidgets::Query::labelanchor {
+}
+
+# ----------------------------------------------------------------------
+## OPTION -labelcolor
+#
+# The default foreground color of the text labels. This can be overridden
+# by directly accessing the label widgets.
+# ----------------------------------------------------------------------
+configbody iwidgets::Query::labelcolor {
+}
+
+# ----------------------------------------------------------------------
+## OPTION -labelfont
+#
+# The default font of the text labels. This can be overridden
+# by directly accessing the label widgets.
+# ----------------------------------------------------------------------
+configbody iwidgets::Query::labelfont {
+}
+
+# ----------------------------------------------------------------------
+## OPTION -padx
+#
+# The default horizontal padding to use when gridding widgets. Widgets
+# are gridded with the <b>-padx</b> option to the Tk <b>grid</b> command
+# set to this value. To override this value for individual widgets,
+# call <B>grid configure</b> directly with the component
+# widget. For example:
+# # <pre>
+#   grid configure [$griddeditems component size] -padx 4
+# </pre>
+# ----------------------------------------------------------------------
+configbody iwidgets::Query::padx {
+    foreach slave [grid slaves $itk_interior] {
+    	if { [grid info $slave -padx] != $itk_option(-padx) } {
+    		grid configure $slave -padx $itk_option(-padx)
+    	}
+    }
+}
+
+# ----------------------------------------------------------------------
+## OPTION -pady
+#
+# The default horizontal padding to use when gridding widgets. Widgets
+# are gridded with the <b>-pady</b> option to the Tk <b>grid</b> command
+# set to this value. To override this value for individual widgets,
+# call <B>grid configure</b> directly directly with the component
+# widget. For example:
+# # <pre>
+#   grid configure [$griddeditems component size] -pady 4
+# </pre>
+# ----------------------------------------------------------------------
+configbody iwidgets::Query::pady {
+    foreach slave [grid slaves $itk_interior] {
+    	if { [grid info $slave -pady] != $itk_option(-pad) } {
+    		grid configure $slave -pady $itk_option(-pady)
+    	}
+    }
+}
+
+
+# ------------------------------------------------------------------
+##                             METHODS
+# ------------------------------------------------------------------
+
+# ------------------------------------------------------------------
+## METHOD: add type tag ?option value...? 
+#
+# Add a new item to the layout. The first argument is the name
+# of the widget type to create. This is followed by the _tag_
+# that will be used to reference the widget, then an option-value
+# list. The options can be any that are valid for the widget type
+# _type_, plus options that specify labeling and positioning
+# information, as described in the section <i>Item Types</i>
+# above. For each item, a variable is created that can be used to
+# hold its value, which can be accessed within control scripts
+# as *%v*.
+#
+body iwidgets::Query::add {type name args} {
+	if [::info exists _row($tag)] {
+		error "Item already exists: \"$tag\""
+	}
+	if ![::info exists _create($type)] {
+		error "Unknown item type \"$type\": must be one of $_knowntypes"
+	}
+    # Decompose the tag
+    if ![regexp {^((([^\.]+)?.*)?\.)?[^\.]+$} $tag _ _ par]
+    	error "Illegal item tag: \"$tag\""
+	}
+	# Remember key parameters
+	set _type($tag) $type
+
+	# The group type may have an extra argument
+	if { $type == "group" && [llength $args] & 1 } {
+		set contents [lindex $args end]
+		set arg [lreplace $args end end]
+	} else {
+		set contents {}
+	}
+	# Get options
+	array set opts [list \
+		-initial {} \
+		-label {} \
+		-row $_currow($par)
+		-column $_curcol($par) \
+		-rowspan 1 \
+		-columnspan $_childspan($par) \
+		-childspan 1 \
+		-sticky "nsew" ]
+	array set opts $args
+
+	set init $opts(-initial)
+	set label $opts(-label)
+	set _row($tag) $opts(-row)
+	set _column($tag) $opts(-column)
+	set col $_column($tag)
+	set _rowspan($tag) $opts(-rowspan)
+	set _columnspan($tag) $opts(-columnspan)
+	set _childspan($tag) $opts(-childspan)
+	set stk $opts(-sticky)
+
+	unset opts(-initial)  opts(-label) \
+			opts(-row) opts(-column) \
+			opts(-rowspan) opts(-columnspan) opts(-sticky)
+
+	# Remember the largest rowspan in this row
+	if { $_rowspan($tag) > $_rowheight($par,$_row($tag)) } {
+		set _rowheight($par,$_row($tag)) $_rowspan($tag)
+	}
+	# If this is a nested item, make sure we haven't gone
+	# past the end of the group.
+	if { $par != "" } {
+		lappend _children($par) $tag
+		if { $_row($tag) >= $_rowspan($par) } {
+			error "Moved past end of group: $par"
+		}
+	}
+	# Create the label only if this is a top-level item
+	if { $par == "" } {
+		itk_component add ${tag}label {
+				label $itk_interior ${tag}label -text $label
+		} {
+			usual
+			rename -font -labelfont labelFont LabelFont
+			rename -foreground -labelcolor labelColor LabelColor
+		}
+		# Grid it
+		grid $itk_component(${tag}label) \
+			-row [expr $row($par) + $_row($tag)] \
+			-column [expr $_column($par) + $col] \
+			-sticky $itk_option(-labelanchor)
+		incr col
+	}
+	if { $type == "group" } {
+		# Create a group. We have a dummy frame that we subsequently ignore
+		frame $itk_interior.$tag
+		
+		# If the initial value is not null, create the shared
+		# variable -- that way we know it's a shared group later
+		if { $init != "" } {
+			set [scope $tag$unique] $init
+		}
+		# Set up grid variables
+		set _currow($tag) 0
+		set _curcol($tag) 1
+		set _rowheight($tag,0) $_rowspan($tag)
+
+		# If there's a contents description, evaluate it
+		if { $contents != "" } {
+			parse $contents $tag 2
+		}
+	} else {
+		# Create a regular item
+		if [::info exists _create($type)] {
+			itk_component add $tag {
+				eval [_cmd create $tag $args]
+			} $_options($type)
+		}
+		# Set its initial value
+		if { $_assign($type) != "" } {
+			assign $tag $init
+		}
+		# Grid it
+		eval grid $itk_interior.$tag \
+			-row [expr $_row($par) + $_row($tag)] \
+			-column [expr $_column($par) + $col] \
+			-rowspan $_rowspan($this) \
+			-columnspan $_columnspan(this) \
+			-sticky $stk \
+			-padx $itk_option(-padx) \
+			-pady $itk_option(-pady) \
+			-in $itk_interior
+	}
+	# Increment row and column counters
+	if { $par == "" } {
+		hskip [expr 1+$_columnspan($tag)]
+	} else {
+		hskip $_columnspan($tag) $par
+	}
+}
+
+# ------------------------------------------------------------------
+## METHOD: assign tag value
+#
+# Assign a value to an item. The value must make sense for the item.
+# If the item is a group with a shared variable, the value will
+# be assigned to the shared variable. If the group is not shared,
+# the value must be a list, and one consecutive elements of the list
+# will be assigned to each member of the group, in the order created.
+# Raise an error if _tag_ does not exist.
+#
+body iwidgets::Query::assign {tag value} {
+	if ![::info exists _row($tag)] {
+		error "Unknown tag: \"$tag\""
+	}
+	eval [_cmd assign $tag $value]
+}
+
+# ------------------------------------------------------------------
+## METHOD: delete tag
+#
+# Delete an item. If the item is a group, all members of the group
+# will also be deleted. Raise an error if _tag_ does not exist.
+#
+body iwidgets::Query::delete {tag value} {
+	if ![::info exists _row($tag)] {
+		error "Unknown tag: \"$tag\""
+	}
+	if { $_delete($tag) == "" } {
+		return
+	}
+	grid forget $itk_component(tag)
+	eval [_cmd delete $tag]
+	
+	# Clean up internal data
+	unset itk_component($tag)
+	unset _row($tag)
+	unset _column($tag)
+	unset _currow($tag)
+	unset _curcol($tag)
+	unset _columnspan($tag)
+	unset _rowspan($tag)
+	unset _childspan($tag)
+
+    if [regexp {^((([^\.]+).)*)[^\.]+$} $tag _ _ par]
+    	set t [lsearch -exact $_children($par) $tag]
+    	set _children($par) [lreplace $_children($par) $t $t]
+	}
+}
+
+# ------------------------------------------------------------------
+## METHOD: disable tag
+#
+# Disable an item. If the item is a group, all members of the group
+# will also be disabled. Raise an error if _tag_ does not exist.
+#
+body iwidgets::Query::disable {tag} {
+	if ![::info exists _row($tag)] {
+		error "Unknown tag: \"$tag\""
+	}
+	eval [_cmd disable $tag]
+}
+
+# ------------------------------------------------------------------
+## METHOD: enable tag
+#
+# Enable an item. If the item is a group, all members of the group
+# will also be enabled. Raise an error if _tag_ does not exist.
+#
+body iwidgets::Query::enable {tag} {
+	if ![::info exists _row($tag)] {
+		error "Unknown tag: \"$tag\""
+	}
+	eval [_cmd enable $tag]
+}
+
+# ------------------------------------------------------------------
+## METHOD: get ?pattern?
+#
+# Get the value of one or more items. If the _pattern_ argument is
+# not supplied or is null, return a list consisting of all the
+# items in the grid. If a group has a shared variable, that
+# group is included in the result, and its member are not. Otherwise,
+# the group is not included in the result and the members are.
+# If the _pattern_ argument exactly matches a tag within the grid,
+# return only the value of that item. If the tag is a group with no
+# shared variable, return a list of the members in the order in
+# which they were created. (Note that in this case, just the value
+# is returned, not a tag-value list.) Otherwise, use the pattern _argument_
+# as a glob-style pattern to select tags and return a list containing
+# the selected tags and the corresponding values.
+#
+body iwidgets::Query::get {{pattern {}}} {
+	if [::info exists _row($pattern)] {
+		# Get a single item
+		return [eval [_cmd get $pattern]]
+	} elseif { $pattern == "" } {
+		set tags [array names _row]
+	} else {
+		set tags [array names _row $pattern]
+	}
+	set result {}
+	foreach tag $tags {
+		lappend result $tag [eval [_cmd get $tag]]
+	}
+	return $result
+}
+
+# ------------------------------------------------------------------
+## METHOD: hskip distance ?parent?
+#
+# Skip one or more columns. The _distance_ argument specifies
+# the number of columns to skip. The _parent_
+# argument, if supplied, is the name of a group within which to skip.
+# If the distance given takes the current column past the end of the
+# grid or the group, call <b>vskip</b> to move to the next row.
+#
+body iwidgets::Query::hskip {distance {parent {}}} {
+	if { $parent != "" && ![::info exists _column($parent)] } {
+		error "Unknown group: \"$parent\""
+	}
+	incr _curcol($parent) $distance
+	if { $_curcol($parent) >= $_columnspan($parent)-2 } {
+		vskip $parent
+	}
+}
+
+# ------------------------------------------------------------------
+## METHOD: itemcget tag option
+#
+# Get an option of an item. The options can be any that can be specified
+# in the call to <b>add</b> when the widget _tag_ was created. Raise
+# an error if _tag_ does not exist.
+#
+body iwidgets::Query::itemcget {tag option} {
+	if ![::info exists _row($tag)] {
+		error "Unknown tag: \"$tag\""
+	}
+	if { $option == "-label" } {
+		$itk_component(${tag}label) cget -text
+	} elseif [regexp {^-(row|column|rowspan|columnspan|sticky)$} $option] {
+		array set opts [grid info $itk_component($tag)
+		set opts($option)
+	} else { 
+		$itk_component($tag) cget $option
+	}
+}
+
+# ------------------------------------------------------------------
+## METHOD: itemconfigure tag ?option? ?value? ?option value...?
+#
+# Configure options of an item. Raise an error if _tag_ does not exist.
+# If only a single argument is supplied, return the value lists of
+# all options. If two arguments are supplied, the second is taken
+# to be an option and the value list of that option is returned.
+# If more arguments are supplied, each option is set to the specified
+# value, with the exception of the following:
+# <ul>
+# <li>The options <b>-row</b>, <b>-column</b>, <b>-columnspan</b>
+# and <b>-rowspan</b>. It would be possible to support changing
+# these, but it's just tedious and doesn't seem to be something
+# that would be needed very often... If an attempt is made to
+# change them they will just be ignored.
+# <li>The <b>-initial</b> options of the type <b>group</b>. This
+# cannot be changed since either a) it's only the initial of a
+# shared group and changing it would mean nothing, or b) it's
+# being changed from null to non-null or vice-versa. which implies
+# changing a group from shared to non-shared or vice-versa.
+# </ul>
+#
+body iwidgets::Query::itemconfigure {tag {option {}} args} {
+	if ![::info exists _row($tag)] {
+		error "Unknown tag: \"$tag\""
+	}
+	if { $option == "" } {
+		set result {}
+		foreach o {row column rowspan columnspan sticky} {
+			lappend result [itemconfigure $tag $o]
+		}
+		return $result
+	} elseif { $args == "" } {
+		if { $option == "-label" } {
+			$itk_component(${tag}label) configure -text
+		} elseif [regexp {^-(row|column|rowspan|columnspan|sticky)$} $option] {
+			array set opts [grid info $itk_component($tag)
+			list $option {} {} $opts($option) $opts($option)
+		} elseif [regexp {^-(initial|childspan)$} {
+			return ""
+		} else {
+			$itk_component($tag) configure $option
+		}
+	} else {
+		foreach {option value} [concat $option $args] {
+			if { $option == "-label" } {
+				$itk_component(${tag}label) configure -text $value
+			} elseif { $option == "-sticky" } {
+				grid configure $itk_component($tag) -sticky $value
+			} elseif [regexp {^-(row|column|rowspan|columnspan)$} $option] {
+				;# do nothing
+			} elseif [regexp {^-(initial|childspan)$} {
+				;# Do nothing
+			} else {
+				$itk_component($tag) configure $option $value
+			}
+		}
+	}
+}
+
+# ------------------------------------------------------------------
+## METHOD: parse description ?parent? ?level?
+#
+# Parse a description of the contents of the Query widget
+# or of a group. The _description_ is a string containing
+# psuedo-commands that create items. Allowed commands are
+# any known item type, <b>hskip</b>, and <b>vskip</b>. If the
+# _parent_ argument is supplied, is the current context in
+# which to evaluate the string, and must be null if parsing
+# at the top level. If the _level argument is supplied and non-zero,
+# this specifies the stack level in which to perform a substitution
+# on the string, using the Tcl </b>subst</b> command. The default
+# is one. This allows the string to be constructed as a nested list
+# but still contain commands and variable references.
+#
+body iwidgets::Query::parse {description {parent {}} {level 1}} {
+	# Substitution
+	if { $level != 0 } {
+		uplevel $level [list subst $description]
+	}
+	# This makes termination testing easier
+    append $data "\n"
+    
+	# Parse the string. Unfortunately, we cannot simply 
+	# do an eval and rely on private methods to catch
+	# evaluation of each command as in iwidgets::Menubar, for
+	# instance, because the available widget types can be
+	# extended dynamically. So we really do parse the string,
+	# more-or-less.
+    while { $data != "" } {
+        # Get the next line
+        regexp "^(\[^\n\]*)\n(.*)" $data _ line data
+        # Process if not a space or comment line
+        if ![regexp "^\[ \t\]*#" $line] {
+            # Get lines until a complete command 
+            set command $line
+            while { ! [::info complete $command] && $data != "" } {
+                regexp "^(\[^\n\]*)\n(.*)" $data _ line data
+                append command "\n" $line
+            }
+            # Process the command
+            if [regexp {^(hskip|vskip)$} [lindex $command 0]] {
+            	eval $command $parent
+            } else {
+            	set type [lindex $command 0]
+            	set tag $parent.[lindex $command 1]
+            	set args [lreplace $command 0 1]
+            	eval add $type $tag $args
+            }
+        }
+    }
+}
+
+# ------------------------------------------------------------------
+## METHOD: vskip ?parent?
+#
+# Skip to the next row. The current row counter is incremented
+# by the row span of the item in the current row with the
+# largest row span, and the current row counter reset to zero.
+# If the _parent_ argument is supplied the row counter within
+# that group is incremented.
+#
+body iwidgets::Query::vskip {{parent {}}} {
+	if { $parent != "" && ![::info exists _row($parent)] } {
+		error "Unknown group: \"$parent\""
+	}
+	incr _currow($parent) $_rowheight($parent,$_currow($parent))
+	set _curcol($parent) 0
+	if ![::info exists _rowheight($parent,$_currow($parent))] {
+		set _rowheight($parent,$_currow($parent)) 1
+	}
+}
+
+# ------------------------------------------------------------------
+##                             METHODS
+# ------------------------------------------------------------------
+
+# ------------------------------------------------------------------
+## METHOD: _cmd mode tag ?arg...?
+#
+# Get the command to evaluate for a widget. The _mode_ argument
+# selects the widget mode and must be one of <b>get</b>, <b>assign</b>,
+# <b>enable</b>, <b>delete</b>, <b>disable</b>, or <b>create</b>.
+# The _tag_ argument is the item to evaluate the command on.
+#
+body iwidgets::Query::_cmd {mode tag args} {
+	set type $_type($tag)
+	if { ! [::info exists _[set mode]($type)] } {
+		error "Cannot get _[set mode] script of type \"$type\""
+	}
+	set command $_[set mode]($type)
+
+	regsub -all %w $command $itk_interior.$tag command
+	regsub -all %v $command [scope $tag$unique] command
+	regsub -all %a $command $args command
+	regsub -all %t $command $tag command
+	regsub -all %Q $command $this command
+
+	return $command
+}
+
+# ------------------------------------------------------------------
+## METHOD: _group mode tag ?option value ...?
+#
+# Access a group. The mode is assign, delete, disable, enable,
+# or get.
+#
+body iwidgets::Query::_group {mode tag args} {
+	switch -exact $mode {
+		"assign" {
+			if [::info exists [scope $tag$unique]] {
+				# Shared group
+				set [scope $tag$unique] $args
+			} else {
+				# Not a shared group
+				foreach t $_children($tag) v $args {
+					assign $t $v
+				}
+			}
+		}
+		"delete" {
+			foreach t $_children($tag) {
+				delete $t
+			}
+			grid forget $itk_component(${tag}label)
+			destroy $itk_component(${tag}label)
+			destroy $itk_component($tag)
+			unset itk_component(${tag}label)
+			foreach i [array names _rowheight $tag,*] {
+				unset _rowheight
+		}
+		"disable" {
+			foreach t $_children($tag) {
+				disable $t
+			}
+		}
+		"enable" {
+			foreach t $_children($tag) {
+				enable $t
+			}
+		}
+		"get" {
+			if [::info exists [scope $tag$unique]] {
+				# Shared group
+				set [scope $tag$unique]
+			} else {
+				# Not a shared group
+				set result {}
+				foreach t $_children($tag) {
+					lappend result [get $t]
+				}
+				return $result
+			}
+		}
+	}
+}
+
+# ------------------------------------------------------------------
+## METHOD: _hline path ?option value ...?
+#
+# Create a horizontal line.
+#
+body iwidgets::Query::_hline {path args} {
+	array set opts [list \
+		-pad $itk_option(-linepad) \
+		-borderwidth 1 \
+		-relief $itk_option(-relief)]
+	array set opts $args
+	set pad $opts(-pad)
+	unset opts(-pad)
+	set args [array get opts]
+
+	frame $path
+	eval frame $path.f $args
+	pack $path.f -fill x -expand on
+}
+
+# ------------------------------------------------------------------
+##                          PROCEDURES
+# ------------------------------------------------------------------
+
+# ------------------------------------------------------------------
+## PROCEDURE: newtype type ?option value?
+#
+# Add a new item type to the Query class. The _type_ is the
+# item type. Following arguments are an option-value list,
+# where legal options are as described in <i>Control Scripts</i>
+# above. Raise an error if the _type_ already exists, or
+# if an invalid option is specified.
+#
+body iwidgets::Query::newtype {type args} {
+	if { [lsearch -exact $_knowntypes $type] != -1 } {
+		error "Type \"$type\" is already defined"
+	}
+	array set opts $args
+	foreach c {assign create delete disable enable get options} {
+		if ![::info exists opts(-$c) {
+			set _[set c]($type) [set _[set c](default)]
+		} else {
+			set _[set c]($type) $opts(-$c)
+			unset opts(-$c)
+		}
+	}
+	if { [array names opts] != "" } {
+		error "bad option: \"[lindex [array names opts] 0]\""
+	}
+	lappend _knowntypes $type
+}

@@ -1,0 +1,223 @@
+##########################################################################
+# @Version: $Id$
+# @Author: H. John Reekie
+#
+# @Copyright (c) 1996-1997 The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the
+# above copyright notice and the following two paragraphs appear in all
+# copies of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+# 						PT_COPYRIGHT_VERSION_2
+# 						COPYRIGHTENDKEY
+##########################################################################
+
+ 
+#######################################################################
+## Animator
+#
+# An interactor that generates interaction events. Objects of this
+# class can be created and used directly, or via the animate{}
+# method of the Slate. They can be cascaded with other interactors
+# to modify animation, such as for producing quantized movement.
+#
+# <p><b>Options</b>
+#
+# See also: <a href="Interactor.html">Interactor</a>.
+#
+# <dl>
+# <dt><dd>
+# <dl>
+# <dt><b>-distance</b>
+# <dd>A pair consisting of the x and y distance to move.
+#
+# <dt><b>-duration</b>
+# <dd>The total time (roughly) of the animation sequence.
+#
+# <dt><b>-interval</b>
+# <dd>The time interval between animation events.
+#
+# <dt><b>-prefix</b>
+# <dd>The prefix used to cause movement. This is a short-hand
+# for the *-clickprefix*, *-dragprefix*, and *-releaseprefix*
+# options.
+#
+# </dl></dl>
+#
+# <p><b>Bugs</b>
+#
+# (None.)
+#
+# <p><b>Enhancements</b>
+#
+# <ol>
+# <li> Add other kinds of trajectory other than just linear.
+# </ol>
+#
+# <p><b>Links</b>
+# 
+# <ul>
+# <li><a href="../internals/interacting.html">How interactors work</a>.
+# <li><a href="../internals/interactors.html">Interactor classes</a>.
+# <li><a href="../internals/index.html">Infrastructure contents</a>
+# <li><a href="index.html">Class documentation index</a>
+# </ul>
+#
+class ::tycho::Animator {
+    inherit ::tycho::Interactor
+
+    constructor {{s {}} {c {}} args} {
+	set slate $s
+	set canvas $c
+
+	eval configure $args
+    }
+    destructor {}
+    
+    
+    ###################################################################
+    ####                            options                        ####
+
+    # The distance to move
+    public variable distance {20 20}
+
+    # The duration of the animation sequence, in ms
+    public variable duration 1000
+
+    # The time interval between executions.
+    public variable interval 50
+
+    ###################################################################
+    ####                         public methods                    ####
+
+    # Start the animation
+    method activate {t x y args}
+
+    # Stop the animation
+    method deactivate {args}
+
+    # Continue the animation
+    method reactivate {x y}
+
+    ###################################################################
+    ####                   protected methods                       ####
+
+
+    ###################################################################
+    ####                       private variables                   ####
+
+    # The id of the "after" script, so it can be cancelled
+    private variable afterid
+
+    # The current mouse position
+    private variable currentX
+    private variable currentY
+
+    # The change in mouse position
+    private variable deltaX
+    private variable deltaY
+
+    # The number of events
+    private variable repetitions
+}
+
+#######################################################################
+#### activate target x y
+#
+# Start the animation sequence on the given item or tag. Unlike
+# other interactors, this method does not create mouse bindings
+# but starts generating a series of interaction events.
+#
+body ::tycho::Animator::activate {t x y args} {
+    # Set the target.
+    target $t
+    
+    # Adjust the prefixes
+    if { $prefix != "" } {
+    	configure \
+    		-clickprefix ${prefix}click \
+    		-dragprefix ${prefix}drag \
+    		-releaseprefix ${prefix}release
+    } else {
+    	configure  \
+    		-clickprefix {}
+    		-dragprefix {}
+    		-releaseprefix {}
+    }
+
+    # Remember where we are
+    set currentX $x
+    set currentY $y
+    
+    # How many events to generate
+    set repetitions [expr float($duration) / $interval]
+    if { $repetitions < 1.0 } {
+    	set repetitions 1.0
+    } else {
+    	set repetitions [expr ceil($repetitions)]
+    }
+    
+    # Figure out how far to move each time
+    set deltaX [expr float([lindex $distance 0]) / $repetitions]
+    set deltaX [expr float([lindex $distance 1]) / $repetitions]
+
+    # Start the interaction sequence
+    eval click $x $y $args
+    
+    # Call reactivate to do the first event
+    reactivate $x $y
+}
+
+#######################################################################
+#### deactivate
+#
+# Stop the interaction.
+#
+body ::tycho::Animator::deactivate {args} {
+    # Cancel the delayed event
+    if { $afterid != "" } {
+    	after cancel $afterid
+	    set afterid ""
+	}
+    # Clear the target 
+    set target ""
+}
+
+#######################################################################
+#### reactivate
+#
+# Trigger an interaction event, and set up a delayed call for
+# the next one.
+#
+body ::tycho::Animator::reactivate {x y} {
+	# New coordinates
+	set currentX [expr $currentX + $deltaX]
+	set currentY [expr $currentY + $deltaY]
+
+    # The interaction event
+    drag $currentX $currentY
+
+    # Delayed call for next event
+    incr repetitions -1
+    if { $repetitions > 0 } {
+    	set afterid [after $interval \
+	    	[list catch \
+	    	[list $this reactivate $currentX $currentY]]]
+	}
+}

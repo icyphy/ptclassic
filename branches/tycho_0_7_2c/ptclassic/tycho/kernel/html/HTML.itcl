@@ -1,0 +1,204 @@
+# Definition of a window that displays HTML.
+# This uses the HTML library by Stephen Uhler.
+#
+# Author: Edward A. Lee
+#
+# Version: $Id$
+#
+# Copyright (c) 1990-%Q% The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the
+# above copyright notice and the following two paragraphs appear in all
+# copies of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+# 						PT_COPYRIGHT_VERSION_2
+# 						COPYRIGHTENDKEY
+#######################################################################
+
+# FIXME:  Known bugs
+#  - Many of the File menu commands do not do anything reasonable.
+
+#######################################################################
+#### HTML
+# This window contains a text widget that displays HTML using the
+# library by Stephen Uhler.
+# 
+class ::tycho::HTML {
+    inherit ::tycho::File
+
+    constructor {args} {}
+    destructor {}
+
+    #### openSource
+    # Open the HTML source
+    method openSource {}
+
+    #### reload
+    # Clear the current text and reload from the source file.
+    method reload {}
+
+    #### seename
+    # Follow a hypertext link within the file.
+    method seename {name}
+
+    #### switchfile
+    # Switch to a different HTML file.
+    method switchfile {filename}
+
+    #########################################################################
+    #### protected methods and variables
+
+    #### textwidget
+    # Return the name of the type of text widget to use.
+    method textwidget {} {return HTMLText}
+}
+
+###################################################################
+#
+body ::tycho::HTML::constructor {args} {
+
+    # A frame for accelerator buttons
+    itk_component add acc {
+	frame $itk_component(childsite).acc
+    } {
+	keep -background -cursor
+    }
+    pack $itk_component(acc) -expand yes -fill x
+
+    # The text widget.
+    itk_component add text {
+	[textwidget] $itk_component(childsite).text
+    } {
+	# FIXME: add all pertinent options from EditText
+	keep -text -readonly -font
+    }
+    pack $itk_component(text) -expand yes -fill both
+
+    # A button to move back in the stack
+    itk_component add back {
+	button $itk_component(acc).back \
+		-text Back \
+		-command "$itk_component(text) back"
+    } {
+	keep -background -font -activebackground -cursor \
+		-highlightthickness -activeforeground \
+		-foreground -highlightcolor -highlightbackground
+    }
+    pack $itk_component(back) -side left
+
+    eval itk_initialize $args
+    eval configure $args
+
+    # Modify the menu commands appropriately.
+    $itk_component(fileMenu) entryconfigure 2 \
+	    -label "Open Source" \
+	    -underline 1 \
+	    -command "$this openSource"
+
+    $itk_component(fileMenu) entryconfigure 6 \
+	    -label "Reload" \
+	    -underline 1 \
+	    -command "$this reload"
+
+    if {$itk_option(-file) != "NoName"} {
+	# In order to get reasonably interactive response, this is delayed.
+	# Not doing this seems to send the program into an infinite wait.
+	after 1 $itk_component(text) readFile $itk_option(-file)
+    }
+
+    $itk_component(text) configure -readonly 1
+}
+
+#####################################################################
+#### openSource
+# Clear the current text and reload from the source file.
+# FIXME: This should be modified to open a context-sensitive editor
+# for HTML.
+#
+body ::tycho::HTML::openSource {} {
+    set win [autoName .edit]
+    uplevel #0 "::tycho::Edit $win -file $file"
+    wm deiconify $win
+    raise $win
+}
+
+#####################################################################
+#### reload
+# Clear the current text and reload from the source file.
+#
+body ::tycho::HTML::reload {} {
+    HMreset_win [$itk_component(text) textWinName]
+    $itk_component(text) deleteRange 1.0 end
+    $itk_component(text) readFile $file
+}
+
+#####################################################################
+#### seename
+# Follow a hypertext link.  If the hypertext link is in this same file,
+# defer to the HTMLText widget.  Otherwise, check to see whether
+# the other referenced file is an HTML file.  If it is, read the other
+# file into this same text widget.  Otherwise, open a new window.
+#
+body ::tycho::HTML::seename {name} {
+    if {![regexp {([^#]*)#(.+)} $name dummy fileref fragment]} {
+	set fileref $name
+	set fragment {}
+    }
+
+    if {$fileref == {} && $fragment != {}} {
+	# A local reference within the same file
+	$itk_component(text) seename $fragment
+	return
+    }
+    # Got a reference to a file.
+    # If the filename is not absolute, use the current file directory
+    # as a prefix.
+    if {![string match /* $fileref]} {
+	set fileref [$itk_component(text) lastDirectory]/$file
+    }
+
+    # If the file is another html file, we open it in this same window.
+    # Otherwise, we open a new window.
+    if {[file extension $fileref] == {.html}} {
+	configure -file $fileref
+	switchfile $fileref
+    } {
+	::tycho::File::openContext $fileref
+    }
+}
+
+#####################################################################
+#### switchfile
+# Switch to displaying another HTML file.
+#
+body ::tycho::HTML::switchfile {filename} {
+
+    # Remove the old file from the list of open files.
+    if [info exists filesOpen($file)] {
+	catch {unset filesOpen($file)}
+    }
+    # Record the new filename in various places.
+    set file $filename
+    set filesOpen($file) $prefix
+    set previousfile $file
+    wm iconname $prefix [file tail $file]
+
+    # Render the HTML file.
+    $itk_component(text) readFile $file
+}

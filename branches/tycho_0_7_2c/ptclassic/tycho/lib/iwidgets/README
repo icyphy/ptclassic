@@ -1,0 +1,16 @@
+README: $TYCHO/lib/iwidgets
+
+This is a partial copy of the [incr Widgets] 3.0.0
+release. The current latest versions from Mark Ulferts
+are at $TYCHO/lib/iwidgets3.0.0. Files in this tree are
+those that are actively being developed by Tycho
+developers. By the time of the full 3.0.0 release,
+the full set of 3.0.0 files will have migrated into
+this tree.
+
+If you need to modify a prerelease 3.0.0 widget and it
+isn't in this tree, copy it from iwidgets3.0.0 and
+put it under SCCS control. Please let johnr know so he
+can keep the release up to date.
+
+JohnR, Aug 15, 1997

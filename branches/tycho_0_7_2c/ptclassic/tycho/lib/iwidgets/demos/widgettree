@@ -1,0 +1,90 @@
+#!/bin/sh
+# ----------------------------------------------------------------------
+#  DEMO: Widget tree in [incr Widgets]
+# $Id$
+# ----------------------------------------------------------------------
+#\
+exec itkwish -f "$0" ${1+"$@"}
+
+source widgettree.itk
+
+# The first widget is a simple expanding widget that doesn't
+# do anything other than demonstrate how the Widgettree
+# is dynamically constructed. The tree is packed into a
+# scrolledframe widget, as it should be in order to prevent
+# nasty window resizing as the widget is used.
+
+proc expand {widget tag} {
+    puts "Adding to $tag"
+    $widget add node $tag.foo -text $tag.foo
+    $widget add node $tag.bar -text $tag.bar
+}
+
+catch {delete object .f}
+iwidgets::scrolledframe .f \
+        -hscrollmode dynamic -vscrollmode dynamic \
+        -height 200 -width 150
+
+set w [.f childsite].
+iwidgets::widgettree $w -createcommand "expand $w"
+$w add node foo -text foo
+$w add node bar -text bar
+grid $w -sticky nw
+
+pack .f -fill both -expand on
+
+# The second widget illustrates how arbitrary widgets
+# can be included as leaves of the tree. The expand
+# command is set to call a proc that creates a preference
+# setting panel.
+
+proc mkPref {win tag} {
+    set path [$win path $tag]
+
+    switch -exact $tag {
+	"size" {
+	    radiobox $path
+
+	    $path add small -text "Small"
+	    $path add med -text "Medium"
+	    $path add large -text "Large"
+	    $path add xlarge -text "Biggie"
+
+	    $path select med
+	    
+	    $win place size $path
+	}
+	"address" {
+	    frame $path
+
+	    entryfield $path.name -labeltext "Name"
+	    grid $path.name -sticky e
+	    entryfield $path.addr -labeltext "Street"
+	    grid $path.addr -sticky e
+	    entryfield $path.addr2 -labeltext "City, State"
+	    grid $path.addr2 -sticky e
+	    entryfield $path.email -labeltext "E-mail"
+	    grid $path.email -sticky e
+
+	    $win place address $path
+	}
+    }
+}
+
+catch {delete object .g}
+iwidgets::scrolledframe .g \
+        -hscrollmode dynamic -vscrollmode dynamic \
+        -height 200 -width 150
+
+set v [.g childsite].
+iwidgets::widgettree $v -createcommand "mkPref $v"
+$v add node size -text Size:
+$v add node address -text Address:
+grid $v -sticky nw
+
+pack .g -fill both -expand on
+
+
+
+wm deiconify .
+

@@ -1,0 +1,206 @@
+# A directed acyclic graph (DAG) data structure.
+#
+# @Author: Edward A. Lee
+#
+# @Version: $Id$
+#
+# @Copyright (c) 1995-%Q% The Regents of the University of California.
+# All rights reserved.
+#
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the above
+# copyright notice and the following two paragraphs appear in all copies
+# of this software.
+#
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+#
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+#                                        PT_COPYRIGHT_VERSION_2
+#                                        COPYRIGHTENDKEY
+#######################################################################
+
+
+#######################################################################
+#### DirectedAcyclicGraph
+# A directed acyclic graph is a collection of nodes that may have other
+# nodes as parents or children, but where cycles are not permitted.
+# This class is derived from the more general <code>Graph</code> class,
+# which permits cycles. A key difference is that a
+# <code>DirectedAcyclicGraph</code> must be built in a certain order,
+# so that parents are always added before their children. Thus, the
+# correctness of the graph is checked as it is built. This class
+# provides methods to build, browse, and edit such a data structure.
+# Data stored on the nodes of the graph are arbitrary Tcl strings. A
+# method is provided to encode the data structure as a list, which can,
+# for example, be written to a file. A method is also provided to
+# convert this list back into a directed acyclic graph.
+# <p>
+# Here is an example of how to use the DirectedAcyclicGraph:
+# <tcl><pre>
+#    catch {delete object foo}
+#    ::tycho::DirectedAcyclicGraph foo
+#    foo add a aa
+#    foo add c cc a
+#    foo add d dd a
+#    foo add e ee {a d} c
+#    ::tycho::post [foo describe]
+# </pre></tcl>
+# The description that is posted in the last line will be:
+# {{a aa {} {c d e}} {d dd a {e c}} {e ee {a d} c} {e ee {a d} c}
+# {c cc {a d} {}}}. This is a list of nodes in the graph, toplogically
+# sorted. Each node is a list of four items, the name, contents,
+# parents, and children of the node.
+#
+class ::tycho::DirectedAcyclicGraph {
+    inherit ::tycho::Graph
+
+    constructor {args} {}
+    destructor {}
+    
+    ###################################################################
+    ####                         public methods                    ####
+
+    # Add a node to the graph.
+    method add {nodename contents {parents {}} {children {}}}
+
+    # Add an arc between existing nodes, if it does not already exist.
+    method addArc {parent child}
+
+    # Return a list that describes the graph.
+    method describe {}
+
+    # Return a list that describes the subgraph with the given roots.
+    method describeSubgraph {roots}
+
+    # Initialize the graph from a description
+    method init {description}
+}
+
+    ###################################################################
+    ###################################################################
+    ####                      public methods                       ####
+
+#######################################################################
+#### add
+# Add a node to the graph with the specified parents and children (if
+# any). It is an error if the parents do not exist. It is also an error
+# if the specified node name already exists in the graph.
+#
+body ::tycho::DirectedAcyclicGraph::add \
+        {nodename contents {parents {}} {children {}}} {
+    foreach parent $parents {
+        verify $parent
+    }
+    ::tycho::Graph::add $nodename $contents $parents $children
+}
+
+#######################################################################
+#### addArc
+# Add an arc between existing nodes, if it doesn't already exist.
+# If it does exist, ignore.
+#
+body ::tycho::DirectedAcyclicGraph::addArc {parent child} {
+    verify $parent
+    verify $child
+    if {[lsearch -exact $childrennames($parent) $child] < 0} {
+        # The arc does not exist.
+        # First verify that adding this arc will not create a cycle.
+        foreach node [describeSubgraph [list $child]] {
+            set name [lindex $node 0]
+            if {$name == $parent} {
+                error "Creating an arc between $parent and $child will result \
+                        in a directed loop, which is not allowed in a \
+                        directed acyclic graph."
+            }
+        }
+        # Add the arc.
+        lappend childrennames($parent) $child
+        lappend parentnames($child) $parent
+    }
+}
+
+#######################################################################
+#### describe
+# Return a list that describes the graph. The returned list contains
+# one element for each node in the graph, in such an order that parents
+# are always described before their children. Each node is described as
+# a list with four elements: the node name, the contents, the list of
+# parents, and the list of children.
+#
+body ::tycho::DirectedAcyclicGraph::describe {} {
+    return [describeSubgraph [roots]]
+}
+
+#######################################################################
+#### describeSubgraph
+# Return a list that describes the subgraph with the given roots. This
+# includes the roots themselves and all descendants. The returned list
+# contains one element for each node in the subgraph, beginning with
+# the roots, sorted alphabetically, then children of the first root,
+# followed by children of the second root, etc. The descendants are
+# listed in a topologically sorted order, meaning that parents are
+# always described before their children. Each node is described as a
+# list with four elements: the node name, the contents, the list of
+# parents, and the list of children. The parents and children lists are
+# sorted alphabetically. Note that this method is not very efficient,
+# so for performance sensitive applications, more direct scanning
+# of the graph may be more appropriate.
+#
+body ::tycho::DirectedAcyclicGraph::describeSubgraph {roots} {
+    # Keep track of our current position in the result list.
+    set pos 0
+    foreach node [lsort $roots] {
+        lappend result [list \
+                $node \
+                $contentsstring($node) \
+                $parentnames($node) \
+                $childrennames($node)]
+        set done($node) $pos
+        incr pos
+    }
+    set idx 0
+    while {$idx < [llength $result]} {
+        foreach child [lsort [lindex [lindex $result $idx] 3]] {
+            if [info exists done($child)] {
+                # The child has been previously listed.  That may have
+                # been premature.  Remove it.
+                set where $done($child)
+                set result [lreplace $result $where $where]
+                incr pos -1
+            }
+            lappend result [list \
+                    $child \
+                    $contentsstring($child) \
+                    [lsort $parentnames($child)] \
+                    [lsort $childrennames($child)]]
+            set done($child) $pos
+            incr pos
+        }
+        incr idx
+    }
+    return $result
+}
+
+#######################################################################
+#### init
+# Initialize the graph from a description. The format of the
+# description should be compatible with that produced by the
+# <code>describe</code> method.
+#
+body ::tycho::DirectedAcyclicGraph::init {description} {
+    clear
+    foreach node $description {
+        eval add $node
+    }
+}

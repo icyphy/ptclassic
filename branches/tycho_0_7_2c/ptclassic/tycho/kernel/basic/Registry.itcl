@@ -1,0 +1,156 @@
+#########################################################################
+# @Version: $Id$
+# @Author: H. John Reekie
+#
+# @Copyright (c) 1997 The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the
+# above copyright notice and the following two paragraphs appear in all
+# copies of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+# 						PT_COPYRIGHT_VERSION_2
+# 						COPYRIGHTENDKEY
+##########################################################################
+
+
+#####################################################################
+#### openContext
+# Open a file based on its extension, name, or header.
+# If an editor has been registered for the file or directory, use it to
+# open the file or directory. Otherwise, if it is a file, open a plain
+# text editor and return the name of the editor object. If a window
+# already exists editing this file, simply raise it instead. New
+# windows are always opened at the global scope. File names are
+# expanded using <code>::tycho::expandPath</code>, making them absolute
+# and unique.
+#
+body ::tycho::openContext {filename args} {
+    ::tycho::File::openContext $filename
+}
+
+##########################################################################
+## Registry
+#
+# The Registry class implements Tycho's global name service. It is
+# an uninstantiable class -- in other words, a collection of
+# procedures. Some of the services it provides have a more convenient
+# interface provided by <a href="Registry_rel.html">non-class
+# procedures</a>, also defined in this source file.
+#
+# This class draws together a number of services that are required
+# by many of the objects that Tycho creates: registering opened
+# files and corresponding widgets, managing global information
+# in menubars (such as the Help menu), and providing widgets
+# with the support needed to open files correctly.
+#
+# Currently this class has very little functionality, and mainly
+# functions as a place-holder.
+#
+class ::tycho::Registry {
+    inherit ::tycho::Uninstantiable
+
+    ###################################################################
+    ####                            public procs                   ####
+
+    # Open a TIM model file and return the model
+    proc openModel {path}
+
+    # Link to an open model
+    proc linkModel {path key}
+
+    # Unlink from an open model
+    proc unlinkModel {path key}
+
+    ###################################################################
+    ####                           protected procs                 ####
+
+    ###################################################################
+    ####                         protected variables               ####
+
+    # The array of open models 
+    protected common _openModels
+
+    # The array of linked clients 
+    protected common _linkedClients
+}
+
+##########################################################################
+## openModel
+#
+# Open a TIM model file and return the model. If the model already
+# exists, just return it. The link count of the model is
+# not altered. The argument is the path to the model,
+# <i>relative to the TIM_PATH preference</i>. Clients should be sure
+# to perform a linkModel if this is the first time they have
+# accessed this model.
+#
+body ::tycho::Registry::openModel {path} {
+    if [::info exists _openModels($path)] {
+        # Already open, so return
+        return $_openModels($path)
+    } else {
+        # Not open, so open it....
+        foreach tp [::tycho::preference get config TIM_PATH] {
+            set fullpath [::tycho::url join $tp $path]
+            if [::tycho::resource exists $fullpath] {
+                # OK, found the file, so read the class name
+                # ?????
+
+            }
+        }
+    }
+}
+
+##########################################################################
+## linkModel
+#
+# Link a client to the model. A model remains in memory for as
+# long as there are clients with links to it. The _key_ argument
+# is used only to unlink from the model later -- usually, you can
+# use the name of the calling object. This method raises an error
+# if the key has already been used to link to the model. Linking
+# and unlinking uses keys because it's likely to be more reliable
+# than a simple link count.
+#
+body ::tycho::Registry::linkModel {path key} {
+    if ![::info exists _openModels($path)] {
+        error "Model $path is not open"
+    }
+    if [::info exists _linkedClients($path,$key)] {
+        error "Model $path is already linked by $key"
+    }
+    set _linkedClients($path,$key) 1
+}
+
+##########################################################################
+## unlinkModel
+#
+# Unlink from a model. The key must be a key that was previously
+# used to link to the model, or an error is raised.
+#
+body ::tycho::Registry::unlinkModel {path key} {
+    if ![::info exists _linkedClients($path,$key)] {
+        error "Model $path is not linked by $key"
+    }
+    unset _linkedClients($path,$key)
+    if { [array names _linkedClients($path,*)] == "" } {
+        delete object $_openModels($path)
+        unset openModels($path)
+    }
+}

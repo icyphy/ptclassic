@@ -1,0 +1,1080 @@
+# Generate an IDoc file (a representation of a ::tycho::Class) from java source.
+#
+# @Author: Cliff Cordeiro
+#
+# @Contributor: Christopher Hylands
+#
+# @Version: %W %Q
+#
+# @Copyright (c) 1996-1997 The Regents of the University of California.
+# All rights reserved.
+#
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the above
+# copyright notice and the following two paragraphs appear in all copies
+# of this software.
+#
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+#
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+#                                        PT_COPYRIGHT_VERSION_2
+#                                        COPYRIGHTENDKEY
+#######################################################################
+
+#######################################################################
+#### JavaDocSys
+# Parses Java code, creates ::tycho::Class models for each class found, 
+# and outputs those to the proper files. The most convenient interface
+# is from ::tycho::IDocSys::generateIDoc which will also generate Itcl
+# documentation if necessary.
+#
+class ::tycho::JavaDocSys {
+    inherit ::tycho::IDocSys
+
+    constructor {args} {}
+    destructor {}
+    
+    ###################################################################
+    ####                         public methods                    ####
+
+    # Read the current file, call parseData
+    method readFile {filename}
+
+    # Output an IDoc representation of the loaded classes.
+    method generateSingleFileIDoc {filename}
+
+    ###################################################################
+    ####                      public procs                         ####
+
+    # Return a list of all the classes defined in the given source file.
+    public proc getClassesInSource {filename}
+
+    # Check if the given file is newer than its related documentation.
+    public proc modCheck {filename}
+
+    ###################################################################
+    ####                   protected methods                       ####
+
+    # Format a description properly
+    protected method formatDesc {comment}
+
+    # Format an explanation properly (in HTML)
+    protected method formatExpl {comment {parsetags 1}}
+
+    ###################################################################
+    ####                   private methods                         ####
+
+    # Parse the data for a single file, creating and modifying classes as needed
+    private method parseData {data}
+
+    # Parse the data within a class definition
+    private method parseClass {class body}
+
+    # Parse the extends/implements portion of the class definition
+    private method parseExtends {class extends}
+
+    # Parse the class modifiers (public/non-public, final, etc.)
+    private method parseModifiers {class modifiers}
+
+    # Add the class comment by formatting it into HTML.
+    private method addClassComment {class expl}
+
+    # Format and add the arguments in a form the class model understands
+    private method addArgs {class entityName arguments}
+
+    # Add a variable to the class model
+    private method addVariable {class protection modifiers others comment}
+
+    # Add a method to the class model
+    private method addMethod {class protection modifiers others comment} 
+
+    # Split a tcl list of a Java method/variable declaration into Java tokens
+    private method tokenize {list}
+
+    # Return a signature for this method
+    private method uniqueName {methodName arguments}
+
+    ###################################################################
+    ####                   private variables                       ####
+
+    # Keywords that can appear in a class definition
+    private common keywords "# public private protected static synchronized \
+            abstract final native transient volatile"
+
+}
+
+#######################################################################
+#### constructor
+#
+body ::tycho::JavaDocSys::constructor {args} {
+}
+
+    ###################################################################
+    ###################################################################
+    ####                      public methods                       ####
+
+#####################################################################
+#### readFile 
+# Read in a file line by line, identify comments, merge multi-line comments
+# into one line, bracket protect the comment contents, and append to a 
+# variable. Then parse that variable to distill class information.
+#
+body ::tycho::JavaDocSys::readFile {filename} {
+    # Initialize single file data
+    set author ""
+    set contributor ""
+    set version ""
+    set copyright ""
+
+    catch {unset myClass}
+
+    # check extension (only java supported here)
+    set ext [file extension $filename]
+    switch $ext {
+        .java {
+            set language Java
+        }
+        default {
+            error "::tycho::JavaDocSys does not support $ext files"
+        }
+    }
+
+    set inDocComment 0
+    set inComment 0
+    set sourceFile $filename
+    set currentComment ""
+    set inEscapedComments ""
+    set fd [open $filename]
+    while {![eof $fd]} {
+        # Keep the interface live.
+        tydocUpdate $this
+
+        gets $fd lineIn
+
+        if {!$inComment} {
+            # Remove // comments
+            if [ regexp {^(.*)\/\/(.*)$} $lineIn dmy code comment] {
+                if {[string trim $code " \t"] == ""} {
+                    # Comment begins the line
+                    continue
+                } {
+                    # Comment follows code
+                    set lineIn $code
+                }
+            }
+
+            # Remove line ending and single line /* */ comments
+            if [ regexp {^(.*)\/\*[^*](.*)\*\/(.*)$} \
+                    $lineIn d code comment code2] {
+                # NOTE: only removes a single comment per line
+                append code $code2
+                if {[string trim $code " \t"] == ""} {
+                    # No code
+                    continue
+                } {
+                    # Code and comments
+                    set lineIn $code
+                }
+            }
+            
+            # Check for multi-line comments
+            if [ regexp {^[	 ]*(\/\*\*)(.*)$} $lineIn dmy dmy2 comment] {
+                # Doc comment
+                set inDocComment 1
+                set inComment 1
+                set lineIn $comment
+            } elseif [ regexp {^[	 ]*(\/\*)(.*)$} \
+                    $lineIn dmy dmy2 comment] {
+                # C style comment
+                set inComment 1
+                set lineIn $comment
+            }
+        }
+        
+        if {$inDocComment} {
+            if [ regexp {^(.*)(\*\/)(.*)$} $lineIn dmy comment dmy2 code] {
+                # End of doc comment
+                append commentText [string trimleft $comment "* \t"] " "
+                append inEscapedComments "# \{$commentText\} \n"
+                set commentText ""
+                set lineIn $code
+                set inComment 0
+                set inDocComment 0
+            } {
+                # Doc comment continues
+                append commentText [string trimleft $lineIn "* \t"] "\n"
+                continue
+            }
+        } {
+            if {$inComment} {
+                if [ regexp {^(.*)(\*\/)(.*)$} $lineIn dmy comment dmy2 code] {
+                    # End of C style comment
+                    set lineIn $code
+                    set inComment 0
+                } {
+                    # C style comment continues
+                    continue
+                }
+            }
+        }
+        
+        if [ regexp {^(.*)[ ]*class[ ]+([A-Za-z_]+[A-Za-z0-9_]*)[ ]+(.*)\{$} \
+                $lineIn dmy mod name code] {
+            # Reformat class definitions:
+            # before: modifier ?modifier? class name extends impl... {code}
+            # after:  class name {modifier ?modifier} {extends impl...} {code}
+            set lineIn "class $name \{$mod\} \{$code\} \{"
+        }
+
+        append inEscapedComments "$lineIn \n"
+    }    
+    close $fd
+    parseData $inEscapedComments
+}
+
+#####################################################################
+#### generateSingleFileIDoc
+# Output an IDoc (::tycho::Class) representation of the loaded classes.
+#
+body ::tycho::JavaDocSys::generateSingleFileIDoc {filename} {
+    # output class model data
+    foreach class [array names myClass] {
+        # puts $class
+        # puts [$myClass($class) describe]
+        if {$class != "related"} {
+            set docFile [info namespace tail $class].idoc
+            ::tycho::rmIfNotWritable $docFile
+            set fd [open $docFile "w"]
+            $myClass($class) write $fd
+            close $fd
+            delete object $myClass($class)
+        } else {
+            if {$relatedModified} {
+                # NOTE: goes by the filename, not the class name, for
+                # related documentation
+                if {[array size myClass] == 1} {
+                    # Not related, ONLY docs
+                    set relFile [file root $filename].idoc
+                } else {
+                    # Related file
+                    set relFile [file root $filename]_rel.idoc
+                }
+                ::tycho::rmIfNotWritable $relFile
+                set fd [open $relFile "w"]
+                $myClass(related) write $fd
+                close $fd
+            }
+            delete object $myClass(related)
+        }
+    }
+}
+
+    ###################################################################
+    ###################################################################
+    ####                      public procedures                    ####
+
+#####################################################################
+#### getClassesInSource
+# Quickly scan the source file for the classes which are defined within.
+# Not implemented for Java.
+#
+body ::tycho::JavaDocSys::getClassesInSource {filename} {
+    error "Not implemented in Java."
+}
+
+#####################################################################
+#### modCheck
+# Checks if the current file is newer than it's associated documentation.
+# And returns 1 if so.
+#
+# This requires searching for all classes defined within the file and
+# checking if those class's documents are older. JavaDocSys does not
+# support inner classes (yet), so only checks if the file is newer than it's 
+# top-level class' documentation.
+#
+# For non-java files, it silently returns 1 because it can't tell.
+# NOTE: should normally be called through its parent, which will call the
+# appropriate sibling for the file extension.
+#
+body ::tycho::JavaDocSys::modCheck {filename} {
+    set sourceTime [file mtime $filename]
+    set extension [file extension $filename]
+    
+    if {$extension != ".java"} {
+        # Can't check other types of files
+        return 1
+    }
+    # Takes advantage of Java's requirement that the classname and filename
+    # be identical
+    set docFile [file join doc codeDoc [file root $filename].idoc]
+        
+    if ![file exists $docFile] {
+        # There is no documentation.
+        return 1
+    }
+    if {$sourceTime > [file mtime $docFile]} {
+        # The source is newer.
+        return 1
+    }
+    # Not modified
+    return 0   
+}
+
+    ###################################################################
+    ###################################################################
+    ####                     protected methods                     ####
+
+#####################################################################
+#### formatDesc 
+# Format the description appropriately by removing carriage returns
+# and returning a filler value if no description is found. (The IDoc
+# viewer requires a description.)
+#
+body ::tycho::JavaDocSys::formatDesc {comment} {
+    return [shortDesc $comment]
+}
+
+#####################################################################
+#### formatExpl
+# Format the explanation appropriately by substituting HTML tags for
+# comment conventions such as _underlines_ and *asterisks*. Include a
+# &lt;p&gt; tag for every empty line in a comment. Surround proc and
+# method names with &lt;code&gt; tags.
+#
+body ::tycho::JavaDocSys::formatExpl {comment {parsetags 1}} {
+    if {"$comment" == "\n"} {
+        return {}
+    }
+
+    # Knows: return, param, exception
+    # Ignores: since, deprecated FIXME: see
+    if {$parsetags} {
+        # Parse line by line
+        set desc ""
+        set param ""
+        set return ""
+        set exception ""
+        set docTag desc
+        set commList [split $comment "\n"]
+        
+        foreach commLine $commList {
+            if [regexp {^[ 	]*@([A-Za-z]+):*[ 	]+(.*)} \
+                    $commLine dummy docTag docValue] {
+                set commLine $docValue
+                set docTag [formatTag $docTag]
+                append $docTag "\n"
+                # puts "ct: $docTag, cl: $docValue"
+            }
+            if {$docTag == "param" || $docTag == "return"\
+                    || $docTag == "exception"} {
+                append $docTag $commLine " "
+            } else {
+                append $docTag $commLine "\n"
+            }
+        }
+
+        set comment $desc
+
+        # Parameter comments
+        if {$param != {}} {
+            set paramList [split $param "\n"]
+            append comment "\n<b>Parameters</b><ul>\n"
+            foreach par $paramList {
+                if {$par != {}} {
+                    set parname [lindex $par 0]
+                    append comment "<li><i>$parname</i> [lreplace $par 0 0]\n"
+                }
+            }
+            append comment "</ul>\n"
+        }
+
+        # Exception comments
+        if {$exception != {}} {
+            set throwList [split $exception "\n"]
+            append comment "\n<b>Throws</b><ul>\n"
+            foreach throw $throwList {
+                if {$throw != {}} {
+                    set throwname [lindex $throw 0]
+                    append comment \
+                            "<li><i>$throwname</i> [lreplace $throw 0 0]\n"
+                }
+            }
+            append comment "</ul>\n"
+        }
+        
+        # Return comment (only one?)
+        if {$return != {}} {
+            set return [string trimleft $return " \t\n"]
+            append comment "\n<b>Returns</b> $return\n"
+        }
+    }
+
+    return [chain $comment]
+}
+
+    ###################################################################
+    ###################################################################
+    ####                      private methods                      ####
+
+#####################################################################
+#### parseData
+# Expects a modified source file, with adjacent doc comments all on one line,
+# useless comments removed. This data is then gone through as a list,
+# looking for toplevel keywords, such as "class" "package" and 
+# "import". These are parsed according to Java's syntax and information
+# of note is added to the class model.
+#
+# Comments are saved until the next keyword and are assumed to belong to
+# that entity. The class comment, then, must be the comment directly
+# preceding the class definition, ignoring initialization code that 
+# JavaDocSys does not recognize.
+#
+# NOTE: @ tags are only recognized in the class comment, the comment 
+# that appears before the class definition.
+#
+body ::tycho::JavaDocSys::parseData {data} {
+    set inClass 0
+    set inComment 0
+    set inPackage 0
+    set inImport 0
+    set import ""
+    set firstComment {}
+    foreach construct $data {
+        # Keep the interface live.
+        tydocUpdate $this
+
+        if {$inComment} {
+            # This is the class comment. Save it.
+            # FIXME: assumes there is only one top-level doc comment
+            set firstComment $construct
+            set inComment 0
+            continue
+        }
+        if {$construct == "\n"} {
+            # Ignore empty lines outside of comments
+            continue
+        }
+        if {$inPackage} {
+            # This is part of a package statement.
+            # package packagename;
+            set package [string trimright $construct " \t;"]
+            set inPackage 0
+            continue
+        }
+        if {$inImport} {
+            # This is part of an import statement.
+            # import package.class | import package.*
+            append import [string trimright $construct " \t;"]
+            set inImport 0
+            continue
+        }
+        if {$inClass} {
+            # This is part of a class statement. 
+            # class name {modifiers} {extends,implements} {definition}
+            if {$inClass == 1} {
+                set className $construct
+                set inClass 2
+            } elseif {$inClass == 2} {
+                set modifiers $construct
+                set inClass 3
+            } elseif {$inClass == 3} {
+                set extends $construct
+                set inClass 4
+            } else {
+                parseClass $className $construct
+                parseModifiers $className $modifiers
+                parseExtends $className $extends
+                addClassComment $className $firstComment
+                # FIXME: what to do with import?
+                set inClass 0
+            }
+            continue
+        }
+        if {[string index $construct 0] == "#"} {
+            # A comment follows.
+            set inComment 1
+            continue
+        }
+        if {$construct == "package"} {
+            # A package name follows.
+            set inPackage 1
+            continue
+        }
+        if {$construct == "import"} {
+            # An import statement follows.
+            set inImport 1
+            continue
+        }
+        if {$construct == "class"} {
+            # A class follows.
+            set inClass 1
+            continue
+        } 
+        # puts "UNCLASSIFIED: $construct"
+    }
+}
+
+
+#####################################################################
+#### parseClass
+# This method works in much the same way as parseBody. It takes the 
+# contents of the class definition and looks for keywords. 
+# These are then parsed according to Java syntax, relevant
+# information added to the class model for this class. 
+#
+# Because there may be multiple classes in one Java file, each class
+# model is stored in an array which is indexed by the name of the class
+# the class models are created in this procedure while parsing the class
+# definition.
+#
+# NOTE: Actually, this does not yet support Java 1.1 Inner classes.
+#
+body ::tycho::JavaDocSys::parseClass {class body} {
+    set myClass($class) [::tycho::Class [::tycho::autoName class]]
+    $myClass($class) modelconfigure -language $language
+    $myClass($class) modelconfigure -name $class
+    $myClass($class) modelconfigure -source $sourceFile
+    $myClass($class) modelconfigure -package $package
+
+    set lastComment {}
+    set lastProtection {}
+    set default {}
+    set modifiers {}
+    set others {}
+    set inComment 0
+    set inVariable 0
+    set inMethod 0
+    set inStatic 0
+    set inSynchronized 0
+
+    # To assure every item is seen
+    lappend body # #
+
+    # Parse each item
+    foreach construct $body {
+        # Keep the interface live.
+        tydocUpdate $this
+
+        # Ignore empty lines (is necessary?)
+        if {$construct == "\n"} {
+            continue
+        }
+        # First, check if we know what we're doing.
+        if {$inComment} {
+            # This is a comment. Save it.
+            set lastComment "$construct"
+            set inComment 0
+            continue
+        }
+        if {$inStatic} {
+            set construct [string trimright $construct " \t\n"]
+            set inStatic 0
+            if {[llength $construct] == 1} {
+                # Heuristic says: not a static initializer
+                lappend modifiers "static"
+                # Keep parsing
+            } {
+                # Heuristic says: a static initializer, ignore
+                continue
+            }
+        }
+        if {$inSynchronized} {
+            set construct [string trimright $construct " \t\n"]
+            set inSynchronized 0
+            if {[llength $construct] == 1} {
+                # Heuristic says: a synchronized method
+                lappend modifiers "synchronized" 
+                # Keep parsing
+            } {
+                # Heuristic says: a synchronized block, ignore
+                continue
+            }
+        }
+        if {$inVariable} {
+            # Default protection is package
+            if {$lastProtection == {}} {
+                set lastProtection package
+            }
+            addVariable $class $lastProtection $modifiers $others $lastComment
+            set inVariable 0
+            set lastProtection {}
+            set modifiers {}
+            set others {}
+            set lastComment {}
+            # present construct is valid, continue
+        }
+        if {$inMethod} {
+            # Default protection is package
+            if {$lastProtection == {}} {
+                set lastProtection package
+            }
+            addMethod $class $lastProtection $modifiers $others $lastComment
+            set inMethod 0
+            set lastProtection {}
+            set modifiers {}
+            set others {}
+            set lastComment {}
+            # present construct is valid, continue
+        }
+        # Below, parse keywords
+        switch -- $construct {
+            "#" {
+                set inComment 1
+            }
+            "private" {
+                set lastProtection private
+            }
+            "protected" {
+                set lastProtection protected
+            }
+            "public" {
+                set lastProtection public
+            }
+            "static" {
+                set inStatic 1
+            }
+            "synchronized" {
+                set inSynchronized 1
+            }
+            "abstract" {
+                lappend modifiers "abstract"
+            }
+            "final" {
+                lappend modifiers "final"
+            }
+            "native" {
+                lappend modifiers "native"
+            }
+            "transient" {
+                lappend modifiers "transient"
+            }
+            "volatile" {
+                lappend modifiers "volatile"
+            }
+            default {
+                # Check if it is an end of command (;) or block {}
+                set construct [string trimright $construct " \t\n"]
+                set lastchar [string range $construct end end]
+
+                if {$lastchar == ";" || $lastchar == "\}" || $construct == {}} {
+                    if {[lsearch $modifiers "native"] != -1 \
+                            || [lsearch $modifiers "abstract"] != -1} {
+                        # It's a method with no body.
+                        lappend others $construct
+                        set inMethod 1
+                    } elseif ![regexp {^(.*)[ 	]+(.*)$} $construct] {
+                        # Heuristic says: it's a variable
+                        lappend others $construct
+                        set inVariable 1
+                    } {
+                        # Heuristic says: it's a method body, ignore it
+                        set inMethod 1
+                    }
+                } {
+                    # Just a word, figure out what it is at the end.
+                    lappend others $construct
+                }
+            }
+        }
+    }
+}
+
+#####################################################################
+#### parseExtends
+# Parse the extends and implements clause of a Java class definition.
+# Extends denotes a parent which supplies an implementation, implements
+# denotes parents which supply an interface.
+#
+body ::tycho::JavaDocSys::parseExtends {class extends} {
+    set classModel $myClass($class)
+
+    if [regexp {^[ ]*extends[ ]+([A-Za-z_]+[A-Za-z0-9_.]*)[ ]+(.*)$} \
+            $extends dmy parent other] {
+        # Extends a class
+        $classModel parent $parent -inheritance implementation
+        set extends [string trimleft $other " \t"]
+    }
+    if [regexp {^[ ]*implements[ ]+(.*)$} $extends dmy parents] {
+        # Implements a class
+        while {$parents != ""} {
+            if [regexp {^([A-Za-z_]+[A-Za-z0-9_.]*)[ ]*,[ ]*(.*)$} \
+                    $parents dmy parent left] {
+                # Pull out a parent interface
+                $classModel parent $parent -inheritance interface
+                set parents [string trimleft $left " \t"]
+            } {
+                # Last interface
+                regexp {^([A-Za-z_]+[A-Za-z0-9_.]*)[ ]*(.*)$} \
+                        $parents dmy parent left
+                if {$parent != ""} {
+                    $classModel parent $parent -inheritance interface
+                    set parents $left
+                } 
+                set extends $parents
+                set parents ""
+            }
+        }
+    }
+    if [regexp {^[ ]*throws[ ]+(.*)$} $extends dmy throws] {
+        # Throws an exception
+        set exceptions ""
+        while {$throws != ""} {
+            if [regexp {^([A-Za-z_]+[A-Za-z0-9_.]*)[ ]*,[ ]*(.*)$} \
+                    $throws dmy throw left] {
+                # Pull out an exception
+                lappend exceptions $throw
+                set throws [string trimleft $left " \t"]
+            } {
+                # Last exception
+                regexp {^([A-Za-z_]+[A-Za-z0-9_.]*)[ ]*(.*)$} \
+                        $throws dmy throw left
+                if {$throw != ""} {
+                    lappend exceptions $throw
+                    set throws $left
+                } 
+                set extends $throws
+                set throws ""
+            }
+        }
+        $classModel modelconfigure -exceptions $exceptions
+    }
+}
+
+#####################################################################
+#### parseModifiers
+# Parse the class modifiers and protection and add them to the class 
+# model. Examples of class modifiers are final and (?). FIXME: Does 
+# not support other types of classes (inner classes in Java 1.1). 
+#
+body ::tycho::JavaDocSys::parseModifiers {class modifiers} {
+    set classModel $myClass($class)
+    if [regexp {^(.*)[	 ]*public[ 	]*(.*)$} $modifiers dmy other other2] {
+        $classModel modelconfigure -protection public
+        set modifiers [string trimleft "$other $other2" " \t"]
+    } {
+        $classModel modelconfigure -protection package
+    }
+    $classModel modelconfigure -modifiers $modifiers
+}
+
+#####################################################################
+#### addClassComment
+# Add a class comment to the class model. 
+#
+# NOTE: What to do about see tags here?
+#
+body ::tycho::JavaDocSys::addClassComment {class expl} {
+    set classModel $myClass($class)
+    set expl [formatClassComment $expl]
+    $classModel annotation explanation "$expl"
+}
+
+#####################################################################
+#### addArgs
+# Add the arguments to a method or Constructor to its associated entity in
+# the class model. This involves reformatting from Java:
+# <code>(int num1, String ding)</code> to the class model's preferred
+# format: <code>parameter num1 -type int; parameter ding -type String</code>
+#
+body ::tycho::JavaDocSys::addArgs {class entityName arguments} {
+    set classModel $myClass($class)
+    set istype 1
+    set type ""
+    set name ""
+
+    # Remove parentheses
+    set lastarg [expr [llength $arguments] -2] 
+    set arguments [lrange $arguments 1 $lastarg]
+
+    # Add a comma to signal the end
+    append arguments " ,"
+    
+    foreach token $arguments {
+        if {$istype == 1} {
+            set type $token
+            set istype 0
+        } {
+            # Got the type, now check for [] and ,
+            if {$token == "\["} {
+                # part of the type
+                append type \[
+            } elseif {$token == "\]"} {
+                # part of the type
+                append type \]
+            } elseif {$token == ","} {
+                # next token is type
+                $classModel parameter $entityName $name -type $type
+                set type ""
+                set name ""
+                set istype 1
+            } else {
+                set name $token
+            }
+        }
+    }
+}
+
+#####################################################################
+#### addVariable 
+# Add a variable at the given protection, its associated description,
+# and its default (if any) to the class model for $class.
+#
+body ::tycho::JavaDocSys::addVariable {class protection modifiers\
+        others comment} {
+
+    # Check if is static
+    set static [lsearch -exact $modifiers "static"]
+    if {$static != -1} {
+        lreplace $modifiers $static $static
+        set scope "class"
+    } {
+        set scope "instance"
+    }
+
+    # Break into tokens, pull out known information
+    set others [tokenize $others]
+
+    set type [lindex $others 0]
+    set others [lreplace $others 0 0]
+
+    # Pull out brackets if it is an array type
+    while {[lindex $others 0] == "\["} {
+        append type {[]}
+        set others [lreplace $others 0 1]
+    }
+
+    set varName [lindex $others 0]
+    set others [lreplace $others 0 0]
+
+    # Pull out brackets if it is an array type (again)
+    while {[lindex $others 0] == "\["} {
+        append type {[]}
+        set others [lreplace $others 0 1]
+    }
+
+    if {$others != {}} {
+        # Assume there's an equals sign at index 0
+        if {[lindex $others end] != ";"} {
+            # The ; is munged to the last item
+            set last [lindex $others end]
+            set last [string trimright $last ";"]
+            set default [lreplace $others end end $last]
+            set default [lreplace $default 0 0]
+        } {
+            # The last item is a ;
+            set enddef [expr [llength $others] -2]
+            set default [lrange $others 1 $enddef]
+        }
+    }
+    
+    set classModel $myClass($class)
+    
+    # Create the variable entry
+    $classModel variable $varName -modifiers $modifiers -scope $scope \
+            -protection $protection -type $type -default $default
+
+    # Add the comments
+    set desc [formatDesc $comment]
+    set expl [formatExpl $comment]
+    $classModel annotation $varName.description $desc variable
+    if {$expl != {}} {
+        $classModel annotation $varName.explanation $expl variable
+    }
+}
+
+#####################################################################
+#### addMethod 
+# Add a method at the given protection, its arguments, and associated
+# description to the class model for $class.
+#
+body ::tycho::JavaDocSys::addMethod {class protection modifiers others comment} {    
+    set isConstructor 0
+    set exceptions {}
+
+    # Check if is static
+    set static [lsearch -exact $modifiers "static"]
+    if {$static != -1} {
+        lreplace $modifiers $static $static
+        set scope "class"
+    } {
+        set scope "instance"
+    }
+
+    # Break into tokens, pull out known information
+    set others [tokenize $others]
+
+    set type [lindex $others 0]
+    set others [lreplace $others 0 0]
+
+    # Pull out brackets if it is an array type
+    while {[lindex $others 0] == "\["} {
+        append type {[]}
+        set others [lreplace $others 0 1]
+    }
+
+    set methodName [lindex $others 0]
+    if {$methodName == "\("} {
+        # It's a constructor and has no type
+        set methodName $type
+        set isConstructor 1
+    } {
+        set others [lreplace $others 0 0]
+    }
+
+    # Pull out the arguments, including ( and )
+    set endparen [lsearch -exact $others ")"]
+    if {$endparen != -1} {
+        # There should always be an endparen
+        set arguments [lrange $others 0 $endparen]
+        set others [lreplace $others 0 $endparen]
+    } elseif {$debug} {
+        puts "Error in JavaDocSys::addMethod: no end parenthesis found."
+    }
+    
+    if {$others != {}} {
+        # Should be a "throws" at index 0
+        if {[lindex $others 0] == "throws"} {
+            set others [lreplace $others 0 0] 
+            while {$others != {}} {
+                lappend exceptions [lindex $others 0]
+                # Assume element 1 is a comma
+                set others [lreplace $others 0 1]
+            }
+        }
+    }
+    
+    set classModel $myClass($class)
+    set methodName [uniqueName $methodName $arguments]
+
+    set classModel $myClass($class)
+    set desc [formatDesc $comment]
+    set expl [formatExpl $comment]
+
+    if {$isConstructor} {
+        # Constructors are special
+        $classModel Constructor $methodName -protection $protection \
+                -modifiers $modifiers -exceptions $exceptions
+
+        # Add comments
+        $classModel annotation $methodName.description $desc Constructor
+        if {$expl != {}} {
+            $classModel annotation $methodName.explanation $expl Constructor
+        }
+    } elseif {$methodName == "finalize"} {
+        # So are destructors
+        $classModel Destructor $methodName -protection $protection \
+                -modifiers $modifiers -exceptions $exceptions
+
+        # Add comments
+        $classModel annotation $methodName.description $desc Destructor
+        if {$expl != {}} {
+            $classModel annotation $methodName.explanation $expl Destructor
+        }
+    } {
+        $classModel method $methodName -protection $protection -scope $scope \
+                -type $type -modifiers $modifiers -exceptions $exceptions
+
+        # Add comments
+        $classModel annotation $methodName.description $desc method
+        $classModel annotation $methodName.explanation $expl method
+    }
+    addArgs $class $methodName $arguments
+}
+
+#####################################################################
+#### tokenize
+# Turn a tcl list into a list of Java tokens. Basically, a list element
+# can either be an identifier followed by something else or a token
+# followed by something else. tokenize breaks up each element, then 
+# moves on to the next until all elements are broken into tokens.
+#
+body ::tycho::JavaDocSys::tokenize {list} {
+    set retval ""
+
+    # Remove extra braces so regexp works
+    foreach item $list {
+        append tlist " " $item
+    }
+    set list $tlist
+
+    while {$list != {}} {
+        # Pull of a token that's white space delimited
+        set ltoken [lindex $list 0]
+        set list [lreplace $list 0 0]
+        
+        while {$ltoken != {}} {
+            # Either identifier-something
+            if [regexp {^([A-Za-z_]+[A-Za-z0-9_.]*)(.*)$} \
+                    $ltoken dmy id remain] {
+                lappend retval $id
+                set ltoken $remain
+                # Or token-something
+            } elseif [regexp {^([][,()=;])(.*)$} \
+                    $ltoken dmy token remain] {
+                lappend retval $token
+                set ltoken $remain
+                # Or just a token
+            } elseif {$ltoken != {}} {
+                lappend retval $ltoken
+                set ltoken {}
+            }
+        }
+        
+    }
+    return $retval
+}
+
+#####################################################################
+#### uniqueName
+# Return a signature of the given method in the form: 
+# methodName(arg1type,arg2type,arg3type)
+# Substitutes <>s for brackets to avoid inconsistencies in the
+# string translation.
+#
+# Try:
+# <pre><tcl>string match {* b[] *} {a b[] c}</tcl></pre>
+#
+body ::tycho::JavaDocSys::uniqueName {methodName arguments} {
+    set type 1
+    
+    append retval $methodName "("
+    
+    # Remove parentheses
+    set lastarg [expr [llength $arguments] -2] 
+    set arguments [lrange $arguments 1 $lastarg] 
+    
+    foreach token $arguments {
+        if {$type == 1} {
+            append retval $token
+            set type 0
+        } {
+            # Got the type, now check for [] and ,
+            if {$token == "\["} {
+                # part of the type
+                append retval \<
+            } elseif {$token == "\]"} {
+                # part of the type
+                append retval \>
+            } elseif {$token == ","} {
+                # next token is type
+                append retval ","
+                set type 1
+            }
+        }
+    }
+
+    append retval ")"
+    
+    return $retval
+}

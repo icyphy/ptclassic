@@ -1,0 +1,25 @@
+#
+# $Id$
+#
+# The "stacktrace" master style-sheet
+#
+modelconfigure -label "Stack trace colors"
+modelconfigure -description {
+    Additional color settings for stack trace windows.
+}
+
+style default \
+	-label "Default"  {
+    
+    parameter commentColor forestGreen \
+	    -type color \
+	    -label "Comment highlight"
+
+    parameter errorColor red \
+	    -type color \
+	    -label "Error text highlight"
+
+    parameter titleColor black \
+	    -type color \
+	    -label "Title color"
+}

@@ -1,0 +1,175 @@
+##########################################################################
+# @Version: $Id$
+# @Author: H. John Reekie
+#
+# @Copyright (c) 1996 The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the above
+# copyright notice and the following two paragraphs appear in all copies
+# of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+#                                                         COPYRIGHTENDKEY
+##########################################################################
+
+
+#######################################################################
+#### AsLine
+#
+# A shape for lines.
+#
+class ::tycho::AsLine {
+    inherit ::tycho::Shape
+
+    ###################################################################
+    ####                         public procs                      ####
+
+    # Get one or more aspects of an item
+    proc aspect {id canvas slate args}
+
+    # Deform one or more aspects of an item
+    proc deform {id canvas slate x y args}
+
+    # Attach a set of grapples to an item
+    proc grapple {id canvas slate interactor args}
+
+    # Process a phase of an interaction sequence to deform an item
+    proc interact {id canvas slate mode x y args}
+
+    # Deform an aspect of a picture to absolute coordinates
+    proc reshape {id canvas slate x y aspect}
+
+
+    ###################################################################
+    ####                   private variables                       ####
+
+    # The aspects on which deformations etc are being performed.
+    private common aspect
+
+    # The ghost items
+    private common ghost
+
+    # Initial starting coordinates in interaction sequence
+    private common start
+
+    # Values of the aspects used during click-drag-release sequence.
+    private common west
+    private common north
+    private common east
+    private common south
+}
+
+
+#######################################################################
+#### aspect
+#
+# Return the value of an aspect. Valid aspects are "start,"
+# "end," "length," or <code>vertex-</code><i>n</i>, where _n_ is
+# between 0 and _length_.
+#
+body ::tycho::AsLine::aspect {id canvas slate args} {
+    set coords [$slate coords $id]
+    set result {}
+
+    if { $args == "" } {
+	lappend result length start end
+	foreach n [interval 0 \
+		[expr [llength $coords] / 2 - 1]] {
+	    lappend result "vertex-$n"
+	}
+    } else {
+	foreach aspect $args {
+	    set a [lindex [split $aspect "-"] 0]
+	    switch -exact $a {
+		"length" {
+		    return [expr [llength $coords] / 2 - 1]
+		}
+		"start" {
+		    return [lrange $coords 0 1]
+		}
+		"end" {
+		    return [lrange $coords \
+			    [expr [llength $coords] - 2] end]
+		}
+		"vertex" {
+		    set n [lindex [split $aspect "-"] 1]
+		    return [lrange $coords [expr 2*$n] [expr 2*$n + 1]]
+		}
+		default {
+		    error "Invalid aspect \"$aspect\" of line shape"
+		}
+	    }
+	}
+    }
+    return $result
+}
+
+#######################################################################
+#### deform
+#
+# Deform one or more aspects of the picture by the specified amount.
+# Deform each aspect by the specified _x_ and _y_ relative
+# values. Aspects are only affected by the appropriate _x_ or _y_
+# value -- for example, if the "e" (east) aspect is specified, it
+# is moved only by the _x_ amount.
+#
+body ::tycho::AsLine::deform {id canvas slate x y args} {
+    # Get the coordinates of the line into an efficient-to-process form
+    set i 0
+    set indexes {}
+    foreach {a b} [$slate coords $id] {
+	set _x($i) $a
+	set _y($i) $b
+	lappend indexes $i
+	incr i
+    }
+
+    # Process all aspects to change coordinates
+    foreach aspect $args {
+	assign a n [split $aspect "-"]
+	switch -exact $a {
+	    "start" {
+		set _x(0) [expr $_x(0) + $x]
+		set _y(0) [expr $_y(0) + $y]
+	    }
+	    "end" {
+		set n [lindex $indexes end]
+		set _x($n) [expr $_x($n) + $x]
+		set _y($n) [expr $_y($n) + $y]
+	    }
+	    "length" {
+		error "Cannot set the \"length\" aspect of a line"
+	    }
+	    "vertex" {
+		set _x($n) [expr $_x($n) + $x]
+		set _y($n) [expr $_y($n) + $y]
+	    }
+	    default {
+		error "Invalid aspect \"$aspect\" of line shape"
+	    }
+	}
+    }
+
+    # Rebuild the coordinates list and change coordinates
+    set coords {}
+    foreach i $indexes {
+	lappend coords $_x($i) $_y($i)
+    }
+    eval $slate coords $id $coords
+}
+
+    

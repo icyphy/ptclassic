@@ -1,0 +1,358 @@
+# A viewer for the idocumentation.
+#
+# @Author: Cliff Cordeiro
+#
+# @Version: $Id$
+#
+# @Copyright (c) 1995-1996 The Regents of the University of California.
+# All rights reserved.
+#
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the above
+# copyright notice and the following two paragraphs appear in all copies
+# of this software.
+#
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+#
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+#                                        PT_COPYRIGHT_VERSION_2
+#                                        COPYRIGHTENDKEY
+#######################################################################
+
+#######################################################################
+#### options
+
+# Default height of the HTML and text widgets in lines
+option add *Idoc.height 50 widgetDefault
+
+# Default width of the HTML widget in characters
+option add *Idoc.htmlWidth 80 widgetDefault
+
+# Default width of the text widget in characters
+option add *Idoc.textWidth 32 widgetDefault
+
+#######################################################################
+#### Idoc
+# This class defines a combination of an HTML widget and a text widget
+# which will eventually be used for more efficient class browsing.
+#  
+# Data is stored in an array of lists. The array is indexed by type
+# (Protected Variable, Private Method, etc.) and the lists are arranged in
+# name/content pairs (link {click here} altlink {shift-click here} etc {and
+# more}). 
+#  
+# Eventually I would like to somehow add the methods of parent classes into
+# the text widget and ultimately I think a better design would inherit from
+# the HTML widget and add on to it. In a perfect world, this functionality 
+# could be implemented with frames. (Except for the shift-click, which is  
+# not well defined anyway.)
+#  
+# John suggested something about right clicking on the methods to allow
+# switching to the idoc for the parent class or something. I think a link to
+# the parent class(es) would be useful, but I would like to first document  
+# all the methods that are available to a user and to a maintainer of this  
+# particular class, which includes public and protected methods from the   
+# parent classes which are not redefined.
+
+
+class ::tycho::Idoc {
+    inherit tycho::File
+
+    ##########################################################################
+    ####                            options                               ####
+
+    # The color of Itcl options.
+    itk_option define -optioncolor optionColor OptionColor white {
+	$itk_component(text) tag configure optionname \
+		-foreground $itk_option(-optioncolor)
+    }
+    # The color of public constructs.
+    itk_option define -publiccolor publicColor PublicColor white {
+	$itk_component(text) tag configure public \
+		-foreground $itk_option(-publiccolor)
+    }
+    # The color of protected constructs.
+    itk_option define -protectedcolor protectedColor ProtectedColor white {
+	$itk_component(text) tag configure protected \
+		-foreground $itk_option(-protectedcolor)
+    }
+    # The color of private constructs.
+    itk_option define -privatecolor privateColor PrivateColor white {
+	$itk_component(text) tag configure private \
+		-foreground $itk_option(-privatecolor)
+    }
+
+    constructor {args} {}
+    destructor {}
+
+    ###################################################################
+    ####                      public methods                       ####
+    
+    # Insert the specified data.
+    public method insertData {data}
+    
+    # Insert HTML into myHtml widget
+    public method putHtml {data}
+
+    ###################################################################
+    ####                      protected variables                  ####
+  
+    # Current document description
+    protected variable myIdoc
+ 
+    # Current class name and html description
+    protected variable myClass
+   
+    # Internal text widget
+    protected variable myText
+
+    # Internal HTML widget
+    protected variable myHtml
+
+    ###################################################################
+    ####                      private methods                      ####
+
+    # Add a record to the array of lists which describes the current idoc
+    private method add {args}
+
+    # Set the name of the current class.
+    private method setClass {args}
+    
+    # Display the contents of the myIdoc variable in text widget.
+    private method display {}
+    
+    # Verify that the argument is a properly formatted list.
+    private method verifycontents {contents}
+
+}
+
+###################################################################
+#
+body ::tycho::Idoc::constructor {args} {
+
+    # Setup a frame for the HTML and text widgets
+    itk_component add mainFrame {
+        frame $itk_interior.mainFrame
+    } 
+ 
+    itk_component add html {
+        ::tycho::HTML $itk_interior.html
+    } {
+        rename -textwidth -htmlwidth htmlWidth HtmlWidth
+        rename -textheight -height height Height
+    }
+
+    set myHtml $itk_component(html)
+  
+    itk_component add text {
+        text $itk_interior.text
+    } {
+        usual
+        keep -height
+        rename -width -textwidth textWidth TextWidth
+    }
+
+    set myText $itk_component(text)
+
+    pack $itk_component(text) -side left -anchor e  -fill y \
+            -in $itk_interior.mainFrame
+
+    pack $itk_component(html) -side left -expand 1 -fill both \
+            -anchor n -in $itk_interior.mainFrame
+    
+    pack $itk_component(mainFrame) -side top -expand 1 -fill both
+
+    # Insert items in the menubar, if there is one.
+    if {$myMenubar != {}} {
+        $myMenubar disable {Undo/Redo}
+        $myMenubar disable {Cut}
+        $myMenubar disable {Paste}
+        $myMenubar disable "Font..."
+        $myMenubar delete "Fill Region"
+        $myMenubar delete "Right Fill Column"
+        $myMenubar delete "Set Fill Prefix"
+        $myMenubar delete "Lower Case"
+        $myMenubar delete "Upper Case"
+        $myMenubar delete "Capitalize"
+        $myMenubar delete "Insert..."
+        $myMenubar delete "Save"
+        $myMenubar delete "SaveAs..."
+        $myMenubar delete "Evaluate"
+        $myMenubar delete "Revision Control..."
+    }
+
+    # Create standard text tags
+    $myText tag configure head -font -*-Helvetica-Bold-R-Normal--*-180-*
+
+    # We don't want a cursor or a selection in the text widget
+    bind $myText <Double-Button-1> {break}
+    bind $myText <Button-1> {break}
+    bind $myText <B1-Motion> {break}
+    bind $myText <Button-2> {break}
+
+    eval itk_initialize $args
+
+    # Something annoying inherited insists on creating this thing
+    pack forget $itk_interior.childsite
+    }
+###########################################################################
+#### add
+# add a record to the array of lists which describes the current
+# idoc. myIdoc is arranged by type and contains a list of 
+# name contents pairs
+body ::tycho::Idoc::add {type name contents} {
+    # if it doesn't exist, lappend will still work
+    catch {set tmp [set myIdoc($type)]}
+    lappend tmp "$name $contents"
+    set myIdoc($type) $tmp   
+}
+
+###########################################################################
+#### setClass
+# set the (single) name and HTML description of the current
+# class. Subsequent calls overwrite $myClass
+body ::tycho::Idoc::setClass {name html} {
+    set myClass(name) $name
+    set myClass(html) $html
+}
+
+###########################################################################
+#### display
+# display the contents of the myidoc variable in text widget
+body ::tycho::Idoc::display {} {
+    
+    # clear the text widget
+    $myText delete 0.0 end
+
+    # insert the class name, if one exists
+    if {![catch {set myClass(name)}]} {
+        $myText insert end $myClass(name)\n\n
+        if {![catch {set myClass(html)}]} {
+            $myText tag configure class
+            $myText tag bind class <Double-Button-1> \
+                    [code "$this putHtml {$myClass(html)}"]
+            $myText tag add class "end - 3 lines" "end - 2 line"
+            $myText tag add head "end - 3 lines" "end - 2 line"
+        }
+    }
+
+    set i 0
+
+    # put in each type (Protected Method, etc.) by array order
+    foreach type [array names myIdoc] {
+        $myText insert end $type\n
+        $myText tag add head "end - 2 lines" "end - 1 line"
+        foreach item [set myIdoc($type)] {
+            set name [lindex $item 0]
+            set contents [lrange $item 1 end]
+            
+            #insert displayed text
+            $myText insert end $name\n
+            switch -regexp $type {
+                Protected.* {$myText tag add protected \
+                        "end - 2 lines" "end - 1 line"}
+                Private.* {$myText tag add private \
+                        "end - 2 lines" "end - 1 line"}
+                Public.* {$myText tag add public \
+                        "end - 2 lines" "end - 1 line"}
+                .*Option {$myText tag add optionname \
+                        "end - 2 lines" "end - 1 line"}
+            }
+
+            # bind <enter> text
+            foreach {attr value} $contents {
+                if {$attr == "link"} {
+                    # When the pointer is over the tag
+                    $myText tag configure ltag$i
+                    $myText tag bind ltag$i <Enter> \
+                            [code "$this putStatus {$value}"]
+                    $myText tag bind ltag$i <KeyRelease-Shift_L> \
+                            [code "$this putStatus {$value}"]
+                    $myText tag bind ltag$i <KeyRelease-Shift_R> \
+                            [code "$this putStatus {$value}"]
+                    $myText tag bind ltag$i <Leave> \
+                            [code "$this putStatus {}"]
+                    $myText tag add ltag$i "end - 2 lines" "end - 1 line"
+                }
+                if {$attr == "altlink"} {
+                    # Pointer is over and shift is pressed
+                    $myText tag configure atag$i
+                    $myText tag bind atag$i <Shift-Enter> \
+                            [code "$this putStatus {$value}"]
+                    $myText tag bind atag$i <KeyPress-Shift_L> \
+                            [code "$this putStatus {$value}"]
+                    $myText tag bind atag$i <KeyPress-Shift_R> \
+                            [code "$this putStatus {$value}"]
+                    $myText tag bind atag$i <Leave> \
+                            [code "$this putStatus {}"]
+                    $myText tag add atag$i "end - 2 lines" "end - 1 line"
+                }
+                if {$attr == "html"} {
+                    # HTML to display after double click
+                    $myText tag configure htag$i
+                    $myText tag bind htag$i <Double-Button-1> \
+                            [code "$this putHtml {$value}"]
+                    $myText tag add htag$i "end - 2 lines" "end - 1 line"
+                }
+            }
+            incr i
+        }
+        $myText insert end \n
+    }
+}
+
+#######################################################################
+#### verifycontents
+# Verify that the argument is a properly formatted list.
+#
+body ::tycho::Idoc::verifycontents {contents} {
+    if {$contents != {}} {
+        if [catch {array set foo $contents}] {
+            error "Contents are not formatted as a \
+                    {keyword item keyword item ...} list: $contents"
+        }
+    }
+}
+
+#######################################################################
+#### insertData
+# Append the specified data to the existing display.
+# The data should be a list of items of the form <i>methodname args</i>,
+# where <i>methodname</i> is a method of this class (i.e. any class
+# derived from <code>Idoc</code>), and <i>args</i> is the
+# set of arguments appropriate for that method.
+#
+body ::tycho::Idoc::insertData {data} {
+    if [getReadOnly] {bell; return}
+    catch {unset myIdoc}
+    foreach command $data {
+        if [catch {
+            eval $this $command
+        } msg] {
+            global ::errorInfo
+            set saveErr $errorInfo
+            error "Invalid item: $data\n$msg" $saveErr
+        }
+    }
+    display
+    putHtml $myClass(html)
+}
+
+#########################################################################
+#### putHtml
+# Load a portion of HTML into the $myHtml widget
+body ::tycho::Idoc::putHtml {data} {
+    $myHtml clear
+    $myHtml insertData $data
+}

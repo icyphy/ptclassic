@@ -1,0 +1,55 @@
+#
+# $Id$
+#
+# The "interaction" master style-sheet
+#
+modelconfigure -label "Interaction"
+modelconfigure -description [
+	This style contains settings for key user-interaction
+	parameters.
+}
+
+style default \
+	-label "Default" \
+	-description {
+    The default style for user interaction.
+} {
+    parameter confirmOnExit 1 \
+	    -type boolean \
+	    -label "Confirm on program exit" \
+	    -description {
+	If set, Tycho asks for confirmation before exiting.
+    }
+
+    parameter welcomeWindow 1 \
+	    -type boolean \
+	    -label "Show the welcome window on startup" \
+	    -description {
+	If set, then Tycho brings up the welcome
+	window when it starts up. Note that the
+	welcome window will not appear if the
+	'Slow network' parameter of the 'System'
+	style is on.
+    }
+
+    parameter itclClassRedefinitionWarning 1 \
+	    -type boolean \
+	    -label "Warn if a Itcl class is being redefined" \
+	    -description {
+	If set, then, when a Itcl class is being redefined,
+	bring up a dialog box asking if the user really wants
+	to redefine that class.
+    }
+
+    parameter fileBrowserUseLastDirectory 1 \
+	    -type boolean \
+	    -label "Use last directory opened in file browser"
+
+    parameter caseSensitiveCompletion 0 \
+	    -type boolean \
+	    -label "Case-sensitive name completion"
+
+    parameter oneWindow 0 \
+	    -type boolean \
+	    -label "Only create a single stack trace window"
+}

@@ -1,0 +1,489 @@
+# Control the fonts in the Tycho system.
+#
+# Author: Edward A. Lee
+# Version: $Id$
+#
+# Copyright (c) 1990-%Q% The Regents of the University of California.
+# All rights reserved.
+#
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the above
+# copyright notice and the following two paragraphs appear in all copies
+# of this software.
+#
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+#
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+#                                                         COPYRIGHTENDKEY
+###########################################################################
+
+option add *FontManager.preferredFoundries {adobe b&h *} widgetDefault
+option add *FontManager.preferredResolutions {75 *} widgetDefault
+option add *FontManager.families \
+	{times courier helvetica lucida lucidatypewriter lucidabright} \
+	widgetDefault
+option add *FontManager.sizes {10 12 14 18 24 32 48} widgetDefault
+option add *FontManager.weights {medium bold} widgetDefault
+option add *FontManager.styles {r i} widgetDefault
+option add *FontManager.specialFonts \
+	{fixed 8x13 8x13bold 9x15 9x15bold 10x20 variable} widgetDefault
+
+# The following options support a set of preferred fonts.
+# Call defaultFont with the option name as an argument to get the font name.
+option add *FontManager.fixed \
+	{9x15 {lucidatypewriter 14 medium r} {courier 14 medium r}}
+option add *FontManager.fixedBold \
+	{9x15bold {lucidatypewriter 14 bold r} {courier 14 bold r}}
+option add *FontManager.variable \
+	{{lucida 14 medium r} {helvetica 14 medium r} 9x15}
+option add *FontManager.variableBold \
+	{{lucida 14 bold r} {helvetica 14 bold r} 9x15bold}
+
+#########################################################################
+#### FontManager
+# This class supports font selection. Instances of this class are
+# dialog windows that permit the user to select a font. If the instance
+# is created using the DialogWindow::newModal procedure, the procedure
+# will return either a valid font name selected by the user or the null
+# string.
+#
+# One instance of this class called .tychoFonts is created and left
+# unmapped at all times. This instance can be used by any widget to
+# select a valid font, using for example the "findFont" method. It is
+# necessary to have such an instance because the way that the validity
+# of a font is checked is by configuring a text widget with that font.
+#
+# Unfortunately, fonts are a major weak point in the X window system,
+# since there is only one font that is guaranteed to be installed on
+# all systems: "fixed". This font is the fallback font of the
+# "findFont" method, which always returns a valid font.
+#
+class ::tycho::FontManager {
+    inherit ::tycho::DialogWindow
+
+    constructor {args} {}
+    destructor {}
+
+    ##########################################################################
+    ####                         public methods                           ####
+
+    #### clearFont
+    # Clear commandResult variable so that no font is identified.
+    method clearFont {} {set commandResult($prefix) {}}
+
+    #### defaultFont
+    # Get a preferred font from a list of possibilities given by an option
+    method defaultFont {optionName}
+
+    #### findFont
+    # Return a valid font, using the given prioritized specifications.
+    method findFont {specs}
+
+    #### fontValid
+    # Return 1 if the specified font is valid, otherwise return 0.
+    method fontValid {font}
+
+    #### getFont
+    # Given a font specification, return a font name or an empty string.
+    method getFont {family {size 14} {weight medium} {style r}}
+
+    #### setCurrentFont
+    # Attempt to set the font specified by the menu radio buttons.
+    method setCurrentFont {}
+
+    #### tryFont
+    # Attempt to set a specific font.
+    method tryFont {font}
+
+    ##########################################################################
+    ####                      private common variables                    ####
+
+    private common familySelection times
+    private common sizeSelection 14
+    private common weightSelection medium
+    private common styleSelection r
+}
+
+#####################################################################
+#
+body ::tycho::FontManager::constructor {args} {
+
+    # Pack the OK button.
+    addButton ok -text "OK <Ret>" -command \
+	    "$this nextWindow; delete object $this"
+    default ok
+
+    # Pack the Cancel button.
+    addButton cancel -text "Cancel <Esc>" -command \
+	    "$this clearFont; $this nextWindow; delete object $this"
+
+    bind $prefix <Escape> "$this invoke cancel"
+
+    # Set up the menubar
+    itk_component add menuFrame {
+	frame $itk_interior.m -relief raised -bd 2
+    } {
+	keep -background -cursor
+    }
+    pack $itk_component(menuFrame) -side top -fill x \
+	    -before $itk_component(childsite)
+
+    # Insert items in the menubar.
+    # First, a selector for miscellaneous fonts
+    itk_component add miscMenuButton {
+	menubutton $itk_component(menuFrame).misc \
+		-text Misc \
+		-underline 0 \
+		-menu $itk_component(menuFrame).misc.menu
+    } {
+	keep -font -activebackground -cursor -activeforeground \
+		-background -foreground -highlightbackground \
+		-highlightcolor
+    }
+
+    # Next, the family.
+    itk_component add familyMenuButton {
+	menubutton $itk_component(menuFrame).family \
+		-text Family \
+		-underline 0 \
+		-menu $itk_component(menuFrame).family.menu
+    } {
+	keep -font -activebackground -cursor -activeforeground \
+		-background -foreground -highlightbackground \
+		-highlightcolor
+    }
+
+    # Next, the size.
+    itk_component add sizeMenuButton {
+	menubutton $itk_component(menuFrame).size \
+		-text Size \
+		-underline 0 \
+		-menu $itk_component(menuFrame).size.menu
+    } {
+	keep -font -activebackground -cursor -activeforeground \
+		-background -foreground -highlightbackground \
+		-highlightcolor
+    }
+
+    # Next, the weight.
+    itk_component add weightMenuButton {
+	menubutton $itk_component(menuFrame).weight \
+		-text Weight \
+		-underline 0 \
+		-menu $itk_component(menuFrame).weight.menu
+    } {
+	keep -font -activebackground -cursor -activeforeground \
+		-background -foreground -highlightbackground \
+		-highlightcolor
+    }
+
+    # Next, the style
+    itk_component add styleMenuButton {
+	menubutton $itk_component(menuFrame).style \
+		-text Style \
+		-underline 0 \
+		-menu $itk_component(menuFrame).style.menu
+    } {
+	keep -font -activebackground -cursor -activeforeground \
+		-background -foreground -highlightbackground \
+		-highlightcolor
+    }
+
+    # Next, the help menu.
+    itk_component add helpMenuButton {
+	menubutton $itk_component(menuFrame).help \
+		-text Help \
+		-underline 0 \
+		-menu $itk_component(menuFrame).help.menu
+    } {
+	keep -font -activebackground -cursor -activeforeground \
+		-background -foreground -highlightbackground \
+		-highlightcolor
+    }
+
+    # Arrangement of menu items
+    pack $itk_component(familyMenuButton) -side left
+    pack $itk_component(sizeMenuButton) -side left
+    pack $itk_component(weightMenuButton) -side left
+    pack $itk_component(styleMenuButton) -side left
+    pack $itk_component(miscMenuButton) -side left
+    pack $itk_component(helpMenuButton) -side right
+    
+    ##################################################################
+    # Insert items in the menus.
+    # We severely constrain the possible fonts here in a effort to
+    # guide the user to decent looking fonts.  There are many horrible
+    # looking fonts installed on a typical X window installation.
+
+    itk_component add familyMenu {
+	menu $itk_component(familyMenuButton).menu
+    } {
+	keep -font -activebackground -cursor -activeforeground \
+		-background -foreground
+    }
+
+    foreach family [option get $itk_component(hull) families FontManager] {
+	$itk_component(familyMenu) add radio \
+		-label $family \
+		-variable [scope familySelection] \
+		-command "$this setCurrentFont"
+    }
+
+    itk_component add sizeMenu {
+	menu $itk_component(sizeMenuButton).menu
+    } {
+	keep -font -activebackground -cursor -activeforeground \
+		-background -foreground
+    }
+
+    foreach size [option get $itk_component(hull) sizes FontManager] {
+	$itk_component(sizeMenu) add radio \
+		-label $size \
+		-variable [scope sizeSelection] \
+		-command "$this setCurrentFont"
+    }
+
+    itk_component add weightMenu {
+	menu $itk_component(weightMenuButton).menu
+    } {
+	keep -font -activebackground -cursor -activeforeground \
+		-background -foreground
+    }
+
+    foreach weight [option get $itk_component(hull) weights FontManager] {
+	$itk_component(weightMenu) add radio \
+		-label $weight \
+		-variable [scope weightSelection] \
+		-command "$this setCurrentFont"
+    }
+
+    itk_component add styleMenu {
+	menu $itk_component(styleMenuButton).menu
+    } {
+	keep -font -activebackground -cursor -activeforeground \
+		-background -foreground
+    }
+
+    foreach style [option get $itk_component(hull) styles FontManager] {
+	$itk_component(styleMenu) add radio \
+		-label $style \
+		-variable [scope styleSelection] \
+		-command "$this setCurrentFont"
+    }
+
+    itk_component add miscMenu {
+	menu $itk_component(miscMenuButton).menu
+    } {
+	keep -font -activebackground -cursor -activeforeground \
+		-background -foreground
+    }
+
+    foreach font [option get $itk_component(hull) specialFonts FontManager] {
+	$itk_component(miscMenu) add command \
+		-label $font \
+		-command "$this tryFont $font"
+    }
+
+    ##################################################################
+    # Help menu contents
+    #
+    itk_component add helpMenu {
+	menu $itk_component(helpMenuButton).menu
+    } {
+	keep -font -activebackground -cursor -activeforeground \
+		-background -foreground
+    }
+    
+    $itk_component(helpMenu) add command \
+	    -label "About Tycho" \
+	    -underline 0 \
+	    -command \
+	    {::tycho::welcomeMessage $TychoBinaryInfo $TychoVersionInfo}
+    
+    # FIXME: help command not implemented. Should be a proc.
+    $itk_component(helpMenu) add command \
+	    -label "User's Guide" \
+	    -underline 0 \
+	    -command [code help]
+
+    set sample "
+ABCDEFGHIJKLMNOPQRSTUVWXYZ
+abcdefghijklmnopqrstuvwxyz
+0123456789
+!@#$%^&*()_+-=[]{};:'\"`~,.<>/?\\|
+"
+    itk_component add sampler {
+	label $itk_component(childsite).sampler -text $sample
+    } {
+	keep -font -highlightthickness -background \
+		-foreground -highlightbackground
+    }
+    pack $itk_component(sampler) -fill both -expand yes
+
+    itk_component add fontname {
+	label $itk_component(childsite).label
+    } {
+	keep -highlightthickness -background \
+		-foreground -highlightbackground
+	rename -font -samplerfont samplerFont SamplerFont
+    }
+    pack $itk_component(fontname) -fill both -expand yes    
+
+    eval itk_initialize $args
+
+    $itk_component(fontname) configure -text \
+	    [$itk_component(fontname) cget -font]
+
+    catch {setCurrentFont}
+}
+
+#########################################################################
+#########################################################################
+####                       public methods                            ####
+
+########################################################################
+#### defaultFont
+# Get a preferred font from a list of possibilities given by an option.
+# The possible options are fixed, fixedBold, variable, and variableBold.
+#
+body ::tycho::FontManager::defaultFont {optionName} {
+    return [findFont \
+	    [option get $itk_component(hull) $optionName FontManager]]
+}
+
+########################################################################
+#### findFont
+# Find a font, given a prioritized list of specifications. Each
+# specification is either a font name or a list with four items. The
+# items are the family, point size, weight, and style. Common families
+# are "times", "courier", and "helvetica". Reasonable point sizes are
+# 12, 14, 18, and 24. The weight is typically either "medium" or
+# "bold", and the style is either "r" or "i" for roman or italic. If a
+# valid font is found matching the first specification, that font is
+# returned. Otherwise, the method steps through the list of
+# specifications. if no valid font is found, it returns "fixed". The
+# actual font returned will depend on what is installed on the system,
+# but a valid font is always returned.
+#
+body ::tycho::FontManager::findFont {specs} {
+    foreach spec $specs {
+	if {[llength $spec] == 1} {
+	    if [fontValid $spec] {
+		return $spec
+	    }
+	} elseif {[llength $spec] == 4} {
+	    set ft [eval getFont $spec]
+	    if {$ft != {}} {
+		return $ft
+	    }
+	} else {
+	    error "Invalid font specification: $spec"
+	}
+    }
+    
+    # No font was found.  Resort to fixed.
+    return fixed
+}
+########################################################################
+#### fontValid
+# Return 0 if the specified font is not available on the current
+# system, otherwise return 1.  If the font is valid, the commandResult
+# variable is set to the name of the font.  This determines the value
+# returned by the newModal method.
+#
+body ::tycho::FontManager::fontValid {font} {
+    if {[catch {$itk_component(sampler) configure -font $font}] == 0} {
+	set commandResult($prefix) $font
+	return 1
+    }
+    return 0
+}
+
+########################################################################
+#### getFont
+# Given a font specification, check to see whether the font is
+# available on the current system, and if it is, return the font name.
+# Otherwise, return the empty string. A font specification consists of
+# four items, the family, point size, weight, and style. Common
+# families are "times", "courier", and "helvetica". Reasonable point
+# sizes are 12, 14, 18, and 24. The weight is typically either "medium"
+# or "bold", and the style is either "r" or "i" for roman or italic. If
+# the style is omitted, it defaults to "r". If the style and weight are
+# omitted, they default to "medium" and "r". If the point size, style,
+# and weight are omitted, they default to "14", "medium", and "r". The
+# family is not optional.  If the font is found, set the variable
+# commandResult to the name of this font.  Otherwise, set commandResult
+# to the empty string.  This determines the value returned by the newModal
+# method.
+#
+body ::tycho::FontManager::getFont {family {size 14} {weight medium} {style r}} {
+    set foundries \
+	    [option get $itk_component(hull) preferredFoundries FontManager]
+    set resolutions \
+	    [option get $itk_component(hull) preferredResolutions FontManager]
+    foreach res $resolutions {
+	foreach foundry $foundries {
+	    set font \
+	"-$foundry-$family-$weight-$style-normal-*-*-${size}0-$res-$res-*-*-*-*"
+	    if [fontValid $font] {
+		$itk_component(fontname) configure -text \
+			[$itk_component(sampler) cget -font]
+		return $font
+	    }
+	}
+    }
+    set commandResult($prefix) {}
+    return {}
+}
+
+#########################################################################
+#### setCurrentFont
+# Attempt to set the font specified by the menu radio buttons.
+# If the font is not valid, report an error.
+#
+body ::tycho::FontManager::setCurrentFont {} {
+    if {[getFont $familySelection $sizeSelection \
+	    $weightSelection $styleSelection] == {}} {
+	error "Invalid font specification: $familySelection, $sizeSelection, \
+		$weightSelection, $styleSelection"
+    }
+}
+
+#########################################################################
+#### tryFont
+# Attempt to set the font specified by the argument.
+# If the font is not valid, report an error.  If the font is valid,
+# set the commandResult variable to the font name.  This determines
+# the value returned by the newModal method.
+#
+body ::tycho::FontManager::tryFont {font} {
+    if [fontValid $font] {
+	$itk_component(fontname) configure -text \
+		[$itk_component(sampler) cget -font]
+	set commandResult($prefix) $font
+    } {
+	error "Invalid font: $font"
+    }
+}
+
+
+namespace ::tycho {
+
+    # Create an instance of the class
+    FontManager .tychoFonts
+
+    # The overall default font is fixed
+    set defaultFont [.tychoFonts defaultFont fixed]
+    option add *Font $defaultFont widgetDefault
+    option add *font $defaultFont widgetDefault
+}

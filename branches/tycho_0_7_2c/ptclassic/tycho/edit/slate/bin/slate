@@ -1,0 +1,45 @@
+#! /bin/sh
+# Command-line program for the slate utility \
+    exec tclsh "$0" "$@"
+
+# @(#)%%	1.1 02/10/98
+# Author: John Reekie
+
+# If the SLATE_LIBRARY variable is set, add it to the auto_path
+if [info exists env(SLATE_LIBRARY)] {
+    if { [lsearch -exact $auto_path $env(SLATE_LIBRARY)] }  {
+	lappend auto_path $env(SLATE_LIBRARY)
+    }
+}
+
+# Same for the TYCHO environment variable
+if [info exists env(TYCHO)] {
+    if { [lsearch -exact $auto_path $env(TYCHO)] }  {
+	lappend auto_path $env(TYCHO)
+    }
+}
+
+# Require the Slate package. If this fails, require the Tycho
+# package first, since that may make the Slate package visible
+if [catch {package require Slate}] {
+    if [catch {package require Tycho}] {
+	puts "Cannot find Slate or Tycho. You can\n\
+		1. Set the TYCHO variable to point to your \
+		Tycho installation\n\
+		2. Set the SLATE_LIBRARY variable to point to the \
+		slate directory\n\
+		3. Install slate in a subdirectory of your Tcl library"
+	exit
+    } else {
+	package require Slate
+    }
+}
+
+# Print startup sig
+puts "Slate, version 1.0"
+
+# Run the main procedure
+eval slate $argv
+
+# Done
+

@@ -1,0 +1,249 @@
+# Top-level window class.
+#
+# $Id$
+# Author: Edward A. Lee
+#
+# Copyright (c) 1990-%Q% The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the above
+# copyright notice and the following two paragraphs appear in all copies
+# of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+#                                                         COPYRIGHTENDKEY
+##########################################################################
+
+
+##########################################################################
+#### autoName 
+# This procedure returns a name constructed by augmenting the provided
+# stem with a number to guarantee that the name is unique. A global
+# (within the tycho namespace) array autoNames is used to keep track of
+# the numbers used for each stem. This procedure should be used for
+# window classes instead of the #auto facility in itcl to assign to the
+# class valid names for windows. Window names must begin with a period.
+# By convention, for a class named "Class", we would use the stem
+# ".class". Thus, the single argument should be ".class".
+# Note that if you invoke this outside the namespace "tycho", you
+# must call it "tycho::autoName".
+#
+namespace tycho {
+    proc autoName {stem} {
+	global autoNames
+	if {[info exists autoNames] && [info exists autoNames($stem)]} {
+	    incr autoNames($stem)
+	} else {
+	    set autoNames($stem) 0
+	}
+	return "$stem$autoNames($stem)"
+    }
+}
+
+##########################################################################
+#### TopLevel
+# This class creates a top-level window with nothing in it, and provides
+# a repository for common functions on windows, such as centering them
+# on the screen.  The window is created in the withdrawn state.  It is
+# up to derived classes to map the window using either "wm deiconify"
+# or the method "centerOnScreen".
+#
+class tycho::TopLevel {
+
+    inherit itk::Toplevel
+
+    #### geometry option
+    # By default, the geometry option is set to the
+    # null string, deferring to the window manager the control over
+    # position. It can be set alternatively to a string of the
+    # form "+x+y", where x and y give the screen position of
+    # the upper left corner of the window relative to the upper
+    # left corner of the screen.  Using "-" instead of "+" will
+    # define the screen position relative to the right or
+    # bottom of the screen rather than the left or top.
+    # 
+    itk_option define -geometry geometry Geometry "" {
+	wm geometry $itk_component(hull) $itk_option(-geometry)
+    }
+
+    # An array of top-level windows is kept here and supported by
+    # the <Control-x><o> binding, which switches the focus to the
+    # next window in the list.  The order of the windows in the list
+    # is arbitrary.  The value of each array element will be the name
+    # of the window that has the focus when the new window is created.
+    # If this window still exists when a window is deleted, then
+    # the focus will revert to this window.
+    private common topLevelWindows
+
+    # The prefix will be set to either $this or "".  The latter
+    # is used if the window name is ".".  Thus, it is always
+    # safe to refer to a widget within the window as $prefix.name,
+    # where "name" is the name of the widget.
+    protected variable prefix
+
+    constructor {args} {}
+    destructor {}
+
+    # Center the window on the screen.
+    method centerOnScreen {} {}
+
+    # Prevent interactive resizing of the window.
+    method freezeWindowSize {} {}
+
+    # Shift the focus ot the next window in the topLevelWindows list.
+    method nextWindow {} {}
+
+    # Exit the program
+    protected method exitprogram {} {}
+}
+
+#####################################################################
+#
+body tycho::TopLevel::constructor {args} {
+    
+    # The name of the window
+    set prefix $itk_component(hull)
+    wm withdraw $prefix
+    
+    # Support for switching the focus from one window to the next.
+    # The value of the array element is not used for anything currently.
+    set topLevelWindows($prefix) [focus -displayof $prefix]
+    bind $prefix <Control-x><o> "$this nextWindow; break"
+    
+    # To prevent the "o" from appearing in Entry windows,
+    bind Entry <Control-x><o> { }
+    
+    #
+    # Explicitly handle configs that may have been ignored earlier.
+    #
+    eval itk_initialize $args
+}
+
+#####################################################################
+#### Destructor
+# Destroy the window containing the widget When a window that has the
+# focus is deleted, we return the focus to the window that had the
+# focus when it was created, if this window still exists. Otherwise,
+# the focus goes to the next window in the topLevelWindows list. Note
+# that if the mouse is not over a window belonging to this application
+# after a window is deleted, the focus will be given up entirely by the
+# application.
+#
+body tycho::TopLevel::destructor {} {
+    set prev $topLevelWindows($prefix)
+    unset topLevelWindows($prefix)
+    
+    if {[focus] != {} && [winfo toplevel [focus]] == $prefix} {
+	if {$prev != "" && [winfo exists $prev]} {
+	    focus $prev
+	} else {
+	    nextWindow
+	}
+    }
+}
+
+#####################################################################
+#### centerOnScreen
+# This procedure will request of the window manager that it center
+# the window.  To properly accomplish such centering, this
+# should be called after all the widgets have been packed into the
+# window, but before any tkwait visibility.
+#
+# FIXME: This procedure doesn't work with widgets that defer mapping
+# (like the iwidget buttonbox). The width of the button box is not
+# taken into account depite the fact that everything has been packed
+# into it already. This is because the widget actually defers the
+# packing using an "after" command. This is allegedly done for speed
+# reasons, but seems like a bit of a hack to me.
+#
+body tycho::TopLevel::centerOnScreen {} {
+    # We used to withdraw the window here, but it appears unnecessary.
+    update idletasks    
+
+    # Use the larger of the actual width and the requested width
+    set w [winfo width $prefix]
+    set rw [winfo reqwidth $prefix]
+    if {$w > $rw} {set width $w} {set width $rw}
+    
+    # Use the larger of the actual height and the requested height
+    set h [winfo height $prefix]
+    set rh [winfo reqheight $prefix]
+    if {$h > $rh} {set height $h} {set height $rh}
+    
+    set x [expr [winfo screenwidth $prefix]/2-$width/2-\
+	    [winfo vrootx [winfo parent $prefix]]]
+    set y [expr [winfo screenheight $prefix]/2-$height/2-\
+	    [winfo vrooty [winfo parent $prefix]]]
+    wm geometry $prefix +$x+$y
+    wm deiconify $prefix
+}
+
+#####################################################################
+#### freezeWindowSize
+# This method freezes the window at its current size, prohibiting
+# resizing by the user.
+#
+body tycho::TopLevel::freezeWindowSize {} {
+    wm resizable $prefix 0 0
+}
+
+#####################################################################
+#### nextWindow
+# Switch the focus to the next window listed in the array topLevelWindows.
+#
+body tycho::TopLevel::nextWindow {} {
+    
+    # Since there is a recursive call here, as an extra cautious
+    # safety check, if the array size gets to zero, just return,
+    # doing nothing.  This should never happen.
+    if {[array size topLevelWindows] <= 0} {return}
+    
+    set searchID [array startsearch topLevelWindows]
+    set first ""
+    while {[set next [array nextelement topLevelWindows $searchID]] != ""} {
+	if {$first == ""} {set first $next}
+	if {$next == $prefix} {break}	    
+    }
+    set next [array nextelement topLevelWindows $searchID]
+    if {$next == ""} {
+	set fw [focus -lastfor $first]
+	set next $first
+    } {
+	set fw [focus -lastfor $next]
+    }
+    # If the identified window does not exist for some reason
+    # (this could happen if an error occurred while it was being
+    # constructed), then delete it from the list and recursively
+    # invoke this function.
+    if [winfo exists $fw] {
+	focus $fw
+	raise $next
+    } else {
+	unset topLevelWindows($next)
+	nextWindow
+    }
+}
+
+#####################################################################
+#### exitprogram
+# Confirm exit with a dialog, then quit. The destructors will query
+# for save of any windows with modified data.
+#
+body tycho::TopLevel::exitprogram {} {
+    if [askuser "OK to exit the program?"] {
+	exit
+    }
+}

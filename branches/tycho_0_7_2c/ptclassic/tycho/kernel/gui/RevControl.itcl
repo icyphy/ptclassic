@@ -1,0 +1,220 @@
+# Definition of the class which handles revision control.
+#
+# Author: Joel King
+#
+# Version: @(#)RevControl.itcl	$Id$\t$Date$
+#
+# Copyright (c) 1990-1996 The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the
+# above copyright notice and the following two paragraphs appear in all
+# copies of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+# 						PT_COPYRIGHT_VERSION_2
+# 						COPYRIGHTENDKEY
+#######################################################################
+
+#######################################################################
+#### RevControl
+# This class defines how revision control will be handled, and is 
+# intended to be contained within objects that use such facilities.
+#
+class ::tycho::RevControl {
+    inherit ::tycho::DialogWindow
+
+    constructor {args} {}
+    destructor {}
+
+    ###################################################################
+    ####                         options                           ####
+
+    #### -textobject option
+    # Stores the value of the text widget object that we are 
+    # associated with.
+    itk_option define -textobject textobject TextObject ""
+
+    #### -object option
+    # Stores the value of the object that we are associated with.
+    itk_option define -object object Object ""
+
+    #### -file option
+    # Stores the value of the file that we are associated with.
+    itk_option define -file file File ""
+
+    ###################################################################
+    ####                      public methods                       ####
+
+    #### checkIn
+    # Checkin the file associated with this class.
+    method checkIn {}
+
+    #### checkOut
+    # Checkout the file associated with this class.
+    method checkOut {}
+
+    #### nextAction
+    # Perform the next logical action.
+    method nextAction {}
+
+    #### revert
+    # Unedit the file associated with this class.
+    method unedit {}
+
+    #### unMapWindow
+    # unmap the window from the screen and return the focus to the 
+    # previous owner.
+    method unMapWindow {}
+
+    #### viewHistory
+    # View the prior comments and other information about the 
+    # associated file.
+    method viewHistory {}
+
+    ###################################################################
+    ####                   protected methods                       ####
+
+    #### checkRevControl
+    # Check if the file associated with this class is under revision 
+    # control, and return a 1 if it is or a 0 otherwise.
+    protected method checkRevControl {}
+
+    ###################################################################
+    ####                  protected variables                      ####
+
+    # The text widget object that we are associated with.
+    protected variable textobject ""
+
+    # The object that we are associated with.
+    protected variable object ""
+
+    # The file that we are associated with.
+    protected variable file ""
+
+}
+
+#########################################################################
+#### -file configuration
+# 
+configbody ::tycho::RevControl::file {
+    set file $itk_option(-file)
+    if {$file == "NoName"} {
+	set file ""
+    }
+}
+    
+#########################################################################
+#### -object configuration
+# 
+configbody ::tycho::RevControl::object {
+    set object $itk_option(-object)
+}
+    
+#########################################################################
+#### -textobject configuration
+# 
+configbody ::tycho::RevControl::textobject {
+    set textobject $itk_option(-textobject)
+}
+    
+###################################################################
+# constructor
+# Create the revision control dialog.
+#
+body ::tycho::RevControl::constructor {args} {
+    eval itk_initialize $args
+    $this configure -object $object
+    $this configure -file $file
+#    $this addButton checkin -text "Checkin" -command "$this checkIn"
+#    $this addButton checkout -text "Checkout" -command "$this checkOut"
+    $this addButton nextaction -text "Next Action" -command "$this nextAction"
+#    $this addButton history -text "History" -command "$this viewHistory"
+    $this addButton unedit -text "Unedit" -command "$this unedit"
+    $this addButton cancel -text "Cancel <ESC>" -command \
+	    "$this unMapWindow"
+    $this default nextaction
+    bind $itk_component(hull) <Escape> "$this unMapWindow"
+    $this configure -bitmap info
+}
+
+#####################################################################
+#### destructor
+#
+body ::tycho::RevControl::destructor {} {
+}
+
+#####################################################################
+#### checkIn
+# 
+body ::tycho::RevControl::checkIn {} {
+    error "Sorry, files can't be checked in unless a base class of\
+	    RevControl specific to a certain revision control system\
+	    is used."
+}
+
+#####################################################################
+#### checkOut
+# 
+body ::tycho::RevControl::checkOut {} {
+    error "Sorry, files can't be checked out unless a base class of\
+	    RevControl specific to a certain revision control system\
+	    is used."
+}
+
+#####################################################################
+#### revert
+# 
+body ::tycho::RevControl::unedit {} {
+    error "Sorry, files can't unedited unless a base class of\
+	    RevControl specific to a certain revision control system\
+	    is used."
+}
+
+#####################################################################
+#### nextAction
+# 
+body ::tycho::RevControl::nextAction {} {
+    error "Sorry, you can't do this unless a base class of\
+	    RevControl specific to a certain revision control system\
+	    is used."
+}
+
+#####################################################################
+#### viewHistory
+# 
+body ::tycho::RevControl::viewHistory {} {
+    error "Sorry, you can't view the revision control history of\
+	    this file unless a base class of\
+	    RevControl specific to a certain revision control system\
+	    is used."
+}
+
+#####################################################################
+#### checkRevControl
+# 
+body ::tycho::RevControl::checkRevControl {} {
+    # We don't know how to do this yet.
+}
+
+#####################################################################
+#### unMapWindow
+# 
+body ::tycho::RevControl::unMapWindow {} {
+    wm withdraw $itk_component(hull)    
+}
+

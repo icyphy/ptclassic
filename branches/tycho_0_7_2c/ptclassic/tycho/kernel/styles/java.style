@@ -1,0 +1,46 @@
+#
+# $Id$
+#
+# The "java" master style-sheet
+#
+modelconfigure -label "Java"
+modelconfigure -description {
+    This style contains settings for Java language
+    development.
+}
+
+style default \
+	-label "Default" \
+	-description {
+    The default Java-related style.
+} {
+    preference useEnvClassPath 1 \
+	    -type boolean \
+	    -label "Use the CLASSPATH from the environment" \
+	    -description {
+	If set, Tycho uses $CLASSPATH from the environment.
+    }
+
+    preference classPath {{$env(JAVA_HOME)/lib/classes.zip} {$TYCHO/java}} \
+	    -label "Java classpath" \
+	    -description {
+	The colon-separated path that the java tools
+	such as javac, java and appletviewer use.  If
+	the useEnvClassPath preference is 1, then this
+	preference is ignored.
+    }
+
+    preference javaHome \$JAVA_HOME \
+	    -label "Pathname to the Java JDK" \
+	    -description {
+	The location of the Java Development Kit, including the
+	javac java compiler.  The initial default is the JAVA_HOME
+	environment variable.
+    }
+
+    preference javaCompileCommand {javac -g -deprecation} \
+	    -label "Java compile command" \
+	    -description {
+        The command that is used to compile Java files.
+    }
+}

@@ -1,0 +1,288 @@
+# Definition of the class which handles revision control using SCCS.
+#
+# Author: Joel King
+#
+# Version: @(#)RevControlSCCS.itcl	$Id$\t$Date$
+#
+# Copyright (c) 1990-1996 The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the
+# above copyright notice and the following two paragraphs appear in all
+# copies of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+# 						PT_COPYRIGHT_VERSION_2
+# 						COPYRIGHTENDKEY
+#######################################################################
+
+#######################################################################
+#### RevControlSCCS
+# This class defines how revision control will be handled when using 
+# SCCS, and is intended to be contained within objects that use such 
+# facilities.
+class ::tycho::RevControlSCCS {
+    inherit ::tycho::RevControl
+
+    constructor {args} {}
+    destructor {}
+
+    ###################################################################
+    ####                      public methods                       ####
+
+    #### checkIn
+    # Checkin the file associated with this class.
+    method checkIn {}
+
+    #### checkOut
+    # Checkout the file associated with this class.
+    method checkOut {}
+
+    #### nextAction
+    # Perform the next logical action.
+    method nextAction {}
+
+    #### prelimChecks
+    # Do some preliminary checks.
+    method prelimChecks {}
+
+    #### revert
+    # Unedit the file associated with this class.
+    method unedit {}
+
+    #### viewHistory
+    # View the prior comments and other information about the 
+    # associated file.
+    method viewHistory {}
+
+    ###################################################################
+    ####                   protected methods                       ####
+
+    #### checkRevControl
+    # Check if the file associated with this class is under revision 
+    # control.
+    protected method checkRevControl {}
+
+}
+
+###################################################################
+# constructor
+# Create the revision control dialog.
+#
+body ::tycho::RevControlSCCS::constructor {args} {
+    eval itk_initialize $args 
+}
+
+#####################################################################
+#### destructor
+#
+body ::tycho::RevControlSCCS::destructor {} {
+}
+
+#####################################################################
+#### checkIn
+# 
+body ::tycho::RevControlSCCS::checkIn {} {
+    #check in the file
+    set dir [file dirname $file]
+    set basefile [file tail $file]
+    set olddir [eval pwd]
+    if {![file exists [format "%s/SCCS/p.$basefile" $dir]]} {
+	::tycho::inform "The file that you want to check in is not\
+		currently checked out."
+	return
+    }
+    if {[file isdirectory $dir] && [file executable $dir] && \
+	[file writable $dir]} {
+	cd $dir
+    }
+    set comments [::tycho::queryinfo "Enter comments:" "" 60]
+    catch {exec echo $comments | sccs delget $file} output
+    if {[file exists [format "%s/SCCS/p.$basefile" $dir]]} {
+	::tycho::inform "The checkin operation failed with the following\
+		error message: $output"
+	return
+    }
+    cd $olddir
+    $object reload 0
+}
+
+#####################################################################
+#### checkOut
+# 
+body ::tycho::RevControlSCCS::checkOut {} {
+    # check out the file 
+    set dir [file dirname $file]
+    set basefile [file tail $file]
+    set olddir [eval pwd]
+    if {[file exists [format "%s/SCCS/p.$basefile" $dir]]} {
+	::tycho::inform "The file that you want to check out is already\
+		checked out."
+	return 
+    }
+    if {[file isdirectory $dir] && [file executable $dir] && \
+	[file writable $dir]} {
+        # Move into the right directory. 
+	cd $dir
+    }
+    catch {exec sccs edit $file} output
+    if {![file exists [format "%s/SCCS/p.$basefile" $dir]]} {
+	::tycho::inform "The following error was encountered while trying to\
+		checkout the desired file: $output"
+	return 
+    }
+    cd $olddir
+    $object reload 0
+}
+
+#####################################################################
+#### unedit
+# 
+body ::tycho::RevControlSCCS::unedit {} {
+    if {![$this prelimChecks]} {
+	return
+    }
+    set dir [file dirname $file]
+    set basefile [file tail $file]
+    set olddir [eval pwd]
+    if {![file exists [format "%s/SCCS/p.$basefile" $dir]]} {
+	::tycho::inform "The file that you want to unedit is not being\
+		edited, or does not exist."
+	return
+    }
+    if {[file isdirectory $dir] && [file executable $dir] && \
+	[file writable $dir]} {
+        # Move into the right directory. 
+	cd $dir
+    }
+    catch {exec sccs unedit $file} output 
+    puts "output: $output"
+    if {[file exists [format "%s/SCCS/p.$basefile" $dir]]} {
+	::tycho::inform "The following error was encountered while trying to\
+		unedit the desired file: $output"
+	return 
+    }    
+    cd $olddir
+    $object reload 0
+}
+
+#####################################################################
+#### prelimChecks
+# 
+body ::tycho::RevControlSCCS::prelimChecks {} {
+    if {$file == ""} {
+	# The contents of this editor do not currently have a name.
+	tycho::inform "You must name the file before attempting any\
+		revision actions."
+	return 0
+    }
+    set modvalue [$object getModified]
+    if {$modvalue == 1} {
+	if [askuser "Do you want modifications saved before performing\
+		revision command on the file?"] {
+	    # update changes since last save, so they will appear in delta
+	    $object save 
+	}
+    }
+    return 1
+}
+
+#####################################################################
+#### nextAction
+# 
+body ::tycho::RevControlSCCS::nextAction {} {
+    if {![$this prelimChecks]} {
+	return
+    }
+    # If checkRevControl returns a one then we need to proceed, otherwise
+    # we are done.
+    if {[$this checkRevControl]} {
+	if [$object getReadonly] {
+	    $this checkOut
+	} else {
+	    $this checkIn
+	}
+    }
+}
+
+#####################################################################
+#### viewHistory
+# 
+body ::tycho::RevControlSCCS::viewHistory {} {
+    set dir [file dirname $file]
+    set basefile [file tail $file]
+    if {![file exists [format "%s/SCCS/p.$basefile" $dir]] && \
+	![file exists [format "%s/SCCS/s.$basefile" $dir]]} {
+	::tycho::inform "The file whose history you want to view is not\
+		under SCCS control."
+	return 
+    }
+    catch {exec sccs prs $file} history
+    if [info exists itk_component(text)] {
+	    $itk_component(text) delete 1.0 end
+	    $itk_component(text) insert $history
+    } else {
+	    # Create the text window.
+	    itk_component add text {
+		text $itk_interior.top.text
+	    } {
+		keep -background -cursor -foreground -font
+	    }
+	    $itk_component(text) delete 1.0 end
+	    $itk_component(text) insert $history
+	    pack $itk_component(text) -side bottom -fill both	
+    }
+}
+
+#####################################################################
+#### checkRevControl
+# 
+body ::tycho::RevControlSCCS::checkRevControl {} {
+    set dir [file dirname $file]
+    set revdir [format "%s/SCCS" $dir]
+    set basefile [file tail $file]
+    if {![file exists [format "%s/SCCS/s.%s" $dir $basefile]] && \
+	    ![file exists [format "%s/SCCS/p.%s" $dir $basefile]]} { 
+	# File is not currently under revision control.
+	if {![askuser "This file is not currently under revision\
+		control, do you want it to be placed under revision\
+		control?"]} {
+	    return 0
+	} else {
+	    if {![file exists $revdir]} {
+		if {![file writable $dir]} {
+		    tycho::inform "The necessary revision control\
+			    directory doesn't exist, and you do not\
+			    have write permission to be able\
+			    to create it."
+		    return 0 
+		}   
+		exec mkdir $revdir
+	    }
+	    catch {exec sccs create $file} output
+	    if {![regexp "^\[1-9\]+.\[0-9\]+" $output]} {
+		tycho::inform "Unable to place the file under revision\
+			control."
+		return 0
+	    }   
+	    $this checkOut
+	    $object reload 0	    
+	    return 0
+	}	    
+    }
+    return 1
+}

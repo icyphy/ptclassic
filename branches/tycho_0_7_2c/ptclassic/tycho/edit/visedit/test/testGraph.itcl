@@ -1,0 +1,16 @@
+# $Id$
+# The graph below has a cycle in it.
+catch {delete object foo}
+::tycho::Graph foo
+foo add a aa
+foo add c cc a
+foo add d dd a
+foo add e ee a c
+foo add f ff e a
+foo addArc d e
+::tycho::post [foo describe]
+
+# Posts: {{d dd a e} {e ee {a d} {c f}} {a aa {} {c d e}} {f ff e a} {c cc a {}}}
+
+# The following should return nothing, but not trigger an error.
+foo verify

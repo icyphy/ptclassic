@@ -1,0 +1,291 @@
+# Base class for Tycho widgets.
+# 
+# @Author: Edward A. Lee
+#
+# @Version: $Id$
+# 
+# @Copyright (c) 1995-%Q% The Regents of the University of California.
+# All rights reserved.
+#
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the above
+# copyright notice and the following two paragraphs appear in all copies
+# of this software.
+#
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+#
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+#                                        PT_COPYRIGHT_VERSION_2
+#                                        COPYRIGHTENDKEY
+#######################################################################
+
+# NOTE:  It would be nice to be able to name this "Widget".
+# In theory, this should be possible since it is in a different namespace
+# from ::itk::Widget.  In practice, however, very strange behavior
+# (with core dumps) results if that name is used.
+
+#######################################################################
+#### TWidget
+# This class is the base class for most widgets in Tycho. It provides a
+# set of useful methods and a frame within which to insert other widgets.
+# The frame is an itk component called "childsite".  It also implements
+# a focus model by binding the event "Enter" to cause the method
+# <code>focusin</code> to be invoked.
+#
+class ::tycho::TWidget {
+    inherit ::itk::Widget
+
+    constructor {args} {}
+    destructor {}
+
+    ###################################################################
+    ####                         public methods                    ####
+
+    # Change the cursor to the "watch" and execute the arguments.
+    method busy {args}
+
+    # Invoke a command on the context-sensitive popup menu.
+    method contextmenu {args}
+
+    # Give the window or a subwindow the focus and set the menu bar (if any).
+    method focusin {}
+
+    # Open a file and go to its internal point identified by name.
+    method hyperJump {file {point {}}}
+
+    # Raise the top-level window.
+    method raiseWindow {}
+
+    # Find and make visible a point in the display.
+    method seeFragment {point}
+
+    # Return the name of my window.
+    method windowName {} {return $itk_component(hull)}
+
+    ###################################################################
+    ####                         public procs                      ####
+
+    # Get the current contents of the local clipboard.
+    proc getClipboard {} {return $clipboard}
+
+    # Set the current contents of the local and Tk clipboards.
+    proc setClipboard {text} {}
+
+    ###################################################################
+    ####                         protected methods                 ####
+
+    # Prevent destruction of this object while evaluating the arguments.
+    protected method safeEval {args}
+
+    ###################################################################
+    ####                         protected variables               ####
+
+    # A local Tycho clipboard that is mirrored in the Tk clipboard.
+    protected common clipboard {}
+
+    # Name of my context-sensitive popup menu
+    protected variable myContextmenu {}
+
+    # The prefix is just a shorthand for $itk_component(hull).
+    protected variable prefix
+
+    ###################################################################
+    ####                         private variables                 ####
+
+    # If non-zero, disable destruction.
+    private variable disableDestruction 0
+}
+
+#######################################################################
+#### constructor
+#
+body ::tycho::TWidget::constructor {args} {
+    # Create a childsite for the contents of the widget
+    itk_component add childsite {
+	frame $itk_interior.childsite
+    } {
+	keep -background -cursor
+    }
+    pack $itk_component(childsite) -fill both -expand yes
+    
+    set prefix $itk_component(hull)
+
+    eval itk_initialize $args
+
+    ::bind $itk_component(hull) <Enter> "$this focusin"
+}
+
+#######################################################################
+#### destructor
+# Destruction will succeed only if we are not within a <code>safeEval</code>
+# call.  If we are, then destruction is canceled with a silent error, and
+# scheduled to be attempted again after 1 second.
+#
+body ::tycho::TWidget::destructor {} {
+    if $disableDestruction {
+        # Schedule a future attempt at destruction.
+        after 1000 "$this nextWindow; delete object $this"
+        ::tycho::silentError
+    }
+}
+
+
+    ###################################################################
+    ###################################################################
+    ####                      public methods                       ####
+
+#####################################################################
+#### busy
+# Change the cursor in the interior of this widget to the "watch"
+# cursor (to indicate that the object is busy), execute the arguments
+# and then change the cursor back to whatever it was before. In order
+# for the cursor to actually change, the method calls "update", during
+# which time the object may be deleted. If the object is deleted, this
+# method never returns (it unwinds the stack by triggering a silent
+# error). A typical invocation is as follows:
+# <pre>
+#     busy $this methodname arg1 arg2
+# </pre>
+# Notice that, unlike <code>safeEval</code>, this method does not prevent
+# destruction of the object.  Instead, if the object is destroyed during
+# the update, the method never returns.
+#
+body ::tycho::TWidget::busy {args} {
+    set oldCursor [lindex [config -cursor] end]
+    config -cursor {watch}
+    ::tycho::safeUpdate $prefix
+    # If we get here, then the object $this still exists.
+    # Catch errors so that we can reset the cursor.
+    if {[catch {eval $args} msg] != 0} {
+        config -cursor $oldCursor
+        global ::errorInfo
+        set saveInfo $errorInfo
+	error $msg $saveInfo
+    }
+    config -cursor $oldCursor
+    return $msg
+}
+
+#########################################################################
+#### contextmenu
+# If there is a context-sensitive popup menu associated with this widget,
+# use the arguments as a command to issue to the PopupMenu widget,
+# Menubar, and return whatever is returned by the command.  Otherwise,
+# return an empty string.
+#
+body ::tycho::TWidget::contextmenu {args} {
+    if {$myContextmenu != {}} {
+        return [eval $myContextmenu $args]
+    } {
+        return {}
+    }
+}
+
+#########################################################################
+#### focusin
+# Grab the focus and change the Displayer menu, if necessary. This
+# should be redefined in derived classes to give the focus to the
+# appropriate subwindow.
+#
+body ::tycho::TWidget::focusin {} {
+    focus $itk_component(hull)
+}
+
+#####################################################################
+#### hyperJump
+# Open a file and go to its internal point identified by name. If the
+# filename is the empty string, just call <code>seeFragment</code>,
+# passing it the second argument. Otherwise, the
+# file is opened  with <code>::tycho::File::openContext</code>,
+# which will choose an editor based on the filename extension.
+# Invoke <code>seeFragment</code> to view the specified point within the
+# file. The format for the <i>point</i> argument depends on the type of
+# file being opened. For HTML files, it will normally be the name of an
+# anchor in the file. For text files, it will normally be either "{line
+# <i>linenumber</i>}" or "{range <i>start</i> <i>end</i>}", where
+# <i>start</i> and <i>end</i> have the form
+# <i>linenumber.characternumber</i>.
+# 
+body ::tycho::TWidget::hyperJump {file {point {}}} {
+    if {$file != {}} {
+        set obj [uplevel #0 [list ::tycho::File::openContext $file]]
+        if {$point != {}} {
+            # The seeFragment call is postponed to give time for the widget
+            # to be created. The catch is in case it is immediately deleted.
+            after 200 [list catch [list $obj seeFragment $point]]
+        }
+    } {
+        seeFragment $point
+    }
+}
+
+#####################################################################
+#### raiseWindow
+# Bring the corresponding top-level window to the foreground, and
+# make sure it is deiconified.
+#
+body ::tycho::TWidget::raiseWindow {} {
+    set tl [winfo toplevel $itk_component(hull)]
+    wm deiconify $tl
+    raise $tl
+    focusin
+}
+
+#####################################################################
+#### seeFragment
+# In derived classes, this method will go to the point in the display
+# identified by the name argument.  What this means depends on what
+# type of data being displayed.  In this base class, do nothing.
+#
+body ::tycho::TWidget::seeFragment {point} {
+}
+
+#####################################################################
+#### setClipboard
+# Set the current contents of the local and Tk clipboards.
+#
+body ::tycho::TWidget::setClipboard {text} {
+    set clipboard $text
+    clipboard clear
+    clipboard append -- $text
+}
+
+#####################################################################
+#####################################################################
+####                   protected methods                         ####
+
+#####################################################################
+#### safeEval
+# Prevent destruction of this object while evaluating the arguments.
+# Destruction will be cancelled by invoking a silent error, and will
+# be scheduled for another attempt in the future.
+# <p>
+# This method is a workaround for a defect in Itcl. If "update",
+# "update idletasks", or "tkwait" is called directly or indirectly from
+# within an Itcl method, and during the update the Itcl object is
+# destroyed, then when update returns, you may get a catastrophic failure
+# of the application (a core dump).
+#
+body ::tycho::TWidget::safeEval {args} {
+    set disableDestruction 1
+    set retval {}
+    if [catch {set retval [eval $args]} msg] {
+        global ::errorInfo
+        set saveInfo $errorInfo
+        set disableDestruction 0
+        error $saveInfo
+    }
+    set disableDestruction 0
+    return $retval
+}
