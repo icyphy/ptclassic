@@ -54,4 +54,5 @@ makefile:	make.template
 		@echo makefile remade -- you must rerun make.
 		exit 1
 
-
+sccsinfo:
+		sccs info
