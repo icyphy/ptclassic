@@ -25,7 +25,9 @@ static char SccsId[]="$Id$";
  * 
  */
 
+#include "port.h"
 #include "iv.h"
+#include "ivBuf.h"
 #include <stdio.h>
 
 static Display* ivBufDisplay;
@@ -85,8 +87,6 @@ void ivBufAddString( buf, s )
     char* s;
 {
     int len = strlen( s );
-    int i = buf->count;
-    int size = buf->size;
     if ( buf->count + len < buf->size ) {
 	strcpy( &buf->buf[ buf->count ] , s ) ;
 	buf->count += len ;
