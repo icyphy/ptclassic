@@ -23,9 +23,11 @@
 #   Backspace
 #   Backspace
 
-# Also:
+# Also (disabled): 
 #  <space>	Kill current selection/insert space character depending on
 #		 context
+# selection remains in entry even when it's been deleted for cases
+#  where indices are not referenced with respect to sel.first/sel.last.
 
     bind Entry <Control-f> {
 	%W icursor [expr [%W index insert]+1]; tk_entrySeeCaret %W
@@ -71,16 +73,16 @@
     bind Entry <2> {%W insert insert [selection get]; tk_entrySeeCaret %W}
     bind Entry <B2-Motion> ""
 
-    bind Entry <space> {
-	if {[selection own] != ""} {
-	        set ptkKillBuffer [
-		  string range [%W get] [%W index sel.first] \
-			[%W index sel.last]
-		  ]
-		%W delete sel.first sel.last
-		selection clear %W
-	} else {
-		%W insert insert %A
-		tk_entrySeeCaret %W
-	}
-    }
+#    bind Entry <space> {
+#	if {[selection own] == [focus]} {
+#	        set ptkKillBuffer [
+#		  string range [%W get] [%W index sel.first] \
+#			[%W index sel.last]
+#		  ]
+#		%W delete sel.first sel.last
+#		selection clear %W
+#	} else {
+#		%W insert insert %A
+#		tk_entrySeeCaret %W
+#	}
+#   }
