@@ -7,7 +7,7 @@ samples, then passes the "decision" input to the output.  Designed
 for use in decision feedback equalizers, but can be used for other
 purposes.
 	}
-	version { @(#)CGCTrainer.pl	1.2	1/28/94 }
+	version { $Id$ }
 	author { S. Ha }
 	copyright {
 Copyright (c) 1990-1994 The Regents of the University of California.
