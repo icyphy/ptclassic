@@ -2,8 +2,8 @@ defstar {
 	name { RectToPolar }
 	domain { SDF }
 	desc {
-Convert the inputs "x" and "y" representing the complex number
-$x ~+~ j ~ y$ to magnitude and phase form.
+Converts the complex number x + j y, for inputs "x" and "y",
+into magnitude and phase form.
 The phase output is in the range -PI to PI.
 	}
 	version {$Id$}
