@@ -1,4 +1,4 @@
-# Makefile for Ptolemy Tycho system, kernel/doc/internals directory.
+# Makefile for Ptolemy Tycho system, kernel/gui/doc/internals directory.
 #
 # $Id$
 # Author: Christopher Hylands
@@ -30,10 +30,10 @@
 ##########################################################################
 
 # Root of Tycho directory
-ROOT =		../../..
+ROOT =		../../../..
 
 # True source directory
-VPATH =		$(ROOT)/kernel/doc/internals
+VPATH =		$(ROOT)/kernel/gui/doc/internals
 
 # Get configuration info
 CONFIG =	$(ROOT)/mk/tycho.mk
