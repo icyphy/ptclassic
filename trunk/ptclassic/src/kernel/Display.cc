@@ -103,8 +103,8 @@ void XGraph :: initialize(Block* parent,
 			  int ignore)
 {
 	// test for existence of program.
-	if (progNotFound("xgraph", "Plots cannot be generated without it.\n"))
-		return;
+	// if (progNotFound("xgraph", "Plots cannot be generated without it.\n"))
+	// 	return;
 
 	StringList msg;
 
@@ -265,7 +265,10 @@ void XGraph :: terminate () {
                     }
         }
 
-        cmd += " xgraph ";
+	cmd += getenv("PTOLEMY");
+	cmd += "/bin.";
+	cmd += getenv("ARCH");
+        cmd += "/xgraph ";
 	if (!ascii)
 		cmd += "-binary ";
 
