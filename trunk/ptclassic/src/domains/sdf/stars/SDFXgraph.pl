@@ -34,7 +34,7 @@ for a complete explanation of the options.
 	defstate {
 		name {title}
 		type {string}
-		default {"X graph"}
+		default {"Ptolemy Xgraph"}
 		desc { Title for the plot. }
 	}
 	defstate {
@@ -46,7 +46,7 @@ for a complete explanation of the options.
 	defstate {
 		name {options}
 		type {string}
-		default {""}
+		default {"-bb -tk =800x400"}
 		desc { Command line options for xgraph.}
 	}
 	defstate {
