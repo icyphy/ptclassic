@@ -27,7 +27,7 @@ for a complete explanation of the options.
 	}
 	input {
 		name { input }
-		type { anytype }
+		type { float }
 	}
 	defstate {
 		name {title}
