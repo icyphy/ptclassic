@@ -17,15 +17,13 @@ Copyright (c) 1989 The Regents of the University of California.
 #include "err.h"
 #include "octMacros.h"
 #include "oh.h"
+#include "mkTerm.h"
+
+/* the names of the layers for the icon stems all end in "Solid",
+   e.g., redSolid, blueSolid,... */
+#define TERM_LAYER_SUFFIX "Solid"
 
 #define SHAPE_MAX 100  /* max number of points in a Shape */
-
-/* Position of terminals around icon box.  This is exported. */
-enum Position_e {
-    l3u = 0, l2u, l1u, l0, l1d, l2d, l3d,
-    r3u, r2u, r1u, r0, r1d, r2d, r3d
-};
-#define POSITION_MAX 14  /* max number of positions */
 
 struct Shape_s {
     int type;  /* OCT_PATH, OCT_POLYGON, OCT_BOX */
@@ -124,7 +122,19 @@ struct octPoint boxTranslates[] = {
 };
 
 
-static octObject *facetPtr, wiringLayer, blueOutlineLayer, blueSolidLayer;
+static octObject *facetPtr, wiringLayer;
+static octObject floatTermLayer, intTermLayer, complexTermLayer,
+		 anytypeTermLayer;
+
+/* Combine the 1st and 2nd strings and return it in the 3rd string */
+static boolean
+StrCombine(str1, str2, result)
+char *str1, *str2, *result;
+{
+    strcpy(result, str1);
+    strcat(result, str2);
+    return (TRUE);
+}
 
 /* MkTermInit 7/28/89 8/6/88 8/27/88
 Call this first.
@@ -133,9 +143,21 @@ boolean
 MkTermInit(CurrentFacetPtr)
 octObject *CurrentFacetPtr;
 {
+    char floatLayerName[20], intLayerName[20], complexLayerName[20],
+	 anytypeLayerName[20];
+    boolean StrCombine();
+
+    /* FLOAT_COLOR, etc. are defined in mkTerm.h */
+    StrCombine(FLOAT_COLOR, TERM_LAYER_SUFFIX, floatLayerName);
+    StrCombine(INT_COLOR, TERM_LAYER_SUFFIX, intLayerName);
+    StrCombine(COMPLEX_COLOR, TERM_LAYER_SUFFIX, complexLayerName);
+    StrCombine(ANYTYPE_COLOR, TERM_LAYER_SUFFIX, anytypeLayerName);
+
     facetPtr = CurrentFacetPtr;
-    CK_OCT(ohGetOrCreateLayer(facetPtr, &blueOutlineLayer, "blueOutline"));
-    CK_OCT(ohGetOrCreateLayer(facetPtr, &blueSolidLayer, "blueSolid"));
+    CK_OCT(ohGetOrCreateLayer(facetPtr, &floatTermLayer, floatLayerName));
+    CK_OCT(ohGetOrCreateLayer(facetPtr, &intTermLayer, intLayerName)); 
+    CK_OCT(ohGetOrCreateLayer(facetPtr, &complexTermLayer, complexLayerName));
+    CK_OCT(ohGetOrCreateLayer(facetPtr, &anytypeTermLayer, anytypeLayerName)); 
     CK_OCT(ohGetOrCreateLayer(facetPtr, &wiringLayer, "WIRING"));
     return(TRUE);
 }
@@ -191,22 +213,36 @@ Caveats: Assumes that inputs are always on the left and outputs are
 Updates: 8/24/89 = change to conform to OCT2.0
 */
 boolean
-MkTerm(name, input, multiple, position)
+MkTerm(name, input, type, multiple, position)
 char *name;
-boolean input, multiple;
+boolean input;
+char *type;
+boolean multiple;
 enum Position_e position;
 {
     static struct octPoint noTranslate = {0, 0};
     octObject dummy, box, term;
     struct octPoint arrowTranslate;
+    octObject *layerPtr;
 
-    ERR_IF1(!PutShape(&blueOutlineLayer, &dummy, &pathShapes[(int) position],
+    if (strcmp(type, "float") == 0 || strcmp(type, "FLOAT") == 0) {
+	layerPtr = &floatTermLayer;
+    } else if (strcmp(type, "int") == 0 || strcmp(type, "INT") == 0 ) {
+	layerPtr = &intTermLayer;
+    } else if (strcmp(type, "complex") == 0 || strcmp(type, "COMPLEX") == 0) {
+	layerPtr = &complexTermLayer;
+    } else if (strcmp(type, "anytype") == 0 || strcmp(type, "ANYTYPE") == 0) {
+	layerPtr = &anytypeTermLayer;
+    } else {
+	/* print error message, unknown datatype */ ;
+    }
+    ERR_IF1(!PutShape(layerPtr, &dummy, &pathShapes[(int) position],
 	&noTranslate));
     ERR_IF1(!PutShape(&wiringLayer, &box, &boxShape,
 	&boxTranslates[(int) position]));
     CK_OCT(ohGetByTermName(facetPtr, &term, name));
     CK_OCT(octAttach(&term, &box));
-    ERR_IF1(!PutShape(&blueSolidLayer, &dummy, &arrowShape, 
+    ERR_IF1(!PutShape(layerPtr, &dummy, &arrowShape, 
 	&boxTranslates[(int) position]));
     if (multiple) {
 /* this is obsolete now (eeg 8/27/89)
@@ -215,16 +251,12 @@ enum Position_e position;
 	if (input) {
 	    /* multiple input: add arrow to the right */
 	    arrowTranslate.x = boxTranslates[(int) position].x + (octCoord) 5;
-	    arrowTranslate.y = boxTranslates[(int) position].y;
-	    ERR_IF1(!PutShape(&blueSolidLayer, &dummy, &arrowShape,
-		&arrowTranslate));
 	} else {
 	    /* multiple output: add arrow to the left */
 	    arrowTranslate.x = boxTranslates[(int) position].x - (octCoord) 5;
-	    arrowTranslate.y = boxTranslates[(int) position].y;
-	    ERR_IF1(!PutShape(&blueSolidLayer, &dummy, &arrowShape,
-		&arrowTranslate));
-	}
+        }
+        arrowTranslate.y = boxTranslates[(int) position].y;
+        ERR_IF1(!PutShape(layerPtr, &dummy, &arrowShape, &arrowTranslate));
     } else {
 /* this is obsolete now (eeg 8/27/89)
 	(void) ohCreatePropStr(&term, &dummy, "single", "");
