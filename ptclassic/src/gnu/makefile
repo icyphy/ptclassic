@@ -316,7 +316,11 @@ $(OBJ_DIR):
 	mkdir $(OBJ_DIR)
 
 $(GNU_DEST)/$(PTARCH):
-	if [ ! -d $@ ]; then \
+	# If $@ is a link, then the mkdir may fail, which is ok
+	-if [ ! -d $@ ]; then \
+		if [ ! -d $(GNU_DEST) ]; then \
+			mkdir $(GNU_DEST); \
+		fi
 		mkdir $@; \
 	fi
 
