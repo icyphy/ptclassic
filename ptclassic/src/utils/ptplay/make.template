@@ -79,8 +79,10 @@ ptplay.unixware:
 	@echo "unixware architecture does not have a ptplay (yet)."
 
 C_INCL =	$(PTCOMPAT_INCSPEC)
-ptplay.sol2 ptplay.sol2.cfront \
-ptplay.sol2.5 ptplay.sol2.5.cfront: ptplay.sol2.o
+ptplay.sol2 ptplay.sol2.5: ptplay.sol2.o
+
+ptplay.sol2.cfront ptplay.sol2.5.cfront: ptplay.sol2.o 
+	$(CC) $^ -o $@
 
 $(BINDIR)/ptplay:	ptplay
 	@if [ $(PTARCH) = "mips" -o $(PTARCH) = "unixware" ]; then \
