@@ -1,3 +1,6 @@
+#ifndef _PTDSPcephes_h
+#define _PTDSPcephes_h
+
 /*
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
@@ -72,4 +75,6 @@ extern double PTDSPchbevl( double x, double array[], int n );
 
 #ifdef __cplusplus
 }
+#endif
+
 #endif
