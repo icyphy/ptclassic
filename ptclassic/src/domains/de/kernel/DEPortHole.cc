@@ -132,6 +132,7 @@ void InDEPort :: triggers (GenericPort& op)
 
 // destructor
 InDEPort :: ~InDEPort () {
+	cleanIt();
 	LOG_DEL; delete inQue;
 	LOG_DEL; delete triggerList;
 }
