@@ -66,7 +66,7 @@ indices:
 
 # If JAVAHOME is not set, then don't go down into the java directory
 makefiles all clean depend realclean checkjunk sccsinfo sccsclean itcldocs \
-	tests extraclean weblint:
+	tests idocs extraclean weblint:
 	@for x in $(DIRS); do \
 	    if [ -w $$x ] ; then \
 		if [ $$x = "java" ]; then \
@@ -178,7 +178,7 @@ lib.$(PTARCH):
 # This rule should contains things that might take a little while
 # to run, so it is run nightly
 nightly: sources doc/tychoClasses.dag typt/lib/PtolemyFacets.fst \
-			itcldocs indices glimpse
+			itcldocs indices glimpse idocs
 
 # Empty rule to force certain makefile rules to run
 FORCE: 
