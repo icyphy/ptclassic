@@ -49,10 +49,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 CGCTychoTarget::CGCTychoTarget(const char* name,const char* starclass,
                    const char* desc) : CGCTarget(name,starclass,desc) {
 
-	addState(skeletonMakefile.setState("skeletonMakefile",this,
-					   "$PTOLEMY/lib/cgc/TclTk_Target.mk",
-                                           "makefile to use as a base for copying to remote machine"));
-
 	loopingLevel.setInitValue("1");
 	addStream("mainLoopTerm", &mainLoopTerm);
         addStream("tychoSetup",&tychoSetup);
@@ -98,75 +94,81 @@ CodeStream CGCTychoTarget::mainLoopBody() {
     return body;
 }
 
-void CGCTychoTarget :: addStaticDecls
+void CGCTychoTarget :: addStaticDecls 
                  ( StringList &result, const char *string ) {
-  int length;
-  char *start;
-  char *current = (char *)string;
-
-  // If the string is NULL, dont parse through it
-  if (!(string == NULL)) {
-  while ( *current != '\0' ) {
-    // skip white space
-    while ( *current != '\0' 
-	    && ( *current == ' ' || *current == '\n' || *current == '\t' )) {
-      current++;
+    int length;
+    char *start;
+    char *current = (char *)string;
+    
+    // If the string is NULL, don't parse through it
+    if (!(string == NULL)) {
+        while ( *current != '\0' ) {
+            // skip white space
+            while ( *current != '\0' 
+            && ( *current == ' ' || *current == '\n' || *current == '\t' )) {
+                current++;
+            }
+            if ( *current == '\0' ) {
+                result << "\n";
+                break;
+            }
+            length = 0;
+            start = current;
+            if ( *current == '/' && *(current+1) == '*' ) {
+                // If this is a comment, go to the end of it
+                current += 2;
+                while ( *current != '\0'
+                && *current != '*' && *(current+1) != '/') {
+                    current++;
+                    length++;
+                }
+            } else if ( ! strncmp(start, "typedef", 7) ) {
+                // In a typedef. This is fragile and should match braces
+                while ( *current != '\0' && *current != '}' ) {
+                    length++;
+                    current++;
+                }
+                while ( *current != '\0' && *current != ';' ) {
+                    length++;
+                    current++;
+                }
+            } else if ( ! strncmp(start, "#", 1) ) {
+                // In a preprocessor line. Scan to end of line
+                while ( *current != '\0' && *current != '\n' ) {
+                    length++;
+                    current++;
+                }
+            } else {
+                /// Otherwise scan to the end of the statement
+                while ( *current != '\0' && *current != ';' ) {
+                    length++;
+                    current++;
+                }
+            }
+            length++;
+	    if ( *current == '*' && *(current+1) == '/' ) {
+	      /* skip the 2 symbols */
+	      length+=3;
+	      current+=3;
+	      result << "\n";
+	    } else if ( ! strncmp(start, "typedef", 7)) {
+	      result << "\n";
+	    } else if ( ! strncmp(start, "#", 1)) {
+	      result << "\n";
+	    } else if ( *current == '\0' ) {
+	      result << start;
+	      break;
+	    } else {
+	      result << "\n" << "static ";
+	    }
+	    char *temp = new char[length+1];
+	    temp[length] = '\0';
+	    strncpy(temp,start,length);
+	    result << temp;
+	    delete [] temp; 
+	    current++;
+        }
     }
-    if ( *current == '\0' ) {
-      result << "\n";
-      break;
-    }
-    length = 0;
-    start = current;
-    // If this is a comment, go to the end of it
-    if ( *current == '/' && *(current+1) == '*' ) {
-      current += 2;
-      while ( *current != '\0'
-	      && *current != '*' && *(current+1) != '/') {
-	current++;
-	length++;
-      }
-
-    } else if ( ! strncmp(start, "typedef", 7) ) {
-      // In a typedef. This is fragile and should match braces
-      while ( *current != '\0' && *current != '}' ) {
-	length++;
-	current++;
-      }
-      while ( *current != '\0' && *current != ';' ) {
-	length++;
-	current++;
-      }
-    } else {
-      while ( *current != '\0' && *current != ';' ) {
-	length++;
-	current++;
-      }
-    }
-    length++;
-    if ( *current == '\0' ) {
-      result << "static" << start;
-      break;
-    } else {
-      if ( *current == '*' && *(current+1) == '/' ) {
-	/* skip the 2 symbols */
-	length+=3;
-	current+=3;
-	result << "\n";
-      } else if ( ! strncmp(start, "typedef", 7)) {
-	result << "\n";
-      } else {
-	result << "\n" << "static ";
-      }
-      char *temp = new char[length+1];
-      temp[length] = '\0';
-      strncpy(temp,start,length);
-      result << temp;
-      delete [] temp; 
-      current++;
-    }
-  }
-  }
 }
 
 void CGCTychoTarget :: frameCode() {
@@ -220,11 +222,15 @@ void CGCTychoTarget :: frameCode() {
       << comment("so call wrapup and return 0")
 	<< "wrapup();\n"
 	<< "return 0;\n}\n";
-    
+   
+  // Mess about to get the right name for the initialization function
   char buffer[120];
+  char *b = buffer;
   strcpy(buffer,galaxy()->name());
-  buffer[0] = toupper(buffer[0]);
-
+  *b++ = toupper(*b);
+  while ( *b != '\0' ) {
+    *b++ = tolower(*b);
+  }
 
   StringList initProcedure = "int ";
   initProcedure << buffer << "_Init"
