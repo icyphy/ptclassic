@@ -144,6 +144,9 @@ class ::tycho::IDoc {
     # Return a description of the main or given class.
     public method describe {{class {}}}
 
+    # Return the filename of the documentation of the given class.
+    public method docFile {classname}
+    
     # Make the fonts in all FIMXE: widgets smaller.
     public method downSize {}
 
@@ -162,6 +165,9 @@ class ::tycho::IDoc {
     # Insert HTML into myHtml(Top or Bottom) widget
     public method putHtml {class data {top 1}}
 
+    # Return the filename of the relative documentation of the given class.
+    public method relFile {classname}
+
     # Resize the appropriate frame.
     public method resizeFrame {horizontal pixels}
     
@@ -170,12 +176,6 @@ class ::tycho::IDoc {
 
     ###################################################################
     ####                      public procs                         ####
-
-    # Return the filename of the documentation of the given class.
-    public method docFile {classname}
-
-    # Return the filename of the documentation related to the given class.
-    public method relFile {classname}
 
     ###################################################################
     ####                      protected variables                  ####
@@ -462,6 +462,82 @@ body ::tycho::IDoc::describe {{class {}}} {
 }
 
 #####################################################################
+#### docFile
+#
+# Return the documentation file for a given classname. This
+# can be any class of the language of the current IDoc. This method will
+# attempt to find the file using a language specific algorithm and will return 
+# the filename or {} if one isn't found.
+#
+# FIXME: The Itcl implementation is a hack and not valid under all cases.
+# There needs to be a facility for specifying where classes are (for Itcl 
+# especially). Java uses the CLASSPATH, which may or may not point to the
+# needed file.
+#
+body ::tycho::IDoc::docFile {classname} {
+    if {$classname == $mainClass} {
+        return [$this cget -file]
+    }
+    
+    switch $language {
+        Itcl {
+            set docname "[info namespace tail $classname].idoc"
+            
+            lappend dirs {$TYCHO/kernel}
+            lappend dirs {$TYCHO/editors/textedit}
+            lappend dirs {$TYCHO/editors/slate}
+            lappend dirs {$TYCHO/editors/visedit}
+            lappend dirs {$TYCHO/lib/tydoc}
+            
+            foreach dir $dirs {
+                set findfile [file join $dir doc codeDoc $docname]
+                set findfile [::tycho::expandPath $findfile]
+                set docfile [glob -nocomplain $findfile]
+                if {$docfile != {}} {
+                    break
+                }
+            }
+            return "$docfile"
+        }
+        Java {
+            # Shorten the full classname
+            set docname $classname
+            regexp {[.]([^.]+)$} $docname dmy docname
+            
+            # Add the idoc extension
+            set docname "$docname.idoc"
+
+            # Get the CLASSPATH, turn into a list
+            set classPath [::tycho::expandPathSplit \
+                    [::tycho::preference get java classPath]]
+            set classPathList [split $classPath [::tycho::pathSeparator]]
+
+            # Can't read .zip files (Assume at most one.)
+            set zipfile [lsearch -glob $classPathList *.zip]
+            if {$zipfile != -1} {
+                lreplace $classPathList $zipfile $zipfile                
+            }
+
+            # Add tycho java directories, which may not be in the classPath
+            # NOTE: let's not do this...
+
+            foreach dir $classPathList {
+                set findfile [::tycho::expandPath \
+                        [file join $dir doc codeDoc $docname]]
+                set docfile [glob -nocomplain $findfile]
+                if {$docfile != {}} {
+                    break
+                }
+            }
+            
+            # Last, check java source docs. FIXME: Where will they go?
+
+            return "$docfile"
+        }
+    }
+}
+
+#####################################################################
 #### downSize
 # 
 body ::tycho::IDoc::downSize {} {
@@ -549,7 +625,7 @@ body ::tycho::IDoc::inheritAll {{redisplay 1}} {
     # clear inherited classes
     deleteClasses 0
 
-    set parents [$classModel parents]
+    set parents [$classModel parents -inheritance implementation]
         
     while {[llength $parents] != 0} {
         set parent [lindex $parents 0]
@@ -647,58 +723,6 @@ body ::tycho::IDoc::putHtml {class data {top 1}} {
 }
 
 #####################################################################
-#### resizeFrame
-# Resize the frame after a mouse event involving either handle.
-#
-body ::tycho::IDoc::resizeFrame {horizontal pixels} {
-    if {$horizontal} {
-        $this config -relwidth [newRelWidth $pixels]
-    } {
-        $this config -relheight [newRelHeight $pixels]
-    }
-}
-
-#####################################################################
-#### upSize
-# 
-body ::tycho::IDoc::upSize {} {
-    $myHtmlTop upSize
-    $myHtmlBottom upSize
-}
-
-    ###################################################################
-    ###################################################################
-    ####                      public procs                         ####
-
-#####################################################################
-#### docFile
-# FIXME: this is a hack and not valid under all (many) cases 
-#
-body ::tycho::IDoc::docFile {classname} {
-    if {$classname == $mainClass} {
-        return [$this cget -file]
-    }
-
-    set docname "[info namespace tail $classname].idoc"
-
-    lappend dirs {$TYCHO/kernel}
-    lappend dirs {$TYCHO/editors/textedit}
-    lappend dirs {$TYCHO/editors/slate}
-    lappend dirs {$TYCHO/editors/visedit}
-    lappend dirs {$TYCHO/lib/tydoc}
-    
-    foreach dir $dirs {
-        set findfile [file join $dir doc codeDoc $docname]
-        set findfile [::tycho::expandPath $findfile]
-        set docfile [glob -nocomplain $findfile]
-        if {$docfile != {}} {
-            break
-        }
-    }
-    return "$docfile"
-}
-
-#####################################################################
 #### relFile
 # FIXME: this is a hack and not valid under all (many) cases 
 # This should use the class model -source option and modify that
@@ -723,6 +747,31 @@ body ::tycho::IDoc::relFile {classname} {
     }
     return "$relfile"
 }
+
+#####################################################################
+#### resizeFrame
+# Resize the frame after a mouse event involving either handle.
+#
+body ::tycho::IDoc::resizeFrame {horizontal pixels} {
+    if {$horizontal} {
+        $this config -relwidth [newRelWidth $pixels]
+    } {
+        $this config -relheight [newRelHeight $pixels]
+    }
+}
+
+#####################################################################
+#### upSize
+# 
+body ::tycho::IDoc::upSize {} {
+    $myHtmlTop upSize
+    $myHtmlBottom upSize
+}
+
+    ###################################################################
+    ###################################################################
+    ####                      public procs                         ####
+
 
     ###################################################################
     ###################################################################
@@ -1690,6 +1739,12 @@ body ::tycho::IDoc::formatExpl {class item type} {
                 set html "<b>$shortname</b> "
             }
             append html "<i>$other</i> $exceptions<p> $expl"            
+    
+            # Add footer for inherited items
+            if {$class != $mainClass && $class != "related"} {
+                append html "<br><br><br><hr>\
+                        <a href=\"[docFile $class]\">$class</a>"
+            }
         }
     }
     return $html
