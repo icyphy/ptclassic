@@ -185,7 +185,7 @@ body ::tycho::Builder::classDiagram {} {
     puts "Creating [file join $TYCHO doc tychoClasses.dag]"
     update
     if { [info command tychoStandardDAG] == {} } {
-	source [file join $TYCHO kernel tychoMakeClassDAG.tcl]
+	source [file join $TYCHO kernel basic tychoMakeClassDAG.tcl]
     }
     set savedir [pwd]
     cd [file join $TYCHO doc]
@@ -394,7 +394,7 @@ body ::tycho::Builder::testAll {} {
     global TYCHO
     set savedir [pwd]
     cd $TYCHO
-    source [file join kernel test alltychotests.tcl]
+    source [file join kernel gui test alltychotests.tcl]
     cd $savedir
 }
 
