@@ -453,6 +453,7 @@ proc tkoct_window { w args} {
     } else {
       # From tkAux, we need to fix this
       #focus_goTo $w.main.ged
+      bind $w.main.ged <Enter> {focus %W}
       focus $w.main.ged
     }
     return $w
