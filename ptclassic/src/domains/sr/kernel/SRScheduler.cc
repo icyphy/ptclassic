@@ -24,8 +24,8 @@ PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
 CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
 
-    Author:	T.M. Parks
-    Created:	6 January 1992
+    Author:	S. A. Edwards
+    Created:	9 April 1996
 
 */
 
@@ -35,7 +35,9 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #include "SRScheduler.h"
 #include "Galaxy.h"
+#include "GalIter.h"
 #include "Error.h"
+#include <stream.h>
 
 extern const char SRdomainName[];
 
@@ -76,6 +78,15 @@ int SRScheduler::run()
     }
 
     /* Insert your own code to run the simulation. */
+
+    GalStarIter nextStar( *galaxy() );
+    Star *s;
+
+    while ( ( s = nextStar++ ) != 0 ) {
+      cout << s->fullName() << "\n";
+    }
+
+    cout.flush();
 
     return !SimControl::haltRequested();
 }
