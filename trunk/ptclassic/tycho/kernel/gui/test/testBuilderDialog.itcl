@@ -93,5 +93,5 @@ test BuilderDialog-3.1 {Build the Distribution} {
     $bd menubar invoke Distribute {{Full Distribution}}
     delete object [$bd displayer]
     # It would be nice if we knew where the distribution was to appear.
-    file writable [::tycho::Build::getDistBuildDir]
+    file writable [::tycho::Builder::getDistBuildDir]
 } {1}
