@@ -719,8 +719,12 @@ PortHole& MultiPortHole :: installPort(PortHole& p) {
 	if (type() == ANYTYPE)
 		p.inheritTypeFrom(*this);
 	// we can do the following as a friend function
-	p.myMultiPortHole = this;
+	letMeKnownToChild(p);
 	return p;
+}
+
+void MultiPortHole :: letMeKnownToChild(PortHole& p) {
+	p.myMultiPortHole = this;
 }
 
 PortHole& MultiPortHole :: newPort() {
