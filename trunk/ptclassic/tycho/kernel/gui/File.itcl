@@ -1242,7 +1242,7 @@ body ::tycho::File::indicateReadOnly {bool} {
 # (use <a href="File_rel.html"><code>::tycho::openContext</code></a>
 # instead).
 #
-body ::tycho::openContext {filename {mode {}}} {
+body ::tycho::File::openContext {filename {mode {}}} {
      eval [list ::tycho::openContext $filename] $mode
 }
 
