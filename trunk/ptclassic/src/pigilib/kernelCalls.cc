@@ -630,12 +630,12 @@ KcCheckTerms(const char* name, const char** newNames, const char** newTypes,
 	// Now look for any multiPortHoles that were not converted
 	for (int mphNum = 0; mphNum < nm; mphNum++) {
 	    int mpos = 0;
-	    if (!isStringInList(names[n+mphNum], (const char**)mphname,
-			        nf, mpos) && npspec[mpos]) {
-		newNames[newNameCount] = names[n+mphNum];
-		newTypes[newNameCount] = types[n+mphNum];
-		newIsOut[newNameCount++] = isOut[n+mphNum];
-	    }
+	    if (isStringInList(names[n+mphNum], (const char**)mphname,
+			        nf, mpos) && npspec[mpos])
+		continue;
+	    newNames[newNameCount] = names[n+mphNum];
+	    newTypes[newNameCount] = types[n+mphNum];
+	    newIsOut[newNameCount++] = isOut[n+mphNum];
 	}
 
 	// Return values
