@@ -50,7 +50,7 @@ ITCL_SRCS =
 
 EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) tydoc
 
-MISC_FILES = 
+MISC_FILES =	README.txt
 
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =
