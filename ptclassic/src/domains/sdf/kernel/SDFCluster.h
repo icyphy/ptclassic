@@ -110,6 +110,9 @@ public:
 	// galaxy
 	void dupStream(SDFClusterGal *pgal) { logstrm = pgal->logstrm;}
 
+	// generate schedules for interior clusters
+	void genSubScheds();
+
 protected:
 	ostream* logstrm;	// for logging errors
 
@@ -162,8 +165,11 @@ public:
 	// generate code using target methods
 	virtual void genCode(Target&, int depth) = 0;
 
-	// hook for doing simulated execution of the real stars.
-	virtual void simRunRealStars() = 0;
+	// generate internal schedule, if any.  Default is do-nothing.
+	virtual int genSched() { return TRUE;}
+
+	// fix internal buffer sizes.  Arg is #times cluster is executed.
+	virtual void fixBufferSizes(int) = 0;
 
 	// run/go
 	int run() = 0;
@@ -235,7 +241,7 @@ public:
 
 	// generate code for loop beginning and ending
 	// by default, no code.
-	virtual void genLoopInit(Target&, int reps) {}
+	virtual void genLoopInit(Target&, int) {}
 	virtual void genLoopEnd(Target&) {}
 };
 
@@ -261,11 +267,8 @@ public:
 	void go() { run();}
 	int myExecTime();
 
-	// simulate execution of underlying real stars.
-	// call simRunStar on the "real" star loop() times,
-	// so info like the maximum # of tokens on each arc
-	// will get set right.
-	void simRunRealStars();
+	// set buffer sizes of the real star.
+	void fixBufferSizes(int);
 
 	// print me
 	ostream& printOn(ostream&);
@@ -300,8 +303,6 @@ protected:
 	// we permit disconnected galaxies.
 	int checkConnectivity() { return TRUE;}
 
-	// simulate execution of "real" stars to set geodesics right.
-	void simRunRealStars();
 };
 
 // An SDFClusterBag is a composite object.  In some senses it is like
@@ -318,12 +319,8 @@ public:
 	// how many clusters
 	int size() const { return gal ? gal->numberBlocks() : 0;}
 
-	// simulate execution for schedule generation.  When executed
-	// for the first time, my internal schedule is generated.
-	// The effect is to call simRunStar on the "real" stars,
-	// so info like the maximum # of tokens on each arc will
-	// get set right.
-	void simRunRealStars();
+	// set info on maximum # of tokens on each arc.
+	void fixBufferSizes(int);
 
 	// absorb adds the SDFCluster argument to the bag
 	void absorb(SDFCluster*,SDFClusterGal*);
@@ -402,6 +399,11 @@ public:
 	SDFClustPort* inPtr() {
 		return bagPortFlag ? (SDFClustPort*)&pPort : 0;
 	}
+	// set arc count ... go inside until one with a geo is found
+	void setMaxArcCount(int n);
+	// get arc count .. go outside until one with a geo is found
+	int maxArcCount();
+
 private:
 	DFPortHole& pPort;
 	SDFClustPort* pOutPtr;
@@ -435,14 +437,14 @@ class SDFClustPortIter : public BlockPortIter {
 public:
 	SDFClustPortIter(SDFCluster& s) : BlockPortIter(s) {}
 	SDFClustPort* next() { return (SDFClustPort*)BlockPortIter::next();}
-	SDFClustPort* operator++() { return next();}
+	SDFClustPort* operator++(POSTFIX_OP) { return next();}
 };
 
 class SDFClusterGalIter : public GalTopBlockIter {
 public:
 	SDFClusterGalIter(SDFClusterGal& g) : GalTopBlockIter(g) {}
 	SDFCluster* next() { return (SDFCluster*)GalTopBlockIter::next();}
-	SDFCluster* operator++() { return next();}
+	SDFCluster* operator++(POSTFIX_OP) { return next();}
 	GalTopBlockIter::reset;
 };
 
@@ -450,7 +452,7 @@ class SDFClusterBagIter : public GalTopBlockIter {
 public:
 	SDFClusterBagIter(SDFClusterBag& b) : GalTopBlockIter(*(b.gal)) {}
 	SDFCluster* next() { return (SDFCluster*)GalTopBlockIter::next();}
-	SDFCluster* operator++() { return next();}
+	SDFCluster* operator++(POSTFIX_OP) { return next();}
 	GalTopBlockIter::reset;
 };
 
