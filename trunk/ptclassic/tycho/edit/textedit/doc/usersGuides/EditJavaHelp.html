@@ -28,11 +28,60 @@ The <CODE>Evaluate</CODE> menu choice under the <CODE>File</CODE> menu
 will compile and optionally run the Java file currently being edited.
 The <A
 HREF="../../../../kernel/doc/codeDoc/CompileJava.html"><CODE>CompileJava</CODE></A>
-class documentation discusses the details.
- <P> 
-The Tycho <CODE>classPath</CODE> preference is used to set the
+class documentation discusses the programming details, we discuss the
+user level details below.
+<p>
+The EditJava editor support two primary methods of evaluating Java files:
+<MENU>
+<li>If the <code>.java</code> file contains a <code>main()</code>, then we
+call <CODE>java -cs</CODE> <i>ClassName</i>, which will check the
+modification times of the <code>.java</code> and <code>.class</code>
+file and compile if necessary. Then the class file is run and we are
+done.
+
+<li>If the <code>.java</code> file does not contain a
+<code>main()</code>, then we call <code>javac</code> <i>ClassName</i>,
+which will compile the file.
+
+<p>After the compilation successfully completes, we check if there is a
+<i>ClassName</i><code>.html</code> file present, then we run
+<code>appletViewer</code> <i>ClassName.html</i>. It would be nice if we
+checked to see if the <code>.java</code> file extends
+<code>Applet</code>, but that is more work.
+</MENU>
+<P>The Tycho <CODE>classPath</CODE> preference is used to set the
 <CODE>CLASSPATH</CODE> environment variable before the various Java tools
 are run.
+<H3>Evaluating a Java Application</H3>
+<A
+HREF="../../test/DrawTest.java"><CODE>$TYCHO/editors/textedit/test/DrawTest.java</CODE></A>
+is a Java application that includes a <CODE>main()</CODE>.  If you edit
+this file and then invoke <CODE>Evaluate</CODE> with either 
+<MENU>
+<LI> The <CODE>Evaluate</CODE> choice under the <CODE>File</CODE> menu.
+<LI> By typing <CODE>C-xC-r</CODE>
+</MENU>
+then a 
+<A
+HREF="../../../../kernel/doc/codeDoc/Exec.html"><CODE>Exec</CODE></A>
+widget will come up and evaluate and run the java file with
+<CODE>java -cs -v</CODE>
+<P> Note that evaluating a Java file will create a <CODE>.class</CODE>
+file in the directory where the <CODE>.java</CODE> file resides.  If
+you do not have write permission to <CODE>$TYCHO/editors/textedit/test</CODE>
+then you could copy the <CODE>.java</CODE> files to a directory
+where you have write permission.
+<H3>Evaluating a Java Applet</H3>
+<A
+HREF="../../test/Blink.java"><CODE>$TYCHO/editors/textedit/test/Blink.java</CODE></A>
+is a Java applet that does <B>not</B> include a <CODE>main()</CODE>. If
+you edit this file and then invoke <CODE>Evaluate</CODE> as above, first
+<CODE>javac</CODE> is run to compile the file, and then
+<CODE>appletviewer</CODE> is run.
+<p>
+Note that the Exec windows that come up when you evaluate a Java file are
+persistant between evaluations.  This allows you to modify the command line
+once and reuse your command line during the next evaluation.
 
 <H2>'Special' Menu choices</H2>
 The <A NAME="Java Editor Body Template"><CODE>Body Template</CODE>
