@@ -32,9 +32,13 @@ SDFKERSRC=$(ROOT)/src/domains/sdf/kernel
 SDFLOOP=$(ROOT)/src/domains/sdf/loopScheduler
 
 # libraries
+ifdef MATLABLIBDIR
+MATLABEXT_LIB= -lmat
+endif
+
 LIBS=-lsdfstars -lsdfdspstars -lsdfimagestars -lsdfatmstars -lsdfmatrixstars \
 	-lLS -lsdf -lImage -latm -lcompileSDF -lptolemy \
-	$(SYSLIBS)
+	$(MATLABLIBDIR) $(MATLABEXT_LIB) $(SYSLIBS)
 
 LIBFILES=\
  $(LIBDIR)/libLS.a $(LIBDIR)/libsdf.a \
@@ -49,7 +53,7 @@ SRCS=code.cc
 # Rule for compiling with C++ programs
 .SUFFIXES: .cc
 .cc.o:
-	$(CPLUSPLUS) $(GPPFLAGS) -I$(KERNDIR) -I$(SDFSRC) -I$(SDF_DSP_SRC) -I$(SDF_IMAGE_SRC) -I$(SDF_ATM_SRC) -I$(SDF_MATRIX_SRC) -I$(SDFKERSRC) -I$(SDFLOOP) -c  $<
+	$(CPLUSPLUS) $(GPPFLAGS) -I$(KERNDIR) -I$(SDFSRC) -I$(SDF_DSP_SRC) -I$(SDF_IMAGE_SRC) -I$(SDF_ATM_SRC) -I$(SDF_MATRIX_SRC) -I$(MATLABDIR)/extern/include -I$(SDFKERSRC) -I$(SDFLOOP) -c  $<
 
 all:		makefile code
 
