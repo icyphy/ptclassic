@@ -285,6 +285,7 @@ body ::tycho::Subpanel::constructor {args} {
     itk_component add mainFrame {
 	frame $itk_interior.mainFrame
     } {
+        keep -background -cursor
     }
     pack $itk_component(mainFrame) -side left
 
@@ -292,6 +293,7 @@ body ::tycho::Subpanel::constructor {args} {
     itk_component add titleFrame {
 	frame $itk_component(mainFrame).titleFrame
     } {
+        keep -background -cursor
     }
     pack $itk_component(titleFrame) -side top -anchor nw -expand yes
 
@@ -300,6 +302,7 @@ body ::tycho::Subpanel::constructor {args} {
     itk_component add spaceFrame {
 	frame $itk_component(mainFrame).spaceFrame
     } {
+        keep -background -cursor
     }
     pack propagate $itk_component(spaceFrame) off
 
@@ -307,12 +310,14 @@ body ::tycho::Subpanel::constructor {args} {
     itk_component add panelFrame {
 	frame $itk_component(mainFrame).panelFrame
     } {
+        keep -background -cursor
     }
 
     # create frame for label
     itk_component add labelFrame {
 	frame $itk_component(titleFrame).labelFrame 
     } {
+        keep -background -cursor
     }
     pack $itk_component(labelFrame) -side right -anchor ne  
 
@@ -320,6 +325,7 @@ body ::tycho::Subpanel::constructor {args} {
     itk_component add arrowFrame {
 	frame $itk_component(titleFrame).arrowFrame
     } {
+        keep -background -cursor
     }
     pack $itk_component(arrowFrame) -side right -padx 2 -anchor nw
     
@@ -327,7 +333,7 @@ body ::tycho::Subpanel::constructor {args} {
     itk_component add arrow {
 	button $itk_component(arrowFrame).arrow
     } {
-	keep -cursor
+	keep -cursor -background -foreground
     }
     pack $itk_component(arrow)
 
@@ -336,7 +342,7 @@ body ::tycho::Subpanel::constructor {args} {
 	label $itk_component(labelFrame).title \
 		-justify right
     } {
-	keep -background -font -foreground
+	keep -background -font -foreground -cursor
     }
     pack $itk_component(title) -side left
 
@@ -344,6 +350,7 @@ body ::tycho::Subpanel::constructor {args} {
     itk_component add widgetFrame {
 	frame $itk_component(panelFrame).widgetFrame
     } {
+        keep -background -cursor
     }
     pack $itk_component(widgetFrame) -side top -anchor nw
 
