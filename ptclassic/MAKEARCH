@@ -38,5 +38,5 @@ foreach x (sdf ddf de capsim)
 end
 
 # This is for the makefile
-cd ..
+cd ../..
 touch obj.$ARCH
