@@ -46,6 +46,10 @@ ENHANCEMENTS, OR MODIFICATIONS.
 SimVSSTarget :: SimVSSTarget(const char* name,const char* starclass,
 			     const char* desc) :
 VHDLTarget(name,starclass,desc) {
+  addState(synopsys.setState("$SYNOPSYS",this,"/usr/tools/synopsys",
+			    "value for SYNOPSYS environment variable."));
+  addState(simarch.setState("$SIM_ARCH",this,"sparcOS5",
+			    "value for SIM_ARCH environment variable."));
   addState(analyze.setState("analyze",this,"YES",
 			    "switch for analyzing code."));
   addState(startup.setState("startup",this,"YES",
@@ -102,9 +106,48 @@ void SimVSSTarget :: begin() {
 void SimVSSTarget :: setup() {
 //  printf("Setup Method of SimVSSTarget called\n");
 
+  synopsys.initialize();
+  simarch.initialize();
+
+  StringList synopsysString;
+  StringList simarchString;
+
+  synopsysString = "SYNOPSYS=";
+  synopsysString << synopsys.currentValue();
+  const char* hashSynopsysString = hashstring(synopsysString);
+
+  simarchString = "SIM_ARCH=";
+  simarchString << simarch.currentValue();
+  const char* hashSimarchString = hashstring(simarchString);
+
+  putenv(hashSynopsysString);
+  putenv(hashSimarchString);
+
+/*
+  const char* returnString;
+  returnString = getenv("SYNOPSYS");
+  if (returnString)
+    {
+      printf("$SYNOPSYS = %s\n", returnString);
+    }
+  else
+    {
+      printf("$SYNOPSYS unset\n");
+    }
+  returnString = getenv("SIM_ARCH");
+  if (returnString)
+    {
+      printf("$SIM_ARCH = %s\n", returnString);
+    }
+  else
+    {
+      printf("$SIM_ARCH unset\n");
+    }
+    */
+  
   writeCom = 1;
 
-// Don't init here because it clobbers VHDLCSend,Receive
+// Don't init code streams here because it clobbers VHDLCSend,Receive
 // stars' code generated in their begin methods.
 //  VHDLTarget::setup();
 //  initVHDLObjLists();
