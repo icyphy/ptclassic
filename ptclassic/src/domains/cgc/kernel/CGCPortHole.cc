@@ -26,7 +26,7 @@ CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
 							COPYRIGHTENDKEY
 
- Programmer: E. A. Lee and Soonhoi Ha
+ Programmer: S. Ha and E. A. Lee
 
  These classes are portholes for stars that generate C code.  
 
@@ -59,7 +59,11 @@ void CGCPortHole::setFlags() {
 }
 
 BufType CGCPortHole::bufType() const { 
-	if (atBoundary()) return myType;
+	if (switched()) {
+		CGCPortHole* cp = (CGCPortHole*) cgGeo().sourcePort();
+		return cp->bufType();
+	}
+	if ((far() == 0) || atBoundary()) return myType;
 	return isItOutput()? myType: realFarPort()->bufType(); 
 }
 
@@ -93,7 +97,11 @@ int CGCPortHole :: initOffset() {
 // is achieved or not.
 // return 1 if on the wormhole boundary
 int CGCPortHole :: maxBufReq() const {
-	if (atBoundary()) return maxBuf;
+	if (switched()) {
+		CGCPortHole* cp = (CGCPortHole*) cgGeo().sourcePort();
+		return cp->maxBufReq();
+	}
+	if ((far() == 0) || atBoundary()) return maxBuf;
 	return isItOutput()? maxBuf: realFarPort()->maxBufReq();
 }
 
@@ -102,6 +110,10 @@ int CGCPortHole :: maxBufReq() const {
 // will read.
 void CGCPortHole :: finalBufSize(int statBuf) {
 	if (isItInput()) return;
+	else if (far() == 0) {
+		maxBuf = numXfer();
+		return;
+	}
 
 	if (far()->isItOutput()) {
 		maxBuf = localBufSize();
@@ -199,10 +211,12 @@ const CGCPortHole* CGCPortHole :: realFarPort() const {
 }
 
 void CGCPortHole :: setGeoName(char* n) {
-	geo().setBufName(n);
+	if (myGeodesic == 0) bufName = n;
+	else geo().setBufName(n);
 }
 
 const char* CGCPortHole :: getGeoName() const {
+	if (bufName) return bufName;
 	return geo().getBufName();
 }
 
@@ -222,6 +236,7 @@ int CGCPortHole :: isConverted(){
 }
 
 const char* CGCPortHole :: getLocalGeoName() {
+	if (bufName) return bufName;
 	if (isItInput() || (isConverted() == FALSE))
 		 return geo().getBufName();
 	StringList temp = geo().getBufName();
