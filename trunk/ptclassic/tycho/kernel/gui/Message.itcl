@@ -124,6 +124,8 @@ body ::tycho::Message::constructor {args} {
     # Pack the OK button.
     addButton ok -text "OK <Ret>" -command "delete object $this"
     default ok
+    # For consistency, escape also dismisses dialog.
+    bind $itk_component(hull) <Escape> "$this invoke ok; break"
 
     # Explicitly handle configs that may have been ignored earlier.
     eval itk_initialize $args
