@@ -58,9 +58,7 @@ VHDLFiring* VHDLFiring :: newCopy() {
   newFiring->portList = this->portList->newCopy();
   newFiring->decls = this->decls;
   newFiring->variableList = this->variableList->newCopy();
-  newFiring->portVarList = this->portVarList->newCopy();
   newFiring->action = this->action;
-  newFiring->varPortList = this->varPortList->newCopy();
   newFiring->genericMapList = this->genericMapList->newCopy();
   newFiring->portMapList = this->portMapList->newCopy();
   newFiring->signalList = this->signalList->newCopy();
