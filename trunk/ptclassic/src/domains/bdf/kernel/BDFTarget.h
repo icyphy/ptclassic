@@ -56,6 +56,9 @@ protected:
 	// schedulePeriod for interface with a timed domain.
 	FloatState schedulePeriod;
 
+	// return the domain of the galaxy if it exists and "BDF" otherwise
+	const char* domain();
+
 public:
 	BDFTarget();
 	void setup();

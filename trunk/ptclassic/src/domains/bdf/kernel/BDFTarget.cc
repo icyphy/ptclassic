@@ -81,3 +81,7 @@ void BDFTarget::setup() {
 	setSched(s);
 	Target::setup();
 }
+
+const char* BDFTarget::domain() {
+	return galaxy() ? galaxy()->domain() : "BDF";
+}
