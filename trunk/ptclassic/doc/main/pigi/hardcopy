@@ -26,7 +26,7 @@ a dialog box appears into which options may be entered.
 The following options may prove useful:
 .TS
 l lw(5i).
--p     T{
+-p	T{
 Print in portrait mode, scaling to fit on the page or in the box
 defined by the -b option.
 T}
