@@ -1,14 +1,20 @@
 .\" $Id$
 .NA upsample
 .SD
-Up-sample demo
+Upsampling demonstration.
 .DE
 .SV $Revision$ $Date$
 .AL "S. Ha"
-.LO "~ptolemy/src/domains/cgc/demo"
+.EQ
+delim off
+.EN
+.LO "$PTOLEMY/src/domains/cgc/demo"
+.EQ
+delim $$
+.EN
 .LD
-.Ie "up-sample"
-This simple up-sample demo tests the static buffering.
+.Ie "upsample"
+This simple up-sample demo tests static buffering.
 Each invocation of the
 .c XMgraph
 star reads the input from the fixed buffer location in the generated code
