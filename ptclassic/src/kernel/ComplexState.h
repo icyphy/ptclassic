@@ -33,7 +33,7 @@ public:
         void initialize();
 
         // the type
-        char* type(); // { return "COMPLEX";}
+	const char* type(); // { return "COMPLEX";}
 
         // the value as a string
 	StringList currentValue();

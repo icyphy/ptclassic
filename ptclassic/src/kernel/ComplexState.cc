@@ -26,7 +26,7 @@ $Id$
 **************************************************************************/
 
 // the type
-char* ComplexState :: type() { return "COMPLEX";}
+const char* ComplexState :: type() { return "COMPLEX";}
 
 // the value as a string
 StringList ComplexState :: currentValue() {
