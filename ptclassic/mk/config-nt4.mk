@@ -52,7 +52,7 @@ include $(ROOT)/mk/config-g++.mk
 RANLIB = true
 YACC= byacc
 # Use gcc everywhere including in octtools
-CC =		gcc
+CC =		gcc -I$(ROOT)/src/compat/nt
 
 # In config-$PTARCH.mk, we set the following variables.  We need to 
 # use only the following variables so that we can use them elsewhere, say
