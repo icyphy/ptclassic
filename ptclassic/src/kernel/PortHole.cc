@@ -147,7 +147,7 @@ void GenericPort :: inheritTypeFrom(GenericPort& p) {
   // If a typePortPtr already exists, we need to first remove
   // this porthole from the circle containing it.
   GenericPort *q;
-  if (q = typePortPtr) {
+  if ( (q = typePortPtr) ) {
     while (q->typePortPtr != this)
       q = q->typePortPtr;
     q->typePortPtr = typePortPtr;
