@@ -116,13 +116,13 @@ public:
 	virtual void orgDirective(const char*, unsigned) {}
 
 	// output an integer
-	virtual void writeInt (int) {};
+	virtual void writeInt (int) {}
 
 	// output a fixed-point value, passed as a double argument.
-	virtual void writeFix (double) {};
+	virtual void writeFix (double) {}
 
 	// output a floating-point value.
-	virtual void writeFloat (double) {};
+	virtual void writeFloat (double) {}
 /*
 	// output a comment.  Default form uses "outputLineOrientedComment"
 	// to make comments beginning with semicolons.
