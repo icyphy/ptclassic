@@ -1,7 +1,7 @@
 # Config file to build under NT 4 with cygnus gcc and g++
-# NOTE: PTOLEMY WILL NOT COMPILE UNDER NT
+# NOTE: this is only a partial port of Ptolemy
 # This file is present only as a starting point for others.
-# See http://ptolemy.eecs.berkeley.edu/~cxh/nt-ptolemy.html
+# $PTOLEMY/doc/html/nt/index.html for more information.
 
 # $Id$
 
@@ -31,6 +31,9 @@
 # 						COPYRIGHTENDKEY
 #		       
 # Programmer:  Christopher Hylands
+
+# This port uses Cygnus GNU-win32 b18, available from
+# www.cygnus.com
 
 # --------------------------------------------------------------------
 # |  Please see the file ``config-default.mk'' in this directory!    |
