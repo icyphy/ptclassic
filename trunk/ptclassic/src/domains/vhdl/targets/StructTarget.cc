@@ -506,6 +506,32 @@ void StructTarget :: frameCode() {
     myCode << "\n";
   }
   
+  if (initials()) {
+    myCode << "\n";
+    myCode << "     -- initial : initial value selector\n";
+    myCode << "entity initial is\n";
+    myCode << "	port(\n";
+    myCode << "		control: IN BOOLEAN;\n";
+    myCode << "		init_val: IN INTEGER;\n";
+    myCode << "		input: IN INTEGER;\n";
+    myCode << "		output: OUT INTEGER\n";
+    myCode << "	);\n";
+    myCode << "end initial;\n";
+    myCode << "\n";
+    myCode << "architecture behavior of initial is\n";
+    myCode << "	begin\n";
+    myCode << "		process (control, init_val, input)\n";
+    myCode << "		begin\n";
+    myCode << "			if control then\n";
+    myCode << "				output <= input;\n";
+    myCode << "			else\n";
+    myCode << "				output <= init_val;\n";
+    myCode << "			end if;\n";
+    myCode << "		end process;\n";
+    myCode << "end behavior;\n";
+    myCode << "\n";
+  }
+  
   myCode << "\n-- entity_declaration\n";
   myCode << "\n" << entity_declaration;
   myCode << "\n-- architecture_body_opener\n";
@@ -562,19 +588,6 @@ void StructTarget :: beginIteration(int repetitions, int depth) {
 
 // Generate code to end an iterative procedure
 void StructTarget :: endIteration(int /*reps*/, int depth) {
-}
-
-// Declare PortHole buffer.
-StringList StructTarget :: declBuffer(const VHDLPortHole* /*port*/) {
-  StringList dec;
-  return dec;
-}
-
-// Declare State variable.
-StringList StructTarget :: declState(const State* /*state*/, const
-				     char* /*name*/) {
-  StringList dec;
-  return dec;
 }
 
 int StructTarget :: codeGenInit() {
@@ -710,7 +723,6 @@ void StructTarget :: registerState(State* state, int thisFiring/*=-1*/,
   // Root is ref, without marking for any particular firing.
   root = ref;
 
-//  if (thisFiring >= 0) ref << "_" << thisFiring;
   ref << "_" << thisFiring;
 
   StringList refIn = sanitize(ref);
@@ -752,25 +764,12 @@ void StructTarget :: registerState(State* state, int thisFiring/*=-1*/,
     // If it's the first firing to refer to this state,
     if (isFirstStateRef) {
       // make regi, map it to IN and OUT
-
-      registerRegister(state->type());
-      
-      StringList label = reg;
-      StringList name = "Reg";
-//      name << "_" << stType;
-      name << "_" << "INT";
-      VHDLPortMapList* portMapList = new VHDLPortMapList;
-      VHDLGenericMapList* genMapList = new VHDLGenericMapList;
-      portMapList->initialize();
-      genMapList->initialize();
-      
-      portMapListPut(portMapList, "D", refOut);
-      portMapListPut(portMapList, "Q", refIn);
-      portMapListPut(portMapList, "C", "clock");
-      
-      portListPut(&systemPortList, "clock", "IN", "boolean");
-      
-      registerCompMap(label, name, portMapList, genMapList);
+      connectReg(refOut, refIn, stType);
+//	StringList TEMP = refIn;
+//	TEMP << "_Temp";
+//      connectReg(refOut, TEMP, stType);
+//      connectInit(TEMP, refIn, initVal, stType);
+//      signalListPut(&signalList, TEMP, stType, "", "");
 
       signalListPut(&firingSignalList, refIn, stType, "", refIn);
       portMapListPut(&firingPortMapList, refIn, refIn);
