@@ -36,13 +36,6 @@ Produce code for inter-process communication (send-side)
                 attributes { A_NONSETTABLE }
         }
 	state {
-		name { IPCHandlerName }
-		type { STRING }
-		default { "IPCHandler" }
-		desc { Name of sender's IPC handler function. }
-		attributes { A_NONSETTABLE }
-	}
-	state {
 		name { hostAddr }
 		type { int }
 		default { 0 }
@@ -54,6 +47,13 @@ Produce code for inter-process communication (send-side)
                 type { int }
                 default { 0 }
                 desc { Number of nodes in program. }
+                attributes { A_NONSETTABLE }
+        }
+        state {
+                name { pairNumber }
+                type { int }
+                default { 0 }
+                desc { Send Receive pair number for unique IP port. }
                 attributes { A_NONSETTABLE }
         }
 
@@ -119,10 +119,8 @@ void error_handler(int status, op_t opcode, void *argblock)
 }
         }
         codeblock (amdecls) {
-ea_t endpoint;
 eb_t bundle;
 en_t global;
-int $starSymbol(i);
         }
         codeblock (timedecls) {
 #ifdef TIME_INFO
@@ -139,6 +137,8 @@ double $starSymbol(timeSend);
 prusage_t $starSymbol(beginSend);
 prusage_t $starSymbol(endSend);
 #endif
+ea_t $starSymbol(endpoint);
+int $starSymbol(i);
         }
         codeblock (aminit) {
 AM_Init();
@@ -146,41 +146,9 @@ if (AM_AllocateBundle(AM_PAR, &bundle) != AM_OK) {
         fprintf(stderr, "error: AM_AllocateBundle failed\n");
         exit(1);
 }
-if (AM_AllocateKnownEndpoint(bundle, &endpoint, HARDPORT) != AM_OK) {
-        fprintf(stderr, "error: AM_AllocateKnownEndpoint failed\n");
-        exit(1);
-}
- 
-if (AM_SetTag(endpoint, 1234) != AM_OK) {
-        fprintf(stderr, "error: AM_SetTag failed\n");
-        exit(1);
-}
-if (AM_SetHandler(endpoint, 0, error_handler) != AM_OK) {
-        fprintf(stderr, "error: AM_SetHandler failed\n");
-        exit(1);
-}
-if (AM_SetHandler(endpoint, 1, reply_handler) != AM_OK) {
-        fprintf(stderr, "error: AM_SetHandler failed\n");
-        exit(1);
-}
-if (AM_SetHandler(endpoint, 2, request_handler) != AM_OK) {
-        fprintf(stderr, "error: AM_SetHandler failed\n");
-        exit(1);
-}
- 
 if (AM_SetEventMask(bundle, AM_EMPTYTONOT ) != AM_OK) {
         fprintf(stderr, "error: AM_SetEventMask error\n");
         exit(1);
-}
- 
-for ($starSymbol(i) = 0; $starSymbol(i) < $val(numNodes); $starSymbol(i)++) {
-        global.ip_addr = $ref(nodeIPs, $starSymbol(i));
-        global.port = HARDPORT;
-        if (AM_Map(endpoint, $starSymbol(i), global, 1234) != AM_OK) {
-                fprintf(stderr, "AM_Map error\n");
-                fflush(stderr);
-                exit(-1);
-        }
 }
         }
         codeblock (timeinit) {
@@ -192,6 +160,34 @@ timeRun = 0.0;
 #ifdef TIME_INFO
 $starSymbol(timeSend) = 0.0;
 #endif
+if (AM_AllocateKnownEndpoint(bundle, &$starSymbol(endpoint), HARDPORT + $val(pairNumber)) != AM_OK) {
+
+        fprintf(stderr, "error: AM_AllocateKnownEndpoint failed\n");
+        exit(1);
+}
+ 
+if (AM_SetTag($starSymbol(endpoint), 1234) != AM_OK) {
+        fprintf(stderr, "error: AM_SetTag failed\n");
+        exit(1);
+}
+if (AM_SetHandler($starSymbol(endpoint), 0, error_handler) != AM_OK) {
+        fprintf(stderr, "error: AM_SetHandler failed\n");
+        exit(1);
+}
+if (AM_SetHandler(endpoint, 1, reply_handler) != AM_OK) {
+        fprintf(stderr, "error: AM_SetHandler failed\n");
+        exit(1);
+}
+
+for ($starSymbol(i) = 0; $starSymbol(i) < $val(numNodes); $starSymbol(i)++) {
+        global.ip_addr = $ref(nodeIPs, $starSymbol(i));
+        global.port = HARDPORT + $val(pairNumber);
+        if (AM_Map($starSymbol(endpoint), $starSymbol(i), global, 1234) != AM_OK) {
+                fprintf(stderr, "AM_Map error\n");
+                fflush(stderr);
+                exit(-1);
+        }
+}
         }
         codeblock (openfd) {
 #ifdef TIME_INFO
@@ -214,7 +210,7 @@ else if (ioctl(fd, PIOCUSAGE, &beginRun) == -1)
 
 		// code generation.
 		addInclude("<stdio.h>");
-		addInclude("<thread.h>");
+		addInclude("<stdlib.h>");
 		addInclude("<udpam.h>");
 		addInclude("<am.h>");
 		addCompileOption(
@@ -290,7 +286,7 @@ printf("Time to run %lf seconds\n", timeRun);
 
 	wrapup {
                 addCode(runtime, "mainClose", "runTime");
-                addCode("am_disable();\n", "mainClose", "amDisable");
+                addCode("AM_Terminate();\n", "mainClose", "amTerminate");
 	}
 }
 
