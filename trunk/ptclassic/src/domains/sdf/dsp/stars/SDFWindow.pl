@@ -4,27 +4,27 @@ defstar {
     desc {
 Generates standard window functions: Rectangle,
 Hanning, Hamming, Blackman, and SteepBlackman.
+.lp
+This star produces on its output values that are samples of a standard
+windowing function.  The window function to be sampled is determined by
+the \fIname\fR string parameter.  Possible values are: \fBRectangle\fR,
+\fBBartlett\fR, \fBHanning\fR, \fBHamming\fR, \fBBlackman\fR, and
+\fBSteepBlackman\fR.  Upper and lower case characters in the names are
+equivalent.
+.lp
+The parameter \fIlength\fR is the length of the window to produce.  Note
+that most windows functions have zero value at the first and last sample.
+The parameter \fIperiod\fR specifies the period of the output signal:
+the window will be zero-padded if required.  A \fIperiod\fR of 0
+means a period equal to \fIlength\fR.  A negative period will
+produce only one window, and then outputs zero for all later samples.
+.lp
+One period of samples are produced on every firing.
     }
     version { $Id$ }
     author { Kennard White }
     copyright { 1991 The Regents of the University of California }
     location { SDF dsp library }
-    explanation {
-This star produces on its output values that are samples of
-a standard windowing function.  The window function to be sampled
-is determined by the \fIname\fR string parameter.  Possible values
-are: \fBRectangle\fR, \fBHanning\fR, \fBHamming\fR, \fBBlackman\fR, 
-and \fBSteepBlackman\fR.  Upper and lower case characters in the names
-are equivalent.
-.lp
-The parameter \fIlength\fR is the length of the window to produce.  Note
-that most windows functions have zero value at the first and last
-sample.
-The parameter \fIperiod\fR specifies the period of the output signal:
-the window will be zero-padded if required.  A \fIperiod\fR of 0
-means a period equal to \fIlength\fR.  A negative period will
-produce only one window, and then outputs zero for all later samples.
-    }
     output {
         name {output}
         type {float}
