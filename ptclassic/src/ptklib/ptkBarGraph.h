@@ -1,5 +1,6 @@
 #ifndef PTKBARGRAPH_H
 #define PTKBARGRAPH_H 1
+
 /* 
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
@@ -26,37 +27,44 @@ ENHANCEMENTS, OR MODIFICATIONS.
 						PT_COPYRIGHT_VERSION_2
 						COPYRIGHTENDKEY
 */
+
 /* ptkBarGraph.h  eal
 Version identification:
 $Id$
 */
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#include "tcl.h"
 #include "tk.h"
 
-extern "C" int ptkMakeBarGraph( Tcl_Interp *interp,
-			        Tk_Window *win,
-				char *name,
-				char *desc,
-				double **data,
-				int numTraces,
-				int numBars,
-				double top,
-				double bottom,
-				int** id,
-				char* geo,
-				double deswidth,
-				double desheight);
-extern "C" int ptkSetBarGraph(	Tcl_Interp *interp,
-				Tk_Window *win,
-				char *name,
-				double **data,
-				int numTraces,
-				int numBars,
-				double top,
-				double bottom,
-				int** id);
-extern "C" void ptkFigureBarEdges(
-				int* x0,
+extern int ptkMakeBarGraph( Tcl_Interp *interp,
+			    Tk_Window *win,
+			    char *name,
+			    char *desc,
+			    double **data,
+			    int numTraces,
+			    int numBars,
+			    double top,
+			    double bottom,
+			    int** id,
+			    char* geo,
+			    double deswidth,
+			    double desheight);
+
+extern int ptkSetBarGraph( Tcl_Interp *interp,
+			   Tk_Window *win,
+			   char *name,
+			   double **data,
+			   int numTraces,
+			   int numBars,
+			   double top,
+			   double bottom,
+			   int** id);
+
+extern void ptkFigureBarEdges( int* x0,
 				int* x1,
 				int *y0,
 				int *y1,
@@ -69,4 +77,9 @@ extern "C" void ptkFigureBarEdges(
 				double top,
 				double bottom,
 				double data);
+
+#ifdef __cplusplus
+}
+#endif
+
 #endif /* PTKBARGRAPH_H */
