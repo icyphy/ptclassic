@@ -105,7 +105,7 @@ body ::tycho::EditMake::help {} {
 
 ###################################################################
 #### evaluate
-# Open a Montor window and run make or nmake with this makefile
+# Open a Monitor window and run make or nmake with this makefile
 #
 body ::tycho::EditMake::evaluate {} {
     saveQuery
