@@ -364,22 +364,7 @@ body ::tycho::EditProgram::fileTemplate {fileTemplate {newClassName {}}} {
                 markModified
 
 		if { $newClassName != {} } {
-		    # Find all the 'ClassName' strings.
-		    # The arguments for findAll are:
-		    # tag them 'oldClass', 1 - don't ignore case,
-		    # 0 - return only exact matches, 0 -ignore word boundaries,
-		    # search for 'ClassName', search from the start to the end,
-		    # {} - don't restrict the search.
-		    findAll oldClass 1 0 0 ClassName 0.0 end {}
-
-		    # Substitute the new class name for 'ClassName'
-		    set ind 1.0
-		    while {[set res \
-			    [$itk_component(text) tag nextrange \
-			    oldClass $ind end]] != {}} {
-			eval deleteRange $res
-			insertString [lindex $res 0] $newClassName
-		    }
+		    substituteText ClassName $newClassName
 		}
 	    } {
 		safeEval ::tycho::warn "File is not readable: $fileTemplate"
