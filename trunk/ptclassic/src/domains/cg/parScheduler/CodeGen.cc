@@ -19,8 +19,6 @@ special routines to generate the sub universes.
 
 #include "UniProcessor.h"
 #include "ParProcessors.h"
-#include "CGSpread.h"
-#include "CGCollect.h"
 #include "KnownBlock.h"
 #include "SDFPortHole.h"
 #include "Geodesic.h"
@@ -140,24 +138,29 @@ void UniProcessor :: createSubGal() {
 				continue;
 			}
 
-			DataFlowStar* farS = (DataFlowStar*) p->far()->parent();
+			DataFlowStar* farS =(DataFlowStar*) p->far()->parent();
+			ParNode* farN = (ParNode*) farS->myMaster();
+			ParNode* myN = (ParNode*) org->myMaster();
 			
 			// depending on OSOPreq()
-			if (OSOPreq()) {
+			if (OSOPreq() || (myN->isOSOP() && farN->isOSOP())) {
 				makeOSOPConnect(p, org, farS, touchedStars);
 			} else {
 				makeGenConnect(p, pn, org, farS, touchedStars);
 			}
 		}
 	}
+
+	// galaxy initialize
+	subGal->initialize();
 }
 
 			////////////////////////////
 			// makeOSOPConnect
 			////////////////////////////
 
-void UniProcessor :: makeOSOPConnect(PortHole* p, DataFlowStar* org, DataFlowStar* farS,
-				     SequentialList& touchedStars) {
+void UniProcessor :: makeOSOPConnect(PortHole* p, DataFlowStar* org, 
+	DataFlowStar* farS, SequentialList& touchedStars) {
 
 	if (touchedStars.member(farS)) {
 	 	// make connection if it is output
@@ -166,13 +169,12 @@ void UniProcessor :: makeOSOPConnect(PortHole* p, DataFlowStar* org, DataFlowSta
 			clonedPort(org, p)->connect(*destP, p->numTokens());
 		}
 	} else {
-		ParNode* sn = (ParNode*) org->myMaster();
 		ParNode* n = (ParNode*) farS->myMaster();
 		PortHole* cp = clonedPort(org, p);
 		if (p->isItInput()) {
-			makeReceive(n->getProcId(),cp,p->numTokens(),sn,0,p);
+			makeReceive(n->getProcId(),cp,p->numTokens(),0,p);
 		} else {
-			makeSend(n->getProcId(), cp, sn, 0, p);
+			makeSend(n->getProcId(), cp, 0, p);
 		}
 	}
 }
@@ -190,12 +192,14 @@ void UniProcessor :: makeGenConnect(PortHole* p, ParNode* pn, DataFlowStar*,
 		while (farN->getProcId() != myId())
 			farN = (ParNode*) farN->getNextInvoc();
 	}
-	if (p->isItInput())
-		makeConnection(pn, farN, p);
-	else if (!farN)
+	if (p->isItInput()) {
+		ParNode* firstFar = (ParNode*) farS->myMaster();
+		makeConnection(pn, farN, p, firstFar);
+	} else if (!farN) {
 		// if no output is connected to a star 
 		// assigned, special treatment
 		makeBoundary(pn, p);
+	}
 }
 
 // generate the unique name for "Spread", "Collect", "Receive", and "Send".
@@ -204,9 +208,9 @@ const char* newName(int flag) {
 
 	char buf[20];
 	if (flag == 1) {
-		sprintf(buf, "scatter%d", id++);
+		sprintf(buf, "spread%d", id++);
 	} else if (flag == 0) {
-		sprintf(buf, "gather%d", id++);
+		sprintf(buf, "collect%d", id++);
 	} else if (flag == 2) {
 		sprintf(buf, "receive%d", id++);
 	} else {
@@ -232,83 +236,13 @@ PortHole* findPortHole(DataFlowStar* s, const char* n, int num) {
 // makeConnection 
 ///////////////////
 
-void UniProcessor :: makeConnection(ParNode* dN, ParNode* sN, PortHole* ref) {
-	ParNode* n = dN;
-	ParNode* partner;
+void UniProcessor :: makeConnection(ParNode* dN, ParNode* sN, 
+				    PortHole* ref, ParNode* firstS) {
 	PortHole* farP = ref->far();
-	EGGate* sG;
 
-	// check whether Spread node and Collect node is necessary or not.
-	int scatterReq = 0;
-	int gatherReq = 0;
-
-	int numCon, numRecv, numSend;
-	int numDelay = 0;
-	numRecv = 0;
-	numCon = 0;
-	do {
-		EGGateLinkIter ancs(n->ancestors);
-		EGGate* g;
-		while ((g = ancs++) != 0) {
-			if (g->samples() == 0) continue;
-			if (strcmp(g->name(), ref->name())) continue;
-			
-			// get the partner node.
-			partner = (ParNode*) g->farEndNode();
-
-			if (partner->getProcId() == myId()) {
-				numCon++;
-				numDelay += g->delay();
-				if (numRecv > 0) {
-					gatherReq = TRUE;
-					if (scatterReq < 0) scatterReq = TRUE;
-				}
-			} else {
-				sG = g;
-				numDelay += g->delay();
-				numRecv++;
-				if (numCon > 0) scatterReq = -1;
-			}
-		}
-		n = n->getNextNode();
-	} while (n);
-	if (scatterReq < 0) scatterReq = FALSE;
-
-	if ((numRecv > 0) && (numRecv + numCon > 1)) gatherReq = TRUE;
-
-	if(sN && (!scatterReq)) {  // check additional scatter Req.
-		n = sN;
-		numSend = 0;
-		numCon = 0;
-		do {
-			EGGateLinkIter descs(n->descendants);
-			EGGate* g;
-			while ((g = descs++) != 0) {
-				if (g->samples() == 0) continue;
-				if (strcmp(g->name(),farP->name()))
-					continue;
-				partner = (ParNode*) g->farEndNode();
-				if (partner->getProcId() == myId()) {
-					numCon++;
-					if (numSend > 0) {
-						scatterReq = TRUE;
-						if (gatherReq < 0) 
-							gatherReq = TRUE;
-					}
-				} else {
-					numSend++;
-					if ((numCon > 0) && (!gatherReq))
-						gatherReq = -1;
-				}
-			}
-			n = n->getNextNode();
-		} while (n);
-		if ((numSend > 0) && (numSend + numCon > 1)) scatterReq = TRUE;
-	}
-	if (gatherReq < 0) gatherReq = FALSE;
-	
 	// Now make connections.
 	// STEP1: get the cloned stars and identify portholes
+
 	DataFlowStar* src = 0;
 	PortHole* srcP = 0;
 	DataFlowStar* dest = dN->getCopyStar();
@@ -319,15 +253,83 @@ void UniProcessor :: makeConnection(ParNode* dN, ParNode* sN, PortHole* ref) {
 		srcP = src->portWithName(farP->name());
 	}
 	
-	// STEP2: create Spread and Collect star if necessary and make
+	// temporaries.
+	ParNode* partner;
+	EGGate *sG, *dG;
+
+	// STEP2:
+	// check whether Spread node and Collect node is necessary or not.
+
+	int spreadReq = 0;
+	int collectReq = 0;
+
+	// number of connections, and comm.
+	int numCon = 0, numRecv = 0, numSend = 0;	
+	int numDelay = 0;
+
+	// step through the connections starting from the first invocation
+	// of the source star, which guarantees the right ordering of the
+	// data produced.
+	ParNode* n = firstS;
+	do {
+		int sID = n->getProcId();
+		EGGateLinkIter descs(n->descendants);
+		EGGate* g;
+		while ((g = descs++) != 0) {
+			if (g->samples() == 0) continue;
+			if (strcmp(g->name(), farP->name())) continue;
+			
+			// get the partner node.
+			partner = (ParNode*) g->farEndNode();
+			int dID = partner->getProcId();
+
+			if ((sID == myId()) && (dID == myId())) {
+				numCon++;
+				numDelay += g->delay();
+				if (spreadReq < 0) spreadReq = TRUE;
+				if (collectReq < 0) collectReq = TRUE;
+			} else if (sID == myId()) {
+				sG = g;
+				numSend++;
+				if ((numCon > 0) && (!collectReq))
+					collectReq = -1;
+			} else if (dID == myId()) {
+				numRecv++;
+				dG = g->farGate();
+				numDelay += g->delay();
+				if ((numCon > 0) && (!spreadReq)) 
+					spreadReq = -1;
+			}
+		}
+		n = (ParNode*) n->getNextInvoc();
+	} while (n);
+
+	if (numRecv > 0) {
+		if (numRecv + numCon > 1) collectReq = TRUE;
+		else {
+			partner = (ParNode*) dG->farEndNode();
+			makeReceive(partner->getProcId(),destP,numDelay,dG);
+		}
+	}
+	if (numSend > 0) {
+		if (numSend + numCon > 1) spreadReq = TRUE;
+		else {
+			partner = (ParNode*) sG->farEndNode();
+			makeSend(partner->getProcId(),srcP,sG);
+		}
+	}
+
+	// STEP3: create Spread and Collect star if necessary and make
 	//	  connections between these stars and source/dest stars.
 
 	DataFlowStar* newSpread = 0;
 	DataFlowStar* newCollect = 0;
-	if (scatterReq) newSpread =  makeSpread(srcP,sN); 
-	if (gatherReq) newCollect = makeCollect(destP, dN);
+	if (spreadReq < 0) spreadReq = 0;
+	if (collectReq < 0) collectReq = 0;
+	if (spreadReq == TRUE) newSpread =  makeSpread(srcP,sN); 
+	if (collectReq == TRUE) newCollect = makeCollect(destP, dN);
 
-	// STEP3: depending on the situation, we make connections
+	// STEP4: depending on the situation, we make connections
 	// Note that delay is added on the arc of the destinations 
 	// if IPC occurs.
 	
@@ -336,16 +338,11 @@ void UniProcessor :: makeConnection(ParNode* dN, ParNode* sN, PortHole* ref) {
 	int numDel = 0;
 
 	// (1) neither Spread nor Collect
-	if ((!scatterReq) && (!gatherReq)) {
-		if (srcP) {
-			srcP->connect(*destP,numDelay);
-		} else {
-			// create Receive star
-			makeReceive(partner->getProcId(),destP,numDelay,dN,sG);
-		}
+	if ((!spreadReq) && (!collectReq)) {
+		if (numCon > 0) srcP->connect(*destP,numDelay);
 
 	// (2) Spread only
-	} else if (scatterReq && (!gatherReq)) {
+	} else if (spreadReq && (!collectReq)) {
 		n = sN;
 		do {
 			EGGateLinkIter descs(n->descendants);
@@ -372,7 +369,7 @@ void UniProcessor :: makeConnection(ParNode* dN, ParNode* sN, PortHole* ref) {
 					// create Send star
 					sP = findPortHole(newSpread, "output",
 					     g->samples());
-					makeSend(parId,sP,n,g);
+					makeSend(parId,sP,g);
 				}
 			}
 			n = n->getNextNode();
@@ -383,19 +380,21 @@ void UniProcessor :: makeConnection(ParNode* dN, ParNode* sN, PortHole* ref) {
 		}
 
 	// (3) Collect only
-	} else if ((!scatterReq) && gatherReq) {
-		n = dN;
+	} else if ((!spreadReq) && collectReq) {
+		n = firstS;
 		do {
-			EGGateLinkIter ancs(n->ancestors);
+			int sID = n->getProcId();
+			EGGateLinkIter descs(n->descendants);
 			EGGate* g;
-			while ((g = ancs++) != 0) {
+			while ((g = descs++) != 0) {
 				if (g->samples() == 0) continue;
-				if (strcmp(g->name(),ref->name()))
-					continue;
-				numDel += g->delay();
+				if (strcmp(g->name(),farP->name())) continue;
+
 				partner = (ParNode*) g->farEndNode();
-				int parId = partner->getProcId();
-				if (parId == myId()) {
+				if (partner->getProcId() != myId()) continue;
+
+				numDel += g->delay();
+				if (sID == myId()) {
 					numSamples += g->samples();
 				} else {
 					// make connection to the partner if
@@ -409,10 +408,10 @@ void UniProcessor :: makeConnection(ParNode* dN, ParNode* sN, PortHole* ref) {
 					// create Receive star
 					rP = findPortHole(newCollect, 
 						"input", g->samples());
-					makeReceive(parId,rP,0,n,g);
+					makeReceive(sID,rP,0,g->farGate());
 				}
 			}
-			n = n->getNextNode();
+			n = (ParNode*) n->getNextInvoc();
 		} while (n);
 		if (numSamples > 0) { 	// last connection
 			rP = findPortHole(newCollect, "input", numSamples);
@@ -423,128 +422,55 @@ void UniProcessor :: makeConnection(ParNode* dN, ParNode* sN, PortHole* ref) {
 
 	// (4) Both
 	} else {	// both flags are on.
-		SequentialList scatterGates;
-		scatterGates.initialize();
-
-		// first look at the source
-		// Also, set the starting point of the descendants
-		EGGate* firstGate = 0;
-		ParNode* firstNode = 0;
-		n = sN;
+		n = firstS;
 		do {
+			int sID = n->getProcId();
 			EGGateLinkIter descs(n->descendants);
 			EGGate* g;
 			while ((g = descs++) != 0) {
 				if (g->samples() == 0) continue;
-				if (strcmp(g->name(),farP->name()))
-					continue;
+				if (strcmp(g->name(),farP->name())) continue;
+
 				partner = (ParNode*) g->farEndNode();
-				int parId = partner->getProcId();
-				if (parId == myId()) {
+				int dID = partner->getProcId();
+
+				if ((sID != myId())&&(dID != myId())) continue;
+
+				if (sID == dID) {
 					numSamples += g->samples();
-					if (!firstGate) {
-						firstGate = g->farGate();
-						firstNode = partner;
-					}
+					numDel += g->delay();
 				} else {
-					// make connection to the partner if
-					// connection exists.
 					if (numSamples > 0) {
-					   sP = findPortHole(newSpread,
-						"output", numSamples);
-					   scatterGates.put(sP);
-					   numSamples = 0;
+						// connect Spread & Collect
+						sP = findPortHole(newSpread,
+							"output", numSamples);
+					   	rP = findPortHole(newCollect,
+							"input", numSamples);
+					   	sP->connect(*rP,0);
+						numSamples = 0;
 					}
-					// create Send star
-					sP=findPortHole(newSpread, "output",
-						g->samples());
-					makeSend(parId,sP,n,g);
+					if (sID == myId()) {
+						// create Send star
+						sP=findPortHole(newSpread, 
+							"output",g->samples());
+						makeSend(dID,sP,g);
+					} else {
+						numDel += g->delay();
+						// create Receive star
+						rP = findPortHole(newCollect, 
+							"input",g->samples());
+						dG = g->farGate();
+						makeReceive(sID,rP,0,dG);
+					}
 				}
 			}
-			n = n->getNextNode();
+			n = (ParNode*) n->getNextInvoc();
 		} while (n);
+
 		if (numSamples > 0) { 	// last connection
 			sP = findPortHole(newSpread, "output", numSamples);
-			scatterGates.put(sP);
-		}
-		
-		// next look at the destination			
-		ListIter piter(scatterGates);
-		sP = (PortHole*) piter++;
-		int curNum = sP->numXfer();
-		DataFlowStar* curScat = 0;
-
-		n = firstNode;
-		numSamples = 0;
-		int startFlag = TRUE;
-		int count = dN->numAssigned();
-		int escape = FALSE;
-		do {
-			EGGateLinkIter ancs(n->ancestors);
-			EGGate* g;
-			while ((g = ancs++) != 0) {
-				if (startFlag) {
-					if (g != firstGate) continue;
-					else startFlag = FALSE;
-				}
-				if (g->samples() == 0) continue;
-				if (strcmp(g->name(),ref->name()))
-					continue;
-				if ((count == 0) && (g == firstGate)) {
-					// jump out of the two loops, as if:
-					// goto L;
-					escape = TRUE;
-					break;
-				}
-
-				numDel += g->delay();
-				partner = (ParNode*) g->farEndNode();
-				int parId = partner->getProcId();
-				if (parId == myId()) {
-					numSamples += g->samples();
-				} else {
-					// make connection to the partner if
-					// connection exists.
-					if (numSamples > 0) {
-					   rP = findPortHole(newCollect,
-						"input", numSamples);
-					   if (curNum == numSamples) {
-						if (curScat) {
-					 	  sP = findPortHole(curScat,
-							"output", numSamples);
-						  curScat = 0;
-						}
-					   	sP->connect(*rP,0);
-						sP = (PortHole*) piter++;
-					   } else {
-					        // create Spread star
-						curScat = makeSpread(sP,0);
-						curNum -= numSamples;
-						sP = findPortHole(curScat,
-						     "output", numSamples);
-						sP->connect(*rP,0);
-					   }
-					   numSamples = 0;
-					}
-					// create Receive star
-					rP = findPortHole(newCollect, "input", 
-						g->samples());
-					makeReceive(parId,rP,0,n,g);
-				}
-			}
-			if (escape) break;
-			n = n->getNextNode();
-			if (!n) n = dN;
-			count--;
-		} while (count >= 0);
-// L: (jump here if escaping from loop)
-		if (numSamples > 0) { 	// last connection
 			rP = findPortHole(newCollect, "input", numSamples);
-			if (curScat) {
-				sP = findPortHole(curScat,"output",numSamples);
-				curScat = 0;
-			}
-			sP->connect(*rP, 0);
+			sP->connect(*rP,0);
 		}
 
 		// set the delay parameter
@@ -560,7 +486,7 @@ void UniProcessor :: makeConnection(ParNode* dN, ParNode* sN, PortHole* ref) {
 // create a Receive star or a Send star and connect it to the specified port.
  
 void 
-UniProcessor :: makeReceive(int pindex, PortHole* rP, int delay, ParNode*,
+UniProcessor :: makeReceive(int pindex, PortHole* rP, int delay, 
 			    EGGate* g, PortHole* orgP) {
 	int numSample = rP->numXfer();
 	
@@ -583,7 +509,7 @@ UniProcessor :: makeReceive(int pindex, PortHole* rP, int delay, ParNode*,
 
 // Note that the delay is attached in the receiver part if any.
 void UniProcessor :: makeSend(int pindex, PortHole* sP, 
-			      ParNode*, EGGate* g, PortHole* orgP) {
+			EGGate* g, PortHole* orgP) {
 	int numSample = sP->numXfer();
 	
 	// create target specific Send star
@@ -610,7 +536,7 @@ void UniProcessor :: makeSend(int pindex, PortHole* sP,
 // create a Spread star and connect it to the source porthole.
 
 DataFlowStar* UniProcessor :: makeSpread(PortHole* srcP, ParNode* sN) {
-	LOG_NEW; DataFlowStar* newSpread = new CGSpread; 
+	DataFlowStar* newSpread = mtarget->createSpread();
 	newSpread->setTarget(targetPtr);
 	subGal->addBlock(*newSpread,newName(1));
 	int numTok;
@@ -626,7 +552,7 @@ DataFlowStar* UniProcessor :: makeSpread(PortHole* srcP, ParNode* sN) {
 // create a Collect star and connect it to the destination porthole.
 
 DataFlowStar* UniProcessor :: makeCollect(PortHole* destP, ParNode* dN) {
-	LOG_NEW; DataFlowStar* newCollect = new CGCollect;
+	DataFlowStar* newCollect = mtarget->createCollect();
 	newCollect->setTarget(targetPtr);
 	subGal->addBlock(*newCollect,newName(0));
 	int numTok;
@@ -676,7 +602,7 @@ M:
 	// make connections.
 	if (!newSpread) { // only one send star
 		// create Send star
-		makeSend(partner->getProcId(),srcP, sN, sG);
+		makeSend(partner->getProcId(),srcP, sG);
 		return;
 	}
 	
@@ -693,7 +619,7 @@ M:
 
 			PortHole* sP = findPortHole(newSpread, "output", 
 				g->samples());
-			makeSend(partner->getProcId(),sP,n,g);
+			makeSend(partner->getProcId(),sP,g);
 		}
 		n = n->getNextNode();
 	} while(n);
