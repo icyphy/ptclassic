@@ -60,6 +60,9 @@ the [incr Tcl] (itcl) extension and the Ptolemy/PTcl facilities.
 
 EXTERN int		Ptcl_Init _ANSI_ARGS_((Tcl_Interp *interp));
 
+// We need this so we can include HOF in ptcl
+Tcl_Interp *ptkInterp;
+
 /*
  * The following variable is a special hack that is needed in order for
  * Sun shared libraries to be used for Tcl.
@@ -135,6 +138,8 @@ int main(int argc, char **argv)
 
 int Tcl_AppInit(Tcl_Interp *interp)
 {
+    // We need this so that we can use hof inside ptcl
+    ptkInterp=interp;
     if (Tcl_Init(interp) == TCL_ERROR) {
 	return TCL_ERROR;
     }
