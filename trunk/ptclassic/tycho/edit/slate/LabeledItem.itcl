@@ -44,17 +44,11 @@ namespace ::tycho {
 # This class is the abstract superclass of the LabeledOval, 
 # LabeledRect, and LabeledFrame items.
 #
-# <p><b>Options</b>
+# <p><a name="options"></a><b>Options</b>
 #
 # <ul>
 # <li><b>-anchor</b>:
-# The anchor position of the text label relative to the region
-# occupied by the item. The anchor can be any of the compass points --
-# <i>n</i>, <i>s</i>, <i>e</i>, <i>w</i>, <i>ne</i>, <i>se</i>,
-# <i>nw</i>, <i>sw</i> -- and <i>c</i> or <i>center</i>. If it is
-# <i>c</i> or <i>center</i> and there are graphics drawn on the item,
-# the label is drawn underneath the item (as though the anchor was
-# <i>s</i>).
+# <b>Deprecated</b>. (Use *-textanchor* instead.)
 #
 # <li><b>-font</b>:
 # The font to use for the label. Currently, this must be a valid X font.
@@ -71,6 +65,15 @@ namespace ::tycho {
 # outside the item.  By default, this option is "", which means that
 # nothing is displayed.
 #
+# <li><b>-textanchor</b>:
+# The anchor position of the text label relative to the region
+# occupied by the item. The anchor can be any of the compass points --
+# <i>n</i>, <i>s</i>, <i>e</i>, <i>w</i>, <i>ne</i>, <i>se</i>,
+# <i>nw</i>, <i>sw</i> -- and <i>c</i> or <i>center</i>. If it is
+# <i>c</i> or <i>center</i> and there are graphics drawn on the item,
+# the label is drawn underneath the item (as though the anchor was
+# <i>s</i>).
+#
 # </ul>
 #
 # <p><b>Components</b>
@@ -82,13 +85,16 @@ namespace ::tycho {
 #
 # <p><b>Bugs</b>
 #
-# If there are graphics and the anchor is "e" or "w," the label
+# If there are graphics and the text anchor is "e" or "w," the label
 # is displayed inside the icon not outside.
 #
 # <p><b>Enhancements</b>
 #
-# There are four possible positions for the label (on the left and right
+# <ul>
+# <li>There are four possible positions for the label (on the left and right
 # sides, near the top and bottom of that edge) that cannot be specified.
+# <li>A *-scaling* option is needed with values none, x, y, min, and max.
+# </ul>
 #
 # <p><b>Links</b>
 # 
@@ -111,10 +117,19 @@ class ::tycho::LabeledItem {
     proc _font {id canvas slate font}
 
     # Update the *-graphics* option
-    proc _graphics {id canvas slate graphics}
+    proc _graphics {id canvas slate graphics args}
 
     # Update the *-text* option
     proc _text {id canvas slate text}
+
+    # Update the *-textanchor* option
+    proc _textanchor {id canvas slate textanchor args}
+    
+    ###################################################################
+    ####                           protected procs                 ####
+
+    # Update the text and graphics after a change in coordinates
+    protected proc coords {id canvas slate a0 b0 a1 b1 x0 y0 x1 y1}
 
     ###################################################################
     ####                           private variables               ####
@@ -131,43 +146,30 @@ class ::tycho::LabeledItem {
     #### Set method table
     array set methodtable [array get ::tycho::ComplexItem::methodtable]
 
-    set methodtable(_anchor)   ::tycho::LabeledItem::_anchor
-    set methodtable(_font)     ::tycho::LabeledItem::_font
-    set methodtable(_graphics) ::tycho::LabeledItem::_graphics
-    set methodtable(_text)     ::tycho::LabeledItem::_text
+    set methodtable(_anchor)     ::tycho::LabeledItem::_anchor
+    set methodtable(_font)       ::tycho::LabeledItem::_font
+    set methodtable(_graphics)   ::tycho::LabeledItem::_graphics
+    set methodtable(_text)       ::tycho::LabeledItem::_text
+    set methodtable(_textanchor) ::tycho::LabeledItem::_textanchor
 
     #### Set option defaults
     array set optiondefault [array get ::tycho::ComplexItem::optiondefault]
 
-    set optiondefault(-anchor)		"center"
-    set optiondefault(-font)		[::tycho::font Helvetica 12]
-    set optiondefault(-graphics)	""
-    set optiondefault(-text)		""
+    set optiondefault(-anchor)	   "center"
+    set optiondefault(-font)	   [::tycho::font Helvetica 12]
+    set optiondefault(-graphics)   ""
+    set optiondefault(-text)	   ""
+    set optiondefault(-textanchor) "center"
 }
 
 ##########################################################################
 ## -anchor option configuration
 #
+# <b>Deprecated</b>
+#
 body ::tycho::LabeledItem::_anchor {id canvas slate anchor} {
     set option(anchor$id) $anchor
-
-    # If there are no graphics, place inside the item, else place
-    # outside the item
-    if { $option(text$id) != "" } {
-        eval $canvas coords $component(label$id) \
-		[$slate aspect $id $anchor -shape rectangle]
-        if { $option(graphics$id) == "" } {
-            $canvas itemconfigure $component(label$id) -anchor $anchor
-        } else {
-            if { $anchor == "center" || $anchor == "c" } {
-                set anchor "s"
-                eval $canvas coords $component(label$id) \
-			[$slate aspect $id s -shape rectangle]
-            }
-            $canvas itemconfigure $component(label$id) \
-                    -anchor [::tycho::Shape::compass $anchor "ud"]
-        }
-    }
+    _textanchor $id $canvas $slate $anchor
 }
 
 ##########################################################################
@@ -183,8 +185,12 @@ body ::tycho::LabeledItem::_font {id canvas slate font} {
 #
 # Draw the specified items specified using coordinates in
 # percent of the parent item's size. <i>Do not specify tags.</i>
+# Optional arguments are the new coordinates of the item's region
+# which will be used to scale the graphics. If not supplied, the
+# slate's region{} method will be used.
+# Non-rectangular (or oval) sub-classes will need to override.
 #
-body ::tycho::LabeledItem::_graphics {id canvas slate graphics} {
+body ::tycho::LabeledItem::_graphics {id canvas slate graphics args} {
     set option(graphics$id) $graphics
 
     # Delete existing graphics
@@ -207,7 +213,10 @@ body ::tycho::LabeledItem::_graphics {id canvas slate graphics} {
     }
 
     # Move and scale them to fit into this item
-    ::tycho::assign x0 y0 x1 y1 [$slate region $id]
+    if { $args == "" } {
+	set args [$slate region $id]
+    }
+    ::tycho::assign x0 y0 x1 y1 $args
     $slate move graphics.$id $x0 $y0
     $slate scale graphics.$id $x0 $y0 \
     		[expr ($x1-$x0)/100.0] \
@@ -232,7 +241,7 @@ body ::tycho::LabeledItem::_text {id canvas slate text} {
                     -text $text \
 		    -font $option(font$id) \
 		    -tags  [$canvas gettags $primary($id)]]
-            _anchor $id $canvas $slate $option(anchor$id)
+            _textanchor $id $canvas $slate $option(textanchor$id)
         } else {
 	    $canvas itemconfigure $component(label$id) -text $text
 	}
@@ -240,4 +249,66 @@ body ::tycho::LabeledItem::_text {id canvas slate text} {
         catch {$canvas delete $component(label$id)}
     }
     set option(text$id) $text
+}
+
+##########################################################################
+## -textanchor option configuration
+#
+# Update the text anchor and the text item's position. Optional
+# arguments are the new coordinates of the item's region.
+# Non-rectangular (or oval) sub-classes will need to override.
+#
+body ::tycho::LabeledItem::_textanchor {id canvas slate textanchor args} {
+    set option(textanchor$id) $textanchor
+
+    # Only process if there's is a label
+    if { $option(text$id) != "" } {
+	# Move the label to the anchor point
+	if { $args == "" } {
+	    set args [$canvas coords $primary($id)]
+	}
+        eval $canvas coords $component(label$id) \
+		[eval ::tycho::Rectangle::aspect $args $textanchor]
+	    
+	# Change the text item anchor. Note that we do this
+	# even if the anchor hasn't changed, because the
+	# graphics may have been added or deleted.
+	# If there are no graphics, place inside the item, else place
+	# outside the item
+        if { $option(graphics$id) == "" } {
+	    # No graphics, so just place inside the item
+            $canvas itemconfigure $component(label$id) -anchor $textanchor
+        } else {
+	    # If there are graphics, place outside the item
+            if { $textanchor == "center" || $textanchor == "c" } {
+                set textanchor "s"
+                eval $canvas coords $component(label$id) \
+			[eval ::tycho::Rectangle::aspect $args $textanchor]
+            }
+            $canvas itemconfigure $component(label$id) \
+                    -anchor [::tycho::Shape::compass $textanchor "ud"]
+        }
+    }
+}
+
+##########################################################################
+## coords
+#
+# Update the graphics and text label position after a change in
+# coordinates. The old and new coordinates must be supplied as
+# arguments so that the graphics can be scaledproperly.
+#
+body ::tycho::LabeledItem::coords {id canvas slate a0 b0 a1 b1 x0 y0 x1 y1} {
+    # Move the text label
+    _textanchor $id $canvas $slate $option(textanchor$id) $x0 $y0 $x1 $y1
+
+    # Move and scale the graphics according to old and new coordinates
+    $slate move graphics.$id [expr $x0-$a0] [expr $y0-$b0]
+    $slate scale graphics.$id $x0 $y0 \
+    		[expr double($x1-$x0)/($a1-$a0)] \
+    		[expr double($y1-$y0)/($b1-$b0)]
+ 
+    # FIXME: Inefficient because graphics are redrawn each time!
+#    eval [list _graphics $id $canvas $slate $option(graphics$id)] $args
+#    eval [list _textanchor $id $canvas $slate $option(textanchor$id)] $args
 }
