@@ -217,6 +217,21 @@ uplevel #0 {
 }
 
 uplevel #0 {
+    # Create the global font manager
+    namespace ::tycho {
+	::tycho::FontManager .tychoFonts
+
+	# The following code has been disabled because it breaks the
+	# layout of existing Ptolemy windows by changing the default
+	# widget fonts. (hjr 2/29/96)
+
+	# The overall default font is fixed
+	#    set defaultFont [.tychoFonts defaultFont fixed]
+	#    option add *Font $defaultFont widgetDefault
+	#    option add *TextFont $defaultFont widgetDefault
+	#    option add *font $defaultFont widgetDefault
+    }
+
     ## FIXME: This should be ~/.Tycho/preferences
     global ::tychoprefs
     set tychoprefs [file join $tycholib preferences]
@@ -236,20 +251,6 @@ uplevel #0 {
     # Load the default preference settings -- OBSOLETE
     # source [file join $tychokernel Defaults.tcl]
 
-    # Create the global font manager
-    namespace ::tycho {
-	::tycho::FontManager .tychoFonts
-
-	# The following code has been disabled because it breaks the
-	# layout of existing Ptolemy windows by changing the default
-	# widget fonts. (hjr 2/29/96)
-
-	# The overall default font is fixed
-	#    set defaultFont [.tychoFonts defaultFont fixed]
-	#    option add *Font $defaultFont widgetDefault
-	#    option add *TextFont $defaultFont widgetDefault
-	#    option add *font $defaultFont widgetDefault
-    }
     # Load the library file
     source [file join $tychokernel Lib.tcl]
 }
