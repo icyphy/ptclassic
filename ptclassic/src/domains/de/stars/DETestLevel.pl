@@ -62,13 +62,13 @@ the input exceeds the threshold.
 
 		// compare the input value with the "threshold"
 		if (int(input%0) < int(threshold)) {
-		   if (int(crossingsOnly))
+		   if (int(crossingsOnly)) {
 			if (flag == TRUE) {
 				flag = FALSE;
 				// Indicate downward level crossing
 				output.put(completionTime) << flag;
 			} 
-		   else output.put(completionTime) << FALSE;
+		   } else output.put(completionTime) << FALSE;
 		} else {
 		   if (int(crossingsOnly)) {
 			if (flag == FALSE) {
