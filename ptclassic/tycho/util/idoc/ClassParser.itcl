@@ -858,12 +858,7 @@ body ::tycho::IDocSys::parseClass {class body} {
 
         # Below, parse keywords
         # NOTE: does not support private {method {}{} variable {} ...}
-        # Check if it has a - NOTE: switch can't handle -something's
-        if {[string index $construct 0] == "-"} {
-            # puts "#UNABLE: $construct"
-            continue
-        }
-        switch $construct {
+        switch -- $construct {
             "#" {
                 set inComment 1
             }
