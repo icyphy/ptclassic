@@ -201,6 +201,12 @@ body ::tycho::MultiPanel::append {element {children} args} {
         eval "::tycho::Subpanel $newPanel $args"
     }
     pack $newPanel -anchor nw -side top
+    
+    # raise to keep multiple children unhidden
+    foreach childel $children {
+        set cname [elementinfo $childel]
+        raise $cname $newPanel
+    }
 
     set myData($element) $newPanel
 }
