@@ -12,6 +12,11 @@
 // include all of the Complex class except the stream functions
 #include "ComplexSubset.h"
 
+class ComplexSubMatrix;
+class FixSubMatrix;
+class FloatSubMatrix;
+class IntSubMatrix;
+
 class ParticleStack;
 class Plasma;
 class Block;
@@ -70,6 +75,10 @@ public:
 	virtual operator double () const = 0;
 	virtual operator Complex () const = 0;
         virtual operator Fix () const =  0;
+        virtual operator ComplexSubMatrix* () const; // added
+        virtual operator FixSubMatrix* () const;     // added
+        virtual operator FloatSubMatrix* () const;   // added
+        virtual operator IntSubMatrix* () const;     // added
 
 	// print Particle
 	virtual StringList print () const = 0;
@@ -82,7 +91,7 @@ public:
         // the number of total particles initialized, including this one.
 	// 3/2/94 added
         virtual int initParticleStack(Block* parent, ParticleStack& pstack,
-			      Plasma* myPlasma, const char* delay = 0) = 0;
+				   Plasma* myPlasma, const char* delay = 0) {}
 
 	// Load the Particle with data
 	virtual void operator << (int) = 0;
@@ -170,7 +179,7 @@ public:
         // the number of total particles initialized, including this one.
 	// 3/2/94 added
         virtual int initParticleStack(Block* parent, ParticleStack& pstack,
-			      Plasma* myPlasma, const char* delay = 0);
+				      Plasma* myPlasma, const char* delay = 0);
 	// Load up with data
 	void operator << (int i);
 	void operator << (double f);
@@ -223,7 +232,7 @@ public:
         // the number of total particles initialized, including this one.
 	// 3/2/94 added
         virtual int initParticleStack(Block* parent, ParticleStack& pstack,
-			      Plasma* myPlasma, const char* delay = 0);
+				      Plasma* myPlasma, const char* delay = 0);
 
         // Load up with data
         void operator << (int i);
@@ -279,7 +288,7 @@ public:
         // the number of total particles initialized, including this one.
 	// 3/2/94 added
         virtual int initParticleStack(Block* parent, ParticleStack& pstack,
-			      Plasma* myPlasma, const char* delay = 0);
+				      Plasma* myPlasma, const char* delay = 0);
 
         // Load up with data
         void operator << (int i);
@@ -337,7 +346,7 @@ public:
         // the number of total particles initialized, including this one.
 	// 3/2/94 added
         virtual int initParticleStack(Block* parent, ParticleStack& pstack,
-			      Plasma* myPlasma, const char* delay = 0);
+				      Plasma* myPlasma, const char* delay = 0);
 
         // Load up with data
         void operator << (int i);
