@@ -71,14 +71,14 @@ For each frame, the fraction of input data that was lost is sent to the
 		if (!activeImage) {
 			// Here, activeEnvp is set to contain a WRITABLE
 			// copy of the incoming BaseImage.
-			NetworkCell* tmpNC = (NetworkCell*) inEnvp.writableCopy();
-			firstNC = tmpNC;
-
+			NetworkCell* tmpNC =
+				(NetworkCell*) inEnvp.writableCopy();
 			if (!tmpNC->contentsType("BaseImage")) {
 				LOG_DEL; delete tmpNC;
 				Error::abortRun(*this, "Cell doesn't hold BaseImage.");
 				return;
 			}
+			firstNC = tmpNC;	    // keep for later deletion
 			activeImage = (BaseImage*) tmpNC->writableData();
 			Envelope tmpE(*activeImage);
 			activeEnvp = tmpE;
