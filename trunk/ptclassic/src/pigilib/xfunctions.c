@@ -158,7 +158,8 @@ void PrintVersion ()
 		    pigiFilename, "}", NULL) != TCL_OK) {
         ErrAdd("Unable to bring up ptkStartupMessage.\n");
 	ErrAdd("If you are running a debugger, make sure that $PTOLEMY is");
-	ErrAdd("properly set in your .cshrc\n");
+	ErrAdd("properly set in your .cshrc.\n");
+	ErrAdd("Also, be sure that $PTOLEMY/tycho/typt/kernel exists.\n");
 	ErrAdd(Tcl_GetVar(ptkInterp,"errorInfo",TCL_GLOBAL_ONLY));
 	PrintErr(ErrGet());
 	exit(1);
