@@ -28,7 +28,7 @@
 
 
 #######################################################################
-#### AsOval
+#### Oval
 #
 # The shape of ovals. Like rectangles, items with oval shape have
 # four coordinates, being the left, top, right, and bottom
@@ -62,7 +62,7 @@
 # <li><a href="../internals/shapes.html">Shape classes</a>.
 # </ul>
 #
-class ::tycho::AsOval {
+class ::tycho::Oval {
     inherit ::tycho::Shape
 
     ###################################################################
@@ -95,7 +95,7 @@ class ::tycho::AsOval {
 # "vradius," "center," or <code>circumference-</code><i>x-y</i>, where
 # (_x_, _y_) is a vector from the center.
 #
-body ::tycho::AsOval::aspect {id canvas slate args} {
+body ::tycho::Oval::aspect {id canvas slate args} {
     assign x0 y0 x1 y1 [$slate coords $id]
     set result {}
 
@@ -134,7 +134,7 @@ body ::tycho::AsOval::aspect {id canvas slate args} {
 # value -- for example, if the "e" (east) aspect is specified, it
 # is moved only by the _x_ amount.
 #
-body ::tycho::AsOval::reshape {id canvas slate x y args} {
+body ::tycho::Oval::reshape {id canvas slate x y args} {
     # Get the current coordinates
     assign x0 y0 x1 y1 [$slate coords $id]
     
@@ -156,7 +156,7 @@ body ::tycho::AsOval::reshape {id canvas slate x y args} {
 #######################################################################
 #### reshapeclick
 #
-body ::tycho::AsOval::reshapeclick {id canvas slate x y args} {
+body ::tycho::Oval::reshapeclick {id canvas slate x y args} {
     getflag ghost args
 
     # Remember how I am now.
@@ -175,7 +175,7 @@ body ::tycho::AsOval::reshapeclick {id canvas slate x y args} {
 #######################################################################
 #### reshapedrag
 #
-body ::tycho::AsOval::reshapedrag {id canvas slate x y} {
+body ::tycho::Oval::reshapedrag {id canvas slate x y} {
     # Get the current coordinates
     assign x0 y0 x1 y1 [$slate coords $id]
     
@@ -210,7 +210,7 @@ body ::tycho::AsOval::reshapedrag {id canvas slate x y} {
 #######################################################################
 #### reshaperelease
 #
-body ::tycho::AsOval::reshaperelease {id canvas slate x y} {
+body ::tycho::Oval::reshaperelease {id canvas slate x y} {
     # If there's a ghost, reshape the item to its shape
     # and then delete the ghost.
     if { [::info exists scratch($id.ghost)] } {
