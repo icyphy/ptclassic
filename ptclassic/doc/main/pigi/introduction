@@ -1,0 +1,9 @@
+.\" $Id$
+.H1 "Introduction
+.pp
+This section contains all the information you need to run \*(PT using
+the graphical interface.  If you are familiar with the X window system,
+and your account is appropriately set up to run \*(PT,
+then you may wish to skip directly to section 5 and begin running
+\*(PT immediately.  You may need to occasionally refer to section 2 below
+to understand some of the arcane terminology used.
