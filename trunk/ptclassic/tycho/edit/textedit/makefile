@@ -66,6 +66,7 @@ EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) \
 	edithtml.style \
 	makefile.style \
 	pkgIndex.tcl \
+	tex.style \
 	textedit.tcl
 
 MISC_FILES = doc img templates test tclIndex 
