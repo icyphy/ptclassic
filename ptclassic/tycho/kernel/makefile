@@ -101,7 +101,6 @@ ITCL_SRCS = \
 	Monitor.itcl \
 	MultiPanel.itcl \
 	Object.itcl \
-	ParameterEdit.itcl \
 	PreferenceDialog.itcl \
 	PreferenceEditor.itcl \
 	PopupMenu.itcl \
