@@ -140,7 +140,7 @@ install_tcl: $(TCL_DEST)/lib/libtcl.a $(BINDIR)/tclsh
 $(TCL_DEST)/lib/libtcl.a: $(TCL_OBJ)/libtcl.a $(TCLTK_DEST) $(TCL_DEST) $(TCL_DEST)/lib $(TCL_INDEPENDENT_DEST)
 	(cd  $(TCL_OBJ); $(MAKE) install)
 	if [ ! -f $(TCL_DEST)/lib/libtcl.a ]; then \
-		cd $(TCL_DEST)/lib; ln -s lib$(TCL_VERSION).a libtcl.a; \
+		cd $(TCL_DEST)/lib; ln -s lib$(TCL_MAJOR_VERSION).a libtcl.a; \
 	fi
 
 $(TCLTK_DEST):
@@ -229,7 +229,7 @@ $(TK_DEST)/lib/libtk.a: $(TK_OBJ)/libtk.a $(TCLTK_DEST) $(TK_DEST) $(TK_DEST)/li
 		X11_LIB_SWITCHES="$(X11_LIBSPEC)" \
 		install)
 	if [ ! -f $(TK_DEST)/lib/libtk.a ]; then \
-		cd $(TK_DEST)/lib; ln -s lib$(TK_VERSION).a libtk.a; \
+		cd $(TK_DEST)/lib; ln -s lib$(TK_MAJOR_VERSION).a libtk.a; \
 	fi
 install_xpm:$(TK_DEST)/lib/libxpm.a
 $(TK_DEST)/lib/libxpm.a: $(TK_OBJ)/xpm/libxpm.a
