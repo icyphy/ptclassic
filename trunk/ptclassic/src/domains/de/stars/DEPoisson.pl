@@ -42,7 +42,6 @@ given as parameters.
 	}
 	constructor {
 		random = new NegativeExpntl(double(meanTime),&gen);
-		delayType = TRUE;
 	}
 	destructor {
 		delete random;

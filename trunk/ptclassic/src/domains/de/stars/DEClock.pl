@@ -25,9 +25,6 @@ Generates events at regular intervals, starting at time zero.
 		default {"1.0"}
 		desc { The value of the output particles generated. }
 	}
-	constructor {
-		delayType = TRUE;
-	}
 	go {
 	   // Generate the output event
 	   // (Recall that the first event comes out at time 0).
