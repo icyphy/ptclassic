@@ -77,6 +77,7 @@ void DataFlowStar :: initialize() {
 void DataFlowStar :: initPortCounts() {
 	BlockPortIter nextp(*this);
 	PortHole* p;
+	nInP = 0;
 	while ((p = nextp++) != 0)
 		if (p->isItInput()) nInP++;
 }
