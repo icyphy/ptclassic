@@ -287,6 +287,10 @@ class ::tycho::Edit {
     # number.
     protected variable delayBeforeDeferredParsing 200
 
+    # The characters to be skipped on a word movement of the cursor.
+    protected common skipChars " \t\n\!\@\#\$\%\^\&\*\(\)\-\=\\\_\+\|\;\'\:\"\
+        \`\~,.\/\<\>\?\[\]\{\}"
+
     ##########################################################################
     ####                  protected methods and procedures                ####
 
@@ -588,12 +592,10 @@ body ::tycho::Edit::constructor {args} {
     bind $itk_component(text) <Escape><C> "%Q capitalize; break"
 
     # Modified cursor motion keys
-    bind $itk_component(text) <Control-f> "%Q move fword; break"
     bind $itk_component(text) <Meta-f> "%Q move fword; break"
     bind $itk_component(text) <Escape><f> "%Q move fword; break"
     bind $itk_component(text) <Control-Right> "%Q move fword; break"
     bind $itk_component(text) <Meta-Right> "%Q move fword; break"
-    bind $itk_component(text) <Control-b> "%Q move bword; break"
     bind $itk_component(text) <Meta-b> "%Q move bword; break"
     bind $itk_component(text) <Escape><b> "%Q move bword; break"
     bind $itk_component(text) <Control-Left> "%Q move bword; break"
@@ -2232,20 +2234,12 @@ body ::tycho::Edit::initializeMenubar {} {
 #####################################################################
 #### nextWord
 # Return the number of characters from the selection to the next "word"
-# using Emacs rules.
+# using Emacs rules. If the next word is farther than 1 line away, 
+# return the number of characters to the next line.
 #
 body ::tycho::Edit::nextWord {} {
-    set buffer [$itk_component(text) get insert "insert + 1 line"]
-    # trim whitespace, other chars
-    set newbuff [string trimleft $buffer \
-            " \t\n\!\@\#\$\%\^\&\*\(\)\-\=\\\_\+\|\;\'\
-            \:\"\`\~,.\/\<\>\?\[\]\{\}"]
-    # trim word
-    set newbuff [string trimleft $newbuff \
-            "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"]
-
-    # return number of characters
-    expr [string length $buffer] - [string length $newbuff]
+    set string [$itk_component(text) get insert "insert + 1 line"]
+    return [::tycho::wordright $string 0 $skipChars]
 }
 
 #####################################################################
@@ -2292,20 +2286,19 @@ body ::tycho::Edit::prepareInsert {index} {
 #####################################################################
 #### prevWord
 # Return the number of characters from the selection to the previous "word"
-# using Emacs rules. (returns a positive number)
+# using Emacs rules. (returns a positive number) If the previous word is 
+# farther than 1 line away, return the number of characters to the previous 
+# line.
 #
 body ::tycho::Edit::prevWord {} {
-    set buffer [$itk_component(text) get "insert - 1 line" insert]
-    # trim whitespace, other chars
-    set newbuff [string trimright $buffer \
-            " \t\n\!\@\#\$\%\^\&\*\(\)\-\=\\\_\+\|\;\'\
-            \:\"\`\~,.\/\<\>\?\[\]\{\}"]
-    # trim word
-    set newbuff [string trimright $newbuff \
-            "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"]
-
-    # return number of characters
-    expr [string length $buffer] - [string length $newbuff]
+    if {[$itk_component(text) index insert] < 2.0} {
+        set prevline 1.0
+    } else {
+        set prevline "insert - 1 line"
+    }
+    set string [$itk_component(text) get $prevline insert]
+    set length [string length $string]
+    return [expr $length - [::tycho::wordleft $string $length $skipChars]]
 }
 
 #####################################################################
