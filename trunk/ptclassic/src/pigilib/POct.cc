@@ -256,7 +256,7 @@ void POct::DeletePList( ParamListType* pList) {
         delete (char*)(pList->array[i].value);
         pList->array[i].value = NULL;
     }
-    delete pList->array;
+    delete [] pList->array;
     pList->array = NULL;
 }
 
