@@ -126,7 +126,7 @@ class ::tycho::Builder {
 	    [file join \$TYCHO editors visedit] \
 	    [file join \$TYCHO editors graphedit] \
 	    [file join \$TYCHO typt kernel] \
-	    [file join \$TYCHO typt editors]]
+	    [file join \$TYCHO typt edit]]
 }
 
     ###################################################################

@@ -2,7 +2,7 @@
 #
 # @Author: Christopher Hylands
 #
-# @Version: @(#)BuilderDialog.itcl	1.25 02/26/98
+# @Version: $Id$
 #
 # @Copyright (c) 1997-%Q% The Regents of the University of California.
 # All rights reserved.
@@ -326,7 +326,7 @@ body ::tycho::BuilderDialog::_initializeMenubar {menubar} {
         $menubar command editortests test \
 		-label {Tycho/Ptolemy Editor Tests} -underline 0 \
                 -command "$this busy ::tycho::Builder::testDir \
-                [file join $TYCHO typt editors test]"
+                [file join $TYCHO typt edit test]"
 
     }
 

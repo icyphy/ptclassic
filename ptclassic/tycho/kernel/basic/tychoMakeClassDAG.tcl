@@ -249,7 +249,7 @@ proc tychoStandardDAG {} {
             [file join edit slate] \
             [file join util devtools] \
             [file join util tydoc] \
-            [file join typt editors ] \
+            [file join typt edit ] \
             [file join typt kernel ] \
             [file join typt controls ] \
             [file join lib idx ]
