@@ -49,8 +49,8 @@ SIMPLE_TESTS = \
 	connected.itcl \
 	descriptor.itcl \
 	galaxyPort.itcl \
+	known.itcl \
 	name.itcl \
-	partial.itcl \
 	ports.itcl \
 	predicates.itcl \
 	remove.itcl
