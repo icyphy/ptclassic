@@ -82,8 +82,7 @@ body ::tycho::PopupMenu::constructor {args} {
 		-background -foreground
     }
 
-    # Record its "path" and type
-    set itemtype(top) "menu"
+    # Record its "path"
     set menupath(top) $itk_component(top)
 
     eval itk_initialize $args
