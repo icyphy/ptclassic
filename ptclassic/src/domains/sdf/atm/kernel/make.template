@@ -1,0 +1,48 @@
+# Makefile for DE ATM kernel
+# Version identification:
+# $Id$
+# Copyright (c) 1990 The Regents of the University of California.
+#                       All Rights Reserved.
+# Date of creation: 9/14/90
+#
+# If this file's name is "make.template" and there is no makefile in
+# this directory, do
+#	cp make.template makefile
+#	make depend
+# This will add the dependencies to the makefile.
+
+# Root of Ptolemy directory
+ROOT=../../../../..
+# True source directory
+VPATH = $(ROOT)/src/domains/de/atm/kernel
+
+# get configuration info
+CONFIG=$(ROOT)/mk/config-$(ARCH).mk
+include $(CONFIG)
+
+# DE Kernel
+DEKERNDIR = $(ROOT)/src/domains/de/kernel
+
+INCL = -I$(DEKERNDIR) -I$(KERNDIR)
+
+#Library name
+LIB = libatm.a
+
+HDRS= VoiceData.h NewQueue.h
+
+SRCS= $(HDRS:.h=.cc)
+
+OBJS= $(HDRS:.h=.o)
+
+
+all:	makefile $(LIB)
+
+# "make install" puts things in the official place
+install:	makefile $(LIBDIR)/$(LIB)
+
+# include common definitions, rules
+include $(ROOT)/mk/common.mk
+
+# Don't add anything after the next line; makedepend will zap it.
+# DO NOT DELETE THIS LINE -- make depend depends on it.
+
