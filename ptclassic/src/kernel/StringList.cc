@@ -15,6 +15,7 @@ $Id$
 #include <std.h>
 #include <stream.h>
 #include "StringList.h"
+#include "UserOutput.h"
 
 #define SMALL_STRING 20
 
