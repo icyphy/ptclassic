@@ -749,7 +749,6 @@ body ::tycho::File::nextRevAction {} {
     if [winfo exists $topwin.revcontrol] {
 	wm deiconify $topwin.revcontrol
 	raise $topwin.revcontrol
-	$topwin.revcontrol configure -file $currentfile
 	$topwin.revcontrol focusin
     } {
 	uplevel #0 "
