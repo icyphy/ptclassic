@@ -17,10 +17,13 @@
 # STAR_LIBS include ALL libraries.  It is OK to make subset Ptolemy builds
 # depend on these symbols and search all libraries, but it slows things
 # down a bit.
+#
+# CGC tcl stars are included because they don't pull in tk.
+# SDF tcl stars are omitted because they do.
 
 # Stub files that pull in the stars.
 SDFSTARS = $(LIBDIR)/sdfstars.o $(LIBDIR)/sdfimagestars.o \
- 	   $(LIBDIR)/sdfdspstars.o $(LIBDIR)/sdftclstars.o
+ 	   $(LIBDIR)/sdfdspstars.o
 CGCSTARS = $(LIBDIR)/cgcstars.o $(LIBDIR)/cgctcltkstars.o
 CG96STARS = $(LIBDIR)/cg96dspstars.o $(LIBDIR)/cg96stars.o
 CG56STARS = $(LIBDIR)/cg56dspstars.o $(LIBDIR)/cg56stars.o
@@ -59,7 +62,7 @@ $(LIBDIR)/libddfstars.a $(LIBDIR)/libddf.a \
 $(LIBDIR)/libthorstars.a $(LIBDIR)/libthor.a \
 $(LIBDIR)/libdestars.a $(LIBDIR)/libde.a \
 $(LIBDIR)/libsdfimagestars.a $(LIBDIR)/libImage.a \
-$(LIBDIR)/libsdfdspstars.a $(LIBDIR)/libsdftclstars.a \
+$(LIBDIR)/libsdfdspstars.a \
 $(LIBDIR)/libbdfstars.a $(LIBDIR)/libbdf.a \
 $(LIBDIR)/libsdfstars.a $(LIBDIR)/libLS.a $(LIBDIR)/libsdf.a
 
@@ -74,7 +77,7 @@ STAR_LIBS=\
 -lthorstars -lthor \
 -ldestars -lde \
 -lbdfstars -lbdf \
--lsdfimagestars -lImage -lsdfdspstars -lsdfstars -lsdftclstars -lLS -lsdf
+-lsdfimagestars -lImage -lsdfdspstars -lsdfstars -lLS -lsdf
 
 # Extra targets
 SDFT = $(OBJDIR)/domains/sdf/targets
