@@ -43,6 +43,8 @@ static const char file_id[] = "ArchTarget.cc";
 #include "HashTable.h"
 
 #include <fstream.h>
+#include <stdio.h>              // Pick up FILE for g++2.7.2.1 under 
+                                // Linux (2.0.29 #5 Slackware).
 
 // Constructor.
 ArchTarget :: ArchTarget(const char* name,const char* starclass,
