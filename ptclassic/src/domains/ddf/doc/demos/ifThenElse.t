@@ -1,16 +1,18 @@
 .\" $Id$
 .NA ifThenElse
 .SD
-If-then-else construct in an SDF Wormhole.
+This demo illustrates the use of an SDF wormhole to implement
+a dynamically scheduled construct using the DDF domain.
+An if-then-else is such a dynamically scheduled construct.
+The top level schematic represents an SDF system, while the
+inside schematic represents a DDF system (implementing an
+if-then-else).
 .DE
 .LO "~ptolemy/src/domains/ddf/demo"
 .SV $Revision$ $Date$
 .AL "E. A. Lee"
 .LD
 .Ir "if-then-else"
-This demo illustrates the use of an SDF wormhole to implement
-a dynamically scheduled construct using the DDF domain.
-An if-then-else is such a dynamically scheduled construct.
 In the SDF domain, such dynamic constructs are not allowed since
 the number of tokens to be produced or consumed by each star is not
 deterministic in the dynamic construct.  In this demo,

@@ -1,7 +1,8 @@
 .\" $Id$
 .NA fibonnacci
 .SD
-Demonstrates the Self star.
+Generate the Fibonnacci sequence using a rather inefficient recursive
+algorithm that is nonetheless a good example of how to realize recursion.
 .DE
 .LO "~ptolemy/src/domains/ddf/demo"
 .SV $Revision$ $Date$
@@ -12,11 +13,7 @@ This demo shows how the
 star implements recursion.
 .Se Self
 .Ie recursion
-The Fibonnacci sequence is generated using a rather inefficient recursion
-that nonetheless is a good example
-of how to realize recursion.
-.pp
-A recursion galaxy is defined as a wormhole in the DDF domain and
+A recursive galaxy is defined as a wormhole in the DDF domain and
 named "fib".  In the recursion galaxy, 
 The incoming data is checked to see whether it is zero or one.
 If it is, the

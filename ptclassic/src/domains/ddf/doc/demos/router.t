@@ -1,7 +1,7 @@
 .\" $Id$
 .NA router
 .SD
-Demonstrates the EndCase star.
+This is a simple illustration of the EndCase star.
 .DE
 .LO "~ptolemy/src/domains/ddf/demo"
 .SV $Revision$ $Date$
