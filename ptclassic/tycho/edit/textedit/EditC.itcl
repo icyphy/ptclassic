@@ -138,7 +138,8 @@ body ::tycho::EditC::commentSelection {} {
 body ::tycho::EditC::help {} {
     global ::TYCHO
     ::tycho::File::openContext \
-	    $TYCHO/editors/textedit/doc/usersGuides/EditCHelp.html
+	    [file join $TYCHO editors textedit doc usersGuides \
+	    EditCHelp.html]
 }
 
 #####################################################################

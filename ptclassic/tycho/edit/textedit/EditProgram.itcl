@@ -106,6 +106,9 @@ class ::tycho::EditProgram {
     # Insert the fill prefix at the beginning of every line in the selection.
     method commentSelection {}
 
+    # Exec a process.
+    method execProcess {command}
+
     # Fill the set of lines identified by the selection, make comments.
     method fillSelection {}
 
@@ -126,9 +129,6 @@ class ::tycho::EditProgram {
 
     # In derived classes, returns a string with keywords separated by "|".
     method keywords {} {return {}}
-
-    # Run make
-    method make {}
 
     # Color the code in a region.
     method parseNow {start stop}
@@ -154,6 +154,9 @@ class ::tycho::EditProgram {
 body ::tycho::EditProgram::constructor {args} {
     
     eval itk_initialize $args
+
+    menubar insertMenuItem "Run Make" "Evaluate" File -underline 4 \
+            -command "$this execProcess make"
     
     # Add to the format menu commands to comment and uncomment
     # the regions defined by the selection.
@@ -211,6 +214,17 @@ body ::tycho::EditProgram::closeParen {paren} {
 	    [$itk_component(text) get "insert linestart" "insert lineend"]] {
 	indentLine
     }
+}
+
+#####################################################################
+#### execProcess
+# Exec a process
+# 
+body ::tycho::EditProgram::execProcess {command} {
+    set w [::tycho::autoName .exec]
+    ::tycho::Exec $w -command $command
+    $w centerOnScreen
+    $w invoke ok 
 }
 
 #####################################################################
@@ -306,8 +320,10 @@ body ::tycho::EditProgram::gendoc {setDocCommand genCommand} {
 #
 body ::tycho::EditProgram::help {} {
     global ::TYCHO
+
     ::tycho::File::openContext \
-	    $TYCHO/editors/textedit/doc/usersGuides/EditProgramHelp.html
+        [file join $TYCHO editors textedit doc usersGuides \
+	    EditProgramHelp.html]
 }
 
 #####################################################################
@@ -454,15 +470,6 @@ body ::tycho::EditProgram::indicateReadOnly {bool} {
             menubar enableMenuItem {Tab} Format
 	}
     }
-}
-#####################################################################
-#### make 
-# Exec make in the current directory
-# 
-body ::tycho::EditProgram::make {} {
-    set w [::tycho::autoName .make]
-    ::tycho::Exec $w
-    $w centerOnScreen
 }
 
 #####################################################################

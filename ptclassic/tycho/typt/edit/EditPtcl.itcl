@@ -178,13 +178,7 @@ configbody ::tycho::EditPtcl::facet {
     set facet $itk_option(-facet)
     if {$facet != "" } {
 	set facet [::tycho::expandPath $facet]
-	# temporary name
-	# FIXME: Unix-ism here, /tmp is not portable
-	set facetTmpFile /tmp/[file tail $facet][::tycho::autoName a].pt
-	while {[file exists $facetTmpFile]} {
-	    # Danger: we could go into a tight loop here
-	    set facetTmpFile /tmp/[file tail $facet][::tycho::autoName a].pt
-	}
+	set facetTmpFile ::tycho::tmpFileName [file tail $facet] .pt
 
 	# Unix-ism here.  Why anyone would buy (let alone write)
 	# an operating system without an exec is beyond me. :-)
@@ -209,7 +203,9 @@ configbody ::tycho::EditPtcl::facet {
 body ::tycho::EditPtcl::help {} {
     global ::TYCHO
     ::tycho::File::openContext \
-	    $TYCHO/editors/textedit/doc/usersGuides/EditPtclHelp.html
+        [file join $TYCHO editors textedit doc usersGuides \
+	    EditPtclHelp.html]
+
 }
 
 #####################################################################

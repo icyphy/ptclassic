@@ -335,7 +335,8 @@ body ::tycho::EditItcl::gendoc {} {
 body ::tycho::EditItcl::help {} {
     global ::TYCHO
     ::tycho::File::openContext \
-	    $TYCHO/editors/textedit/doc/usersGuides/EditItclHelp.html
+	[file join $TYCHO editors textedit doc usersGuides \
+	    EditItclHelp.html]
 }
 
 

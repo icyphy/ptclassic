@@ -214,7 +214,8 @@ body ::tycho::EditHTML::evaluate {} {
 body ::tycho::EditHTML::help {} {
     global ::TYCHO
     ::tycho::File::openContext \
-	    $TYCHO/editors/textedit/doc/usersGuides/EditHTMLHelp.html
+	    [file join $TYCHO editors textedit doc usersGuides \
+	    EditHTMLHelp.html]
 }
 
 #####################################################################

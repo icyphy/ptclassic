@@ -116,7 +116,8 @@ body ::tycho::EditCpp::commentSelection {} {
 body ::tycho::EditCpp::help {} {
     global ::TYCHO
     ::tycho::File::openContext \
-	    $TYCHO/editors/textedit/doc/usersGuides/EditCppHelp.html
+	    [file join $TYCHO editors textedit kernel doc usersGuides \
+	    EditCppHelp.html]
 }
 
 #####################################################################
