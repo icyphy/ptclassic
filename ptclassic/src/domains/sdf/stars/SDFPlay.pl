@@ -47,7 +47,8 @@ be a parameter.
 		int delFile;
 		const char* fileName;
 	}
-	ccinclude { "miscFuncs.h" }
+	hinclude { <stdio.h> }
+	ccinclude { "miscFuncs.h" , "UserOutput.h", <std.h> }
 	constructor {
 		strm = NULL;
 		delFile = FALSE;
@@ -61,10 +62,8 @@ be a parameter.
 		else fileName = savestring (expandPathName(fileName));
 		// should check if file already exists here
 		if ((strm = fopen (fileName, "w")) == NULL) {
-			StringList msg = readFullName();
-			msg += "Can't open file ";
-			msg += fileName;
-			Error::abortRun (msg);
+			Error::abortRun (*this, 
+				"Can't open file ", fileName);
 		}
 	}
 // mulaw compression routine

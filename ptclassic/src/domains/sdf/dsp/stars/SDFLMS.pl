@@ -57,7 +57,7 @@ will be stored there after the run has completed.
 		default { "" }
 		desc { File to save final tap values. }
 	}
-	ccinclude { "miscFuncs.h" }
+	ccinclude { "miscFuncs.h" , <stdio.h> }
 	constructor {
 		// remove interpolation as a settable parameter
 		interpolation.clearAttributes(A_SETTABLE);
@@ -66,12 +66,8 @@ will be stored there after the run has completed.
 	}
 	start {
 	// First check to be sure that interpolation is 1.
-		if (int(interpolation) != 1) {
-			StringList msg = readFullName();
-			msg += "Sorry, interpolation not supported yet";
-			Error::abortRun (msg);
-			return;
-		}
+		interpolation = 1;
+
 		// Next run the FIR start routine
 		SDFFIR :: start();
 
@@ -103,11 +99,9 @@ will be stored there after the run has completed.
 			FILE* fp;
 			if (!(fp = fopen(saveFileName,"w"))) {
 				// File cannot be opened
-				StringList msg = readFullName();
-				msg += ": WARNING: Cannot open saveTapsFile for writing: ";
-				msg += saveFileName;
-				msg += ". Taps not saved.";
-				errorHandler.error (msg);
+				Error::warn(*this,
+				 "Cannot open saveTapsFile for writing: ",
+				 saveFileName, ". Taps not saved.");
 			} else
 				for (int i = 0; i < taps.size(); i++)
 					fprintf(fp, "%d %g\n", i, taps[i]);
