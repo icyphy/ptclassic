@@ -1,0 +1,77 @@
+# Makefile for Ptolemy MDSDF stars
+# $Id$
+#
+# If this file's name is "make.template" and there is no makefile in
+# this directory, do
+#	cp make.template makefile
+#	chmod +w makefile
+#	make depend
+# This will add the dependencies to the makefile.
+
+ROOT = ../../../..
+VPATH = $(ROOT)/src/domains/mdsdf/stars
+
+# get configuration info
+CONFIG=$(ROOT)/mk/config-$(ARCH).mk
+include $(CONFIG)
+
+#SDF kernel
+SDFKERNDIR=$(ROOT)/src/domains/sdf/kernel
+
+# MDSDFDIR is the directory containing MDSDF domain support
+MDSDFDIR = $(ROOT)/src/domains/mdsdf/kernel
+INCL = -I$(SDFKERNDIR) -I$(MDSDFDIR) -I$(KERNDIR)
+
+# Library name
+LIB=libmdsdfstars.a
+
+# source files for all stars, using preprocessor
+PL_SRCS= \
+ MDSDFAdd.pl \
+ MDSDFBlackHole.pl \
+ MDSDFConst.pl \
+ MDSDFCxMatrix.pl \
+ MDSDFCxToFloat.pl \
+ MDSDFDB.pl \
+ MDSDFDisplayImage.pl \
+ MDSDFDisplayImage2.pl \
+ MDSDFFIR.pl \
+ MDSDFFFTCx.pl \
+ MDSDFFFTCxCol.pl \
+ MDSDFFloatMatrix.pl \
+ MDSDFFloatToCx.pl \
+ MDSDFFork.pl \
+ MDSDFGain.pl \
+ MDSDFIIDUniformMatrix.pl \
+ MDSDFInverse.pl \
+ MDSDFMult.pl \
+ MDSDFQuant.pl \
+ MDSDFReadImage.pl \
+ MDSDFReadImage2.pl \
+ MDSDFTranspose.pl \
+ MDSDFXprism3.pl
+
+# The .cc files
+SRCS=$(PL_SRCS:.pl=.cc)
+
+# object files for all stars
+OBJS= $(SRCS:.cc=.o)
+
+# header files for all stars
+HDRS= $(SRCS:.cc=.h)
+
+STAR_MK=mdsdfstars
+DOMAIN=MDSDF
+EXTRA_SRCS=$(STAR_MK).mk $(STAR_MK).c $(PL_SRCS)
+
+all:		makefile stars_all
+
+install:	stars_install
+
+# include common definitions, rules
+include $(ROOT)/mk/common.mk
+
+
+# Don't add anything after the next line; makedepend will zap it.
+# DO NOT DELETE THIS LINE -- make depend depends on it.
+
