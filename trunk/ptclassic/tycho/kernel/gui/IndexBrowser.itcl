@@ -428,7 +428,8 @@ body ::tycho::IndexBrowser::processItem {id} {
         set entry $indexEntries($id)
         if {[llength $entry] == 2} {
             # Entry is another index.
-            loadIndexList [lindex $entry 1]
+	    set indexList [lindex $entry 1]
+	    updateListbox
             return 0
         } {
             set filename [lindex $entry 1]
