@@ -317,7 +317,7 @@ body ::tycho::PortedDigraph::subgraphInputs {args} {
 body ::tycho::PortedDigraph::subgraphOutputs {args} {
     set result {}
     foreach v $args {
-        foreach edge [names edge:$v.*^*.*] {
+        foreach edge [names $v.*^*.*] {
             if { [lsearch -exact $args [lindex [split $edge .^] 2]] < 0 } {
                 lappend result $edge
             }
@@ -392,3 +392,4 @@ body ::tycho::PortedDigraph::_updatecache {} {
     # Validate cache
     cache validate
 }
+
