@@ -79,7 +79,7 @@ end
 
 foreach x (thor/pepp cg/targets sdf/expgraph sdf/image sdf/targets \
 	ddf/constructs sdf/loopScheduler cg/gilsScheduler thor/analyzerX11 \
-	cg-ddf/constructs )
+	cg-ddf/constructs cg/dlScheduler cg/quasiScheduler)
 	optmkdir $x
 	cd $x
 	optlink ../../../../src/domains/$x make.template
