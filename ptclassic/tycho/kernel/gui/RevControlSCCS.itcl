@@ -137,7 +137,7 @@ body ::tycho::RevControlSCCS::checkIn {object} {
 	# cancelled
 	return
     }
-    catch {exec echo $comment | sccs delget $basefile} output
+    catch {exec echo " $comment" | sccs delget $basefile} output
     if {[file exists [format "%s/SCCS/p.$basefile" $dir]]} {
 	error "Checkin failed: $output"
     }
