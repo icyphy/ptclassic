@@ -131,18 +131,18 @@ void numberBlocks(Galaxy& galaxy, int flagLocation) {
 	block->flags[flagLocation] = number++;
 }
 
-void resetAllFlags(Galaxy& galaxy,int flagLocation) {
+void resetAllFlags(Galaxy& galaxy,int flagLocation, int resetValue) {
     GalAllBlockIter nextBlock(galaxy);
     Block* block;
     while ((block = nextBlock++) != NULL)
-	block->flags[flagLocation] = 0;
+	block->flags[flagLocation] = resetValue;
 }
 
-void resetFlags(Galaxy& galaxy,int flagLocation) {
+void resetFlags(Galaxy& galaxy,int flagLocation, int resetValue) {
     GalTopBlockIter nextBlock(galaxy);
     Block* block;
     while ((block = nextBlock++) != NULL)
-	block->flags[flagLocation] = 0;
+	block->flags[flagLocation] = resetValue;
 }
 
 void deleteGalaxy(Galaxy&g) {
