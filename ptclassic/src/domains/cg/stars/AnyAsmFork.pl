@@ -16,6 +16,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	input {
 		name {input}
 		type {anytype}
+		attributes { P_CIRC }
 	}
 	outmulti {
 		name {output}
