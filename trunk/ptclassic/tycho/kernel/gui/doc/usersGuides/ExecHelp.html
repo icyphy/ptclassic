@@ -1,46 +1,53 @@
 <!-- $Id$ -->
 <html>
 <head>
-<Title>Tycho Exec Dialog Documentation</title>
+<Title>Tycho Exec/Monitor Dialog Documentation</title>
 </head>
 <body bgcolor="#faf0e6">
-<h1><a name="Exec Dialog">User's Guide to the Exec Dialog</a></h1>
+<h1><a name="Exec Dialog">User's Guide to the Exec/Monitor Dialog</a></h1>
 <p>
-The Exec Dialog in Tycho provides a dialog window that can execute a
+The non-graphical Exec Class in Tycho provides a mechanism for
+programmers to execute a process. The graphical Monitor Class inherits 
+from Exec to provide a graphical dialog window that can execute a
 process in a user specified directory and display the results.
 
-<P>In Tycho0.1.1, the Exec Dialog uses non-blocking I/O, which is not
-supported under Windows.  The Exec Dialog also will not work under the
+<P><h6>
+Currently the Exec/Monitor Dialog uses non-blocking I/O, which is not
+supported under Windows.  The Exec/Monitor Dialog also will not work under the
 Macintosh.  Consult the tcl <CODE>open</CODE> man page for more
 information.
+</h6>
 
-<H2>Exec Dialog Features</H2>
-The Exec Dialog contains the following controls
-
+<H2>Exec/Monitor Dialog Features</H2>
 <DL>
 
-<DT> <CODE>Command to Exec:</CODE>
+<DT> <CODE><b>Command to execute:</b></CODE>
 <DD> An entry widget that contains the name of the command to execute, along
 with any user supplied arguments.
 
-<DT> <CODE>Directory to Exec from:</CODE>
+<DT> <CODE><b>Directory to execute from:</b></CODE>
 <DD> An entry widget that contains the pathname of the directory to execute the command from.
 
-<DT> <CODE>Exec</CODE>
-
+<DT> <CODE><b>Exec</b></CODE>
 <DD> A button that executes the command.  If there is any output, a
 text widget is created and the output is placed in it.  If there is an
 error, then the error is displayed in a dialog widget.
 
-<DT> <CODE>Cancel</CODE>
-<DD> A button to close the current Exec Dialog.
+<DT> <CODE><b>Stop</b></CODE>
+<DD> Stop the current execution.
 
-<DT> <CODE>Help</CODE>
-<DD> A button that brings up this file.
+<DT> <CODE><b>Next Error</b></CODE>
+<DD> If an error message occured during a compilation, open the file
+which contains that error, and jump to the line.
+
+<DT> <CODE><b>Cancel</b></CODE>
+<DD> A button to close the current Exec Dialog.
 
 </DL>
 <p>
-See the <A HREF="../codeDoc/Exec.html">automatically generated Exec documentation</A> for further details.
+See the non-graphical <A HREF="../codeDoc/Exec.html">Exec documentation</A> 
+and graphical <A HREF="../codeDoc/Monitor.html">Monitor documentation</A>
+for further details.
 See also the Tycho internal documentation about <A HREF="../internals/exec.html">Execing Processes</A>.
 
 <p>
