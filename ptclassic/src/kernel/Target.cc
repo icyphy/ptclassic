@@ -141,7 +141,13 @@ void Target::begin() {
 
 // default run: run the scheduler
 int Target::run() {
-	return sched->run();
+	if (sched) {
+		return sched->run();
+	}
+	else {
+		Error::abortRun(*this, "No scheduler!");
+		return FALSE;
+	}
 }
 
 // default wrapup: call wrapup on all stars and galaxies
@@ -156,9 +162,9 @@ void Target::wrapup () {
 int Target :: commTime(int,int,int,int) { return 0;}
 
 // by default, pass these on through
-void Target::setStopTime(double f) { sched->setStopTime(f);}
-void Target::resetStopTime(double f) { sched->resetStopTime(f);}
-void Target::setCurrentTime(double f) { sched->setCurrentTime(f);}
+void Target::setStopTime(double f) { if (sched) sched->setStopTime(f);}
+void Target::resetStopTime(double f) { if (sched) sched->resetStopTime(f);}
+void Target::setCurrentTime(double f) { if (sched) sched->setCurrentTime(f);}
 
 StringList Target::print(int verbose) const {
 	StringList out;
