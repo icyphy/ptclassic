@@ -44,6 +44,7 @@ PL_SRCS= \
  DETkShowEvents.pl \
  DETkShowValues.pl \
  DETkSlider.pl \
+ DETkStripChart.pl \
  DETkText.pl \
  DETkXYPlot.pl
 
@@ -57,6 +58,7 @@ TCL_SRCS= \
   tkShowEvents.tcl \
   $(TCL_SCRIPT_DIR)/tkShowValues.tcl \
   $(TCL_SCRIPT_DIR)/tkSlider.tcl \
+  tkStripChart.tcl \
   tkText.tcl \
   tkLogicAnalyzer.tcl
 
