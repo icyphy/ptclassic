@@ -16,8 +16,14 @@ The difference-coded image sequence is run-length encoded.
 .Ie "encoding, run length"
 The coded image, final image, and difference
 between the original and final images are all displayed.
+.pp
+The DisplayVideo star needs programs from the Utah Raster Toolkit
+to be in your $path variable to work.
+These programs are not included with Ptolemy.
+The manual page for the DisplayVideo star tells how to
+get the Utah Raster Toolkit for free.
 .SA
-DisplayImage
+DisplayVideo
 ReadImage
 Dpcm
 RunLen
