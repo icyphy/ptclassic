@@ -174,6 +174,11 @@ static void reportArcOverflow(PortHole* p, int maxToken) {
 int
 DynDFScheduler :: run () {
 
+	if (!galaxy()) {
+	    Error::abortRun("No galaxy to run");
+	    return FALSE;
+        }
+
 	if (haltRequested()) {
 	    Error::abortRun(*galaxy(), ": Can't continue after run-time error");
 	    return FALSE;
