@@ -37,12 +37,10 @@ limitation of liability, and disclaimer of warranty provisions.
 		input.receiveData();
 
 		// read control value, and repeat input tokens to output 
-		int num = int (control%0);
-		for (int i = num ; i > 0; i--) {
+		int num = int(control%0);
+		for (int i = num; i > 0; i--) {
 			output%0 = input%0;
 			output.sendData();
 		}
 	}
 }
-
-

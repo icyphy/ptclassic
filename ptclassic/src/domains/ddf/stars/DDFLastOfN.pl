@@ -43,11 +43,12 @@ limitation of liability, and disclaimer of warranty provisions.
 		if (!readyToGo) {
 			control.receiveData();	
 		}
-		int num = int (control%0);
+		int num = int(control%0);
 		if (input.numTokens() >= num) {
 			// skip the num-1 inputs
-			for (int i = num; i > 0; i--)
+			for (int i = num; i > 0; i--) {
 				input.receiveData();
+			}
 
 			// prepare for the next round.
 			waitFor(control);
@@ -65,5 +66,3 @@ limitation of liability, and disclaimer of warranty provisions.
 		} 
 	}
 }
-
-
