@@ -55,8 +55,17 @@ class ::tycho::SlateView {
     #################################################################
     ####                     public methods                      ####
 
+    # Change to a new layout model
+    method _layout {layout}
+
     # Set or get the coordinates of an item
     method coords {name args}
+
+    # Return debugging information
+    method debug {mode args}
+
+    # Describe the given item of the given model
+    method describe {model tag}
 
     # Find items.
     method find {mode args}
@@ -82,14 +91,26 @@ class ::tycho::SlateView {
     # Handle event notification from the layout model
     method notifyevent {event args}
 
+    # Manipulate context-sensitive (popup) menus
+    method popup {mode tag args}
+
     # Get the slate id of an item given its name
     method slateid {name}
 
     #################################################################
     ####                  protected methods                      ####
 
+    # Configure the global popup menu
+    protected method _configurePopup {}
+
+    # Initialize the global popup menu
+    protected method _initializePopup {}
+
     # Add a new item
     protected method _add {_ name args}
+
+    # Delete an attribute of an item -- does nothing
+    protected method _attrdel {name args}
 
     # Change attributes of an item
     protected method _attrset {name args}
@@ -154,14 +175,23 @@ class ::tycho::SlateView {
     # Load items from the model into the slate
     private method _loadlayout {{item {}}}
 
+    # Show a popup menu
+    protected method _showpopup {x y menu command {predicate {}}}
+
     #################################################################
     ####                   private variables                     ####
     
+    # The context menus
+    private variable _contextmenus
+
     # The loaded libraries
     private variable _library
 
     # The loaded models
     private variable _model
+
+    # The references to loaded models
+    private variable _modelref
 
     # The mapping from item names to item IDs
     private variable _itemid
@@ -186,6 +216,16 @@ body ::tycho::SlateView::constructor {args} {
     set _slate $itk_component(slate)
     pack $_slate -expand yes -fill both -side left
 
+    # Modify the binding tags of the canvas so that this megawidget
+    # gets events too. This is unfortunate but appears to be necessary
+    set tl [winfo toplevel $itk_component(hull)]
+    set canvas [$_slate component canvas]
+    bindtags $canvas \
+            "$tl $itk_component(hull) $_slate Slate all"
+    
+    # Prevent shadowing of bindings in the Displayer class.
+    bind $_slate <Control-x> {continue}
+
     # Evaluate options
     eval itk_initialize $args
 
@@ -196,18 +236,42 @@ body ::tycho::SlateView::constructor {args} {
 	    -canvascolor  graphedit canvasColor
 
     # Create the layout model.
-    # FIXME: this needs to be settable externally so layouts can be shared.
-    set _layout [uplevel \#0 ::tycho::Layout [::tycho::autoName layout]]
-    model add layout $_layout
+    model notify "layout" "$this _layout"
+    model add "layout" \
+	    [uplevel \#0 ::tycho::Layout [::tycho::autoName layout]]
+
+    # Create and initialize the popup menu for the background
+    popup new "global"
+    popup bind "global" #background \
+	    [list @scope [info class] $this _configurePopup]
+    _initializePopup
+}
+
+########################################################################
+#### _layout
+#
+# Change to a new layout model.
+#
+body ::tycho::SlateView::_layout {layout} {
+    # Lose interest in the old one first...
+    if { $_layout != "" } {
+        $_layout unsubscribe data $this
+        $_layout unsubscribe event $this
+        $_layout unsubscribe view $this
+        # FIXME: decrement reference count?
+    }
+    set _layout $layout
 
     # Subscribe to the layout
-    $_layout subscribe data $this "$this notify"
-    $_layout subscribe event $this "$this notifyevent"
+    if { $layout != "" } {
+        $_layout subscribe data $this "$this notify"
+        $_layout subscribe event $this "$this notifyevent"
 
-    # In addition, subscribe to the layout model as a "view". This
-    # is necessary because the Layout model sometimes needs to get
-    # data from a real Tk canvas...
-    $_layout subscribe view $this
+        # In addition, subscribe to the layout model as a "view". This
+        # is necessary because the Layout model sometimes needs to get
+        # data from a real Tk canvas...
+        $_layout subscribe view $this
+    }
 }
 
 ########################################################################
@@ -219,6 +283,48 @@ body ::tycho::SlateView::coords {name args} {
     eval $_slate coords $_itemid($name) $args
 }
 
+########################################################################
+#### debug
+#
+# Return debugging information.
+#
+# FIXME: document.
+#
+body ::tycho::SlateView::debug {mode args} {
+    switch -exact $mode {
+	"widgetName" {
+	    return $this
+	}
+	"listSelection" {
+	    find withtag sel
+	}
+	"describeSelection" {
+	    set result ""
+	    foreach f [find withtag sel] {
+		append result "\nitem $f [$_layout describe $f]"
+	    }
+	    return $result
+	}
+	default {
+	    eval $args
+	}
+    }
+}
+
+########################################################################
+#### describe
+#
+# Return a description of the given item in the named model.
+#
+body ::tycho::SlateView::describe {model tag} {
+    set result ""
+    set model [model access $model]
+    set items [find withtag $tag]
+    foreach i $items {
+	append result [$model describe $i]\n
+    }
+    return $result
+}
 
 ########################################################################
 #### find
@@ -236,7 +342,7 @@ body ::tycho::SlateView::find {mode tag} {
 #########################################################################
 #### iteminfo
 #
-# Get a printable string conaining information about the item. Subclasses
+# Get a printable string containing information about the item. Subclasses
 # will usually override this to print more meaningful info.
 #
 body ::tycho::SlateView::iteminfo {slateid args} {
@@ -490,6 +596,11 @@ body ::tycho::SlateView::library {mode args} {
 # Delete a model from the list of known models. Note that the
 # model will not be destroyed.
 #
+# <dt><b>notify</b> _name_ _command_
+# <dd>
+# Specify a command that is to be executed whenever a model is
+# created.
+#
 # <dt><b>names</b>
 # <dd>
 # Return a list of known models.
@@ -520,6 +631,10 @@ body ::tycho::SlateView::model {mode args} {
             if [::info exists _model($name)] {
                 error "Model \"$model\" has already been registered"
             }
+	    if [info exists _modelref($name)] {
+		uplevel #0 $_modelref($name) $object
+		puts "uplevel #0 $_modelref($name) $object"
+	    }
             set _model($name) $object
         }
         "delete" {
@@ -528,14 +643,22 @@ body ::tycho::SlateView::model {mode args} {
             if ![::info exists _model($name)] {
                 error "Unknown model \"$name\""
             }
+	    if [info exists _modelref($name)] {
+		uplevel #0 $_modelref($name) [list ""]
+	    }
             unset _model($name)
         }
         "names" {
             array names _model
         }
+	"notify" {
+	    set name [lindex $args 0]
+	    set command [lindex $args 1]
+	    set _modelref($name) $command
+	}
         default {
             error "Invalid mode \"$mode\": should be one of\
-                    access, add, delete, or names"
+                    access, add, delete, notify, or names"
         }
     }
 }
@@ -593,6 +716,136 @@ body ::tycho::SlateView::notifyevent {event args} {
 }
 
 ########################################################################
+#### popup
+#
+# Manipulate context-sensitive (popup) menus. Typically, subclasses
+# will call this method with the <b>bind</b> option, to indicate
+# that they want a context-sensitive popup-menu to appear over certain
+# items. By default, one pop-uyp is bound to the back-ground item,
+# which contains a number of entries that are considered to
+# be globally useful. The subclass can access the global popup
+# with the tag <b>global</b> to change its default behavior.
+#
+# This method has several forms, depending on the value of the
+# _mode_ argument:
+# <dl>
+# <dt><b>access</b> _name_ ?_method_? ?_arg_ ...?
+# <dd>
+# Get access to a menu. If _method_ is supplied, then it is the
+# name of a method on the menu to call, and additional arguments
+# are supplied to the call. Otherwise, the path of the popup menu
+# is returned. If _name_ is "?", return a list of names of
+# all context menus.
+#
+# <dt><b>add</b> _name_ _type_ _tag_ ?_inMenu_? ?_arg_ ...?
+# <dd>
+# Add an entry into the popup menu. This is a shortcut to the
+# PopupMenu <b>add</b> method. _type_ is the type of entry,
+# such as <b>command</b>, <b>checkbutton</b>, <b>radiobutton</b>,
+# <b>separator</b>, or <b>cascade</b>.
+# _tag_ is a unique tag which is used to refer
+# to this entry later. _inMenu_, if supplied, will cause the
+# entry to be created inside the cascade menu with _inMenu_
+# as its tag. Any additional arguments are passed to the
+# <b>add</b> method of PopupMenu.
+#
+# <dt><b>bind</b> _name_ _slatetag_ _command_ ?_predicate_?
+# <dd>
+# Bind _command_ to the popup menu given by _name_. This command
+# will be executed before the menu is created, and can be used by
+# the client to disable, enable, or add menu entries according
+# to the current context. If _predicate_ is supplied, it
+# will be executed before calling _command_, and if it
+# returns false, then _command_ will not be called and the
+# popup menu will not be displayed.
+#
+# <dt><b>delete</b> _name_ _tag_
+# <dd>
+# Delete the entry given by _tag_ from the popup menu named _name_.
+#
+# <dt><b>disable</b> _name_ _tag_
+# <dd>
+# Disable the entry given by _tag_ of the popup menu named _name_.
+#
+# <dt><b>enable</b> _name_ _tag_
+# <dd>
+# Enable the entry given by _tag_ of the popup menu named _name_.
+#
+# <dt><b>new</b> _name_ ?_arg_ ...?
+# <dd>
+# Create a new pop-up menu, with the given _name_. Additional
+# arguments are passed directly to the constructor of the
+# PopupMenu class.
+#
+# </dl>
+#
+body ::tycho::SlateView::popup {mode name args} {
+    if { $mode != "access" && $mode != "new" \
+	    && ![info exists _contextmenus($name)] } {
+	error "Unknown context menu \"$name\""
+    }
+    switch -exact $mode {
+        "access" {
+	    # General call on a popup
+	    if { $name == "?" } {
+		return [array names _contextmenus]
+	    }
+	    if ![info exists _contextmenus($name)] {
+		error "Unknown context menu \"$name\""
+	    }
+	    if { $args == "" } {
+		return $_contextmenus($name)
+	    } else {
+		uplevel #0 $_contextmenus($name) $args
+	    }
+        }
+        "add" {
+            # Add an entry
+	    eval $_contextmenus($name) add $args
+	}
+        "bind" {
+            # Bind a popup menu to an item or a tag
+	    set slatetag [lindex $args 0]
+	    set command [lindex $args 1]
+	    if { [llength $args] > 2 } {
+		set predicate [lindex $args 2]
+	    } else {
+		set predicate ""
+	    }
+	    set tagorid [slateid $slatetag]
+	    $_slate bind $tagorid <Button-3> \
+		    [list @scope [info context] $this _showpopup \
+		    %X %Y $_contextmenus($name) $command $predicate]
+        }
+        "delete" {
+            # Delete an entry
+	    eval $_contextmenus($name) delete $tag
+	}
+        "disable" {
+            # Disable an entry
+	    eval $_contextmenus($name) disable $args
+	}
+        "enable" {
+            # Enable an entry
+	    eval $_contextmenus($name) enable $args
+	}
+        "new" {
+            # Create a new popup menu
+	    if [info exists _contextmenus($name)] {
+		error "Context menu \"$name\" already exists"
+	    }
+	    set _contextmenus($name) [uplevel #0 \
+		    ::tycho::PopupMenu [::tycho::autoName .${name}popup] $args]
+	}
+        default {
+            error "Invalid mode \"$mode\": should be one of\
+                    access, add, bind, delte, disable, enable, \
+		    or new"
+        }
+    }
+}
+
+########################################################################
 #### slateid
 #
 # Return the slate id of an item given its name. If the id is unknown,
@@ -608,8 +861,54 @@ body ::tycho::SlateView::slateid {name} {
 }
 
 #####################################################################
-#####################################################################
+#######################w##############################################
 ####                     protected methods                       ####
+
+#####################################################################
+#### _initializePopup
+#
+# Initialize the global context-sensitive menu. If subclasses
+# override, they should cascade with this after doing their
+# own initialization.
+#
+body ::tycho::SlateView::_initializePopup {} {
+    # Give it some entries
+    # popup add "global" command usersguide \
+    #        -label "Guide to the [info class] widget" \
+    #	    -command "$this help"
+
+    if { [popup access "global" entries "top"] != "" } {
+	popup add "global" separator sepSlateView1
+    }
+    popup add "global" cascade debug -label "Debug"
+    popup add "global" command widgetName debug \
+	    -command "::tycho::post \[$this debug widgetName\]" \
+	    -label "Widget name"
+    popup add "global" command listSelection debug \
+	    -command "::tycho::post \[$this debug listSelection\]" \
+	    -label "List selection"
+    popup add "global" command describeSelection debug \
+	    -command "::tycho::post \[$this debug describeSelection\]" \
+	    -label "Describe selection"
+}
+
+#####################################################################
+#### _configurePopup
+#
+# Configure the global context-sensitive menu. Subclasses should
+# override.
+#
+body ::tycho::SlateView::_configurePopup {} {
+    # Is there a selection?
+    set current [$_slate find withtag current]
+    if { $current != "" && ![$_slate hastag $current #] } {
+        popup enable global listSelection
+	popup enable global describeSelection
+    } else {
+        popup disable global listSelection
+	popup disable global describeSelection
+    }
+}
 
 ########################################################################
 #### _add
@@ -648,6 +947,16 @@ body ::tycho::SlateView::_addtag {tag args} {
     foreach name $args {
 	$_slate addtag $tag withtag $_itemid($name)
     }
+}
+
+########################################################################
+#### _attrdel
+#
+# Delete an attribute of an item. Does nothing, since attributes
+# of slate items cannot be deleted.
+#
+body ::tycho::SlateView::_attrdel {name args} {
+    ;# Do nothing
 }
 
 ########################################################################
@@ -801,7 +1110,7 @@ body ::tycho::SlateView::_select {mode {name {}}} {
 #######################################################################
 #### _loadlayout
 #
-# Load the layout model into the slate. If _item_ is provided, lkoad
+# Load the layout model into the slate. If _item_ is provided, load
 # just that item.
 #
 body ::tycho::SlateView::_loadlayout {{item {}}} {
@@ -811,5 +1120,24 @@ body ::tycho::SlateView::_loadlayout {{item {}}} {
     foreach i [$_layout match item $item] {
         _loadlayout [concat $item $i]
     }
+}
+
+#######################################################################
+#### _showpopup
+#
+# Show a popup menu. If the predicate is not null, evaluate it first
+# to decided whether to proceed any further.
+#
+body ::tycho::SlateView::_showpopup {x y menu command {predicate {}}} {
+    if { $predicate != "" } {
+	if ![uplevel #0 $predicate] {
+	    return
+	}
+    }
+    # Get the menu ready
+    uplevel #0 $command
+
+    # Show it
+    $menu post $x $y
 }
 
