@@ -73,9 +73,11 @@
 # terms specified in this license. 
 
 # How to compile under Microsoft Visual C++
+#
 # NOTE: This does not completely work.  The instructions below
 # assume you are using Bash.
 #
+
 # 1. Set PTARCH
 # 	PTARCH=nt4.vc
 #	export PTARCH
@@ -107,7 +109,12 @@
 # 7. Run the Shell script $PTOLEMY/bin/makevcgen-all, which will
 #    generate a makefile.vc file from from a makefile in each
 #    directory we are building in.	
-# 8. Statically linked binaries will not pull in the stars
+# 8. It is easiest to build under MSVC++ if you build under Cygwin first.
+#    Building under Cygwin does things like running ptlang on the star .pl
+#    files to generate .cc and .h files.  If you don't want to build 
+#    under Cygwin, at least build ptlang:
+#      cd $PTOLEMY/src/ptlang; nmake -f makefile.vc install
+# 9. Statically linked binaries will not pull in the stars
 # 	unless the the *star.c file is edited and compiled as a .cc file.
 #	For each *stars.c file (destars.c, sdfstars.c sdfdspstars.c),
 #	make the following changes:
@@ -117,13 +124,12 @@
 #	2. Copy destars.c to foo.cc
 #	3. Compile with: nmake -f makefile.vc foo.obj
 #	4. Substitute foo.obj for destars.obj: cp foo.obj destars.obj
-#	5. Install: nmake -f makefile.vc install
-#
-# 9. To build, run:
+
+# 10. To build, run:
 #	nmake -f $PTOLEMY/mk/build-nt4.vc.mk.vc all
 #
-# 10. To test ptcl, put the ptcl code below into a file,
-#     start up ptcl.exe and source the file
+# 11. To test ptcl, put the ptcl code below into a file,
+#     start up ptcl.ptiny.exe and source the file
 # --start--
 # reset
 # newuniverse sampler
