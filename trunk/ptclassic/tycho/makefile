@@ -179,7 +179,11 @@ typt/lib/PtolemyFacets.fst: FORCE
 # glimpse is not included with Tycho, see http://glimpse.cs.arizona.edu
 GLIMPSEINDEX =	/usr/sww/bin/glimpseindex
 glimpse: .glimpse_exclude
-	rm -f .glimpse_tmpi2
+	@echo "Saving .glimpse_exclude, removing the .glimpse* files"
+	rm -f glimpse_exclude
+	cp .glimpse_exclude glimpse_exclude
+	rm -f .glimpse*
+	cp  glimpse_exclude .glimpse_exclude
 	if [ "$(TYCHO)" = "" ]; then \
 		$(GLIMPSEINDEX) -H "$(PTOLEMY)/tycho" "$(PTOLEMY)/tycho"; \
 		chmod a+r $(PTOLEMY)/tycho/.glimpse_*; \
@@ -187,6 +191,7 @@ glimpse: .glimpse_exclude
 		$(GLIMPSEINDEX) -H "$(TYCHO)" "$(TYCHO)"; \
 		chmod a+r $(TYCHO)/.glimpse_*; \
 	fi
+	rm -f glimpse_exclude
 
 ############################################################################
 # Rules used to test a release 
