@@ -35,9 +35,11 @@
 # Programming" book
 
 package require tycho.kernel.basic
-package require tycho.kernel.gui
-package require tycho.edit.slate
-
+package require tycho.kernel.model
+if [info exists tk_version] {
+    package require tycho.kernel.gui
+    package require tycho.edit.slate
+}
 package provide tycho.edit.graphedit 1.0
 
 global env auto_path
@@ -46,23 +48,23 @@ if { [lsearch -exact $auto_path $env(GRAPHEDIT_LIBRARY)] == -1 } {
     lappend auto_path $env(GRAPHEDIT_LIBRARY)
 }
 
+if [info exists tk_version] {
+    ### Stylesheets
+    ::tycho::register stylesheet "graphedit" \
+	    [file join $env(GRAPHEDIT_LIBRARY) graphedit.style] \
+	    [file join ~ .Tycho styles graphedit.style]
 
-### Stylesheets
-::tycho::register stylesheet "graphedit" \
-	[file join $env(GRAPHEDIT_LIBRARY) graphedit.style] \
-	[file join ~ .Tycho styles graphedit.style]
+    ### MODE MAPPINGS
+    ::tycho::register extensions "graph" .graph
 
-### MODE MAPPINGS
-::tycho::register extensions "graph" .graph
+    ### MODES
+    ########### graphical editors (alphabetical)
 
-### MODES
-########### graphical editors (alphabetical)
-
-# Basic graph viewer
-::tycho::register mode "graph" \
-	-command {::tycho::view GraphEditor -file {%s}} \
-	-viewclass ::tycho::GraphEditor \
-	-label {Graph Editor}  \
-	-category "graphics" \
-	-underline 0
-
+    # Basic graph viewer
+    ::tycho::register mode "graph" \
+	    -command {::tycho::view GraphEditor -file {%s}} \
+	    -viewclass ::tycho::GraphEditor \
+	    -label {Graph Editor}  \
+	    -category "graphics" \
+	    -underline 0
+}
