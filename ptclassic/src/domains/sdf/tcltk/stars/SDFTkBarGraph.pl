@@ -69,7 +69,7 @@ limitation of liability, and disclaimer of warranty provisions.
 		int count;
 	}
 	setup {
-	    if(float(top) <= float(bottom)) {
+	    if(double(top) <= double(bottom)) {
 		Error::abortRun(*this, "invalid range for the scale");
 	    }
 	    // Need to make non-const copies of "position" and "label"
@@ -79,11 +79,11 @@ limitation of liability, and disclaimer of warranty provisions.
 		(char*) labCopy,
 		input.numberPorts(),
 		(int) number_of_bars,
-		(float) top,
-		(float) bottom,
+		(double) top,
+		(double) bottom,
 		(char*) posCopy,
-		(float) bar_graph_width,
-		(float) bar_graph_height);
+		(double) bar_graph_width,
+		(double) bar_graph_height);
 	    count = 0;
 	}
 	go {
