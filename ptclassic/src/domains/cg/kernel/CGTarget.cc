@@ -153,6 +153,31 @@ CommPair CGTarget::toCGC(PortHole&) {
     return empty;
 }
 
+int setAsynchCommState(AsynchCommPair pair, const char* stateName,
+		     const char* value) {
+    if (pair.peek == NULL || pair.poke == NULL) return FALSE;
+    State* peekState = pair.peek->stateWithName(stateName);
+    State* pokeState = pair.poke->stateWithName(stateName);
+    if (!(peekState && pokeState)) {
+	Error::abortRun(
+	    "Sorry, the peek/poke actors do not support ",stateName);
+	return FALSE;
+    }
+	
+    const char* pValue = hashstring(value);
+    peekState->setInitValue(pValue);
+    pokeState->setInitValue(pValue);
+    peekState->initialize();
+    pokeState->initialize();
+    return TRUE;
+}
+
+AsynchCommPair CGTarget::createPeekPoke(CGTarget& /*peekTarget*/,
+					CGTarget& /*pokeTarget*/) {
+    AsynchCommPair dummy;
+    return dummy;
+}
+
 void CGTarget::setup() {
 	myCode.initialize();
 	makefile.initialize();

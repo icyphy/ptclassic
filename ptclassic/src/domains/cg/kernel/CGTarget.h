@@ -61,7 +61,14 @@ public:
     CGCStar* cgcStar;
     CGStar* cgStar;
 };
- 
+
+class AsynchCommPair {
+public:
+    AsynchCommPair(CGStar* c, CGStar* o):peek(c),poke(o) {};
+    AsynchCommPair():peek(0),poke(0) {};
+    void set(CGStar* c, CGStar* o) {peek = c; poke = o; };
+    CGStar *peek, *poke;
+};
 
 extern const char *CODE, *PROCEDURE;
 
@@ -269,6 +276,14 @@ public:
     virtual CommPair fromCGC(PortHole&);
     virtual CommPair toCGC(PortHole&);
     
+    // create a peek/poke communication pair.  This is described in
+    // detail in:
+    // J.L. Pino, T.M. Parks and E.A. Lee, "Mapping Multiple Independent
+    // Synchronous Dataflow Graphs onto Heterogeneous Multiprocessors," 
+    // Proc. of IEEE Asilomar Conf. on Signals, Systems, and Computers, 
+    // Pacific Grove, CA, Oct. 31 - Nov. 2, 1994.
+    virtual AsynchCommPair createPeekPoke(CGTarget& peekTarget,
+					  CGTarget& pokeTarget);
 protected:
 
     // Initialization for code generation.
@@ -356,4 +371,8 @@ private:
     SequentialList spliceList;
 };
 
+// A utility function to set a state of a AsynchCommPair to a certain
+// value
+int setAsynchCommState(AsynchCommPair pair, const char* stateName,
+		     const char* value);
 #endif
