@@ -37,7 +37,7 @@
 # the welcome message.
 #
 class ::tycho::Matlab {
-    inherit ::tycho::Console
+    inherit ::tycho::TclConsole
 
     # Open a help window.
     method help {}
