@@ -57,7 +57,10 @@ Block* CGBDFTarget::makeNew() const {
 void CGBDFTarget::setup() {
 	if (!scheduler()) {
 		delete [] schedFileName;
-		schedFileName = writeFileName("schedule.log");
+		// Full path name of the log file
+		StringList logPath =
+			logFilePathName(destDirectory, "schedule.log");
+		schedFileName = logPath.newCopy();
 		LOG_NEW; setSched(new BDFClustSched(schedFileName));
 	}
 	CGTarget::setup();
