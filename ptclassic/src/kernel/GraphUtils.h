@@ -39,7 +39,6 @@ Programmer: Jose Luis Pino
 #include "StringList.h"
 #include "Galaxy.h"
 #include "GalIter.h"
-#include "Matrix.h"
 
 // Returns the total number of stars in a galaxy (recursively
 // all galaxies which are contained in the galaxy specified by
@@ -57,12 +56,10 @@ private:
     Block* nextParent;
 };
 
-// These methods returns a StringList that describes a Galaxy in
+// This method returns a StringList that describes a Galaxy in
 // dotty format.  To find out more about this format refer to the
 // URL http://www.research.att.com/orgs/ssr/book/reuse.
 StringList printDot(Galaxy&);
-StringList printTopBlockDot(Galaxy&, const char*);
-StringList printClusterDot(Galaxy&);
 
 // This is a useful funtion to replace all instances of a string
 // with another string within a string.  Note, the string to match
@@ -161,18 +158,10 @@ private:
     BlockInputIter *predecessorPortIter;
 };
 
-class BlockStack : private Stack {
-public:
-    inline BlockStack() : Stack() {};
-    inline void push(Block& b) { Stack::pushTop(&b); }
-    inline Block* pop() { return (Block*) Stack::popTop(); }
-    virtual ~BlockStack() {};
-};
-
 // Delete a galaxy and its ports - useful for clustering, the Galaxy
 // destructor does not delete its ports
 void deleteGalaxy(Galaxy&);
 
-void cleanupAfterCluster(Galaxy&);
+StringList dotName(Block& b);
 #endif
 
