@@ -184,7 +184,7 @@ fa_vertex **ptr1, **ptr2;
 
 static fa_vertex *sum_ptr = NIL(fa_vertex);
 
-static int init_vertex_sum()
+static void init_vertex_sum()
 {
     sum_ptr = NIL(fa_vertex);
 }
