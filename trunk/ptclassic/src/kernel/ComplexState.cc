@@ -4,7 +4,6 @@ static const char file_id[] = "ComplexState.cc";
 #pragma implementation
 #endif
 
-#include <std.h>
 #include "ComplexState.h"
 #include "KnownState.h"
 #include "Tokenizer.h"
@@ -44,12 +43,23 @@ StringList ComplexState :: currentValue() const {
 	return s;
 }
 
+void ComplexState :: setInitValue(const Complex& arg) {
+	StringList sl;
+	sl << "(" << arg.real() << "," << arg.imag() << ")";
+	State::setInitValue(hashstring(sl));
+	val = arg;
+}
+
 // clone
-State* ComplexState :: clone () const {LOG_NEW; return new ComplexState;}
+State* ComplexState :: clone () const {
+	LOG_NEW; ComplexState *s = new ComplexState;
+	s->val = val;
+	return s;
+}
 
 void ComplexState  :: initialize() {
 	const  char* specialChars =  "*+-/(),";
-	Tokenizer lexer(initValue,specialChars);
+	Tokenizer lexer(initValue(),specialChars);
 
 	ParseToken t =getParseToken(lexer);
 
@@ -57,7 +67,7 @@ void ComplexState  :: initialize() {
 
 	if (t.tok == T_ID) {
 		if (!t.s->isA("ComplexState")) {
-			parseError ("invalid state type: ", t.s->readFullName());
+			parseError ("invalid state type: ", t.s->fullName());
 			return;
 		}
 		const ComplexState& cstate = *(const ComplexState*)t.s;

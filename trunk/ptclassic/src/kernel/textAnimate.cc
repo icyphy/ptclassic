@@ -15,10 +15,10 @@ static const char file_id[] = "textAnimate.cc";
 static SimAction *pre = 0, *post = 0;
 
 static void textHighlight(Star* s, const char*) {
-	cout << "RUNNING: " << s->readFullName() << " ... ";
+	cout << "RUNNING: " << s->fullName() << " ... ";
 }
 
-static void textClearHighlight(Star* s,const char*) {
+static void textClearHighlight(Star*,const char*) {
 	cout << "DONE\n";
 }
 

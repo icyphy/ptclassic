@@ -52,7 +52,7 @@ private:
 	StringList actionList;	// saves actions used in building galaxy
 	StringList initList;	// actions to be done by initialize()
 	NodeList nodes;
-	const char* className;
+	const char* myClassName;
 
 protected:
 	// find a star porthole
@@ -73,20 +73,20 @@ protected:
 	void copy(const InterpGalaxy&);
 public:
 // constructor: makes an empty galaxy
-	InterpGalaxy() : className("InterpGalaxy")
-		{ descriptor = "An interpreted galaxy";}
+	InterpGalaxy() : myClassName("InterpGalaxy")
+		{ setDescriptor("An interpreted galaxy");}
 
 // constructor: sets the class name
 	InterpGalaxy(const char* c) {
-		descriptor = "An interpreted galaxy";
-		className = c;
+		setDescriptor("An interpreted galaxy");
+		myClassName = c;
 	}
 
 // copy constructor: duplicates an existing galaxy
 	InterpGalaxy(const InterpGalaxy& g) { copy(g);}
 
 // read the class name
-	const char* readClassName() const {return className; }
+	const char* className() const {return myClassName; }
 
 // assignment operator: change this galaxy to look like another one
 	InterpGalaxy& operator=(const InterpGalaxy& g) {
@@ -97,7 +97,7 @@ public:
 
 // set the descriptor
 	void
-	setDescriptor(const char* dtext) { descriptor = dtext;}
+	setDescriptor(const char* dtext) { NamedObj::setDescriptor(dtext);}
 
 // initialize: does variable-parameter connections
 	void initialize();
@@ -159,6 +159,7 @@ public:
 	setDomain(const char* newDomain);
 		
 // Make a new, identical galaxy
+	Block *makeNew() const;
 	Block *clone() const;
 
 // "register" the galaxy (add it to the known list)

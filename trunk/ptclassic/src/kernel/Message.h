@@ -1,5 +1,5 @@
-#ifndef _Packet_h
-#define  _Packet_h 1
+#ifndef _Message_h
+#define  _Message_h 1
 
 #ifdef __GNUG__
 #pragma interface
@@ -14,27 +14,22 @@ $Id$
  Programmer:  J. T. Buck
  Date of creation: 2/20/91
 
- This file defines the Packet interface of Ptolemy.  A Packet is
- an envelope for passing objects of type PacketData around.  A
- PacketSample is a type of Particle that transports Packets.
+ This file defines the Envelope interface of Ptolemy.  A Envelope is
+ an Message for passing objects of type Message around.  A
+ MessageParticle is a type of Particle that transports Envelopes.
 
 **************************************************************************/
 #include "Particle.h"
 #include "StringList.h"
+#include "isa.h"
 
-extern const DataType PACKET;
+extern const DataType MESSAGE;
 
-class PacketData {
-	friend class Packet;
-private:
-	// we use indirection for the reference count so it can be
-	// manipulated even for a const PacketData object.
-	int* refCount;
-protected:
-	int errorConvert(const char*) const;
+class Message {
+	friend class Envelope;
 public:
 	// constructor.  Reference count is zero.
-	PacketData() {
+	Message() {
 		INC_LOG_NEW; refCount = new int; *refCount = 0;
 	}
 
@@ -42,90 +37,78 @@ public:
 	// arg is ignored since all objects are the same.  The
 	// default copy constructor cannot be used because we must
 	// have a separate refCount field.
-	PacketData(const PacketData&) {
+	Message(const Message&) {
 		INC_LOG_NEW; refCount = new int; *refCount = 0;
 	}
 
 	// destructor.
-	virtual ~PacketData();
+	virtual ~Message();
 
-	// functions that may be specified by specific packets.
+	// functions that may be specified by specific Envelopes.
 	virtual int asInt() const;
 	virtual double asFloat() const;
 	virtual Complex asComplex() const;
 
-	// type of the PacketData.  When overriding, be SURE
+	// type of the Message.  When overriding, be SURE
 	// that the prototype matches (don't forget the const keywords)
 	virtual const char* dataType() const;
 
-	// specify how to print the packet.
+	// specify how to print the Envelope.
 	virtual StringList print() const;
 
-	// clone the packet.  MUST BE REDEFINED by each derived class!
+	// clone the Envelope.  MUST BE REDEFINED by each derived class!
 	// don't forget the "const" keyword when you do so!
-	virtual PacketData* clone() const;
+	virtual Message* clone() const;
 
 	// type checking: isA returns true if given the name of
 	// the class or the name of any baseclass.  Exception:
 	// the baseclass function returns FALSE to everything
 	// (as it has no data at all).
 	virtual int isA(const char*) const;
+protected:
+	int errorConvert(const char*) const;
+private:
+	// we use indirection for the reference count so it can be
+	// manipulated even for a const Message object.
+	int* refCount;
 };
 
-#include "isa.h"
-
-// A Packet is simply a way of making a single PacketData look like
+// A Envelope is simply a way of making a single Message look like
 // multiple objects.
 
-class Packet {
-private:
-	static PacketData dummyPacket;
-
-	// a pointer to my real data
-	PacketData* d;
-
-	// manipulate the reference count.  These MUST be used
-	// properly.
-	void incCount() const { (*d->refCount)++;}
-	void decCount() const { (*d->refCount)--;}
-
-	int refCount() const { return *d->refCount;}
-
-	// bookkeeping function to zap the PacketData when done
-	void unlinkData();
-
+class Envelope {
 public:
-	// constructor: by default, point to dummyPacket.
-	// dummyPacket is special, doesn't bother with ref counts.
-	Packet() : d(&dummyPacket) {}
+	// constructor: by default, point to dummyMessage.
+	// dummyMessage is special, doesn't bother with ref counts.
+	Envelope() : d(&dummyMessage) {}
 
-	Packet(PacketData& dat) : d(&dat) {
+	Envelope(Message& dat) : d(&dat) {
 		incCount();
 	}
 
 	// copy constructor
-	Packet(const Packet& p) {
+	Envelope(const Envelope& p) {
 		d = p.d;
 		incCount();
 	}
 	// assignment operator
-	Packet& operator=(const Packet& p) {
+	Envelope& operator=(const Envelope& p) {
 		p.incCount();
 		unlinkData();
 		d = p.d;
 		return *this;
 	}
 
-	// destructor.  Wipe out the PacketData when the last
+	// destructor.  Wipe out the Message when the last
 	// link is removed.
-	~Packet() {
+	~Envelope() {
 		unlinkData();
 	}
 
 	// dataType() : pass through
 	const char* dataType() const { return d->dataType();}
 
-	// type check: checks PacketData type
+	// type check: checks Message type
 	int typeCheck(const char* type) const {
 		return d->isA(type);
 	}
@@ -134,26 +117,41 @@ public:
 	// the pointer points to a static buffer!
 	const char* typeError(const char* expected) const;
 
-	// interfaces to PacketData functions
+	// interfaces to Message functions
 	int asInt() const { return d->asInt();}
 	double asFloat() const { return d->asFloat();}
 	Complex asComplex() const { return d->asComplex();}
 	StringList print() const { return d->print();}
 
-	// we can get a pointer to the PacketData.  It's a const
-	// pointer so it cannot be used to alter the PacketData
+	// we can get a pointer to the Message.  It's a const
+	// pointer so it cannot be used to alter the Message
 	// (since there may be other references to it).
-	const PacketData* myData() const { return d;}
+	const Message* myData() const { return d;}
 
-	// produce a writable copy of the packetData.  side effect --
-	// contents of Packet are changed to dummyPacket.
-	PacketData* writableCopy();
+	// produce a writable copy of the Message.  side effect --
+	// contents of Envelope are changed to dummyMessage.
+	Message* writableCopy();
+private:
+	static Message dummyMessage;
+
+	// a pointer to my real data
+	Message* d;
+
+	// manipulate the reference count.  These MUST be used
+	// properly.
+	void incCount() const { (*d->refCount)++;}
+	void decCount() const { (*d->refCount)--;}
+
+	int refCount() const { return *d->refCount;}
+
+	// bookkeeping function to zap the Message when done
+	void unlinkData();
 };
 
-// A Particle class to transmit Packets
-class PacketSample : public Particle {
+// A Particle class to transmit Messages (which are enclosed in Envelopes)
+class MessageParticle : public Particle {
 public:
-	DataType readType() const;
+	DataType type() const;
 
 	operator int () const;
 	operator float () const;
@@ -161,21 +159,21 @@ public:
 	operator Complex () const;
 	StringList print() const;
 
-	void getPacket (Packet& p);
-	void accessPacket (Packet& p) const;
+	void getMessage (Envelope& p);
+	void accessMessage (Envelope& p) const;
 
 	// fill in remaining functions for Particle classes
 
-	PacketSample(const Packet& p) : data(p) {}
-	PacketSample() {}
+	MessageParticle(const Envelope& p) : data(p) {}
+	MessageParticle() {}
 	void initialize();
 
-	// load with data -- these cause errors except for a Packet argument.
+	// load with data -- these cause errors except for a Envelope argument.
 
 	void operator << (int i);
 	void operator << (double f);
 	void operator << (const Complex& c);
-	void operator << (const Packet& p);
+	void operator << (const Envelope& p);
 
 	// particle copy
 	Particle& operator = (const Particle& p);
@@ -184,7 +182,6 @@ public:
 	int operator == (const Particle&);
 
 	// clone, useNew, die analogous to other particles.
-	// packetPlasma is of type Plasma.
 
 	Particle* clone();
 
@@ -193,13 +190,13 @@ public:
 
 private:
 	void errorAssign(const char*) const;
-	Packet data;
+	Envelope data;
 };
 
 // function and macro to ease type checking in stars.  badType is always
 // OK.  TYPE_CHECK is assumed to be called in a member function of a star.
 class NamedObj;
-int badType(NamedObj& n,Packet& p,const char* typ);
+int badType(NamedObj& n,Envelope& p,const char* typ);
 
 #define TYPE_CHECK(pkt,type) if (badType(*this,pkt,type)) return
 

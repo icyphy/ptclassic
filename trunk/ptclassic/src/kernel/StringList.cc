@@ -28,16 +28,12 @@ $Id$
 // and are deleted by the StringList destructor
 
 // Assignment operator
-// The resulting StringList always has 0 or 1 chunk.
 StringList&
 StringList :: operator = (const StringList& sl) {
 	// check for assignment to self and do nothing
 	if (this != &sl) {
-		if (size()) {
-			initialize ();
-		}
-		totalSize = sl.totalSize;
-		if (sl.size()) put(sl.newCopy());
+		if (size()) initialize ();
+		copy(sl);
 	}
 	return *this;
 }
@@ -61,6 +57,16 @@ StringList :: operator = (char c) {
 	return *this = buf;
 }
 
+StringList& StringList :: operator = (int i)
+{ initialize(); return *this += i;}
+
+StringList& StringList :: operator = (double d)
+{ initialize(); return *this += d;}
+
+StringList& StringList :: operator = (unsigned u)
+{initialize(); return *this += u;}
+
+
 // Constructors
 StringList::StringList(const char* s) {
 	totalSize=strlen(s);
@@ -75,10 +81,18 @@ StringList::StringList(double d) {totalSize=0; *this += d;}
 
 StringList::StringList(unsigned u) {totalSize=0; *this += u;}
 
+void StringList::copy(const StringList& s) {
+	StringListIter nexts(s);
+	const char* p;
+	while ((p = nexts++) != 0) {
+		put(savestring(p));
+	}
+	totalSize = s.totalSize;
+}
+
 // Copy constructor
 StringList::StringList (const StringList& s) {
-	totalSize = s.totalSize;
-	if (s.size()) put(s.newCopy());
+	copy(s);
 }
 
 // Add another StringList to the StringList

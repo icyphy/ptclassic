@@ -28,9 +28,6 @@ $Id$
 
 class <T>ArrayState : public State
 {
-protected:
-	int	nElements;
-	<C>	*val;
 public:
 	// Constructor
 	<T>ArrayState () {nElements = 0; val = 0;}
@@ -66,7 +63,8 @@ public:
 
 	// class identification
 	int isA(const char*) const;
-	const char* readClassName() const {return "<T>ArrayState";}
+	const char* className() const;
+	int isArray() const;
 
 	// extend/truncate the array size
 	void resize(int);
@@ -79,6 +77,9 @@ public:
 
 	// clone method
 	State* clone() const; // {return new <T>ArrayState;}
+protected:
+	int	nElements;
+	<C>	*val;
 };
 
 #endif

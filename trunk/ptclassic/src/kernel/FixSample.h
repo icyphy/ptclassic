@@ -22,7 +22,7 @@ $Id$
 
 extern const DataType FIX;
 
-class FixSample : public FloatSample {
+class FixParticle : public FloatParticle {
 protected:
 	void saturate() {
 		double d = *this;
@@ -30,7 +30,7 @@ protected:
 		else if (d < -1.0) *this << -1.0;
 	}
 public:
-	DataType readType() const;
+	DataType type() const;
 	Particle* useNew();
 	Particle* clone();
 	void die();
@@ -39,3 +39,4 @@ public:
 	void operator<<(const Complex&);
 };
 #endif
+

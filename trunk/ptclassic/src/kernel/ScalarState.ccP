@@ -39,12 +39,23 @@ const char* <T>State :: type() const { return "<T>";}
 // the value as a string
 StringList <T>State :: currentValue() const { StringList s; s = val; return s;}
 
+// set initValue from a <C> (also sets current value)
+void <T>State :: setInitValue(<C> arg) {
+	StringList sl = arg;
+	val = arg;
+	State::setInitValue(hashstring(sl));
+}
+
 // clone
-State* <T>State :: clone () const { LOG_NEW; return new <T>State;}
+State* <T>State :: clone () const {
+	LOG_NEW; <T>State *s = new <T>State;
+	s->val = val;
+	return s;
+}
 
 void <T>State  :: initialize() {
 	const  char* specialChars =  "*+-/^()";
-	Tokenizer lexer(initValue,specialChars);
+	Tokenizer lexer(initValue(),specialChars);
 
 	ParseToken t = eval<T>Expression(lexer);
 	if (t.tok != T_ERROR && t.tok != T_EOF)

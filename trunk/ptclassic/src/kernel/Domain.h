@@ -40,26 +40,24 @@ public:
 	Domain (const char* domname) {
 		index = numDomains++;
 		allDomains[index] = this;
-		name = domname;
+		myName = domname;
 	}
-	virtual Star& newWorm(Galaxy& innerGal,Target* innerTarget = 0) = 0;
-	virtual PortHole& newInPort() = 0;
-	virtual PortHole& newOutPort() = 0;
-	virtual EventHorizon& newFrom() = 0;
-	virtual EventHorizon& newTo() = 0;
+	virtual Star& newWorm(Galaxy& innerGal,Target* innerTarget = 0);
+	virtual EventHorizon& newFrom();
+	virtual EventHorizon& newTo();
 	virtual Geodesic& newNode() = 0;
-	virtual int isGalWorm() {return FALSE;}
-	const char* domainName() { return name;}
+	virtual int isGalWorm();
+	const char* name() { return myName;}
 	static Domain* named(const char* name);
-	static Domain* domainOf(Block&);
-	static int numberOfDomains() {return numDomains;}
-	static const char* nthDomainName(int n) {return (allDomains[n])->name;}
+	static Domain* of(Block&);
+	static int number() {return numDomains;}
+	static const char* nthName(int n) {return (allDomains[n])->myName;}
 	StringList subDomains;
 private:
 	static int numDomains;
 	static Domain* allDomains[NUMDOMAINS];
 
 	int index;
-	const char* name;
+	const char* myName;
 };
 #endif

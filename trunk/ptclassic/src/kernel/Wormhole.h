@@ -9,7 +9,7 @@
 #include "Universe.h"
 #include "Galaxy.h"
 #include "StringList.h"
-#include "WormConnect.h"
+#include "EventHorizon.h"
 
 
 /*******************************************************************
@@ -48,18 +48,15 @@ public:
 		from.ghostConnect(to);
 	}
 
-	void setup() { initSched(); }
+	void setup() { initTarget(); }
 
-	void run() { if (!checkReady()) return;
-		     setStopTime(1.0);		// 1.0 is dummy value.
-		     Runnable :: run(); 
-		     sumUp();}
+	int run();
 
 	// return the inside Domain
 	const char* insideDomain() const { return gal.domain(); }
 
 	// redefine setStopTime()
-	void setStopTime(float stamp);
+	void setStopTime(double stamp);
 
 	// constructor.  We never use plain Wormholes, we always have
 	// class SDFWormhole : public Wormhole, public SDFStar
@@ -81,7 +78,7 @@ public:
 protected :
 	// get the stopping condition for the inner domain.
 	// SHOULD be redefined in the derived class.
-	virtual float getStopTime();
+	virtual double getStopTime();
 
 	// arrange things after run if necessary
 	virtual void sumUp();

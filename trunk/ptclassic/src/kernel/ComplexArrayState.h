@@ -28,9 +28,6 @@ $Id$
 
 class ComplexArrayState : public State
 {
-protected:
-	int	nElements;
-	Complex	*val;
 public:
 	// Constructor
 	ComplexArrayState () {nElements = 0; val = 0;}
@@ -57,7 +54,8 @@ public:
 
 	// class identification
 	int isA(const char*) const;
-	const char* readClassName() const {return "ComplexArrayState";}
+	const char* className() const;
+	int isArray() const;
 
         // the value as a string
         StringList currentValue() const;
@@ -73,6 +71,9 @@ public:
 
 	// clone method
 	virtual State* clone() const;
+protected:
+	int	nElements;
+	Complex	*val;
 };
 
 #endif

@@ -53,7 +53,7 @@ public:
 		}
 		else return head->useNew();
 	}
-	DataType type() { return head->readType();}
+	DataType type() { return head->type();}
 
 // constructor -- all objs built are added to the static linked list.
 	Plasma(Particle& p) : ParticleStack(&p), nextPlasma(plasmaList) {

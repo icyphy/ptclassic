@@ -33,7 +33,7 @@ StringList checkConnect (Galaxy& g) {
 	while ((s = next++) != 0) {
 		// error if no portholes
 		if (s->numberPorts() == 0) {
-			msg += s->readFullName();
+			msg += s->fullName();
 			msg += " has no portholes\n";
 			Error::mark(*s);
 			break;
@@ -43,7 +43,7 @@ StringList checkConnect (Galaxy& g) {
 		PortHole* p;
 		while ((p = nextp++) != 0) {
 			if (!p->far()) {
-				msg += p->readFullName();
+				msg += p->fullName();
 				msg += " is not connected\n";
 				Error::mark(*p->parent());
 			}

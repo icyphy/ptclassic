@@ -42,7 +42,7 @@ public:
 
 	// class identification
 	int isA(const char*) const;
-	const char* readClassName() const {return "FixState";}
+	const char* className() const {return "FixState";}
 
 	State* clone () const; // { return new FixState;}
 

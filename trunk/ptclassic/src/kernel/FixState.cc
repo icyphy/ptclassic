@@ -60,7 +60,9 @@ const char* FixState :: type() const {
 }
 
 State* FixState :: clone() const {
-	return new FixState;
+	LOG_NEW; FixState* s = new FixState;
+	s->val = val;
+	return s;
 }
 
 // assignment operator: truncate the value

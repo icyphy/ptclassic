@@ -28,65 +28,15 @@ class Galaxy;
 class EventHorizon;
 
 class Target : public Block {
-private:
-	const char* supportedStarClass;
-	Target* children;
-	Target* link;
-	int nChildren;
-	Scheduler* sched;
-protected:
-	Galaxy* gal;
-
-	// The following sets the scheduler and tells it which target belongs
-	void setSched(Scheduler* sch);
-
-	void delSched();
-
-	// add a new child
-	void addChild(Target&);
-
-	// add a inherited child
-	void inheritChildren(Target*, int, int);
-
-	// remove the "children" list (no effect on children)
-	void remChildren() { nChildren = 0; children = 0;}
-
-	// delete all the "children" (for when they are created dynamically)
-	void deleteChildren();
-
-	// auxililary star class: permits a second type of star in addition
-	// to supportedStarClass.
-	virtual const char* auxStarClass() const;
-
-	// Method returns a directory name for writing.
-	// If the directory does not exist, it attempts create it.
-	// Always returns a pointer to a string in new memory, or 0
-	// if it cannot find or create the directory.
-	// It is up to the user to delete the string memory when
-	// no longer needed.
-	char* writeDirectoryName(const char* dirName = 0);
-
-	// Method to set a file name for writing.
-	// Prepends dirFullName to fileName with "/" between.
-	// Always returns a pointer to a string in new memory.
-	// It is up to the user to delete the memory when no longer needed.
-	// If dirFullName or fileName is NULL then it returns a
-	// pointer to a new copy of the string "/dev/null"
-	char* writeFileName(const char* fileName = 0);
-
-	// Store a directory name for writing
-	char* dirFullName;
 public:
-	Target(const char* nam, const char* starClass,const char* desc = "") :
-		Block(nam,0,desc),
-		supportedStarClass(starClass), sched(0), gal(0),
-		children(0), link(0), nChildren(0) {dirFullName = 0;}
+	Target(const char* nam, const char* starClass,const char* desc = "");
+	~Target();
 
-	StringList printVerbose() const;
+	/* virtual */ StringList print(int verbose = 0) const;
 
 	const char* starType() const { return supportedStarClass;}
 
-	Scheduler* mySched() const { return sched;}
+	Scheduler* scheduler() const { return sched;}
 
 	// this function makes for cleaner code: clone() is derived
 	// from Block and returns a duplicate obj so this cast is
@@ -113,16 +63,16 @@ public:
 	int nProcs() const { return children ? nChildren : 1;}
 
 	// initialize the target, given a galaxy.
-	virtual int setup(Galaxy&);
+	virtual void setGalaxy(Galaxy& g); // default: { gal = &g; }
 
 	// set the stopping condition.
-	virtual void setStopTime(float);
+	virtual void setStopTime(double);
 
 	// reset the stopping condition (why different?)
-	virtual void resetStopTime(float);
+	virtual void resetStopTime(double);
 
 	// set the current time
-	virtual void setCurrentTime(float);
+	virtual void setCurrentTime(double);
 
 	// run
 	virtual int run();
@@ -152,8 +102,68 @@ public:
 
 	// class identification
 	int isA(const char*) const;
-	const char* readClassName() const {return "Target";}
+	const char* className() const {return "Target";}
+	Galaxy* galaxy() { return gal;}
+protected:
 
+	// initialization for the target (called by initialize)
+	virtual void setup();
+
+	// The following sets the scheduler and tells it which target belongs
+	void setSched(Scheduler* sch);
+
+	void delSched();
+
+	// add a new child
+	void addChild(Target&);
+
+	// add a inherited child
+	void inheritChildren(Target*, int, int);
+
+	// remove the "children" list (no effect on children)
+	void remChildren() { nChildren = 0; children = 0;}
+
+	// delete all the "children" (for when they are created dynamically)
+	void deleteChildren();
+
+	// auxililary star class: permits a second type of star in addition
+	// to supportedStarClass.
+	virtual const char* auxStarClass() const;
+
+	// Method returns a directory name for writing.
+	// If the directory does not exist, it attempts create it.
+	// Returns the fully expanded pathname (which is saved by
+	// the target).
+
+	const char* writeDirectoryName(const char* dirName = 0);
+
+	// Method to set a file name for writing.
+	// Prepends dirFullName (which was set by writeDirectoryName)
+	// to fileName with "/" between.
+	// Always returns a pointer to a string in new memory.
+	// It is up to the user to delete the memory when no longer needed.
+	// If dirFullName or fileName is NULL then it returns a
+	// pointer to a new copy of the string "/dev/null"
+	char* writeFileName(const char* fileName = 0);
+
+	// this fn returns it.
+	const char* workingDirectory() const { return dirFullName;}
+
+private:
+	// name of class of star this target supports
+	const char* supportedStarClass;
+	// points to a linked list of children
+	Target* children;
+	// points to the next sibling (child of same parent)
+	Target* link;
+	// number of children
+	int nChildren;
+	// scheduler for the target
+	Scheduler* sched;
+	// galaxy of stars to be run on the target
+	Galaxy* gal;
+	// Store a directory name for writing
+	char* dirFullName;
 };
 
 

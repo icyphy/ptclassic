@@ -17,13 +17,6 @@
 
 class Clock
 {
-private:
-    // When the clock was started.
-    TimeVal startTime;
-
-    // Read the system clock.
-    TimeVal timeOfDay() const;
-
 public:
     Clock();
 
@@ -35,6 +28,13 @@ public:
 
     // Sleep until specified elapsed time.
     int sleepUntil(const TimeVal&) const;
+private:
+    // When the clock was started.
+    TimeVal startTime;
+
+    // Read the system clock.
+    TimeVal timeOfDay() const;
+
 };
 
 #endif

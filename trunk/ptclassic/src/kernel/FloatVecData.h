@@ -17,9 +17,9 @@ of arbitrary length.  The length is specified by the constructor.
 #pragma interface
 #endif
 
-#include "Packet.h"
+#include "Message.h"
 
-class FloatVecData : public PacketData {
+class FloatVecData : public Message {
 private:
 	int len;
 
@@ -51,7 +51,7 @@ public:
 	FloatVecData(int l,const double *srcData);
 
 	// clone
-	PacketData* clone() const;
+	Message* clone() const;
 
 	// print
 	StringList print() const;

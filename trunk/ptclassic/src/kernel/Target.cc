@@ -32,6 +32,17 @@ $Id$
 #include <sys/stat.h>
 #include "miscFuncs.h"
 
+// constructor
+Target::Target(const char* nam, const char* starClass,const char* desc) :
+Block(nam,0,desc), supportedStarClass(starClass), sched(0), gal(0),
+children(0), link(0), nChildren(0), dirFullName(0) {}
+
+// destructor
+Target::~Target() {
+// should we delete children?
+	LOG_DEL; delete dirFullName;
+}
+
 void Target::setSched(Scheduler* sch) {
 	LOG_DEL; delete sched;
 	sched = sch;
@@ -54,33 +65,37 @@ StringList Target::displaySchedule() {
 // default auxiliary star class: none.
 const char* Target::auxStarClass() const { return "";}
 
+void Target::setGalaxy(Galaxy& g) {
+	gal = &g;
+}
+
 // default setup: set all stars to have me as their Target, then
 // do Scheduler::setup.
 
-int Target::setup(Galaxy& g) {
-	gal = &g;
-	GalStarIter next(g);
+void Target::setup() {
+	GalStarIter next(*gal);
 	Star* s;
 	while ((s = next++) != 0) {
 		if (!s->isA(supportedStarClass) && !s->isA(auxStarClass())) {
 			Error::abortRun (*s,
 					 "wrong star type for target ",
-					 readName());
-			return FALSE;
+					 name());
+			return;
 		}
 		s->setTarget(this);
 	}
 	if (!sched) {
 		Error::abortRun(*this, "No scheduler!");
-		return FALSE;
+		return;
 	}
 	sched->stopBeforeDeadlocked = FALSE;
-	return sched->setup(g);
+	sched->setGalaxy(*gal);
+	sched->setup();
 }
 
 // default run: run the scheduler
 int Target::run() {
-	return sched->run(*gal);
+	return sched->run();
 }
 
 // default wrapup: call wrapup on all stars and galaxies
@@ -100,23 +115,17 @@ void Target::addCode (const char* code) {
 int Target :: commTime(int,int,int,int) { return 0;}
 
 // by default, pass these on through
-void Target::setStopTime(float f) { sched->setStopTime(f);}
-void Target::resetStopTime(float f) { sched->resetStopTime(f);}
-void Target::setCurrentTime(float f) { sched->setCurrentTime(f);}
+void Target::setStopTime(double f) { sched->setStopTime(f);}
+void Target::resetStopTime(double f) { sched->resetStopTime(f);}
+void Target::setCurrentTime(double f) { sched->setCurrentTime(f);}
 
-StringList Target::printVerbose() const {
+StringList Target::print(int verbose) const {
 	StringList out;
-	out = "Target: ";
-	out += readFullName();
-	out += "\n";
-	out += "Descriptor: ";
-	out += readDescriptor();
-	out += "\n";
-	out += printStates("target");
+	out << "Target: " << fullName() << "\n";
+	out << "Descriptor: " << descriptor() << "\n";
+	out << printStates("target",verbose);
 	if (nChildren > 0) {
-		out += "The target has ";
-		out += nChildren;
-		out += " children\n";
+		out << "The target has " << nChildren << " children\n";
 	}
 	return out;
 }
@@ -156,7 +165,7 @@ void Target::addChild(Target& newChild) {
 // inherit children
 void Target::inheritChildren(Target* father, int start, int stop) {
 	if (start < 0 || stop >= father->nProcs()) {
-		Error::abortRun(readName(),
+		Error::abortRun(name(),
 			"inheritance fails due to indices out of range");
 		return;
 	}
@@ -175,20 +184,18 @@ void Target::deleteChildren() {
 	nChildren = 0;
 }
 
-char* Target::writeDirectoryName(const char* dirName) {
+const char* Target::writeDirectoryName(const char* dirName) {
 
    if(dirName && *dirName) {
-	const char* dir;
-
 	// expand the path name
-	dir = expandPathName(dirName);
+	dirFullName = savestring(expandPathName(dirName));
 
 	// check to see whether the directory exists, create it if not
 	struct stat stbuf;
-	if(stat(dir, &stbuf) == -1) {
+	if(stat(dirFullName, &stbuf) == -1) {
 	    // Directory does not exist.  Attempt to create it.
-	    if (mkdir(dir, 0777)) {
-		Error::warn("Cannot create Target directory : ", dir);
+	    if (mkdir(dirFullName, 0777)) {
+		Error::warn("Cannot create Target directory : ", dirFullName);
 		return 0;
 	    }
 	} else {
@@ -199,8 +206,7 @@ char* Target::writeDirectoryName(const char* dirName) {
 		return 0;
 	    }
 	}
-	// Directory is there
-	return savestring(dir);
+	return dirFullName;
    } else return 0;
 }
 

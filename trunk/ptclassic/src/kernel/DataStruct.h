@@ -5,7 +5,7 @@ $Id$
  Copyright (c) 1990 The Regents of the University of California.
                        All Rights Reserved.
 
- Programmer:  D. G. Messerschmitt
+ Programmer:  D. G. Messerschmitt and J. Buck
  Date of creation: 1/17/89
 
 This header file contains basic container class data structures
@@ -31,7 +31,7 @@ deallocating memory for the objects, etc.
 
 class SingleLink
 {
-	friend class SingleLinkList;
+	friend class SequentialList;
 	friend class ListIter;
 
 	SingleLink *next;
@@ -40,87 +40,64 @@ class SingleLink
 	SingleLink(Pointer a, SingleLink* p) {e=a;next=p;}
 };
 
-class SingleLinkList
+class SequentialList
 {
+	friend class ListIter;
 public:
 	// destructor
-	~SingleLinkList()  { initialize(); }
+	~SequentialList()  { initialize(); }
+
 	// constructor
-	SingleLinkList() { lastNode = 0; }
+	SequentialList() : lastNode(0), dimen(0) {}
+
 	// constructor, with argument
-	SingleLinkList(Pointer a)
+	SequentialList(Pointer a) : dimen(1)
 	{
 		INC_LOG_NEW; lastNode= new SingleLink(a,0);
 		lastNode->next=lastNode;
 	}
 
-	void insert(Pointer a);	// Add at head of list
+	int size() const { return dimen;}
+	
+	void prepend(Pointer a);	// Add at head of list
+
 	void append(Pointer a);	// Add at tail of list
+
+	void put(Pointer a) {append(a);} // synonym
+
 	int remove(Pointer a);	// remove ptr: return TRUE if removed
+
 	Pointer getAndRemove();	// Return and remove head of list
+
         Pointer getTailAndRemove();     // Return and remove tail of list
-	Pointer getNotRemove() const  // Return head, do not remove
+
+	Pointer head() const  // Return head, do not remove
 	{
 		return lastNode ? lastNode->next->e : 0;
 	}
+	
+	Pointer tail() const {	// return tail, do not remove
+		return lastNode ? lastNode->e : 0;
+	}
+	
 	Pointer elem(int) const;// Return arbitary node of list
+
 	void initialize();	// Remove all links
 
 	// predicates
 	// is list empty?
 	int empty() const { return (lastNode == 0);}
+
 	// is arg a member of the list? (returns TRUE/FALSE)
 	int member(Pointer arg) const;
 
-protected:
-
+private:
         // Store head of list, so that there is a notion of 
         // first node on the list, lastNode->next is head of list 
         SingleLink *lastNode;
+	int dimen;
 };
 
-
-	/////////////////////////////////////
-	// class Vector
-	////////////////////////////////////
-
-/*
-Class implements a vector which is accessed by an index and can
- grow as elements are added (it never shrinks)
-Each element of the vector is a Pointer....so arbitrary objects
- can be stored in the vector
-*/
-
-class Vector : private SingleLinkList
-{
-public:
-	// Add element to the vector
-        void put(Pointer p) {append(p); ++dimen;}
-
-	// Return the dimension of the vector
-	int dimension() const {return dimen;}
-
-	// Return and element of the vector, given index
-	Pointer elem (int index);
-
-	// Clear out the data structure
-	void initialize() {SingleLinkList::initialize(); dimen=0;}
-
-	Vector() {dimen = 0;}
-
-	// need public destructor
-	~Vector() {}
-
-private:
-	int dimen;	// Size of vector
-};
-
-inline Pointer Vector :: elem (int i)
-	{
-	// No error checking on index at present
-	// if(i >= dimen) error
-	return SingleLinkList :: elem(i);
-	}
 
 	/////////////////////////////////
 	// class Queue
@@ -131,87 +108,36 @@ Class implements a queue, which may be used to implement FIFO or LIFO or a
 mixture -- using putTail (or put), putHead, getTail, and getHead (or get).
 */
 
-class Queue : private SingleLinkList
+class Queue : private SequentialList
 {
-	int numberNodes;
 public:
+	Queue() {}
+
 	// Add element to the queue
-        void put(Pointer p) {++numberNodes; SingleLinkList::append(p);}
-	void putTail(Pointer p) {put(p);}
-	void putHead(Pointer p) {++numberNodes; insert(p);}
+        void put(Pointer p) {append(p);}
+	void putTail(Pointer p) {append(p);}
+	void putHead(Pointer p) {prepend(p);}
 
 	// Remove and return element from end of the queue
-        Pointer get() {--numberNodes; return getAndRemove();}
+        Pointer get() {return getAndRemove();}
 	Pointer getHead() {return get();}
-	Pointer getTail() {--numberNodes; return getTailAndRemove();}
+	Pointer getTail() {return getTailAndRemove();}
 
-	// Return number of elements currently in queue
-	int length() const {return numberNodes;}
+	SequentialList::size;
+	SequentialList::initialize;
 
-	// Clear the queue
-        void initialize() {SingleLinkList::initialize(); numberNodes=0;}
-
-	Queue() {numberNodes = 0;}
-
+	int length() const { return size();} // TEMPORARY
 	// need public destructor
 	~Queue() {}
-};
-
-
-	/////////////////////////////////////
-	//  class SequentialList
-	/////////////////////////////////////
-
-/*
-This is a container class containing a list of elements
-that are added and accessed sequentially; it is optimized for
-those situations where a list of elements is needed and access
-is sequential through the list
-
-It is recommended that operator ++ be used
-to access the next element of the list
-*/
-
-class SequentialList : private SingleLinkList
-{
-	friend class ListIter;
-public:
-	// Add element to the end of the list
-        void put(Pointer p) {append(p); ++dimen;}
-
-	// Add element to the beginning of the list
-        void tup(Pointer p) {insert(p); ++dimen;}
-
-	// Return number of elements on the list
-	int size() const {return dimen;}
-
-	// Return head of list
-	Pointer head() const { return getNotRemove();}
-
-	// Remove an object from the list
-	int remove(Pointer p) {
-		int i = SingleLinkList::remove(p);
-		dimen -= i;
-		return i;
-	}
-
-	// Clear the data structure
-	void initialize() {SingleLinkList::initialize(); dimen=0;}
-
-	// make baseclass function accessible.
-	SingleLinkList::member;
-
-	SequentialList() {dimen=0;}
-
-	// need destructor since baseclass is private, so others can destroy
-	~SequentialList() {}
-private:
-	int dimen;	// Size of list
 };
 
 	///////////////////////////////////
 	// class ListIter
 	///////////////////////////////////
+
+// ListIter steps sequentially through a SequentialList.  Warning: if
+// the list is modified "out from under" the ListIter, bad things may
+// happen if next() is called, though reset() will be safe.
 
 class ListIter {
 public:
@@ -223,7 +149,8 @@ public:
 
 	// next and operator++ are synonyms.  Return the next element,
 	// return 0 if there are no more.
-	// The compact form is chosen so that cfront can inline it.
+	// The compact and hard to read form is chosen so that cfront 2.1
+	// can inline it.
 	Pointer next() {
 		Pointer p = ref ? (ref = ref->next, ref->e) : 0;
 		if (ref == list->lastNode) ref = 0;
@@ -252,32 +179,28 @@ of the stack. In addition, we allow elements to be added
 to the bottom of the stack.
 */
 
-class Stack : private SingleLinkList
+class Stack : private SequentialList
 {
 public:
+	Stack() {}
+
 	// Add element at the top of the stack
-	void pushTop(Pointer p) {insert(p);++dimen;}
+	void pushTop(Pointer p) {prepend(p);}
 
 	// Add element to the bottom of the stack
-	void pushBottom(Pointer p) {append(p);++dimen;}
+	void pushBottom(Pointer p) {append(p);}
 
 	// Access and remove element from the top of the stack
-	Pointer popTop() {--dimen; return getAndRemove();}
+	Pointer popTop() {return getAndRemove();}
 
 	// Access but do not remove element from top of stack
-	Pointer accessTop() const {return getNotRemove();}
+	Pointer accessTop() const {return head();}
 
-	// Clear the data structure
-	void initialize() {SingleLinkList::initialize(); dimen=0;}
-
-	int size() const {return dimen;}
-
-	Stack() {dimen=0;}
+	SequentialList::initialize;
+	SequentialList::size;
 
 	// need destructor since baseclass is private, so others can destroy
 	~Stack() {}
-private:
-	int dimen;	// Number elements on the stack
 };
 
 #endif

@@ -44,19 +44,20 @@ field for its priority.
 class LevelLink 
 {
 	friend class PriorityQueue;
+public:
+	Pointer e;
+	double	level;		// currently, level is "double" type.
+	double fineLevel;	// If levels are equal, we may need
+				// finerLevel which is optional.
+	LevelLink() {}
 
+private:
 	LevelLink* next;
 	LevelLink* before;
 
 	// v sets the level, and fv sets the fineLevel of the entry.
 	// Numerically smaller number represents  the higher priority.
-	LevelLink* setLink(Pointer a, float v, float fv, LevelLink* n, LevelLink* b);
-public:
-	Pointer e;
-	float	level;		// currently, level is "float" type.
-	float fineLevel;	// If levels are equal, we may need
-				// finerLevel which is optional.
-	LevelLink() {}
+	LevelLink* setLink(Pointer a, double v, double fv, LevelLink* n, LevelLink* b);
 };
 
 	//////////////////////////////////////
@@ -65,43 +66,23 @@ public:
 
 class PriorityQueue
 {
-	int numberNodes;
-	// These are for memory management scheme to minimize the dynamic
-	// memory (de)allocation. FreeLinks are managed in linked-list
-	// structure.
-	LevelLink* freeLinkHead;
-	int  	   numFreeLinks;		// mainly for debugging.
-
-protected:
-
-	// Store head of the queue, lastNode->next is head of queue
-	LevelLink* lastNode;
-
-	// Store last access to the list for sequential access
-	LevelLink* lastReference;
-
-	// To avoid memory (de)allocation overhead at each push/pop, we
-	// store the freeLinks once created.
-	LevelLink* getFreeLink();
-	virtual void 	   clearFreeList();
-
 public:
 	// Add element to the tail of the queue and sort it by its level (v)
 	// first and its fineLevel (fv) second.
 	// Numerically smaller number represents the higher priority.
 	// (i.e., highest level is at the tail)
-	LevelLink* levelput(Pointer a, float v, float fv = 1.0);
+	LevelLink* levelput(Pointer a, double v, double fv = 1.0);
 
 	// Add element to the head of the queue and sort it by its level (v)
 	// first and its fineLevel (fv) second.
 	// Numerically smaller number represents the higher priority.
 	// (i.e., highest level is at the head)
-	LevelLink* leveltup(Pointer a, float v, float fv = 1.0);
+	LevelLink* leveltup(Pointer a, double v, double fv = 1.0);
 
 	// append the link to the end of the queue (ignore levels).
 	// Value v is necessary to fill a link (the fineLevel of the link is
 	// set to 1.0 -- default value).
-	void put(Pointer a, float v = 0);
+	void put(Pointer a, double v = 0);
 
 	// Push back the link just gotten.
 	void pushBack(LevelLink*);
@@ -147,8 +128,28 @@ public:
 	// Constructor
 	PriorityQueue() : freeLinkHead(0), numberNodes(0), 
 			  lastNode(0), numFreeLinks(0) {}
-	PriorityQueue(Pointer a, float v, float fv) ;
+	PriorityQueue(Pointer a, double v, double fv) ;
 	virtual ~PriorityQueue();
+
+protected:
+	// Store head of the queue, lastNode->next is head of queue
+	LevelLink* lastNode;
+
+	// Store last access to the list for sequential access
+	LevelLink* lastReference;
+
+	// To avoid memory (de)allocation overhead at each push/pop, we
+	// store the freeLinks once created.
+	LevelLink* getFreeLink();
+	virtual void 	   clearFreeList();
+
+private:
+	int numberNodes;
+	// These are for memory management scheme to minimize the dynamic
+	// memory (de)allocation. FreeLinks are managed in linked-list
+	// structure.
+	LevelLink* freeLinkHead;
+	int  	   numFreeLinks;		// mainly for debugging.
 };
 
 

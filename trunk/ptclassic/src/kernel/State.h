@@ -61,8 +61,8 @@ public:
 // class State
 ////////////////////////////////////////////
 
-// attribute bit definitions.  The kernel reserves the next three bits
-// (4, 8, 16) for future expansion; domains may use higher-order bits
+// attribute bit definitions.  The kernel reserves the next two bits
+// (8, 16) for future expansion; domains may use higher-order bits
 // for their own purposes (example: code generation domains do this).
 
 const bitWord AB_CONST = 1;
@@ -81,7 +81,7 @@ class State : public NamedObj
 {
 public:
 
-        State() : initValue(0), attributeBits(AB_DEFAULT) {}
+        State() : myInitValue(0), attributeBits(AB_DEFAULT) {}
 	~State();
 
 	// Method setting internal data  in the State
@@ -98,24 +98,31 @@ public:
 			Attribute attr);
 
 	// set the initial value
-	void setValue(const char*  s) { initValue = s;}
+	void setInitValue(const char* s);
+
+	// alias for Ptolemy 0.3.1 compatibility
+	void setValue(const char* s) {setInitValue(s);}
 
 	// get the initial value
-	const char* getInitValue () const { return initValue;}
+	const char* initValue () const { return myInitValue;}
 
         // return the parameter type (for use in GUI, interpreter)
-        virtual const char* type() const;
+        virtual const char* type() const = 0;
+
+	virtual const char* className() const = 0;
 
         // return the parameter size (redefined for array states)
         virtual int size() const;
 
+	// am I an array state? (default FALSE)
+	virtual int isArray() const;
+
 	// Initialize when starting or restarting a simulation
-	// (inherits from NamedObj)
-	// virtual void initialize(){};
+	virtual void initialize() = 0;
 
         // return the current value as a string.  Here we just give
         // back initValue
-	virtual StringList currentValue() const;
+	virtual StringList currentValue() const = 0;
 
 	// modify the current value, in a type-independent way
 	void setCurrentValue(const char* newval);
@@ -140,12 +147,8 @@ public:
 
 	// class identification
 	int isA(const char*) const;
-	const char* readClassName() const;
 
 protected:
-	// string used to set initial value by initialize()
-	const char* initValue;
-
 	// get Token  from  string 
 	ParseToken getParseToken(Tokenizer&, int = T_Float);
 
@@ -170,6 +173,10 @@ protected:
 	ParseToken evalFloatAtom(Tokenizer& lexer);
 
 private:
+	// string used to set initial value by initialize()
+	const char* myInitValue;
+
+	// attributes
 	bitWord attributeBits;
 };
 

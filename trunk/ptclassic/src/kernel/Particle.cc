@@ -27,9 +27,9 @@ $Id$
 // Here are the plasmas!
 // Create instances of each particle and plasma
 
-static IntSample iproto;
-static FloatSample fproto;
-static ComplexSample cproto;
+static IntParticle iproto;
+static FloatParticle fproto;
+static ComplexParticle cproto;
 
 Plasma* Plasma :: plasmaList = 0;
 static Plasma intPlasma(iproto);
@@ -44,9 +44,9 @@ static Plasma complexPlasma(cproto);
 int Particle :: compareType (const Particle& src) const {
 	if (typesEqual(src)) return 1;
 	StringList msg = "Attempt to copy ";
-	msg += src.readType();
+	msg += src.type();
 	msg += " Particle to ";
-	msg += readType();
+	msg += type();
 	msg += " Particle";
 	Error::abortRun (msg);
 	return 0;
@@ -55,135 +55,135 @@ int Particle :: compareType (const Particle& src) const {
 extern const DataType ANYTYPE = "ANYTYPE";
 
 	///////////////////////////////////////
-	// class IntSample
+	// class IntParticle
 	///////////////////////////////////////
 
 extern const DataType INT = "INT";
 
-Particle* IntSample :: clone () {
+Particle* IntParticle :: clone () {
 	Particle* p = intPlasma.get();
-	((IntSample*)p)->data = data;
+	((IntParticle*)p)->data = data;
 	return p;
 }
 
-void IntSample :: die () { intPlasma.put(this);}
+void IntParticle :: die () { intPlasma.put(this);}
 
-Particle* IntSample :: useNew () { LOG_NEW; return new IntSample;}
+Particle* IntParticle :: useNew () { LOG_NEW; return new IntParticle;}
 
-Particle& IntSample :: operator = (const Particle& p)
+Particle& IntParticle :: operator = (const Particle& p)
 {
 	if(compareType(p)) {
 		// Types are compatible, so we can copy
-		data = ((const IntSample*)&p)->data;
+		data = ((const IntParticle*)&p)->data;
 	}
 	return *this;
 }
 
-int IntSample :: operator == (const Particle& p) {
+int IntParticle :: operator == (const Particle& p) {
 	if (!typesEqual(p)) return 0;
 	return data == int(p);
 }
 
-DataType IntSample :: readType() const {return INT;}
-IntSample :: operator int () const {return data;}
-IntSample :: operator double () const {return double(data);}
-IntSample :: operator float () const {return float(data);}
-IntSample :: operator Complex () const {return Complex(data);}
+DataType IntParticle :: type() const {return INT;}
+IntParticle :: operator int () const {return data;}
+IntParticle :: operator double () const {return double(data);}
+IntParticle :: operator float () const {return float(data);}
+IntParticle :: operator Complex () const {return Complex(data);}
 
-StringList IntSample :: print () const { return StringList(data);}
+StringList IntParticle :: print () const { return StringList(data);}
 
 	// Wash the Particle
-void IntSample :: initialize() {data=0;}
+void IntParticle :: initialize() {data=0;}
 
 	// Load up with data
-void IntSample :: operator << (int i) {data=i;}
-void IntSample :: operator << (double f) {data=int(f);}
-void IntSample :: operator << (const Complex& c) {data=int(abs(c));}
+void IntParticle :: operator << (int i) {data=i;}
+void IntParticle :: operator << (double f) {data=int(f);}
+void IntParticle :: operator << (const Complex& c) {data=int(abs(c));}
 
 
 	////////////////////////////////////////
-	// class FloatSample
+	// class FloatParticle
 	////////////////////////////////////////
 
 extern const DataType FLOAT = "FLOAT";
 
-Particle* FloatSample :: useNew () { LOG_NEW; return new FloatSample;}
+Particle* FloatParticle :: useNew () { LOG_NEW; return new FloatParticle;}
 
-Particle* FloatSample :: clone () { 
+Particle* FloatParticle :: clone () { 
 	Particle* p = floatPlasma.get();
-	((FloatSample*)p)->data = data;
+	((FloatParticle*)p)->data = data;
 	return p;
 }
 
 
-void FloatSample :: die () { floatPlasma.put(this);}
+void FloatParticle :: die () { floatPlasma.put(this);}
 
-Particle& FloatSample :: operator = (const Particle& p)
+Particle& FloatParticle :: operator = (const Particle& p)
 {
         if(compareType(p)) {
                 // Types are compatible, so we can copy
-		data = ((const FloatSample*)&p)->data;
+		data = ((const FloatParticle*)&p)->data;
 	}
 	return *this;
 }
 
-int FloatSample :: operator == (const Particle& p) {
+int FloatParticle :: operator == (const Particle& p) {
 	if (!typesEqual(p)) return 0;
 	return data == double(p);
 }
 
 
 
-DataType FloatSample :: readType() const {return FLOAT;}
+DataType FloatParticle :: type() const {return FLOAT;}
 
         // Cast to an int, double, and Complex
-FloatSample :: operator int () const {return int(data);}
-FloatSample :: operator double () const {return data;}
-FloatSample :: operator float () const {return float(data);}
-FloatSample :: operator Complex () const {return Complex(data);}
+FloatParticle :: operator int () const {return int(data);}
+FloatParticle :: operator double () const {return data;}
+FloatParticle :: operator float () const {return float(data);}
+FloatParticle :: operator Complex () const {return Complex(data);}
 
-StringList FloatSample :: print () const { return StringList(data);}
+StringList FloatParticle :: print () const { return StringList(data);}
 
  
         // Initialize the Particle
-void FloatSample :: initialize() {data=0.0;}
+void FloatParticle :: initialize() {data=0.0;}
  
         // Load up with data
-void FloatSample :: operator << (int i) {data=i;}
-void FloatSample :: operator << (double f) {data=f;}
-void FloatSample :: operator << (const Complex& c) {data=abs(c);}
+void FloatParticle :: operator << (int i) {data=i;}
+void FloatParticle :: operator << (double f) {data=f;}
+void FloatParticle :: operator << (const Complex& c) {data=abs(c);}
 
         ////////////////////////////////////////
-        // class ComplexSample
+        // class ComplexParticle
         ////////////////////////////////////////
 
 extern const DataType COMPLEX = "COMPLEX";
 
-ComplexSample :: ComplexSample(double f) {data= f;}
-ComplexSample :: ComplexSample(int i) {data = double(i);}
-ComplexSample :: ComplexSample() {data=0.0;}
+ComplexParticle :: ComplexParticle(double f) {data= f;}
+ComplexParticle :: ComplexParticle(int i) {data = double(i);}
+ComplexParticle :: ComplexParticle() {data=0.0;}
 
-Particle* ComplexSample :: useNew () { LOG_NEW; return new ComplexSample;}
+Particle* ComplexParticle :: useNew () { LOG_NEW; return new ComplexParticle;}
 
-Particle* ComplexSample :: clone () {
+Particle* ComplexParticle :: clone () {
 	Particle* p = complexPlasma.get();
-	((ComplexSample*)p)->data = data;
+	((ComplexParticle*)p)->data = data;
 	return p;
 }
 
-void ComplexSample :: die () { complexPlasma.put(this);}
+void ComplexParticle :: die () { complexPlasma.put(this);}
 
-Particle& ComplexSample :: operator = (const Particle& p)
+Particle& ComplexParticle :: operator = (const Particle& p)
 {
         if(compareType(p)) {
                 // Types are compatible, so we can copy
-		const ComplexSample& cs = *(const ComplexSample*)&p;
+		const ComplexParticle& cs = *(const ComplexParticle*)&p;
 		data = cs.data;
 	}
         return *this;
 }
 
-int ComplexSample :: operator == (const Particle& p) {
+int ComplexParticle :: operator == (const Particle& p) {
 	if (!typesEqual(p)) return 0;
 	Complex pdata = Complex(data);
 	return data.real() == pdata.real() &&
@@ -191,17 +191,17 @@ int ComplexSample :: operator == (const Particle& p) {
 }
 
 
-DataType ComplexSample :: readType() const {return COMPLEX;}
+DataType ComplexParticle :: type() const {return COMPLEX;}
  
         // Cast to an int, double, Complex
 	// when casting to a real, we use the magnitude
 
-ComplexSample :: operator int () const {return int(abs(data));}
-ComplexSample :: operator double () const {return abs(data);}
-ComplexSample :: operator float () const {return float(abs(data));}
-ComplexSample :: operator Complex () const {return data;}
+ComplexParticle :: operator int () const {return int(abs(data));}
+ComplexParticle :: operator double () const {return abs(data);}
+ComplexParticle :: operator float () const {return float(abs(data));}
+ComplexParticle :: operator Complex () const {return data;}
 
-StringList ComplexSample :: print () const {
+StringList ComplexParticle :: print () const {
 	StringList out = "(";
 	out += data.real();
 	out += ",";
@@ -211,12 +211,12 @@ StringList ComplexSample :: print () const {
 }
  
         // Initialize the Particle
-void ComplexSample :: initialize() {data=0.0;}
+void ComplexParticle :: initialize() {data=0.0;}
 
         // Load up with data
-void ComplexSample :: operator << (int i) {data=Complex(i);}
-void ComplexSample :: operator << (double f) {data=Complex(f);}
-void ComplexSample :: operator << (const Complex& c) {data=c;}
+void ComplexParticle :: operator << (int i) {data=Complex(i);}
+void ComplexParticle :: operator << (double f) {data=Complex(f);}
+void ComplexParticle :: operator << (const Complex& c) {data=c;}
 
 
 // ParticleStack methods
@@ -251,7 +251,7 @@ Plasma* Plasma :: getPlasma(DataType t)
 	Plasma* p = plasmaList;
 
 	while (p) {
-		DataType dt = p->head->readType();
+		DataType dt = p->head->type();
 		if (t == dt) return p;
 		p = p->nextPlasma;
 	}
@@ -265,20 +265,20 @@ Plasma* Plasma :: getPlasma(DataType t)
 	return 0;
 }
 
-// Error catcher for attempts to retrieve a Packet from a different
+// Error catcher for attempts to retrieve a Message from a different
 // type of particle
 
-class Packet;
+class Envelope;
 
-void Particle::accessPacket(Packet &) const {
-	Error::abortRun ("Attempt to getPacket from a non-packet Particle");
+void Particle::accessMessage(Envelope &) const {
+	Error::abortRun ("Attempt to getMessage from a non-Message Particle");
 }
 
-void Particle::getPacket(Packet & p) {
-	Particle::accessPacket(p);
+void Particle::getMessage(Envelope & p) {
+	Particle::accessMessage(p);
 }
 
-void Particle::operator<<(const Packet&) {
-	Error::abortRun ("Attempt to load a Packet into non-packet Particle");
+void Particle::operator<<(const Envelope&) {
+	Error::abortRun ("Attempt to load a Message into non-Message Particle");
 }
 

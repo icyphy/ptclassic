@@ -17,9 +17,9 @@ of arbitrary length.  The length is specified by the constructor.
 #pragma interface
 #endif
 
-#include "Packet.h"
+#include "Message.h"
 
-class IntVecData : public PacketData {
+class IntVecData : public Message {
 private:
 	int len;
 
@@ -45,7 +45,7 @@ public:
 	IntVecData(const IntVecData& src) { init(src.len,src.data);}
 
 	// clone
-	PacketData* clone() const;
+	Message* clone() const;
 
 	// print
 	StringList print() const;

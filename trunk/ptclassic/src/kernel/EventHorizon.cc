@@ -1,9 +1,9 @@
-static const char file_id[] = "WormConnect.cc";
+static const char file_id[] = "EventHorizon.cc";
 #ifdef __GNUG__
 #pragma implementation
 #endif
 
-#include "WormConnect.h"
+#include "EventHorizon.h"
 #include "Star.h"
 #include "StringList.h"
 #include "Error.h"
@@ -28,7 +28,7 @@ $Id$
         each doamin needs to define In??EventHorizon and Out??EventHorizon
         derived from Universal EventHorizon and domain-specific PortHoles.
 
-Code for functions declared in WormConnect.h
+Code for functions declared in EventHorizon.h
 
 **************************************************************************/
 
@@ -164,7 +164,7 @@ void FromEventHorizon :: transferData ()
 {
 	// call ghostPort->grabData for initial conversion if it is output.
 	if (isItOutput())
-		ghostPort->asPort()->grabData();
+		ghostPort->asPort()->receiveData();
 }
 
 void FromEventHorizon :: initialize()
@@ -202,13 +202,13 @@ PortHole& WormMultiPort :: newPort() {
 	PortHole& realP = galp->newConnection();
 
 	// build eventHorizon
-        DataType type = realP.myType();
+        DataType type = realP.type();
         int numToken = realP.numXfer();
 // separate rules for connecting inputs and outputs.
         if (galp->isItInput()) {
                 EventHorizon& to = outSideDomain->newTo();
                 EventHorizon& from = inSideDomain->newFrom();
-                to.setEventHorizon(in, galp->readName(), worm, 
+                to.setEventHorizon(in, galp->name(), worm, 
 			(Star*) parent(), type, numToken);
                 parent()->addPort(*(to.asPort()));
 		ports.put(*(to.asPort()));
@@ -222,7 +222,7 @@ PortHole& WormMultiPort :: newPort() {
         } else {
                 EventHorizon& to = inSideDomain->newTo();
                 EventHorizon& from = outSideDomain->newFrom();
-                from.setEventHorizon(out, galp->readName(), worm, 
+                from.setEventHorizon(out, galp->name(), worm, 
 			(Star*) parent(), type, numToken);
                 parent()->addPort(*(from.asPort()));
 		ports.put(*(from.asPort()));

@@ -1,5 +1,5 @@
-#ifndef _connect_h
-#define _connect_h 1
+#ifndef _PortHole_h
+#define _PortHole_h 1
 
 #ifdef __GNUG__
 #pragma interface
@@ -19,18 +19,8 @@ $Id$
  Copyright (c) 1990 The Regents of the University of California.
                        All Rights Reserved.
 
- Programmer:  E. A. Lee and D. G. Messerschmitt
+ Programmer:  E. A. Lee and D. G. Messerschmitt, J. Buck
  Date of creation: 1/17/90
- Revisions:
- 	3/19/90 - J. Buck
-		Make MultiPortHole a derived type of PortHole.
-		add a virtual method newConnection to get the
-		PortHole to use for a new connection (realPort
-		for PortHoles, realPort.newPort for MultiPortHoles).
-		Allow casting from MultiPortHole to PortHole.
-
-	5/29/90 - J. Buck
-		Move SDF-specific portholes to SDFConnect.h
 
 This file contains definitions relevant to connections.
 
@@ -54,6 +44,9 @@ Plasma: The place where Particles reside in transit back.
 	Particles are re-used as a way to preserve memory.
 
 Particles: Defined in Particle.h
+
+A MultiPortHole is a set of related portholes.
+
 ******************************************************************/
 class CircularBuffer;
 class Geodesic;
@@ -95,7 +88,7 @@ public:
 	virtual int isItMulti () const;
 
 	// print info on the PortHole
-	StringList printVerbose () const;
+	/* virtual*/ StringList print (int verbose = 0) const;
 
 	// virtual function used for new connections.
 	// PortHole uses this one unchanged; MultiPortHole has to create
@@ -111,7 +104,7 @@ public:
 
 	GenericPort& setPort(const char* portName, Block* blk, DataType typ=FLOAT) {
 		setNameParent (portName, blk);
-		type = typ;
+		myType = typ;
 		return *this;
 	}
 
@@ -126,7 +119,7 @@ public:
 	virtual void connect(GenericPort& destination,int numberDelays);
 
 	// return my type
-	DataType myType () const { return type;}
+	DataType type () const { return myType;}
 
 	// class identification
 	int isA(const char*) const;
@@ -160,10 +153,10 @@ protected:
 	// Translate aliases, if any.
 	GenericPort* translateAliases();
 
-	// datatype of particles in this porthole
-	DataType type;
-
 private:
+	// datatype of particles in this porthole
+	DataType myType;
+
 	// PortHole this is aliased to
 	GenericPort* aliasedTo;
 
@@ -247,7 +240,7 @@ public:
 	virtual PortHole& newConnection();
 
         // Print a description of the MultiPortHole
-	StringList printVerbose () const;
+	/* virtual */ StringList print (int verbose = 0) const;
 
 	// function to set Plasma type of subportholes
 	Plasma* setPlasma(Plasma *useType = NULL);
@@ -318,7 +311,7 @@ public:
 	PortHole* far() const { return farSidePort;}
 
         // Print a description of the PortHole
-	StringList printVerbose () const;
+	/* virtual */ StringList print (int verbose = 0) const;
 
 	// set the alias
 	void setAlias (PortHole& blockPort) {
@@ -336,7 +329,7 @@ public:
 
 	// Can be used for things like inputing and output
 	//  Particles.  These are currently do-nothing functions
-	virtual void grabData(); 
+	virtual void receiveData(); 
 	virtual void sendData();
 
 	// Operator to return Particles previously input or output
@@ -349,7 +342,7 @@ public:
 
 	// return the type associated with my plasma (0 is returned if
 	// the plasma has not been set, e.g. before initialization)
-	DataType plasmaType () const;
+	DataType resolvedType () const;
 
 	// Number of Particles stored in the buffer each
 	// time the Geodesic is accessed -- normally this is
@@ -364,12 +357,14 @@ public:
 	// return the number of particles on my Geodesic
 	int numTokens() const;
 
-	// Maintain pointer to Geodesic connected to this PortHole
-	Geodesic* myGeodesic;
+	// return the number of initial delays on my Geodesic
+	int numInitDelays() const;
 
-	// Allocate a return a Geodesic compatible with this
-	// type of PortHole
-	virtual Geodesic* allocateGeodesic();
+	// adjust the number of delays on the Geodesic
+	void adjustDelays(int numNewDelays);
+
+	// return pointer to my Geodesic
+	Geodesic* geo() { return myGeodesic;}
 
 	// initialize the Plasma
 	Plasma* setPlasma(Plasma *useType = NULL);
@@ -391,7 +386,14 @@ public:
 	// adjust the delay on the connection
 	virtual void setDelay (int);
 
+	// Allocate a return a Geodesic compatible with this
+	// type of PortHole
+	virtual Geodesic* allocateGeodesic();
+
 protected:
+	// Maintain pointer to Geodesic connected to this PortHole
+	Geodesic* myGeodesic;
+
         // Indicate the real port (aliases resolved) at the far end
         // of a connection.  Initialized to NULL.
         // This information is redundant with what's in the geodesic,

@@ -10,19 +10,23 @@ them back one-by-one, or can concatinate them into a single
 char* string. A StringList can only grow; there is no way to
 take something away that has been added to the list.
 
-Typical use: For a class that wants to cast into a char*,
-the strings can be accumulated into a StringList, and then
-let StringList do the cast into char*.
-
 StringList implements a small subset of the function of the
-String class
+String class that will someday be an ANSI standard.
 
-Programmer: D.G. Messerschmitt, U.C. Berkeley
-Date: Jan 11, 1990
+Programmer: J. Buck
 
-Revised by: J.T. Buck
-The revised version eliminates memory leaks and adds constructors
-with arguments.
+WARNING: if a function or expression returns a StringList, and
+that value is not assigned to a StringList variable or reference,
+and the (const char*) cast is used, it is possible (likely under
+g++) that the StringList temporary will be destroyed too soon,
+leaving the const char* pointer pointing to garbage.  Always
+assign temporary StringLists to StringList variables or references
+before using the const char* conversion.  This includes code like
+
+strcpy(destBuf,functionReturningStringList());
+
+which uses the const char* conversion implicitly.
+
 *******************************************************************/
 
 #ifndef _StringList_h
@@ -35,7 +39,7 @@ with arguments.
 #include "miscFuncs.h"
 #include "DataStruct.h"
 
-class StringList : public SequentialList
+class StringList : private SequentialList
 {
 	friend class StringListIter;
 public:
@@ -63,9 +67,9 @@ public:
 	StringList& operator = (const StringList& sl);
 	StringList& operator = (const char* s);
 	StringList& operator = (char c);
-	StringList& operator = (int i) { initialize(); return *this += i;}
-	StringList& operator = (double d) { initialize(); return *this += d;}
-	StringList& operator = (unsigned u) {initialize(); return *this += u;}
+	StringList& operator = (int i);
+	StringList& operator = (double d);
+	StringList& operator = (unsigned u);
 
 	// Destructor
 	~StringList();
@@ -79,19 +83,30 @@ public:
 	StringList& operator += (const StringList&);
 
 	// Return first string on list
-	char* head() const {return (char*)SequentialList::head();}
+	const char* head() const {
+		return (const char*)SequentialList::head();
+	}
+
+	// Return the length in characters.
+	int length() const { return totalSize;}
+	// Return the number of pieces
+	int numPieces() const { return size();}
 
 	// Convert to const char*
 	// NOTE!!  This operation modifies the StringList -- it calls
 	// the private consolidate method to collect all strings into
 	// one string and clean up the garbage.  No modification happens
-	// if the StringList is already in one chunk.
+	// if the StringList is already in one chunk.  A null pointer
+	// is always returned if there are no characters, never "".
 	operator const char* () { return consolidate();}
 
 	// Make a copy of the StringList as a char* in dynamic memory.
 	// the user is responsible for deletion.
 	char* newCopy() const;
 private:
+	// copy constructor body
+	void copy(const StringList&);
+	// change chunks into one chunk
 	const char* consolidate();
 	int totalSize;
 };
@@ -106,8 +121,7 @@ public:
 	ListIter::reset;
 };
 
-// print a StringList on a stream (don't give function here so we
-// don't have to include stream.h)
+// print a StringList on a stream
 
 class ostream;
 ostream& operator << (ostream& o,const StringList& sl);

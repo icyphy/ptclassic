@@ -39,9 +39,10 @@ public:
 	~InterpUniverse();
         int newTarget(const char* newTargName = 0);
 	const char* targetName() const;
-	Scheduler* mySched() const;
+	Scheduler* scheduler() const;
 	Target* myTarget() const { return target;}
-
+	int run() { return Runnable::run();}
+	void wrapup() { target->wrapup();}
 	// class identification
 	int isA(const char*) const;
 };

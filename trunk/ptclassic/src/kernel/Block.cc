@@ -33,57 +33,54 @@ Block :: Block(const char* n,Block* p,const char* d) : NamedObj(n,p,d) {}
 // print all port names in the block, omitting hidden ports
 
 StringList
-Block :: printPorts (const char* type) const {
+Block :: printPorts (const char* type, int verbose) const {
 	StringList out;
 // first the ports
 	if (numberPorts()) {
-		out += "Ports in the ";
-		out += type;
-		out += ":\n";
+		if (verbose)
+			out << "Ports in the " << type << ":\n";
+		else out << "Ports:\n";
 		CBlockPortIter next(*this);
 		const PortHole* p;
 		while ((p = next++) != 0)
-			if (!hidden(*p)) out += p->printVerbose();
+			if (!hidden(*p)) out += p->print(verbose);
 	}
 // next the multiports
 	if (numberMPHs()) {
-		out += "MultiPortHoles in the ";
-		out += type;
-		out += "\n";
+		if (verbose)
+			out << "MultiPortHoles in the " << type << "\n";
+		else
+			out << "MultiPorts:\n";
 		CBlockMPHIter next(*this);
 		const MultiPortHole* mp;
 		while ((mp = next++) != 0)
-			if (!hidden(*mp)) out += mp->printVerbose();
+			if (!hidden(*mp)) out += mp->print(verbose);
 	}
 	return out;
 }
 
 StringList
-Block :: printStates (const char* type) const {
+Block :: printStates (const char* type, int verbose) const {
         StringList out;
 	if (numberStates() == 0) return out;
-        out += "States in the ";
-        out += type;
-        out += ":\n";
+	if (verbose) 
+		out << "States in the " << type << ":\n";
+	else
+		out << "States:\n";
 	const State* s;
 	CBlockStateIter next(*this);
 	while ((s = next++) != 0)
-		out += s->printVerbose();
+		out += s->print(verbose);
         return out;
 }
 
 StringList
-Block :: printVerbose () const
+Block :: print(int verbose) const
 {
 	StringList out;
-	out = "Block: ";
-	out += readFullName();
-	out += "\n";
-	out += "Descriptor: ";
-	out += readDescriptor();
-	out += "\n";
-	out += printPorts("block");
-	return out;
+	return out << "Block: " << fullName() << "\n"
+		   << "Descriptor: " << descriptor() << "\n"
+		   << printPorts("block",verbose);
 }
 
 void Block :: initialize()
@@ -98,7 +95,7 @@ void Block :: initialize()
         // initialize States
         initState();
 	// call user-specified initialization
-	start();
+	setup();
 }
 
 // This method returns a GenericPort corresponding to the given name.
@@ -107,7 +104,7 @@ Block::genPortWithName (const char* name) {
 	GenericPort* g;
 	BlockGenPortIter gpi(*this);
 	while ((g = gpi++) != 0) {
-		if (strcmp (name, g->readName()) == 0)
+		if (strcmp (name, g->name()) == 0)
 			return g;
 	}
 	// Not found, return NULL
@@ -122,7 +119,7 @@ Block::portWithName (const char* name) {
 	GenericPort* g;
 	BlockGenPortIter gpi(*this);
 	while ((g = gpi++) != 0) {
-		if (strcmp (name, g->readName()) == 0)
+		if (strcmp (name, g->name()) == 0)
 			return &(g->newConnection());
 	}
 	// Not found, return NULL
@@ -134,37 +131,49 @@ MultiPortHole* Block::multiPortWithName(const char* name) {
 	MultiPortHole* m;
 	BlockMPHIter mpi(*this);
 	while ((m = mpi++) != 0) {
-		if (strcmp (name, m->readName()) == 0)
+		if (strcmp (name, m->name()) == 0)
 			return m;
 	}
 	return NULL;
 }
 
 // The following function is an error catcher -- it is called if
-// a star or galaxy in the known list hasn't redefined the clone
-// method.
-Block* Block::clone() const {
-	Error::abortRun ("The star or galaxy \"", readName(),
-		      "doesn't implement the clone method");
+// a star or galaxy in the known list hasn't redefined the makeNew
+// method.  It would be nice if that could be caught at compile time.
+Block* Block::makeNew() const {
+	Error::abortRun ("The star or galaxy \"", name(),
+		      "doesn't implement the makeNew method");
 	return 0;
 }
 
-Block& Block::copyStates(const Block& src) {
+// The following function is also an error catcher.
+int Block::run() {
+	Error::abortRun(*this, "Objects of class ", className(),
+			" are not runnable!");
+	return FALSE;
+}
+
+Block* Block::clone() const {
+	Block* b = makeNew();
+	return b ? b->copyStates(*this) : 0;
+}
+
+Block* Block::copyStates(const Block& src) {
 	CBlockStateIter nexts(src);
 	BlockStateIter nextd(*this);
 	const State* srcStatePtr;
 	State *destStatePtr;
 	while ((srcStatePtr = nexts++) != 0 && (destStatePtr = nextd++) != 0)
-		destStatePtr->setValue(srcStatePtr->getInitValue());
-	return *this;
+		destStatePtr->setInitValue(srcStatePtr->initValue());
+	return this;
 }
 
 // This one matters only for galaxies... try the plasma type first;
 // if not set, use the defined type.
 
 static DataType trueType(const PortHole* p) {
-	DataType d = p->plasmaType();
-	return d ? d : p->myType();
+	DataType d = p->resolvedType();
+	return d ? d : p->type();
 }
 
 // Return the names of the ports within the block.  Omit hidden ports.
@@ -178,7 +187,7 @@ Block::portNames (const char** names, const char** types,
 	for (int i = n; i>0; i--) {
 		const PortHole* p = next++;
 		if (hidden(*p)) continue;
-		*names++ = p->readName();
+		*names++ = p->name();
 		*types++ = trueType(p);
 		*io++ = p->isItOutput();
 		count++;
@@ -197,8 +206,8 @@ Block::multiPortNames (const char** names, const char** types,
 	for (int i = n; i>0; i--) {
 		const MultiPortHole* p = next++;
 		if (hidden(*p)) continue;
-		*names++ = p->readName();
-		*types++ = p->myType();
+		*names++ = p->name();
+		*types++ = p->type();
 		*io++ = p->isItOutput();
 		count++;
 	}
@@ -210,10 +219,17 @@ Block::stateWithName(const char* name) {
 	State* s;
 	BlockStateIter next(*this);
 	while ((s = next++) != 0) {
-		if(strcmp(name,s->readName()) == 0)
+		if(strcmp(name,s->name()) == 0)
 			return s;
 	}
 	return NULL;
+}
+
+int Block :: setState(const char* stateName, const char* expression) {
+	State* s = stateWithName(stateName);
+	if (!s) return FALSE;
+	s->setInitValue(expression);
+	return TRUE;
 }
 
 ISA_FUNC(Block,NamedObj);
@@ -246,11 +262,11 @@ Galaxy& Block::asGalaxy() {
 }
 
 // small virtual functions
-void Block::start () {}
+void Block::setup () {}
 
 void Block::wrapup () {}
 
-const char* Block::readClassName() const { return "Block";}
+const char* Block::className() const { return "Block";}
 
 Block& Block::setBlock(const char* s, Block* parent) {
 	setNameParent (s, parent);
@@ -263,7 +279,7 @@ int Block::isItWormhole () const { return FALSE;}
 
 void Block::initState () { states.initElements();}
 
-Scheduler* Block :: mySched() const { return parent()->mySched() ;}
+Scheduler* Block :: scheduler() const { return parent()->scheduler() ;}
 
 // destructor isn't really do-nothing because it calls destructors
 // for members

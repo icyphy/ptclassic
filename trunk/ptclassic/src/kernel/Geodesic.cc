@@ -27,7 +27,7 @@ Geodesics can be created named or unnamed.
 
 #include "Geodesic.h"
 #include "Block.h"
-#include "Connect.h"
+#include "PortHole.h"
 #include "Plasma.h"
 #include "StringList.h"
 
@@ -35,16 +35,16 @@ StringList Geodesic :: printVerbose () const {
 	StringList out;
 	if (isItPersistent()) out += "Persistent ";
 	out += "Geodesic: ";
-	out += readFullName();
+	out += fullName();
 	out += "\n";
 	if (originatingPort) {
 		out += "originatingPort: ";
-		out += originatingPort->readFullName();
+		out += originatingPort->fullName();
 		out += "\n";
 	}
 	if (destinationPort) {
 		out += "destinationPort: ";
-		out += destinationPort->readFullName();
+		out += destinationPort->fullName();
 		out += "\n";
 	}
 	if (!originatingPort && !destinationPort)
