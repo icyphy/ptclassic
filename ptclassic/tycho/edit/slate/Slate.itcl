@@ -170,7 +170,7 @@ class ::tycho::Slate {
     method describe {id args}
 
     # Create a "ghost" of one or more items
-    method ghost {tag {tags {}}}
+    method ghost {tag args}
 
     # Add a highlight to an item
     method highlight {tag args}
@@ -352,47 +352,46 @@ body ::tycho::Slate::describe {id args} {
 #### ghost
 #
 # Create a ghost of an item and return the ID of the ghost item.
-# This is a grey outline of the item
-# for (optional) use when moving and resizing the item. If
-# _tag_ refers to more than one item, the returned (complex) item
-# contains a ghost for each of those items. If the optional
-# _tags_ argument is given, these tags are given to the created
-# ghost item. If a matching complex item has a ghost{} procedure
-# in its method table, that procedure is called to create the
-# ghost item.
+# This is a grey outline of the item for use when moving and resizing
+# the item. Complex items can choose their
+# own style of ghosting by providing a ghost{} procedure.
+# Each created ghost item is tagged with "ghost" and
+# "ghost._id_", where _id_ is the item it ghosts, and any
+# additional arguments to this method. If the first argument is
+# tag, then each ghosted item is also tagged with
+# "ghost._tag_". The return value is a list of created items.
 #
-body ::tycho::Slate::ghost {tag {tags {}}} {
-    if { ! [string match {[_0-9]*} $tag] } {
-	# It's a tag, so get matching items
-	set match [find withtag $tag]
-	if { [llength $match] == 0 } {
-	    return
-	} elseif { [llength $match] == 1 } {
-	    set tag [lindex $match 0]
-	} else {
-	    # If there are multiple items, create a ComplexItem and
-	    # add the ghost of each item to it.
-	    set ghost [eval create ComplexItem [region $tag]]
-	    eval lappend tags [gettags $ghost]
-	    foreach item $match {
-		ghost $item $tags
-	    }
-	    return $ghost
-	}
-    } elseif { [string match {_*} $tag] } {
+# Note: It is ths caller's responsibility to delete ghosts after
+# completion with a call such as <code>$slate delete ghost</code>.
+#
+body ::tycho::Slate::ghost {tag args} {
+    if { [string match {_*} $tag] } {
 	# If it's a complex item and it has a ghost{} method,
 	# call that
 	if { [@scope ::tycho::$itemClass($tag) \
 		[list ::info exists methodtable(ghost)]] } {
 	    return [@scope ::tycho::$itemClass($tag) \
 		    [list eval \[set methodtable(ghost)\] \
-		    $tag $canvas $this]]
+		    $tag $canvas $this \
+		    -tags [concat "ghost" "ghost.$tag" $args]]]]
+    	} else {
+	    set primary [@scope ::tycho::ComplexItem [list set primary($tag)]]
+	}
+    } elseif { ! [string match {[_0-9]*} $tag] } {
+    	# It's a tag, so do for each item
+    	set result {}
+    	foreach item [find withtag $tag] {
+	    lappend result [eval ghost $item "ghost.$tag" $args]
     	}
+    	return $result
+    } else {
+	# Simple item
+	set primary $tag
     }
 
     # If we get to here, tag represents a single item
     set shape [shape $tag]
-    set primary [@scope ::tycho::ComplexItem [list set primary($tag)]]
+    set tags [concat "ghost" "ghost.$tag" $args]
     switch -exact $shape {
 	"rectangle" -
 	"oval" -
