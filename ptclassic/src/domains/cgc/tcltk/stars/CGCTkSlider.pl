@@ -86,7 +86,7 @@ limitation of liability, and disclaimer of warranty provisions.
                     errorReport("Invalid value");
                     return TCL_ERROR;
                 }
-		$ref(value) = $val(low)+($val(high) - $val(low))*(position/100.0);
+		$ref(value) = $val(low) + ($val(high) - $val(low))*(position/100.0);
 		/* set the value display */
 		sprintf(buf, "%.4f", $ref(value));
 		displaySliderValue(".low", "$starSymbol(scale)", buf);
