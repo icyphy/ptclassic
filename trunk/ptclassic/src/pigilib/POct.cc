@@ -432,7 +432,7 @@ int POct::ptkGetParams (int aC,char** aV) {
 	    }
 	    // Convert "property" into Result string
 	    Tcl_AppendElement (interp, title,0);
-	    Tcl_AppendResult(interp, "{ {", NULL);
+	    Tcl_AppendResult(interp, " { {", NULL);
 	    Tcl_AppendElement(interp, property.contents.prop.name, 0);
 	    sprintf( tempStr, "INTEGER" );
 	    Tcl_AppendElement(interp, tempStr, 0);
