@@ -1,7 +1,7 @@
-/**************************************************************************
-Version identification:
-@(#)DEScheduler.h	1.21	11/25/92
+#ifndef _CQScheduler_h
+#define _CQScheduler_h 1
 
+/*
 Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
 All rights reserved.
 
@@ -24,16 +24,8 @@ PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
 CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
 							COPYRIGHTENDKEY
-
- Programmer:  Soonhoi Ha
- Date of creation: 5/30/90
-
- DE Scheduler for single computer is implemented.
-
- ********************************************************************/
+*/
  
-#ifndef _DEScheduler_h
-#define _DEScheduler_h 1
 #ifdef __GNUG__
 #pragma interface
 #endif
@@ -41,17 +33,17 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "type.h"
 #include "Galaxy.h"
 #include "DEStar.h"
-#include "Scheduler.h"
-#include "EventQueue.h"
+#include "DEScheduler.h"
+#include "CQEventQueue.h"
 #include "CalendarQueue.h"
 
 
 	////////////////////////////
-	// DEScheduler
+	// CQScheduler
 	////////////////////////////
 
 
-class DEScheduler : public Scheduler {
+class CQScheduler : public DEBaseSched {
 
 	// stoping condition of the scheduler
 	double stopTime;
@@ -85,7 +77,7 @@ public:
 
 	// Here, EventQueue inherits from CalendarQueue
 	// rather than PriorityQueue
-	EventQueue eventQ;
+	CQEventQueue eventQ;
 
 	// Set up the stopping condition.
 	void setStopTime(double limit) {stopTime = limit ;}
@@ -113,13 +105,10 @@ public:
 	StringList displaySchedule(); 
 
 	// Constructor sets default options
-	DEScheduler () { stopTime = 100.0; }
+	CQScheduler () { stopTime = 100.0; }
 
 	// output the stopTime
 	double whenStop() { return stopTime ;}
-
-	// relative time scale to the outer domain when it is a inner domain.
-	double relTimeScale;
 
 	// synchronization mode. It is set by default.
 	// If reset, the execution of the process star can be optimized.
@@ -127,7 +116,9 @@ public:
 	int syncMode;
 
 	// fetch an event on request.
-	int fetchEvent(InDEPort* p, double timeVal);
+	/*virtual*/ int fetchEvent(InDEPort* p, double timeVal);
+
+	/*virtual*/ BasePrioQueue* queue() { return &eventQ; }
 };
 
 #endif
