@@ -99,7 +99,7 @@ int TclObj::result(int value) {
 
 void TclObj::addResult(const char* value) {
         // cast-away-const needed to interface with Tcl.
-        Tcl_AppendElement(interp,(char*)value,0);
+        Tcl_AppendElement(interp,(char*)value);
 }
 
 
