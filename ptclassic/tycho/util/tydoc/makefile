@@ -56,15 +56,7 @@ DIRS =	 bin demo doc test
 
 TCL_SRCS = 
 
-ITCL_SRCS =  \
-	ClassModel.itcl \
-	ClassParser.itcl \
-	ClassViewer.itcl \
-	ItclParser.itcl \
-	ItclViewer.itcl \
-	JavaParser.itcl \
-	JavaViewer.itcl \
-	MultiPanel.itcl \
+ITCL_SRCS = \
 	TyDocMain.itcl
 
 EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) \
