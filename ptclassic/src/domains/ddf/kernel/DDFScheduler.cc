@@ -589,5 +589,10 @@ int DDFScheduler::isSDFType() {
 	return flag;
 }
 
-void DDFScheduler::resetFlag() { restructured = FALSE ;}
+void DDFScheduler::resetFlag() { 
+	restructured = FALSE ;
+	numOverlapped = 1;
+	maxToken = 1024;
+	overFlow = FALSE;
+}
 
