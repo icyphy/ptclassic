@@ -12,7 +12,7 @@ plotted as it adapts.
 	version {$Id$}
 	author { J. T. Buck }
 	copyright { 1991 The Regents of the University of California }
-	location { SDF main library }
+	location { SDF dsp library }
 	explanation {
 This star is exactly like the CxLMS star, except that, in addition,
 it makes a plot of the tap coefficients, one plot for the magnitude,

@@ -8,7 +8,7 @@ Output a complex raised-cosine Nyquist pulse.
 	version { $Id$ }
 	author { J. T. Buck }
 	copyright { 1991 The Regents of the University of California }
-	location { SDF main library }
+	location { SDF dsp library }
 	explanation {
 This star outputs a complex raised cosine pulse with excess bandwidth given
 by \fIexcessbw\fR and pulse width (distance from center to first

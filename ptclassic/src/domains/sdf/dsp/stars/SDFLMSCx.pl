@@ -13,7 +13,7 @@ Supports decimation, but not interpolation.
 	version { $Id$ }
 	author { J. T Buck, E. A. Lee }
 	copyright { 1991 The Regents of the University of California }
-	location { SDF main library }
+	location { SDF dsp library }
 	explanation {
 When correctly used, this filter will adapt to try to minimize
 the mean-squared error of the signal at its \fIerror\fR input.

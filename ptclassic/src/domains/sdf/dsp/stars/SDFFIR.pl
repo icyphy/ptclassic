@@ -11,7 +11,7 @@ coefficients with "<fileName".
 	version {$Id$}
 	author { E. A. Lee }
 	copyright { 1991 The Regents of the University of California }
-	location { SDF main library }
+	location { SDF dsp library }
 	explanation {
 .pp
 This star implements a finite-impulse response filter with multirate capability.
