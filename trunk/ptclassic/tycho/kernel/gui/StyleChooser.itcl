@@ -169,10 +169,18 @@ body ::tycho::PreferenceDialog::destructor {} {
     # Save the whole bag of preferences
     ::tycho::preference model save
 
-    # Also save just the ones the user wants
-    # FIXME: Save file in Model?
-    foreach {group preference} $changed {
-	# puts "$group $changed"
+    # Save preferences that are different from the default
+    # in ~/.Tycho/preferences
+    set fd [open [::tycho::expandPath \
+	    [file join [::tycho::tychoDir] preferences]] "w"]
+    if { $fd != "" } {
+	puts $fd "# User preference settings\n"
+	foreach {group preference value} \
+		[::tycho::preference model different] {
+	    puts $fd [list ::tycho::preference model assign \
+		    $group $preference $value]
+	}
+	close $fd
     }
 }
 
