@@ -60,6 +60,7 @@
 # </pre></tcl>
 #
 class ::tycho::HTMLExport {
+    inherit ::tycho::Object
     ###################################################################
     ####                         public methods                    ####
 
