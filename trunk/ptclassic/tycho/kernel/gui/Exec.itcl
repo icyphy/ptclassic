@@ -80,12 +80,12 @@ proc ::tycho::execModal {{command {}} {dir {}} {execWidget {}}} {
         $execWidget execProcess
     }
 
-    #This is the modal mode, which we don't use anymore
-    #::tycho::Dialog::wait $win
-
     # Get the name of the variable that will contain the status of 
     # exec after the exec is deleted
-    set statusVariableName [$execWidget getStatusVariableName]
+    if [catch {set statusVariableName [$execWidget getStatusVariableName]}] {
+        # If execWidget was closed, then catch the error.
+        return
+    }
     global $statusVariableName
     
     # If statement is used to prevent crashing
