@@ -56,22 +56,22 @@ namespace ::tycho {
 # The id of the item to which this grapple is attached.
 #
 # <li><b>-outline</b>:
-# The color of the outline of the oval. If "", 
-# the oval has no outline. By default, it is black.
+# The color of the outline of the grapple. If "", 
+# the grapple has no outline. By default, it is null.
 #
 # <li><b>-sticky</b>:
 # The grapple will not be deleted by the <b>ungrapple</b> method of
 # the Slate.
 #
 # <li><b>-width</b>:
-# The width of the outline of the oval, in pixels. By 
+# The width of the outline of the grapple, in pixels. By 
 # default, it is one.
 #
 # </ul>
 #
 # <p><b>Bugs</b>: (none)
 #
-# <p><b>Example</b>: Create a labelled oval:
+# <p><b>Example</b>: Create a grapple:
 # <tcl quiet><pre>
 #   source $tycho/editors/slate/doc/internals/newslate.itcl
 #   $slate create Grapple 40 40 100 80 -fill white -outline blue &#92
@@ -216,17 +216,12 @@ body ::tycho::Grapple::construct {id canvas slate tags x y args} {
 	    [::tycho::Rectangle::stretch $x $y $x $y 4] \
 	    [list -fill $option(fill$id) -outline $option(outline$id) \
 	    -width $option(width$id) -tags $tags]]
-
-    # Add the tags grapple and grapple._item_
-    # FIXME: Do in grapple{} method
-    $slate addtag grapple withtag $id
-    $slate addtag grapple.$option(item$id) withtag $id
 }
 
 ##########################################################################
 #### coords
 #
-# Set or read the oval's coordinates
+# Set or read the grapple's coordinates
 #
 body ::tycho::Grapple::coords {id canvas slate args} {
     set coords [$canvas coords $primary($id)]
