@@ -69,6 +69,7 @@ if ![info exists TESTS] {
 
 proc print_verbose {test_name test_description contents_of_test code answer} {
     global FAILED
+    global errorInfo 
     puts stdout "\n"
     puts stdout "==== $test_name $test_description"
     puts stdout "==== Contents of test case:"
@@ -78,6 +79,7 @@ proc print_verbose {test_name test_description contents_of_test code answer} {
         if {$code == 1} {
             puts stdout "==== Test generated error:"
             puts stdout $answer
+	    puts stdout "$errorInfo"
         } elseif {$code == 2} {
             puts stdout "==== Test generated return exception;  result was:"
             puts stdout $answer
