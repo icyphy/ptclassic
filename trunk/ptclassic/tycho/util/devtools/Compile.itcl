@@ -140,8 +140,8 @@ body ::tycho::Compile::constructor {args} {
     # compileWidget is the execModal widget
     set editorName [$this cget -view]
     set editorWidget $editorName.history.text
-    puts "Okay, created, editor name is $editorName"
-    puts "Okay, this is $this"
+    # puts "Okay, created, editor name is $editorName"
+    # puts "Okay, this is $this"
 }
 
 
@@ -215,7 +215,7 @@ body ::tycho::Compile::parseError {results} {
     $compileWidget.bbox buttonconfigure next \
             -command "$this jumpNextError"
 
-    puts "editorName=$editorName, compileWidget=$compileWidget, text=$text, this=$this"
+    # puts "editorName=$editorName, compileWidget=$compileWidget, text=$text, this=$this"
     set eLineNum -1     ;# We haven't read the line number yet
     set cLineNum 0      ;# Compiler's line starts at 0
     set errorCount 0    ;# If errorCount==-1, then we have no error
@@ -270,7 +270,7 @@ body ::tycho::Compile::setErrorCount {count} {
 # eLineNum, which is the editor's line number.
 #
 body ::tycho::Compile::jumpNextError {} {
-    puts "jumpNextError... errorCount=$errorCount   errorList=$errorList"
+    # puts "jumpNextError... errorCount=$errorCount   errorList=$errorList"
     if {$errorCount!=-1 && $errorCount<[llength $errorList]} {
         set entry [lindex $errorList $errorCount]
         jumpToLine $entry
