@@ -44,6 +44,6 @@ complex particles.
     }
     constructor {
 	put_in_control_panel.clearAttributes(A_SETTABLE);
-	label = "Inputs to the TkText star";
+	label.setInitValue("Inputs to the TkText star");
     }
 }
