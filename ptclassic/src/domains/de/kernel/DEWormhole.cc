@@ -88,6 +88,12 @@ Block* DEWormhole :: clone() const
 LOG_NEW; return new DEWormhole(gal.clone()->asGalaxy(), target->cloneTarget());
 }
 
+// makeNew, analogous to clone.
+Block* DEWormhole :: makeNew() const
+{
+LOG_NEW; return new DEWormhole(gal.makeNew()->asGalaxy(), target->cloneTarget());
+}
+
 // sumUp();  If the inner domain is timed and stopBeforeDeadlocked,
 // put the wormhole into the process queue.
 void DEWormhole :: sumUp() {
