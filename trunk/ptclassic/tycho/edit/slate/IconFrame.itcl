@@ -76,22 +76,20 @@ namespace ::tycho {
 # When first created, the icon has no terminals.
 # To create, call the terminal{} method:
 # <tcl quiet><pre>
-#   $slate call $icon terminal input-1 Terminal 0 0 &#92
-#       -anchor {50 0} &#92
+#   $slate call $icon terminal input-1 Terminal 50 0 &#92
 #       -direction {0 -1} &#92
-#       -type input &#92
-#       -style doublearrow
-#   $slate call $icon terminal input-2 Terminal 0 0 &#92
-#       -anchor {0 50} &#92
+#       -style doublearrowin
+#   $slate call $icon terminal input-2 Terminal 0 50 &#92
 #       -direction {-1 0} &#92
-#       -type input &#92
-#       -style blob -fill blue
+#       -style circle -fill blue
 # </pre></tcl>
 # 
 # The actual terminal items can be queried with the slate's
 # component{} method:
 # <tcl quiet><pre>
 #   $slate highlight [$slate component $icon input-1]
+#   update; after 500
+#   $slate unhighlight all
 # </pre></tcl>
 #
 # The icon's size can be changed with the *-hsize* and *-vsize*

@@ -67,22 +67,16 @@ namespace ::tycho {
 # <tcl quiet><pre>
 #   source $tycho/editors/slate/doc/internals/newslate.itcl
 #   set icon [$slate create IconOval 80 80 &#92
-#       -inputs {0 50 50 0} &#92
-#       -outputs 1 &#92
 #       -fill green &#92
 #       -graphics {line 20 50 80 50 -width 4
 #                  line 50 20 50 80 -width 4} &#92
 #       -tags moveable]
-#   $slate call $icon terminal input Terminal 0 0 &#92
-#       -anchor {0 50} &#92
+#   $slate call $icon terminal input Terminal 0 50 &#92
 #       -direction {-1 0} &#92
-#       -type input &#92
-#       -style blob &#92
+#       -style circle &#92
 #       -fill red
-#   $slate call $icon terminal output Terminal 0 0 &#92
-#       -anchor {100 50} &#92
-#       -type output &#92
-#       -style doublearrow  &#92
+#   $slate call $icon terminal output Terminal 100 50 &#92
+#       -style doublearrowout  &#92
 #       -fill blue
 # </pre></tcl>
 # 

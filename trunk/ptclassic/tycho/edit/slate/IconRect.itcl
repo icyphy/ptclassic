@@ -68,33 +68,32 @@ namespace ::tycho {
 # <tcl quiet><pre>
 #   source $tycho/editors/slate/doc/internals/newslate.itcl
 #   set icon [$slate create IconRect 100 100 &#92
-#       -color green &#92
-#	-graphics {rectangle 20 20 80 80; &#92
+#       -fill green &#92
+#       -graphics {rectangle 20 20 80 80; &#92
 #                  line 20 20 80 80; &#92
 #                  line 20 80 80 20} &#92
 #       -text {A Sample Icon} &#92
+#       -textanchor e &#92
 #       -tags moveable]
 # </pre></tcl>
 #
 # When first created, the icon has no terminals.
 # To create, call the terminal{} method:
 # <tcl quiet><pre>
-#   $slate call $icon terminal input Terminal 0 0 &#92
-#       -anchor {50 0} &#92
+#   $slate call $icon terminal input Terminal 50 0 &#92
 #       -direction {0 -1} &#92
-#       -type input &#92
-#       -style doublearrow
-#   $slate call $icon terminal output Terminal 0 0 &#92
-#       -anchor {50 100} &#92
-#       -direction {1 0} &#92
-#       -type output &#92
-#       -style arrow -fill red
+#       -style doublearrowin
+#   $slate call $icon terminal output Terminal 50 100 &#92
+#       -direction {0 1} &#92
+#       -style arrowout -fill red
 # </pre></tcl>
 # 
 # The actual terminal items can be queried with the slate's
 # component{} method:
 # <tcl quiet><pre>
 #   $slate highlight [$slate component $icon input]
+#   update; after 500
+#   $slate unhighlight all
 # </pre></tcl>
 #
 # The icon's size can be changed with the *-hsize* and *-vsize*
@@ -189,3 +188,4 @@ body ::tycho::IconRect::highlight {id canvas slate args} {
     eval $canvas create rectangle [$canvas bbox $primary($id)] $args
     $slate lower highlight.$id $id
 }
+
