@@ -98,7 +98,7 @@ Particle& InDEPort :: get()
 void InDEPort :: getSimulEvent()
 {
         if (moreData > 1) {
-                DEScheduler* sched = (DEScheduler*) parent()->scheduler();
+                DEBaseSched* sched = (DEBaseSched*) parent()->scheduler();
 		int store = moreData;
 		moreData = 0;
                 if (sched->fetchEvent(this, timeStamp)) {
@@ -196,7 +196,7 @@ void OutDEPort :: sendData ()
 	// If the port lies on the Wormhole boundary, inform timeStamp.
 	if (farSidePort->isItOutput()) {
 		EventHorizon* q = farSidePort->asEH();
-		DEScheduler* sr = (DEScheduler*) parent()->scheduler();
+		DEBaseSched* sr = (DEBaseSched*) parent()->scheduler();
 		q->setTimeMark(timeStamp / sr->relTimeScale);
 		level = -1;
 	} else {

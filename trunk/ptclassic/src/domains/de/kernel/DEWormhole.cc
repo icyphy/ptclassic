@@ -98,20 +98,20 @@ LOG_NEW; return new DEWormhole(gal.makeNew()->asGalaxy(), target->cloneTarget())
 // put the wormhole into the process queue.
 void DEWormhole :: sumUp() {
 	if (scheduler()->stopBeforeDeadlocked()) {
-		DEScheduler* sched = (DEScheduler*) outerSched();
+		DEBaseSched* sched = (DEBaseSched*) outerSched();
 		DEStar* me = this;
-		sched->eventQ.levelput(me, sched->now(), 0);
+		sched->queue()->levelput(me, sched->now(), 0);
 	}
 }
 		
 // getStopTime() ; gives the stopTime to the inner domain.
-// If syncMode is set (in DEScheduler), return the currentTime meaning that
+// If syncMode is set (in DEBaseSched), return the currentTime meaning that
 //	the global clock of the inner domain marches with that in DE domain.
 // Otherwise, execute the inner domain until it is deadlocked by returning
-//	the stopTime of the DEScheduler.
+//	the stopTime of the DEBaseSched.
 
 double DEWormhole :: getStopTime() {
-	DEScheduler* sched = (DEScheduler*) outerSched();
+	DEBaseSched* sched = (DEBaseSched*) outerSched();
 	if (sched->syncMode) {
 		return sched->now();
 	} else {
@@ -189,14 +189,14 @@ void DEfromUniversal :: sendData ()
 	// check if there is new event arrived.
    	while (tokenNew) {
 
-		DEScheduler* s;
+		DEBaseSched* s;
 	
 		// 2. copy the timeMark from ghostPort if it is an input.
 		if (DEfromUniversal :: isItInput()) {
-			s = (DEScheduler*) innerSched();
+			s = (DEBaseSched*) innerSched();
 			timeMark = ghostPort->getTimeMark() * s->relTimeScale;
 		} else {
-			s = (DEScheduler*) outerSched();
+			s = (DEBaseSched*) outerSched();
 			timeMark = s->now();
 		}
 
@@ -219,7 +219,7 @@ void DEfromUniversal :: sendData ()
 			Particle* pp = myPlasma->get();
 			*pp = **p;
 
-		   	s->eventQ.pushHead(pp, far(), timeMark, level);
+		   	s->queue()->pushHead(pp, far(), timeMark, level);
 		}
 	
 		// 5. repeat as long as new data exists.
