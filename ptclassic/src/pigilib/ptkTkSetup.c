@@ -68,7 +68,7 @@ ptkTkSetup(funcArray, size)
 
     /* Create Tk Window */
     ptkInterp = Tcl_CreateInterp();
-    ptkW = Tk_CreateMainWindow(ptkInterp, NULL, "Pigi");
+    ptkW = Tk_CreateMainWindow(ptkInterp, NULL, "pigi");
     if (ptkW == NULL) {
 	ErrAdd("FATAL ERROR");
 	ErrAdd(ptkInterp->result);
@@ -76,12 +76,6 @@ ptkTkSetup(funcArray, size)
         exit(1);
     }
     Tk_SetClass(ptkW, "Pigi");
-    if ( Tk_RegisterInterp( ptkInterp, "pigi", ptkW) != TCL_OK ) {
-	ErrAdd("FATAL ERROR");
-	ErrAdd(ptkInterp->result);
-	PrintErr(ErrGet());
-        exit(1);
-    }
 
     /* Register all Tk Functions here */
     ptkRegisterCmds( ptkInterp, ptkW);
