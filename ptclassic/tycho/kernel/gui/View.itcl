@@ -81,6 +81,9 @@ class ::tycho::View {
     ###################################################################
     ####                         public methods                    ####
 
+    # Attach the displayer and the menu/status/tool bars
+    method attachDisplayer {displayer menubar statusbar toolbar}
+
     # In derived classes, return the current point for use by seeFragment.
     method currentPoint {} {return {}}
 
@@ -119,7 +122,7 @@ class ::tycho::View {
     protected method indicateReadOnly {bool}
 
     # Initialize the menu/status/tool bars
-    protected method initialize {{menubar {}} {statusbar {}} {toolbar {}}}
+    protected method _initializeBars {menubar statusbar toolbar}
 
     ###################################################################
     ####                         protected variables               ####
@@ -177,6 +180,28 @@ body ::tycho::View::destructor {} {
     ###################################################################
     ###################################################################
     ####                      public methods                       ####
+
+#####################################################################
+#### attachDisplayer
+# Attach the view to a Displayer widget. The method remembers the
+# name of given Displayer and initializes the menu, status, 
+# and toolbars associated with this widget. Subclasses will need to
+# override the protected method *_initializeBars* to set up
+# the menu, status, and toolbar for their own needs. Each of
+# these can be the null string, in which the View assumes that
+# it doesn't exist. This method is intended for calling from
+# within the *attachView* method if the Displayer class.
+#
+body ::tycho::View::attachDisplayer {displayer menubar statusbar toolbar} {
+    # Remember the displayer and its bars
+    set myDisplayer $displayer
+    set myMenubar $menubar
+    set myStatusbar $statusbar
+    set myToolbar $toolbar
+
+    # Initialize the bars
+    _initializeBars $menubar $statusbar $toolbar
+}
 
 #########################################################################
 #### displayer
@@ -284,6 +309,17 @@ body ::tycho::View::toolbar {args} {
 ####                   protected methods                         ####
 
 #####################################################################
+#### _initializeBars
+# Initialize the menubar, toolbar, and statusbar or a view. This
+# default method does nothing. Subclasses should override this
+# method to properly initialize their bars. If a bar is null,
+# then this view does not have one.
+#
+body ::tycho::View::_initializeBars {menubar statusbar toolbar} {
+    ;# Do nothing
+}
+
+#####################################################################
 #### indicateReadOnly
 # Indicate in the status bar (and in derived classes, in the menus)
 # whether modifications are allowed on the buffer.
@@ -296,28 +332,3 @@ body ::tycho::View::indicateReadOnly {bool} {
     }
 }
 
-#####################################################################
-#### initialize
-# Set myDisplayer if I'm in a displayer, and initialize the menu, status, 
-# and toolbars associated with this widget. Children of view will redefine
-# and chain this method to create their own menu/status/toolbars.
-#
-# This functionality used to be in the constructor, however that design
-# was not flexible and didn't fit with the notion of multiple views.
-# 
-# This method is called by it's displayer when attachView is called (usually
-# in ::tycho::view
-#
-body ::tycho::View::initialize {{menubar {}} {statusbar {}} {toolbar {}}} {
-    # Figure out whether I'm in a displayer, and if so, set myDisplayer.
-    set top [winfo toplevel $prefix]
-    set cmd [winfo command $top]
-    if ![catch {set disp [$cmd isa ::tycho::Displayer]}] {
-        if $disp {
-            set myDisplayer $cmd
-        }
-    }
-    set myMenubar $menubar
-    set myStatusbar $statusbar
-    set myToolbar $toolbar
-}
