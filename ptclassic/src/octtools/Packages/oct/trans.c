@@ -29,6 +29,8 @@ static char SccsId[]="$Id$";
 #include "internal.h"
 #include "tr.h"
 
+#include "oct_utils.h"
+
 static int get_points();
 
 /* play around with justifications in labels */
@@ -368,7 +370,7 @@ double scale;
 static int pt_arr_size = 0;
 static struct octPoint *pt_arr;
 
-static get_points(obj, num, arr)
+static int get_points(obj, num, arr)
 octObject *obj;
 int *num;
 struct octPoint **arr;
