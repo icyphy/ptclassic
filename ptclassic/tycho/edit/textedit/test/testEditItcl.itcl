@@ -32,7 +32,7 @@
 
 # Make sure that the required packages are loaded
 package require tycho.util.tytest
-package require tycho.kernel.gui
+package require tycho.edit.textedit
 
 # We also have to load this helper file
 source [file join $env(GUI_LIBRARY) test FileTester.itcl]
