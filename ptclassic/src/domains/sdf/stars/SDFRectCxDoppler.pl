@@ -21,17 +21,21 @@ This pulse generator is similiar to the <i>Rect</i> star, except
 that it is complex-valued and supports several additional options
 for Doppler effects.  This star was initially intended for radar
 simulations.
+
 <p>
-The magnitude of the height of the pulse is equal to
+
+The magnitude of the height of the pulse is equal to:
 <pre>
 SqrPthn * 10 <sup>SNRn/20</sup>
+
 </pre>
-The phase of the height of the pulse is equal to
+The phase of the height of the pulse is equal to:
 <pre>
-Pi ( {{2 Fpor (count - sdelay)} over {Fsimu}} -
-{{bandwidth (count - sdelay)^2} over {Te Fsimu^2}} +
-{{4 dopplercount Fe Tp vn} over {c}} )
+Pi(2.Fpor(count-sdelay)/Fsimu - 
+bandwidth(count-sdelay)<sup>2</sup>/Te.Fsimu<sup>2</sup> + 
+4.dopplercount.Fe.Tp.vn/c)
 </pre>
+
 	}
 	location { SDF main library }
 	defstate {
@@ -43,7 +47,7 @@ Pi ( {{2 Fpor (count - sdelay)} over {Fsimu}} -
 	defstate {
 		name { Te }
 		type { float }
-		default { "30.0*10^-6"  }
+		default { "30e-6" }
 		desc { Duration time }
 	}
 	defstate {
