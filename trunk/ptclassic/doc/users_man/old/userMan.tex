@@ -2,7 +2,7 @@
 % Author:	T. M. Parks
 % Created:	17 January 1993
 
-\documentstyle[12pt,elisp,ptinfo,Almagest]{book}
+\documentstyle[12pt,psfig,elisp,ptinfo,Almagest]{book}
 \newindex{cp}
 \newindex{pg}
 \newindex{fn}
@@ -35,7 +35,12 @@ A User's Guide to \Ptolemy}
 \setcounter{chapter}{0}
 \setcounter{page}{1}
 \end{iftex}
-\include{../../src/domains/cgc/doc/CGCUser}
+
+\include{CGUser}
+
+\include{CGCUser}
+
+\include{CPUser}
 
 \include{other}
 
