@@ -56,6 +56,7 @@ extern "C" {
 #include "local.h"
 #include "misc.h"
 #include "paramStructs.h"
+#include "palette.h" /* used by MkSchemIcon */
 #include "util.h"
 #include "icon.h"
 #include "compile.h"
@@ -165,6 +166,8 @@ POct::POct(Tcl_Interp* i) : interp(i)
 	MkStarDomain = DEFAULT_DOMAIN;
 	MkStarDir = "NIL";
 	MkStarPalette = "./user.pal";
+        // FIXME:  Add following line back for MkSchemIcon state
+	// MkSchemPalette = "./user.pal";
 }
 
 // destructor
@@ -635,6 +638,7 @@ int POct::ptkSetParams (int aC,char** aV) {
 // This procedure was written to work with ptkEditValues
 //
 // Written by Alan Kamas  1/94
+// based on original code by Edwin Goei
 //
 int POct::ptkSetFindName (int aC,char** aV) {
     octObject facet;
@@ -644,7 +648,7 @@ int POct::ptkSetFindName (int aC,char** aV) {
     char **nameV;
 
     if (aC != 3) return 
-        usage ("ptkSetComment <OctObjectHandle> <NameList>");
+        usage ("ptkSetFindName <OctObjectHandle> <NameList>");
     nameList = aV[2];
 
     if (ptkHandle2OctObj(aV[1], &facet) == 0) {
@@ -686,6 +690,7 @@ int POct::ptkSetFindName (int aC,char** aV) {
 // returns the Comment for the passed facet or instance.
 //
 // Written by Alan Kamas  1/94
+// based on original code by Edwin Goei
 // 
 int POct::ptkGetComment (int aC,char** aV) {
     octObject facet;
@@ -726,6 +731,7 @@ int POct::ptkGetComment (int aC,char** aV) {
 // This procedure was written to work with ptkEditValues
 //
 // Written by Alan Kamas  1/94
+// based on original code by Edwin Goei
 //
 int POct::ptkSetComment (int aC,char** aV) {
     octObject facet;
@@ -772,12 +778,80 @@ int POct::ptkSetComment (int aC,char** aV) {
 
 }
 
+// ptkGetMkSchemIcon
+// returns the past value of the MkSchemIcon Command
+//
+// Written by Alan Kamas  1/94
+//
+int POct::ptkGetMkSchemIcon (int aC,char** aV) {
+
+    // FIXME:  Add following line back for MkSchemIcon state
+    // Tcl_AppendResult(interp, (char *)MkSchemPalette, (char *) NULL);
+    // FIXME:  Delete following line for MkSchemIcon state
+    Tcl_AppendResult(interp, "./user.pal", (char *) NULL);
+
+    return TCL_OK;
+}
+
+// ptkSetMkSchemIcon <facet-id> <Palette>
+//
+// Makes a Scematic Icon of the passed facet and stores
+// the new icon into the passed palette directory.
+//
+// This procedure was written to work with ptkEditStrings
+//
+// Written by Alan Kamas  1/94
+// based on original code by Edwin Goei
+//
+int POct::ptkSetMkSchemIcon (int aC,char** aV) {
+    octObject facet;
+    char* palette;
+    char buf[512];
+
+    if (aC != 3) return 
+        usage ("ptkSetComment <OctObjectHandle> <Palette>");
+   
+    if (ptkHandle2OctObj(aV[1], &facet) == 0) {
+        Tcl_AppendResult(interp, "Bad or Stale Facet Handle passed to ", aV[0],
+                         (char *) NULL);
+        return TCL_ERROR;
+    }
+    // FIXME:  Add following line back for MkSchemIcon state
+    // MkSchemPalette = aV[2];
+    palette = aV[2];
+
+    if (!GetTildePath(&facet, buf)) {
+        Tcl_AppendResult(interp, ErrGet(), (char *) NULL);
+        return TCL_ERROR;
+    }
+    DirName(buf);
+    if (IsGalFacet(&facet)) {
+        if (!MkGalIconInPal(&facet, buf, palette)) {
+            Tcl_AppendResult(interp, ErrGet(), (char *) NULL);
+            return TCL_ERROR;
+        }
+    } else if (IsPalFacet(&facet)) {
+        if (!MkPalIconInPal(&facet, buf, palette)) {
+            Tcl_AppendResult(interp, ErrGet(), (char *) NULL);
+            return TCL_ERROR;
+        }
+    } else {
+        if (!MkUnivIconInPal(&facet, buf, palette)) {
+            Tcl_AppendResult(interp, ErrGet(), (char *) NULL);
+            return TCL_ERROR;
+        }
+    }
+
+    return TCL_OK;
+}
+
 // ptkGetMkStar
 // returns the past values of the MkStar Command
 //
 // Return format is as follows:
 // {"Star Name" StarNameValue} {Domain DomainValue} ...
 // Written by Alan Kamas  1/94
+// based on code by Edwin Goei
 // 
 int POct::ptkGetMkStar (int aC,char** aV) {
 
@@ -817,12 +891,9 @@ int POct::ptkGetMkStar (int aC,char** aV) {
 //    The titles are used to determine which entry is which.
 //
 // Written by Alan Kamas  1/94
+// based on original code by Edwin Goei
 //
 int POct::ptkSetMkStar (int aC,char** aV) {
-
-    int i;
-    int elementC;
-    char **elementV;
 
     if (aC != 5) return 
         usage ("ptkSetMkStar <StarName> <Domain> <SrcDir> <PaleteDir>");
@@ -1003,6 +1074,7 @@ int POct::ptkGetDomainNames (int aC,char** aV) {
 // saves the domain of the passed facet to the passed domain
 //
 // Written by Alan Kamas  12/93
+// based on original code by Edwin Goei
 //
 int POct::ptkSetDomain (int aC,char** aV) {
     octObject facet;
@@ -1116,6 +1188,7 @@ int POct::ptkGetTargetNames (int aC,char** aV) {
 //
 //
 // Written by Alan Kamas  12/93
+// based on original code by Edwin Goei
 //
 int POct::ptkGetTargetParams (int aC,char** aV) {
     octObject facet;
@@ -1181,6 +1254,7 @@ int POct::ptkGetTargetParams (int aC,char** aV) {
 //    {name1 type1 value1} {name2 type2 value2} ...
 //
 // Written by Alan Kamas  12/93
+// based on original code by Edwin Goei
 //
 int POct::ptkSetTargetParams (int aC,char** aV) {
     octObject facet;
@@ -1362,6 +1436,7 @@ int POct::ptkGetMaster (int aC,char** aV) {
 // Note that this code is a modified version of the code
 // in misc.c: RpcOpenFacet
 // - Alan Kamas 9/93
+//   based on original code by Edwin Goei
 //
 int POct::ptkOpenFacet (int aC,char** aV) {
 
@@ -1556,6 +1631,8 @@ static InterpTableEntry funcTable[] = {
 	ENTRY(ptkSetMkStar),
 	ENTRY(ptkGetComment),
 	ENTRY(ptkSetComment),
+	ENTRY(ptkGetMkSchemIcon),
+	ENTRY(ptkSetMkSchemIcon),
 	ENTRY(ptkGetSeed),
 	ENTRY(ptkSetSeed),
 	ENTRY(ptkGetDomainNames),

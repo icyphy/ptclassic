@@ -33,3 +33,4 @@ extern int RpcMkSchemIcon();
 extern int RpcLookInside();
 extern int RpcShowName();
 extern int RpcEditIcon();
+extern int GetTildePath();  /* used by POct - SetMkSchemIcon */
