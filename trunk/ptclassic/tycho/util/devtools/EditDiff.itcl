@@ -258,9 +258,6 @@ body ::tycho::EditDiff::constructor {args} {
             {set filename2 [::tycho::queryfilename {File 2 to compare:}]} \
             -textvariable filename2
 
-    toolbar entry lala "LALALA" {} {} -background yellow
-
-
     eval itk_initialize $args
 
     # Subscribe to the preference set
