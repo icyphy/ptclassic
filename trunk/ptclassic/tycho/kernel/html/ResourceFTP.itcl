@@ -51,20 +51,11 @@ class ::tycho::ResourceFTP {
     ###################################################################
     ####                         public methods                    ####
 
+    # Get a cached copy of the data
+    method cachefile {}
+
     # Close the resource. Calls ftpget to send out the message.
     method close {}
-
-    proc debug {} {
-        foreach i [array names _forward] {
-            ::puts "_forward($i) == $_forward($i)"
-        }
-        foreach i [array names _exists] {
-            ::puts "_exists($i) == $_exists($i)"
-        }
-        foreach i [array names _stat] {
-            ::puts "_stat($i) == $_stat($i)"
-        }
-    }
 
     # Return the eof of file status
     method eof {}
@@ -90,8 +81,8 @@ class ::tycho::ResourceFTP {
     # Read a string containing the data in a streamable resource
     method read {}
 
-    # Get a cached copy of the data
-    method cachefile {} {error "Not implemented yet"}
+    # Return 1 if this resource is streamable
+    method streamable {} 
 
     ###################################################################
     ####                           public procs                    ####
@@ -134,7 +125,7 @@ class ::tycho::ResourceFTP {
     protected method debugputs {string}
 
     # 1) Initiate a connection on the FTP server. Called by open.
-    method ftpget {{url {}}}
+    protected method ftpget {{url {}}}
 
     # 2) Protocol handler for ftp server. Called by ftpget. 
     protected method ftphandler {}
@@ -221,7 +212,7 @@ class ::tycho::ResourceFTP {
     ####                         private variables               ####
     
     # Debug status. Print if 1
-    private variable debug 1
+    private variable debug 0
 
     # Cache file name
     private variable cachefilename
@@ -257,6 +248,30 @@ body ::tycho::ResourceFTP::destructor {} {
 #########################################################################
 #########################################################################
 ####                      public methods                             ####
+
+#####################################################################
+#### cachefile
+# Get a cached copy of the contents of the file. This is provided
+# to work around Tcl's lack of binary data handling.
+#
+body ::tycho::ResourceFTP::cachefile {} {
+    set url [forward [path]]
+    debugputs "Cachefile, seeking at $url"
+
+    if {![::tycho::cache exists $url]} {
+        # If cache doesn't exist, go fetch the information
+	if ![isopen] {
+	    open "r"
+	    read
+	    close
+	} else {
+	    read
+	}
+    }
+
+    return [::tycho::cache getcachefile $url]
+    #return $_cachefile($url)
+}
 
 #####################################################################
 #### close
@@ -342,8 +357,14 @@ body ::tycho::ResourceFTP::read {} {
     if {!$fileIsOpen} {
 	error "File \"$this\" is not open (read)"
     }
-    ::puts "EXISTS [info exists fileid]"
+    #::puts "EXISTS [info exists fileid]"
     ::read $fileid
+}
+
+#####################################################################
+#### streamable
+body ::tycho::ResourceFTP::streamable {} {
+    return 1
 }
 
 #########################################################################
@@ -396,22 +417,20 @@ body ::tycho::ResourceFTP::dirlist {url} {
         $ftpobj open
         after $timeout "delete object $ftpobj"
     }
-    if {![::tycho::cache exists $url]} {error "Can't cache $url"}
+    if {![::tycho::cache exists $url]} {error "Can't find cache for: $url"}
 
     set cachefile [::tycho::cache getcachefile $url]
     set fd [::open $cachefile "r"]
     set buffer {}
     while {![::eof $fd]} {
         ::gets $fd line
-        if {[lindex $line 8]!={}} {
-            if {[lindex $line 8]!={}} {
-                append buffer "[::tycho::url join $url [lindex $line 8]]"
-                #"[forward [::tycho::url join $url [lindex $line 8]]] "
-            }
+        set fname [lindex $line 8]
+        if {$fname!={} && $fname!="." && $fname!=".."} {
+            append buffer "[::tycho::url join $url $fname]"
             
             # If a directory, add / behind it.
-            if {[contenttype [::tycho::url join \
-                    $url [lindex $line 8]]]=="directory"} {
+            if {[contenttype \
+                    [::tycho::url join $url $fname]]=="directory"} {
                 append buffer "/ "
             } else {
                 append buffer " "
@@ -869,7 +888,11 @@ body ::tycho::ResourceFTP::ftpdataportinit {fd location port} {
     fileevent $fd r \
             "@scope ::tycho::ResourceFTP $this ftpdataport $fd"
     # "testa $fd"
-    fconfigure $fd -blocking no -translation auto
+    if {$ftptype=="directory"} {
+        fconfigure $fd -blocking no -translation auto
+    } else {
+        fconfigure $fd -blocking no -translation lf
+    }
 }
 
 #########################################################################
@@ -884,17 +907,18 @@ body ::tycho::ResourceFTP::ftpdataport {fd} {
         $this ftpdone $fd
         return
     }
-    #if {$ftptype=="directory"} {}
-    ::gets $fd line
-    ::puts $cachefileid $line
-    lappend cachefilebuffer $line
-    ::puts "TRANSFER1< $line"
-
-    # Binary transaction.
-    # In Tcl8, this should be called fcopy.
-    #catch {unsupported0 $fd $cachefileid} readsize
-    #::seek $cachefileid -$readsize end
-    #set line [::read -nonewline $cachefileid]
+    if {$ftptype=="directory"} {
+        ::gets $fd line
+        ::puts $cachefileid $line
+        lappend cachefilebuffer $line
+        debugputs "TRANSFER1< $line"
+    } else {    
+        # Binary transaction.
+        # In Tcl8, this should be called fcopy.
+        catch {unsupported0 $fd $cachefileid} readsize
+        ::seek $cachefileid -$readsize end
+        set line [::read -nonewline $cachefileid]
+    }
 }
 
 #########################################################################
