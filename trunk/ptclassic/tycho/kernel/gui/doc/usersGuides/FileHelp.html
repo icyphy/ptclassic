@@ -8,53 +8,28 @@
 <p>
 The File class in Tycho is the base class for most editors.
 It provides a top-level window with a menu bar at the top.
-It also provides some common key bindings that are therefore shared
-by all derived classes, and
-it handles autosave and crash recovery.
+It also handles autosave and crash recovery.
+Tycho will save the data to a file with the same name as the current
+file but with the prefix <CODE>#auto#</CODE>.  This file is
+automatically removed when you save the modified data.
+<p>
 By itself, this class is not very useful;
 the derived classes are the ones actually used.
+Keyboard <a href="../../../doc/bindings.html">shortcuts</a> are
+provided for many commands, as well as for traversal of the menus.
 <p>
 <ul>
-<li><a href="#file access">File Access Commands</a>
-<li><a href="#Window menu">Window Menu</a>
+<li><a href="#version control">Version control</a>
+<li><a href="#Window menu">Window menu</a>
 <li><a href="#Help menu">Help Menu</a>
-<li><a href="#keyboard traversal of menus">Keyboard Traversal of the Menus</a>
+<li><a href="#registering an editor">Registering an Editor with the
+File Class</a>
 </ul>
+
+<h2><a name="version control">Version Control</a></h2>
 <p>
-<h2><a name="file access">File Access Commands</a></h2>
-<p>
-The following commands are available in the <CODE>File</CODE> menu as well
-through <a name="bindings, file access">key bindings</a>.
-<dl COMPACT>
-<dt><CODE>C-x C-f</CODE><dd>open a file
-<dt><CODE>C-x C-v</CODE><dd>switch to a new file in the same window
-<dt><CODE>C-x i</CODE><dd>insert a file
-<dt><CODE>C-x C-s</CODE><dd>save the current file
-<dt><CODE>C-x C-w</CODE><dd>save to some other file name
-<dt><CODE>C-x p</CODE><dd>print the contents (not yet implemented)
-<dt><CODE>C-x C-r</CODE><dd>evaluate a file (only valid in some derived classes)
-<dt><CODE>C-x C-q</CODE><dd>toggle read-only (possibly invoking version control)
-<dt><CODE>C-x v</CODE><dd>invoke revision control
-<dt><CODE>C-x k</CODE><dd>close the window
-<dt><CODE>C-x C-c</CODE><dd>exit the program
-</dl>
-<p>
-In addition to the above, the <CODE>File</CODE> menu provides the following
-command without any key binding:
-<dl>
-<dt><CODE>Revert</CODE>
-<dd> Revert to the previously saved version of this file.
-</dl>
-<p>
-The File class also provides the following binding with no corresponding
-menu entry:
-<dl>
-<dt><CODE>C-x o</CODE><dd>move the <a name="focus">focus</a> to another window
-</dl>
-<h3>Version Control</h3>
-<p>
-The <a name="version control">version control</a> or
-<a name="revision control">revision control</a> mechanism built into
+The version control</a> or
+<a name="revision control">revision control mechanism built into
 the File class interfaces to either <a name="SCCS">SCCS</a>,
 a Unix "source code control system", or
 <a name="RCS">RCS</a>, a public domain improvement.
@@ -92,7 +67,9 @@ When a file is checked in, these get converted into the version number
 and date.
 In addition, in order to support copyright notices, <CODE>&#37Q&#37</CODE>
 gets converted into the current year.
-<p>
+
+
+
 <h2><a name="Window menu">Window Menu</a></h2>
 <p>
 File objects have a Window menu in the menu bar.
@@ -108,22 +85,25 @@ manager, it will not appear when you issue the command in the Window
 menu.  Also, if an editor has the name <CODE>NoName</CODE> associated with it,
 it does not appear in the Window menu.  To give it a name, use SaveAs
 (in the <CODE>File</CODE> menu).
-<h3>Window Control Commands</h3>
+
+
+
 <p>
-A few window control menu commands and associated key bindings
-are provided for convenience.
-<dl>
-<dt><CODE>C-x 0</CODE><dd>iconify the window
-<dt><CODE>C-x 1</CODE><dd>full size
-<dt><CODE>C-x 2</CODE><dd>half size
-<dt><CODE>C-x 6</CODE><dd>original size
-</dl>
+<h2><a name="Help menu">Help Menu</a></h2>
 <p>
-Eventually, this list will be more complete, but in the current version,
-bugs in the interface to the window manager make this impossible.
+The Help menu provides access to the on-line documentation for Tycho.
+The <CODE>User's Guide</CODE> entry in the menu will bring up a user's guide
+for the widget in which you invoke the command, if one exists.
+The <CODE>Index</CODE> entry will bring up the master Tycho index.
 <p>
-<h3><a name="registering an editor">Registering an Editor with the
-File Class</a></h3>
+
+
+
+
+
+
+<h2><a name="registering an editor">Registering an Editor with the
+File Class</a></h2>
 <p>
 Since Tycho is meant to be an extensible system, it is expected
 that users will create new editors.  Integrating these editors into
@@ -172,38 +152,11 @@ command would look like:
             {::tycho::view HTML -file {%s} -toolbar 1} \
             {}
 </PRE>
-
-<p>
-<h2><a name="Help menu">Help Menu</a></h2>
-<p>
-The Help menu provides access to the on-line documentation for Tycho.
-The <CODE>User's Guide</CODE> entry in the menu will bring up a user's guide
-for the widget in which you invoke the command, if one exists.
-The <CODE>Index</CODE> entry will bring up the master Tycho index.
-<p>
-<h2><a name="keyboard traversal of menus">Keyboard
-Traversal of the Menus</a></h2>
-<p>
-The mechanism for keyboard traversal of the menus is exactly
-that provided in Tk.  Thus, the following explanation is from
-the Tk man pages, written by John Ousterhout.
-<p>
-"The menus can be invoked using the Alt key (sometimes
-"Alt Graph") together with the underlined character
-in the menu title.  Once the menu is posted, typing
-the underlined character in a menu item will invoke it.
-The F10 key will post the <CODE>File</CODE> menu.
-<p>
-<h2><a name="autosave">Autosave</a></h2>
-<p>
-Tycho will save the data to a file with the same name as the current
-file but with the prefix <CODE>#auto#</CODE>.  This file is
-automatically removed when you save the modified data.
 <p>
 <a href="../../../doc/index.html">Tycho Home Page</a><br>
 <p>
 <HR>
-Copyright &#169 1996-%Q%, The Regents of the University of California.
+Copyright &#169 1996-1997, The Regents of the University of California.
 All rights reserved.
 <br>
 Last updated: $Date$,
