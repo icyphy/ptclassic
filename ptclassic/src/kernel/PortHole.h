@@ -1,6 +1,7 @@
 #ifndef _connect_h
 #define _connect_h 1
 
+#include "NamedObj.h"
 #include "DataStruct.h"
 #include "Particle.h"
 #include "type.h"
@@ -99,13 +100,65 @@ class Geodesic;
 class Plasma;
 class Block;
 
+	//////////////////////////////////////////
+	// class GenericPort
+	//////////////////////////////////////////
+
+// Base class for PortHole and MultiPortHole; it is derived
+// from NamedObj.
+
+class PortHole;
+
+class GenericPort : public NamedObj
+{
+public:
+        // Determine whether the port is an input or output.
+        // For class PortHole, it is unspecified, so both
+        // functions return FALSE.
+        virtual int isItInput () {return FALSE; }
+        virtual int isItOutput () {return FALSE; }
+
+	// print info on the PortHole
+	virtual operator char* ();
+
+	// no initialize function here
+	virtual void initialize () {}
+
+	// virtual function used for new connections.
+	// PortHole uses this one unchanged; MultiPortHole has to create
+	// a new Port.
+	virtual PortHole& newConnection() {
+	// my apologies for this horrible cast
+		return *(PortHole *)&GenericPort::realPort();
+	}
+
+	GenericPort& realPort() {
+		if (alias == NULL) return *this;
+		else return alias->realPort();
+	}
+
+	GenericPort& setPort(char* portName, Block* blk, dataType typ=FLOAT) {
+		setNameParent (portName, blk);
+		type = typ;
+		alias = NULL;
+		return *this;
+	}
+protected:
+	// datatype of particles in this porthole
+	dataType type;
+
+	// PortHole this is aliased to
+	GenericPort* alias;
+};
+
+	
         //////////////////////////////////////////
         // class PortHole
         //////////////////////////////////////////
 
 // Contains all the facilities of all PortHoles; base class
 //  for all PortHoles
-class PortHole
+class PortHole : GenericPort
 {
 public:
 
@@ -120,13 +173,6 @@ public:
 	// Initialize when starting a simulation
 	virtual void initialize();
 
-        // Name is private (below) so that it can't be changed.
-        char* readName() { return name;}
-
-        // In order to trace through the topology graph, we need
-        // a pointer to the block to which the PortHole belongs.
-        Block* blockIamIn;      // The block I am in.
- 
         // Indicate the real port (aliases resolved) at the far end
         // of a connection.  Initialized to NULL.
         // This information is redundant with what's in the geodesic,
@@ -135,30 +181,10 @@ public:
         PortHole* farSidePort;
 
         // Print a description of the PortHole
-        operator char* ();
- 
-        // The PortHole can be aliased to another PortHole.
-        // For example, any PortHole belonging to a Galaxy is aliased
-        // to a PortHole belonging to a Star in the Galaxy.
-        PortHole* alias;
-        
-        // Find the eventual PortHole to which this is aliased
-        PortHole& realPort() {
-                if (alias == NULL) return *this;
-                else return alias->realPort();
-        	}
+        virtual operator char* ();
 
-	// Return the PortHole that is used for connections
-	// This is virtual so that MultiPortHole can override it
-	virtual PortHole& newConnection() { return realPort(); }
-
-        // Determine whether the port is an input or output.
-        // For class PortHole, it is unspecified, so both
-        // functions return FALSE.
-        // These functions are necessary to be able to check
-        // the validity of a connection.
-        virtual int isItInput () {return FALSE; }
-        virtual int isItOutput () {return FALSE; }
+	// set the alias
+	setAlias (PortHole& blockPort) { alias = &blockPort; }
 
 	// Methods that are called by the Star::beforeGo()
 	//  and Star::afterGo() before and after go()
@@ -193,17 +219,11 @@ public:
 	virtual Geodesic* allocateGeodesic();
 
 protected:
-	// Type of data carried by this PortHole
-	dataType type;
-
 	// Buffer where the Particle*'s are stored
 	CircularBuffer* myBuffer;
 
 	// Allocate new buffer
 	void allocateBuffer(int size);
-
-	// Name of this PortHole
-	char* name;
 };
 
         //////////////////////////////////////////
@@ -247,14 +267,7 @@ public:
 // Examples of reasonable input MultiPortHoles are summing junctions,
 // or an input where all data samples are multiplied together.
 
-// This is its own class for two reasons:  (1) The differences between
-// it and ordinary PortHoles are substantial, and (2) this makes it
-// easier to overload the connect() function of the Galaxy class to
-// properly handle these.  The way the connect function works is that
-// every connection to a MultiPortHole causes a new PortHole to be
-// created and connected.
- 
-class MultiPortHole: public PortHole
+class MultiPortHole: public GenericPort
 {
 public:
 	void initialize() {ports.initialize();}
@@ -265,19 +278,6 @@ public:
                           Block* parent,                // parent block pointer
                           dataType type = FLOAT);       // defaults to FLOAT
  
- 
-        // Print a description of the MultiPortHole
-        operator char* ();
- 
-        // The MultiPortHole can be aliased to another MultiPortHole.
-        MultiPortHole* alias;
- 
-        // Find the eventual MultiPortHole to which this is aliased
-        MultiPortHole& realPort() {
-                if (alias == NULL) return *this;
-                else return alias->realPort();
-                }
-
         // Return the number of physical port currently allocated
         int numberPorts() {return ports.size();}
 
@@ -290,11 +290,24 @@ public:
         // Add a new physical port to the MultiPortHole list
         virtual PortHole& newPort();
 
+	MultiPortHole& realPort() {
+	// my apologies for this horrible cast.  It is safe because
+	// alias for a MultiPortHole is always a MultiPortHole.
+		return *(MultiPortHole *)&GenericPort::realPort();
+	}
+
+	// set alias for MultiPortHole
+	setAlias (MultiPortHole &blockPort) { alias = &blockPort;}
+
 	// Return a new port for connections
 	virtual PortHole& newConnection() { return realPort().newPort();}
 
 	// Also use this in casting to PortHole.  (Is this what we want?)
 	operator PortHole (){ return newConnection();}
+
+        // Print a description of the MultiPortHole
+        virtual operator char* ();
+
 protected:                           
         // List of ports allocated
         PortList ports;
