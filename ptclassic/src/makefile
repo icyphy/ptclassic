@@ -11,7 +11,7 @@
 # way a separate directory containing, say, Sun-3 and Sun-4 objects can be
 # maintained.
 
-DIRS = kernel thread ptlang tkvem domains ptcl pigilib libgantt ptklib pigiRpc pxgraph filters utils
+DIRS = kernel thread ptlang domains ptcl pigilib libgantt ptklib pigiRpc pxgraph filters utils
 
 # "leaf" directories with a make.template
 MTDIRS = kernel pigilib libgantt pxgraph ptcl ptklib
@@ -20,7 +20,7 @@ MTDIRS = kernel pigilib libgantt pxgraph ptcl ptklib
 LDIRS = ptlang pigiRpc filters utils
 
 # directories with subtrees
-SDIRS = tkvem thread domains
+SDIRS = thread domains
 
 # directories to build TAGS tables in
 TDIRS = kernel domains
