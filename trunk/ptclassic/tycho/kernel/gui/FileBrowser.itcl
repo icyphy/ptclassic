@@ -117,7 +117,7 @@ class ::tycho::FileBrowser {
     ####                     public methods                       ####
    
     # Complete the partially entered item.
-    method complete {{case 0}}
+    method complete {}
 
     # Open a help window.
     method help {}
@@ -300,10 +300,12 @@ body ::tycho::FileBrowser::constructor {args} {
 # Hitting tab again after such a completion WILL change the directory, however.
 # For example: tycho/ke <Tab> tycho/kernel/ <Tab> (now in kernel directory).
 #
-body ::tycho::FileBrowser::complete {{case 0}} {
+body ::tycho::FileBrowser::complete {} {
     if {[file dirname [get entry]] == "."} {
-        return [::tycho::ListBrowser::complete $case]
+        return [::tycho::ListBrowser::complete]
     }
+    
+    set case $caseSensitiveCompletion
     
     # not in current ListBrowser. Check if in another directory
     set pattern "[get entry]"
@@ -323,7 +325,7 @@ body ::tycho::FileBrowser::complete {{case 0}} {
             # it's a directory/something
             processItem [file join $localCWD [file dirname $pattern]]
             setEntry [file tail $pattern]
-            return [complete $case]
+            return [complete]
         }
     }
 
