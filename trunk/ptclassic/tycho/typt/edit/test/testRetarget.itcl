@@ -50,5 +50,4 @@ source ../../kernel/DomainInfo.itcl
 
 catch {delete class ::tycho::Retarget}
 source ../Retarget.itcl
-::tycho::Retarget .t
-.t centerOnScreen
+::tycho::view Retarget {} Displayer {-toolbar 1}
