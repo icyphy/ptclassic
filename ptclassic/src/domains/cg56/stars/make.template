@@ -53,6 +53,7 @@ EXTRA_SRCS= $(STAR_MK).c $(PL_SRCS)
 # source files for all stars, using preprocessor, listing base stars first
 PL_SRCS= \
  CG56HostASrc.pl \
+ CG56Quant.pl \
  CG56SSI.pl \
  CG56WrtFile.pl \
  CG56ACos.pl \
@@ -117,9 +118,9 @@ PL_SRCS= \
  CG56PrPrtADDA.pl \
  CG56PrPrtDA.pl \
  CG56Pulse.pl \
- CG56Quant.pl \
  CG56QntBtsInt.pl \
  CG56QntBtsLin.pl \
+ CG56QuantIdx.pl \
  CG56QuantRange.pl \
  CG56Ramp.pl \
  CG56ReadFile.pl \
