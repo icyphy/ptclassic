@@ -54,10 +54,10 @@ public:
 	// new wormhole
 	Star& newWorm(Galaxy& ,Target* )  {
 		// return *new VHDLBWormhole(innerGal,innerTarget);
-		// Error::abortRun("No VHDLB wormhole implemented yet");
+	        // Error::abortRun("No VHDLB wormhole implemented yet");
 		// Following is a hack
 		LOG_NEW;
-		return *(new VHDLBStar);
+		return *new VHDLBStar;
 	}
 */
 	// new input porthole
@@ -91,7 +91,7 @@ static VHDLBDomain proto;
 // declare the default Target object
 
 static VHDLBTarget defaultVHDLBtarget("default-VHDLB","VHDLBStar",
-"Generate stand-alone VHDLB programs and compile them.  The program\n"
-"and associated makefile is written to a directory given as a Target param.\n");
+"Generate stand-alone VHDLB programs.  The program\n"
+"is written to a directory given as a Target param.\n");
 
 static KnownTarget entry(defaultVHDLBtarget,"default-VHDLB");

@@ -39,6 +39,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #include "CGStar.h"
 #include "VHDLBPortHole.h"
+#include "SDFPortHole.h"
 #define VHDLBCodeBlock CodeBlock
 
 class VHDLBTarget;
@@ -49,6 +50,8 @@ private:
 	int forkId;
 
 protected:
+        virtual const char* portWidthName(const MultiVHDLBPort* pp);
+
 	void setForkId() { forkId = TRUE; }
 
 	// If "name" is a state, add the state to the list of referenced

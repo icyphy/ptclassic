@@ -37,8 +37,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #pragma implementation
 #endif
 
-#include "HLLTarget.h"
-#include "Galaxy.h"
 #include "VHDLBTarget.h"
 #include "CGUtilities.h"
 #include "FloatArrayState.h"
@@ -95,13 +93,16 @@ void VHDLBTarget :: headerCode () {
 int VHDLBTarget :: galFunctionDef(Galaxy& galaxy) {
   StringList tempCode = "";
   StringList blockName = "";
-  int dataIns = FALSE;
-  int dataOuts = FALSE;
 
+  int integerVecs = FALSE;
+  int dataIns = FALSE; /* vestigial kludge - strive to remove */
+  int dataOuts = FALSE; /* vestigial kludge - strive to remove */
+  
   /* Temporarily store upper-level code:  ensure bottom-up code gen order */
   tempCode = vhdlCode;
 
-  /* If top level, className = "InterpGalaxy", so use universe name instead */
+  /* If className = "InterpGalaxy", then we're at the top level,
+     so use universe name instead */
   if(!strcmp(galaxy.className(),"InterpGalaxy")) {
     blockName = galaxy.name();
   }
@@ -124,77 +125,111 @@ int VHDLBTarget :: galFunctionDef(Galaxy& galaxy) {
     galaxyList << blockName;
   }
 
-  vhdlCode = "\n";
-  vhdlCode << "entity " << blockName << " is\n";
 
-  /* Define the generic interface list, if any */
-  CBlockStateIter galStateIter(galaxy);
-  const State* st;
+  /* StringLists to be used in the ENTITY DECLARATION */
+
   StringList genericList = "";
+  StringList inputs = "";
+  StringList outputs = "";
+  
+  /* Define the generic interface list, if any */
 
-  while ((st = galStateIter++) != 0) {
-    if(genericList.numPieces() > 1) genericList << "; ";
-    genericList << sanitize(st->name()) << ": ";
-    if(!strcmp(st->type(), "INT")) {
-      genericList << "INTEGER";
-    }
-    else if(!strcmp(st->type(), "FLOAT")) {
-      genericList << "REAL";
-    }
-    else {
-      genericList << sanitize(st->type());
+  /* GALAXY'S STATE SCAN */
+  if(galaxy.numberStates()) {
+    CBlockStateIter galStateIter(galaxy);
+    const State* st;
+    while ((st = galStateIter++) != 0) {
+      if(genericList.numPieces() > 1) genericList << "; ";
+      genericList << sanitize(st->name()) << ": ";
+      genericList << translateType(st->type());
     }
   }
+  /* END GALAXY'S STATE SCAN */
+  
+
+  /* Make a list of the inputs and outputs by name */
+  
+  /* GALAXY'S SINGLE PORT SCAN */
+  if(galaxy.numberPorts()) {
+    CBlockPortIter galPortIter(galaxy);
+    const PortHole* ph;
+    while ((ph = galPortIter++) != 0) {
+      /* Check to make sure ph not a part of a MultiPortHole */
+      if (!(ph->getMyMultiPortHole())) {
+	/* Get to innermost level to find geodesic name */
+	const VHDLBPortHole* innerPortHole = (const VHDLBPortHole*) ph;
+	while(innerPortHole->alias()) {
+	  innerPortHole = (const VHDLBPortHole*) innerPortHole->alias();
+	}
+	/* All the alias-chained ports are at the boundary if any are, but
+	   only the outermost level is not aliased from aother port */
+	/* Sometimes outer port is "at boundary" when inner,
+	   alias port is not */
+	if(!(innerPortHole->atBoundary()) || (ph->aliasFrom())) {
+	  StringList tempString = sanitize(ph->name());
+	  tempString << ": " << direction(ph) << " ";
+	  tempString << translateType(ph->type());
+	  if(ph->isItOutput()) {
+	    if(outputs.numPieces() > 1) outputs << "; ";
+	    outputs << tempString;
+	  }
+	  else {
+	    if(inputs.numPieces() > 1) inputs << "; ";
+	    inputs << tempString;
+	  }
+	}
+      }
+    }
+  }
+  /* END GALAXY'S SINGLE PORT SCAN */
+
+
+  /* GALAXY'S MULTI PORT SCAN */
+  if(galaxy.numberMPHs()) {
+    integerVecs = TRUE;
+
+    CBlockMPHIter galMPHIter(galaxy);
+    const MultiVHDLBPort* mph;
+    while ((mph = (const MultiVHDLBPort*) galMPHIter++) != 0) {
+
+      /* Get to innermost level to find portWidthName */
+      const MultiVHDLBPort* innerMultiPort = (const MultiVHDLBPort*) mph;
+      while(innerMultiPort->alias()) {
+	innerMultiPort = (const MultiVHDLBPort*) innerMultiPort->alias();
+      }
+
+      VHDLBStar* innerStar = (VHDLBStar*) innerMultiPort->parent();
+
+      StringList tempString = sanitize(mph->name());
+      tempString << ": " << direction(mph) << " ";
+      tempString << translateType(mph->type()) << "_VECTOR(1 to ";
+      tempString << sanitize(mph->name())  << "_";
+      tempString << innerStar->portWidthName(innerMultiPort) << ")";
+
+      if(mph->isItOutput()) {
+	if(outputs.numPieces() > 1) outputs << "; ";
+	outputs << tempString;
+       }
+      else { /* assume it's input */
+	if(inputs.numPieces() > 1) inputs << "; ";
+	inputs << tempString;
+      }
+      if(genericList.numPieces() > 1) genericList << "; ";
+      genericList << sanitize(mph->name()) << "_";
+      genericList << innerStar->portWidthName(innerMultiPort) << ": ";
+      genericList << "INTEGER";
+    }
+  }
+  /* END GALAXY'S MULTI PORT SCAN */
+
+
+  /* Generate VHDL code for ENTITY DECLARATION */
+
+  vhdlCode = "\n";
+  vhdlCode << "entity " << blockName << " is\n";
   if(genericList.numPieces() > 1) {
     vhdlCode << indent(1) << "generic(" << genericList << ");\n";
   }
-
-  /* Make a list of the inputs and outputs by name */
-  CBlockPortIter galPortIter(galaxy);
-  const PortHole* ph;
-  StringList phTypeDecl = "";
-  StringList inputs = "";
-  StringList outputs = "";
-
-  while ((ph = galPortIter++) != 0) {
-    const PortHole* phAlias;
-    if(ph->alias()) {
-      phAlias = (const PortHole*) ph->alias();
-    }
-    else {
-      phAlias = ph;
-    }
-    /* Get to innermost level to find geodesic name */
-    const VHDLBPortHole* innermost = (const VHDLBPortHole*) ph;
-    while(innermost->alias()) {
-      innermost = (VHDLBPortHole*) innermost->alias();
-    }
-    /* All the alias-chained ports are at the boundary if any are, but only
-       the outermost level is not aliased from aother port */
-    /* Sometimes outer port is "at boundary" when inner, alias port is not */
-    if(!(innermost->atBoundary()) || (ph->aliasFrom())) {
-      if(!strcmp(ph->type(), "INT")) {
-	phTypeDecl = "INTEGER";
-      }
-      else if(!strcmp(ph->type(), "FLOAT")) {
-	phTypeDecl = "REAL";
-      }
-      else {
-	phTypeDecl << sanitize(ph->type());
-      }
-      if(ph->isItOutput()) {
-	/* FIXME: The following line should use the datatype of the portHole */
-	if(outputs.numPieces() > 1) outputs << "; ";
-	outputs << sanitize(ph->name()) << ": out " << phTypeDecl;
-      }
-      else {
-	/* FIXME: The following line should use the datatype of the portHole */
-	if(inputs.numPieces() > 1) inputs << "; ";
-	inputs << sanitize(ph->name()) << ": in " << phTypeDecl;
-      }
-    }
-  }
-
   if((inputs.numPieces() > 1) || (outputs.numPieces() > 1)) {
     vhdlCode << indent(1) << "port(" << inputs;
     if((inputs.numPieces() > 1) && (outputs.numPieces() > 1)) vhdlCode << "; ";
@@ -202,14 +237,15 @@ int VHDLBTarget :: galFunctionDef(Galaxy& galaxy) {
   }
   vhdlCode << "end " << blockName << ";\n\n";
 
+
+  /* StringLists to be used in the ARCHITECTURE BODY */
+
   StringList signals = "";
   StringList processes = "";
   StringList parts = "";
   StringList components = "";
 
-  StringList partName = "";
   StringList partList = "";
-  StringList partDecl = "";
 
   StringList componentName = "";
   StringList componentList = "";
@@ -218,250 +254,347 @@ int VHDLBTarget :: galFunctionDef(Galaxy& galaxy) {
   StringList wormProcs = "";
   StringList wormParts = "";
 
-  GalTopBlockIter next(galaxy);
+  /* Top-level block iterator and block pointer to be used both in
+     ARCHITECTURE BODY scan and in subordinate galaxy definition */
+
+  GalTopBlockIter nextTopBlock(galaxy);
   Block* b;
-  while ((b = next++) != 0) {
-    if(b->isItAtomic()) {
-      VHDLBStar* s = (VHDLBStar*) b;
-      if (s->amIFork()) continue;
-    }
 
-    /* Generate component declaration */
-    componentName = (*b).className();
-    componentDecl = indent(1);
-    componentDecl << "component " << (*b).className();
+  /* Scan the top-level blocks to determine the ARCHITECTURE BODY */
 
-    /* Generate process declaration */
-    processes << indent(1) << sanitizedName(*b) << ":" << (*b).className();
+  /* GALAXY/UNIVERSE'S TOP-LEVEL BLOCK SCAN */
+  if(galaxy.numberBlocks()) {
+    while ((b = nextTopBlock++) != 0) {
+      if(b->isItAtomic()) {
+	VHDLBStar* s = (VHDLBStar*) b;
+	if (s->amIFork()) continue;
+      }
+      
+      /* Generate component declaration */
+      componentName = (*b).className();
+      componentDecl = indent(1);
+      componentDecl << "component " << componentName;
+      
+      /* Generate process declaration */
+      processes << indent(1) << sanitizedName(*b) << ":" << componentName;
+      
+      /* Generate part declaration only if it hasn't been done already */
+      StringListIter partNext(partList);
+      const char* ppart;
+      int isNewPart = 1;
+      while ((ppart = partNext++) != 0) {
+	if (!strcmp(componentName,ppart)) isNewPart = 0;
+      }
+      
+      if(isNewPart == 1) { /* add new part */
+	partList << componentName;
+	parts << indent(1) << "for all:" << componentName;
+	parts << " use entity work." << componentName << "(" << componentName;
+	if(!b->isItAtomic()) {
+	  parts << "_structure); end for;\n";
+	}
+	else {
+	  parts << "_behavior); end for;\n";
+	}
+      }
+      
+      StringList genericDecl = "";
+      StringList generics = "";
+      StringList portDecl = "";
+      StringList ports = "";
+      
 
-    /* Generate part declaration */
-    partName = (*b).className();
-    partDecl = indent(1);
-    partDecl << "for all:" << (*b).className();
-    partDecl << " use entity work." << (*b).className() << "(";
-    partDecl << (*b).className();
-    if(!b->isItAtomic()) {
-      partDecl << "_structure); end for;\n";
-    }
-    else {
-      partDecl << "_behavior); end for;\n";
-    }
+      /* BLOCK'S STATE SCAN */
+      if(b->numberStates()) {
+	CBlockStateIter stIter(*b);
+	const State* st;
+	while ((st = stIter++) != 0) {
+	  /* Skip the state "procId" if present since we don't use it */
+	  if(strcmp(st->name(), "procId")) {
+	    /* Generic declarations for component declarations */
+	    if(genericDecl.numPieces() > 1) genericDecl << "; ";
+	    genericDecl << sanitize(st->name()) << ": ";
+	    genericDecl << translateType(st->type());
+	    /* Generic maps for process declarations */
+	    if(generics.numPieces() > 1) generics << ", ";
+	    generics << sanitize(st->name()) << " => " << st->currentValue();
+	  }
+	}
+      }
+      /* END BLOCK'S STATE SCAN */
+      
+      
+      /* BLOCK'S SINGLE PORT SCAN */
+      if(b->numberPorts()) {
+	CBlockPortIter phIter(*b);
+	const VHDLBPortHole* ph;
+	while ((ph = (const VHDLBPortHole*) phIter++) != 0) {
+	  /* Check to make sure ph not a part of a MultiPortHole */
+	  if (!(ph->getMyMultiPortHole())) {
+	    /* Get to innermost level to find geodesic name */
+	    const VHDLBPortHole* terminal = ph;
+	    while(terminal->alias()) {
+	      terminal = (VHDLBPortHole*) terminal->alias();
+	    }
+	    /* All the alias-chained ports are at the boundary if any are,
+	       but only the outermost level is not aliased from another port.
+	       Sometimes outer port is "at boundary" when inner,
+	       alias port is not */
+	    const GenericPort* outer = ph->aliasFrom();
+	    if(outer) {
+	      outer = outer->aliasFrom();
+	    }
+	    else {
+	      outer = (const GenericPort*) ph;
+	    }
+	    if((terminal->atBoundary()) && !(outer)) {
+	      StringList geoName;
+	      geoName = ((const VHDLBPortHole*) (ph->aliasFrom()))->getGeoReference();
+	      wormProcs << indent(1) << "Worm" << geoName << ": ";
+	      
+	      const char *uniqueName = (const char*) geoName;
+	      const int uniqueLenDiff = 30 - strlen(uniqueName);
+	      StringList tempCode = geoName;
+	      for(int count = 0; count < uniqueLenDiff; count++) {
+		tempCode << " ";
+	      }
+	      if(ph->isItInput()) {
+		dataIns = TRUE;
+		wormProcs << "dataIn generic map(unique => \"";
+		wormProcs << tempCode;
+		wormProcs << "\") port map(output => ";
+	      }
+	      if(ph->isItOutput()) {
+		dataOuts = TRUE;
+		wormProcs << "dataOut generic map(unique => \"";
+		wormProcs << tempCode;
+		wormProcs << "\") port map(input => ";
+	      }
+	      wormProcs << ph->getGeoReference() << ");\n";
+	    }
+	    if((!(outer) && (terminal->atBoundary())) || (ph->isItOutput() && !(ph->aliasFrom()))) {
+	      signals << indent(1) << "signal " << ph->getGeoReference();
+	      signals << ": " << translateType(ph->type()) << ";\n";
+	    }
 
-    /* check whether the part is included or not. */
-    StringListIter partNext(partList);
-    const char* ppart;
+	    /* Port declarations for component declarations */
+	    if(portDecl.numPieces() > 1) portDecl << "; ";
+	    portDecl << sanitize(ph->name()) << ": " << direction(ph);
+	    portDecl << " " << translateType(ph->type());
+	    
+	    /* Port maps for process declarations */
+	    if(ports.numPieces() > 1) ports << ", ";
+	    ports << sanitize(ph->name()) << " => ";
+	    /* Eliminate '@' chars due to delays; we ignore delays for now */
+	    StringList dirtyList = ph->getGeoReference();
+	    dirtyList << '\0';
+	    const char* dirty = (const char*) dirtyList;
+	    while(*dirty && (*dirty != '@')) {
+	      ports << *dirty;
+	      dirty++;
+	    }
+	  }
+	}
+      }
+      /* END BLOCK'S SINGLE PORT SCAN */
+      
+      
+      /* BLOCK'S MULTI PORT SCAN */
+      if(b->numberMPHs()) {
+	integerVecs = TRUE;
 
-    int isNewPart = 1;
-    while ((ppart = partNext++) != 0) {
-      if (!strcmp(partName,ppart)) isNewPart = 0;
-    }
+	BlockMPHIter mphIter(*b);
+	MultiPortHole* mph;
+	while ((mph = (MultiPortHole*) mphIter++) != 0) {
+	  /* Generate signals ONLY for output ports (unique naming) */
+	  if(mph->isItOutput()) {
+	    MPHIter portsIter(*mph);
+	    const VHDLBPortHole* mpPort;
+	    int portNum = 0;
+	    while ((mpPort = (const VHDLBPortHole*) portsIter++) != 0) {
+	      portNum++;
+	      signals << indent(1) << "signal " << mpPort->getGeoReference();
+	      signals << ": " << translateType(mpPort->type()) << ";\n";
+	    }
+	  }
 
-    if(isNewPart == 1) { /* add new part */
-      partList << partName;
-      parts << partDecl;
-    }
+	  /* Get to innermost level to find port width name */
+	  MultiVHDLBPort* innerMultiPort = (MultiVHDLBPort*) mph;
+	  while(innerMultiPort->alias()) {
+	    innerMultiPort = (MultiVHDLBPort*) innerMultiPort->alias();
+	  }
+	  
+	  /* Port declarations for component declarations */
+	  if(portDecl.numPieces() > 1) portDecl << "; ";
+	  portDecl << sanitize(mph->name()) << ": ";
+	  portDecl << direction((GenericPort*) mph) << " ";
+	  portDecl << translateType(mph->type()) << "_VECTOR(1 to ";
+	  /* If mph has an alias, then distinguish its portWidthName
+	     with a unique prefix in case its parent is reused at this
+	     level; else just use the portWidthName by itself */
+	  if(mph->alias()) { /* not at bottom of alias chain */
+	    portDecl << sanitize(mph->name()) << "_";
+	  }
+	  VHDLBStar* innerStar = (VHDLBStar*) innerMultiPort->parent();
+	  portDecl << innerStar->portWidthName(innerMultiPort) << ")";
 
-    StringList genericDecl = "";
-    StringList generics = "";
-    StringList portDecl = "";
-    StringList ports = "";
+	  /* Port maps for process declarations */
 
-    /* Find the names of the parameters and their values */
-    CBlockStateIter stIter(*b);
-    const State* st;
-    while ((st = stIter++) != 0) {
-      /* Skip the state "procId" if present since we don't use it */
-      if(strcmp(st->name(), "procId")) {
-	/* Generic declarations for component declarations */
-	if(genericDecl.numPieces() > 1) genericDecl << "; ";
-	genericDecl << sanitize(st->name()) << ": ";
-	if(!strcmp(st->type(), "INT")) {
+	  /* If mph not aliased from another galaxy's port, then map
+	     the individual portHoles to their signals;
+	     But if we're at any level below that, map the whole
+	     multiPortHole to the containing galaxy's multiPortHole */
+	  if(!(mph->aliasFrom())) { /* at top of alias chain */
+	    MPHIter innerPortsIter(*innerMultiPort);
+	    int portNum = 0;
+	    const VHDLBPortHole* mpPort;
+	    while ((mpPort = (const VHDLBPortHole*) innerPortsIter++) != 0) {
+	      portNum++;
+	      if(ports.numPieces() > 1) ports << ", ";
+	      ports << sanitize(mph->name()) << "(" << portNum << ") => ";
+	      ports << mpPort->getGeoReference();
+	    }
+	  }
+	  else { /* not at top of alias chain */
+	    if(ports.numPieces() > 1) ports << ", ";
+	    ports << sanitize(mph->name()) << " => ";
+	    /* Analogous to what getGeoReference does for
+	       single portHoles which are aliased from a terminal;
+	       Could expand getGeoReference to do multiportholes also */
+	    ports << sanitize(mph->aliasFrom()->name());
+	  }
+
+	  /* Generic declarations for component declarations */
+
+	  /* If mph has an alias, then distinguish its portWidthName
+	     with a unique prefix in case its parent is reused at this
+	     level; else just use the portWidthName by itself */
+	  if(genericDecl.numPieces() > 1) genericDecl << "; ";
+	  if(mph->alias()) { /* not at bottom of alias chain */
+	    genericDecl << sanitize(mph->name()) << "_";
+	  }
+	  genericDecl << innerStar->portWidthName(innerMultiPort) << ": ";
 	  genericDecl << "INTEGER";
-	}
-	else if(!strcmp(st->type(), "FLOAT")) {
-	  genericDecl << "REAL";
-	}
-	else {
-	  genericDecl << sanitize(st->type());
-	}
-	/* Generic maps for process declarations */
-	if(generics.numPieces() > 1) generics << ", ";
-	generics << sanitize(st->name()) << " => " << st->currentValue();
-      }
-    }
+	  
+	  /* Generic maps for process declarations */
 
-    if(generics.numPieces() > 1) {
-      processes << " generic map(" << generics << ")";
-    }
-    if(genericDecl.numPieces() > 1) {
-      componentDecl << " generic(" << genericDecl << ");";
-    }
-
-    /* Find the names of the geodesics of all the outputs. */
-    CBlockPortIter phIter(*b);
-    const VHDLBPortHole* ph;
-    while ((ph = (const VHDLBPortHole*) phIter++) != 0) {
-      const VHDLBPortHole* terminal = ph;
-      /* Get to innermost level to find geodesic name */
-      while(terminal->alias()) {
-	terminal = (VHDLBPortHole*) terminal->alias();
-      }
-      /* All the alias-chained ports are at the boundary if any are, but only
-	 the outermost level is not aliased from aother port */
-      /* Sometimes outer port is "at boundary" when inner, alias port is not */
-      const GenericPort* outer = ph->aliasFrom();
-      if(outer) {
-	outer = outer->aliasFrom();
-      }
-      else {
-	outer = (const GenericPort*) ph;
-      }
-      if((terminal->atBoundary()) && !(outer)) {
-	StringList geoName;
-	geoName = ((const VHDLBPortHole*) (ph->aliasFrom()))->getGeoReference();
-
-	wormProcs << indent(1) << "Worm" << geoName << ": ";
-
-	if(ph->isItInput()) {
-	  wormProcs << "dataIn generic map(unique => \"";
-	  const char *uniqueName = (const char*) geoName;
-	  const int uniqueLenDiff = 30 - strlen(uniqueName);
-	  wormProcs << geoName;
-	  for(int count = 0; count < uniqueLenDiff; count++) {
-	    wormProcs << " ";
+	  /* If mph has an alias, then distinguish its portWidthName
+	     with a unique prefix in case its parent is reused at this
+	     level; else just use the portWidthName by itself */
+	  if(generics.numPieces() > 1) generics << ", ";
+	  if(mph->alias()) { /* not at bottom of alias chain */
+	    generics << sanitize(mph->name()) << "_";
 	  }
-	  wormProcs << "\") port map(output => ";
-	  if(ph->isItInput() && (dataIns == FALSE)) dataIns = TRUE;
-	}
-	if(ph->isItOutput()) {
-	  wormProcs << "dataOut generic map(unique => \"";
-	  const char *uniqueName = (const char*) geoName;
-	  const int uniqueLenDiff = 30 - strlen(uniqueName);
-	  wormProcs << geoName;
-	  for(int count = 0; count < uniqueLenDiff; count++) {
-	    wormProcs << " ";
+	  generics << innerStar->portWidthName(innerMultiPort) << " => ";
+
+	  /* If mph not aliased from another galaxy's port, then use
+	     numberPorts, determined by this mph's connections;
+	     But if we're at any level below that, use the portWidthName,
+	     which comes from the innerMultiPort star's portWidthName */
+	  if(!(mph->aliasFrom())) { /* at top of alias chain */
+	    generics << innerMultiPort->numberPorts();
 	  }
-	  wormProcs << "\") port map(input => ";
-	  if(ph->isItOutput() && (dataOuts == FALSE)) dataOuts = TRUE;
-	}
-	wormProcs << ph->getGeoReference() << ");\n";
-      }
-      if((!(outer) && (terminal->atBoundary())) || (ph->isItOutput() && !(ph->aliasFrom()))) {
-	StringList geoName;
-
-	geoName = terminal->getGeoReference();
-
-	signals << indent(1) << "signal " << ph->getGeoReference();
-	if(!strcmp(ph->type(), "INT")) {
-	  signals << ": INTEGER;\n";
-	}
-	else if(!strcmp(ph->type(), "FLOAT")) {
-	  signals << ": REAL;\n";
-	}
-	else if(!strcmp(ph->type(), "ANYTYPE")) {
-	  signals << ": REAL;\n";
-	}
-	else {
-	  signals << ": BIT;\n";
+	  else { /* not at top of alias chain */
+	    generics << sanitize(mph->aliasFrom()->name()) << "_";
+	    generics << innerStar->portWidthName(innerMultiPort);
+	  }
 	}
       }
-      /* Port declarations for component declarations */
-      if(portDecl.numPieces() > 1) portDecl << "; ";
-      portDecl << sanitize(ph->name()) << ": ";
-      if(ph->isItOutput()) {
-	portDecl << "out ";
+      /* END BLOCK'S MULTI PORT SCAN */
+      
+      
+      /* Add the generics and ports to both the
+	 component declarations and process declarations */
+      
+      if(genericDecl.numPieces() > 1) {
+	componentDecl << " generic(" << genericDecl << ");";
       }
-      else {
-	portDecl << "in ";
+      if(generics.numPieces() > 1) {
+	processes << " generic map(" << generics << ")";
       }
-      if(!strcmp(ph->type(), "INT")) {
-	portDecl << "INTEGER";
+      
+      if(portDecl.numPieces() > 1) {
+	componentDecl << " port(" << portDecl << ");";
       }
-      else if(!strcmp(ph->type(), "FLOAT")) {
-	portDecl << "REAL";
+      if(ports.numPieces() > 1) {
+	processes << " port map(" << ports << ")";
       }
-      else if(!strcmp(ph->type(), "ANYTYPE")) {
-	portDecl << "REAL";
+      
+      componentDecl << " end component;\n";
+      processes << ";\n";
+      
+      
+      /* Add component to component list and component declaration to
+	 component declaration code if it is newly declared */
+      StringListIter compNext(componentList);
+      const char* pcomp;
+      
+      int isNewComp = 1;
+      while ((pcomp = compNext++) != 0) {
+	if (!strcmp(componentName,pcomp)) isNewComp = 0;
       }
-      else {
-	portDecl << "BIT";
+      if(isNewComp == 1) { /* add new component */
+	componentList << componentName;
+	components << componentDecl;
       }
-
-      /* Port maps for process declarations */
-      if(ports.numPieces() > 1) ports << ", ";
-      ports << sanitize(ph->name()) << " => ";
-      /* Eliminate '@' chars due to delays; we ignore delays for now */
-      StringList dirtyList = ph->getGeoReference();
-      dirtyList << '\0';
-      const char* dirty = (const char*) dirtyList;
-      while(*dirty && (*dirty != '@')) {
-	ports << *dirty;
-	dirty++;
-      }
-    }
-    if(ports.numPieces() > 1) {
-      processes << " port map(" << ports << ")";
-    }
-    if(portDecl.numPieces() > 1) {
-      componentDecl << " port(" << portDecl << ");";
-    }
-
-    processes << ";\n";
-    componentDecl << " end component;\n";
-
-    /* check whether the component is included or not. */
-    StringListIter compNext(componentList);
-    const char* pcomp;
-
-    int isNewComp = 1;
-    while ((pcomp = compNext++) != 0) {
-      if (!strcmp(componentName,pcomp)) isNewComp = 0;
-    }
-
-    if(isNewComp == 1) { /* add new component */
-      componentList << componentName;
-      components << componentDecl;
     }
   }
+  
+  /* Vestigial code for wormhole stars */
   if(dataIns == TRUE) {
-    componentDecl = indent(1);
-    componentDecl << "component dataIn generic(unique: STRING(1 to 30)); port(output: out INTEGER); end component;\n";
-    components << componentDecl;
+    components << indent(1);
+    components << "component dataIn generic(unique: STRING(1 to 30)); port(output: out INTEGER); end component;\n";
     wormParts << indent(1);
     wormParts << "for all:dataIn use entity work.dataIn(dataIn_behavior); end for;\n";
   }
+
   if(dataOuts == TRUE) {
-    componentDecl = indent(1);
-    componentDecl << "component dataOut generic(unique: STRING(1 to 30)); port(input: in INTEGER); end component;\n";
-    components << componentDecl;
+    components << indent(1);
+    components << "component dataOut generic(unique: STRING(1 to 30)); port(input: in INTEGER); end component;\n";
     wormParts << indent(1);
     wormParts << "for all:dataOut use entity work.dataOut(dataOut_behavior); end for;\n";
   }
 
-  /* Generate the architecture definition */
-  vhdlCode << "architecture " << blockName << "_structure of " << blockName << " is\n";
+
+  /* Generate VHDL code for ARCHITECTURE BODY */
+
+  vhdlCode << "architecture " << blockName << "_structure of ";
+  vhdlCode << blockName << " is" << "\n";
   vhdlCode << components;
   vhdlCode << signals;
-  vhdlCode << "begin\n";
+  vhdlCode << "begin" << "\n";
   vhdlCode << processes;
   vhdlCode << wormProcs;
-  vhdlCode << "end " << blockName << "_structure;\n\n";
+  vhdlCode << "end " << blockName << "_structure;" << "\n\n";
 
-  /* Generate the configuration definition */
-  vhdlCode << "configuration " << blockName << "_parts of " << blockName << " is\n";
-  vhdlCode << "for " << blockName << "_structure\n";
+  /* Generate VHDL code for CONFIGURATION DECLARATION */
+
+  vhdlCode << "configuration " << blockName << "_parts of ";
+  vhdlCode << blockName << " is" << "\n";
+  vhdlCode << "for " << blockName << "_structure" << "\n";
   vhdlCode << parts;
   vhdlCode << wormParts;
-  vhdlCode << "end for;\n";
-  vhdlCode << "end " << blockName << "_parts;\n";
-  vhdlCode << "\n";
+  vhdlCode << "end for;" << "\n";
+  vhdlCode << "end " << blockName << "_parts;" << "\n\n";
+
 
   /* Put current-level code in front of previous (higher-level) code */
+
+  /* Put use-clause in front of galaxy code if needed */
+  StringList galaxyCode = "";
+  if(integerVecs) {
+    galaxyCode = "use work.datatypes.all;\n";
+  }
+  galaxyCode << vhdlCode;
+
+  vhdlCode = galaxyCode;
   vhdlCode << tempCode;
 
-  /* Now define each of the galaxies */
-  next.reset();
-  while ((b = next++) != 0) {
+
+  /* Now define each of the subordinate galaxies */
+
+  nextTopBlock.reset();
+  while ((b = nextTopBlock++) != 0) {
     if(!b->isItAtomic()) galFunctionDef(b->asGalaxy());
   }
   return TRUE;
@@ -503,7 +636,7 @@ void VHDLBTarget :: setup () {
   galFunctionDef(*gal);
 
   // Assemble all the code segments
-  StringList runCode = include;
+  StringList runCode = "";
   runCode << sectionComment(leader) << mainInitialization << vhdlCode;
   vhdlCode = runCode;
 
@@ -639,4 +772,43 @@ int VHDLBTarget :: codeGenInit() {
     s->initCode();
   }
   return TRUE;
+}
+
+/////////////////////////////////////////
+// translateType
+/////////////////////////////////////////
+
+StringList VHDLBTarget :: translateType (const char* type) {
+  StringList newType;
+  if(!strcmp(type, "INT")) {
+    newType = "INTEGER";
+  }
+  else if(!strcmp(type, "FLOAT")) {
+    newType = "REAL";
+  }
+  else if(!strcmp(type, "ANYTYPE")) {
+    newType = "REAL";
+  }
+  else {
+    newType = sanitize(type);
+  }
+  return newType;
+}
+
+/////////////////////////////////////////
+// direction
+/////////////////////////////////////////
+
+StringList VHDLBTarget :: direction (const GenericPort* port) {
+  StringList direct;
+  if(port->isItInput()) {
+    direct = "in";
+  }
+  else if(port->isItOutput()) {
+    direct = "out";
+  }
+  else {
+    direct = "inout";
+  }
+  return direct;
 }
