@@ -42,8 +42,7 @@ public:
 
 // For const packets.
 	const float*		constData() const {
-		if (size == fullSize) return (DCTData);
-		return 0;
+		return (size == fullSize) ? DCTData : 0;
 	}
 
 	void				setSize(const int);
