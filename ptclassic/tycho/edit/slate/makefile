@@ -51,6 +51,7 @@ ITCL_SRCS = \
 	Follower.itcl \
 	Frame.itcl \
 	IconFrame.itcl \
+	IconOval.itcl \
 	Interactor.itcl \
 	IncrCanvas.itcl \
 	LabeledFrame.itcl \
