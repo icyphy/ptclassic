@@ -1370,7 +1370,16 @@ body ::tycho::File::registerFilenames \
 # returned value the registered command for opening a file.
 #
 body ::tycho::File::registeredCommands {name} {
-    if [::tycho::resource isdirectory $name] {
+    if {[::tycho::url protocol $name]=="http"} {
+        # EXCEPTION: If something's on HTTP, it is ***ALWAYS*** a HTML file.
+        set ext ".html"
+        if {[info exists editorsExtension] && \
+                [info exists editorsExtension($ext)]} {
+            return $editorsExtension($ext)
+	} else {
+            error "HTML protocol is gone! Assertion failed."
+        }
+    } elseif [::tycho::resource isdirectory $name] {
         # FIXME: For now, do not try and do this test
         # on remote directories. The test for a VEM
         # facet (schematic) every time I access a remote
