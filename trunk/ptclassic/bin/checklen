@@ -30,10 +30,10 @@ awk '
 
 retval=0
 if [ -f $tmpfile ]; then
+	cat $tmpfile
+	rm -f $tmpfile
 	retval=1
 fi
 
-cat $tmpfile
-rm -f $tmpfile
 
 exit $retval
