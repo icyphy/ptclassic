@@ -1,5 +1,5 @@
 .\" $Id$
-.VR 0.$Revision$ "October 15, 1990"
+.VR 0.$Revision$ "November 16, 1990"
 .TI "DDF Domain"
 .AU
 Soonhoi Ha
