@@ -36,8 +36,8 @@ static char SccsId[]="$Id$";
 /*LINTLIBRARY*/
 
 static void incorporateWidth
-	ARGS((struct connLayer *layerDescPtr, octCoord width, octCoord
-	      angle, int direction));
+	ARGS((struct connLayer *layerDescPtr, octCoord width, int
+	      direction, octCoord angle));
 static int initConnectors
 	ARGS((struct tapTech *techPtr));
 static int tryConnector
@@ -179,7 +179,6 @@ octObject *instPtr;
     int initConnectors(), tryConnector();
     octObject selectedInstance;
     int actualLayersInConn = 0;
-    void incorporateWidth();
 
     TAP_START("tapGetConnector");
 
@@ -263,8 +262,9 @@ octObject *instPtr;
 /*ARGSUSED*/
 static void incorporateWidth(layerDescPtr, width, direction, angle)
 struct connLayer *layerDescPtr;
-octCoord width, angle;
+octCoord width;
 int direction;
+octCoord angle;
 {
     layerDescPtr->isUsed = 1;
 
