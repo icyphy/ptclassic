@@ -4,7 +4,7 @@
 
   PackageName [ ptdsp ]
 
-  Synopsis    [ Function definition for Ptdsp_ExtendedGCD, Ptdsp_GCD and Ptdsp_LCM. ]
+  Synopsis    [ Greatest common divisor and least common multiple routines ]
 
   Author      [ Brian L. Evans ]
 
@@ -59,7 +59,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 ******************************************************************************/
 int
 Ptdsp_GCD(int a, int b) {
-  int rem, t;
   int sign = 1;
 
   /* record signs */
@@ -72,10 +71,10 @@ Ptdsp_GCD(int a, int b) {
   }
 
   /* swap to make a > b if needed */
-  if (a < b) { t = a; a = b; b = t;}
+  if (a < b) { int t; t = a; a = b; b = t;}
   if (b == 0) return a;
   while (b > 1) {
-    rem = a%b;
+    int rem = a%b;
     if (rem == 0) break;
     a = b;
     b = rem;
@@ -85,17 +84,18 @@ Ptdsp_GCD(int a, int b) {
 
 /**Function*******************************************************************
 
-  Synopsis    [ Lowest Common Denominator function]
+  Synopsis    [ Least common multiple function]
 
   Description [ Order of the multiplication and division is chosen to
                 avoid overflow in cases where a*b > MAXINT but
-		lcm(a,b) < MAXINT.  The division always goes evenly. ]
+		lcm(a,b) < MAXINT.  The division always goes evenly.
+		This routines returns 0 for the lcm of 0 and 1. ]
 
   SideEffects []
 
 ******************************************************************************/
 int 
-Ptdsp_LCM(int a,int b) { 
+Ptdsp_LCM(int a, int b) { 
   return a == b ? a : a * (b / Ptdsp_GCD(a,b));
 }
 
@@ -121,10 +121,9 @@ Ptdsp_ExtendedGCD(int a, int b, int* alphap, int* betap) {
   int bnorm = b / gcdvalue;
 
   if ( intabs(a) <= intabs(b) ) {
-    int lambdap;
     int mumax = intabs(anorm);
     for ( mu = 0; mu < mumax; mu++ ) {
-      lambdap = ( 1 - mu * bnorm );
+      int lambdap = ( 1 - mu * bnorm );
       lambda = lambdap / anorm;
       if ( lambdap == (lambda * anorm) ) {
 	lambdavalue = lambda;
@@ -134,10 +133,9 @@ Ptdsp_ExtendedGCD(int a, int b, int* alphap, int* betap) {
     }
   }
   else {
-    int mup;
     int lambdamax = intabs(bnorm);
     for ( lambda = 0; lambda < lambdamax; lambda++ ) {
-      mup = ( 1 - lambda * anorm );
+      int mup = ( 1 - lambda * anorm );
       mu = mup / bnorm;
       if ( mup == ( mu * bnorm ) ) {
 	muvalue = mu;
