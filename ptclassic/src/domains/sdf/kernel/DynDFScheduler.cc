@@ -116,6 +116,15 @@ void DynDFScheduler :: setup () {
 	// then it is not safe to continue.
 	if (SimControl::haltRequested()) return;
 
+	// The galaxy may have changed after galaxy()->initialize() due
+	// to e.g. hof stars performing block replacement, so we have to
+	// do the checks again.
+	if (warnIfNotConnected (*galaxy())) {
+		return;
+	}
+
+	if (!checkBlocks()) return;
+
 	currentTime = schedulePeriod;
 	overFlowArc = 0;
 	initStructures();
