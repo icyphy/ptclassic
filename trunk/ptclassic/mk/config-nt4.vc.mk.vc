@@ -213,7 +213,7 @@ OPTIMIZER =	#-O2
 WARNINGS =	#-Wall -Wsynth #-Wcast-qual 
 LOCALCCFLAGS =	/DPTNT /DPT_NT4VC /DPT_NO_TIMER $(GCC_270_OPTIONS)\
 		/DPT_NO_ITCL /PT_USE_RAND /PT_NO_GETTIMEOFDAY /PT_NO_SELECT \
-		/DPT_NO_PWD \
+		/DPT_NO_PWD /DPT_SYS_NERR_STDLIB \
 		/Dfar=ptfar -Dstrcasecmp=stricmp \
 		/nologo /D__WIN32__ \
 		$(cflags) $(cvarsdll) $(include32)
