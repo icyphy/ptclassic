@@ -111,6 +111,12 @@ class ::tycho::FileBrowser {
     method mkdir {}
 
     ##################################################################
+    ####                     public procs                         ####
+
+    # Set the global current working directory.
+    proc setCWD {cwd} {set CWD $cwd}
+
+    ##################################################################
     ####                   protected methods                      ####
 
     # Process a file or directory selection.
@@ -123,7 +129,7 @@ class ::tycho::FileBrowser {
     ####                   protected variables                    ####
 
     # The last file opened.
-    protected common fileLastOpened
+    protected common fileLastOpened {}
     # The directory last visited.
     protected common CWD
 
@@ -142,11 +148,10 @@ body ::tycho::FileBrowser::constructor {args} {
     
     global ::env
     
-    if {! [info exists fileLastOpened]} {
+    if {! [info exists CWD]} {
 	# First FileBrowser window constructed.
 	# If the environment variable PTPWD exists, it gives the directory.
-	# Otherwise, we issue the Unix command pwd.
-	set fileLastOpened ""
+	# Otherwise, we issue the Tcl command pwd.
 	if [info exists env(PTPWD)] {
 	    set CWD $env(PTPWD)
 	} {
@@ -164,16 +169,16 @@ body ::tycho::FileBrowser::constructor {args} {
     }
     pack $itk_component(dir) -side top -fill x -after $itk_component(listscroll)
     
-    # In case updateListbox inserts into the entry; to avoid repetition
-    clear entry
-    insert entry $fileLastOpened
-
     # Create directory button.
     $itk_component(buttons) add mkdir -text "New Directory" \
 	    -command "$this mkdir"
 
     # Process any unevaluated arguments.
     eval itk_initialize $args
+
+    # In case updateListbox inserts into the entry; to avoid repetition
+    clear entry
+    insert entry $fileLastOpened
 }
 
 
