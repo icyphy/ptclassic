@@ -147,6 +147,9 @@ protected:
 	// mark feed-forward delays
 	int markFeedForwardDelayArcs();
 
+	// make feedback arcs for while loops
+	int markWhileFeedbackArcs();
+
 private:
 	int bagNumber;		// number for generating bag names
 	int urateFlag;

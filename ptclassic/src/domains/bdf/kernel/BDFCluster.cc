@@ -198,7 +198,7 @@ int BDFClusterGal::cluster() {
 	// if we did not get to uniform rate, try marking feedforward
 	// delay arcs as ignorable and clustering some more.
 
-	if (!urate && markFeedForwardDelayArcs()) {
+	if (!urate && (markWhileFeedbackArcs() || markFeedForwardDelayArcs())) {
 		change |= clusterCore(urate);
 	}
 //	if (!urate)
@@ -263,8 +263,10 @@ int BDFClusterGal::mergePass() {
 		// note we must always reset the iterator after a
 		// merge since it might be invalid (point to a deleted
 		// cluster).
-		else if ((c2 = fullSearchMerge()) != 0)
+		else if ((c2 = fullSearchMerge()) != 0) {
 			nextClust.reset();
+			changes = TRUE;
+		}
 	} while (c2 && !SimControl::haltRequested());
 
 	// Try to turn clusters with self-loops into while-loops now.
@@ -286,7 +288,6 @@ int BDFClusterGal::mergePass() {
 			}
 		}
 	} while (!gotThrough);
-				
 	if (logstrm) {
 		if (changes)
 			*logstrm << "After merge pass:\n" << *this;
@@ -623,16 +624,21 @@ int BDFClusterGal::indirectPath(BDFCluster* src, BDFCluster* dst,
 // transferred on the arc.  Such paths do not interfere with clustering
 // if the cluster is uniform rate.
 
+// arcs may also be marked "ignored" by the markWhileFeedbackArcs routine; we
+// pretend that such arcs do not exist.
+
 int BDFClusterGal::findPath(BDFCluster* start, BDFCluster* dst,
 		    int ignoreDelayArcs) {
 	stopList.put(start);
 	BDFClustPortIter nextP(*start);
 	BDFClustPort* p;
 	while ((p = nextP++) != 0) {
-		if (p->isItInput() || p->far() == 0) continue;
+		BDFClustPort* pFar = p->far();
+		if (p->isItInput() || pFar == 0 || p->ignore() ||
+		    pFar->ignore()) continue;
 		if (ignoreDelayArcs && p->numTokens() >= p->numIO())
 			continue;
-		BDFCluster* peer = p->far()->parentClust();
+		BDFCluster* peer = pFar->parentClust();
 		if (peer == start) continue; // ignore self-loops
 		if (peer == dst) return TRUE;
 		if (stopList.member(peer)) continue;
@@ -1329,6 +1335,69 @@ void BDFClusterBag::adjustAssociations() {
 		if (TorF(bagp->relType()))
 			bagp->assoc()->setControl(TRUE);
 	}
+}
+
+static int seeIfIgnore(BDFClustPort *);
+
+// This stage assumes that conditional arcs that depend on a control
+// output with a delay form the feedback for a while loop, and it marks
+// them to be ignored for the purposes of finding indirect paths in
+// fullSearchMerge.  It is conceivable that this is unsafe if what appears
+// to be a do-while loop is in fact something else (a clustering may
+// occur that results in deadlock).  The arcs are marked, one 
+// pass happens, and then any marked arcs are "unmarked".
+
+int BDFClusterGal::markWhileFeedbackArcs() {
+	// find feedback signals that appear to form part of a do-while
+	// loop, and set the "ignore" flag.
+	BDFClusterGalIter nextClust(*this);
+	BDFCluster* c;
+	int nIgnored = 0;
+	while ((c = nextClust++) != 0) {
+		BDFClustPortIter nextPort(*c);
+		BDFClustPort* p;
+		while ((p = nextPort++) != 0)
+			nIgnored += seeIfIgnore(p);
+	}
+	if (nIgnored == 0) return FALSE;
+	if (logstrm)
+		*logstrm << "markWhileFeedbackArcs: sliced " << nIgnored
+			<< " feedback arcs, trying merge now\n";
+	int status = mergePass();
+	if (logstrm)
+		*logstrm << "markWhileFeedbackArcs "
+			<< (status ? " succeeded\n" : "failed\n");
+	// clear the ignore flags.
+	nextClust.reset();
+	while ((c = nextClust++) != 0) {
+		BDFClustPortIter nextPort(*c);
+		BDFClustPort* p;
+		while ((p = nextPort++) != 0)
+			p->setIgnore(FALSE);
+	}
+	return status;
+}
+
+// see if the "ignore flag" should be set on port p (and possibly its
+// control port) because they look like feedback paths for a while loop
+// (they are conditional on an output control port and it has a delay).
+// return the number of ports marked as ignored.
+static int seeIfIgnore(BDFClustPort *p) {
+	BDFRelation r;
+	// we require a conditional port whose control port is an
+	// output with delay on it.  we return 0 immediately if
+	// the port is already marked ignored.
+	if (!p || p->ignore() || !TorF(r = p->relType()))
+		return 0;
+	BDFClustPort* ctlp = p->assoc();
+	if (ctlp->isItInput()) return 0;
+	BDFClustPort* c = ctlp;
+	while (c->outPtr()) c = c->outPtr();
+	if (c->numTokens() != 1) return 0;
+	p->setIgnore(TRUE);
+	if (ctlp->ignore()) return 1;
+	ctlp->setIgnore(TRUE);
+	return 2;
 }
 
 // internal clustering for a bag
