@@ -68,8 +68,8 @@ of \fIthresholds\fR.
 ; x0 = input value
         move    #>$addr(levels),r4
         move    #<$addr(thresholds),r0
-        move    $ref(input),x0		r4,r5
-        move    x:(r0)+,a    y:(r4)+,b
+        move    r4,r5		$ref(input),x0
+        move    x:(r0)+,a	y:(r4)+,b
         do      #$val(X)-1,$label(lab)		; begin loop
         cmp	x0,a
         jlt	$label(again)
