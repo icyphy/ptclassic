@@ -331,6 +331,7 @@ body ::tycho::RunWindow::simulation {mode args} {
 	    # Create a new simulation.
 	    set simClass [_simulationClass]
 	    set _simulation [uplevel #0 $simClass #auto $args]
+            puts !$_simulation
 	    return $_simulation
 	}
 	"delete" {
