@@ -31,9 +31,11 @@
 #		       
 # Programmer:  Christopher Hylands
 
-include $(ROOT)/mk/config-sol2.5.mk
+include $(ROOT)/mk/config-sol2.mk
+
+ARCHFLAGS =	-DPTSOL2_5 -DPT_EGCS
 
 CC =		$(PTOLEMY)/gnu/egcs/sol2.5/bin/gcc
-#-I$(ROOT)/src/compat/cfront
-CPLUSPLUS =	$(PTOLEMY)/gnu/egcs/sol2.5/bin/g++ 
+
+CPLUSPLUS =	$(PTOLEMY)/gnu/egcs/sol2.5/bin/g++ -I$(ROOT)/src/compat/cfront
 
