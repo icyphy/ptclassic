@@ -1,4 +1,4 @@
--*-Mode: text-*- -[Fri Aug 26 18:32:17 1994 by cxh]-
+-*-Mode: text-*- -[Thu Aug  3 15:46:10 1995 by cxh]-
 Version: $Id$
 
 src/tcl/README
@@ -11,10 +11,10 @@ Probably the only time you would want to build from this directory is
 if you were doing a Ptolemy port to a new platform.
 
 You should be able to build tcl and tk from the top level Ptolemy
-directory.  You will need to set the $PTOLEMY and $ARCH variables:
+directory.  You will need to set the $PTOLEMY and $PTARCH variables:
 	setenv PTOLEMY /users/ptolemy
 	cd $PTOLEMY
-	setenv ARCH sun4
+	setenv PTARCH sun4
 	make install_tcltk	
 
 The makefile $PTOLEMY/mk/scratch-srcs.mk has rules to build tcl and
@@ -49,7 +49,7 @@ GNU make
 	If you are compiling from scratch, make sure that you are
 	using GNU make.  Not all versions of make can deal with VPATH.
 	You should install the GNU tools first, then make sure that
-	$PTOLEMY/bin.$ARCH is in your path.
+	$PTOLEMY/bin.$PTARCH is in your path.
 
 DEC
 ---
