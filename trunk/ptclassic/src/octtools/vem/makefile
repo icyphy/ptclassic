@@ -115,10 +115,10 @@ OBJECTS=bags/bags.o buffers/bufinternal.o \
 	windows/trans.o windows/wininternal.o
 
 # Objects (*.o and *.a files) that are locally produced
-VEMOBJECTS =	$(OBJECTS) rpc/librpcserver.a
+VEMOBJECTS =	$(OBJECTS) dialogs/libdialogs.a rpc/librpcserver.a
 
 # This rule uses GNU make specific directives $(@D) $(@F) 
-$(OBJECTS) $(LIBS):
+$(VEMOBJECTS):
 	(cd $(@D); \
 		$(MAKE) $(MFLAGS) $(MAKEVARS) \
 		VPATH=../../../../src/octtools/vem/$(@D) $(@F)  ;\
@@ -129,7 +129,7 @@ $(OBJECTS) $(LIBS):
 # try 'make CC="gcc -traditional" OCTTOOLS_MM_LIB= '
 OCTTOOLS_MM_LIB = -lmm
 
-VEMLIBS = -Lrpc -Ldialogs rpc/librpcserver.a -ldialogs \
+VEMLIBS = rpc/librpcserver.a dialogs/libdialogs.a \
 	-L$(OCTLIBDIR) -lts -llel -lfc -lsymbolic -lvulcan \
 	-lharpoon -lfang -lregion -lkd -lgu -lda -llist -loh -ltap \
 	-loptions -loct -ltr -lst -lxpa -lfb -ldds -lMaxport -lTable \
