@@ -71,12 +71,14 @@ ifdef FULL
 	CG96 =		1
 	CGCFULL =	1
 	CGFULL =	1
+	CODESIGN =	1
 	DDF =		1
 	DE =		1
 	ifeq ($(INCLUDE_IPUS_DOMAIN),yes)
 		# Non G++ compilers fail to compile IPUS' templates
 		IPUS =		1
 	endif
+	DMM = 		1
 	HOF =		1
 	MDSDF =		1
 	PN =		1
@@ -113,6 +115,8 @@ endif
 ifndef TK
 	# Don't need Higher Order Functions.  ptcl does not need HOF
 	HOF=
+	# DMM needs Oct.
+	DMM=
 endif
 
 include $(ROOT)/mk/stars.mk
