@@ -43,7 +43,7 @@ include $(CONFIG)
 include $(ROOT)/mk/topdomain.mk
 
 # Subdirectories with star directories in them
-SUBDOMAINDIRS = dsp tcltk
+SUBDOMAINDIRS = dsp tcltk contrib
 
 DIRS = kernel stars targets rtlib $(SUBDOMAINDIRS)
 
