@@ -36,9 +36,17 @@ private:
 protected:
 	ProcMemory* mem;
 
-	// in a multiprocessor target, if the following is TRUE, then
-	// the same memory is used for all child targets.  Note that it
-	// has to be FALSE the first time (for the first processor).
+	// in a multiprocessor target, if the following is non-zero, then
+	// the same memory is used for all child targets.
+	// However, the memory allocation procedure requires the following
+	// convention:
+	// sharedMemory = 0	Uniprocessor case
+	// sharedMemory = 1	Multiprocessor; do mem->reset(for first target)
+	// sharedMemory = 2	Multiprocessor; do performAllocation(for last
+	//			target)
+	// sharedMemory = 3	Multiprocessor; do neither of above (for procs
+	//			1 to n-1)
+
 	int sharedMemory;
 
 	// what it says
