@@ -6,9 +6,9 @@ This will receive as its input, as an integer, the bus contents
 and then it will convert it to a bus with the required no. of lines.
 (which is read in as a parameter ).
 	}
-	author { Asawaree }
+	author { Asawaree Kalavade }
 	copyright { 1991 The Regents of the University of California }
-	version { %W %G}
+	version { $Id$ }
 	input {
 		name {input}
 		type {int}
