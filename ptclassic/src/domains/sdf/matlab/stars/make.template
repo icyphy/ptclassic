@@ -82,7 +82,9 @@ HDRS= $(SRCS:.cc=.h)
 STAR_MK=sdfmatlabstars
 DOMAIN=SDF_MATRIX
 DOMAIN_2=SDF
-EXTRA_SRCS=$(STAR_MK).c $(PL_SRCS) $(MATLAB_SRCS)
+# SDFMatlab*.pl are links so that edit params will work in those stars
+EXTRA_SRCS=$(STAR_MK).c $(PL_SRCS) $(MATLAB_SRCS) \
+	SDFMatlab.pl SDFMatlabCx_M.pl SDFMatlab_M.pl
 
 all:		$(SRCS) stars_all
 
