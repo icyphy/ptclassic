@@ -45,7 +45,7 @@ public:
 		int intval;
 		double  doubleval;
 		Complex* Complexval;
-		State*  s;
+		const State*  s;
 	}; 
 	ParseToken () { tok = 0; intval = 0;}
 };
@@ -86,10 +86,10 @@ public:
 	const char* getInitValue () const { return initValue;}
 
         // return the parameter type (for use in GUI, interpreter)
-        virtual const char* type();
+        virtual const char* type() const;
 
         // return the parameter size (redefined for array states)
-        virtual int size();
+        virtual int size() const;
 
 	// Initialize when starting or restarting a simulation
 	// (inherits from NamedObj)
@@ -97,19 +97,25 @@ public:
 
         // return the current value as a string.  Here we just give
         // back initValue
-	virtual StringList currentValue();
+	virtual StringList currentValue() const;
 
-	// force all state classes to redefine this
-	virtual State* clone() = 0;
+	// modify the current value, in a type-independent way
+	void setCurrentValue(const char* newval);
+
+	// force all state classes to redefine this: produce a new
+	// State of identical type.
+	virtual State* clone() const = 0;
 
 	// output all info.  This is NOT redefined for each type of state
-	StringList printVerbose();
+	StringList printVerbose() const;
 
 	// attributes
 	unsigned int attributes() const { return attributeBits;}
+
 	unsigned int setAttributes(unsigned int newBits) {
 		return attributeBits |= newBits;
 	}
+
 	unsigned int clearAttributes(unsigned int newBits) {
 		return attributeBits &= ~newBits;
 	}
@@ -121,13 +127,22 @@ protected:
 	ParseToken getParseToken(Tokenizer&, int = T_Float);
 
 	// lookup state from name
-	State* lookup(char*, Block*);	
+	const State* lookup(char*, const Block*) const;
 
 	// complain of parse error
 	void parseError (const char*, const char* = "");
 
 	// pushback token, for use in parsing
 	static ParseToken pushback;
+
+	// expression evaluation functions
+	ParseToken evalIntExpression(Tokenizer& lexer);
+	ParseToken evalIntTerm(Tokenizer& lexer);
+	ParseToken evalIntFactor(Tokenizer& lexer);
+
+	ParseToken evalFloatExpression(Tokenizer& lexer);
+	ParseToken evalFloatTerm(Tokenizer& lexer);
+	ParseToken evalFloatFactor(Tokenizer& lexer);
 
 private:
 	unsigned int attributeBits;
@@ -141,22 +156,13 @@ private:
 
 class StateList : public  SequentialList
 {
-	friend class Block;
-	friend class State;
-	friend class KnownState;
-	
+public:
 	// Add State to list
 	void put(State& s) {SequentialList::put(&s);}
 
 	// Return size of list
 	int size() const {return SequentialList::size();}
        
-	// Reset the list to beginning
-        void reset() {SequentialList::reset();}
-
-	// Return next State on list
-	State& operator ++ () {return *(State*)next();}
-
 	// initialize elements
 	void initElements();
 
@@ -164,4 +170,18 @@ class StateList : public  SequentialList
 	State* stateWithName(const char* name) ;
 
 };
+
+///////////////////////////////////////////
+// class StateList
+///////////////////////////////////////////
+
+// an iterator for StateList
+class StateListIter : private ListIter {
+public:
+	StateListIter(const StateList& sl) : ListIter (sl) {}
+	State* next() { return (State*)ListIter::next();}
+	State* operator++() { return next();}
+	ListIter::reset;
+};
+
 #endif
