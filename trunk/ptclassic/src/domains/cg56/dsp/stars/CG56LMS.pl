@@ -64,14 +64,6 @@ error samples.
         }        
 
         state {
-                name { X }
-                type { int }
-                desc { internal }
-                default { 0 }
-                attributes { A_NONSETTABLE|A_NONCONSTANT }
-        }        
-    
-        state {
                 name { Y }
                 type { int }
                 desc { internal }
@@ -109,15 +101,9 @@ error samples.
                 attributes { A_NONCONSTANT|A_NONSETTABLE }
         }
 
-//        move    #$addr2(delayLine,coefLen),r3
-
         codeblock(std) {
 	; initialize address registers for coef and delayLine
-;        move    #$addr(coef),a
-;        move    #$val(X),x0
-;        add     x0,a
-;        move    a1,r3     	      ; coef
-        move    #$val(X),r3
+         move    #$addr(coef)+$val(coefLen)-1,r3
 ; insert here
         move    $ref(delayLineStart),r5            ; delayLine
         move    #$val(Y),m5
@@ -205,7 +191,7 @@ $label(loop1)
                 coefLen=coef.size();
                 delayLineSize=errorDelay-1;
 		delayLineSize=coefLen+decimation*delayLineSize;
-		delayLine.resize(int(delayLineSize));
+		delayLine.resize(delayLineSize);
                 input.setSDFParams(int(decimation),int(decimation)-1);
 
 	        if (decimation <=0)
@@ -217,10 +203,9 @@ $label(loop1)
                 gencode(delaystart);
         }
         go { 
-                X=coefLen-1;
                 Y=errorDelay-1;
                 Y=coefLen-1+decimation*Y;
-                
+
 	        gencode(std);
 	
         	if(coefLen>2) {

@@ -116,8 +116,6 @@ DSP56000 -  A combined input/output star for the Magnavox CD player.
         bset    #7,x:m_pcc
         bset    #6,x:m_pcc
         bset    #5,x:m_pcc
-; Enable interrupts
-        bset    #m_srie,x:m_crb         ; SSI Receive Interrupt enable
         }
 
         codeblock(abortyes) {
@@ -200,6 +198,8 @@ $starSymbol(mag)_outiptr   equ     $addr(outIntBufferStart)
         bset    #7,x:m_pcc
         bset    #6,x:m_pcc
         bset    #5,x:m_pcc
+; Enable interrupts
+        bset    #m_srie,x:m_crb         ; SSI Receive Interrupt enable
         }    
         codeblock(interruptIn) {
 ; Input first sample from interrupt buffer
