@@ -68,6 +68,9 @@ public:
 	State* stateWithName (const char* name) const {
 		return gal.stateWithName(name);
 	}
+	
+	// state initialize
+	void initState() { gal.initState() ;}
 };
 	
 #endif

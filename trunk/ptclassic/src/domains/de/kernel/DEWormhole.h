@@ -52,6 +52,9 @@ public:
 		return gal.stateWithName(name);
 	}
 
+	// state initialize
+	void initState() { gal.initState() ;}
+
 protected:
 	// redefine getStopTime() : 
 	// return the currentTime if syncMode of the scheduler is set (default)
