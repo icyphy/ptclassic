@@ -629,7 +629,7 @@ body ::tycho::Model::notify {mode args} {
 # which commands are recorded and published. The _command_
 # argument must be the name of a method valid for this model.
 # This method must record the command and the undo command in
-# the command history. All relevent subscribers will be notified
+# the command history. All relevant subscribers will be notified
 # of the data change.
 #
 body ::tycho::Model::publish {command args} {

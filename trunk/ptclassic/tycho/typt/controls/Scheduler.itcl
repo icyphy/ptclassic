@@ -317,7 +317,7 @@ body ::tycho::Scheduler::resume {task} {
 # script is _not_. The sixth argument, if present
 # and true, indicates the the task is "real-time." Realtime tasks can return
 # -1 to indicate that they have not performed any processing because they
-# are runable (waiting on I/O, for example). Real-time tasks, if they
+# are runnable (waiting on I/O, for example). Real-time tasks, if they
 # can process, always take priority over non-real-time tasks.
 #
 body ::tycho::Scheduler::start \
