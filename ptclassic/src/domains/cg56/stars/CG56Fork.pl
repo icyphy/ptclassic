@@ -19,13 +19,8 @@ are laid out; no code is required.
 		type {=input}
 	}
 	ccinclude { "AsmGeodesic.h" }
-	start {
-		input.geo().initDestList();
-		MPHIter next(output);
-		AsmPortHole* p;
-		while ((p = (AsmPortHole*)next++) != 0) {
-			input.geo().addDest(p->geo());
-		}
+	constructor {
+		output.setForkBuf(input);
 	}
 	exectime {
 		return 0;
