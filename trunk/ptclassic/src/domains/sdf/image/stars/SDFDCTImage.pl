@@ -122,7 +122,7 @@ cosine transform (DCT) and outputs a DCTImage.
 		}
 	} // end for(jj)
 
-	LOG_DEL; delete tmpbuf;
+	LOG_DEL; delete [] tmpbuf;
 		}
 	} // end doDCT()
 
@@ -132,7 +132,7 @@ cosine transform (DCT) and outputs a DCTImage.
 		cosSet();
 	}
 
-	wrapup { LOG_DEL; delete cosData; }
+	wrapup { LOG_DEL; delete [] cosData; }
 
 	go {
 // Read input image.
