@@ -77,6 +77,10 @@ ptcl.debug:	$(OBJS) $(LIBFILES) $(ALLSTARS) $(ALLTARGETS)
 		rm -f $@ 
 		$(PURELINK) $(LINKER) $(LINKFLAGS_D) $(PTCL_MODS) -o $@ 
 
+ptcl.debug.purify:	$(OBJS) $(LIBFILES) $(ALLSTARS) $(ALLTARGETS)
+		rm -f $@ 
+		$(PURIFY) $(LINKER) $(LINKFLAGS_D) $(PTCL_MODS) -o $@ 
+
 # Small version of ptcl, sdf domain (but with no image stars), and de domain
 ptcl.ptiny:	$(OBJS) $(PTINY_LIBFILES) $(PTINY_STARS) $(PTINY_TARGETS)
 		rm -f $@ 
