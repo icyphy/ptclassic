@@ -30,7 +30,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #define SOL2
 #endif
 
-#ifdef USG
+#ifdef USG || defined(linux)
 extern int sprintf();
 #else
 #ifndef sgi
