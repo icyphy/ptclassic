@@ -46,8 +46,8 @@ if ( -d stars ) then
 		cat starstitle >> /tmp/pt$$
 	endif
 	cd stars
-	# The following is silent in case there is an SCCS directory
-	cat -s * >> /tmp/pt$$
+	# print all "ordinary files"
+	cat `find . -type f -print` >> /tmp/pt$$
 	cd ..
 endif
 if ( -d demos ) then
@@ -55,8 +55,8 @@ if ( -d demos ) then
 		cat demotitle >> /tmp/pt$$
 	endif
 	cd demos
-	# The following is silent in case there is an SCCS directory
-	cat -s * >> /tmp/pt$$
+	# print all "ordinary files"
+	cat `find . -type f -print` >> /tmp/pt$$
 	cd ..
 endif
 /bin/rm -rf index
