@@ -69,7 +69,8 @@ namespace ::tycho {
     ::tycho::File::registerExtensions {.java} \
             {::tycho::view EditJava -file {%s}} \
             {Java editor} "text"
-    ::tycho::File::registerExtensions {.mk .template} \
+    # .vc is for Microsoft Visual c++
+    ::tycho::File::registerExtensions {.mk .template .vc} \
             {::tycho::view EditMake -file {%s}} \
 	    {Makefile editor} "text"
     ::tycho::File::registerFilenames {Makefile makefile GNUmakefile} \
