@@ -129,39 +129,71 @@ long userOptionWord;
     ViDone();
 }
 
+
+/***********************************************************************
+PrintFacet(): calls "prfacet" utility to save PostScript to printer
+or file.
+***********************************************************************/
 int
 PrintFacet(spot, cmdList, userOptionWord) /* ARGSUSED */
 RPCSpot *spot;
 lsList cmdList;
 long userOptionWord;
 {
-    static dmTextItem item = {"Options (e.g. -p -b 3x3):", 1, 40, "-x -X", NULL};
-    char buf[512];
-    octObject facet;
-    char* fullName;
+	static dmTextItem items[] = {
+		{"oct2ps options:", 1, 40, "-x -X -b 3x3", NULL},
+		{"(P)rint or to (F)ile:", 1, 40, "P", NULL},
+		{"file name:", 1, 40, "", NULL}
+	};
+#define ITEMS_N sizeof(items) / sizeof(dmTextItem)
 
-    ViInit("print facet");
-    ErrClear();
+	char buf[512];
+	octObject facet;
+	char* fullName;
+	char fileName[128];
 
-    facet.objectId = spot->facet;
-    if (octGetById(&facet) != OCT_OK) {
-        PrintErr(octErrorString());
-        ViDone();
-    }
-    octFullName(&facet,&fullName);
+/** Begin here. **/
+	ViInit("print facet");
+	ErrClear();
 
-    if (dmMultiText("print facet (PRINTER variable must be set)", 1, &item) != VEM_OK) {
-        PrintCon("Aborted entry");
-        ViDone();
-    }
-    sprintf(buf, "prfacet %s %s", item.value, fullName);
-    PrintDebug(buf);
-    if (util_csystem(buf)) {
-        sprintf(buf, "Error invoking prfacet utility.");
-	PrintErr(buf);
-    }
-    ViDone();
-}
+/** Get facet information. **/
+	facet.objectId = spot->facet;
+	if (octGetById(&facet) != OCT_OK) {
+		PrintErr(octErrorString());
+		ViDone();
+	}
+	octFullName(&facet, &fullName);
+
+/** Display dialog box. **/
+	if (dmMultiText("print facet (PRINTER variable must be set)",
+			ITEMS_N, items) != VEM_OK) {
+		PrintCon("Aborted entry");
+		ViDone();
+	}
+
+/** Error-check the user input. **/
+	if ((items[1].value[0] == 'f') || (items[1].value[0] == 'F')) {
+		sscanf(items[2].value, "%s", fileName); /* Get first word. */
+		if (!fileName[0]) {
+			PrintErr("print-facet needs a filename");
+			ViDone();
+		}
+		sprintf(buf, "prfacet -TOFILE %s %s %s", fileName,
+				items[0].value, fullName);
+	} else {
+		sprintf(buf, "prfacet %s %s", items[0].value, fullName);
+	}
+
+/** Call the prfacet command. **/
+	PrintDebug(buf);
+	if (util_csystem(buf)) {
+		sprintf(buf, "Error invoking prfacet utility.");
+		PrintErr(buf);
+	}
+	ViDone();
+
+#undef ITEMS_N
+} /* end PrintFacet() */
 
 
 int
