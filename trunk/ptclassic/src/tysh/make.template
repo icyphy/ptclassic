@@ -107,7 +107,7 @@ TK = 		1
 
 PT_DEPEND += 	$(LIBDIR)/$(LIB)
 
-PIGI_OBJS += 	-ltycho version.c
+PIGI_OBJS += 	-ltycho version.o
 
 INSTALL += 	$(LIBDIR)/$(LIB)
  
