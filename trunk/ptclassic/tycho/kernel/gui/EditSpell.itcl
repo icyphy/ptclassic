@@ -151,15 +151,16 @@ body ::tycho::EditSpell::constructor {args} {
     } {
 	keep -background -cursor
     }
-    pack $itk_component(dbox) -side right -before $itk_component(word)
-
+    # FIXME: This button and the lbox button below are in the wrong place
+    # Formerly, we could use $itk_component(word), but that does not work
+    pack $itk_component(dbox) -side right  -before $itk_component(separator)
     itk_component add lbox {
 	button $itk_component(childsite).lbox -text {Learn} \
 		-command "$this learn" -pady 0 -width 14
     } {
 	keep -background -cursor
     }
-    pack $itk_component(lbox) -side right -before $itk_component(word)
+    pack $itk_component(lbox) -side right -before $itk_component(separator)
 }
 
 ##################################################################
@@ -249,7 +250,7 @@ body ::tycho::EditSpell::recheck {} {
     set tw $itk_option(-edit)
 
     set filename [::tycho::tmpFileName tychoSpell]
-    if {![$tw busy writeSpellText $filename]} {return}
+    if {[$tw busy $tw writeSpellText $filename] != ""} {return}
     set errs [exec spell $filename]
     set dict [readDictionary]
     foreach exception $dict {
