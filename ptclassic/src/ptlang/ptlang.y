@@ -68,6 +68,9 @@ Programmer: J. T. Buck and E. A. Lee
 /* chars allowed in "identifier" */
 #define IDENTCHAR(c) (isalnum(c) || c == '.' || c == '_')
 
+/* chars allowed in "url" */
+#define URLCHAR(c) (c == ':' || c == '/' || c == '$')
+
 char yytext[BIGBUFSIZE];	/* lexical analysis buffer */
 int yyline = 1;			/* current input line */
 int bodyMode = 0;		/* special lexan mode flag to read bodies  */
@@ -155,7 +158,7 @@ void clearDefs(), clearStateDefs(), addMembers(), genState(), describeState(),
      genInstance(), genStdProto(), yyerror(), yyerr2(), cvtCodeBlockExpr(),
      cvtCodeBlock(), genCodeBlock(), cvtMethod(), genMethod(), genDef(),
      yywarn(), mismatch(), genAlias(), stripDefaultArgs(),
-     checkIncludes(), checkSeeAlsos();
+     checkIncludes(), checkSeeAlsos(), seeAlsoGenerate();
 
 char* inputFile;		/* input file name */
 char* idBlock;			/* ID block */
@@ -266,7 +269,7 @@ typedef char * STRINGVAL;
 %token CCINCLUDE HINCLUDE PROTECTED PUBLIC PRIVATE METHOD ARGLIST CODE
 %token BODY IDENTIFIER STRING CONSCALLS ATTRIB LINE HTMLDOC
 %token VERSION AUTHOR ACKNOWLEDGE COPYRIGHT EXPLANATION SEEALSO LOCATION
-%token CODEBLOCK EXECTIME PURE INLINE STATIC HEADER INITCODE START
+%token CODEBLOCK EXECTIME PURE INLINE STATIC HEADER INITCODE START URL
 %%
 /* production to report better about garbage at end */
 full_file:
@@ -664,6 +667,8 @@ cclist: /* nothing */
 /* see also list */
 seealso: /* nothing */
 |	seealso optcomma IDENTIFIER	{ checkSeeAlsos(nSeeAlso-1);
+					  seeAlsoList[nSeeAlso++] = $3;}
+|	seealso optcomma URL		{ checkSeeAlsos(nSeeAlso-1);
 					  seeAlsoList[nSeeAlso++] = $3;}
 ;
 
@@ -1731,17 +1736,33 @@ void genDef ()
 	if (nSeeAlso > 0) fprintf (fp, "<p><b>See also:</b>");
 	if (nSeeAlso > 2) {
 	    checkSeeAlsos(nSeeAlso);
-	    for (i = 0; i < (nSeeAlso - 2); i++)
-                fprintf (fp, "<a href=\"$PTOLEMY/src/domains/%s/domain.idx#%s \">%s</a>,\n", cvtToLower(domain), seeAlsoList[i], seeAlsoList[i]);
+	    for (i = 0; i < (nSeeAlso - 2); i++) {
+		seeAlsoGenerate(fp, domain, seeAlsoList[i]);
+                fprintf (fp, ",\n");
+	    }
 	}
-	if (nSeeAlso > 1) fprintf (fp, "<a href=\"$PTOLEMY/src/domains/%s/domain.idx#%s \">%s</a> and\n", cvtToLower(domain), seeAlsoList[nSeeAlso-2], seeAlsoList[nSeeAlso-2]);
-	if (nSeeAlso > 0) fprintf (fp, "<a href=\"$PTOLEMY/src/domains/%s/domain.idx#%s \">%s</a>.\n<br>\n", cvtToLower(domain), seeAlsoList[nSeeAlso-1], seeAlsoList[nSeeAlso-1]);
+	if (nSeeAlso > 1) {
+		seeAlsoGenerate(fp, domain, seeAlsoList[nSeeAlso-2]);
+                fprintf (fp, " and\n");
+	}
+	if (nSeeAlso > 0) {
+		seeAlsoGenerate(fp, domain, seeAlsoList[nSeeAlso-1]);
+                fprintf (fp, ".\n<br>\n");
+	}
 
 /* Hyperlink to the source code.  Note that this assumes the source */
 /* is in the same directory. */
         fprintf(fp,
-                "<br><b>See:</b> <a href=\"%s%s.pl>source code</a>",
+                "<br><b>See:</b> <a href=\"%s%s.pl>source code</a>,\n",
                 domain, objName);
+
+/* Hyperlink to the users of this star.
+ * Note that the index file might say 'foo facet, XXX user' or
+ * 'foo facet, XXX users' depending on whether there is one or more users
+ */
+	fprintf (fp,
+		 "<a href=\"$PTOLEMY/src/domains/%s/domain.idx#%s facet, %s user\"> %s users</a>\n",
+		 cvtToLower(domain), objName, cvtToUpper(domain), objName);
 
 /* copyright */
 	if (objCopyright) {
@@ -2138,7 +2159,7 @@ yylexNormal(pCurChar)
 {
     int		c = *pCurChar;
     char    	*p = yytext;
-    int		key;
+    int		key, isurl = 0;
 
     while (1) {
 	if (c != '/') {
@@ -2203,7 +2224,7 @@ yylexNormal(pCurChar)
 	*pCurChar = 0;
 	yylval = save(yytext);
 	return STRING;
-    } else if (! IDENTCHAR(c) ) {
+    } else if (! IDENTCHAR(c) && ! URLCHAR(c)) {
 	    yytext[0] = c;
 	    yytext[1] = 0;
 	    *pCurChar = 0;
@@ -2213,9 +2234,11 @@ yylexNormal(pCurChar)
 	 * digits and '.' allowed
 	 */
         do {
+	    if (URLCHAR(c))
+		isurl = 1;
 	    *p++ = c;
 	    c = yyinput();
-        } while ( IDENTCHAR(c) );
+        } while ( IDENTCHAR(c) || URLCHAR(c));
     }
     *p = 0;
     *pCurChar = c;
@@ -2223,6 +2246,8 @@ yylexNormal(pCurChar)
     if ((key = lookup (yytext)) != 0) {
 	    return key;
     }
+    if (isurl) 
+	return URL;
     return IDENTIFIER;
 }
 
@@ -2475,3 +2500,42 @@ int numSeeAlsos;
 		exit(1);
 	}
 }
+
+
+/* A seealso can have a url in it.  If it does, then we just
+ * want to use the URL
+ */
+void seeAlsoGenerate(fp,domain,seeAlso)
+FILE *fp;
+char *domain;
+char *seeAlso;
+{
+	if (strchr(seeAlso,'/')) {
+		/* This is a URL, just print it */
+		fprintf(fp, "<a href=\"%s\">%s</a>", seeAlso, seeAlso);
+	} else {
+		/* This is not a URL, so we use the following conventions:
+		 * If it is capitalized, it is a star.
+		 * If it is lower case, it is a facet. 
+		 */
+		if (isupper(seeAlso[0])) {
+			/* Interstellar Hyperdrive (A link to a star) */
+	                fprintf (fp, "<a href=\"$PTOLEMY/src/domains/%s/domain.idx#%s star, %s domain\">%s</a>",
+				cvtToLower(domain), seeAlso, 
+				cvtToUpper(domain), seeAlso);
+
+		} else	if (islower(seeAlso[0])) {
+			/* A facet */
+	                fprintf (fp, "<a href=\"$PTOLEMY/src/domains/%s/domain.idx#%s universe, %s domain\">%s</a>",
+				cvtToLower(domain), seeAlso,
+				cvtToUpper(domain), seeAlso);
+		} else {
+			/* Does not start with a alpha numeric, so we
+			 * just create a links with a trailing space.
+			 */
+	                fprintf (fp, "<a href=\"$PTOLEMY/src/domains/%s/domain.idx#%s \">%s</a>",
+				cvtToLower(domain), seeAlso, seeAlso);
+		}
+	}
+}
+
