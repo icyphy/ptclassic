@@ -51,7 +51,7 @@ class StringArrayState : public State
 {
 public:
         // constructors and destructor
-        StringArrayState() : nElements(0), val(0) {}
+        StringArrayState() : val(0), nElements(0) {}
 	StringArrayState(const StringArrayState&);
 	~StringArrayState();
 
