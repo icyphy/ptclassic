@@ -37,7 +37,7 @@ support both.
 <p>
 There is unfortunately a hazard with using modal dialogs within Itcl
 objects.  Modal dialogs
-indirectly call <a name=update><code>update</code></a>, a Tk utility
+indirectly call <a name="update"><code>update</code></a>, a Tk utility
 that processes pending events, including mouse events. If the modal
 dialog is is called from within an Itcl object, directly or
 indirectly, it is possible (albeit somewhat unlikely) that the
