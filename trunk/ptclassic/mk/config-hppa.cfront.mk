@@ -128,7 +128,9 @@ LIB_FLUSH_CACHE = $(LIBDIR)/flush_cache.o
 
 # Defines to build xv
 XMKMF =		/usr/sww/X11/bin/xmkmf
-XV_CC =		cc $(X11_INCSPEC) $(X11_LIBSPEC)
+# -Ac turns on compatibility mode
+# -DXLIB_ILLEGAL_ACCESS is needed to compile xv.c
+XV_CC =		cc -Ac -DXLIB_ILLEGAL_ACCESS $(X11_INCSPEC) $(X11_LIBSPEC)
 
 # Matlab architecture
 MATARCH = hp700
