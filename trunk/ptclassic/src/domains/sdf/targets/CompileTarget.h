@@ -67,6 +67,9 @@ private:
 	// in a string (i.e. " => \")
 	StringList quoteQuotationMarks(const char* str);
 
+	StringList tcltkSetup();
+	StringList tcltkInitialize(StringList& universeName);
+
 	StringList galDef(Galaxy* galaxy, StringList className, int level);
 
 	int writeGalDef(Galaxy& galaxy, StringList className);
