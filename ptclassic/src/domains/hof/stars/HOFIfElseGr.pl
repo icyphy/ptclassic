@@ -1,9 +1,9 @@
 defstar {
 	name { IfElseGr }
 	domain { HOF }
-	derivedFrom { IfThenElse }
+	derivedFrom { IfElse }
 	desc {
-A variant of the IfThenElse star where the two possible replacement
+A variant of the IfElse star where the two possible replacement
 blocks are specified by graphically rather than textually.  There must
 be exactly two blocks connected in the positions of the replacement blocks.
 The HOFNop stars are the only exception: they may be used in addition to the
@@ -11,7 +11,7 @@ two replacement blocks in order to control the order of connection.
 	}
 	explanation {
 See the documentation for the
-.c IfThenElse
+.c IfElse
 star, from which this is derived, for background information.
 The parameter values for the replacement blocks are set directly
 by editing the parameters of the block.
@@ -53,7 +53,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	  // Note that both branches must have the same output type.
 	  output.inheritTypeFrom(truein);
 
-	  // The constructor for IfThenElse hides blockname, where_defined,
+	  // The constructor for IfElse hides blockname, where_defined,
 	  // input_map, output_map, and parameter_map.  Here, we need to hide
 	  // the rest.
 	  true_block.clearAttributes(A_SETTABLE);
