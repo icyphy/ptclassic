@@ -40,6 +40,14 @@ ENHANCEMENTS, OR MODIFICATIONS.
 extern const double __infinity;
 #define HUGE_VAL __infinity	
 #endif
+
+#ifndef HUGE_VAL
+// Some users report that HUGE_VAL is not defined for them.
+// (sun4, gcc-2.4.5, gcc-2.5.8)  There could be nasty problems here.
+// linux had problems with the statistics demo and a SIGFPE.
+#define HUGE_VAL MAXDOUBLE
+#endif
+
 #include "DataStruct.h"
 #include "DEStar.h"
 #include "PriorityQueue.h"
