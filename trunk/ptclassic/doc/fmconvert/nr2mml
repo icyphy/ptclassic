@@ -10,8 +10,8 @@
 # directory of the Ptolemy installation.
 #
 # Usage:
-#         Cat sect.* files to xxxx.mm.
-#         Run nr2mml xxxx.mm.
+#         cat sect.* > xxxx
+#         nr2mml xxxx
 #         Create a new maker file
 #		(e.g. using $PTOLEMY/doc/users_man/pigi.doc)
 #         Import xxxx.mml.
