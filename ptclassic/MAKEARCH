@@ -244,7 +244,7 @@ foreach x ( Packages Xpackages attache vem)
 	cd $PTOLEMY/obj.$PTARCH/octtools
 end
 
-foreach x ( installColors masters octfix octls oct2ps octredomain)
+foreach x ( installColors masters octfix octls oct2ps oct2tim octredomain)
 	optmkdir $x
 	cd $x
 	optlink ../../../src/octtools/$x make.template
