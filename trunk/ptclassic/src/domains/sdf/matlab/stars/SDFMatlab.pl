@@ -68,7 +68,7 @@ extern "C" {
 #define MXREAL     0
 }
 
-#define MATLAB_BUFFER_LEN	1024
+#define MATLAB_BUFFER_LEN	1023
 #define MATLAB_ERROR_STRING	">> \x07???"
 #define MATLAB_ERROR_STRING_LEN	( sizeof(MATLAB_ERROR_STRING) - 1 )
 	}
@@ -84,8 +84,8 @@ extern "C" {
 
 	code {
 		// Initialization of static members
-		int SDFMatlab::matlabStarsCount = 0;
 		Engine *SDFMatlab::matlabEnginePtr = 0;
+		int SDFMatlab::matlabStarsCount = 0;
 	}
 
 	constructor {
@@ -149,15 +149,44 @@ extern "C" {
 	}
 
 	method {
+	  name { evaluateOneMatlabCommand }
+	  access { protected }
+	  type { int }
+	  arglist { "(const char *matlabCommand)" }
+	  code {
+		// assert location of buffer to hold output of Matlab commands
+		engOutputBuffer(matlabEnginePtr,
+				matlabOutputBuffer,
+				MATLAB_BUFFER_LEN);
+
+		// engEvalString returns 0 on success and non-zero on failure
+		matlabOutputBuffer[0] = 0;
+		int merror = engEvalString(matlabEnginePtr, matlabCommand);
+		matlabOutputBuffer[MATLAB_BUFFER_LEN] = 0;
+
+		// kludge: engEvalString always returns 0 (success) even if
+		// there is an error.  Therefore, we must determine if there
+		// is an error.  Since we terminate Matlab commands with a
+		// semicolon, an error occurs when the output of the Matlab
+		// command is not null.
+		if ( merror == 0 ) {
+		  merror = ( matlabOutputBuffer[0] != 0 );
+		}
+
+		return( merror );
+	  }
+	}
+
+
+	method {
 	  name { evaluateMatlabCommand }
 	  access { protected }
 	  type { int }
 	  arglist { "(const char *matlabCommand)" }
 	  code {
 		// change directories to one containing the Matlab command
-		static InfString lastdirname;
-
 		// expand the pathname and check its existence
+		static InfString lastdirname;
 		const char *dirname = (const char *) ScriptDirectory;
 		if ( dirname[0] != 0 ) {
 		  const char *expandeddirname = expandPathName(dirname);
@@ -176,28 +205,15 @@ extern "C" {
 		    char *changeDirCommand = new char[strlen(fulldirname) + 4];
 		    strcpy(changeDirCommand, "cd ");
 		    strcat(changeDirCommand, fulldirname);
-		    engEvalString(matlabEnginePtr, changeDirCommand);
+		    evaluateOneMatlabCommand(changeDirCommand);
 		    delete [] changeDirCommand;
 		  }
 		  delete [] fulldirname;
 		}
 
-		// engEvalString is supposed to return 0 on error but does not
-		matlabOutputBuffer[0] = 0;
-		int mstatus = engEvalString( matlabEnginePtr, matlabCommand );
-		matlabOutputBuffer[MATLAB_BUFFER_LEN] = 0;
-
-		// kludge: if Matlab says that there was no error, then
-		// there might be an error.  If the output from the Matlab
-		// command is not null, then there is an error because we
-		// terminate Matlab commands with a semicolon to suppress
-		// output of result of expression
-		if ( mstatus == 0 ) {
-		  mstatus = ( matlabOutputBuffer[0] != 0 );
-		}
-
-		// report error if one occurred
-		if ( mstatus != 0 ) {
+		// evaluate the passed command and report error if one occurred
+		int merror = evaluateOneMatlabCommand(matlabCommand);
+		if ( merror ) {
 		  InfString errstr;
 		  errstr = "\nThe Matlab command `";
 		  errstr << matlabCommand;
@@ -205,7 +221,7 @@ extern "C" {
 		  Error::warn(*this, (const char *) errstr, matlabOutputBuffer);
 		}
 
-		return(mstatus);
+		return(merror);
 	  }
 	}
 
@@ -242,9 +258,6 @@ extern "C" {
 		  Error::abortRun( *this, "Could not start Matlab using ",
 				   (const char *) OSStartCommand );
 		}
-		engOutputBuffer(matlabEnginePtr,
-				matlabOutputBuffer,
-				MATLAB_BUFFER_LEN);
 	  }
 	}
 
