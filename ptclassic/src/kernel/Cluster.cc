@@ -110,8 +110,8 @@ ClusterPort* Cluster::addNewPort(PortHole& p) {
 		    Cluster Group, Absorb, & Merge Methods
  **********************************************************************/
 
-// Group: This creates a new cluster that contains the two argument clusters
-// 			as its clusters.
+// Group: This creates a new cluster that contains the argument cluster
+// 			and this as its clusters.
 //
 // Absorb: This absorbs the argument cluster into itself, increasing the
 // 			the number of clusters inside itself by 1.
@@ -120,21 +120,23 @@ ClusterPort* Cluster::addNewPort(PortHole& p) {
 // 			increasing the number of clusters inside itself by the number 
 //			of clusters inside of the argument cluster.
 
-Cluster* Cluster::group(Cluster& c, Cluster& b, int removeFlag)
+Cluster* Cluster::group(Cluster& c, int removeFlag)
 {
-	// first make sure that c and b both have the same parent: me
-	if (c.parent() != this || b.parent() != this) {
+	// first make sure that c and me have the same parent
+	if (c.parent() != parent()) {
 		StringList message;
-		message << "Can't group " << c.name() << " and " << b.name()
+		message << "Can't group " << name() << " and " << c.name()
 		<< " because the clusters don't have the same parent.";
 		Error::abortRun(*this,message);
 		return 0;
 	}
 	Cluster* newC = (Cluster*)makeNew();
-	newC->setName(c.name());
-	addBlock(*newC, newC->name());
-	if (!newC->absorb(c,removeFlag) || !newC->absorb(b,removeFlag)) {
-		asGalaxy().removeBlock(*newC);
+	// The new cluster will have my name
+	newC->setName(name());
+	// new cluster is added to parent galaxy's list
+	(parent()->asGalaxy()).addBlock(*newC, newC->name());
+	if (!newC->absorb(*this,removeFlag) || !newC->absorb(c,removeFlag)) {
+		(parent()->asGalaxy()).removeBlock(*newC);
 		StringList message;
 		message << "Failed to absorb c into newly created empty cluster"
 		<< "or failed to absorb b into newly created empty cluster";

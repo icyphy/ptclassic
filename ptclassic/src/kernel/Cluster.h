@@ -131,9 +131,9 @@ Merge: This merges the clusters inside the argument cluster into itself,
        dangling pointer until ListIter::remove is called.
      ******************************************************************/
 
-	// groups the two argument clusters into a newly created empty
+	// groups the argument cluster and this into a newly created empty
 	// cluster and returns the new cluster
-	virtual Cluster* group(Cluster&, Cluster&, int /*removeFlag*/=TRUE);
+	virtual Cluster* group(Cluster& c, int removeFlag=TRUE);
 
     // absorbs the specified block into this cluster
     virtual int absorb(Cluster&, int /*removeFlag*/= TRUE);    
