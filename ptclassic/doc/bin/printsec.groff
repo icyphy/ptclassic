@@ -38,6 +38,7 @@ set tempdir = /tmp
 set tempTroffFile = $tempdir/pt$$.t
 set tempIndexFile = $tempdir/index$$
 set tempNroffFile = $tempdir/pt$$.n
+set tempFiles = $tempTroffFile $tempIndexFile $tempNroffFile
 
 # Variables
 set indexonly = 0
@@ -94,17 +95,17 @@ else
 	# otherwise just print it out
 	($printcommand $printoptions $tempTroffFile | lpr ) >& $tempIndexFile
 	$contentscmd $tempIndexFile
-	if (-r title) $printcommand $printoptions $dirheader/shared title
+	if (-r title.t) $printcommand $printoptions $dirheader/shared title.t
 else
 endif
 
 if (-r $tempIndexFile ) cat $tempIndexFile >>! $ALMAGEST_INDEX
-/bin/rm -f $tempTroffFile $tempIndexFile $tempNroffFile
+/bin/rm -f $tempFiles
 
 exit 0
 
 catch:
         # prevent the "no match" error message if there are no temporary files
         set nonomatch
-        /bin/rm -f $tempTroffFile $tempIndexFile $tempNroffFile
+        /bin/rm -f $tempFiles
         exit 1

@@ -35,11 +35,14 @@ set contentscmd = $PTOLEMY/doc/bin/contents
 set files = ""
 set previewcommand = "xditview -"
 set psprintcommand = ptroff
+
+# Temporary Fils
 set tempdir = /tmp
 set tempTroffFile = $tempdir/pt$$.t
 set tempIndexFile = $tempdir/index$$
 set tempNroffFile = $tempdir/pt$$.n
 set tempPSFile = $tempdir/pt$$.ps
+set tempFiles = $tempTroffFile $tempIndexFile $tempNroffFile $tempPSFile
 
 # Variables
 set indexonly = 0
@@ -105,17 +108,17 @@ else
 	# otherwise just print it out
 	$printcommand $printoptions $tempTroffFile >& $tempIndexFile
 	$contentscmd $tempIndexFile
-	if (-r title) $printcommand $printoptions $dirheader/shared title
+	if (-r title.t) $printcommand $printoptions $dirheader/shared title.t
 else
 endif
 
 if (-r $tempIndexFile ) cat $tempIndexFile >>! $ALMAGEST_INDEX
-/bin/rm -f $tempTroffFile $tempIndexFile
+/bin/rm -f $tempFiles
 
 exit 0
 
 catch:
         # prevent the "no match" error message if there are no temporary files
         set nonomatch
-        /bin/rm $tempTroffFile $tempIndexFile
+        /bin/rm $tempFiles
         exit 1
