@@ -255,7 +255,6 @@ else if (ioctl(fd, PIOCUSAGE, &beginRun) == -1)
 
 	go {
 		addProcedure(ipcHandler);
-                addProcedure(replyHandler, "ReplyHandler");
                 addProcedure(errorHandler, "ErrorHandler");
 		addCode(block);
 	}
@@ -273,7 +272,7 @@ else if (ioctl(fd, PIOCUSAGE, &beginRun) == -1)
 	}
 	wrapup {
 		addCode(runtime, "mainClose", "runTime");
-		addCode("am_disable();\n", "mainClose", "amDisable");
+		addCode("AM_Terminate();\n", "mainClose", "amTerminate");
 	}
 }
 
