@@ -60,23 +60,24 @@ option add *FontManager.variableItalic \
 
 #########################################################################
 #### FontManager
-# This class supports font selection. Instances of this class are
-# dialog windows that permit the user to select a font. If the instance
-# is created using the ::tycho::DialogWindow::newModal procedure, the
+# Manage font selection. Instances of this class are dialog windows
+# that permit the user to select a font. If the instance is created
+# using the <code>::tycho::DialogWindow::newModal</code> procedure, the
 # procedure will return either a valid font name selected by the user
 # or the null string (if the user cancels).
-#
-# One instance of this class called .tychoFonts is created and left
-# unmapped at all times. This instance can be used by any widget to
-# select a valid font, using for example the "findFont" method. It is
-# necessary to have such an instance because the way that the validity
-# of a font is checked is by configuring a text widget with that font.
-# Thus, it would not be sufficient to just provide procs with the class.
-#
+# <p>
+# One instance of this class called <code>.tychoFonts</code> is created
+# and left unmapped at all times. This instance can be used by any
+# widget to select a valid font, using for example the <code>findFont</code>
+# method. It is necessary to have such an instance because the way that
+# the validity of a font is checked is by configuring a text widget
+# with that font. Thus, it would not be sufficient to just provide
+# procs with the class.
+# <p>
 # Unfortunately, fonts are a major weak point in the X window system,
 # since there is only one font that is guaranteed to be installed on
 # all systems: "fixed". This font is the fallback font of the
-# "findFont" method, which always returns a valid font.
+# <code>findFont</code> method, which always returns a valid font.
 #
 class ::tycho::FontManager {
     inherit ::tycho::DialogWindow
@@ -90,16 +91,16 @@ class ::tycho::FontManager {
     # Specify the initial font displayed in the window.
     itk_option define -initialfont initialFont InitialFont {9x15}
 
-    # The command to execute on an OK response.
+    # Specify the command to execute when user clicks OK.
     itk_option define -okcommand okcommand OkCommand ""
 
     ##########################################################################
     ####                         public methods                           ####
 
-    # Clear commandResult variable so that no font is identified.
+    # Reset so that no font is identified (invoked in response to Cancel).
     method clearFont {} {set commandResult($prefix) {}}
 
-    # Get a preferred font from a list of possibilities given by an option
+    # Get a preferred font from a list of possibilities given by an option.
     method defaultFont {optionName}
 
     # Return a valid font, using the given prioritized specifications.
@@ -118,7 +119,7 @@ class ::tycho::FontManager {
     # or the largest value in the sizes list.
     method getValidSize {proposed}
 
-    # Open a window with help on the current widget.
+    # Open a help window.
     method help {}
 
     # Attempt to set the font specified by the menu radio buttons.
@@ -138,12 +139,14 @@ class ::tycho::FontManager {
 
 #########################################################################
 #### -initialfont option configuration
-# Set the initial font.
+# Specify the initial font. If the font is not valid, trigger an error.
+# If it is valid, the text sample in the window will be displayed in
+# the specified font. If the specified font can be parsed so that the
+# family, size, weight, and style are recognized, then the radio
+# buttons in the menus will be set to match. Otherwise, they remain in
+# their previous state.
 # 
 configbody ::tycho::FontManager::initialfont {
-    # If the font can be parse so that the family, size, weight, and style
-    # are recognized, then we set the radio buttons to match.  Otherwise,
-    # we leave them alone.
     set families [join [option get $itk_component(hull) families FontManager] |]
     set sizes [join [option get $itk_component(hull) sizes FontManager] |]
     set weights [join [option get $itk_component(hull) weights FontManager] |]
@@ -522,7 +525,7 @@ body ::tycho::FontManager::getValidSize {proposed} {
 
 #########################################################################
 #### help
-# Open a window with help on the current widget.
+# Open a help window.
 #
 body ::tycho::FontManager::help {} {
     global ::TYCHO
