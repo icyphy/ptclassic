@@ -11,7 +11,7 @@ When run on the simulator, arranges for its input to be logged to a file.
 	explanation {
 	}
 	execTime {
-		return (input.bufSize() >= 1) ? 2 : 0;
+		return 2;
 	}
 	input {
 		name {input}
@@ -26,18 +26,12 @@ When run on the simulator, arranges for its input to be logged to a file.
 	state {
 		name { outVal}
 		type { int }
-		attributes { A_NONCONSTANT|A_NONSETTABLE }
+		attributes { A_NONCONSTANT|A_NONSETTABLE|A_YMEM|A_NOINIT }
 		default { "0"}
-	}
-	start {
-		if (input.bufSize() >= 1) {
-			// these attributes allocate memory
-			outVal.setAttributes(A_YMEM|A_NOINIT);
-		}
 	}
 
 	// this codeblock tells the simulator to log writes to the
-	// outVal state, which works when the buffersize is >= 1.
+	// outVal state.
 	codeblock (logOut) {
 output $ref(outVal) $val(fileName).sim -RD
 }
@@ -50,6 +44,6 @@ output $ref(outVal) $val(fileName).sim -RD
 		genMiscCmd(logOut);
 	}
 	go {
-		if (input.bufSize() >= 1) gencode(copy);
+		gencode(copy);
 	}
 }
