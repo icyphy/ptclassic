@@ -1,4 +1,4 @@
-# Copyright (c) 1990-1997 The Regents of the University of California.
+# Copyright (c) 1997-$Date$ The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -24,7 +24,7 @@
 # 						COPYRIGHTENDKEY
 # Makefile for Ptolemy DE SiP kernel
 #
-# @(#)make.template	1.6	09/20/96
+# $Id$
 #
 # If this file's name is "make.template" and there is no makefile in
 # this directory, do
@@ -36,7 +36,7 @@
 # Root of Ptolemy directory
 ROOT = ../../../../..
 # True source directory
-VPATH = $(ROOT)/src/domains/de/sip/kernel
+VPATH = $(ROOT)/src/domains/de/sip/ptsip
 
 # get configuration info
 CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
@@ -45,18 +45,47 @@ include $(CONFIG)
 INCL = -I$(KERNDIR) 
 
 # Library name
-LIB=libsip.$(LIBSUFFIX)
+LIB =	libptsip.$(LIBSUFFIX)
 
 # The .cc files
-SRCS= dstep.cc pangen1.cc sched.cc sym.cc flow.cc pangen2.cc \
-      spin_init.cc guided.cc pangen3.cc spin_init2.cc main.cc \
-      pangen4.cc spinlex.cc mesg.cc ps_msc.cc structures.cc vars.cc \
-      tl_malloc.cc tl_buchi.cc tl_parse.cc tl_cache.cc tl_rewrite.cc \
-      tl_lex.cc tl_trans.cc tl_main.cc 
+SRCS = \
+	dstep.cc \
+	flow.cc \
+	guided.cc \
+	main.cc \
+	mesg.cc \
+	pangen1.cc \
+	pangen2.cc \
+	pangen3.cc \
+	pangen4.cc \
+	ps_msc.cc \
+	sched.cc \
+	spin_init.cc \
+	spin_init2.cc \
+	spinlex.cc \
+	structures.cc \
+	sym.cc \
+	tl_buchi.cc \
+	tl_cache.cc \
+	tl_lex.cc \
+	tl_main.cc \
+	tl_malloc.cc \
+	tl_parse.cc \
+	tl_rewrite.cc \
+	tl_trans.cc \
+	vars.cc
 
 # header files for all stars
-HDRS= Error.h pangen2.h pangen4.h spin.h version.h pangen1.h pangen3.h \
-      pangen5.h tl.h y.tab.h
+HDRS = \
+	Error.h \
+	pangen1.h \
+	pangen2.h \
+	pangen3.h \
+	pangen4.h \
+	pangen5.h \
+	spin.h \
+	tl.h \
+	version.h
 
 # object files for all stars
 OBJS= y.tab.o $(SRCS:.cc=.o)
@@ -70,13 +99,16 @@ install:        makefile $(LIBDIR)/$(LIB)
 include $(ROOT)/mk/common.mk
 
 # yacc it!
-y.tab.o: spin.y; \
-yacc -v -d $(ROOT)/src/domains/de/sip/kernel/spin.y; \
-cp y.tab.h $(ROOT)/src/domains/de/sip/kernel/y.tab.h; \
-$(CPLUSPLUS) $(CC_SHAREDFLAGS) $(GPPFLAGS) -I$(VPATH) $(INCL) -c y.tab.c -o y.tab.o; \
-rm -f y.tab.c; \
-rm -f y.tab.h; \
-rm -f y.output
+y.tab.o: spin.y
+	cd $(VPATH); $(YACC) $^
+	rm -f $@
+	$(CPLUSPLUS) $(CC_SHAREDFLAGS) $(GPPFLAGS) \
+		-I$(VPATH) $(INCL) -c y.tab.c -o y.tab.o
+	#yacc -v -d $(ROOT)/src/domains/de/sip/kernel/spin.y
+	#cp y.tab.h $(ROOT)/src/domains/de/sip/kernel/y.tab.h
+	#$(CPLUSPLUS) $(CC_SHAREDFLAGS) $(GPPFLAGS) \
+	#	-I$(VPATH) $(INCL) -c y.tab.c -o y.tab.o
+	#rm -f y.tab.c y.tab.h y.output
 
 # Don't add anything after the next line; makedepend will zap it.
 # DO NOT DELETE THIS LINE -- make depend depends on it.
