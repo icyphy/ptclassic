@@ -57,6 +57,12 @@ cutoff frequency at about 1/3 of the Nyquist frequency.
 		default {1}
 		desc {Decimation ratio.}
 	}
+        defstate {
+		name {decimationPhase}
+		type {int}
+		default {0}
+		desc {Downsampler phase, currently not supported.}
+	}
 	state {
 		name {interpolation}
 		type {int}
@@ -117,9 +123,15 @@ cutoff frequency at about 1/3 of the Nyquist frequency.
         }	    
 
 	setup {
-	      int interp = interpolation;
- 	      int decimt = decimation;
-              tapsNum=taps.size();
+	      if ( int(decimationPhase) != 0 ) {
+		  Error::warn(*this,
+			      "A non-zero decimationPhase is not supported ",
+			      "in the CG56 version of this star");
+	      }
+
+	      int interp = int(interpolation);
+ 	      int decimt = int(decimation);
+              tapsNum = taps.size();
 	      int oldSampleNum = int(ceil(double(tapsNum - decimt)/double(interp)));	      if (oldSampleNum>0)
                    oldsample.resize(oldSampleNum);
               else
