@@ -575,26 +575,12 @@ KcNodeConnect (const char* inst, const char* term, const char* node) {
 	return currentGalaxy->nodeConnect(inst, term, node);
 }
 
-/* 1/28/91, by eal
-Return the number of architectures supported by a domain
+/*
+Return a list of architectures supported by the current domain.
 */
 extern "C" int
-numberOfArchs(char* domainName, int indices[]) {
-	int count = 0;
-	for(int i = 0; i < Architecture::numberOfArchs(); i++) {
-	    if((Architecture::nthArch(i))->scheduler->
-			isDomainSupported(domainName))
-		indices[count++]=i;
-	}
-	return count;
-}
-
-/* 1/28/91, by eal
-Return the name of the nth architecture in the list of known architectures
-*/
-extern "C" char*
-nthArchName(int n) {
-        return (char*) Architecture::nthArchName(n);
+supportedArches(const char** names, int nMax) {
+	return Architecture::supportedNames(names,nMax);
 }
 
 /* 7/22/91, by eal
