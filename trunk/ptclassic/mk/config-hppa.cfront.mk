@@ -91,8 +91,11 @@ LOCALCFLAGS =	-DUSG $(CDEBUGFLAGS) -Aa -D_HPUX_SOURCE
 # It turns out that when you order HPUX CC, you don't get a cc compiler
 CC = 		gcc
 # Note that the bundled hppa cc compiler is non-ansi so it won't 
-# compile certain files in octtools that use ansi CPP, such as oct/io.h
+#  compile certain files in octtools that use ansi CPP, such as oct/io.h
 OCT_CC =	gcc
+# If you compile with gcc, then you will need to add -lgcc to the link
+#  or you will get complaints about _eprintf missing
+LIBGCC_SPEC =	-L$(PTOLEMY)/gnu/hppa/lib/gcc-lib/hppa/2.7.2 -lgcc 
 LOCALCFLAGS = 	-DUSG
 
 CFLAGS =	$(OPTIMIZER) $(MEMLOG) $(WARNINGS) \
@@ -124,7 +127,8 @@ CRT0 =
 # system libraries (libraries from the environment)
 # /usr/lib/end.o is necessary for debugging with xdb under hpux9.x
 # /opt/langtools/lib/end.o is necessary for debugging with xdb under hpux10.x
-SYSLIBS =	-lm /opt/langtools/lib/end.o
+#SYSLIBS =	-lm /opt/langtools/lib/end.o
+SYSLIBS =	$(LIBGCC_SPEC) -lm /opt/langtools/lib/end.o
 
 # system libraries for linking .o files from C files only
 CSYSLIBS = $(SYSLIBS)
