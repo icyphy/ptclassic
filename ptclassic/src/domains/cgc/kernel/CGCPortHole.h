@@ -18,13 +18,22 @@ $Id$
 #include "SDFPortHole.h"
 #include "CGPortHole.h"
 
+// three different types of buffer.
+// If owner, this porthole owns buffer.
+// If embedded, no physical buffer is assigned to that porthole.
+// If copied, two different set of buffer is assigned. It is needed when
+// the output is embedding, and its far() requires past samples, or delays.
+enum BufType { NA, OWNER, EMBEDDED, COPIED };
+
 class CGCGeodesic;
 
 class CGCPortHole : public CGPortHole {
 friend class ForkDestIter;
 public:
 	CGCPortHole() : maxBuf(1), manualFlag(0), asLinearBuf(1), 
-			hasStaticBuf(1), ownership(0) {}
+			hasStaticBuf(1), myType(NA) {}
+
+	void initialize();
 
 	CGCPortHole* getForkSrc() { return (CGCPortHole*) forkSrc; }
 
@@ -53,9 +62,9 @@ public:
 	// return TRUE if the actual static buffering achieved.
 	int staticBuf() const { return hasStaticBuf; }
 
-	// declare and claim the ownership of the buffer
-	void becomeOwner() { ownership = TRUE; }
-	int  isOwner() { return ownership; }
+	// set and get the buffer type
+	void setBufType(BufType b) { myType = b; }
+	BufType  bufType() const { return myType; }
 
 	void setGeoName(char* n);
 	const char* getGeoName() const;
@@ -85,14 +94,16 @@ public:
 	// compare this manual value with what the current scheduler
 	// calculates. If this manual value is smaller, signal an error.
 	void requestBufSize(int i) { maxBuf = i; manualFlag = TRUE; }
+
 protected:
 	void setFlags();
+
 private:
 	int maxBuf;		// Final buffer size.
 	short manualFlag;	// set if buffer size is manually chosen.
 	short hasStaticBuf;	// set if static buffer is achieved.
 	short asLinearBuf;	// set if acts as a linear buf inside a star
-	short ownership;	// set if this porthole owns the buffer.
+	BufType myType;		// buffer Type.
 
 	SequentialList& myDest() { return forkDests; }
 };
