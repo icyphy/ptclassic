@@ -41,8 +41,7 @@ CGCTarget::CGCTarget(const char* name,const char* starclass,
                         "options to be specified for linking."));
 	addState(saveFileName.setState("saveFileName",this,"",
                         "file name to save the generated code."));
-	wormIn.initialize();	
-	wormOut.initialize();
+	initCodeStrings();
 }
 
 StringList CGCTarget :: sectionComment(const StringList s) {
@@ -60,16 +59,16 @@ void CGCTarget :: headerCode () {
 }
 
 
-int CGCTarget :: galDataStruct(Galaxy& galaxy, int) {
+// galaxy declaration
+void CGCTarget :: galDataStruct(Galaxy& galaxy, int) {
     GalStarIter next(galaxy);
     CGCStar* b;
     while ((b = (CGCStar*) next++) != 0) {
 	if (!b->isItFork()) starDataStruct(b);
     }
-    return TRUE;
 }
 
-int CGCTarget :: starDataStruct(CGCStar* block, int) {
+void CGCTarget :: starDataStruct(CGCStar* block, int) {
     
     StringList tmp = "Star: ";
     tmp += block->fullName();
@@ -88,31 +87,35 @@ int CGCTarget :: starDataStruct(CGCStar* block, int) {
     StateListIter nextState(block->referencedStates);
     const State* s;
     while ((s = nextState++) != 0) {
-	out += block->declareState(s);	// declare state
-
-	// Initialize the state
-	mainInitialization += block->initializeState(s);	
+	out += block->declareState(s);	// declare and initialize state
     }
 
     if (block->emptyFlag == 0) staticDeclarations += out;
-    return(TRUE);
 }
 
 void CGCTarget :: setup() {
+    // member initialize
     galId = 0;
-
-    // Initializations
-    include = "";
-    mainDeclarations = "";
-    mainInitialization = "";
-    procedures = "";
     unique = 0;
 
-    includeFiles.initialize();
-    globalDecls.initialize();
     if (galaxy()) setStarIndices(*galaxy()); 
     CGTarget::setup();
 }
+
+void CGCTarget :: initCodeStrings() {
+	staticDeclarations.initialize();
+	procedures.initialize();
+	include.initialize();
+	mainDeclarations.initialize();
+	mainInitialization.initialize();
+	wormIn.initialize();
+	wormOut.initialize();
+	includeFiles.initialize();
+	globalDecls.initialize();
+}
+	
+static char* complexDecl = 
+"\n typedef struct complex_data { double real; double imag; } complex; \n";
 
 void CGCTarget :: frameCode () {
     Galaxy* gal = galaxy();
@@ -125,6 +128,7 @@ void CGCTarget :: frameCode () {
 
     // Assemble all the code segments
     StringList runCode = include;
+    runCode += complexDecl;
     runCode += staticDeclarations;
     runCode += procedures;
     runCode += sectionComment("Main function");
@@ -135,12 +139,17 @@ void CGCTarget :: frameCode () {
     runCode += myCode;
     
     myCode = runCode;
-    myCode += updateCopyOffset();
+
+    // after generating code, initialize code strings again.
+    initCodeStrings();
 }
 
 StringList CGCTarget :: generateCode() {
 	setup();
-	if (galaxy()->parent() == 0) run();
+	if (galaxy()->parent() == 0) {
+		run();
+		Target :: wrapup();
+	}
 	myCode += "}\n";
 	return myCode;
 }
@@ -168,16 +177,20 @@ int CGCTarget :: compileCode() {
 	StringList cmd = "cd ";
 	cmd += (const char*)destDirectory;
 	cmd += "; ";
-	cmd += (const char*)compileCommand;
-	cmd += " ";
-	cmd += (const char*)compileOptions;
-	cmd += " code.c ";
-	cmd += (const char*)linkOptions;
+	cmd += compileLine("code.c");
 	if(system(cmd)) {
 		Error::abortRun("Compilation errors in generated code.");
 		return FALSE;
 	}
 	return TRUE;
+}
+
+// return compile command
+StringList CGCTarget :: compileLine(const char* fName) {
+	StringList cmd = (const char*) compileCommand;
+	cmd << " " << (const char*) compileOptions << " ";
+	cmd << fName << " " << (const char*) linkOptions;
+	return cmd;
 }
 
 // down-load (do nothing here) and run the code
@@ -221,7 +234,6 @@ void CGCTarget::beginIteration(int repetitions, int depth) {
                 myCode += "++) {\n";
         }
 	myCode += wormIn;
-	wormIn.initialize();
         return;
 }
 
@@ -237,8 +249,8 @@ void CGCTarget :: wormOutputCode(PortHole& p) {
 
 void CGCTarget :: endIteration(int /*reps*/, int depth) {
 	myCode << wormOut;
+	myCode << updateCopyOffset();
 	myCode << "} /* end repeat, depth " << depth << "*/\n";
-	wormOut.initialize();
 }
 
 void CGCTarget :: addInclude(const char* inc) {
@@ -372,6 +384,7 @@ int CGCTarget :: codeGenInit() {
 	// the output port that actually produces the data.
 	setGeoNames(*galaxy());
 
+	// call initialization code.
 	nextStar.reset();
 	while ((s = (CGCStar*) nextStar++) != 0) {
 		if (s->isItFork()) continue;
@@ -435,6 +448,8 @@ StringList CGCTarget :: offsetName(const CGCPortHole* p) {
 const char* whichType(DataType s) {
 	if ((strcmp(s, INT) == 0) || (strcmp(s, "INTARRAY") == 0)) 
 		return "int";
+	else if ((strcmp(s, COMPLEX) == 0) || (strcmp(s, "COMPLEXARRAY") == 0)) 
+		return "complex";
 	else if (strcmp(s, "STRING") == 0) return "char*";
 	return "double";
 }

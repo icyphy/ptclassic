@@ -55,6 +55,9 @@ public:
 	// name the offset of portholes
 	StringList offsetName(const CGCPortHole* p); 
 
+	// virtual method to generate compiling command
+	virtual StringList compileLine(const char* fName);
+
 	// make public this method
 	StringList correctName(const NamedObj& p) 
 		{return  sanitizedFullName(p); }
@@ -80,6 +83,11 @@ protected:
 	StringList mainInitialization;
 	StringList wormIn;
 	StringList wormOut;
+	StringList includeFiles;
+	StringList globalDecls;
+
+	// virtual function to initialize strings
+	virtual void initCodeStrings();
 
 	// buffer size determination
 	int allocateMemory();
@@ -113,11 +121,9 @@ protected:
 	int galId;
 
 private:
-	StringList includeFiles;
-	StringList globalDecls;
 	StringList sectionComment(const StringList s);
-	virtual int galDataStruct(Galaxy& galaxy, int level=0);
-	virtual int starDataStruct(CGCStar* block, int level=0);
+	virtual void galDataStruct(Galaxy& galaxy, int level=0);
+	virtual void starDataStruct(CGCStar* block, int level=0);
 	void setGeoNames(Galaxy& galaxy);
 
 	// Update the copy-offset (for embedded portholes) after
