@@ -90,6 +90,11 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #define ARCH "irix5"
 #endif
 
+#ifdef PTIRIX5_CFRONT
+#undef ARCH
+#define ARCH "irix5.cfront"
+#endif
+
 #ifdef PTLINUX
 #define ARCH "linux"
 #endif
