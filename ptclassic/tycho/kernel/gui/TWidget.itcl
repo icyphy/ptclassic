@@ -53,6 +53,9 @@ class ::tycho::TWidget {
     # Change the cursor to the "watch" and execute the arguments.
     method busy {args}
 
+    # Configure options of this widget
+    method configure {args}
+
     # Invoke a command on the context-sensitive popup menu.
     method contextmenu {cmd args}
 
@@ -95,6 +98,10 @@ class ::tycho::TWidget {
 
     # Configure the popup menu depending on the current context
     protected method configureContextMenu {}
+
+    # Remember explicitly-set options and then call the built-in
+    # itk_initialize
+    protected method itk_initialize {args}
 
     ###################################################################
     ####                         protected variables               ####
@@ -187,6 +194,26 @@ body ::tycho::TWidget::busy {args} {
     }
     config -cursor $oldCursor
     return $msg
+}
+
+#####################################################################
+#### configure
+# Configure a widget. This method overrides the default in
+# itk::Archetype. It unsubscribes the widget from
+# the prefereences manager for the given options. This ensures that
+# the widget keeps the value set by this method rather then
+# reverting to the value decided by the preferences manager -- that
+# is, setting options with this method "overrides" the preferences.
+#
+body ::tycho::TWidget::configure {args} {
+    set temp {}
+    foreach {option arg} $args {
+ 	lappend temp $option
+    }
+    if { $temp != "" } {
+ 	eval ::tycho::preference unsubscribeoptions $this $args
+    }
+    eval ::itk::Archetype::configure $args
 }
 
 #########################################################################
@@ -332,6 +359,25 @@ body ::tycho::TWidget::configureContextMenu {} {
     # FIXME: could be much more useful
     contextmenu add [list Name of this [info class] widget...] -command \
 	    "::tycho::post $this"
+}
+
+#####################################################################
+#### itk_initialize
+# Initialize options of a widget. This method overrides the
+# default itk_initialize{} provided in ::itk::Archetype to
+# remember the options that have been explicitly set by the
+# user. This is used by the preference manager so that these
+# options "override" any option subscriptions.
+#
+body ::tycho::TWidget::itk_initialize {args} {
+    set temp {}
+    foreach {option value} $args {
+	lappend temp $option
+    }
+    if { $temp != "" } {
+	eval ::tycho::preference excludeoptions $this $temp
+    }
+    uplevel ::itk::Archetype::itk_initialize $args
 }
 
 #####################################################################
