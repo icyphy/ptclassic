@@ -33,9 +33,18 @@
 # This file is set up for egcs-1.0.  gcc-2.8.0 has problems
 # compiling certain c++ files with -O -fPIC
 
-ARCHFLAGS =	-DPTSOL2_5 -DPT_EGCS
+ARCHFLAGS =	-DPTSOL2_5
 
 include $(ROOT)/mk/config-sol2.mk
+
+
+CPLUSPLUS_COMPAT =  -I$(ROOT)/src/compat/cfront
+
+# We must pase -DPT_EGCS so that make depend works properly.  Otherwise
+# we get messages like:
+# ../../src/compat/cfront/std.h:65: warning: No include path in which
+#	 to find sysent.h 
+CPLUSPLUS = g++ $(GPLUSPLUS_COMPAT) -DPT_EGCS
 
 # system libraries (libraries from the environment)
 # No need to include -lg++ under egcs
