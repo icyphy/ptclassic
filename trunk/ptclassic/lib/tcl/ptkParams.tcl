@@ -480,8 +480,8 @@ proc ed_RemoveParam {facet number top button} {
   bind Label <1> "ed_Remove $facet $number %W"
   bind Scrollbar <1> "ed_Remove $facet $number %W"
   while {! $ed_EntryDestroyFlag} {
-    after 500
     update
+    after 50
   }
   bind Entry <1> $oldB1EntryBinding
   bind Label <1> $oldB1LabelBinding
@@ -503,8 +503,10 @@ proc ed_RemoveParam {facet number top button} {
 
 proc ed_Remove {facet number winName} {
   global ed_EntryDestroyFlag ed_Parameters ed_ToplevelNumbers
+  # Update the display by destroying the subframe that displays the parameter
   regsub {^(.*\.f[^\.]+)((\.entry|\.label)|)$} $winName {\1} window
   destroy $window
+  # Now find the parameter in ed_Parameters, and remove it
   regsub {^.*\.f([^\.]+)$} $window {\1} countd
   set name $ed_ToplevelNumbers($facet,$number,$countd)
   set count 0
@@ -512,6 +514,9 @@ proc ed_Remove {facet number winName} {
     if {[string match [lindex $param 0] $name]} {
       set ed_Parameters($facet,$number) \
             [lreplace $ed_Parameters($facet,$number) $count $count]
+      if {[llength $ed_Parameters($facet,$number)] == 0} {
+	set ed_Parameters($facet,$number) NIL
+      }
       ed_WriteParam $ed_Parameters($facet,$number) $facet $number
       break
     }
