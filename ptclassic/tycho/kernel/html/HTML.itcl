@@ -2115,7 +2115,7 @@ proc HMtag_/color {win param text} {
 }
 
 # If you mess with the dl code, make sure that the javadoc output looks ok.
-# See also $TYCHO/kernel/test/dltest.html
+# See also $TYCHO/kernel/html/test/dltest.html
 #
 # Here's a summary of how the HTML dl code works.  This is a little
 # long winded, but this code is very tricky.
