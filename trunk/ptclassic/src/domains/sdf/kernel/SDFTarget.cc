@@ -158,5 +158,5 @@ BlockPortIter nextp(*galaxy());
 //be called if the wormhole has no inputs and has to trigger itself, ie 
 //selfFiringRequested() returns TRUE
 double SDFTarget :: nextFiringTime(){
-return ((double)schedulePeriod);
+        return scheduler()->now() + (double)schedulePeriod;
 }

@@ -103,6 +103,13 @@ public:
 
 	/*virtual*/ BasePrioQueue* queue() { return &eventQ; }
 
+        // Let outside domain know whether to refire.
+	/*virtual*/ int selfFiringRequested();
+	
+	// If selfFiringRequested returns TRUE, return the time at which
+	// this firing is requested.
+	/*virtual*/ double nextFiringTime();
+
         // class identification
         int isA(const char*) const;
 };

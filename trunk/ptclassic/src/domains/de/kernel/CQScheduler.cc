@@ -347,5 +347,28 @@ int CQScheduler :: fetchEvent(InDEPort* p, double timeVal)
 	return FALSE;
 }
 
+int CQScheduler :: selfFiringRequested() {
+    CqLevelLink* f = eventQ.get();
+    if (f == NULL) {
+        // No event left in queue
+        return FALSE;
+    }
+    
+    eventQ.pushBack(f);	// push back
+    return TRUE;
+}
+	
+double CQScheduler :: nextFiringTime() {
+    CqLevelLink* f = eventQ.get();
+    if (f == NULL) {
+        // No event left in queue
+        return 0.0;
+    }
+    
+    double level = f->level;
+    eventQ.pushBack(f);	// push back
+    return level;
+}
+
 // isA
 ISA_FUNC(CQScheduler,DEBaseSched);
