@@ -33,6 +33,21 @@ limitation of liability, and disclaimer of warranty provisions.
 	desc { Expression to evaulate. }
     }
 
+    state {
+	name { inDataType }
+	type { string }
+	default { "float" }
+	desc{ "DataType of `in` porthole, one of [float,int,anytype,complex]" }
+    }
+
+    state {
+	name { outDataType }
+	type { string }
+	default { "float" }
+	desc
+	 {"DataType of `out` porthole, one of [float,int,complex,=in]"}
+    }
+
     state
     {
 	name { include }
@@ -47,6 +62,54 @@ limitation of liability, and disclaimer of warranty provisions.
 	type { int }
 	default { "2" }
 	desc { execution time }
+    }
+
+    setup {
+	const char* letter = inDataType;
+	switch (letter[0]) {
+	case 'F':
+	case 'f':
+	    in.setPort("in",this,FLOAT);
+	    break;
+	case 'I':
+	case 'i':
+	    in.setPort("in",this,INT);
+	    break;
+	case 'A':
+	case 'a':
+	    in.setPort("in",this,ANYTYPE);
+	    break;
+	case 'C':
+	case 'c':
+	    in.setPort("in",this,COMPLEX);
+	    break;
+	default:
+	    Error::abortRun(*this,"CGC Expr does not support the type",
+			    inDataType);
+	    break;
+	}
+	letter = outDataType;
+	switch (letter[0]) {
+	case 'F':
+	case 'f':
+	    out.setPort("out",this,FLOAT);
+	    break;
+	case 'I':
+	case 'i':
+	    out.setPort("out",this,INT);
+	    break;
+	case '=':
+	    out.inheritTypeFrom(in);
+	    break;
+	case 'C':
+	case 'c':
+	    out.setPort("out",this,COMPLEX);
+	    break;
+	default:
+	    Error::abortRun(*this,"CGC Expr does not support the type",
+			    outDataType);
+	    break;
+	}
     }
 
     initCode
