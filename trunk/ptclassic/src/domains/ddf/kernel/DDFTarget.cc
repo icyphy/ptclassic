@@ -88,5 +88,33 @@ DDFTarget::~DDFTarget() {
 	delSched();
 }
 
+StringList DDFTarget::hint (const char* blockname) {
+    const char* value = firings.lookup(blockname);
+    if (value) {
+	StringList ret = "firingsPerIteration ";
+	ret += value;
+	return ret;
+    } else {
+	return "";
+    }
+}
+
+StringList DDFTarget::hint (const char* blockname, const char* hintname) {
+    if (strcmp(hintname,"firingsPerIteration") == 0) {
+	return hint(blockname);
+    } else {
+	return "";
+    }
+}
+
+StringList DDFTarget::hint (const char* blockname,
+			    const char* hintname,
+			    const char* value) {
+    if (strcmp(hintname,"firingsPerIteration") == 0) {
+	firings.insert(blockname, value);
+    }
+    return "";
+}
+
 const char* DDFTarget::className() const { return "DDFTarget";}
 ISA_FUNC(DDFTarget,Target);
