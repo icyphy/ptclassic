@@ -172,6 +172,8 @@ proc ::ptkExpandEnvVar { path } {::tycho::expandPath $path}
 # Derived classes may also wish to override <code>reload</code>.
 # For example, the text editors derived from this class overload
 # <code>reload</code> to prevent it from corrupting the clipboard buffer.
+# Finally, most derived classes will want to redefine <code>focusin</code>
+# to give the focus to a key widget.
 #
 class ::tycho::File {
     inherit ::tycho::Dismiss
