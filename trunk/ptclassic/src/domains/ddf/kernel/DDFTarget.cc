@@ -31,7 +31,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
  Programmer: Soonhoi Ha
  The authors gratefully acknowledge the contributions of Richard Stevens.
- Date of creation: 7/20/94
 
 
  Declaration for DDFTarget, the default target to be used in the DDF
@@ -100,11 +99,12 @@ StringList DDFTarget::hint (const char* blockname) {
 }
 
 StringList DDFTarget::hint (const char* blockname, const char* hintname) {
-    if (strcmp(hintname,"firingsPerIteration") == 0) {
-	return hint(blockname);
-    } else {
-	return "";
-    }
+  const char* c;
+  if (strcmp(hintname,"firingsPerIteration") != 0 ||
+      !(c = firings.lookup(blockname))) {
+    c = "";
+  }
+  return c;
 }
 
 StringList DDFTarget::hint (const char* blockname,
