@@ -164,6 +164,8 @@ extern int RPCMaxApplications;
 #define RPC_FILE_EVENT	 3
 
 
+extern void		rpcInit(); /* Called in main/vem.c */
+
 /* handle connection/network operations */
 extern rpcStatus	RPCAddApplication();
 extern void		RPCServerEnd();
