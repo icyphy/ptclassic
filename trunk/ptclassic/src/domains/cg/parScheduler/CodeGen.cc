@@ -567,6 +567,7 @@ UniProcessor :: makeReceive(int pindex, PortHole* rP, int delay,
 	// make connection
 	PortHole* sP = newR->portWithName("output");
 	sP->connect(*rP, delay);
+	((DFPortHole*)sP)->setSDFParams(numSample,numSample-1);
 
 	// set the cloned star pointer of the receive nodes
 	int comp = myId() - pindex;
@@ -589,6 +590,7 @@ void UniProcessor :: makeSend(int pindex, PortHole* sP,
 	// make connection
 	PortHole* rP = newS->portWithName("input");
 	sP->connect(*rP, 0);
+	((DFPortHole*)rP)->setSDFParams(numSample,numSample-1);
 
 	// set the cloned star pointer of the Send node
 	int comp = myId() - pindex;
