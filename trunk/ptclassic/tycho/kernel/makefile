@@ -49,7 +49,6 @@ include $(CONFIG)
 TCL_SRCS = \
 	Color.tcl \
 	Lib.tcl \
-	Options.tcl \
 	tychoMakeIndex.tcl
   
 ITCL_SRCS = \
@@ -69,13 +68,11 @@ ITCL_SRCS = \
 	File.itcl \
 	FileBrowser.itcl \
 	FontManager.itcl \
-	Graphics.itcl \
 	HTML.itcl \
 	HTMLText.itcl \
 	IndexBrowser.itcl \
 	ListBrowser.itcl \
 	Message.itcl \
-	Preferences.itcl \
 	RevControl.itcl \
 	RevControlSCCS.itcl \
 	RevControlRCS.itcl \
