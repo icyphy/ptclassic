@@ -68,9 +68,9 @@ const char* omsg;
 	/* The message in omsg is a C string.  Need to convert it to */
 	/* a Tcl string, adding braces and backslashes if necessary. */
 	/* omsg is not altered, but the Tcl prototypes want char*    */
-	numChars = Tcl_ScanElement(omsg, &flags) + 1;
+	numChars = Tcl_ScanElement((char *) omsg, &flags) + 1;
 	dst = (char *) malloc(numChars);
-	Tcl_ConvertElement(omsg, dst, flags);
+	Tcl_ConvertElement((char *) omsg, dst, flags);
 
 	if (Tcl_VarEval(ptkInterp, "ptkImportantMessage .ptkMessage ",
 			dst, NULL) != TCL_OK) {
