@@ -90,6 +90,10 @@ public:
 		return setData(arg.value());
 	}
 
+protected:
+	// dummy default constructor so derived classes can be made.
+	HashEntry() {}
+
 private:
 	// constructor can be invoked only by HashTable class
 	HashEntry(HashTable* t,HashEntry** b,const char* k);
