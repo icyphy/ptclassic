@@ -53,6 +53,11 @@ ENHANCEMENTS, OR MODIFICATIONS.
 **************************************************************************/
 
 ///////////////////////////////////////////////////////////////////////
+// Constructor
+//
+DDFSimpleSched::DDFSimpleSched() : runUntilDeadlock(0) {}
+
+///////////////////////////////////////////////////////////////////////
 // Check to see whether the specified star has a pragma registered
 // with it.  As a side effect, the value of the pragma will be
 // parsed and stored in the star.
@@ -60,9 +65,9 @@ ENHANCEMENTS, OR MODIFICATIONS.
 // pragmaStars list.
 //
 int DDFSimpleSched :: pragmaRegistered(DataFlowStar* st) {
-  // For efficiency, check to see whether st->getIter() returns
+  // For efficiency, check to see whether the iter flag is
   // non-zero.  This means we have already parsed a pragma.
-  if (st->getIter() > 0) return 1;
+  if (st->flags[iter] > 0) return 1;
 
   // The following conditional is a hopefully unnecessary precaution,
   // since the star should certainly have a target.
@@ -77,11 +82,11 @@ int DDFSimpleSched :: pragmaRegistered(DataFlowStar* st) {
       // Note that we will register a zero if no integer is recognized
       // in the specified string.  If the number of iterations is non-zero,
       // then add the star to the pragmaStars list.
-      st->setIter(atoi((const char*)pragma));
-      if (st->getIter()) pragmaStars.append(st);
+      st->flags[iter] = atoi((const char*)pragma);
+      if (st->flags[iter]) pragmaStars.append(st);
       return 1;
     } else {
-      st->setIter(0);
+      st->flags[iter] = 0;
     }
   }
   return 0;
@@ -89,25 +94,16 @@ int DDFSimpleSched :: pragmaRegistered(DataFlowStar* st) {
 
 ////////////////////////////////////////////////////////////////////////
 // Determine in which class the star passed in falls.
-// The possible classes are not-enabled (return 0),
-// enabled, non-deferrable (add to enabledNonDef list and return 1),
-// enabled, deferrable, non-sources (add to enabledDefNonSources list
-// and return 2), enabled, deferrable sources (add to defSources list
-// and return 3).
+// The possible classes are "not-enabled" (return 0),
+// "enabled, non-deferrable" (return 1),
+// "enabled, deferrable, non-sources" (return 2),
+// "enabled, deferrable sources" (return 3).
+// The return value is also stored in the enabled flag of the star.
+//
 //
 int DDFSimpleSched :: classify (DataFlowStar* c) {
   int state = enabledState(c);
-  switch(state) {
-  case 1:		// enabled and non-deferrable
-    enabledNonDef.append(c);
-    break;
-  case 2:		// enabled, deferrable, non-source
-    enabledDefNonSources.append(c);
-    break;
-  case 3:		// enabled, deferrable sources
-    defSources.append(c);
-    break;
-  }
+  c->flags[enabled] = state;
   return state;
 }
 
@@ -121,6 +117,36 @@ void DDFSimpleSched :: setup () {
   DFGalStarIter nextStar(*(galaxy()));
   DataFlowStar* c;
   while((c = nextStar++) != 0) pragmaRegistered(c);
+}
+
+////////////////////////////////////////////////////////////////////////
+// Fire the stars in the sequential list that is passed.
+// Return FALSE if an error occurs or a halt is requested.
+// Set the "firedOne" member if any star actually fires.
+//
+int DDFSimpleSched :: fireStarsFrom(SequentialList& list) {
+  while (list.size() > 0) {
+    DataFlowStar *s = (DataFlowStar*)list.getAndRemove();
+    // In order to allow for easier profiling, the star is run through
+    // a local method that is usually in-line.
+    if (!runStar(s)) return FALSE;
+    firedOne = TRUE;
+
+    // Classify the stars that are adjacent this one
+    // (the state of upstream may also change).
+    DFStarPortIter nextPort(*s);
+    DFPortHole *p = 0;
+    while ((p = nextPort++) != 0) {
+      // If the port is not connected, do nothing
+      if (!p->far()) continue;
+      DataFlowStar* far = (DataFlowStar*)p->far()->parent();
+      classify(far);
+    }
+
+    // Also, classify myself for the next round.
+    classify(s);
+  }
+  return TRUE;
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -161,58 +187,72 @@ int DDFSimpleSched :: run() {
   DFGalStarIter nextStar(*(galaxy()));
   DataFlowStar* c;
 
-  while (numFiring < stopTime && !haltRequested()) {
+  // Classify all stars.  For efficiency, after this, we keep a
+  // running track of which stars have their enabled state changed
+  // by firings. Only on the first run do we need to classify all
+  // stars. After that, only stars adjacent to one that fires
+  // can change state.  Note that for a wormhole, this will be
+  // invoked each time the wormhole is invoked.
+  while((c = nextStar++) != 0) classify(c);
+
+  while (numFiring < stopTime) {
 
     // Reset the firings count for all stars.
     // This is used (optionally) to determine how many star
     // firings contitute one "iteration".  To come into play,
     // you must set the firingsPerIteration pragma of the star.
-    nextStar.reset();
-    while ((c = nextStar++) != 0) c->resetFirings();
+    // As an optimization, this is only done if there have
+    // been pragmas registered.
+    if (pragmaStars.size() > 0) {
+      nextStar.reset();
+      while ((c = nextStar++) != 0) c->flags[firings] = 0;
+    }
 
     // The following loop might be repeated if any of the stars in
-    // it return zero in the enoughFirings() method.
+    // it do not have enough firings to satisfy their pragma.  Each pass through
+    // the loop defines a subiteration.  All passes through the
+    // loop together define one complete iteration.
     int doAgain = TRUE;
     while (doAgain) {
+    
+      if (haltRequested()) return TRUE;
+      
       doAgain = FALSE;
 
-      // Classify all stars.  In principle, we could keep a running track
-      // of which stars have their enabled state changed by firings,
-      // but requires fairly complex data structures, and is unlikely
-      // to be faster than this simple method.
+      // Scan the list of stars, and depending on the enabled flag,
+      // put the star onto one of the lists of stars that might fire.
+      enabledNonDef.initialize();
       enabledDefNonSources.initialize();
       defSources.initialize();
       nextStar.reset();
-      while((c = nextStar++) != 0) classify(c);
+      while((c = nextStar++) != 0) {
+	switch(c->flags[enabled]) {
+	case 1:		// enabled and non-deferrable
+	  enabledNonDef.append(c);
+	  break;
+	case 2:		// enabled, deferrable, non-source
+	  enabledDefNonSources.append(c);
+	  break;
+	case 3:		// enabled, deferrable sources
+	  defSources.append(c);
+	  break;
+	}
+      }
 
       // (1) Fire all enabled and non-deferrable actors at most once.
-      int firedOne = FALSE;
-      while (enabledNonDef.size() > 0) {
-	DataFlowStar *s = (DataFlowStar*)enabledNonDef.getAndRemove();
-	if (haltRequested() || !s->run()) return FALSE;
-	firedOne = TRUE;
-      }
+      firedOne = FALSE;
+      if (!fireStarsFrom(enabledNonDef)) return FALSE;
 
       // (2) If the above yielded no firings at all, then we proceed to the
       //     step of firing all enabled deferrable actors that are not sources.
       if (!firedOne) {
-	while (enabledDefNonSources.size() > 0) {
-	  DataFlowStar *s = (DataFlowStar*)enabledDefNonSources.getAndRemove();
-	  if (haltRequested() || !s->run()) return FALSE;
-	  firedOne = TRUE;
-	}
+	if (!fireStarsFrom(enabledDefNonSources)) return FALSE;
       }
 
-      // (3) If the above still yielded no firings, then the graph
-      //     cannot be executed in bounded memory.  We now simply fire
-      //     all sources, all of which must be deferrable, and which
-      //     together comprise all enabled actors.
+      // (3) If the above still yielded no firings, then we now fire
+      //     all deferrable sources.
       if (!firedOne) {
-	while (defSources.size() > 0) {
-	  DataFlowStar *s = (DataFlowStar*)defSources.getAndRemove();
-	  if (haltRequested() || !s->run()) return FALSE;
-	  firedOne = TRUE;
-	}
+	if (!fireStarsFrom(defSources)) return FALSE;
       }
 	  
       // (4) If we still have not fired a star, we are deadlocked.
@@ -229,29 +269,33 @@ int DDFSimpleSched :: run() {
       ListIter ns(pragmaStars);
       DataFlowStar* np;
       while ((np = (DataFlowStar*)ns++) != 0) {
-	if (!np->enoughFirings()) {
+	if ( np->flags[firings] < np->flags[iter] ) {
 	  doAgain = TRUE;
 	  break;
 	}
       }
 
       if (runUntilDeadlock) doAgain = firedOne;
+
+      // End of a subiteration.
     }
 
     // end of ONE iteration
     numFiring++;	
 
-    // Check for buffer overflow.
-    // FIXME: This should be optional, for efficiency.
-    nextStar.reset();
-    while ((c = nextStar++) != 0) {
-      DFStarPortIter nextPort(*c);
-      DFPortHole *p = 0;
-      while ((p = nextPort++) != 0) {
-	if (p->isItInput()) {
-	  if (p->numTokens() > maxToken) {
-	    reportArcOverflow(p, maxToken);
-	    return FALSE;
+    // Check for buffer overflow if the maximum buffer
+    // size is set to a positive number.
+    if(maxToken > 0) {
+      nextStar.reset();
+      while ((c = nextStar++) != 0) {
+	DFStarPortIter nextPort(*c);
+	DFPortHole *p = 0;
+	while ((p = nextPort++) != 0) {
+	  if (p->isItInput()) {
+	    if (p->numTokens() > maxToken) {
+	      reportArcOverflow(p, maxToken);
+	      return FALSE;
+	    }
 	  }
 	}
       }
@@ -271,6 +315,7 @@ int DDFSimpleSched :: isSource(Star& s) {
   }
   return TRUE;
 }
+
 ///////////////////////////////////////////////////////////////////////
 // Check the input ports and return the state of the actor.
 // If it is enabled and non-deferrable, return 1.
@@ -304,11 +349,11 @@ int DDFSimpleSched :: enabledState(DataFlowStar* s) {
 
   if (blockedOnInput(s) > 0) return 0;         // not enabled
   // enabled
-  else if (!isOutputDeferrable(s)) return 1;   // enabled, not deferrable
+  if (!isOutputDeferrable(s)) return 1;        // enabled, not deferrable
   // enabled and deferrable
-  else if (!isSource(*s)) return 2;            // enabled, deferrable, non-source
+  if (!isSource(*s)) return 2;                 // enabled, deferrable, non-source
   // enabled, deferrable source
-  else return 3;                               // enabled, deferrable, source
+  return 3;                                    // enabled, deferrable, source
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -320,19 +365,15 @@ int DDFSimpleSched :: blockedOnInput(DataFlowStar* s) {
   DFStarPortIter nextPort(*s);
   DFPortHole *p;
   while ((p = nextPort++) != 0) {
-    if (p->isItInput()) {
-      // If the arc is over the limit, flag it.
-      if (p->numTokens() > maxToken) overFlowArc = p;
-
-      if (p->numTokens() < p->numXfer()) return 1;
-    }
+    if (p->isItInput() && p->numTokens() < p->numXfer()) return 1;
   }
   return 0;
 }
 
 ///////////////////////////////////////////////////////////////////////
 // Check to see whether any of the outputs has enough data already to
-// satisfy the downstream actor.  If there are no outputs, always return FALSE.
+// satisfy the downstream actor.  If so, return TRUE.
+// If there are no outputs, always return FALSE.
 //
 int DDFSimpleSched :: isOutputDeferrable(DataFlowStar* s) {
   DFStarPortIter nextPort(*s);
@@ -340,25 +381,27 @@ int DDFSimpleSched :: isOutputDeferrable(DataFlowStar* s) {
   while ((p = nextPort++) != 0) {
     if (p->isItInput()) continue;
 
+    PortHole* far = p->far();
+	
     // If output is not connected, continue
-    if (!p->far()) continue;
+    if (!far) continue;
 
-    DataFlowStar* ds = (DataFlowStar*) p->far()->parent();
+    DataFlowStar* ds = (DataFlowStar*) far->parent();
     DFPortHole* wp = ds->waitPort();
-    if (wp && (p->far() == (PortHole*) wp)) {
+    if (far == (PortHole*) wp) {
       // The downstream actor is waiting for data on this port.
       // If the number of tokens available is sufficient...
-      if (wp->numTokens() >= ds->waitTokens()) return 1;
+      if (wp->numTokens() >= ds->waitTokens()) return TRUE;
     } else if (wp) {
       // The downstream actor is waiting for data
       // on another port.
-      return 1;
+      return TRUE;
     } else {
       // The downstream actor is waiting for data on this
       // and other ports (probably an SDF actor).
-      if (p->far()->numXfer() <= p->numTokens()) return 1;
+      if (far->numXfer() <= p->numTokens()) return TRUE;
     }
   }
-  return 0;
+  return FALSE;
 }
 		
