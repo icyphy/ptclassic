@@ -97,13 +97,13 @@ proc ptkRunControl { name octHandle } {
     set defNumIter [ptkGetRunLength $octHandle]
 
     message $ptkControlPanel.msg \
-	    -font -Adobe-times-medium-r-normal--*-180* -width 25c \
-            -text "Control panel for $name" -justify center
+	    -width 25c -text "Control panel for $name" -justify center
 
     # Define the entry that controls the number of iterations
     frame $ptkControlPanel.iter -bd 10
 	label $ptkControlPanel.iter.label -text "When to stop:"
-        entry $ptkControlPanel.iter.entry -relief sunken -width 10 -bg wheat3
+        entry $ptkControlPanel.iter.entry -relief sunken -width 10 \
+		-bg [ptkColor wheat3]
 	$ptkControlPanel.iter.entry insert @0 $defNumIter
 	checkbutton $ptkControlPanel.iter.debug -text "Debug" \
 	    -variable ptkDebug($name) -relief flat \
@@ -308,11 +308,10 @@ proc ptkTxAnimation { on} {
 	    toplevel $win
 	    wm title $win "Textual Animation"
 	    wm iconname $win "Textual Animation"
-	    message $win.msg -font -Adobe-times-medium-r-normal--*-180* \
-		-width 12c -text "Executing stars:"
+	    message $win.msg -width 12c -text "Executing stars:"
 	    frame $win.text
 	    text $win.text.t -relief raised -bd 2 -width 60 -height 20 \
-                -bg AntiqueWhite \
+                -bg [ptkColor AntiqueWhite] \
                 -yscrollcommand "$win.text.s set" -setgrid true
             scrollbar $win.text.s -relief flat -command "$win.text.t yview"
             pack append $win.text $win.text.s {right filly} \
