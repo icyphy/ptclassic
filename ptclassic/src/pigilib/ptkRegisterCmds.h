@@ -40,6 +40,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "tcl.h"
 #include "tk.h"
 
-extern void ptkRegisterCmds ARGS((Tcl_Interp *ip, Tk_Window appWin));
+extern void ptkRegisterCmds ARGS((Tcl_Interp *ip));
 
 #endif  /* _PTKREGISTERCMS_H */

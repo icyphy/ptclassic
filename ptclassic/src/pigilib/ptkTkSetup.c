@@ -95,9 +95,8 @@ int mask;
 
 
 static int
-_ptkAppInit( ip, win)
+_ptkAppInit( ip)
     Tcl_Interp *ip;
-    Tk_Window	win;
 {
     if (Tcl_Init(ip) == TCL_ERROR)
 	return TCL_ERROR;
@@ -115,7 +114,7 @@ _ptkAppInit( ip, win)
       return TCL_ERROR;
     }
 #endif
-    ptkRegisterCmds( ip, win);
+    ptkRegisterCmds(ip);
     return TCL_OK;
 }
 
@@ -135,6 +134,7 @@ ptkTkSetup(funcArray, size)
 
     /* Create Tk Window */
     ptkInterp = Tcl_CreateInterp();
+#if TK_MAJOR_VERSION <= 4 && TK_MINOR_VERSION < 1
     ptkW = Tk_CreateMainWindow(ptkInterp, NULL, appName, appClass);
     if (ptkW == NULL) {
 	ErrAdd("FATAL ERROR");
@@ -142,13 +142,15 @@ ptkTkSetup(funcArray, size)
 	PrintErr(ErrGet());
         exit(1);
     }
+#endif 
+
     /* no argc&argv to transfer */
     Tcl_SetVar(ptkInterp, "argv0", "pigi", TCL_GLOBAL_ONLY);
 
     Tcl_SetVar(ptkInterp, "tcl_interactive", "1", TCL_GLOBAL_ONLY);
 
     /* our vers of Tk_AppInit */
-    if (_ptkAppInit( ptkInterp, ptkW) != TCL_OK) {
+    if (_ptkAppInit( ptkInterp) != TCL_OK) {
 	PrintErr(ptkInterp->result);
 	exit(1);
     }

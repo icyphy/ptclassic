@@ -61,7 +61,7 @@ PTcl *ptcl;
 POct *poct;
 PVem *pvem;
 
-void ptkRegisterCmds( Tcl_Interp *ip, Tk_Window /*appWin*/)
+void ptkRegisterCmds( Tcl_Interp *ip)
 {
 
    // Construct the global PTcl object.  This should be done once only.
