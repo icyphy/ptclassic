@@ -45,7 +45,7 @@ a demand signal arrives and there is no data.
 		data.before(demand);
 	}
 	setup {
-		LOG_DEL; delete saveData;
+		LOG_DEL; delete [] saveData;
 		LOG_NEW; saveData = new float[int(maxLength)];
 		idx = 0;
 	}
@@ -63,6 +63,6 @@ a demand signal arrives and there is no data.
 		}
 	}
 	destructor {
-		LOG_DEL; delete saveData;
+		LOG_DEL; delete [] saveData;
 	}
 }
