@@ -22,6 +22,27 @@ and
 icon.  Be sure to update your path and the other variables mentioned
 in the Cygnus <CODE>README.txt</CODE>.
 
+<li> Part of the GNU-win32 installation includes setting up
+<CODE>/bin/sh.exe</CODE> for use from <CODE>make</CODE>:
+<pre>
+mkdir /bin
+cp /Cygnus/B19/H-i386-cygwin32/bin/sh.exe /bin
+</pre>
+Since the Xgraph stars and various scripts use <CODE>/bin/rm</CODE>
+you should also do:
+<pre>
+cp /Cygnus/B19/H-i386-cygwin32/bin/rm.exe /bin
+</pre>
+ 
+<li> Install 19.1 from:
+<a href="ftp://go.cygnus.com/pub/ftp.cygnus.com/gnu-win32/latest/b19.1-update/"><CODE>ftp://go.cygnus.com/pub/ftp.cygnus.com/gnu-win32/latest/b19.1-update/</CODE></a>.  The installation is fairlys straightforward - exit all programs
+that use Cygwin32 and substitute in the new <CODE>libcygwinb19.dll</CODE>.
+
+<li> Install egcs-1.0.2 from:
+<a href="http://www.xraylith.wisc.edu/~khan/software/gnu-win32/egcs.html"><CODE>http://www.xraylith.wisc.edu/~khan/software/gnu-win32/egcs.html</CODE></a>
+This installation involves removing the <CODE>include/g++</CODE> directory
+and untarring two tar files.
+
 <li> Download <a href="http://dao.gsfc.nasa.gov/software/grads/win32/X11R6.3">Pre-compiled X11R6.3 Libraries/Clients For GNU Win32 B19 </a>.
 
 <li> Install X11R6.3:
@@ -29,7 +50,11 @@ in the Cygnus <CODE>README.txt</CODE>.
 mkdir /usr
 cd /usr
 tar -zxf b19_X11R6_3.tar.gz
+mkdir /etc
+cp /usr/X11R6.3/etc/termcap /etc
 </pre>
+<CODE>/etc/termcap</CODE> is necessary for <CODE>xterm</CODE>, which
+can be used by <CODE>pigi -debug</CODE>.
 
 <li> Add <CODE>c:\usr\X11R6.3\bin</CODE> to your path by using the
 <CODE>System</CODE> control panel.
@@ -63,21 +88,20 @@ PTOLEMY /users/ptolemy
 CC gcc
 </pre>
 
-
-<li> If you have Samba setup, then start up <CODE>bash</CODE> and cd
-to the tree with something like:
+<li> If you have <a href="http://samba.anu.edu.au/samba/">Samba</a>
+setup, then start up <CODE>bash</CODE> and cd to the tree with something like: 
 
 <pre>
 mkdir /users/ptolemy
-mount -b //<I>UnixHost</I>/ptolemy /users/ptolemy
+mount //<I>UnixHost</I>/ptolemy /users/ptolemy
 cd $PTOLEMY
 </pre>
-(The <CODE>-b</CODE> option says that text files are equivalent to binary
-files)
 
 <p>Now you have three ways to get to the sources using Samba:
 <ol>
-<li> Mount a Ptolemy tree located on Unix machine with the <CODE>Run</CODE> Start menu choice. T
+
+<li> Mount a Ptolemy tree located on Unix machine with the
+<CODE>Run</CODE> Start menu choice.
 
 <li> <CODE>cd</CODE> to the UNC, such as <CODE>cd //carson/ptdesign</CODE>
 
@@ -139,31 +163,15 @@ command as above.
  <pre>
     if (/*mkfifo(dst, srcStatBuf.st_mode)*/ -1 &lt; 0) {
  </pre>
+
+  <li> <CODE>unix/tclUnixNotfy.c</CODE>: fix to <CODE>MaskEmpty</CODE>
+The problem was that typing <CODE>R</CODE> to run a Universe never
+brought up the Run Control panel.
+Jan Nijtmans posted a patch to <CODE>comp.lang.tcl</CODE> on 12/18/1996.
  </menu>
  </menu>
 </ol>
 
-
-<h3>Running Ptolemy</h3>
-
-<ol>
-
-<li> If you are mounting the Ptolemy sources via Samba, then mount the <CODE>-b</CODE> option.  If you do not mount with <CODE>-b</CODE>, you 
-may see:
-<pre>
-Cannot find technology for cell init.pal:schematic:contents:
- Unexpected internal error in function tapGetFacetIdFromObj:
-Cannot open $PTOLEMY/lib/colors/ptolemy/tap.views</CODE>
-Either technology "ptolemy" does not exist or viewtype "schematic" is wrong.
-</pre>
-
-<li> If you see the following message, then you may need to 
-upgrade to Cygwinb19.1.
-<pre>
-RPC Error: can not fdopen for write in application
-RPC Error: cannot connect to the server
-</pre>
-</OL>
 <HR>
 <A HREF="index.html">Up to the Ptolemy under NT page</A> -
 <A HREF="ptntbugs.html">Back to Ptolemy NT Installation</A>
