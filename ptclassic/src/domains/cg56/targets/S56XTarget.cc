@@ -130,7 +130,7 @@ void S56XTarget :: writeCode() {
 
 int S56XTarget :: runCode() {
 	StringList runCmd;
-	runCmd << filePrefix << " &";
+	runCmd << "./" << filePrefix << " &";
 	if (systemCall(runCmd,"Problems running code onto S56X",targetHost)!=0)
 	    return FALSE;
 	return TRUE;
