@@ -102,10 +102,10 @@ class ::tycho::DragDropper {
     ####                            options                        ####
 
     # The distance from the mouse to be considered under it
-    itk_option define -halo halo Halo 0
+    public variable halo 0
 
     # The tags of target items
-    itk_option define -targettags targetTags TargetTags {}
+    public variable targettags {}
 
     ###################################################################
     ####                         public methods                    ####
@@ -120,7 +120,7 @@ class ::tycho::DragDropper {
     method drag {x y}
 
     # Test if the mouse is over a target item
-    method item {x y}
+    method over {x y}
 
     # Terminate interaction sequence
     method release {x y}
@@ -170,29 +170,25 @@ body ::tycho::DragDropper::drag {x y} {
     set item [over $x $y]
 
     # Adjust highlighting
-    if { $item == "" } {
-	$slate delete highlight
-    } else {
+    $slate delete highlight
+    if { $item != "" } {
 	$slate highlight $item
     }
 
     # Call -dragcommand
-    if { $itk_option(-dragcommand) != "" } {
+    if { $dragcommand != "" } {
 	uplevel \#0 ::tycho::apply \
-		[list $itk_option(-dragcommand) $this item $x $y $options]
+		[list $dragcommand $this $item $x $y]
     }
 }
 
 #######################################################################
 #### release
 #
-# Let go of the mouse. This method doesn't do anuthing, although
-# it is necesary to override the superclass method to prevent
-# forwarding to the slate (since this doesn't work with
-# drag-drop yet...)
+# Let go of the mouse. This method just deletes highlights.
 #
 body ::tycho::DragDropper::release {x y} {
-    ;# do nothing
+    $slate delete highlight
 }
 
 #######################################################################
@@ -204,17 +200,13 @@ body ::tycho::DragDropper::release {x y} {
 body ::tycho::DragDropper::over {x y} {
     set found 0
     foreach item [eval $slate find overlapping \
-	    [::tycho::Rectangle::stretch $x $y $x $y $itk_option(-halo)]] {
-	foreach tag $itk_options(-targettags) {
+	    [::tycho::Rectangle::stretch $x $y $x $y $halo]] {
+	foreach tag $targettags {
 	    if [$slate hastag $item $tag] {
 		set found 1
-		break
+		return $item
 	    }
 	}
     }
-    if $found {
-	return $item
-    } else {
-	return {}
-    }
+    return {}
 }
