@@ -122,13 +122,49 @@ $(BASENAME).ptiny:
 $(BASENAME):
 	make FULL=1 BASENAME=$(BASENAME) $(BASENAME)
 
+$(BASENAME).ptrim.debug:
+	make PTRIM=1 BASENAME=$(BASENAME) $(BASENAME).ptrim.debug
+
+$(BASENAME).ptiny.debug:
+	make PTINY=1 BASENAME=$(BASENAME) $(BASENAME).ptiny.debug
+
+$(BASENAME).debug:
+	make FULL=1 BASENAME=$(BASENAME) $(BASENAME).debug
+
+$(BASENAME).ptrim.debug.purify:
+	make PTRIM=1 BASENAME=$(BASENAME) $(BASENAME).ptrim.debug.purify
+
+$(BASENAME).ptiny.debug.purify:
+	make PTINY=1 BASENAME=$(BASENAME) $(BASENAME).ptiny.debug.purify
+
+$(BASENAME).debug.purify:
+	make FULL=1 BASENAME=$(BASENAME) $(BASENAME).debug.purify
+
+$(BASENAME).ptrim.debug.quantify:
+	make PTRIM=1 BASENAME=$(BASENAME) $(BASENAME).ptrim.debug.quantify
+
+$(BASENAME).ptiny.debug.quantify:
+	make PTINY=1 BASENAME=$(BASENAME) $(BASENAME).ptiny.debug.quantify
+
+$(BASENAME).debug.quantify:
+	make FULL=1 BASENAME=$(BASENAME) $(BASENAME).debug.quantify
+
+$(BASENAME).ptrim.debug.purecov:
+	make PTRIM=1 BASENAME=$(BASENAME) $(BASENAME).ptrim.debug.purecov
+
+$(BASENAME).ptiny.debug.purecov:
+	make PTINY=1 BASENAME=$(BASENAME) $(BASENAME).ptiny.debug.purecov
+
+$(BASENAME).debug.purecov:
+	make FULL=1 BASENAME=$(BASENAME) $(BASENAME).debug.purecov
+
 $(BINDIR)/$(BASENAME).ptrim: $(BASENAME).ptrim
 	make PTRIM=1 BASENAME=$(BASENAME) install
 
 $(BINDIR)/$(BASENAME).ptiny: $(BASENAME).ptiny
 	make PTINY=1 BASENAME=$(BASENAME) install
 
-$(BINDIR)/$(BASENAME): $(BASENAME)
+$(BINDIR)/$(BASENAME): $(BASENAME).debug.purecov
 	make FULL=1 BASENAME=$(BASENAME) install
 
 else #ALLBINARIES
