@@ -57,8 +57,6 @@ limitation of liability, and disclaimer of warranty provisions.
 	  packedin = (double *) memalign(sizeof(double),sizeof(double));
 	}
 	go {
-	  
-	  int index;
 	  short *invalue;
 	  
 	  *packedin = double(in%0);
