@@ -275,12 +275,14 @@ test MenuBar-post-2 {Post cascade menu} {
 } {1 1}
 update
 
+# Unposting a bottom-level menu has been changed to unpost
+# the whole thing...
 test MenuBar-unpost-2 {Unpost bottom-level menu} {
     .m unpost hypersport
     list \
             [winfo ismapped .m.buttonducati.menuducati] \
             [winfo ismapped .m.buttonducati.menuducati.menuhypersport] 
-} {1 0}
+} {0 0}
 update
 
 
