@@ -85,6 +85,12 @@ class ::tycho::Graphics {
     ###################################################################
     ####                   protected methods                       ####
 
+    # Add or configure a textual display at the bottom.
+    protected method addInfo {tag label value {width {}}}
+
+    # Add a button to the toolbar.
+    protected method addTool {name args}
+
     # Return the text to be saved.
     protected method saveText {}
 
@@ -97,6 +103,14 @@ class ::tycho::Graphics {
 #
 body ::tycho::Graphics::constructor {args} {
 
+    # A tool bar sitting above the canvas
+    itk_component add tools {
+	frame $itk_component(childsite).tools -relief sunken
+    } {
+	keep -background -cursor
+    }
+    pack $itk_component(tools) -expand no -fill x
+
     itk_component add graphics {
        [graphicsWidget] $itk_component(childsite).graphics \
                -top $this
@@ -108,6 +122,14 @@ body ::tycho::Graphics::constructor {args} {
 
     pack $itk_component(graphics) -expand yes -fill both
     
+    # Add a widget at the bottom for displaying info
+    itk_component add info {
+	frame $itk_component(childsite).info -relief sunken
+    } {
+	keep -background -cursor
+    }
+    pack $itk_component(info) -expand no -fill x
+
     addMenu Edit left Window -underline 0
 
     addMenuItem {Undo} Edit -underline 0 -accelerator "z" \
@@ -260,6 +282,75 @@ body ::tycho::Graphics::setReadOnly {bool} {
     ###################################################################
     ###################################################################
     ####                      protected methods                    ####
+
+#####################################################################
+#### addInfo
+# Add or configure textual information displayed at the bottom.
+# The arguments are: a name for the widget, ...
+# For example:
+# <pre>
+#    addInfo foo -text PushMe -command {puts pushed}
+# </pre>
+# will create a button labeled "PushMe" with a command that prints
+# a message on the standard output.
+#
+body ::tycho::Graphics::addInfo {tag label value {width {}}} {
+
+    if [info exists itk_component($tag)] {
+        # Display already exists.  Configure it.
+        component label_$tag configure -text $label
+        component value_$tag configure -text $value
+    } {
+        # Display does not exist. Create it.
+	itk_component add $tag {
+	    frame $itk_component(info).$tag
+	} {
+	    keep -background -cursor
+	}
+	pack $itk_component($tag) -side right -padx 5
+
+        itk_component add label_$tag {
+            label $itk_component($tag).label -text $label -relief flat
+        } {
+            keep -font -background -foreground
+        }
+        pack $itk_component(label_$tag) -side left
+
+        itk_component add value_$tag {
+            label $itk_component($tag).value -text $value -relief ridge
+        } {
+            keep -font -background -foreground
+        }
+        if {$width != {}} {
+            component value_$tag configure -width $width
+        }
+        pack $itk_component(value_$tag) -side left
+    }
+}
+
+
+#####################################################################
+#### addTool
+# Add a button to the toolbar at the top.
+# The arguments are: a name for the button followed by
+# any set of arguments to pass on to the Tk button command.
+# For example:
+# <pre>
+#    addTool foo -text PushMe -command {puts pushed}
+# </pre>
+# will create a button labeled "PushMe" with a command that prints
+# a message on the standard output.
+#
+body ::tycho::Graphics::addTool {name args} {
+    itk_component add $name {
+	eval button $itk_component(tools).$name $args
+    } {
+	keep -background -font -activebackground -cursor \
+		-highlightthickness -activeforeground \
+		-foreground -highlightcolor -highlightbackground
+    }
+    pack $itk_component($name) -side left
+}
 
 #######################################################################
 #### saveText
