@@ -2,8 +2,8 @@
 #
 # $Id$
 
-preference assign textedit textBackground grey93
-preference assign textedit selectColor    lightyellow
+preference assign edittext textBackground grey93
+preference assign edittext selectColor    lightyellow
 preference assign dialogs entryBackground grey90
 
 preference configure tkpalette -inherits tkdefaultpalettePreferences
