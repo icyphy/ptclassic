@@ -2,9 +2,12 @@ defstar {
 	name { Self }
 	domain { DDF }
 	desc {
-This is a first exploration of recursion and higher-order
-functions in dataflow.  It is still experimental, so do not
-expect it to be either efficient or bug-free.
+This is a first exploration of recursion and higher-order functions
+expanded while the system is running.  This is in contrast to the
+higher-order function stars like HOFChain, HOFMap, and HOFMapGr that
+expand the system during compilation and incur no run-time penalty.
+The DDFSelf star is still experimental, so do not expect it to be
+either efficient or bug-free.
 
 The star "represents" the galaxy given by the parameter "recurGal",
 which must be above it in the hierarchy.  That is, when the Self
@@ -42,11 +45,10 @@ Each input must have exactly one token for the star to fire.
 The number of outputs produced can depend on the internal galaxy.
 .pp
 Creating a new instance of the galaxy is quite an expensive operation,
-so setting "reinitialize" to TRUE will cause dramatically slower
-execution.  Thus this should not be used unless it is absolutely
-necessary.
+so setting \fIreinitialize\fR to TRUE will cause dramatically slower
+execution.  Thus this should not be used unless it is absolutely necessary.
 	}
-	seealso { fibonnacci }
+	seealso { fibonnacci, HOFChain, HOFMap, HOFMapGr }
 	hinclude { "InterpGalaxy.h",  "Domain.h", "DDFScheduler.h"}
 	inmulti {
 		name { input }
@@ -82,8 +84,8 @@ necessary.
 		code { return TRUE;}
 	}
 	protected {
-		InterpGalaxy *masterGal;
-		InterpGalaxy *myGal;
+		InterpGalaxy* masterGal;
+		InterpGalaxy* myGal;
 		DDFScheduler sched;
 	}
 	constructor {
@@ -97,35 +99,35 @@ necessary.
 	    // If a galaxy already exists, just initialize it
 	    if (myGal) {
 		myGal->initialize();
-	    } else {
+	    }
+	    else {
 		// The following should not be required because of the
 		// num { 0 } above.  At one time, this did not work.
 		// output.setDDFParams(0);
 
 		StringList msg = "DDFSelf Star \"";
-		msg += name();
-		msg += "\" :\n";
+		msg << name() << "\" :\n";
 		int flag = 0;
 
 		// find out which galaxy is recursive.
 		if (recurGal.null()) {
-			msg += "undefined name for recursion construct\n";
+			msg << "undefined name for recursion construct\n";
 			Error :: abortRun(*this, msg);
 			return;
 		}
 
-		Block *b = this;
+		Block* b = this;
 		do {
 		    b = b->parent();
 		    if (!b || (b->isA("InterpUniverse"))) {
-			msg += "Unmatched name ";
-			msg += (const char*)recurGal;
-			msg += " for recursion construct\n";
+			msg << "Unmatched name "
+			    << (const char*)recurGal
+			    << " for recursion construct\n";
 			Error :: abortRun(*this, msg);
 			return;
 		    }
 		    if(!(b->isA("InterpGalaxy"))) {
-			msg += "Sorry, recursion only works for InterpGalaxies";
+			msg << "Sorry, recursion only works for InterpGalaxies";
 			Error :: abortRun(*this, msg);
 			return;
 		    }
@@ -142,16 +144,18 @@ necessary.
 			else outNum++;
 			DDFPortHole* dp = (DDFPortHole*) portWithName(p.name());
 			if (!dp) {
-				msg += "wrong galaxy portname for recursion \"";
-				msg += p.name();
-				msg += "\" (should be input#? or output#?)\n";
+				msg << "wrong galaxy portname for recursion \""
+				    << p.name()
+				    << "\" (should be input#? or output#?)\n";
 				flag++;
-			} else {
+			}
+			else {
 				dp->imagePort = &p;
 			}
 		}
-		if (input.numberPorts() != inNum || output.numberPorts() != outNum) {
-			msg += "unmatched number of ports with recursion galaxy\n";
+		if (input.numberPorts() != inNum ||
+		    output.numberPorts() != outNum) {
+			msg << "unmatched number of ports with recursion galaxy\n";
 			flag++;
 		}
 		if (flag) Error :: abortRun(*this, msg);
@@ -202,7 +206,7 @@ necessary.
 	    sched.run();
 
 	    // move data out of galaxy
-	    int numXfred;
+	    int numXfred = 0;
 	    MPHIter nexto(output);
 	    for (j = output.numberPorts(); j > 0; j--) {
 	    	OutDDFPort& p = *(OutDDFPort*) nexto++;
