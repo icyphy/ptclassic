@@ -70,9 +70,11 @@ the OverflowHandler will be called.
 	}
         setup {
                 out = Fix( ((const char *) OutputPrecision) );
+		if ( out.invalid() )
+		   Error::abortRun( *this, "Invalid OutputPrecision" );
 		out.set_ovflow( ((const char *) OverflowHandler) );
 		if ( out.invalid() )
-		   Error::abortRun( *this, "Invalid overflow handler" );
+		   Error::abortRun( *this, "Invalid OverflowHandler" );
         }
 	go {
 		out = 0.0;

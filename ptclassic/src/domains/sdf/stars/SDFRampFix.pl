@@ -68,9 +68,11 @@ During simulation, this parameter holds the current value output by the ramp.
         }
         setup {
 		t = Fix( ((const char *) OutputPrecision) );
+		if ( t.invalid() )
+		  Error::abortRun( *this, "Invalid OutputPrecision" );
                 t.set_ovflow( ((const char *) OverflowHandler) );
 		if ( t.invalid() )
-		   Error::abortRun( *this, "Invalid overflow handler" );
+		   Error::abortRun( *this, "Invalid OverflowHandler" );
         }
 	go {
 		t = Fix(value);

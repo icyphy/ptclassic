@@ -78,13 +78,18 @@ the OverflowHandler will be called.
 		Fix fixIn, out;
         }
         setup {
-                if ( ! int(ArrivingPrecision) )
+                if ( ! int(ArrivingPrecision) ) {
                   fixIn = Fix( ((const char *) InputPrecision) );
+		  if ( fixIn.invalid() )
+		    Error::abortRun( *this, "Invalid InputPrecision" );
+		}
 
                 out = Fix( ((const char *) OutputPrecision) );
+		if ( out.invalid() )
+		  Error::abortRun( *this, "Invalid OutputPrecision" );
                 out.set_ovflow( ((const char *) OverflowHandler) );
 		if ( out.invalid() )
-		  Error::abortRun( *this, "Invalid overflow handler" );
+		  Error::abortRun( *this, "Invalid OverflowHandler" );
         }
 	go {
 		// all computations should be performed with out since that

@@ -49,9 +49,11 @@ The keywords are: "truncate" (the default) and "round".
 	}
 	setup {
 		out = Fix( ((const char *) OutputPrecision) );
+		if ( out.invalid() )
+		  Error::abortRun( *this, "Invalid OutputPrecision" );
 		out.set_ovflow( ((const char *) OverflowHandler) );
 		if ( out.invalid() )
-		  Error::abortRun( *this, "Invalid overflow handler" );
+		  Error::abortRun( *this, "Invalid OverflowHandler" );
 
 		const char* Masking = masking;
 		if ( strcasecmp(Masking, "truncate") == 0 )
