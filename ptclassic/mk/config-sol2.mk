@@ -128,6 +128,20 @@ QUANTIFY =	quantify
 
 PURECOV = 	purecov
 
+# Wildforce Directory
+# Annapolis Micro Systems (http://www.annapmicro.com) uses 
+# WF4_BASE as the root of their installation for 
+# the Wildforce board software
+WILDFORCE_DIR 	= $(WF4_BASE)
+
+WILDFORCE_INCL	= $(WILDFORCE_DIR)/include
+WILDFORCE_LIBSPEC = -L$(WILDFORCE_DIR)/lib -lWF4
+
+# Uncomment the two lines below if you have the Annapolis 
+# Micro Systems Wildforce board and software
+#WILDFORCECFLAGS = -DPT_WILDFORCE -I$(WILDFORCE_INCL)
+#SDFWILDFORCE =	1
+
 #
 # Variables for miscellaneous programs
 #
