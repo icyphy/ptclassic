@@ -18,7 +18,7 @@ used for X window displays, such as classes that invoke xgraph.
 #include "type.h"
 #include "miscFuncs.h"
 
-#define MAX_NO_GRAPHS 10
+#define MAX_NO_GRAPHS 64
 
 	//////////////////////////////////////
 	// class XGraph
