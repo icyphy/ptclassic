@@ -1,4 +1,4 @@
-<!-- $Id$ -->
+<!--  $Id$ -->
 <html>
 <head>
 <title>Tydoc Bugs</title>
@@ -76,7 +76,9 @@
 
 	<LI> It would be nice if we generated a directed acyclic graph (DAG)
 	that represented the inheritance of the classes in the current
-	directory.
+	directory.  However, because <CODE>tydoc</CODE> is so slow,
+	we use <A HREF="../../../kernel/tychoMakeClassDAG.itcl"><CODE>$TYCHO/kernel/kernel/tychoMakeClassDAG.itcl</CODE></A> to generate DAGs.
+
 </MENU>
 <HR>
 Copyright &#169 %Q%, The Regents of the University of California.
