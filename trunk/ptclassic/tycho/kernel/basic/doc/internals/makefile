@@ -41,6 +41,7 @@ include $(CONFIG)
 
 EXTRA_SRCS =	\
 	exec.html \
+	index.html \
 	path.html
 
 MISC_FILES =
