@@ -31,6 +31,7 @@ Version: $Id$
  * processor uses IEEE arithmetic.
  */
 #ifdef mips
+#define _IEEE 1
 #include <nan.h>
 #endif
 #ifdef sun
