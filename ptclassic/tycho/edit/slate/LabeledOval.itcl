@@ -158,7 +158,7 @@ body ::tycho::LabeledOval::_outline {id canvas slate outline} {
     set option(outline$id) $outline
     $canvas itemconfigure $primary($id) -outline $outline
     if { $option(text$id) != "" } {
-	    $canvas itemconfigure $textitem($id) -fill $outline
+	    $canvas itemconfigure $component(label$id) -fill $outline
 	}
 }
 
