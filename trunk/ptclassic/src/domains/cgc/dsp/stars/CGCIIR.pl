@@ -12,7 +12,7 @@ constant term of D is not omitted, as is common in other programs that
 assume that it has been normalized to unity.
     }
     version { $Id$ }
-    author { Yu Kee Lim }
+    author { Kennard White, Yu Kee Lim }
     copyright {
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
