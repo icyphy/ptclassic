@@ -203,21 +203,6 @@ void PacketSample::errorAssign(const char* argType) const {
 	Error::abortRun(msg);
 }
 
-// Error catcher for attempts to retrieve a Packet from a different
-// type of particle
-
-void Particle::accessPacket(Packet &) const {
-	Error::abortRun ("Attempt to getPacket from a non-packet Particle");
-}
-
-void Particle::getPacket(Packet & p) {
-	Particle::accessPacket(p);
-}
-
-void Particle::operator<<(const Packet&) {
-	Error::abortRun ("Attempt to load a Packet into non-packet Particle");
-}
-
 // an error checker:
 int badType(NamedObj& where,Packet& pkt,const char* type) {
 	if (!pkt.typeCheck(type)) {
