@@ -350,9 +350,9 @@ configbody ::tycho::File::file {
                 ::tycho::silentError
             }
         }
-	if { $itk_option(-file) != "" && $itk_option(-file) != "NoName" } {
-	    displayer configure -title "$file"
-	}
+        # Following used to be conditional using:
+        # if { $itk_option(-file) != "" && $itk_option(-file) != "NoName" }
+        displayer configure -title "$file"
         
         # Keep track of which files are open by name.
         # This is used to avoid opening the same file twice.
