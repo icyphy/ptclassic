@@ -130,8 +130,6 @@ class iwidgets::Labeledgrid {
     method get     {{tag {}}}
     method group   {tag args}
     method hskip   {{group {}} args}
-    method itemcget      {tag option}
-    method itemconfigure {tag {option {}} args}
     method names   {{group {}}}
     method vskip   {{group {}} args}
     
@@ -620,87 +618,6 @@ body iwidgets::Labeledgrid::hskip {{group {}} args} {
 }
 
 # ------------------------------------------------------------------
-## METHOD: itemcget tag option
-#
-# Get an option of an item. The options can be any that can be specified
-# to add{} or group{}, except for -initial.
-# ------------------------------------------------------------------
-body iwidgets::Labeledgrid::itemcget {tag option} {
-    if ![::info exists _type($tag)] {
-	error "Unknown tag: \"$tag\""
-    }
-    if { $_type($tag) != "group" } {
-	switch -exact -- $option {
-	    "label" {
-		$itk_component(${tag}label) cget -text
-	    }
-	    "columnspan" -
-	    "sticky" {
-		array set opts [grid info $itk_component($tag)]
-		set opts($option)
-	    }
-	    "style" {
-		set _style($tag)
-	    }
-	    default {
-		$itk_component($tag) cget $option
-	    }
-	}
-    } else {
-	error "FIXME"
-    }
-}
-
-# ------------------------------------------------------------------
-## METHOD: itemconfigure tag ?option? ?value? ?option value...?
-#
-# Configure options of an item. Because we can't move layouts
-# around, some options are not supported. For widgets, these are
-# -columnspan, -initial, and -style. For groups, these are -column,
-# -columnspan, -initial, -style -row, -rowspan. The -childstyle and
-# -childcolumnspan options affect only subsequently-created items.
-# ------------------------------------------------------------------
-body iwidgets::Labeledgrid::itemconfigure {tag {option {}} args} {
-    if ![::info exists _type($tag)] {
-	error "Unknown tag: \"$tag\""
-    }
-    error "FIXME"
-
-    if { $option == "" } {
-	set result {}
-	foreach o {row column rowspan columnspan sticky} {
-	    lappend result [itemconfigure $tag $o]
-	}
-	return $result
-    } elseif { $args == "" } {
-	if { $option == "-label" } {
-	    $itk_component(${tag}label) configure -text
-	} elseif [regexp {^-(row|column|rowspan|columnspan|sticky)$} $option] {
-	    array set opts [grid info $itk_component($tag)
-	    list $option {} {} $opts($option) $opts($option)
-	} elseif [regexp {^-(initial|childcolumnspan)$} {
-	    return ""
-	} else {
-	    $itk_component($tag) configure $option
-	}
-    } else {
-	foreach {option value} [concat $option $args] {
-	    if { $option == "-label" } {
-		$itk_component(${tag}label) configure -text $value
-	    } elseif { $option == "-sticky" } {
-		grid configure $itk_component($tag) -sticky $value
-	    } elseif [regexp {^-(row|column|rowspan|columnspan)$} $option] {
-		;# do nothing
-	    } elseif [regexp {^-(initial|childcolumnspan)$} {
-		;# Do nothing
-	    } else {
-		$itk_component($tag) configure $option $value
-	    }
-	}
-    }
-}
-
-# ------------------------------------------------------------------
 ## METHOD: names ?group?
 #
 # Get a list of names. If _group_ is supplied, it must be a non-shared
@@ -1007,7 +924,7 @@ body iwidgets::Labeledgrid::newtype {type args} {
 }
 
 # ------------------------------------------------------------------
-# Initialize predefined types. Unfortunately, we can't puts this code
+# Initialize predefined types. Unfortunately, we can't put this code
 # in the class definition because the proc body hasn't been defined yet...
 # ------------------------------------------------------------------
 Labeledgrid::newtype checkbutton \
@@ -1027,9 +944,7 @@ Labeledgrid::newtype optionmenu \
         -assign {%w select %x}
 
 Labeledgrid::newtype radiobutton \
-        -create {eval ::radiobutton %w \
-	           -variable {%v} \
-		   %a} \
+        -create {eval ::radiobutton %w -variable {%v} %a} \
         -sticky "w"
 
 Labeledgrid::newtype text \
