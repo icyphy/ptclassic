@@ -67,7 +67,7 @@ CGCTarget::CGCTarget(const char* name,const char* starclass,
                         "static buffering is enforced between portholes."));
 	addState(funcName.setState("funcName",this,"main",
                         "function name to be created."));
-	addState(compileCommand.setState("compileCommand",this,"cc",
+	addState(compileCommand.setState("compileCommand",this,"gcc",
                         "command for compiling code."));
 	addState(compileOptions.setState("compileOptions",this,"",
                         "options to be specified for compiler."));
