@@ -83,7 +83,7 @@ unsigned char* GrayImage::retData()
 
 BaseImage* GrayImage::fragment(int cellSz, int Num) const
 {
-	if (Num*cellSz > size) return ((BaseImage*) NULL);
+	if (Num*cellSz >= size) return ((BaseImage*) NULL);
 
 // We use clone(int) rather than clone() in order to avoid copying
 // image data needlessly.
