@@ -98,4 +98,20 @@ group test -label {Test Icons} {
             -icon {edit/graphedit/icons.tim#test.simple} {
         port out
     }
+    star outs \
+            -label {All outputs} \
+            -icon {edit/graphedit/icons.tim#test.outs} {
+    	port out-0
+    	port out-1
+    	port out-2
+    	port out-3
+    }
+    star ins \
+            -label {All inputs} \
+            -icon {edit/graphedit/icons.tim#test.ins} {
+    	port in-0
+    	port in-1
+    	port in-2
+    	port in-3
+    }
 }
