@@ -107,6 +107,7 @@ ITCL_SRCS = \
 	Query.itcl \
 	Resource.itcl \
 	ResourceFile.itcl \
+	ResourceFTP.itcl \
 	ResourceHTTP.itcl \
 	ResourceMail.itcl \
 	ResourceWELD.itcl \
