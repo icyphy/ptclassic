@@ -140,4 +140,5 @@ body ::tycho::Follower::deactivate {x y args} {
     if { $deactivatecommand != "" } {
         uplevel #0 $deactivatecommand $target $x $y
     }
+    set target ""
 }
