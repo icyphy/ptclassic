@@ -1,7 +1,7 @@
 defstar {
-	name { QuadAdd16 }
+	name { VISAddSh }
 	domain { SDF }
-	version { @(#)SDFQuadAdd16.pl	1.6 3/14/96 }
+	version { $Id$ }
 	author { William Chen }
 	copyright {
 Copyright (c) 1990-1996 The Regents of the University of California.
@@ -11,12 +11,12 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { SDF vis library }
 	desc { 
-	  Add the shorts in a 16bit partitioned float to the
-	  corresponding shorts in a 16bit partitioned float.
-	  The result is four signed shorts that is returned as
-	  a single floating point number.  There is no saturation
-	  arithmetic so that overflow results in wraparound.
-	    }
+Add the shorts in a 16bit partitioned float to the
+corresponding shorts in a 16bit partitioned float.
+The result is four signed shorts that is returned as
+a single floating point number.  There is no saturation
+arithmetic so that overflow results in wraparound.
+	}
 	input {
 	  name { inA }
 	  type { float }

@@ -1,5 +1,5 @@
 defstar {
-	name { FloatToVis64 }
+	name { VISPackSh }
 	domain { SDF }
 	version { $Id$ }
 	author { William Chen }
@@ -11,14 +11,14 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { SDF vis library }
 	desc { 
-	  Pack four floating point numbers into a single floating
-	    point number.  Each input floating point number is first
-	    down cast into a 16 bit short and then packed into a series of
-	    four shorts.  Three things to notice:  
-	    First assume that the input ranges from -1 to 1.
-	    Second the code is inlined for faster performance.
-	    Third data memory is prealigned for faster performance.
-	    }
+Pack four floating point numbers into a single floating
+point number.  Each input floating point number is first
+down cast into a 16 bit short and then packed into a series of
+four shorts.  Three things to notice:  
+First assume that the input ranges from -1 to 1.
+Second the code is inlined for faster performance.
+Third data memory is prealigned for faster performance.
+	}
 	input {
 		name { in }
 		type { float }
@@ -29,7 +29,7 @@ limitation of liability, and disclaimer of warranty provisions.
 		type { float }
 		desc { Output float type }
 	}
-        ccinclude {<vis_proto.h>}
+        ccinclude { <vis_proto.h> }
 	defstate {
 	        name { scale }
 		type { float }
@@ -38,7 +38,7 @@ limitation of liability, and disclaimer of warranty provisions.
 		attributes { A_CONSTANT|A_SETTABLE }
 	}
 	code {
-                #define NumIn (4)
+#define NumIn (4)
 	}
 	protected{
 	  short *packedout;
@@ -47,25 +47,24 @@ limitation of liability, and disclaimer of warranty provisions.
 	  packedout = 0;
 	}
 	destructor{
-	  free(packedout);
+	  if (packedout) free(packedout);
 	}
         setup {
 	  in.setSDFParams(NumIn,NumIn-1);
 	}
 	begin {
-	  free(packedout);
+	  if (packedout) free(packedout);
 	  packedout = (short *) memalign(sizeof(double),sizeof(short)*NumIn);
         }
 	go {
-	  double *outvalue;
-	  //scale, cast, and pack input
+	  // scale, cast, and pack input
 	  packedout[0] = (short) (scale * double(in%0));
 	  packedout[1] = (short) (scale * double(in%1));
 	  packedout[2] = (short) (scale * double(in%2));
 	  packedout[3] = (short) (scale * double(in%3));
 
 	  //output packed double	  
-	  outvalue = (double *) packedout;
+	  double* outvalue = (double *) packedout;
 	  out%0 << *outvalue;
 	}
 }

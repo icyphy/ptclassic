@@ -1,5 +1,5 @@
 defstar {
-	name { QuadFir }
+	name { VISFIR }
 	domain { SDF }
 	version { $Id$ }
 	author { William Chen }
@@ -11,7 +11,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { SDF vis library }
 	desc { 
-	  A finite impulse response (FIR) filter.
+A finite impulse response (FIR) filter.
 	}
 	input {
 	  name { signalIn }
