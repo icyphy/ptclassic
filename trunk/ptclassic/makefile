@@ -112,6 +112,8 @@ install_gnu:
 	*)	$(MAKE) -f mk/scratch-srcs.mk CC=$(GNU_BUILD_CC) \
 		$(MFLAGS) gnu_all;; \
 	esac
+clean_gnu:
+	cd obj.$(PTARCH)/gnu; $(MAKE) $(MFLAGS) clean
 
 install_tcltk:
 	$(MAKE) -f mk/scratch-srcs.mk $(MFLAGS) tcltk_all
