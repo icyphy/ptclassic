@@ -82,7 +82,7 @@ void Cluster::setInnerSched(Scheduler* s) {
     }
     LOG_DEL; delete sched;
     sched = s;
-    sched.setGalaxy(gal);
+    sched->setGalaxy(gal);
 }
 
 void Cluster::setMasterBlock(Block* m,PortHole** newPorts) {
@@ -110,7 +110,7 @@ void Cluster::setMasterBlock(Block* m,PortHole** newPorts) {
 	    else {
 		PortHole* clonedPort = clonePort(port,&star());
 		if(newPorts)
-		    newPorts[clonedPort.asClusterPort()->
+		    newPorts[clonedPort->asClusterPort()->
 			     real().index()] = clonedPort;
 	    }
 	}
@@ -206,7 +206,7 @@ void Cluster::addGalaxy(Galaxy* g,PortHole** newPorts) {
 		       connections. */
 		    
 		    PortHole* dummyPort = clonePort(&clusterPort->asClusterPort()->real());
-		    dummyPort->asClusterPort().setClusterAlias(clusterPort);
+		    dummyPort->asClusterPort()->setClusterAlias(clusterPort);
 		    if (clusterPort->isItInput()) {
 			connect(dummyPort,clusterPort);
 		    }
@@ -216,8 +216,8 @@ void Cluster::addGalaxy(Galaxy* g,PortHole** newPorts) {
 
 		    /* Finally, we create the external cluster port */
 		    PortHole* fatClusterPort =
-			clonePort(&clusterPort->asClusterPort().real(),&c->star());
-		    fatClusterPort->asClusterPort().setClusterAlias(clusterPort);
+			clonePort(&clusterPort->asClusterPort()->real(),&c->star());
+		    fatClusterPort->asClusterPort()->setClusterAlias(clusterPort);
 		    newPorts[index] = fatClusterPort;
 		}
 	    }
@@ -235,12 +235,12 @@ void Cluster::addCluster(Cluster* c) {
     c->star().setTarget(star().target());
 }
 
-inline void Cluster::initMaster() {
+void Cluster::initMaster() {
     if (master) master->initialize();
     return;
 }
 
-inline int Cluster::isClusterAtomic() const {
+int Cluster::isClusterAtomic() const {
     return master? master->isItAtomic() : FALSE;
 }
 
@@ -365,7 +365,7 @@ Cluster* FatClusterIter::next() {
     }			
 }			
 
-virtual Block* Cluster::cloneCluster() const {
+Block* Cluster::cloneCluster() const {
     Star* s = (Star*) star().makeNew();
     Cluster* cluster = s->asCluster();
     if (!cluster) {
@@ -373,6 +373,6 @@ virtual Block* Cluster::cloneCluster() const {
 	    (star(),"cloneCluster: makeNew not defined for the cluster class");
 	return NULL;
     }
-    cluster->setMasterBlock(&this.star());
+    cluster->setMasterBlock(&this->star());
     return s;
 }
