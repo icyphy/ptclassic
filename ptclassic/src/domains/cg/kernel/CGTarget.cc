@@ -171,13 +171,12 @@ void CGTarget :: copySchedule(SDFSchedule& s) {
 	sched->copySchedule(s);
 	// indicate multiprocessor scheduler already generated schedule
 	noSchedule = TRUE;
-	// make this processor runs forever
-	sched->setStopTime(-1);	
 }
 
 StringList CGTarget :: generateCode(Galaxy& g) {
 	setup(g);
 	run();
+	Target::wrapup();
 	return myCode;
 }
 
