@@ -1498,6 +1498,7 @@ proc HMinit_state {win} {
         S_symbols O*=+-o\xd7\xb0>:\xb7
         S_insert HTMLInsert
         linkfg blue
+        dlindent 0
     }
     set var(S_bgcolor) [$win cget -background]
     set var(S_fgcolor) [$win cget -foreground]
@@ -1686,14 +1687,14 @@ proc HMset_image {win handle src} {
     # If the slowNetwork misc preference is set, then don't display images.
     if {[$HTML isSlowNetwork] == 0} {
         # if it's an absolute path
-        if {[string match /* $src]} {
+        if {[file pathtype $src] == "absolute"} {
             set image $src
         } else {     
             # if it begins $PTOLEMY, $TYCHO, ~eal, etc.
             if {[string match \$* $src] || [string match ~* $src]} {
                 set image [::tycho::expandPath $src]
             } else {
-                set image [uplevel #0 $HTML lastDirectory]/$src
+                set image [file join [uplevel #0 $HTML lastDirectory] $src]
             }
         }
 
