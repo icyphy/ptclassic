@@ -3,7 +3,7 @@ defstar {
 	domain { CG56 }
 	desc {
 A star to stall the flow of data for parameter cycles to waste cycles.
-        }
+	}
 	version { $Id$ }
 	author { Chih-Tsung Huang, ported from Gabriel }
 	copyright {
@@ -13,14 +13,14 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CG56 control library }
-        explanation {
+	explanation {
 A star to stall the flow of data for parameter cycles to waste cycles.
-        }
-        input {
-                name { input }
-                type { fix }
-        }	    
-        output {
+	}
+	input {
+		name { input }
+		type { fix }
+	}	    
+	output {
 		name { output }
 		type { fix }
 	}
@@ -39,13 +39,13 @@ A star to stall the flow of data for parameter cycles to waste cycles.
 	}
 	codeblock(std) {
 	move	$ref(input),x1
-        rep     #$val(X)
-        nop
-        move    x1,$ref(output)
+	rep     #$val(X)
+	nop
+	move    x1,$ref(output)
 	} 
-        go {
-                X=cyclesToWaste-4;
-                addCode(std);
+	go {
+		X = int(cyclesToWaste) - 4;
+		addCode(std);
 	}
 	execTime { 
 		return int(cyclesToWaste);

@@ -1,7 +1,10 @@
 defstar {
 	name { Reverse }
 	domain { C50 }
-	desc { Reverse a block of input data of length N }
+	desc {
+On each execution, read a block of "N" samples (default 64)
+and write them out backwards.
+	}
 	version { $Id$ }
 	author { A. Baensch }
 	copyright {
@@ -11,9 +14,8 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { C50 control library }
-	explanation { Reverse a block of input data of length N }
 
-        input {
+	input {
 		name {input}
 		type {ANYTYPE}
 	}
@@ -21,11 +23,11 @@ limitation of liability, and disclaimer of warranty provisions.
 		name {output}
 		type {=input}
 	}
-        state {
+	state {
                 name {N}
                 type {int}
                 default {64}
-		desc {Number of particles read and written.}
+		desc {Number of particles read and written}
 	}
 	setup {
                 input.setSDFParams(int(N),int(N)-1);
@@ -45,23 +47,11 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 
         go {
-                if(N>1)
-	            addCode(main);
-		else
-	            addCode(one);
+                if ( int(N) > 1) addCode(main);
+		else addCode(one);
         }
         exectime {
-                if(int(N)>1)
-	            return 2*int(N)+4;
-		else
-	            return 3;
-      }
+                if ( int(N) > 1) return 2*int(N)+4;
+		else return 3;
+	}
 }
-
-
-
-
-
-
-
-

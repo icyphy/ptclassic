@@ -27,27 +27,32 @@ limitation of liability, and disclaimer of warranty provisions.
 		name {factor}
 		type {int}
 		default {2}
-		desc { Number of samples produced. }
+		desc { Number of samples produced }
 		attributes { A_SETTABLE }
 	}
 	state {
 		name {phase}
 		type {int}
 		default {0}
-		desc { Where to put the input in the output block. }
+		desc { Where to put the input in the output block }
 		attributes { A_SETTABLE }
 	}
 	state {
 		name {fill}
 		type {FIX}
 		default {0.0}
-		desc { Value to fill the output block. }
+		desc { Value to fill the output block }
 		attributes { A_SETTABLE|A_UMEM }
 	}
 	setup {
-		output.setSDFParams(int(factor),int(factor)-1);
+		output.setSDFParams(int(factor), int(factor)-1);
 		if (int(phase) >= int(factor))
-			Error::abortRun(*this, ": phase must be < factor");
+			Error::abortRun(*this, "phase must be < factor");
+	}
+	initCode {
+		addCode(initfill);
+		if (int(factor) > 1) addCode(repeatcode);
+		addCode(fillcode);
 	}
 	codeblock (initfill) {
 	mar	*,AR0				;
@@ -61,11 +66,6 @@ limitation of liability, and disclaimer of warranty provisions.
 	codeblock (fillcode) {
 	sach	*,1				;outputsample(i) = fill 
 	}
-	initCode {
-		addCode (initfill);
-		if (factor > 1) addCode(repeatcode);
-		addCode(fillcode);
-	}
 	codeblock (sendsample) {
 	mar	*,AR6				;
 	lar	AR6,#$addr(input)		;Address input		=> AR6
@@ -78,12 +78,3 @@ limitation of liability, and disclaimer of warranty provisions.
 		return 4;
 	}
 }
-
-
-
-
-
-
-
-
-
