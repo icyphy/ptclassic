@@ -126,7 +126,7 @@ configbody ::tycho::EditSearch::backwards {
 
 #####################################################################
 #### -edittext option
-# Verify that the specified edittext option is valid.
+# Specify the EditText object on which the search will occur.
 # 
 configbody ::tycho::EditSearch::edittext {
     if {$itk_option(-edittext) == {} || \
@@ -148,7 +148,7 @@ body ::tycho::EditSearch::constructor {args} {
     } {
 	keep -cursor -background
     }
-    pack $itk_component(switches) -side bottom
+    pack $itk_component(switches) -after $itk_component(radiosite)
 
     itk_component add word {
 	checkbutton $itk_component(switches).word -text "Whole Word" \
@@ -194,36 +194,36 @@ body ::tycho::EditSearch::constructor {args} {
     eval itk_initialize $args
 
     bind $itk_component(hull) <Control-s> \
-	    "$this configure -backwards 0; $this find"
+	    [code "$this configure -backwards 0; $this find"]
     bind $itk_component(hull) <Control-r> \
-	    "$this configure -backwards 1; $this find"
+	    [code "$this configure -backwards 1; $this find"]
 
     # If the findcommand option has not been set, set the default now.
     # This has to be done in the constructor rather than in the class
     # definition (as a default) because "$this" is known here.
     if {$itk_option(-findcommand) == {}} {
-	configure -findcommand "$this find"
+	configure -findcommand [code "$this find"]
     }
 
     $itk_component(bbox) buttonconfigure ok \
 	    -text {Find <Ret>} \
-	    -command "$this execCommand -findcommand"
+	    -command [code "$this execCommand -findcommand"]
 
     addButton clearfind -text {Clear Marks} \
-	    -command "$this clearFindMatch"
+	    -command [code "$this clearFindMatch"]
 
     if {$itk_option(-nochange) == 0} {
 
 	if {$itk_option(-chfindcommand) == {}} {
-	    configure -chfindcommand "$this changeAndFind"
+	    configure -chfindcommand [code "$this changeAndFind"]
 	}
 
 	addButton change -text {Change<M-%>} \
-		-command "$this change"
+		-command [code "$this change"]
 	addButton changeandfind -text {Change&Find} \
-		-command "$this execCommand -chfindcommand"
+		-command [code "$this execCommand -chfindcommand"]
 
-	bind $itk_component(hull) <Meta-percent> "$this change"
+	bind $itk_component(hull) <Meta-percent> [code "$this change"]
 
 	# Add an option to change all matches
 	itk_component add changeall {

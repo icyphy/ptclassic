@@ -136,16 +136,16 @@ body ::tycho::EditSpell::constructor {args} {
 
     $itk_component(bbox) buttonconfigure ok \
 	    -text {Next <Ret>} \
-	    -command [code "$this next"]
+	    -command [code "$this busy next"]
 
     addButton clear -text {Clear Marks} \
 	    -command [code "$this clearFindMatch"]
 
     addButton recheck -text {Recheck} \
-	    -command [code "$this recheck"]
+	    -command [code "$this busy recheck"]
 
     if {$itk_option(-nochange) == 0} {
-	addButton replace -text {Repl <M-Ret>} \
+	addButton replace -text {Change <M-Ret>} \
 		-command [code "$this replace"]
 	bind $itk_component(hull) <Meta-Return> [code "$this replace; break"]
     }
@@ -154,7 +154,7 @@ body ::tycho::EditSpell::constructor {args} {
     # Create a button box for dictionary buttons
     #
     itk_component add dbox {
-	button $itk_interior.dbox -text {Dictionary}\
+	button $itk_component(childsite).dbox -text {Dictionary}\
 		-command [code "$this dictionary"] -pady 0 -width 14
     } {
 	keep -background -cursor
@@ -162,7 +162,7 @@ body ::tycho::EditSpell::constructor {args} {
     pack $itk_component(dbox) -side right -before $itk_component(word)
 
     itk_component add lbox {
-	button $itk_interior.lbox -text {Learn} \
+	button $itk_component(childsite).lbox -text {Learn} \
 		-command [code "$this learn"] -pady 0 -width 14
     } {
 	keep -background -cursor
@@ -248,12 +248,13 @@ body ::tycho::EditSpell::next {} {
 
 #####################################################################
 #### recheck
+# Check the spelling from the beginning.
 # 
 body ::tycho::EditSpell::recheck {} {
     set tw $itk_option(-edittext)
 
     set filename "/tmp/tychoSpell[pid]x[incr count]"
-    $tw writeSpellText $filename
+    if {![$tw busy writeSpellText $filename]} {return}
     set errs [exec spell $filename]
     set dict [readDictionary]
     foreach exception $dict {
@@ -262,14 +263,14 @@ body ::tycho::EditSpell::recheck {} {
 	}
     }
     if {$errs == {}} {
-	inform "Spelling OK."
+	::tycho::inform "Spelling OK."
 	return
     }
     exec rm $filename
     set pattern [join $errs |]
     set tags [$tw spellCheckTags]
 
-    set result [$tw find -forwards -regexp -nocase -wholeword \
+    set result [$tw find -forwards -regexp -wholeword \
 	    -tags $tags $pattern 1.0]
     if {$result == {}} {
 	error "Can't match reported spelling errors with text: $errs"
@@ -316,7 +317,7 @@ body ::tycho::EditSpell::readDictionary {} {
 	    close $fd
 	    return $dict
 	} {
-	    warn "Personal dictionary file, ~/.tychodictionary.lst, \
+	    ::tycho::warn "Personal dictionary file, ~/.tychodictionary.lst, \
 		    is not readable"
 	}
     }
