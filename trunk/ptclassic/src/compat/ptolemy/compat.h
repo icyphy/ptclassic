@@ -364,6 +364,12 @@ extern char *sys_errlist[];
 extern int errno;
 #endif /* NEED_SYS_ERRLIST */
 
+#ifdef NEED_TIMEVAL
+/* See kernel/Clock.cc */
+#ifdef PT_NT4VC
+#include <winsock.h>
+#endif
+#endif /* NEED_TIMEVAL */
 
 /* Here we define common types that differ by platform */
 
