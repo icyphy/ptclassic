@@ -86,6 +86,9 @@ protected:
         // Use MutableCalendarQueue scheduler if TRUE;
         IntState mutableQ;
 
+        //Use DERCScheduler for Resource Contention, if TRUE;
+        IntState dercQ;
+
 };
 
 #endif
