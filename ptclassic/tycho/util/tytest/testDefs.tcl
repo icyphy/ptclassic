@@ -193,7 +193,7 @@ proc openAllFiles {args} {
 	    set win [::tycho::File::openContext $testfile]
 	    #	wm deiconify $win
 	    puts "testDefs.tcl: openAllFiles{}: win = $win"
-	    after [expr {2 * $duration}] removeobj $win 
+	    after [expr {2 * $duration}] removeobj [$win displayer windowName]
 	    update
 	}
     }
