@@ -54,7 +54,6 @@ CCS_WITH_H_FILES=\
  Galaxy.cc \
  Geodesic.cc \
  Histogram.cc \
- ImageData.cc \
  IntArrayState.cc \
  IntState.cc \
  IntVecData.cc \
@@ -80,10 +79,11 @@ CCS_WITH_H_FILES=\
  Target.cc \
  Tokenizer.cc \
  Universe.cc \
- UserOutput.cc \
  WormConnect.cc \
  Wormhole.cc \
  logNew.cc \
+ miscFuncs.cc \
+ pt_fstream.cc \
  textAnimate.cc
 
 # The complete list of .cc files used in the library
@@ -91,8 +91,7 @@ SRCS=$(CCS_WITH_H_FILES) \
  checkConnect.cc \
  expandPath.cc \
  RanGen.cc \
- hashstring.cc \
- miscImpl.cc
+ hashstring.cc
 
 # Header files.  When adding a new header, add it here only if there is
 # no corresponding .cc file; otherwise add the .cc file to CCS_WITH_H_FILES.
@@ -102,13 +101,11 @@ HDRS= $(CCS_WITH_H_FILES:.cc=.h) \
  CompiledUniverse.h \
  ConstIters.h \
  Linker.sysdep.h \
- Output.h \
  ParticleStack.h \
  Plasma.h \
  SimAction.h \
  dataType.h \
  isa.h \
- miscFuncs.h \
  streamCompat.h \
  type.h
 
