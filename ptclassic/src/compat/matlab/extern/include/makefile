@@ -31,7 +31,7 @@ ROOT = ../../../../..
 VPATH = $(ROOT)/src/compat/matlab/extern/include
 
 # get configuration info
-CONFIG=$(ROOT)/mk/config-$(ARCH).mk
+CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
 HDRS = 	engine.h matrix.h

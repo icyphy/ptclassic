@@ -19,7 +19,7 @@ VPATH = $(ROOT)/src/domains/vhdl/stars
 ARCH =	$(PTARCH)
 
 # get configuration info
-CONFIG =	$(ROOT)/mk/config-$(ARCH).mk
+CONFIG =	$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
 # VHDLDIR is the directory containing VHDL domain support

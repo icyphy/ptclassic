@@ -6,7 +6,7 @@
 #
 # Important!  Do not run this makefile while in 
 # ~ptolemy/src/domains/sdf/contrib.  Instead run in from
-# ~ptolemy/obj.$ARCH/domains/sdf/contrib (through the symbolic
+# ~ptolemy/obj.$PTARCH/domains/sdf/contrib (through the symbolic
 # link) -- that way a separate directory containing, say, Sun-3 and Sun-4
 # objects can be maintained.
 
