@@ -94,14 +94,17 @@ KnownBlock::findEntry (const char* name, KnownListEntry* l) {
 	return l;
 }
 
-Block*
+const Block*
 KnownBlock::find(const char* type) {
+	// search the list for this domain
 	KnownListEntry* e = findEntry (type, allBlocks[currentDomain]);
 	if (!e) {
+		// try the lists for any subdomains
 		Domain* dp = Domain::named(domainNames[currentDomain]);
-		dp->subDomains.reset();
-		for (int i = dp->subDomains.size(); i > 0; i--) {
-			int ix = domainIndex(dp->subDomains.next());
+		StringListIter next(dp->subDomains);
+		char* sub;
+		while ((sub = next++) != 0) {
+			int ix = domainIndex(sub);
 			KnownListEntry* en = findEntry(type, allBlocks[ix]);
 			if (en) return en->b;
 		}
@@ -114,7 +117,7 @@ KnownBlock::find(const char* type) {
 
 Block*
 KnownBlock::clone(const char* type) {
-	Block* p = find(type);
+	const Block* p = find(type);
 	if (p) return p->clone();
 	StringList msg = "No star/galaxy named '";
 	msg += type;
