@@ -51,29 +51,30 @@ OBJS = $(LIBCSRCS:.c=.o)
 
 C_INCL= -I../include $(PTCOMPAT_INCSPEC)
 
-all::	 makefile octfix
+BINARY =	octfix$(BINARY_EXT)
+
+all::	 makefile $(BINARY)
 
 LIBS	= -L$(OCTLIBDIR) -loh$(DBGFLAG) -lvov$(DBGFLAG) \
 	-loptions$(DBGFLAG) -loct$(DBGFLAG) -ltr$(DBGFLAG) \
 	-lutility$(DBGFLAG) -lst$(DBGFLAG) \
 	-lerrtrap$(DBGFLAG) -luprintf$(DBGFLAG) -lport$(DBGFLAG)   
 
-octfix:	$(OBJS)
+$(BINARY): $(OBJS)
 	$(CLINKER) $(LINKFLAGS) $(OBJS) \
-		-o octfix \
+		-o $@ \
 		$(LIBS) $(CSYSLIBS) 
 
-DEST = $(OCTTOOLS)/bin.$(PTARCH)/octfix
+DEST = $(OCTTOOLS)/bin.$(PTARCH)/$(BINARY)
 
-$(DEST):	octfix
-		@echo Installing octfix
-		rm -f $(DEST)
-		ln octfix$(BINARY_EXT) $(DEST)
+$(DEST): $(BINARY)
+		@echo Installing $(BINARY)
+		rm -f $(DEST);  ln $^ $@
 
-install: makefile $(DEST) $(BINDIR)/octfix
+install: makefile $(DEST) $(BINDIR)/$(BINARY)
 
-$(BINDIR)/octfix:
-	(cd $(BINDIR); rm -f octfix; ln -s ../octtools/bin.$(PTARCH)/octfix .)
+$(BINDIR)/$(BINARY):
+	(cd $(BINDIR); rm -f $(BINARY); ln -s ../octtools/bin.$(PTARCH)/$(BINARY) .)
 
 # "make sources" will do SCCS get on anything where SCCS file is newer.
 sources:	

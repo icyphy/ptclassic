@@ -53,29 +53,28 @@ C_INCL= -I../include $(PTCOMPAT_INCSPEC)
 
 MISC_FILES =	README doc
 
-all::	 makefile masters
+BINARY =	masters(BINARY_EXT)
+
+all::	 makefile $(BINARY)
 
 LIBS	= -L$(OCTLIBDIR) -loh$(DBGFLAG) -lvov$(DBGFLAG) \
 	-loptions$(DBGFLAG) -loct$(DBGFLAG) -ltr$(DBGFLAG) \
 	-lutility$(DBGFLAG) -lst$(DBGFLAG) \
 	-lerrtrap$(DBGFLAG) -luprintf$(DBGFLAG) -lport$(DBGFLAG)   
 
-masters:	$(OBJS)
-	$(CLINKER) $(LINKFLAGS) $(OBJS) \
-		-o masters \
-		$(LIBS) $(CSYSLIBS) 
+$(BINARY): $(OBJS)
+	$(CLINKER) $(LINKFLAGS) $(OBJS) -o $@ $(LIBS) $(CSYSLIBS) 
 
-DEST = $(OCTTOOLS)/bin.$(PTARCH)/masters
+DEST = $(OCTTOOLS)/bin.$(PTARCH)/$(BINARY)
 
-$(DEST):	masters
-		@echo Installing masters
-		rm -f $(DEST)
-		ln masters.$(BINARY_EXT) $(DEST)
+$(DEST): $(BINARY)
+		@echo Installing $(BINARY)
+		rm -f $(DEST);  ln $^ $@
 
-install: makefile $(DEST) $(BINDIR)/masters
+install: makefile $(DEST) $(BINDIR)/$(BINARY)
 
-$(BINDIR)/masters:
-	(cd $(BINDIR); rm -f masters; ln -s ../octtools/bin.$(PTARCH)/masters .)
+$(BINDIR)/$(BINARY):
+	(cd $(BINDIR); rm -f $(BINARY); ln -s ../octtools/bin.$(PTARCH)/$(BINARY) .)
 
 # "make sources" will do SCCS get on anything where SCCS file is newer.
 sources:	
