@@ -32,7 +32,7 @@ int Interval::endsBefore(const Interval &i1) const {
 }
 
 int Interval::completelyBefore(const Interval &i1) const {
-	return (end() < i1.pOrigin-1);
+	return i1.pOrigin == 0? FALSE : (end() < i1.pOrigin-1);
 }
 
 int Interval::mergeableWith(const Interval& i1) const {
@@ -80,7 +80,7 @@ Interval operator&(const Interval& i1,const Interval& i2) {
 }
 
 unsigned Interval::end() const { 
-	return pOrigin+pLength-1;
+	return pOrigin == 0 && pLength == 0? 0 : pOrigin+pLength-1;
 }
 
 // I/O functions: read and write intervals.
@@ -178,7 +178,7 @@ istream& operator>>(istream& s,IntervalList &l) {
 
 	if (!(s >> ival)) return s;
 	LOG_NEW; l.head = new Interval(ival);
-	Interval* current = l.head;
+	/*Interval* current = l.head;*/
 	if (braceflag) s >> ws;
 	if (!s.get(ch)) return s;
 	while (ch == ',') {
@@ -186,17 +186,8 @@ istream& operator>>(istream& s,IntervalList &l) {
 		if (ival.length() == 0) {
 			// nothing, ignore.
 		}
-		else if (ival.completelyBefore(*current)) {
-			// specified out of order, use union operator
-			// to insert starting at head
+		else 
 			l |= ival;
-		}
-		else if (ival.mergeableWith(*current))
-			current->merge(ival);
-		else {
-			LOG_NEW; current->next = new Interval(ival);
-			current = current->next;
-		}
 		if (braceflag) s >> ws;
 		if (!s.get(ch)) return s;
 	}
@@ -262,50 +253,43 @@ int IntervalList::contains(const Interval& i1) const {
 }
 
 // add a single interval.
-IntervalList& IntervalList::operator|=(const Interval& i1) {
-	IntervalList toAdd(i1.origin(),i1.length());
-	return *this |= toAdd;
+IntervalList& IntervalList::operator|=(const Interval& ival) {
+    if (head==NULL)
+	head = new Interval(ival);
+    else {
+	IntervalListIter next(*this);
+	Interval* current;
+	Interval* last = NULL;
+	while ((current=next++) != 0 ) {
+	    if (ival.completelyBefore(*current)) {
+		if (last!=NULL) last->next = new Interval(ival,current);
+		else head = new Interval(ival,current);
+		return *this;
+	    }
+	    else if (ival.mergeableWith(*current)) {
+	        current->merge(ival);
+		while(current->next!=0&&current->mergeableWith(*current->next)){
+		    current->merge(*current->next);
+		    Interval* toDel = current->next;
+	  	    current->next = current->next->next;
+		    LOG_DEL; delete toDel;
+		}
+		return *this;
+	    } 
+	    last = current;
+	}
+	last->next = new Interval(ival); 
+    }
+    return *this;
 }
 
 // Compute the union of two interval lists, replacing the first
 // by the union.
 IntervalList& IntervalList::operator|=(const IntervalList& toAdd) {
-	if (head == 0) return (*this = toAdd);
-	const Interval* addList = toAdd.head;
-	if (addList == 0) return *this;
-	// special case: toAdd first node completely precedes list.
-	if (addList->completelyBefore(*head)) {
-		LOG_NEW; head = new Interval(*addList,head);
-		addList = addList->next;
-	}
-	Interval* current = head;
-	// initial condition: first node on addList overlaps or follows
-	// first node on current.  Advance current until *addList is
-	// either between current and current->next, or overlaps with
-	// one or the other of them.
-	while (addList) {
-		while (current->next &&
-		       current->next->completelyBefore(*addList))
-			current = current->next;
-		if (current->mergeableWith(*addList)) {
-			current->merge(*addList);
-			if (current->next &&
-			    current->next->mergeableWith(*current)) {
-				Interval* p = current->next->next;
-				current->merge(*current->next);
-				LOG_DEL; delete current->next;
-				current->next = p;
-			}
-		}
-		else if (current->next &&
-			 current->next->mergeableWith(*addList)) {
-			current->next->merge(*addList);
-		}
-		else {
-			LOG_NEW; current->next = new Interval(*addList,current->next);
-		}
-		addList = addList->next;;
-	}
+	CIntervalListIter next(toAdd);
+	const Interval* p;
+	while ((p=next++) != 0)
+	    *this |= *p;
 	return *this;
 }
 
