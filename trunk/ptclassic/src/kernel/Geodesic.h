@@ -175,14 +175,16 @@ protected:
 
 	// lock for the Geodesic
 	PtGate* gate;
+
+	// Where the particles live
+	ParticleStack pstack;
+
+	// number of particles
+	int sz;
 private:
         // A connection may require some initial particles.
 	// This specifies the number.
 	int numInitialParticles;
 
-	// Where the particles live
-	ParticleStack pstack;
-	// number of particles
-	int sz;
 };
 #endif
