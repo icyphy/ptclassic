@@ -481,9 +481,7 @@ jsall: jsoriginal
 	$(MAKE) clean
 	$(MAKE) jsbuild
 	if [ -w test ] ; then \
-	   (cd test; \
-		$(MAKE) jsinstr AUXCLASSPATH=:$(JSCLASSPATH) jclass \
-		jstest_jsimple); \
+	   (cd test; $(MAKE) jstest_jsimple); \
 	fi
 
 
