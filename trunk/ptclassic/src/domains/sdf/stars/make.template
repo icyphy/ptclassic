@@ -26,6 +26,7 @@ LIB=libsdfstars.a
 PL_SRCS= \
  SDFAdd.pl \
  SDFAddCx.pl \
+ SDFAddFix.pl \
  SDFAverage.pl \
  SDFAverageCx.pl \
  SDFBitsToInt.pl \
@@ -43,20 +44,26 @@ PL_SRCS= \
  SDFDistributor.pl \
  SDFDownSample.pl \
  SDFExp.pl \
+ SDFFixToFloat.pl \
+ SDFFixToInt.pl \
+ SDFFloatToFix.pl \
  SDFFloor.pl \
  SDFFork.pl \
  SDFGain.pl \
  SDFGainCx.pl \
+ SDFGainFix.pl \
  SDFIIDGaussian.pl \
  SDFIIDUniform.pl \
  SDFImpulse.pl \
  SDFIntToBits.pl \
+ SDFIntToFix.pl \
  SDFIntegrator.pl \
  SDFLimit.pl \
  SDFLinQuantIdx.pl \
  SDFLog.pl \
  SDFMpy.pl \
  SDFMpyCx.pl \
+ SDFMpyFix.pl \
  SDFMux.pl \
  SDFNumToBus.pl \
  SDFPad.pl \
@@ -65,11 +72,13 @@ PL_SRCS= \
  SDFPrinter.pl \
  SDFQuant.pl \
  SDFRamp.pl \
+ SDFRampFix.pl \
  SDFRampInt.pl \
  SDFReadFile.pl \
  SDFReadPCM.pl \
  SDFReciprocal.pl \
  SDFRect.pl \
+ SDFRectFix.pl \
  SDFRectToCx.pl \
  SDFRectToPolar.pl \
  SDFRepeat.pl \
@@ -79,6 +88,7 @@ PL_SRCS= \
  SDFSqrt.pl \
  SDFSub.pl \
  SDFSubCx.pl \
+ SDFSubFix.pl \
  SDFTable.pl \
  SDFTableCx.pl \
  SDFTableInt.pl \
