@@ -1,7 +1,7 @@
 defstar {
-	name { QuadBiquad }
+	name { VISBiquad }
 	domain { SDF }
-	version { @(#)SDFQuadBiquad.pl	1.2 05/06/96 }
+	version { $Id$ }
 	author { William Chen }
 	copyright {
 Copyright (c) 1990-1996 The Regents of the University of California.
@@ -11,7 +11,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { SDF vis library }
 	desc { 
-	  An IIR Biquad filter.
+An IIR Biquad filter.
 	}
 	input {
 	  name { signalIn }
@@ -27,26 +27,24 @@ limitation of liability, and disclaimer of warranty provisions.
 	defstate {
 	  name {numtaps}
 	  type {floatarray}
-	  default {
-	".067455 .135 .067455"
-	  }
+	  default { ".067455 .135 .067455" }
 	  desc { Filter tap numerator values (n0+n1*z^-1+n2*z^-2). }
 	}		
 	defstate {
 	  name {dentaps}
 	  type {floatarray}
-	  default {
-	"-1.1430 .41280"
-	  }
+	  default { "-1.1430 .41280" }
 	  desc { Filter tap denominator values (1+d1*z^-1+d2*z^-2). }
 	}
 	defstate {
 	  name {scalefactor}
 	  type {int}
 	  default {"1"}
-	  desc { 2^scalefactor is used to scale down the magnitude
-		   of the numerator and denominator coefficients
-		   between 0 and 1. }
+	  desc {
+2^scalefactor is used to scale down the magnitude
+of the numerator and denominator coefficients
+between 0 and 1.
+	  }
 	  attributes{ A_CONSTANT|A_SETTABLE }
 	}
       	defstate {
@@ -92,7 +90,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	  free(outarray);
 	  inarray = (double *) memalign(sizeof(double),sizeof(double));
 	  split_result = (double *)
-	    memalign(sizeof(double),sizeof(short)*NUMPACK);
+	  memalign(sizeof(double),sizeof(short)*NUMPACK);
 	  result = (float *) memalign(sizeof(float),sizeof(float));
 	  dennum = (short *) memalign(sizeof(double),sizeof(short)*NUMPACK);
 	  state = (short *) memalign(sizeof(float),sizeof(short)*NUMPACK);
@@ -101,19 +99,19 @@ limitation of liability, and disclaimer of warranty provisions.
 	  scaledown = (short) 1 << scalefactor;
 
 	  // initialize n0
-	       n0 = ((short) scale/scaledown*numtaps[0]);
+	  n0 = ((short) scale/scaledown*numtaps[0]);
 
 	  // initialize denominator/numerator array
-	       indexcount = dennum;
+	  indexcount = dennum;
 	  for(i=0;i<2;i++){
 	    *indexcount++ = ((short) scale/scaledown*dentaps[i]);
 	    *indexcount++ = ((short) scale/scaledown*numtaps[i+1]);
 	  }
 
 	  // initialize states
-	       for(i=0;i<4;i++){
+	  for(i=0;i<4;i++){
 		 state[i]=0;
-	       }
+	  }
 	}
 	go {	
 	  double *outvalue,*packedfilt;
@@ -148,4 +146,3 @@ limitation of liability, and disclaimer of warranty provisions.
 	  signalOut%0 <<  *outvalue;
 	}
 }
-

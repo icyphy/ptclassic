@@ -1,7 +1,7 @@
 defstar {
-	name { QuadFFTCx }
+	name { VISFFTCx }
 	domain { SDF }
-	version { $Date$ $Id$ }
+	version { $Id$ }
 	author { William Chen }
 	copyright {
 Copyright (c) 1990-1996 The Regents of the University of California.
@@ -11,8 +11,8 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { SDF vis library }
 	desc { 
-	  A single complex sequence FFT using radix 2.
-	    Input length must be power of two.
+A single complex sequence FFT using radix 2.
+Input length must be power of two.
 	}
 	input {
 	  name { realIn }
@@ -133,8 +133,8 @@ limitation of liability, and disclaimer of warranty provisions.
 	  double twopi;
 	}
 	constructor {
-	  rein=imin=Twcosine=Twsine=0;
-	  twopi=6.28318530717959;
+	  rein = imin = Twcosine = Twsine =  0;
+	  twopi = 6.28318530717959;
 	}
 	destructor {
 	  free(rein);
@@ -147,18 +147,18 @@ limitation of liability, and disclaimer of warranty provisions.
 	  short *indexcount;
 
 	  //allocate memory
-	      free(rein);
+	  free(rein);
 	  free(imin);
 	  free(Twcosine);
 	  free(Twsine);
 	  rein = (double *)
-	    memalign(sizeof(double),sizeof(double)*sizeoffft/4);
+		memalign(sizeof(double),sizeof(double)*sizeoffft/4);
 	  imin = (double *)
-	    memalign(sizeof(double),sizeof(double)*sizeoffft/4);
+	  	memalign(sizeof(double),sizeof(double)*sizeoffft/4);
 	  Twcosine = (double *)
-	    memalign(sizeof(double),sizeof(double)*sizeoffft/8);
+	  	memalign(sizeof(double),sizeof(double)*sizeoffft/8);
 	  Twsine = (double *)
-	    memalign(sizeof(double),sizeof(double)*sizeoffft/8);
+	  	memalign(sizeof(double),sizeof(double)*sizeoffft/8);
 	}
 	setup {
           realIn.setSDFParams(sizeoffft/4,sizeoffft/4-1);
@@ -185,14 +185,14 @@ limitation of liability, and disclaimer of warranty provisions.
 	  splits_rein = (short*)rein;
 	  splits_imin = (short*)imin;
 
-	  //read in the input
-	      for(i=0;i<sizeoffft/4;i++){
+	  // read in the input
+	  for(i=0;i<sizeoffft/4;i++){
 		rein[i] = double(realIn%i);
 		imin[i] = double(imagIn%i);
-	      }
+	  }
 
 	  //first stages of fft (order of fft minus last two)
-	      N=sizeoffft;
+	  N=sizeoffft;
 	  N2=N;
 	  for(k=0;k<orderfft-2;k++){
 	    N1=N2;
@@ -249,9 +249,9 @@ limitation of liability, and disclaimer of warranty provisions.
 	  }	
 	  reorderfft(splits_rein,splits_imin,sizeoffft);
 	  //output the results
-	      for(i=0;i<sizeoffft/4;i++){
-		realOut%i << rein[i];
-		imagOut%i << imin[i];
-	      }
+	  for(i=0;i<sizeoffft/4;i++){
+	    realOut%i << rein[i];
+	    imagOut%i << imin[i];
+	  }
 	}	
 }

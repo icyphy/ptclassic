@@ -1,7 +1,7 @@
 defstar {
-	name { Vis64ToFloat }
+	name { VISUnpackSh }
 	domain { SDF }
-	version { @(#)SDFVis64ToFloat.pl	1.1 3/14/96 }
+	version { $Id$ }
 	author { William Chen }
 	copyright {
 Copyright (c) 1990-1996 The Regents of the University of California.
@@ -11,14 +11,14 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { SDF vis library }
 	desc { 
-	  UnPack a single floating point number into four floating 
-	    point numbers.  The input floating point number is first
-	    separated into four shorts and then each short is up cast 
-	    to a floating point number. Three things to notice:  
-            First assume that the input ranges from -1 to 1.
-            Second the code is inlined for faster performance.
-            Third data memory is prealigned for faster performance.
-            }	
+UnPack a single floating point number into four floating 
+point numbers.  The input floating point number is first
+separated into four shorts and then each short is up cast 
+to a floating point number. Three things to notice:  
+First assume that the input ranges from -1 to 1.
+Second the code is inlined for faster performance.
+Third data memory is prealigned for faster performance.
+        }	
 	input {
 		name { in }
 		type { float }
@@ -47,21 +47,20 @@ limitation of liability, and disclaimer of warranty provisions.
 	  packedin = 0;
 	}
 	destructor{
-	  free(packedin);
+	  if (packedin) free(packedin);
        	}
 	setup {
 	  out.setSDFParams(NumOut,NumOut-1);
 	}
 	begin {
-	  free(packedin);
+	  if (packedin) free(packedin);
 	  packedin = (double *) memalign(sizeof(double),sizeof(double));
 	}
 	go {
-	  short *invalue;
-	  
 	  *packedin = double(in%0);
-	  invalue = (short *) packedin;
-	  //scale down and unpack input
+	  short* invalue = (short *) packedin;
+
+	  // scale down and unpack input
 	  out%0 << (double) (scaledown * (double) invalue[0]);
 	  out%1 << (double) (scaledown * (double) invalue[1]);
 	  out%2 << (double) (scaledown * (double) invalue[2]);
