@@ -133,10 +133,8 @@ static char *q1 = "Cannot find star definition.  Define a new star?";
     }
     if (!KcIsKnown(name)) {
 /* if we don't know about the star we try to load it */
-	char fullname[512];
 	PrintDebug("Star not known, trying to load it");
-	sprintf(fullname, "%s/%s%s", dir, domain, name);
-	if (!KcLoad (fullname)) return FALSE;
+	if (!KcCompileAndLink (name, domain, dir)) return FALSE;
 	PrintDebug("Load complete");
 	if (!KcIsKnown(name)) {
 	    ErrAdd("Load completed, but star is still undefined?!?");
