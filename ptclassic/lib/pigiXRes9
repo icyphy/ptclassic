@@ -18,12 +18,12 @@ vem*button*highlightThickness: 5
 vem*edit*borderWidth: 3
 #ifdef COLOR
 vem*cursor*color: red
-Vem*Background: bisque
+Vem*Background: grey93
 Vem*Foreground: black
-vem.background.color: #cdcdc1
-vem.grid.zero.color: #cdcdc1
+vem.background.color: azure3
+vem.grid.zero.color: azure3
 vem*menu*background: white
-vem*menu*item*background: #eeeee0
+vem*menu*item*background: grey93
 vem*button*foreground: IndianRed
 vem*title*foreground: black
 #else
