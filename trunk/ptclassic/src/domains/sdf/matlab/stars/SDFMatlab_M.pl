@@ -87,17 +87,17 @@ extern "C" {
 	}
 
 	protected {
-		// Matlab structures implemented in C
+		// Matlab (C) structures
 		Engine *matlabEnginePtr;
 		Matrix **matlabInputMatrices;
 		Matrix **matlabOutputMatrices;
 
-		// Ptolemy structures for Matlab calls
+		// Ptolemy (C++) structures for Matlab calls
 		StringList *matlabInputNames;	    // array of variable names
 		StringList *matlabOutputNames;	    // array of variable names
 		char *matlabCommand;
 
-		// Ptolemy variables for number of inputs and outputs
+		// Variables for number of inputs and outputs to this star
 		int numInputs;
 		int numOutputs;
 	}
@@ -106,8 +106,10 @@ extern "C" {
 		matlabEnginePtr = 0;
 		matlabInputMatrices = 0;
 		matlabOutputMatrices = 0;
+
 		matlabInputNames = 0;
 		matlabOutputNames = 0;
+		matlabCommand = 0;
 	}
 
 	setup {
@@ -126,61 +128,70 @@ extern "C" {
 				   (const char *) shellCommand );
 		}
 
-		// establish number inputs/outputs & allocate Matlab matrices
-		numInputs = input.numberPorts();
-		if ( matlabInputMatrices != 0 ) {
-		  free(matlabInputMatrices);
-		}
-		matlabInputMatrices =
-		  (Matrix **) malloc( numInputs * sizeof(Matrix *) );
-
-		numOutputs = output.numberPorts();
-		if ( matlabOutputMatrices != 0 ) {
-		  free(matlabOutputMatrices);
-		}
-		matlabOutputMatrices =
-		  (Matrix **) malloc( numOutputs * sizeof(Matrix *) );
-
+		// establish of number inputs & allocate Matlab matrices &
 		// generate names for Matlab versions of input matrix names
-		char *inputBaseName = ((char *) MatlabInputVarName);
-		if ( matlabInputNames != 0 ) {
-		  delete [] matlabInputNames;
-		}
-		matlabInputNames = new StringList[numInputs];
-		for ( i = 0; i < numInputs; i++ ) {
-		  sprintf(numstr, "%d", i+1);
-		  matlabInputNames[i] << inputBaseName << numstr;
-		}
-
-		// generate names for Matlab versions of output matrix names
-		char *outputBaseName = ((char *) MatlabOutputVarName);
-		if ( matlabOutputNames != 0 ) {
-		  delete [] matlabOutputNames;
-		}
-		matlabOutputNames = new StringList[numOutputs];
-		for ( i = 0; i < numOutputs; i++ ) {
-		  sprintf(numstr, "%d", i+1);
-		  matlabOutputNames[i] << outputBaseName << numstr;
-		}
-
-		// create the command that will be sent to Matlab
-		StringList matcommand;
-		if ( numOutputs > 0 ) {
-		  matcommand << "[" << matlabOutputNames[0];
-		  for ( i = 1; i < numOutputs; i++ ) {
-		    matcommand << ", " << matlabOutputNames[i];
-		  }
-		  matcommand << "] = ";
-		}
-		matcommand << ((const char *) matlabFunction);
+		numInputs = input.numberPorts();
 		if ( numInputs > 0 ) {
-		  matcommand << "(" << matlabInputNames[0];
-		  for ( i = 1; i < numInputs; i++ ) {
-		    matcommand << ", " << matlabInputNames[i];
+		  if ( matlabInputMatrices != 0 ) {
+		    free(matlabInputMatrices);
 		  }
-		  matcommand << ")";
+		  matlabInputMatrices =
+		    (Matrix **) malloc( numInputs * sizeof(Matrix *) );
+		  char *inputBaseName = ((char *) MatlabInputVarName);
+		  if ( matlabInputNames != 0 ) {
+		    delete [] matlabInputNames;
+		  }
+
+		  matlabInputNames = new StringList[numInputs];
+		  for ( i = 0; i < numInputs; i++ ) {
+		    sprintf(numstr, "%d", i+1);
+		    matlabInputNames[i] << inputBaseName << numstr;
+		  }
 		}
-		matlabCommand = (char *) matcommand;
+
+		// establish of number outputs & allocate Matlab matrices &
+		// generate names for Matlab versions of output matrix names
+		numOutputs = output.numberPorts();
+		if ( numOutputs > 0 ) {
+		  if ( matlabOutputMatrices != 0 ) {
+		    free(matlabOutputMatrices);
+		  }
+		  matlabOutputMatrices =
+		    (Matrix **) malloc( numOutputs * sizeof(Matrix *) );
+		  char *outputBaseName = ((char *) MatlabOutputVarName);
+		  if ( matlabOutputNames != 0 ) {
+		    delete [] matlabOutputNames;
+		  }
+
+		  matlabOutputNames = new StringList[numOutputs];
+		  for ( i = 0; i < numOutputs; i++ ) {
+		    sprintf(numstr, "%d", i+1);
+		    matlabOutputNames[i] << outputBaseName << numstr;
+		  }
+		}
+
+		// create the command to be sent to the Matlab interpreter
+		if ( matlabCommand != 0 ) {
+		  delete [] matlabCommand;
+		}
+		StringList commandString;
+		if ( numOutputs > 0 ) {
+		  commandString << "[" << matlabOutputNames[0];
+		  for ( i = 1; i < numOutputs; i++ ) {
+		    commandString << ", " << matlabOutputNames[i];
+		  }
+		  commandString << "] = ";
+		}
+		commandString << ((char *) matlabFunction);
+		if ( numInputs > 0 ) {
+		  commandString << "(" << matlabInputNames[0];
+		  for ( i = 1; i < numInputs; i++ ) {
+		    commandString << ", " << matlabInputNames[i];
+		  }
+		  commandString << ")";
+		}
+		matlabCommand = new char[commandString.length()];
+		strcpy(matlabCommand, (char *) commandString);
 	}
 
 	go {
@@ -254,6 +265,7 @@ extern "C" {
 	destructor {
 		delete [] matlabInputNames;
 		delete [] matlabOutputNames;
+		delete [] matlabCommand;
 	}
 
 	wrapup {
