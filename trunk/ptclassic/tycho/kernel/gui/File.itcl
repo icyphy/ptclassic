@@ -420,7 +420,8 @@ body ::tycho::File::constructor {args} {
     $itk_component(helpMenu) add command \
 	    -label "About Tycho" \
 	    -underline 0 \
-	    -command "StartupMessage [autoName .startupMessage]"
+	    -command \
+	    {File::openContext $TYCHO/tycho/kernel/doc/introduction.html}
     
     $itk_component(helpMenu) add command \
 	    -label "Key Bindings" \
