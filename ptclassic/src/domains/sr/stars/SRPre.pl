@@ -3,8 +3,8 @@ defstar {
   domain { SR }
   derivedFrom { SRNonStrictStar }
   desc {
-Delay a present input until the instant in which the next present instant
-occurs.
+Delay the input by an instant.  Absent inputs are ignored.  Output is always
+present.
 }
   version { @(#)SRPre.pl	1.1 4/25/96 }
   author { S. A. Edwards }
@@ -39,8 +39,8 @@ limitation of liability, and disclaimer of warranty provisions.
   }
 
   go {	
-    if ( !output.known() && input.present() ) {
-      output.emit() << int(theState);
+    if ( !output.known() ) {
+        output.emit() << int(theState);
     }
   }
   
