@@ -44,6 +44,7 @@ include $(CONFIG)
 
 INCL = -I$(KERNDIR)
 
+# DCTImage.h and MVImage.h should be removed once we get ParticleVec working
 HDRS= DEPortHole.h DEScheduler.h DEStar.h \
  DEWormhole.h DERepeatStar.h EventQueue.h DETarget.h \
  CalendarQueue.h CQEventQueue.h CQScheduler.h \
