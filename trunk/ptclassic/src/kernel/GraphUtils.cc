@@ -40,14 +40,25 @@ Programmer: Jose Luis Pino
 #include "GalIter.h"
 #include <string.h>
 
+
 DSGalAllBlockIter::DSGalAllBlockIter(Galaxy&g,int(*test)(Block&))
-:testBlock(test){
+:DSBlockIter(test)
+{
     GalAllBlockIter nextBlock(g);
     Block *block;
     while ((block = nextBlock++) != NULL)
-	if (testBlock(*block))
-	    blocksThatMeetTest.put(*block);
-    nextBlockThatMeetsTest = new BlockListIter(blocksThatMeetTest);
+	put(*block);
+    initInternalIterator();
+}
+
+DSGalTopBlockIter::DSGalTopBlockIter(Galaxy&g,int(*test)(Block&))
+:DSBlockIter(test)
+{
+    GalTopBlockIter nextBlock(g);
+    Block *block;
+    while ((block = nextBlock++) != NULL)
+	put(*block);
+    initInternalIterator();
 }
 
 // function to count stars in a galaxy
