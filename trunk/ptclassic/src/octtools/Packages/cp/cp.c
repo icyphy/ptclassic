@@ -1,7 +1,7 @@
 #ifndef lint
 static char SccsId[]="$Id$";
 #endif /*lint*/
-/* Copyright (c) 1990-1993 The Regents of the University of California.
+/* Copyright (c) 1990-1994 The Regents of the University of California.
  * All rights reserved.
  * 
  * Permission is hereby granted, without written agreement and without
@@ -33,7 +33,7 @@ static char SccsId[]="$Id$";
 #define TEXT_BUFFER_INIT_SIZE 120        /* (power of two) - SLOP */
 #define SLOP 8
 
-static boolean in_definition = CP_FALSE;
+static boolean in_definition = FALSE;
 tr_stack *cp_stack;
 
 cp_parse(input_file)
@@ -206,7 +206,7 @@ FILE * input_file;
 			    error("Nested cell definitions not allowed");
 			}
 
-			in_definition = CP_TRUE;
+			in_definition = TRUE;
 
 			if(!cp_get_integer(&cell_num)) {
 			    error("Cannot find cell number in Definition Start command");
@@ -235,7 +235,7 @@ FILE * input_file;
 			cp_deffinish();
 		    }
 
-		    in_definition = CP_FALSE;
+		    in_definition = FALSE;
 		    break;
 
 		case 'D': 
