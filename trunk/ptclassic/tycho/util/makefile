@@ -29,7 +29,7 @@
 # 						COPYRIGHTENDKEY
 ##########################################################################
 
-DIRS = notmake pakman obstcl devtools
+DIRS = notmake pakman obstcl devtools tydoc
 
 # Root of Tycho directory
 ROOT =		..
