@@ -159,7 +159,7 @@ static void fft_rif(double *data, int nn, int isign)
 		double* p = data;
 // note: particle at maximum delay is the first one
 		for (int i = int(size)-1; i >= 0; i--) {
-			Complex t = input%i;
+			Complex& t = Complex(input%i);
 			*p++ = t.real();
 			*p++ = t.imag();
 		}

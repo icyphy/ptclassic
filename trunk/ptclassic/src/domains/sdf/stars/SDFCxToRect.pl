@@ -19,7 +19,7 @@ defstar {
 		type {float}
 	}
 	go {
-		Complex t = input%0;
+		Complex &t = Complex(input%0);
 		real%0 << t.real();
 		imag%0 << t.imag();
 	}
