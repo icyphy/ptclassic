@@ -372,6 +372,19 @@ command, though you might have some error messages. But the second or third
 try usually works. 
 </BLOCKQUOTE>
 
+
+<li> pigi is very slow
+ <p>For example, running the SDF butterfly demo within pigi
+takes roughly 60 seconds, but running it from within ptcl takes roughly
+2 seconds.
+ <p>The problem is that early releases of Cygwin32 did not
+have itimers, so pigi's event loop uses a much slower technique.
+<CODE>config-nt4.mk</CODE> defines <CODE>PT_NO_TIMER</CODE>, which 
+is used in <CODE>src/ProfileTimer.cc</CODE> and
+<CODE>src/SimControl.cc</CODE>.  To try recompiling with itimers,
+edit <CODE>config-nt4.mk</CODE> and remove the <CODE>-DPT_NO_TIMER</CODE>.
+remove <CODE>SimControl.o</CODE>, rebuild the kernel library and pigi.
+
 </MENU>
 
 <HR>
