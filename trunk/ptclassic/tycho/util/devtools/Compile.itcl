@@ -34,7 +34,7 @@
 #######################################################################
 #### Compile
 # The Compile baseclass provides a common interface that can be used
-# to compile files and load them in.  Child clases, such as CompileCTcl
+# to compile files and load them in.  Child classes, such as CompileCTcl
 # derive from this class and refine the functionality.
 #
 # <p>
