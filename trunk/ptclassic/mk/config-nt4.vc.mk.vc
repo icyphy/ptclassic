@@ -116,14 +116,18 @@
 #      cd $PTOLEMY/src/ptlang; nmake -f makefile.vc install
 # 9. Statically linked binaries will not pull in the stars
 # 	unless the the *star.c file is edited and compiled as a .cc file.
-#	For each *stars.c file (destars.c, sdfstars.c sdfdspstars.c),
+	For each stars directory (src/domains/{de,sdf,sdf/dsp}/stars
 #	make the following changes:
-#	1. Edit destars.c and add 'const' in two places
+#	1. Create the .cc files from the .pl files
+#	Note that we use GNU make here, not nmake
+#	make sources
+#	2. Edit {destars.c,sdfstars.c,sdfdspstars.c}
+	    and add 'const' in two places
 #		#define STR extern const char *
 #		static const char** nm_table[] = {
-#	2. Copy destars.c to foo.cc
-#	3. Compile with: nmake -f makefile.vc foo.obj
-#	4. Substitute foo.obj for destars.obj: cp foo.obj destars.obj
+#	3. Copy destars.c to foo.cc
+#	4. Compile with: nmake -f makefile.vc foo.obj
+#	5. Substitute foo.obj for destars.obj: cp foo.obj destars.obj
 
 # 10. To build, run:
 #	nmake -f $PTOLEMY/mk/build-nt4.vc.mk.vc all
