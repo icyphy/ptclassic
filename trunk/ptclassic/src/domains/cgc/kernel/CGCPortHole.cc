@@ -266,7 +266,7 @@ const CGCPortHole* CGCPortHole :: realFarPort() const {
 	return p;
 }
 
-void CGCPortHole :: setGeoName(char* n) {
+void CGCPortHole :: setGeoName(const char* n) {
 	delete [] bufName;
 	if (myGeodesic == 0) bufName = savestring(n);
 	else geo().setBufName(n);

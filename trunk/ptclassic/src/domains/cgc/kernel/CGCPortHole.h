@@ -111,7 +111,7 @@ public:
 	BufType  bufType() const;
 
 	// name the porthole in the data structure.
-	void setGeoName(char* n);
+	void setGeoName(const char* n);
 	const char* getGeoName() const;
 
 	// Return the geodesic connected to this PortHole.
