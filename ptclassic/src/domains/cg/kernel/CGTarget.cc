@@ -619,7 +619,7 @@ Block* CGTarget::spliceStar(PortHole* p, const char* name,
 	// star to.
 	Galaxy* addTo;
 
-	if (p->atBoundary && p->isItOutput())
+	if (p->atBoundary() && p->isItOutput())
 	    addTo = (Galaxy*) pfar->parent()->parent();
 	else
 	    addTo = (Galaxy*) p->parent()->parent();
