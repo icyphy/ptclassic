@@ -104,3 +104,8 @@ LIBR_DEBUG =	libdummy_g
 # Itcl2.1 shell: [incr Tcl] sh  (tclsh + namespaces)
 #ITCLSH =	$(PTOLEMY)/tcltk/itcl.$(PTARCH)/bin/itclsh
 ITCLSH =	itclsh
+
+# Tcl script that generates html from itcl files
+# Note that $(ROOT) here is relative to the tycho directory, not
+# the Ptolemy directory.
+TYDOC=$(ROOT)/util/tydoc/bin/tydoc
