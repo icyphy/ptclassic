@@ -56,13 +56,18 @@ public:
 	~CGMultiTarget();
 	int run();
 
+	// If within a WormHole, do nothing.
+	// Otherwise, conditionally display, compile, load, and run the code.
+	/*virtual*/ void wrapup();
+
 	/*virtual*/ void writeCode();
 
 	// type identification
 	/*virtual*/ int isA(const char*) const;
 
 	// redefine: generateCode routine generates code if inside a wormhole
-	// in this redefinition.
+	// in this redefinition.  It also calls all of the child targets
+	// generateCode methods
 	void generateCode();
 
 	void setStopTime(double);
@@ -119,6 +124,13 @@ public:
 	// check whether communication amortization is possible.
 	// If yes, return TRUE, else return FALSE.
 	int amortize(int from, int to);
+
+	// Methods used in stages of a run, these simply call the Child
+	// targets methods.
+	// Return FALSE on error.
+	/*virtual*/ int compileCode();
+	/*virtual*/ int loadCode();
+	/*virtual*/ int runCode();
 
 protected:
 	void setup();
