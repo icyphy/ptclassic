@@ -23,7 +23,7 @@ The single output is the state vector.
 <h3>References</h3>
 <p>[1]  
 R.E. Kalman, "A new approach to linear filtering and prediction problems",
-<i>Trans. ASME, J. Basic Eng., Ser 82D, pp. 35-45, March 1960.
+<i>Trans. ASME, J. Basic Eng.</i>, Ser 82D, pp. 35-45, March 1960.
 <p>[2]  
 S. Haykin, <i>Adaptive Filter Theory</i></b>, Prentice-Hall, Inc., Englewood Cliffs,
 N.J., 1986.

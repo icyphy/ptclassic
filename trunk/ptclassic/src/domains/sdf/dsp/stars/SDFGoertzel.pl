@@ -19,21 +19,25 @@ limitation of liability, and disclaimer of warranty provisions.
 <p>
 This two-pole, one-zero IIR filter has a transfer function of
 <pre>
-{1 ~-~ {W sub N} sup k z sup -1} over
-{1 ~-~ 2 cos ( {2 pi} over {N} k ) z sup -1 ~+~ sup -2} ~.
+           1 - (W<sub>N</sub>)<sup>k</sup> z<sup>-1</sup>
+    ---------------------------
+    1 - 2cos(2pik/N)z<sup>-1</sup> + z<sup>-2</sup>
 </pre>
+<p>
 This filter is a biquad filter with
 <p>
 <ul>
-<li> n0 = 1
-<li> n1 = -Wn = exp(j 2 pi k / N)
-<li> n2 = 0
-<li> d1 = -2 cos(2 pi k / N)
-<li> d2 = 1
+<li> n<sub>0</sub> = 1
+<li> n<sub>1</sub> = -(W<sub>N</sub>) <sup>k</sup> = exp(j 2 pi k / N)
+<li> n<sub>2</sub> = 0
+<li> d<sub>1</sub> = -2 cos(2 pi k / N)
+<li> d<sub>2</sub> = 1
 </ul>
 <p>
-The Goertzel's implementation takes the simpler forms of n0, n2, and d2
-into account, and computes n1 and d1 from the parameters k and N.
+The implementation takes the simpler forms of n<sub>0</sub>, n<sub>2</sub>,
+and d<sub>2</sub>
+into account, and computes n<sub>1</sub> and d<sub>1</sub>
+from the parameters k and N.
 It is implemented in direct form II.
 <h3>References</h3>
 <p>[1]  
