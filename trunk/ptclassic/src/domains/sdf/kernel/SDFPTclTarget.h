@@ -111,17 +111,21 @@ public:
     StringState destDirectory;
 
     // Generate the Ptcl description of a galaxy
-    StringList ptclDescription(Galaxy* localGalaxy, int addHeader);
+    StringList ptclDescription(Galaxy* localGalaxy, int addHeader = FALSE,
+			       const char* path = 0) const;
 
 protected:
     // Generate the Ptcl header code for a galaxy
-    StringList ptclHeaderCode(Galaxy* localGalaxy);
+    StringList ptclHeaderCode(Galaxy* localGalaxy) const;
 
     // Generate Ptcl description of a galaxy
-    StringList ptclGalaxyCode(Galaxy* localGalaxy);
+    StringList ptclGalaxyCode(Galaxy* localGalaxy) const;
 
     // Generate Ptcl code specifying the execution time estimates
     StringList ptclExecTimeCode();
+
+    // Write Ptcl code to file called path
+    void writePtclCode(StringList& ptclCode, const char* path) const;
 
 private:
     int numIters;
