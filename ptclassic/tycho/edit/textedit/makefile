@@ -52,6 +52,7 @@ ITCL_SRCS = \
 	EditItcl.itcl \
 	EditJava.itcl \
 	EditMake.itcl \
+	EditMail.itcl \
 	EditProgram.itcl \
 	EditPtcl.itcl \
 	EditPtlang.itcl \
