@@ -37,7 +37,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	  InDEMPHIter nextin(input);
 	  OutDEMPHIter nextoutA(outputA), nextoutB(outputB);
 	  InDEPort *in;
-	  OutDEPort *outA, *outB;
+	  OutDEPort *outA = (OutDEPort *)NULL, *outB = (OutDEPort *)NULL;
 	  while (((in = nextin++) != 0) &&
 		 ((outA = nextoutA++) != 0) &&
 		 ((outB = nextoutB++) != 0)) {
