@@ -192,7 +192,7 @@ int UniProcessor :: filledInIdleSlot(ParNode* node, int start, int limit) {
 }
 
 // schedule in the middle (during an idle slot)
-// return the completion time if succeeded, else "FALSE"
+// return the completion time if succeeded, else "-1"
 int UniProcessor :: schedInMiddle(ParNode* pd, int when, int leng) {
 
 	int curTime = getAvailTime();

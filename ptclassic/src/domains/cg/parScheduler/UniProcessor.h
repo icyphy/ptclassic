@@ -129,11 +129,13 @@ public:
 	int schedAtEnd(ParNode*, int, int);
 	
 	// schedule in the middle (during an idle slot)
-	// return the completion time if done, "FALSE" otherwise.
+	// return the completion time if done, "-1" otherwise.
 	int schedInMiddle(ParNode*, int, int);
 
 	// check whether the node can be filled in an idle slot.
 	// return -1 if failed. Otherwise, return the schedule time.
+	// "limit", if given, indicates the upper bound the node
+	// should be scheduled.
 	int filledInIdleSlot(ParNode*, int start, int limit = 0);
 
 	// append a Node to the end of the schedule
