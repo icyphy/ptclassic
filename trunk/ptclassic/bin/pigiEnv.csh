@@ -26,6 +26,20 @@ endif
 if ( ! $?USER ) then
     setenv USER $LOGNAME
 endif
+if ( ! $?PTX11DIR ) then
+    switch ($ARCH)
+	case sol2:
+	case sol2.cfront:
+	    setenv PTX11DIR /usr/openwin
+	    breaksw
+	case *:
+	    setenv PTX11DIR /usr/X11
+	    breaksw
+    endsw
+endif
+if ( ! $?LD_LIBRARY_PATH ) then
+    setenv LD_LIBRARY_PATH /usr/lib:${PTX11DIR}/lib
+endif
 
 if ( ! $?PIGIRPC ) then
 	if ( "$progname" == "ptiny" ) then
@@ -133,32 +147,6 @@ endif
 
 set path = ( $PTOLEMY/bin.$ARCH $PTOLEMY/bin $path )
 
-set cmdfile = /tmp/pigiCmds.$USER
-/bin/rm -f $cmdfile
-if ( ! $?nocmdfile ) then
-    echo "PTOLEMY=$PTOLEMY"				>! $cmdfile
-    echo "HOME=$HOME"					>> $cmdfile
-    echo "ARCH=$ARCH"					>> $cmdfile
-    echo "PIGIRPC=$PIGIRPC"				>> $cmdfile
-    echo "DISPLAY=$DISPLAY"				>> $cmdfile
-    echo "PATH=$PATH"					>> $cmdfile
-    echo "TCL_LIBRARY=$TCL_LIBRARY"			>> $cmdfile
-    echo "TK_LIBRARY=$TK_LIBRARY"			>> $cmdfile
-    echo "PTPWD=$PTPWD"					>> $cmdfile
-    if ( $?pigiconsole ) then
-        echo "TAILARGS=-console"			>> $cmdfile
-    endif
-    if ( $?pigidebug ) then
-	if ( "$ARCH" == "hppa.cfront" ) then
-		echo "COMMAND=$PTOLEMY/lib/pigiRpcDebug.xdb" >> $cmdfile
-	else
-		echo "COMMAND=$PTOLEMY/lib/pigiRpcDebug" >> $cmdfile
-	endif
-    else if ( $?pigiconsole ) then
-	echo "COMMAND=$PTOLEMY/lib/pigiRpcConsole"	>> $cmdfile
-    endif
-endif
-
 if ( ! $?VEMBINARY) setenv VEMBINARY $PTOLEMY/bin.$ARCH/vem 
 
 $VEMBINARY -G 600x150+0+0 -F ${cell}:schematic -G +0+200 -R $PTOLEMY/lib/pigiRpcShell
@@ -169,4 +157,3 @@ if ( -r $dbfile ) then
     xrdb $dbfile
     /bin/rm -f $dbfile
 endif
-/bin/rm -f $cmdfile
