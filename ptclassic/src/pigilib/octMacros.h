@@ -136,97 +136,14 @@ From: /usr5/octtools/src/octflat/my.h copied 8/7/88
     (t)->contents.circle.center.y = cy,			\
     octCreate(c, t))
 
-#define CreateSprop	CreatePropStr
-#define CreateIprop	CreatePropInt
-#define CreateRprop	CreatePropReal
-
-/*
- *  Macro's to call octGetOrCreate()
- *	c = the container
- *	t = the object
- *	s = name of the object
- */
+/* these were macros but are now functions */
+boolean CreateOrModifyPropInt();
+boolean CreateOrModifyPropReal();
+boolean CreateOrModifyPropStr();
+boolean GetOrCreatePropInt();
+boolean GetOrCreatePropReal();
+boolean GetOrCreatePropStr();
 
-#define GetOrCreateTerm(c, t, s)			\
-    ((t)->type=OCT_TERM, (t)->contents.term.name=s, octGetOrCreate(c,t))
-
-#define GetOrCreateNet(c, t, s)				\
-    ((t)->type=OCT_NET, (t)->contents.net.name=s, octGetOrCreate(c,t))
-
-#define GetOrCreateLabel(c, t, s)			\
-    ((t)->type=OCT_LABEL, (t)->contents.label.label=s, octGetOrCreate(c,t))
-
-#define GetOrCreateBag(c, t, s)				\
-    ((t)->type=OCT_BAG, (t)->contents.bag.name=s, octGetOrCreate(c,t))
-
-#define GetOrCreateLayer(c, t, s)			\
-    ((t)->type=OCT_LAYER, (t)->contents.layer.name=s, octGetOrCreate(c,t))
-
-#define GetOrCreatePropInt(c, t, s, i)			\
-    ((t)->type=OCT_PROP, (t)->contents.prop.name=s,	\
-    (t)->contents.prop.type = OCT_INTEGER, 		\
-    (t)->contents.prop.value.integer = i,		\
-    octGetOrCreate(c,t))
-
-#define GetOrCreatePropStr(c, t, s, s1)			\
-    ((t)->type=OCT_PROP, (t)->contents.prop.name=s,	\
-    (t)->contents.prop.type = OCT_STRING, 		\
-    (t)->contents.prop.value.string = s1,		\
-    octGetOrCreate(c, t))
-
-#define GetOrCreatePropReal(c, t, s, d)			\
-    ((t)->type=OCT_PROP, (t)->contents.prop.name=s,	\
-    (t)->contents.prop.type = OCT_REAL, 		\
-    (t)->contents.prop.value.real = d,			\
-    octGetOrCreate(c, t))
-
-#define GetOrCreateSprop GetOrCreatePropStr
-#define GetOrCreateIprop GetOrCreatePropInt
-#define GetOrCreateRprop GetOrCreatePropReal
-
-/*
- *  Macro's to call octCreateOrModify()
- *	c = the container
- *	t = the object
- *	s = name of the object
- */
-
-#define CreateOrModifyTerm(c, t, s)			\
-    ((t)->type=OCT_TERM, (t)->contents.term.name=s, octCreateOrModify(c,t))
-
-#define CreateOrModifyNet(c, t, s)			\
-    ((t)->type=OCT_NET, (t)->contents.net.name=s, octCreateOrModify(c,t))
-
-#define CreateOrModifyLabel(c, t, s)			\
-    ((t)->type=OCT_LABEL, (t)->contents.label.label=s, octCreateOrModify(c,t))
-
-#define CreateOrModifyBag(c, t, s)			\
-    ((t)->type=OCT_BAG, (t)->contents.bag.name=s, octCreateOrModify(c,t))
-
-#define CreateOrModifyLayer(c, t, s)			\
-    ((t)->type=OCT_LAYER, (t)->contents.layer.name=s, octCreateOrModify(c,t))
-
-#define CreateOrModifyPropInt(c, t, s, i)		\
-    ((t)->type=OCT_PROP, (t)->contents.prop.name=s,	\
-    (t)->contents.prop.type = OCT_INTEGER, 		\
-    (t)->contents.prop.value.integer = i,		\
-    octCreateOrModify(c,t))
-
-#define CreateOrModifyPropStr(c, t, s, s1)		\
-    ((t)->type=OCT_PROP, (t)->contents.prop.name=s,	\
-    (t)->contents.prop.type = OCT_STRING,		\
-    (t)->contents.prop.value.string = s1,		\
-    octCreateOrModify(c, t))
-
-#define CreateOrModifyPropReal(c, t, s, d)		\
-    ((t)->type=OCT_PROP, (t)->contents.prop.name=s,	\
-    (t)->contents.prop.type = OCT_REAL,			\
-    (t)->contents.prop.value.real = d,			\
-    octCreateOrModify(c, t))
-
-#define CreateOrModifySprop CreateOrModifyPropStr
-#define CreateOrModifyIprop CreateOrModifyPropInt
-#define CreateOrModifyRprop CreateOrModifyPropReal
 
 /*
  *  Get object by id
@@ -234,14 +151,7 @@ From: /usr5/octtools/src/octflat/my.h copied 8/7/88
 #define GetById(obj, id)				\
     ((obj)->objectId = id, octGetById(obj))
 
-#define OpenFacet(t, c, v, f, m)			\
-    ((t)->type = OCT_FACET, 				\
-    (t)->contents.facet.cell = c, 			\
-    (t)->contents.facet.view = v,			\
-    (t)->contents.facet.facet = f, 			\
-    (t)->contents.facet.version = OCT_CURRENT_VERSION,	\
-    (t)->contents.facet.mode = m, 			\
-    octOpenFacet(t))
+boolean OpenFacet();
 
 #define CreateInstance2(c, t, xname, xmaster, xview, xfacet, tx, ty, ttype)\
     ((t)->type=OCT_INSTANCE, 				\
