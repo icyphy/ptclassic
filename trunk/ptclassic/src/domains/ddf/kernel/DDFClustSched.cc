@@ -99,8 +99,8 @@ void DDFClustSched :: setup () {
 
   // If the entire galaxy is SDF, do SDFScheduling.
   if (amISDF) {
-    if (!galaxy()) {
-      Error::abortRun("DDFClustSched has no galaxy to cluster");
+    if (! galaxy()) {
+      Error::abortRun("Dynamic Dataflow Cluster Scheduler has no galaxy to cluster");
       return;
     }
     clearHalt();
@@ -115,7 +115,7 @@ void DDFClustSched :: setup () {
 //
 void DDFClustSched::initStructures() {
   if (!galaxy()) {
-    Error::abortRun("DDFClustSched has no galaxy to cluster");
+    Error::abortRun("Dynamic Dataflow Cluster Scheduler has no galaxy to cluster");
     return;
   }
 
@@ -145,7 +145,7 @@ void DDFClustSched :: selectScheduler(SDFClusterGal& cgalaxy) {
   // check whether the galaxy is SDF or not
   if (amISDF) {
     if (!galaxy()) {
-      Error::abortRun("DDFClustSched has no galaxy to cluster");
+      Error::abortRun("Dynamic Dataflow Cluster Scheduler has no galaxy to cluster");
       return;
     }
     LOG_NEW; realSched = new SDFClustSched;
@@ -378,8 +378,8 @@ int DDFClustSched :: run() {
     realSched->setStopTime(getStopTime());
     return realSched->run();
   }
-  if (!galaxy()) {
-    Error::abortRun("DDFClustSched has no galaxy to run");
+  if (! galaxy()) {
+    Error::abortRun("Dynamic Dataflow Cluster Scheduler has no galaxy to run");
     return FALSE;
   }
   
