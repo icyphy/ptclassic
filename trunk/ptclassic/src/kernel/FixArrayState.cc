@@ -100,8 +100,8 @@ void FixArrayState  :: initialize() {
                 case '[':
                         t = evalIntExpression(lexer);
                         if (t.tok != T_Int) {
-                                parseError ("expected integer expression after '['
-");
+                                parseError (
+				    "expected integer expression after '['" );
                                 err = 1;
                                 break;
                         }
