@@ -1579,7 +1579,7 @@ void genDef ()
 	sprintf (destNameBuf, "~%s", fullClass);
 /* Core constructor takes Corona as argument */
 	if ( coreDef == 1 ) {
-		fprintf (fp, "public:\n\t%s();\n\n\t%s(%sCorona & );\n", fullClass, fullClass, domain);
+		fprintf (fp, "public:\n\t%s(%sCorona & );\n", fullClass, domain);
 /* Corona constructor takes Core init flag are argument ( 0 = don't construct cores which is the default ). */
 	} else if ( coronaDef == 1 ) {
 		fprintf (fp, "public:\n\t%s( int doCoreInitFlag = 0);\n", fullClass);
@@ -1672,8 +1672,8 @@ void genDef ()
 	}
 /* FIXME: Corona uses className virtual method as secondary init. */
 	if ( coronaDef == 1 ) 
-        	fprintf (fp, "\nconst char* %s :: className() const { %sCorona* ptr = this; if ( initCoreFlag == 0 ) ptr->addCores(); return star_nm_%s;}\n",
-		fullClass, domain, fullClass);
+        	fprintf (fp, "\nconst char* %s :: className() const { %sCorona* ptr = (%sCorona* )this; if ( initCoreFlag == 0 ) ptr->addCores(); return star_nm_%s;}\n",
+		fullClass, domain, domain, fullClass);
 	else
         fprintf (fp, "\nconst char* %s :: className() const {return star_nm_%s;}\n",
 		fullClass, fullClass);
@@ -1711,7 +1711,7 @@ void genDef ()
 /* prefix code and constructor */
 /* Core constructor takes corona as argument. */
 	if ( coreDef == 1 ) {
-		fprintf (fp, "\n%s::%s() { }\n\n%s%s::%s ( %sCorona & corona_) : %s%sCore(corona_), corona((%s%s&)corona_)", fullClass, fullClass, ccCode, fullClass, fullClass, domain, domain, coreCategory, domain, objName);
+		fprintf (fp, "\n%s%s::%s ( %sCorona & corona_) : %s%sCore(corona_), corona((%s%s&)corona_)", ccCode, fullClass, fullClass, domain, domain, coreCategory, domain, objName);
 /* Corona takes do core init flag and calls parent constructor. */
 	} else if ( coronaDef == 1 ) {
 		fprintf (fp, "\n%s%s::%s (int doCoreInitFlag) : %sCorona(0)", ccCode, fullClass, fullClass, domain);
@@ -1754,7 +1754,8 @@ void genDef ()
 		/* FIXME:, these are all the same */
 		fprintf (fp,
 			"\n// Core prototype instance for known block list\n");
-		fprintf (fp, "static %s proto;\n", fullClass);
+		fprintf (fp, "static %s%s dummy;\n", domain, objName);
+		fprintf (fp, "static %s proto(dummy);\n", fullClass);
 		fprintf (fp, 
 			"static RegisterBlock registerBlock(proto,\"%s%s\");\n",
 			objName, coreCategory);
