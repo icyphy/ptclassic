@@ -52,7 +52,7 @@ static void p4(cc* m1, cc* m2, cc* m3=0, cc* m4=0) {
 	if (!m2) m2 = "";
 	if (!m3) m3 = "";
 	if (!m4) m4 = "";
-	cerr << m1 << " " << m2 << " " << m3 << " " << m4 << "\n";
+	cerr << m1 << m2 << m3 << m4 << "\n";
 }
 
 void
