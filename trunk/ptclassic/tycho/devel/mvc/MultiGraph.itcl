@@ -37,31 +37,28 @@
 # combination to which an edge is connected is called a "weld"
 # and is denoted _vertex_._key_. Each weld (as well each vertex and
 # each edge) can have a set of arbitrary options. More than one
-# edge can be connected to a weld -- this class thus "sort-of"
-# supports hyperedges.
+# edge can be connected to a weld. See the _HyperGraph_ class for
+# a related structure.
 #
 # <b>Note</b>: Keys must be unique at each vertex.
 #
 class ::tycho::MultiGraph {
-    inherit ::tycho::Digraph
+    inherit ::tycho::Digraph ::tycho::KeyedGraph
     
     constructor {args} {}
     destructor {}
 
     #################################################################
-    ####                        options                          ####
-
-    # The default options of each weld
-    public variable weldoptions {}
-
-    #################################################################
     ####                     public methods                      ####
 
-    # Get the adjacent vertex connected to the given weld
-    method adjacentvertex {weld}
+    # Get edges adjacent to a vertex
+    method adjacentedges {vertex {pattern1 *} {pattern2 *}}
 
-    # Get the adjacent weld connected to the given weld
-    method adjacentweld {weld}
+    # Get vertices adjacent to a vertex
+    method adjacentvertices {vertex {pattern1 *} {pattern2 *}}
+
+    # Get welds adjacent to a vertex
+    method adjacentwelds {vertex {pattern1 *} {pattern2 *}}
 
     # Add an edge and options to the graph
     method connect {source target args}
@@ -82,45 +79,64 @@ body ::tycho::MultiGraph::constructor {args} {
 }
 
 ########################################################################
-#### adjacentvertex
+#### adjacentedges
 #
-# Get the adjacent vertex connected to the given weld. Return the
-# empty string if the weld does not exist or there is no connection
-# to it.
+# Get the adjacent edges to all welds matching the given patterns.
+# Return the empty string if the weld does not exist or there is
+# no connection to it. Edges are returned as a flat list of
+# vertex.key vertex.key pairs.
 #
-body ::tycho::MultiGraph::adjacentvertex {weld} {
-    # Try child
-    set adjacent [array names _edges $vertex.$key^*]
-    if { $adjacent != "" } {
-	return [lindex [split [lindex [split $adjacent "^"] 1] "."] 0]
+body ::tycho::MultiGraph::adjacentedges {vertex {pattern1 *} {pattern2 *}} {
+	set result {}
+    # Try children
+    foreach {_ e} [array get _edges $vertex.$pattern1^*.$pattern2] {
+    	eval lappend result [split $e "^"]
     }
-    # Try parent
-    set adjacent [array names _edges *^$vertex.$key]
-    if { $adjacent != "" } {
-	return [lindex [split [lindex [split $adjacent "^"] 0] "."] 0]
+    # Try parents
+    foreach {_ e} [array get _edges *.$pattern2^$vertex.$pattern1] {
+		lappend result [split $e "^"]
     }
-    return ""
+    return $result
 }
 
 ########################################################################
-#### adjacentweld
+#### adjacentvertices
 #
-# Get the adjacent weld connected to the given weld. Return the
-# empty string if the weld does not exist or there is no connection
-# to it.
+# Get the adjacent vertices to all welds matching the given patterns.
+# Return the empty string if the weld does not exist or there is
+# no connection to it.
 #
-body ::tycho::MultiGraph::adjacentweld {weld} {
-    # Try child
-    set adjacent [array names _edges $vertex.$key^*]
-    if { $adjacent != "" } {
-	return [lindex [split $adjacent "^"] 1]
+body ::tycho::MultiGraph::adjacentvertices {vertex {pattern1 *} {pattern2 *}} {
+	set result {}
+    # Try children
+    foreach {_ e} [array get _edges $vertex.$pattern1^*.$pattern2] {
+    	lappend result [lindex $e 2]
     }
-    # Try parent
-    set adjacent [array names _edges *^$vertex.$key]
-    if { $adjacent != "" } {
-	return [lindex [split $adjacent "^"] 0]
+    # Try parents
+    foreach {_ e} [array get _edges *.$pattern2^$vertex.$pattern1] {
+		lappend result [lindex $e 0]
     }
-    return ""
+    return $result
+}
+
+########################################################################
+#### adjacentwelds
+#
+# Get the adjacent welds to all welds matching the given patterns.
+# Return the empty string if the weld does not exist or there is
+# no connection to it.
+#
+body ::tycho::MultiGraph::adjacentwelds {vertex {pattern1 *} {pattern2 *}} {
+	set result {}
+    # Try children
+    foreach e [array names _edges $vertex.$pattern1^*.$pattern2] {
+		lappend result [lindex [split $e "^"] 1]
+    }
+    # Try parents
+    foreach e [array names _edges *.$pattern2^$vertex.$pattern] {
+		lappend result [lindex [split $e "^"] 0]
+    }
+    return $result
 }
 
 ########################################################################
@@ -132,6 +148,13 @@ body ::tycho::MultiGraph::adjacentweld {weld} {
 # already exists, but not if the two vertices or their welds do not exist. 
 #
 body ::tycho::MultiGraph::connect {source target args} {
+	#
+	# The edge matrices are stored as
+	#
+	#     _edges:       source.key^target.key |-> {source key target key}
+	#     _edgeoptions: source.key^target.key |-> {option value ...}
+	#
+	
     if { [::info exists _edges($source^$target)] } {
 	error "Edge ($source, $target) already exists in $dataname"
     }
@@ -151,15 +174,15 @@ body ::tycho::MultiGraph::connect {source target args} {
     set _edgeoptions($source^$target) [array get temp]
 
     # Remember the welds
-    if { ! [::info exists _weldoptns($source)] } {
-	set _weldoptns($source) $weldoptions
+    if { ! [::info exists _weldoptions($source)] } {
+	set _weldoptions($source) $weldoptions
     }
-    if { ! [::info exists _weldoptns($target)] } {
-	set _weldoptns($target) $weldoptions
+    if { ! [::info exists _weldoptions($target)] } {
+	set _weldoptions($target) $weldoptions
     }
 
     # Clear any cached structural information
-    unset _attributes
+    catch {unset _cache}
 
     # Return the inverse command
     return [list disconnect $source $target]
@@ -172,16 +195,16 @@ body ::tycho::MultiGraph::connect {source target args} {
 #
 body ::tycho::Digraph::delete {vertex} {
     if { ! [::info exists _vertices($vertex)] } {
-	error "Unknown vertex $vertex in $dataname"
+		error "Unknown vertex $vertex in $dataname"
     }
     set modified 1
 
     set inverse [list add $vertex $_vertices($vertex) $_vertexoptions($vertex)]
     unset _vertices($vertex)
 
-    foreach weld [array names _weldoptns $vertex.*] {
-	append inverse "; weldconfigure $weld $_weldoptns($weld)"
-	unset _weldoptns($weld)
+    foreach weld [array names _weldoptions $vertex.*] {
+		append inverse "; weldconfigure $weld $_weldoptions($weld)"
+		unset _weldoptions($weld)
     }
 
     # Clear any cached structural information

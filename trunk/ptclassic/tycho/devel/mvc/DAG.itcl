@@ -68,6 +68,15 @@ class ::tycho::DAG {
     ###################################################################
     ####                         public methods                    ####
 
+    # Return the value of the specified attribute for the specified vertex.
+    method attribute {attrname vertex}
+
+    # Set the specified attribute for all vertices to the specified value.
+    method attributeInit {attrname {initvalue 0}}
+
+    # Set the specified attribute for the specified vertex to the specified value.
+    method attributeSet {attrname vertex {value 1}}
+
     # Check to see whether an edge between a parent and child is in a cycle.
     method checkEdge {parent child}
 
@@ -96,6 +105,46 @@ class ::tycho::DAG {
     ###################################################################
     ###################################################################
     ####                      public methods                       ####
+
+#######################################################################
+#### attribute
+# Return the value of the specified attribute for the specified vertex.
+# It is an error if the attribute has not been set for this vertex.
+# The method <code>attributeInit</code> or <code>attributeSet</code>
+# should be used to set the value of the attribute.
+# Attributes are used by various algorithms that traverse the graph.
+# For example, to keep track of which vertices have beed visited already
+# in some graph traversal algorithm, you could use an attribute with
+# "visited" that takes value 0 or 1.
+#
+body ::tycho::AbstractGraph::attribute {attrname vertex} {
+    return $_cache($attrname,$vertex)
+}
+
+#######################################################################
+#### attributeInit
+# Set the specified attribute for all vertices to the specified value.
+# The attribute name is an arbitrary identifying string, and the value
+# is an arbitrary string.  If the value is not given, it defaults to "0".
+#
+body ::tycho::AbstractGraph::attributeInit {attrname {initvalue 0}} {
+    if [info exists _vertices] {
+        set searchid [array startsearch _vertices]
+        while {[set vertex [array nextelement _vertices $searchid]] != {}} {
+            set _cache($attrname,$vertex) $initvalue
+        }
+        array donesearch _vertices $searchid
+    }
+}
+
+#######################################################################
+#### attributeSet
+# Set the specified attribute for the specified vertex to the specified value.
+# The attribute name and value can be any arbitrary Tcl strings.
+#
+body ::tycho::AbstractGraph::attributeSet {attrname vertex {value 1}} {
+    set _cache($attrname,$vertex) $value
+}
 
 #######################################################################
 #### checkEdge

@@ -88,10 +88,6 @@ body ::tycho::Digraph::children {vertex} {
     return $result
 }
 
-# body ::tycho::Digraph::children {vertex} {
-#     return _adjacency($vertex.children)
-# }
-
 ########################################################################
 #### connect
 #
@@ -101,6 +97,13 @@ body ::tycho::Digraph::children {vertex} {
 # already exists, but not if the two vertices do not exist. 
 #
 body ::tycho::Digraph::connect {source target args} {
+	#
+	# The edge matrices are stored as
+	#
+	#     _edges:       source^target |-> {source target}
+	#     _edgeoptions: source^target |-> {option value ...}
+	# 
+
     if { [::info exists _edges($source^$target)] } {
 	error "Edge ($source, $target) already exists in $dataname"
     }
@@ -153,7 +156,7 @@ body ::tycho::Digraph::disconnect {source target} {
 ########################################################################
 #### leaves
 #
-# Return the "leaves" of the graph
+# Return the "leaves" of the graph.
 #
 body ::tycho::Digraph::leaves {} {
     # Start with all vertices
@@ -165,16 +168,6 @@ body ::tycho::Digraph::leaves {} {
     }
     return $result
 }
-
-# body ::tycho::Digraph::leaves {} {
-#     set result {}
-#     foreach {vertex children} [array get _adjacency *.children] {
-# 	if { $children == "" } {
-# 	    lappend result $vertex
-# 	}
-#     }
-#     return $result
-# }
 
 ########################################################################
 #### parents
@@ -190,14 +183,10 @@ body ::tycho::Digraph::parents {vertex} {
     return $result
 }
 
-# body ::tycho::Digraph::parents {vertex} {
-#     return _adjacency($vertex.parents)
-# }
-
 ########################################################################
 #### roots
 #
-# Return the roots of the graph
+# Return the roots of the graph.
 #
 body ::tycho::Digraph::roots {} {
     # Start with all vertices
@@ -210,12 +199,3 @@ body ::tycho::Digraph::roots {} {
     return $result
 }
 
-# body ::tycho::Digraph::roots {} {
-#     set result {}
-#     foreach {vertex parents} [array get _adjacency *.parents] {
-# 	if { $children == "" } {
-# 	    lappend result $vertex
-# 	}
-#     }
-#     return $result
-# }
