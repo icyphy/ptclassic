@@ -22,12 +22,11 @@ $Id$
 
  Programmer:  Soonhoi Ha
  Date of creation: 5/31/90
- Date of Revision: 6/13/90
+ Date of Revision: 9/16/92
  Revisions:
 	make EventHorizon Universal.
         each doamin needs to define In??EventHorizon and Out??EventHorizon
-        derived from Universal EventHorizon with domain-specific
-  	translation.
+        derived from Universal EventHorizon and domain-specific PortHoles.
 
 Code for functions declared in WormConnect.h
 
@@ -39,7 +38,7 @@ Code for functions declared in WormConnect.h
 
 **************************************************************************/
 
-inline Particle** EventHorizon :: nextInBuffer() { return myBuffer->next(); }
+inline Particle** EventHorizon :: nextInBuffer() { return buffer()->next(); }
 
 void 
 EventHorizon :: ghostConnect(EventHorizon& to)
@@ -49,7 +48,16 @@ EventHorizon :: ghostConnect(EventHorizon& to)
         ghostPort = &to;
 }
  
-PortHole& EventHorizon :: setPort (
+// destructor
+EventHorizon :: ~EventHorizon() {
+	if (ghostPort) { 
+		ghostPort->ghostPort = 0;
+		LOG_DEL; delete ghostPort;
+		ghostPort = 0;
+	}
+}
+
+void EventHorizon :: setEventHorizon (
 			     inOutType inOut,
 			     const char* s,
                              Wormhole* parentWormhole,
@@ -58,31 +66,19 @@ PortHole& EventHorizon :: setPort (
 			     unsigned numTokens)
 {
 	// Initialize PortHole
-        PortHole::setPort(s, parentStar,t);
+        asPort().setPort(s, parentStar,t);
 
 	// Initialize the EventHorizon members
-	timeStamp = 0.0;
-	dataNew = FALSE;
-	numberTokens = numTokens;
-	bufferSize = numberTokens;
+	timeMark = 0.0;
+	tokenNew = FALSE;
+	asPort().numberTokens = numTokens;
+	asPort().setMaxDelay(0);
 
 	// set which wormhole it is in
 	wormhole = parentWormhole;
 
-	// in or out?
-	inOrOut = inOut;
-
-        return *this;
-}
-
-int EventHorizon :: isItInput() const {
-	if (inOrOut < 2) return TRUE;
-	else		 return FALSE;
-}
-
-int EventHorizon :: isItOutput() const {
-	if (inOrOut > 1) return TRUE;
-	else		 return FALSE;
+        // in or out?
+        inOrOut = inOut;
 }
 
 /**************************************************************************
@@ -94,11 +90,11 @@ int EventHorizon :: isItOutput() const {
 void ToEventHorizon :: getData()
 {
 	// check whether data exists or not
-	if (numTokens() >= numberTokens) {
-		getParticle();
-		dataNew = TRUE;
+	if (asPort().numTokens() >= asPort().numXfer()) {
+		asPort().getParticle();
+		tokenNew = TRUE;
 	} else {
-		dataNew = FALSE;
+		tokenNew = FALSE;
 	}
 }
 
@@ -107,16 +103,16 @@ void ToEventHorizon :: transferData ()
 // It moves a Particle from the Universal EventHorizon to the ghostPort.
 
 	// check if data in.
-	if (dataNew == FALSE) return;
+	if (tokenNew == FALSE) return;
 
 	// Back up in the buffer by numberTokens
-	myBuffer->backup(numberTokens);
+	buffer()->backup(asPort().numberTokens);
 
 	// now, transfer the data.
-	for(int i = numberTokens; i>0; i--) {
+	for(int i = asPort().numberTokens; i>0; i--) {
 
 		// get pointers to each of the CircularBuffer objects.
-		Particle** p = myBuffer->next();
+		Particle** p = buffer()->next();
 		Particle** q = ghostPort->nextInBuffer();
 
 		// In the following code, particles aren't copied, only
@@ -133,26 +129,23 @@ void ToEventHorizon :: transferData ()
 	}
 
 	// set DataNew Value to ghostPort
-	ghostPort->dataNew = TRUE;
-	dataNew = FALSE;
+	ghostPort->tokenNew = TRUE;
+	tokenNew = FALSE;
 
 	// call ghostPort->sendData() for further conversion if it is input.
-	if (isItInput())
-		ghostPort->sendData();
+	if (asPort().isItInput())
+		ghostPort->asPort().sendData();
 }
 
-void ToEventHorizon :: initialize()
+void ToEventHorizon :: initializing()
 {
-	// call initialization routine for itselt
-	PortHole :: initialize();
-
 	// Initialize members
-	timeStamp = 0.0;
-	dataNew = FALSE;
+	timeMark = 0.0;
+	tokenNew = FALSE;
 
 	// if on the boundary, call ghostPort :: initialize()
-	if (isItInput())
-		ghostPort->initialize();
+	if (asPort().isItInput())
+		ghostPort->asPort().initialize();
 }
 
 /**************************************************************************
@@ -164,22 +157,19 @@ void ToEventHorizon :: initialize()
 void FromEventHorizon :: transferData ()
 {
 	// call ghostPort->grabData for initial conversion if it is output.
-	if (isItOutput())
-		ghostPort->grabData();
+	if (asPort().isItOutput())
+		ghostPort->asPort().grabData();
 }
 
-void FromEventHorizon :: initialize()
+void FromEventHorizon :: initializing()
 {
-	// call initialization routine for myself
-	PortHole :: initialize();
-
 	// Initialize members
-	timeStamp = 0.0;
-	dataNew = FALSE;
+	timeMark = 0.0;
+	tokenNew = FALSE;
 
 	// if on the boundary, call ghostPort :: initialize()
-	if (isItOutput())
-		ghostPort->initialize();
+	if (asPort().isItOutput())
+		ghostPort->asPort().initialize();
 }
 
 int FromEventHorizon :: ready() { return TRUE ;}
@@ -212,31 +202,31 @@ PortHole& WormMultiPort :: newPort() {
         if (galp->isItInput()) {
                 EventHorizon& to = outSideDomain->newTo();
                 EventHorizon& from = inSideDomain->newFrom();
-                to.setPort(in, galp->readName(), worm, (Star*) parent(),
-                	type, numToken);
-                parent()->addPort(to);
-		ports.put(to);
-                from.setPort(in, ghostName(*galp), worm, (Star*) parent(),
-                	type, numToken);
+                to.setEventHorizon(in, galp->readName(), worm, 
+			(Star*) parent(), type, numToken);
+                parent()->addPort(to.asPort());
+		ports.put(to.asPort());
+                from.setEventHorizon(in, ghostName(*galp), worm, 
+			(Star*) parent(), type, numToken);
                 to.ghostConnect (from);
-                from.inheritTypeFrom (realP);
-                to.inheritTypeFrom (from);
-                from.connect(realP,0);
-		return to;
+                from.asPort().inheritTypeFrom (realP);
+                to.asPort().inheritTypeFrom (from.asPort());
+                from.asPort().connect(realP,0);
+		return to.asPort();
         } else {
                 EventHorizon& to = inSideDomain->newTo();
                 EventHorizon& from = outSideDomain->newFrom();
-                from.setPort(out, galp->readName(), worm, (Star*) parent(),
-                                     type, numToken);
-                parent()->addPort(from);
-		ports.put(from);
-                to.setPort(out, ghostName(*galp), worm, (Star*) parent(),
-                                   type, numToken);
+                from.setEventHorizon(out, galp->readName(), worm, 
+			(Star*) parent(), type, numToken);
+                parent()->addPort(from.asPort());
+		ports.put(from.asPort());
+                to.setEventHorizon(out, ghostName(*galp), worm, 
+			(Star*) parent(), type, numToken);
                 to.ghostConnect (from);
-                to.inheritTypeFrom (realP);
-                from.inheritTypeFrom (to);
-                realP.connect(to,0);
-		return from;
+                to.asPort().inheritTypeFrom (realP);
+                from.asPort().inheritTypeFrom (to.asPort());
+                realP.connect(to.asPort(),0);
+		return from.asPort();
         }
 }
 

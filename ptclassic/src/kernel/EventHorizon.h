@@ -22,17 +22,18 @@ $Id$
 
  Programmer:  Soonhoi Ha
  Date of creation: 5/31/90
- Date of revision: 6/15/90
+ Date of revision: 9/16/92
  Revisions:
 	EventHorizon is defined.
-	EventHorizon is PortHole associated with Wormholes.
 ******************************************************************/
 
 /*********************************************************************
 
  EventHorizon:
 
- For Wormholes, we need another class of PortHoles.
+ For Wormholes, we need another class of PortHoles that will be multiply
+ derived from a domain-specific Porthole class and common EventHorizon
+ class.
 
  *********************************************************************/
 
@@ -41,22 +42,29 @@ $Id$
         //////////////////////////////////////////
 
 //  This PortHole links two PortHoles inside and outside a Wormhole.
-class EventHorizon : public PortHole
+class EventHorizon 
 {
+friend class Wormhole;
+friend class ToEventHorizon;
+
 public:
-	// We need another set of connection information
-	// between boundary and inside of the wormhole.
-	EventHorizon* ghostPort;
-	
+	// constructor
+	// We never use plain EventHorizons, we always have
+	// SDFToUniversal: public ToUniversal, public InSDFPort
+	// SDFfromUniversal: public FromUniversal, public OutSDFPort
+	// SDFToUniversal::SDFToUniversal() : ToEventHorizon(this) {...}
+
+	EventHorizon(PortHole* self): selfPort(*self) {}
+
+	// virtual destructor
+	virtual ~EventHorizon();
+
+	// return myself as a porthole
+	PortHole& asPort() { return selfPort; }
+	PortHole& ghostAsPort() { return ghostPort->asPort(); }
+
 	// Connect two EventHorizons.
 	void ghostConnect(EventHorizon& to );
-
-	// TimeStamp of the current data, which is necessary for interface
-	// of two domains. 
-	float timeStamp;
-
-	// Is data new?
-	int dataNew;
 
 	// Which wormhole it is in.
 	Wormhole* wormhole;
@@ -66,7 +74,7 @@ public:
 	int isItOutput() const;
 
 	// set ports
-	PortHole& setPort(inOutType inOut, const char* portName, 
+	void setEventHorizon(inOutType inOut, const char* portName, 
 		Wormhole* parentWormhole, Star* parentStar,
 		DataType type = FLOAT, unsigned numTokens = 1 );
 
@@ -76,8 +84,32 @@ public:
 	// friends).
 	Particle** nextInBuffer(); // { return myBuffer->next();}
 
-private:
-	int inOrOut;
+	// return the timeMark
+	double getTimeMark() { return timeMark; }
+	void setTimeMark(double d) { timeMark = d; }
+
+	// pure virtual
+	virtual void initializing() = 0;
+
+protected:
+	// reference to myself as a Porthole
+	PortHole& selfPort;
+
+	// Access the myBuffer of the porthole
+	CircularBuffer* buffer() { return asPort().myBuffer; }
+
+	// We need another set of connection information
+	// between boundary and inside of the wormhole.
+	EventHorizon* ghostPort;
+	
+	// Is data token new?
+	int tokenNew;
+
+	// TimeMark of the current data, which is necessary for interface
+	// of two domains. 
+	double timeMark;
+
+        int inOrOut;
 };
 
         //////////////////////////////////////////
@@ -96,8 +128,10 @@ protected:
 	void transferData();
 
 public:
-	// redefine initialize()
-	void initialize(); 
+	ToEventHorizon(PortHole* p) : EventHorizon(p) {}
+
+	// initialization routine
+	void initializing(); 
 
 };
 
@@ -112,8 +146,8 @@ friend class Wormhole;
 protected:
 
 	//transfer data from Universal EventHorizon to outside
-	void putData() { putParticle();
-			 dataNew = FALSE; }
+	void putData() { asPort().putParticle();
+			 tokenNew = FALSE; }
 
 	// fire ghostPort :: grabData to get Data
 	void transferData();
@@ -123,11 +157,11 @@ protected:
 	virtual int ready();
 			   
 public:
-	// redefine initialize()
-	void initialize(); 
+	FromEventHorizon(PortHole* p) : EventHorizon(p) {}
 
+	// initialization routine
+	void initializing(); 
 };
-
 
         //////////////////////////////////////////
         // class WormMultiPort
