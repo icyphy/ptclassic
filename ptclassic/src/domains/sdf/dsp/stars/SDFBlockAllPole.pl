@@ -76,8 +76,7 @@ and can be changed, at the expense of recompiling.
 	    }
 	}
 	go {
-	    int tapsIndex;
-	    double out, tap;
+	    double out;
 
 	    // first read in new tap values
 	    int index = 0;
