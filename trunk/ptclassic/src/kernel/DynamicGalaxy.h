@@ -8,19 +8,25 @@
 SCCS version identification
 $Id$
 
- Copyright (c) 1990 The Regents of the University of California.
+ Copyright (c) 1992 The Regents of the University of California.
                        All Rights Reserved.
  Programmer : Soonhoi Ha
  Date : Jan. 14, 1992
 
 ********************************************************************/
 
-// This galaxy is created during the auto-wormholization process.
-// It can destroy the component blocks.
+// This galaxy is the baseclass for a family of dynamically created
+// galaxies.  Blocks, portholes, and other objects in the galaxy are
+// assumed to be on the heap and are removed by the destructor.
 
 class DynamicGalaxy : public Galaxy {
+protected:
+	void zero();		// remove contained objects
 public:
-	~DynamicGalaxy();
+	~DynamicGalaxy() { zero();}
+
+	// the clone function returns an error and a null pointer.
+	Block* clone() const;
 
 	// class identification
         int isA(const char*) const;
