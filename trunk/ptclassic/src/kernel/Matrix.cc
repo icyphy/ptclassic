@@ -42,6 +42,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "Matrix.h"
 #include "Plasma.h"
 #include "Error.h"
+#include <stdio.h>              // sprintf()
 #include <math.h>
 
 // Must be greater than the maximum number of characters in the %22.15g format
