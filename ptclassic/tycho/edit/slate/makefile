@@ -90,7 +90,8 @@ ITCL_SRCS = \
 	SmartLine.itcl \
 	Solid.itcl \
 	Stepper.itcl \
-	Terminal.itcl
+	Terminal.itcl \
+	Transition.itcl
 
 EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) slate.tcl pkgIndex.tcl README.txt
 
