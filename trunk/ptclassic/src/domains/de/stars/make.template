@@ -43,7 +43,6 @@ DEFork.pl \
 DEHandShake.pl \
 DEImageToCell.pl \
 DEImpulse.pl \
-DEInsertPacket.pl \
 DEIntPacketize.pl \
 DEIntUnPacketize.pl \
 DEInvert.pl \
@@ -52,10 +51,10 @@ DEMerge.pl \
 DENull.pl \
 DEOr.pl \
 DEPassGate.pl \
+DEPCMVoiceRecover.pl \
 DEPSServer.pl \
 DEPacketize.pl \
 DEPoisson.pl \
-DEPrevPacketSub.pl \
 DEPrQueue.pl \
 DEPriorityCheck.pl \
 DEPriorityQueue.pl \
@@ -68,6 +67,8 @@ DERealTimeStar.pl \
 DERouter.pl \
 DESampler.pl \
 DEServer.pl \
+DESeqATMSub.pl \
+DESeqATMZero.pl \
 DEStack.pl \
 DEStatistics.pl \
 DEStopTimer.pl \
@@ -88,8 +89,7 @@ DEVarServer.pl \
 DEVirtClock.pl \
 DEXMgraph.pl \
 DEXgraph.pl \
-DEXhistogram.pl \
-DEZeroSubstitution.pl
+DEXhistogram.pl
 
 SRCS =	$(PL_SRCS:.pl=.cc)
 
