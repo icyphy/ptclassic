@@ -292,7 +292,7 @@ body ::tycho::AbstractGraph::acyclic {} {
 # supplied, return all edges.
 #
 # This is different from edges{} only if the edges are not connected
-# from vertex to vertex -- see _MultiGraph_ for an example.
+# from vertex to vertex -- see _KeyedDigraph_ for an example.
 #
 body ::tycho::AbstractGraph::adjacency {{pattern1 *} {pattern2 *}} {
     set result {}
@@ -310,48 +310,10 @@ body ::tycho::AbstractGraph::adjacency {{pattern1 *} {pattern2 *}} {
 #### delete
 #
 # Delete a vertex and all connected edges from the graph, and
-# return the inverse command.
-#
-# FIXME: parameterize so works with subclasses.
+# return the inverse command. <i>This is an abstract method.</i>
 #
 body ::tycho::AbstractGraph::delete {vertex} {
-    _verify vertex $vertex
-
-    # Start inverse command
-    set inverse ""
-
-    # Delete the edges first
-    # !!!
-
-    # Delete edges to children
-    foreach child $_adjacency($vertex,children) {
-	set i [lsearch -exact $_adjacency($child,parents)]
-	set _adjacency($child,parents) \
-		[lreplace $_adjacency($child,parents) $i $i]
-	append inverse [_delete edge [list $vertex $child]]
-    }
-    # Delete edges to parents
-    foreach parent $_adjacency($vertex,parents) {
-	set i [lsearch -exact $_adjacency($parent,children)]
-	set _adjacency($parent,children) \
-		[lreplace $_adjacency($parent,children) $i $i]
-	append inverse [_delete edge [list $parent $vertex]]
-    }
-    # Clear parent-child links
-    unset _adjacency($vertex,children)
-    unset _adjacency($vertex,parents)
-
-    # Clear any cached structural information
-    catch {unset _cache}
-
-    # Forget the copy of the vertex name
-    unset _vertices($vertex)
-
-    # Call the superclass to delete
-    append inverse [_delete vertex $vertex]
-    
-    # Return the inverse command
-    return $inverse
+    abstractMethod delete
 }
 
 ########################################################################
@@ -969,8 +931,6 @@ body ::tycho::AbstractGraph::numberofvertices {} {
 # This method cannot be recorded or published.
 #
 body ::tycho::AbstractGraph::repair {} {
-    set modified 1
-
     foreach {src tgt} [edges] {
 	if { ! [::info exists _vertices($src)] \
                 || ! [::info exists _vertices($tgt)] } {
@@ -1406,7 +1366,7 @@ body ::tycho::AbstractGraph::_adjacencydelete {vertex1 vertex2} {
         set _adjacency($vertex1,children) \
                 [lreplace $_adjacency($vertex1,children) $pindex $pindex]
         set _adjacency($vertex2,parents) \
-                [lreplace $_adjacency($vertex2,parents $cindex $cindex]
+                [lreplace $_adjacency($vertex2,parents) $cindex $cindex]
     }
 }
 
