@@ -35,8 +35,8 @@ specified in the precision parameter, then a error message is given.
         protected {
 		Fix out;
         }
-        begin {
-		SDFFix::begin();
+        setup {
+		SDFFix::setup();
 
                 out = Fix( ((const char *) OutputPrecision) );
 		if ( out.invalid() )
