@@ -89,26 +89,26 @@ void Wormhole :: buildEventHorizons () {
 			EventHorizon& from = inSideDomain->newFrom();
 			to.setEventHorizon(in, galp.readName(), this, 
 				&selfStar, type, numToken);
-			selfStar.addPort(to.asPort());
+			selfStar.addPort(*(to.asPort()));
 			from.setEventHorizon(in, ghostName(galp), this, 
 				&selfStar, type, numToken);
 			to.ghostConnect (from);
-			from.asPort().inheritTypeFrom (realGalp);
-			to.asPort().inheritTypeFrom (from.asPort());
-			from.asPort().connect(realGalp,0);
+			from.asPort()->inheritTypeFrom (realGalp);
+			to.asPort()->inheritTypeFrom (*(from.asPort()));
+			from.asPort()->connect(realGalp,0);
 		}
 		else {
 			EventHorizon& to = inSideDomain->newTo();
 			EventHorizon& from = outSideDomain->newFrom();
 			from.setEventHorizon(out, galp.readName(), this, 
 				&selfStar, type, numToken);
-			selfStar.addPort(from.asPort());
+			selfStar.addPort(*(from.asPort()));
 			to.setEventHorizon(out, ghostName(galp), this, 
 				&selfStar, type, numToken);
 			to.ghostConnect (from);
-			to.asPort().inheritTypeFrom (realGalp);
-			from.asPort().inheritTypeFrom (to.asPort());
-			realGalp.connect(to.asPort(),0);
+			to.asPort()->inheritTypeFrom (realGalp);
+			from.asPort()->inheritTypeFrom (*(to.asPort()));
+			realGalp.connect(*(to.asPort()),0);
 		}
 	}
 // Take care of galaxy multi porthole
@@ -133,7 +133,7 @@ void Wormhole::freeContents () {
 	PortHole* p;
 	while ((p = nextp++) != 0) {
 		// remove parents
-		p->asEH()->ghostAsPort().setPort("",0);
+		p->asEH()->ghostAsPort()->setPort("",0);
 		p->setPort("",0);
 		LOG_DEL; delete p;
 	}
