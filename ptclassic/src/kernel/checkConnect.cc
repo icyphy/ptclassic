@@ -1,4 +1,5 @@
 static const char file_id[] = "checkConnect.cc";
+
 /**************************************************************************
 Version identification:
 $Id$
@@ -45,22 +46,19 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "Block.h"
 #include "Error.h"
 #include "GalIter.h"
+#include "checkConnect.h"
 
-StringList checkConnect (Galaxy& g) {
+// checkConnect checks a Galaxy to see if it is completely connected.
+StringList checkConnect(Galaxy& g) {
 	GalStarIter next(g);
 	StringList msg;
 
+	// iterate over every star to make sure each is connected
 	Star* s;
-	// iterate over every star
 	while ((s = next++) != 0) {
-		// error if no portholes
-// 		if (s->numberPorts() == 0) {
-// 			msg += s->fullName();
-// 			msg += " has no portholes\n";
-// 			Error::mark(*s);
-// 			break;
-// 		}
 		// error if any porthole is disconnected
+		// ignore the case when the star has no portholes, as
+		// this is used in some domains like IPUS
 		BlockPortIter nextp(*s);
 		PortHole* p;
 		while ((p = nextp++) != 0) {
@@ -74,14 +72,11 @@ StringList checkConnect (Galaxy& g) {
 	return msg;
 }
 
-int warnIfNotConnected (Galaxy& g) {
-	StringList msg = checkConnect (g);
-	const char* str = msg;	// cast to char*
-	// check for non-zero-length message
-	if (str && *str) {
-		Error::abortRun (str);
-		return 1;
-	}
-	else return 0;
+// warnIfNotConnected prints result of checkConnect if any ports are
+// not conencted
+int warnIfNotConnected(Galaxy& g) {
+	StringList msg = checkConnect(g);
+	int notConnectedFlag = msg.length();	     // non-zero string length
+	if (notConnectedFlag) Error::abortRun(msg);
+	return notConnectedFlag;
 }
-
