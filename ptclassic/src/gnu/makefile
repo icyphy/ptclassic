@@ -56,6 +56,7 @@ GNU_PREFIX=$(GNU_DEST)/common
 # refer to the right version.  Also, $PTOLEMY/src/gnu/makefile contains
 # references to the current version, along with
 # $PTOLEMY/src/gnu/README and $PTOLEMY/src/gnu/INSTALL.
+# Also, check out the COLLECTOR variables in $PTOLEMY/mk/config-*.mk
 GCC_VERSION=2.7.2
 
 # Machine dependent files
