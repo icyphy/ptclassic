@@ -113,10 +113,12 @@ octObject *facetPtr;
 	    /* assume inst is a star... */
 	    if (!AutoLoadCk(&inst)) {
 		EssAddObj(&inst);
+		octFreeGenerator(&genInst);
 		return (FALSE);
 	    }
 	}
     }
+    octFreeGenerator(&genInst);
     return(TRUE);
 }
 
@@ -139,6 +141,7 @@ octObject *facetPtr;
 	}
 	(void) octDetach(&net, &prop);
     }
+    octFreeGenerator(&netGen);
 }
 
 /* ProcessDelay  5/28/88
@@ -219,6 +222,7 @@ octObject *facetPtr;
 	    ERR_IF1(!KcInstance(name, akoName, &pList));
 	}
     }
+    octFreeGenerator(&genInst);
     return(TRUE);
 }
 
@@ -286,6 +290,7 @@ int *inN, *outN;
 	    i++;
 	}
     }
+    octFreeGenerator(&termGen);
     if (i >= TERMS_MAX) {
 	ErrAdd("CollectTerms: Too many actual terminals on net");
 	EssAddObj(netPtr);
@@ -394,12 +399,14 @@ octObject *facetPtr;
 	else if (inN == 0 || outN == 0) {
 	    ErrAdd("ConnectPass: cannot match an input to an output");
 	    EssAddObj(&net);
+	    octFreeGenerator(&netGen);
 	    return (FALSE);
 	}
 /* We only allow delay on point-to-point connections */
 	else if (delay && totalN > 2) {
 	    ErrAdd("ConnectPass: delay not allowed on multi-connections");
 	    EssAddObj(&net);
+	    octFreeGenerator(&netGen);
 	    return (FALSE);
         }
 	else if (totalN == 2) {
@@ -416,21 +423,32 @@ octObject *facetPtr;
 	    else {
 		ErrAdd("can't connect multiple outputs to ordinary input");
 		EssAddObj(&net);
+	        octFreeGenerator(&netGen);
 		return (FALSE);
 	    }
 	}
 /* All other cases are handled by the kernel, including autofork */
 	else {
 	    char *nodename = UniqNameGet("node");
-	    if (!KcNode(nodename)) return (FALSE);
+	    if (!KcNode(nodename)) {
+		octFreeGenerator(&netGen);
+		return (FALSE);
+	    }
 	    for (i = 0; i < outN; i++) {
-		if (!JoinToNode(&out[i], nodename)) return (FALSE);
+		if (!JoinToNode(&out[i], nodename)) {
+		    octFreeGenerator(&netGen);
+		    return (FALSE);
+		}
 	    }
 	    for (i = 0; i < inN; i++) {
-		if (!JoinToNode(&in[i], nodename)) return (FALSE);
+		if (!JoinToNode(&in[i], nodename)) {
+		    octFreeGenerator(&netGen);
+		    return (FALSE);
+		}
 	    }
         }
     }
+    octFreeGenerator(&netGen);
     return (TRUE);
 }
 
