@@ -45,6 +45,7 @@ HDRS	      = compile.h \
 		local.h \
 		paramStructs.h \
 		util.h \
+		utilities.h \
 		vemInterface.h \
 		ganttIfc.h \
 		octIfc.h \
@@ -58,6 +59,7 @@ HDRS	      = compile.h \
 
 LIBCSRCS      = main.c \
 		util.c \
+		utilities.c \
 		compile.c \
 		paramStructs.c \
 		vemInterface.c \
