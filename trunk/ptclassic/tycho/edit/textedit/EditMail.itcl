@@ -172,7 +172,7 @@ body ::tycho::EditMail::help {} {
 
     ::tycho::File::openContext \
         [file join $TYCHO edit textedit doc usersGuides \
-	    EditMailHelp.html]
+	    EditMailHelp.html] html
 }
 
 ###################################################################

@@ -201,7 +201,7 @@ body ::tycho::EditCpp::help {} {
     global ::TYCHO
     ::tycho::File::openContext \
 	    [file join $env(TEXTEDIT_LIBRARY) doc usersGuides \
-	    EditCppHelp.html]
+	    EditCppHelp.html] html
 }
 
 #####################################################################

@@ -111,7 +111,7 @@ body ::tycho::EditSDL::help {} {
     global ::TYCHO
     ::tycho::File::openContext \
 	    [file join $TYCHO edit textedit doc usersGuides \
-	    EditSDLHelp.html]
+	    EditSDLHelp.html] html
 }
 
 ####################################################################

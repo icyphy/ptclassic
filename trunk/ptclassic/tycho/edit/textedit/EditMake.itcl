@@ -100,7 +100,7 @@ body ::tycho::EditMake::help {} {
     global ::TYCHO
     ::tycho::File::openContext \
         [file join $TYCHO editors makeedit doc usersGuides \
-	    EditMakeHelp.html]
+	    EditMakeHelp.html] html
 }
 
 ###################################################################
