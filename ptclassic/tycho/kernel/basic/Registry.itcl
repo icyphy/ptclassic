@@ -130,7 +130,8 @@ ensemble ::tycho::deregister {
 # <dd>
 # Register the user profile. _filename_ is the name of the user's
 # profile file.  If it doesn't exists, then it will be created with
-# a blank profile. See <a href="UserProfile.html">::tycho::UserProfile</a>.
+# a blank profile. See
+# <a href="../../../gui/doc/codeDoc/UserProfile.html">::tycho::UserProfile</a>.
 #
 # <dt><b>protocol</b> _protocol_ ?_option value_ ...?
 # <dd>
