@@ -82,6 +82,7 @@ LIBS=bags/libbags.a buffers/libbuffers.a \
 	drawing/libdrawing.a drs/libdrs.a main/libmain.a \
 	options/liboptions.a patterns/libpatterns.a \
 	physical/libphysical.a properties/libproperties.a rpc/librpc.a \
+	rpc/librpcserver.a \
 	schematic/libschematic.a select/libselect.a \
 	strings/libstrings.a symbolic/libsymbolic.a \
 	utility/libutility.a windows/libwindows.a 
@@ -113,6 +114,9 @@ OBJECTS=bags/bags.o buffers/bufinternal.o \
 	windows/queue.o windows/table.o windows/titlebar.o \
 	windows/trans.o windows/wininternal.o
 
+# Objects (*.o and *.a files) that are locally produced
+$(VEMOBJECTS) =	$(OBJECTS) rpc/librpcserver.a
+
 # This rule uses GNU make specific directives $(@D) $(@F) 
 $(OBJECTS) $(LIBS):
 	(cd $(@D); \
@@ -125,7 +129,7 @@ $(OBJECTS) $(LIBS):
 # try 'make CC="gcc -traditional" OCTTOOLS_MM_LIB= '
 OCTTOOLS_MM_LIB = -lmm
 
-VEMLIBS = -Lrpc -Ldialogs -lrpcserver -ldialogs \
+VEMLIBS = -Lrpc -Ldialogs rpc/librpcserver.a -ldialogs \
 	-L$(OCTLIBDIR) -lts -llel -lfc -lsymbolic -lvulcan \
 	-lharpoon -lfang -lregion -lkd -lgu -lda -llist -loh -ltap \
 	-loptions -loct -ltr -lst -lxpa -lfb -ldds -lMaxport -lTable \
@@ -168,14 +172,14 @@ _vem:
 	done
 
 
-linkvem.debug: $(OBJECTS)
+linkvem.debug: $(VEMOBJECTS)
 	$(CC) -g -o vem.debug $(OBJECTS) $(VEMLIBS)
-linkvem: $(OBJECTS)
+linkvem: $(VEMOBJECTS)
 	$(CC) -o vem $(OBJECTS) $(VEMLIBS)
 
-linkvem.debug.gcc: $(OBJECTS)
+linkvem.debug.gcc: $(VEMOBJECTS)
 	$(LINKER) $(LINKFLAGS_D) -g -o vem.debug $(OBJECTS) $(VEMLIBS)
-linkvem.gcc: $(OBJECTS)
+linkvem.gcc: $(VEMOBJECTS)
 	$(LINKER) $(LINKFLAGS) -o vem $(OBJECTS) $(VEMLIBS)
 
 OCTBINDIR =	$(OCTTOOLS)/bin.$(ARCH)
