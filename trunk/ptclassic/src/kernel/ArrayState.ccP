@@ -180,6 +180,24 @@ ParseToken <T>ArrayState :: evalExpression(Tokenizer& lexer)
 	return t;
 }
 
+// resize the array state: append zeros if size increases
+void <T>ArrayState :: resize (int newSize) {
+	if (newSize == nElements) return;
+	<C> * oldVal = val;
+	int oldSize = nElements;
+	val = new <C> [nElements = newSize];
+	int nCopy = oldSize;
+	if (newSize < nCopy) nCopy = newSize;
+	for (int i = 0; i < nCopy; i++)
+		val[i] = oldVal[i];
+	int nZero = newSize - oldSize;
+	// note: the following loop is executed zero times
+	// if nZero is negative
+	for (i = 0; i < nZero; i++)
+		val[oldSize+i] = 0;
+	delete oldVal;
+}
+
 // make knownstate entry
 static <T>ArrayState proto;
 static KnownState entry(proto,"<T>ARRAY");

@@ -141,6 +141,20 @@ StringList ComplexArrayState :: currentValue() {
 	return s;
 }
 
+// resize the array state: append zeros if size increases
+void ComplexArrayState :: resize (int newSize) {
+	if (newSize == nElements) return;
+	Complex * oldVal = val;
+	int oldSize = nElements;
+	// constructor initializes elements to (0,0)
+	val = new Complex [nElements = newSize];
+	int nCopy = oldSize;
+	if (newSize < nCopy) nCopy = newSize;
+	for (int i = 0; i < nCopy; i++)
+		val[i] = oldVal[i];
+	delete oldVal;
+}
+
 // make knownstate entry
 static ComplexArrayState proto;
 static KnownState entry(proto,"COMPLEXARRAY");

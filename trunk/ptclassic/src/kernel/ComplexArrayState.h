@@ -77,6 +77,9 @@ public:
 	// Parse initValue to set Value
 	void initialize();
 
+	// Truncate/extend to new size
+	void resize(int);
+
 	// Parse element
 	ParseToken evalExpression(Tokenizer&);
 
