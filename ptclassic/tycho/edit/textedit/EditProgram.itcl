@@ -127,6 +127,9 @@ class ::tycho::EditProgram {
     # In derived classes, returns a string with keywords separated by "|".
     method keywords {} {return {}}
 
+    # Run make
+    method make {}
+
     # Color the code in a region.
     method parseNow {start stop}
 
@@ -451,6 +454,15 @@ body ::tycho::EditProgram::indicateReadOnly {bool} {
             menubar enableMenuItem {Tab} Format
 	}
     }
+}
+#####################################################################
+#### make 
+# Exec make in the current directory
+# 
+body ::tycho::EditProgram::make {} {
+    set w [::tycho::autoName .make]
+    ::tycho::Exec $w
+    $w centerOnScreen
 }
 
 #####################################################################
