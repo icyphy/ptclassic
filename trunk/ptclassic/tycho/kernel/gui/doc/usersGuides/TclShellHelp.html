@@ -12,8 +12,12 @@ the Tcl interpreter.  Note that Tk and Itcl are understood by
 this interpreter, as are, of course, all Tycho commands.
 If you are running a version of Tycho with Ptolemy attached,
 the ptcl or pitcl commands are also understood.  
+
+<!--
+FIXME: doesn't exist.
 (See the <A HREF="../../../../typt/doc/internals/pitcl.html">pitcl</A>
 page for more information).
+-->
 
 By default, commands are executed at the global scope namespace
 (<CODE>::</CODE>),
@@ -90,7 +94,7 @@ that output is redirected to a file.  If you start Tycho with a shell
 window, that shell window is a master shell window.
 Note that for output to appear in the master shell window it
 may be necessary to call <CODE>update</CODE>, <CODE>update idletasks</CODE>,
-<a href="../../../../doc/coding/update.html"><CODE>::tycho::saferUpdate</CODE></a>.
+<a href="../../../../doc/coding/update.html"><CODE>::tycho::safeUpdate</CODE></a>.
 <p>
 A second feature of a master shell window is that when it is
 dismissed, the program is exited (after confirmation, of course).
