@@ -48,24 +48,27 @@ include $(CONFIG)
 
 # Note that the rest of Ptolemy uses itcl-2.0, once tycho does these
 # lines should go into the cosmic dustbin.
-TCL_INCDIR=$(TCL_ROOT)/tcl7.4p1/include
+TCL_VERSION =	tcl7.4p1
+TK_VERSION =	tk4.0p1
+ITCL_VERSION =	itcl-1.5
+
+TCL_INCDIR=$(TCL_ROOT)/$(TCL_VERSION)/include
 
 # Combined -L and -l options to link with tcl library.
-TCL_LIBSPEC=-L$(TCL_ROOT)/tcl7.4p1.$(PTARCH)/lib -ltcl
+TCL_LIBSPEC=-L$(TCL_ROOT)/$(TCL_VERSION).$(PTARCH)/lib -ltcl
 
 # Directory containing Tk include files
-TK_INCDIR=$(TCL_ROOT)/tk4.0p1/include
+TK_INCDIR=$(TCL_ROOT)/$(TK_VERSION)/include
 
 # Combined -L and -l options to link with tk library.  Can add
 # addtional -L and/or -l options to support tk extensions.
-TK_LIBSPEC=-L$(TCL_ROOT)/tk4.0p1.$(PTARCH)/lib -ltk #-lXpm
+TK_LIBSPEC=-L$(TCL_ROOT)/$(TK_VERSION).$(PTARCH)/lib -ltk #-lXpm
 
-ITCL_VERSION =	itcl-1.5
 # Directory containing itcl include files
 ITCL_INCDIR=$(TCL_ROOT)/$(ITCL_VERSION)/include
 ITCL_LIBSPEC=-L$(TCL_ROOT)/$(ITCL_VERSION).$(PTARCH)/lib -litcl
 
-SHARED_LIBRARY_R_LIST = -Wl,-R,$(PTOLEMY)/lib.$(PTARCH):$(PTOLEMY)/octtools/lib.$(PTARCH):$(X11_LIBDIR):$(SHARED_COMPILERDIR):$(PTOLEMY)/tcltk/itcl-1.5.$(PTARCH)/lib/shared:$(PTOLEMY)/tcltk/tcl.$(PTARCH)/lib/shared:$(PTOLEMY)/tcltk/tk.$(PTARCH)/lib/shared/
+SHARED_LIBRARY_R_LIST = -Wl,-R,$(PTOLEMY)/lib.$(PTARCH):$(PTOLEMY)/octtools/lib.$(PTARCH):$(X11_LIBDIR):$(SHARED_COMPILERDIR):$(PTOLEMY)/tcltk/$(ITCL_VERSION).$(PTARCH)/lib/shared:$(PTOLEMY)/tcltk/$(TCL_VERSION).$(PTARCH)/lib/shared:$(PTOLEMY)/tcltk/$(TK_VERSION).$(PTARCH)/lib/shared/
 
 # itk is part of itcl-2.0b
 #ITK_INCDIR=$(TCL_ROOT)/$(ITCL_VERSION)/include
