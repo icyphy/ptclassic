@@ -285,16 +285,17 @@ body ::tycho::EditJava::gendocBuffer {} {
         puts "$htmlFile does not exist"
         set treeFile [file join doc codeDoc tree.html]
         if [file exists $treeFile] {
-            return [::tycho::File::openContext $treeFile]
+            set window [::tycho::File::openContext $treeFile]
+	    $window reload
+	    return $window
         } else {
             error "$htmlFile does not exist, nor does $treeFile.\
                     perhaps javadoc had an error?"
         }
     }
-    if {[::tycho::File::isFileOpen $htmlFile] != {}} {
-        delete object [[::tycho::File::isFileOpen $htmlFile] displayer]
-    }
-    return [::tycho::File::openContext $htmlFile]
+    set window [::tycho::File::openContext $htmlFile]
+    $window reload
+    return $window
 }
 
 #####################################################################
