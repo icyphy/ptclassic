@@ -28,7 +28,8 @@ If you wish to dynamically link a star is derived from another
 dynamically linked star, you must ``permanently'' link the parent star.
 This can be done with the ``Extend:load-star-perm'' command (``K'').
 To do this, place the mouse over an icon representing the parent star,
-and type ``K''.
+and type ``K''.  Once the parent star is permanently linked, it cannot
+be replaced or redefined: you must restart pigi.
 .pp
 You can make your own private version of
 .i pigiRpc ;
@@ -85,7 +86,7 @@ directory, pigi will run the
 program, using the makefile to create the object file (or make sure it
 is up to date).  If there is no makefile, pigi will run a make-like
 procedure on its own, running the preprocessor as needed to produce
-the C++ source files, then running the Gnu C++ compiler to create the
+the C++ source files, then running the C++ compiler to create the
 object file.  By default, the C++ compiler will be told to look for
 include files in the kernel directory and the domain-specific kernel
 and star directories; if this is not adequate, then you need to write a
@@ -114,4 +115,6 @@ the old icon with a new one.
 .pp
 If you modify the code for a dynamically loaded star and wish to load
 the new definition, execute the \fIload-star\fR command while pointing
-to an instance of the star (or type ``L'').
+to an instance of the star (or type ``L'').  This will not work if you
+previously permanently linked the star with the \fIload-star-perm\fP command
+(``K'' key).  In this case, you must restart pigi to load in the new version.
