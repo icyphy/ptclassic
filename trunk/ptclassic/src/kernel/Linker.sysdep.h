@@ -57,10 +57,7 @@ struct flock;
 #include <sys/file.h>
 #if defined(MIPSEL) || defined(USG) 
 #if !defined(hpux)
-#define exec aouthdr
-#define a_text text_start
-#define a_data data_start
-#define a_bss bss_start
+#define COFF
 #endif
 #endif
 
