@@ -535,7 +535,9 @@ int application;
 				   src/compat/ptolemy/compat.h */ 
     extern time_t time();
 #else
+#ifndef PTALPHA
     extern long time();
+#endif /* PTALPHA */
 #endif
     struct RPCApplication *app;
 
@@ -577,14 +579,16 @@ long userOptionWord;
     RPCSpot *Spot;
     lsList cmdList;
     struct RPCApplication *app;
-    char number[4];
-    long *pointer;
+    char number[sizeof(int32)];
+    int32 *pointer;
     char remoteUser[128];
 #ifdef PTULTRIX			/* PTULTRIX defined in
 				   src/compat/ptolemy/compat.h */ 
     extern time_t time();
 #else
+#ifndef PTALPHA
     extern long time();
+#endif /* PTALPHA */
 #endif
 
     application = RPCAddApplication(host, path);
@@ -649,11 +653,12 @@ long userOptionWord;
 	 * swapped relative to the server
 	 */
 	
+	pointer = (int32 *) number;
+	*pointer = 0;			/* Clear entire value */
 	number[0] = 0x01;
 	number[1] = 0x02;
 	number[2] = 0x03;
 	number[3] = 0x04;
-	pointer = (long *) number;
 
 	if (app->user == NIL(char)) {
 	    remoteUser[0]='\0';
