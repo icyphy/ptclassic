@@ -7,12 +7,26 @@ for generating code. The stars in the \fBCG\fR domain itself can be thought
 of as ``comment generators''; they are useful for testing and debugging 
 schedulers and for little else. The \fBCG\fR domain is intended as a model 
 and a collection of base classes for derivative domains. This section, 
-therefore, documents the common features and general structure of all code 
-generation domains. All the code generation domains derived from the 
-\fBCG\fR in this release obey \fBSDF\fR semantics and can thus be scheduled 
-at compile time. Internally, however, the \fBCG\fR only assumes that stars 
-obey data flow semantics. A future release will take advantage of this 
-fact. 
+documents the common features and general structure of all code 
+generation domains. 
+.pp
+The design goal of the class hierachy is to save work and to make the 
+system more maintainable. The vast majority of the problem of allocating 
+memory for buffers, constants, tables, etc that are required in code are 
+completely processor-independent; thus these facilities are provided the 
+generic classes found in the $PTOLEMY/src/domains/cg/kernel directory.
+.pp
+.Ir "CG-DDF (Dynamic Dataflow Code Generation)"
+.Ir "BDF (Boolean Dataflow, token-flow)"
+All the code generation domains that are derived from the \fBCG\fR in this 
+release obey \fBSDF\fR semantics and can thus be scheduled at compile time. 
+Internally, however, the \fBCG\fR only assumes that stars obey data flow 
+semantics. In the future, we will eventually implement two approaches for 
+data-dependent execution, \fBCG-DDF\fR, which recognizes and implements certain 
+commonly used programming constructs, and BDF ("boolean dataflow" or the 
+token-flow model). Even when these are implemented, the vast majority of 
+stars in any given application should obey the SDF rules to permit 
+efficient multiprocessor code generation.
 .pp
 .Ir "target, code generation"
 A key feature of code generation domains is the notion of a target 
