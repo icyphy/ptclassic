@@ -49,6 +49,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "miscFuncs.h"
 #include "MatlabIfc.h"
 #include "MatlabIfcFuns.h"
+#include "Linker.h"
 
 #define MATLAB_BUFFER_LEN 8192
 
@@ -67,6 +68,9 @@ static Engine* matlabEnginePtr = 0;
 // default buffer to store return strings from Matlab
 static char matlabDefaultBuffer[MATLAB_BUFFER_LEN];
 
+// pointers to matlab functions
+#include "MatlabIfc.cc.Auto1"
+
 // constructor
 MatlabIfc :: MatlabIfc() {
     matlabStarsCount++;
@@ -78,6 +82,18 @@ MatlabIfc :: MatlabIfc() {
     outputBuffer = matlabDefaultBuffer;
     outputBufferLen = MATLAB_BUFFER_LEN;
     outputBuffer[0] = 0;
+
+#if MATLABSHARED
+    if (! Linker::enabled())
+	Error::abortRun( "Internal error - Linker isn't enabled");
+    else if (Linker::multiLink("-lptmatlab", 1) == FALSE) {
+#include "MatlabIfc.cc.Auto2"
+    }
+#elif MATLABSTATIC
+    // do nothing
+#else
+#include "MatlabIfc.cc.Auto2"
+#endif
 }
 
 // destructor
@@ -252,6 +268,16 @@ const char* MatlabIfc :: BuildMatlabCommand(
 
 // manage the Matlab process (low-level methods)
 
+// error
+void MatlabIfc :: MatlabEngineError() {
+#ifdef MATLABSHARED
+    Error::abortRun("The Matlab shared libraries could not be found.");
+#else
+    Error::abortRun("The external interface to Matlab has not been compiled "
+		    "into Ptolemy.");
+#endif
+}
+    
 // start a Matlab process
 Engine* MatlabIfc :: MatlabEngineOpen(char* unixCommand) {
     return engOpen(unixCommand);
