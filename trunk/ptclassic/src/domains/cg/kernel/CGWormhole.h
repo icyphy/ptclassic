@@ -68,6 +68,7 @@ public:
 
 	// identify myself as a wormhole
 	int isItWormhole() const { return TRUE;}
+	Wormhole* asWormhole() { return this; }
 
 	// FIXME: what should this do?
 	double getStopTime() { return 0.0;}
