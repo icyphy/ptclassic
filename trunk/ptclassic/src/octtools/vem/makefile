@@ -28,7 +28,7 @@
 # Makefile for Ptolemy vem
 
 # Important!  Do not run this makefile while in ~ptolemy/src/octtools/vem.
-# Instead run in from ~ptolemy/obj.$ARCH (through the symbolic link) -- that
+# Instead run in from ~ptolemy/obj.$PTARCH (through the symbolic link) -- that
 # way a separate directory containing, say, Sun-3 and Sun-4 objects can be
 # maintained.
 
@@ -39,7 +39,7 @@ ROOT	      = ../../..
 VPATH         = $(ROOT)/src/octtools/vem
 
 # get configuration info
-CONFIG=$(ROOT)/mk/config-$(ARCH).mk
+CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
 # Oct Tools libraries.
@@ -184,7 +184,7 @@ _vem:
 		cd .. ; \
 	done
 
-OCTBINDIR =	$(OCTTOOLS)/bin.$(ARCH)
+OCTBINDIR =	$(OCTTOOLS)/bin.$(PTARCH)
 DESTBIN =	$(OCTBINDIR)/vem
 DESTBIN_D =	$(OCTBINDIR)/vem.debug
 
@@ -213,10 +213,10 @@ install: $(DESTBIN) $(DESTBIN_D)  $(BINDIR)/vem $(BINDIR)/vem.debug
 # These should rely on OCTBINDIR etc, but the relative paths make life
 # difficult.
 $(BINDIR)/vem:
-	(cd $(BINDIR); rm -f vem; ln -s ../octtools/bin.$(ARCH)/vem .)
+	(cd $(BINDIR); rm -f vem; ln -s ../octtools/bin.$(PTARCH)/vem .)
 $(BINDIR)/vem.debug:
 	(cd $(BINDIR); rm -f vem.debug; \
-		ln -s ../octtools/bin.$(ARCH)/vem.debug .)
+		ln -s ../octtools/bin.$(PTARCH)/vem.debug .)
 
 
 clean::

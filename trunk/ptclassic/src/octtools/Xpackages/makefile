@@ -29,7 +29,7 @@
 
 # Important!  Do not run this makefile while in
 # ~ptolemy/src/octtools/Xpackages.
-# Instead run in from ~ptolemy/obj.$ARCH (through the symbolic link) -- that
+# Instead run in from ~ptolemy/obj.$PTARCH (through the symbolic link) -- that
 # way a separate directory containing, say, Sun-3 and Sun-4 objects can be
 # maintained.
 
@@ -44,7 +44,7 @@ LDIRS =
 # directories with subtrees
 SDIRS = 
 
-MAKEVARS = "ARCH=$(ARCH)"
+MAKEVARS = "ARCH=$(PTARCH)"
 
 # This target makes sure all the makefiles are current
 makefiles:
