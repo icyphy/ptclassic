@@ -170,20 +170,21 @@ proc getDirname {} {
 # Produce documentation for the file named by the filename argument
 proc testHTMLDocSys {filename} {
     puts "Producing documentation for $filename"
-    ::tycho::HTMLDocSys .HTMLDocSys
-    .HTMLDocSys readFile $filename
-    .HTMLDocSys generateClassHTML
-    .HTMLDocSys generateOutsideClassHTML
-    .HTMLDocSys resetOutsideClassComment
-    .HTMLDocSys generateHTMLIndex
-    delete object .HTMLDocSys
+    ::tycho::HTMLDocSys::generateHTML 1 1 1 "tydoc test" [list $filename]
+#    ::tycho::HTMLDocSys .HTMLDocSys
+#    .HTMLDocSys readFile $filename
+#    .HTMLDocSys generateClassHTML
+#    .HTMLDocSys generateOutsideClassHTML
+#    .HTMLDocSys resetOutsideClassComment
+#    .HTMLDocSys generateHTMLIndex
+#    delete object .HTMLDocSys
 }
 
 ## testHTMLDocSysThisFile
 # Run the documentation system on just this file
 # This procedure is what we use to do simple regression tests on the doc system
 proc testHTMLDocSysThisFile {} {
-    testHTMLDocSys [getDirname]/../lib/tydoc/test/test.itcl
+    testHTMLDocSys [getDirname]/../util/tydoc/test/test.itcl
 }
 
 ## testHTMLDocSysKernelFiles
@@ -201,20 +202,21 @@ proc testHTMLDocSysKernelFiles {} {
     delete object .HTMLDocSys
 }
 
+proc foo {} {
 # This always worked
 curlybracket-followed-by-squarebracket-1 [list {foo new zoo} ]
 # This caused problems
 curlybracket-followed-by-squarebracket-2 [list {foo new zoo}]
+}
 
-
-source ../TyDoc.itcl
-source ../../../kernel/Path.tcl
+source ../TyDocMain.itcl
+source ../../../kernel/basic/Path.tcl
 
 # Run the doc system on this file
 testHTMLDocSysThisFile
 
 # testHTMLDocSys /users/cxh/pt/tycho/kernel/RevControlSCCS.itcl
 # testHTMLDocSys /users/cxh/pt/tycho/editors/textedit/EditCppText.itcl
-# testHTMLDocSys /users/cxh/pt/tycho/lib/tydoc/DocSys.itcl
+# testHTMLDocSys /users/cxh/pt/tycho/util/tydoc/DocSys.itcl
 # testHTMLDocSysKernelFiles
 
