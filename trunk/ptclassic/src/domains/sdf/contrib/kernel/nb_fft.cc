@@ -1,6 +1,6 @@
 static const char file_id[] = "nb_fft.cc";
 
-#include <Complex.h>
+#include <ComplexSubset.h>
 #include "nb_fft.h"
 
 const NEXTMX = 12;
