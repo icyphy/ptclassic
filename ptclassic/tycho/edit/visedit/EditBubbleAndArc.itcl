@@ -405,7 +405,8 @@ body ::tycho::EditBubbleAndArc::bind_B1 {x y} {
 	    # is not over any item, unselect the selected item.
 	    set curTags [$slate gettags current]
 	    if {[lsearch $curTags selected] == -1 && \
-		[lsearch $curTags selectedpoint] == -1} {
+		[lsearch $curTags selectedpoint] == -1 && \
+	        [lsearch $curTags selarclabel] == -1} {
 		$this unselect
 	    }
 	}
