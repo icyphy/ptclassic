@@ -14,7 +14,6 @@ $Id$
 *******************************************************************/
 
 #ifdef __GNUG__
-#pragma once
 #pragma interface
 #endif
 
@@ -37,6 +36,7 @@ public:
 		    unsigned y_addr, unsigned y_len);
 	Block* clone() const;
 	void headerCode();
+	void wrapup();
 	StringList beginIteration(int repetitions, int depth);
 	StringList endIteration(int repetitions, int depth);
 	~CG56Target();
