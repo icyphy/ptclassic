@@ -1,9 +1,15 @@
 defstar {
   name { SharedMem }
   domain {SDF}
-  version { $Revision$ %Z% }
-  author { Stefan De Troch }
-  copyright{ }
+  version { $Id$ }
+  author { Stefan De Troch (IMEC) }
+  copyright{ 
+Copyright (c) 1994 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+
+}
   desc { base class for shared memory }
   header {
 
