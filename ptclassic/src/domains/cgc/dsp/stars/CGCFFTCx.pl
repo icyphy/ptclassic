@@ -179,10 +179,14 @@ int nn, isign;
 
 	codeblock(loadCode) {
 	int i, j = 0;
-	for (i = $val(size) - 1; i > 0; i--) {
+	for (i = $val(size) - 1; i >= 0; i--) {
 		$ref(localData,j++) = $ref(input,i).real;
 		$ref(localData,j++) = $ref(input,i).imag;
 	}
+        for (i = $val(size) ; i < $val(fftSize) ; i ++) {
+		$ref(localData)[j++] = 0.0;
+		$ref(localData)[j++] = 0.0;
+	}		
 	fft_rif ($ref(localData),$val(fftSize), $val(direction));
 	}
 
