@@ -138,6 +138,7 @@ ddsData data;			/* Should be (ddsEditText *)          */
 		 "DDS_SHOW_TEXT components must have a parent");
 	/*NOTREACHED*/
     }
+    return (ddsHandle)NULL;
 }
 
 
@@ -153,14 +154,13 @@ char *filename;
 {
     FILE *fp;
     char err[MAXLINE];
-    char line[MAXLINE];
     char *result, *ptr;
-    int alloc, temp, len, ch;
+    int alloc, temp, ch;
 
     alloc = START_SIZE;
     result = ALLOC(char, alloc);
     ptr = result;
-    if (fp = fopen(util_file_expand(filename), "r")) {
+    if ( (fp = fopen(util_file_expand(filename), "r")) ) {
 	while ((ch = getc(fp)) != EOF) {
 	    if ((ptr-result) >= alloc) {
 		temp = ptr - result;
@@ -422,8 +422,6 @@ ddsData data;			/* (ddsShowText *) */
     ddsFullShowText new_state;
     XFontStruct *font;
     int top, bottom, right, left, char_width, char_height;
-    Arg arg_list[MAX_ARGS];
-    int arg_len;
 
     new_state.user_spec = *actual;
     if (!new_state.user_spec.text) new_state.user_spec.text = DDS_SHOWTEXT_NAME;
@@ -504,6 +502,7 @@ ddsInternal *child;		/* New child   */
     errRaise(ddsPackageName, DDS_BAD_PARENT,
 	     "DDS_SHOW_TEXT components may not have child components");
     /*NOTREACHED*/
+    return (Widget)NULL;
 }
 
 /*ARGSUSED*/
