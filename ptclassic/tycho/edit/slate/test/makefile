@@ -49,7 +49,10 @@ ITCL_SRCS = \
 EXTRA_SRCS =	$(TCL_SRCS) $(ITCL_SRCS)
 
 MISC_FILES = \
-	makefile
+	makefile \
+	test \
+	test.tcl \
+	pkgIndex.tcl
 
 # If we get some SIMPLE_TESTS, then add $(SIMPLE_TESTS)
 # to ITCL_SRCS above.
@@ -75,8 +78,7 @@ GRAPHICAL_TESTS = \
 	testIconFrame.itcl \
 	testInteractor.itcl \
 	testFollower.itcl \
-	testBounder.itcl \
-	testTute.itcl
+	testBounder.itcl 
 
 
 # Scripts that are generated
