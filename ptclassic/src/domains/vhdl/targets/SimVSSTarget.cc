@@ -40,6 +40,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #include "SimVSSTarget.h"
 #include "KnownTarget.h"
+#include "CGUtilities.h"
 #include "paths.h"
 
 // Constructor.
@@ -196,8 +197,11 @@ void SimVSSTarget :: frameCode() {
   StringList topName = galName;
   topName << "_top";
 
+  StringList temp_top_uses = "";
+  temp_top_uses << top_uses;
+  top_uses.initialize();
   top_uses << "-- top-level use clauses\n";
-  //  top_uses << "library SYNOPSYS,IEEE,PTVHDLSIM;\n";
+  top_uses << temp_top_uses;
   top_uses << "library SYNOPSYS,IEEE;\n";
   top_uses << "use SYNOPSYS.ATTRIBUTES.all;\n";
   top_uses << "use IEEE.STD_LOGIC_1164.all;\n";
@@ -304,6 +308,22 @@ void SimVSSTarget :: frameCode() {
 // Write the code to a file.
 void SimVSSTarget :: writeCode() {
   writeFile(myCode,".vhdl",displayFlag);
+
+  // Write a .synopsys_vss.setup file to satisfy gvan and ptvhdlsim
+  // so that they can find the PTVHDLSIM library directory.
+  StringList setupText = "";
+  setupText << "-- Synopsys VSS Setup File" << "\n";
+  setupText << "-- DO NOT DELETE" << "\n";
+  setupText << "-- Synopsys neds this in order to find" << "\n";
+  setupText << "-- the PTVHDLSIM library" << "\n";
+  setupText << "" << "\n";
+  setupText << "PTVHDLSIM : $PTOLEMY/obj.$PTARCH/utils/ptvhdlsim" << "\n";
+  setupText << "\n";
+
+  // Write the file, but do not display it.
+  rcpWriteFile(targetHost, destDirectory, ".synopsys_vss.setup",
+	       setupText, 0);
+
   if (writeCom) {
     writeComFile();
   }
