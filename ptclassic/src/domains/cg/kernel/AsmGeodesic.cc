@@ -54,6 +54,17 @@ int AsmGeodesic :: bufSize() const {
 	else return internalBufSize();
 }
 
+// Return the address assigned to the geodesic.
+// if I am a fork destination, my address is that of my source.
+unsigned AsmGeodesic::address() const {
+	return (forkType & F_DEST) ? src->address() : addr;
+}
+
+
+ProcMemory* AsmGeodesic::memory() const {
+	return (forkType & F_DEST) ? src->memory() : mem;
+}
+
 ISA_FUNC(AsmGeodesic,Geodesic);
 
 
