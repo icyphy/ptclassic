@@ -54,6 +54,8 @@ if {${itcl::version} < 2.1} {
     exit 3
 }
 
+set tyDebug 1
+
 # Currently Tycho.tcl checks this variable to workaround a bug
 if {$tcl_platform(platform) == "macintosh"} {
     set tyDebug 1
@@ -275,6 +277,12 @@ uplevel #0 {
     source [file join $tychokernel ErrorMessage.itcl]
     source [file join $tychokernel File.itcl]
 
+	source [file join $tychokernel Edit.itcl]
+	source [file join $tychokernel HTML.itcl]
+	source [file join $tychokernel HTMLMessage.itcl]
+	source [file join $tychokernel WelcomeMessage.itcl]
+	source [file join $tychokernel MenuSupport.itcl]
+	source [file join $tychokernel PopupMenu.itcl]
     ::tycho::_announce "Sourced File.itcl"
 
     # Load the library file
@@ -352,12 +360,8 @@ if { $tychoWelcomeWindow \
     ::tycho::_announce "About to create a welcome message"
     uplevel #0 {
 	source [file join $tychokernel ButtonBox.itcl]
-	source [file join $tychokernel Edit.itcl]
-	source [file join $tychokernel HTML.itcl]
-	source [file join $tychokernel HTMLMessage.itcl]
-	source [file join $tychokernel WelcomeMessage.itcl]
-	source [file join $tychokernel MenuSupport.itcl]
-	source [file join $tychokernel PopupMenu.itcl]
+
+
     }
     ::tycho::welcomeMessage $TychoBinaryInfo $TychoVersionInfo
     ::tycho::_announce "Done creating a welcome message"
@@ -366,10 +370,8 @@ if { $tychoWelcomeWindow \
 # Determine whether we exit when there are no more windows.
 ::tycho::TopLevel::exitWhenNoMoreWindows $tychoExitWhenNoMoreWindows
 
-# Wait to source the displayer code so that the html widget can come up first
-uplevel #0 {
-	source [file join $tychokernel Displayer.itcl]
-}
+# We could try sourcing Displayer.itcl here, but 'tycho' and 'tycho foo'
+# behave slightly differently, so it is not worthit.
 ::tycho::Displayer::normalExit $tychoShouldWeDoRegularExit
 
 # FIXME: if the user starts with slowNetwork==1 and then sets it to 0
