@@ -193,7 +193,7 @@ hp_configure: $(GNU_OBJ)
 	#-(cd $(GNU_OBJ)/gcc/gdb; ln -s $(HP_GNU_SRC)/gcc/gdb/*.c .)
 	#-(cd $(GNU_OBJ)/gcc/gdb; ln -s $(HP_GNU_SRC)/gcc/gdb/*.h .)
 	# Building libg++ requires as to bin in gcc so -B arg will work
-	-(cd $(GNU_OBJ)/gcc; ln -s $(HP_GNU_SRC)/gas/as as)
+	-(cd $(GNU_OBJ)/gcc; ln -s ../gas/as as)
 	-(cd $(GNU_OBJ)/librx; ln -s $(HP_GNU_SRC)/librx/*.c .)
 	-(cd $(GNU_OBJ)/libstdc++; ln -s $(HP_GNU_SRC)/libstdc++/*.cc .)
 	-(cd $(GNU_OBJ)/libstdc++/stl; ln -s $(HP_GNU_SRC)/libstdc++/stl/*.cc .)
