@@ -81,6 +81,8 @@ public:
 
         MatrixParticle* mainParticle() { return motherParticle; }
 
+	/*virtual*/ void resetBufferValues() {};
+
  protected:
 	int lastRow;     // The index of the last valid row and columns
 	int lastCol;     // in the buffer.
