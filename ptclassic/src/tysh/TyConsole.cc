@@ -147,7 +147,7 @@ int TyConsole::appInit(Tcl_Interp *ip, Tk_Window) {
     return TCL_ERROR;
   }
 #if ITCL_MAJOR_VERSION == 2
-  if (Itk_Init(interp) == TCL_ERROR) {
+  if (Itk_Init(ip) == TCL_ERROR) {
     return TCL_ERROR;
   }
 #endif
