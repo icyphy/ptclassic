@@ -54,6 +54,9 @@ public:
 	int run();
 	void wrapup();
 
+	// type identification
+	/*virtual*/ int isA(const char*) const;
+
 	// redefine: generateCode routine generates code if inside a wormhole
 	// in this redefinition.
 	void generateCode();
@@ -67,10 +70,7 @@ public:
 	void setProfile(Profile* p);
 
 	// download the code with a specified processor
-	void downLoadCode(int, Profile* prof = 0);
-
-	// sort the processors with finish time.
-	void insideSchedule();
+	int downLoadCode(int, int, Profile* prof = 0);
 
 	// total work load
 	int totalWorkLoad();
@@ -153,10 +153,10 @@ protected:
 
 	// parallel processors
 	ParProcessors* parProcs;
+	IntArray canProcs;
 
 private:
 	char oldChildType[40];
-	IntArray canProcs;
 };
 
 #endif
