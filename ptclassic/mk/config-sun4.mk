@@ -79,7 +79,8 @@ X11EXT_LIBSPEC=-lXext -lSM -lICE
 #X11EXT_LIBSPEC=-lXext
 
 # Variables for Pure Inc tools (purify, purelink, quantify)
-COLLECTOR = 	-collector=$(ROOT)/gnu/$(PTARCH)/lib/gcc-lib/$(PTARCH)/2.7.2/ld
+#COLLECTOR = 	-collector=$(ROOT)/gnu/$(PTARCH)/lib/gcc-lib/$(PTARCH)/2.7.2/ld
+COLLECTOR = 	-collector=$(ROOT)/gnu/$(PTARCH)/lib/gcc-lib/$(PTARCH)/2.7.2/ld-2.6.3
 
 PURELINK =	purelink $(COLLECTOR) -hardlink=yes
 PURIFY =	purelink $(COLLECTOR) purify
