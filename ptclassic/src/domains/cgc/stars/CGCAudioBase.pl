@@ -1,5 +1,4 @@
-defstar
-{
+defstar {
     name { PCM }
     domain { CGC }
     desc {
@@ -93,7 +92,7 @@ blockSize))
     }
 
     initCode {
-	addInclude("<math.h>");
+	addModuleFromLibrary("ptdspMuLaw", "src/utils/libptdsp", "ptdsp");
 	addDeclaration(declarations);
     }
 
