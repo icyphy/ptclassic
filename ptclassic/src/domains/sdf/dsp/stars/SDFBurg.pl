@@ -37,6 +37,15 @@ and the reflection coefficients.
 .Ir "reflection coefficients"
 .Ir "coefficients, reflection"
 .pp
+The autoregressive (AR) coefficients are the estimated coefficients of
+the all-pole filter that could have produced the observations
+(input data) given a white noise input.
+The transfer function of the all-pole filter is:
+.EQ
+H(z) ~=~ 1 over {1 ~+~ sum from n=1 to N d sub n z sup -n }
+.EN
+where $d$ is the set of AR coefficients.
+.pp
 Note that the definition of reflection coefficients is not quite
 universal in the literature.
 The reflection coefficients in references [2] and [3]
