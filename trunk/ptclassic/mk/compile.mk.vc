@@ -79,7 +79,7 @@
 # UNOPTIMIZED_COMPILE_RULE.  Having this rule in config-g++.mk means
 # that we don't see architecture dependent variables.
 #
-UNOPTIMIZED_WARNING_MESSAGE = @echo "DANGER: gcc-2.7.2 optimizer workaround here, see $$PTOLEMY\mk\config-g++.mk"
+UNOPTIMIZED_WARNING_MESSAGE = @echo "DANGER: gcc-2.7.2 and later optimizer workaround here, see $$PTOLEMY\mk\compile.mk.vc"
 
 UNOPTIMIZED_COMPILE_RULE = 	$(CPLUSPLUS) $(CC_SHAREDFLAGS) $(WARNINGS) \
 					$(ARCHFLAGS) $(LOCALCCFLAGS) \
