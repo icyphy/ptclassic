@@ -1,19 +1,41 @@
-/* 
-    gedTk.c :: high-level Tk interface to ged (graphics editor) widget
+/*******************************************************************
+SCCS version identification
+$Id$
 
+Copyright (c) 1990-1994 The Regents of the University of California.
+All rights reserved.
+
+Permission is hereby granted, without written agreement and without
+license or royalty fees, to use, copy, modify, and distribute this
+software and its documentation for any purpose, provided that the above
+copyright notice and the following two paragraphs appear in all copies
+of this software.
+
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY 
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES 
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF 
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF 
+SUCH DAMAGE.
+
+THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+ENHANCEMENTS, OR MODIFICATIONS.
+							COPYRIGHTENDKEY
+
+ Programmer: Kennard White
+
+ tkoctTk.c :: high-level Tk interface to ged (graphics editor) widget
     Tk widget that displays OCT facets.  This replaces a small portion
     of what the octtools program VEM does.  This module of ged implements
     the high level interface to Tk: configuration and drawing.
 
-    Author: Kennard White
+********************************************************************/
 
-    Copyright (c) 1990-93 The Regents of the University of California.
-    All rights reserved.  See the file "./copyright.h" for full copyright
-    notice, limitation of liability, and disclaimer of warranty provisions.
-#include "copyright.h"				COPYRIGHTENDKEY
-*/
 #if !defined(lint) && !defined(SABER)
-static char rcsid[] = "$Header$";
+static char SccsId[] = "$Id$";
 #endif
 
 #include "topFixup.h"
@@ -33,8 +55,8 @@ static char rcsid[] = "$Header$";
 #include "tkh.h"
 
 #include "xpDefaults.h"
-#include "gedInt.h"
-#include "ged.h"
+#include "tkoctInt.h"
+#include "tkoct.h"
 
 /*global*/ char _XpGedSubPackage[] = "xp.ged";
 #define SPKG _XpGedSubPackage
@@ -287,6 +309,7 @@ _xpGedConfig( Tcl_Interp *ip, XPGed *pGed, int aC, char **aV, int flags) {
     return TCL_OK;
 }
 
+#ifdef UNUSED
 static int
 _xpGedGetTriant(Tk_Window tkwin, int x, int y) {
     int triant;
@@ -299,6 +322,7 @@ _xpGedGetTriant(Tk_Window tkwin, int x, int y) {
     else 				triant += 6;
     return triant;
 }
+#endif /* UNUSED */
 
 #define XPGed_ScaleAdj(val,by) \
     ( (by)>=0 ? (val) * (1.0+(by)) : (val) / (1.0-(by)) )
@@ -322,9 +346,8 @@ _xpGedScanScale( XPGed *pGed, double newScale) {
 static int
 _xpGedCmds( ClientData cld, Tcl_Interp *ip, int aC, char **aV) {
     XPGed		*pGed = (XPGed*) cld;
-    char		*cmd = aV[1], c, cd, cl;
+    char		*cmd = aV[1], c;
     int			r = TCL_OK;
-    int			i;
     TOPStrLenType	len;
 
     if ( aC < 2 ) {
