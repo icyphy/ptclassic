@@ -92,6 +92,7 @@ PL_SRCS= \
  CG56Mpy.pl \
  CG56MpyInt.pl \
  CG56MpyRx.pl \
+ CG56MpyCx.pl \
  CG56MpyShift.pl \
  CG56Neg.pl \
  CG56Pad.pl \
