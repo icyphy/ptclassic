@@ -55,7 +55,7 @@ public:
 	/* virtual */ StringList print(int verbose = 0) const;
 
 	// Invoke the begin methods of the constituent stars
-	void begin();
+	virtual void begin();
 
 	const char* starType() const { return supportedStarClass;}
 
