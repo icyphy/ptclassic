@@ -79,7 +79,7 @@ void AsmTarget::doInitialization(CGStar& cgStar) {
 		}
 		if (strcmp(s->type(), "INT") == 0) {
 			IntState* i = (IntState*)s;
-			writeInt(int(*i));
+			writeInt(*i);
 		}
 		else if (strcmp(s->type(), "INTARRAY") == 0) {
 			IntArrayState* i = (IntArrayState*)s;
@@ -88,7 +88,7 @@ void AsmTarget::doInitialization(CGStar& cgStar) {
 		}
 		else if (strcmp(s->type(), "FIX") == 0) {
 			FixState* i = (FixState*)s;
-			writeFix(double(*i));
+			writeFix(i->asDouble());
 		}
 		else if (strcmp(s->type(), "FIXARRAY") == 0) {
 			FixArrayState* i = (FixArrayState*)s;
@@ -97,7 +97,7 @@ void AsmTarget::doInitialization(CGStar& cgStar) {
 		}
 		else if (strcmp(s->type(), "FLOAT") == 0) {
 			FloatState* i = (FloatState*)s;
-			writeFloat(double(*i));
+			writeFloat(*i);
 		}
 		else if (strcmp(s->type(), "FLOATARRAY") == 0) {
 			FloatArrayState* i = (FloatArrayState*)s;
