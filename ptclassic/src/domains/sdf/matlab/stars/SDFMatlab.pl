@@ -76,7 +76,9 @@ when the run panel in the graphical interface is closed.
 
 	setup {
 		if ( ! matlabInterface.MatlabIsRunning() ) {
-		    matlabInterface.StartMatlab();
+		    if ( ! matlabInterface.StartMatlab() ) {
+			Error::error( *this, matlabInterface.GetErrorString() );
+		    }
 		}
 
 		const char* scriptDir = ScriptDirectory;
