@@ -41,8 +41,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #endif
 
 #include "CGTarget.h"
-#include "IntState.h"
-#include "StringState.h"
 #include "SDFScheduler.h"
 
 class ProcMemory;
@@ -50,65 +48,11 @@ class AsmStar;
 class AsmTargetPtr;
 
 class AsmTarget : public CGTarget {
-private:
-	void initStates();
-protected:
-	ProcMemory* mem;
-
-	// what it says
-	int allocateMemory();
-
-	// redefine init routine for code generation
-	int codeGenInit();
-
-	// Request memory for all structures in a Star
-	int allocReq(AsmStar&);
-
-	// make modifications to interface circular to linear buffers
-	// and handling of long delays.
-	int modifyGalaxy();
-
-	virtual void doInitialization(CGStar&);
-
-	// host through which the target should be accessed.
-	StringState targetHost;
-
-	// if state displayFlag=TRUE then display generated code.
-	IntState displayFlag;
-
-	// if state runFlag=TRUE compile & run code
-	IntState runFlag;		
-
-	// 'uname' points to the universe name in all lowercase letters.
-	// This is typically used for the base name for a file produced
-	// by the target
-	char* uname;
-
-	// The filename for the assembly code produced is specified 
-	// by 'uname'asmSuffix().
-	virtual const char* asmSuffix() const {return ".asm";}
-
-
-	// methods for generating code for reading and writing
-	// wormhole ports.  Argument is the "real port" of the interior
-	// star that is attached to an event horizon.
-	void wormInputCode(PortHole&);
-	void wormOutputCode(PortHole&);
-
-	// AsmTargets always support "AnyAsmStar" stars.
-	const char* auxStarClass() const;
-
-	/*virtual*/ void frameCode();
-
 public:
 	AsmTarget(const char* nam, const char* desc,
 		  const char* stype, ProcMemory* m = 0);
 
-	~AsmTarget();
-
 	Block* makeNew() const = 0;
-
-	void setup();
 
 	// output a directive that switches to the code section
 	virtual void codeSection() = 0;
@@ -123,7 +67,7 @@ public:
 	// NOTE: User must delete the char* returned after use.
 	char* fullFileName(const char* base, const char* suffix=NULL);
 
-	char* baseName() { return uname; }
+	char* baseName() { return filePrefix; }
 
 	/*virtual*/ void writeCode(const char* name = NULL);
 
@@ -166,7 +110,42 @@ public:
 
 	void headerCode();
 
-	void wrapup();
+protected:
+	ProcMemory* mem;
+
+	// what it says
+	int allocateMemory();
+
+	// redefine init routine for code generation
+	int codeGenInit();
+
+	// Request memory for all structures in a Star
+	int allocReq(AsmStar&);
+
+	// make modifications to interface circular to linear buffers
+	// and handling of long delays.
+	int modifyGalaxy();
+
+	virtual void doInitialization(CGStar&);
+
+	// The filename for the assembly code produced is specified 
+	// by 'filePrefix'asmSuffix().
+	virtual const char* asmSuffix() const {return ".asm";}
+
+	// methods for generating code for reading and writing
+	// wormhole ports.  Argument is the "real port" of the interior
+	// star that is attached to an event horizon.
+	void wormInputCode(PortHole&);
+	void wormOutputCode(PortHole&);
+
+	// AsmTargets always support "AnyAsmStar" stars.
+	const char* auxStarClass() const;
+
+	/*virtual*/ void frameCode();
+
+private:
+	void initStates();
+
 };
 
 #endif
