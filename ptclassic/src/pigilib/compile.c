@@ -909,13 +909,14 @@ octObject *facetPtr;
 
 	    sprintf(msg, "RunAllDemos: executing universe '%s'", name);
 	    PrintDebug(msg);
-	    if (!CompileFacet(&univFacet) ||
-		GetIterateProp(&univFacet,&n) < 0 ||
-		!KcRun(n)) {
+	    if (GetIterateProp(&univFacet,&n) < 0) {
+		n = 10;  /* default number of iterations */
+            }
+	    if (!CompileFacet(&univFacet) || !KcRun(n)) {
 		sprintf (msg, "Execution of '%s' failed", name);
 		PrintErr(msg);
 		return FALSE;
-	    }
+            }
 	}
 	else if (IsPalFacet(&univFacet)) {
 	    RunAll(&univFacet);
