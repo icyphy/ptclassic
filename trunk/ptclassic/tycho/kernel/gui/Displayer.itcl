@@ -65,7 +65,7 @@ proc ::tycho::view {view {viewoptions {}} \
     set wname [::tycho::autoName .view]
     uplevel #0 eval $displayer $wname $dispoptions
     uplevel #0 eval $view $wname.v $viewoptions
-    $wname centerOnScreen
+    wm deiconify $wname
     return $wname
 }
 
