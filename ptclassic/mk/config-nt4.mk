@@ -57,6 +57,7 @@ RANLIB = touch
 YACC= byacc
 # Use gcc everywhere including in octtools
 CC =		gcc -I$(ROOT)/src/compat/nt
+CPLUSPLUS =	g++ -I$(ROOT)/src/compat/cfront -DPT_EGCS
 
 # In config-$PTARCH.mk, we set the following variables.  We need to 
 # use only the following variables so that we can use them elsewhere, say
@@ -121,7 +122,7 @@ BINARY_EXT = .exe
 #
 # Directories to use
 #
-X11_DIR =	/usr/X11R6.3
+X11_DIR =	/usr/X11R6.4
 X11_INCSPEC =	-I$(X11_DIR)/include
 X11_LIBDIR =	$(X11_DIR)/lib
 X11EXT_LIBSPEC=	-lXext -lSM -lICE
@@ -138,4 +139,3 @@ INCLUDE_GTHREADS =	no
 
 # Don't include the PN domain
 INCLUDE_PN_DOMAIN =	no
-
