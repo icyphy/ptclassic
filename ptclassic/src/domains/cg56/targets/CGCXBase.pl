@@ -16,25 +16,30 @@ limitation of liability, and disclaimer of warranty provisions.
 
 ccinclude { <stdio.h>,"compat.h" }
 
-public {
-    StringList S56XFilePrefix;
+state {
+    name {S56XFilePrefix}
+    type {string}
 }
 
-codeblock(downloadCode,"const char* filePrefix,const char* s56path") {
+public {
+    friend class S56XTarget;
+}
+
+codeblock(downloadCode,"const char* s56path") {
     /* open the DSP */
-    if ((dsp = qckAttach("/dev/s56dsp", NULL, 0)) == NULL) {
+    if (($val(S56XFilePrefix)_dsp = qckAttach("/dev/s56dsp", NULL, 0)) == NULL) {
 	perror("Could not access the S-56X Card");
 	EXIT_CGC(0);
     }
 
     /* boot the moniter */
-    if (qckBoot(dsp,"@s56path/lib/qckMon.lod")==-1) {
+    if (qckBoot($val(S56XFilePrefix)_dsp,"@s56path/lib/qckMon.lod")==-1) {
 	perror(qckErrString);
 	EXIT_CGC(0);
     }
 
     /* load the application */
-    if (qckLoad(dsp,"@filePrefix.lod") == -1) {
+    if (qckLoad($val(S56XFilePrefix)_dsp,"@(cgTarget()->destDirectory)/$val(S56XFilePrefix).lod") == -1) {
 	perror(qckErrString);
 	EXIT_CGC(0);
     }
@@ -43,7 +48,7 @@ codeblock(downloadCode,"const char* filePrefix,const char* s56path") {
 codeblock(signalSOL2){
 {
     int sig = SIGUSR1;
-    if (ioctl(dsp->fd,DspSetAsyncSig, &sig) == -1) {
+    if (ioctl($val(S56XFilePrefix)_dsp->fd,DspSetAsyncSig, &sig) == -1) {
 	perror("Setting of interrupt process pointer to S56X driver failed");
 	EXIT_CGC(0);
     }
@@ -54,7 +59,7 @@ codeblock(signalSUN4) {
 {
     Params dspParams;
     /* get the DSP parameters */
-    if (ioctl(dsp->fd,DspGetParams, (char*) &dspParams) == -1) {
+    if (ioctl($val(S56XFilePrefix)_dsp->fd,DspGetParams, (char*) &dspParams) == -1) {
 	perror("Read failed on S-56X parameters");
 	EXIT_CGC(0);
     }
@@ -68,7 +73,7 @@ codeblock(signalSUN4) {
     dspParams.signal = SIGUSR1;
 
     /* set the DSP parameters */
-    if (ioctl(dsp->fd,DspSetParams, (char*) &dspParams) == -1) {
+    if (ioctl($val(S56XFilePrefix)_dsp->fd,DspSetParams, (char*) &dspParams) == -1) {
 	perror("Write failed on S-56X parameters");
 	EXIT_CGC(0);
     }
@@ -76,7 +81,7 @@ codeblock(signalSUN4) {
 }
 
 codeblock(startDSP) {    
-    if (qckJsr(dsp,"START") == -1) {
+    if (qckJsr($val(S56XFilePrefix)_dsp,"START") == -1) {
 	perror(qckErrString);
 	EXIT_CGC(0);
     }
@@ -91,7 +96,7 @@ initCode {
 	addInclude("<s56dspUser.h>");
 	addInclude("<qckMon.h>");
 	addInclude("<stdio.h>");
-	addGlobal("    QckMon* dsp;","dsp");
+	addGlobal("    QckMon* $val(S56XFilePrefix)_dsp;","dsp");
 	// We do this here so that all the stars can do there initialization
 	// before starting the DSP
        	char *s56path = getenv("S56DSP");
@@ -100,7 +105,7 @@ initCode {
 	    s56path = expandPathName("$PTOLEMY/vendors/s56dsp");
 	    newmemory = TRUE;
 	}
-	addMainInit(downloadCode(S56XFilePrefix,s56path),"s56load");
+	addMainInit(downloadCode(s56path),"s56load");
 #ifdef PTSOL2
 	addMainInit(signalSOL2,"s56signal");
 #else
@@ -111,7 +116,7 @@ initCode {
 
 wrapup {
 	addMainInit(startDSP,"s56start");
-	addCode("qckDetach(dsp);dsp=0;\n","mainClose","qckDetach");
+	addCode("qckDetach($val(S56XFilePrefix)_dsp);$val(S56XFilePrefix)_dsp=0;\n","mainClose","qckDetach");
 }
 
 }

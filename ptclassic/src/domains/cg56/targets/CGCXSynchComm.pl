@@ -30,92 +30,102 @@ public {
 
 codeblock(s56xInterrupt) {
 #ifdef __cplusplus
-static void s56xSignal(int) 
+static void $val(S56XFilePrefix)_s56xSignal(int) 
 #else
-static void s56xSignal(sig) 
+static void $val(S56XFilePrefix)_s56xSignal(sig) 
 int sig;
 #endif
 {
 	/* The memory location y:@currentBuffer contains the pairNumber 
 	   of send/receive buffer that just changed state, we store
 	   that it is ready to process in the global array
-	   s56xSemaphores
+	   $val(S56XFilePrefix)_s56xSemaphores
 	 */
 	int buffer;
-	if (!dsp) return;
-	if ((buffer = qckGetY(dsp,$sharedSymbol(comm,currentBuffer))-1) < 0) {
+	if (!$val(S56XFilePrefix)_dsp) return;
+	if ((buffer = qckGetY($val(S56XFilePrefix)_dsp,$val(S56XFilePrefix)_currentBuffer)-1) < 0) {
 	        char buffer[128];
 		sprintf(buffer, 
 			"S56X Buffer Status Update Failed: %s", 
 			qckErrString);
 		EXIT_CGC(buffer);
 	}
-	s56xSemaphores[buffer/24] = qckGetY(dsp,$sharedSymbol(comm,semaphorePtr)+buffer/24);
-	if (qckPutY(dsp,$sharedSymbol(comm,currentBuffer),0) == -1) { 
+	$val(S56XFilePrefix)_s56xSemaphores[buffer/24] = qckGetY($val(S56XFilePrefix)_dsp,$val(S56XFilePrefix)_semaphorePtr+buffer/24);
+	$val(S56XFilePrefix)_hostSemaphores[buffer] = !$val(S56XFilePrefix)_hostSemaphores[buffer];
+	if (qckPutY($val(S56XFilePrefix)_dsp,$val(S56XFilePrefix)_currentBuffer,0) == -1) { 
 	        char buffer[128];
 		sprintf(buffer, "S56X Interrupt Reset Failed: %s", 
 			qckErrString);
 		EXIT_CGC(buffer);
 	}
-} /* end s56xSignal interrupt */
+} /* end $val(S56XFilePrefix)_s56xSignal interrupt */
 }
 
 codeblock(s56xSemaphoresInit,"int size") {
 {
 	int i;
-	for (i = 0 ; i < @size ; i++); {
-		s56xSemaphores[i] = 0;	/* all buffers emtpy */
-	}
+	for (i = 0 ; i < @(size/24 + 1) ; i++)
+	    /* all buffers empty */
+	    $val(S56XFilePrefix)_s56xSemaphores[i] = 0;
+	for (i = 0 ; i < @size ; i++)
+	    $val(S56XFilePrefix)_hostSemaphores[i] = 0;
 }
 }
 
 codeblock(loadDSPSymbols,"const char* varName") {
-    if (($starSymbol(s56xBuffer) = qckItem(dsp,"@varName")) == 0)
+    if (($starSymbol(s56xBuffer) = qckItem($val(S56XFilePrefix)_dsp,"@varName")) == 0)
 	EXIT_CGC("CGCXSynchComm address resolution failed");
 }
 
 codeblock(loadSemaphoreItem) {
-    if (($sharedSymbol(comm,s56xSemaphore) = qckItem(dsp,"PTOLEMY_S56X_SEM")) 
+    if (($val(S56XFilePrefix)_s56xSemaphore = qckItem($val(S56XFilePrefix)_dsp,"PTOLEMY_S56X_SEM")) 
 	== 0)
 	EXIT_CGC("CGCXSynchComm semaphore address resolution failed");
-    $sharedSymbol(comm,semaphorePtr) = 
-        QckAddr($sharedSymbol(comm,s56xSemaphore));
-    if (($sharedSymbol(comm,s56xCurrentBuffer) = qckItem(dsp,"PTOLEMY_S56X_BUF")) 
+    $val(S56XFilePrefix)_semaphorePtr = 
+        QckAddr($val(S56XFilePrefix)_s56xSemaphore);
+    if (($val(S56XFilePrefix)_s56xCurrentBuffer = qckItem($val(S56XFilePrefix)_dsp,"PTOLEMY_S56X_BUF")) 
 	== 0)
 	EXIT_CGC("CGCXSynchComm current buffer address resolution failed");
-    $sharedSymbol(comm,currentBuffer) = 
-        QckAddr($sharedSymbol(comm,s56xCurrentBuffer));
+    $val(S56XFilePrefix)_currentBuffer = 
+        QckAddr($val(S56XFilePrefix)_s56xCurrentBuffer);
 }
 
 codeblock(sigsetUSR1) {
 { 
     struct sigaction pt_alarm_action;
-    sigset(SIGUSR1,s56xSignal);
+    sigset(SIGUSR1,$val(S56XFilePrefix)_s56xSignal);
     sigaction(SIGUSR1, 0, &pt_alarm_action);
     pt_alarm_action.sa_flags |= SA_RESTART;
     sigaction(SIGUSR1, &pt_alarm_action, 0);
 }
 }
 
+codeblock (semaphoreDeclaration,"int count") {
+    /* We have a pair of redundant semaphore arrays.  The first
+       version keeps the semaphore as bits in a word.  The second
+       version keeps each semaphore as a separate integer.  This is
+       done for polling efficiency on the workstation */
+    int $val(S56XFilePrefix)_s56xSemaphores[@(count/24 + 1)];
+    volatile int $val(S56XFilePrefix)_hostSemaphores[@count];
+}
+    
 initCode {
-	StringList s56xSemaphores;
-	s56xSemaphores << "int s56xSemaphores[" << *commCount/24 + 1 << "];";
 	addDeclaration("QckItem $starSymbol(s56xBuffer);\n");
-        addDeclaration("QckItem $sharedSymbol(comm,s56xSemaphore);\n"
-		       "QckItem $sharedSymbol(comm,s56xCurrentBuffer);\n");
-	addGlobal("unsigned int $sharedSymbol(comm,semaphorePtr);\n"
-		  "unsigned int $sharedSymbol(comm,currentBuffer);\n",
+        addDeclaration("QckItem $val(S56XFilePrefix)_s56xSemaphore;\n"
+		       "QckItem $val(S56XFilePrefix)_s56xCurrentBuffer;\n");
+	addGlobal("unsigned int $val(S56XFilePrefix)_semaphorePtr;\n"
+		  "unsigned int $val(S56XFilePrefix)_currentBuffer;\n",
 		  "s56xSemaphorePtr");
-	addGlobal(s56xSemaphores,"s56xSemaphores");
+	addGlobal(semaphoreDeclaration(*commCount),"s56xSemaphores");
         addGlobal("#define S56X_MAX_POLL 10000000","S56X_MAX_POLL");
-	addMainInit(s56xSemaphoresInit(*commCount/24 + 1),"s56xSemaphoresInit");
+	addMainInit(s56xSemaphoresInit(*commCount),"s56xSemaphoresInit");
 	CGCXBase::initCode();
 	addGlobal(s56xInterrupt,"s56xInterrupt");
 #ifdef PTSOL2
 	addMainInit(sigsetUSR1,"s56x_sigset");
-	addMainInit("	dsp->intr=sbusMemHostIntr;","s56x_dspintr");
+	addMainInit("	$val(S56XFilePrefix)_dsp->intr=sbusMemHostIntr;","s56x_dspintr");
 #else
-	addMainInit("   signal(SIGUSR1,s56xSignal);");
+	addMainInit("   signal(SIGUSR1,$val(S56XFilePrefix)_s56xSignal);");
 #endif
         addMainInit(loadDSPSymbols(s56xSide->bufferName()));
         addMainInit(loadSemaphoreItem,"s56x_sem_item");

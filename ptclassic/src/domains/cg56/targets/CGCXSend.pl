@@ -43,8 +43,9 @@ codeblock(sendData,"const char* command,int numXfer") {
     int i,semaphoreMask = 1<<@(pairNumber%24);
     int count = S56X_MAX_POLL;
     /* wait for dsp buffer to be empty */
-    while (--count && (s56xSemaphores[@(pairNumber/24)]&semaphoreMask));
-    if (count == 0) EXIT_CGC("The S-56X board is failing to receive data.  Is there another process still attached to the DSP?");
+    while ($val(S56XFilePrefix)_hostSemaphores[@pairNumber] && --count);
+    $val(S56XFilePrefix)_hostSemaphores[@pairNumber]=1;
+    if (count == 0) EXIT_CGC("The S-56X buffer# @pairNumber is still empty.  The S-56X board is failing to receive data.  Is there another process still attached to the DSP?");
     for(i = 0 ; i<@numXfer ; i ++) {
 	char* pValue;
 	fix dspWord;
@@ -53,9 +54,9 @@ codeblock(sendData,"const char* command,int numXfer") {
         memcpy(++pValue,dspWord,3);
     }
 #if @(numXfer-1)
-    if (qckPutBlkItem(dsp,value,$starSymbol(s56xBuffer),@numXfer) == -1)
+    if (qckPutBlkItem($val(S56XFilePrefix)_dsp,value,$starSymbol(s56xBuffer),@numXfer) == -1)
 #else
-    if (qckPokeItem(dsp,$starSymbol(s56xBuffer),value[0]) == -1)
+    if (qckPokeItem($val(S56XFilePrefix)_dsp,$starSymbol(s56xBuffer),value[0]) == -1)
 #endif
     {
 	char buffer[128];
@@ -63,8 +64,8 @@ codeblock(sendData,"const char* command,int numXfer") {
 		"Send Data Failed, Pair @pairNumber: %s", qckErrString);
 	EXIT_CGC(buffer);
     }
-    s56xSemaphores[@(pairNumber/24)] |= semaphoreMask;
-    if (qckPutY(dsp,$sharedSymbol(comm,semaphorePtr)+@(pairNumber/24),s56xSemaphores[@(pairNumber/24)]) == -1) { 
+    $val(S56XFilePrefix)_s56xSemaphores[@(pairNumber/24)] |= semaphoreMask;
+    if (qckPutY($val(S56XFilePrefix)_dsp,$val(S56XFilePrefix)_semaphorePtr+@(pairNumber/24),$val(S56XFilePrefix)_s56xSemaphores[@(pairNumber/24)]) == -1) { 
 	char buffer[128];
 	sprintf(buffer, "Semaphore update failed, Pair @pairNumber: %s", qckErrString);
 	EXIT_CGC(buffer);

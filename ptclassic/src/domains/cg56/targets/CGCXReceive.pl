@@ -25,12 +25,13 @@ codeblock(receiveData,"const char* command, int numXfer") {
     int count = S56X_MAX_POLL;
     int value[@numXfer];
     /* wait for dsp buffer to be full */
-    while ( --count && (~s56xSemaphores[@(pairNumber/24)] & semaphoreMask ));
+    while ( ! $val(S56XFilePrefix)_hostSemaphores[@pairNumber] && --count);
+    $val(S56XFilePrefix)_hostSemaphores[@pairNumber]=0;
     if (count == 0) EXIT_CGC("The S-56X board is failing to send data.  Is there another process still attached to the DSP?");
 #if @(numXfer-1)
-    if (qckGetBlkItem(dsp,$starSymbol(s56xBuffer),value,@numXfer) == -1)
+    if (qckGetBlkItem($val(S56XFilePrefix)_dsp,$starSymbol(s56xBuffer),value,@numXfer) == -1)
 #else
-    if ((value[0] = qckPeekItem(dsp,$starSymbol(s56xBuffer))) == -1)
+    if ((value[0] = qckPeekItem($val(S56XFilePrefix)_dsp,$starSymbol(s56xBuffer))) == -1)
 #endif
      {
 	char buffer[128];
@@ -47,8 +48,8 @@ codeblock(receiveData,"const char* command, int numXfer") {
 	memcpy(fixValue,pValue,3);
 	@command;
     }
-    s56xSemaphores[@(pairNumber/24)] &= ~semaphoreMask;
-    if (qckPutY(dsp,$sharedSymbol(comm,semaphorePtr)+@(pairNumber/24),s56xSemaphores[@(pairNumber/24)]) == -1) { 
+    $val(S56XFilePrefix)_s56xSemaphores[@(pairNumber/24)] &= ~semaphoreMask;
+    if (qckPutY($val(S56XFilePrefix)_dsp,$val(S56XFilePrefix)_semaphorePtr+@(pairNumber/24),$val(S56XFilePrefix)_s56xSemaphores[@(pairNumber/24)]) == -1) { 
 	char buffer[128];
 	sprintf(buffer, "Semaphore update failed, Pair @pairNumber: %s", 
 		qckErrString);
