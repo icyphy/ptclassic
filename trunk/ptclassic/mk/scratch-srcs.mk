@@ -93,7 +93,9 @@ hpgnu_all: $(OBJARCH)/gnu
 	(cd $(PTOLEMY)/src/gnu; $(MAKE) $(MFLAGS) ARCH=$(ARCH) PTOLEMY=$(PTOLEMY) GNU_DEST=$(GNU_DEST) hp_all)
 
 # For irix5
-irix5gnu_all: $(OBJARCH)/gnu
+# No need to depend on  $(OBJARCH)/gnu, as irix5_all will run configure
+# for us
+irix5gnu_all:
 	(cd $(PTOLEMY)/src/gnu; $(MAKE) $(MFLAGS) ARCH=$(ARCH) PTOLEMY=$(PTOLEMY) GNU_DEST=$(GNU_DEST) irix5_all)
 
 	
