@@ -1,8 +1,0 @@
-$Id$
-
-The header files in this directory are an attempt to make the
-environment under a different compiler (e.g. Sun C++ 2.1)
-look like a tiny subset of the libg++ library.  The random
-number generator classes duplicate only enough of the behavior
-to work under Ptolemy (for example, there is only one stream
-of random numbers).
