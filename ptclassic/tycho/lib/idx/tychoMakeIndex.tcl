@@ -72,7 +72,7 @@ proc tychoMkIndex {name filename prependTYCHO nested args } {
 	    set contents [string range $contents [lindex $matchname 1] end]
 	}
     }
-    set fd [open $filename w]
+    set fd [open "$filename" w]
     # Put a comment line that gives reasonable output in netscape.
     puts $fd "# <h1>This is a Tycho index file. \
             Use tycho to view it.</h1> <nothtml"
@@ -217,7 +217,7 @@ proc tychoStandardIndex {} {
     # cd back in case we have followed links in tychoFindAllHTML
     cd $TYCHO
     eval tychoMkIndex {{Tycho index}} \
-    	    [file join $TYCHO lib idx tycho.idx] 1 0 $files 
+    	    [list [file join $TYCHO lib idx tycho.idx]] 1 0 $files 
     cd $olddir
 }
 
@@ -236,7 +236,7 @@ proc tychoCodeDocIndex {} {
     # cd back in case we have followed links in tychoFindAllHTML
     cd $TYCHO
     eval tychoMkIndex {{Tycho Itcl Code Index}} \
-	    [file join $TYCHO lib idx codeDoc.idx] 1 0 $files
+	    [list [file join $TYCHO lib idx codeDoc.idx]] 1 0 $files
     cd $olddir
 }
 
