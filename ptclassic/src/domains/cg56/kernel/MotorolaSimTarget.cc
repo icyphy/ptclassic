@@ -53,8 +53,6 @@ void MotorolaSimTarget :: initStates(const char* dsp,const char* start,
 	addState(interactiveFlag.setState(
 		"Interactive Simulation",this,"YES",""));
 	addStream("simulatorCmds",&simulatorCmds);
-	runFlag.setInitValue("YES");
-	runFlag.setAttributes(A_SETTABLE|A_NONCONSTANT);
 }
 
 int MotorolaSimTarget::compileCode() {
