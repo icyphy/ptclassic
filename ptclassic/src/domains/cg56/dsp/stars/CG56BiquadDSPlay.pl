@@ -28,8 +28,9 @@ as follows:
 This only works if a, b, c, d, and e are in the range <i></i>(<i>-</i>1<i>, +</i>1<i></i>)<i></i>.
 The transfer function realized by the filter is:
 <pre>
-H(z) ~ = ~ { { a ~ + ~ b z sup { -1 } ~ + ~ c z sup { -2 } } over
-{ 1 ~ - ~ (d ~ + ~ 1) z sup { -1 } ~ - ~ e z sup { -2 } }  }
+H(z) = a + bz<sup>-1</sup> + cz<sup>-2</sup>
+       ---------------------
+       1 - (d + 1)z<sup>-1</sup> - ez<sup>-2</sup>
 </pre>
 The default coefficients implement a low pass filter.
         }
