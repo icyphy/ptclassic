@@ -3,6 +3,7 @@
 #include "StringList.h"
 #include "Output.h"
 #include "Particle.h"
+#include "miscFuncs.h"
  
 /**************************************************************************
 Version identification:
@@ -86,6 +87,32 @@ int GenericPort :: isItMulti () { return FALSE;}
 PortHole& GenericPort :: newConnection () {
 	// my apologies for this horrible cast
 	return *(PortHole *)&GenericPort::realPort();
+}
+
+// inheritTypeFrom maintains a circular list of typePortPtr pointers.
+// only this function and the destructor alters typePortPtr.
+void GenericPort :: inheritTypeFrom(GenericPort& p) {
+	typePortPtr = &p;
+// case 1: no pre-existing circle.  Make one and return.
+	if (!p.typePortPtr) {
+		p.typePortPtr = this;
+		return;
+	}
+// case 2: a pre-existing circle.  Search for the link back to p
+// and make it point to me instead.
+	GenericPort* q = p.typePortPtr;
+	while (q->typePortPtr != &p)
+		q = q->typePortPtr;
+	q->typePortPtr = this;
+	return;
+}
+
+// destructor remove myself from the circle but preserve a smaller circle
+GenericPort :: ~GenericPort () {
+	if (!typePortPtr) return;
+	GenericPort* q = typePortPtr;
+	while (q->typePortPtr != this) q = q->typePortPtr;
+	q->typePortPtr = typePortPtr;
 }
 
 // The connect method
@@ -227,10 +254,36 @@ MultiPortHole :: printVerbose () {
 	return out;
 }
 
+// define a marker value to prevent infinite recursion
+Plasma* const Mark = (Plasma*)1;
+
+// The setPlasma function's job is to propagate types all around the
+// structure.  It is, unfortunately, necessarily complex.  It supports
+// several functions:
+// 1) The allowance and correct resolution of ANYTYPE (for Fork, Printer,
+//    type stars)
+// 2) Allowing ports with different types to be connected together; the
+//    input porthole determines what Plasma to use
+// 3) The use of typePort() to require that several PortHoles have the
+//    same type
+// 4) Handle wormhole boundary conditions, where far() doesn't quite
+//    mean the same thing.
+//
+// In some cases the type is really undefined.  Consider this universe
+// (using interpreter syntax)
+//
+// (star f Fork) (star p Printer)
+// (connect f output f input 1)
+// (connect f output p input)
+//
+// There are no types anywhere in the system.
+
 Plasma*
 PortHole :: setPlasma (Plasma* useType) {
 // return immediately if useType matches myPlasma and non-null.
 	if (far() == NULL) return myPlasma;
+// check for infinite recursion
+	if (myPlasma == Mark) return 0;
 
 // I am allowed to change my type only if I am an output porthole.
 // This happens if, say, an output of type FLOAT feeds an input of
@@ -239,11 +292,11 @@ PortHole :: setPlasma (Plasma* useType) {
 		if (useType == myPlasma) return useType;
 		if (!myPlasma || isItOutput()) {
 			myPlasma = useType;
-			if (typePort) typePort->setPlasma(useType);
-			if (typePortBack) typePortBack->setPlasma(useType);
+			// following recursion ends when we get to ourself
+			if (typePort()) typePort()->setPlasma(useType);
 		}
 		else {
-			StringList msg = "Attempt to change type of ";
+			StringList msg = "Type conflict at ";
 			msg += readFullName();
 			Error::abortRun(msg);
 			return myPlasma;
@@ -253,9 +306,9 @@ PortHole :: setPlasma (Plasma* useType) {
 	else if (isItInput()) {
 // If my type isn't known try to set it.
 		if (!myPlasma) {
-			if (typePort)
-				myPlasma = typePort->setPlasma();
-// no, we can't do this on typePortBack also; infinite recursion
+			myPlasma = Mark;
+			if (typePort())
+				myPlasma = typePort()->setPlasma();
 			else
 				myPlasma = far()->setPlasma();
 		}
@@ -263,34 +316,33 @@ PortHole :: setPlasma (Plasma* useType) {
 // If it is an output PortHole.
 	else {	
 		// first, far() has known type and not on wormhole boundary
-		if (far()->myPlasma && far()->isItInput()) {
+		if (far()->myPlasma && far()->isItInput() &&
+		    far()->myPlasma != Mark) {
 			myPlasma = far()->myPlasma;
 		}
 		// or, far() has typePort and not on wormhole boundary
-		else if (far()->typePort && far()->isItInput()) {
-			Plasma* tmp = far()->typePort->setPlasma();
-			if (tmp) myPlasma = tmp;
-			else if (myPlasma)
-				far()->setPlasma(myPlasma);
+		else if (far()->typePort() && far()->isItInput()) {
+			Plasma* save = myPlasma;
+			myPlasma = Mark;
+			myPlasma = far()->setPlasma();
+			if (!myPlasma) {
+				myPlasma = save;
+				if (myPlasma) far()->setPlasma(myPlasma);
+			}
 		}
 		// second, look for typePort (ANYTYPE or on wormhole boundary)
-		else if (typePort)
-			myPlasma = typePort->setPlasma();
-		else if (typePortBack)
-			myPlasma = typePortBack->setPlasma();
+		if (myPlasma == 0 && typePort()) {
+			myPlasma = Mark;
+			myPlasma = typePort()->setPlasma();
+		}
 	}
 	if (myPlasma) {
-		if (typePort) typePort->setPlasma(myPlasma);
-		if (typePortBack) typePortBack->setPlasma(myPlasma);
+		if (typePort()) typePort()->setPlasma(myPlasma);
 	}
 	return myPlasma;
 }
 
 // Function to get plasma type for a MultiPortHole.
-// The algorithm is to use the type of the first contained PortHole
-// if typePort is null.  This means that, for an ANYTYPE adder star, say,
-// the type of the output will be the type of the first input, which
-// may not be what is desired.
 Plasma*
 MultiPortHole :: setPlasma (Plasma* useType) {
 	reset();
@@ -299,10 +351,16 @@ MultiPortHole :: setPlasma (Plasma* useType) {
 			(ports++).setPlasma(useType);
 		return useType;
 	}
-	if (typePort) return typePort->setPlasma();
-	// call setPlasma the first contained PortHole to get the value.
-
-	return (ports++).setPlasma();
+	// call setPlasma the first contained PortHole whose type we
+	// can resolve to get the value.
+	for (int n = numberPorts(); n>0; n--) {
+		Plasma* q = (ports++).setPlasma();
+		if (q) {
+			reset();
+			return q;
+		}
+	}
+	return 0;
 }
 
 void PortHole :: initialize()
@@ -312,6 +370,7 @@ void PortHole :: initialize()
 		StringList msg = "Can't determine dataType of ";
 		msg += readFullName();
 		Error::abortRun (msg);
+		return;
 	}
 
 	// allocate buffer if not allocated or wrong size
@@ -373,17 +432,20 @@ MultiPortHole :: newName () {
 	char buf[512];
 	sprintf (buf, "%s#%d", readName(), ports.size());
 // save the string on the heap.  Disadvantage: multiple copies of "input#1"
-	char* newname = new char[strlen(buf)+1];
-	return strcpy (newname, buf);
+	return savestring (buf);
 }
 
-// Add a new PortHole to the MultiPortHole.
+// Add a new PortHole to the MultiPortHole.  install is provided so
+// we can do multiports for specific domains.
+PortHole& MultiPortHole :: installPort(PortHole& p) {
+	ports.put(p);
+	parent()->addPort(p.setPort(newName(), parent(), type));
+	p.inheritTypeFrom(*this);
+	return p;
+}
+
 PortHole& MultiPortHole :: newPort() {
-        PortHole* newport = new PortHole;
-        ports.put(*newport);
-        parent()->addPort(newport->setPort(newName(), parent(), type));
-	newport->typePort = this;
-        return *newport;
+	return installPort(*new PortHole);
 }
 
 // Return a PortHole for a new connection.  We return the first available

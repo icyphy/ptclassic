@@ -142,11 +142,9 @@ public:
 		return *this;
 	}
 
-	// set up a port for determining the type of ANYTYPE connections
-	void inheritTypeFrom(GenericPort& p) {
-		typePort = &p;
-		p.typePortBack = this;
-	}
+	// set up a port for determining the type of ANYTYPE connections.
+	// typePort pointers form a circular loop.
+	void inheritTypeFrom(GenericPort& p);
 
 	// function to initialize PortHole Plasmas
 	virtual Plasma* setPlasma(Plasma *useType = NULL) = 0;
@@ -159,16 +157,10 @@ public:
 	dataType myType () const { return type;}
 
 	// Constructor
-	GenericPort () : type(ANYTYPE),alias(0),typePort(0),typePortBack(0) {}
+	GenericPort () : type(ANYTYPE),alias(0),typePortPtr(0) {}
 
 	// Destructor
-	~GenericPort() {
-		if (typePort && typePort->typePortBack == this)
-			typePort->typePortBack = 0;
-		if (typePortBack && typePortBack->typePort == this)
-			typePortBack->typePort = 0;
-	}
-
+	~GenericPort();
 
 protected:
 	// datatype of particles in this porthole
@@ -177,12 +169,11 @@ protected:
 	// PortHole this is aliased to
 	GenericPort* alias;
 
-	// PortHole to inherit type from for ANYTYPE connections
-	GenericPort* typePort;
+	// return typePortPtr
+	GenericPort* typePort() const { return typePortPtr;}
 
-	// A pointer to point in the reverse direction
-	GenericPort* typePortBack;
-
+private:
+	GenericPort* typePortPtr;
 };
 
 
@@ -393,6 +384,9 @@ protected:
 
 	// Method for generating names for contained PortHoles
 	char* newName();
+
+	// add a newly created port to the multiporthole
+	PortHole& installPort(PortHole& p);
 };
 
         //////////////////////////////////////////
