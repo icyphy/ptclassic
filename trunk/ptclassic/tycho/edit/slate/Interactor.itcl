@@ -53,6 +53,7 @@
 # object, which then reacts according to its current "behavior."
 #
 class ::tycho::Interactor {
+    inherit ::tycho::Object
 
     constructor {} {}
     destructor {}

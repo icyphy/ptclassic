@@ -46,7 +46,10 @@
 # selection of colors (i.e. fewer but better colors) in a manner
 # that is independent of the X color names.
 #
+# FIXME: This class needs to be merged with Color.itcl,
+#
 class ::tycho::Shades {
+    inherit ::tycho::Object
 
     ###################################################################
     ## Public methods and procedures.
