@@ -53,20 +53,9 @@ Particle& InDEPort :: get()
 
 void InDEPort :: grabData ()
 {
-// DE Scheduler calls this routine when an event is fetched from the
-// event queue to a DEStar. It gets a Particle from the
-// Geodesic and store it in the buffer.
-
-	// get the buffer pointer
-	Pointer* p = myBuffer->here();
-
-	// put the previuos Particle back into Plasma
-	myPlasma->put((Particle*)*p);
-
-	// Get a new Particle (event) from the Geodesic
-	*p = myGeodesic->get();
-
+	getParticle();
 	dataNew = TRUE;
+	timeStamp = ((DEStar*) parent())->arrivalTime;
 }
 
 Particle& OutDEPort :: put(float stamp)
@@ -84,16 +73,7 @@ void OutDEPort :: sendData ()
 // It sends a data to the output Geodesic, and generates an event into the Q
 // inside the DE system. At the DEin##_WormHole boundary, no event is signaled.
    if (dataNew) {
-	Pointer* p = myBuffer->here();
-	
-	// Get Particle from Plasma
-	Particle* pp = myPlasma->get();
-
-	// Copy from the buffer to this Particle
-	*pp = *(Particle *)*p;
-	
-	// Launch this Particle into the Geodesic
-	myGeodesic->put(pp);
+	putParticle();
 
 	// If the port lies on the Wormhole boundary, skip. Otherwise,
 	// generate an event into the event queue.
