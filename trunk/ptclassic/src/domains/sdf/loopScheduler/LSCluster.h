@@ -65,8 +65,8 @@ public:
 	StringList displaySchedule(int depth);
 
 	// fire the cluster
-	void fire() { go(); }
-	void go();
+	int fire();
+	void go() { fire();}
 
 	// class identification
 	int isA(const char*) const;

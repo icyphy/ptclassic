@@ -10,6 +10,7 @@ $Id$
  Date of creation: 4/92
 
  LSCluster class
+ '
 
 *******************************************************************/
 #ifdef __GNUG__
@@ -97,14 +98,16 @@ void LSCluster :: addFiring(SDFStar* s, int cnt) {
 }
 
 // fire the cluster
-void LSCluster :: go() {
+int LSCluster :: fire() {
 
 	SDFFiring* f = firing;
 	while (f) {
-		for (int i = f->count; i > 0; i--)
-			f->s->fire();
+		for (int i = f->count; i > 0; i--) {
+			if (!f->s->fire()) return FALSE;
+		}
 		f = f->next;
 	}
+	return TRUE;
 }
 	
 // isA functions
