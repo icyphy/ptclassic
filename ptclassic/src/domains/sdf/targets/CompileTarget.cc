@@ -199,7 +199,7 @@ void CompileTarget::wrapup() {
 
 
 void CompileTarget::writeFiring(Star& s, int depth) {
-	myCode << indent(depth) << sanitizedFullName(s) << ".fire();\n";
+	myCode << indent(depth) << sanitizedFullName(s) << ".run();\n";
 }
 
 const GenericPort* CompileTarget::findMasterPort(const PortHole* p) const {
