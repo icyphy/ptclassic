@@ -66,6 +66,11 @@ const char* VHDLArc :: className() const { return "VHDLArc"; }
 
 ISA_FUNC(VHDLArc,VHDLObj);
 
+// Use the name as a key to find the arc.
+VHDLArc* VHDLArcList :: arcWithName(const char* name) {
+  return (VHDLArc*) myTable.lookup(name);
+}
+
 // Return a pointer to a new copy of the list.
 VHDLArcList* VHDLArcList :: newCopy() {
   // Put new copy of each entry into the new list.

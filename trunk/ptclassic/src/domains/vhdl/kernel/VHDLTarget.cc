@@ -39,15 +39,15 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #endif
 
 #include "VHDLTarget.h"
+#include "CGUtilities.h"
 #include "ConversionTable.h"
-//#include <ostream.h>
+
 // HPPA CC under HPUX10.01 cannot deal with arrays, the message is:
 //  'sorry, not implemented: general initializer in initializer lists'
 // if we have an array:
 //  static TypeConversionTable cgcCnvTable[7] = {
 //   {  COMPLEX, 	FIX, 		"CxToFix"	},
 // So, we create a class and let it do the work.
-
 class VHDLConversionTable: public ConversionTable {
 public:
    VHDLConversionTable():ConversionTable(7) {
@@ -83,6 +83,18 @@ HLLTarget(name, starclass, desc) {
   // Set the default to not use loop scheduling.
   loopingLevel.setInitValue("0");
   
+  // Initialize hashstrings for quick comparison.
+  hashINTEGER = hashstring("INTEGER");
+  hashINT = hashstring("INT");
+  hashint = hashstring("int");
+  hashREAL = hashstring("REAL");
+  hashreal = hashstring("real");
+  hashCOMPLEX = hashstring("COMPLEX");
+  hashcomplex = hashstring("complex");
+  hashCHARACTER = hashstring("CHARACTER");
+  hashIN = hashstring("IN");
+  hashOUT = hashstring("OUT");
+
   // Initialize type conversion table
   typeConversionTable = &vhdlConversionTable;
   typeConversionTableRows = 7;
@@ -105,52 +117,48 @@ void VHDLTarget :: prepend(StringList code, CodeStream& stream) {
 // Register a read or write to an arc and the offset.
 void VHDLTarget :: registerArcRef(VHDLPortHole* port, int tokenNum) {
   StringList direction = port->direction();
-  const char* pDirec = hashstring(direction);
+  const char* hashDirec = hashstring(direction);
   StringList name = port->getGeoName();
-  const char* pName = hashstring(name);
   int noSuchArc = 1;
   
-  // Search through the arc list for an arc with the given name.
-  // If one is found, update it's low/high write/read markers.
-  VHDLArcListIter nextArc(arcList);
-  VHDLArc* arc;
-  while ((arc = nextArc++) != 0) {
-//    if (!strcmp(arc->name, name)) {
-// Assume that if the arc is in the list, it's name's already hashed
-//    if (hashstring(arc->name) == hashstring(name)) {
-//    if (arc->name == hashstring(name)) {
-    if (arc->name == pName) {
-      noSuchArc = 0;
-//      if (!strcmp(port->direction(),"OUT")) {
-      if (pDirec == hashstring("OUT")) {
-	if (tokenNum < arc->lowWrite) arc->lowWrite = tokenNum;
-	if (tokenNum > arc->highWrite) arc->highWrite = tokenNum;
-      }
-//      else if (!strcmp(port->direction(),"IN")) {
-      else if (pDirec == hashstring("IN")) {
-	if (tokenNum < arc->lowRead) arc->lowRead = tokenNum;
-	if (tokenNum > arc->highRead) arc->highRead = tokenNum;
-      }
-      else {
-	Error::error(*port, " is neither IN nor OUT");
+  if (!arcList.inList(name)) {
+    noSuchArc = 1;
+  }
+  else {
+    noSuchArc = 0;
+// Search through the arc list for an arc with the given name.
+// If one is found, update it's low/high write/read markers.
+    VHDLArc* arc = arcList.arcWithName(name);
+    {
+      {
+	noSuchArc = 0;
+	if (hashDirec == hashIN) {
+	  if (tokenNum < arc->lowRead) arc->lowRead = tokenNum;
+	  if (tokenNum > arc->highRead) arc->highRead = tokenNum;
+	}
+	else if (hashDirec == hashOUT) {
+	  if (tokenNum < arc->lowWrite) arc->lowWrite = tokenNum;
+	  if (tokenNum > arc->highWrite) arc->highWrite = tokenNum;
+	}
+	else {
+	  Error::error(*port, " is neither IN nor OUT");
+	}
       }
     }
-  } 
-
-  // If no arc with the given name is in the list, then create one.
+  }
+  
+// If no arc with the given name is in the list, then create one.
   if (noSuchArc) {
     VHDLArc* newArc = new VHDLArc;
-    newArc->name = pName;
-//    if (!strcmp(port->direction(),"OUT")) {
-    if (pDirec == hashstring("OUT")) {
+    newArc->setName(name);
+    if (hashDirec == hashOUT) {
       newArc->type = port->dataType();
       newArc->lowWrite = tokenNum;
       newArc->highWrite = tokenNum;
       newArc->lowRead = port->geo().firstGet();
       newArc->highRead = port->geo().firstGet();
     }
-//    else if (!strcmp(port->direction(),"IN")) {
-    else if (pDirec == hashstring("IN")) {
+    else if (hashDirec == hashIN) {
       newArc->type = port->dataType();
       newArc->lowWrite = port->geo().firstPut();
       newArc->highWrite = port->geo().firstPut();
@@ -210,7 +218,7 @@ int VHDLTarget :: receiveWormData(PortHole& p) {
 
 // Initial stage of code generation.
 void VHDLTarget :: headerCode() {
-  StringList galName = galaxy()->name();
+  const char* galName = hashstring(galaxy()->name());
 
   // Generate the entity_declaration.
   entity_declaration << "-- entity_declaration\n";
@@ -240,6 +248,7 @@ void VHDLTarget :: trailerCode() {
   VHDLArcListIter nextArc(arcList);
   VHDLArc* arc;
   while ((arc = nextArc++) != 0) {
+    const char* hashArcType = hashstring(arc->type);
     for (int ix = arc->lowRead; ix < arc->lowWrite; ix++) {
       StringList sourceName = arc->name;
       StringList destName = arc->name;
@@ -265,30 +274,12 @@ void VHDLTarget :: trailerCode() {
       // However, do not create a variable if it's a wormhole input.
       // Will have created a system port input instead.
 
-/*
-      // If no system port by the given name, go ahead and make the variable.
-      if (!(variableList.inList(sourceName))) {
-	// Allocate memory for a new VHDLVariable and put it in the list.
-	VHDLVariable* newvar = new VHDLVariable;
-	newvar->name = hashstring(sourceName);
-	newvar->type = arc->type;
-	//	if (!strcmp(arc->type,"INTEGER")) {
-	if (hashstring(arc->type) == hashstring("INTEGER")) {
-	  newvar->initVal = "0";
-	}
-	else {
-	  newvar->initVal = "0.0";
-	}
-	variableList.put(*newvar);
-      }
-      */
       {
 	// Allocate memory for a new VHDLVariable and put it in the list.
 	VHDLVariable* newvar = new VHDLVariable;
-	newvar->name = hashstring(sourceName);
+	newvar->setName(sourceName);
 	newvar->type = arc->type;
-//	if (!strcmp(arc->type,"INTEGER")) {
-	if (hashstring(arc->type) == hashstring("INTEGER")) {
+	if (hashArcType == hashINTEGER) {
 	  newvar->initVal = "0";
 	}
 	else {
@@ -297,29 +288,12 @@ void VHDLTarget :: trailerCode() {
 	variableList.put(*newvar);
       }
 
-/*
-      if (!(variableList.inList(destName))) {
-	// Allocate memory for a new VHDLVariable and put it in the list.
-	VHDLVariable* newvar = new VHDLVariable;
-	newvar->name = hashstring(destName);
-	newvar->type = arc->type;
-	//	if (!strcmp(arc->type,"INTEGER")) {
-	if (hashstring(arc->type) == hashstring("INTEGER")) {
-	  newvar->initVal = "0";
-	}
-	else {
-	  newvar->initVal = "0.0";
-	}
-	variableList.put(*newvar);
-      }
-      */
       {
 	// Allocate memory for a new VHDLVariable and put it in the list.
 	VHDLVariable* newvar = new VHDLVariable;
-	newvar->name = hashstring(destName);
+	newvar->setName(destName);
 	newvar->type = arc->type;
-//	if (!strcmp(arc->type,"INTEGER")) {
-	if (hashstring(arc->type) == hashstring("INTEGER")) {
+	if (hashArcType == hashINTEGER) {
 	  newvar->initVal = "0";
 	}
 	else {
@@ -454,13 +428,18 @@ void VHDLTarget :: beginIteration(int repetitions, int depth) {
     loopOpener << indent(depth)
 	       << "for " << targetNestedSymbol.pop() << " in 1 to "
 	       << repetitions << " loop\n";
+    // Put this delay here to allow connections to be established in
+    // delta-time before any reads or writes are attempted.  If you
+    // attempt to read or write before all socket connections get
+    // established, you will block and deadlock with the other side
+    // that is still waiting to accept a connection.
+    loopOpener << indent(depth) << "wait for 1 ns;" << "\n";
   }
   return;
 }
 
 // Generate code to end an iterative procedure
 void VHDLTarget :: endIteration(int /*reps*/, int depth) {
-  loopCloser << indent(depth) << "wait for 1 ns;" << "\n";
   loopCloser << indent(depth)
 	     << "end loop;     -- end repeat, depth " << depth << "\n";
 }
@@ -489,12 +468,8 @@ void VHDLTarget :: setGeoNames(Galaxy& galaxy) {
     BlockPortIter nextPort(*s);
     VHDLPortHole* p;
     while ((p = (VHDLPortHole*) nextPort++) != NULL) {
-      if (p->isItInput()) {
-	// Create temporary StringLists so as to allow
-	// safe (const char*) casts.
-	StringList sym,sl = sanitize(p->name());
-	sym << symbol(sl);
-	p->setGeoName(sym);
+      if (p->isItOutput()) {
+	p->setGeoName(symbol(ptSanitize(p->name())));
       }
     }
   }
@@ -503,11 +478,8 @@ void VHDLTarget :: setGeoNames(Galaxy& galaxy) {
     BlockPortIter nextPort(*s);
     VHDLPortHole* p;
     while ((p = (VHDLPortHole*) nextPort++) != NULL) {
-      if (p->isItOutput()) {
-	// Create temporary StringLists so as to allow
-	// safe (const char*) casts.
-	StringList sl = sanitize(p->name());
-	p->setGeoName(symbol(sl));
+      if (p->getGeoName() == NULL) {
+	p->setGeoName(symbol(ptSanitize(p->name())));
       }
     }
   }
@@ -606,7 +578,7 @@ void VHDLTarget :: registerState(State* state, const char* varName,
 
   // Allocate memory for a new VHDLVariable and put it in the list.
   VHDLVariable* newvar = new VHDLVariable;
-  newvar->name = hashstring(ref);
+  newvar->setName(ref);
   newvar->type = stateType(state);
   newvar->initVal = initVal;
   variableList.put(*newvar);
@@ -634,9 +606,9 @@ void VHDLTarget :: registerPortHole(VHDLPortHole* port, const char* varName,
 
   // Allocate memory for a new VHDLVariable and put it in the list.
   VHDLVariable* newvar = new VHDLVariable;
-  newvar->name = hashstring(ref);
+  newvar->setName(ref);
   newvar->type = port->dataType();
-  if (hashstring(newvar->type) == hashstring("INTEGER")) {
+  if (hashstring(newvar->type) == hashINTEGER) {
     newvar->initVal = "0";
   }
   else {
@@ -647,13 +619,11 @@ void VHDLTarget :: registerPortHole(VHDLPortHole* port, const char* varName,
 
 // Register the temporary storage reference.
 void VHDLTarget :: registerTemp(const char* temp, const char* type) {
-  StringList ref = sanitize(temp);
-
   // Allocate memory for a new VHDLVariable and put it in the list.
   VHDLVariable* newvar = new VHDLVariable;
-  newvar->name = hashstring(ref);
+  newvar->setName(temp);
   newvar->type = sanitizeType(type);
-  if (hashstring(newvar->type) == hashstring("INTEGER")) {
+  if (hashstring(newvar->type) == hashINTEGER) {
     newvar->initVal = "0";
   }
   else {
@@ -665,11 +635,9 @@ void VHDLTarget :: registerTemp(const char* temp, const char* type) {
 // Register the constant storage reference.
 void VHDLTarget :: registerDefine(const char* define, const char* type,
 				  const char* init) {
-  StringList ref = sanitize(define);
-
   // Allocate memory for a new VHDLVariable and put it in the list.
   VHDLVariable* newvar = new VHDLVariable;
-  newvar->name = hashstring(ref);
+  newvar->setName(define);
   newvar->type = sanitizeType(type);
   newvar->initVal = init;
   variableList.put(*newvar);
@@ -688,33 +656,36 @@ const char* VHDLTarget :: portAssign() {
 }
 
 // Return the VHDL type corresponding to the State type.
-StringList VHDLTarget :: stateType(const State* st) {
-  StringList type;
+const char* VHDLTarget :: stateType(const State* st) {
+  const char* type;
   
-  if (st->isA("IntState") || st->isA("IntArrayState"))
-    type = "INTEGER";
+  if (st->isA("FloatState") || st->isA("FloatArrayState"))
+    type = hashREAL;
+  else if (st->isA("IntState") || st->isA("IntArrayState"))
+    type = hashINTEGER;
   else if (st->isA("ComplexState") || st->isA("ComplexArrayState"))
-    type = "REAL";
+    type = hashREAL;
   else if (st->isA("StringState") || st->isA("StringArrayState"))
-    type = "CHARACTER";
+    type = hashCHARACTER;
   else
-    type = "REAL";
+    type = hashREAL;
 
   return type;
 }
 
 // Return the VHDL type corresponding to the given const char*.
-StringList VHDLTarget :: sanitizeType(const char* ctyp) {
-  StringList type;
-
-  if ((hashstring(ctyp) == hashstring("INT")) ||
-      (hashstring(ctyp) == hashstring("int")))
-    type << "INTEGER";
-  else if ((hashstring(ctyp) == hashstring("COMPLEX")) ||
-	   (hashstring(ctyp) == hashstring("complex")))
-    type << "REAL";
+const char* VHDLTarget :: sanitizeType(const char* ctyp) {
+  const char* type;
+  const char* hashtype = hashstring(ctyp);
+  
+  if ((hashtype == hashREAL) || (hashtype == hashreal))
+    type = hashREAL;
+  else if ((hashtype == hashINT) || (hashtype == hashint))
+    type = hashINTEGER;
+  else if ((hashtype == hashCOMPLEX) || (hashtype == hashcomplex))
+    type = hashREAL;
   else
-    type << "REAL";
+    type = hashREAL;
 
   return type;
 }
