@@ -231,7 +231,7 @@ public:
 
 	// make destructor virtual so that delete p works properly when
 	// p can be either a BDFCluster* or a pointer to child of BDFCluster
-	/* virtual */ ~BDFCluster() {}
+	/* virtual */ ~BDFCluster() { deleteAllGenPorts(); }
 
 	void setVisit(int i) { visitFlag = i; }
 	int  visited() { return visitFlag; }
@@ -472,9 +472,6 @@ public:
 	// constructor
 	BDFWhileLoop(BDFRelation t, BDFClustPort* cond,
 		     BDFCluster* first,BDFCluster* second=0);
-
-	// destructor
-	~BDFWhileLoop();
 
 	// overrides of virtual functions
 	ostream& printOn(ostream&);
