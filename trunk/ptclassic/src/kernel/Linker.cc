@@ -296,6 +296,7 @@ Linker::generateSharedObject(int argc, char **argv, char* objName,
   for (int i = 1; i < argc; i++) {
     const char* fullObjName = expandPathName(argv[i]);
     command << " " << fullObjName;
+    delete [] fullObjName;
   }
 #else // USE_SHLLOAD
 
@@ -531,6 +532,7 @@ int Linker::multiLink (int argc, char** argv) {
 	for (int i = 1; i < argc; i++) {
 		const char* objName = expandPathName(argv[i]);
 		cmd << " " << objName;
+		delete [] objName;
 	}
 	// these options go last so libraries will be searched properly.
 	cmd << " " << myDefaultOpts;
@@ -590,8 +592,12 @@ void Linker::installTable(const char* newTable) {
 
 	if (ptolemyName == symTableName) {
 		symTableName = getenv("PTOLEMY_SYM_TABLE");
-		if (!symTableName) symTableName =
-			hashstring(expandPathName("~/.pt_symtable"));
+		if (!symTableName) {
+			const char *symtablefile =
+				expandPathName("~/.pt_symtable");
+			symTableName = hashstring(symtablefile);
+			delete [] symtablefile;
+		}
 	}
 	ifstream in(newTable);
 	ofstream out(symTableName, ios::out, 0600);
