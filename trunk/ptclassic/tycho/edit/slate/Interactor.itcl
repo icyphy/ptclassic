@@ -396,7 +396,7 @@ body ::tycho::Interactor::event {type args} {
 
     getopt button args
     getopt key args
-    getoption modifiers args
+    getopt modifiers args
 
     set i ""
     switch -exact [string tolower $type] {
