@@ -59,7 +59,7 @@ determines when to fire the blocks in an application.
 This determination can be made statically or dynamically.
 For that purpose, the
 .c Scheduler
-base class has two methods : \fIsetup()\fR (for operations done once
+base class has two methods: \fIsetup()\fR (for operations done once
 before a run, such as static scheduling), and
 \fIrun()\fR (for dynamically invoking blocks).
 The \fIrun()\fR method fires blocks under its control until
@@ -90,7 +90,7 @@ in the domain.  An example is the \fIrepetitions\fR in the
 class, which
 indicates how many times the
 star will be executed in one iteration.  It is required by the scheduler
-during the setup() phase to perform static scheduling.
+during the setup phase to perform static scheduling.
 Similarly the
 .c SDFPortHole
 class contains methods for setting parameters that are specific
@@ -125,8 +125,7 @@ is the domain name.
 These classes are placed in the input or output port of a
 wormhole
 depending on the direction of dataflow.
-Details of these classes are given below, including a specification
-of the universal event horizon.
+Further details of these classes are given below.
 .pp
 Two additional classes defined in a domain are the
 .c Universe
@@ -141,8 +140,10 @@ for the bases classes in the kernel is self-explanatory,
 so it serves as the best reference.
 Wormhole design, however, is much more subtle,
 and hence is explained in more detail below.
+.pp
 A complete domain definition also consists of a library of stars.
 However, the design of these stars is entirely up the domain
 designer, so there is little guidance we can provide.
-Note that for many new domains, it may be possible to use
+Note that for many new domains, it will be possible to use
 the ptlang preprocessor unchanged for the design of stars.
+This is encouraged because it promotes uniformity.
