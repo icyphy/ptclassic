@@ -1,15 +1,15 @@
 .\" $Id$
 .H1 "Status
 .pp
-Currently, we have four domains in \*(PT : SDF, DE, DDF, CAPSIM.
+Currently, we have at least four domains in \*(PT : SDF, DE, DDF, and CAPSIM.
+The source code, demos, and documentation for these domains is contained
+in ~ptolemy/src/domains/xxx, where ``xxx'' is the domain name (in lower
+case letters).
 These domains can be mixed arbitrarily to compose a complicated
-system.  Any 
-.c Wormhole
-may contain other
-.c Wormhole s
+system.  Any wormhole may contain any other wormhole
 to make a hierarchical structure.
-A couple of domains are to be added in the near future : THOR, MQ.
-Currently, the DE domain only is timed.  After the THOR domain
+Two domains are to be added in the near future : THOR, and MQ.
+Currently, the DE domain s the only timed domain.  After the THOR domain
 is incorporated, our scheme of timing management will be rigorously
 tested.  The timed nature of the SDF domain has proven 
 well behaved with the DE domain.

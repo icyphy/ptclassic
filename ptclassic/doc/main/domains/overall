@@ -8,15 +8,17 @@
 .\" If you edit this document, PLEASE BE SURE TO MANUALLY CHANGE THE DATE
 .\" BELOW, to indicate a new version.  Be sure you have properly checked
 .\" out this file with SCCS (the version number should not be a number below):
-.VR 0.$Revision$ "November 15, 1990"
+.VR 0.$Revision$ $Date$
 .TI "Domains in \*(PT"
 .AU
+Joseph Buck
 Soonhoi Ha
+Edward A. Lee
 David G. Messerschmitt
 .AE
 .so introduction
+.so design
+.so timing
 .so wormhole
 .so eventHorizons
-.so timing
-.so design
 .so status
