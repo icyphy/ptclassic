@@ -371,7 +371,7 @@ Particle & OutSRPort::emit()
     }
   }
 
-  return *(emittedParticle = myPlasma->get());  
+  return *(emittedParticle = myPlasma->get());
 }
 
 // Destroy the particle in the port, if any, resetting it to "unknown"
@@ -430,3 +430,31 @@ PortHole & MultiInSRPort::newConnection() {
   // so we have to resolve it to its real porthole.
   return newPort().newConnection();
 }
+
+// Disconnect this PortHole, removing it from its Geodesic, if any
+//
+// @Disconnect This overrides PortHole::disconnect, which expects
+// farSidePort to always be correct.  With the SR domain's multiple
+// connections, this is impossible.
+void SRPortHole::disconnect(int delGeo) {
+
+  if ( myGeodesic ) {
+    myGeodesic->disconnect(*this);
+    if ( delGeo ) {
+      LOG_DEL; delete myGeodesic;
+    }
+    myGeodesic = NULL;
+  }
+
+  farSidePort = NULL;
+}
+
+// Destructor
+//
+// @Description Disconnects the PortHole and attempts to
+// delete its Geodesic.
+SRPortHole::~SRPortHole()
+{
+  SRPortHole::disconnect(1);
+}
+
