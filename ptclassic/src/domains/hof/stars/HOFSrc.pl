@@ -2,6 +2,15 @@ defstar {
 	name { Src }
 	domain { HOF }
 	derivedFrom { Map }
+	version { $Id$ }
+	author { Edward A. Lee, Tom Lane }
+	location { HOF main library }
+	copyright {
+Copyright (c) 1994-%Q% The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
 	desc {
 Create one or more instances of the named block to produce the
 required number of output stream(s).
@@ -11,15 +20,6 @@ The replacement block(s) are connected as specified by "output_map",
 using the existing connections to the Src star.
 Their parameters are determined by "parameter_map".
 	}
-	version { $Id$ }
-	author { Edward A. Lee }
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-	}
-	location { HOF main library }
 	htmldoc {
 See the explanation for
 <tt>Map</tt>

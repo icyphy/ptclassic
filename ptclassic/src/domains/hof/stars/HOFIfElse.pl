@@ -3,14 +3,14 @@ defstar {
 	domain {HOF}
 	derivedFrom {Map}
 	version { $Id$ }
-	author { E. A. Lee }
+	author { Edward A. Lee, Tom Lane }
+	location { HOF main library }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1994-%Q% The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { HOF main library }
 	desc {
 This star is just like Map, except that it creates one of two named blocks
 to replace itself, instead of just one.
@@ -112,6 +112,7 @@ The full path and facet name for the definition of false_block.
 		default {""}
 		desc {The parameter mapping for the false block}
 	}
+
 	constructor {
 	  // Hide all the parameters that are controlled internally
 	  blockname.clearAttributes(A_SETTABLE);
@@ -120,39 +121,34 @@ The full path and facet name for the definition of false_block.
 	  output_map.clearAttributes(A_SETTABLE);
 	  parameter_map.clearAttributes(A_SETTABLE);
 	}
+
 	method {
-	  name { preinitialize }
-	  access { public }
+	  name { doExpansion }
+	  type { int }
 	  code {
-	    // Call low-level preinit to make state values valid
-	    HOFBaseHiOrdFn::preinitialize();
+	    StringList temp;
 	    // Copy appropriate set of parameters
-	    // Note we must set the init values, not the current values,
-	    // because HOFMap::preinitialize will reinit the states.
-	    // Use of hashstring here is a small memory leak.
-	    if ((int) condition) {
-		blockname.setInitValue(hashstring((const char*) true_block));
-		where_defined.setInitValue(hashstring((const char*) where_true_defined));
-		StringList temp;
+	    if (int(condition)) {
+		blockname.setCurrentValue((const char*) true_block);
+		where_defined.setCurrentValue((const char*) where_true_defined);
 		temp = true_input_map.currentValue();
-		input_map.setInitValue(hashstring((const char*) temp));
+		input_map.setCurrentValue((const char*) temp);
 		temp = true_output_map.currentValue();
-		output_map.setInitValue(hashstring((const char*) temp));
+		output_map.setCurrentValue((const char*) temp);
 		temp = true_parameter_map.currentValue();
-		parameter_map.setInitValue(hashstring((const char*) temp));
+		parameter_map.setCurrentValue((const char*) temp);
 	    } else {
-		blockname.setInitValue(hashstring((const char*) false_block));
-		where_defined.setInitValue(hashstring((const char*) where_false_defined));
-		StringList temp;
+		blockname.setCurrentValue((const char*) false_block);
+		where_defined.setCurrentValue((const char*) where_false_defined);
 		temp = false_input_map.currentValue();
-		input_map.setInitValue(hashstring((const char*) temp));
+		input_map.setCurrentValue((const char*) temp);
 		temp = false_output_map.currentValue();
-		output_map.setInitValue(hashstring((const char*) temp));
+		output_map.setCurrentValue((const char*) temp);
 		temp = false_parameter_map.currentValue();
-		parameter_map.setInitValue(hashstring((const char*) temp));
+		parameter_map.setCurrentValue((const char*) temp);
 	    }
 	    // Now let HOFMap do its thing
-	    HOFMap::preinitialize();
+	    return HOFMap::doExpansion();
 	  }
 	}
 }

@@ -3,14 +3,14 @@ defstar {
 	domain {HOF}
 	derivedfrom {BaseHiOrdFn}
 	version { $Id$ }
-	author { E. A. Lee }
+	author { Edward A. Lee, Tom Lane  }
+	location { HOF main library }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1994-%Q% The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { HOF library }
 	desc {
 Map one or more instances of the named block to the input stream(s)
 to produce the output stream(s).
@@ -79,8 +79,7 @@ for non-multiple inputs are an error.
 However, this is not detected.
 Results could be unexpected.
 	}
-        hinclude { "Galaxy.h" }
-	ccinclude { "SimControl.h" }
+
 	inmulti {
 		name {input}
 		type {anytype}
@@ -110,31 +109,30 @@ to the named block outputs according to output_map.
 		desc {The mapping of outputs}
 	}
 
+	ccinclude { "SimControl.h" }
+
 	method {
-	  name { preinitialize }
-	  access { public }
+	  name { doExpansion }
+	  type { int }
 	  code {
-	    HOFBaseHiOrdFn::preinitialize();
 	    // Check that either an input_map or output_map is given
 	    if (input_map.size() == 0 && output_map.size() == 0) {
 		Error::abortRun(*this,
 		    "Must specify at least one of input_map or output_map");
-		return;
+		return 0;
 	    }
-	    Galaxy* mom = idParent();
-	    if(!mom) return;
-
 	    // Make sure we know the number of connections on the
 	    // input and output multiPortHoles.
-	    initConnections(input);
-	    initConnections(output);
+	    if (! initConnections(input)) return 0;
+	    if (! initConnections(output)) return 0;
 
 	    MPHIter nexti(input);
 	    MPHIter nexto(output);
 
-	    if (!iterateOverPorts(nexti,nexto,mom,1)) return;
+	    if (!iterateOverPorts(nexti,nexto,1))
+	      return 0;
 
-	    mom->deleteBlockAfterInit(*this);
+	    return 1;
 	  }
 	}
 
@@ -142,12 +140,14 @@ to the named block outputs according to output_map.
 	// can iterate over all but the first replacement block.
 	method {
 	  name { iterateOverPorts }
-	  type { "int" }
+	  type { int }
 	  access { protected }
-	  arglist { "(MPHIter &nexti, MPHIter &nexto, Galaxy *mom, int firstInstanceNo)" }
+	  arglist { "(MPHIter &nexti, MPHIter &nexto, int firstInstanceNo)" }
 	  code {
-	    PortHole *pi, *po;
 	    int instanceno = firstInstanceNo;
+
+	    Galaxy* mom = idParent();
+	    if (!mom) return 0;
 
 	    // The following loop creates however many instances of the block
 	    // are required to connect all the inputs and outputs.  The number
@@ -156,6 +156,7 @@ to the named block outputs according to output_map.
 	    while (!SimControl::haltRequested()) {
 
 	      // Check to see whether we are out of inputs or outputs
+	      PortHole *pi, *po;
 	      if ((pi = nexti++) == 0 && input_map.size() != 0) {
 		// Out of inputs.  Better be out of outputs as well.
 		if (nexto++) {	
@@ -187,13 +188,13 @@ to the named block outputs according to output_map.
 	      for (i=0; i < input_map.size(); i++) {
 		if (i != 0 && (pi = nexti++) == 0) {
 		  Error::abortRun(*this,
-				  "number of inputs is not a multiple of the ",
-				  "input_map size");
+				  "number of inputs is not a multiple of ",
+				  "the input_map size");
 		  return 0;
 		}
 		// Reconnect
 		GenericPort *dest;
-		if (!(dest = block->genPortWithName(input_map[i]))) {
+		if (!(dest = findPortWithName(block, input_map[i]))) {
 		    Error::abortRun(*this,
 			"input_map contains unrecognized name: ",
 			input_map[i]);
@@ -206,15 +207,15 @@ to the named block outputs according to output_map.
 	      for (i=0; i < output_map.size(); i++) {
 		if (i != 0 && (po = nexto++) == 0) {
 		  Error::abortRun(*this,
-				  "number of outputs is not a multiple of the ",
-				  "output_map size");
+				  "number of outputs is not a multiple of ",
+				  "the output_map size");
 		  return 0;
 		}
 		// Reconnect
 		GenericPort *source;
-		if (!(source = block->genPortWithName(output_map[i]))) {
+		if (!(source = findPortWithName(block, output_map[i]))) {
 		    Error::abortRun(*this,
-			"maybe output_map contains unrecognized name: ",
+			"output_map contains unrecognized name: ",
 			output_map[i]);
 		    return 0;
 		}

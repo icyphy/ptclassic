@@ -3,14 +3,14 @@ defstar {
 	domain {HOF}
 	derivedFrom {BaseHiOrdFn}
 	version { $Id$ }
-	author { E. A. Lee }
+	author { Edward A. Lee, Tom Lane }
+	location { HOF main library }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1994-%Q% The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { HOF main library }
 	desc {
 Create one or more instances of the named block connected in a chain.
 This is implemented by replacing the <tt>Chain</tt>
@@ -103,19 +103,17 @@ to the last named block outputs according to output_map.
 		default {"NO"}
 		desc {If YES, put a delay on each internal connection}
 	}
-	ccinclude { "Galaxy.h" }
+
 	ccinclude { "SimControl.h" }
 
 	method {
-	  name { preinitialize }
-	  access { public }
+	  name { doExpansion }
+	  type { int }
 	  code {
-	    HOFBaseHiOrdFn::preinitialize();
-
 	    // Make sure we know the number of connections on the
 	    // input and output multiPortHoles.
-	    initConnections(input);
-	    initConnections(output);
+	    if (! initConnections(input)) return 0;
+	    if (! initConnections(output)) return 0;
 
 	    // Check that all maps are the right size
 	    int allsizes = input.numberPorts();
@@ -126,17 +124,17 @@ to the last named block outputs according to output_map.
 		    Error::abortRun(*this,
 			"Number of inputs, outputs, and internal connections"
 			" need to be the same");
-		    return;
+		    return 0;
 	    }
 	    // Get the parent galaxy
 	    Galaxy* mom = idParent();
-	    if(!mom) return;
+	    if (!mom) return 0;
 
 	    // Create the first block
 	    Block* block = createBlock(*mom,
 				       (const char*)blockname,
 				       (const char*)where_defined);
-	    if (!block) return;
+	    if (!block) return 0;
 
 	    // Connect the inputs to the first block
 	    int inputno = 0;
@@ -144,26 +142,26 @@ to the last named block outputs according to output_map.
 	    PortHole *pi;
 	    while ((pi = nexti++) != 0) {
 		GenericPort *dest;
-		if (!(dest = block->genPortWithName(input_map[inputno++]))) {
+		if (!(dest = findPortWithName(block, input_map[inputno++]))) {
 		    Error::abortRun(*this,
 			"input_map contains unrecognized name: ",
 			input_map[inputno-1]);
-		    return;
+		    return 0;
 		}
-		if(!connectInput(pi,dest)) return;
+		if (!connectInput(pi,dest)) return 0;
 	    }
 
 	    // Create the rest of the blocks and the internal connections
-	    for (int instno = 1; instno < (int)chain_length; instno++) {
+	    for (int instno = 1; instno < int(chain_length); instno++) {
 		if (SimControl::haltRequested())
-		  return;
+		  return 0;
 		Block* newblock = createBlock(*mom,
 					      (const char*)blockname,
 					      (const char*)where_defined);
-		if (!newblock) return;
-		if(!connectInternal(block,newblock)) return;
+		if (!newblock) return 0;
+		if (!connectInternal(block,newblock)) return 0;
 		// set params of prior block just before forgetting it
-		if(!setParams(block, instno)) return;
+		if (!setParams(block, instno)) return 0;
 		block = newblock;
 	    }
 
@@ -173,19 +171,19 @@ to the last named block outputs according to output_map.
 	    PortHole *po;
 	    while ((po = nexto++) != 0) {
 		GenericPort *source;
-		if (!(source = block->genPortWithName(output_map[outputno++]))) {
+		if (!(source = findPortWithName(block, output_map[outputno++]))) {
 		    Error::abortRun(*this,
 			"output_map contains unrecognized name: ",
 			output_map[outputno-1]);
-		    return;
+		    return 0;
 		}
-		if(!connectOutput(po,source)) return;
+		if (!connectOutput(po,source)) return 0;
 	    }
 
 	    // set params of last block
-	    if(!setParams(block, (int)chain_length)) return;
+	    if (!setParams(block, int(chain_length))) return 0;
 
-	    mom->deleteBlockAfterInit(*this);
+	    return 1;
 	  }
 	}
 
@@ -195,24 +193,25 @@ to the last named block outputs according to output_map.
 	    access { protected }
 	    arglist { "(Block* block1, Block* block2)" }
 	    code {
-		PortHole *port1, *port2;
-		int i = 0;
 		int numdelays = 0;
-		if ((int)pipeline) numdelays = 1;
+		if (int(pipeline)) numdelays = 1;
+		int i = 0;
 		while (i < internal_map.size()-1) {
-		    if (!(port1 = block1->portWithName(internal_map[i++]))) {
+		    GenericPort *port1, *port2;
+		    if (!(port1 = findPortWithName(block1, internal_map[i++]))) {
 			Error::abortRun(*this,
 			    "internal_map contains unrecognized name: ",
 			    internal_map[i-1]);
 			return 0;
 		    }
-		    if (!(port2 = block2->portWithName(internal_map[i++]))) {
+		    if (!(port2 = findPortWithName(block2, internal_map[i++]))) {
 			Error::abortRun(*this,
 			    "internal_map contains unrecognized name: ",
 			    internal_map[i-1]);
 			return 0;
 		    }
-		    connectPorts(*port1,*port2,numdelays,NULL);
+		    // There cannot be any aliases pointing at these ports.
+		    connectPorts(*port1,*port2,numdelays,NULL, 0, 0);
 		}
 		return 1;
 	    }
