@@ -55,7 +55,7 @@ limitation of liability, and disclaimer of warranty provisions.
 		type { fixarray }
 		default { "0.0[2]" }
 		desc { Filter states }
-		attributes { A_RAM|A_YMEM }
+		attributes { A_RAM|A_YMEM|A_NONSETTABLE|A_NONCONSTANT }
 	}
 // code copied from Gabriel 56biquad star
 	codeblock (std) {
