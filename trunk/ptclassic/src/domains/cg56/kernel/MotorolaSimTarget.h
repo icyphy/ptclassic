@@ -67,7 +67,10 @@ public:
 	/*virtual*/ void frameCode();
 
 	int computeImplementationCost();
-	const char* printImplementationCost();
+	const char* describeImplementationCost();
+
+        // Indicate whether target can compute execution time
+	int canComputeExecutionTime() { return TRUE; }
 
 private:
 	// stream for writeFile stars
@@ -76,6 +79,9 @@ private:
 
 	// implementation costs
 	StringList costInfoString;
+
+	// return the execution time
+	int computeExecutionTime();
 };
 
 #endif

@@ -52,6 +52,10 @@ void MotorolaSimTarget :: initStates(
 			"Interactive Simulation",this,"YES",""));
 	addStream("simulatorCmds", &simulatorCmds);
 	addStream("shellCmds", &shellCmds);
+
+	// Make reportExecutionTime visible
+	reportExecutionTime.setAttributes(A_SETTABLE);
+
 	assemblerOptions = "-A -B -L";
 	costInfoString.initialize();
 }
@@ -59,7 +63,6 @@ void MotorolaSimTarget :: initStates(
 int MotorolaSimTarget::compileCode() {
 	StringList assembleCmds = "asm";
 	assembleCmds << dspType << " " << assemblerOptions << " " << filePrefix;
-	resetImplementationCost();
 	return !systemCall(assembleCmds, "Errors in assembly");
 }
 
@@ -77,7 +80,7 @@ int MotorolaSimTarget::loadCode() {
 
 	// Save the simulator state so that we can extract the number of
 	// cycles executed (-O always overwrites the .sim if it exists)
-	if (int(reportMemoryUsage)) {
+	if (int(reportExecutionTime)) {
 	    cmdFile << "save s " << filePrefix << ".sim -O\n";
 	}
 
@@ -100,7 +103,7 @@ void MotorolaSimTarget::writeCode() {
 	else 
 		realcmds << "sim";
 	realcmds << dspType << " " << filePrefix << ".cmd" << " >/dev/null\n";
-	if (int(reportMemoryUsage)) {
+	if (int(reportExecutionTime)) {
 		// Search the simulation state file for the pattern 'cyc:' e.g.
 		// ^Break #1 pc>=$ff0 h ;dev:0 pc:0ff0 cyc:439131
 		realcmds << "\n# Extract the number of cycles executed\n";
@@ -130,7 +133,7 @@ int MotorolaSimTarget::runCode() {
 	StringList runCmd;
 	runCmd << "./" << filePrefix;
 
-	if ( int(reportMemoryUsage) ) {
+	if ( int(reportExecutionTime) ) {
 	    StringList msg = "In order to extract the execution time of the ";
 	    msg << filePrefix
 		<< " system, user interaction will be frozen"
@@ -144,23 +147,39 @@ int MotorolaSimTarget::runCode() {
 	// Run the simulation
 	int valid = !systemCall(runCmd, "Error running code in the simulator");
 
-	// Extract the number of cycles executed if reportMemoryUsage is true
-	if (valid && int(reportMemoryUsage)) {
-	    computeImplementationCost();
-	    Error::message(*this, printImplementationCost());
+	// Extract the number of cycles executed if reportExecutionTime is true
+	if (valid && (int(reportMemoryUsage) || int(reportExecutionTime))) {
+	    if ( computeImplementationCost() )
+		Error::message(*this, describeImplementationCost());
+	    else
+		Error::message(*this, "Could not read the ", filePrefix,
+			       ".lod file to extract the memory usage");
 	}
 
 	return valid;
 }
 
-#define MAXLINE 128
-
 int MotorolaSimTarget::computeImplementationCost() {
-	// Compute memory usage
+	int retval = FALSE;
+
+	// Initialize softwareCost and conditionally compute data memory usage
 	if (! MotorolaTarget::computeImplementationCost()) return FALSE;
 
-	// Figure out where the .cyc file is
-	// If it is on a remote machine, then copy it over
+	// Conditionally compute the execution time
+	if ( int(reportExecutionTime) ) {
+	    int numCycles = computeExecutionTime();
+	    softwareCost->setExecutionTime(numCycles);
+	    retval = (numCycles >= 0);
+	}
+
+	return retval;
+}
+
+#define MAXLINE 128
+
+// return the execution time or -1 on error
+int MotorolaSimTarget::computeExecutionTime() {
+	// Find the .cyc file and copy it over if it's on a remote machine
 	int deleteFlag = FALSE;
 	StringList cycleFileName;
 	cycleFileName << filePrefix << ".cyc";
@@ -169,40 +188,30 @@ int MotorolaSimTarget::computeImplementationCost() {
 				  cycleFileName, deleteFlag);
 	if ( loadpathname.length() == 0 ) return FALSE;
 
-	// Update the execution time
-	// Open the local copy of the .cyc file and read in the first
-	// word as the number of cycles executed
+	// Extract the execution time by opening the local copy of the
+	// .cyc file and read in the first word as number of cycles executed
 	int retval = FALSE;
+	int numCycles = 0;
 	FILE* fp = fopen(loadpathname, "r");
 	if (fp) {
 	    char buffer[MAXLINE];
-	    int numCycles = 0;
-	    ImplementationCost* costInfoPtr = implementationCost();
 	    if ( fgets(buffer, MAXLINE, fp) != 0 ) {
 		buffer[MAXLINE - 1] = 0;	// null terminate string
 		retval = ( sscanf(buffer, "%d", &numCycles) == 1 );
 	    }
 	    fclose(fp);
-	    costInfoPtr->setExecutionTime(numCycles);
 	}
 
-	if ( deleteFlag ) {
-	    StringList removeCommand = "rm ";
-	    removeCommand << loadpathname;
-	    StringList errmsg = "Could not remove ";
-	    errmsg << loadpathname;
-	    systemCall(removeCommand, errmsg);
-	}
+	cleanupLocalFileName(loadpathname, deleteFlag);
 
-	return retval;
+	return retval ? numCycles : -1;
 }
 
-const char* MotorolaSimTarget::printImplementationCost() {
-	ImplementationCost* costInfoPtr = implementationCost();
-	costInfoString = MotorolaTarget::printImplementationCost();
-	if ( costInfoPtr ) {
-	    costInfoString << ", execution time = "
-			   << costInfoPtr->executionTime()
+const char* MotorolaSimTarget::describeImplementationCost() {
+	costInfoString = MotorolaTarget::describeImplementationCost();
+	if ( softwareCost ) {
+	    costInfoString << "execution time = "
+			   << softwareCost->executionTime()
 			   << " cycles";
 	}
 	return costInfoString;
