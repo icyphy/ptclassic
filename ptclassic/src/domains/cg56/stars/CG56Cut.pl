@@ -76,7 +76,7 @@ $label(loop)
         }    
 	go {
                 addCode(main);
-		if(int(nwrite) > 0) addCode(int(write));
+		if(int(nwrite) > 0) addCode(write);
 	}
         execTime {
                 return 4 + 2*int(nwrite);
