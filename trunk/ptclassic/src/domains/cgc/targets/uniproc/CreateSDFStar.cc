@@ -79,7 +79,7 @@ void CreateSDFStar::setup () {
     // Create the base name for the SDF star to be generated
     StringList plPrefix;
     plPrefix << "SDF" << filePrefix; 
-    filePrefix = savestring(plPrefix);
+    filePrefix = hashstring(plPrefix);
 
     CGCTarget::setup();
 
@@ -88,7 +88,7 @@ void CreateSDFStar::setup () {
 }
 
 inline void commStarInit(CGCSDFBase& s,PortHole& p,int numXfer,int maxDelay) {
-    s.sdfPortName = p.name();
+    s.sdfPortName = hashstring(ptSanitize(p.name()));
     s.numXfer = numXfer;
     s.maxDelay = maxDelay;
     DataType type = p.newConnection().resolvedType();
@@ -98,7 +98,7 @@ inline void commStarInit(CGCSDFBase& s,PortHole& p,int numXfer,int maxDelay) {
 void CreateSDFStar::wormPrepare() {
     StringList plPrefix;
     plPrefix << "SDF" << galaxy()->name(); 
-    filePrefix = savestring(plPrefix);    
+    filePrefix = hashstring(plPrefix);    
     convertWormholePorts(*galaxy());
 }
 int CreateSDFStar::convertWormholePorts(Galaxy& gal) {
@@ -152,10 +152,7 @@ int CreateSDFStar::compileCode() {
     StringList command;
     command << "cd " << (const char*)destDirectory << "; "
 	    << "make -f " << (const char*) filePrefix << ".mk all";
-    if(system(command)) {
-	Error::abortRun("Compilation error");
-	return FALSE;
-    }
+    if(systemCall(command,"Compilation error")) return FALSE;
     return TRUE;
 }
 
@@ -198,10 +195,14 @@ void CreateSDFStar::writeCode() {
     makefile << headerComment("# ") << "# To make the star, do: " 
 	     << "make -f " << (const char*) filePrefix << ".mk all\n"
 	     << "ROOT = " << getenv("PTOLEMY") << "\n"
-	     << "WORM_INCL = " << (const char *) compileOptions << " "
-	     << (compileOptionsStream.numPieces()?
-		 expandPathName(compileOptionsStream):"")
-	     << starIncludeDirs << "\n" 
+	     << "WORM_INCL = " << (const char *) compileOptions << " ";
+    if (compileOptionsStream.numPieces()) {
+	const char* expandedCompileOptionsStream =
+	    expandPathName(compileOptionsStream);
+	makefile << expandedCompileOptionsStream;
+	delete [] expandedCompileOptionsStream;
+    }
+    makefile << starIncludeDirs << "\n" 
 	     << "all: " << (const char*) filePrefix << ".o\n"
 	     << "include $(ROOT)/mk/cgworm.mk\n\n";
     writeFile(makefile,".mk");
@@ -243,9 +244,13 @@ int CreateSDFStar::linkFiles () {
     dir << expandedDirName;
     linkCmd << dir << "/" << (const char*) filePrefix << ".o " 
 	    << "-L" << getenv("PTOLEMY") << "/lib." <<getenv("PTARCH")
-	    << " -lCGCrtlib " << starLinkOptions << " "
-	    << (linkOptionsStream.numPieces()?
-		expandPathName(linkOptionsStream):"");
+	    << " -lCGCrtlib " << starLinkOptions << " ";
+    if (linkOptionsStream.numPieces()) {
+	const char* expandedLinkOptionsStream =
+	    expandPathName(linkOptionsStream);
+	linkCmd << expandedLinkOptionsStream;
+	delete [] expandedLinkOptionsStream;
+    }
 
     const char* argv[2];
     const char* multiLink = "multilink";
@@ -285,7 +290,7 @@ int CreateSDFStar::connectStar() {
 	PortHole* farPort = wormPort->far();
 	int delays = wormPort->numInitDelays();
 	PortHole* newPort =
-	    newWormStar->portWithName(wormPort->name());
+	    newWormStar->portWithName(ptSanitize(wormPort->name()));
 	farPort->disconnect();
 	newPort->connect(*farPort,delays);
     }
