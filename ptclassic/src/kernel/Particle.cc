@@ -207,11 +207,8 @@ Particle& ComplexParticle :: operator = (const Particle& p)
 
 int ComplexParticle :: operator == (const Particle& p) {
 	if (!typesEqual(p)) return 0;
-	Complex pdata = Complex(data);
-	return data.real() == pdata.real() &&
-		data.imag() == pdata.imag();
+	return data == Complex(p);
 }
-
 
 DataType ComplexParticle :: type() const {return COMPLEX;}
  
