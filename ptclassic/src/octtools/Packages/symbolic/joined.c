@@ -98,7 +98,7 @@ octObject *term;		/* Actual terminal */
     int result;
 
     if (symInstanceP(term)) {
-	if (jtd = get_joined_bag(term)) {
+	if ( (jtd = get_joined_bag(term)) ) {
 	    result = 0;
 	    SYMCK(octInitGenContents(jtd, OCT_TERM_MASK, &gen));
 	    while (octGenerate(&gen, &obj) == OCT_OK) {
@@ -138,7 +138,7 @@ octObject joined[];		/* Array of terminals           */
     int spot;
 
     if (symInstanceP(term)) {
-	if (jtb = get_joined_bag(term)) {
+	if ( (jtb = get_joined_bag(term)) ) {
 	    /* Obtain instance */
 	    inst.objectId = term->contents.term.instanceId;
 	    SYMCK(octGetById(&inst));
