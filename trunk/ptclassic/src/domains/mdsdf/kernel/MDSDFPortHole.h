@@ -160,8 +160,8 @@ class OutMDSDFPort : public MDSDFPortHole {
  public:
   int isItOutput() const;       // returns TRUE
 
-  /*virtual*/ inline PtMatrix* getOutput();
-  /*virtual*/ inline double& getFloatOutput();
+  /*virtual*/ PtMatrix* getOutput();
+  /*virtual*/ double& getFloatOutput();
 };
 
         //////////////////////////////////////////
