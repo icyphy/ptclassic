@@ -61,6 +61,9 @@ KERNDIR=$(ROOT)/src/kernel
 STARDOCDIR = $(VPATH)/../doc/stars
 HELPDIR=$(ROOT)/lib
 
+# DMM kernel directory
+DMM_KERN_DIR=$(ROOT)/src/domains/dmm/kernel
+
 PTCL_OBJS = $(OBJDIR)/ptcl/PTcl.o
 PTCL_INCDIR = $(ROOT)/src/ptcl
 
