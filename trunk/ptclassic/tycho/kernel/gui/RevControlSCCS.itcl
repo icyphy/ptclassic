@@ -58,11 +58,18 @@ class ::tycho::RevControlSCCS {
     # Get the specified version and open the file.
     method retrieveVersion {version}
 
+    # Get the specified version and open the file.
+    method compareVersion {}
+
     # Unedit the file associated with this class.
     method unedit {}
 
     # View or close the version control history.
     method viewHistory {}
+
+    # Update the files to diff stack
+    method updateDiff {buttonName} {}
+
 
     ###################################################################
     ####                      public procs                         ####
@@ -225,6 +232,7 @@ body ::tycho::RevControlSCCS::retrieveVersion {version} {
             [file extension $basefile]]
 
 
+    puts "Version $version"
     # In sccs get, -s means silent, -p means to stdout.
     if [catch {exec sccs get -p -s -r$version $basefile > $tmpFile} output ] {
         error "Problem executing:\n\
@@ -236,6 +244,53 @@ body ::tycho::RevControlSCCS::retrieveVersion {version} {
 
     cd $olddir
 }
+
+#### Compare version
+# Compare the two files selected
+#
+body ::tycho::RevControlSCCS::compareVersion {} {
+    if {[llength $difflist]!=2} {
+        error "You need to select exactly TWO files to compare!"
+    }
+
+    set dir [file dirname $file]
+    set basefile [file tail $file]
+    set olddir [eval pwd]
+    cdDir $dir
+    # Generate a temporary file name that has the same extension as the file
+    # we are working on.
+    set tmpFile [::tycho::tmpFileName \
+            [file rootname $basefile] \
+            [file extension $basefile]]
+
+    regexp {.*\+(.*)} [lindex $difflist 0] match version1
+    regexp {.*\+(.*)} [lindex $difflist 1] match version2
+    set version1 [join [split $version1 _] .]
+    set version2 [join [split $version2 _] .]
+
+    # In sccs get, -s means silent, -p means to stdout.
+    if [catch \
+            {exec sccs get -p -s -r$version1 $basefile > $tmpFile.1} output] {
+        error "Problem executing:\n\
+             `sccs get -p -s -r$version1 $basefile > $tmpFile.1':\n\ $output"
+    }
+    if [catch \
+            {exec sccs get -p -s -r$version2 $basefile > $tmpFile.2} output] {
+        error "Problem executing:\n\
+             `sccs get -p -s -r$version2 $basefile > $tmpFile.2':\n\ $output"
+    }
+
+    # We have the files! Now safely invoke diffWidget
+    set diffWidget [::tycho::view EditDiff -toolbar 1 -textheight 32]
+    $diffWidget configure -filename1 $tmpFile.1
+    $diffWidget configure -filename2 $tmpFile.2
+    $diffWidget configureUpdate
+    $diffWidget compareFile
+
+    cd $olddir
+}
+
+
 
 #####################################################################
 #### unedit
@@ -284,6 +339,7 @@ body ::tycho::RevControlSCCS::viewHistory {} {
 	    error "The file \"$file\" is not under SCCS control."
 	}
 	cdDir $dir
+        # Read in from the SCCS execution
 	catch {exec sccs prs $basefile} history
 
 	# Create the display
@@ -299,7 +355,7 @@ body ::tycho::RevControlSCCS::viewHistory {} {
 	$itk_component(history) configure -readonly 1
 
 	# Parse the history
-	parseHistory $history [$itk_component(history) textWinName]
+        parseHistory $history [$itk_component(history) textWinName]
 
 	# FIXME: Delay or the focus command is ignored.  Tk bug?
 	#after 500 "focus [$itk_component(history) textWinName]"
@@ -363,27 +419,90 @@ body ::tycho::RevControlSCCS::updateHistory {} {
 # Parse the history information and insert a synopsis into the text window.
 # 
 body ::tycho::RevControlSCCS::parseHistory {history text} {
+    set file [file tail [$object filename]]
     set lines [split $history "\n"]
 
+    # FIXME:Error recovery scheme should be more complicated!
     if {[llength $lines] < 2} {
 	$text insert insert $lines
 	return
     }
 
-    $text insert insert "Double click to view versions. "
-    if [isCheckedOut] {
-	$text insert insert "The file is currently checked out"
-    }
-    $text insert insert "\n\n"
-
     set commentColor [preference get commentColor]
     set versionColor [preference get versionColor]
+
+    $text insert insert "Double click the underlined text to view versions.\n" 
+
+
+
+    # Diff
+    set filelist {}
+    set uniqueID [join [split $this .] ""]
+    # strip off leading ::
+    #regexp {(::)?(.*)} $uniqueID match leadingTrailingJunk uniqueID
+    set uniqueID [string trim $uniqueID :]+
+    set background [$text cget -background]
+
+    $text insert insert "Select two check buttons to the left of the \
+            file\nversion, then press "
+    # Create the START DIFF button
+    set version STARTDIFFNOW
+    set buttonName $uniqueID$version
+    puts $buttonName
+    button $text.$buttonName -text "Start Diff" -command "$this compareVersion"
+    $text window create end -window $text.$buttonName
+    $text insert insert " to compare the two files.\n\n"
+
+    # Create a line entry for the original file
+    # The original file could be compared with
+    set version 0_0
+    set start [$text index insert]
+    set buttonName $uniqueID$version
+    checkbutton $text.$buttonName -variable $buttonName \
+            -command "$this updateDiff $buttonName" \
+            -background $background -foreground $background \
+            -relief flat -padx 0 -pady 0
+    $text window create end -window $text.$buttonName -padx 0 -pady 0
+    $text insert insert "Current file in directory"
+    if [isCheckedOut] {
+	$text insert insert ", <checked out>\n"
+    } else {
+        $text insert insert ".\n"
+    }
+    $text tag add v$version $start insert
+    $text tag configure v$version -foreground $versionColor -underline 1
+    $text tag bind v$version <Double-Button-1> \
+            "::tycho::File::openContext $file"
+
+
+    lappend filelist $buttonName
+    if {[uplevel #0 "set $buttonName"]==1} {lappend difflist $buttonName}
+    $text insert insert "\n"
 
     # Skip first two lines
     foreach line [lrange $lines 2 end] {
 	if [regexp -nocase {D ([0-9.]*) ([0-9/]*) ([0-9:]*) ([a-z]*)} \
 		$line junk version date time user] {
 	    set start [$text index insert]
+
+            # Check button name, must be unique for each editor.
+            set buttonName $uniqueID[join [split $version .] "_"]
+            checkbutton $text.$buttonName -variable $buttonName \
+                    -command "$this updateDiff $buttonName" \
+                    -background $background -foreground $background \
+                    -relief flat -padx 0 -pady 0
+            lappend filelist $buttonName
+            if {[uplevel #0 "set $buttonName"]==1} {
+                if {[llength $difflist]<2} {
+                    lappend difflist $buttonName
+                } else {
+                    # This is an attempt of error recovery, if list is >2
+                    uplevel #0 "set $buttonName 0"
+                }
+            }
+            $text window create end -window $text.$buttonName -padx 0 -pady 0
+            
+            # Insert Name, Version number, etc...
 	    $text insert insert "$version $date, checked in by $user\n"
 	    $text tag add v$version $start insert
 	    $text tag configure v$version -foreground $versionColor -underline 1
@@ -399,5 +518,32 @@ body ::tycho::RevControlSCCS::parseHistory {history text} {
 	    $text tag configure comment -lmargin1 0.5c
 	    $text tag configure comment -lmargin2 0.5c
 	}
+    }
+}
+
+#####################################################################
+#### updateDiff
+# update the check buttons so that only two is activated at once
+# 
+body ::tycho::RevControlSCCS::updateDiff {buttonName} {
+    global $buttonName [lindex $difflist 0]
+    
+    # Clicking on or off
+    if {[uplevel #0 "set $buttonName"]==1} {
+        # click on
+        # push off the oldest file name
+        if {[llength $difflist]>=2} {
+            # Disable the check button
+            uplevel #0 "set [lindex $difflist 1] 0"
+        }
+        # put in a new one.
+        set difflist "[lindex $difflist 0] $buttonName"
+    } else {
+        # click off
+        if {$buttonName==[lindex $difflist 0]} {
+            set difflist [lindex $difflist 1]
+        } else {
+            set difflist [lindex $difflist 0]
+        }
     }
 }
