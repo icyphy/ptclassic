@@ -47,8 +47,10 @@ DIRS =
 TCL_SRCS = 
 
 SIMPLE_TESTS = \
-	testLoader.itcl \
-	testPath.itcl \
+	testPath.itcl
+
+GRAPHICAL_TESTS = \
+	testLoader.itcl
 
 ITCL_SRCS = \
 	$(SIMPLE_TESTS) $(GRAPHICAL_TESTS)
@@ -63,7 +65,7 @@ REALCLEAN_STUFF =
 # Title for the tydoc index page
 TYDOC_DESC =
 
-tests:: test_simple
+tests:: test_simple test_graphics
 
 # These tests do not require a graphics terminal
 test_simple: $(TCL_SRCS) $(ITCL_SRCS)
