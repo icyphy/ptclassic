@@ -51,7 +51,7 @@ test EditForest-1.1 {Create a Forest, then display it} {
     ff roots
     ff add e {e e} b
     set descr [ff describe]
-    set view [::tycho::view EditForest [list -graph ff]]
+    set view [::tycho::view EditForest -graph ff]
     set win [$view displayer windowName]
     wm deiconify $win
     after $duration removeobj $win
@@ -83,7 +83,7 @@ test EditForest-1.2 {Create a Large Forest, then display it.  This could take ti
 	fst add $rootname {}
 	makechildren $rootname 1
     }
-    set view [::tycho::view EditForest {-graph fst}]
+    set view [::tycho::view EditForest -graph fst]
     set win [$view displayer windowName]
 
     update
