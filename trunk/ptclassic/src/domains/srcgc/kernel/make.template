@@ -48,6 +48,8 @@
 #  -------- --- --- -----------
 #  22/01/98 FBO 1.0 original
 # ###################################################################
+#
+# Version: $Id$
 
 # Root of Ptolemy directory
 ROOT=../../../..
@@ -77,7 +79,6 @@ LIB=libsrcgc.$(LIBSUFFIX)
 
 # Header files
 HDRS= SRCGCStar.h SRCGCTarget.h SRCGCPortHole.h SRCGCGeodesic.h SRCGCWormhole.h SRCGCRecursiveScheduler.h SRCGCNonStrictStar.h
-	
 
 # Library objects
 OBJS= $(HDRS:.h=.o) SRCGCDomain.o
