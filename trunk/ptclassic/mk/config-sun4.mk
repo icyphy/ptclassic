@@ -43,12 +43,12 @@ TK_VERSION_NUM=42i
 ITCL_VERSION_NUM=22
 ITK_VERSION_NUM=22
 
-# If we are using shared tcl libraries, then tell the linker to do the
-# right thing
-LD_DYNAMIC=-Wl,-Bdynamic
+# Don't build with shared libraries under SunOS4.x, or incremental
+# linking of stars will fail because ld will be looking for -ldl
+# when loading in the star.
 
 # Combined -L and -l options to link with tcl library.
-TCL_LIBSPEC=$(LD_DYNAMIC) -L$(TCL_ROOT)/itcl.$(PTARCH)/lib/itcl \
+TCL_LIBSPEC=-L$(TCL_ROOT)/itcl.$(PTARCH)/lib/itcl \
 	-ltcl$(TCL_VERSION_NUM)
 
 # Directory containing Tk include files
@@ -56,16 +56,16 @@ TK_INCDIR=$(TCL_ROOT)/itk/include
 
 # Combined -L and -l options to link with tk library.  Can add
 # addtional -L and/or -l options to support tk extensions.
-TK_LIBSPEC=$(LD_DYNAMIC) -L$(TCL_ROOT)/itcl.$(PTARCH)/lib/itcl \
+TK_LIBSPEC=-L$(TCL_ROOT)/itcl.$(PTARCH)/lib/itcl \
 	 -ltk$(TK_VERSION_NUM) #-lXpm
 
 # Directory containing itcl include files
 ITCL_INCDIR=$(TCL_ROOT)/$(ITCL_VERSION)/include
-ITCL_LIBSPEC=$(LD_DYNAMIC) -L$(TCL_ROOT)/$(ITCL_VERSION).$(PTARCH)/lib/itcl \
+ITCL_LIBSPEC=-L$(TCL_ROOT)/$(ITCL_VERSION).$(PTARCH)/lib/itcl \
 	-litcl$(ITCL_VERSION_NUM)
 
 ITK_INCDIR=$(TCL_ROOT)/$(ITCL_VERSION)/include
-ITK_LIBSPEC=$(LD_DYNAMIC) -L$(TCL_ROOT)/$(ITCL_VERSION).$(PTARCH)/lib/itcl \
+ITK_LIBSPEC=-L$(TCL_ROOT)/$(ITCL_VERSION).$(PTARCH)/lib/itcl \
 	-litk$(ITCL_VERSION_NUM)
 
 # Location of the ish binary (tcl + namespaces)
@@ -140,7 +140,7 @@ SYSLIBS =	-lg++ -lstdc++ $(CSYSLIBS)
 # We could use X11_DIR here, but the rules to make tcltk do not pass it down.
 X11_INCSPEC =	-I/usr/openwin/include
 # Statically link X11 so we can ship something that works
-X11_LIBSPEC =	-Wl,-Bstatic -L/usr/openwin/lib -lX11 #$(LD_DYNAMIC)
+X11_LIBSPEC =	-L/usr/openwin/lib -lX11
 
 # Use -lSM -lICE for X11R6, don't use then for X11R5
 #X11EXT_LIBSPEC=-lXext -lSM -lICE
