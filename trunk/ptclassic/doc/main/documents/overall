@@ -649,7 +649,7 @@ it cannot handle as many fonts; therefore the scripts for using
 .i groff
 cause some of the fancier fonts used in the manuals to print in bold
 face instead.  There may be other glitches as well; however, the
-resulting manuals are usable and even look pretty good.
+resulting manuals are still quite usable.
 .pp
 The
 .i groff
@@ -657,5 +657,11 @@ program can be obtained from many FTP sites;
 .Ir "obtaining Gnu groff"
 the Free Software Foundation
 will also send a copy of it to you on tape for a reasonable fee.  Write
-to ``gnu@prep.ai.mit.edu'' for more information on obtaining FSF software.
+to:
+.br
+Free Software Foundation, Inc.
+.br
+675 Mass Ave, Cambridge, MA 02139, USA
+.br
+or send email to ``gnu@prep.ai.mit.edu'' for more information on obtaining FSF software.
 
