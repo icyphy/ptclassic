@@ -32,16 +32,19 @@ The simplest use of these classes is as follows:
 This creates an interactive window that permits the user to try out
 the available fonts by selecting the family, size, and style (roman,
 bold, italic, and so on) from pull-down menus.  Since some of the best
-X window fonts -- 9x15 and 10x20, for example, are particularly nice
-screen fonts -- the font manager provides these as a pseudo font
-"Screen."  When the user selects a font, a sample is displayed.
+X window fonts -- <CODE>9x15</CODE> and <CODE>10x20</CODE>, for
+example, are particularly nice screen fonts -- the font manager
+provides these as a pseudo font <CODE>Screen</CODE>.  When the user selects a
+font, a sample is displayed.
 
 <P> The arguments passed to this procedure represent the initial font
 to be displayed, as its family, size, and style. Any number may be
 supplied (provided they remain in the right order). If none are
-supplied, the font default to "Helvetica 12 Roman." The style can be
-one of "Roman," "Italic," "Bold," or "Bold Italic" -- if omitted, it
-defaults to "Roman". Font family names and styles are all
+supplied, the font default to 
+<CODE>Helvetica 12 Roman</CODE>.
+The style can be one of <CODE>Roman</CODE>, <CODE>Italic</CODE>,
+<CODE>Bold</CODE>, or <CODE>Bold Italic</CODE> -- if omitted, it
+defaults to <CODE>Roman</CODE>. Font family names and styles are all
 case-insensitive.
 
 
@@ -69,10 +72,11 @@ eval ::tycho::font $font
 
 The font manager goes to some lengths to find a reasonable alternative
 font if the requested one is not available on the system. For example,
-try selecting the "Screen" font in an italic style: you will get a
-courier font instead. The <code>::tycho::font</code> procedure will
-always return a valid system font, even if it cannot find a reasonable one:
-as a last resort, it will return the font "fixed".
+try selecting the <CODE>Screen</CODE> font in an italic style: you
+will get a courier font instead. The <code>::tycho::font</code>
+procedure will always return a valid system font, even if it cannot
+find a reasonable one: as a last resort, it will return the font
+<CODE>fixed</CODE>.
 
 
 <p>
@@ -103,7 +107,7 @@ again.
 <h3><a name="font, families">Font Families and Types</a></h3>
 
 The font manager understands three "types" of font:
-<I>serif</I>, <I>sans-serif</I>, and <I>constant-width</i>.
+<CODE>serif</CODE>, <CODE>sans-serif</CODE>, and <CODE>constant-width</CODE>.
 To find out the families in a particular type, use
 <code>::tycho::FontManager::family</code>:
 
@@ -145,7 +149,7 @@ in the Family menu.
 Copyright &#169 1996, The Regents of the University of California.
 All rights reserved.
 <br>
-Last updated: 96/11/20,
+Last updated: $Date$,
 comments to: <author>eal@eecs.berkeley.edu</author>
 </body>
 </html>
