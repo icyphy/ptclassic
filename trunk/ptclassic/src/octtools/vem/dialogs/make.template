@@ -59,6 +59,8 @@ SRCS = $(LIBCSRCS)
 
 OBJS = $(LIBCSRCS:.c=.o)
 
+LIB =		libdialogs.a
+
 LIB=libdialogs.a
 
 all::	$(LIB)

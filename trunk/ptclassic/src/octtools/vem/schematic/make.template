@@ -51,6 +51,8 @@ SRCS = $(LIBCSRCS)
 
 OBJS = $(LIBCSRCS:.c=.o)
 
+LIB =		libschematic.a
+
 # common makefile file for vem binary
 VEMBINCONFIG=../../vem-bin.mk
 include $(VEMBINCONFIG)
