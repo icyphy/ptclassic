@@ -67,8 +67,8 @@ $(BINDIR)/rman:	rman
 
 $(ROOT)/man/man1/rman.1: rman.1
 	# Can't use mkdir -p here, because not all machines have it
-	if [ ! -d $(ROOT)/man ]; then mkdir $(ROOT)/man; fi
-	if [ ! -d $(ROOT)/man/man1 ]; then mkdir $(ROOT)/man/man1; fi
+	-if [ ! -d $(ROOT)/man ]; then mkdir $(ROOT)/man; fi
+	-if [ ! -d $(ROOT)/man/man1 ]; then mkdir $(ROOT)/man/man1; fi
 	@echo Installing $<
 	rm -f $@
 	cp $< $@
