@@ -178,6 +178,7 @@ static SIGNAL_FN trapChildHandler( ) /* All args are ignored */
     } else {
 	fprintf(stderr, "Strange child died" );
     }
+    return (SIGNAL_FN)0;
 }
 
 
