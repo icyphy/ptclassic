@@ -56,6 +56,7 @@ repetitions of the SDFCLusters inside itself.
 #include "DataFlowStar.h"
 #include "DFPortHole.h"
 
+// Initialize function sets <code>numberTokens</code> and pointer to the Geodesic.
 void SynDFClusterPort :: initializeClusterPort()
 {
     ClusterPort :: initializeClusterPort();
@@ -68,37 +69,68 @@ void SynDFClusterPort :: initializeClusterPort()
     // and not from DFPortHole.
 }
 
+/****
+
+This updates ports after clustering operations typically.
+
+@Description
+It will re-compute the numbers produced or consumed based on the far side
+clusters <code>loopFac</code> (i.e, its repetitions).
+
+@SideEffects
+<code>numberTokens</code> is updated.
+
+****/
 void SynDFClusterPort :: update()
 {
-    int farClustLoopFac;
+    int farClustLoopFac, myClustLoopFac;
     ClusterPort :: update();
     if (farSidePort && farSidePort->parent()) {
 	farClustLoopFac = ((SynDFCluster*)farSidePort->parent())->loopFactor();
-	numberTokens = farSidePort->numXfer() * farClustLoopFac
-	/ ((SynDFCluster*)parent())->loopFactor();
+	myClustLoopFac = ((SynDFCluster*)parent())->loopFactor();
+	if (myClustLoopFac == 0) {
+	    StringList message;
+	    message << "This SynDFCluster has a loopFac of 0.  This could";
+	    message << "mean that it does not contain a valid DataFlowStar";
+	    message << "inside.";
+	    Error::abortRun(parent(), message);
+	    return;
+	}
+	numberTokens = farSidePort->numXfer() * farClustLoopFac/myClustLoopFac;
     }
 }
 
+/****
+Set the <code>tnob</code> private member of <code>SynDFCluster</code>.
+
+@Description
+<code>Galaxy::numberBlocks()</code> returns the number of clusters in
+<code>*this</code>.  Sometimes
+we would like to know the TOTAL number of atomic actors that are
+there in the hierarchy, not just the top-level number of clusters.
+Hence, this function goes through and computes this quantity.  Ideally,
+(FIXME) we should make <code>Galaxy::addBlock</code> a virtual function
+and redefine that to keep track of this number rather than computing
+it this way.
+For now, until we feel bored enough to want to recompile all of Ptolemy
+again, we do it this way.
+<p>
+WARNING: THIS FUNCTION SHOULD ONLY BE CALLED AFTER ALL CLUSTERING
+OPERATIONS HAVE BEEN DONE SINCE OTHERWISE THE NUMBER WILL HAVE TO BE
+RECOMPUTED.
+<p>
+Also, <code>SynDFCluster::totalNumberOfBlocks</code> calls this function
+if <code>tnob</code> < 0.  Hence,
+if <code>totalNumberOfBlocks</code> is called and the cluster is modified
+later, this function should be called explicitly to set tnob again.
+<p>
+In general, the Cluster methods <code>absorb, merge, group</code> will change
+this number and hence it should be recomputed after any of those
+operations.
+
+****/
 void SynDFCluster::setTotalNumberOfBlocks()
 {
-    // numberBlocks() returns the number of clusters in *this.  Sometimes
-    // we would like to know the TOTAL number of atomic actors that are
-    // there in the heirarchy, not just the top-level number of clusters.
-    // Hence, this function goes through and computes this quantity.  Ideally,
-    // (FIXME) we should make Galaxy::addBlock a virtual function and redefine
-    // that to keep track of this number rather than computing it this way.
-    // For now we do it this way.
-    // WARNING: THIS FUNCTION SHOULD ONLY BE CALLED AFTER ALL CLUSTERING
-    // OPERATIONS HAVE BEEN DONE SINCE OTHERWISE THE NUMBER WILL HAVE TO BE
-    // RECOMPUTED.
-
-    // Also, totalNumberOfBlocks calls this function if tnob < 0.  Hence,
-    // if totalNumberOfBlocks is called and the cluster is modified later,
-    // this function should be called explicitly to set tnob again.
-
-    // In general, the Cluster methods absorb, merge, and group will change
-    // this number and hence it should be recomputed after any of those
-    // operations.
     SynDFClusterIter nextClust(*this);
     SynDFCluster *c;
     tnob = 0;
@@ -112,6 +144,10 @@ void SynDFCluster::setTotalNumberOfBlocks()
     }
 }
 
+/****
+Calls <code>Cluster::convertStar</code> and sets the <code>loopFac</code> for the cluster.
+
+****/
 Cluster* SynDFCluster::convertStar(Star& s)
 {
     SynDFCluster* a = (SynDFCluster*)Cluster::convertStar(s);
@@ -119,6 +155,10 @@ Cluster* SynDFCluster::convertStar(Star& s)
     return a;
 }
 
+/****
+Again, just updates <code>loopFac, tnob</code> after <code>Cluster::absorb</code>.
+
+****/
 int SynDFCluster::absorb(Cluster& c, int removeFlag)
 {
     setLoopFac(gcd(loopFactor(), ((SynDFCluster&)c).loopFactor()));
@@ -129,6 +169,10 @@ int SynDFCluster::absorb(Cluster& c, int removeFlag)
     return Cluster::absorb(c, removeFlag);
 }
 
+/****
+Again, just updates <code>loopFac, tnob</code> after <code>Cluster::absorb</code>.
+
+****/
 int SynDFCluster::merge(Cluster& c, int removeFlag)
 {
     setLoopFac(gcd(loopFactor(), ((SynDFCluster&)c).loopFactor()));
@@ -139,8 +183,14 @@ int SynDFCluster::merge(Cluster& c, int removeFlag)
     return Cluster::merge(c, removeFlag);
 }
 
-SynDFCluster :: SynDFCluster() : loopFac(0), tnob(-1) {} // constructor
+// constructor
+SynDFCluster :: SynDFCluster() : loopFac(0), tnob(-1) , Cluster() {}
 
+/****
+
+TNSE = Total Number of Samples Exchanged in a complete period of an SDF schedule.
+
+****/
 int SynDFCluster::computeTNSE(SynDFCluster* c1, SynDFCluster* c2, SynDFClusterPort* a)
 {
     // Compute the TNSE+numInitDelays for the arc between c1 and c2
