@@ -106,6 +106,7 @@ PL_SRCS= \
  CGCIntToBits.pl \
  CGCLimit.pl \
  CGCLMS.pl \
+ CGCLMSOscDet.pl \
  CGCLog.pl \
  CGCLogic.pl \
  CGCMaxMin.pl \
