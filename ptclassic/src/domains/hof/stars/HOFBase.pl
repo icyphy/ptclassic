@@ -62,6 +62,10 @@ limitation of liability, and disclaimer of warranty provisions.
 	      // thus it would be a waste of time to do it for every star.
 	      initState();
 
+	      // Don't proceed if initState reported an error.
+	      if (SimControl::haltRequested())
+		return;
+
 	      // Make sure I have a parent galaxy.
 	      Galaxy* mom = idParent();
 	      if (!mom) return;
