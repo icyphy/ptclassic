@@ -25,7 +25,7 @@ CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
 							COPYRIGHTENDKEY
 
- Programmer:  J. Buck
+ Programmers:  J. Buck, Christopher Hylands
  Date of creation: 7/30/90
 
  This file defines the system-dependent cruft needed for incremental
@@ -40,9 +40,13 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #define SOL2
 #endif
 
+#if defined(__alpha) || defined(linux)
+#define LINKING_NOT_SUPPORTED
+#endif
+
 // Is linking supported?
 const int linkingNotSupported =
-#if defined(__alpha)
+#ifdef LINKING_NOT_SUPPORTED
  1;
 #else
  0;
@@ -348,16 +352,18 @@ read (fd, (void *) &h2, sizeof h2) <= 0)
 #endif
 #endif
 
-// alpha stuff
-#if defined(__alpha) || defined(SOL2)
-#define STRUCT_DEFS
+
+#if defined(LINKING_NOT_SUPPORTED) || defined(SOL2)
+#define STRUCT2_DEFS
 #define READHEAD_FAIL 1
 #define READOBJ_FAIL 1
 #define OBJ_SIZE 0
 #define READOBJ_FAIL 1
-#if ! defined(SOL2)
+#endif // LINKING_NOT_SUPPORTED
+
+// alpha stuff
+#if defined(__alpha)
 inline int getpagesize() { return 4096;}
-#endif // ! SOL2
 // ugly hack to get around a bug in the popen prototype for Alpha/OSF
 #define ALPHAFIX (char*)(const char*)
 #else
