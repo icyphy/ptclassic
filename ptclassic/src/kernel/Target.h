@@ -44,9 +44,6 @@ public:
 
 	Target* cloneTarget() const { return (Target*)clone();}
 
-	// send a string to the Target
-	virtual void addCode (const char* code);
-
 	virtual StringList displaySchedule();
 
 	// return the nth child Target, null if no children.
