@@ -112,7 +112,7 @@ void MultiTarget :: pairSendReceive(DataFlowStar* send, DataFlowStar* receive) {
 	if (output->type() == ANYTYPE) output->inheritTypeFrom(*input);
 }
 
-AsynchCommPair MultiTarget::createPeekPoke(int peekProcId,
+AsynchCommPair MultiTarget::createPeekPokeProcId(int peekProcId,
 					     int pokeProcId) {
     AsynchCommPair pair;
     CGTarget* peekChild = cgChild(peekProcId);
