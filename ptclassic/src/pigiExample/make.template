@@ -15,7 +15,7 @@
 # Whenever you add or delete an #include line in one of your files,
 # type "make depend" to regenerate the dependencies in the makefile.
 #
-# To design your own, customized interpreter, edit the definitions
+# To design your own, customized pigiRpc, edit the definitions
 # of the symbols OBJS and PLSRCS below.  The file "defpalettes.c"
 # determines the list of default palettes; you may change this by
 # editing that file.
@@ -25,23 +25,41 @@
 #
 #############################################################################
 # DON'T EDIT THIS STUFF.
+# root of the Ptolemy source tree
+ROOT = $(PTOLEMY)
+# Path (absolute or relative) to the object directory root
+OBJDIR = $(ROOT)/obj.$(ARCH)
+# VPATH points to the "real" source directory
+VPATH = .
+
 # get configuration info
-#ROOT = $(PTOLEMY)
-ROOT = ../..
 CONFIG=$(ROOT)/mk/config-$(ARCH).mk
 include $(CONFIG)
-
-OBJDIR = $(ROOT)/obj.$(ARCH)
-# Root of domain-specific object files
-DOBJ = $(OBJDIR)/domains
-# Root of domain-specific header files
-DHDR = $(ROOT)/src/domains
-
-VPATH = .
 
 # Include information on all stars and targets.
 
 include $(ROOT)/mk/stars.mk
+
+# Oct Tools libraries.
+OCTLIBS = -loh -lrpc -llist -ltr -lutility -lst -lerrtrap -luprintf -lport
+
+# Entire library list.
+# note that -lrpc is searched twice, before and after -lpigi.
+# (it is also in OCTLIBS).
+LIBS	= $(STAR_LIBS) -lsdftclstars -ldetclstars \
+		-lrpc -lpigi -lptk -lgantt -lptolemy $(OCTLIBS)
+
+# Libraries specified as files.
+LIBFILES = $(STAR_LIBFILES) \
+	$(LIBDIR)/libdetclstars.a \
+	$(LIBDIR)/libsdftclstars.a \
+	$(LIBDIR)/libpigi.a $(LIBDIR)/libptolemy.a $(LIBDIR)/libgantt.a \
+	$(LIBDIR)/libptk.a
+
+# Root of domain-specific object files
+DOBJ = $(OBJDIR)/domains
+# Root of domain-specific header files
+DHDR = $(ROOT)/src/domains
 
 ##############################################################################
 # START YOUR EDITING HERE!!!!
@@ -56,15 +74,21 @@ OBJS=SDFSayDigit.o
 # will be built from a .cc file).
 PLSRCS=SDFSayDigit.pl
 
+# The following specifies your version string.  It appears in the
+# startup window.
+VERSION = "Joe Blow's private pigi"
+
 # Stars and targets from other directories to include
-# The following makefile magic will include all SDF, DE, and DDF stars.
-# The variables DDFSTARS, DESTARS, and SDFSTARS are defined by stars.mk.
+# The following makefile magic will include all SDF, DDF, and DE stars.
+# The variables SDFSTARS, DDFSTARS, and DESTARS are defined by stars.mk.
 # There is one variable defined for each domain; also SDFTARGETS,
 # CGTARGETS, CGCTARGETS, CG56TARGETS, and CG96TARGETS.  You may include
 # any of these.  It is also possible to specify individual stars by
 # including their .o files individually.
 
-OTHERS=$(DDFSTARS) $(DESTARS) $(SDFSTARS)
+ALLSTARS = $(SDFSTARS) $(DDFSTARS) $(DESTARS) \
+	$(LIBDIR)/sdftclstars.o $(LIBDIR)/detclstars.o
+ALLTARGETS = $(SDFTARGETS)
 
 # Domain-specific include files we need.  Remove domains you don't use,
 # or add domains that you do use.
@@ -74,11 +98,7 @@ OTHERS=$(DDFSTARS) $(DESTARS) $(SDFSTARS)
 # CGC, CG56, and CG96 stars also require $(DHDR)/cg/kernel.
 # CG96 stars also require $(DHDR)/cg56/kernel.
 
-DOMINC = -I$(DHDR)/sdf/kernel -I$(DHDR)/de/kernel -I$(DHDR)/ddf/kernel
-
-# The following specifies your version string.  It appears in the
-# startup window.
-VERSION = "Joe Blow's private pigi"
+DOMINC = -I$(DHDR)/sdf/kernel -I$(DHDR)/ddf/kernel -I$(DHDR)/de/kernel
 
 # Specify where you want star documentation files to end up.  The
 # following version puts them in a subdirectory named starDoc.
@@ -87,40 +107,30 @@ STARDOCDIR = starDoc
 # DON'T EDIT ANYTHING PAST THIS.
 ##############################################################################
 
+PIGI_OBJS =	pigiMain.o defpalettes.o \
+		$(PTCL_OBJS) $(ALLSTARS) $(ALLTARGETS)
+
+PIGI_LIBS =     -L$(OCTLIBDIR) $(LIBS) \
+		$(TK_LIBSPEC) $(TCL_LIBSPEC) $(X11_LIBSPEC) $(SYSLIBS)
+
 SRCS=$(OBJS:.o=.cc)
 HDRS=$(OBJS:.o=.h)
 
 INCL = $(DOMINC) -I$(KERNDIR)
 
-# The PTcl object file
-PTCL_OBJS = $(OBJDIR)/ptcl/PTcl.o
-
-# Oct Tools libraries.
-OCTLIBS = -loh -lrpc -llist -ltr -lutility -lst -lerrtrap -luprintf -lport
-
-# Entire library list.
-# note that -lrpc is searched twice, before and after -lpigi.
-# (it is also in OCTLIBS).
-LIBS	= $(STAR_LIBS) -lrpc -lpigi -lgantt -lptolemy $(OCTLIBS) \
-		-ltk -lXpm -ltcl $(LX11) $(SYSLIBS)
-
-# Libraries specified as files.
-LIBFILES = $(STAR_LIBFILES) \
-	$(LIBDIR)/libpigi.a $(LIBDIR)/libptolemy.a $(LIBDIR)/libgantt.a
-
 all:	makefile pigiRpc
-pigiRpc:	$(SRCS) $(OBJS) $(OTHERS) $(PTCL_OBJS) $(LIBFILES) \
-	defpalettes.o pigiMain.o
+pigiRpc:	pigiMain.o defpalettes.o $(PTCL_OBJS) \
+		$(LIBFILES) $(OBJS) $(ALLSTARS) $(ALLTARGETS)
 	rm -f pigiRpc
 	echo char '*pigiVersion = "Version:' $(VERSION) \
 		'%created' `date` '";' | sed 's/%/\\n/' > version.c
 	$(CC) -c version.c
-	$(LINKER) $(LINKFLAGS) -L$(OCTLIBDIR) -L$(TCL_LIBDIR) $(X11LIBDIR) \
-	  version.o pigiMain.o defpalettes.o $(OTHERS) $(PTCL_OBJS) \
-	  $(OBJS) $(LIBS) -o pigiRpc
+	$(LINKER) $(LINKFLAGS) $(PIGI_OBJS) $(OBJS) $(PIGI_LIBS) version.o \
+		-o pigiRpc
 
-LIB=dummy
+LIB=dummy               # required since no LIB
 
+# include common definitions, rules
 include $(ROOT)/mk/common.mk
 
 # Don't add anything after the next line; makedepend will zap it.
