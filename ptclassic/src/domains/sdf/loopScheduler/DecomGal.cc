@@ -103,15 +103,13 @@ void DecomGal :: decompose() {
 	if (numberClusts() <= 1) return;
 
 	SDFClusterGalIter nextClust(*this);
-	SDFCluster* c;
-
 	int change = TRUE;
-
 	while (change) {
 		change = FALSE;
 
 		// reset visit flags.
 		nextClust.reset();
+		SDFCluster* c;
 		while ((c = nextClust++) != 0) {
 			c->setVisit(0);
 		}
@@ -119,10 +117,11 @@ void DecomGal :: decompose() {
 		
 		// find a strongly connected components.
 		while ((c = nextClust++) != 0) {
-			SequentialList* clist = (SequentialList *)NULL;
+			SequentialList* clist = 0;
 			if (!(c->visited()) && (clist = findSCComponent(c))) {
 				makeCluster(clist);
 				LOG_DEL; delete clist;
+				clist = 0;
 				change = TRUE;
 				break;
 			}
@@ -138,11 +137,11 @@ void DecomGal :: decompose() {
 // find a strongly connected component
 // depth-first search.
 SequentialList* DecomGal :: findSCComponent(SDFCluster* c) {
+	if (c == 0) return 0;
+
 	c->setVisit(1);
-		
 	SDFClustPortIter nextP(*c);
 	SDFClustPort* p;
-
 	while ((p = nextP++) != 0) {
 		// downward direction.
 		if (p->isItInput()) continue;
@@ -151,7 +150,8 @@ SequentialList* DecomGal :: findSCComponent(SDFCluster* c) {
 		if (peer == c) continue;
 		if (peer->visited() > 0) {
 			return makeList(c, peer);
-		} else if (peer->visited() == 0) {
+		}
+		else if (peer->visited() == 0) {
 			SequentialList* tempList = findSCComponent(peer);
 			if (tempList) return tempList;
 		}
@@ -168,7 +168,6 @@ SequentialList* DecomGal :: makeList(SDFCluster* start, SDFCluster* stop) {
 	LOG_NEW; SequentialList* newList = new SequentialList;
 
 	SDFCluster* path = start;
-	
 	while (path != stop) {
 		newList->prepend(path);
 
@@ -211,7 +210,8 @@ void DecomGal :: makeCluster(SequentialList* nlist) {
 	while ((c = (SDFCluster*) nodes++) != 0) {
 		if (c->asSpecialBag()) {
 			if (c != bag) bag->merge((SDFClusterBag*)c, this);
-		} else {
+		}
+		else {
 			bag->absorb(c,this);
 		}
 	}
@@ -226,7 +226,7 @@ void DecomGal :: setUpClusters() {
 	SDFClusterGalIter nextC(*this);
 	SDFCluster* c;
 
-	// setup them
+	// set them up
 	while ((c = nextC++) != 0) {
 		DecomClusterBag* tBag = (DecomClusterBag*) c->asSpecialBag();
 		if (tBag) {
@@ -240,9 +240,8 @@ void DecomGal :: setUpClusters() {
 		*logstrm << "finishing setup\n";
 }
 
-// After finding out the new repetition numbers of each block,
-// we update the repetition of this bag and the numberTokens of the
-// portholes.
+// After finding out the new repetition numbers of each block, we update
+// the repetition of this bag and the numberTokens of the portholes.
 
 void DecomClusterBag :: setUpGalaxy() {
 
@@ -298,7 +297,7 @@ void DecomClusterBag::go() {
 // destructor
 DecomClusterBag :: ~DecomClusterBag() {
 	LOG_DEL; delete cgal;
-	
+
 	SDFClustPortIter nextPort(*this);
 	SDFClustPort* p;
 	while ((p = nextPort++) != 0) {
