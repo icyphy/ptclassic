@@ -156,7 +156,7 @@ class AsmStarPortIter : public BlockPortIter {
 public:
 	AsmStarPortIter(AsmStar& s) : BlockPortIter(s) {}
 	AsmPortHole* next() { return (AsmPortHole*)BlockPortIter::next();}
-	AsmPortHole* operator++() { return next();}
+	AsmPortHole* operator++(POSTFIX_OP) { return next();}
 };
 
 #endif

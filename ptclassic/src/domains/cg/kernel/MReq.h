@@ -144,7 +144,7 @@ public:
 		if (ptr) ptr = ptr->next;
 		return res;
 	}
-	MReq* operator++() { return next();}
+	MReq* operator++(POSTFIX_OP) { return next();}
 };
 
 #endif

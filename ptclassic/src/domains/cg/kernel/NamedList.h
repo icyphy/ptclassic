@@ -87,7 +87,7 @@ class NamedListIter : private ListIter
 public:
     NamedListIter(NamedList& list) : ListIter(list) {}
     Pointer next();
-    Pointer operator ++() { return next(); }
+    Pointer operator ++(POSTFIX_OP) { return next(); }
     ListIter::reset;
 };
 
