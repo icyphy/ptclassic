@@ -365,7 +365,7 @@ body ::tycho::Slate::_selection {mode {id {}} {index {}}} {
 # Here is a more complex example:
 #
 # <pre><tcl quiet>
-# set s [[::tycho::view TCanvas] component slate]
+# set s [[::tycho::view Graphics] component slate]
 # set f [$s create Frame 50 50 100 100 -color green]
 # set a [$s create Solid 150.0 60.0 182.0 60.0 &#92
 #         182.0 44.0 214.0 76.0 182.0 108.0 182.0 &#92
