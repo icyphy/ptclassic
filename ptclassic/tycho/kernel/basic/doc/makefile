@@ -42,7 +42,7 @@ CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
 # Sub directories to run make in.
-DIRS =		internals usersGuides
+DIRS =		internals #usersGuides
 
 TCL_SRCS = 
 
