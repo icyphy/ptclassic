@@ -138,7 +138,8 @@ body ::tycho::Line::_reshape {id canvas slate x y args} {
 #### _reshapeclick
 #
 body ::tycho::Line::_reshapeclick {id canvas slate x y args} {
-    ::tycho::getflag ghost args
+    set ghost 0
+    ::tycho::getopt ghost args
 
     # Remember how I am now.
     set scratch($id.prevX) $x
@@ -182,9 +183,10 @@ body ::tycho::Line::_reshapeclick {id canvas slate x y args} {
 
     # If the -ghost flag is set, draw the ghost line.
     if { $ghost } {
-	set scratch($id.ghost) [eval $canvas create line \
-		$scratch($id.coords) \
-		-fill grey]
+	$slate ghost $id
+	set scratch($id.ghost) 1
+    } else {
+	set scratch($id.ghost) 0
     }
 }
 
@@ -213,8 +215,8 @@ body ::tycho::Line::_reshapedrag {id canvas slate x y} {
     }
 
     # If there's a ghost, reshape it. Otherwise reshape the item.
-    if { [::info exists scratch($id.ghost)] } {
-	eval $canvas coords $scratch($id.ghost) $coords
+    if $scratch($id.ghost) {
+	eval $canvas coords ghost $coords
     } else {
 	eval $slate coords $id $coords
     }
@@ -226,16 +228,14 @@ body ::tycho::Line::_reshapedrag {id canvas slate x y} {
 body ::tycho::Line::_reshaperelease {id canvas slate x y} {
     # If there's a ghost, reshape the item to its shape
     # and then delete the ghost.
-    if { [::info exists scratch($id.ghost)] } {
+    if $scratch($id.ghost) {
 	# Reshape the item
-	eval $slate coords $id [$slate coords $scratch($id.ghost)]
-	$canvas delete $scratch($id.ghost)
-
-	# Clean up
-	unset scratch($id.ghost)
+	eval $slate coords $id [$slate coords ghost]
+	$canvas delete ghost
     }
 
     # General cleaning up
+    unset scratch($id.ghost)
     unset scratch($id.prevX)
     unset scratch($id.prevY)
 
