@@ -59,7 +59,7 @@ test Exec-1.1 {run make} {
     set removemake "make\[^\n\]*\n"
     regsub -all $removemake $results {} newresults
 
-    list $status $newresults
+    list $status $newresults $history 
 } {normal {
 This message is used to test the Exec class
 
