@@ -89,6 +89,9 @@ public:
 	virtual void initialize(){};
 
 	// get Token  from  string 
+	ParseToken getParseToken(Tokenizer&, Block*, char*);
+
+	// get Token  from  string 
 	ParseToken getParseToken(Tokenizer&, Block*);
 
 	// lookup state from name
