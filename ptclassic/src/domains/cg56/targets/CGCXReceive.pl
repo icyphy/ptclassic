@@ -34,7 +34,7 @@ codeblock(receiveData,"const char* command, int numXfer") {
 		if (value & 0x00800000) value |= 0xff000000;
 		@command;
 	}
-	s56xSemaphores[@(pairNumber/24)] &= !semaphoreMask;
+	s56xSemaphores[@(pairNumber/24)] &= ~semaphoreMask;
 	if (qckPutY(dsp,@(semaphorePtr+pairNumber/24),s56xSemaphores[@(pairNumber/24)]) == -1) { 
 		fprintf(stderr, "Semaphore update failed, Pair @pairNumber:	%s\n", qckErrString);
 		exit(1);
