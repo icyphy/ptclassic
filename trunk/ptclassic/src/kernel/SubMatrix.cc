@@ -90,7 +90,7 @@ ComplexSubMatrix::ComplexSubMatrix(int nRow, int nCol) {
 // and the dimensions of this SubMatrix. 
 // Error if the dimensions of the SubMatrix go beyond the dimensions of
 // parent.
-ComplexSubMatrix::ComplexSubMatrix(const ComplexSubMatrix& src,
+ComplexSubMatrix::ComplexSubMatrix(ComplexSubMatrix& src,
                                    int sRow, int sCol, int nRow, int nCol){
   parent = src.parent;
   if(sRow + nRow > parent->numRows()) {
@@ -194,7 +194,7 @@ FixSubMatrix::FixSubMatrix(int nRow, int nCol) {
 // and the dimensions of this SubMatrix. 
 // Error if the dimensions of the SubMatrix go beyond the dimensions of
 // parent.
-FixSubMatrix::FixSubMatrix(const FixSubMatrix& src,
+FixSubMatrix::FixSubMatrix(FixSubMatrix& src,
                            int sRow, int sCol, int nRow, int nCol){
   parent = src.parent;
   if(sRow + nRow > parent->numRows()) {
@@ -298,7 +298,7 @@ FloatSubMatrix::FloatSubMatrix(int nRow, int nCol) {
 // and the dimensions of this SubMatrix. 
 // Error if the dimensions of the SubMatrix go beyond the dimensions of
 // parent.
-FloatSubMatrix::FloatSubMatrix(const FloatSubMatrix& src,
+FloatSubMatrix::FloatSubMatrix(FloatSubMatrix& src,
                                int sRow, int sCol, int nRow, int nCol){
   parent = src.parent;
   if(sRow + nRow > parent->numRows()) {
@@ -403,7 +403,7 @@ IntSubMatrix::IntSubMatrix(int nRow, int nCol) {
 // and the dimensions of this SubMatrix. 
 // Error if the dimensions of the SubMatrix go beyond the dimensions of
 // parent.
-IntSubMatrix::IntSubMatrix(const IntSubMatrix& src,
+IntSubMatrix::IntSubMatrix(IntSubMatrix& src,
                            int sRow, int sCol, int nRow, int nCol){
   parent = src.parent;
   if(sRow + nRow > parent->numRows()) {
