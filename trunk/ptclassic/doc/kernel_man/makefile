@@ -6,6 +6,7 @@ TEXINPUTS= .:$(ROOT)/doc/tex:$(LATEXINFO)/styles:
 export LATEXINFO
 export TEXINPUTS
 
+EMACS=	emacs-18
 INFO=	-l $(ROOT)/doc/elisp/default.el -l $(LATEXINFO)/.emacs \
 	-l latexinfo -l latexnfo-mde
 
@@ -13,14 +14,14 @@ all:	ptk.info ptk.dvi ptk.ps.Z chapter.dvi chapter.ps.Z
 
 # Update all nodes and menus.
 %.update:	%.tex
-	emacs -batch $(INFO) $< \
+	$(EMACS) -batch $(INFO) $< \
 		-f latexinfo-every-node-update \
 		-f latexinfo-all-menus-update \
 		-f save-buffer -kill
 
 # Generate an info file from the LaTeXinfo source.
 %.info:		%.tex
-	emacs -batch $(INFO) $< \
+	$(EMACS) -batch $(INFO) $< \
 		-f latexinfo-format-buffer \
 		-f save-buffer -kill
 
