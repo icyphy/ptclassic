@@ -152,6 +152,7 @@ xv_bin: $(OBJARCH)/xv
 	(cd $(OBJARCH)/xv; \
 		$(MAKE) \
 		EXTRA_LDOPTIONS=$(CC_STATIC) \
+		RANLIB=ranlib \
 		RAND=$(XV_RAND) \
 		BINDIR=$(XV_DEST)/bin.$(ARCH) all)
 
@@ -159,6 +160,7 @@ xv_install: $(OBJARCH)/xv
 	(cd $(OBJARCH)/xv; \
 		$(MAKE) \
 		EXTRA_LDOPTIONS=$(CC_STATIC) \
+		RANLIB=ranlib \
 		INSTALL=$(INSTALL) \
 		BINDIR=$(XV_DEST)/bin.$(ARCH)  install)
 	strip $(PTOLEMY)/bin.$(ARCH)/xv
