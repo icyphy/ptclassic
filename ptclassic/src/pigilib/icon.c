@@ -72,7 +72,7 @@ char *codeDir, **iconDir;
 
 
 /* 5/8/90
-Open a window and run vi on a file.
+Open a window and run xedit on a file.
 Does not run in the background.
 This routine does not return until vi is exited.
 */
@@ -82,8 +82,7 @@ char *fileName;
 {
     char buf[612];
 
-    sprintf(buf, "xterm -display %s -name ptolemy_code -e vi %s",
-	xDisplay, fileName);
+    sprintf(buf, "xedit -name ptolemy_code %s", fileName);
     PrintDebug(buf);
     if (util_csystem(buf)) {
 	ErrAdd(sprintf(buf, "Cannot edit Ptolemy code file '%s'", fileName));
@@ -92,7 +91,7 @@ char *fileName;
 }
 
 /* 8/3/90
-Open a window and run vi on a file.
+Open a window and run xedit on a file.
 Runs in the background and returns immediately.
 */
 static boolean
@@ -101,8 +100,7 @@ char *fileName;
 {
     char buf[612];
 
-    sprintf(buf, "xterm -display %s -name ptolemy_code -e vi %s &",
-	xDisplay, fileName);
+    sprintf(buf, "xedit -name ptolemy_code %s &", fileName);
     PrintDebug(buf);
     if (util_csystem(buf)) {
 	ErrAdd(sprintf(buf, "Cannot edit Ptolemy code file '%s'", fileName));
@@ -110,12 +108,11 @@ char *fileName;
     return (TRUE);
 }
 
-
 /*
 Inputs:
     name = name of star
     domain = domain of star
-    dir = src directory of star, which contains .cc (and .pl ?) file
+    dir = src directory of star, which contains .pl file
 */
 static boolean
 MkStar(name, domain, dir)
@@ -135,8 +132,16 @@ static char *q1 = "Cannot find star definition.  Define a new star?";
 	return FALSE;
     }
     if (!KcIsKnown(name)) {
-	ErrAdd("No such star in the given domain");
-	return (FALSE);
+/* if we don't know about the star we try to load it */
+	char fullname[512];
+	PrintDebug("Star not known, trying to load it");
+	sprintf(fullname, "%s/%s%s", dir, domain, name);
+	if (!KcLoad (fullname)) return FALSE;
+	PrintDebug("Load complete");
+	if (!KcIsKnown(name)) {
+	    ErrAdd("Load completed, but star is still undefined?!?");
+	    return FALSE;
+        }
     }
     ERR_IF2(dmMultiText("Enter pathname of palette", 1, &item) != VEM_OK,
 	"Aborted entry");
@@ -385,7 +390,7 @@ long userOptionWord;
 {
     octObject mFacet, inst, facet;
     vemStatus status;
-    char *fullName, dir[512], codeFile[512], *base, *domain;
+    char *fullName, codeFile[512], domain[64];
 
     ViInit("look-inside");
     ErrClear();
@@ -423,24 +428,9 @@ long userOptionWord;
 	        octFullName(&mFacet, &fullName);
 
 	        /* Figure out file names */
-	        strcpy(dir, fullName);
-	        DirName(dir);
+		if (!IconFileToSourceFile (fullName, codeFile, domain))
+			return FALSE;
 
-		/* The following supports names like Fork.output=2
-		   using only the "Fork" part.  */
-	        base = callParseClass(BaseName(fullName));
-		/* determine the domain */
-		setCurDomainF(&facet);
-		domain = KcDomainOf(base);
-
-		/* See if dir ends in "/icons" */
-		if (!strcmp(BaseName(dir), "icons")) {
-		    DirName(dir); /* Remove "/icons" from dir */
-		    strcat(dir, "/stars");
-		}
-
-	        /* Form the filename */
-	        sprintf(codeFile, "%s/%s%s.pl", dir, domain, base);
 	        ERR_IF1(!LookAtFile(codeFile));
 
 		ViDone();
@@ -451,6 +441,46 @@ long userOptionWord;
 	}
     }
     ViDone();
+}
+
+/* This function takes an icon file name and finds the matching source
+   file.  If there is no matching source file, FALSE is returned.
+   the string "sourceFile" gets the full source file name and
+   the string "domain" gets the domain.
+*/
+
+char* nthDomainName();
+
+int
+IconFileToSourceFile (iconFile, sourceFile, domain)
+char* iconFile, *sourceFile, *domain;
+{
+	char dir[512], *base, *dom;
+	int i, n;
+
+	strcpy (dir, iconFile);
+	DirName (dir);
+/* See if dir ends in /icons */
+	if (!strcmp(BaseName(dir), "icons")) {
+		DirName (dir);
+		strcat(dir, "/stars");
+	}
+	base = callParseClass(BaseName(iconFile));
+	/* Search for source file */
+	n = numberOfDomains ();
+	for (i = 0; i < n; i++) {
+		dom = nthDomainName(i);
+		sprintf (sourceFile, "%s/%s%s.pl", dir, dom, base);
+		if (access (sourceFile, 0) == 0) break;
+		dom = 0;
+	}
+	if (!dom) {
+		sprintf (sourceFile, "Can't find source file for %s", base);
+		ErrAdd (sourceFile);
+		return FALSE;
+	}
+	strcpy (domain, dom);
+	return TRUE;
 }
 
 int 
