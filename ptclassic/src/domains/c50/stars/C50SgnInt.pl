@@ -24,7 +24,7 @@ The output is either 0 or 1
 	}
 	input {
 		name{input}
-		type{FIX}
+		type{INT}
 	}
 	output {
 		name{output}
