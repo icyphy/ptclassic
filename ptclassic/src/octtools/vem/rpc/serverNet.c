@@ -531,7 +531,12 @@ int application;
 {
     STREAM stream;
     char buffer[1024];
+#ifdef PTULTRIX			/* PTULTRIX defined in
+				   src/compat/ptolemy/compat.h */ 
+    extern time_t time();
+#else
     extern long time();
+#endif
     struct RPCApplication *app;
 
 
