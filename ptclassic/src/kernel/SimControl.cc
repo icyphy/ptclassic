@@ -294,6 +294,13 @@ void SimControl::setPollTimer( int seconds, int micro_seconds ) {
 	i.it_interval.tv_usec = 0;
         i.it_value.tv_sec = seconds;
         i.it_value.tv_usec = micro_seconds;
+
+	// Define PT_NO_TIMER if you don't want the interval timer
+	// If PT_NO_TIMER is defined, then pigi could get really slow
+#if defined(PT_NO_TIMER)
+	/* no poll timer */
+	setPollFlag();
+#else
 	// Turn off the poll flag until the timer fires
 	pollflag = 0;
 	// Turn on the poll flag when the timer expires
@@ -304,5 +311,6 @@ void SimControl::setPollTimer( int seconds, int micro_seconds ) {
 	ptBlockSig(SIGALRM);
 	// Start the timer
 	setitimer(ITIMER_REAL, &i, 0);
+#endif // PT_NO_TIMER
 }
 
