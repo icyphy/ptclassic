@@ -138,6 +138,8 @@ const int linkingNotSupported =
 // gcc-2.7.2 under HPUX10.01 cannot create shared libraries, so this
 // might not work.
 #define SHARED_OBJECT_COMMAND "g++ -shared -fPIC -nostdlib -Xlinker +s -lg++ -lstdc++ -o"
+// HPPA really, really wants shared library permissions to be 555.
+#define READONLY_SHAREDLIBS
 #include <dl.h>
 #include <errno.h>
 #endif
