@@ -145,7 +145,6 @@ install: $(BINDIR)
 		$(GNU_OBJ)/make/make \
 		CC=$(GNU_OBJ)/gcc/xgcc CFLAGS=-B$(GNU_OBJ)/gcc/ \
 		LDFLAGS=-B$(GNU_OBJ)/gcc/ install)
-	(cd $(GNU_SRC)/libg++; $(GNU_OBJ)/make/make install-info)
 	-(cd $(BINDIR); ln -s $(REL_GNU_BINDIR)/* .)
 	-(cd $(BINDIR); \
 	  rm -f gperf unprotoize protoize hp* make-* sparc-* c++ make.old)
@@ -153,6 +152,14 @@ install: $(BINDIR)
 	-(cd $(GNU_DEST)/$(PTARCH)/lib; rm libstdc++.so libg++.so; \
 		ln -s libg++.so.$(LIBGPLUSPLUS_VERSION) libg++.so; \
 		ln -s libstdc++.so.$(LIBGPLUSPLUS_VERSION) libstdc++.so)
+	# Create links in libio for info files
+	-(cd $(GNU_OBJ)/libg++/libio; \
+		ln -s $(GNU_SRC)/libg++/libio/*.info* .)
+	-(cd $(GNU_OBJ)/libg++/libg++; \
+		ln -s $(GNU_SRC)/libg++/libg++/*.info* .)
+	-(cd $(GNU_OBJ)/libg++/libg++/gperf; \
+		ln -s $(GNU_SRC)/libg++/libg++/gperf/*.info* .)
+	(cd $(GNU_OBJ)/libg++; $(GNU_OBJ)/make/make install-info)
 
 ############################################################
 # Build the GNU tools for HP machines
