@@ -33,7 +33,7 @@
 if {[string compare test [info procs test]] == 1} then { 
     source [file join $TYCHO kernel test testDefs.tcl]
 } {}
-source [file join .. Path.tcl]
+source [file join $TYCHO kernel Path.tcl]
 
 
 test Path-1.1 { Check out files in the current dir vs. paths with env vars} {
@@ -240,3 +240,10 @@ test Path-7.1 {Test out isRelative} {
 	    [::tycho::isRelative [file join .. a b]] \
 	    [::tycho::isRelative [file join / a b .. ..]]
 } {1 1 0 0 0 0 1 0}
+
+test Path-8.1 {Test out expandPathSplit} {
+    set env(MY_TY_TEST_VAR) [file join /a b c]
+    set path1 [file join {$MY_TY_TEST_VAR} d e f]
+    set path2 [file join {$MY_TY_TEST_VAR} g h i]
+   ::tycho::expandPathSplit "$path1:$path2:[file join j k l]"
+} {/a/b/c/d/e/f:/a/b/c/g/h/i:j/k/l}
