@@ -1,2 +1,2 @@
 .\" $Id$
-.TI "CG Demos"
+.TI "CG56 Demos"
