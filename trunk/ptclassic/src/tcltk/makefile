@@ -83,7 +83,6 @@ ITCL_VERSION =		itcl-2.0b2
 # Version of tcl and tk shipped with itcl
 ITCL_TCL_MAJOR_VERSION_NUMBER =	7.4
 ITCL_TK_MAJOR_VERSION_NUMBER =	4.0
-
 # Location of the tcl source
 TCL_SRC =	$(TCLTK_SRC)/$(TCL_VERSION)$(TCL_7_5_HACK)
 # Location of the tk source
@@ -107,6 +106,7 @@ TCL_DEST =	$(TCLTK_DEST)/tcl.$(PTARCH)
 # Destination of the machine independent tcl files
 TCL_INDEPENDENT_DEST =	$(TCLTK_DEST)/tcl
 #TCL_INDEPENDENT_DEST =	$(TCLTK_DEST)/$(TCL_VERSION)
+TCL_INDEPENDENT_DEST_LIB =	$(TCL_INDEPENDENT_DEST)/lib/tcl
 
 # Destination of tk only machine dependent files
 TK_DEST =	$(TCLTK_DEST)/tk.$(PTARCH)
@@ -114,6 +114,7 @@ TK_DEST =	$(TCLTK_DEST)/tk.$(PTARCH)
 # Destination of the machine independent tk files
 TK_INDEPENDENT_DEST =	$(TCLTK_DEST)/tk
 #TK_INDEPENDENT_DEST =	$(TCLTK_DEST)/$(TK_VERSION)
+TK_INDEPENDENT_DEST_LIB =	$(TK_INDEPENDENT_DEST)/lib/tk
 
 # Destination of itcl only machine dependent files
 ITCL_DEST =	$(TCLTK_DEST)/itcl.$(PTARCH)
@@ -122,6 +123,7 @@ ITCL_DEST =	$(TCLTK_DEST)/itcl.$(PTARCH)
 # Destination of the machine independent itcl files
 ITCL_INDEPENDENT_DEST =		$(TCLTK_DEST)/itcl
 #ITCL_INDEPENDENT_DEST =		$(TCLTK_DEST)/$(ITCL_VERSION)
+ITCL_INDEPENDENT_DEST_LIB =	$(ITCL_INDEPENDENT_DEST)/lib/itcl
 
 ITCL_DEST_LIB = $(ITCL_DEST)/lib
 
@@ -282,7 +284,9 @@ $(ITCL_DEST_LIB)/libitcl.a: \
 		$(ITCL_DEST_LIB)/libitk.a \
 		$(ITCL_DEST_LIB)/shared \
 		$(TCL_DEST) $(TCL_INDEPENDENT_DEST) \
-		$(TK_DEST) $(TK_INDEPENDENT_DEST) 
+			$(TCL_INDEPENDENT_DEST_LIB) \
+		$(TK_DEST) $(TK_INDEPENDENT_DEST) \
+			$(TK_INDEPENDENT_DEST_LIB)			
 	(cd  $(ITCL_OBJ); $(MAKE) \
 		CFLAGS="$(CFLAGS) $(WRITABLE_STRINGS_CFLAGS)" \
 		X11_INCLUDES="$(X11_INCSPEC)" \
@@ -313,6 +317,19 @@ $(ITCL_DEST_LIB)/libitk.a:
 	(cd $(ITCL_DEST_LIB); \
 		rm -f libitk.a; \
 		ln -s libitk$(ITCL_MAJOR_VERSION_NUMBER).a libitk.a)
+
+$(TCL_INDEPENDENT_DEST_LIB):
+	(cd $(TCL_INDEPENDENT_DEST)/lib; \
+		rm -f $@; \
+		ln -s tcl$(ITCL_TCL_MAJOR_VERSION_NUMBER) tcl)
+$(TK_INDEPENDENT_DEST_LIB):
+	(cd $(TK_INDEPENDENT_DEST)/lib; \
+		rm -f $@; \
+		ln -s tk$(ITCL_TK_MAJOR_VERSION_NUMBER) tk)
+$(ITCL_INDEPENDENT_DEST_LIB):
+	(cd $(ITCL_INDEPENDENT_DEST)/lib; \
+		rm -f $@; \
+		ln -s itcl$(ITCL_ITCL_MAJOR_VERSION_NUMBER) itcl)
 
 # Links so that older programs can find libs and includes.
 # Note that itcl contains its own tcl/tk so we have to make links
