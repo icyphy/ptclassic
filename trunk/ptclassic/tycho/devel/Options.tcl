@@ -34,7 +34,7 @@
 # within Tycho. Thus, if you want to use the standard color that
 # indicates a positive number for something, you would refer to it as:
 #
-#	[option get . positiveColor {}]
+#	[option get . positiveColor {} ]
 #	
 # All of these options are in the null class. The main window
 # created by sg (called "."), and all derivative windows are of the null
