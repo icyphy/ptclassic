@@ -34,7 +34,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
    PtCondition is a condition variable for use with monitors.
 */
 #ifdef __GNUG__
-#pragma interface
+#pragma interface "PtCondition.h"
 #endif
 
 class PtGate;

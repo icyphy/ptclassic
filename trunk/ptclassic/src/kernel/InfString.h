@@ -51,7 +51,7 @@ flexibility)
 *******************************************************************/
 
 #ifdef __GNUG__
-#pragma interface
+#pragma interface "InfString.h"
 #endif
 
 #include "StringList.h"

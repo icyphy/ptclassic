@@ -45,7 +45,7 @@ ParticleStack is used as the baseclass in implementing Plasma
 and Geodesic.
 ***************************************************************/
 #ifdef __GNUG__
-#pragma interface
+#pragma interface "ParticleStack.h"
 #endif
 
 #include "Particle.h"

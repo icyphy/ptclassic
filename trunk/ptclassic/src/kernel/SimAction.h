@@ -37,7 +37,7 @@ represents an action to be called under certain conditions.
 #ifndef _SimAction_h
 #define _SimAction_h 1
 #ifdef __GNUG__
-#pragma interface
+#pragma interface "SimAction.h"
 #endif
 
 #include "DataStruct.h"

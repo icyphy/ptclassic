@@ -38,7 +38,7 @@ Particle*s corresponding to past input or output Particles.
 
 ******************************************************************/
 #ifdef __GNUG__
-#pragma interface
+#pragma interface "CircularBuffer.h"
 #endif
 
 class Particle;

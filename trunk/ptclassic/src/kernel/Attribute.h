@@ -38,7 +38,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 **************************************************************************/
 
 #ifdef __GNUG__
-#pragma interface
+#pragma interface "Attribute.h"
 #endif
 
 typedef unsigned long bitWord;
