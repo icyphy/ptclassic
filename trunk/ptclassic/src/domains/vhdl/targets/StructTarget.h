@@ -86,8 +86,8 @@ public:
 	/*virtual*/ void registerState(State*, const char*, int=-1, int=-1);
 
 	// Register PortHole reference.
-	/*virtual*/ void registerPortHole(VHDLPortHole*, const char*, int=-1,
-					  const char* ="");
+	/*virtual*/ void registerPortHole(VHDLPortHole*, const char*, int,
+					  int=-1, const char* ="");
 
 	// Return the assignment operators for States and PortHoles.
 	/*virtual*/ const char* stateAssign();
@@ -123,11 +123,16 @@ protected:
 	virtual void initFiringLists();
 
 private:
+	// A list of clocks to trigger in order.
+	StringList clockList;
+
+	// Relevant code streams.
 	CodeStream component_declarations;
 	CodeStream signal_declarations;
 	CodeStream component_mappings;
 	CodeStream configuration_declaration;
 	CodeStream firingAction;
+	CodeStream ctlerAction;
 
 	// General VHDLObjLists.
 	VHDLPortList systemPortList;
@@ -147,6 +152,17 @@ private:
 	VHDLVariableList firingVariableList;
 	VHDLPortVarList firingPortVarList;
 	VHDLPortVarList firingVarPortList;
+
+	// The following are for keeping track of components and
+	// signals having to do with the controller.
+	VHDLPortList ctlerPortList;
+	VHDLGenericList ctlerGenericList;
+	VHDLPortMapList ctlerPortMapList;
+	VHDLGenericMapList ctlerGenericMapList;
+	VHDLSignalList ctlerSignalList;
+	VHDLVariableList ctlerVariableList;
+	VHDLPortVarList ctlerPortVarList;
+	VHDLPortVarList ctlerVarPortList;
 
 	// Assign names for each geodesic according to port connections.
 	void setGeoNames(Galaxy&);
@@ -175,7 +191,7 @@ private:
 	void registerMultiplexor(StringList type);
 
 	// Connect a register between the given input and output signals.
-	void connectRegister(StringList, StringList, StringList);
+	void connectRegister(StringList, StringList, StringList, StringList);
 
 	// Add a register component declaration.
 	void registerRegister(StringList);
