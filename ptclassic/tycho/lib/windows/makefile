@@ -41,6 +41,7 @@ include $(CONFIG)
 
 ITCL_SRCS = \
 	tycho-windows.itk
+	tyjava-windows.itk
 
 EXTRA_SRCS =	$(TCL_SRCS) $(ITCL_SRCS)
 
