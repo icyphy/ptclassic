@@ -42,6 +42,7 @@
 #	make -f $PTOLEMY/mk/scratch-srcs.mk
 
 # If your system does not have strdup(), use the following (Ultrix4.3a)
+# to build the Pixmap extension to tk.
 #XPM_DEFINES="-DZPIPE -DNEED_STRDUP"
 # Otherwise:
 XPM_DEFINES="-DZPIPE"
@@ -141,6 +142,7 @@ xv_bin: $(OBJARCH)/xv
 	(cd $(OBJARCH)/xv; \
 		$(MAKE) \
 		EXTRA_LDOPTIONS=$(CC_STATIC) \
+		AR=ar\
 		RANLIB=ranlib \
 		RAND=$(XV_RAND) \
 		BINDIR=$(XV_DEST)/bin.$(ARCH) all)
@@ -149,10 +151,12 @@ xv_install: $(OBJARCH)/xv
 	(cd $(OBJARCH)/xv; \
 		$(MAKE) \
 		EXTRA_LDOPTIONS=$(CC_STATIC) \
+		AR=ar\
 		RANLIB=ranlib \
 		INSTALL=$(XV_INSTALL) \
 		BINDIR=$(XV_DEST)/bin.$(ARCH)  install)
 	strip $(PTOLEMY)/bin.$(ARCH)/xv
+
 xv_install.man:
 	(cd $(OBJARCH)/xv; \
 		$(MAKE) \
