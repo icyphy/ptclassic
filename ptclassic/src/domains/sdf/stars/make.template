@@ -70,6 +70,7 @@ PL_SRCS= \
  SDFConst.pl \
  SDFConstCx.pl \
  SDFConstFix.pl \
+ SDFConstInt.pl \
  SDFCos.pl \
  SDFCxToFix.pl \
  SDFCxToFloat.pl \
