@@ -98,6 +98,7 @@ ifdef PTINY
 	SDF =		1
 	SDFTK =		1
 	SDFDSP =	1
+	SDFDMM =	1
 	SDFMATRIX =	1
 	SDFMATLAB =	1
 endif
@@ -119,6 +120,8 @@ ifndef TK
 	HOF=
 	# DMM needs Oct.
 	DMM=
+	# SDFDMM uses TclScript
+	SDFDMM =
 endif
 
 include $(ROOT)/mk/stars.mk
@@ -279,9 +282,9 @@ install: $(INSTALL)
 # Build three binaries
 all: makefile $(LIB) $(PIGI) $(PIGI).ptiny $(PIGI).ptrim
 
-# Build as many as 12 binaries
-everything: $(REALCLEAN_STUFF)
-
 # Print the names of all the binaries that can be produced
 echo_every_binary:
 	@echo $(EVERY_BINARY)
+
+# Build as many as 12 binaries
+everything: $(REALCLEAN_STUFF)
