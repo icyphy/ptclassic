@@ -190,8 +190,7 @@ HDRS = \
   TclStarIfc.h \
   XYPlot.h \
   SetSigHandle.h \
-  SigHandle.h \
-  SigHandle_c.h 
+  SigHandle.h 
   
 TMPSRCS=$(SRCS:.cc=.o)
 
