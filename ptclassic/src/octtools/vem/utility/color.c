@@ -77,11 +77,12 @@ XColor *clr;			/* Returned color structure */
  * for the black pixel.
  */
 {
-    static XColor black;
+    static XColor black, exactblack;
     static int init = 0;
 
     if (!init) {
-	black.pixel = BlackPixel(xv_disp(), xv_scrn());
+        XAllocNamedColor(xv_disp(), xv_cmap(), "black", &black, &exactblack);
+	//black.pixel = BlackPixel(xv_disp(), xv_scrn());
 	XQueryColor(xv_disp(), xv_cmap(), &black);
     }
     if (clr) *clr = black;
