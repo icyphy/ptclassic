@@ -38,11 +38,13 @@ static char SccsId[]="$Id$";
 #include "utility.h"
 #include "errtrap.h"
 #include <sys/types.h>
-#if defined(aiws) || defined(_IBMR2) || defined(SYSV)
+
+#ifdef USE_DIRENT_H		/* compat.h declares USE_DIRENT_H */
 #include <dirent.h>
 #else
 #include <sys/dir.h>
-#endif /* aiws */
+#endif /* USE_DIRENT_H */
+
 #include <pwd.h>
 
 #define FC_TIL		'~'
