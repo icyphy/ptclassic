@@ -234,7 +234,7 @@ body ::tycho::Compile::compileFiles {} {
         #set compileWidget [$this cget -view].compile
         #set retList [::tycho::execModal $compileString $dirname]
 
-        set autostart 1
+        set autostart 0
         set autodestroy 0
 
         set compileString "make -f $makefile"
