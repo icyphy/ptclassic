@@ -62,6 +62,15 @@ class ::tycho::EditItcl {
     constructor {args} {}
     destructor {}
 
+    ##########################################################################
+    ####                            options                               ####
+
+    # The color of Itcl options.
+    itk_option define -optioncolor optionColor OptionColor black {
+	$itk_component(text) tag configure optionname \
+		-foreground $itk_option(-optioncolor)
+    }
+
     ###################################################################
     ####                     public methods                        ####
 
@@ -404,13 +413,4 @@ body ::tycho::EditItcl::parseNow {start stop} {
 	if [$text compare $ind >= end] {break}
     }
     # Set the visual characteristics of the tagged text
-    set hull $itk_component(hull)
-    $text tag configure classname -foreground \
-	    [preference get textedit classColor]
-    $text tag configure methodname -foreground \
-	    [preference get textedit methodColor]
-    $text tag configure varname -foreground \
-	    [preference get textedit variableColor]
-    $text tag configure optionname -foreground \
-	    [preference get textedit optionColor]
 }

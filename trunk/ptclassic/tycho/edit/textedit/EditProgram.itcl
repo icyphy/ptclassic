@@ -73,6 +73,58 @@ class ::tycho::EditProgram {
     destructor {}
 
     ##########################################################################
+    ####                            options                               ####
+
+    # The color of strings.
+    itk_option define -stringcolor stringColor StringColor black {
+	$itk_component(text) tag configure string \
+		-foreground $itk_option(-stringcolor)
+    }
+
+    # The color of comments.
+    itk_option define -commentcolor commentColor CommentColor black {
+	$itk_component(text) tag configure comment \
+		-foreground $itk_option(-commentcolor)
+    }
+
+    # The color of "FIXME".
+    itk_option define -fixmecolor fixmeColor FixmeColor black {
+	$itk_component(text) tag configure fixme \
+		-foreground $itk_option(-fixmecolor)
+    }
+
+    # The color of keywords.
+    itk_option define -keywordcolor keywordColor KeywordColor black {
+	$itk_component(text) tag configure keyword \
+		-foreground $itk_option(-keywordcolor)
+    }
+
+    # The color of procedure names.
+    itk_option define -proccolor procColor ProcColor black {
+	$itk_component(text) tag configure procname \
+		-foreground $itk_option(-proccolor)
+    }
+
+    # The color of class names.
+    itk_option define -classcolor classColor ClassColor black {
+	$itk_component(text) tag configure classname \
+		-foreground $itk_option(-classcolor)
+    }
+
+    # The color of method names.
+    itk_option define -methodcolor methodColor MethodColor black {
+	$itk_component(text) tag configure methodname \
+		-foreground $itk_option(-methodcolor)
+    }
+
+    # The color of variable names.
+    itk_option define -variablecolor variableColor VariableColor black {
+	$itk_component(text) tag configure varname \
+		-foreground $itk_option(-variablecolor)
+    }
+
+
+    ##########################################################################
     ####                         public methods                           ####
 
     # Match an open paranthesis and also indent the line, if appropriate.
@@ -127,6 +179,18 @@ body ::tycho::EditProgram::constructor {args} {
     
     eval itk_initialize $args
     
+    # Subscribe to the preference set
+    preference subscribe $preferences $this \
+	    -stringcolor stringColor \
+	    -commentcolor commentColor \
+	    -fixmecolor fixmeColor \
+	    -keywordcolor keywordColor \
+	    -classcolor classColor \
+	    -methodcolor methodColor \
+	    -variablecolor variableColor \
+	    -proccolor procColor
+
+
     # Add to the format menu commands to comment and uncomment
     # the regions defined by the selection.
     menubar addSeparator Format
@@ -500,16 +564,8 @@ body ::tycho::EditProgram::parseNow {start stop} {
     }
 
     # Set the visual characteristics of the tagged text
-    $text tag configure string -foreground \
-	    [preference get textedit stringColor]
     $text tag lower string comment
-    $text tag configure comment -foreground \
-	    [preference get textedit commentColor]
     $text tag lower comment fixme
-    $text tag configure fixme -foreground \
-            [preference get textedit fixmeColor]
-    $text tag configure keyword -foreground \
-            [preference get textedit keywordColor]
 }
 
 #####################################################################
