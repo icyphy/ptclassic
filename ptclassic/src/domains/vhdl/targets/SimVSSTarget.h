@@ -77,6 +77,7 @@ public:
 
 protected:
 	// States.
+	StringState simarch;
 	IntState analyze;
 	IntState startup;
 	IntState simulate;
@@ -86,8 +87,8 @@ protected:
 	/*virtual*/ void setup();
 
 private:
-	CodeStream preSynch;
-	CodeStream postSynch;
+//	CodeStream preSynch;
+//	CodeStream postSynch;
 	CodeStream top_uses;
 	CodeStream top_entity;
 	CodeStream top_architecture;
