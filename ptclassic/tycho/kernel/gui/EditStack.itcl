@@ -97,13 +97,13 @@ body ::tycho::EditStack::hyperJump {filename method line} {
     set methodline 0
     set methodline [$editorName findOne 0 0 0 0 $method 1.0 end {}]
     # Return in the following format: "23.53 53"
-    # FIXME: after idle doesn't work!!! So added the following hack.
     if {$methodline=={}} {return}
 
     set methodline [lindex $methodline 0]
     set methodline [lindex [split $methodline .] 0]
     set methodline [expr $methodline + $line - 1]
-    after 250 $editorName seeFragment "\"line $methodline\""
+    # FIXME: after idle doesn't work!!!
+    after idle $editorName seeFragment "\"line $methodline\""
 }
 
 #####################################################################
@@ -153,7 +153,7 @@ body ::tycho::EditStack::parseNow {start stop} {
         set line [$text get $st $end]
         # Parse the above line, and determine the action.
         # If the message has the format:
-        #    (....... method "<method name>" body line <line>
+        #    (....... (method|class|procedure) "<method name>" body line <line>
         #    then open $auto_index(<method name>) then go to <line>
         # If the message has the format:
         #    (... line <line>)
@@ -161,8 +161,8 @@ body ::tycho::EditStack::parseNow {start stop} {
         set fname ""
         $text tag configure link$linkcount -foreground \
                 [preference get linkColor] -underline 1
-        if {[regexp {((method)|(class)) "([^"]+)" body line ([0-9]+)} \
-                $line match junk1 junk2 junk3 meth lnum]} { ;#"
+        if {[regexp {(method|class|procedure) "([^"]+)".* line ([0-9]+)} \
+                $line match _ meth lnum]} { ;#"
             # WARNING: This is TclIndex dependent.
             set classnm [::info namespace qualifiers $meth]
             if { [uplevel #0 "info exists auto_index($meth)"] } {
