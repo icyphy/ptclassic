@@ -37,10 +37,12 @@ $Id$
 #include "Error.h"
 #include "miscFuncs.h"
 #include "StringList.h"
+#include "streamCompat.h"
 
 // static data objects
 int Linker::activeFlag = 0;
-const char* ptolemyName = 0;
+int Linker::pid = 0;
+const char* Linker::ptolemyName = 0;
 
 const char*
 pathSearch (const char* name, const char* path) {
@@ -87,7 +89,7 @@ int Linker::linkObj (const char* objName) {
 
 // first, read the object file
 	int fd;
-	if ((fd = open (objName, 0, 0)) < 0) {
+	if ((fd = open (objName, O_RDONLY, 0)) < 0) {
 		Error::error("Linker: Can't open file ", objName);
 		return FALSE;
 	}
@@ -148,7 +150,7 @@ int Linker::linkObj (const char* objName) {
 		unlink (headerName);
 		LOG_DEL; delete (char*)headerName;
 	}
-	fd = open (tname, 2, 0);
+	fd = open (tname, O_RDWR, 0);
 // unix lets us do this: the file actually disappears when closed.
 	unlink (tname);
 
