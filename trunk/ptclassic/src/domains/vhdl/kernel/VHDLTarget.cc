@@ -595,7 +595,7 @@ void VHDLTarget :: registerState(State* state, const char* varName,
 
 // Register PortHole reference.
 void VHDLTarget :: registerPortHole(VHDLPortHole* port, const char* varName,
-				    int firing,
+				    int /*firing*/,
 				    int tokenNum/*=-1*/,
 				    const char* part/*=""*/) {
   StringList ref = varName;
