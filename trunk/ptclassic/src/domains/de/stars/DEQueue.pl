@@ -68,6 +68,7 @@ defstar {
 
 	start {
 		demand.dataNew = TRUE;
+		queue.initialize();
 	}
 
 	go {

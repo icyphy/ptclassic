@@ -99,9 +99,11 @@ defstar {
 	   if (inData.numberPorts() > 10) {
 		Error::abortRun(*this, "Too many input ports.");
 	   } else {
-		// Create the Queues
-		for(int i=(inData.numberPorts()-1); i>=0; i--)
-		    queue[i] = new Queue;
+		// Create or initialize the Queues
+		for(int i=(inData.numberPorts()-1); i>=0; i--) {
+		    if (queue[i]) queue[i]->initialize();
+		    else queue[i] = new Queue;
+		}
 	   }
 	   demand.dataNew = TRUE;
 
