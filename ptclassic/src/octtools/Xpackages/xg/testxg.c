@@ -30,14 +30,10 @@ static char SccsId[]="$Id$";
 #include "copyright.h"
 #include "port.h"
 #include "st.h"          /* TO force linking of st routines */
-#ifdef X11
 #include <X11/Xlib.h>
-#else
-#include <X/Xlib.h>
-#endif
 #include "xg.h"
 
-static int dummyfuncToloadST()
+static void dummyfuncToloadST()
 {
     st_free_table( (st_table*)0);
 }
@@ -51,13 +47,14 @@ static int dummyfuncToloadST()
 int func(mx,my)
 	double mx,my;
 {
-	(void) printf("Measured value: (%lf,%lf)\n", mx,my);
+	(void) printf("Measured value: (%f,%f)\n", mx,my);
 	return(XG_OK);
 } /* func... */
 
 /**************************************************************************
  * MAIN
  */
+int
 main(argc,argv)
 	int		argc;
 	char	**argv;
@@ -124,5 +121,6 @@ main(argc,argv)
 	alarm(30);
 
 	while (1) (void) xgProcessAllEvents(display);
+	return 0;
 } /* main... */
 
