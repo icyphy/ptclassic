@@ -52,11 +52,6 @@ Target("default-FSM", "FSMStar", "default FSM target")
   addState(intlEventTypes.setState("intlEventTypes", this, "",
 	   "Assign the type for each internal event. Each type should be sparated by at least one space."));
 
-  addState(evaluationType.setState("evaluationType", this, "Strict",
-	   "Specify how this FSM will be evaluated: Strict or NonStrict."));
-  addState(oneWriterType.setState("oneWriterType", this, "Compile",
-	   "Specify when to do the one-writer rule checking."));
-
   addState(schedulePeriod.setState("schedulePeriod", this, "0.0",
 	   "schedulePeriod for interface with a timed domain."));
 }
@@ -68,15 +63,7 @@ Block* FSMTarget::makeNew() const {
 FSMTarget::~FSMTarget() { delSched(); }
 
 void FSMTarget::setup() {
-  FSMScheduler* fsmSched;
-  InfString buf = (const char*)evaluationType;
-  if (!strcmp(buf,"Strict")) {
-      fsmSched = new StrictSched;
-  } else {
-      Error::abortRun("FSMTarget: ", 
-		      "Unregconized evaluation type!");
-      return; 
-  }
+  FSMScheduler* fsmSched = new FSMScheduler;
 
   // setSched deletes the old scheduler.
   setSched(fsmSched);
@@ -94,9 +81,6 @@ void FSMTarget::setup() {
   fsmSched->intlEventTypes.initialize();
   for (int i=0; i<intlEventTypes.size(); i++)
       fsmSched->intlEventTypes << intlEventTypes[i];
-
-  fsmSched->evaluationType = evaluationType;
-  fsmSched->oneWriterType = oneWriterType;
 
 //	fsmSched->schedulePeriod = schedulePeriod;
 
