@@ -32,7 +32,10 @@
 
 #######################################################################
 #### ResourceHTTP
-#
+# This provides an abstraction of remote file for anything that
+# uses Resource. Using this class, attributes are abstracted away
+# from functionalities which include: cache, updating cache, HTTP
+# protocol, socket error, etc.
 #
 class ::tycho::ResourceHTTP {
     inherit ::tycho::Resource
@@ -46,47 +49,61 @@ class ::tycho::ResourceHTTP {
     ###################################################################
     ####                         public methods                    ####
 
-    # Close the resource
-    method close {}
+    # Close the resource.
+    method close {} {::close $cachefd; set cachefd -1}
 
     # Return the content type of the current file
-    method contenttype {}
+    method contenttype {} {return $contenttype}
 
-    # Test if a given resource exists
+    # Return the end of file status
+    method eof {} {return [::eof $cachefd]}
+
+    # Test if a given resource exists.
+    # FIXME: Currently we need to "open" first.
+    # FIXME: This doesn't work yet.
     method exists {path}
 
     # Return the current file type 
-    method filetype {}
+    method filetype {} {return HTTP}
 
-    # Read a string from a streamable resource 
-    method gets {}
+    # Read a string from a streamable resource
+    # Takes in variable name as input, and outputs the string length.
+    # If no argument, then just return the string.
+    method gets {{arg1 {}} {arg2 {}}}
 
-    # Return files at a given path
+    # Return files at a given path.
+    # FIXME: Doesn't work yet.
     method glob {path}
 
     # Return true if a given path is a file
-    method isfile {path}
+    # FIXME FIXME FIXME FIXME FIXME FIXME FIXME FIXME FIXME FIXME FIXME FIXME
+    # I stronly think that "filetype" can replace this method
+    # because filetype returns "file", "http", "ftp", "weld", etc...
+    method isfile {path} {return 0}
 
     # Open a new resource
     method new {{path {}}}
 
-    # Open the resource
+    # Open the resource. Make a connection and download entire file into cache.
+    # Return positive number if successful, and 0 to negative if not.
     method open {path {mode "r"}}
 
     # Get the current full resource path
-    method path {}
+    method path {} {}
 
-    # Write a string to a streamable resource 
-    method puts {}
+    # Write a string to a streamable resource.
+    # Can't write into HTTP file! Read permission of off
+    method puts {} {error "Cannot write to HTTP file."}
 
     # Return a string containing the data in a streamable resource 
     method read {}
 
     # Return true if a given resource is readable
-    method readable {path}
+    # If the HTTP file exists, then it's readable.
+    method readable {path} {return [exists]}
 
     # Source a streamable resource as a Tcl script
-    method source {{path {}}}
+    method source {{path {}}} {source $cachefile}
 
     # Get the status of a resource
     method stat {path varName}
@@ -95,7 +112,7 @@ class ::tycho::ResourceHTTP {
     method streamable {}
 
     # Return true if a resource is writable
-    method writable {{path {}}}
+    method writable {{path {}}} {return 0}
 
     ###################################################################
     ####                      public variables                     ####
@@ -138,16 +155,19 @@ class ::tycho::ResourceHTTP {
     protected variable port 80
 
     # The name of the cache file associated with this HTTP
-    protected variable cache {}
+    protected variable cachefile {}
 
-    # The index of the get
+    # The index of the get. FIXME: Not being used yet (performance issue)
     protected variable idx 0
+    # Instead, the following variable is used!
+    # This is the cache file id, used for [$this gets] and [$this eof]
+    protected variable cachefd -1
 
     # Whether we are getting the header or not (header mode or body mode)
     protected variable isheader 1
 
     # Returning status of a http get. 200 by default is "normal"
-    protected variable status 200
+    protected variable status -1
 
     # The last modified date of this http file. Used for caching purpose.
     protected variable lastmodified {}
@@ -192,33 +212,34 @@ body ::tycho::ResourceHTTP::close {} {
 }
 
 #####################################################################
-#### contenttype
-body ::tycho::ResourceHTTP::contenttype {} {
-
-}
-
-#####################################################################
 #### exists
 body ::tycho::ResourceHTTP::exists {[ath} {
-
-}
-
-#####################################################################
-#### filetype
-body ::tycho::ResourceHTTP::filetype {} {
-    return "http"
+    return ($status>=200 && $status<300)
 }
 
 #####################################################################
 #### gets
-body ::tycho::ResourceHTTP::gets {} {
-
+body ::tycho::ResourceHTTP::gets {{arg1 {}} {arg2 {}}} {
+    # If two arguments are passed, just use arg2 because
+    # arg1 is simply a bogus file ID
+    if {$arg2!={}} {
+        set arg1 $arg2
+    }
+    # Enclose brackets around so that in "uplevel" it is evaluated safely
+    set line [list [::gets $cachefd]]
+    if {$arg1!={}} {
+        uplevel "set $arg1 $line"
+        # If argument is passed then we want to return number of char
+        return [string length $line]
+    }
+    return $line
 }
 
 #####################################################################
 #### glob
+# FIXME: not implemented yet. Need to parse output crazy!!!
 body ::tycho::ResourceHTTP::glob {path} {
-
+    return {}
 }
 
 #####################################################################
@@ -267,23 +288,22 @@ body ::tycho::ResourceHTTP::open {url {mode "r"}} {
 
     # If the get status is not within 200-299 then get isn't successful
     if {$status>=200 && $status<300} {
-        return 0
+        # Successful
+        set cachefd [::open $cachefile]
+        return 1
     } else {
-        return $status
+        # Error!
+        return [expr -$status]
     }
 }
-
-
-
-
 
 #####################################################################
 #### path
 body ::tycho::ResourceHTTP::path {} {
-    if {$port!={}} {
-        return "HTTP://$hostname$currentPath:$port"
+    if {$port==80} {
+        return "HTTP://$hostname$path"
     } else {
-        return "HTTP://$hostname$currentPath"
+        return "HTTP://$hostname$path:$port"
     }
 }
 
@@ -333,7 +353,7 @@ body ::tycho::ResourceHTTP::writable {{path {}}} {
 #
 body ::tycho::ResourceHTTP::httpparse {url} {
     # Reset the status from the header of HTTP protocol
-    set cache {}
+    set cachefile {}
     set port 80
     set status 200
     set lastmodified {}
@@ -387,8 +407,8 @@ body ::tycho::ResourceHTTP::httpget {} {
     fconfigure $fd -translation auto
 
     # Wait until finished reading HTTP file
-    set cache [::tycho::tmpFileName Cache].html
-    set tmpfd [::open $cache "w"]
+    set cachefile [::tycho::tmpFileName Cache].html
+    set tmpfd [::open $cachefile "w"]
     set isheader 1    ;# Initially we're getting the header first
 
     ::tycho::safeUpdate $this
@@ -402,7 +422,7 @@ body ::tycho::ResourceHTTP::httpget {} {
 #
 body ::tycho::ResourceHTTP::httpread {fd tmpfd} {
     global $httpGlobalStatus
-    if [eof $fd] {
+    if [::eof $fd] {
         # Got the HTTP file, now check to see if everything's valid.
 	catch {::close $fd}
 	catch {::close $tmpfd}
