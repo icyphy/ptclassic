@@ -26,7 +26,7 @@ SDFDIR=$(ROOT)/src/domains/sdf/kernel
 # CG directories
 CGDIR=$(ROOT)/src/domains/cg/kernel
 
-INCL=-I$(KERNDIR) -I$(CGDIR) -I$(SDFDIR)
+INCL=-I$(KERNDIR) $(PTCOMPAT_INCSPEC) -I$(CGDIR) -I$(SDFDIR)
 
 # Library name
 LIB=libcgc.$(LIBSUFFIX)
