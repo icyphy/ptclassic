@@ -77,8 +77,12 @@ CGTarget::CGTarget(const char* name,const char* starclass,
 	sharedSymbol.setSeparator(separator);
 	sharedSymbol.setCounter(&symbolCounter);
 
-	addState(destDirectory.setState("Destination Directory",this,
-		"PTOLEMY_SYSTEMS","Directory to write to"));
+	addState(targetHost.setState("host", this, "",
+	    "Host machine to compile or assemble code on."));
+	addState(destDirectory.setState("directory", this, "PTOLEMY_SYSTEMS",
+	    "Directory to write to"));
+	addState(filePrefix.setState("file", this, "",
+	    "Prefix for file names."));
 	addState(loopingLevel.setState("Looping Level",this,"0",
 		"Specify whether to use loop scheduler and in what level."));
 	addState(displayFlag.setState("display?", this, "YES",
@@ -89,6 +93,16 @@ CGTarget::CGTarget(const char* name,const char* starclass,
 	    "Enable loading of code."));
 	addState(runFlag.setState("run?", this, "YES",
 	    "Enable running of code."));
+
+	/* Hide parameters by making them nonsettable.
+	   Derived Targets can re-enable those that are appropriate.
+	*/
+	targetHost.clearAttributes(A_SETTABLE);
+	filePrefix.clearAttributes(A_SETTABLE);
+	displayFlag.clearAttributes(A_SETTABLE);
+	compileFlag.clearAttributes(A_SETTABLE);
+	loadFlag.clearAttributes(A_SETTABLE);
+	runFlag.clearAttributes(A_SETTABLE);
 
 	addStream(CODE, &myCode);
 	addStream(PROCEDURE, &procedures);
@@ -145,6 +159,8 @@ void CGTarget::setup() {
 		}
 	}
 	if (!galaxy()) return;
+
+	if (filePrefix.null()) filePrefix = galaxy()->name();
 
 	// Reset the symbol lists.
 	symbolCounter = 0;
@@ -424,7 +440,7 @@ void CGTarget :: genLoopEnd(Star& s) {
 }
 
 void CGTarget :: writeCode(const char* name) {
-    if (name == NULL) name = "code.output";
+    if (name == NULL) name = filePrefix;
     char* codeFileName = writeFileName(name);
     pt_ofstream codeFile(codeFileName);
     if (!codeFile) return;
