@@ -303,6 +303,11 @@ body ::tycho::TextItemEdit::deactivate {x y args} {
     # Clear the selection
     select clear
 
+    # If there is no target, return here
+    if { $target == "" } {
+        return
+    }
+
     # Remove the text drag-selection bindings
     $slate bind $target \
 	    [eval ::tycho::Interactor::event Click -button $button] {}
@@ -501,6 +506,9 @@ body ::tycho::TextItemEdit::key {key keysym state args} {
 		    icursor -char
 		    $slate dchars $target insert
 		}
+                # Adjust the highlight
+                $slate unhighlight sel
+                $slate highlight sel
 	    }
 	    "Delete" {
 		# If there's a selection then delete it
@@ -510,7 +518,10 @@ body ::tycho::TextItemEdit::key {key keysym state args} {
 		    # If not, then delete the next character
 		    $slate dchars $target insert
 		}
-	    }
+                # Adjust the highlight
+                $slate unhighlight sel
+                $slate highlight sel
+            }
 	    "Left" {
 		# Move the cursor. Adjust the selection if shift.
 		if { $shift } {
@@ -543,6 +554,10 @@ body ::tycho::TextItemEdit::key {key keysym state args} {
 
 		# Insert the character
 		$slate insert $target [$slate index $target insert] $key
+
+                # Adjust the highlight
+                $slate unhighlight sel
+                $slate highlight sel
 	    }
 	}
     }
@@ -622,11 +637,15 @@ body ::tycho::TextItemEdit::select {mode args} {
 	    if { ! ([$slate select item] == "") } {
 		$slate select clear
 	    }
+
 	}
 	"delete" {
 	    if { ! ([$slate select item] == "") } {
 		$slate dchars $target sel.first sel.last
 		$slate select clear
+                # Adjust the highlight
+                $slate unhighlight sel
+                $slate highlight sel
 	    }
 	}
 	"exists" {
