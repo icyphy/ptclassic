@@ -33,7 +33,7 @@
 #       expandEnvVars \$PTOLEMY/tmp
 # returns /usr/tools/ptolemy/tmp
 #
-proc ptkExpandEnvVars { path } {
+proc ptkExpandEnvVar { path } {
     if {[string first \$ $path] == 0} {
         global env
         set slash [string first / $path]
