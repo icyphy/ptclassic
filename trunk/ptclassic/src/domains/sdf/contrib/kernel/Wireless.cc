@@ -102,11 +102,11 @@ Complex WirelessChannel::Input( Complex input )
 	ShiftData( input );
 
 	sample_cnt =+ 1;
-	if( params.channel_type == 'i' | params.channel_type == 'I' )
+	if( params.channel_type == 'i' || params.channel_type == 'I' )
 	{
 	     CorruptData();
 	}
-	else if( params.channel_type == 'o' | params.channel_type == 'O' )
+	else if( params.channel_type == 'o' || params.channel_type == 'O' )
 	{
 	     if( sample_cnt * params.Ts > params.wc )
 	     {
