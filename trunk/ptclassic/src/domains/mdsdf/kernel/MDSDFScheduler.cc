@@ -218,17 +218,21 @@ int MDSDFScheduler::reptArc (MDSDFPortHole& nearPort, MDSDFPortHole& farPort){
 	////////////////////////////
 
 int MDSDFScheduler::run() {
-  MDSDFSchedIter nextEntry(mySchedule);
-  MDSDFScheduleEntry* entry;
-
-  if(invalid) {
-    Error::abortRun(*galaxy(), "Error during setup - can't run");
+  if (!galaxy()) {
+    Error::abortRun("No galaxy to run");
     return FALSE;
   }
   if(haltRequested()) {
     Error::abortRun(*galaxy(), "Can't continue after run-time error");
     return FALSE;
   }
+  if(invalid) {
+    Error::abortRun(*galaxy(), "Error during setup - can't run");
+    return FALSE;
+  }
+
+  MDSDFSchedIter nextEntry(mySchedule);
+  MDSDFScheduleEntry* entry;
 
   while(numItersSoFar < numIters && !haltRequested()) {
     nextEntry.reset();
