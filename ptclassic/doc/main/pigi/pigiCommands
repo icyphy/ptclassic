@@ -59,6 +59,12 @@ If no target architectures are defined for the current domain, an
 error message will be issued.
 T}
 .sp 0.5
+edit-comment	;	T{
+Append a comment to a galaxy or universe.
+For a galaxy, the comment will form the descriptor field for the
+Other:profile command.
+T}
+.sp 0.5
 edit-seed	#	T{
 To specify the seed of the random number generation.
 T}
@@ -126,6 +132,10 @@ cursor.  The compile is recursive and so if the schematic
 contains sub-galaxies, each sub-galaxy schematic gets compiled also.
 Average users will not need this command.
 T}
+.sp 0.5
+display-schedule		T{
+Displays a parallel schedule if supported by the current Target.
+T}
 =
 \fBExtend Menu:\fP
 _
@@ -137,12 +147,13 @@ make-star	*	T{
 Make an icon for a new star.
 T}
 .sp 0.5
-load-stars	*	T{
-Load all stars defined in a given directory.
+load-star	L	T{
+Load the star pointed to by the cursor.
 T}
 .sp 0.5
-load	*	T{
-Load a particular star.
+load-star-perm	K	T{
+Permanently load a star so that you can subsequently load
+stars derived from it.
 T}
 =
 \fBFilter Menu:\fP
@@ -173,15 +184,23 @@ plot signal	~	T{
 Plot a signal.
 T}
 .sp 0.5
-DFT	~	T{
+plot Cx signal	-	T{
+Plot real and imaginary parts of a complex signal.
+T}
+.sp 0.5
+DFT	^	T{
 Plot the discrete-time Fourier transform (magnitude and phase) of a signal,
 as a function of normalized frequency.
+T}
+DFT of a Cx signal	_	T{
+Plot the discrete-time Fourier transform (magnitude and phase) of a complex
+signal, as a function of normalized frequency.
 T}
 =
 \fBOther Menu:\fP
 _
 .sp 0.5
-man		T{
+man	M	T{
 Display a section of the Almagest.
 Not functional at this time.
 T}
@@ -192,9 +211,13 @@ cursor.
 The information currently appears in the VEM command window.
 T}
 .sp 0.5
-options		Edit various Pigi options.
+options		T{
+Edit various Pigi options.
+T}
 .sp 0.5
-version		Displays Ptolemy version.
+version		T{
+Shows which pigiRpc executable is currently running.
+T}
 .sp 0.5
 exit-pigi		T{
 Clean exit from pigi application program.  VEM continues
