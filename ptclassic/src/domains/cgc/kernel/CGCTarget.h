@@ -142,6 +142,9 @@ protected:
 
 	CodeStream compileOptionsStream;
 	CodeStream linkOptionsStream;
+	CodeStream localLinkOptionsStream;
+	CodeStream remoteLinkOptionsStream;
+	CodeStream remoteFilesStream;
 	
 	// virtual function to initialize strings
 	virtual void initCodeStrings();
