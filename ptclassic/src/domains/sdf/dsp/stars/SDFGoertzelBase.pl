@@ -100,7 +100,7 @@ first-order feedback coefficient which is a function of k and N }
 	}
 	go {
 		// Run all-pole section of Goertzel's algorithm N iterations.
-		// Only one multipler (d1) in iteration.
+		// Only one multiplier (d1) in iteration.
 		// Zero the IIR state for each DFT calculation; otherwise,
 		// the filter output could grow without bound.
 		// state1 and state2 are states and not local variables

@@ -78,7 +78,7 @@ which is a function of k and N
 		// Discard all but the last sample
 		SDFGoertzelBase::go();
 
-		// Final value is function of two real IIR state values
+		// Final value is function of the two real IIR state values
 		double s1 = state1;
 		double s2 = state2;
 		Complex o(s1 + s2 * double(negWnReal), s2 * double(negWnImag));
