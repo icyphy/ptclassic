@@ -45,7 +45,8 @@ Target for TI TMSC50C5x DSP board.
 
 class DSKC50Target : public C50Target {
 public:
-    DSKC50Target(const char*,const char*);
+    DSKC50Target(const char* name,const char* desc,
+		    const char* assocDomain = C50domainName);
     DSKC50Target(const DSKC50Target&);
     /*virtual*/ int compileCode();
     /*virtual*/ void writeCode();
