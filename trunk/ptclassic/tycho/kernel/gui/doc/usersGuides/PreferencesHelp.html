@@ -8,41 +8,39 @@
 <p>
 The Tycho preferences manager allows you to set a number of preferences
 that control fonts, layout, and colors in the Tycho user interface.
+Preferences are grouped into <I>stylesheets</I>, where each stylesheet
+has one or more styles that you can choose and edit.
 
- <P>To open the preferences manager, choose the
-<CODE>Preferences...</CODE> entry from the <CODE>Help</CODE> menu on
-the right-hand side of any Tycho shell or editor. This brings up a
-window with a stack of buttons: clicking on a button brings up another
-window that gives you access to a set of preferences values. To change
-a preference, simply change the text in the corresponding entry box
-and press the <CODE>Apply</CODE> button. Pressing the <CODE>OK</CODE>
-button (or the <CODE>Return</CODE> key) applies any changed
-preferences and closes the window; the <CODE>Cancel</CODE> button
-(<CODE>Escape</CODE> key) closes the window without changing any
-preferences.
+ <P>To open the preferences manager, choose the <CODE>Style
+Preferences...</CODE> entry from the <CODE>Help</CODE> menu on the
+right-hand side of any Tycho main window. This brings up a window
+listing the currently-loaded style sheets. Each of these has an option
+menu that selects the currently-chosen style. For example, the
+<CODE>Fonts</CODE> style-sheet has (at least) the styles
+<CODE>Default</CODE> and <CODE>Small</CODE>. By selecting one of the
+styles in the option menu, all widgets that use that stylesheet will
+change to the chosen style.
 
- <P>If the preference is a font or color, pressing the button will
-bring up a modal dialog box containing a <A
-HREF="FontDialogHelp.html">FontDialog</A> or <A
-HREF="ColorBrowserHelp.html">ColorBrowser</A> selector, which you can use
-to select a new font or color. <I>The color browser requires
-that your press apply to make the change take effect -- OK will
-not work.</I> (Sorry, we're working on a fix.)
+ <P>To edit the values in a style, click on the edit button next to
+the option menu. For example, clicking on the Edit button of the Fonts
+stylesheet brings up a window that allows you to select eight
+different types of font used throughout Tycho. In any style editor,
+just change the option menu or check-button selections, or type into
+the entry field to change the value of the preference. All changes
+take effect immediately.
 
- <P>The buttons on the main preferences selection dialog have the
-same effects on all open preference viewers: <CODE>Apply</CODE> applies all changed
-preferences; <CODE>OK</CODE> applies all changed preferences and closes all
-open preference windows; <CODE>Cancel</CODE> closes all open preference windows
-without changing any preferences.
+ <P>Tycho stores your style preferences in the ~/.Tycho
+directory. The file in that directory named <CODE>profile</CODE>
+contains the styles within each stylesheet that you have chosen.
+(To make your choices all revert to the default styles, delete
+this file and restart Tycho.)
 
- <P>Tycho stores your changed preference in two files:
-<code>~/.Tycho/.preferences</code> contains a "snapshot" of your
-current preferences, including the undo
-information. <code>~/.Tycho/preferences</code> contains code that sets
-the preferences that are different to the default preferences.  Both
-of these files are rewritten by Tycho when you close the preferences
-editing dialog box.  If you wish to change preferences without using
-the preference dialog, edit the latter file and restart Tycho.
+ <P>Your preference values are stored in the sub-directory
+<CODE>styles</CODE>. For each style-sheet that you edited, Tycho
+creates a file in this directory containing the preferences that you
+changed. To revert all your styles to the default values, simple
+delete this directory and restart Tycho.
+
 <p>
 <a href="../../../../doc/index.html">Tycho Home Page</a><br>
 <p>
