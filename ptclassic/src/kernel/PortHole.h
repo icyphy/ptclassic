@@ -129,10 +129,7 @@ public:
 		return *(PortHole *)&GenericPort::realPort();
 	}
 
-	GenericPort& realPort() {
-		if (alias == NULL) return *this;
-		else return alias->realPort();
-	}
+	GenericPort& realPort();
 
 	GenericPort& setPort(const char* portName, Block* blk, dataType typ=FLOAT) {
 		setNameParent (portName, blk);
