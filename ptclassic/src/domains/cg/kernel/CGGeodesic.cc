@@ -41,7 +41,20 @@ F_SRC|F_DEST:
 
 #include "CGGeodesic.h"
 #include "Error.h"
+#include "SDFStar.h"
 #include <builtin.h>
+
+void CGGeodesic :: initialize() {
+	Geodesic :: initialize();
+	maxNumParticles = size();
+}
+
+void CGGeodesic :: incCount(int n) {
+	Geodesic :: incCount(n);
+	if (size() > maxNumParticles) maxNumParticles = size();
+}
+
+ISA_FUNC(CGGeodesic,Geodesic);
 
 // local functions
 static int gcd(int a, int b) {
@@ -57,18 +70,6 @@ static int gcd(int a, int b) {
 }
 
 inline int lcm(int a, int b) { return a * b / gcd(a,b);}
-
-void CGGeodesic :: initialize() {
-	Geodesic :: initialize();
-	maxNumParticles = size();
-}
-
-void CGGeodesic :: incCount(int n) {
-	Geodesic :: incCount(n);
-	if (size() > maxNumParticles) maxNumParticles = size();
-}
-
-ISA_FUNC(CGGeodesic,Geodesic);
 
 int CGGeodesic :: localBufSize() const {
 	if (src() != 0) return 0;
@@ -106,34 +107,66 @@ int CGGeodesic :: forkDelay() const {
 }
 
 // recursive function to compute buffer and forkbuf sizes.  Note that
-// buffers are only actually allocated for types 0 and F_SRC.  For others,
-// the return value represents a partial result, since we must compute
-// the LCM of all reader and writer values of numberTokens.
+// buffers are only actually allocated for types 0 and F_SRC.
+
+// We return 0 if the schedule has not yet been run and there are
+// delays, or old values are needed.
+
 int CGGeodesic :: internalBufSize() const {
-	int bsiz;
+	CGPortHole* dest = (CGPortHole*)destinationPort;
+	int bsiz = minNeeded();
 	int type = forkType();
-	switch (type) {
-	case 0:
-		// a normal buffer
-		bsiz = lcm(originatingPort->numberTokens,
-			   destinationPort->numberTokens);
-		break;
-		// output of fork: no buffer at all (we share the forkbuf)
-	case F_DEST:
-		return destinationPort->numberTokens;
-	default:
-		// an F_SRC (true fork buffer) or F_SRC|F_DEST buffer
-		// (a buffer that sits between fork stars).  Want the lcm
-		// of all connected ports.
-		{
-			CGPortHole* dPort = (CGPortHole*)destinationPort;
-			ListIter next(dPort->forkDests);
-			bsiz = (type == F_SRC ?
-				originatingPort->numberTokens : 1);
-			CGPortHole* p;
-			while ((p = (CGPortHole*)next++) != 0)
-				bsiz = lcm(bsiz,p->cgGeo().internalBufSize());
+	if ((type & F_SRC) != 0) {
+		// size must be >= max of all destbuf sizes.
+		CGPortHole* dPort = (CGPortHole*)destinationPort;
+		ListIter next(dPort->forkDests);
+		CGPortHole* p;
+		while ((p = (CGPortHole*)next++) != 0)
+			bsiz = max(bsiz,p->cgGeo().internalBufSize());
+	}
+// if there are delays or old values are used, it may be better to
+// use a larger size so that compile-time indexing is supportable.
+// The buffer size must divide the total number of tokens produced in
+// one execution.
+	if (numInit() > 0 || dest->usesOldValues()) {
+		// cannot determine size without schedule.
+		if (maxNumParticles == 0) return 0;
+		SDFStar* dstStar = (SDFStar*)dest->parent();
+		int total = dstStar->reps() * dest->numXfer();
+		if (total >= bsiz) {
+			// return the smallest factor of total
+			// that is >= size
+			int rval = total;
+			for (int d = 2; bsiz*d <= total; d++) {
+				if (total % d == 0)
+					rval = total / d;
+			}
+			return rval;
 		}
+		// if we fall out of this loop, run-time addressing
+		// will be required, so we might as well use the smaller
+		// size.
+	}
+	else {
+		// no delays: we still prefer to use lcm(nread,nwrite)
+		// (avoiding modulo addressing) unless it is very
+		// wasteful.  Heuristic: OK if <= wasteFactor() times the
+		// sum of nread and nwrite.
+		// example: 5->6 gives 11; 30 > 2*11 so 11 is used.
+		// 2->n, n odd, gives n+2; 2n < 2*(n+2) so 2n is used.
+		// to force use of lcm, make wasteFactor huge; to force
+		// minimum memory, make wasteFactor 1.
+
+		int nread = dest->numXfer();
+		int nwrite = originatingPort->numXfer();
+		int lcmValue = lcm(nread,nwrite);
+		if (lcmValue >= bsiz &&
+		    lcmValue <= wasteFactor() * (nread + nwrite))
+			return lcmValue;
 	}
 	return bsiz;
 }
+
+// default waste factor.
+double CGGeodesic::wasteFactor() const { return 2.0;}
+

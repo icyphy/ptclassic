@@ -41,7 +41,10 @@ public:
 	// if I am a fork destination, my memory is that of my source.
 
 	ProcMemory* memory() const;
-	
+protected:
+	// determine whether extra memory should be used to obtain
+	// linear access with no wraparound.
+	double wasteFactor() const;
 private:
 	int internalBufSize() const;
 	ProcMemory* mem;
