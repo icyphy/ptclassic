@@ -3,6 +3,7 @@ defstar {
 	domain { SDF }
 	derivedFrom { FIR }
 	desc {
+THIS STAR IS OBSOLETE ----- USE SDF RaisedCosine.
 An FIR filter with a magnitude frequency response shaped
 like the standard raised cosine used in digital communications.
 By default, the star upsamples by a factor of 16, so 16 outputs
