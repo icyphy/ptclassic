@@ -45,7 +45,8 @@ private:
 	istream *strm;		// associated input stream
 	TokenContext* stack;	// stack for include files
 	char* curfile;		// current input file name
-	int depth;		// depth of nesting
+	short depth;		// depth of nesting
+	short myStrm;		// true if strm needs deletion at end
 	int line_num;		// current line number
 	char comment_char;	// character for comments
 	char quote_char;	// character for quoted strings
@@ -82,6 +83,9 @@ public:
 	Tokenizer(istream& input,const char* spec,const char* w = defWhite);
 	Tokenizer(const char* buffer,const char* spec,const char* w = defWhite);
 	Tokenizer();
+
+	// destructor
+	~Tokenizer();
 
 	// get next token
 	Tokenizer& operator >> (char * s);
