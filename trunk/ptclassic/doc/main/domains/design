@@ -1,124 +1,148 @@
 .\" $Id$
-.H1 "Domain Design\**
+.H1 "Domain Design"
 .pp
-.(f
-\**This section can be skipped for those who are not interested in
-the domain design.  A knowledgeable reader will obtain the useful
-information to build his own domain from this section and from
-the documentation of any existing domain as a reference.
-.)f
-.IE "domain, creation"
+.IE "domain design"
 Data abstraction and polymorphism, two tenets of object-oriented
-programming, allow domains (models of computation) to be abstracted
+programming, allow domains (corresponding to models of computation)
+to be abstracted
 so that their differences are not visible from the kernel.
-By combining the domains of interest to the kernel, we can
-tune the system to a particular application.  For example,
-if we are interested in the network simulation, we can
-add only the DE and the SDF domains to the kernel, 
-excluding THOR or Capsim domains.
-This modularized design of the domains provides the
-extreme flexibility of \*(PT.
-For the abstraction of the domains, each domain should be built on
-the same basic structure, which will be discussed in this section.
+Domains can be selectively linked into \*(PT,
+and the mere action of linking them makes them visible and usable.
+\*(PT executables can therefore be created that are
+tuned to a particular application.  For example,
+if we are interested only in simulation of communication networks, we can
+link only the DE and the SDF domains to the kernel, 
+excluding other domains.
+.pp
+To define a new domain, it is necessary to define a base class
+for the stars in the domain, a universe class, a set of classes
+for interconnecting stars in the domain and passing data
+between them, a scheduler, a wormhole, a mechanism for
+connecting to other domains through the wormhole boundary,
+and a domain object.
+This is no small task.
+However, all of these objects have well-defined base classes
+from which the new classes must be derived, and most new domains
+make only very minor additions or changes to these base classes.
+Major changes, however, are possible, and may be required to introduce
+domains that operate in very different ways compared to the existing
+domains.
+.pp
+There is a great deal of flexibility in the definition of new domains,
+and only the \*(PT source code can provide full documentation.
+If the \fIptlang\fR preprocessor is to be used with a new domain,
+however, then there is less flexibility.
+This preprocessor generates C++ code that assumes that certain
+classes have been defined.  These classes normally contain
+the domain name as part of their class name, e.g.
+.c SDFStar ,
+and
+.c InSDFPort .
+Hence when defining a new domain, many new classes have to be defined.
+Of course, if these are identical to existing classes, the definition
+may be very simple, as in the following example:
+.(c
+#define XXXGeodesic AutoForkNode
+.)c
+In this example, a
+.c Geodesic
+has been defined for a new domain ``XXX'' to be identical
+to a class defined in the kernel,
+.c AutoForkNode .
 .pp
 A domain has a specific operational semantics for a block diagram
 representation.  The operational semantics is realized by a
 .c Scheduler
-for the domain.  The 
-.c Scheduler
-determines how to and when to fire the blocks in the domain.
-The main function of a
-.c Scheduler
-is to perform the compile-time and the runtime scheduling.
+for the domain, so in some sense this forms the heart
+of the domain.  The scheduler
+determines when to fire the blocks in an application.
+This determination can be made statically or dynamically.
 For that purpose, the
-.c Scheduler\ class
-provides two methods : \fIsetup()\fR (for compile-time scheduling),
-\fIrun()\fR (for runtime scheduling).
-It also provides two different methods to specify the stopping condition for
-the domain.  If the domain is that of a
+.c Scheduler
+base class has two methods : \fIsetup()\fR (for operations done once
+before a run, such as static scheduling), and
+\fIrun()\fR (for dynamically invoking blocks).
+The \fIrun()\fR method fires blocks under its control until
+a stopping condition is met.
+.IE "run() scheduler method"
+.IE "setup() scheduler method"
+Two different methods are provided to specify the stopping condition for
+the run.
+If the domain is that of a
 .c Universe ,
 we call the \fIsetStopTime()\fR method.  If the domain resides in a
 .c Wormhole ,
-we call the \fIresetStopTime()\fR method, instead.
+we call the \fIresetStopTime()\fR method.
+.IE "setStopTime() scheduler method"
+.IE "resetStopTime() scheduler method"
 .pp
-It may be also necessary to define domain specific
-.c Star\ class 
-and
-.c PortHole\ class .
+It may also be necessary to define domain specific star and
+.c PortHole
+classes.
 For example, the 
-.c Star s
-and the
-.c PortHole s
-in the DE domain need to keep the timing information while those
+stars and portholes
+in the DE domain need to keep timing information while those
 in the SDF domain need not.
-They may also have some properties accessed by the 
+They may also have some members and methods accessed by the 
 .c Scheduler
-in the domain.  The \fIrepetitions\fR in the 
-.c SDFStar\ class
-is an example.  The \fIrepetitions\fR of a 
-.c Star
+in the domain.  An example is the \fIrepetitions\fR in the 
+.c SDFStar
+class, which
 indicates how many times the
-.c Star
-will be executed in one iteration.  It is necessary only for the
-.c Scheduler
-in the SDF domain during the compile-time scheduling.
-Thus, the design of the generic
-.c Star\ class 
-and 
-.c PortHole\ class
-is closely related to the design of the
-.c Scheduler
-in the domain.
+star will be executed in one iteration.  It is required by the scheduler
+during the setup() phase to perform static scheduling.
+Similarly the
+.c SDFPortHole
+class contains methods for setting parameters that are specific
+to SDF, such as the number of
+.c Particle s
+consumed or produced on a porthole when the star fires.
 .pp
-The next step is to design 
-.c EventHorizon s.
-To be a domain in \*(PT, it can be coexistent with other domains.
-The
-.c Wormhole\ class
-and the
-.c EventHorizon\ class
-are two basic tools for domain interface in \*(PT.
-It is worth noting that a domain may do without the
-.c Wormhole\ class
-in the domain if the domain won't contain other domains inside.
-However, the
-.c EventHorizon\ class
-is still necessary for the domain to be an inner domain of a
-.c Wormhole .
-We have to define a pair of
-.c EventHorizon s
-for the new domain :
-.c (domain-name)toUniversal
+To get a new domain to interact with existing domains, it
+is necessary to define
+.c Wormhole
 and
-.c (domain-name)fromUniversal .
-Each
 .c EventHorizon
-can be placed in the input or output port of a
+classes.
+It is worth noting that a domain may do without the
 .c Wormhole
-depending on whether the domain is the inner domain of the
-.c Wormhole
-or the outer.
-Look at the section three for details on
-.c EventHorizon\ class .
+class if the domain will never contain other domains inside.
+.IE Wormhole
+.IE EventHorizon
+However, the
+.c EventHorizon
+class is required for the domain to be an inner domain of a
+wormhole.
+An event horizon actually consists of a pair of classes,
+.c XXXtoUniversal
+and
+.c XXXfromUniversal ,
+where
+.c XXX
+is the domain name.
+.IE toUniversal
+.IE fromUniversal
+These classes are placed in the input or output port of a
+wormhole
+depending on the direction of dataflow.
+Details of these classes are given below, including a specification
+of the universal event horizon.
 .pp
-If a domain is to contain other domains, the domain must have
-.c Wormhole\ class .
-The domain-specific 
-.c Wormhole\ class
-is necessary to disguise the
-.c Wormhole
-indistinguishable from other
-.c Star s
-in the outer domain.  The role of 
-.c Wormhole s
-is already discussed in the earlier part of this document.
-.pp
-There are two additional classes to be defined in a domain.
-One is the
-.c Universe\ class ,
-and the other is the
-.c Domain\ class .
-Their definitions are straightforward but very essential for
-domain abstraction in the kernel.  Refer to the source code
-for those classes for details (the code is self-explanatory).
-With those classes, the creation of a new domain is completed.
+Two additional classes defined in a domain are the
+.c Universe
+and
+.c Domain
+classes.
+.IE "Universe class"
+.IE "Domain class"
+Their definitions are straightforward but essential for
+domain abstraction in the kernel.  The source code
+for the bases classes in the kernel is self-explanatory,
+so it serves as the best reference.
+Wormhole design, however, is much more subtle,
+and hence is explained in more detail below.
+A complete domain definition also consists of a library of stars.
+However, the design of these stars is entirely up the domain
+designer, so there is little guidance we can provide.
+Note that for many new domains, it may be possible to use
+the ptlang preprocessor unchanged for the design of stars.

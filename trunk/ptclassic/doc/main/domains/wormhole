@@ -1,23 +1,28 @@
 .\" $Id$
-.H1 "Wormhole
+.H1 "The Wormhole Class"
 .pp
-.IE "wormhole, design"
+.IE "wormhole design"
+A wormhole for a domain is much like star belonging to that domain,
+but it can contain pointers to a subsystem that operates in a different
+domain.  The interface to that other domain is through a "universal
+event horizon".
+.IE "universal event horizon"
+The wormhole design, therefore, does not depend on the domain
+it contains, but only on the domain in which it is used as a block.
+It must look like a star in that outer domain.
+.pp
 The base
-.c Wormhole\ class
-is derived from 
-.c class\ Runnable 
-that is also the base class of 
-.c class\ Universe .
-As members of the
-.c Runnable\ class
-there are pointers to a component
+.c Wormhole
+class is derived from class
+.c Runnable ,
+just like the base class
+.c Universe .
+Every member of the
+.c Runnable
+class has a pointer to a component
 .c Galaxy
 and a
 .c Scheduler .
-A
-.c Wormhole
-is created automatically at compile time as already discussed in the
-introduction.
 Like a
 .c Universe ,
 a 
@@ -28,18 +33,19 @@ A
 .c Wormhole
 is different from a
 .c Universe
-in that it is not a stand-alone object. Instead, it is triggered
+in that it is not a stand-alone object.  Instead, it is triggered
 from the outer domain to initiate the scheduling.
 .pp
-Each domain has a derived 
-.c Wormhole\ class .
-For example, the SDF domain has 
-.c class\ SDFWormhole .
+Each domain has a derived
+.c Wormhole
+class.
+For example, the SDF domain has  class
+.c SDFWormhole .
 This domain-specific
 .c Wormhole
 is derived from not only the base
-.c Wormhole\ class
-but also the domain-specific star class,
+.c Wormhole
+class but also from the domain-specific star class,
 .c SDFStar .
 This multiple inheritance realizes the inherent nature of the
 .c Wormhole .
@@ -53,60 +59,36 @@ Second, internally it can encapsulate an entire foreign domain
 with a separate 
 .c Galaxy
 and a separate
-.c Scheduler 
-since it is derived from the
-.c Wormhole
-base class.
+.c Scheduler .
 .pp
 The 
 .c Scheduler 
-executes a
+executes a star by calling its \fIgo()\fR method.
+Before the execution of a star
+data packets (
+.c Particles )
+are delivered to the 
 .c Star
-by calling the \fIgo()\fR method of the
-.c Star .
-Before the execution of a
-.c Star ,
-the data packets are delivered to the 
-.c Star
-by \fIgrabData()\fR method of the input ports.
+via \fIgrabData()\fR method of the input ports.
+.IE "grabData()"
 After its execution, the 
 .c Star
-sends the data packets to other
-.c Star s
-by \fIsendData()\fR method of the output ports.
+sends particles to other stars
+via the \fIsendData()\fR method of the output ports.
+.IE "sendData()"
 Thus, the
 .c Scheduler
-calls a sequence of methods to execute a 
-.c Star :
-\fIgrabData()\fR of the input ports, \fIgo()\fR of the 
+calls a sequence of methods to execute a star:
+\fIgrabData()\fR on the input ports, \fIgo()\fR on the 
 .c Star ,
-and \fIsendData()\fR of the output ports.
-Since the
-.c Scheduler
-can not distinguish a
-.c Wormhole
-from a
-.c Star ,
-the
-.c Scheduler
-follows the same sequence of calls to execute the
-.c Wormhole .
-On the other hand,
-there is a sequence of actions to be performed for domain interface.
-Therefore, these actions are divided into three calls.
-The \fIgrabData()\fR of the input ports\** of a
-.(f
-\** The ports of a \fBWormhole\fR is called a \fBEventHorizon\fR.
-The \fBEventHorizon\fR will be discussed in the next section.
-.)f
-.c Wormhole
-delivers the data packets from the outside to the inside of the
-.c Wormhole .
-Similarly, the \fIsendData()\fR of the output ports of the
-.c Wormhole
-transfers the data packets from the inside to the outside of the
-.c Wormhole .
-The additional features of these methods will be discussed in the 
+and \fIsendData()\fR on the output ports.
+Since the scheduler
+can not distinguish a wormhole
+from a star,
+it follows the same sequence of calls to fire the wormhole.
+In this case \fIgrabData()\fR and \fIsendData()\fR operate
+via the event horizon.
+The design of these methods will be discussed in the 
 next section.
 .pp
 The main part of the domain interface is performed in the
@@ -124,24 +106,23 @@ void SDFWormhole :: go() {
 	run();
 }
 .)c
-After getting the input data packets (\fIgrabData()\fR of the input ports),
+After getting the input data packets (\fIgrabData()\fR),
 the
 .c Wormhole
 first synchronize the inner domain with the outer domain.
 The \fIcurrentTime\fR of the inner 
 .IE "currentTime, scheduler"
-.c scheduler
-is set by the arrival time of the data packets
+scheduler is set to equal the arrival time of the data packets
 .c (arrivalTime) .
 Since the SDF domain is untimed, decision on the arrival time of the
-data packets is not trivial.  See section 4 for details.
+data packets is not trivial, as explained above.
 The next step is to call the \fIrun()\fR method of the base
 .c Wormhole\ class .
 Here is a part of the definition\** of the base 
 .c Wormhole\ class .
 .(f
 \** We omit the members that are not relevant to the domain interface such
-as constructor, print methods.
+as constructor and print methods.
 .)f
 .(c
 	//////////////////////////////
@@ -175,69 +156,53 @@ private :
 };
 .)c
 The \fIrun()\fR method of the
-.c Wormhole\ class
-consists of four method calls.
+.c Wormhole
+class consists of four method calls.
 The first one, \fIcheckReady()\fR, checks the readiness of the input data.
-Suppose the
-.c Wormhole
-is a
-.c DE\ Wormhole
-and the inner domain is a SDF domain.  If there is an input event to the
-.c Wormhole ,
-the
-.c Wormhole
+Suppose the wormhole is a
+DE wormhole,
+and the inner domain is an SDF domain.  If there is an input event to the
+wormhole, then the wormhole
 is runnable\** from the point of view of the DE domain, and the \fIgo()\fR
 method is called.
 .IE "runnable"
 .(f
-\**The decision of runnability of a \fBWormhole\fR is indistinguishable
-from those of other \fBstars\fR.  For example, a \fBSDFWormhole\fR is
-runnable when all input ports have sufficient data packets.
+\**The decision of runnability of a wormhole is indistinguishable
+from those of other stars.  For example, an
+.c SDFWormhole
+is runnable when all input ports have sufficient data packets.
 .)f
 However, the inner SDF domain may not be fired before all input 
 .c PortHole s
-have enough data packets.  Then, the \fIcheckReady()\fR method
-will return FALSE to quit the execution of the
-.c Wormhole .
-See the next section for complete discussion of this method.
+have enough particles.  In this case, the \fIcheckReady()\fR method
+will return FALSE to terminate the execution.
+This method is discussed in more detail below.
 .pp
 When all input data packets are ready, we can initiate the
-inner
-.c Scheduler
+inner scheduler
 by calling the \fIrun()\fR method of the
-.c Runnable\ class
-which is the base class of the
+.c Runnable
+class which is the base class of the
 .c Wormhole .
-Before initiate the inner 
-.c Scheduler ,
-we should specify the stopping condition of the
-.c Scheduler ,
-which is the function of the
-\fIsetStopTime()\fR method.  The \fIresetStopTime()\fR method
-of the
-.c Scheduler\ class
-set the stopping condition.  Decision of the stopping condition
-.IE "stopping condition"
-is the most complicated task in the domain interface.  We will discuss
-this task in the section 4 in great detail.
-.pp
-After execution of the inner domain, we may need some extra actions
-before sending the output data packets out (\fIsumUp()\fR method).
-This method will be also discussed in the section 4.
+Before initiating the inner scheduler,
+we should specify its stopping condition
+using the \fIsetStopTime()\fR method of the wormhole,
+which invokes the \fIresetStopTime()\fR method of the scheduler.
+How to set the value of the stop time is discussed above.
 .pp
 In the initialization stage of the outer
-.c Galaxy ,
+galaxy,
 the \fIstart()\fR method is called.  The \fIstart()\fR method of a
+wormhole calls the \fIsetup()\fR method of the base
 .c Wormhole
-calls the \fIsetup()\fR method of the base
-.c Wormhole\ class
-(refer to \fISDFWormhole :: start()\fR).
+class (see for instance the source code
+for \fISDFWormhole :: start()\fR in ~ptolemy/src/domains/sdf/kernel).
 In the \fIsetup()\fR method, the inner domain is not only initialized
-but also the compile time scheduling for the inner domain is performed.
-And, the flag, \fIstopBeforeDeadlocked\fR, is set FALSE by default.
-The flag will be set TRUE by the inner
-.c Scheduler
-when the inner domain is not deadlocked (meaning that no
-.c Star
-in the domain is runnable) before finishes the execution.
-.IE "deadlocked"
+but also any compile-time scheduling for the inner domain is performed.
+Also, the flag \fIstopBeforeDeadlocked\fR is set FALSE by default.
+The flag will be set TRUE by the inner scheduler
+when the inner domain suspends execution before
+being deadlocked (meaning that one or more stars
+in the domain is runnable).
+.IE "deadlock"
+.IE "stopBeforeDeadlocked"
