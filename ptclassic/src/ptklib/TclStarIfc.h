@@ -106,6 +106,8 @@ public:
 	void setAllNewOutputFlags(int flag);
 
 	Block* myStar;
+
+	char* id() { return starID; }
 protected:
 	// A static variable used to create names that are
 	// guaranteed to be unique.  After each use, it should
