@@ -5,39 +5,39 @@
 # Test icon library for CT domain
 
 termstyle 3-1-east {
-    terminal input-0 -coords {0 50} -direction w -style circle
-    terminal input-1 -coords {50 0} -direction n -style circle
-    terminal input-2 -coords {50 100} -direction s -style circle
+    terminal input-0 -coords {0 50} -direction w -style arrowtail
+    terminal input-1 -coords {50 0} -direction n -style arrowtail
+    terminal input-2 -coords {50 100} -direction s -style arrowtail
     terminal output -coords {100 50} -direction e \
             -style arrowout \
             -tags output
 }
 
 termstyle 2-1-north-east {
-    terminal input-0 -coords {0 50} -direction w -style circle
-    terminal input-1 -coords {50 0} -direction n -style circle
+    terminal input-0 -coords {0 50} -direction w -style arrowtail
+    terminal input-1 -coords {50 0} -direction n -style arrowtail
     terminal output -coords {100 50} -direction e \
             -style arrowout \
             -tags output
 }
 
 termstyle 2-1-north-west {
-    terminal input-0 -coords {100 50} -direction e -style circle
-    terminal input-1 -coords {50 0} -direction n -style circle
+    terminal input-0 -coords {100 50} -direction e -style arrowtail
+    terminal input-1 -coords {50 0} -direction n -style arrowtail
     terminal output -coords {0 50} -direction w \
             -style arrowout \
             -tags output
 }
 
 termstyle 2-1-east {
-    terminal input-0 -coords {0 25} -direction w -style circle
-    terminal input-1 -coords {0 75} -direction w -style circle
+    terminal input-0 -coords {0 25} -direction w -style arrowtail
+    terminal input-1 -coords {0 75} -direction w -style arrowtail
     terminal output -coords {100 50} -direction e \
             -style arrowout -fill green2 -tags output
 }
 
 termstyle 1-0-east {
-    terminal input -coords {0 50} -direction w -style circle
+    terminal input -coords {0 50} -direction w -style arrowtail
 }
 
 termstyle 0-1-east {
@@ -48,7 +48,7 @@ termstyle 0-1-east {
 }
 
 termstyle multi_1-0-east {
-    terminal input -coords {0 50} -direction w -style circle -slash 1
+    terminal input -coords {0 50} -direction w -style arrowtail -slash 1
 }
 
 termstyle 0-multi_1-east {
@@ -60,7 +60,7 @@ termstyle 0-multi_1-east {
 }
 
 termstyle 1-0-west {
-    terminal input -coords {100 50} -direction e -style circle
+    terminal input -coords {100 50} -direction e -style arrowtail
 }
 
 termstyle 0-1-west {
@@ -71,7 +71,7 @@ termstyle 0-1-west {
 }
 
 termstyle multi_1-0-west {
-    terminal input -coords {100 50} -direction e -style circle -slash 1
+    terminal input -coords {100 50} -direction e -style arrowtail -slash 1
 }
 
 termstyle 0-multi_1-west {
@@ -83,36 +83,36 @@ termstyle 0-multi_1-west {
 }
 
 termstyle 1-1-east {
-    terminal input -coords {0 50} -direction w -style circle
+    terminal input -coords {0 50} -direction w -style arrowtail
     terminal output -coords {100 50} -direction e \
             -style arrowout \
             -tags output
 }
 
 termstyle 1-1-west {
-    terminal input -coords {100 50} -direction e -style circle
+    terminal input -coords {100 50} -direction e -style arrowtail
     terminal output -coords {0 50} -direction w \
             -style arrowout \
             -tags output
 }
 
 termstyle 1_multi-1-east {
-    terminal input -coords {0 50} -direction w -style circle -slash 1
+    terminal input -coords {0 50} -direction w -style arrowtail -slash 1
     terminal output -coords {100 50} -direction e \
             -style arrowout \
             -tags output
 }
 
 termstyle 1_multi-1-west {
-    terminal input -coords {100 50} -direction e -style circle -slash 1
+    terminal input -coords {100 50} -direction e -style arrowtail -slash 1
     terminal output -coords {0 50} -direction w \
             -style arrowout \
             -tags output
 }
 
 termstyle 2-2-east {
-    terminal input-0 -coords {0 25} -direction w -style circle
-    terminal input-1 -coords {0 75} -direction w -style circle
+    terminal input-0 -coords {0 25} -direction w -style arrowtail
+    terminal input-1 -coords {0 75} -direction w -style arrowtail
     terminal output-0 -coords {100 25} -direction e \
             -style arrowout -fill green2 -tags output
     terminal output-1 -coords {100 75} -direction e \
@@ -194,7 +194,7 @@ group sink -label {Sink Icons} {
 
     } {
         terminal input -coords {0 50} -direction w \
-                -style circle -fill red
+                -style arrowtail -fill red
     }
 }
 
