@@ -200,6 +200,85 @@ StringList State::parseNestedExpression(const char* expression) {
     return parsedExpression;
 }
 
+// The next token on the lexer is treated as a filename
+int State :: mergeFileContents(Tokenizer& lexer, ParseToken& t, char* token) {
+	char filename[TOKSIZE];
+
+	// disable special characters, e.g. so '/' does not screw us up.
+	const char* tc = lexer.setSpecial("");
+	lexer >> filename;
+	StringList parsedFileName = parseFileName(filename);
+	lexer.setSpecial(tc);		// re-enable special characters
+
+	// check for an error in parsing the file name
+	if (parsedFileName.length() == 0) return FALSE;
+
+	// direct the lexer to parse the contents of the file
+	if (!lexer.fromFile(parsedFileName)) {
+		StringList msg;
+		msg << parsedFileName << ": " << why();
+		parseError("cannot open the file ", msg);
+		t.tok = T_ERROR;
+		return FALSE;
+	}
+
+	lexer >> token;		// overwrites '<' char in token buffer
+	return TRUE;
+}
+
+// Send the next token on the lexer to be evaluated by an external interpreter
+int State::sendToInterpreter(Tokenizer& lexer, ParseToken& t, char* token) {
+	char shellCommand[TOKSIZE];
+
+	// temporarily disable special characters because we don't
+	// know what special characters the external interpreter uses
+	const char* tc = lexer.setSpecial("");
+	lexer >> shellCommand;
+	StringList parsedCommand = parseNestedExpression(shellCommand);
+	lexer.setSpecial(tc);		// re-enable special characters
+
+	// check for an error in parsing the expression
+	if (parsedCommand.length() == 0) return FALSE;
+
+	// send the command to the external interpreter
+	const char* result = interp.interpreter(parsedCommand);
+
+	// check for an error from the interpreter
+	if (result == 0) {
+		StringList msg;
+		msg << "'" << shellCommand << "'"
+		    << " which was expanded into "
+		    << "'" << parsedCommand << "'";
+		parseError("could not evaluate ", msg);
+		t.tok = T_ERROR;
+		return FALSE;
+	}
+
+	lexer.pushBack(result);		// overwrites ! in expr
+	lexer >> token;			// updates token buffer
+	return TRUE;
+}
+
+// Look for parameters of the form {name}
+int State :: getParameterName(Tokenizer& lexer, char* token) {
+	char parameterName[TOKSIZE], closeBraceBuf[TOKSIZE];
+
+	// look for a state name followed by a closed curly brace '}'
+	lexer >> parameterName;
+	lexer >> closeBraceBuf;
+	const State* s = lookup(parameterName, parent()->parent());
+	if (s == 0 || closeBraceBuf[0] != '}' || closeBraceBuf[1]) {
+		lexer.pushBack(closeBraceBuf);
+		lexer.pushBack(parameterName);
+	}
+	else {
+		StringList value = s->currentValue();
+		lexer.pushBack(value);	// overwrites {name} in expr
+		lexer >> token;		// update token buffer
+	}
+	return TRUE;
+}
+
 // The state tokenizer: return next token when parsing a state
 // initializer string.  Handles references to files and other states.
 // We allow one push back token in State class to support multithreading
@@ -213,72 +292,23 @@ State :: getParseToken(Tokenizer& lexer, int stateType) {
 	}
 	lexer >> token;
 
-	// read tokens from a file name
-	if (token[0] == '<' && token[1] == 0) {
-		char filename[TOKSIZE];
-		// temporarily disable special characters, e.g. so '/' 
-		// does not screw us up.
-		const char* tc = lexer.setSpecial("");
-		lexer >> filename;
-		StringList parsedFileName = parseFileName(filename);
-		// enable special characters
-		lexer.setSpecial(tc);
-		// check for an error in parsing the file name
-		if (parsedFileName.length() == 0) return t;
-		// direct the lexer to parse the contents of the file
-		if (!lexer.fromFile(parsedFileName)) {
-			StringList msg;
-			msg << parsedFileName << ": " << why();
-			parseError("cannot open the file ", msg);
-			t.tok = T_ERROR;
-			return t;
-		}
-		else lexer >> token;	// overwrites '<' char in token buffer
-	}
+	// process single character directives
+	// '<' treat next token as a file name to be read
+	// '!' send next token to an external interpreter for evaluation
+	// '{' look for {parameterName} and replace it with its value
+	if (token[1] == 0) {
+		switch ( *token ) {
+		    case '<':
+			if (!mergeFileContents(lexer, t, token)) return t;
+			break;
 
-	// read tokens from the output of an external interpreter
-	if (token[0] == '!' && token[1] == 0) {
-		char shellCommand[TOKSIZE];
-		// temporarily disable special characters because we don't
-		// know what special characters the external interpreter uses
-		const char* tc = lexer.setSpecial("");
-		lexer >> shellCommand;
-		StringList parsedCommand = parseNestedExpression(shellCommand);
-		// enable special characters
-		lexer.setSpecial(tc);
-		// send the command to the external interpreter
-		const char* result = interp.interpreter(parsedCommand);
-		// check for an error from the interpreter
-		if (result == 0) {
-			StringList msg;
-			msg << "'" << shellCommand << "'"
-			    << " which was expanded into "
-			    << "'" << parsedCommand << "'";
-			parseError("could not evaluate ", msg);
-			t.tok = T_ERROR;
-			return t;
-		}
-		else {
-			lexer.pushBack(result);	// overwrites ! in expr
-			lexer >> token;		// updates token buffer
-		}
-	}
+		    case '!':
+			if (!sendToInterpreter(lexer, t, token)) return t;
+			break;
 
-	if (token[0] == '{' && token[1] == 0) {
-		char parameterName[TOKSIZE], closeBraceBuf[TOKSIZE];
-
-		// look for a state name followed by a closed curly brace '}'
-		lexer >> parameterName;
-		lexer >> closeBraceBuf;
-		const State* s = lookup(parameterName, parent()->parent());
-		if (s == 0 || closeBraceBuf[0] != '}' || closeBraceBuf[1]) {
-			lexer.pushBack(closeBraceBuf);
-			lexer.pushBack(parameterName);
-		}
-		else {
-			StringList value = s->currentValue();
-			lexer.pushBack(value);	// overwrites {name} in expr
-			lexer >> token;		// update token buffer
+		    case '{':
+			if (!getParameterName(lexer, token)) return t;
+			break;
 		}
 	}
 
