@@ -31,6 +31,21 @@
 # 						COPYRIGHTENDKEY
 #######################################################################
 
+#####################################################################
+#### openContext
+# Open a file based on its extension, name, or header.
+# If an editor has been registered for the file or directory, use it to
+# open the file or directory. Otherwise, if it is a file, open a plain
+# text editor and return the name of the editor object. If a window
+# already exists editing this file, simply raise it instead. New
+# windows are always opened at the global scope. File names are
+# expanded using <code>::tycho::expandPath</code>, making them absolute
+# and unique.
+#
+proc ::tycho::openContext {filename args} {
+    eval ::tycho::File::openContext $filename $args
+}
+
 #######################################################################
 #### File
 # This is a base class for widgets that have persistent data in files.
@@ -43,7 +58,7 @@
 # Unfortunately, there appears to be no way to accomplish this when using
 # a standard itkwish.
 # <p>
-# If the File a is "attached" to a Displayer object, then the File
+# If the File is "attached" to a Displayer object, then the File
 # object initialize its menu bar with three menus. The "File" menu
 # contains commands to open a file, insert a file, save data to a file,
 # save as some other file name, print, evaluate the data, reload the
@@ -183,48 +198,26 @@ class ::tycho::File {
     # Toggle the read-only status of a file (maybe invoking revision control).
     method toggleReadOnly {}
 
-    # Append a file editor to the window menu.
-    method windowMenuAppend {obj label {type {}}}
-
-    # Add me to the window menus of all open File objects.
+    # Add me to the window menus of all menu bars
     method windowMenuAddAll {label}
+
+    # Remove a label from the window menus of all menu bars
+    method windowMenuRemoveAll {label}
 
     ##########################################################################
     ####                         public procedures                        ####
 
     # If the argument is a File object, call its autoSave method.
-    proc callAutoSave {obj} {}
+    proc callAutoSave {obj}
 
     # Call the saveCrash method for all File objects.
-    proc emergencySave {} {}
+    proc emergencySave {}
 
-    # Is the file already open? if YES, then return the window name,
-    # if NO, then return 0.
-    proc isFileOpen {filename} {}
+    # Edit a file based on its extension, mode, etc
+    proc openContext {filename {mode {}}}
 
     # Open a file browser, and then open an editor for the file.
-    proc openWin {{megawidget {}}} {}
-
-    # Edit a file using the file extension to select an editor.
-    proc openContext {filename} {}
-
-    # Register directory contents and an associated viewing command.
-    proc registerContents \
-	    {contents filecommand {description {}} {editorclass {}}} {}
-
-    # Register file extensions and an associated viewing command.
-    proc registerExtensions \
-	    {extensions filecommand {description {}} {editorclass {}}} {}
-
-    # Register file names and an associated viewing command.
-    proc registerFilenames \
-	    {filename filecommand {description {}} {editorclass {}}} {}
-
-    # Return the registered viewing commands for a file or directory name.
-    proc registeredCommands {name} {}
-
-    # Remove a filename from the window menus of all open File objects.
-    proc windowMenuRemoveAll {filename}
+    proc openWin {{megawidget {}}}
 
     # Get the window name by the rootname of a file.
     proc winGetByRootName {rootname}
@@ -243,15 +236,6 @@ class ::tycho::File {
 
     ##########################################################################
     ####                         protected variables                      ####
-
-    # This array stores object names indexed by file names so that
-    # if the same file is opened a second time, we can just raise
-    # the window.
-    protected common filesOpen
-
-    # This array stores the "type" of a file, indexed by file names,
-    # so that the Window submenus can be set up properly.
-    protected common filesOpenTypes
 
     # Indicate whether or not the file has been modified since it was
     # last saved.
@@ -286,31 +270,15 @@ class ::tycho::File {
     # The expanded path to the current file.
     private variable completeFilePath "NoName"
 
-    # The object representing the current resource.
-    private variable resourceObject ""
-
-    # List of registered viewing commands by extension.
-    private common editorsExtension
-
-    # List of registered viewing commands by filename.
-    private common editorsFilename
-
-    # List of registered viewing commands by directory contents.
-    private common editorsContents
-
     # This array stores the names of all currently active objects
     # of type File.  This is used to create crash recovery files.
     private common fileObjects
 
-    # Keep track of registered editors to put them into the Window menu.
-    private common windowMenuEntries {}
+    # The object representing the current resource.
+    private variable resourceObject ""
 
     # Keep track of the compare widget
     private variable diffWidget {}
-
-    # Class identifier
-    private variable myclass {}
-
 }
 
 #########################################################################
@@ -341,26 +309,30 @@ configbody ::tycho::File::file {
 	    delete object $resourceObject
 	    set resourceObject ""
 	}
-        if {[info exists filesOpen($completeFilePath)] \
-                && ![$filesOpen($completeFilePath) getReadOnly] \
-                && !$readOnly} {
-            $filesOpen($completeFilePath) raiseWindow
-            if {![safeEval ::tycho::askuser \
-                    "File $completeFilePath is already open for writing. \
-                    Proceed anyway?"]} {
-                # Exit by triggering an error.
-                ::tycho::silentError
-            }
-        }
+	if { $completeFilePath != "NoName" \
+		&& [::tycho::registry isopen $completeFilePath] } {
+	    foreach win [::tycho::registry windows $completeFilePath] {
+		if { ![$win getReadOnly] && ![getReadOnly]} {
+		    $win raiseWindow
+		    if {![safeEval ::tycho::askuser \
+			    "File $completeFilePath is already open for \
+			    writing. Proceed anyway?"]} {
+			# Exit by triggering an error.
+			::tycho::silentError
+		    }
+		    break
+		}
+	    }
+	}
         # Following used to be conditional using:
         # if { $itk_option(-file) != "" && $itk_option(-file) != "NoName" }
         displayer configure -title "$itk_option(-file)"
-        
+
         # Keep track of which files are open by name.
         # This is used to avoid opening the same file twice.
         # It is also used to maintain the Window menu entries.
         if {$previousfile != {}} {
-            windowMenuRemoveAll $previousfile
+	    ::tycho::deregister window $previousfile $this
             # unmap the revcontrol window.
             set topwin $itk_component(hull)
             if {[winfo exists $topwin.revcontrol]} {
@@ -376,10 +348,11 @@ configbody ::tycho::File::file {
             }
         }
         if {$completeFilePath != "NoName"} {
-            # Add the current object to the menu entries in all open editors.
-            windowMenuAddAll $completeFilePath
             set previousfile $completeFilePath
         }
+	# Add the current object to the menu entries in all open editors.
+	windowMenuAddAll $completeFilePath
+
 	# Remove Control-X from the <<Cut>> event 
 	# In Itcl2.2, we have virtual events, so Control-Key-x is bound to
 	#<<Cut>> in tk.tcl.  This means that we cannot have things like C-x C-r
@@ -414,8 +387,6 @@ configbody ::tycho::File::tmpfile {
 body ::tycho::File::constructor {args} {
     global tcl_platform
 
-    # Store my class identifier in a private variable.
-    set myclass "[info class]"
 
     # Bindings.
     # <Control-x><Control-f> is bound in TopLevel, so don't rebind it here.
@@ -444,11 +415,6 @@ body ::tycho::File::constructor {args} {
 
     # Initiate the auto-save loop
     autoSave
-
-    # FIXME: Because of some Itcl bogosity, filesOpen finds itself
-    # not settable as an array.  Here we force it to be an array
-    # and hope nobody uses the file name here.
-    # set filesOpen(junktychofileforitclbogosity) junk
 }
 
 #####################################################################
@@ -458,7 +424,6 @@ body ::tycho::File::constructor {args} {
 # error.  This has the effect of undoing the destruction.
 #
 body ::tycho::File::destructor {} {
-
     if {[info exists modified]} {
 	if {$itk_option(-tmpfile)} { 
 	    # This is a temporary file, if it is modified, as the user
@@ -471,16 +436,17 @@ body ::tycho::File::destructor {} {
 	    saveQuery
 	}
     }
+    # Remove this file from all menubars
+    windowMenuRemoveAll $completeFilePath
 
-    if { $completeFilePath != "NoName" } {
-        windowMenuRemoveAll $completeFilePath
+    # Deregister this menubar
+    if { [menubar] != "" } {
+	::tycho::deregister menubar [menubar]
     }
-
     # If an error occurred in construction, this may not exist.
-    if [info exists fileObjects($this)] {
+    if [::info exists fileObjects($this)] {
 	unset fileObjects($this)
     }
-    
     # Do not get rid of the backup files.  This should be done
     # only on a successful save.
     # removeBackupFiles
@@ -691,7 +657,7 @@ body ::tycho::File::markModified {} {
 #
 body ::tycho::File::markUnmodified {} {
     if $modified {
-	if $readOnly {
+	if [getReadOnly] {
  	    statusbar configure -filestatus "readonly"	    
 	} {
 	    statusbar configure -filestatus "readwrite"
@@ -1050,63 +1016,42 @@ body ::tycho::File::toggleReadOnly {} {
 #### windowMenuAddAll
 # Add me to all "Window" menus of all current file objects.
 # The argument, normally a file name, gives the menu label.
-# If a menu entry already exists with the given label, leave it alone
-# and ignore the call. Also ignore it if this View is not inside a
-# Displayer.
+# Do nothing if this View is not inside a Displayer.
 #
 body ::tycho::File::windowMenuAddAll {label} {
-    if {![info exists filesOpen($completeFilePath)] && [displayer] != {}} {
-        set filesOpen($label) $this
-	set filesOpenTypes($label) $viewType
-        foreach fileobj [array names fileObjects] {
-            catch {$fileobj windowMenuAppend $this $label $viewType}
-        }
+    # puts "windowMenuAddAll $label ([info class])"
+    if { [displayer] == {} } {
+	return
+    }
+    set mode [::tycho::registry viewmode [info class]]
+    if { $label != "NoName" } {
+	::tycho::register window $label $this \
+		-label $label \
+		-mode $mode
+    } elseif { $mode != "" } {
+	set label [::tycho::registry modecget $mode -label]
+	if { $label != "" } {
+	    ::tycho::register window $label $this \
+		    -label "Untitled $label" \
+		    -mode $mode
+	}
     }
 }
 
 #####################################################################
-#### windowMenuAppend
-# Place the name of an open file editor in the "Window" menu.
-# The second argument, normally a filename, gives the menu label.
-# If the given file object has a non-null value of its "viewType"
-# variable, then the editor is placed into an appropriate
-# sub-menu of the Window menu, otherwise it is appended to the end.
+#### windowMenuRemoveAll
+# Remove the specified label from the Window menu of all
+# menu bars.  The specified label must match
+# exactly the label given in the call to <code>windowMenuAddAll</code>
+# that created the entry in the first place. Do nothing if this View
+# is not inside a Displayer.
 #
-body ::tycho::File::windowMenuAppend {obj label {type {}}} {
-    # Avoid entries with empty names or NoName
-    if {$label != {NoName} && $label != {}} {
-	switch -exact $type {
-	    "text" {
-		menubar command $label opentext \
-			-label $label \
-			-command "$obj raiseWindow"
-		menubar enable opentext
-	    }
-	    "html" {
-		menubar command $label openhtml \
-			-label $label \
-			-command "$obj raiseWindow"
-		menubar enable openhtml
-	    }
-	    "graphics" {
-		menubar command $label opengraphics \
-			-label $label \
-			-command "$obj raiseWindow"
-		menubar enable opengraphics
-	    }
-	    "tools" {
-		menubar command $label opentools \
-			-label $label \
-			-command "$obj raiseWindow"
-		menubar enable {Open tools}
-	    }
-	    default {
-		# Add to the end of the main menu
-		menubar command $label window \
-			-label $label -command "$obj raiseWindow"
-	    }
-	}
+body ::tycho::File::windowMenuRemoveAll {label} {
+    if { [displayer] == {} } {
+	return
     }
+    # puts "windowMenuRemoveAll $label $this"
+    ::tycho::deregister window $label $this
 }
 
 #########################################################################
@@ -1154,18 +1099,79 @@ body ::tycho::File::indicateReadOnly {bool} {
 }
 
 #####################################################################
-#### isFileOpen
-# Check if the file is already open, if YES, then return the window name,
-# if NO, then return empty string.
+#### openContext
+# If an editor has been registered for the file or directory, use it to
+# open the file or directory. Otherwise, if it is a file, open a plain
+# text editor and return the name of the editor object. If a window
+# already exists editing this file, simply raise it instead. New
+# windows are always opened at the global scope. File names are
+# expanded using <code>::tycho::expandPath</code>, making them absolute
+# and unique.
 #
-body ::tycho::File::isFileOpen {filename} {
+# The _mode_ argument, if supplied, overrides the default mode
+# and the mode determined from
+# the file. If the file is already open in this mode, raise the
+# viewer window. If not, then open it. Note: It is the callers'
+# responsibility to ensure that multiple open windows on the same
+# file behave correctly.
+#
+body ::tycho::File::openContext {filename {mode {}}} {
     set filename [::tycho::expandPath $filename]
-    if {[info exists filesOpen($filename)]} {
-	set winName $filesOpen($filename)
+
+    if { $mode == "" } {
+	# We only want one window to be open on this file
+	if [::tycho::registry isopen $filename] {
+	    set win [lindex [::tycho::registry windows $filename] 0]
+	    if [catch {$win raiseWindow} msg] {
+                # FIXME
+		puts "!!! windowMenuRemoveAll $filename !!!"
+		# windowMenuRemoveAll $filename
+		global ::errorInfo
+		set saveInfo $errorInfo
+		error "Registered command failed on $filename:\n$msg" $saveInfo
+	    }
+	    return $win
+	}
     } else {
-	set winName ""
+	# We allow one window in each mode
+	foreach win [::tycho::registry windows $filename] {
+	    if { [::tycho::registry windowcget $filename $win -mode] \
+		    == $mode } {
+		if [catch {$win raiseWindow} msg] {
+		    windowMenuRemoveAll $filename
+		    global ::errorInfo
+		    set saveInfo $errorInfo
+		    error "Registered command failed on \
+			    $filename:\n$msg" $saveInfo
+		}
+		return $win
+	    }
+	}
     }
-    return $winName
+    # If we got to here, we can open the file in the appropriate mode
+    # Check for existing autosave files
+    set filename [checkForAutoSaveFiles $filename]
+
+    # If a mode is not supplied, get the default mode and
+    # override with the mode from the file header
+    if { $mode == "" } {
+	set mode [::tycho::readFileHeader $filename junk]
+	if { $mode == "" } {
+	    set mode [::tycho::registry filemode $filename]
+	}
+    }
+
+    # Get the command for this mode and execute it
+    set command [::tycho::registry modecget $mode -command]
+    if [catch {
+	set command [format $command $filename]
+	set result [uplevel #0 $command]
+    } msg] {
+	global ::errorInfo
+	set saveInfo $errorInfo
+	error "Registered command failed on $filename:\n$msg" $saveInfo
+    }
+    return $result
 }
 
 #####################################################################
@@ -1204,255 +1210,6 @@ body ::tycho::File::openWin {{megawidget {}}} {
 }
 
 #####################################################################
-#### openContext
-# If an editor has been registered for the file or directory, use it to
-# open the file or directory. Otherwise, if it is a file, open a plain
-# text editor and return the name of the editor object. If a window
-# already exists editing this file, simply raise it instead. New
-# windows are always opened at the global scope. File names are
-# expanded using <code>::tycho::expandPath</code>, making them absolute
-# and unique.
-#
-body ::tycho::File::openContext {filename} {
-    set filename [::tycho::expandPath $filename]
-
-    if {[info exists filesOpen] && \
-	    [info exists filesOpen($filename)]} {
-	if [catch {$filesOpen($filename) raiseWindow} msg] {
-            windowMenuRemoveAll $filename
-            global ::errorInfo
-            set saveInfo $errorInfo
-            error "Registered command failed on $filename:\n$msg" $saveInfo
-        }
-	return $filesOpen($filename)
-    } {
-	#check for existing autosave files
-	set filename [checkForAutoSaveFiles $filename]
-        set reg [registeredCommands $filename]
-        if {$reg != {}} {
-            if [catch {
-                set command [format $reg $filename]
-                set result [uplevel #0 $command]
-            } msg] {
-                global ::errorInfo
-                set saveInfo $errorInfo
-                error "Registered command failed on $filename:\n$msg" $saveInfo
-            }
-            return $result
-        } {
-            ::tycho::view Edit -file $filename
-        }
-    }
-}
-
-#####################################################################
-#### registerContents
-# Register directory contents and an associated viewing command.
-# By "directory contents" we mean a list of file or directory names
-# that may exist inside a directory. The purpose of this method is to
-# define an editor or viewer for relatively complicated data that is
-# stored in multiple files inside a directory. When such an editor or
-# viewer is registered by this method, then any future open-file
-# command (via the <code>openContext</code> procedure in this class)
-# will recognize a directory that contains the given contents and invoke
-# the specified command. The directory must contain <i>all</i> of the
-# specified contents items to be recognized.
-# <p>
-# The <i>filecommand</i> argument is a string with a "%s" embedded.
-# The "%s" is replaced with the file name before invoking the command,
-# using the Tcl <code>format</code>command. For example, if the command is
-# "::tycho::view EditItcl -file {%s}", then the Tycho
-# <code>::tycho::view</code>
-# procedure will be used to open the file using an
-# <code>EditItcl</code> view object. The braces around the "%s" allow
-# the file name to have spaces.
-# <p>
-# If a <i>description</i> argument is a non-empty string, then the
-# command will be added to the "Window" menu of all <code>File</code>
-# objects opened in the future using the value of this description as
-# the menu label. This permits the user to open a new blank editor of
-# the given class.
-# <p>
-# If the <i>editorclass</i> argument is supplied and non-empty, then
-# is selects the sub-menu of the Window menu into which the entry
-# to open a blank editor will be placed. Legal values are
-# "text", "graphics", and "tools".
-#
-body ::tycho::File::registerContents \
-	{contents filecommand {description {}} {editorclass {}}} {
-    set editorsContents($contents) $filecommand
-    if {$description != {}} {
-	lappend windowMenuEntries \
-                [list $filecommand $description $editorclass]
-    }
-}
-
-#####################################################################
-#### registerExtensions
-# Register one or more file extensions and an associated viewing
-# commands. Any future open-file command (via the
-# <code>openContext</code> or <code>displayData</code> procedures in
-# this class) will recognize a file name that has the given extension
-# and will use the specified command to open it. Note that the leading
-# period is considered part of the extension, as in ".itcl".
-# <p>
-# The <i>filecommand</i> argument is a string with a "%s" embedded.
-# The "%s" is replaced with the file name before invoking the command,
-# using the Tcl <code>format</code>command. For example, if the command is
-# "::tycho::view EditItcl -file {%s}", then the Tycho
-# <code>::tycho::view</code>
-# procedure will be used to open the file using an
-# <code>EditItcl</code> view object. The braces around the "%s" allow
-# the file name to have spaces.
-# <p>
-# If a <i>description</i> argument is a non-empty string, then the
-# command will be added to the "Window" menu of all <code>File</code>
-# objects opened in the future using the value of this description as
-# the menu label. This permits the user to open a new blank editor of
-# the given class.
-# <p>
-# If the <i>editorclass</i> argument is supplied and non-empty, then
-# is selects the sub-menu of the Window menu into which the entry
-# to open a blank editor will be placed. Legal values are
-# "text", "graphics", and "tools".
-#
-body ::tycho::File::registerExtensions \
-        {extensions filecommand {description {}} {editorclass {}}} {
-    foreach extension $extensions {
-	set editorsExtension($extension) $filecommand
-    }
-    if {$description != {}} {
-	lappend windowMenuEntries \
-                [list $filecommand $description $editorclass]
-    }
-}
-
-#####################################################################
-#### registerFilenames
-# Register one or more file names and an associated viewing command.
-# Any future open-file command (via the <code>openContext</code>
-# procedure in this class) will recognize a file that has one of the
-# given names and will use the specified command to open it.
-# <p>
-# The <i>filecommand</i> argument is a string with a "%s" embedded.
-# The "%s" is replaced with the file name before invoking the command,
-# using the Tcl <code>format</code>command. For example, if the command is
-# "::tycho::view EditItcl -file {%s}", then the Tycho
-# <code>::tycho::view</code>
-# procedure will be used to open the file using an
-# <code>EditItcl</code> view object. The braces around the "%s" allow
-# the file name to have spaces.
-# <p>
-# If a <i>description</i> argument is a non-empty string, then the
-# command will be added to the "Window" menu of all <code>File</code>
-# objects opened in the future using the value of this description as
-# the menu label. This permits the user to open a new blank editor of
-# the given class.
-# <p>
-# If the <i>editorclass</i> argument is supplied and non-empty, then
-# is selects the sub-menu of the Window menu into which the entry
-# to open a blank editor will be placed. Legal values are
-# "text", "graphics", and "tools".
-#
-body ::tycho::File::registerFilenames \
-	{filenames filecommand {description {}} {editorclass {}}} {
-    foreach name $filenames {
-	set editorsFilename($name) $filecommand
-    }
-    if {$description != {}} {
-	lappend windowMenuEntries \
-                [list $filecommand $description $editorclass]
-    }
-}
-
-#####################################################################
-#### registeredCommands
-# Given a file or directory name, return the registered viewing commands.
-# If none has been registered, return an empty string.  Otherwise, the
-# returned value the registered command for opening a file.
-#
-body ::tycho::File::registeredCommands {name} {
-    if {[::tycho::url protocol $name]=="http"} {
-        # EXCEPTION: If something's on HTTP, it is ***ALWAYS*** a HTML file.
-        set ext ".html"
-        if {[info exists editorsExtension] && \
-                [info exists editorsExtension($ext)]} {
-            return $editorsExtension($ext)
-	} else {
-            error "HTML protocol is gone! Assertion failed."
-        }
-    } elseif [::tycho::resource isdirectory $name] {
-        # FIXME: For now, do not try and do this test
-        # on remote directories. The test for a VEM
-        # facet (schematic) every time I access a remote
-        # directory is a complete pain...
-        if [::tycho::resource isremote $name] {
-            return ""
-        }
-        if {[info exists editorsContents]} {
-            set fname [::tycho::expandPath $name]
-            foreach cnt [array names editorsContents] {
-                set recognized 1
-                foreach file $cnt {
-                    if ![::tycho::resource exists \
-			    [::tycho::url join $fname $file]] {
-                        set recognized 0
-                        break
-                    }
-                }
-                if $recognized {
-                    return $editorsContents($cnt)
-                }
-            }
-        }
-        return {}
-    } {
-	set ext [::tycho::url extension $name]
-	set base [::tycho::url tail $name]
-        if {[info exists editorsExtension] && \
-                [info exists editorsExtension($ext)]} {
-            return $editorsExtension($ext)
-	} elseif {[info exists editorsFilename] && \
-                [info exists editorsFilename($base)]} {
-            return $editorsFilename($base)
-	} else {
-            return {}
-        }
-    }
-}
-
-#####################################################################
-#### windowMenuRemoveAll
-# Remove the specified filename from the Window menu of all open
-# <code>File</code> objects.  The specified filename must match
-# exactly the label given in the call to <code>windowMenuAddAll</code>
-# that created the entry in the first place. NOTE: Used to require that 
-# the object referenced by the menu must be this one, however, that
-# precluded removing bogus ones, which must be done from procs such as
-# openContext.
-#
-body ::tycho::File::windowMenuRemoveAll {filename} {
-    if {[info exists filesOpen] && \
-            [info exists filesOpen($filename)]} {
-	unset filesOpen($filename)
-	unset filesOpenTypes($filename)
-	foreach fileobj [array names fileObjects] {
-	    # Check that the widget exists
-            if { [::info which -command $fileobj] == "" } {
-                unset fileObjects($fileobj)
-                continue
-            }
-            set menuname [$fileobj menubar inmenu $filename]
-            $fileobj menubar delete $filename
-            # Disable the submenu if it's empty
-            if { [$fileobj menubar entries $menuname] == "" } {
-                $fileobj menubar disable $menuname
-            }
-	}
-    }
-}
-
-#####################################################################
 #### winGetByRootName
 # Check if there is a file with the same root name (without directory path)
 # as "rootname". If YES, then return the window name,
@@ -1468,6 +1225,7 @@ body ::tycho::File::winGetByRootName {rootname} {
     }
     return ""
 }
+
 
 #########################################################################
 #########################################################################
@@ -1495,9 +1253,13 @@ body ::tycho::File::initialize {{menubar {}} {statusbar {}} {toolbar {}}} {
     }
     displayer configure -title $itk_option(-file)
 
-    if {$completeFilePath != "NoName"} {
+    #if {$completeFilePath != "NoName"} {
+	# We have to call this again here, because the
+	# first time it is called (in the -file configbody), the displayer
+	# doesn't exist, and the window will therefore not be
+	# registered...
         windowMenuAddAll $completeFilePath
-    }
+    #}
 }
 
 #####################################################################
@@ -1614,123 +1376,9 @@ body ::tycho::File::initializeMenubar {menubar} {
 		-command "::tycho::TopLevel::exitProgram"
     }
     
-    # Window menu contents
-    
-    # Create the submenus for blank editors
-    $menubar add cascade texteditors window \
-	    -label "Text Editors"
-    $menubar add cascade graphicseditors window \
-	    -label "Graphics Editors"
-    $menubar add cascade tools window \
-	    -label "Tools"
+    # Register the menubar so its Window and Help menus get set up
+    ::tycho::register menubar $menubar $this
 
-    # Construct menu entries for registered editors.
-    foreach entry $windowMenuEntries {
-	# Put NoName in place of the filename
-	set command [format [lindex $entry 0] NoName]
-	set desc [lindex $entry 1]
-	set class [lindex $entry 2]
-	# Add to a menu
-	switch -exact $class {
-	    "text" {
-		$menubar command $desc texteditors \
-			-label $desc \
-			-command $command
-	    }
-	    "graphics" {
-		$menubar command $desc graphicseditors \
-			-label $desc \
-			-command $command
-	    }
-	    "tools" {
-		$menubar command $desc tools \
-			-label $desc \
-			-command $command
-	    }
-	    default {
-		# Add to the end of the main menu
-		$menubar command $desc window \
-			-label $desc \
-			-command $command
-	    }
-	}
-    }
-    $menubar separator windowsep1 window
-
-    # Create the submenus for open files
-    $menubar add cascade openhtml window \
-	    -label "Open HTML Viewers" -state disabled
-    $menubar add cascade opentext window \
-	    -label "Open Text Editors" -state disabled
-    $menubar add cascade opengraphics window \
-	    -label "Open Graphics Editors" -state disabled
-    $menubar add cascade opentools window \
-	    -label "Open Tools" -state disabled
-
-    # use the filesOpen variable to construct menu entries for all open
-    # files.
-    foreach filename [array names filesOpen] {
-	windowMenuAppend $filesOpen($filename) \
-		$filename $filesOpenTypes($filename)
-    }
-    
-    # Help menu contents
-    
-    $menubar command about help \
-	    -label "About Tycho" -underline 0 -command \
-	    {::tycho::welcomeMessage $TychoBinaryInfo $TychoVersionInfo}
-    
-    global ::TYCHO
-    $menubar command homepage help \
-	    -label "Tycho Home Page" -underline 0 -command \
-	    {::tycho::File::openContext \
-	    [file join $TYCHO doc index.html]}
-
-    # FIXME: We should be able to easily add and subtract Help items
-    # on a global basis without modifying this file.
-    global ptolemyfeature
-    if $ptolemyfeature(ptolemy) {
-        $menubar command ptabout help \
-		-label "About Ptolemy" -underline 0 -command \
-                ptkStartupMessage
-        global ::PTOLEMY
-        $menubar command pthomepage help \
-		-label "Ptolemy Home Page" -underline 0 -command \
-                {::tycho::File::openContext \
-                [file join $PTOLEMY doc html index.html]}
-    }
- 
-    $menubar command usersguide help \
-	    -label "Guide to $myclass Widget" -underline 0 \
-            -command "$this help"
-    
-    $menubar command conceptindex help \
-	    -label "Concept Index..." -underline 8 \
-	    -command {::tycho::File::openContext \
-	    [file join \$TYCHO lib idx tycho.idx]}
-    
-    $menubar command codeindex help \
-	    -label "Code Index..." -underline 0 \
-	    -command {set _nmBogosity [::tycho::autoName .index]; \
-            ::tycho::IndexBrowser $_nmBogosity \
-	    -file [file join \$TYCHO lib idx codeDoc.idx] \
-	    -width 80; $_nmBogosity centerOnScreen}
-    
-    $menubar command classdiagram help \
-	    -label "Class Diagram" -underline 6 -command \
-	    {::tycho::File::openContext \
-	    [file join \$TYCHO doc tychoClasses.dag]}
-
-    $menubar command itclmanpages help \
-	    -label "Itcl Man Pages" -underline 0 \
-	    -command "$this ::tycho::File::openItclHTMLPage"
-
-    # Add the Preferences menu. This is probably the wrong place
-    # for it, but it will do until we figure out a good menu to
-    # put it in that doesn't keep disappearing...
-    $menubar command preferences help \
-	    -label "Preferences..." -underline 0 \
-	    -command { ::tycho::preferencedialog }
 }
 
 #####################################################################
