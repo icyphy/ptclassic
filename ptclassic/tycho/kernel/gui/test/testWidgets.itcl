@@ -48,6 +48,8 @@ if {[string compare test [info procs test]] == 1} then {
     source $TYCHO/kernel/test/testDefs.tcl
 } {}
 
+#set VERBOSE 1
+
 ############################################################################
 # Test DialogWindow
 test DialogWindow-1.1 {Test DialogWindow} {
@@ -63,31 +65,26 @@ test DialogWindow-1.1 {Test DialogWindow} {
 } {ouch}
 
 ############################################################################
-# Test Dismiss
-test Dismiss-1.1 {Test Dismiss} {
-    set win [::tycho::Dismiss [::tycho::autoName .dismiss] -geometry +0+0]
-    wm deiconify $win
-    after $duration removeobj $win
-    update
-} {}
-
-############################################################################
 # Test Edit
 test Edit-1.1 {Test Edit} {
-    set win [::tycho::Edit [::tycho::autoName .edit] -geometry +0+0]
+    set win [::tycho::view Edit]
     wm deiconify $win
-    after $duration removeobj $win
-    update
-} {}
+#    after $duration ::tycho::safeUpdate $win
+    after $longDuration removeobj $win
+    list {Done}
+} {Done}
 
 ############################################################################
 # Test ErrorMessage
 test ErrorMessage-1.1 {Test ErrorMessage} {
     ::tycho::ErrorMessage .msg2 -text \
 	    "This is not really an error, but just a test of the messenger"
+    wm deiconify .msg2
     after $duration removeobj .msg2
-    update
-} {}
+#    ::tycho::safeUpdate .msg2
+    list {Done}
+} {Done}
+
 
 ############################################################################
 # Test EntryQuery
@@ -96,17 +93,21 @@ test EntryQuery-1.1 {Test EntryQuery} {
     ::tycho::EntryQuery .entry \
 	    -queries {{entry {Enter here:} {Default text}}}
     .entry centerOnScreen
-    update
-} {}
+#    ::tycho::safeUpdate .entry
+    list {Done}
+} {Done}
+
 
 ############################################################################
 # Test File
 test File-1.1 {Test File} {
-    set win [::tycho::File [::tycho::autoName .file] -geometry +0+0]
+    set win [::tycho::view File]
     wm deiconify $win
-    after $duration removeobj $win
-    update
-} {}
+#    after $duration ::tycho::safeUpdate $win
+    after $longDuration removeobj $win
+    list {Done}
+} {Done}
+
 
 ###########################################################################
 # Test FileBrowser
@@ -114,19 +115,20 @@ test FileBrowser-1.1 {Test FileBrowser} {
     after $duration .file invoke cancel
     ::tycho::FileBrowser .file
     .file centerOnScreen
-    update
-} {}
+#    ::tycho::safeUpdate .file
+    list {Done}
+} {Done}
+
 
 ############################################################################
 # Test ListBrowser
 test ListBrowser-1.1 {Test ListBrowser} {
     global globalReturn
-    set win [::tycho::ListBrowser [::tycho::autoName .listBrowser] \
+    set win [::tycho::ListBrowser [::tycho::autoName .lb] \
 	    -items { {1st Item} {2nd Item} {3rd Item}} \
 	    -command "set globalReturn"]
-    wm deiconify $win
-    after $duration removeobj $win
-    update
+#    after $duration ::tycho::safeUpdate $win
+    after $longDuration removeobj $win
     # Get item #1, which is actually the second item in the list
     $win clearselection
     $win goto 1
@@ -137,22 +139,26 @@ test ListBrowser-1.1 {Test ListBrowser} {
 ############################################################################
 # Test HTML
 test HTML-1.1 {Test HTML} {
-    set win [::tycho::HTML [::tycho::autoName .html] -geometry +0+0]
+    set win [::tycho::view HTML]
     wm deiconify $win
-    after $duration removeobj $win
-    update
-} {}
+#    after $duration ::tycho::safeUpdate $win
+    after $longDuration removeobj $win
+    list {Done}
+} {Done}
+
 
 ############################################################################
 # Test IndexBrowser
 test IndexBrowser-1.1 {Test IndexBrowser} {
-    global $TYCHO
-    set win [::tycho::IndexBrowser [::tycho::autoName .indexBrowser] \
-	    -file $TYCHO/lib/idx/tycho.idx]
+    global tycho
+    set win [::tycho::view IndexBrowser \
+	    [list -file $tycho/lib/idx/tycho.idx ] ]
     wm deiconify $win
-    after $duration removeobj $win
-    update
-} {}
+#    after $duration ::tycho::safeUpdate $win
+    after $longDuration removeobj $win
+    list {Done}
+} {Done}
+
 
 ############################################################################
 # Test Message
@@ -161,30 +167,33 @@ test Message-1.1 {Test Message} {
 	    "This is a plain message"
     .msg1 centerOnScreen
     after $duration removeobj .msg1
-    update
-} {}
+#    ::tycho::safeUpdate .msg1
+    list {Done}
+} {Done}
+
 
 ############################################################################
 # Test TopLevel
 test TopLevel-1.1 {Test TopLevel} { 
-    set win [::tycho::TopLevel \
-	    [::tycho::autoName .toplevel] -geometry 100x100+0+0]
+    set win [::tycho::view TopLevel]
     wm deiconify $win
-    after $duration removeobj $win
-    list {Done.}
-} {Done.}
-
+#    after $duration ::tycho::safeUpdate $win
+    after $longDuration removeobj $win
+    list {Done}
+} {Done}
 
 ############################################################################
 # Test WelcomeMessage
 test WelcomeMessage-1.1 {Test WelcomeMessage} {
-    set win [::tycho::WelcomeMessage [::tycho::autoName .welcomeMessage] \
+    set win [::tycho::view WelcomeMessage { \
 	    -version "A test version" \
-	    -executable "A test executable" ]
+	    -executable "A test executable" } ]
     wm deiconify $win
-    after $duration removeobj $win
-    update
-} {}
+#    after $duration ::tycho::safeUpdate $win
+    after $longDuration removeobj $win
+    list {Done}
+} {Done}
+
 
 ############################################################################
 # Test YesNoCancel
@@ -198,8 +207,9 @@ test YesNoCancel-1.1 {Test YesNoCancel} {
 	    -cancelcommand "set globalReturn cancel"
     .yesnocancel centerOnScreen
     update
+    tkwait window .yesnocancel
     list $globalReturn
-} {}
+} {cancel}
 
 ############################################################################
 # Test YesNoQuery
@@ -214,8 +224,7 @@ test YesNoQuery-1.1 {Test YesNoQuery} {
         } \
 	-nocommand "askuser {Are you sure not?}"
     .yesno centerOnScreen
-    update
-} {}
-
+    list {Done}
+} {Done}
 
 doneTests
