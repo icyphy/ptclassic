@@ -32,7 +32,10 @@ int *nPtr;
 	oldN = 10;
     }
     item.value = sprintf(buf, "%d", oldN);
-    ERR_IF2(dmMultiText("Iterations", 1, &item) != VEM_OK, "Aborted entry");
+    if (dmMultiText("Iterations", 1, &item) != VEM_OK) {
+	    PrintCon("Aborted entry");
+	    return (FALSE);
+    }
     ERR_IF2((*nPtr = atoi(item.value)) <= 0,
 	"Invalid entry, number must be > 0");
     if (*nPtr != oldN) {
@@ -50,7 +53,7 @@ octObject *facetPtr;
     int n;
 
     lastFacet = *facetPtr;
-    ERR_IF1(!AskIterate(facetPtr, &n));
+    if(!AskIterate(facetPtr, &n)) return (TRUE);
     ERR_IF1(!CompileFacet(facetPtr));
     ERR_IF1(!KcRun(n));
     return (TRUE);
