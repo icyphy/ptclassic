@@ -641,6 +641,7 @@ body ::tycho::Edit::constructor {args} {
     
     bind $itk_component(text) <Control-x><Control-c> { }
     bind $itk_component(text) <Control-x><Control-f> { }
+    bind $itk_component(text) <Control-x><Control-F> { }
     bind $itk_component(text) <Control-x><Control-r> { }
     bind $itk_component(text) <Control-x><Control-s> { }
     bind $itk_component(text) <Control-x><Control-w> { }
@@ -1445,7 +1446,7 @@ body ::tycho::Edit::help {} {
 #
 body ::tycho::Edit::incSearchMinibuffer {{backward 0}} {
     # Because of Tcl's event model need to scope for callbacks
-    set incSearch "@scope ::tycho::EditProgram $this incSearch"
+    set incSearch "@scope ::tycho::Edit $this incSearch"
 
     if { [statusbar] == "" } {
         search
@@ -2443,7 +2444,11 @@ body ::tycho::Edit::_initializeMenubar {menubar} {
     
     $menubar command findchange edit \
 	    -label "Find/Change..." -underline 0 \
-	    -accelerator "C-s" -command "$this search"
+	    -accelerator "C-S" -command "$this search"
+    
+    $menubar command search edit \
+	    -label "Incremental Search" -underline 0 \
+	    -accelerator "C-s" -command "$this incSearchMinibuffer"
     
     $menubar command spelling edit \
 	    -label "Spelling..." -underline 2 \
