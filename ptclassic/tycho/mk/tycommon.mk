@@ -619,7 +619,7 @@ htmlchek:
 checkjunk:
 	@checkextra -v $(SRCS) $(HDRS) $(EXTRA_SRCS) $(MISC_FILES) \
 		$(OPTIONAL_FILES) $(JSRCS) makefile SCCS \
-		$(JCLASS) $(OBJS) $(LIBR) $(TYDISTS)
+		$(JCLASS) $(OBJS) $(LIBR) $(TYDISTS) $(JARFILE)
 	@if [ "x$(DIRS)" != "x" ]; then \
 		set $(DIRS); \
 		for x do \
@@ -638,7 +638,7 @@ checkjunk:
 CRUD=*.o *.so core *~ *.bak ,* LOG* *.class \
 	config.cache config.log config.status manifest.tmp \
 	$(JCLASS) $(TYPACKAGE).zip $(TYPACKAGE).jar \
-	$(TYDISTS) $(KRUFT)  
+	$(TYDISTS) $(JARFILE) $(KRUFT)  
 
 clean:
 	rm -f $(CRUD)
