@@ -92,11 +92,11 @@ public:
 // about an action that has been registered via Tcl.
 class TclAction {
 public:
-	// Constructor.  It was added to silence compiler warnings.
-	TclAction() {}
+	// Constructor was added to initialize data members.
+	TclAction();
 
 	// Destructor cancels the action and
-	// frees the memory associated with the above pointers.
+	// frees the memory associated with the pointers below.
 	~TclAction();
 
 	char* name;

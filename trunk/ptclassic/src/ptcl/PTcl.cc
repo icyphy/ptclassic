@@ -1129,6 +1129,13 @@ void ptkAction(Star* s, const char* tclCommand) {
 		    (char*)temp, "\"", (char*)NULL);
 }
 
+// Constructor was added to initialize data members.
+TclAction::TclAction() {
+    action = 0;
+    tclCommand = 0;
+    name = 0;
+}
+
 // Destructor cancels an action and frees memory allocated for a TclAction
 TclAction::~TclAction() {
     // remove action and delete its memory
