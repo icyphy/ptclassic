@@ -36,7 +36,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #include "DataStruct.h"
 #include "DEStar.h"
-#include <iostream.h>
 
 
 #define MAX_BUCKET     1024*4
