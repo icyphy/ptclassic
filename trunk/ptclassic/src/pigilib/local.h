@@ -51,12 +51,10 @@ extern RAW_PTR malloc ARGS((size_t));
 
 #include <sys/param.h>
 
-#ifdef USG
-extern int sprintf ARGS((char*, const char*, ...));
+#ifdef hpux
 extern char *getcwd ARGS((char *,size_t));
 #define getwd(foo) getcwd(foo,MAXPATHLEN-1)
 #else
-extern char *sprintf ARGS((char*, const char*, ...));
 extern char *getwd ARGS((char *));
 #endif
 
