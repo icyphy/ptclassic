@@ -759,6 +759,7 @@ body ::tycho::Slate::highlight {tag args} {
  	}
     }
     $canvas lower $highlight $tag
+    return $highlight
 }
 
 #######################################################################
