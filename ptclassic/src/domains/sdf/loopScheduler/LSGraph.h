@@ -53,7 +53,7 @@ public:
 	// Constructor for creating the expanded graph from a galaxy.
 	// The resulting graph will depict the dataflow relationships
 	// among the different invocations of the stars in the galaxy.
-	int createMe(Galaxy& galaxy);
+	int createMe(Galaxy& galaxy, int selfLoopFlag = 0);
 
 	// Set up an invocation of a cluster whose master is given as 
 	// the first argument. The second argument contains the nodes
