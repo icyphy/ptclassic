@@ -1,6 +1,6 @@
 static const char file_id[] = "Resource.cc";
 /**************************************************************************
-Version identification:	@(#)Resource.cc	1.7 03/11/98
+Version identification:	$Id$
 
 Copyright (c) 1997- The Regents of the University of California.
 All rights reserved.
