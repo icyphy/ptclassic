@@ -76,6 +76,10 @@ public:
 	// set a fork source
         void setForkSource(CGPortHole* p);
 
+	// functions for moving data across wormhole boundaries
+	void forceSendData() { putParticle();}
+	void forceGrabData() { getParticle();}
+
 protected:
 	int offset;
 	// Stuff to support fork buffers
