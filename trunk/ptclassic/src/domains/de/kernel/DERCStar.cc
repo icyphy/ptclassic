@@ -1,6 +1,6 @@
 static const char file_id[] = "DERCStar.cc";
 /******************************************************************** 
-Version identification: @(#)DERCStar.cc	1.4 03/02/98
+Version identification: $Id$
  
 Author: Mudit Goel
         Neil Smyth

@@ -2,7 +2,7 @@
 #define _DERCScheduler_h 1
 
 /**************************************************************************
-Version identification:	@(#)DERCScheduler.h	1.5 03/02/98
+                                                                           Version identification: $Id$
 
  
 Author: Mudit Goel, Neil Smyth
