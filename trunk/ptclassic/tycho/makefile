@@ -89,15 +89,23 @@ indices:
 
 # This rule should contains things that might take a little while
 # to run, so it is run nightly
-nightly: sources doc/tychoClasses.dag itcldocs indices glimpse
+nightly: sources doc/tychoClasses.dag typt/lib/PtolemyFacets.fst \
+			itcldocs indices glimpse
 
+# Empty rule to force certain makefile rules to run
 FORCE: 
+
+# Create a Directed Acyclic Graph that contains the Tycho classes
 doc/tychoClasses.dag: FORCE
 	(cd doc; $(MAKE) tychoClasses.dag)
+
+# Create a forest that contains all the Ptolemy universes
+typt/lib/PtolemyFacets.fst: FORCE
+	(cd typt/lib; rm -f PtolemyFacets.fst; $(MAKE) PtolemyFacets.fst)
 
 # Glimpse is a tool that prepares an index of a directory tree.
 # glimpse is not included with Tycho, see http://glimpse.cs.arizona.edu
 GLIMPSEINDEX =	/usr/sww/bin/glimpseindex
 glimpse:
 	$(GLIMPSEINDEX) -H $(PTOLEMY)/tycho $(PTOLEMY)/tycho
-	chmod a+x $(PTOLEMY)/tycho/.glimpse_index
+	chmod a+r $(PTOLEMY)/tycho/.glimpse_*
