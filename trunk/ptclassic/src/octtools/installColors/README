@@ -1,0 +1,97 @@
+This directory contains a modified version of the pat2tap
+program from the Berkeley octtools distribution.
+The program has been modified to work more easily with Ptolemy,
+and has been renamed "installColors".
+
+To use the program:
+
+A text file is used to define the colors used by vem to display ptolemy
+facets.  In Vem terminology, it defines the "ptolemy technology."
+The colors can be changed, and users can define their own colors.
+The default ptolemy colors are defined in ~ptolemy/lib/colors/colors.pat
+for color monitors and ~ptolemy/lib/colors/colors.bw.pat for black
+and white monitors.
+
+Editing the text file is not sufficient to effect changes to the colors.
+The colors must be incorporated into the tap.views facet for any
+changes to take effect.  This can be done as follows:
+
+        cd ~ptolemy/lib/colors/ptolemy
+	vi colors.pat
+        installColors
+
+The last line invokes a program located in ~ptolemy/octtools/bin.sun4, where
+'sun4' may be replaced with whatever machine type you are running on.
+The dialog with the program should proceed as follows:
+	Name of the color pattern file [colors.pat]:
+	Directory in which ptolemy technology is installed
+		[~ptolemy/lib/colors]:
+	Do you wish to specify an X host and display other
+		than the one in your DISPLAY variable? [no]:
+	Output display type [MIT X Consortium]:
+        Color output device [yes]:
+
+If you are modified the colors in ~ptolemy/lib/colors/colors.pat,
+the defaults will work.  Otherwise, you must enter answers to the above
+questions.  The program uses your DISPLAY environment variable to
+determine your output display type ("MIT X Consortium" above).
+If you wish to over-ride this, you can answer "yes" to the third
+query.  You will then be asked for a display name.
+
+The file colors.pat is pretty self-explanatory.
+Larger priorities 0,1,2,... indicate greater visibility priority.
+Priorities may evidently be arbitrarily large.
+
+If you wish to create your own colors, you may create a directory
+like this one somewhere.  Suppose you define your colors in a directory
+called "~myLogin/myColors".  Then
+
+        mkdir ~myLogin/myColors
+        cd ~myLogin/myColors
+        cp -r ~ptolemy/lib/colors/ptolemy .
+        cd ptolemy
+        vi colors.pat
+
+Edit colors.pat, run installColors as explained above,
+and set the X resources as follows:
+
+vem.technology:  ~myLogin/myColors
+
+NOTE THAT FOR SOME REASON I DON'T UNDERSTAND, THE PIGI COMMAND
+OVERRIDES THIS X RESOURCE.  ONLY SOLUTION I KNOW OF IS TO CREATE
+YOUR OWN pigi SCRIPT.
+
+You should also update the pointers in your new color specification
+by running the octmvlib program:
+
+	cd ~myLogin/myColors
+	octmvlib -O "~ptolemy/lib/colors" -N "~myLogin/myColors" tap.views:schematic
+
+Then restart pigi.
+
+Note: You can save a little disk space by creating symbolic links to
+parts of the directory you do not wish to change.
+For instance, the files of form myColors/ptolemy/%* may be OK
+as they are.
+
+
+
+To make installColors, in a C shell, type "setenv OCTTOOLS ~octtools".
+Then "make".
+
+
+The program includes a cleanup routine, explained by its author below:
+
+Author: Wan-Teh Chang  wtc@eecs.berkeley.edu
+
+After editing the vem pattern files, one uses pat2tap to generate the
+tap.views facet.  However the tap.views we get has lot of "edges" 
+(two per layer) whose use I don't know.  These edges are collected
+in the DESIGN-RULES bag in tap.views.  They have the effect of making
+all paths having a width of 2, thus resulting in "fat" lines.
+
+From experience we found we don't need any design rules for Ptolemy.
+So cleantap is written to remove these spurious edges in the 
+DESIGN-RULES bag, sort of "clean up tap.views", hence the name.
+
+

@@ -1,0 +1,16 @@
+NAME: installColors
+DESCRIPTION: Generate TAP technology descriptions from VEM patterns files
+TYPE: T
+PACKAGES: oct tap list mm port
+MISC: tst
+
+EXTRAFLAGS: 
+
+SOURCES: fill_pat.c installColors.c process.c scan.c tech.c cleantap.c
+HEADERS: fill_pat.h general.h message.h scan.h str.h tech.h cleantap.c
+OBJECTS: fill_pat.o installColors.o process.o scan.o tech.o cleantap.o
+SYSLIBS: -lX11 -lm
+
+TESTNAME: $(NAME)-test
+TESTSOURCES: 
+TESTOBJECTS: 
