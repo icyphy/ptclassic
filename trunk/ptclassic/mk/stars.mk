@@ -62,11 +62,23 @@ CGDDFSTARS = $(LIBDIR)/cgddfstars.o
 BDFSTARS = $(LIBDIR)/bdfstars.o
 VHDLFSTARS = $(LIBDIR)/vhdlfstars.o
 VHDLBSTARS = $(LIBDIR)/vhdlbstars.o
-ATMSTARS = $(LIBDIR)/mqstars.o $(LIBDIR)/deatmstars.o $(LIBDIR)/sdfatmstars.o
 MDSDFSTARS = $(LIBDIR)/mdsdfstars.o
-CPSTARS =	$(LIBDIR)/cpstars.o $(LIBDIR)/cpipstars.o
-PNSTARS =	$(LIBDIR)/pnstars.o
+CPSTARS = $(LIBDIR)/cpstars.o $(LIBDIR)/cpipstars.o
+PNSTARS = $(LIBDIR)/pnstars.o
 
+# Optional star libraries
+ATMSTARS = $(LIBDIR)/mqstars.o $(LIBDIR)/deatmstars.o $(LIBDIR)/sdfatmstars.o
+ATM_LIBFILES = $(LIBDIR)/libmq.$(LIBSUFFIX) $(LIBDIR)/libmqstars.$(LIBSUFFIX) \
+	$(LIBDIR)/libdeatmstars.$(LIBSUFFIX) \
+	$(LIBDIR)/libsdfatmstars.$(LIBSUFFIX) $(LIBDIR)/libatm.$(LIBSUFFIX)
+ATM_LIBS= -lmqstars -lmq -ldeatmstars -lsdfatmstars -latm
+CONTRIBSTARS = $(LIBDIR)/sdfcontribstars.o
+CONTRIB_LIBFILES = $(LIBDIR)/libsdfcontribstars.$(LIBSUFFIX)
+CONTRIB_LIBS = -lsdfcontribstars
+
+OPTIONAL_STARS = $(ATMSTARS) $(CONTRIBSTARS)
+OPTIONAL_LIBFILES = $(ATM_LIBFILES) $(CONTRIB_LIBFILES)
+OPTIONAL_LIBS = $(ARM_LIBS) $(CONTRIB_LIBS)
 
 # parallel scheduler libraries.
 PARLIBFILES = $(LIBDIR)/libDC.$(LIBSUFFIX) $(LIBDIR)/libHu.$(LIBSUFFIX) \
@@ -74,7 +86,8 @@ PARLIBFILES = $(LIBDIR)/libDC.$(LIBSUFFIX) $(LIBDIR)/libHu.$(LIBSUFFIX) \
 	$(LIBDIR)/libPar.$(LIBSUFFIX) \
 	$(LIBDIR)/libcgstars.$(LIBSUFFIX) $(LIBDIR)/libcg.$(LIBSUFFIX)
 
-# Library files reqd by stars.  Note that libptolemy.$(LIBSUFFIX) is not included.
+# Library files reqd by stars.
+# Note that libptolemy.$(LIBSUFFIX) is not included.
 PTINY_STAR_LIBFILES=\
 $(LIBDIR)/libdestars.$(LIBSUFFIX) $(LIBDIR)/libde.$(LIBSUFFIX) \
 $(LIBDIR)/libsdfdspstars.$(LIBSUFFIX) \
@@ -98,7 +111,7 @@ $(LIBDIR)/libsdfstars.$(LIBSUFFIX) $(LIBDIR)/libLS.$(LIBSUFFIX) \
 $(LIBDIR)/libsdf.$(LIBSUFFIX) \
 
 STAR_LIBFILES=\
-$(ATM_LIBFILES) \
+$(OPTIONAL_LIBFILES) \
 $(LIBDIR)/libcgcstars.$(LIBSUFFIX) $(LIBDIR)/libcgctcltk.$(LIBSUFFIX) \
 $(LIBDIR)/libcgc.$(LIBSUFFIX) \
 $(LIBDIR)/libcg96dspstars.$(LIBSUFFIX) \
@@ -121,10 +134,6 @@ $(LIBDIR)/libvhdlbstars.$(LIBSUFFIX) $(LIBDIR)/libvhdlb.$(LIBSUFFIX) \
 $(LIBDIR)/libmdsdfstars.$(LIBSUFFIX) $(LIBDIR)/libmdsdf.$(LIBSUFFIX) \
 $(THREAD_STAR_LIBFILES) \
 $(MATLABSTARS_LIBFILE)
-
-ATM_LIBFILES = $(LIBDIR)/libmq.$(LIBSUFFIX) $(LIBDIR)/libmqstars.$(LIBSUFFIX) \
-	$(LIBDIR)/libdeatmstars.$(LIBSUFFIX) \
-	$(LIBDIR)/libsdfatmstars.$(LIBSUFFIX) $(LIBDIR)/libatm.$(LIBSUFFIX)
 
 # HOF stars can be used in pigiRpc but not ptcl.
 # The HOF base classes call Tk_DoOneEvent so that if you accidentally
@@ -175,7 +184,7 @@ $(MATLABSTAR_LIB) $(MATLABEXT_LIB)
 
 # Library switches reqd by stars.  Note that -lptolemy is not included.
 STAR_LIBS=\
-$(ATM_LIBS) \
+$(OPTIONAL_LIBS) \
 -lcgcstars -lcgc -lcgctcltk \
 -lcg96dspstars -lcg96stars -lcg96 \
 -lcg56dspstars -lcg56stars -lcg56 \
@@ -191,8 +200,6 @@ $(MATLABSTAR_LIB) $(MATLABEXT_LIB) \
 -lvhdlbstars -lvhdlb \
 -lmdsdfstars -lmdsdf \
 $(THREAD_STAR_LIBS)
-
-ATM_LIBS= -lmqstars -lmq -ldeatmstars -lsdfatmstars -latm
 
 # Extra targets
 SDFT = $(OBJDIR)/domains/sdf/targets
