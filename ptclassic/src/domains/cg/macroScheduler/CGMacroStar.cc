@@ -63,10 +63,10 @@ void CGMacroStar :: setProp(CGStar* s, int pix, int invoc, int flag) {
 	myCluster = (CGMacroClusterBag*) s;
 
 	if (flag) {
-		input.setPort("input", this, ANYTYPE);
-		output.setPort("output", this, ANYTYPE);
-		CGClustPortIter nextp(*myCluster);
-		CGClustPort* p;
+		input.setPort("input", this, FLOAT);
+		output.setPort("output", this, FLOAT);
+		CGMacroClustPortIter nextp(*myCluster);
+		CGMacroClustPort* p;
 		PortHole * newP;
 		while ((p = nextp++) != 0) {
 			if (p->isItInput()) {
@@ -74,17 +74,18 @@ void CGMacroStar :: setProp(CGStar* s, int pix, int invoc, int flag) {
 			} else {
 				newP = &output.newPort();
 			}
-			CGClustPort* inp = p->inPtr();
+			CGMacroClustPort* inp = p->inPtr();
 			while (inp->inPtr()) inp = inp->inPtr();
 
 			DFPortHole& ref = inp->real();
-			newP->setPort(p->name(), this, ref.resolvedType(),
-				      ref.numXfer());
+ 			DataType dt = ref.resolvedType();
+ 			if (!dt) dt = ANYTYPE;
+			newP->setPort(p->name(), this, dt, ref.numXfer());
 	   	}
 	}
 }
 
-void CGMacroStar :: initialize() {}
+// void CGMacroStar :: initialize() {}
 
 // redefine go() method to generate code for the inside macro actor
 void CGMacroStar :: go() {
