@@ -264,10 +264,49 @@ proc html2ps {filelist} {
 }
 
 #####################################################################
+#### htmlByDir
+# Given a list of directories, return a list of all the html files.
+# If there is an index.html file present in a directory, then we place that
+# at the front of the list of files in that directory.
+# 
+# A good way to find html directories is:
+# find . \( -name html_library -o -name -o -name adm -o -name codeDoc -o -name devel -o -name itclhtml \) -prune -o -name "*.html" -exec dirname {} \; | sort -u
+#
+proc htmlByDir {htmldirlist} {
+    global filesSeen
+
+    if {[llength $htmldirlist] == 0 } {
+	errror "html2ps: internal error, htmlByDir was passed an empty list"
+    }
+
+    foreach htmldir $htmldirlist {
+	set dircontents [glob -nocomplain \
+		[file join $htmldir *.html] \
+		[file join $htmldir *.htm]]
+
+	# Place index.htm* at the start of the list of files for this dir
+	set indexindex [lsearch -regexp $dircontents {.*index.htm(l)?}]
+	if { $indexindex == -1 } {
+	    lappend filesSeen $dircontents
+        } else {
+	    set index [lindex $dircontents $indexindex]
+	    puts "Processing $index"
+	    cd [file dirname $index]
+	    lappend filesSeen [::tycho::expandPath $index]
+	    htmlLinks $index 0 {} 0
+	    #set dircontents [lreplace $dircontents $indexindex $indexindex]
+	    #lappend filesSeen $index $dircontents
+	}
+
+    }
+    set filesSeen [join $filesSeen]
+}
+
+#####################################################################
 #### htmlLinks
 # Given a html file, return a list of the links
 #
-proc htmlLinks {htmlfile {depth 0} {dagfd {}}} { 
+proc htmlLinks {htmlfile {depth 0} {dagfd {}} {recurse 1}} { 
     global filesSeen
     
     if {$depth > 100} {
@@ -295,58 +334,77 @@ proc htmlLinks {htmlfile {depth 0} {dagfd {}}} {
     #puts "$htmlfile: $taglist"
 
     foreach tag $taglist {
-        # Only search tags that we have not seen, are .html files
-        # and are not codeDoc files
-        if { [lsearch $filesSeen $tag] == -1 && \
-                [file extension $tag] == ".html" && \
-                [file readable $tag] && \
-                ![regexp {/codeDoc/} $tag] \
-            } {
-	if { $dagfd != {}} {
-	    addToDAG $dagfd $htmlfile $tag
+	# Only search tags that we have not seen, are .html files
+	# and are not codeDoc files
+	if { [lsearch $filesSeen $tag] == -1 && \
+		[file extension $tag] == ".html" && \
+		[file readable $tag] && \
+		![regexp {/codeDoc/} $tag] } {
+	    if { $dagfd != {}} {
+		addToDAG $dagfd $htmlfile $tag
+	    }
+
+	    if $recurse {
+		#puts "About to call htmlLinks $tag"
+		lappend filesSeen $tag
+		incr depth
+		htmlLinks $tag $depth $dagfd $recurse
+		incr depth -1
+	    } {
+		if { [::tycho::expandPath [file dirname $htmlfile]] == \
+			[::tycho::expandPath [file dirname $tag]] } {
+		    #puts "About to call htmllinks $tag"
+		    lappend filesSeen [::tycho::expandPath $tag]
+		    htmlLinks $tag $depth $dagfd $recurse
+		}
+	    }
 	}
-
-
-            #puts "About to call htmlLinks $tag"
-            lappend filesSeen $tag
-            incr depth
-	    htmlLinks $tag $depth $dagfd
-            incr depth -1
-        }
     }
     return $taglist
 }
 
 #####################################################################
-#### htmlDir2ps
+#### htmlTree2ps
 # This command is useful for generating PostScript from an html index file.
 # Given a .html index file, produce a PostScript file that contains
 # PostScript of all of the html files that the index file has links to.
 #
 # Typical Usage: 
 # <tcl><pre>
-# htmlDir2ps $TYCHO/doc/index.html index.ps
+# htmlTree2ps $TYCHO/doc/index.html index.ps
 # </pre></tcl>
 #
-proc htmlDir2ps {indexfile psfile} {
+proc htmlTree2ps {indexfile psfile args} {
     global filesSeen
     set filesSeen {}
 
-    puts "About to traverse all local files linked from\n $indexfile"
-    puts " and generate $psfile"	
-    flush stdout
-    update
+    # If we are printing by directory, set printbydir
+    set printbydir 0
+    if {$args != {} } {
+	set printbydir 1
+    }
 
-    # Insert the index file
-    set filesSeen [linsert $filesSeen 0 $indexfile]
-    cd [file dirname $indexfile]
-    htmlLinks $indexfile
+    if $printbydir {
+	puts "About to traverse all directories:\n $args"
+	puts " and generate $psfile"
+	htmlByDir $args
+    } else {
+	puts "About to traverse all local files linked from\n $indexfile"
+	puts " and generate $psfile"	
+	flush stdout
+	update
 
+	# Insert the index file
+	set filesSeen [linsert $filesSeen 0 $indexfile]
+	cd [file dirname $indexfile]
+	htmlLinks $indexfile
+    }
 
     puts "  Done ([llength $filesSeen] files seen)"
     #puts "$filesSeen"
     flush stdout
     update
+
 
     set pslist {}
     foreach tag $filesSeen {
@@ -443,11 +501,11 @@ proc html2DAG {indexfile dagfile} {
 proc html2psProcessArgs {} {
     global argc argv env
     set error 0
-    if {$argc < 2 || $argc > 3} {
+    if {$argc < 2 } {
 	puts "html2ps: wrong number of arguments"
 	set error 1
     } 
-    if { $argc == 3 } {
+    if { $argc >= 3 } {
 	set commandarg [lindex $argv 0]
 	set indexfile [lindex $argv 1]
 	set outputfile [lindex $argv 2]
@@ -461,37 +519,42 @@ proc html2psProcessArgs {} {
     }    
 
     # Check for -d in the first arg
-    if { $argc == 3 && $commandarg != "-d" } {
-	puts "html2ps: $commandarg not understood, it must be -d"
+    if { $argc == 3 && $commandarg != "-d" && $commandarg != "-dag" } {
+	puts "html2ps: $commandarg not understood, it must be -d or -dag"
 	set error 1
     }
 
     if {$error} {
-	puts "Usage: html2ps \[-d\] <html file> <outputfile>"
+	puts "Usage: html2ps \[-d\] \[-dag\] <html file> <outputfile> \[htmldirs\]"
 	puts " This script uses netscape to convert an html tree to PostScript"
 	puts " or it can generate a Tycho Directed Acyclic Graph (DAG)."
-	puts " If the -d option is present, then a DAG is produced, if the"
-	puts " -d option is not present, then all of the local links" 
-	puts " in the html file are followed,"
-	puts " and added to the PostScript file."
-	puts " This options is useful for printing of directories that contain"
-	puts " multiple html files into one PostScript file."
+        puts " -dag       Produce a DAG"
+        puts " -d         Collect html files from the htmldirs args"
+	puts " If the -d option is not present, then all of the local links" 
+	puts " in the html file are followed, and added to the"
+        puts " PostScript file in a depth first order."
 	exit
     }
     switch $argc {
-	2 { htmlDir2ps $indexfile $outputfile }
+	2 { htmlTree2ps $indexfile $outputfile }
 	3 { 
-	    if {"$commandarg" == "-d" } {
+	    if {"$commandarg" == "-dag" } {
 		html2DAG $indexfile $outputfile
 	    }
-	}
-	default { error "html2ps: internal error, can't handle $argc args"}
+	    error "html2ps: don't understand $commandarg, exiting."
+	  }
+	default { 
+	    if {"$commandarg" != "-d" } {
+		error "html2ps: usage: html2ps -d htmlfile outputfile directories
+	    }
+	    eval htmlTree2ps $indexfile $outputfile [lrange $argv 3 end] 
+          }
     }
 }
 
 # If we are not in an interactive tclsh, then call processArgs
 # By doing this, we make it possible to source this file and then
-# call htmlDir2ps by hand for testing
+# call htmlTree2ps by hand for testing
 if {$tcl_interactive != 1 } {
 	html2psProcessArgs
 }
