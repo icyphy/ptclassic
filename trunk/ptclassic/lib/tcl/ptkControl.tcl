@@ -61,15 +61,15 @@ proc ptkClearRunFlag { name } {
 #
 proc ptkRunControl { name octHandle } {
     global ptkRunFlag
-    if {[ptkGetRunFlag $name] > 0} {
-        ptkImportantMessage .error \
+    set w .run_$name
+    if {[ptkGetRunFlag $name] > 0 && [winfo exists $w]} {
+            ptkImportantMessage .error \
 		"Sorry.  Only one run window for $name at time. "
-	return
+	    return
     }
     # Mark an open window, but with no run yet.
     set ptkRunFlag($name) 1
 
-    set w .run_$name
     catch {destroy $w}
     toplevel $w
     wm title $w "Run $name"
