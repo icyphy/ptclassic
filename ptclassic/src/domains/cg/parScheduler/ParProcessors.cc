@@ -46,10 +46,13 @@ ParProcessors :: ParProcessors(int pNum, MultiTarget* t) : mtarget(t) {
 	pIndex.create(pNum);
 	SCommNodes.initialize();
 	commCount = 0;
+	LOG_NEW; schedules = new UniProcessor[pNum];
+	candidate.create(pNum);
 }
 
 ParProcessors :: ~ParProcessors() {
 	removeCommNodes();
+	LOG_DEL; delete [] schedules;
 }
 
 void ParProcessors :: initialize()
@@ -79,17 +82,16 @@ void ParProcessors :: removeCommNodes() {
 	SCommNodes.initialize();
 }
 
-UniProcessor* ParProcessors :: getProc(int) { return 0; }
+UniProcessor* ParProcessors :: getProc(int num) {
+	return &(schedules[num]); 
+}
 
 // map targets for each processing element
 // If the argument is non-zero pointer, the array contains the mapping
 // information.
-void ParProcessors :: mapTargets(IntArray* a) {
+void ParProcessors :: mapTargets() {
 	for (int i = 0; i < numProcs; i++) {
-		int ix;
-		if (a && (i < a->size())) ix = a->elem(i);
-		else ix = i;
-		getProc(i)->targetPtr = (CGTarget*) mtarget->child(ix);
+		getProc(i)->targetPtr = (CGTarget*) mtarget->child(i);
 	}
 }
 
@@ -101,6 +103,38 @@ int ParProcessors :: getMakespan() {
 		if (temp > max) max = temp;
 	}
 	return max;
+}
+
+IntArray* ParProcessors :: candidateProcs(DataFlowStar* s) {
+        // clear the array.
+        int k = 0;
+        int flag = 0;
+        int temp = -1;
+ 
+        // heterogeneous case
+        int hetero = mtarget->isHetero();
+ 
+        // Scan the processors. By default, include only one
+        // unused processor and all used processors which satisfy
+        // resource constraints.
+        for (int i = 0; i < numProcs; i++) {
+                UniProcessor* uni = &(schedules[i]);
+                CGTarget* t = uni->target();
+                if (s && t && !t->support(s)) continue;
+                else if (s && t && !mtarget->childHasResources(*s, i)) 
+			continue;
+                else if (uni->getAvailTime() || hetero) {
+                        candidate[k] = i;
+                        k++;
+                } else if (!flag) {
+                        temp = i;
+                        flag = 1;
+                }
+        }
+        if (temp >= 0) { candidate[k] = temp; k++; }
+        candidate.truncate(k);
+        if (!k) return 0;
+	else return &candidate;
 }
 
 /*****************************************************************
@@ -159,7 +193,7 @@ int ParProcessors :: listSchedule(ParGraph* graph) {
 		if (node->getType() < 0) {
 			p->scheduleCommNode(node, start);
 		} else if (node->amIBig()) {
-			scheduleParNode(node);
+			if (!scheduleParNode(node)) return -1;
 		} else {
 			// schedule a regular node
 			p->addNode(node, start);
@@ -180,45 +214,10 @@ int ParProcessors :: listSchedule(ParGraph* graph) {
 			///  scheduleParNode ///
 			////////////////////////
 
-void ParProcessors :: scheduleParNode(ParNode* node) {
-	Profile* pf = node->profile();
-	int num =  pf->getEffP();
-	int invocNum = node->invocationNumber();
-
-	// Compare the processor availability and the startTime profile
-	int tempIx;
-	int tempMax, refMin = -1;
-	for (int i = 0; i < num; i++) {
-		if (pf->getStartTime(i) == 0) {
-			tempIx = pf->assignedTo(invocNum,i);
-			tempMax = getProc(tempIx)->getAvailTime();
-			if ((refMin < 0) || (refMin < tempMax)) {
-				refMin = tempMax;
-			} 
-		}
-	}
-
-	// compute the shift.
-	int shift = 0;
-	for (i = 0; i < num; i++) {
-		tempIx = pf->assignedTo(invocNum,i);
-		tempMax = getProc(tempIx)->getAvailTime() - refMin -
-			  pf->getStartTime(i);
-		if (tempMax > shift) shift = tempMax;
-	}
-
-	// schedule the node
-	int saveFinish = 0;
-	for (i = 0; i < num; i++) {
-		tempIx = pf->assignedTo(invocNum,i);
-		UniProcessor* proc = getProc(tempIx);
-		int leng = pf->getFinishTime(i) - pf->getStartTime(i);
-		int when = refMin + shift + pf->getStartTime(i);
-		proc->schedAtEnd(node, when, leng);
-		if (saveFinish < when + leng) saveFinish = when + leng;
-	}
-	node->setScheduledTime(refMin + shift);
-	node->setFinishTime(saveFinish);
+int ParProcessors :: scheduleParNode(ParNode* node) {
+	Error :: abortRun("this scheduler does not support parallel tasks.",
+		"\n Try macroScheduler instead.");
+	return FALSE;
 }
 
 			///////////////////////
@@ -234,8 +233,7 @@ void ParProcessors::findCommNodes(ParGraph* graph)
 
 	// Iterate over all nodes in the expanded graph.  Search for
 	// arcs that connect nodes that are allocated to different
-	// processors.  Insert send/receive nodes on these arcs, group the
-	// arcs if they are going to the same processor.
+	// processors.  Insert send/receive nodes on these arcs
 	EGIter iter(*graph);
 	ParNode* pg;
 	while ((pg = (ParNode*) iter++) != 0) {
@@ -246,8 +244,8 @@ void ParProcessors::findCommNodes(ParGraph* graph)
 	   // Current receive node
 	   ParNode* rnode = NULL;
 
-	   // Last node to receive data
-	   ParNode* lastDesc = NULL;
+	   // last Porthole considered
+	   const PortHole* lastP = NULL;
 
 	   // Number of tokens transfered from ParNode 'pg'
 	   int numXfer = 0;
@@ -269,8 +267,7 @@ void ParProcessors::findCommNodes(ParGraph* graph)
 			if (from != to) {
 				// make send/receive nodes if necessary.
 				if ((snode==NULL) ||
-				    (rnode->getProcId() != to) ||
-				    (desc->myStar() != lastDesc->myStar())) {
+				 (g->aliasedPort() != lastP)) {
 					snode = createCommNode(-1);
 					rnode = createCommNode(-2);
 					numXfer = 0;
@@ -294,8 +291,7 @@ void ParProcessors::findCommNodes(ParGraph* graph)
 					SCommNodes.insert(snode);
 					SCommNodes.insert(rnode);
 
-					// save the destination node
-					lastDesc = desc;
+					lastP = g->aliasedPort();
 				}
 				if (!hidden) rnode->connectedTo(desc);
 
@@ -488,3 +484,4 @@ void ParProcessors :: generateCode() {
 		mtarget->addProcessorCode(i, (const char*) foo);
 	}
 }		
+

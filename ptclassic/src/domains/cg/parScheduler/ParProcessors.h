@@ -67,8 +67,7 @@ public:
 	virtual UniProcessor* getProc(int num);
 
 	// map targets to each processor
-	// The optional argument directs the mapping.
-	void mapTargets(IntArray* a = 0);
+	void mapTargets();
 
 	// get makespan
 	int getMakespan(); 
@@ -93,11 +92,18 @@ public:
 	// code generation
 	void generateCode();
 
+	// set the indices of candidate processors to schedule the
+	// argument star. If none exists, return FALSE.
+	IntArray* candidateProcs(DataFlowStar* s);
+	
 	// Match comm. nodes with the comm. stars created during subGalaxy
 	// generation.
 	ParNode* matchCommNodes(DataFlowStar*, EGGate*, PortHole*);
 
 protected:
+	// processors
+	UniProcessor* schedules;
+
 	// number of processors.
 	int numProcs;
 
@@ -113,8 +119,11 @@ protected:
 	// The number of interprocessor communications in the schedule.
 	int commCount;
 
-	// schedule a node of a data-parallel star or a wormhole.
-	void scheduleParNode(ParNode*);
+	// candidate processors
+	IntArray candidate;
+
+	// schedule a node of a parallel star
+	virtual int scheduleParNode(ParNode*);
 
 	// makes send and receive nodes for IPC.
 	void findCommNodes(ParGraph*);
