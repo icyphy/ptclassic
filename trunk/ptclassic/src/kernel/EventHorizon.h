@@ -70,8 +70,7 @@ public:
 	// set ports
 	PortHole& setPort(inOutType inOut, const char* portName, 
 		Wormhole* parentWormhole, Star* parentStar,
-		dataType type = FLOAT, float timeStamp = 0.0,
-		unsigned numTokens = 1, unsigned delay = 0);
+		dataType type = FLOAT, unsigned numTokens = 1 );
 
 private:
 	int inOrOut;
@@ -104,6 +103,7 @@ protected:
 // Output EventHorizon
 class FromEventHorizon : public EventHorizon
 {
+friend class Wormhole;
 protected:
 
 	//transfer data from Universal EventHorizon to outside
@@ -115,9 +115,10 @@ protected:
 
 	// redefine initialize()
 	void initialize(); 
+
+	// make sure this port is ready for inside Galaxy if it is an input.
+	virtual int ready();
 			   
-	// number of Data collected
-	int numData;
 };
 
 #endif
