@@ -36,10 +36,10 @@ PL_SRCS= \
  C50ASin.pl \
  C50Abs.pl \
  C50Add.pl \
+ C50Chop.pl \
  C50Commutator.pl \
  C50Const.pl \
  C50Cos.pl \
- C50Cut.pl \
  C50Delay.pl \
  C50Distributor.pl \
  C50DownSample.pl \
