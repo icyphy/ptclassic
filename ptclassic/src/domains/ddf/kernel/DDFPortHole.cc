@@ -128,7 +128,7 @@ int OutDDFPort :: moveData()
     } else {
 	// produce a however many tokens are available in the image geodesic
 	Particle* tp;
-	while (tp = imageGeo->get()) {
+	while ( (tp = imageGeo->get()) ) {
 		Particle** p = myBuffer->next();
 		(*p)->die();
 		*p = tp;
