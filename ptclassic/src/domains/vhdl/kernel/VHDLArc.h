@@ -80,6 +80,13 @@ class VHDLArcList : public VHDLObjList
   // Add VHDLArc to list.
   void put(VHDLArc& v) { VHDLObjList::put(v); }
 
+  // Use the name as a key to find the arc.
+  VHDLArc* arcWithName(const char*);
+
+  const VHDLArc* vhdlArcWithName(const char* name) const {
+    return (const VHDLArc*) vhdlObjWithName(name);
+  }
+
   // Return first VHDLArc on list (const, non-const forms).
   VHDLArc* head() { return (VHDLArc*) VHDLObjList::head(); }
   const VHDLArc* head() const {
@@ -93,10 +100,6 @@ class VHDLArcList : public VHDLObjList
   // Find VHDLArc with given name (const, non-const forms).
   VHDLArc* vhdlArcWithName(const char* name) {
     return (VHDLArc*) vhdlObjWithName(name);
-  }
-
-  const VHDLArc* vhdlArcWithName(const char* name) const {
-    return (const VHDLArc*) vhdlObjWithName(name);
   }
 
   // Return a pointer to a new copy of the list.

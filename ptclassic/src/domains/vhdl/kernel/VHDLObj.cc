@@ -49,7 +49,12 @@ VHDLObj :: ~VHDLObj() {}
 
 // Initializer.
 void VHDLObj :: initialize() {
-  name = hashstring("XXX");
+  name = "XXX";
+}
+
+// Set the name.
+void VHDLObj :: setName(const char* newName) {
+  name = hashstring(newName);
 }
 
 // Class identification.

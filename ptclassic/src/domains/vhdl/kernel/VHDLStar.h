@@ -55,9 +55,6 @@ public:
 	// my domain
 	const char* domain() const;
 
-//	// Sanitize a string so that it is usable as a VHDL identifier.
-//	const char* sanitize(const char*);
-
 	// run this star
 	int run();
 
@@ -85,13 +82,13 @@ protected:
 					     const char*);
 
 	// Assignment operator, depending on variable or signal
-	StringList expandAssign(const char*);
+	const char* expandAssign(const char*);
 
 	// Temproary variable reference.
-	StringList expandTemp(const char*, const char*);
+	const char* expandTemp(const char*, const char*);
 
 	// Constant variable reference.
-	StringList expandDefine(const char*, const char*, const char*);
+	const char* expandDefine(const char*, const char*, const char*);
 
 	// Update the offset read and write pointers to the porthole queues.
 	void updateOffsets();

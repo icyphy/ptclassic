@@ -55,6 +55,9 @@ class VHDLObj : public NamedObj
   // Initializer.
   /* virtual */ void initialize();
 
+  // Set the name.
+  void setName(const char*);
+
   // Class Idenitification.
   /* virtual */ int isA(const char*) const;
   /* virtual */ const char* className() const;

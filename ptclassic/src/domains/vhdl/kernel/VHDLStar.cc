@@ -47,31 +47,6 @@ extern const char VHDLdomainName[];
 // My domain.
 const char* VHDLStar :: domain() const { return VHDLdomainName; }
 
-/*
-// Sanitize a string so that it is usable as a VHDL identifier.
-const char* VHDLStar :: sanitize(const char* string) {
-    const int MAX_LENGTH = 64;
-    static char clean[MAX_LENGTH];
-    char* c = clean;
-    int i = 0;
-
-    // Check for leading digit.
-    if (isdigit(*string)) {
-	*c++ = '_';
-	i++;
-    }
-
-    // Replace strange charachters.
-    while (++i < MAX_LENGTH && *string) {
-	*c++ = isalnum(*string) ? *string : '_';
-	string++;
-    }
-    *c = 0;
-
-    return clean;
-}
-*/
-
 // Expand macros.  Return empty StringList on error.  ArgList must be
 // passed by reference so that the StringList is not consolidated.
 StringList VHDLStar :: expandMacro(const char* func, const StringList&
@@ -276,7 +251,6 @@ StringList VHDLStar :: expandInterOp(const char* oper, const char* args,
       MPHIter nextPort(*multiPort);
       VHDLPortHole* port;
       while ((port = (VHDLPortHole*) nextPort++) != 0) {
-//	if (!strcmp(part,"")) {
 	if (hashstring(part) == hashstring("")) {
 	  finalList << expandRef(port->name(), "", "");
 	}
@@ -286,7 +260,6 @@ StringList VHDLStar :: expandInterOp(const char* oper, const char* args,
       }
     }
     else {
-//      if (!strcmp(part,"")) {
       if (hashstring(part) == hashstring("")) {
 	finalList << expandRef(item, "", "");
       }
@@ -309,52 +282,46 @@ StringList VHDLStar :: expandInterOp(const char* oper, const char* args,
 }
 
 // Assignment operator, depending on variable or signal.
-StringList VHDLStar :: expandAssign(const char* name) {
-  StringList assign;
+const char* VHDLStar :: expandAssign(const char* name) {
+  const char* assign;
   State* state;
   VHDLPortHole* port;
   StringList portName = expandPortName(name);
 
-  assign.initialize();
-  
-  // Check if it's a State reference.
-  if ((state = stateWithName(name)) != 0) {
-    assign << targ()->stateAssign();
-  }
-
   // Check if it's a PortHole reference.
-  else if ((port = (VHDLPortHole*) genPortWithName(portName)) != 0) {
-    assign << targ()->portAssign();
+  if ((port = (VHDLPortHole*) genPortWithName(portName)) != 0) {
+    assign = targ()->portAssign();
   }
-
-  // Error:  couldn't find a State or a PortHole with given name.
+  // Check if it's a State reference.
+  else if ((state = stateWithName(name)) != 0) {
+    assign = targ()->stateAssign();
+  }
+  // Error:  couldn't find a PortHole or a State with given name.
   else {
     codeblockError(name, " is not defined as a state or port");
-    assign.initialize();
+    assign = "XXX";
   }
 
   return assign;
 }
 
 // Temproary variable reference.
-StringList VHDLStar :: expandTemp(const char* name, const char* type) {
-  StringList temp;
+const char* VHDLStar :: expandTemp(const char* name, const char* type) {
+  const char* temp;
   State* state;
   VHDLPortHole* port;
   StringList portName = expandPortName(name);
 
-  temp.initialize();
-  
-  // Check if it's a State reference.
-  if ((state = stateWithName(name)) != 0) {
-    codeblockError(name, " is already defined as a state");
-  }
-
   // Check if it's a PortHole reference.
-  else if ((port = (VHDLPortHole*) genPortWithName(portName)) != 0) {
+  if ((port = (VHDLPortHole*) genPortWithName(portName)) != 0) {
     codeblockError(name, " is already defined as a port");
+    temp = "XXX";
   }
-
+  // Check if it's a State reference.
+  else if ((state = stateWithName(name)) != 0) {
+    codeblockError(name, " is already defined as a state");
+    temp = "XXX";
+  }
   // Register it as temporary storage.
   else {
     temp = starSymbol.lookup(name);
@@ -365,25 +332,23 @@ StringList VHDLStar :: expandTemp(const char* name, const char* type) {
 }
 
 // Constant variable reference.
-StringList VHDLStar :: expandDefine(const char* name, const char* type,
-				    const char* init) {
-  StringList define;
+const char* VHDLStar :: expandDefine(const char* name, const char* type,
+				     const char* init) {
+  const char* define;
   State* state;
   VHDLPortHole* port;
   StringList portName = expandPortName(name);
 
-  define.initialize();
-  
-  // Check if it's a State reference.
-  if ((state = stateWithName(name)) != 0) {
-    codeblockError(name, " is already defined as a state");
-  }
-
   // Check if it's a PortHole reference.
-  else if ((port = (VHDLPortHole*) genPortWithName(portName)) != 0) {
+  if ((port = (VHDLPortHole*) genPortWithName(portName)) != 0) {
     codeblockError(name, " is already defined as a port");
+    define = "XXX";
   }
-
+  // Check if it's a State reference.
+  else if ((state = stateWithName(name)) != 0) {
+    codeblockError(name, " is already defined as a state");
+    define = "XXX";
+  }
   // Register it as temporary storage.
   else {
     define = starSymbol.lookup(name);

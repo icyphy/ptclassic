@@ -132,7 +132,7 @@ protected:
 	void prepend(StringList, CodeStream&);
 
 	// Return the VHDL type corresponding to the State type.
-	virtual StringList stateType(const State* st);
+	const char* stateType(const State* st);
 
 	/*virtual*/ void setup();
 
@@ -160,6 +160,18 @@ protected:
 	// Initialize VHDLObjLists.
 	virtual void initVHDLObjLists();
 
+	// Various hashed strings for quick comparison.
+        const char* hashINTEGER;
+        const char* hashINT;
+        const char* hashint;
+        const char* hashREAL;
+        const char* hashreal;
+        const char* hashCOMPLEX;
+        const char* hashcomplex;
+        const char* hashCHARACTER;
+        const char* hashIN;
+        const char* hashOUT;
+
 private:
 	VHDLVariableList variableList;
 
@@ -167,7 +179,7 @@ private:
 	void setGeoNames(Galaxy&);
 
 	// Return the VHDL type corresponding to the given const char*.
-	virtual StringList sanitizeType(const char*);
+	const char* sanitizeType(const char*);
 
 	// Clean up the code by wrapping around long lines as separate lines.
 	void wrapAround(StringList*);
