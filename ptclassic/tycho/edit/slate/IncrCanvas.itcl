@@ -471,8 +471,9 @@ body ::tycho::IncrCanvas::canvasy {screeny {gridspacing {}}} {
 #######################################################################
 #### children
 #
-# Get the children of an item. If the item is a simple item, null
-# is returned; otherwise all children of the complex item are returned.
+# Get the children of an item -- that is, the complex items that
+# make up the passed item. If the item is a simple item, or if it is
+# a complex item with no children, null is returned.
 # If the argument is a tag, perform this operation on the first item
 # returned by `find withtag'.
 #
@@ -488,15 +489,11 @@ body ::tycho::IncrCanvas::children {tag} {
 	set id $tag
     }
 
-    # Scan the list of parent-child links and use to delete marker tag
-    $canvas addtag temp withtag $id
+    # Scan the list of parent-child links
     set result {}
     foreach {_ pc} [array get parentChild $id,*] {
 	lappend result [lindex $pc 1]
-	$canvas dtag [lindex $pc 1] temp
     }
-    set result [concat $result [$canvas find withtag temp]]
-    $canvas dtag temp
     return $result
 }
 
@@ -684,10 +681,10 @@ body ::tycho::IncrCanvas::createrootchild {parent type args} {
 #######################################################################
 #### createrootchild*
 #
-# Create a root child item and return its ID. The first argument is the hierarchy
-# tags of the parent as passed to the construct{} procs of the
-# ComplexItem classes or as obtained by *getrootchildtags*; the second
-# is the additional tags of the new item.
+# Create a root child item and return its ID. The first argument is
+# the hierarchy tags of the parent as passed to the construct{} procs
+# of the ComplexItem classes or as obtained by *getrootchildtags*;
+# the second is the additional tags of the new item.
 #
 body ::tycho::IncrCanvas::createrootchild* {parent ptags tags type args} {
     set t [lsearch $ptags {!*}]
