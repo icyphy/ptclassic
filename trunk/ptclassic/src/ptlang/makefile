@@ -13,6 +13,7 @@ CFLAGS = -O
 all:	ptlang
 
 ptlang:	ptlang.o
+	cc ptlang.o -o ptlang
 
 ptlang.o:	ptlang.y
 
