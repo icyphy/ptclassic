@@ -212,8 +212,6 @@ void SimVSSTarget :: frameCode() {
 
   StringList label = galName;
   label << "_proc";
-  //  topCompDeclList.put(label, &mainPortMapList, &mainGenMapList,
-  //		      galName, &mainPortMapList, &mainGenMapList);
   topCompDeclList.put(label, &mainPortList, &mainGenList,
 		      galName, &mainPortList, &mainGenList);
 
@@ -223,20 +221,12 @@ void SimVSSTarget :: frameCode() {
   top_architecture << " of ";
   top_architecture << topName;
   top_architecture << " is\n";
-  //  top_architecture << cli_comps;
   top_architecture << addComponentDeclarations(&topCompDeclList);
-  //  top_architecture << "component ";
-  //  top_architecture << galName;
-  //  top_architecture << "\n";
-  //  top_architecture << addGenericRefs(&mainGenList);
-  //  top_architecture << addPortRefs(&mainPortList);
-  //  top_architecture << "end component;\n";
   top_architecture << "\n";
   top_architecture << addSignalDeclarations(&topSignalList);
   top_architecture << "\n";
   top_architecture << "begin\n";
 
-  //  top_architecture << addComponentMappings(&topCompMapList);
   top_architecture << addComponentMappings(&topCompDeclList);
   top_architecture << "end ";
   top_architecture << "structure";
@@ -282,7 +272,6 @@ void SimVSSTarget :: frameCode() {
 
 /////////////////////////////////////////////
   
-  //  code << "\n" << cli_models;
   code << "\n" << top_uses;
   code << "\n" << entity_declaration;
   code << "\n" << architecture_body_opener;
@@ -398,7 +387,7 @@ void SimVSSTarget :: registerComm(int direction, int pairid, int numxfer,
     return;
   }
   
-  // Construct unique label and signal names and put comp map in main list
+  // Construct unique label and signal names and put comp in main list
   StringList label;
   StringList goName, dataName, doneName;
   StringList rootName = name;
@@ -454,8 +443,6 @@ void SimVSSTarget :: writeComFile() {
 
 // Add additional codeStreams.
 void SimVSSTarget :: addCodeStreams() {
-  //  addStream("cli_models", &cli_models);
-  addStream("cli_comps", &cli_comps);
   addStream("cli_configs", &cli_configs);
   addStream("top_uses", &top_uses);
   addStream("top_entity", &top_entity);
@@ -467,8 +454,6 @@ void SimVSSTarget :: addCodeStreams() {
 
 // Initialize codeStreams.
 void SimVSSTarget :: initCodeStreams() {
-  //  cli_models.initialize();
-  cli_comps.initialize();
   cli_configs.initialize();
   top_uses.initialize();
   top_entity.initialize();
@@ -482,10 +467,7 @@ void SimVSSTarget :: initCodeStreams() {
 void SimVSSTarget :: initVHDLObjLists() {
   mainGenList.initialize();
   mainPortList.initialize();
-  //  mainGenMapList.initialize();
-  //  mainPortMapList.initialize();
   topSignalList.initialize();
-  //  topCompMapList.initialize();
   topCompDeclList.initialize();
 
   VHDLTarget::initVHDLObjLists();

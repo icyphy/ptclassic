@@ -78,8 +78,6 @@ public:
 
 protected:
 	// CodeStreams.
-//	CodeStream cli_models;
-	CodeStream cli_comps;
 	CodeStream cli_configs;
 
 	// States.
@@ -119,10 +117,7 @@ private:
 
 	VHDLGenericList mainGenList;
 	VHDLPortList mainPortList;
-//	VHDLGenericList mainGenMapList;
-//	VHDLPortList mainPortMapList;
 	VHDLSignalList topSignalList;
-//	VHDLCompDeclList topCompMapList;
 	VHDLCompDeclList topCompDeclList;
 
 	int pairNumber;
