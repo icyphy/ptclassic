@@ -6,6 +6,7 @@
 #include "Output.h"
 #include "type.h"
 #include "NamedObj.h"
+#include "Tokenizer.h"
 
 /**************************************************************************
 Version identification:
@@ -31,7 +32,7 @@ public:
 	char* tok;
 	union {
 		char cval;
-		char *sval;
+		const char *sval;
 		int ival;
 		double  dval;
 		State*  s;
@@ -45,8 +46,6 @@ public:
 class State : public NamedObj
 {
 public:
-
-	const char* lexptr;
 
         // Constructor
         State()  {};
@@ -87,7 +86,7 @@ public:
 	virtual void initialize(){};
 
 	// get Token  from  string 
-	ParseToken getParseToken(const char*, Block*);
+	ParseToken getParseToken(Tokenizer&, Block*);
 
 	// lookup state from name
 	State* lookup(char*, Block*);	
