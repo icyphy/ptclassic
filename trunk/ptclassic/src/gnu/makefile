@@ -144,6 +144,15 @@ HP_MACH=hppa1.1-hp-hpux
 
 hp_all: hp_configure hp_pregcc_install hp_bin install hp_all_gdb
 
+# Binaries to be renamed after installation
+HP_BINARIES= ar nm ranlib size strings strip
+hp_post_install:
+	for file in $(HP_BINARIES); \
+	do \
+		if [ -f $(GNU_EXEC_PREFIX)/bin/$$file ]; then \
+			mv $(GNU_EXEC_PREFIX)/bin/$$file $(GNU_EXEC_PREFIX)/bin/g$$file; \
+		fi; \
+	done
 
 hp_configure: $(GNU_OBJ)
 	@echo "Configure everything, then go back and reconfigure gcc"
@@ -177,8 +186,8 @@ hp_configure: $(GNU_OBJ)
 	-(cd $(GNU_OBJ)/libiberty; ln -s $(HP_GNU_SRC)/libiberty/*.c* .)
 	-(cd $(GNU_OBJ)/libg++/src; ln -s $(HP_GNU_SRC)/libg++/src/*.c* .)
 	-(cd $(GNU_OBJ)/libg++/src; ln -s $(HP_GNU_SRC)/libg++/src/*.h .)
-	-(cd $(GNU_OBJ)/libg++/gperf/src; \
-		ln -s $(HP_GNU_SRC)/libg++/gperf/src/*.c* .)
+	-(cd $(GNU_OBJ)/libg++/gprof/src; \
+		ln -s $(HP_GNU_SRC)/libg++/gprof/src/*.c* .)
 	-(cd $(GNU_OBJ)/gcc; ln -s $(HP_GNU_SRC)/gcc/*.c .)
 	# Don't link the .h files, or cp/call.c won't compile
 	#-(cd $(GNU_OBJ)/gcc; ln -s $(HP_GNU_SRC)/gcc/*.h .)
@@ -187,13 +196,14 @@ hp_configure: $(GNU_OBJ)
 	-(cd $(GNU_OBJ)/gcc/objc; ln -s $(HP_GNU_SRC)/gcc/objc/*.h .)
 	-(cd $(GNU_OBJ)/gcc/objc; ln -s $(HP_GNU_SRC)/gcc/objc/*.m .)
 	-(cd $(GNU_OBJ)/gcc/cp; ln -s $(HP_GNU_SRC)/gcc/cp/*.c .)
-	-(cd $(GNU_OBJ)/gcc/gdb; ln -s $(HP_GNU_SRC)/gcc/gdb/*.c .)
-	-(cd $(GNU_OBJ)/gcc/gdb; ln -s $(HP_GNU_SRC)/gcc/gdb/*.h .)
+	# We build gdb as a separate step, after we have GNU make
+	#-(cd $(GNU_OBJ)/gcc/gdb; ln -s $(HP_GNU_SRC)/gcc/gdb/*.c .)
+	#-(cd $(GNU_OBJ)/gcc/gdb; ln -s $(HP_GNU_SRC)/gcc/gdb/*.h .)
 	# Building libg++ requires as to bin in gcc so -B arg will work
-	-(cd $(GNU_OBJ)/gcc; ln -s $(GNU_OBJ/gas/gas as)
-	-(cd $(GNU_OBJ)/librx; ln -s $(GNU_OBJ/librx/*.c)
-	-(cd $(GNU_OBJ)/libstdc++; ln -s $(GNU_OBJ/libstdc++/*.cc)
-	-(cd $(GNU_OBJ)/libstdc++/stl; ln -s $(GNU_OBJ/libstdc++/stl/*.cc)
+	-(cd $(GNU_OBJ)/gcc; ln -s $(GNU_OBJ)/gas/gas as)
+	-(cd $(GNU_OBJ)/librx; ln -s $(GNU_OBJ)/librx/*.c .)
+	-(cd $(GNU_OBJ)/libstdc++; ln -s $(GNU_OBJ)/libstdc++/*.cc .)
+	-(cd $(GNU_OBJ)/libstdc++/stl; ln -s $(GNU_OBJ)/libstdc++/stl/*.cc .)
 
 # Set up links for GNU as.
 hp_pregcc_install: $(GNU_DEST)/$(ARCH)
