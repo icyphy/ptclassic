@@ -128,9 +128,6 @@ class ::tycho::IconRect {
     # Create a new item
     proc construct {id canvas slate tags x y args}
 
-    # Draw a highlight around the frame
-    proc highlight {id canvas slate args}
-    
     ###################################################################
     ####                         private variables                ####
 
@@ -148,9 +145,7 @@ class ::tycho::IconRect {
     array set methodtable [array get ::tycho::IconItem::methodtable]
 
     set methodtable(_coords)     ::tycho::LabeledRect::coords
-
     set methodtable(construct)   ::tycho::IconRect::construct
-    set methodtable(highlight)   ::tycho::IconRect::highlight
 
     #### Set option defaults
     array set optiondefault [@scope ::tycho::LabeledRect \
@@ -175,17 +170,5 @@ body ::tycho::IconRect::construct {id canvas slate tags x y args} {
 
     # Adjust anchor
     _anchor $id $canvas $slate $anchor
-}
-
-##########################################################################
-#### highlight
-#
-# Draw a highlight around the main icon. This is so the highlight
-# appears around the icon, not around the outside of the terminals,
-# which looks a bit rough.
-#
-body ::tycho::IconRect::highlight {id canvas slate args} {
-    eval $canvas create rectangle [$canvas bbox $primary($id)] $args
-    $slate lower highlight.$id $id
 }
 
