@@ -23,10 +23,10 @@
 <LI> <A HREF="coding/buildtclexts.html">Building Tcl Extensions</A>
 </MENU>
 
-Tycho is designed to be used as a stand-alone program or on
+Tycho is designed to be used as a stand-alone program or in
 conjunction with the Ptolemy system.  The Ptolemy system is a
 heterogeneous design environment developed at U.C. Berkeley.  We do
-most of our development under Solaris2.5, so Tycho will probably work
+most of our development under Solaris 2.5, so Tycho will probably work
 best under that operating system.
 
 
@@ -35,7 +35,7 @@ best under that operating system.
 To <A NAME="setup">setup</A> Tycho under Unix, you will need to
 download Tycho from the Tycho home page at <A
 HREF="http://ptolemy.eecs.berkeley.edu/tycho/Tycho.html"><CODE>http://ptolemy.eecs.berkeley.edu/tycho/Tycho.html</CODE></A>
-has a link to the downloads page that contains Tycho sources and Itcl
+has a link to the download page that contains Tycho sources and Itcl
 binaries for certain Unix platforms.
 
  <p>Tycho0.1.1 will not work with Itcl2.0, which is the version
@@ -45,14 +45,14 @@ Itcl2.2 installed.
  <P>To check the version number of Tycho, look at the startup screen
 that has the 'Mr. Tycho' bitmap.  The startup screen can be brought up by 
 selecting the <CODE>Help</CODE> menu in the upper right side and then selecting
-<CODE>About</CODE>.  You can also type
+<CODE>About</CODE>.  You can also
 type
 <tcl><pre>
 puts $TychoVersionInfo
 </pre></tcl>
 into a Tycho console.
-(If you are running tycho, you can just mouse on the tcl command
-above and the version information will be printed in the Console
+(If you are running Tycho, you can just mouse on the Tcl command
+above and the version information will be printed in the console
 window).
 
  <P>You will also need to have the <CODE>tycho/bin</CODE> directory in
@@ -111,7 +111,7 @@ The <a name="-debug tycho option">-debug</a> option will bring up
 <p>
 If you are running Ptolemy version 0.6 or higher, then
 Tycho is already running when you run the user interface <CODE>pigi</CODE>.
-You can obtain a Tycho console window with the key binding "y".
+You can obtain a Tycho console window with the key binding <CODE>y</CODE>.
 You can also run Tycho with the Ptolemy textual interpreter, 
 <CODE>ptcl</CODE>.
 The command-line syntax for this is:
@@ -156,18 +156,18 @@ command in any File menu.
 <p>
 The directory <A HREF="../typt"><CODE>$TYCHO/typt</CODE></A>
 contains the Ptolemy specific Tycho features.  The <A
-HREF="../typt/doc/usersGuides/index.html">typt User's Guides</A>
+HREF="../typt/doc/usersGuides/index.html"><CODE>typt</CODE> User's Guides</A>
 documentation is a good starting point.
 <h2><a name="debugging Tycho with Ptolemy">Debugging Tycho with Ptolemy</a></h2>
 
 <p> Since Ptolemy is a fundamentally extensible system, Tycho running
 with Ptolemy has special features to allow experimentation and
 debugging.  One feature is that it traps segmentation faults and
-related errors that cause the program to crash, and attempts to save
+related errors that cause the program to crash and attempts to save
 any unsaved work before exiting.  Of course, there is no guarantee
 that this will work, so files are saved with the prefix
 <CODE>#crash#</CODE> . When the file is reopened Tycho will check to
-see if a <CODE>#crash#</CODE> file exists, and if it does, give the
+see if a <CODE>#crash#</CODE> file exists, and if it does, it will give the
 user the option of opening it.
 
 <p>
