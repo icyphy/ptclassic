@@ -33,7 +33,11 @@ static char SccsId[]="$Id$";
 
 #include <stdio.h>
 #include <sys/types.h>
+#ifdef SYSV
+#include <dirent.h>
+#else
 #include <sys/dir.h>
+#endif
 #include <sys/stat.h>
 
 #include <X11/Intrinsic.h>
@@ -112,7 +116,7 @@ static void do_post();
 
 #define MM 1024
 
-static x_errors(disp, evt)
+static int x_errors(disp, evt)
 Display *disp;
 XErrorEvent *evt;
 {
@@ -128,8 +132,10 @@ XErrorEvent *evt;
     (void) fprintf(stderr, "               Request %s (minor code %d)\n",
 		   request, evt->minor_code);
     abort();
+    return -1;
 }
 
+int
 main(argc, argv)
 int argc;
 char *argv[];
@@ -151,6 +157,7 @@ char *argv[];
     image = dds_component(top, DDS_EXTERN, (ddsData) &ext_data);
     do_post(top);
     dds_loop((ddsEvtHandler *) 0);
+    return 0;
 }
 
 struct pos_data {
@@ -310,6 +317,7 @@ char *dir;			/* Directory     */
     result = dds_component(top, DDS_ITEM_LIST, (ddsData) &list);
     FREE(list.items);
     FREE(fl);
+    return result;
 }
 
 static void quit(item)
@@ -344,7 +352,6 @@ int thing;
     char buf[1024];
     ddsEditText data;
     ddsItemList idata;
-    static Cursor foobar = (Cursor) 0;
 
     dds_get(item, (ddsData) &idata);
     sprintf(buf, "State of `%s' has changed to `%s'\n",
@@ -380,7 +387,11 @@ fb_item **items;		/* Returned list of items */
  */
 {
     DIR *dp;
+#ifdef SYSV
+    struct dirent *entry;
+#else
     struct direct *entry;
+#endif
     struct stat buf;
     char full_name[MAX_NAME];
     int num_alloc, num_items;
@@ -388,15 +399,16 @@ fb_item **items;		/* Returned list of items */
     num_alloc = EST_DIR_SIZE;
     num_items = 0;
     (*items) = (fb_item *) XtCalloc(num_alloc, sizeof(fb_item));
-    if (dp = opendir(dir)) {
-	while (entry = readdir(dp)) {
+    if ( (dp = opendir(dir)) ) {
+	while ( (entry = readdir(dp)) ) {
 	    if (entry->d_name[0] != '.') {
 		(void) sprintf(full_name, "%s/%s", dir, entry->d_name);
 		if (stat(full_name, &buf) == 0) {
 		    if (num_items >= num_alloc) {
 			num_alloc *= 2;
 			(*items) = (fb_item *)
-			  XtRealloc((*items), num_alloc*sizeof(fb_item));
+			  XtRealloc((char *)(*items),
+				    num_alloc*sizeof(fb_item));
 		    }
 		    if ((buf.st_mode & S_IFMT) == S_IFDIR) {
 			(*items)[num_items].class = DirClass;
