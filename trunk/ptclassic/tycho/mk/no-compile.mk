@@ -110,11 +110,11 @@ tests:: makefile
 # the Ptolemy directory.
 itcldocs: $(ITCL_SRCS)
 	@if [ "$(TYDOC_DESC)" = "" ] ; then \
-		echo "$(ROOT)/lib/tydoc/tydoc $(ITCL_SRCS)"; \
-	 	$(ROOT)/lib/tydoc/tydoc $(ITCL_SRCS); \
+		echo "$(ROOT)/lib/tydoc/tydoc -d $(ITCL_SRCS)"; \
+	 	$(ROOT)/lib/tydoc/tydoc -d $(ITCL_SRCS); \
 	else \
-		echo "$(ROOT)/lib/tydoc/tydoc -t "$(TYDOC_DESC)" $(ITCL_SRCS)"; \
-		$(ROOT)/lib/tydoc/tydoc -t "$(TYDOC_DESC)" $(ITCL_SRCS); \
+		echo "$(ROOT)/lib/tydoc/tydoc -d -t "$(TYDOC_DESC)" $(ITCL_SRCS)"; \
+		$(ROOT)/lib/tydoc/tydoc -d -t "$(TYDOC_DESC)" $(ITCL_SRCS); \
 	fi
 
 # You probably don't want to add $(SRCS) here, since really $(SRCS)
