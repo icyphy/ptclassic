@@ -80,7 +80,7 @@ void DLParProcs :: prepareComm(DLNode* node) {
 void DLParProcs :: fireNode(DLNode* temp) {
 	EGGateLinkIter nextKid(temp->descendants);
 	EGGate* d;
-	while ((d = nextKid.nextMaster(0)) != 0) {
+	while ((d = nextKid++) != 0) {
 		DLNode* pd = (DLNode*) d->farEndNode();
 		if (pd->fireable()) 
 			myGraph->sortedInsert(myGraph->runnableNodes,pd,1);
