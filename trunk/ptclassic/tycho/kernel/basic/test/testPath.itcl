@@ -170,4 +170,30 @@ test Path-5.1 {Test out evalIfNewer} {
     set res2 [::tycho::evalIfNewer Path-5.1a Path-5.1b set a 1]
     list $res1 $res2
 } {1 {}}
+
+test Path-6.1 {Test out simplifyPath} {
+    global TYCHO env
+    set env(TYCHO) $TYCHO
+    # Simple case
+    set r1 [::tycho::simplifyPath [::tycho::expandPath \
+	    [file join \$TYCHO README.files]] \
+	    [list TYCHO]]
+
+    # This envvar does not exist
+    set r2 [::tycho::simplifyPath [::tycho::expandPath \
+	    [file join \$TYCHO doesNotExist]] \
+	    [list NOTAENVVAR]]
+    
+    set r3 [::tycho::simplifyPath [::tycho::expandPath \
+	    [file join \$TYCHO foo.r3]] \
+	    [list NOTAENVVAR TYCHO]]
+
+    # This path should not be simplified
+    set r4 [::tycho::simplifyPath [::tycho::expandPath \
+	    [file join / tmp elvis  bar.r4]] \
+	    [list NOTAENVVAR TYCHO]]
+
+    list $r1 $r2 $r3 $r4
+} {{$TYCHO/README.files} /export/watson/watson3/cxh/pt/tycho/doesNotExist {$TYCHO/foo.r3} /tmp/elvis/bar.r4}
+
 doneTests
