@@ -60,11 +60,14 @@ class ::tycho::EdgeController {
     # Process a click event
     method click {id x y}
 
+    # Configure the context-sensitive popup menu
+    method configurePopup {name}
+
     # Delete an edge
     method delete {name}
 
     # Disconnect an edge
-    method disconnect {edge args}
+    method disconnect {edge end}
 
     # Process a motion event
     method drag {id x y}
@@ -77,6 +80,9 @@ class ::tycho::EdgeController {
 
     # Find the closest available junction point.
     method junctionnearest {name id x y}
+
+    # Redraw an edge
+    method redraw {edge end}
 
     # Process a release event
     method release {args}
@@ -238,6 +244,19 @@ body ::tycho::EdgeController::click {id x y} {
     # Mark the histories so that it can be compacted later
     $graph mark set edge
     $layout mark set edge
+}
+
+#########################################################################
+#### configurePopup
+#
+# Initialize the context-sensitive pop-up menu. 
+#
+body ::tycho::EdgeController::configurePopup {name} {
+    set e [$slateview find withtag current]
+    puts "Over edge $e"
+
+    # Rebuild the terminal style cascade menu
+    
 }
 
 ########################################################################
@@ -433,6 +452,41 @@ body ::tycho::EdgeController::junctionnearest {name id x y} {
 }
 
 ########################################################################
+#### redraw
+#
+# Redraw an edge, given its name. The _end_ argument is
+# either "-from" or "-to," giving the end of the edge that
+# has changed. The edge is redrawn so that the end point is
+# in the correct position for a connected terminal.
+#
+body ::tycho::EdgeController::redraw {edge end} {
+    set edgeitem [slateid $edge]
+    set term [$graph attrget $edge $end]
+    set id [slateid $term]
+
+    if [$slate hastag $id "junction"] {
+        set connectat [junctionnearest [itemname $id] $id $x $y]
+        set direction $_connectat
+    } else {
+        set connectat "terminal"
+        set direction [$slate itemcget $id -direction]
+    }
+    if { $end == "-from" } {
+	set aspect "start"
+    } else {
+	set aspect "end"
+    }
+    set coords [$slate aspect $id $connectat]
+    eval $slate reshapeto $edgeitem $coords $aspect
+
+    # Change the end direction of the line 
+    if { $aspect == "end" } {
+        set direction [::tycho::Shape::compass $direction "rev"]
+    }
+    $slate itemconfigure $edgeitem -$aspect $direction
+}
+
+########################################################################
 #### release
 #
 # Release the item, making a connection in the graph if
@@ -585,7 +639,7 @@ body ::tycho::EdgeController::_initdrag:edge {x y} {
     set edgename1 [itemname $edgeitem1]
     
     # Get a unique junction name
-    while [$graph exists [set junctionname [::tycho::autoName junction]]] {}
+    set junctionname [$graph uniqueid junction]
     
     # Create the junction item
     set coords [$slate coords [$slate primary $edgeitem1]]
@@ -600,9 +654,9 @@ body ::tycho::EdgeController::_initdrag:edge {x y} {
     $graph publish add vertex $junctionname
 
     # Get two unique edge names
-    while [$graph exists [set edgename2 [::tycho::autoName edge]]] {}
-    while [$graph exists [set _edgename [::tycho::autoName edge]]] {}
-
+    set edgename2 [$graph uniqueid edge]
+    set _edgename [$graph uniqueid edge]
+puts "$edgename1 $edgename2 $_edgename"
     # Split the edge: get coordinates
     set out [eval ::tycho::Line::direction [list $coords] $point]
     set in [::tycho::Shape::compass $out rev]
@@ -704,7 +758,7 @@ body ::tycho::EdgeController::_initdrag:junction {x y} {
     set coords [concat [$slate aspect $id $connectat] $x $y]       
 
     # Get a unique name for the edge/net
-    while [$graph exists [set _edgename [::tycho::autoName edge]]] {}
+    set _edgename [$graph uniqueid edge]
     
     # Create the new edge
     $graph publish add edge $_edgename -from $name
@@ -743,7 +797,7 @@ body ::tycho::EdgeController::_initdrag:terminal {x y} {
         set dir [::tycho::Shape::compass $dir "rev"]
     }
     # Get a unique name for the edge/net
-    while [$graph exists [set _edgename [::tycho::autoName edge]]] {}
+    set _edgename [$graph uniqueid edge]
     
     # Create the new edge
     $graph publish add edge $_edgename -$end [itemname $source]
