@@ -47,17 +47,27 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "IntState.h"
 
 class SubC50Target : public C50Target {
-private:
-	void initStates();
+public:
+	// Constructor
+	SubC50Target(const char* name, const char* desc, 
+		     const char* assocDomain = C50domainName);
+
+	// Copy constructor
+	SubC50Target(const SubC50Target&);
+
+	/*virtual*/ void mainLoopCode();
+
+	// Return a copy of itself
+	/*virtual*/ Block* makeNew() const;
+
+	// Type checking
+	/*virtual*/ int isA(const char*) const;
+
 protected:
         /*virtual*/ void headerCode();
-public:
-	SubC50Target(const char* name, const char* desc, 
-		    const char* assocDomain = C50domainName);
-	SubC50Target(const SubC50Target&);
-	/*virtual*/ void mainLoopCode();
-	/*virtual*/ Block* makeNew() const;
-	/*virtual*/ int isA(const char*) const;
+
+private:
+	void initStates();
 };
 
 #endif
