@@ -107,6 +107,9 @@ class ::tycho::RunWindow {
     ###################################################################
     ####                   protected methods                       ####
 
+    # Tell the class to use for the simulation.
+    protected method _simulationClass {}
+
     # Initialize the menu/status/tool bars associated with this widget.
     protected method _initializeBars {menubar statusbar toolbar}
 
@@ -175,7 +178,7 @@ body ::tycho::RunWindow::constructor {args} {
     } {
 	keep -background -cursor -font -padx -pady
     }
-    pack $itk_component(bbox) -side right -expand no -padx 2 -pady 4
+    pack $itk_component(bbox) -side bottom -expand no -padx 2 -pady 4
 
     # Initialize the iteration counter and add a trace to it
     global iterationcounter
@@ -326,7 +329,8 @@ body ::tycho::RunWindow::simulation {mode args} {
     switch -exact $mode {
 	"create" {
 	    # Create a new simulation.
-	    set _simulation [uplevel #0 ::tycho::Simulation #auto $args]
+	    set simClass [_simulationClass]
+	    set _simulation [uplevel #0 $simClass #auto $args]
 	    return $_simulation
 	}
 	"delete" {
@@ -462,6 +466,16 @@ body ::tycho::RunWindow::starConnect {galaxy star control callback} {
     ###################################################################
     ###################################################################
     ####                      protected methods                    ####
+
+#####################################################################
+#### _simulationClass
+# Return the class to create for simulations. Subclasses can override
+# this method to have specific subclasses of <b>Simulation</b>
+# created.
+#
+body ::tycho::RunWindow::_simulationClass {} {
+    return ::tycho::Simulation
+}
 
 #####################################################################
 #### _initializeBars
