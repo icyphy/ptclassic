@@ -2,32 +2,28 @@ defstar {
 	name {Chop}
 	domain {C50}
 	desc {
-On each execution, this star reads a block of "nread" samples (default 128)
-and writes "nwrite" of these samples (default 64), skipping the first
-"offset" samples (default 0).  It is an error if nwrite + offset > nread.
-If nwrite > nread, then the output consists of overlapping windows,
-and hence "offset" must be negative.
+On each execution, this star reads a block of "nread" particles
+and writes them to the output with the given offset.  The number of
+particles written is given by "nwrite".  The output block contains
+all or part of the input block, depending on "offset" and "nwrite".
+The "offset" specifies where in the output block the first (oldest)
+particle in the input block will lie.  If "offset" is positive,
+then the first "offset" output particles will be either particles
+consumed on previous firings (if "use_past_inputs" parameter is YES),
+or zero (otherwise).  If "offset" is negative, then the first "offset"
+input particles will be discarded.
 	}
-	version { $Id$ }
-	author { A. Baensch }
+	version { $Id$}
+	author { Luis Gutierrez, based on CG56 version }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { C50 main library }
 	explanation {
-This star reads a block of particles of any type, and writes a block
-of particles that somehow overlaps the input block.
-The number of input particles consumed is given by \fInread\fR,
-and the number of output particles produced is given by \fInwrite\fR.
-The \fIoffset\fR parameter (default 0) specifies where the output
-block should start, relative to the beginning of the input block.
-To avoid trying to read samples that have not yet been consumed,
-it is required that $nwrite ~+~ offset ~<=~ nread$.
-Hence, if $nwrite ~>~ nread$, \fIoffset\fR must be negative,
-and the output consists of overlapping blocks input particles.
+See the explanation of the SDFChop star.
 	}
 	input {
 		name{input}
@@ -55,8 +51,87 @@ and the output consists of overlapping blocks input particles.
 		default {0}
 		desc { Position of output block relative to input block.}
 	}
-	// FIXME: use_past_inputs is not supported
-	setup {
+	
+	state {
+		name { use_past_inputs }
+		type { int }
+		default {"YES"}
+		desc {
+if offset > 0, specify whether to use previously read inputs
+(otherwise use zeros).
+		}
+	}
+
+	state {
+		name { pastInputs }
+		type { intarray}
+		default {" 0 0"}
+		desc { internal storage for past inputs }
+		attributes{ A_NONSETTABLE|A_CIRC|A_UMEM }
+	}
+	
+	state{
+		name {pastInputsPtr }
+		type { int }
+		default { 0 }
+		desc { it's were the next input goes in pastInputs }
+		attributes { A_NONSETTABLE|A_UMEM }
+	}
+
+
+	protected {
+		int hiLim, index, padding, numInputs, numCpy, cmplx;
+//hiLim : start writing trailing zeros at this point
+//index : copy inputs starting at inputs[index]
+//padding: number of old inputs or zeros to write at begining
+//numInput: number of inputs to copy
+//numCpy: number of inputs to store in pastInputs buffer
+	}
+
+	method {
+	    name { computeRange }
+	    type { "void" }
+	    arglist { "()" }
+	    access { protected }
+	    code {
+		// Compute the range of output indexes that come from inputs
+		// This method is called in the setup() method for the Chop
+		// star, and in the go method for ChopVarOffset because
+		// it resets the offset parameter
+		hiLim = int(nread) + int(offset);
+		if (hiLim > int(nwrite)) hiLim = int(nwrite);
+		numInputs = int(nread);
+		padding = int(offset);
+		if (padding < 0 ) {
+			padding = 0;
+			numInputs = hiLim;
+		}
+		if (padding > int(nwrite)){
+			padding = int(nwrite);
+		}
+		if ((int(nwrite) - padding) < numInputs) {
+			numInputs = int(nwrite) - padding;
+		}
+		index = -int(offset);
+		if (index < 0) {
+			index = 0;
+		}
+		else if (index > int(nread)){
+			Error::abortRun(*this,
+					"absolute value of negative offsets ",
+					"must not be larger than nread");
+			return;
+		}
+		numCpy = int(nread);
+		if (numCpy > padding) numCpy = padding;
+	    }
+	}
+
+	initCode{
+		addCode(initPtr);
+	}
+
+	setup{
 		if (int(nread) <= 0){
 			Error::abortRun(*this,
 					"The number of samples to read ",
@@ -69,31 +144,106 @@ and the output consists of overlapping blocks input particles.
 					"must be positive");
 			return;
 		}
-		if (int(nwrite) + int(offset) > int(nread)) {
-			Error::abortRun(*this,
-			   ": nwrite + offset cannot be greater than nread");
-			return;
+		cmplx = 0;
+		if (input.resolvedType() == COMPLEX){
+		//complex inputs take twice as much space
+			nread = 2*(int(nread));
+			nwrite = 2*(int(nwrite));
+			offset = 2*(int(offset));
+			cmplx = 1;
 		}
-		input.setSDFParams(int(nread), int(nread)-int(offset)-1);
-		output.setSDFParams(int(nwrite), int(nwrite)-1);
+
+		input.setSDFParams(int(nread),int(nread)-1);
+		output.setSDFParams(int(nwrite),int(nwrite)-1);
+		computeRange();
+		// FIXME: We had to use a past_inputs state because
+		// the C50 domain does not support a construct like
+		// input.setSDFParams(int(nread), int(nread)+int(offset)-1);
+		if (int(use_past_inputs) > 0) {
+			pastInputs.resize(padding);
+		}
 	}
-	codeblock(main) {
-	lar	AR0,#$addr(input,offset)	;Startaddress input	=> AR0
-    	lar	AR7,#$addr(output)		;Address output		=> AR7
-	mar	*,AR0
-	}
-	codeblock(write) {
-	splk	#$val(nwrite)-1,BRCR		;number of loops into BRCR
-	rptb	label(loop)			;loop to label(write)
-	lacc	*,15,AR7			;Accu = input(i)
-	sach	*,1,AR0				;output(n) = input(i)
-label(loop)
-	}    
+
 	go {
-		addCode(main);
-		if (int(nwrite) > 0) addCode(write);
+		if ( padding > 0){
+			if (int(use_past_inputs)){
+				int save_indx = int(nread)-int(padding);
+				if (save_indx < 0) save_indx = 0;
+				addCode(padNsavePastInputs(save_indx));
+			} else addCode(padWithZeroesStart());
+		};
+		if (numInputs > 0) addCode(writeInputToOutput(index));
+		if (hiLim < int(nwrite)){
+			int pad_end = int(nwrite)- hiLim;
+			addCode(padWithZeroesEnd(pad_end));
+		}	
 	}
+
+	codeblock(initPtr){
+	.ds	$addr(pastInputsPtr)
+	.word	$addr(pastInputs)
+	.text
+	}
+
+	codeblock(padNsavePastInputs,"int saveindx"){
+*initialize circular buffer for pastInputs
+	lacl	#$addr(pastInputs)	; get start addr of circ buffer
+	samm	cbsr1			; set start addr of circ buffer
+	add	#@(int(padding) - 1)	; get end addr of circ buffer
+	samm	cber1			; set end addr of circ buffer
+	lacl	#08h			
+	samm	cbcr				; enable circ buffer 1 with ar0
+	lmmr	ar0,#$addr(pastInputsPtr)	; get loc of next input
+	lar	ar1,#$addr(output)		; get loc of output
+	mar	*,ar0
+	rpt	#@(int(padding)-1)		
+	bldd	*+,#$addr(output)		; copy last inputs to output
+	rpt	#@(int(numCpy)-1)		
+	bldd	#$addr(input,@saveindx),*+	; save current inputs
+	smmr	ar0,#$addr(pastInputsPtr)	; save ptr for next time
+	zap
+	samm	brcr				; clear circ buffer reg.
+	}
+
+	codeblock(padWithZeroesStart,""){
+	lar	ar0,#$addr(output)
+	zap
+	mar	*,ar0
+	rpt	#@(int(padding)-1)
+	sacl	*+
+	}
+
+	codeblock(writeInputToOutput,"int idx"){
+	lar	ar0,#$addr(output,@idx)
+	rpt	#@(int(numInputs)-1)
+	bldd	#$addr(input),*+
+	}
+
+	codeblock(padWithZeroesEnd,"int iter"){
+	lar	ar0,#$addr(output,@(int(hiLim)))
+	rpt	#@(iter - 1)
+	sacl	*+
+	}
+
 	execTime {
-		return 3 + 2*int(nwrite);
+		int time = 0;
+		if ( padding > 0){
+			if (int(use_past_inputs)){ 
+				time += 14 + padding + numCpy;
+			} else time += 5;
+		}
+		time += 2 + numInputs;
+		if (hiLim < int(nwrite)) time += 2 + (int(nwrite) - hiLim);
+		return time;
 	}
+
 }
+
+
+
+
+
+
+
+
+
