@@ -49,14 +49,12 @@ Block :: printPorts (const char* type) {
 StringList
 Block :: printStates (const char* type) {
         StringList out;
+	if (numberStates() == 0) return out;
         out += "States in the ";
         out += type;
         out += " ";
         out += readName();
         out += ":\n";
-        out += "Number of status: ";
-        out += numberStates();
-        out += "\n";
         for(int i = numberStates(); i>0; i--)
                 out += (StringList) nextState();
         return out;
