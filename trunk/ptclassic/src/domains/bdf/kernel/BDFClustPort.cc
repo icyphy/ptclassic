@@ -94,9 +94,10 @@ void BDFClustPort::makeExternLink(BDFClustPort* bagPort) {
 	// to my external link (the bagPort)
 	BDFClustPort* pFar = far();
 	if (pFar) {
-		int del = numTokens();
+		int numDelays = numInitDelays();
+		const char* initDelays = initDelayValues();
 		disconnect();
-		bagPort->connect(*pFar,del);
+		bagPort->connect(*pFar,numDelays,initDelays);
 		bagPort->initGeo();
 	}
 }
