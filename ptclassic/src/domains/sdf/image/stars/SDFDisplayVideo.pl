@@ -125,21 +125,28 @@ may have changed.
 	}
 
 	setup {
+		CleanUp();
+
 		fieldNum = 0;
 		firstTime = TRUE;
+
 		delete [] tempFrame;
 		tempFrame = 0;
 
+		// Set rootName
 		const char* t = ImageName;
+		const char *nm = 0;
 		if (t && t[0]) {
-			rootName = t;
+			nm = expandPathName(t);
 		}
 		else {
-			char *nm = tempFileName();
-			rootName = nm;
-			delete [] nm;
+			nm = tempFileName();
 		}
-		char *nm = tempFileName();
+		rootName = nm;
+		delete [] nm;
+
+		// Set tmpFile
+		nm = tempFileName();
 		tmpFile = nm;
 		delete [] nm;
 	}
@@ -150,21 +157,28 @@ may have changed.
 		access { private }
 		arglist { "()" }
 		code {
+			StringList cmd = "rm -f";
+			int shellout = FALSE;
 			if ( tmpFile.length() > 0 ) {
-				StringList cmd = "rm -f ";
-				cmd << tmpFile;
-				system(cmd);
+				cmd << " " << tmpFile;
+				shellout = TRUE;
 			}
 			tmpFile.initialize();
 			if ((allFileNames.length() > 0) && !int(Save)) {
-				StringList cmd = "rm -f ";
-				cmd << allFileNames;
+				cmd << " " << allFileNames;
+				shellout = TRUE;
+			}
+			if (shellout) {
 				system(cmd);
 			}
 			allFileNames.initialize();	// Clear the file list.
 			LOG_DEL; delete [] tempFrame;
 			tempFrame = 0;
 		}
+	}
+
+	destructor {
+		CleanUp();
 	}
 
 	wrapup {
@@ -174,8 +188,6 @@ may have changed.
 		  cmd << allFileNames;
 		  system(cmd);
 		}
-
-		CleanUp();
 	}
 
 

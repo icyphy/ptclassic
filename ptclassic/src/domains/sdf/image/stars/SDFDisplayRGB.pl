@@ -89,17 +89,17 @@ to produce the full filename of the displayed image.
 		const char* saveMe = saveColor;
 		int del = !((saveMe[0] == 'y') || (saveMe[0] == 'Y'));
 
-		StringList fileName;
 		const char* iname = imageName;
+		const char* nm = 0;
 		if (iname && iname[0]) {
-		  fileName = iname;
+		  nm = expandPathName(iname);
 		}
 		else {
-		  char* nm = tempFileName();
-		  fileName = nm;
-		  delete [] nm;
+		  nm = tempFileName();
 		}
+		StringList fileName = nm;
 		fileName << "." << imgR->retId();
+		delete [] nm;
 
 		FILE* fptr = fopen(fileName, "w");
 		if (fptr == (FILE*) NULL) {
