@@ -4,6 +4,11 @@ defstar {
 	desc {
 Takes any number of inputs and dynamically
 displays their values in bar-chart form.
+The time stamp is ignored, so the bar chart
+only indicates the order of occurrence of events.
+If there is more than one input port, then
+bars for the two inputs will be plotted together
+only if the events are simultaneous.
 	}
 	version { $Id$ }
 	author { B. L. Evans }
@@ -93,6 +98,11 @@ limitation of liability, and disclaimer of warranty provisions.
 		if ( p->dataNew ) {
 		  if ( bar.update(i, count, p->get()) == FALSE ) {
 		    Error::abortRun(*this, "failed to update bar chart");
+		    return;
+		  }
+		} else {
+		  if ( bar.update(i, count, 0.0) == FALSE ) {
+		    Error::abortRun(*this, "failed to clear bar");
 		    return;
 		  }
 		}
