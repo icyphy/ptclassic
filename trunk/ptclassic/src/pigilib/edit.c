@@ -22,32 +22,47 @@ void FindClear();
 #define dmWidth 40
 #define dmIncrement 20
 
-/* EditDelayParams  5/27/88
-Edit the delay value associated with a delay instance.
+/* EditDelayParams, EditBusParams
+Edit the delay value associated with a delay instance,
+or the bus width value associated with a bus instance.
 Inputs: instPtr = delay instance pointer.
 Outputs: return = TRUE if no error.
+editBusOrDelay is the common part.
 */
+
+static boolean editBusOrDelay(prop,msg,msg2)
+octObject* prop;
+char* msg;
+char* msg2;
+{
+    static dmTextItem item = {NULL, 1, 10, NULL, NULL};
+    char buf[100];
+    int l;
+    StringizeProp(prop, buf, 100);
+    item.itemPrompt = msg;
+    item.value = buf;
+    l = strlen(buf);
+    item.cols = 10;
+    if (l >= 10) item.cols = l + 1;
+    if (dmMultiText(msg2, 1, &item) != VEM_OK) {
+	PrintCon("Aborted entry");
+        return(TRUE);
+    }
+    prop->contents.prop.type = OCT_STRING;
+    prop->contents.prop.value.string = item.value;
+    IntizeProp(prop);
+    (void) octModify(prop);
+    return(TRUE);
+}
 
 static boolean			   
 EditDelayParams(instPtr)
 octObject *instPtr;
 {
     octObject delayProp;
-    static dmTextItem item = {"Number of delays", 1, 10, NULL, NULL};
-    char buf[100];
 
     GetOrInitDelayProp(instPtr, &delayProp);
-    StringizeProp(&delayProp, buf, 100);
-    item.value = buf;
-    if (dmMultiText("Edit Delay", 1, &item) != VEM_OK) {
-	PrintCon("Aborted entry");
-        return(TRUE);
-    }
-    delayProp.contents.prop.type = OCT_STRING;
-    delayProp.contents.prop.value.string = item.value;
-    IntizeProp(&delayProp);
-    (void) octModify(&delayProp);
-    return(TRUE);
+    return editBusOrDelay(&delayProp,"Number of delays","Edit Delay");
 }
 
 static boolean			   
@@ -56,20 +71,9 @@ octObject *instPtr;
 {
     octObject busProp;
     static dmTextItem item = {"Bus Width", 1, 10, NULL, NULL};
-    char buf[100];
 
     GetOrInitBusProp(instPtr, &busProp);
-    StringizeProp(&busProp, buf, 100);
-    item.value = buf;
-    if (dmMultiText("Edit Bus Width", 1, &item) != VEM_OK) {
-	PrintCon("Aborted entry");
-        return(TRUE);
-    }
-    busProp.contents.prop.type = OCT_STRING;
-    busProp.contents.prop.value.string = item.value;
-    IntizeProp(&busProp);
-    (void) octModify(&busProp);
-    return(TRUE);
+    return editBusOrDelay(&busProp,"Bus Width","Edit Bus Width");
 }
 
 /* EditSogParams  5/27/88
@@ -92,10 +96,17 @@ octObject *instPtr;
 	PrintErr("Star or galaxy has no parameters");
 	return(TRUE);
     }
-    if (EditParamList(&pList,"Edit Actual Parameters"))
+    if (EditParamList(&pList,"Edit Actual Parameters") == TRUE) {
 	    SetSogParams(instPtr, &pList);
-    return(TRUE);
+    }
+    return TRUE;
 }
+
+/* body of parameter-edit code.
+Returns 0 if there is an error.
+Returns 1 if the parameters were changed or if the user clicked OK.
+Returns 2 if the command was aborted by the user.
+*/
 
 static boolean
 EditParamList(pListPtr, dmTitle)
@@ -124,7 +135,7 @@ char* dmTitle;
     }
     if (dmMultiText(dmTitle, pListPtr->length, items) != VEM_OK) {
 	PrintCon("Aborted entry");
-	return(FALSE);
+	return 2;
     }
     /* should free place->value string before assignment */
     place = pListPtr->array;
@@ -157,35 +168,8 @@ octObject *galFacetPtr;
         PrintErr("Galaxy or Universe has no parameters");
         return(1);
     }
-    items = (dmTextItem *) calloc((unsigned)pList.length, sizeof(dmTextItem));
-    place = pList.array;
-    width = 0;
-    maxwidth = 0;
-    for (i = 0; i < pList.length; i++) {
-	items[i].itemPrompt = place->name;
-	items[i].rows = 1;
-	items[i].value = place->value;
-	width = strlen(place->value);
-	if(maxwidth < width) maxwidth = width;
-	items[i].userData = NULL;
-	place++;
-    }
-    for (i = 0; i < pList.length; i++) {
-        items[i].cols = maxwidth + dmIncrement;
-    }
-    if (dmMultiText("Edit Formal Parameters", pList.length, items) != VEM_OK) {
-	PrintCon("Aborted entry");
-	return(2);
-    }
-    /* should free place->value string before assignment */
-    place = pList.array;
-    for (i = 0; i < pList.length; i++) {
-	place->value = items[i].value;
-	place++;
-    }
-
-    free((char *)items);
-
+    i = EditParamList(&pList, "Edit Formal Parameters");
+    if (i != 1) return i;
     ERR_IF1(!SetFormalParams(galFacetPtr, &pList));
     return(1);
 }
@@ -760,7 +744,8 @@ long userOptionWord;
 	    PrintErr(ErrGet());
 	    ViDone();
 	}
-	if (pList.length > 0 && EditParamList(&pList,"Edit Target Params")) {
+	if (pList.length > 0 &&
+	    EditParamList(&pList,"Edit Target Params") == TRUE) {
 	    SetTargetParams(&facet, &pList);
         }
     }
