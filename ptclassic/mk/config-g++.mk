@@ -57,5 +57,14 @@ OCTTOOLS = $(ROOT)/octtools
 # Oct libraries
 OCTLIBDIR = $(OCTTOOLS)/lib.$(ARCH)
 
+# If the X11 include directories are in /usr/include/X11, leave
+# the following symbol blank.  Otherwise define it as "-Idir" where
+# dir is the PARENT of the include directory, which must end in X11.
+X11INCL=
+
+# If the X11 libraries are not on the standard library search path,
+# define the following symbol as "-Ldir" where dir is the directory
+# containing them.  Otherwise leave it blank.
+X11LIBDIR=
 
 
