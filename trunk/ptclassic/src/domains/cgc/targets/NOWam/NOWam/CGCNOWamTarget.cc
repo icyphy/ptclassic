@@ -127,20 +127,6 @@ void CGCNOWamTarget :: pairSendReceive(DataFlowStar* s, DataFlowStar* r) {
         cs->nodeIPs.setInitValue(hashstring(nodeAddrs));
         cr->nodeIPs.setInitValue(hashstring(nodeAddrs));
 
-	// set the IPC handler names
-	// for sender
-	StringList handlerName = "ipcHandler";
-	handlerName << '_' << cr->name();
-	cs->IPCHandlerName.setInitValue(hashstring(handlerName));
-	StringList callHandler;
-	callHandler << handlerName << "();\n";
-	// for receiver
-	handlerName = "ipcHandler";
-	handlerName << '_' << cr->name();
-	cr->IPCHandlerName.setInitValue(hashstring(handlerName));
-	callHandler.initialize();
-	callHandler << handlerName << "();\n";
-
 	cs->partner = cr;
 }
 
