@@ -3,7 +3,7 @@
 # This shell script invokes a Tcl script to make a personal Ptolemy
 # development tree. See "mkPtolemyTree.tcl" for more information.
 #
-# Copyright (c) 1996-%Q% The Regents of the University of California.
+# Copyright (c) 1995-%Q% The Regents of the University of California.
 # All Rights Reserved.
 # See $PTOLEMY/copyright for the complete copyright notice.
 #
