@@ -361,7 +361,7 @@ extern int abort();
 extern void free();
 extern void perror();
 #else /* SYSV */
-#if !defined(PTAIX_XLC)
+#if !defined(PTAIX_XLC) && !defined(PTIRIX5_CFRONT)
 extern VOID_HACK abort(), free(), exit(), perror();
 #endif /* !PTAIX_XLC */
 #endif /* SYSV */
