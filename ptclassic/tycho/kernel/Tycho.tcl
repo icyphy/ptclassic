@@ -217,8 +217,24 @@ uplevel #0 {
 }
 
 uplevel #0 {
-    # Load the default preference settings
-    source [file join $tychokernel Defaults.tcl]
+    ## FIXME: This should be ~/.Tycho/preferences
+    global ::tychoprefs
+    set tychoprefs [file join $tycholib preferences]
+
+    # Create the tycho database
+    ::tycho::Parameters tychoData
+
+    # Add the preferences entry
+    tychoData add preferences UNKNOWN \
+	    -type data \
+	    -name tychoPreferences \
+	    -file [file join $tychoprefs _preferences.tcl] \
+	    -build "uplevel #0 source [file join $tychokernel Defaults.tcl]"
+
+    tychoData get preferences
+
+    # Load the default preference settings -- OBSOLETE
+    # source [file join $tychokernel Defaults.tcl]
 
     # Create the global font manager
     namespace ::tycho {
