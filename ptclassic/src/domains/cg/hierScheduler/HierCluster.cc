@@ -76,7 +76,7 @@ Cluster* HierCluster::convertGalaxy(Galaxy& g) {
 	scheduler = new LoopScheduler("");
     else
 	scheduler = new SDFScheduler;
-    cluster->setScheduler(scheduler);
+    cluster->setClusterScheduler(scheduler);
     
     ClusterIter next(*cluster);
     HierCluster *c;
