@@ -1,4 +1,4 @@
-<!<!-$Id$ -->
+<!-$Id$ -->
 <html>
 <head>
 <title>Troubleshooting Tycho</title>
@@ -37,14 +37,28 @@ files were prepared with itcl2.1.  The workaround is to	regenerate the
 cd $TYCHO
 make sources
 </PRE>
-<p> 
-It is also possible that you are running an itcl2.0 <CODE>itkwish</CODE> by
-accident.  If you start up itkwish by hand, and type
+<H3><A NAME="file join error message">file join error message</A></H3>
+If you are starting up Tycho0.1.1 or later and you see a message about
 <PRE>
-info tclversion
+ bad option "join": should be atime, dirname, executable, 
+    exists, extension, isdirectory, isfile, lstat, mtime, owned, readable, 
+    readlink, root, size, stat, tail, type, or writable
+        while executing
+    "file join $tycho kernel"
+        invoked from within
 </PRE>
-you should get back <CODE>7.4</CODE>if you are running itcl2.0 and
-<CODE>7.5</CODE> if you are running itcl2.1.
+
+then the problem is that you are running an
+itcl2.0<CODE>itkwish</CODE>, and Tycho0.1.1 requires itcl2.1, which
+includes the tcl7.5 <CODE>file join</CODE> command.  The way to tell
+is to start <CODE>itkwish</CODE> by hand and type
+
+<PRE>
+set itcl::version
+</PRE>
+you should get back <CODE>2.0</CODE>if you are running itcl2.0 and
+<CODE>2.1</CODE> if you are running itcl2.1.
+
 <p>
 Up to: <A HREF="introduction.html">Tycho Introduction</A> -
 Previous: <A HREF="running.html">Running Tycho</A> -
