@@ -422,11 +422,10 @@ stdkey2:
 /* version identifier */
 version:
         '$' IDENTIFIER ':' IDENTIFIER '$'
-   '$' IDENTIFIER ':' IDENTIFIER '/' IDENTIFIER '/' IDENTIFIER
-                 IDENTIFIER ':' IDENTIFIER ':' IDENTIFIER '$'
+   '$' IDENTIFIER ':' URL URL '$'
                 { char b[SMALLBUFSIZE];
                   objVer = $4;
-                  sprintf(b, "\"%s/%s/%s %s:%s:%s\"", $9, $11, $13, $14, $16, $18);
+                  sprintf(b, "\"%s %s\"", $9, $10);
                   objDate = save(b);
                 }
 |
@@ -444,10 +443,10 @@ version:
 |
 	'@' '(' '#' ')' IDENTIFIER
 		IDENTIFIER
-		IDENTIFIER '/' IDENTIFIER '/' IDENTIFIER
+		URL
 		{ char b[SMALLBUFSIZE];
 		  objVer = $6;
-		  sprintf(b, "\"%s/%s/%s\"", $7, $9, $11);
+		  sprintf(b, "\"%s\"", $7);
 		  objDate = save(b);
 		}
 |
@@ -460,10 +459,10 @@ version:
 		  objDate = save(b);
 		}
 
-|	IDENTIFIER IDENTIFIER '/' IDENTIFIER '/' IDENTIFIER
+|	IDENTIFIER URL
 		{ char b[SMALLBUFSIZE];
 		  objVer = $1;
-		  sprintf(b, "\"%s/%s/%s\"", $2, $4, $6);
+		  sprintf(b, "\"%s\"", $2);
 		  objDate = save(b);
 		}
 |	'%' IDENTIFIER '%' '%' IDENTIFIER '%'	
