@@ -27,7 +27,7 @@
 # Date of creation: 6/15/92.
 # Written by: J. Buck
 
-MAKEVARS = "ARCH=$(PTARCH)"
+MAKEVARS = "PTARCH=$(PTARCH)"
 
 makefiles:
 	@for x in $(DIRS); do \

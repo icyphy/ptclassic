@@ -51,7 +51,7 @@
 XPM_DEFINES="-DZPIPE"
 
 #PTOLEMY=	/users/ptdesign
-#ARCH=		sun4
+#PTARCH=	sun4
 #########################################
 # Should not have to change below here
 SHELL=		/bin/sh
