@@ -6,14 +6,14 @@ Output a waveform as specified by the array state "value" (default "1 -1").
 You can get periodic signals with any period, and can halt a simulation
 at the end of the given waveform.  The following table summarizes the
 capabilities:
-
+.nf
 haltAtEnd   periodic   period    operation
 -----------------------------------------------------------------------
 NO          YES        0         The period is the length of the waveform
 NO          YES        N>0       The period is N
 NO          NO         anything  Output the waveform once, then zeros
 YES         anything   anything  Stop after outputting the waveform once
-
+.fi
 The first line of the table gives the default settings.
 	}
 	explanation {
