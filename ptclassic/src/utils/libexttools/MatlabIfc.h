@@ -147,17 +147,11 @@ public:
 
 	// Methods for interface to/from another scripting language (e.g. Tcl)
 	// Use FreeStringArray to deallocate realPartStrings/imagPartStrings
-	Matrix* SetVariable(const char* name,
-			    int numrows, int numcols,
-			    Real* realPart, Real* imagPart);
-	Matrix* SetVariable(const char* name,
-			    int numrows, int numcols,
-			    char** realPartStrings,
-			    char** imagPartStrings);
-	Matrix* GetVariable(char* name,
-			    int* numrows, int* numcols,
-			    Real** realPart, Real** imagPart);
-	Matrix* GetVariable(char* name,
+	int MatlabSetVariable(const char* name,
+			      int numrows, int numcols,
+			      char** realPartStrings,
+			      char** imagPartStrings);
+	int MatlabGetVariable(char* name,
 			    int* numrows, int* numcols,
 			    char*** realPartStrings,
 			    char*** imagPartStrings);
