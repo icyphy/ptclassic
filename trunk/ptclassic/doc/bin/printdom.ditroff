@@ -121,8 +121,10 @@ if ( -d stars ) then
 		cat starstitle >> /tmp/pt$$
 	endif
 	cd stars
-	# print all stars
-	cat -s * >> /tmp/pt$$
+	# print all stars, sorted in dictionary order
+	foreach file (`ls -1 -d * | sort -f -d`)
+		cat -s $file >> /tmp/pt$$
+	end
 	cd ..
 endif
 
