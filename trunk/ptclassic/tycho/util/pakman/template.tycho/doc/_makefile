@@ -28,6 +28,9 @@ EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) \
 
 MISC_FILES = 
 
+# make checkjunk will not report OPTIONAL_FILES as trash
+OPTIONAL_FILES =	codeDoc img 
+
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =
 

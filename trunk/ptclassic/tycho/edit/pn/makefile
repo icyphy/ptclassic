@@ -62,6 +62,9 @@ EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) \
 
 MISC_FILES = $(DIRS) tclIndex
 
+# make checkjunk will not report OPTIONAL_FILES as trash
+OPTIONAL_FILES =	adm
+
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =
 
