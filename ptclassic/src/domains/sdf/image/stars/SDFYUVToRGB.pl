@@ -22,10 +22,15 @@ black-and-white televisions [1].
 Y is the luminance (intensity) of the image, and U and V represent the
 chrominance (hue and saturation).
 The YUV format is based on how the eyes perceive color.
+The U axis has yellow at its minimum point and blue at its maximum point,
+whereas the V axis has turquoise at its minimum point and red at its
+maximum point.
+In this implementation, each of the RGB values and each of the YUV values
+are integer values in the range from 0 to 255 (inclusive).
 .Id "format conversion, YUV to RGB"
 .Id "image format conversion, YUV to RGB"
-.Ir "image format, RGB"
-.Ir "image format, YUV"
+.Ir "image format, red-green-blue (RGB)"
+.Ir "image format, luminance-chrominance (YUV)"
 .Id "Pratt, W."
 .UH REFERENCES
 .ip [1]
@@ -43,7 +48,7 @@ Wiley & Sons: New York.  1991.  2nd ed.
 	output { name { output2 } type { message } }
 	output { name { output3 } type { message } }
 
-	inline method {
+	inline method {		// perform rounding in range [0, 255]
 		name { quant }
 		type { "unsigned char" }
 		arglist { "(float inval)" }
@@ -51,7 +56,7 @@ Wiley & Sons: New York.  1991.  2nd ed.
 		code {
 			if (inval < 0.5) return ((unsigned char) 0);
 			else if (inval > 254.5) return ((unsigned char) 255);
-			else return ((unsigned char) int(inval+0.5));
+			else return ((unsigned char) int(inval + 0.5));
 		}
 	} // end quant()
 
@@ -70,8 +75,8 @@ Wiley & Sons: New York.  1991.  2nd ed.
 		GrayImage* greenI = (GrayImage*) envp2.writableCopy();
 		GrayImage* blueI = (GrayImage*) envp3.writableCopy();
 		if (redI->fragmented() || redI->processed() ||
-				greenI->fragmented() || greenI->processed() ||
-				blueI->fragmented() || blueI->processed()) {
+		    greenI->fragmented() || greenI->processed() ||
+		    blueI->fragmented() || blueI->processed()) {
 			LOG_DEL; delete redI; LOG_DEL; delete greenI;
 			LOG_DEL; delete blueI;
 			Error::abortRun(*this,
@@ -81,9 +86,9 @@ Wiley & Sons: New York.  1991.  2nd ed.
 		const int width = redI->retWidth();
 		const int height = redI->retHeight();
 		if ((greenI->retWidth() != width) ||
-				(greenI->retHeight() != height) ||
-				(blueI->retWidth() != width) ||
-				(blueI->retHeight() != height)) {
+		    (greenI->retHeight() != height) ||
+		    (blueI->retWidth() != width) ||
+		    (blueI->retHeight() != height)) {
 			LOG_DEL; delete redI; LOG_DEL; delete greenI;
 			LOG_DEL; delete blueI;
 			Error::abortRun(*this,
@@ -102,12 +107,12 @@ Wiley & Sons: New York.  1991.  2nd ed.
 			for (j = 0; j < width; j++){
 				temp2 = j + temp1;
 				rrr = quant(rptr[temp2]
-						+ 1.4026 * (bptr[temp2]-128) + 0.5);
+						+ 1.4026 * (bptr[temp2]-127.5));
 				ggg = quant(rptr[temp2]
-						- 0.3444 * (gptr[temp2]-128)
-						- 0.7144 * (bptr[temp2]-128) + 0.5);
+						- 0.3444 * (gptr[temp2]-127.5)
+						- 0.7144 * (bptr[temp2]-127.5));
 				bbb = quant(rptr[temp2]
-						+ 1.773 * (gptr[temp2]-128) + 0.5);
+						+ 1.773 * (gptr[temp2]-127.5));
 				rptr[temp2] = rrr;
 				gptr[temp2] = ggg;
 				bptr[temp2] = bbb;
