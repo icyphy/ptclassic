@@ -142,6 +142,12 @@ test DomainInfo::queryDomains-1.1 {Check out the queryDomains command} {
 
 } {DE}
 
+######################################################################
+#### queryDomains
+test DomainInfo::diffDomains-1.1 {Check out the diffDomains proc} {
+    set diffresults [::tycho::DomainInfo::diffDomains HOF SDF]
+    list [lrange $diffresults 0 3] [llength $diffresults]
+} {{{} {} {} {}} 6}
 catch {delete object .sdf}
 catch {delete object .hof}
 catch {delete object .domainInfo}
