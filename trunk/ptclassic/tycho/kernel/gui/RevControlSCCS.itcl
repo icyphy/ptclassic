@@ -36,10 +36,10 @@
 #   It should not be modal.
 
 
-# Default options for the "sccs create" command force there to be ID
+# Default options for the "sccs admin" command force there to be ID
 # keywords in the file, and also indicate that %Q% should be replaced with
 # the current year.
-option add *RevControlSCCS.createOptions {-fq19[exec date +%y] -fi} widgetDefault
+option add *RevControlSCCS.adminOptions {-fq19[exec date +\%y] -fi} widgetDefault
 
 option add *RevControlSCCS.versionColor [ptkColor blue black] widgetDefault
 option add *RevControlSCCS.commentColor [ptkColor firebrick black] widgetDefault
@@ -117,6 +117,7 @@ body ::tycho::RevControlSCCS::checkIn {object} {
     set dir [file dirname $file]
     set basefile [file tail $file]
     set olddir [eval pwd]
+
     if {![file exists [format "%s/SCCS/p.$basefile" $dir]]} {
 	error "The file \"$basefile\" is not checked out."
     }
@@ -186,12 +187,21 @@ body ::tycho::RevControlSCCS::initializeRevControl {} {
 	exec mkdir $revdir
     }
     cdDir $dir
-    set opts [option get $itk_component(hull) createOptions RevControlSCCS]
-    catch {eval exec sccs create $opts $basefile} output
+    catch {eval exec sccs create $basefile} output
     if {![regexp "^\[1-9\]+.\[0-9\]+" $output]} {
 	error "Failed to place the file under revision\
 		control: $output."
     }   
+    # Run sccs admin
+    set opts [option get $itk_component(hull) adminOptions RevControlSCCS]
+    if [catch {eval exec sccs admin $opts $basefile} output] {
+	error "Failed to run 'sccs admin $opts $basefile:\
+		$output."
+    }
+    if [catch {eval exec sccs get $basefile} output] {
+	error "Failed to run 'sccs get $basefile:\
+		$output."
+    }
     $object reload
     cd $olddir
 }
