@@ -183,9 +183,6 @@ XV_RAND = 	-DNO_RANDOM
 # Matlab architecture
 MATARCH = sol2
 
-# Mathematica MathLink library
-MATHLINKLIBNAME = MLelf
-
 # Mathematica architecture
 MATHEMATICAARCH = Solaris
 
