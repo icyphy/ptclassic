@@ -56,16 +56,16 @@ LIB=libhofstars.$(LIBSUFFIX)
 PL_SRCS= \
  HOFBase.pl \
  HOFBaseHiOrdFn.pl \
+ HOFMap.pl \
+ HOFMapGr.pl \
+ HOFIfElse.pl \
  HOFBusDeinterleave.pl \
  HOFBusInterleave.pl \
  HOFBusMerge.pl \
  HOFBusSplit.pl \
  HOFChain.pl \
  HOFDelayedMap.pl \
- HOFIfElse.pl \
  HOFIfElseGr.pl \
- HOFMap.pl \
- HOFMapGr.pl \
  HOFNop.pl \
  HOFSrc.pl \
  HOFSrcCx.pl \
