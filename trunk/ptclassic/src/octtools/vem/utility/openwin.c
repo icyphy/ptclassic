@@ -250,7 +250,7 @@ STR geoSpec;			/* Optional geometry spec  */
     disp = xv_disp();
     dfGetInt("lambda", &gridSize);
     user_flags = 0;
-    if (oldWin = wnGrabWindow(oldWin)) {
+    if ( (oldWin = wnGrabWindow(oldWin)) ) {
 	/* Get information about old window */
 	XGetGeometry(disp, oldWin, &root, &ox, &oy, &ow, &oh, &ob, &od);
 	if (ext) {
@@ -498,7 +498,7 @@ STR geoSpec;			/* Optional geometry specification  */
 	if (rpcSpec) {
 	    /* Parse remote specification */
 	    STRMOVE(host, rpcSpec);
-	    if (comma = strchr(host, ',')) {
+	    if (( comma = strchr(host, ',')) ) {
 		STRMOVE(path, comma+1);
 		*comma = '\0';
 	    } else {
