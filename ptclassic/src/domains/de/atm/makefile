@@ -11,7 +11,7 @@
 
 include ../../../../mk/subdomain.mk
 
-DIRS = kernel stars
+DIRS = stars
 
 ME = de/atm
 
