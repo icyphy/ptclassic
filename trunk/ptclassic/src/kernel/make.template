@@ -70,6 +70,7 @@ CCS_WITH_H_FILES=\
  KnownState.cc \
  KnownTarget.cc \
  Linker.cc \
+ Matrix.cc \
  Message.cc \
  NamedObj.cc \
  Particle.cc \
