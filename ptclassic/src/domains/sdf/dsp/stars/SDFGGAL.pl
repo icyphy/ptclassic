@@ -3,7 +3,12 @@ defstar
     name { GGAL }
     derivedFrom { GAL }
     domain { SDF } 
-    desc { Ganged Gradient Adaptive Lattice filters. }
+    desc {
+Ganged Gradient Adaptive Lattice filters.
+This means that there are actually two lattice filters,
+one of which is adapted using the stochastic gradient algorithm,
+and the other which tracks the first.
+    }
     version { $Id$ }
     author { T. M. Parks }
     copyright {
