@@ -159,8 +159,8 @@ public:
 
 	// generate code
 	StringList generateCode() {
-		StringList foo = targetPtr->generateCode();
-		return foo;
+		targetPtr->generateCode();
+		return (*targetPtr->getStream("myCode"));
 	}
 
 
