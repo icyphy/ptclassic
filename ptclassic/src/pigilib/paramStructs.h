@@ -1,3 +1,6 @@
+#ifndef PARAMSTRUCTS_H
+#define PARAMSTRUCTS_H 1
+
 /* 
 Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
 All rights reserved.
@@ -49,3 +52,6 @@ typedef struct ParamListStruct ParamListType;
 
 extern boolean PStrToPList();
 extern char * PListToPStr();
+
+#endif /* PARAMSTRUCTS_H */
+
