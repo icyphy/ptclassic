@@ -119,7 +119,7 @@ id, geo, deswidth, desheight)
     /* Make the bar graph */
     sprintf(command, "ptkMakeBarGraph %s \"%s\" \"%s\" %d %f %f [curuniverse]",
 	name, desc, geo, numBars, deswidth, desheight);
-    if(Tcl_Eval(interp, command, 0, (char**)NULL) != TCL_OK)
+    if(Tcl_Eval(interp, command) != TCL_OK)
         return 0;
 
     /* Get the actual plot window size, which may differ from that requested */
@@ -139,7 +139,7 @@ id, geo, deswidth, desheight)
             sprintf(command,
 		"%s.pf.plot create rect %d %d %d %d -fill [option get . plotColor%d PlotColor%d]",
 		name, x0, y0, x1, y1, color, color);
-            if(Tcl_Eval(interp, command, 0, (char**)NULL) != TCL_OK)
+            if(Tcl_Eval(interp, command) != TCL_OK)
                 return 0;
             else
                 sscanf(interp->result,"%d",&id[j][i]);
@@ -198,7 +198,7 @@ int ptkSetBarGraph (interp, win, name, data, numTraces,
 
             sprintf(command, "%s.pf.plot coords %d %d %d %d %d",
 		name, id[j][i], x0, y0, x1, y1);
-            if(Tcl_Eval(interp, command, 0, (char**)NULL) != TCL_OK)
+            if(Tcl_Eval(interp, command) != TCL_OK)
                 return 0;
 	}
     }
