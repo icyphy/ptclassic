@@ -3,9 +3,9 @@
 .SD
 A simple demo illustrating the different masking options available.
 .SE
-.LO "~ptolemy/src/domains/sdf/demo"
+.LO "$PTOLEMY/src/domains/sdf/demo"
 .SV $Revision$ $Date$
-.AL "A. Khazeni"
+.AL "A. Khazeni, Asawaree Kalavade"
 .LD
 This simple demo is used to illustrate the different masking
 options available.
