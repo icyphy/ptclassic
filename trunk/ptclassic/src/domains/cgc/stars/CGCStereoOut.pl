@@ -35,7 +35,7 @@ provisions.
       name { blockSize }
       type { int }
       default { 8180 }
-      desc { Number of samples to write. }
+      desc { Number of bytes to write. }
     }
 
     defstate {
@@ -97,7 +97,7 @@ provisions.
 
     codeblock (declarations) {
       int $starSymbol(file);
-      int $starSymbol(buffer)[$val(blockSize)*2];
+      short $starSymbol(buffer)[$val(blockSize)/2];
       int $starSymbol(counter);
     }
     
@@ -188,14 +188,18 @@ provisions.
     codeblock (convert) {
       /* Take data from Input and put it in buffer */
       for ($starSymbol(counter)=0; $starSymbol(counter) <
-	     ($val(blockSize)*2); $starSymbol(counter)++) {
-	$starSymbol(buffer)[$starSymbol(counter)] = (int)floor($ref(input,$starSymbol(counter))*32768);
+	     ($val(blockSize)/2); $starSymbol(counter)++) {
+	$starSymbol(buffer)[$starSymbol(counter)] = ceil($ref(input,$starSymbol(counter))*32768.0);
       }
     }
 
     codeblock (write) {
       /* Write data to a file */
-      write($starSymbol(file), $starSymbol(buffer), $val(blockSize));
+      if (write($starSymbol(file), $starSymbol(buffer),
+		$val(blockSize)) != $val(blockSize)){
+	perror("Error writing to file: $val(fileName)");
+	exit(1);
+      }
     }
 
 
@@ -220,7 +224,7 @@ provisions.
     setup {
       fileName.clearAttributes(A_SETTABLE);
       standardOutput = (strcmp(fileName,"") == 0);
-      input.setSDFParams(2*int(blockSize), 2*int(blockSize)-1);
+      input.setSDFParams(int(blockSize/2), int(blockSize/2)-1);
     }
       
     initCode {
