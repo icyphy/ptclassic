@@ -37,6 +37,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #pragma interface
 #endif
 
+#include "DataStruct.h"
 #include "DoubleLink.h"
 #include "StringList.h"
 #include "PortHole.h"
@@ -78,7 +79,7 @@ public :
 	int delay() { return arc_delay; }
 
 	// Add x samples to the arc.
-	void addSamples(int x) { arc_samples+=x; }
+	void addSamples(int x) { arc_samples += x; }
 
 private :
 	// The number of samples passed along the arc.
@@ -94,35 +95,33 @@ private :
 //
 // This class is used to store a single entry in the list of ancestors or
 // descendants for a node in the expanded graph. 
-//
 
 class EGGate {
 public:
 	EGGate(EGNode* n, PortHole* p = 0) : 
-		parent(n), arc(0), far(0), pPort(p){}
+		parent(n), arc(0), far(0), myLink(0), pPort(p), index(0) {}
  
 	virtual ~EGGate();
 
 	// input or output?
-	int isItInput() { return pPort->isItInput(); }
+	int isItInput() { return pPort && pPort->isItInput(); }
 
 	// readName
-	const char* name() const { return pPort->name(); }
+	const char* name() const {
+		return pPort ? pPort->name() : (const char*)0;
+	}
 
 	// hide me from the node
 	void hideMe(int flag = 0);
 
 	//  a pointer to the far end node
-	EGNode* farEndNode() 
-		{ if (far==0) return 0;
-		  else return far->parent; }
-	
+	EGNode* farEndNode() { return far ? far->parent : (EGNode*)0; }
+
 	// far gate
 	EGGate* farGate() { return far; }
 
 	// set the original porthole and the index.
-	void setProperty(PortHole* p, int i) 
-		{ pPort = p; index = i; }
+	void setProperty(PortHole* p, int i) { pPort = p; index = i; }
 
 	// return the aliased porthole
 	const PortHole* aliasedPort() { return pPort; }
@@ -131,7 +130,7 @@ public:
 	StringList printMe();
 
 	// the master on the far end of this arc
-	DataFlowStar *farEndMaster();
+	DataFlowStar* farEndMaster();
 
 	// set link pointer
 	void setLink(EGGateLink* p) { myLink = p; }
@@ -141,29 +140,25 @@ public:
 	int farEndInvocation();
 
 	// return the number of samples for this arc
-	int samples()
-		{ if (arc==0) return 0;
-		  else return arc->samples(); }
+	int samples() { return arc ? arc->samples() : 0; }
 
 	// return the delay along this arc
-	int delay()
-		{ if (arc==0) return 0;
-		  else return arc->delay(); }
+	int delay() { return arc ? arc->delay() : 0; }
 
-	void addSamples(int x) { arc->addSamples(x); } 
+	void addSamples(int x) { if (arc) arc->addSamples(x); } 
 
 	// allocate & set up an arc between this gate and "dest"
-	void allocateArc(EGGate *dest,int no_samples,int no_delays);
+	void allocateArc(EGGate* dest, int no_samples, int no_delays);
 
 private:
 	// the EG node for which this is a gate.
-	EGNode *parent;
+	EGNode* parent;
 
 	// the arc which connects this gate to a gate in another node
-	EGArc *arc;
+	EGArc* arc;
 
 	// a pointer to the far end gate, accross the arc
-	EGGate *far;
+	EGGate* far;
 
 	// pointer to my link
 	EGGateLink* myLink;
@@ -188,8 +183,8 @@ class EGGateLink : public DoubleLink
 {
 friend class EGGateList;
 public:
-	EGGate* gate() { return (EGGate*) e; }
-	EGGateLink* nextLink() { return (EGGateLink*) next; }
+	EGGate* gate() { return (EGGate*)e; }
+	EGGateLink* nextLink() { return (EGGateLink*)next; }
 
 	EGGateLink(EGGate* e) : DoubleLink(e), myList(0) {}
 
@@ -220,7 +215,7 @@ public:
 		{ INC_LOG_NEW; EGGateLink* tmp = new EGGateLink(e);
 		  e->setLink(tmp);
 		  return tmp; }
-	
+
 	// Insert a new gate into the proper position in the precedence list. 
 	// The update parameter indicates whether or not to
 	// update the arc data if a node with the same "farEndNode",
@@ -231,13 +226,12 @@ public:
 	// (If update is 1, we will still try to update the other
 	// end of "p" later, so don't deallocate now.)
 	//
-	void insertGate(EGGate *p, int update);
+	void insertGate(EGGate* p, int update);
+
+	// destructor: makes sure that "arc"'s get deallocated too
+	~EGGateList();
 
 	void initialize();
-
-	// destructor :
-	// this makes sure that "arc"'s get deallocated too
-	~EGGateList();
 
 	// print out the list
 	StringList printMe();
@@ -276,4 +270,3 @@ private:
 };
 
 #endif
-
