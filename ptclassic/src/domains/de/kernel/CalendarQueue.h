@@ -2,7 +2,7 @@
 Version identification:
 $Id$ $Revision$
 
-Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
+Copyright (c) 1990-1994 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -34,9 +34,9 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #pragma interface
 #endif
 
-#include "PriorityQueue.h"
 #include "DataStruct.h"
 #include "DEStar.h"
+#include "PriorityQueue.h"
 
 
 #define MAX_BUCKET     1024*4
@@ -57,17 +57,28 @@ ENHANCEMENTS, OR MODIFICATIONS.
 class CqLevelLink : public LevelLink
 {
 	friend class CalendarQueue;
-	friend class CQScheduler;
 public:
+	Pointer e;
+	double	level;		// currently, level is "double" type.
+	double fineLevel;	// If levels are equal, we may need
+				// finerLevel which is optional.
 	Star* dest;             // All the destinations are also stored
 				// contiguously to allow sequential
 				// popping off of same Star event;
-				// of an event.
+				// of an event. Finally, if events have
+	unsigned long absEventNum;   // all of the above the same, we still
+				     // need to have events sorted by the order 
+				     // that they arrived
+	CqLevelLink() {}
+
+	CqLevelLink* next;
+	CqLevelLink* before;
 
 	// v sets the level, and fv sets the fineLevel of the entry.
 	// Numerically smaller number represents  the higher priority.
 	CqLevelLink* setLink(Pointer a, double v, double fv,
-			   Star* d, CqLevelLink* n, CqLevelLink* b);
+			   Star* d, unsigned long abs, 
+			   CqLevelLink* n, CqLevelLink* b);
 };
 
 	//////////////////////////////////////
@@ -116,7 +127,7 @@ public:
 
 	// Constructor
 	CalendarQueue() : freeLinkHead(0), cq_eventNum(0), numFreeLinks(0), 
-			  cq_resizeEnabled(1)
+			  cq_absEventCounter(0), cq_resizeEnabled(1)
         { LocalInit(0, 2, 1.0, 0.0); }
 	virtual ~CalendarQueue();
 
@@ -124,14 +135,17 @@ protected:
 
 	CqLevelLink **cq_bucket;
 
-	int cq_lastBucket;      /* bucket number last event was dequeued */
-	double cq_bucketTop;    /* priority at the top of that bucket    */
-	double cq_lastTime;     /* priority of last dequeued event       */
+	int cq_lastBucket;      // bucket number last event was dequeued 
+	double cq_bucketTop;    // priority at the top of that bucket   
+	double cq_lastTime;     // priority of last dequeued event     
 
 	int cq_bottomThreshold, cq_topThreshold;  
-	int cq_bucketNum;       /* number of buckets                     */
-	int cq_eventNum;        /* number of events in calendar queue    */
-	double cq_interval;     /* size of intervals of each bucket      */
+	int cq_bucketNum;       // number of buckets                  
+	int cq_eventNum;        // number of events in calendar queue 
+	double cq_interval;     // size of intervals of each bucket  
+	unsigned long cq_absEventCounter;  // keep a count of the total events
+				// received in order to sort on
+				// the order events were sent
 	int cq_firstSub;
 	CqLevelLink* CalendarQ[QUEUE_SIZE];
 
