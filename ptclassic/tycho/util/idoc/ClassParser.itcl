@@ -1013,7 +1013,7 @@ body ::tycho::IDocSys::addConstructor {class arguments desc} {
     set classModel $myClass($class)
     $classModel Constructor constructor
     set desc [formatDesc $desc]
-    $classModel annotation constructor.description $desc
+    $classModel annotation constructor.description $desc Constructor
     addArgs $class constructor $arguments    
 }
 
@@ -1026,7 +1026,7 @@ body ::tycho::IDocSys::addDestructor {class desc} {
     set classModel $myClass($class)
     $classModel Destructor destructor
     set desc [formatDesc $desc]
-    $classModel annotation destructor.description $desc
+    $classModel annotation destructor.description $desc Destructor
 }
 
 #####################################################################
@@ -1040,7 +1040,7 @@ body ::tycho::IDocSys::addItk_Option {class switchName desc {default {}}} {
     $classModel variable $switchName \
             -protection public -modifiers itk_option -default $default
     set desc [formatDesc $desc]
-    $classModel annotation $switchName.description $desc
+    $classModel annotation $switchName.description $desc variable
 }
 
 #####################################################################
@@ -1055,7 +1055,7 @@ body ::tycho::IDocSys::addCommon {class commonName protection \
     $classModel variable $commonName \
             -protection $protection -scope class -default $default
     set desc [formatDesc $desc]
-    $classModel annotation $commonName.description $desc
+    $classModel annotation $commonName.description $desc variable
 }
 
 #####################################################################
@@ -1069,7 +1069,7 @@ body ::tycho::IDocSys::addVariable {class varName protection \
     $classModel variable $varName \
             -protection $protection -scope instance -default $default
     set desc [formatDesc $desc]
-    $classModel annotation $varName.description $desc
+    $classModel annotation $varName.description $desc variable
 }
 
 #####################################################################
@@ -1083,7 +1083,7 @@ body ::tycho::IDocSys::addInsideProc {class procName protection \
     set classModel $myClass($class)
     $classModel method $procName -protection $protection -scope class
     set desc [formatDesc $desc]
-    $classModel annotation $procName.description $desc
+    $classModel annotation $procName.description $desc method
     addArgs $class $procName $arguments
 }    
 
@@ -1097,7 +1097,7 @@ body ::tycho::IDocSys::addMethod {class methodName protection arguments desc} {
     set classModel $myClass($class)
     $classModel method $methodName -protection $protection -scope instance
     set desc [formatDesc $desc]
-    $classModel annotation $methodName.description $desc
+    $classModel annotation $methodName.description $desc method
     addArgs $class $methodName $arguments
 }
 
@@ -1125,7 +1125,7 @@ body ::tycho::IDocSys::addBody {bodyName arguments expl} {
         # Insert the explanation
         set expl [formatExpl "$expl"]
         if {$expl != {}} {
-            $classModel annotation $bodyName.explanation $expl
+            $classModel annotation $bodyName.explanation $expl method
         }
     }
 }
@@ -1152,7 +1152,7 @@ body ::tycho::IDocSys::addConfigBody {configName expl} {
         set classModel $myClass($class) 
         set expl [formatExpl "$expl"]
         if {$expl != {}} {
-            $classModel annotation $configName.explanation $expl
+            $classModel annotation $configName.explanation $expl variable
         } 
     }
 }
@@ -1169,7 +1169,7 @@ body ::tycho::IDocSys::addOutsideProc {procName arguments expl} {
     $classModel method $procName -protection public -scope class
     set expl [formatExpl "$expl"]
     if {$expl != {}} {
-        $classModel annotation $procName.explanation $expl
+        $classModel annotation $procName.explanation $expl method
     }
     set relatedModified 1
 }
