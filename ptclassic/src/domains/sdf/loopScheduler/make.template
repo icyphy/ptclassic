@@ -1,0 +1,65 @@
+# $Id$
+# Copyright (c) 1991 The Regents of the University of California.
+#				All Rights Reserved.
+# For creating an SDF loop scheduler.
+
+SOURCES =	LSNode.cc LSMaster.cc LSGraph.cc LoopScheduler.cc \
+		MergeList.cc 
+HEADERS =	LSNode.h LSMaster.h LSGraph.h \
+		LoopScheduler.h MergeList.h 
+ 
+# Root of Ptolemy directory
+ROOT=../../../..
+# True source directory
+VPATH = $(ROOT)/src/domains/cg/loopScheduler
+KERNEL = $(ROOT)/src/kernel
+SDFKERNEL = $(ROOT)/src/domains/sdf/kernel
+EGKERNEL = $(ROOT)/src/domains/sdf/expgraph
+LSKERNEL = $(ROOT)/src/domains/cg/loopScheduler
+# Where to install the libraries
+DESTDIR=$(ROOT)/lib.$(ARCH)
+
+GPPFLAGS = -g
+GNU = g++
+GNUINCLUDE = /usr/gnu/lib/g++-include
+
+.SUFFIXES: .cc 
+.cc.o:
+	$(GNU) $(GPPFLAGS) -I$(SDFKERNEL) -I$(KERNEL) -I$(EGKERNEL) -I$(LSKERNEL) -c  $<
+
+OBJS = $(SOURCES:.cc=.o)
+LIB = libLS.a
+
+all:	makefile $(LIB)
+
+$(LIB):	makefile $(SOURCES) $(HEADERS) $(OBJS)
+	rm -f $(LIB)
+	ar cq $(LIB) $(OBJS) 
+	ranlib $(LIB)
+
+# "make install" puts things in the official place
+install:	makefile $(DESTDIR)/$(LIB)
+
+$(DESTDIR)/$(LIB):	$(LIB)
+		rm -f $(DESTDIR)/$(LIB)
+		cp $(LIB) $(DESTDIR)
+		ranlib $(DESTDIR)/$(LIB)
+
+
+clean:
+		rm -f *.o core *~ *#
+
+sources:	$(SOURCES) $(HEADERS) make.template
+
+depend:		$(SOURCES)
+	makedepend -I$(KERNEL) -I$(SDFKERNEL) -I$(GNUINCLUDE) \
+		-I$(LSKERNEL) -I$(EGKERNEL) $(SOURCES)
+
+makefile:	make.template
+		cd $(VPATH); rm -f makefile; cp make.template makefile; \
+		make -f make.template sources depend
+		if [ ! -f makefile ]; then ln -s $(VPATH)/makefile makefile; fi
+		@echo makefile remade -- you must rerun make.
+		exit 1
+
+# DO NOT DELETE THIS LINE -- make depend depends on it.
