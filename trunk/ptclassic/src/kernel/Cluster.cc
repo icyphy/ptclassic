@@ -71,8 +71,10 @@ StringList Cluster::displaySchedule() {
 	schedule << "ERROR NO SCHEDULE MEMBER IN CLUSTER:"
 		 << star().fullName() << "\n";
     else
-	schedule << "/* Schedule for " << star().fullName() << " */\n"
-		 << innerSched()->displaySchedule() << "\n";
+	schedule << "Cluster \"" << star().fullName()
+		 << "\" using\n\t" << innerSched()->displaySchedule()
+		 << "_______________________________________"
+		 << "_______________________________________\n\n";
     // If we get here cluster is Non-atomic
     FatClusterIter next(*this);
     Cluster* fatCluster;
@@ -83,8 +85,8 @@ StringList Cluster::displaySchedule() {
 
 void Cluster::setInnerSched(Scheduler* s) {
     if (s == NULL) {
-	Error::abortRun(star(),
-			"Cluster::setInnerSched sent a NULL scheduler pointer");
+	Error::abortRun
+	    (star(),"Cluster::setInnerSched sent a NULL scheduler pointer");
 	return;
     }
     LOG_DEL; delete sched;
@@ -167,6 +169,7 @@ void Cluster::connect(PortHole* source, PortHole* destination) {
 
 /* Add a galaxy, flattened at the the top-most level */
 void Cluster::addGalaxy(Galaxy* g,PortHole** newPorts) {
+    gal.setName(g->name());
     GalTopBlockIter nextBlock(*g);
     Block* b; 
     while ((b = nextBlock++) != 0) {
