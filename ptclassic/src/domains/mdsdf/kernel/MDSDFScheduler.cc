@@ -3,8 +3,8 @@ static const char file_id[] = "MDSDFScheduler.cc";
 /*******************************************************************
   $Id$
 
-Copyright (c) 1990-1994
-    The Regents of the University of California. All rights reserved.
+Copyright (c) 1990-%Q%
+The Regents of the University of California. All rights reserved.
 
 Permission is hereby granted, without written agreement and without
 license or royalty fees, to use, copy, modify, and distribute this
@@ -50,6 +50,8 @@ const char* MDSDFScheduler::domain() const { return MDSDFdomainName; }
 
 // Derived from SDFScheduler::repetitions()
 int MDSDFScheduler::repetitions()  {
+  if (! galaxy()) return FALSE;
+
   // Initialize the least common multiple for the rows and the columns,
   // which after all the repetitions have been set, will equal the lcm
   // of all the row and all the column denominators respectively.
@@ -218,23 +220,16 @@ int MDSDFScheduler::reptArc (MDSDFPortHole& nearPort, MDSDFPortHole& farPort){
 	////////////////////////////
 
 int MDSDFScheduler::run() {
-  if (!galaxy()) {
-    Error::abortRun("No galaxy to run");
-    return FALSE;
-  }
-  if(haltRequested()) {
-    Error::abortRun(*galaxy(), "Can't continue after run-time error");
-    return FALSE;
-  }
-  if(invalid) {
-    Error::abortRun(*galaxy(), "Error during setup - can't run");
+  if (SimControl::haltRequested() || invalid || !galaxy()) {
+    invalid = TRUE; 
+    Error::abortRun("MDSDF Scheduler has no galaxy to run");
     return FALSE;
   }
 
   MDSDFSchedIter nextEntry(mySchedule);
   MDSDFScheduleEntry* entry;
 
-  while(numItersSoFar < numIters && !haltRequested()) {
+  while(numItersSoFar < numIters && !SimControl::haltRequested()) {
     nextEntry.reset();
 
     // assume the schedule has been set by the setup member
@@ -262,14 +257,16 @@ int MDSDFScheduler::run() {
 	////////////////////////////
 
 void MDSDFScheduler :: setup () {
-	if (!galaxy()) {
-		Error::abortRun("MDSDFScheduler: no galaxy!");
-		return;
-	}
 	numItersSoFar = 0;
 	numIters = 1;			// reset the member "numIters"
 	clearHalt();
 	invalid = FALSE;
+
+	if (!galaxy()) {
+		invalid = TRUE;
+		Error::abortRun("MDSDF Scheduler has no galaxy defined");
+		return;
+	}
 
         checkConnectivity();            // from SDFScheduler
         if (invalid) return;
@@ -281,7 +278,7 @@ void MDSDFScheduler :: setup () {
 
 	currentTime = 0;
 
-	if (haltRequested()) {
+	if (SimControl::haltRequested()) {
 		invalid = TRUE;
 		return;
 	}
@@ -308,6 +305,8 @@ void MDSDFScheduler :: setup () {
 }
 
 void MDSDFScheduler::postSchedulingInit() {
+  if (! galaxy()) return;
+
   // Sort of quirky.  The automatic domain generator created a function
   // prepareForScheduling() in the MDSDFStar class, but this function
   // does not exist in Star or DataFlowStar
