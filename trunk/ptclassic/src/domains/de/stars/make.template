@@ -126,7 +126,7 @@ DEXYgraph.pl \
 DEXgraph.pl \
 DEXhistogram.pl
 
-LIB  =  libdestars.$(LIBSUFFIX)
+PTLIB  =  libdestars.$(LIBSUFFIX)
 
 # Used to create .dlls under nt4.vc
 DLLDEPS = 	$(KERNEL_DLLDEP) ../kernel/libde.lib

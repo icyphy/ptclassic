@@ -47,7 +47,7 @@ SRDIR = $(ROOT)/src/domains/sr/kernel
 INCL = -I$(SRDIR) -I$(KERNDIR) -I$(TCL_INCDIR)
 
 # Library name
-LIB=libsrstars.$(LIBSUFFIX)
+PTLIB=libsrstars.$(LIBSUFFIX)
 
 # source files for all stars, using preprocessor
 # base classes/stars go in the front of the list

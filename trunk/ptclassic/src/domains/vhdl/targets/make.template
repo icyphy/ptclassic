@@ -77,12 +77,12 @@ HDRS = $(SRCS:.cc=.h)
 
 OBJS = $(SRCS:.cc=.o) $(LIBSRCS:.cc=.o) 
 
-LIB = libvhdltargets.$(LIBSUFFIX)
+PTLIB = libvhdltargets.$(LIBSUFFIX)
 
-all:	makefile $(LIB)
+all:	makefile $(PTLIB)
 
 # "make install" does nothing extraordinary
-install:	all $(LIBDIR)/$(LIB)
+install:	all $(LIBDIR)/$(PTLIB)
 		@echo Installation complete.
 
 # include common definitions, rules

@@ -75,7 +75,7 @@ CGCDIR=$(ROOT)/src/domains/cgc/kernel
 INCL=-I$(KERNDIR) $(PTCOMPAT_INCSPEC) -I$(CGDIR) -I$(CGCDIR)  -I$(SRDIR) -I$(SDFDIR)
 
 # Library name
-LIB=libsrcgc.$(LIBSUFFIX)
+PTLIB=libsrcgc.$(LIBSUFFIX)
 
 # Header files
 HDRS= SRCGCStar.h SRCGCTarget.h SRCGCPortHole.h SRCGCGeodesic.h SRCGCWormhole.h SRCGCRecursiveScheduler.h SRCGCNonStrictStar.h
@@ -86,10 +86,10 @@ OBJS= $(HDRS:.h=.o) SRCGCDomain.o
 # Library sources
 SRCS= $(OBJS:.o=.cc)
 
-all:	makefile $(LIB)
+all:	makefile $(PTLIB)
 
 # "make install" puts things in the official place
-install:	makefile $(LIBDIR)/$(LIB)
+install:	makefile $(LIBDIR)/$(PTLIB)
 
 # include common definitions, rules
 include $(ROOT)/mk/common.mk

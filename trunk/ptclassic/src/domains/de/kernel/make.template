@@ -75,7 +75,7 @@ LIB_SRCS = $(HDRS:.h=.cc) DEDomain.cc
 SRCS = $(LIB_SRCS) sipdummy.cc
 
 #Library name
-LIB=libde.$(LIBSUFFIX)
+PTLIB=libde.$(LIBSUFFIX)
 
 # Used to create .dlls under nt4.vc
 DLLDEPS =	..\..\..\kernel\libptolemy.lib
@@ -85,10 +85,10 @@ OBJS = $(LIB_SRCS:.cc=.o)
 
 PT_DEPEND += sipdummy.o
 
-all: 	makefile $(LIB) sipdummy.o
+all: 	makefile $(PTLIB) sipdummy.o
 
 # "make install" puts things in the official place
-install:	makefile $(LIBDIR)/$(LIB) sipdummy.o
+install:	makefile $(LIBDIR)/$(PTLIB) sipdummy.o
 
 
 # include common definitions, rules

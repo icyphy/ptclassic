@@ -46,7 +46,7 @@ ATM = $(ROOT)/src/domains/sdf/atm/kernel
 INCL = -I$(SDFDIR) -I$(KERNDIR) -I$(ATM)
 
 # Library name
-LIB=libsdfatmstars.$(LIBSUFFIX)
+PTLIB=libsdfatmstars.$(LIBSUFFIX)
 
 # source files for all stars, using preprocessor
 PL_SRCS= \

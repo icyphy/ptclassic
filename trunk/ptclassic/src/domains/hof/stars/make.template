@@ -49,7 +49,7 @@ INCL = -I$(HOFDIR) -I$(KERNDIR) -I$(PTKLIB) -I$(TCL_INCDIR) \
  -I$(TK_INCDIR) $(X11_INCSPEC)
 
 # Library name
-LIB=libhofstars.$(LIBSUFFIX)
+PTLIB=libhofstars.$(LIBSUFFIX)
 
 # source files for all stars, using preprocessor
 # base classes/stars go in the front of the list

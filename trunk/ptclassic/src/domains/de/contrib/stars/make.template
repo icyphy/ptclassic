@@ -49,7 +49,7 @@ INCL =		-I$(DEDIR) -I$(KERNDIR) -I$(PIGIDIR) -I$(PTKLIB) \
 			-I$(ROOT)/src/domains/de/contrib/stars
 
 # Library name
-LIB =		libdecontribstars.$(LIBSUFFIX)
+PTLIB =		libdecontribstars.$(LIBSUFFIX)
 
 # source files for all stars, using preprocessor
 PL_SRCS= \

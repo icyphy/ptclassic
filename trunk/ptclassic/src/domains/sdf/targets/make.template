@@ -45,13 +45,13 @@ CGKERNEL = $(ROOT)/src/domains/cg/kernel
 INCL =-I$(SDFKERNEL) -I$(LOOPKERNEL) -I$(KERNDIR) -I$(CGKERNEL)
 
 OBJS = $(LIBSRCS:.cc=.o)
-LIB = libcompileSDF.$(LIBSUFFIX)
+PTLIB = libcompileSDF.$(LIBSUFFIX)
 EXTRA_DESTS = CompileTarget.o
 
-all:	makefile $(LIB) $(EXTRA_DESTS)
+all:	makefile $(PTLIB) $(EXTRA_DESTS)
 
 # "make install" does nothing extraordinary
-install:	all $(LIBDIR)/$(LIB)
+install:	all $(LIBDIR)/$(PTLIB)
 		@echo Installation complete.
 
 
