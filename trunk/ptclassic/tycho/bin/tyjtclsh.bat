@@ -1,8 +1,8 @@
 @echo off
-rem MSDOS batch script Tcl Blend under NT
+rem MSDOS batch script Tcl Blend under NT with the Ptolemy II classes
 
 rem @author: Christopher Hylands
-rem @version: @(#)jtclsh.bat	1.1 11/24/97
+rem @version: $Id$
 rem @copyright: Copyright (c) 1997 The Regents of the University of California.
 rem All rights reserved.
 rem See the file $TYCHO/copyright for copyright notice,
