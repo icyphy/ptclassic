@@ -41,6 +41,8 @@ static char SccsId[]="$Id$";
 #include "attributes.h"
 #include "rpcServer.h"
 #include "errtrap.h"
+#include "rpcInternal.h"
+
 extern struct RPCApplication *RPCApplication;
 
 
@@ -78,244 +80,6 @@ void vemRpcErrorHandler( name, code, message)
 	longjmp( rpcFailureJump, 1 );
     }
     /* Fall through */
-}
-
-
-/*
- * process a remote OCT request
- *
- * get the OCT function number and then call the appropriate routine
- *
- * all remote OCT requests proceed as follows:
- *
- *   receive OCT function number
- *   receive OCT arguments
- *   (perform OCT function)
- *   send return code
- *   send modified OCT arguments
- */
-rpcStatus
-RPCOCTRequest(application, functionNumber)
-int application;
-long functionNumber;
-{
-    STREAM sendStream;
-    STREAM receiveStream;
-    rpcStatus status;
-
-    sendStream = RPCApplication[application].SendStream;
-    receiveStream = RPCApplication[application].ReceiveStream;
-
-    
-    if ( setjmp( rpcFailureJump ) ) {
-	errPopHandler();
-	return RPC_ERROR;
-    } else {
-	errPushHandler( vemRpcErrorHandler );
-    }
-
-    switch (functionNumber) {
-
-	case OCT_DELETE_FUNCTION:
-	    status = RPCoctDelete(sendStream, receiveStream);
-	    break;
-	
-	case OCT_GET_BY_ID_FUNCTION:
-	    status = RPCoctGetById(sendStream, receiveStream);
-	    break;
-	    
-	case OCT_MODIFY_FUNCTION:
-	    status = RPCoctModify(sendStream, receiveStream);
-	    break;
-	    
-	case OCT_MODIFY_SPECIAL_FUNCTION:
-	    status = RPCoctModifySpecial(sendStream, receiveStream);
-	    break;
-	    
-        case OCT_OPEN_FACET_FUNCTION:
-            status = RPCoctOpenFacet(sendStream, receiveStream);
-	    break;
-	    
-	case OCT_FLUSH_FACET_FUNCTION:
-            status = RPCoctFlushFacet(sendStream, receiveStream);
-	    break;
-	    
-	case OCT_CLOSE_FACET_FUNCTION:
-            status = RPCoctCloseFacet(sendStream, receiveStream);
-	    break;
-	    
-	case OCT_FREE_FACET_FUNCTION:
-            status = RPCoctFreeFacet(sendStream, receiveStream);
-	    break;
-
-	case OCT_OPEN_MASTER_FUNCTION:
-            status = RPCoctOpenMaster(sendStream, receiveStream);
-            break;
-
-	case OCT_ATTACH_FUNCTION:
-            status = RPCoctAttach(sendStream, receiveStream);
-	    break;
-	    
-	case OCT_ATTACH_ONCE_FUNCTION:
-            status = RPCoctAttachOnce(sendStream, receiveStream);
-	    break;
-	    
-	case OCT_IS_ATTACHED_FUNCTION:
-            status = RPCoctIsAttached(sendStream, receiveStream);
-	    break;
-	    
-	case OCT_DETACH_FUNCTION:
-            status = RPCoctDetach(sendStream, receiveStream);
-	    break;
-	    
-	case OCT_COPY_FACET_FUNCTION:
-            status = RPCoctCopyFacet(sendStream, receiveStream);
-	    break;
-	    
-	case OCT_WRITE_FACET_FUNCTION:
-            status = RPCoctWriteFacet(sendStream, receiveStream);
-	    break;
-	    
-	case OCT_CREATE_FUNCTION:
-            status = RPCoctCreate(sendStream, receiveStream);
-	    break;
-	    
-	case OCT_GET_BY_NAME_FUNCTION:
-            status = RPCoctGetByName(sendStream, receiveStream);
-	    break;
-	    
-	case OCT_GET_CONTAINER_BY_NAME_FUNCTION:
-            status = RPCoctGetContainerByName(sendStream, receiveStream);
-	    break;
-	    
-	case OCT_GET_OR_CREATE_FUNCTION:
-            status = RPCoctGetOrCreate(sendStream, receiveStream);
-	    break;
-	    
-	case OCT_CREATE_OR_MODIFY_FUNCTION:
-            status = RPCoctCreateOrModify(sendStream, receiveStream);
-	    break;
-	
-	case OCT_INIT_GEN_CONTAINERS_FUNCTION:
-            status = RPCoctInitGenContainers(sendStream, receiveStream);
-	    break;
-	    
-	case OCT_INIT_GEN_CONTENTS_FUNCTION:
-            status = RPCoctInitGenContents(sendStream, receiveStream);
-	    break;
-
-	case OCT_GENERATE_FUNCTION:
-	    status = RPCoctGenerate(sendStream, receiveStream);
-	    break;
-
-	case OCT_GENERATE_SPECIAL_FUNCTION:
-	    status = RPCoctGenerateSpecial(sendStream, receiveStream);
-	    break;
-
-	case OCT_GEN_FIRST_CONTENT_FUNCTION:
-	    status = RPCoctGenFirstContent(sendStream, receiveStream);
-	    break;
-
-	case OCT_GEN_FIRST_CONTAINER_FUNCTION:
-	    status = RPCoctGenFirstContainer(sendStream, receiveStream);
-	    break;
-
-	case OCT_FREE_GENERATOR_FUNCTION:
-	    status = RPCoctFreeGenerator(sendStream, receiveStream);
-	    break;
-
-	case OCT_ERROR_FN_FUNCTION:
-            status = RPCoctError(sendStream, receiveStream);
-	    break;
-	    
-	case OCT_GET_POINTS_FUNCTION:
-            status = RPCoctGetPoints(sendStream, receiveStream);
-	    break;
-	    
-	case OCT_PUT_POINTS_FUNCTION:
-            status = RPCoctPutPoints(sendStream, receiveStream);
-	    break;
-	    
-	case OCT_BB_FUNCTION:
-	    status = RPCoctBB(sendStream, receiveStream);
-	    break;
-
-        case OCT_GET_FACET_FUNCTION:
-            status = RPCoctGetFacet(sendStream, receiveStream);
-	    break;
-	    
-        case OCT_ERROR_STRING_FUNCTION:
-            status = RPCoctErrorString(sendStream, receiveStream);
-	    break;
-
-        case OCT_TRANSFORM_GEO_FUNCTION:
-            status = RPCoctTransformGeo(sendStream, receiveStream);
-	    break;
-
-        case OCT_TRANSFORM_MODIFY_GEO_FUNCTION:
-            status = RPCoctTransformAndModifyGeo(sendStream, receiveStream);
-	    break;
-
-        case OCT_TRANSFORM_POINTS_FUNCTION:
-            status = RPCoctTransformPoints(sendStream, receiveStream);
-	    break;
-
-        case OCT_SCALE_GEO_FUNCTION:
-            status = RPCoctScaleGeo(sendStream, receiveStream);
-	    break;
-
-        case OCT_SCALE_MODIFY_GEO_FUNCTION:
-            status = RPCoctScaleAndModifyGeo(sendStream, receiveStream);
-	    break;
-
-        case OCT_MARK_TEMPORARY_FUNCTION:
-            status = RPCoctMarkTemporary(sendStream, receiveStream);
-	    break;
-
-        case OCT_UNMARK_TEMPORARY_FUNCTION:
-            status = RPCoctUnmarkTemporary(sendStream, receiveStream);
-	    break;
-
-        case OCT_IS_TEMPORARY_FUNCTION:
-            status = RPCoctIsTemporary(sendStream, receiveStream);
-	    break;
-
-        case OCT_XID_FUNCTION:
-            status = RPCoctExternalId(sendStream, receiveStream);
-	    break;
-
-        case OCT_GET_BY_XID_FUNCTION:
-            status = RPCoctGetByExternalId(sendStream, receiveStream);
-	    break;
-
-        case OCT_FULL_NAME_FUNCTION:
-            status = RPCoctFullName(sendStream, receiveStream);
-	    break;
-
-        case OCT_GET_FACET_INFO_FUNCTION:
-            status = RPCoctGetFacetInfo(sendStream, receiveStream);
-	    break;
-
-        case OCT_OPEN_RELATIVE_FUNCTION:
-            status = RPCoctOpenRelative(sendStream, receiveStream);
-	    break;
-
-	default:
-	    (void) sprintf(RPCErrorBuffer, "RPC Error: illegal OCT function number (%d)\n",
-		    functionNumber);
-	    vemMessage(RPCErrorBuffer, 0);
-	    return(RPC_ERROR);
-    }
-
-    errPopHandler();
-
-    if (status == RPC_ERROR) {
-	vemMessage("RPC Error: OCT function failure\n", 0);
-	return(RPC_ERROR);
-    }
-
-    RPCFLUSH(sendStream, RPC_ERROR);
-    return(RPC_OK);
 }
 
 
@@ -1397,4 +1161,242 @@ STREAM sendStream, receiveStream;
     }
 
     return RPC_OK;
+}
+
+/*
+ * process a remote OCT request
+ *
+ * get the OCT function number and then call the appropriate routine
+ *
+ * all remote OCT requests proceed as follows:
+ *
+ *   receive OCT function number
+ *   receive OCT arguments
+ *   (perform OCT function)
+ *   send return code
+ *   send modified OCT arguments
+ */
+rpcStatus
+RPCOCTRequest(application, functionNumber)
+int application;
+long functionNumber;
+{
+    STREAM sendStream;
+    STREAM receiveStream;
+    rpcStatus status;
+
+    sendStream = RPCApplication[application].SendStream;
+    receiveStream = RPCApplication[application].ReceiveStream;
+
+    
+    if ( setjmp( rpcFailureJump ) ) {
+	errPopHandler();
+	return RPC_ERROR;
+    } else {
+	errPushHandler( vemRpcErrorHandler );
+    }
+
+    switch (functionNumber) {
+
+	case OCT_DELETE_FUNCTION:
+	    status = RPCoctDelete(sendStream, receiveStream);
+	    break;
+	
+	case OCT_GET_BY_ID_FUNCTION:
+	    status = RPCoctGetById(sendStream, receiveStream);
+	    break;
+	    
+	case OCT_MODIFY_FUNCTION:
+	    status = RPCoctModify(sendStream, receiveStream);
+	    break;
+	    
+	case OCT_MODIFY_SPECIAL_FUNCTION:
+	    status = RPCoctModifySpecial(sendStream, receiveStream);
+	    break;
+	    
+        case OCT_OPEN_FACET_FUNCTION:
+            status = RPCoctOpenFacet(sendStream, receiveStream);
+	    break;
+	    
+	case OCT_FLUSH_FACET_FUNCTION:
+            status = RPCoctFlushFacet(sendStream, receiveStream);
+	    break;
+	    
+	case OCT_CLOSE_FACET_FUNCTION:
+            status = RPCoctCloseFacet(sendStream, receiveStream);
+	    break;
+	    
+	case OCT_FREE_FACET_FUNCTION:
+            status = RPCoctFreeFacet(sendStream, receiveStream);
+	    break;
+
+	case OCT_OPEN_MASTER_FUNCTION:
+            status = RPCoctOpenMaster(sendStream, receiveStream);
+            break;
+
+	case OCT_ATTACH_FUNCTION:
+            status = RPCoctAttach(sendStream, receiveStream);
+	    break;
+	    
+	case OCT_ATTACH_ONCE_FUNCTION:
+            status = RPCoctAttachOnce(sendStream, receiveStream);
+	    break;
+	    
+	case OCT_IS_ATTACHED_FUNCTION:
+            status = RPCoctIsAttached(sendStream, receiveStream);
+	    break;
+	    
+	case OCT_DETACH_FUNCTION:
+            status = RPCoctDetach(sendStream, receiveStream);
+	    break;
+	    
+	case OCT_COPY_FACET_FUNCTION:
+            status = RPCoctCopyFacet(sendStream, receiveStream);
+	    break;
+	    
+	case OCT_WRITE_FACET_FUNCTION:
+            status = RPCoctWriteFacet(sendStream, receiveStream);
+	    break;
+	    
+	case OCT_CREATE_FUNCTION:
+            status = RPCoctCreate(sendStream, receiveStream);
+	    break;
+	    
+	case OCT_GET_BY_NAME_FUNCTION:
+            status = RPCoctGetByName(sendStream, receiveStream);
+	    break;
+	    
+	case OCT_GET_CONTAINER_BY_NAME_FUNCTION:
+            status = RPCoctGetContainerByName(sendStream, receiveStream);
+	    break;
+	    
+	case OCT_GET_OR_CREATE_FUNCTION:
+            status = RPCoctGetOrCreate(sendStream, receiveStream);
+	    break;
+	    
+	case OCT_CREATE_OR_MODIFY_FUNCTION:
+            status = RPCoctCreateOrModify(sendStream, receiveStream);
+	    break;
+	
+	case OCT_INIT_GEN_CONTAINERS_FUNCTION:
+            status = RPCoctInitGenContainers(sendStream, receiveStream);
+	    break;
+	    
+	case OCT_INIT_GEN_CONTENTS_FUNCTION:
+            status = RPCoctInitGenContents(sendStream, receiveStream);
+	    break;
+
+	case OCT_GENERATE_FUNCTION:
+	    status = RPCoctGenerate(sendStream, receiveStream);
+	    break;
+
+	case OCT_GENERATE_SPECIAL_FUNCTION:
+	    status = RPCoctGenerateSpecial(sendStream, receiveStream);
+	    break;
+
+	case OCT_GEN_FIRST_CONTENT_FUNCTION:
+	    status = RPCoctGenFirstContent(sendStream, receiveStream);
+	    break;
+
+	case OCT_GEN_FIRST_CONTAINER_FUNCTION:
+	    status = RPCoctGenFirstContainer(sendStream, receiveStream);
+	    break;
+
+	case OCT_FREE_GENERATOR_FUNCTION:
+	    status = RPCoctFreeGenerator(sendStream, receiveStream);
+	    break;
+
+	case OCT_ERROR_FN_FUNCTION:
+            status = RPCoctError(sendStream, receiveStream);
+	    break;
+	    
+	case OCT_GET_POINTS_FUNCTION:
+            status = RPCoctGetPoints(sendStream, receiveStream);
+	    break;
+	    
+	case OCT_PUT_POINTS_FUNCTION:
+            status = RPCoctPutPoints(sendStream, receiveStream);
+	    break;
+	    
+	case OCT_BB_FUNCTION:
+	    status = RPCoctBB(sendStream, receiveStream);
+	    break;
+
+        case OCT_GET_FACET_FUNCTION:
+            status = RPCoctGetFacet(sendStream, receiveStream);
+	    break;
+	    
+        case OCT_ERROR_STRING_FUNCTION:
+            status = RPCoctErrorString(sendStream, receiveStream);
+	    break;
+
+        case OCT_TRANSFORM_GEO_FUNCTION:
+            status = RPCoctTransformGeo(sendStream, receiveStream);
+	    break;
+
+        case OCT_TRANSFORM_MODIFY_GEO_FUNCTION:
+            status = RPCoctTransformAndModifyGeo(sendStream, receiveStream);
+	    break;
+
+        case OCT_TRANSFORM_POINTS_FUNCTION:
+            status = RPCoctTransformPoints(sendStream, receiveStream);
+	    break;
+
+        case OCT_SCALE_GEO_FUNCTION:
+            status = RPCoctScaleGeo(sendStream, receiveStream);
+	    break;
+
+        case OCT_SCALE_MODIFY_GEO_FUNCTION:
+            status = RPCoctScaleAndModifyGeo(sendStream, receiveStream);
+	    break;
+
+        case OCT_MARK_TEMPORARY_FUNCTION:
+            status = RPCoctMarkTemporary(sendStream, receiveStream);
+	    break;
+
+        case OCT_UNMARK_TEMPORARY_FUNCTION:
+            status = RPCoctUnmarkTemporary(sendStream, receiveStream);
+	    break;
+
+        case OCT_IS_TEMPORARY_FUNCTION:
+            status = RPCoctIsTemporary(sendStream, receiveStream);
+	    break;
+
+        case OCT_XID_FUNCTION:
+            status = RPCoctExternalId(sendStream, receiveStream);
+	    break;
+
+        case OCT_GET_BY_XID_FUNCTION:
+            status = RPCoctGetByExternalId(sendStream, receiveStream);
+	    break;
+
+        case OCT_FULL_NAME_FUNCTION:
+            status = RPCoctFullName(sendStream, receiveStream);
+	    break;
+
+        case OCT_GET_FACET_INFO_FUNCTION:
+            status = RPCoctGetFacetInfo(sendStream, receiveStream);
+	    break;
+
+        case OCT_OPEN_RELATIVE_FUNCTION:
+            status = RPCoctOpenRelative(sendStream, receiveStream);
+	    break;
+
+	default:
+	    (void) sprintf(RPCErrorBuffer,
+			   "RPC Error: illegal OCT function number (%ld)\n",
+			   (long)functionNumber);
+	    vemMessage(RPCErrorBuffer, 0);
+	    return(RPC_ERROR);
+    }
+
+    errPopHandler();
+
+    if (status == RPC_ERROR) {
+	vemMessage("RPC Error: OCT function failure\n", 0);
+	return(RPC_ERROR);
+    }
+
+    RPCFLUSH(sendStream, RPC_ERROR);
+    return(RPC_OK);
 }
