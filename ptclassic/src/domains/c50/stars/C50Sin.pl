@@ -41,7 +41,7 @@ the range (-1.0, 1.0).  The parameter \fIphase\fR is in degrees
 		type { fixarray }
 		default { "0.0" }
 		desc { internal state to hold sin table }
-		attributes { A_UMEM|A_NONSETTABLE|A_SHARED|A_NOINIT }
+		attributes { A_UMEM|A_CIRC|A_NONSETTABLE|A_SHARED|A_NOINIT }
 	}
 
 	protected{
@@ -51,7 +51,7 @@ the range (-1.0, 1.0).  The parameter \fIphase\fR is in degrees
 	}
  
 	code {
-	#include "GalIter.h"
+	#include "TITarget.h"
 	}
 
 	method{
@@ -60,37 +60,32 @@ the range (-1.0, 1.0).  The parameter \fIphase\fR is in degrees
 		arglist { "()" }
 		access { protected }
 		code {
-		
-		// would like to include sine table only once in the
-		// output file so only make the last sin/cos star in the galaxy
-		// include its sine table. 
 
-		C50SinTable = 0;
-		GalStarIter nextStar(this->parent()->asGalaxy());
-		Star *	s;
-		int	index = 0;
-		int	myindex = 0;
-		int	i = 0;
-		while ((s = nextStar++) != 0){
-			if ( (strcmp(s->className(),"C50Sin") == 0) ||
-			     (strcmp(s->className(),"C50Cos") == 0) ){
-			  index = i;
-			  if (strcmp(s->fullName(),this->fullName())==0){
-				myindex = index;
-			  }
-			}
-			i++;
-		}
+		  TITarget * myTarget = (TITarget *) this->target();
+		  if (myTarget->testFlag("sinTableFlag")) {
+			C50SinTable = FALSE;
+		  } else {
+			C50SinTable = TRUE;
+			myTarget->setFlag("sinTableFlag ");
+		  }
 		
-		if (myindex == index) C50SinTable = 1;
+
 		}
 	}
 	
-	setup {
 
+	begin {
 		setC50SinTable();
+		
+		if (C50SinTable) {
+			tbl.resize(129);
+		} else {
+			tbl.clearAttributes(A_UMEM);
+			tbl.clearAttributes(A_SHARED);
+		}
+	}
 
-		tbl.resize(129);
+	setup {
 
 		int tempPhase;
 		double temp;
@@ -123,9 +118,11 @@ the range (-1.0, 1.0).  The parameter \fIphase\fR is in degrees
 		}
 	}	
 
+
+
 	initCode {
 
-	//add sin table only if i'm the last star in galaxy
+	//add sin table only if it has not been added yet
 	
 	if (C50SinTable) {
 	
@@ -133,7 +130,7 @@ the range (-1.0, 1.0).  The parameter \fIphase\fR is in degrees
 		double value;
 		double floor;
 		floor = double(1/32768); // floor = smallest pos. value
-		sinTable<<"\t.ds\t$addr(tbl)\n";
+		sinTable<<"\t.ds\t$addr(tbl)\n$sharedSymbol(Sin,SINTBL):\n";
 		for (int i = 0; i< 128; i++){
 			value = sin(double(i*M_PI/128));
 			if ((value < floor) && (value > -floor)) 
@@ -146,7 +143,7 @@ the range (-1.0, 1.0).  The parameter \fIphase\fR is in degrees
 			            << "\n";
 			}
 		}
-		sinTable<<"\t.q15\t0.0\n";
+		sinTable<<"\t.q15\t0.0\n\t.text\n";
 		addCode(sinTable);
 	}
 
@@ -164,7 +161,7 @@ the range (-1.0, 1.0).  The parameter \fIphase\fR is in degrees
 	abs				; acc = abs(input) with saturation
 	bsar	9			; get 7 MSB in accH
 	add	#1,14			; round up
-	add	#$addr(tbl),15		; add base address of table
+	add	#$sharedSymbol(Sin,SINTBL),15	; add base address of table
 	bit	*,0			; test to see if input is negative
 	sach	*,1,ar3			; ar3 = address of entry on table
 	clrc	ovm			; unset overflow mode

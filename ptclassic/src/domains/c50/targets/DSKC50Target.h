@@ -63,13 +63,37 @@ public:
     // Type checking
     /*virtual*/ int isA(const char*) const;
 
+
+
 protected:
+
     /*virtual*/ void headerCode();
     /*virtual*/ void trailerCode();
-
+    
 private:
+
     void initStates();
+
     CodeStream shellCmds;
+
+    // flags
+
+    int aicFlag;  // TRUE to initialize AIC
+    int xmitFlag; // TRUE if a star will generate interrupt procedure for XINT
+    int rcvFlag;  // TRUE if a star will generate interrupt procedure for RINT
+    int timerFlag; //TRUE if a star will generate interrupt procedure for TINT
+
+
 };
 
 #endif
+
+
+
+
+
+
+
+
+
+

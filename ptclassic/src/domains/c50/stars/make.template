@@ -15,11 +15,12 @@ VPATH = $(ROOT)/src/domains/c50/stars
 CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
+SDFDIR = $(ROOT)/src/domains/sdf/kernel
 C50DIR = $(ROOT)/src/domains/c50/kernel
 # CGDIR is the directory containing CG domain support
 CGDIR = $(ROOT)/src/domains/cg/kernel
 
-INCL = -I$(C50DIR) -I$(CGDIR) -I$(KERNDIR) 
+INCL = -I$(C50DIR) -I$(CGDIR) -I$(KERNDIR)  -I$(SDFDIR)
 
 LIB = libc50stars.$(LIBSUFFIX)
 STAR_MK=c50stars
