@@ -15,8 +15,8 @@ $Id$
 ***********************************************************************/
 
 #include "Domain.h"
-#include "Target.h"
-#include "SDFScheduler.h"
+#include "KnownTarget.h"
+#include "SDFTarget.h"
 #include "SDFWormhole.h"
 #include "SDFConnect.h"
 #include "SDFWormConnect.h"
@@ -52,3 +52,8 @@ public:
 
 // declare a prototype
 static SDFDomain proto;
+
+// declare a prototype default target object.
+
+static SDFTarget defaultSDFtarget;
+static KnownTarget entry(defaultSDFtarget,"default-SDF");
