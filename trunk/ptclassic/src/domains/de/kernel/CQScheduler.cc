@@ -1,6 +1,6 @@
 static const char file_id[] = "DEScheduler.cc";
 
-// FIXME put the copyright back
+// copyright
 
 #ifdef __GNUG__
 #pragma implementation
@@ -125,14 +125,9 @@ int DEScheduler :: computeDepth() {
 // pop the top element (earliest event) from the global queue
 // and fire the destination star. Check all simultaneous events to the star.
 // Run until StopTime.
-// EWK this is where the biggest changes are made
 
 int DEScheduler :: run () {
 
-// FIXME we should be able to insert the destination stuff
-// during put so that we don't have to search for it here.
-
-// fprintf(stderr,"DESC: started DEScheduler::run\n");
     if (haltRequested()) {
 	    Error::abortRun(*galaxy(),
 			    "Can't continue after run-time error");
@@ -146,18 +141,14 @@ int DEScheduler :: run () {
 
 	// fetch the earliest event.
 	CqLevelLink* f   = eventQ.get();
-// fprintf(stderr,"DESC: got event at top of outer loop\n");
 	if (f == NULL) {
-// fprintf(stderr,"DESC: event is null\n");
 	    break;
 	}
 	double level    = f->level;
 
 	// if level > stopTime, RETURN...
 	if (level > stopTime)	{
-// fprintf(stderr,"DESC: have to push it back\n");
 		eventQ.pushBack(f);		// push back
-// fprintf(stderr,"DESC: pushed it back\n");
 		// set currentTime = next event time.
 		currentTime = level/relTimeScale;
 		stopBeforeDeadFlag = TRUE;  // there is extra events.
@@ -190,7 +181,6 @@ int DEScheduler :: run () {
 	Star* s;
 	PortHole* terminal = 0;
 	if (f->fineLevel != 0) {
-// fprintf(stderr,"DESC: Doing stuff for fineLevel != 0\n");
 		Event* ent = (Event*) f->e;
 		terminal = ent->dest;
 		s = &terminal->parent()->asStar();
@@ -209,7 +199,6 @@ int DEScheduler :: run () {
 		InDEPort* inp = (InDEPort*) terminal;
 		inp->getFromQueue(ent->p);
 	} else {
-// fprintf(stderr,"DESC: Doing stuff for fineLevel == 0\n");
 	// process star is fetched
 		ds = (DEStar*) f->e;
 		ds->arrivalTime = level;
@@ -220,7 +209,6 @@ int DEScheduler :: run () {
 	}
 	// put the LinkList into the free pool for memory management.
 
-// fprintf(stderr,"DESC: called putFreeLink\n");
 	eventQ.putFreeLink(f);
 			
 	// Check if there is another event launching onto the
@@ -228,21 +216,16 @@ int DEScheduler :: run () {
         CqLevelLink *store = NULL;
 	Star* dest;
 	while (TRUE) {
-// fprintf(stderr,"DESC: Attempting another get\n");
             CqLevelLink *h = eventQ.get();
-// fprintf(stderr,"DESC: got event at top of inner loop\n");
 	    if (h == NULL) {
-// fprintf(stderr,"DESC: null event, break\n");
 		break;
 	    }
 	    if (h->level > level) {
-// fprintf(stderr,"DESC: event in future, break\n");
 		eventQ.pushBack(h);
 		break;
 	    }
 	    PortHole* tl = 0;
 	    Event* ee = 0; 
-// FIXME we shouldn't have to do this if we already sorted on dest
 	    if (h->fineLevel != 0) {
 		    ee = (Event*) h->e;
 		    tl = ee->dest;
@@ -251,12 +234,10 @@ int DEScheduler :: run () {
 		    dest = (Star*) h->e;
 	    }
 
-assert(dest == h->dest);
+	    assert(dest == h->dest);
 	    // if same destination star with same time stamp..
-// We don't need to extract since our get does an extract
-// fprintf(stderr,"DESC: check dest in inner loop\n");
+	    // We don't need to extract since our get does an extract
 	    if (dest == s) {
-	    // FIXME
 		if (tl) {
 		     int success =
 			((InDEPort*) tl)->getFromQueue(ee->p);
@@ -269,7 +250,7 @@ assert(dest == h->dest);
  		     eventQ.putFreeLink(h);
 		} 
 	    } else {
-		// Added this, need to put back since we did a get
+		// need to put back since we did a get
 		eventQ.pushBack(h);
 		// In the calendar queue, once you get a "bad"
 		// event, you're done, don't need to go through
@@ -288,9 +269,7 @@ assert(dest == h->dest);
 
 // fire the star.
 	if (!bFlag) {
-// fprintf(stderr,"DESC: call run\n");
 	    if (!s->run()) return FALSE;
-// fprintf(stderr,"DESC: called run\n");
         }
 
     } // end of while
@@ -298,7 +277,6 @@ assert(dest == h->dest);
 if (haltRequested()) return FALSE;
 
 stopBeforeDeadFlag = FALSE;	// yes, no more events...
-// fprintf(stderr,"end of run()\n");
 return TRUE;
 }
 
