@@ -1,0 +1,63 @@
+<!-- $Id$ -->
+<html>
+<head>
+<Title>Infrastructure Introduction</Title>
+</head>
+<body>
+[<a href="../introduction.html">        Home     </a>]
+[<a href="../authors.html">             Authors  </a>]
+[<a href="../../../tycho.idx">          Index    </a>]
+[<a href="../abbreviations.html">       Abbreviations </a>]
+[<a href="../bindings.html">            Bindings </a>]
+<HR>
+<h1>Infrastructure Introduction</h1>
+<p>
+This
+<a name="interactive documents">
+interactive section of the Tycho documentation
+</a>
+will walk you through the basic class hierarchy
+central to the Tycho system.  These classes are designed to be used in
+your applications, and of course are used extensively in Tycho itself.
+<p>
+<a name="Tcl within HTML">
+If you are viewing this document from within Tycho, then you can
+double click on sections of Tcl code to execute them.
+</a>
+If you are viewing it from Netscape or some other browser, then
+you cannot execute them.
+Within Tycho, you should proceed sequentially through each section.
+If you do not follow the commands sequentially, you will occasionally
+get error messages like "Invalid command name .z".
+This just means that the command you clicked on expected a window
+named ".z" to be open, and it isn't.  Back up to where the window
+was first created, and create it again.
+Please send email to eal@eecs.berkeley.edu if you find problems.
+<p>
+<color value=red>
+To be able to execute the embedded tcl code, you must be viewing
+this document from within tycho.  See
+<a href="../running.html">Running Tycho</a>.
+</color>
+
+<p>
+<a name="namespace">
+<h2>The "tycho" Namespace</h2>
+</a>
+<p>
+In the tycho system,
+all classes and most procedures are defined in a 
+<a name="tycho namespace">namespace called "tycho"</a>.
+Such commands can be executed from any
+namespace by prefixing the command with "::tycho::".
+Namespaces are a concept introduced by the Itcl extension to Tcl.
+As the name implies, they provide seperable collections of names
+for procedures and variables, with the intention of isolating
+applications and program modules that share a common infrastructure.
+<p>
+<HR>
+Copyright &#169 %Q%, The Regents of the University of California.
+All rights reserved.
+<br>
+Last updated: %D%,
+comments to: <author>eal@eecs.berkeley.edu</author>

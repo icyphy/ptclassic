@@ -1,0 +1,100 @@
+<!-- $Id$ -->
+<html>
+<head>
+<Title>The HTML and HTMLText Classes</title>
+</head>
+<body>
+[<a href="../introduction.html">        Home     </a>]
+[<a href="../authors.html">             Authors  </a>]
+[<a href="../../../tycho.idx">          Index    </a>]
+[<a href="../abbreviations.html">       Abbreviations </a>]
+[<a href="../bindings.html">            Key bindings </a>]
+<HR>
+<h1><a name="HTML class">The HTML and HTMLText Classes</a></h1>
+<p>
+The HTML class, derived from <a href=file.html>File</a>,
+is a top-level window that renders HTML in a text widget.
+It uses the
+<a href="../../../lib/html_library/html/help.html">HTML library</a>
+written by Stephen Uhler of Sun Microsystems, which supports all the
+features of HTML 2.0.
+There is currently no support in Tycho for
+<a name=HTTP>HTTP</a> hyperlink references, so you cannot
+within Tycho directly read documents on the internet.
+A <a href="../../../lib/html_library/html/sample.html">sample document</a>
+illustrates the HTML tags that are supported.
+<p>
+The HTML class is used for all
+<a href=documentation.html>Tycho documentation</a>.
+It supports an extension of HTML with embedded Tcl scripts.
+If the user double
+clicks on a script, the Tcl script is executed in the global
+namespace.
+<p>
+You may create an instance of the HTML class as follows:
+<tcl><pre>
+::tycho::HTML .e -file $TYCHO/kernel/doc/introduction.html
+.e centerOnScreen
+</pre></tcl>
+There are many public methods associated with this class.
+See the class documentation for details.
+<p>
+<a name="HTMLText class">
+<h2>HTMLText Class</h2>
+<p>
+The top-level HTML class window
+is implemented by packing into it a megawidget that implements
+the editor itself.
+This megawidget, the HTMLText class, can be used
+stand-alone inside any other widget or window.
+For example, the Tycho welcome window contains an
+instance of HTMLText.
+<p>
+We can create an instance of the HTMLText megawidget in its own top-level
+window as follows:
+<tcl><pre>
+::tycho::TopLevel .t
+::tycho::HTMLText .t.t -width 40 -height 10 -scrollbar 0 -html {
+    &lt;h1&gt;Sample HTML Header&lt;/h1&gt;
+    Sample HTML body.
+}
+pack .t.t
+.t centerOnScreen
+</pre></tcl>
+To delete the above example:
+<tcl><pre>
+delete object .t
+</pre></tcl>
+HTMLText has a number of options.  For example:
+<tcl><pre>
+::tycho::TopLevel .p
+::tycho::HTMLText .p.t &#92
+    -html "&lt;h1&gt;Initial header in the HTML widget&lt;/h1&gt;" &#92
+    -width 60 &#92
+    -scrollbar 0 &#92
+    -height 20
+pack .p.t
+.p centerOnScreen
+</pre></tcl>
+By default, an HTMLText widget is read only, so
+you cannot modify its contents.
+You can change this, and read in a file as follows:
+<tcl><pre>
+.p.t configure -readonly no
+.p.t readFile $ptolemy/tycho/kernel/doc/rationale.html
+</pre></tcl>
+Notice that emacs-like <a href="../bindings.html>key bindings</a>
+can be used to navigate through the text.
+There are a large number of other public methods for HTMLText.
+See the class documentation.
+To delete the above example:
+<tcl><pre>
+delete object .p
+</pre></tcl>
+<p>
+<HR>
+Copyright &#169 %Q%, The Regents of the University of California.
+All rights reserved.
+<br>
+Last updated: %D%,
+comments to: <author>eal@eecs.berkeley.edu</author>
