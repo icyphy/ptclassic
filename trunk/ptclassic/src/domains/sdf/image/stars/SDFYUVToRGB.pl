@@ -110,10 +110,10 @@ standards; otherwise, the usual YUV space is meant. }
 		}
    
 		// FIXME
-		// Sets YImg to the vector representing the FloatMatrix, yI, UImg to uI,
+		// Sets YImg to the vector representing the FloatMatrix yI, UImg to uI,
 		// and VImg to vI.
 		// This only works because in the underlying implementation of 
-		// FloatMatrix, YImg[0] for example, which returns the 1st row of the 
+		// FloatMatrix, yI[0] for example, which returns the 1st row of the 
 		// matrix, also returns the entire vector representing the matrix. 
 		// A method should be added to the FloatMatrix class to do this instead
 		// of relying on this current operation
