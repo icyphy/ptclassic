@@ -132,7 +132,7 @@ int DDFScheduler :: setup (Block& b) {
 		s->prepareForScheduling();
 	}
 
-	galaxy.initialize();
+	galaxy.initState();
 
 	// If user gives the option of numOverlapped, set it.
 	FloatState* ist = (FloatState*) galaxy.stateWithName("numOverlapped");
@@ -150,11 +150,17 @@ int DDFScheduler :: setup (Block& b) {
 	currentTime = schedulePeriod;
 	overFlow = FALSE;
 
-	// fancy stuff...
-	// auto-creation of SDF wormholes and decide the most efficient
-	// scheduler (Case, For, DoWhile, Recur)
-	makeWormholes(galaxy);
-	selectScheduler();
+	if (newGal) {
+		newGal->initialize();
+	} else {
+		galaxy.initialize();
+
+		// fancy stuff...
+		// auto-creation of SDF wormholes, decide the most efficient
+		// scheduler (Case, For, DoWhile, Recur)
+		makeWormholes(galaxy);
+		selectScheduler();
+	}
 
 	if (canDom == DDF) {
 		GalStarIter nextS(*newGal);
