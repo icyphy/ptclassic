@@ -55,7 +55,7 @@ class ClusterNodeList : public SequentialList
 {
 public:
 	ClusterNodeList(ClusterNodeList* n = NULL) : 
-		next(0),first(0),second(0) { if (n) n->next = this; }	
+		first(0), second(0), next(0) { if (n) n->next = this; }	
 	~ClusterNodeList();
 	ClusterNodeList* nextList() { return next; }
 
