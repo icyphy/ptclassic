@@ -161,7 +161,7 @@ proc starindex_SwapPairsInList { facetpairs } {
 # use "catch" in case the exec command causes an error
 proc starindex_FindOctFacetDirs { pathname } {
   # recursively find all schematic sub-directories (success if retval is 0)
-  set retval [catch "exec find $pathname -name \"schematic\" -print" \
+  set retval [catch "exec find $pathname -follow -name \"schematic\" -print" \
                     schematicFiles]
 
   # remove the schematic sub-directory from the list of file names
@@ -171,6 +171,7 @@ proc starindex_FindOctFacetDirs { pathname } {
       lappend facetdirlist [starindex_StripSubDir $sfile]
     }
   }
+  #puts "starindex_FindOctFacetDirs $pathname: $facetdirlist $schematicFiles"
   return $facetdirlist
 }
 
@@ -268,17 +269,20 @@ proc starindex_MakeStarDemoIndex { pathname } {
 # 4. ROUTINES TO CONVERT LISTS OF FACET PAIRS TO WORLD WIDE WEB FORMAT
 
 # starindex_StarDemoIndexToWWW
-# convert a starlist returned by starindex_MakeStarDemoIndex into World Wide Web format
+# convert a starlist returned by starindex_MakeStarDemoIndex
+# into World Wide Web format
 proc starindex_StarDemoIndexToWWW { starlist header } {
   set wwwcode "$header\n<ul>\n"
   set numelements [llength $starlist]
   for { set i 0 } { $i < $numelements } { incr i } {
     set treelist [lindex $starlist $i]
     set starname [lindex $treelist 0]
-    set demolist [join [lrange $treelist 1 end] ", "]
-    set wwwcode "$wwwcode<li>$starname: $demolist\n"
+    foreach demo [lrange $treelist 1 end]  {
+	lappend demolist "<a href=\"$demo\">$demo</a>"
+    }
+    set wwwcode "$wwwcode<li>$starname: [join $demolist ", "]\n"
   }
-  set wwwcode "$wwwcode</ul>\n"
+  set wwwcode "$wwwcode</ul>\n<hr>Updated: [clock format [clock seconds]]\n"
   return $wwwcode
 }
 
@@ -331,6 +335,8 @@ proc starindex_WriteWWWStarDemoDir { domainlist wwwdirectory } {
 
   # write out each domain file
   foreach domain $domainlist {
+    puts -nonewline "$domain "
+    flush stdout  
     set f [open "$wwwdirectory/$domain.html" w]
     puts $f [starindex_MakeWWWStarDemoIndex $domain]
     close $f
@@ -338,7 +344,8 @@ proc starindex_WriteWWWStarDemoDir { domainlist wwwdirectory } {
   }
 
   # write trailer and close "index.html"
-  puts $indexfile "</ul>\n\n<p>\n<hr>\n\n</body>\n</html>"
+  puts $indexfile "</ul>\n\n<p>\n<hr>"
+  puts $indexfile "Updated: [clock format [clock seconds]]\n\n</body>\n</html>"
   close $indexfile
 
   return 1
