@@ -63,7 +63,7 @@ The argument list for setOutputs_$starID should contain a
 floating point value for each output of the star.
 The inputs can be of any type.  The print() method of the particle
 is used to construct a string passed to Tcl.
-This mechanism is entirely asychronous, in that the Tcl/Tk script
+This mechanism is entirely asynchronous, in that the Tcl/Tk script
 decides when these actions should be performed on the basis of X events.
 .pp
 In synchronous operation,
