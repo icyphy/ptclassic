@@ -12,7 +12,12 @@ limitation of liability, and disclaimer of warranty provisions.
 }
   location { SDF main library }
   desc {
-Write the value of the input to a floating-point variable in shared memory.
+Write the value of the input to a double-precision floating-point variable
+in shared memory.  Use the ReadVar star to read values from the shared memory.
+
+WARNING: This star may produce unpredictable results, since the results
+will depend on the precedences in the block diagram in which it appears
+as well as the scheduler (target) used.
   }
   input
   {

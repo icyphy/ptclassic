@@ -10,7 +10,14 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 }
   derivedfrom { SDFSharedMem }
-  desc { Output the value of a floating variable in shared memory. }
+  desc {
+Output the value of a double-precision floating variable from a shared memory.
+Use the WriteVar star to write values into the shared memory.
+
+WARNING: This star may produce unpredictable results, since the results
+will depend on the precedences in the block diagram in which it appears
+as well as the scheduler (target) used.
+}
   location { SDF main library }
   output
   {
