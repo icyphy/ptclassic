@@ -47,7 +47,11 @@ a Tcl interpreter.
 #include <string.h>
 
 #include "POct.h"
-#include "ptcl.h"
+extern POct *poct;
+
+#include "PTcl.h"
+extern PTcl *ptcl;  
+
 #include "SimControl.h"
 
 extern "C" {
