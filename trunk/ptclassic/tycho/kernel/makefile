@@ -90,6 +90,8 @@ ITCL_SRCS = \
 	HTMLText.itcl \
 	Matlab.itcl \
 	MatlabText.itcl \
+	Mathematica.itcl \
+	MathematicaText.itcl \
 	Message.itcl \
 	Preferences.itcl \
 	RevControl.itcl \
