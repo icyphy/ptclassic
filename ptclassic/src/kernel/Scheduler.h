@@ -35,7 +35,7 @@ class Target;
 class Scheduler {
 public:
 	// Constructor
-	Scheduler() : myTarget(0), myGalaxy(0) {}
+	Scheduler() : myTarget(0), myGalaxy(0), stopBeforeDeadFlag(0) {}
 
 	// connect a galaxy to the scheduler
 	virtual void setGalaxy(Galaxy& g);
@@ -68,11 +68,11 @@ public:
 	virtual ~Scheduler() {}
 
 	// current time of the schedule
-	double currentTime;
+	double now() const { return currentTime;}
 
 	// flag set if stop before deadlocked.
 	// for untimed domain, it is always FALSE.
-	int stopBeforeDeadlocked;
+	int stopBeforeDeadlocked() const { return stopBeforeDeadFlag;}
 
 	// identify itself
 	virtual const char* domain() const;
@@ -100,6 +100,12 @@ public:
 	static int haltRequested() { return SimControl::haltRequested();}
 
 protected:
+	// the current time
+	double currentTime;
+
+	// flag used if stopped before deadlocked.
+	int stopBeforeDeadFlag;
+
 	// clearHalt, for backward compatibilty
 	static void clearHalt() { SimControl::clearHalt();}
 

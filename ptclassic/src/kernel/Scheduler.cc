@@ -45,7 +45,11 @@ Target& Scheduler :: target() {
 	return *myTarget;
 }
 
-void Scheduler :: setGalaxy(Galaxy& g) { myGalaxy = &g;}
+void Scheduler :: setGalaxy(Galaxy& g) {
+	myGalaxy = &g;
+	stopBeforeDeadFlag = FALSE;
+	currentTime = 0;
+}
 
 // Return a StringList with code that can be executed to
 // effect a run.  In the base class, this just causes an error.
