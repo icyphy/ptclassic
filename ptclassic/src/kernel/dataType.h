@@ -11,18 +11,18 @@ $Id$
  Date of creation: 8/13/90
  Revisions:
 
-define the pseudo-class dataType and the "standard" particle types.
+define the pseudo-class DataType and the "standard" particle types.
 
 **************************************************************************/
 
 
 // Types of data stored in queues between stars
-typedef const char* dataType;
+typedef const char* DataType;
 
 // build in standard types, user may add others
 // ANYTYPE is provided for the benefit of Stars like Fork
 // and Printer that operate independently of Particle type
 
-extern dataType INT, FLOAT, STRING, COMPLEX, ANYTYPE;
+extern const DataType INT, FLOAT, STRING, COMPLEX, ANYTYPE;
 
 #endif
