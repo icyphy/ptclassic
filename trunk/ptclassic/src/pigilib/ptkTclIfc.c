@@ -38,9 +38,11 @@ They are registered with Tcl calling registerTclFns().
 #include "exec.h"
 #include "ganttIfc.h"
 #include "handle.h"
+#include "vemInterface.h"
+
 /*******************************************************************
  * Command to highlight an object given its name. Call as
- *	ptkHighlight <fullName>
+ *	ptkHighlight <fullName> [color]
  *******************************************************************/
 static int
 ptkHighlight(dummy, interp, argc, argv)
@@ -49,12 +51,30 @@ ptkHighlight(dummy, interp, argc, argv)
     int argc;                           /* Number of arguments. */
     char **argv;                        /* Argument strings. */
 {
-    if(argc != 2) {
+    char *name;
+    static RgbValue color;
+    extern char *incr();
+    extern boolean FrameStarCall();
+
+    if(argc < 2) {
         strcpy(interp->result,
-            "incorrect usage: should be \"ptkHighlight <fullName>\"");
+            "incorrect usage: should be \"ptkHighlight <fullName> [color]\"");
         return TCL_ERROR;
     }
-    PigiMark(argv[1]);
+    if (argc > 5) {
+	strcpy(interp->result,
+	   "extra garbage at end of line removed");
+	argc = 5;
+    }
+    color.red = (argc >= 3) ? (unsigned short)atoi(argv[2]) : 65535;
+    color.green = (argc >= 4) ? (unsigned short)atoi(argv[3]) : 0;
+    color.blue = (argc == 5) ? (unsigned short)atoi(argv[4]) : 0;
+    name = incr(argv[1]);
+    if (name == NULL) {
+	strcpy(interp->result,"no such star: argv[1]");
+	return TCL_ERROR;    
+    }
+    FrameStarCall(name, &color, 1);
     return TCL_OK;
 }
 
