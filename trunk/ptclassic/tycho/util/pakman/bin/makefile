@@ -50,7 +50,7 @@ ITCL_SRCS =
 
 EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) pakman
 
-MISC_FILES = 	_README.txt
+MISC_FILES = 	_README.txt README.txt
 
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =
