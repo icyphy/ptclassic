@@ -39,6 +39,13 @@ public:
 	virtual	BaseImage*	fragment(int, int);
 	virtual	void		assemble(const BaseImage*);
 	float*				retData();
+
+// For const packets.
+	const float*		constData() const {
+		if (size = fullSize) return (DCTData);
+		return 0;
+	}
+
 	void				setSize(const int);
 
 	inline	int	retBS() const		{ return blocksize; }
