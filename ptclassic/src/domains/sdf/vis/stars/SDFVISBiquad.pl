@@ -23,7 +23,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	  type { float }
 	  desc { Output float type }
 	}
-        ccinclude {<vis_proto.h>, <math.h>}
+        ccinclude {<vis_proto.h>, <math.h>, <stdio.h>}
 	defstate {
 	  name {numtaps}
 	  type {floatarray}
@@ -41,18 +41,11 @@ limitation of liability, and disclaimer of warranty provisions.
 	  desc { Filter tap denominator values (1+d1*z^-1+d2*z^-2). }
 	}
 	defstate {
-	  name {state1}
-	  type {float}
-	  default {"0"}
-	  desc { Internal state. }
-	  attributes{ A_NONCONSTANT|A_NONSETTABLE }
-	}
-	defstate {
-	  name {state2}
-	  type {float}
-	  default {"0"}
-	  desc { Internal state. }
-	  attributes{ A_NONCONSTANT|A_NONSETTABLE }
+	  name {scalefactor}
+	  type {int}
+	  default {"1"}
+	  desc { Power of Two reduction of coefficients. }
+	  attributes{ A_CONSTANT|A_SETTABLE }
 	}
       	defstate {
 	  name { scale }
@@ -73,7 +66,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	  double *inarray;
 	  double *result_filt;
 	  short n0;
-	  double scaledown;
+	  short scaledown;
 	  float *result;
 	}
 	constructor {
@@ -113,27 +106,16 @@ limitation of liability, and disclaimer of warranty provisions.
 	  outarray = (short *) memalign(sizeof(double),sizeof(short)*NUMPACK);
 	  result_filt = (double *) memalign(sizeof(double),sizeof(double)*2);
 
-	  // find largest coefficient
-	       norm = fabs(dentaps[0]) > fabs(dentaps[1]) ?
-	       fabs(dentaps[0]) :fabs(dentaps[1]);
-	  norm = norm > fabs(numtaps[0]) ? norm : fabs(numtaps[0]);
-	  norm = norm > fabs(numtaps[1]) ? norm : fabs(numtaps[1]);
-	  norm = norm > fabs(numtaps[2]) ? norm : fabs(numtaps[2]);
-
-	  // scale down the entire transfer function
-	  if(norm > 1.0)
-	    scaledown = 1.0/(norm);
-	  else
-	    scaledown = 1.0;
+	  scaledown = (short) 1 << scalefactor;
 
 	  // initialize n0
-	       n0 = (short) scale*scaledown*numtaps[0];
+	       n0 = ((short) scale/scaledown*numtaps[0]);
 
 	  // initialize denominator array
-	  indexcount = dennum;
+	       indexcount = dennum;
 	  for(i=0;i<2;i++){
-	    *indexcount++ = (short) scale*scaledown*dentaps[i];
-	    *indexcount++ = (short) scale*scaledown*numtaps[i+1];
+	    *indexcount++ = ((short) scale/scaledown*dentaps[i]);
+	    *indexcount++ = ((short) scale/scaledown*numtaps[i+1]);
 	  }
 
 	  // initialize states
@@ -145,14 +127,13 @@ limitation of liability, and disclaimer of warranty provisions.
 	go {	
 	  short *invalue;
 	  short *result_den;
+	  short tmpshort;
 	  int outerloop,innerloop;
 	  float *statetmp,*taps;
-	  double out_dbl;
 	  double *outvalue;
 	  double *packedfilt;
 	  double upper, lower;
 	  double split_result;
-	  double tmp;
 
 	  vis_write_gsr(8);
 	  *inarray = double(signalIn%0);
@@ -161,30 +142,26 @@ limitation of liability, and disclaimer of warranty provisions.
 	  statetmp = (float *) state;
 
 	  for(outerloop=3;outerloop>=0;outerloop--){
-
 	    // find product of state and denominator/numerator
 	    for(innerloop=0;innerloop<2;innerloop++){
 	      upper = vis_fmuld8sux16(statetmp[innerloop],taps[innerloop]);
 	      lower = vis_fmuld8ulx16(statetmp[innerloop],taps[innerloop]);
 	      result_filt[innerloop] = vis_fpadd32(upper,lower);
 	    }
-
 	    split_result = vis_fpadd32(result_filt[0],result_filt[1]);
 	    // find next_state
 		 *result = vis_fpackfix(split_result);
 	    result_den = (short *) result;
-	    tmp = (double)(1/scaledown)*(invalue[outerloop] - *result_den);
 	    state[2] = state[0];
 	    state[3] = state[2];
-	    state[0] = short(tmp);
+	    state[0] = (invalue[outerloop] - *result_den) << scalefactor;
 	    state[1] = state[0];	    
-
+	    
 	    // find output
-		 out_dbl = (double)(n0*tmp/scale + *(result_den+1));
-	    outarray[outerloop] = (short) out_dbl;
-
+	    outarray[outerloop] = (n0*state[0] >> 15) + *(result_den+1);
 	  }
 	  outvalue = (double *) outarray;
 	  signalOut%0 <<  *outvalue;
 	}
 }
+
