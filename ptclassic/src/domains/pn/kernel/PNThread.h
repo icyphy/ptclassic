@@ -38,14 +38,21 @@ ENHANCEMENTS, OR MODIFICATIONS.
 class DataFlowStar;
 class PtCondition;
 
-class PNThread : public AweThread {};
+class PNThread : public AweThread
+{
+public:
+    // Constructor.
+    PNThread(unsigned int stackSize = defStackSize)
+	: AweThread(stackSize) {}
+};
 
 // A Kahn process for dataflow actors.
 class DataFlowProcess : public PNThread
 {
 public:
     // Constructor.
-    DataFlowProcess(DataFlowStar& s) : star(s) {}
+    DataFlowProcess(DataFlowStar& s, unsigned int stackSize = defStackSize)
+	: star(s), PNThread(stackSize) {}
 
 protected:
     /*virtual*/ void run();
@@ -57,8 +64,9 @@ class SyncDataFlowProcess : public DataFlowProcess
 {
 public:
     // Constructor.
-    SyncDataFlowProcess(DataFlowStar& s, PtCondition& c)
-	: DataFlowProcess(s), start(c) {}
+    SyncDataFlowProcess(DataFlowStar& s, PtCondition& c,
+	unsigned int stackSize = defStackSize)
+	: start(c), DataFlowProcess(s, stackSize) {}
 
 protected:
     /*virtual*/ void run();
