@@ -281,3 +281,42 @@ int onHostMachine(const char* hname) {
 }
 
 
+// This function sanitizes a string so that it is usable as a
+// C/C++ identifier.  If the string begins with a digit, the
+// character 'x' is prepended.  Then, all the characters in
+// the string that are not alphanumeric are changed to '_'.
+// The returned (const char*) pointer points to the resulting
+// string in an internal buffer maintained by this function,
+// and is only valid until the next invocation of this function.
+const char* ptSanitize(const char* string)
+{
+    // This pointer points to the dynamically allocated buffer that
+    // holds the result string.  The pointer is static so that we can
+    // remember the buffer allocated in the previous invocation of
+    // this function.
+    static char *sanitizedString = 0;
+
+    // Delete the buffer allocated in the previous invocation.
+    if (sanitizedString) { LOG_DEL; delete sanitizedString; }
+
+    // Allocate a new buffer for this invocation.
+    LOG_NEW; sanitizedString = new char [strlen(string) + 2];
+
+    char *cPtr = sanitizedString;
+
+    // Check for leading digit.
+    if (isdigit(*string)) *(cPtr++) = 'x';
+
+    // Replace non-alphanumeric characters.
+    while (*string != 0) {
+	if (isalnum(*string))
+	    *(cPtr++) = *string;
+        else
+	    *(cPtr++) = '_';
+	string++;
+    }
+    *cPtr = 0;
+
+    // Note that the result string is kept until the next invocation.
+    return sanitizedString;
+}
