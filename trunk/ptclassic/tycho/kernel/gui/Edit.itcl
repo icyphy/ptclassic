@@ -42,15 +42,15 @@
 # options
 #
 # base command.
-option add *Edit.revcom "sccs" widgetDefault
+option add *Edit.revcom sccs widgetDefault
 # check in command. (ci for RCS)
-option add *Edit.cicom "delget" widgetDefault
+option add *Edit.cicom delget widgetDefault
 # check out command. (co for RCS)
-option add *Edit.cocom "edit" widgetDefault
+option add *Edit.cocom edit widgetDefault
 # revision control directory name. (RCS for RCS)
-option add *Edit.revdir "SCCS" widgetDefault
+option add *Edit.revdir SCCS widgetDefault
 # command to place current file under rev control. (??? for RCS)
-option add *Edit.createcom "create" widgetDefault
+option add *Edit.createcom create widgetDefault
 
 #######################################################################
 #### Edit
@@ -385,8 +385,8 @@ body ::tycho::Edit::nextRevAction {} {
 	}
     }
     set dir [file dirname $currentfile]
-    set revdir [option get $itk_component(hull) revdir Edit]	    
-    set revdir [format "%s/%s" $dir $revdir]
+    #set revdir [option get $itk_component(hull) revdir Edit]	    
+    set revdir [format "%s/SCCS" $dir]
     if {![file exists $revdir]} {
 	if {![file writable $dir]} {
 	    tycho::inform "The necessary revision control directory doesn't\
@@ -397,16 +397,19 @@ body ::tycho::Edit::nextRevAction {} {
 	exec mkdir $revdir
     }
     # NOTE: the following check is specific to sccs.
-    set revcom [option get $itk_component(hull) revcom Edit]
+    #set revcom [option get $itk_component(hull) revcom Edit]
+    set revcom sccs
     set basefile [file tail $currentfile]
-    if {![file exists [format "%s/s.%s" $revdir $basefile]]} { 
+    if {![file exists [format "%s/s.%s" $revdir $basefile]] && \
+	    [file exists [format "%s/p.%s" $revdir $basefile]]} { 
 	# File is not currently under revision control.
 	if {![askuser "This file is not currently under revision\
 		control, do you want it to be placed under revision\
 		control?"]} {
 	    return
 	} else {
-	    set createcom [option get $itk_component(hull) createcom Edit]
+	    #set createcom [option get $itk_component(hull) createcom Edit]
+	    set createcom create
 	    catch {exec $revcom $createcom $currentfile} output
 	    if {![regexp "^\[1-9\]+.\[0-9\]+" $output]} {
 		tycho::inform "Unable to place the file under revision\
@@ -419,15 +422,17 @@ body ::tycho::Edit::nextRevAction {} {
     }
     if {[$itk_component(hull) cget -readonly] != 0} {
 	# check out the file 
-	set cocom [option get $itk_component(hull) cocom Edit]
+	#set cocom [option get $itk_component(hull) cocom Edit]
+	set cocom edit
 	catch {exec $revcom $cocom $currentfile} output
     } else {
 	#check in the file
-	set comments [::tycho::queryinfo "Enter comments:" "" 30]
+	set comments [::tycho::queryinfo "Enter comments:" "" 60]
 	# FIXME: this is a bogus solution to the problem of getting 
 	# a comment into sccs delget.
 	exec echo $comments > #tycho#temp
-	set cicom [option get $itk_component(hull) cicom Edit]
+	#set cicom [option get $itk_component(hull) cicom Edit]
+	set cicom delget
 	catch {exec $revcom $cicom $currentfile < #tycho#temp} output
 	exec rm -f #tycho#temp
     }
@@ -476,6 +481,7 @@ body ::tycho::Edit::reload {{askuser 1} {filename ""}} {
     $itk_component(text) deleteRange 1.0 end
     $this loadFile $filename
     $itk_component(text) setInsert $ins
+    $itk_component(text) center
     markUnmodified
     if {[file writable $filename]} {
 	$itk_component(hull) configure -readonly 0
