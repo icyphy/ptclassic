@@ -117,7 +117,7 @@
 #
 # Delete a vertex and all edges connected to it, recording it:
 # <pre><tcl>
-#     $graph record delete c
+#     $graph record delete* c
 #     $graph describe
 # </tcl></pre>
 #
@@ -189,7 +189,7 @@ class ::tycho::PortedDigraph {
     ####                   protected methods                     ####
 
     # Return a description of a single item
-    protected method _describeitem {context type tail {prefix {}}}
+    protected method _describeitem {name {prefix {}}}
 
     # Update the cache
     protected method _updatecache
@@ -200,11 +200,11 @@ class ::tycho::PortedDigraph {
 #
 body ::tycho::PortedDigraph::constructor {args} {
     # Define the "port" entity: no value, no default attributes
-    defineEntityType port -leaf 1
+    definetype port -leafonly 1
 
     # Turn off the -leaf option of vertices, so that
     # they can contain ports
-    configureEntityType vertex -leaf 0
+    # configureEntityType vertex -leaf 0
 
     # Evaluate options
     eval configure $args
@@ -246,7 +246,7 @@ body ::tycho::PortedDigraph::edge {vertex1 port1 vertex2 port2 args} {
     # Add the edge to the model. We encode the vertex name into the
     # edge names to make it possible to implement methods like
     # edges{} using pattern-matching.
-	eval add edge:$vertex1.$port1^$vertex2.$port2 $args
+    eval add edge:$vertex1.$port1^$vertex2.$port2 $args
 }
 
 ########################################################################
@@ -289,14 +289,14 @@ body ::tycho::PortedDigraph::edgedelete {vertex1 port1 vertex2 port2} {
 body ::tycho::PortedDigraph::edges {{vertex1 *} {port1 *} {vertex2 *} {port2 *}} {
     # Only use the cached data if the cache is valid
     if [cache valid] {
-	    eval concat [array names _edges [list $vertex1 $port1 $vertex 2 $port2]]
-	} else {
-		set result {}
-		foreach edge [names edge:$vertex1.$port1^$vertex2.$port2] {
-	        eval lappend [lreplace [split $edge :.^] 0 0]
-		}
-		return $result
-	}
+        eval concat [array names _edges [list $vertex1 $port1 $vertex 2 $port2]]
+    } else {
+        set result {}
+        foreach edge [names edge:$vertex1.$port1^$vertex2.$port2] {
+            eval lappend result [lreplace [split $edge :.^] 0 0]
+        }
+        return $result
+    }
 }
 
 ########################################################################
@@ -308,7 +308,7 @@ body ::tycho::PortedDigraph::edges {{vertex1 *} {port1 *} {vertex2 *} {port2 *}}
 # the undo command.
 #
 body ::tycho::PortedDigraph::port {vertex port args} {
-	eval add [list "vertex:$vertex port:$port"] $args
+    eval add [list "vertex:$vertex port:$port"] $args
 }
 
 ########################################################################
@@ -318,7 +318,7 @@ body ::tycho::PortedDigraph::port {vertex port args} {
 # exist or the attribute does not exist.
 #
 body ::tycho::PortedDigraph::portcget {vertex port {attribute {}}} {
-	itemcget [list vertex:$vertex port:$port] $attribute
+    itemcget [list vertex:$vertex port:$port] $attribute
 }
 
 ########################################################################
@@ -328,7 +328,7 @@ body ::tycho::PortedDigraph::portcget {vertex port {attribute {}}} {
 # is a flat list of attribute-value pairs.
 #
 body ::tycho::PortedDigraph::portconfigure {vertex port args} {
-	eval itemconfigure [list "vertex:$vertex port:$port"] $args
+    eval itemconfigure [list "vertex:$vertex port:$port"] $args
 }
 
 ########################################################################
@@ -350,8 +350,8 @@ body ::tycho::PortedDigraph::portdelete {vertex port} {
 #
 body ::tycho::PortedDigraph::ports {vertex {pattern *}} {
     set result {}
-    foreach port [names [list vertex:$vertex port:$port]] {
-    	lappend result [lindex [split $port :] 3]
+    foreach port [names [list vertex:$vertex port:$pattern]] {
+    	lappend result [lindex [split [lindex $port end] :] 1]
     }
     return $result
 }
@@ -365,11 +365,11 @@ body ::tycho::PortedDigraph::ports {vertex {pattern *}} {
 body ::tycho::PortedDigraph::repair {} {
     foreach edge [names edge:*] {
         foreach {_ v1 p1 v2 p2} [split $edge :.^] {}
-		if { ![exists [list vertex:$v1 port:$p1]] \
-				|| ![exists [list vertex:$v2 port:$p2]] } {
+        if { ![exists [list vertex:$v1 port:$p1]] \
+                || ![exists [list vertex:$v2 port:$p2]] } {
             # Delete a disconnected edge
             edgedelete $v1 $p1 $v2 $p2
-		}
+        }
     }
     # Return null so record{} or publish{} will complain.
     return ""
@@ -384,7 +384,7 @@ body ::tycho::PortedDigraph::repair {} {
 # editors more generic.
 #
 body ::tycho::PortedDigraph::subgraphEdges {args} {
-	_update
+    _update
     set result {}
     foreach u $args {
         foreach v $args {
@@ -438,14 +438,15 @@ body ::tycho::PortedDigraph::subgraphOutputs {args} {
 #### verify
 #
 # Test whether a graph is properly constructed.
+# This method checks for improperly-connected edges.
 #
 body ::tycho::PortedDigraph::verify {} {
     foreach edge [names edge:*] {
         foreach {_ v1 p1 v2 p2} [split $edge :.^] {}
-		if { ![exists [list vertex:$v1 port:$p1]] \
-				|| ![exists [list vertex:$v2 port:$p2]] } {
+        if { ![exists [list vertex:$v1 port:$p1]] \
+                || ![exists [list vertex:$v2 port:$p2]] } {
             return 0
-		}
+        }
     }
     return 1
 }
@@ -461,18 +462,20 @@ body ::tycho::PortedDigraph::verify {} {
 # the default method because edges have a different format
 # from the default.
 #
-body ::tycho::Digraph::_describeitem {context type tail {prefix {}}} {
+body ::tycho::PortedDigraph::_describeitem {name {prefix {}}} {
+    regexp {(.+):(.+)} [lindex $name end] _ type tail
+
     if { $type == "edge" } {
         # Start string with type
         set string $prefix
         append string "edge"
 
         # Append the two vertices and the data
-        eval lappend string $tail [itemcget edge:$tail]
+        eval lappend string [split $tail ^.] [itemcget edge:$tail]
 
         append string \n
     } else {
-        chain $context $type $tail $prefix
+        chain $name $prefix
     }
 }
 
@@ -482,7 +485,7 @@ body ::tycho::Digraph::_describeitem {context type tail {prefix {}}} {
 # Clear the cache and build updated versions of the _parents,
 # _children, _edges and _vertices arrays.
 #
-body ::tycho::Digraph::_updatecache {} {
+body ::tycho::PortedDigraph::_updatecache {} {
     # Clear all cached data
     cache delete
 
