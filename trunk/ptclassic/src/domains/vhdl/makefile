@@ -47,6 +47,6 @@ ARCH = $(PTARCH)
 # Subdirectories with star directories in them
 SUBDOMAINDIRS =
 
-DIRS = kernel stars targets $(SUBDOMAINDIRS)
+DIRS = kernel stars targets tcltk $(SUBDOMAINDIRS)
 
 include $(ROOT)/mk/domain.mk
