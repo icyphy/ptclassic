@@ -90,6 +90,12 @@ protected:
     // Mathematica error string
     InfString errorString;
 
+    // Add an error message
+    void AddErrorMessage(const char *msg);
+
+    // Initialize error messages
+    void InitErrorMessages();
+
     // Mathematica warning string
     InfString warningString;
 
