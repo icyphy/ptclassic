@@ -28,6 +28,7 @@ INC =-I$(SDFKERNEL) -I$(KERNEL) -I$(EGKERNEL) -I$(LSKERNEL)
 	$(GNU) $(GPPFLAGS) $(INC) -c $<
 
 OBJS = $(SOURCES:.cc=.o)
+LIBOBJS = $(LIBSOURCES:.cc=.o)
 LIB = libLS.a
 
 all:	makefile $(OBJS) $(LIB) 
