@@ -398,13 +398,15 @@ body ::tycho::EditHTML::fixLink {link start end err} {
 	    -background [preference get targetColor]
 
     set nm [::tycho::autoName .entry]
-    ::tycho::EntryQuery $nm \
+    ::tycho::Query $nm \
 	    -bitmap questhead \
 	    -text "$err: Make corrections." \
-	    -queries [list [list correction {} $link]] \
+	    -queries [list [list line correction {} $link]] \
 	    -entrywidth 80 \
 	    -geometry +0+0
 
+    # FIXME: This centers on the screen, which is not what we want.
+    # Invoking wm deiconify would work, but "wait" doesn't support this.
     set replacement [lindex [::tycho::Dialog::wait $nm] 1]
 
     if {$replacement != {} && $replacement != $link} {
