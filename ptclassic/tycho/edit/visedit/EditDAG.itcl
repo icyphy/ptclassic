@@ -119,6 +119,9 @@ body ::tycho::EditDAG::constructor {args} {
     addMenuItem {New Child} Edit -underline 4 -accelerator "C" \
 	    -command "$this component graphics addChild"
 
+    addMenuItem {New Arc} Edit -underline 4 -accelerator "A" \
+	    -command "$this component graphics addArc"
+
     addMenuItem {Transpose} Format -underline 0 \
             -command "$this transpose"
 
