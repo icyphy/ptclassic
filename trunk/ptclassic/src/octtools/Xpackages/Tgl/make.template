@@ -1,3 +1,4 @@
+# Octtools Tgl - Toggle Widget for X Toolkit and Athena Widget Set
 # Version Identification:
 # $Id$
 # Copyright (c) 1990-1993 The Regents of the University of California.
@@ -54,9 +55,19 @@ LIB = 		libTgl.$(LIBSUFFIX)
 
 EXPHDR =	Tgl.h
 
+DRIVER =	tg_test
+
+KRUFT =		$(DRIVER) 
+
+DRVROBJ =	tgtest.o
+
+DRVRLIBS =	-lutility -lst -lTable -lerrtrap -luprintf -lport $(X11_LIBSPEC)  $(X11EXT_LIBSPEC) -lXt -lXaw -lXmu -lX11
 # common makefile file for vem libraries
 VEMLIBCONFIG=../../vem-lib.mk
 include $(VEMLIBCONFIG)
+
+tests:: $(DRIVER) 
+	$(DRIVER) 
 
 # include common definitions, rules
 include $(ROOT)/mk/common.mk
