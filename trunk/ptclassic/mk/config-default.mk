@@ -25,10 +25,6 @@
 # 		Directories to use
 #-----------------------------------------------------------------------
 
-# Full path to the ~ptolemy directory (you may need to change this
-# for your installation)
-PTOLEMY_FULL_PATH = /usr/users/ptolemy
-
 # where libraries are (and where to install them)
 LIBDIR=$(ROOT)/lib.$(ARCH)
 # where to install binaries
