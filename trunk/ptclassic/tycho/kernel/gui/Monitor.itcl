@@ -35,10 +35,10 @@
 # inherits from Exec, with tk widgets added. This function is added
 # for fully backward compatibility with the original Exec.
 # <p>
-# Here is an example of how to use the Monitor:
+# <b>Simple examples on using the Monitor:</b>
 # <tcl><pre>
 #     set win [::tycho::autoName .execExample]
-#     ::tycho::Exec $win -command {make all}
+#     ::tycho::Monitor $win -command {ls -al}
 #     $win centerOnScreen
 #     ::tycho::Dialog::wait $win
 #     ::tycho::inform "We waited until the Exec window was closed"
@@ -46,40 +46,61 @@
 # In the above example, we bring up the Exec window and then wait  
 # until the user closes it.
 #
-# In this example, we automatically start up the subprocess, and then
+# In another example, we automatically start up the subprocess, and then
 # close the window if the subprocess completed without an error
 # <tcl><pre>
 #     set win [::tycho::autoName .execExample]
-#     ::tycho::Exec $win &#92
-#        -command {make all} &#92
-#        -autostart 1 &#92
-#        -autodestroy 1
+#     ::tycho::Monitor $win &#92
+#        -command {ls -al} -autostart 1 -autodestroy 1
 #     $win centerOnScreen
 # </pre></tcl>
 # If the make in the above example had returned an error, then the window
 # would not have been destroyed.
+#
+# <hr>
+# <b>There are many ways to interface with the Monitor:</b><br>
+# Examples below show how to interface with the windows.
+# This is exactly how the Compile class parses output.
+# The variable "output" now contains the exactly lines in Monitor.
+# <tcl><pre>
+#   set win [::tycho::autoName .execExample]
+#   ::tycho::Monitor $win -command {ls -al} -autostart 1 -autodestroy 0
+#   $win centerOnScreen
+# </pre></tcl>
+#
+# The next set of examples show how to read in the input, parse, 
+# change screen, etc. In this particular example, we changed the
+# attribute for the file owner (ie. changing color and underline).
+# <tcl><pre> 
+# set text $win.history.text
+# set output [$win.history get 0.0 end]
+# set output [split $output \n]
+# set lineno 0
+# foreach line $output {
+#     incr lineno
+#     # Typical format of a file:
+#     # lrwxrwxrwx  5 root 28 Feb 25 18:33 README -> /users/README
+#     if {[regexp {([-a-zA-Z]+) +([0-9]+) +([a-zA-Z]+).*} $line match &#92
+#             perm lnk usr]} {
+#         set strstart [string first $usr $line]
+#         set strend   [expr $strstart+[string length $usr]]
+#         $text tag add color0 $lineno.$strstart $lineno.$strend
+#         $text tag configure color0 -foreground red -underline 1
+#     }
+# }
+# </pre></tcl>
 class ::tycho::Monitor {
     inherit ::tycho::Query ::tycho::Exec
     constructor {args} {}
     destructor {}
 
-    public method insertLine {line} {
-        $itk_component(history) configure -readonly 0
-        $itk_component(history) insertData "$line"
-        $itk_component(history) center
-        $itk_component(history) configure -readonly 1
-    }
-    
 
-    public method execProcessInMonitor {} {
-        # Clear both history logs
-        $itk_component(history) configure -readonly 0
-        $itk_component(history) clear
-        $itk_component(history) configure -readonly 1
-        $this clearHistory
+    ###################################################################
+    ####                      public methods                       ####
+    public method execProcessInMonitor {} {}
 
-        $this execProcess [get commandToExec] [get dirToExecFrom]
-    }
+    # We want to make sure that only private function can write
+    public method insertLine {line} {}
 
     ###################################################################
     ####                            options                        ####
@@ -95,7 +116,6 @@ class ::tycho::Monitor {
 
     # Directory to execute the command in.
     itk_option define -dir dir Dir {}
-
 }
 
 #######################################################################
@@ -154,11 +174,6 @@ body ::tycho::Monitor::constructor {args} {
         $itk_component(history) configure -readonly 1 -save 0
     }
 
-    #
-    # A lot of old code here
-    #
-
-
     # Make the entry boxes wide so we can see the entire command
     configure -entrywidth 80
 
@@ -174,6 +189,7 @@ body ::tycho::Monitor::constructor {args} {
     if {$itk_option(-autostart) != 0} {
         $this execProcessInMonitor
     }
+
     return $this
 }
 
@@ -197,6 +213,32 @@ body ::tycho::Monitor::destructor {} {
     catch {unset ::tycho::Monitor::$statusVariableName}
 }
 
+body ::tycho::Monitor::insertLine {line} {
+    # Need to lock up the output of the executable
+    $itk_component(history) configure -readonly 0
+    $itk_component(history) insertData "$line"
+    $itk_component(history) center
+    $itk_component(history) configure -readonly 1
+}
+    
+
+body ::tycho::Monitor::execProcessInMonitor {} {
+    # Clear both history logs before executing
+    $itk_component(history) configure -readonly 0
+    $itk_component(history) clear
+    $itk_component(history) configure -readonly 1
+    $this clearHistory
+    
+    $this execProcess [get commandToExec] [get dirToExecFrom]
+
+    if {[get autoDestroy]=="Yes"} {
+        # ASSERT([$this getSatusWait]!="running")       always the case
+        if {[$this getStatusWait]=="normal"} {
+            # If returned correctly, it's okay to exit this window
+            after 2000 delete object $this
+        }
+    }
+}
 
 #######################################################################
 #### -autodestroy configuration
