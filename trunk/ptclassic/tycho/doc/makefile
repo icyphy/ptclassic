@@ -50,6 +50,7 @@ EXTRA_SRCS =	abbreviations.html \
 		index.html \
 		install.html \
 		introduction.html \
+		itcllinks.html \
 		overview.html \
 		policies.html \
 		rationale.html \
