@@ -96,9 +96,6 @@ proc ::pakman::mirror {path mirror args} {
 	    if $debug {
 		puts "Linking [file join $mirror $dir]"
 	    }
-	    puts "exec ln -s \
-		    [file join $path $dir] \
-		    [file join $mirror $dir]"
 	    catch {exec ln -s \
 		    [file join $path $dir] \
 		    [file join $mirror $dir]} msg
