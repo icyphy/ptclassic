@@ -3,8 +3,8 @@
 .SD
 Simple commutator-distributor demo
 .DE
-.IE Commutator
-.IE Distributor
+.Ie Commutator
+.Ie Distributor
 .SV $Revision$ $Date$
 .AL "J. T. Buck"
 .LO "~ptolemy/src/domains/sdf/demo"

@@ -10,6 +10,7 @@ Demonstrate the Quantizer star.
 This trivial system shows how to use the
 .c Quantizer
 star.
+.Ie Quantizer
 Three thresholds, at -1.0, 0.0, and 1.0 are used to produce
 one of four levels, -1.5, -0.5, 0.5, 1.5.
 The
