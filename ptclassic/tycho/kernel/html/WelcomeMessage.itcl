@@ -102,7 +102,7 @@ body ::tycho::WelcomeMessage::constructor {args} {
     # but it is better to restrict it in the source.
     if {!$ptolemygifexists} {
 	image create photo ptolemygif \
-		-file $TYCHO/kernel/tychologo.gif
+		-file $TYCHO/kernel/img/tychologo.gif
     }
     configure -image ptolemygif
 
