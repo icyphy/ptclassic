@@ -3,7 +3,7 @@
 # @Version: $Id$
 # @Author: H. John Reekie
 #
-# @Copyright (c) 1990-1997 The Regents of the University of California.
+# @Copyright (c) 1990-%Q% The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -622,7 +622,7 @@ body ::tycho::StatusBar::entry {label args} {
     bind $itk_component(feedback) <Escape> "$opts(-returnfocus) focusin"
    
     # Allow the following to be handled by the top-level (displayer)
-    bind $itk_component(feedback) <Control-x><o> { }
+    bind $itk_component(feedback) <<NextPane>> { }
 
     # Now focus on the entry
     focus $itk_component(feedback)
@@ -659,13 +659,17 @@ body ::tycho::StatusBar::fileentry {label args} {
             -tabcommand "$this _complete \"%%\" $opts(-casesensitive)"
 
     # Bind for reverse rotation
-    bind $itk_component(feedback) <Control-Tab> \
-            "$this _complete ?DUMMY? $opts(-casesensitive) 0"
-    bind $itk_component(feedback) <Up> \
-            "$this _complete ?DUMMY? $opts(-casesensitive) 0"
+    # No... Control-Tab moves the focus to the next pane.
+    # bind $itk_component(feedback) <Control-Tab> \
+    #        "$this _complete ?DUMMY? $opts(-casesensitive) 0"
+
+    # NOTE: These sorts of undocumented bindings are a really bad
+    # idea.  Let's keep things simple please.
+    # bind $itk_component(feedback) <Up> \
+    #       "$this _complete ?DUMMY? $opts(-casesensitive) 0"
     # Alternative to Tab
-    bind $itk_component(feedback) <Down> \
-            "$this _complete ?DUMMY? $opts(-casesensitive) 1"
+    # bind $itk_component(feedback) <Down> \
+    #       "$this _complete ?DUMMY? $opts(-casesensitive) 1"
     
     # Initialize completion data
     set _completedata(lastEntry) {}
@@ -909,8 +913,7 @@ body ::tycho::StatusBar::_setmode {mode} {
                 ::entry $itk_interior.status.feedback \
                         -borderwidth 1 \
                         -relief sunken \
-                        -highlightthickness 2 \
-                        -highlightcolor grey70
+                        -highlightthickness 2
             } {
                 keep -background -cursor
                 rename -font -messagefont messageFont MessageFont
