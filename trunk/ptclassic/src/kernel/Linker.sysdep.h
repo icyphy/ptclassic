@@ -40,6 +40,10 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #define SOL2
 #endif
 
+#if defined(__sparc) && ! defined (__svr4__) && defined(__GNUG__)
+#define SUN4
+#endif
+
 #if defined(__alpha) || defined(linux)
 #define LINKING_NOT_SUPPORTED
 #endif
@@ -56,27 +60,41 @@ const int linkingNotSupported =
 // 1. Use a 4.3/Sun-style loader with the -A flag.  Usually, binaries
 // that are to be dynamically linked must be built with the -N option
 // 2. Use the System V Release 4 dlopen() style call.  SunOS4.1.x,
-// Solaris2.x and Irix5.x support this
+// Solaris2.x and Irix5.x support this.
+//
+// dlopen() style linking works under sun4, but if you try and load a
+// star that has undefined symbols, pigiRpc or ptcl will exit.
+
 #if defined(__sgi) || defined(SOL2)
 #include <dlfcn.h>
 #include <sys/stat.h>
 #define USE_DLOPEN
 
-// Set up dlopen() calls so that symbols are visible everywhere.  If
-// this is not done, then symbols from one dlopen() will not be
-// visible to subsequent dlopens().  Note that using dlopen() means
-// that link and permlink have the same functionality.
+// Don't use RTLD_GLOBAL, or if you reload a star, you won't see the changes
 #if defined(__sgi)
-#define DLOPEN sgidladd
+// Under sgi, don't use sgidladd, or you won't see changes
+#define DLOPEN dlopen
 #define DLOPEN_FLAGS RTLD_NOW
 #endif // __sgi
-#if defined(SOL2)
+
+#if defined(SOL2) || defined(SUN4)
 #define DLOPEN dlopen
-#define DLOPEN_FLAGS RTLD_NOW|RTLD_GLOBAL
-#endif // __SOL2
+#if defined(SOL2)
+#define DLOPEN_FLAGS RTLD_NOW
+#else
+// defined(sun)
+#define DLOPEN_FLAGS RTLD_LAZY
+#endif // SOL2
+#endif // SOL2 || SUN4
 
 #if defined(__GNUG__)
+#if defined(SOL2) || defined (sgi)
 #define SHARED_OBJECT_COMMAND "g++ -shared -o"
+#else
+#if defined(SUN4)
+#define SHARED_OBJECT_COMMAND "ld -z -o"
+#endif // SUN4
+#endif // SOL2
 #else // __GNUG__
 #define SHARED_OBJECT_COMMAND "CC -G -o"
 #endif // __GNUG__
@@ -343,7 +361,7 @@ read (fd, (void *) &h2, sizeof h2) <= 0)
 #endif
 
 #if defined(sun) || defined(vax)
-#if !defined(SOL2)
+#if !defined(USE_DLOPEN)
 #define STRUCT_DEFS exec header
 #define READHEAD_FAIL (read (fd, (char*) &header, sizeof(header)) <= 0)
 #define OBJ_READ_SIZE ((size_t)(header.a_text + header.a_data))
