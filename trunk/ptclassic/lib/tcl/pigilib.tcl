@@ -67,7 +67,7 @@ source $ptolemy/lib/tcl/ptkOptions.tcl
 # Other Pigi procedures
 source $ptolemy/lib/tcl/message.tcl
 source $ptolemy/lib/tcl/utilities.tcl
-source $ptolemy/lib/tcl/dialog.tcl
+source $ptolemy/lib/tcl/ptkDialog.tcl
 source $ptolemy/lib/tcl/ptkBind.tcl
 source $ptolemy/lib/tcl/ptkControl.tcl
 source $ptolemy/lib/tcl/ptkRunAllDemos.tcl
