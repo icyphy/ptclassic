@@ -21,8 +21,9 @@ limitation of liability, and disclaimer of warranty provisions.
 	htmldoc {
 The output of the FIR filter is given by:
 <pre>
-        y(n) ~ = ~ sum from { i = 0 } to { N - 1 } { c[i] ~ x[N-i] }
+        y(n) = sum from { i = 0 } to { N - 1 } of { c[i]x[N-i] }
 </pre>
+<p>
 where N is the order of the filter given by the number of coefficients in
 <i>taps</i>.
 c[i], i = 0..N-1 are the tap coefficients; and x[T-i] is the input i samples
