@@ -46,10 +46,11 @@ periodically repeated, or the file contents can be padded with zeros.
 
 	protected {
 		istream* input;
+		char* expandedFileName;
 	}
 
-	constructor { input = 0;   }
-	destructor  { LOG_DEL; delete input;}
+	constructor { input = 0; expandedFileName = 0; }
+	destructor  { LOG_DEL; delete input; delete [] expandedFileName; }
 
 	code {
 		// This routine is by
@@ -85,9 +86,9 @@ periodically repeated, or the file contents can be padded with zeros.
 	{
 		LOG_DEL; delete input; input = 0;
 		// open input file
-		char *expandedFileName = expandPathName(fileName);
-		int fd = open(expandedFileName, O_RDONLY);
 		delete [] expandedFileName;
+		expandedFileName = expandPathName(fileName);
+		int fd = open(expandedFileName, O_RDONLY);
 		if (fd < 0) {
 			Error::abortRun(*this, fileName, ": can't open file: ",
 					sys_errlist[errno]);
@@ -104,14 +105,13 @@ periodically repeated, or the file contents can be padded with zeros.
 		if (!input) {
 			// nothing
 		}
-		else if (input->eof())
-		{
+		else if (input->eof()) {
 			if (haltAtEnd)		// halt the run
 				SimControl::requestHalt();
 			else if (periodic)	// close and re-open file
 			{
 				LOG_DEL; delete input; input = 0;
-				int fd = open(expandPathName(fileName), 0);
+				int fd = open(expandedFileName, 0);
 				if (fd < 0) {
 					Error::abortRun(*this, fileName,
 					     ": can't re-open file: ",
@@ -123,17 +123,10 @@ periodically repeated, or the file contents can be padded with zeros.
 				x = ulaw_to_linear(ch);
 			}
 		}
-		else			// get next value
-		{
+		else {			// get next value
 			input->get(ch);
 			x = ulaw_to_linear(ch);
 		}
 		output%0 << x;
-	}
-	
-	wrapup
-	{
-		LOG_DEL; delete input;
-		input = 0;
 	}
 }
