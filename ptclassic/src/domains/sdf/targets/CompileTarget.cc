@@ -111,11 +111,9 @@ int CompileTarget::writeGalDef(Galaxy& galaxy, StringList className) {
     // -- destructor for pt_ofstream will close the file automatically
     StringList galFileName = galaxy.className();
     galFileName += ".h";
-    char* codeWriteFileName = writeFileName(galFileName);
-    char codeFileName[strlen(codeWriteFileName) + 1];
-    strcpy(codeFileName, codeWriteFileName);
-    delete [] codeWriteFileName;
+    char* codeFileName = writeFileName(galFileName);
     pt_ofstream codeFile(codeFileName);
+    delete [] codeFileName;
     if (!codeFile) return FALSE;
 
     myCode.initialize();
@@ -213,11 +211,9 @@ void CompileTarget::wrapup() {
     if (Scheduler::haltRequested()) return;
 
     // Open code.cc
-    char* codeWriteFileName = writeFileName("code.cc");
-    char codeFileName[strlen(codeWriteFileName) + 1];
-    strcpy(codeFileName, codeWriteFileName);
-    delete [] codeWriteFileName;
+    char* codeFileName = writeFileName("code.cc");
     pt_ofstream codeFile(codeFileName);
+    delete [] codeFileName;
     if (!codeFile) return;
 
     // Write code to code.cc
