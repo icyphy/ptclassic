@@ -1,94 +1,94 @@
-static const char file_id[] = "DEPolis.pl";
+static const char file_id[] = "DERCStar.cc";
 
 #ifdef __GNUG__
 #pragma implementation
 #endif
 
-#include "DEPolis.h"
+#include "DERCStar.h"
 
-const char *star_nm_DEPolis = "DEPolis";
-const char* DEPolis :: className() const {return star_nm_DEPolis;}
-ISA_FUNC(DEPolis,DERepeatStar);
-Block* DEPolis :: makeNew() const { LOG_NEW; return new DEPolis;}
+const char *star_nm_DERCStar = "DERCStar";
+const char* DERCStar :: className() const {return star_nm_DERCStar;}
+ISA_FUNC(DERCStar,DERepeatStar);
+Block* DERCStar :: makeNew() const { LOG_NEW; return new DERCStar;}
 
-FILE * DEPolis::fpoverflow;
-FILE * DEPolis::fpfiring;
+FILE * DERCStar::fpoverflow;
+FILE * DERCStar::fpfiring;
 
-DEPolis::DEPolis ()
+DERCStar::DERCStar ()
 {
-	setDescriptor("Common Polis Software Scheduler");
+	setDescriptor("Common Polis(resource contention) Software Scheduler");
         isRCStar = 1;  // override to true (false in DEStar)
 }
 
 
-double DEPolis::getDelay ()
+double DERCStar::getDelay ()
 {
 	return 0;
 }
 
 
-SequentialList* DEPolis::getEvents ()
+SequentialList* DERCStar::getEvents ()
 {
 	return emittedEvents;
 }
 
 
-FILE* DEPolis::Openoverflow ( char *name )
+FILE* DERCStar::Openoverflow ( char *name )
 {
-	if ( DEPolis::fpoverflow == NULL ) {
-        	DEPolis::fpoverflow = fopen( name, "w" );
-        	if ( DEPolis::fpoverflow ) {
-          		fprintf( DEPolis::fpoverflow, "Overflow report\n\n" );
-          	fflush( DEPolis::fpoverflow );
+	if ( DERCStar::fpoverflow == NULL ) {
+        	DERCStar::fpoverflow = fopen( name, "w" );
+        	if ( DERCStar::fpoverflow ) {
+          		fprintf( DERCStar::fpoverflow, "Overflow report\n\n" );
+          	fflush( DERCStar::fpoverflow );
         	}
 	}
 	return( fpoverflow );
 }
 
 
-void DEPolis::Printoverflow ( char *st )
+void DERCStar::Printoverflow ( char *st )
 {
-	if ( DEPolis::fpoverflow ) {
-        	fprintf( DEPolis::fpoverflow, st );
-        	fflush( DEPolis::fpoverflow );
+	if ( DERCStar::fpoverflow ) {
+        	fprintf( DERCStar::fpoverflow, st );
+        	fflush( DERCStar::fpoverflow );
 	}
 }
 
 
-FILE * DEPolis::Openfiring ( char *name )
+FILE * DERCStar::Openfiring ( char *name )
 {
-	if ( DEPolis::fpfiring == NULL ) {
-        	DEPolis::fpfiring = fopen( name, "w" );
-        	if ( DEPolis::fpfiring ) {
-          		fprintf( DEPolis::fpfiring, "Firing report\n\n" );
-          		fflush( DEPolis::fpfiring );
+	if ( DERCStar::fpfiring == NULL ) {
+        	DERCStar::fpfiring = fopen( name, "w" );
+        	if ( DERCStar::fpfiring ) {
+          		fprintf( DERCStar::fpfiring, "Firing report\n\n" );
+          		fflush( DERCStar::fpfiring );
         	}
 	}
 	return( fpfiring );
 }
 
 
-void DEPolis::Printfiring ( char *st )
+void DERCStar::Printfiring ( char *st )
 {
-	if ( DEPolis::fpfiring ) {
-        	fprintf( DEPolis::fpfiring, st );
-        	fflush( DEPolis::fpfiring );
+	if ( DERCStar::fpfiring ) {
+        	fprintf( DERCStar::fpfiring, st );
+        	fflush( DERCStar::fpfiring );
 	}
 }
 
 
-void DEPolis::Closeflow ()
+void DERCStar::Closeflow ()
 {
-	if ( DEPolis::fpoverflow ) {
-        	fclose( DEPolis::fpoverflow );
-        	DEPolis::fpoverflow = NULL;
+	if ( DERCStar::fpoverflow ) {
+        	fclose( DERCStar::fpoverflow );
+        	DERCStar::fpoverflow = NULL;
 	}
-	if ( DEPolis::fpfiring ) {
-        	fclose( DEPolis::fpfiring );
-        	DEPolis::fpfiring = NULL;
+	if ( DERCStar::fpfiring ) {
+        	fclose( DERCStar::fpfiring );
+        	DERCStar::fpfiring = NULL;
 	}
 }
 
 
-static DEPolis proto;
-static RegisterBlock registerBlock(proto,"Polis");
+static DERCStar proto;
+static RegisterBlock registerBlock(proto,"RCStar");

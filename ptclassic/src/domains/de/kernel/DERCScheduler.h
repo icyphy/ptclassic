@@ -1,10 +1,10 @@
-#ifndef _PolisScheduler_h
-#define _PolisScheduler_h 1
+#ifndef _DERCScheduler_h
+#define _DERCScheduler_h 1
 
 /**************************************************************************
 
 Version identification:
-@(#)PolisScheduler.h	1.14     12/05/97
+@(#)DERCScheduler.h	$Id$
 
  
 Author: Mudit Goel
@@ -45,22 +45,22 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "DEScheduler.h"
 #include "CQEventQueue.h"
 #include "Resource.h"
-#include "PolisEventQ.h"
+#include "DERCEventQ.h"
 #include <string.h>
 
 
 	////////////////////////////////////
-	//  PolisScheduler
+	//  DERCScheduler
 	///////////////////////////////////
 
-class PolisScheduler : public DEBaseSched {
+class DERCScheduler : public DEBaseSched {
 
 	// stoping condition of the scheduler
 	double stopTime;
 
 public:
 	// Generate a list of all the distinct resources required by
-	// Polis stars
+	// RC stars
 	SequentialList *getResources();
 
 	// Stores the resource LinkedList
@@ -68,8 +68,8 @@ public:
 
 	// Here, EventQueue inherits from CalendarQueue
 	// rather than PriorityQueue
-	PolisEventQ interruptQ;
-	PolisEventQ eventQ;
+	DERCEventQ interruptQ;
+	DERCEventQ eventQ;
 
 	// Set up the stopping condition.
 	void setStopTime(double limit) {stopTime = limit ;}
@@ -97,7 +97,7 @@ public:
 	StringList displaySchedule(); 
 
 	// Constructor sets default options
-	PolisScheduler () { stopTime = 100.0; }
+	DERCScheduler () { stopTime = 100.0; }
 
 	// output the stopTime
 	double whenStop() { return stopTime ;}

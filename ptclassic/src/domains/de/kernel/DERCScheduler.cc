@@ -1,7 +1,7 @@
-static const char file_id[] = "PolisScheduler.cc";
+static const char file_id[] = "DERCScheduler.cc";
 /******************************************************************** 
 Version identification:
-@(#)PolisScheduler.cc	@(#)PolisScheduler.cc	1.2 02/18/98
+@(#)DERCScheduler.cc	@(#)DERCScheduler.cc	$Id$
  
 Author: Mudit Goel
         Neil Smyth
@@ -38,7 +38,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #endif
 
 #include "type.h"
-#include "PolisScheduler.h"
+#include "DERCScheduler.h"
 #include "StringList.h"
 #include "FloatState.h"
 #include "GalIter.h"
@@ -46,7 +46,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include <assert.h>
 #include "checkConnect.h"
 #include "DataStruct.h"
-#include "DEPolis.h"
+#include "DERCStar.h"
 
 extern const char DEdomainName[];
 
@@ -58,20 +58,20 @@ extern const char DEdomainName[];
 ////////////////////////////
 // displaySchedule
 ////////////////////////////
-StringList PolisScheduler :: displaySchedule () {
-    return "{ { scheduler \"Calendar queue for Polis run-time scheduler\" } }";
+StringList DERCScheduler :: displaySchedule () {
+    return "{ { scheduler \"Calendar queue for Resource Contention(RC) run-time scheduler\" } }";
 }
 
 
 ////////////////////////////
 // setup
 ////////////////////////////
-void PolisScheduler :: setup () {
+void DERCScheduler :: setup () {
     clearHalt();
     currentTime = 0;
 
     if (! galaxy()) {
-        Error::abortRun("Polis scheduler has no galaxy defined");
+        Error::abortRun("DERC scheduler has no galaxy defined");
         return;
     }
 
@@ -97,17 +97,17 @@ void PolisScheduler :: setup () {
 
 
 	///////////////////////////////////////////////////
-	// The following are the Polis specific methods.
+	// The following are the DERC specific methods.
 	///////////////////////////////////////////////////
 
 // Gets the list of all distinct resources and sets the resourcePointer in all
 // stars to the appropriate new Resource object. Currently each Star is 
 // restricted to accessing one resource
-SequentialList* PolisScheduler :: getResources() {
+SequentialList* DERCScheduler :: getResources() {
 
     GalStarIter nextStar(*galaxy());
     DEStar* star;
-    DEPolis *pStar;
+    DERCStar *rcStar;
     char* newResourceName;
     int found = 0;
     Resource* reslink;
@@ -115,20 +115,20 @@ SequentialList* PolisScheduler :: getResources() {
     SequentialList* resList = new SequentialList();
     while ((star = (DEStar*) nextStar++) != 0) {
 	if (star->isRCStar) {
-	    pStar = (DEPolis*)s;
-	    newResourceName = pStar->resource;; 	
-	    pStar->interruptQ = (PolisEventQ*)interruptQueue();
+	    rcStar = (DERCStar*)s;
+	    newResourceName = rcStar->resource;; 	
+	    rcStar->interruptQ = (DERCEventQ*)interruptQueue();
 	    if (strcmp(newResourceName, "HW")) {	 //Not a HW star
 		found = 0;
 		ListIter nextResource(*resList);
 		while ((found == 0) && ((reslink = (Resource*)nextResource++) != NULL)) {
 		    if (strcmp (newResourceName, reslink->name) == 0){
 			found = 1;   // Resource already exists
-			pStar->resourcePointer = reslink;
+			rcStar->resourcePointer = reslink;
 
                         // Now check that this Star has the same scheduling
                         // policy as all the other Stars using this resource
-                        if (pStar->schedPolicy != reslink->schedPolicy) {
+                        if (rcStar->schedPolicy != reslink->schedPolicy) {
                             Error::abortRun("Stars with different scheduling \
 policies executing on same resource");
                             return FALSE;
@@ -136,16 +136,16 @@ policies executing on same resource");
 		    }
 		}
 		if (found == 0) {
-                    int schedPolicy = (pStar->schedPolicy);
+                    int schedPolicy = (rcStar->schedPolicy);
                     Resource* newResource = new Resource(newResourceName, schedPolicy, this); 
 		    resList->append(newResource);
-		    pStar->resourcePointer = newResource;
+		    rcStar->resourcePointer = newResource;
                 }
 	    }
 	    else { // This is a HW star
 		// 1 indicates that the resource doesn't allow preemption
 		Resource* newResource = new Resource("HW", NonPreemptive, this);
-		pStar->resourcePointer = newResource;	
+		rcStar->resourcePointer = newResource;	
 	    }
 	}
     }
@@ -161,7 +161,7 @@ policies executing on same resource");
 // and fire the destination star. Check all simultaneous events to the star.
 // Run until StopTime.
 
-int PolisScheduler :: run () {
+int DERCScheduler :: run () {
     resourceList = getResources();
 
     if (SimControl::haltRequested() || !galaxy()) {
@@ -236,16 +236,16 @@ int PolisScheduler :: run () {
        
         // event from the interruptQ
 	if (qFlag == 1) {
-	    PolisEvent* pEvent = (PolisEvent*)(f->e);
-	    DEPolis* pStar = (DEPolis*)(pEvent->src);
+	    DERCEvent* pEvent = (DERCEvent*)(f->e);
+	    DERCStar* pStar = (DERCStar*)(pEvent->src);
             pStar->arrivalTime = level;
            // interruptQ.putFreeLink(f);
             pStar->resourcePointer->newEventFromInterruptQ(pEvent,currentTime); 
 	}
         //A new event, never seen before
-	else if (f->dest->isA("DEPolis")) {
-	    PolisEvent* pEvent = (PolisEvent*)(f->e);
-	    DEPolis* pStar = (DEPolis*)(f->dest);
+	else if (f->dest->isRCStar) {
+	    DERCEvent* pEvent = (DERCEvent*)(f->e);
+	    DERCStar* pStar = (DERCStar*)(f->dest);
             pStar->arrivalTime = level;
  	 //   eventQ.putFreeLink(f);
              pStar->resourcePointer->newEventFromEventQ(pEvent, currentTime);
@@ -367,7 +367,7 @@ int PolisScheduler :: run () {
 ////////////////////////////
 
 // fetch an event on request.
-int PolisScheduler :: fetchEvent(InDEPort* p, double timeVal) 
+int DERCScheduler :: fetchEvent(InDEPort* p, double timeVal) 
 {
     CqLevelLink *store = NULL;
     eventQ.DisableResize();
@@ -406,4 +406,4 @@ int PolisScheduler :: fetchEvent(InDEPort* p, double timeVal)
 }
 
 // isA
-ISA_FUNC(PolisScheduler,DEBaseSched);
+ISA_FUNC(DERCScheduler,DEBaseSched);
