@@ -93,6 +93,9 @@ public:
 	// function used in finding paths by indirectPath.
 	int findPath(SDFCluster* src,SDFCluster* dst);
 
+	// remove feed-forward delays
+	int removeDelay();
+
 	// merge two clusters, returning the result.
 	SDFCluster* merge(SDFCluster* c1,SDFCluster* c2);
 
