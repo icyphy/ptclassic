@@ -11,7 +11,7 @@ input.  Otherwise, whenever a non-zero is received on this input,
 the accumulated sum is reset to the current input (i.e. no feedback).
 
 Limits are controlled by the "top" and "bottom" parameters.
-If top <= bottom, no limiting is performed (default).  Otherwise,
+If top greater than or equal to bottom, no limiting is performed (default).  Otherwise,
 the output is kept between "bottom" and "top".  If "saturate" = YES,
 saturation is performed.  If "saturate" = NO, wrap-around is performed
 (default).  Limiting is performed before output.
