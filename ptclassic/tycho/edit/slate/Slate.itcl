@@ -323,8 +323,10 @@ class ::tycho::Slate {
     ###################################################################
     ####                    private variables                      ####
 
-    # Unique IDs and tags are created using this counter
-    private variable secretcounter 0
+    # Unique IDs and tags are created using this counter.
+    # Note: this must be common so item ids are unique across 
+    # all slates!
+    private common secretcounter 0
 
     # Every picture remembers its parent
     private variable parent
@@ -1090,12 +1092,13 @@ body ::tycho::Slate::focusin {} {
 #
 body ::tycho::Slate::gettags {id} {
     # If a tag, get the first matching item
-    set picts [$this find withtag $id]
-    if { $picts == "" } {
-	return ""
+    if { ! [string match {[_0-9]*} $id] } {
+	set picts [$this find withtag $id]
+	if { $picts == "" } {
+	    return ""
+	}
+	set id [lindex $picts 0]
     }
-    set id [lindex $picts 0]
-
     # If a picture, get the primary
     if { [string match {_*} $id] } {
 	set id [@scope ::tycho::Picture [list set primary($id)]]
