@@ -822,6 +822,18 @@ example, try
 .(c
 (load "~ptolemy/demo/figure.pt")
 .)c
+.H3 "Changing the seed of random number generation
+The
+.c seed
+.IE "seed command"
+command changes the seed of the random number generation.  The default
+value is 1.  The syntax is
+.(c
+(seed \fIn\fP)
+.)c
+where 
+.i n
+is a long integer.
 .H3 "Changing the current directory"
 .pp
 The
