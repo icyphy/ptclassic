@@ -47,6 +47,7 @@ public:
 	DETarget();
 	Block* makeNew() const;
 	~DETarget();
+	/* virtual */ void begin();
 protected:
 	void setup();
 	FloatState timeScale;	// relative time scale for interface with
