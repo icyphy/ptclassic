@@ -380,6 +380,7 @@ void TkSchedTarget :: interact() {
 	}
       }
     }
+    /*
     // If the token has no dest firings, place it at the bottom
     // of the iteration cycle.
     if (!token->getDestFirings()->size()) {
@@ -389,6 +390,7 @@ void TkSchedTarget :: interact() {
 	  << " -> " << token->getName() << ";" << "\n";
       }
     }
+    */
   }
 
   theDestDir = expandPathName(destDirectory);
