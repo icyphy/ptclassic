@@ -41,6 +41,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #endif
 
 #include "DERepeatStar.h"
+#include "DEScheduler.h"
+#include "DEWormhole.h"
 
 // DERepeatStar constructor
 DERepeatStar :: DERepeatStar() {
@@ -96,6 +98,14 @@ int DERepeatStar :: canGetFired() {
 // start method for DERepeatStar
 
 void DERepeatStar :: begin() {
-	feedbackOut->put(completionTime) << 0.0;
+	Scheduler *mysched;
+	// Need different access methods to the scheduler for
+	// wormholes and for stars, unfortunately
+	if (isItWormhole()) {
+	  mysched = ((DEWormhole*)this)->outerSched();
+	} else {
+	  mysched = scheduler();
+	}
+	feedbackOut->put(mysched->now()) << 0.0;
 }
 
