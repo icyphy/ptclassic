@@ -3,11 +3,8 @@
 #				All Rights Reserved.
 # For creating an SDF loop scheduler.
 
-LIBSOURCES =	LSNode.cc LSMaster.cc LSGraph.cc LoopScheduler.cc \
-		MergeList.cc 
-SOURCES =	$(LIBSOURCES) LoopTarget.cc
-HEADERS =	LSNode.h LSMaster.h LSGraph.h \
-		LoopScheduler.h MergeList.h 
+SRCS =	LSNode.cc LSMaster.cc LSGraph.cc LoopScheduler.cc MergeList.cc LoopTarget.cc
+HDRS =	LSNode.h LSMaster.h LSGraph.h LoopScheduler.h MergeList.h 
  
 # Root of Ptolemy directory
 ROOT=../../../..
@@ -22,47 +19,21 @@ SDFKERNEL = $(ROOT)/src/domains/sdf/kernel
 EGKERNEL = $(ROOT)/src/domains/sdf/expgraph
 LSKERNEL = $(ROOT)/src/domains/sdf/loopScheduler
 CGKERNEL = $(ROOT)/src/domains/cg/kernel
+INCL =-I$(SDFKERNEL) -I$(KERNDIR) -I$(EGKERNEL) -I$(LSKERNEL) -I$(CGKERNEL)
 
-
-INC =-I$(SDFKERNEL) -I$(KERNDIR) -I$(EGKERNEL) -I$(LSKERNEL) -I$(CGKERNEL)
-.SUFFIXES: .cc 
-.cc.o:
-	$(GNU) $(GPPFLAGS) $(INC) -c $<
-
-OBJS = $(SOURCES:.cc=.o)
-LIBOBJS = $(LIBSOURCES:.cc=.o)
+OBJS = $(SRCS:.cc=.o)
 LIB = libLS.a
 
-all:	makefile $(OBJS) $(LIB) 
-
-$(LIB):	makefile $(LIBOBJS)
-	rm -f $(LIB)
-	ar cq $(LIB) $(LIBOBJS) 
-	ranlib $(LIB)
+all:	makefile $(LIB) 
 
 # "make install" puts things in the official place
 install:	all $(LIBDIR)/$(LIB)
 
-$(LIBDIR)/$(LIB):	$(LIB)
-		rm -f $(LIBDIR)/$(LIB)
-		cp $(LIB) $(LIBDIR)
-		ranlib $(LIBDIR)/$(LIB)
+
+# include common definitions, rules
+include $(ROOT)/common.mk
 
 
-clean:
-		rm -f *.o core *~ *#
-
-sources:	$(SOURCES) $(HEADERS) make.template
-
-depend:		$(SOURCES)
-		cd $(VPATH); \
-		$(DEPEND) $(INC) $(SOURCES) |\
-		 cat make.template - > makefile.n; mv -f makefile.n makefile
-
-makefile:	make.template
-		cd $(VPATH); make -f make.template sources depend
-		if [ ! -f makefile ]; then ln -s $(VPATH)/makefile makefile; fi
-		@echo makefile remade -- you must rerun make.
-		exit 1
-
+# Don't add anything after the next line; makedepend will zap it.
 # DO NOT DELETE THIS LINE -- make depend depends on it.
+

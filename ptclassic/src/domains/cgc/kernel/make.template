@@ -27,10 +27,6 @@ SDFDIR=$(ROOT)/src/domains/sdf/kernel
 CGDIR=$(ROOT)/src/domains/cg/kernel
 
 INCL=-I$(KERNDIR) -I$(CGDIR) -I$(SDFDIR)
-# Rule for compiling with g++
-.SUFFIXES: .cc
-.cc.o:
-	$(GNU) $(GPPFLAGS) $(INCL) -c $<
 
 # Library name
 LIB=libcgc.a
@@ -47,36 +43,11 @@ SRCS= $(OBJS:.o=.cc)
 
 all:	makefile $(LIB)
 
-$(LIB):	$(OBJS)
-	rm -f $(LIB)
-	ar cq $(LIB) $(OBJS)
-	ranlib $(LIB)
-
 # "make install" puts things in the official place
 install:	makefile $(LIBDIR)/$(LIB)
 
-$(LIBDIR)/$(LIB):	$(LIB)
-		rm -f $(LIBDIR)/$(LIB)
-		cp $(LIB) $(LIBDIR)
-		ranlib $(LIBDIR)/$(LIB)
-
-# "make clean" removes .o files and other cruft
-clean:
-		rm -f *.o core *~ *.bak *#
-
-# "make sources" will do SCCS get on anything where SCCS file is newer.
-sources:	$(SRCS) $(HDRS) make.template
-
-depend:
-		cd $(VPATH); \
-		$(DEPEND) $(INCL) $(SRCS)| cat make.template - > makefile.n;\
-		mv -f makefile.n makefile
-
-makefile:	make.template
-		cd $(VPATH); make -f make.template sources depend
-		if [ ! -f makefile ]; then ln -s $(VPATH)/makefile makefile; fi
-		@echo makefile remade -- you must rerun make.
-		exit 1
+# include common definitions, rules
+include $(ROOT)/common.mk
 
 # Don't add anything after the next line; makedepend will zap it.
 # DO NOT DELETE THIS LINE -- make depend depends on it.

@@ -30,10 +30,6 @@ CGDIR=$(ROOT)/src/domains/cg/kernel
 CG56DIR=$(ROOT)/src/domains/cg56/kernel
 
 INCL=-I$(CG56DIR) -I$(CGDIR) -I$(SDFDIR) -I$(KERNDIR)
-# Rule for compiling with g++
-.SUFFIXES: .cc
-.cc.o:
-	$(GNU) $(GPPFLAGS) $(INCL) -c $<
 
 # objects to make
 OBJS=	Sim56Target.o Sub56Target.o
@@ -47,21 +43,11 @@ all:	makefile $(OBJS)
 install:	all
 	@echo Installation complete.
 
-clean:
-		rm -f *.o core *~ *#
+LIB=none	# required by common.mk
 
-sources:	$(SRCS) $(HDRS) make.template
+# include common definitions, rules
+include $(ROOT)/common.mk
 
-depend:		$(SRCS)
-		cd $(VPATH);\
-		$(DEPEND) $(INCL) $(SRCS) | cat make.template - > makefile.n;\
-		mv -f makefile.n makefile
-
-makefile:	make.template
-		cd $(VPATH); make -f make.template sources depend
-		if [ ! -f makefile ]; then ln -s $(VPATH)/makefile makefile; fi
-		@echo makefile remade -- you must rerun make.
-		exit 1
-
+# Don't add anything after the next line; makedepend will zap it.
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 
