@@ -4,8 +4,8 @@ domain { CG56 }
 desc { S56X to CGC asynchronous IPC base star }
 version { $Id$ }
 author { Jose Luis Pino }
-copyright {
-Copyright (c) 1994,1993 The Regents of the University of California.
+copyright { 
+Copyright (c) 1994-%Q% The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
