@@ -102,6 +102,10 @@ int SetProcCmd(ClientData clientData,
 	       Tcl_Interp *interp,
 	       int argc, char *argv[]);
 
+int SetTimesCmd(ClientData clientData,
+		Tcl_Interp *interp,
+		int argc, char *argv[]);
+
 void do_main(int argc, char *argv[], VHDLFiringList* theFiringList) {
   Tcl_Interp *interp;
   int error; char *trace;
@@ -154,6 +158,10 @@ void do_main(int argc, char *argv[], VHDLFiringList* theFiringList) {
 		    */
 
   Tcl_CreateCommand(interp, "setProc", SetProcCmd,
+		    (ClientData) 0,
+		    (Tcl_CmdDeleteProc *)NULL);
+
+  Tcl_CreateCommand(interp, "setTimes", SetTimesCmd,
 		    (ClientData) 0,
 		    (Tcl_CmdDeleteProc *)NULL);
 
@@ -293,6 +301,56 @@ int SetProcCmd(ClientData clientData,
   return TCL_OK;
 }
 
+int SetTimesCmd(ClientData clientData,
+		Tcl_Interp *interp,
+		int argc, char *argv[])
+{
+  // To avoid a warning
+  if (clientData) {}
+
+  int error;
+  char* firingName;
+  int startTime, endTime, latency;
+  if (argc != 5) {
+    interp->result = 
+      "Usage: setTimes ?firingName? ?startTime? ?endTime? ?latency?";
+    return TCL_ERROR;
+  }
+  if (argc == 5) {
+    firingName = argv[1];
+    error = Tcl_GetInt(interp, argv[2], &startTime);
+    if (error != TCL_OK) {
+      return error;
+    }
+    error = Tcl_GetInt(interp, argv[3], &endTime);
+    if (error != TCL_OK) {
+      return error;
+    }
+    error = Tcl_GetInt(interp, argv[4], &latency);
+    if (error != TCL_OK) {
+      return error;
+    }
+  }
+  printf("Setting timing for %s to %d, %d, %d\n",
+	 firingName, startTime, endTime, latency);
+
+  VHDLFiring* firing = new VHDLFiring;
+  firing = ourFiringList->vhdlFiringWithName(firingName);
+  if (firing) {
+    firing->startTime = startTime;
+    firing->endTime = endTime;
+    firing->latency = latency;
+  }
+  else {
+    printf("\n");
+    printf("Couldn't find firing with name %s\n", firingName);
+    printf("Size of ourFiringList is %d\n", ourFiringList->size());
+    printf("\n");
+  }
+
+  return TCL_OK;
+}
+
 /*
 #
 #	End Tcl/Tk support code.
@@ -343,25 +401,29 @@ void TkSchedTarget :: setup() {
 void TkSchedTarget :: interact() {
   StringList graph_data;
 
+  int lat = 10;
   // Iterate over firing list and print names.
   VHDLFiringListIter fireNext(masterFiringList);
   VHDLFiring* nextFire;
   while ((nextFire = fireNext++) != 0) {
-    graph_data << "Node " << nextFire->name << "\n";
+    graph_data << "Node " << nextFire->name << " latency "
+	       << lat << "\n";
+    lat += 10;
+  //	       << nextFire->latency << "\n";
   }
   // Iterate over dependency list and print names.
   VHDLDependencyListIter depNext(dependencyList);
   VHDLDependency* nextDep;
   while ((nextDep = depNext++) != 0) {
     graph_data << "Conn " << nextDep->source->name << " -> "
-	 << nextDep->sink->name << ";" << "\n";
+	       << nextDep->sink->name << ";" << "\n";
   }
   // Iterate over dependency list and print names.
   VHDLDependencyListIter iterDepNext(iterDependencyList);
   VHDLDependency* nextIterDep;
   while ((nextIterDep = iterDepNext++) != 0) {
     graph_data << "IterConn " << nextIterDep->source->name << " -> "
-	 << nextIterDep->sink->name << ";" << "\n";
+	       << nextIterDep->sink->name << ";" << "\n";
   }
   // Iterate over token list and print names of source/dest tokens.
   VHDLTokenListIter tokenNext(tokenList);
