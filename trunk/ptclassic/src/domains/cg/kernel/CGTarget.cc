@@ -864,7 +864,8 @@ StringList destDirectoryName(const char* subdir) {
 	return dir;
 }
 
-// Write a log file to the local machine in the destination directory.
+// If logFile is blank, return an empty StringList, otherwise return
+// the entire path name of the log file, including its directory.
 // Create the directory dir if it does not exist.
 StringList CGTarget::logFilePathName(const char* dir, const char* logfile) {
 	StringList pathname = "";
@@ -874,10 +875,12 @@ StringList CGTarget::logFilePathName(const char* dir, const char* logfile) {
 
 	// Build up the complete path name of the log file
 	if (logfile) {
+	  if (strlen(logfile)) {
 	    pathname << dir << "/" << logfile;
 	    char* expandedPath = expandPathName(pathname);
 	    pathname = expandedPath;
 	    delete [] expandedPath;
+	  }
 	}
 
 	return pathname;
