@@ -110,6 +110,7 @@ definition in the makefile.
 #include "CGCTarget.h"
 #include "Tokenizer.h"
 #include <pwd.h>
+#include <unistd.h>              // getuid()
 
 CGCMakefileTarget::CGCMakefileTarget(const char* name,const char* starclass,
 				     const char* desc)
