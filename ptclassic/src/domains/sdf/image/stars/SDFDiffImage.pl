@@ -12,9 +12,6 @@ and pass the result to the output.
     }
 
     ccinclude { "GrayImage.h", "Error.h" }
-    code {
-        inline double abs(double a) { return(a>=0.0 ? a : -a); }
-    }
 
 // INPUT AND STATES.
     input {
