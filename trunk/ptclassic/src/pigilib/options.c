@@ -38,6 +38,7 @@ $Id$
 #include "icon.h"
 #include "misc.h"
 #include "err.h"
+#include "kernelCalls.h"
 
 int 
 Options(spot, cmdList, userOptionWord) /* ARGSUSED */
