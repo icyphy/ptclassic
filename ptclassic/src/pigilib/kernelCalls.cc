@@ -723,7 +723,7 @@ KcModTargetParams(ParamListType* pListPtr) {
 			Error::abortRun (*galTarget, "no target-state named ", n);
 			return FALSE;
 		}
-		s->setValue(hashstring(v));
+		s->setInitValue(hashstring(v));
 	}
 	return TRUE;
 }
