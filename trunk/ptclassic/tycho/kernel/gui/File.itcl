@@ -470,16 +470,18 @@ body ::tycho::File::constructor {args} {
                 -command "$this help"
         
         $myMenubar addMenuItem "Concept Index" Help -underline 0 \
-                -command {::tycho::File::openContext $TYCHO/lib/idx/tycho.idx}
+                -command {::tycho::File::openContext \
+		[file join \$TYCHO lib idx tycho.idx]}
         
         set nm [::tycho::autoName .index]
         $myMenubar addMenuItem "Code Index" Help -underline 0 \
                 -command "::tycho::IndexBrowser $nm \
-                -file \$TYCHO/lib/idx/codeDoc.idx \
+                -file [file join \$TYCHO lib idx codeDoc.idx] \
                 -width 80; $nm centerOnScreen"
         
         $myMenubar addMenuItem "Class Diagram" Help -underline 0 -command \
-                {::tycho::File::openContext $TYCHO/doc/tychoClasses.dag}
+                {::tycho::File::openContext \
+		[file join \$TYCHO doc tychoClasses.dag]}
 
         $myMenubar addMenuItem "Glimpse" Help -underline 0 -command { \
                 set w [::tycho::autoName .glimpse]; \
@@ -609,7 +611,8 @@ body ::tycho::File::evaluate {} {
 #
 body ::tycho::File::help {} {
     global ::TYCHO
-    ::tycho::File::openContext $TYCHO/kernel/doc/usersGuides/FileHelp.html
+    ::tycho::File::openContext \
+	    [file join $TYCHO kernel doc usersGuides FileHelp.html]
 }
 
 #####################################################################
@@ -1050,21 +1053,23 @@ body ::tycho::File::indicateReadOnly {bool} {
 # NOTE: Unix implementation.
 # 
 body ::tycho::File::makeTychoDir {} {
-    set home [glob ~]
-    if {![file exists "$home/.Tycho"]} {
-        exec mkdir "$home/.Tycho"
+    set dotTycho [file join [glob ~] .Tycho]
+
+    if {![file exists $dotTycho]} {
+        exec mkdir $dotTycho
     } {
-        if {![file isdirectory "$home/.Tycho"]} {
-            error "Cannot create ~/.Tycho directory because a file \
+        if {![file isdirectory $dotTycho]} {
+            error "Cannot create $dotTycho directory because a file \
                     exists by that name."
         }
     }
-    if {![file exists "$home/.Tycho/tychorc.tcl"] && \
-            [file exists "$home/.tycho"]} {
+    set tychorc [file join $dotTycho tychorc.tcl]
+    if {![file exists $tychorc] && \
+            [file exists [file join [glob ~] .tycho]]} {
         if [::tycho::askuser \
                 {Ok to copy your ~/.tycho file to the new place: \
-                ~/.Tycho/tychorc.tcl?}] {
-            exec cp $home/.tycho $home/.Tycho/tychorc.tcl
+                $tychorc?}] {
+            exec cp [file join [glob ~] .tycho] $tychorc
         }
     }
 }

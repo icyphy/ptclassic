@@ -115,7 +115,8 @@ body ::tycho::EditStack::constructor {args} {
 body ::tycho::EditStack::help {} {
     global ::TYCHO
     ::tycho::File::openContext \
-	    $TYCHO/editors/textedit/doc/usersGuides/EditStackHelp.html
+	    [file join $TYCHO kernel doc usersGuides EditStackHelp.html]
+
 }
 
 #####################################################################

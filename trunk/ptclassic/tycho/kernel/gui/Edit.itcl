@@ -1296,7 +1296,8 @@ body ::tycho::Edit::gotoLine {} {
 #
 body ::tycho::Edit::help {} {
     global ::TYCHO
-    ::tycho::File::openContext $TYCHO/kernel/doc/usersGuides/EditHelp.html
+    ::tycho::File::openContext \
+	    [file join $TYCHO kernel doc usersGuides EditHelp.html]
 }
 
 #####################################################################

@@ -193,7 +193,7 @@ body ::tycho::FileBrowser::constructor {args} {
 body ::tycho::FileBrowser::help {} {
     global ::TYCHO
     ::tycho::File::openContext \
-	    $TYCHO/kernel/doc/usersGuides/FileBrowserHelp.html
+	    [file join $TYCHO kernel doc usersGuides FileBrowserHelp.html]
 }
 
 ######################################################################

@@ -57,15 +57,19 @@ proc ::tycho::loadIfNotPresent {command package} {
 	    if [info exists env(PTARCH)] {
 		# If we are here, the Ptolemy is probably installed
 		set PTARCH $env(PTARCH)
-		set ptolemyLibList "$PTOLEMY/tcltk/itcl.$PTARCH/lib \
-			$PTOLEMY/tcltk/itcl.$PTARCH/lib/itcl"
+		
+		set ptolemyLibList \
+			"[file join $PTOLEMY tcltk itcl.$PTARCH lib] \
+			[file join $PTOLEMY tcltk itcl.$PTARCH lib itcl]"
 		foreach ptolemyLib $ptolemyLibList {
 		    if [file isdirectory $ptolemyLib] {
 			if { ![catch \
-				{load $ptolemyLib/lib$packageLibName} ] || \
+				{load [file join \
+				       $ptolemyLib lib$packageLibName]} ] || \
 				![catch \
-				{load \
-				$ptolemyLib/lib$lowerCasepackageLibName} ] } {
+				{load [file join \
+				       $ptolemyLib \
+				       lib$lowerCasepackageLibName]} ] } {
 			    # We loaded ok, so we are done.
 			    return
 			}

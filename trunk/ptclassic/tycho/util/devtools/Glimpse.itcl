@@ -202,7 +202,8 @@ body tycho::Glimpse::glimpseSearch {} {
 #
 body ::tycho::Glimpse::help {} {
     global ::TYCHO
-    ::tycho::File::openContext $TYCHO/kernel/doc/usersGuides/GlimpseHelp.html
+    ::tycho::File::openContext \
+	    [file join $TYCHO kernel doc usersGuides GlimpseHelp.html]
 }
 
 #####################################################################
@@ -211,11 +212,11 @@ body ::tycho::Glimpse::help {} {
 #
 body ::tycho::Glimpse::updateTychoDatabase {} {
     global TYCHO
-    ::tycho::rm -f [file join $TYCHO/.glimpse_index]  \
-            [file join $TYCHO/.glimpse_partitions] \
-            [file join $TYCHO/.glimpse_messages] \
-            [file join $TYCHO/.glimpse_statistics] \
-            [file join $TYCHO/.glimpse_filenames] 
+    ::tycho::rm -f [file join $TYCHO .glimpse_index]  \
+            [file join $TYCHO .glimpse_partitions] \
+            [file join $TYCHO .glimpse_messages] \
+            [file join $TYCHO .glimpse_statistics] \
+            [file join $TYCHO .glimpse_filenames] 
 
     # Unix specific:
     set savedir [pwd]
