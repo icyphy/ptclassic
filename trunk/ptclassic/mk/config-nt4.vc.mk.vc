@@ -350,7 +350,7 @@ ITCL_VERSION_NUM= 30
 
 # Combined -L and -l options to link with tcl library.
 #TCL_LIBSPEC=$(TCL_ROOT)\lib\tcl80.lib
-TCL_LIBSPEC	= $(ROOT)\src\tcltk\tcl8.0.4\win\Release\tcl80.lib
+TCL_LIBSPEC	= $(ROOT)\src\tcltk\tcl8.0.5pt\win\Release\tcl80.lib
 
 TCL_LIBDEP	= $(TCL_LIBSPEC)
 TCL_INCDIR	= $(TCL_ROOT)\include
