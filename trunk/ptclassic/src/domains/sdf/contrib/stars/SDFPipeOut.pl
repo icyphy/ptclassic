@@ -49,7 +49,7 @@ If no output y, return.}
   setup {
     const char *commandstr = command;
     out = popen( commandstr, "w" );
-    x = float(Xinit);
+    x = Xinit;
     if( !out ) {
       Error::abortRun( *this, "Error opening pipe to command",
 		       commandstr );
@@ -59,7 +59,7 @@ If no output y, return.}
     int count = 0;		// count how many fields have been output
     if( int(XY) ) {
       fprintf( out, "%g", x );
-      x += float(Xinc);
+      x += Xinc;
       count++;
     }
     MPHIter nextp( in );
