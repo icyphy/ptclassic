@@ -247,7 +247,10 @@ and evaluate it at the global scope with the name of the dialog box
 substituted for every occurrence of the string <code>%0</code>. The
 script should invoke methods of the dialog box to insert
 data into the dialog and invoke buttons, as a user would
-in normal usage. Because <CODE>Dialog::wait</CODE> removes
+in normal usage. The return result from the call to
+<CODE>Dialog::wait</CODE> will be the same as if
+a user had invoked those operations and closed the modal
+dialog. Because <CODE>Dialog::wait</CODE> removes
 the script from <code>TY_TEST_MODAL</code>, successive calls
 to <CODE>Dialog::wait</CODE> execute each script in the list
 in succession, allowing tests to easily simulate user input
