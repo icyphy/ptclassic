@@ -434,7 +434,6 @@ body ::tycho::File::constructor {args} {
     # The following initialize options and then invoke any
     # configuration options, assuming there are options specified.
     eval itk_initialize $args
-    eval preference excludeoptions $this $args
 
     # Subscribe to the preference set
     preference subscribeoptions $this \
@@ -1375,7 +1374,7 @@ body ::tycho::File::initializeMenubar {} {
     $myMenubar addSeparator File
     
     $myMenubar command Close File -underline 0 -accelerator "C-x k" \
-	    -command [list "[displayer] nextWindow; delete object [displayer]"]
+	    -command "[displayer] nextWindow; delete object [displayer]"
     
     if {[::tycho::Displayer::normalExit] == 1} {
 	$myMenubar command Quit File -underline 0 \
