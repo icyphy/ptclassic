@@ -156,6 +156,7 @@ static boolean
 ProcessSubGals(facetPtr)
 octObject *facetPtr;
 {
+    int retval = TRUE;
     octGenerator genInst;
     octObject inst = {OCT_UNDEFINED_OBJECT},
 	      galFacet = {OCT_UNDEFINED_OBJECT};
@@ -168,21 +169,24 @@ octObject *facetPtr;
 	} else if (IsGal(&inst)) {
 	    if ( !MyOpenMaster(&galFacet, &inst, "contents", "r") ||
 		 !CompileGal(&galFacet) ) {
-		octFreeGenerator(&genInst);
-		return (FALSE);
+		FreeOctMembers(&inst);
+		retval = FALSE;
+		break;
 	    }
-	} else {
-	    /* assume inst is a star... */
+	} else {			/* assume inst is a star... */
 	    if (!AutoLoadCk(&inst)) {
 		EssAddObj(&inst);
-		octFreeGenerator(&genInst);
-		return (FALSE);
+		FreeOctMembers(&inst);
+		retval = FALSE;
+		break;
 	    }
 	}
 	FreeOctMembers(&inst);
     }
+
     octFreeGenerator(&genInst);
-    return(TRUE);
+
+    return(retval);
 }
 
 /* DetachDelaysFromNets  5/29/88
@@ -194,7 +198,7 @@ octObject *facetPtr;
 {
     octObject net = {OCT_UNDEFINED_OBJECT};
     octGenerator netGen;
-    octObject prop = {OCT_PROP};	/* most data members are not dynamic */
+    octObject prop;		/* most data members are not dynamic */
 
     (void) octInitGenContentsSpecial(facetPtr, OCT_NET_MASK, &netGen);
     while (octGenerate(&netGen, &net) == OCT_OK) {
@@ -210,6 +214,7 @@ octObject *facetPtr;
 	(void) octDetach(&net, &prop);
         FreeOctMembers(&net);
     }
+    FreeOctMembers(&net);
     octFreeGenerator(&netGen);
 }
 
@@ -224,10 +229,10 @@ ProcessMarker(facetPtr, instPtr, propname)
 octObject *facetPtr, *instPtr;
 char *propname;
 {
+    int retval = TRUE;
     octObject path = {OCT_UNDEFINED_OBJECT},
 	      dummy = {OCT_UNDEFINED_OBJECT},
-	      net = {OCT_UNDEFINED_OBJECT},
-	      prop = {OCT_PROP};	/* some data members are not dynamic */
+	      net = {OCT_UNDEFINED_OBJECT};
     struct octBox box;
     regObjGen rGen;
 
@@ -241,62 +246,65 @@ char *propname;
 	ErrAdd("Dangling delay or bus marker");
 	EssAddObj(instPtr);
 	(void) regObjFinish(rGen);
-	FreeOctMembers(&path);
-	return(FALSE);
+	retval = FALSE;
     }
 
-    if (regObjNext(rGen, &dummy) != REG_NOMORE) {
+    else if (regObjNext(rGen, &dummy) != REG_NOMORE) {
 	ErrAdd("Delay or bus marker intersects more than one path");
 	EssAddObj(instPtr);
 	(void) regObjFinish(rGen);
-	FreeOctMembers(&path);
-	FreeOctMembers(&dummy);
-	return(FALSE);
+	retval = FALSE;
     }
 
-    if (octGenFirstContainer(&path, OCT_NET_MASK, &net) != OCT_OK) {
+    else if (octGenFirstContainer(&path, OCT_NET_MASK, &net) != OCT_OK) {
 	ErrAdd("ProcessMarker: Path not contained in a net");
 	EssAddObj(&path);
-	FreeOctMembers(&net);
-	FreeOctMembers(&path);
-	FreeOctMembers(&dummy);
-	return(FALSE);
+	retval = FALSE;
     }
 
-    prop.contents.prop.name = propname;
-    if (octGetByName(&net, &prop) != OCT_NOT_FOUND) {
-	char buf[128];
-	sprintf (buf, "Net has more than one %s instance on top of it",
-		 propname);
-	ErrAdd(buf);
-	EssAddObj(&net);
-	FreeOctMembers(&net);
-	FreeOctMembers(&path);
-	FreeOctMembers(&dummy);
-	return(FALSE);
-    }
-
-    /* fill in default values, and get or create the property. */
-    if( IsBus(instPtr) ) {
-        prop.contents.prop.type = OCT_INTEGER;
-        prop.contents.prop.value.integer = 1;
-    }
-    else if ( IsDelay(instPtr) ) {
-        prop.contents.prop.type = OCT_STRING;
-        prop.contents.prop.value.string = "1";
-    }
     else {
-        /* IsDelay2(instPtr) */
-        prop.contents.prop.type = OCT_STRING;
-        prop.contents.prop.value.string = "0";
+	octObject prop;		/* do not deallocate: contains static data */
+	prop.type = OCT_PROP;
+	prop.objectId = 0;				 /* silence Purify */
+	prop.contents.prop.name = propname;
+
+	if (octGetByName(&net, &prop) != OCT_NOT_FOUND) {
+	    char buf[128];
+	    sprintf(buf, "Net has more than one %s instance on top of it",
+		    propname);
+	    ErrAdd(buf);
+	    EssAddObj(&net);
+	    retval = FALSE;
+	}
+
+	/* fill in default values, and get or create the property. */
+	else {
+	    if ( IsBus(instPtr) ) {
+		prop.contents.prop.type = OCT_INTEGER;
+		prop.contents.prop.value.integer = 1;
+	    }
+	    else if ( IsDelay(instPtr) ) {
+		prop.contents.prop.type = OCT_STRING;
+		prop.contents.prop.value.string = "1";
+	    }
+	    else {					/* IsDelay2(instPtr) */
+		prop.contents.prop.type = OCT_STRING;
+		prop.contents.prop.value.string = "0";
+	    }
+            octGetOrCreate(instPtr, &prop);
+	    if ( octAttach(&net, &prop) != OCT_OK ) {
+		ErrAdd(octErrorString());
+		retval = FALSE;
+	    }
+	}
     }
+
+    /* Clean up dynamic memory */
     FreeOctMembers(&path);
     FreeOctMembers(&dummy);
-    prop.objectId = 0;				/* silence Purify */
-    octGetOrCreate (instPtr, &prop);
-    ERR_IF2(octAttach(&net, &prop) != OCT_OK, octErrorString());
     FreeOctMembers(&net);
-    return(TRUE);
+
+    return(retval);
 }
 
 /* ProcessInsts
@@ -453,6 +461,8 @@ int *inN, *outN;
 
     *inN = 0;				/* Set length of arrays to zero */
     *outN = 0;
+
+    /* FIXME: Memory leak */
     (void) octInitGenContentsSpecial(netPtr, OCT_TERM_MASK, &termGen);
     for (i = 0; i < TERMS_MAX; ) {
 	if (octGenerate(&termGen, &term) != OCT_OK) {
@@ -503,6 +513,7 @@ JoinOrdinary(inTermPtr, outTermPtr, initDelayValues, width)
 octObject *inTermPtr, *outTermPtr;
 char *initDelayValues, *width;
 {
+    int retval = TRUE;
     octObject inInst = {OCT_UNDEFINED_OBJECT},
 	      outInst = {OCT_UNDEFINED_OBJECT},
 	      fTerm = {OCT_UNDEFINED_OBJECT};
@@ -517,46 +528,56 @@ char *initDelayValues, *width;
 
     if (!inIsGalPort && !outIsGalPort) {
 	/* 2 sogs connected - no Galaxy Ports involved */
-	ERR_IF1(!KcConnect(
-	    outInst.contents.instance.name, outTermPtr->contents.term.name, 
-	    inInst.contents.instance.name, inTermPtr->contents.term.name,
-			   initDelayValues, width)
-	);
-	
-      /* if one of the ports is a Galaxy Port, then width may not be defined */
+	if (!KcConnect(outInst.contents.instance.name,
+		       outTermPtr->contents.term.name, 
+		       inInst.contents.instance.name,
+		       inTermPtr->contents.term.name,
+		       initDelayValues,
+		       width)) {
+	     retval = FALSE;
+	}
+    /* if one of the ports is a Galaxy Port, then width may not be defined */
     } else if ( (width != NULL) && *width ) {
 	ErrAdd("Cannot make a bus connection between a galaxy port and its alias");
 	EssAddObj(&inInst);
 	EssAddObj(&outInst);
-	return (FALSE);
+	retval = FALSE;
     } else if (!inIsGalPort && outIsGalPort) {
 	/* Connect an input to a Galaxy Port */
-	if (octGenFirstContainer(outTermPtr, OCT_TERM_MASK, &fTerm)
-	    != OCT_OK) {
+	if (octGenFirstContainer(outTermPtr, OCT_TERM_MASK, &fTerm) != OCT_OK) {
 	    ErrAdd("JoinOrdinary: input port has no name");
 	    EssAddObj(&outInst);
-	    return (FALSE);
+	    retval = FALSE;
 	}
-	ERR_IF1(!KcAlias(fTerm.contents.term.name,
-	    inInst.contents.instance.name, inTermPtr->contents.term.name));
+	if (!KcAlias(fTerm.contents.term.name,
+		     inInst.contents.instance.name,
+		     inTermPtr->contents.term.name)) {
+	    retval = FALSE;
+	}
     } else if (inIsGalPort && !outIsGalPort) {
 	/* Connect an output to a Galaxy Port */
 	if (octGenFirstContainer(inTermPtr, OCT_TERM_MASK, &fTerm) !=OCT_OK) {
 	    ErrAdd("JoinOrdinary: output port has no name");
 	    EssAddObj(&inInst);
-	    return (FALSE);
+	    retval = FALSE;
 	}
-	ERR_IF1(!KcAlias(fTerm.contents.term.name,
-	    outInst.contents.instance.name, outTermPtr->contents.term.name));
+	if (!KcAlias(fTerm.contents.term.name,
+		     outInst.contents.instance.name,
+		     outTermPtr->contents.term.name)) {
+	    retval = FALSE;
+	}
     } else {
 	ErrAdd("JoinOrdinary: cannot connect input galaxy port directly to output galaxy port");
 	EssAddObj(&inInst);
 	EssAddObj(&outInst);
-	return (FALSE);
+	retval = FALSE;
     }
+
     FreeOctMembers(&inInst);
     FreeOctMembers(&outInst);
-    return (TRUE);
+    FreeOctMembers(&fTerm);
+
+    return (retval);
 }
 
 /* This function connects terminals to nodes; it is used in n-way connections*/
@@ -622,10 +643,8 @@ octObject *facetPtr;
 	if (totalN < 2) {
 	    /* bad net, delete it */
 	    if (octDelete(&net) != OCT_OK) {
-		octFreeGenerator(&netGen);
-		FreeOctMembers(&net);
-		ErrAdd(octErrorString());
-		return FALSE;
+		errMsg = octErrorString();	    /* static string */
+		break;
 	    }
 	    PrintDebug("Warning: bad net deleted");
 	    continue;
@@ -660,8 +679,7 @@ octObject *facetPtr;
 		    }
 		}
 	    } else {
-		/* error: multiple outputs are connected to one ordinary
-		   input */
+		/* error: multiple outputs connected to one ordinary input */
 		strcpy(msg, "can't connect more than one output port:\n");
 		for (i = 0; i < outN; i++) {
 		    strcat(msg, "\t");
@@ -701,6 +719,7 @@ octObject *facetPtr;
     if (errMsg) {
 	if (*errMsg) ErrAdd (errMsg);
 	EssAddObj(&net);
+	FreeOctMembers(&net);
     }
     octFreeGenerator(&netGen);
 
@@ -718,12 +737,19 @@ static boolean
 TermIsMulti(termPtr)
 octObject *termPtr;
 {
+    int retval = FALSE;
     octObject inst = {OCT_UNDEFINED_OBJECT};
 
-    ERR_IF2(GetById(&inst, termPtr->contents.term.instanceId) != OCT_OK,
-	octErrorString());
-    return KcIsMulti(inst.contents.instance.name,
-		     termPtr->contents.term.name);
+    if (GetById(&inst, termPtr->contents.term.instanceId) != OCT_OK) {
+	ErrAdd(octErrorString());
+    }
+    else {
+        retval = KcIsMulti(inst.contents.instance.name,
+			   termPtr->contents.term.name);
+    }
+    FreeOctMembers(&inst);
+
+    return(retval);
 }
 
 /*
