@@ -61,6 +61,8 @@ public:
 protected:
 	StringState skeletonMakefile;
 	IntState appendToMakefile;
+private:
+        char *expandMakefileVariables(const char *);
 };
 
 #endif
