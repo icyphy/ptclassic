@@ -80,7 +80,7 @@ makefile:	make.template
 # Commands to make some sources from templates
 
 SDFDomain.cc :	$(KERNDIR)/XDomain.ccP
-	rm -f SDFDomain.cc
+	cd $(VPATH); rm -f SDFDomain.cc; \
 	sed 's/<T>/SDF/g' $(KERNDIR)/XDomain.ccP > SDFDomain.cc
 
 # Don't add anything after the next line; makedepend will zap it.
