@@ -11,7 +11,9 @@ if (! ($?PIGIRPC)) then
 	setenv PIGIRPC ~ptolemy/obj.$ARCH/pigiRpc/pigiRpc
 endif
 
-# check if we have an env-passing file
+setenv DISPLAY unix:0
+
+# check if we have an environment-passing file
 set tfile=/tmp/pigiDebug.$USER
 if (-r $tfile ) then
 	source $tfile
@@ -22,6 +24,6 @@ cat > /tmp/rpc$$ <<EOF
 break main
 run $*
 EOF
-xterm -display unix:0 -title "pigiRpc debug window" -bg black -fg green \
+xterm -display $DISPLAY -title "pigiRpc debug window" -bg black -fg green \
 	-e gdb $PIGIRPC -x /tmp/rpc$$ &
 
