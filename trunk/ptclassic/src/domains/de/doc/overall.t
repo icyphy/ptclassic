@@ -67,17 +67,30 @@ which are to be placed in the event-queue before the system is executed.
 The 
 .c Scheduler
 fetches an event from the head of the queue, which is the
-earlist event in simulated time, and sends it to its destination block. 
+earlist event in simulated time, and sends it to an input
+.c Porthole
+of its destination block. A DE star is executed (fired) whenever there is
+any new event on the input portholes.
 Before executing
-the block, it searches the event queue to find out whether there are
-any simultaneous events to the same block (a user may or may not allow
-simultaneous events when defining stars).
+the star, the scheduler searches the event queue to find out whether there are
+any simultaneous events to the other input portholes of the 
+same star, and fetch those events. 
+Thus, for each firing, a star consumes simultaneous events for all
+input portholes, but at most one event per porthole.
 After a block is executed it may generate some output events on its
 output
 .c PortHole s.
-These events are also put into the global event queue.
+These events are put into the global event queue.
 Then the scheduler fetches another events and repeats its action until
 a given stopping condition is met.
+.pp
+It is worth noting that the particle movement is not
+through
+.c Geodesic s,
+but through the global queue in the DE domain.  Since the geodesic
+is a FIFO queue, we can not implement the un-chronological arrival
+of the incoming events if we put the particles into the geodesics.
+Instead, the particles are managed globally in the event queue.
 .H2 "Wormholes"
 .pp
 \fBTime\fR in the \*(DO
@@ -97,17 +110,17 @@ the wormhole can become a "process-star"\** if the
 .(f
 \** see the Almagest section "\fBDomains in Ptolemy\fR".
 .)f
-inner domain is not deadlocked\** when the stopping condition is met.
+inner domain is not deadlocked\** after the stopping condition is met.
 .(f
 \** The domain is said deadlocked if there is no more runnable blocks
 in the domain.
 .)f
-In this case, we have to fire the process-star without incoming events
+In this case, we have to fire the process-star without new events
 to the block until it is deadlocked.  Therefore, we put the
 process-star into the event queue with the time stamp telling when
-it should be fired again.  We can differentiate process-stars
-from the events in the queue by marking them.
-A process star is inserted into the event queue after
+it should be fired again.  We mark the process-stars to differenciate
+from the events in the queue.
+A process star is pushed into the event queue after
 execution as long as it is not deadlocked.
 .pp
 On the other hand, a DE domain subsystem may reside inside a wormhole
@@ -115,7 +128,7 @@ of another timed domain.  In this case, the scheduler
 must check to see whether it is deadlocked at the end of the execution
 (when it meets the stopping condition).
 A flag, called \fIstopBeforeDeadlocked\fR, 
-is set when the DE domain finishes the current execution not
+is set when the DE domain finishes the current execution, but is not
 deadlocked.  If the outer domain is a timed domain and the
 \fIstopBeforeDeadlocked\fR flag of the inner DE domain is set, then
 the wormhole
@@ -130,20 +143,21 @@ as described in the document "\fBDomains in Ptolemy\fR".
 If this scheme is applied, we say that the DE domain operates in the
 \fIsynchronized mode\fR.
 .IE "synchronized mode, DE"
-The synchronized mode operation suffers a lot of overhead at 
+The synchronized mode operation suffers significant overhead at 
 runtime since the wormhole
 should be called at
-every time increment in the inner domain.  If we can be sure that
+every time increment in the inner timed domain.  If we are sure that
 the inner domain can be processed until it finishes the current execution,
 stopping the inner domain at each time increment is too conservative.
 .pp
 This situation will not be rare; for example, if a wormhole
 has only one input port, we may execute the wormhole
 until it is deadlocked without worrying about the next input event.
-Therefore, to improve the runtime efficiency, we make it an option to 
+Therefore, to improve the runtime efficiency, we make an option to 
 avoid synchronized mode operation.  Instead, we can process a wormhole
-until the inner domain is deadlocked or the inner time reaches the global
-stoptime.  Then, we say the DE domain operates in the
+until the inner domain is deadlocked or the inner time reaches the next
+event time of the outer domain.
+Then, we say the DE domain operates in the
 \fIoptimized mode\fR.
 .IE "optimized mode, de"
 We may choose the mode by setting a 
@@ -170,7 +184,7 @@ A
 can be viewed as an event-processing unit, which receives
 events from the outside, processes them, and generates output events after
 some latency.  In the \*(DO domain, the management of the
-time stamps of the particles
+time stamps of the particles (events)
 is as important as the functionality of a star.
 For time-management, the
 .c DEStar
@@ -203,7 +217,7 @@ realize a general DE star
 .H2 "Delay Stars
 .pp
 \fIDelay-star\fRs are in charge of time-management task
-in the \*(DO domain.  A strict definition is given above.
+in the \*(DO domain.  
 We can classify the delay-stars
 further into two types.  One type is a \fIpure-delay\fR.
 .IE "pure-delay type, DE"
@@ -213,7 +227,7 @@ event arrives.  Here is an example.
 It is the preprocessor format of the
 .c Delay\ Star 
 in the \*(DO domain.  For more details on the preprocessor,
-see the Almagest section "\fBThe Ptolemy Preprocessor Language\fR".
+see the Almagest section "\fBWriting Stars\fR".
 .(d
 defstar {
 	name {Delay}
@@ -260,7 +274,8 @@ In a delay star of \fIserver\fR type, the input event should wait
 until the previous execution is completed.  It emulates a server that
 can process only one event at a time.  Here is the example of a
 \fIserver\fR type : 
-.c Server\ Star .
+.c Server\ 
+Star.
 .(d
 defstar {
 	name {Server}
@@ -316,6 +331,7 @@ A
 is fired only when an event is fed into the star. 
 In the \*(DO domain, we need another class of DE star,
 called a \fIself-scheduling star\fR.
+.IE "self-scheduling star, de"
 A self-scheduling star generates an event to itself.
 The feedback event triggers the star itself, which emulates
 an event generator.  An event generator is a special case of a delay star
@@ -371,7 +387,7 @@ given as parameters.
 		default {"1.0"}
 		desc { The magnitude of samples generated. }
 	}
-	hinclude { <NegativeExpntl.h> }
+	hinclude { <NegExp.h> }
 	ccinclude { <ACG.h> }
 	protected {
 		NegativeExpntl *random;
@@ -390,7 +406,6 @@ given as parameters.
 		if(random) delete random;
 		random = new NegativeExpntl(double(meanTime),gen);
 		DERepeatStar :: start();
-		random->mean(double(meanTime));
 	}
 	go {
 	   // Generate the output event
@@ -412,8 +427,10 @@ given as parameters.
 The
 .c Poisson
 star generates a Poisson arrival process.  The inter-arrival time of events
-is exponentially distributed with parameter \fImeanTime\fR.
-The method,
+is exponentially distributed with parameter \fImeanTime\fR. Refer to 
+the Almagest section "\fBWriting Stars\fR" for the use of built-in
+class of random numbers.
+The method
 \fIrefireAtTime()\fR launches a event onto a feedback arc which is
 invisible to the users.  The feedback event triggers the 
 self-scheduling star some time later.
@@ -421,13 +438,18 @@ self-scheduling star some time later.
 To initiate event generation, an event is placed on the feedback
 arc before the scheduler
 runs.  In other words, at time zero, some events are placed in the
-global queue to trigger the self-scheduling stars.  Also it is
+global event queue to trigger the event generators.  Also it is
 noteworthy that the feedback event for the next execution is
-generated in the current execution.
+generated in the current execution. The
+.c DERepeatStar 
+class can be used for other purposes besides event generation.
+For example, the
+.c Sampler
+star fires itself at regular intervals by \fIrefireAtTime()\fR method.
 .pp
 Another method, \fIcanGetFired()\fR is seldom used in the star
 definitions.  The method
-checks the feedback event, and return TRUE if there is
+checks the existence of feedback event, and return TRUE if there is
 a new event or FALSE otherwise.
 .H2 "Functional Stars
 .pp
@@ -508,19 +530,16 @@ depending the value of the last received \fIcontrol\fR input.
 First, we have to check
 whether a new input event arrives. 
 It is done by looking at the \fIdataNew\fR
-flag of the \fIinput\fR porthole.
+flag of the \fIinput\fR portholes.
 .pp
 There are three methods to access a particle
 from  input or output ports. First, we may use \fI%\fR operator followed
 by a integer, which
-is similar to the \fBSDF\fR domain mechanism.  
+is equivalent to the same operator of the \fBSDF\fR domain.  
 For example,
 .c control%0
 returns the most recent particle
-from the \fIcontrol\fR porthole,
-and
-.c control%2
-returns the previous particle.
+from the \fIcontrol\fR porthole.
 The second method, \fIget()\fR, is specific to 
 .IE "get(), de"
 .c InDEPort .
@@ -548,7 +567,7 @@ We can send more than one output events through
 the same port by calling the \fIput(float)\fR
 method repeatedly.
 .pp
-A DE star may not generate any output event after invoked
+A DE star may not generate any immediate output event after invoked
 by some input events.  In the above example, the \fIcontrol\fR
 event does not "trigger" any output event while the \fIinput\fR event
 does.  This behavior is described in the constructor.  
@@ -563,18 +582,11 @@ input.triggers(output);
 .)c
 Obviously, no input triggers any output in the delay stars.
 Possibly, an input event triggers conditionally an output.
-Then, first check whether it is probable that
-the star runs forever if the output
-is connected to the input with a delay free path.  If an infinite computation
-is possibly, the \fItriggers()\fR method should be called
-explicitly since the detection of the delay-free loop is
-based on the triggering relations (refer to the next section).
-Even though the delay-free connection from the output to the input
-does not result in unbounded executions, the star-writer can
-specify the triggering relation to prohibit the possibility of
-the delay-free path between the output to the input port.
-However, this extra set-up of triggering relation is not
-recommended since it may limit the usage of the star.
+In principle, if there is any chance of triggering from an input to an output,
+we set the triggering relation between the input and the output.
+The triggering relation informs the DE scheduler that there is a 
+delay-free path from the input to the output (see next section for details).
+Hence, the star writer should not miss any triggering relation.
 We can set up multiple triggering relations for a given input if the
 input triggers several outputs, but not all outputs.
 .pp
@@ -652,13 +664,12 @@ for the porthole.
 Although we have tried to give comprehensive instructions
 for designing a DE star, a good starting point is to
 look at the existing stars.		
-They are stored in ~ptolemy/src/domains/de/stars.
 .H1 "The \\*(DO Scheduler (part II)
 .pp
 .H2 "Delay-free loops"
 .pp
-An event-path consists of the physical arcs between an output
-porthole and input portholes and the triggering relations inside the
+An event-path consists of the physical arcs between output
+portholes and input portholes and the triggering relations inside the
 stars, on which an event flows instantaneously (without delay).
 .IE "event path"
 If an event-path forms a loop, we call it a delay-free loop.
@@ -669,6 +680,18 @@ causes an unbounded computation.  Therefore, it is profitable
 that the delay-free loop is detected at compile-time.
 If a delay-free loop is detected, the error is signaled and
 simulation is halted.
+.pp
+The scheduler may not detect a delay-free loop when a delay star
+is given zero latency.  It is the user's responsibility to prohibit
+this kind of unusal cases. In case a triggering relation between a pair of
+input and output porthole is conditional, a delay-free path can be safe
+in a certain condition which the programmer has in mind. For such an
+intentional case, the programmer can avoid the error message by putting a
+delay element on a proper place. The delay-free path is detected when
+.IE "delay element, de"
+assigning priorities to the portholes. A delay element makes the 
+priority of the source porthole of the arc, on which the delay lies, smallest.
+The effects of the priorities are explained in the following section.
 .H2 "Simultaneous events"
 .pp
 There may be simultaneous events in the event queue.
@@ -694,7 +717,11 @@ To overcome this difficulty, the usual solution is to put an
 infinitesimal time delay on the arc from block A to block C.
 This delay is enough to force scheduling of block B before block C.
 However, for complicated applications, this demands a great deal
-of the user.
+of the user. The main disadvantage of using infinitesimal delays is that
+the effect of those delays is global over the system. More than ordering
+some simultaneous events in one part of the system, it may change the
+order of all simultaneous events in the whole system. Therefore, the usage
+of infinitesimal delays is prohibited.
 .pp
 Our technique is to assign priorities to the simultaneous events.
 The priority of an event is equal to the "depth"
@@ -732,8 +759,7 @@ unique way.  In other words, more than one simultaneous
 events lauching on a non-deterministic loop can not be ordered in
 a unique fashion.  If a programmer can guarantee that there is no
 possibility that simultaneous events launch on the non-deterministic
-loop, the system may be simulated correctly.  Therefore, it is not
-an error unlike a delay-free loop.
+loop, the system may be simulated correctly.  
 .pp
 If a non-deterministic loop contains only one "before" relation,
 the scheduler assigns depths in a well-defined way, but
@@ -750,16 +776,119 @@ the SDF domain.  In the SDF domain, a delay implies an initial token
 on the arc as well as one sample delay.   In the DE domain, however,
 a delay element just gives the illusion that the destination
 port of the arc looks like a termination port.  Therefore, the source
-port of the arc is assigned $-2$ for its depth.  The depth of the
+port of the arc is assigned $-1$ for its depth.  The depth of the
 destination port of the arc will be determined seperately.
+.H1 "Phase-Based Firing Mode
 .pp
-It is worth noting that the particle movement is not
-through
-.c Geodesic s,
-but through the global queue in the DE domain.  Since the geodesic
-is a FIFO queue, we can not implement the un-chronological arrival
-of the incoming events if we put the particles into the geodesics.
-Instead, the particles are managed globally in the event queue.
+The ordering of simultaneous events is the most challenging task of the
+DE scheduler. In general, Simultaneous events are caused by insufficient time
+resolution, particularly when the time unit is integer. 
+In our case,
+simultaneous events are mainly caused by functional stars that produce output
+events at the same time as they assume input events.  Since the time unit
+is float, we have almost infinite time resolution.
+.pp
+As explained earlier,
+the DE scheduler fetchs at most one event for each input porthole at each
+firing of a DE star. In the body of the star code, the programmer can
+consume the simultaneous events onto a certain input porthole by calling
+\fIgetSimulEvent()\fR method for the porthole. This mode of operation is
+called \fIsimple\fR mode, which is the default mode of operation.
+.IE "simple mode, de"
+.IE "SIMPLE, de"
+.pp
+Suppose we program a new DE star, called 
+.c Counter .
+The
+.c Counter 
+star has one clock input and one demand input. A clock event will increase
+the counter value by one, and the demand input will send the counter value
+to the output. If there are multiple simultaneous clock inputs and another
+simultaneous demand input, we should count up all the clock inputs before
+consuming the demand input and producing an output.
+Then, the programmer should call \fIgetSimulEvent()\fR method for the clock
+input. The \fIgetSimulEvent()\fR is not cheap in case there are many
+simultaneous events since it scans the global event queue over all
+events of same time stamp to get one event that is sent to the input of
+interest. For example, if there are five
+simultaneous events on the clock input of the 
+.c Counter
+star, a part of the global event queue is scanned five times.
+This runtime overhead is reduced in \fIphase-based firing\fR mode.
+.IE "phase mode, de"
+.IE "PHASE, de"
+.pp
+In \fIphase-based firing\fR mode, or simply \fIphase\fR mode, before
+executing a star, the scheduler fetches all simultaneous events for the
+star. The fetched events are stored in the internal queue of each input
+porthole. The internal queue of inputs are created only if the star operates 
+in phase mode. This incurs a memory overhead to be compensated with
+the runtime overhead of simple mode operation. If simultaneous events are
+rare, the cost of the memory overhead may not be cheaper. In phase mode,
+when a DE star fires, it consumes all simultaneous events
+currently available. It constructs a "phase". Afterwards, other simultaneous
+events for the same star may be generated by a network of functional stars.
+Then, the star fired again with another set of simultaneous events, which
+forms another "phase".  We can set the operation mode of a star \fIphase\fR
+by calling method \fIsetMode(PHASE)\fR in the constructor. The following
+is an example originally written in simple mode.
+.(c
+go {
+	...
+	while (input.dataNew) {
+		temp += int(input.get());
+		input.getSimulEvent();
+	}
+	...
+}
+.)c
+If the star is re-written in phase mode, it will look like
+.(c
+constructor {
+	setMode(PHASE);
+}
+go {
+	...
+	while (input.dataNew) {
+		temp += int(input.get());
+	}
+	...
+}
+or,
+go {
+	...
+	for (int i = input.numSimulEvents(); i > 0; i--) {
+		temp += int(input.get());
+	}
+	...
+}
+.)c
+The \fIget()\fR method in phase mode fetches an event from the internal
+queue at a time. After consuming all events from the queue (now
+queue is empty), it resets the \fIdataNew\fR flag. The successive calling
+after the queue is empty will return 
+the last accessed event. It is consistent with the simple mode operation
+though the usage of this feature is very unlikely.
+We can access the previously read Particle by using \fI%\fR operator.
+If a star in phase mode do not consume all input events at a firing,
+the unaccessed particles (events) are thrown away before the next firing.
+Thus, all simultaneous inputs are expected to be consumed at each
+firing.
+.pp
+The method, \fInumSimulEvent()\fR, returns the current queue size in phase
+mode. Recall that in simple mode, the method returns the number of
+simultaneous events in the global queue, which is one less than the
+actual number of simultaneous events. This one-difference between two
+modes is necessary for coding efficiency.
+.pp
+There is still inherent non-determinism in the simultaneity in the DE
+domain. For example, suppose that the
+.c Switch
+star has more than one simultaneous control events. Which one is really
+the last one? Since the input is routed to either "true" or "false"
+output depending on the last value of the control event, the decision
+is quite critical. We leave the responsibility of resolving such an
+inherent non-deterministic case to the programmer.
 .H1 "EventHorizon in the \\*(DO Domain
 .pp
 The mixture of the \*(DO domain with other domains
@@ -821,6 +950,10 @@ of the DE domain to the other domain by setting time stamps.
 Refer to the "\fBDomains in Ptolemy\fR" for the standard
 functions of the
 .c ToEventHorizon\ class .
+This class provides another method called \fIfetchData()\fR.
+The DE scheduler calls this method if an event arrives at this EventHorizon
+that is an input port.
+Then, it passes the particle to the inside domain.
 .H2 "DEfromUniversal EventHorizon
 .pp
 .IE "DEfromUniversal
@@ -829,6 +962,8 @@ The
 receives the data packets from the associated 
 .c ToEventHorizon 
 of the other domain and transfers them to the DE domain.
-The time stamp is copied from that of its counterpart after being scaled.
+The time stamp is copied from that of its counterpart and scaled if it
+is an input port. If it is an output port, the timeStamp is same as the
+global clock of the outer DE domain.
 According to the time stamp, the received events are put into
 the global queue of the \*(DO domain.
