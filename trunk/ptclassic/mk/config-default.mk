@@ -123,10 +123,8 @@ ITK_INCDIR=$(TCL_ROOT)/$(ITCL_VERSION)/include
 # Uncomment the next line for itcl-2.0b2
 ITK_LIBSPEC=-L$(TCL_ROOT)/$(ITCL_VERSION).$(PTARCH)/lib/itcl -litk
 
-# Location of the itcl_sh binary
-ITCL_SH=$(ROOT)/tcltk/$(ITCL_VERSION).$(PTARCH)/bin/itcl_sh
-# Temporary itcl-2.0 itclsh, once we upgrade, this should be renamed to ITCL_SH
-ITCL2_0_SH=$(ROOT)/tcltk/$(ITCL_VERSION).$(PTARCH)/bin/itclsh
+# Location of the ish binary (tcl + namespaces)
+ISH=$(ROOT)/tcltk/$(ITCL_VERSION).$(PTARCH)/bin/ish
 
 # Location of the itcl library, needed for itcl_mkindex
 ITCL_LIBDIR=$(ROOT)/tcltk/$(ITCL_VERSION)/library
