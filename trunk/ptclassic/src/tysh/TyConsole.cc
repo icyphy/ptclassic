@@ -62,12 +62,17 @@ TyConsole::TyConsole(int argc, char **argv) {
   char *appName = "tycho";
   char *appClass = "Tycho";
 
+#if TK_MAJOR_VERSION <= 4 && TK_MINOR_VERSION < 1
   ptkw = Tk_CreateMainWindow(interp, NULL, appName, appClass);
+#else
+  ptkW = Tk_MainWindow(ptkInterp);
+  Tk_SetClass(ptkW, appClass);
+  Tk_SetAppName(ptkW, appName);
+#endif /* TK_MAJOR_VERSION <= 4 && TK_MINOR_VERSION < 1 */
   if (!ptkw) {
     fprintf(stderr,"Failed to create Tk main window: %s\n", interp->result);
     exit(1);
   }
-
   // Define Tcl and Tk extensions
   tytcl = new TyTcl(interp, ptkw);
 
