@@ -242,31 +242,6 @@ class ::tycho::Slate {
 }
 
 
-## constructor
-#
-body ::tycho::Slate::constructor {args} {
-    #
-    # Create the canvas and pack it
-    #
-    itk_component add canvas {
-	canvas $itk_interior.canvas
-    } {
-	keep -background -cursor -relief \
-		-height -width -borderwidth \
-		-xscrollcommand -yscrollcommand \
-		-scrollregion
-    }
-
-    pack $itk_component(canvas) -fill both -expand yes
-
-
-    #
-    # Initialise options
-    #
-    eval itk_initialize $args
-}
-
-
 ## addtag tag all
 ## addtag tag withtag     tag
 ## addtag tag overlapping x0 x1 y0 y1
@@ -460,6 +435,31 @@ body ::tycho::Slate::bind {tagOrID args} {
 	    }
 	}
     }
+}
+
+
+## constructor
+#
+body ::tycho::Slate::constructor {args} {
+    #
+    # Create the canvas and pack it
+    #
+    itk_component add canvas {
+	canvas $itk_interior.canvas
+    } {
+	keep -background -cursor -relief \
+		-height -width -borderwidth \
+		-xscrollcommand -yscrollcommand \
+		-scrollregion
+    }
+
+    pack $itk_component(canvas) -fill both -expand yes
+
+
+    #
+    # Initialise options
+    #
+    eval itk_initialize $args
 }
 
 
