@@ -48,7 +48,7 @@ ITCL_SRCS = \
 
 EXTRA_SRCS =	$(TCL_SRCS) $(ITCL_SRCS)
 
-MISC_FILES =	tclIndex
+MISC_FILES =	doc tclIndex
 
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =	tclIndex
