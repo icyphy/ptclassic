@@ -28,7 +28,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 						PT_COPYRIGHT_VERSION_2
 						COPYRIGHTENDKEY
 
- Programmer:  J. T. Buck
+ Programmer:  J. T. Buck, Jose Luis Pino
  Date of creation: 6/10/90
 
 Routine to expand a pathname
@@ -41,56 +41,79 @@ environment variable.  Variables are expanded only at the beginning.
 **************************************************************************/
 
 #include <pwd.h>
-#include <std.h>
-#include <string.h>
 #include "Error.h"
-#define MAXLEN 256
+#include "Tokenizer.h"
+#include "StringList.h"
+#define MAXLEN 2000
+#define MAXSTRINGLEN 4096
 
 const char*
 expandPathName(const char* name) {
-	static char buf[MAXLEN];
-	const char* value;
+    const char* buf[MAXLEN];
+    char tokbuf[MAXSTRINGLEN];
+    const char* specialChars = "~/$";
+    Tokenizer lexer(name,specialChars);
+    int i = 0;
+    int err=0;
+    const char* tilda = "~";
+    const char* dollar = "$";
+    const char* slash = "/";
+    while(!lexer.eof() && i < MAXLEN && err == 0) {
+	lexer >> tokbuf;
+	char c = tokbuf[0];
+	if (c != 0 && tokbuf[1]) c = 0;
+	switch (c) {
+	case '~' : {
+	    // we only expand the first tilda
+	    if (i != 0) {
+		buf[i++] = tilda;
+		break;
+	    }
 
-	if (*name != '~' && *name != '$') return name;
-
-	// find first / after the env-var or the username
-
-	const char* pslash = strchr (name, '/');
-	if (pslash == NULL) pslash = name + strlen(name);
-
-	// copy the username or variable name into buf.
-
-	int l = pslash - name - 1;
-	strncpy (buf, name + 1, l);
-	buf[l] = 0;
-
-	// if an environment variable, look up the value.
-	if (*name == '$') {
-		value = getenv (buf);
-		if (!value) return name;
-	}
-	else {
-		passwd* pwd;
-		if (pslash == name + 1) {
-			pwd = getpwuid(getuid());
-			if (pwd == 0) {
-				Error::abortRun ("getpwuid doesn't know you!");
-				exit (1);
-			}
+	    // next token might be user name or /.
+	    lexer >> tokbuf;
+	    passwd* pwd;
+	    if (tokbuf[0] == '/') {
+		pwd = getpwuid(getuid());
+		if (pwd == 0) {
+		    Error::abortRun ("getpwuid doesn't know you!");
+		    exit (1);
 		}
-		else {
-			pwd = getpwnam(buf);
-			if (pwd == 0) return name;
-		}
-		value = pwd->pw_dir;
+		buf[i++] = savestring(pwd->pw_dir);
+		buf[i++] = slash;
+	    }
+	    else {
+		pwd = getpwnam(tokbuf);
+		if (pwd == 0)
+		    buf[i++] = savestring(tokbuf);
+		else
+		    buf[i++] = savestring(pwd->pw_dir);
+	    }
+	    break;
+	}    
+	case '/' : {
+	    buf[i++] = slash;
+	    break;
 	}
-	// Put in the home directory or value of variable
-	strcpy (buf, value);
-
-	// add the rest of the name
-	strcat (buf, pslash);
-	return buf;
+	case '$' : {
+	    // next token might be an environment variable
+	    lexer >> tokbuf;
+	    const char* value = getenv (tokbuf);
+	    if (!value) {
+		buf[i++] = dollar;
+		buf[i++] = savestring(tokbuf);
+	    }
+	    else {
+		buf[i++] = savestring(value);
+	    }
+	    break;
+	}
+	default: {
+	    buf[i++] = savestring(tokbuf);
+	}
+	}
+    }
+    StringList expandedPath;
+    for (int j = 0 ; j < i ; j++) expandedPath << buf[j];
+    return savestring(expandedPath);
 }
-
-
-	
