@@ -387,7 +387,7 @@ body ::tycho::ResourceFTP::dirlist {url} {
         ::gets $fd line
         if {$line!={}} {
             if {[lindex $line 8]!={}} {
-                append buffer "[lindex $line 8]"
+                append buffer "[::tycho::url join $url [lindex $line 8]]"
                 #"[forward [::tycho::url join $url [lindex $line 8]]] "
             }
             
