@@ -458,9 +458,10 @@ proc ptkGantt_DrawProcLabels {chart} {
 
     set base [expr [winfo y $chart.canvas] - [winfo y $chart.proclabel]]
 
-    set layoutPositions [spread -indented $ptkGantt_Layout($chart.numprocs) \
+    set layoutPositions [spread $ptkGantt_Layout($chart.numprocs) \
 	    [expr $base + $ptkGantt_Layout($chart.graphTop) ]\
-	    [expr $base + $ptkGantt_Layout($chart.graphBottom) ]]
+	    [expr $base + $ptkGantt_Layout($chart.graphBottom) ] \
+	    -indented]
 
     foreach* location $layoutPositions -counter n {
 	$chart.proclabel create text \
@@ -597,9 +598,10 @@ proc ptkGantt_RedrawLabels {chart stars} {
     $chart.proclabel delete star
 
     set base [expr [winfo y $chart.canvas] - [winfo y $chart.proclabel]]
-    set layoutPositions [spread -indented $ptkGantt_Layout($chart.numprocs) \
+    set layoutPositions [spread $ptkGantt_Layout($chart.numprocs) \
 	    [expr $base + $ptkGantt_Layout($chart.graphTop) ]\
-	    [expr $base + $ptkGantt_Layout($chart.graphBottom) ]]
+	    [expr $base + $ptkGantt_Layout($chart.graphBottom) ] \
+	    -indented ]
 
     foreach s $stars {
 	assign star proc $s
