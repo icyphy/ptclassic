@@ -70,7 +70,7 @@ public:
 	int isItInput (); // {return TRUE; }
 
 	// Get Particles from input Geodesic
-	void beforeGo();
+	void grabData();
 
         // Services of PortHole that are often used: 
         // setPort(dataType d); 
@@ -90,12 +90,12 @@ public:
 
 	// Move the current Particle in the input buffer -- this
 	// method is invoked by the SDFScheduler before go()
-	void beforeGo();
+	void grabData();
 
 	// Put the Particles that were generated into the
 	// output Geodesic -- this method is invoked by the
 	// SDFScheduler after go()
-	void afterGo();
+	void sendData();
 
         // Services of PortHole that are often used: 
         // setPort(dataType d); 

@@ -20,13 +20,13 @@ Code for SDF-type portholes and multiportholes.
 
 int InSDFPort :: isItInput () { return TRUE;}
 
-void InSDFPort :: beforeGo () { getParticle();}
+void InSDFPort :: grabData () { getParticle();}
 
 int OutSDFPort :: isItOutput () { return TRUE;}
 
-void OutSDFPort :: beforeGo () { clearParticle();}
+void OutSDFPort :: grabData () { clearParticle();}
 
-void OutSDFPort :: afterGo () { putParticle();}
+void OutSDFPort :: sendData () { putParticle();}
 
 int MultiInSDFPort :: isItInput () { return TRUE;}
 int MultiOutSDFPort :: isItOutput () { return TRUE;}
