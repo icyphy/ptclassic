@@ -51,8 +51,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 class CGWormhole : public CGWormBase, public CGStar {
 
 public:
-	void setup();
-	void go();
 	void wrapup() { }
 
 	// Constructor
@@ -62,39 +60,18 @@ public:
 	// return my scheduler
 	Scheduler* scheduler() const { return myTarget()->scheduler() ;}
 
-	// execution time which is the average of the workload inside 
-	// the wormhole with 1 processor.
-	int myExecTime() { return execTime; }
-
-	// print methods
-	StringList print(int verbose = 0) const {
-		return Wormhole::print(verbose);
-	}
-
+        // execution time which is the average of the workload inside
+        // the wormhole with 1 processor.
+        int myExecTime() { return execTime; }
 	// clone -- allows interpreter/pigi to make copies
 	Block* clone() const;
 
 	// identify myself as a wormhole
 	int isItWormhole() const { return TRUE;}
 
-	// use statelist for inner galaxy for stateWithName
-	State* stateWithName (const char* name) {
-		return gal.stateWithName(name);
-	}
-	
-	// state initialize
-	void initState() { gal.initState() ;}
-
-	// return myself
-	CGWormBase* myWormhole();
-
 	// FIXME: what should this do?
 	double getStopTime() { return 0.0;}
 
-/*******  methods for parallel scheduler. ********/
-
-        // Redefine: return the profile when "pNum" processors are assigned.
-        Profile* getProfile(int pNum); 
 };
 
 
