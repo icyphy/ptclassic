@@ -68,7 +68,6 @@ EXTRA_SRCS =	\
 		troubleshooting.html \
 		tychoClasses.html \
 		tychoFaq.html \
-		tymac.html \
 		tynt.html \
 		tyunix.html
 
