@@ -52,14 +52,6 @@ limitation of liability, and disclaimer of warranty provisions.
 	displaySliderValue(".low", "$starSymbol(scale2)", "  $val(balance)");
       }
       
-      /* Test code for the new custom control panels */
-      connectControl("$val(starName)",
-		     "gain",
-		     $starSymbol(setVolume));
-
-      connectControl("$val(starName)",
-		     "balance",
-		     $starSymbol(setBalance));
     }
     codeblock (setVolumeDef) {
         static int $starSymbol(setVolume)(dummy, interp, argc, argv)

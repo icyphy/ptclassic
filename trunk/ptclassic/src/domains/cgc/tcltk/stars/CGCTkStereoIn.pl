@@ -40,11 +40,7 @@ limitation of liability, and disclaimer of warranty provisions.
 			   "$val(volume)");
       }
 
-      /* Test code for the new custom control panels */
-      connectControl("$val(starName)",
-		     "attenuate",
-		     $starSymbol(setVolume));
-    }
+  }
 
     codeblock (setVolumeDef) {
       static int $starSymbol(setVolume)(dummy, interp, argc, argv)

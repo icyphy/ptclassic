@@ -68,15 +68,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	displaySliderValue(".middle", "$starSymbol(scale2)",
 			   "$val(centerFreq)");
       }
-      /* Test code for the new custom control panels */
-      connectControl("$val(starName)",
-		     "gain",
-		     $starSymbol(setGain));
-
-      connectControl2("$val(starName)",
-		     "frequency",
-		     $starSymbol(setcenterFreq2));
-    }
+     }
     codeblock(tkSetupband) {
       /* "tkband" is  a local variable which scales the    */
       /* bandwidth from (0.1 to 4) to (0 to 100) for makeScale */ 
@@ -91,9 +83,6 @@ limitation of liability, and disclaimer of warranty provisions.
 	displaySliderValue(".high", "$starSymbol(scale3)",
 			     "$val(bandwidth)");
       }      
-      connectControl("$val(starName)",
-		     "bandwidth",
-		     $starSymbol(setBandwidth));
     }
     codeblock(tkSetuppass) {
       /* "tkpass" is a local variable which scale the pass  */
