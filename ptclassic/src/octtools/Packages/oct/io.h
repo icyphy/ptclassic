@@ -61,5 +61,12 @@
 
 extern octId oct_id_offset, oct_next_dump_id;
 
+int oct_dump
+	ARGS((struct facet *desc, char *file));
+int oct_restore
+	ARGS((char *file, struct facet *desc));
+int oct_restore_info
+	ARGS((char *file, struct facet *desc));
+
 #endif /* OCT_IO_H */
 
