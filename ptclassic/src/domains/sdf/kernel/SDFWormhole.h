@@ -70,7 +70,7 @@ public:
 	int isItWormhole() const { return TRUE;}
 
 	// use statelist for inner galaxy for stateWithName
-	State* stateWithName (const char* name) const {
+	State* stateWithName (const char* name) {
 		return gal.stateWithName(name);
 	}
 	
