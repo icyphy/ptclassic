@@ -217,7 +217,7 @@ alltests: kernel/test/alltychotests.tcl
 	tycho -noconsole -e $^
 
 # Run with Ptolemy
-alltests.pt:  kernel/test/alltychotests.tcl
+alltests.ptiny:  kernel/test/alltychotests.tcl
 	tycho -ptiny -noconsole -e $^
 
 # Check html docs for problems
