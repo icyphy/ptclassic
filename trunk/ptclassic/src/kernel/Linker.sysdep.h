@@ -232,7 +232,7 @@ extern "C" size_t getpagesize(void);
 // This is an attempt to support both g++ and cfront.
 #ifdef __GNUG__
 #if defined(mips) || defined(PTHPPA)
-#if defined(PTIRIX5)
+#if defined(PTIRIX5) && __GNUC_MINOR__ < 7
 #define CONS_PREFIX "_GLOBAL_.I."
 #define CONS_LENGTH 11
 #else
