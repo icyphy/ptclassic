@@ -257,7 +257,6 @@ body ::tycho::Compile::parseError {results} {
     set errorList {}    ;# Default is that our list is empty
 
     # Get the output of the compiler
-    #set output [[lindex $results 1].history get 0.0 end]
     set output [$results.history get 0.0 end]
     set output [split $output "\n"]
     foreach line $output {
@@ -328,9 +327,8 @@ body ::tycho::Compile::jumpNextError {} {
 # fname = filename of the error source code.
 body ::tycho::Compile::jumpToLine {cLineNum eLineNum fname} {
     # Name of our editor/viewer
-    #set editorName [$this cget -view]
-
-    set editorName [::tycho::File::openContext $fname]
+    # FIXME: directory could potentially be anywhere, specified in Makefile.
+    set editorName [::tycho::File::openContext [file join $dirname $fname]]
     set editorName [string trim $editorName :]
 
     # Jump to the line in editor
