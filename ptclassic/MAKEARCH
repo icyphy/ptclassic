@@ -2,8 +2,8 @@
 # script to make directories and links for an architecture
 # $Id$
 
-if (! $?ARCH ) then
-	echo The environment variable ARCH must be set.
+if (! $?PTARCH ) then
+	echo The environment variable PTARCH must be set.
 	exit 1
 endif
 
@@ -28,27 +28,27 @@ alias pushd 'pushd \!* > /dev/null'
 alias popd 'popd \!* > /dev/null'
 
 # Make the top-level directories
-optmkdir bin.$ARCH
-optmkdir lib.$ARCH
-optmkdir obj.$ARCH
+optmkdir bin.$PTARCH
+optmkdir lib.$PTARCH
+optmkdir obj.$PTARCH
 optmkdir octtools
 optmkdir octtools/include
-optmkdir octtools/lib.$ARCH
-optmkdir octtools/bin.$ARCH
+optmkdir octtools/lib.$PTARCH
+optmkdir octtools/bin.$PTARCH
 
-cd bin.$ARCH
-optdifflink ../octtools/bin.$ARCH/attache attache
-optdifflink ../octtools/bin.$ARCH/installColors installColors
-optdifflink ../octtools/bin.$ARCH/masters masters
-optdifflink ../octtools/bin.$ARCH/oct2ps oct2ps
-optdifflink ../octtools/bin.$ARCH/octfix octfix
-optdifflink ../octtools/bin.$ARCH/octls octls
-optdifflink ../octtools/bin.$ARCH/vem vem
+cd bin.$PTARCH
+optdifflink ../octtools/bin.$PTARCH/attache attache
+optdifflink ../octtools/bin.$PTARCH/installColors installColors
+optdifflink ../octtools/bin.$PTARCH/masters masters
+optdifflink ../octtools/bin.$PTARCH/oct2ps oct2ps
+optdifflink ../octtools/bin.$PTARCH/octfix octfix
+optdifflink ../octtools/bin.$PTARCH/octls octls
+optdifflink ../octtools/bin.$PTARCH/vem vem
 cd ..
 
-# Now, make stuff under obj.$ARCH
+# Now, make stuff under obj.$PTARCH
 
-cd obj.$ARCH
+cd obj.$PTARCH
 optlink ../src makefile
 
 # interp used to be in the line below, as of 0.5.1, it is no longer.
@@ -106,13 +106,13 @@ cd ..
 
 # Make posix thread and PN directories.
 # Currently specific to SunOS and Solaris.
-if ($ARCH =~ sun?* || $ARCH =~ sol?*) then
+if ($PTARCH =~ sun?* || $PTARCH =~ sol?*) then
 	mkarch thread thread/posix
 	mkarch domains/pn{,/kernel,/stars}
 endif
 
 # Make thread and CP directories (currently specific to sun)
-if ($ARCH =~ sun?*) then
+if ($PTARCH =~ sun?*) then
 	mkarch thread/lwp
 	mkarch domains/cp{,/kernel,/stars,/infopad{,/stars}}
 endif
@@ -165,7 +165,7 @@ foreach x ($ALLDOMAINS)
 	cd ..
 end
 
-# At this point, we are in obj.$ARCH/domains.
+# At this point, we are in obj.$PTARCH/domains.
 
 # create extra directories under domain-specific directories
 # everything must have one slash (be two levels down)
@@ -294,4 +294,4 @@ cd ../../
 
 # This is for the makefile
 cd ../..
-touch obj.$ARCH
+touch obj.$PTARCH
