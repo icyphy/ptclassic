@@ -1,4 +1,4 @@
-# Definition of a Spice context-sensitive editor.
+# Definition of a Makefile context-sensitive editor.
 #
 # Author: Joel King
 #
@@ -34,7 +34,7 @@
 #### EditMake
 # This class defines a window that provides an emacs-like editor
 # specialized for editing Make files. It colorizes the code, identifying
-# comments, automagically indents the code, and fills blocks of comments.
+# comments, and fills blocks of comments.
 #
 class ::tycho::EditMake {
     inherit ::tycho::EditProgram
