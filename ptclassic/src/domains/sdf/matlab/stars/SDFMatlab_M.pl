@@ -16,26 +16,26 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { SDF main library }
 	explanation {
+.Ir "Matlab interface"
 This star converts the matrices/scalars on the input ports to Matlab format,
 passes the Matlab matrices to the \fIMatlabFunction\fR, converts the
 resulting Matlab matrices to Ptolemy matrices, and outputs the matrices.
-If there are no inputs, then the \fIMatlabFunction\fR is treated as a
-Matlab command so no matrix arguments are passed to it.
-For example, a value of "hilb(4)" for \fIMatlabFunction\fR would return
-a 4 x 4 Hilbert matrix.
-The names of the input arguments and output variables for the Matlab function
-are derived from \fImatlabInputName\fR and \fImatlabOutputName\fR,
-respectively.
-The values of \fImatlabInputName\fR and \fImatlabOutputName\fR may be the same.
-The user should specify these names so as to avoid name conflicts with
-built-in Matlab commands and custom Matlab scripts.
+The \fIMatlabFunction\fR state can either be a Matlab function name,
+a call to a Matlab function, or one Matlab command.
+The star will add the missing pieces to form a complete command.
 
-As an example of how the Matlab command is built, suppose that this
-star has three inputs and two outputs.
-If \fImatlabInputName\fR is "Pout", \fImatlabOutputName\fR is "Pin",
-and \fIfIMatlabFunction\fR is "doit", then this star would evaluate
-the Matlab command "[Pout1, Pout2] = doit(Pin1, Pin2, Pin3);".
-.Ir "Matlab interface"
+For example, if \fIMatlabFunction\fR were "eig" and the star had one input
+and two outputs, then the star would build the Matlab command
+"[output#1, output#2] = eig(input#1);".
+If \fIMatlabFunction\fR were "hilb(4)" and the star had no inputs and
+one output, then the star would build the Matlab command
+"[output#1] = hilb(4);".
+If \fIMatlabFunction\fR were
+"[output#1,output#2] = func1(func2(input#2),input#1)", then
+the star would simply add a semicolon at the end.
+Before the command is passed to Matlab, the pound '#' characters are replaced
+with underscore '_' characters.
+The pound characters are used to maintain compatibility with Ptolemy syntax.
 	}
 	inmulti {
 		name { input }
@@ -52,24 +52,6 @@ the Matlab command "[Pout1, Pout2] = doit(Pin1, Pin2, Pin3);".
 		desc {
 The Matlab command to execute.
 The values of the input ports will be passed as arguments to this function.
-}
-	}
-	defstate {
-		name { MatlabInputVarName }
-		type { string }
-		default { "Pmm" }
-		desc {
-Base name for Matlab variables to hold the value of the input matrices.
-The variables will be of the form input name + port number, e.g. "Pmm1".
-}
-	}
-	defstate {
-		name { MatlabOutputVarName }
-		type { string }
-		default { "Pmm" }
-		desc {
-Base name for Matlab variables to hold the value of the output matrices.
-The variables will be of the form output name + port number, e.g. "Pmm1".
 }
 	}
 
@@ -132,9 +114,7 @@ The variables will be of the form output name + port number, e.g. "Pmm1".
 		  }
 		  LOG_DEL; delete [] matlabInputNames;
 		  LOG_NEW; matlabInputNames = new InfString[numInputs];
-		  nameMatlabMatrices( matlabInputNames,
-		  		      numInputs,
-				      (const char *) MatlabInputVarName );
+		  nameMatlabMatrices(matlabInputNames, numInputs, "input");
 		}
 
 		// allocate Matlab output matrices and generate their names
@@ -147,9 +127,7 @@ The variables will be of the form output name + port number, e.g. "Pmm1".
 		  }
 		  LOG_DEL; delete [] matlabOutputNames;
 		  LOG_NEW; matlabOutputNames = new InfString[numOutputs];
-		  nameMatlabMatrices( matlabOutputNames,
-		  		      numOutputs,
-				      (const char *) MatlabOutputVarName );
+		  nameMatlabMatrices(matlabOutputNames, numOutputs, "output");
 		}
 
 		// create the command to be sent to the Matlab interpreter
