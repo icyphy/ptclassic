@@ -24,21 +24,6 @@ $Id$
 ********************************************************************/
 
 
-
-// Redefine method setting internal data in the Block
-// so that various DDF-specific initilizations can be performed.
-// If the parent pointer is not provied, it defaults to NULL
-Block& DDFStar :: setBlock(char* s, Block* parent = NULL) {
-	// First invoke the generic setBlock
-	Block::setBlock(s,parent);
-
-	// Then perform DDF-specific initializations
-	waitPort = NULL;
-	waitNum = 0;
-
-	return *this;
-}
-
 // initialize DDF specific members
 void DDFStar :: prepareForScheduling() {
 	waitPort = NULL;

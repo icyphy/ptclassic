@@ -34,16 +34,14 @@ class DDFStar : public Star  {
 	int waitNum;
 
 public:
+	// constructor
+	DDFStar() { waitNum = 0; waitPort = NULL; }
+
 	// initialize DDF-specific members
 	void prepareForScheduling();
 
 	// my domain
 	const char* domain() const;
-
-	// Redefine method setting internal data in the Block
-	// so that various DDF-specific initilizations can be performed.
-	// If the parent pointer is not provied, it defaults to NULL
-	Block& setBlock(char* starName, Block* parent = NULL);
 
 	// wait until this porthole has as many tokens as "waitNum"
 	void waitFor(PortHole& p, int num = 1) ;
