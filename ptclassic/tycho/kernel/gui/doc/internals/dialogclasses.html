@@ -204,6 +204,23 @@ Pushing this button invokes another widget (in this case the
 <code>ColorBrowser</code> or
 <code>FontBrowser</code>), which mediates the selection of a value.
 <p>
+It is also possible to present an option menu to the user.
+For example,
+<tcl><pre>
+::tycho::Query .bb
+.bb choice drink {Drink:} {Coke Snapple Lemmonade} Coke
+.bb choice chips {Chips:} {None Potato Plantain} None
+::tycho::Dialog::wait .bb 0
+</pre></tcl>
+<p>
+Here, the query consists of a menu button.
+Pushing this button causes a pop-up menu to appear.
+For technical reasons, the second argument (0) to the the
+<code>::tycho::Dialog::wait</code> procedure is needed.
+This second argument disables the auto-raise feature that modal
+dialogs have by default.  Unfortunately, auto-raise obscures the
+pop-up menu as soon as it appears.
+<p>
 In all of the above examples, we have first created the <code>Query</code>
 object, and then added queries to it by invoking its methods.
 Alternatively, the
@@ -216,16 +233,18 @@ This keyword is actually the method name for the <code>Query</code>
 class.  Here is a summary of the arguments associated with each
 method:
 <menu>
+<li> choice tag label possibilities default command
 <li> line tag label default
 <li> lines tag label default height
 <li> radio tag label possibilities default
 <li> mediated tag label default command
 </menu>
-In addition, all four can accept any number of additional arguments.
+In addition, all except choice can accept any number of additional arguments.
 These arguments are passed to the widget that implements the query
 (a Tk entry, a Tycho Edit, a set of Tk radio buttons, or a single Tk
 button, respectively).  These additional arguments can be used to
-control the appearance of the query.
+control the appearance of the query.  The command argument to the choice
+query is optional.
 <p>
 The arguments above are explained below:
 <menu>
@@ -235,9 +254,11 @@ The arguments above are explained below:
      of the query.
 <li> default: the initial value of the query.
 <li> height: the number of lines in a multi-line text query.
-<li> possibilities: a list of button names.  These are the labels
-     that appear on each of the radio buttons.
-<li> command: a command to invoke for a mediated query.  Before
+<li> possibilities: a list of possible choices.  These are the labels
+     that appear on each of the radio buttons or in the pop-up menu
+     in the choice query.
+<li> command: a command to invoke for a mediated query or, in the choice,
+     when the user changes the selection.  Before
      invoking this command, the current (default) value of the
      query will be appended to the command, separated by a space.
      The command should return the new value of the query.
@@ -251,25 +272,37 @@ Here is an example that creates one of each of the types of queries:
         {line first {First query:} {Default string}} &#92
         {lines second {Second query:} {Another default} 4}  &#92
         {radio third {Third query:} {A B C D} A}  &#92
-        {mediated fourth {Fourth entry:} red {::tycho::querycolor Choose}}  &#92
+        {choice fourth {Fourth query:} {A B C D} A}  &#92
+        {mediated fifth {Fifth entry:} red {::tycho::querycolor Choose}}  &#92
      } &#92
     -okcommand {::tycho::inform "Result of a get:\n[.z get]"} &#92
     -cancelcommand {::tycho::inform "You canceled"}
 .z centerOnScreen
 </pre></tcl>
 <p>
-The <code><a name="remove">remove</a></code> method
+The <code><a name="disable query">disable</a></code> method
+disables a query.  For instance,
+<tcl><pre>
+.z disable first
+</pre></tcl>
+The query can be re-enabled with
+<code><a name="enable query">enable</a></code> method, as follows:
+<tcl><pre>
+.z enable first
+</pre></tcl>
+The <code><a name="remove query">remove</a></code> method
 takes a tag as an argument and simply removes the corresponding query.
 <tcl><pre>
 .z remove first
 </pre></tcl>
 <p>
-The <code>get</code> method may also specify a particular tag.
+The <code><a name="get query">get</a></code>
+method may also specify a particular tag.
 <tcl><pre>
 ::tycho::inform [.z get second]
 </pre></tcl>
 <p>
-The <a name="clear method">clear method</a>
+The <a name="clear query">clear method</a>
 clears all entries (or a single entry, if
 a tag argument is given).
 <tcl><pre>
@@ -278,7 +311,7 @@ a tag argument is given).
 In the case of radio button and mediated entries, "clear" means
 to reset to the default value.
 <p>
-The <a name="insert method">insert method</a>
+The <a name="insert query">insert method</a>
 inserts a string into the specified entry.
 <tcl><pre>
 .z insert second {An inserted string. }
@@ -342,7 +375,7 @@ Consider the example:
 ::tycho::ColorBrowser .f -command "::tycho::inform"
 wm deiconify .f
 </pre></tcl>
-The <a name="command option">-command option</a> again
+The <a name="command option, color browser">-command option</a> again
 specifies a command to execute once the user
 has selected a color name, as above.
 Refer to the <a href="../usersGuides/ColorBrowserHelp.html">user-level
