@@ -50,8 +50,8 @@ limitation of liability, and disclaimer of warranty provisions.
 		if (!readyToGo)
 			control.receiveData();	
 		
-		MPHIter nexti(input);
-		PortHole* p = 0;
+		InDDFMPHIter nexti(input);
+		InDDFPort* p = 0;
 		for (int i = int(control%0); i >= 0; i--)
 			p = nexti++;
 		if (!p) {
