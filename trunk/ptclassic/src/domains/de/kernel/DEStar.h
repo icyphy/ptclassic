@@ -69,6 +69,10 @@ protected:
 	InDEPort feedbackIn;
 	OutDEPort feedbackOut;
 
+	// access the feedback arc.
+	void repeat(float when);	// send next event.
+	int canGetFired();		// can it be fired?
+
 public:
 	// define the common start function for this class
 	// completionTime should be setup beforehand.

@@ -44,3 +44,14 @@ DERepeatStar :: DERepeatStar() {
 	// make a feedback connection
 	feedbackOut.connect(feedbackIn, 0);
 }
+
+void DERepeatStar :: repeat(float when) {
+	feedbackOut.put(when) << 0.0 ;
+}
+
+int DERepeatStar :: canGetFired() {
+	int i = feedbackIn.dataNew;
+	if (i == TRUE)
+		feedbackIn.dataNew = FALSE;	// reset the flag.
+	return i;
+}
