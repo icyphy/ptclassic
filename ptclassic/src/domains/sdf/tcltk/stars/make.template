@@ -51,6 +51,7 @@ TCL_SRCS= \
  tkButtons.tcl \
  tkBreakPt.tcl \
  tkMeter.tcl \
+ tkBreakPause.tcl \
  tkScript.tcl \
  tkShowBooleans.tcl \
  tkShowValues.tcl \
