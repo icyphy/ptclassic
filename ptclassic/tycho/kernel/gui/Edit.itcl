@@ -82,6 +82,9 @@ class ::tycho::Edit {
     # Query the user for an alternative font.
     method setFont {}
 
+    # Specify whether or not modifications are allowed in the displayed text.
+    method setReadOnly {bool}
+
     ###################################################################
     ####                     protected methods                     ####
 
@@ -265,6 +268,34 @@ body ::tycho::Edit::setFont {} {
 	    -initialfont $ifont \
 	    -okcommand \
 	    "$this configure -textfont \[$wname getCurrentFont\]"
+}
+
+#####################################################################
+#### setReadOnly
+# Specify whether or not modifications are allowed in the displayed text.
+# Note that this is independent of whether the associated file is readonly.
+# It merely determines whether the buffer can be modified, not whether the
+# file can be modified.  To control the file, use <code>toggleReadOnly</code>.
+#
+body ::tycho::Edit::setReadOnly {bool} {
+    ::tycho::File::setReadOnly $bool
+    if [winfo exists $prefix] {
+	if {$bool} {
+            disableMenuItem {Undo/Redo} Edit
+            disableMenuItem Cut Edit
+            disableMenuItem Paste Edit
+            disableMenuItem {Fill Region} Format
+            disableMenuItem {Right Fill Column} Format
+            disableMenuItem {Set Fill Prefix} Format
+	} {
+            enableMenuItem {Undo/Redo} Edit
+            enableMenuItem Cut Edit
+            enableMenuItem Paste Edit
+            enableMenuItem {Fill Region} Format
+            enableMenuItem {Right Fill Column} Format
+            enableMenuItem {Set Fill Prefix} Format
+	}
+    }
 }
 
     ###################################################################
