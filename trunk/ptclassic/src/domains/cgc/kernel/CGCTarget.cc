@@ -344,33 +344,9 @@ void CGCTarget :: writeCode()
 {
     writeFile(myCode, ".c", displayFlag);
     if (!onHostMachine(targetHost)) {
-	// FIXME: The rcpCopyFile method only works for one filename.
-	// We need to copy over a list of files to a remote machine,
-	// so we must call rcpCopyFile with one file at a time even
-	// though rcp supports multiple files.
-	// Because the remoteFilesStream is globally accessible, we
-	// are not guaranteed that it is a list of files.  Since
-	// CodeStreams are derived from StringLists, the internal
-	// representation could have been altered by a const char* cast.
-	// Maybe there should be a new rcpCopyFiles method in CGUtilties?
 	if (remoteFilesStream.length() > 0) {
-	    char* fileList = savestring(remoteFilesStream);
-	    char* lastString;
-	    char* curString;
-	    int notAtEndOfString;
-	    lastString = fileList;
-	    curString = lastString;
-	    do {
-	        while (*curString && !isspace(*curString)) curString++;
-		notAtEndOfString = *curString;
-		if (lastString != curString) {
-		    *curString = 0;
-		    rcpCopyFile(targetHost, destDirectory, lastString);
-		    if (notAtEndOfString) curString++;
-		    lastString = curString;
-		}
-	    } while (notAtEndOfString);
-	    delete [] fileList;
+	    rcpCopyMultipleFiles(targetHost, destDirectory,
+				 remoteFilesStream, FALSE);
 	}
     }
 }
@@ -387,17 +363,62 @@ int CGCTarget::compileCode()
 
 // return compile command
 StringList CGCTarget :: compileLine(const char* fName) {
-	StringList cmd;
+	// Get the compiler and linker arguments with environment
+	// variables expanded
+	StringList compileArgs = getCompileOptions(TRUE);
+	StringList linkArgs = getLinkOptions(TRUE);
 	int onhostflag = onHostMachine(targetHost);
-	cmd << (const char*) compileCommand << " "
-	    << (const char*) compileOptions << " "
-	    << compileOptionsStream << " "
-	    << fName << " ";
+	StringList cmd;
+	cmd << (const char*) compileCommand << " " << compileArgs;
+	cmd << fName << " ";
 	if (! onhostflag) cmd << remoteLinkOptionsStream << " ";
-	cmd << (const char*) linkOptions << " "
-	    << linkOptionsStream << " ";
-	if (onhostflag) cmd << localLinkOptionsStream << " ";
+	cmd << linkArgs;
 	return cmd;
+}
+
+// Return a concatenation of all applicable link options, and expand
+// the environment variables if expandEnvironmentVars is TRUE.
+StringList CGCTarget :: getLinkOptions(int expandEnvironmentVars) {
+	StringList retLinkOptions;
+
+	// Link options requested by stars if we're on a local machine
+	// such as the ptdsp or CGCrtlib libraries
+	if (onHostMachine(targetHost)) {
+		retLinkOptions << localLinkOptionsStream << " ";
+	}
+
+	// Link options requested by the user as a target parameter
+	// such as what math library to use
+	retLinkOptions << (const char*) linkOptions << " ";
+
+	// Link options requested by stars
+	retLinkOptions << linkOptionsStream << " ";
+
+	// Conditionally expand environment variables in the link options
+	if (expandEnvironmentVars) {
+	    char* allLinkOptions = expandPathName(retLinkOptions);
+	    retLinkOptions = allLinkOptions;
+	    delete [] allLinkOptions;
+	}
+
+	return retLinkOptions;
+}
+
+// Return a concatenation of all applicable compile options, and expand
+// the environment variables if expandEnvironmentVars is TRUE.
+StringList CGCTarget :: getCompileOptions(int expandEnvironmentVars) {
+	StringList retCompileOptions;
+	retCompileOptions << (const char*) compileOptions << " "
+			  << compileOptionsStream << " ";
+
+	// Conditionally expand environment variables in the compile options
+	if (expandEnvironmentVars) {
+	    char* allCompileOptions = expandPathName(retCompileOptions);
+	    retCompileOptions = allCompileOptions;
+	    delete [] allCompileOptions;
+	}
+
+	return retCompileOptions;
 }
 
 // Run the code.
