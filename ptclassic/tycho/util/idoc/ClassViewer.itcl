@@ -692,12 +692,11 @@ body ::tycho::ClassViewer::insertData {data} {
     # get the related file, if it exists
     set relfile [relFile $_currentclass]
     if {$relfile != {}} {
-.
         set _classmodels(related) \
-        		[::tycho::ClassModel [::tycho::autoName class]]
+                [::tycho::ClassModel [::tycho::autoName class]]
         set fd [open $relfile]
-		$_classmodels(related) parse [$fd read]
-		close $fd    
+        $_classmodels(related) parse [read $fd]
+        close $fd    
     }
     
     _display
