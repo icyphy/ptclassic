@@ -35,7 +35,7 @@ CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
 MISC_FILES = README.txt
-all:
+all: sources
 	@echo "There are two versions of pxgraph:"
 	@echo "the older one that uses X11 sources"
 	@echo "   $$PTOLEMY/src/pxgraph/pxgraph"
@@ -46,7 +46,7 @@ all:
 	@echo " see $$PTOLEMY/src/pxgraph/README.txt"
 	cd pxgraph; $(MAKE) CC="$(CC)" CFLAGS="$(CFLAGS)"
 
-install: sources $(BINDIR)/pxgraph.x11 $(BINDIR)/pxgraph 
+install: all $(BINDIR)/pxgraph.x11 $(BINDIR)/pxgraph 
 
 $(BINDIR)/pxgraph: $(ROOT)/tycho/java/ptolemy/plot/pxgraph
 	rm -f $@
