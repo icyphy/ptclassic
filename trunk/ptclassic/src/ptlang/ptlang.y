@@ -2,7 +2,7 @@
 /************************************************************************
  Version: $Id$
 
-Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
+Copyright (c) 1990-1994 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -83,8 +83,8 @@ char* codeBlockArgs[NUMCODEBLOCKS];
 int numBlocks = 0;
 
 /* scratch buffers */
-char str1[SMALLBUFSIZE];
-char str2[SMALLBUFSIZE];
+char str1[SMALLBUFSIZE*2];
+char str2[SMALLBUFSIZE*2];
 char consStuff[BIGBUFSIZE];
 char publicMembers[MEDBUFSIZE];
 char protectedMembers[MEDBUFSIZE];
@@ -956,7 +956,7 @@ wrapMethod ()
 /* generate an instance of a block within a galaxy */
 genInstance ()
 {
-	sprintf (str1, "\t%s $s;\n", instClass, instName);
+	sprintf (str1, "\t%s %s;\n", instClass, instName);
 	strcat (protectedMembers, str1);
 	sprintf (str2,"addBlock(%s.setBlock(\"%s\",this)", instName, instName);
 	strcat (consStuff, str2);
