@@ -103,9 +103,9 @@ parameter.  The keywords for overflow handling methods are :
         if(int(UseArrivingPrecision))
           fixIn = matrix.entry(i);
         else
-          fixIn = (const Fix&)(in_len, in_IntBits, matrix.entry(i));
+          fixIn = (const Fix&) Fix(in_len, in_IntBits, matrix.entry(i));
         result.entry(i).set_ovflow(OV);
-        result.entry(i) = fixIn * Fix(gain%0);
+        result.entry(i) = fixIn * (const Fix&)(gain%0);
       }
 
       output%0 << result;
