@@ -38,7 +38,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 */
 
 #include "ptkPlot_defs.h"
-#include "math.h"
+#include <math.h>
 #include "ieee.h"
 
 /* Global scract buffer used for constructing Tcl commands */
