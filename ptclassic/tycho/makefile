@@ -118,7 +118,7 @@ HTMLCHEK=/usr/tools/www/htmlchek
 HTMLCHEKOUT=htmlchekout
 htmlchek:
 	rm -f $(HTMLCHEKOUT)*
-	@HTMLCHEK=$(HTMLCHEK); \
+	@HTMLCHEK=$(HTMLCHEK); export HTMLCHEK; \
 	if [ "$(TYCHO)" = "" ]; then \
 		echo "TYCHO is not set so we assume we are part of PTOLEMY"; \
 		sh $(HTMLCHEK)/runachek.sh $(PTOLEMY)/tycho $(HTMLCHEKOUT) \
@@ -130,7 +130,8 @@ htmlchek:
 			netscape=1 nowswarn=1 arena=1 strictpair=TCL,AUTHOR; \
 	fi
 	-chmod g+w $(HTMLCHEKOUT)*
-
+	@echo "The following links in $(HTMLCHEKOUT).HREF might be bogus"
+	ls `egrep '\.html' htmlchekout.HREF | grep -v http`
 
 spellcheck:
 	cat `find . -name "*.html" -print` | spell
