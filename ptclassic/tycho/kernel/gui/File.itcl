@@ -54,17 +54,15 @@ option add *File.autoSaveInterval 5 widgetDefault
 # returns /usr/tools/tycho/tmp. If there is no such environment
 # variable, but a global Tcl variable with the given name exists, then
 # the value of that variable is substituted. If no such variable is
-# defined as well, then the argument is taken to be a literal filename,
-# and the current working directory is assumed to be its location.
-# Similarly, "~user/foo" will be expanded (on Unix systems) to
-# "/users/user/foo", assuming that "user" has his or her home directory
-# at "/users/user". If there is no user named "user", or we are not on
-# a Unix system, then "~user/foo" will be returned with the current
-# working directory prepended.  In all cases, any extra spaces at the
-# beginning or the end of the given path are removed.  Moreover,
-# filenames are normalized before being returned.  Symbolic links
-# are followed, as are fields in the path like "/../".  Thus, any
-# two references to the same path should return the same string.
+# defined as well, then an error is reported. Similarly, "~user/foo"
+# will be expanded (on Unix systems) to "/users/user/foo", assuming
+# that "user" has his or her home directory at "/users/user". If there
+# is no user named "user", or we are not on a Unix system, then an
+# error is reported. In all cases, any extra spaces at the beginning or
+# the end of the given path are removed. Moreover, filenames are
+# normalized before being returned. Symbolic links are followed, as are
+# fields in the path like "/../". Thus, any two references to the same
+# path should return the same string.
 #
 proc ::tycho::expandPath { path } {
     set path [string trim $path]
@@ -82,8 +80,8 @@ proc ::tycho::expandPath { path } {
             global $envvar
             set envval [set $envvar]
         } else {
-            # No such variable.  Use the original form.
-            set envval "\$$envvar"
+            # No such variable.
+            error "No such variable: $envvar"
         }
         if {$slash > 0} {
             set path [format "%s%s" $envval [string range $path $slash end]]
@@ -91,25 +89,8 @@ proc ::tycho::expandPath { path } {
             set path $envval
         }
     } elseif {[string first ~ $path] == 0} {
-        if {[catch {
-            set dir [file dirname $path]
-            set np [glob $dir]
-        }] == 0} {
-            # glob succeeded
-            set path [format "%s/%s" $np [file tail $path]]
-        }
+        set path [glob $path]
     }
-    # If the result is not absolute, prepend the current working directory.
-    if {[string first "/" $path] != 0} {
-	global ::env
-	if [info exists env(PTPWD)] {
-	    set CWD $env(PTPWD)
-	} {
-	    set CWD [pwd]
-	}
-        set path [format "%s/%s" $CWD $path]
-    }
-    
     # Get a consistent filename using "cd".  Note that this may not work
     # on non-Unix machines.  The catch is in case the directory does not
     # exist.
