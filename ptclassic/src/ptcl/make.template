@@ -45,7 +45,8 @@ VPATH =		$(ROOT)/src/ptcl
 CONFIG =	$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
-INCL = 		-I$(KERNDIR) -I$(TCL_INCDIR) $(PTCOMPAT_INCSPEC)
+INCL = 		-I$(KERNDIR) -I$(ITCL_INCDIR) -I$(TCL_INCDIR) \
+			$(PTCOMPAT_INCSPEC)
 
 # config-default.mk sets this to 'yes', but we can't include the ipus domain
 # since the non-tk ipus stars need Blackboard* symbols, which are defined in
@@ -70,6 +71,8 @@ LIB =		libptcl.$(LIBSUFFIX)
 # Set up definitions for ptbin.mk
 BASENAME = 	ptcl
 SPECIAL_LIBS =	-L./ -lptcl -lptolemy
+# We always depend on libptolemy, so there is no need to add it
+SPECIAL_LIBS_DEPEND=
 NEED_PALETTES = no
 NEED_HOF =	no
 NEED_GRAPHICS =	no
