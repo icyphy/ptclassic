@@ -81,8 +81,14 @@ public:
 	// Generate code to end an iterative procedure.
 	/*virtual*/ void endIteration(int, int);
 
+	// Pulse the given clock TRUE at the given time.
+	void pulseClock(const char*, int);
+
 	// Add the clock to the clock list and generate code to toggle it.
 	void toggleClock(const char*);
+
+	// Assert the given clock with the given value at the given time.
+	void assertValue(const char*, int, int);
 
 	// Add the clock to the clock list and generate code
 	// to assert it with the given value.
