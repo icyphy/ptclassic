@@ -97,7 +97,7 @@ CFLAGS =	$(OPTIMIZER) $(MEMLOG) $(WARNINGS) \
 # Variables for the linker
 #
 # system libraries (libraries from the environment) for c++ files
-SYSLIBS=$(SHARED_COMPILERDIR_FLAG) -lg++ $(SHARED_SYSLIBS) -lm
+SYSLIBS=$(SHARED_COMPILERDIR_FLAG) $(SHARED_SYSLIBS) -lm
 
 # system libraries for linking .o files from C files only
 CSYSLIBS=$(SHARED_COMPILERDIR_FLAG) -lm
