@@ -25,6 +25,7 @@ $Id$
 #include "isa.h"
 #include "dataType.h"
 #include <builtin.h>
+#include <minmax.h>
 
 MemInterval::~MemInterval() {
 	LOG_DEL; delete link;;
