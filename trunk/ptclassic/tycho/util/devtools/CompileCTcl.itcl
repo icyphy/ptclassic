@@ -82,82 +82,12 @@ body ::tycho::CompileCTcl::destructor {} {
 
 #######################################################################
 #### checkSourceFiles
-# Check the source files for necessary features. 
-# When a C file is loaded into Tcl, an initialization procedure with
-# a specific name is called.  See the Tcl load command for naming details.
-# 
-# We search the first filename in the list for an apropriately named
-# initialization function.  This might be a mistake, the fix would
-# be to make this code package aware so that it could use the package
-# name.
+# Check the source files for necessary features. Presently, this
+# doesn't do anything.
 #
 body ::tycho::CompileCTcl::checkSourceFiles {} {
-    set initProcName "[string toupper\
-            [string range $basename 0 0]][string tolower\
-            [string range $basename 1 end]]_Init"
-
-    # Search for tcl.h and initProcName
-    set sawInclude 0
-    set sawInitProcName 0
-    # catch all of this incase the file does not yet exist
-    if ![catch {set fd [open $firstFile r]}] {
-        while {[gets $fd linein] >= 0} {
-            if [regexp {#include [<"](tcl|tk|itcl).h[">]} $linein] {
-                set sawInclude 1 
-            }
-            if [regexp $initProcName $linein] {
-                set sawInitProcName 1
-                break
-            } 
-        }
-        close $fd
-    }
-
-    if {$sawInitProcName == 0} {
-	# The initialization procedure was not found.
-	# Ask the user if they want to append one, if they do, append it
-	# and don't load, so the user can stick in the body and re-evaluate.
-	set nm [::tycho::autoName .editCYNC]
-	::tycho::YesNoCancel $nm \
-		-text "The file $firstFile does not have a Tcl initialization \
-		procedure named \"$initProcName\".\nIf you choose to add\
-		the initialization procedure, then be sure to reedit\
-		the file and insert calls to register your commands and\
-		reevaluate the file.\nAdd\
-		the initialization procedure now?"
-	
-	set response [::tycho::Dialog::wait $nm]
-        switch -- $response {
-            -1 {return}
-            0 {}
-	    1 {
-		# Add a initialization procedure to the end of the file
-		set fd [open $firstFile a]
-                # Check to see if we need to add #include <tcl.h>
-                if {$sawInclude == 0 } { 
-                    puts $fd "#ifndef _TCL\n#include <tcl.h>"
-                    puts $fd "#endif"
-                }
-
-		puts $fd "/* Tcl initialization procedure added for\
-			the Tcl load command\n */"
-		puts $fd "int ${initProcName}\(Tcl_Interp *interp)\n\{"
-		puts $fd "    /* A sample Tcl command registration. */"
-		puts $fd "    /* Tcl_CreateCommand(interp, \"$basename\",\
-			Tcl_${basename}Cmd,"
-		puts $fd "                         (ClientData) NULL,\
-			(Tcl_CmdDeleteProc*) NULL);"
-                puts $fd "     */"
-                puts $fd "    return TCL_OK;\n\}"
-		close $fd
-                if {$view != {} } {
-                    $view reload
-                }
-                putStatus "Successfully added initialization procedure"
-		return
-	    }
-        }
-    }
+    # This used to check for the Tcl initialization function,
+    # but that has been moved to EditC.itcl.
 }
 
 #######################################################################
