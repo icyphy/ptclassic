@@ -58,6 +58,10 @@ case "${UNAME_MACHINE}:${UNAME_SYSTEM}:${UNAME_RELEASE}:${UNAME_VERSION}" in
 	echo sol2
 	exit 0 ;;
 
+    sun4*:SunOS:5.5:*)
+	echo sol2.5
+	exit 0 ;;
+
     sun4*:SunOS:5.*:*)
     echo sol2
     exit 0 ;;
