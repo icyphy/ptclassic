@@ -81,17 +81,20 @@ internal state to store the second-to-last valid integer
 	codeblock(test) {
 
 		/* if the current input is valid, then compare it
-		   with the last and second-to-last valid inputs
-		   and then update the last and second-to-last inputs;
+		   with the last and second-to-last valid inputs;
 		   otherwise, return FALSE */
+		int retval = 0;
+		int inputValue = $val(initialLastInput);
+		int lastValue = $ref(last);
 		if ( $ref(valid) ) {
-		  int inputValue = $ref(input%0);
-		  int lastValue = $ref(last);
+		  inputValue = $ref(input%0);
 		  retval = ( inputValue == lastValue &&
-		             lastValue != $val(secondToLast) );
-		  $ref(secondToLast) = $val(last);
-		  $ref(last) = inputValue;
+		             lastValue != $ref(secondToLast) );
 		}
+
+		/* Update the last and second-to-last input storage */
+		$ref(secondToLast) = lastValue;
+		$ref(last) = inputValue;
 	}
 	codeblock(sendOutput) {
 
