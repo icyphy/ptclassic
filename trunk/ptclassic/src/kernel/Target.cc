@@ -60,7 +60,7 @@ children(0), link(0), nChildren(0), dirFullName(0) {}
 // destructor
 Target::~Target() {
 // should we delete children?
-	LOG_DEL; delete dirFullName;
+	LOG_DEL; delete [] dirFullName;
 }
 
 void Target::setSched(Scheduler* sch) {
@@ -255,6 +255,8 @@ int Target::childHasResources(Star& s,int childNum) {
 const char* Target::writeDirectoryName(const char* dirName) {
 
    if(dirName && *dirName) {
+	// delete old value if any
+	LOG_DEL; delete [] dirFullName;
 	// expand the path name
 	dirFullName = savestring(expandPathName(dirName));
 
