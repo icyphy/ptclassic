@@ -82,6 +82,9 @@ class ::tycho::Forest {
     # Return a list that describes the forest or a subtree with the given root.
     method describe {{root {}}}
 
+    # Return 1 if the specified node exists, otherwise, return 0.
+    method exists {nodename}
+
     # Initialize the forest from a description
     method init {description}
 
@@ -239,6 +242,14 @@ body ::tycho::Forest::describe {{root {}}} {
         }
     }
     return $result
+}
+
+#######################################################################
+#### exists
+# Return 1 if the specified node exists, otherwise, return 0.
+#
+body ::tycho::Forest::exists {nodename} {
+    return [info exists contentsstring($nodename)]
 }
 
 #######################################################################
