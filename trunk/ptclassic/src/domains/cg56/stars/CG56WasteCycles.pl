@@ -35,6 +35,7 @@ A star to stall the flow of data for parameter cycles to waste cycles.
 		type { int }
 		desc { internal }
 		default { 0 }
+		attributes {A_NONSETTABLE|A_NONCONSTANT}
 	}
 	codeblock(std) {
 	move	$ref(input),x1
