@@ -61,8 +61,8 @@ proc ::tycho::view {view {viewoptions {}} \
         set displayer "::tycho::$displayer"
     }
     set wname [::tycho::autoName .view]
-    uplevel #0 eval $displayer $wname $dispoptions
-    uplevel #0 eval $view $wname.v $viewoptions
+    uplevel #0 $displayer $wname $dispoptions
+    uplevel #0 $view $wname.v $viewoptions
     wm deiconify $wname
     return $wname.v
 }
