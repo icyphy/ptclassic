@@ -67,6 +67,7 @@ CHDRS	      = compile.h \
 		pigiLoader.h \
 		poct.h \
 		ptcl.h \
+		pthreadCompat.h \
 		ptk.h \
 		ptkNet.h \
 		ptkRegisterCmds.h \
