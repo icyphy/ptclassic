@@ -7,7 +7,7 @@
 #include "<T>ArrayState.h"
 #include "Tokenizer.h"
 
-const int MAXLEN = 20000;
+#define MAXLEN 20000
 
 /**************************************************************************
 Version identification:
