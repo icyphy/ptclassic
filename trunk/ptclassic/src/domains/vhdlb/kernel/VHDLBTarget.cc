@@ -634,7 +634,9 @@ void VHDLBTarget :: setup () {
   // to remove pre-existing output files
   removeOldFiles = "";
   changeOptions  = "";
-  changeOptions << "cd " << expandPathName(destDirectory) << "; ";
+  char *expandedName = expandPathName(destDirectory);
+  changeOptions << "cd " << expandedName << "; ";
+  delete [] expandedName;
 
   // Data structure declaration
   StringList leader = "Code from Universe: ";
