@@ -42,6 +42,10 @@ class ::tycho::EditHTML {
     # Evaluate the HTML.
     method evaluate {}
 
+    #### help
+    # Open a help window.
+    method help {}
+
     #### reload
     # Override the base-class reload to recolorize.
     method reload {{askuser 1} {filename \
@@ -85,11 +89,8 @@ body ::tycho::EditHTML::constructor {args} {
     # option will not have been processed by the time the base class
     # constructor is executed.
     if {$file != {NoName}} {
-	set savereadonly [$itk_component(text) cget -readonly]
-	$itk_component(text) configure -readonly 0
-	$itk_component(text) readFile $file
+	$itk_component(text) initFile $file
 	markUnmodified
-	$itk_component(text) configure -readonly $savereadonly
     }
 }
 
@@ -99,6 +100,16 @@ body ::tycho::EditHTML::constructor {args} {
 #
 body ::tycho::EditHTML::evaluate {} {
     $itk_component(text) evaluate
+}
+
+###################################################################
+#### help
+# Open a window with help on the current widget.
+#
+body ::tycho::EditHTML::help {} {
+    global TYCHO
+    ::tycho::File::openContext \
+	    $TYCHO/editors/textedit/doc/usersGuides/EditHTMLHelp.html
 }
 
 #####################################################################
