@@ -574,7 +574,7 @@ ComplexMatrix::ComplexMatrix(const ComplexMatrix& src, int startRow, int startCo
 
   for(int row = 0; row < nRows; row++)
     for(int col = 0; col < nCols; col++)
-      (*this)[row][col] = src[(startRow + row - 1)][(startCol + col - 1)];
+      (*this)[row][col] = src[(startRow + row)][(startCol + col)];
 }
 
 // Prints matricies in standard row column form.
@@ -1028,7 +1028,7 @@ FixMatrix::FixMatrix(const FixMatrix& src, int startRow, int startCol, int numRo
 
   for(int row = 0; row < nRows; row++)
     for(int col = 0; col < nCols; col++)
-      (*this)[row][col] = src[(startRow + row - 1)][(startCol + col - 1)];
+      (*this)[row][col] = src[(startRow + row)][(startCol + col)];
 }
 
 // Prints matricies in standard row column form.
@@ -1367,7 +1367,7 @@ FloatMatrix::FloatMatrix(const FloatMatrix& src, int startRow, int startCol, int
 
   for(int row = 0; row < nRows; row++)
     for(int col = 0; col < nCols; col++)
-      (*this)[row][col] = src[(startRow + row - 1)][(startCol + col - 1)];
+      (*this)[row][col] = src[(startRow + row)][(startCol + col)];
 }
 
 // Prints matricies in standard row column form.
@@ -1707,7 +1707,7 @@ IntMatrix::IntMatrix(const IntMatrix& src, int startRow, int startCol, int numRo
 
   for(int row = 0; row < nRows; row++)
     for(int col = 0; col < nCols; col++)
-      (*this)[row][col] = src[(startRow + row - 1)][(startCol + col - 1)];
+      (*this)[row][col] = src[(startRow + row)][(startCol + col)];
 }
 
 // Prints matricies in standard row column form.
