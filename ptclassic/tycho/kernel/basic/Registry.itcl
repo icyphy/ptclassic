@@ -225,12 +225,23 @@ ensemble ::tycho::registered {
 #
 # <dt><b>modecget</b> _mode_ _option_
 # <dd>
-# Get an option of a mode, as passed to
-# <code>::tycho::register mode</code>.
+# Get an option of a mode, as passed to <code>::tycho::register mode</code>.
+# Raise an error if the mode does not exist. (To prevent these
+# errors, use the *modeexists* option.)
 #
 # <dt><b>modeconfigure</b> _mode_ ?_option_ _value_...?
 # <dd>
 # Configure options of a mode.
+# Raise an error if the mode does not exist. (To prevent these
+# errors, use the *modeexists* option.)
+#
+# <dt><b>modeexists</b> _mode_
+# <dd>
+# Return true if _mode_ is a registered mode, otherwise false.
+#
+# <dt><b>modes</b>
+# <dd>
+# Return a list of valid modes.
 #
 # <dt><b>protocolcget</b> _protocol_ _option_
 # <dd>
@@ -291,6 +302,9 @@ ensemble ::tycho::registry {
 	}
 	return $props($prop)
     }
+    option modes {} {
+        @scope ::tycho::Registry array names _modes
+    }
     option modeconfigure {mode args} {
 	if ![@scope ::tycho::Registry ::info exists _modes($mode)] {
 	    error "Unregistered mode \"$mode\""
@@ -300,6 +314,12 @@ ensemble ::tycho::registry {
 	    set opts($opt) $val
 	}
 	@scope ::tycho::Registry array set _modes($mode) [array get opts]
+    }
+    option modeexists {mode} {
+        @scope ::tycho::Registry ::info exists _modes($mode)
+    }
+    option modes {} {
+        @scope ::tycho::Registry array names _modes
     }
     option protocolcget {protocol prop} {
 	if ![@scope ::tycho::Registry ::info exists _protocols($protocol)] {
