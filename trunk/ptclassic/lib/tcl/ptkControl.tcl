@@ -86,7 +86,7 @@ proc ptkRunControl { name octHandle } {
     
     if {[info exists ptkRunFlag($name)] && [winfo exists $ptkControlPanel]} {
             ptkImportantMessage .error \
-		"Sorry.  Only one run window for $name at time. "
+		"You already have a run control window open for $name"
 	    return
     }
     # Mark an open window, but with no run yet.
