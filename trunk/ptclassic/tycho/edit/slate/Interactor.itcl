@@ -285,7 +285,7 @@ body ::tycho::Interactor::click {x y args} {
     if { $proxy != "" } {
 	eval $proxy click $x $y $args
     } elseif { $clickprefix != "" } {
-        eval $clickprefix $x $y $args
+        eval $clickprefix $target $x $y $args
     } else {
 	eval $slate moveclick $target $x $y $args
     }
@@ -332,7 +332,7 @@ body ::tycho::Interactor::drag {x y} {
     if { $proxy != "" } {
 	$proxy drag $x $y
     } elseif { $dragprefix != "" } {
-        eval $dragprefix $x $y
+        eval $dragprefix $target $x $y
     } else {
 	$slate movedrag $target $x $y
     }
@@ -398,7 +398,7 @@ body ::tycho::Interactor::release {x y} {
     if { $proxy != "" } {
 	$proxy release $x $y
     } elseif { $releaseprefix != "" } {
-        eval $releaseprefix $x $y
+        eval $releaseprefix $target $x $y
     } else {
 	$slate moverelease $target $x $y
     }
