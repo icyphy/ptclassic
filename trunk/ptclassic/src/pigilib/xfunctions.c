@@ -1,4 +1,7 @@
 /* 
+SCCS Version identification :
+$Id$
+
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
 
@@ -23,14 +26,13 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 						PT_COPYRIGHT_VERSION_2
 						COPYRIGHTENDKEY
-*/
-/*
- * Tcl/Tk window interface routines for Ptolemy.
- */
 
-#ifndef lint
-static char SccsId[] = "$Id$";
-#endif
+ Programmer: Joe Buck
+ Created: 4/10/90
+
+X window interface routines for Ptolemy.
+Converted to Tcl/Tk by Kennard White and Edward Lee.
+*/
 
 #include <stdlib.h>
 #include "ptk.h"
