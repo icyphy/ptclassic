@@ -28,7 +28,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 						PT_COPYRIGHT_VERSION_2
 						COPYRIGHTENDKEY
 
- Programmer: S. Ha, E. A. Lee, and T. M. Parks
+ Programmer: S. Ha, E. A. Lee, T. M. Parks and J. L. Pino
 
  Base target for C code generation.
 
@@ -67,6 +67,16 @@ void prepend(StringList code, CodeStream& stream)
     stream << temp;
 }
 
+static TypeConversionTable cgcCnvTable[7] = {
+  {  COMPLEX, 	FIX, 		"CxToFix"	},
+  {  COMPLEX, 	ANYTYPE,	"CxToFloat"	},
+  {  FIX,	COMPLEX,	"FixToCx"	},
+  {  FIX,	FIX,		"FixToFix"	},
+  {  FIX,	ANYTYPE,	"FixToFloat"	},
+  {  ANYTYPE, 	COMPLEX,	"FloatToCx"	},
+  {  ANYTYPE, 	FIX,		"FloatToFix"	}
+};
+
 // constructor
 CGCTarget::CGCTarget(const char* name,const char* starclass,
                    const char* desc) : HLLTarget(name,starclass,desc) {
@@ -99,6 +109,10 @@ CGCTarget::CGCTarget(const char* name,const char* starclass,
 	addStream("compileOptions", &compileOptionsStream);
 	addStream("linkOptions", &linkOptionsStream);	
 	addStream("mainClose", &mainClose);
+
+	// Initialize type conversion table
+	typeConversionTable = cgcCnvTable;
+	typeConversionTableRows = 7;
 }
 
 StringList CGCTarget::comment(const char* text, const char* b,
@@ -477,198 +491,61 @@ int CGCTarget :: codeGenInit() {
 // Splice in stars.
 // Return FALSE on error.
 
-    static int needsSpliceStar(CGCPortHole* port)
-    {
-	if (port->isItOutput()) {
+int CGCTarget::needsTypeConversionStar(PortHole& port) {
+    if (HLLTarget::needsTypeConversionStar(port)) return TRUE;
+    // check for ports of type FIX;
+    // splice a FixToFix star if the precisions do not match or
+    // one or both side uses precision variables that can change at
+    // runtime
+    if (port.resolvedType() == FIX) {
 
-	    // splice conversion star if type of output port does not
-	    // match the type of the data connection
-	    if ((port->type() != port->resolvedType()) &&
- 	        (port->type() != ANYTYPE))
-		return TRUE;
+	Precision p1, p2;
 
-	    // check for ports of type FIX;
-	    // splice a FixToFix star if the precisions do not match or
-	    // one or both side uses precision variables that can change at
-	    // runtime
-	    if (port->resolvedType() == FIX) {
+	// Determine the two connected ports;
+	// If this port is the output of a fork star we go back to
+	// the input of the fork
+	CGCPortHole* far_port  = (CGCPortHole*)port.far();
+	CGCPortHole* this_port = far_port->realFarPort();
 
-		Precision p1, p2;
+	// if this or the far side is a multiporthole, refer to the
+	// multiport rather than to the normal porthole itself;
+	// this is because when deriving a new port from the multiport,
+	// the precision of the multiport may not have been set yet
+	// (cf. MultiInCGCPort::newPort)
 
-		// Determine the two connected ports;
-		// If this port is the output of a fork star we go back to
-		// the input of the fork
-		CGCPortHole* far_port  = (CGCPortHole*)port->far();
-		CGCPortHole* this_port = far_port->realFarPort();
+	MultiCGCPort *this_mph,*far_mph;
+	this_mph = (MultiCGCPort*)this_port->getMyMultiPortHole();
+	far_mph  = (MultiCGCPort*)far_port ->getMyMultiPortHole();
 
-		// if this or the far side is a multiporthole, refer to the
-		// multiport rather than to the normal porthole itself;
-		// this is because when deriving a new port from the multiport,
-		// the precision of the multiport may not have been set yet
-		// (cf. MultiInCGCPort::newPort)
+	// Get the precision assigned to the two connected ports.
+	// Since the precision() method eventually passes the
+	// precision of the connected port, we use validPrecision()
+	// to determine whether a precision has been assigned
+	// explicitly to the port.
 
-		MultiCGCPort *this_mph,*far_mph;
-		this_mph = (MultiCGCPort*)this_port->getMyMultiPortHole();
-		far_mph  = (MultiCGCPort*)far_port ->getMyMultiPortHole();
+	if (this_mph && this_mph->validPrecision())
+	    p1 = this_mph->precision();
+	else if (this_port->validPrecision())
+	    p1 = this_port->precision();
 
-		// Get the precision assigned to the two connected ports.
-		// Since the precision() method eventually passes the
-		// precision of the connected port, we use validPrecision()
-		// to determine whether a precision has been assigned
-		// explicitly to the port.
+	if (far_mph && far_mph->validPrecision())
+	    p2 = far_mph->precision();
+	else if (far_port->validPrecision())
+	    p2 = far_port->precision();
 
-		if (this_mph && this_mph->validPrecision())
-			p1 = this_mph->precision();
-	   else if (this_port->validPrecision())
-			p1 = this_port->precision();
+	// if at least one of the connected ports uses variable
+	// precisions and the other side defines its own precision,
+	// we need a FixToFix star
+	if (((this_port->attributes() & AB_VARPREC) && p2.isValid()) ||
+	    ((far_port->attributes()  & AB_VARPREC) && p1.isValid()))
+	    return TRUE;
 
-		if (far_mph && far_mph->validPrecision())
-			p2 = far_mph->precision();
-	   else if (far_port->validPrecision())
-			p2 = far_port->precision();
-
-		// if at least one of the connected ports uses variable
-		// precisions and the other side defines its own precision,
-		// we need a FixToFix star
-		if (((this_port->attributes() & AB_VARPREC) && p2.isValid()) ||
-		    ((far_port->attributes()  & AB_VARPREC) && p1.isValid()))
-			return TRUE;
-
-		// otherwise check whether the precisions differ
-		if (p1.isValid() && p2.isValid() && (p1 != p2))
-			return TRUE;
-	    }
-	}
-	return FALSE;
+	// otherwise check whether the precisions differ
+	if (p1.isValid() && p2.isValid() && (p1 != p2))
+	    return TRUE;
     }
-
-// hppa.cfront CC 3.50 has this annoying bug that barfs on the code below
-// > CC: "../../../../src/domains/cgc/kernel/CGCTarget.cc", line 461:
-// > sorry, not implemented: general initializer in initializer list
-// So rather than having a nice clean portable way of doing this, we
-// use an ugly if/else tree below
-
-#define HP_CC_3_50_BUG
-#ifndef HP_CC_3_50_BUG
-struct cnv_tb {
-  /*DataType src, dst;*/
-  const char *src, *dst, *star;
-};
-static struct cnv_tb cnv_table[7] = {
-  {  COMPLEX, 	FIX, 		"CxToFix"	},
-  {  COMPLEX, 	ANYTYPE,	"CxToFloat"	},
-  {  FIX,	COMPLEX,	"FixToCx"	},
-  {  FIX,	FIX,		"FixToFix"	},
-  {  FIX,	ANYTYPE,	"FixToFloat"	},
-  {  ANYTYPE, 	COMPLEX,	"FloatToCx"	},
-  {  ANYTYPE, 	FIX,		"FloatToFix"	}
-};
-#endif // HP_CC_3_50_BUG
-
-
-int CGCTarget::modifyGalaxy() {
-
-    extern int warnIfNotConnected (Galaxy&);
-
-    Galaxy& gal = *galaxy();
-    GalStarIter starIter(gal);
-    Star* star;
-    const char* domain = gal.domain();
-
-    // type conversion table;
-    // procession takes place in chronological order
-
-    if (warnIfNotConnected(gal)) return FALSE;
-
-    while ((star = starIter++) != NULL) {
-	BlockPortIter portIter(*star);
-	CGCPortHole* port;
-	while ((port = (CGCPortHole*)portIter++) != NULL) {
-	    // Splice in type conversion stars.
-	    if (needsSpliceStar(port)) {
-		// Avoid re-initializing the Galaxy, which will break
-		// things if this is a child in a MultiTarget. (Why? See
-		// comments for CGTarget::setup() method.)  Initialize it
-		// only if there is no resolved type.
-		if (port->resolvedType() == NULL) {
-		    gal.initialize();
-		    if (SimControl::haltRequested()) return FALSE;
-		    // We must now re-run modifyGalaxy, blocks & ports may
-		    // have been added or deleted in the initialize method.
-		    return CGCTarget::modifyGalaxy();
-		}
-
-		Star* s = 0;
-
-		PortHole* input = port->far();	// destination input PortHole
-
-#ifdef HP_CC_3_50_BUG
-		if ( port->type() == COMPLEX ) {
-		  if ( port->resolvedType() == FIX ) {
-		    //COMPLEX, 	FIX, 		"CxToFix"
-		    if (!(s = (Star*)spliceStar(input, "CxToFix",
-						TRUE, domain)))
-				return FALSE;
-		  } else {
-		    //COMPLEX, 	ANYTYPE,	"CxToFloat"
-		    if (!(s = (Star*)spliceStar(input, "CxToFloat",
-						TRUE, domain)))
-				return FALSE;
-		  }
-		} else if ( port->type() == FIX ) {
-		  if ( port->resolvedType() == COMPLEX ) {
-		    //FIX,		COMPLEX,	"FixToCx"
-		    if (!(s = (Star*)spliceStar(input, "FixToCx",
-						TRUE, domain)))
-				return FALSE;
-		  } else if ( port->resolvedType() == FIX ) {
-		    //FIX,		FIX,		"FixToFix"
-		    if (!(s = (Star*)spliceStar(input, "FixToFix",
-						TRUE, domain)))
-				return FALSE;
-		  } else {
-		    //FIX,		ANYTYPE,	"FixToFloat"
-		    if (!(s = (Star*)spliceStar(input, "FixToFloat",
-						TRUE, domain)))
-				return FALSE;
-		  }
-		} else {
-		  if ( port->resolvedType() == COMPLEX ) {
-		    //ANYTYPE, 	COMPLEX,	"FloatToCx"
-		    if (!(s = (Star*)spliceStar(input, "FloatToCx",
-						TRUE, domain)))
-				return FALSE;
-		  } else if ( port->resolvedType() == FIX ) {
-		    //ANYTYPE, 	FIX,		"FloatToFix"
-		    if (!(s = (Star*)spliceStar(input, "FloatToFix",
-						TRUE, domain)))
-				return FALSE;
-		  }
-		}
-
-#else // HP_CC_3_50_BUG
-		for (int i=0; i < sizeof(cnv_table)/sizeof(*cnv_table); i++) {
-		    if (((port->type() == cnv_table[i].src) ||
-				  (cnv_table[i].src == ANYTYPE)) &&
-		        ((port->resolvedType() == cnv_table[i].dst) ||
-				  (cnv_table[i].dst == ANYTYPE))) {
-		      if (!(s = (Star*)spliceStar(input,
-			  cnv_table[i].star, TRUE, domain)))
-				return FALSE;
-			  break;
-		    }
-		}
-#endif // HP_CC_3_50_BUG
-		if (s) s->setTarget(this);
-	    }
-	}
-    }
-    return TRUE;
+    return FALSE;
 }
-
-/////////////////////////////////////////
-// addSpliceStars
-/////////////////////////////////////////
 
 static void setupBuffer(CGCStar* s, int dimen, int bufsz) {
 	CGCPortHole* p = (CGCPortHole*) s->portWithName("output");
