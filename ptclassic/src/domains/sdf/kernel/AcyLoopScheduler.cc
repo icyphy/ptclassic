@@ -124,7 +124,6 @@ Also, uses <code>flags[1]</code> for marking nodes.
 void AcyLoopScheduler::createReachabilityMatrix(Galaxy& gal)
 {
     Block *s;
-    int count = 0;
     // reset flags[1] to 0 for all blocks in gal
     resetFlags(gal, 1, 0);
     graphSize = gal.numberBlocks();
@@ -132,26 +131,24 @@ void AcyLoopScheduler::createReachabilityMatrix(Galaxy& gal)
     GalTopBlockIter nextStar(gal);
     while ((s=nextStar++) != NULL) {
 	if (s->flags[1]) continue;
-	if (!(count=visitSuccessors(s,1,count))) return;
+	if (!visitSuccessors(s,1)) return;
     }
-    cout << "The total number of steps take is " << count << "\n";
 }
 
-int AcyLoopScheduler::visitSuccessors(Block* s, int flagLoc, int cnt)
+int AcyLoopScheduler::visitSuccessors(Block* s, int flagLoc)
 {
     Block *succ;
     int fl;
     s->flags[flagLoc] = 1;
     SuccessorIter nextSucc(*s);
     while ((succ=nextSucc++) != NULL) {
-	cnt++;
 	fl = succ->flags[flagLoc];
 	if (fl == 1) {
 	    Error::abortRun("Graph is cyclic.  Aborting...");
 	    return FALSE;
 	}
 	if (fl == 0) {
-	    if (!(cnt+=visitSuccessors(succ, flagLoc, cnt))) return FALSE;
+	    if (!visitSuccessors(succ, flagLoc)) return FALSE;
 	}
 	// Now we have visited and updated the row in the reachability
 	// matrix corresponding to succ.  Hence, s can visit anything that
@@ -159,7 +156,6 @@ int AcyLoopScheduler::visitSuccessors(Block* s, int flagLoc, int cnt)
 	// we already know we can visit succ, then we do not have to
 	// update since it would have happened before.
 	if (!reachMatrix.m[NODE_NUM(s)][NODE_NUM(succ)]) {
-	    cnt += graphSize;
 	    for (int i = 0; i < graphSize; i++) {
 		reachMatrix.m[NODE_NUM(s)][i] = reachMatrix.m[NODE_NUM(s)][i] |
 			reachMatrix.m[NODE_NUM(succ)][i];
@@ -168,7 +164,7 @@ int AcyLoopScheduler::visitSuccessors(Block* s, int flagLoc, int cnt)
 	}
     }
     s->flags[flagLoc] = 2;
-    return cnt;
+    return TRUE;
 }
 
 
@@ -331,12 +327,11 @@ int AcyLoopScheduler :: computeSchedule(Galaxy& gal)
 	Error::abortRun(message);
 	return FALSE;
     }
-    isWellOrdered(&gal, wellOrderedList);
 
     numberBlocks(gal,0);  // Numbers top-level blocks in galaxy at flags[0]
     createIncidenceMatrix(gal);
 
-    if (wellOrderedList.size() == graphSize) {
+    if (isWellOrdered(&gal, wellOrderedList)) {
 	// Means the graph is well ordered; hence, just fill up the
 	// topSort array and call DPPO on it.
 	i = 0;
@@ -355,7 +350,7 @@ int AcyLoopScheduler :: computeSchedule(Galaxy& gal)
 	// Reachability matrix is needed by APGAN.
 	createReachabilityMatrix(gal);
 
-	// Prepare a galaxy for clustering
+	// Prepare the galaxy for clustering
 	AcyCluster dummy;
 	dummy.initializeForClustering(gal);
 
@@ -380,6 +375,7 @@ int AcyLoopScheduler :: computeSchedule(Galaxy& gal)
 	if (rpmc < 0) return FALSE;
 	topSort = RPMCTopSort;
 	rpmcDppo = DPPO();
+	if (rpmcDppo < 0) return FALSE;
 
 	// save results for rpmc
 	SimpleIntMatrix RPMCGcdMatrix = gcdMatrix;
@@ -399,6 +395,7 @@ int AcyLoopScheduler :: computeSchedule(Galaxy& gal)
 	if (apgan < 0) return FALSE;
 	topSort = APGANTopSort;
 	apganDppo = DPPO();
+	if (apganDppo < 0) return FALSE;
 
 	// Compare the two and use the better one.
 	if (rpmcDppo < apganDppo) {
@@ -431,7 +428,7 @@ This function is essentially a hack to get around
 a vexing problem with teh clustering process that leaves the
 topmost level structure as a Galaxy instead of a Cluster.
 
-@Returns Int: -1 if unsuccessful , 1 if successful.
+@Returns Int: 0 if unsuccessful , 1 if successful.
 
 @SideEffects gal will only have one block, a cluster containing everything
 else inside it.
@@ -446,7 +443,7 @@ int AcyLoopScheduler::addTopLevelCluster(Galaxy* gal)
 	c = nextClust++;
 	while ((b=nextClust++) != NULL) {
 	    if (b==c) continue;
-	    if (!c->absorb(*b,0)) return -1;
+	    if (!c->absorb(*b,0)) return FALSE;
 	}
 	cleanupAfterCluster(*gal);
 	if (gal->numberBlocks() != 1) {
@@ -454,11 +451,11 @@ int AcyLoopScheduler::addTopLevelCluster(Galaxy* gal)
 	    message << "Bug in AcyLoopScheduler::addTopLevelCluster galaxy has"
 		    << "more than one block after clustering process";
 	    Error::abortRun(message);
-	    return -1;
+	    return FALSE;
 	}
 	// Change c's name to gal's name.
 	c->setName(gal->name());
-	return 1;
+	return TRUE;
     } else {
 	StringList message;
 	message << "Function addTopLevelCluster called on galaxy that has "
@@ -467,7 +464,7 @@ int AcyLoopScheduler::addTopLevelCluster(Galaxy* gal)
 		<< "OR There's a bug in addTopLevelCluster since it thinks "
 		<< "that the members of the argument galaxy are not Clusters.";
 	Error::abortRun(message);
-	return -1;
+	return FALSE;
    }
 }
 
@@ -487,8 +484,25 @@ objective of buffer minimization.  Since type conversion and LinToCirc/
 CircToLin stars are like B, this preprocessing step will work for any
 spliced star currently used.  Hence, the function below clusters together
 actors like B (that produce and consume the same amount as the source
-or sink that B is connected to) with their source/sink and does not need
-to explicitly check for spliced-in stars (since they are like B).
+or sink that B is connected to) with their source/sink.
+<p>
+However, some care needs to be exercised since there may be non-spliced
+in stars that are "like B" in that there is no rate change across the
+arc and node.  Clustering all these stars together could lead to cycles
+in the graph.  Hence, the following rule is used.  
+<p>
+Let (A,B) be an arc and suppose that A produces the same amount as B consumes
+on this arc.  We cluster A and B together iff either of these conditions
+hold:
+a) B has only one input arc and on all its output arcs it produces the same
+	number as it consumes.
+b) A has only output arc and on all of its input arcs, it produces the same
+	number as it consumes.
+<p>
+As we traverse the graph one node at a time and examine that nodes neighbors,
+if the node under examination is either A or B, and B is a spliced-in star,
+then condition a) is satisfied.  If A is the spliced-in star, then b) is
+satisfied.
 
 @Returns Int: TRUE or FALSE depending on whether the clustering was successfull.
 
@@ -508,9 +522,23 @@ int AcyLoopScheduler::clusterSplicedStars(AcyCluster* gr)
 	while ((p=nextPort++) != NULL) {
 	    flag = 1;
 	    if (!p->far()) continue;
+	    b = (AcyCluster*)p->far()->parent();
+	    if (!b) continue;
 	    if ((sdfParam=p->numXfer()) == p->far()->numXfer()) {
-		b = (AcyCluster*)p->far()->parent();
-		if (!b) continue;
+		// Now determine whether p is an input or output,
+		// and correspondingly, whether b has the right number
+		// of inputs or outputs.
+		if (p->isItInput()) {
+		    // b is a candidate for being clustered into
+		    // the sink of this edge.  Hence, either b should only
+		    // have one output arc or c should have only one input arc.
+		    if (b->numOutputs() > 1 && c->numInputs() > 1) continue;
+		} else {
+		    // b is a candidate for being clustered into the
+		    // source of this edge; hence, it should either have just
+		    // one input or c should have just one output.
+		    if (b->numInputs() > 1 && c->numOutputs() > 1) continue;
+		}
 		SynDFClusterPortIter nextPortb(*b);
 		while ((bp = nextPortb++) != NULL) {
 		    if (sdfParam != bp->numXfer()) {flag = 0; break;}
@@ -568,7 +596,7 @@ int AcyLoopScheduler::RPMC(AcyCluster* gr)
 	    // Means that a bounded cut was not found; call again
 	    // relaxing the bound.  Note that the splitter returns
 	    // -1 iff a cut respecting the bound was not found.
-	    // However, with a bound of N, a cut should always be wrong.
+	    // However, with a bound of N, a cut should always be found.
 	    cost = gr->legalCutIntoBddSets(N);
 	}
 	if (cost == -1) {
@@ -576,7 +604,12 @@ int AcyLoopScheduler::RPMC(AcyCluster* gr)
 	    // since normally the graph splitter should never return -1
 	    // if it can find a bounded cut, and the code above takes
 	    // care of that.
-	    Error::abortRun("A bug detected in AcyCluster::legalCutIntoBddSets");
+	    StringList message;
+	    message << "AcyCluster::legalCutIntoBddSets failed to"
+		    << "produce a cut. Either there is a bug there"
+		    << "or earlier clustering steps have introduced"
+		    << "cycles into the graph.";
+	    Error::abortRun(message);
 	    return cost;
 	}
 	// Now build up the right and left subgraphs.
@@ -898,7 +931,6 @@ int AcyLoopScheduler::DPPO()
 		// First check if the number of delays are sufficiently high
 		// since this is a feedback arc
 		if (tmpDel2 < tmpInc2*reps[ke]) {
-		    // FIXME: Improve the following error message.
 		    StringList message;
 		    message << "Topological sort constructed by RPMC or APGAN "
 		            << "has reverse arcs with insufficient delay. "
@@ -1092,24 +1124,35 @@ StringList AcyLoopScheduler::dispNestedSchedules(int depth,int i,int j,int g)
     return sch;
 }
 
-// move over to Galaxy later
-// Returns a list containing ALL the nodes in the graph in topological
-// ordering if the graph is
-// well ordered.  This means that the
-// following are equivalent for this graph
-// a) there is only 1 topological sort
-// b) there is a hamiltonian path
-// c) there is a total precedence ordering rather than a partial one,
-// d) For any two nodes u,v, it is either the case that u->v is a path
-//     or v->u is a path
-//
-// The algorithm is to repeatedly find sources, and return the incomplete
-// list if there is more than 1 source node at any stage.  If there is
-// only one source at any stage, we mark that node (meaning it is
-// "removed" from the graph) and find sources on the resulting
-// graph.  Worst case running time: O(N+E) where N=graphSize,
-// E is the number of edges.
-void AcyLoopScheduler::isWellOrdered(Galaxy* g, SequentialList& topsort)
+/****
+
+Determine whether the graph is well-ordered or not.
+
+@Description
+Returns a list containing ALL the nodes in the graph in topological
+ordering if the graph is well ordered.  This means that the
+following are equivalent for this graph
+<p>
+<li>a) there is only 1 topological sort
+<li>b) there is a hamiltonian path
+<li>c) there is a total precedence ordering rather than a partial one,
+<li>d) For any two nodes u,v, it is either the case that u->v is a path
+	or v->u is a path
+<p>
+The algorithm is to repeatedly find sources, and return the incomplete
+list if there is more than 1 source node at any stage.  If there is
+only one source at any stage, we mark that node (meaning it is
+"removed" from the graph) and find sources on the resulting
+graph.  Worst case running time: O(N+E) where N=graphSize,
+E is the number of edges.
+
+@SideEffects
+Fills the <code>topsort</code> list with the topological ordering of the nodes
+
+@Returns Int TRUE or FALSE.
+
+****/
+int AcyLoopScheduler::isWellOrdered(Galaxy* g, SequentialList& topsort)
 {
     int flagLoc = 0, numPasses=0;
     resetFlags(*g,flagLoc); // reset flags[flagLoc] for all blocks
@@ -1123,9 +1166,10 @@ void AcyLoopScheduler::isWellOrdered(Galaxy* g, SequentialList& topsort)
 	    numPasses++;
 	    findSources(g, flagLoc, sources, src);
 	} else {
-	    return;
+	    return FALSE;
 	}
     }
+    return TRUE;
 }
 
 // These methods are for debugging; they print out the various matrices
