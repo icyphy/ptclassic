@@ -13,9 +13,5 @@ the "ask" galaxy on the left.
 The modulation format is a simple, baseband, binary-antipodal signal
 with a 100% excess bandwidth raised cosine pulse.
 .Ir "raised cosine pulse"
-The sample rate is eight times the baud rate, as controlled by the
-\fIdecimation\fR and \fIinterpolation\fR parameters of the pulse
-shaping FIR filter.
-.pp
-The resulting signal is low-pass filtered and displayed.
+The sample rate is eight times the baud rate.
 .ES
