@@ -613,6 +613,12 @@ int PTcl::listobjs (int argc,char ** argv) {
 	return TCL_OK;
 }
 
+// Interface to Matlab for matrix computations
+int PTcl::matlab(int argc,char** argv) {
+	matlabtcl.SetTclInterpreter(interp);
+	return matlabtcl.matlab(argc, argv);
+}
+
 int PTcl::reset(int argc,char** argv) {
 	if (argc > 2)
 		return usage ("reset ?<name>?");
@@ -926,7 +932,7 @@ int PTcl::halt(int /*argc*/, char ** /*argv*/) {
 	return TCL_OK;
 }
 
-// Added to support galileo - eal
+// Added to support tycho - eal
 // Monitor commands to ptcl.  The third, monitorPtcl can be redefined.
 // The default method prints the command to the standard output using cout.
 
@@ -1102,6 +1108,7 @@ static InterpTableEntry funcTable[] = {
 	ENTRY(knownlist),
 	ENTRY(link),
 	ENTRY(listobjs),
+	ENTRY(matlab),
 	ENTRY(multilink),
 	ENTRY(newstate),
 	ENTRY(newuniverse),
@@ -1159,7 +1166,7 @@ int PTcl::dispatcher(ClientData which,Tcl_Interp* interp,int argc,char* argv[])
 	Tcl_Interp* save = activeInterp;
 	activeInterp = interp;
 
-	// Added to support galileo - eal
+	// Added to support tycho - eal
 	// If the flag monitor is set, call monitorPtcl to monitor commands.
 	// Avoid the call if the command is "monitorPtcl", "monitorOn",
 	// or "monitorOff".

@@ -46,6 +46,7 @@ interpreter.
 #include "tcl.h"
 #include "NamedObj.h"
 #include "SimControl.h"
+#include "MatlabTcl.h"
 
 #undef setstate                 /* work around bug in Linux headers */
 
@@ -176,12 +177,15 @@ private:
 	// function to register extensions with the Tcl interpreter
 	void registerFuncs();
 
-	// This is added to support galileo - eal
+	// This is added to support tycho - eal
 	// The following flag determines whether ptcl will call the tcl
 	// procedure monitorPtcl every time a ptcl command is invoked.
 	// This procedure can be redefined in Tcl to monitor all commands
 	// executed.
 	static int monitor;
+
+	// the Matlab/Tcl interface class
+	MatlabTcl matlabtcl;
 
 protected:
 
@@ -219,14 +223,13 @@ protected:
 	int computeSchedule();
 
 public:
-// the active Tcl interpreter, for error reporting.
+	// the active Tcl interpreter, for error reporting.
 	static Tcl_Interp* activeInterp;
 
 	PTcl(Tcl_Interp* interp = 0);
 	~PTcl();
 
-	// the dispatcher is called by Tcl to handle all extension
-	// commands.
+	// dispatcher is called by Tcl to handle all extension commands.
 	static int dispatcher(ClientData,Tcl_Interp*,int,char*[]);
 
 // the following are the Tcl-callable functions.  Each returns TCL_OK
@@ -252,8 +255,9 @@ public:
 	int knownlist(int argc,char** argv);
 	int link(int argc,char** argv);
 	int listobjs(int argc,char** argv);
+	int matlab(int argc,char** argv);
 
-	// added to support galileo - eal
+	// added to support tycho - eal
 	int monitorOff(int argc,char** argv);
 	int monitorOn(int argc,char** argv);
 	int monitorPtcl(int argc,char** argv);
