@@ -239,7 +239,7 @@ Caveats: The code should support more "shared users" than just ~ptolemy.
      But this if probably too costly.
 Added handling of $PTOLEMY -- kennard
 */
-static boolean
+boolean
 GetTildePath(facetPtr, tPath)
     octObject		*facetPtr;
     char		*tPath;
@@ -338,44 +338,26 @@ RPCSpot *spot;
 lsList cmdList;
 long userOptionWord;
 {
-static dmTextItem item = {"Palette", 1, DM_WIDTH, "./user.pal", NULL};
     octObject facet;
-    char buf[512];
+    char facetHandle[16];
 
     ViInit("make-schem-icon");
     ErrClear();
+
     /* get current facet */
     facet.objectId = spot->facet;
     if (octGetById(&facet) != OCT_OK) {
-	PrintErr(octErrorString());
-    	ViDone();
+        PrintErr(octErrorString());
+        ViDone();
     }
 
-    if (dmMultiText("Enter pathname of palette", 1, &item) != VEM_OK) {
-	PrintCon("Aborted entry");
-	ViDone();
-    }
-    if (!GetTildePath(&facet, buf)) {
-	PrintErr(ErrGet());
-	ViDone();
-    }
-    DirName(buf);
-    if (IsGalFacet(&facet)) {
-	if (!MkGalIconInPal(&facet, buf, item.value)) {
-	    PrintErr(ErrGet());
-	    ViDone();
-	}
-    } else if (IsPalFacet(&facet)) {
-	if (!MkPalIconInPal(&facet, buf, item.value)) {
-	    PrintErr(ErrGet());
-	    ViDone();
-	}
-    } else {
-	if (!MkUnivIconInPal(&facet, buf, item.value)) {
-	    PrintErr(ErrGet());
-	    ViDone();
-	}
-    }
+    ptkOctObj2Handle(&facet,facetHandle);
+
+    TCL_CATCH_ERR( Tcl_VarEval(ptkInterp,"ptkEditStrings ",
+          " \"Make Schematic Icon\" ",
+          " \"ptkSetMkSchemIcon ", facetHandle, " %s \" ",
+          " \" {{Enter pathname of palette} [ptkGetMkSchemIcon]}\" ",
+          (char *)NULL) )
     ViDone();
 }
 

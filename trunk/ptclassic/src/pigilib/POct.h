@@ -98,6 +98,9 @@ private:
         StringList MkStarDomain; 
 	StringList MkStarDir; 
 	StringList MkStarPalette;
+	// For ptkSetMkSchemIcon and ptkGetMkSchemIcon
+	// FIXME:  Add following line back for MkSchemIcon state
+	// StringList MkSchemPalette;
 
 	// Helper Functions that are not TCL callable directly
 
@@ -144,6 +147,8 @@ public:
 	int ptkSetMkStar (int argc,char** argv);
 	int ptkGetComment (int argc,char** argv);
 	int ptkSetComment (int argc,char** argv);
+	int ptkGetMkSchemIcon (int argc,char** argv);
+	int ptkSetMkSchemIcon (int argc,char** argv);
 	int ptkGetSeed (int argc,char** argv);
 	int ptkSetSeed (int argc,char** argv);
 	int ptkGetDomainNames (int argc,char** argv);
