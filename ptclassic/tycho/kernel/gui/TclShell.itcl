@@ -302,13 +302,7 @@ body ::tycho::TclShell::constructor {args} {
     menubar delete Format
     
     # Change some of the configuration made by default.
-    # NOTE: The -title option of itk::Toplevel should probably
-    # change the name of the icon, but it does not, so we do that
-    # here.
-# FIXME
-#     configure -title "Tcl Shell"
-#     set tl [winfo toplevel $itk_component(hull)]
-#     wm iconname $tl "Tcl Shell"
+    displayer configure -title "Tcl Shell"
     
     # Add a Special menu
     menubar addMenu Special -underline 0
