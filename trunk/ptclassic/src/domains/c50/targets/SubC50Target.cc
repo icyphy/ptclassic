@@ -46,13 +46,13 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 SubC50Target :: SubC50Target(const char* nam, const char* desc,
 			     const char* assocDomain) :
-	C50Target(nam,desc),TITarget(nam,desc,"C50Star",assocDomain)
+C50Target(nam,desc,assocDomain),TITarget(nam,desc,"C50Star",assocDomain)
 {
 	initStates();
 }
 
 SubC50Target::SubC50Target(const SubC50Target& arg) :
-	C50Target(arg),TITarget(arg)
+C50Target(arg),TITarget(arg)
 {
 	initStates();
 	copyStates(arg);
@@ -81,7 +81,7 @@ Block* SubC50Target::makeNew() const {
 
 ISA_FUNC(SubC50Target, C50Target);
 
-//make an instance
+// Register an instance
 static SubC50Target proto("sub-C50",
 			  "generate subroutines pigiInit and pigiMain");
 
