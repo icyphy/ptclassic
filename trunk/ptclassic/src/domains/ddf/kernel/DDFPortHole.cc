@@ -1,6 +1,9 @@
 #include "Block.h"
 #include "DDFConnect.h"
 #include "Particle.h"
+#include "Plasma.h"
+#include "CircularBuffer.h"
+#include "Geodesic.h"
 
 /**************************************************************************
 Version identification:
