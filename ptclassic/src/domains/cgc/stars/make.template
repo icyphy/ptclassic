@@ -27,10 +27,12 @@ PL_SRCS= \
  CGCAdd.pl \
  CGCBlackHole.pl \
  CGCCollect.pl  \
+ CGCCommutator.pl \
  CGCConst.pl \
  CGCCos.pl \
  CGCCxToRect.pl \
  CGCDB.pl \
+ CGCDistributor.pl \
  CGCDownSample.pl \
  CGCExp.pl \
  CGCFFTCx.pl \
