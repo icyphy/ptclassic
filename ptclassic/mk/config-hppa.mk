@@ -53,7 +53,7 @@ RANLIB =	ranlib
 # ptlang and islang use yacc, which is not necessarily part of hpux10.x
 YACC =		bison -y
 # src/kernel/makefile uses this to 
-HP_AS =		/usr/ccs/bin/gas
+HP_AS =		/usr/ccs/bin/as
 # Use gcc everywhere, including octtools
 CC =		gcc
 OPTIMIZER =	-O2
