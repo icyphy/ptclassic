@@ -23,16 +23,17 @@ limitation of liability, and disclaimer of warranty provisions.
     codeblock(receiveData,"int numXfer,const char* command") {
     char buffer[@(numXfer*3)];
     int status;
+    int i;
     status = read(dsp->fd,buffer,@(numXfer*3));
     if (status == 0) {
-	fprintf(stderr,"receive: DSP wormhole received premature EOF");
+	fprintf(stderr,"DSP read ioctl premature EOF\n");
 	exit(1);
     }
     if (status == -1) {
-	fprintf(stderr,"receive: DSP wormhole receive timeout");
+	fprintf(stderr,"DSP read ioctl timeout\n");
 	exit(1);
     }
-    for (int i = 0; i < @numXfer; i++) {
+    for (i = 0; i < @numXfer; i++) {
 	int value = (buffer[3*i]<<16)+ (buffer[3*i+1]<<8)+ buffer[3*i+2];
 	if (value & 0x00800000) value |= 0xff000000;
         @command;
@@ -42,7 +43,7 @@ limitation of liability, and disclaimer of warranty provisions.
     
     go {
 	const char* intReceive = "$ref(output,i) = value";
-	const char* fixReceive = "$ref(output,i) = value/(1<<(24-1))";
+	const char* fixReceive = "$ref(output,i) = (double)value/(1<<23)";
 	if (output.resolvedType()==INT) 
 	    addCode(receiveData(output.numXfer(),intReceive));
 	else

@@ -14,30 +14,37 @@ limitation of liability, and disclaimer of warranty provisions.
     location { CG56 Target Directory }
     explanation {
     }
-
+    state {
+	name { S56XFilePrefix }
+	type { string }
+	default { "" }
+	desc { The file prefix of the s56x generated files.  Set by 
+	       CGCS56XTarget::create{Send,Receive}
+	}
+    }
     codeblock(downloadCode,"const char* filePrefix,const char* s56path") {
     {
 	Params p;
 
-	// open the DSP
+	/* open the DSP */
 	if ((dsp = qckAttach("/dev/s56dsp", NULL, 0)) == NULL) {
 		fprintf(stderr,"Could not access the S-56X Card");
 		exit(1);
 	}
 
-	// boot the moniter
+	/* boot the moniter */
 	if (qckBoot(dsp,"@s56path/lib/qckMon.lod","@filePrefix.lod")==-1) {
 		fprintf(stderr,qckErrString);
 		exit(1);
 	}
 
-	// load the application
+	/* load the application */
 	if (qckLoad(dsp,"@filePrefix.lod") == -1) {
 		fprintf(stderr,qckErrString);
 		exit(1);
 	}
 
-	// get the DSP parameters
+	/* get the DSP parameters */
 	if (ioctl(dsp->fd,DspGetParams, &p) == -1) {
 		fprintf(stderr,"Read failed on S-56X parameters");
 		exit(1);
@@ -59,23 +66,29 @@ limitation of liability, and disclaimer of warranty provisions.
 		fprintf(stderr,"NO STARTW label in @filePrefix.lod");
 		exit(1);
 	}
-	// set the DSP parameters
+	/* set the DSP parameters */
 	if (ioctl(dsp->fd,DspSetParams, &p) == -1) {
 		fprintf(stderr,"Write failed on S-56X parameters");
 		exit(1);
 	}
+    }
+    if (qckJsr(dsp,"START") == -1) {
+	fprintf(stderr,qckErrString);
+	exit(1);
     }
     }
 
     initCode {
 	addInclude("<sys/types.h>");
 	addInclude("<sys/uio.h>");
-	addInclude("\"s56dspUser.h\"");
+	addInclude("<s56dspUser.h>");
+	addInclude("<qckMon.h>");
+	addInclude("<stdio.h>");
+	addDeclaration("    QckMon* dsp;","dsp");
 	const char *s56path = getenv("S56DSP");
 	if (s56path == NULL)
 		s56path = expandPathName("$PTOLEMY/vendors/s56dsp");
-	const char* filePrefix = myTarget()->stateWithName("file")->currentValue();
-	addCode(downloadCode(filePrefix,s56path));
+	addMainInit(downloadCode(S56XFilePrefix,s56path),"s56load");
     }
     
 }
