@@ -209,7 +209,7 @@ putprelude(void)
 }
 
 void
-putpostlude(void)
+putpostlude()
 {	putpages();
 	fprintf(pfd, "%%%%Trailer\n");
 	fprintf(pfd, "end\n");
