@@ -118,12 +118,12 @@ const int linkingNotSupported =
 #if defined(PTHPPA) &&  __GNUG__ > 1
 // Uncomment the # diretives below for Neal Becker's HPPA shl_load() style
 // dynamic linking.
-// To get this to work, you'll need currently
-// (3/95) unreleased patches to gcc-2.6.3.u6 and a shared libg++.
-// #define USE_SHLLOAD
-// #define SHARED_OBJECT_COMMAND "g++ -shared -fPIC -nostdlib -o"
-// #include <dl.h>
-// #include <errno.h>
+// To get this to work, you'll need a linker patch
+// As of 4/95 the linker patch was PHSS_5083* for hpux9.x
+#define USE_SHLLOAD
+#define SHARED_OBJECT_COMMAND "g++ -shared -fPIC -nostdlib -o"
+#include <dl.h>
+#include <errno.h>
 #endif
 
 // Full pathname of the "nm" program; it reads symbol names from a .o
@@ -207,15 +207,6 @@ extern "C" size_t getpagesize(void);
 //
 // This is still experimental.  If this works, then there will be no
 // need to call dlsym().
-//
-// Joe Buck's g++ FAQ says:
-// `If you want to build shared libraries from g++ compiled code on any
-// sort of SVr4 system (including Solaris) you should contact Ron Guilmette
-// <rfg@netcom.com>.  He has patches that insure that any file-scope static-
-// storage objects within such libraries will be properly initialized when
-// the libraries are first attached to your running process. (The patches
-// are for g++ 2.5.8.  They *might* be incorporated into the g++ 2.6 standard
-// distribution, but that's not certain yet.)'
 //
 #define NO_INVOKECONSTRUCTORS
 // NO_INVOKECONSTRUCTORS only works with dlopen() style linking
