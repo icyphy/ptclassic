@@ -36,85 +36,148 @@
 # cannot run these in the same process, they require different versions
 # of Tcl
 #
-# The procs in this file are based on the Tcl-DP commands.
-
-#######################################################################
-#### tydp_connect
-# Tcl-DP usage: dp_connect tcp -host $host -port $port] 0]
+# The procs in this file are loosely based on the Tcl-DP commands.
 #
-proc tydp_connect {host port} {
-}
-
-#######################################################################
-#### tydp_RDO
-# Perform a remote procedure call without return value.
-#
-proc tydp_RDO {channel args} {
-}
-
-#######################################################################
-#### tydp_RPC
-# Perform a remote procedure call.
-#
-proc tydp_RPC {channel args} {
-}
+# FIXME: This client/server setup is very insecure.  If the server is
+# running on a machine, then anyone on the local machine can connect
+# to the server and run arbitrary commands as the user that is running
+# the server.
 
 
 ########################################################################
-#### tydp_MakeRPCClient
+#### tydp_StartJava
+# Setup a connect to a jtclsh 
 #
-proc tydp_MakeRPCClient {host port {checkCmd none}} {
-    # puts "attempting to connect"
-    set client [lindex [tydp_connect tcp -host $host -port $port] 0]
-    # puts "connected -- waiting for reply"
-    set return [gets $client]
-    # puts stdout $return
-    if {[lindex $return 1] == "refused:"} {
-	close $client
-	error $return
+proc tydp_StartJava {} {
+    global tycho
+    if {![info exists tycho]} {
+	set tycho [file join / users ptdesign]
     }
-    if {[string match "Server not responding*" $return]} {
-        close $client
-        error $return
+    # FIXME: we can only have one Tcl Blend server running on a machine
+    # because we hardwire the port number
+    set port 19876
+    # FIXME: this will probably only work under Unix right now.
+    # FIXME: we need to somehow close this process
+    # FIXME: we need to save the output
+    set pid [exec jtclsh [file join $tycho kernel tydp.tcl] > /tmp/jtclsh.out &]
+    exec sleep 5
+    set socket [tydp_MakeRPCClient 19876]
+    return [list $socket $pid]
+}
+
+########################################################################
+#### tydp_MakeRCPClient
+# Setup a client connection on a specific port
+#
+proc tydp_MakeRPCClient {port} {
+    puts "attempting to connect"
+    set clientSocket [socket localhost $port]
+    puts "tydp_MakeRPCClient [_tydp_sockName $clientSocket]"
+    fconfigure $clientSocket -blocking 
+    #fileevent $clientSocket readable "_tydp_ReadOrClose $clientSocket"
+    #fileevent $clientSocket writable "_tydp_Write $clientSocket"
+    return $clientSocket
+}
+
+########################################################################
+#### tydp_MakeRCPServer
+# Set up a server on a specific port
+#
+proc tydp_MakeRPCServer {port} {
+    set serverSocket [socket -server _tydp_serverCmd $port]
+    puts "tydp_MakeRPCServer $port: serverSocket = $serverSocket"
+    puts "tydp_MakeRPCServer: [_tydp_sockName $serverSocket]"
+    # Need this for a tclsh
+    vwait forever
+}
+
+########################################################################
+#### tydp_RPC
+# Run a remote command on channel.  Wait for the results
+#
+proc tydp_RPC {channel args} {
+    eval [puts $channel $args]
+    flush $channel
+    fconfigure $channel -blocking 0
+    # FIXME: this is a busy loop, and it sucks.
+    set rl {}
+    while {[llength $rl] != 2} {
+	append rl [read $channel]
     }
-    tydp_admin register $client -check $checkCmd
-    tydp_CleanupRPC $client
-    # puts stdout "Created $client"
-    return $client
+    if {[lindex $rl 0]} {
+	global errorInfo
+	set errorInfo [lindex $rl 0]
+	error [lindex $rl 1]
+    } else {
+	return [lindex $rl 1]
+    }
 }
 
-proc tydp_MakeRPCServer {{port 0} {loginFunc none} {checkCmd none}
-			{retPort 0}} {
-    # puts "tydp_MakeRPCServer $port $loginFunc $checkCmd $retPort"
-    set rv [tydp_connect tcp -server 1 -myport $port]
-    # puts "rv = $rv"
-    set server [lindex $rv 0]
+########################################################################
+# Procs internal to tydp are below here.  All internal procs start
+# with _tydp.
+# If you call these from methods other than the extern tydp methods,
+# then rats will come over and chew your toes off in your sleep.  
+########################################################################
 
-    fileevent $server readable "tydp_AcceptRPCConnection $loginFunc $checkCmd $server"
-    tydp_atexit appendUnique "close $server"
-    tydp_atclose $server append "tydp_ShutdownServer $server"
-    return $server
+########################################################################
+#### _tydp_sockName
+# Used for debugging.  Given a socket channel, return the address,
+# hostname and port in human readable form
+proc _tydp_sockName {socket} {
+    set rv [fconfigure $socket -sockname]
+    return "$socket: address: [lindex $rv 0] hostname: [lindex $rv 1] \
+	    port: [lindex $rv 2]"
 }
 
-#######################################################################
+########################################################################
+#### _tydp_serverCmd
+# This command is called whenever the server gets an inital connection
+# from a client.  For security reasons, we only allow connections from
+# localhost.
 #
-# This creates two "callbacks" which will clean up RPC connections
-# behind the user's back.  If the user calls "close $rpcchan", we
-# "alias" this to "tydp_CloseRPC $rpcchan" which is defined below.
-#
-# Likewise, if the user tries to exit tclsh/wish, we close the
-# RPC channel first (which will, in turn, call tydp_CloseRPC as above.
-#
+proc _tydp_serverCmd {channel clientAddress clientPort} {
+    if { "$clientAddress" != "127.0.0.1"} {
+	puts stderr "_tydp_serverCmd: $clientAddress != 127.0.0.1"
+	exit
+    }
 
-proc tydp_CleanupRPC {file} {
-    tydp_atclose $file appendUnique "tydp_CloseRPC $file"
-    tydp_atexit appendUnique "close $file"
+    puts "_tydp_serverCmd $channel $clientAddress $clientPort"
+    fconfigure $channel -blocking 0
+    fileevent $channel readable "_tydp_ReadOrClose $channel"
+    #fileevent $channel writable "_tydp_Write $channel"
 }
 
-
-proc tydp_CloseRPC {file} {
-    tydp_RDO $file dp_CloseRPCFile
-    tydp_admin delete $file
-    tydp_atexit delete "close $file"
-    # puts stdout "close $file"
+########################################################################
+#### _tydp_ReadOrClose
+# Event handler for reading from sockets.
+# 
+proc _tydp_ReadOrClose {fd} {
+    puts "_tydp_ReadOrClose: $fd"
+    set line [gets $fd]
+    puts "$line"
+    if [eof $fd] {
+	puts "_tydp_ReadOrClose: eof $fd"
+        if ![catch {close $fd} errMsg] {
+	    puts "_tydp_ReadOrClose: close $fd failed: $errMsg "
+	}
+	return;
+    }
+    if [catch {eval $line} result] {
+	global errorInfo
+	puts $fd [list 1 $result $errorInfo]
+	flush $fd
+    } else {
+	puts $fd [list 0 $result]
+	flush $fd
+    }
 }
+
+#
+# If this file is sourced in a Tcl that has the java package loaded
+# then start up the server and wait forever
+if {[lsearch [package names ] java] == 1} {
+    tydp_MakeRPCServer 19876
+    vwait foreever
+}
+
