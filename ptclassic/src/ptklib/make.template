@@ -39,8 +39,8 @@ all:	makefile $(LIB)
 install: makefile $(LIBDIR)/$(LIB)
 
 # include the X11, oct and tcl headers for C++ as well as C
-INCL=-I$(KERNDIR) -I$(TCL_LIBDIR)
-C_INCL=-I$(TCL_LIBDIR)
+INCL=-I$(KERNDIR) -I$(TCL_INCDIR)
+C_INCL=-I$(TCL_INCDIR)
 
 lint:	$(LIBCSRCS)
 	lint -u $(LIBCSRCS) > lint
