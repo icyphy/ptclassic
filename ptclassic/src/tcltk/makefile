@@ -90,6 +90,7 @@ ENABLE_GCC =		--enable-gcc --disable-load
 
 ITCL_MAJOR_VERSION =	itcl2.0
 ITCL_MAJOR_VERSION_NUMBER = 2.0
+ITCL_MAJOR_VERSION_INT = 2
 ITCL_VERSION =		itcl2.0
 
 IWIDGETS_VERSION =	iwidgets2.0.0
@@ -150,7 +151,7 @@ ITCL_DEST_LIB = $(ITCL_DEST)/lib
 ITCL_SHARED_OBJ =	$(TCLTK_OBJ)/$(ITCL_VERSION).shared
 ITCL_SHARED_DEST_LIB = 	$(ITCL_DEST)/lib/shared
 
-# itcl-2.0b2 contains its own custom tcltk
+# itcl2.0 contains its own custom tcltk
 all: 		configure itcl
 configure:	$(ITCL_OBJ)/config.status $(TCLTK_OBJ)/makefile
 bin:		itcl
@@ -258,7 +259,7 @@ clean_tk:
 ######################################################################
 # Rules for itcl
 # itcl is an extension for tcl that provides tcl 'classes'
-# The itcl-2.0b distribution contains tcl and tk
+# The itcl2.0 distribution contains tcl and tk
 
 # Configure itcl
 $(ITCL_OBJ)/config.status: config_itcl
@@ -385,41 +386,41 @@ $(ITCL_SHARED_OBJ): $(TCLTK_OBJ)
 
 itcl_shared: $(ITCL_SHARED_OBJ) \
 		$(ITCL_SHARED_OBJ)/iwidgets/init.iwidgets \
-		$(ITCL_SHARED_OBJ)/tcl/libtcl.so \
-		$(ITCL_SHARED_OBJ)/tk/libtk.so \
-		$(ITCL_SHARED_OBJ)/itcl/libitcl.so \
-		$(ITCL_SHARED_OBJ)/itk/libitk.so
+		$(ITCL_SHARED_OBJ)/tcl/libtcl.$(LIBSUFFIX) \
+		$(ITCL_SHARED_OBJ)/tk/libtk.$(LIBSUFFIX) \
+		$(ITCL_SHARED_OBJ)/itcl/libitcl.$(LIBSUFFIX) \
+		$(ITCL_SHARED_OBJ)/itk/libitk.$(LIBSUFFIX)
 	@echo "Done making all shared libraries in itcl"
 
 $(ITCL_SHARED_OBJ)/iwidgets/init.iwidgets:
 	(cd  $(ITCL_SHARED_OBJ)/$(IWIDGETS_VERSION); $(MAKE) all)
 
-$(ITCL_SHARED_OBJ)/tcl/libtcl.so: 
+$(ITCL_SHARED_OBJ)/tcl/libtcl.$(LIBSUFFIX): 
 	(cd  $(ITCL_SHARED_OBJ)/tcl$(ITCL_TCL_MAJOR_VERSION_NUMBER); $(MAKE) \
 	       CFLAGS="$(CFLAGS) $(WRITABLE_STRINGS_CFLAGS) $(C_SHAREDFLAGS)" \
 		X11_INCLUDES="$(X11_INCSPEC)" \
 		X11_LIB_SWITCHES="$(X11_LIBSPEC)" \
 		all)
 	(cd  $(ITCL_SHARED_OBJ)/tcl$(ITCL_TCL_MAJOR_VERSION_NUMBER); \
-		 $(CSHARED_LIBRARY_COMMAND) libtcl.so *.o)
+		 $(CSHARED_LIBRARY_COMMAND) libtcl.$(LIBSUFFIX) *.o)
 
-$(ITCL_SHARED_OBJ)/tk/libtk.so: 
+$(ITCL_SHARED_OBJ)/tk/libtk.$(LIBSUFFIX): 
 	(cd  $(ITCL_SHARED_OBJ)/tk$(ITCL_TK_MAJOR_VERSION_NUMBER); $(MAKE) \
 	       CFLAGS="$(CFLAGS) $(WRITABLE_STRINGS_CFLAGS) $(C_SHAREDFLAGS)" \
 		X11_INCLUDES="$(X11_INCSPEC)" \
 		X11_LIB_SWITCHES="$(X11_LIBSPEC)" \
 		all)
 	(cd  $(ITCL_SHARED_OBJ)/tk$(ITCL_TK_MAJOR_VERSION_NUMBER); \
-		$(CSHARED_LIBRARY_COMMAND) libtk.so *.o)
+		$(CSHARED_LIBRARY_COMMAND) libtk.$(LIBSUFFIX) *.o)
 
-$(ITCL_SHARED_OBJ)/itcl/libitcl.so: 
+$(ITCL_SHARED_OBJ)/itcl/libitcl.$(LIBSUFFIX): 
 	(cd  $(ITCL_SHARED_OBJ)/itcl; $(MAKE) \
 	       CFLAGS="$(CFLAGS) $(WRITABLE_STRINGS_CFLAGS) $(C_SHAREDFLAGS)" \
 		X11_INCLUDES="$(X11_INCSPEC)" \
 		X11_LIB_SWITCHES="$(X11_LIBSPEC)" \
 		SHLIB_LD=ld \
 		shared)
-$(ITCL_SHARED_OBJ)/itk/libitk.so: 
+$(ITCL_SHARED_OBJ)/itk/libitk.$(LIBSUFFIX): 
 	(cd  $(ITCL_SHARED_OBJ)/itk; $(MAKE) \
 	       CFLAGS="$(CFLAGS) $(WRITABLE_STRINGS_CFLAGS) $(C_SHAREDFLAGS)" \
 		X11_INCLUDES="$(X11_INCSPEC)" \
@@ -428,7 +429,7 @@ $(ITCL_SHARED_OBJ)/itk/libitk.so:
 		shared)
 
 # Install itcl
-install_itcl_shared: $(ITCL_SHARED_DEST_LIB)/libitcl.so
+install_itcl_shared: $(ITCL_SHARED_DEST_LIB)/libitcl.$(LIBSUFFIX)
 	# make links be relative, not absolute so we can move the dist.
 	-(cd $(ITCL_DEST)/bin; rm -f itclsh itkwish tclsh wish; \
 		ln -s itclsh$(ITCL_MAJOR_VERSION_NUMBER) itclsh; \
@@ -436,14 +437,14 @@ install_itcl_shared: $(ITCL_SHARED_DEST_LIB)/libitcl.so
 		ln -s tclsh$(ITCL_TCL_MAJOR_VERSION_NUMBER) tclsh; \
 		ln -s wish$(ITCL_TK_MAJOR_VERSION_NUMBER) wish)
 
-$(ITCL_SHARED_DEST_LIB)/libitcl.so: \
+$(ITCL_SHARED_DEST_LIB)/libitcl.$(LIBSUFFIX): \
 		$(ITCL_DEST) $(ITCL_DEST_LIB) \
 		$(TCLTK_DEST) \
 		$(ITCL_SHARED_DEST_LIB) $(ITCL_INDEPENDENT_DEST) \
-		$(ITCL_SHARED_OBJ)/itcl/libitcl.so \
-		$(ITCL_SHARED_DEST_LIB)/libtcl.so \
-		$(ITCL_SHARED_DEST_LIB)/libtk.so \
-		$(ITCL_SHARED_DEST_LIB)/libitk.so \
+		$(ITCL_SHARED_OBJ)/itcl/libitcl.$(LIBSUFFIX) \
+		$(ITCL_SHARED_DEST_LIB)/libtcl.$(LIBSUFFIX) \
+		$(ITCL_SHARED_DEST_LIB)/libtk.$(LIBSUFFIX) \
+		$(ITCL_SHARED_DEST_LIB)/libitk.$(LIBSUFFIX) \
 		$(TCL_DEST) $(TCL_INDEPENDENT_DEST) \
 		$(TK_DEST) $(TCL_INDEPENDENT_DEST) 
 	(cd  $(ITCL_SHARED_OBJ); $(MAKE) \
@@ -452,7 +453,8 @@ $(ITCL_SHARED_DEST_LIB)/libitcl.so: \
 		X11_LIB_SWITCHES="$(X11_LIBSPEC)" \
 		INCLUDE_DIR=$(ITCL_INDEPENDENT_DEST)/include \
 		install)
-	mv $(ITCL_DEST_LIB)/libitcl.so.2 $(ITCL_SHARED_DEST_LIB)/libitcl.so
+	mv $(ITCL_DEST_LIB)/libitcl.$(LIBSUFFIX).$(ITCL_MAJOR_VERSION_INT) \
+		$(ITCL_SHARED_DEST_LIB)/libitcl.$(LIBSUFFIX)
 
 
 
@@ -465,12 +467,16 @@ $(ITCL_SHARED_DEST_LIB):
 
 
 # Links so that we don't have to change version numbers in lots of makefiles.
-$(ITCL_SHARED_DEST_LIB)/libtcl.so: $(ITCL_SHARED_OBJ)/tcl/libtcl.so
-	mv $(ITCL_SHARED_OBJ)/tcl$(ITCL_TCL_MAJOR_VERSION_NUMBER)/libtcl.so $@
-$(ITCL_SHARED_DEST_LIB)/libtk.so: $(ITCL_SHARED_OBJ)/tk/libtk.so 
-	mv $(ITCL_SHARED_OBJ)/tk$(ITCL_TK_MAJOR_VERSION_NUMBER)/libtk.so $@
-$(ITCL_SHARED_DEST_LIB)/libitk.so: $(ITCL_SHARED_OBJ)/itk/libitk.so 
-	mv $(ITCL_DEST_LIB)/libitk.so.2 $(ITCL_SHARED_DEST_LIB)/libitk.so
+$(ITCL_SHARED_DEST_LIB)/libtcl.$(LIBSUFFIX): \
+				$(ITCL_SHARED_OBJ)/tcl/libtcl.$(LIBSUFFIX)
+	mv $(ITCL_SHARED_OBJ)/tcl$(ITCL_TCL_MAJOR_VERSION_NUMBER)/libtcl.$(LIBSUFFIX) $@
+$(ITCL_SHARED_DEST_LIB)/libtk.$(LIBSUFFIX): \
+				$(ITCL_SHARED_OBJ)/tk/libtk.$(LIBSUFFIX) 
+	mv $(ITCL_SHARED_OBJ)/tk$(ITCL_TK_MAJOR_VERSION_NUMBER)/libtk.$(LIBSUFFIX) $@
+$(ITCL_SHARED_DEST_LIB)/libitk.$(LIBSUFFIX): \
+				$(ITCL_SHARED_OBJ)/itk/libitk.$(LIBSUFFIX) 
+	mv $(ITCL_DEST_LIB)/libitk.$(LIBSUFFIX).$(ITCL_MAJOR_VERSION_INT) \
+		$(ITCL_SHARED_DEST_LIB)/libitk.$(LIBSUFFIX)
 
 
 clean_itcl_shared:
