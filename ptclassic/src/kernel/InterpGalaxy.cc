@@ -25,15 +25,6 @@ $Id$
 
 extern Error errorHandler;
 
-
-// Make a copy of a new string in a safe place.  This is needed because
-// we may be fed strings from an interpreter that are later written over.
-static char*
-savestring (const char* txt) {
-	char* s = new char[strlen(txt)+1];
-	return strcpy (s, txt);
-}
-
 // Report an error: no such star or porthole
 
 static void noInstance(const char* star,const char* gal) {
@@ -320,7 +311,7 @@ InterpGalaxy::setDomain (const char* name) {
 // This is the key to the works -- the function that makes an identical
 // galaxy, given a galaxy.
 Block* 
-InterpGalaxy::clone() {
+InterpGalaxy::clone() const {
 // make a new interpreted galaxy!  We do this by processing the action
 // list.
 	InterpGalaxy* gal = new InterpGalaxy;
@@ -330,85 +321,85 @@ InterpGalaxy::clone() {
 
 // process the action list
 	int nacts = actionList.size();
-	actionList.reset();
+	StringListIter next(actionList);
 
 	while (nacts > 0) {
 		const char *a, *b, *c, *d, *action;
 		int ndelay;
 
-		action = actionList.next();
+		action = next++;
 		switch (action[0]) {
 
 		case 'S':	// make a Star
-			a = actionList.next();
-			b = actionList.next();
+			a = next++;
+			b = next++;
 			gal->addStar (a, b);
 			nacts -= 3;
 			break;
 
 		case 'C':	// add an internal connection
-			a = actionList.next();
-			b = actionList.next();
-			c = actionList.next();
-			d = actionList.next();
-			ndelay = atoi(actionList.next());
+			a = next++;
+			b = next++;
+			c = next++;
+			d = next++;
+			ndelay = atoi(next++);
 
 			gal->connect (a, b, c, d, ndelay);
 			nacts -= 6;
 			break;
 
 		case 'A':	// add an alias porthole to the galaxy
-			a = actionList.next();
-			b = actionList.next();
-			c = actionList.next();
+			a = next++;
+			b = next++;
+			c = next++;
 
 			gal->alias (a, b, c);
 			nacts -= 4;
 			break;
 
 		case 'n':	// make a node (Geodesic)
-			a = actionList.next();
+			a = next++;
 			gal->addNode (a);
 			nacts -= 2;
 			break;
 
 		case 'c':	// connect a port to a node
-			a = actionList.next();
-			b = actionList.next();
-			c = actionList.next();
-			ndelay = atoi(actionList.next());
+			a = next++;
+			b = next++;
+			c = next++;
+			ndelay = atoi(next++);
 			gal->nodeConnect (a, b, c, ndelay);
 			nacts -= 5;
 			break;
 
 		case 'd':	// disconnect a porthole
-			a = actionList.next();
-			b = actionList.next();
+			a = next++;
+			b = next++;
 			gal->disconnect (a, b);
 			nacts -= 3;
 			break;
 
                case 'T':       // add a state
-                        a = actionList.next();
-                        b = actionList.next();
-                        c = actionList.next();
+                        a = next++;
+                        b = next++;
+                        c = next++;
 
                         gal->addState (a, b, c);
                         nacts -= 4;
                         break;
                case 'R':       // set a state
-                        a = actionList.next();
-                        b = actionList.next();
-                        c = actionList.next();
+                        a = next++;
+                        b = next++;
+                        c = next++;
 
                         gal->setState (a, b, c);
                         nacts -= 4;
                         break;
 
 		case 'N':	// make ports within multiports
-			a = actionList.next();
-			b = actionList.next();
-			c = actionList.next();
+			a = next++;
+			b = next++;
+			c = next++;
 
 			gal->numPorts (a, b, atoi (c));
 			nacts -= 4;
@@ -416,7 +407,7 @@ InterpGalaxy::clone() {
 
 		case 'D':	// change the domain
 			oldDom = KnownBlock::domain();
-			a = actionList.next();
+			a = next++;
 			gal->setDomain (a);
 			nacts -= 2;
 			break;
@@ -472,22 +463,26 @@ Block* InterpGalaxy::blockWithDottedName (const char* dotname) {
 // ports, and states are members.
 
 InterpGalaxy :: ~InterpGalaxy () {
+	GalTopBlockIter nextb(*this);
 	for (int i = numberBlocks(); i > 0; i--)
-		delete &nextBlock();
+		delete nextb++;
+	BlockPortIter nextp(*this);
 	for (i = numberPorts(); i > 0; i--)
-		delete &nextPort();
+		delete nextp++;
+	BlockStateIter nexts(*this);
 	for (i = numberStates(); i > 0; i--)
-		delete &nextState();
+		delete nexts++;
+	NodeListIter nextn(nodes);
 	for (i = nodes.size(); i > 0; i--)
-		delete &(nodes++);
+		delete nextn++;
 }
 
 // function to find Node with given name, or NULL if no match
 Geodesic*
 NodeList::nodeWithName (const char* ident) {
 	Geodesic *g;
-	for (int i = size(); i > 0; i--) {
-		g = (Geodesic*)next();
+	NodeListIter next(*this);
+	while ((g = next++) != 0) {
 		if (strcmp(ident, g->readName()) == 0)
 			return g;
 	}
