@@ -19,6 +19,10 @@ Methods for class Galaxy
 #include "Galaxy.h"
 #include "Block.h"
 #include "Scheduler.h"
+#include "ConstIters.h"
+
+// Constructor
+Galaxy :: Galaxy() : myDomain(0) {}
 
 // small virtual functions
 
@@ -51,8 +55,8 @@ Galaxy :: printRecursive () const {
 	out += printPorts("Galaxy");
 	out += printStates("Galaxy");
 	out += "Blocks in the Galaxy:----------------------------------\n";
-	Block* b;
-	GalTopBlockIter next(*this);
+	const Block* b;
+	CGalTopBlockIter next(*this);
 	while ((b = next++) != 0)
 		out += b->printRecursive();
 	return out;
@@ -72,8 +76,8 @@ Galaxy :: printVerbose () const {
 	out += readDescriptor();
 	out += "\n";
 	out += "Contained blocks: ";
-	Block* b;
-	GalTopBlockIter next(*this);
+	const Block* b;
+	CGalTopBlockIter next(*this);
 	while ((b = next++) != 0) {
 		out += b->readName();
 		out += " ";
@@ -121,7 +125,7 @@ void Galaxy :: initState() {
 
 // return ptr to sub-block with given name, NULL if not found
 Block *
-Galaxy::blockWithName(const char* name) const {
+Galaxy::blockWithName(const char* name) {
 	Block* b;
 	GalTopBlockIter next(*this);
 	while ((b = next++) != 0) {
