@@ -1333,16 +1333,16 @@ int POct::ptkFacetContents (int aC,char** aV) {
     return TCL_OK;
 }
 
-// ptkGetMaster <OctInstanceHandle> [contents|interface]
+// ptkOpenMaster <OctInstanceHandle> [contents|interface]
 // Returns the Oct ID of the master facet of the passed instance
 // by default it returns the contents facet, but if the third
 // arguement is "contents" or "interface" it returns that facet.
-int POct::ptkGetMaster (int aC,char** aV) {
+int POct::ptkOpenMaster (int aC,char** aV) {
     octObject instance;
     octObject facet;
 
     if ( (aC != 2) && (aC != 3) ) return 
-          usage ("ptkGetMaster <OctInstanceHandle> [contents|interface]");
+          usage ("ptkOpenMaster <OctInstanceHandle> [contents|interface]");
 
     // "NIL" instances have "NIL" masters.  Hope this is what the
     // user expects
@@ -1434,7 +1434,24 @@ int POct::ptkOpenFacet (int aC,char** aV) {
 
 }
 
-    
+// Close an Oct facet
+int POct::ptkCloseFacet(int argc, char **argv) {
+    octObject facet;
+
+    if (argc != 2) return usage("ptkCloseFacet <octObjectHandle>");
+    if (!ptkHandle2OctObj(argv[1], &facet)) {
+	Tcl_AppendResult(interp, "Can't convert Oct handle to facet",
+	  (char *) NULL);
+	return TCL_ERROR;
+    }
+    if (octCloseFacet(&facet) == OCT_OK) {
+	return TCL_OK;
+    } else {
+	Tcl_AppendResult(interp, octErrorString(), (char *) NULL);
+	return TCL_ERROR;
+    }
+}
+
 // Basic Oct Facet Type checking command
 int POct::ptkIsStar (int aC,char** aV) {
     octObject facet;
@@ -1587,8 +1604,9 @@ static InterpTableEntry funcTable[] = {
 	ENTRY(ptkGetTargetParams),
 	ENTRY(ptkSetTargetParams),
 	ENTRY(ptkFacetContents),
-	ENTRY(ptkGetMaster),
+	ENTRY(ptkOpenMaster),
 	ENTRY(ptkOpenFacet),
+	ENTRY(ptkCloseFacet),
 	ENTRY(ptkIsStar),
 	ENTRY(ptkIsGalaxy),
 	ENTRY(ptkIsBus),
