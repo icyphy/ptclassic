@@ -6,7 +6,8 @@ Produces a matrix with complex value entries. The entries are
 read in from values in a sequence of complex valued particles
 in rasterized order, e.g. for a MxN matrix, the first row is 
 filled from left to right using the first N values from the 
-first N particles. }
+first N particles.
+  }
   version   { $Id$ }
   author    { Mike J. Chen }
   copyright { 1993 The Regents of the University of California }
