@@ -207,6 +207,8 @@ $(LIB):	$(OBJS)
 ifeq ($(USE_SHARED_LIBS),yes) 
 	rm -f $@
 	$(SHARED_LIBRARY_COMMAND) $@ $(OBJS) 
+	# HPUX wants shared libraries to be 555 for performance reasons
+	chmod 555 $@
 else
 	rm -f $@
 	$(AR) cq $@ $(OBJS)
@@ -223,6 +225,8 @@ $(CLIB):	$(OBJS)
 ifeq ($(USE_SHARED_LIBS),yes) 
 	rm -f $@
 	$(CSHARED_LIBRARY_COMMAND) $@ $(OBJS) 
+	# HPUX wants shared libraries to be 555 for performance reasons
+	chmod 555 $@
 else
 	rm -f $@
 	$(AR) cq $@ $(OBJS)
