@@ -134,7 +134,7 @@ int LSCluster :: run() {
 	
 static const int FORCE = 2;
 // simulate the execution of the cluster
-int LSCluster :: simRunStar(int) {
+void LSCluster :: simRunRealStars() {
 
 	SDFFiring* f = firing;
 	while (f) {
@@ -143,7 +143,6 @@ int LSCluster :: simRunStar(int) {
 		}
 		f = f->next;
 	}
-	return 0;
 }
 
 // indent by depth tabs.
