@@ -102,22 +102,27 @@ limitation of liability, and disclaimer of warranty provisions.
 	  /* initialize shifted taparrays to zero*/
 	       $starSymbol(indexcount) = $starSymbol(shift_taparray);
 	  for($starSymbol(taprowindex)=0;
-	      $starSymbol(taprowindex)<$starSymbol(NUMPACK); $starSymbol(taprowindex)++){
+	      $starSymbol(taprowindex)<$starSymbol(NUMPACK);
+	      $starSymbol(taprowindex)++){
 	    for($starSymbol(tapcolindex)=0;
-		$starSymbol(tapcolindex)<$val(tappadlength); $starSymbol(tapcolindex)++){
+		$starSymbol(tapcolindex)<$val(tappadlength);
+		$starSymbol(tapcolindex)++){
 	      *$starSymbol(indexcount)++ = 0;
 	    }
 	  }
 	  /* fill taparrays*/
-	       for($starSymbol(taprowindex)=0;$starSymbol(taprowindex)<$starSymbol(NUMPACK);
+	       for($starSymbol(taprowindex)=0;
+		   $starSymbol(taprowindex)<$starSymbol(NUMPACK);
 		   $starSymbol(taprowindex)++){
 		 $starSymbol(indexcount) = $starSymbol(shift_taparray) +
 		   ($val(tappadlength)+1)*($starSymbol(taprowindex));
 		 for($starSymbol(tapcolindex)=0
-		       ;$starSymbol(tapcolindex)<$val(taplength); $starSymbol(tapcolindex)++){
+		       ;$starSymbol(tapcolindex)<$val(taplength);
+		     $starSymbol(tapcolindex)++){
 		   /* scale and cast taps to short */
 		     *$starSymbol(indexcount)++ = (short)
-		       $val(scale)/$starSymbol(scaledown)*$ref2(taps,$starSymbol(tapcolindex));
+		       $val(scale)/$starSymbol(scaledown)*
+		       $ref2(taps,$starSymbol(tapcolindex));
 		 }
 	       }	  	
 	       /* loop once for each set of filter taps*/
