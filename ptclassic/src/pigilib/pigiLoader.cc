@@ -68,6 +68,11 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #define ARCH "aix"
 #endif
 
+#ifdef PTAIX_XLC
+// IBM AIX running IBM's c and c++ compilers
+#define ARCH "aix.xlc"
+#endif
+
 #ifdef PTALPHA
 #define ARCH "alpha"
 #endif
