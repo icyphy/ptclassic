@@ -119,7 +119,7 @@ body ::tycho::Edit::constructor {args} {
     } {
 	keep -text -readonly -width -height -background \
 		-highlightbackground -highlightcolor -selectforeground \
-		-cursor -insertbackground -foreground -textfont \
+		-cursor -insertbackground -textforeground -textfont \
 		-textbackground
     }
     pack $itk_component(text) -expand yes -fill both
