@@ -797,8 +797,8 @@ int BDFScheduler::reps (Star& s) {
 BDFStarSchedInfo::BDFStarSchedInfo() : numToksConst(TRUE), set(0),
 		noTimes(0), writesBoolean(0) {}
 
-BDFPortSchedInfo::BDFPortSchedInfo() : num(0), assoc(0), relDelay(0), geo(0),
-		relation(0),finalAssoc(0), neg(0) {}
+BDFPortSchedInfo::BDFPortSchedInfo() : num(0), assoc(0), relation(0),
+		neg(0), finalAssoc(0), relDelay(0), geo(0) {}
 
 // function to initialize information for a DataFlowStar
 // In this function and the next, it is assumed that the info structure
