@@ -47,7 +47,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	PortHole* input = s56xSide->portWithName("input");
 	DataType inputType = input->setResolvedType();
 	if (strcmp(inputType,FIX) == 0) {
-		output.setPort("output",this,FLOAT,numXfer);
+		output.setPort("output",this,FLOAT,output.numXfer());
 	}
     }
 
