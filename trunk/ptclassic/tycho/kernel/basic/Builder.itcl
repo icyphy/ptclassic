@@ -136,8 +136,7 @@ class ::tycho::Builder {
 #
 body ::tycho::Builder::all {} {
     global TYCHO
-    set win [::tycho::autoName .allExec]
-    ::tycho::Monitor $win \
+    ::tycho::view Monitor -toolbar 1 \
             -command {make all} \
             -dir $TYCHO \
             -autostart 1 -autodestroy 1
@@ -205,8 +204,8 @@ body ::tycho::Builder::distFull {} {
         error "Cannot build Tycho distribution, the\ndirectory\
                 '$distbuilddir' either does not exist or is not writable."
     }
-    set win [::tycho::autoName .distFullExec]
-    ::tycho::Monitor $win \
+    #set win [::tycho::autoName .distFullExec]
+    ::tycho::view Monitor -toolbar 1 \
             -command {make clean all} \
             -dir $distbuilddir \
             -autostart 1 -autodestroy 1
@@ -307,8 +306,8 @@ body ::tycho::Builder::ptDomainIndex {} {
     global PTOLEMY
     if [ file exists [file join $PTOLEMY src domains makefile ]] { 
 	puts "Generating domain.idx may take an hour"
-	set win [::tycho::autoName .starIndices]
-	::tycho::Monitor $win \
+	#set win [::tycho::autoName .starIndices]
+	::tycho::view Monitor -toolbar 1 \
 		-command {make src/domains/domain.idx} \
 		-dir $PTOLEMY \
 		-autostart 1 -autodestroy 1
@@ -324,7 +323,7 @@ body ::tycho::Builder::ptolemyFacetsForest {} {
     if [ file exists [file join $PTOLEMY src domains makefile ]] { 
 	set win [::tycho::autoName .ptolemyFacetForest]
 	file delete -force [file join $TYCHO typt lib PtolemyFacets.fst]
-	::tycho::Monitor $win \
+	::tycho::view Monitor -toolbar 1 \
 		-command {make PtolemyFacets.fst} \
 		-dir [file join $TYCHO typt lib] \
 		-autostart 1 -autodestroy 1
@@ -337,8 +336,8 @@ body ::tycho::Builder::ptolemyFacetsForest {} {
 #
 body ::tycho::Builder::sources {} {
     global TYCHO
-    set win [::tycho::autoName .tclextsExec]
-    ::tycho::Monitor $win \
+    #set win [::tycho::autoName .tclextsExec]
+    ::tycho::view Monitor -toolbar 1 \
             -command {make sources} \
             -dir $TYCHO \
             -autostart 1 -autodestroy 1
@@ -375,8 +374,8 @@ body ::tycho::Builder::filesLoaded { {namespace ::tycho} } {
 #
 body ::tycho::Builder::tclexts {} {
     global TYCHO
-    set win [::tycho::autoName .tclextsExec]
-    ::tycho::Monitor $win \
+    #set win [::tycho::autoName .tclextsExec]
+    ::tycho::view Monitor -toolbar 1 \
             -command {make tclexts} \
             -dir $TYCHO \
             -autostart 1 -autodestroy 1
