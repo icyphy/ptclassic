@@ -48,11 +48,11 @@ include $(CONFIG)
 
 C_INCL = $(PTCOMPAT_INCSPEC)
 
-HDRS = cephes.h PTDSPNearestNeighbor.h PTDSPPartitionCodebook.h \
- PTDSPRaisedCosine.h PTDSPWindow.h
+HDRS = cephes.h PTDSPfft_rif.h PTDSPNearestNeighbor.h \
+ PTDSPPartitionCodebook.h PTDSPRaisedCosine.h PTDSPWindow.h
 
-LIBCSRCS = chbevl.c i0.c PTDSPNearestNeighbor.c PTDSPPartitionCodebook.c \
- PTDSPRaisedCosine.c PTDSPWindow.c
+LIBCSRCS = chbevl.c i0.c PTDSPfft_rif.c PTDSPNearestNeighbor.c \
+ PTDSPPartitionCodebook.c PTDSPRaisedCosine.c PTDSPWindow.c
 
 SRCS = $(LIBCSRCS)
 
