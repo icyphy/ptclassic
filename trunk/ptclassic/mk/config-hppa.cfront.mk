@@ -150,11 +150,15 @@ LINKER =	CC
 CLINKER = $(CC)
 # startup module
 CRT0 =
+
+# DON'T USE shared libraries or incremental linking will fail!
+# See the -A option in the hppa ld man page for details
+#
 # List of libraries to search, obviating the need to set SHLIB_PATH
 # See the ld man page for more information.  These path names must
 # be absolute pathnames, not relative pathnames.
-SHARED_LIBRARY_PATH = $(PTOLEMY)/lib.$(PTARCH):$(PTOLEMY)/octtools/lib.$(PTARCH):$(PTOLEMY)/tcltk/itcl.$(PTARCH)/lib/itcl
-SHARED_LIBRARY_R_LIST = -Wl,+s,+b,$(SHARED_LIBRARY_PATH)
+#SHARED_LIBRARY_PATH = $(PTOLEMY)/lib.$(PTARCH):$(PTOLEMY)/octtools/lib.$(PTARCH):$(PTOLEMY)/tcltk/itcl.$(PTARCH)/lib/itcl
+#SHARED_LIBRARY_R_LIST = -Wl,+s,+b,$(SHARED_LIBRARY_PATH)
 
 # system libraries (libraries from the environment)
 # /usr/lib/end.o is necessary for debugging with xdb under hpux9.x
