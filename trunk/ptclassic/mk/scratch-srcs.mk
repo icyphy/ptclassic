@@ -99,7 +99,8 @@ tcltk_install: stats $(OBJARCH)/tcltk
 
 #
 # Build and install xv
-#
+# 	These rules might not work on architectures other than sun4 w/ cc
+#	
 xv_all: xv_configure xv_bin xv_install
 
 .PHONY: xv_configure xv_bin xv_install
@@ -109,6 +110,9 @@ xv_all: xv_configure xv_bin xv_install
 #INSTALL=bsdinst
 #CC_STATIC=-Wl,-a,archive
 
+# For sun4
+CC_STATIC=-Bstatic
+INSTALL=install
 xv_configure: $(OBJARCH)/xv \
 		$(OBJARCH)/xv/jpeg $(OBJARCH)/xv/jpeg/Makefile \
 		$(OBJARCH)/xv/tiff $(OBJARCH)/xv/tiff/Makefile	\
