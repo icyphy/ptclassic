@@ -83,6 +83,13 @@ void XGraph :: addPoint (int dataSet, float x, float y) {
 	    fprintf(strm[dataSet-1], "%g %g\n", x, y);
 }
 
+// start a new trace on the graph.
+void XGraph :: newTrace(int dataSet) {
+	if (strm[dataSet-1])
+	    fprintf(strm[dataSet-1], "move ");
+	index = 0;
+}
+
 void XGraph :: terminate () {
 	for (int i = 0; i<ng; i++)
 	   if (strm[i]) {

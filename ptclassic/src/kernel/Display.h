@@ -51,6 +51,10 @@ public:
 	// where N <= MAX_NO_GRAPHS
 	void addPoint(int dataSet, float x, float y);
 
+	// start a new trace for the nth dataset.
+	void newTrace(int dataSet = 1);
+
+	// complete and draw the graph
         void terminate();
 
 private:
