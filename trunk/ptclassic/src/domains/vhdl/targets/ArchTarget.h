@@ -301,6 +301,9 @@ private:
 	// Add in variable to port transfers here from varPortList.
 	StringList addVarPortTransfers(VHDLFiring*, int);
 
+	// Add in null assignments to support case statements.
+	StringList addNullAssignments(VHDLFiring*, int);
+
 	// Register compDecls and merge signals.
 	void registerAndMerge(VHDLFiring*);
 
