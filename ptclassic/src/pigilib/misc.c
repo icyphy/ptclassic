@@ -83,7 +83,7 @@ RPCSpot *spot;
 lsList cmdList;
 long userOptionWord;
 {
-    static dmTextItem item = {"Key", 1, 80, NULL, NULL};
+    static dmTextItem item = {"Star name", 1, 80, NULL, NULL};
     octObject facet, inst;
     vemStatus status;
     char *info;
@@ -116,18 +116,17 @@ long userOptionWord;
 	if (!KcProfile(item.value)) {
 	    PrintErr(ErrGet());
 	}
-	ViDone();
-    } else if (IsDelay(&inst)) {
-	/* delay inst is under cursor */
+    } else if (IsDelay(&inst) || IsPal(&inst)) {
+	/* delay or palette inst is under cursor */
 	PrintErr("Cursor must be over a star");
-	ViDone();
-    } else {
-	/* assume inst is a star... */
+    } else if (IsStar(&inst)) {
 	if (!KcProfile(AkoName(inst.contents.instance.master))) {
 	    PrintErr(ErrGet());
 	}
-	ViDone();
+    } else {
+	PrintErr("Profile not yet implemented for galaxies/universes");
     }
+    ViDone();
 }
 
 /* 6/27/89 = tries to open facet read-only first */
