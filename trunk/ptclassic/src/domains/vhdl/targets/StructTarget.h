@@ -152,7 +152,6 @@ private:
 	VHDLPortList systemPortList;
 	VHDLCompDeclList mainCompDeclList;
 	VHDLSignalList mainSignalList;
-	VHDLCompDeclList mainCompMapList;
 	VHDLStateList stateList;
 	VHDLClusterList clusterList;
 
@@ -161,10 +160,10 @@ private:
 
 	// The following are for keeping track of components and
 	// signals within one firing.
-	VHDLPortList firingPortList;
 	VHDLGenericList firingGenericList;
-	VHDLPortList firingPortMapList;
+	VHDLPortList firingPortList;
 	VHDLGenericList firingGenericMapList;
+	VHDLPortList firingPortMapList;
 	VHDLSignalList firingSignalList;
 	VHDLVariableList firingVariableList;
 	VHDLPortVarList firingPortVarList;
@@ -172,10 +171,10 @@ private:
 
 	// The following are for keeping track of components and
 	// signals having to do with the controller.
-	VHDLPortList ctlerPortList;
 	VHDLGenericList ctlerGenericList;
-	VHDLPortList ctlerPortMapList;
+	VHDLPortList ctlerPortList;
 	VHDLGenericList ctlerGenericMapList;
+	VHDLPortList ctlerPortMapList;
 	VHDLSignalList ctlerSignalList;
 	VHDLVariableList ctlerVariableList;
 	VHDLPortVarList ctlerPortVarList;
@@ -186,29 +185,16 @@ private:
 	void mergeSignalList(VHDLSignalList*);
 
 	// Connect a source of the given value to the given signal.
-	void connectSource(StringList, StringList, StringList);
-
-	// Add a source component declaration.
-	void registerSource(StringList="INTEGER");
+	void connectSource(StringList, VHDLSignal*);
 
 	// Connect a multiplexor between the given input and output signals.
-	void connectMultiplexor(StringList, StringList, StringList,
-				StringList);
-
-	// Add a multiplexor component declaration.
-	void registerMultiplexor(StringList="INTEGER");
+	void connectMultiplexor(VHDLSignal*, VHDLSignal*, VHDLSignal*);
 
 	// Connect a register between the given input and output signals.
-	void connectRegister(StringList, StringList, StringList, StringList);
+	void connectRegister(VHDLSignal*, VHDLSignal*, VHDLSignal*);
 
 	// Connect a clock generator driving the given signal.
 	void connectClockGen(StringList);
-
-	// Add a clock generator declaration.
-	void registerClockGen();
-
-	// Add a register component declaration.
-	void registerRegister(StringList="INTEGER");
 
 	// Flag indicating if system clock generator is needed.
         int systemClockUsed;
