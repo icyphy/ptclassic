@@ -9,27 +9,33 @@ MAKEVARS = "ARCH=$(ARCH)"
 
 makefiles:
 	@for x in $(DIRS); do \
+	    if [ -w $$x ] ; then \
 		( cd $$x ; \
 		  echo Updating makefile in domains/$(ME)/$$x ; \
 		  $(MAKE) -f make.template $(MFLAGS) $(MAKEVARS) \
 			VPATH=../../../../../src/domains/$(ME)/$$x $@ ; \
 		) \
+	    fi ; \
 	done
 
 all install clean sources realclean checkjunk sccsinfo:
 	@for x in $(DIRS); do \
+	    if [ -w $$x ] ; then \
 		( cd $$x ; \
 		  echo making $@ in domains/$(ME)/$$x ; \
 		  $(MAKE) $(MFLAGS) $(MAKEVARS) \
 			VPATH=../../../../../src/domains/$(ME)/$$x $@ ; \
 		) \
+	    fi ; \
 	done
 
 depend:
 	@for x in $(DIRS); do \
+	    if [ -w $$x ] ; then \
 		( cd $$x ; \
 		  echo making $@ in domains/$(ME)/$$x ; \
 		  $(MAKE) -f make.template $(MFLAGS) $(MAKEVARS) \
 			VPATH=../../../../../src/domains/$(ME)/$$x $@ ; \
 		) \
+	    fi ; \
 	done

@@ -19,8 +19,10 @@ MAKEVARS = "ARCH=$(ARCH)"
 
 makefiles all install clean sources depend realclean checkjunk sccsinfo:
 	@for x in $(DOMAINS); do \
+	    if [ -w $$x ] ; then \
 		cd $$x ; \
 		echo making $@ in domains/$$x ; \
 		$(MAKE) $(MFLAGS) $(MAKEVARS) VPATH=../../../src/domains/$$x $@ ;\
 		cd .. ; \
+	    fi ; \
 	done
