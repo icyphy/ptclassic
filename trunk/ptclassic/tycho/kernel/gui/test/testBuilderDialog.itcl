@@ -60,7 +60,7 @@ if {[namespace ptolemy {info classes BuilderDialog}] == {} } {
 # 
 test BuilderDialog-1.1 {Build the Class Diagram} {
     set bd [::tycho::view BuilderDialog]
-    $bd menubar invoke Build {{Class Diagram Only}}
+    $bd menubar invoke buildclassdiagram
     delete object [$bd displayer]
     file writable [file join $TYCHO doc tychoClasses.dag]
 } {1}
@@ -70,7 +70,7 @@ test BuilderDialog-1.1 {Build the Class Diagram} {
 # 
 test BuilderDialog-1.2 {Build the Indices} {
     set bd [::tycho::view BuilderDialog]
-    $bd menubar invoke Build {{Indices Only}}
+    $bd menubar invoke buildindices
     delete object [$bd displayer]
     file writable [file join $TYCHO lib idx tycho.idx]
 } {1}
@@ -80,7 +80,7 @@ test BuilderDialog-1.2 {Build the Indices} {
 # 
 test BuilderDialog-2.1 {Test the test menu} {
     set bd [::tycho::view BuilderDialog]
-    $bd menubar invoke Test {{Slate Tests}}
+    $bd menubar invoke slate_tests
     delete object [$bd displayer]
     list dummy
 } {dummy}
@@ -90,7 +90,7 @@ test BuilderDialog-2.1 {Test the test menu} {
 # 
 test BuilderDialog-3.1 {Build the Distribution} {
     set bd [::tycho::view BuilderDialog]
-    $bd menubar invoke Distribute {{Full Distribution}}
+    $bd menubar invoke fulldistribution
     delete object [$bd displayer]
     # It would be nice if we knew where the distribution was to appear.
     file writable [::tycho::Builder::getDistBuildDir]
