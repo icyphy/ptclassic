@@ -99,7 +99,8 @@ class ::tycho::Library {
     method edititemModal {item}
 
     # Create a menu with items in this library
-    method makemenu {type menubar menuname prefix {context {}}}
+    method makemenu \
+            {type menubar menuname command {context {}} {prefix {}}}
 }
 
 ########################################################################
@@ -191,19 +192,19 @@ body ::tycho::Library::edititemModal {item} {
 # of the name which will be appended to the menu command.
 #
 body ::tycho::Library::makemenu \
-		{type menubar menuname prefix {context {}} {prefix {}}} {
-   	# Add cascade menus
-	foreach g [listing group] {
+        {type menubar menuname command {context {}} {prefix {}}} {
+    # Add cascade menus
+    foreach g [listing group] {
         $menubar add cascade $g $menuname \
-        		-label [itemcget [concat $context group:$g] -label]
-	    makemenu $type $menubar $g $prefix \
-	    	[concat $context group:$g] \
-	    	[concat $prefix $g]
-	}
-	# Add items
+                -label [itemcget [concat $context group:$g] -label]
+        makemenu $type $menubar $g $command \
+                [concat $context group:$g] \
+                [concat $prefix $g]
+    }
+    # Add items
     foreach i [listing $type] {
         $menubar command $i $menuname \
-             -label [itemcget [concat $context $type:$i] -label] \
-             -command [concat $command [concat $prefix $i]]
-	}
+                -label [itemcget [concat $context $type:$i] -label] \
+                -command [concat $command [concat $prefix $i]]
+    }
 }
