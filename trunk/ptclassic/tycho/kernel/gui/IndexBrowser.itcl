@@ -31,7 +31,7 @@
 #######################################################################
 
 # Options from the derived class
-option add *IndexBrowser*entryWidth 50 widgetDefault
+option add *IndexBrowser*entryWidth 30 widgetDefault
 
 option add *IndexBrowser*entryBackground \
 	[ptkColor antiqueWhite white] widgetDefault
@@ -45,7 +45,7 @@ option add *IndexBrowser*textForeground \
 
 option add *IndexBrowser.entryfont \
 	[.tychoFonts defaultFont fixed] widgetDefault
-option add *IndexBrowser.width 50 widgetDefault
+option add *IndexBrowser.width 30 widgetDefault
 option add *IndexBrowser.height 20 widgetDefault
 
 ##########################################################################
