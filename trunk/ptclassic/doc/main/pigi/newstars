@@ -30,7 +30,11 @@ directory.  Otherwise, just put the icon in the same star source directory.
 It is the user's responsibility to make sure the star source code is 
 indeed in the star source directory he/she enters into the dialog box.
 Otherwise, Pigi will not be able to locate the star source code when
-executing the look-inside command.
+executing the look-inside command.  The way Pigi does a look-inside on
+a star icon is based on a similar rule:  if the directory where the master
+copy of the star icon is stored ends in "../icons" then Pigi looks for 
+the star source code in the "../stars" directory, otherwise it looks for
+the source code in the same directory.
 .pp
 Pigi will next query for the name of a palette into which
 to store (an instance of) the icon.
