@@ -94,19 +94,19 @@ class ::tycho::ResourceFTP {
     method progress {} {return $progress}
 
     # Write a string to a streamable resource.
-    method puts {string} {error "FTP puts not implemented yet"}
+    method puts {string} {::tycho::abstractMethod puts}
 
     ###################################################################
     ####                           public procs                    ####
 
     # Change the permissions of a resource
-    proc chmod {permissions path} {error "FTP chmod not implemented yet"}
+    proc chmod {permissions path} {::tycho::abstractProc chmod}
 
     # Return the content type of the current file
     proc contenttype {path}
 
     # Delete a resource
-    proc delete {path} {error "FTP delete not implemented yet"}
+    proc delete {path} {::tycho::abstractProc delete}
 
     # Return a directory listing
     proc dirlist {path}
@@ -115,7 +115,7 @@ class ::tycho::ResourceFTP {
     proc exists {path}
 
     # Create a new directory
-    proc mkdir {path} {error "FTP mkdir not implemented yet"}
+    proc mkdir {path} {::tycho::abstractProc mkdir}
 
     # Create a new resource object
     proc new {path args}
@@ -176,9 +176,17 @@ class ::tycho::ResourceFTP {
 
     # Attribute of the FTP server and the file/directory.
     protected variable ftpserver {}
+
+    # Default FTP port is always 21
     protected variable ftpport "21"
+
+    # Default path to go CWD into
     protected variable ftppath /
+
+    # Default file to get
     protected variable ftpfile {}
+
+    # Default size
     protected variable ftpsize 0
 
     # Transfer could be either "file" or "directory" (distince FTP commands).
@@ -188,11 +196,18 @@ class ::tycho::ResourceFTP {
     # are set after "fconfigure ftpid -sockname", which returns:<br>
     # <tt>n1.n2.n3.n4  client_name  unique_16_bit_clientsocket</tt>
     protected variable dataport 0
+
+    # This is the client's receiving address, to receive data from
+    # port 20 of the FTP server.
     protected variable dataaddr 127.0.0.1
+
+    # File id of the cache file as data is being received.
     protected variable datafd -1
 
     # Attribute of myself (FTP client)
     protected variable myusername "anonymous"
+
+    # String to send to the server after anonymous login
     protected variable mypassword "tycho@"
 
     ###################################################################
@@ -209,7 +224,6 @@ class ::tycho::ResourceFTP {
 #
 body ::tycho::ResourceFTP::constructor {args} {
     eval configure $args
-
 }
 
 #######################################################################
@@ -234,7 +248,7 @@ body ::tycho::ResourceFTP::open {{mode "r"}} {
 
     # FIXME: Need to implement write on FTP!
     if {$mode != "r"} {
-        error "Only read feature is implemented"
+        error "Currently only read feature has been implemented."
     }
 
     if { ! [exists $currentURL] } {
@@ -513,11 +527,35 @@ body ::tycho::ResourceFTP::ftpget {{url {}}} {
 #### ftphandler
 # The following is the handshake protocol between the client and
 # the server. When the ftphandler gets the expected state from
-# the server, it'll send out the right data.
+# the server, it'll send out the right data. Please read the
+# RFC protocol carefully to cover "most" of the test coverage
+# in order for this client to be compatible with the many different
+# types of FTP servers out there.<br><br>
+# The following is the state transition table. If not explicitly
+# specified, next state is the state following the next entry in
+# the table.
+# 
 # <pre>
-# State          Expect from Server             Send/"Action"
-# -----          ------------------             -----------
-#
+# State      Expect from Server             Send/"Action"
+# -----      ------------------             -----------
+# USER       220 messier.eecs FTP server    USER $myusername
+# PASS       331 Guest login ok             PASS $mypassword
+# PWD        230 Guest login ok, ...        PWD
+# PASV       257 "/" is current directory   PASV
+# SIZE       227 Entering Passive Mode      SIZE $filename
+# PORT       213 5000                       PORT $tmpport,$p1,$p2
+#                                              "if file, next state=TYPE"
+#                                              "if dir,  next state=CWD"
+# TYPE       200 PORT command successful    TYPE I
+# RETR       200 Type set to I              RETR $filename
+# FILE_DIR   150 Binary data connection...     "next state=TRANSFER2"
+#            550 /pub: not a plain file.    CWD $directory
+#                                              "next state=LIST"
+# CWD        200 PORT command successful.   CWD $directory
+# LIST       250 CWD command successful.    LIST
+# TRANSFER1  150 Binary data connection...     "next state=TRANSFER2"
+# TRANSFER2  226 ASCII Transfer complete    QUIT
+# QUIT       221 Goodbye
 # </pre>
 body ::tycho::ResourceFTP::ftphandler {} {
     # Line will contain the status
@@ -574,7 +612,6 @@ body ::tycho::ResourceFTP::ftphandler {} {
         }
 
         SIZE {
-            # NOTE: THIS IS NOT BEING USED!!!!
             # 227 Entering Passive Mode (128,32,240,78,165,11)
             if [regexp -nocase {^22[0-9] .*} $line] {
                 set cmd "SIZE [::tycho::url join $ftppath $ftpfile]"
