@@ -32,7 +32,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
  Programmer: S. Ha, J. Pino
 
- This is a test multitarget class for CGCdomain.
+ This is a test multitarget class for CG56 domain.
 
 *******************************************************************/
 
@@ -48,6 +48,9 @@ ENHANCEMENTS, OR MODIFICATIONS.
 class CG56MultiSimTarget : public CGMultiTarget {
 public:
 	CG56MultiSimTarget(const char* name, const char* starclass, const char* desc);
+
+	/* return the sum of execution times of all stars in my galaxy */
+	int totalExecTime();
 
 	/*virtual*/ Block* makeNew() const;
 	/*virtual*/ int isA(const char*) const;

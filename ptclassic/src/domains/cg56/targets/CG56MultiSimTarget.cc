@@ -153,6 +153,17 @@ int CG56MultiSimTarget :: sendWormData(PortHole& p) {
 	cp.forceGrabData();
 	return TRUE;
 }
+// ---------------------------------------------------------------------------  
+int CG56MultiSimTarget :: totalExecTime()
+{
+        int execTime;
+        execTime = 0;
+        ParScheduler* sched;
+        sched = (ParScheduler*) scheduler();
+        // expanded graph
+        execTime = sched->myEG()->getExecTotal();
+        return execTime;
+}
 // -----------------------------------------------------------------------------
 ISA_FUNC(CG56MultiSimTarget,CGMultiTarget);
 
