@@ -36,6 +36,6 @@ library IEEE,PTVHDLSIM;
 use IEEE.STD_LOGIC_1164.all;
 	}
   initCode {
-    addCode(uses, "useLibs", "std_logic");
+    addCode(uses, "top_uses", "std_logic");
   }
 }
