@@ -48,16 +48,6 @@ class ::tycho::RevControlRCS {
     ###################################################################
     ####                      public methods                       ####
 
-    # Check in the file associated with this class.
-    method checkIn {}
-
-    # Check out the file associated with this class.
-    method checkOut {}
-
-    # Get rlog information about the current file and check for the 
-    # existance of the locks field.
-    method getRlog {}
-
     # Put the file under revision control.
     method initializeRevControl {}
 
@@ -73,26 +63,32 @@ class ::tycho::RevControlRCS {
     ###################################################################
     ####                      public procs                         ####
 
+    # Check in the file associated with a File object.
+    proc checkIn {object} {}
+
+    # Check out the file associated with a File object.
+    proc checkOut {object} {}
+
     # Return 1 if the given file is under revision control, 0 otherwise.
     proc isUnderRevControl {file} {}
 
     ###################################################################
     ####                   protected methods                       ####
 
-    # Open a dialog box to query the user for comments.
-    protected method getComments {} 
-
     # Return 1 if the file is checked out, 0 otherwise.
     protected method isCheckedOut {}
 
+    # Update the history information, if it is on display.
+    protected method updateHistory {}
+
     ###################################################################
-    ####                   private methods                         ####
+    ####             private methods and procs                     ####
 
     # Parse the history information and insert a synopsis into the text window.
     private method parseHistory {history text}
 
-    # Update the history information, if it is on display.
-    private method updateHistory {}
+    # Get rlog information about a file and check for the  "locks" field.
+    private proc getRlog {file} {}
 }
 
 ###################################################################
@@ -101,92 +97,6 @@ class ::tycho::RevControlRCS {
 body ::tycho::RevControlRCS::constructor {args} {
     eval itk_initialize $args 
     configure -text "RCS revision control for: $file"
-}
-
-#####################################################################
-#### checkIn
-# Check in the file associated with this class.
-# 
-body ::tycho::RevControlRCS::checkIn {} {
-    ::tycho::RevControl::checkIn 
-    set dir [file dirname $file]
-    set basefile [file tail $file]
-    set olddir [eval pwd]
-    set scanout [getRlog]
-    regexp -nocase {([a-z]+):} $scanout garbage lockowner
-    if {[info exists lockowner]} {
-        catch {exec whoami} currentuser
-        if {$currentuser != $lockowner} {
-	    error "The file \"$basefile\" is checked out by: $lockowner."
-        }
-    } else {
-        error "The file \"$basefile\" is not checked out."
-    }
-    cdDir $dir
-    set comment [getComments]
-    if {$comment == ""} {
-	# cancelled
-	return
-    }
-    set comment [format "%s\n.\n" $comment]
-    catch {exec echo $comment | ci -u $basefile} output
-    set scanout [getRlog]
-    if {[regexp -nocase {([a-z]+):} $scanout]} {
-	error "Checkin failed: $output"
-    }
-    cd $olddir
-    $object reload
-    enableButton checkout
-
-    updateHistory
-}
-
-#####################################################################
-#### getRlog
-# Get rlog information about the current file and check for the 
-# existance of the locks field.
-# 
-body ::tycho::RevControlRCS::getRlog {} {
-    catch {exec rlog $file} results
-    set ind1 [string first "locks:" $results]
-    set ind2 [string first "access list:" $results]
-    set ind1 [expr $ind1 + 6]
-    set ind2 [expr $ind2 - 1]
-    if {$ind1 == -1 || $ind2 == -1} {
-	error "An error occurred while obtaining file information with rlog: $results."
-	return ""
-    } else {
-        return [string range $results $ind1 $ind2]
-    }
-}
-
-#####################################################################
-#### checkOut
-# Check out the file associated with this class.
-# 
-body ::tycho::RevControlRCS::checkOut {} {
-    ::tycho::RevControl::checkOut    
-    set dir [file dirname $file]
-    set basefile [file tail $file]
-    set olddir [eval pwd]
-    set scanout [getRlog]
-    regexp -nocase {([a-z]+):} $scanout garbage lockowner
-    if {[info exists lockowner]} {
-        catch {exec whoami} currentuser
-	error "The file \"$basefile\" is checked out by: $lockowner."
-    } 
-    cdDir $dir
-    catch {exec co -l $basefile} output
-    set scanout [getRlog]
-    regexp -nocase {([a-z]+):} $scanout garbage lockowner
-    if {![info exists lockowner]} {
-	error "Checkout failed: $output."
-    }
-    cd $olddir
-    $object reload
-    enableButton checkin
-
-    updateHistory
 }
 
 #####################################################################
@@ -248,13 +158,13 @@ body ::tycho::RevControlRCS::unedit {} {
     set dir [file dirname $file]
     set basefile [file tail $file]
     set olddir [eval pwd]
-    set scanout [getRlog]
+    set scanout [getRlog $file]
     if {![regexp -nocase {([a-z]+):} $scanout]} {
         error "The file \"$basefile\" is not checked out."
     }
     cdDir $dir
     catch {exec rcs -u $basefile} output 
-    set scanout [getRlog]
+    set scanout [getRlog $file]
     if {[regexp -nocase {([a-z]+):} $scanout]} {
 	error "Unedit failed: $output"
     }    
@@ -321,7 +231,71 @@ body ::tycho::RevControlRCS::viewHistory {} {
 }
 
     ###################################################################
+    ###################################################################
     ####                   public procs                            ####
+
+#####################################################################
+#### checkIn
+# Check in the file associated with a File object
+# 
+body ::tycho::RevControlRCS::checkIn {object} {
+    ::tycho::RevControl::checkIn $object
+    set file [$object filename]
+    set dir [file dirname $file]
+    set basefile [file tail $file]
+    set olddir [eval pwd]
+    set scanout [getRlog $file]
+    regexp -nocase {([a-z]+):} $scanout garbage lockowner
+    if {[info exists lockowner]} {
+        catch {exec whoami} currentuser
+        if {$currentuser != $lockowner} {
+	    error "The file \"$basefile\" is checked out by: $lockowner."
+        }
+    } else {
+        error "The file \"$basefile\" is not checked out."
+    }
+    cdDir $dir
+    set comment [getComments]
+    if {$comment == ""} {
+	# cancelled
+	return
+    }
+    set comment [format "%s\n.\n" $comment]
+    catch {exec echo $comment | ci -u $basefile} output
+    set scanout [getRlog $file]
+    if {[regexp -nocase {([a-z]+):} $scanout]} {
+	error "Checkin failed: $output"
+    }
+    cd $olddir
+    $object reload
+}
+
+#####################################################################
+#### checkOut
+# Check out the file associated with a File object.
+# 
+body ::tycho::RevControlRCS::checkOut {object} {
+    ::tycho::RevControl::checkOut $object
+    set file [$object filename]
+    set dir [file dirname $file]
+    set basefile [file tail $file]
+    set olddir [eval pwd]
+    set scanout [getRlog $file]
+    regexp -nocase {([a-z]+):} $scanout garbage lockowner
+    if {[info exists lockowner]} {
+        catch {exec whoami} currentuser
+	error "The file \"$basefile\" is checked out by: $lockowner."
+    } 
+    cdDir $dir
+    catch {exec co -l $basefile} output
+    set scanout [getRlog $file]
+    regexp -nocase {([a-z]+):} $scanout garbage lockowner
+    if {![info exists lockowner]} {
+	error "Checkout failed: $output."
+    }
+    cd $olddir
+    $object reload
+}
 
 #####################################################################
 #### isUnderRevControl
@@ -339,20 +313,8 @@ body ::tycho::RevControlRCS::isUnderRevControl {file} {
 }
 
     ###################################################################
+    ###################################################################
     ####                   protected methods                       ####
-
-#####################################################################
-#### getComments
-# Open a dialog box to query the user for comments.
-# 
-body ::tycho::RevControlRCS::getComments {} {
-    set list [::tycho::DialogWindow::newModal EntryQuery \
-	    [::tycho::autoName .getcomment] \
-	    -queries {{body {Comment:} {} 5}}  \
-	    -entrywidth 60]
-    set comments [lindex [lindex $list 0] 1]
-    return [join [split $comments "\n"] "\\\n"]
-}
 
 #####################################################################
 #### isCheckedOut
@@ -367,8 +329,22 @@ body ::tycho::RevControlRCS::isCheckedOut {} {
     }
 }
 
+#####################################################################
+#### updateHistory
+# Update the history information, if it is on display.
+# 
+body ::tycho::RevControlRCS::updateHistory {} {
+    if {[info exists itk_component(history)] && \
+	    [winfo exists $itk_component(history)]} {
+	delete object $itk_component(history)
+	viewHistory
+    }
+}
+
+
     ###################################################################
-    ####                   private methods                         ####
+    ###################################################################
+    ####               private methods and procs                   ####
 
 #####################################################################
 #### parseHistory
@@ -424,13 +400,20 @@ body ::tycho::RevControlRCS::parseHistory {history text} {
 }
 
 #####################################################################
-#### updateHistory
-# Update the history information, if it is on display.
-# 
-body ::tycho::RevControlRCS::updateHistory {} {
-    if {[info exists itk_component(history)] && \
-	    [winfo exists $itk_component(history)]} {
-	delete object $itk_component(history)
-	viewHistory
+#### getRlog
+# Get rlog information about a file and check for the "locks" field.
+#
+body ::tycho::RevControlRCS::getRlog {file} {
+    catch {exec rlog $file} results
+    set ind1 [string first "locks:" $results]
+    set ind2 [string first "access list:" $results]
+    set ind1 [expr $ind1 + 6]
+    set ind2 [expr $ind2 - 1]
+    if {$ind1 == -1 || $ind2 == -1} {
+	error "rlog reports an error: $results."
+	return ""
+    } else {
+        return [string range $results $ind1 $ind2]
     }
 }
+
