@@ -28,12 +28,13 @@ main (int argc, char *argv[])
   hrtime_t start, end;
   float    time1, time2,time3;
   double sinarg,twopiover50;
-  vis_d64  *dst1,*src1,numtaps[2],dentaps[3],*taps1,taps2;
-  vis_d64  t0,t1,t2,t3;
+  vis_d64  *dst1,*dst2,*src1,numtaps[2],dentaps[3],*taps1,taps2;
+  vis_d64  t0,t1,t2,t3,quadn0;
+  vis_u32  dbln0;
   int      i,j;
   int	   scalefactor;
   short    scaledown;
-  vis_s16  *dst0,*dst2,*src0,n0,*taps0;
+  vis_s16  *dst0,*src0,n0,*taps0;
   short    *tmp;
 
   twopiover50 = 0.0;
@@ -63,7 +64,7 @@ main (int argc, char *argv[])
 /**************allocate memory************************************/
 dst0 = (vis_s16 *) memalign(sizeof(double),sizeof(short)*length);
 dst1 = (vis_d64 *) memalign(sizeof(double),sizeof(double)*length);
-dst2 = (vis_s16 *) memalign(sizeof(double),sizeof(short)*length);
+dst2 = (vis_d64 *) memalign(sizeof(double),sizeof(double)*length/4);
 src0 = (vis_s16 *) memalign(sizeof(double),sizeof(short)*length);
 src1 = (vis_d64 *) memalign(sizeof(double),sizeof(double)*length);
 taps0 = (vis_s16 *) memalign(sizeof(double),sizeof(short)*5);
@@ -106,6 +107,9 @@ taps1 = (vis_d64 *) memalign(sizeof(double),sizeof(double)*5);
   taps2 = vis_faligndata(t2,taps2);
   taps2 = vis_faligndata(t1,taps2);
   taps2 = vis_faligndata(t0,taps2);
+
+  dbln0 = (n0<<16)|(n0&0xffff);
+  quadn0 = vis_to_double_dup(dbln0);
 /***************************************************************/
   if (verbose) {
     printf("NTIME=%d\n", ntime);
@@ -136,21 +140,24 @@ taps1 = (vis_d64 *) memalign(sizeof(double),sizeof(double)*5);
     printf("    CFLOAT-GL Time = %f msec\n", time2);
   }
 /***************measure vis unit iir*****************************/
+  vis_alignaddr(0,6);
   start = gethrtime();
   for (j = 0; j < ntime; j ++) {
-    vdk_vis_ptolemyiir(src0, dst2, length, n0, taps2, scalefactor);
+    vdk_vis_ptolemyiir((double*)src0, dst2, length/4, quadn0, taps2,
+		       scalefactor);
   }
   end = gethrtime();
   time3 = (float) (end - start)/1000000/ntime;
+  printf("  VIS-GL Time = %f msec\n", time3);
 /***************************************************************/
   if (print) {
     printf("compare outputs\n");
+    tmp=(short*)dst2;
     for(i=0;i<length;i++){
-      printf("%i %i %f %i\n",i,dst0[i],dst1[i]*SCALEDATA,dst2[i]);
+      printf("%i %i %f %i\n",i,dst0[i],dst1[i]*SCALEDATA,tmp[i]<<1);
     }
   }
   if (verbose) {
-    printf("  VIS-GL Time = %f msec\n", time3);
     printf("  CINT-GL/VIS-GL = %f\n", time1/time3);
     printf("  CFLOAT-GL/VIS-GL = %f\n", time2/time3);
     printf("\n");
