@@ -49,33 +49,35 @@ include $(CONFIG)
 # wfir-f2c.c:	wfir.f converted to C with f2c
 # wfir.c:	hand massaged C version that works
 
-SRCS	      = wfir.c
+SRCS =		wfir.c
 EXTRA_SRCS = 	wfir.f wfir-f2c.c
 EXTRA_DESTS= 	wfir-fortran
 
-OBJS = $(SRCS:.c=.o)
+OBJS =		$(SRCS:.c=.o)
 
 # common.mk wants this, otherwise we get multiple targets for $(LIBDIR)/$(LIB)
-LIB = foo
+LIB =		foo
 
 C_INCL =	$(PTCOMPAT_INCSPEC)
 
-REALCLEAN_STUFF =	wfir
+BINARY = 	wfir$(BINARY_EXT)
 
-all:	makefile $(LIB) wfir
+REALCLEAN_STUFF =	$(BINARY)
 
-install: makefile $(BINDIR)/wfir
+all:	makefile $(BINARY)
+
+install: makefile $(BINDIR)/$(BINARY)
 
 # Use the $(CLINKER) so the binary is statically linked for distribution.
 # On suns, cc takes -Bstatic, gcc takes -static, so we can't just add a flag
 # here.
-wfir:	wfir.o 
-	rm -f wfir
+$(BINARY):	wfir.o 
+	rm -f $@
 	$(CLINKER) $(LINKFLAGS) wfir.o -lm -o $@ 
 
-$(BINDIR)/wfir:	wfir
-	rm -f $(BINDIR)/wfir
-	ln wfir $(BINDIR)/wfir
+$(BINDIR)/$(BINARY):	$(BINARY)
+	rm -f $@
+	ln $^ $@
 
 lint:	$(SRCS)
 	lint -u $(SRCS) > lint
@@ -89,7 +91,6 @@ wfir-fortran: wfir.f
 	$(FC) $^ -O  -o $@ $(LDFLAGS) -lm
 # include common definitions, rules
 include $(ROOT)/mk/common.mk
-
 
 # Don't add anything after the next line; makedepend will zap it.
 # DO NOT DELETE THIS LINE -- make depend depends on it.
