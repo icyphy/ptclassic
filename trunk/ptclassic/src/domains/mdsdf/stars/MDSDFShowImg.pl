@@ -2,7 +2,7 @@ defstar {
   name		{ ShowImg }
   domain	{ MDSDF }
   version	{ $Id$ }
-  author	{ J. Buck & Paul Haskell, modified for MDSDF by Mike J. Chen }
+  author	{ Joe Buck and Paul Haskell, modified for MDSDF by Mike J. Chen }
   copyright {
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
@@ -38,7 +38,6 @@ This star does not support frame numbers.  See ShowImg2.
     "SubMatrix.h" , <std.h> , <stdio.h>, "Error.h"
   }
 
-// INPUT AND STATES.
   input { 
     name { imageInput } 
     type { FLOAT_MATRIX } 
@@ -74,11 +73,11 @@ This star does not support frame numbers.  See ShowImg2.
     desc { If 'y' or 'Y', then save the file }
   }
 
-// CODE.
   setup {
     // set the dimensions of the output
     imageInput.setMDSDFParams(int(height),int(width));
   }
+
   go {
     // Read data from input.
     FloatSubMatrix* image = (FloatSubMatrix*)(imageInput.getInput());
@@ -87,26 +86,26 @@ This star does not support frame numbers.  See ShowImg2.
     const char* saveMe = saveImage;
     int del = !((saveMe[0] == 'y') || (saveMe[0] == 'Y'));
 
-    StringList fileName;
     const char* iname = imageName;
-    if (iname && iname[0]) {
-      fileName = (const char*) imageName;
+    const char* nm = 0;
+    if (iname && *iname) {
+      nm = expandPathName(iname);
     }
     else {
-      char* nm = tempFileName();
-      fileName = nm;
-      delete [] nm;
+      nm = tempFileName();
     }
+    StringList fileName = nm;
+    delete [] nm;
 
-    FILE* fptr = fopen(fileName, "w");
-    if (fptr == (FILE*) NULL) {
-      Error::abortRun(*this, "cannot create: ", fileName);
+    FILE* fp = fopen(fileName, "w");
+    if (fp == 0) {
+      Error::abortRun(*this, "cannot open '", fileName, "' for writing.");
       delete image;
       return;
     }
 
     // Write the PGM header and the data, and then run.
-    fprintf (fptr, "P5\n %d %d 255\n", int(width), int(height));
+    fprintf(fp, "P5\n %d %d 255\n", int(width), int(height));
 
     // Reverse of the hack used in ReadImage, first copy the data to
     // a buffer of the unsigned char's, then do a block fwrite
@@ -124,8 +123,11 @@ This star does not support frame numbers.  See ShowImg2.
         *p++ = (unsigned char)tmp;
     }
 
-    fwrite((const char*)buffer, sizeof(unsigned char), size, fptr);
-    fclose(fptr);
+    fwrite( (const char*)buffer,
+    	    int(width) * sizeof(unsigned char),
+	    int(height),
+	    fp );
+    fclose(fp);
     delete [] buffer;
 
     StringList cmdbuf = "(";

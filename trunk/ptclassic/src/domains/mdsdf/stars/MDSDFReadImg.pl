@@ -44,21 +44,24 @@ This star does not support frame numbers.  See ReadImg2.
     desc    { Name of file containing PGM-format image. }
   }
   ccinclude { "SubMatrix.h", <std.h>, <stdio.h> }
+
   setup {
     // set the dimensions of the output
     imageOutput.setMDSDFParams(int(height),int(width));
   }
-////// Read data into an GrayImage object...
+
   go {
-// Open file containing the image.
-    const char* expandedName = expandPathName(fileName);
+    // Open file containing the image.
+    const char* nm = expandPathName(fileName);
+    StringList expandedName = nm;
+    delete [] nm;
     FILE* fp = fopen(expandedName, "r");
     if (fp == (FILE*) NULL) {
-      Error::abortRun(*this, "File not opened: ", fileName);
+      Error::abortRun(*this, "cannot open '", expandedName, "' for reading.");
       return;
     }
 
-// Read header, skipping 1 whitespace character at end.
+    // Read header, skipping 1 whitespace character at end.
     char word[80];
     int fileImageWidth, fileImageHeight, maxval;
     fscanf(fp, "%s", word);
@@ -87,24 +90,29 @@ This star does not support frame numbers.  See ReadImg2.
     }
     fscanf(fp, "%*c"); // skip one whitespace char.
 
-// Create a FloatMatrix object and fill it with data.
-// We use a hack for faster file reading: create a buffer to read in
-// the data as unsigned char's and then convert that in memory.
+    // Create a FloatMatrix object and fill it with data.
+    // We use a hack for faster file reading: create a buffer to read in
+    // the data as unsigned char's and then convert that in memory.
     if(fileImageWidth != int(width) ||
        fileImageHeight != int(height)) {
-      Error::abortRun("the width and height states of the star do not match those of the file image");
+      Error::abortRun(*this,
+		      "the width and height states do not ",
+		      "match those of the file image read from ",
+		      fileName);
       return;
     }
     unsigned int size = fileImageWidth * fileImageHeight;
     unsigned char *buffer = new unsigned char[size];
     unsigned char *p = buffer;
-    fread((char*)buffer, sizeof(unsigned char), size, fp);
+    fread( (char*)buffer,
+    	   int(width) * sizeof(unsigned char),
+	   int(height),
+	   fp );
     FloatSubMatrix* imgData = (FloatSubMatrix*)imageOutput.getOutput();
     for(unsigned int i = 0; i < size; i++)
       imgData->entry(i) = double(*p++);
     delete [] buffer;
     delete imgData;
     fclose(fp);
-    delete [] expandedName;
   } // end go{}
 } // end defstar{ ReadImg }

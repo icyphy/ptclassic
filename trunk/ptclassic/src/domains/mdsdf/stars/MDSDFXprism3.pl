@@ -63,35 +63,39 @@ for a complete explanation of the options.
 	go {
           // read data from input
 	  FloatSubMatrix* inputMatrix = (FloatSubMatrix*)(input.getInput());
-	  int del = 0;
+	  int del = FALSE;
 
-	  char fileName[256]; fileName[0] = '\000';
-	  if((const char*)saveFile) {
-	    strcpy(fileName, (const char*)saveFile);
-	    del = 0;
+	  const char* iname = saveFile;
+	  const char* nm = 0;
+	  if (iname && *iname) {
+	    nm = expandPathName(iname);
+	    del = FALSE;
 	  }
-	  if(fileName[0] == '\000') {
-	    char* nm = tempFileName();
-	    strcpy(fileName, nm);
-	    del = 1;
-	    LOG_DEL; delete [] nm;
+	  else {
+	    nm = tempFileName();
+	    del = TRUE;
 	  }
-	  
-	  FILE * fptr = fopen(fileName, "w");
-	  if(fptr == (FILE*)NULL) {
-	    Error::abortRun(*this, "can not create: ", fileName);
+	  StringList fileName = nm;
+	  delete [] nm;
+
+	  FILE *fp = fopen(fileName, "w");
+	  if (fp == 0) {
 	    delete inputMatrix;
+	    Error::abortRun(*this, "cannot open '", fileName, "' for writing.");
 	    return;
 	  }
-          int size = int(numRows) * int(numCols);
+
           // write out as float instead of double
+          int size = int(numRows) * int(numCols);
 	  float* buffer = new float[size];
 	  float* p = buffer;
-	  for(int i = 0; i < size; i++)
+	  for(int i = 0; i < size; i++) {
 	    *p++ = (float)inputMatrix->entry(i);
-	  fwrite((char *)buffer,sizeof(float),size,fptr);
-	  fclose(fptr);
-	  
+	  }
+	  fwrite((char *)buffer, sizeof(float), size, fp);
+	  fclose(fp);
+	  delete [] buffer;
+
 	  StringList cmd;
 	  StringList tmpFileName;
 	  tmpFileName << fileName << ".viff";
