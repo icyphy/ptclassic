@@ -24,10 +24,10 @@ public:
 
   Complex* Compute( Complex* z1, Complex* z2 );
 
-  Complex getW( int m, int n ) {
-    double angle = ( Pi2 * m ) / n;
-    return Complex( cos( angle ), sin( angle ) );
-  }
+				// AIX-4.1 under gcc-2.7.2 can't
+  				// handle having the definition of getW
+  				// in this file.
+  Complex getW( int m, int n );
 
 };
 
