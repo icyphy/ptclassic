@@ -1,4 +1,4 @@
-<!-- $Id$ -->
+<!-- <!-- $Id$ -->
 <html>
 <head>
 <Title>User's Guide to the Tycho File Class</title>
@@ -22,8 +22,7 @@ provided for many commands, as well as for traversal of the menus.
 <li><a href="#version control">Version control</a>
 <li><a href="#Window menu">Window menu</a>
 <li><a href="#Help menu">Help Menu</a>
-<li><a href="#registering an editor">Registering an Editor with the
-File Class</a>
+<li><a href="#registering an editor">Registering an editor</a>
 </ul>
 
 <h2><a name="version control">Version Control</a></h2>
@@ -102,56 +101,98 @@ The <CODE>Index</CODE> entry will bring up the master Tycho index.
 
 
 
-<h2><a name="registering an editor">Registering an Editor with the
-File Class</a></h2>
-<p>
-Since Tycho is meant to be an extensible system, it is expected
-that users will create new editors.  Integrating these editors into
-Tycho is easy.  Just issue the following command:
+<h2><a name="registering an editor">Registering an editor</a></h2>
+
+<p> Since Tycho is meant to be an extensible
+system, it is expected that users will create new editors.
+Integrating these editors into Tycho is easy. The code illustrated in
+the following example is generally contained in the package load file
+of the package containing your editor (see <A
+HREF="../../../../doc/packages/index.html">Tycho's package
+system</A>), or you can execute it directly into
+the Tycho console, or source a file containing at after
+you start Tycho.
+
+ <P>
+First, you need to create a "mode" for the file type -- this
+is much like a file mode in emacs. For example:
+
 <pre>
-::tycho::File::registerExtensions {.foo} &#92
-	{::tycho::view ::tycho::EditFoo -file {%s}} &#92
-	{Foo editor} "text"
+::tycho::register mode "foo" \
+	-command  {::tycho::view EditFoo -file {%s}} &#92
+	-viewclass ::tycho::EditFoo \
+	-label    {Foo editor} \
+	-category "text" \
+	-underline 0
 </pre>
+
+Here, the arguments to the <CODE>::tycho::register mode</CODE>
+command are:
+
 <MENU>
-<LI> 
-The first argument, <CODE>{.foo}</CODE> gives zero or more filename
-extensions that will cause your editor to be used in place of the
-default editor.  
 
-<LI> The second argument is a string with a <CODE>%s</CODE> embedded.
-The <CODE>%s</CODE> is replaced with the file name before invoking the
-command, using the Tcl <code>format</code>command to use.
+<LI> The first argument is the name of the mode.
 
-<LI>If the third argument is a non-empty string, then the
-command will be added to the <CODE>Window</CODE> menu of all File
-objects opened in the future using the value of this description as
-the menu label. This permits the user to open a new blank editor of
-the given class.
+<li> The <CODE>-command</CODE> argument is a Tcl command that is
+executed when a file is opened in this mode. An occurrence of an
+embedded <CODE>%s</CODE> is replaced with the file name before
+invoking the command, using the Tcl <code>format</code> command.
 
-<LI> If the fourth argument is supplied and non-empty, then is selects
-the sub-menu of the <CODE>Window</CODE> menu into which the entry to
-open a blank editor will be placed. Legal values are <CODE>text</CODE>,
-<CODE>graphics</CODE>, and <CODE>tools</CODE>.
+<LI> The <CODE>-viewclass</CODE> argument is the class
+of your editor.
+
+<li> The <CODE>-label</CODE> argument is a description of the
+editor. If it is supplied, then the command will be added to the
+<CODE>Window</CODE> menu of all File objects opened in the future
+using the value of this description as the menu label. This permits
+the user to open a new blank editor of the given class.
+
+<LI> The <CODE>-category</CODE> argument selects the sub-menu of the
+<CODE>Windows</CODE> menu into which this editor will be placed.
+The standard set of categories is <CODE>text</CODE>, <CODE>graphics</CODE>,
+<CODE>tool</CODE>, and <CODE>html</CODE>.
+
+<li> The <CODE>-underline</CODE> argument is the position of the
+character in <CODE>-label</CODE> to underline for menu traversal.
+
 </MENU>
- With the above example, a Tycho <CODE>Open
-File</CODE> command on a file called <CODE>file.foo</CODE>
-will cause an view of <CODE>::tycho::EditFoo</CODE> to be created.
-The syntax of the command that creates the instance will be:
+
+ <P>
+You also need to associate one or more file extensions with the mode.
+For example:
 <pre>
-::tycho::view EditFoo -file file.foo
+::tycho::register extensions "foo" .foo .bar .baz
 </pre>
-The name is generated automatically.  The 
-<a name="-file option"><CODE>-file</CODE> option</a> must (obviously)
-be understood by the editor.  But that is the only constraint on the editor.
-<p>
-If an editor has a ToolBar, then the <CODE>registerExtensions</CODE>
-command would look like:
+
+ <P>Now, any file that ends with one of the extensions
+<CODE>.foo</CODE>, <CODE>.bar</CODE>, or <CODE>.baz</CODE> will by
+default be opened in an <CODE>EditFoo</CODE> widget.  For example, a
+Tycho <CODE>Open File</CODE> command on a file called
+<CODE>file.foo</CODE> will cause a window containing an instance of
+<CODE>::tycho::EditFoo</CODE> to be created, and <CODE>file.foo</CODE>
+will be loaded into it.  The syntax of the command that creates the
+windows will be:
+
+<pre>
+  ::tycho::view EditFoo -file file.foo
+</pre>
+
+The name of the widget is generated automatically.  The <a name="-file
+option"><CODE>-file</CODE> option</a> must (obviously) be understood
+by the editor.  But that is the only constraint on the editor.
+
+  <p> If an editor has a ToolBar, then the <CODE>::tycho::register
+mode</CODE> command might look like this:
+
 <PRE>
-    ::tycho::File::registerExtensions {.html .htm .htl} \
-            {::tycho::view HTML -file {%s} -toolbar 1} \
-            {}
+ ::tycho::register mode "html" \
+	-command  {::tycho::view HTML -file {%s} -toolbar 1} \
+	-viewclass ::tycho::HTML \
+	-label    {HTML Viewer}  \
+	-category "html" \
+	-underline 5
 </PRE>
+
 <p>
 <a href="../../../../doc/index.html">Tycho Home Page</a><br>
 <p>
