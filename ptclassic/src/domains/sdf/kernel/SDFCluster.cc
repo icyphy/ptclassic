@@ -70,6 +70,16 @@ static const char file_id[] = "SDFCluster.cc";
 #include "pt_fstream.h"
 #include "Error.h"
 
+// indent by depth tabs
+const char* tab(int depth) {
+	// this fails for depth > 20, so:
+	if (depth > 20) depth = 20;
+	// For more compact schedule displays, we use two spaces
+	// rather than tabs.
+	static const char *tabs = "                                        ";
+	return (tabs + 40 - depth*2);
+}
+
 // A SDFClusterGal is a Galaxy, built from another galaxy.
 
 // function to print an SDFClusterGal on an ostream.
@@ -867,17 +877,6 @@ int SDFClusterBag::genSched() {
 }
 
 	
-// indent by depth tabs.
-static const char* tab(int depth) {
-	// this fails for depth > 20, so:
-	if (depth > 20) depth = 20;
-
-	// For more compact schedule displays, we use two spaces
-	// rather than tabs.
-	static const char *tabs = "                                        ";
-	return (tabs + 40 - depth*2);
-}
-
 // return the bag's schedule as one or more schedule items
 StringList SDFClusterBag::displaySchedule(int depth) {
 	if (sched == 0) genSched();
