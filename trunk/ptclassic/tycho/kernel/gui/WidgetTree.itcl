@@ -79,79 +79,12 @@ itk::usual Widgettree {
 # Widgettree implements an unfolding tree of widgets, with a button at
 # each node to open and close the node. The widget is designed for
 # implementing unfolding preference and dialog boxes as well as
-# viewers of tree-like structures.
-#
-# Each item in the tree is referenced by a tag, which is constructed
-# in the same manner as hierarchical Tk widget names, but without
-# the leading period. For example, a node at the top level may
-# have the tag <code>foo</code>, and a widget contained within that
-# node the tag <code>foo.bar</code>. Widgets and nodes are added to
-# the tree with the <b>add</b> method.
-#
-# Widgets can be added to the tree either when the Widgettree is
-# created or as each node is opened. To add widgets as node are opened,
-# supply the <b>-createcommand</b> option. This command will be
-# evaluated when a node with no children is opened -- it should
-# call <b>add</b> to add children to the node.
-#
-# <h2>Accessing components</h2>
-#
-# The Tk path of each widget in the tree can be accessed
-# with the Itk <b>component</b> method. For example, to access the widget
-# with tag <code>foo.bar</code>, use
-# <pre>
-#   $widgettree component foo.bar
-# </pre>
-# If <code>foo.bar</code> is a leaf, this call will return the
-# widget path. If it is a node,
-# this call will return the Tk frame into which chidren of the node
-# are packed. Note, however, that this frame may not be created
-# until a child widget is added, so creating a node called
-# <code>foo.bar</code> and immediately making the above call may
-# raise a Tk error. If direct access is required to either the
-# open-close button or the label of a node, <b>component</b> can be used
-# with "button" or "label" appended to the tag, as in
-# <pre>
-#   $widgettree component foo.barbutton
-# </pre>
-# The <b>-padx</b> and
-# <b>-pady</b> options give the default padding used to pack the
-# components. If it is not suitable, use the Tk <b>grid</b> command
-# and <b>component</b> to alter it, as in:
-# <pre>
-#   grid configure [$widgettree component size] -pady 4
-# </pre>
-#
-# The returned value from this method is always the item tag. If needed,
-# the Tk path of a created widget can be accessed by passing _tag_ to
-# the <b>component</b> method. Note that, in the case of nodes, this
-# method will attempt to access the frame in which child nodes are placed,
-# and will fail if no child nodes have been created. If the parent node
-# is currently open, any newly created items will be displayed in the
-# window. 
-#
-# <h2>Default bindings</h2>
-#
-# If the <b>-traversal</b> option is true, the widget tree can
-# be navigated using tab traversal and cursor keys. Each button
-# will accept the focus, and can be traversed using the standard
-# Tk traversal mechanism. The Return key opens or closes the node
-# with the focus. In addition, cursor keys navigate the tree as follows:
-# <ul>
-# <li><b>down</b>: Move to the next button in the same node. If
-# at the bottom, stay there.
-# <li><b>up</b>: Move to the previous button in the same node. If
-# at the top, stay there.
-# <li><b>left</b>: Move up to the parent node, if there is one. If there
-# isn't, stay there.
-# <li><b>right</b>: If the node is closed, open it. If there are child nodes,
-# move to the first child. If there aren't any, stay there.
-# </ul>
-#
-# Widgettree does not implement
-# a selection mechanism, but does provides some support for it with
-# the <b>locate</b> method. If required, selection can be implemented
-# by wrapping or subclassing Widgettree.
+# viewers of tree-like structures. Each item in the tree is referenced
+# by a tag, which is constructed in the same manner as hierarchical
+# Tk widget names, but without the leading period. Widgets can be added
+# to the tree either when the Widgettree is created or as each node
+# is opened. Default bindings provides traversal through the tree using
+# the cursor and return keys.
 #
 class iwidgets::Widgettree { 
     inherit itk::Widget
@@ -434,22 +367,14 @@ body iwidgets::Widgettree::_mkNodeFrame {tag} {
 #
 # Add a new widget to the tree. The first argument is the widget type,
 # and the second is a tag to give it. Raise an error if an item with
-# _tag_ already
-# exists. Tags are hierarchical, as in *foo.bar* -- the 
-# parent node must already exist (<code>foo</code>, in this case). The
+# _tag_ already exists. Tags are hierarchical, as in *foo.bar*. The
 # special type <b>node</b> is used to create a new node, in which case
 # options are passed directly to the constructor of the node label, which
-# is a Tk label. Usually, the options will include at least the <b>-text</b>
-# option.
+# is a Tk label.
 #
 # Any other value of _type_ is assumed to be the type of the widget to
 # create. The optional arguments comprise an option-value list which can
-# contain any valid options for _type_. By default, the widget's options
-# are integrated into the mega-widgets option-list with the <b>usual</b>
-# option handling. If this is not correct, then this behaviour can
-# be overridden for each _type_ by using the <b>options</b> method.
-# The return value is the tag.
-#
+# contain any valid options for _type_. The return value is the tag.
 # ------------------------------------------------------------------    
 body iwidgets::Widgettree::add {type tag args} {
     if [::info exists _type($tag)] {
@@ -553,8 +478,7 @@ body iwidgets::Widgettree::add {type tag args} {
 # scope. In this case, the node is not closed -- the close command must
 # explicitly close it with the <b>hide</b> method. If the
 # <b>-closecommand</b> option is null, the node is just closed. 
-# Raise an error if the node does not exist or if _tag_
-# is a leaf.
+# Raise an error if the node does not exist or if _tag_ is a leaf.
 # ------------------------------------------------------------------
 body iwidgets::Widgettree::close {tag} {
     if ![::info exists _type($tag)] {
@@ -712,14 +636,12 @@ body iwidgets::Widgettree::itemconfigure {tag {option {}} args} {
 # ------------------------------------------------------------------
 ## METHOD: locate x y ?tag?
 #
-# Return the tag of the item at the given <i>x</i> and <i>y</i> coordinates. If
-# the _tag_ argument is given, it must be a node, and the <i>x</i> and <i>y</i>
-# coordinates are relative to the interior of that node. If <i>x</i>
-# is negative, then the <i>x</i> coordinate is ignored in figuring out
-# which item is under the mouse -- this is most useful when
-# drag-selecting a region of the tree. If <i>x</i> is non-negative,
-# then a tag is returned only if the mouse is actually over
-# an item.
+# Return the tag of the item at the given _x_ and _y_ coordinates.
+# If the _tag_ argument is given, it must be a node, and the _x_ and
+# _y_ coordinates are relative to the interior of that node. If _x_
+# is negative, then the _x_ coordinate is ignored in figuring out
+# which item is under the mouse. If _x_ is non-negative, then a tag
+# is returned only if the mouse is actually over an item.
 # ------------------------------------------------------------------
 body iwidgets::Widgettree::locate {x y {tag {}}} {
     if { $tag == "" } {
@@ -828,24 +750,11 @@ body iwidgets::Widgettree::open {tag} {
 # Query or specify option commands for a type that can be passed to
 # <b>add</b>. By default, an added widget's options are integrated
 # into the option list with the <b>usual</b> option handling
-# mechanism. If this is not correct -- for example, the widget
-# may require that some options be renamed -- then this method
-# can be called to override the default behavior. The _type_ is
-# a widget type that can be passed to the <b>add</b> method.
-# The _optioncmds_ argument is a list of option commands in the
-# same format as the second argument to the <b>itk_component add</b>
-# method of <code>itk::Archetype</code>. If _optioncmds_ is not
+# mechanism. This method can be used to override the default behavior.
+# The _type_ is a widget type, and _optioncmds_ is a list of option
+# commands in the same format as the second argument to the 
+# *itk_component add*. If _optioncmds_ is not
 # supplied, return the option commands for the specified _type_.
-#
-# For example, we could specify that each time we add a radiobox
-# to a query widget, we want its <b>-labelfont</b> option to
-# integrate with the <b>-font</b> option of the widget tree:
-# <pre>
-#   $widgettree options radiobox {
-#       usual
-#       rename -labelfont -font font Font
-#   }
-# </pre>
 # ------------------------------------------------------------------
 body iwidgets::Widgettree::options {type {optioncmds _}} {
     if { $optioncmds == "_" } {
@@ -872,7 +781,7 @@ body iwidgets::Widgettree::options {type {optioncmds _}} {
 # focus. To aid construction of call-backs, the _tag_ can either be
 # a tag or a widget path. _mode_ is case-insensitive, and can be one
 # of <b>down</b>, <b>return</b>, <b>up</b>, <b>left</b>, or <b>right</b>,
-# with the effect described for the deffault bindings. It can also
+# with the effect described for the default bindings. It can also
 # be <b>to</b>, which moves the focus to the given node.
 # If the <b>-traversal</b> option is false, the method returns
 # without doing anything.
