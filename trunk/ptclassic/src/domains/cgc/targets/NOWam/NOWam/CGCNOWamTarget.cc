@@ -108,10 +108,6 @@ void CGCNOWamTarget :: pairSendReceive(DataFlowStar* s, DataFlowStar* r) {
 	CGCNOWamSend* cs = (CGCNOWamSend*) s;
 	CGCNOWamRecv* cr = (CGCNOWamRecv*) r;
 
-	// for each child_target
-	CGCTarget* ts = (CGCTarget*) cs->cgTarget();
-	CGCTarget* tr = (CGCTarget*) cr->cgTarget();
-
 	// set the IPC handler names
 	// for sender
 	StringList handlerName = "ipcHandler";
