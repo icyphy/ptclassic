@@ -81,6 +81,7 @@ libsdfatmstars.exp\
 libsdfdspstars.exp\
 libsdfimagestars.exp\
 libsdfcontrib.exp\
+libsdfcontribstars.exp\
 libsdfmatrixstars.exp\
 libsdfstars.exp\
 libsdftclstars.exp\
