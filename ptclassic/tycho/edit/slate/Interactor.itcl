@@ -461,7 +461,8 @@ body ::tycho::Interactor::release {} {
 #
 # Set or get the item that this interactor is currently
 # operating on. With no argument, return the current target;
-# with an argument, sets the target item to that value. This
+# with an argument, sets the target item to that value. The
+# argument can be null, which clears the target. This
 # method is for use only within actions -- the target is not valid
 # until the interactor has been activated. You can call this method
 # in the *-activatecommand* script to have the item being operated on
