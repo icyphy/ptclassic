@@ -33,101 +33,89 @@ namespace ::tycho {
     if { [::info classes Connectible] == "" } {
 	uplevel #0 {source $tychoslate/Connectible.itcl}
     }
-    if { [::info classes Frame] == "" } {
-	uplevel #0 {source $tychoslate/Frame.itcl}
+    if { [::info classes LabeledFrame] == "" } {
+	uplevel #0 {source $tychoslate/LabeledFrame.itcl}
     }
 }
 
 ########################################################################
-## Connectible
+## IconFrame
 #
-# <i>Connectible</i> is an abstract class for items that can have
-# things connected to them with terminals.
-# The appearance of its terminals if given by configuration options. 
-# For a specific application, you may prefer to write a subclass
-# dedicated to the application.
+# <i>IconFrame</i> is a Frame with connecting terminals on it, intended
+# for use as an icon in block diagrams and the like. It has just two
+# coordinates, which are the _x_ and _y_ coordinates of its anchor point.
+# Currently, the anchor point can only be in the center of the icon.
 # 
 # <p><b>Options</b>:
 # 
+# _IconFrame_ has all options of <a href="Connectible.html">Connectible</a>
+# and <a href="LabeledFrame">LabeledFrame</a>. In addition, is the options:
+#
 # <ul>
-# <li><b>-inputs</b>.  The positions of the input connections.  This is a 
-# flat list of <i>x</i> and <i>y</i> coordinates, as percentages of the 
-# icon size and with the origin at the top left of the icon.  By default, 
-# this is <code>{0 50}</code>, meaning that there is a single input 
-# halfway up the left edge of the icon.  If a single integer is given when 
-# setting this option, the option is set to a list such that that number 
-# of inputs are evely spaced along the left edge of the icon.  For 
-# example, setting <code>-inputs 2</code> will result in the 
-# <code>-inputs</code> being set to <code>{0 25 0 75}</code>.
-# 
-# <li><b>-intype</b>.  A list containing the item type to use to draw the 
-# input terminals, followed by options of the item.  The item must accept 
-# exactly two coordinates.  The default is <code>{Terminal -type 
-# input}</code>.
-# 
-# <li><b>-outputs</b>.  The positions of the output connections.  This is 
-# must the same as the <code>inputs</code> option, except that output 
-# terminals are by default placed at the right-hand side of the node icon.
-# 
-# <li><b>-outtype</b>.  A list containing the item type to use to draw the 
-# output terminals, followed by options of the item.  The default is 
-# <code>{Terminal -type output}</code>.
-# 
+# <li><b>-height</b>
+# The height of the icon frame, in pixels.
+# <li><b>-width</b>
+# The width of the icon frame, in pixels.
+#
 # </ul>
 # 
 # <p><b>Components</b>
 #
-# <ul>
-# <li><b>inports</b>:
-# The input ports.
-# <li><b>outports</b>:
-# The output ports.
-# </ul>
-#
-# <p><b>Enhancements</b>: In an earlier version of the Slate,
-# Connectible items had primary and secondary "directions," so that
-# you could flip the node about the vertical and horizontal axes.
+# _IconFrame_ has all components of <a href="Connectible.html">Connectible</a>
+# and <a href="LabeledFrame">LabeledFrame</a>.
 # 
-# <p><b>Caveats</b>: (none)
+# <p><b>Bugs</b>: (none)
 # 
-# <p><b>Example</b>: Create a node:
+# <p><b>Example</b>: Create an icon:
 # <tcl quiet><pre>
 #   source $tycho/editors/slate/doc/internals/newslate.itcl
-#   .t.s create Connectible 50 50 120 90 -inputs {0 50 50 0} -outputs 2 &#92
-# 	-name Foo -tags moveable &#92
-# 	-intype {Terminal -type input -style blob -fill red} &#92
-# 	-outtype {Terminal -type output -style doublearrow -fill blue}
+#   .t.s create IconFrame 80 80 &#92
+#       -inputs {0 50 50 0} &#92
+#       -outputs 2 &#92
+#       -color green &#92
+#       -tags moveable &#92
+#       -intype {Terminal -type input -style blob -fill red} &#92
+#       -outtype {Terminal -type output -style doublearrow -fill blue}
 # </pre></tcl>
 # 
-# <a href="../internals/howtoread.html">Reading <i>ComplexItem</i> documentation</a>.
+# <p><b>Enhancements</b>: Would a <b>-anchor</b> option be useful?
 #
-# <b>Note</b>: This is an experimental class.
+# <p><b>Links</b>
+# 
+# <ul>
+# <li><a href="../internals/howtoread.html">Reading <i>ComplexItem</i>
+# documentation</a>.
+# <li><a href="../internals/items.html">Complex item classes</a>.
+# </ul>
 #
-class ::tycho::Connectible {
-    inherit ::tycho::ComplexItem
+class ::tycho::IconFrame {
+    inherit ::tycho::Connectible
 
     ###################################################################
     ####                         public procs                      ####
 
-    # Update the *-inputs* option
-    proc _inputs {id canvas slate inputs}
-    
-    # Update the *-intype* option
-    proc _intype {id canvas slate intype}
-    
-    # Update the *-outputs* option
-    proc _outputs {id canvas slate outputs}
-    
-    # Update the *-outtype* option
-    proc _outtype {id canvas slate outtype}
+    # Update the *-height* option
+    proc _height {id canvas slate height}
+
+    # Update the *-width* option
+    proc _width {id canvas slate width}
 
     # Create a new item
-    proc construct {id canvas slate tags x0 y0 x1 y1 args}
+    proc construct {id canvas slate tags x y args}
 
-    # Get or set the coordinates of the Connectible's icon
+    # Get or set the coordinates of the IconFrame's icon
     proc coords {id canvas slate args}
     
+    # Draw a highlight around the frame
+    proc highlight {id canvas slate args}
+    
     ###################################################################
+    ####                           protected procs                 ####
+
+    # Update the coordinates
+    proc _coords {id canvas slate x y}
+    
+   ###################################################################
     ####                         protected variables               ####
 
     # All methods are looked up through a table
@@ -137,57 +125,105 @@ class ::tycho::Connectible {
     common optiondefault
 
     ###################################################################
-    ####                           private procs                   ####
-
-    proc redrawinputs  {id canvas slate positions}
-    proc redrawoutputs {id canvas slate positions}
-
-    ###################################################################
     ####                       class initialization                ####
 
     #### Set method table
     array set methodtable [array get ::tycho::ComplexItem::methodtable]
-    array set methodtable [@scope ::tycho::Frame array get methodtable]
+    array set methodtable [@scope ::tycho::LabeledFrame array get methodtable]
 
-    set methodtable(construct)   ::tycho::Connectible::construct
-    set methodtable(coords)      ::tycho::Connectible::coords
+    set methodtable(_height)   ::tycho::IconFrame::_height
+    set methodtable(_width)    ::tycho::IconFrame::_width
+
+    set methodtable(construct)   ::tycho::IconFrame::construct
+    set methodtable(coords)      ::tycho::IconFrame::coords
+    set methodtable(highlight)   ::tycho::IconFrame::highlight
 
     #### Set option defaults
     array set optiondefault [array get ::tycho::ComplexItem::optiondefault]
-    array set optiondefault [@scope ::tycho::Frame array get optiondefault]
+    array set optiondefault [@scope ::tycho::LabeledFrame \
+            array get optiondefault]
+    set optiondefault(-height) 40
+    set optiondefault(-text) "NoName"
+    set optiondefault(-width) 70
 }
 
+##########################################################################
+## -height option configuration
+#
+body ::tycho::IconFrame::_height {id canvas slate height} {
+    set option(height$id) $height
+    eval _coords $id $canvas $slate [coords $id $canvas $slate]
+}
+
+##########################################################################
+## -width option configuration
+#
+body ::tycho::IconFrame::_width {id canvas slate width} {
+    set option(width$id) $width
+    eval _coords $id $canvas $slate [coords $id $canvas $slate]
+}
+
+##########################################################################
+#### _coords
+#
+body ::tycho::IconFrame::_coords {id canvas slate x y} {
+    # Alter the coordinates of the frame
+    set coords [eval ::tycho::Rectangle::stretch $x $y $x $y \
+        [expr $option(width$id)/2] [expr $option(height$id)/2]]
+    eval ::tycho::Frame::coords $id $canvas $slate $coords
+
+    # Move the inputs and outputs
+    eval ::tycho::Connectible::coords $id $canvas $slate $coords
+}
 
 ##########################################################################
 #### construct
 #
-body ::tycho::Connectible::construct {id canvas slate tags x0 y0 x1 y1 args} {
+body ::tycho::IconFrame::construct {id canvas slate tags x y args} {
     # Initialize the options
     foreach {opt val} [concat [array get optiondefault] $args] {
 	set option([string trimleft $opt -]$id) $val
     }
 
-    # Create the Frame
-    eval ::tycho::Frame::construct \
-	    $id $canvas $slate [list $tags] $x0 $y0 $x1 $y1
+    # Figure out the coordinates of the bounding Frame
+    set coords [::tycho::Rectangle::stretch $x $y $x $y \
+        [expr $option(width$id)/2] [expr $option(height$id)/2]]
+
+    # Create the Frame.
+    eval ::tycho::LabeledFrame::_construct \
+	    $id $canvas $slate [list $tags] $coords
 
     # Create the input and output ports
-    _inputs  $id $canvas $slate $option(inputs$id)
-    _outputs $id $canvas $slate $option(outputs$id)
+    ::tycho::Connectible::_inputs  $id $canvas $slate $option(inputs$id)
+    ::tycho::Connectible::_outputs $id $canvas $slate $option(outputs$id)
 }
 
 ##########################################################################
 #### coords
 #
-body ::tycho::Connectible::coords {id canvas slate args} {
+body ::tycho::IconFrame::coords {id canvas slate args} {
     # No args: just return coordinates
     if { $args == "" } {
-	return [$canvas coords $primary($id)]
+        ::tycho::assign x0 y0 x1 y1 [$canvas coords $primary($id)]
+        return [list [expr ($x0+$x1)/2] [expr ($y0+$y1)/2]]
     }
 
-    # Move the frame itself
-    eval ::tycho::Frame::coords $id $canvas $slate $args
+    # Alter the coordinates of the frame
+    eval _coords $id $canvas $slate $args
+}
 
-    # Move the inputs and outputs
-    eval ::tycho::Connectible::coords $id $canvas $slate $args
+##########################################################################
+#### highlight
+#
+# Draw a highlight around the main icon. This is so the highlight
+# appears around the icon, not around the outside of the terminals,
+# which looks a bit rough.
+#
+body ::tycho::IconFrame::highlight {id canvas slate args} {
+    # No args: just return coordinates
+    if { $args == "" } {
+        ::tycho::assign x0 y0 x1 y1 [$canvas coords $primary($id)]
+        return [list [expr ($x0+$x1)/2] [expr ($y0+$y1)/2]]
+    }
+    eval $canvas create rectangle [$canvas bbox $primary($id)] $args
 }

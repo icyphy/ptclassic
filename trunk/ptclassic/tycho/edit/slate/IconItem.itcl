@@ -37,27 +37,17 @@ namespace ::tycho {
 
 
 ########################################################################
-## Node
+## Connectible
 #
-# <i>Node</i> is an item that represents a node of a computation graph 
-# of some kind. It is fully parameterized: the way the node is drawn and 
-# the appearance of its terminals if given by configuration options. 
-# For a specific application, you may prefer to write an item type
+# <i>Connectible</i> is an abstract class for items that can have
+# things connected to them with terminals.
+# The appearance of its terminals if given by configuration options. 
+# For a specific application, you may prefer to write a subclass
 # dedicated to the application.
 # 
 # <p><b>Options</b>:
 # 
 # <ul>
-# <li><b>-font</b>. The font to use to display the textual name of the 
-# node. By default, this is a twelve-point Helvetica font.
-# 
-# <li><b>-icon</b>. A list containing the item type to use to draw the
-# node, followed by options of the item. The item must accept exactly 
-# four coordinates, and is assumed in fact to be rectangular.
-# The default is <code>{Frame -color green}</code>, meaning that the 
-# icon will be a raised green pseudo-3D rectangle (not as bad as it 
-# sounds!).
-# 
 # <li><b>-inputs</b>.  The positions of the input connections.  This is a 
 # flat list of <i>x</i> and <i>y</i> coordinates, as percentages of the 
 # icon size and with the origin at the top left of the icon.  By default, 
@@ -73,9 +63,6 @@ namespace ::tycho {
 # exactly two coordinates.  The default is <code>{Terminal -type 
 # input}</code>.
 # 
-# <li><b>-name</b>.  The name of the node, which is displayed immediately 
-# underneath the node's icon.  The default is "NoName."
-# 
 # <li><b>-outputs</b>.  The positions of the output connections.  This is 
 # must the same as the <code>inputs</code> option, except that output 
 # terminals are by default placed at the right-hand side of the node icon.
@@ -89,55 +76,36 @@ namespace ::tycho {
 # <p><b>Components</b>
 #
 # <ul>
-# <li><b>icon</b>:
-# The item used as the node's icon.
-# <li><b>label</b>:
-# The editable text label.
 # <li><b>inports</b>:
 # The input ports.
 # <li><b>outports</b>:
 # The output ports.
 # </ul>
 #
-# <p><b>Enhancements</b>: In an earlier version of the Slate, Node items 
-# had primary and secondary "directions," so that you could flip the 
-# node about the vertical and horizontal axes.
+# <p><b>Enhancements</b>: In an earlier version of the Slate,
+# Connectible items had primary and secondary "directions," so that
+# you could flip the node about the vertical and horizontal axes.
 # 
 # <p><b>Caveats</b>: (none)
 # 
-# <p><b>Example</b>: Create a node:
-# <tcl quiet><pre>
-#   source $tycho/editors/slate/doc/internals/newslate.itcl
-#   .t.s create Node 50 50 120 90 -inputs {0 50 50 0} -outputs 2 &#92
-# 	-name Foo -tags moveable &#92
-# 	-intype {Terminal -type input -style blob -fill red} &#92
-# 	-outtype {Terminal -type output -style doublearrow -fill blue}
-# </pre></tcl>
-# 
+# <p><b>Example</b>: See <a href="IconFrame.html">IconFrame.html</a>
+# and <a href="IconRect.html">IconRect.html</a>
+#
 # <a href="../internals/howtoread.html">Reading <i>ComplexItem</i> documentation</a>.
 #
 # <b>Note</b>: This is an experimental class.
 #
-class ::tycho::Node {
+class ::tycho::Connectible {
     inherit ::tycho::ComplexItem
 
     ###################################################################
     ####                         public procs                      ####
 
-    # Update the *-font* option
-    proc _font {id canvas slate font}
-    
-    # Update the *-icon* option
-    proc _icon {id canvas slate icon}
-    
     # Update the *-inputs* option
     proc _inputs {id canvas slate inputs}
     
     # Update the *-intype* option
     proc _intype {id canvas slate intype}
-    
-    # Update the *-name* option
-    proc _name {id canvas slate name}
     
     # Update the *-outputs* option
     proc _outputs {id canvas slate outputs}
@@ -148,18 +116,15 @@ class ::tycho::Node {
     # Get an aspect
     proc aspect {id canvas slate args}
     
-    # Create a new item
-    proc construct {id canvas slate tags x0 y0 x1 y1 args}
-
-    # Get or set the coordinates of the Node's icon
-    proc coords {id canvas slate args}
-    
     # Access a component
     proc component {id canvas slate {name {}}}
 
     ###################################################################
-    ####                         picture components                ####
+    ####                          protected procs                  ####
 
+    # Update the inputs and output because of change in coordinates
+    protected proc coords {id canvas slate x0 y0 x1 y1}
+    
     ###################################################################
     ####                         protected variables               ####
 
@@ -187,53 +152,21 @@ class ::tycho::Node {
     #### Set method table
     array set methodtable [array get ::tycho::ComplexItem::methodtable]
 
-    set methodtable(_font)       ::tycho::Node::_font
-    set methodtable(_icon)   ::tycho::Node::_icon
-    set methodtable(_inputs)     ::tycho::Node::_inputs
-    set methodtable(_intype)     ::tycho::Node::_intype
-    set methodtable(_name)       ::tycho::Node::_name
-    set methodtable(_outputs)    ::tycho::Node::_outputs
-    set methodtable(_outtype)    ::tycho::Node::_outtype
+    set methodtable(_inputs)     ::tycho::Connectible::_inputs
+    set methodtable(_intype)     ::tycho::Connectible::_intype
+    set methodtable(_outputs)    ::tycho::Connectible::_outputs
+    set methodtable(_outtype)    ::tycho::Connectible::_outtype
 
-    set methodtable(aspect)      ::tycho::Node::aspect
-    set methodtable(construct)   ::tycho::Node::construct
-    set methodtable(component)   ::tycho::Node::component
-    set methodtable(coords)      ::tycho::Node::coords
-    set methodtable(update)      ::tycho::Node::update
+    set methodtable(aspect)      ::tycho::Connectible::aspect
+    set methodtable(component)   ::tycho::Connectible::component
 
     #### Set option defaults
     array set optiondefault [array get ::tycho::ComplexItem::optiondefault]
 
-    set optiondefault(-font)     [::tycho::font Helvetica 12]
-    set optiondefault(-icon) {Frame -color green}
     set optiondefault(-inputs)   1
     set optiondefault(-intype)   {Terminal -type input}
-    set optiondefault(-name)     "NoName"
-    set optiondefault(-outtype)  {Terminal -type output}
     set optiondefault(-outputs)  1
-}
-
-
-##########################################################################
-#### -font option configuration
-#
-body ::tycho::Node::_font {id canvas slate font} {
-    set option(font$id) $font
-    $canvas itemconfigure $component(label$id) -font $font
-}
-
-##########################################################################
-#### -icon option configuration
-#
-body ::tycho::Node::_icon {id canvas slate icon} {
-    set option(icon$id) $icon
-
-    $slate delete $component(icon$id)
-    set component(icon$id) [eval $slate create [lindex $option(icon$id) 0] \
-	    [$canvas coords $primary($id)] [lrange $option(icon$id) 1 end] \
-	    -tags [list [$slate gettags $id]]]
-
-    $slate lower $component(icon$id) $component(label$id)
+    set optiondefault(-outtype)  {Terminal -type output}
 }
 
 ##########################################################################
@@ -256,7 +189,7 @@ body ::tycho::Node::_icon {id canvas slate icon} {
 # the option *-inputs 2* to the constructor will result in
 # the -inputs variable being set to *{0 25 0 75}*.
 #
-body ::tycho::Node::_inputs {id canvas slate inputs} {
+body ::tycho::Connectible::_inputs {id canvas slate inputs} {
     # Set up coordinates
     ::tycho::assign x0 y0 x1 y1 [$canvas coords $primary($id)]
     set xscale [expr ($x1-$x0)/100.0]
@@ -267,7 +200,7 @@ body ::tycho::Node::_inputs {id canvas slate inputs} {
     # along the left axis.
     if { [llength $inputs] == 1 && [string match {[0-9]*} $inputs] } {
 	set option(inputs$id) {}
-	set indirn($id) {}
+	set variable(indirn$id) {}
 
 	# If it's zero, then delete ports and we're done
 	if { $inputs == 0 } {
@@ -280,25 +213,25 @@ body ::tycho::Node::_inputs {id canvas slate inputs} {
 	}
 	foreach y [::tycho::spread $inputs 0 100 -indented] {
 	    lappend option(inputs$id) 0 $y
-	    lappend indirn($id) -1 0
+	    lappend variable(indirn$id) -1 0
 	    lappend positions $x0 [expr $y0 + $yscale * $y]
 	}
     } else {
 	# The argument has the correct format
 	set option(inputs$id) $inputs
-	set indirn($id) {}
+	set variable(indirn$id) {}
 	foreach {x y} $inputs {
 	    if { $x == 0 } {
-		lappend indirn($id) -1 0
+		lappend variable(indirn$id) -1 0
 		lappend positions $x0 [expr $y0 + $yscale * $y]
 	    } elseif { $x == 100 } {
-		lappend indirn($id) 1 0
+		lappend variable(indirn$id) 1 0
 		lappend positions $x1 [expr $y0 + $yscale * $y]
 	    } elseif { $y == 0 } {
-		lappend indirn($id) 0 -1
+		lappend variable(indirn$id) 0 -1
 		lappend positions [expr $x0 + $xscale * $x] $y0
 	    } elseif { $y == 100 } {
-		lappend indirn($id) 0 1
+		lappend variable(indirn$id) 0 1
 		lappend positions [expr $x0 + $xscale * $x] $y1
 	    } else {
 		error "Invalid coordinates $x $y"
@@ -312,7 +245,7 @@ body ::tycho::Node::_inputs {id canvas slate inputs} {
 ##########################################################################
 #### -intype option configuration
 #
-body ::tycho::Node::_intype {id canvas slate intype} {
+body ::tycho::Connectible::_intype {id canvas slate intype} {
     set option(intype$id) $intype
     foreach p $component(inports$id) {
 	$slate delete $p
@@ -323,19 +256,11 @@ body ::tycho::Node::_intype {id canvas slate intype} {
 }
 
 ##########################################################################
-#### -name option configuration
-#
-body ::tycho::Node::_name {id canvas slate name} {
-    set option(name$id) $name
-    $canvas itemconfigure $component(label$id) -text $name
-}
-
-##########################################################################
 #### -outputs option configuration
 #
 # See _inputs{} for comments.
 #
-body ::tycho::Node::_outputs {id canvas slate outputs} {
+body ::tycho::Connectible::_outputs {id canvas slate outputs} {
     # Set up coordinates
     ::tycho::assign x0 y0 x1 y1 [$canvas coords $primary($id)]
     set xscale [expr ($x1-$x0)/100.0]
@@ -346,7 +271,7 @@ body ::tycho::Node::_outputs {id canvas slate outputs} {
     # along the right axis.
     if {  [llength $outputs] == 1 && [string match {[0-9]*} $outputs] } {
 	set option(outputs$id) {}
-	set outdirn($id) {}
+	set variable(outdirn$id) {}
 
 	# If it's zero, then delete ports and we're done
 	if { $outputs == 0 } {
@@ -359,25 +284,25 @@ body ::tycho::Node::_outputs {id canvas slate outputs} {
 	}
 	foreach y [::tycho::spread $outputs 0 100 -indented] {
 	    lappend option(outputs$id) 100 $y
-	    lappend outdirn($id) 1 0
+	    lappend variable(outdirn$id) 1 0
 	    lappend positions $x1 [expr $y0 + $yscale * $y]
 	}
     } else {
 	# The argument has the correct format
 	set option(outputs$id) $outputs
-	set outdirn($id) {}
+	set variable(outdirn$id) {}
 	foreach {x y} $outputs {
 	    if { $x == 0 } {
-		lappend outdirn($id) -1 0
+		lappend variable(outdirn$id) -1 0
 		lappend positions $x0 [expr $y0 + $yscale * $y]
 	    } elseif { $x == 100 } {
-		lappend outdirn($id) 1 0
+		lappend variable(outdirn$id) 1 0
 		lappend positions $x1 [expr $y0 + $yscale * $y]
 	    } elseif { $y == 0 } {
-		lappend outdirn($id) 0 -1
+		lappend variable(outdirn$id) 0 -1
 		lappend positions [expr $x0 + $xscale * $x] $y0
 	    } elseif { $y == 100 } {
-		lappend outdirn($id) 0 1
+		lappend variable(outdirn$id) 0 1
 		lappend positions [expr $x0 + $xscale * $x] $y1
 	    } else {
 		error "Invalid coordinates $x $y"
@@ -391,42 +316,13 @@ body ::tycho::Node::_outputs {id canvas slate outputs} {
 ##########################################################################
 #### -outtype option configuration
 #
-body ::tycho::Node::_outtype {id canvas slate outtype} {
+body ::tycho::Connectible::_outtype {id canvas slate outtype} {
     set option(outtype$id) $outtype
     foreach p $component(outports$id) {
 	$slate delete $p
     }
     set component(outports$id) {}
     _outputs $id $canvas $option(outputs$id)
-}
-
-##########################################################################
-#### construct
-#
-body ::tycho::Node::construct {id canvas slate tags x0 y0 x1 y1 args} {
-    # Initialize the options
-    foreach {opt val} [concat [array get optiondefault] $args] {
-	set option([string trimleft $opt -]$id) $val
-    }
-
-    # Create the primary component for the outline coordinates.
-    set primary($id) [$canvas create rectangle $x0 $y0 $x1 $y1 \
-	    -tags $tags]
-
-    # Create the iconitem
-    set component(icon$id) [eval $slate create [lindex $option(icon$id) 0] \
-	    $x0 $y0 $x1 $y1 [lrange $option(icon$id) 1 end] \
-	    -tags [list $tags]]
-
-    # Create the label (should it be underneath?)
-    set point [::tycho::Rectangle::aspect $x0 $y0 $x1 $y1 "c"]
-    set component(label$id) [eval $canvas create text $point \
-	    -text $option(name$id) -font $option(font$id) \
-	    -tags [list $tags]]
-
-    # Create the input and output ports
-    _inputs  $id $canvas $slate $option(inputs$id)
-    _outputs $id $canvas $slate $option(outputs$id)
 }
 
 ##########################################################################
@@ -442,7 +338,7 @@ body ::tycho::Node::construct {id canvas slate tags x0 y0 x1 y1 args} {
 # Plus it doesn't assume that the ports have an aspect called
 # "terminal."
 #
-body ::tycho::Node::aspect {id canvas slate args} {
+body ::tycho::Connectible::aspect {id canvas slate args} {
     set result {}
 
     # If there are no args, return a list of aspect names
@@ -478,14 +374,13 @@ body ::tycho::Node::aspect {id canvas slate args} {
     return $result
 }
 
-
 ##########################################################################
 #### component
 #
 # Return a component of a node. Component names are of the form *input-*_n_
 # or $output-*_n_.
 #
-body ::tycho::Node::component {id canvas slate {name {}}} {
+body ::tycho::Connectible::component {id canvas slate {name {}}} {
     # If there is no component argument, return a list of components
     if { $name == "" } {
 	return [aspect $id $canvas]
@@ -509,25 +404,10 @@ body ::tycho::Node::component {id canvas slate {name {}}} {
 ##########################################################################
 #### coords
 #
-body ::tycho::Node::coords {id canvas slate args} {
-    # No args: just return coordinates
-    if { $args == "" } {
-	return [$canvas coords $primary($id)]
-    }
-
-    # Move the primary
-    set coords $args
-    eval $canvas coords $primary($id) $coords
-
-    # Move the iconitem
-    eval $slate coords $component(icon$id) $coords
-
-    # Perform a generic update
-    update $id $canvas
-
-    # Set up coordinates for moving inputs and outputs
-    ::tycho::assign x0 y0 x1 y1 $coords
-
+# Move the inputs and outputs to match the coordinates of the
+# primary component
+#
+body ::tycho::Connectible::coords {id canvas slate x0 y0 x1 y1} {
     set xscale [expr ($x1-$x0)/100.0]
     set yscale [expr ($y1-$y0)/100.0]
 
@@ -566,14 +446,16 @@ body ::tycho::Node::coords {id canvas slate args} {
 ##########################################################################
 #### redrawinputs
 #
-body ::tycho::Node::redrawinputs {id canvas slate positions} {
+body ::tycho::Connectible::redrawinputs {id canvas slate positions} {
     if { ! [::info exists component(inports$id)] } {
 	set component(inports$id) {}
     }
     set tags [$canvas gettags $id]
-    foreach {x y} $positions {a b} $indirn($id) p $component(inports$id) {
+    foreach {x y} $positions {a b} \
+	    $variable(indirn$id) \
+	    p $component(inports$id) {
 	if { $p == "" } {
-	    lappend component(inports$id) [eval $slate create \
+	    lappend component(inports$id) [eval $slate createrootchild $id \
 		    [lindex $option(intype$id) 0] \
 		    $x $y \
 		    [lrange $option(intype$id) 1 end] \
@@ -591,14 +473,16 @@ body ::tycho::Node::redrawinputs {id canvas slate positions} {
 ##########################################################################
 #### redrawoutputs
 #
-body ::tycho::Node::redrawoutputs {id canvas slate positions} {
+body ::tycho::Connectible::redrawoutputs {id canvas slate positions} {
     if { ! [::info exists component(outports$id)] } {
 	set component(outports$id) {}
     }
     set tags [$canvas gettags $id]
-    foreach {x y} $positions {a b} $outdirn($id) p $component(outports$id) {
+    foreach {x y} $positions \
+	    {a b} $variable(outdirn$id) \
+	    p $component(outports$id) {
 	if { $p == "" } {
-	    lappend component(outports$id) [eval $slate create \
+	    lappend component(outports$id) [eval $slate createrootchild $id \
 		    [lindex $option(outtype$id) 0] \
 		    $x $y \
 		    [lrange $option(outtype$id) 1 end] \
@@ -612,4 +496,3 @@ body ::tycho::Node::redrawoutputs {id canvas slate positions} {
 	}
     }    
 }
-
