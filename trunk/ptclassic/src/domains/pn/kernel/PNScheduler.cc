@@ -23,8 +23,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 							COPYRIGHTENDKEY
 */
 /*  Version $Id$
-    Programmer:		T.M. Parks
-    Date of creation:	7 February 1992
+    Author:	T.M. Parks
+    Created:	7 February 1992
 */
 
 static const char file_id[] = "$RCSfile$";
@@ -38,28 +38,38 @@ static const char file_id[] = "$RCSfile$";
 #include "MTDFThread.h"
 #include "MTDFThreadIter.h"
 #include "GalIter.h"
-#include "CriticalSection.h"
 
 extern const char MTDFdomainName[];
 
-const int stackSize = 0x4000;
-
-// Create static Thread for main().
-MTDFThread& MTDFScheduler::main
-    = (MTDFThread&)Thread::init(MTDFThread::minPriority()+1, stackSize);
+// Master PtGate object for mutual exclusion.
+LwpMonitor masterMonitor;
 
 // Constructor.
 MTDFScheduler::MTDFScheduler() : starThreads(), monitor(), start(monitor)
 {
-    currentTime = 0.0;
-    stopTime = 1.0;
     schedulePeriod = 1.0;
+    setStopTime(0.0);
+    setCurrentTime(0.0);
+
+    // Initialize the Lightweight Process library.
+    const int stackSize = 0x4000;
+    MTDFThread::initStackCache(stackSize);
+    MTDFThread::setMaxPriority(MTDFThread::minPriority()+1);
+    thread = MTDFThread::currentThread();
+    thread->setPriority(MTDFThread::maxPriority());
+
+    // Enable all registered PtGates before additional threads are created.
+    GateKeeper::enableAll(masterMonitor);
 }
 
 // Destructor.
 MTDFScheduler::~MTDFScheduler()
 {
     deleteThreads();
+    LOG_DEL; delete thread;
+
+    // Disable all registered PtGates after other threads have been deleted.
+    GateKeeper::disableAll();
 }
 
 // Domain identification.
@@ -81,20 +91,22 @@ void MTDFScheduler::setup()
 
     // Delete any left-over threads before creating new ones.
     deleteThreads();
-    createThreads();
 
-    currentTime = 0.0;
+    if (!SimControl::haltRequested())
+	createThreads();
+
+    setCurrentTime(0.0);
 }
 
 // Run (or continue) the simulation.
 int MTDFScheduler::run()
 {
-    // Lower priority to allow Threads to run.
-    main.setPriority(MTDFThread::minPriority());
+    // Lower priority to allow other threads to run.
+    thread->setPriority(MTDFThread::minPriority());
 
     while((currentTime < stopTime) && !SimControl::haltRequested())
     {
-	// Notify all source Threads to start.
+	// Notify all source threads to start.
 	{
 	    CriticalSection x(monitor);
 	    start.notifyAll();
@@ -102,14 +114,14 @@ int MTDFScheduler::run()
 	currentTime += schedulePeriod;
     }
 
-    // Raise priority to prevent Threads from running.
-    main.setPriority(MTDFThread::maxPriority());
+    // Raise priority to prevent other threads from running.
+    thread->setPriority(MTDFThread::maxPriority());
 
     return !SimControl::haltRequested();
 }
 
 // Select thread function for a star.
-void (*MTDFScheduler::thread(MTDFStar* star))(MTDFStar*)
+void (*MTDFScheduler::selectThread(MTDFStar* star))(MTDFStar*)
 {
     if (star->isSource()) return sourceThread;
     else return starThread;
@@ -119,23 +131,20 @@ void (*MTDFScheduler::thread(MTDFStar* star))(MTDFStar*)
 void MTDFScheduler::starThread(MTDFStar* star)
 {
     // Fire the Star ad infinitum.
-    while(TRUE)	star->run();
+    while(star->run());
 }
 
 // Thread for source Stars.
 void MTDFScheduler::sourceThread(MTDFStar* star)
 {
-    MTDFScheduler* sched = (MTDFScheduler*) star->scheduler();
+    MTDFScheduler& sched = *(MTDFScheduler*)star->scheduler();
 
     // Wait for notification from the Scheduler, then fire the Star.
-    while(TRUE)
+    do
     {
-	{
-	    CriticalSection x(sched->monitor);
-	    sched->start.wait();
-	}
-	star->run();
-    }
+	CriticalSection x(sched.monitor);
+	sched.start.wait();
+    } while (star->run());
 }
 
 // Create threads and build ThreadList.
@@ -149,7 +158,7 @@ void MTDFScheduler::createThreads()
     // Create Threads for all the Stars.
     while((star = (MTDFStar*)starIter++) != NULL)
     {
-	LOG_NEW; t = new MTDFThread(p, thread(star), star);
+	LOG_NEW; t = new MTDFThread(p, selectThread(star), star);
 	starThreads.append(t);
     }
 }
@@ -179,4 +188,10 @@ void MTDFScheduler::setStopTime(double limit)
 double MTDFScheduler::getStopTime()
 {
     return stopTime;
+}
+
+TimeVal MTDFScheduler::delay(TimeVal when)
+{
+    TimeVal zero;
+    return zero;
 }

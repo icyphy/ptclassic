@@ -23,8 +23,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 							COPYRIGHTENDKEY
 */
 /*  Version $Id$
-    Programmer:		T.M. Parks
-    Date of creation:	7 February 1992
+    Author:	T.M. Parks
+    Created:	7 February 1992
 */
 
 #ifndef _MTDFScheduler_h
@@ -36,8 +36,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #include "Scheduler.h"
 #include "MTDFThreadList.h"
-#include "Monitor.h"
-#include "Condition.h"
+#include "LwpMonitor.h"
 #include "TimeVal.h"
 
 class MTDFStar;
@@ -53,19 +52,19 @@ public:
     ~MTDFScheduler();
 
     // Domain identification.
-    /* virtual */ const char* domain() const;
+    /*virtual*/ const char* domain() const;
 
     // Initialization.
-    /* virtual */ void setup();
+    /*virtual*/ void setup();
 
     // Run the simulation.
-    /* virtual */ int run();
+    /*virtual*/ int run();
 
     // Set the stopping time.
-    /* virtual */ void setStopTime(double);
+    /*virtual*/ void setStopTime(double);
 
     // Get the stopping time.
-    /* virtual */ double getStopTime();
+    /*virtual*/ double getStopTime();
 
     // Create threads and build ThreadList.
     void createThreads();
@@ -76,28 +75,31 @@ public:
     // Duration of one schedule period or iteration.
     TimeVal schedulePeriod;
 
+    // Delay used for sleeping Threads.
+    virtual TimeVal delay(TimeVal);
+
 protected:
     // Stopping time.
     TimeVal stopTime;
 
-    // Thread for main().
-    static MTDFThread& main;
+    // Thread in which this scheduler is running.
+    MTDFThread* thread;
 
     // List of Star Threads.
     MTDFThreadList starThreads;
 
     // Select thread function for a star.
-    virtual void (*thread(MTDFStar*))(MTDFStar*);
+    virtual void (*selectThread(MTDFStar*))(MTDFStar*);
 
     // Thread functions.
     static void starThread(MTDFStar*);
     static void sourceThread(MTDFStar*);
 
     // Monitor for guarding the Conditions used by the Scheduler.
-    Monitor monitor;
+    LwpMonitor monitor;
 
     // Condition variable for synchronizing the start of an iteration.
-    Condition start;
+    LwpCondition start;
 };
 
 #endif
