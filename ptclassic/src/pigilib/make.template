@@ -70,6 +70,7 @@ HDRS	      = compile.h \
 		mkTerm.h \
 		mkIcon.h \
 		palette.h \
+		pdmm.h \
 		octMacros.h \
 		ptcl.h \
 		ptk.h \
