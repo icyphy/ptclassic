@@ -19,7 +19,7 @@ CGKERNEL = $(ROOT)/src/domains/cg/kernel
 
 INCL=-I$(SDFKERNEL) -I$(CGKERNEL) -I$(KERNDIR) -I$(EGKERNEL) 
 
-SRCS =	ParNode.cc Parraph.cc ParScheduler.cc \
+SRCS =	ParNode.cc ParGraph.cc ParScheduler.cc \
 		UniProcessor.cc ParProcessors.cc 
 
 HDRS =  ParNode.h ParGraph.h ParScheduler.h \
