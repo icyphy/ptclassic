@@ -25,18 +25,18 @@
 # or
 #DEFAULT (echo ""; id; echo %{sVv}; date; cat) >> $CVSROOT/CVSROOT/commitlog
 
-CVSROOT/.* mailx -s "%s" root@gigasource.eecs.berkeley.edu
+CVSROOT/.* mailx -s \"%s\" root@gigasource.eecs.berkeley.edu
 
-collabrador/.* mailx -s "%s" collabrador-cvs@gigascale.org
-diva/.* mailx -s "%s" diva-cvs@gigascale.org
-diva-binaries/.* mailx -s "%s" diva-cvs@gigascale.org
-mescal/.* mailx -s "%s" mescal-cvs@gigascale.org
-mvsis/.* mailx -s "%s" mvsis-cvs@gigascale.org
-impact/.* mailx -s "%s" mescal-cvs@gigascale.org
-powertools/.* mailx -s "%s" powertools-cvs@gigascale.org
+collabrador/.* mailx -s \"%s\" collabrador-cvs@gigascale.org
+diva/.* mailx -s \"%s\" diva-cvs@gigascale.org
+diva-binaries/.* mailx -s \"%s\" diva-cvs@gigascale.org
+mescal/.* mailx -s \"%s\" mescal-cvs@gigascale.org
+mvsis/.* mailx -s \"%s\" mvsis-cvs@gigascale.org
+impact/.* mailx -s \"%s\" mescal-cvs@gigascale.org
+powertools/.* mailx -s \"%s\" powertools-cvs@gigascale.org
 
 #panda releated stuff (Bart Kienhuis)
-panda/.* mailx -s "%s" kienhuis@eecs.berkeley.edu rijpkema@liacs.nl
+panda/.* mailx -s \"%s\" kienhuis@eecs.berkeley.edu rijpkema@liacs.nl
 
 #testing
 gsrcwww/javapages/.* mailx -s \"%{s}\" allenh@eecs.berkeley.edu
