@@ -24,8 +24,9 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  * 
  */
+#include "sort.h"
 /* forward declaration */
-static or_check_emit();
+static void or_check_emit();
 
 static scan_point *or_scan(outgeo, pointer, vertex, l_delta)
 fa_geometry *outgeo;
@@ -74,7 +75,7 @@ int l_delta;
     return (ptr);
 }
 
-static or_check_emit(geo, x, y, l_delta, l_new, r_delta, r_new)
+static void or_check_emit(geo, x, y, l_delta, l_new, r_delta, r_new)
 fa_geometry *geo;
 fa_coord x,y;
 int l_delta, l_new;
