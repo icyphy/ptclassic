@@ -258,8 +258,7 @@ Engine* MatlabIfc :: MatlabEngineOpen(char* unixCommand) {
     // A better solution is to use ioctl to sever the association
     // from the parent stderr and the matlab engine stderr
     freopen("/dev/null", "w", stderr);
-    Engine* ep = engOpen(unixCommand);
-    return ep;
+    return engOpen(unixCommand);
 }
 
 // send a command to the Matlab Engine for evaluation
