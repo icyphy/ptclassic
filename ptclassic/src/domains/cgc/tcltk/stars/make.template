@@ -41,11 +41,13 @@ include $(CONFIG)
 
 CGCDIR = $(ROOT)/src/domains/cgc/kernel
 CGCSTARDIR = $(ROOT)/src/domains/cgc/stars
+CGCDSPDIR = $(ROOT)/src/domains/cgc/dsp/stars
 # CGDIR is the directory containing CG domain support
 CGDIR = $(ROOT)/src/domains/cg/kernel
 SDFDIR = $(ROOT)/src/domains/sdf/kernel
 
-INCL = -I$(CGCDIR) -I$(CGDIR) -I$(SDFDIR) -I$(KERNDIR) -I$(CGCSTARDIR)
+INCL = -I$(CGCDSPDIR) -I$(CGCDIR) -I$(CGDIR) -I$(SDFDIR) \
+ -I$(KERNDIR) -I$(CGCSTARDIR)
 
 # source files for all stars, using preprocessor, listing base stars first
 PL_SRCS= \
