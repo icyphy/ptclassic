@@ -30,10 +30,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
  Programmer:  J. T. Buck
  Date of creation: 7/2/90
 
- WARNING -- XDomain.ccP is a template file that is used to generate
- domain description modules.  If the name of this file is not XDomain.ccP,
- DO NOT EDIT IT!!!
-
  A device to produce the correct portholes, wormholes, event horizons,
  etc, for the MDSDF domain so the interpreter can generate them dynamically.
 
@@ -61,8 +57,11 @@ public:
 	// new toUniversal EventHorizon
 	EventHorizon& newTo() { LOG_NEW; return *new MDSDFtoUniversal;}
 
-	// new node (geodesic)
-	Geodesic& newNode() { LOG_NEW; return *new MDSDFForkNode;}
+	// new geodesic
+	Geodesic& newGeo(int multi) {
+		if (multi) { LOG_NEW; return *new MDSDFForkNode;}
+		else { LOG_NEW; return *new MDSDFGeodesic;}
+	}
 
 	// constructor
 	MDSDFDomain() : Domain("MDSDF") {}
