@@ -26,7 +26,8 @@ Methods for class Galaxy
 int Galaxy :: isItAtomic () const { return FALSE;}
 
 // return myself as a galaxy
-Galaxy& Galaxy :: asGalaxy () const { return *this;}
+Galaxy& Galaxy :: asGalaxy () { return *this;}
+const Galaxy& Galaxy :: asGalaxy () const { return *this;}
 
 // destructor.  Not really do-nothing because members are deleted
 Galaxy :: ~ Galaxy () {}
