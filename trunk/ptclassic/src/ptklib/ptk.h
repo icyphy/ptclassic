@@ -43,6 +43,13 @@ ENHANCEMENTS, OR MODIFICATIONS.
  */
 #include <tk.h>
 
+/* Unfortunately X.h which is included by tk.h defines Complex to "0".
+   The following fix permits star files to use class Complex.
+*/
+#if Complex == 0
+#   undef Complex
+#endif
+
 extern Tcl_Interp *ptkInterp;
 extern Tk_Window ptkW;
 
