@@ -95,7 +95,7 @@ char *filename;
 char *mode;
 {
 #ifdef unix
-    int access_mode;
+    int access_mode = 0;
 
     if (strcmp(mode, "r") == 0) {
 	access_mode = /*R_OK*/ 4;
