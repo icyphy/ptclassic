@@ -46,9 +46,11 @@ ITCL_SRCS = \
 	EditBubbleAndArc.itcl \
 	EditDAG.itcl \
 	EditForest.itcl \
+	EditGraph.itcl \
 	EditPalette.itcl \
 	EditSTD.itcl \
 	Graphics.itcl \
+	GraphLayout.itcl \
 	ProfileTcl.itcl \
 	TCanvas.itcl
 
