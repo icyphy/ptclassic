@@ -278,7 +278,7 @@ body ::tycho::DialogWindow::constructor {args} {
     } {
 	keep -background -cursor
     }
-    pack $itk_component(top) -expand yes
+    pack $itk_component(top)
     
     #
     # Create a frame to serve as a childsite.
@@ -320,6 +320,10 @@ body ::tycho::DialogWindow::constructor {args} {
 
     # Process any unevaluated arguments.
     eval itk_initialize $args
+
+    # Most dialog windows don't want the user resizing. Those that
+    # do should reverse this.
+    freezeWindowSize
 }
 
 ######################################################################
@@ -425,9 +429,7 @@ body ::tycho::DialogWindow::new {class instance args} {
     # FIXME: Should check to make sure the class is derived from this.
     uplevel #0 ::tycho::$class $instance $args
     $instance centerOnScreen
-    $instance freezeWindowSize
     update
-#    $instance focusin
     if [info exists commandResult($instance)] {
 	unset commandResult($instance)
     }
@@ -472,7 +474,6 @@ body ::tycho::DialogWindow::newModal {class instance args} {
 	uplevel #0 ::tycho::$class $instance $args
     }
     $instance centerOnScreen
-    $instance freezeWindowSize
     update
     # Do not continue in this thread until the window is dismissed.
     if [winfo exists $instance] {
