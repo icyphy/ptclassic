@@ -130,10 +130,10 @@ install_gcc: $(BINDIR)
 	(cd $(GNU_OBJ)/make; $(MAKE) install)
 	(cd $(GNU_OBJ)/gcc; $(GNU_OBJ)/make/make install CC="stage2/xgcc -Bstage2/" CFLAGS="-g -O")
 	@echo "Install c++filt, the g++ name demangler"
-	(cd $(GNU_OBJ)/gcc; cp c++filt $(BINDIR))
+	-(cd $(GNU_OBJ)/gcc; cp c++filt $(BINDIR))
 	@echo "Set up some links so we can move the compiler"
-	(cd $(GNU_DEST)/$(PTARCH); ln -s $(MACH) $(PTARCH) )
-	(cd $(GNU_DEST)/$(PTARCH)/lib/gcc-lib; ln -s $(MACH) $(PTARCH) )
+	-(cd $(GNU_DEST)/$(PTARCH); ln -s $(MACH) $(PTARCH) )
+	-(cd $(GNU_DEST)/$(PTARCH)/lib/gcc-lib; ln -s $(MACH) $(PTARCH) )
 	-(cd $(BINDIR); ln -s $(REL_GNU_BINDIR)/* .)
 
 bin_libg++:
@@ -165,7 +165,7 @@ install: $(BINDIR)
 		ln -s $(GNU_SRC)/libg++/libg++/*.info* .)
 	-(cd $(GNU_OBJ)/libg++/libg++/gperf; \
 		ln -s $(GNU_SRC)/libg++/libg++/gperf/*.info* .)
-	(cd $(GNU_OBJ)/libg++; $(GNU_OBJ)/make/make install-info)
+	-(cd $(GNU_OBJ)/libg++; $(GNU_OBJ)/make/make install-info)
 
 ############################################################
 # Build the GNU tools for HP machines
