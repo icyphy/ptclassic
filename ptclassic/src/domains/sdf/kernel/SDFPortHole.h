@@ -51,6 +51,16 @@ public:
 			  // Maximum delay the Particles are accessed
 			  unsigned delay = 0);
 
+	// Function to alter only numTokens and delay.
+	// We re-do porthole initialization if bufferSize changes
+	PortHole& setSDFParams(unsigned numTokens = 1, unsigned delay=0) {
+		numberTokens = numTokens;
+		bufferSize = numberTokens + delay;
+		if (myBuffer && myBuffer->size() != bufferSize)
+			initialize();
+		return *this;
+	}
+
 	// Services of PortHole that are often used:
 	// setPort(dataType d);
 	// Particle& operator % (int);
