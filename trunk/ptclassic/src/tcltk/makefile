@@ -429,6 +429,12 @@ $(ITCL_SHARED_OBJ)/itk/libitk.so:
 
 # Install itcl
 install_itcl_shared: $(ITCL_SHARED_DEST_LIB)/libitcl.so
+	# make links be relative, not absolute so we can move the dist.
+	-(cd $(ITCL_DEST)/bin; rm -f itclsh itkwish tclsh wish; \
+		ln -s itclsh$(ITCL_MAJOR_VERSION_NUMBER) itclsh; \
+		ln -s itkwish$(ITCL_MAJOR_VERSION_NUMBER) itkwish; \
+		ln -s tclsh$(ITCL_TCL_MAJOR_VERSION_NUMBER) tclsh; \
+		ln -s wish$(ITCL_TK_MAJOR_VERSION_NUMBER) wish)
 
 $(ITCL_SHARED_DEST_LIB)/libitcl.so: \
 		$(ITCL_DEST) $(ITCL_DEST_LIB) \
@@ -447,6 +453,8 @@ $(ITCL_SHARED_DEST_LIB)/libitcl.so: \
 		INCLUDE_DIR=$(ITCL_INDEPENDENT_DEST)/include \
 		install)
 	mv $(ITCL_DEST_LIB)/libitcl.so.2 $(ITCL_SHARED_DEST_LIB)/libitcl.so
+
+
 
 
 # Hack to workaround shared libraries.  Eventually we will build them
