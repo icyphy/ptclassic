@@ -61,9 +61,13 @@ is repeated inline so may not be efficient for large N.
 	for (int j = 0; j < n; j++) {
 	    if (input.resolvedType() == COMPLEX)
 		addCode(oneComplex
-			(j,output.bufSize()==1?"$addr(output)":"(r0)+"));
+			(j,
+                        (char *) (output.bufSize()==1 ?
+                                "$addr(output)" : "(r0)+")));
 	    else
-		addCode(oneReal(j,output.bufSize()==1?"$addr(output)":"(r0)+"));
+		addCode(oneReal(j,
+                        (char *) (output.bufSize()==1 ?
+                                "$addr(output)":"(r0)+")));
 	}
 	if (output.bufSize()>1) addCode(restore);
     }
