@@ -12,6 +12,11 @@
 #
 # Programs to use
 CPLUSPLUS = g++
+# If we have g++, then compile Octtools with gcc.  ARCHs that are cfront
+# based probably don't have gcc.
+OCT_CC =	gcc -traditional -fwritable-strings
+
+# Compiler flags
 GPPFLAGS = -g -Wall -Wcast-qual $(MEMLOG)
 CFLAGS = -g
 DEPEND= $(CPLUSPLUS) -MM
