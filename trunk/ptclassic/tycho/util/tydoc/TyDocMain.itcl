@@ -1943,7 +1943,7 @@ body ::tycho::HTMLDocSys::putsConstructIfNotEmpty {fd docClass construct} {
 # the links to parent classes in tycho subdirectories right.
 #
 body ::tycho::HTMLDocSys::getFileName {classname} { 
-    #puts "getFileName: $classname"
+    # puts "getFileName{$classname}"
     global env
     set docFile "[info namespace tail $classname].html"
     if [file readable $docFile] {
@@ -1957,7 +1957,7 @@ body ::tycho::HTMLDocSys::getFileName {classname} {
 	    # The codeDoc.idx file is present, check it to see if it
 	    # has a link to our file
 	    if { $codeDocIdxContents == {} } {
-		#puts "getFileName: reading in $codeDocIdx"
+		# puts "getFileName: reading in $codeDocIdx"
 		# Read codeDoc.idx into a common variable
 		set fd [open $codeDocIdx r]
 		set tmpContents [read $fd]
@@ -1966,6 +1966,7 @@ body ::tycho::HTMLDocSys::getFileName {classname} {
 		regsub -all "(^|\n)\[ \t\]*#\[^\n\]*(\n|$)" $tmpContents {} \
 			codeDocIdxContents
 	    }
+	    # puts "getFileName: done reading in"
 	    foreach item [lindex $codeDocIdxContents 1] {
 		set len [llength $item]
 		if {$len != 3 && $len != 2} {
@@ -1974,20 +1975,35 @@ body ::tycho::HTMLDocSys::getFileName {classname} {
 			    or { id indexlist }"
 		}
 		if [regexp "$classname class$" [lindex $item 0]] {
-		    #puts "getFileName: found $item "
-		    #puts "getFileName: [::tycho::relativePath \
-		    #	    [file join [pwd] doc codeDoc] [lindex $item 1]]"
-		    return [::tycho::relativePath \
-			    [file join [pwd] doc codeDoc] [lindex $item 1]]"
+		    # puts "getFileName: found $item "
+		    return [::tycho::relativePath  [file join [pwd] doc codeDoc] [lindex $item 1]]
 		}
 	    }
+
+	    # Strip off the namespace qualifier and look for just the tail.
+	    # We need this to find ::tycho::Uninstantiable, which only
+	    # has a constructor and a destructor.
+	    set classNameTail [info namespace tail $classname]
+	    # puts "getFileName: classNameTail = $classNameTail" 
+	    foreach item [lindex $codeDocIdxContents 1] {
+		set len [llength $item]
+		if [regexp "$classNameTail class documentation" \
+			[lindex $item 0]] {
+		    # puts "getFileName: found $item "
+		    # puts "getFileName: returning [::tycho::relativePath \
+		    #	    [file join [pwd] doc codeDoc] [lindex $item 1]]"
+		    return [::tycho::relativePath \
+			    [file join [pwd] doc codeDoc] [lindex $item 1]]
+		}
+	    }
+
 	}
     }
 
     # We failed to find a pre-existing html file with the right name,
     # so we just return the calculated name and hope that it gets
     # created later
-    #puts "getFileName: returning $docFile"
+    puts "getFileName: returning $docFile"
     return $docFile
 }
 
