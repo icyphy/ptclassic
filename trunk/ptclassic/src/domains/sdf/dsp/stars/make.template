@@ -17,7 +17,7 @@ include $(CONFIG)
 
 # SDFDIR is the directory containing SDF domain support
 SDFDIR = $(ROOT)/src/domains/sdf/kernel
-INCL = -I$(SDFDIR) -I$(KERNDIR)
+INCL = -I$(SDFDIR) -I$(KERNDIR) -I../../stars
 
 # Library name
 LIB=libsdfdspstars.a
