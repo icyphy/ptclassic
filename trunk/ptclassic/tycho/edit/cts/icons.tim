@@ -191,9 +191,27 @@ group sink -label {Sink Icons} {
         line 50 22 50 79 -fill green 
         line 70 23 70 79 -fill green
 	line 21 79 40 40 70 60 79 31 -smooth true -fill red
-
     } {
         terminal input -coords {0 50} -direction w \
+                -style arrowtail -fill red
+    }
+   icon plot_2 \
+            -slatetype IconFrame \
+            -label {Plotter_2} \
+            -text Plotter \
+            -color lightblue \
+            -graphics {
+        polygon 20 20 20 80 80 80 80 20 -fill gray -outline black
+        line 21 39 79 39 -fill green -stipple gray25
+        line 21 59 79 59 -fill green -stipple gray25
+        line 30 22 30 79 -fill green
+        line 50 22 50 79 -fill green 
+        line 70 23 70 79 -fill green
+	line 21 79 40 40 70 60 79 31 -smooth true -fill red
+    } {
+        terminal input-0 -coords {0 33} -direction w \
+                -style arrowtail -fill red
+        terminal input-1 -coords {0 66} -direction w \
                 -style arrowtail -fill red
     }
     icon xyplot \
@@ -214,7 +232,7 @@ group sink -label {Sink Icons} {
         terminal inputX -coords {0 33} -direction w \
                 -style arrowtail -fill red
         terminal inputY -coords {0 66} -direction w \
-                -style arrowtail -fill red
+                -style arrowtail -fill green
     }
 }
 
@@ -257,24 +275,23 @@ group arithmetic -label {Arithmetic Icons} {
             -color lightsteelblue \
             -termstyles {
                 1-1-west
-                1-1-east
             } \
             -graphics {
          polygon 70 20 70 80 30 50 -fill red -outline black
          line 10 50 30 50 -width 1 -fill black
          line 70 50 90 50 -width 1 -fill black
      }
-#     icon gain_right \
-#            -slatetype IconFrame \
-#            -label {Gain} \
-#            -text Gain \
-#            -color lightsteelblue \
-#            -termstyles {1-1-east} \
-#            -graphics {
-#         polygon 30 20 30 80 70 50 -fill red -outline black
-#         line 10 50 30 50 -width 1 -fill black
-#         line 70 50 90 50 -width 1 -fill black
-#     }
+     icon gain_right \
+            -slatetype IconFrame \
+            -label {Gain} \
+            -text Gain \
+            -color lightsteelblue \
+            -termstyles {1-1-east} \
+            -graphics {
+         polygon 30 20 30 80 70 50 -fill red -outline black
+         line 10 50 30 50 -width 1 -fill black
+         line 70 50 90 50 -width 1 -fill black
+     }
     icon add -label Add \
             -slatetype IconOval \
             -fill white \

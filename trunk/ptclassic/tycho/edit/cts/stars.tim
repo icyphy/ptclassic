@@ -50,6 +50,14 @@ group sink -label {Sink Actors} {
         attribute YMax -default "1.0" -label "Y maximum" -type number
         port input -datatype float
     }
+    star plot_2 \
+            -class {Plot} \
+            -label {Plotter_2} \
+            -icon {edit/cts/icons.tim#sink.plot_2} {
+        attribute YMin -default "-1.0" -label "Y minimum" -type number
+        attribute YMax -default "1.0" -label "Y maximum" -type number
+        port input -datatype float -composite 1
+    }
     star xyplot \
             -class {XYPlot} \
             -label {2D-Plotter} \
@@ -121,13 +129,13 @@ group arithmetic -label {Basic Arithmetic} {
         port input -composite 0
         port output -composite 0
     }
-#    star gain_right \
-#            -class {Gain} \
-#            -label Gain_Right \
-#            -icon {edit/cts/icons.tim#arithmetic.gain_right} {
-#        attribute gain -default "1.0" -type number -label Gain
-#        port input -composite 0
-#        port output -composite 0
-#    }
+    star gain_right \
+            -class {Gain} \
+            -label Gain_Right \
+            -icon {edit/cts/icons.tim#arithmetic.gain_right} {
+        attribute gain -default "1.0" -type number -label Gain
+        port input -composite 0
+        port output -composite 0
+    }
 
 }
