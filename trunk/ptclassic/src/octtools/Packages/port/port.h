@@ -247,7 +247,7 @@ extern double trunc();
 #define LACK_SYS5
 #endif
 
-#if defined(ultrix3) || defined(sunos4) || defined(_IBMR2) || defined(ultrix4) || define(linux)
+#if defined(ultrix3) || defined(sunos4) || defined(_IBMR2) || defined(ultrix4) || defined(linux)
 #define SIGNAL_FN	void
 #else
 /* sequent, ultrix2, 4.3BSD (vax, hp), sunos3 */
