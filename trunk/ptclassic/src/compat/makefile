@@ -46,7 +46,7 @@ all install clean realclean sources depend checkjunk sccsinfo:
 	@for x in $(DIRS); do \
 	    if [ -w $$x ] ; then \
 		cd $$x ; \
-		echo making $@ in utils/$$x ; \
+		echo making $@ in compat/$$x ; \
 		$(MAKE) $(MFLAGS) $(MAKEVARS) VPATH=../../../src/utils/$$x $@ ;\
 	 	cd .. ; \
 	    fi ; \
