@@ -23,7 +23,9 @@ INCL = -I$(SDFDIR) -I$(KERNDIR)
 LIB=libsdfstars.a
 
 # source files for all stars, using preprocessor
+# base classes/stars go in the front of the list
 PL_SRCS= \
+ SDFFix.pl \
  SDFAdd.pl \
  SDFAddCx.pl \
  SDFAddFix.pl \
@@ -48,7 +50,6 @@ PL_SRCS= \
  SDFDistributor.pl \
  SDFDownSample.pl \
  SDFExp.pl \
- SDFFix.pl \
  SDFFixToCx.pl \
  SDFFixToFloat.pl \
  SDFFixToInt.pl \
