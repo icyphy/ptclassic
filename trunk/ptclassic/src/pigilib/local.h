@@ -64,7 +64,8 @@ extern RAW_PTR malloc ARGS((size_t));
 
 #ifdef PTHPPA
 #ifndef PTHPUX10
-extern char *getcwd ARGS((char *,size_t));
+/* gcc-2.7.2 seems not to require this on the hppa anymore */
+/* extern char *getcwd ARGS((char *,size_t));*/
 #endif /* PTHPUX10 */
 #define getwd(foo) getcwd(foo,MAXPATHLEN-1)
 #else /* PTHPPA */
