@@ -119,12 +119,16 @@ public:
 	// timing/interation control
 	void setStopTime (float limit);
 	void resetStopTime (float v);
+	int getStopTime () {return numIters;}
 
 	// scheduler Period : used when interfaced with timed domain.
 	float schedulePeriod;
 
         // my domain
         const char* domain() const;
+
+	// Generate code using the Target to produce the right language
+	StringList compileRun();
 
 protected:
 	// Flag for errors detected while computing the schedule
