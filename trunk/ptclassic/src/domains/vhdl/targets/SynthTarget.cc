@@ -50,6 +50,8 @@ StructTarget(name,starclass,desc) {
 			    "switch for elaborating design into structure."));
   addState(compile.setState("compile",this,"YES",
 			    "switch for compiling structure into gates."));
+  addState(precision.setState("precision",this,"INTEGER RANGE 0 to 15",
+			      "Specifies precision for synthesis."));
 }
 
 // Clone the Target.
@@ -60,6 +62,15 @@ Block* SynthTarget :: makeNew() const {
 static SynthTarget proto("Synth-VHDL", "VHDLStar",
 			 "VHDL code generation target for Synopsys");
 static KnownTarget entry(proto,"Synth-VHDL");
+
+void SynthTarget :: setup() {
+    precision.initialize();
+    StringList precisionString;
+    precisionString = precision.currentValue();
+    precSpec = savestring(precisionString);
+
+    StructTarget::setup();
+}
 
 // Write the code to a file.
 void SynthTarget :: writeCode() {
