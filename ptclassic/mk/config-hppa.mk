@@ -4,7 +4,7 @@
 # gdb to debug.
 #
 # $Id$
-# Copyright (c) 1993 The Regents of the University of California.
+# Copyright (c) 1993,1994 The Regents of the University of California.
 #                       All Rights Reserved.
 #		       
 # Programmer:  J. T. Buck
@@ -29,3 +29,11 @@ CFLAGS=-DUSG -g
 LINKFLAGS=-L$(LIBDIR) -Xlinker -x -static
 X11_INCSPEC = -I$(ROOT)/src/compat
 X11_LIBSPEC = -L/usr/lib/X11R5 -lX11
+# Binaries that are shipped should be statically linked.
+# Note that currently vem is built with cc, not gcc, so vem uses
+# this flag. See also config-g++.mk
+CC_STATIC = -Wl,-a,archive
+
+# Used by xv
+XV_RAND= RAND="-DNO_RANDOM -Drandom=rand"
+XV_INSTALL=bsdinst
