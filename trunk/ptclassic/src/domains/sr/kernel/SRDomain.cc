@@ -55,26 +55,28 @@ extern const char SRdomainName[] = "SR";
  value on each wire may be unknown, absent, or present with some
  value.  The semantics of the domain are the least fixed point of the
  system, and schedulers use an iterative relaxation scheme to approach
- this least fixed point.
+ this least fixed point. <P>
+
+ This class is responsible for returning SR domain wormholes, event horizons,
+ and geodesics.
 
 **********************************************************************/
 class SRDomain : public Domain {
 public:
-  // constructor
   SRDomain() : Domain(SRdomainName) {}
 
-  // new wormhole
+  // Return a newly-created wormhole
   Star& newWorm(Galaxy& innerGal,Target* innerTarget)  {
     LOG_NEW; return *new SRWormhole(innerGal,innerTarget);
   }
   
-  // new fromUniversal EventHorizon
+  // Return a new fromUniversal Event Horizon
   EventHorizon& newFrom() { LOG_NEW; return *new SRfromUniversal;}
 
-  // new toUniversal EventHorizon
+  // Return a new toUniversal Event Horizon
   EventHorizon& newTo() { LOG_NEW; return *new SRtoUniversal;}
 
-  // Allocate a new geodesic
+  // Return a new geodesic
   Geodesic & newGeo(int = FALSE) {
     LOG_NEW; return *(Geodesic *) new SRGeodesic;
   }
@@ -88,25 +90,24 @@ static SRDomain proto;
 
   The dynamic target for the SR domain
 
-  @Description This uses the brute-force dynamic scheduler
+  @Description This uses the brute-force dynamic scheduler.
 
   @SeeAlso SRScheduler
 
  **********************************************************************/
 class SRDynamicTarget : public Target {
 public:
-  // Constructor
   SRDynamicTarget()
     : Target("dynamic-SR", "SRStar", "SR target with dynamic scheduling",
 		      SRdomainName) {}
 
-  // Destructor
   ~SRDynamicTarget() { delSched(); }
 
   // Return a new SRTarget
   Block * makeNew() const { LOG_NEW; return new SRDynamicTarget;}
 
 protected:
+  // Create a new scheduler (if necessary) and call Target::setup()
   void setup() {
     if (!scheduler()) { LOG_NEW; setSched(new SRScheduler); }
     Target::setup();
@@ -129,7 +130,6 @@ static KnownTarget dynamicEntry(dynamicSRtarget,"dynamic-SR");
  **********************************************************************/
 class SRRecursiveTarget : public Target {
 public:
-  // Constructor
   SRRecursiveTarget() : Target("default-SR", "SRStar",
 			       "SR target with recursive scheduling",
 			       SRdomainName) {
@@ -141,19 +141,21 @@ public:
 				   "inout : Greedy minimum indegree/outdegree\n" ));
   };
 
-  // Destructor
   ~SRRecursiveTarget() { delSched(); }
 
   // Return a new SRRecursiveTarget
   Block * makeNew() const { LOG_NEW; return new SRRecursiveTarget;}
 
 protected:
-  void setup() {
 
+  // Create a new scheduler (if necessary) and call Target::setup()
+  //
+  // @Description Also call setParter to set up the selected
+  // partition scheme.
+  void setup() {
     if (!scheduler()) { LOG_NEW; setSched(new SRRecursiveScheduler); }
 
     // Select the partitioning scheme
-
     SRParter::setParter(partScheme);
 
     Target::setup();
