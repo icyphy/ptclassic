@@ -30,6 +30,7 @@ $Id$
 */
 
 extern int EditParams();
+extern int EditAttributes();
 extern int EditFormalParams();
 extern int RpcOpenPalette();
 extern boolean OpenPaletteInit();

@@ -283,6 +283,7 @@ octObject *facetPtr;
     char *name;
     ParamListType pList;
     char *akoName, *oldInstName;
+    char instanceHandle[16];
     
     DetachDelaysFromNets(facetPtr);
     (void) octInitGenContentsSpecial(facetPtr, OCT_INSTANCE_MASK, &genInst);
@@ -331,6 +332,10 @@ octObject *facetPtr;
 		octFreeGenerator(&genInst);
 		return FALSE;
 	    }
+	    /* Process the attributes list, if any */
+	    ptkOctObj2Handle(&inst,instanceHandle);
+	    Tcl_VarEval(ptkInterp, "ptkProcessAttributes ",
+			instanceHandle, (char*)NULL);
 	}
 	FreeOctMembers(&inst);
     }

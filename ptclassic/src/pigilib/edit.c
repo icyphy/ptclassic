@@ -165,7 +165,56 @@ long userOptionWord;
 	ptkOctObj2Handle(&inst,instanceHandle);
     }
 
-    TCL_CATCH_ERR( Tcl_VarEval(ptkInterp,"ptkEditParams ", facetHandle, " ", instanceHandle, (char *)NULL) )
+    TCL_CATCH_ERR( Tcl_VarEval(ptkInterp,"ptkEditParams ",
+			       facetHandle, " ",
+			       instanceHandle, (char *)NULL) )
+
+    ViDone();
+}
+
+/* EditDDFiter
+Set the number of firings of a DDF star that correspond
+to one iteration of the DDF scheduler.
+FIXME: This is so domain specific, that it should appear
+only when the domain is DDF. Maybe in tycho.
+*/
+int 
+EditAttributes(spot, cmdList, userOptionWord) /* ARGSUSED */
+RPCSpot *spot;
+lsList cmdList;
+long userOptionWord;
+{
+    octObject facet, inst;
+    vemStatus status;
+    char facetHandle[16], instanceHandle[16];
+
+    ViInit("define-ddf-iteration");
+    ErrClear();
+    /* get current facet */
+    facet.objectId = spot->facet;
+    if (octGetById(&facet) != OCT_OK) {
+	PrintErr(octErrorString());
+    	ViDone();
+    }
+    ptkOctObj2Handle(&facet,facetHandle);
+
+    /* get name of instance under cursor */
+    status = vuFindSpot(spot, &inst, OCT_INSTANCE_MASK);
+    if (status == VEM_NOSELECT) {
+	PrintCon("Aborted");
+        ViDone();
+    } else if (status != VEM_OK) {
+	/* cursor not over an instance... */
+	strcpy (instanceHandle, "NIL");
+    } else {
+	/* cursor is over some type of instance... */
+	ptkOctObj2Handle(&inst,instanceHandle);
+    }
+
+    TCL_CATCH_ERR( Tcl_VarEval(ptkInterp,"ptkEditParams ",
+			       facetHandle, " ",
+			       instanceHandle, " ",
+			       "Attributes", (char *)NULL) )
 
     ViDone();
 }
