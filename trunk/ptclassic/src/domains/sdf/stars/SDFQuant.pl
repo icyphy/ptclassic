@@ -24,11 +24,11 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	htmldoc {
-Assume that the <i>thresholds</i> parameter is set to <i></i>(<i></i>8<i>.</i>1<i>, </i>9<i>.</i>2<i>, </i>10<i>.</i>3<i></i>)<i></i>,
+Assume that the <i>thresholds</i> parameter is set to (8<i>.</i>1<i>, </i>9<i>.</i>2<i>, </i>10<i>.</i>3),
 and that the <i>levels</i> parameter is not set so that the default values
-of <i></i>(<i></i>0<i>.</i>0<i>, </i>1<i>.</i>0<i>, </i>2<i>.</i>0<i>, </i>3<i>.</i>0<i></i>)<i></i> are used.  Then, an input of <i>-</i>1<i>.</i>5<i></i> would give
-an output of <i></i>0<i>.</i>0<i></i>, an input of <i></i>8<i>.</i>2<i></i> would give an output of <i></i>1<i>.</i>0<i></i>, and
-an input of <i></i>15<i>.</i>5<i></i> would give an output of <i></i>3<i>.</i>0<i></i>.
+of (0<i>.</i>0<i>, </i>1<i>.</i>0<i>, </i>2<i>.</i>0<i>, </i>3<i>.</i>0) are used.  Then, an input of <i>-</i>1<i>.</i>5 would give
+an output of 0<i>.</i>0, an input of 8<i>.</i>2 would give an output of 1<i>.</i>0, and
+an input of 15<i>.</i>5 would give an output of 3<i>.</i>0.
 	}
 	location { SDF main library }
 	input {

@@ -21,7 +21,7 @@ Generate a complex data matrix <i>X</i>, with dimensions
 The data matrix is a Toeplitz matrix such that the first row is
 [ x(M-1) x(M-2) ... x(0) ], the second row is [ x(M) x(M-1) x(M-2) ... x(1) ],
 and so forth until the last row, which is [ x(N-1) x(N-2) ... x(N-M) ], where
-<i>numRows</i> = <i>N-M+</i>1<i></i> and <i>numCols</i> = <i>M</i>.
+<i>numRows</i> = <i>N-M+</i>1 and <i>numCols</i> = <i>M</i>.
 <a name="singular-value decomposition"></a>
 This is the form of the matrix that is required by the singular-value
 decomposition star

@@ -26,7 +26,7 @@ This star implements a finite-impulse response filter with multirate capability.
 <a name="FIR filter"></a>
 The default coefficients correspond to an eighth-order, equiripple,
 linear-phase, lowpass filter which has a 3 dB cutoff frequency at
-approximately <i></i>1<i>/</i>3<i></i> of the Nyquist frequency.
+approximately 1<i>/</i>3 of the Nyquist frequency.
 The default precision on these coefficients is a total of 24 bits.
 The number of decimal bits is chosen as the minimum number of bits
 needed to represent the number in fixed-point.
@@ -63,8 +63,8 @@ parameter and the output sample rate.
 <a name="filter, multirate"></a>
 In particular, considerable care must be taken to avoid aliasing.
 Specifically, if the input sample rate is f,
-then the filter stopband should begin before <i>f/</i>2<i></i>.
-If the interpolation ratio is <i>i</i>, then <i>f/</i>2<i></i> is a fraction <i></i>1<i>/</i>(<i></i>2<i> i</i>)<i></i>
+then the filter stopband should begin before <i>f/</i>2.
+If the interpolation ratio is <i>i</i>, then <i>f/</i>2 is a fraction 1<i>/</i>(2<i> i</i>)
 of the sample rate at which you must design your filter.
 <p>
 The <i>decimationPhase</i> parameter is somewhat subtle.

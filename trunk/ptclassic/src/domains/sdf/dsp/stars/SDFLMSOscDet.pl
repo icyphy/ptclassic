@@ -47,7 +47,7 @@ In this implementation the taps are scaled by 1/2 to make the
 star behave like the CG56 version.  Thus the output of the filter is also
 scaled by 1/2.  To compensate for this scaling <i>mu</i> is multiplied by 2. 
 This filter outputs the current value of <i>a <sub></i>1<i></sub></i> on the <i>cosOmega</i>
-output port.  The initial value is <i>a<sub></i>1<i></sub> </i>=<i> </i>1<i></i>, that is, zero frequency,
+output port.  The initial value is <i>a<sub></i>1<i></sub> </i>=<i> </i>1, that is, zero frequency,
 so the initial value of the second tap is -1 (because of the 1/2 scaling).
 <p>
 For more information on the LMS filter implementation, see the description

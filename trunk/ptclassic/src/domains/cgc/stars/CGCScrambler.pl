@@ -30,7 +30,7 @@ register is a so-called <i>maximal length feedback shift register</i>.
 <a name="primitive polynomial"></a>
 <a name="maximal length feedback shift register"></a>
 This means that with a constant input, the output will be sequence
-with period <i></i>2<i> <sup>N</sup>  -  </i>1<i></i>, where <i>N</i> is the order of the polynomial
+with period 2<i> <sup>N</sup>  -  </i>1, where <i>N</i> is the order of the polynomial
 (the length of the shift register).  This is the longest possible sequence.
 Moreover, within this period, the sequence will appear to be white,
 in that a computed autocorrelation will be very nearly an impulse.
@@ -38,8 +38,8 @@ Thus, the scrambler with a constant input can be very effectively used
 to generate a pseudo-random bit sequence.
 <p>
 The maximal-length feedback shift register with constant input will
-pass through <i></i>2<i> <sup>N</sup>  -  </i>1<i></i> states before returning to a state it has
-been in before.  This is one short of the <i></i>2<i> <sup>N</sup></i> states that a register
+pass through 2<i> <sup>N</sup>  -  </i>1 states before returning to a state it has
+been in before.  This is one short of the 2<i> <sup>N</sup></i> states that a register
 with <i>N</i> bits can take on.  This one missing state, in fact, is a <i>lock-up</i>
 state, in that if the input is an appropriate constant, the scrambler will
 cease to produce random-looking output, and will output a constant.

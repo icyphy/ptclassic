@@ -32,7 +32,7 @@ register is a so-called <i>maximal length feedback shift register</i>.
 <a name="primitive polynomial"></a>
 <a name="maximal length feedback shift register"></a>
 This means that with a constant input, the output will be sequence
-with period <i></i>2<i> <sup>N</sup>  -  </i>1<i></i>, where <i>N</i> is the order of the polynomial
+with period 2<i> <sup>N</sup>  -  </i>1, where <i>N</i> is the order of the polynomial
 (the length of the shift register).
 This is the longest possible sequence.
 Moreover, within this period, the sequence will appear to be white,
@@ -41,15 +41,15 @@ Thus, the scrambler with a constant input can be very effectively used
 to generate a pseudo-random bit sequence.
 <p>
 The maximal-length feedback shift register with constant input will
-pass through <i></i>2<i> <sup>N</sup>  -  </i>1<i></i> states before returning to a state it has
-been in before.  This is one short of the <i></i>2<i> <sup>N</sup></i> states that a register
+pass through 2<i> <sup>N</sup>  -  </i>1 states before returning to a state it has
+been in before.  This is one short of the 2<i> <sup>N</sup></i> states that a register
 with <i>N</i> bits can take on.  This one missing state, in fact, is a <i>lock-up</i>
 state, in that if the input is an appropriate constant, the scrambler will
 cease to produce random-looking output, and will output a constant.
 For example, if the input is all zeros, and the initial state of the
 scrambler is zero, then the outputs will be all zero, hardly random.
 This is easily avoided by initializing the scrambler to some non-zero state.
-That is why the default value for the <i>shiftReg</i> is set to <i></i>1<i></i>.
+That is why the default value for the <i>shiftReg</i> is set to 1.
 <p>
 The <i>polynomial</i> must be carefully chosen. It must represent a
 <i>primitive polynomial</i>, which is one that cannot be factored into two

@@ -39,7 +39,7 @@ H(z) =  --------------------------------------
 </pre>
 <p>
 Since this filter is minimum phase, the transfer function of the lattice
-filter is <i>H <sup>-</i>1<i></sup> </i>(<i>z</i>)<i></i>.
+filter is <i>H <sup>-</i>1<i></sup> </i>(<i>z</i>).
 <p>
 Note that the definition of reflection coefficients is not quite universal
 in the literature.

@@ -30,7 +30,7 @@ The transfer function of the filter is
 <pre>
 H(z) ~=~ 1 over { 1 ~-~ z sup -1 D(z) }
 </pre>
-where <i>D</i>(<i>z</i>)<i></i> is specified by the externally supplied coefficients.
+where <i>D</i>(<i>z</i>) is specified by the externally supplied coefficients.
 Let
 <pre>
 D(z) ~=~ d sub 1 ~+~ d sub 2 z sup -1 ~+~ ... ~+~ d sub M z sup M-1 ~.

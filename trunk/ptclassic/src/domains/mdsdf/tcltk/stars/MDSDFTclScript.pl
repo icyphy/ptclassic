@@ -73,7 +73,7 @@ for example, grab input values and compute output values,
 although it can do anything the designer wishes, even ignoring the input
 and output values.
 <pre>
-delim <i></i>
+delim 
 </pre>
 	}
 	hinclude { "TclStarIfc.h" }

@@ -22,7 +22,7 @@ transform (DTFT) of a finite length sequence [1].
 <a name="spectral estimation"></a>
 The <i>signal</i> input is the signal to be transformed.
 The number of input samples consumed is given by <i>length</i>.
-Letting the input samples be written as <i>a</i>(<i></i>0<i></i>)<i>,   ...   ,  a</i>(<i>L-</i>1<i></i>)<i></i>, where
+Letting the input samples be written as <i>a</i>(0)<i>,   ...   ,  a</i>(<i>L-</i>1), where
 <i>L</i> is the <i>length</i>, the output is
 <pre>
 A ( j omega ) ~=~

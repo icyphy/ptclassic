@@ -59,7 +59,7 @@ coefficients in the statistics literature.
 <p>
 The <i>errPower</i> output is the power of the prediction error
 as a function of the model order.
-There are <i>order+</i>1<i></i> output samples, and the first sample corresponds
+There are <i>order+</i>1 output samples, and the first sample corresponds
 to the prediction error of a zero-th order predictor.
 This is simply an estimate of the input signal power.
 <a name="Makhoul, J."></a>

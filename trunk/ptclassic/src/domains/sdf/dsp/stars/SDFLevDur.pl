@@ -38,7 +38,7 @@ autocorrelation algorithm.
 The given order should be the same as the <i>noLags</i> parameter of the
 <tt>Autocor</tt>
 star.  Three outputs are generated.
-On the <i>errPower</i> output, a sequence of <i>order  +  </i>1<i></i>
+On the <i>errPower</i> output, a sequence of <i>order  +  </i>1
 samples gives the prediction
 error power for each predictor order from zero to <i>order</i>.
 The first sample, which corresponds to the zeroth-order predictor,

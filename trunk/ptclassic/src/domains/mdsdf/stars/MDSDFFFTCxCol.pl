@@ -20,7 +20,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	location { MDSDF library }
 	htmldoc {
 A number of input samples given by the parameter <i>size</i> will
-be consumed at the input, zero-padded if necessary to make <i></i>2<i> <sup>order</sup></i>
+be consumed at the input, zero-padded if necessary to make 2<i> <sup>order</sup></i>
 samples, and transformed using a fast Fourier transform algorithm.
 <a name="FFT, complex"></a>
 <a name="fast Fourier transform, complex"></a>
@@ -29,7 +29,7 @@ If <i>direction</i> is 1, then the forward Fourier transform is computed.
 If <i>direction</i> is -1, then the inverse Fourier transform is computed.
 <p>
 Note a single firing of this star consumes <i>size</i> inputs
-and produces <i></i>2<i> <sup>order</sup></i> outputs.
+and produces 2<i> <sup>order</sup></i> outputs.
 This must be taken into account when determining for how many iterations
 to run a universe.
 For example, to compute just one FFT, only one iteration should be run.
