@@ -71,7 +71,7 @@ extern RAW_PTR malloc ARGS((size_t));
 #endif /* PTHPUX10 */
 #define getwd(foo) getcwd(foo,MAXPATHLEN-1)
 #else /* PTHPPA */
-#if !defined(PTALPHA) && !defined(PTLINUX)
+#if !defined(PTALPHA) && !defined(PTLINUX) && !defined(PTIRIX5)
 extern char *getwd ARGS((char *));
 #endif /* PTALPHA */
 #endif /* PTHPPA */
