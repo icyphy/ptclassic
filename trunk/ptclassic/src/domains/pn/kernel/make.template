@@ -13,10 +13,11 @@ VPATH=$(ROOT)/src/domains/mtdf/kernel
 CONFIG=$(ROOT)/mk/config-$(ARCH).mk
 include $(CONFIG)
 
-THREADDIR=$(ROOT)/src/thread/lwp
+AWESIME=$(ROOT)/src/thread/Awesime/include.$(ARCH)
+THREADDIR=$(ROOT)/src/thread/awe
 SDFDIR=$(ROOT)/src/domains/sdf/kernel
 
-INCL=-I$(KERNDIR) -I$(THREADDIR) -I$(SDFDIR)
+INCL=-I$(KERNDIR) -I$(THREADDIR) -I$(SDFDIR) -I$(AWESIME)
 
 # Library name
 LIB=libmtdf.a
@@ -26,16 +27,16 @@ CC_WITH_H=\
 	MTDFTarget.cc MTDFScheduler.cc MTDFStar.cc\
 	MTDFWormhole.cc MTDFEventHorizon.cc\
 	MTDFPortHole.cc MTDFGeodesic.cc MTDFForkNode.cc\
-	MTDFThread.cc\
-	RTScheduler.cc
+	MTDFThread.cc
 
 SRCS=	$(CC_WITH_H)\
 	MTDFDomain.cc
 
 # Header files
 HDRS=	$(CC_WITH_H:.cc=.h)\
-	MTDFUniverse.h\
-	MTDFThreadList.h MTDFThreadIter.h
+	MTDFUniverse.h \
+	MTDFMonitor.h \
+	MTDFCondition.h
 
 # Library objects
 OBJS = $(SRCS:.cc=.o)
