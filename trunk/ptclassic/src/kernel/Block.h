@@ -99,6 +99,9 @@ public:
 	// classes derived therefrom.
 	void addPort(PortHole& p) {ports.put(p);}
 
+	// remove a porthole from the list
+	int removePort(PortHole& p) { return ports.remove(&p);}
+
 	// This function saves the given MultiPortHole so portWithName
 	// can find it.
 	void addPort(MultiPortHole& p) {multiports.put(p);}
