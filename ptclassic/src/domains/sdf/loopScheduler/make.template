@@ -22,9 +22,7 @@ CONFIG=$(ROOT)/config-$(ARCH).mk
 include $(CONFIG)
 
 SDFKERNEL = $(ROOT)/src/domains/sdf/kernel
-EGKERNEL = $(ROOT)/src/domains/sdf/expgraph
-CGKERNEL = $(ROOT)/src/domains/cg/kernel
-INCL =-I$(SDFKERNEL) -I$(KERNDIR) -I$(EGKERNEL) -I$(CGKERNEL)
+INCL =-I$(SDFKERNEL) -I$(KERNDIR)
 
 OBJS = $(SRCS:.cc=.o)
 LIB = libLS.a
