@@ -141,7 +141,7 @@ foreach x ( Packages Xpackages attache vem)
 	cd ..
 end
 
-foreach x ( installColors masters octfix octls oct2ps octmvlib)
+foreach x ( installColors masters octfix octls oct2ps)
 	optmkdir $x
 	cd $x
 	optlink ../../../src/octtools/$x make.template
