@@ -164,3 +164,34 @@ octObject *facetPtr;
     }
     return (TRUE);
 }
+
+/* We do the following to trim trailing whitespace the user might
+   type in (or extra returns) which have a tendency to screw us up.
+   dmMultiTextTrim is a version that trims trailing blanks, linefeeds,
+   etc. from user entries.
+*/
+
+static void trim (s)
+char *s;
+{
+	char *e;
+	if (*s == 0) return;
+	/* find end of string */
+	e = s;
+	while (*e) e++;
+	/* back up, deleting spaces, tabs, newlines, control chars */
+	while (e >= s && *e <= ' ') *e-- = 0;
+}
+
+vemStatus
+dmMultiTextTrim(name, nItems, items)
+char *name;
+int nItems;
+dmTextItem items[];
+{
+	int i;
+	vemStatus result = dmMultiText(name, nItems, items);
+	for (i = 0; i < nItems; i++)
+		trim (items[i].value);
+	return result;
+}
