@@ -124,11 +124,12 @@ vol. 28, no. 2, pp. 574-587, April 1992.
 
     // check for empty input
     if(inputPkt.empty()) {
-      FloatMatrix V(int(numRows),int(numCols));
+      FloatMatrix& V = *(new FloatMatrix(int(numRows),int(numCols)));
       V = 0.0;
       for(int row = 0; row < nrows; row++)
         for(int col = 0; col < numNoise; col++)
           (*Vn)[row][col] = V[row][col+(2*int(numSignals))];
+      delete &V;
     }
     else {
       const FloatMatrix& V = *(const FloatMatrix *)inputPkt.myData();
