@@ -59,6 +59,10 @@ class ::tycho::RevControlSCCS {
     # Put the file under revision control.
     method initializeRevControl {}
 
+    #### retrieveVersion
+    # Get the specified version and open the file.
+    method retrieveVersion {version}
+
     #### unedit
     # Unedit the file associated with this class.
     method unedit {}
@@ -196,6 +200,24 @@ body ::tycho::RevControlSCCS::initializeRevControl {} {
 		control: $output."
     }   
     $object reload
+    cd $olddir
+}
+
+#####################################################################
+#### retrieveVersion
+# Retrieve the specified version and display.
+# 
+body ::tycho::RevControlSCCS::retrieveVersion {version} {
+    set dir [file dirname $file]
+    set basefile [file tail $file]
+    set olddir [eval pwd]
+    cdDir $dir
+
+    # SCCS redirects the version info to stderr, so we redirect stderr.
+    # Unfortunately, this means there is no way to report errors.
+    set text [exec sccs get -p -r$version $basefile 2> /dev/null]
+
+    ::tycho::File::displayData $text $file
     cd $olddir
 }
 
@@ -342,9 +364,11 @@ body ::tycho::RevControlSCCS::parseHistory {history text} {
 	return
     }
 
+    $text insert insert "Double click to view versions. "
     if [isCheckedOut] {
-	$text insert insert "The file is currently checked out\n\n"
+	$text insert insert "The file is currently checked out"
     }
+    $text insert insert "\n\n"
 
     set commentColor \
 	    [option get $itk_component(hull) commentColor RevControlSCCS]
@@ -357,8 +381,10 @@ body ::tycho::RevControlSCCS::parseHistory {history text} {
 		$line junk version date time user] {
 	    set start [$text index insert]
 	    $text insert insert "$version $date, checked in by $user\n"
-	    $text tag add version $start insert
-	    $text tag configure version -foreground $versionColor
+	    $text tag add v$version $start insert
+	    $text tag configure v$version -foreground $versionColor -underline 1
+	    $text tag bind v$version <Double-Button-1> \
+		    [code "$this retrieveVersion $version"]
 	} elseif [regexp {MRs:|COMMENTS:} $line] {
 	    # ignore
 	} else {
