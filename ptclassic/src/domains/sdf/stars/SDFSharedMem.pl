@@ -8,8 +8,7 @@ Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
-
-}
+  }
   desc { Base class for shared memory }
   header {
 
@@ -25,13 +24,19 @@ limitation of liability, and disclaimer of warranty provisions.
     };
 
   }
-  hinclude { "HashTable.h" }
-  explanation {}
-  code {
 
+  hinclude { "HashTable.h" }
+
+  htmldoc {
+This base star implements supporting code for the ReadVar and WriteVar
+stars.
+  }
+
+  code {
     // instantiate the static register list
     HashTable SDFSharedMem::regList;
   }
+
   protected {
     static HashTable regList;
   }
