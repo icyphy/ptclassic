@@ -1,5 +1,5 @@
 defstar {
-	name		{ ZigZag }
+	name		{ ZigZagImage }
 	domain		{ SDF }
 	version		{ $Id$ }
 	author		{ Paul Haskell }

@@ -1,5 +1,5 @@
 defstar {
-	name		{ DctCodeInv }
+	name		{ DCTImageCodeInv }
 	domain		{ SDF }
 	version		{ $Id$ }
 	author		{ Paul Haskell }
@@ -15,7 +15,7 @@ input data is affected by loss.
 NOTE!! This star is different from the SDFRunLenInv star.
 This one works on DCTImages, not GrayImages.
 	}
-	seealso { DctCode }
+	seealso { DCTImageCode }
 
 	input	{ name	{ hiport }	type { message } }
 	input	{ name	{ loport }	type { message } }

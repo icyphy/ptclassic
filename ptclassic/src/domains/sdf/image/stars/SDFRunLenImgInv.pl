@@ -1,5 +1,5 @@
 defstar {
-	name		{ RunLenInv }
+	name		{ RunLenImageInv }
 	domain		{ SDF }
 	version		{ $Id$ }
 	author		{ Paul Haskell }
@@ -15,7 +15,7 @@ Check to make sure we don't write past unallocated memory.
 .Id "run length decoding"
 .Id "image, run length decoding"
 	}
-	seealso { RunLen }
+	seealso { RunLenImage }
 
 	hinclude { "GrayImage.h", "Error.h" }
 

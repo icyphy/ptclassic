@@ -1,5 +1,5 @@
 defstar {
-	name		{ AddMvecs }
+	name		{ AddMotionVecs }
 	domain		{ SDF }
 	version		{ $Id$ }
 	author		{ Paul Haskell }
