@@ -67,7 +67,6 @@ int toggled;
     mulw_cb_data *data;
     ddsItemList idata;
     item_callback *cb;
-    int *flag_ptr;
 
     dds_get(item_list, (ddsData) &idata);
     cb = (item_callback *) (idata.items[toggled].user_data);
@@ -336,7 +335,6 @@ STR help_buf;			/* Help text (if any)            */
 	    (ddsData) &cb_info },
     };
     ddsPosition pos;
-    ddsControl help_con;
     static int num_cons = sizeof(controls)/sizeof(ddsControl);
     ww_cb_data data;
     item_callback *item_cb;
