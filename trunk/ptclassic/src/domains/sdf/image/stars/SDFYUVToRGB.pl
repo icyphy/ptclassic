@@ -16,10 +16,20 @@ Read three GrayImages that describe a color image in YUV format and
 output three GrayImages that describe an image in RGB format.
 	}
 	explanation {
+The YUV format, which is a linear mapping of the RGB format, is used
+in broadcast television to maintain compability with black-and-white
+televisions [1].
+In essence, Y is the luminance of the image, and U and V represent the
+chrominance (hue and saturation).
 .Id "format conversion, YUV to RGB"
 .Id "image format conversion, YUV to RGB"
 .Ir "image format, RGB"
 .Ir "image format, YUV"
+.Id "Pratt, W."
+.UH REFERENCES
+.ip [1]
+W. Pratt, \fIDigital image processing\fR,
+Wiley & Sons: New York.  1991.  2nd ed.
 	}
 
 	ccinclude { "GrayImage.h", "Error.h" }

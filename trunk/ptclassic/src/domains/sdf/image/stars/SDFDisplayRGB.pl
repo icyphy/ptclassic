@@ -12,7 +12,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	location	{ SDF image library }
 	desc {
 Accept three ColorImages (Red, Green, and Blue) from three input
-GrayImages and generate a PPM format color image file.
+GrayImages and generate a color image file in Portable Pixmap (PPM) format.
 Send the filename to a user-specified command 
 (by default,
 .EQ
@@ -25,16 +25,16 @@ delim $$
 is used).
 
 The user can set the root filename of the displayed image (which will
-probably be printed in the image display window titlebar) and
+probably be printed in the image display window title bar) and
 can choose whether or not the image file is saved or deleted.
 The frameId of the received image is appended to the root filename
 to produce the full filename of the displayed image.
 	}
 	explanation {
-.Id "image display, RGB"
+.Id "image display, red-green-blue (RGB)"
 .Id "RGB image display"
 .Ir "PPM image format"
-.Ir "image format, PPM"
+.Ir "image format, portable pixmap (PPM)"
 	}
 
 	ccinclude {

@@ -12,15 +12,25 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	location	{ SDF image library }
 	desc {
-Read three GrayImages that describe a color image in RGB format and
-output three GrayImages that describe an image in YUV format.
-No downsampling is done on the U and V signals.
+Read three GrayImages that describe a color image in Red-Green-Blue (RGB)
+format and output three GrayImages that describe an image in YUV format.
+No downsampling is performed on the U and V signals.
 	}
 	explanation {
+The YUV format, which is a linear mapping of the RGB format, is used
+in broadcast television to maintain compability with black-and-white
+televisions [1].
+In essence, Y is the luminance of the image, and U and V represent the
+chrominance (hue and saturation).
 .Id "format conversion, RGB to YUV"
 .Id "image format conversion, RGB to YUV"
-.Ir "image format, RGB"
-.Ir "image format, YUV"
+.Ir "image format, red-green-blue (RGB)"
+.Ir "image format, luminance-chrominance (YUV)"
+.Id "Pratt, W."
+.UH REFERENCES
+.ip [1]
+W. Pratt, \fIDigital image processing\fR,
+Wiley & Sons: New York.  1991.  2nd ed.
 	}
 
 	ccinclude { "GrayImage.h", "Error.h" }
