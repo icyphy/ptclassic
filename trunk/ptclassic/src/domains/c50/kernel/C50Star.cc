@@ -4,7 +4,7 @@ static const char file_id[] = "C50Star.cc";
 Version:
 $Id$
 
-@Copyright (c) 1990-%Q% The Regents of the University of California.
+@Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -29,7 +29,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 						PT_COPYRIGHT_VERSION_2
 						COPYRIGHTENDKEY
 
-Programmer: Andreas Baensch
+Programmer: Andreas Baensch, G. Arslan
 Date of Creation: 25 May 1994
 
 Modeled on code by T.M. Parks dated 5 January 1992.
@@ -46,11 +46,68 @@ Modeled on code by T.M. Parks dated 5 January 1992.
 
 extern const char C50domainName[];
 
-// Class identification.
-ISA_FUNC(C50Star,Star);
 
 // Domain identification.
 const char* C50Star::domain() const
 {
     return C50domainName;
 }
+
+// State or PortHole reference.
+StringList C50Star::expandRef(const char* name)
+{
+    return expandRef(name, "0");
+}
+
+// State or PortHole reference with offset.
+StringList C50Star::expandRef(const char* name, const char* offset)
+{
+    StringList ref;
+    ref << lookupMem(name) << ':' << lookupAddress(name, offset);
+    return ref;
+}
+
+
+StringList C50Star::expandMacro(const char* func, const StringList& argList)
+{
+	StringList s,tmp;
+	StringListIter arg(argList);
+	const char* arg1 = arg++;
+	const char* arg2 = arg++;
+
+
+
+	if (matchMacro(func, argList, "addr2", 2)){
+	  tmp = lookupAddress(arg1, arg2);
+	  s << "addr" << tmp;
+	}
+	else if (matchMacro(func, argList, "addr", 2)){
+	  tmp = lookupAddress(arg1, arg2);
+	  s << "addr" << tmp;
+	}
+	else if (matchMacro(func, argList, "addr", 1)){
+	  tmp = lookupAddress(arg1);
+	  s << "addr" << tmp;
+	}
+	else if (matchMacro(func, argList, "ref2", 2)){ 
+	  tmp = expandRef(arg1, arg2);
+	  s << "addr" << tmp;
+	}
+	else if (matchMacro(func, argList, "ref", 2)){ 
+	  tmp = expandRef(arg1, arg2);
+	  s << "addr" << tmp;
+	}
+	else if (matchMacro(func, argList, "ref", 1)){
+	  tmp = expandRef(arg1);
+	  s << "addr" << tmp;
+	}
+	else if (matchMacro(func, argList, "valfix", 1)){
+	  s << int(atof(expandVal(arg1))*(pow(2,15)-1));
+	}
+	else s = AsmStar::expandMacro(func, argList);
+
+	return s;
+}
+
+// Class identification.
+ISA_FUNC(C50Star,Star);
