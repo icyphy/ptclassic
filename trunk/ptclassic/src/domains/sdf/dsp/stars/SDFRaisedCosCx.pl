@@ -65,9 +65,7 @@ of raised cosine pulses in communications systems.
 		decimationPhase.clearAttributes(A_SETTABLE);
 	}
 	start {
-		sprintf (ivbuf, "(0, 0) [%d]", int(N));
-		taps.setValue (ivbuf);
-		taps.initialize ();
+		taps.resize(int(N));
 		int center = int(N)/2;
 		for (int i = 0; i < int(N); i++)
 			taps[i] = rcos (i - center, P, excessBW);
