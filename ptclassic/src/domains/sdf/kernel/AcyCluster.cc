@@ -499,13 +499,13 @@ int AcyCluster::legalCutIntoBddSets(int K)
 	    updateBestCut(numPred);
 	}
     }
-    if (minCutVal == (int)HUGE_VAL) {
+    if (minCutVal == INT_MAX) {
 	// There is no legal cut that obeys the bound; hence,
 	// return -1.  See the comments in the optimization step in the 
 	// Successors section of the code above.
 	return -1;
     }
-    //
+
     // Now we check the above.  We follow Blum's advice: programs should
     // always check their work since the check is usually less expensive
     // and uses a different algorithm than the one used to compute the result.
