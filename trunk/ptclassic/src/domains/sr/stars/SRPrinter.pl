@@ -8,7 +8,7 @@ In each instant, print the value of the input to the filename in the
 also be used.
   }
 
-  version {@(#)SRPrinter.pl }
+  version { $Id$ }
   author { S. A. Edwards }
 
   copyright {
@@ -25,7 +25,7 @@ If output is directed to a file, then flushing does not occur until the
 wrapup method is called.
 Before the first data are flushed, the file will not exist.
 }
-  in {
+  input {
     name { input }
     type { ANYTYPE }
   }
@@ -50,7 +50,7 @@ Before the first data are flushed, the file will not exist.
   setup {
     // In case the file was not closed earlier by wrapup()..
     LOG_DEL; delete p_out;
-    LOG_NEW; p_out = new ptofstream(fileName);
+    LOG_NEW; p_out = new pt_ofstream(fileName);
   }
 
   go {
