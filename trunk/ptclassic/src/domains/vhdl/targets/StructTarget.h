@@ -94,8 +94,8 @@ public:
 					  int=-1, const char* ="");
 
 	// Return the assignment operators for States and PortHoles.
-	/*virtual*/ const char* stateAssign();
-	/*virtual*/ const char* portAssign();
+	/*virtual*/ const char* stateAssign() { return ":=" ; }
+	/*virtual*/ const char* portAssign() { return "<=" ; }
 
 protected:
 	/*virtual*/ void begin();
