@@ -71,6 +71,9 @@ public:
 		subDomains += "SDF";
 		subDomains += "BDF";
 	}
+
+	// require DDFTarget
+	const char* requiredTarget() { return "DDFTarget";}
 };
 
 // declare a prototype
