@@ -26,7 +26,7 @@ defstar
     output
     {
 	name { alarm }
-	type { anyType }
+	type { float }
 	desc { Indicates that a timeout has expired. }
     }
 
