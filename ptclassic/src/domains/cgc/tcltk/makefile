@@ -33,7 +33,7 @@
 
 include ../../../../mk/subdomain.mk
 
-DIRS = stars targets
+DIRS = lib stars targets
 
 ME = cgc/tcltk
 
