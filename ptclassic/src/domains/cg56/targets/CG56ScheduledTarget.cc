@@ -77,42 +77,39 @@ void CG56ScheduledTarget :: setup() {
 
 	// Open the file name
 	FILE* fp = fopen(schedFileName, "r");
-	if(fp == NULL) {
+	if (fp == NULL) {
 		Error::abortRun("Can't read schedule file.");
 		return;
 	}
 
 	// Read the number of stars
 	int numStars = 0;
-	if(fscanf(fp, "%d", &numStars) != 1) {
+	if (fscanf(fp, "%d", &numStars) != 1) {
 		Error::abortRun("Can't read the number of stars from the schedule.");
 		return;
 	}
 
 	// Create a new schedule
 	SDFSchedule sched;
-	for(int i=0; i < numStars; i++) {
+	for (int i = 0; i < numStars; i++) {
 		char starName[256];
-		if(fscanf(fp, "%s", starName) != 1) {
+		if (fscanf(fp, "%s", starName) != 1) {
 			Error::abortRun("Can't read the star name from the schedule");
 			return;
 		}
 		starName[255] = 0;
 		CG56Star* star = (CG56Star*)starWithFullName(starName);
-		if(star == NULL) {
+		if (star == NULL) {
 			Error::abortRun("The star '", starName,
 					"' was not found in universe");
 			return;
 		}
 		sched.append(*star);
 	}
-	setSched(new SDFScheduler);
-	galaxySetup();
 
-	// schedulerSetup();
+	copySchedule(sched);
 	SDFScheduler* sch = (SDFScheduler*)scheduler();
 	sch->setGalaxy(*galaxy());
-	copySchedule(sched);
 	CG56Target :: setup();
 }
 
