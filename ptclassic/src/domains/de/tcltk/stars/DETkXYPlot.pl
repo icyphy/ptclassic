@@ -116,7 +116,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	  }
 
 	  int plotstyle = 0;
-	  if (strcmp(style,"connect")) plotstyle = 1;
+	  if (strcmp(style,"connect") == 0) plotstyle = 1;
 
 	  // create the XYplot window labeling, scaling,
 	  // and ranging as specified by the parameters
