@@ -15,9 +15,10 @@ This trivial system connects a
 to an
 .c XMgraph
 using a single connection that represents an arbitrary
-number of connections.  The bus icon has a single parameter
-that controls the number of connections.
+number of connections.
+The bus icon has a single parameter that controls the number of connections.
 The default is set to four.
 .SA
-Distributor, XMgraph.
+Distributor,
+XMgraph.
 .ES

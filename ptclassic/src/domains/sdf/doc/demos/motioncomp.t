@@ -19,8 +19,8 @@ The difference-coded sequence is run-length encoded.
 .Ie "encoding, run length"
 The final image is displayed.
 .SA
-DisplayImage
-ReadImage
-MotionCmp
-RunLen
+DisplayImage,
+ReadImage,
+MotionCmp,
+RunLen.
 .ES

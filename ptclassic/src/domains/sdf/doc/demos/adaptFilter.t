@@ -13,9 +13,9 @@ A Gaussian white noise signal serves as input to an FIR filter and
 an adaptive filter using the LMS algorithm.
 The output of the two filters and the error are displayed
 after the run.
-By examining the parameters of the two filters, you can find
+By examining the parameters of the two filters, one can find
 the filenames for the FIR filter coefficients and the initial tap values.
-The final tap values can be saved by specifying a saveTapsFile
+The final tap values can be saved by specifying a \fIsaveTapsFile\fR
 in the adaptive filter star.
 .Ie "adaptive filter"
 .Ie "filter, adaptive"

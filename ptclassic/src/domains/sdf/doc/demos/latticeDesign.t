@@ -39,14 +39,17 @@ and
 stars
 .Se BlockLattice
 .Se BlockRLattice
-The BlockLattice star therefore
-has transfer function $H sup -1 (z)$.
+The
+.c BlockLattice
+star therefore has transfer function $H sup -1 (z)$.
 To verify this, the impulse response of the AR filter is fed into it,
 producing an impulse at the output.
-The BlockRLattice star will have transfer function $H(z)$.
+The
+.c BlockRLattice
+star will have transfer function $H(z)$.
 This is verified by plotting its impulse response together with that
-of the AR filter.  They should be identical, so the two plots should
-exactly overlap.
+of the AR filter.
+They should be identical, so the two plots should exactly overlap.
 .SA
 Autocor,
 BlockLattice,

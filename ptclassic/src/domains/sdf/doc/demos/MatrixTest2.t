@@ -9,3 +9,4 @@ two inputs.  These include multiply, add, and subtract.
 .SV $Revision$ $Date$
 .AL "Mike J. Chen"
 .Ir "matrix stars"
+.ES

@@ -8,3 +8,4 @@ a similar filter implemented with fixed-point arithmetic.
 .LO "$PTOLEMY/src/domains/sdf/demo"
 .SV $Revision$ $Date$
 .AL "E. A. Lee"
+.ES

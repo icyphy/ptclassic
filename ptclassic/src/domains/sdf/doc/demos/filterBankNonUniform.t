@@ -7,7 +7,7 @@ two non-uniform frequency bands.
 .LO "$PTOLEMY/src/domains/sdf/demo"
 .DM SDF Universe
 .SV $Revision$	$Date$
-.AL "Brian Evans"
+.AL "Brian L. Evans"
 .LD
 .pp
 .Ie "filter bank"
@@ -27,7 +27,7 @@ interpreter ptcl by the signal processing packages for Mathematica [2].
 .Ir "Evans, B."
 .SA
 filterBank
-.UH References
+.UH REFERENCES
 .ip [1]
 K. Nayebi, T. P. Barnwell, and M. J. T. Smith,
 ``Nonuniform Filter Banks: A Reconstruction and Design Theory,''

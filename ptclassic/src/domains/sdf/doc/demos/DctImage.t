@@ -20,8 +20,8 @@ on the image.
 .Se ReadImage
 Next, the transform is inverted, and the result is displayed.
 .SA
-DisplayImage
-ReadImage
-Dct
-DctInv
+Dct,
+DctInv,
+DisplayImage,
+ReadImage.
 .ES

@@ -7,7 +7,7 @@ Samples of the frequency response are converted into FIR filter coefficients.
 .LO "$PTOLEMY/src/domains/sdf/demo"
 .DM SDF Universe
 .SV $Revision$	$Date$
-.AL "Joe T. Buck and Edward A. Lee"
+.AL "Joseph T. Buck and Edward A. Lee"
 .LD
 The frequency domain specification is given using the
 .c WaveForm
@@ -23,7 +23,7 @@ the same transition sample again, and five sample with magnitude 1.0.
 This specifies a lowpass filter with the cutoff at about 1/3
 of the Nyquist frequency.
 The frequency specification is first modulated by a sequence
-of alternating $+- 1$.
+of alternating $+1$ and $-1$.
 This effectively translates the impulse response so that it
 is symmetric about the center sample, number 15.
 Modulation in the frequency domain yields translation in the time domain.
@@ -35,9 +35,9 @@ an inverse FFT gives the impulse response of the filter.
 Both the real and imaginary parts of this are plotted.
 Symmetry in the specification will result in the imaginary parts being zero.
 To compute the frequency response, a forward FFT of much higher order
-is computed (256, in this case).  The plot therefore has
-enough resolution to see how the frequency response behaves
-in-between the specified samples.
+is computed (256, in this case).
+The plot therefore has enough resolution to see how the frequency response
+behaves in-between the specified samples.
 Note that the \fIsize\fR parameter of the FFT is 32,
 indicating that only 32 input samples should be read.
 Of course, as is standard with the frequency sampling method, the magnitude
@@ -45,18 +45,16 @@ response of the resulting filter exactly passes through the given
 samples at discrete frequency intervals.
 This can be easily verified with the plot.
 .pp
-To obtain a filter with a real-valued impulse response, the
-frequency domain specification
-must be symmetric, as with the default parameters.
+To obtain a filter with a real-valued impulse response, the frequency domain
+specification must be symmetric, as with the default parameters.
 To understand the symmetry precisely, note
 that the frequency domain specification is actually only one
 cycle of a periodic specification.
 With this observation, and the fact that the first sample specifies
 the DC response, the symmetry is obvious.
 .pp
-To design a filter of a different order
-from that in the demo, you must modify the \fIsize\fR and \fIorder\fR
-parameters of the first
+To design a filter of a different order from that in the demo, you must
+modify the \fIsize\fR and \fIorder\fR parameters of the first
 .c ComplexFFT
 star, and the \fIsize\fR parameter of the second.
 .SA

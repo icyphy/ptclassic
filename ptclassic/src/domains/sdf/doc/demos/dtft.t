@@ -30,11 +30,10 @@ star can produce any number of samples, without any constraint that
 the number be a power of two.
 Furthermore, the FFT samples must be uniformly spaced, and cover the
 entire spectrum from d.c. to the sampling frequency.
-The DTFT
-samples can be spaced at arbitrary intervals, and can cover any
+The DTFT samples can be spaced at arbitrary intervals, and can cover any
 subset of the spectrum.
-An outside signal source (in this case a
-.c FloatRamp
+An outside signal source (in this case an
+.c Add
 star) provides the values of $omega$ at which to sample the DTFT.
 .pp
 In both cases, the magnitude (in dB) and phase are plotted.

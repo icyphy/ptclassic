@@ -19,7 +19,7 @@ r ~=~ e sup { cos ( theta ) } ~-~ 2 cos ( 4 theta ) ~+~
 sin sup 5 ( theta / 12) ~.
 .EN
 .Se XYgraph
-.UH Reference
+.UH REFERENCES
 .ip [1]
 T. Fay, "The Butterfly Curve," \fIAmerican Math. Monthly,\fR 96(5), pp. 442-443.
 .SA

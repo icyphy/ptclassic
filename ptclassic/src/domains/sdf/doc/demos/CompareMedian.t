@@ -9,8 +9,7 @@ due to interleaved scanning of video sequences.
 .SV $Revision$	$Date$
 .AL "Paul E. Haskell"
 .LD
-This universe reads an image from a file and median filters the
-image.
+This universe reads an image from a file and median filters the image.
 .Ie "filter, median"
 .Ie "image, median filter"
 .Ie "median filtering"
@@ -20,7 +19,7 @@ between the two are all displayed.
 .Se ReadImage
 .Se MedianImage
 .SA
-DisplayImage
-ReadImage
-MedianImage
+DisplayImage,
+ReadImage,
+MedianImage.
 .ES

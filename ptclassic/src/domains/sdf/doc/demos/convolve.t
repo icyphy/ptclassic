@@ -11,11 +11,11 @@ use of the Convolve block.
 .LD
 This trivial system uses two
 .c Rect
-blocks to generate rectangular pulses,
-and then convolves them.
+blocks to generate rectangular pulses, and then convolves them.
 Note that the \fItruncationDepth\fR parameter of the
 .c Convolve
 block must be set larger than the number of output samples of interest.
 .SA
-Convolve, Rect.
+Convolve,
+Rect.
 .ES

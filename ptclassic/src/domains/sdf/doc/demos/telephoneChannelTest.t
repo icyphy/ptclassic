@@ -9,16 +9,11 @@ additive Gaussian noise, nonlinear distortion, and phase jitter.
 .DM SDF Universe
 .SV $Revision$	$Date$
 .AL "Edward A. Lee"
-.EQ
-delim off
-.EN
-.EQ
-delim $$
-.EN
 .LD
 The time domain plot of the output clearly shows the phase jitter
 and the noise, but only the most discerning eye can see the nonlinear
-distortion.  A periodogram power spectrum estimate, however, clearly
+distortion.
+A periodogram power spectrum estimate, however, clearly
 shows the second harmonic distortion, plus a DC offset.
 .SE TelephoneChannel
 .IR "phase jitter"
@@ -29,5 +24,5 @@ E. A. Lee and D. G. Messerschmitt,
 .i "Digital Communication" ,
 2nd ed., Kluwer Academic Publishers, Boston, MA, 1994, pp. 160-167.
 .SA
-TelephoneChannel
+TelephoneChannel.
 .ES

@@ -2,9 +2,10 @@
 .NA cep
 .SD
 Given the coefficients of any polynomial, this demo uses the cepstrum to
-find a minimum-phase polynomial. Thus, given the coefficients of the denominator
-polynomial of an unstable filter, this demo will compute the coefficients of a
-stable denominator polynomial that has the same magnitude frequency response.
+find a minimum-phase polynomial.
+Thus, given the coefficients of the denominator polynomial of an unstable
+filter, this demo will compute the coefficients of a stable denominator
+polynomial that has the same magnitude frequency response.
 .DE
 .LO "$PTOLEMY/src/domains/sdf/demo"
 .DM SDF Universe
@@ -20,8 +21,7 @@ Given a filter
 H(z) ~=~ { sum from n=0 to q b(n) z sup -n } over
 {sum from n=0 to p a(n) z sup -n } ~=~ B(z) over A(z) ~,
 .EN
-this demo serves as a tool to determine whether the filter is
-stable.
+this demo serves as a tool to determine whether the filter is stable.
 If the filter is not stable, we wish to find a denominator $A sub s (z)$
 that is causal and stable and is equal to $|A(z)|$ on the unit circle.
 The filter $H sub s (z) ~=~ B(z)/A sub s (z)$ will therefore evaluate to
@@ -41,13 +41,15 @@ The parameter
 .i ncoefs
 should be set greater than or equal to the number
 of coefficients in $a(n)$ (including the 0'th coefficient).
- Since 256-point FFT's are used, for good results
+Since 256-point FFT's are used, for good results
 .i ncoefs
 should be a good deal smaller than this.
 .pp
 The input coefficients are supplied as the
 .i value
-parameter of the WaveForm star on the far left.
+parameter of the
+.c WaveForm
+star on the far left.
 To read the parameters from a file instead, give "< filename" as the
 parameter value.
 The values are the coefficients of $a(n)$, starting with $a(0)$.
@@ -69,11 +71,12 @@ plotted in green.
 If the original signal was minimum phase (equivalently, if the original
 filter was stable) you will see only one plot.
 .Ir "Lim, J."
-.UH "References"
+.UH REFERENCES
 .ip [1]
 J. Lim,
 .i "Two-Dimensional Signal and Image Processing" ,
 Prentice-Hall, Englewood Cliffs, NJ, 1990, pp. 298-300
 .SA
-WaveForm, ComplexFFT
+WaveForm,
+ComplexFFT.
 .ES

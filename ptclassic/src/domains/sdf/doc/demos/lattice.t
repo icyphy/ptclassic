@@ -19,8 +19,8 @@ Gaussian white noise with an all-pole filter with transfer function
 H(z) ~=~ 1 over { 1 ~-~ 2 z sup -1 ~+~ 1.91z sup -2 ~-~ 0.91z sup -3 ~+~
 0.205z sup -4 } ~.
 .EN
-.Ie "allpole filter"
-.Ie "filter, allpole"
+.Ie "all-pole filter"
+.Ie "filter, all-pole"
 The filter is implemented two ways.
 First, it is impmented with an FIR filter in a feedback loop.
 Then, in parallel, it is implemented with a recursive lattice filter,
@@ -36,8 +36,8 @@ using an FIR lattice (the
 star) with the same coefficients as in the recursive lattice.
 .Se Lattice
 This has transfer function $H sup -1 (z)$, which whitens the
-random process.  The power spectrum for each process is then
-estimated using the
+random process.
+The power spectrum for each process is then estimated using the
 .c autocorrelation
 galaxy.
 .SA

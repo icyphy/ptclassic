@@ -17,7 +17,8 @@ time produce a complex approximately analytic signal
 The magnitude spectrum of the original sinusoid and the filtered
 sinusoid are both displayed.
 Note the shift in the peak of the spectrum due to the sample-rate
-conversion.  Also note that the symmetry of the original spectrum
+conversion.
+Also note that the symmetry of the original spectrum
 is lost in the filtered spectrum.
 .SA
 ComplexFIR.
