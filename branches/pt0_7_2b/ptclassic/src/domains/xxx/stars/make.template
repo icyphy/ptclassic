@@ -1,0 +1,53 @@
+# Makefile for Ptolemy XXX stars
+# $Id$
+#
+# If this file's name is "make.template" and there is no makefile in
+# this directory, do
+#	cp make.template makefile
+#	chmod +w makefile
+#	make depend
+# This will add the dependencies to the makefile.
+
+ROOT = ../../../..
+VPATH = $(ROOT)/src/domains/xxx/stars
+
+# get configuration info
+CONFIG=$(ROOT)/mk/config-$(ARCH).mk
+include $(CONFIG)
+
+# XXXDIR is the directory containing XXX domain support
+XXXDIR = $(ROOT)/src/domains/xxx/kernel
+INCL = -I$(XXXDIR) -I$(KERNDIR)
+
+# Library name
+LIB=libxxxstars.a
+
+# source files for all stars, using preprocessor
+# base classes/stars go in the front of the list
+PL_SRCS= \
+  XXXNop.pl
+
+# The .cc files
+SRCS=$(PL_SRCS:.pl=.cc)
+
+# object files for all stars
+OBJS= $(SRCS:.cc=.o)
+
+# header files for all stars
+HDRS= $(SRCS:.cc=.h)
+
+STAR_MK=xxxstars
+DOMAIN=XXX
+EXTRA_SRCS=$(STAR_MK).c $(PL_SRCS)
+
+all:		makefile stars_all
+
+install:	stars_install
+
+# include common definitions, rules
+include $(ROOT)/mk/common.mk
+
+
+# Don't add anything after the next line; makedepend will zap it.
+# DO NOT DELETE THIS LINE -- make depend depends on it.
+

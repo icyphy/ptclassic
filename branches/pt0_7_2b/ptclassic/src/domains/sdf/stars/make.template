@@ -1,0 +1,34 @@
+# Makefile for Ptolemy stars
+# $Id$
+#
+# If this file's name is "make.template" and there is no makefile in
+# this directory, do
+#	cp make.template makefile
+#	chmod +w makefile
+#	make depend
+# This will add the dependencies to the makefile.
+
+GFLAGS = -g
+GNU = g++
+GNUINCLUDE = /usr/gnu/lib/g++-include
+
+.SUFFIXES: .cc
+.cc.o:
+	$(GNU) $(GFLAGS) -c  $<
+
+SRCS=AdaptFilter.cc FIR.cc FloatFork.cc FloatPrinter.cc FloatRamp.cc \
+	Fork.cc Gaussian.cc IIR.cc IntFork.cc IntPrinter.cc IntRamp.cc \
+	Printer.cc CheatGain.cc Sin.cc
+
+OBJS=AdaptFilter.o FIR.o FloatFork.o FloatPrinter.o FloatRamp.o \
+	Fork.o Gaussian.o IIR.o IntFork.o IntPrinter.o IntRamp.o Printer.o \
+	CheatGain.o Sin.o
+
+all:		$(OBJS)
+
+depend:
+		makedepend -I$(GNUINCLUDE) $(SRCS)
+		sed 's?: $(GNUINCLUDE)?: $$(GNUINCLUDE)?' makefile > foo
+		mv foo makefile
+# Don't add anything after the next line; makedepend will zap it.
+# DO NOT DELETE THIS LINE -- make depend depends on it.

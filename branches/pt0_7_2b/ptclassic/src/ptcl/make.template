@@ -1,0 +1,148 @@
+# Makefile for Ptolemy/Tcl interpreter
+# Version identification:
+# $Id$
+# Copyright (c) 1992 The Regents of the University of California.
+#                       All Rights Reserved.
+# Date of creation: 3/4/92
+# Written by: J. Buck
+#
+# If this file's name is "make.template" and there is no makefile in
+# this directory, do
+#	cp make.template makefile
+#	make depend
+# This will add the dependencies to the makefile.
+
+# Root of Ptolemy directory
+ROOT=../..
+# Path (absolute or relative) to the object directory root
+OBJDIR=..
+# True source directory
+VPATH = $(ROOT)/src/ptcl
+
+# get configuration info
+CONFIG=$(ROOT)/config-$(ARCH).mk
+include $(CONFIG)
+
+# The following variables will eventually be in the config file
+# Directory containing Tcl/Tk include files
+TCL_H_DIR=/usr/tools/tcl/tcl/lib
+
+# Directory containing Tcl/Tk libraries
+TCL_LIBDIR=/usr/tools/tcl/tcl/lib
+
+INCL=-I$(KERNDIR) -I$(TCL_H_DIR)
+# Rule for compiling C++ programs
+.SUFFIXES: .cc
+.cc.o:
+	$(GNU) $(GPPFLAGS) $(INCL) -c $<
+
+SDF=$(OBJDIR)/domains/sdf/stars
+DDF=$(OBJDIR)/domains/ddf/stars
+DE =$(OBJDIR)/domains/de/stars
+Thor=$(OBJDIR)/domains/thor/stars
+CG=$(OBJDIR)/domains/cg/stars
+CGDDF=$(OBJDIR)/domains/cg-ddf/stars
+
+# object files for targets of dynamic constructs
+CGCON=$(OBJDIR)/domains/cg-ddf/constructs
+
+SDFSRC=$(ROOT)/src/domains/sdf/stars
+DDFSRC=$(ROOT)/src/domains/ddf/stars
+DESRC =$(ROOT)/src/domains/de/stars
+ThorSRC=$(ROOT)/src/domains/thor/stars
+CGSRC=$(ROOT)/src/domains/cg/stars
+CGDDFSRC=$(ROOT)/src/domains/cg-ddf/stars
+
+# source files for targets of dynamic constructs
+CGCONTARGET=$(ROOT)/src/domains/cg-ddf/constructs
+
+# libraries
+LIBS=-lcgcon -lcgddf -lddf -ldycon -lPG -lQS -lDL -lLS -lEG -lcg -lsdf \
+	-lde -lthor -lptolemy -lImage -ltcl $(SYSLIBS)
+
+LIBFILES=\
+ $(LIBDIR)/libcgddf.a $(LIBDIR)/libcgcon.a \
+ $(LIBDIR)/libDL.a $(LIBDIR)/libQS.a \
+ $(LIBDIR)/libcg.a $(LIBDIR)/libPG.a \
+ $(LIBDIR)/libLS.a $(LIBDIR)/libEG.a $(LIBDIR)/libsdf.a \
+ $(LIBDIR)/libImage.a \
+ $(LIBDIR)/libdycon.a $(LIBDIR)/libddf.a \
+ $(LIBDIR)/libde.a \
+ $(LIBDIR)/libthor.a \
+ $(LIBDIR)/libptolemy.a
+
+# kernel objects
+MAIN=$(LIBDIR)/interpmain.o
+KERNOBJS=$(MAIN) $(LIBFILES)
+
+# include files for star names.  These define the symbols SDFSTARS, DESTARS,
+# DDFSTARS, ThorSTARS, and CGSTARS.
+
+include $(SDFSRC)/sdfstars.mk
+include $(DESRC)/destars.mk
+include $(DDFSRC)/ddfstars.mk
+include $(ThorSRC)/thorstars.mk
+include $(CGSRC)/cgstars.mk
+include $(CGDDFSRC)/cgddfstars.mk
+
+include $(CGCONTARGET)/cgcontargets.mk
+
+# Extra targets
+CGT = $(OBJDIR)/domains/cg/targets
+SDFT = $(OBJDIR)/domains/sdf/targets
+
+TARGETS = $(OBJDIR)/domains/sdf/loopScheduler/LoopTarget.o \
+	$(CGT)/CGMultiTarget.o $(CGT)/SharedBus.o $(SDFT)/CompileTarget.o \
+	$(CGCONTARGETS) $(CGT)/CGQuasiTarget.o $(CGT)/QS_SharedBus.o
+
+# Sources
+SRCS= PTcl.cc ptclMain.cc
+
+# Header files
+HDRS= PTcl.h
+
+# Objects
+OBJS= $(SRCS:.cc=.o)
+
+all:	makefile ptcl
+
+# note that the LAST star linked in determines the default domain
+ALLSTARS=$(CGDDFSTARS) $(CGSTARS) $(ThorSTARS) $(DESTARS) $(DDFSTARS) $(SDFSTARS)
+
+ptcl:		$(OBJS) $(LIBFILES) $(ALLSTARS) $(TARGETS)
+		$(LINKER) $(LINKFLAGS) -L$(TCL_LIBDIR) $(OBJS) $(ALLSTARS) \
+			$(TARGETS) $(LIBS) -o ptcl
+
+ptcl.debug:	$(OBJS) $(LIBFILES) $(ALLSTARS) $(TARGETS)
+		$(LINKER) $(LINKFLAGS_D) -L$(TCL_LIBDIR) $(OBJS) $(ALLSTARS) \
+			$(TARGETS) $(LIBS) -o ptcl.debug
+
+
+
+# "make install" puts things in the official place
+install:	$(BINDIR)/ptcl
+
+$(BINDIR)/ptcl:	ptcl
+		cp ptcl $(BINDIR)
+
+# "make clean" removes .o files and other cruft
+clean:
+		rm -f *.o core *~ *.bak *# ptcl
+
+# "make sources" will do SCCS get on anything where SCCS file is newer.
+sources:	$(SRCS) $(HDRS) make.template
+
+depend:
+		cd $(VPATH); \
+		g++ -MM $(INCL) $(SRCS)|cat make.template - > makefile.n;\
+		mv -f makefile.n makefile
+
+makefile:	make.template
+		cd $(VPATH); make -f make.template sources depend
+		if [ ! -f makefile ]; then ln -s $(VPATH)/makefile makefile; fi
+		@echo makefile remade -- you must rerun make.
+		exit 1
+
+# Don't add anything after the next line; makedepend will zap it.
+# DO NOT DELETE THIS LINE -- make depend depends on it.
+

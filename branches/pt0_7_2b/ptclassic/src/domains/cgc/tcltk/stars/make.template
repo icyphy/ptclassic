@@ -1,0 +1,61 @@
+# Makefile for Ptolemy CGC stars
+# $Id$
+#
+# If this file's name is "make.template" and there is no makefile in
+# this directory, do
+#	cp make.template makefile
+#	chmod +w makefile
+#	make depend
+# This will add the dependencies to the makefile.
+
+ROOT = ../../../../..
+VPATH = $(ROOT)/src/domains/cgc/tcltk/stars
+
+# get configuration info
+CONFIG=$(ROOT)/config-$(ARCH).mk
+include $(CONFIG)
+
+CGCDIR = $(ROOT)/src/domains/cgc/kernel
+CGCSTARDIR = $(ROOT)/src/domains/cgc/stars
+# CGDIR is the directory containing CG domain support
+CGDIR = $(ROOT)/src/domains/cg/kernel
+SDFDIR = $(ROOT)/src/domains/sdf/kernel
+
+INCL = -I$(CGCDIR) -I$(CGDIR) -I$(SDFDIR) -I$(KERNDIR) -I$(CGCSTARDIR)
+
+# source files for all stars, using preprocessor
+PL_SRCS= \
+ CGCTclScript.pl \
+ CGCTkEntry.pl \
+ CGCTkImpulse.pl \
+ CGCTkLMS.pl \
+ CGCTkSlider.pl \
+ CGCTkSunSound.pl
+
+# The .cc files
+SRCS=$(PL_SRCS:.pl=.cc)
+
+# object files for all stars
+OBJS= $(SRCS:.cc=.o)
+
+# header files for all stars
+HDRS= $(SRCS:.cc=.h)
+
+DOMAIN=CGC
+STAR_MK=cgctcltkstars
+EXTRA_SRCS=$(STAR_MK).mk $(STAR_MK).c $(PL_SRCS)
+LIB=libcgctcltk.a
+
+# Where star doc files go
+STARDOCDIR = ../../doc/stars
+
+all:		makefile stars_all
+
+install:	stars_install
+
+# include common definitions, rules
+include $(ROOT)/common.mk
+
+# Don't add anything after the next line; makedepend will zap it.
+# DO NOT DELETE THIS LINE -- make depend depends on it.
+

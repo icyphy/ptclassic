@@ -1,0 +1,39 @@
+# Version identification:
+# $Id$
+# Copyright (c) 1994 The Regents of the University of California.
+#				All Rights Reserved.
+# Special targets.
+
+# Root of Ptolemy directory
+ROOT=../../../..
+# True source directory
+VPATH = $(ROOT)/src/domains/X/targets
+
+# get configuration info
+CONFIG=$(ROOT)/mk/config-$(ARCH).mk
+include $(CONFIG)
+
+VHDLKERNEL = $(ROOT)/src/domains/X/kernel
+SDFKERNEL = $(ROOT)/src/domains/sdf/kernel
+CGKERNEL = $(ROOT)/src/domains/cg/kernel
+
+INCL = -I$(VHDLKERNEL) -I$(SDFKERNEL) -I$(KERNDIR) \
+		-I$(CGKERNEL)
+
+SRCS = StructTarget.cc
+HDRS = $(SRCS:.cc=.h)
+OBJS = StructTarget.o $(LIBSRCS:.cc=.o)
+LIB = libvhdlstruct.a
+
+all:	makefile $(LIB)
+
+# "make install" does nothing extraordinary
+install:	all $(LIBDIR)/$(LIB)
+		@echo Installation complete.
+
+# include common definitions, rules
+include $(ROOT)/mk/common.mk
+
+# Don't add anything after the next line; makedepend will zap it.
+# DO NOT DELETE THIS LINE -- make depend depends on it.
+

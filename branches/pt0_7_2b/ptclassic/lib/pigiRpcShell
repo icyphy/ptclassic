@@ -1,0 +1,32 @@
+#! /bin/sh
+# usage: pigiRpcShell <vem-rpc-args>
+#
+# This shell is invoked by vem via vem's rpc mechanism.  It is our
+# job to recover our environment from the other side of the link,
+# and exec the appropriate actual rpc client.
+
+# Notes:
+# 1) This is borne shell so that it is fast.  If you make this
+#    a csh script, use the "-f" option so that the user's .cshrc
+#    doesnt clobber the environment.
+
+# Version: $Id$
+# Copyright (c) 1990,1991,1992 The Regents of the University of California.
+# All Rights Reserved.
+
+#
+# check if we have an environment-passing file
+#
+cmdfile=/tmp/pigiCmds.$USER
+if [ -r $cmdfile ] ; then
+    . $cmdfile
+fi
+libdir=`dirname $0`
+PTOLEMY=${PTOLEMY-`dirname $libdir`}
+ARCH=${ARCH-`(/bin/arch || /bin/machine) 2> /dev/null`}
+PIGIRPC=${PIGIRPC-$PTOLEMY/bin.$ARCH/pigiRpc}
+COMMAND=${COMMAND-$PIGIRPC}
+DISPLAY=${DISPLAY-'unix:0'}
+TAILARGS=${TAILARGS-''}
+export PTOLEMY ARCH PIGIRPC DISPLAY
+exec $COMMAND $* $TAILARGS

@@ -1,0 +1,79 @@
+# Makefile for Ptolemy library, interpreter, and demos
+# $Id$
+#
+# If this file's name is "make.template" and there is no makefile in
+# this directory, do
+#	cp make.template makefile
+#	chmod +w makefile
+#	make depend
+# This will add the dependencies to the makefile.
+
+GFLAGS = -g
+GNU = g++
+GNUINCLUDE = /usr/gnu/lib/g++-include
+
+.SUFFIXES: .cc
+.cc.o:
+	$(GNU) $(GFLAGS) -c  $<
+
+LIBSRCS=Star.cc Connect.cc Block.cc Galaxy.cc Scheduler.cc SpaceWalk.cc \
+	Output.cc Fraction.cc Universe.cc StringList.cc Particle.cc Help.cc \
+	Command.cc KnownBlock.cc Tokenizer.cc InterpGalaxy.cc Interpreter.cc
+
+DEMOSRCS=BlockDemo.cc DataStructDemo.cc FractionDemo.cc MultiPortDemo.cc \
+	SchedulerDemo.cc SpaceWalkDemo.cc StarDemo.cc StringListDemo.cc \
+	TokenDemo.cc UniverseDemo.cc
+
+SRCS=$(LIBSRCS) interpmain.cc $(DEMOSRCS)
+
+LIBOBJS=Star.o Connect.o Block.o Galaxy.o Scheduler.o SpaceWalk.o  Output.o \
+	Fraction.o Universe.o StringList.o Particle.o Help.o Command.o \
+	KnownBlock.o Tokenizer.o InterpGalaxy.o Interpreter.o
+
+
+interpreter:	interpmain.o ptolemy.a
+		$(GNU) $(GFLAGS) interpmain.o STARS/*.o ptolemy.a -o interpreter
+
+demos:		BlockDemo DataStructDemo FractionDemo MultiPortDemo \
+		SchedulerDemo SpaceWalkDemo StarDemo StringListDemo \
+		TokenDemo UniverseDemo
+
+BlockDemo:	BlockDemo.o ptolemy.a
+		$(GNU) $(GFLAGS) BlockDemo.o ptolemy.a -oBlockDemo
+
+DataStructDemo:	DataStructDemo.o ptolemy.a
+		$(GNU) $(GFLAGS) DataStructDemo.o ptolemy.a -oDataStructDemo
+
+FractionDemo:	FractionDemo.o ptolemy.a
+		$(GNU) $(GFLAGS) FractionDemo.o ptolemy.a -oFractionDemo
+
+MultiPortDemo:	MultiPortDemo.o ptolemy.a
+		$(GNU) $(GFLAGS) MultiPortDemo.o ptolemy.a -oMultiPortDemo
+
+SchedulerDemo:	SchedulerDemo.o ptolemy.a
+		$(GNU) $(GFLAGS) SchedulerDemo.o ptolemy.a -oSchedulerDemo
+
+SpaceWalkDemo:	SpaceWalkDemo.o ptolemy.a
+		$(GNU) $(GFLAGS) SpaceWalkDemo.o ptolemy.a -oSpaceWalkDemo
+
+StarDemo:	StarDemo.o ptolemy.a
+		$(GNU) $(GFLAGS) StarDemo.o ptolemy.a -oStarDemo
+
+StringListDemo:	StringListDemo.o ptolemy.a
+		$(GNU) $(GFLAGS) StringListDemo.o ptolemy.a -oStringListDemo
+
+TokenDemo:	TokenDemo.o ptolemy.a
+		$(GNU) $(GFLAGS) TokenDemo.o ptolemy.a -oTokenDemo
+
+UniverseDemo:	UniverseDemo.o ptolemy.a
+		$(GNU) $(GFLAGS) UniverseDemo.o ptolemy.a -oUniverseDemo
+
+ptolemy.a:	$(LIBOBJS)
+	ar cr ptolemy.a $(LIBOBJS)
+	ranlib ptolemy.a
+
+depend:	
+		makedepend -I$(GNUINCLUDE) $(SRCS)
+# Don't add anything after the next line; makedepend will zap it.
+# DO NOT DELETE THIS LINE -- make depend depends on it.
+

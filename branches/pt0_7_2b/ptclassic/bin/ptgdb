@@ -1,0 +1,17 @@
+#!/bin/csh -f
+# $Id$
+# Run gdb inside emacs.
+# Author:	T. M. Parks
+# Created:	30 July 1994
+
+set cmdFile = /tmp/emacs.gdb.$$
+
+onintr cleanUp
+cat >> $cmdFile << EOF
+(gdb "gdb $*")
+EOF
+
+emacs -l $cmdFile
+
+cleanUp:
+rm -f $cmdFile

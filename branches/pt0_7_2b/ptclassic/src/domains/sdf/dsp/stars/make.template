@@ -1,0 +1,82 @@
+# Makefile for Ptolemy SDF stars
+# $Id$
+#
+# If this file's name is "make.template" and there is no makefile in
+# this directory, do
+#	cp make.template makefile
+#	chmod +w makefile
+#	make depend
+# This will add the dependencies to the makefile.
+
+ROOT = ../../../../..
+VPATH = $(ROOT)/src/domains/sdf/dsp/stars
+
+# get configuration info
+CONFIG=$(ROOT)/config-$(ARCH).mk
+include $(CONFIG)
+
+# SDFDIR is the directory containing SDF domain support
+SDFDIR = $(ROOT)/src/domains/sdf/kernel
+INCL = -I$(SDFDIR) -I$(KERNDIR)
+
+# Library name
+LIB=libsdfdspstars.a
+
+# source files for all stars, using preprocessor
+PL_SRCS= \
+ SDFAutocor.pl \
+ SDFBiquad.pl \
+ SDFBlockAllPole.pl \
+ SDFBlockFIR.pl \
+ SDFBlockLattice.pl \
+ SDFBlockRLattice.pl \
+ SDFBurg.pl \
+ SDFFFTCx.pl \
+ SDFFIRCx.pl \
+ SDFMuLaw.pl \
+ SDFConvolve.pl \
+ SDFLMSCx.pl \
+ SDFLMSPlotCx.pl \
+ SDFRaisedCosCx.pl \
+ SDFDTFT.pl \
+ SDFFIR.pl \
+ SDFHilbert.pl \
+ SDFIIR.pl \
+ SDFLMS.pl \
+ SDFLMSLeak.pl \
+ SDFLMSPlot.pl \
+ SDFLattice.pl \
+ SDFLevDur.pl \
+ SDFRLattice.pl \
+ SDFRaisedCos.pl \
+ SDFUnwrap.pl \
+ SDFWindow.pl
+
+# The .cc files
+SRCS=$(PL_SRCS:.pl=.cc)
+
+# object files for all stars
+OBJS= $(SRCS:.cc=.o)
+
+# header files for all stars
+HDRS= $(SRCS:.cc=.h)
+
+all:		$(SRCS) makefile $(LIB)
+
+# install library for use by code generation domains
+install:	all $(LIBDIR)/$(LIB)
+		@echo Installation complete.
+
+STAR_MK=sdfdspstars
+DOMAIN=SDF_DSP
+DOMAIN_2=SDF
+
+EXTRA_SRCS=$(STAR_MK).mk $(PL_SRCS)
+
+# include common definitions, rules
+include $(ROOT)/common.mk
+
+
+# Don't add anything after the next line; makedepend will zap it.
+# DO NOT DELETE THIS LINE -- make depend depends on it.
+

@@ -1,0 +1,52 @@
+#
+# README for ~ptolemy/lib/rename
+#
+# Author: Kennard White
+# Version: $Id$
+#
+
+GENERAL
+-------
+Ptolemy version 0.4 uses different names for stars than previous
+versions.  The star names were changed to be consistent and more
+descriptive of their functionality.  Any galaxies built using a pre-0.4
+release must be converted to use the new star names.  The script
+``~ptolemy/lib/rename/sdf.fixref'' is provided to perform the
+conversion automatically.  In each directory where you have ptolemy
+cells (facets), invoke the script:
+
+	~ptolemy/lib/rename/sdf.fixref
+
+The script will adjust the names of all the stars in the cell to use
+the new 0.4 names.  You can also convert a single cell (instead of all
+the cells in the directory) using the command:
+
+	~ptolemy/lib/rename/sdf.fixref -cell cell_name
+
+where cell_name is the name of the cell to convert.
+
+Also, if you wrote your own stars derived from one of the standard SDF
+stars, you may have to change your source code to reflect the name
+changes.  If you run the above script in the directory where you have
+your ".pl" file, the script will attempt automatic conversion.
+
+
+EXPERIMENTAL DOMAINS
+--------------------
+The experimental domains cg56 and cg96 also had similar name changes.
+These domains have not been previously released, thus it is unlikely
+you have an universes using these domains.  However, if you do,
+you can use the scripts
+	~ptolemy/lib/rename/cg56.fixref
+and
+	~ptolemy/lib/rename/cg96.fixref
+as described above for SDF stars.
+
+
+PTOLEMY HOME CONVERSION
+-----------------------
+Ptolemy version 0.4 has eliminated use of the '~ptolemy' dependencies
+in most places, and substitutes the environment variable '$PTOLEMY'.
+This change will be entirely transparent to most users, since Ptolemy
+programs will still use '~ptolemy' if '$PTOLEMY' is not set.  The above
+scripts will change all cells to use '$PTOLEMY' and not '~ptolemy'.

@@ -1,0 +1,51 @@
+# @(#)make.template	1.2	8/19/92
+# Copyright (c) 1991 The Regents of the University of California.
+#				All Rights Reserved.
+# Code generation targets
+
+
+# Root of Ptolemy directory
+ROOT=../../../..
+# True source directory
+VPATH = $(ROOT)/src/domains/cgc/targets
+
+# get configuration info
+CONFIG=$(ROOT)/config-$(ARCH).mk
+include $(CONFIG)
+
+SDFKERNEL = $(ROOT)/src/domains/sdf/kernel
+CGKERNEL = $(ROOT)/src/domains/cg/kernel
+CGCKERNEL = $(ROOT)/src/domains/cgc/kernel
+CGCSTARS = $(ROOT)/src/domains/cgc/stars
+EGKERNEL = $(ROOT)/src/domains/sdf/expgraph
+PARDIR = $(ROOT)/src/domains/cg/parScheduler
+CGTARDIR = $(ROOT)/src/domains/cg/targets
+
+INCL=-I$(CGCKERNEL) -I$(CGKERNEL) -I$(SDFKERNEL) -I$(KERNDIR) -I$(EGKERNEL) \
+	-I$(PARDIR) -I$(CGTARDIR) -I$(CGCSTARS)
+
+PL_SRCS = \
+	CGCUnixSend.pl \
+	CGCUnixReceive.pl
+
+PLSRC = $(PL_SRCS:.pl=.cc)
+
+SRCS=CGCMultiTarget.cc $(PLSRC) 
+HDRS=CGCMultiTarget.h $(PLSRC:.cc=.h)
+
+OBJS = $(SRCS:.cc=.o)
+
+all:	makefile $(OBJS)
+
+# "make install" puts things in the official place
+install:	all
+		@echo Installation complete.
+
+LIB=none	# required by common.mk
+
+# include common definitions, rules
+include $(ROOT)/common.mk
+
+# Don't add anything after the next line; makedepend will zap it.
+# DO NOT DELETE THIS LINE -- make depend depends on it.
+

@@ -1,0 +1,9 @@
+#!/bin/sh
+#
+# Invoke attache within the ptolemy environment
+#
+# $Id$
+
+PTOLEMY=${PTOLEMY-`csh -fc 'echo ~ptolemy'`}
+export PTOLEMY
+$PTOLEMY/octtools/bin.$ARCH/attache "$@"

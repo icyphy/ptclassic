@@ -1,0 +1,260 @@
+# Makefile for Ptolemy Tycho system, kernel directory.
+#
+# $Id$
+# Author: E. A. Lee (based on ptcl)
+#
+# Copyright (c) 1991-%Q% The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the
+# above copyright notice and the following two paragraphs appear in all
+# copies of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+# 						PT_COPYRIGHT_VERSION_2
+# 						COPYRIGHTENDKEY
+##########################################################################
+
+# If this file's name is "make.template" and there is no makefile in
+# this directory, do
+#	cp make.template makefile
+#	make depend
+# This will add the dependencies to the makefile.
+
+# Root of Ptolemy directory
+ROOT =		../../..
+# Path (absolute or relative) to the object directory root
+OBJDIR =	../..
+# True source directory
+VPATH =		$(ROOT)/src/tycho/kernel
+
+# get configuration info
+CONFIG =	$(ROOT)/mk/config-$(ARCH).mk
+include $(CONFIG)
+
+# To use Tcl 7.4b3 and tk4.0b3, set the following
+# FIXME: The version should not be hardwired in this way.
+TCL_INCDIR=$(TCL_ROOT)/tcl7.4b3/include
+TCL_LIBSPEC=-L$(TCL_ROOT)/tcl7.4b3.$(ARCH)/lib -ltcl
+TK_INCDIR=$(TCL_ROOT)/tk4.0b3/include
+TK_LIBSPEC=-L$(TCL_ROOT)/tk4.0b3.$(ARCH)/lib -ltk #-lXpm
+
+# Directory containing utilities for BarGraph and XYPlot
+PTKDIR = $(ROOT)/src/ptklib
+
+# Directory containing the [incr Tcl] extensions to Tcl
+# FIXME: This should be in the Ptolemy tree
+ITCL_INCDIR = $(ROOT)/tcltk/itcl/include
+ITCL_LIBSPEC = -L$(ROOT)/tcltk/itcl.$(ARCH)/lib -litcl
+
+INCL =		-I$(KERNDIR) -I$(PTCL_INCDIR) \
+		-I$(TCL_INCDIR) -I$(TK_INCDIR) $(X11_INCSPEC) -I$(PTKDIR) \
+		-I$(ITCL_INCDIR)
+
+# Include information on all stars and targets.
+include $(ROOT)/mk/stars.mk
+
+# For development period, disable optimization
+OPTIMIZER=
+
+# libraries
+# Note that we have two underscores in the name PTINY__LIBS to differentiate 
+# it from PTINY_LIBS below
+PTINY__LIBS =	$(PTINY_STAR_LIBS) -lsdftclstars -ldetclstars \
+		-lhofstars -lhof \
+		-lptk -lptolemy $(LIB_FLUSH_CACHE)
+
+PTRIM__LIBS =	$(PTRIM_STAR_LIBS) -lsdftclstars -ldetclstars \
+		-lhofstars -lhof \
+		-lptk -lptolemy \
+		$(LIB_FLUSH_CACHE)
+
+LIBS =		$(STAR_LIBS) -lsdftclstars -ldetclstars -lmdsdftclstars \
+		-lhofstars -lhof \
+		-lptk -lptolemy $(LIB_FLUSH_CACHE)
+
+PTINY_LIBFILES =	$(PTINY_STAR_LIBFILES) \
+	$(LIBDIR)/libdetclstars.$(LIBSUFFIX) \
+	$(LIBDIR)/libsdftclstars.$(LIBSUFFIX) \
+	$(LIBDIR)/libptolemy.$(LIBSUFFIX) \
+	$(LIBDIR)/libptk.$(LIBSUFFIX)
+
+PTRIM_LIBFILES = $(PTRIM_STAR_LIBFILES) \
+	$(LIBDIR)/libdetclstars.$(LIBSUFFIX) \
+	$(LIBDIR)/libsdftclstars.$(LIBSUFFIX) \
+	$(LIBDIR)/libpigi.$(LIBSUFFIX) $(LIBDIR)/libptolemy.$(LIBSUFFIX) \
+	$(LIBDIR)/libgantt.$(LIBSUFFIX) \
+
+LIBFILES = 		$(STAR_LIBFILES) \
+			$(LIBDIR)/libdetclstars.$(LIBSUFFIX) \
+			$(LIBDIR)/libsdftclstars.$(LIBSUFFIX) \
+			$(LIBDIR)/libptolemy.$(LIBSUFFIX) \
+			$(LIBDIR)/libptk.$(LIBSUFFIX)
+
+VERSION=0.6.tycho
+
+# first star determines default domain as a rule
+PTINY_STARS = $(PTINY_SDFSTARS) \
+	$(DESTARS) \
+	$(LIBDIR)/sdftclstars.o $(LIBDIR)/detclstars.o \
+	$(LIBDIR)/hofstars.o
+
+PTRIM_STARS = $(SDFSTARS) \
+	$(CGCSTARS) $(CGSTARS) \
+	$(DDFSTARS) $(DESTARS) $(BDFSTARS) \
+	$(LIBDIR)/sdftclstars.o $(LIBDIR)/detclstars.o \
+	$(LIBDIR)/hofstars.o
+
+ALLSTARS = $(ATMSTARS) $(SDFSTARS) \
+	$(CGCSTARS) $(CG96STARS) $(CG56STARS) $(SilageSTARS) \
+	$(VHDLFSTARS) $(VHDLBSTARS) $(CGSTARS) \
+	$(DDFSTARS) $(THORSTARS) $(DESTARS) $(BDFSTARS) \
+	$(LIBDIR)/sdftclstars.o $(LIBDIR)/detclstars.o \
+	$(MDSDFSTARS)  $(LIBDIR)/mdsdftclstars.o \
+	$(LIBDIR)/hofstars.o
+
+PTINY_TARGETS =		$(SDFTARGETS) 
+
+PTRIM_TARGETS = 	$(SDFTARGETS) $(CGCTCL)/CGCTclTkTarget.o $(BDFTARGETS) 
+ALLTARGETS =		$(SDFTARGETS) $(CGTARGETS) $(CGCTARGETS) \
+			$(CG56TARGETS) $(CG96TARGETS) $(BDFTARGETS) \
+			$(MDSDFTARGETS)
+
+PTINY_OBJS =		$(OBJS) $(PTCL_OBJS) $(PTINY_STARS) $(PTINY_TARGETS)
+
+PTRIM_OBJS =		$(OBJS)	$(PTCL_OBJS) $(PTRIM_STARS) $(PTRIM_TARGETS)
+
+TY_OBJS =		$(OBJS) $(PTCL_OBJS) $(ALLSTARS) $(ALLTARGETS)
+
+PTINY_LIBS =		$(PTINY__LIBS) \
+			$(ITCL_LIBSPEC) \
+			$(TK_LIBSPEC) $(TCL_LIBSPEC) $(X11_LIBSPEC) $(SYSLIBS)
+
+PTRIM_LIBS =		$(PTRIM__LIBS) \
+			$(ITCL_LIBSPEC) \
+			$(TK_LIBSPEC) $(TCL_LIBSPEC) $(X11_LIBSPEC) $(SYSLIBS)
+
+TY_LIBS = 		$(LIBS) \
+			$(ITCL_LIBSPEC) \
+			$(TK_LIBSPEC) $(TCL_LIBSPEC) $(X11_LIBSPEC) $(SYSLIBS)
+
+# Allow for user specified overriding definitions.  Do not declare
+# any variables after this command.  GNU make's earlier that 3.71 may
+# print a warning message.
+-include override.mk
+
+# Sources
+SRCS = \
+  BarGraph.cc \
+  TyConsole.cc \
+  TyError.cc \
+  TyMain.cc \
+  TyTcl.cc \
+  TclObj.cc \
+  TclStarIfc.cc \
+  XYPlot.cc
+
+# Header files
+HDRS = \
+  BarGraph.h \
+  TyConsole.h \
+  TyTcl.h \
+  ptk.h \
+  TclObj.h \
+  TclStarIfc.h \
+  XYPlot.h
+
+# Objects
+OBJS =			$(SRCS:.cc=.o)
+
+all:	makefile tycho
+
+tycho:	$(OBJS) $(LIBFILES) $(ALLSTARS) $(ALLTARGETS)
+		rm -f $@ 
+		echo char '*gVersion = "Version:' $(VERSION) \
+			'%created' `date` '";' | sed 's/%/\\n/' > version.c
+		$(CC) -c version.c
+		$(PURELINK) $(LINKER) $(LINKFLAGS) $(TY_OBJS) $(TY_LIBS) \
+			version.o -o $@ 
+
+tycho.debug:	$(OBJS) $(LIBFILES) $(ALLSTARS) $(ALLTARGETS)
+		rm -f $@ 
+		echo char '*gVersion = "Version:' $(VERSION) \
+			'(with debug symbols)' \
+			'%created' `date` '";' | sed 's/%/\\n/' > debugVersion.c
+		$(CC) -c debugVersion.c
+		$(PURELINK) $(LINKER) $(LINKFLAGS_D) $(TY_OBJS) $(TY_LIBS) \
+			debugVersion.o -o $@ 
+
+# Small version of tycho, sdf domain (but with no image stars), and de domain
+tycho.ptiny:	$(OBJS) $(PTINY_LIBFILES) $(PTINY_STARS) $(PTINY_TARGETS)
+		rm -f $@ 
+		echo char '*gVersion = "Version:' $(VERSION) \
+			'(ptiny version)' \
+			'%created' `date` '";' | sed 's/%/\\n/' > version.c
+		$(CC) -c version.c
+		$(PURELINK) $(LINKER) $(LINKFLAGS) $(PTINY_OBJS) $(PTINY_LIBS) \
+			version.o -o $@
+
+tycho.ptiny.debug:	$(OBJS) $(PTINY_LIBFILES) $(PTINY_STARS) $(PTINY_TARGETS)
+		rm -f $@ 
+		echo char '*gVersion = "Version:' $(VERSION) \
+			'(ptiny version with debug symbols)' \
+			'%created' `date` '";' | sed 's/%/\\n/' > debugVersion.c
+		$(CC) -c debugVersion.c
+		$(PURELINK) $(LINKER) $(LINKFLAGS_D) $(PTINY_OBJS) $(PTINY_LIBS) \
+			debugVersion.o -o $@
+
+# Small version of tycho, sdf, de, cgc, no parallel targets
+tycho.ptrim:	$(OBJS) $(PTRIM_LIBFILES) $(PTRIM_STARS) $(PTRIM_TARGETS)
+		rm -f $@ 
+		echo char '*gVersion = "Version:' $(VERSION) \
+			'(ptrim version)' \
+			'%created' `date` '";' | sed 's/%/\\n/' > version.c
+		$(CC) -c version.c
+		$(PURELINK) $(LINKER) $(LINKFLAGS) $(PTRIM_OBJS) $(PTRIM_LIBS) \
+			version.o -o $@
+
+tycho.ptrim.debug:	$(OBJS) $(PTRIM_LIBFILES) $(PTRIM_STARS) $(PTRIM_TARGETS)
+		rm -f $@ 
+		echo char '*gVersion = "Version:' $(VERSION) \
+			'(ptrim version with debug symbols)' \
+			'%created' `date` '";' | sed 's/%/\\n/' > debugVersion.c
+		$(CC) -c debugVersion.c
+		$(PURELINK) $(LINKER) $(LINKFLAGS_D) $(PTRIM_OBJS) $(PTRIM_LIBS) \
+			debugVersion.o -o $@
+
+# "make install" puts things in the official place
+# FIXME: For now, we just make ptiny
+install:	$(BINDIR)/tycho.ptiny
+
+# FIXME: For now, we just make ptiny
+$(BINDIR)/tycho.ptiny:	tycho.ptiny
+		rm -f $(BINDIR)/tycho.ptiny
+		ln tycho.ptiny $(BINDIR)
+
+# extra stuff to delete
+REALCLEAN_STUFF=tycho tycho.debug tycho.ptiny tycho.ptiny.debug \
+		tycho.ptrim tycho.ptrim.debug
+
+LIB=dummy		# required since no LIB
+# include common definitions, rules
+include $(ROOT)/mk/common.mk
+
+# Don't add anything after the next line; makedepend will zap it.
+# DO NOT DELETE THIS LINE -- make depend depends on it.
+

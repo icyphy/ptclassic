@@ -1,0 +1,16 @@
+#! /bin/csh -f
+
+# This shell script simply finds the appropriate (platform dependent)
+# version of masters and invokes it.
+#
+# Version: $Id$
+# Copyright (c) 1990-1994 The Regents of the University of California.
+# 	All Rights Reserved.
+#
+
+if ( ! $?PTOLEMY ) setenv PTOLEMY ~ptolemy
+if ( ! $?ARCH ) then
+    setenv ARCH `$PTOLEMY/bin/arch`
+endif
+
+$PTOLEMY/bin.$ARCH/masters $*

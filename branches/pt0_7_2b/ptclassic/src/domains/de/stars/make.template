@@ -1,0 +1,70 @@
+# Makefile for Ptolemy DE stars
+# $Id$
+# Copyright (c) 1990 The Regents of the University of California.
+#				All Rights Reserved.
+#
+# If this file's name is "make.template" and there is no makefile in
+# this directory, do
+#	make -f make.template makefile
+#
+# This will add the dependencies to the makefile.
+
+ROOT = ../../../..
+VPATH = $(ROOT)/src/domains/de/stars
+# KERNDIR is the directory containing the Ptolemy kernel source.
+KERNDIR = $(ROOT)/src/kernel
+# DEDIR is the directory containing DE domain support
+DEDIR = $(ROOT)/src/domains/de/kernel
+
+GPPFLAGS = -g
+GNU = g++
+GNUINCLUDE = /usr/gnu/lib/g++-include
+
+.SUFFIXES: .cc
+.cc.o:
+	$(GNU) $(GPPFLAGS) -I$(DEDIR) -I$(KERNDIR) -c  $<
+
+SRCS=DEDelay.cc DEPoisson.cc Record.cc DESampler.cc \
+	DEXgraph.cc DEBlackHole.cc EvenSpacer.cc DEFloatDC.cc DEFloatRamp.cc \
+	DEFork.cc PrServer.cc SpaceConst.cc SpaceUniform.cc Synch.cc \
+	DESwitch.cc DEMerge.cc DERouter.cc DEServer.cc DEExpDelay.cc \
+	DEUniDelay.cc DEClock.cc
+
+OBJS=DEDelay.o DEPoisson.o Record.o DESampler.o \
+	DEXgraph.o DEBlackHole.o EvenSpacer.o DEFloatDC.o DEFloatRamp.o \
+	DEFork.o PrServer.o SpaceConst.o SpaceUniform.o Synch.o \
+	DESwitch.o DEMerge.o DERouter.o DEServer.o DEExpDelay.o \
+	DEUniDelay.o DEClock.o
+
+HDRS=DEDelay.h DEPoisson.h Record.h DESampler.h \
+	DEXgraph.h DEBlackHole.h EvenSpacer.h DEFloatDC.h DEFloatRamp.h \
+	DEFork.h PrServer.h SpaceConst.h SpaceUniform.h Synch.h \
+	DESwitch.h DEMerge.h DERouter.h DEServer.h DEExpDelay.h \
+	DEUniDelay.h DEClock.h
+
+all:		makefile $(OBJS)
+
+# nothing to install -- use it where it lies
+install:	all
+		@echo Installation complete.
+
+sources:	$(SRCS) $(HDRS) make.template
+
+clean:
+		rm -f *.o core *~ *#
+depend:
+		makedepend -I$(DEDIR) -I$(KERNDIR) -I$(GNUINCLUDE) $(SRCS)
+
+makefile:	make.template
+		rm -f makefile
+		cd $(VPATH); rm -f makefile; cp make.template makefile; \
+		make -f make.template sources depend
+		ln -s $(VPATH)/makefile makefile
+		@echo makefile remade -- you must rerun make.
+		exit 1
+
+# Don't add anything after the next line; makedepend will zap it.
+# DO NOT DELETE THIS LINE -- make depend depends on it.
+
+
+

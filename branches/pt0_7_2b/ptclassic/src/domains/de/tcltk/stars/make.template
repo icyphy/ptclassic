@@ -1,0 +1,82 @@
+# Makefile for Ptolemy DE tcl stars
+# $Id$
+#
+# If this file's name is "make.template" and there is no makefile in
+# this directory, do
+#	cp make.template makefile
+#	chmod +w makefile
+#	make depend
+# This will add the dependencies to the makefile.
+#
+# This file is patterned after
+#	$PTOLEMY/src/domains/sdf/tcltk/stars/make.template
+
+ROOT = ../../../../..
+VPATH = $(ROOT)/src/domains/de/tcltk/stars
+
+# get configuration info
+CONFIG=$(ROOT)/mk/config-$(ARCH).mk
+include $(CONFIG)
+
+# DEDIR is the directory containing DE domain support
+DEDIR = $(ROOT)/src/domains/de/kernel
+TCLDIR = $(ROOT)/tcl/include
+PIGIDIR = $(ROOT)/src/pigilib
+PTKLIB = $(ROOT)/src/ptklib
+INCL = -I$(DEDIR) -I$(KERNDIR) -I$(PIGIDIR) -I$(PTKLIB) \
+ -I$(TCL_INCDIR) -I$(TK_INCDIR) $(X11_INCSPEC)
+
+# Library name
+LIB=libsdftclstars.a
+
+# Where star doc files go
+STARDOCDIR = ../../doc/stars
+
+# source files for all stars, using preprocessor
+PL_SRCS= \
+ DETkBarGraph.pl
+
+# DELMSTkPlot.pl \
+# DELMSCxTkPlot.pl \
+# DETkMeter.pl \
+# DETclScript.pl \
+# DETkShowValues.pl \
+# DETkSlider.pl \
+# DETkText.pl
+
+# TCL_SRCS= \
+#  tkMeter.tcl \
+#  tkScript.tcl \
+#  tkShowValues.tcl \
+#  tkSlider.tcl \
+#  tkText.tcl
+
+# The .cc files
+SRCS=$(PL_SRCS:.pl=.cc)
+
+# object files for all stars
+OBJS= $(SRCS:.cc=.o)
+
+# header files for all stars
+HDRS= $(SRCS:.cc=.h)
+
+# extra source files: tcl/tk script files
+SCRIPTS= 
+
+STAR_MK=sdftclstars
+DOMAIN=DE_TCL
+DOMAIN_2=DE
+EXTRA_SRCS=$(STAR_MK).mk $(STAR_MK).c $(PL_SRCS) $(SCRIPTS) $(TCL_SRCS)
+
+all:		makefile stars_all
+
+install:	stars_install
+
+
+# include common definitions, rules
+include $(ROOT)/mk/common.mk
+
+
+# Don't add anything after the next line; makedepend will zap it.
+# DO NOT DELETE THIS LINE -- make depend depends on it.
+

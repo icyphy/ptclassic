@@ -1,0 +1,107 @@
+# Makefile  edg 5/23/90
+# Version identification:
+# $Id$
+#
+# Copyright (c) 1989 The Regents of the University of California.
+#			All Rights Reserved.
+#
+
+# Change PTOLEMY to point to the correct directory
+# in your system (no tilde-user allowed!).
+PTOLEMY	      = /usr/tools/ptolemy
+
+# Octtools root directory
+OCTTOOLS      = /usr/tools/octtools
+
+# C compiler variables
+CFLAGS        = -g -I$(OCTTOOLS)/include
+
+# C++ compiler variables
+GXX	      = g++
+GFLAGS        = -g -fminimal-debug -I$(PTOLEMY)/src/kernel
+
+# Linker variables
+LINKER        = g++
+LDFLAGS	      = -L$(OCTTOOLS)/lib
+LIBS	      = -lg++ -loh -lrpc -llist -ltr -lutility -lst -lerrtrap \
+		-luprintf -lport -lX11 -lm
+
+HDRS	      = compile.h \
+		edit.h \
+		err.h \
+		exec.h \
+		kernelCalls.h \
+		main.h \
+		local.h \
+		paramStructs.h \
+		util.h \
+		vemInterface.h \
+		ganttIfc.h \
+		octIfc.h \
+		icon.h \
+		misc.h \
+		options.h \
+		mkTerm.h \
+		mkIcon.h \
+		palette.h \
+		octMacros.h
+
+OBJS	      = main.o \
+		util.o \
+		compile.o \
+		paramStructs.o \
+		vemInterface.o \
+		edit.o \
+		exec.o  \
+		err.o \
+		ganttIfc.o \
+		octIfc.o \
+		icon.o \
+		misc.o \
+		mkTerm.o \
+		mkIcon.o \
+		palette.o \
+		kernelCalls.o \
+		options.o
+
+SRCS	      = main.c \
+		util.c \
+		compile.c \
+		paramStructs.c \
+		vemInterface.c \
+		edit.c \
+		exec.c \
+		err.c \
+		ganttIfc.c \
+		octIfc.c \
+		icon.c \
+		misc.c \
+		mkTerm.c \
+		mkIcon.c \
+		palette.c \
+		options.c
+
+TARGET	      = pigiRpc
+
+$(TARGET): $(OBJS) $(PTOLEMY)/lib/libptolemy.a 
+	$(LINKER) $(LDFLAGS) $(OBJS) \
+	    $(PTOLEMY)/lib/sdf/*.o \
+	    $(PTOLEMY)/lib/libptolemy.a \
+	    $(LIBS) -o $(TARGET)
+
+install: $(TARGET)
+	@echo Installing $(TARGET) in $(PTOLEMY)/bin
+	mv $(TARGET) $(PTOLEMY)/bin
+
+clean:
+	rm -f $(OBJS)
+
+# Rule for compiling with g++
+.SUFFIXES: .cc
+.cc.o:
+	$(GXX) $(GFLAGS) -c  $<
+
+# print out source file names
+srcs:;	@echo "$(SRCS)"
+hdrs:;  @echo "$(HDRS)"
+files:; @echo "$(SRCS) $(HDRS) $(MAKEFILE) $(MISCFILES)"

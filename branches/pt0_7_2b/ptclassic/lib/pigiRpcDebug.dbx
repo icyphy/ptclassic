@@ -1,0 +1,24 @@
+#! /bin/sh
+# usage: pigiRpcDebug.dbx <vem-args>
+# $Id$
+
+# Use dbx as a debugger instead of gdb.
+# sol2.cfront requires this
+
+dbxcmdfile=/tmp/pigiRpcDebug.dbx$$
+
+cat > $dbxcmdfile <<EOF
+stop in main
+EOF
+
+echo "dbx command file is:"
+echo "------start----"
+cat $dbxcmdfile
+echo "------end----"
+
+xterm -display $DISPLAY -title "pigiRpc dbx debug window" -bg black -fg green \
+	-e dbx -I$PTOLEMY/src/pigilib \
+	-I$PTOLEMY/src/pigiRpc -s $dbxcmdfile -c "run $*" \
+	$PIGIRPC &
+
+

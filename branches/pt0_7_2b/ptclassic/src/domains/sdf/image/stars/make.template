@@ -1,0 +1,80 @@
+# Makefile for Ptolemy SDF stars
+# $Id$
+#
+# If this file's name is "make.template" and there is no makefile in
+# this directory, do
+#	cp make.template makefile
+#	chmod +w makefile
+#	make depend
+# This will add the dependencies to the makefile.
+
+ROOT = ../../../../..
+VPATH = $(ROOT)/src/domains/sdf/image/stars
+
+# get configuration info
+CONFIG=$(ROOT)/config-$(ARCH).mk
+include $(CONFIG)
+
+# SDFDIR is the directory containing SDF domain support
+SDFDIR = $(ROOT)/src/domains/sdf/kernel
+IMAGE = $(ROOT)/src/domains/sdf/image/kernel
+INCL = -I$(SDFDIR) -I$(KERNDIR) -I$(IMAGE)
+
+# Library name
+LIB=libsdfimagestars.a
+
+# source files for all stars, using preprocessor
+PL_SRCS= \
+ SDFAddMotionVecs.pl \
+ SDFDCTImage.pl \
+ SDFDCTImageCode.pl \
+ SDFDCTImageCodeInv.pl \
+ SDFDCTImageInv.pl \
+ SDFDiffImage.pl \
+ SDFDisplayImage.pl \
+ SDFDisplayRGB.pl \
+ SDFDisplayVideo.pl \
+ SDFDPCMImage.pl \
+ SDFDPCMImageInv.pl \
+ SDFImageToPix.pl \
+ SDFMedianImage.pl \
+ SDFMotionCmp.pl \
+ SDFMotionCmpInv.pl \
+ SDFPixToImage.pl \
+ SDFReadImage.pl \
+ SDFReadRGB.pl \
+ SDFRGBToYUV.pl \
+ SDFRunLenImage.pl \
+ SDFRunLenImageInv.pl \
+ SDFYUVToRGB.pl \
+ SDFZigZagImage.pl \
+ SDFZigZagImageInv.pl
+
+# The .cc files
+SRCS=$(PL_SRCS:.pl=.cc)
+
+# object files for all stars
+OBJS= $(SRCS:.cc=.o)
+
+# header files for all stars
+HDRS= $(SRCS:.cc=.h)
+
+all:		$(SRCS) makefile # $(LIB)
+
+# install library for use by code generation domains
+install:	all $(LIBDIR)/$(LIB)
+		@echo Installation complete.
+
+STAR_MK=sdfimagestars
+DOMAIN=SDF_IMAGE
+DOMAIN_2=SDF
+
+EXTRA_SRCS=$(STAR_MK).mk $(PL_SRCS)
+
+# include common definitions, rules
+include $(ROOT)/common.mk
+
+
+# Don't add anything after the next line; makedepend will zap it.
+# DO NOT DELETE THIS LINE -- make depend depends on it.
+

@@ -1,0 +1,57 @@
+This directory contains the definitions of colors used by Vem
+when running Ptolemy.  To change these, edit the file colors.pat.
+Then run "installColors".
+
+The file colors.pat defines the colors used by vem to display ptolemy
+facets.  In Vem terminology, it defines the 'ptolemy technology.'
+The colors can be changed, and users can define their own colors.
+
+The colors must be incorporated into the tap.views facet for any
+changes to take effect.  This can be done as follows:
+
+	cd ~ptolemy/lib/colors/ptolemy
+	installColors
+
+This invokes a program located in ~ptolemy/octtools/bin.sun4, where
+'sun4' may be replaced with whatever machine type you are running on.
+The dialog with the program should proceed as follows:
+	Name of the color pattern file [colors.pat]:
+	Root directory for technology [~ptolemy/lib/colors]:
+		< enter the directory if the default is not correct >
+	Color output device [yes]:
+
+The file colors.pat is pretty self-explanatory.
+Larger priorities 0,1,2,... indicate greater visibility priority.
+Priorities may evidently be arbitrarily large.
+
+If you wish to create your own colors, you may create a directory
+like this one somewhere.  Suppose you define your colors in a directory
+called "~myLogin/myColors".  Then
+	mkdir ~myLogin/myColors
+	cd ~myLogin/myColors
+	cp -r ~ptolemy/lib/colors/ptolemy .
+	cd ptolemy
+	vi colors.pat
+Edit colors.pat, run installColors as explained above,
+and set the X resources as follows:
+
+vem.technology:  ~myLogin/myColors
+
+Then restart pigi.
+
+Unfortunately, you have to jump through hoops to get the "P"
+command to open your new palette, if you make a new palette.
+The default palette is stored
+in "~ptolemy/lib/colors/ptolemy/layers:schematic:contents".
+This is accessed by Vem as "($OCTTOOLS)/tech/colors/layers:schematic:contents",
+where OCTTOOLS is an environment variable normally set to "~ptolemy"
+and "tech" is a symbolic link in ~ptolemy.  You have to change
+set OCTTOOLS in your environment to point to some intermediate
+directory, then in that directory, put a symbolic link to the directory
+where you stored your technology.
+
+Note: You can save a little disk space by creating symbolic links to
+parts of the directory you do not wish to change.
+For instance, the files of form myColors/ptolemy/%* may be OK
+as they are.
+

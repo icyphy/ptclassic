@@ -1,0 +1,10 @@
+#!/bin/csh -f
+# prfacet
+# $Id$
+#
+# Print a facet using oct2ps to the printer specified by the environment
+# variable PRINTER.
+#
+
+set path = ( ~ptolemy/octtools/bin.$ARCH $path )
+oct2ps -=T ~ptolemy/lib/technology -x -f interface $*\:schematic | lpr -P$PRINTER

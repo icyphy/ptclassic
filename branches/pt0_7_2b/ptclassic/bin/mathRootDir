@@ -1,0 +1,79 @@
+#!/bin/csh -f
+#
+# Script to find the root (installation) Mathematica directory.  Used by
+# makefiles to determine the location of the external interface library.
+# It returns either the path name of the root Mathematica directory or an
+# empty string.
+#
+# Author:  Brian L. Evans
+# Version: $Id$
+#
+# Copyright (c) 1990-%Q% The Regents of the University of California.
+# All rights reserved.
+# See the file $PTOLEMY/copyright for copyright notice,
+# limitation of liability, and disclaimer of warranty provisions.
+#
+# This script takes no arguments.  It first searches for the script
+# "math" on the path and if it is not found there, it searches on
+# an alternative path of bin sub-directories in /usr.  If it finds
+# the math script, then it extracts the value of the 'mathdir'
+# shell variable.
+#
+#  Look for the Mathematica kernel startup script "math"
+#
+set searchfile = "math"
+#
+#  Search the path
+#
+foreach i ( $path )
+  if ( -x $i/$searchfile && ! -d $i/$searchfile ) then
+    set mmapath = $i/$searchfile
+    break
+  endif
+end
+#
+#  Search an alternate path:  all bin sub-directories of /usr
+#
+if ( ! $?mmapath ) then
+  if ( -x /usr/bin && -r /usr/bin && -d /usr/bin ) then
+    set altpath = /usr/{bin,*/bin}
+    foreach i ( $altpath )
+      if ( -x $i/$searchfile && ! -d $i/$searchfile ) then
+        set mmapath = $i/$searchfile
+        break
+      endif
+    end
+  endif
+endif
+#
+#  If the math script is found, then
+#  1. the first while statement will determine the full path name of the
+#     math script by following a finite number of symbolic links.
+#  2. the second while statement will back up one directory at a time
+#     along the full math script path name to find the Mathematica root
+#     directory which contains the external interface sub-directories
+#     extern/include and extern/lib
+#
+if ( ! $?mmapath ) then
+  echo ""
+else
+  # The following command to set newpath takes the following steps:
+  # 1. eliminate all comments:           sed -e 's/#\(.*\)//g' 
+  # 2. find the expression for mathdir:  grep "mathdir="
+  # 3. extract the value of mathdir:     sed -e 's/mathdir=//g'
+  set newpath = `sed -e 's/#\(.*\)//g' $mmapath | grep 'mathdir=' | sed -e 's/mathdir=//g'`
+  # If the newpath is not an absolute path name, then append
+  # newpath to the mmapath (mmapath is always guaranteed to be correct)
+  if ( ! -e $newpath ) then
+    set newdir = "$mmapath:h"
+    set newpath = "$newdir/$newpath"
+  endif
+  set mathlinklibdir = $newpath/Bin/MathLink
+  set mathlinkincdir = $newpath/Source/Includes
+  if ( -x $mathlinklibdir && -r $mathlinklibdir && -d $mathlinklibdir && \
+       -x $mathlinkincdir && -r $mathlinkincdir && -d $mathlinkincdir ) then
+    echo $newpath
+  else
+    echo ""
+  endif
+endif
