@@ -64,21 +64,21 @@ class Galaxy;
 /////////////////////////////////////////////////
 // Common base for derived Matrix Message classes
 /////////////////////////////////////////////////
-class Matrix : public Message {
+class PMatrix : public Message {
  public:
   int numCols() const { return nCols; }
   int numRows() const { return nRows; }
 
-  virtual Matrix& operator = (const Matrix &) = 0;
-  virtual int operator == (const Matrix &) const = 0;
-  virtual int operator != (const Matrix &) const = 0;
+  virtual PMatrix& operator = (const PMatrix &) = 0;
+  virtual int operator == (const PMatrix &) const = 0;
+  virtual int operator != (const PMatrix &) const = 0;
 
   int totalDataSize;     // number of elements
  protected:
-  int typesEqual(const Matrix& m) const {
+  int typesEqual(const PMatrix& m) const {
     return (dataType() == m.dataType());
   }
-  int compareType(const Matrix& m) const;
+  int compareType(const PMatrix& m) const;
 
   int nRows;
   int nCols;
@@ -88,7 +88,7 @@ class Matrix : public Message {
 //  ComplexMatrix Message Class  
 ///////////////////////////////
 
-class ComplexMatrix: public Matrix {
+class ComplexMatrix: public PMatrix {
  public:
   // return data entry
   virtual Complex& entry(int element) const { return data[element]; }
@@ -132,8 +132,8 @@ class ComplexMatrix: public Matrix {
   // Operators
   virtual Complex* operator [] (int row) { return &data[row*nCols]; }
   virtual const Complex* operator[] (int row) const {return &data[row*nCols]; }
-  virtual int operator == (const Matrix& src) const;
-  virtual int operator != (const Matrix& src) const {return !(*this == src); }
+  virtual int operator == (const PMatrix& src) const;
+  virtual int operator != (const PMatrix& src) const {return !(*this == src); }
 
   // cast conversion operators
   operator FixMatrix () const;
@@ -142,7 +142,7 @@ class ComplexMatrix: public Matrix {
 
   // destructive replacement operators 
      // assignment
-  virtual Matrix& operator = (const Matrix& src);
+  virtual PMatrix& operator = (const PMatrix& src);
   ComplexMatrix& operator = (const Complex& value);          
      // element wise operators
   ComplexMatrix& operator += (const ComplexMatrix& src);
@@ -156,7 +156,7 @@ class ComplexMatrix: public Matrix {
      // make this an identity matrix
   ComplexMatrix& identity();  
 
-  // non-destructive operators, returns a new Matrix
+  // non-destructive operators, returns a new PMatrix
      // prefix unary operators
   ComplexMatrix operator- () const;
   ComplexMatrix operator~ () const { return transpose(); }
@@ -194,7 +194,7 @@ class ComplexMatrix: public Matrix {
 //////////////////////////
 // FixMatrix Message Class
 //////////////////////////
-class FixMatrix: public Matrix {
+class FixMatrix: public PMatrix {
  public:
   // return data entry
   virtual Fix& entry(int element) const { return data[element]; } 
@@ -259,8 +259,8 @@ class FixMatrix: public Matrix {
   // Operators 
   virtual Fix* operator [] (int row) { return &data[row*nCols]; }
   virtual const Fix* operator [] (int row) const { return &data[row*nCols]; }
-  virtual int operator == (const Matrix& src) const;
-  virtual int operator != (const Matrix& src) const {return !(*this == src); }
+  virtual int operator == (const PMatrix& src) const;
+  virtual int operator != (const PMatrix& src) const {return !(*this == src); }
 
   // cast conversion operators
   operator ComplexMatrix () const;
@@ -269,7 +269,7 @@ class FixMatrix: public Matrix {
 
   // destructive replacement operators 
      // assignment
-  virtual Matrix& operator = (const Matrix& src);
+  virtual PMatrix& operator = (const PMatrix& src);
   FixMatrix& operator = (const Fix& value);
      // element wise operators
   FixMatrix& operator += (const FixMatrix& src);
@@ -283,7 +283,7 @@ class FixMatrix: public Matrix {
      // make this an identity matrix
   FixMatrix& identity();  
 
-  // non-destructive operators, returns a new Matrix
+  // non-destructive operators, returns a new PMatrix
      // prefix unary operators
   FixMatrix operator- () const ;
   FixMatrix operator~ () const { return transpose(); }
@@ -318,7 +318,7 @@ class FixMatrix: public Matrix {
 //  FloatMatrix Message Class  
 /////////////////////////////
 
-class FloatMatrix: public Matrix {
+class FloatMatrix: public PMatrix {
  public:
   // return data entry
   virtual double& entry(int element) const { return data[element]; } 
@@ -362,8 +362,8 @@ class FloatMatrix: public Matrix {
   // Operators
   virtual double* operator [] (int row) { return &data[row*nCols]; }
   virtual const double* operator[] (int row) const { return &data[row*nCols]; }
-  virtual int operator == (const Matrix& src) const;
-  virtual int operator != (const Matrix& src) const {return !(*this == src); }
+  virtual int operator == (const PMatrix& src) const;
+  virtual int operator != (const PMatrix& src) const {return !(*this == src); }
 
   // cast conversion operators
   operator ComplexMatrix () const;
@@ -372,7 +372,7 @@ class FloatMatrix: public Matrix {
 
   // destructive replacement operators 
      // assignment
-  virtual Matrix& operator = (const Matrix& src);
+  virtual PMatrix& operator = (const PMatrix& src);
   FloatMatrix& operator = (double value);
      // element wise operators
   FloatMatrix& operator += (const FloatMatrix& src);
@@ -386,7 +386,7 @@ class FloatMatrix: public Matrix {
      // make this an identity matrix
   FloatMatrix& identity();  
 
-  // non-destructive operators, returns a new Matrix
+  // non-destructive operators, returns a new PMatrix
      // prefix unary operators
   FloatMatrix operator- () const;
   FloatMatrix operator~ () const { return transpose(); }
@@ -421,7 +421,7 @@ class FloatMatrix: public Matrix {
 //////////////////////////
 // IntMatrix Message Class
 //////////////////////////
-class IntMatrix: public Matrix {
+class IntMatrix: public PMatrix {
  public:
   // return data entry
   virtual int& entry(int element) const { return data[element]; } 
@@ -465,8 +465,8 @@ class IntMatrix: public Matrix {
   // Operators
   virtual int* operator [] (int row) { return &data[row*nCols]; }
   virtual const int* operator [] (int row) const { return &data[row*nCols]; }
-  virtual int operator == (const Matrix& src) const;
-  virtual int operator != (const Matrix& src) const {return !(*this == src); }
+  virtual int operator == (const PMatrix& src) const;
+  virtual int operator != (const PMatrix& src) const {return !(*this == src); }
 
   // cast conversion operators
   operator ComplexMatrix () const;
@@ -475,7 +475,7 @@ class IntMatrix: public Matrix {
 
   // destructive replacement operators 
      // assignment
-  virtual Matrix& operator = (const Matrix& src);
+  virtual PMatrix& operator = (const PMatrix& src);
   IntMatrix& operator = (int value);
      // element wise operators
   IntMatrix& operator += (const IntMatrix& src);
@@ -489,7 +489,7 @@ class IntMatrix: public Matrix {
      // make this an identity matrix
   IntMatrix& identity();  
 
-  // non-destructive operators, returns a new Matrix
+  // non-destructive operators, returns a new PMatrix
      // prefix unary operators
   IntMatrix operator- () const;
   IntMatrix operator~ () const { return transpose(); }
