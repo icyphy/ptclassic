@@ -432,7 +432,8 @@ struct walker *walkerPtr;
 tapStroke *strokePtr;
 {
     struct walkPath *paths, *newPaths, *temp;
-    int i, count;
+    int i, count = 1;		/* Make count = 1 to avoid divide by
+				   zero. */
     int w;		/* dimension parallel to startEdge */
     int h;		/* dimension perpendicular to startEdge */
     int stepPattern();
