@@ -72,25 +72,29 @@ public:
 
 	// get data members
 	int GetDeleteFigures();
-	const char *GetScriptDirectory();
-	const char *GetFigureHandle();
-	const char *GetMatlabCommand();
+	const char* GetScriptDirectory();
+	const char* GetFigureHandle();
+	const char* GetMatlabCommand();
 
 	// setup functions
-	void NameMatlabMatrices(char *matNames[], int numMatrices,
-				const char *baseName);
-	const char *BuildMatlabCommand(const char *matlabFunction,
-				char *matlabInputNames[], int numInputs,
-				char *matlabOutputNames[], int numOutputs);
+	void NameMatlabMatrices(char *matNames[],
+				int numMatrices,
+				const char* baseName);
+	const char* BuildMatlabCommand(
+				char* matlabInputNames[], int numInputs,
+				const char* matlabFunction,
+				char* matlabOutputNames[], int numOutputs);
 
 	// manage Matlab process (low-level methods)
 	// derived class must override these methods
 	char* MatlabEngineOpen(char* unixCommand);
-	int MatlabEngineSend(char* command);
-	int MatlabEngineOutputBuffer();
-	char* MatlabEngineGetMatrix(char* name);
-	char* MatlabEnginePutMatrix(char* matrix);
-	int MatlabEngineClose();
+	int MatlabEngineSend(char* enginePtr, char* command);
+	int MatlabEngineOutputBuffer(char* enginePtr,
+				     char* buffer,
+				     int buferLength);
+	char* MatlabEngineGetMatrix(char* enginePtr, char* name);
+	char* MatlabEnginePutMatrix(char* enginePtr, char* matrix);
+	int MatlabEngineClose(char* enginePtr);
 
         // higher-level interfaces to the Matlab process
 	int EvaluateOneCommand(char* command);
@@ -98,6 +102,7 @@ public:
 	// highest-level interface to the Matlab process
 	int StartMatlab();
 	int MatlabIsRunning();
+	int AssertOutputBuffer();
 	int EvaluateUserCommand();
 	int EvaluateUserCommand(char* command);
 	int ChangeMatlabDirectory();
@@ -105,7 +110,7 @@ public:
 	int CloseMatlabFigures();
 	int KillMatlab();
 
-protected:
+private:
 	// counts how many instances of this class have been created
 	static int matlabStarsCount;
 
@@ -116,7 +121,7 @@ protected:
 	int deleteFigures;
 
 	// script directory containing user scripts
-	char *scriptDirectory;
+	char* scriptDirectory;
 
 	// place to put the first N output characters from Matlab
 	char matlabOutputBuffer[MATLAB_BUFFER_LEN + 1];
@@ -125,7 +130,7 @@ protected:
 	StringList matlabFigureHandle;
 
 	// Matlab command to execute
-	StringList commandString;
-}
+	InfString commandString;
+};
 
 #endif
