@@ -1531,7 +1531,7 @@ void genDef ()
 	fprintf (fp, "<html>\n<head>\n<title>%s %s star</title>\n</head>\n",
                  domain, objName);
 /* Background color (this color is called "ivory2") */
-        fprintf (fp, "<body bgcolor=#eeeee0>\n");
+        fprintf (fp, "<body bgcolor=\"#eeeee0\">\n");
 
 /* Name */
 	fprintf (fp,
@@ -1642,7 +1642,7 @@ void genDef ()
 /* Hyperlink to the source code.  Note that this assumes the source */
 /* is in the same directory. */
         fprintf(fp,
-                "<br><b>See:</b> <a href=\"%s%s.pl>source code</a>,\n",
+                "<br><b>See:</b> <a href=\"%s%s.pl\">source code</a>,\n",
                 domain, objName);
 
 /* Hyperlink to the users of this star.
@@ -1669,6 +1669,8 @@ void genDef ()
 			fprintf(fp, "%s\n", objCopyright);
 		}
 	}
+
+	fprintf(fp, "</body>\n</html>\n");
 
 /* close the file */
 	(void) fclose (fp);
