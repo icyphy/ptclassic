@@ -48,8 +48,9 @@ static const char file_id[] = "MDSDFTarget.cc";
 extern const char MDSDFdomainName[];
 
 MDSDFTarget::MDSDFTarget() :
-Target("simulate-MDSDF","MDSDFStar",
-"Runs MDSDF systems on the local workstation using the default scheduler.")
+Target("simulate-MDSDF", "MDSDFStar",
+"Runs MDSDF systems on the local workstation using the default scheduler.",
+MDSDFdomainName)
 {
 	addState(logFile.setState("logFile",this,"",
 			"Log file to write to (none if empty)"));
@@ -80,8 +81,4 @@ void MDSDFTarget::setup() {
 	if (o) {
 		o << scheduler()->displaySchedule();
 	}
-}
-
-const char* MDSDFTarget::domain() {
-	return galaxy() ? galaxy()->domain() : MDSDFdomainName;
 }
