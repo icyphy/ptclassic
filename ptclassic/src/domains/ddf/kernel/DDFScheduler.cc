@@ -6,8 +6,6 @@ static const char file_id[] = "DDFScheduler.cc";
 #include "type.h"
 #include "SDFStar.h"
 #include "DDFScheduler.h"
-#include "FloatState.h"
-#include "IntState.h"
 #include "Geodesic.h"
 #include "GalIter.h"
 #include "ConstIters.h"
@@ -53,15 +51,13 @@ static MESSAGE err1_1 = "First check DELAY-FREE LOOP or ";
 static MESSAGE err1_2 = "The auto-wormholization procedure may create an "
 "artificial deadlock.\n";
 static MESSAGE err1_3 = "You can disable the procedure by defining a IntState "
-"(restructure) and \nsetting 0 in the DDF galaxy.";
+"(restructure) and \nsetting 0 in the DDF target.";
 static MESSAGE err2_1 = " needs too large input buffer size (>";
 static MESSAGE err2_2 = ") \nFirst check INCONSISTENT SAMPLE RATES or ";
 static MESSAGE err2_3 = "other semantic errors \n... (sorry for poor hints) \n";
 static MESSAGE err2_4 = "You may increase the max buffer size by defining a ";
-static MESSAGE err2_5 = "IntState (maxBufferSize) \nin the DDF galaxy.";
+static MESSAGE err2_5 = "IntState (maxBufferSize) \nin the DDF target.";
 	
-#define MAXTOKEN 1024
-static int maxToken;
 static int lazyDepth;
 static int overFlow;
 static StringList msg;
@@ -129,30 +125,6 @@ int DDFScheduler :: setup (Galaxy& galaxy) {
 	}
 
 	galaxy.initialize();
-
-	// If user gives the option of numOverlapped, set it.
-	IntState* nst = (IntState*) galaxy.stateWithName("numOverlapped");
-	if (nst) numOverlapped = int(*nst);
-
-	// If user gives the option of schedulePeriod, set it.
-	FloatState* sst = (FloatState*) galaxy.stateWithName("schedulePeriod");
-	if (sst) schedulePeriod = float ((double) *sst);
-
-	// If user gives the option of maxBufferSize, set it.
-	IntState* mst = (IntState*) galaxy.stateWithName("maxBufferSize");
-	if (mst) maxToken = int(*mst);
-	else	 maxToken = MAXTOKEN;
-
-	// If user gives the option of restructure, set it.
-	IntState* rst = (IntState*) galaxy.stateWithName("restructure");
-	if (rst) {
-		int val = int(*rst);
-		if (!val) {
-			restructured = TRUE;
-			canDom = DDF;
-		} else 
-			restructured = FALSE;
-	}
 
 	currentTime = schedulePeriod;
 	overFlow = FALSE;
