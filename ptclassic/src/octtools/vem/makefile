@@ -35,6 +35,11 @@ ROOT	      = ../../..
 # VPATH points to the "real" source directory
 VPATH         = $(ROOT)/src/octtools/vem
 
+# If, under gcc, you link with -lmm, then you will probably get bus errors
+# If you are compiling with gcc, don't include -lmm
+# try 'make CC="gcc -traditional" OCTTOOLS_MM_LIB= '
+OCTTOOLS_MM_LIB = -lmm
+
 # get configuration info
 CONFIG=$(ROOT)/mk/config-$(ARCH).mk
 include $(CONFIG)
@@ -123,11 +128,6 @@ $(VEMOBJECTS):
 		$(MAKE) $(MFLAGS) $(MAKEVARS) \
 		VPATH=../../../../src/octtools/vem/$(@D) $(@F)  ;\
 	)
-
-# If, under gcc, you link with -lmm, then you will probably get bus errors
-# If you are compiling with gcc, don't include -lmm
-# try 'make CC="gcc -traditional" OCTTOOLS_MM_LIB= '
-OCTTOOLS_MM_LIB = -lmm
 
 VEMLIBS = rpc/librpcserver.a dialogs/libdialogs.a \
 	-L$(OCTLIBDIR) -lts -llel -lfc -lsymbolic -lvulcan \
