@@ -83,7 +83,14 @@ public:
 	}
 
 	int feedForward() const { return feedForwardFlag;}
-	void markFeedForward() { feedForwardFlag = 1;}
+
+	// indicate that this is a feedforward arc.  Mark both
+	// ends of the connection.
+	void markFeedForward() {
+		feedForwardFlag = 1;
+		BDFClustPort* pFar = far();
+		if (pFar) pFar->feedForwardFlag = 1;
+	}
 
 	// return TRUE if there is no sample rate change between me
 	// and who I am connected to
