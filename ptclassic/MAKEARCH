@@ -102,7 +102,7 @@ cd ../..
 # create extra subsub dirs in each domain
 # everything must have two slashs (be three levels down)
 
-foreach x ( cg56/dsp/stars cg96/dsp/stars sdf/dsp/stars sdf/image/kernel sdf/image/stars )
+foreach x ( cg56/dsp/stars cg96/dsp/stars sdf/dsp/stars sdf/image/kernel sdf/image/stars cgc/targets/cm5 )
 	optmkdir $x
 	cd $x
 	optlink ../../../../../src/domains/$x make.template
