@@ -129,8 +129,10 @@ private:
 	// Method called by V2C star to place important code into structure.
 	void registerV2C(int pairid, int numxfer, const char* dtype);
 
-	int needC2V;
-	int needV2C;
+	int needC2Vinteger;
+	int needV2Cinteger;
+	int needC2Vreal;
+	int needV2Creal;
 	int pairNumber;
 	int writeCom;
 	void configureCommPair(CommPair&);

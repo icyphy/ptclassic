@@ -59,9 +59,12 @@ VHDLTarget(name,starclass,desc) {
 
 //  addStream("preSynch", &preSynch);
 //  addStream("postSynch", &postSynch);
-  needC2V = 0;
-  needV2C = 0;
-  pairNumber = 0;
+  needC2Vinteger = 0;
+  needV2Cinteger = 0;
+  needC2Vreal = 0;
+  needV2Creal = 0;
+  // See if this takes hold, or init in setup
+  pairNumber = 2000;
 }
 
 // Clone the Target.
@@ -74,9 +77,12 @@ static SimVSSTarget proto("SimVSS-VHDL", "VHDLStar",
 static KnownTarget entry(proto,"SimVSS-VHDL");
 
 void SimVSSTarget :: setup() {
-  needC2V = 0;
-  needV2C = 0;
-  pairNumber = 0;
+  needC2Vinteger = 0;
+  needV2Cinteger = 0;
+  needC2Vreal = 0;
+  needV2Creal = 0;
+  // See if this takes hold, or init in setup
+  pairNumber = 1000;
   writeCom = 1;
 
   // Generate the command to set the SIM_ARCH environment variable here.
@@ -154,7 +160,7 @@ void SimVSSTarget :: frameCode() {
   top_architecture << " of ";
   top_architecture << topName;
   top_architecture << " is\n";
-  top_architecture << "component C2V\n";
+  top_architecture << "component C2Vinteger\n";
   top_architecture << indent(1) << "generic ( pairid  : INTEGER ;\n";
   top_architecture << indent(1) << "          numxfer : INTEGER );\n";
   top_architecture << indent(1) << "port ( go   : in  STD_LOGIC ;\n";
@@ -162,7 +168,7 @@ void SimVSSTarget :: frameCode() {
   top_architecture << indent(1) << "       done : out STD_LOGIC );\n";
   top_architecture << "end component;\n";
   top_architecture << "\n";
-  top_architecture << "component V2C\n";
+  top_architecture << "component V2Cinteger\n";
   top_architecture << indent(1) << "generic ( pairid  : INTEGER ;\n";
   top_architecture << indent(1) << "          numxfer : INTEGER );\n";
   top_architecture << indent(1) << "port ( go   : in  STD_LOGIC ;\n";
@@ -202,14 +208,14 @@ void SimVSSTarget :: frameCode() {
   top_configuration << indent(1) << "for all:" << galName;
   top_configuration << " use entity work." << galName;
   top_configuration << "(behavior); end for;\n";
-  if (needC2V) {
-  top_configuration << indent(1) << "for all:C2V use entity work.C2V";
-  top_configuration << "(CLI); end for;\n";
-}
-  if (needV2C) {
-  top_configuration << indent(1) << "for all:V2C use entity work.V2C";
-  top_configuration << "(CLI); end for;\n";
-}
+  if (needC2Vinteger) {
+    top_configuration << indent(1) << "for all:C2Vinteger use entity work.C2Vinteger";
+    top_configuration << "(CLI); end for;\n";
+  }
+  if (needV2Cinteger) {
+    top_configuration << indent(1) << "for all:V2Cinteger use entity work.V2Cinteger";
+    top_configuration << "(CLI); end for;\n";
+  }
   top_configuration << "end for;\n";
   top_configuration << "end parts;\n";
 
@@ -235,29 +241,30 @@ void SimVSSTarget :: frameCode() {
 
 /////////////////////////////////////////////
   
-  code << "\n
---C2V.vhdl
+  if (needC2Vinteger) {
+    code << "\n
+--C2Vinteger.vhdl
 
 library SYNOPSYS,IEEE;
 use SYNOPSYS.ATTRIBUTES.all;
 use IEEE.STD_LOGIC_1164.all;
 
-entity C2V is
+entity C2Vinteger is
 	generic ( pairid	: INTEGER	;
 		  numxfer	: INTEGER	);
 	port	( go		: in STD_LOGIC	;
 		  data		: out INTEGER	;
 		  done		: out STD_LOGIC	);
-end C2V;
+end C2Vinteger;
 
-architecture CLI of C2V is
+architecture CLI of C2Vinteger is
 
 	attribute FOREIGN of CLI : architecture is \"Synopsys:CLI\";
 
-	attribute CLI_ELABORATE	of CLI	: architecture is \"c2v_open\";
-	attribute CLI_EVALUATE	of CLI	: architecture is \"c2v_eval\";
-	attribute CLI_ERROR	of CLI	: architecture is \"c2v_error\";
-	attribute CLI_CLOSE	of CLI	: architecture is \"c2v_close\";
+	attribute CLI_ELABORATE	of CLI	: architecture is \"c2vinteger_open\";
+	attribute CLI_EVALUATE	of CLI	: architecture is \"c2vinteger_eval\";
+	attribute CLI_ERROR	of CLI	: architecture is \"c2vinteger_error\";
+	attribute CLI_CLOSE	of CLI	: architecture is \"c2vinteger_close\";
 
 	attribute CLI_PIN	of go	: signal is CLI_ACTIVE;
 	attribute CLI_PIN	of data	: signal is CLI_PASSIVE;
@@ -266,30 +273,32 @@ architecture CLI of C2V is
 begin
 end;
 ";
-
-  code << "\n
---V2C.vhdl
+  }
+  
+  if (needV2Cinteger) {
+    code << "\n
+--V2Cinteger.vhdl
 
 library SYNOPSYS,IEEE;
 use SYNOPSYS.ATTRIBUTES.all;
 use IEEE.STD_LOGIC_1164.all;
 
-entity V2C is
+entity V2Cinteger is
 	generic ( pairid	: INTEGER	;
 		  numxfer	: INTEGER	);
 	port	( go		: in STD_LOGIC	;
 		  data		: in INTEGER	;
 		  done		: out STD_LOGIC	);
-end V2C;
+end V2Cinteger;
 
-architecture CLI of V2C is
+architecture CLI of V2Cinteger is
 
 	attribute FOREIGN of CLI : architecture is \"Synopsys:CLI\";
 
-	attribute CLI_ELABORATE	of CLI	: architecture is \"v2c_open\";
-	attribute CLI_EVALUATE	of CLI	: architecture is \"v2c_eval\";
-	attribute CLI_ERROR	of CLI	: architecture is \"v2c_error\";
-	attribute CLI_CLOSE	of CLI	: architecture is \"v2c_close\";
+	attribute CLI_ELABORATE	of CLI	: architecture is \"v2cinteger_open\";
+	attribute CLI_EVALUATE	of CLI	: architecture is \"v2cinteger_eval\";
+	attribute CLI_ERROR	of CLI	: architecture is \"v2cinteger_error\";
+	attribute CLI_CLOSE	of CLI	: architecture is \"v2cinteger_close\";
 
 	attribute CLI_PIN	of go	: signal is CLI_ACTIVE;
 	attribute CLI_PIN	of done	: signal is CLI_PASSIVE;
@@ -298,7 +307,8 @@ architecture CLI of V2C is
 begin
 end;
 ";
-
+  }
+  
   code << "\n" << top_uses;
   code << "\n" << entity_declaration;
   code << "\n" << architecture_body_opener;
@@ -541,23 +551,27 @@ void SimVSSTarget :: registerCompMap(StringList label, StringList name,
 
 // Method called by C2V star to place important code into structure.
 void SimVSSTarget :: registerC2V(int pairid, int numxfer, const char* dtype) {
-  needC2V = 1;
 
   // Create a string with the right VHDL data type
   StringList vtype = "";
-  if (strcmp(dtype, "INT") == 0) 
+  StringList name = "";
+  if (strcmp(dtype, "INT") == 0) {
     vtype = "INTEGER";
-  else if (strcmp(dtype, "FLOAT") == 0) 
+    name = "C2Vinteger";
+    needC2Vinteger = 1;
+  }
+  else if (strcmp(dtype, "FLOAT") == 0) {
     vtype = "REAL";
+    name = "C2Vreal";
+    needC2Vreal = 1;
+  }
   else
     Error::abortRun(*this, dtype, ": type not supported");
   printf("Vtype is %s\n", (const char*) vtype);
   
   // Construct unique label and signal names and put comp map in main list
   StringList label;
-  StringList name;
   StringList goName, dataName, doneName;
-  name = "C2V";
   StringList rootName = name;
   rootName << pairid;
 
@@ -594,22 +608,26 @@ void SimVSSTarget :: registerC2V(int pairid, int numxfer, const char* dtype) {
 
 // Method called by V2C star to place important code into structure.
 void SimVSSTarget :: registerV2C(int pairid, int numxfer, const char* dtype) {
-  needV2C = 1;
-
   // Create a string with the right VHDL data type
   StringList vtype = "";
-  if (strcmp(dtype, "INT") == 0) 
+  StringList name = "";
+  if (strcmp(dtype, "INT") == 0) {
     vtype = "INTEGER";
-  else if (strcmp(dtype, "FLOAT") == 0) 
+    name = "V2Cinteger";
+    needV2Cinteger = 1;
+  }
+  else if (strcmp(dtype, "FLOAT") == 0) {
     vtype = "REAL";
+    name = "V2Creal";
+    needV2Creal = 1;
+  }
   else
     Error::abortRun(*this, dtype, ": type not supported");
+  printf("Vtype is %s\n", (const char*) vtype);
   
   // Construct unique label and signal names and put comp map in main list
   StringList label;
-  StringList name;
   StringList goName, dataName, doneName;
-  name = "V2C";
   StringList rootName = name;
   rootName << pairid;
 

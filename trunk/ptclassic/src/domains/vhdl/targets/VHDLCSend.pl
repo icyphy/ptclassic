@@ -29,26 +29,38 @@ limitation of liability, and disclaimer	of warranty provisions.
     type {int}
     default {0}
   }
-setup {
-  numXfer = input.numXfer();
+  defstate {
+    name {rtype}
+    type {string}
+    default {"type"}
+  }
+  setup {
+    if (strcmp(input.resolvedType(), "INT") == 0) 
+      rtype = "integer";
+    else if (strcmp(input.resolvedType(), "FLOAT") == 0) 
+      rtype = "real";
+    else
+      Error::abortRun(*this, input.resolvedType(), ": type not supported");
+
+    numXfer = input.numXfer();
 //  VHDLCSynchComm::setup();
-}
+  }
 
 // Called only once, after the scheduler is done
-begin {
-  // Call method to wire up a V2C VHDL entity
-  targ()->registerV2C(int(pairNumber), numXfer, input.resolvedType());
-}
+  begin {
+    // Call method to wire up a V2C VHDL entity
+    targ()->registerV2C(int(pairNumber), numXfer, input.resolvedType());
+  }
 
-go {
-  // Add code to synch at end of main.
-  StringList postSynch;
-  postSynch << "V2C" << int(pairNumber) << "_data" << " <= " << "$ref(input)" << ";\n";
-  postSynch << "V2C" << int(pairNumber) << "_go" << " <= " << "'0';\n";
-  postSynch << "wait on " << "V2C" << int(pairNumber) << "_done" << "'transaction;\n";
+  go {
+    // Add code to synch at end of main.
+    StringList postSynch;
+    postSynch << "V2C" << rtype << int(pairNumber) << "_data" << " <= " << "$ref(input)" << ";\n";
+    postSynch << "V2C" << rtype << int(pairNumber) << "_go" << " <= " << "'0';\n";
+    postSynch << "wait on " << "V2C" << rtype << int(pairNumber) << "_done" << "'transaction;\n";
 
 //  addCode(postSynch, "postSynch");
-  addCode(postSynch);
-}
+    addCode(postSynch);
+  }
 
 }
