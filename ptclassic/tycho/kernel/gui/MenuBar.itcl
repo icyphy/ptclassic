@@ -78,9 +78,6 @@ class ::tycho::MenuBar {
     # Return the entries in a menu
     method entries {{tag {}}}
 
-    # Return the menu tag in which an entry is contained
-    method inmenu {tag}
-
     # Post a menu or cascade menu
     method post {tag}
 
@@ -160,10 +157,13 @@ body ::tycho::MenuBar::addMenu {tag args} {
     set args [array get temp]
 
     # Create the menu button
+    set buttonpath $itk_interior.[incr _unique]
+    set _menupath($tag) $buttonpath.menu
+    set _tag($_menupath($tag)) $tag
     itk_component add button$tag {
-	eval menubutton $itk_interior.$tag \
+	eval menubutton $buttonpath \
 		$args \
-		-menu $itk_interior.$tag.menu
+		-menu $_menupath($tag)
     } {
 	keep -font -activebackground -cursor -activeforeground \
 		-background -foreground -highlightbackground \
@@ -174,7 +174,7 @@ body ::tycho::MenuBar::addMenu {tag args} {
     # that adding menu entries in the superclass (MenuSupport)
     # do not invoke unknown{}.
     itk_component add $tag {
-	uplevel #0 menu $itk_component(button$tag).menu -tearoff 0
+	uplevel #0 menu $_menupath($tag) -tearoff 0
     } {
 	keep -font -activebackground -cursor -activeforeground \
 		-background -foreground
@@ -195,9 +195,6 @@ body ::tycho::MenuBar::addMenu {tag args} {
 	pack $itk_component(button$tag) -side $side
 	lappend menubuttons $tag
     }
-
-    # Record its "path"
-    set menupath($tag) $itk_component($tag)
     return $tag
 }
 
@@ -253,7 +250,7 @@ body ::tycho::MenuBar::delete {tag} {
 	destroy $itk_component(button$tag)
 	unset itk_component($tag)
 	unset itk_component(button$tag)
-	unset menupath($tag)
+	unset _menupath($tag)
 	set menubuttons [::tycho::ldelete $menubuttons $tag]
     } else {
 	# If not, perform default removal
@@ -300,25 +297,6 @@ body ::tycho::MenuBar::enable {tag} {
 body ::tycho::MenuBar::entries {{tag {}}} {
     if { $tag == "" } {
 	return $menubuttons
-    } else {
-	chain $tag
-    }
-}
-
-#####################################################################
-#### inmenu
-# Return the tag of the menu containing the given menu.
-#
-body ::tycho::MenuBar::inmenu {tag} {
-    # Check if the entry exists
-    if { ! [::info exists parentmenu($tag)] } {
-        error "Menu entry $tag does not exist"
-    }
-    set parent $parentmenu($tag)
-    regexp {([^\.]+)\.[^\.]+$} $parent _ parent
-    if { [::info exists itk_component(button$parent)] } {
-	# Return menu tag
-        return $parent
     } else {
 	chain $tag
     }
