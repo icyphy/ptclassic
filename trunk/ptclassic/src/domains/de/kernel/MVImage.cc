@@ -88,7 +88,7 @@ BaseImage* MVImage::fragment(int cellSz, int Num) const
 	if ((Num == 0) && (size == 0)) {
 		return ((BaseImage*) clone()); // NULL MV field.
 	}
-	if (Num*arrSz > size) { return ((BaseImage*) NULL); }
+	if (Num*arrSz >= size) { return ((BaseImage*) NULL); }
 
 // Use clone(1) rather than clone() to avoid copying image data.
 	MVImage* retval = (MVImage*) clone(1);

@@ -96,7 +96,7 @@ BaseImage* DCTImage::fragment(int cellSz, int Num) const
 {
 	int arrSz = cellSz/4; // 4 == sizeof(float)
 
-	if (Num*arrSz > size) { return((BaseImage*) NULL); }
+	if (Num*arrSz >= size) { return((BaseImage*) NULL); }
 
 // Use clone(1) rather than clone() to avoid copying image data.
 	DCTImage* retval = (DCTImage*) clone(1);
