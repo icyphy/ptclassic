@@ -50,6 +50,7 @@ ITCL_SRCS = \
 	DragDropper.itcl \
 	Follower.itcl \
 	Frame.itcl \
+	Grapple.itcl \
 	IconItem.itcl \
 	IconFrame.itcl \
 	IconOval.itcl \
@@ -67,6 +68,7 @@ ITCL_SRCS = \
 	Point.itcl \
 	Polygon.itcl \
 	Rectangle.itcl \
+	Reshaper.itcl \
 	Repeater.itcl \
 	Selector.itcl \
 	Shades.itcl \
