@@ -392,7 +392,7 @@ StringList CGCStar :: declarePortHole(CGCPortHole* p) {
 }
 
 // Type-specific initialization for PortHole data structures.
-StringList typeInit(CGCPortHole& port, int dim = 1,
+static StringList typeInit(CGCPortHole& port, int dim = 1,
 	double realVal = 0.0, double imagVal = 0.0)
 {
     DataType typeName = port.resolvedType();
@@ -489,7 +489,7 @@ StringList CGCStar :: initializeOffset(const CGCPortHole* p) {
 	////////////////////////////////////
 
 // Type-specific initialization for State data structures.
-StringList typeInit(const State& state, const char* val)
+static StringList typeInit(const State& state, const char* val)
 {
     const char* typeName = state.type();
 
@@ -499,7 +499,7 @@ StringList typeInit(const State& state, const char* val)
     {
 	const char* special = "(,)";
 	Tokenizer lexer(val,special);
-	char* token;
+	char token[256];
 
 	do	// find token following '('
 	{
@@ -559,7 +559,7 @@ StringList CGCStar :: declareState(const State* s)
 	const char* white = "\n";
 	StringList val = s->currentValue();
 	Tokenizer lexer(val, special, white);
-	char* token;
+	char token[256];
 
 	if (insideMain) dec << ";\n";
 	else dec << " = {\n";
