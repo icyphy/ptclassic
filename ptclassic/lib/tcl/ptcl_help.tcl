@@ -124,8 +124,7 @@ around this restriction, see "multilink" or "permlink".
 }
 
 add_to_help matlab {<command> ?<arg> ...?} {
-Manage a running Matlab process.  Commands include end, eval, get, result,
-set, start, and unset:
+Manage a running Matlab process.  Commands are shown below:
 
 terminate connection:       matlab end
 evaluate Matlab script:     matlab eval <script>
