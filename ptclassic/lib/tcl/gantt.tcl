@@ -54,5 +54,5 @@ if { $argc != 1 } {
   puts stderr "Usage: gantt filename"
   exit 1
 } else {
-  ptkGanttDisplay unknown [lindex $argv 0]
+  ptkGanttDisplay unknown [lindex $argv 0] 1
 }
