@@ -585,7 +585,7 @@ body ::tycho::File::evaluate {} {
 #
 body ::tycho::File::help {} {
     global TYCHO
-    ::tycho::File::openContext $TYCHO/doc/FileHelp.html
+    ::tycho::File::openContext $TYCHO/kernel/doc/FileHelp.html
 }
 
 #####################################################################
