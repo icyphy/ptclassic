@@ -493,34 +493,6 @@ body ::tycho::File::constructor {args} {
 		-background -foreground
     }
     
-    $itk_component(windowMenu) add command \
-	    -label Iconify \
-	    -underline 0 \
-	    -accelerator "C-x 0" \
-	    -command "wm iconify $itk_component(hull)"
-
-    $itk_component(windowMenu) add command \
-	    -label "Full Screen" \
-	    -underline 0 \
-	    -accelerator "C-x 1" \
-	    -command "$this fullScreen"
-
-    # FIXME: Because of problems with gridded window management,
-    # the following does not quite work.
-    #     $itk_component(windowMenu) add command \
-            # 	    -label "Half Height" \
-            # 	    -underline 0 \
-            # 	    -accelerator "C-x 2" \
-            # 	    -command "$this halfHeight"
-
-    $itk_component(windowMenu) add command \
-	    -label "Original Size" \
-	    -underline 0 \
-	    -accelerator "C-x 6" \
-	    -command "$this originalSize"
-
-    $itk_component(windowMenu) add separator
-
     # Use the editors variable to construct menu entries for registered
     # editors.
     foreach entry $windowMenuEntries {
