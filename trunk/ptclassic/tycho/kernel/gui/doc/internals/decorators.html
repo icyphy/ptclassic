@@ -50,26 +50,26 @@ $f centerOnScreen
 your screen.) Now, we'll add a couple of menus to the menu bar:
 
 <tcl quiet><pre>
-$f.mb addMenu File
-$f.mb addMenu Help -side right -underline 0
+$f.mb addMenu file -label File
+$f.mb addMenu help -label Help -side right -underline 0
 </pre></tcl>
 
-Note that the <CODE>Help</CODE> menu is packed to the right of the menu bar:
-stretch the window with the mouse to see this. The
-<code>-underline</code> option places an underline under the
+Note that the <CODE>Help</CODE> menu is packed to the right of the menu bar.
+The <code>-underline</code> option places an underline under the
 indicated letter of the label and enables keyboard navigation through
-menus. (Sorry, this is currently broken...)
+menus.
 
- <P>The menu bar accesses all menus and menu entries by label -- that
-is, by the string displayed in the menu bar or in the menu. To add
+ <P>The menu bar accesses all menus and menu entries by tag -- that
+is, by the first argument you gave when you created the menu.
+To add
 entries to a menu, call <code>add</code> with the entry label, the
 name of the menu to place the entry into, and additional options.  For
 example, we'll add a <CODE>Close</CODE> menu choice to the <CODE>File</CODE>
 menu and a Tycho Home Page entry to the <CODE>Help</CODE> menu:
 
 <tcl quiet><pre>
-$f.mb add Close File -command {delete object $f}
-$f.mb add {Tycho Home Page} Help &#92
+$f.mb add command close file -label Close -command {delete object $f}
+$f.mb add command home help -label {Tycho Home Page} &#92
 	-command {::tycho::File::openContext &#92
 	$TYCHO/doc/index.html} &#92
 	-underline 0 -accelerator "C-x h"
@@ -104,14 +104,14 @@ key bindings as well as displaying the accelerator string.)
  <P> You can add a separator to a menu:
 
 <tcl quiet><pre>
-$f.mb addSeparator Help
-$f.mb add Foo Help -command {::tycho::inform Foo!}
+$f.mb add separator sep1 help
+$f.mb add command foo help -label Foo -command {::tycho::inform Foo!}
 </pre></tcl>
 
  <P>Individual menu entries can be disabled and enabled:
 
 <tcl quiet><pre>
-$f.mb disable {Tycho Home Page}
+$f.mb disable home
 </pre></tcl>
 
 (Pop down the <CODE>Help</CODE> menu: the <CODE>Tycho Home Page</CODE>
@@ -119,14 +119,14 @@ entry is greyed out and cannot be invoked.) Whole menus can be
 disabled in exactly the same way:
 
 <tcl quiet><pre>
-$f.mb disable File
+$f.mb disable file
 </pre></tcl>
 
 To re-enable disabled menus or entries, just call <code>enable</code>:
 
 <tcl quiet><pre>
-$f.mb enable {Tycho Home Page}
-$f.mb enable File
+$f.mb enable home
+$f.mb enable file
 </pre></tcl>
 
 For more detailed information on menu bars, see the 
