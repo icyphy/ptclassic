@@ -1,0 +1,71 @@
+<!-- $Id$ -->
+<html>
+<head>
+<title>Tydoc Overview</title>
+</head>
+<body>
+[<a href="introduction.html">        Tydoc </a>]
+<hr>
+Tydoc is the Tycho documentation system.  Tycho consists of two main parts:
+<DL>
+	<LI> <DT>DocSys classes<DD>The tydoc itcl classes <CODE>DocSys</CODE>, 
+	<CODE>DocClass</CODE>, <CODE>ListDocSys</CODE> and 
+	<CODE>HTMLDocSys</CODE>.  These classes are defined in 
+	<A HREF="../DocSys.itcl"><CODE>$TYCHO/lib/tydoc/DocSys.itcl</CODE></A>
+	These classes could be used inside tycho for direct runtime
+	conversion of itcl files to html.
+	
+	<LI> <DT><CODE>tydoc</CODE><DD>A small standalone binary that
+	takes file names as command line arguments and converts the
+	files to html output.  For example <CODE>tydoc
+	DocSys.html</CODE> would convert DocSys.html into four files,
+	one for each class in the <CODE>doc/codeDoc</CODE> directory.
+	If the <CODE>doc/codeDoc</CODE> directory does not exist, 
+	it is created.	
+</DL>
+
+<H2>How it works</H2>
+	
+Tydoc reads in an itcl file, protects the contents of the comments
+from interpretation, and then parses the file as a list into lists of
+different elements.
+	
+<P> To produce output in different formats, we have all of the format
+specific information in the child class.  Currently, we only generate
+HTML output, but we have written test code that merely regenerates the
+itcl file as text, operating as a pretty printer. That code is at
+<A HREF="../TextDocSys.itcl"><CODE>TextDocSys.itcl</CODE></A> in the
+tydoc directory.
+
+<H2>File formatting conventions</H2>
+Note: this should be merged into a Tycho style guide.
+
+<P> Tydoc depends on certain formatting conventions to grab comment
+information.
+<H3>Comment formatting</H3>
+
+In tcl, a comment line is a line that has a <CODE>#</CODE> as the
+first non-blank character.  The symbol <CODE>#</CODE> is usually
+referred to as a hashmark, a poundsign or an octothorpe.  In this
+document we refer to <CODE>#</CODE> as a hashmark.
+
+<MENU>
+
+	<LI> Lines that contain more than one hashmarks are not copied
+	into the tydoc output.
+
+	<LI> A <I>docComment</I> is a block of comments associated
+	with a itcl construct.  An itcl construct is a part of the
+	language like a class or method declaration.  For a block of
+	comments to be associated with a construct, there must be
+	no blank lines between the block of comments and the construct.
+
+</MENU>
+
+
+<HR>
+Copyright &#169 %Q%, The Regents of the University of California.
+All rights reserved.
+<br>
+Last updated: $Date$,
+comments to: <author>cxh@eecs.berkeley.edu</author>
