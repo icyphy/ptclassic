@@ -440,6 +440,7 @@ body ::tycho::Query::choice {tag label entries default {command {}}} {
 		-relief raised -bd 2 -highlightthickness 2 -anchor c
     } {
         keep -background -cursor -background -font
+        rename -width -entrywidth entryWidth EntryWidth
     }
     grid $itk_component(tag_$tag) -row $numentries -column 1 -sticky e
     
@@ -721,6 +722,7 @@ body ::tycho::Query::mediated {tag label default command args} {
                 $args
     } {
 	keep -background -foreground -font
+        rename -width -entrywidth entryWidth EntryWidth
     }
     
     grid $itk_component(tag_$tag) -column 1 -row $numentries -sticky ew
