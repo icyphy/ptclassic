@@ -49,11 +49,7 @@
 # The model has the following entities:
 # <ul>
 # <li><b>parent</b> _name_: A parent of the current class. Parents can
-# appear only at the top level. Parents have the following attributes:
-#   <ul>
-#   <li><b>-sourcefile</b>: The file in which the parent class resides.
-#   <li><b>-docfile</b>: The file with the parents documentation (.tim).
-#   </ul>
+# appear only at the top level. 
 # 
 # <li><b>Constructor</b> _name_: A constructor. Constructors should be named
 # according to the language. (See note following methods below.)
@@ -198,11 +194,6 @@
 #     $class parameters bar
 # </tcl></pre>
 #
-# Return the source file of a parent:
-# <pre><tcl>
-#     $class itemcget parent ::tycho::Mommy -sourcefile
-# </tcl></pre>
-#
 class ::tycho::Class {
     inherit ::tycho::HierModel
 
@@ -300,10 +291,7 @@ body ::tycho::Class::constructor {args} {
 
     # Define the "parent" entity
     defineEntityType parent \
-            -ordered 1 \
-            -scope "" \
-            -sourcefile "" \
-            -docfile ""
+            -ordered 1 
 
     # Define the "Constructor" entity
     defineEntityType Constructor \
