@@ -71,22 +71,23 @@ ensemble ::tycho::cache {
 # 1) a file exists in the cache directory but not in index file, or 
 # 2) a file exists in the index file but not in the cache directory).
 # <br>
-# <br><b>Here is a mini-tutorial on using this class. Note that
+# <br><b>Here is a mini-tutorial on using this class.</b>
+# Note that
 # <tt>ensemble ::tycho::cache (method_name)</tt> is used as a 
 # typing shortcut to <tt>::tycho::CacheManager::(method_name).</tt>
 # <br>
 #
-# <b>1:Initialize index.db and the cache directory:</b><br>
+# 1. Initialize index.db and the cache directory:<br>
 # <tcl><tt> ::tycho::cache initialize</tt></tcl>
 # <br>
 #
-# <b>2:Get a cache file name to write to:</b><br>
+# 2. Get a cache file name to write to:<br>
 # <tcl><pre> set url "vrml://ptolemy/cool_file.vrml"
 # set cachefile [::tycho::cache tmpCacheName $url]</pre></tcl>
 # <br>
 #
-# <b>3:Assume we got the remote file attributes and the content.
-# Write to the cache file</b><br>
+# 3. Assume we got the remote file attributes and the content.
+# Write to the cache file<br>
 # <tcl><pre> set date {Monday 1-2-3}
 # set size 12345
 # set contenttype "vrml/slow"
@@ -97,13 +98,13 @@ ensemble ::tycho::cache {
 # ::close $cacheid</pre></tcl>
 # <br>
 # 
-# <b>4:Now update in the index database</b><br>
+# 4. Now update in the index database<br>
 # <tcl><pre> ::tycho::cache update $url &#92
 #       $date $size $contenttype $cachefile
 # unset date size contenttype cachefile</pre></tcl>
 # <br>
 #
-# <b>5:Retrieve information from the database
+# 5. Retrieve information from the database
 # <tcl><pre> set exists [::tycho::cache exists $url]
 # set date [::tycho::cache getdate $url]
 # set contenttype [::tycho::cache getcontenttype $url]
@@ -113,13 +114,13 @@ ensemble ::tycho::cache {
 # </pre></tcl>
 # <br>
 #
-# <b>6:Check whether a current URL is the same as the one on cache:</b><br>
+# 6. Check whether a current URL is the same as the one on cache:<br>
 # <tcl><tt> ::tycho::cache same $url $date $size $contenttype</tt></tcl><br>
 # or<br>
 # <tcl><tt> ::tycho::cache same $url $date 54321 $contenttype</tt></tcl><br>
 # <br>
 #
-# <b>7:Delete the cache file from the cache directory<b><br>
+# 7. Delete the cache file from the cache directory<br>
 # <tcl><tt> ::file delete $cachefile</tt></tcl>
 # <br>
 #
@@ -134,6 +135,7 @@ ensemble ::tycho::cache {
 # exists       no                yes          yes             n/a
 # update       no (appends)      yes          yes             O(1)
 # others...    no                no           no              O(1)?
+# </pre>
 #
 class ::tycho::CacheManager {
     inherit ::tycho::Uninstantiable
