@@ -166,8 +166,11 @@ to access the next element of the list
 class SequentialList : SingleLinkList
 {
 public:
-	// Add element to the list
+	// Add element to the end of the list
         void put(Pointer p) {append(p); ++dimen;}
+
+	// Add element to the beginning of the list
+        void tup(Pointer p) {insert(p); ++dimen;}
 
 	// Return number of elements on the list
 	int size() const {return dimen;}
