@@ -106,6 +106,7 @@ ITCL_SRCS = \
 	Object.itcl \
 	OldModel.itcl \
 	ParameterEdit.itcl \
+	PackageData.itcl \
 	PopupMenu.itcl \
 	PortedDigraph.itcl \
 	PreferenceDialog.itcl \
