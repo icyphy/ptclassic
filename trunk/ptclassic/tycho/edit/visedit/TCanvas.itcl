@@ -366,7 +366,7 @@ body ::tycho::TCanvas::exportGif {filename} {
     set fn1 [::tycho::tmpFileName]
     exportXwd $fn1
     # NOTE: -transparent color option should be added for the background.
-    if [catch { ::tycho::invoke xwdtopnm $fn1 | ppmtogif -interlace > \
+    if [catch { ::tycho::tyexec xwdtopnm $fn1 | ppmtogif -interlace > \
             $filename 2> /dev/null} msg] {
         ::tycho::rm $fn1
         error $msg
@@ -449,7 +449,7 @@ body ::tycho::TCanvas::exportXwd {filename} {
     # is fixed in itcl.
     ::tycho::safeUpdate $prefix
     # NOTE: xwd always returns an error status.
-    catch {::tycho::invoke xwd -id $id -debug -out $filename >& /dev/null} msg
+    catch {::tycho::tyexec xwd -id $id -debug -out $filename >& /dev/null} msg
     if ![file exists $filename] {
         error $msg
     }
@@ -485,7 +485,7 @@ body ::tycho::TCanvas::print {} {
         set printOrient $pp(orient)
         set tmpFile [::tycho::tmpFileName typr .eps]
         exportEps $tmpFile $printOrient $printColor $printWidth
-        eval ::tycho::invoke $printCmd $tmpFile
+        eval ::tycho::tyexec $printCmd $tmpFile
         ::tycho::rm $tmpFile
     }
 }
