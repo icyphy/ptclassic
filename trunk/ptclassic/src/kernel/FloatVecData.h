@@ -54,15 +54,13 @@ public:
 	int isA(const char*) const;
 
 	// constructor: makes an uninitialized array
-	FloatVecData(int l) : len(l) {
-		INC_LOG_NEW; data = new float[l];
-	}
+	FloatVecData(int l);
 
 	// constructor: makes an initialized array from a float array
-	FloatVecData(int l,const float *srcData) { init(l,srcData); }
+	FloatVecData(int l,const float *srcData);
 
 	// copy constructor
-	FloatVecData(const FloatVecData& src) { init(src.len,src.data);}
+	FloatVecData(const FloatVecData& src);
 
 	// assignment operator
 	const FloatVecData& operator=(const FloatVecData& src);

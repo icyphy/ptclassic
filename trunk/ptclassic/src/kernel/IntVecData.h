@@ -54,15 +54,13 @@ public:
 	int isA(const char*) const;
 
 	// constructor: makes an uninitialized array
-	IntVecData(int l) : len(l) {
-		INC_LOG_NEW; data = new int[l];
-	}
+	IntVecData(int l);
 
 	// constructor: makes an initialized array from a int array
-	IntVecData(int l,int *srcData) { init(l,srcData);}
+	IntVecData(int l,int *srcData);
 
 	// copy constructor
-	IntVecData(const IntVecData& src) { init(src.len,src.data);}
+	IntVecData(const IntVecData& src);
 
 	// clone
 	Message* clone() const;

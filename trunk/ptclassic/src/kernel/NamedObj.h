@@ -102,6 +102,8 @@ class NamedObjList : private SequentialList
 	friend class NamedObjListIter;
 	friend class CNamedObjListIter;
 public:
+	NamedObjList();
+
 	// Add object to list
 	void put(NamedObj& s) {SequentialList::put(&s);}
 
@@ -149,7 +151,7 @@ private:
 // an iterator for NamedObjList
 class NamedObjListIter : private ListIter {
 public:
-	NamedObjListIter(NamedObjList& sl) : ListIter (sl) {}
+	NamedObjListIter(NamedObjList& sl);
 	NamedObj* next() { return (NamedObj*)ListIter::next();}
 	NamedObj* operator++(POSTFIX_OP) { return next();}
 	ListIter::reset;
@@ -158,7 +160,7 @@ public:
 // an iterator for NamedObjList, const form
 class CNamedObjListIter : private ListIter {
 public:
-	CNamedObjListIter(const NamedObjList& sl) : ListIter (sl) {}
+	CNamedObjListIter(const NamedObjList& sl);
 	const NamedObj* next() { return (const NamedObj*)ListIter::next();}
 	const NamedObj* operator++(POSTFIX_OP) { return next();}
 	ListIter::reset;

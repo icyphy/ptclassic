@@ -50,6 +50,12 @@ int Domain::numDomains = 0;
 
 Domain* Domain::allDomains[NUMDOMAINS];
 
+Domain :: Domain (const char* domname) {
+	index = numDomains++;
+	allDomains[index] = this;
+	myName = domname;
+}
+
 // return ptr to domain matching given name
 Domain* Domain::named(const char* nm) {
 	if (!nm) return 0;

@@ -43,6 +43,17 @@ void IntVecData::init(int l,const int *srcData) {
 		data[i] = *srcData++;
 }
 
+// constructor: makes an uninitialized array
+IntVecData::IntVecData(int l) : len(l) {
+	LOG_NEW; data = new int[l];
+}
+
+// constructor: makes an initialized array from a int array
+IntVecData::IntVecData(int l,int *srcData) { init(l,srcData);}
+
+// copy constructor
+IntVecData::IntVecData(const IntVecData& src) { init(src.len,src.data);}
+
 const char* IntVecData::dataType() const { return "IntVecData";}
 
 ISA_FUNC(IntVecData,Message);

@@ -108,7 +108,7 @@ public:
 
 	// class identification
 	/* virtual */ int isA(const char*) const;
-	/* virtual */ const char* className() const {return "Galaxy";}
+	/* virtual */ const char* className() const;
 
 	// system initialize method.  Derived Galaxies should not
 	// redefine initialize; they should write a start() method

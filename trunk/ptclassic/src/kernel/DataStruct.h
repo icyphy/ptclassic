@@ -71,11 +71,7 @@ public:
 	SequentialList() : lastNode(0), dimen(0) {}
 
 	// constructor, with argument
-	SequentialList(Pointer a) : dimen(1)
-	{
-		INC_LOG_NEW; lastNode= new SingleLink(a,0);
-		lastNode->next=lastNode;
-	}
+	SequentialList(Pointer a);
 
 	int size() const { return dimen;}
 	
