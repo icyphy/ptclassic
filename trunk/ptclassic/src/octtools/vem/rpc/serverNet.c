@@ -580,7 +580,12 @@ long userOptionWord;
     char number[4];
     long *pointer;
     char remoteUser[128];
-    extern long time();    
+#ifdef PTULTRIX			/* PTULTRIX defined in
+				   src/compat/ptolemy/compat.h */ 
+    extern time_t time();
+#else
+    extern long time();
+#endif
 
     application = RPCAddApplication(host, path);
 
