@@ -83,7 +83,7 @@ ifdef FULL
 	PN =		1
 	ACS =		1
 	SDFFULL =	1
-#	SR =		1
+	SR =		1
 #	SRCGC =		1
 	VHDLFULL =	1
 	VHDLB =		1
