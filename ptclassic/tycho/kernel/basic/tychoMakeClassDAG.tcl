@@ -29,18 +29,22 @@
 # 						PT_COPYRIGHT_VERSION_2
 # 						COPYRIGHTENDKEY
 
+# FIXME: This is a temporary hack.  tydoc should generate this info.
+
 #### tychoMkClassGraph
 # Make a class graph of the type displayed by the Tycho EditDAG class.
-# The first argument is the name of the graph.
-# The second argument is the name of the graph file to create.
-# The rest of the arguments are any number of file names
-# from which the graph should be created.
-# FIXME: This is a temporary hack.  tydoc should generate this info.
+# The first argument is the name of the graph. The second argument is
+# the name of the graph file to create. The rest of the arguments are
+# any number of file names from which the graph should be created.
+# These file names should be absolute (or relative to an environment
+# variable like TYCHO) that the resulting hyperlinks work from any
+# directory. To create a graph for the entire Tycho tree, use the
+# procedure <code>tychoStandardClasses</code>.
 #
 proc tychoMkClassGraph {name filename args} {
     set entries {}
     foreach file $args {
-	set fd [open $file r]
+	set fd [open [::tycho::expandPath $file] r]
 	set contents [read $fd]
 	close $fd
         set nm {}
@@ -61,6 +65,12 @@ proc tychoMkClassGraph {name filename args} {
     }
         
     set fd [open $filename w]
+
+    # Put in titles and a reasonable default size.
+    puts $fd "\{configure -canvasheight 600\} \{configure -canvaswidth 800\}"
+    puts $fd "\{centeredText \{$name\} title \{\} black \{\{helvetica 24 bold i\} \{times 24 bold i\}\}\}"
+    # NOTE: Unix-only implementation:
+    puts $fd "\{centeredText \{created: [exec date]\} subtitle title firebrick \{\{helvetica 16 bold i\} \{times 16 bold i\}\}\}"
     foreach nm [array names classfile] {
         set pnt $parent($nm)
         set rxp "\[ \t\]*class\[ \t\]+$nm"
@@ -70,6 +80,28 @@ proc tychoMkClassGraph {name filename args} {
         regexp "::(\[^: \t\]*)\$" $nm match sname
         puts $fd "\{add $nm \{label \{$sname\} link \{$classfile($nm) \{$rxp\}\}\} \{$pnt\}\}"
     }
-    puts $fd "\{verifyAll 1\}"
     close $fd
+}
+
+#### tychoStandardClasses
+# Update the Tycho classes graph.
+#
+proc tychoStandardDAG {} {
+    global TYCHO
+    set olddir [pwd]
+    cd $TYCHO
+
+    set dirs [list \
+            kernel \
+            [file join editors textedit] \
+            [file join editors visedit]]
+
+    foreach dir $dirs {
+        eval lappend files [glob [file join $dir {*.itcl}]]
+    }
+    foreach file $files {
+        lappend filesenv [file join "\$TYCHO" $file]
+    }
+    eval tychoMkClassGraph {{Tycho Class Hierarchy}} tychoClasses.dag $filesenv
+    cd $olddir
 }
