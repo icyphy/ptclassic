@@ -115,9 +115,9 @@ public:
 	// redefine the execution time of a star
 	/* virtual */ int execTime(DataFlowStar*, CGTarget*);
 
-	// check whether communication ammortization is possible.
+	// check whether communication amortization is possible.
 	// If yes, return TRUE, else return FALSE.
-	int ammortize(int from, int to);
+	int amortize(int from, int to);
 
 protected:
 	void setup();
@@ -136,7 +136,7 @@ protected:
 	StringState filePrefix;
 	IntState ganttChart;
 	StringState logFile;
-	IntState ammortizedComm;
+	IntState amortizedComm;
 
 	// prepare child targets: create and initialize.
 	virtual void prepareChildren();
