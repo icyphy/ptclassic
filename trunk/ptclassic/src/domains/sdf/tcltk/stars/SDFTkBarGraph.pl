@@ -64,14 +64,21 @@ limitation of liability, and disclaimer of warranty provisions.
 		default { "+0+0" }
 		desc { Width of the bar graph in centimeters }
 	}
+	defstate {
+	        name {updateSize}
+	        type {int}
+	        default {1}
+	        desc { To speed up the display, this many bars are updated at once }
+	}
 	protected {
 		BarGraph bar;
-		int count;
+		int count,batchCount;
 	}
 	setup {
 	    if(double(top) <= double(bottom)) {
 		Error::abortRun(*this, "invalid range for the scale");
 	    }
+	    input.setSDFParams(1,(int)updateSize-1);
 	    // Need to make non-const copies of "position" and "label"
 	    InfString posCopy((const char*)position);
 	    InfString labCopy((const char*)label);
@@ -84,19 +91,26 @@ limitation of liability, and disclaimer of warranty provisions.
 		(char*) posCopy,
 		(double) bar_graph_width,
 		(double) bar_graph_height);
-	    count = 0;
+	    count = batchCount = 0;
 	}
 	go {
+	  if (++batchCount == (int)updateSize) {
+	    batchCount = 0;
 	    MPHIter nexti(input);
 	    PortHole *p;
-	    int i=0;
-	    while ((p = nexti++) != 0) {
-		if(bar.update(i++,count,(*p)%0) == FALSE) {
-		    Error::abortRun(*this, "failed to update bar chart");
-		    return;
+	    // Iterate over the number of points to be plotted at once.
+	    for (int j = (int)updateSize-1; j >= 0; j--) {
+	      int i=0;
+	      while ((p = nexti++) != 0) {
+		if(bar.update(i++,count,(*p)%j) == FALSE) {
+		  Error::abortRun(*this, "failed to update bar chart");
+		  return;
 		}
+	      }
+	      nexti.reset();
+	      count++;
+	      if(count >= int(number_of_bars)) count=0;
 	    }
-	    count++;
-	    if(count >= int(number_of_bars)) count=0;
+	  }
 	}
 }
