@@ -84,20 +84,26 @@ the function definition (for example, main()), "mainDecls" stream,
 "wormOut" streams are placed at the beginning and at the end of
 the main loop body respectively.
 To add code strings to these code streams, we can use
-.c getStream(stream-name)->put(code-string, optional name) .
+.(c 
+getStream(stream-name)->put(code-string, optional name).
+.)c
 For star writers, some methods are defined the 
 .c CGCStar
 class:
+.ip
 .c addInclude()
 to include file names into the "include" code stream,
+.ip
 .c addGlobal()
 to add codes into the "globalDecls" stream,
+.ip
 .c addDeclaration()
 to add codes into the "mainDecls" stream, and
+.ip
 .c addMainInit()
 to add codes into the "mainInit" stream.
 .pp
-One of the main task of the target is to allocate resources. In c-code
+One of the main task of the target is to allocate resources. In the c-code
 generation domain, the global names are the resources to be managed.
 We need to assign a unique name for each block and their portholes, states,
 and variable. One approach was to use a structure (
@@ -127,8 +133,9 @@ scheduling option is taken). The generated code will look like:
 .)c
 The minimum buffer size of the connection
 between A and B is 4. Unfortunately, the runtime cost of this 
-minimum allocation is prohibitively high. First of all, at the second,
-the starting location to write a token to the buffer, which is 3,
+minimum allocation is prohibitively high. First of all, at the second
+iteration,
+the starting location of the buffer to write a token, which is 3,
 is not the same as that of the first iteration, 1. Thus, we need to
 use an indirect addressing through an index pointer. Second, the second
 invocation of B has to access the buffer locations in the following order:
@@ -247,13 +254,13 @@ the body of codeblock() macro in the
 .c CGCRamp 
 star. The value of
 the state \fBstep\fR is accessed by the 
-.c val
+.c $val
 macro, and the references of porthole 
 .c output 
 and state
 .c value
 are made by
-.c ref
+.c $ref
 macro as explained in the CG domain documentation. In go() method
 of the CGCRamp star, the code is added to a stream in the target
 by addCode() method.
@@ -322,7 +329,7 @@ defstar {
 	}
 }
 .)c
-This example shows some difference between simulation stars and 
+This example shows some differences between simulation stars and 
 C-code generation stars. In the simulation star, we can access
 each input port by \fIiterating\fR the input multi-ports. We can not
 do the same thing in the generated C-code since each input porthole
@@ -384,7 +391,7 @@ Since the
 .c starSymbol
 macro guarantees the uniqueness of the variable, we do not need to
 give the unique name for that declaration statement. On the other
-hand, a included file is always checked for uniqueness, so we don't
+hand, each included file is always checked for uniqueness, so we don't
 have to give a unique name. The 
 .c addMainInit()
 .Ir "addMainInit, method"
@@ -442,7 +449,7 @@ defstar {
 }
 .)c
 Since the output porthole is complex, we use
-.c ref
+.c $ref
 macro appended by ".real" or ".imag" to access the real or imaginary
 part of the predefined \fBcomplex\fR structure.
 Type conversion between complex data types and integer or float data
