@@ -208,7 +208,6 @@ endif
 
 ifdef VHDL
 	CUSTOM_DIRS += $(VHDLFDIR)/kernel $(VHDLFDIR)/stars \
-		 $(VHDLFDIR)/targets  $(VHDLBDIR)/targets \
 		$(VHDLBDIR)/kernel $(VHDLBDIR)/stars 
 	CG = 1
 	SDFLIB = 1
