@@ -1,3 +1,5 @@
+/* -*- c++ -*- */
+
 #ifndef _SRPortHole_h
 #define _SRPortHole_h
 
@@ -25,10 +27,10 @@ PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
 CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
 
-    Programmer:		T.M. Parks
-    Date of creation:	5 January 1992
+    Author:	S. A. Edwards
+    Created:	14 April 1996
 
-    Definitions of domain-specific PortHole classes.
+    Definition of the SR domain's PortHole classes.
 */
 
 #ifdef __GNUG__
@@ -37,51 +39,108 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #include "PortHole.h"
 
-class SRPortHole : public PortHole
-{
+	//////////////////////////////
+	// class SRPortHole
+	//////////////////////////////
+
+class SRPortHole : public PortHole {
 public:
-    // Class identification.
-    virtual int isA(const char* className) const;
+  // Class identification
+  virtual int isA(const char* className) const;
+
+  // Return TRUE if the particle in the port hole is known (present or absent)
+  virtual int known() const;
+
+  // Return TRUE if this input is (known as) present
+  virtual int present() const;
+
 };
 
-class InSRPort : public SRPortHole
-{
+	//////////////////////////////
+	// class InSRPort
+	//////////////////////////////
+
+class InSRPort : public SRPortHole {
 public:
-    // Input/output identification.
-    virtual int isItInput() const;
+
+  // Input/output identification.
+  virtual int isItInput() const;
+
+  // Return the particle being emitted
+  Particle & get() const;
+
+
+  /*virtual*/ int known() const;
+  /*virtual*/ int present() const;
+  
 };
 
+	//////////////////////////////
+	// class OutSRPort
+	//////////////////////////////
 
-class OutSRPort : public SRPortHole
-{
+class OutSRPort : public SRPortHole {
+
+  friend class InSRPort;
+
+private:
+
+  // The particle emitted by this Port Hole.  0 denotes unknown,
+  // 1 denotes absent, and everything else is a present particle.
+  Particle * emittedParticle;
+
 public:
-    // Input/output identification.
-    virtual int isItOutput() const;
+
+  // Destroy the particle in the port, if any, resetting it to "unknown"
+  void clearPort();
+
+  // Input/output identification.
+  virtual int isItOutput() const;
+
+  // Make the particle known absent
+  void absent();
+
+  // Emit a particle
+  Particle & emit();
+
+  /*virtual*/ int known() const;
+  /*virtual*/ int present() const;
+
+  void initialize();
+
 };
 
+	//////////////////////////////
+	// class MultiSRPort
+	//////////////////////////////
  
-class MultiSRPort : public MultiPortHole
-{
+class MultiSRPort : public MultiPortHole {
 };
 
-class MultiInSRPort : public MultiSRPort
-{
-public:
-    // Input/output identification.
-    virtual int isItInput() const;
- 
-    // Add a new physical port to the MultiPortHole list.
-    virtual PortHole& newPort();
-};
- 
-class MultiOutSRPort : public MultiSRPort
-{     
-public:
-    // Input/output identification.
-    virtual int isItOutput() const;
+	//////////////////////////////
+	// class MultiInSRPort
+	//////////////////////////////
 
-    // Add a new physical port to the MultiPortHole list.
-    virtual PortHole& newPort();
+class MultiInSRPort : public MultiSRPort {
+public:
+  // Input/output identification.
+  virtual int isItInput() const;
+ 
+  // Add a new physical port to the MultiPortHole list.
+  virtual PortHole& newPort();
+};
+
+	//////////////////////////////
+	// class MultiOutSRPort
+	//////////////////////////////
+ 
+class MultiOutSRPort : public MultiSRPort {     
+public:
+  // Input/output identification.
+  virtual int isItOutput() const;
+
+  // Add a new physical port to the MultiPortHole list.
+  virtual PortHole& newPort();
 };
 
 #endif

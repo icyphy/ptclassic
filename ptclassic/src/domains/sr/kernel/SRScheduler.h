@@ -1,9 +1,11 @@
+/* -*- C++ -*- */
+
 #ifndef _SRScheduler_h
 #define _SRScheduler_h
 
-/*  Version $Id$
+/*  Version @(#)SRScheduler.h	1.1 3/19/96
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990- The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -38,27 +40,32 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 class SRScheduler : public Scheduler
 {
+private:
+
+  // Tick in which to stop
+  double stopTime;
+  
 public:
-    // Constructor.
-    SRScheduler();
+  // Constructor.
+  SRScheduler();
 
-    // Domain identification.
-    /*virtual*/ const char* domain() const;
+  // Domain identification.
+  /*virtual*/ const char* domain() const;
 
-    // Initialization.
-    /*virtual*/ void setup();
+  // Initialization.
+  /*virtual*/ void setup();
 
-    // Run (or continue) the simulation.
-    /*virtual*/ int run();
+  // Run (or continue) the simulation.
+  /*virtual*/ int run();
 
-    // Get the stopping time.
-    /*virtual*/ double getStopTime();
+  // Get the stopping time.
+  /*virtual*/ double getStopTime();
 
-    // Set the stopping time.
-    /*virtual*/ void setStopTime(double);
+  // Set the stopping time.
+  /*virtual*/ void setStopTime(double);
 
-    // Set the stopping time when inside a Wormhole.
-    /*virtual*/ void resetStopTime(double);
+  // Set the stopping time when inside a Wormhole.
+  /*virtual*/ // void resetStopTime(double);
 };
 
 #endif
