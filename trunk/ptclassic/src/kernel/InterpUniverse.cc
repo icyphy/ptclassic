@@ -103,7 +103,10 @@ void InterpUniverse :: initTarget() {
 }
 
 // isa
-// FIXME: This is not quite right since it does not check both parents
-// (InterpGalaxy and Runnable).  It can't check Runnable right now
-// because Runnable does not have isA defined!
-ISA_FUNC(InterpUniverse,InterpGalaxy);
+int InterpUniverse :: isA(const char* cname) const {
+    if (strcmp(cname,"InterpUniverse") == 0) {
+        return TRUE;
+    } else {
+        return (InterpGalaxy::isA(cname) || Runnable::isA(cname));
+    }
+}
