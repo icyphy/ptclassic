@@ -30,6 +30,17 @@ Date of last revision:
 
 // main body of the parallel schedule
 
+
+ParScheduler :: ParScheduler(BaseMultiTarget* t, const char* logName) {
+	mtarget = t;
+	logFile = logName;
+	exGraph = 0;
+	inUniv = TRUE;
+}
+
+ParScheduler :: ~ParScheduler() {
+}
+
 int ParScheduler :: computeSchedule(Galaxy& galaxy)
 {
 	myGal = &galaxy;
@@ -41,27 +52,15 @@ int ParScheduler :: computeSchedule(Galaxy& galaxy)
 			return FALSE;
 		} 
 	} else {
-	   // log file stuff.
-	   const char* file = logFile;
-	   logstrm = 0;
-	   if (file && *file) {
-		if (strcmp(file,"cerr") == 0 || strcmp(file,"stderr") == 0)
-			logstrm = &cerr;
-		else {
-			int fd = creat(expandPathName(file), 0666);
-			if (fd < 0)
-			   Error::warn(galaxy, "Can't open log file ",file);
-			else {
-			   LOG_NEW; logstrm = new ofstream(fd);
-			}
-		}
-	   }
+	       if ( logFile && logFile != '\0' ) {
+		    logstrm.open(logFile);
+	       }
 	}
 
-	if (logstrm)
-		*logstrm << "Starting computeSchedule\n";
+	if (logstrm.good())
+		logstrm << "Starting computeSchedule\n";
 
-	exGraph->setLog(logstrm);
+	exGraph->setLog(&logstrm);
 
 	// form the expanded graph
 	if (!exGraph->createMe(galaxy, OSOPreq())) {
@@ -92,19 +91,13 @@ int ParScheduler :: computeSchedule(Galaxy& galaxy)
 	// targetPtr setup for each processor
 	parProcs->mapTargets();
 
-	// delete logging stream
-	if (logstrm) {
-		logstrm->flush();
+	if (logstrm.good()) {
+		logstrm.flush();
 	}
 
         return TRUE;
 }
 
-ParScheduler :: ~ParScheduler() {
-	if (logstrm != &cerr) {
-		LOG_DEL; delete logstrm;
-	}
-}
 
 /////////////////////////////
 // setUpProcs
@@ -212,9 +205,9 @@ void ParScheduler :: compileRun() {
 		return;
 	}
 
-	if (logstrm) {
-		*logstrm << parProcs->displaySubUnivs();
-		logstrm->flush();
+	if (logstrm.good()) {
+		logstrm << parProcs->displaySubUnivs();
+		logstrm.flush();
 	}
 
 	// run sub-universe in each processor to generate the code
