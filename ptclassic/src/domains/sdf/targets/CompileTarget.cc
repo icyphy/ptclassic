@@ -3,7 +3,7 @@ static const char file_id[] = "CompileTarget.cc";
 Version identification:
 $Id$
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -46,6 +46,7 @@ a universe.
 #include "CompileTarget.h"
 #include "miscFuncs.h"
 #include "Scope.h"
+#include "AcyLoopScheduler.h"
 #include "LoopScheduler.h"
 #include "KnownTarget.h"
 #include "Galaxy.h"
@@ -62,6 +63,7 @@ CompileTarget::CompileTarget(const char* nam,
 			     const char* desc)
 : HLLTarget(nam,stype,desc)
 {
+	destDirectory.setInitValue("~/PTOLEMY_SYSTEMS/SDF");
 }
 
 Block* CompileTarget::makeNew() const {
@@ -70,19 +72,30 @@ Block* CompileTarget::makeNew() const {
 
 void CompileTarget::setup() {
 	char* schedFileName = 0;
+	SDFScheduler *s;
 	writeDirectoryName(destDirectory);
 	int lv = int(loopingLevel);
-	if (lv) {
+	switch(lv) {
+	case 0:
+		LOG_NEW; s = new SDFScheduler;
+		break;
+	case 1:
 		schedFileName = writeFileName("schedule.log");
-		if (lv == 1) {
-			LOG_NEW; setSched(new SDFClustSched(schedFileName));
-		} else {
-			LOG_NEW; setSched(new LoopScheduler(schedFileName));
-		}
+		LOG_NEW; s = new SDFClustSched(schedFileName);
+		break;
+	case 2:
+		schedFileName = writeFileName("schedule.log");
+		LOG_NEW; s = new LoopScheduler(schedFileName);
+		break;
+	case 3:
+		LOG_NEW; s = new AcyLoopScheduler;
+		break;
+	default:
+		Error::abortRun(*this,"Unknown scheduler");
+		return;
 	}
-	else {
-		LOG_NEW; setSched(new SDFScheduler);
-	}
+	setSched(s);
+
 	// This kludge bypasses setup() in CGTarget, which casts
 	// the portholes to CGPortHole.  These casts are no good for
 	// this target, which has SDFPortHole types.
