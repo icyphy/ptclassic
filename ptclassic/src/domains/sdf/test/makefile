@@ -47,6 +47,7 @@ SIMPLE_TESTS = \
 	testSDFArith.tcl \
 	testSDFConv.tcl \
 	testSDFDSP.tcl \
+	testSDFFourier.tcl \
 	testSDFMatrix.tcl
 
 GRAPHICAL_TESTS = \
