@@ -78,7 +78,7 @@ public:
 
 protected:
 	// CodeStreams.
-	CodeStream cli_models;
+//	CodeStream cli_models;
 	CodeStream cli_comps;
 	CodeStream cli_configs;
 
@@ -119,8 +119,8 @@ private:
 
 	VHDLGenericList mainGenList;
 	VHDLPortList mainPortList;
-	VHDLGenericList mainGenMapList;
-	VHDLPortList mainPortMapList;
+//	VHDLGenericList mainGenMapList;
+//	VHDLPortList mainPortMapList;
 	VHDLSignalList topSignalList;
 //	VHDLCompDeclList topCompMapList;
 	VHDLCompDeclList topCompDeclList;
