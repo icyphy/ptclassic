@@ -172,10 +172,120 @@ delim off
 .tm headerU \\n(AS-\\n% \\$1 \"Output for table of contents
 ..
 
+.\"
+.\" If the Ic variable is 0, .LO just prints out the location.
+.\" If it's non-zero, .LO tries to include postscript code for
+.\" star icons.  Because the location argument varies so widely
+.\" and contains a variety of formats, we have to do a bunch of
+.\" comparisons to map the location description into the pathmame
+.\" of the file that contains the postscript for the icon.
+.\"
 .de LO \"Location
 .\" Single argument is the location
 .br
-.uh "\\f\\n(SXLOCATION:\\fR \\$1"
+.na
+.if \\n(Ic .ta 5i
+.if !\\n(Ic .uh "\\f\\n(SXLOCATION:\\fR \\$1"
+.if \\n(Ic .uh "\\f\\n(SXLOCATION:\\fR \\$1	\\f\\n(SXICON:\\fR"
+.nr Im 0
+.\"
+.if \\n(Ic .if '\\$1'CG56 arithmetic library' \{\
+.Ps /usr/users/ptolemy/src/domains/cg56/icons/\\*(NM.ps 1i
+.nr Im 1 \}
+.if \\n(Ic .if '\\$1'CG56 control library' \{\
+.Ps /usr/users/ptolemy/src/domains/cg56/icons/\\*(NM.ps 1i
+.nr Im 1 \}
+.if \\n(Ic .if '\\$1'CG56 demo library' \{\
+.Ps /usr/users/ptolemy/src/domains/cg56/icons/\\*(NM.ps 1i
+.nr Im 1 \}
+.if \\n(Ic .if '\\$1'CG56 dsp library' \{\
+.Ps /usr/users/ptolemy/src/domains/cg56/dsp/icons/\\*(NM.ps 1i
+.nr Im 1 \}
+.if \\n(Ic .if '\\$1'CG56 nonlinear functions library' \{\
+.Ps /usr/users/ptolemy/src/domains/cg56/icons/\\*(NM.ps 1i
+.nr Im 1 \}
+.if \\n(Ic .if '\\$1'CG56 signal sources library' \{\
+.Ps /usr/users/ptolemy/src/domains/cg56/icons/\\*(NM.ps 1i
+.nr Im 1 \}
+.\"
+.if \\n(Ic .if '\\$1'SDF comm library' \{\
+.Ps /usr/users/ptolemy/src/domains/sdf/icons/\\*(NM.ps 1i
+.nr Im 1 \}
+.if \\n(Ic .if '\\$1'SDF comm palette' \{\
+.Ps /usr/users/ptolemy/src/domains/sdf/icons/\\*(NM.ps 1i
+.nr Im 1 \}
+.if \\n(Ic .if '\\$1'SDF communications palette' \{\
+.Ps /usr/users/ptolemy/src/domains/sdf/icons/\\*(NM.ps 1i
+.nr Im 1 \}
+.if \\n(Ic .if '\\$1'SDF conversion palette' \{\
+.Ps /usr/users/ptolemy/src/domains/sdf/icons/\\*(NM.ps 1i
+.nr Im 1 \}
+.if \\n(Ic .if '\\$1'SDF dsp library' \{\
+.Ps /usr/users/ptolemy/src/domains/sdf/dsp/icons/\\*(NM.ps 1i
+.nr Im 1 \}
+.if \\n(Ic .if '\\$1'SDF dsp palette' \{\
+.Ps /usr/users/ptolemy/src/domains/sdf/dsp/icons/\\*(NM.ps 1i
+.nr Im 1 \}
+.if \\n(Ic .if '\\$1'SDF image library' \{\
+.Ps /usr/users/ptolemy/src/domains/sdf/image/icons/\\*(NM.ps 1i
+.nr Im 1 \}
+.if \\n(Ic .if '\\$1'SDF image palette' \{\
+.Ps /usr/users/ptolemy/src/domains/sdf/image/icons/\\*(NM.ps 1i
+.nr Im 1 \}
+.if \\n(Ic .if '\\$1'SDF main library' \{\
+.Ps /usr/users/ptolemy/src/domains/sdf/icons/\\*(NM.ps 1i
+.nr Im 1 \}
+.if \\n(Ic .if '\\$1'SDF non-linear palette' \{\
+.Ps /usr/users/ptolemy/src/domains/sdf/icons/\\*(NM.ps 1i
+.nr Im 1 \}
+.if \\n(Ic .if '\\$1'SDF nonlinear palette' \{\
+.Ps /usr/users/ptolemy/src/domains/sdf/icons/\\*(NM.ps 1i
+.nr Im 1 \}
+.if \\n(Ic .if '\\$1'SDF sources palette' \{\
+.Ps /usr/users/ptolemy/src/domains/sdf/icons/\\*(NM.ps 1i
+.nr Im 1 \}
+.\"
+.if \\n(Ic .if '\\$1'SDF comm library (galaxy)' \{\
+.Ps /usr/users/ptolemy/src/domains/sdf/demo/\\*(NM.ps 1i
+.nr Im 1 \}
+.if \\n(Ic .if '\\$1'SDF comm palette (galaxy)' \{\
+.Ps /usr/users/ptolemy/src/domains/sdf/demo/\\*(NM.ps 1i
+.nr Im 1 \}
+.if \\n(Ic .if '\\$1'SDF communications palette (galaxy)' \{\
+.Ps /usr/users/ptolemy/src/domains/sdf/demo/\\*(NM.ps 1i
+.nr Im 1 \}
+.if \\n(Ic .if '\\$1'SDF conversion palette (galaxy)' \{\
+.Ps /usr/users/ptolemy/src/domains/sdf/demo/\\*(NM.ps 1i
+.nr Im 1 \}
+.if \\n(Ic .if '\\$1'SDF dsp library (galaxy)' \{\
+.Ps /usr/users/ptolemy/src/domains/sdf/demo/\\*(NM.ps 1i
+.nr Im 1 \}
+.if \\n(Ic .if '\\$1'SDF main library (galaxy)' \{\
+.Ps /usr/users/ptolemy/src/domains/sdf/demo/\\*(NM.ps 1i
+.nr Im 1 \}
+.if \\n(Ic .if '\\$1'SDF nonlinear palette (galaxy)' \{\
+.Ps /usr/users/ptolemy/src/domains/sdf/demo/\\*(NM.ps 1i
+.nr Im 1 \}
+.if \\n(Ic .if '\\$1'SDF sources palette (galaxy)' \{\
+.Ps /usr/users/ptolemy/src/domains/sdf/demo/\\*(NM.ps 1i
+.nr Im 1 \}
+.\"
+.if \\n(Ic .if '\\$1'~ptolemy/src/domains/sdf/demo' \{\
+.Ps /usr/users/ptolemy/src/domains/sdf/demo/\\*(NM.ps 1i
+.nr Im 1 \}
+.if \\n(Ic .if '\\$1'~ptolemy/src/domains/sdf/utilities' \{\
+.Ps /usr/users/ptolemy/src/domains/sdf/utilities/\\*(NM.ps 1i
+.nr Im 1 \}
+.if \\n(Ic .if !\\n(Im .Ps \\$1.ps
+.ad
+..
+
+.\" Postscript inclusion macro, for use with Phil's included postscript stuff.
+.\" $1 is the file, $2 is width/height in inches.  The ".sp -1" backs us up
+.\" one line so things come out where you'd expect.
+.de Ps
+	PSINCLUDE:\\$1:\w@\h@\\$2@@
+.sp -1
 ..
 
 .de LD \"long description
