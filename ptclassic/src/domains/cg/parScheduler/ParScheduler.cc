@@ -2,7 +2,7 @@ static const char file_id[] = "ParScheduler.cc";
 
 /*****************************************************************
 Version identification:
-$Id$
+@(#)ParScheduler.cc	1.3	7/15/92
 
 Copyright (c) 1991 The Regents of the University of California.
                         All Rights Reserved.
@@ -35,10 +35,17 @@ int ParScheduler :: computeSchedule(Galaxy& galaxy)
 {
 	myGal = &galaxy;
 
-	// log file stuff.
-	const char* file = logFile;
-	logstrm = 0;
-	if (file && *file) {
+	if (overrideSchedule()) {
+		if (!exGraph) {
+			Error::abortRun("We can not override an empty",
+			"schedule.");
+			return FALSE;
+		} 
+	} else {
+	   // log file stuff.
+	   const char* file = logFile;
+	   logstrm = 0;
+	   if (file && *file) {
 		if (strcmp(file,"cerr") == 0 || strcmp(file,"stderr") == 0)
 			logstrm = &cerr;
 		else {
@@ -49,6 +56,7 @@ int ParScheduler :: computeSchedule(Galaxy& galaxy)
 			   LOG_NEW; logstrm = new ofstream(fd);
 			}
 		}
+	   }
 	}
 
 	if (logstrm)
@@ -57,7 +65,7 @@ int ParScheduler :: computeSchedule(Galaxy& galaxy)
 	exGraph->setLog(logstrm);
 
 	// form the expanded graph
-	if (!exGraph->createMe(galaxy)) {
+	if (!exGraph->createMe(galaxy, OSOPreq())) {
 		Error::abortRun("Could not create expanded graph");
 		invalid = TRUE;
 		return FALSE;
@@ -66,16 +74,29 @@ int ParScheduler :: computeSchedule(Galaxy& galaxy)
 	totalWork = exGraph->getExecTotal();
 
 	// prepare scheduling
-	if (!preSchedule()) return FALSE;
+	if (!preSchedule()) {
+		invalid = TRUE;
+		return FALSE;
+	}
 
 	// schedule it.
-	if(!scheduleIt()) return FALSE;
+	if(!mainSchedule(galaxy)) {
+		invalid = TRUE;
+		return FALSE;
+	}
 
 	// finalize the schedule of wormholes.
-	if (inUniv) finalSchedule(galaxy);
+	if (inUniv) {
+		finalSchedule(galaxy);
+		createSubGals();
+	 	if (logstrm)
+			*logstrm << parProcs->displaySubUnivs();
+	}
  
 	// delete logging stream
-	if (logstrm) logstrm->flush();
+	if (logstrm) {
+		logstrm->flush();
+	}
 	LOG_DEL; delete logstrm;
 
         return TRUE;
@@ -90,12 +111,80 @@ void ParScheduler :: setUpProcs(int num) {
 	avail.create(numProcs);
 }
 
+void ParScheduler :: createSubGals() {
+	exGraph->restoreHiddenGates();
+	parProcs->createSubGals();
+}
+
+/////////////////////////////
+// mainSchedule 
+/////////////////////////////
+
+int ParScheduler :: mainSchedule(Galaxy& g) {
+	// If manual assignment is requested
+	if (assignManually()) return scheduleManually(g);
+	// Else, call automatic scheduling routine.
+	else {
+		if(!scheduleIt()) return FALSE;
+		if (OSOPreq()) saveProcIds(g);
+	}
+	return TRUE;
+}
+
+/////////////////////////////
+// saveProcIds
+/////////////////////////////
+
+void ParScheduler :: saveProcIds(Galaxy& g) {
+	GalStarIter iter(g);
+	CGStar* s;
+	while ((s = (CGStar*) iter++) != 0) {
+		ParNode* n = (ParNode*) s->myMaster();
+		s->setProcId(n->getProcId());
+	}
+}
+
+/////////////////////////////
+// scheduleManually
+/////////////////////////////
+
+int ParScheduler :: scheduleManually(Galaxy& g) {
+	// Make sure all stars are assigned to processors.
+	GalStarIter iter(g);
+	CGStar* s;
+	while ((s = (CGStar*) iter++) != 0) {
+		if (s->getProcId() < 0) {
+			Error::abortRun(*s, " is not assigned a processor",
+				"Manual assignment fails.");
+			return FALSE;
+		} else if (s->getProcId() > numProcs) {
+			Error :: abortRun(*s, " procId is out of range",
+				"Manual assignment is failed");
+		} else {
+			// set procId of all invocations of the star
+			ParNode* n = (ParNode*) s->myMaster();
+			while (n) {
+				n->setProcId(s->getProcId());
+				n = (ParNode*) n->getNextInvoc();
+			}
+		}
+	}
+
+	// Based on the assignment, let's make a list schedule
+	mtarget->clearCommPattern();
+	parProcs->initialize();
+	exGraph->findRunnableNodes();
+	parProcs->listSchedule(exGraph);
+	mtarget->saveCommPattern();
+	return TRUE;
+}
+
 /////////////////////////////
 // virtual methods
 /////////////////////////////
 
-int ParScheduler :: scheduleIt() { return FALSE; }
 int ParScheduler :: preSchedule() { return TRUE; }
+int ParScheduler :: scheduleIt() { return FALSE; }
 
 /////////////////////////////
 // runOnce
