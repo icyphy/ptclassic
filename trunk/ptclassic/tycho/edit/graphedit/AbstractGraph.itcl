@@ -172,7 +172,7 @@ class ::tycho::AbstractGraph {
     method vertex {vertex args}
 
      # Get an attribute or attributes of a vertex
-    method vertexcget {vertex attribute}
+    method vertexcget {vertex {attribute {}}}
 
     # Configure the vertex with one or more attributes
     method vertexconfigure {vertex args}
