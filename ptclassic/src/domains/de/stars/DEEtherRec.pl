@@ -64,6 +64,11 @@ giving the time at which the particle should be sent to the output.
 	    // Flag used to identify the first firing
 	    int firstFiring;
 	}
+	constructor {
+	    recdData = 0;
+	    dataValid = FALSE;
+	    firstFiring = TRUE;
+	}
 	method {
 	    name { schedReception }
 	    access { public }
@@ -75,23 +80,23 @@ giving the time at which the particle should be sent to the output.
 		recdData = data.clone();
 		refireAtTime(firingTime);
 		feedbackOut->sendData();
-		dataValid = 1;
+		dataValid = TRUE;
 	    }
 	}
 	begin {
 	    DEEther::begin();
 
-	    firstFiring = 1;
-
-	    if(!registerReceiver(recName, this)) {
+	    if (!registerReceiver(recName, this)) {
 		Error::warn(*this,
 	"Additional receivers with the same name will be ignored. Name is ",
                         recName);
 	    }
 
-	    // Initialize the local flag to indicate that we don't now have
+	    // Initialize dataValid flag to indicate that we don't now have
 	    // valid data pending output.
-	    dataValid = 0;
+	    recdData = 0;
+	    dataValid = FALSE;
+	    firstFiring = TRUE;
 	}
 	go {
 	    if (dataValid) {
