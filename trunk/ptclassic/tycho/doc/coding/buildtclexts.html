@@ -6,11 +6,11 @@
 <body bgcolor="#faf0e6">
 <H1><A NAME="tcl extensions, building">Building Tcl Extensions</A></H1>
 
-Tycho optionally includes several Tcl extensions that consist of C
+Tycho optionally includes Tcl extensions that consist of C
 code that is compiled and loaded into a vanilla <CODE>itkwish</CODE>:
 
 <OL>
-
+<LI> <A HREF="../../src/tytest/index.html">Tycho's tytest package for testing other Tycho C packages</A>
 <LI> <A HREF="../../src/tytimer/index.html">Tycho's timer package</A>
 
 </OL>
@@ -212,7 +212,7 @@ HREF="../../src/makefile.in"><CODE>$TYCHO/src/makefile.in</CODE></A>
 and add your extension directory to the <CODE>DIRS</CODE> macro.
 
 <LI> Copy a <CODE>makefile.in</CODE> from another directory, such as 
-<CODE>src/profile/makefile.in</CODE> to the directory for your extension.
+<CODE>src/tytimer/makefile.in</CODE> to the directory for your extension.
 
 <LI> Edit the <CODE>makefile.in</CODE> appropriately. 
 <MENU>
