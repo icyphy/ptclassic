@@ -33,14 +33,17 @@
 
 # Options from the derived class
 option add *FileBrowser*entryWidth 30 widgetDefault
+
 option add *FileBrowser*entryBackground \
 	[ptkColor antiqueWhite white] widgetDefault
 option add *FileBrowser*entryForeground \
 	[ptkColor black black] widgetDefault
+
 option add *FileBrowser*textBackground \
 	[ptkColor antiqueWhite white] widgetDefault
-option add *FileBrowser.textForeground \
+option add *FileBrowser*textForeground \
 	[ptkColor black black] widgetDefault
+
 option add *FileBrowser.entryfont \
 	[.tychoFonts defaultFont fixed] widgetDefault
 option add *FileBrowser.width 30 widgetDefault
