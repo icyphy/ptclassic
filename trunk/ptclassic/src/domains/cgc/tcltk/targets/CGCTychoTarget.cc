@@ -55,6 +55,12 @@ ENHANCEMENTS, OR MODIFICATIONS.
 CGCTychoTarget::CGCTychoTarget(const char* name,const char* starclass,
                    const char* desc) : CGCTarget(name,starclass,desc) {
 
+        // These target parameters are not used, so make them
+        // invisible and not settable.
+        compileCommand.clearAttributes(A_SETTABLE);
+        compileOptions.clearAttributes(A_SETTABLE);
+        linkOptions.clearAttributes(A_SETTABLE);
+
 	loopingLevel.setInitValue("1");
 	addStream("mainLoopTerm", &mainLoopTerm);
         addStream("tychoSetup",&tychoSetup);
