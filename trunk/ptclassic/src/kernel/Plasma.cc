@@ -136,7 +136,7 @@ Plasma* Plasma :: makeNew(DataType t)
 void Plasma :: makeLock(const PtGate& master) {
 	if (!isLocal()) return;
 	LOG_DEL; delete gate;
-	gate = master.clone();
+	gate = master.makeNew();
 }
 
 void Plasma :: delLock() {

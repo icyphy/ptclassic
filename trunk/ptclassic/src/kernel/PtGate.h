@@ -40,8 +40,8 @@ This file defines classes that support multi-threading in the kernel.
 // PtGate is an abstract baseclass; derived classes typically provide the
 // desired semantics for use with a particular threads library (such
 // as Sun lightweight processes, Posix threads, etc.  The PtGate object
-// provides a "lock" and an "unlock" primitive.  Also, "clone" is a sort
-// of virtual constructor, permitting more identical PtGate objects to
+// provides a "lock" and an "unlock" primitive.  Also, "makeNew" is a sort
+// of virtual constructor, permitting more PtGate objects of the same type to
 // be constructed given a prototype.
 
 class PtGate
@@ -49,8 +49,8 @@ class PtGate
     friend class CriticalSection;
 public:
 	virtual ~PtGate();
-	// make a new, identical PtGate
-	virtual PtGate* clone() const = 0;
+	// make a new PtGate
+	virtual PtGate* makeNew() const = 0;
 protected:
 	// obtain exclusive use of the lock
 	virtual void lock() = 0;
