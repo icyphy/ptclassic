@@ -49,7 +49,7 @@ done with g++ (type "long long"), but it isn't portable.
 		else gencode (range1);
 	}
 	execTime {
-		return (double(range) < 1.0) ? 17 : 15;
+		return (double(range) < double(ONE)) ? 17 : 15;
 	}
 	// "code" to initialize the seed
 	codeblock(initSeed) {
