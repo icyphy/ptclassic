@@ -3,7 +3,10 @@ defstar {
     domain {SDF}
     derivedFrom { TclScript }
     desc {
-Displays the values of the inputs.
+Display the values of the inputs in textual form.
+The print method of the input particles is used,
+so any datatype can be handled, although the space
+allocated on the screen may need to be adjusted.
     }
     version { $Id$ }
     author { E. A. Lee }

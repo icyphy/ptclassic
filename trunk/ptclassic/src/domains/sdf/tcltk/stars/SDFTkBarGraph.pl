@@ -2,8 +2,9 @@ defstar {
 	name {TkBarGraph}
 	domain {SDF}
 	desc {
-Takes any number of inputs and dynamically
-displays their value in bar-chart form.
+Dynamically display the value of any number of input signals in bar-chart form.
+The first 12 input signals will be assigned distinct colors. After that,
+the colors are repeated. The colors can be controlled using X resources.
 	}
 	version { $Id$ }
 	author { E. A. Lee }

@@ -3,8 +3,7 @@ defstar {
 	domain {SDF}
 	derivedFrom { TclScript }
 	desc {
-Takes any number of inputs and dynamically
-displays their value on a set of sliding scales
+Dynamically display the value of any number of input signals on a set of bar meters.
 	}
 	version { $Id$ }
 	author { E. A. Lee }
