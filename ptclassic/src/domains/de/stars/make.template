@@ -43,7 +43,16 @@ DEDIR = $(ROOT)/src/domains/de/kernel
 NETWK = $(ROOT)/src/domains/sdf/image/kernel
 INCL = -I$(DEDIR) -I$(KERNDIR) -I$(NETWK)
 
+# source files for all stars, using preprocessor
+# base classes/stars go in the front of the list
 PL_SRCS= \
+DEDelay.pl \
+DEEther.pl \
+DEQueueBase.pl \
+DERealTimeStar.pl \
+DESeqATMZero.pl \
+DEServer.pl \
+DETimeoutStar.pl \
 DEArbitrate.pl \
 DEBarGraph.pl \
 DEBeep.pl \
@@ -56,10 +65,8 @@ DECellToImage.pl \
 DECellUnload.pl \
 DEClock.pl \
 DEConst.pl \
-DEDelay.pl \
 DEDiscard.pl \
 DEEndCase.pl \
-DEEther.pl \
 DEEtherRec.pl \
 DEEtherSend.pl \
 DEFIFOQueue.pl \
@@ -87,14 +94,10 @@ DEPrinter.pl \
 DEPulseGen.pl \
 DERamp.pl \
 DEQueue.pl \
-DEQueueBase.pl \
 DERanGen.pl \
-DERealTimeStar.pl \
 DERouter.pl \
 DESampler.pl \
-DEServer.pl \
 DESeqATMSub.pl \
-DESeqATMZero.pl \
 DEStack.pl \
 DEStatistics.pl \
 DEStopTimer.pl \
@@ -102,7 +105,6 @@ DESynchronize.pl \
 DETest.pl \
 DETestLevel.pl \
 DETimeout.pl \
-DETimeoutStar.pl \
 DETimer.pl \
 DETimeStamp.pl \
 DEUDCounter.pl \
