@@ -25,8 +25,6 @@ void AsmGeodesic :: incCount(int n) {
 	if (size() > maxNumParticles) maxNumParticles = size();
 }
 
-inline int max(int i,int j) { return i > j ? i : j;}
-
 // recursive function to sum up fork buffer sizes
 int AsmGeodesic :: internalBufSize() const {
 	switch (forkType) {
