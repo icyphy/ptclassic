@@ -496,11 +496,11 @@ body ::tycho::Edit::constructor {args} {
     # that do the right thing.
     
     bind $text <KeyPress> \
-	    "if \[%Q recordCharForUndo %A\] {bell; break}"
-    bind $text <Control-Shift-Key> [code "%Q undoBoundary"]
-    bind $text <Control-Key> [code "%Q undoBoundary"]
-    bind $text <Meta-Key> [code "%Q undoBoundary"]
-    bind $text <Meta-Shift-Key> [code "%Q undoBoundary"]
+	    "if \[$this recordCharForUndo %A\] {bell; break}"
+    bind $text <Control-Shift-Key> [list $this undoBoundary]
+    bind $text <Control-Key> [list $this undoBoundary]
+    bind $text <Meta-Key> [list $this undoBoundary]
+    bind $text <Meta-Shift-Key> [list $this undoBoundary]
 
     # Stop Tycho from beeping when pressing Alt on read-only files
     bind $text <Alt_L> { }
@@ -512,117 +512,117 @@ body ::tycho::Edit::constructor {args} {
     
     # Bindings to highlight parenthesized regions
     bind $text <Key-parenright> \
-	    "if \[%Q recordCharForUndo %A\] {bell; break}; \
+	    "if \[$this recordCharForUndo %A\] {bell; break}; \
 	    $this closeParen paren ; break"
     bind $text <Key-braceright> \
-	    "if \[%Q recordCharForUndo %A\] {bell; break}; \
+	    "if \[$this recordCharForUndo %A\] {bell; break}; \
 	    $this closeParen brace ; break"
     bind $text <Key-bracketright> \
-	    "if \[%Q recordCharForUndo %A\] {bell; break}; \
+	    "if \[$this recordCharForUndo %A\] {bell; break}; \
 	    $this closeParen bracket ; break"
     
     # Modify the following bindings to mark modified and set up undo
-    bind $text <BackSpace> "%Q del char; break"
-    bind $text <Control-BackSpace> "%Q del word; break"
-    bind $text <Meta-BackSpace> "%Q del word; break"
-    bind $text <Escape><BackSpace> "%Q del word; break"
-    bind $text <Delete> "%Q del fchar; break"
-    bind $text <Control-Delete> "%Q del fword; break"
-    bind $text <Meta-Delete> "%Q del fword; break"
-    bind $text <Escape><Delete> "%Q del fword; break"
+    bind $text <BackSpace> "$this del char; break"
+    bind $text <Control-BackSpace> "$this del word; break"
+    bind $text <Meta-BackSpace> "$this del word; break"
+    bind $text <Escape><BackSpace> "$this del word; break"
+    bind $text <Delete> "$this del fchar; break"
+    bind $text <Control-Delete> "$this del fword; break"
+    bind $text <Meta-Delete> "$this del fword; break"
+    bind $text <Escape><Delete> "$this del fword; break"
 
     # Non-standard bindings
-    bind $text <Control-Key-h> "%Q del char; break"
-    bind $text <Meta-Control-Key-h> "%Q del word; break"
-    bind $text <Escape><Control-Key-h> "%Q del word; break"
-    bind $text <Control-d> "%Q del fchar; break"
-    bind $text <Meta-d> "%Q del fword; break"
-    bind $text <Escape><d> "%Q del fword; break"
+    bind $text <Control-Key-h> "$this del char; break"
+    bind $text <Meta-Control-Key-h> "$this del word; break"
+    bind $text <Escape><Control-Key-h> "$this del word; break"
+    bind $text <Control-d> "$this del fchar; break"
+    bind $text <Meta-d> "$this del fword; break"
+    bind $text <Escape><d> "$this del fword; break"
 
     # The virtual event <<Tab>> is the alternative for Tab.
     # In some derived classes, the tab key is rebound.  This binding
     # here ensures a uniform alternative.
-    bind $itk_component(text) <<Tab>> "%Q insertString insert {\t}; break"
+    bind $itk_component(text) <<Tab>> "$this insertString insert {\t}; break"
     
     # Cutting and pasting
-    bind $text <<Paste>> "%Q paste; break"
-    bind $text <Key-F18> "%Q paste; break"
-    bind $text <Insert> "%Q paste; break"
-    bind $text <<Cut>> "%Q cut; break"
-    bind $text <Key-F20> "%Q cut; break"
-    bind $text <<Copy>> "%Q copy; break"
-    bind $text <<Copy2>> "%Q copy; break"
-    bind $text <Key-F16> "%Q copy; break"
+    bind $text <<Paste>> "$this paste; break"
+    bind $text <Key-F18> "$this paste; break"
+    bind $text <Insert> "$this paste; break"
+    bind $text <<Cut>> "$this cut; break"
+    bind $text <Key-F20> "$this cut; break"
+    bind $text <<Copy>> "$this copy; break"
+    bind $text <<Copy2>> "$this copy; break"
+    bind $text <Key-F16> "$this copy; break"
     
-    bind $text <Button-2> "%Q recordMousePos %x %y"
-    bind $text <ButtonRelease-2> "%Q mouseStuff %x %y; break"
+    bind $text <Button-2> "$this recordMousePos %x %y"
+    bind $text <ButtonRelease-2> "$this mouseStuff %x %y; break"
     
-    bind $text <<SelectAll>> "%Q selectRange 1.0 end; break"
+    bind $text <<SelectAll>> "$this selectRange 1.0 end; break"
 
     # The following bindings are basically the same as in the Text
     # widget, but here they set up the undo and save data to our
     # clipboard.
-    bind $text <<ClearToEnd>> "%Q killToEndOfLine ; break"
-    bind $text <<ClearToStart>> "%Q killToStartOfLine ; break"
+    bind $text <<ClearToEnd>> "$this killToEndOfLine ; break"
+    bind $text <<ClearToStart>> "$this killToStartOfLine ; break"
     # Tab character alternate C-i (overridden by OpenLine)
     # bind $text <Control-i> \
-    #      "if \[%Q recordCharForUndo %A\] {bell; break}"
-    bind $text <<OpenLine>> "%Q openLine; break"
+    #      "if \[$this recordCharForUndo %A\] {bell; break}"
+    bind $text <<OpenLine>> "$this openLine; break"
         
     # Search commands
-    bind $text <Find> "%Q search; break"
-    bind $text <<Find>> "%Q search; break"
+    bind $text <Find> "$this search; break"
+    bind $text <<Find>> "$this search; break"
     # NOTE: There used to be separate bindings for case sensitive
     # and case insensitive.  Now we have only case insensitive
     # incremental search.
-    bind $text <<Search>> "%Q incSearchMinibuffer; break"
+    bind $text <<Search>> "$this incSearchMinibuffer; break"
     bind $text <<SearchBackwards>> \
-            "%Q incSearchMinibuffer 1; break"
+            "$this incSearchMinibuffer 1; break"
 
     # Spelling command
-    bind $text <<Spelling>> "%Q spellCheck; break"
-    bind $text <<Spelling2>> "%Q spellCheck; break"
+    bind $text <<Spelling>> "$this spellCheck; break"
+    bind $text <<Spelling2>> "$this spellCheck; break"
 
     # Scrolling commands
-    bind $text <<DownPage>> "%Q scroll 1; break"
-    bind $text <<UpPage>> "%Q scroll -1; break"
-    bind $text <<UpPage2>> "%Q scroll -1; break"
-    bind $text <<Center>> "%Q center; break"
+    bind $text <<DownPage>> "$this scroll 1; break"
+    bind $text <<UpPage>> "$this scroll -1; break"
+    bind $text <<UpPage2>> "$this scroll -1; break"
+    bind $text <<Center>> "$this center; break"
     
     # Regardless of binding preferences, page up and page down
     # buttons should behave reasonably.
-    bind $text <Next> "%Q scroll 1; break"
-    bind $text <Prior> "%Q scroll -1; break"
+    bind $text <Next> "$this scroll 1; break"
+    bind $text <Prior> "$this scroll -1; break"
 
     # The undo command
-    bind $text <<Undo>> "%Q undo; break"
+    bind $text <<Undo>> "$this undo; break"
 
     # The goto command
     bind $text <<Goto>> \
-	    "%Q gotoLine; break"
+	    "$this gotoLine; break"
     bind $text <<Top>> \
-            "%Q seeFragment {range 1.0 1.0}; break"
+            "$this seeFragment {range 1.0 1.0}; break"
     bind $text <<Bottom>> \
-            "%Q seeFragment {range end-1c end-1c}; break"
-    bind $text <End> +[code "%Q undoBoundary"]
-    bind $text <Home> +[code "%Q undoBoundary"]
+            "$this seeFragment {range end-1c end-1c}; break"
+    bind $text <End> +[list $this undoBoundary]
+    bind $text <Home> +[list $this undoBoundary]
 
     # The fillSelection commands
-    bind $text <<Fill>> "%Q busy %Q fillSelection; break"
+    bind $text <<Fill>> "$this busy $this fillSelection; break"
     bind $text <<Fill2>> \
-	    "%Q busy %Q fillSelection; break"
+	    "$this busy $this fillSelection; break"
     bind $text <<FillPrefix>> \
-	    "%Q queryFillPrefix; break"
+	    "$this queryFillPrefix; break"
     bind $text <<FillColumn>> \
-	    "%Q queryFillColumn; break"
+	    "$this queryFillColumn; break"
     
     # Case control
-    bind $text <<LowerCase>> "%Q lowerCase; break"
-    bind $text <<LowerCase2>> "%Q lowerCase; break"
-    bind $text <<UpperCase>> "%Q upperCase; break"
-    bind $text <<UpperCase2>> "%Q upperCase; break"
-    bind $text <<Capitalize>> "%Q capitalize; break"
-    bind $text <<Capitalize2>> "%Q capitalize; break"
+    bind $text <<LowerCase>> "$this lowerCase; break"
+    bind $text <<LowerCase2>> "$this lowerCase; break"
+    bind $text <<UpperCase>> "$this upperCase; break"
+    bind $text <<UpperCase2>> "$this upperCase; break"
+    bind $text <<Capitalize>> "$this capitalize; break"
+    bind $text <<Capitalize2>> "$this capitalize; break"
 
     # Cursor motion.
     bind $text <<LineStart>> \
@@ -633,20 +633,20 @@ body ::tycho::Edit::constructor {args} {
     # Although some of these make no sense for windows, them seem
     # pretty harmless, so we leave them in without intermediary
     # virtual events.
-    bind $text <Meta-f> "%Q move fword; break"
-    bind $text <Escape><f> "%Q move fword; break"
+    bind $text <Meta-f> "$this move fword; break"
+    bind $text <Escape><f> "$this move fword; break"
     # Override Tk binding to get more emacs-like behavior.
-    bind $text <Control-Right> "%Q move fword; break"
+    bind $text <Control-Right> "$this move fword; break"
     # So that Tk bindings work for extending the selection:
     bind $text <Control-Shift-Right> { }
-    bind $text <Meta-Right> "%Q move fword; break"
-    bind $text <Meta-b> "%Q move bword; break"
-    bind $text <Escape><b> "%Q move bword; break"
+    bind $text <Meta-Right> "$this move fword; break"
+    bind $text <Meta-b> "$this move bword; break"
+    bind $text <Escape><b> "$this move bword; break"
     # Override Tk binding to get more emacs-like behavior.
-    bind $text <Control-Left> "%Q move bword; break"
+    bind $text <Control-Left> "$this move bword; break"
     # So that Tk bindings work for extending the selection:
     bind $text <Control-Shift-Left> { }
-    bind $text <Meta-Left> "%Q move bword; break"
+    bind $text <Meta-Left> "$this move bword; break"
 
     # Cursor motion keys do not set the modified flag
     # Note that the definitions below have a blank space.
@@ -681,13 +681,13 @@ body ::tycho::Edit::constructor {args} {
     # The following do break a sequence of key entries for
     # the purposes of the undo.  I don't know why some systems
     # require the "KP" prefix, but here it is.
-    bind $text <Prior> +[code "%Q undoBoundary"]
-    bind $text <Next> +[code "%Q undoBoundary"]
-    bind $text <Up> +[code "%Q undoBoundary"]
-    bind $text <Right> +[code "%Q undoBoundary"]
-    bind $text <Down> +[code "%Q undoBoundary"]
-    bind $text <Left> +[code "%Q undoBoundary"]
-    bind $text <Pause> +[code "%Q undoBoundary"]
+    bind $text <Prior> +[list $this undoBoundary]
+    bind $text <Next> +[list $this undoBoundary]
+    bind $text <Up> +[list $this undoBoundary]
+    bind $text <Right> +[list $this undoBoundary]
+    bind $text <Down> +[list $this undoBoundary]
+    bind $text <Left> +[list $this undoBoundary]
+    bind $text <Pause> +[list $this undoBoundary]
     
     # font size control
     bind $text <Control-equal> "$this upSize"
@@ -701,15 +701,15 @@ body ::tycho::Edit::constructor {args} {
     # being undefined on some machines.  But they also seem
     # be needed for other machines.  Hence the catch.
     catch {
-	bind $text <KP_Insert> "%Q stuff; break"
-	bind $text <KP_Prior> [code "%Q undoBoundary"]
-	bind $text <KP_Next> [code "%Q undoBoundary"]
-	bind $text <KP_End> [code "%Q undoBoundary"]
-	bind $text <KP_Up> [code "%Q undoBoundary"]
-	bind $text <KP_Right> [code "%Q undoBoundary"]
-	bind $text <KP_Down> [code "%Q undoBoundary"]
-	bind $text <KP_Left> [code "%Q undoBoundary"]
-	bind $text <KP_Home> [code "%Q undoBoundary"]
+	bind $text <KP_Insert> "$this stuff; break"
+	bind $text <KP_Prior> [list $this undoBoundary]
+	bind $text <KP_Next> [list $this undoBoundary]
+	bind $text <KP_End> [list $this undoBoundary]
+	bind $text <KP_Up> [list $this undoBoundary]
+	bind $text <KP_Right> [list $this undoBoundary]
+	bind $text <KP_Down> [list $this undoBoundary]
+	bind $text <KP_Left> [list $this undoBoundary]
+	bind $text <KP_Home> [list $this undoBoundary]
     }
 
     # Initialize options and tell stylesheet manager to ignore them
