@@ -21,19 +21,13 @@ limitation of liability, and disclaimer of warranty provisions.
         /* Establish the Tk window for setting the value */
         makeScale(".high",
 		  "$starSymbol(scale1)",
-		  "Volume control",
+		  "Record volume control",
 		  $val(volume),
                   $starSymbol(setVolume));
 	displaySliderValue(".high", "$starSymbol(scale1)",
 			   "$val(volume)%");
-	makeScale(".low",
-		  "$starSymbol(scale2)",
-		  "Balance control",
-		  $val(balance),
-                  $starSymbol(setBalance));
-	displaySliderValue(".low", "$starSymbol(scale2)", "  $val(balance)%");
-
     }
+
     codeblock (setVolumeDef) {
         static int $starSymbol(setVolume)(dummy, interp, argc, argv)
             ClientData dummy;                   /* Not used. */
@@ -53,32 +47,10 @@ limitation of liability, and disclaimer of warranty provisions.
         }
     }
 
-    codeblock (setBalanceDef) {
-        static int $starSymbol(setBalance)(dummy, interp, argc, argv)
-            ClientData dummy;                   /* Not used. */
-            Tcl_Interp *interp;                 /* Current interpreter. */
-            int argc;                           /* Number of arguments. */
-            char **argv;                        /* Argument strings. */
-        {
-	    static char buf[20];
-            if(sscanf(argv[1], "%d", &$ref(balance)) != 1) {
-                errorReport("Invalid balance");
-                return TCL_ERROR;
-            }
-            $starSymbol(set_parameters) ();
-	    sprintf(buf, "%5d%%", $ref(balance));
-	    displaySliderValue(".low", "$starSymbol(scale2)", buf);
-            return TCL_OK;
-        }
-    }
-
-
-
-
     initCode {
 	CGCStereoIn :: initCode();
 	addCode(tkSetup, "tkSetup");
         addCode(setVolumeDef, "procedure");
-        addCode(setBalanceDef, "procedure");
     }
 }
+
