@@ -298,11 +298,18 @@ extern "C" int displayGanttChart(const char* file) {
 
 static void loadStartup(Tcl_Interp* interp) {
 	const char *pt = getenv("PTOLEMY");
-	if (!pt) pt = expandPathName("~ptolemy");
+	int newmemory = FALSE;
+	if (!pt) {
+	    pt = expandPathName("~ptolemy");
+	    newmemory = TRUE;
+	}
 	StringList startup = pt;
 	startup << "/lib/tcl/ptcl.tcl";
 	if (Tcl_EvalFile(interp, startup.chars()) != TCL_OK) {
-		fprintf(stderr, "ptcl: error in startup file: %s\n",
-		  interp->result);
+	    fprintf(stderr, "ptcl: error in startup file '%s'.\n",
+		    interp->result);
+	}
+	if ( newmemory ) {
+	    delete [] pt;
 	}
 }
