@@ -146,4 +146,11 @@ ifdef DIRS
 	done
 endif
 
+# Create tclIndex from .tcl and .itcl files
+# This rule must be after the TCL_SRC and ITCL_SRC lines in the makefile
+# that includes this makefile
+tclIndex: $(TCL_SRCS) $(ITCL_SRCS)
+	@echo "Updating tclIndex"
+	rm -f $@
+	echo 'set auto_path [linsert $$auto_path 0 [info library] ]; auto_mkindex . $(TCL_SRCS) $(ITCL_SRCS)' | $(ITCLSH)
 
