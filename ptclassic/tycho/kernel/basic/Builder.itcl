@@ -55,9 +55,6 @@ class ::tycho::Builder {
     ###################################################################
     ####                         public procs                      ####
 
-    # Run all the Tycho tests.
-    proc alltests {}
-
     # Do what ever is necessary to Build Tycho.
     proc build {}
 
@@ -75,6 +72,12 @@ class ::tycho::Builder {
 
     # Create itcldocs in the subdirectories.
     proc itcldocs {}
+
+    # Run all the Tycho tests.
+    proc testAll {}
+
+    # Run all the Tycho tests in a directory
+    proc testDir { dir {testfile alltests.itcl}}
 
     # Create tclIndex files.
     proc tclIndex {}
@@ -110,18 +113,6 @@ body ::tycho::Builder::destructor {} {
     ###################################################################
     ####                      public procs                       ####
 
-
-#######################################################################
-#### alltests
-# Run all the Tycho tests.
-#
-body ::tycho::Builder::alltests {} {
-    global TYCHO
-    set savedir [pwd]
-    cd $TYCHO
-    source [file joint kernel test alltychotests.tcl]
-    cd $savedir
-}
 
 #######################################################################
 #### build
@@ -223,6 +214,30 @@ body ::tycho::Builder::itcldocs {} {
 	    puts $retval
 	}
     }
+    cd $savedir
+}
+
+#######################################################################
+#### testAll
+# Run all the Tycho tests.
+#
+body ::tycho::Builder::testAll {} {
+    global TYCHO
+    set savedir [pwd]
+    cd $TYCHO
+    source [file join kernel test alltychotests.tcl]
+    cd $savedir
+}
+
+#######################################################################
+#### testDir
+# Run all the Tycho tests in a directory
+#
+body ::tycho::Builder::testDir { dir {testfile alltests.itcl}} {
+    global TYCHO
+    set savedir [pwd]
+    cd dir
+    source $testfile
     cd $savedir
 }
 
