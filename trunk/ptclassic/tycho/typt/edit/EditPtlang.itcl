@@ -54,14 +54,21 @@ class ::tycho::EditPtlang {
     ##########################################################################
     ####                         public methods                           ####
 
-    # Generate and display a doc file from the current buffer
-    method gendoc {}
+    # Generate and display a doc file from the current buffer.
+    method gendocBuffer {}
 
     # Open a help window.
     method help {}
 
     # Tag and color the code in a region.
     method parseNow {start stop}
+
+    ##########################################################################
+    ####                         public procedures                        ####
+
+    # Run ptlang on filename, generate html documentation and display it.
+    proc gendoc {filename}
+
 }
 
 #######################################################################
@@ -124,20 +131,23 @@ body ::tycho::EditPtlang::constructor {args} {
     menubar addSeparator Special
 
     menubar add "Generate doc" Special -underline 0 \
-            -command "$this gendoc"
+            -command "$this gendocBuffer"
 
 }
+###################################################################
+###################################################################
+####                     public methods                        ####
 
 ###################################################################
-#### gendoc
+#### gendocBuffer
 # Generate and display a doc file.
 # If the doc file already exists and is newer than the source file,
 # then it is simply displayed, not regenerated.
 # NOTE: This is a Unix-specific implementation, since "exec" is used
 # to invoke "ptlang".
 #
-body ::tycho::EditPtlang::gendoc {} {
-    return [::tycho::EditProgram::gendoc {set docfile $root.htm} \
+body ::tycho::EditPtlang::gendocBuffer {} {
+    return [::tycho::EditProgram::gendocBufferInternal {set docfile $root.htm} \
             { ::tycho::rm -f "$root.h" "$root.cc" "$root.htm" "$root.t"; \
             exec ptlang $tail}] 
 
@@ -189,3 +199,23 @@ body ::tycho::EditPtlang::parseNow {start stop} {
     # To get C++ parsing
     EditCpp::parseNow $start $stop
 }
+###################################################################
+###################################################################
+####                     public procedures                     ####
+
+###################################################################
+#### gendoc
+# Generate and display a doc file.
+# If the doc file already exists and is newer than the source file,
+# then it is simply displayed, not regenerated.
+# NOTE: This is a Unix-specific implementation, since "exec" is used
+# to invoke "ptlang".
+#
+body ::tycho::EditPtlang::gendoc {filename} {
+    return [::tycho::EditProgram::gendocFileInternal $filename \
+            {set docfile $root.htm} \
+            { ::tycho::rm -f "$root.h" "$root.cc" "$root.htm" "$root.t"; \
+            exec ptlang $tail}] 
+            
+}
+

@@ -84,7 +84,7 @@ class ::tycho::EditItcl {
     method fileTemplate {}
 
     # Generate and display a doc file from the current buffer
-    method gendoc {}
+    method gendocBuffer {}
 
     # Guess about the class name from the filename
     public method getClassName {}
@@ -94,6 +94,12 @@ class ::tycho::EditItcl {
 
     # Tag and color the code in a region.
     method parseNow {start stop}
+
+    ##########################################################################
+    ####                         public procedures                        ####
+
+    # Run tydoc on filename, generate html documentation and display it.
+    proc gendoc {filename}
 
     ###################################################################
     ####                   protected variables                     ####
@@ -116,7 +122,7 @@ body ::tycho::EditItcl::constructor {args} {
     menubar addSeparator Special
 
     menubar add "Generate doc" Special -underline 0 \
-	    -command "$this gendoc"
+	    -command "$this gendocBuffer"
 }
 
 ###################################################################
@@ -289,13 +295,13 @@ body ::tycho::EditItcl::getClassName {} {
 }
     
 ###################################################################
-#### gendoc
-# Given a source file (a .itcl file) generate and display a doc file.
+#### gendocBuffer
+# Generate and display a doc file from the current file.
 # If the doc file already exists and is newer than the source file,
 # then it is simply displayed, not regenerated.
 #
-body ::tycho::EditItcl::gendoc {} {
-    return [ ::tycho::EditProgram::gendoc \
+body ::tycho::EditItcl::gendocBuffer {} {
+    return [ ::tycho::EditProgram::gendocBufferInternal \
         [list set docfile [file join doc codeDoc \
                 [info namespace tail [getClassName]].html]] \
     {
@@ -413,4 +419,27 @@ body ::tycho::EditItcl::parseNow {start stop} {
 	if [$text compare $ind >= end] {break}
     }
     # Set the visual characteristics of the tagged text
+}
+###################################################################
+###################################################################
+####                     public procedures                     ####
+
+###################################################################
+#### gendoc
+# Generate and display a doc file.
+# If the doc file already exists and is newer than the source file,
+# then it is simply displayed, not regenerated.
+#
+body ::tycho::EditItcl::gendoc {filename} {
+    return [ ::tycho::EditProgram::gendocFileInternal $filename\
+            [list set docfile [file join doc codeDoc \
+            [info namespace tail [file tail [file rootname $filename].html]]]] \
+            {
+        set verbose 0
+        set debug 0
+        set generateIndex 0
+        ::tycho::rm -f $docfile
+        ::tycho::HTMLDocSys::generateHTML \
+                $verbose $debug $generateIndex {An Itcl Class} $tail
+    }]
 }
