@@ -364,6 +364,7 @@ realGetParams(const char* name, ParamListType* pListPtr)
 		    // Only return settable states
 		    if (s.attributes() & A_SETTABLE) {
 		        tempArray[j].name = s.readName();
+			tempArray[j].type = s.type();
 		        tempArray[j++].value = s.getInitValue();
 		    }
 	    }
@@ -377,10 +378,8 @@ realGetParams(const char* name, ParamListType* pListPtr)
 		if (!pListPtr->array) { // out of memory error
 		    return FALSE;
 		}
-		for (i = 0; i < j; i++) {
-		    pListPtr->array[i].name = tempArray[i].name;
-		    pListPtr->array[i].value = tempArray[i].value;
-		}
+		for (i = 0; i < j; i++)
+		    pListPtr->array[i] = tempArray[i];
 	    }
 	    delete tempArray;
 	}
