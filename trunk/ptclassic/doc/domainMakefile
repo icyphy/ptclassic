@@ -6,8 +6,8 @@
 # The _short suffixes print only 
 PTOLEMY       = ../../../..
 DOCBIN	      = $(PTOLEMY)/doc/bin
-PRINTSEC      = printsec
-PRINTDOM      = printdom
+PRINTSEC      = printsec.groff
+PRINTDOM      = printdom.groff
 OPTIONS       =
 
 print:
