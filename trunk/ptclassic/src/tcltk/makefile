@@ -74,7 +74,7 @@ TK_MAJOR_VERSION = 	tk4.1
 TK_VERSION =		tk4.1a1
 # Between tcl7.4 and tcl7.5, the location of the unix sources moved.
 TCL_7_5_HACK=		/unix
-ENABLE_GCC =		--enable-gcc
+ENABLE_GCC =		--enable-gcc --disable-load
 
 ITCL_MAJOR_VERSION =	itcl-2.0
 ITCL_MAJOR_VERSION_NUMBER = 2.0
