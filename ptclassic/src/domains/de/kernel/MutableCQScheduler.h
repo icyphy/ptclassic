@@ -62,6 +62,9 @@ public:
 	// rather than PriorityQueue
 	MutableCQEventQueue eventQ;
 
+        // Resort events according to new fine levels. 
+        void resortEvents();
+
 	// Set up the stopping condition.
 	void setStopTime(double limit) {stopTime = limit ;}
 
