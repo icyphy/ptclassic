@@ -43,7 +43,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 class DFClusterPort : public DFPortHole, public ClusterPort{
 public:
-    DFClusterPort(const PortHole* master, Star* parent);
+    DFClusterPort(PortHole* master, Star* parent);
     /*virtual*/ int isItInput() const {
 	return ClusterPort::isItInput();
     }
@@ -60,7 +60,7 @@ public:
     // Constructors
     DFCluster(const char* domain);
 
-    /*virtual*/ PortHole* clonePort(const PortHole* master, Star* parent);
+    /*virtual*/ PortHole* clonePort(PortHole* master, Star* parent);
     
     /*virtual*/ Cluster* newCluster(Block* master,const char* domain) const;
 
