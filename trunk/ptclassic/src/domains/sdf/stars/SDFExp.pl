@@ -8,6 +8,7 @@ defstar {
 	location { SDF main library }
 	explanation {
 \fBBugs:\fR Overflow is not handled well.
+.Id "exponential"
 	}
 	input {
 		name { input }

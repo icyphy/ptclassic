@@ -42,7 +42,8 @@ The output sample rate is \fIupsample\fP times the input.
 This is set by default to 16 becuase in digital communication systems
 this pulse is used for line coding of symbols, and upsampling is necessary.
 The star is implemented by deriving from the FIR star.
-.IE "raised cosine pulses"
+.Id "raised cosine pulse"
+.Id "Nyquist pulse"
 .UH REFERENCES
 .ip [1]
 E. A. Lee and D. G. Messerchmitt,

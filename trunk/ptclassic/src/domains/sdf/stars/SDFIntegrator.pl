@@ -24,6 +24,9 @@ is the previous output.
 	author { E. A. Lee }
 	copyright { 1991 The Regents of the University of California }
 	location { SDF main library }
+	explanation {
+.Id "filter, integrator"
+	}
 	input {
 		name { data }
 		type { float }

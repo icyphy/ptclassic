@@ -9,6 +9,7 @@ defstar {
 	explanation {
 This star hard limits input samples to keep the in the range
 of (\fIbottom, top\fR).
+.Id "hard limiter"
 	}
 	input {
 		name{input}

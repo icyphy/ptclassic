@@ -16,6 +16,11 @@ the frame number to be read next. For example, if the 'frameId' state is
 set to 2 and if the 'fileName' state is 'dir.#/pic#' then the files that
 are read and output are 'dir.2/pic2', 'dir.3/pic3', etc.
 	}
+	explanation {
+.Id "image reading"
+.Ir "PPM image format"
+.Ir "image format, PPM"
+}
 
 	ccinclude { "GrayImage.h", <std.h>, <stdio.h>, "Error.h" }
 

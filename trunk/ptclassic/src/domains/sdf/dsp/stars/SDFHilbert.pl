@@ -11,11 +11,14 @@ Output the (approximate) Hilbert transform of the input signal.
 	location { SDF dsp library }
 	explanation {
 This star approximates the Hilbert transform by using an FIR filter.
+.Id "Hilbert filter"
+.Id "filter, Hilbert"
 The exact Hilbert transform cannot be realized; instead, we just chop
 off the response symmetrically at -N/2 and N/2.  This is good enough
 for demos, but for high accuracy we suggest the use of the Parks-McClellan
 algorithm to design a Hilbert transformer filter with the desired
 characteristics.  The "optfir" program supplied with Ptolemy can do this.
+.Ir "optfir"
 	}
 	ccinclude { <math.h> }
 	defstate {
