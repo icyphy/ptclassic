@@ -1,3 +1,4 @@
+static const char file_id[] = "Particle.cc";
 /**************************************************************************
 Version identification:
 $Id$
@@ -65,7 +66,7 @@ Particle* IntSample :: clone () {
 
 void IntSample :: die () { intPlasma.put(this);}
 
-Particle* IntSample :: useNew () { return new IntSample;}
+Particle* IntSample :: useNew () { LOG_NEW; return new IntSample;}
 
 Particle& IntSample :: operator = (const Particle& p)
 {
@@ -104,7 +105,7 @@ void IntSample :: operator << (const Complex& c) {data=int(abs(c));}
 
 extern const DataType FLOAT = "FLOAT";
 
-Particle* FloatSample :: useNew () { return new FloatSample;}
+Particle* FloatSample :: useNew () { LOG_NEW; return new FloatSample;}
 
 Particle* FloatSample :: clone () { 
 	Particle* p = floatPlasma.get();
@@ -160,7 +161,7 @@ ComplexSample :: ComplexSample(double f) {data= f;}
 ComplexSample :: ComplexSample(int i) {data = double(i);}
 ComplexSample :: ComplexSample() {data=0.0;}
 
-Particle* ComplexSample :: useNew () { return new ComplexSample;}
+Particle* ComplexSample :: useNew () { LOG_NEW; return new ComplexSample;}
 
 Particle* ComplexSample :: clone () {
 	Particle* p = complexPlasma.get();
@@ -227,7 +228,7 @@ ParticleStack :: ~ParticleStack () {
 	while (head->link) {
 		p = head;
 		head = head->link;
-		delete p;
+		LOG_DEL; delete p;
 	}
 }
 
