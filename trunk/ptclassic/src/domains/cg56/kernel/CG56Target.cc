@@ -71,10 +71,10 @@ int CG56Target :: setup(Galaxy& g) {
 	cmds.initialize();
 	LOG_DEL; delete mem;
 	LOG_NEW; mem = new CG56Memory(xMemMap,yMemMap);
-	if (!AsmTarget::setup(g)) return FALSE;
 	uname = makeLower(g.readName());
 	targetNestedSymbol.initialize();
 	targetNestedSymbol.setTarget(this);
+	if (!AsmTarget::setup(g)) return FALSE;
 	return TRUE;
 }
 
