@@ -139,6 +139,14 @@ namespace ::tycho {
 		{Glimpse} "tools"
     }
 
+    if {$tcl_platform(platform) != "macintosh"} {
+	::tycho::File::registerExtensions {} \
+		{set w [::tycho::autoName .exec]; \
+                ::tycho::Monitor $w;\
+                $w centerOnScreen} \
+		{Exec} "tools"
+    }
+
     ::tycho::File::registerExtensions {.icl} \
             {::tycho::view ItclClassList -file {%s} -toolbar 1} \
             {Itcl Class List} "tools"
