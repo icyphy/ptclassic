@@ -249,6 +249,9 @@ class ::tycho::Query {
     # Invoke the command of a mediated query.
     method mediatedCommand {tag command}
 
+    # Get the names (tags) of all entries.
+    method names {}
+
     # Execute the -okcommand command and close the window.
     method ok {}
 
@@ -802,6 +805,14 @@ body ::tycho::Query::mediatedCommand {tag command} {
     if {$retval != {}} {
         $itk_component(querysite).tag_$tag configure -text $retval
     }
+}
+
+#####################################################################
+#### names
+# Get the names (tags) of all entries.
+# 
+body ::tycho::Query::names {} {
+    return $tags
 }
 
 #####################################################################
