@@ -1,5 +1,3 @@
-static const char file_id[] = "Set.h";
-
 /* Version $Id$
 
 Copyright (c) 1990-%Q% The Regents of the University of California.
@@ -40,8 +38,10 @@ ENHANCEMENTS, OR MODIFICATIONS.
  **********************************************************************/
 class Set {
 
+public:
+
   Set(int);
-  ~Set;
+  ~Set();
 
   // Return one more than the largest allowed index
   int size() { return mysize; }
@@ -53,7 +53,7 @@ class Set {
 
   // Add an item to the set
   Set & operator |= (int index) {
-    words |= (1 << bit(index));
+    words[word(index)] |= (1 << bit(index));
     return *this;
   }
 
@@ -61,7 +61,7 @@ class Set {
 
   // Remove an item from the set
   Set & operator -= (int index) {
-    words &= ~(1 << bit(index));
+    words[word(index)] &= ~(1 << bit(index));
     return *this;
   }
 
@@ -83,4 +83,4 @@ protected:
   // Array of integers used to store the bitmask
   int * words;
 
-}
+};
