@@ -77,10 +77,16 @@ for {set n 0} {$n < $argc} {incr n} {
 }
 
 if {$argc == 0 || $argc == $switchCount} {
-    tychoStandardDAG
+    set retval [tychoStandardDAG]
 } else {
-    eval tychoMkClassGraph {{$title}} [lindex $argv $switchCount] \
-	[split [lrange $argv [expr $switchCount + 1] end]]
-}
+    if {$argc < 2 } {
+	error "Usage: itcl2dag \[-t title\] dagoutput itclinput"
+    }
+    set retval [eval tychoMkClassGraph {{$title}} [lindex $argv $switchCount] \
+	[split [lrange $argv [expr $switchCount + 1] end]]]
 
+}
+if {$retval != {}} {
+    puts stderr $retval
+}
 		
