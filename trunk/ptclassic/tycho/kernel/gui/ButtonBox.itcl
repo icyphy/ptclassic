@@ -220,7 +220,12 @@ body ::tycho::ButtonBox::constructor {args} {
     } {
  	keep -background -cursor
     }
-    pack $itk_component(buttonsite) -side top -expand yes -fill x
+    # Pack the main button frame, leaving 2 pixels on either side
+    # to improve appearance. Subclasses will need to put in
+    # the extra padding too...
+    pack $itk_component(buttonsite) -side top \
+            -expand yes -fill x \
+            -padx 2
     grid $itk_component(inside)
     grid columnconfigure $itk_component(buttonsite) 1 -weight 1
 
