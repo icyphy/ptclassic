@@ -117,7 +117,7 @@ id, geo, deswidth, desheight)
     Tk_Window plotwin;
 
     /* Make the bar graph */
-    sprintf(command, "ptkMakeBarGraph %s \"%s\" \"%s\" %d %f %f",
+    sprintf(command, "ptkMakeBarGraph %s \"%s\" \"%s\" %d %f %f [curuniverse]",
 	name, desc, geo, numBars, deswidth, desheight);
     if(Tcl_Eval(interp, command, 0, (char**)NULL) != TCL_OK)
         return 0;
