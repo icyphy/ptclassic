@@ -61,7 +61,7 @@ cd ..
 # EXPDOMAINS = experimental domains
 # EXPDOMAINS = capsim bdf
 set EXPDOMAINS=(sproc silage cg-ddf cg56 cgc cg96)
-set EXPEXTRAS=(cg56/targets cg96/targets)
+set EXPEXTRAS=(sproc/targets cg56/targets cg96/targets)
 
 cd domains
 foreach x (sdf ddf de thor bdf cg $EXPDOMAINS)
@@ -86,7 +86,7 @@ end
 foreach x (thor/pepp cg/targets sdf/image sdf/targets \
 	sdf/loopScheduler sdf/tcltk cg/parScheduler thor/analyzerX11 \
 	cg/dlScheduler cg/HuScheduler cg/dcScheduler cgc/targets cgc/tcltk \
-	cg56/dsp cg96/dsp sdf/dsp sdf/image $EXPEXTRAS )
+	cg56/dsp cg96/dsp sdf/dsp sdf/image sdf/matrix $EXPEXTRAS )
 	optmkdir $x
 	cd $x
 	optlink ../../../../src/domains/$x make.template
