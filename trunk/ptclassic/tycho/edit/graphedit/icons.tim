@@ -1,0 +1,25 @@
+# $Id$
+
+# Test icon index for graph editor
+
+icon foo2 IconFrame \
+		-inputs {0 50 50 0} \
+		-outputs {100 50 50 100} \
+		-text Foo \
+                -anchor nw \
+                -graphics {Frame 10 10 50 50 -color red; Frame 50 50 90 90 -color green -relief sunken} \
+		-color green \
+		-tags vertex \
+		-intype {Terminal -type input -style blob -fill red -tags input} \
+		-outtype {Terminal -type output -style doublearrow -fill blue -tags output}
+
+icon bar2 IconFrame {
+	    -inputs 2
+	    -outputs 1
+	    -text Bar
+	    -color lightsteelblue
+	    -tags vertex
+	    port in0 {Terminal 0 25} -type input
+	    port in1 {Terminal 0 75} -type input
+	    port out {Terminal 100 50} -type output -fill green2
+	}
