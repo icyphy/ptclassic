@@ -34,7 +34,7 @@ VPATH = $(ROOT)/src/compat/cfront
 CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
-HDRS = 	compat.h ptarch.h
+HDRS = 	compat.h
 
 # We don't include common.mk since we don't use the compiler here
 include $(ROOT)/mk/no-compile.mk
