@@ -323,7 +323,7 @@ int rcpCopyFile(const char* hname, const char* dir, const char* filePath,
 // The old files will not be deleted if there is an error in creating
 // or accessing the directory.
 int rcpCopyMultipleFiles(const char* hname, const char* dir,
-	const char* filePathList, int deleteOld = TRUE) {
+	const char* filePathList, int deleteOld /*=TRUE*/) {
 
     // Expand the environment variables in the remote directory name
     char* expandedDirName = expandPathName(dir);
