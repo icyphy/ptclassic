@@ -284,11 +284,11 @@ body ::tycho::ResourceFile::delete {path} {
 body ::tycho::ResourceFile::dirlist {path} {
     regsub {^file:} $path {} path
     set result {}
-    foreach f [::glob $path] {
+    foreach f [::glob [file join $path *]] {
 	if [::file isdirectory $f] {
-	    lappend result $f/
+	    lappend result [file tail $f]/
 	} else {
-	    lappend result $f
+	    lappend result [file tail $f]
 	}
     }
     # Sort and return
@@ -318,8 +318,8 @@ body ::tycho::ResourceFile::new {path} {
 #####################################################################
 #### query
 body ::tycho::ResourceFile::query {path option} {
-    # Check for "remote"
-    if { $option == "remote" } {
+    # Check for "isremote"
+    if { $option == "isremote" } {
 	return 0
     }
     # Check for valid option
@@ -340,8 +340,9 @@ body ::tycho::ResourceFile::source {path} {
 #####################################################################
 #### stat
 body ::tycho::ResourceFile::stat {path varName} {
-    # FIXME: Need to do uplevel?
     regsub {^file:} $path {} path
-    ::stat $path $varName
+    if [::file exists $path] {
+	upvar $varName v
+	::file stat $path v
+    }
 }
-
