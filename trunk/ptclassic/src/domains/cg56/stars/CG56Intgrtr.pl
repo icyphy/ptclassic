@@ -1,5 +1,5 @@
 defstar {
-	name { Integrator }
+	name { Intgrtr }
 	domain { CG56 }
 	desc { 
 An integrator with leakage and limits.  With the default parameters,
@@ -125,7 +125,7 @@ reset.
 		addCode(cbCoreWrap);
 		break;
 	default:
-		Error::abortRun(*this,"Unrecognized onOverflow option in CG56Integrator.");
+		Error::abortRun(*this,"Unrecognized onOverflow option in CG56Intgrtr.");
 		break;
 	}
     }
