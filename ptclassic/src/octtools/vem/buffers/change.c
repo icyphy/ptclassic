@@ -100,7 +100,6 @@ intern_buffer *buf;		/* Locally maintained information */
  * the lyr_tbl for the buffer.
  */
 {
-    int cnt = 0;
     int layerChanges = 0;
     int instanceChanges = 0;
     lyr_args args;
@@ -246,7 +245,7 @@ gu_marker marker;		/* Instance changes  */
     int cnt = 0;
 
     gen = guStart(marker);
-    while (change = guNext(gen)) {
+    while ( (change = guNext(gen)) ) {
 	switch (guOp(change)) {
 	case GU_ADD:
 	case GU_REMOVE:
@@ -254,7 +253,7 @@ gu_marker marker;		/* Instance changes  */
 	    /* Intentional fall-through */
 	default:
 	    /* Queue up old location */
-	    if (bb_ptr = guOldSize(change)) {
+	    if ( (bb_ptr = guOldSize(change)) ) {
 		wnQRedisplay(fct->objectId, bb_ptr);
 	    }
 	    /* Queue up new location */
@@ -306,9 +305,9 @@ char *key, *value, *arg;
     if (octGetById(&layer)) {
 	if (lyr->lyr_changes) {
 	    gen = guStart(lyr->lyr_changes);
-	    while (change = guNext(gen)) {
+	    while ( (change = guNext(gen))) {
 		/* No case analysis is required -- just the region change */
-		if (bb_ptr = guOldSize(change)) {
+		if ( (bb_ptr = guOldSize(change)) ) {
 		    wnQRedisplay(args->fct->objectId, bb_ptr);
 		}
 		if ((octGetByExternalId(args->fct, guXid(change), &obj) == OCT_OK) &&
