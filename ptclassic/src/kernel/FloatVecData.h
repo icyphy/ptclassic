@@ -44,12 +44,11 @@ public:
 	// copy constructor
 	FloatVecData(const FloatVecData& src) { init(src.len,src.data);}
 
+	// assignment operator
+	const FloatVecData& operator=(const FloatVecData& src);
+
 	// constructor: makes an initialized array from a double array
-	FloatVecData(int l,const double *srcData) : len(l) {
-		INC_LOG_NEW; data = new float[l];
-		for (int i = 0; i < l; i++)
-			data[i] = *srcData++;
-	}
+	FloatVecData(int l,const double *srcData);
 
 	// clone
 	PacketData* clone() const;
