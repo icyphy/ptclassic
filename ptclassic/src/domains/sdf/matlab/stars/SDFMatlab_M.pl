@@ -74,9 +74,17 @@ The variables will be of the form output name + port number, e.g. "Pmm1".
 }
 	}
 
-	// matrix.h and engine.h are provided with Matlab
 	// Matrix.h is from the Ptolemy kernel
-	hinclude { "matrix.h", "engine.h", "Matrix.h" }
+	hinclude { "Matrix.h" }
+
+	// matrix.h and engine.h are provided with Matlab
+	header{
+// Matlab interface library and Matlab data types
+extern "C" {
+#include "matrix.h"
+#include "engine.h"
+}
+	}
 
 	protected {
 		// Matlab structures implemented in C
