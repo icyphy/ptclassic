@@ -41,7 +41,7 @@ public:
 	// for use as a string in stars
 	operator const char* () { return val;}
 
-	State* clone ()  {return new StringState;}
+	State* clone () const {return new StringState;}
 
 private:
 	const char* val;
