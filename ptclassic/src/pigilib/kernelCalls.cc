@@ -385,7 +385,7 @@ realGetParams(const char* name, ParamListType* pListPtr)
 	    for (int i = 0; i < n; i++) {
 		    State& s = *nexts++;
 		    // Only return settable states
-		    if (s.attributes() & A_SETTABLE) {
+		    if (s.attributes() & AB_SETTABLE) {
 		        tempArray[j].name = s.readName();
 			tempArray[j].type = s.type();
 		        tempArray[j++].value = s.getInitValue();
