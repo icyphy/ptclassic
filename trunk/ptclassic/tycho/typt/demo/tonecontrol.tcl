@@ -31,7 +31,7 @@
 #######################################################################
 
 # Turn on debugging
-controlPanel debug 1
+# controlPanel debug 1
 
 # Add a help button
 controlPanel configure -helpfile {$tycho/typt/demo/tonecontrol.html}
