@@ -266,8 +266,8 @@ int SimC50Target :: runCode() {
 	      dataMem = dataMem + atoi(tokenPtr);
 	    else{
  
-	      Error::message(*this, "A memory allocation directive except than 
-                                    .text .data .sect and .bss is not allowed");
+	      Error::message(*this, "A memory allocation directive other than"
+                      ".text .data .sect and .bss is not allowed");
 	      return(FALSE); 
 	    }
 	  }
