@@ -45,9 +45,20 @@ const int linkingNotSupported =
  0;
 #endif
 
+// There are two styles of incremental linking:
+// 1. Use a 4.3/Sun-style loader with the -A flag.  Usually, binaries
+// that are to be dynamically linked must be built with the -N option
+// 2. Use the System V Release 4 dlopen() style call.  SunOS4.1.x,
+// Solaris2.x and Irix5.x support this
+#if defined(__sgi)
+#include <dlfcn.h>
+#define USE_DLOPEN
+#endif
+
 // The loader should do incremental linking; use a 4.3/Sun-style loader
 // or use the Gnu loader.
 #if defined(__sgi) || defined (sgi)
+// For USE_DLOPEN, we need ld so we can process .o files into .so files
 #define LOADER "/usr/bin/ld"
 #else
 #define LOADER "/bin/ld"
@@ -73,7 +84,7 @@ const int linkingNotSupported =
 #ifdef mips
 #define __mips 1
 #define LOADOPTS "-N -x -G 0"
-#else
+#else // mips
 #define LOADOPTS "-N -x"
 #endif // !mips
 #endif // !hpux
@@ -117,8 +128,13 @@ extern "C" size_t getpagesize(void);
 // This is an attempt to support both g++ and cfront.
 #ifdef __GNUG__
 #if defined(mips) || defined(hpux)
+#if defined(sgi)
+#define CONS_PREFIX "_GLOBAL_.I."
+#define CONS_LENGTH 11
+#else
 #define CONS_PREFIX "_GLOBAL_$I$"
 #define CONS_LENGTH 11
+#endif // sgi
 #else /* g++, nonmips & nonhpux */
 #define CONS_PREFIX "__GLOBAL_$I$"
 #define CONS_LENGTH 12
@@ -142,7 +158,11 @@ extern "C" size_t getpagesize(void);
 #define USE_NM_GREP
 #define NM_GREP_STRING "..*|extern|entry'"
 #else
+#ifdef sgi
+#define NM_OPTIONS "-Bg"
+#else
 #define NM_OPTIONS "-g"
+#endif
 #endif
 
 // g++ has to see the following before it sees the declaration of
