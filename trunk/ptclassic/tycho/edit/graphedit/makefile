@@ -42,7 +42,9 @@ include $(CONFIG)
 
 TCL_SRCS = 
   
-ITCL_SRCS =  
+ITCL_SRCS =  \
+	Layout.itcl \
+	SlateView.itcl
 
 EXTRA_SRCS =		$(TCL_SRCS) $(ITCL_SRCS)
 
