@@ -1,4 +1,4 @@
- # Definition of the class which handles revision control using SCCS.
+# Definition of the class which handles revision control using SCCS.
 #
 # @Authors: Joel King and Edward A. Lee
 # @Contributor: Christopher Hylands
@@ -223,9 +223,7 @@ body ::tycho::RevControlSCCS::retrieveVersion {version} {
     # Generate a temporary file name that has the same extension as the file
     # we are working on.
     set tmpFile [::tycho::tmpFileName \
-            [file rootname $basefile] \
-            [file extension $basefile]]
-
+            [file rootname $basefile] [file extension $basefile]].$version
 
     # In sccs get, -s means silent, -p means to stdout.
     if [catch {exec sccs get -p -s -r$version $basefile > $tmpFile} output ] {
@@ -366,9 +364,7 @@ body ::tycho::RevControlSCCS::viewHistory {} {
     catch {exec sccs prs $basefile} history
     
     # Parse the history
-    $itk_component(history) clear
     parseHistory $history [$itk_component(history) textWinName]
-    $itk_component(history) markUnmodified
     
     # FIXME: Delay or the focus command is ignored.  Tk bug?
     #after 500 "focus [$itk_component(history) textWinName]"
