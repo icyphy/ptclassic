@@ -13,10 +13,16 @@ set s $ptkControlPanel.meter_$starID
 
 # If a window with the right name already exists, we assume it was
 # created by a previous run of the very same star, and hence can be
-# used for this new run.
+# used for this new run.  Some trickiness occurs, however, because
+# parameter values may have changed, including the number of inputs.
 
-if {![winfo exists $s]} {
+if {[winfo exists $s]} {
+    set window_previously_existed 1
+} {
+    set window_previously_existed 0
+}
 
+if {!$window_previously_existed} {
     if {[set ${starID}(put_in_control_panel)]} {
 	frame $s
 	pack after $ptkControlPanel.low $s top
@@ -27,10 +33,12 @@ if {![winfo exists $s]} {
     }
 
     frame $s.f
-    message $s.msg -width 12c -text [set ${starID}(label)]
-    for {set i 0} {$i < [set ${starID}(numInputs)]} {incr i} {
-    	ptkMakeMeter $s.f m$i "" [set ${starID}(low)] [set ${starID}(high)]
-    }
+    message $s.msg -width 12c
+}
+for {set i 0} {$i < [set ${starID}(numInputs)]} {incr i} {
+    ptkMakeMeter $s.f m$i "" [set ${starID}(low)] [set ${starID}(high)]
+}
+if {!$window_previously_existed} {
     pack append $s $s.msg {top expand} $s.f top
 
     if {![set ${starID}(put_in_control_panel)]} {
@@ -48,10 +56,6 @@ if {![winfo exists $s]} {
 	}
     }
 
-    proc goTcl_$starID {starID} "
-        tkMeterSetValues $starID [set ${starID}(numInputs)] $s
-    "
-
     proc destructorTcl_$starID {starID} {
 	global $starID
 	if {[set ${starID}(put_in_control_panel)]} {
@@ -61,4 +65,10 @@ if {![winfo exists $s]} {
 	}
     }
 }
+
+proc goTcl_$starID {starID} "
+    tkMeterSetValues $starID [set ${starID}(numInputs)] $s
+"
+
+$s.msg configure -text [set ${starID}(label)]
 unset s

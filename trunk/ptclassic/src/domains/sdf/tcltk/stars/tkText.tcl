@@ -13,78 +13,97 @@ set s $ptkControlPanel.label_$starID
 
 # If a window with the right name already exists, we assume it was
 # created by a previous run of the very same star, and hence can be
-# used for this new run.
+# used for this new run.  Some trickiness occurs, however, because
+# parameter values may have changed, including the number of inputs.
 
-if {![winfo exists $s]} {
+if {[winfo exists $s]} {
+    set window_previously_existed 1
+} {
+    set window_previously_existed 0
+}
+
+if {!$window_previously_existed} {
 
     proc ptkTextMakeWindow {win label numInputs univ wait starID} {
-        toplevel $win
-        wm title $win "Text Display"
-        wm iconname $win "Text Display"
-
-        frame $win.f
-        message $win.msg -width 12c -text $label
 
 	# shorthand for refering to the star's data structure
 	upvar #0 $starID param
 	global $starID
 
-        for {set i 0} {$i < $numInputs} {incr i} {
-    	    frame $win.f.m$i
-	    scrollbar $win.f.m$i.s -relief flat -command "$win.f.m$i.t yview"
-    	    text $win.f.m$i.t -relief raised -bd 2 -width 40 -height 10 \
-		-yscrollcommand "$win.f.m$i.s set" -setgrid true
-	    pack append $win.f $win.f.m$i {top fill expand}
-	    pack append $win.f.m$i $win.f.m$i.s {right filly} \
-		$win.f.m$i.t {expand fill}
-        }
-        pack append $win $win.msg {top fill} $win.f {top fill expand}
+	# If the window already exists, we assume it was created by this
+	# very same star, so all we have to do is update its parameters.
+	if {![winfo exists $win]} {
+            toplevel $win
+            wm title $win "Text Display"
+            wm iconname $win "Text Display"
 
-	set ${starID}(tkTextWaitTrig) 0
-	if {$wait} {
+            frame $win.f
+
+            for {set i 0} {$i < $numInputs} {incr i} {
+    	        frame $win.f.m$i
+	        scrollbar $win.f.m$i.s -relief flat -command "$win.f.m$i.t yview"
+    	        text $win.f.m$i.t -relief raised -bd 2 -width 40 -height 10 \
+		    -yscrollcommand "$win.f.m$i.s set" -setgrid true
+	        pack append $win.f $win.f.m$i {top fill expand}
+	        pack append $win.f.m$i $win.f.m$i.s {right filly} \
+		    $win.f.m$i.t {expand fill}
+            }
+            message $win.msg -width 12c
+            pack append $win $win.msg {top fill} $win.f {top fill expand}
+
+            button $win.ok -text "DISMISS" -command \
+		"catch {incr ${starID}(tkTextWaitTrig)}
+		 ptkStop $univ
+		 destroy $win"
+            pack append $win $win.ok {top fillx}
+	}
+	if {$wait && ![winfo exists $win.att]} {
+	    set ${starID}(tkTextWaitTrig) 0
+
 	    # The following flag is used if the wait_between_outputs
 	    # parameter is set
 	    frame $win.att -class Attention
 	    button $win.att.cont -relief raised -width 40 \
-                -command "incr ${starID}(tkTextWaitTrig)" -text CONTINUE \
-		-state disabled
+                    -command "incr ${starID}(tkTextWaitTrig)" -text CONTINUE \
+		    -state disabled
             pack append $win.att $win.att.cont {top fillx}
-            pack append $win $win.att {top fillx}
-	}
-        button $win.ok -text "DISMISS" -command \
-		"catch {incr ${starID}(tkTextWaitTrig)}
-		 ptkStop $univ
-		 destroy $win"
-        pack append $win $win.ok {top fillx}
-
-	if {[set ${starID}(wait_between_outputs)]} {
+            pack configure $win.att -fill x -before $win.ok
+	
 	    # Arrange for the tkTextWaitTrig variable
 	    # to be updated if the run status changes (for example,
 	    # a halt is requested)
 	    global ptkRunFlag
 	    trace variable ptkRunFlag($univ) w tkTextReleaseWait
 	}
+
+        $win.msg configure -text $label
     }
 
-    global $starID
-
-    proc tkTextReleaseWait {runflag univ op} "
+    proc tkTextReleaseWaitReal {starID} {
 	global ${starID}
-	incr ${starID}(tkTextWaitTrig)
-    "
+	catch {incr ${starID}(tkTextWaitTrig)}
+    }
+}
 
-    ptkTextMakeWindow $s [set ${starID}(label)] [set ${starID}(numInputs)] \
-		[curuniverse] [set ${starID}(wait_between_outputs)] $starID
+global $starID
 
-    # The following is needed to avoid a seg fault if an error occurs
-    # (Tk bug)
-    update
+proc tkTextReleaseWait {runflag univ op} "
+	tkTextReleaseWaitReal $starID
+"
 
-    set ${starID}(lineCount) 0
+ptkTextMakeWindow $s [set ${starID}(label)] [set ${starID}(numInputs)] \
+	[curuniverse] [set ${starID}(wait_between_outputs)] $starID
 
-    # Store the window name in the star data structure
-    set ${starID}(win) $s
+# The following is needed to avoid a seg fault if an error occurs
+# (Tk bug)
+update
 
+set ${starID}(lineCount) 0
+
+# Store the window name in the star data structure
+set ${starID}(win) $s
+
+if {!$window_previously_existed} {
     proc goTcl_$starID {starID} {
 
 	# Define a shorthand for referring to parameters.
