@@ -71,7 +71,7 @@ if ( ! $?S56DSP ) then
 	setenv S56DSP /users/ptdesign/vendors/s56dsp
 endif
 
-setenv TMPLD_LIBRARY_PATH $PTOLEMY/lib.${PTARCH}:$PTOLEMY/octtools/lib.${PTARCH}:$PTOLEMY/gnu/${PTARCH}/lib:$PTOLEMY/tcltk/itcl.${PTARCH}/lib/itcl
+setenv TMPLD_LIBRARY_PATH $PTOLEMY/lib.${PTARCH}:$PTOLEMY/octtools/lib.${PTARCH}:$PTOLEMY/gnu/${PTARCH}/lib:$PTOLEMY/tcltk/tcl.${PTARCH}/lib
 
 # Matlab settings
 set matlabdir = `$PTOLEMY/bin/matlabRootDir`
@@ -97,20 +97,26 @@ else
 endif
 unsetenv TMPLD_LIBRARY_PATH
 
-if ( -f "$PTOLEMY/tcltk/itcl/lib/itcl/itcl/itcl.tcl" ) then
-	# Itcl2.1
-	setenv TCL_LIBRARY "$PTOLEMY/tcltk/itcl/lib/itcl/tcl"
-	setenv TK_LIBRARY "$PTOLEMY/tcltk/itcl/lib/itcl/tk"
-	setenv ITCL_LIBRARY "$PTOLEMY/tcltk/itcl/lib/itcl/itcl"
-	setenv ITK_LIBRARY "$PTOLEMY/tcltk/itcl/lib/itcl/itk"
-	setenv IWIDGETS_LIBRARY "$PTOLEMY/tcltk/itcl/lib/itcl/iwidgets"
+if ( -f "$PTOLEMY/tcltk/tcl/lib/tcl/init.tcl" ) then
+	# Itcl3.0
+	setenv TCL_LIBRARY "$PTOLEMY/tcltk/tcl/lib/tcl"
+	setenv TK_LIBRARY "$PTOLEMY/tcltk/tcl/lib/tk"
+	setenv ITCL_LIBRARY "$PTOLEMY/tcltk/tcl/lib/itcl"
+	setenv ITK_LIBRARY "$PTOLEMY/tcltk/tcl/lib/itk"
+	setenv IWIDGETS_LIBRARY "$PTOLEMY/tcltk/tcl/lib/iwidgets"
+
 else
-	# Itcl2.0, which was shipped with Ptolemy0.6
-	setenv TCL_LIBRARY "$PTOLEMY/tcltk/tcl/lib/tc"
-	setenv TK_LIBRARY "$PTOLEMY/tcltk/tk/lib/tk"
-	setenv ITCL_LIBRARY "$PTOLEMY/tcltk/itcl/lib/itcl"
-	setenv ITK_LIBRARY "$PTOLEMY/tcltk/itcl/lib/itk"
-	setenv IWIDGETS_LIBRARY "$PTOLEMY/tcltk/itcl/lib/iwidgets"
+	if ( -f "$PTOLEMY/tcltk/itcl/lib/itcl/itcl/itcl.tcl" ) then
+		# Itcl2.1
+		setenv TCL_LIBRARY "$PTOLEMY/tcltk/itcl/lib/itcl/tcl"
+		setenv TK_LIBRARY "$PTOLEMY/tcltk/itcl/lib/itcl/tk"
+		setenv ITCL_LIBRARY "$PTOLEMY/tcltk/itcl/lib/itcl/itcl"
+		setenv ITK_LIBRARY "$PTOLEMY/tcltk/itcl/lib/itcl/itk"
+		setenv IWIDGETS_LIBRARY "$PTOLEMY/tcltk/itcl/lib/itcl/iwidgets"
+	else
+		echo "${progname}: Warning: Can't find init.tcl"
+
+	endif
 endif
 
 # Wrap this in quotes in case we are in a directory that has

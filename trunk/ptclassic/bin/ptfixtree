@@ -18,5 +18,5 @@
 PTOLEMY=${PTOLEMY:-~/ptolemy}
 PTARCH=`$PTOLEMY/bin/ptarch`
 tclscript=$PTOLEMY/bin/ptfixtree.tcl
-ptolemytcl=$PTOLEMY/tcltk/itcl.$PTARCH/bin/ish
+ptolemytcl=$PTOLEMY/tcltk/tcl.$PTARCH/bin/itclsh
 exec $ptolemytcl $tclscript "$@"

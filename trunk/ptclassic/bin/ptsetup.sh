@@ -114,8 +114,8 @@ if [ -d "$PTOLEMY/gnu/$PTARCH/lib" ]; then
     TMPLD_LIB_PATH="$TMPLD_LIB_PATH:$PTOLEMY/gnu/$PTARCH/lib"
 fi 
 
-if [ -d "$PTOLEMY/tcltk/itcl.${PTARCH}/lib/itcl" ]; then
-    TMPLD_LIB_PATH="$TMPLD_LIB_PATH:$PTOLEMY/tcltk/itcl.${PTARCH}/lib/itcl"
+if [ -d "$PTOLEMY/tcltk/tcl.${PTARCH}/lib" ]; then
+    TMPLD_LIB_PATH="$TMPLD_LIB_PATH:$PTOLEMY/tcltk/tcl.${PTARCH}/lib"
 fi 
 
 # Matlab settings
@@ -138,11 +138,11 @@ esac
 
 unset TMPLD_LIB_PATH
 
-TCL_LIBRARY="$PTOLEMY/tcltk/itcl/lib/itcl/tcl"
-TK_LIBRARY="$PTOLEMY/tcltk/itcl/lib/itcl/tk"
-ITCL_LIBRARY="$PTOLEMY/tcltk/itcl/lib/itcl/itcl"
-ITK_LIBRARY="$PTOLEMY/tcltk/itcl/lib/itcl/itk"
-IWIDGETS_LIBRARY="$PTOLEMY/tcltk/itcl/lib/itcl/iwidgets"
+TCL_LIBRARY="$PTOLEMY/tcltk/tcl/lib/tcl"
+TK_LIBRARY="$PTOLEMY/tcltk/tcl/lib/tk"
+ITCL_LIBRARY="$PTOLEMY/tcltk/tcl/lib/itcl"
+ITK_LIBRARY="$PTOLEMY/tcltk/tcl/lib/itk"
+IWIDGETS_LIBRARY="$PTOLEMY/tcltk/tcl/lib/iwidgets"
 export TCL_LIBRARY TK_LIBRARY ITCL_LIBRARY ITK_LIBRARY IWIDGETS_LIBRARY
 
 # Wrap this in quotes in case we are in a directory that has
