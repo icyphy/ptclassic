@@ -1,45 +1,33 @@
 % Version $Id$
-% Author:	T. M. Parks
-% Created:	17 January 1993
+% Author:       T. M. Parks
+% Created:      17 January 1993
 
-\documentstyle[12pt,psfig,elisp,ptinfo,Almagest]{book}
-\batchmode	% Suppress all messages from now on.
-\pssilent	% Suppress messages from psfig.
+% Document style for Hyperlatex.
+%\documentstyle[Ptolemy]{book}
+
+\documentstyle[12pt,psfig,colordvi,Almagest]{Ptolemy}
+
+\htmldirectory{.}
+\htmlname{userMan}
+\htmltitle{Ptolemy User's Manual}
 
 \newcommand{\PTOLEMY}{/users/ptdesign}
 \newcommand{\FIGURES}{\PTOLEMY/doc/figures}
 
-\newindex{cp}
-\newindex{pg}
-\newindex{fn}
-\newindex{vr}
-\newindex{tp}
-\newindex{ky}
-
-% The \syncodeindex command does not work, so use \synindex instead.
-\synindex{pg}{cp}
-\synindex{vr}{cp}
-\synindex{ky}{cp}
-
-% Keep the data type and function index entries separate.
-% \synindex{fn}{cp}
-% \synindex{tp}{cp}
-
 \begin{document}
 
-\date{$Date$}
-\alwaysrefill
-\setfilename{userMan.info}
-
-\node Top
+\topnode{The Almagest \\ Ptolemy 0.5 User's Manual}
 
 \begin{iftex}
 \begin{titlepage}
-\centering
-\Huge\bsf
-The Almagest \\
-\comment \psfig{figure=\FIGURES/PtolemySmall.epsi,width=\textwidth}
-Volume \thevolume :  A User's Guide to Ptolemy 0.5
+
+% \psfig{figure=../figures/PtolemySmall.epsi,rheight=6in,width=\textwidth,clip=}
+
+\begin{center}
+\Huge\sf
+\White{The Almagest, Volume \thevolume} \\
+\White{A Programmer's Guide to Ptolemy 0.5}
+\end{center}
 \end{titlepage}
 
 \clearpage
@@ -55,29 +43,17 @@ Volume \thevolume :  A User's Guide to Ptolemy 0.5
 \listoftables
 
 \clearpage
-\pagenumbering{Chapter}
-
+\pagenumbering{arabic}
 \end{iftex}
 
-\begin{ifinfo}
-\title{The Almagest\\
-A User's Guide to Ptolemy 0.5}
-\author{}
-\maketitle
-\end{ifinfo}
-
-\include{other}
-
-\c number of the previous chapter
-\cleardoublepage
-\setcounter{chapter}{41}
+\T \include{start}
+\include{cgc}
 \include{cp}
 
-\c number of the previous chapter
-\cleardoublepage
-\setcounter{chapter}{9}
-\include{cgc}
-
-\c \include{index}
+\begin{ifhtml}
+\chapter*{Index}
+\htmlprintindex
+\end{ifhtml}
 
 \end{document}
+
