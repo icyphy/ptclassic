@@ -1426,6 +1426,12 @@ body ::tycho::HTMLDocSys::modCheck {filename} {
     set sourceTime [file mtime $filename]
 
     set classes [getClassesInSource $filename]
+
+    if {$classes == {}} {
+        # Don't know how to check, so reparse
+        return 1
+    }
+
     foreach class $classes {
         set docFile [file join doc codeDoc [info namespace tail $class].html]
         if ![file exists $docFile] {
@@ -1510,6 +1516,7 @@ body ::tycho::HTMLDocSys::generateHTML {verbose debug generateIndex \
 # IDocSys. Maybe there is a shorter file it could belong to?
 #
 body ::tycho::HTMLDocSys::getClassesInSource {filename} {
+    set retval {}
     set fd [open $filename]
     while {![eof $fd]} {
         gets $fd lineIn
