@@ -80,6 +80,10 @@ ITCL_MAJOR_VERSION =	itcl-2.0
 ITCL_MAJOR_VERSION_NUMBER = 2.0
 ITCL_VERSION =		itcl-2.0b2
 
+# Version of tcl and tk shipped with itcl
+ITCL_TCL_MAJOR_VERSION_NUMBER =	7.4
+ITCL_TK_MAJOR_VERSION_NUMBER =	4.0
+
 # Location of the tcl source
 TCL_SRC =	$(TCLTK_SRC)/$(TCL_VERSION)$(TCL_7_5_HACK)
 # Location of the tk source
@@ -112,11 +116,12 @@ TK_DEST =	$(TCLTK_DEST)/$(TK_VERSION).$(PTARCH)
 TK_INDEPENDENT_DEST =	$(TCLTK_DEST)/$(TK_VERSION)
 
 # Destination of itcl only machine dependent files
-#ITCL_DEST =	$(TCLTK_DEST)/itcl.$(PTARCH)
-ITCL_DEST =	$(TCLTK_DEST)/$(ITCL_VERSION).$(PTARCH)
+ITCL_DEST =	$(TCLTK_DEST)/itcl.$(PTARCH)
+#ITCL_DEST =	$(TCLTK_DEST)/$(ITCL_VERSION).$(PTARCH)
+
 # Destination of the machine independent itcl files
-#ITCL_INDEPENDENT_DEST =		$(TCLTK_DEST)/itcl
-ITCL_INDEPENDENT_DEST =		$(TCLTK_DEST)/$(ITCL_VERSION)
+ITCL_INDEPENDENT_DEST =		$(TCLTK_DEST)/itcl
+#ITCL_INDEPENDENT_DEST =		$(TCLTK_DEST)/$(ITCL_VERSION)
 
 ITCL_DEST_LIB = $(ITCL_DEST)/lib
 
@@ -271,7 +276,9 @@ $(ITCL_DEST_LIB)/libitcl.a: \
 		$(ITCL_OBJ)/libitcl.a $(TCLTK_DEST) $(ITCL_DEST) \
 		$(ITCL_DEST_LIB) $(ITCL_INDEPENDENT_DEST) \
 		$(ITCL_DEST_LIB)/libtk.a \
-		$(ITCL_DEST_LIB)/libitcl.a $(ITCL_DEST_LIB)/libitk.a \
+		$(ITCL_DEST_LIB)/libtcl.a \
+		$(ITCL_DEST_LIB)/libitk.a \
+		$(ITCL_DEST_LIB)/shared \
 		$(TCL_DEST) $(TCL_INDEPENDENT_DEST) \
 		$(TK_DEST) $(TCL_INDEPENDENT_DEST) 
 	(cd  $(ITCL_OBJ); $(MAKE) \
@@ -292,9 +299,11 @@ $(ITCL_INDEPENDENT_DEST):
 
 # Links so that we don't have to change version numbers in lots of makefiles.
 $(ITCL_DEST_LIB)/libtcl.a:
-	(cd $(ITCL_DEST_LIB); ln -s lib$(TCL_MAJOR_VERSION).a libtcl.a)
+	(cd $(ITCL_DEST_LIB); \
+		ln -s libtcl$(ITCL_TCL_MAJOR_VERSION_NUMBER).a libtcl.a)
 $(ITCL_DEST_LIB)/libtk.a:
-	(cd $(ITCL_DEST_LIB); ln -s lib$(TK_MAJOR_VERSION).a libtk.a)
+	(cd $(ITCL_DEST_LIB); \
+		ln -s libtk$(ITCL_TK_MAJOR_VERSION_NUMBER).a libtk.a)
 $(ITCL_DEST_LIB)/libitk.a:
 	(cd $(ITCL_DEST_LIB); \
 		ln -s libitk$(ITCL_MAJOR_VERSION_NUMBER).a libitk.a)
@@ -302,21 +311,21 @@ $(ITCL_DEST_LIB)/libitk.a:
 # Links so that older programs can find libs and includes.
 # Note that itcl contains its own tcl/tk so we have to make links
 $(TCL_DEST):
-	#(cd $(TCLTK_DEST); ln -s itcl.$(PTARCH) tcl.$(PTARCH))
-	mkdir $@
+	(cd $(TCLTK_DEST); ln -s itcl.$(PTARCH) tcl.$(PTARCH))
+	#mkdir $@
 $(TCL_INDEPENDENT_DEST):
-	#(cd $(TCLTK_DEST); ln -s itcl tcl)
-	mkdir $@
+	(cd $(TCLTK_DEST); ln -s itcl tcl)
+	#mkdir $@
 $(TCL_DEST)/lib:
 	mkdir $@
 $(TK_DEST):
-	#(cd $(TCLTK_DEST); ln -s itcl.$(PTARCH) tk.$(PTARCH))
-	mkdir $@
+	(cd $(TCLTK_DEST); ln -s itcl.$(PTARCH) tk.$(PTARCH))
+	#mkdir $@
 $(TK_DEST)/lib:
 	mkdir $@
 $(TK_INDEPENDENT_DEST):
-	#(cd $(TCLTK_DEST); ln -s itcl tk)
-	mkdir $@
+	(cd $(TCLTK_DEST); ln -s itcl tk)
+	#mkdir $@
 
 clean_itcl:
 	(cd $(ITCL_OBJ); $(MAKE) clean)
@@ -404,8 +413,12 @@ $(ITCL_SHARED_DEST_LIB)/libitcl.so: \
 	mv $(ITCL_DEST_LIB)/libitcl.so.2 $(ITCL_SHARED_DEST_LIB)/libitcl.so
 
 
+# Hack to workaround shared libraries.  Eventually we will build them
 $(ITCL_SHARED_DEST_LIB):
-	mkdir $@
+	(cd $(ITCL_DEST_LIB); ln -s . shared)
+	#mkdir $@
+
+
 
 # Links so that we don't have to change version numbers in lots of makefiles.
 $(ITCL_SHARED_DEST_LIB)/libtcl.so: $(ITCL_SHARED_OBJ)/tcl/libtcl.so
