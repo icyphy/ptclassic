@@ -206,13 +206,12 @@ int AsmTarget::modifyGalaxy() {
     dummySched.repetitions();
 
     if (Scheduler::haltRequested()) return FALSE;
-    int status = TRUE;
     GalStarIter nextStar(g);
     Star* s;
     while ((s = nextStar++) != 0) {
 	BlockPortIter nextPort(*s);
 	DFPortHole* p;
-	while ((p = (DFPortHole*) nextPort++) != 0 && status) {
+	while ((p = (DFPortHole*) nextPort++) != 0) {
 	    int nread;
 	    int nwrite;
 	    int boundaryFlag = 0;
@@ -278,7 +277,7 @@ int AsmTarget::modifyGalaxy() {
 	    }
 	}
     }
-    return status;
+    return CGTarget::modifyGalaxy();
 }
 
 void AsmTarget::disableInterrupts() {}

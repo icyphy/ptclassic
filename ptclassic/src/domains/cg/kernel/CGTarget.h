@@ -54,6 +54,11 @@ class SDFSchedule;
 class SDFScheduler;
 class CGCStar;
 
+class TypeConversionTable {
+public:
+    const char *src, *dst, *star;
+};
+
 class CommPair {
 public:
     CommPair(CGCStar* c, CGStar* o):cgcStar(c),cgStar(o) {};
@@ -359,6 +364,10 @@ protected:
     Block* spliceStar(PortHole*, const char* name, int delayBefore,
                              const char* domainName);
 
+    TypeConversionTable *typeConversionTable;
+    int typeConversionTableRows;
+    virtual int needsTypeConversionStar(PortHole& port);
+    
 private:
     // Counter used to make symbols unique.
     int counter;
