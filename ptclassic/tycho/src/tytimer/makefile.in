@@ -61,12 +61,12 @@ INCLUDE = \
 	-I$(srcdir) \
 	$(TCL_INCLUDES)
 
-SRCS = 		tyTimer.c
-HDRS =		tyTimer.h
+SRCS = 		tytimer.c
+HDRS =		tytimer.h
 
 EXTRA_SRCS =	makefile.in test.tcl index.html
 
-OBJS =		tyTimer.o
+OBJS =		tytimer.o
 
 # `make realclean` removes these files
 REALCLEAN_STUFF = makefile
