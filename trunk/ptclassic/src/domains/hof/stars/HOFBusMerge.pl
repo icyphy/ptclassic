@@ -4,11 +4,11 @@ defstar {
 	derivedfrom {Base}
 	desc {
 Bridge inputs to outputs and then self-destruct.
-This star is used to merge two input busses into a single bus.
-	}
-	explanation {
-The total number of input connections (the sum of the
-two input bus widths) must equal the number of output connections.
+This star merges two input busses into a single bus.
+If the input bus widths are M1 and M2, and the output
+bus width is N, then we require that N = M1 + M2.
+The first M1 outputs come from the first input bus,
+while the next M2 outputs come from the second input bus.
 	}
 	version {$Id$ }
 	author { E. A. Lee }

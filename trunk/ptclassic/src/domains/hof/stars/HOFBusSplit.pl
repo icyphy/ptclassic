@@ -4,11 +4,11 @@ defstar {
 	derivedfrom {Base}
 	desc {
 Bridge inputs to outputs and then self-destruct.
-This star is used to split and input bus into two.
-	}
-	explanation {
-The total number of output connections (the sum of the
-two output bus widths) must equal the number of input connections.
+This star splits an input bus into two.
+If the input bus width is N, and the output bus widths
+are M1 and M2, then we require that N = M1 + M2.
+The first M1 inputs go the first output bus, while
+the next M2 inputs go to the second output bus.
 	}
 	version {$Id$}
 	author { E. A. Lee }
