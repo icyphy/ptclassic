@@ -58,6 +58,7 @@ PL_SRCS= \
  CGCSGIAudio.pl \
  CGCXgraph.pl \
  CGCAbs.pl \
+ CGCAdaptLinQuant.pl \
  CGCAdd.pl \
  CGCAddCx.pl \
  CGCAddFix.pl \
