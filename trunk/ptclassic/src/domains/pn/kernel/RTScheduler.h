@@ -1,5 +1,8 @@
+#ifndef _RTScheduler_h
+#define _RTScheduler_h
+
 /* 
-Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
+Copyright (c) 1990-1993 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -20,15 +23,13 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
 PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
 CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
-							COPYRIGHTENDKEY
 */
 /*  Version $Id$
-    Author:	T.M. Parks
+    Author:	T. M. Parks
     Created:	7 January 1993
-*/
 
-#ifndef _RTDFScheduler_h
-#define _RTDFScheduler_h
+    Real-time scheduler for multi-threaded dataflow.
+*/
 
 #ifdef __GNUG__
 #pragma interface
@@ -37,7 +38,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "MTDFScheduler.h"
 #include "Clock.h"
 
-class RTDFScheduler : public MTDFScheduler
+class RTScheduler : public MTDFScheduler
 {
 public:
     // Run (or continue) the simulation.
@@ -48,7 +49,7 @@ public:
     double now();
 
     // Delay used for sleeping Threads.
-    /*virtual*/ TimeVal delay(TimeVal);
+    /*virtual*/ double delay(double);
 
 protected:
     // Select Thread function for a Star.
