@@ -51,18 +51,6 @@ int AsmTarget :: setup(Galaxy& g) {
 	return CGTarget::setup(g);
 }
 
-int AsmTarget :: compileTarget() {
-	Error::
-	  abortRun("No compileTarget method defined for current target");
-	return FALSE;
-}
-
-int AsmTarget :: runTarget() {
-	Error::
-	  abortRun("No runTarget method defined for current target");
-	return FALSE;
-}
-
 int AsmTarget :: hostSystemCall(const char* cmd, const char* err=NULL) {
 	int val = rshSystem(targetHost,cmd,dirFullName);
 	if (err != NULL && val != 0) Error::abortRun(err);

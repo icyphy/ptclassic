@@ -102,10 +102,6 @@ public:
 
 	int setup(Galaxy &g);
 
-	// methods to compile and run the target.
-	virtual int compileTarget();
-	virtual int runTarget();
-
 	// output a directive that switches to the code section
 	virtual void codeSection() = 0;
 
