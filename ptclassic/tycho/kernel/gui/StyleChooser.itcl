@@ -39,8 +39,8 @@ proc ::tycho::preferencedialog {} {
     if { [::info which -command .tychoPreferences] != "" } {
 	raise .tychoPreferences
     } else {
-	::tycho::PreferenceDialog .tychoPreferences \
-		-title {Tycho preferences}
+	uplevel #0 [list ::tycho::PreferenceDialog .tychoPreferences \
+		-title {Tycho preferences}]
 	wm deiconify .tychoPreferences
     }
 }
@@ -162,6 +162,11 @@ body ::tycho::PreferenceDialog::constructor {args} {
     addButton defaults -text "Defaults" -row 3 -column 0 \
 	    -command "$this revert"
 
+    # Register this window so it appears on the menus
+    ::tycho::register window Preferences $this \
+            -label "Tycho Preferences" \
+            -category tool
+
     # Initialise options
     eval itk_initialize $args
 }
@@ -193,6 +198,8 @@ body ::tycho::PreferenceDialog::destructor {} {
 	}
 	close $fd
     }
+    # Deregister this window
+    ::tycho::deregister window Preferences $this
 }
 
 #######################################################################
