@@ -78,7 +78,7 @@ catch {delete class ::tycho::Displayer}
 # attached to the displayer, so views can have different menu
 # structures, and information in the status bar can be preserved as the
 # focus changes between views. Only one each of the menu, status, and
-# tool bars are displayed at a time, the one correspoding to the view
+# tool bars are displayed at a time, the one corresponding to the view
 # with the focus.
 # <p>
 # FIXME: Here is an example:
