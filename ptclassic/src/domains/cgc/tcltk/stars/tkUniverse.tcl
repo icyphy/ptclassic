@@ -54,7 +54,7 @@ set y1 [expr ($frameSize/2)-$marsRadius]
 set x2 [expr ($frameSize/2)+$marsRadius]
 set y2 [expr ($frameSize/2)+$marsRadius]
 set marsId [$c create oval ${x1}c ${y1}c ${x2}c ${y2}c \
-	-outline white -fill firebrick1 ]
+	-outline white -fill firebrick ]
 
 # Compute initial position and size for Venus
 set x1 [expr ($frameSize/2)-$venusRadius]

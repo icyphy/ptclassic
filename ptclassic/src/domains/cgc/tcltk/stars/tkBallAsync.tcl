@@ -31,7 +31,7 @@ set y2 [expr 2.5+$ballRadius]
 
 # FIX ME: The following name should be somehow unique
 set ballId [$c create oval ${x1}c ${y1}c ${x2}c ${y2}c \
-	-outline white -fill firebrick4 ]
+	-outline tan4 -fill red3 ]
 
 proc ${uniqueSymbol}callTcl {} {
     global uniqueSymbol
