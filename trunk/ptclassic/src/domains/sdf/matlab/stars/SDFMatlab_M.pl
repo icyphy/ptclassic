@@ -190,25 +190,31 @@ During the wrapup procedure, there is no data passing into or out of the star.
 		processInputMatrices();
 
 		// evaluate the Matlab command (non-zero means error)
+		StringList errmsg;
 		int merror = matlabInterface->EvaluateUserCommand();
 		if ( merror ) {
-		  matlabInterface->FreeMatlabMatrices(matlabInputMatrices,
-						     numInputs);
-		  matlabInterface->FreeMatlabMatrices(matlabOutputMatrices,
-						     numOutputs);
+		  errmsg = matlabInterface->GetErrorString();
 		  Error::abortRun( *this, matlabInterface->GetErrorString() );
 		}
 		else {
 		  // convert Matlab matrices to Ptolemy matrices
-		  int oerror = processOutputMatrices();
-		  matlabInterface->FreeMatlabMatrices(matlabInputMatrices,
+		  merror = processOutputMatrices();
+		  errmsg = "Could not convert the Matlab output matrices to Ptolemy matrices";
+		}
+
+		// Free dynamic memory
+		matlabInterface->FreeMatlabMatrices(matlabInputMatrices,
+						    numInputs);
+		matlabInterface->UnsetMatlabVariable(matlabInputNames,
 						     numInputs);
-		  matlabInterface->FreeMatlabMatrices(matlabOutputMatrices,
+		matlabInterface->FreeMatlabMatrices(matlabOutputMatrices,
+						    numOutputs);
+		matlabInterface->UnsetMatlabVariable(matlabOutputNames,
 						     numOutputs);
-		  if ( oerror ) {			// non-zero means error
-		    Error::abortRun( *this, "Could not convert the Matlab ",
-				     "output matrices to Ptolemy matrices" );
-		  }
+
+		// Report any errors that occurred
+		if ( merror ) {
+		  Error::abortRun( *this, errmsg );
 		}
 	}
 
