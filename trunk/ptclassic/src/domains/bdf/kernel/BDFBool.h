@@ -54,11 +54,11 @@ public:
 	const PortHole& p;
 	int neg() const { return negated;}
 	BoolSignal(const PortHole& ph, int n, BoolSignal* lnk = 0) :
-		p(ph), negated(n), link(lnk) {}
-	BoolSignal(const BoolSignal& a) : p(a.p),negated(a.negated),
-					  link(0) {}
+		negated(n), link(lnk), p(ph) {}
+	BoolSignal(const BoolSignal& a) :
+	        negated(a.negated), link(0), p(a.p) {}
 	BoolSignal(const BoolSignal& a, BoolSignal* lnk) :
-		p(a.p),negated(a.negated),link(lnk){}
+		negated(a.negated), link(lnk), p(a.p) {}
 	const BoolSignal* next() const { return link;}
 };
 
@@ -88,7 +88,7 @@ public:
 	void zerofy();
 	int contradiction() const;
 	BoolTerm& lcm(const BoolTerm&);
-	BoolTerm(int i=1) : constTerm(i), bList(0) {}
+	BoolTerm(int i=1) : bList(0), constTerm(i) {}
 	BoolTerm(int i,const BoolSignal& term) : constTerm(i) {
 		INC_LOG_NEW; bList = new BoolSignal(term);
 	}
