@@ -76,17 +76,26 @@ MACH=`$(GNU_SRC)/gcc/config.guess`
 # hurt, either
 configure: $(GNU_OBJ)
 	(cd $(GNU_OBJ); \
-	$(GNU_SRC)/configure $(MACH) --srcdir=$(GNU_SRC) \
+	$(GNU_SRC)/configure --srcdir=$(GNU_SRC) \
 		--prefix=$(GNU_PREFIX) --exec-prefix=$(GNU_EXEC_PREFIX) )
+	@echo "Now reconfiguring gcc directory so we set up gcc/cp right."
+	rm -rf $(GNU_OBJ)/gcc
+	mkdir $(GNU_OBJ)/gcc
+	(cd $(GNU_OBJ)/gcc; \
+	$(GNU_SRC)/gcc/configure --srcdir=$(GNU_SRC)/gcc \
+		--prefix=$(GNU_PREFIX) --exec-prefix=$(GNU_EXEC_PREFIX) )
+
 	-(cd $(GNU_OBJ)/make; ln -s $(GNU_SRC)/make/*.c .)
 	-(cd $(GNU_OBJ)/make/glob; ln -s $(GNU_SRC)/make/glob/*.h .)
 	-(cd $(GNU_OBJ)/make/glob; ln -s $(GNU_SRC)/make/glob/*.c .)
 	-(cd $(GNU_OBJ)/libio; ln -s $(GNU_SRC)/libio/*.c* .)
 	-(cd $(GNU_OBJ)/libiberty; ln -s $(GNU_SRC)/libiberty/*.c* .)
 	-(cd $(GNU_OBJ)/libg++/src; ln -s $(GNU_SRC)/libg++/src/*.c* .)
+	-(cd $(GNU_OBJ)/libg++/src; ln -s $(GNU_SRC)/libg++/src/*.h .)
 	-(cd $(GNU_OBJ)/libg++/gperf/src; ln -s $(GNU_SRC)/libg++/gperf/src/*.c* .)
 	-(cd $(GNU_OBJ)/gcc; ln -s $(GNU_SRC)/gcc/*.c .)
-	-(cd $(GNU_OBJ)/gcc; ln -s $(GNU_SRC)/gcc/*.h .)
+	#-(cd $(GNU_OBJ)/gcc; ln -s $(GNU_SRC)/gcc/*.h .)
+
 $(GNU_OBJ): $(OBJ_DIR) 
 	-mkdir "$(GNU_OBJ)"
 
@@ -103,6 +112,7 @@ GMAKE= `if [ -f $(GNU_OBJ)/make/make ]; \
 
 bin:
 	(cd $(GNU_OBJ); $(MAKE) $(MFLAGS) CC="$(CC)" MAKE=$(GMAKE) )
+	#	(cd $(GNU_OBJ); $(MAKE) $(MFLAGS) CC="$(CC)" MAKE=$(GMAKE) )
 
 $(BINDIR):
 	mkdir $(BINDIR)
