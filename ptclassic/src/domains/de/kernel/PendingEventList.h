@@ -46,30 +46,34 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "LinkedList.h"
 
 class CqLevelLink;
+// class DEStar;
 
 
 class PendingEventList : public LinkedList {
 	friend class DEStar;
+	friend class PendingEventListIter;
 
 public:
 	// Constructor 
 	PendingEventList(); 
 
 	// Destructor
-	// FIXME: Fill this in!
 	~PendingEventList();
 
 	// Append to tail and return pointer to element
 	Link * appendGet( CqLevelLink * obj ); 
 
 	// return and remove head of list
-	LinkedList::getHeadAndRemove;
+	Pointer getHeadAndRemove() {
+	    // myStar->target()->sched();
+	    return LinkedList::getHeadAndRemove();
+	}
 
 	// return and remove tail of list
 	LinkedList::getTailAndRemove;
 
 	// Clear list
-	void clearList() { LinkedList::initialize(); }
+	LinkedList::initialize;
 
 	// Return the size of the list
 	LinkedList::size;
@@ -80,7 +84,47 @@ private:
 	// to memory leaks.
 	void remove( Link * obj ); 
 
+	// The DEStar which owns this PendingEventList
+	// DEStar *myStar;
+
+	// MutableCalendarQueue *queue;
+
 };
+
+
+
+        ///////////////////////////////////
+        // class PendingEventListIter
+        ///////////////////////////////////
+
+// PendingEventListIter steps sequentially through a PendingEventList.  
+// Warning: if the list is modified "out from under" the 
+// PendingEventListIter, bad things may happen if next() is called, 
+// though reset() will be safe.
+
+class PendingEventListIter : public LinkedListIter {
+public:
+        // constructor: attach to a PendingEventList
+        inline PendingEventListIter(PendingEventList& l) 
+		: LinkedListIter(&l) { }
+
+        // next and operator++ are synonyms.  Return the next element,
+        // return 0 if there are no more.
+        // This routine has been re-implemented and optimized for speed
+        // because of its heavy usage.  The if-structure is organized
+        // so that necessary ifs are executed, but for cases where only
+        // a few ifs are needed, the minimum number of ifs is done for
+        // the most common cases, with rarer cases taking decreasing
+        // priority in the if-structure.
+	inline CqLevelLink* next() { 
+	    return (CqLevelLink*)LinkedListIter::next();
+	}
+        inline CqLevelLink* operator++ (POSTFIX_OP) { return next();}
+
+        LinkedListIter::reset;
+	LinkedListIter::remove;
+};
+
 
 #endif
 
