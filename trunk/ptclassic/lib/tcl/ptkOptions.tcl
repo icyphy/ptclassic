@@ -63,7 +63,9 @@
 #option add Pigi.mediumfont *-times-medium-r-normal--*-180-*-*-*-*-iso8859 startupfile
 #option add CGC.mediumfont  *-times-medium-r-normal--*-180-*-*-*-*-iso8859 startupfile
 
-# option add Pigi.mediumfont *-times-medium-r-normal--*-180-* startupFile
+# The Pigi.mediumfont option is used by the make-star '*' command.
+# If you change Pigi.medium font, be sure that make-star still works.
+option add Pigi.mediumfont *-times-medium-r-normal--*-180-* startupFile
 option add CGC.mediumfont *-times-medium-r-normal--*-180* startupFile
 
 # Font for major titles.  It is very large.
