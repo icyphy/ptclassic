@@ -80,6 +80,36 @@ Error :: abortRun (NamedObj& o, cc* m1, cc* m2, cc* m3) {
 	Scheduler::requestHalt();
 }
 
+// information messages.
+extern "C" {
+	void win_msg (const char*);
+	int ViGetErrWindows();
+	void PrintCon (const char*);
+};
+
+static void info(cc* obj, cc* m1, cc* m2, cc* m3) {
+	char buf[1024];
+	if (!m2) m2 = "";
+	if (!m3) m3 = "";
+	if (obj)
+		sprintf (buf, "%s: %s%s%s", obj, m1, m2, m3);
+	else	sprintf (buf, "%s%s%s", m1, m2, m3);
+	if (ViGetErrWindows())
+		win_msg (buf);
+	else PrintCon (buf);
+}
+
+void
+Error :: message (NamedObj& o, cc* m1, cc* m2, cc* m3) {
+	StringList nam = o.readFullName();
+	info(nam, m1, m2, m3);
+}
+
+void
+Error :: message (cc* m1, cc* m2, cc* m3) {
+	info(0, m1, m2, m3);
+}
+
 // marking is supported in this implementation
 int Error :: canMark() { return 1;}
 
