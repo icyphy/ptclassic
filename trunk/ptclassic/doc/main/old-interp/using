@@ -29,12 +29,12 @@ containing all the classes of
 and
 .c Galaxy s
 it currently knows about.
-It is not currently possible to add a new type
-of
+It is possible to add a new
 .c Star
-to the known list at runtime;
-.c Star s
-must be linked into the interpreter (you can make your own copy of the
+to the known list at runtime only by using the incremental linking
+facility, but this has restrictions, see the
+.c link
+command below (you can also make your own copy of the
 interpreter with your own
 .c Star s
 linked in).  However, it's
@@ -48,12 +48,11 @@ Normally, this is
 .c mainGalaxy .
 During the execution of a
 .c defgalaxy
-command, however, the current
-.c Galaxy
+command, however, the current galaxy
 is the one being defined, not the
 .c mainGalaxy .
 .pp
-This description of commands is current for version 1.31 of
+This description of commands is current for version 2.2 of
 the interpreter \(em commands are being added all the time.
 .H2 "Commands for Defining the Simulation"
 .pp
@@ -116,8 +115,7 @@ of class
 .i class ,
 names it
 .i name ,
-and inserts it into the current
-.c Galaxy .
+and inserts it into the current galaxy.
 Any
 .c State s
 in the
@@ -167,13 +165,24 @@ Example:
 .(c
 (connect (mystar output) (yourstar input))
 .)c
+The connect command accepts an optional integer delay
+parameter:
+.(c
+(connect (mystar output) (yourstar input) 1)
+.)c
+specifies one delay on the connection.  This parameter
+makes sense only for the SDF and DDF domains; it is
+meaningless for DE.
+.pp
 One or both of the portholes may really be a
 .c MultiPortHole .
 If so, the effect of doing the connect is to create a new porthole
 within the
 .c MultiPortHole
 and connect to that
-(see Section 5.3.1).
+(see also the
+.c numports
+command).
 .H3 "Netlist-style connections
 .pp
 As an alternative to issuing connect commands (which specify
@@ -205,7 +214,7 @@ The
 .c input
 .IE "input command"
 command is used to add an input porthole to the current
-.c Galaxy ,
+galaxy,
 and associate it with an input porthole of one of the contained
 .c Star s
 within the
@@ -303,12 +312,18 @@ Some examples are:
 (state title string "This is a title")
 (state myfreq float galaxyfreq)
 .)c
-Eventually,
+The
 .i default-value
-will be allowed to be an arbitrary arithmetic expression involving
+can also be an arbitrary arithmetic expression involving
 constant values and other
 .c State
-names (enclosed in quotes).
+names (enclosed in quotes); this expression is evaluated when the
+simulation starts.  The following state names are predefined:
+YES, NO, TRUE, FALSE, PI.  YES and TRUE have value 1; NO and
+FALSE have value 0; PI has the value 3.14159... .  Example:
+.(c
+(state angularFreq "2*PI*freq")
+.)c
 .H3 "Setting the Value of States
 .pp
 The
@@ -323,19 +338,17 @@ Change the value of a
 for
 .c Star
 within the current
-.c Galaxy .
+galaxy.
 .BU
 Change the value of a
 .c State
 for a
 .c Galaxy
-within the current
-.c Galaxy.
+within the current galaxy.
 .BU
 Change the value of a
 .c State
-within the current
-.c Galaxy .
+within the current galaxy.
 .lp
 The latter would normally be used when you want to perform
 multiple simulations using different parameters.
@@ -353,8 +366,7 @@ is either the name of a
 .c Star
 or a
 .c Galaxy
-that is inside the current
-.c Galaxy , 
+that is inside the current galaxy,
 and it is the block for which the value of the
 .c State
 is to be changed.
@@ -362,9 +374,7 @@ It can also be
 .c this ,
 which says to change a
 .c State
-belonging to the current
-.c Galaxy
-itself.
+belonging to the current galaxy itself.
 .BU
 .i state-name
 is the name of a
@@ -379,16 +389,12 @@ The syntax for
 is the same as described in the
 .c state
 command.
-However, there there is an additional useful capability,
-which is to set
+However, the expression for
 .i value
-to the name of another
-.c State
-in the current
-.c Galaxy .
-(Eventually it can also be an expression in terms of other
-states in the
-.c Galaxy .)
+may refer to the name of one or more
+.c State s
+in the current galaxy
+or an ancestor of the current galaxy.
 .lp
 An example of the use of
 .c setstate
@@ -417,9 +423,8 @@ Every block in \*(PT has a
 which is a string that briefly describes the purpose of that block.
 The
 .c descriptor
-command changes the descriptor for the current
+command changes the descriptor for the current galaxy,
 .IE "descriptor command"
-.c Galaxy ,
 which is
 by default "An interpreted galaxy".  Example:
 .(c
@@ -455,8 +460,7 @@ where
 .i star
 is the name of a
 .c Star
-within the current
-.c Galaxy ,
+within the current galaxy,
 .i portname
 is the name of a
 .c MultiPortHole
@@ -604,15 +608,13 @@ domain.
 If invoked without an argument, the
 .c show
 .IE "show command"
-command displays information on the current
-.c Galaxy.
+command displays information on the current galaxy.
 If invoked with an argument, the argument
 is either the name of a
 .c Star
 (or
 .c Galaxy )
-contained in the current
-.c Galaxy ,
+contained in the current galaxy,
 or the name of a class on the known list, and information
 is shown about that
 .c Star
@@ -639,12 +641,10 @@ within the
 it is applied to, at any level.  This
 may generate a lot of information.  Like
 .c show ,
-it may apply to the current
-.c Galaxy ,
+it may apply to the current galaxy,
 a
 .c Star
-within the
-.c Galaxy ,
+within the current galaxy,
 or a class on the known list.
 The syntax is:
 .(c
@@ -849,6 +849,11 @@ object files that have already been compiled.  The syntax is
 .(c
 (link "\fIobject-file-name\fP")
 .)c
+.pp
+Any star object files that are linked in must only call routines that
+are already linked into the interpreter.  For that reason, it is possible
+that a star that can be linked into Pigi, the graphic interface, might
+not be linkable into the interpreter in some rare cases.
 .IE "link command"
 .IE "dynamic linking"
 .H3 "Messages to the User
