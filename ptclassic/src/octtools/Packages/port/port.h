@@ -109,6 +109,11 @@
 #define volatile
 #endif
 
+#if defined(__sparc) && defined(__svr4__)
+#define SOL2
+#define SYSV
+#endif
+
 #ifdef _IBMR2
 #define _BSD
 #ifndef _POSIX_SOURCE
@@ -173,7 +178,31 @@ typedef int int16;
 
 #include <stdio.h>
 #include <ctype.h>
+
+#ifdef SOL2
+/* Solaris2.3 defines type boolean as an enum, which is a no no.
+ * see also pigilib/compat.h
+ */
+#define boolean sun_boolean
+#include <unistd.h>
+#undef boolean
+#else
 #include <sys/types.h>
+#endif /*SOL2*/
+
+#ifndef TYPEDEF_BOOLEAN
+#define TYPEDEF_BOOLEAN 1
+typedef int boolean;
+#endif /*TYPEDEF_BOOLEAN*/
+
+#ifndef TRUE
+#define TRUE 1
+#endif
+
+#ifndef FALSE
+#define FALSE 0
+#endif
+
 #undef HUGE
 #include <math.h>
 #include <signal.h>
@@ -270,7 +299,9 @@ extern VOID_HACK clearerr();
 #ifndef _IBMR2
 #ifndef rewind
 #ifndef sgi
+#ifndef SOL2
 extern VOID_HACK rewind();
+#endif /* SOL2*/
 #endif /*sgi*/
 #endif /* rewind */
 #endif /* _IBMR2 */
@@ -286,10 +317,15 @@ extern VOID_HACK rewind();
 extern int abort();
 extern void free(), exit(), perror();
 #else
-#ifdef _IBMR2
+#if defined(_IBMR2) 
 extern int abort(), exit();
 extern void free(), perror();
-#else
+#else /*_IBMR2*/
+#if defined(SYSV)
+extern int abort();
+extern void free();
+extern void perror();
+#else /*SYSV*/
 #ifdef sgi
 /* The vfork man page says:
  *   vfork is no longer supported in IRIX as of Release 4.0.  By default, IRIX 
@@ -301,9 +337,10 @@ extern VOID_HACK free();
 #else
 extern VOID_HACK abort(), free(), exit(), perror();
 #endif /*sgi*/
+#endif /*SYSV*/
 #endif /*_IBMR2*/
 extern char *getenv();
-#ifdef ultrix4
+#if defined(ultrix4) || defined(SYSV)
 /* Hack for Ptolemy pigilib/local.h:  skip this if we've seen local.h
    already */
 #ifndef _local_h
@@ -314,7 +351,7 @@ extern char *malloc(), *realloc(), *calloc();
 #endif
 #endif
 
-#if defined(hpux) || defined (__hpux) || defined(aiws)
+#if defined(hpux) || defined (__hpux) || defined(aiws) || (defined(SOL2) && ! defined(BSD))
 extern int sprintf();
 #else
 #ifndef _IBMR2
@@ -344,7 +381,11 @@ extern char *strcpy(), *strncpy(), *strcat(), *strncat(), *strerror();
 extern char *strpbrk(), *strtok(), *strchr(), *strrchr(), *strstr();
 extern int strcoll(), strncmp();
 #ifndef sgi
+#ifndef SOL2
+#if !(defined(sun) && defined(__GNUC__))
 extern int strxfrm(), strlen(), strspn(), strcspn();
+#endif
+#endif /*SOL2*/
 #endif /*sgi*/
 extern char *memmove(), *memccpy(), *memchr(), *memcpy(), *memset();
 extern int memcmp(), strcmp();
