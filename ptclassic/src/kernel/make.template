@@ -58,6 +58,7 @@ CCS_WITH_H_FILES=\
  GalIter.cc \
  Galaxy.cc \
  Geodesic.cc \
+ HashTable.cc \
  Histogram.cc \
  IntArrayState.cc \
  IntState.cc \
