@@ -1,5 +1,6 @@
 #include "Block.h"
 #include "SDFConnect.h"
+#include "CircularBuffer.h"
 
 /**************************************************************************
 Version identification:
@@ -49,6 +50,16 @@ PortHole& SDFPortHole :: setPort (
 	bufferSize = numberTokens + delay;
 
         return *this;
+}
+
+// Function to alter only numTokens and delay.
+// We re-do porthole initialization if bufferSize changes
+PortHole& SDFPortHole :: setSDFParams(unsigned numTokens, unsigned delay) {
+	numberTokens = numTokens;
+	bufferSize = numberTokens + delay;
+	if (myBuffer && myBuffer->size() != bufferSize)
+		initialize();
+	return *this;
 }
 
 MultiPortHole& MultiSDFPort :: setPort (const char* s,
