@@ -31,6 +31,8 @@ LIB=libvhdlbstars.a
 
 # source files for all stars, using preprocessor
 PL_SRCS=\
+ VHDLBDC.pl \
+ VHDLBBlackHole.pl \
  VHDLBRegister.pl \
  VHDLBPar2Ser.pl \
  VHDLBSer2Par.pl \
