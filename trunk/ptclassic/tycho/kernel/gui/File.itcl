@@ -102,6 +102,9 @@ class ::tycho::File {
     # Specify the name of the file associated with the data being edited.
     itk_option define -file file File "NoName"
 
+    # Path name of Itcl HTML documentation file
+    itk_option define -itclhtmlpage itclHTMLPage ItclHTMLPage {}
+
     # If zero, do not query for saving on exit.
     itk_option define -save save Save 1
 
@@ -156,6 +159,9 @@ class ::tycho::File {
 
     # If possible, mark the window as containing unmodified data.
     method markUnmodified {}
+
+    # Open up the Itcl HTML documentation
+    method openItclHTMLPage {} {}
 
     # Open a file browser, and then open an editor for the file.
     method openWinMethod {} {}
@@ -558,6 +564,9 @@ body ::tycho::File::constructor {args} {
                 {::tycho::File::openContext \
 		[file join \$TYCHO doc tychoClasses.dag]}
 
+	$myMenubar add "Itcl man pages" Help -underline 0 \
+	        -command "$this ::tycho::File::openItclHTMLPage"
+
 	# Add the Preferences menu. This is probably the wrong place
 	# for it, but it will do until we figure out a good menu to
 	# put it in that doesn't keep disappearing...
@@ -572,7 +581,8 @@ body ::tycho::File::constructor {args} {
 
     # Subscribe to the preference set
     preference subscribe $this \
-	    -autosaveinterval autoSaveInterval
+	    -autosaveinterval autoSaveInterval \
+	    -itclhtmlpage itclHTMLPage
 
     # Identify the object for crash recovery
     set fileObjects($this) $this
@@ -796,6 +806,27 @@ body ::tycho::File::markUnmodified {} {
         set modified 0
     }
 }
+
+#####################################################################
+#### openItclHTMLPage
+# Open up the Itcl HTML documentation.  The Itcl2.2 sources
+# contain the Itcl HTML documentation at itcl2.2/html/TclTkMainList.html
+# Tycho does not understand frames, so Tycho can't read the index.html
+# file in that directory
+# In Tycho, the itclHTMLPage preference controls what file is opened.
+#
+body ::tycho::File::openItclHTMLPage {} {
+
+    if [file exists "$itk_option(-itclhtmlpage)"] {
+        ::tycho::File::openContext "$itk_option(-itclhtmlpage)"
+    } else {
+	error "Sorry, $itk_option(-itclhtmlpage) does not exist. You can\nuse\
+	the itclHTMLPage Miscellaneous preference to set the\npath\
+	of the file that is opened by this page.\nThe Itcl2.2 sources\
+	come with html man pages located at\nitcl2.2/html/TclTkMainList.html"
+    }
+}
+
 
 #####################################################################
 #### openWinMethod
