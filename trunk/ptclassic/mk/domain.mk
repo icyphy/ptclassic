@@ -34,10 +34,10 @@
 ifndef SUBSTARIDXS
 # starHTML.idx files in the subdomain directories, like sdf/dsp
 SUBSTARIDXS =	$(addprefix $(VPATH)/, \
-			$(addsuffix /doc/stars/starHTML.idx, $(SUBDOMAINDIRS)))
+			$(addsuffix starHTML.idx, $(SUBDOMAINDIRS)))
 
 # All of the starHTML.idx files to go into the domain starHTML.idx file
-ALLSTARIDXS = 		$(SUBSTARIDXS) $(VPATH)/doc/stars/starHTML.idx
+ALLSTARIDXS = 		$(SUBSTARIDXS) $(VPATH)/stars/starHTML.idx
 endif
 
 # Generic rule to produce a starHTML.idx file.  This rule depends
