@@ -46,10 +46,12 @@ include $(CONFIG)
 
 HDRS	      = ptkBarGraph.h ptkPlot.h ptkPlot_defs.h \
 		ptkTclCommands.h BarGraph.h TclStarIfc.h XYPlot.h \
+		ptkPicture.h ptkPicture_defs.h Picture.h
 
-LIBCSRCS      = ptkBarGraph.c ptkPlot.c ptkGlobals.c
+LIBCSRCS      = ptkBarGraph.c ptkPlot.c ptkGlobals.c ptkPicture.c
 
-LIBCPPSRCS    = BarGraph.cc TclStarIfc.cc XYPlot.cc ptkRunEvents.cc 
+LIBCPPSRCS    = BarGraph.cc TclStarIfc.cc XYPlot.cc ptkRunEvents.cc \
+		Picture.cc
 
 SRCS = 		$(LIBCSRCS) $(LIBCPPSRCS)
 
@@ -65,7 +67,7 @@ OBJS = 		$(LIBCSRCS:.c=.o) $(LIBCPPSRCS:.cc=.o)
 LIBNONSHARED=	libptk.a
 
 # extra source files: tcl/tk script files
-SCRIPTS = ptkPlot.tcl
+SCRIPTS = ptkPlot.tcl ptkPicture.tcl
 
 EXTRA_SRCS = 	$(SCRIPTS) README
 
