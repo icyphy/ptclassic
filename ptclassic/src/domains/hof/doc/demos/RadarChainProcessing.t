@@ -35,9 +35,12 @@ We give dimensions of the data processed by the bank of
 galaxies.
 Each
 .c RadarAntenna
-galaxy produces $N sub p$ streams of $Ns x Na x Ntargets$ samples.
-Thus, the MATLAB matrix is $Np$ by $Ns x Na x Ntargets$.
-The hypercube dimension is Na . [ Ntarget . [  Ns. Nf ] ].
+galaxy produces \fINp\fR streams of \fINs\fR x \fINa\fR x \fINtargets\fR
+samples.
+Thus, the MATLAB matrix is
+\fINp\fR streams of \fINs\fR x \fINa\fR x \fINtargets\fR.
+The hypercube dimension is
+\fINa\fR . [ \fINtargets\fR . [  \fINs\fR . \fINf\fR ] ].
 .IR "radar"
 .IR "Doppler radar"
 .IP [1]
