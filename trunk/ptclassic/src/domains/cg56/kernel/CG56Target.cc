@@ -73,6 +73,8 @@ int CG56Target :: setup(Galaxy& g) {
 	LOG_NEW; mem = new CG56Memory(xMemMap,yMemMap);
 	if (!AsmTarget::setup(g)) return FALSE;
 	uname = makeLower(g.readName());
+	targetNestedSymbol.initialize();
+	targetNestedSymbol.setTarget(this);
 	return TRUE;
 }
 
@@ -80,6 +82,7 @@ void CG56Target :: headerCode () {
         StringList code = "generated code for target ";
         code += readFullName();
 	outputComment (code);
+	AsmTarget::headerCode();
 	const char* path = expandPathName("~ptolemy/lib/cg56");
 	StringList inc = "\tinclude '";
 	inc += path;
@@ -100,7 +103,7 @@ void CG56Target :: wrapup () {
 CG56Target :: ~CG56Target () {
 	LOG_DEL; delete mem;
 //	LOG_DEL; delete dirFullName; dirFullName = 0;
-	LOG_DEL; delete uname;
+//	LOG_DEL; delete uname;
 }
 
 // copy constructor
@@ -118,22 +121,31 @@ Block* CG56Target :: clone () const {
 
 StringList CG56Target::beginIteration(int repetitions, int) {
 	StringList out;
-	if (repetitions == -1)		// iterate infinitely
-		out = "LOOP\n";
+	if (repetitions == -1) {	// iterate infinitely
+		out = targetNestedSymbol.push("LOOP");
+		out += "\n";
+	}
 	else {				// iterate finitely
 		out = "\tdo\t#";
 		out += repetitions;
-		out += ",LOOP\n";
+		out += ",";
+		out += targetNestedSymbol.push("LOOP");
+		out += "\n";
 	}
 	return out;
 }
 
 StringList CG56Target::endIteration(int repetitions, int) {
 	StringList out;
-	if (repetitions == -1)		// iterate infinitely
-		out = "\tjmp\tLOOP\n";
-	else				// iterate finitely
-		out = "LOOP\n";
+	if (repetitions == -1)	{	// iterate infinitely
+		out = "\tjmp\t";
+		out += targetNestedSymbol.pop();
+		out += "\n";
+	}
+	else {				// iterate finitely
+		out = targetNestedSymbol.pop();
+		out += "\n";
+	}
 	return out;
 }
 
@@ -142,6 +154,32 @@ void CG56Target::codeSection() {
 		addCode("\torg p:\n");
 		inProgSection = 1;
 	}
+}
+
+void CG56Target::disableInterrupts() {
+	codeSection();
+	addCode("	ori	#03,mr	;disable interrupts\n");
+}
+
+void CG56Target::enableInterrupts() {
+	codeSection();
+	addCode("	andi	#00,mr	;enable interrupts\n");
+}
+
+void CG56Target::saveProgramCounter() {
+	codeSection();
+	StringList spc;
+	spc = targetNestedSymbol.push("SAVEPC");
+	spc += "\tequ	*";
+	addCode(spc);
+}
+
+void CG56Target::restoreProgramCounter() {
+	codeSection();
+	StringList spc;
+	spc = targetNestedSymbol.pop();
+	spc += "\tequ	*";
+	addCode(spc);
 }
 
 void CG56Target::orgDirective(const char* memName, unsigned addr) {

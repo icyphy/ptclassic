@@ -30,6 +30,7 @@ public:
 
 class CG56Target : public AsmTarget {
 private:
+	NestedSymbol targetNestedSymbol;
 	void initStates();
 protected:
 	StringList cmds;
@@ -41,6 +42,10 @@ protected:
 	void writeInt(int);
 	void writeFix(double);
 	void writeFloat(double);
+	void disableInterrupts();
+	void enableInterrupts();
+	void saveProgramCounter();
+	void restoreProgramCounter();
 
 	char* uname;
 	IntState disCode;
