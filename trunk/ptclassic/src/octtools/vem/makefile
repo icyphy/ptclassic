@@ -121,13 +121,13 @@ all: vem vem.debug
 vem: include $(VEMOBJECTS)
 	rm -f main/version.o
 	(cd main; $(MAKE) $(MFLAGS) $(MAKEVARS) \
- 		VPATH=../../../../src/octtools/vem/main version.o)
+		VPATH=../../../../src/octtools/vem/main version.o)
 	$(LINKER) $(LINKFLAGS) -o vem main/version.o $(OBJECTS) $(VEMLIBS)
 
 vem.debug: include $(VEMOBJECTS)
 	rm -f main/version.o
 	(cd main; $(MAKE) $(MFLAGS) $(MAKEVARS) \
- 		VPATH=../../../../src/octtools/vem/main version.o)
+		VPATH=../../../../src/octtools/vem/main version.o)
 	$(LINKER) $(LINKFLAGS_D) -o vem.debug main/version.o \
 		$(OBJECTS) $(VEMLIBS)
 
@@ -160,11 +160,10 @@ INC_FILES = \
 	../drawing/attributes.h ../drawing/display.h \
 	../drs/drs.h \
 	../main/ansi.h ../main/defaults.h ../main/errors.h ../main/general.h \
-	../main/message.h ../main/cursors.h ../main/xvals.h \
+	../main/message.h ../main/cursors.h ../main/vemMain.h ../main/xvals.h \
 	../patterns/fill_pat.h ../patterns/tech.h \
 	../select/hilite.h ../select/selset.h ../select/selection.h \
 	../strings/str.h \
-	../symlib/symbolic.h \
 	../symbolic/se.h \
 	../utility/vemUtil.h \
 	../windows/argsel.h ../windows/objsel.h ../windows/windows.h
