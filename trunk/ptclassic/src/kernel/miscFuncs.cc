@@ -42,7 +42,7 @@ static const char file_id[] = "miscImpl.cc";
 // This function returns a new, unique temporary file name.
 // It lives on the heap and may be deleted when no longer needed.
 char* tempFileName() {
-	int pid = getpid();
+	int pid = (int) getpid();
 	static int count = 1;
 	LOG_NEW; char* buf = new char[17];
 	sprintf (buf, "/tmp/pt%04x.%04d", pid, count);
