@@ -336,8 +336,8 @@ int POct::MakePList( char* parameterList, ParamListType* pList) {
 // Calls the compile.c code.  May want to update it so that
 // this code uses the PTcl function calls.
 // FIXME:  If a non-universe facet is passed to this function,
-           it churns ahead anyway and then crashes.  - aok
-           fix it by added an IsUniv check.
+//         it churns ahead anyway and then crashes.  - aok
+//         fix it by added an IsUniv check.
 int POct::ptkCompile (int aC,char** aV) {
     octObject facet;
 
