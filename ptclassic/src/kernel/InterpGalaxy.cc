@@ -24,7 +24,7 @@ $Id$
 #include "Error.h"
 #include "Connect.h"
 #include "Geodesic.h"
-#include <string.h>
+#include "miscFuncs.h"
 #include "Domain.h"
 
 // Report an error: no such star or porthole
@@ -73,7 +73,7 @@ InterpGalaxy::findPortHole (const char* star,const char* port) {
 int
 InterpGalaxy::connect(const char* srcStar,const char* srcPipe,
 		      const char* dstStar,const char* dstPipe,
-		      int numberDelays=0) {
+		      int numberDelays) {
 // Get the source and destination ports
 	PortHole *srcP = findPortHole (srcStar, srcPipe);
 	PortHole *dstP = findPortHole (dstStar, dstPipe);
@@ -91,7 +91,7 @@ InterpGalaxy::connect(const char* srcStar,const char* srcPipe,
 	actionList += dstPipe;
 	actionList += numberDelays;
 // Now it's obvious:
-	connect (*srcP, *dstP, numberDelays);
+	Galaxy::connect (*srcP, *dstP, numberDelays);
 	return TRUE;
 }
 
@@ -153,12 +153,12 @@ InterpGalaxy::alias(const char* galportname,const char* starname,
 	if (ph->isItInput()) {
 		InPortHole *p = new InPortHole;
 		addPort(p->setPort(galportname,this));
-		alias (*p, *ph);
+		Galaxy::alias (*p, *ph);
 	}
 	else {
 		OutPortHole *p = new OutPortHole;
 		addPort(p->setPort(galportname,this));
-		alias (*p, *ph);
+		Galaxy::alias (*p, *ph);
 	}
 // add action to list
 	actionList += "A";
@@ -257,7 +257,7 @@ InterpGalaxy::addState (const char* statename, const char* stateclass, const cha
         statevalue = savestring (statevalue);
         State *src = KnownState::clone(stateclass);
         if (src == 0) return FALSE;
-        addState(src->setState(statename,this,statevalue));
+        Block::addState(src->setState(statename,this,statevalue));
 //add action to list
         actionList += "T";
         actionList += statename;
@@ -275,7 +275,7 @@ InterpGalaxy::setState (const char* blockname, const char* statename, const char
 	if(!strcmp(blockname, "this")) {
 		State *src = stateWithName(statename);
 		if (src == 0) return FALSE;
-		setState(statename,statevalue);
+		Block::setState(statename,statevalue);
 	}
 	else {
 		Block* blk = blockWithName(blockname);
