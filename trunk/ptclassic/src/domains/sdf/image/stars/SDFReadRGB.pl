@@ -69,7 +69,7 @@ Each packet is of type GrayImage.
         }
 
         unsigned char* rgbfp = new unsigned char[3*width*height];
-        fread(rgbfp, sizeof(unsigned char), 3*width*height, fp);
+        fread((char*)rgbfp, sizeof(unsigned char), 3*width*height, fp);
         fclose(fp);
 
         GrayImage* rColor = new GrayImage(width, height, int(frameId));
