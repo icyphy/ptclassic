@@ -251,7 +251,7 @@ body ::tycho::ButtonBox::add {tag args} {
 
     # Create a frame for the button: this gives the default ring
     itk_component add frame$tag {
-	frame $itk_component(childsite).frame$tag -borderwidth 2
+	frame $itk_interior.frame$tag -borderwidth 2
     } {
 	keep -background -cursor
     }
@@ -261,7 +261,7 @@ body ::tycho::ButtonBox::add {tag args} {
     # are invalid: if they are, then we need to clean up so
     # adding further buttons still works correctly.
     itk_component add button$tag {
-	eval button $itk_component(childsite).button$tag \
+	eval button $itk_interior.button$tag \
 		-highlightthickness 0 \
 		-width $itk_option(-buttonwidth) \
 		[array get buttopts] \
@@ -445,6 +445,6 @@ body ::tycho::ButtonBox::location {tag} {
 	error "Button $tag does not exist"
     }
 
-    set opts [array set [grid info $itk_component(childsite)]]
+    set opts [array set [grid info $itk_interior]]
     return [join $opts(-row) $opts(-column) "."]
 }

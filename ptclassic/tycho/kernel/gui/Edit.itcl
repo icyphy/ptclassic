@@ -338,7 +338,7 @@ configbody ::tycho::Edit::scrollbar {
 	if {[info exists itk_component(scroll)]} {
 	    destroy $itk_component(scroll)
 	}
-	$itk_component(childsite).text configure -yscrollcommand {}
+	$itk_component(text) configure -yscrollcommand {}
 
 	# Remove scrollbar packing from statusbar
 	statusbar configure -scrollbarpad 0
@@ -352,7 +352,7 @@ configbody ::tycho::Edit::scrollbar {
 	#
 	if {![info exists itk_component(scroll)]} {
 	    itk_component add scroll {
-		scrollbar $itk_component(childsite).scroll \
+		scrollbar $itk_interior.scroll \
 			-relief sunken \
 			-command "$itk_component(text) yview"
 	    } {
@@ -362,7 +362,7 @@ configbody ::tycho::Edit::scrollbar {
 	    pack $itk_component(scroll) -side right -fill y \
 		    -before $itk_component(text)
 
-	    $itk_component(childsite).text configure \
+	    $itk_component(text) configure \
 		-yscrollcommand "$itk_component(scroll) set"
 	}
 	# Add scrollbar packing to statusbar
@@ -395,8 +395,7 @@ body ::tycho::Edit::constructor {args} {
     # The text window.
     itk_component add text {
         # Put at the global scope to avoid invoking "unknown".
-        uplevel #0 text $itk_component(childsite).text \
-		-bd 2 \
+        uplevel #0 text $itk_interior.text \
 		-setgrid true
     } {
 	keep -background -highlightbackground \

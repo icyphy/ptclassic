@@ -38,8 +38,7 @@
 #######################################################################
 #### TWidget
 # This class is the base class for most widgets in Tycho. It provides a
-# set of useful methods and a frame within which to insert other widgets.
-# The frame is an itk component called "childsite".
+# set of useful methods.
 #
 class ::tycho::TWidget {
     inherit ::itk::Widget
@@ -126,14 +125,6 @@ class ::tycho::TWidget {
 #### constructor
 #
 body ::tycho::TWidget::constructor {args} {
-    # Create a childsite for the contents of the widget
-    itk_component add childsite {
-	frame $itk_interior.childsite
-    } {
-	keep -background -cursor
-    }
-    pack $itk_component(childsite) -fill both -expand yes
-    
     set prefix $itk_component(hull)
 
     eval itk_initialize $args
