@@ -79,8 +79,6 @@ proc ::tycho::slate {pathName args} {
     return $pathName
 }
 
-
-
 #######################################################################
 #### Slate
 #
@@ -158,7 +156,7 @@ class ::tycho::Slate {
     ####                         public methods                    ####
 
     # Manipulate the selection -- low level
-    method _select {option {id {}} {index {}}}
+    method _selection {option {id {}} {index {}}}
 
     # Align and distribute items
     method align {where args}
@@ -218,7 +216,7 @@ class ::tycho::Slate {
     method reshapeto {tag x y aspect}
 
     # Manipulate the selection
-    method select {option {id {}} {index {}}}
+    method selection {option {id {}} {index {}}}
 
     # Access the slate's selector object
     method selector {args}
@@ -228,6 +226,21 @@ class ::tycho::Slate {
 
     # Remove a highlight from an item
     method unhighlight {tag}
+
+    ###################################################################
+    ####                       public procs                        ####
+
+    # Create a sample slate for testing, tutorials, etc
+    proc sample {} {
+        uplevel #0 {
+            catch {delete object .t}
+            ::tycho::Displayer .t
+            ::tycho::slate .t.s
+            pack .t.s -fill both -expand on
+            .t centerOnScreen
+            return .t.s
+        }
+    }
 
     ###################################################################
     ####                    protected methods                      ####
@@ -260,11 +273,11 @@ body ::tycho::Slate::constructor {args} {
 }
 
 #######################################################################
-#### _select
+#### _selection
 #
 # Manipulate the selection. For use by the Selector object.
 #
-body ::tycho::Slate::_select {mode {id {}} {index {}}} {
+body ::tycho::Slate::_selection {mode {id {}} {index {}}} {
     switch -exact $mode {
 	"add" {
 	    $canvas select clear
@@ -840,7 +853,7 @@ body ::tycho::Slate::reshapeto {tag x y aspect} {
 }
 
 #######################################################################
-#### select
+#### selection
 #
 # Manipulate the selection. This methods extends the canvas mechanism
 # to allow multiple items to be selected. In particular, the "item"
@@ -867,7 +880,7 @@ body ::tycho::Slate::reshapeto {tag x y aspect} {
 # managed by the selector object. If called directly, this
 # will result in incorrect behaviour.
 #
-body ::tycho::Slate::select {mode {id {}} {index {}}} {
+body ::tycho::Slate::selection {mode {id {}} {index {}}} {
     switch -exact $mode {
 	"clear" {
 	    unhighlight "sel"
@@ -912,8 +925,9 @@ body ::tycho::Slate::select {mode {id {}} {index {}}} {
 	    return $description
 	}
 	default {
-	    eval chain $mode $id $index
-	    claimSelection
+	    error "Sorry, I think this is bogus"
+            # eval chain $mode $id $index
+	    # claimSelection
 	}
     }
 }
