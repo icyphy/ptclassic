@@ -67,11 +67,19 @@ int TyTcl::ptkCheckFont(int argc, char** argv) {
 
   if (argc != 2) return usage ("ptkCheckFont <fontName>");
 
+#if TCL_MAJOR_VERSION < 8
   XFontStruct *xf = Tk_GetFontStruct(interp, tkwin, argv[1]);
+#else
+  Tk_Font xf = Tk_GetFont(interp,tkwin,argv[1]);
+#endif
   if (!xf) {
     result("");
   } else {
+#if TCL_MAJOR_VERSION < 8
     result(Tk_NameOfFontStruct(xf));
+#else
+    result(Tk_NameOfFont(xf));
+#endif
   }
   return TCL_OK;
 }
