@@ -341,23 +341,51 @@ body ::tycho::RevControlRCS::checkOut {object} {
 
 #####################################################################
 #### fixRecent
-# Check out the most recent file, then remove it from history
-# 
+# Check out the most recent file, then remove it from history.
+# In SCCS, the command is simply "sccs fix <filename>",
+# but in RCS, this is:
+# 1) co <file>
+# 2) cp <file> <tmp>
+# 3) rcs -u <file>
+#    rm -f <file>
+# 4) rcs -o[recent_version] <file>
+# 5) co <file>
+# 6) cp <tmp> <file>
+#
 body ::tycho::RevControlRCS::fixRecent {object version} {
     ::tycho::RevControl::checkOut $object
     set file [$object filename]
     set dir [file dirname $file]
     set basefile [file tail $file]
     set olddir [eval pwd]
-
-    checkOut $object
-
+    set tmpFile [::tycho::tmpFileName $basefile]
+    
     # At this point, successful check out, now delete from the history
     cdDir $dir
+
     # -l argument locks, -q argument does not print diagnostics
+    if [catch {exec co -l -q $basefile} output] {
+	error "1) Cmd failed:\n$output"
+    }
+    if [catch {exec cp $basefile $tmpFile} output] {
+	error "2) Cmd failed:\n$output"
+    }
+    catch {exec rcs -u $basefile} output
+    set scanout [getRlog $basefile]
+    if {[regexp -nocase {([a-z]+):} $scanout]} {
+	error "Unedit failed: $output"
+    }    
+    catch {exec rm -f $basefile} output
+    #catch {exec co -u $basefile} output
 
     if [catch {exec rcs -o$version -q $basefile} output] {
-	error "Checkout command `co -l $basefile' failed:\n$output"
+	error "4) Cmd failed:\n$output"
+    }
+    if [catch {exec co -l -q $basefile} output] {
+	error "5) Cmd failed:\n$output"
+    }
+    if [catch {exec cp $tmpFile $basefile} output] {
+	error "6) Cmd failed:\n$output"
     }
 
     cd $olddir
@@ -406,7 +434,6 @@ body ::tycho::RevControlRCS::isCheckedOutBy {} {
     set dir [file dirname $file]
     set basefile [file tail $file]
     set olddir [eval pwd]
-    puts "Checking check out"
 
     cdDir $dir
     # Read in information list (who checked this file?)
