@@ -218,7 +218,7 @@ else if (ioctl(fd, PIOCUSAGE, &beginRun) == -1)
 		hostAddr.initialize();
 
 		// code generation.
-		addCode(converttype, "global", "convert");
+		addCode(converttype, "globalDecls", "convert");
 		addGlobal("#define HARDPORT 61114\n", "hardPort");
 		addInclude("<stdio.h>");
 		addInclude("<stdlib.h>");
