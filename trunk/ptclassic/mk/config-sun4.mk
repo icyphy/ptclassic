@@ -66,6 +66,10 @@ CC_STATIC = 	-static
 X11_INCSPEC =	-I/usr/X11/include
 X11_LIBSPEC =	-L/usr/X11/lib -lX11
 
+# Use -lSM -lICE for X11R6, don't use then for X11R5
+X11EXT_LIBSPEC=-lXext -lSM -lICE
+#X11EXT_LIBSPEC=-lXext
+
 # Variables for Pure Inc tools (purify, purelink, quantify)
 COLLECTOR = 	-collector=$(ROOT)/gnu/sun4/lib/gcc-lib/sparc-sun-sunos4.1.3/2.6.3/ld
 
