@@ -4,6 +4,19 @@
 
 extern Error errorHandler;
 
+Particle& IntSample :: operator = (const Particle& p)
+{
+	if(compareType(p)) {
+		// Types are compatible, so we can copy
+		data = ((IntSample&)p).data;
+		return *this;
+		}
+	else
+		errorHandler.error(
+		"Particle: attempt to assign incompatible Particle types"
+			);
+}
+
 IntSample :: operator char* ()
 	{ return form("%d",data);}
 
@@ -23,6 +36,7 @@ Particle* Plasma :: get()
 			);
         } else {
                 p = Stack::popTop();
+		p->wash();
 	}
 
 	return p;
@@ -31,6 +45,11 @@ Particle* Plasma :: get()
 Plasma* PlasmaList :: getPlasma(dataType t)
 {
 	Plasma* p;
+
+	if(t == ANYTYPE)
+		errorHandler.error(
+		"PlasmaList: cannot create Plasma with dataType=ANYTYPE"
+				);
 
 	// Find a Plasma, if one with that type is already on the list
 	for(int i= size(); i>0; i--) {
