@@ -42,7 +42,9 @@ static char SccsId[]="$Id$";
 #include "st.h"
 #define MEASURE_FILE	"~cad/lib/vem/measurefile"
 
+#ifdef MF
 static st_table *cmd_table = (st_table *) 0;
+#endif
 
 void m_command(uid)
 STR uid;			/* Unique command identifier */
