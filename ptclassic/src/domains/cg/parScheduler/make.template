@@ -37,7 +37,7 @@ include $(CONFIG)
 
 SDFKERNEL = $(ROOT)/src/domains/sdf/kernel
 CGKERNEL = $(ROOT)/src/domains/cg/kernel
-GANTTINCL = $(ROOT)/src/pigilib
+GANTTINCL = $(ROOT)/src/libgantt
 
 INCL=-I$(SDFKERNEL) -I$(CGKERNEL) -I$(KERNDIR) -I$(GANTTINCL)
 
