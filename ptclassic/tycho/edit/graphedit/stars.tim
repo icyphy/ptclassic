@@ -1,0 +1,19 @@
+# $Id$ G%
+# Test star index for graph editor
+
+group sdf {
+    -label {SDF Stars}
+    item Ramp {
+        -label {Ramp}
+	-numinputs 0
+	-numoutputs 1
+        parameter step 1.0 -type number -label step
+        parameter value 0.0 -type number -label value
+    }
+    item Printer {
+        -label {Printer}
+	-numinputs 0
+	-numoutputs 1
+	parameter fileName "<stdout>" -label fileName
+    }
+}
