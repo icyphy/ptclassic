@@ -73,6 +73,7 @@ HDRS= \
 	VHDLStar.h \
 	VHDLState.h \
 	VHDLTarget.h \
+	VHDLToken.h \
 	VHDLTypedObj.h \
 	VHDLVariable.h \
 	VHDLWormhole.h \
