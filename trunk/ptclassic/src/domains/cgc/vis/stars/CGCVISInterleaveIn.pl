@@ -24,7 +24,7 @@ provisions.
     location { CGC vis library }
 
     output {
-      name { input }
+      name { stereoOut }
       type { float }
       desc { Left and right stereo channel output }
     }
@@ -37,7 +37,7 @@ provisions.
     }
 
     setup {
-      input.setSDFParams(int(blockSize/4), int(blockSize/4)-1);
+      stereoOut.setSDFParams(int(blockSize/4), int(blockSize/4)-1);
     }
 
     codeblock(globalDecl){
@@ -67,10 +67,11 @@ provisions.
 		       <<  channels << ");\n";
       addCode(setupParameters);
       StringList controlParameters =  "$sharedSymbol(CGCAudioBase,audio_control)";
-      controlParameters     << "($starSymbol(file),"
-		       << "\"" << encodingType << "\","
-		       <<  volume << "," 
-		       <<  balance << ",1);\n";
+      controlParameters << "($starSymbol(file), "
+			<< "\"" << portType << "\", "
+			<<  volume << ", " 
+			<<  balance << ", "
+			<< "1);\n";
       addCode(controlParameters);
     }
 
@@ -92,7 +93,7 @@ provisions.
 	  $starSymbol(packit).regvaluesh[1] = $starSymbol(buffer)[j+1];
 	  $starSymbol(packit).regvaluesh[2] = $starSymbol(buffer)[j+2];
 	  $starSymbol(packit).regvaluesh[3] = $starSymbol(buffer)[j+3];
-	  $ref(input,$val(blockSize)/4-1-i) = $starSymbol(packit).regvaluedbl;
+	  $ref(stereoOut,$val(blockSize)/4-1-i) = $starSymbol(packit).regvaluedbl;
 	}
       }
     }
