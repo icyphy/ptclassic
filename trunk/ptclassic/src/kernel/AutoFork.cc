@@ -109,6 +109,8 @@ PortHole* AutoFork::setDest (GenericPort &gp, int alwaysFork) {
 				LOG_DEL; delete forkStar;
 				forkStar = 0;
 			}
+			forkInput = 0;
+			forkOutput = 0;
 			return 0;
 		}
 
@@ -142,25 +144,13 @@ const char* AutoFork::autoForkName() {
 	return hashstring (buf);
 }
 
-// destructor: remove fork star if present.  Otherwise the normal
-// Geodesic destructor will clean up properly.
-
-// it is possible that restructuring (such as removal of wormholes by
-// DDFAutoWorm) has eliminated use of this Geodesic, so that
-// geo.originatingPort is no longer valid (it might be an EventHorizon
-// that has been deleted).  If this has *not* happened,
-// then my geodesic will be connected to forkInput.  This is the reason
-// for testing of forkInput's Geodesic.
+// destructor: remove fork star if present.  We rely on the geodesic's
+// destructor to do any disconnection work that remains after deleting
+// the fork star.
 
 AutoFork::~AutoFork() {
 	if (forkStar) {
-		if (forkInput->geo() != &geo) {
-			geo.originatingPort = geo.destinationPort = 0;
-		}
 		forkStar->parent()->asGalaxy().removeBlock(*forkStar);
 		LOG_DEL; delete forkStar;
-		if (geo.originatingPort)
-			geo.originatingPort->disconnect(0);
-		geo.originatingPort = geo.destinationPort = 0;
 	}
 }
