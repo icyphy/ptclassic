@@ -33,7 +33,11 @@ static char	sccsid_xfunctions[] = "$Id$";
 #include <stdlib.h>
 #include "ptk.h"
 #include <stdio.h>
+#include <sys/types.h>
+#include <unistd.h>		/* Pick up getpid() */
+#include "vemInterface.h"
 
+#include "xfunctions.h"
 
 /*******************************************************************
 
@@ -134,7 +138,7 @@ void PrintVersion ()
     PrintCon(pigiVersion);
     if ( pigiFilename == NULL )
         pigiFilename = "pigiRpc";
-    sprintf( buf, "Running %s, %d", pigiFilename, getpid());
+    sprintf( buf, "Running %s, %d", pigiFilename, (int)getpid());
     PrintCon(buf);
 
     Tcl_VarEval(ptkInterp, "ptkStartupMessage {", pigiVersion, "} {",
