@@ -31,7 +31,7 @@ A typical call within an Itcl method looks like this:
      ::tycho::safeUpdate $this
 </pre>
 <p>
-<h3><a name="silent error">Silent errors</a>
+<h3><a name="silent error">Silent errors</a></h3>
 <p>
 A "silent error" is an ordinary error where no error message is
 reported to the user, like a "throw" and "catch" in some languages.
@@ -40,7 +40,7 @@ You can directly invoke a silent error with the following command:
      ::tycho::silentError
 </pre>
 <p>
-<h3><a name="safeEval">safeEval method</a>
+<h3><a name="safeEval">safeEval method</a></h3>
 <p>
 The three key Tycho base classes,
 <code>Object</code>,
@@ -52,6 +52,12 @@ then evaluates its arguments, then re-enables destruction of the object.
 Thus, if during evaluation of the arguments an attempt is made to destroy
 the object, the attempt will be intercepted and deferred until after
 evaluation of the arguments is complete.
+<p>
+The <code>safeEval</code> method should be used to invoke all modal
+dialogs, as in the following example:
+<pre>
+    safeEval ::tycho::warn "this is a warning"
+</pre>
 <p>
 <a href="../index.html">Tycho Home Page</a><br>
 <p>
