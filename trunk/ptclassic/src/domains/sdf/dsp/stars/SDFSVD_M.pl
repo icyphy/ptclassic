@@ -118,7 +118,9 @@ Data_M
     setup {
 	nrows = (int)rows;
 	ncols = (int)cols;
-
+    }
+    hinclude 	{ <math.h>, "Matrix.h" }
+    go {
 	// These matricies will hold the results.
         // Don't delete these, let envelope class handle that
 
@@ -129,9 +131,7 @@ Data_M
         LOG_NEW; W = new FloatMatrix(ncols,1);    
         // matrix of right singular vectors
         LOG_NEW; V = new FloatMatrix(ncols,ncols);
-    }
-    hinclude 	{ <math.h>, "Matrix.h" }
-    go {
+
 	// Get the input matrix and call the svd function.
         Envelope inputPkt;
         (input%0).getMessage(inputPkt);
