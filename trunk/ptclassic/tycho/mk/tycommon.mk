@@ -325,7 +325,7 @@ htest-netscape: $(JTESTHTML) $(JCLASS)
 # We cd up one level so that the zip file has the proper package name
 jzip: $(JZIP)
 $(JZIP): $(JSRCS) $(JCLASS)
-	(cd $(CLASSPATH); $(JAR) -c0Mf $@ $(JPACKAGE_DIR)/*.class)
+	(cd $(CLASSPATH); $(JAR) -c0Mf $@ $(TYPACKAGE_DIR)/*.class)
 
 jars: $(JARFILE) 
 $(JARFILE): $(JSRCS) $(JCLASS)
@@ -338,13 +338,13 @@ $(JARFILE): $(JSRCS) $(JCLASS)
 			echo "Name: $$x" >> manifest.tmp; \
 			echo "Java-Bean: True" >> manifest.tmp; \
 		done; \
-		(cd $(CLASSPATH); $(JAR) cfm $(JPACKAGE_DIR)/$@ \
-			$(JPACKAGE_DIR)/manifest.tmp \
-			$(JPACKAGE_DIR)/*.class); \
+		(cd $(CLASSPATH); $(JAR) cfm $(TYPACKAGE_DIR)/$@ \
+			$(TYPACKAGE_DIR)/manifest.tmp \
+			$(TYPACKAGE_DIR)/*.class); \
 	else \
 		echo "Creating $@"; \
-		(cd $(CLASSPATH); $(JAR) cf $(JPACKAGE_DIR)/$@ \
-			$(JPACKAGE_DIR)/*.class); \
+		(cd $(CLASSPATH); $(JAR) cf $(TYPACKAGE_DIR)/$@ \
+			$(TYPACKAGE_DIR)/*.class); \
 	fi
 
 ##############
