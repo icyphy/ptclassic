@@ -35,7 +35,7 @@ void DEWormhole :: go()
 }
 
 // cloner -- clone the inside and make a new wormhole from that.
-Block* DEWormhole :: clone()
+Block* DEWormhole :: clone() const
 {
 	return new DEWormhole(gal.clone()->asGalaxy());
 }
