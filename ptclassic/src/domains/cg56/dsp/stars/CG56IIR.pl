@@ -3,20 +3,17 @@ defstar {
     domain {CG56}
     desc {
 An infinite impulse response (IIR) filter implemented in a direct form II
-realization.
-The transfer function is of the form H(z) = G*N(1/z)/D(1/z),
-where N() and D() are polynomials.
-The parameter "gain" specifies G, and the floating-point arrays
-"numerator" and "denominator" specify N() and D(), respectively.
-Both arrays start with the constant terms of the polynomial
-and decrease in powers of z (increase in powers of 1/z).
-Note that the constant term of D is not omitted, as is common in
-other programs that assume that it has been normalized to unity.
-The denominator coefficients will be scaled by 1/leading denominator
-coefficient; the numerator coefficients will be scaled by
-gain/leading denominator coefficient.  An error will result if,
-after scaling, any of the coefficients is greater than 1
-or less than -1.
+realization.  The transfer function is of the form H(z) = G*N(1/z)/D(1/z),
+where N() and D() are polynomials.  The parameter "gain" specifies G, and
+the fixed-point arrays "numerator" and "denominator" specify N() and D(),
+respectively.  Both arrays start with the constant terms of the polynomial
+and decrease in powers of z (increase in powers of 1/z).  Note that the
+constant term of D is not omitted, as is common in other programs that
+assume that it has been normalized to unity.  The denominator coefficients
+will be scaled by 1/leading denominator coefficient; the numerator
+coefficients will be scaled by gain/leading denominator coefficient.  An
+error will result if, after scaling, any of the coefficients is greater
+than 1 or less than -1.
     }
     version { $Id$ }
     author { Kennard White and Luis Gutierrez}
@@ -94,9 +91,9 @@ Prentice-Hall: Englewood Cliffs, NJ, 1989.
 	name {coeffs}
 	type {fixarray}
 	default { "0" }
-	desc {internal state: contains coeffs; even addresses
-		  correspond to denominator coeffs., odd addresses
-		  correspond to numerator coeffs.
+	desc {
+internal state: contains coeffs; even addresses correspond to denominator
+coeffs., odd addresses correspond to numerator coeffs.
 	}
 	attributes { A_NONCONSTANT|A_NONSETTABLE|A_YMEM }
     }
@@ -106,7 +103,7 @@ Prentice-Hall: Englewood Cliffs, NJ, 1989.
 	default { "0" }
 	desc { internal state: contains delays }
 	attributes { A_NONCONSTANT|A_NONSETTABLE|A_XMEM }
-   }
+    }
     protected {
 	int numState, numLoops;
     }
@@ -119,53 +116,62 @@ Prentice-Hall: Englewood Cliffs, NJ, 1989.
 	numState = max(numNumer, numDenom);
 	double b0, scaleDenom, scaleNumer;
 	numLoops = numState - 1;
+
 	// Set up scaling to distribute the gain through the numerator,
 	// and scale both numer and denom to make b0 = 1
 	if ( numDenom < 1 ) {
 	    b0 = 1.0;
 	}
 	else if ( (b0 = double(denominator[0])) == 0.0 ) {
-	    // XXX: should sanity-check b0 more thoroughly
+	    // FIXME: should sanity-check b0 more thoroughly
 	    // (e.g., shouldn't even be close to zero)
 	    Error::abortRun(*this, "Must have non-zero leading denominator");
 	    return;
 	}
+
 	scaleDenom = 1.0 / b0;
 	scaleNumer = scaleDenom * double(gain);
 	coeffs.resize(2*numState);
 	delays.resize(numState+1);
 	for (int i = 0; i < numState; i++) {
-	    double temp;
             delays[i] = 0;
             if (i < numNumer) {
-                temp = scaleNumer*double(numerator[i]);
-                if ((temp > 1)||(temp < -1)) {
-                    Error::abortRun(*this,"|Scaled numerator ", 
-                                          "coefficient| > 1");
-                } else {
-                    coeffs[i*2+1] = temp;
+                double temp = scaleNumer*double(numerator[i]);
+                if ((temp > 1) || (temp < -1)) {
+		    StringList msg = "After scaling, numerator coefficient #";
+		    msg << i << " has a value of " << temp
+			<< " which is not is the range of (-1, 1).";
+                    Error::abortRun(*this, msg);
+		    return;
                 }
-            } else {
+		else {
+                    coeffs[i*2 + 1] = temp;
+                }
+            }
+	    else {
                 coeffs[i*2 + 1] = 0;
             }
 
             if ( i < numDenom ) {
-                temp = scaleDenom * -(double(denominator[i]));
-                if ((temp > 1)||(temp < -1)) {
-                    Error::abortRun(*this,"|Scaled denominator ", 
-                                          "coefficient| > 1");
-                } else {
+                double temp = scaleDenom * -(double(denominator[i]));
+                if ((temp > 1) || (temp < -1)) {
+		    StringList msg = "After scaling, denominator coefficient #";
+		    msg << i << " has a value of " << temp
+			<< " which is not is the range of (-1, 1).";
+                    Error::abortRun(*this, msg);
+		    return;
+                }
+		else {
                     coeffs[i*2] = temp;
                 }
-            } else {
+            }
+	    else {
                 coeffs[i*2] = 0;
-            }  
-				
+            }
         }
-
     }
 
-    go{
+    go {
 	if (numState == 1) {
 		addCode(one);
 	}
@@ -176,7 +182,7 @@ Prentice-Hall: Englewood Cliffs, NJ, 1989.
 	}
     }
 
-    codeblock(one){
+    codeblock(one) {
 ; H(z) = 1 so just pass input to output
 	move	$ref(signalIn),x1
 	move	$ref(coeffs,1),x0
@@ -184,7 +190,7 @@ Prentice-Hall: Englewood Cliffs, NJ, 1989.
 	move	a,$ref(signalOut)
     }
 
-    codeblock(init){
+    codeblock(init) {
 ;        b[0] + b[1]z^-1 + ... + b[n]z^-n
 ; H(z) = ----------------------------------
 ;        1  + a[1]z^-1 + ... + a[n]z^-n
@@ -214,20 +220,19 @@ Prentice-Hall: Englewood Cliffs, NJ, 1989.
 $label(end_loops)
     }
 
-    codeblock(end){
-	move $ref(coeffs,1),y1
+    codeblock(end) {
 ; y1 = b[0]
-	move a,x0
 ; x0 = sample + a[1]w[1] + ... + a[n]w[n]
-	macr x0,y1,b    a,$ref(delays,1)
 ; b  = b[0]*{ sample + a[1]w[1] + ... + a[n]w[n]} = output
 ; w[1] = sample + a[1]w[1] + ... + a[n]w[n]
-	move b,$ref(signalOut)
+	move	$ref(coeffs,1),y1
+	move	a,x0
+	macr	x0,y1,b    a,$ref(delays,1)
+	move	b,$ref(signalOut)
     }
 
-    exectime{
+    exectime {
 	if (numState == 1) return 4;
 	return (4 + 3 + 4*numLoops + 4);
     }
-
 }
