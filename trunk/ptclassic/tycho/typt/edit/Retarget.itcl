@@ -29,18 +29,20 @@
 #                                        PT_COPYRIGHT_VERSION_2
 #                                        COPYRIGHTENDKEY
 #######################################################################
-catch {delete  class EditRetarg}
 
 #######################################################################
-#### EditRetarg
+#### Retarget
 # Display Ptolemy Retargetting information.
+# The user can compare stars in two Ptolemy domains, and check
+# to see if the current universe would have conflicts while
+# being retargeted between domains.
 # <p>
-# Here is an example of how to use the EditRetarg
+# Here is an example of how to use the Retarget
 # <tcl><pre>
-#	::tycho::EditRetarg .t
+#	::tycho::Retarget .t
 #	.t centerOnScreen
 # </pre></tcl>
-class ::tycho::EditRetarg {
+class ::tycho::Retarget {
     inherit ::tycho::EditForest
     constructor {args} {}
     destructor {}
@@ -70,7 +72,7 @@ class ::tycho::EditRetarg {
 #######################################################################
 #### constructor
 #
-body ::tycho::EditRetarg::constructor {args} {
+body ::tycho::Retarget::constructor {args} {
     addTool newDomains -text {Compare Domains} -command "$this compareDomains"
     addTool domainAButton -text "Change Domain A: $domainA" \
             -command "$this changeDomainA"
@@ -97,7 +99,7 @@ body ::tycho::EditRetarg::constructor {args} {
 #### changeDomainA
 # Change the name of one of the domains that we are going to compare
 #
-body ::tycho::EditRetarg::changeDomainA {} {
+body ::tycho::Retarget::changeDomainA {} {
    set arglist [DialogWindow::newModal EntryQuery .e2 -queries "
        {domainA {Domain A:} $domainA}" ]
 
@@ -111,7 +113,7 @@ body ::tycho::EditRetarg::changeDomainA {} {
 #### changeDomainB
 # Change the name of one of the domains that we are going to compare
 #
-body ::tycho::EditRetarg::changeDomainB {} {
+body ::tycho::Retarget::changeDomainB {} {
    set arglist [DialogWindow::newModal EntryQuery .e2 -queries "
        {domainB {Domain B:} $domainB}" ]
 
@@ -126,7 +128,7 @@ body ::tycho::EditRetarg::changeDomainB {} {
 # Determine what stars are in two domains and compare them by plotting
 # the information as a Forest.
 #
-body ::tycho::EditRetarg::compareDomains {} {
+body ::tycho::Retarget::compareDomains {} {
     set clashList [::tycho::DomainInfo::diffDomains $domainA $domainB]
 
     clear
@@ -140,7 +142,7 @@ body ::tycho::EditRetarg::compareDomains {} {
         component graphics add $header {}
         foreach star [lindex $clashList $indexCount] {
             set contents [list tcl \
-                    "::tycho::EditRetarg::printStars $star $header \
+                    "::tycho::Retarget::printStars $star $header \
                     $domainA $domainB" ]
             component graphics add $star $contents $header
         }
@@ -175,7 +177,7 @@ body ::tycho::EditRetarg::compareDomains {} {
 #### printStars
 # Print the same star from two different domains
 # This procedure is called when the user double clicks on a star name
-body ::tycho::EditRetarg::printStars { starName relation domainA domainB} {
+body ::tycho::Retarget::printStars { starName relation domainA domainB} {
     domain $domainA
     if [catch {set domainAPrint [::print $starName]}] {
         set domainAPrint "Star $starName is not present in domain $domainA"
@@ -221,17 +223,18 @@ body ::tycho::EditRetarg::printStars { starName relation domainA domainB} {
                     \"Internal Error: I don't know about: $relation\"
         }
     "
-    ::tycho::HTMLMessage .editRetargPrintStars -html "
+
+    set retargWin [::tycho::HTMLMessage .retarget#auto -html "
         <H1>Star: $starName in domains $domainA and $domainB</H1>
         $relationMessage
 
         <tcl><pre>
-        ::tycho::EditPtlang .ePtlangA -star {$domainA $starName}
-        .ePtlangA centerOnScreen
+        ::tycho::EditPtlang .ptlangA -star {$domainA $starName}
+        .ptlangA centerOnScreen
         </pre></tcl>
         <tcl><pre>
-        ::tycho::EditPtlang .ePtlangB -star {$domainB $starName}
-        .ePtlangB centerOnScreen
+        ::tycho::EditPtlang .ptlangB -star {$domainB $starName}
+        .ptlangB centerOnScreen
         </pre></tcl>
         <H2>$domainA Domain</H2>
         <pre>
@@ -241,7 +244,7 @@ body ::tycho::EditRetarg::printStars { starName relation domainA domainB} {
         <pre>
         $domainBPrint
         </pre>
-    "
+    "]
 
-    .editRetargPrintStars centerOnScreen
+    $retargWin centerOnScreen
 }
