@@ -30,11 +30,13 @@ class EventQueue : public CalendarQueue
 public:
 	void pushHead(Particle* p, PortHole* ph, double v, double fv) {
             Event* temp = getEvent(p, ph);
-	    Star *dest;
+	    Star *dest = NULL;
 	    PortHole* tl = 0;
 	    if (fv != 0) {
 		tl = temp->dest;
-		dest = &tl->parent()->asStar();
+		if (tl != NULL)
+			dest = &tl->parent()->asStar();
+		// ELSE dest IS ALREADY INITIALIZED TO NULL
 	    } else {
 		dest = (Star*) temp;
 	    }
@@ -42,6 +44,25 @@ public:
 	}
 	void pushTail(Particle* p, PortHole* ph, double v, double fv) {
 	    pushHead(p, ph, v, fv);
+	}
+
+
+ // The following takes care of the case where levelput is called
+ // directly without going thru pushHead. In that case it is called
+ // with three arguments and dest must be internallu calculated.
+
+	CqLevelLink* levelput(Pointer a, double v, double fv) {
+	     Star *dest= NULL;
+	     PortHole* tl = 0;
+	     if (fv != 0) {
+		 tl = ((Event *)a)->dest;
+		 if (tl != NULL)
+		       dest = &tl->parent()->asStar();
+		 // else  dest is already NULL; 
+	     } else {
+		 dest = (Star*) a;
+	     }
+	     return CalendarQueue::levelput(a, v, fv, dest);
 	}
 
 	void putFreeLink(CqLevelLink* p); // virtual
