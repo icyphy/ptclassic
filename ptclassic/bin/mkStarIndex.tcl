@@ -19,5 +19,5 @@ if { $argc != 2 } {
   puts stderr "Usage: mkStarIndex domainList destDirectory"
   exit 1
 } else {
-  starindex_WriteWWWStarDemoDir [lindex $argv 0] [lindex $argv 1]/www
+  starindex_WriteWWWStarDemoDir [lindex $argv 0] [lindex $argv 1]
 }
