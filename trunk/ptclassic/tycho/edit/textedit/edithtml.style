@@ -4,8 +4,8 @@
 #
 # The "edithtml" master style-sheet
 #
-modelconfigure -label "HTML editor colors"
-modelconfigure -description {
+configure -title "HTML editor colors"
+configure -description {
     Additional color settings for HTML editors.
 }
 

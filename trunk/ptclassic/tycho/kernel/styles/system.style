@@ -4,8 +4,8 @@
 #
 # The "system" master style-sheet
 #
-modelconfigure -label "System"
-modelconfigure -description {
+configure -title "System"
+configure -description {
 	This style contains system-wide application settings.
 }
 

@@ -6,8 +6,8 @@
 #
 # FIXME: Add tk palette
 #
-modelconfigure -label "Colors"
-modelconfigure -description {
+configure -title "Colors"
+configure -description {
     This style contains color settings for widgets
     in general.
 }

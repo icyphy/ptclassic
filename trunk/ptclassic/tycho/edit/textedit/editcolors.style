@@ -4,8 +4,8 @@
 #
 # The "textcolors" master style-sheet
 #
-modelconfigure -label "Text colors"
-modelconfigure -description {
+configure -title "Text colors"
+configure -description {
     This style contains highlight colors for plain text editors,
     such as code editors and so on. In general, a new style
     will be needed if new styles are create in the <i>textcolors</i>

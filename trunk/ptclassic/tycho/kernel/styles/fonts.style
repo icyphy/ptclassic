@@ -4,8 +4,8 @@
 #
 # The "fonts" master style-sheet
 #
-modelconfigure -label "Fonts"
-modelconfigure -description {
+configure -title "Fonts"
+configure -description {
 	This style contains global font settings
 }
 

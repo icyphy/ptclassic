@@ -4,8 +4,8 @@
 #
 # The "style" master style-sheet
 #
-modelconfigure -label "Layout"
-modelconfigure -description {
+configure -title "Layout"
+configure -description {
     This style contains settings for widget dimensions.
 }
 

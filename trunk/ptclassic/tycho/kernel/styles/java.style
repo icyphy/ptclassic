@@ -4,8 +4,8 @@
 #
 # The "java" master style-sheet
 #
-modelconfigure -label "Java"
-modelconfigure -description {
+configure -title "Java"
+configure -description {
     This style contains settings for Java language
     development.
 }

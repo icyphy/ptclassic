@@ -4,8 +4,8 @@
 #
 # The "text" master style-sheet
 #
-modelconfigure -label "Text"
-modelconfigure -description {
+configure -title "Text"
+configure -description {
     This style contains settings for text widgets.
     It contains universal coloring settings such
     as foreground and background, cursor and selection
