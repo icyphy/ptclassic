@@ -67,6 +67,7 @@ public:
 	int send(int argc, char** argv);
 	int set(int argc, char** argv);
 	int start(int argc, char** argv);
+	int status(int argc, char** argv);
 	int unset(int argc, char** argv);
 
 	// set data members
@@ -85,11 +86,14 @@ protected:
 	// set Matlab figure handle
 	void sethandle();
 
+	// start a Matlab process if one is not running
+	int init();
+
 	// the current Tcl interpeter
 	Tcl_Interp* tclinterp;
 
 	// the interface to the Matlab engine
-	MatlabIfc matlabInterface;
+	MatlabIfc* matlabInterface;
 
 };
 
