@@ -30,10 +30,52 @@
 #######################################################################
 #### Shape
 #
-# The superclass of the shape class hierarchy. The Shape
+# The superclass of the shape class hierarchy. The Slate, by default, 
+# gives every item a "shape," which is one of _point_, _line_,
+# _polygon_, _rectangle_, or _oval_. This shape is what the Slate
+# uses to determine how to respond to requests to reshape an item,
+# for example. Complex item classes can also override their default shape
+# behavior by providing appropriate procedures.
+#
+# The Shape
 # classes are, like the ComplexItem class, really just collections
 # of procedures with shared data that use item IDs to "simulate"
-# real objects.
+# real objects. The Slate separates the concept of "shape" into a
+# separate hierarcchy to enhance re-usability -- after all, there
+# could be dozens of different items types shaped like a "rectangle",
+# which would probably not fit neatly into a class hierarchy in which
+# all of these inherited from a Rectangle class. In the OO design pattern
+# community, this kind of class structure is known as a "strategy."
+# (Although we are faking it here -- shapes and complex items are not
+# really proper classes -- the concept is the same.)
+#
+# Each Shape class has two kinds of procedure. The first all start with
+# an underscore: these procedures are called by the slate to implement
+# methods such as aspect{} and reshape{}, or to implement interactive
+# moving or reshaping{}. The first three arguments to these are always
+# the item ID, the canvas the item is drawn on, and the slate the item
+# is drawn on. The second type of procedure are purely functional
+# utility procedures that take one or more sets of coordinates in the
+# argument list and produce some result. They do not modify a slate
+# item -- they are, however, used by some of the item-modifying
+# procedures to calculate coordinates. These procedures can be called
+# from anywhere in Tycho.
+#
+# <p><b>Options</b>
+#
+# Shape classes have no options.
+#
+# <p><b>Bugs</b> (none)
+#
+# <p><b>Enhancements</b> (none)
+#
+# <p><b>Links</b>
+# 
+# <ul>
+# <li><a href="../internals/shaped.html">An overview of Shape classes</a>.
+# <li><a href="../internals/index.html">Infrastructure contents</a>.
+# <li><a href="../codeDoc/index.html">Class documentation index</a>.
+# </ul>
 #
 class ::tycho::Shape {
     inherit ::tycho::Uninstantiable
@@ -130,7 +172,7 @@ body ::tycho::Shape::_aspect {id canvas slate args} {
 #######################################################################
 #### _grapple
 #
-# This procedure must be implemented by Shape subclasses.
+# _Abstract procedure._
 #
 body ::tycho::Shape::_grapple {id canvas slate interactor args} {
     error "Abstract procedure"
@@ -199,7 +241,7 @@ body ::tycho::Shape::_moverelease {id canvas slate x y} {
 #######################################################################
 #### _reshape
 #
-# This procedure must be implemented by Shape subclasses.
+# _Abstract procedure._
 #
 body ::tycho::Shape::_reshape {id canvas slate x y args} {
     error "Abstract procedure"
@@ -208,13 +250,12 @@ body ::tycho::Shape::_reshape {id canvas slate x y args} {
 #######################################################################
 #### _reshapeclick
 #
+# _Abstract procedure._
 # Start a click-drag-release sequence for reshaping an item. This
 # assumes that a release action has been called since previous
 # drag actions. The optional -ghost flag indicates that the picture
 # is to be reshaped by dragging a ``ghost'' of the picture. One or
 # more aspects can be specified.
-#
-# This procedure must be implemented by Shape subclasses.
 #
 body ::tycho::Shape::_reshapeclick {id canvas slate x y args} {
     error "Abstract procedure"
@@ -223,13 +264,12 @@ body ::tycho::Shape::_reshapeclick {id canvas slate x y args} {
 #######################################################################
 #### _reshapedrag
 #
+# _Abstract procedure._
 # Reshape the aspects previously specified by click{}
 # to the specified value. Aspects are modified by the relevent
 # x or y coordinate only.
 # Drag assumes that click has already been called on the picture,
 # and will function unpredictably if not.
-#
-# This procedure must be implemented by Shape subclasses.
 #
 body ::tycho::Shape::_reshapedrag {id canvas slate x y} {
     error "Abstract procedure"
@@ -238,12 +278,11 @@ body ::tycho::Shape::_reshapedrag {id canvas slate x y} {
 #######################################################################
 #### _reshaperelease
 #
+# _Abstract procedure._
 # Terminate a click-drag-release sequence. If a ghost is
 # being reshaped, then the picture is reshaped to the shape of the ghost
 # and the ghost is deleted. Note: A release must be used to terminate
 # the click-drag-release sequence, even if not ghosting the picture.
-#
-# This procedure must be implemented by Shape subclasses.
 #
 body ::tycho::Shape::_reshaperelease {id canvas slate x y} {
     error "Abstract procedure"

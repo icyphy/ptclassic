@@ -34,7 +34,10 @@
 # mode of operation, the interactor quantizes movement to the option
 # *-stepsize*. Setting the *-gridded* option to true will, however,
 # cause movement to be quantized such that the _cursor position_
-# is a multiple of the step size.
+# is a multiple of the step size. Stepper inherits from
+# <a href="Follower.html">Follower</a>, which provides non-quantized
+# movement, and is related to <a href="Bounder.html">Bounder</a>,
+# which constrains the region of movement.
 #
 # <p><b>Options</b>
 #
@@ -72,9 +75,11 @@
 # <p><b>Links</b>
 # 
 # <ul>
-# <li><a href="../internals/interacting.html">How interactors work</a>.
-# <li><a href="../internals/interactors.html">Interactor classes</a>.
-# <li><a href="Bounder.html">Bounder</a>
+# <li><a href="../internals/interacting.html">How interactors work</a>
+# <li><a href="../internals/interactors.html">An overview of
+#                    interactor classes</a>
+# <li><a href="../internals/index.html">Infrastructure contents</a>
+# <li><a href="index.html">Class documentation index</a>
 # </ul>
 #
 class ::tycho::Stepper {

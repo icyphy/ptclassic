@@ -33,7 +33,10 @@
 # An interactor that keeps the target object within a given region.
 # The region can either be specified by an option, by the target
 # picture, or defaults to the size of the slate. The *-constrain*
-# option that restricts movement along certain axes.
+# option that restricts movement along certain axes.  Bounder inherits from
+# <a href="Follower.html">Follower</a>, which provides non-constrained
+# movement, and is related to <a href="Stepper.html">Stepper</a>,
+# which quantizes mouse movement.
 #
 # Note that the bounds enforced by this interactor apply to the target 
 # item, not to the cursor. That is, the interactor keeps the target 
@@ -88,7 +91,8 @@
 # <ul>
 # <li><a href="../internals/interacting.html">How interactors work</a>.
 # <li><a href="../internals/interactors.html">Interactor classes</a>.
-# <li><a href="Stepper.html">Stepper</a>
+# <li><a href="../internals/index.html">Infrastructure contents</a>
+# <li><a href="index.html">Class documentation index</a>
 # </ul>
 #
 class ::tycho::Bounder {
