@@ -25,7 +25,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 							COPYRIGHTENDKEY
 */
 
-// Programmer:  J. Buck, Kennard
+// Programmer:  J. Buck, Kennard White
 // $Id$
 
 // This defines derived types of ifstream and ofstream that do the following:
@@ -106,7 +106,13 @@ pt_ifstream::pt_ifstream(const char *name,int mode, int prot) {
 void pt_ifstream::open(const char* name, int mode, int prot) {
 	int nobufB;
 	int fd = check_special(name, nobufB);
-	if (fd == 0) rdbuf()->attach(fd);
+	if (fd == 0) {
+		rdbuf()->attach(fd);
+#ifdef __GNUG__
+		// this should not be needed: problem with libg++ 2.5
+		setf(ios::dont_close);
+#endif
+	}
 	else if (fd > 0) {
 		Error::abortRun("Can't open ", name,
 				" for reading: write-only file descriptor");
@@ -129,7 +135,13 @@ void pt_ofstream::open(const char* name, int mode, int prot) {
 				" for writing: can't write to standard input");
 		return;
 	}
-	else if (fd > 0) rdbuf()->attach(fd);
+	else if (fd > 0) {
+		rdbuf()->attach(fd);
+#ifdef __GNUG__
+		// this should not be needed: problem with libg++ 2.5
+		setf(ios::dont_close);
+#endif
+	}
 	else ofstream::open(expand(name),mode,prot);
 	if (!*this) reportError("writing");
 	if (nobufB) setf(unitbuf);
