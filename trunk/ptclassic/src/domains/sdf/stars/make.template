@@ -44,9 +44,6 @@ PL_SRCS= \
  SDFDistributor.pl \
  SDFDownSample.pl \
  SDFExp.pl \
- SDFFixToFloat.pl \
- SDFFixToInt.pl \
- SDFFloatToFix.pl \
  SDFFloor.pl \
  SDFFork.pl \
  SDFGain.pl \
@@ -56,7 +53,6 @@ PL_SRCS= \
  SDFIIDUniform.pl \
  SDFImpulse.pl \
  SDFIntToBits.pl \
- SDFIntToFix.pl \
  SDFIntegrator.pl \
  SDFLimit.pl \
  SDFLinQuantIdx.pl \
