@@ -28,7 +28,7 @@ ENHANCEMENTS, OR MODIFICATIONS.  COPYRIGHTENDKEY
 
  Programmers:  Eric Pauer (Sanders), Christopher Hylands
  Date of creation: 1/15/98
- Version: @(#)ACSCorona.cc	1.15	06/18/99
+ Version: $Id$
 
 ***********************************************************************/
 
