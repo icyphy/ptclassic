@@ -623,7 +623,7 @@ body ::tycho::Graphics::centeredText \
             set cwidth [expr $cwidth-20]
         }
         if {$font != {}} {
-            set usefont $font
+            set usefont [eval ::tycho::font $font]
         } {
             set usefont [::tycho::font helvetica]
         }
