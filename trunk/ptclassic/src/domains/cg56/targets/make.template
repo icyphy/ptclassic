@@ -57,6 +57,7 @@ INCL=-I$(CG56DIR) -I$(CGDIR) -I$(CGSTARDIR) -I$(SDFDIR) -I$(KERNDIR) \
 
 # stars to make
 PL_SRCS = CG56MultiSimReceive.pl CG56MultiSimSend.pl $(S56PL_SRCS)
+EXTRA_SRCS = $(PL_SRCS)
 
 # objects to make
 OBJS=	CG56MultiSimTarget.o Sim56Target.o S56XTarget.o Sub56Target.o \
