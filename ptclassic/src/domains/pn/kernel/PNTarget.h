@@ -54,10 +54,6 @@ public:
 
     // End simulation.
     /* virtual */ void wrapup();
-
-protected:
-    // Select Scheduler type.
-    IntState realTime;
 };
 
 #endif
