@@ -4,7 +4,7 @@
 #
 # @Contributor: Christopher Hylands
 #
-# @Version: $Id$
+# @Version: @(#)ItclParser.itcl	1.7 09/21/97
 #
 # @Copyright (c) 1996-1997 The Regents of the University of California.
 # All rights reserved.
@@ -73,11 +73,11 @@ class ::tycho::ItclParser {
     ###################################################################
     ####                         public methods                    ####
 
-    # Read the current file, call parseData.
-    method readFile {filename}
-
     # Output an IDoc representation of the loaded classes.
     method generateSingleFileIDoc {filename}
+
+    # Read the current file, call parseData.
+    method readFile {filename}
 
     ###################################################################
     ####                      public procs                         ####
@@ -133,12 +133,12 @@ class ::tycho::ItclParser {
     # Add a variable to the class model
     private method addVariable {class name protection desc {default {}}}
 
+    # Parse the data within a class definition
+    private method parseClass {class body}
+
     # Parse the data for a single file, creating and
     # modifying classes as needed
     private method parseData {data}
-
-    # Parse the data within a class definition
-    private method parseClass {class body}
 
     ###################################################################
     ####                   private variables                       ####
@@ -157,6 +157,45 @@ body ::tycho::ItclParser::constructor {args} {
     ###################################################################
     ###################################################################
     ####                      public methods                       ####
+
+#####################################################################
+#### generateSingleFileIDoc
+# Write the models for all loaded classes into a file.
+#
+body ::tycho::ItclParser::generateSingleFileIDoc {filename} {
+    # output class model data
+    foreach {class model} [array get _classmodels] {
+        # puts $class
+        # puts [$_classmodels($class) describe]
+        if {$class != "related"} {
+            set docFile [info namespace tail $class].itclclass
+            ::tycho::rmIfNotWritable $docFile
+            set fd [open $docFile "w"]
+	    puts $fd [$model describe]
+            close $fd
+            # FIXME - ?
+	    delete object $model
+        } else {
+            if {$_relatedModified} {
+                # NOTE: goes by the filename, not the class name, for
+                # related documentation
+                if {[array size _classmodels] == 1} {
+                    # Not related, ONLY docs
+                    set relFile [file root $filename].itclclass
+                } else {
+                    # Related file
+                    set relFile [file root $filename]_rel.itclclass
+                }
+                ::tycho::rmIfNotWritable $relFile
+                set fd [open $relFile "w"]
+		puts $fd [$model describe]
+                close $fd
+            }
+	    # FIXME - ?
+            delete object $model
+        }
+    }
+}
 
 #####################################################################
 #### readFile 
@@ -267,45 +306,6 @@ body ::tycho::ItclParser::readFile {filename} {
     close $fd
 
     parseData $inEscapedComments
-}
-
-#####################################################################
-#### generateSingleFileIDoc
-# Write the models for all loaded classes into a file.
-#
-body ::tycho::ItclParser::generateSingleFileIDoc {filename} {
-    # output class model data
-    foreach {class model} [array get _classmodels] {
-        # puts $class
-        # puts [$_classmodels($class) describe]
-        if {$class != "related"} {
-            set docFile [info namespace tail $class].itclclass
-            ::tycho::rmIfNotWritable $docFile
-            set fd [open $docFile "w"]
-	    puts $fd [$model describe]
-            close $fd
-            # FIXME - ?
-	    delete object $model
-        } else {
-            if {$_relatedModified} {
-                # NOTE: goes by the filename, not the class name, for
-                # related documentation
-                if {[array size _classmodels] == 1} {
-                    # Not related, ONLY docs
-                    set relFile [file root $filename].itclclass
-                } else {
-                    # Related file
-                    set relFile [file root $filename]_rel.itclclass
-                }
-                ::tycho::rmIfNotWritable $relFile
-                set fd [open $relFile "w"]
-		puts $fd [$model describe]
-                close $fd
-            }
-	    # FIXME - ?
-            delete object $model
-        }
-    }
 }
 
     ###################################################################
@@ -473,7 +473,6 @@ body ::tycho::ItclParser::modCheck {filename} {
 body ::tycho::ItclParser::addArgs {class name arguments} {
     set classModel $_classmodels($class)
     foreach arg $arguments {
-        puts [list arg $arg [llength $arg]]
 	if { [llength $arg] == 2 } {
 	    set argname [lindex $arg 0]
 	    set default [lindex $arg 1]
@@ -496,7 +495,6 @@ body ::tycho::ItclParser::addArgs {class name arguments} {
 # the given entity in the proper class.
 #
 body ::tycho::ItclParser::addBody {name arguments expl} {
-puts "addBody $name $arguments"
     # assumes the method or proc already exists
     set class [info namespace qualifiers $name]
     set name [info namespace tail $name]
@@ -570,7 +568,10 @@ body ::tycho::ItclParser::addConfigBody {name expl} {
         set classModel $_classmodels($class) 
         set expl [formatExpl "$expl"]
         if {$expl != {}} {
-            $classModel itemconfigure variable:-$name -explanation $expl
+            if ![$classModel exists variable:$name] {
+                set name -$name
+            }
+            $classModel itemconfigure variable:$name -explanation $expl
         } 
     }
 }
@@ -673,164 +674,6 @@ body ::tycho::ItclParser::addVariable \
 	    -scope instance \
 	    -default $default \
 	    -description [formatDesc $desc]
-}
-
-#####################################################################
-#### parseData
-# Expects a modified source file, with adjacent comments all on one line,
-# useless comments removed. This data is then gone through as a list,
-# looking for toplevel keywords, such as "class" "proc" "configbody" and 
-# "body". These are parsed according to Itcl's syntax and information
-# of note is added to the class model.
-#
-# Comments are saved until the next keyword and are assumed to belong to
-# that entity. The class comment, then, must be the comment directly
-# preceding the class definition, ignoring initialization code that 
-# ItclParser does not recognize.
-#
-# NOTE: @ tags are only recognized in the class comment, the comment 
-# that appears before the class definition.
-#
-body ::tycho::ItclParser::parseData {data} {
-    set inComment 0
-    set inOutsideProc 0
-    set inBody 0
-    set inConfigBody 0
-    set inEnsemble 0
-    set inClass 0
-    set firstComment {}
-    set lastComment {}
-    foreach construct $data {
-        # Keep interface live.
-        tydocUpdate $this
-
-        if {$inComment} {
-            # This is a comment. Save it.
-            # The first comment in a file contains tags that need to be saved.
-            if {$firstComment == {}} {
-                set firstComment "$construct"
-            } else {
-                set lastComment "$construct"
-            }
-            set inComment 0
-            continue
-        }
-        if {$construct == "\n"} {
-            # Ignore empty lines outside of comments
-            continue
-        }
-        if {$inOutsideProc} {
-            # This is an outside proc. proc name args body
-            if {$inOutsideProc == 1} {
-                set procName $construct
-                set inOutsideProc 2
-            } elseif {$inOutsideProc == 2} {
-                set args $construct
-                set inOutsideProc 3
-            } else {
-                # puts "PROC: $procName ARGS: $args BODY: $construct"
-                addOutsideProc $procName $args $lastComment
-                set inOutsideProc 0
-                set lastComment {}
-                set procName {}
-                set args {}
-            }
-            continue
-        }
-        if {$inBody} {
-            # This is part of a body statement. body class::func arglist body
-            if {$inBody == 1} {
-                set bodyName $construct
-                set inBody 2
-            } elseif {$inBody == 2} {
-                set args $construct
-                set inBody 3
-            } else {
-                # puts "BODY: $bodyName ARGS: $args BODY: $construct"
-                addBody $bodyName $args $lastComment
-                set inBody 0
-                set lastComment {}
-                set bodyName {}
-                set args {}
-            }
-            continue
-        }
-        if {$inConfigBody} {
-            # This is part of a configbody statement. 
-            # configbody class::option body
-            if {$inConfigBody == 1} {
-                set optionName $construct
-                set inConfigBody 2
-            } else {
-                # puts "CONFIG: $optionName BODY: $construct"
-                addConfigBody $optionName $lastComment
-                set inConfigBody 0
-                set lastComment {}
-                set optionName {}
-            }
-            continue
-        }
-        if {$inEnsemble} {
-            # This is part of an ensemble statement. ensemble name { commands }
-            if {$inEnsemble == 1} {
-                set ensembleName $construct
-                set inEnsemble 2
-            } else {
-                #puts "ENS: $ensembleName BODY: $construct"
-                set inEnsemble 0
-                # FIXME: ensembles are unsupported
-                # Keep lastComment: probably relates to Class
-                set ensembleName {}
-            }
-            continue
-        }
-        if {$inClass} {
-            # This is part of a class statement. class name { definition }
-            if {$inClass == 1} {
-                set className $construct
-                set inClass 2
-            } else {
-                # puts "CLASS: $className BODY: $construct"
-                parseClass $className $construct
-                addClassComment $className "$firstComment \n $lastComment"
-                set inClass 0
-                set lastComment {}
-                set className {}
-            }
-            continue
-        }
-        if {[string index $construct 0] == "#"} {
-            # A comment follows.
-            set inComment 1
-            continue
-        }
-        if {$construct == "proc"} {
-            # A proc follows.
-            set inOutsideProc 1
-            continue
-        }
-        if {$construct == "body"} {
-            # A body follows.
-            set inBody 1
-            continue
-        }
-        if {$construct == "configbody"} {
-            # A configbody follows.
-            set inConfigBody 1
-            continue
-        }
-        if {$construct == "ensemble"} {
-            # An ensemble follows.
-            set inEnsemble 1
-            continue
-        }
-        if {$construct == "class"} {
-            # A class follows.
-            set inClass 1
-            continue
-        } 
-        # puts "UNCLASSIFIED: $construct"
-    }
 }
 
 #####################################################################
@@ -1074,5 +917,163 @@ body ::tycho::ItclParser::parseClass {class body} {
                 # puts "#UNCLASSIFIED: $construct"
             }
         }
+    }
+}
+
+#####################################################################
+#### parseData
+# Expects a modified source file, with adjacent comments all on one line,
+# useless comments removed. This data is then gone through as a list,
+# looking for toplevel keywords, such as "class" "proc" "configbody" and 
+# "body". These are parsed according to Itcl's syntax and information
+# of note is added to the class model.
+#
+# Comments are saved until the next keyword and are assumed to belong to
+# that entity. The class comment, then, must be the comment directly
+# preceding the class definition, ignoring initialization code that 
+# ItclParser does not recognize.
+#
+# NOTE: @ tags are only recognized in the class comment, the comment 
+# that appears before the class definition.
+#
+body ::tycho::ItclParser::parseData {data} {
+    set inComment 0
+    set inOutsideProc 0
+    set inBody 0
+    set inConfigBody 0
+    set inEnsemble 0
+    set inClass 0
+    set firstComment {}
+    set lastComment {}
+    foreach construct $data {
+        # Keep interface live.
+        tydocUpdate $this
+
+        if {$inComment} {
+            # This is a comment. Save it.
+            # The first comment in a file contains tags that need to be saved.
+            if {$firstComment == {}} {
+                set firstComment "$construct"
+            } else {
+                set lastComment "$construct"
+            }
+            set inComment 0
+            continue
+        }
+        if {$construct == "\n"} {
+            # Ignore empty lines outside of comments
+            continue
+        }
+        if {$inOutsideProc} {
+            # This is an outside proc. proc name args body
+            if {$inOutsideProc == 1} {
+                set procName $construct
+                set inOutsideProc 2
+            } elseif {$inOutsideProc == 2} {
+                set args $construct
+                set inOutsideProc 3
+            } else {
+                # puts "PROC: $procName ARGS: $args BODY: $construct"
+                addOutsideProc $procName $args $lastComment
+                set inOutsideProc 0
+                set lastComment {}
+                set procName {}
+                set args {}
+            }
+            continue
+        }
+        if {$inBody} {
+            # This is part of a body statement. body class::func arglist body
+            if {$inBody == 1} {
+                set bodyName $construct
+                set inBody 2
+            } elseif {$inBody == 2} {
+                set args $construct
+                set inBody 3
+            } else {
+                # puts "BODY: $bodyName ARGS: $args BODY: $construct"
+                addBody $bodyName $args $lastComment
+                set inBody 0
+                set lastComment {}
+                set bodyName {}
+                set args {}
+            }
+            continue
+        }
+        if {$inConfigBody} {
+            # This is part of a configbody statement. 
+            # configbody class::option body
+            if {$inConfigBody == 1} {
+                set optionName $construct
+                set inConfigBody 2
+            } else {
+                # puts "CONFIG: $optionName BODY: $construct"
+                addConfigBody $optionName $lastComment
+                set inConfigBody 0
+                set lastComment {}
+                set optionName {}
+            }
+            continue
+        }
+        if {$inEnsemble} {
+            # This is part of an ensemble statement. ensemble name { commands }
+            if {$inEnsemble == 1} {
+                set ensembleName $construct
+                set inEnsemble 2
+            } else {
+                #puts "ENS: $ensembleName BODY: $construct"
+                set inEnsemble 0
+                # FIXME: ensembles are unsupported
+                # Keep lastComment: probably relates to Class
+                set ensembleName {}
+            }
+            continue
+        }
+        if {$inClass} {
+            # This is part of a class statement. class name { definition }
+            if {$inClass == 1} {
+                set className $construct
+                set inClass 2
+            } else {
+                # puts "CLASS: $className BODY: $construct"
+                parseClass $className $construct
+                addClassComment $className "$firstComment \n $lastComment"
+                set inClass 0
+                set lastComment {}
+                set className {}
+            }
+            continue
+        }
+        if {[string index $construct 0] == "#"} {
+            # A comment follows.
+            set inComment 1
+            continue
+        }
+        if {$construct == "proc"} {
+            # A proc follows.
+            set inOutsideProc 1
+            continue
+        }
+        if {$construct == "body"} {
+            # A body follows.
+            set inBody 1
+            continue
+        }
+        if {$construct == "configbody"} {
+            # A configbody follows.
+            set inConfigBody 1
+            continue
+        }
+        if {$construct == "ensemble"} {
+            # An ensemble follows.
+            set inEnsemble 1
+            continue
+        }
+        if {$construct == "class"} {
+            # A class follows.
+            set inClass 1
+            continue
+        } 
+        # puts "UNCLASSIFIED: $construct"
     }
 }
