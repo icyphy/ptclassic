@@ -107,6 +107,9 @@ public:
 	void setTarget(MultiTarget* t, ParProcessors* p) 
 		{ mtarget = t; parent = p; }
 
+	// return my target
+	CGTarget* target() { return targetPtr; }
+
 	// create the galaxy
 	void createSubGal();
 
