@@ -49,7 +49,7 @@ HDRS		=
 LIBCSRCS	= oct2ps.c \
 		version.c
 
-SRCS = $(LIBCSRCS)
+SRCS = $(LIBCSRCS) $(ROOT)/octtools/lib/oct2ps.pro $(ROOT)/lib/oct2ps.pro
 
 OBJS = $(LIBCSRCS:.c=.o)
 
@@ -57,20 +57,13 @@ C_INCL= -I../include $(PTCOMPAT_INCSPEC)
 
 MISC_FILES =	oct2ps.1 oct2ps.pro sample sample.ps sample2 sample2.ps
 
-all::	 makefile oct2ps $(ROOT)/octtools/lib/oct2ps.pro $(ROOT)/lib/oct2ps.pro
-
-$(ROOT)/octtools/lib/oct2ps.pro: oct2ps.pro
-	cp oct2ps.pro $(ROOT)/octtools/lib/oct2ps.pro
-
-$(ROOT)/lib/oct2ps.pro: oct2ps.pro
-	cp oct2ps.pro $(ROOT)/lib/oct2ps.pro
+all::	 makefile oct2ps 
 
 LIBS	= -L$(OCTLIBDIR) -llel$(DBGFLAG) -lda$(DBGFLAG) -ltap$(DBGFLAG) \
 	-loh$(DBGFLAG) -lvov$(DBGFLAG) -loptions$(DBGFLAG) \
 	-llist$(DBGFLAG) -loct$(DBGFLAG) -ltr$(DBGFLAG) -lst$(DBGFLAG) \
 	-lutility$(DBGFLAG) -lerrtrap$(DBGFLAG) \
 	-luprintf$(DBGFLAG) -lport$(DBGFLAG) 
-
 
 oct2ps:	$(OBJS)
 	$(LINKER) $(LINKFLAGS) $(OBJS) -o $@ $(LIBS) -lm 
@@ -119,6 +112,10 @@ $(BINDIR)/oct2ps:
 	(cd $(BINDIR); rm -f oct2ps; ln -s ../octtools/bin.$(PTARCH)/oct2ps .)
 
 $(ROOT)/lib/oct2ps.pro: $(VPATH)/oct2ps.pro
+	rm -f $@
+	cp $? $@
+
+$(ROOT)/octtools/lib/oct2ps.pro: $(VPATH)/oct2ps.pro
 	rm -f $@
 	cp $? $@
 
