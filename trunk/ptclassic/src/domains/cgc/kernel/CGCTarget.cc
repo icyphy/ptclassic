@@ -312,7 +312,12 @@ void CGCTarget :: frameCode () {
     // (such as procedures) which may use those variables.  Within the
     // main function, declarations must appear before any code.
 
-    myCode << headerComment() << include << globalDecls << procedures;
+    StringList functionDeclaration = "int ";
+    functionDeclaration << (const char*)funcName << "(int argc, char *argv[])";
+
+    myCode << headerComment() << include
+	   << "\nextern " << functionDeclaration << ";\n\n"
+	   << globalDecls << procedures;
 
     // If there are command-line settable states in the target,
     // add the supporting code.
@@ -325,9 +330,9 @@ void CGCTarget :: frameCode () {
     	   << setargFunc << "\t}\n}\n\n";			
     }								
 
-    myCode << comment("main function")				
-	 << "int " << (const char*)funcName << "(int argc, char *argv[]) {\n"
-	 << mainDecls;							
+    myCode << comment("main function")
+	   << functionDeclaration << " {\n"
+	   << mainDecls;
     if ((cmdargStruct.length() != 0))					
       myCode << "set_arg_val(argv);\n";					
 
