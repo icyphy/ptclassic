@@ -1,4 +1,3 @@
-static const char file_id[] = "AsmStar.cc";
 /******************************************************************
 Version identification:
 $Id$
@@ -69,7 +68,7 @@ AsmStar::lookupMem(const char* name) {
 	StringList s;
 	ProcMemory* m;
 	AsmPortHole* p = (AsmPortHole*)portWithName(name);
-	if (p) s = p->memory()->readName();
+	if (p && p->memory()) s = p->memory()->readName();
 	// see if it's a state
 	else if (m = lookupEntry(name,a)) {
 	    s = m->readName();
