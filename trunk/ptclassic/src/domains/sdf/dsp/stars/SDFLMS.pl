@@ -109,7 +109,7 @@ Prentice Hall: Englewood Cliffs, NJ.  1991.  2nd ed.
 	wrapup {
 		const char* sf = saveTapsFile;
 		if (sf != NULL && *sf != 0) {
-			char* saveFileName = expandPathName(sf);
+			const char* saveFileName = expandPathName(sf);
 			// open the file for writing
 			FILE* fp;
 			if (!(fp = fopen(saveFileName,"w"))) {

@@ -52,9 +52,9 @@ be a parameter.
 		desc {File to save the output mu-law samples.}
 	}
 	protected {
-		FILE *strm;	// for writing the file
-		int delFile;	// if true, file needs deletion at end
-		char* fileName;	// name of file to use (on heap)
+		FILE *strm;		// for writing the file
+		int delFile;		// if true, file needs deletion at end
+		const char* fileName;	// name of file to use (on heap)
 	}
 	hinclude { <stdio.h> }
 	ccinclude { "miscFuncs.h", "paths.h", <std.h> }

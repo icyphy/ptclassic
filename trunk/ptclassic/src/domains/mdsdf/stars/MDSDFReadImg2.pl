@@ -69,7 +69,7 @@ are read are 'dir.2/pic2', 'dir.3/pic3', etc.
     arglist { "(char* outstr, const char* str, const int d)" }
     access { protected }
     code {
-      char* expandedName = expandPathName(str);
+      const char* expandedName = expandPathName(str);
 
       char num[16];
       sprintf(num, "%d", d);

@@ -72,7 +72,7 @@ int rshSystem(const char* hname, const char* cmd, const char* dir) {
 	StringList newCmd;
 	newCmd << "cd ";
 	if ( onHostMachine(hname) ) {
-	  char *expandedName = expandPathName(dir);
+	  const char *expandedName = expandPathName(dir);
 	  newCmd << expandedName;
 	  delete [] expandedName;
 	}
@@ -135,7 +135,7 @@ int rcpWriteFile(const char* hname, const char* dir, const char* file,
 	directory << dir;
     }
     else {
-	char *expandedName = expandPathName(dir);
+	const char *expandedName = expandPathName(dir);
 	directory << expandedName;
 	delete [] expandedName;
     }
@@ -229,7 +229,7 @@ int rcpWriteFile(const char* hname, const char* dir, const char* file,
 
 int rcpCopyFile(const char* hname, const char* dir, const char* filePath,
 		int deleteOld, const char* newFileName) {
-    char *expandedName = expandPathName(filePath);
+    const char *expandedName = expandPathName(filePath);
     StringList expandedFilePath = expandedName;
     delete [] expandedName;
     if (access(expandedFilePath,R_OK) == -1) {
@@ -249,7 +249,7 @@ int rcpCopyFile(const char* hname, const char* dir, const char* filePath,
 	    fileName << expandedFilePath;
     }
 
-    char *expandedDirName = expandPathName(dir);
+    const char *expandedDirName = expandPathName(dir);
     StringList directory = expandedDirName;
     delete [] expandedDirName;
     StringList command;

@@ -51,7 +51,7 @@ This star does not support frame numbers.  See ReadImg2.
 ////// Read data into an GrayImage object...
   go {
 // Open file containing the image.
-    char* expandedName = expandPathName(fileName);
+    const char* expandedName = expandPathName(fileName);
     FILE* fp = fopen(expandedName, "r");
     if (fp == (FILE*) NULL) {
       Error::abortRun(*this, "File not opened: ", fileName);
