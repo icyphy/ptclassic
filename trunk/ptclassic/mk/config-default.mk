@@ -109,6 +109,12 @@ TK_INCDIR=$(TCL_ROOT)/tk/include
 # addtional -L and/or -l options to support tk extensions.
 TK_LIBSPEC=-L$(TCL_ROOT)/tk.$(ARCH)/lib -ltk #-lXpm
 
+# Location of the itcl_sh binary
+ITCL_SH=$(ROOT)/tcltk/itcl.$(ARCH)/bin/itcl_sh
+
+# Location of the itcl library, needed for itcl_mkindex
+ITCL_LIBDIR=$(ROOT)/tcltk/itcl/library
+
 #-----------------------------------------------------------------------
 # 		Global options to use
 #-----------------------------------------------------------------------
