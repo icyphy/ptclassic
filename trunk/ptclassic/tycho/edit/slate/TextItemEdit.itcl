@@ -79,9 +79,12 @@
 #
 # See also: <a href="Interactor.html">Interactor</a>.
 #
-# <dt><b>(none)</b>
-# <dd>
-#
+# <dt><b>-button</b> _button_
+# <dd> The button for moving the cursor through the text.
+# Note that the button that activates the interactor is given
+# in arguments to the bind{} method -- this option controls
+# the button used in subsequent interaction.
+# 
 # </dl></dl>
 #
 # <p><b>Bugs</b>
@@ -92,8 +95,6 @@
 # <p><b>Enhancements</b>
 #
 # <ol>
-# <li>This interactor should probably be renamed
-# <i>LineTextItemEdit</i>.
 # <li>Double-click and dragging does not quite work: 
 # the selection moves from the start of the first selected word, not 
 # from the farthest end.
@@ -102,6 +103,19 @@
 # <li>The cursor should change to the insertion cursor while
 # over an item being edited.
 # </ol>
+#
+# <p><b>Example</b>
+# 
+# Create a slate and a TextItemEdit interactor. Clicking on
+# either text item will make it editable. Escape makes either
+# item uneditable:
+# <tcl quiet><pre>
+#   set slate [::tycho::Slate::sample]
+#   $slate create text 50 50 -text Foo -tags foo
+#   $slate create text 100 100 -text Bar -tags foo
+#   set edit [$slate interactor TextItemEdit]
+#   $edit bind foo -button 1
+# </pre></tcl>
 #
 # <p><b>Links</b>
 # 
@@ -124,6 +138,12 @@ class ::tycho::TextItemEdit {
     destructor {}
 
     ###################################################################
+    ####                            options                        ####
+
+    # The button used to move the cursor
+    public variable button 1
+
+    ###################################################################
     ####                         public methods                    ####
 
     # Attach the interactor to the current item
@@ -136,7 +156,7 @@ class ::tycho::TextItemEdit {
     method dbclick {}
 
     # Remove the interactor from the current item
-    method deactivate {args}
+    method deactivate {x y args}
 
     # Drag the mouse to select.
     method drag {x y}
@@ -177,17 +197,14 @@ class ::tycho::TextItemEdit {
 body ::tycho::TextItemEdit::activate {t x y args} {
     # If already editing another item, deactivate from it first
     if { $target != "" } {
-	deactivate
+	deactivate 0 0
     }
 
-    # Set the target. The client can modify its options later
-    # with -activatecommand if desired. If the target argument is
-    # in fact a tag, get the current item from the slate.
-    if { [string match {_*} $t] || [string match {[0-9]*} $t] } {
-	target $t
-    } else {
-	target [$slate find withtag current]
-    }
+    # "Debind" from this item
+    debind $t
+
+    # Set the target
+    target $t
 
     # Set the focus to the slate
     $slate focusin
@@ -209,16 +226,16 @@ body ::tycho::TextItemEdit::activate {t x y args} {
     # interactor. This could be parameterised with an option, but
     # I doubt it's necessary.
     $slate bind $target \
-	    [eval ::tycho::Interactor::event Click -button 1] \
-	    "$this click %x %y -button 1"
+	    [eval ::tycho::Interactor::event Click -button $button] \
+	    "$this click %x %y -button $button"
 
     # Also a binding to detect a double-click, for word-dragging
     $slate bind $target \
-	    [eval ::tycho::Interactor::event DoubleClick -button 1] \
+	    [eval ::tycho::Interactor::event DoubleClick -button $button] \
 	    "$this dbclick"
 
     # Start the interaction sequence
-    eval click $x $y -button 1
+    eval click $x $y -button $button
 }
 
 #######################################################################
@@ -235,12 +252,12 @@ body ::tycho::TextItemEdit::click {x y args} {
     # Move the insertion cursor
     $slate icursor $target @$x,$y
 
-    # Create the motion events
+    # Make the motion event bindings
     $slate bind $target \
-	    [eval ::tycho::Interactor::event Motion -button 1] \
+	    [eval ::tycho::Interactor::event Motion -button $button] \
 	    "$this drag %x %y"
     $slate bind $target \
-	    [eval ::tycho::Interactor::event Release -button 1] \
+	    [eval ::tycho::Interactor::event Release -button $button] \
 	    "$this release"
 
     # Forward to a cascaded interactor if there is one
@@ -263,12 +280,12 @@ body ::tycho::TextItemEdit::dbclick {} {
     icursor -word
     select adjust +char
 
-    # For some reason, it is necessary to make the motion bindings again...
+    # Make the motion event bindings
     $slate bind $target \
-	    [eval ::tycho::Interactor::event Motion] \
-	    "$this drag %x %y"
+	    [eval ::tycho::Interactor::event Motion -button $button] \
+            "$this drag %x %y"
     $slate bind $target \
-	    [eval ::tycho::Interactor::event Release] \
+	    [eval ::tycho::Interactor::event Release -button $button] \
 	    "$this release"
 }
 
@@ -278,7 +295,7 @@ body ::tycho::TextItemEdit::dbclick {} {
 # Deactivate the interactor from the target. This method must be called
 # by the script bound to the release event.
 # 
-body ::tycho::TextItemEdit::deactivate {args} {
+body ::tycho::TextItemEdit::deactivate {x y args} {
     # Remove the focus
     $slate focus ""
     ::bind $slate <Key> {}
@@ -288,12 +305,15 @@ body ::tycho::TextItemEdit::deactivate {args} {
 
     # Remove the text drag-selection bindings
     $slate bind $target \
-	    [eval ::tycho::Interactor::event Click -button 1] {}
+	    [eval ::tycho::Interactor::event Click -button $button] {}
     $slate bind $target \
-	    [eval ::tycho::Interactor::event DoubleClick -button 1] {}
+	    [eval ::tycho::Interactor::event DoubleClick -button $button] {}
 
-    # Reset the original activation bindings in case they changed
-    $this enable
+    # Put the target back into this interactor
+    $this rebind $target
+
+    # Reset the original activation bindings in case they changed - ?
+    # $this enable
 
     # Call the deactivation command. This must follow the above bindings!
     if { $deactivatecommand != "" } {
@@ -301,7 +321,7 @@ body ::tycho::TextItemEdit::deactivate {args} {
     }
 
     # Clear the target
-    target {}
+    target ""
 }
 
 #######################################################################
@@ -536,9 +556,9 @@ body ::tycho::TextItemEdit::release {} {
 
     # Clear the motion and release events
     $slate bind $target \
-	    [eval ::tycho::Interactor::event Motion -button 1] {}
+	    [eval ::tycho::Interactor::event Motion -button $button] {}
     $slate bind $target \
-	    [eval ::tycho::Interactor::event Release -button 1] {}
+	    [eval ::tycho::Interactor::event Release -button $button] {}
 }
 
 #######################################################################
@@ -600,13 +620,13 @@ body ::tycho::TextItemEdit::select {mode args} {
 	}
 	"clear" {
 	    if { ! ([$slate select item] == "") } {
-		$slate _select clear
+		$slate select clear
 	    }
 	}
 	"delete" {
 	    if { ! ([$slate select item] == "") } {
 		$slate dchars $target sel.first sel.last
-		$slate _select clear
+		$slate select clear
 	    }
 	}
 	"exists" {
