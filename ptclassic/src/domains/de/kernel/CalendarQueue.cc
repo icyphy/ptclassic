@@ -30,11 +30,11 @@ ENHANCEMENTS, OR MODIFICATIONS.
 						COPYRIGHTENDKEY
 
  Modified: John Davis
- Date: 5/19/97
+ Date: 12/12/97
         Modifications were made to allow for mutability within
         the DE domain. The primary modifications is the addition
         of the member  
-           Link * destinedLink
+           Link * starPendingEventRef
         to the class CqLevelLink. This allows CqLevelLink to be
         directly accessed by the DestinedEventList.
 
