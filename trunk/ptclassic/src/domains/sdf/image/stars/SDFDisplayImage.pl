@@ -13,8 +13,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	desc {
 Accept a black-and-white input GrayImage and generate
 output in PGM format. Send the output to a user-specified command
-(by default, "xv" is used). Of course, the specified program must
-be in your PATH.
+(by default, "$PTOLEMY/bin.$ARCH/xv" is used).
 
 The user can set the root filename of the displayed image (which will
 probably be printed in the image display window titlebar) and
@@ -38,7 +37,7 @@ complete filename of the displayed image.
 	defstate {
 		name { command }
 		type { string }
-		default { "xv" }
+		default { "$PTOLEMY/bin.$ARCH/xv" }
 		desc { Program to run on PGM data }
 	}
 	defstate {
