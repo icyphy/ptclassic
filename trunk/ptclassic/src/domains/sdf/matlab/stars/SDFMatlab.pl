@@ -97,7 +97,7 @@ extern "C" {
 
 // Matlab limits filenames to 20 characters (base name + ".m")
 // Therefore, Matlab functions must have 18 or fewer characters
-#define PTOLEMY_MATLAB_DIRECTORY "$PTOLEMY/src/domains/sdf/matrix/stars"
+#define PTOLEMY_MATLAB_DIRECTORY "$PTOLEMY/src/domains/sdf/matlab/stars"
 #define MATLAB_SET_FIGURES       "PtSetStarFigures"
 #define MATLAB_CLOSE_FIGURES     "PtCloseStarFigures"
 #define MATLAB_UNIX_COMMAND      "matlab"
