@@ -411,17 +411,17 @@ $starSymbol(ssi)_dualbuf	equ	$val(dualbufFlag)
 	name {go_intr_port} arglist {"(const char *port)"}
 	code {
 	    /*IF*/ if ( strcmp(port,"xmit1")==0 ) {
-		gencode(intrPutXmit1);
-		gencode(intrPutXmitY0);
+		addCode(intrPutXmit1);
+		addCode(intrPutXmitY0);
 	    } else if ( strcmp(port,"xmit2")==0 ) {
-		gencode(intrPutXmit2);
-		gencode(intrPutXmitY0);
+		addCode(intrPutXmit2);
+		addCode(intrPutXmitY0);
 	    } else if ( strcmp(port,"recv1")==0 ) {
-		gencode(intrGetRecvY0);
-		gencode(intrGetRecv1);
+		addCode(intrGetRecvY0);
+		addCode(intrGetRecv1);
 	    } else if ( strcmp(port,"recv2")==0 ) {
-		gencode(intrGetRecvY0);
-		gencode(intrGetRecv2);
+		addCode(intrGetRecvY0);
+		addCode(intrGetRecv2);
 	    } else {
 		Error::abortRun(*this,": invalid port");
 	    }
@@ -431,9 +431,9 @@ $starSymbol(ssi)_dualbuf	equ	$val(dualbufFlag)
     method {
 	name { go_intr }
 	code {
-	    gencode(intrLoadM0);
+	    addCode(intrLoadM0);
 	    if ( doSymmetric ) {
-		gencode(intrLoadRecvPtr);
+		addCode(intrLoadRecvPtr);
 		if ( doRecv1 || doXmit1 ) {
 		    go_intr_port("recv1");
 		    go_intr_port("xmit1");
@@ -442,22 +442,22 @@ $starSymbol(ssi)_dualbuf	equ	$val(dualbufFlag)
 		    go_intr_port("recv2");
 		    go_intr_port("xmit2");
 		}
-		gencode(intrSaveRecvPtr);
+		addCode(intrSaveRecvPtr);
 	    } else {
 		if ( doRecv1 || doRecv2 ) {
-		    gencode(intrLoadRecvPtr);
+		    addCode(intrLoadRecvPtr);
 		    if ( doRecv1 )		go_intr_port("recv1");
 		    if ( doRecv2 )		go_intr_port("recv2");
-		    gencode(intrSaveRecvPtr);
+		    addCode(intrSaveRecvPtr);
 		}
 		if ( doXmit1 || doXmit2 ) {
-		    gencode(intrLoadXmitPtr);
+		    addCode(intrLoadXmitPtr);
 		    if ( doXmit1 )		go_intr_port("xmit1");
 		    if ( doXmit2 )		go_intr_port("xmit2");
-		    gencode(intrSaveXmitPtr);
+		    addCode(intrSaveXmitPtr);
 		}
 	    }
-	    gencode(intrRestoreM0);
+	    addCode(intrRestoreM0);
 	}
     }
 
@@ -577,28 +577,28 @@ $label(tx_done)
     }
     initCode {
 	    if ( ! doIntr ) {
-	        gencode(ssiInit);
+	        addCode(ssiInit);
             } else {
-		genProcCode(ihdlPreserveRegs);
+		addProcedure(ihdlPreserveRegs);
 		if ( doSymmetric ) {
-		    genProcCode(ihdlSingleBuffer);
+		    addProcedure(ihdlSingleBuffer);
 		} else {
-		    genProcCode(ihdlDualBuffer);
+		    addProcedure(ihdlDualBuffer);
 		}
-		genProcCode(ihdlRestoreRegs);
+		addProcedure(ihdlRestoreRegs);
 
-		gencode(interruptInit);
+		addCode(interruptInit);
 		genInterruptCode(interruptRecvDataVec);
 		genInterruptCode(interruptRecvExcptVec);
-		gencode(ssiInit);
-		gencode(enableInterupts);
+		addCode(ssiInit);
+		addCode(enableInterupts);
             }
     }	   
     go {
 	if ( ! doIntr ) {
 	    if ( doErrAbort )
-		gencode(abortyes);
-	    gencode(polling);
+		addCode(abortyes);
+	    addCode(polling);
 	} else {
 	    go_intr();
 	}

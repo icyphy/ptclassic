@@ -70,7 +70,7 @@ defstar {
 			return;
 		}
 	}
-	go { gencode(std); }
+	go { addCode(std); }
 	execTime { return 7;}
 	codeblock (std) {
 	move	$ref(state2),x1

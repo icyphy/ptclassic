@@ -42,9 +42,9 @@ stars.
 	move	x0,x:(r1)+
         }
  	go {
-   		gencode(block);
-		if (int(numTimes)>1) gencode(repeat);
-		gencode(cont);
+   		addCode(block);
+		if (int(numTimes)>1) addCode(repeat);
+		addCode(cont);
  	}
 
 	exectime {

@@ -60,10 +60,10 @@ This can be done with g++ (type "long long"), but it isn't portable.
                 ravs.resize(noUniforms);
         }		
         initCode {
-                gencode(block);
+                addCode(block);
         }		
         go {
-                gencode(std);
+                addCode(std);
         }		
 
         codeblock(block) {

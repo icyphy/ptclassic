@@ -97,24 +97,24 @@ reset.
 	move	a1,$ref(sum)
 	}
 	go {
-		if (feedbackGain != 1) gencode(setLeakage);
-		gencode(setUp);
+		if (feedbackGain != 1) addCode(setLeakage);
+		addCode(setUp);
 		const char *p = onOverflow;
 		switch (p[0]) {
 		case('r'):		//Reset on overflow
- 			if (feedbackGain == 1) gencode(noLeakageWithReset);
-			else gencode(leakageWithReset);
-			gencode(resetWrapUp);
+ 			if (feedbackGain == 1) addCode(noLeakageWithReset);
+			else addCode(leakageWithReset);
+			addCode(resetWrapUp);
 			break;
 		case('s'):		//Saturate on overflow
-			if (feedbackGain == 1) gencode(noLeakageNotReset);
-			else gencode(leakageNotReset);
-			gencode(saturateWrapUp);
+			if (feedbackGain == 1) addCode(noLeakageNotReset);
+			else addCode(leakageNotReset);
+			addCode(saturateWrapUp);
 			break;
 		case('w'):		//Wrap around on overflow
-			if (feedbackGain == 1) gencode(noLeakageNotReset);
-			else gencode(leakageNotReset);
-			gencode(wrapAroundWrapUp);
+			if (feedbackGain == 1) addCode(noLeakageNotReset);
+			else addCode(leakageNotReset);
+			addCode(wrapAroundWrapUp);
 			break;
 		default:
 			Error::abortRun(*this,"Unrecognized onOverflow option in CG56Integrator.");

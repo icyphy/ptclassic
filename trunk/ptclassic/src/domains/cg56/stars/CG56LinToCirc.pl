@@ -57,14 +57,14 @@ is repeated inline so may not be efficient for large N.
 		input.setSDFParams(n,n-1);
 		output.setSDFParams(n,n-1);
 	}
-	initCode { gencode(init);}
+	initCode { addCode(init);}
 	go {
-		gencode(setupC);
+		addCode(setupC);
 		for (int j = 0; j < n; j++) {
 			i = j;
-			gencode(one);
+			addCode(one);
 		}
-		gencode(restore);
+		addCode(restore);
 	}
 	
 	exectime {

@@ -63,13 +63,13 @@ the next B particles from the next input, etc.
 
 	go {
                 if (input.numberPorts() == 1) {
-                        gencode(one);
+                        addCode(one);
                         return;
                 }
-		gencode(main);
+		addCode(main);
                 for (int i = 1; i <= input.numberPorts(); i++) {
                         inputNum=i;
-                        gencode(loop);
+                        addCode(loop);
                 }
 	}
 	exectime {

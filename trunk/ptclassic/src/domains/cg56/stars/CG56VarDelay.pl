@@ -73,10 +73,10 @@ Delay will vary between 0 and maxDelay as the control varies between -1.0 and 1.
                 buf.resize(maxDelay+1);
         }		
         initCode {
-                gencode(block);
+                addCode(block);
 	}
         go {
-                gencode(std);
+                addCode(std);
         }		
 
 	execTime { 

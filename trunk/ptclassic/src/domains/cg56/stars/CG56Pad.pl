@@ -89,13 +89,13 @@ $label(rloop)
 		}
 	}
 	go {
-		gencode(main);
+		addCode(main);
 		if (offset > 0)
-			gencode(off);
+			addCode(off);
 		if (nread > 0)
-			gencode(read);
+			addCode(read);
 		if (nwrite > nread + offset)
-			gencode(write);
+			addCode(write);
 	}
 	execTime {
 		int             a, b, c;

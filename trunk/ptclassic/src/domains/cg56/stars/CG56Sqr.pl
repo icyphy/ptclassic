@@ -28,6 +28,6 @@ The input is squared.
  	move	a,$ref(output)
 	}
  	go {
-	 	 gencode(std);
+	 	 addCode(std);
 	}
 }

@@ -55,7 +55,9 @@ This implementation currently uses the "unsafe" START/STOP DMA.
 	}
 	initCode {
 		const char* p=command;
-		if (p[0] != 0) addRunCmd(command,"\n");
+		StringList cmd;
+		cmd << command << "\n";
+		if (p[0] != 0) addCode(command,"shellCmds");
 	}
 	codeblock(cbSingleBlocking) {
 $label(wait)
@@ -95,15 +97,15 @@ $label(wait)
 	go {
 		if (int(samplesConsumed)==1) {
 			if ( int(blockOnHost) ) {
-				gencode(cbSingleBlocking);
+				addCode(cbSingleBlocking);
 			} else {
-				gencode(cbSingleNonBlocking);
+				addCode(cbSingleNonBlocking);
 			}
 		} else {
 			if ( int(blockOnHost) ) {
-				gencode(cbMultiBlocking);
+				addCode(cbMultiBlocking);
 			} else {
-				gencode(cbMultiNonBlocking);
+				addCode(cbMultiNonBlocking);
 			}
 		}
 	}

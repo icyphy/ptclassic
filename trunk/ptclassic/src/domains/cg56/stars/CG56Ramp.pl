@@ -49,7 +49,7 @@ with step size "step" (default 0.001).
 		sum=value;
 	}
 	go {
-		gencode(main);
+		addCode(main);
 	}
         execTime {
 		return 5;

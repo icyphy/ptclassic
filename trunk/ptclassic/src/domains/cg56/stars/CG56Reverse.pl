@@ -42,9 +42,9 @@ $label(loop)
 
         go {
                 if(N>1)
-	            gencode(main);
+	            addCode(main);
 		else
-	            gencode(one);
+	            addCode(one);
         }
         exectime {
                 if(int(N)>1)

@@ -57,11 +57,11 @@ in that case.
 		if (identity) {
 		    ;
 		} else if (double(gain)==0.0) {
-		    gencode(cbZero);
+		    addCode(cbZero);
 		} else if (double(gain)==-1.0) {
-		    gencode(cbNeg);
+		    addCode(cbNeg);
 	 	} else {
-		    gencode(cbStd);
+		    addCode(cbStd);
 		}
 	}
 }

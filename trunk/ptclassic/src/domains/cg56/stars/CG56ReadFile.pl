@@ -38,7 +38,7 @@ Reads data from file for use with Motorola DSP56000 simulator.
 input $ref(inVal) $val(fileName).sim -RF
 }
 	initCode {
-                genMiscCmd(logIn);
+                addCode(logIn,"simulatorCmds");
 	}
 
 	// this codeblock produces code
@@ -47,7 +47,7 @@ input $ref(inVal) $val(fileName).sim -RF
 	move	a,$ref(output)
 	}
 	go {
-		gencode(copy);
+		addCode(copy);
 	}
 }
 

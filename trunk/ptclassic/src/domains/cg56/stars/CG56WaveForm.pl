@@ -188,18 +188,18 @@ $label(l28)
 	initCode {
 		if (period == 1) {
 			//special case, reproduce DC star.
-				gencode(org);
+				addCode(org);
 			for (int i = 0; i < output.bufSize(); i++)
-				gencode(dc);
-			gencode(orgp);
+				addCode(dc);
+			addCode(orgp);
 		}
 		if (period != 1) {
 			if ((period == 0 && valueLen > 1) ||
 			   (period != 0 && period <= valueLen)) {
-				gencode(initDataCirc);
+				addCode(initDataCirc);
 			} else {
 				if (period > valueLen)
-					gencode(makeblock);
+					addCode(makeblock);
 			}
 		}
 	}
@@ -211,23 +211,23 @@ $label(l28)
 		//special case, output stored at compile time.
 			if (period == 0) {
 			if (valueLen == 1)
-				gencode(impulse);
+				addCode(impulse);
 			//output impulse.
 				else {
 				X = valueLen - 1;
-				gencode(aperiodic);
+				addCode(aperiodic);
 				//output general aperiodic value.
 			}
 		}
 		if (period <= valueLen && period != 1 && period != 0) {
 			//output periodic value-- use first period values.
 				X = period - 1;
-			gencode(periodperiodicSequence);
+			addCode(periodperiodicSequence);
 		}
 		if (period > valueLen && period != 1 && period != 0) {
 			//output periodic value-- zero padded.
 				X = period - 1;
-			gencode(zeroPaddedSequence);
+			addCode(zeroPaddedSequence);
 		}
 	}
 

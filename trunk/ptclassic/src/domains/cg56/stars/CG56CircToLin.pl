@@ -58,14 +58,14 @@ is repeated inline so may not be efficient for large N.
 		default { 0 }
 		attributes { A_YMEM|A_NOINIT|A_NONSETTABLE }
 	}
-	initCode { gencode(init);}
+	initCode { addCode(init);}
 	go {
-		gencode(setupC);
+		addCode(setupC);
 		for (int j = 0; j < n; j++) {
 			i = j;
-			gencode(one);
+			addCode(one);
 		}
-		gencode(restore);
+		addCode(restore);
 	}
 	
 	exectime {

@@ -44,15 +44,15 @@ The inputs are multiplied and the result is written on the output.
 
 	go {
 		if (input.numberPorts() == 1) {
-			gencode(one);
+			addCode(one);
 			return;
 		}
-		gencode(std);
+		addCode(std);
 		for (int i = 3; i <= input.numberPorts(); i++) {
 	                inputNum=i;
-			gencode(loop);
+			addCode(loop);
 		}
-	        gencode(sat);
+	        addCode(sat);
 	}
 	exectime {
 		if (input.numberPorts() == 1) return 2;

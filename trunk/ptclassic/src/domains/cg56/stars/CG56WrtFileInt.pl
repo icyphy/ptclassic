@@ -45,9 +45,9 @@ output $ref(outVal) $val(fileName).sim -RD
 	move	a,$ref(outVal)
 	}
         initCode {
-		genMiscCmd(logOut);
+		addCode(logOut,"simulatorCmds");
 	}
 	go {
-		gencode(copy);
+		addCode(copy);
 	}
 }

@@ -36,7 +36,7 @@ a valid fixed point number on the DSP56001.
 	}	
 
 	go {
-		gencode(sgnblock);
+		addCode(sgnblock);
  
 	}
 }

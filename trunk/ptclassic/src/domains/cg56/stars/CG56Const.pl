@@ -30,9 +30,9 @@ output buffer is initialized with the specified DC value.
 	org	p:
 	}
 	initCode {
-		gencode(org);
-		for (int i=0 ; i<output.bufSize() ; i++) gencode(dc);
-		gencode(orgp);
+		addCode(org);
+		for (int i=0 ; i<output.bufSize() ; i++) addCode(dc);
+		addCode(orgp);
 	}
 	execTime {
 		return 0;

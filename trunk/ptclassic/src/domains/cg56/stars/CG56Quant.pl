@@ -54,7 +54,7 @@ an optional offset can be added to shift the output levels up or down.
 		
                 double a = pow(2,1-double(noBits));
    		X=a;
- 		gencode(std);
+ 		addCode(std);
  	}
 
 	execTime { 
