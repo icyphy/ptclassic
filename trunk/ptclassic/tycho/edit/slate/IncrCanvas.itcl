@@ -1435,7 +1435,7 @@ body ::tycho::IncrCanvas::findoverlapping {x0 y0 x1 y1} {
     }
     # Remove duplicates and return
     $canvas dtag temp.find
-    return [lnub $found]
+    return [::tycho::lnub $found]
 }
 
 #######################################################################

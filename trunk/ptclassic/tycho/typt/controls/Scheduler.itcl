@@ -376,8 +376,8 @@ body ::tycho::Scheduler::start \
 body ::tycho::Scheduler::startC {procname args} {
     set notify {}
     set realtime 0
-    getopt notify args
-    getopt realtime args
+    ::tycho::getopt notify args
+    ::tycho::getopt realtime args
     set taskname [::info namespace tail $procname]
 
     start $taskname \
@@ -412,9 +412,9 @@ body ::tycho::Scheduler::startTcl {task command args} {
     set setup {}
     set wrapup {}
     set notify {}
-    getopt setup args
-    getopt wrapup args
-    getopt notify args
+    ::tycho::getopt setup args
+    ::tycho::getopt wrapup args
+    ::tycho::getopt notify args
 
     regsub %% {
         ::tycho::timer start

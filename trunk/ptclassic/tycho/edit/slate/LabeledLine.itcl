@@ -211,7 +211,7 @@ body ::tycho::LabeledLine::_anchor {id canvas slate anchor} {
     $canvas itemconfigure $textitem($id) -anchor $anchor
     
     # Check if the text anchor needs to be changed
-    if { [lmember [eval $canvas find overlapping \
+    if { [::tycho::lmember [eval $canvas find overlapping \
 	    [eval ::tycho::Rectangle::shrink \
 	    [$canvas bbox $textitem($id)] 2]] $primary($id)] } {
 	# Build the list of anchor points
@@ -220,7 +220,7 @@ body ::tycho::LabeledLine::_anchor {id canvas slate anchor} {
 	# For each, move the text and test for overlap again
 	foreach a $anchors {
 	    $canvas itemconfigure $textitem($id) -anchor $a
-	    if { ! [lmember [eval $canvas find overlapping \
+	    if { ! [::tycho::lmember [eval $canvas find overlapping \
 		    [eval ::tycho::Rectangle::shrink \
 		    [$canvas bbox $textitem($id)] 2]] $primary($id)] } {
 		# Success!
@@ -287,7 +287,7 @@ body ::tycho::LabeledLine::_text {id canvas slate text} {
 #### construct
 #
 body ::tycho::LabeledLine::construct {id canvas slate tags args} {
-    getalloptions options args
+    ::tycho::getalloptions options args
 
     # Initialize the options
     foreach {option value} [concat [array get optiondefault] $options] {

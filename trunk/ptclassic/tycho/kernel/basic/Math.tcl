@@ -38,7 +38,7 @@
 # Given a range, space, field width, and padding, figure out how
 # the field increment so they will fit.
 #
-proc axisIncrement {low high space width padding} {
+proc ::tycho::axisIncrement {low high space width padding} {
     set maxnum   [expr double($space) / ($width+$padding)]
     set estimate [expr (double($high) - $low) / ($maxnum)]
     set estimate [axisRoundUp $estimate]
@@ -54,7 +54,7 @@ proc axisIncrement {low high space width padding} {
 #
 # Note: The argument must be positive.
 #
-proc axisRoundUp {x} {
+proc ::tycho::axisRoundUp {x} {
     set exp [expr floor (log10($x))]
     set x [expr $x * pow(10, -$exp)]
 
@@ -71,32 +71,12 @@ proc axisRoundUp {x} {
 }
 
 #######################################################################
-#### interval
-#
-# Return list of integers in the range _x_ to _y_. For example,
-# <pre>
-#    interval 2 5
-# </pre>
-# returns <code>{2 3 4 5}</code>.
-#
-proc interval {x y} {
-    set result {}
-
-    while { $x <= $y } {
-	lappend result $x
-	incr x +1
-    }
-
-    return $result
-}
-
-#######################################################################
 #### mapRange
 #
 # Given two ranges and a list of numbers in the first range,
 # produce the mapping of that list to the second range.
 #
-proc mapRange {low high values lowdash highdash} {
+proc ::tycho::mapRange {low high values lowdash highdash} {
     set result {}
 
     set scale [expr (double($highdash) - $lowdash) / ($high - $low)]
@@ -113,9 +93,49 @@ proc mapRange {low high values lowdash highdash} {
 # Given two ranges and a number in the first range,
 # produce the mapping of that number to the second range.
 #
-proc mapValue {low high value lowdash highdash} {
+proc ::tycho::mapValue {low high value lowdash highdash} {
     set scale [expr (double($highdash) - $lowdash) / ($high - $low)]
     return [expr $lowdash + ($value-$low) * $scale]
+}
+
+##########################################################################
+##### max
+# Return the largest of two numbers.
+#
+proc ::tycho::max {x y} {
+    if { $x > $y } {
+	set x
+    } else {
+	set y
+    }
+}
+
+##########################################################################
+##### maximum
+# Return the largest of a list of numbers.
+#
+proc ::tycho::maximum {args} {
+    lindex [lsort -real $args] end
+}
+
+##########################################################################
+##### min 
+# Return the smallest of two numbers.
+#
+proc ::tycho::min {x y} {
+    if { $x < $y } {
+	set x
+    } else {
+	set y
+    }
+}
+
+##########################################################################
+##### minimum
+# Return the smallest of a list of numbers.
+#
+proc ::tycho::minimum {args} {
+    lindex [lsort -real $args] 0
 }
 
 #######################################################################
@@ -124,7 +144,7 @@ proc mapValue {low high value lowdash highdash} {
 # Given a range and an increment, return the list of numbers
 # within that range and on that increment.
 #
-proc rangeValues {low high inc} {
+proc ::tycho::rangeValues {low high inc} {
     set result {}
     set n      1
 
@@ -142,7 +162,7 @@ proc rangeValues {low high inc} {
 #
 # Given a number, round down to the nearest power of two.
 #
-proc roundDownTwo {x} {
+proc ::tycho::roundDownTwo {x} {
     set exp [expr floor (log($x)/log(2))]
     set x   [expr pow(2,$exp)]
     return $x
@@ -154,7 +174,7 @@ proc roundDownTwo {x} {
 # Given two numbers, round down the first to the nearest multiple of
 # the second.
 #
-proc roundDownTo {x i} {
+proc ::tycho::roundDownTo {x i} {
     return [expr $i * int(floor(double($x)/$i))]
 }
 
@@ -164,7 +184,7 @@ proc roundDownTo {x i} {
 # Given two numbers, round the first to the nearest multiple of
 # the second.
 #
-proc roundTo {x i} {
+proc ::tycho::roundTo {x i} {
     return [expr $i * round(double($x)/$i)]
 }
 
@@ -174,7 +194,7 @@ proc roundTo {x i} {
 # Given two numbers, round up the first to the nearest multiple of
 # the second.
 #
-proc roundUpTo {x i} {
+proc ::tycho::roundUpTo {x i} {
     return [expr $i * int(ceil(double($x)/$i))]
 }
 
@@ -184,7 +204,7 @@ proc roundUpTo {x i} {
 # Given a number, round up to the nearest power of two.
 # The argument must be positive.
 #
-proc roundUpTwo {x} {
+proc ::tycho::roundUpTwo {x} {
     set exp [expr ceil (log($x)/log(2))]
     set x   [expr pow(2,$exp)]
     return $x
@@ -207,7 +227,7 @@ proc roundUpTwo {x} {
 # returns <code>{1.5 2.5 3.5 4.5}</code>. Note that there may
 # be some rounding errors, as in the first example above.
 #
-proc spread {n x y args} {
+proc ::tycho::spread {n x y args} {
     getflag indented args
 
     set result {}

@@ -211,8 +211,8 @@ body ::tycho::ComplexItem::coords {id canvas slate args} {
     }
 
     # Scale the picture
-    assign x0 y0 x1 y1 $oldbox
-    assign a0 b0 a1 b1 $newbox
+    ::tycho::assign x0 y0 x1 y1 $oldbox
+    ::tycho::assign a0 b0 a1 b1 $newbox
 
     set xdelta [expr $a0-$x0]
     set ydelta [expr $b0-$y0]

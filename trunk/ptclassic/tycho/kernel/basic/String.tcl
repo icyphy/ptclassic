@@ -1,11 +1,3 @@
-#
-# string.tcl
-#
-# Utility functions on strings
-#
-# FIXME: Move into ::tycho namespace
-#
-
 ##########################################################################
 #
 # Author:  H. John Reekie
@@ -40,20 +32,11 @@
 
 
 ##########################################################################
-#### butt {word}
-#
-# Join arguments into a string without intervening spaces
-#
-proc butt {args} {
-    return [join $args ""]
-}
-
-##########################################################################
 #### capitalize
 #
 # Capitalize a word -- first letter is uppercase; rest are lowercase.
 #
-proc capitalize {word} {
+proc ::tycho::capitalize {word} {
     return [string toupper \
 	    [string index $word 0]][string tolower [string range $word 1 end]]
 }
@@ -66,7 +49,7 @@ proc capitalize {word} {
 #
 # (Similar to regsub, but for literals.)
 #
-proc stringSubtract {args} {
+proc ::tycho::stringSubtract {args} {
     getflag all args
     assign a b $args
 
@@ -92,7 +75,7 @@ proc stringSubtract {args} {
 # left of the cursor. The behaviour is more useful than "string
 # wordstart" for cursor movement operations.
 #
-proc wordleft {string index} {
+proc ::tycho::wordleft {string index} {
     if { $index <= 0 } {
 	return 0
     }
@@ -127,7 +110,7 @@ proc wordleft {string index} {
 # rightof the cursor. The behaviour is more useful than "string
 # wordend" for cursor movement operations.
 #
-proc wordright {string index} {
+proc ::tycho::wordright {string index} {
     set length [string length $string]
     if { $index > $length } {
 	return $length

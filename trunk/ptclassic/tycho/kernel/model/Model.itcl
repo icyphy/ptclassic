@@ -538,7 +538,7 @@ body ::tycho::Model::execute {commands} {
 # This method must be overridden by subclasses.
 #
 body ::tycho::Model::get {index} {
-    abstractMethod get
+    ::tycho::abstractMethod get
 }
 
 ########################################################################
@@ -591,7 +591,7 @@ body ::tycho::Model::load {{description {}}} {
 # This method must be overridden by subclasses.
 #
 body ::tycho::Model::indexes {pattern args} {
-    abstractMethod indexes
+    ::tycho::abstractMethod indexes
 }
 
 ########################################################################
@@ -668,7 +668,7 @@ body ::tycho::Model::markHistory {{markname {}} {position current}} {
 # This method must be overridden by subclasses.
 #
 body ::tycho::Model::match {pattern args} {
-    abstractMethod match
+    ::tycho::abstractMethod match
 }
 
 ########################################################################
@@ -1020,10 +1020,12 @@ body ::tycho::Model::notify {whoiam command index args} {
 	    }
 	    if { $script != "" } {
 		# if there's a script supplied by the subscriber, apply it
-		uplevel #0 apply [list $script $subscriber $command $index] $args
+		uplevel #0 ::tycho::apply \
+			[list $script $subscriber $command $index] $args
 	    } elseif { $notifyscript != "" } {
 		# Or if there's a global script, apply that
-		uplevel #0 apply [list $notifyscript $subscriber $command $index] $args
+		uplevel #0 ::tycho::apply \
+			[list $notifyscript $subscriber $command $index] $args
 	    } else {
 		# By default, call the subscriber directly
 		uplevel #0 $subscriber $command [list $index] $args

@@ -578,14 +578,14 @@ body ::tycho::SmartLine::redraw {id canvas slate} {
     set flipped 0
     
     # Get the coordinates
-    assign x0 y0 x1 y1 [$canvas coords $primary($id)]
+    ::tycho::assign x0 y0 x1 y1 [$canvas coords $primary($id)]
 
     # "Normalize" the line
     set x [expr $x1-$x0]
     set y [expr $y1-$y0]
 
     set type $rotate($_start($id)-$_end($id))
-    assign x y [eval list $normalize($_start($id))]
+    ::tycho::assign x y [eval list $normalize($_start($id))]
 
     # Swap north-south if needed
     if { $type == "n" } {

@@ -182,7 +182,7 @@ body ::tycho::Shape::_grapple {id canvas slate interactor args} {
 #### _moveclick
 #
 body ::tycho::Shape::_moveclick {id canvas slate x y args} {
-	getflag ghost args
+    ::tycho::getflag ghost args
 	
     # Remember where we started
     set scratch($id.prevX) $x
@@ -223,8 +223,8 @@ body ::tycho::Shape::_moverelease {id canvas slate x y} {
     # If there's a ghost, move the complex item to its
     # position and then delete it
     if { [::info exists scratch($id.ghost)] } {
-		assign x y $scratch($id.start)
-		assign a b [$this coords $scratch($id.ghost)]
+		::tycho::assign x y $scratch($id.start)
+		::tycho::assign a b [$this coords $scratch($id.ghost)]
 
 		$slate move $id [expr $a - $x] [expr $b - $y]
 		$slate delete $scratch($id.ghost)

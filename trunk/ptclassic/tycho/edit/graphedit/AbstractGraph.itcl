@@ -313,7 +313,7 @@ body ::tycho::AbstractGraph::assign {vertex data} {
 # <i>This is an abstract method.</i>
 #
 body ::tycho::AbstractGraph::connect {vertex1 vertex2 args} {
-    abstractMethod connect
+    ::tycho::abstractMethod connect
 }
 
 ########################################################################
@@ -372,7 +372,7 @@ body ::tycho::AbstractGraph::describe {} {
 # <i>This is an abstract method.</i>
 #
 body ::tycho::AbstractGraph::disconnect {vertex1 vertex2} {
-    abstractMethod disconnect
+    ::tycho::abstractMethod disconnect
 }
 
 ########################################################################

@@ -169,7 +169,7 @@ body ::tycho::Rectangle::_aspect {id canvas slate args} {
 # somewhere and using cached objects.
 #
 body ::tycho::Rectangle::_grapple {id canvas slate interactor args} {
-    getflag ghost args
+    ::tycho::getflag ghost args
 
     # If the interactor argument is null, remove an existing
     # resizer. This gets its value as an annotation, and 
@@ -185,7 +185,7 @@ body ::tycho::Rectangle::_grapple {id canvas slate interactor args} {
     }
 
     # If it's not null, then create four grapplers in a composite.
-    assign x0 y0 x1 y1 [$target coords]
+    ::tycho::assign x0 y0 x1 y1 [$target coords]
 
     set resizer [$slate create Composite]
 
@@ -276,11 +276,14 @@ body ::tycho::Rectangle::_reshape {id canvas slate x y args} {
 # runs, this strategy may no longer be necessary.
 #
 body ::tycho::Rectangle::_reshapeclick {id canvas slate x y args} {
-    getflag ghost args
+    ::tycho::getflag ghost args
 
     # Remember how I am now.
-    assign scratch($id.w) scratch($id.n) scratch($id.e) scratch($id.s)  \
-	    [$slate region $id]
+    ::tycho::assign \
+	    scratch($id.w) \
+	    scratch($id.n) \
+	    scratch($id.e) \
+	    scratch($id.s) [$slate region $id]
     set scratch($id.prevX) $x
     set scratch($id.prevY) $y
 
@@ -497,5 +500,9 @@ body ::tycho::Rectangle::stretch {x0 y0 x1 y1 hdelta {vdelta {}}} {
 # contains both rectangles.
 #
 body ::tycho::Rectangle::union {x0 y0 x1 y1 a0 b0 a1 b1} {
-    return [list [min $x0 $a0] [min $y0 $b0] [max $x1 $a1] [max $y1 $b1]]
+    return [list \
+	    [::tycho::min $x0 $a0] \
+	    [::tycho::min $y0 $b0] \
+	    [::tycho::max $x1 $a1] \
+	    [::tycho::max $y1 $b1]]
 }

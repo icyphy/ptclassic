@@ -236,8 +236,8 @@ body ::tycho::Axis::coords {id canvas slate args} {
     if { $args == "" } {
 	return [lrange [$canvas coords $primary($id)] 0 1]
     } else {
-	assign x y [$canvas coords $primary($id)]
-	assign a b $args
+	::tycho::assign x y [$canvas coords $primary($id)]
+	::tycho::assign a b $args
 
 	# Do the move. FIXME: should this call the slate?
 	$canvas move $id [expr $a - $x] [expr $b - $y]
@@ -251,7 +251,7 @@ body ::tycho::Axis::coords {id canvas slate args} {
 body ::tycho::Axis::redraw {id canvas} {
     
     # Get the base coordinates
-    assign x0 y0 [$canvas coords $primary($id)]
+    ::tycho::assign x0 y0 [$canvas coords $primary($id)]
     
     # Redraw ticks and labels
     redrawTicks $id $canvas $x0 $y0

@@ -151,7 +151,7 @@ body ::tycho::PreferenceDialog::update {} {
 	if { [::info which -command $e] != "" } {
 	    $e update
 	} else {
-	    set editors [ldelete $editors $e]
+	    set editors [::tycho::ldelete $editors $e]
 	}
     }
 }

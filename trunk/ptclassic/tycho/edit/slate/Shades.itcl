@@ -69,7 +69,7 @@ class ::tycho::Shades {
 	if { [info exists colorobjects($color) ] } {
 	    return $colorobjects($color)
 
-	} elseif { ! [lmember $colornames $color] } {
+	} elseif { ! [::tycho::lmember $colornames $color] } {
 	    #
 	    # The requested color is not valid, so return the
 	    # default color object. The default color is currently
@@ -81,7 +81,7 @@ class ::tycho::Shades {
 		# Find the default color and make sure it's valid
 		#
 		set defaultcolor "background"  ;# read from options db?
-		if { ! [lmember $colornames $defaultcolor] } {
+		if { ! [::tycho::lmember $colornames $defaultcolor] } {
 		    set defaultcolor [lhead $colornames]
 		}
 
@@ -199,10 +199,10 @@ class ::tycho::Shades {
 	    }
 
 	    default {
-		set light [butt $color 1]
-		set gloss [butt $color 2]
-		set matt  [butt $color 3]
-		set dark  [butt $color 4]
+		set light ${color}1
+		set gloss ${color}2
+		set matt  ${color}3
+		set dark  ${color}4
 	    }
 	}
     }
