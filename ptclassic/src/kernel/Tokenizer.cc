@@ -53,6 +53,15 @@ and a quote character for strings.
 #include "miscFuncs.h"
 #include "streamCompat.h"
 
+// older versions of the GNU libg++ library have a bug; this
+// turns on the bug fix code
+
+#ifdef __GNUG__
+#if !defined(__GNUC_MINOR__) || __GNUC_MINOR__ < 7
+#define NEED_DONT_CLOSE
+#endif
+#endif
+
 // The default whitespace string
 const char *Tokenizer::defWhite = " \t\n\r";
 
@@ -94,7 +103,7 @@ Tokenizer::Tokenizer(const char* buffer,const char* spec,const char* w) {
 	char* p = (char*) buffer;
 	LOG_NEW; strm = new istrstream(p, strlen(p));
 
-#ifdef __GNUG__
+#ifdef NEED_DONT_CLOSE
 // work around memory leak with libg++-2.2
 // FIXME: remove when library is fixed.
 	strm->unsetf(ios::dont_close);
