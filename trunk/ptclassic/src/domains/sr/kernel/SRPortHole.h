@@ -72,6 +72,10 @@ public:
   virtual int		absent() const;
   virtual int		present() const;
   virtual Particle &	get() const;
+
+  void disconnect(int);
+
+  ~SRPortHole();
 };
 
 
@@ -132,6 +136,7 @@ class OutSRPort : public SRPortHole {
   Particle * emittedParticle;
 
 public:
+  OutSRPort() { emittedParticle = NULL; }
 
   // Destroy the particle in the port, if any, resetting it to
   // "unknown"
