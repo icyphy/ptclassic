@@ -35,6 +35,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #endif
 
 #include "DataStruct.h"
+#include "DEStar.h"
 
 
 #define MAX_BUCKET     1024*4
@@ -63,6 +64,7 @@ public:
 	Star* dest;             // All the destinations are also stored
 				// contiguously to allow sequential
 				// popping off of same Star event;
+				// of an event.
 	LevelLink() {}
 
 private:
@@ -71,7 +73,8 @@ private:
 
 	// v sets the level, and fv sets the fineLevel of the entry.
 	// Numerically smaller number represents  the higher priority.
-	LevelLink* setLink(Pointer a, double v, double fv, Star* d, LevelLink* n, LevelLink* b);
+	LevelLink* setLink(Pointer a, double v, double fv,
+			   Star* d, LevelLink* n, LevelLink* b);
 };
 
 	//////////////////////////////////////
@@ -85,7 +88,7 @@ public:
 	// first and its fineLevel (fv) second.
 	// Numerically smaller number represents the higher priority.
 	// (i.e., highest level is at the tail)
-	LevelLink* levelput(Pointer a, double v, double fv = 1.0, Star* dest);
+	LevelLink* levelput(Pointer a, double v, double fv = 1.0, Star* dest=0);
 
 	// Push back the link just gotten.
 	void pushBack(LevelLink*);
@@ -103,18 +106,22 @@ public:
 	LevelLink* get() { return NextEvent(); }
 
 	// Return number of elements currently in queue...
-	int length() {return numberNodes;}
+	int length() {return cq_eventNum;}
 
 	// clear the queue...
 	// move all Links into the free List.
 	void initialize();
 
+	// Fetch an event which matches the porthole and lies in
+	// the time interval [now, timeVal]
+	int fetchEvent(InDEPort* p, double timeVal);
+
 	// put the link into the pool of free links.
 	virtual void 	   putFreeLink(LevelLink*);
 
 	// Constructor
-	CalendarQueue() : freeLinkHead(0), numberNodes(0), numFreeLinks(0), 
-			  cq_resizeEnabled(1) 
+	CalendarQueue() : freeLinkHead(0), cq_eventNum(0), numFreeLinks(0), 
+			  cq_resizeEnabled(1)
         { LocalInit(0, 2, 1.0, 0.0); }
 	virtual ~CalendarQueue();
 
@@ -146,7 +153,6 @@ protected:
 	double NewInterval();
 
 private:
-	int numberNodes;
 	// These are for memory management scheme to minimize the dynamic
 	// memory (de)allocation. FreeLinks are managed in linked-list
 	// structure.

@@ -32,12 +32,13 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #pragma implementation
 #endif
 
+#include "EventQueue.h"
 #include "CalendarQueue.h"
+#include <assert.h>
 
 // Set the properties of the LevelLink class.
-LevelLink* LevelLink :: setLink(Pointer a, double v, double fv, Star* d,
-			  LevelLink* n,
-			  LevelLink* b) 
+LevelLink* LevelLink :: setLink(Pointer a, double v, double fv,
+			  Star* d, LevelLink* n, LevelLink* b) 
 {
 	e = a;
 	level = v;
@@ -124,7 +125,7 @@ double lastTime)
 /* set up initial position in queue */
 
     cq_lastTime = lastTime;
-    n = lastTime/cq_interval;
+    n = (int) (lastTime/cq_interval);
     cq_lastBucket = n % cq_bucketNum;
     cq_bucketTop = (n+1.5)*cq_interval;
 
@@ -142,17 +143,19 @@ double lastTime)
 // lowest level first, lowest fineLevel first.
 
 // FIXME
-LevelLink* CalendarQueue :: levelput(Pointer a, double v, double fv, Star* dest)
+LevelLink* CalendarQueue :: levelput(Pointer a, double v, double fv,
+					Star* dest)
 {
-    numberNodes++;
     LevelLink* newLink = getFreeLink();
 
     newLink->setLink(a, v, fv, dest, 0, 0);
-    int i = v / cq_interval;	// find virtual bucket
+    int i = (int) (v / cq_interval);	// find virtual bucket
     i = i % cq_bucketNum;	// find actual bucket
     InsertEventInBucket(&cq_bucket[i], newLink);
-    if (cq_eventNum > cq_topThreshold && cq_bucketNum < HALF_MAX_DAYS)
+    if ((cq_resizeEnabled) &&
+	(cq_eventNum > cq_topThreshold && cq_bucketNum < HALF_MAX_DAYS))
 	    Resize(2 * cq_bucketNum);
+    return newLink;
 }
 
 
@@ -172,7 +175,7 @@ void CalendarQueue :: InsertEventInBucket(LevelLink **bucket, LevelLink *link)
 	save_resizeEnabled = cq_resizeEnabled;
 	cq_resizeEnabled = 0;
 	least_link = NextEvent();
-	i = least_link->level/cq_interval;
+	i = (int) (least_link->level/cq_interval);
 	i = i% cq_bucketNum;
 	if (cq_bucket[i]) {
 	    least_link->next = cq_bucket[i];
@@ -184,9 +187,9 @@ void CalendarQueue :: InsertEventInBucket(LevelLink **bucket, LevelLink *link)
 	cq_resizeEnabled = save_resizeEnabled;
 	cq_eventNum++;
     }
-    if (least_link && link->level < least_link->level) {
+    if ((least_link) && (link->level < least_link->level)) {
 	cq_lastTime = link->level;
-	virtualBucket = cq_lastTime/cq_interval;
+	virtualBucket = (int)(cq_lastTime/cq_interval);
 	cq_lastBucket = virtualBucket%cq_bucketNum;
 	cq_bucketTop = (virtualBucket+1.5)*cq_interval;
     }
@@ -272,7 +275,7 @@ LevelLink* CalendarQueue :: NextEvent()
 	    if (reg_cq_bucket[i] = reg_cq_bucket[i]->next) 
 		reg_cq_bucket[i]->before = NULL;
 	    cq_lastBucket = i;
-	    if (--cq_eventNum < cq_bottomThreshold)
+	    if ((cq_resizeEnabled) && (--cq_eventNum < cq_bottomThreshold))
 		Resize(cq_bucketNum/2);
 	    return(result);
 	} else {
@@ -307,7 +310,7 @@ LevelLink* CalendarQueue :: NextEvent()
     }
 	    
     cq_lastTime = result->level;
-    year = cq_lastTime/(cq_interval*cq_bucketNum);
+    year = (int)(cq_lastTime/(cq_interval*cq_bucketNum));
     cq_bucketTop = year*cq_interval*cq_bucketNum + 
 	(cq_lastBucket+1.5)*cq_interval;
     goto again;
@@ -322,7 +325,7 @@ void CalendarQueue :: Resize(int newSize)
     double newInterval, NewInterval();
     int i;
     int oldBucketNum;
-    struct Event *currentEvent, **oldBucket;
+    LevelLink *currentEvent, **oldBucket;
 
     if (!cq_resizeEnabled) return;
 
@@ -348,9 +351,9 @@ void CalendarQueue :: Resize(int newSize)
     for (i = oldBucketNum - 1; i>=0; i--) {
 	currentEvent = oldBucket[i];
 	while (currentEvent) {
-	    struct Event *nextEvent = currentEvent->next;
+	    LevelLink *nextEvent = currentEvent->next;
 	    int virtualBucket;
-	    virtualBucket = currentEvent->level/cq_interval;
+	    virtualBucket = (int)(currentEvent->level/cq_interval);
 	    virtualBucket = virtualBucket% cq_bucketNum; 
 	    InsertEventInBucket(&cq_bucket[virtualBucket], currentEvent);
 	    currentEvent = nextEvent;
@@ -417,7 +420,7 @@ double CalendarQueue :: NewInterval()
 
     for (i=0; i<sampleNum; i++) {
 	int temp;
-	temp = sampledEvent[i]->level/cq_interval; /* find virtual bucket */
+	temp = (int)(sampledEvent[i]->level/cq_interval); // find virtual bucket
 	temp = temp % cq_bucketNum;      /* find actual bucket  */
 	InsertEventInBucket(&cq_bucket[temp], sampledEvent[i]);
     }	
@@ -449,21 +452,21 @@ double CalendarQueue :: NewInterval()
 
 void CalendarQueue :: pushBack(LevelLink* a) {
   
-    numberNodes++;
 
-    int i = a->level / cq_interval;	// find virtual bucket
+    int i = (int)(a->level / cq_interval);	// find virtual bucket
     i = i % cq_bucketNum;	// find actual bucket
-    InsertEventInBucket(&cq_bucket[i], newLink);
+    InsertEventInBucket(&cq_bucket[i], a);
     if ((cq_resizeEnabled) &&
 	(cq_eventNum > cq_topThreshold && cq_bucketNum < HALF_MAX_DAYS))
 	    Resize(2 * cq_bucketNum);
 }
 
+// fetch an event on request
 int CalendarQueue :: fetchEvent(InDEPort* p, double timeVal)
 {
 	LevelLink *store = NULL;
 	cq_resizeEnabled = 0;
-	while (true)
+	while (1)
 	{
 		LevelLink *h = NextEvent();
 		if ((h == NULL) || (h->level > timeVal)) {
@@ -472,7 +475,7 @@ int CalendarQueue :: fetchEvent(InDEPort* p, double timeVal)
 		}
 		InDEPort* tl = 0;
                 if (h->fineLevel != 0) {
-                        Event* ent = (Event*) h->e;
+			Event* ent = (Event*) h->e;
                         tl = (InDEPort*) ent->dest;
 
                         // if same destination star with same time stamp..
@@ -481,11 +484,11 @@ int CalendarQueue :: fetchEvent(InDEPort* p, double timeVal)
 					putFreeLink(h);
 				else
 					pushBack(h);
-				for (;store != NULL;
-				      temp = store,
-				      store = store->next,
-				      pushBack(temp));
-
+				while (store != NULL) {
+				      LevelLink *temp = store;
+				      store = store->next;
+				      pushBack(temp);
+				}
 				cq_resizeEnabled = 1;
                                 return TRUE;
                         }
@@ -495,7 +498,7 @@ int CalendarQueue :: fetchEvent(InDEPort* p, double timeVal)
 		h->before = NULL;
 		store = h;
 	}
-	Error :: abortRun (*p, " has no more data.");
+	Error :: abortRun (*p, " Should never get here.");
 	return FALSE;
 }
 
@@ -504,11 +507,9 @@ void CalendarQueue :: initialize()
 	if (cq_eventNum == 0) return;		// Queue already empty
 
 	for (int i = cq_bucketNum - 1; i>=0; i--) {
-		// Point to the first element of the list
-		LevelLink *l = cq_bucket[i];
 
 		// Put all Links into the free List.
-		for (LevelLink *l = cq_bucket[i]; l != NULL; ) {
+		for (LevelLink *l = cq_bucket[i]; l != NULL;) {
 			LevelLink *ll = l;
 			l = l->next;
 			putFreeLink(ll);
