@@ -149,11 +149,14 @@ class ::tycho::FileBrowser {
     # The last file opened.
     protected common fileLastOpened {}
 
+    # The parent directory string: platform-dependent
+    protected common directoryParent
+
     # The directory separator: platform-dependent
     protected common directorySeparator
 
-    # The parent directory string: platform-dependent
-    protected common directoryParent
+    # The directory separator to use at the end of a directory.
+    protected common directorySeparatorTrailer "/"
 
     # The directory last visited.
     protected common CWD
@@ -174,16 +177,16 @@ class ::tycho::FileBrowser {
     # Set directory separator and parent according to platform
     switch $tcl_platform(platform) {
         macintosh {
-            set directorySeparator ":"
             set directoryParent "::"
+            set directorySeparator ":"
         }
         unix {
-            set directorySeparator "/"
             set directoryParent "../"
+            set directorySeparator "/"
         }
         windows {
-            set directorySeparator "/"
             set directoryParent "../"
+            set directorySeparator "/"
 	    # This is what is used to be -- according to CliffC
 	    # the forward slashes work just as well
             # set directorySeparator "\\"
@@ -527,7 +530,9 @@ body ::tycho::FileBrowser::updateListbox {} {
     set fileList [lsort $fileList]
     
     # Insert directories into the listbox
-    appendItems $dirList $directorySeparator
+    # Note that Tcl seems to understand trailing / reasonably well.
+    # See the Tcl filename man page for details
+    appendItems $dirList $directorySeparatorTrailer
 
     # Insert the files into the listbox
     appendItems $fileList
