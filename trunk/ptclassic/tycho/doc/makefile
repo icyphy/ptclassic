@@ -79,6 +79,10 @@ tychoClasses.dag: FORCE
 		echo "set TYCHO $(TYCHO);  source ../kernel/tychoMakeClassDAG.tcl; tychoStandardDAG" | $(ITCLSH); \
 	fi
 
+# Traverse all the html files (except the codedoc files) and produce PostScript
+tycho.ps:
+	netscape &
+	tycho -e lib/html2ps.tcl
 
 # We don't include common.mk since we don't use the compiler here
 include $(ROOT)/mk/no-compile.mk
