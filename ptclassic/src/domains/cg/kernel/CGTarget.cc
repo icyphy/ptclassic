@@ -26,7 +26,7 @@ CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
 							COPYRIGHTENDKEY
 
- Programmer: J. Buck, J. Pino
+ Programmer: J. Buck, J. Pino, T. M. Parks
 
  Baseclass for all single-processor code generation targets.
 
@@ -77,10 +77,20 @@ CGTarget::CGTarget(const char* name,const char* starclass,
 	targetNestedSymbol.setCounter(&symbolCounter);
 	sharedSymbol.setSeparator(separator);
 	sharedSymbol.setCounter(&symbolCounter);
-	addState(destDirectory.setState("destDirectory",this,
+
+	addState(destDirectory.setState("Destination Directory",this,
 		"PTOLEMY_SYSTEMS","Directory to write to"));
-	addState(loopingLevel.setState("loopingLevel",this,"0",
+	addState(loopingLevel.setState("Looping Level",this,"0",
 		"Specify whether to use loop scheduler and in what level."));
+	addState(displayFlag.setState("display?", this, "YES",
+	    "Enable displaying of code."));
+	addState(compileFlag.setState("compile?", this, "YES",
+	    "Enable compilation of code."));
+	addState(loadFlag.setState("load?", this, "YES",
+	    "Enable loading of code."));
+	addState(runFlag.setState("run?", this, "YES",
+	    "Enable running of code."));
+
 	addStream(CODE, &myCode);
 	addStream(PROCEDURE, &procedures);
 	symbolCounter = 0;
@@ -100,10 +110,16 @@ CGTarget::~CGTarget() {
 	}
 }
 
-// dummy functions that perform parts of setup.
+
+// Methods used in setup(), run(), wrapup(), and generateCode().
+// The default versions do nothing.
+// Return FALSE on error.
 int CGTarget :: modifyGalaxy() { return TRUE; }
-int CGTarget :: allocateMemory() { return TRUE; }
 int CGTarget :: codeGenInit() { return TRUE; }
+int CGTarget :: allocateMemory() { return TRUE; }
+int CGTarget :: compileCode() { return TRUE; }
+int CGTarget :: loadCode() { return TRUE; }
+int CGTarget :: runCode() { return TRUE; }
 
 // the main guy.
 // If there is no galaxy yet, we just create a scheduler and return.
@@ -146,12 +162,47 @@ void CGTarget::setup() {
 	}
 	noSchedule = 0;		// reset for next setup.
 
-	// choose sizes for buffers and allocate memory, if needed
-	if (inWormHole() && alone()) {
-		adjustSampleRates();
-		generateCode();
-		wormLoadCode();
+	// If in a WormHole, generate, compile, load, and run code.
+	// Ignore flags which may otherwise disable these functions.
+	if (inWormHole() && alone())
+	{
+	    adjustSampleRates();
+	    generateCode();
+	    if (compileCode())
+	    {
+		if (loadCode())
+		{
+		    if (!runCode())
+			Error::abortRun(*this, "could not run!");
+		}
+		else Error::abortRun(*this, "could not load!");
+	    }
+	    else Error::abortRun(*this, "could not compile!");
 	}
+}
+
+// If not in a WormHole, conditionally display, compile, load, and run code.
+void CGTarget :: wrapup()
+{
+    if (!inWormHole())
+    {
+	if (displayFlag) display(myCode);
+	if (compileFlag)
+	{
+	    if (!compileCode())
+		Error::abortRun(*this, "could not compile code!");
+	    else if (loadFlag)
+	    {
+		if (!loadCode())
+		    Error::abortRun(*this, "could not load code!");
+		else if (runFlag)
+		{
+		    if (!runCode())
+			Error::abortRun(*this, "could not run code!");
+		}
+	    }
+	}
+    }
 }
 
 void CGTarget::generateCode() {
@@ -185,9 +236,9 @@ void CGTarget :: mainLoopCode() {
 	// target is inside a wormhole
 	int iterations = inWormHole()? -1 : (int)scheduler()->getStopTime();
 	beginIteration(iterations,0);
-	if (inWormHole()) wormInputCode();
+	if (inWormHole()) allWormInputCode();
 	compileRun((SDFScheduler*) scheduler());
-	if (inWormHole()) wormOutputCode(); 
+	if (inWormHole()) allWormOutputCode(); 
 	endIteration(iterations,0);
 }
 
@@ -232,8 +283,8 @@ CodeStream* CGTarget :: getStream(const char* name)
 int CGTarget :: run() {
     // if a wormhole, we must do the transfer of data to and from the target.
     if(inWormHole()) {
-	if(!sendWormData()) return FALSE;
-	if(!receiveWormData()) return FALSE;
+	if(!allSendWormData()) return FALSE;
+	if(!allReceiveWormData()) return FALSE;
     }
     else 	
 	generateCode();
@@ -268,24 +319,12 @@ void CGTarget :: endIteration(int /*reps*/, int depth) {
 	myCode << "} /* end repeat, depth " << depth << "*/\n";
 }
 
-int CGTarget :: compileCode() {
-	Error::abortRun("No compileCode method defined for current target");
-	return FALSE;
-}
-
-int CGTarget :: loadCode() {
-	return TRUE; // load and Run can be combined in runCode method
-}
 
 int CGTarget :: incrementalAdd(CGStar*, int) {
 	Error:: abortRun("No Incremental-Add(so, no wormhole) supported yet");
 	return FALSE;
 }
 
-int CGTarget :: runCode() {
-	Error::abortRun("No runCode method defined for current target");
-	return FALSE;
-}
 
 int CGTarget::inWormHole() {
 	return int(galaxy()->parent());
@@ -303,7 +342,7 @@ void CGTarget :: adjustSampleRates() {
 	}
 }
 
-void CGTarget :: wormInputCode() {
+void CGTarget :: allWormInputCode() {
 	BlockPortIter nextPort(*galaxy());
 	PortHole* p;
 	while ((p = nextPort++) != 0) {
@@ -314,7 +353,7 @@ void CGTarget :: wormInputCode(PortHole& p) {
 	myCode << "/* READ from wormhole port " << p.fullName() << " */\n";
 }
 
-void CGTarget :: wormOutputCode() {
+void CGTarget :: allWormOutputCode() {
 	BlockPortIter nextPort(*galaxy());
 	PortHole* p;
 	while ((p = nextPort++) != 0) {
@@ -325,7 +364,7 @@ void CGTarget :: wormOutputCode(PortHole& p) {
 	myCode << "/* WRITE to wormhole port " << p.fullName() << " */\n";
 }
 
-int CGTarget :: sendWormData() {
+int CGTarget :: allSendWormData() {
     BlockPortIter nextPort(*galaxy());
     PortHole* p;
     while ((p = nextPort++) != 0) {
@@ -345,7 +384,7 @@ int CGTarget :: sendWormData(PortHole& p) {
 	return TRUE;
 }
 
-int CGTarget :: receiveWormData() {
+int CGTarget :: allReceiveWormData() {
     BlockPortIter nextPort(*galaxy());
     PortHole* p;
     while ((p = nextPort++) != 0) {
@@ -368,11 +407,6 @@ int CGTarget :: receiveWormData(PortHole& p) {
 	return TRUE;
 }
 
-int CGTarget :: wormLoadCode() {
-	display(myCode);
-	return TRUE;
-}
-
 void CGTarget :: writeFiring(Star& s,int) { // depth parameter ignored
 	s.run();
 }
@@ -387,10 +421,6 @@ void CGTarget :: genLoopInit(Star& s, int reps) {
 void CGTarget :: genLoopEnd(Star& s) {
 	DataFlowStar* ds = (DataFlowStar*)&s;
 	ds->endLoop();
-}
-
-void CGTarget :: wrapup() {
-	display(myCode);
 }
 
 void CGTarget :: writeCode(const char* name) {

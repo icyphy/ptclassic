@@ -25,7 +25,7 @@ CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
 							COPYRIGHTENDKEY
 
- Programmer: J. Buck, J. Pino
+ Programmer: J. Buck, J. Pino, T. M. Parks
 
  Baseclass for all single-processor code generation targets.
 
@@ -59,77 +59,85 @@ public:
 
     ~CGTarget();
 
-    static int haltRequested() {return SimControl::haltRequested();}
-
-    // return non-zero if currently inside a wormhole
-    // if the target is not inside a wormhole, then it returns 0.
-    int inWormHole();
-
-    // function that computes the schedule, allocates memory (if needed),
-    // and prepares for code generation (generating header and initial
-    // code)
-    /*virtual*/ void setup();
-
-    // function that executes the schedule to generate the main code.
-    /*virtual*/ int run();
-
-    // finalization.  In derived classes, wrapup might download and
-    // execute the generated code; the baseclass simply displays the
-    // code.
-    /*virtual*/ void wrapup();
-
-    // generate a new, identical CGTarget.
+    // Generate a new CGTarget.
     /*virtual*/ Block* makeNew() const;
 
-    // write the generated code to files
-    virtual void writeCode(const char* name = NULL);
+    // Class identification.
+    /*virtual*/ int isA(const char*) const;
+
+    // Perform initialization such as setting up the schedule.
+    // If within a WormHole, generate, compile, load, and run code.
+    /*virtual*/ void setup();
+
+    // If within a WormHole, transfer data to the already running code.
+    // Otherwise, generate code.
+    /*virtual*/ int run();
+
+    // If within a WormHole, do nothing.
+    // Otherwise, conditionally display, compile, load, and run the code.
+    /*virtual*/ void wrapup();
+
+    // Generate code.
+    virtual void generateCode();
+
+    // Generate code for a Star firing.
+    // The default version simply fires the star.
+    void writeFiring(Star&,int depth);
 
     // incrementally add a star
     // If flag is FALSE, just call go() method of the star.
     virtual int incrementalAdd(CGStar* s, int flag = 1);
 
-    // methods to compile and run the target.
-    // check access privilege later.
-    virtual int compileCode();
-    virtual int loadCode();
-    virtual int runCode();
-
-    // generate code, final code is left in a target CodeStream
-    virtual void generateCode();
-
-    // add codes from a galaxy during mainLoopCode function.
-    // The schedule of the galaxy should be also provided.
+    // Add code from a galaxy.
+    // The schedule of the galaxy should be provided.
     virtual int insertGalaxyCode(Galaxy* g, SDFScheduler*);
 
-    // type identification
-    /*virtual*/ int isA(const char*) const;
-
-   // generate a comment from a specified string.  If begin = NULL 
-    // default to shell-style comments.  If continue is specified,
-    // multi-line comments are supported by the target.  Continue can
-    // be "".
-    virtual StringList comment(const char* cmt, const char* begin=NULL, 
-            const char* end="",const char* cont=NULL);
-
-    // Return a StringList detailing the user name, time & date,
-    // user name, target type.  This function uses the comment function.
-    // Begin, end & continue are the same as the argument used in comment().
-    // If headerComment begin==NULL, call comment(msg) w/o additional args.
-    virtual StringList headerComment(const char* begin=NULL,
-				     const char* end="",
-				     const char* cont=NULL);
-
-    // generate code for a firing.  The definition here simply
-    // fires the star
-    void writeFiring(Star&,int depth);
-
-    // dummy beginIteration and endIteration
+    // Support methods for loops.
     /* virtual */ void beginIteration(int,int);
     /* virtual */ void endIteration(int,int);
 
-    // functions to call loop initialization code for stars.
+    // Generate loop initialization code for stars.
     /* virtual */ void genLoopInit(Star& s, int reps);
     /* virtual */ void genLoopEnd(Star& s);
+
+    // methods for generating code for reading and writing
+    // wormhole ports.  Argument is the "real port" of the interior
+    // star that is attached to an event horizon.  If no argument is
+    // given, generate code for all the appropriate portholes.
+    virtual void wormInputCode(PortHole&);
+    virtual void allWormInputCode();
+    virtual void wormOutputCode(PortHole&);
+    virtual void allWormOutputCode();
+
+    // methods for sending and receiving data to a target when
+    // run inside of a wormhole. Argument is the "real port" of the 
+    // interior star that is attached to an event horizon.  If no argument 
+    // is given, send & receive for all the appropriate portholes.
+    virtual int allSendWormData();
+    virtual int allReceiveWormData();
+    virtual int sendWormData(PortHole&);
+    virtual int receiveWormData(PortHole&);
+
+    // Save the generated code to a file.
+    virtual void writeCode(const char* fileName = NULL);
+
+    // Provided for convenience and backward compatibility.
+    static int haltRequested() {return SimControl::haltRequested();}
+
+    // Return FALSE if the Target is not inside a WormHole.
+    int inWormHole();
+
+    // Generate a comment from a specified string.
+    // Multi-line comments are supported if a continuation string is specified.
+    // Defaults to shell-style comments.
+    virtual StringList comment(const char* cmt, const char* begin=NULL, 
+            const char* end="",const char* cont=NULL);
+
+    // Return a StringList detailing the user name, time, date, and
+    // target type.
+    // Uses the comment() method.
+    virtual StringList headerComment(const char* begin=NULL,
+	const char* end="", const char* cont=NULL);
 
     // system call in destination directory.  If error is specified
     // & the system call is unsuccessful display the error message.
@@ -144,15 +152,6 @@ public:
     // not found, This method allows stars to access a code StringList by 
     // name.  If stream is not found, return NULL.
     CodeStream* getStream(const char* name);
-
-    // methods for generating code for reading and writing
-    // wormhole ports.  Argument is the "real port" of the interior
-    // star that is attached to an event horizon.  If no argument is
-    // given, generate code for all the appropriate portholes.
-    virtual void wormInputCode(PortHole&);
-    virtual void wormInputCode();
-    virtual void wormOutputCode(PortHole&);
-    virtual void wormOutputCode();
 
     // separator for symbols, <name><separator><unique number>
     char separator;
@@ -173,16 +172,31 @@ public:
     virtual int execTime(DataFlowStar* s, CGTarget* t = 0)
 	{ return s->myExecTime(); }
 
-    // methods for sending and receiving data to a target when
-    // run inside of a wormhole. Argument is the "real port" of the 
-    // interior star that is attached to an event horizon.  If no argument 
-    // is given, send & receive for all the appropriate portholes.
-    virtual int sendWormData();
-    virtual int receiveWormData();
-    virtual int sendWormData(PortHole&);
-    virtual int receiveWormData(PortHole&);
-
 protected:
+
+    // Methods used in setup(), run(), and wrapup().
+    // The default versions do nothing.
+    // Return FALSE on error.
+    virtual int compileCode();
+    virtual int loadCode();
+    virtual int runCode();
+
+    // Initialization for code generation.
+    // The default version does nothing.
+    virtual int codeGenInit();
+
+    // Methods used for stages of code generation.
+    virtual void headerCode();
+    virtual void mainLoopCode();
+    virtual void trailerCode();
+
+    // Combine all sections of code.
+    virtual void frameCode();
+
+    // Compute buffer sizes and allocate memory.
+    // Return FALSE on error.
+    virtual int allocateMemory();
+
     // Add a CodeStream to the target.  This allows stars to access this
     // stream by name.  This method should be called in the the target's
     // constructor.  If a target tries to add a stream where another stream
@@ -213,6 +227,12 @@ protected:
     // If set to 2, Shuvra and Ha's extensive looping.
     IntState loopingLevel;
 
+    // Enable or disable Target functions.
+    IntState displayFlag;
+    IntState compileFlag;
+    IntState loadFlag;
+    IntState runFlag;
+
     char *schedFileName;
 
     // scheduling is not needed since the schedule is 
@@ -234,42 +254,14 @@ protected:
     // if needed to do the start functions.
     virtual int modifyGalaxy();
 
-    // compute buffer sizes, allocate memory, etc.  return TRUE for
-    // success, false for failure.  Called after schedule generation
-    // and modifyGalaxy.
-    virtual int allocateMemory();
-
-    // do initialization for code generation: for example, compute
-    // offsets of portholes and generate initCode. But in this base
-    // class, do nothing
-    virtual int codeGenInit();
-
-    // generate the code for the main loop.
-    virtual void mainLoopCode();
-
     // call the scheduler compileRun(). Make this method virtual to
     // allow derived target to manage the target code streams.
     virtual void compileRun(SDFScheduler*);
 
-    // The following method downloads code for the inside of a wormhole
-    // and starts it executing.
-    virtual int wormLoadCode();
 
-	 // If a CG domain is inside a wormhole, we may need to change
-	 // the sample rate of event horizons after scheduling is performed.
-	 void adjustSampleRates();
-
-    // writes initial code
-    virtual void headerCode();
-
-    // writes trailer code
-    virtual void trailerCode();
-
-    // Besides the code the scheduler generated, we usually need to
-    // add more codes (such as global structure definitions). Then,
-    // this virtual method provides the hook for that.
-    // In this base class, do nothing.
-    virtual void frameCode();
+     // If a CG domain is inside a wormhole, we may need to change
+     // the sample rate of event horizons after scheduling is performed.
+     void adjustSampleRates();
     
     // codeStringLists is a list of all the code streams that a star 
     // has access to.  These StringLists should be added from the 
@@ -279,9 +271,8 @@ protected:
     CodeStreamList codeStringLists;
     
     // splice in a new star, returning a pointer to the new star.
-    // dom is the domain of the new star.
     Block* spliceStar(PortHole*, const char* name, int delayBefore,
-                             const char* dom);
+                             const char* domainName);
 
 private:
     // return non-zero if this target is not a child target, or not
