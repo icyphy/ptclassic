@@ -49,16 +49,6 @@ if {[string compare test [info procs test]] == 1} then {
 } {}
 
 ############################################################################
-# Test TopLevel
-test TopLevel-1.1 {Test TopLevel} { 
-    set win [::tycho::TopLevel \
-	    [::tycho::autoName .toplevel] -geometry 100x100+0+0]
-    wm deiconify $win
-    after $duration removeobj $win
-    list {Done.}
-} {Done.}
-
-############################################################################
 # Test DialogWindow
 test DialogWindow-1.1 {Test DialogWindow} {
     global globalReturn
@@ -73,12 +63,20 @@ test DialogWindow-1.1 {Test DialogWindow} {
 } {ouch}
 
 ############################################################################
-# Test Message
-test Message-1.1 {Test Message} {
-    ::tycho::Message .msg1 -text \
-	    "This is a plain message"
-    .msg1 centerOnScreen
-    after $duration removeobj .msg1
+# Test Dismiss
+test Dismiss-1.1 {Test Dismiss} {
+    set win [::tycho::Dismiss [::tycho::autoName .dismiss] -geometry +0+0]
+    wm deiconify $win
+    after $duration removeobj $win
+    update
+} {}
+
+############################################################################
+# Test Edit
+test Edit-1.1 {Test Edit} {
+    set win [::tycho::Edit [::tycho::autoName .edit] -geometry +0+0]
+    wm deiconify $win
+    after $duration removeobj $win
     update
 } {}
 
@@ -92,22 +90,6 @@ test ErrorMessage-1.1 {Test ErrorMessage} {
 } {}
 
 ############################################################################
-# Test YesNoQuery
-test YesNoQuery-1.1 {Test YesNoQuery} {
-    after $duration .yesno invoke yes
-    after [expr 2*$duration] .another invoke yes
-    ::tycho::YesNoQuery .yesno \
-	    -text "Either button should bring up another dialog" \
-	    -yescommand {
-	::tycho::YesNoQuery .another -text {Another dialog}
-	.another centerOnScreen
-        } \
-	-nocommand "askuser {Are you sure not?}"
-    .yesno centerOnScreen
-    update
-} {}
-
-############################################################################
 # Test EntryQuery
 test EntryQuery-1.1 {Test EntryQuery} {
     after $duration .entry invoke cancel
@@ -116,40 +98,6 @@ test EntryQuery-1.1 {Test EntryQuery} {
     .entry centerOnScreen
     update
 } {}
-
-############################################################################
-# Test YesNoCancel
-test YesNoCancel-1.1 {Test YesNoCancel} {
-    global globalReturn
-    after $duration .yesnocancel invoke cancel
-    ::tycho::YesNoCancel .yesnocancel \
-	    -text "Yes, No, or Cancel" \
-	    -yescommand "set globalReturn yes" \
-	    -nocommand "set globalreturn no" \
-	    -cancelcommand "set globalReturn cancel"
-    .yesnocancel centerOnScreen
-    update
-    list $globalReturn
-} {}
-
-############################################################################
-# Test Dismiss
-test Dismiss-1.1 {Test Dismiss} {
-    set win [::tycho::Dismiss [::tycho::autoName .dismiss] -geometry +0+0]
-    wm deiconify $win
-    after $duration removeobj $win
-    update
-} {}
-
-############################################################################
-# Test Edit
-test Edit-1.1 {Test Edit} {
-    set win [::tycho::Edit [::tycho::autoName .file] -geometry +0+0]
-    wm deiconify $win
-    after $duration removeobj $win
-    update
-} {}
-
 
 ############################################################################
 # Test File
@@ -170,12 +118,104 @@ test FileBrowser-1.1 {Test FileBrowser} {
 } {}
 
 ############################################################################
+# Test ListBrowser
+test ListBrowser-1.1 {Test ListBrowser} {
+    global globalReturn
+    set win [::tycho::ListBrowser [::tycho::autoName .listBrowser] \
+	    -items { {1st Item} {2nd Item} {3rd Item}} \
+	    -command "set globalReturn"]
+    wm deiconify $win
+    after $duration removeobj $win
+    update
+    # Get item #1, which is actually the second item in the list
+    $win clearselection
+    $win goto 1
+    $win ok
+    set globalReturn
+} {2nd Item}
+
+############################################################################
 # Test HTML
 test HTML-1.1 {Test HTML} {
-    set win [::tycho::HTML [::tycho::autoName .file] -geometry +0+0]
+    set win [::tycho::HTML [::tycho::autoName .html] -geometry +0+0]
     wm deiconify $win
     after $duration removeobj $win
     update
 } {}
+
+############################################################################
+# Test IndexBrowser
+test IndexBrowser-1.1 {Test IndexBrowser} {
+    global $TYCHO
+    set win [::tycho::IndexBrowser [::tycho::autoName .indexBrowser] \
+	    -file $TYCHO/lib/idx/tycho.idx]
+    wm deiconify $win
+    after $duration removeobj $win
+    update
+} {}
+
+############################################################################
+# Test Message
+test Message-1.1 {Test Message} {
+    ::tycho::Message .msg1 -text \
+	    "This is a plain message"
+    .msg1 centerOnScreen
+    after $duration removeobj .msg1
+    update
+} {}
+
+############################################################################
+# Test TopLevel
+test TopLevel-1.1 {Test TopLevel} { 
+    set win [::tycho::TopLevel \
+	    [::tycho::autoName .toplevel] -geometry 100x100+0+0]
+    wm deiconify $win
+    after $duration removeobj $win
+    list {Done.}
+} {Done.}
+
+
+############################################################################
+# Test WelcomeMessage
+test WelcomeMessage-1.1 {Test WelcomeMessage} {
+    set win [::tycho::WelcomeMessage [::tycho::autoName .welcomeMessage] \
+	    -version "A test version" \
+	    -executable "A test executable" ]
+    wm deiconify $win
+    after $duration removeobj $win
+    update
+} {}
+
+############################################################################
+# Test YesNoCancel
+test YesNoCancel-1.1 {Test YesNoCancel} {
+    global globalReturn
+    after $duration .yesnocancel invoke cancel
+    ::tycho::YesNoCancel .yesnocancel \
+	    -text "Yes, No, or Cancel" \
+	    -yescommand "set globalReturn yes" \
+	    -nocommand "set globalreturn no" \
+	    -cancelcommand "set globalReturn cancel"
+    .yesnocancel centerOnScreen
+    update
+    list $globalReturn
+} {}
+
+############################################################################
+# Test YesNoQuery
+test YesNoQuery-1.1 {Test YesNoQuery} {
+    after $duration .yesno invoke yes
+    after [expr 2*$duration] .another invoke yes
+    ::tycho::YesNoQuery .yesno \
+	    -text "Either button should bring up another dialog" \
+	    -yescommand {
+	::tycho::YesNoQuery .another -text {Another dialog}
+	.another centerOnScreen
+        } \
+	-nocommand "askuser {Are you sure not?}"
+    .yesno centerOnScreen
+    update
+} {}
+
 
 doneTests
