@@ -103,15 +103,20 @@ configbody ::tycho::EditPtlang::star {
 #
 body ::tycho::EditPtlang::constructor {args} {
     global PTOLEMY
-    addMenuItem {Star/Demo Xref} Help -underline 11 -accelerator "C-x C-x" \
+    eval itk_initialize $args
+
+    # Stuff for the help menu
+    addMenuItem "Ptolemy Universes" Help -underline 0 \
             -command "::tycho::File::openContext \
-            [file join $PTOLEMY public_html star-demo-index index.html]"
+	    \[file join \$env(PTOLEMY) tycho typt lib PtolemyFacets.fst\]"
+
+    addMenuItem "Star/Demo Xref" Help -underline 11 \
+            -command "::tycho::File::openContext \
+            [file join $PTOLEMY doc star-demo-index index.html]"
 
     addMenuItem "Ptolemy stars" Help -underline 0 \
-            -command "::tycho::File::openContext \[file join \$env(PTOLEMY) src domains starHTML.idx.fst\]"
-
-
-    eval itk_initialize $args
+            -command "::tycho::File::openContext \
+	    \[file join \$env(PTOLEMY) src domains starHTML.idx.fst\]"
 }
 
 ###################################################################
