@@ -180,7 +180,17 @@ LIBSUFFIX =		sl
 #
 # To bad hp can't ship a complete set of X includes and libs
 #  in a standard location
-X11DIR = 	/usr/sww/X11R5
+#
+# If you are running HPUX10, and you plan on using the prebuilt hpux binaries
+# in this directory, then you must have X11R6 installed.
+# 
+# If you do not, you will see messages like:
+# /usr/lib/dld.sl: Unresolved symbol: XOpenIM (code)  from /users/ptolemy/bin.hppa
+#
+# The hpux faq says that you can download X11R6 libraries and binaries
+# from http://hpux.cs.utah.edu/hppd/hpux/X11/Core/XR6built-6.11/
+#
+X11DIR = 	/usr/local/X11R6
 X11_INCSPEC =	-I$(ROOT)/src/compat -I$(X11DIR)/include
 X11_LIBSPEC =	-L$(X11DIR)/lib -lX11
 # X11_LIBDIR is used in the SHARED_LIBRARY_PATH
