@@ -34,7 +34,9 @@ public:
 	// constructors
 	NamedObj () : name(""), blockIamIn(0), descriptor("") {}
 	NamedObj (const char* n,Block* p,const char* d) :
-		name(n), blockIamIn(p), descriptor(d){}
+		name(n), blockIamIn(p), descriptor(d) {}
+
+	virtual const char* readClassName() const {return "NamedObj";}
 
 	// return just the end name
 	const char* readName() const { return name;}
@@ -47,6 +49,11 @@ public:
 
 	// return the full name
 	StringList readFullName() const;
+
+	// return a name that can be used as C++ identifiers, derived
+	// from the actual name.
+	StringList sanitizedName() const;
+	StringList sanitizedFullName() const;
 
 	// set the name and parent
 	void setNameParent (const char* my_name,Block* my_parent) {
