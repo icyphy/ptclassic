@@ -134,15 +134,11 @@ class ::tycho::Axis {
 #######################################################################
 #### constructor
 #
-body ::tycho::Axis::constructor {x0 y0 args} {
+body ::tycho::Axis::constructor {s c x0 y0 args} {
 
     # Set the slate and canvas variables.
-    set t [lsearch -exact $args -slate]
-    if { $t != -1 } {
-	set slate [lindex $args [expr $t+1]]
-	set canvas [$slate _canvas]
-	set args [lreplace $args $t [expr $t+1]]
-    }
+    set slate  $s
+    set canvas $c
 
     # Grab some options now to save redrawing when the options
     # are initialized.
