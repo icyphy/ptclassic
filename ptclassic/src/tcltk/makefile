@@ -171,6 +171,8 @@ fixlinks:
 ###
 # TclX rules
 # we use TclX for the profile command
+all_tclx: all config_tclx tclx install_tclx
+
 # FIXME: configure fails with GNU make!  try set path=(`pwd` $path)
 config_tclx: $(TCLX_OBJ)	
 	( cd $(TCLX_OBJ); \
