@@ -372,12 +372,14 @@ if {![info exists TychoBinaryInfo]} {
     set TychoBinaryInfo itkwish
 }
 if {![info exists TychoVersionInfo]} {
+    # Builder uses tycho_version.
+    set tycho_version 0.2.1devel
     if [info exists tk_version] {
-	set TychoVersionInfo "Version 0.2.1devel,\
+	set TychoVersionInfo "Version $tycho_version,\
 		running under Itcl ${itcl::version}, Tcl$tcl_patchLevel,\
 		Tk$tk_version, \$TYCHO = $TYCHO"
     } else {
-	set TychoVersionInfo "Version 0.2.1devel,\
+	set TychoVersionInfo "Version $tycho_version,\
 		running under Itcl ${itcl::version}, Tcl$tcl_patchLevel,\
 		\$TYCHO = $TYCHO"
     }
