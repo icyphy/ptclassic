@@ -1,62 +1,70 @@
 defstar {
-	name { FloatToFix }	
-	domain {SDF}
-	desc { 
-Convert from a float to a fixed-point given the precision specified 
-in bits (dot notation) by the "OutputPrecision" state variable. }
-        author { A. Khazeni }
+	name { FloatToFix }
+	domain { SDF }
 	version { $Id$ }
-        location { SDF main library }
+	author { Mike J. Chen }
+	copyright {
+Copyright (c) 1990-1993 The Regents of the University of California.
+All rights reserved.
+See the file ~ptolemy/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
+	location { SDF conversion palette }
+	desc { Converts a float input to an fix type output. }
+	}
 	input {
 		name { input }
 		type { float }
+		desc { Input float type }
 	}
 	output {
 		name { output }
 		type { fix }
+		desc { Output fix type }
 	}
         defstate {
-                name { OutputPrecision }
+                name { outputPrecision }
                 type { string }
                 default { "2.14" }
                 desc {
-Precision of the output in bits.  The double inputs will be casted
-to this precision.  If the value of the double can not be represented
-by the number of bits specified in the precision parameter, it signals
-an error message.}
+Precision of the output, in bits.  The complex number is cast to a double
+and then converted to this precision.  If the value of the double cannot
+be represented by the number of bits specified in the precision parameter,
+then a error message is given. }
         }
         defstate {
-                name { Masking }
+                name { masking }
                 type { string }
                 default { "truncate" }
-                desc { 
-Masking method.  This parameter is used to specify the way the
-double is masked for casting to the fixed-point notation.  The
+                desc {
+Masking method.  This parameter is used to specify the way the complex number
+converted to a double is masked for casting to the fixed-point notation. The
 keywords are: "truncate" (default), "round". }
         }
         protected {
-                const char* OP;
-                const char* MS;
-                int out_IntBits;
-                int out_len;
+                const char* OutputPrecision;
+                const char* Masking;
+                int outIntBits;
+                int outLen;
         }
         setup {
-                OP = OutputPrecision;
-                MS = Masking;
-                out_IntBits = Fix::get_intBits (OP);
-                out_len = Fix::get_length (OP);
-                if (strcmp((MS), "truncate") == 0)
+                OutputPrecision = outputPrecision;
+                Masking = masking;
+                outIntBits = Fix::get_intBits(OutputPrecision);
+                outLen = Fix::get_length(OutputPrecision);
+                if(strcmp(Masking, "truncate") == 0)
                   Fix::Set_MASK(Fix::mask_truncate);
-                else if (strcmp((MS), "round") == 0)
+                else if (strcmp(Masking, "round") == 0)
                   Fix::Set_MASK(Fix::mask_truncate_round);
-                else
-                {
-                  Error::abortRun (*this, ": not a valid function for masking");
-                  return;
+                else {
+                  Error::abortRun(*this, ": not a valid function for masking");
                 }
         }
-	go {   
-	       Fix out(out_len, out_IntBits, double(input%0));
-	       output%0 << out;
+	go {
+                Fix out(outLen, outIntBits, (double)(input%0));
+                output%0 << out;
 	}
 }
+
+
+
