@@ -67,7 +67,7 @@ LIBOBJS=Block.o Connect.o ComplexArrayState.o ComplexState.o Fraction.o Galaxy.o
  expandPath.o Wormhole.o WormConnect.o Domain.o Linker.o DataStruct.o \
  checkConnect.o gnulib3a.o \
  FloatState.o IntState.o KnownState.o State.o StringState.o \
- FloatArrayState.o IntArrayState.o \
+ FloatArrayState.o IntArrayState.o
 
 all:	makefile $(LIB) interpmain.o
 
