@@ -98,7 +98,7 @@ int PTDSPWindow(double* window, int realLen, int winType, double* parameters) {
 	    break;
 	  case PTDSP_WINDOW_TYPE_KAISER:
 	    alpha = ((double)(realLen-1))/2.0;
-	    norm = fabs(i0(parameters[0]));
+	    norm = fabs(PTDSPi0(parameters[0]));
 	    break;
 	  default:
 	    return 0;
@@ -117,7 +117,7 @@ int PTDSPWindow(double* window, int realLen, int winType, double* parameters) {
 	    for (i = 0; i < realLen; i++){
 		double squared = pow(((i - alpha)/alpha), 2);
 		double entry = parameters[0] * sqrt(1-squared);
-		window[i] = i0(entry)/norm;
+		window[i] = PTDSPi0(entry)/norm;
 	    }
 	    break;
 	  default:
