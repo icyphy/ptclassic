@@ -36,7 +36,7 @@
 # drawn on the slate.
 #
 class ::tycho::Layout {
-    inherit ::tycho::Model
+    inherit ::tycho::OldModel
 
     constructor {args} {}
     destructor {}
