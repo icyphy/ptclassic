@@ -274,10 +274,8 @@ body ::tycho::EditSTD::saveText {} {
     }
     append text "\$canvas configure -width $width\n"
 
-    # Set global variables
-    append text "\n### Global variables\n"
-    append text "set create_item(\$this) \{\}\n"
-
+    # Set member variables
+    append text "\n### Member variables\n"
     # I/O port names
     append text "\n### InPort names\n"
     append text "set portNames(in) \"$portNames(in)\"\n"
