@@ -25,7 +25,7 @@
 if (!($?PTOLEMY)) setenv PTOLEMY ~ptolemy
 if (!($?OCTTOOLS)) setenv OCTTOOLS $PTOLEMY
 set path = ( $PTOLEMY/octtools/bin.$ARCH $path )
-set fixedArgs = ( -=T $PTOLEMY/lib/bw_postscript -f interface )
+set fixedArgs = ( -=T $PTOLEMY/lib/colors -f interface )
 
 
 ##
