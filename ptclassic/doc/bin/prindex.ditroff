@@ -3,21 +3,38 @@
 # $Id$
 # Print index for Ptolemy Almagest.
 
-if ($#argv != 1) then
-	echo "usage: $0 index_file"
+set preview = 0
+set printoptions = "-me -P$PRINTER"
+set printcommand = "ditroff"
+set dircmds = ~ptolemy/doc/bin/
+set dirheader = ~ptolemy/doc/headers/
+
+while ($#argv)
+	switch ($argv[1])
+	case -preview:
+		set preview = 1
+		shift
+		breaksw
+	case -*:
+		set printoptions = ($printoptions $argv[1])
+		shift
+		breaksw
+	default:
+		break
+	endsw
+end
+if ($#argv < 1) then
+	echo "usage: $0 [-preview] [troff options] index_file [...]"
 	exit 1
 endif
 
 # On interrupt, remove temporary files
 onintr catch
 
-set dircmds = ~ptolemy/doc/bin/
-set dirheader = ~ptolemy/doc/headers/
-
 # Cull out the interesting entries from the input file, sort them,
 # and then change spaces into |'s so subsequent awk script can
 # do the right thing with them.
-egrep index $1 | \
+egrep index $* | \
 	sort -fd +2 +1.2 -2n | \
 	sed -e 's/ /\|/' -e 's/ /\|/' \
 	> /tmp/ptc$$
@@ -26,9 +43,12 @@ egrep index $1 | \
 awk -f ${dircmds}awk.index /tmp/ptc$$ > /tmp/ptinf$$
 
 # Print it.
-ditroff -me -P$PRINTER ${dirheader}index /tmp/ptinf$$
-# (for previewing)
-#ditroff -me -t -P$PRINTER ${dirheader}index /tmp/ptinf$$ | xditview -
+if ($preview) then
+	$printcommand $printoptions -t ${dirheader}index /tmp/ptinf$$ \
+		| xditview -
+else
+	$printcommand $printoptions ${dirheader}index /tmp/ptinf$$
+endif
 
 /bin/rm /tmp/ptc$$ /tmp/ptinf$$
 exit 0
