@@ -55,10 +55,14 @@ limitation of liability, and disclaimer of warranty provisions.
   go {
     // Add code to synch at beginning of main.
     StringList preSynch;
-    preSynch << "C2V" << rtype << int(pairNumber) << "_go" << " <= '0';\n";
-    preSynch << "wait on " << "C2V" << rtype << int(pairNumber) << "_done" << "'transaction;\n";
-    preSynch << "$ref(output)" << " := " << "C2V" << rtype << int(pairNumber) << "_data;\n";
-  
+    for (int i = 0 ; i < numXfer ; i++) {
+      preSynch << "C2V" << rtype << int(pairNumber) << "_go" << " <= '0';\n";
+      preSynch << "wait on " << "C2V" << rtype << int(pairNumber) << "_done" << "'transaction;\n";
+      preSynch << "$ref(output,";
+      preSynch << -i;
+      preSynch << ")" << " := " << "C2V" << rtype << int(pairNumber) << "_data;\n";
+    }
+    
 //  addCode(preSynch, "preSynch");
     addCode(preSynch);
   }

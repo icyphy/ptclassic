@@ -25,7 +25,11 @@ defstar {
     if (strcmp(input.resolvedType(), "INT") == 0) 
       format = "%d";
     else if (strcmp(input.resolvedType(), "FLOAT") == 0) 
+/*
+  Note: using %f in sscanf() seems to mess up.
       format = "%f";
+*/
+      format = "%lf";
     else
       Error::abortRun(*this, input.resolvedType(), ": type not supported");
 
@@ -34,24 +38,32 @@ defstar {
   }
 
   go {
-    addCode("
+    StringList transfer;
+    for (int i = numXfer-1 ; i >= 0 ; i--) {
+      if (i > 0) transfer << "\n";
+      transfer << "
   /* Go */
   $starSymbol(intptr) = 0;
   $starSymbol(status) = 0;
   if($starSymbol(status) >= 0) {
-");
+";
 
-    StringList oneline = "  (void) sprintf($starSymbol(buffer), \"";
-    oneline << format;
-    oneline << "\", $ref(input));";
-    addCode(oneline);
-    
-    addCode("$starSymbol(status) = write($starSymbol(xmitsock), $starSymbol(buffer), $starSymbol(nbytes));
+      StringList oneline = "    (void) sprintf($starSymbol(buffer), \"";
+      oneline << format;
+      oneline << "\", $ref(input,";
+      oneline << i;
+      oneline << "));";
+      transfer << oneline;
+
+      transfer << "
+    $starSymbol(status) = write($starSymbol(xmitsock), $starSymbol(buffer), $starSymbol(nbytes));
     if($starSymbol(status) < 0) {
       perror($starSymbol(dummy));
     }
   }
-");
+";
+    }
+    addCode(transfer);
   }
 
 }

@@ -55,10 +55,14 @@ limitation of liability, and disclaimer	of warranty provisions.
   go {
     // Add code to synch at end of main.
     StringList postSynch;
-    postSynch << "V2C" << rtype << int(pairNumber) << "_data" << " <= " << "$ref(input)" << ";\n";
-    postSynch << "V2C" << rtype << int(pairNumber) << "_go" << " <= " << "'0';\n";
-    postSynch << "wait on " << "V2C" << rtype << int(pairNumber) << "_done" << "'transaction;\n";
-
+    for (int i = 0 ; i < numXfer ; i++) {
+      postSynch << "V2C" << rtype << int(pairNumber) << "_data" << " <= " << "$ref(input,";
+      postSynch << -i;
+      postSynch << ")" << ";\n";
+      postSynch << "V2C" << rtype << int(pairNumber) << "_go" << " <= " << "'0';\n";
+      postSynch << "wait on " << "V2C" << rtype << int(pairNumber) << "_done" << "'transaction;\n";
+    }
+    
 //  addCode(postSynch, "postSynch");
     addCode(postSynch);
   }
