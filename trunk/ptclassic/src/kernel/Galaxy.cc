@@ -119,6 +119,7 @@ void Galaxy :: initSubblocks() {
 	GalTopBlockIter next(*this);
 	Block *b;
 	while ((b = next++) && !Scheduler::haltRequested()) {
+	    if (!blocksToDelete.blockWithName(b->name()))
 		b->initialize();
 	}
 	if (Scheduler::haltRequested()) return;
