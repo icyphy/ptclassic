@@ -46,6 +46,13 @@ public:
 #endif /* !__GNUG__ || PT_EGCS */
 #else /* hppa */
 #ifdef PT_USE_RAND
+
+#if defined(PT_NT4VC)
+extern "C" {
+#include <stdlib.h>    
+}
+#endif /* PT_NT4VC */
+
 //extern "C" int rand();
 
 // returns a random value between 0 and 1.
@@ -58,7 +65,7 @@ public:
 };
 #else /* PT_USE_RAND */
 
-#if defined(PTNT)
+#if defined(PTNT) && !defined(PT_NT4VC)
 extern "C" {
 #include <stdlib.h>
 #else
