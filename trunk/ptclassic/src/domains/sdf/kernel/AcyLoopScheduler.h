@@ -51,6 +51,8 @@ Kluwer Academic Publishers, 1996
 
 *******************************************************************/
 
+class ostream;
+
 /****
 
 This is a simple integer matrix class designed to just hold things.
@@ -110,6 +112,7 @@ public:
     }
 };
 
+ostream& operator << (ostream& o, const SimpleIntMatrix& a);
 
 /////////////////////////
 // class AcyLoopScheduler //
@@ -171,6 +174,20 @@ public:
 	// A hack to do a pre-pass on all the spliced-in stars
 	int clusterSplicedStars(AcyCluster*);
 	
+	// For debugging; print out various matrices that the scheduler
+	// uses
+
+	// this one prints out the reachability, incidence, and delay matrices
+	void printTopMatrices();
+
+	// this one prints out the matrices used by DPPO
+	void printDPPOMatrices();
+
+	// this one prints out the RPMC and APGAN topSort arrays
+	void printTopSorts();
+
+	// this one prints out the node number corresponding to each star
+	void printStarNumbers();
 protected:
 	// This one actually does the work for displaySchedule()
 	StringList dispNestedSchedules(int depth, int i, int j, int g);
@@ -187,6 +204,9 @@ protected:
 
 	// Create reachMatrix
 	void createReachabilityMatrix(Galaxy& gal);
+
+	// This is used by <code>createReachabilityMatrix</code>
+	int visitSuccessors(Block* s, int flagLoc, int cnt);
 
 	// Called from SDFScheduler::run
 	/* virtual */ void runOnce();
