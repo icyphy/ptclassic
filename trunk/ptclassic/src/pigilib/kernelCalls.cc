@@ -44,7 +44,7 @@ struct TermList {
 // Parameter structs for pigi
 struct ParamStruct {
     const char *name;
-    char *value;
+    const char *value;
 };
 typedef struct ParamStruct ParamType;
 
@@ -93,6 +93,13 @@ KcInstance(char *name, char *ako, ParamListType* pListPtr) {
 				    pListPtr->array[i].value)) return FALSE;
     }
     return TRUE;
+}
+
+// 7/25/90
+// create a new state for the galaxy
+extern "C" boolean
+KcMakeState(char *name, char *type, char *initVal) {
+    return currentGalaxy->addState(name, type, initVal);
 }
 
 // connect
@@ -222,6 +229,14 @@ KcInfo(char* name, char** info)
     }
     *info = savestring((char *)b->printVerbose());
     return (TRUE);
+}
+	
+/* 7/25/90
+   Make multiple ports in a star multiporthole
+ */
+extern "C" boolean
+KcNumPorts (char* starname, char* portname, int numP) {
+    return currentGalaxy->numPorts(starname, portname, numP);
 }
 
 /*
