@@ -69,11 +69,10 @@ WARNINGS =	-Wall -Wcast-qual -Wsynth
 MULTITHREAD =	-D_REENTRANT
 # Define PTSOL2_4 if you are on Solaris2_4
 LOCALFLAGS =    -DPTSOL2_4
-GPPFLAGS =	-g $(MEMLOG) $(WARNINGS) $(OPTIMIZER) $(MULTITHREAD) $(LOCALFLAG
-S)
+# Under gcc-2.7.0, you will need -fno-for-scope for GPPFLAGS
+GPPFLAGS =	-g $(MEMLOG) $(WARNINGS) $(OPTIMIZER) $(MULTITHREAD) $(LOCALFLAGS)
 # If you are not using gcc, then you might have problems with the WARNINGS flag
-CFLAGS =	-g $(MEMLOG) $(WARNINGS) $(OPTIMIZER) $(MULTITHREAD) $(LOCALFLAG
-S)
+CFLAGS =	-g $(MEMLOG) $(WARNINGS) $(OPTIMIZER) $(MULTITHREAD) $(LOCALFLAGS)
 
 #
 # Variables for the linker

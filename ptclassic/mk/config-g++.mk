@@ -41,6 +41,7 @@ OCT_CC =	gcc -fwritable-strings
 
 # Compiler flags
 # -Wsynth is new in g++-2.6.x
+# Under gcc-2.7.0, you will need to add -fno-for-scope to GPPFLAGS
 GPPFLAGS = -g -Wall -Wcast-qual -Wsynth $(MEMLOG)
 CFLAGS = -g
 DEPEND= $(CPLUSPLUS) -MM

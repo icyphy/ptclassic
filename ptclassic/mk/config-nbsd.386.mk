@@ -61,6 +61,7 @@ EXTRA_OPTIMIZER=-O2
 #OPTIMIZER=	-O2 -m486 -fomit-frame-pointer -pipe
 
 WARNINGS =	-Wall -Wcast-qual -Wcast-align
+# Under gcc-2.7.0, you will need -fno-for-scope for GPPFLAGS
 GPPFLAGS =	$(SYSTEMDEF) $(WARNINGS) $(EXTRA_OPTIMIZER) $(OPTIMIZER) $(MEMLOG)
 CFLAGS =	$(SYSTEMDEF) $(WARNINGS) $(EXTRA_OPTIMIZER) $(OPTIMIZER) $(MEMLOG) \
 		-fwritable-strings
