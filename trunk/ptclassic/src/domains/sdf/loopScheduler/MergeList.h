@@ -71,13 +71,16 @@ public:
 	// Constructor with base node and adjacent node arguments.
 	MergeLink(LSNode*, LSNode*, int);
 
+	// Destructor
+	~MergeLink();
+
 	// Try to form an iterated cluster based on this merge link.
 	int formRepeatedCluster(LSGraph &g);
 
 private:
 	// The base  and adjacent node 
-	LSNode *base_node;
-	LSNode *adjacent_node;
+	LSNode* base_node;
+	LSNode* adjacent_node;
 
 	// invocation index of the adjacent node. - tie break criterion.
 	// Among links with same base_inv, the smaller adj_ix takes priority.
@@ -153,7 +156,7 @@ class MergeListIter : public DoubleLinkIter
 {
 public:
 	MergeListIter(const MergeList& l) : DoubleLinkIter(l) {}
-	MergeLink *next() {return (MergeLink*)DoubleLinkIter::nextLink();}
+	MergeLink* next() {return (MergeLink*)DoubleLinkIter::nextLink();}
 	MergeLink* operator++ (POSTFIX_OP) { return next();}
 };
 
