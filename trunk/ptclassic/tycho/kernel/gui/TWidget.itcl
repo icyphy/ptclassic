@@ -76,6 +76,9 @@ class ::tycho::TWidget {
     ###################################################################
     ####                         public procs                      ####
 
+    # If the named object exists, evaluate the arguments.
+    proc evalIfExists {command args} {}
+
     # Get the current contents of the local clipboard.
     proc getClipboard {} {return $clipboard}
 
@@ -272,6 +275,28 @@ body ::tycho::TWidget::raiseWindow {} {
 # type of data being displayed.  In this base class, do nothing.
 #
 body ::tycho::TWidget::seeFragment {point} {
+}
+
+#####################################################################
+#####################################################################
+####                   public procedures                         ####
+
+
+#####################################################################
+#### evalIfExists
+# If the command exists, evaluate the arguments.
+# This is useful for evaluating something in the background where you are
+# not sure that the widget will still exist when Tcl gets around to doing
+# the evaluation.  It should be used, for example, when invoking an object
+# method using "after".  For example, within an object, you can say:
+# <pre>
+#    after idle [code evalIfExists $this methodname]
+# </pre>
+#
+proc ::tycho::TWidget::evalIfExists {command args} {
+    if {[info which -command $command] != {}} {
+        eval $command $args
+    }
 }
 
 #####################################################################
