@@ -82,25 +82,29 @@ Under the X window system and compatible systems
 there are facilities for capturing screen images.
 .IE "screen dumps"
 .IE "printing the screen"
+.IE "color printers"
 These can be used directly with \*(PT.
-However, when a color workstation is used, and the image is ultimately
-going to be printed without color, the effect may not be desirable.
-For this reason, a facility is provided to run pigi without color
-on a color workstation.  The screen images will be made with dark colors on
-a white background, and will print well when converted to black and white.
-To run pigi in this mode, simply do the following:
+However, colors that work well on the screen are not always ideal
+for hardcopy.  For this reason, two sets of alternative colors
+have been devised.  The first works well with color printers.
+The second works well with black and white printers.
+To use the colors for a color printer, run pigi with the environment
+variable "PIGICP" set, as shown below:
+.(c
+setenv PIGICP
+pigi
+.)c
+To get only dark and light colors,
 .(c
 setenv PIGIBW
 pigi
 .)c
-The first command sets an environment variable which tells pigi
-to run in its colorless mode.
 .IE "PIGIBW"
-The second command simply runs pigi.
+.IE "PIGICP"
 Now, the screen capture command can be used effectively.
 For example, under X11R4 or X11R5, 
 the following command will print a window on a
-postscript printer:
+black and white postscript printer:
 .(c
 xwd | xpr -width 4 -portrait -device ps -gray 4 | lpr
 .)c
@@ -112,20 +116,36 @@ Other alternatives include a program called xgrabsc,
 and the document processing system FrameMaker, which can capture
 a region of the screen and import it into a document.
 .IE FrameMaker
-The FrameMaker utility "fmcolor" can be used to reduce the color window
+FrameMaker can also import and print ordinary color X window dumps.
+To have these displayed in color on the screen, the following lines
+should appear in your X Resources file:
+.(c
+Maker.colorImages:      True
+Maker.colorDocs:        True
+.)c
+The FrameMaker utility "fmcolor" can be used to reduce a color window
 dump to a black and white window dump.  This will save space and avoid
 any dithered imitations of color.
+The color window dumps gotten with PIGICP set can be converted to black
+and white window dumps using the following FrameMaker command:
+.(c
+fmcolor -i 90 filein fileout
+.)c
 A useful hint when using such a document editor is to turn off the
 lables in pigi before capturing the image, and then to use the document
 editor itself to annotate the image.  The fonts then will be printer fonts
-rather than screen fonts.  To turn of the labels, execute the Vem
+rather than screen fonts.  To turn off the labels, execute the Vem
 command "layer-display" under the Vem "Options" menu.
 You may want to turn off both labels and colors used for annotations,
 such as "whiteSolid".
 .pp
-To restore color, simply exit pigi, and unset the environment variable:
+To restore normal color, simply exit pigi, and unset the environment variable:
 .(c
 unsetenv PIGIBW
+.)c
+or
+.(c
+unsetenv PIGICP
 .)c
 Next time you run pigi, it will have whatever colors you originally
 specified in your X resources file, or if none, the default colors.
