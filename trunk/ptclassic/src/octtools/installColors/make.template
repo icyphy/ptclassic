@@ -69,7 +69,8 @@ LIBS	= -L$(OCTLIBDIR) -loh$(DBGFLAG) -lvov$(DBGFLAG) \
 	-lerrtrap$(DBGFLAG) -luprintf$(DBGFLAG) -lport$(DBGFLAG)   
 
 $(BINARY): $(OBJS)
-	$(CLINKER) $(LINKFLAGS) $(OBJS) -o $@ $(LIBS) $(CSYSLIBS) 
+	$(CLINKER) $(LINKFLAGS) $(OBJS) -o $@ \
+		$(LIBS) $(X11_LIBSPEC) $(CSYSLIBS) 
 
 DEST = $(OCTTOOLS)/bin.$(PTARCH)/$(BINARY)
 
