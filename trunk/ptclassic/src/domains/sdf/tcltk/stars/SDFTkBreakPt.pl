@@ -48,6 +48,23 @@ use the "Bus create" icons in the HOF functions palette.  Connect
 the bus create icon of your choice to the input of the TkBreakPt star.
 Then connect the inputs to the bus create icon.  The top input is 
 input(1), the next is input(2), etc.
+.pp
+The second parameter, Optional_Script_File is the script to source if the 
+condition evaluates to "true".  If this parameter is left blank (the default)
+then the default script is executed which pauses the run and 
+puts up a message in the Run Control block.  This should be fine for
+most applications of this star.
+.pp
+The Optional_Script_File is sourced from the goTcl_$starID proceedure.  It
+was access to the following variables:
+.br
+$starID() : The $starID associative array.  See the programmer's manual for
+details.
+.br
+input(1), input(2), etc. : The inputs to this star.  See above for the details
+of the numbering.
+.br
+$ptkControlPanel : The current Run Control window.
 } 
 
 	hinclude { "ptk.h" }
@@ -56,6 +73,12 @@ input(1), the next is input(2), etc.
 	        type {string}
 	        default { "$input(1) < 0" }
 	        desc {Condition on which to pause the run}
+	}
+	defstate {
+	        name {Optional_Script_File}
+	        type {string}
+	        default{""}
+	        desc {Script to run instead of the default when the condition is true.  The default script pauses the run.}
 	}
 	setup {
 	    if (output.numberPorts() > 0) {
