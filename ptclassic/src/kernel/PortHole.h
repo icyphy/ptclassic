@@ -70,21 +70,26 @@ public:
         // Determine whether the port is an input or output.
         // For class PortHole, it is unspecified, so both
         // functions return FALSE.
-        virtual int isItInput ();
-        virtual int isItOutput ();
+        virtual int isItInput () const;
+        virtual int isItOutput () const;
 
 	// Determine whether the port is a multiporthole.
-	virtual int isItMulti ();
+	virtual int isItMulti () const;
 
 	// print info on the PortHole
-	StringList printVerbose ();
+	StringList printVerbose () const;
 
 	// virtual function used for new connections.
 	// PortHole uses this one unchanged; MultiPortHole has to create
 	// a new Port.
 	virtual PortHole& newConnection();
 
-	GenericPort& realPort();
+	// Translate aliases, if any.
+	GenericPort& realPort() const {
+		const GenericPort* p = this;
+		while (p->alias) p = alias;
+		return *p;
+	}
 
 	GenericPort& setPort(const char* portName, Block* blk, dataType typ=FLOAT) {
 		setNameParent (portName, blk);
@@ -159,7 +164,7 @@ public:
 	PortHole* far() const { return farSidePort;}
 
         // Print a description of the PortHole
-	StringList printVerbose ();
+	StringList printVerbose () const;
 
 	// set the alias
 	setAlias (PortHole& blockPort) { alias = &blockPort; }
@@ -244,7 +249,7 @@ private:
 
 class InPortHole : public PortHole {
 public:
-	int isItInput(); // return TRUE
+	int isItInput() const; // return TRUE
 };
 
         //////////////////////////////////////////
@@ -253,7 +258,7 @@ public:
 
 class OutPortHole : public PortHole {
 public:
-	int isItOutput(); // {return TRUE;}
+	int isItOutput() const; // {return TRUE;}
 };
 
         //////////////////////////////////////////
@@ -264,12 +269,24 @@ public:
 class PortList : public SequentialList
 {
 public:
-        // Return next PortHole on list
-        PortHole& operator ++ () {return *(PortHole*)next();}
 
         // Add PortHole to list
         void put(PortHole& p) {SequentialList::put(&p);}
 };
+
+        //////////////////////////////////////////
+        // class PortListIter
+        //////////////////////////////////////////
+
+// An iterator for PortLists
+class PortListIter : private ListIter {
+public:
+	PortListIter(const PortList& plist) : ListIter (plist) {}
+	PortHole* next() { return (PortHole*)ListIter::next();}
+	PortHole* operator++() { return next();}
+	ListIter::reset;
+};
+
 
         //////////////////////////////////////////
         // class MultiPortHole
@@ -285,11 +302,12 @@ public:
 
 class MultiPortHole: public GenericPort
 {
+	friend class MPHIter;
 public:
 	void initialize();
 
 	// virtual function to identify multi-ness
-	int isItMulti(); // {return TRUE;}
+	int isItMulti() const; // {return TRUE;}
 
         // Every MultiPortHole must be initialized with the setPort function
         // Arguments are the name and type (see type.h for supported types).
@@ -298,13 +316,7 @@ public:
                           dataType type = FLOAT);       // defaults to FLOAT
  
         // Return the number of physical port currently allocated
-        int numberPorts() {return ports.size();}
-
-        // Return the next port in the list      
-        PortHole& operator () () {return ports++;}
-
-	// Reset the list to the beginning
-	void reset() {ports.reset();}
+        int numberPorts() const {return ports.size();}
 
         // Add a new physical port to the MultiPortHole list
         virtual PortHole& newPort();
@@ -325,7 +337,7 @@ public:
 	operator PortHole (){ return newConnection();}
 
         // Print a description of the MultiPortHole
-	StringList printVerbose ();
+	StringList printVerbose () const;
 
 	// function to set Plasma type of subportholes
 	Plasma* setPlasma(Plasma *useType = NULL);
@@ -351,11 +363,18 @@ protected:
 class MPHList : public SequentialList
 {
 public:
-	// Return next MultiPortHole on list
-        MultiPortHole& operator ++ () {return *(MultiPortHole*)next();}
-
         // Add MultiPortHole to list
         void put(MultiPortHole& p) {SequentialList::put(&p);}
+};
+
+        //////////////////////////////////////////
+        // class MPHIter
+        //////////////////////////////////////////
+
+// Iterator for MultiPortHoles
+class MPHIter : public PortListIter {
+public:
+	MPHIter(const MultiPortHole& mph) : PortListIter (mph.ports) {}
 };
 
 /***********************************************************
