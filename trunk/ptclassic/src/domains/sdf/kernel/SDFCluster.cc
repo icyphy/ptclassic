@@ -788,20 +788,48 @@ ostream& SDFClusterBag::printOn(ostream& o) {
 	return printPorts(o);
 }
 
-// Routine to do a simulated execution of the underlying real stars.
-// This one does a recursion; SDFAtomCluster bottoms out the recursion.
+// The following procedures are used in the propagation of arc
+// counts from outer to inner arcs.
+int SDFClustPort::maxArcCount() {
+	SDFClustPort* p = this;
+	while (p && !p->geo()) p = p->outPtr();
+	if (p) return p->geo()->maxNumParticles();
+	Error::abortRun(*this, "can't find outer geodesic");
+	return 0;
+}
 
-void SDFClusterBag::simRunRealStars() {
-	if (!sched) genSched();
-	SDFSchedIter nextStar(*sched);
-	int nRun = loop();
-	for (int i = 0; i < nRun; i++) {
-		nextStar.reset();
-		SDFCluster* c;
-		while ((c = (SDFCluster*)nextStar++) != 0) {
-			c->simRunRealStars();
+// if I have a geodesic, set its count, else look inside.
+void SDFClustPort::setMaxArcCount(int n) {
+	SDFClustPort* p = this;
+	while (p && !p->geo()) {
+		SDFClustPort* q = p->inPtr();
+		if (q == 0) {
+			p->real().geo()->setMaxArcCount(n);
+			return;
 		}
+		else p = q;
 	}
+	if (p) p->geo()->setMaxArcCount(n);
+	else Error::abortRun(*this, "can't find inner geodesic");
+}
+
+// propagate buffer sizes downward to set sizes of cluster-boundary
+// buffers.
+void SDFClusterBag::fixBufferSizes(int nReps) {
+	// account for looping of this cluster
+	nReps *= loop();
+	// pass down sizes of external buffers.
+	SDFClustPortIter nextPort(*this);
+	SDFClustPort* p;
+	while ((p = nextPort++) != 0) {
+		SDFClustPort* in = p->inPtr();
+		int n = p->maxArcCount();
+		in->setMaxArcCount(n);
+	}
+	SDFClusterBagIter nextClust(*this);
+	SDFCluster* c;
+	while ((c = nextClust++) != 0)
+		c->fixBufferSizes(nReps);
 }
 
 int SDFClusterBag::genSched() {
@@ -809,8 +837,16 @@ int SDFClusterBag::genSched() {
 	LOG_NEW; sched = new SDFBagScheduler;
 	sched->setGalaxy(*gal);
 	sched->setup();
-	return !Scheduler::haltRequested();
+	if (Scheduler::haltRequested()) return FALSE;
+	// generate sub-schedules.
+	SDFClusterBagIter nextClust(*this);
+	SDFCluster* c;
+	while ((c = nextClust++) != 0) {
+		if (!c->genSched()) return FALSE;
+	}
+	return TRUE;
 }
+
 	
 // indent by depth tabs.
 static const char* tab(int depth) {
@@ -974,27 +1010,37 @@ int SDFAtomCluster::run() {
 	return TRUE;
 }
 
-// simulate the execution of the atomic cluster, for schedule generation.
-// We pass through the call of simRunStar to the real star.
-
-// Actually, rather than doing simRunStar we just do the incCounts and
-// decCounts on the portholes.  This should be done by providing a
-// faster DataFlowStar method that assumes we are ready to run and does
-// the same.
-
-void SDFAtomCluster::simRunRealStars() {
-	int nRun = loop();
-	DFStarPortIter nextp(pStar);
-	for (int i = 0; i < nRun; i++) {
-		nextp.reset();
-		DFPortHole* port;
-		while ((port = nextp++) != 0) {
-			// on wormhole bound, skip
-			if (port->atBoundary()) continue;
-			if (port->isItInput())
-				port->decCount(port->numXfer());
-			else
-				port->incCount(port->numXfer());
+// set the buffer sizes of the actual buffers -- we can pass down all
+// but the self-loops.
+// A self-loop buffer size is just numInitDelays * numXfer.
+// For a wormhole boundary, the size is nReps * numXfer (the
+// total # moved throughout the execution of the schedule).
+void SDFAtomCluster::fixBufferSizes(int nReps) {
+	// # times real star is executed
+	nReps *= loop();
+	SDFClustPortIter nextPort(*this);
+	SDFClustPort *cp;
+	while ((cp = nextPort++) != 0) {
+		DFPortHole& rp = cp->real();
+		int sz = cp->maxArcCount();
+		rp.setMaxArcCount(sz);
+	}
+	// set repetitions
+	pStar.repetitions = Fraction(nReps,1);
+	// may need to set self-loops separately
+	if (numberPorts() == pStar.numberPorts()) return;
+	// there are additional ports (selfloops, wormholes); set their sizes
+	DFStarPortIter nextReal(pStar);
+	DFPortHole *dp;
+	while ((dp = nextReal++) != 0) {
+		if (dp->atBoundary()) {
+			int siz = dp->numXfer() * nReps;
+			dp->setMaxArcCount(siz);
+		}
+		if (dp->far()->parent() == &pStar) {
+			// self-loop! bufsize = #init + #write
+			int siz = dp->numInitDelays() + dp->numXfer();
+			dp->setMaxArcCount(siz);
 		}
 	}
 }
@@ -1074,10 +1120,9 @@ int SDFClustSched::computeSchedule (Galaxy& g) {
 	repetitions();
 // generate schedule
 	if (SDFScheduler::computeSchedule(*cgal)) {
-		if (logstrm) {
-			*logstrm << "Doing simulated run to set geodesics\n";
-			simRunRealStars();
-		}
+		if (logstrm)
+			*logstrm << "Generate subschedules, propagate buffer sizes\n";
+		cgal->genSubScheds();
 		if (logstrm) {
 			*logstrm << "Schedule:\n" << displaySchedule();
 			LOG_DEL; delete logstrm;
@@ -1087,14 +1132,15 @@ int SDFClustSched::computeSchedule (Galaxy& g) {
 	else return FALSE;
 }
 
-// simulate execution of the real stars, so geodesics will be set
-// properly for code-generation.
-void SDFBagScheduler::simRunRealStars() {
-	SDFSchedIter next(mySchedule);
+// generate sub-schedules and fix buffer sizes.
+void SDFClusterGal::genSubScheds() {
+	SDFClusterGalIter nextClust(*this);
 	SDFCluster* c;
-	while ((c = (SDFCluster*)next++) != 0) {
-		c->simRunRealStars();
-	}
+	while ((c = nextClust++) != 0)
+		c->genSched();
+	nextClust.reset();
+	while ((c = nextClust++) != 0)
+		c->fixBufferSizes(c->reps());
 }
 
 StringList SDFBagScheduler::displaySchedule(int depth) {
