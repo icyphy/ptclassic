@@ -26,11 +26,14 @@ the last received control input.
 		type {=input}
 	}
 	go {
+	   if (input.dataNew) {
 	   	completionTime = arrivalTime;
 		Particle& pp = input.get();
-		if(int(control%0))
+		int c = int(control%0);
+		if(c)
            	   true.put(completionTime) = pp;
 		else
            	   false.put(completionTime) = pp;
+	   }
 	}
 }
