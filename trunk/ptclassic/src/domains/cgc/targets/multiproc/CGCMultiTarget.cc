@@ -56,7 +56,9 @@ extern "C" {
 	char* inet_ntoa(struct in_addr);
 }
 
-pt_ofstream feedback("cgcMulti_log");
+// stream for logging information.  It is opened by the setup method.
+
+static pt_ofstream feedback;
 
 // -----------------------------------------------------------------------------	
 CGCMultiTarget::CGCMultiTarget(const char* name,const char* starclass,
@@ -109,7 +111,7 @@ DataFlowStar* CGCMultiTarget :: createCollect() {
 }
 
 void CGCMultiTarget :: pairSendReceive(DataFlowStar* s, DataFlowStar* r) {
-	feedback << "\tpairing" << s->fullName() << " --> " << r->fullName()
+	feedback << "\tpairing " << s->fullName() << " --> " << r->fullName()
 		<< "\n"; feedback.flush();
 	CGCUnixSend* cs = (CGCUnixSend*) s;
 	CGCUnixReceive* cr = (CGCUnixReceive*) r;
@@ -163,6 +165,11 @@ int CGCMultiTarget :: machineId(Target* t) {
 void CGCMultiTarget :: setup() {
 	currentPort = int(portNumber);
 
+	// all runs will append to the same file.
+	// FIXME: should not be done this way.
+	if (!feedback) feedback.open("cgcMulti_log");
+	if (!feedback) return;
+
 	// machine idetifications
 	if (identifyMachines() == FALSE) return;
 
@@ -173,6 +180,7 @@ void CGCMultiTarget :: setup() {
 		CGCTarget* t = (CGCTarget*) child(i);
 		t->setHostName(machineInfo[i].nm);
 	}
+	feedback.flush();
 }
 
 int CGCMultiTarget :: identifyMachines() {
@@ -309,7 +317,7 @@ int CGCMultiTarget :: sendWormData(PortHole& p) {
 ISA_FUNC(CGCMultiTarget,CGMultiTarget);
 
 static CGCMultiTarget targ("unixMulti_C","CGCStar",
-"A test targets for parallel c-code generation");
+"A test target for parallel C code generation");
 
 static KnownTarget entry(targ,"unixMulti_C");
 
