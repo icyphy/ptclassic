@@ -159,6 +159,7 @@ LSGraph :: ~LSGraph() {
 
 	while ((n = (LSCluster*) nextCluster++) != 0) {
 		n->myMaster()->deleteInvocChain();
+		LOG_DEL; delete n->myMaster();
 		LOG_DEL; delete n;
 	}
 }
