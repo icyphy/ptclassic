@@ -491,6 +491,8 @@ ParamListType *pListPtr;
     ParamListType tempList = {0, 0};
 
     ERR_IF1(!GetDefaultParams(instPtr, pListPtr));
+
+    /* Don't free prop with FreeOctMembers: contents.prop.name is static */
     prop.contents.prop.name = "params";
 
     /* If no parameters: use default list */
@@ -499,10 +501,9 @@ ParamListType *pListPtr;
 	return(TRUE);
     }
     if (!PStrToPList(prop.contents.prop.value.string, &tempList)) {
+	free(prop.contents.prop.value.string);
 	return(FALSE);
     }
-
-    /* Don't free prop with FreeOctMembers: prop.contents.prop.name is static */
     free(prop.contents.prop.value.string);
 
     /* Do not free tempList: its pointers will be copied to pListPtr */
@@ -530,6 +531,8 @@ ParamListType *pListPtr;
     ParamListType tempList = {0, 0};
 
     ERR_IF1(!KcGetTargetParams(targName, pListPtr));
+
+    /* Don't free prop with FreeOctMembers: contents.prop.name is static */
     prop.contents.prop.name = "targetparams";
 
     /* If no parameters, return default list */
@@ -537,10 +540,9 @@ ParamListType *pListPtr;
 	return(TRUE);
     }
     if (!PStrToPList(prop.contents.prop.value.string, &tempList)) {
+	free(prop.contents.prop.value.string);
 	return(FALSE);
     }
-
-    /* Don't free prop with FreeOctMembers: prop.contents.prop.name is static */
     free(prop.contents.prop.value.string);
 
     /* Do not free tempList: its pointers will be copied to pListPtr */
