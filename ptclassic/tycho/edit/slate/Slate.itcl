@@ -187,13 +187,13 @@ class ::tycho::Slate {
     method move {tag xAmount yAmount}
 
     # Start a move interaction sequence
-    method moveclick {id x y args}
+    method moveclick {tag x y args}
 
     # Continue a move interaction sequence
-    method movedrag {id x y}
+    method movedrag {tag x y}
 
     # Terminate a move interaction sequence
-    method moverelease {id}
+    method moverelease {tag}
 
     # Move to an absolute location
     method moveto {tag x y aspect args}
@@ -700,6 +700,9 @@ body ::tycho::Slate::move {tag xAmount yAmount} {
 
     # Move the highlights
     $canvas move highlight.$tag $xAmount $yAmount
+
+    # Move the graples
+    $canvas move grapple.$tag $xAmount $yAmount
 }
 
 #######################################################################
@@ -711,8 +714,8 @@ body ::tycho::Slate::move {tag xAmount yAmount} {
 # the behavior of items, such as *-ghost*, which says that an
 # item is to be moved or reshaped using a "ghost" outline.
 #
-body ::tycho::Slate::moveclick {id x y args} {
-    eval [list ::tycho::Shape::_moveclick $id $canvas $this $x $y] $args
+body ::tycho::Slate::moveclick {tag x y args} {
+    eval [list ::tycho::Shape::_moveclick $tag $canvas $this $x $y] $args
 }
 
 #######################################################################
@@ -722,8 +725,8 @@ body ::tycho::Slate::moveclick {id x y args} {
 # (_x_, _y_) as the new cursor position. There are no additional
 # arguments supplied.
 #
-body ::tycho::Slate::movedrag {id x y} {
-    ::tycho::Shape::_movedrag $id $canvas $this $x $y
+body ::tycho::Slate::movedrag {tag x y} {
+    ::tycho::Shape::_movedrag $tag $canvas $this $x $y
 }
 
 #######################################################################
@@ -731,8 +734,8 @@ body ::tycho::Slate::movedrag {id x y} {
 #
 # Terminate the interaction sequence.
 #
-body ::tycho::Slate::moverelease {id} {
-    ::tycho::Shape::_moverelease $id $canvas $this
+body ::tycho::Slate::moverelease {tag} {
+    ::tycho::Shape::_moverelease $tag $canvas $this
 }
 
 #######################################################################
@@ -1213,7 +1216,7 @@ body ::tycho::Slate::shape* {tag args} {
 # Note that this may not always behave sensibly.
 # </ul>
 #
-# (Note that many calls to shapcall{} include an x and y coordinate
+# (Note that many calls to shapecall{} include an x and y coordinate
 # as the first of the optional args. This is fine, and they will be
 # passed onto the procedure in the correct shape class. However,
 # there must always be an even number of arguments.)
