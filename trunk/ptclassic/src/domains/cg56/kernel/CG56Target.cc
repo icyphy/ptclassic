@@ -89,8 +89,7 @@ int CG56Target :: compileCode() {
     assembleCmds << assemblerOptions << " " << filePrefix;
     resetImplementationCost();
     int valid = !systemCall(assembleCmds, "Errors in assembly", targetHost);
-    if (valid && int(reportMemoryUsage)) {
-	computeImplementationCost();
+    if (valid && int(reportMemoryUsage) && computeImplementationCost() ) {
 	Error::message(*this, printImplementationCost());
     }
     return valid;
