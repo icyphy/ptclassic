@@ -28,12 +28,12 @@ Particle& IntSample :: operator = (const Particle& p)
 	if(compareType(p)) {
 		// Types are compatible, so we can copy
 		data = ((IntSample&)p).data;
-		return *this;
 		}
 	else
 		errorHandler.error(
 		"Particle: attempt to assign incompatible Particle types"
 			);
+	return *this;
 }
 
 IntSample :: operator StringList ()
@@ -48,12 +48,12 @@ Particle& FloatSample :: operator = (const Particle& p)
         if(compareType(p)) {
                 // Types are compatible, so we can copy
                 data = ((FloatSample&)p).data;
-                return *this;
                 }
         else
                 errorHandler.error(
                 "Particle: attempt to assign incompatible Particle types"
                         );
+	return *this;
 }
 
 FloatSample :: operator StringList ()
@@ -89,6 +89,7 @@ Particle* Plasma :: get()
 				errorHandler.error(
 				"Plasma: Unsupported Particle type requested"
 				);
+				p = NULL;
 			}
         else {
 		// need the cast to avoid a warning
