@@ -69,6 +69,15 @@ class ::tycho::EditGraph {
     # Call the model
     method model {method args}
 
+    # Start creating a new edge
+    method newclick {item x y}
+
+    # Continue move the end of the new edge
+    method newdrag {item x y}
+
+    # Stop moving a new edge
+    method newrelease {x y}
+
     # Handle change notification from the graph layout model
     method notify {method args}
 
@@ -117,6 +126,9 @@ class ::tycho::EditGraph {
     # Stop moving an item
     protected method _moverelease {tag x y}
 
+    # Add a new port to a vertex
+    protected method _portin {context name coords args}
+
     # Reshape an item
     protected method _reshape {name x y args}
 
@@ -150,7 +162,16 @@ class ::tycho::EditGraph {
     # The mapping from item IDs to vertex and edge names
     protected variable _itemname
 
-    #################################################################
+    # The interactor to connect things around
+    protected variable follower
+
+    # The interactor to connect edges
+    protected variable dropper
+
+    # Storage for temporary variables
+    protected variable _scratch
+
+  #################################################################
     ####                   private methods                       ####
 
 }
@@ -243,7 +264,17 @@ body ::tycho::EditGraph::constructor {args} {
 	    -deselectprefix "$this deselect" \
 	    -selectprefix "$this select"
 
-    # Try this:
+    # Create a DragDropper to join terminals
+    set dropper [$slate interactor DragDropper]
+    $dropper bind output
+    $dropper configure \
+	    -halo 4 \
+	    -targettags input \
+	    -activatecommand "$this newclick %1 %2 %3" \
+	    -dragcommand "$this newdrag %1 %2 %3" \
+	    -deactivatecommand "$this newrelease %2 %3"
+
+    # Is this needed?
     $slate configure -exportselection 0
 }
 
@@ -300,6 +331,75 @@ body ::tycho::EditGraph::model {method args} {
 }
 
 ########################################################################
+#### newclick
+#
+# Start creating a new edge. Create the edge item and remember
+# it.
+#
+body ::tycho::EditGraph::newclick {item x y} {
+    # Create the connection line
+    set coords [$slate aspect $item terminal]
+    set _scratch(line) [eval $slate create SmartLine $coords $x $y]
+
+    # Set the directions of the line
+    set dir [eval ::tycho::Shape::compassFromVector \
+	    [$slate itemcget $item -direction]]
+    $slate itemconfigure $_scratch(line) -start $dir -end $dir
+    set _scratch(dir) $dir
+
+    # Remember the source item
+    set _scratch(source) $item
+}
+
+########################################################################
+#### newdrag
+#
+# Move the end of the new edge. If the _item_ argument is null,
+# then we are not over a suitable terminal item, so just move the
+# end of the line. If _item_ is not null, then we are over
+# an input terminal, so move the end of the line to the right
+# connection point.
+#
+body ::tycho::EditGraph::newdrag {item x y} {
+    if { $item == "" } {
+	# Just move end point
+	$slate reshapeto $_scratch(line) $x $y end
+    } else {
+	# Move end point to terminal connection point
+	set coords [$slate aspect $item terminal]
+	eval $slate reshapeto $_scratch(line) $coords end
+
+	# If the line direction does not match the terminal
+	# direction, change the line
+	set dir [eval ::tycho::Shape::compassFromVector \
+	    [$slate itemcget $item -direction]]
+	set dir [::tycho::Shape::compass $dir rev]
+
+	if { $dir != $_scratch(dir) } {
+	    $slate itemconfigure $_scratch(line) -end $dir
+	    set _scratch(dir) $dir
+	}
+    }
+    # Remember the target item for newrelease{}
+    set _scratch(destination) $item
+}
+
+########################################################################
+#### newrelease
+#
+# Release the item. If we are currently over a target input terminal,
+# make a conneciton in the graph. If not, just delete the line,
+# since connection failed.
+#
+body ::tycho::EditGraph::newrelease {x y} {
+    if { $_scratch(destination) == "" } {
+	$slate delete $_scratch(line)
+    } else {
+	puts "Creating edge from $_scratch(source) to $_scratch(destination)"
+    }
+}
+
+########################################################################
 #### notify
 #
 body ::tycho::EditGraph::notify {method args} {
@@ -333,7 +433,7 @@ body ::tycho::EditGraph::updateLayout {} {
 }
 
 ########################################################################
-#### vertexclick
+#### vertex
 #
 body ::tycho::EditGraph::vertex {name x y} {
     # Add a vertex to the graph
@@ -352,19 +452,22 @@ body ::tycho::EditGraph::vertex {name x y} {
 		-intype {Terminal -type input -style blob -fill red -tags input} \
 		-outtype {Terminal -type output -style doublearrow -fill blue -tags output}
     } elseif { $name == "bar" } {
-	$this model publish vertex bar [list IconFrame $x $y] \
-		-inputs 2 \
-		-outputs 1 \
-		-text Bar \
-		-color lightsteelblue \
-		-tags vertex \
-		-intype {Terminal -type input} \
-		-outtype {Terminal -type output -fill green2}
+	$this model publish vertex bar [list IconFrame $x $y] {
+	    -inputs 2
+	    -outputs 1
+	    -text Bar
+	    -color lightsteelblue
+	    -tags vertex
+	    port in0 {Terminal 0 25} -type input
+	    port in1 {Terminal 0 75} -type input
+	    port out {Terminal 100 50} -type output -fill green2
+	}
+#	$this model publish portin bar in0 {Terminal 0 25} -type input -fill green2
     } else {
         $this model publish vertex baz [list IconOval $x $y] \
                 -inputs {0 50 50 0} \
                 -outputs 1 \
-                -fill green \
+                -fill white \
                 -graphics {line 20 50 80 50 -width 4; \
                     line 50 20 50 80 -width 4} \
                 -tags vertex \
@@ -480,6 +583,25 @@ body ::tycho::EditGraph::_moverelease {tag x y} {
 }
 
 ########################################################################
+#### _portin
+#
+# Add a new port to the view. This method must be called only
+# by the model.
+#
+body ::tycho::EditGraph::_portin {context name spec args} {
+puts "EditGraph::portin: $context $name $spec $args"
+
+    set type [lindex $spec 0]
+    set x [lindex $spec 1]
+    set y [lindex $spec 2]
+    set parent $_itemID($context)
+
+    set id [eval $slate createrootchild $parent $type $x $y $args -name $name]
+    set _itemID($name) $id
+    set _itemname($id) $name
+}
+
+########################################################################
 #### _reshape
 #
 body ::tycho::EditGraph::_reshape {name x y args} {
@@ -532,7 +654,9 @@ body ::tycho::EditGraph::_selectionclear {foo} {
 # by the model.
 #
 body ::tycho::EditGraph::_vertex {name spec args} {
-    set id [eval $slate create $spec $args]
+    puts "EditGraph::_vertex $name $spec $args"
+
+    set id [eval $slate create $spec $args -name $name]
     set _itemID($name) $id
     set _itemname($id) $name
 }
