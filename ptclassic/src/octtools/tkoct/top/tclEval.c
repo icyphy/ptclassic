@@ -222,7 +222,7 @@ int topTclMsgEval( Tcl_Interp *ip, char *source, char *cmd) {
     if ( r != TCL_OK ) {
 	topWarnMsg("%s: TclEval: Error %d: %s", source,
 	  r, ip->result ? ip->result : "???");
-    } else if ( ip->result && ip->result[0] != NULL) {
+    } else if ( ip->result && ip->result[0] != (char)NULL) {
 	TOP_DBG(("%s: TclEval: %s", source, ip->result));
     } else {
 	TOP_DBG(("%s: TclEval: Ok", source));
