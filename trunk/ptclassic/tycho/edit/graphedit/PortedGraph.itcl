@@ -525,11 +525,10 @@ body ::tycho::KeyedDigraph::subgraphEdges {args} {
 #
 body ::tycho::KeyedDigraph::subgraphInputs {args} {
     set result {}
-    set vertices [array names _vertices]
     foreach v $args {
         foreach quad [array names _info [list edge * * [list * * $v *]]] {
             set edge [lindex $quad 3]
-            if { [lsearch -exact $vertices [lindex $edge 0]] < 0 } {
+            if { [lsearch -exact $args [lindex $edge 0]] < 0 } {
                 lappend result $edge
             }
         }
@@ -547,11 +546,10 @@ body ::tycho::KeyedDigraph::subgraphInputs {args} {
 #
 body ::tycho::KeyedDigraph::subgraphOutputs {args} {
     set result {}
-    set vertices [array names _vertices]
     foreach v $args {
         foreach quad [array names _info [list edge * * [list $v * * *]]] {
             set edge [lindex $quad 3]
-            if { [lsearch -exact $vertices [lindex $edge 2]] < 0 } {
+            if { [lsearch -exact $args [lindex $edge 2]] < 0 } {
                 lappend result $edge
             }
         }
