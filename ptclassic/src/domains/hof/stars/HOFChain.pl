@@ -13,8 +13,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	location { HOF main library }
 	desc {
 Create one or more instances of the named block connected in a chain.
-This is implemented by replacing the
-.c Chain
+This is implemented by replacing the <tt>Chain</tt>
 star with instances of the named blocks at preinitialization time.
 The replacement block(s) are connected as specified by
 <i>input_map</i>, <i>internal_map</i>, and <i>output_map</i>.
@@ -30,12 +29,13 @@ documentation for background information.
 <h3>Number of replacement blocks</h3>
 <p>
 The star is replaced by one or more instances of the block with name
-given by <i>blockname</i> at setup time, before the scheduler is invoked.
+given by <i>blockname</i> at preinitialization time,
+before the scheduler is invoked.
 The number of instances of the replacement block is given by the
 <i>chain_length</i> parameter.
 If the named block is not on the knownlist (e.g., it is not a built-in block),
 then the <i>where_defined</i> parameter is taken to be the full path name and
-filename of facet that should be compiled to define the block.
+filename of the facet that should be compiled to define the block.
 This path name may (and probably should) begin with the environment
 variable $PTOLEMY or ~username.
 <h3>Connections</h3>
@@ -56,9 +56,6 @@ for the replacement blocks.
 The syntax is the same as in the
 <tt>Map</tt>
 star.
-<h3>A note about data types</h3>
-<p>
-The output data type is inherited from the input data type.
 	}
 	inmulti {
 		name {input}

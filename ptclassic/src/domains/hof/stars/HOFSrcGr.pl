@@ -6,7 +6,7 @@ defstar {
 Create one or more instances of the named block to produce the
 required number of output stream(s).
 This is implemented by replacing the SrcGr star with the example block
-at setup time.
+at preinitialization time.
 The replacement block(s) are connected as illustrated by the example
 block that is connected.
 Their parameters are determined by "parameter_map".
