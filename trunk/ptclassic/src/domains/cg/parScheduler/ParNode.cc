@@ -165,7 +165,7 @@ void ParNode::copyAncDesc(ParGraph* g, int flag) {
 }
 
 // clone a star
-DataFlowStar* ParNode :: copyStar(CGTarget* t, int pid, int) {
+DataFlowStar* ParNode :: copyStar(CGTarget* t, int /*pid*/, int) {
 	DataFlowStar* org = myMaster();
 	DataFlowStar* newS;
                  
