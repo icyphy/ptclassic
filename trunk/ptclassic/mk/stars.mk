@@ -381,6 +381,7 @@ ifdef NOWAM
 		CUSTOM_DIRS += $(CGCDIR)/targets/NOWam/NOWam \
 			$(CGCDIR)/targets/NOWam/libudpam
 		CGC = 1
+		CGPAR = 1
 		ifeq ($(USE_SHARED_LIBS),yes) 
 			LIBS += -lNOWam
 			LIBFILES += $(LIBDIR)/libNOWam.$(LIBSUFFIX)
