@@ -68,6 +68,9 @@ public:
 
 	// constructor
 	CGCDomain() : Domain("CGC") {}
+
+	// require CGCTarget
+	const char* requiredTarget() { return "CGCTarget";}
 };
 
 // declare a prototype
