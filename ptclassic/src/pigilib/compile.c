@@ -407,12 +407,13 @@ octObject *facetPtr;
 	    ptkOctObj2Handle(&inst, instanceHandle);
 	    ptkOctObj2Handle(facetPtr, facetHandle);
 	    parentname = BaseName(facetPtr->contents.facet.cell);
-	    Tcl_VarEval(ptkInterp, "ptkProcessPragmas ",
-			facetHandle, " ",
-			parentname, " ",
-			instanceHandle, " ",
-			name, " ",
-			(char*)NULL);
+	    if (Tcl_VarEval(ptkInterp, "ptkProcessPragmas ",
+			    facetHandle, " ",
+			    parentname, " ",
+			    instanceHandle, " ",
+			    name, " ",
+			    (char*)NULL) == TCL_OK)
+	      KcLog(ptkInterp->result);
 	    free(name);
 	}
 	FreeFlatPList(&pList);
