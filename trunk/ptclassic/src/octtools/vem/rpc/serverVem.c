@@ -1265,7 +1265,7 @@ lsList argList;
     RPCSpot spot;
     lsList cmdList;
 
-    if (RPCApplication[application].state == RPC_BUSY) {
+    if (RPCApplication[application].state != RPC_IDLE) {
 /* fprintf(stderr, "aborting out of user function since vem is busy\n"); */
 	vemMessage("Something is already running, wait awhile\n",
 		   MSG_NOLOG|MSG_DISP);
@@ -1310,22 +1310,87 @@ STREAM sendStream;
 {
     extern octStatus octDelete();
 
-    RPCApplication[application].state = RPC_IDLE;
+    if (RPCApplication[application].state > 0)
+	RPCApplication[application].state--;
+
+    if (RPCApplication[application].state == RPC_IDLE) {
 /* fprintf(stderr, "going idle (function complete)\n"); */
 
-    /* process all outstanding queued regions */
-    wnQuickFlush();
+	/* process all outstanding queued regions */
+	wnQuickFlush();
 
-    /* delete all cloned bags */
-    lsDestroy(RPCApplication[application].clonedBags, (void (*)()) octDelete);
+	/* delete all cloned bags */
+	lsDestroy(RPCApplication[application].clonedBags, (void (*)()) octDelete);
 
-    /* XXXXX */
+	/* XXXXX */
 #ifdef notdef
-    vemRemoteFunctionComplete(application);
+	vemRemoteFunctionComplete(application);
 #endif /* notdef */
+    }
 
     RPCASSERT(RPCSendLong((long) 0, sendStream), RPC_ERROR);
 /*    RPCFLUSH(sendStream, RPC_ERROR); */
+
+    return RPC_OK;
+}
+
+
+/* RPCVemLock: new function added by tgl 11/18/97.
+ * This function allows the application to mark itself busy or unbusy;
+ * with suitable programming in the application, protocol errors can be
+ * prevented or at least minimized.
+ * VemLock takes a single "long" argument, which is a signed delta to be
+ * applied to the state.  Thus, +1 locks, -1 unlocks, 0 can be used as
+ * a probe.  The state cannot be decremented below 0, but it can be
+ * incremented indefinitely, allowing nested locks.
+ * The response is RPC_LOCK_RESPONSE_FUNCTION followed by a single "long"
+ * containing the new state.
+ * After sending the lock command, the application should receive and
+ * execute Vem commands until it gets the lock response command.  This
+ * approach is necessary in case Vem tries to send a command to the app
+ * at about the same time the app is trying to lock Vem.
+ */
+
+rpcStatus
+RPCVemLock(application, receiveStream, sendStream)
+int application;
+STREAM receiveStream, sendStream;
+{
+    int oldstate = RPCApplication[application].state;
+    int newstate = oldstate;
+    long delta;
+
+    RPCASSERT(RPCReceiveLong(&delta, receiveStream), RPC_ERROR);
+
+    newstate += (int) delta;
+    if (newstate < 0)
+      newstate = 0;
+    RPCApplication[application].state = newstate;
+
+    if (newstate > 0 && oldstate <= 0) {
+      /* fprintf(stderr, "going busy (first lock)\n"); */
+      /* create a cloned bag list.
+       * we do this to make sure that this kind of lock and unlock works
+       * just like the regular kind.
+       */
+      RPCApplication[application].clonedBags = lsCreate();
+    }
+
+    if (newstate == 0 && oldstate > 0) {
+      /* fprintf(stderr, "going idle (last unlock)\n"); */
+      extern octStatus octDelete();
+      /* process all outstanding queued regions */
+      wnQuickFlush();
+      /* delete all cloned bags */
+      lsDestroy(RPCApplication[application].clonedBags, (void (*)()) octDelete);
+      /* XXXXX */
+#ifdef notdef
+      vemRemoteFunctionComplete(application);
+#endif /* notdef */
+    }
+
+    RPCASSERT(RPCSendLong((long) RPC_LOCK_RESPONSE_FUNCTION, sendStream), RPC_ERROR);
+    RPCASSERT(RPCSendLong((long) newstate, sendStream), RPC_ERROR);
 
     return RPC_OK;
 }
@@ -1584,7 +1649,7 @@ octObject *cl;
     int state = RPCApplication[app].state;
     FILE *stream = RPCApplication[app].SendStream;
 
-    if (state == RPC_BUSY) {
+    if (state != RPC_IDLE) {
 /* fprintf(stderr, "aborting out of demon function since vem is busy\n"); */
 	return RPC_ERROR;
     }
@@ -1799,6 +1864,10 @@ long functionNumber;
 
 	case VEM_COMPLETE_FUNCTION:
 	    status = RPCVemRemoteFunctionComplete(application, sendStream);
+	    break;
+
+	case VEM_LOCKING_FUNCTION:
+	    status = RPCVemLock(application, receiveStream, sendStream);
 	    break;
 	    
         case VU_FIND_SPOT_FUNCTION:
