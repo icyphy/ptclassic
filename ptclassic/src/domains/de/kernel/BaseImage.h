@@ -81,10 +81,11 @@ public:
 
 	virtual ~BaseImage() { ; }
 
-	inline int retWidth()	const { return(width); }
-	inline int retHeight()	const { return(height); }
-	inline int retSize()	const { return(size); }
-	inline int retId()		const { return(frameId); }
+	inline int retWidth()		const { return(width); }
+	inline int retHeight()		const { return(height); }
+	inline int retFullSize()	const { return(fullSize); }
+	inline int retSize()		const { return(size); }
+	inline int retId()			const { return(frameId); }
 
 	inline int operator==(const BaseImage& a) const
 			{ return (frameId == a.frameId); }
