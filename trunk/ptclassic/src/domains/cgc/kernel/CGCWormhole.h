@@ -8,6 +8,8 @@
 #include "StringList.h"
 #include "EventHorizon.h"
 #include "CGCPortHole.h"
+#include "CGWormBase.h"
+#include "CGCStar.h"
 
 /*******************************************************************
  SCCS Version identification :
@@ -44,6 +46,47 @@ ENHANCEMENTS, OR MODIFICATIONS.
         //////////////////////////////////////////
         // class CGCtoUniversal
         //////////////////////////////////////////
+
+class CGCWormhole : public CGWormBase, public CGCStar {
+
+public:
+	// Constructor
+	CGCWormhole(Galaxy& g, Target* t = 0);
+	~CGCWormhole();
+
+	// return my scheduler
+	Scheduler* scheduler() const { return myTarget()->scheduler() ;}
+
+	// execution time which is the average of the workload inside
+	// the wormhole with 1 processor.
+	int myExecTime() { return execTime; }
+
+	// print methods
+	StringList print(int verbose = 0) const {
+		return Wormhole::print(verbose);
+	}
+	
+	// clone -- allows interpreter/pigi to make copies
+	Block* clone() const;
+
+	// identify myself as a wormhole
+	int isItWormhole() const { return TRUE;}
+
+	// use statelist for inner galaxy for stateWithName
+	State* stateWithName (const char* name) {
+		return gal.stateWithName(name);
+	}
+
+	// state initialize
+	void initState() { gal.initState() ;}
+
+	// FIXME: what should this do?
+	double getStopTime() { return 0.0;}
+
+	// return myself
+        /*virtual*/ Wormhole* asWormhole();
+
+};
 
 // Input Boundary of ??inCGC_Wormhole
 class CGCtoUniversal : public ToEventHorizon, public InCGCPort
