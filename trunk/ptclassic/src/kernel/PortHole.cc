@@ -1,3 +1,4 @@
+static const char file_id[] = "Connect.cc";
 #ifdef __GNUG__
 #pragma implementation
 #endif
@@ -38,7 +39,7 @@ CircularBuffer :: CircularBuffer(int i)
 {
         dimen = i;
         current = 0;
-        buffer = new Particle*[dimen];
+        LOG_NEW; buffer = new Particle*[dimen];
 	for(int j = dimen-1; j>=0; j--)
 		buffer[j] = NULL;
 }
@@ -50,7 +51,7 @@ CircularBuffer :: ~CircularBuffer()
 		Particle* q = *next();
 		if (q) q->die();
 	}
-        delete buffer;
+        LOG_DEL; delete buffer;
 }
 
 // Find the position in the buffer i in the past relative to current
@@ -164,8 +165,9 @@ void PortHole :: disconnect(int delGeo) {
 		myGeodesic->disconnect(*this);
 
 		// free up geodesic if it is not persistent
-		if (!myGeodesic->isItPersistent())
-			delete myGeodesic;
+		if (!myGeodesic->isItPersistent()) {
+			LOG_DEL; delete myGeodesic;
+		}
 	}
 	myGeodesic = 0;
 	return;
@@ -179,7 +181,7 @@ PortHole :: PortHole () : myGeodesic(0), farSidePort(0), myPlasma(0),
 // Porthole destructor.
 PortHole :: ~PortHole() {
 	disconnect();
-	delete myBuffer;
+	LOG_DEL; delete myBuffer;
 }
 
 // small virtual functions for PortHole, GalPort, GalMultiPort
@@ -204,7 +206,7 @@ int GalMultiPort :: isItOutput() const { return alias()->isItOutput();}
 // create a new porthole in a GalMultiPort
 PortHole& GalMultiPort :: newPort() {
 	PortHole& newAliasPort = ((MultiPortHole*)alias())->newPort();
-	return installPort(*new GalPort(newAliasPort));
+	LOG_NEW; return installPort(*new GalPort(newAliasPort));
 }
 
 // return number of tokens waiting on Geodesic
@@ -213,10 +215,10 @@ int PortHole :: numTokens() const { return myGeodesic->size();}
 void PortHole :: allocateBuffer()
 {
 	// If there is a buffer, release its memory
-	delete myBuffer;
+	LOG_DEL; delete myBuffer;
 
 	// Allocate new buffer, and fill it with initialized Particles
-	myBuffer = new CircularBuffer(bufferSize);
+	LOG_NEW; myBuffer = new CircularBuffer(bufferSize);
         for(int i = myBuffer->size(); i>0; i--) {
                 Particle** p = myBuffer->next();
                 *p = myPlasma->get();
@@ -296,8 +298,9 @@ void MultiPortHole :: initialize() {}
 MultiPortHole :: ~MultiPortHole() {
 	MPHIter next(*this);
 	PortHole* p;
-	while ((p = next++) != 0)
-		delete p;
+	while ((p = next++) != 0) {
+		LOG_DEL; delete p;
+	}
 }
 
 StringList
@@ -492,7 +495,7 @@ PortHole& MultiPortHole :: installPort(PortHole& p) {
 }
 
 PortHole& MultiPortHole :: newPort() {
-	return installPort(*new PortHole);
+	LOG_NEW; return installPort(*new PortHole);
 }
 
 // Return a PortHole for a new connection.  We return the first available
@@ -515,11 +518,11 @@ PortHole& MultiPortHole :: newConnection() {
 // allocate a new Geodesic.  Set its name and parent according to the
 // source porthole (i.e. *this).
 Geodesic* PortHole :: allocateGeodesic () {
-	char* nm = new char[strlen(readName())+6];
-	strcpy (nm, "Node_");
-	strcat (nm, readName());
-	Geodesic *g = new Geodesic;
-	g->setNameParent(nm, parent());
+	char buf[80];
+	strcpy (buf, "Node_");
+	strcat (buf, readName());
+	LOG_NEW; Geodesic *g = new Geodesic;
+	g->setNameParent(hashstring(buf), parent());
 	return g;
 }
 
