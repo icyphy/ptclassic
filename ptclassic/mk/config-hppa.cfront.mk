@@ -127,3 +127,7 @@ LIB_FLUSH_CACHE = $(LIBDIR)/flush_cache.o
 
 # Matlab architecture
 MATARCH = hp700
+
+# Ipus uses templates in a way that is compatible with g++, but not hppa.cfront
+INCLUDE_IPUS_DOMAIN = no
+INCLUDE_IPUS_DOMAIN = no
