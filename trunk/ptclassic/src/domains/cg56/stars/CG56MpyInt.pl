@@ -41,12 +41,14 @@ This star is similar to the Mpy star.
 
         codeblock(multiply,"int i") {
         mpy     x0,y0,a     $ref(input#@i),x0	; a = x0 * y0, get next input
-	move    a1,y0			; y0 = integer result in accumulator
+	asr	a			; adjust for integer multiplication
+	move    a0,y0			; y0 = integer result in accumulator
         }
 
 	codeblock (multiplyEnd) {
 	mpy	x0,y0,a			; a = x0 * y0
-	move	a1,$ref(output)			; return the integer result
+	asr	a			; adjust for integer multiplication
+	move	a0,$ref(output)			; return the integer result
 	}
 
 	go {
