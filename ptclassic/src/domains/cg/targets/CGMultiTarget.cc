@@ -65,14 +65,12 @@ CGMultiTarget::CGMultiTarget(const char* name,const char* sClass,
 			     const char* desc) :
 MultiTarget(name,sClass,desc), modifiedGalaxy(0), rm(0)
 {
-    addState
-	(childType.setState("childType",this,"default-CG","child proc types"));
-    addState
-	(resources.setState("resources",this,"","define the specific "
-			    "resources of child targets (separated by ;)"));
-    addState
-	(relTimeScales.setState("relTimeScales",this,"1","define the "
-				"relative time scales of child targets"));
+    addState(childType.setState("childType", this, "default-CG",
+	"child proc types"));
+    addState(resources.setState("resources", this, "",
+	"define the specific resources of child targets (separated by ;)"));
+    addState(relTimeScales.setState("relTimeScales", this, "1",
+	"define the relative time scales of child targets"));
     filePrefix.setAttributes(A_SETTABLE);
     addState(schedName.setState
 	     ("schedName(DL,HU,DC,HIER,CGDDF)",this,"DL",
@@ -84,11 +82,11 @@ MultiTarget(name,sClass,desc), modifiedGalaxy(0), rm(0)
 	      "defaults to DL top-level parallel scheduler\n"
 	      "\tCGDDF - S. Ha's dynamic constructs scheduler"));
     addState(ganttChart.setState("ganttChart",this,"YES",
-				 "if true, display Gantt chart"));
-    addState(logFile.setState("logFile",this,"",
-			      "log file to write to (none if empty)"));
+	 "if true, display Gantt chart"));
+    addState(logFile.setState("logFile", this, "",
+	"log file to write to (none if empty)"));
     addState(amortizedComm.setState("amortizedComm",this,"NO",
-				    "try to amortize communication?"));
+	"try to amortize communication?"));
     addedStates.initialize();
 }
 
@@ -100,27 +98,20 @@ CGMultiTarget::~CGMultiTarget() {
 }
 
 Block* CGMultiTarget::makeNew() const {
-    LOG_NEW; return new CGMultiTarget(name(),starType(),descriptor());
+    LOG_NEW; return new CGMultiTarget(name(), starType(), descriptor());
 }
 
-/////////////////////////
 // setup
-/////////////////////////
-
 void CGMultiTarget::setup() {
     // Method works okay if gal is NULL
     Galaxy* gal = galaxy();
 
     // if the filePrefix is not set, set it to the galaxy name.
-    if (filePrefix.null() && gal) filePrefix = gal->name();		
+    if (gal && filePrefix.null()) filePrefix = gal->name();		
 
     // prepare child targets
     prepareChildren();
     if (SimControl :: haltRequested()) return;
-
-    // This will be phased out.  Use either CGTarget::writeFile
-    // or CGUtilities.h rpcWriteFile.
-    writeDirectoryName(destDirectory);
 
     // We only want to modify the galaxy once.  See the comment in
     // CGMultiTarget.h for protected member modifiedGalaxy for details.
@@ -191,7 +182,7 @@ int CGMultiTarget::recursiveModifyGalaxy(Galaxy& gal) {
     topStarType << gal.domain() << "Star";
     int i;
     for (i = 0 ; i < nChildrenAlloc ; i++) {
-	if (strcmp(child(i)->starType(),topStarType) == 0) {
+	if (strcmp(child(i)->starType(), topStarType) == 0) {
 	    if (cgChild(i)) {
 		cgChild(i)->setGalaxy(gal);
 		gal.setTarget(cgChild(i));
@@ -202,7 +193,7 @@ int CGMultiTarget::recursiveModifyGalaxy(Galaxy& gal) {
 	}
     }
     if (i == nChildrenAlloc) {
-	Error::abortRun(*this,"Could not find child target to modify "
+	Error::abortRun(*this, "Could not find child target to modify "
 			"the galaxy named: ", gal.name());
     }
     
@@ -214,6 +205,7 @@ int CGMultiTarget::recursiveModifyGalaxy(Galaxy& gal) {
 	    if (!recursiveModifyGalaxy(innerGalaxy)) return FALSE;
 	}
     }
+
     return TRUE;
 }
 
@@ -222,26 +214,24 @@ int CGMultiTarget::modifyGalaxy() {
     return recursiveModifyGalaxy(*galaxy());
 }
 
+// Return TRUE if the string c is equal to "HIER" (case-insensitive).
+// Compared to the names of the other schedulers, the second letter is unique.
 inline int hierSchedulerTest(const char* c) {
     // HPUX10 hppa.cfront can't handle inline functions that have statments
-    // after 'return', so we use a temporary variable.
-    int tmpVal; 
-    if (strlen(c) < 2)
-      tmpVal = FALSE;
-    else  
-      tmpVal = (*(c+1) == 'I' || *(c+1) == 'i');
-    return tmpVal;
+    // after 'return', so we combine the test into a single statement
+    return ((*c == 'H') || (*c == 'h')) &&
+	   ((*(c+1) == 'I') || (*(c+1) == 'i'));
 }
 
 void CGMultiTarget :: prepareChildren() {
     deleteChildren();
     nChildrenAlloc = nprocs;
     if (childType.size() > nChildrenAlloc) {
-	Error :: warn("too many child types are",
+	Error :: warn(*this, "too many child types are",
 		      " specified: look at [nprocs] parameter");
     }
     if (childType.size() != relTimeScales.size()) {
-	Error :: warn("unmatched number of parameters: ",
+	Error :: warn(*this, "unmatched number of parameters: ",
 		      "[childType] and [relTimeScales].\n",
 		      "By default, we assume the same time scale, 1");
     }
@@ -297,7 +287,7 @@ void CGMultiTarget :: resourceInfo() {
 	    StringList temp = no;
 	    if (strcmp(item, temp) || 
 		(no < 0) || (no > nChildrenAlloc)) {
-		Error :: abortRun(item, ":unknown proc Id");
+		Error :: abortRun(*this, item, " has unknown proc id");
 		return;
 	    }
 	    added.initialize();
@@ -336,42 +326,45 @@ void CGMultiTarget :: chooseScheduler() {
     const char* sname = schedName;
     int hierSchedulingFlag = FALSE;
     size_t snamelen = strlen(sname);
-    if(hierSchedulerTest(sname)) {
+    if (hierSchedulerTest(sname)) {
 	hierSchedulingFlag = TRUE;
 	const char* paren = strchr(sname,'(');
 	if (paren && ! ++paren == '\0') sname = paren;
 	// else, default to DL
     }
+
+    // Set the scheduler
+    StringList logPath = logFilePathName(destDirectory, logFile);
     if (snamelen > 1 && (*(sname+1) == 'U' || *(sname+1) == 'u')) {
-    	LOG_NEW; mainScheduler = new HuScheduler(this, logFile);
+    	LOG_NEW; mainScheduler = new HuScheduler(this, logPath);
     }
     else if (snamelen > 1 && (*(sname+1) == 'C' || *(sname+1) == 'c')) {
     	if (childType.size() > 1) {
-	    Error :: warn("Declustering technique can not be "
+	    Error :: warn(*this, "Declustering technique cannot be "
 			  "applied for heterogeneous targets.\nBy default "
 			  "we use dynamic-level scheduling.");
-	    LOG_NEW; mainScheduler = new DLScheduler(this, logFile, 1);
+	    LOG_NEW; mainScheduler = new DLScheduler(this, logPath, 1);
     	}
 	else if (resources.size() > 1) {
-	    Error :: warn("Declustering technique can not be "
+	    Error :: warn(*this, "Declustering technique cannot be "
 			  "applied with resource restriction.\nBy default "
 			  "we use dynamic-level scheduling.");
-	    LOG_NEW; mainScheduler = new DLScheduler(this, logFile, 1);
+	    LOG_NEW; mainScheduler = new DLScheduler(this, logPath, 1);
     	}
 	else {
-	    LOG_NEW; mainScheduler = new DeclustScheduler(this, logFile);
+	    LOG_NEW; mainScheduler = new DeclustScheduler(this, logPath);
     	}
     }
     else if (! hierSchedulingFlag && snamelen > 1 &&
 	       (*(sname+1) == 'G' || *(sname+1) == 'g')) {
-    	LOG_NEW; mainScheduler = new CGDDFScheduler(this, logFile);
+    	LOG_NEW; mainScheduler = new CGDDFScheduler(this, logPath);
     }
     else {
-    	mainScheduler = new DLScheduler(this, logFile, 1);
+    	mainScheduler = new DLScheduler(this, logPath, 1);
     }
 
     if (hierSchedulingFlag)
-	mainScheduler=new HierScheduler(this,logFile,*mainScheduler);
+	mainScheduler = new HierScheduler(this, logPath, *mainScheduler);
 
     setSched(mainScheduler);
 }
@@ -385,7 +378,7 @@ void CGMultiTarget :: flattenWorm() {
 	if (s->isItWormhole()) {
 	    CGWormBase* w = (CGWormBase*)s->asWormhole();
 	    if (w == NULL) {
-		Error::abortRun(*this,"flattenWorm: Wormhole does "
+		Error::abortRun(*this, "flattenWorm: Wormhole does "
 				"returns a NULL pointer.  Is the "
 				"myWormhole() method defined for "
 				"the current domain?");
@@ -441,7 +434,7 @@ void CGMultiTarget::writeSchedule() {
 
 // Wormhole support routines are tricky to interpret. The major difficulty
 // comes from the fact that one EventHorizon may be connected to more than
-// subGalaxies which can not be expressed by regular porthole connection.
+// subGalaxies which cannot be expressed by regular porthole connection.
 // So, we examine the stars at the wormhole boudnary (via expandedgraph nodes)
 // instead of portholes, make a temporary connection between EH and 
 // the corresponding porthole, and do things -> major hack!.
@@ -683,7 +676,7 @@ DataFlowStar* CGMultiTarget :: createCollect() {
 
 // create Macro Star
 CGStar* CGMultiTarget :: createMacro(CGStar*, int, int, int) {
-    Error :: abortRun("code generation fails with macro actor",
+    Error :: abortRun(*this, "code generation fails with macro actor",
 		      "\n create domain-specific Macro star");
     return 0;
 }
