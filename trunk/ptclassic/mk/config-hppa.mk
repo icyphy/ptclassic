@@ -40,4 +40,3 @@ XV_INSTALL=bsdinst
 
 # Used to flush the cache on the hppa.  (source is in the kernel/ directory)
 FLUSH_CACHE = flush_cache.o
-LIB_FLUSH_CACHE = $(LIBDIR)/flush_cache.o
