@@ -182,13 +182,15 @@ StringList AsmStar::lookupMem(const char* name)
 // Expand Macros.
 StringList AsmStar::expandMacro(const char* func, const StringList& argList)
 {
-	StringListIter arg(argList);
 	StringList s;
+	StringListIter arg(argList);
+	const char* arg1 = arg++;
+	const char* arg2 = arg++;
 
-	if (matchMacro(func, argList, "addr2", 2)) s = lookupAddress(arg++, arg++);
-	else if (matchMacro(func, argList, "addr", 2)) s = lookupAddress(arg++, arg++);
-	else if (matchMacro(func, argList, "addr", 1)) s = lookupAddress(arg++);
-	else if (matchMacro(func, argList, "mem", 1)) s = lookupMem(arg++);
+	if (matchMacro(func, argList, "addr2", 2)) s = lookupAddress(arg1, arg2);
+	else if (matchMacro(func, argList, "addr", 2)) s = lookupAddress(arg1, arg2);
+	else if (matchMacro(func, argList, "addr", 1)) s = lookupAddress(arg1);
+	else if (matchMacro(func, argList, "mem", 1)) s = lookupMem(arg1);
 	else if (matchMacro(func, argList, "fullname", 0)) s = fullName();
 	else if (matchMacro(func, argList, "starname", 0)) s = name();
 	else s = CGStar::expandMacro(func, argList);
