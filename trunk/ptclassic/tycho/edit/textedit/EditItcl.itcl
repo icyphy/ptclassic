@@ -73,11 +73,11 @@ class ::tycho::EditItcl {
 
     # Location of the template file
     itk_option define -filetemplate fileTemplate FileTemplate \
-	    $TYCHO/editors/textedit/templates/ItclTemplate.itcl {}
+	    $TYCHO/edit/textedit/templates/ItclTemplate.itcl {}
 
     # Location of the template file
     itk_option define -testtemplate testTemplate TestTemplate \
-	    $TYCHO/editors/textedit/templates/testTemplate.itcl {}
+	    $TYCHO/edit/textedit/templates/testTemplate.itcl {}
 
 
     ###################################################################
