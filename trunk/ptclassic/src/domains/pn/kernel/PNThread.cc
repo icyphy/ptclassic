@@ -53,6 +53,8 @@ void DataFlowProcess::run()
 
 void SyncDataFlowProcess::run()
 {
+    int i = 0;
+
     // Configure the star for dynamic execution.
     star.setDynamicExecution(TRUE);
 
@@ -62,7 +64,8 @@ void SyncDataFlowProcess::run()
 	// Wait for notification to start.
 	{
 	    CriticalSection region(start.monitor());
-	    start.wait();
+	    while (iteration <= i) start.wait();
+	    i = iteration;
 	}
 	if (star.waitPort()) star.waitPort()->receiveData();
     } while (star.run());

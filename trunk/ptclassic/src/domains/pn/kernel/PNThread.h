@@ -50,8 +50,8 @@ class DataFlowProcess : public PNThread
 {
 public:
     // Constructor.
-    DataFlowProcess(PNThreadScheduler& t, DataFlowStar& s)
-	: PNThread(t), star(s) {}
+    DataFlowProcess(DataFlowStar& s)
+	: star(s) {}
 
 protected:
     /*virtual*/ void run();
@@ -63,12 +63,13 @@ class SyncDataFlowProcess : public DataFlowProcess
 {
 public:
     // Constructor.
-    SyncDataFlowProcess(PNThreadScheduler& t, DataFlowStar& s, PtCondition& c)
-	: DataFlowProcess(t, s), start(c) {}
+    SyncDataFlowProcess(DataFlowStar& s, PtCondition& c, int& i)
+	: DataFlowProcess(s), start(c), iteration(i) {}
 
 protected:
     /*virtual*/ void run();
     PtCondition& start;
+    int& iteration;
 };
 
 #endif
