@@ -59,7 +59,7 @@ static int exponent_to_sample_table[8] =
 	{ 0, 132, 396, 924, 1980, 4092, 8316, 16764 };
 
 /* Compress 16-bit linear data to 8-bit mu-law data */
-unsigned char Ptdsp_Linear16ToMuLaw8(int sample) {
+unsigned char Ptdsp_LinearToPCMMuLaw(int sample) {
   int exponent, mantissa, sign;
   unsigned char ulawbyte;
 
@@ -80,14 +80,6 @@ unsigned char Ptdsp_Linear16ToMuLaw8(int sample) {
 }
 
 /*
-Compress 8-bit linear data to 8-bit mu-law data
-Convert the data to 16 bits and call the 16-bit converter
-*/
-unsigned char Ptdsp_Linear8ToMuLaw8(int sample) {
-  return Ptdsp_Linear8ToMuLaw8((sample & 0xFF) << 8);
-}
-
-/*
 Uncompress 8-bit mu-law data to 16-bit linear data
 
 Author:  Craig Reese: IDA/Supercomputing Research Center
@@ -102,7 +94,7 @@ References:
 Input: 8 bit ulaw sample
 Output: signed 16 bit linear sample
 */
-int Ptdsp_MuLaw8ToLinear16(unsigned char ulawbyte) {
+int Ptdsp_PCMMuLawToLinear(unsigned char ulawbyte) {
   int sign, exponent, mantissa, sample;
 
   ulawbyte = ~ ulawbyte;
@@ -113,9 +105,4 @@ int Ptdsp_MuLaw8ToLinear16(unsigned char ulawbyte) {
 		( mantissa << ( exponent + 3 ) );
   if ( sign != 0 ) sample = -sample;
   return sample;
-}
-
-/* Uncompress 8-bit mu-law data to 8-bit linear data */
-int Ptdsp_MuLaw8ToLinear8(unsigned char ulawbyte) {
-  return ((Ptdsp_MuLaw8ToLinear16(ulawbyte) >> 8) & 0xFF);
 }
