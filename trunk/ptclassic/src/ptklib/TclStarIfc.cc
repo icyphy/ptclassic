@@ -131,8 +131,7 @@ int TclStarIfc::setup (Block* star,
 
 	myStar = star;
 
-	char ncstring[] = "starID";
-	if(Tcl_SetVar(ptkInterp, ncstring, (char*)starID, TCL_GLOBAL_ONLY)
+	if(Tcl_SetVar(ptkInterp, "starID", (char*)starID, TCL_GLOBAL_ONLY)
 			== NULL) {
 		Error::abortRun(*star, "Failed to set starID");
 		return FALSE;
@@ -154,13 +153,11 @@ int TclStarIfc::setup (Block* star,
 
 	// Set entries in the $starID array
 	buf = numInputs;
-	char ncstring2[] = "numInputs";
-	Tcl_SetVar2(ptkInterp, (char*)starID, ncstring2,
+	Tcl_SetVar2(ptkInterp, (char*)starID, "numInputs",
 			(char*)buf, TCL_GLOBAL_ONLY);
 
 	buf = numOutputs;
-	char ncstring3[] = "numOutputs";
-	Tcl_SetVar2(ptkInterp, (char*)starID, ncstring3,
+	Tcl_SetVar2(ptkInterp, (char*)starID, "numOutputs",
 			(char*)buf, TCL_GLOBAL_ONLY);
 
 	// Step through all the states
@@ -195,13 +192,12 @@ int TclStarIfc::setup (Block* star,
 	}
 	outputArraySize = numOutputs;
 
-	char ncstring4[] = "ptkDisplayErrorInfo";
 	if(tcl_file[0] == '$') {
 	        buf = "source [ptkExpandEnvVar \\";
 		buf += tcl_file;
 		buf += "]";
 	        if(Tcl_GlobalEval(ptkInterp, (char*)buf) != TCL_OK) {
-		    Tcl_GlobalEval(ptkInterp, ncstring4);
+		    Tcl_GlobalEval(ptkInterp, "ptkDisplayErrorInfo");
 		    Error::abortRun(*star, "Cannot source tcl script");
 		    return FALSE;
 		}
@@ -209,7 +205,7 @@ int TclStarIfc::setup (Block* star,
 	        buf = "source ";
 		buf += tcl_file;
 	        if(Tcl_GlobalEval(ptkInterp, (char*)buf) != TCL_OK) {
-		    Tcl_GlobalEval(ptkInterp, ncstring4);
+		    Tcl_GlobalEval(ptkInterp, "ptkDisplayErrorInfo");
 		    Error::abortRun(*star, "Cannot source tcl script");
 		    return FALSE;
 	        }
@@ -237,8 +233,7 @@ int TclStarIfc::callTclProc(const char* name) {
 	if(Tcl_GlobalEval(ptkInterp, (char*)buf) == TCL_OK &&
 	    strlen(ptkInterp->result) != 0) {
 		// A name_starID procedure is defined.  Invoke it.
-		char ncstring5[] = "starID";
-	        if(Tcl_SetVar(ptkInterp, ncstring5, (char*)starID,
+	        if(Tcl_SetVar(ptkInterp, "starID", (char*)starID,
 			TCL_GLOBAL_ONLY) == NULL) {
 		    Error::abortRun(*myStar, "Failed to set starID");
 		    return FALSE;
@@ -249,8 +244,7 @@ int TclStarIfc::callTclProc(const char* name) {
 		buf += " ";
 		buf += starID;
 	        if(Tcl_GlobalEval(ptkInterp, (char*)buf) != TCL_OK) {
-		    char ncstring6[] = "ptkDisplayErrorInfo";
-		    Tcl_GlobalEval(ptkInterp, ncstring6);
+		    Tcl_GlobalEval(ptkInterp, "ptkDisplayErrorInfo");
 		    Error::abortRun(*myStar, "Failed to run Tcl procedure");
 		    return FALSE;
 		}
