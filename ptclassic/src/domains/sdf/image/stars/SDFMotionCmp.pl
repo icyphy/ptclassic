@@ -149,7 +149,7 @@ can be added or reduced-search motion compensation can be performed.
 				tmp1 = (ii+i+yvec)*width + jj+xvec;
 				tmp2 = (ii+i)*width + jj;
 				for(j = 0; j < blocksize; j++) {
-					diff[tmp2+j] = quant(cur[tmp2+j] - prev[tmp1+j]);
+					diff[tmp2+j] = quant(cur[tmp2+j], prev[tmp1+j]);
 			}	}
 // NOTE THE -1's!! These are so the motion vector points FROM the past
 // block TO the current block, rather than the other way around!
@@ -158,12 +158,17 @@ can be added or reduced-search motion compensation can be performed.
 		}
 	} // end DoOneBlock{}
 
-	inline virtual method { // don't do thresholding, use wrap-around.
+	inline virtual method { // DON'T use wrap-around, use thresholding.
 		name { quant }
 		access { protected }
 		type { "unsigned char" }
-		arglist { "(const float inp)"}
-		code { return((unsigned char) (inp + 128.5)); }
+		arglist { "(const int i1, const int i2)"}
+		code {
+			int f = i1 - i2;
+			if (f >= 127) { return ((unsigned char) 255); }
+			if (f <= -128) { return ((unsigned char) 0); }
+			return ((unsigned char) (f + 128));
+		}
 	}
 
 	method {
