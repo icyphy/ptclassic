@@ -158,6 +158,7 @@ void PrintVersion ()
 		    pigiFilename, "}", NULL) != TCL_OK) {
         ErrAdd("Unable to bring up ptkStartupMessage: ");
         ErrAdd(ptkInterp->result);
+	ErrAdd(Tcl_GetVar(ptkInterp,"errorInfo",TCL_GLOBAL_ONLY));
 	PrintErr(ErrGet());
 	exit(1);
     } 
