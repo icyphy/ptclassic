@@ -320,7 +320,7 @@ body ::tycho::Layout::dirty {item} {
 #
 # Call a method on a slate. The first widget in the list of widgets
 # subscribed with <b>subscribe view</b> must be able to respond to
-# the <b>slateid</b> method and the <b>component slate</b>
+# the <b>slateid</b> method and the <b>slate</b>
 # method.
 #
 body ::tycho::Layout::forward {method name args} {
@@ -329,7 +329,7 @@ body ::tycho::Layout::forward {method name args} {
     }
     set view [lindex $_views 0]
     set id [$view slateid $name]
-    set slate [$view component slate]
+    set slate [$view slate]
     eval $slate $method $id $args
 }
 
