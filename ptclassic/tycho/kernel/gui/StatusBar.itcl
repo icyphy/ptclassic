@@ -34,7 +34,26 @@
 #### StatusBar
 #
 # A very simple prototype status bar display, for putting at the
-# bottom of windows.
+# bottom of windows. This status bar is a single row of a Tk grid,
+# with four columns containing (from left to right):
+# <ol>
+# <li> A small amount of padding at the left.
+# <li> A file status indicator, showing whether the file is read-only
+# or modified.
+# <li> A main status area used to status messages, progress bars
+# and so on.
+# <li> A Button, usually labeled "Close."
+# <li> A padding area to allow for good alignment in the presence
+# of scrollbars in the main window.
+# </ol>
+#
+# The main status area expands to fill the available space, while
+# all other areas are a fixed size. The file status and scrollbar
+# padding areas can be set to zero size if appropriate.
+# The main status area is itself divided into two columns, the
+# first being used for text messages, and the second containing
+# some other form of feedback widget. Currently, the second column
+# can contain a progress indicator or an entry widget.
 #
 class ::tycho::StatusBar {
     inherit ::tycho::TWidget
@@ -53,7 +72,7 @@ class ::tycho::StatusBar {
     itk_option define -closetext closeText CloseText "Close"
 
     # The current file status: none, readonly, readwrite, modified
-    itk_option define -filestatus fileStatus FileStatus "none"
+    itk_option define -filestatus filestatus FileStatus "none"
 
     # Flag to indicate whether to leave space for a scroll bar
     itk_option define -scrollbarpad scrollbarPad ScrollbarPad 0
@@ -64,17 +83,20 @@ class ::tycho::StatusBar {
     ###################################################################
     ####                         public methods                    ####
 
+    # Display the file status help -- callback for enter events
+    method _filestatushelp {}
+
+    # Execute a command with the entry widget contents -- key callback
+    method _entrycommand {command}
+
+    # Create an entry field in the status bar
+    method entry {label args}
+    
     # Get the most recent string written to the status bar
     method get {}
 
-    # Display the file status help
-    method helpFileStatus {} {}
-
-    # Put a string to the status bar
+     # Put a string to the status bar
     method puts {string}
-
-    # Set the line and column display, and clear the status string
-    method lineColumn {line column}
 
     # Start or update progress display
     method progress {{label {}} {command {}}}
@@ -83,10 +105,10 @@ class ::tycho::StatusBar {
     ####                       private methods                     ####
 
     # Draw the progress bar
-    private method drawProgress {progress {color blue}}
+    private method _drawprogress {progress {color blue}}
 
     # Set the current display mode
-    private method setMode {mode}
+    private method _setmode {mode}
 
     ###################################################################
     ####                       private variables                   ####
@@ -97,7 +119,7 @@ class ::tycho::StatusBar {
     # The current file status setting
     private variable filestatus "readwrite"
 
-    # The current mode: "status" or "progress"
+    # The current mode: "status" or "progress" or "entry"
     private variable currentMode ""
 
     # The command to get the current progress
@@ -134,41 +156,42 @@ configbody ::tycho::StatusBar::closetext {
 configbody ::tycho::StatusBar::filestatus {
     if { $itk_option(-filestatus) == "none" } {
 	# Delete the file status if there is one
-	if { [::info exists itk_component(fileStatus)] } {
-	    destroy $itk_component(fileStatus)
-	    unset itk_component(fileStatus)
+	if [::info exists itk_component(filestatus)] {
+	    destroy $itk_component(filestatus)
+	    unset itk_component(filestatus)
 	}
-    } else {
+        grid columnconfigure $itk_interior 0 -minsize 0
+   } else {
 	# Create the file status if there isn't one
-	if { ! [::info exists itk_component(fileStatus)] } {
-	    itk_component add fileStatus {
-		label $itk_interior.fileStatus -width 3 \
+	if { ! [::info exists itk_component(filestatus)] } {
+	    itk_component add filestatus {
+		label $itk_interior.filestatus -width 3 \
 			-borderwidth 1 \
 			-relief raised
 	    } {
 		keep -background -cursor -font
 	    }
-	    pack $itk_component(fileStatus) \
-		    -side left -fill y \
-		    -padx 0 -pady 2 \
-		    -side left \
-		    -before $itk_component(mainStatus)
-	}
+	    grid $itk_component(filestatus) \
+                    -row 0 -column 1 \
+		    -sticky ns \
+		    -padx 0 -pady 2
+            grid columnconfigure $itk_interior 0 -minsize 2
+        }
 	
 	# Bind help to the file status display
-	bind $itk_component(fileStatus) <Enter> [code "%Q helpFileStatus"]
-	bind $itk_component(fileStatus) <Leave> [code "%Q puts {}"]
+	bind $itk_component(filestatus) <Enter> [code "%Q _filestatushelp"]
+	bind $itk_component(filestatus) <Leave> [code "%Q puts {}"]
 
 	# Set the status display
 	switch -exact $itk_option(-filestatus) {
 	    "readonly" {
-		$itk_component(fileStatus) configure -text "R"
+		$itk_component(filestatus) configure -text "R"
 	    }
 	    "readwrite" {
-		$itk_component(fileStatus) configure -text ""
+		$itk_component(filestatus) configure -text ""
 	    }
 	    "modified" {
-		$itk_component(fileStatus) configure -text "M"
+		$itk_component(filestatus) configure -text "M"
 	    }
 	    default {
 		error "StatusBar::filestatus: Invalid option $status"
@@ -182,23 +205,12 @@ configbody ::tycho::StatusBar::filestatus {
 #### -scrollbarpad configuration
 #
 configbody ::tycho::StatusBar::scrollbarpad {
-    if { $itk_option(-scrollbarpad) } {
-	if { ! [::info exists itk_component(packing)] } {
-	    # Create the empty space under the scroll bar
-	    # FIXME: Need a better way of getting the scroll bar width
-	    itk_component add packing {
-		frame $itk_interior.packing -width 23
-	    } {
-		keep -background -cursor
-	    }
-	    pack $itk_component(packing) -fill y -side right \
-		    -before $itk_component(closeButton)
-	}
+    if $itk_option(-scrollbarpad) {
+        # Create the empty space under the scroll bar
+        # FIXME: Need a better way of getting the scroll bar width
+        grid columnconfigure $itk_interior 4 -minsize 23
     } else {
-	if { [::info exists itk_component(packing)] } {
-	    destroy $itk_component(packing)
-	    unset itk_component(packing)
-	}
+        grid columnconfigure $itk_interior 4 -minsize 0
     }
 }
 
@@ -207,38 +219,53 @@ configbody ::tycho::StatusBar::scrollbarpad {
 #
 body ::tycho::StatusBar::constructor {args} {
 
-    # A tiny bit of padding to the left of the status bar.
-    itk_component add leftpacking {
-	frame $itk_interior.leftpacking -width 2
+    # The file status frame is in column zero, but is
+    # created in the -filestatus configuration body
+
+    # Create the main status frame -- this gives the status
+    # area a border
+    itk_component add status {
+        frame $itk_interior.status \
+		-borderwidth 1 \
+		-relief raised
     } {
 	keep -background -cursor
     }
-    pack $itk_component(leftpacking) -side left
-
+    # Create the status message display
+    itk_component add message {
+	label $itk_interior.status.message \
+		-anchor w -justify left
+    } {
+	keep -background -cursor
+	rename -font -messagefont messageFont MessageFont
+    }
     # Create the close button
     itk_component add closeButton {
-	button $itk_interior.closeButton -text Close -pady 2
+	button $itk_interior.closeButton -text Close -pady 2 \
+                -takefocus 0
     } {
 	keep -background -font -activebackground -cursor \
 		-highlightthickness -activeforeground \
 		-foreground -highlightcolor -highlightbackground \
 		-padx -pady
     }
-    pack $itk_component(closeButton) -side right
 
-    # Create the status output display (but don't pack it yet)
-    itk_component add mainStatus {
-	label $itk_interior.mainStatus \
-		-anchor w -justify left \
-		-borderwidth 1 \
-		-relief raised
-    } {
-	keep -background -cursor
-	rename -font -messagefont messageFont MessageFont
-    }
-    
+    # Grid components
+    grid $itk_component(status) \
+            -row 0 -column 2 \
+            -sticky nsew \
+            -padx 1 -pady 2
+    grid $itk_component(closeButton) -row 0 -column 3 -sticky ns
+    grid $itk_component(message) -row 0 -column 0 -sticky nsew
+ 
+    # The main status expands to fill available space
+    grid columnconfigure $itk_interior 2 -weight 1 -minsize 100
+
+    # The feedback column with the status expands
+    grid columnconfigure $itk_component(status) 1 -weight 1
+
     # Set up the display
-    setMode "status"
+    _setmode "status"
 
     # Initialise options
     eval itk_initialize $args
@@ -248,18 +275,28 @@ body ::tycho::StatusBar::constructor {args} {
 }
 
 #######################################################################
-#### get
+#### _entrycommand
 #
-# Get the most recent string written to the statusbar.
+# Key press callback to entry widget. Subsitute the current
+# widget value for "%s" and evaluate at global scope.
 #
-body ::tycho::StatusBar::get {} {
-    $itk_component(mainStatus) cget -text
+body ::tycho::StatusBar::_entrycommand {command} {
+    # Make sure we're in the right mode and the widget still exists
+    if { $currentMode != "entry" \
+	    || ![::info exists itk_component(feedback)] } {
+        return
+    }
+    # Substitute for %e and evaluate
+    regsub -all -- % $command [$itk_component(feedback) get] script
+    uplevel #0 $script
 }
 
 #######################################################################
-#### helpFileStatus
+#### _filestatushelp
 #
-body ::tycho::StatusBar::helpFileStatus {} {
+# Mouse event callback to display file status help.
+#
+body ::tycho::StatusBar::_filestatushelp {} {
     switch -exact $itk_option(-filestatus) {
 	"readonly" {
 	    puts "File is read-only"
@@ -274,11 +311,69 @@ body ::tycho::StatusBar::helpFileStatus {} {
 }
 
 #######################################################################
-#### lineColumn
+#### entry
 #
-body ::tycho::StatusBar::lineColumn {line column} {
-    $itk_component(mainStatus) configure -text \
-	"  $line : $column"
+# Create an entry field in the status bar. The first argument is
+# a string to display to the left of thr entry field; following
+# arguments are an option-value list, and can be any of:
+# <ul>
+# <li><b>-command</b>: The command to execute when the user hits
+# Return. The current contents of the widget will be substituted
+# for any occurrence of the string "%s", and the command evaluated
+# at the global scope. The default is null.
+# <li><b>-default</b>: The default text to place into the entry field.
+# <li><b>-keycommand</b>: The command to execute when the user hits
+# any key other than return, tab, or escape. The character input
+# will be substituted for any occurrence of the string "%A,"
+# and the command evaluated in the global scope.
+# <li><b>-returnfocus</b>: A widget to return the focus to if
+# <Escape> is pressed. Defaults to the toplevel containging
+# this status bar.
+# </ul>
+# More options will be implemented at a later date, including options
+# to control file completion.
+#
+body ::tycho::StatusBar::entry {label args} {
+    _setmode "entry"
+
+    # Extract args
+    array set opts {-command {} -keycommand {} -default {}}
+    array set opts [list -returnfocus [winfo toplevel $itk_component(hull)]]
+    array set opts $args
+
+    # Configure the label
+    $itk_component(message) configure -text $label
+
+    # Configure the entry widget
+    if { $opts(-default) != "" } {
+        $itk_component(feedback) insert 0 $opts(-default)
+        $itk_component(feedback) insert end [::tycho::directorySeparator]
+    }
+    if { $opts(-command) != "" } {
+        bind $itk_component(feedback) <Return> \
+                [list $this _entrycommand $opts(-command)]
+    }
+    if { $opts(-keycommand) != "" } {
+        bind $itk_component(feedback) <Key> $opts(-keycommand)
+    }
+
+    # By default, the Tab key breaks (to prevent tab-traversal)
+    bind $itk_component(feedback) <Tab> {break}
+   
+    # The Escape key returns the focus
+    bind $itk_component(feedback) <Escape> "$opts(-returnfocus) focusin"
+   
+    # Focus on it
+    focus $itk_component(feedback)
+}
+
+#######################################################################
+#### get
+#
+# Get the most recent string written to the statusbar.
+#
+body ::tycho::StatusBar::get {} {
+    $itk_component(message) cget -text
 }
 
 #######################################################################
@@ -297,12 +392,12 @@ body ::tycho::StatusBar::lineColumn {line column} {
 # the progress bar is set to about 5 times per second.
 #
 body ::tycho::StatusBar::progress {{label {}} {command {}}} {
-    setMode "progress"
+    _setmode "progress"
     if { $command == "" } {
 	if { $progressCommand != "" } {
 	    if ![catch {uplevel #0 $progressCommand} progress] {
 		# Redraw the progress bar
-		drawProgress $progress
+		_drawprogress $progress
 		if { $progress < 1.0 } {
                     # Catch, since widget could be deleted before the progress
 		    after $updateInterval [list catch "$this progress"]
@@ -310,14 +405,13 @@ body ::tycho::StatusBar::progress {{label {}} {command {}}} {
 	    } else {
                 # There's a terrible error! Display the bar fully
                 # filled in red!
-                drawProgress 1 red
+                _drawprogess 1 red
 	    }
 	}
     } else {
-	$itk_component(progressLabel) configure -text $label:
+	$itk_component(message) configure -text $label:
 	set progressCommand $command
-	drawProgress 0
-        puts "THIS: $this"
+	_drawprogress 0
         # Catch, since widget could be deleted before the progress updates
         after $updateInterval [list catch "$this progress"]
     }
@@ -330,95 +424,96 @@ body ::tycho::StatusBar::progress {{label {}} {command {}}} {
 # wrap-around, set the wrap-length of the label to its current width.
 #
 body ::tycho::StatusBar::puts {string} {
-    setMode "status"
-    $itk_component(mainStatus) configure -wraplength \
-	    [expr [winfo width $itk_component(mainStatus)] - 4]
-    $itk_component(mainStatus) configure -text "$string"
+    _setmode "status"
+    # Set the wrap length of the label to the length of
+    # the containing frame less a fudge factor, to prevent
+    # long messages from making the window resize
+    set width [expr [winfo width $itk_component(status)] - 10]
+    $itk_component(message) configure -wraplength $width -text $string
 }
 
 #######################################################################
-#### drawProgress
+#### _drawprogress
 #
 # Draw or update the progress bar.
 #
-body ::tycho::StatusBar::drawProgress {progress {color blue}} {
+body ::tycho::StatusBar::_drawprogress {progress {color blue}} {
     if { $progress < 0 } {
 	set progress 0
     } elseif { $progress > 1.0 } {
 	set progress 1.0
     }
     # First get/create an item
-    if { [$itk_component(progressDisplay) find withtag foo] == "" } {
-	$itk_component(progressDisplay) create rectangle \
+    if { [$itk_component(feedback) find withtag foo] == "" } {
+	$itk_component(feedback) create rectangle \
 		0 0 0 0 \
 		-outline "" \
 		-fill $color \
 		-tags foo
     }
-    set width  [winfo width $itk_component(progressDisplay)]
-    set height [winfo height $itk_component(progressDisplay)]
+    set width  [winfo width $itk_component(feedback)]
+    set height [winfo height $itk_component(feedback)]
     set width  [expr $width * $progress]
-    $itk_component(progressDisplay) coords foo 0 0 $width $height
+    $itk_component(feedback) coords foo 0 0 $width $height
     # Update the color too in case it changed
-    $itk_component(progressDisplay) itemconfigure foo -fill $color
+    $itk_component(feedback) itemconfigure foo -fill $color
 }
 
 #######################################################################
-#### setMode
+#### _setmode
 #
 # Set up the display according to the current mode
 #
-body ::tycho::StatusBar::setMode {mode} {
+body ::tycho::StatusBar::_setmode {mode} {
     if { $mode == $currentMode } {
 	return
     }
     set currentMode $mode
+
+    # Whatever is in the feedback column, forget and delete
+    if [::info exists itk_component(feedback)] {
+        grid forget $itk_component(feedback)
+        destroy $itk_component(feedback)
+        unset itk_component(feedback)
+    }
+
+    # Create a new feedback widget if needed
     switch $mode {
 	"progress" {
-	    if ![::info exists itk_component(progress)] {
-		# Create the progress output display
-		itk_component add progress {
-		    frame $itk_interior.progress
-		} {
-		    keep -background -cursor
-		}
-		itk_component add progressLabel {
-		    label $itk_interior.progress.label
-		} {
-		    keep -background -cursor
-		    rename -font -messagefont messageFont MessageFont
-		}
-		pack $itk_component(progressLabel) -side left
-                
-                # Create the progress display bar. We just set it
-                # to a fixed height because if you try and make
-                # it a fraction of the status bar height it gets
-                # zero if invoked before the window is mapped. Same
-                # old samo Tk nonsense... -- hjr
-		itk_component add progressDisplay {
-		    canvas $itk_interior.progress.display \
-			    -height 12 \
-			    -borderwidth 2 \
-			    -relief sunken
-		} {
-		    keep -background -cursor
-		}
-		pack $itk_component(progressDisplay) \
-			-side left -fill x -expand on
-	    }
-	    # Unpack the status display and pack the progress display
-	    pack forget $itk_component(mainStatus)
-	    pack $itk_component(progress) \
-		    -fill both -expand on \
-		    -padx 0 -pady 2 \
-		    -side left
+            # Create the progress display bar. We just set it
+            # to a fixed height because if you try and make
+            # it a fraction of the status bar height it gets
+            # zero if invoked before the window is mapped. Same
+            # old samo Tk nonsense... -- hjr
+            itk_component add feedback {
+                canvas $itk_interior.status.feedback \
+                        -height 10 \
+                        -borderwidth 2 \
+                        -relief sunken
+            } {
+                keep -background -cursor
+            }
+            grid $itk_component(feedback) -row 0 -column 1 -sticky nsew
+	}
+	"entry" {
+            # Create the entry widget
+            itk_component add feedback {
+                ::entry $itk_interior.status.feedback \
+                        -borderwidth 1 \
+                        -relief sunken \
+                        -highlightthickness 2 \
+                        -highlightcolor grey70
+            } {
+                keep -background -cursor
+                rename -font -messagefont messageFont MessageFont
+            }
+            grid $itk_component(feedback) \
+                    -row 0 -column 1 \
+                    -sticky nsew \
+                    -padx 4
 	}
 	"status" {
-	    catch {pack forget $itk_component(progress)}
-	    pack $itk_component(mainStatus) \
-		    -fill both -expand on \
-		    -padx 0 -pady 2 \
-		    -side left
+            # Nothing needs to be done
 	}
 	default {
 	    error "Unknown mode $mode"
