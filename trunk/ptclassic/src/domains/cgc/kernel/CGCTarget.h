@@ -19,6 +19,8 @@ $Id$
 
 #include "BaseCTarget.h"
 
+class CGCPortHole;
+
 class CGCTarget : public BaseCTarget {
 public:
 	CGCTarget();
@@ -38,6 +40,16 @@ public:
 	// Method available to stars to add to declarations that are
 	// put at the beginning of the main code segment.
 	void addDeclaration(const char* decl);
+
+	// Method available to stars to add to static declarations.
+	void addGlobal(const char* decl);
+
+	// Method available to stars to add to main initialization.
+	void addMainInit(const char* decl);
+
+	// name the offset of portholes
+	StringList offsetName(CGCPortHole*);
+
 protected:
 	char *schedFileName;
 	StringList staticDeclarations;
@@ -45,11 +57,24 @@ protected:
 	StringList mainDeclarations;
 	StringList mainInitialization;
 	StringList mainCode;
+
+	// buffer size determination
+	int decideBufSize(Galaxy&);
+
+	// code generation init routine; compute offsets, generate initCode
+	int codeGenInit(Galaxy&);
+
 private:
+	StringList includeFiles;
+	StringList globalDecls;
 	StringList sectionComment(const StringList s);
 	int galDataStruct(Galaxy& galaxy, int level=0);
 	int starDataStruct(Block& block, int level=0);
 	void setGeoNames(Galaxy& galaxy);
+
+	// setup forkDests list for all Fork input portholes
+	// This complete list is needed to decide the buffer size computation.
+	void setupForkDests(Galaxy&);
 };
 
 #endif

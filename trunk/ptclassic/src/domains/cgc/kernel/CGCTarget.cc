@@ -17,6 +17,7 @@ $Id$
 #endif
 
 #include "CGCTarget.h"
+#include "FloatArrayState.h"
 #include "CGCStar.h"
 #include "GalIter.h"
 #include "miscFuncs.h"
@@ -35,6 +36,12 @@ StringList CGCTarget :: sectionComment(const StringList s) {
 	out += s;
 	out += " ******/\n\n";
 	return out;
+}
+
+StringList CGCTarget::offsetName(CGCPortHole* p) {
+        StringList out = sanitizedFullName(*p);
+        out += "_ix";
+        return out;
 }
 
 void CGCTarget :: headerCode () {
@@ -58,7 +65,8 @@ int CGCTarget :: galDataStruct(Galaxy& galaxy, int level) {
 	    staticDeclarations += sanitize(b->readName());
 	    staticDeclarations += ";\n";
 	} else {
-	    starDataStruct(*b, level);
+	    CGCStar* s = (CGCStar*) b;
+	    if (!s->amIFork()) starDataStruct(*b, level);
 	}
     }
     return TRUE;
@@ -71,23 +79,30 @@ int CGCTarget :: starDataStruct(Block& block, int level) {
 
     // Start with the PortHoles
     BlockPortIter nextPort(block);
-    const PortHole* p;
-    while ((p = nextPort++) != 0) {
+    CGCPortHole* p;
+    while ((p = (CGCPortHole*) nextPort++) != 0) {
 	// Define variables only for each output port, except outputs of forks
 	if (p->isItOutput()) {
-	   int bufSize = ((CGPortHole*)p)->localBufSize();
-	   if(bufSize > 0) {
+	   	int dimen = ((CGCPortHole*)p)->maxBufReq();
 		out += indent(level+1);
 		out += "float ";
 		out += sanitizedName(*p);
-		if(bufSize > 1) {
+		if(dimen > 1) {
 		    out += "[";
-		    out += bufSize;
+		    out += dimen;
 		    out += "]";
 		}
 		out += ";\n";
 		emptyFlag = FALSE;
-	   }
+	}
+	// store offsets too.
+	if (p->maxBufReq() > 1) {
+		emptyFlag = FALSE;
+		out += indent(level+1);
+		out += "int ";
+		out += sanitizedName(*p);
+		out += "_ix";		// suffix to indicate the offset.
+		out += ";\n";
 	}
     }
 
@@ -98,15 +113,33 @@ int CGCTarget :: starDataStruct(Block& block, int level) {
 	out += indent(level+1);
 	out += "float ";
 	out += sanitizedName(*s);
+	if (s->size() > 1) {
+		out += "[";
+		out += s->size();
+		out += "]";
+	}
 	out += ";\n";
 	emptyFlag = FALSE;
 
 	// Initialize the state
 	mainInitialization += indent(1);
-	mainInitialization += sanitizedFullName(*s);
-	mainInitialization += " = ";
-	mainInitialization += s->getInitValue();
-	mainInitialization += ";\n";
+	if (s->size() > 1) {
+		FloatArrayState* fs = (FloatArrayState*) s;
+		for (int i = 0; i < s->size(); i++) {
+			mainInitialization += "\t";
+			mainInitialization += sanitizedFullName(*s);
+			mainInitialization += "[";
+			mainInitialization += i;
+			mainInitialization += "] = ";
+			mainInitialization += (*fs)[i];
+			mainInitialization += ";\n";
+		}
+	} else {
+		mainInitialization += sanitizedFullName(*s);
+		mainInitialization += " = ";
+		mainInitialization += s->getInitValue();
+		mainInitialization += ";\n";
+	}
     }
 
     out += indent(level);
@@ -125,16 +158,13 @@ int CGCTarget :: setup (Galaxy& g) {
     mainInitialization = "";
     unique = 0;
 
+    includeFiles.initialize();
+    globalDecls.initialize();
+
     return CGTarget::setup(g);
 }
 
 int CGCTarget :: run () {
-
-    // Set all geodesics to contain a symbolic name that can be
-    // used as the C object representing the buffer.  That name will
-    // be of the form "universe.gal1.gal2.star.output", which designates
-    // the output port that actually produces the data.
-    setGeoNames(*gal);
 
     // Main loop runs before data structure declarations so that
     // the states that are referenced with $ref() macros can be
@@ -172,6 +202,7 @@ void CGCTarget :: wrapup () {
 	if(Scheduler::haltRequested()) return;
 	Target::wrapup();
 
+	myCode += indent(1);
 	myCode += "exit(0);\n";
 	myCode += "}\n";
 
@@ -236,11 +267,46 @@ StringList CGCTarget::beginIteration(int repetitions, int depth) {
 }
 
 void CGCTarget :: addInclude(const char* inc) {
-	include += inc;
+
+	// check whether the file is included or not.
+	StringListIter next(includeFiles);
+	const char* p;
+
+	while ((p = next++) != 0) {
+		if (!strcmp(inc,p)) return;
+	}
+
+	// add new file
+	includeFiles += inc;
+	StringList out = "#include ";
+	out += inc;
+	out += "\n";
+	include += out;
+}
+
+void CGCTarget :: addGlobal(const char* decl) {
+
+	// check whether the file is included or not.
+	StringListIter next(globalDecls);
+	const char* p;
+
+	while ((p = next++) != 0) {
+		if (!strcmp(decl,p)) return;
+	}
+
+	// add new file
+	globalDecls += decl;
+	staticDeclarations += decl;
 }
 
 void CGCTarget :: addDeclaration(const char* decl) {
+	mainDeclarations += indent(1);
 	mainDeclarations += decl;
+}
+
+void CGCTarget :: addMainInit(const char* decl) {
+	mainInitialization += indent(1);
+	mainInitialization += decl;
 }
 
 // copy constructor
@@ -268,3 +334,71 @@ void CGCTarget :: setGeoNames(Galaxy& galaxy) {
 	}
     }
 }
+
+/////////////////////////////////////////
+// routines to determine the buffer sizes
+/////////////////////////////////////////
+
+int CGCTarget :: decideBufSize(Galaxy& g) {
+	// set up the forkDests members of each Fork inputs.
+	setupForkDests(g);
+	
+	GalStarIter nextStar(g);
+	CGCStar* s;
+	while ((s = (CGCStar*)nextStar++) != 0) {
+		if (s->amIFork()) continue;
+		BlockPortIter next(*s);
+		CGCPortHole* p;
+		while ((p = (CGCPortHole*) next++) != 0) {
+			p->finalBufSize();
+		}
+	}
+
+	return TRUE;
+}
+
+void CGCTarget :: setupForkDests(Galaxy& g) {
+	GalStarIter nextStar(g);
+	CGCStar* s;
+	while ((s = (CGCStar*)nextStar++) != 0) {
+		if (!s->amIFork()) continue;
+		BlockPortIter next(*s);
+		CGCPortHole* p = (CGCPortHole*) next++;
+		if (p->isItOutput()) p = p->getForkSrc();
+		p->setupForkDests();
+	}
+}
+
+
+/////////////////////////////////////////
+// codeGenInit
+/////////////////////////////////////////
+
+int CGCTarget :: codeGenInit(Galaxy& g) {
+
+        // initialize the porthole offsets, and do all initCode methods.
+        GalStarIter nextStar(g);
+        CGCStar* s;
+        while ((s = (CGCStar*)nextStar++) != 0) {
+                BlockPortIter next(*s);
+                CGCPortHole* p;
+                while ((p = (CGCPortHole*) next++) != 0) {
+                        if (!p->initOffset()) return FALSE;
+                }
+        }
+
+	// Set all geodesics to contain a symbolic name that can be
+	// used as the C object representing the buffer.  That name will
+	// be of the form "universe.gal1.gal2.star.output", which designates
+	// the output port that actually produces the data.
+	setGeoNames(*gal);
+
+	nextStar.reset();
+	while ((s = (CGCStar*) nextStar++) != 0) {
+		s->offsetInit();
+		s->initCode();
+	}
+
+        return TRUE;
+}
+

@@ -33,31 +33,108 @@ StringList CGCStar::getRef(const char* name) {
 	GenericPort *p = genPortWithName(name);
 	if(!p) return CGStar::getRef(name);
 	if(p->isItMulti()) {
-	    Error::abortRun(*this,
-	        "Accessing MultiPortHole without identifying which port.");
-	    return("ERROR");
+		Error::abortRun(*this,
+		"Accessing MultiPortHole without identifying which port.");
+		return("ERROR");
 	}
-	return ((CGCPortHole*)p)->getGeoName();
+
+	// if necessary, we add offset to this.
+	CGCPortHole* cp = (CGCPortHole*) p;
+	StringList out = cp->getGeoName();
+	if (cp->maxBufReq() > 1) {
+		out += "[";
+		out += ((CGCTarget*)myTarget())->offsetName(cp);
+		out += "]";
+	}
+	
+	return out;
 }
 
 StringList CGCStar::getRef2(const char* name, const char* offset) {
-	StringList out = getRef(name);
-	out += "[";
-	out += offset;
+	StringList out;
+	registerState(name);
+	GenericPort *p = genPortWithName(name);
+	State* s = stateWithName(offset);
+	int offVal;
+	if (s) {
+		if (!s->isA("IntState")) {
+                        codeblockError(offset, " is not the name of an IntState"
+);
+		}
+		IntState* is = (IntState*) s;
+		offVal = *is;
+	}
+
+	if(!p) {
+		out += CGStar::getRef(name);
+		out += "[";
+		if (s) out += offVal;
+		else out += offset;
+	} else {
+		// if necessary, we add offset to this.
+		CGCPortHole* cp = (CGCPortHole*) p;
+		out += cp->getGeoName();
+		if (cp->maxBufReq() > 1) {
+			out += "[(";
+			out += ((CGCTarget*)myTarget())->offsetName(cp);
+			out += " + (";
+			if (s) out += offVal;
+			else out += offset;
+
+			// The maximum possible value of the offset is limited
+			// by the maximum buffer size.
+			if (cp->bufPos() > 0) {
+				out += ")) % ";
+				out += cp->maxBufReq();
+			} else {
+				out += "))";
+			}
+
+		} else {
+			out += "[";
+			if (s) out += offVal;
+			else out += offset;
+		}
+	}
+
 	out += "]";
 	return out;
 }
 
+void CGCStar :: offsetInit() {
+	BlockPortIter next(*this);
+	CGCPortHole* p;
+	while ((p = (CGCPortHole*) next++) != 0) {
+		if (p->maxBufReq() > 1) {
+			StringList out = ((CGCTarget*)myTarget())->offsetName(p);
+			out += " = ";
+			out += p->bufPos();
+			out += ";\n";
+
+			// initialize output buffer
+			if (p->isItOutput()) {
+				out += "    { int i;\n";
+				out += "    for (i = 0; i < ";
+				out += p->maxBufReq();
+				out += "; i++)\n\t";
+				out += p->getGeoName();
+				out += "[i] = 0;\n    }\n";
+			}
+			addMainInit(out);
+		}
+	}
+}
+	
 void CGCStar::registerState(const char* name) {
 	State* state;
 	if(state = stateWithName(name)) {
-	    // If the state is not already on the list of referenced
-	    // states, add it.
-	    StateListIter nextState(referencedStates);
-	    const State* sp;
-	    while ((sp = nextState++) != 0)
-		if(strcmp(name,sp->readName()) == 0) return;
-	    referencedStates.put(*state);
+		// If the state is not already on the list of referenced
+		// states, add it.
+		StateListIter nextState(referencedStates);
+		const State* sp;
+		while ((sp = nextState++) != 0)
+			if(strcmp(name,sp->readName()) == 0) return;
+		referencedStates.put(*state);
 	}
 }
 
@@ -69,6 +146,14 @@ void CGCStar::addDeclaration(const char* decl) {
 	((CGCTarget*)myTarget())->addDeclaration(decl);
 }
 
+void CGCStar::addGlobal(const char* decl) {
+	((CGCTarget*)myTarget())->addGlobal(decl);
+}
+
+void CGCStar::addMainInit(const char* decl) {
+	((CGCTarget*)myTarget())->addMainInit(decl);
+}
+
 void CGCStar::start() {
 	CGStar::start();
 	referencedStates.initialize();
@@ -77,11 +162,39 @@ void CGCStar::start() {
 // fire: prefix the code with a comment
 
 void CGCStar::fire() {
-	StringList code = "/* code from star ";
+	StringList code = "\t{  /* star ";
 	code += readFullName();
 	code += " (class ";
 	code += readClassName();
 	code += ") */\n";
 	addCode(code);
 	CGStar::fire();
+	
+	// update the offset member
+	StringList code2;
+	CGCTarget* t = (CGCTarget*) myTarget();
+
+	BlockPortIter next(*this);
+	CGCPortHole* p;
+	while ((p = (CGCPortHole*) next++) != 0) {
+		if (p->maxBufReq() > 1) {
+			if (p->numberTokens == p->maxBufReq()) continue;
+			code2 += "\t";
+			code2 += t->offsetName(p);
+			code2 += " = (";
+			code2 += t->offsetName(p);
+			code2 += " + ";
+			code2 += p->numberTokens;
+			if (p->wrapAround()) {
+				code2 += ") % ";
+				code2 += p->maxBufReq();
+			} else {
+				code2 += ")";
+			}
+			code2 += ";\n";
+			p->setPrevOffset();
+		}
+	}
+	code2 += "\t}\n";
+	addCode(code2);
 }
