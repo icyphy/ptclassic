@@ -83,61 +83,7 @@ represent a training vector.
     default { "" }
     desc { File to save final gain codebook values. }
   }
-  ccinclude { "Matrix.h" }
-  code {
-
-     // Code for partition function which is to find the optimum partition
-     // of the training vector for fixed gain and shape codebooks, and find
-     // the squared error (squared distance) of this training vector. 
-
-     static void partition(int& indexShape, int& indexGain, 
-			   double& distance, const double* trnVector, 
-			   const double* shapeCodebook, int sizeShapeCodebook,
-			   int dimension, const double* gainCodebook, 
-			   int sizeGainCodebook) {
-
-	// If X=input vector, and Si=i_th shape codeword.
-	// First find shape codeword Si to maximize X'*Si ( ' means transpose ),
-	indexShape = 0;
-	double shapeDistance = 0;
-	for ( int j = 0; j<dimension; j++ )
-	    shapeDistance += trnVector[j] * shapeCodebook[j];
-
-	double sum = 0.0;
-	for ( int i = 1; i < sizeShapeCodebook; i++ ) {
-	    for ( j = 0; j < dimension; j++ )
-	        sum += trnVector[j]*shapeCodebook[i*dimension+j];
-	    if ( sum > shapeDistance ) {
-	       shapeDistance = sum;
-	       indexShape = i;
-	    }
-	    sum = 0.0;
-	}
-
-	// Now shapeDistance stores the maximum X'*Si
-	// Then find the j_th gain codeword gj to minimize (gj-X'*Si)^2
-	indexGain = 0;
-	distance = gainCodebook[0]-shapeDistance;
-	distance *= distance;
-
-	for (i=1; i<sizeGainCodebook; i++) {
-	  sum = gainCodebook[i] - shapeDistance;
-	  sum *= sum;
-          if ( sum < distance ) {
-            distance = sum;
-            indexGain = i;
-          }
-	}
-
-	// Now distance stores the minimun (gj-X'*Si)^2
-	// Squared error (squared distance) is ||X||^2+(gj-X'*Si)^2-(X'*Si)^2. 
-	distance -= shapeDistance * shapeDistance;
-	for (j = 0; j < dimension; j++) {
-	  distance += trnVector[j] * trnVector[j];
-	}
-     }  // end of partition function
-  } 	 // end of code
-
+  ccinclude { "Matrix.h", "PTDSPPartitionCodebook.h" }
   protected {
     double* shapeCodebook;
     double* gainCodebook;
@@ -194,7 +140,7 @@ represent a training vector.
   }
 
   go {
-//  Get the input training vectors and store them in the 2-dimension array
+    // Get the input training vectors and store them in the 2-dimension array
     Envelope inpkt;
     FloatMatrix zerovector(1, int(dimension));
     zerovector = 0;
@@ -270,9 +216,10 @@ represent a training vector.
     double distortion = 0;
 
     for (i = 0; i < int(sizeTrnSet); i++) {
-      partition(indexShape,indexGain,distance,&(trnSet[i*int(dimension)]),
-                shapeCodebook,int(sizeShapeCodebook),int(dimension),
-		gainCodebook,int(sizeGainCodebook));
+      PTDSPPartitionCodebook(&indexShape, &indexGain, &distance,
+			     &(trnSet[i*int(dimension)]), shapeCodebook,
+			     int(sizeShapeCodebook), int(dimension),
+			     gainCodebook, int(sizeGainCodebook));
       distortion += distance;
       for (int j = 0; j < int(dimension); j++) {
         shapeCentroid[indexShape*int(dimension) + j] +=
@@ -311,9 +258,11 @@ represent a training vector.
 
       //  Compute the optimum partition R(Cs(m+1),Cg(m)).
       for (i=0; i<int(sizeTrnSet); i++) {
-        partition(indexShape, indexGain, distance, &(trnSet[i*int(dimension)]),
-                  shapeCodebook, int(sizeShapeCodebook), int(dimension),
-                  gainCodebook, int(sizeGainCodebook));
+        PTDSPPartitionCodebook(&indexShape, &indexGain, &distance,
+			&(trnSet[i*int(dimension)]),
+			shapeCodebook, int(sizeShapeCodebook),
+			int(dimension), gainCodebook,
+			int(sizeGainCodebook));
         (numGainPart[indexGain])++;
 	int s_rowloc = indexShape * int(dimension);
 	int t_rowloc = i * int(dimension);
@@ -348,9 +297,11 @@ represent a training vector.
 	
       //  Compute the optimum partition R(Cs(m+1),Cg(m+1)).
       for (i = 0; i < int(sizeTrnSet); i++) {
-        partition(indexShape, indexGain, distance, &(trnSet[i*int(dimension)]),
-                  shapeCodebook, int(sizeShapeCodebook), int(dimension),
-                  gainCodebook, int(sizeGainCodebook));
+        PTDSPPartitionCodebook(&indexShape, &indexGain, &distance,
+			       &(trnSet[i*int(dimension)]),
+			       shapeCodebook, int(sizeShapeCodebook),
+			       int(dimension), gainCodebook,
+			       int(sizeGainCodebook));
         distortion += distance;
 	int s_rowloc = indexShape * int(dimension);
 	int t_rowloc = i * int(dimension);
