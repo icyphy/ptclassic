@@ -230,13 +230,23 @@ puts "%[list $libraryItem $attr $label]"
     if { $instanceModel == "" } {
         # Get values from the library model
         foreach tag [$libraryModel match attribute $libraryItem] {
-puts "set vals(-$tag) [$libraryModel attrget $libraryItem -$tag]"
             set vals(-$tag) [$libraryModel attrget $libraryItem -$tag]
         }
     } else {
-        # Get values from the instance model
-puts "array set vals [$instanceModel attrset $instanceItem]"
+        # Get values from the instance model.
         array set vals [$instanceModel attrset $instanceItem]
+
+        # Check with the library, in case the attribute was added
+        # to the library after the star was originally instantiated
+        foreach tag [$libraryModel match attribute $libraryItem] {
+            if ![info exists vals(-$tag)] {
+                set vals(-$tag) [$libraryModel attrget \
+                        [concat $libraryItem $tag] -default]
+                
+                # Update the instance model
+                $instanceModel publish attrset $instanceItem -$tag $vals(-$tag)
+            }
+        }
     }
 
     # Build the parameter queries. Booleans are a checkbox.
@@ -404,8 +414,8 @@ body ::tycho::ParameterDialog::update {} {
     # Collect the changed parameters and change the model
     foreach {tag val} [$this get] {
 	if { $val != [$instanceModel attrget $instanceItem -$tag] } {
-puts "$instanceModel publish attrset $instanceItem $-tag $val"
-	    $instanceModel publish attrset $instanceItem $-tag $val
+puts "$instanceModel publish attrset $instanceItem -$tag $val"
+	    $instanceModel publish attrset $instanceItem -$tag $val
 	    lappend updated $tag $val
 	}
     }
