@@ -57,6 +57,11 @@ option add *IndexBrowser.height 20 widgetDefault
 # file. When the user selects an item, we make a hyperjump to the file
 # and to the position given by the point.
 # <p>
+# If a hyperjump is taken into an index file, and a point is specified,
+# then the index is searched for a matching entry.  If a single matching
+# entry is found, then the link is followed for that entry.  Otherwise,
+# the index is displayed with all matching entries shown.
+# <p>
 # If the -file option is given, that file is read for the contents of
 # the listbox.  Moreover, the directory of that file is used for relative
 # filenames referenced by the index.  Otherwise, the current working directory
@@ -84,11 +89,17 @@ class ::tycho::IndexBrowser {
     ##################################################################
     ####                     public methods                       ####
 
+    # Return the current point in a form usable by seePoint.
+    method currentPoint {}
+
     # Open a help window.
     method help {}
 
     # Open a file and go to its internal point identified by name.
     method hyperJump {filename {point {}}}
+
+    # Find a match in the list, and open that entry.
+    method seePoint {point}
 
     ##################################################################
     ####                   protected methods                      ####
@@ -163,6 +174,14 @@ body ::tycho::IndexBrowser::constructor {args} {
     ##################################################################
     ####                     public methods                       ####
 
+#####################################################################
+#### currentPoint
+# Return the text of the current entry.
+#
+body ::tycho::IndexBrowser::currentPoint {} {
+    return [get entry]
+}
+
 ######################################################################
 #### help
 # Open a help window.
@@ -197,6 +216,25 @@ body ::tycho::IndexBrowser::hyperJump {filename {point {}}} {
     ::tycho::TopLevel::hyperJump $filename $point
 }
 
+#####################################################################
+#### seePoint
+# If a hyperjump is taken into an index file, and a point is specified,
+# then the index is searched for a matching entry.  If a single matching
+# entry is found, then the link is followed for that entry.  Otherwise,
+# the index is displayed with all matching entries shown.
+#
+body ::tycho::IndexBrowser::seePoint {point} {
+    insert entry $point
+    set match [complete 1]
+    if {$match == 1} {
+        ok
+    } elseif {$match == 0} {
+        ::tycho::warn "No matching entry found in the domain index"
+    } else {
+        ::tycho::warn "Multiple matching entries found in the domain index. \
+                Use <Tab> to scroll through."
+    }
+}
 
     ##################################################################
     ##################################################################
