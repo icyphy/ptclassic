@@ -166,7 +166,7 @@ class ::tycho::Model {
     private method _clearhistory {args}
     
     # Compact a portion of the command history
-    private method _compacthistory {from to {command {}} {inverse {}}}
+    private method _compacthistory {from {to current}}
     
     #################################################################
     ####                  private variables                      ####
@@ -298,14 +298,12 @@ body ::tycho::Model::header {{prefix "# "}} {
 # indexes into the command history, but this is intended for internal
 # use only.
 #
-# <dt><b>compact</b> _from_ _to_ ?_redo_? ?_undo_?
+# <dt><b>compact</b> _from_ ?_to_?
 # <dd>
 # Compact a portion of the command history. All commands from the
 # one after the mark _from_ up to and including the mark _to_
-# are compacted into a single command. By default, this method
-# constructs a compound command from individual commands. If,
-# however, the _redo_ and _undo_ arguments are supplied, the
-# compacted commands are replaced with the supplied commands.
+# are compacted into a single command. If not supplied, _to_
+# default to "current."
 # An error will be raised if _from_ is not earlier than _to_,
 # or if either mark does not exist.
 #
@@ -315,22 +313,24 @@ body ::tycho::Model::header {{prefix "# "}} {
 # can be saved to a file. Do not assume anything about the format
 # of the returned string.
 #
+# <dt><b>redo</b> _mark_ ?_command_?
+# <dd>
+# If _command_ is not given, return the redo command at the
+# given mark, otherwise set the redo command at the given mark to
+# _mark_. Use this option very carefully. An error is raised if
+# _mark_ does not exist.
+#
 # <dt><b>set</b> _data_
 # <dd>Reconstruct the command history, presumably from data saved
 # to a file. The _data_ must be a string returned by the <b>get</b>
 # option.
 #
-# <dt><b>at</b> _mark_
+# <dt><b>undo</b> _mark_ ?_command_?
 # <dd>
-# Return the redo and undo commands at the given mark. Use
-# this option very carefully. An error is raised if
+# If _command_ is not given, return the undo command at the
+# given mark, otherwise set the undo command at the given mark to
+# _mark_. Use this option very carefully. An error is raised if
 # _mark_ does not exist.
-#
-# <dt><b>replace</b> _mark_ _redo_ _undo_
-# <dd>
-# Replace the redo and undo commands at the given mark with the
-# supplied commands.  Use this option very carefully.
-# An error is raised if _mark_ does not exist.
 #
 # </dl>
 #
@@ -342,15 +342,33 @@ body ::tycho::Model::history {mode args} {
 	    }
 	    eval _appendhistory $args
 	}
-	"at" {
-	    if { [llength $args] != 1 } {
-		error "wrong # args: should be \"history at mark\""
+	"undo" {
+	    if { [llength $args] < 1 || [llength $args] > 2 } {
+		error "wrong # args: should be \"history undo mark ?command?\""
 	    }
 	    set mark [lindex $args 0]
 	    if ![::info exists _mark($mark)] {
 		error "Unknown mark: $mark"
 	    }
-	    list $_redo($_mark($mark)) $_undo($_mark($mark))
+	    if { [llength $args] == 1 } {
+		return $_undo($_mark($mark))
+	    } else {
+		set _undo($_mark($mark)) [lindex $args 1]
+	    }
+	}
+	"redo" {
+	    if { [llength $args] < 1 || [llength $args] > 2 } {
+		error "wrong # args: should be \"history redo mark ?command?\""
+	    }
+	    set mark [lindex $args 0]
+	    if ![::info exists _mark($mark)] {
+		error "Unknown mark: $mark"
+	    }
+	    if { [llength $args] == 1 } {
+		return $_redo($_mark($mark))
+	    } else {
+		set _redo($_mark($mark)) [lindex $args 1]
+	    }
 	}
 	"clear" {
 	    if { [llength $args] > 2 } {
@@ -359,9 +377,8 @@ body ::tycho::Model::history {mode args} {
 	    eval _clearhistory $args
 	}
 	"compact" {
-	    if { [llength $args] < 2 || [llength $args] > 4 } {
-		error "wrong # args: should be \"history compact \
-			from to ?redo ?undo?\""
+	    if { [llength $args] < 2 || [llength $args] > 2 } {
+		error "wrong # args: should be \"history compact from to\""
 	    }
 	    eval _compacthistory $args
 	}
@@ -374,10 +391,12 @@ body ::tycho::Model::history {mode args} {
             set result {}
             foreach index [lsort -integer [array names _redo]] {
                 append result $index
-                append result "\n\{" [::tycho::breakLines $_redo($index) \
-                        -length 60 -substring " -"] "\}"
-                append result "\n\{" [::tycho::breakLines $_undo($index) \
-                        -length 60 -substring " -"] "\}\n"
+                #append result "\n\{" [::tycho::breakLines $_redo($index) \
+                #        -length 60 -substring " -"] "\}"
+                #append result "\n\{" [::tycho::breakLines $_undo($index) \
+                #        -length 60 -substring " -"] "\}\n"
+                append result "\n\{" $_redo($index) "\}"
+                append result "\n\{" $_undo($index) "\}\n"
             }
 	    return $result
             #list [array get _redo] [array get _undo]
@@ -391,19 +410,6 @@ body ::tycho::Model::history {mode args} {
                 set _redo($index) $redo
                 set _undo($index) $undo
             }
-	}
-	"replace" {
-	    if { [llength $args] != 3 } {
-		error "wrong # args: should be \"history replace \
-			mark redo undo\""
-	    }
-	    foreach {mark redo undo} $args {}
-	    if ![::info exists _mark($mark)] {
-		error "Unknown mark: $mark"
-	    }
-	    set _redo($_mark($mark)) $redo
-	    set _undo($_mark($mark)) $undo
-
 	}
 	default {
 	    error "bad option \"$mode\": should be append, at, clear, \
@@ -1042,11 +1048,9 @@ body ::tycho::Model::_clearhistory {{from first} {to last}} {
 #
 # Compact a portion of the command history.
 # Commands from the one after "from" up to and including "to"
-# are compacted into a single command. The third and fourth
-# arguments, if supplied, are commands to replace the compacted
-# commands -- if not supplied, a compound command is constructed.
+# are compacted into a single command.
 #
-body ::tycho::Model::_compacthistory {from to {redo {}} {undo {}}} {
+body ::tycho::Model::_compacthistory {from {to current}} {
 
     # Get the indexes corresponding to the marks
     if { [string match {[0-9]*} $from] } {
@@ -1072,15 +1076,19 @@ body ::tycho::Model::_compacthistory {from to {redo {}} {undo {}}} {
 		to $to ($toindex) in $modelname"
     }
 
-    # Build composite commands if not supplied
-    if { $redo == "" && [expr $fromindex+1] < $toindex } {
+    # Build composite commands
+    if { [expr $fromindex+1] < $toindex } {
 	set i [expr $fromindex + 1]
 	set redo _compound
 	set undo _compound
 	while { $i <= $toindex } {
 	    lappend redo $_redo($i)
-	    lappend undo $_undo($i)
 	    incr i
+	}
+        incr i -1
+	while { $i > $fromindex } {
+	    lappend undo $_undo($i)
+	    incr i -1
 	}
 	# Put the new command into the history
 	set _redo($toindex) $redo
