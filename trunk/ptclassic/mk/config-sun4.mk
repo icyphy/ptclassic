@@ -20,7 +20,8 @@ CC =		gcc
 OPTIMIZER =	-O2
 WARNINGS =	-Wall -Wcast-qual
 GPPFLAGS =	-g $(MEMLOG) $(WARNINGS) $(OPTIMIZER)
-CFLAGS =	-g $(OPTIMIZER)
+# If you are not using gcc, then you might have problems with the WARNINGS flag
+CFLAGS =	-g $(MEMLOG) $(WARNINGS) $(OPTIMIZER)
 
 #
 # Variables for the linker
