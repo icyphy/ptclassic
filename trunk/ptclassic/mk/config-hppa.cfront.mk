@@ -117,7 +117,7 @@ X11EXT_LIBSPEC=	-L/usr/sww/X11R6/lib -lXext -lSM -lICE
 # Variables for miscellaneous programs
 #
 # Used by xv
-XV_RAND =	RAND="-DNO_RANDOM -Drandom=rand"
+XV_RAND =	"-DNO_RANDOM -Drandom=rand"
 XV_INSTALL =	bsdinst
 
 # Used to flush the cache on the hppa.  (source is in the kernel/ directory)
