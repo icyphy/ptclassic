@@ -44,7 +44,7 @@ SRCS = 		$(OBJS:.o=.c)
 
 HDRS = 		oct2ptcl.h
 
-MISC_FILES =	Policy README
+MISC_FILES =	Policy README BUGS
 
 # common.mk wants this, otherwise we get multiple targets for $(LIBDIR)/$(LIB)
 LIB = foo
