@@ -242,7 +242,7 @@ XV_INSTALL=install
 PTCOMPAT_INCSPEC =	-I$(ROOT)/src/compat/ptolemy
 
 # ptbin.mk uses this to decide whether to include the Ipus stars
-INCLUDE_IPUS_DOMAIN = yes
+INCLUDE_IPUS_DOMAIN = no
 
 # ptbin.mk uses this to decide whether to include the PN stars
 INCLUDE_PN_DOMAIN = no
