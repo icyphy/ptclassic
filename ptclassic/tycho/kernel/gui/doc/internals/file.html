@@ -17,14 +17,13 @@ Here we explain how to use the class in scripts.
 To create an instance of the File class directly,
 do the following:
 <tcl><pre>
-::tycho::File .file
-.file centerOnScreen
+set file [::tycho::view File]
 </pre></tcl>
 You can now pack other items into its childsite frame.
 For example:
 <tcl><pre>
-button .file.childsite.b1 -text pushme -command "::tycho::inform thanks"
-pack .file.childsite.b1
+button $file.b1 -text pushme -command "::tycho::inform thanks"
+pack $file.b1
 </pre></tcl>
 However, this class is not intended to be used this way.
 It is intended to be used instead as a base class for any top-level window
