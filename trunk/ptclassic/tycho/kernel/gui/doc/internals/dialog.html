@@ -86,19 +86,6 @@ The only advantage of using this feature is that message automatically
 appears in the center of the screen, without having to issue a second
 command.  This is not a big advantage.
 <p>
-If we wanted to create
-a modal dialog, we could use the
-<a name="newModal procedure">newModal procedure</a>:
-<tcl><pre>
-::tycho::Dialog::newModal Message .y &#92
-    -text {This message must be dismissed before you can continue}
-</pre></tcl>
-The newModal procedure is a convenience that replaces several
-lines of Tcl code that would be required to make the dialog box modal.
-Moreover, the newModal procedure returns the value returned by
-the script called when the button is pushed.  This allows us to create
-modal dialogs that return a value.
-<p>
 The Dialog <A NAME="wait"><CODE>wait</CODE></A> procedure can be used
 to map an Dialog object to the screen and then wait for the object to
 be destroyed.
