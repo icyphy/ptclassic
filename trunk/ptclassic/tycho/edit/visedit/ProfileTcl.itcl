@@ -185,8 +185,7 @@ body ::tycho::ProfileTcl::profileOff {} {
 # Turn profiling on.
 #
 body ::tycho::ProfileTcl::profileOn {} {
-    ::tycho::Loader .myLoader
-    .myLoader loadIfNotPresent profile tclx
+    ::tycho::loadIfNotPresent profile tclx
 
     profile -commands on
 }
