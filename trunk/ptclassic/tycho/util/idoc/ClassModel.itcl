@@ -55,7 +55,7 @@
 #   <li><b>-docfile</b>: The file with the parents documentation (.tim).
 #   </ul>
 # 
-# <li><b>constructor</b> _name_: A constructor. Constructors should be named
+# <li><b>Constructor</b> _name_: A constructor. Constructors should be named
 # according to the language. (See note following methods below.)
 # Constructors can appear only at the top level. Constructors have the 
 # following attributes:
@@ -70,7 +70,7 @@
 # the parameters of the constructor, and may contain nested _annotation_ 
 # entities as documentation.
 #
-# <li><b>destructor</b> _name_: A destructor. Destructors should be named
+# <li><b>Destructor</b> _name_: A destructor. Destructors should be named
 # according to the language. (See note following methods below.)
 # Destructors can appear only at the top level. Destructors have the 
 # following attributes:
@@ -217,17 +217,17 @@ class ::tycho::Class {
     # Add a top-level annotation with attributes to the class
     method annotation {name string args}
 
-    # Add a constructor with attributes to the class
-    method construct {name args}
+    # Add a Constructor with attributes to the class
+    method Constructor {name args}
 
-    # Get the constructor(s) of the class
-    method constructors {}
+    # Get the Constructor(s) of the class
+    method Constructors {}
 
-    # Add a destructor with attributes to the class
-    method destruct {name args}
+    # Add a Destructor with attributes to the class
+    method Destructor {name args}
 
-    # Get the destructor(s) of the class
-    method destructors {}
+    # Get the Destructor(s) of the class
+    method Destructors {}
 
     # Add a method with attributes to the class
     method method {name args}
@@ -304,14 +304,14 @@ body ::tycho::Class::constructor {args} {
             -sourcefile "" \
             -docfile ""
 
-    # Define the "constructor" entity
-    defineEntityType constructor \
+    # Define the "Constructor" entity
+    defineEntityType Constructor \
             -ordered 1 \
 	    -protection public \
 	    -modifiers "" 
 
-    # Define the "destructor" entity
-    defineEntityType destructor \
+    # Define the "Destructor" entity
+    defineEntityType Destructor \
             -ordered 1 \
 	    -protection public \
 	    -modifiers "" 
@@ -358,47 +358,51 @@ body ::tycho::Class::annotation {name value args} {
 }
 
 ########################################################################
-#### construct
+#### Constructor
 #
-# Add a new constructor and return the inverse command.
+# Add a new Constructor and return the inverse command.
 # Additional arguments are a flat attribute-value list for the
-# constructor. Flag an error if the constructor already exists. 
+# constructor. Flag an error if the Constructor already exists. 
+# NOTE: This is capitalized to avoid collisions with the ::tycho::Class
+# constructor.
 #
-body ::tycho::Class::construct {name args} {
-    _verifynot constructor {} $name $name
-    _addentity constructor {} $name {} {} $args
-    list delete constructor $name
+body ::tycho::Class::Constructor {name args} {
+    _verifynot Constructor {} $name $name
+    _addentity Constructor {} $name {} {} $args
+    list delete Constructor $name
 }
 
 ########################################################################
-#### constructors
+#### Constructors
 #
-# Get the constructors of the class.
+# Get the Constructors of the class.
 #
-body ::tycho::Class::constructors {} {
-    _children constructor {}
+body ::tycho::Class::Constructors {} {
+    _children Constructor {}
 }
 
 ########################################################################
-#### destruct
+#### Destructor
 #
-# Add a new destructor and return the inverse command.
+# Add a new Destructor and return the inverse command.
 # Additional arguments are a flat attribute-value list for the
-# destructor. Flag an error if the destructor already exists. 
+# Destructor. Flag an error if the Destructor already exists. 
+# NOTE: This is capitalized to avoid collisions with the ::tycho::Class
+# destructor.
 #
-body ::tycho::Class::destruct {name args} {
-    _verifynot destructor {} $name $name
-    _addentity destructor {} $name {} {} $args
-    list delete destructor $name
+body ::tycho::Class::Destructor {name args} {
+    _verifynot Destructor {} $name $name
+    _addentity Destructor {} $name {} {} $args
+    list delete Destructor $name
 }
 
 ########################################################################
-#### destructors
+#### Destructors
 #
-# Get the destructors of the class.
+# Get the Destructors of the class.
 #
-body ::tycho::Class::destructors {} {
-    _children destructor {}
+body ::tycho::Class::Destructors {} {
+    _children Destructor {}
 }
 
 ########################################################################
