@@ -298,7 +298,7 @@ extern int bind(int, const struct sockaddr *, int);
 #if ! defined(PTSOL7)
 extern int bind(int, struct sockaddr *, int);
 #endif /* ! PTSOL7 */
-#endif /* PTFREEBSD || PTSOL2_6 && ! PTSOL7 *//
+#endif /* PTFREEBSD || PTSOL2_6 && ! PTSOL7 */
 #endif /* ! PTIRIX5 && ! PTHPPA && ! PTALPHA && ! PTLINUX*/
 
 extern void endpwent();		/* octtools/Packages/fc/fc.c and
