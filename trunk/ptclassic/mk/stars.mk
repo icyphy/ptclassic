@@ -133,6 +133,7 @@ endif
 ifdef CGCFULL
 	CGC = 1
 	CGCTK = 1
+	CM5 = 1
 endif
 
 ifdef CGFULL
@@ -334,7 +335,7 @@ ifdef CG
 			$(LIBDIR)/libcgstars.$(LIBSUFFIX) \
 			$(LIBDIR)/libcg.$(LIBSUFFIX)
 	endif
-	SDF = 1
+	SDFLIB = 1
 	CGSTARS = $(LIBDIR)/cgstars.o
 	TARGETS += $(SDFT)/CompileTarget.o
 	LIBS += -lcgstars -lcg
@@ -393,12 +394,15 @@ ifdef SDF
 		LIBS += -lsdfcontribstars
 	endif
 	STARS += $(LIBDIR)/sdfstars.o 
-	TARGETS += $(OBJDIR)/domains/sdf/loopScheduler/LoopTarget.o \
-		
-	LIBS += -lLS -lsdfstars -lsdf
-	LIBFILES += $(LIBDIR)/libsdfstars.$(LIBSUFFIX) \
-		$(LIBDIR)/libLS.$(LIBSUFFIX) \
-		$(LIBDIR)/libsdf.$(LIBSUFFIX)
+	TARGETS += $(OBJDIR)/domains/sdf/loopScheduler/LoopTarget.o 
+	LIBS += -lsdfstars
+	LIBFILES += $(LIBDIR)/libsdfstars.$(LIBSUFFIX)	
+	SDFLIB = 1
+endif
+
+ifdef SDFLIB
+	LIBS += -lLS -lsdf
+	LIBFILES += $(LIBDIR)/libLS.$(LIBSUFFIX) $(LIBDIR)/libsdf.$(LIBSUFFIX)
 endif
 
 # HOF stars can be used in pigiRpc but not ptcl.
