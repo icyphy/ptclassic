@@ -34,11 +34,15 @@ CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
 							COPYRIGHTENDKEY
 
- Programmer:  Soonhoi Ha, Joseph Buck
+ Programmers:	Joseph Buck, Soonhoi Ha, E. A. Lee,
+		Thomas Parks, R. S. Stevens
 
 These are the methods for the basic dynamic dataflow scheduler.  It
-can handle any type of DataFlowStar.  It does not do any kind of
-restructuring of the universe (as is done by DDFScheduler).
+can handle any type of DataFlowStar.  When given an SDF system,
+this scheduler attempts to match the notion of an iteration that
+the SDF scheduler uses.  However, when delays are present, it often
+fails to do so.  Thus, it may be hard to determine, except experimentally,
+how many firings of each star constitute one iteration.
 
 **************************************************************************/
 
@@ -61,7 +65,7 @@ static int isSource(Star& s) {
 	while ((p = nextp++) != 0) {
 		if (p->isItInput()) {
 			int numP = p->numInitDelays();
-			if (!numP || p->numTokens() > numP)
+			if (p->numXfer() > numP)
 				return FALSE;
 		}
 	}
@@ -138,14 +142,16 @@ int DynDFScheduler::checkBlocks() {
 
 void DynDFScheduler::initStructures() {
 	GalStarIter nextStar(*galaxy());
-	// initialize sourceBlocks list
+	// initialize lists of sourceBlocks and nonSourceBlocks
 	sourceBlocks.initialize();
+	nonSourceBlocks.initialize();
 	Star* sW;
 	galSize = 0;
 	while ((sW = nextStar++) != 0) {
 		// put the source block into the sourceBlocks list.
 		if (isSource(*sW))
 			sourceBlocks.put(sW);
+		else nonSourceBlocks.put(sW);
 		galSize++;
 	}
 }
@@ -184,10 +190,21 @@ DynDFScheduler :: run () {
 	    return FALSE;
 	}
 
-	DFGalStarIter nextStar(*galaxy());
+	ListIter nextStar (nonSourceBlocks);
 
-	int scanSize = galSize;		// how many not-runnable stars scanned
 	int deadlock = TRUE;		// deadlock detection.
+
+	// Each pass through this while loop contitutes one iteration.
+	// Each pass has two phases:
+	//	Fire all "source" blocks once
+	//	Fire all non-source blocks as many times as possible.
+	// In firing the non-source blocks, source blocks may also
+	// be invoked using the lazy evaluation mechanism.  For
+	// SDF stars, the scheduler attempts to return the buffers
+	// to their original state (numTokens == numInitialDelays).
+	// A block with enough initial delays at its inputs to be fired
+	// initially is considered a source block, as are, of course,
+	// blocks with no input ports.
 
 	while (numFiring < stopTime && !haltRequested()) {
 
@@ -208,15 +225,17 @@ DynDFScheduler :: run () {
 			deadlock = FALSE;
 		}
 
-		scanSize = galSize;
+		// how many not-runnable stars scanned
+		int scanSize = nonSourceBlocks.size();
    
+		// execute stars as much as possible
 		while (scanSize) {
 
 			// look at the next star in the block-list
-			DataFlowStar* s = nextStar++;
+		        DataFlowStar* s = (DataFlowStar*)nextStar++;
 			if (!s) {
 				nextStar.reset();
-				s = nextStar++;
+				s = (DataFlowStar*)nextStar++;
 			}
 		
 			// check the star is runnable
@@ -226,10 +245,10 @@ DynDFScheduler :: run () {
 				do {
 					if (!s->run()) return FALSE;
 					deadlock = FALSE;
-				} while (isRunnable(*s));
+				} while (isRunnable(*s), FALSE);
 
 				// reset scanSize
-				scanSize = galSize;
+				scanSize = nonSourceBlocks.size();
 			} else {
 				scanSize--;
 			}
@@ -239,7 +258,7 @@ DynDFScheduler :: run () {
 				return FALSE;
 			}
 			// there is a deadlock condition.
-			if (lazyDepth > galSize) {
+			if (lazyDepth > nonSourceBlocks.size()) {
 				deadlock = TRUE;
 				break;
 			}
@@ -272,10 +291,12 @@ static PortHole* checkInputOverflow(Star& s, int maxToken) {
 	return 0;
 }
 
-int DynDFScheduler :: isRunnable(DataFlowStar& s) {
+int DynDFScheduler :: isRunnable(DataFlowStar& s, 
+				 int enableLazyEvalForDynPorts) {
 
-	// if source, return FALSE
-	if (isSource(s)) return FALSE;
+	// Before, this routine would check to see if s is a
+	// source star, in which case it would return FALSE.
+	// Now, we don't call this for source stars.
 
 	lazyDepth = 1;		 // initialize lazyDepth
 
@@ -296,8 +317,10 @@ int DynDFScheduler :: isRunnable(DataFlowStar& s) {
 
 		// if # tokens are static, return FALSE.
 		// if on wormhole boundary, return FALSE.
-		
-		if (!wp->isDynamic() || wp->atBoundary())
+		// if lazy evaluation turned off for dynamic ports,
+		//	return FALSE
+		if (!wp->isDynamic() || wp->atBoundary()
+		                     || !enableLazyEvalForDynPorts)
 			return FALSE;
 
 		// OK, try to get some tokens by evaluating the source star.
