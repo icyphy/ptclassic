@@ -166,7 +166,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	       $ref(passFreq), $ref(centerFreq), $ref(bandwidth), $ref(gain));
 	    $sharedSymbol(CGCParametricEq,selectFilter)
 	      (&$starSymbol(parametric), $starSymbol(filtercoeff),
-	       $starSymbol(filtertaps), "$val(filtertype)");
+	       $starSymbol(filtertaps), $ref(filtertype));
 
 	    sprintf(buf, "%.2f", $ref(centerFreq));
 	    displaySliderValue(".middle", "$starSymbol(scale2)", buf);
@@ -192,7 +192,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	       $ref(passFreq), $ref(centerFreq), $ref(bandwidth), $ref(gain));
 	    $sharedSymbol(CGCParametricEq,selectFilter)
 	      (&$starSymbol(parametric), $starSymbol(filtercoeff),
-	       $starSymbol(filtertaps), "$val(filtertype)");
+	       $starSymbol(filtertaps), $ref(filtertype));
 
 	    sprintf(buf, "%.2f", $ref(centerFreq));
 	    displaySliderValue(".middle", "$starSymbol(scale2)", buf);
@@ -222,7 +222,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	       $ref(passFreq), $ref(centerFreq), $ref(bandwidth), $ref(gain));
 	    $sharedSymbol(CGCParametricEq,selectFilter)
 	      (&$starSymbol(parametric), $starSymbol(filtercoeff),
-	       $starSymbol(filtertaps), "$val(filtertype)");
+	       $starSymbol(filtertaps), $ref(filtertype));
 
 	    sprintf(buf, "%.4f", $ref(bandwidth));
 	    displaySliderValue(".high", "$starSymbol(scale3)", buf);
@@ -254,7 +254,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	       $ref(passFreq), $ref(centerFreq), $ref(bandwidth), $ref(gain));
 	    $sharedSymbol(CGCParametricEq,selectFilter)
 	      (&$starSymbol(parametric), $starSymbol(filtercoeff),
-	       $starSymbol(filtertaps), "$val(filtertype)");
+	       $starSymbol(filtertaps), $ref(filtertype));
 
 	    sprintf(buf, "%.2f", $ref(passFreq));
 	    displaySliderValue(".middle", "$starSymbol(scale4)", buf);
