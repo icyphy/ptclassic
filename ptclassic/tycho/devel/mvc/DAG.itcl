@@ -159,33 +159,31 @@ body ::tycho::DirectedAcyclicGraph::describe {} {
 #
 body ::tycho::DirectedAcyclicGraph::describeSubgraph {roots} {
     # Keep track of our current position in the result list.
-    set pos 0
     foreach node [lsort $roots] {
         lappend result [list \
                 $node \
                 $contentsstring($node) \
                 $parentnames($node) \
                 $childrennames($node)]
-        set done($node) $pos
-        incr pos
+        set done($node) 1
     }
     set idx 0
     while {$idx < [llength $result]} {
         foreach child [lsort [lindex [lindex $result $idx] 3]] {
+            set nodeinfo [list \
+                    $child \
+                    $contentsstring($child) \
+                    $parentnames($child) \
+                    $childrennames($child)]
             if [info exists done($child)] {
                 # The child has been previously listed.  That may have
                 # been premature.  Remove it.
-                set where $done($child)
+                set where [lsearch -exact $result $nodeinfo]
                 set result [lreplace $result $where $where]
-                incr pos -1
+                if {$where < $idx} {incr idx -1}
             }
-            lappend result [list \
-                    $child \
-                    $contentsstring($child) \
-                    [lsort $parentnames($child)] \
-                    [lsort $childrennames($child)]]
-            set done($child) $pos
-            incr pos
+            lappend result $nodeinfo
+            set done($child) 1
         }
         incr idx
     }
