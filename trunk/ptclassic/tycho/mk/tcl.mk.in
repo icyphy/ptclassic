@@ -86,8 +86,3 @@ TCL_INCLUDES = \
 	$(TK_XINCLUDES)
 
 CFLAGS =	$(TCL_CFLAGS) $(AC_FLAGS) $(INCLUDE) $(OTHERCFLAGS)
-
-.SUFFIXES: .c .o
-
-.c.o :
-	$(CC) -c $(CFLAGS) $<
