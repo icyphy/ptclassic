@@ -25,7 +25,7 @@ If output is directed to a file, then flushing does not occur until the
 wrapup method is called.
 Before the first data are flushed, the file will not exist.
 }
-  input {
+  inmulti {
     name { input }
     type { ANYTYPE }
   }
@@ -56,7 +56,20 @@ Before the first data are flushed, the file will not exist.
 
   go {
     pt_ofstream & output = *p_out;
-    output << input.get().print() << "\n";
+    MPHIter nexti(input);
+    InSRPort * p;   
+    while ( (p = (InSRPort *)(nexti++)) != NULL ) {
+      output << p->name() << ": ";
+      if ( p->known() ) {
+	output << "unknown\n";
+      } else {
+	if ( p->present() ) {
+	  output << p->get().print() << "\n";
+	} else {
+	  output << "absent\n";
+	}	    
+      }
+    }
   }
 
   wrapup {
