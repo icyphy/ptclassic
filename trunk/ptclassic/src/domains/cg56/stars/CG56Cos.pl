@@ -2,8 +2,8 @@ defstar {
 	name { Cos }
 	domain { CG56 }
 	desc { 
-Cosine function.
-Calculation by table lookup.  Input range of (-1,1) scaled by pi.
+Cosine function calculated by table lookup.
+Input range of (-1,1) scaled by $pi$.
 	}
 	version { $Id$ }
 	acknowledge { Gabriel version by Maureen O'Reilly }
@@ -19,9 +19,9 @@ limitation of liability, and disclaimer of warranty provisions.
 .Id "cosine"
 This star computes the cosine of the input, which must be in the range
 (-1.0, 1.0).
-The output equals cos($~pi~cdot~$\fIin\fR), so the input range is 
-effectively (-$~pi$, $pi~$).
-The output is in the range (-1.0, 1.0).
+The output equals $cos(pi cdot in)$, so the input range is 
+effectively $(-pi, pi)$.
+The output is in the range $(-1.0, 1.0)$.
 	}
 	input {
 		name {input}

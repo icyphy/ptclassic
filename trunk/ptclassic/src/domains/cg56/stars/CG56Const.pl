@@ -12,8 +12,8 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CG56 signal sources library }
 	explanation {
-There are no runtime instructions associated with this star.  The
-output buffer is initialized with the specified DC value.
+There are no runtime instructions associated with this star.
+The output buffer is initialized with the specified DC value.
 	}
 	output {
 		name {output}
