@@ -123,7 +123,7 @@ DEScheduler :: run (Block& galaxy) {
 		// Record the arrival time, and flag existence of data.
 		// We may require more than one events on an arc such as
 		// SDFinDEWormholes. Then, wait...
-		if (terminal->myGeodesic->size() < terminal->numberTokens)
+		if (terminal->numTokens() < terminal->numberTokens)
 			continue;
 		s->arrivalTime = level;
 		terminal->grabData();
@@ -144,7 +144,7 @@ DEScheduler :: run (Block& galaxy) {
 			if (level == h->level && dest == s && tl != terminal) {
 				eventQ.extract(h);
 				delete h;
-				if (tl->myGeodesic->size() >= tl->numberTokens)
+				if (tl->numTokens() >= tl->numberTokens)
 					tl->grabData();
 			} else if (h->level > level)
 				goto L1;
