@@ -178,7 +178,7 @@ makefile: config.status
 	$(SHELL) config.status	
 
 install:	makefile
-	@$(INSTALL_PROGRAM) pxgraph $(BIN_INSTALL_DIR)/pxgraph
+	@$(INSTALL_PROGRAM) pxgraph $(BIN_DIR)/pxgraph
 	@$(INSTALL_DATA) pxgraph.man $(MAN1_INSTALL_DIR)/pxgraph.1
 
 # "make clean" removes .o files and other cruft
