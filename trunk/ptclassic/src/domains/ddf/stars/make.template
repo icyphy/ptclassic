@@ -18,11 +18,10 @@ include $(CONFIG)
 
 # DDFDIR is the directory containing DDF domain support
 DDFDIR = $(ROOT)/src/domains/ddf/kernel
-DYCONDIR = $(ROOT)/src/domains/ddf/constructs
 # SDFDIR is the directory containing SDF domain support (also needed)
 SDFDIR = $(ROOT)/src/domains/sdf/kernel
 
-INCL = -I$(DDFDIR) -I$(DYCONDIR) -I$(SDFDIR) -I$(KERNDIR)
+INCL = -I$(DDFDIR) -I$(SDFDIR) -I$(KERNDIR)
 
 PL_SRCS=\
 DDFCase.pl \
