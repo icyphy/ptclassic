@@ -1,0 +1,23 @@
+#! /bin/csh -f
+# $Id$
+
+# Command uses printer defined by environmental variable $PRINTER
+# User .cshrc file must contain "set PRINTER = whatever"
+
+# The argument(s) are the titles to be printed.
+# An implicit header file, $PRINTER/doc/headers/shared, is prepended.
+
+if ($#argv == 0) then
+	echo "Usage: printpage files"
+	exit 0
+endif
+
+if ( ! $?PTOLEMY ) setenv PTOLEMY ~ptolemy
+
+# File structure information:
+set dirheader = $PTOLEMY/doc/headers
+set printcommand = groff
+set printoptions = "-me -t -e"
+
+gsoelim $dirheader/groff-fix $dirheader/shared $* | \
+$printcommand $printoptions | lpr

@@ -1,0 +1,23 @@
+#! /bin/csh -f
+
+# print title, Alan Kamas: $Id$
+# Command uses printer defined by environmental variable $PRINTER
+# User .cshrc file must contain "set PRINTER = whatever"
+
+# The argument(s) are the title files to be printed.
+# An implicit header file, $PRINTER/doc/headers/shared, is prepended.
+
+if ($#argv == 0) then
+	echo "Usage: printtitle files"
+	exit 0
+endif
+
+if ( ! $?PTOLEMY ) setenv PTOLEMY ~ptolemy
+
+# File structure information:
+set dirheader = $PTOLEMY/doc/headers
+set printcommand = ditroff
+set printoptions = "-me -tbl -eqn -P$PRINTER"
+
+soelim $dirheader/shared $* | \
+$printcommand $printoptions
