@@ -25,16 +25,20 @@ Output as a fixed-point number the "pos" input minus all "neg" inputs.
                 default {"YES"}
                 desc {
 Flag indicating whether or not to use the precision of the arriving particles
-("neg" inputs) as they are:  YES processes them unaltered, and NO casts
-them to the precision specified by the parameter "InputPrecision". }
+(the "pos" input and the "neg" inputs) as they are:  YES processes them
+unaltered, and NO casts them to the precision specified by the
+parameter "InputPrecision".
+		}
         }
         defstate {
                 name { InputPrecision }
                 type { string }
                 default { "4.14" }
                 desc {
-Precision of the "neg" input in bits.  The input particles are only
-cast to this precision if the parameter "ArrivingPrecision" is set to NO.}
+Precision of the "neg" input in bits.
+The input particles are only cast to this precision if the
+parameter "ArrivingPrecision" is set to NO.
+		}
         }
         defstate {
                 name { OutputPrecision }
@@ -62,13 +66,15 @@ The keywords for overflow handling methods are:
 		}
         }
         protected {
-                int in_IntBits, in_len;
 		Fix fixIn, diff;
         }
         setup {
-                const char* IP = InputPrecision;
-                in_IntBits = Fix::get_intBits(IP);
-                in_len = Fix::get_length(IP);
+                if ( ! int(ArrivingPrecision) ) {
+                  const char* IP = InputPrecision;
+                  int in_IntBits = Fix::get_intBits(IP);
+                  int in_len = Fix::get_length(IP);
+                  fixIn = Fix(in_len, in_IntBits);
+		}
 
                 const char* OP = OutputPrecision;
                 int out_IntBits = Fix::get_intBits(OP);
@@ -81,16 +87,19 @@ The keywords for overflow handling methods are:
         go {
                 MPHIter nexti(neg);
                 PortHole *p;
-                Fix fixIn;
 
-		diff = Fix(pos%0);
-                while ((p = nexti++) != 0) {
-                  if ( int(ArrivingPrecision) )
-                    fixIn = Fix((*p)%0);
-                  else
-                    fixIn = Fix(in_len, in_IntBits, Fix((*p)%0));
-
-                  diff -= fixIn;
+                if ( int(ArrivingPrecision) ) {
+		  diff = Fix(pos%0);
+                  while ((p = nexti++) != 0)
+                    diff -= Fix((*p)%0);
+		}
+		else {
+		  fixIn = Fix(pos%0);
+		  diff = fixIn;
+                  while ((p = nexti++) != 0) {
+		    fixIn = Fix((*p)%0);
+                    diff -= fixIn;
+		  }
 		}
                 output%0 << diff;
         }

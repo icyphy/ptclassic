@@ -82,12 +82,14 @@ The keywords for overflow handling methods are:
         }
         protected {
 		Fix fixIn, out;
-                int in_IntBits, in_len;
         }
         setup {
-                const char* IP = InputPrecision;
-                in_IntBits = Fix::get_intBits(IP);
-                in_len = Fix::get_length(IP);
+                if ( ! int(ArrivingPrecision) ) {
+                  const char* IP = InputPrecision;
+                  int in_IntBits = Fix::get_intBits(IP);
+                  int in_len = Fix::get_length(IP);
+                  fixIn = Fix(in_len, in_IntBits);
+		}
 
                 const char* OP = OutputPrecision;
                 int out_IntBits = Fix::get_intBits(OP);
@@ -100,11 +102,8 @@ The keywords for overflow handling methods are:
 	go {
 		// all computations should be performed with out since that
 		// is the Fix variable with the desired overflow handler
+                fixIn = Fix(input%0);
 		out = Fix(gain);
-                if ( int(ArrivingPrecision) )
-                  fixIn = Fix(input%0);
-                else
-                  fixIn = Fix(in_len, in_IntBits, Fix(input%0));
                 out *= fixIn;
 		output%0 << out;
 	}

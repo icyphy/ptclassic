@@ -59,12 +59,14 @@ The keywords for overflow handling methods are:
 	}
 	protected {
 		Fix fixIn, product;
-		int in_IntBits, in_len;
 	}
 	setup {
-	        const char* IP = InputPrecision;
-	        in_IntBits = Fix::get_intBits(IP);
-	        in_len = Fix::get_length(IP);
+		if ( ! int(ArrivingPrecision) ) {
+	          const char* IP = InputPrecision;
+	          int in_IntBits = Fix::get_intBits(IP);
+	          int in_len = Fix::get_length(IP);
+		  fixIn = Fix(in_len, in_IntBits);
+		}
 
 	        const char* OP = OutputPrecision;
 	        int out_IntBits = Fix::get_intBits(OP);
@@ -73,20 +75,28 @@ The keywords for overflow handling methods are:
 
 	        const char* OV = OverflowHandler;
 	        product.set_ovflow(OV);
-
 	}
 	go {
 	        MPHIter nexti(input);
 	        PortHole *p;
 
+		// initialize product as the value on the first input port
+		// (if it exists) and then compute the product
 		p = nexti++;
-		product = Fix((*p)%0);
-	        while ((p = nexti++) != 0) {
-		  if ( int(ArrivingPrecision) )
-	            fixIn = Fix((*p)%0);
-		  else
-	            fixIn = Fix(in_len, in_IntBits, Fix((*p)%0));
-		  product *= fixIn;
+		if ( p != 0 ) {
+	          fixIn = Fix((*p)%0);
+	          product = fixIn;
+	          while ((p = nexti++) != 0) {
+		    if ( int(ArrivingPrecision) )
+		      product *= Fix((*p)%0);
+		    else {
+	              fixIn = Fix((*p)%0);
+		      product *= fixIn;
+		    }
+		  }
+		}
+		else {			// 1.0 will overflow if the fixed-
+		  product = 1.0;	// representation has 0 integer bits
 		}
 	        output%0 << product;
 	}

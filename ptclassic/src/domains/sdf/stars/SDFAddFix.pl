@@ -59,12 +59,14 @@ The keywords for overflow handling methods are:
         }
         protected {
 		Fix fixIn, sum;
-		int in_IntBits, in_len;
         }
         setup {
-                const char* IP = InputPrecision;
-                in_IntBits = Fix::get_intBits(IP);
-                in_len = Fix::get_length(IP);
+                if ( ! int(ArrivingPrecision) ) {
+                  const char* IP = InputPrecision;
+                  int in_IntBits = Fix::get_intBits(IP);
+                  int in_len = Fix::get_length(IP);
+                  fixIn = Fix(in_len, in_IntBits);
+		}
 
                 const char* OP = OutputPrecision;
                 int out_IntBits = Fix::get_intBits(OP);
@@ -78,14 +80,15 @@ The keywords for overflow handling methods are:
                 MPHIter nexti(input);
                 PortHole *p;
 
+		// The current fixed-point class can always represent 0.0
 		sum = 0.0;
                 while ((p = nexti++) != 0) {
                   if ( int(ArrivingPrecision) )
+                    sum += Fix((*p)%0);
+		  else {
                     fixIn = Fix((*p)%0);
-                  else
-                    fixIn = Fix(in_len, in_IntBits, Fix((*p)%0));
-
-                  sum += fixIn;
+                    sum += fixIn;
+		  }
 		}
                 output%0 << sum;
         }
