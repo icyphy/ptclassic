@@ -85,6 +85,9 @@ parameter values, hierarchy, and file structure.
 .IE VEM
 VEM provides one of many ways to examine and edit designs
 stored by Oct.
+This section gives enough information about VEM to use it with \*(PT
+in simple ways.  More complete documentation is contained in the VEM
+section of the Almagest.
 A third component of this system, called \fBRPC\fR, is
 .IE RPC
 a link between applications and VEM.
