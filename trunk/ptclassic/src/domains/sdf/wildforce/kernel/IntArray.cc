@@ -94,24 +94,17 @@ void IntArray::fill(int default_val)
     ints[loop]=default_val;
 }
 
-static int intcompare(int *i, int *j)
+static int intcompare(const void *i, const void *j)
 {
-  if (*i > *j)
+
+  if (*((int *)i) > *((int *)j))
     return(1);
-  if (*i <= *j)
+  if (*((int *)i) <= *((int *)j))
     return(-1);
   return(0);
     
 }
-static int intcompare2(int *i, int *j)
-{
-  if (*i < *j)
-    return(1);
-  if (*i >= *j)
-    return(-1);
-  return(0);
-    
-}
+
 IntArray* IntArray::sort_lh(void)
 {
   IntArray* results=new IntArray(total);
