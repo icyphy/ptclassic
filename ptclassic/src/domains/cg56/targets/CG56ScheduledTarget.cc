@@ -50,14 +50,12 @@ is read in and the scheduler is initialized to it.
 
 // constructor
 CG56ScheduledTarget::CG56ScheduledTarget(const char* name,const char* desc) : 
-		CG56Target(name,desc), MotorolaTarget(name,desc,"CG56Star") 
-{
+		CG56Target(name,desc), MotorolaTarget(name,desc,"CG56Star") {
 	initStates();
 }
 
 CG56ScheduledTarget::CG56ScheduledTarget(const CG56ScheduledTarget& arg) : 
-		CG56Target(arg), MotorolaTarget(arg) 
-{
+		CG56Target(arg), MotorolaTarget(arg) {
 	initStates();
 	copyStates(arg);
 }
@@ -76,22 +74,29 @@ void CG56ScheduledTarget :: setup() {
 
 	// Open the file name
 	FILE* fp = fopen(schedFileName, "r");
-	if(fp == NULL)
-	{
+	if(fp == NULL) {
 		Error::abortRun("Can't read schedule file.");
 		return;
 	}
-	SDFSchedule sched;
+
+	// Read the number of stars
 	int numStars = 0;
-	fscanf(fp, "%d", &numStars); 
-	for(int i=0; i < numStars; i++)
-	{
+	if(fscanf(fp, "%d", &numStars) != 1) {
+		Error::abortRun("Can't read the number of stars from the schedule.");
+		return;
+	}
+
+	// Create a new schedule
+	SDFSchedule sched;
+	for(int i=0; i < numStars; i++) {
 		char starName[256];
-		fscanf(fp, "%s", starName);
+		if(fscanf(fp, "%s", starName) != 1) {
+			Error::abortRun("Can't read the star name from the schedule");
+			return;
+		}
 		starName[255] = 0;
 		CG56Star* star = (CG56Star*)starWithFullName(starName);
-		if(star == NULL)
-		{
+		if(star == NULL) {
 			Error::abortRun("The star '", starName,
 					"' was not found in universe");
 			return;
