@@ -242,8 +242,9 @@ void MultiTarget :: restoreChildOrder() {
  
 // virtual function
 Target* MultiTarget :: child(int n) {
-	int ix = reorder[n];
-	return Target::child(ix);
+    if ( n < 0 || n >= nProcs()) return (Target*) NULL;
+    int ix = reorder[n];
+    return Target::child(ix);
 }
 
 ISA_FUNC(MultiTarget, CGTarget);
