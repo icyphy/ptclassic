@@ -9,7 +9,7 @@
 # See the file $PTOLEMY/copyright for copyright notice,
 # limitation of liability, and disclaimer of warranty provisions.
 
-set usagestring = "usage: tycho [-debug] [-ptiny|-ptrim|-pigi] [-bin tychobin] [-bak] [scriptfile]"
+set usagestring = "Usage: $0 [-debug] [-ptiny|-ptrim|-pigi|-bin tychobin] [-bak] [scriptfile]"
 
 if ( ! $?PTOLEMY ) setenv PTOLEMY ~ptolemy
 
@@ -45,6 +45,8 @@ else
     setenv MANPATH $PTOLEMY/tcltk/tk/man:$PTOLEMY/tcltk/tcl/man:$PTOLEMY/doc/man:$MANPATH
 endif
 
+set argError = "Usage: $0 -ptiny, -ptrim, -pigi and -bin xxx are mutually exclusive"
+
 while ($#argv)
 	switch ($argv[1])
 		case -help:
@@ -61,15 +63,35 @@ while ($#argv)
 			set tychodebug
 			breaksw
 		case -ptiny:
+			if ( $?selectPtolemy ) then
+				echo $argError
+				exit 2
+			endif
+			set selectPtolemy
 			set tychoptiny
 			breaksw
 		case -ptrim:
+			if ( $?selectPtolemy ) then
+				echo $argError
+				exit 2
+			endif
+			set selectPtolemy
 			set tychoptrim
 			breaksw
 		case -pigi:
+			if ( $?selectPtolemy ) then
+				echo $argError
+				exit 2
+			endif
+			set selectPtolemy
 			set tychopigi
 			breaksw
 		case -bin:
+			if ( $?selectPtolemy ) then
+				echo $argError
+				exit 2
+			endif
+			set selectPtolemy
 			set prog = $argv[2]
 			shift
 			breaksw
@@ -102,7 +124,7 @@ if ( ! $?prog ) then
 			    set prog = $PTOLEMY/obj.$PTARCH/tycho/kernel/tysh
 			else
 			    set tychoedit
-			    set prog = ($PTOLEMY/tcltk/itcl.$PTARCH/bin/itkwish -f $PTOLEMY/tycho/kernel/Tycho)
+			    set prog = ($PTOLEMY/tcltk/itcl.$PTARCH/bin/itkwish -f $PTOLEMY/tycho/kernel/Tycho.tcl)
 			endif
 		endif
 
