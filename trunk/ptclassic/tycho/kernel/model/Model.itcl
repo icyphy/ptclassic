@@ -175,6 +175,18 @@ class ::tycho::Model {
     # The name of this model, used in messages and the like
     public variable modelname ""
 
+    # The author
+    public variable author ""
+
+    # The author
+    public variable description ""
+
+    # The title
+    public variable title ""
+
+    # The version
+    public variable version ""
+
     #################################################################
     ####                     public methods                      ####
 
@@ -217,6 +229,9 @@ class ::tycho::Model {
     #################################################################
     ####               protected variables                       ####
 
+    # A list of printable public variables
+    protected variable printable {-author -description -title -version}
+
     # A flag saying whether to record commands
     protected variable recording 0
 
@@ -251,11 +266,6 @@ class ::tycho::Model {
 
     # The array of undo commands
     private variable _undo
-
-    # Debugging only
-    method debug {args} {
-	eval $args
-    }
 
     #################################################################
     ####                private common variables                 ####
