@@ -63,7 +63,7 @@ CGCTclTkTarget::CGCTclTkTarget(const char* name,const char* starclass,
 		  "-L$PTOLEMY/lib.$ARCH "
 		  "-L$PTOLEMY/tcltk/tk.$ARCH/lib "
 		  "-L/usr/X11/lib "
-		  "-ltk -ltcl -lptk -lXpm -lX11 -lm";
+		  "-ltk -ltcl -lptk -lX11 -lm";
 	linkOptions.setInitValue(hashstring(linkOpts));
 	loopingLevel.setInitValue("1");
 	addStream("mainLoopInit", &mainLoopInit);
