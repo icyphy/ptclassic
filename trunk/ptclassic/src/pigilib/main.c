@@ -1,5 +1,5 @@
 /* 
-Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
+Copyright (c) 1990-1994 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -89,7 +89,6 @@ long userOptionWord;
 
 RPCFunction CommandArray[] = {
     {EditParams, "Edit", "edit-params", "e", 0},
-    {DefineParams, "Edit", "define-params", "+", 0},
     {RpcEditDomain, "Edit", "edit-domain", "d", 0},
     {RpcEditTarget, "Edit", "edit-target", "T", 0},
     {RpcEditComment, "Edit", "edit-comment", ";", 0},
@@ -117,7 +116,8 @@ RPCFunction CommandArray[] = {
     {ShowFacetNum, "Other", "facet number", "H",0},
     {Man, "Other", "man","M",0},
     {Profile, "Other", "profile", ",", 0},
-    {PrintFacet, "Other", "print facet"},
+    {PrintFacet, "Other", "print facet", "", 0},
+    {RpcShowName, "Other", "show-name", "n", 0},
     {Options, "Other", "options"},
     {Version, "Other", "version"},
     {ExitApp, "Other", "exit-pigi"}
