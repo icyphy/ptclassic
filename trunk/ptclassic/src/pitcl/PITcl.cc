@@ -504,7 +504,9 @@ int PTcl::domains(int argc,char **) {
 		return usage("domains");
 	int n = Domain::number();
 	for (int i = 0; i < n; i++) {
-		addResult(Domain::nthName(i));
+	    const char* domain = Domain::nthName(i);
+	    if (KnownBlock::validDomain(domain))
+		addResult(domain);
 	}
 	return TCL_OK;
 }
