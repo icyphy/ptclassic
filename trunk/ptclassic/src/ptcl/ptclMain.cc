@@ -52,6 +52,7 @@ static void loadStartup(Tcl_Interp* interp);
 #include <tcl.h>
 #include <errno.h>
 
+#ifndef linux
 /*
  * Declarations for various library procedures and variables (don't want
  * to include tclUnix.h here, because people might copy this file out of
@@ -65,6 +66,7 @@ extern void		exit _ANSI_ARGS_((int status));
 extern int		isatty _ANSI_ARGS_((int fd));
 extern char *		strcpy _ANSI_ARGS_((char *dst, CONST char *src));
 };
+#endif
 
 static Tcl_Interp *interp;	/* Interpreter for application. */
 static Tcl_DString command;	/* Used to buffer incomplete commands being
