@@ -144,4 +144,22 @@ test Path-5.1 {Test out pathEnvSearch} {
     set env(PATH) $savePATH
     list $isexecutable $nonexistant $msg1
 } {1 {} {pathEnvSearch: $PATH is not set!}}
+
+test Path-5.1 {Test out evalIfNewer} {
+    set fd [open Path-5.1a w]
+    puts $fd "Test file for evalIfNewer"
+    close $fd
+
+    # Delay 1 second
+    set startTime [clock seconds]
+    while {$startTime == [clock seconds]} {}
+
+    set fd [open Path-5.1b w]
+    puts $fd "Test file for evalIfNewer"
+    close $fd
+
+    set res1 [::tycho::evalIfNewer Path-5.1b Path-5.1a set a 1]
+    set res2 [::tycho::evalIfNewer Path-5.1a Path-5.1b set a 1]
+    list $res1 $res2
+} {1 {}}
 doneTests
