@@ -226,6 +226,9 @@ private:
 	// Add in port to variable transfers here from portVarList.
 	void addPortVarTransfers(VHDLCluster*, int);
 
+	// Add in firing declarations here.
+	void addDeclarations(VHDLCluster*, int);
+
 	// Add in firing actions here.
 	void addActions(VHDLCluster*, int);
 
