@@ -16,6 +16,7 @@ include $(ROOT)/mk/config-g++.mk
 X11_INCSPEC = -I/usr/X11/include
 X11_LIBSPEC = -L/usr/X11/lib -lX11
 
+RANLIB =	ranlib
 # Use gcc everywhere _except_ in octtools
 CC=		gcc
 OPTIMIZER=	-O2
