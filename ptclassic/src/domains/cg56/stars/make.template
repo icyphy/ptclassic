@@ -52,7 +52,7 @@ PL_SRCS= \
  CG56IIDGaussian.pl \
  CG56IIDUniform.pl \
  CG56Impulse.pl \
- CG56Integrator.pl \
+ CG56Intgrtr.pl \
  CG56IntegratorR.pl \
  CG56Limit.pl \
  CG56LinToCirc.pl \
