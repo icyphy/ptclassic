@@ -266,16 +266,12 @@ int POct::SetDelayParams(octObject *instPtr, ParamListType *pListp) {
 // copies of name and value fields but instead are indices into a single
 // string
 void POct::DeletePList(ParamListType* pListp) {
-    if ( pListp ) {
+    if ( pListp->flat_plist_flag ) {
+	FreeFlatPList(pListp);
+    }
+    else if ( pListp ) {
 	if ( pListp->array ) {
 	    for (int i=0; i < pListp->length; i++) {
-
-		// FIXME: a consistent decision should be made about
-		// whether a ParamListType owns its strings or not,
-		// and if so they should not be "const char *".
-		// Note that it is not legal C++ to delete a "const T *"
-		// pointer, hence the casts.
-
 		// strings created by savestring, which uses the new operator
 		delete [] (char*)(pListp->array[i].name);
 		pListp->array[i].name = 0;
@@ -288,6 +284,7 @@ void POct::DeletePList(ParamListType* pListp) {
 	    pListp->array = 0;
 	}
 	pListp->length = 0;
+	pListp->dynamic_memory = 0;
     }
 }
 
@@ -305,6 +302,7 @@ int POct::MakePList(char* parameterList, ParamListType* pListp) {
     pListp->length = 0;
     pListp->array = 0;
     pListp->dynamic_memory = 0;
+    pListp->flat_plist_flag = FALSE;
 
     if (strcmp(parameterList, "NIL") == 0) {
         return TRUE;
@@ -417,10 +415,6 @@ int POct::ptkCompile (int aC, char** aV) {
 int POct::ptkGetParams (int aC, char** aV) {
     octObjectClass facet;
 
-    //  FIXME:  The current pList and the strings it points to are
-    //  allocated in subfunctions, but never freed.  This needs to
-    //  be systematically fixed in pigilib, and KernelCalls. - aok
-
     // Error checking: number of arguments, oct facet file
     if (aC != 3) {
         return usage ("ptkGetParams <OctFacetHandle> <OctInstanceHandle>");
@@ -432,7 +426,7 @@ int POct::ptkGetParams (int aC, char** aV) {
     }
 
     // Check to see if a valid instance was passed
-    ParamListType pList = {0, 0, 0};
+    ParamListType pList = {0, 0, 0, FALSE};
     char title[64];
     if (strcmp(aV[2], "NIL") == 0) {
         // If there is no instance, then this must be a Galaxy or Universe
@@ -568,7 +562,7 @@ int POct::ptkSetParams (int aC, char** aV) {
 
     // Covert the parameter List string in the pList structure.
     // Be sure to free pList before returning
-    ParamListType pList = {0, 0, 0};
+    ParamListType pList = {0, 0, 0, FALSE};
     if (!MakePList(aV[3], &pList)) {
         Tcl_AppendResult(interp, "Unable to parse parameter list: ",
                          aV[3], (char *) NULL);
@@ -1225,14 +1219,18 @@ int POct::ptkGetTargetParams (int aC, char** aV) {
     }
 
     // Get the pList form
-    ParamListType pList = {0, 0, 0};
+    ParamListType pList = {0, 0, 0, FALSE};
     if (!GetTargetParams(target, facet, &pList)) {
 	Tcl_AppendResult(interp, ErrGet(), (char *) NULL);
         return TCL_ERROR;
     }
 
     // Convert the pList form into a Tcl list
-    if (pList.length == 0) return POCT_TCL_NIL;
+    if (pList.length == 0) {
+	FreeFlatPList(&pList);
+	return POCT_TCL_NIL;
+    }
+
     for (int i=0; i<pList.length; i++) {
 	Tcl_AppendResult(interp, "{", (char *) NULL);
         Tcl_AppendElement(interp, (char *)pList.array[i].name);
@@ -1242,7 +1240,7 @@ int POct::ptkGetTargetParams (int aC, char** aV) {
     }
 
     // Clean up memory
-    delete [] pList.array;		// allocated by GetTargetParams via new
+    FreeFlatPList(&pList);		// allocated by GetTargetParams
 
     return TCL_OK;
 }
@@ -1288,7 +1286,7 @@ int POct::ptkSetTargetParams (int aC, char** aV) {
 
     // Covert the parameter List string into the pList structure.
     // Now that the pList has been made, it should be freed before returning.
-    ParamListType pList = {0, 0, 0};
+    ParamListType pList = {0, 0, 0, FALSE};
     if (!MakePList(aV[3], &pList)) {
         Tcl_AppendResult(interp, "Unable to parse parameter list: ",
                          aV[3], (char *) NULL);
