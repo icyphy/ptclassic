@@ -32,10 +32,15 @@ CircularBuffer :: CircularBuffer(int i)
 
 CircularBuffer :: ~CircularBuffer()
 {
+// If there are any particles, return them to correct Plasma
+	for (int i = size(); i>0; i--) {
+		Particle* q = (Particle*)*next();
+		if (q) q->die();
+	}
         delete buffer;
 }
 
-Pointer* CircularBuffer :: here()
+Pointer* CircularBuffer :: here() const
 {
         return buffer+current;
 }
@@ -56,7 +61,7 @@ Pointer* CircularBuffer :: last()
 
 // Find the position in the buffer i in the past relative to current
 // This method does not change current
-Pointer* CircularBuffer :: previous(int i)
+Pointer* CircularBuffer :: previous(int i) const
 {
         if(i > dimen-1)
 		Error::abortRun(
@@ -82,8 +87,6 @@ PortHole& GenericPort :: newConnection () {
 	// my apologies for this horrible cast
 	return *(PortHole *)&GenericPort::realPort();
 }
-
-Plasma* GenericPort :: setPlasma() { return 0;}
 
 // The connect method
 // This method is virtual and may be overridden
@@ -144,24 +147,14 @@ void PortHole :: afterGo () { return;}
 void PortHole :: allocateBuffer()
 {
 	// If there is a buffer, release its memory
-	if(myBuffer != NULL) {
-		// Release any Particles on the buffer to Plasma
-        	// before deleting it -- avoids dangling Particles!
-        	for(int i = myBuffer->size(); i>0; i--) {
-			Pointer* p = myBuffer->next();
-			myPlasma->put((Particle*)*p);
-			}
-
-		// Now release the memory and re-allocate myBuffer
-		delete myBuffer;
-		}
+	delete myBuffer;
 
 	// Allocate new buffer, and fill it with initialized Particles
 	myBuffer = new CircularBuffer(bufferSize);
         for(int i = myBuffer->size(); i>0; i--) {
                 Pointer* p = myBuffer->next();
                 *p = myPlasma->get();
-                }
+	}
 }
 
 PortHole& PortHole :: setPort(const char* s,
@@ -216,7 +209,7 @@ PortHole :: printVerbose () {
 
 int MultiPortHole :: isItMulti() { return TRUE;}
 
-void MultiPortHole :: initialize() { ports.initialize();}
+void MultiPortHole :: initialize() { reset();}
 
 // this is not really a do-nothing: it destroys its member object "ports".
 MultiPortHole :: ~MultiPortHole() {}
@@ -235,47 +228,62 @@ MultiPortHole :: printVerbose () {
 }
 
 Plasma*
-PortHole :: setPlasma () {
-	// zeroth case: disconnected porthole.  Return what I am.
+PortHole :: setPlasma (Plasma* useType) {
+// return immediately if useType matches myPlasma and non-null.
 	if (far() == NULL) return myPlasma;
 
-	// If it is an input PortHole
-	if (isItInput()) {
-		// first, my type is known.
-		if (myPlasma) return myPlasma;
-		// second, I am of ANYTYPE, look for typePort or far()
-		if (typePort) myPlasma = typePort->setPlasma();
-		else	      myPlasma = far()->setPlasma();
+// I am allowed to change my type only if I am an output porthole.
+// This happens if, say, an output of type FLOAT feeds an input of
+// type Complex.
+	if (useType) {
+		if (useType == myPlasma) return useType;
+		if (!myPlasma || isItOutput()) {
+			myPlasma = useType;
+			if (typePort) typePort->setPlasma(useType);
+			if (typePortBack) typePortBack->setPlasma(useType);
+		}
+		else {
+			StringList msg = "Attempt to change type of ";
+			msg += readFullName();
+			Error::abortRun(msg);
+			return myPlasma;
+		}
+	}
+// If it is an input PortHole
+	else if (isItInput()) {
+// If my type isn't known try to set it.
+		if (!myPlasma) {
+			if (typePort)
+				myPlasma = typePort->setPlasma();
+// no, we can't do this on typePortBack also; infinite recursion
+			else
+				myPlasma = far()->setPlasma();
+		}
 	} 
-	// If it is an output PortHole.
+// If it is an output PortHole.
 	else {	
 		// first, far() has known type and not on wormhole boundary
 		if (far()->myPlasma && far()->isItInput()) {
 			myPlasma = far()->myPlasma;
-			return myPlasma;
 		}
 		// or, far() has typePort and not on wormhole boundary
-		if (far()->typePort && far()->isItInput()) {
-			myPlasma = far()->typePort->setPlasma();
+		else if (far()->typePort && far()->isItInput()) {
+			Plasma* tmp = far()->typePort->setPlasma();
+			if (tmp) myPlasma = tmp;
+			else if (myPlasma)
+				far()->setPlasma(myPlasma);
 		}
 		// second, look for typePort (ANYTYPE or on wormhole boundary)
-		if (typePort)
+		else if (typePort)
 			myPlasma = typePort->setPlasma();
-		// third, deal with rare case : all portholes around wormhole
-		//	  boundary are of ANYTYPE.
-		if (myType() == ANYTYPE && far()->isItOutput()) {
-			PortHole* p = (PortHole*) far()->typePort;
-			// if far()->typePort is defined and output, and
-			// its far() has a known type.
-			if (p && p->isItOutput() && p->far()->myPlasma)
-				myPlasma = p->far()->myPlasma;
-		}
+		else if (typePortBack)
+			myPlasma = typePortBack->setPlasma();
 	}
-	if (myPlasma) return myPlasma;
-	StringList msg = "Can't determine dataType of ";
-	msg += readFullName();
-	Error::abortRun (msg);
-	return 0;
+	if (myPlasma) {
+		if (typePort) typePort->setPlasma(myPlasma);
+		if (typePortBack) typePortBack->setPlasma(myPlasma);
+	}
+	return myPlasma;
 }
 
 // Function to get plasma type for a MultiPortHole.
@@ -284,17 +292,27 @@ PortHole :: setPlasma () {
 // the type of the output will be the type of the first input, which
 // may not be what is desired.
 Plasma*
-MultiPortHole :: setPlasma () {
+MultiPortHole :: setPlasma (Plasma* useType) {
+	reset();
+	if (useType) {
+		for (int n = numberPorts(); n>0; n--)
+			(ports++).setPlasma(useType);
+		return useType;
+	}
 	if (typePort) return typePort->setPlasma();
 	// call setPlasma the first contained PortHole to get the value.
-	reset();
+
 	return (ports++).setPlasma();
 }
 
 void PortHole :: initialize()
 {
 	// set plasma if not set
-	setPlasma ();
+	if (!setPlasma ()) {
+		StringList msg = "Can't determine dataType of ";
+		msg += readFullName();
+		Error::abortRun (msg);
+	}
 
 	// allocate buffer if not allocated or wrong size
 	if (myBuffer == NULL || bufferSize != myBuffer->size())
@@ -364,7 +382,7 @@ PortHole& MultiPortHole :: newPort() {
         PortHole* newport = new PortHole;
         ports.put(*newport);
         parent()->addPort(newport->setPort(newName(), parent(), type));
-	newport->typePort = typePort;
+	newport->typePort = this;
         return *newport;
 }
 
