@@ -155,14 +155,14 @@ body ::tycho::LabeledItem::_anchor {id canvas slate anchor} {
     # outside the item
     if { $option(text$id) != "" } {
         eval $canvas coords $component(label$id) \
-		[$slate aspect $id $anchor -region]
+		[$slate aspect $id $anchor -shape rectangle]
         if { $option(graphics$id) == "" } {
             $canvas itemconfigure $component(label$id) -anchor $anchor
         } else {
             if { $anchor == "center" || $anchor == "c" } {
                 set anchor "s"
                 eval $canvas coords $component(label$id) \
-			[$slate aspect $id s -region]
+			[$slate aspect $id s -shape rectangle]
             }
             $canvas itemconfigure $component(label$id) \
                     -anchor [::tycho::Shape::compass $anchor "ud"]
