@@ -198,11 +198,6 @@ int SequentialList::member (Pointer x) const {
 	return FALSE;
 }
 
-void ListIter::reset() {
-    startAtHead = TRUE;
-    ref = 0;
-}
-
 void ListIter::reconnect(const SequentialList& l) {
     list = &l;
     reset();
