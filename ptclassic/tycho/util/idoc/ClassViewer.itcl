@@ -128,6 +128,9 @@ class ::tycho::IDoc {
     ###################################################################
     ####                      public methods                       ####
 
+    # Reinitialize the internal data.
+    public method clear {}
+
     public method debug {} {
         foreach class [array names myClass] {
             puts $class
@@ -426,6 +429,13 @@ body ::tycho::IDoc::constructor {args} {
     ###################################################################
     ###################################################################
     ####                      public methods                       ####
+
+#####################################################################
+#### clear
+# Clear the internal data.
+#
+body ::tycho::IDoc::clear {} {
+}
 
 #####################################################################
 #### describe 
