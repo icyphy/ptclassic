@@ -368,14 +368,11 @@ body ::tycho::HTMLOutline::_generate {section inline} {
 
     # Make a backup of the file if it already exists
     if [file exists $filename] {
-        set backup [file join $directory \
-                $section.bak$suffix]
-        set fd [open $filename]
-        set data [read $fd]
-        close $fd
-        set fd [open $backup "w"]
-        puts $fd $data
-        close $fd
+        if ![file exists [file join $directory backup]] {
+            file mkdir [file join $directory backup]
+        }
+        file copy -force $filename [file join $directory \
+                backup [lindex $section end]$suffix]
     }
 
     # If the file exists, get its data. Otherwise create default data
