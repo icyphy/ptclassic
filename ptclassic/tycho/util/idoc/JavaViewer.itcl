@@ -167,8 +167,8 @@ body ::tycho::JavaViewer::_displayConstructors {} {
 		-font [$this cget -bodyfont] \
 		-fg [$this cget -publiccolor]
 	# setup bindings on <Enter> and <B1-Click>
-	_bindDesc $_currentclass constructor:$constructor $constructor\c
-	_bindExpl $_currentclass constructor:$constructor $constructor\c
+	_bindDesc $_currentclass constructor $constructor $constructor\c
+	_bindExpl $_currentclass constructor $constructor $constructor\c
 	lappend subnames $constructor\c
     }
     
@@ -199,8 +199,8 @@ body ::tycho::JavaViewer::_displayDestructors {} {
 		-font [$this cget -bodyfont] \
 		-fg [$this cget -publiccolor]
 	# setup bindings on <Enter> and <B1-Click>
-	_bindDesc $_currentclass destructor:$destructor $destructor\d
-	_bindExpl $_currentclass destructor:$destructor $destructor\d
+	_bindDesc $_currentclass destructor $destructor $destructor\d
+	_bindExpl $_currentclass destructor $destructor $destructor\d
 	lappend subnames $destructor\d
     }
     
@@ -231,13 +231,14 @@ body ::tycho::JavaViewer::_displayMethods {protection} {
     foreach method [$classModel match method \
 	    -protection $protection -scope instance] {
 	# put label into contents widget
+        regexp {^m:(.*)$} $method _ label
 	$itk_component(contents) appendlabel $method\m \
-		-text [_fixName $method 0] \
+		-text [_fixName $label 0] \
 		-font [$this cget -bodyfont] \
 		-fg [$this cget -$protection\color]
 	# setup bindings on <Enter> and <B1-Click>
-	_bindDesc $_currentclass method:$method $method\m
-	_bindExpl $_currentclass method:$method $method\m
+	_bindDesc $_currentclass method $method $method\m
+	_bindExpl $_currentclass method $method $method\m
 	lappend subnames $method\m
     }
 
@@ -247,17 +248,18 @@ body ::tycho::JavaViewer::_displayMethods {protection} {
 	foreach class $_heritage {
 	    set currLabels [$itk_component(contents) labels]
 	    set currentModel $_classmodels($class)
-	    foreach method [$currentModel methods \
+	    foreach method [$currentModel match method \
 		    -protection $protection -scope instance] {
 		# put label into contents widget if not there
+		regexp {^m:(.*)$} $method _ label
 		if {[lsearch -exact $currLabels "$method\m"] == -1} {
 		    $itk_component(contents) appendlabel $method\m \
-			    -text [_fixName $method 0] \
+			    -text [_fixName $label 0] \
 			    -font [$this cget -bodyfont] \
 			    -fg [$this cget -inheritcolor]
 		    # setup bindings on <Enter> and <B1-Click>
-		    _bindDesc $class method:$method $method\m
-		    _bindExpl $class method:$method $method\m
+		    _bindDesc $class method $method $method\m
+		    _bindExpl $class method $method $method\m
 		    lappend subnames $method\m
 		}
 	    }
@@ -279,13 +281,14 @@ body ::tycho::JavaViewer::_displayMethods {protection} {
     foreach method [$classModel match method \
 	    -protection $protection -scope class] {
 	# put label into contents widget
+	regexp {^m:(.*)$} $method _ label
 	$itk_component(contents) appendlabel $method\p \
-		-text [_fixName $method 0] \
+		-text [_fixName $label 0] \
 		-font [$this cget -bodyfont] \
 		-fg [$this cget -$protection\color]
 	# setup bindings on <Enter> and <B1-Click>
-	_bindDesc $_currentclass method:$method $method\p
-	_bindExpl $_currentclass method:$method $method\p
+	_bindDesc $_currentclass method $method $method\p
+	_bindExpl $_currentclass method $method $method\p
 	lappend subnames $method\p
     }
 
@@ -295,12 +298,13 @@ body ::tycho::JavaViewer::_displayMethods {protection} {
 	foreach class $_heritage {
 	    set currLabels [$itk_component(contents) labels]
 	    set currentModel $_classmodels($class)
-	    foreach method [$currentModel methods \
+	    foreach method [$currentModel match method \
 		    -protection $protection -scope class] {
 		# put label into contents widget if not there
+		regexp {^m:(.*)$} $method _ label
 		if {[lsearch -exact $currLabels "$method\p"] == -1} {
 		    $itk_component(contents) appendlabel $method\p \
-			    -text [_fixName $method 0] \
+			    -text [_fixName $label 0] \
 			    -font [$this cget -bodyfont] \
 			    -fg [$this cget -inheritcolor]
 		    # setup bindings on <Enter> and <B1-Click>
@@ -338,13 +342,14 @@ body ::tycho::JavaViewer::_displayVariables {protection} {
     foreach variable [$classModel match variable \
 	    -protection $protection -scope instance] {
 	# put label into contents widget   
+        regexp {^v:(.*)$} $variable _ label
 	$itk_component(contents) appendlabel $variable\v \
-		-text $variable \
+		-text $label \
 		-font [$this cget -bodyfont] \
 		-fg [$this cget -$protection\color]
 	# setup bindings on <Enter> and <B1-Click>
-	_bindDesc $_currentclass variable:$variable $variable\v
-	_bindExpl $_currentclass variable:$variable $variable\v
+	_bindDesc $_currentclass variable $variable $variable\v
+	_bindExpl $_currentclass variable $variable $variable\v
 	lappend subnames $variable\v
     }
 
@@ -357,14 +362,15 @@ body ::tycho::JavaViewer::_displayVariables {protection} {
 	    foreach variable [$currentModel variables \
 		    -protection $protection -scope instance] {
 		# put label into contents widget if not there
+		regexp {^v:(.*)$} $variable _ label
 		if {[lsearch -exact $currLabels "$variable\v"] == -1} {
 		    $itk_component(contents) appendlabel $variable\v \
-			    -text $variable \
+			    -text $label \
 			    -font [$this cget -bodyfont] \
 			    -fg [$this cget -inheritcolor]
 		    # setup bindings on <Enter> and <B1-Click>
-		    _bindDesc $class variable:$variable $variable\v
-		    _bindExpl $class variable:$variable $variable\v
+		    _bindDesc $class variable $variable $variable\v
+		    _bindExpl $class variable $variable $variable\v
 		    lappend subnames $variable\v
 		}
 	    }
@@ -386,13 +392,14 @@ body ::tycho::JavaViewer::_displayVariables {protection} {
     foreach variable [$classModel match variable \
 	    -protection $protection -scope class] {
 	# put label into contents widget
+	regexp {^v:(.*)$} $variable _ label
 	$itk_component(contents) appendlabel $variable\v \
-		-text $variable \
+		-text $label \
 		-font [$this cget -bodyfont] \
 		-fg [$this cget -optioncolor]
 	# setup bindings on <Enter> and <B1-Click>
-	_bindDesc $_currentclass variable:$variable $variable\v
-	_bindExpl $_currentclass variable:$variable $variable\v
+	_bindDesc $_currentclass variable $variable $variable\v
+	_bindExpl $_currentclass variable $variable $variable\v
 	lappend subnames $variable\v
     }
     
@@ -402,17 +409,18 @@ body ::tycho::JavaViewer::_displayVariables {protection} {
 	foreach class $_heritage {
 	    set currLabels [$itk_component(contents) labels]
 	    set currentModel $_classmodels($class)
-	    foreach variable [$currentModel variables \
+	    foreach variable [$currentModel match variable \
 		    -protection $protection -scope class] {
 		# put label into contents widget if not there
+		regexp {^v:(.*)$} $variable _ label
 		if {[lsearch -exact $currLabels "$variable\v"] == -1} {
 		    $itk_component(contents) appendlabel $variable\v \
-			    -text $variable \
+			    -text $label \
 			    -font [$this cget -bodyfont] \
 			    -fg [$this cget -inheritcolor]
 		    # setup bindings on <Enter> and <B1-Click>
-		    _bindDesc $class variable:$variable $variable\v
-		    _bindExpl $class variable:$variable $variable\v
+		    _bindDesc $class variable $variable $variable\v
+		    _bindExpl $class variable $variable $variable\v
 		    lappend subnames $variable\v
 		}
 	    }
@@ -442,29 +450,32 @@ body ::tycho::JavaViewer::_displayVariables {protection} {
 body ::tycho::JavaViewer::_formatExpl {class item type {extern 0}} {
     set classModel $_classmodels($class)
 
-    set expl [$classModel attrget $type:$item -explanation]
+    set expl [$classModel attrget $item -explanation]
     if { $expl == "" } {
-        set expl [$classModel attrget $type:$item -description]
+        set expl [$classModel attrget $item -description]
     }
     
     set other {}
     set exceptions {}
 
+    set label $item
     if {$type == "method" || $type == "constructor" \
 	    || $type == "destructor"} {
 
+        if {$type == "method" } {
+            regexp {^m:(.*)$} $item _ label
+        }
 	# Get method parameters and their types
 	set arglist "("
-	foreach arg [$classModel match argument $type:$item] {
-	    set argtype [$classModel attrget \
-		    [list $type:$item argument:$arg] -type]
+	foreach arg [$classModel match argument $item] {
+	    set argtype [$classModel attrget [concat $item $arg] -type]
 	    append arglist $argtype " " $arg ", "
 	}
 	# Remove extra comma
 	set other [string trimright $arglist " ,"])
 	
 	# Get exceptions
-	set exceptions [$classModel attrget $type:$item -exceptions]
+	set exceptions [$classModel attrget $item -exceptions]
 	
 	# Format exceptions
 	if {$exceptions != {}} {
@@ -476,21 +487,30 @@ body ::tycho::JavaViewer::_formatExpl {class item type {extern 0}} {
 	    set exceptions [string trimright $temp ", "]
 	}
     } elseif {$type == "variable"} {
+        regexp {^v:(.*)$} $item _ label
 	
 	# Get the default value
-	set default [$classModel attrget variable:$item -default]
+	set default [$classModel attrget $item -default]
 	if {$default != {}} {
 	    set other "= $default"
 	}
     }
     
     set shortname [_fixName $item]
-    set modifiers [$classModel attrget $type:$item -modifiers]
+    set modifiers [$classModel attrget $item -modifiers]
     # Constructors don't have an explicit type
     if {$type != "constructor"} {
+        # Remove tag to make item names unique
+        if {$type == "method"} {
+            regexp {^m:(.*)$} $item _ shortname
+        } elseif {$type == "variable"} {
+            regexp {^v:(.*)$} $item _ shortname
+        } else {
+            set shortname $item
+        }
 	# Remove signature portion of item name
-	set shortname [_fixName $item]
-	set itemtype [$classModel attrget $type:$item -type]
+	set shortname [_fixName $shortname]
+	set itemtype [$classModel attrget $item -type]
     } {
 	set shortname "$_currentclass"
 	set itemtype ""
@@ -778,13 +798,13 @@ body ::tycho::JavaViewer::_hyperLink \
     }
 
     # Assume text is the fixed name and item is the full name
-    set protection [$classModel attrget $type:$item -protection]
+    set protection [$classModel attrget $item -protection]
     if {$protection == "package"} {
 	set protection {}
     } else {
 	set protection "$protection "
     }
-    set modifiers [$classModel attrget $type:$item -modifiers]
+    set modifiers [$classModel attrget $item -modifiers]
     if {$modifiers != {}} {
 	set modifiers "$modifiers "
     }

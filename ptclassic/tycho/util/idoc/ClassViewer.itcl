@@ -218,10 +218,10 @@ class ::tycho::ClassViewer {
     ####                     protected methods                     ####
 
     # Bind a description to <enter>ing a label.
-    protected method _bindDesc {class item label}
+    protected method _bindDesc {class type item label}
   
     # Bind an explanation to button 1 clicking a label.
-    protected method _bindExpl {class item label}
+    protected method _bindExpl {class type item label}
 
     # Display the contents of the current class in contents widget.
     protected method _display {}
@@ -254,7 +254,7 @@ class ::tycho::ClassViewer {
     protected method _hyperLink {class item type {text {}} {itemtype {}}}
 
     # Initialize the menu/status/tool bars
-    protected method initialize {{menubar {}} {statusbar {}} {toolbar {}}}
+    protected method _initializeBars {menubar statusbar toolbar}
 
     ###################################################################
     ####                      private methods                      ####
@@ -263,7 +263,7 @@ class ::tycho::ClassViewer {
     private method _deleteClasses {{all 1}}
 
     # Initialize the menu bar.
-    private method initializeMenubar {menubar}
+    private method _initializeMenubar {menubar}
 
     # Calculate a new -relwidth parameter (doesn't reset it)
     private method _newRelWidth {pixels}
@@ -656,11 +656,11 @@ body ::tycho::ClassViewer::inheritAll {{redisplay 1}} {
             putStatus "Loading $parent"
             ::tycho::safeUpdate $this
             set fd [open $parentFile]
-            $_classmodels($parent) parse [$fd read]
+            $_classmodels($parent) parse [read $fd]
             close $fd
             
             # Load my parents too.
-            set newparents [$_classmodels($parent) parents]
+            set newparents [$_classmodels($parent) cget -inherits]
             set parents "$parents $newparents"
         } else {
             putStatus "$parent idoc file not found."
@@ -803,7 +803,7 @@ body ::tycho::ClassViewer::upSize {} {
 # the display of the description of the given item in the statusbar
 # if such a description exists
 #
-body ::tycho::ClassViewer::_bindDesc {class item label} {
+body ::tycho::ClassViewer::_bindDesc {class type item label} {
     set classModel $_classmodels($class)
 
     # get the type of the label
@@ -844,7 +844,7 @@ body ::tycho::ClassViewer::_bindDesc {class item label} {
 # the explanation includes extra information besides the
 # actual explanation field of the item
 #
-body ::tycho::ClassViewer::_bindExpl {class item label} {
+body ::tycho::ClassViewer::_bindExpl {class type item label} {
     # get the type of the label
     switch [string range $label end end] {
         "\p" {set type method}
@@ -857,7 +857,6 @@ body ::tycho::ClassViewer::_bindExpl {class item label} {
     }
 
     # format explanation
-    set item [lindex [split $item :] 1]
     set expl [_formatExpl $class $item $type]
 
     # bind explanation to button 1 click
@@ -1053,22 +1052,19 @@ body ::tycho::ClassViewer::_hyperLink \
 }
 
 #####################################################################
-#### initialize
+#### _initializeBars
 # Initialize the menu, status, and toolbars associated with this widget.
-# The root (view) class sets up the menubar methods in it's initialize
-# via the chain command, which should always be the first command in
-# this method.
-# 
-# This method is called by it's displayer when attachView is called (usually
-# in ::tycho::view)
+# If any of these arguments is null, the associated bar does not
+# exist and must be ignored. This method is called from within
+# the attachDisplayer{} method.
 #
-body ::tycho::ClassViewer::initialize {{menubar {}} {statusbar {}} {toolbar {}}} {
+body ::tycho::ClassViewer::_initializeBars {menubar statusbar toolbar} {
     chain $menubar $statusbar $toolbar
 
     if {$menubar != {}} {
         # We have to qualify the call to this supposed-ly private
         # method because Itcl (2.2) has virtual private methods!
-        ::tycho::ClassViewer::initializeMenubar $menubar
+        ::tycho::ClassViewer::_initializeMenubar $menubar
     }
 
     # Bindings
@@ -1135,10 +1131,10 @@ body ::tycho::ClassViewer::_deleteClasses {{all 1}} {
 }
 
 #####################################################################
-#### initializeMenubar
+#### _initializeMenubar
 # Initialize the menu bar.  Adds entries specific to this class.
 #
-body ::tycho::ClassViewer::initializeMenubar {menubar} {
+body ::tycho::ClassViewer::_initializeMenubar {menubar} {
     $menubar delete compareto
     $menubar delete insert
     $menubar delete save
