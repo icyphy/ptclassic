@@ -70,6 +70,12 @@ class ::tycho::Glimpse {
     # Call glimpse on the pattern and produce an index browser with the results
     method glimpseSearch {}
 
+    # Bring up help for this widget
+    method help {}
+
+    # Update the Tycho glimpse database
+    method updateTychoDatabase {}
+
     ###################################################################
     ####                         private variables                 ####
     private variable glimpseOutputFile {}
@@ -87,12 +93,13 @@ configbody ::tycho::Glimpse::findcommand {
 #### constructor
 #
 body ::tycho::Glimpse::constructor {args} {
-
+    global PTOLEMY
     global TYCHO
-    configure -queries {
-	{pattern {Search pattern:} {}}
-	{glimpse_index {Glimpse Index} {$TYCHO .glimpse_index}}
-    }
+    configure -queries [list \
+	{pattern {Search pattern:} {}} \
+	[list glimpse_index {Glimpse Index} \
+                [file join $TYCHO .glimpse_index]] \
+    ]
 
     eval itk_initialize $args
 
@@ -107,8 +114,28 @@ body ::tycho::Glimpse::constructor {args} {
     $itk_component(bbox) buttonconfigure ok \
 	    -text {Find <Ret>} \
 	    -command "$this execCommand -findcommand"
-}
 
+    # If the $PTOLEMY environment variable is set and 
+    # $PTOLEMY/src/.glimpse_index exists, then offer two buttons,
+    # one to set the index to use $PTOLEMY/src/.glimpse_index,
+    # one to set the index to use $TYCHO/.glimpse_index
+    if {[info exists PTOLEMY] && \
+            [file exists [::tycho::expandPath \
+            [file join $PTOLEMY src .glimpse_index]]]} {
+        addButton ptolemy -text "Search Ptolemy" -command \
+                "$this clear glimpse_index; \
+                $this insert glimpse_index \
+                [file join $PTOLEMY src .glimpse_index]"
+        addButton tycho -text "Search Tycho" -command \
+                "$this clear glimpse_index; \
+                $this insert glimpse_index [file join $TYCHO .glimpse_index]"
+    }
+
+    addButton update -text "Update Tycho DB" \
+            -command "$this updateTychoDatabase"
+
+    addButton help -text "Help" -command "$this help"
+}
 
 #######################################################################
 #### destructor
@@ -167,4 +194,41 @@ body tycho::Glimpse::glimpseSearch {} {
             -file $glimpseOutputFile \
             -width 100
     $nm centerOnScreen
+}
+
+######################################################################
+#### help
+# Open a help window.
+#
+body ::tycho::Glimpse::help {} {
+    global ::TYCHO
+    ::tycho::File::openContext $TYCHO/kernel/doc/usersGuides/GlimpseHelp.html
+}
+
+#####################################################################
+#### updateTychoDatabase
+# Update $TYCHO/.glimpse_index by running 'make glimpse'
+#
+body ::tycho::Glimpse::updateTychoDatabase {} {
+    global TYCHO
+    ::tycho::rm -f [file join $TYCHO/.glimpse_index]  \
+            [file join $TYCHO/.glimpse_partitions] \
+            [file join $TYCHO/.glimpse_messages] \
+            [file join $TYCHO/.glimpse_statistics] \
+            [file join $TYCHO/.glimpse_filenames] 
+
+    # Unix specific:
+    set savedir [pwd]
+    cd $TYCHO
+    set patience [::tycho::autoName .patience]
+    uplevel #0 [list \
+            ::tycho::Message $patience -text \
+            {Running `make glimpse'.  Please be patient.}]
+    $patience centerOnScreen
+    update
+    # FIXME: we should probably run this with busy
+    if [catch {exec make glimpse} output] {
+        error "Failed to run `make glimpse':\n $output"
+    }
+    cd $savedir
 }
