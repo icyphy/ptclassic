@@ -311,7 +311,7 @@ configbody ::tycho::File::file {
 	    set readOnly 1
 	}
     }
-    $this configure -readonly $readOnly
+    configure -readonly $readOnly
 
     # Keep track of which files are open by name.
     # This is used to avoid opening the same file twice.
@@ -319,6 +319,15 @@ configbody ::tycho::File::file {
     if {[info exists previousfile] && [info exists filesOpen($previousfile)]} {
 	unset filesOpen($previousfile)
 	windowMenuRemoveAll $previousfile
+	# unmap the revcontrol window.
+	set topwin [winfo toplevel $itk_component(hull)]
+	if {[winfo exists $topwin.revcontrol]} {
+	    wm withdraw $topwin.revcontrol
+	}
+	# unmap the search window.
+	if {[winfo exists $topwin.search]} {
+	    wm withdraw $topwin.search
+	}
     }
     if {$file != "NoName"} {
 	# If there is already an entry for this filename, do not overwrite it.
@@ -599,7 +608,8 @@ body ::tycho::File::destructor {} {
 	    error "File is unchanged"
 	}
 	if {$response == 1} {
-	    save
+	    # FIXME: the following never returns if there is an error.
+	    $this save
 	}
     }
     if {[info exists filesOpen($file)] && \
@@ -629,7 +639,21 @@ body ::tycho::File::destructor {} {
 # Query the user for a filename, insert it into the current editor.
 #
 body ::tycho::File::altFile {} {
-    error "Sorry, alternate file not implemented yet."
+    if {$modified} {
+	if [askuser "Save modifications before opening the new file?"] {
+	    # update changes since last save
+	    save
+	}
+    }
+    set prevfile $itk_option(-file)
+    set filename [DialogWindow::newModal FileBrowser [autoName .fileBrowser] \
+	    -text "Alternate file to load:"]
+    if {$filename != {}} {
+	configure -file $filename
+	$itk_component(text) setInsert 1.0
+	reload
+	windowMenuRemoveAll $prevfile
+    }
 }
 
 #####################################################################
@@ -728,23 +752,11 @@ body ::tycho::File::nextRevAction {} {
 	$topwin.revcontrol configure -file $currentfile
 	$topwin.revcontrol focusin
     } {
-	if {$topwin != "" &&  \
-		[uplevel #0 info objects $topwin] != "" && \
-		[$topwin isa ::tycho::Edit]} {
-	    set currentTitle $currentfile
-	} {
-	    set currentTitle "Revision Control Window"
-	}
-
 	uplevel #0 "
 	    $revclass $topwin.revcontrol \
-		    -text {Select desired revision control command} \
 		    -object $this \
-		    -textobject $itk_component(text) \
-		    -file $currentfile \
 		    -geometry +0+0 \
-		    -before $itk_component(hull) \
-		    -title $currentTitle "
+		    -before $itk_component(hull)"
 	    wm deiconify $topwin.revcontrol
     }
 }
@@ -983,11 +995,7 @@ body ::tycho::File::openContext {filename} {
 	    set name [uplevel #0 [list \
 		    Edit [autoName .edit] -file $filename]]
 	}
-	$name busy
 	$name centerOnScreen
-	update
-	# The above update could destroy the object.
-	catch {$name unBusy}
 	return $name
     }
 }
@@ -999,12 +1007,11 @@ body ::tycho::File::openContext {filename} {
 # openContext procedure in this class) will recognize the file
 # extension, or base filename and open the specified editor. The editor
 # is assumed to be a class derived from File, or at least to have a
-# -file option and a "busy" method (to mark it busy). Note that the
-# leading period is considered part of the extension, as in ".itcl". If
-# a third argument is given, then the editor will be added to the
-# Window menu of all File objects opened in the future using the value
-# of the third argument as the menu label. This permits the user to
-# open a new blank editor of the given class.
+# -file option. Note that the leading period is considered part of the
+# extension, as in ".itcl". If a third argument is given, then the
+# editor will be added to the Window menu of all File objects opened in
+# the future using the value of the third argument as the menu label.
+# This permits the user to open a new blank editor of the given class.
 #
 body ::tycho::File::registerEditor {extensions editorClass {description {}} \
 	{baseFilename {}}  } {
