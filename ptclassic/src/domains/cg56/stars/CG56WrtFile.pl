@@ -9,6 +9,10 @@ When run on the simulator, arranges for its input to be logged to a file.
 	copyright { 1992 The Regents of the University of California }
 	location { CG56 demo library }
 	explanation {
+.Ir "simulator, Motorola DSP56000"
+.Ir "Motorola DSP56000 simulator"
+.Id "file output"
+Writes data to a file, for use with the Motorola DSP56000 simulator.
 	}
 	execTime {
 		return 2;
