@@ -6,7 +6,6 @@ An inconsistent DDF program is one where the long term
 average number of particles produced on an arc is not the same
 as the average long term number of particles consumed.
 This error is detected by bounding the buffer sizes and detecting overflow.
-.DE
 .EQ
 delim off
 .EN

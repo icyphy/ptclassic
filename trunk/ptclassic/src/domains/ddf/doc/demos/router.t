@@ -4,7 +4,6 @@
 This is a simple illustration of the
 .c EndCase
 star.
-.DE
 .EQ
 delim off
 .EN

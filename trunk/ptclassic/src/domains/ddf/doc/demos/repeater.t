@@ -4,7 +4,6 @@
 This is a simple illustration of the
 .c Repeater
 star, used in an SDF wormhole.
-.DE
 .EQ
 delim off
 .EN

@@ -6,7 +6,6 @@ to implement asynchronous signal processing systems.
 In this case, the system performs baud-rate timing
 recovery using an approximate minimum mean-square-error
 (MMSE) technique.
-.DE
 .EQ
 delim off
 .EN

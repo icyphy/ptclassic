@@ -2,7 +2,6 @@
 .NA eratosthenes
 .SD
 The sieve of Eratosthenes is a recursive algorithm for computing prime numbers.
-.DE
 .EQ
 delim off
 .EN
