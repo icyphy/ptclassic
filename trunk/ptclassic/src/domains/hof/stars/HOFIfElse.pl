@@ -1,5 +1,5 @@
 defstar {
-	name {IfThenElse}
+	name {IfElse}
 	domain {HOF}
 	derivedFrom {Map}
 	version { $Id$ }
@@ -31,7 +31,7 @@ The choice between them is determined by the \fIcondition\fR parameter.
 .pp
 An application for this block is in recursion.
 A galaxy \fIX\fR can be created that has somewhere within it an
-.c IfThenElse
+.c IfElse
 block with \fIX\fR given as the replacement block.
 To ensure that the recursion terminates, the parameter \fIuse_alt\fR
 is computed from galaxy parameters, for example by subtracting one

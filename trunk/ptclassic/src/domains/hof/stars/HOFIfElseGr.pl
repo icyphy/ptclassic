@@ -1,5 +1,5 @@
 defstar {
-	name { IfThenElseGr }
+	name { IfElseGr }
 	domain { HOF }
 	derivedFrom { IfThenElse }
 	desc {
