@@ -304,8 +304,8 @@ int MacroParSched :: scheduleIt()
 // Processor id of Fork star is  determined by the ancestor.
 
 int MacroParSched :: procIdOfFork(CGMacroCluster* s) {
-	CGClustPortIter piter(*s);
-	CGClustPort* p;
+	CGMacroClustPortIter piter(*s);
+	CGMacroClustPort* p;
 	p = piter++;
 	while (p->isItOutput()) p = piter++;
 	CGMacroCluster* farS = p->far()->parentClust();
