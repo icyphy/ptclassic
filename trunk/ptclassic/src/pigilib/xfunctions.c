@@ -34,14 +34,18 @@ X window interface routines for Ptolemy.
 Converted to Tcl/Tk by Kennard White and Edward Lee.
 */
 
+/* Standard includes */
+#include "local.h"			/* include "ansi.h" and "compat.h" */
 #include <stdlib.h>
-#include "ptk.h"
 #include <stdio.h>
 #include <sys/types.h>
-#include <unistd.h>		/* Pick up getpid() */
-#include "compat.h"
-#include "vemInterface.h"
+#include <unistd.h>			/* Pick up getpid() */
 
+#include "tcl.h"
+
+/* Pigilib includes */
+#include "ptk.h"
+#include "vemInterface.h"
 #include "xfunctions.h"
 
 /*******************************************************************
@@ -132,21 +136,21 @@ pr_accum_string()
 ********************************************************************
 
    Pop up the opening message and version identification
-
 */
-extern char *gVersion;
+
+extern char *gVersion;		/* defined by pigiRpc (version.c) */
 char *pigiFilename = NULL;      /* initialized by pigiMain */
 
 void PrintVersion ()
 {
-    char buf[200];
+    char buf[256];
 
     PrintCon(gVersion);
     if ( pigiFilename == NULL )
         pigiFilename = "pigiRpc";
-    sprintf( buf, "Running %s, %d", pigiFilename, (int)getpid());
+    sprintf(buf, "Running %s, %d", pigiFilename, (int)getpid());
     PrintCon(buf);
 
     Tcl_VarEval(ptkInterp, "ptkStartupMessage {", gVersion, "} {",
-      pigiFilename, "}", NULL);
+    		pigiFilename, "}", NULL);
 }
