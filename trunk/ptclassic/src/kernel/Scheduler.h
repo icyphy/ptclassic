@@ -30,16 +30,16 @@ $Id$
 	// Scheduler
 	////////////////////////////
 
-class Block;
+class Galaxy;
 
 class Scheduler {
 public:
 	// setup sets up the schedule; it returns TRUE for success
 	// and FALSE for failure.
-	virtual int setup(Block& galaxy) = 0;
+	virtual int setup(Galaxy&) = 0;
 
 	// run runs the simulation.
-	virtual int run(Block& galaxy) = 0;
+	virtual int run(Galaxy&) = 0;
 
 	// hack method to set stopping time
 	virtual void setStopTime(float limit) = 0;
