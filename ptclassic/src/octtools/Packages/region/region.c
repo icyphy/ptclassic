@@ -370,7 +370,7 @@ reg_val **val;		/* Returned request record */
     octGenerator gen;
     reg_key *new_entry;
     register int i;
-    octStatus gen_ret;
+    octStatus gen_ret = OCT_OK;
 
 #ifdef PRT
 prt_req(obj, mask);
@@ -503,7 +503,7 @@ reg_val *val;			/* Region request record */
 	/* Examine list */
 	count = 0;
 	gen = guStart(val->changes);
-	while (change = guNext(gen)) {
+	while ( (change = guNext(gen)) ) {
 	    change_apply(val->tr, change);
 	    count++;
 	}
