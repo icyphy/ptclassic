@@ -6,11 +6,14 @@ domains since adding a new domain does not affect any existing
 implementation of other domains as well as kernels.
 The domain interface should take care of timing relations between
 the outer and inner domains. Timing management is the most 
+.IE "timing management"
 challenging task in the design of
 .c Wormhole s
 and their interconnection mechanism.  Our approach is to
 classify the domains\** into two groups : \fItimed\fR, and
 \fIuntimed\fR. In the \fItimed\fR domain, the scheduler
+.IE "timed domain"
+.IE "untimed domain"
 of the domain requires the global timing relations among data packets
 over the domain.  On the other hand, the \fIuntimed\fR domain
 requires only the local ordering information of data packets.
@@ -29,8 +32,10 @@ Thus, the resulting taxonomy is :
 The
 .c Scheduler
 of a domain keeps a property called \fIcurrentTime\fR for timing
+.IE "currentTime"
 management.  For the timed domain, the \fIcurrentTime\fR indicates the
 global time.  As the scheduler proceeds, the \fIcurrentTime\fR also
+.IE "global time"
 increases.  Hence, the stopping condition for the timed domain is
 usually given by "stop time".  On the other hand, the untimed domain
 does not have the concept of time.  If an untimed domain resides in a
@@ -60,6 +65,7 @@ The stopping condition of the inner domain is given by the number of
 "iteration" of the schedule.  Refer to the individual domain 
 documentation (e.g. \fBSDF Domain, DDF Domain\fR, etc) to see
 what is the definition of one "iteration".  The meaning of one
+.IE "iteration, scheduling"
 "iteration" is very domain specific.
 Then, the stopping condition of the inner domain is "one iteration".
 .H2 "Untimed Domain in Timed Domain
@@ -94,6 +100,7 @@ we have to synchronize both domains.  Therefore, the inner domain
 has a 
 .c State 
 called \fItimeScale\fR which is the ratio between the time unit of
+.IE "timeScale"
 inner domain and that of the outer domain.  If the state is undefined,
 the \fItimeScale\fR is $1.0$ by default (no scaling).  
 At the beginning of the execution of the 
@@ -204,6 +211,7 @@ march in parallel.  The
 forms a special class of
 .c Star s
 in a timed domain, called "process star".  The first invocation
+.IE "process star"
 of a process star is triggered by external events to the star.
 But the further invocations are without external events until the
 star completes the execution.
@@ -214,6 +222,7 @@ untimed domain.  Even though the untimed domain has no notion of
 time, it needs to control the inner timed domain by setting the
 stopping condition.  For that purpose, an untimed domain
 keeps a property called \fIschedulePeriod\fR.  
+.IE "schedulePeriod"
 The \fIcurrentTime\fR of the untimed domain is increased by the
 \fIschedulePeriod\fR after each iteration.
 A user can control the value of the \fIschedulePeriod\fR by defining a 
@@ -246,6 +255,7 @@ applicable.  Suppose that the untimed
 .c Universe 
 is a SDF domain.
 We can interpret the SDF domain as a time driven domain where
+.IE "time driven"
 the time interval between data packets is fixed, so hidden safely
 in the system representation.  A SDF application as a digital
 signal processing system falls into this category.

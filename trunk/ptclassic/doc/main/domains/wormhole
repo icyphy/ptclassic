@@ -1,6 +1,7 @@
 .\" $Id$
 .H1 "Wormhole
 .pp
+.IE "wormhole, design"
 The base
 .c Wormhole\ class
 is derived from 
@@ -110,6 +111,7 @@ At runtime, the outer
 execute the 
 .c Wormhole 
 when it is runnable\**. 
+.IE "runnable"
 .(f
 \**The decision of runnability of a \fBWormhole\fR is indistinguishable
 from those of other \fBstars\fR.  For example, a \fBSDFWormhole\fR is
@@ -130,6 +132,7 @@ which will be discussed in the next section.
 Then, the \fIgo()\fR method is called to invoke the inner
 .c Scheduler
 until the specified stopping condition is met.  
+.IE "stopping condition"
 Since the decision of the stopping condition is a fairly complicated
 topic, we dedicate a whole section for it in this document.
 The execution of the

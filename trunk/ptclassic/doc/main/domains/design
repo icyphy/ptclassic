@@ -7,6 +7,7 @@ the domain design.  A knowledgeable reader will obtain the useful
 information to build his own domain from this section and from
 the documentation of any existing domain as a reference.
 .)f
+.IE "domain, creation"
 Data abstraction and polymorphism, two tenets of object-oriented
 programming, allow domains (models of computation) to be abstracted
 so that their differences are not visible from the kernel.
@@ -85,6 +86,8 @@ has a couple of derived class. One is the
 .c ToEventHorizon\ class
 and the other is the
 .c FromEventHorizon\ class .
+.IE "ToEventHorizon"
+.IE "FromEventHorizon"
 The
 .c ToEventHorizon\ class 
 is the base class of all
