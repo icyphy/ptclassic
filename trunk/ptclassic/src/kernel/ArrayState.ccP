@@ -3,7 +3,7 @@
 #include "<T>ArrayState.h"
 #include "Tokenizer.h"
 
-const int MAXLEN = 2000;
+const int MAXLEN = 20000;
 
 /**************************************************************************
 Version identification:
@@ -99,6 +99,11 @@ void <T>ArrayState  :: initialize() {
 				break;
 			}
 			numRepeats = t.intval - 1;
+			if (i + numRepeats > MAXLEN) {
+				parseError ("too many elements!");
+				err = 1;
+				break;
+			}
 			while ( numRepeats != 0) {
 				buf[i++] = saveValue;
 				numRepeats--;   
@@ -110,8 +115,40 @@ void <T>ArrayState  :: initialize() {
 				break;
 			}
 			break;
+		case '(':
+			// allow general expression inside parenths
+			t = eval<T>Expression(lexer);
+			if (t.tok == T_<T>) {
+				buf[i++] = t.<C>val;
+				t = getParseToken(lexer);
+				if (t.tok != ')') {
+					parseError ("expected ')'", "");
+					err = 1;
+				}
+			}
+			else {
+				parseError ("syntax error after '('", "");
+				err = 1;
+			}
+			break;
 		case T_<T>:
 			buf[i++] = t.<C>val;
+			break;
+		case T_ID:
+			// got a state value.  Must have same type as me.
+			if (strcmp((t.s)->type(), type()) != 0) {
+				parseError ("bad state type in initValue","");
+				err = 1;
+				break;
+			}
+			int sSiz = t.s->size();
+			if (i + sSiz > MAXLEN) {
+				parseError ("too many elements!");
+				break;
+			}
+			<C> * sPtr = *(<T>ArrayState *)(t.s);
+			for (int j = 0; j < sSiz; j++)
+				buf[i++] = *sPtr++;
 			break;
 		default:
 			parseError ("syntax error", "");
