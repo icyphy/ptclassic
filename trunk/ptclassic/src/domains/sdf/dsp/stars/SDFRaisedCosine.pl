@@ -89,7 +89,7 @@ E. A. Lee and D. G. Messerchmitt,
 I. Korn, \fIDigital Communications\fR, Van Nostrand Reinhold, New York, 1985.
 	}
 	seealso {FIR, Window, pulses}
-	ccinclude { "PTDSPRaisedCosine.h" }
+	ccinclude { "ptdspRaisedCosine.h" }
 	defstate {
 		name { length }
 		type { int }
@@ -129,10 +129,10 @@ I. Korn, \fIDigital Communications\fR, Van Nostrand Reinhold, New York, 1985.
 		int center = int(length)/2;
 		for (int i = 0; i < int(length); i++) {
 		    if (int(square_root))
-			taps[i] = PTDSPSqrtRaisedCosine(i - center,
+			taps[i] = Ptdsp_SqrtRaisedCosine(i - center,
 					int(symbol_interval), int(excessBW));
 		    else
-			taps[i] = PTDSPRaisedCosine(i - center,
+			taps[i] = Ptdsp_RaisedCosine(i - center,
 					int(symbol_interval), int(excessBW));
 		}
 		SDFFIR :: setup();

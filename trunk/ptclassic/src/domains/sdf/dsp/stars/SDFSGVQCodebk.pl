@@ -83,7 +83,7 @@ represent a training vector.
     default { "" }
     desc { File to save final gain codebook values. }
   }
-  ccinclude { "Matrix.h", "PTDSPPartitionCodebook.h", "WriteASCIIFiles.h" }
+  ccinclude { "Matrix.h", "ptdspPartitionCodebook.h", "WriteASCIIFiles.h" }
   protected {
     double* shapeCodebook;
     double* gainCodebook;
@@ -216,10 +216,10 @@ represent a training vector.
     double distortion = 0;
 
     for (i = 0; i < int(sizeTrnSet); i++) {
-      PTDSPPartitionCodebook(&indexShape, &indexGain, &distance,
-			     &(trnSet[i*int(dimension)]), shapeCodebook,
-			     int(sizeShapeCodebook), int(dimension),
-			     gainCodebook, int(sizeGainCodebook));
+      Ptdsp_PartitionCodebook(&indexShape, &indexGain, &distance,
+			      &(trnSet[i*int(dimension)]), shapeCodebook,
+			      int(sizeShapeCodebook), int(dimension),
+			      gainCodebook, int(sizeGainCodebook));
       distortion += distance;
       for (int j = 0; j < int(dimension); j++) {
         shapeCentroid[indexShape*int(dimension) + j] +=
@@ -258,11 +258,11 @@ represent a training vector.
 
       //  Compute the optimum partition R(Cs(m+1),Cg(m)).
       for (i=0; i<int(sizeTrnSet); i++) {
-        PTDSPPartitionCodebook(&indexShape, &indexGain, &distance,
-			&(trnSet[i*int(dimension)]),
-			shapeCodebook, int(sizeShapeCodebook),
-			int(dimension), gainCodebook,
-			int(sizeGainCodebook));
+        Ptdsp_PartitionCodebook(&indexShape, &indexGain, &distance,
+				&(trnSet[i*int(dimension)]),
+				shapeCodebook, int(sizeShapeCodebook),
+				int(dimension), gainCodebook,
+				int(sizeGainCodebook));
         (numGainPart[indexGain])++;
 	int s_rowloc = indexShape * int(dimension);
 	int t_rowloc = i * int(dimension);
@@ -297,11 +297,11 @@ represent a training vector.
 	
       //  Compute the optimum partition R(Cs(m+1),Cg(m+1)).
       for (i = 0; i < int(sizeTrnSet); i++) {
-        PTDSPPartitionCodebook(&indexShape, &indexGain, &distance,
-			       &(trnSet[i*int(dimension)]),
-			       shapeCodebook, int(sizeShapeCodebook),
-			       int(dimension), gainCodebook,
-			       int(sizeGainCodebook));
+        Ptdsp_PartitionCodebook(&indexShape, &indexGain, &distance,
+			        &(trnSet[i*int(dimension)]),
+			        shapeCodebook, int(sizeShapeCodebook),
+			        int(dimension), gainCodebook,
+			        int(sizeGainCodebook));
         distortion += distance;
 	int s_rowloc = indexShape * int(dimension);
 	int t_rowloc = i * int(dimension);

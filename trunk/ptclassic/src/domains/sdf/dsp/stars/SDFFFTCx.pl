@@ -84,7 +84,7 @@ Prentice-Hall: Englewood Cliffs, NJ, 1989.
 	destructor {
 		LOG_DEL; delete [] data;
 	}
-	ccinclude { "PTDSPfft_rif.h" }
+	ccinclude { "ptdspfft_rif.h" }
 	setup {
 		fftSize = 1 << int(order);
 		if (fftSize < int(size)) {
@@ -110,7 +110,7 @@ Prentice-Hall: Englewood Cliffs, NJ, 1989.
 			*p++ = 0.0;
 			*p++ = 0.0;
 		}
-		PTDSPfft_rif(data, fftSize, int(direction));
+		Ptdsp_fft_rif(data, fftSize, int(direction));
 		// generate output data.  If inverse, we scale the result.
 		if (int(direction) != 1)
 			for (i = 0; i < 2*fftSize; i++)
