@@ -47,20 +47,6 @@ Initialization code for pigiRpc.
 /* Global Vars */
 
 char *xDisplay;  /* display name passed by vem */
-char *pigiFilename = NULL;	/* initialized by pigiMain */
-extern char *pigiVersion;
-
-
-static void
-PrintVersion()
-{
-    char buf[200];
-    PrintCon(pigiVersion);
-    if ( pigiFilename == NULL )
-	pigiFilename = "pigiRpc";
-    sprintf( buf, "Running %s, %d", pigiFilename, getpid());
-    PrintCon(buf);
-}
 
 int
 Version(spot, cmdList, userOptionWord) /* ARGSUSED */
@@ -137,8 +123,6 @@ RPCFunction CommandArray[] = {
     {ExitApp, "Other", "exit-pigi"}
 };
 
-static void welcome_window();
-
 long
 UserMain(display, spot, cmdList, userOptionWord, array) /* ARGSUSED */
 char *display;
@@ -172,26 +156,9 @@ RPCFunction **array;
 	RPCExit(-1);
     }
 /* initialize modules: compilation of universes, signal catching, loader*/
-    open_display (xDisplay);
-    PrintVersion();
     KcDoStartupLinking();
-    welcome_window ();
     PrintConLog("PIGI is running");
     vemPrompt();
     *array = CommandArray;
     return(sizeof(CommandArray) / sizeof(RPCFunction));
-}
-
-void pr_accum_string();
-
-static void welcome_window ()
-{
-	accum_string ("Ptolemy Interactive Graphics Interface\n");
-	accum_string (pigiVersion);
-	accum_string ("\nCopyright 1990, 1991, 1992 Regents of the University of California");
-	accum_string ("\nAll rights reserved.");
-	accum_string ("\nSee the file $PTOLEMY/copyright for copyright notice,");
-	accum_string ("\nlimitation of liability, and disclaimer of warranty provisions,");
-	accum_string ("\nwhere `$PTOLEMY' is the home directory of your Ptolemy installation.");
-	pr_accum_string ();
 }
