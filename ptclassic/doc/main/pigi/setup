@@ -2,18 +2,19 @@
 .H1 "Setup"
 .pp
 This section explains how to configure a user to run pigi.
-It includes an explanation of environment variables that are
-required, as well as enough information about the window system
+If someone has done this for you already, you may skip this section.
+It includes enough information about the window system
 for the novice user to get started.
 .pp
-When \*(PT is installed on your system, a
+Usually, when \*(PT is installed on your system, a
 fictitious user named `ptolemy' is created.
 This user is configured according to the tastes
 of the authors of Ptolemy.
 To configure your own account to behave the same way,
-you can copy all the dot files from the directory ~ptolemy
+you can copy all the dot files (hidden files whose names
+begin with a period) from the directory ~ptolemy
 into your home directory.
-This behavior is explained below.
+You can see these files with the ``ls -a ~ptolemy'' Unix command.
 Unless you are a new user, however, you will probably not want to overwrite
 features already defined in your own dot files.
 In this case, you will need to extract the features you desire
@@ -34,6 +35,7 @@ where these names depend on who you are and what your machine is
 called.  If rsh is not granted permission, you will receive an
 uninformative message saying ``Permission denied.''  If you see this,
 it means you must fix your .rhosts file.
+.Ir "permission denied"
 .pp
 As an alternative, the system manager may have set up the file
 ``/etc/hosts.equiv'' to make all the workstations on your cluster
@@ -44,6 +46,7 @@ The most basic requirement
 is that \*(PT executables be in your path.
 .IE path
 .b Important:
+If you are a csh user,
 this should be done in your .cshrc file, rather than your .login file,
 because RPC applications are started as separate processes,
 and new processes do not examine the .login file.
@@ -85,7 +88,20 @@ process, you will need to set your PIGIRPC environment variable
 to the complete pathname of the executable file for the ``alternate
 pigiRpc'' you wish to use (advanced users use this feature when
 they want to, say, link in their own domains to Ptolemy).
-.H3 "Running Pigi using Open Windows"
+.Ir "customized pigiRpc"
+.H2 "If There Is No `ptolemy' User"
+.pp
+If \*(PT has been installed without creating a `ptolemy' user,
+then you must set the environment variable PTOLEMY to point
+to the main directory of the \*(PT installation.
+If \*(PT is installed in /usr/tools/ptolemy, for example,
+your .cshrc file should read:
+.(c
+setenv PTOLEMY /usr/tools/ptolemy
+.)c
+Whenever the documentation refers to `~ptolemy', you should use
+`$PTOLEMY'.
+.H2 "Running Pigi using Open Windows"
 .pp
 Sun does not provide the Athena widgets in the Open Windows
 distribution; these are required by the VEM editor (the Athena widgets
