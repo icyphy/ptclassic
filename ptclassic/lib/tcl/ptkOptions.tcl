@@ -62,18 +62,18 @@ option add Pigi.positiveColor [ptkColor blue] startupFile
 option add Pigi.negativeColor [ptkColor red] startupFile
 
 #Colors used for plots with multiple traces
-option add Pigi.plotColor1 [ptkColor red3] startupFile
-option add Pigi.plotColor2 [ptkColor SkyBlue3] startupFile
-option add Pigi.plotColor3 [ptkColor DarkOliveGreen3] startupFile
-option add Pigi.plotColor4 [ptkColor ivory] startupFile
-option add Pigi.plotColor5 [ptkColor gray40] startupFile
-option add Pigi.plotColor6 [ptkColor gold] startupFile
-option add Pigi.plotColor7 [ptkColor BlueViolet] startupFile
-option add Pigi.plotColor8 [ptkColor CadetBlue] startupFile
-option add Pigi.plotColor9 [ptkColor chocolate] startupFile
-option add Pigi.plotColor10 [ptkColor DarkSlateGray] startupFile
-option add Pigi.plotColor11 [ptkColor ForestGreen] startupFile
-option add Pigi.plotColor12 [ptkColor LightYellow] startupFile
+option add *plotColor1 [ptkColor red3] startupFile
+option add *plotColor2 [ptkColor SkyBlue3] startupFile
+option add *plotColor3 [ptkColor DarkOliveGreen3] startupFile
+option add *plotColor4 [ptkColor ivory] startupFile
+option add *plotColor5 [ptkColor gray40] startupFile
+option add *plotColor6 [ptkColor gold] startupFile
+option add *plotColor7 [ptkColor BlueViolet] startupFile
+option add *plotColor8 [ptkColor CadetBlue] startupFile
+option add *plotColor9 [ptkColor chocolate] startupFile
+option add *plotColor10 [ptkColor DarkSlateGray] startupFile
+option add *plotColor11 [ptkColor ForestGreen] startupFile
+option add *plotColor12 [ptkColor LightYellow] startupFile
 
 #Default parameters for certain widgets
 option add Pigi.meterWidthInC 8.0 startupFile
@@ -115,13 +115,15 @@ option add Pigi*Attention*Button.disabledForeground [ptkColor black] startupFile
 
 option add *CGC*Message*Font [option get . mediumfont Pigi] startupFile
 
-# set the specific interations entry window color
-option add CGC.numberIters.entry.background [ptkColor wheat3] startupFile
-
-# set general options for all CGC windows
-option add *CGC*Button*Foreground [ptkColor blue3] startupFile
-option add *CGC*Scale*Foreground [ptkColor bisque1] startupFile
-option add *CGC*Scale*SliderForeground [ptkColor bisque1] startupFile
-option add *CGC*Scale*Background [ptkColor tan4] startupFile
-option add *CGC*Entry*Background [ptkColor burlywood1] startupFile
-
+option add *CGC*Background [ptkColor antiqueWhite2] startupFile
+option add *CGC*Text.Background [ptkColor antiqueWhite] startupFile
+option add *CGC*Entry.Background [ptkColor ivory] startupFile
+option add *CGC*selectForeground [ptkColor midnightblue] startupFile
+option add *CGC*Canvas.background [ptkColor antiqueWhite3] startupFile
+option add *CGC*Button.foreground [ptkColor blue4] startupFile
+option add *CGC*Button.activeBackground [ptkColor antiqueWhite3] startupFile
+option add *CGC*Button.activeForeground [ptkColor blue4] startupFile
+option add *CGC*Scale.Foreground [ptkColor antiqueWhite2] startupFile
+option add *CGC*Scale.background [ptkColor cadetBlue] startupFile
+option add *CGC*Scale.sliderForeground [ptkColor antiqueWhite2] startupFile
+option add *CGC*Scale.activeForeground [ptkColor antiqueWhite3] startupFile
