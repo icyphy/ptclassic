@@ -10,8 +10,7 @@ system.
 ptk.info is may be used by the Emacs "info" interactive help
 system.
 
-ptk.ps.Z is a compressed PostScript version of the document.  The
-document is 122 pages long.
+ptk.ps.Z is a compressed PostScript version of the document.  
 
 The file title_small.ps is the same as title.ps, but without the cover art
 
