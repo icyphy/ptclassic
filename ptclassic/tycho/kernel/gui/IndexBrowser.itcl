@@ -186,7 +186,7 @@ body ::tycho::IndexBrowser::currentPoint {} {
 body ::tycho::IndexBrowser::help {} {
     global ::TYCHO
     ::tycho::File::openContext \
-	    $TYCHO/kernel/doc/usersGuides/IndexBrowserHelp.html
+	    [file join $TYCHO kernel doc usersGuides IndexBrowserHelp.html]
 }
 
 #####################################################################
@@ -208,7 +208,7 @@ body ::tycho::IndexBrowser::help {} {
 body ::tycho::IndexBrowser::hyperJump {filename {point {}}} {
     set char [string index $filename 0]
     if {$char != "/" && $char != "~" && $char != "\$" && $CWD != {}} {
-        set filename [format "%s/%s" $CWD $filename]
+	set filename [file join $CWD $filename]
     }
     ::tycho::TopLevel::hyperJump $filename $point
 }

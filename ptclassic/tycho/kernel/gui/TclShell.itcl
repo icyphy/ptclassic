@@ -544,7 +544,8 @@ body ::tycho::TclShell::displayResult {args} {
 #
 body ::tycho::TclShell::help {} {
     global ::TYCHO
-    ::tycho::File::openContext $TYCHO/kernel/doc/usersGuides/TclShellHelp.html
+    ::tycho::File::openContext \
+	    [file join $TYCHO kernel doc usersGuides TclShellHelp.html]
 }
 
 #####################################################################

@@ -386,7 +386,8 @@ body ::tycho::ListBrowser::goto {item} {
 #
 body ::tycho::ListBrowser::help {} {
     global ::TYCHO
-    ::tycho::File::openContext $TYCHO/kernel/doc/ListBrowserHelp.html
+    ::tycho::File::openContext \
+	    [file join $TYCHO kernel doc usersGuides ListBrowser.html]
 }
 
 ######################################################################

@@ -235,7 +235,8 @@ body ::tycho::HTML::constructor {args} {
     global ::TYCHO
     
     toolbar addButton home {Go to the Tycho home page} \
-            -text Home -command "$this hyperJump $TYCHO/doc/index.html"
+            -text Home -command "$this hyperJump \
+	    [file join \$TYCHO doc index.html]"
     
     toolbar addButton reload {Reload and reparse from the file} \
             -text Reload -command "$this reload"
@@ -401,7 +402,8 @@ body ::tycho::HTML::execTcl {} {
 #
 body ::tycho::HTML::help {} {
     global ::TYCHO
-    ::tycho::File::openContext $TYCHO/kernel/doc/usersGuides/HTMLHelp.html
+    ::tycho::File::openContext \
+	    [file join $TYCHO kernel doc usersGuides HTMLHelp.html]
 }
 
 #####################################################################
