@@ -1,7 +1,7 @@
 defstar {
 	name { WiNeS_Tcl_Animation }
 	domain { DE }
-	version { 1.0   6/22/97 }
+	version { $Id$ }
 	author { J. Voigt }
 	copyright {
             Copyright (c) 1997 Dresden University of Technology,
@@ -240,7 +240,6 @@ defstar {
             int TclStarIfcWiNeS::mySetup(Block *star, const char *tcl_file) {
                 myStar = star;
                 InfString buffer;
-                int dummy = 0;
                 synchronous = 1; 
 
                 buffer = "grabInputsNew_";
@@ -380,7 +379,7 @@ defstar {
             }
 	    if (Interferenz.dataNew) {
 		dummy = Interferenz%0;
-		int r, i, flag, r1, i1, r2, i2;
+		int r, i, flag;
 		r = int(real(dummy));
 		i = int(imag(dummy));
 		tcl.s = strength.get();
