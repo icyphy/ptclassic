@@ -115,7 +115,7 @@ octObject *facetPtr;
 
     (void) octInitGenContents(facetPtr, OCT_INSTANCE_MASK, &genInst);
     while (octGenerate(&genInst, &inst) == OCT_OK) {
-	if (IsVemConnector(&inst) || IsIoPort(&inst) || IsDelay(&inst)) {
+	if (IsVemConnector(&inst) || IsIoPort(&inst) || IsMarker(&inst)) {
 	    /* skip */
 	    continue;
 	} else if (IsGal(&inst)) {
@@ -135,7 +135,7 @@ octObject *facetPtr;
 }
 
 /* DetachDelaysFromNets  5/29/88
-Detach any delay props from nets in facet.
+Detach any delay or bus props from nets in facet.
 */
 static void
 DetachDelaysFromNets(facetPtr)
@@ -149,7 +149,8 @@ octObject *facetPtr;
 	prop.type = OCT_PROP;
 	prop.contents.prop.name = "delay";
 	if (octGetByName(&net, &prop) == OCT_NOT_FOUND) {
-	    continue;
+	    prop.contents.prop.name = "buswidth";
+	    if (octGetByName(&net, &prop) == OCT_NOT_FOUND) continue;
 	}
 	(void) octDetach(&net, &prop);
     }
@@ -158,50 +159,57 @@ octObject *facetPtr;
 
 /* ProcessDelay  5/28/88
 Process delay instance by attaching its delay prop to the net associated
-with the delay instance.
+with the delay instance.  Same for buses and buswidth property.
 Inputs: facetPtr, instPtr
 Outputs: return = FALSE if error
 */
 static boolean
-ProcessDelay(facetPtr, instPtr)
+ProcessMarker(facetPtr, instPtr, propname)
 octObject *facetPtr, *instPtr;
+char *propname;
 {
     octObject path, dummy, net, prop;
     struct octBox box;
     regObjGen rGen;
 
     if (octBB(instPtr, &box) != OCT_OK) {
-	ErrAdd("ProcessDelay: Instance has no bounding box");
+	ErrAdd("ProcessMarker: Instance has no bounding box");
 	return(FALSE);
     }
 
     (void) regObjStart(facetPtr, &box, OCT_PATH_MASK, &rGen, 0);
     if (regObjNext(rGen, &path) == REG_NOMORE) {
-	ErrAdd("Dangling delay");
+	ErrAdd("Dangling delay or bus marker");
 	EssAddObj(instPtr);
 	(void) regObjFinish(rGen);
 	return(FALSE);
     }
     if (regObjNext(rGen, &dummy) != REG_NOMORE) {
-	ErrAdd("Delay intersects more than one path");
+	ErrAdd("Delay or bus marker intersects more than one path");
 	EssAddObj(instPtr);
 	(void) regObjFinish(rGen);
 	return(FALSE);
     }
 
     if (octGenFirstContainer(&path, OCT_NET_MASK, &net) != OCT_OK) {
-	ErrAdd("ProcessDelay: Path not contained in a net");
+	ErrAdd("ProcessMarker: Path not contained in a net");
 	EssAddObj(&path);
 	return(FALSE);
     }
     prop.type = OCT_PROP;
-    prop.contents.prop.name = "delay";
+    prop.contents.prop.name = propname;
     if (octGetByName(&net, &prop) != OCT_NOT_FOUND) {
-	ErrAdd("Net has more than one delay instance on top of it");
+	char buf[80];
+	sprintf (buf, "Net has more than one %s instance on top of it",
+		 propname);
+	ErrAdd(buf);
 	EssAddObj(&net);
 	return(FALSE);
     }
-    GetOrInitDelayProp(instPtr, &prop);
+    /* fill in default values, and get or create the property. */
+    prop.contents.prop.type = OCT_INTEGER;
+    prop.contents.prop.value.integer = 1;
+    octGetOrCreate (instPtr, &prop);
     ERR_IF2(octAttach(&net, &prop) != OCT_OK, octErrorString());
     return(TRUE);
 }
@@ -223,7 +231,9 @@ octObject *facetPtr;
 	    /* skip */
 	    continue;
 	} else if (IsDelay(&inst)) {
-	    ERR_IF1(!ProcessDelay(facetPtr, &inst));
+	    ERR_IF1(!ProcessMarker(facetPtr, &inst, "delay"));
+	} else if (IsBus(&inst)) {
+	    ERR_IF1(!ProcessMarker(facetPtr, &inst, "buswidth"));
 	} else {
 	    /* assume it's a sog */
 	    ERR_IF1(!GetOrInitSogParams(&inst, &pList));
@@ -314,9 +324,9 @@ int *inN, *outN;
 /* 6/14/89
 */
 static boolean
-JoinOrdinary(inTermPtr, outTermPtr, delay)
+JoinOrdinary(inTermPtr, outTermPtr, delay, width)
 octObject *inTermPtr, *outTermPtr;
-int delay;
+int delay, width;
 {
     octObject inInst, outInst, fTerm;
     boolean inIsConn, outIsConn;
@@ -332,7 +342,8 @@ int delay;
 	/* 2 sogs connected */
 	ERR_IF1(!KcConnect(
 	    outInst.contents.instance.name, outTermPtr->contents.term.name, 
-	    inInst.contents.instance.name, inTermPtr->contents.term.name, delay)
+	    inInst.contents.instance.name, inTermPtr->contents.term.name,
+			   delay, width)
 	);
     } else if (!inIsConn && outIsConn) {
 	if (octGenFirstContainer(outTermPtr, OCT_TERM_MASK, &fTerm)
@@ -392,76 +403,82 @@ octObject *facetPtr;
     octObject net, in[TERMS_MAX], out[TERMS_MAX];
     octObject delayProp;
     octGenerator netGen;
-    int inN, outN, totalN, i, delay;
+    int inN, outN, totalN, i, delay, width;
+    char *errMsg = 0;
 
     (void) octInitGenContents(facetPtr, OCT_NET_MASK, &netGen);
-    while (octGenerate(&netGen, &net) == OCT_OK) {
+    while (octGenerate(&netGen, &net) == OCT_OK && !errMsg) {
 /* For each net, we require only that there be at least one input
    and at least one output.  Other errors are handled by the kernel.
  */
 	ERR_IF1(!CollectTerms(&net, in, &inN, out, &outN));
 	totalN = inN + outN;
         delay = (GetByPropName(&net, &delayProp, "delay") == OCT_NOT_FOUND)
-		? 0 : (int) delayProp.contents.prop.value.integer;
+	    ? 0 : (int) delayProp.contents.prop.value.integer;
+	width = (GetByPropName(&net, &delayProp, "buswidth") == OCT_NOT_FOUND)
+	    ? 0 : (int) delayProp.contents.prop.value.integer;
 	if (totalN < 2) {
 	    /* bad net, delete it */
 	    ERR_IF2(octDelete(&net) != OCT_OK, octErrorString());
 	    PrintDebug("Warning: bad net deleted");
+	    continue;
 	}
-	else if (inN == 0 || outN == 0) {
-	    ErrAdd("ConnectPass: cannot match an input to an output");
-	    EssAddObj(&net);
-	    octFreeGenerator(&netGen);
-	    return (FALSE);
-	}
+	else if (inN == 0 || outN == 0)
+	    errMsg = "ConnectPass: cannot match an input to an output";
 /* We only allow delay on point-to-point connections */
-	else if (delay && totalN > 2) {
-	    ErrAdd("ConnectPass: delay not allowed on multi-connections");
-	    EssAddObj(&net);
-	    octFreeGenerator(&netGen);
-	    return (FALSE);
-        }
+	else if (delay && totalN > 2)
+	    errMsg = "ConnectPass: delay not allowed on multi-connections";
+	else if (width && totalN > 2)
+	    errMsg = "ConnectPass: bus not allowed on multi-connections";
 	else if (totalN == 2) {
-	    ERR_IF1(!JoinOrdinary(&in[0], &out[0], delay));
+	    if (width > 0 &&
+		(!TermIsMulti(&in[0]) || !TermIsMulti(&out[0])))
+		errMsg = "Bus connection only works with multiports";
+	    else if (!JoinOrdinary(&in[0], &out[0], delay, width))
+		errMsg = "";
         }
 /* Handle input multiporthole case.  Eventually this will be handled
  * in the kernel (we will eliminate this else clause. */
 	else if (inN == 1 && outN > 1) {
 	    if (TermIsMulti(&in[0])) {
 		for (i = 0; i < outN; i++) {
-		    ERR_IF1 (!JoinOrdinary(&in[0], &out[i], 0));
-	        }
+		    if (!JoinOrdinary(&in[0], &out[i], 0, 0)) {
+			errMsg = "";
+			break;
+		    }
+		}
 	    }
 	    else {
-		ErrAdd("can't connect multiple outputs to ordinary input");
-		EssAddObj(&net);
-	        octFreeGenerator(&netGen);
-		return (FALSE);
+		errMsg = "can't connect multiple outputs to ordinary input";
 	    }
 	}
 /* All other cases are handled by the kernel, including autofork */
 	else {
 	    char *nodename = UniqNameGet("node");
 	    if (!KcNode(nodename)) {
-		octFreeGenerator(&netGen);
-		return (FALSE);
+		errMsg = "";
+		break;
 	    }
 	    for (i = 0; i < outN; i++) {
 		if (!JoinToNode(&out[i], nodename)) {
-		    octFreeGenerator(&netGen);
-		    return (FALSE);
+		    errMsg = "";
+		    break;
 		}
 	    }
 	    for (i = 0; i < inN; i++) {
 		if (!JoinToNode(&in[i], nodename)) {
-		    octFreeGenerator(&netGen);
-		    return (FALSE);
+		    errMsg = "";
+		    break;
 		}
 	    }
-        }
+	}
+    }
+    if (errMsg) {
+	if (*errMsg) ErrAdd (errMsg);
+	EssAddObj(&net);
     }
     octFreeGenerator(&netGen);
-    return (TRUE);
+    return errMsg ? FALSE : TRUE;
 }
 
 /* 7/31/90
@@ -531,7 +548,7 @@ boolean
 CompileGalInst(galInstPtr,parentFacetPtr)
 octObject *galInstPtr, *parentFacetPtr;
 {
-    char* galDomain, *oldDom;
+    char* galDomain;
     octObject galFacet;
 
     /* get the galaxy domain */
