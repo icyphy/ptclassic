@@ -94,8 +94,8 @@ body ::tycho::EditPalette::constructor {args} {
     menubar add "Show Ptcl" Special -underline 0 \
             -command "::tycho::view EditPtcl -facet $itk_option(-facet)"
 
-    menubar add "Retarget" Special -underline 0 \
-            -command "::tycho::view Retarget -edit $this -toolbar 1"
+    #menubar add "Retarget" Special -underline 0 \
+    #        -command "::tycho::view Retarget -edit $this -toolbar 1"
 
 
 }
