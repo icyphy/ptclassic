@@ -168,8 +168,8 @@ The variables will be of the form output name + port number, e.g. "Pmm1".
 		processInputMatrices();
 
 		// evaluate the Matlab command (non-zero means error)
-		int mstatus = evaluateMatlabCommand(matlabCommand);
-		if ( mstatus ) {
+		int merror = evaluateMatlabCommand(matlabCommand);
+		if ( merror ) {
 		  freeMatlabMatrices(matlabInputMatrices, numInputs);
 		  freeMatlabMatrices(matlabOutputMatrices, numOutputs);
 		  Error::abortRun( *this,
@@ -177,10 +177,10 @@ The variables will be of the form output name + port number, e.g. "Pmm1".
 		}
 		else {
 		  // convert Matlab matrices to Ptolemy matrices
-		  int ostatus = processOutputMatrices();
+		  int oerror = processOutputMatrices();
 		  freeMatlabMatrices(matlabInputMatrices, numInputs);
 		  freeMatlabMatrices(matlabOutputMatrices, numOutputs);
-		  if ( ostatus ) {			// non-zero means error
+		  if ( oerror ) {			// non-zero means error
 		    Error::abortRun( *this, "Could not convert the Matlab ",
 				     "output matrices to Ptolemy matrices" );
 		  }
@@ -423,10 +423,10 @@ The variables will be of the form output name + port number, e.g. "Pmm1".
 					*(new FloatMatrix(rows, cols));
 		      if ( mxIsComplex(matlabMatrix) ) {
 			InfString myerrstr;
-			myerrstr = "Imaginary components ignored for the ";
+			myerrstr = "\nImaginary components ignored for the ";
 			myerrstr << "Matlab matrix " << matlabOutputNames[j];
 			myerrstr << " on output port " << j;
-			Error::warn(*this, (char *) myerrstr);
+			Error::warn(*this, (const char *) myerrstr);
 		      }
 		      for ( int jrow = 0; jrow < rows; jrow++ ) {
 			for ( int jcol = 0; jcol < cols; jcol++ ) {
