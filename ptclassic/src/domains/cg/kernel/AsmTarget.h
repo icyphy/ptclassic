@@ -132,9 +132,6 @@ protected:
 	void wormInputCode(PortHole&);
 	void wormOutputCode(PortHole&);
 
-	// AsmTargets always support "AnyAsmStar" stars.
-	const char* auxStarClass() const;
-
 	/*virtual*/ void mainLoopCode();
 
 	CodeStream mainLoop;

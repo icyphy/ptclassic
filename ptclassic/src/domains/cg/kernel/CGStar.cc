@@ -98,7 +98,7 @@ const int TOKLEN = 80;
 // Create a new CodeStream called 'name' if it doesn't exist.  Return it's 
 // pointer.
 CodeStream* CGStar::newStream(const char* name) {
-	CodeStream* code = myTarget()->newStream(name);
+	CodeStream* code = cgTarget()->newStream(name);
 	if (!code) {
 		Error::abortRun(*this,"newStream: allocation failed ",name);
 	}
@@ -109,18 +109,19 @@ CodeStream* CGStar::newStream(const char* name) {
 // Return NULL on error.
 const char* CGStar::lookupSharedSymbol(const char* scope, const char* name)
 {
-    return myTarget()->lookupSharedSymbol(scope, name);
+    return cgTarget()->lookupSharedSymbol(scope, name);
 }
 
 // Set the Target pointer, initialize the symbols to point to the target
 // and initize the pointer to the stream code.
-void CGStar :: setTarget(Target* t)
+int CGStar :: setTarget(Target* t)
 {
-	Star::setTarget(t);
-	codeblockSymbol.setSeparator(myTarget()->separator);
-	codeblockSymbol.setCounter(myTarget()->symbolCounter());
-	starSymbol.setSeparator(myTarget()->separator);
-	starSymbol.setCounter(myTarget()->symbolCounter());
+    	if (!Star::setTarget(t)) return FALSE;
+	codeblockSymbol.setSeparator(cgTarget()->separator);
+	codeblockSymbol.setCounter(cgTarget()->symbolCounter());
+	starSymbol.setSeparator(cgTarget()->separator);
+	starSymbol.setCounter(cgTarget()->symbolCounter());
+	return TRUE;
 }
 
 // Add a string to the Target code.
@@ -165,7 +166,7 @@ int CGStar::addProcedure(const char* string, const char* name)
 void CGStar::outputComment (const char* msg,const char* stream)
 {
 	CodeStream* cs = getStream(stream);
-	if (cs != NULL) *cs << myTarget()->comment(msg);
+	if (cs != NULL) *cs << cgTarget()->comment(msg);
 }
 
 // Process a CodeBlock, expanding macros.
@@ -424,7 +425,7 @@ int CGStar :: maxComm() {
 	}
 
 	// processor 1 to 2, "max" sample, both sending plus receiving.
-	return targetPtr->commTime(1,2,max,2);
+	return target()->commTime(1,2,max,2);
 }
 
 // deferrable: never defer a fork; always defer a non-fork star that

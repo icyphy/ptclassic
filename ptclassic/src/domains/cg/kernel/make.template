@@ -17,7 +17,7 @@ ROOT=../../../..
 VPATH = $(ROOT)/src/domains/cg/kernel
 
 # get configuration info
-CONFIG=$(ROOT)/mk/config-$(ARCH).mk
+CONFIG=$(ROOT)/mk/config-$(ARCH).debug.mk
 include $(CONFIG)
 
 # SDF directory
@@ -39,6 +39,7 @@ AsmStar.h \
 AsmTarget.h \
 MultiTarget.h \
 HLLTarget.h \
+CGCluster.h \
 CGPortHole.h \
 CGGeodesic.h \
 CGStar.h \

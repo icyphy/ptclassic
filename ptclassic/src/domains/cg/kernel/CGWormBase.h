@@ -64,8 +64,10 @@ public:
 	StringList displaySchedule();
 
 	// return TRUE if inside domain is a code generation domain.
-	int isCGinside() 
-	   { return target->isA("CGTarget") && !target->isA("CGDDFTarget"); }
+    	int isCGinside() {
+	    return myTarget()->isA("CGTarget") &&
+		!myTarget()->isA("CGDDFTarget");
+	}
 
 /*******  methods for parallel scheduler. ********/
 

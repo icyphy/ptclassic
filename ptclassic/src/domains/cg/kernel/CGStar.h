@@ -91,7 +91,7 @@ public:
 	int run();
 
 	// Pointer to target
-	CGTarget* myTarget() { return (CGTarget*)targetPtr; }
+	CGTarget* cgTarget() { return (CGTarget*)target(); }
 
 	// class identification
 	int isA(const char*) const;
@@ -118,7 +118,7 @@ public:
 
 	// set the target pointer, initialize the various target pointers
 	// such as codeStreams & symbols if needed.
-	void setTarget(Target* t);
+    	/*virtual*/ int setTarget(Target* t);
 
 	// return error on attempt to execute dynamically
 	int setDynamicExecution(int);
@@ -198,7 +198,7 @@ protected:
 	// Lookup a CodeStream in the target.
 	CodeStream* getStream(const char* name=NULL)
 	{
-	    return myTarget()->getStream(name);
+	    return cgTarget()->getStream(name);
 	}
 
 	// create a new CodeStream with a given name.  It is legal to call this

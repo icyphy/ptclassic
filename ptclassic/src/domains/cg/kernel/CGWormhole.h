@@ -53,14 +53,14 @@ class CGWormhole : public CGWormBase, public CGStar {
 public:
 	void setup();
 	void go();
-	void wrapup() { /* target->wrapup();  */ }
+	void wrapup() { }
 
 	// Constructor
 	CGWormhole(Galaxy& g, Target* t = 0);
 	~CGWormhole();
 
 	// return my scheduler
-	Scheduler* scheduler() const { return target->scheduler() ;}
+	Scheduler* scheduler() const { return myTarget()->scheduler() ;}
 
 	// execution time which is the average of the workload inside 
 	// the wormhole with 1 processor.
