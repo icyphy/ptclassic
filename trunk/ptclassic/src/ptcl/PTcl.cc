@@ -57,6 +57,8 @@ static const char file_id[] = "PTcl.cc";
 #include "Scheduler.h"
 #include "InfString.h"
 
+#include "ptclDescription.h"
+
 // "matlab" ptcl command -BLE
 // we make matlabtcl a static instance of the MatlabTcl class instead of
 // a data member of the PTcl class because other libraries, e.g. pigilib,
@@ -218,6 +220,18 @@ const Block* PTcl::getBlock(const char* name) {
 	return b;
 }
 
+// description: return the ptcl description of the current galaxy.
+// This differs from print in that the output of the ptcl description 
+// command can be read back in to ptcl to recreate the universe.
+// description		- return the description of the current universe
+// FIXME: this command should be able to handle named galaxies, it
+// should be able to recurse over subgalaxies, and it should print 
+// target settings.
+int PTcl::description(int argc,char** argv) {
+	if (argc > 1) return usage("description");
+	return result(ptclDescription(currentGalaxy));
+}
+
 // descriptor: print the descriptor of the current galaxy, or of
 // a block in the galaxy or on the known list, or of the current
 // target or any known target.
@@ -234,6 +248,7 @@ int PTcl::print(int argc,char** argv) {
 	if (!b) return TCL_ERROR;
 	return result(b->print(0));
 }
+
 
 // star: create a new instance of star/galaxy/wormhole within the
 // current galaxy.
@@ -1164,6 +1179,7 @@ static InterpTableEntry funcTable[] = {
 	ENTRY(delnode),
 	ENTRY(delstar),
 	ENTRY(deluniverse),
+	ENTRY(description),
 	ENTRY(descriptor),
 	ENTRY(disconnect),
 	ENTRY(domain),

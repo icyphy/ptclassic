@@ -243,6 +243,7 @@ public:
 	int delstar(int argc,char** argv);
 	int deluniverse(int argc,char** argv);
 	int descriptor(int argc,char** argv);
+	int description(int argc,char** argv);
 	int disconnect(int argc,char** argv);
 	int domain(int argc,char** argv);
 	int domains(int argc,char** argv);
