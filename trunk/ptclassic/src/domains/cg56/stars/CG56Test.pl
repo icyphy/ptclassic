@@ -11,16 +11,14 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CG56 main library }
 	desc {
-This star compares its two inputs "upper" and "lower".
-The test "condition" can be any one of {EQ NE GT GE},
-or equivalently any one of {== != > >=},
-whose elements represent the binary operations of equals, not equals,
-greater than, and greater than or equals, respectively.
-
-If the "crossingsOnly" parameter is TRUE, then the output is TRUE only
-when the outcome of the test changes from TRUE to FALSE
-or FALSE to TRUE.
-In this case, the first output is always TRUE.
+This star compares its two inputs "upper" and "lower" using the comparison
+test "condition".  The "condition" test can be any one of {EQ NE GT GE},
+or equivalently any one of {== != > >=}, whose elements represent the binary
+operations of equals, not equals, greater than, and greater than or equals,
+respectively.  If the "crossingsOnly" parameter is TRUE, then the output is
+TRUE only when the outcome of the test changes from TRUE to FALSE or FALSE
+to TRUE.  In this case, the first output is always TRUE.  This star outputs
+0 on FALSE and 1 on TRUE.
 	}
 	explanation {
 To implement the tests "<" or "<=", simply reverse the inputs.
@@ -36,30 +34,30 @@ To implement the tests "<" or "<=", simply reverse the inputs.
 	input {
 		name { upper }
 		type { fix }
-		desc { Left-hand side of the test. }
+		desc { Left-hand side of the test }
 	}
 	input {
 		name { lower }
 		type { fix }
-		desc { Right-hand side of the test. }
+		desc { Right-hand side of the test }
 	}
 	output {
 		name { output }
 		type { int }
-		desc { Result of the test. }
+		desc { Result of the test }
 	}
 	defstate {
 		name { condition }
 		type { string }
 		default { "EQ" }
-		desc { The test condition, i.e, one of EQ, NE, LT, or LE. }
+		desc { The test condition, i.e, one of EQ, NE, LT, or LE }
 	}
 	defstate {
 		name { crossingsOnly }
 		type { int }
 		default { "FALSE" }
 		desc {
-If TRUE, outputs are TRUE only when the sense of the test changes.
+If TRUE, outputs are TRUE only when the sense of the test changes
 		}
 	}
 	// The A_YMEM attribute is set or cleared below in the setup method
@@ -95,7 +93,7 @@ test.  This ensures that the first test result will always be TRUE.
 		else if ( strcasecmp(cn, "!=") == 0 ) test = NEID;
 		else if ( strcasecmp(cn, ">") == 0 ) test = GTID;
 		else if ( strcasecmp(cn, ">=") == 0 ) test = GEID;
-		else Error::abortRun(*this, "Unrecognized test.");
+		else Error::abortRun(*this, "Unrecognized test.", cn);
 
 		// This state has radically different behavior
 		// depending on the setting of crossingsOnly
@@ -129,21 +127,21 @@ test.  This ensures that the first test result will always be TRUE.
 	move	$ref(upper),a
 	}
 
-	// 2. Perform comparison
+	// 2. Perform comparison: output 0 for FALSE and 1 for TRUE
 
 	codeblock(equalTest) {
-	cmp	x0,a	#$$FF,a		; test a - x0 and set a = TRUE
+	cmp	x0,a	#$$01,a		; test a - x0 and set a = TRUE
 	tne	b,a			; if lower != upper then a = FALSE
 	}
 	codeblock(notEqualTest) {
 	sub	x0,a			; test a - x0 which returns a Boolean
 	}
 	codeblock(greaterThan) {
-	cmp	x0,a	#$$FF,a		; test a - x0 and set a = TRUE
+	cmp	x0,a	#$$01,a		; test a - x0 and set a = TRUE
 	tle	b,a			; if upper <= lower, then a = FALSE
 	}
 	codeblock(greaterEqual) {
-	cmp	x0,a	#$$FF,a		; test a - x0 and set a = TRUE
+	cmp	x0,a	#$$01,a		; test a - x0 and set a = TRUE
 	tlt	b,a			; if upper < lower, then a = FALSE
 	}
 
@@ -190,12 +188,9 @@ test.  This ensures that the first test result will always be TRUE.
 		addCode(saveResult);
 	}
 	exectime {
-                // FIXME. Estimates of execution time are given in pairs of
-		// oscillator cycles because that's the way it was done in
-		// Gabriel: they simply counted the number of instructions.
-
 		// Time to read in the two inputs and write out one result
 		int pairsOfCycles = 3;
+
 		// Add number of pairs of cycles
 		if ( int(crossingsOnly) ) pairsOfCycles++;
 		switch (test) {
