@@ -10,8 +10,9 @@
 # way a separate directory containing, say, Sun-3 and Sun-4 objects can be
 # maintained.
 
-
-DIRS = sdf de ddf capsim
+# The EXPDOMAINS environment variable can be used to build experimental domains
+# which are assumed to follow the same directory structure.
+DIRS = sdf de ddf $(EXPDOMAINS)
 
 MAKEVARS = "ARCH=$(ARCH)"
 
