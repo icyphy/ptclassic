@@ -29,6 +29,25 @@
 
 # Author: Alberto Vignani, FIAT Research Center, TORINO
 
+#
+# --------------------------------------------------------------------
+# |  Please note that Linux is moving to the ELF object file format, |
+# |  but only some new distributions support it as of May 8,1995     |
+# |  e.g.the Slackware distribution up to 2.2 does NOT support ELF   |
+# --------------------------------------------------------------------
+# Answer 'yes' if you have installed ELF tools (libc 5.0.x, binutils
+#	2.5.2l.xx, libg++-2.6.2.4, ELF gcc 2.6.3 or later), even if
+#	you compile in a.out format !
+#
+HAVE_ELF=yes
+#
+# We use ELF.
+#
+#USE_ELF=yes
+#
+# We use a.out.
+USE_ELF=no
+
 # --------------------------------------------------------------------
 # |  Please see the file ``config-default.mk'' in this directory!    |
 # --------------------------------------------------------------------
@@ -45,6 +64,43 @@ CC =		gcc
 # based probably don't have gcc.
 # OCT_CC is used in src/octtools/vem-{lib,bin}.mk
 OCT_CC =	gcc
+
+#
+# Programs to use - override previous definitions
+#
+ifeq ($(HAVE_ELF),yes)
+ifeq ($(USE_ELF),yes)
+CC	=	gcc
+# If we have g++, then compile Octtools with gcc.  ARCHs that are cfront
+# based probably don't have gcc.
+# OCT_CC is used in src/octtools/vem-{lib,bin}.mk
+# define in this way to avoid recursion
+OCT_CC	=	gcc
+CPLUSPLUS =	g++
+LD	=	ld -m elf_i386
+CPP	=	gcc -E -D__ELF__
+OBJDUMP	=	objdump
+OBJDUMP_FLAGS =	-k -q 
+LDFLAGS	=	-e startup_32 
+else
+AS	=	/usr/i486-linuxaout/bin/as
+LD	=	/usr/i486-linuxaout/bin/ld -m i386linux
+CC	=	gcc -b i486-linuxaout
+OCT_CC	=	gcc -b i486-linuxaout
+CPP	=	gcc -E
+CPLUSPLUS = 	g++ -b i486-linuxaout
+endif
+else
+CC	=	gcc
+OCT_CC	=	gcc
+CPP	=	gcc -E
+AS	=	as
+LD	=	ld
+CPLUSPLUS = 	g++
+endif
+
+LINKER	=	$(CPLUSPLUS)
+RANLIB	= 	ranlib
 
 # debug version
 LINUXDEF =	-Dlinux #-D_GNU_SOURCE -D_BSD_SOURCE
