@@ -69,7 +69,7 @@ protected:
 	// no need of sumUp method.
 
 public:
-	void begin() { Wormhole::begin(); }
+	void begin();
 	void wrapup();
 
 	// Constructor
