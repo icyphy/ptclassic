@@ -38,11 +38,11 @@ HREF="http://ptolemy.eecs.berkeley.edu/tycho/Tycho.html"><CODE>http://ptolemy.ee
 The Tycho home page has a link to the download page that contains Tycho sources and Itcl
 binaries for certain Unix platforms.
 
-<p>Tycho0.2.1 will not work with versions of Itcl earlier than Itcl2.2,
-which is the version shipped with Ptolemy0.7 and Ptolemy 0.7.1.
+<p>Tycho 0.2.1 will not work with versions of Itcl earlier than Itcl 2.2,
+which is the version shipped with Ptolemy 0.7 and Ptolemy 0.7.1.
 
  <P>To check the version number of Tycho, look at the startup screen
-that has the 'Mr. Tycho' bitmap.  The startup screen can be brought up by 
+that has the 'Mr. Tycho' bitmap.  The startup screen can be brought up by
 selecting the <CODE>Help</CODE> menu in the upper right side and then selecting
 <CODE>About</CODE>.  You can also
 type
@@ -77,9 +77,9 @@ than one version installed on your system.
 <p>
 
 Tycho includes HTML documentation of the Itcl classes that make up
-Tycho.  In Tycho0.2 and earlier, these files (located in the
+Tycho.  In Tycho 0.2 and earlier, these files (located in the
 <CODE>doc/codeDoc</CODE> directory) were not shipped with the
-distribution and had to be installed.  In Tycho0.2.1, these files are
+distribution and had to be installed.  In Tycho 0.2.1, these files are
 shipped in the Tycho tar file, so there is no need to build them by
 hand.
 
@@ -95,7 +95,7 @@ for more information.
 <p>
 <h2><a name="standalone execution">Standalone Execution</a></h2>
 <p>
-To use Tycho standalone (independent of Ptolemy),
+To start up Tycho standalone (independent of Ptolemy),
 the command-line syntax is:
 <pre>
     tycho [-nowelcome] [-noconsole] [-debug] [-tty] [-e tclfile] [file...]
@@ -120,12 +120,16 @@ output is directed to a file.
 This is particularly useful if you are running
 over a slow X connection (like a modem) and do not wish to waste
 the bandwidth.
-The <A NAME="slow network preference"><CODE>slow network</CODE> preference</A> 
+The
+<A NAME="slow network preference"><CODE>slow network</CODE> System preference</A> 
 can also be set to modify the behaviour of Tycho over a slow network.
+<DT><CODE>-noconsole</CODE>
+<DD>Do not open a console window.
 <DT> <a name="-debug tycho option"><CODE>-debug</CODE></a>
 <DD> Start <CODE>itkwish</CODE> inside the Gnu <CODE>gdb</CODE> debugger.
 <DT> <A NAME="-tty tycho option"><CODE>-tty</CODE></A>
-<DD> Start a non-graphical version of Tycho that has a tty prompt.
+<DD> Start a non-graphical version of Tycho that runs in the current xterm or
+shell window. 
 <DT> <A NAME="-e tycho option"><CODE>-e <CODE>tclfile</CODE></CODE></A>
 <DD> Start up and source <CODE><I>tclfile</I></CODE>.  Note that
 at startup time, <CODE>~/.Tycho/tychorc.tcl</CODE> is also sourced.
