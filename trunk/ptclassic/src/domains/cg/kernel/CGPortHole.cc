@@ -39,7 +39,7 @@ Code for CG-type portholes and multiportholes.
 
 // constructor
 CGPortHole :: CGPortHole() : offset(0), forkSrc(0), embeddedPort(0),
-	embeddingFlag(0) {}
+	embeddingFlag(0), switchFlag(0) {}
 
 // destructor: remove forklist references.
 CGPortHole :: ~CGPortHole() {
@@ -48,6 +48,13 @@ CGPortHole :: ~CGPortHole() {
 	while ((p = (OutCGPort*)next++) != 0) p->setForkSource(0);
 	if (forkSrc)
 		forkSrc->forkDests.remove(this);
+	// If myGeodesic is switched, the pointer is set to zero to prevent
+	// deleting the same geodesic multiple times. 
+	// Make sure that original geodesic is destroyed when switching
+	// geodesics
+	if (switched()) {
+		myGeodesic = 0;
+	}
 }
 
 // Advance the offset by the number of tokens produced or
