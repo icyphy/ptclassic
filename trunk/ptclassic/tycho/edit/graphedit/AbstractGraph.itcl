@@ -110,7 +110,7 @@
 # the _Model_ or one of the graph classes if appropriate.
 #
 class ::tycho::AbstractGraph {
-    inherit ::tycho::Object
+    inherit ::tycho::Model
 
     constructor {args} {}
     destructor {}
@@ -136,12 +136,6 @@ class ::tycho::AbstractGraph {
     # Assign new data to an existing vertex
     method assign {vertex data}
     
-    # Add a vertex to the graph.
-    method add {vertexname contents {parents {}}}
-
-    # Add an arc between existing vertices, if it does not already exist.
-    method addArc {parent child}
-
     # Return the value of the specified attribute for the specified vertex.
     method attribute {attrname vertex}
 
@@ -180,6 +174,9 @@ class ::tycho::AbstractGraph {
 
     # Return the value of a vertex
     method get {vertex}
+
+    # Initialize the graph from a description
+    method init {description}
 
     # Get the keys at a vertex
     method keys {vertex}
@@ -233,10 +230,10 @@ class ::tycho::AbstractGraph {
     protected method deleteedge {vertex1 vertex2}
 
     # Add an edge to the adjacency matrix
-    protected method adjacencyadd {vertex1 vertex2}
+    method adjacencyadd {vertex1 vertex2}
 
     # Delete an edge from the adjacency matrix
-    protected method adjacencydelete {vertex1 vertex2}
+    method adjacencydelete {vertex1 vertex2}
 
     #################################################################
     ####                  protected variables                    ####
@@ -250,6 +247,10 @@ class ::tycho::AbstractGraph {
     # will have to be modified. The parent-child representation
     # is more efficient for traversing the graph, but rather more
     # tedious to maintain in the presence of graph alterations.
+    # <b>Note:</b> Preliminary tests using the depthsort{} method
+    # indicate that the efficiency overhead using this representation
+    # is only about 20%. It may be more critical if we can make
+    # depthSort{} and similar algorithms fully non-recursive.
     protected variable _adjacency
     
     # A general-purpose array for storing structural information.
@@ -348,12 +349,12 @@ body ::tycho::AbstractGraph::attribute {attrname vertex} {
 # is an arbitrary string.  If the value is not given, it defaults to "0".
 #
 body ::tycho::AbstractGraph::attributeInit {attrname {initvalue 0}} {
-    if [info exists contentslist] {
-        set searchid [array startsearch contentslist]
-        while {[set vertex [array nextelement contentslist $searchid]] != {}} {
+    if [info exists _vertices] {
+        set searchid [array startsearch _vertices]
+        while {[set vertex [array nextelement _vertices $searchid]] != {}} {
             set _cache($attrname,$vertex) $initvalue
         }
-        array donesearch contentslist $searchid
+        array donesearch _vertices $searchid
     }
 }
 
@@ -551,7 +552,7 @@ body ::tycho::AbstractGraph::get {index} {
 # <code>describe</code> method.  The graph should be verified
 # after this using <code>verify</code>.
 #
-body ::tycho::Graph::init {description} {
+body ::tycho::AbstractGraph::init {description} {
     clear
     foreach cmd $description {
         eval $this $cmd

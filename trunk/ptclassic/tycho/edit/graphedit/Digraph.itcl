@@ -30,261 +30,192 @@
 ##########################################################################
 #### Digraph
 #
-# The _Digraph_ model is a directed graph that explicitly 
-# represents both edges and vertices. Vertices can have an arbitrary
-# value and a set of annotations; edges can have an arbitrary set of
-# annotations.
+# The _Digraph_ model is a standard directed graph.  It extends the
+# _AbstractGraph_ superclass with concrete methods to add and delete
+# vertices and edges, and provides methods for a number of common 
+# algorithms on directed graphs.
 #
-# The methods inherited from the superclass apply to the vertices
-# of the graph: add{}, for example, adds a vertex, while delete{}
-# deletes it. Additional methods are provided to create and access
-# the edges of the graph. (Note: I considered providing a more
-# exposed representation, such as simply using say *vertex1.0->vertex2.0*
-# to denote an edge. In this case, no additional methods are needed to
-# create or access edges. I decided against it in the interests of
-# making the difference between vertices and edges more explicit.)
-#
-# FIXME: Add useful algorithms: SCCs, transitive closure, topological 
-# sort etc.
+# Because the graph is directed, adjacent vertices are known as
+# "parent" or "child" vertices.
 #
 class ::tycho::Digraph {
-	inherit ::tycho::NamedData
-	
-	constructor {args} {}
-	destructor {}
+    inherit ::tycho::AbstractGraph
+    
+    constructor {args} {}
+    destructor {}
 
-	####################################################################
-	
-	# The default options of each edge
-	public variable defaultedgeoptions {}
+    #################################################################
+    ####                     public methods                      ####
 
-	# A flag that indicates that the graph is supposed to be acyclic
-	# FIXME: Why do we need this? Why not just provide a test for cycles?
-	public variable acyclic 0
+    # Get the children of a vertex
+    method children {vertex}
 
-	####################################################################
+    # Add an edge and options to the graph
+    method connect {source target args}
 
-	# Get the children of a vertex
-	method children {vertex}
+    # Remove an edge from the graph
+    method disconnect {source target}
 
-	# Add an edge to the graph
-	method connect {src dst args}
+    # Get the "leaves" of the graph
+    method leaves {}
 
-	# Remove an edge from the graph
-	method disconnect {src dst}
+    # Get the parents of a vertex
+    method parents {vertex}
 
-	# Get an option or options of an edge
-	method edgecget {src dst {option {}}}
-
-	# Configure the edge with one or more options
-	method edgeconfigure {src dst args}
-
-	# Return all options of an edge
-	method edgeoptions {src dst}
-
-	# Get the parents of a vertex
-	method parents {vertex}
-
-	# Get an option or options of a vertex
-	method vertexcget {vertex {option {}}}
-
-	# Configure the vertex with one or more options
-	method vertexconfigure {vertex args}
-
-	# Return all options of a vertex
-	method vertexoptions {vertex}
-
-	####################################################################
-
-	# The children of each vertex, for improved efficiency
-	protected variable _children
-	
-	# The edges associated with each vertex
-	protected variable _edges
-	
-	# The parents of each vertex, for improved efficiency
-	protected variable _parents
+    # Get the roots of the graph
+    method roots {}
 }
 
 ########################################################################
 #### constructor
 #
 body ::tycho::Digraph::constructor {args} {
-	# Evaluate options
-	eval configure $args
+    # Evaluate options
+    eval configure $args
 }
 
 ########################################################################
 #### children
 #
-# Return the children of _vertex_.
+# Return the children of a vertex. An empty list will be returned
+# if the vertex does not exist.
 #
 body ::tycho::Digraph::children {vertex} {
-	if { ! [::info exists _value($vertex)] } {
-		error "Vertex $vertex unknown in $dataname"
-	}
-	return _children($vertex)
+    set result {}
+    foreach {_ edge} [array get _adjacency $vertex^*] {
+	lappend result [lindex $edge 1]
+    }
+    return $result
 }
+
+# body ::tycho::Digraph::children {vertex} {
+#     return _adjacency($vertex.children)
+# }
 
 ########################################################################
 #### connect
 #
-# Add a new edge to the graph.
+# Add a new edge to the graph, and return the inverse command.
+# The edge is specified by two vertices; additional arguments are a
+# flat option-value list for the edge. Flag an error if the edge
+# already exists, but not if the two vertices do not exist. 
 #
-body ::tycho::Digraph::connect {src dst args} {
-	if { [::info exists _edge($src->$dst)] } {
-		error "Edge $src->$dst already exists in $dataname"
-	}
-	if { ! [::info exists _value($src)] } {
-		error "Vertex $src unknown in $dataname"
-	}
-	if { ! [::info exists _value($dst)] } {
-		error "Vertex $dst unknown in $dataname"
-	}
+body ::tycho::Digraph::connect {source target args} {
+    if { [::info exists _edges($source^$target)] } {
+	error "Edge ($source, $target) already exists in $dataname"
+    }
+    set modified 1
 
-	# Record the edge and its options
-	array set temp [concat $defaultedgeoptions $args]
-	set _edges($src->$dst) [array get temp]
-	
-	# Record the parent-child relation
-	lappend _parents($dst) $src
-	lappend _children($src) $dst
+    # Record the edge
+    adjacencyadd $source $target
+    set _edges($source^$target) [list $source $target]
 
-	# Return the inverse command
-	return [list disconnect $src $dst]
+    # Record its options
+    array set temp [concat $edgeoptions $args]
+    set _edgeoptions($source^$target) [array get temp]
+    
+    # Clear any cached structural information
+    catch {unset _cache}
+
+    # Return the inverse command
+    return [list disconnect $source $target]
 }
 
 ########################################################################
 #### disconnect
 #
-# Remove an edge from the graph. The source and destination are as
-# for connect{}; an error is flagged if the edge does not exist.
+# Remove an edge from the graph, and return the inverse command. Flag an
+# error if the edge does not exist.
 #
-body ::tycho::Digraph::disconnect {src dst} {
-	if { ! [::info exists _edge($src->$dst)] } {
-		error "Edge $src->$dst does not exist in $dataname"
-	}
+body ::tycho::Digraph::disconnect {source target} {
+    if { ! [::info exists _edges($source^$target)] } {
+	error "Edge ($source, $target) unknown in $dataname"
+    }
+    set modified 1
 
-	# Remember the inverse command
-	set inverse [list eval connect $src $dst $_edges($src->$dst)]
+    # Remember the inverse
+    set inverse [list connect $source $target $_edgeoptions($source^$target)]
 
-	# Remove the edge and its options
-	unset _edges($src->$dst)
+    # Delete the edge
+    adjacencydelete $source $target
+    unset _edges($source^$target)
 
-	# Delete the parent-child relation
-	set _parents($dst) [ldelete $_parents($dst) $src]
-	set _children($src) [ldelete $_children($src) $dst]
+    # Delete the options(s)
+    unset _edgeoptions($source^$target)
 
-	# Return the inverse command
-	return $inverse
+    # Clear any cached structural information
+    catch {unset _cache}
+
+    # Return the inverse command
+    return $inverse
 }
 
 ########################################################################
-#### edgecget
+#### leaves
 #
-# Get an option of an edge.
+# Return the "leaves" of the graph
 #
-# If the second argument is absent, return a list of option-value pairs,
-# where options are in the list only if they are different from
-# the default.
-#
-body ::tycho::Digraph::edgecget {src dst {option {}}} {
-	if { $option == "" } {
-		# Get all options that differ from the defaults
-		set result
-		array set temp $_edges($src->$dst)
-		foreach {opt dflt} $defaultedgeoptions
-			if { $temp($opt) != $dflt } {
-				lappend result $opt $temp($opt)
-			}
-		}
-		return $result
-	} else {
-		# Just get one option
-		array set temp $_edges($src->$dst)
-		return $temp($option)
-	}
+body ::tycho::Digraph::leaves {} {
+    # Start with all vertices
+    set result [array names _vertices]
+
+    # Delete the ones that have children
+    foreach {_ edge} [array get _adjacency *^*] {
+	set result [ldelete $result [lindex $edge 0]]
+    }
+    return $result
 }
 
-########################################################################
-#### edgeconfigure
-#
-# Configure the edge and return the inverse command. The argument list
-# is a flat list of option-value pairs.
-#
-body ::tycho::Digraph::edgeconfigure {src dst args} {
-	set inverse [list dataconfigure $src->$dst]
-	array set temp $_edges($src->$dst)
-	foreach {option value} $args {
-		lappend inverse $option $temp($option)
-		set temp($option) $value
-	}
-	set _edges($src->$dst) [array get temp]
-	return $inverse
-}
-
-########################################################################
-#### edgeoptions
-#
-# Return a list containing the options of the edge as a flat
-# option-default-value list.
-#
-body ::tycho::Digraph::edgeoptions {src dst} {
-	set result {}
-	array set temp $_edges($src->$dst)
-	foreach {opt dflt} $defaultedgeoptions {
-		lappend result [list $opt $dflt $temp($opt)]
-	}
-	return $result
-}
+# body ::tycho::Digraph::leaves {} {
+#     set result {}
+#     foreach {vertex children} [array get _adjacency *.children] {
+# 	if { $children == "" } {
+# 	    lappend result $vertex
+# 	}
+#     }
+#     return $result
+# }
 
 ########################################################################
 #### parents
 #
-# Return the parents of _vertex_.
+# Return the parents of a vertex. An empty list will be returned
+# if the vertex does not exist.
 #
 body ::tycho::Digraph::parents {vertex} {
-	if { ! [::info exists _value($vertex)] } {
-		error "Vertex $vertex unknown in $dataname"
-	}
-	return $_parents($vertex)
+    set result {}
+    foreach {_ edge} [array get _adjacency *^$vertex] {
+	lappend result [lindex $edge 0]
+    }
+    return $result
 }
 
-########################################################################
-#### vertexcget
-#
-# Get an option of a vertex.
-#
-# If the second argument is absent, return a list of option-value pairs,
-# where options are in the list only if they are different from
-# the default.
-#
-# This method is simply a renaming of entrycget{}.
-#
-body ::tycho::Digraph::vertexcget {vertex {option {}}} {
-	entrycget $vertex $option
-}
+# body ::tycho::Digraph::parents {vertex} {
+#     return _adjacency($vertex.parents)
+# }
 
 ########################################################################
-#### vertexconfigure
+#### roots
 #
-# Configure the vertex and return the inverse command. The argument list
-# is a flat list of option-value pairs.
+# Return the roots of the graph
 #
-# This method is simply a renaming of entryconfigure{}.
-#
-body ::tycho::Digraph::vertexconfigure {vertex args} {
-	eval entryconfigure [list $vertex] $args
+body ::tycho::Digraph::roots {} {
+    # Start with all vertices
+    set result [array names _vertices]
+    
+    # Delete the ones that have parents
+    foreach {_ edge} [array get _adjacency *^*] {
+	set result [ldelete $result [lindex $edge 1]]
+    }
+    return $result
 }
 
-########################################################################
-#### vertexoptions
-#
-# Return a list containing the options of the vertex as a flat
-# option-default-value list.
-#
-# This method is simply a renaming of entryoptions{}.
-#
-body ::tycho::Digraph::vertexoptions {vertex} {
-	entryoptions $vertex
-}
+# body ::tycho::Digraph::roots {} {
+#     set result {}
+#     foreach {vertex parents} [array get _adjacency *.parents] {
+# 	if { $children == "" } {
+# 	    lappend result $vertex
+# 	}
+#     }
+#     return $result
+# }

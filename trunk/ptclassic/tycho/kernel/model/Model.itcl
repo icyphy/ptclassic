@@ -29,268 +29,266 @@
 
 ##########################################################################
 #### Model
-
-This class is the abstract superclass of Tycho's implementation of the 
-_model_ component of the model-view user interface architecture.  The 
-model-view architecture is a derivation of the well-known 
-model-view-controller architecture developed as part of Smalltalk and 
-seemingly discussed in just about every book on object-oriented 
-architectures and design techniques.  The model-view derivation combines 
-MVC's view and controller into a single abstraction -- the key forcees 
-driving this change are the increased control functionality provided 
-these days by widgets in UI frameworks (including Tk) and the increased 
-amount of direct manipulation and feedback, which makes the 
-functionality of the view and controller more tightly coupled; ``The 
-prevailing paradigm in user interface software today is _model-view_,'' 
-_Designing Object-oriented User Interfaces_, Dave Collins, 1995.
-
-The _Model_ class is subclassed to provide application-specific (or 
-application-related, at least), information models.  (The corresponding 
-view class in Tycho is named _View_.) This abstract superclass supports 
-multiple views using the ``publish-and-subscribe'' design pattern (known 
-as the ``Observer'' pattern in books such as Gamma _et al's_ `Design 
-Patterns.'' It also incorporates two additional factors not essential 
-to, but very useful to, the model abstraction: persistence and a 
-command history.
-
-Multiple views can _subscribe_ to the same model -- when any view 
-changes the data in the model, the other subscribed views are notified 
-of the change.  (Note: I always use ``notify'' instead of ``update'' to 
-avoid possible confusion with Tk's update{} procedure.) The notification 
-model is what is known as the ``push'' model: when data is changed, the 
-subscribers are informed of the type of the change _and_ the changed 
-data.  Some subclasses may choose to implement instead a ``pull'' model, 
-in which subscribers query the model for changed information.  All data 
-is accessed by means of an _index_.  Depending on the functionality 
-implemented by specific subclasses, this index could a simple integer or 
-string key, or somehting more complex: a region of a file between two 
-positions, a regular expression indicating the text associated with a 
-particular method, or some other symbolic representation of a portion of 
-or position within the data contained by one of these objects.  
-Different subclasses support subscription of varying complexity -- for 
-example, an object may be able to subscribe to changes only of a certain 
-type.  By default, subscription and notification uses glob-style 
-pattern-matching to provide flexible and reasonably-efficient (in Tcl) 
-access to indexes.
-
-Persistent data is an important aspect of information models: the user 
-opens and closes windows, but the information model, representing the 
-user's conceptual understanding of the semantics of the operations he or 
-she performs via the user interface, is persistent across window 
-openings and closings, and even across invocations of the application 
-program.  It is supported by the three options *-sourcefile*, 
-*-datafile*, and *-imagefile*.  These are all file names, and any may be 
-used, depending on the subclass and the particular application.  The 
-"source" is a file containing information needed to build the data and 
-is never modified by the data object; the "file" is a file containing 
-the same information, but can be written by the data object: it is thus 
-the same as the usual *-file* option to the Tycho editors; the "image" 
-is a file containing the data in a form that can be rapidly 
-reconstructed by the data object.  The image is a simple Tcl 
-implementation of the ``Memento'' design pattern (Gamma _et al_).
-
-A key aspect of a user interface that encourages user interaction and 
-exploration is the ability to ``undo'' any operation.  This class 
-implements a reasonably flexible, unbounded, undo and redo 
-mechanism, so that any change to a model can be undone and redone.  The 
-undo history implemented by this class is linear -- an interesting 
-extension of the history mechanism is to make it tree-structured, for 
-applications such as design exploration, where a designer may want to 
-try out a number of different design paths and "milestone" significant 
-designs in a tree or forest of alternative designs.
-
-An alternative (better?) class structure is certainly possible: split 
-the undo history into a separate class.  (This would make it an instance 
-of the ``CommandServer'' pattern of Buschmann et al's _A System of 
-Patterns_.) This would be more flexible -- for example, substituting a 
-tree-structured history for the linear history would be straightforward.  
-There is some close coupling between the history and the persistence 
-(the history is saved in the image) which makes it convenient to combine 
-them into one class.  Perhaps after some usage this issue should be 
-examined to see whether to split the history out.
-
-The methods in the _Model_ classes fall into six groups:
-
-<ul>
-<li>Change commands: add{}, replace{}, dataconfigure{}, delete{}, 
-    execute{}, and so on.
-    These are the commands that are available for undo/redo
-    and publishing. In this abstract superclass, only the exceute{} 
-    command (which executes a list of commands) is implemented: other 
-    commands must be provided by subclasses. Suggested commands are :
-    
-    <ul>
-    <li>*add* _index_ _data_ _args_: Add new data at the given index.
-         Some subclasses may not allow this operation if data already
-         exists at the given index, while others will just insert
-         additional data at that index. If the data subclass accepts
-         data options, then following arguments are option values.
-    <li>*replace* _index_ _data_: Replace the data at the given index
-         with new data. Some subclasses may not allow this operation
-         if data does not exist at the given index; others will.
-    <li>*create* _index_ _args_: Create some kind of data with the given
-         index, where the additional arguments describe how to create
-         the data. This method is appropriate for models of graphical
-         diagrams. <i>See note below regarding returned values.</i>
-    <li>*dataconfigure* _index_ ?_option? ?_value? ...: Configure options of
-         data at the given index. This method is appropriate in any 
-         model in which some data can be given additional attributes.
-         It is often renamed according to the model: entryconfigure{},
-         itemconfigure{}, textconfigure{}, and so on.
-    </ul>
-
-    Every data change command 
-    must return an _inverse_ command -- that is, a command that can be 
-    executed (in the scope of the model object) to undo the change.
-    Some commands may choose to return the null string if the command
-    failed.    
-    <b>Note</b>: Commands such as create{} cannot return a new 
-    identifier, since they must return an inverse command. This shifts
-    the onus onto the client to provide names for new graphical objects
-    (for example), but is not difficult (after all, that's what Tk
-    widgets require).
-    
-<li>Access commands: get{}, match{}, indexes{}.
-    All of these are abstract and must be 
-    overridden by subclasses. Most subclasses will also define a 
-    function called datacget{} or something similar, which can be used
-    to access configuration options of data.
-    
-<li>Persistence commands: load{}, describe{}, and  
-    write{}. load{} and write{} must never be overridden; 
-    describe{} usually is.
-    
-<li>Publish-subscribe commands: subscribe{}, unsubscribe{}, and publish{}.
-    None of these must ever be overridden (except in special
-    circumstances, such as the _Publisher_ and _WidgetPreferences_ 
-    classes).
-    
-<li>Undo-redo commands: record{}, undo{}, redo{}, mark{}, clear{}, and 
-    compact{}. These commands manipulat the undo history in various
-    ways. None of these must ever be overridden (except in special
-    circumstances, such as the _Publisher_ and _WidgetPreferences_ 
-    classes).
-    
-<li>Protected methods: notify{}, and writeData{}. All 
-    of these do sensible things by default, although subclasses may
-    choose to override them to change behavior or for efficiency.
-</ul>
-
+#
+# This class is the abstract superclass of Tycho's implementation of the 
+# _model_ component of the model-view user interface architecture.  The 
+# model-view architecture is a derivation of the well-known 
+# model-view-controller architecture developed as part of Smalltalk and 
+# seemingly discussed in just about every book on object-oriented 
+# architectures and design techniques.  The model-view derivation combines 
+# MVC's view and controller into a single abstraction -- the key forcees 
+# driving this change are the increased control functionality provided 
+# these days by widgets in UI frameworks (including Tk) and the increased 
+# amount of direct manipulation and feedback, which makes the 
+# functionality of the view and controller more tightly coupled -- 
+# see the book _Designing Object-oriented User Interfaces_, Dave Collins,
+# 1995.
+#
+# The _Model_ class is subclassed to provide application-specific (or 
+# application-related, at least), information models.  (The corresponding 
+# view class in Tycho is named _View_.) This abstract superclass supports 
+# multiple views using the ``publish-and-subscribe'' design pattern (known 
+# as the ``Observer'' pattern in books such as Gamma _et al's_ `Design 
+# Patterns.'' It also incorporates two additional factors not essential 
+# to, but very useful to, the model abstraction: persistence and a 
+# command history.
+#
+# Multiple views can _subscribe_ to the same model -- when any view 
+# changes the data in the model, the other subscribed views are notified 
+# of the change.  (Note: I always use ``notify'' instead of ``update'' to 
+# avoid possible confusion with Tk's update{} procedure.) The notification 
+# model is what is known as the ``push'' model: when data is changed, the 
+# subscribers are informed of the type of the change _and_ the changed 
+# data.  Some subclasses may choose to implement instead a ``pull'' model, 
+# in which subscribers query the model for changed information.  All data 
+# is accessed by means of an _index_.  Depending on the functionality 
+# implemented by specific subclasses, this index could a simple integer or 
+# string key, or somehting more complex: a region of a file between two 
+# positions, a regular expression indicating the text associated with a 
+# particular method, or some other symbolic representation of a portion of 
+# or position within the data contained by one of these objects.  
+# Different subclasses support subscription of varying complexity -- for 
+# example, an object may be able to subscribe to changes only of a certain 
+# type.  By default, subscription and notification uses glob-style 
+# pattern-matching to provide flexible and reasonably-efficient (in Tcl) 
+# access to indexes.
+#
+# Persistent data is an important aspect of information models: the user 
+# opens and closes windows, but the information model, representing the 
+# user's conceptual understanding of the semantics of the operations he or 
+# she performs via the user interface, is persistent across window 
+# openings and closings, and even across invocations of the application 
+# program.  It is supported by the three options *-sourcefile*, 
+# *-datafile*, and *-imagefile*.  These are all file names, and any may be 
+# used, depending on the subclass and the particular application.  The 
+# "source" is a file containing information needed to build the data and 
+# is never modified by the data object; the "file" is a file containing 
+# the same information, but can be written by the data object: it is thus 
+# the same as the usual *-file* option to the Tycho editors; the "image" 
+# is a file containing the data in a form that can be rapidly 
+# reconstructed by the data object.  The image is a simple Tcl 
+# implementation of the ``Memento'' design pattern (Gamma _et al_).
+#
+# A key aspect of a user interface that encourages user interaction and 
+# exploration is the ability to ``undo'' any operation.  This class 
+# implements a reasonably flexible, unbounded, undo and redo 
+# mechanism, so that any change to a model can be undone and redone.  The 
+# undo history implemented by this class is linear -- an interesting 
+# extension of the history mechanism is to make it tree-structured, for 
+# applications such as design exploration, where a designer may want to 
+# try out a number of different design paths and "milestone" significant 
+# designs in a tree or forest of alternative designs.
+#
+# <i>(Edward has pointed out the relation between persistence, undo, 
+# and version control. We need to work out a good abstraction for
+# these mechanisms.)</i>
+#
+# An alternative (better?) class structure is certainly possible: split 
+# the undo history into a separate class.  (This would make it an instance 
+# of the ``CommandServer'' pattern of Buschmann et al's _A System of 
+# Patterns_.) This would be more flexible -- for example, substituting a 
+# tree-structured history for the linear history would be straightforward.  
+# There is some close coupling between the history and the persistence 
+# (the history is saved in the image) which makes it convenient to combine 
+# them into one class.  Perhaps after some usage this issue should be 
+# examined to see whether to split the history out.
+#
+# The methods in the _Model_ classes fall into six groups:
+#
+# <ul>
+# <li>Change commands: add{}, replace{}, dataconfigure{}, delete{}, 
+#     execute{}, and so on.
+#     These are the commands that are available for undo/redo
+#     and publishing. In this abstract superclass, only the exceute{} 
+#     command (which executes a list of commands) is implemented: other 
+#     commands must be provided by subclasses. Suggested commands are :
+#    
+#     <ul>
+#     <li>*add* _index_ _data_ _args_: Add new data at the given index.
+#          Some subclasses may not allow this operation if data already
+#          exists at the given index, while others will just insert
+#          additional data at that index. If the data subclass accepts
+#          data options, then following arguments are option values.
+#     <li>*replace* _index_ _data_: Replace the data at the given index
+#          with new data. Some subclasses may not allow this operation
+#          if data does not exist at the given index; others will.
+#     <li>*create* _index_ _args_: Create some kind of data with the given
+#          index, where the additional arguments describe how to create
+#          the data. This method is appropriate for models of graphical
+#          diagrams. <i>See note below regarding returned values.</i>
+#     <li>*dataconfigure* _index_ ?_option? ?_value? ...: Configure options of
+#          data at the given index. This method is appropriate in any 
+#          model in which some data can be given additional attributes.
+#          It is often renamed according to the model: entryconfigure{},
+#          itemconfigure{}, textconfigure{}, and so on.
+#     </ul>
+#
+#     Every data change command 
+#     must return an _inverse_ command -- that is, a command that can be 
+#     executed (in the scope of the model object) to undo the change.
+#     Some commands may choose to return the null string if the command
+#     failed.    
+#     <b>Note</b>: Commands such as create{} cannot return a new 
+#     identifier, since they must return an inverse command. This shifts
+#     the onus onto the client to provide names for new graphical objects
+#     (for example), but is not difficult (after all, that's what Tk
+#     widgets require).
+#    
+# <li>Access commands: get{}, match{}, indexes{}.
+#     All of these are abstract and must be 
+#     overridden by subclasses. Most subclasses will also define a 
+#     function called datacget{} or something similar, which can be used
+#     to access configuration options of data.
+#    
+# <li>Persistence commands: load{}, describe{}, and  
+#     write{}. load{} and write{} must never be overridden; 
+#     describe{} usually is.
+#    
+# <li>Publish-subscribe commands: subscribe{}, unsubscribe{}, and publish{}.
+#     None of these must ever be overridden (except in special
+#     circumstances, such as the _Publisher_ and _WidgetPreferences_ 
+#     classes).
+#   
+# <li>Undo-redo commands: record{}, undo{}, redo{}, markHistory{},
+#     clearHistory{}, and 
+#     compactHistory{}. These commands manipulate the undo history in various
+#     ways. None of these must ever be overridden (except in special
+#     circumstances, such as the _Publisher_ and _WidgetPreferences_ 
+#     classes).
+#
+# <li>Protected methods: notify{}, and writeData{}. All 
+#     of these do sensible things by default, although subclasses may
+#     choose to override them to change behavior or for efficiency.
+# </ul>
+#
 class ::tycho::Model {
-	inherit ::tycho::Object
+    inherit ::tycho::Object
 
-	constructor {args} {}
-	destructor {}
-	
-	####################################################################
+    constructor {args} {}
+    destructor {}
+    
+    #################################################################
+    ####                        options                          ####
 
-	# The name of this data object
-	public variable dataname [namespace tail $this]
+    # The name of this data object
+    public variable dataname ""
 
-	# The file that this data is based on
-	public variable datafile {}
+    # The file that this data is based on
+    public variable datafile {}
 
-	# The file used for storing this data
-	public variable imagefile {}
+    # The file used for storing this data
+    public variable imagefile {}
 
-	# The immutable file that this data is based on
-	public variable sourcefile {}
+    # The immutable file that this data is based on
+    public variable sourcefile {}
 
-	# A flag saying whether this model is persistent
-	public variable persistent 0
+    # A flag saying whether this model is persistent
+    public variable persistent 0
 
-	# A script to that changes the default notification mechanism
-	public variable notifyscript {}
+    # A script to that changes the default notification mechanism
+    public variable notifyscript {}
 
-	####################################################################
-	
-	# Clear the undo history
-	method clear {args}
-	
-	# Compact a portion of the undo history
-	method compact {from to publish {command {}} {inverse {}}}
-	
-	# Describe data matched by the given pattern
-	method describe {pattern args}
+    #################################################################
+    ####                     public methods                      ####
 
-	# Execute a list of data change commands
-	method execute {commands}
+    # Clear the undo history
+    method clearHistory {args}
+    
+    # Compact a portion of the undo history
+    method compactHistory {from to publish {command {}} {inverse {}}}
+    
+    # Describe data matched by the given pattern
+    method describe {pattern args}
 
-	# Return some data given a symbolic index
-	method get {index}
+    # Execute a list of data change commands
+    method execute {commands}
 
-	# Return a list of indexes that match a pattern
-	method indexes {pattern args}
+    # Return some data given a symbolic index
+    method get {index}
 
-	# Load data into the object
-	method load {{description {}}}
+    # Return a list of indexes that match a pattern
+    method indexes {pattern args}
 
-	# Get or set a mark in the undo history
-	method mark {{markname {}} {position current}}
+    # Load data into the object
+    method load {{description {}}}
 
-	# Return a list of index-data pairs based on a pattern
-	method match {pattern args}
+    # Get or set a mark in the undo history
+    method markHistory {{markname {}} {position current}}
 
-	# Publish a change in data
-	method publish {whoiam command index args}
+    # Return a list of index-data pairs based on a pattern
+    method match {pattern args}
 
-	# Record a change in data
-	method record {command index args}
+    # Publish a change in data
+    method publish {whoiam command index args}
 
-	# Redo changes to the data
-	method redo {{distance 1}}
+    # Record a change in data
+    method record {command index args}
 
-	# Subscribe to data changes that match an index pattern
-	method subscribe {whoiam pattern {whattodo {}}}
+    # Redo changes to the data
+    method redo {{distance 1}}
 
-	# Undo changes to the data
-	method undo {{distance 1}}
+    # Subscribe to data changes that match an index pattern
+    method subscribe {whoiam pattern {whattodo {}}}
 
-	# Unsubscribe from data changes
-	method unsubscribe {whoiam {pattern {}}}
+    # Undo changes to the data
+    method undo {{distance 1}}
 
-	# Write the data to a file
-	method write {{file {}} {image {}}}
+    # Unsubscribe from data changes
+    method unsubscribe {whoiam {pattern {}}}
 
-	####################################################################
-	
-	# Notify the subscribers of a change in data
-	protected method notify {whoiam command pattern args}
+    # Write the data to a file
+    method write {{file {}} {image {}}}
 
-	# Write data to a data file and image file.
-	protected method writeData {fd id}
+    #################################################################
+    ####                  protected methods                      ####
 
-	####################################################################
-	
-	# The array of undo commands
-	protected variable undoCommand
+    # Notify the subscribers of a change in data
+    protected method notify {whoiam command pattern args}
 
-	# A flag marking this model as having been modified
-	protected variable modified
+    # Write data to a data file and image file.
+    protected method writeData {fd id}
 
-	# The array of redo commands
-	protected variable redoCommands
+    #################################################################
+    ####                  protected variables                    ####
 
-	# The array of flags indicating whether an undo/redo command was published
-	protected variable publishable
-	
-	# The array of subscriptions. Each array index is an index pattern,
-	# and each element is a flat subscriber-script list
-	protected variable subscriptions
-	
-	# The marks in the redo/undo history
-	protected variable historyMark
-	set historyMark(current) 0
-	set historyMark(first) 0
-	set historyMark(last) 0
-	set historyMark(opened) 0
-	set historyMark(published) 0
-	set historyMark(saved) 0
+    # The array of undo commands
+    protected variable undoCommands
 
-	# Initialize the first node of the history
-	set undoCommands(0) "execute {}"
-	set redoCommands(0) "execute {}"
-	set publishable(0) 0
+    # A flag marking this model as having been modified
+    protected variable modified
+
+    # The array of redo commands
+    protected variable redoCommands
+
+    # The array of flags indicating whether an undo/redo command was published
+    protected variable publishable
+    
+    # The array of subscriptions. Each array index is an index pattern,
+    # and each element is a flat subscriber-script list
+    protected variable subscriptions
+    
+    # The marks in the redo/undo history
+    protected variable historyMark
 }
 
 
@@ -298,24 +296,42 @@ class ::tycho::Model {
 #### constructor
 #
 body ::tycho::Model::constructor {args} {
-	# Evaluate options
-	eval configure $args
+    # Initialize history marks
+    set historyMark(current) 0
+    set historyMark(first) 0
+    set historyMark(last) 0
+    set historyMark(opened) 0
+    set historyMark(published) 0
+    set historyMark(saved) 0
+
+    # Initialize the first node of the history
+    set undoCommands(0) "execute {}"
+    set redoCommands(0) "execute {}"
+    set publishable(0) 0
+
+    # Evaluate options
+    eval configure $args
+
+    # If there is no dataname, supply a default
+    if { $dataname == "" } {
+	set dataname [::info namespace tail $this]
+    }
 }
 
 ########################################################################
 #### destructor
 #
-body ::tycho::Model::destructor {
-	# If the model is persistent and modified, save it
-	# FIXME: Need to really work out the logic of persistence and
-	# loading and writing.
-	if { $persistent && $modified } {
-		write
-	}
+body ::tycho::Model::destructor {} {
+    # If the model is persistent and modified, save it
+    # FIXME: Need to really work out the logic of persistence and
+    # loading and writing.
+    if { $persistent && $modified } {
+	write
+    }
 }
 
 ########################################################################
-#### clear
+#### clearHistory
 #
 # Clear the undo history. The first argument is the command to clear
 # from, the second the one to clear to. The arguments can be omitted,
@@ -336,67 +352,67 @@ body ::tycho::Model::destructor {
 # The two indexes can also be raw integer indexes into the history,
 # but this is intended for internal use only.
 #
-body ::tycho::Model::clear {{from first} {to last}} {
-	# Get the indexes corresponding to the marks
-	if { ! [info exists historyMark($from)] } {
-		error "Unknown mark $from in $dataname"
-	}
-	if { ! [info exists historyMark($to)] } {
-		error "Unknown mark $to in $dataname"
-	}
-	if { ! [string match {[0-9]*} $from] } {
-		set fromindex $historyMark($from)
-	} else {
-		set fromindex $from
-	}
-	if { ! [string match {[0-9]*} $to] } {
-		set toindex $historyMark($to)
-	} else {
-		set toindex $to
-	}
+body ::tycho::Model::clearHistory {{from first} {to last}} {
+    # Get the indexes corresponding to the marks
+    if { ! [info exists historyMark($from)] } {
+	error "Unknown mark $from in $dataname"
+    }
+    if { ! [info exists historyMark($to)] } {
+	error "Unknown mark $to in $dataname"
+    }
+    if { ! [string match {[0-9]*} $from] } {
+	set fromindex $historyMark($from)
+    } else {
+	set fromindex $from
+    }
+    if { ! [string match {[0-9]*} $to] } {
+	set toindex $historyMark($to)
+    } else {
+	set toindex $to
+    }
 
-	# Do nothing if from is not earlier than to
-	if { $fromindex >= $toindex } {
-		return
-	}
+    # Do nothing if from is not earlier than to
+    if { $fromindex >= $toindex } {
+	return
+    }
 
-	# Clear the commands
-	set i [expr $fromindex + 1]
-	while { $i <= $toindex } {
-		unset undoCommands($i)
-		unset redoCommands($i)
-		unset publishable($i)
-		incr i
-	}
+    # Clear the commands
+    set i [expr $fromindex + 1]
+    while { $i <= $toindex } {
+	unset undoCommands($i)
+	unset redoCommands($i)
+	unset publishable($i)
+	incr i
+    }
 
-	# Because the history indexes are contiguous, we have to shift
-	# any commands above "to" down to fill in the gap left by the
-	# deleted commands. (Note: i is already set to "to + 1")
-	set delta [expr $toindex - $fromindex] 
-	while { $i <= historyMark(last) } {
-		set undoCommands([expr $i - $delta]) $undoCommands($i)
-		set redoCommands([expr $i - $delta]) $redoCommands($i)
-		set publishable([expr $i - $delta]) $publishable($i)
+    # Because the history indexes are contiguous, we have to shift
+    # any commands above "to" down to fill in the gap left by the
+    # deleted commands. (Note: i is already set to "to + 1")
+    set delta [expr $toindex - $fromindex] 
+    while { $i <= $historyMark(last) } {
+	set undoCommands([expr $i - $delta]) $undoCommands($i)
+	set redoCommands([expr $i - $delta]) $redoCommands($i)
+	set publishable([expr $i - $delta]) $publishable($i)
 
-		unset undoCommands($i)
-		unset redoCommands($i)
-		unset publishable($i)
-		incr i
-	}
+	unset undoCommands($i)
+	unset redoCommands($i)
+	unset publishable($i)
+	incr i
+    }
 
-	# If any marks got clobbered, set them to "from". Any marks
-	# above "to" are shifted down the right amount.
-	foreach {mark index} [array get historyMark] {
-		if { $index > $fromindex || $index <= $toindex } {
-			set historyMark($mark) $fromindex
-		} elseif { $index > $toindex } {
-			set historyMark($mark) [expr $index - $delta]
-		}
+    # If any marks got clobbered, set them to "from". Any marks
+    # above "to" are shifted down the right amount.
+    foreach {mark index} [array get historyMark] {
+	if { $index > $fromindex || $index <= $toindex } {
+	    set historyMark($mark) $fromindex
+	} elseif { $index > $toindex } {
+	    set historyMark($mark) [expr $index - $delta]
 	}
+    }
 }
 
 ########################################################################
-#### compact
+#### compactHistory
 #
 # Compact a portion of the undo history. The first two arguments are the 
 # marks of the command to compact from and the command to compact to: commands
@@ -410,47 +426,47 @@ body ::tycho::Model::clear {{from first} {to last}} {
 # compacted commands; without these command, this method will construct
 # composite commands based on the execute{} method.
 #
-# Any valid marks can be specified -- see clear{} for
+# Any valid marks can be specified -- see clearHistory{} for
 # more information. The "from" mark must be earlier than the
 # "to" mark: an error will be flagged if it is not.
 # If either mark does not exist, then an error will be generated.
 #
-body ::tycho::Model::compact {from to publish {command {}} {inverse {}}} {
-	# Get the indexes corresponding to the marks
-	if { ! [info exists historyMark($from)] } {
-		error "Unknown mark $from in $dataname"
-	}
-	if { ! [info exists historyMark($to)] } {
-		error "Unknown mark $to in $dataname"
-	}
-	set fromindex $historyMark($from)
-	set toindex   $historyMark($to)
+body ::tycho::Model::compactHistory {from to publish {command {}} {inverse {}}} {
+    # Get the indexes corresponding to the marks
+    if { ! [info exists historyMark($from)] } {
+	error "Unknown mark $from in $dataname"
+    }
+    if { ! [info exists historyMark($to)] } {
+	error "Unknown mark $to in $dataname"
+    }
+    set fromindex $historyMark($from)
+    set toindex   $historyMark($to)
 
-	# Flag an error if from is not earlier than to
-	if { $fromindex >= $toindex } {
-		error "Cannot compact from $from ($fromindex) to $to (toindex) in $dataname"
+    # Flag an error if from is not earlier than to
+    if { $fromindex >= $toindex } {
+	error "Cannot compact from $from ($fromindex) to $to (toindex) in $dataname"
+    }
+    
+    # Build composite commands if not supplied
+    if { $command == "" } {
+	set command "execute \{\n"
+	set inverse "execute \{\n"
+	set i [expr $fromindex + 1]
+	while { $i <= $toindex } {
+	    append command "    " redoCommands($i) "\n"
+	    append inverse "    " undoCommands($i) "\n"
 	}
-	
-	# Build composite commands if not supplied
-	if { $command == "" } {
-		set command "execute \{\n"
-		set inverse "execute \{\n"
-		set i [expr $fromindex + 1]
-		while { $i <= $toindex } {
-			append command "    " redoCommands($i) "\n"
-			append inverse "    " undoCommands($i) "\n"
-		}
-		append command "\}\n"
-		append inverse "\}\n"
-	}
-	
-	# Put the new command into the history
-	set redoCommands($toindex) $command
-	set undoCommands($toindex) $inverse
-	set publishable($toindex) $publish
+	append command "\}\n"
+	append inverse "\}\n"
+    }
+    
+    # Put the new command into the history
+    set redoCommands($toindex) $command
+    set undoCommands($toindex) $inverse
+    set publishable($toindex) $publish
 
-	# Clear the compacted commands
-	clear $from [expr $toindex - 1]
+    # Clear the compacted commands
+    clearHistory $from [expr $toindex - 1]
 }
 
 ########################################################################
@@ -477,13 +493,13 @@ body ::tycho::Model::compact {from to publish {command {}} {inverse {}}} {
 # explicitly if they need to include the undo history in their output.
 #
 body ::tycho::Model::describe {pattern args} {
-	set result "# The undo history of $dataname\n"
-	append result "array set undoCommands [list [array get undoCommands]]\n"
-	append result "array set redoCommands [list [array get redoCommands]]\n"
-	append result "array set publishable  [list [array get publishable]]\n"
-	append result "array set historyMark  [list [array get historyMark]]\n"
+    set result "# The undo history of $dataname\n"
+    append result "array set undoCommands [list [array get undoCommands]]\n"
+    append result "array set redoCommands [list [array get redoCommands]]\n"
+    append result "array set publishable  [list [array get publishable]]\n"
+    append result "array set historyMark  [list [array get historyMark]]\n"
 
-	return $result
+    return $result
 }
 
 ########################################################################
@@ -493,11 +509,11 @@ body ::tycho::Model::describe {pattern args} {
 # method simplifies merging of undo commands.
 #
 body ::tycho::Model::execute {commands} {
-	set inverse [list execute]
-	foreach cmd $commands {
-		lappend inverse [eval $cmd]
-	}
-	return $inverse
+    set inverse [list execute]
+    foreach cmd $commands {
+	lappend inverse [eval $cmd]
+    }
+    return $inverse
 }
 
 ########################################################################
@@ -510,7 +526,7 @@ body ::tycho::Model::execute {commands} {
 # This method must be overridden by subclasses.
 #
 body ::tycho::Model::get {index} {
-	abstractMethod get
+    abstractMethod get
 }
 
 ########################################################################
@@ -532,18 +548,18 @@ body ::tycho::Model::get {index} {
 # be faster to delete the object and create a new one.)
 #
 body ::tycho::Model::load {{description {}}} {
-	# If there's no description, get it from a file
-	if { $description == "" } {
-		# Remember this position
-		set historyMark(opened) $historyMark(current)
+    # If there's no description, get it from a file
+    if { $description == "" } {
+	# Remember this position
+	set historyMark(opened) $historyMark(current)
 
-		# Load the most recently-written file
-		# FIXME: Figure out which file is newest	
-		source $newestFile
+	# Load the most recently-written file
+	# FIXME: Figure out which file is newest	
+	source $newestFile
 
-	} else {
-		eval [list $description]
-	}
+    } else {
+	eval [list $description]
+    }
 }
 
 ########################################################################
@@ -563,11 +579,11 @@ body ::tycho::Model::load {{description {}}} {
 # This method must be overridden by subclasses.
 #
 body ::tycho::Model::indexes {pattern args} {
-	abstractMethod indexes
+    abstractMethod indexes
 }
 
 ########################################################################
-#### mark
+#### markHistory
 #
 # Place a mark in the undo history. The first argument is the name of
 # the mark to set. The second is the name of the mark to set it to;
@@ -604,24 +620,24 @@ body ::tycho::Model::indexes {pattern args} {
 # changes as a single change, it can set a mark before the incremental
 # changes, and either i) make sure that it calls undo{} and redo{}
 # using the marks it has set, or ii) _compact_ the history since that
-# mark into a single command (see the compact{} method).
+# mark into a single command (see the compactHistory{} method).
 #
-body ::tycho::Model::mark {{markname {}} {position current}} {
-	# Return all mark names
-	if { $markname == "" } {
-		return [array names historyMark]
-	}
+body ::tycho::Model::markHistory {{markname {}} {position current}} {
+    # Return all mark names
+    if { $markname == "" } {
+	return [array names historyMark]
+    }
 
-	if { $position == "" } {
-		# Delete a mark
-		unset historyMark($markname)
-	} else {
-		if { ! [::info exists historyMark($position)] } {
-			error "Mark $position unknown in $dataname"
-		}
-		# Set a mark
-		set historyMark($mark) $historyMark($position)
+    if { $position == "" } {
+	# Delete a mark
+	unset historyMark($markname)
+    } else {
+	if { ! [::info exists historyMark($position)] } {
+	    error "Mark $position unknown in $dataname"
 	}
+	# Set a mark
+	set historyMark($mark) $historyMark($position)
+    }
 }
 
 ########################################################################
@@ -640,7 +656,7 @@ body ::tycho::Model::mark {{markname {}} {position current}} {
 # This method must be overridden by subclasses.
 #
 body ::tycho::Model::match {pattern args} {
-	abstractMethod match
+    abstractMethod match
 }
 
 ########################################################################
@@ -652,17 +668,17 @@ body ::tycho::Model::match {pattern args} {
 # (or, in some subclasses, an overlapping index).
 #
 body ::tycho::Model::publish {whoiam command index args} {
-	# Record the command
-	eval [list record $command $index] $args
+    # Record the command
+    eval [list record $command $index] $args
 
-	# Mark as publishable
-	set publishable($historyMark(current)) 1
+    # Mark command as publishable
+    set publishable($historyMark(current)) 1
 
-	# Remember where it happened
-	set historyMark(published) $historyMark(current)
+    # Remember where it happened
+    set historyMark(published) $historyMark(current)
 
-	# Notify subscribers.
-	eval [list notify $whoiam $command $index] $args
+    # Notify subscribers.
+    eval [list notify $whoiam $command $index] $args
 }
 
 ########################################################################
@@ -672,23 +688,28 @@ body ::tycho::Model::publish {whoiam command index args} {
 # its inverse for undoing.
 #
 body ::tycho::Model::record {command index args} {
-	# Clear the redo future if needed
-	if { $historyMark(current) < $historyMark(last) } {
-		clear current last
-	}
+    # Clear the redo future if needed
+    if { $historyMark(current) < $historyMark(last) } {
+	clearHistory current last
+    }
 
-	# Record this command and its inverse
-	incr historyMark(current)
-	set undoCommands($historyMark(current)) [concat [list $command $index] $args]
-	set redoCommands($historyMark(current)) \
-				[eval [list inverse $command $index] $args]
-	set publishable($historyMark(current)) 0
+    # Record the command
+    incr historyMark(current)
+    incr historyMark(last)
+    set redoCommands($historyMark(current)) \
+	    [concat [list $command $index] $args]
+    set publishable($historyMark(current)) 0
 
-	# Execute the command
-	eval $command [list $index] $args
+    # Execute the command and record its inverse
+    set undoCommands($historyMark(current)) \
+	    [eval $this $command [list $index] $args]
+    # Mark command as not publishable
+    set publishable($historyMark(current)) 0
 
-	# Mark as modified
-	set modified 1
+    # Mark model as modified
+    set modified 1
+
+puts [array get undoCommands]
 }
 
 ########################################################################
@@ -707,39 +728,39 @@ body ::tycho::Model::record {command index args} {
 # Return the number of steps redone.
 #
 body ::tycho::Model::redo {{distance 1}} {
-	# If a mark is given, figure out the distance
-	if { ! [string match {[0-9]*} $distance] } {
-		# Check that the mark exists
-		if { ! [::info exists historyMark($distance)] } {
-			error "Unknown mark $distance in $dataname"
-		}
-		set distance [expr $historyMark($distance) - $historyMark($current)]
+    # If a mark is given, figure out the distance
+    if { ! [string match {[0-9]*} $distance] } {
+	# Check that the mark exists
+	if { ! [::info exists historyMark($distance)] } {
+	    error "Unknown mark $distance in $dataname"
 	}
+	set distance [expr $historyMark($distance) - $historyMark($current)]
+    }
+puts "$historyMark(last) - $historyMark(current)"
+    # Go forward only as far as the last command
+    if { $distance > $historyMark(last) - $historyMark(current) } {
+	set distance [expr $historyMark(last) - $historyMark(current)]
+    }
 
-	# Go forward only as far as the last command
-	if { $distance > $historyMark(last) - $historyMark(current) } {
-		set distance [expr $historyMark(last) - $historyMark(current)]
+    # Mark model as modified
+    set modified 1
+
+    # Redo the commands
+    set count 0
+    while { $count < $distance } {
+	# Adjust indexes
+	incr historyMark(current)
+	incr count
+
+	# Execute the command
+	eval $this $redoCommands($historyMark(current))
+
+	# Publish if publishable
+	if { $publishable($historyMark(current)) } {
+	    eval notify noone $redoCommands($historyMark(current))
 	}
-
-	# Mark as modified
-	set modified 1
-
-	# Redo the commands
-	set count 0
-	while { $count < $distance } {
-		# Adjust indexes
-		incr historyMark(current)
-		incr count
-
-		# Execute the command
-		eval $redoCommands($historyMark(current))
-
-		# Publish if publishable
-		if { $publishable($historyMark(current)) } {
-			eval notify noone $redoCommands($historyMark(current))
-		}
-	}
-	return $count
+    }
+    return $count
 }
 
 ########################################################################
@@ -765,7 +786,7 @@ body ::tycho::Model::redo {{distance 1}} {
 # To subscribe to all changes, simply use the pattern "*".
 #
 body ::tycho::Model::subscribe {whoiam pattern {whattodo {}}} {
-	lappend subscriptions($pattern) $whoiam $whattodo
+    lappend subscriptions($pattern) $whoiam $whattodo
 }
 
 ########################################################################
@@ -784,40 +805,41 @@ body ::tycho::Model::subscribe {whoiam pattern {whattodo {}}} {
 # Return the number of steps undone.
 #
 body ::tycho::Model::undo {{distance 1}} {
-	# If a mark is given, figure out the distance
-	if { ! [string match {[0-9]*} $distance] } {
-		# Check that the mark exists
-		if { ! [::info exists historyMark($distance)] } {
-			error "Unknown mark $distance in $dataname"
-		}
-		set distance [expr $historyMark($current) - $historyMark($distance)]
+    # If a mark is given, figure out the distance
+    if { ! [string match {[0-9]*} $distance] } {
+	# Check that the mark exists
+	if { ! [::info exists historyMark($distance)] } {
+	    error "Unknown mark $distance in $dataname"
+	}
+	set distance [expr $historyMark($current) - $historyMark($distance)]
+    }
+
+    # Go back only as far as the first command (but don't actually
+    # execute the first command, since it is a null command)
+    if { $distance > $historyMark(current) - $historyMark(first) } {
+	set distance [expr $historyMark(current) - $historyMark(first)]
+    }
+puts "distance = $distance"
+    # Mark model as modified
+    set modified 1
+
+    # Undo the commands
+    set count 0
+    while { $count < $distance } {
+puts [array get undoCommands]
+	# Execute the command
+	eval $this $undoCommands($historyMark(current))
+
+	# Publish if publishable
+	if { $publishable($historyMark(current)) } {
+	    eval notify noone $undoCommands($historyMark(current))
 	}
 
-	# Go back only as far as the first command (but don't actually
-	# execute the first command, since it is a null command)
-	if { $distance > $historyMark(current) - $historyMark(first) } {
-		set distance [expr $historyMark(current) - $historyMark(first)]
-	}
-
-	# Mark as modified
-	set modified 1
-
-	# Undo the commands
-	set count 0
-	while { $count < $distance } {
-		# Execute the command
-		eval $undoCommands($historyMark(current))
-
-		# Publish if publishable
-		if { $publishable($historyMark(current)) } {
-			eval notify noone $undoCommands($historyMark(current))
-		}
-
-		# Adjust indexes
-		incr historyMark(current) -1
-		incr count
-	}
-	return $count
+	# Adjust indexes
+	incr historyMark(current) -1
+	incr count
+    }
+    return $count
 }
 
 ########################################################################
@@ -836,19 +858,19 @@ body ::tycho::Model::undo {{distance 1}} {
 # this operation is slow.)
 #
 body ::tycho::Model::unsubscribe {whoiam {pattern {}}} {
-	if { $pattern != "" } {
-		# Unsubscribe from a given pattern
-		array set temp $subscriptions($pattern)
-		unset temp($whoiam)
-		set subscriptions($pattern) [array get temp]
-	} else {
-		# Unsubscribe from all patterns
-		foreach pattern [array names subscriptions] {
-			array set temp $subscriptions($pattern)
-			unset temp($whoiam)
-			set subscriptions($pattern) [array get temp]
-		}
+    if { $pattern != "" } {
+	# Unsubscribe from a given pattern
+	array set temp $subscriptions($pattern)
+	unset temp($whoiam)
+	set subscriptions($pattern) [array get temp]
+    } else {
+	# Unsubscribe from all patterns
+	foreach pattern [array names subscriptions] {
+	    array set temp $subscriptions($pattern)
+	    unset temp($whoiam)
+	    set subscriptions($pattern) [array get temp]
 	}
+    }
 }
 
 ########################################################################
@@ -877,34 +899,34 @@ body ::tycho::Model::unsubscribe {whoiam {pattern {}}} {
 # <i>Do not override this method: override writeData{} instead.</i>
 #
 body ::tycho::Model::write {{file {}} {image {}}} {
-	# Remember this position
-	set historyMark(saved) $historyMark(current)
-	
-	# Get the right files
-	if { $file == "" } {
-		set file $datafile
-	}
-	if { $image == "" } {
-		set image $imagefile
-	}
-	
-	# Open files
-	# FIXME: Check that the file can be opened for writing
-	set id [open $image "w"]
-	set fd [open $file "w"]
+    # Remember this position
+    set historyMark(saved) $historyMark(current)
+    
+    # Get the right files
+    if { $file == "" } {
+	set file $datafile
+    }
+    if { $image == "" } {
+	set image $imagefile
+    }
+    
+    # Open files
+    # FIXME: Check that the file can be opened for writing
+    set id [open $image "w"]
+    set fd [open $file "w"]
 
-	# Write signature to the image file
-	puts $id "# This is a Tycho image file for $dataname\n"
-	
-	# Write data specific to the subclass
-	writeData $fd $id
-	
-	# Close the files
-	close $fd
-	close $id
-	
-	# Clear modified flag
-	set modified 0
+    # Write signature to the image file
+    puts $id "# This is a Tycho image file for $dataname\n"
+    
+    # Write data specific to the subclass
+    writeData $fd $id
+    
+    # Close the files
+    close $fd
+    close $id
+    
+    # Clear modified flag
+    set modified 0
 }
 
 
@@ -937,34 +959,34 @@ body ::tycho::Model::write {{file {}} {image {}}} {
 # Model object printing to the console).
 #
 body ::tycho::Model::notify {whoiam command index args} {
-	# Scan for subscribers with a pattern that matches the index
-	foreach pattern [array names subscriptions] {
-		if { ! [string match $pattern $index] } {
-			continue
-		}
-		foreach {subscriber script} $subscriptions($pattern) {
-			# Don't notify the caller
-			if { $subscriber == $whoiam } {
-				continue
-			}
-			# Unsubscribe if the subscriber no longer exists!
-			if { [::info which -command $subscriber] == "" } {
-				puts "Error: subscriber $subscriber to $dataname no longer exists"
-				unsubscribe $subscriber
-				continue
-			}
-			if { $script != "" } {
-				# if there's a script supplied by the subscriber, apply it
-				uplevel #0 apply [list $script $subscriber $command $index] $args
-			} elseif { $notifyscript != "" } {
-				# Or if there's a global script, apply that
-				uplevel #0 apply [list $notifyscript $subscriber $command $index] $args
-			} else {
-				# By default, call the subscriber directly
-				uplevel #0 $subscriber $command [list $index] $args
-			}
-		}
+    # Scan for subscribers with a pattern that matches the index
+    foreach pattern [array names subscriptions] {
+	if { ! [string match $pattern $index] } {
+	    continue
 	}
+	foreach {subscriber script} $subscriptions($pattern) {
+	    # Don't notify the caller
+	    if { $subscriber == $whoiam } {
+		continue
+	    }
+	    # Unsubscribe if the subscriber no longer exists!
+	    if { [::info which -command $subscriber] == "" } {
+		puts "Error: subscriber $subscriber to $dataname no longer exists"
+		unsubscribe $subscriber
+		continue
+	    }
+	    if { $script != "" } {
+		# if there's a script supplied by the subscriber, apply it
+		uplevel #0 apply [list $script $subscriber $command $index] $args
+	    } elseif { $notifyscript != "" } {
+		# Or if there's a global script, apply that
+		uplevel #0 apply [list $notifyscript $subscriber $command $index] $args
+	    } else {
+		# By default, call the subscriber directly
+		uplevel #0 $subscriber $command [list $index] $args
+	    }
+	}
+    }
 }
 
 ########################################################################
@@ -984,10 +1006,10 @@ body ::tycho::Model::notify {whoiam command index args} {
 # written to the file is likely to be more efficient.
 #
 body ::tycho::Model::writeData {fd id} {
-	if { $fd != "" } {
-		puts $fd [match * -alloptions]
-	}
-	if { $id != "" } {
-		puts $id [describe *]
-	}
+    if { $fd != "" } {
+	puts $fd [match * -alloptions]
+    }
+    if { $id != "" } {
+	puts $id [describe *]
+    }
 }
