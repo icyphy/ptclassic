@@ -70,7 +70,7 @@ SRGeodesic::~SRGeodesic()
 // @Description Used for both point-to-point and node-style connections.
 // Disconnect the old driver if necessary.
 
-PortHole * SRGeodesic::setSourcePort( GenericPort & p, int, const char * = 0 )
+PortHole * SRGeodesic::setSourcePort( GenericPort & p, int, const char * )
 {
   //  cout << "SRGeodesic::setSourcePort called on " << name() << " to "
   //       << p.parent()->name() << " " << p.name() << "\n";
