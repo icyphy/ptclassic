@@ -43,14 +43,14 @@ LSKERNEL = $(ROOT)/src/domains/sdf/loopScheduler
 DCDIR = $(ROOT)/src/domains/cg/dcScheduler
 DLDIR = $(ROOT)/src/domains/cg/dlScheduler
 HuDIR = $(ROOT)/src/domains/cg/HuScheduler
-MultiDIR = $(ROOT)/src/domains/cg/multiScheduler
+HierDIR = $(ROOT)/src/domains/cg/hierScheduler
 PARDIR = $(ROOT)/src/domains/cg/parScheduler
 MACRODIR = $(ROOT)/src/domains/cg/macroScheduler
 CGDDFDIR = $(ROOT)/src/domains/cg/ddfScheduler
 
 INCL=-I$(CGSTARS) -I$(CGKERNEL) -I$(BDFKERNEL) -I$(SDFKERNEL) -I$(KERNDIR) \
 	-I$(LSKERNEL) -I$(DCDIR)  -I$(DLDIR) -I$(HuDIR) -I$(PARDIR) \
-	-I$(MultiDIR)  -I$(MACRODIR) -I$(CGDDFDIR)
+	-I$(HierDIR) -I$(MACRODIR) -I$(CGDDFDIR)
 
 SRCS=CGMultiTarget.cc CGSharedBus.cc CGBDFTarget.cc
 HDRS=$(SRCS:.cc=.h)
