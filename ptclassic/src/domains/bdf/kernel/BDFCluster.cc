@@ -106,6 +106,7 @@ BDFClusterGal::BDFClusterGal(Galaxy& gal, ostream* log)
 		// FIXME: Memory leak
 		BDFCluster* c = new BDFAtomCluster(*s,this);
 		addBlock(*c);
+		dynamicClusterList.append(c);
 		BDFClustPortIter nextPort(*c);
 		BDFClustPort *p;
 		while ((p = nextPort++) != 0) {
@@ -152,6 +153,19 @@ BDFClusterGal::BDFClusterGal(Galaxy& gal, ostream* log)
 	delete [] ptable;
 }
 
+// Delete the list of clusters dynamically allocated
+// The clusters may be of derived classes, but the virtual
+// destructor of the BDFCluster class will do the right thing
+BDFClusterGal::~BDFClusterGal() {
+	BDFCluster* c;
+	while ((c = (BDFCluster *)dynamicClusterList.getAndRemove()) != 0) {
+		Block* b = (Block *)c;
+		// It is possible that the BDFCluster was moved into another
+		// galaxy and not deleted from the dynamicClusterList
+		if ( removeBlock(*b) ) delete c;
+	}
+}
+
 // remove blocks from this galaxy without deallocating the blocks.
 // It does deallocate the sequential list holding the block pointers. -BLE
 void BDFClusterGal::orphanBlocks() {
@@ -159,6 +173,7 @@ void BDFClusterGal::orphanBlocks() {
 	BDFCluster* c;
 	while ((c = nextC++) != 0) {
 		removeBlock(*c);
+		dynamicClusterList.remove(c);
 		nextC.reset();
 	}
 }
@@ -203,7 +218,7 @@ static int pseudNum = 0;
 static const char* pseudoName() {
 	StringList name = "_dup_";
 	pseudNum++;
-	name += pseudNum;
+	name << pseudNum;
 	return hashstring(name);
 }
 
@@ -328,6 +343,7 @@ void BDFClusterGal::makeWhile(BDFClustPort* ctl, BDFRelation rel) {
 	BDFCluster* c_in = ctl->parentClust();
 	BDFCluster* c_new = new BDFWhileLoop(rel,ctl,c_in);
 	addBlock(c_new->setBlock(genBagName(),this));
+	dynamicClusterList.append(c_new);
 	if (logstrm)
 		*logstrm << "Created while loop around " << c_in->name()
 			 << ": " << *c_new << "\n";
@@ -529,6 +545,7 @@ BDFCluster* BDFClusterGal::tryLoopMerge(BDFCluster* a,BDFCluster* b) {
 				 << ": doing loop merge, result:\n";
 		BDFCluster* c = new BDFWhileLoop(desrel,condSrc,a,b);
 		addBlock(c->setBlock(genBagName(),this));
+		dynamicClusterList.append(c);
 		if (logstrm) *logstrm << *c << "\n";
 		return c;
 	}
@@ -1196,8 +1213,13 @@ static int leaveSelfLoop(BDFClustPort* a,BDFClustPort* b) {
 		(TorF(a->relType()) && TorF(b->relType()) && !condMatch(a,b)));
 }
 
-// This function absorbs an atomic cluster into a bag.
+// move c from its current galaxy par to my galaxy gal
+void BDFClusterBag::moveClusterInto(BDFCluster* c, BDFClusterGal* par) {
+	par->removeBlock(*c);
+	gal->addBlock(*c, c->name());
+}
 
+// absorb an atomic cluster into a bag.
 void BDFClusterBag::absorb(BDFCluster* c,BDFClusterGal* par) {
 	if (size() == 0) {
 		createInnerGal();
@@ -1205,8 +1227,7 @@ void BDFClusterBag::absorb(BDFCluster* c,BDFClusterGal* par) {
 	}
 
 	// move c from its current galaxy to my galaxy.
-	par->removeBlock(*c);
-	gal->addBlock(*c,c->name());
+	moveClusterInto(c, par);
 
 	// adjust the bag porthole list.  Some of c's ports will now become
 	// external ports of the cluster, while some external ports of the
@@ -1238,6 +1259,7 @@ void BDFClusterBag::absorb(BDFCluster* c,BDFClusterGal* par) {
 
 // this function merges two bags.
 void BDFClusterBag::merge(BDFClusterBag* b,BDFClusterGal* par) {
+	if (b == 0 || par == 0) return;
 	if (b->size() == 0) return;
 	if (!gal) createInnerGal();
 	// get a list of all "bagports" that connect the two clusters.

@@ -89,9 +89,15 @@ public:
 	: logstrm(log), bagNumber(-1), urateFlag(FALSE) {}
 
 	// inherit virtual destructor, which zaps inherited data members
-	virtual ~BDFClusterGal() {}
+	virtual ~BDFClusterGal();
 
-        // remove blocks from this galaxy without deallocating the blocks
+	// override removeBlock
+	inline int removeBlock(Block& b) {
+		dynamicClusterList.remove(&b);
+		return DynamicGalaxy::removeBlock(b);
+	}
+
+        // remove all blocks in this galaxy without deallocating the blocks
 	void orphanBlocks();
 
 	// how many?
@@ -183,6 +189,8 @@ protected:
 	// create a new arc to pass boolean information
 	BDFClustPort* connectBoolean(BDFCluster* c,BDFClustPort* cond,
 				     BDFRelation& rel);
+
+	SequentialList dynamicClusterList;
 
 private:
 	int bagNumber;			// number for generating bag names
@@ -443,6 +451,7 @@ public:
 
 	// return my scheduler
 	Scheduler* scheduler() const { return sched;}
+
 protected:
 	// createInnerGal
 	virtual void createInnerGal();
@@ -453,6 +462,8 @@ protected:
 	BDFBagScheduler* sched;
 	BDFClusterGal* gal;
 	int exCount;
+
+	void moveClusterInto(BDFCluster* c, BDFClusterGal* par);
 };
 
 // a BDFWhileLoop is a cluster that represents data-dependent iteration.
