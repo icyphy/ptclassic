@@ -59,7 +59,7 @@
 #                [file join / users ptdesign lib profile obj.$env(PTARCH)]]]  
 # </pre></tcl>
 proc ::tycho::loadIfNotPresent {command package {packagePathList {}}} {
-    global PTOLEMY env
+    global PTOLEMY env TYCHO
 
     # "info procs" does not work in itcl, so we use "info which"
     if {[info which -command $command] == {}} {
@@ -81,16 +81,23 @@ proc ::tycho::loadIfNotPresent {command package {packagePathList {}}} {
 		set libNameList [list $packageLibName]
 	    }
 
+	    if [info exists env(PTARCH)] {
+		set PTARCH $env(PTARCH)
+		if [file isdirectory [file join $TYCHO lib.$PTARCH]] {
+		    set libDirList \
+			    [file join $TYCHO lib.$PTARCH]
+		}
+	    }
 	    if {[info exists env(PTARCH)] && \
 		    [info exists PTOLEMY]} {
 		# If we are here, the Ptolemy is probably installed
 		set PTARCH $env(PTARCH)
 		
-		set libDirList [list \
-			[file join $PTOLEMY tcltk itcl.$PTARCH lib] \
-			[file join $PTOLEMY tcltk itcl.$PTARCH lib itcl]]
-            } else {
-                set libDirList {}
+		lappend libDirList \
+			[file join $PTOLEMY tcltk itcl.$PTARCH lib]
+		lappend libDirList \
+			[file join $PTOLEMY tcltk itcl.$PTARCH lib itcl]
+
             }
 
             # Get the package name and directory from packagePathList
