@@ -200,7 +200,7 @@ char *CGCMakefileTarget :: expandMakefileVariables(const char *makefileLine)
 	    const char* value = getenv (tokbuf);
 	    if (!value)
 				// Wrap the value in $()
-		expandedVars << '$(' << tokbuf << ")";
+		expandedVars << "$(" << tokbuf << ")";
 	    else
 		expandedVars << value;
 	    lexer.setWhite("\r");	// Set whitespace back to original;
