@@ -12,6 +12,11 @@
 
 # The EXPDOMAINS environment variable can be used to build experimental domains
 # which are assumed to follow the same directory structure.
+
+ifeq ($(ARCH),sun4)
+EXPDOMAINS = cp
+endif
+
 DOMAINS = sdf de ddf bdf thor cg sproc silage cgc cg56 cg96 vhdlf vhdlb \
           mq mdsdf $(EXPDOMAINS)
 
