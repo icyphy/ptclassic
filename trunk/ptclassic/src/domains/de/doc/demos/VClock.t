@@ -27,13 +27,17 @@ in the next time slot.
  The output graph shows the length of the longest input queue vs. time,
 the output times for successfully delivered data cells, and the times
 at which cell losses occurred.
+.Ir "Zhang, H."
+.Ir "Keshav, S."
 .pp
-See
+ For a discussion of the virtual clock and other buffer service disciplines,
+see [1].
+.UH REFERENCES
+.ip [1]
 H. Zhang and S. Keshav,
 "Comparison of Rate-Based Service Disciplines,"
-\fIACM SIGCOMM'91 Conference\fR,
-vol. 21, #4, September 1991, pp. 113-121.
-for a discussion of the virtual clock and other buffer service disciplines.
+\fIACM SIGCOMM Conference\fR,
+vol. 21, no. 4, Sep. 1991, pp. 113-121.
 .SA
 VirtClock
 .ES
