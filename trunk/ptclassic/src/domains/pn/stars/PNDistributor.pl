@@ -55,6 +55,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	{
 	    PortHole& port = *nextPort++;
 	    input.receiveData();
+	    port.receiveData();
 	    for (int j = int(blockSize)-1; j >= 0; j--)
 		port%j = input%j;
 	    port.sendData();
