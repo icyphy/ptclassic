@@ -1,14 +1,13 @@
 An index to the Ptolemy distribution
 $Id$
 
-In this structure listing, wherever ARCH appears, replace it by
-"sun3" if you're running on a Sun 3, "sun4" if you're running on
-a Sun 4, "vax" if you're running on a Vax, or "mips" for DecStations
-based on the MIPS RISC chips.
+In this structure listing, wherever PTARCH appears, replace it by sol2
+if you're running on a Solaris2.x machine, "sun4" if you're running on
+a SunOS4.x machine, "hppa" if you're running on a HP.
 
 If you're on a mixed cluster, more than one version may exist (say, one
 containing Sun 3 objects and binaries, and one containing those
-for the Sun 4).  To work correctly, the ARCH environment variable
+for the Sun 4).  To work correctly, the PTARCH environment variable
 should be set to "sun3" or sun4" (whichever is appropriate).  If
 this is done, just typing "make" from the top level directory will
 build and install everything.  The top level directory should be
@@ -19,7 +18,7 @@ make Ptolemy; the Ultrix versions lack some features we need.
 
 MAKEARCH
 	a script to build architecture-specific directories for
-	object files, libraries, and binaries.  If the ARCH environment
+	object files, libraries, and binaries.  If the PTARCH environment
 	variable is "vax", say, it will make bin.vax, lib.vax, obj.vax
 	and appropriate subdirectories
 
@@ -33,8 +32,8 @@ bin/	Contains user-executable shell scripts:
 		Runs the Ptolemy interactive graphics interface
 	pigiDebug
 		Runs pigi with gdb debugger
-bin.ARCH/
-	Contains binary user-executables for the ARCH architecture:
+bin.PTARCH/
+	Contains binary user-executables for the PTARCH architecture:
 	interpreter
 		Ptolemy interpreter
 	pigiRpc
@@ -49,22 +48,6 @@ bin.ARCH/
 		Program for displaying bitmaps under X11
 	optfir, wfir
 		Filter design programs
-
-config-g++.mk
-	Configuration file for building Ptolemy with g++ on most platforms.
-
-config-{sun3,sun4,vax}.mk
-	These are symbolic links to the g++ version.
-
-config-cfront.mk
-	Configuration file for building Ptolemy with AT&T's "cfront" C++
-	compiler on Suns (should work on other platforms with small changes).
-	EXPERIMENTAL: some parts of Ptolemy don't run correctly with cfront
-	at the moment.
-
-config-mips.mk
-	Configuration file for building Ptolemy with the OSF port of g++
-	to the DecStation (MIPS architecture).
 
 demo/
 	Directory containing pigi and interpreter demos.
@@ -85,7 +68,7 @@ lib/
 	vem.bindings.7-3
 	vem.bindings.8-1
 		VEM bindings files for use with pigi
-lib.ARCH/
+lib.PTARCH/
 	interpmain.o
 		main() for interpreter
 	libddf.a, libsdf.a, libde.a
@@ -96,8 +79,8 @@ lib.ARCH/
 		Library routines for Pigi
 makefile
 	The top level makefile for Ptolemy -- it builds everything
-obj.ARCH/
-	Directory for building the system on a ARCH architecture.
+obj.PTARCH/
+	Directory for building the system on a PTARCH architecture.
 	It has subdirectories paralleling the subdirectories of src
 	and is initially built by MAKEARCH.  That is, it has
 	subdirectories domains/, interp/, kernel/, pigiRpc/, preproc/,
@@ -106,12 +89,12 @@ obj.ARCH/
 octtools/
 	Contains the parts of the OCT/VEM system required to build
 	and run pigi.
-	bin.ARCH/
-		Contains binaries for ARCH.  Currently contains only
+	bin.PTARCH/
+		Contains binaries for PTARCH.  Currently contains only
 		vem.
 	include/
 		Contains header files needed to build pigiRpc.
-	lib.ARCH/
+	lib.PTARCH/
 		Contains OCT libraries needed to build pigiRpc
 src/
 	Source files and OCT icons for Ptolemy.
@@ -128,10 +111,6 @@ compat/
 	cfront/
 		include files for building with cfront instead of g++
 		(this does not completely work)
-
-	libg++-1.37.0/
-		fixes to build with older versions of libg++ than
-		1.37.2
 
 domains/
 	Domain-specific support:
