@@ -742,7 +742,8 @@ void BuildArgBlock(ArgBlock *argblock, int type, ea_t request_endpoint,
  */
 void *TimeoutThread(void *voidbundle)
 {
-  int              num_eps, err, n, flag = 0;
+  int              num_eps, err, n;
+  int flag = 0;
   struct ep_elem   *ep_elem_ptr;
   eb_t             bundle;
   fd_set           temp_fdset;
