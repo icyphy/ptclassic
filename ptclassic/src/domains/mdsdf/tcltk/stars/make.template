@@ -43,9 +43,8 @@ include $(CONFIG)
 MDSDFDIR = $(ROOT)/src/domains/mdsdf/kernel
 SDFDIR = $(ROOT)/src/domains/sdf/kernel
 TCLDIR = $(ROOT)/tcl/include
-PIGIDIR = $(ROOT)/src/pigilib
 PTKDIR = $(ROOT)/src/ptklib
-INCL = -I$(SDFDIR) -I$(MDSDFDIR) -I$(KERNDIR) -I$(PIGIDIR) -I$(PTKDIR) \
+INCL = -I$(SDFDIR) -I$(MDSDFDIR) -I$(KERNDIR) -I$(PTKDIR) \
  -I$(TCL_INCDIR) -I$(TK_INCDIR) $(X11_INCSPEC)
 
 # Library name
