@@ -70,7 +70,7 @@ ostream& operator<< (ostream& o, BDFClusterGal& g) {
 // their corresponding BDFClustPorts and connect it all up.
 
 BDFClusterGal::BDFClusterGal(Galaxy& gal, ostream* log)
-: bagNumber(1), logstrm(log)
+: bagNumber(1), logstrm(log), urateFlag(FALSE)
 {
 	int nports = setPortIndices(gal);
 	LOG_NEW; BDFClustPort** ptable = new BDFClustPort*[nports];
@@ -198,14 +198,19 @@ int BDFClusterGal::genSubScheds() {
 	return TRUE;
 }
 
-// Test to see if we have uniform rate.
+// Test to see if we have uniform rate.  Since a uniform-rate cluster
+// is never turned into a nonuniform rate cluster, the information is
+// cached.
+
 int BDFClusterGal::uniformRate() {
-	if (numberClusts() <= 1) return TRUE;
+	if (urateFlag) return TRUE;
+	if (numberClusts() <= 1) return (urateFlag = TRUE);
 	BDFClusterGalIter nextClust(*this);
 	BDFCluster* c;
 	while ((c = nextClust++) != 0) {
 		if (!c->matchNeighborRates()) return FALSE;
 	}
+	urateFlag = TRUE;
 	return TRUE;
 }
 
@@ -243,6 +248,10 @@ int BDFClusterGal::mergePass() {
 		else *logstrm << "Merge pass made no changes\n";
 	}
 	return changes;
+}
+
+void showBDFg(BDFClusterGal* g) {
+	cerr << g->numberClusts() << " clusters: " << *g << "\n";
 }
 
 // This function does a full search for possible clusters to merge.  If
@@ -284,6 +293,25 @@ BDFCluster* BDFClusterGal::fullSearchMerge() {
 	return 0;
 }
 
+static BDFLoopType revType[] = {
+	DO_ITER, DO_IFFALSE, DO_IFTRUE, DO_UNTILFALSE, DO_UNTILTRUE
+};
+
+// return TRUE if this and b have the same loop condition.
+
+int BDFCluster::sameLoopCondition(const BDFCluster& b) const
+{
+	BDFRelation desrel;
+	if (pType == DO_ITER)
+		return b.pType == DO_ITER && pLoop == b.pLoop;
+	if (b.pType == DO_ITER)
+		return FALSE;
+	if (pType == b.pType) desrel = BDF_SAME;
+	else if (revType[pType] == b.pType) desrel = BDF_COMPLEMENT;
+	else return FALSE;
+	return sameSignal(pCond,b.pCond) == desrel;
+}
+
 int BDFClusterGal::parallelLoopMergePass() {
 	// See if we can do a merge of two disconnected
 	// clusters that have the same loop factor.
@@ -299,21 +327,23 @@ int BDFClusterGal::parallelLoopMergePass() {
 	// falseHitList is a list of clusters not to try again.
 	SequentialList falseHitList;
 
+	int urate = uniformRate();
 	while ((c = nextClust++) != 0) {
-		if (c->loop() <= 1) continue;
+		if (!c->looped()) continue;
 		if (falseHitList.member(c)) continue;
 		// copy the iterator using the copy constructor.
 		BDFClusterGalIter i2(nextClust);
 		BDFCluster* c2;
 		int falseMatch = FALSE;
 		while ((c2 = i2++) != 0) {
-			if (c2->loop() != c->loop()) continue;
+			if (!c->sameLoopCondition(*c2)) continue;
 			if (logstrm)
 				*logstrm <<
 				 "Trying parallel loop merge of " <<
 				 c->name() << " and " << c2->name();
 			// merge if no indirect paths in either direction.
-			if (indirectPath(c,c2) || indirectPath(c2,c)) {
+			if (indirectPath(c,c2,urate) ||
+			    indirectPath(c2,c,urate)) {
 				if (logstrm) *logstrm <<
 					"... Can't merge, indirect paths\n";
 				falseMatch = TRUE;
@@ -345,7 +375,9 @@ int BDFClusterGal::parallelLoopMergePass() {
 // src cluster to the dst cluster (one that passes through another
 // cluster), treating the ports as directed paths.
 
-int BDFClusterGal::indirectPath(BDFCluster* src, BDFCluster* dst) {
+// The optional ignoreDelayArcs is passed onto findPath.
+int BDFClusterGal::indirectPath(BDFCluster* src, BDFCluster* dst,
+			int ignoreDelayArcs) {
 	stopList.initialize();
 	stopList.put(src);
 	BDFClustPortIter nextP(*src);
@@ -353,7 +385,8 @@ int BDFClusterGal::indirectPath(BDFCluster* src, BDFCluster* dst) {
 	while ((p = nextP++) != 0) {
 		if (p->far() == 0) continue;
 		BDFCluster* peer = p->far()->parentClust();
-		if (p->isItOutput() && peer != dst && findPath(peer,dst))
+		if (p->isItOutput() && peer != dst &&
+		    findPath(peer,dst,ignoreDelayArcs))
 			return TRUE;
 	}
 	return FALSE;
@@ -365,16 +398,24 @@ int BDFClusterGal::indirectPath(BDFCluster* src, BDFCluster* dst) {
 // any cluster on the stop list.  When indirectPath calls this it puts
 // src on the stop list to initialize it.
 
-int BDFClusterGal::findPath(BDFCluster* start, BDFCluster* dst) {
+// If ignoreDelayArcs is set, we ignore the presence
+// of arcs with delays that equal or exceed the number of tokens
+// transferred on the arc.  Such paths do not interfere with clustering
+// if the cluster is uniform rate.
+
+int BDFClusterGal::findPath(BDFCluster* start, BDFCluster* dst,
+		    int ignoreDelayArcs) {
 	stopList.put(start);
 	BDFClustPortIter nextP(*start);
 	BDFClustPort* p;
 	while ((p = nextP++) != 0) {
 		if (p->isItInput() || p->far() == 0) continue;
+		if (ignoreDelayArcs && p->numTokens() >= p->numIO())
+			continue;
 		BDFCluster* peer = p->far()->parentClust();
 		if (peer == dst) return TRUE;
 		if (stopList.member(peer)) continue;
-		if (findPath(peer,dst)) return TRUE;
+		if (findPath(peer,dst,ignoreDelayArcs)) return TRUE;
 	}
 	return FALSE;
 }
@@ -440,6 +481,7 @@ int BDFClusterGal::loopPass() {
 		BDFClustPort* cond = c->ifFactor(rel);
 		if (cond) {
 			c->ifIze(cond,rel,logstrm);
+			changes = TRUE;
 		}
 		else if ((fac = c->loopFactor()) > 1) {
 				c->loopBy(fac);
@@ -589,6 +631,8 @@ BDFClustPort* BDFCluster::connectBoolean(BDFClustPort* cond,
 	}
 	// create a new port in the far cluster
 	BDFClustPort *a = createDupPort(cond,pseudoName());
+	// mark it as a control port
+	a->setControl(TRUE);
 	// create it in the near cluster -- name matches original
 	// condition and the inner port is cond->innermost(), so
 	// we will not be effected when outer bag ports are zapped.
@@ -643,7 +687,7 @@ int BDFCluster::matchNeighborRates() {
 	BDFClustPortIter nextPort(*this);
 	BDFClustPort* p;
 	while ((p = nextPort++) != 0) {
-		if (!p->sameRate()) return FALSE;
+		if (p->far() && !p->sameRate()) return FALSE;
 	}
 	return TRUE;
 }
@@ -700,17 +744,25 @@ void BDFCluster::loopBy(int fac) {
 		p->numberTokens *= fac;
 }
 
-// unloop a cluster.  Return old loop factor.  This undoes the effect
+// unloop a cluster.  Return old loop condition signal.  This undoes the effect
 // of previous loopBy calls.
-int BDFCluster::unloop() {
-	int fac = pLoop;
+BDFClustPort* BDFCluster::unloop(int& fac,BDFLoopType& lcond) {
+	fac = pLoop;
 	pLoop = 1;
 	repetitions *= Fraction(fac,1);
 	BDFClustPortIter nextPort(*this);
 	BDFClustPort* p;
 	while ((p = nextPort++) != 0)
 		p->numberTokens /= fac;
-	return fac;
+	lcond = pType;
+	pType = DO_ITER;
+	return pCond;
+}
+
+void BDFCluster::reloop(int fac, BDFLoopType lcond,BDFClustPort* pcond) {
+	loopBy(fac);
+	pType = lcond;
+	pCond = pcond;
 }
 
 // generate a name for a new bag
@@ -724,7 +776,9 @@ const char* BDFClusterGal::genBagName() {
 // basically the distinction between atomic and non-atomic clusters.
 
 BDFCluster* BDFClusterGal::merge(BDFCluster* c1, BDFCluster* c2) {
-//	int fac = 1;
+	int fac = 1;
+	BDFLoopType lcond = DO_ITER;
+	BDFClustPort* pcond = 0;
 
 // if a bag has a loop factor we treat it as an atom for merging
 // purposes (put it inside another bag instead of combining bags).
@@ -732,12 +786,10 @@ BDFCluster* BDFClusterGal::merge(BDFCluster* c1, BDFCluster* c2) {
 // Exception: if both loop factors are the same, we "unloop" and
 // "reloop".
 
-	
-// unloop check: put this back right, must handle conditions as well.
-//	if (c1->loop() == c2->loop() && c1->loop() > 1) {
-//		fac = c1->unloop();
-//		c2->unloop();
-//	}
+	if (c1->looped() && c1->sameLoopCondition(*c2)) {
+		pcond = c1->unloop(fac,lcond);
+		c2->unloop(fac,lcond);
+	}
 
 	if (logstrm)
 		*logstrm << "merging " << c1->name() << " and " <<
@@ -765,10 +817,8 @@ BDFCluster* BDFClusterGal::merge(BDFCluster* c1, BDFCluster* c2) {
 	if (logstrm)
 		*logstrm << "result is " << *c1Bag << "\n\n";
 
-//	if (fac > 1) {
-//		// reloop after merge
-//		c1Bag->loopBy(fac);
-//	}
+// restore any saved loop factors.
+	c1Bag->reloop(fac,lcond,pcond);
 	return c1Bag;
 }
 
