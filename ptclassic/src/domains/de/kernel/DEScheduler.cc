@@ -22,7 +22,6 @@ These are the methods for the discrete event scheduler.
 
 #include "type.h"
 #include "DEScheduler.h"
-#include "Output.h"
 #include "StringList.h"
 #include "FloatState.h"
 #include "GalIter.h"
