@@ -144,7 +144,7 @@
 # .e line yyy {line item} {}
 # </pre></tcl>
 # However, this probably does not yield the desired intent because it
-# causes the first column to widen sufficiently to accomodate the
+# causes the first column to widen sufficiently to accommodate the
 # line item.  More likely, we want it to span existing columns.
 # This is done with the -columnspan option, as follows:
 # <tcl><pre>

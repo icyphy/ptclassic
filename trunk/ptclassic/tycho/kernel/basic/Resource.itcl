@@ -396,7 +396,7 @@ class ::tycho::Resource {
     # A statusbar to keep updated of progress (remote resources)
     public variable statusbar {}
     
-    # Remote acess timeout, in ms. -1 means no timeout.
+    # Remote access timeout, in ms. -1 means no timeout.
     public variable timeout -1
     
     ###################################################################
