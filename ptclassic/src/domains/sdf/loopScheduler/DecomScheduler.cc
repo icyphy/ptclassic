@@ -97,12 +97,9 @@ int DecomScheduler::genSched(DecomGal* cgal)
 	}
 
 	// Step 2. Joe's clustering algorithm.
-	//         After removing all feed-forward delays, apply his 
-	//         clustering again.
-	if(!cgal->cluster())
-		// remove forward delays in "cgal", and do more 
-		// clustering if possible.
-		if (cgal->removeDelay()) cgal->cluster();
+	//         We no longer need to call this twice.
+
+	cgal->cluster();
 
 	// recursive application of the decomposition.
 	if (!cgal->genSubScheds()) {

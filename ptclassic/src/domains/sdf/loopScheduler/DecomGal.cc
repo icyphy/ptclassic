@@ -231,7 +231,7 @@ void DecomClusterBag :: setUpGalaxy() {
 	while ((c = nextC++) != 0) {
 		// if atomic cluster.
 		if (!c->asBag()) {
-			gal.removeBlock(*c);
+			gal->removeBlock(*c);
 			nextC.reset();
 			cgal->addBlock(*c, c->readName());
 		} else {

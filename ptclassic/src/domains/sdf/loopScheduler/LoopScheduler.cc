@@ -60,14 +60,10 @@ int LoopScheduler::computeSchedule(Galaxy& galaxy)
 	dGal->decompose();	// decomposition step.
 
 	// Step 2. Joe's clustering algorithm.
-	//         After removing all feed-forward delays, apply his 
-	//         clustering again.
+	// It now deals correctly with feed-forward delays, so we
+	// do not need to apply it twice as before.
 
-	if(!dGal->cluster()) {
-		// remove forward delays in "cgal", and do more 
-		// clustering if possible.
-		if (dGal->removeDelay()) dGal->cluster();
-	} 
+	dGal->cluster();
 
 	// if the clusterGal is not uni-rate, do this
 	if (dGal->uniformRate() == FALSE) {
