@@ -14,58 +14,191 @@ description.
 *******************************************************************/
 #include "KnownBlock.h"
 #include "Output.h"
-#include "string.h"
-#include "std.h"
+#include <string.h>
+#include <std.h>
+#include "Scheduler.h"
 
 extern Error errorHandler;
 
-BlockList *KnownBlock::allBlocks;	// define the static member
+int KnownBlock :: currentDomain = 0;
+int KnownBlock :: numDomains = 0;
 
-int KnownBlock::numBlocks = 0;		// define the number of blocks
+// This function looks up a domain.  It returns -1 if not found and
+// we specified no adding.
 
-// Constructor.  Adds a block to the known list
+int KnownBlock::domainIndex (const char* myDomain, int addIfNotFound) {
 
-KnownBlock::KnownBlock (Block &block, const char* name) {
-// on the first call, create the known block list.
-// It's done this way to get around the order-of-static-constructors problem.
-	if (numBlocks == 0)
-		allBlocks = new BlockList;
-	numBlocks++;
-// set my name and add to the list
-	block.setBlock (name,NULL);
-	allBlocks->put (&block);
+	for (int i = 0; i < NUMDOMAINS; i++) {
+		if (domainNames[i] == 0) {
+			if (addIfNotFound) {
+				domainNames[i] = myDomain;
+				return i;
+			}
+			else return -1;
+		}
+		else if (strcmp (domainNames[i], myDomain) == 0)
+			return i;
+	}
+	errorHandler.error("Too many distinct domains");
+	exit (1);
+}
+
+// Look up the domain index of a block.
+
+int KnownBlock::domainIndex (Block& block) {
+	// handle galaxy case -- domain of first star found
+	if (!block.isItAtomic) {
+		Galaxy& g = block.asGalaxy();
+		if (g.numberBlocks() == 0) {
+			errorHandler.error ("empty galaxy");
+			return -1;
+		}
+		else return domainIndex (g.nextBlock());
+	}
+	return domainIndex (block.asStar().domain(), TRUE);
+}
+
+// Constructor #1.  Add a block to the appropriate known list
+
+KnownBlock::KnownBlock (Block& block, const char* name) {
+	// set my name
+	block.setBlock (name, NULL);
+	// get domain index
+	int idx = domainIndex (block);
+	// see if defined; if so, replace
+	KnownListEntry* kb = findEntry (block.readName(), allBlocks[idx]);
+	if (kb) {
+		delete kb->b;
+		kb->b = &block;
+	}
+	else {
+		KnownListEntry* nkb = new KnownListEntry;
+		nkb->b = &block;
+		nkb->next = allBlocks[idx];
+		allBlocks[idx] = nkb;
+	}
+}
+
+// Constructor #2.  Add a scheduler to the table of schedulers.
+
+KnownBlock::KnownBlock (Scheduler& sched, const char* name) {
+	int idx = domainIndex (name, TRUE);
+	allSchedulers[idx] = &sched;
+}
+
+// Find a known list entry
+KnownListEntry*
+KnownBlock::findEntry (const char* name, KnownListEntry* l) {
+	while (l) {
+		if (strcmp (name, l->b->readName()) == 0)
+			break;
+		l = l->next;
+	}
+	return l;
 }
 
 Block*
 KnownBlock::find(const char* type) {
-	return numBlocks == 0 ? NULL : allBlocks->blockWithName(type);
+	KnownListEntry* e = findEntry (type, allBlocks[currentDomain]);
+	return e ? e->b : NULL;
 }
 
 // The main cloner.  This method gives us a new block of the named
 // type, by asking the matching block on the list to clone itself.
 
-Block *
+Block*
 KnownBlock::clone(const char* type) {
-	Block *p = find(type);
+	Block* p = find(type);
 	if (p) return p->clone();
-// If we get here, we don't know the block.  Report error, return NULL.
-	errorHandler.error("KnownBlock::clone: unknown star/galaxy name: ",type);
+	StringList msg = "No star/galaxy named '";
+	msg += type;
+	msg += "' in domain '";
+	msg += domainNames[currentDomain];
+	msg += "'";
+	errorHandler.error (msg);
 	return 0;
+}
+
+// Produce a scheduler matching the current domain
+Scheduler*
+KnownBlock::newSched(const char* name) {
+	int idx = domainIndex (name);
+	if (idx < 0 || allSchedulers[idx] == 0) {
+		errorHandler.error ("No scheduler defined for domain ",
+				    name);
+		return NULL;
+	}
+	return allSchedulers[idx]->clone();
+}
+
+Scheduler*
+KnownBlock::newSched() {
+	if (allSchedulers[currentDomain] == 0) {
+		errorHandler.error ("No scheduler defined for domain ",
+				    domain());
+		return NULL;
+	}
+	return allSchedulers[currentDomain]->clone();
+}
+
+// Function to set the domain.
+int
+KnownBlock::setDomain (const char* newDom) {
+	int idx = domainIndex (newDom);
+	if (idx < 0) {
+		errorHandler.error ("Unknown domain: ", newDom);
+		return FALSE;
+	}
+	currentDomain = idx;
+	return TRUE;
+}
+
+// comparison function for qsort.  Done this way to shut up the compiler;
+// this is the right thing for qsort.
+static int compar(void* a, void* b) {
+	const char** ca = (const char**)a;
+	const char** cb = (const char**)b;
+	return strcmp (*ca, *cb);
+}
+
+// Return known list for domain index i as text, separated by linefeeds
+// Names are printed in sorted order.
+StringList
+KnownBlock::nameListForDomain (int idx) {
+	StringList s;
+	KnownListEntry* l = allBlocks[idx];
+	// count entries in list
+	int n = 0;
+	while (l) {
+		n++;
+		l = l->next;
+	}
+	const char** table = new const char*[n];
+	l = allBlocks[idx];
+	for (int i = 0; i < n; i++) {
+		table[i] = l->b->readName();
+		l = l->next;
+	}
+	qsort (table, n, sizeof (char*), compar);
+	for (i = 0; i < n; i++) {
+		s += table[i];
+		s += "\n";
+	}
+	delete table;
+	return s;
 }
 
 // Return known list as text, separated by linefeeds
 StringList
 KnownBlock::nameList () {
-	StringList s;
-	if (numBlocks > 0) {
-		allBlocks->reset();
-		for (int i=numBlocks; i>0; i--) {
-			Block& b = (*allBlocks)++;
-			s += b.readName();
-			s += "\n";
-		}
-	}
-	return s;
+	return nameListForDomain (currentDomain);
 }
 
+// Same as above, but the user specifies the domain.
+StringList
+KnownBlock::nameList (const char* dom) {
+	int idx = domainIndex (dom);
+	if (idx < 0) return "";
+	return nameListForDomain (idx);
+}
 
