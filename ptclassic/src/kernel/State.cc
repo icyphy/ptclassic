@@ -57,7 +57,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 // enough to store tokens that represent numbers, pathnames, and strings.
 // Pathnames in Unix are limited to 256 characters.
 
-#define TOKSIZE 256
+#define TOKSIZE 512
 
 /*************************************************************************
 
@@ -318,7 +318,10 @@ State :: getParseToken(Tokenizer& lexer, int stateType) {
 			break;
 
 		    case '!':
-			err = !sendToInterpreter(lexer, token);
+			if ( stateType != T_STRING ||
+			     lexer.peekAtNextChar() == '\"' ) {
+				err = !sendToInterpreter(lexer, token);
+			}
 			break;
 
 		    case '{':
