@@ -31,7 +31,7 @@
 # Author: Christopher Hylands
 
 makefiles all install clean sources depend realclean checkjunk sccsinfo \
-itcldocs extraclean tests:
+itcldocs extraclean tests weblint:
 	@for x in $(DIRS); do \
 	    if [ -w $$x ] ; then \
 		( cd $$x ; \
