@@ -166,7 +166,7 @@ body ::tycho::HTML::constructor {args} {
     pack $itk_component(formatMenuButton) -side left
 
     itk_component add formatMenu {
-	menu $itk_component(formatMenuButton).menu
+	menu $itk_component(formatMenuButton).menu -tearoff 0
     } {
 	keep -font -activebackground -cursor -activeforeground \
 		-background -foreground
