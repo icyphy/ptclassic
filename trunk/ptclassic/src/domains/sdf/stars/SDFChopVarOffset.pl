@@ -1,7 +1,7 @@
 defstar {
 	name { ChopVarOffset }
 	domain { SDF }
-	derivedFrom { CutAndPaste }
+	derivedFrom { Chop }
 	author { G. S. Walter, E. A. Lee }
 	version { $Id$ }
 	location { SDF control palette }
