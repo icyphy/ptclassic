@@ -1,31 +1,35 @@
-/*
- * transport.c:  Active Messages over UDP (UDPAM) Transport Functions 
- *
- * "Copyright (c) 1995 by Brent N. Chun and The Regents of the University 
- * of California.  All rights reserved."
- *
- * Permission to use, copy, modify, and distribute this software and its
- * documentation for any purpose, without fee, and without written agreement is
- * hereby granted, provided that the above copyright notice and the following
- * two paragraphs appear in all copies of this software.
- * 
- * IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY FOR
- * DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES ARISING OUT
- * OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF THE UNIVERSITY OF
- * CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- * 
- * THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
- * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
- * AND FITNESS FOR A PARTICULAR PURPOSE.  THE SOFTWARE PROVIDED HEREUNDER IS
- * ON AN "AS IS" BASIS, AND THE UNIVERSITY OF CALIFORNIA HAS NO OBLIGATION TO
- * PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS."
- *
- * Author:              Brent N. Chun
- * Version:             $Revision$
- * Creation Date:       Sat Nov  4 17:25:01 PST 1995
- * Filename:            transport.c
- */
-static char rcsid[] = "@(#)$Id$";
+/******************************************************************
+Version identification:
+$Id$
+
+Copyright (c) 1995-%Q%  The Regents of the University of California.
+All Rights Reserved.
+
+Permission is hereby granted, without written agreement and without
+license or royalty fees, to use, copy, modify, and distribute this
+software and its documentation for any purpose, provided that the above
+copyright notice and the following two paragraphs appear in all copies
+of this software.
+
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+SUCH DAMAGE.
+
+THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+ENHANCEMENTS, OR MODIFICATIONS.
+
+						PT_COPYRIGHT_VERSION_2
+						COPYRIGHTENDKEY
+
+ Programmer: Brent Chun 
+ Creation Date: Sat Nov  4 17:25:01 PST 1995
+*/
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -342,10 +346,10 @@ op_t ReplyErrorCheck(ea_t requestEndpoint, int type, tag_t pktTag,
       (requestEndpoint->tag == AM_NONE))
     return(EBADTAG);
   else 
-  if (((pktHandler < 0) && (pktHandler != UDPAM_EMPTY_HANDLER)) || 
-	   (pktHandler >= requestEndpoint->num_handlers) ||
-	   (requestEndpoint->handler_table[pktHandler] == abort) &&
-	   (pktHandler != UDPAM_EMPTY_HANDLER)) 
+  if ((((pktHandler < 0) && (pktHandler != UDPAM_EMPTY_HANDLER)) || 
+       (pktHandler >= requestEndpoint->num_handlers) ||
+       (requestEndpoint->handler_table[pktHandler] == abort)) &&
+      (pktHandler != UDPAM_EMPTY_HANDLER)) 
     return(EBADHANDLER);
   else if (((type == UDPAM_REPLY_LONG_4) || (type == UDPAM_REPLY_LONG_8)) && 
 	   ((destOffset < 0) || (destOffset > requestEndpoint->length)))
@@ -780,8 +784,6 @@ int AM_RequestXfer4(ea_t request_endpoint, int reply_endpoint,
 		    void *source_addr, int nbytes,
 		    int arg0, int arg1, int arg2, int arg3)
 {
-  int                segsize;
-  caddr_t            segstartaddr;
   UDPAM_Buf          *buf;
   UDPAM_Long4_Pkt    *packet;
   struct sockaddr_in dest_sockaddr;
@@ -849,8 +851,6 @@ int AM_RequestXfer8(ea_t request_endpoint, int reply_endpoint,
 		    int arg0, int arg1, int arg2, int arg3,
 		    int arg4, int arg5, int arg6, int arg7)
 {
-  int                 segsize;
-  caddr_t             segstartaddr;
   UDPAM_Buf           *buf;
   UDPAM_Long8_Pkt     *packet;
   struct sockaddr_in  dest_sockaddr;
@@ -1292,9 +1292,7 @@ int AM_ReplyXfer4(void *token, int dest_offset,
 		  handler_t handler, void *source_addr, int nbytes, 
 		  int arg0, int arg1, int arg2, int arg3)
 {
-  int                 segsize;
   ea_t                source_ep;
-  caddr_t             segstartaddr;
   UDPAM_Buf           *buf;
   UDPAM_Long4_Pkt     *packet;
   struct sockaddr_in  dest_sockaddr;
@@ -1349,9 +1347,7 @@ int AM_ReplyXfer8(void *token, int dest_offset,
 		  int arg0, int arg1, int arg2, int arg3,
 		  int arg4, int arg5, int arg6, int arg7)
 {
-  int                   segsize;
   ea_t                  source_ep;
-  caddr_t               segstartaddr;
   UDPAM_Buf             *buf;
   UDPAM_Long8_Pkt       *packet;
   struct sockaddr_in    dest_sockaddr;
