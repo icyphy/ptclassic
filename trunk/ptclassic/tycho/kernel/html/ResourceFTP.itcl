@@ -39,6 +39,45 @@ set _ftpstatus(ftp://127.0.0.1) done
 #######################################################################
 #### ResourceFTP
 #
+# This class provides an abstraction of remote files through FTP. 
+# Using this class, remote attributes are abstracted away
+# from functionalities that Resource has.
+# 
+# <i>NOTE: Currently, FTP will assume anonymous account, and will only
+# receive files. But in the future, it will be relatively easy to implement
+# features that will allow users to input user name and password, and
+# have full FTP features. Using those features, it will be easy to implement
+# ange-ftp.</i>
+#
+# Here is a tutorial to download a file through FTP:
+# <ul>
+# <li><b>Select one of the following sites to see...</b><br>
+# <tcl><pre>set site "ftp://ptolemy.eecs.berkeley.edu/"</pre></tcl>
+# <tcl><pre>set site "ftp://ptolemy.eecs.berkeley.edu/README"</pre></tcl>
+# <tcl><pre>set site "ftp://ptolemy.eecs.berkeley.edu/pub/README"</pre></tcl>
+# <tcl><pre>set site "ftp://ptolemy.eecs.berkeley.edu/i_dont_exist"</pre></tcl>
+#
+# <li><b>See if the object exists or not</b>
+# <tcl><pre>::tycho::ResourceFTP::exists $site</pre></tcl>
+#
+# <li><b>Create a new FTP object, and set the pathname</b><tcl>
+# <pre>  set ftpobj [::tycho::autoName ftpdemo]
+#   ::tycho::ResourceFTP $ftpobj
+#   $ftpobj connect $site
+# </pre></tcl>
+#
+# <li><b>Open for reading</b>
+# <tcl><pre>  $ftpobj open r</pre></tcl>
+#
+# <li><b>Print out next 25 lines in this HTML file</b>
+# <tcl><pre>  set i 0
+#   set line {}
+#   while {![$ftpobj eof] && [incr i]!=20} {
+#     append line "[$ftpobj gets]\n"
+#   }
+#   ::tycho::inform $line
+# </pre></tcl>
+#
 class ::tycho::ResourceFTP {
     inherit ::tycho::Resource
 
@@ -64,7 +103,7 @@ class ::tycho::ResourceFTP {
     method gets {{varName {}}}
     
     # Not open by default
-    method isopen {} {return 0}
+    method isopen {} 
 
     # if there's timeout on protocol, we can't connect to the ftp server.
     method ftptimeout {oldstate}
@@ -309,6 +348,29 @@ body ::tycho::ResourceFTP::forward {url} {
 }
 
 #####################################################################
+#### gets
+# If the local FTPed file is a text file, then perform the exact
+# same task that the base method gets does.
+#
+body ::tycho::ResourceHTTP::gets {{varName {}}} {
+    if !$fileIsOpen {
+	openerror "File \"$this\" is not open (gets)"
+    }
+    if { $varName == "" } {
+	::gets $fileid
+    } else {
+	upvar $varName v
+	uplevel ::gets $fileid v
+    }
+}
+
+#####################################################################
+#### isopen
+body ::tycho::ResourceFTP::isopen {} {
+    return $fileIsOpen
+}
+
+#####################################################################
 #### open
 # Open a connection for ftp on port 21.
 #
@@ -456,7 +518,7 @@ body ::tycho::ResourceFTP::exists {url} {
     if {[::info exists _exists($url)]} {return $_exists($url)}
 
     # If not, need to get it again (once per session). Set to -1
-    # so that during httpget, we don't invoke Tcl's error.
+    # so that during ftpget, we don't invoke Tcl's error.
     set _exists($url) -1
     set resource [::tycho::resource new $url]
     $resource open
