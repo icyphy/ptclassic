@@ -6,11 +6,11 @@
 #                       All Rights Reserved.
 
 # Root of Ptolemy directory
-ROOT=../../..
+ROOT =		../../../..
 # Where we are
-VPATH = ../../../src/tkvem/tkgraph
-# get configuration info
-CONFIG=$(ROOT)/mk/config-$(ARCH).mk
+VPATH = 	../../../../src/octtools/tkoct/tkgraph
+# Get configuration info
+CONFIG =	$(ROOT)/mk/config-$(ARCH).mk
 include $(CONFIG)
 
 OBJS = 		axisCore.o planeSdh.o rubberTk.o seqTk.o xfaDraw.o axisTk.o \
@@ -27,10 +27,10 @@ all: 		$(OBJS) $(LIB)
 
 install:	makefile $(OUT)
 
-# top is a package used by tkvem
-TOPDIR = $(VPATH)/../top
-TKGRAPHDIR = $(VPATH)		#tkvem uses tkgraph
-EEMDIR = $(VPATH)/../eem	#tkgraph uses eem
+
+TOPDIR = 	$(VPATH)/../top		# top is a package used by tkoct
+TKGRAPHDIR =	$(VPATH)		# tkoct uses tkgraph
+EEMDIR =	$(VPATH)/../eem		#tkgraph uses eem
 
 C_INCL = -I$(OCTTOOLS)/include -I$(TOPDIR) -I$(TKGRAPHDIR) -I$(EEMDIR) -I$(TK_INCDIR) -I$(TCL_INCDIR) $(PTCOMPAT_INCSPEC) $(X11_INCSPEC)
 
