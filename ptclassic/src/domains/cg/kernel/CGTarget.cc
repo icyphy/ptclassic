@@ -325,8 +325,7 @@ void CGTarget::generateCode() {
 	if (haltRequested()) return;
 	if (parent()) setup();
 	if (haltRequested()) return;
-	if(!allocateMemory()) 
-	{
+	if(!allocateMemory()) {
 		Error::abortRun(*this,"Memory allocation error");
 		return;
 	}
@@ -353,8 +352,7 @@ int* CGTarget::symbolCounter() {
 void CGTarget::generateCodeStreams() {
 	if (SimControl::haltRequested()) return;
 	headerCode();
-	if (!codeGenInit())
-	{
+	if (!codeGenInit()) {
 		Error::abortRun(*this,"codeGenInit error");
 		return;
 	}
@@ -399,12 +397,10 @@ void CGTarget :: compileRun(SDFScheduler* s) {
 
 void CGTarget :: addStream(const char* name, CodeStream* code)
 {
-	int flag = codeStringLists.append(code,name);
-	if (flag == FALSE)
-	{
-		StringList message;
-		message << "addStream: " << name << " already exists";
-		Error::abortRun(*this,message);
+	if (! codeStringLists.append(code, name) ) {
+		StringList message = "addStream: ";
+		message << name << " already exists";
+		Error::abortRun(*this, message);
 	}
 }
 
@@ -416,8 +412,7 @@ CodeStream* CGTarget :: getStream(const char* name)
     if (name == NULL) stream = defaultStream;
     else stream  = codeStringLists.get(name);
 
-    if (stream == NULL)
-    {
+    if (stream == NULL) {
 	Error::abortRun(*this, "getStream: could not find ", name);
     }
 
