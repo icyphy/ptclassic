@@ -43,6 +43,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "InterpUniverse.h"
 #include "KnownTarget.h"
 #include "miscFuncs.h"
+#include "SimControl.h"
 
 // constructor: set name and domain
 InterpUniverse::InterpUniverse (const char* name, const char* dom) :
@@ -78,7 +79,7 @@ void InterpUniverse :: initTarget() {
         // The following invokes the scheduler
         Runnable::initTarget();
         // The following invokes the begin methods of the stars
-        target->begin();
+        if (!SimControl::haltRequested()) target->begin();
 }
 
 // isa
