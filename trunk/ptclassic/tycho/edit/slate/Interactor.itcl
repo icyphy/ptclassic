@@ -49,9 +49,8 @@
 # Interactors can be combined to make more complex interactions: several
 # interactors can be <i>bound</i> to the same picture; they can be
 # <i>cascaded</i> to modify each other's effects. Actions eventually
-# end up being given to a <a href="../../../kernel/doc/codeDoc/Picture.html">
-# <i>Picture</i></a> object, which then reacts according to its current
-# ``behavior.''
+# end up being given to a <a href="Picture.html"><i>Picture</i></a>
+# object, which then reacts according to its current "behavior."
 #
 class ::tycho::Interactor {
 
