@@ -23,6 +23,8 @@ $Id$
 #include "DeclustScheduler.h"
 #include "UserOutput.h"
 #include "KnownTarget.h"
+#include "CGSend.h"
+#include "CGReceive.h"
 
 CGFullConnect::CGFullConnect(const char* name,const char* sClass,
 			     const char* desc) :
@@ -63,9 +65,11 @@ void CGFullConnect::start() {
 	if (int(ignoreIPC)) {
 		LOG_NEW; setSched(new QuasiScheduler(this, logFile));
 	} else if (int(overlapComm)) {
-		LOG_NEW; setSched(new DLScheduler(this, logFile));
-	} else {
+		LOG_NEW; setSched(new DLScheduler(this, logFile, 0));
+	} else if (int(useCluster)) {
 		LOG_NEW; setSched(new DeclustScheduler(this, logFile));
+	} else {
+		LOG_NEW; setSched(new DLScheduler(this, logFile, 1));
 	}
 
 	ParScheduler* tempSched = (ParScheduler*) mySched();
@@ -79,8 +83,7 @@ int CGFullConnect::setup(Galaxy& gal) {
 	if (gal.parent()) {
 		((ParScheduler*) mySched())->ofWorm();
 	}
-	Target :: setup(gal);
-	return TRUE;
+	return Target :: setup(gal);
 }
 
 void CGFullConnect :: setProfile(Profile* p) {
@@ -91,7 +94,7 @@ int CGFullConnect :: computeProfile(int nP, int flag, IntArray*) {
 	resetResources();
 	ParScheduler* qs = (ParScheduler*) mySched();
 	qs->setUpProcs(nP);
-	int temp = qs->scheduleIt();
+	int temp = qs->mainSchedule(*gal);
 	if (flag < 0) qs->finalSchedule(*gal);
 	return temp;
 }
@@ -190,11 +193,30 @@ IntArray* CGFullConnect :: candidateProcs(ParProcessors* parSched) {
 	return &canProcs;
 }
 	
+ParNode* CGFullConnect :: backComm(ParNode* n) {
+	if (n->getType() >= -1) return 0;
+	ParAncestorIter iter(n);
+	return (iter++);
+}
+
 void CGFullConnect :: resetResources() {}			
 
 Block* CGFullConnect::clone() const {
 	LOG_NEW; CGFullConnect *t = new CGFullConnect(readName(),starType(),readDescriptor());
 	return &t->copyStates(*this);
+}
+
+// create communication stars
+SDFStar* CGFullConnect :: createSend(int from, int to, int num) {
+	LOG_NEW; CGSend* newS = new CGSend;
+	newS->registerProcs(from, to);
+	return newS;
+}
+
+SDFStar* CGFullConnect :: createReceive(int from, int to, int num) {
+	LOG_NEW; CGReceive* newS = new CGReceive;
+	newS->registerProcs(from, to);
+	return newS;
 }
 
 static CGFullConnect targ("FullyConnected","CGStar",
