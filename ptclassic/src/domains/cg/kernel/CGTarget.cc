@@ -101,16 +101,18 @@ void CGTarget::setup() {
 	noSchedule = 0;		// reset for next setup.
 
 	// choose sizes for buffers and allocate memory, if needed
-	if (inWormHole()) {
+	if (inWormHole() && (parent() == NULL)) {
 		generateCode();
 		wormLoadCode();
 	}
 }
 
 void CGTarget::generateCode() {
+	if (parent()) setup();
 	headerCode();
 	if(!allocateMemory() || !codeGenInit()) return;
 	mainLoopCode();
+	galaxy()->wrapup();
 	trailerCode();
 	frameCode();
 	if (!parent()) writeCode();
@@ -278,8 +280,9 @@ void CGTarget :: wrapup() {
 	display(myCode);
 }
 
-void CGTarget :: writeCode() {
-    char* codeFileName = writeFileName("code.output");
+void CGTarget :: writeCode(const char* name) {
+    if (name == NULL) name = "code.output";
+    char* codeFileName = writeFileName(name);
     pt_ofstream codeFile(codeFileName);
     if (!codeFile) return;
     codeFile << myCode;
