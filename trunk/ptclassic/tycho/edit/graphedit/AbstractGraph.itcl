@@ -40,25 +40,23 @@
 # this class by providing concrete methods for creating, modifying,
 # and accessing specific types of graph.
 #
-# AbstractGraph is a subclass of Model: vertices and edges are items
-# with no value and no default attributes (these can be added with
-# <b>type configure</b>).
+# _AbstractGraph_ model has the following types:
+# <dl>
+# <dt><b>vertex</b> _name_
+# <dd>
+# A vertex of the graph. Vertices have no default attributes.
+#
+# </dl>
 #
 # Here are some examples illustrating the methods in this class.
 # Because an AbstractGraph can't actually do anything useful, we'll
 # illustrate with one of its concrete subclasses,
-# <a href="Digraph.html">Digraph</a>.
-# For more general information on models, see <a href="Model.html">Model</a>.
-# Create a graph and give its vertices and edges some default attributes:
-# <pre><tcl quiet>
+# <a href="Digraph.html">Digraph</a>:
+# <pre><tcl>
 #     catch {delete object $graph}
 #     set graph [::tycho::Digraph [::tycho::autoName graph]]
 #     $graph type configure vertex -label {}
 #     $graph type configure edge -weight 0
-# </tcl></pre>
-#
-# Now load the graph with some data:
-# <pre><tcl>
 #     $graph parse {
 #         vertex a -label "First vertex"
 #         vertex b -label "Second vertex"
@@ -70,10 +68,14 @@
 #     $graph describe
 # </tcl></pre>
 #
+# Change an attribute of an edge and query it again. Note that the
+# _Digraph_ produces the name of an edge by joining the source
+# and target vertices with a caret:
+#
 # Change an attribute of an edge and query it again:
 # <pre><tcl>
-#     $graph edgeconfigure a b -weight 2
-#     $graph edgecget a b -weight
+#     $graph itemconfigure edge:a^b -weight 2
+#     $graph itemcget edge:a^b -weight
 # </tcl></pre>
 #
 # Display a TIM representation of the graph
@@ -98,7 +100,7 @@
 #
 # Delete a vertex but not edges connected to it, and record the deletion:
 # <pre><tcl>
-#     $graph record vertexdelete c
+#     $graph record delete vertex:c
 #     $graph describe
 # </tcl></pre>
 #
@@ -110,7 +112,7 @@
 #
 # Delete a vertex and all edges connected to it:
 # <pre><tcl>
-#     $graph delete* c
+#     $graph remove c
 #     $graph describe
 # </tcl></pre>
 #
@@ -135,9 +137,6 @@ class ::tycho::AbstractGraph {
     # Get the children of a vertex
     method children {vertex}
 
-    # Remove a vertex _and_ adjacent edges from the graph
-    method delete* {vertex}
-
     # Perform a depth-first traversal of the graph
     method depthFirst {{roots {}}}
 
@@ -152,6 +151,9 @@ class ::tycho::AbstractGraph {
 
     # Get the parents of a vertex
     method parents {vertex}
+
+    # Remove a vertex _and_ adjacent edges from the graph
+    method remove {vertex}
 
     # Get the roots of the graph
     method roots {}
@@ -168,29 +170,17 @@ class ::tycho::AbstractGraph {
     # Traverse the graph: recursive simulation
     method traverse3 {}
 
-    # Add a vertex with attributes to the graph
-    method vertex {vertex args}
-
-     # Get an attribute or attributes of a vertex
-    method vertexcget {vertex {attribute {}}}
-
-    # Configure the vertex with one or more attributes
-    method vertexconfigure {vertex args}
-
-    # Remove a vertex (but not adjacent edges) from the graph
-    method vertexdelete {vertex}
-
     # Return vertices matching a pattern
     method vertices {{pattern *}}
 
     #################################################################
     ####                   protected methods                     ####
 
+    # Update the cache
+    protected method _updatecache
+
     #################################################################
     ####                  protected variables                    ####
-
-    # A cached list of edge names
-    protected variable _edges ""
 
     # An array of cached lists of vertex parents
     protected variable _parents ""
@@ -212,6 +202,9 @@ class ::tycho::AbstractGraph {
 
     #################################################################
     ####                    private variables                    ####
+
+    # Cached data containing results of various algorithms
+    private variable _cache
 
     # Arrays used by various algorithms
     private variable _firstfree
@@ -248,8 +241,8 @@ body ::tycho::AbstractGraph::acyclic {} {
     _update
 
     # Don't traverse if we don't have to
-    if { [cache exists acyclic] } {
-	return [cache get acyclic]
+    if { [::info exists _cache(acyclic)] } {
+	return $_cache(acyclic)
     }
 
     # The mark for each vertex is initialized to 0
@@ -286,7 +279,7 @@ body ::tycho::AbstractGraph::acyclic {} {
 		    } else {
 			# If its index is lower, we have a cycle
 			if { $_visited($child) <= $count } {
-			    cache set acyclic 0
+			    set _cache(acyclic) 0
 			    return 0
 			}
 		    }
@@ -307,7 +300,7 @@ body ::tycho::AbstractGraph::acyclic {} {
     }
     
     # If we get to here, we have no cycles
-    cache set acyclic 1
+    set _cache(acyclic) 1
     return 1
 }
 
@@ -348,16 +341,6 @@ body ::tycho::AbstractGraph::children {vertex} {
 }
 
 ########################################################################
-#### delete*
-#
-# Delete a vertex and all connected edges from the graph, and
-# return the undo command. <i>This is an abstract method.</i>
-#
-body ::tycho::AbstractGraph::delete* {vertex} {
-    abstractMethod delete*
-}
-
-########################################################################
 #### depthFirst
 #
 # Perform a depth-first search of the graph and return the vertices
@@ -380,8 +363,8 @@ body ::tycho::AbstractGraph::depthFirst {{roots {}}} {
 
     # If we already have it, just return it
     set cacheindex depthfirst,[join $roots -]
-    if [cache exists $cacheindex] {
-	return [cache get $cacheindex]
+    if [::info exists _cache($cacheindex)] {
+	return $_cache($cacheindex)
     }
 
     # The traversal "stack" and result list
@@ -417,7 +400,7 @@ body ::tycho::AbstractGraph::depthFirst {{roots {}}} {
         }
     }
     # Remember the search in case it's needed later
-    cache set $cacheindex $result
+    set _cache($cacheindex) $result
     return $result
 }
 
@@ -439,8 +422,8 @@ body ::tycho::AbstractGraph::depthSort {} {
     _update
 
     # If we already have it, just return it
-    if { [cache exists depthsort] } {
-	return [cache get depthsort]
+    if { [::info exists _cache(depthsort)] } {
+	return $_cache(depthsort)
     }
 
     # The traversal "stack" and result list
@@ -512,7 +495,7 @@ body ::tycho::AbstractGraph::depthSort {} {
     }
 
     # Remember the result in case it's needed later
-    cache set depthsort $result
+    set _cache(depthsort) $result
 
     return $result
 }
@@ -533,8 +516,8 @@ body ::tycho::AbstractGraph::gridLayout {} {
     _update
 
     # If we already have it, just return it
-    if { [cache exists gridlayout] } {
-        return [cache get gridlayout]
+    if { [::info exists _cache(gridlayout)] } {
+        return $_cache(gridlayout)
     }
     # Make sure we have a depth-sort
     set depthsort [depthSort]
@@ -566,7 +549,7 @@ body ::tycho::AbstractGraph::gridLayout {} {
         lappend result $r
     }
     # Remember and return the result
-    cache set gridlayout $result
+    set _cache(gridlayout) $result
 
     return $result
 }
@@ -597,6 +580,16 @@ body ::tycho::AbstractGraph::leaves {} {
 body ::tycho::AbstractGraph::parents {vertex} {
     _update
     return $_parents($vertex)
+}
+
+########################################################################
+#### remove
+#
+# Delete a vertex and all connected edges from the graph, and
+# return the undo command. <i>This is an abstract method.</i>
+#
+body ::tycho::AbstractGraph::remove {vertex} {
+    abstractMethod remove
 }
 
 ########################################################################
@@ -634,8 +627,8 @@ body ::tycho::AbstractGraph::topologicalSort {{leaves {}}} {
     _update
 
     # If we already have it, just return it
-    if { [cache exists topologicalsort] } {
-	return [cache get topologicalsort]
+    if { [::info exists _cache(topologicalsort)] } {
+	return $_cache(topologicalsort)
     }
 
     # The traversal "stack" and result list
@@ -691,7 +684,7 @@ body ::tycho::AbstractGraph::topologicalSort {{leaves {}}} {
 	}
     }
     # Remember and return the result
-    cache set topologicalsort $result
+    set _cache(topologicalsort) $result
 
     return $result
 }
@@ -890,55 +883,6 @@ body ::tycho::AbstractGraph::traverse3 {} {
 }
 
 ########################################################################
-#### vertex
-#
-# Add a new vertex to the graph and return the undo command.
-# Additional arguments are a flat attribute-value list for the
-# vertex. Flag an error if the vertex already exists.
-# This method clears any cached information
-# on the graph structure (transitive closure, depth, and so on)
-# so that they will be recalculated for the new structure.
-#
-body ::tycho::AbstractGraph::vertex {vertex args} {
-    eval add vertex:$vertex $args
-}
-
-########################################################################
-#### vertexcget
-#
-# Get an attribute of an vertex. Flag an error if the vertex does
-# not exist.
-#
-body ::tycho::AbstractGraph::vertexcget {vertex {attribute {}}} {
-    itemcget vertex:$vertex $attribute
-}
-
-########################################################################
-#### vertexconfigure
-#
-# Configure the vertex and return the inverse command. The argument list
-# is a flat list of attribute-value pairs. Flag an error if the
-# vertex does not exist.
-#
-body ::tycho::AbstractGraph::vertexconfigure {vertex args} {
-    eval itemconfigure vertex:$vertex $args
-}
-
-########################################################################
-#### vertexdelete
-#
-# Delete a vertex and return the undo command. Flag an error if
-# the vertex does not exist. This method clears any cached information
-# on the graph structure (transitive closure, depth, and so on)
-# so that they will be recalculated for the new structure. Note that
-# edges connected to this vertex are not deleted: use <code>delete*</code>
-# for that.
-#
-body ::tycho::AbstractGraph::vertexdelete {vertex} {
-    delete vertex:$vertex
-}
-
-########################################################################
 #### vertices
 #
 # Return a list containing the vertices of the graph whose names match 
@@ -1029,3 +973,14 @@ body ::tycho::AbstractGraph::_gridlayout {roots ymin} {
     return $result
 }
 
+########################################################################
+#### _updatecache
+#
+# Clear the cache.
+#
+body ::tycho::AbstractGraph::_updatecache {} {
+    catch {unset _parents}
+    catch {unset _children}
+    catch {unset _vertices}
+    catch {unset _cache}
+}
