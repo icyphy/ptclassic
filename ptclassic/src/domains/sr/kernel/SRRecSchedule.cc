@@ -600,8 +600,8 @@ SRRecursiveSchedule::mergeVertex(int v /* the vertex to be merged */)
 
     // Check to see if it appears in the input list of the moving
     // vertex
-
-    for (int e = mygraph->backwardEdges(vertex[index]) ; --e >= 0 ; ) {
+    int e;
+    for ( e = mygraph->backwardEdges(vertex[index]) ; --e >= 0 ; ) {
       if ( outputVertex == mygraph->source(vertex[index],e) ) {
 
 	// output was one of the inputs
@@ -745,8 +745,8 @@ SRRecursiveSchedule::deleteIndex( int index /* Index to be deleted */)
   }
 
   int oldVertex = vertex[index];
-
-  for ( int i = 0 ; i < index ; i++ ) {
+  int i;
+  for ( i = 0 ; i < index ; i++ ) {
 
     // If the index falls within the partition, head, or parallel block,
     // decrease each of these as appropriate
