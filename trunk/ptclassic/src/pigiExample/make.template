@@ -90,10 +90,12 @@ OTHERS=$(DDFSTARS) $(DESTARS) $(SDFSTARS)
 # Domain-specific libraries
 # You must specify them two ways, as shown.  You can remove libraries for
 # domains you don't need.
+# If you remove "ddf" domain, remove "dycon" also.
 
-DOMLIBS = -lsdf -lde -lddf
+DOMLIBS = -lsdf -lde -lddf -ldycon
 
-DOMLIBFILES = $(LIBDIR)/libsdf.a $(LIBDIR)/libde.a $(LIBDIR)/libddf.a
+DOMLIBFILES = $(LIBDIR)/libsdf.a $(LIBDIR)/libde.a $(LIBDIR)/libddf.a \
+ $(LIBDIR)/libdycon.a
 
 # Domain-specific include files we need.  Remove domains you don't use.
 # Note: you only need the include files if you are WRITING a star
