@@ -42,7 +42,7 @@
 # directory. To create a graph for the entire Ptolemy tree, use the
 # procedure <code>ptolemyStandardFacets</code>.
 #
-proc ptolemyMkFacetGraph {name filename args} {
+proc ptolemyMkFacetGraph {name filename recurse parentPalette} {
     set entries {}
     set outfd [open $filename w]
     # Put in titles and a reasonable default size.
@@ -50,22 +50,21 @@ proc ptolemyMkFacetGraph {name filename args} {
     puts $outfd "\{centeredText \{$name\} title \{\} black \{\{helvetica 24 bold i\} \{times 24 bold i\}\}\}"
     puts $outfd "\{centeredText \{created: [clock format [clock seconds]]\} subtitle title firebrick \{\{helvetica 16 bold i\} \{times 16 bold i\}\}\}"
 
-    puts $outfd {{add src/domains/cgc/demo/init.pal {}}}
-    ptolemyMkFacet [lindex $args 0] $outfd $args
+    ptolemyMkFacet [lindex $parentPalette 0] $outfd $recurse $parentPalette
     close $outfd
 }
 
 set autoName 0
 set paletteList {}
-proc ptolemyMkFacet { nm outfd parentPalette} {
+proc ptolemyMkFacet { nm outfd recurse parentPalette} {
     global autoName paletteList
     set infd [open "|octls $parentPalette" r]
     while {[gets $infd line ] >= 0} {
 	regexp {([^ ]+) ([^ ]+)} $line dummy1 dummy2 palette 
-	
+
 	# FIXME: do all palettes have a .pal suffix?
 	# Do all dogs go to heaven?
-	if [regexp {.pal} $palette ] {
+	if [regexp {.pal} $palette && $recurse == 1 ] {
             # Check the list of facets we have already visited.
             # If the facet is not in the list, then visit it.
             # FIXME: if we were not generating a DAG, we would not have to
@@ -75,7 +74,7 @@ proc ptolemyMkFacet { nm outfd parentPalette} {
                 puts $palette
                 flush stdout
                 lappend paletteList $palette
-                ptolemyMkFacet $palette $outfd $palette
+                ptolemyMkFacet $palette $outfd $recurse $palette
             }
 	} {
             # A facet, not a palette containing facets
@@ -90,8 +89,9 @@ proc ptolemyMkFacet { nm outfd parentPalette} {
 #
 proc ptolemyStandardFacets {} {
     global env
+    set recurse 1
     eval ptolemyMkFacetGraph {{Ptolemy Facet Hierarchy}} \
-	    PtolemyFacets.fst $env(PTOLEMY)/init.pal
+	    PtolemyFacets.fst $recurse $env(PTOLEMY)/init.pal
 }
 
 
