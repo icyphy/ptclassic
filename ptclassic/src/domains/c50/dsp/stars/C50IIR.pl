@@ -164,7 +164,7 @@ Prentice-Hall: Englewood Cliffs, NJ, 1989.
 
 	denominator.setInitValue(coeffsd);
 	
-	for (i = 0; i < numState; i++) {
+	for (int i = 0; i < numState; i++) {
             delays[i] = 0;
             if (i < numNumer) {
                 double temp = scaleNumer*double(numerator[i]);
