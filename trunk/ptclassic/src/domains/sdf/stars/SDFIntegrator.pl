@@ -9,6 +9,8 @@ If top <= bottom, no limiting is performed (default).
 If "saturate" = 1, saturation is performed.
 If "saturate" = 0, wrap-around is performed (default).
 When the "reset" input is non-zero, the Integrator is reset to 0.0.
+The output is the data input plus feedbackGain*state, where state
+is the previous output.  Limiting is performed before output.
 	}
 	version {$Id$}
 	author { E. A. Lee }
