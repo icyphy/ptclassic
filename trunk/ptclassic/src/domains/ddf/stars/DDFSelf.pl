@@ -37,7 +37,7 @@ necessary.
 	seealso { fibonnacci }
 	hinclude { "InterpGalaxy.h",  "Domain.h", "DDFScheduler.h"}
 	protected {
-		InterpGalaxy* masterGal;
+		InterpGalaxy *masterGal;
 		InterpGalaxy *myGal;
 		DDFScheduler  sched;
 	}
@@ -108,15 +108,24 @@ necessary.
 			return;
 		}
 
-		Block* b = parent();
-		while (b && strcmp(b->name(), recurGal) != 0)
-			b = b->parent();
-		if (!b) {
-			msg += "unmatched name for recursion construct\n";
+		Block *b = this;
+		do {
+		    b = b->parent();
+		    if (!b) {
+			msg += "Unmatched name ";
+			msg += (const char*)recurGal;
+			msg += " for recursion construct\n";
 			Error :: abortRun(msg);
 			return;
-		}
-		masterGal = (InterpGalaxy*) &(b->asGalaxy());
+		    }
+		    if(!(b->isA("InterpGalaxy"))) {
+			msg += "Sorry, recursion only works for InterpGalaxies";
+			Error :: abortRun(msg);
+			return;
+		    }
+		    masterGal = (InterpGalaxy*)b;
+		} while (strcmp(masterGal->className(), (const char*)recurGal)
+			!= 0);
 
 		// match portholes.
 		int inNum = 0, outNum = 0;
