@@ -9,6 +9,7 @@ PRINTSEC      = $(PTOLEMY)/doc/bin/printsec
 HEADER        = $(PTOLEMY)/doc/headers/together
 MAINSEC	      = overall
 TMPFILE	      = tmp_print
+OPTIONS       =
 
 DIRS = overview pigi interpreter ptlang domains documents
 SECTIONS = overview/$(TMPFILE) pigi/$(TMPFILE) \
@@ -30,6 +31,6 @@ print:
 		soelim $(MAINSEC) > $(TMPFILE) ; \
 		cd .. ; \
 	done ; \
-	$(PRINTSEC) $(HEADER) init $(SECTIONS); \
+	$(PRINTSEC) $(OPTIONS) $(HEADER) init $(SECTIONS); \
 	ditroff -me -eqn -P$(PRINTER) $(PTOLEMY)/doc/headers/shared title; \
 	/bin/rm $(SECTIONS)
