@@ -78,14 +78,10 @@ protected:
 	void copy(const InterpGalaxy&);
 public:
 // constructor: makes an empty galaxy
-	InterpGalaxy() : myClassName("InterpGalaxy")
-		{ setDescriptor("An interpreted galaxy");}
+	InterpGalaxy();
 
 // constructor: sets the class name
-	InterpGalaxy(const char* c) {
-		setDescriptor("An interpreted galaxy");
-		myClassName = c;
-	}
+	InterpGalaxy(const char* c);
 
 // copy constructor: duplicates an existing galaxy
 	InterpGalaxy(const InterpGalaxy& g) { copy(g);}
