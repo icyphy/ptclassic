@@ -138,7 +138,8 @@ public:
 	}
 
 	// set up a link for determining the type of ANYTYPE connections.
-	// this would be better named sameTypeAs().
+	// this would be better named sameTypeAs(), since it is a completely
+	// symmetric constraint.
 	void inheritTypeFrom(GenericPort& p);
 
 	// function to connect two portholes
@@ -146,7 +147,8 @@ public:
 	virtual void connect(GenericPort& destination,int numberDelays,
 			     const char* initDelayValues = 0);
 
-	// return my type
+	// return my declared type
+	// caution: declared type may not be the particle type actually in use!
 	inline DataType type () const { return myType;}
 
 	// class identification
@@ -186,14 +188,6 @@ public:
 protected:
 	// Translate aliases, if any.
 	GenericPort* translateAliases();
-
-	// Actual type of particles flowing through my geodesic.
-	// 0 if not determined yet.
-	DataType myResolvedType;
-
-	// Two recursive phases of type resolution
-	DataType resolvePass1(DataType useType = 0);
-	DataType resolvePass2(DataType useType = 0);
 
 private:
 	// Declared datatype of this porthole (may be ANYTYPE).
@@ -374,7 +368,7 @@ public:
 	// geodesics.
 	virtual void disconnect(int delGeo = 1);
 
-	// Return the porthole we are connected to (see below)
+	// Return the porthole we are connected to (see below).
 	inline PortHole* far() const { return farSidePort;}
 
         // Print a description of the PortHole
@@ -410,13 +404,19 @@ public:
         virtual Particle& operator % (int); // changed to virtual for MDSDF
 
 	// return the "resolved type", the type that the pair of connected
-	// portholes have agreed to use.  This will never by ANYTYPE.
+	// portholes have agreed to use.  This will never be ANYTYPE.
 	// The result will be 0 (a null pointer) if type resolution has
 	// not yet been performed.
-	inline DataType resolvedType () const { return myResolvedType;}
+	inline DataType resolvedType () const { return myResolvedType; }
+
+	// return the "preferred type" of the porthole (never ANYTYPE).
+	// The result will be 0 (a null pointer) if type resolution has
+	// not yet been performed.
+	inline DataType preferredType () const { return myPreferredType; }
 
 	// function to resolve types during initialization.
-	// perhaps this ought to be protected?
+	// Returns the resolved type of this porthole, or 0 on failure.
+	// Probably this ought to be protected?
 	virtual DataType setResolvedType();
 
 	// return the number of tokens transferred per execution
@@ -460,6 +460,7 @@ public:
 	void disableLocking();
 
 	int isLockEnabled() const;
+
 protected:
 	// Maintain pointer to Geodesic connected to this PortHole
 	Geodesic* myGeodesic;
@@ -510,7 +511,20 @@ protected:
 	// Allocate new buffer
 	void allocateBuffer();
 
+	// function to determine preferred types during initialization.
+	// Returns the preferred type of this porthole, or 0 on failure.
+	// Protected, not private, so that subclasses that override
+	// setResolvedType() can call it.
+	DataType setPreferredType();
+
 private:
+	// Actual type of particles flowing through my geodesic.
+	// 0 if not determined yet.
+	DataType myResolvedType;
+
+	// "Preferred" type of porthole --- intermediate step in
+	// type resolution process.  See setResolvedType and friends.
+	DataType myPreferredType;
 
 	// index value, for making scheduler tables
 	int indexValue;
@@ -518,6 +532,12 @@ private:
 	// Pointer to the MultiPortHole that spawned this PortHole,
 	// if there is one.  Otherwise, NULL
 	MultiPortHole* myMultiPortHole;
+
+	// Two recursive phases of preferred-type assignment
+	DataType assignPass1();
+	DataType assignPass2();
+	// Find the "true" far end, ignoring any intervening event horizons.
+	PortHole* findFarEnd() const;
 };
 
 // PortList methods.  They are here because they cannot appear until
