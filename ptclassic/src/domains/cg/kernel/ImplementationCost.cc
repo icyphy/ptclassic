@@ -34,7 +34,7 @@ and hardware implementation costs.
 ******************************************************************/
 
 #ifdef __GNUG__
-#pragma interface
+#pragma implementation
 #endif
 
 #include "ImplementationCost.h"
