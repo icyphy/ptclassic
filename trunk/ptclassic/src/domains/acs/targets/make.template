@@ -1,6 +1,6 @@
 # Makefile for Ptolemy Adaptive Computing Systems Targets
-# $Id$
-# Copyright (c) 1998-%Q% The Regents of the University of California.
+# @(#)make.template	1.4 04/22/98
+# Copyright (c) 1998 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -52,14 +52,19 @@ SRCS =	\
 	ACSIntArray.cc \
 	DoubleArray.cc \
 	StringArray.cc \
+	CoreList.cc \
+	Connection_List.cc \
+	utilities.cc \
 	Delay.cc \
 	Connectivity.cc \
 	Pin.cc \
 	acs_vhdl_lang.cc \
 	Directory.cc \
+	BindingRule.cc \
 	Arch.cc \
 	Fpga.cc \
-	MemPort.cc \
+	Port.cc \
+	Address.cc \
 	Sg_Constructs.cc \
 	Port_Timing.cc \
 	Pipealign.cc \
@@ -80,11 +85,9 @@ SRCS =	\
 #	ACSSimTarget.cc \
 #	$(PLSRC) 
 
-EXTRA_SRCS = $(PL_SRCS) guide.txt
+EXTRA_SRCS = $(PL_SRCS)
 
-HDRS=$(SRCS:.cc=.h) \
-	acs_starconsts.h \
-	import.h
+HDRS=$(SRCS:.cc=.h)
 
 OBJS = $(SRCS:.cc=.o)
 
