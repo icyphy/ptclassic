@@ -39,6 +39,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "StructTarget.h"
 #include "VHDLStar.h"
 #include "VHDLState.h"
+#include "VHDLCluster.h"
 #include "FloatArrayState.h"
 #include "IntArrayState.h"
 #include "ComplexArrayState.h"
@@ -123,18 +124,50 @@ int StructTarget :: runIt(VHDLStar* s) {
   // Change the default stream back.
   defaultStream = &myCode;
 
+  // Create a new VHDLCluster to load up.
+  VHDLCluster* cl = new VHDLCluster;
+
   // Begin constructing the firing's code in myCode.
   StringList tempName = s->fullName();
   StringList sanTempName = sanitize(tempName);
-  myCode << "\n\t-- firing " << targetNestedSymbol.push(sanTempName);
-  myCode << " (class " << s->className() << ") \n";
-  myCode << "entity " << targetNestedSymbol.get() << " is\n";
+  cl->name = targetNestedSymbol.push(sanTempName);
+  cl->starClassName = s->className();
 
-  // Add in generic refs here from firingGenericList.
-  if (firingGenericList.head()) {
+  cl->genericList = firingGenericList.newCopy();
+  cl->portList = firingPortList.newCopy();
+  cl->variableList = firingVariableList.newCopy();
+  cl->portVarList = firingPortVarList.newCopy();
+  cl->action = firingAction;
+  firingAction.initialize();
+  cl->varPortList = firingVarPortList.newCopy();
+
+  VHDLGenericList* genList = firingGenericList.newCopy();
+  VHDLPortList* portList = firingPortList.newCopy();
+  VHDLGenericMapList* genMapList = firingGenericMapList.newCopy();
+  VHDLPortMapList* portMapList = firingPortMapList.newCopy();
+  VHDLSignalList* sigList = firingSignalList.newCopy();
+
+  StringList label = cl->name;
+  label << "_proc";
+  StringList name = cl->name;
+
+  registerCompDecl(name, portList, genList);
+  mergeSignalList(sigList);
+  registerCompMap(label, name, portMapList, genMapList);
+
+/////////////////////////////////////////////////////
+/////////////////////////////////////////////////////
+
+  // Begin constructing the cluster's code in myCode.
+  myCode << "\n\t-- firing " << cl->name;
+  myCode << " (class " << cl->starClassName << ") \n";
+  myCode << "entity " << cl->name << " is\n";
+
+  // Add in generic refs here from genericList.
+  if ((*(cl->genericList)).head()) {
     level++;
     myCode << indent(level) << "generic(\n";
-    VHDLGenericListIter nextGeneric(firingGenericList);
+    VHDLGenericListIter nextGeneric(*(cl->genericList));
     VHDLGeneric* ngen;
     int genCount = 0;
     while ((ngen = nextGeneric++) != 0) {
@@ -154,11 +187,11 @@ int StructTarget :: runIt(VHDLStar* s) {
     level--;
   }
   
-  // Add in port refs here from firingPortList.
-  if (firingPortList.head()) {
+  // Add in port refs here from portList.
+  if ((*(cl->portList)).head()) {
     level++;
     myCode << indent(level) << "port(\n";
-    VHDLPortListIter nextPort(firingPortList);
+    VHDLPortListIter nextPort(*(cl->portList));
     VHDLPort* nport;
     int portCount = 0;
     while ((nport = nextPort++) != 0) {
@@ -174,19 +207,19 @@ int StructTarget :: runIt(VHDLStar* s) {
     level--;
   }
   
-  myCode << indent(level) << "end " << targetNestedSymbol.get() << ";\n";
+  myCode << indent(level) << "end " << cl->name << ";\n";
   myCode << "\n";
   myCode << "architecture " << "behavior" << " of "
-	 << targetNestedSymbol.get() << " is\n";
+	 << cl->name << " is\n";
   myCode << "begin\n";
   myCode << "process\n";
 
   // Add in sensitivity list of input ports.
   // Do this explicitly for sake of synthesis.
-  if (firingPortList.head()) {
+  if ((*(cl->portList)).head()) {
     level++;
     myCode << indent(level) << "(\n";
-    VHDLPortListIter nextPort(firingPortList);
+    VHDLPortListIter nextPort(*(cl->portList));
     VHDLPort* nport;
     int portCount = 0;
     while ((nport = nextPort++) != 0) {
@@ -205,8 +238,8 @@ int StructTarget :: runIt(VHDLStar* s) {
     level--;
   }
   
-  // Add in variable refs here from firingVariableList.
-  VHDLVariableListIter nextVar(firingVariableList);
+  // Add in variable refs here from variableList.
+  VHDLVariableListIter nextVar(*(cl->variableList));
   VHDLVariable* nvar;
   while ((nvar = nextVar++) != 0) {
     level++;
@@ -220,19 +253,18 @@ int StructTarget :: runIt(VHDLStar* s) {
 
   myCode << "begin\n";
 
-  // Add in port to variable transfers here from firingPortVarList.
-  VHDLPortVarListIter nextPortVar(firingPortVarList);
+  // Add in port to variable transfers here from portVarList.
+  VHDLPortVarListIter nextPortVar(*(cl->portVarList));
   VHDLPortVar* nPortVar;
   while ((nPortVar = nextPortVar++) != 0) {
     myCode << nPortVar->variable << " := " << nPortVar->name << ";\n";
   }
 
   // process action
-  myCode << firingAction;
-  firingAction.initialize();
+  myCode << cl->action;
 
-  // Add in variable to port transfers here from firingVarPortList.
-  VHDLPortVarListIter nextVarPort(firingVarPortList);
+  // Add in variable to port transfers here from varPortList.
+  VHDLPortVarListIter nextVarPort(*(cl->varPortList));
   VHDLPortVar* nVarPort;
   while ((nVarPort = nextVarPort++) != 0) {
     myCode << nVarPort->name << " <= " << nVarPort->variable << ";\n";
@@ -240,20 +272,6 @@ int StructTarget :: runIt(VHDLStar* s) {
 
   myCode << "end process;\n";
   myCode << "end behavior;\n";
-
-  StringList label = targetNestedSymbol.get();
-  label << "_proc";
-  StringList name = targetNestedSymbol.get();
-
-  VHDLGenericList* genList = firingGenericList.newCopy();
-  VHDLPortList* portList = firingPortList.newCopy();
-  VHDLGenericMapList* genMapList = firingGenericMapList.newCopy();
-  VHDLPortMapList* portMapList = firingPortMapList.newCopy();
-  VHDLSignalList* sigList = firingSignalList.newCopy();
-
-  registerCompDecl(name, portList, genList);
-  mergeSignalList(sigList);
-  registerCompMap(label, name, portMapList, genMapList);
 
   // Vestigial code - see original for reasoning behind this, then change it.
   if (!status) {
@@ -347,6 +365,13 @@ void StructTarget :: trailerCode() {
 
 
   int level = 0;
+
+// Begin Cluster Elaboration  
+// iterate for all firings/clusters:
+
+
+// End Cluster Elaboration
+  
   // Generate the entity_declaration.
   entity_declaration << "entity " << galaxy()->name() << " is\n";
   if (systemPortList.head()) {
