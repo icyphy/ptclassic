@@ -267,8 +267,8 @@ InterpGalaxy::alias(const char* galportname,const char* starname,
 	GenericPort *ph = findGenPort (starname, portname);
 	if (ph == NULL) return FALSE;
 // create new galaxy port, add to galaxy, do the alias
-	Plasma* pla = ph->setPlasma();
-	DataType dType = pla ? pla->type() : ph->type();
+	DataType res = ph->setResolvedType();
+	DataType dType = res ? res : ph->type();
 	if (ph->isItMulti()) {
 		LOG_NEW; GalMultiPort *p = new GalMultiPort(*ph);
 		addPort(p->setPort(galportname,this,dType));
