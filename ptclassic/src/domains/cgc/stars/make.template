@@ -59,6 +59,7 @@ PL_SRCS= \
  CGCAdd.pl \
  CGCAddCx.pl \
  CGCAddFix.pl \
+ CGCAddInt.pl \
  CGCBitsToInt.pl \
  CGCBlackHole.pl \
  CGCBusFork.pl \
@@ -67,6 +68,7 @@ PL_SRCS= \
  CGCCommutator.pl \
  CGCConst.pl \
  CGCConstCx.pl \
+ CGCConstInt.pl \
  CGCCopy.pl \
  CGCCos.pl \
  CGCCxToFix.pl \
@@ -93,6 +95,7 @@ PL_SRCS= \
  CGCGGAL.pl \
  CGCGain.pl \
  CGCGainFix.pl \
+ CGCGainInt.pl \
  CGCGoertzel.pl \
  CGCGoertzelPower.pl \
  CGCImpulse.pl \
@@ -104,6 +107,7 @@ PL_SRCS= \
  CGCLimit.pl \
  CGCLMS.pl \
  CGCLog.pl \
+ CGCLogic.pl \
  CGCMaxMin.pl \
  CGCModulo.pl \
  CGCModuloInt.pl \
