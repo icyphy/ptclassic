@@ -104,3 +104,38 @@ method set the number of tokens (in the SDF domain, this is
 accomplished with the
 .c setSDFParams
 method).
+.pp
+There is an alternate syntax for the type field of a porthole; this
+syntax is used in connection with ANYTYPE to specify a connection
+between the types of two portholes.  The syntax is
+.sp
+.c type
+{ =
+.i name " }"
+.sp
+where
+.i name
+is the name of another porthole.  This indicates that this porthole
+inherits its type from the specified porthole.  For example, here
+is the definition of the SDF Fork star:
+.(c
+defstar {
+	name {Fork}
+	domain {SDF}
+	desc { "A fork function: copies input particles to each output" }
+	input {
+		name{input}
+		type{ANYTYPE}
+	}
+	outmulti {
+		name{output}
+		type{= input}
+	}
+	go {
+		MPHIter nextp(output);
+		PortHole* p;
+		while ((p = nextp++) != 0)
+			(*p)%0 = input%0;
+	}
+}
+.)c
