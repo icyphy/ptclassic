@@ -89,6 +89,7 @@ source $ptolemy/lib/tcl/ptkDialog.tcl
 source $ptolemy/lib/tcl/ptkBind.tcl
 source $ptolemy/lib/tcl/ptkControl.tcl
 source $ptolemy/lib/tcl/ptkRunAllDemos.tcl
+source $ptolemy/lib/tcl/ptkRunDesignMaker.tcl
 source $ptolemy/lib/tcl/ptkParams.tcl
 source $ptolemy/lib/tcl/ptkBarGraph.tcl
 source $ptolemy/lib/tcl/ptkPrfacet.tcl
