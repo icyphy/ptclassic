@@ -47,13 +47,11 @@ include $(CONFIG)
 LIB=libexttools.$(LIBSUFFIX)
 
 # Put the Ptolemy kernel directory in the include path
-INCL = -I$(KERNDIR)
+INCL=-I$(KERNDIR) $(MATLAB_INCSPEC)
 
 # Library sources.  CCS_WITH_H_FILES includes all .cc files with a
 # corresponding .h file with the same root.
-CCS_WITH_H_FILES=\
-  MatlabIfc.cc \
-  MatlabIfcFuns.cc \
+CCS_WITH_H_FILES = MatlabIfc.cc MatlabIfcFuns.cc
 
 # The complete list of .cc files used in the library
 SRCS = $(CCS_WITH_H_FILES)
@@ -72,9 +70,6 @@ install:	makefile $(LIBDIR)/$(LIB)
 
 # Include common make definitions
 include $(ROOT)/mk/common.mk
-
-# Add Matlab to the include path
-INCL += $(MATLAB_INCSPEC)
 
 # Don't add anything after the next line; makedepend will zap it.
 # DO NOT DELETE THIS LINE -- make depend depends on it.
