@@ -38,7 +38,7 @@ public:
 	StringList print() const;
 
 private:
-	unsigned short* cell = 0;
+	unsigned short* cell;
 	int seqNo;
 	int getIndex( const int ) const; // returns word containing int
 	int getOffSet( const int ) const; // returns pos of bit in word
