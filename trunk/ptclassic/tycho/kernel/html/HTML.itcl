@@ -104,9 +104,6 @@ class ::tycho::HTML {
     # If true (the default), underline hyperlinks.
     itk_option define -underlinelinks underlineLinks UnderlineLinks 1
 
-    # Offset from the preferred font size.
-    itk_option define -size size Size 0
-
     # The default display font -- currently an X font, but should
     # be made symbolic in Tk 8.0
     itk_option define -displayfont displayFont Font [::tycho::font Times 14]
@@ -132,7 +129,10 @@ class ::tycho::HTML {
 
     # Clear the window.
     method clear {}
-
+ 
+   # Decrease the current font size in this widget.
+    method downSize {}
+    
     # Execute Tcl code embedded in the HTML.
     method execTcl {x y}
 
@@ -186,6 +186,9 @@ class ::tycho::HTML {
 
     # Return the full path name of the text window.
     method textWinName {}
+  
+    # Increase the current font size in this widget.
+    method upSize {}
 
     # Add a file editor object to the window menus of all open File objects.
     method windowMenuAddAll {label}
@@ -207,7 +210,7 @@ class ::tycho::HTML {
 
     # Configure the popup menu depending on the current context
     protected method configureContextMenu {}
-
+   
     ###################################################################
     ####                      protected variables                  ####
 
@@ -229,11 +232,11 @@ class ::tycho::HTML {
     ###################################################################
     ####                     private variables                     ####
 
+    # Size modification for quick font changes  
+    private variable fontOffset 0
+    
     # Keep count of the number of calls to seeFragment
     private variable seecount 0
-
-    # Keep track of the requested size adjustment.
-    private common sizeName
 
     # Keep track of the current source window for the current file.
     private variable sourcewin {}
@@ -246,15 +249,6 @@ class ::tycho::HTML {
 
     # The name of the global array used to store the state of the window.
     private variable stateArrayName {}
-}
-
-#########################################################################
-#### -size configuration
-# The size of normal text will be 14 points plus the size adjustment
-# set with this option.
-#
-configbody ::tycho::HTML::size {
-    HMset_state [textWinName] -size $itk_option(-size)
 }
 
 #########################################################################
@@ -430,17 +424,6 @@ body ::tycho::HTML::constructor {args} {
 	    -textheight textHeight \
 	    -underlinelinks underlineLinks
 
-    # Setup Special menu
-    menubar addMenu Special -underline 0
-
-    menubar add "Appletviewer" Special -underline 0 \
-            -command "$this appletViewer"
-    global tcl_platform
-    if {$tcl_platform(platform) == "macintosh"} {
-	menubar disable Appletviewer
-    }
-
-
     if {$itk_option(-directory) == {}} {
         configure -directory [file dirname $file]
     }
@@ -453,6 +436,17 @@ body ::tycho::HTML::constructor {args} {
 
     # Double clicks normally select text, something we don't want here.
     bind $text <Double-Button-1> {break}
+
+
+    # Setup Special menu
+    menubar addMenu Special -underline 0
+
+    menubar add "Appletviewer" Special -underline 0 \
+            -command "$this appletViewer"
+    global tcl_platform
+    if {$tcl_platform(platform) == "macintosh"} {
+	menubar disable Appletviewer
+    }
 
     # Modify the menu commands appropriately.
     if {$myMenubar != {}} {
@@ -476,26 +470,14 @@ body ::tycho::HTML::constructor {args} {
 
         # then re-create it
         $myMenubar addMenu Format -underline 1
-    }
+ 
+        # with font size control
+        $myMenubar command "Bigger Font" Format -underline 0\
+                -accelerator "C-+" -command "$this upSize"
+        $myMenubar command "Smaller Font" Format -underline 0\
+                -accelerator "C--" -command "$this downSize"
 
-    array set sizes {tiny -2 small 0 medium 2 large 4 huge 8}
-    if {$myMenubar != {}} {
-        foreach size {tiny small medium large huge} {
-            $myMenubar add [lindex $size 0] Format \
-		    -type radiobutton \
-                    -variable [scope sizeName($this)] \
-                    -command \
-                    "$this configure -size $sizes($size); \
-                    ::tycho::HTML::render $this"
-        }
     }
-
-    # Now that the preferences font setting control font sizes,
-    # initialize this variable to "small", since that has a zero
-    # offset.
-    # set sizeName($this) [preference get fontSize]
-    set sizeName($this) "small"
-    configure -size $sizes($sizeName($this))
 
     bind $prefix <Control-x><Key-s> "$this openSource; break"
     # disable certain bindings
@@ -505,12 +487,6 @@ body ::tycho::HTML::constructor {args} {
     bind $prefix <Control-x><Control-q> {bell; break}
     bind $prefix <Control-x><Key-i> {bell; break}
     bind $prefix <Control-x><Key-v> {bell; break}
-
-    # disable Edit's resize font bindings
-    bind $prefix <Control-equal> {break}
-    bind $prefix <Control-plus> {break}
-    bind $prefix <Control-minus> {break}
-   
 
     # Add bindings for forward and back
     bind $itk_component(text) <Meta-Left> "$this back"
@@ -548,7 +524,6 @@ body ::tycho::HTML::destructor {} {
 	# base class destructor removes the menu entry.
 	after idle "$sourcewin windowMenuAddAll $file"
     }
-    catch {unset sizeName($this)}
 }
 
     ###################################################################
@@ -617,6 +592,21 @@ body ::tycho::HTML::back {} {
 #
 body ::tycho::HTML::clear {} {
     HMreset_win [textWinName]
+}
+
+#####################################################################
+#### downSize 
+# Decrease the font size of the current widget. 
+# Redefined from ::tycho::Edit
+#
+body ::tycho::HTML::downSize {} {
+    if {$fontOffset > 0} {
+        set fontOffset [expr $fontOffset - 1 - ($fontOffset / 2)]
+    } else {
+        incr fontOffset -2
+    }
+    HMset_state [textWinName] -size $fontOffset
+    render $this
 }
 
 #####################################################################
@@ -1092,6 +1082,22 @@ body ::tycho::HTML::textWinName {} {
 	return {}
     }
 }
+
+#####################################################################
+#### upSize
+# Increase the font size in the current widget.
+# Redefined from ::tycho::Edit
+#
+body ::tycho::HTML::upSize {} {
+    if {$fontOffset > 0} {
+        set fontOffset [expr ($fontOffset / 2) + 1 + $fontOffset]
+    } else {
+        incr fontOffset 2
+    }        
+    HMset_state [textWinName] -size $fontOffset
+    render $this
+}
+
 
 #####################################################################
 #### windowMenuAddAll
