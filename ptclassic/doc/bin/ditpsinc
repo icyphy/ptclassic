@@ -16,7 +16,7 @@ endif
 
 # File structure information:
 set psprolog = $PTOLEMY/doc/lib/psdit.pro
-set psicommand = $PTOLEMY/doc/bin/psi
+set psicommand = $PTOLEMY/bin.$ARCH/psi
 set psditcommand = /usr/local/lib/ps/psdit
 
 # The ../../.. crap below is because psdit doesn't allow us to specify
