@@ -163,7 +163,7 @@ body ::tycho::EditSpell::constructor {args} {
     $itk_component(dbox) add learn -text {Learn} \
             -underline 0 \
 	    -command "$this learn"
-    bind $itk_component(hull) <Key-l> "$this dictionary"
+    bind $itk_component(hull) <Key-l> "$this learn"
     pack $itk_component(dbox) -side right -before $itk_component(querysite)
 }
 
