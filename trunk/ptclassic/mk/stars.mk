@@ -348,21 +348,23 @@ endif
 # Set up definitions for stars.mk
 
 ifdef IPUS
-	CUSTOM_DIRS += $(IPUSDIR)/kernel $(IPUSDIR)/stars 
-	PALETTES += PTOLEMY/src/domains/ipus/icons/ipus.pal
 	ifdef TK
-		CUSTOM_DIRS += $(IPUSDIR)/tcltk/kernel \
-			$(IPUSDIR)/tcltk/stars 
-		STARS += $(LIBDIR)/ipustclstars.o
+		CUSTOM_DIRS += $(IPUSDIR)/kernel $(IPUSDIR)/stars \
+				 $(IPUSDIR)/tcltk/kernel \
+				 $(IPUSDIR)/tcltk/stars 
+		PALETTES += PTOLEMY/src/domains/ipus/icons/ipus.pal
+		STARS += $(LIBDIR)/ipustclstars.o $(LIBDIR)/ipusstars.o
 		LIBFILES += $(LIBDIR)/libipustclstars.$(LIBSUFFIX) \
-			$(LIBDIR)/libipustcltk.$(LIBSUFFIX)
-		LIBS += -lipustclstars -lipustcltk
-	endif
-	STARS += $(LIBDIR)/ipusstars.o
-	LIBS += -lipusstars -lipus -licp
-	LIBFILES += $(LIBDIR)/libipusstars.$(LIBSUFFIX) \
+			$(LIBDIR)/libipustcltk.$(LIBSUFFIX) \
+			$(LIBDIR)/libipusstars.$(LIBSUFFIX) \
 			$(LIBDIR)/libipus.$(LIBSUFFIX) \
 			$(LIBDIR)/libicp.$(LIBSUFFIX)
+		# ipustcltk is listed twice since -lipus needs Blackboard
+		# symbols.  ipustcltk must be listed twice if we are
+		# using static libraries, like under sun4
+		LIBS += -lipustclstars -lipustcltk -lipusstars -lipus \
+			-lipustcltk -licp
+	endif
 endif
 
 ifdef MQ
