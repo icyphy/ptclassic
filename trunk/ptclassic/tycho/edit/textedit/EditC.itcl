@@ -375,5 +375,5 @@ body ::tycho::EditC::initializeMenubar {menubar} {
     $menubar insert command compileandload close \
 	    -label {Compile and Load} -underline 0 \
             -command "$this compileAndLoad"
-    $menubar insert separator filesep2 close
+    $menubar insert separator filesep3 close
 }
