@@ -221,9 +221,20 @@ void Galaxy :: 	initPortsSubblocks() {
 }
 
         ////////////////////////////////////
-        // const char* domain()
+        // resetPortBuffers()
         ////////////////////////////////////
 
+// resetPortBuffers in each Star.
+void Galaxy :: resetPortBuffers() {
+	GalStarIter next(*this);
+	Star* s;
+	while ((s = next++) != 0 && !Scheduler::haltRequested())
+		s->resetPortBuffers();
+}
+
+        ////////////////////////////////////
+        // const char* domain()
+        ////////////////////////////////////
 
 // return myDomain if set, else use domain of first sub-block.
 const char*
