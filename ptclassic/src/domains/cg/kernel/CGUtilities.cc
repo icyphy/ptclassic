@@ -255,8 +255,8 @@ int rcpWriteFile(const char* hname, const char* dir, const char* file,
     //  display the file on local machine
     if (displayFlag) {
 	if (displayFile(outputFileName,
-			(void (*)(char *)) NULL,
-			(void (*)(char *)) NULL) != TRUE )
+			(void (*)(const char *)) NULL,
+			(void (*)(const char *)) NULL) != TRUE )
 	  status = FALSE;
 	if (tmpFile) {
 	  StringList displayCommand;
