@@ -195,6 +195,8 @@ ifdef VHDL
 	LIBFILES += $(LIBDIR)/libvhdlstars.$(LIBSUFFIX) \
 		$(LIBDIR)/libvhdl.$(LIBSUFFIX) \
 		$(LIBDIR)/libvhdltargets.$(LIBSUFFIX)
+	# Window star in vhdl/stars needs the Cephes Library
+	CEPHESLIB = 1
 endif
 
 ifdef VHDLB
