@@ -45,6 +45,7 @@ SRCS= \
  CG56DummySource.pl \
  CG56DummySink.pl \
  CG56IIDUniform.pl \
+ CG56Integrator.pl \
  CG56Sub.pl \
  CG56UpSample.pl \
  CG56WriteFile.pl
