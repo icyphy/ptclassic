@@ -53,6 +53,11 @@ foreach x (optfir wfir)
 end
 cd ..
 
+# Make link for xgraph bitmaps
+cd xgraph
+optlink ../../src/xgraph/bitmaps .
+cd ..
+
 # EXPDOMAINS = experimental domains
 # EXPDOMAINS = capsim bdf
 set EXPDOMAINS=(cg-ddf cg56 cgc cg96)
@@ -88,6 +93,11 @@ foreach x (thor/pepp cg/targets sdf/expgraph sdf/image sdf/targets \
 	optlink ../../../../src/domains/$x makefile
 	cd ../..
 end
+
+# create Bitmaps for analyzerX11
+cd thor/analyzerX11
+optlink ../../../../src/domains/thor/analyzerX11/Bitmaps .
+cd ../..
 
 # create extra subsub dirs in each domain
 # everything must have two slashs (be three levels down)
