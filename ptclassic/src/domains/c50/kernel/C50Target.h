@@ -45,19 +45,20 @@ Base target for TI 320C5x assembly code generation.
 
 extern StringList C50ONE;
 
+// Defined in C50Domain.cc
+extern const char C50domainName[];
+
 class C50Target : public virtual TITarget {
 public:
 	// constructor
-	C50Target(const char* nam, const char* desc);
+	C50Target(const char* nam, const char* desc,
+		  const char* assocDomain = C50domainName);
 
 	// copy constructor
 	C50Target(const C50Target& src);
 
 	// return a new copy of itself
 	/*virtual*/ Block* makeNew() const;
-
-	// return the domain of the galaxy if it exists and "C50" otherwise
-	/*virtual*/ const char* domain();
 
 	/*virtual*/ int isA(const char*) const;
 	void headerCode();
@@ -69,9 +70,6 @@ protected:
 	void writeFloat(double);
 	const char* memoryMapInitCode();
 	const char* startCode();
-
-private:
-	void initDataMembers();
 };
 
 // Adds the galaxy parameter ONE.  This should be called by any multiprocessor
