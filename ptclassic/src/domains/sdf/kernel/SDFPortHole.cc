@@ -97,6 +97,20 @@ MultiPortHole& MultiSDFPort :: setPort (const char* s,
         return *this;
 }
 
+// Function to alter only numTokens and delay.
+// We re-do porthole initialization if bufferSize changes
+MultiPortHole& MultiSDFPort :: setSDFParams(unsigned numTokens,
+					    unsigned maxPstValue)
+{
+	MPHIter next(*this);
+	PortHole* p;
+	while((p = next++) != 0) {
+	    ((SDFPortHole*)p)->setSDFParams(numTokens,maxPstValue);
+	}
+	return *this;
+}
+
+
 PortHole& MultiInSDFPort :: newPort () {
 	LOG_NEW; PortHole& p = *new InSDFPort;
 	p.numberTokens = numberTokens;

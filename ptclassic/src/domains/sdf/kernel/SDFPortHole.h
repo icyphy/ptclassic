@@ -160,6 +160,11 @@ public:
 	MultiSDFPort();
 	~MultiSDFPort();
 
+	// Function to alter only numTokens and delay.
+	// We re-do porthole initialization if bufferSize changes
+	MultiPortHole& setSDFParams(unsigned numTokens = 1,
+				    unsigned maxPstValue=0);
+
         // The setPort function is redefined to take one more optional
         // argument, the number of Particles produced
         MultiPortHole& setPort(const char* portName,
