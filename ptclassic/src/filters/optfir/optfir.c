@@ -100,9 +100,9 @@ main()
 /*<       dimension des(1600),grid(1600),wt(1600) > */
 /*<       dimension edge(20),fx(10),wtx(10),deviat(10) > */
 /*<       pi=3.141592653589793 > */
-  pi = 3.141592653589793f;
+  pi = 3.141592653589793;
 /*<       pi2=6.283185307179586 > */
-  _BLNK__1.pi2 = 6.283185307179586f;
+  _BLNK__1.pi2 = 6.283185307179586;
 /* Maximum filter length */
 /*<       nfmax=256 > */
   nfmax = 256;
@@ -144,16 +144,16 @@ L100:
   if (jtype == 4) {
     nfilt = (nfilt + 1) / 2;
     nbands = 1;
-    edge[0] = 0.f;
+    edge[0] = 0.0;
     if (fin == stdin) 
       printf(" Enter passband edge frequency: ");
 /*<          read (io,*) edge(2) > */
     fscanf(fin,"%f", &edge[1]);
     if (fin != stdin) 
       printf(" passband edge frequency: %f\n",edge[1]);
-    edge[1] = edge[1] * 2.f / fs;
-    fx[0] = .5f;
-    wtx[0] = 1.f;
+    edge[1] = edge[1] * 2.0 / fs;
+    fx[0] = 0.5;
+    wtx[0] = 1.0;
     goto L118;
   }
   if (fin == stdin )
@@ -250,10 +250,10 @@ L120:
   d__1 = ripple;
 /* Computing 2nd power */
   d__2 = ripple;
-  ripple = (d__1 * d__1 * .005309f + ripple * .07114f - .4761f) * attn - (
-			  d__2 * d__2 * .00266f + ripple * .5941f + .4278f);
+  ripple = (d__1 * d__1 * .005309 + ripple * .07114 - .4761) * attn - (
+			  d__2 * d__2 * .00266 + ripple * .5941 + .4278);
 /*<       attn=11.01217+0.51244*(svrip-attn) > */
-  attn = (svrip - attn) * .51244f + 11.01217f;
+  attn = (svrip - attn) * .51244 + 11.01217;
 /*<       deltaf=edge(3)-edge(2) > */
   deltaf = edge[2] - edge[1];
 /*<       nfilt=ripple/deltaf-attn*deltaf+1 > */
@@ -290,7 +290,7 @@ L130:
 /*<       delf=16*nfcns > */
   delf = (float) (_BLNK__1.nfcns << 4);
 /*<       delf=0.5/delf > */
-  delf = .5f / delf;
+  delf = .5 / delf;
 /*<       if(neg.eq.0) go to 135 > */
   if (neg == 0) {
     goto L135;
@@ -354,7 +354,7 @@ L160:
     goto L165;
   }
 /*<       if(grid(ngrid).gt.(0.5-delf)) ngrid=ngrid-1 > */
-  if (_BLNK__1.grid[_BLNK__1.ngrid - 1] > .5f - delf) {
+  if (_BLNK__1.grid[_BLNK__1.ngrid - 1] > .5 - delf) {
     --_BLNK__1.ngrid;
   }
 /*<   165 continue > */
@@ -444,7 +444,7 @@ L300:
   for (j = 1; j <= nm1; ++j) {
 /*<   305 h(j)=0.5*alpha(nz-j) > */
 /* L305: */
-    h[j - 1] = _BLNK__1.alpha[nz - j - 1] * .5f;
+    h[j - 1] = _BLNK__1.alpha[nz - j - 1] * .5;
   }
 /*<       h(nfcns)=alpha(1) > */
   h[_BLNK__1.nfcns - 1] = _BLNK__1.alpha[0];
@@ -452,17 +452,17 @@ L300:
   goto L350;
 /*<   310 h(1)=0.25*alpha(nfcns) > */
 L310:
-  h[0] = _BLNK__1.alpha[_BLNK__1.nfcns - 1] * .25f;
+  h[0] = _BLNK__1.alpha[_BLNK__1.nfcns - 1] * .25;
 /*<       do 315 j=2,nm1 > */
   for (j = 2; j <= nm1; ++j) {
 /*<   315 h(j)=0.25*(alpha(nz-j)+alpha(nfcns+2-j)) > */
 /* L315: */
     h[j - 1] = (_BLNK__1.alpha[nz - j - 1] + _BLNK__1.alpha[
-					_BLNK__1.nfcns + 2 - j - 1]) * .25f;
+					_BLNK__1.nfcns + 2 - j - 1]) * .25;
   }
 /*<       h(nfcns)=0.5*alpha(1)+0.25*alpha(2) > */
-  h[_BLNK__1.nfcns - 1] = _BLNK__1.alpha[0] * .5f + _BLNK__1.alpha[1] *
-    .25f;
+  h[_BLNK__1.nfcns - 1] = _BLNK__1.alpha[0] * .5 + _BLNK__1.alpha[1] *
+    .25;
 /*<       go to 350 > */
   goto L350;
 /*<   320 if(nodd.eq.0) go to 330 > */
@@ -471,36 +471,36 @@ L320:
     goto L330;
   }
 /*<       h(1)=0.25*alpha(nfcns) > */
-  h[0] = _BLNK__1.alpha[_BLNK__1.nfcns - 1] * .25f;
+  h[0] = _BLNK__1.alpha[_BLNK__1.nfcns - 1] * .25;
 /*<       h(2)=0.25*alpha(nm1) > */
-  h[1] = _BLNK__1.alpha[nm1 - 1] * .25f;
+  h[1] = _BLNK__1.alpha[nm1 - 1] * .25;
 /*<       do 325 j=3,nm1 > */
   for (j = 3; j <= nm1; ++j) {
 /*<   325 h(j)=0.25*(alpha(nz-j)-alpha(nfcns+3-j)) > */
 /* L325: */
     h[j - 1] = (_BLNK__1.alpha[nz - j - 1] - _BLNK__1.alpha[
-					_BLNK__1.nfcns + 3 - j - 1]) * .25f;
+					_BLNK__1.nfcns + 3 - j - 1]) * .25;
   }
 /*<       h(nfcns)=0.5*alpha(1)-0.25*alpha(3) > */
-  h[_BLNK__1.nfcns - 1] = _BLNK__1.alpha[0] * .5f - _BLNK__1.alpha[2] *
-    .25f;
+  h[_BLNK__1.nfcns - 1] = _BLNK__1.alpha[0] * .5 - _BLNK__1.alpha[2] *
+    .25;
 /*<       h(nz)=0.0 > */
-  h[nz - 1] = 0.f;
+  h[nz - 1] = 0.0;
 /*<       go to 350 > */
   goto L350;
 /*<   330 h(1)=0.25*alpha(nfcns) > */
 L330:
-  h[0] = _BLNK__1.alpha[_BLNK__1.nfcns - 1] * .25f;
+  h[0] = _BLNK__1.alpha[_BLNK__1.nfcns - 1] * .25;
 /*<       do 335 j=2,nm1 > */
   for (j = 2; j <= nm1; ++j) {
 /*<   335 h(j)=0.25*(alpha(nz-j)-alpha(nfcns+2-j)) > */
 /* L335: */
     h[j - 1] = (_BLNK__1.alpha[nz - j - 1] - _BLNK__1.alpha[
-					_BLNK__1.nfcns + 2 - j - 1]) * .25f;
+					_BLNK__1.nfcns + 2 - j - 1]) * .25;
   }
 /*<       h(nfcns)=0.5*alpha(1)-0.25*alpha(2) > */
-  h[_BLNK__1.nfcns - 1] = _BLNK__1.alpha[0] * .5f - _BLNK__1.alpha[1] *
-    .25f;
+  h[_BLNK__1.nfcns - 1] = _BLNK__1.alpha[0] * .5 - _BLNK__1.alpha[1] *
+    .25;
 /*<   350 write(6,360) > */
 L350:
   printf(" Finite Impulse Response (FIR)\n Linear Phase Digital Filter Design\n Remez Exchange Algorithm\n");
@@ -556,7 +556,7 @@ L350:
 /*<       write(6,390)(edge(2*j-1),j=k,kup) > */
     for (j = k; j <= kup; ++j)
       printf("     % f", edge[(j << 1) - 2]);
-/*<   390 format(/' Lower band edge:',5f15.7) > */
+/*<   390 format(/' Lower band edge:',515.7) > */
 /*<       write(6,395)(edge(2*j),j=k,kup) > */
     printf("\n Upper band edge: ");
     for (j = k; j <= kup; ++j)
@@ -595,13 +595,13 @@ L350:
 /*<       do 430 j=k,kup > */
     for (j = k; j <= kup; ++j) {
 /*<       if(fx(j).eq.1.0) deviat(j)=(1.0+deviat(j))/(1.0-deviat(j)) > */
-      if (fx[j - 1] == 1.f) {
-	deviat[j - 1] = (deviat[j - 1] + 1.f) / (1.f - deviat[j - 1]);
+      if (fx[j - 1] == 1.0) {
+	deviat[j - 1] = (deviat[j - 1] + 1.0) / (1.0 - deviat[j - 1]);
       }
 /*<   430 deviat(j)=20.0*alog10(deviat(j)) > */
 /* L430: */
       deviat[j - 1] = log(deviat[j - 1]) * log10e * 20;
-/*      deviat[j - 1] = r_lg10(&deviat[j - 1]) * 20.f;*/
+/*      deviat[j - 1] = r_lg10(&deviat[j - 1]) * 20.0;*/
     }
 /*<       write(6,435) (deviat(j),j=k,kup) > */
     printf("\n Deviation in dB: ");
@@ -766,9 +766,9 @@ eff_(freq, fx, lband, jtype, idist)
     return ret_val;
   }
 /*<       x=3.141593*freq > */
-  x = *freq * 3.141593f;
+  x = *freq * 3.141593;
 /*<       if(x.ne.0) eff=eff*x/sin(x) > */
-  if (x != 0.f) {
+  if (x != 0.0) {
     ret_val = ret_val * x / sin(x);
   }
 /*<       return > */
@@ -810,7 +810,7 @@ wate_(freq, fx, wtx, lband, jtype)
   return ret_val;
 /*<     1 if(fx(lband).lt.0.0001) go to 2 > */
 L1:
-  if (fx[*lband] < 1e-4f) {
+  if (fx[*lband] < 1e-4) {
     goto L2;
   }
 /*<       wate=wtx(lband)/freq > */
@@ -878,7 +878,7 @@ remez_(edge, nbands)
   /* Function Body */
   itrmax = 25;
 /*<       devl=-1.0 > */
-  devl = -1.f;
+  devl = -1.0;
 /*<       nz=nfcns+1 > */
   nz = _BLNK__1.nfcns + 1;
 /*<       nzz=nfcns+2 > */
@@ -916,9 +916,9 @@ L100:
     _BLNK__1.ad[j - 1] = d_(&kid, &nz, &jet);
   }
 /*<       dnum=0.0 > */
-  dnum = 0.f;
+  dnum = 0.0;
 /*<       dden=0.0 > */
-  dden = 0.f;
+  dden = 0.0;
 /*<       k=1 > */
   k = 1;
 /*<       do 130 j=1,nz > */
@@ -1177,7 +1177,7 @@ L300:
 /*<       kup=k1 > */
   kup = k1;
 /*<       comp=ynz*(1.00001) > */
-  comp = ynz * 1.00001f;
+  comp = ynz * 1.00001;
 /*<       luck=1 > */
   luck = 1;
 /*<   310 l=l+1 > */
@@ -1227,7 +1227,7 @@ L325:
 /*<       nut=-nut1 > */
   nut = -nut1;
 /*<       comp=y1*(1.00001) > */
-  comp = y1 * 1.00001f;
+  comp = y1 * 1.00001;
 /*<   330 l=l-1 > */
 L330:
   --l;
@@ -1291,21 +1291,21 @@ L400:
 /*<       nm1=nfcns-1 > */
   nm1 = _BLNK__1.nfcns - 1;
 /*<       fsh=1.0e-06 > */
-  fsh = 1e-6f;
+  fsh = 1e-6;
 /*<       gtemp=grid(1) > */
   gtemp = _BLNK__1.grid[0];
 /*<       x(nzz)=-2.0 > */
-  _BLNK__1.x[nzz - 1] = -2.f;
+  _BLNK__1.x[nzz - 1] = -2.0;
 /*<       cn=2.*nfcns-1. > */
-  cn = _BLNK__1.nfcns * 2.f - 1.f;
+  cn = _BLNK__1.nfcns * 2.0 - 1.0;
 /*<       delf=1.0/cn > */
-  delf = 1.f / cn;
+  delf = 1.0 / cn;
 /*<       l=1 > */
   l = 1;
 /*<       kkk=0 > */
   kkk = 0;
 /*<       if(edge(1).eq.0.0.and.edge(2*nbands).eq.0.5) kkk=1 > */
-  if (edge[1] == 0.f && edge[*nbands * 2] == .5f) {
+  if (edge[1] == 0.0 && edge[*nbands * 2] == .5) {
     kkk = 1;
   }
 /*<       if(nfcns.le.3) kkk=1 > */
@@ -1321,7 +1321,7 @@ L400:
 /*<       dnum=dcos(pi2*grid(ngrid)) > */
   dnum = cos(_BLNK__1.pi2 * _BLNK__1.grid[_BLNK__1.ngrid - 1]);
 /*<       aa=2.0/(dtemp-dnum) > */
-  aa = 2.f / (dtemp - dnum);
+  aa = 2.0 / (dtemp - dnum);
 /*<       bb=-(dtemp+dnum)/(dtemp-dnum) > */
   bb = -(dtemp + dnum) / (dtemp - dnum);
 /*<   405 continue > */
@@ -1385,7 +1385,7 @@ L405:
 /*<       do 510 j=1,nfcns > */
   for (j = 1; j <= _BLNK__1.nfcns; ++j) {
 /*<       dtemp=0.0 > */
-    dtemp = 0.f;
+    dtemp = 0.0;
 /*<       dnum=(j-1)*dden > */
     dnum = (j - 1) * dden;
 /*<       if(nm1.lt.1) go to 505 > */
@@ -1400,7 +1400,7 @@ L405:
     }
 /*<   505 dtemp=2.0*dtemp+a(1) > */
   L505:
-    dtemp = dtemp * 2.f + a[0];
+    dtemp = dtemp * 2.0 + a[0];
 /*<   510 alpha(j)=dtemp > */
 /* L510: */
     _BLNK__1.alpha[j - 1] = dtemp;
@@ -1409,7 +1409,7 @@ L405:
   for (j = 2; j <= _BLNK__1.nfcns; ++j) {
 /*<   550 alpha(j)=2.*alpha(j)/cn > */
 /* L550: */
-    _BLNK__1.alpha[j - 1] = _BLNK__1.alpha[j - 1] * 2.f / cn;
+    _BLNK__1.alpha[j - 1] = _BLNK__1.alpha[j - 1] * 2.0 / cn;
   }
 /*<       alpha(1)=alpha(1)/cn > */
   _BLNK__1.alpha[0] /= cn;
@@ -1418,10 +1418,10 @@ L405:
     goto L545;
   }
 /*<       p(1)=2.0*alpha(nfcns)*bb+alpha(nm1) > */
-  p[0] = _BLNK__1.alpha[_BLNK__1.nfcns - 1] * 2.f * bb + _BLNK__1.alpha[nm1
+  p[0] = _BLNK__1.alpha[_BLNK__1.nfcns - 1] * 2.0 * bb + _BLNK__1.alpha[nm1
 									- 1];
 /*<       p(2)=2.0*aa*alpha(nfcns) > */
-  p[1] = aa * 2.f * _BLNK__1.alpha[_BLNK__1.nfcns - 1];
+  p[1] = aa * 2.0 * _BLNK__1.alpha[_BLNK__1.nfcns - 1];
 /*<       q(1)=alpha(nfcns-2)-alpha(nfcns) > */
   q[0] = _BLNK__1.alpha[_BLNK__1.nfcns - 3] - _BLNK__1.alpha[_BLNK__1.nfcns
 							     - 1];
@@ -1432,23 +1432,23 @@ L405:
       goto L515;
     }
 /*<       aa=0.5*aa > */
-    aa *= .5f;
+    aa *= .5;
 /*<       bb=0.5*bb > */
-    bb *= .5f;
+    bb *= .5;
 /*<   515 continue > */
   L515:
 /*<       p(j+1)=0.0 > */
-    p[j] = 0.f;
+    p[j] = 0.0;
 /*<       do 520 k=1,j > */
     for (k = 1; k <= j; ++k) {
 /*<       a(k)=p(k) > */
       a[k - 1] = p[k - 1];
 /*<   520 p(k)=2.0*bb*a(k) > */
 /* L520: */
-      p[k - 1] = bb * 2.f * a[k - 1];
+      p[k - 1] = bb * 2.0 * a[k - 1];
     }
 /*<       p(2)=p(2)+a(1)*2.0*aa > */
-    p[1] += a[0] * 2.f * aa;
+    p[1] += a[0] * 2.0 * aa;
 /*<       jm1=j-1 > */
     jm1 = j - 1;
 /*<       do 525 k=1,jm1 > */
@@ -1494,9 +1494,9 @@ L545:
     return 0;
   }
 /*<       alpha(nfcns+1)=0.0 > */
-  _BLNK__1.alpha[_BLNK__1.nfcns] = 0.f;
+  _BLNK__1.alpha[_BLNK__1.nfcns] = 0.0;
 /*<       alpha(nfcns+2)=0.0 > */
-  _BLNK__1.alpha[_BLNK__1.nfcns + 1] = 0.f;
+  _BLNK__1.alpha[_BLNK__1.nfcns + 1] = 0.0;
 /*<       return > */
   return 0;
 /*<       end > */
@@ -1522,7 +1522,7 @@ d_(k, n, m)
 /*<       dimension iext(100),ad(100),alpha(100),x(100),y(100) > */
 /*<       dimension des(1600),grid(1600),wt(1600) > */
 /*<       d=1.0 > */
-  ret_val = 1.f;
+  ret_val = 1.0;
 /*<       q=x(k) > */
   q = _BLNK__1.x[*k - 1];
 /*<       do 3 l=1,m > */
@@ -1538,7 +1538,7 @@ d_(k, n, m)
       }
 /*<     1 d=2.0*d*(q-x(j)) > */
     L1:
-      ret_val = ret_val * 2.f * (q - _BLNK__1.x[j - 1]);
+      ret_val = ret_val * 2.0 * (q - _BLNK__1.x[j - 1]);
 /*<     2 continue > */
     L2:
       ;
@@ -1547,7 +1547,7 @@ d_(k, n, m)
 /* L3: */
   }
 /*<       d=1.0/d > */
-  ret_val = 1.f / ret_val;
+  ret_val = 1.0 / ret_val;
 /*<       return > */
   return ret_val;
 /*<       end > */
@@ -1576,13 +1576,13 @@ gee_(k, n)
 /*<       dimension iext(100),ad(100),alpha(100),x(100),y(100) > */
 /*<       dimension des(1600),grid(1600),wt(1600) > */
 /*<       p=0.0 > */
-  p = 0.f;
+  p = 0.0;
 /*<       xf=grid(k) > */
   xf = _BLNK__1.grid[*k - 1];
 /*<       xf=dcos(pi2*xf) > */
   xf = cos(_BLNK__1.pi2 * xf);
 /*<       d=0.0 > */
-  d = 0.f;
+  d = 0.0;
 /*<       do 1 j=1,n > */
   for (j = 1; j <= *n; ++j) {
 /*<       c=xf-x(j) > */
