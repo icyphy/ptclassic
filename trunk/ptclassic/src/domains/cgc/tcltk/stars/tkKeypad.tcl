@@ -53,14 +53,14 @@ for {set row 0} {$row < 4} {incr row} {
 	set textid [$c create text [expr $x1+0.5]c [expr $y1+0.5]c \
 	    -anchor center \
 	    -fill [ptkColor white] -text $keytext \
-	    -font [option get . mainfont Mainfont] ]
+	    -font [option get . mediumfont CGC] ]
 
 	$c bind $textid <ButtonPress-1> \
 	    "${uniqueSymbol}setOutputs 1.0 [lindex $freq1 $keyind] [lindex $freq2 $keyind]; $c itemconfigure $keyid -fill [ptkColor salmon]"
 	$c bind $textid <ButtonRelease-1> \
 	    "${uniqueSymbol}setOutputs 0.0 0.0 0.0; $c itemconfigure $keyid -fill [ptkColor red3]"
 
-	set keynum [expr $keynum+1.0]
+	set keynum [expr $keynum+1]
     }
 }
 
