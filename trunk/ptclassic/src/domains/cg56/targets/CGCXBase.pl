@@ -23,9 +23,6 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
     }
     codeblock(downloadCode,"const char* filePrefix,const char* s56path") {
-    {
-	Params p;
-
 	/* open the DSP */
 	if ((dsp = qckAttach("/dev/s56dsp", NULL, 0)) == NULL) {
 		fprintf(stderr,"Could not access the S-56X Card");
@@ -45,37 +42,28 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 
 	/* get the DSP parameters */
-	if (ioctl(dsp->fd,DspGetParams, &p) == -1) {
+	if (ioctl(dsp->fd,DspGetParams, &dspParams) == -1) {
 		fprintf(stderr,"Read failed on S-56X parameters");
 		exit(1);
 	}
 
-	p.dmaPageSize = 65536;
-	p.writeMode = DspWordCnt | DspPack24;
-	p.readMode = p.writeMode;
-	p.topFill = 0;
-	p.midFill = 0;
-	p.dmaTimeout = 1000;
-	p.startRead = qckLodGetIntr(dsp->prog,"STARTR");
-	p.startWrite = qckLodGetIntr(dsp->prog,"STARTW");
-	if (p.startRead == -1) {
-		fprintf(stderr,"No STARTR label in @filePrefix.lod");
-		exit(1);
-	}
-	if(p.startWrite == -1) {
-		fprintf(stderr,"NO STARTW label in @filePrefix.lod");
-		exit(1);
-	}
+	dspParams.dmaPageSize = 65536;
+	dspParams.writeMode = DspWordCnt | DspPack24;
+	dspParams.readMode = dspParams.writeMode;
+	dspParams.topFill = 0;
+	dspParams.midFill = 0;
+	dspParams.dmaTimeout = 1000;
+
 	/* set the DSP parameters */
-	if (ioctl(dsp->fd,DspSetParams, &p) == -1) {
+	if (ioctl(dsp->fd,DspSetParams, &dspParams) == -1) {
 		fprintf(stderr,"Write failed on S-56X parameters");
 		exit(1);
 	}
-    }
-    if (qckJsr(dsp,"START") == -1) {
-	fprintf(stderr,qckErrString);
-	exit(1);
-    }
+
+	if (qckJsr(dsp,"START") == -1) {
+		fprintf(stderr,qckErrString);
+		exit(1);
+	}
     }
 
     initCode {
@@ -85,6 +73,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	addInclude("<qckMon.h>");
 	addInclude("<stdio.h>");
 	addDeclaration("    QckMon* dsp;","dsp");
+	addDeclaration("    Params dspParams;","dspParams");
 	const char *s56path = getenv("S56DSP");
 	if (s56path == NULL)
 		s56path = expandPathName("$PTOLEMY/vendors/s56dsp");

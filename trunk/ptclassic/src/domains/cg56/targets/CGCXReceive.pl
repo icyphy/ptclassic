@@ -19,7 +19,25 @@ limitation of liability, and disclaimer of warranty provisions.
 	name {output}
 	type {ANYTYPE}
     }
-    
+
+    codeblock(DSPStartWrite,"const char* filePrefix") {
+        /* get the DSP parameters */
+        if (ioctl(dsp->fd,DspGetParams, &dspParams) == -1) {
+                fprintf(stderr,"Read failed on S-56X parameters");
+                exit(1);
+        }
+        dspParams.startWrite = qckLodGetIntr(dsp->prog,"STARTW");
+        if (dspParams.startWrite == -1) {
+                fprintf(stderr,"No STARTW label in @filePrefix.lod");
+                exit(1);
+        }
+	/* set the DSP parameters */
+	if (ioctl(dsp->fd,DspSetParams, &dspParams) == -1) {
+		fprintf(stderr,"Write failed on S-56X parameters");
+		exit(1);
+	}
+    }
+   
     codeblock(receiveData,"int numXfer,const char* command") {
     char buffer[@(numXfer*3)];
     int status;
@@ -40,7 +58,11 @@ limitation of liability, and disclaimer of warranty provisions.
     }
     }
     
-    
+    initCode {
+        CGCS56XBase::initCode();
+        addMainInit(DSPStartWrite(S56XFilePrefix),"STARTW");
+    }
+
     go {
 	const char* intReceive = "$ref(output,i) = value";
 	const char* fixReceive = "$ref(output,i) = (double)value/(1<<23)";
