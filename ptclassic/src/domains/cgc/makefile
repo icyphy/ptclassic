@@ -34,7 +34,7 @@
 
 include ../../../mk/topdomain.mk
 
-DIRS = kernel stars targets tcltk rtlib
+DIRS = kernel stars dsp targets tcltk rtlib
 
 ME = cgc
 
