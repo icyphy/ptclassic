@@ -3,9 +3,11 @@ defstar {
 	domain {SDF}
 	version {$Id$}
 	desc {
-Takes N input streams and synchronously combines them into one output stream,
-where N is the number of inputs.  It consumes N input particles from each
-input, and produces N*B particles on the output, where B = blockSize.
+Takes N input streams (where N is the number of inputs) and
+synchronously combines them into one output stream.
+It consumes B input particles from each
+input (where B is the blockSize), and produces N*B particles on the
+output.
 The first B particles on the output come from the first input,
 the next B particles from the next input, etc.
 	}
