@@ -1,0 +1,48 @@
+# Makefile for Ptolemy thread class library.
+# Version  $Id$
+# Copyright (c) %Q% The Regents of the University of California.
+#                       All Rights Reserved.
+# Author:	T. M. Parks
+# Created:	21 October 1994
+
+# Root of Ptolemy directory tree.
+ROOT= ../../..
+
+# Directory with source files.
+VPATH= $(ROOT)/src/thread/posix
+
+# Configuration info.
+CONFIG= $(ROOT)/mk/config-$(ARCH).mk
+include $(CONFIG)
+
+# Library name
+LIB= libposixthread.$(LIBSUFFIX)
+
+# Extra directories to include
+INCL= -I$(KERNDIR) -I$(ROOT)/thread/include.$(ARCH)
+
+# Library sources.  CC_WITH_H includes all .cc files with a
+# corresponding .h file with the same root.
+CC_WITH_H= \
+ PosixThread.cc \
+ PosixMonitor.cc \
+ PosixCondition.cc
+
+# The complete list of .cc files used in the library
+SRCS= $(CC_WITH_H)
+
+# Header files.  When adding a new header, add it here only if there is
+# no corresponding .cc file; otherwise add the .cc file to CC_WITH_H.
+HDRS= $(CC_WITH_H:.cc=.h)
+
+# Library objects
+OBJS= $(SRCS:.cc=.o)
+
+all:	makefile $(LIB)
+
+# "make install" puts things in the official place
+install:	makefile $(LIBDIR)/$(LIB)
+
+EXTRA_SRCS=
+
+include $(ROOT)/mk/common.mk
