@@ -27,6 +27,7 @@ static char SccsId[]="$Id$";
 #include "copyright.h"
 #include "port.h"
 #include "internal.h"
+#include "oct_utils.h"
 
 int32 oct_null_xid = 0;
 
