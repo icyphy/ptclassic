@@ -53,7 +53,6 @@ LIB=libcgcvisstars.$(LIBSUFFIX)
 # source files for all stars, using preprocessor
 # put base stars first
 PL_SRCS= \
- CGCBiquad.pl \
  CGCPackVis64.pl \
  CGCUnpackVis64.pl \
  CGCQuadAdd16.pl \
