@@ -43,13 +43,13 @@
 # Ptcl code.
 
 class ::tycho::EditPtcl {
-    inherit ::tycho::EditTcl
+    inherit ::tycho::EditItcl
  
     ###################################################################
     ####                            options                        ####
 
     # Specify the name of the Oct facet associated with the data being edited.
-    itk_option define -facet facet File "init.pal"
+    itk_option define -facet facet File ""
 
     ###################################################################
     ####                     public methods                        ####
@@ -74,19 +74,33 @@ class ::tycho::EditPtcl {
 #
 configbody ::tycho::EditPtcl::facet {
     set facet $itk_option(-facet)
-    if {$facet != {init.pal} } {
+    if {$facet != "" } {
 	set facet [::tycho::expandPath $facet]
-    }
-    # Unix-ism here.  Why anyone would buy (let alone write)
-    # an operating system without an exec is beyond me. :-)
-    #
-    # oct2ptcl is part of Ptolemy, it converts Oct facets to Ptolemy
-    # tcl commands.  
-    # -r recursive translation: convert sub-galaxies
-    # -g append a run and a wrap up command
-    exec oct2ptcl -rg $facet > $facet.pt
+        # Check to see if we can write here
+        if [catch {set fd [open $facet.pt w]} errMsg] {
+            # Ok, we could not write the facet, so come up with a
+            # temporary name
+            # FIXME: Unix-ism here, /tmp is no portable
+            set facetTmpFile /tmp/[file tail $facet][::tycho::autoName a].pt
+            while {[file exists $facetTmpFile]} {
+                # Danger: we could go into a tight loop here
+                set facetTmpFile /tmp/[file tail $facet][::tycho::autoName a].pt
+            }
+        } else {
+            close $fd
+            set $facetTmpFile $facet.pt
+        }
+	# Unix-ism here.  Why anyone would buy (let alone write)
+	# an operating system without an exec is beyond me. :-)
+	#
+	# oct2ptcl is part of Ptolemy, it converts Oct facets to Ptolemy
+	# tcl commands.  
+	# -r recursive translation: convert sub-galaxies
+	# -g append a run and a wrap up command
+	exec oct2ptcl -rg $facet > $facetTmpFile
 
-    configure -file $facet.pt
+	configure -file $facetTmpFile
+    }
 }
 
 
@@ -98,7 +112,7 @@ body ::tycho::EditPtcl::constructor {args} {
     
     addMenu Special left Window -underline 0
     addMenuItem "Retarget" Special -underline 0 \
-	    -command {set w [::tycho::Retarget #auto]; $w centerOnScreen}
+	    -command {set w [::tycho::Retarget .retrg#auto]; $w centerOnScreen}
 
     addMenuItem "Open Facet" File -underline 0 \
 	    -command "$this openFacet"
