@@ -1,0 +1,105 @@
+
+<!-- $Id$ -->
+<html>
+<head>
+<meta name="generator"  content="Tycho, ::outline::htmlOutline, Fri Jul 24 21:23:49 PDT 1998">
+  <title>Graphing items</title>
+ <!--header-->
+  
+  <!-- <LINK href="style.css" rel="stylesheet" type="text/css"> -->
+
+  <!--/header-->
+</head>
+<div class="body">
+<blockquote>
+<body bgcolor=#faf0e6>
+
+<h1>Graphing items</h1>
+
+
+<p>The Slate includes a number of item types that assist the 
+construction of graphs (of the <i>x</i>-versus<i>y</i> kind, not the 
+vertices-and-edges kind).  The Slate is by no means the fastest way of 
+drawing graphs ([incr Tcl] is fully interpreted and the Slate adds a 
+fair amount of overhead), but it's still very handy for rapid 
+prototyping.
+
+<h2><a name="Axis item type"></a><a href="../codeDoc/Axis.html">Axis</a></h2>
+
+<i>Axis</i> is an "axis" of a graph.
+
+<p><b>Options</b>:
+
+<ul>
+<li><b>-digits</b>. The number of digits after the decimal point to 
+display in the axis labels. If zero, none are displayed. The default is 
+the zero.
+
+<li><b>-from</b>. The value at the start (left or bottom) of the axis.
+The default is zero.
+
+<li><b>-length</b>. The length of the axis, in pixels. The default is
+200 (a completely arbitrary choice, but you have to have something).
+
+<li><b>-ticklength</b>. The length of the "tick" marks on the axis, in pixels.
+The default is six.
+
+<li><b>-to</b>. The value at the end (right or top) of the axis.
+The default is 100.
+
+</ul>
+
+The coordinates of the Axis are the <i>x</i> and <i>y</i> positions of 
+the axis origin.
+
+<p><b>Enhancements</b>: (i) The Axis needs a <b>-orientation</b> 
+option with values <i>horizontal</i> and <i>vertical</i>. (ii) There is
+no way to control the spacing between tick marks -- one of these days,
+this might be useful. (iii) We should be able to select which 
+<i>side</i> of the axis the tick marks appear on.
+
+<p><b>Example</b>: Create an axis:
+<tcl quiet><pre>
+  source $tycho/editors/slate/doc/internals/newslate.itcl
+  $slate create Axis 20 60 -digits 1 -from 0 -to 2 &#92
+		-length 320 -tags moveable
+</pre></tcl>
+
+<h2>Strip</h2>
+
+<i>Strip</i> is a strip of colored boxes, as used in things like bar 
+charts and Gantt charts (which is why we're implementing it). Because, 
+however, the current code is very flaky, we have not included it in 
+this release.
+
+
+ <P>
+
+<center>
+<div class="navigation">
+<br>
+<a href="index.html">  <img  border=0  src="../img/BTN_Top.gif"  alt="Top: The Slate Programmer's Guide"></a>
+<a href="c-boxarrow.html">  <img  border=0  src="../img/BTN_Prev.gif"  alt="Previous: Box-and-arrow items"></a>
+<a href="items.html">  <img  border=0  src="../img/BTN_Section.gif"  alt="Up: Item classes"></a>
+<a href="c-labeled.html">  <img  border=0  src="../img/BTN_Next.gif"  alt="Next: Labeled items"></a>
+
+<br>
+</div class="navigation">
+</center>
+
+<div class="footer">
+  
+<p>
+<HR>
+Copyright 1996-%Q%, The Regents of the University of California.
+All rights reserved.
+<br>
+Last updated: $Date$,
+comments to: <author>johnr@eecs.berkeley.edu</author>
+
+  </div class="footer">
+</body>
+</blockquote>
+</div>
+</html>
+

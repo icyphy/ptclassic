@@ -1,0 +1,183 @@
+
+<!-- $Id$ -->
+<html>
+<head>
+<meta name="generator" content="Tycho, ::outline::htmlOutline,  Fri Jul 24 21:23:49 PDT 1998">
+  <title>An overview of interactor classes</title>
+  <!--header-->
+  
+  <!-- <LINK href="style.css" rel="stylesheet" type="text/css"> -->
+
+  <!--/header-->
+</head>
+<div class="body">
+<blockquote>
+<body bgcolor=#faf0e6 bgcolor=#faf0e6>
+
+<h1>An overview of interactor classes</h1>
+
+
+
+<B>Contents</B>
+<ul>
+<li><a href="#Interactors: Mouse tracking interactors">Mouse tracking interactors</a>
+  <ul>
+  <li><a href="#Interactors: Follower interactor">Follower</a>
+  <li><a href="#Interactors: Bounder interactor">Bounder</a>
+  <li><a href="#Interactors: Stepper interactor">Stepper</a>
+  </ul>
+<li><a href="#Interactors: Repeater interactor">Repeater</a>
+<li><a href="#Interactors: TextItemEdit interactor">TextItemEdit</a>
+<li><a href="#Interactors: Selector interactor">Selector</a>
+</ul>
+
+ <P>
+<h2><a name="Interactors: Mouse tracking interactors"></a>Mouse tracking interactors</h2>
+
+<p>The most numerous and best-developed set of interactors in Tycho are
+those that "track" movement of the mouse in some way. These interactors 
+can all be cascaded -- for example, cascading a <i>Bounder</i> with a 
+<i>Stepper</i> will move an item in discrete steps <i>and</i> keep it within 
+a given region of the Slate.
+
+<h3><a name="Interactors: Follower interactor"></a><a href="../codeDoc/Follower.html">Follower</a></h3>
+
+<i>Follower</i> just follows the mouse exactly. It is the most basic 
+kind of mouse tracker, and is the superclass of all other mouse 
+trackers. It has no options other than those in the <i>Interactor</i> 
+superclass.
+
+<h3><a name="Interactors: Bounder interactor"><a href="../codeDoc/Bounder.html">Bounder</a></h3>
+
+<i>Bounder</i> moves an item, but keeps it within a rectangular region
+of the Slate. It can also constrain the movement of the item in other
+ways.  It adds the following options:
+
+<ul>
+
+<li><b>-bounds</b>.  A four-list giving the rectangular coordinates in 
+which to keep the target item.  If it is the empty list, then the 
+Bounder keeps the target item within the coordinates of the slate.
+
+<li><b>-constrain</b>. This option further restricts
+movement along certain axes. The default is "none." It can
+have the following values:
+<ul>
+<li><b>none</b>: Move anywhere within the bounds
+<li><b>x</b>: Move only along the horizontal axis
+<li><b>y</b>: Move only along the horizontal axis
+<li><b>positive</b>: Move only along the positive diagonal axis
+<li><b>negative</b>: Move only along the negative diagonal axis
+</ul>
+
+</ul>
+
+<h3><a name="Interactors: Stepper interactor"><a href="../codeDoc/Stepper.html"> Stepper</a></h3>
+
+<i>Stepper</i> quantizes the mouse movement. It 
+adds the following options:
+
+<ul>
+
+<li><b>-stepsize</b>. The quantization step size. The default is 12.
+
+<li><b>-gridded</b>. If true, the cursor movement is quantized to a
+grid with size given by the <b>-stepsize</b> option. Otherwise,
+the change in coordinates is quantized (the default).
+
+</ul>
+
+
+<h2><a name="Interactors: Repeater interactor"><a href="../codeDoc/Repeater.html">Repeater</a></h2>
+
+<p> The Repeater interactor is used to provide recurring stimulus
+while the mouse is held down. Once activated on an item, it executes a
+command it fixed time intervals for as long as the mouse is held down.
+It is used, for example, in the <a
+href="../usersGuides/SliderHelp.html">Slider</a> widget to move the
+slider bar while the mouse is pressed anywhere above or below the bar.
+
+ <P>Repeater adds the following options:
+
+<ul>
+
+<li><b>-command</b>. The script that is executed repeatedly as
+long as the mouse button is held down.
+
+<li><b>-delay</b>. The time delay between the first and second clicks.
+
+<li><b>-interval</b>. The time interval between executions of the script.
+
+</ul>
+
+
+<h2><a name="Interactors: TextItemEdit interactor"><a href="../codeDoc/TextItemEdit.html">TextItemEdit</a></h2>
+
+<p> The Tk canvas (and thus the Slate) provides no built-in editing
+capabilities for text. The <i>TextItemEdit</i> interactor encapsulates the 
+code needed by the Slate to support basic interactive editing on text 
+items. Note that this is intended only for editing small
+items like labels in diagrams.
+
+<p> The interactor is attached to one or a set of Slate items with the 
+<b>bind</b> command (as usual).  Once activated, the insertion 
+cursor remains in the text item until the <b>stop</b> method is 
+called.  How this method is called depends on the client -- it will 
+usually be by the user clicking on a different object.  (The 
+usual click-drag-release sequence <i>is</i> used in this interactor, but 
+to drag-select text.)
+
+<p> While an item has the insertion cursor, the text can be edited as 
+follows:
+
+<ul>
+<li>Typing deletes the selection (if any) and inserts text;
+<li>Left and right cursor keys move one character, control-left and
+control-right move a word;
+<li>Text can be drag-selected with the mouse; double-click and dragging
+selects words at a time;
+<li>Holding shift while pressing cursor keys extends the selection.
+</ul>
+
+<h2><a name="Interactors: Selector interactor"><a href="../codeDoc/Selector.html">Selector</a></h2>
+
+<p> The <i>Selector</i> interactor provides the Slate with a general
+selection mechanism. In effect, it coordinates a number of interactors
+in order to achieve complex user interaction. By default, the Slate
+contains a single Selector object that can be accessed through the
+<b>selector</b>, <b>select</b>, and <b>deselect</b>
+method. In more complex editors, multiple selectors can be created
+(such as for selecting within different hierarchical items).
+
+ <P>More detail on the selection mechanism is given in
+<a href="selecting.html">Managing graphical selections</a>.
+
+<center>
+<div class="navigation">
+<br>
+<a href="index.html">  <img  border=0  src="../img/BTN_Top.gif"  alt="Top: The Slate Programmer's Guide"></a>
+<a href="i-work.html">  <img  border=0  src="../img/BTN_Prev.gif"  alt="Previous: How interactors work"></a>
+<a href="interactors.html">  <img  border=0  src="../img/BTN_Section.gif"  alt="Up: Interactors"></a>
+<a href="i-select.html">  <img  border=0  src="../img/BTN_Next.gif"  alt="Next: Managing graphical selections"></a>
+
+<br>
+</div class="navigation">
+</center>
+
+<div class="footer">
+  
+<p>
+<HR>
+Copyright 1996-%Q%, The Regents of the University of California.
+All rights reserved.
+<br>
+Last updated: $Date$,
+comments to: <author>johnr@eecs.berkeley.edu</author>
+
+  </div class="footer">
+</body>
+</blockquote>
+</div>
+</html>
+
+

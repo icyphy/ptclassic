@@ -1,0 +1,72 @@
+
+<!-- $Id$ -->
+<html>
+<head>
+<meta name="generator" content="Tycho, ::outline::htmlOutline,  Fri Jul 24 21:23:49 PDT 1998">
+  <title>Class overview</title>
+  <!--header-->
+  
+  <!-- <LINK href="style.css" rel="stylesheet" type="text/css"> -->
+
+  <!--/header-->
+</head>
+<div class="body">
+<blockquote>
+<body bgcolor=#faf0e6 bgcolor=#faf0e6>
+
+<h1>Class overview</h1>
+
+
+ <P>The Slate is structured as a set of classes in the <B>::tycho</B>
+namespace. It runs with either vanilla Tcl (8.0) or [incr Tcl] (3.0).
+The Slate was originally written for [incr Tcl], so all of the code is
+written in an object-oriented style. To run in vanilla Tcl, the Slate
+uses a small object-oriented layer that simulates objects (see the
+installation notes).
+
+ <P> The two main classes in this package are IncrCanvas and Slate.
+IncrCanvas is the basic widget that extends the Tk canvas to work with
+complex items. The Slate is a subclass of IncrCanvas that adds the
+more advanced features.  Generally, you will just create an instance
+of Slate.
+
+ <P>There are three main tress in the rest of the support classes.
+The tree rooted by ComplexItem contains all of the 
+complex item classes (a.k.a the user-defined items). The Shape
+tree contains the objects that handle information related to
+the shape of items. Finally, the Interactor tree contains the
+interactor classes.
+
+ <P>
+<br>
+<center>
+<img src="../img/classes.gif" alt="Slate class diagram">
+</center>
+
+<center>
+<div class="navigation">
+<br>
+<a href="index.html">  <img  border=0  src="../img/BTN_Top.gif"  alt="Top: The Slate Programmer's Guide"></a>
+<a href="tagging.html">  <img  border=0  src="../img/BTN_Next.gif"  alt="Next: How tagging works"></a>
+
+<br>
+</div class="navigation">
+</center>
+
+<div class="footer">
+  
+<p>
+<HR>
+Copyright 1996-%Q%, The Regents of the University of California.
+All rights reserved.
+<br>
+Last updated: $Date$,
+comments to: <author>johnr@eecs.berkeley.edu</author>
+
+  </div class="footer">
+</body>
+</blockquote>
+</div>
+</html>
+
+

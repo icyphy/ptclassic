@@ -1,0 +1,171 @@
+
+<!-- $Id$ -->
+<html>
+<head>
+<meta name="generator" content="Tycho, ::outline::htmlOutline,  Fri Jul 24 21:23:49 PDT 1998">
+  <title>How interactors work</title>
+  <!--header-->
+  
+  <!-- <LINK href="style.css" rel="stylesheet" type="text/css"> -->
+
+  <!--/header-->
+</head>
+<div class="body">
+<blockquote>
+<body bgcolor=#faf0e6 bgcolor=#faf0e6>
+
+<h1>How interactors work</h1>
+
+
+
+<p> <i>Interactors</i> package common patterns of user interaction
+into reusable objects.  They are a mechanism originally developed in
+Brad Meyer's Garnet system.  The Slate's interactors are much smaller,
+lighter, and more numerous than the interactors in Garnet.  They are
+also known as "manipulators" in other systems (and this would perhaps
+be a better name, since the Slate's interactors are much less general
+than Garnet's and apply only to graphical items on the Slate).  The
+Slate's interactors are designed to be easy to combine to create
+complex patterns of interaction from simpler ones.  Interactors are
+built on top of Tk's event-handling mechanism.
+
+<p> Each sub-class of <i>Interactor</i> implements a particular kind of 
+user interaction.  Most interactors are based on the observation that 
+user interactions can be broken into a sequence: a <i>click</i>, some 
+number of <i>drags</i>, and a <i>release</i>.  (These are abstract 
+operations, and do not necessarily correspond to physical mouse 
+clicks, drags, and releases.)
+
+<p> When an interactor is first created, it can do absolutely nothing.  
+To enable it to do something, the creator "binds" the interactor to an 
+object or tag on the Slate.  Usually (depending on the interactor 
+class), this creates a single event binding on the slate that calls the 
+interactor's <b>activate</b> method when the mouse button is 
+pressed on the item.
+
+<p> When invoked by a mouse click (or some other such action), the 
+<b>activate</b> method adds some more bindings to the Slate, for 
+mouse motion and mouse release.  It then calls its own 
+<b>click</b> method: in this method, the interactor takes whatever 
+action it thinks is appropriate -- this usually involves at least 
+remembering the starting coordinates of the interaction sequence, and 
+forwarding those coordinates onto the interactors <i>target</i> (more 
+about targets below).
+
+<p> When the mouse is moved, the interactor's <b>drag</b> method 
+is called (by the binding set up by <b>activate</b>).  
+<b>drag</b> computes new coordinates, and then forwards them onto 
+the target.  At the termination of the interaction sequence, the user 
+releases the mouse, which causes the <b>release</b> and 
+<b>deactivate</b> methods to be called.  The first performs any 
+actions needed (usually, not much), while the second restores the Slate 
+bindings to how they were before the interaction started.
+
+<p> When interaction with an item or set of items is no longer needed, 
+the interaction bindings can be removed with the <b>unbind</b> 
+method.  There are many more complex variations on this basic sequence 
+of events, and we are still discovering ways in which interaction can be 
+characterized and re-used.
+
+<p> An interactor has a "target," which is a Slate item ID, and may have 
+a "proxy," which is another interactor.  If an interactor has a proxy, 
+then it forwards each interaction event (click, drag, or release) to its 
+proxy (after calculating and modifying coordinates.) If not, then it 
+forwards the coordinates to the Slate's <b>interact</b> method, with 
+a flag indicating which phase of the interaction it is in. Proxies are 
+set with the <b>cascade</b> and <b>uncascade</b> methods.
+
+<p> The behavior of interactors can be parameterized in three ways:
+The first way is by supplying options to its <b>bind</b>
+method. Currently, <b>bind</b> accepts these options:
+
+<ul>
+
+<li><b>-button <i>button</i></b>: The mouse button to react to.  By 
+default, this is button 1 (the left one).
+
+<li><b>-modifiers <i>modifiers</i></b>: A list of modifiers
+needed to make the interactor respond.  The list can include any of
+the following: <b>shift</b>, <b>alt</b>,
+<b>meta</b>, and <b>control</b>.  The default is an empty
+list.
+
+<li><b>-ghost</b>: If present, this flag indicates that moving or 
+resizing is to be performed with a "ghost" of the item.
+
+</ul>
+
+The second is with configuration options that are executed at certain
+times in an interaction sequence:
+
+<ul>
+<li><b>-activatecommand</b>: If not null, this is a function-script 
+(see the documentation for the <b>apply</b> procedure) which is 
+applied to four arguments when the interactor is activated: the 
+interactor, the target, and the current <i>x</i> and <i>y</i> 
+coordinates. This is used to customize the behavior of the interactor
+depending on information that is not known until activation.
+
+<li><b>-deactivatecommand</b>: If not null, this is a function-script 
+which is applied to the same four arguments when the interactor is 
+de-activated.
+
+<li><b>-dragcommand</b>: If not null, this is a function-script 
+which is applied to the same four arguments at the completion of the
+interactor's <b>drag</b> method.
+
+</ul>
+
+The third is with configuration options that are override the default
+forwarding of interaction events (click, drag, release).  These are
+typically used to implement more sophisticated model-view-controller
+interfaces, in which the interaction events (from the controller) are
+forward to the slate (the view) only after interception and processing
+by some other object (the model). These options are
+
+<ul> <li><b>-clickprefix</b>: If not null, this is a script which has
+the target and coordinates appended and evaluated in the
+<b>click</b> method. This is typically used if the mouse
+interaction is not going directly to a Slate.
+
+<li><b>-dragprefix</b>: If not null, this is a script which has the
+target and coordinates appended and evaluated in the <b>drag</b>
+method. This is typically used if the mouse interaction is not going
+directly to a Slate.
+
+<li><b>-releaseprefix</b>: If not null, this is a script which has the
+target and coordinates appended and evaluated in the
+<b>release</b> method. This is typically used if the mouse
+interaction is not going directly to a Slate.
+
+</ul>
+
+ <P>
+<center>
+<div class="navigation">
+<br>
+<a href="index.html">  <img  border=0  src="../img/BTN_Top.gif"  alt="Top: The Slate Programmer's Guide"></a>
+<a href="interactors.html">  <img  border=0  src="../img/BTN_Section.gif"  alt="Up: Interactors"></a>
+<a href="i-classes.html">  <img  border=0  src="../img/BTN_Next.gif"  alt="Next: An overview of interactor classes"></a>
+
+<br>
+</div class="navigation">
+</center>
+
+<div class="footer">
+  
+<p>
+<HR>
+Copyright 1996-%Q%, The Regents of the University of California.
+All rights reserved.
+<br>
+Last updated: $Date$,
+comments to: <author>johnr@eecs.berkeley.edu</author>
+
+  </div class="footer">
+</body>
+</blockquote>
+</div>
+</html>
+
+

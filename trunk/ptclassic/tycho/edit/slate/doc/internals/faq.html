@@ -1,0 +1,266 @@
+
+<!-- $Id$ -->
+<html>
+<head>
+<meta name="generator" content="Tycho, ::outline::htmlOutline,  Fri Jul 24 21:23:50 PDT 1998">
+  <title>FAQ: tricks and pitfalls</title>
+  <!--header-->
+  
+  <!-- <LINK href="style.css" rel="stylesheet" type="text/css"> -->
+
+  <!--/header-->
+</head>
+<div class="body">
+<blockquote>
+<body bgcolor=#faf0e6 bgcolor=#faf0e6>
+
+<h1>FAQ: tricks and pitfalls</h1>
+
+
+
+<P> In theory, The Tycho IncrCanvas and Slate these classes are
+upwards-compatible with the Tk canvas and are as easy to use as the Tk
+canvas. In practice, however, it's not that simple, either because the
+performance constraints of Tcl forced some short-cuts that
+occasionally show up in the interface, or because we just
+boo-booed. Here's a frank listing of possible problems and hard
+questions that might come up, in no particular order.
+
+<p>(For the sake of brevity, "Slate" means "the IncrCanvas and
+Slate classes.")
+<ol>
+
+<p><li><b>Question</b>:
+In my ComplexItem subclass, I created an item and gave
+it a tag <b>$id.myitem</b>, and got some kind of
+"item class not found" message. What's up?
+
+<p><b>Answer</b>: The Slate uses the following tests to figure out if an
+argument is a the ID of a simple (Tk canvas) item, a complex
+item, or a tag (anything else):
+
+<pre>
+    if [string match {[0-9]*} $tag] {
+        # $tag is a simple item
+        ...
+    } elseif [string match {_*} $tag] {
+        # $tag is a complex item
+        ...
+    } else {
+        # $tag is a tag
+        ...
+    }
+</pre>
+
+(Complex item IDs start with an underscore.)
+We (i.e. Reekie, it's all his fault) did this
+because we were concerned about the cost of
+using a full regular expression match. Because of this,
+the Slate interprets any tag starting with an underscore
+as a complex item id, which is why it complains when it
+turns out that <b>$id.myitem</b> is not in fact
+a complex item.
+
+<p><b>Work-around</b>: Use <b>myitem.$id</b> instead.
+
+<p><b>Cure</b>: We should replace string matches
+with proper regexps once we have the byte-compiler:
+<pre>
+    if [regexp {[0-9]+} $tag] {
+        # $tag is a simple item
+        ...
+    } elseif [regexp {_[0-9]+} $tag] {
+        # $tag is a complex item
+        ...
+    } else {
+        # $tag is a tag
+        ...
+    }
+</pre>
+
+
+<p><li><b>Question</b>:
+The Slate is supposed to be upwards-compatible with the Tk canvas.
+Well, when I converted my code using the Tk canvas to 
+use the Tycho Slate, it just didn't work. Why?
+
+<p><b>Answer</b>:
+Unfortunately, full upwards compatibility got lost 
+because a) we insisted on implementing the Slate
+entirely in Itcl to maintain portability and b) we
+had to make a few compromises made along the way.
+Here are the most likely causes of incompatibility:
+
+<ul>
+
+<li>Tags cannot begin with an underscore. (The Slate usurps
+these as complex item IDs.)
+<li>Tags cannot begin with a hash (#). (The Slate usurps
+these for "invisible" item.)
+<li>We (i.e. Reekie, it's still his fault) messed up.
+<a href="" "mailto:johnr@eecs.berkeley.edu">Send us</a>
+some mail about it. (Some sample code and/or a stack trace
+would help a lot!)
+
+</ul>
+
+<p><li><b>Question</b>:
+The Slate is supposed to be upwards-compatible with the Tk canvas.
+OK, so I converted my code to use the Tycho Slate and it's
+ridiculously slow. Why?
+
+<p><b>Answer</b>:
+In real applications, the Slate is "not all that much
+slower" than the Tk canvas. If you've noticed a noticeable
+slow-down, it could be because you're using tags to
+access items instead of item ID's.
+
+<p>Let me explain: The Tk canvas allow items to be accessed
+by tag or by item ID. For example, you might have some
+code triggered by a mouse event like this:
+<pre>
+    $canvas dothis current args
+    $canvas dothat current args
+</pre>
+
+("current" denotes the item being moused on.) With the Slate,
+this will still work (in theory), because each Slate
+method tries to figure out whether it's being passed an
+item ID or a tag and act in the same or similar manner to
+the Tk canvas. Unfortunately, if you <i>do</i> pass the Slate
+a tag instead of an item ID, it has to do a certain amount
+of work to figure out what item or items are actually represented
+by that tag. Since the code is written in Tcl ("Takes Considerably
+Longer"), that means noticeable delays.
+
+<p><b>Work-around</b>:
+Instead of accessing items by tag, access them by item ID. For example,
+replace the above code by:
+<pre>
+    set id [$slate find withtag current]
+    $slate dothis $id args
+    $slate dothat $id args
+</pre>
+
+<p><b>Cure</b>:
+The cure is to integrate Tk into Java and use that... Good luck!
+
+
+<p><li><b>Question</b>:
+I wrote some testing code that assigns the "current" tag to
+an item with something like <b>$slate addtag current withtag 
+$item</b>, and I'm getting some bizarre errors. Any clues?
+
+<p><b>Answer</b>: The Slate doesn't prevent you from assigning
+the "current" tag to a complex item. Unfortunately, it doesn't
+cope when you attempt to "find" the current item, since it assumes 
+that there is only
+a single canvas item with the "current" tag. As a result, you
+will be getting a list of the canvas items when you try to
+"find" the current item, rather than a single complex item id.
+
+<p><b>Work-around</b>: Instead of assigning to the tag to a
+complex item, assign it to a simple component. Here's the most
+likely code to work:
+<pre>
+    $slate addtag current withtag [$slate primary $id]
+</pre>
+
+<p><b>Cure</b>: The <b>find withtag</b> operation should
+deal with the case where multiple canvas items have the 
+<b>current</b> tag.
+
+
+<p><li><b>Question</b>:
+I can see that many classes in the <b>tycho/slate</b>
+directory contain common arrays indexed by the id of an item.
+Some, though, use just the item ID, while others do a weird
+thing with an id obtained from a slate, like this:
+<pre>
+    set unique $id.[$slate uniqueid]
+    set option(foo.$unique) ...
+</pre>
+Why?
+
+<p><b>Answer</b>:
+Well, you realize that the common arrays are indexed by
+item ID because actually creating Itcl objects for each
+complex item turned out to be too expensive. In effect,
+we are trying to implement OO in a non-OO way. Now, since the
+arrays are common, we have to guarantee that the indexes are
+unique. There are two situations, which arise because of the
+ways that various classes in these directories are implemented.
+(Note, by the way, that the IDs of complex items are generated from
+a common variable in IncrCanvas.) The two situations are:
+
+<ol>
+<li>ComplexItem and subclasses. These classes only ever manipulate
+item IDs of complex items, which are guaranteed to be unique
+across all Slates. They therefore use indexes into common arrays such
+as <b>foo.$id</b>
+ 
+<li>The Shape classes. These classes manipulate simple and complex items.
+Since simple item IDs are unique only within each Slate (since they
+are generated by a Tk canvas), array indexes also need to contain the
+Slate name to guarantee uniqueness. To avoid the use of the full Slate
+name, each Slate also has a unique ID -- hence the code reproduced above.
+
+</ol>
+
+<p><b>Work-around</b>:
+No work-around is required.
+
+<p><b>Cure</b>: There is no cure! (At least, not one that
+would making writing ComplexItem subclasses harder to write.)
+
+
+<p><li><b>Question</b>:
+The ComplexItem class and its subclasses would be more
+easily implemented as Itcl classes. You're using
+an OO language pretty much in the same as I used to use
+C to fake OO. Why aren't ComplexItems objects?
+
+<p><b>Answer</b>:
+We did that... and it was too slow. Not horrendously slow...
+not breathtakingly slow (well, not any more than Tcl was to
+start with...)... but slow enough to worry us.
+So we "flattened" the OO structure into an essentially-procedural  
+implementation and it turned out to be about three times faster.
+So that was that....
+
+<p>As it turned out, the procedural version was simpler
+to develop anyway. Much as I'd like to do a full OO
+implementation, Itcl is not really designed for that
+granularity, and the procedural version of the ComplexItem
+classes just "works better."
+
+</ul>
+
+ <P>
+<center>
+<div class="navigation">
+<br>
+<a href="index.html">  <img  border=0  src="../img/BTN_Top.gif"  alt="Top: The Slate Programmer's Guide"></a>
+<a href="user.html">  <img  border=0  src="../img/BTN_Prev.gif"  alt="Previous: Writing user-defined items"></a>
+
+<br>
+</div class="navigation">
+</center>
+
+<div class="footer">
+  
+<p>
+<HR>
+Copyright 1996-%Q%, The Regents of the University of California.
+All rights reserved.
+<br>
+Last updated: $Date$,
+comments to: <author>johnr@eecs.berkeley.edu</author>
+
+  </div class="footer">
+</body>
+</blockquote>
+</div>
+</html>
+
+
