@@ -26,7 +26,7 @@ CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
 							COPYRIGHTENDKEY
 
- Programmer: E. A. Lee
+ Programmer: S. Ha, E. A. Lee
 
  Base target for C code generation.
 
@@ -44,6 +44,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "miscFuncs.h"
 #include "dataType.h"
 #include "EventHorizon.h"
+#include "SDFScheduler.h"
 
 extern const char* whichType(DataType);
 
@@ -108,6 +109,7 @@ void CGCTarget :: starDataStruct(CGCStar* block, int) {
     BlockPortIter nextPort(*block);
     CGCPortHole* p;
     while ((p = (CGCPortHole*) nextPort++) != 0) {
+	if (p->switched()) continue;
 	out += block->declarePortHole(p);	// declare porthole
 	out += block->declareOffset(p);	// declare offset
     }
@@ -124,7 +126,7 @@ void CGCTarget :: starDataStruct(CGCStar* block, int) {
 
 void CGCTarget :: setup() {
     // member initialize
-    galId = 0;
+    galId = 0; curId = 0;
 
     if (galaxy()) setStarIndices(*galaxy()); 
     CGTarget::setup();
@@ -138,15 +140,19 @@ void CGCTarget :: initCodeStrings() {
 	mainInit.initialize();
 	wormIn.initialize();
 	wormOut.initialize();
+	mainClose.initialize();
 }
 	
 static char* complexDecl = 
-"\n typedef struct complex_data { double real; double imag; } complex; \n";
+"\n#if !defined(COMPLEX_DATA)\n#define COMPLEX_DATA 1"
+"\n typedef struct complex_data { double real; double imag; } complex; \n"
+"#endif\n";
 
 void CGCTarget :: frameCode () {
     Galaxy* gal = galaxy();
     // Data structure declaration
-    globalDecls += sectionComment("Data structure declations");
+    StringList tmp = sectionComment("Data structure declations");
+    globalDecls += tmp;
     galDataStruct(*gal,1);
 
     // Assemble all the code segments
@@ -154,12 +160,14 @@ void CGCTarget :: frameCode () {
     runCode += complexDecl;
     runCode += globalDecls;
     runCode += procedures;
-    runCode += sectionComment("Main function");
+    tmp = sectionComment("Main function");
+    runCode += tmp;
     runCode += (const char*) funcName;
     runCode += "() {\n";
     runCode += mainDecls;
     runCode += mainInit;
     runCode += myCode;
+    runCode += mainClose;
     runCode += "}\n";
     
     myCode.initialize();
@@ -181,7 +189,7 @@ void CGCTarget :: writeCode(const char* name) {
 
 void CGCTarget :: wrapup () {
 	display(myCode);
-	if (inWormHole() == FALSE) wormLoadCode();
+	if (galaxy() && inWormHole() == FALSE) wormLoadCode();
 }
 
 int CGCTarget :: wormLoadCode() {
@@ -338,7 +346,7 @@ void CGCTarget :: setGeoNames(Galaxy& galaxy) {
 	CGCPortHole* p;
 	while ((p = (CGCPortHole*)nextPort++) != 0) {
 	    // Assign names only for each output port
-	    if (p->isItOutput()) {
+	    if (p->isItOutput() && (!p->switched())) {
 		StringList s = sanitizedFullName(*p);
 		p->setGeoName(savestring(s));
 	    }
@@ -420,6 +428,7 @@ int CGCTarget :: codeGenInit() {
 	setGeoNames(*galaxy());
 
 	// call initialization code.
+	switchCodeStream(galaxy(), &mainInit);
 	nextStar.reset();
 	while ((s = (CGCStar*) nextStar++) != 0) {
 		if (s->isItFork()) continue;
@@ -459,12 +468,79 @@ StringList CGCTarget :: updateCopyOffset() {
 	return out;
 }
 			
+/////////////////////////////////////////
+// incrementalAdd
+/////////////////////////////////////////
+
+int CGCTarget :: incrementalAdd(CGStar* s) {
+	// initialize the star
+	s->initialize();
+
+	// allocate resource
+	BlockPortIter nextPort(*s);
+	CGCPortHole* p;
+	while ((p = (CGCPortHole*)nextPort++) != 0) {
+
+		p->finalBufSize(useStaticBuffering());
+	  	p->initOffset(); 
+
+		// Assign names only for each output port
+		if (p->isItOutput() && (p->switched() == 0)) {
+			StringList sl = sanitizedFullName(*p);
+			p->setGeoName(savestring(sl));
+	    }
+	}
+
+	// initCode
+	CGCStar* cs = (CGCStar*) s;
+	switchCodeStream(cs, &mainInit);
+	cs->initBufPointer();
+	cs->initCode();
+
+	// run the star
+	switchCodeStream(cs, &myCode);
+	writeFiring(*cs, 1);
+
+	switchCodeStream(cs, &mainClose);
+	cs->wrapup();
+
+	// data structure for the star
+	starDataStruct(cs);
+
+	switchCodeStream(cs, &myCode);
+	return TRUE;
+}
+	
+// maintain the galaxy id properly.
+int CGCTarget :: insertGalaxyCode(Galaxy* g, SDFScheduler* s) {
+	int saveId = galId;
+	curId++;
+	galId = curId;
+	setStarIndices(*g);
+	if (!CGTarget :: insertGalaxyCode(g, s)) return FALSE;
+	galDataStruct(*g, 1);
+	galId = saveId;
+	return TRUE;
+}
+
+// redefine compileRun to switch code stream of stars
+void CGCTarget :: compileRun(SDFScheduler* s) {
+	switchCodeStream(galaxy(), &myCode);
+	s->compileRun();
+	switchCodeStream(galaxy(), &mainClose);
+}
+
+/////////////////////////////////////////
+// Utilities
+/////////////////////////////////////////
+
 StringList CGCTarget :: sanitizedFullName (const NamedObj& obj) const {
 	StringList out;
 	out << 'g' << galId << '_';
 	Star* s = (Star*) obj.parent();
 	out += sanitizedName(*s);
-	out << '_' << s->index() << '_';
+	out << '_';
+	if (s->index() >= 0) out << s->index() << '_';
 	out += sanitizedName(obj);
 	return out;
 }
