@@ -249,6 +249,39 @@ hp_post_install:
 
 
 ############################################################
+# Build the GNU tools for SGI IRIX5 machines
+# This rule has not been tested inhouse at UCB, but it should work
+#
+# See src/gnu/INSTALL for the details, but basically, we install a special
+# GNU assembler so the the -g flag will work.
+# Also, we need to install gcc before trying to build libg++
+
+irix5_all: irix5_configure bin install
+irix5_configure: $(GNU_OBJ)
+	-mkdir $(GNU_OBJ)/make
+	(cd $(GNU_OBJ)/make; \
+	$(GNU_SRC)/make/configure --srcdir=$(GNU_SRC)/make \
+		--prefix=$(GNU_PREFIX) --exec-prefix=$(GNU_EXEC_PREFIX) \
+		$(SHAREDLIB_CONFIGURE_FLAGS) $(MACH) )
+	@echo "Some non-GNU makes can't deal with VPATH"
+	-(cd $(GNU_OBJ)/make; ln -s $(GNU_SRC)/make/*.c .)
+	-(cd $(GNU_OBJ)/make/glob; ln -s $(GNU_SRC)/make/glob/*.h .)
+	-(cd $(GNU_OBJ)/make/glob; ln -s $(GNU_SRC)/make/glob/*.c .)
+	@echo "Now configure gcc with -with-gnu-as"
+	-mkdir $(GNU_OBJ)/gcc
+	(cd $(GNU_OBJ)/gcc; \
+	$(GNU_SRC)/gcc/configure --srcdir=$(GNU_SRC)/gcc \
+		--prefix=$(GNU_PREFIX) --exec-prefix=$(GNU_EXEC_PREFIX) \
+		$(SHAREDLIB_CONFIGURE_FLAGS) \
+		--with-gnu-as $(MACH) )
+	@echo "Now configure libg++"
+	-mkdir $(GNU_OBJ)/libg++
+	(cd $(GNU_OBJ)/libg++; \
+	$(GNU_SRC)/libg++/configure --srcdir=$(GNU_SRC)/libg++ \
+		--prefix=$(GNU_PREFIX) --exec-prefix=$(GNU_EXEC_PREFIX) \
+		$(SHAREDLIB_CONFIGURE_FLAGS) $(MACH) )
+
+############################################################
 # dejaGNU
 # dejaGNU is the GNU test suite system.  We don't ship it yet.
 # Note that dejaGNU uses tcl and expect, but since it uses tcl7.3, we 
