@@ -15,7 +15,7 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { CGC main library }
+	location { CGC dsp library }
 	htmldoc {
 <p>
 This two-pole, one-zero IIR filter has a transfer function of
