@@ -52,7 +52,7 @@ SRCS = Decoder.cc Encoder.cc Interp.cc Wireless.cc nb_fft.cc
 HDRS = Constants.h $(SRCS:.cc=.h)
 
 #Library name
-LIB=libContrib.$(LIBSUFFIX)
+LIB=libsdfcontrib.$(LIBSUFFIX)
 
 # Objects:
 OBJS = $(SRCS:.cc=.o)
