@@ -47,7 +47,8 @@ DIRS =
 TCL_SRCS = \
 	testClass.tcl
 
-ITCL_SRCS = 
+ITCL_SRCS = \
+	test.itcl
 
 EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS)
 
