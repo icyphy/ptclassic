@@ -1,5 +1,4 @@
-# Definition of a text editor with facilities for editing programs
-# in various languages.
+# A text editor for email message.
 #
 # @Author: Kevin Chang
 #
@@ -42,9 +41,8 @@
 #######################################################################
 #### EditMail
 # This class defines a widget that provides an emacs-like editor
-# for the mailto interface.
+# for the <code>mailto</code> protocol.
 #
-
 class ::tycho::EditMail {
     inherit ::tycho::Edit
 
@@ -58,7 +56,7 @@ class ::tycho::EditMail {
     # passed onto the entry lines.
     itk_option define -mailto mailto Mailto ""
 
-    # Subject
+    # The subject line of the message
     itk_option define -subject subject Subject ""
 
 
