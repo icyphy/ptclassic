@@ -29,6 +29,9 @@ if ( ! $?PIGIRPC ) setenv PIGIRPC $PTOLEMY/bin.$ARCH/pigiRpc
 set cell = init.pal
 set resfile = pigiXRes9
 
+setenv TCL_LIBRARY $PTOLEMY/tcltk/tcl/lib/tcl
+setenv TK_LIBRARY $PTOLEMY/tcltk/tk/lib/tk
+
 while ($#argv)
 	switch ($argv[1])
 		case -help:
@@ -127,6 +130,8 @@ if ( ! $?nocmdfile ) then
     echo "PIGIRPC=$PIGIRPC"				>> $cmdfile
     echo "DISPLAY=$DISPLAY"				>> $cmdfile
     echo "PATH=$PATH"					>> $cmdfile
+    echo "TCL_LIBRARY=$TCL_LIBRARY"			>> $cmdfile
+    echo "TK_LIBRARY=$TK_LIBRARY"			>> $cmdfile
     if ( $?pigiconsole ) then
         echo "TAILARGS=-console"			>> $cmdfile
     endif
