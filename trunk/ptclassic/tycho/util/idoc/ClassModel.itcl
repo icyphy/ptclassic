@@ -353,7 +353,7 @@ body ::tycho::ClassModel::constructor {args} {
 	    -modifiers "" \
 	    -type "" \
 	    -scope instance \
-            -default "" \ \
+            -default "" \
 	    -description "" \
 	    -explanation ""
 }
