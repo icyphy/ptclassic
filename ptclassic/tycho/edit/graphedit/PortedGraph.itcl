@@ -305,6 +305,9 @@ body ::tycho::KeyedDigraph::edge {vertex1 key1 vertex2 key2 args} {
     # Record the edge
     set inverse [_link edge {} [list $vertex1 $key1 $vertex2 $key2] $args]
 
+    # FIXME FIXME FIXME FIXME
+    set inverse [list edgedelete $vertex1 $key1 $vertex2 $key2]
+
     # Add links to the adjacency matrix
     _adjacencyadd $vertex1 $vertex2
 
