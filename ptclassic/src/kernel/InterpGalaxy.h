@@ -27,23 +27,28 @@ $Id$
 class Target;
 
 // class for a list of Geodesics (or nodes)
-class NodeList : public SequentialList {
+class NodeList : private NamedObjList
+{
 	friend class NodeListIter;
 public:
-	void put(Geodesic& g);
-	SequentialList::size;
-	Geodesic* nodeWithName (const char* name);
-	void initialize();
 	NodeList() {}
-	~NodeList() { initialize();}
+	~NodeList() { deleteAll();}
+	void put(Geodesic& g);
+	Geodesic* nodeWithName (const char* name) {
+		return (Geodesic*) NamedObjList::objWithName(name);
+	}
+	int remove(Geodesic* g);
+	// pass along baseclass methods.
+	NamedObjList::size;
+	NamedObjList::deleteAll;
 };
 
-class NodeListIter : private ListIter {
+class NodeListIter : private NamedObjListIter {
 public:
-	NodeListIter(NodeList& n) : ListIter(n) {}
-	Geodesic* next() { return (Geodesic*) ListIter::next();}
+	NodeListIter(NodeList& n) : NamedObjListIter(n) {}
+	Geodesic* next() { return (Geodesic*) NamedObjListIter::next();}
 	Geodesic* operator++() { return next();}
-	ListIter::reset;
+	NamedObjListIter::reset;
 };
 
 class InterpGalaxy: public DynamicGalaxy {

@@ -132,7 +132,7 @@ public:
 	virtual State* clone() const = 0;
 
 	// output all info.  This is NOT redefined for each type of state
-	StringList printVerbose() const;
+	StringList print(int verbose) const;
 
 	// attributes
 	bitWord attributes() const { return attributeBits;}
@@ -186,34 +186,39 @@ private:
 
 //  This class is used to store a list of states in a Block
 
-class StateList : public  SequentialList
+class StateList : private NamedObjList
 {
+	friend class StateListIter;
+	friend class CStateListIter;
 public:
 	// Add State to list
-	void put(State& s) {SequentialList::put(&s);}
-
-	// Return size of list
-	int size() const {return SequentialList::size();}
-       
-	// initialize elements
-	void initElements();
+	void put(State& s) {NamedObjList::put(s);}
 
 	// Find a state with the given name and return pointer
-	State* stateWithName(const char* name) ;
+	const State* stateWithName(const char* name) const {
+		return (const State*)objWithName(name);
+	}
 
+	State* stateWithName(const char* name) {
+		return (State*)objWithName(name);
+	}
+
+	NamedObjList::size;
+	NamedObjList::initElements;
+	NamedObjList::deleteAll;
 };
 
 ///////////////////////////////////////////
-// class StateList
+// class StateListIter
 ///////////////////////////////////////////
 
 // an iterator for StateList
-class StateListIter : private ListIter {
+class StateListIter : private NamedObjListIter {
 public:
-	StateListIter(StateList& sl) : ListIter (sl) {}
-	State* next() { return (State*)ListIter::next();}
+	StateListIter(StateList& sl) : NamedObjListIter (sl) {}
+	State* next() { return (State*)NamedObjListIter::next();}
 	State* operator++() { return next();}
-	ListIter::reset;
+	NamedObjListIter::reset;
 };
 
 #endif

@@ -35,13 +35,11 @@ class Block : public NamedObj
 	friend class BlockPortIter;
 	friend class BlockStateIter;
 	friend class BlockMPHIter;
-	friend class BlockGenPortIter;
 
 	// These are defined in ConstIters.h.
 	friend class CBlockPortIter;
 	friend class CBlockStateIter;
 	friend class CBlockMPHIter;
-	friend class CBlockGenPortIter;
 public:
 	// Initialize the data structures
 	/* virtual */ void initialize();
@@ -118,7 +116,9 @@ public:
 	PortHole *portWithName(const char* name);
 
 	// Retrieve the MultiPortHole with the given name
-	MultiPortHole *multiPortWithName(const char* name);
+	MultiPortHole *multiPortWithName(const char* name) {
+		return multiports.multiPortWithName(name);
+	}
 
 	// Get a list of contained PortHole names
 	int portNames (const char** names, const char** types,
@@ -178,6 +178,16 @@ protected:
 	// state list as the "this" object.  
         Block* copyStates(const Block&);
 
+	// delete all States.  This must not be called unless the
+	// States are on the heap!
+	void deleteAllStates() { states.deleteAll();}
+
+	// same for ports and multiports.  Order is important:
+	// delete multiports first.
+	void deleteAllGenPorts() {
+		multiports.deleteAll();
+		ports.deleteAll();
+	}
 private:
 	// Database for this block
 
@@ -202,24 +212,9 @@ public:
 	BlockStateIter(Block& b) : StateListIter (b.states) {}
 };
 
-class BlockMPHIter : private ListIter {
+class BlockMPHIter : public MPHListIter {
 public:
-	BlockMPHIter(Block& b) : ListIter (b.multiports) {}
-	MultiPortHole* next() { return (MultiPortHole*)ListIter::next();}
-	MultiPortHole* operator++() { return next();}
-	ListIter::reset;
-};
-
-class BlockGenPortIter : private ListIter {
-public:
-	BlockGenPortIter(Block& b) : ListIter(b.ports), usedP(0),
-			myBlock(b) {}
-	GenericPort* next();
-	GenericPort* operator++() { return next();}
-	void reset() { reconnect(myBlock.ports);}
-private:
-	const Block& myBlock;
-	int usedP;
+	BlockMPHIter(Block& b) : MPHListIter (b.multiports) {}
 };
 
 #endif

@@ -27,20 +27,43 @@ Definition of the Galaxy class, together with the BlockList class.
 
 // This class is used to store a list of component blocks in a Galaxy
 
-class BlockList : public SequentialList
+class BlockList : private NamedObjList
 {
+	friend class BlockListIter;
+	friend class CBlockListIter;
 public:
 	// Add Block to list
-	void put(Block* b) {SequentialList::put(b);}
-
-	// Return size of list
-	int size() const {return SequentialList::size();}
-
+	void put(Block& b) {NamedObjList::put(b);}
 	// Return first Block on list (a const method)
-	Block& head () const {return *(Block*) SequentialList::head();}
+	Block* head () const {return (Block*) NamedObjList::head();}
 
 	// Remove a Block from the list.  Note: block is not deleted
-	int remove (Block* b) { return SequentialList::remove(b);}
+	int remove (Block* b) { return NamedObjList::remove(b);}
+
+	// find Block with given name
+	const Block* blockWithName(const char* name) const {
+		return (const Block*)objWithName(name);
+	}
+	Block* blockWithName(const char* name) {
+		return (Block*)objWithName(name);
+	}
+
+	// pass along baseclass methods.
+	NamedObjList::size;
+	NamedObjList::deleteAll;
+};
+
+///////////////////////////////////////////
+// class BlockListIter
+///////////////////////////////////////////
+
+// an iterator for BlockList
+class BlockListIter : private NamedObjListIter {
+public:
+	BlockListIter(BlockList& sl) : NamedObjListIter (sl) {}
+	Block* next() { return (Block*)NamedObjListIter::next();}
+	Block* operator++() { return next();}
+	NamedObjListIter::reset;
 };
 
 	////////////////////////////////////
@@ -50,45 +73,6 @@ public:
 class Galaxy : public Block  {
 	friend class GalTopBlockIter;
 	friend class CGalTopBlockIter;
-private:
-	// Keep a list of component Blocks
-	BlockList	blocks;
-
-protected:
-
-	// Add blocks to the list
-	void addBlock(Block& b) {blocks.put(&b);}
-
-	// Connect sub-blocks with a delay (default to zero delay)
-	void connect(GenericPort& source, GenericPort& destination,
-			  int numberDelays = 0) {
-		source.connect(destination,numberDelays);
-	}
-
-	// TO BE DONE:
-	// Allow delays to be initialized to something reasonable.
-	// Geodesic& connect(PortHole& source, PortHole& destination,
-			// int numberDelays, Particle& delayValue);
-
-	// Connect a Galaxy PortHole to a PortHole of a sub-block
-	void alias(PortHole& galPort, PortHole& blockPort) {
-		galPort.setAlias(blockPort);
-	}
-
-	// Overload to alias MultiPortHoles
-	void alias(MultiPortHole& galPort, MultiPortHole& blockPort) {
-		galPort.setAlias(blockPort);
-	}
-
-	// support blockWithName message to access internal block list
-	Block* blockWithName (const char* name);
-
-	// initialize subblocks only.
-	void initSubblocks();
-
-	// initialize states in subblocks only.
-	void initStateSubblocks();
-
 public:
 
 	// Constructor
@@ -109,11 +93,6 @@ public:
 	// system wrapup method.  Recursively calls wrapup in subsystems
 	void wrapup();
 
-        // Define States of component Blocks by States of this Block
-        int stateAlias(Block& b, char* stateName, char* expression)  {
-		return b.setState(stateName,expression);
-        }
-
 	// Add block and call setBlock for it
 	void addBlock(Block& b,const char* bname) {
 		addBlock(b.setBlock(bname,this));
@@ -124,6 +103,7 @@ public:
 
         // States initialize
         virtual void initState();
+
 	// Return the number of blocks in the galaxy.
 	int numberBlocks() const {return blocks.size();}
 
@@ -132,7 +112,7 @@ public:
 
 	// Method replies FALSE to indicate that component blocks
 	// can be seen from outside.
-	virtual int isItAtomic () const; // {return FALSE;}
+	/* virtual */ int isItAtomic () const; // {return FALSE;}
 
 	// Return myself as a Galaxy.  Overrides Block::asGalaxy.
 	Galaxy& asGalaxy(); // { return *this;}
@@ -141,16 +121,59 @@ public:
 	// return my domain
 	const char* domain () const;
 
+	// set my domain.  FIXME: should be protected, but
+	// DDFAutoWorm needs access.
+	void setDomain(const char* dom) { myDomain = dom;}
+
+protected:
+
+	// Add blocks to the list
+	void addBlock(Block& b) {blocks.put(b);}
+
+	// Connect sub-blocks with a delay (default to zero delay)
+	void connect(GenericPort& source, GenericPort& destination,
+			  int numberDelays = 0) {
+		source.connect(destination,numberDelays);
+	}
+
+	// Connect a Galaxy PortHole to a PortHole of a sub-block
+	void alias(PortHole& galPort, PortHole& blockPort) {
+		galPort.setAlias(blockPort);
+	}
+
+	// Overload to alias MultiPortHoles
+	void alias(MultiPortHole& galPort, MultiPortHole& blockPort) {
+		galPort.setAlias(blockPort);
+	}
+
+	// support blockWithName message to access internal block list
+	const Block* blockWithName (const char* name) const {
+		return blocks.blockWithName(name);
+	}
+
+	Block* blockWithName (const char* name) {
+		return blocks.blockWithName(name);
+	}
+
+	// initialize subblocks only.
+	void initSubblocks();
+
+	// initialize states in subblocks only.
+	void initStateSubblocks();
+
+	// delete sub-blocks
+	void deleteAllBlocks() { blocks.deleteAll();}
+private:
+	// Keep a list of component Blocks
+	BlockList	blocks;
+
 	// my domain
 	const char* myDomain;
 };
 
-// Iterator classes associated with Galaxy
-class GalTopBlockIter : private ListIter {
+// Iterator class associated with Galaxy
+class GalTopBlockIter : public BlockListIter {
 public:
-	GalTopBlockIter(Galaxy& g) : ListIter(g.blocks) {}
-	Block* next() { return (Block*)ListIter::next();}
-	Block* operator++() { return next();}
-	ListIter::reset;
+	GalTopBlockIter(Galaxy& g) : BlockListIter(g.blocks) {}
 };
 #endif

@@ -3,7 +3,6 @@ static const char file_id[] = "Block.cc";
 #pragma implementation
 #endif
 
-#include <std.h>
 #include "Block.h"
 #include "StringList.h"
 #include "ConstIters.h"
@@ -88,12 +87,11 @@ void Block :: initialize()
 	// Call initialize() for each PortHole, if not of Galaxy
 	// also do MultiPortHoles
 	if (isItAtomic()) {
-		GenericPort* g;
-		BlockGenPortIter next(*this);
-		while ((g = next++) != 0) g->initialize();
+		ports.initElements();
+		multiports.initElements();
 	}
         // initialize States
-        initState();
+	states.initElements();
 	// call user-specified initialization
 	setup();
 }
@@ -101,14 +99,9 @@ void Block :: initialize()
 // This method returns a GenericPort corresponding to the given name.
 GenericPort *
 Block::genPortWithName (const char* name) {
-	GenericPort* g;
-	BlockGenPortIter gpi(*this);
-	while ((g = gpi++) != 0) {
-		if (strcmp (name, g->name()) == 0)
-			return g;
-	}
-	// Not found, return NULL
-	return NULL;
+	GenericPort* g = ports.portWithName(name);
+	if (!g) g = multiports.multiPortWithName(name);
+	return g;
 }
 
 // This method returns a PortHole corresponding to the given name.
@@ -116,25 +109,9 @@ Block::genPortWithName (const char* name) {
 // The real port is always returned (no need to check for aliases).
 PortHole *
 Block::portWithName (const char* name) {
-	GenericPort* g;
-	BlockGenPortIter gpi(*this);
-	while ((g = gpi++) != 0) {
-		if (strcmp (name, g->name()) == 0)
-			return &(g->newConnection());
-	}
-	// Not found, return NULL
-	return NULL;
-}
-
-// Return the matching MultiPortHole.
-MultiPortHole* Block::multiPortWithName(const char* name) {
-	MultiPortHole* m;
-	BlockMPHIter mpi(*this);
-	while ((m = mpi++) != 0) {
-		if (strcmp (name, m->name()) == 0)
-			return m;
-	}
-	return NULL;
+	GenericPort* g = genPortWithName(name);
+	if (!g) return 0;
+	return &(g->newConnection());
 }
 
 // The following function is an error catcher -- it is called if
@@ -216,13 +193,7 @@ Block::multiPortNames (const char** names, const char** types,
 
 State *
 Block::stateWithName(const char* name) {
-	State* s;
-	BlockStateIter next(*this);
-	while ((s = next++) != 0) {
-		if(strcmp(name,s->name()) == 0)
-			return s;
-	}
-	return NULL;
+	return states.stateWithName(name);
 }
 
 int Block :: setState(const char* stateName, const char* expression) {
@@ -290,15 +261,4 @@ Block::~Block () {}
 // this?)
 const char* Block :: domain () const { return "UNKNOWN";}
 
-// "next" method for GenericPort iterator.  First return portholes,
-// then multiportholes.
 
-GenericPort* BlockGenPortIter :: next () {
-	GenericPort* g = (GenericPort*)ListIter::next();
-	if (g == 0 && !usedP) {
-		reconnect(myBlock.multiports);
-		g = (GenericPort*)ListIter::next();
-		usedP = 1;
-	}
-	return g;
-}

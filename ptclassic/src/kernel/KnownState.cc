@@ -87,9 +87,9 @@ StringList
 KnownState::nameList () {
         StringList s;
         if (numStates > 0) {
-		ListIter next(*allStates);
+		StateListIter next(*allStates);
                 for (int i=numStates; i>0; i--) {
-                        State* t = (State*)next++;
+                        State* t = next++;
                         s += t->name();
                         s += "\n";
                 }

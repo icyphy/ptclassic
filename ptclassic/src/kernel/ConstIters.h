@@ -27,21 +27,21 @@ Block.h, PortHole.h, State.h, or Galaxy.h.
 #include "Galaxy.h"
 
 // Step through PortHoles in a PortList
-class CPortListIter : private ListIter {
+class CPortListIter : private CNamedObjListIter {
 public:
-	CPortListIter(const PortList& plist) : ListIter (plist) {}
-	const PortHole* next() { return (const PortHole*)ListIter::next();}
+	CPortListIter(const PortList& plist) : CNamedObjListIter (plist) {}
+	const PortHole* next() { return (const PortHole*)CNamedObjListIter::next();}
 	const PortHole* operator++() { return next();}
-	ListIter::reset;
+	CNamedObjListIter::reset;
 };
 
 // Step through States in a StateList
-class CStateListIter : private ListIter {
+class CStateListIter : private CNamedObjListIter {
 public:
-	CStateListIter(const StateList& sl) : ListIter (sl) {}
-	const State* next() { return (const State*)ListIter::next();}
+	CStateListIter(const StateList& sl) : CNamedObjListIter (sl) {}
+	const State* next() { return (const State*)CNamedObjListIter::next();}
 	const State* operator++() { return next();}
-	ListIter::reset;
+	CNamedObjListIter::reset;
 };
 
 // Step through PortHoles in a Block
@@ -56,15 +56,20 @@ public:
 	CBlockStateIter(const Block& b) : CStateListIter (b.states) {}
 };
 
-// Step through MultiPortHoles in a Block
-class CBlockMPHIter : private ListIter {
+// An iterator for MPHLists, const version
+class CMPHListIter : private CNamedObjListIter {
 public:
-	CBlockMPHIter(const Block& b) : ListIter (b.multiports) {}
+	CMPHListIter(const MPHList& plist) : CNamedObjListIter (plist) {}
 	const MultiPortHole* next() {
-		return (const MultiPortHole*)ListIter::next();
-	}
+		return (const MultiPortHole*)CNamedObjListIter::next();}
 	const MultiPortHole* operator++() { return next();}
-	ListIter::reset;
+	CNamedObjListIter::reset;
+};
+
+// Step through MultiPortHoles in a Block
+class CBlockMPHIter : public CMPHListIter {
+public:
+	CBlockMPHIter(const Block& b) : CMPHListIter (b.multiports) {}
 };
 
 // Step through PortHoles in a MultiPortHole
@@ -73,13 +78,19 @@ public:
 	CMPHIter(const MultiPortHole& mph) : CPortListIter (mph.ports) {}
 };
 
-// Step through Blocks in a Galaxy
-class CGalTopBlockIter : private ListIter {
+// an iterator for BlockList
+class CBlockListIter : private CNamedObjListIter {
 public:
-	CGalTopBlockIter(const Galaxy& g) : ListIter(g.blocks) {}
-	const Block* next() { return (const Block*)ListIter::next();}
+	CBlockListIter(const BlockList& sl) : CNamedObjListIter (sl) {}
+	const Block* next() { return (const Block*)CNamedObjListIter::next();}
 	const Block* operator++() { return next();}
-	ListIter::reset;
+	CNamedObjListIter::reset;
+};
+
+// Iterator class associated with const Galaxy
+class CGalTopBlockIter : public CBlockListIter {
+public:
+	CGalTopBlockIter(const Galaxy& g) : CBlockListIter(g.blocks) {}
 };
 
 #endif
