@@ -139,13 +139,14 @@ cutoff frequency at about 1/3 of the Nyquist frequency.
         }
         initCode {
 		int interp = interpolation;
+		int i = 0;
 		StringList tapInit;
 		tapInit = "\torg\t$ref(taps)\n";
 		if (interp == 1)
-			for (int i = 0; i < taps.size() ; i++)
+			for (i = 0; i < taps.size() ; i++)
 				tapInit << "\tdc\t" << double(taps[i]) << '\n';
 		else
-			for (int i = 0; i < interp; i++)
+			for (i = 0; i < interp; i++)
 				for (int j = i; j < taps.size(); j += interp)
 					tapInit << "\tdc\t"
 						<< double(taps[j]) << '\n';
