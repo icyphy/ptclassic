@@ -25,7 +25,7 @@ $Id$
 **************************************************************************/
 
 // return the type
-char* <T>State :: type() { return "<T>";}
+const char* <T>State :: type() { return "<T>";}
 
 // the value as a string
 StringList <T>State :: currentValue() { StringList s; s = val; return s;}
@@ -105,7 +105,7 @@ ParseToken <T>State :: evalFactor(Tokenizer& lexer) {
 		
 	switch (t.tok) {
 	case EOF:
-		return t;
+		break;
 	case '(':
 		ParseToken t1 = evalExpression(lexer);
 		if (t1.tok != T_<T>) return t1;
@@ -117,15 +117,16 @@ ParseToken <T>State :: evalFactor(Tokenizer& lexer) {
 		else {
 			parseError ("unbalanced parentheses");
 			t.tok = T_ERROR;
-			return t;
 		}
+		break;
 	case T_<T>:
 		t.<C>val = signflag * t.<C>val;
-		return  t;
+		break;
 	default:
 		t.tok = T_ERROR;
 		parseError ("syntax error");
 	}
+	return t;
 }
 
 
