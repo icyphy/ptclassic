@@ -51,10 +51,8 @@ AsmTarget :: AsmTarget(const char* nam, const char* desc,
 	initStates();
 	addStream("mainLoop",&mainLoop);
 	addStream("trailer",&trailer);
+	starTypes +=  "AnyAsmStar";
 }
-
-// all AsmTargets permit AnyAsmStar.
-const char* AsmTarget :: auxStarClass() const { return "AnyAsmStar";}
 
 void AsmTarget :: initStates() {
 	targetHost.setAttributes(A_SETTABLE);

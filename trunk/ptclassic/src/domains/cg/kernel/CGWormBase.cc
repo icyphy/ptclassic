@@ -122,7 +122,7 @@ Profile* CGWormBase :: getProfile(int pNum) {
 
 // Display schedules
 StringList CGWormBase :: displaySchedule() {
-	return target->displaySchedule();
+	return myTarget()->displaySchedule();
 }
 
 // compute schedule
@@ -163,7 +163,8 @@ void CGWormBase :: assignProcs(int num) {
 
 	// When the system is under MultiProcessor target, define "mtarget".
 	// A hack.
-	if (target->isA("MultiTarget")) mtarget = (MultiTarget*) target;
+	if (myTarget()->isA("MultiTarget"))
+	    mtarget = (MultiTarget*) myTarget();
 }
 
 // set up profiles -> create assignedId member of profile

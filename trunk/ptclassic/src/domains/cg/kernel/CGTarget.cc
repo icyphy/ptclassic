@@ -39,11 +39,13 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "CGTarget.h"
 #include "CGStar.h"
 #include "CGPortHole.h"
+#include "Domain.h"
 #include "GalIter.h"
 #include "Error.h"
 #include "SDFScheduler.h"
 #include "EventHorizon.h"
 #include "LoopScheduler.h"
+#include "SDFMultiScheduler.h"
 #include "SDFCluster.h"
 #include "miscFuncs.h"
 #include "CGUtilities.h"
@@ -77,6 +79,8 @@ CGTarget::CGTarget(const char* name,const char* starclass,
 	targetNestedSymbol.setCounter(symbolCounter());
 	sharedSymbol.setSeparator(separator);
 	sharedSymbol.setCounter(symbolCounter());
+
+	starTypes += "HOFStar";
 
 	addState(targetHost.setState("host", this, "",
 	    "Host machine to compile or assemble code on."));
@@ -148,17 +152,25 @@ void CGTarget::setup() {
 	// This only initializes the streams owned by 'codeStringLists'
 	codeStringLists.initialize();
 	if (!scheduler()) {
-		int lv = int(loopingLevel);
-		if(lv > 0) {
-			schedFileName = writeFileName("schedule.log");
-			if (lv == 1) {
-			   LOG_NEW; setSched(new SDFClustSched(schedFileName));
-			} else {
-			   LOG_NEW; setSched(new LoopScheduler(schedFileName));
-			}
-		} else {
-			LOG_NEW; setSched(new SDFScheduler);
-		}
+	    switch (int(loopingLevel)) {
+	    case 0:
+		LOG_NEW; setSched(new SDFScheduler);
+		break;
+	    case 1:
+		schedFileName = writeFileName("schedule.log");
+		LOG_NEW; setSched(new SDFClustSched(schedFileName));
+		break;
+	    case 2:
+		schedFileName = writeFileName("schedule.log");
+		LOG_NEW; setSched(new LoopScheduler(schedFileName));
+		break;
+	    case 3:
+		LOG_NEW; setSched(new SDFMultiScheduler);
+		break;
+	    default:
+		Error::abortRun(*this,"Unknown scheduler");
+		break;
+	    }
 	}
 	if (!galaxy()) return;
 	if (!galaxySetup()) return;
@@ -569,11 +581,6 @@ const char* CGTarget::lookupSharedSymbol(const char* scope, const char* name)
     return sharedSymbol.lookup(scope, name);
 }
 
-// do I support a given star
-int CGTarget :: support(Star* s) {
-	return (s->isA(starType()) || s->isA(auxStarClass()));
-}
-
 // splice star "name" to the porthole p.
 Block* CGTarget::spliceStar(PortHole* p, const char* name,
 				int delayBefore, const char* dom)
@@ -605,18 +612,34 @@ Block* CGTarget::spliceStar(PortHole* p, const char* name,
 	// using size of splice list in name forces unique names.
 	StringList newname("splice-");
 	newname << newb->className() << "-" << spliceList.size();
-	galaxy()->addBlock(*newb,hashstring(newname));
-	newb->initialize();
 
-	// check errors in initialization
-	if (Scheduler::haltRequested()) return 0;
+	// try and resolve which galaxy we should add the splice
+	// block to.  Ideally we want the block added to one of the
+	// galaxies of the stars that we are connecting this spliced
+	// star to.
+	Galaxy* addTo;
 
-	// connect up the new star
+	if (p->atBoundary && p->isItOutput())
+	    addTo = (Galaxy*) pfar->parent()->parent();
+	else
+	    addTo = (Galaxy*) p->parent()->parent();
+	
+	addTo->addBlock(*newb,hashstring(newname));
+
+ 	// connect up the new star.  This must be done after adding the
+	// block to the galaxy so that the geodesics are allocated
+	// properly.  It must be also be done before initializing so that
+	// the spliced in block can resolve the data type on its ports.
 	pfar->connect(*ip,delayBefore ? ndelay : 0);
 	op->connect(*p,delayBefore ? 0 : ndelay);
 
+	newb->initialize();
+	
 	// save in the list of spliced stars
 	spliceList.put(newb);
+
+	// check errors in initialization
+	if (Scheduler::haltRequested()) return 0;
 
 	return newb;
 }

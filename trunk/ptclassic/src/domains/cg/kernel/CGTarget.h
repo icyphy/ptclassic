@@ -197,12 +197,9 @@ public:
     // set inheritFlag;
     void amInherited() { inheritFlag = TRUE; }
 
-    // virtual method: do I support the given star type?
-    virtual int support(Star* s); 
-
     // virtual method to return the relative execution of a star
     // by default, it just returns the myExecTime() of the star.
-    virtual int execTime(DataFlowStar* s, CGTarget* t = 0)
+    virtual int execTime(DataFlowStar* s, CGTarget* = 0)
 	{ return s->myExecTime(); }
 
     // Additional initialization (invoked by initialize method).

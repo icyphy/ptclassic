@@ -51,7 +51,7 @@ extern const Attribute A_CONSEC = {AB_CONSEC,0};
 extern const Attribute A_SYMMETRIC = {AB_SYMMETRIC,0};
 
 void AsmStar::genInterruptCode(CodeBlock& cb) {
-	AsmTarget* asmTargetPtr = (AsmTarget*)targetPtr;
+	AsmTarget* asmTargetPtr = (AsmTarget*)target();
 	asmTargetPtr->saveProgramCounter();
 	addCode(cb);
 	asmTargetPtr->restoreProgramCounter();
@@ -222,7 +222,7 @@ ProcMemory* AsmStar :: lookupEntry(const char* s, unsigned& a) {
 	// lookup the memory
 	State* stateP = stateWithName(s);
 	if ((stateP->attributes() & AB_SHARED) !=0) {
-	        AsmTarget* t = (AsmTarget*)targetPtr;
+	        AsmTarget* t = (AsmTarget*)target();
 		if (stateP != t->lookupSharedState(*stateP)) {
 			return t->lookupSharedEntry(*stateP,a); 
 		}
