@@ -287,7 +287,7 @@ KcAlias(char *fterm, char *inst, char *aterm) {
         EAL, 9/23/90
 */
 
-extern const char DEFAULT_DOMAIN[];
+extern char DEFAULT_DOMAIN[];
 
 extern "C" boolean
 KcSetKBDomain(const char* domain) {
@@ -659,7 +659,7 @@ KcProfile (char* name) {
 		// get the first line put out by printVerbose.
 		StringList pv = b->printVerbose();
 		char* msg = pv.newCopy();
-		char* p = index(msg, ':');
+		char* p = strchr(msg, ':');
 		if (p) {
 			p[1] = 0;
 			accum_string (msg);
