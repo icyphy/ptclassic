@@ -38,12 +38,12 @@ public:
 	void startNewPhase();
 
 	// constructor
-	DEWormhole(Galaxy &g) : Wormhole(*this,g) {
+	DEWormhole(Galaxy &g,Target* t = 0) : Wormhole(*this,g,t) {
 		buildEventHorizons ();
 	}
 
 	// return my scheduler
-	Scheduler* mySched() const { return scheduler ;}
+	Scheduler* mySched() const { return target->mySched();}
 
 	// print methods
 	StringList printVerbose() const { return Wormhole :: print(0);}
