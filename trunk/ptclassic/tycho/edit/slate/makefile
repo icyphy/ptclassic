@@ -53,6 +53,7 @@ ITCL_SRCS = \
 	IconItem.itcl \
 	IconFrame.itcl \
 	IconOval.itcl \
+	IconRect.itcl \
 	Interactor.itcl \
 	IncrCanvas.itcl \
 	LabeledFrame.itcl \
