@@ -48,6 +48,17 @@ ENHANCEMENTS, OR MODIFICATIONS.
    refers to Matlab files that they do not have.  A negative side
    effect of this is that if these files change, then this file will
    not be automatically recompiled (cxh) */
+
+/* For Matlab 3.0, matrix.h relies on the data type 'bool' being defined.
+   This data type is not properly handled by some cfront (non-GNU)
+   compilers.  For example, the Solaris 2.5 CC compiler says that
+   bool is undefined, and the HP-PA CC compiler warns that "bool" is a
+   future reserved word*. (ble,cxh) */
+ 
+#ifndef __GNUC__
+#define bool int
+#endif
+
 #include <matrix.h>
 #include <engine.h>
 
@@ -57,9 +68,16 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #undef  TEXT
 #undef  MATRIX
 
-#define MXCOMPLEX  1
+/* Check to see if we are using Matlab 5.0 */
+#ifdef mxMAXNAM
+#define MXREAL     mxREAL
+#define MXCOMPLEX  mxCOMPLEX
+#else
 #define MXREAL     0
-#define MXTEXT     1
+#define MXCOMPLEX  1
+#endif
+
 #define MXMATRIX   0
+#define MXTEXT     1
 
 #endif
