@@ -56,7 +56,7 @@ SRCS =		$(LIBCSRCS)
 
 OBJS =		$(LIBCSRCS:.c=.o)
 
-LIB = 		libfb.$(LIBSUFFIX)
+CLIB = 		libfb.$(LIBSUFFIX)
 
 EXPHDR =	fb.h
 

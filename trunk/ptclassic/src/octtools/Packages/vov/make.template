@@ -56,7 +56,7 @@ SRCS =		$(LIBCSRCS)
 
 OBJS =		$(LIBCSRCS:.c=.o)
 
-LIB = 		libvov.$(LIBSUFFIX)
+CLIB = 		libvov.$(LIBSUFFIX)
 
 EXPHDR =	vov.h
 

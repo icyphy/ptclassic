@@ -70,7 +70,7 @@ SRCS = $(LIBCSRCS)
 
 OBJS = $(LIBCSRCS:.c=.o)
 
-LIB =		libmain.$(LIBSUFFIX)
+CLIB =		libmain.$(LIBSUFFIX)
 
 VERSION=8-2
 OTHERCFLAGS="-DCUR_DATE=\"`date`\"" -DCUR_VER=\"$(VERSION)\"

@@ -57,7 +57,7 @@ SRCS =		$(LIBCSRCS)
 
 OBJS =		$(LIBCSRCS:.c=.o)
 
-LIB = 		liboptions.$(LIBSUFFIX)
+CLIB = 		liboptions.$(LIBSUFFIX)
 
 EXPHDR =	options.h
 

@@ -52,7 +52,7 @@ SRCS =		$(LIBCSRCS)
 
 OBJS =		$(LIBCSRCS:.c=.o)
 
-LIB = 		libMaxport.$(LIBSUFFIX)
+CLIB = 		libMaxport.$(LIBSUFFIX)
 
 EXPHDR =	Maxport.h
 

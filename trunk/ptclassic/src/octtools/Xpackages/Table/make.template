@@ -56,7 +56,7 @@ SRCS =		$(LIBCSRCS)
 
 OBJS =		$(LIBCSRCS:.c=.o)
 
-LIB = 		libTable.$(LIBSUFFIX)
+CLIB = 		libTable.$(LIBSUFFIX)
 
 EXPHDR =	Table.h
 
