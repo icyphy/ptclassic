@@ -49,7 +49,7 @@ Prentice-Hall: Englewood Cliffs, NJ, 1989.
 	}
 	defstate {
 		name { negWnReal }
-		type { float }
+		type { fix }
 		default { "0.0" }
 		desc {
 internal state for the storage of the negative of the real part of the
@@ -59,7 +59,7 @@ twiddle factor, which is a function of k and N
 	}
 	defstate {
 		name { negWnImag }
-		type { float }
+		type { fix }
 		default { "0.0" }
 		desc {
 internal state for the storage of the imaginary part of the twiddle factor,
@@ -79,9 +79,9 @@ which is a function of k and N
 		CG56GoertzelBase::go();
 
 		// Final value is function of the two real IIR state values
-		double s1 = state1;
-		double s2 = state2;
-		Complex o(s1 + s2 * double(negWnReal), s2 * double(negWnImag));
+		Fix s1 = state1;
+		Fix s2 = state2;
+		Complex o(s1 + s2 * Fix(negWnReal), s2 * Fix(negWnImag));
 		// output%0 << o;
 	}
 }

@@ -48,7 +48,7 @@ Prentice-Hall: Englewood Cliffs, NJ, 1989.
 	}
 	output {
 		name{ output }
-		type{ float }
+		type{ fix }
 	}
 	// Inherit setup method
 	go {
@@ -69,9 +69,9 @@ Prentice-Hall: Englewood Cliffs, NJ, 1989.
 		//   z z* = state1*state1 - state1*state2*2*cos(theta) +
 		//          state2*state2
 		// where 2*cos(theta) = d1, by definition in CG56GoertzelBase.
-		double acc = double(state1)*double(state1) -
-			     double(state1)*double(state2)*double(d1) +
-		             double(state2)*double(state2);
+		Fix acc = Fix(state1)*Fix(state1) -
+			     Fix(state1)*Fix(state2)*Fix(d1) +
+		             Fix(state2)*Fix(state2);
 		// output%0 << acc;
 	}
 }
