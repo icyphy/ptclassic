@@ -1,7 +1,7 @@
 static const char file_id[] = "DDFStar.cc";
 /******************************************************************
 Version identification:
-@(#)DDFStar.cc	2.20	7/19/95
+$Id$
 
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
@@ -66,7 +66,6 @@ void DDFStar :: initialize() {
 }
 
 int DDFStar :: run() {
-  incrFirings();
   return Star :: run();
 }
 		
