@@ -1,50 +1,67 @@
 # test.tcl
 #
-# File to demonstrate the Tycho/C scheduler
+# File to demonstrate the Tycho scheduler
 #
 # $Id$
 #
 
-FIXME FIXME FIXME FIXME FIXME FIXME FIXME FIXME FIXME FIXME 
-
-# Load the Tycho scheduler interface
-::tycho::loadIfNotPresent ::tycho::scheduler tysched
-
-# Initialize a Tk counter
+# Initialize a Tcl counter
 set counter 0
 
-# Create a label which prints the counter value
 catch {destroy .t}
 toplevel .t
-label .t.l -textvariable counter -width 8 \
+frame .t.a
+frame .t.b
+pack .t.a
+pack .t.b
+
+
+# Create a label which prints the counter value
+label .t.a.l -textvariable counter -width 8 \
         -font [::tycho::font Helvetica 24]
-frame .t.f
+frame .t.a.buttons
 
-# This button starts the event loop and the C counter.
-# Use a long period just to demonstrate that events are
-# only processed at the correct interval
-button .t.start -text Start -command {
-    ::tycho::eventLoop start 500
-    ::tycho::eventTest start counter
+# This button adds a task to the scheduler.
+button .t.a.start -text Start -command {
+    ::tycho::Scheduler::start tcltask {
+	set counter 0
+    } {
+	::tycho::timer start
+	while { ! [::tycho::timer elapsed] } {
+	incr counter
+	}
+	expr 1 ;# 1 means that we haven't terminated
+    } {} {}
 }
 
-# This button stops the C counter and then the event loop
-button .t.stop  -text Stop  -command {
-    ::tycho::eventTest stop
-    ::tycho::eventLoop stop
+# This button pauses the task
+button .t.a.pause  -text Pause  -command {
+    ::tycho::Scheduler::suspend tcltask
 }
+
+# This button resumes the task
+button .t.a.resume  -text Resume  -command {
+    ::tycho::Scheduler::resume tcltask
+}
+
+# This button kills the task
+button .t.a.stop  -text Stop -command {
+    ::tycho::Scheduler::kill tcltask
+}
+
+pack .t.a.l -fill x -expand on
+pack .t.a.buttons -fill x -expand on
+pack .t.a.start -in .t.a.buttons -side left
+pack .t.a.pause -in .t.a.buttons -side left
+pack .t.a.resume -in .t.a.buttons -side left
+pack .t.a.stop -in .t.a.buttons -side left
+
 
 # It's handy to have a button to close the window
 button .t.close  -text Close -command {
-    ::tycho::eventTest stop
-    ::tycho::eventLoop stop
+    catch {::tycho::Scheduler::kill tcltask}
     destroy .t
 }
-
-pack .t.l -fill x -expand on
-pack .t.f -fill x -expand on
-pack .t.start -in .t.f -side left
-pack .t.stop -in .t.f -side left
-pack .t.close -in .t.f -side left
+pack .t.close
 
 wm deiconify .t
