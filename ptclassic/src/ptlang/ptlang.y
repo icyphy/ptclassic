@@ -17,6 +17,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
+#include <time.h>
 
 /* Symbols for special characters*/
 #define LPAR '('
@@ -65,6 +66,7 @@ char inputDescriptions[MEDBUFSIZE];
 char outputDescriptions[MEDBUFSIZE];
 char stateDescriptions[MEDBUFSIZE];
 char ccCode[BIGBUFSIZE];
+char hCode[BIGBUFSIZE];
 char miscCode[BIGBUFSIZE];
 char codeBlock[MEDBUFSIZE];
 char consCalls[BIGBUFSIZE];
@@ -79,6 +81,10 @@ char consCalls[BIGBUFSIZE];
 #define T_COMPLEXARRAY 6
 #define NSTATECLASSES 7
 
+#define M_PURE 1
+#define M_VIRTUAL 2
+#define M_INLINE 4
+
 /* note: names must match order of symbols above */
 char* stateClasses[] = {
 "IntState", "FloatState", "ComplexState", "StringState",
@@ -91,6 +97,9 @@ int stateMarks[NSTATECLASSES];
 /* external functions */
 char* save();			/* duplicate a string */
 char* malloc();
+char* ctime();
+time_t time();
+void exit();
 
 /* forward declarations for functions */
 
@@ -133,22 +142,39 @@ char* methodArgs;		/* arglist of user method */
 char* methodAccess;		/* protection of user method */
 char* methodType;		/* return type of user method */
 char* methodCode;		/* body of user method */
-int   methodVirtual;		/* if true, make method virtual */
+int   methodMode;		/* modifier flags for a method */
+int   pureFlag;			/* if true, class is abstract */
 char* galPortName;		/* name of galaxy port */
-char* consCode;			/* extra constructor code */
-char* destCode;			/* destructor */
-char* startCode;		/* start method */
-char* goCode;			/* go method */
-char* wrapupCode;		/* wrapup method */
-char* exectimeCode;		/* myExecTime method */
+
+/* codes for "standard methods".  To add more, add them at the end,
+ * modify N_FORMS, and put types in the codeType array and names in
+ * the codeFuncName array.
+ */
+#define C_CONS 0
+#define C_EXECTIME 1
+#define C_START 2
+#define C_GO 3
+#define C_WRAPUP 4
+#define C_DEST 5
+
+#define N_FORMS 6
+char* codeBody[N_FORMS];		/* code bodies for each entity */
+int inlineFlag[N_FORMS];		/* marks which are to be inline */
+char destNameBuf[MEDBUFSIZE];		/* storage for destructor name */
+
+/* types and names of standard member funcs */
+char* codeType[] = {"","int ","void ","void ","void ",""};
+char* codeFuncName[] = {"","myExecTime","start","go","wrapup",destNameBuf};
+int methKey;			/* signals which of the standard funcs */
+
+#define consCode codeBody[C_CONS]	/* extra constructor code */
+
 char* hInclude[NINC];		/* include files in .h file */
 int   nHInclude;		/* number of such files */
 char* ccInclude[NINC];		/* include files in .cc file */
 int   nCcInclude;		/* number of such files */
 char* seeAlsoList[NSEE];	/* list of pointers to other manual sections */
 int   nSeeAlso;			/* number of such pointers */
-char* stringBuf[NSTR];		/* bufs for multi-line descriptors */
-int   nStrings;			/* # of strings */
 
 /* all tokens with values are type char *.  Keyword tokens
  * have their names as values.
@@ -164,7 +190,7 @@ typedef char * STRINGVAL;
 %token CCINCLUDE HINCLUDE PROTECTED PUBLIC PRIVATE METHOD ARGLIST CODE
 %token BODY IDENTIFIER STRING CONSCALLS ATTRIB LINE
 %token VERSION AUTHOR COPYRIGHT EXPLANATION SEEALSO LOCATION CODEBLOCK
-%token EXECTIME
+%token EXECTIME PURE INLINE HEADER
 %%
 /* a file consists of a series of definitions. */
 file:
@@ -221,20 +247,23 @@ sgitem:
 |	SEEALSO '{' seealso '}'		{ }
 |	DEFSTATE 			{ clearStateDefs();}
 		'{' dstatelist '}'	{ genState(); describeState();}
-|	constructor BODY		{ consCode = $2; bodyMode = 0;}
-|	destructor BODY			{ destCode = $2; bodyMode = 0;}
-|	start BODY			{ startCode = $2; bodyMode = 0;}
-|	wrapup BODY			{ wrapupCode = $2; bodyMode = 0;}
-|	exectime BODY			{ exectimeCode = $2; bodyMode = 0;}
+
+/* definitions of the constructor, destructor, etc. */
+|	inl stdmethkey BODY		{ inlineFlag[methKey] = $1 ? 1 : 0;
+					  codeBody[methKey] = $3;
+					  bodyMode = 0;
+					}
+
 |	members BODY			{ addMembers ($1, $2); bodyMode = 0;}
 |	code BODY			{ strcat (ccCode, $2); 
 					  strcat (ccCode, "\n\n");
 					  bodyMode = 0;
 					}
-|	METHOD { clearMethodDefs();}
-		'{' methlist '}'	{ genMethod();}
-|	VIRTUAL METHOD { clearMethodDefs(); methodVirtual = 1; }
-		'{' methlist '}'	{ genMethod();}
+|	header BODY			{ strcat (hCode, $2);
+					  strcat (hCode, "\n");
+					  bodyMode = 0;
+					}
+|	method '{' methlist '}'		{ genMethod();}
 |	CCINCLUDE '{' cclist '}'	{ }
 |	HINCLUDE '{' hlist '}'
 |	conscalls BODY			{ if(consCalls[0]) {
@@ -245,7 +274,42 @@ sgitem:
 					  }
 					  bodyMode = 0; 
 					}
-|	error '}'			{ yyerror ("bad sgitem");}
+|	error '}'			{ yyerror ("Illegal item");}
+;
+
+/* method introducer */
+/* if VIRTUAL is combined with another keyword, it must be second */
+method:	METHOD				{ clearMethodDefs(0);}
+|	PURE vopt METHOD		{ clearMethodDefs(M_PURE);}
+|	VIRTUAL METHOD			{ clearMethodDefs(M_VIRTUAL);}
+|	INLINE vopt METHOD		{ int mode = M_INLINE;
+					  if ($2) mode |= M_VIRTUAL;
+					  clearMethodDefs(mode);
+					}
+;
+
+/* optional inline keyword */
+inl:	/* nothing */			{ $$ = 0;}
+|	INLINE				{ $$ = $1;}
+;
+
+/* optional virtual keyword */
+vopt:	/* nothing */			{ $$ = 0;}
+|	VIRTUAL				{ $$ = $1;}
+;
+
+/* keywords for standard methods */
+stdmethkey:
+	stdkey2 optp '{'		{ bodyMode = 1;}
+;
+
+stdkey2:
+	CONSTRUCTOR			{ methKey = C_CONS;}
+|	DESTRUCTOR			{ methKey = C_DEST;}
+|	START				{ methKey = C_START;}
+|	GO				{ methKey = C_GO;}
+|	WRAPUP				{ methKey = C_WRAPUP;}
+|	EXECTIME			{ methKey = C_EXECTIME;}
 ;
 
 /* version identifier */
@@ -269,13 +333,14 @@ version:
 		  char b[SMALLBUFSIZE];
 		  long t;
 		  objVer = "?.?";
-		  t = time(0);
+		  t = time((time_t *)0);
 		  b[0] = QUOTE;
 		  strncat(b,ctime(&t),24);
 		  strcat(b,"\"");
 		  objDate = save(b);
 		  /* objDate = "\"checked out\""; */
 		}
+|	error				{ yyerror("Illegal version format");}
 ;
 
 
@@ -286,16 +351,14 @@ staritem:
 |	DERIVED '{' ident '}'		{ derivedFrom = $3;}
 |	portkey '{' portlist '}'	{ genPort();
 					  describePort(); }
-|	go BODY				{ goCode = $2; bodyMode = 0;}
-|	CODEBLOCK '(' IDENTIFIER ')' '{'
+|	CODEBLOCK '(' ident ')' '{'
 					{ char* b = malloc(SMALLBUFSIZE);
 					  blockID = $3;
 					  strcpy(b,blockID);
 					  blockNames[numBlocks]=b;
 					  codeMode = 1;
 					}
-		lines '}'		{ char* b = malloc(strlen(codeBlock));
-					  strcpy(b,codeBlock);
+		lines '}'		{ char* b = save(codeBlock);
 					  codeBlocks[numBlocks++]=b;
 					  codeMode = 0; 
 					  codeBlock[0] = 0;
@@ -309,30 +372,8 @@ lines:	/* nothing */
 				}
 ;
 
-constructor:
-	CONSTRUCTOR optp '{'		{ bodyMode = 1;}
-;
-
 conscalls:
 	CONSCALLS '{'			{ bodyMode = 1;}
-
-destructor:
-	DESTRUCTOR optp '{'		{ bodyMode = 1;}
-
-start:
-	START optp '{'			{ bodyMode = 1;}
-;
-
-go:
-	GO optp	'{'			{ bodyMode = 1;}
-;
-
-wrapup:
-	WRAPUP optp '{'			{ bodyMode = 1;}
-;
-
-exectime:
-	EXECTIME optp '{'		{ bodyMode = 1;}
 
 methlist:
 	methitem
@@ -356,6 +397,11 @@ methitem:
 /* a code block */
 code:
 	CODE '{'			{ bodyMode = 1;}
+;
+
+/* a header code block */
+header:
+	HEADER '{'			{ bodyMode = 1;}
 ;
 
 /* declare extra members */
@@ -433,12 +479,13 @@ defval:	stringseq			{ $$ = $1;}
 					  sprintf (b, "\"%s\"", $1);
 					  $$ = save(b);
 					}
+|	keyword				{ char b[SMALLBUFSIZE];
+					  sprintf (b, "\"%s\"", $1);
+					  $$ = save(b);
+					}
 ;
 
-stringseq: STRING			{ char* b = malloc(MEDBUFSIZE);
-					  strcpy(b, $1);
-					  $$ = b;
-					}
+stringseq: STRING			{ $$ = save($1);}
 |	stringseq STRING		{ char* b = malloc(MEDBUFSIZE);
 					  strcpy(b,$1);
 					  strcat(b," ");
@@ -494,15 +541,19 @@ optcomma:/* nothing */
 
 /* this production allows keywords as idents in some places */
 
-ident:	IDENTIFIER|DEFSTAR|GALAXY|NAME|DESC|DEFSTATE|DOMAIN|NUMPORTS|DERIVED
-|CONSTRUCTOR|DESTRUCTOR|STAR|ALIAS|OUTPUT|INPUT|OUTMULTI|INMULTI|TYPE
-|DEFAULT|START|GO|WRAPUP|CONNECT|CCINCLUDE|HINCLUDE|PROTECTED|PUBLIC
-|PRIVATE|METHOD|ARGLIST|CODE|ACCESS|AUTHOR|VERSION|COPYRIGHT|EXPLANATION
-|SEEALSO|LOCATION|CODEBLOCK|EXECTIME
+ident:	keyword
+|	IDENTIFIER
 /* also allow strings; strip quotation marks */
 |STRING					{ $$ = stripQuotes ($1);}
 ;
 
+/* keyword in identifier position */
+keyword:	DEFSTAR|GALAXY|NAME|DESC|DEFSTATE|DOMAIN|NUMPORTS|DERIVED
+|CONSTRUCTOR|DESTRUCTOR|STAR|ALIAS|OUTPUT|INPUT|OUTMULTI|INMULTI|TYPE
+|DEFAULT|START|GO|WRAPUP|CONNECT|CCINCLUDE|HINCLUDE|PROTECTED|PUBLIC
+|PRIVATE|METHOD|ARGLIST|CODE|ACCESS|AUTHOR|VERSION|COPYRIGHT|EXPLANATION
+|SEEALSO|LOCATION|CODEBLOCK|EXECTIME|PURE|INLINE|HEADER
+;
 %%
 /* Reset for a new star or galaxy class definition.  If arg is TRUE
    we are defining a galaxy.
@@ -516,11 +567,15 @@ int g;
 	galDef = g;
 	objName = objVer = objDesc = domain = derivedFrom =
 		objAuthor = objCopyright = objExpl = objLocation = NULL;
-	consStuff[0] = ccCode[0] = codeBlock[0] = consCalls[0] = 0;
+	consStuff[0] = ccCode[0] = hCode[0] = codeBlock[0] = consCalls[0] = 0;
 	publicMembers[0] = privateMembers[0] = protectedMembers[0] = 0;
 	inputDescriptions[0] = outputDescriptions[0] = stateDescriptions[0] = 0;
 	nCcInclude = nHInclude = nSeeAlso = 0;
-	startCode = goCode = wrapupCode = exectimeCode = 0;
+	pureFlag = 0;
+	for (i = 0; i < N_FORMS; i++) {
+		codeBody[i] = 0;
+		inlineFlag[i] = 0;
+	}
 }
 
 /* Generate a state definition */
@@ -586,7 +641,6 @@ char* nameArg;
 /* generate code for a state defn */
 genState ()
 {
-	char buf[128];
 	char* stateDescriptor;
 	char* stateDefault;
 	/* test that all fields are known */
@@ -621,7 +675,7 @@ genState ()
 /* describe the states */
 describeState ()
 {
-	char* descriptString[MEDBUFSIZE];
+	char descriptString[MEDBUFSIZE];
 
 	sprintf(str1,".NE\n\\fI%s\\fR (%s)",stateName,stateClass);
 	strcat(stateDescriptions,str1);
@@ -686,7 +740,7 @@ genPort ()
 
 describePort ()
 {
-	char *dest, *m;
+	char *dest;
 	char descriptString[MEDBUFSIZE];
 	if(portOut)
 	    /* describe an output port */
@@ -710,14 +764,15 @@ describePort ()
 }
 
 /* set up for user-supplied method */
-clearMethodDefs ()
+clearMethodDefs (mode)
+int mode;
 {
 	methodName = NULL;
 	methodArgs = "()";
 	methodAccess = "protected";
 	methodCode = NULL;
 	methodType = "void";
-	methodVirtual = 0;
+	methodMode = mode;
 }
 
 /* generate code for user-defined method */
@@ -725,9 +780,32 @@ genMethod ()
 {
 	char * p = whichMembers (methodAccess);
 /* add decl to class body */
-	sprintf (str1, "\t%s%s %s %s;\n", methodVirtual ? "virtual " : "",
+	if (methodMode == M_PURE) {
+		if (methodCode) yyerror ("Code supplied for pure method");
+		/* pure virtual function case */
+		sprintf (str1, "\tvirtual %s %s %s = 0;\n",
+			methodType, methodName, methodArgs);
+		strcat (p, str1);
+		pureFlag++;
+		return;
+	}
+	if (methodCode == NULL) {
+		yyerror ("No code supplied for method");
+		methodCode = "";
+	}
+	/* form declaration in class body */
+	sprintf (str1, "\t%s%s %s %s", (methodMode & M_VIRTUAL) ? "virtual " : "",
 		 methodType, methodName, methodArgs);
 	strcat (p, str1);
+	/* handle inline functions */
+	if (methodMode & M_INLINE) {
+		strcat (p, " {\n");
+		strcat (p, methodCode);
+		strcat (p, "\n\t}\n");
+		return;
+	}
+	/* not inline: put it into the .cc file */
+	strcat (p, ";\n");
 	sprintf (str2, "\n\n%s %s%s::%s %s\n{\n", methodType,
 		 galDef ? "" : domain, objName,
 		 methodName, methodArgs);
@@ -768,6 +846,7 @@ char* type;
 	default:
 		fprintf (stderr, "Internal error in whichMembers\n");
 		exit (1);
+		/* NOTREACHED */
 	}
 }
 
@@ -791,12 +870,11 @@ genDef ()
 	char baseClass[SMALLBUFSIZE];
 	char fullClass[SMALLBUFSIZE];
 	char descriptString[MEDBUFSIZE];
-	char *d;
 
 /* temp, until we implement this */
 	if (galDef) {
 		fprintf (stderr, "Sorry, galaxy definition is not yet supported.\n");
-		exit ();
+		exit (1);
 	}
 	if (objName == NULL) {
 		yyerror ("No class name defined");
@@ -861,31 +939,33 @@ genDef ()
 		if (stateMarks[i])
 			fprintf (fp, "#include \"%s.h\"\n", stateClasses[i]);
 
-
+/* extra header code */
+	fprintf (fp, "%s\n", hCode);
 /* The class template */
-	fprintf (fp, "\nclass %s : public %s\n{\n", fullClass, baseClass);
+	fprintf (fp, "class %s : public %s\n{\n", fullClass, baseClass);
 	if (privateMembers[0])
 		fprintf (fp, "private:\n%s\n", privateMembers);
 	if (protectedMembers[0])
 		fprintf (fp, "protected:\n%s\n", protectedMembers);
 	fprintf (fp, "public:\n\t%s();\n", fullClass);
-	if (startCode)
-		fprintf (fp, "\tvoid start();\n");
-	if (goCode)
-		fprintf (fp, "\tvoid go();\n");
-	if (wrapupCode)
-		fprintf (fp, "\tvoid wrapup();\n");
-	if (exectimeCode)
-		fprintf (fp, "\tint myExecTime();\n");
-	if (destCode)
-		fprintf (fp, "\t~%s();\n", fullClass);
+	sprintf (destNameBuf, "~%s", fullClass);
+	for (i = C_EXECTIME; i <= C_DEST; i++) {
+		if (codeBody[i])
+			fprintf (fp, "\t%s%s()%s\n", codeType[i],
+				codeFuncName[i], inlineFlag[i] ? " {" : ";");
+		if (inlineFlag[i])
+			fprintf (fp, "%s\n\t}\n", codeBody[i]);
+	}
 	if (publicMembers[0])
 		fprintf (fp, "%s\n", publicMembers);
 	for (i=0; i<numBlocks; i++)
 		fprintf (fp, "\tstatic %sCodeBlock %s;\n",domain,blockNames[i]);
-/* The clone function; end of file */
-	fprintf (fp, "\tBlock* clone() const { return new %s;}\n};\n", fullClass);
-	fprintf (fp, "#endif\n");
+/* The clone function: only if the class isn't a pure virtual */
+	if (!pureFlag)
+		fprintf (fp, "\tBlock* clone() const { return new %s;}\n",
+			 fullClass);
+/* that's all, end the class def and put out an #endif */
+	fprintf (fp, "};\n#endif\n");
 	(void) fclose (fp);
 
 /**************************************************************************
@@ -909,7 +989,8 @@ genDef ()
 	if (idBlock)
 		fprintf (fp, "%s\n", idBlock);
 /* include files */
-	fprintf (fp, "#include \"KnownBlock.h\"\n");
+	if (!pureFlag)
+		fprintf (fp, "#include \"KnownBlock.h\"\n");
 	fprintf (fp, "#include \"%s.h\"\n", fullClass);
 	for (i = 0; i < nCcInclude; i++)
 		fprintf (fp, "#include %s\n", ccInclude[i]);
@@ -923,26 +1004,28 @@ genDef ()
 	if (!consCode) consCode = "";
 	fprintf (fp, "%s\n%s\n", consStuff, consCode);
 	fprintf (fp, "}\n");
-	if (startCode)
-		fprintf (fp, "\nvoid %s::start() {\n%s\n}\n", fullClass, startCode);
-	if (goCode)
-		fprintf (fp, "\nvoid %s::go() {\n%s\n}\n", fullClass, goCode);
-	if (wrapupCode)
-		fprintf (fp, "\nvoid %s::wrapup() {\n%s\n}\n", fullClass, wrapupCode);
-	if (exectimeCode)
-		fprintf (fp, "\nint %s::myExecTime() {\n%s\n}\n", fullClass,
-				exectimeCode);
-	if (destCode)
-		fprintf (fp, "\n%s::~%s() {\n%s\n}\n", fullClass, fullClass, destCode);
+	for (i = C_EXECTIME; i <= C_DEST; i++) {
+		if (codeBody[i] && !inlineFlag[i])
+			fprintf (fp, "\n%s%s::%s() {\n%s\n}\n",
+			codeType[i], fullClass, codeFuncName[i], codeBody[i]);
+	}
 	if (miscCode[0])
 		fprintf (fp, "%s\n", miscCode);
 	/* generate the CodeBlock constructor calls */
 	for (i=0; i<numBlocks; i++)
 		fprintf (fp, "%sCodeBlock %s :: %s (\n%s);\n",
 			domain,fullClass,blockNames[i],codeBlocks[i]);
-	fprintf (fp, "\n// prototype instance for known block list\n");
-	fprintf (fp, "static %s proto;\n", fullClass);
-	fprintf (fp, "static KnownBlock entry(proto,\"%s\");\n", objName);
+	if (pureFlag) {
+		fprintf (fp,
+			 "\n// %s is an abstract class: no KnownBlock entry\n",
+			 fullClass);
+	}
+	else {
+		fprintf (fp, "\n// prototype instance for known block list\n");
+		fprintf (fp, "static %s proto;\n", fullClass);
+		fprintf (fp, "static KnownBlock entry(proto,\"%s\");\n",
+			 objName);
+	}
 	(void) fclose(fp);
 
 /**************************************************************************
@@ -1081,9 +1164,11 @@ struct tentry keyTable[] = {
 	"explanation", EXPLANATION,
 	"galaxy", GALAXY,
 	"go", GO,
+	"header", HEADER,
 	"hinclude", HINCLUDE,
 	"ident", ID,
 	"inmulti", INMULTI,
+	"inline", INLINE,
 	"input", INPUT,
 	"location", LOCATION,
 	"method", METHOD,
@@ -1098,6 +1183,7 @@ struct tentry keyTable[] = {
 	"programmer", AUTHOR,
 	"protected", PROTECTED,
 	"public", PUBLIC,
+	"pure", PURE,
 	"seealso", SEEALSO,
 	"star", STAR,
 	"start", START,
@@ -1373,7 +1459,7 @@ char* text;
 char* save(in)
 char* in;
 {
-	char* out = malloc(strlen(in)+1);
+	char* out = malloc((unsigned)strlen(in)+1);
 	return strcpy(out,in);
 }
 
@@ -1384,7 +1470,7 @@ char* in;
 	char* out;
 	int l = strlen (in);
 	if (l <= 2 || *in != QUOTE) return in;
-	out = malloc(l-1);
+	out = malloc((unsigned)l-1);
 	return strncpy(out,in+1,l-2);
 }
 
