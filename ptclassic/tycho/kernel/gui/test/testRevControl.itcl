@@ -42,7 +42,7 @@ proc testRevControl {versionControlSystem} {
 	set testdir sccstst
 	set testfile [file join $testdir sccs.itcl]
     } else {
-	set testdir rcsstst
+	set testdir rcstst
 	set testfile [file join $testdir rcs.itcl]
     }
     # FIXME: Unixism
