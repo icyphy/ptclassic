@@ -18,6 +18,6 @@ Generic code generator source star.
 // Line 2 from Source star
 	}
 	go {
-		gencode(blockname);
+		addCode(blockname);
 	}
 }

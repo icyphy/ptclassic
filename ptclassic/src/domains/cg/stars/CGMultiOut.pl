@@ -25,6 +25,6 @@ It outputs lines of comments, instead of code.
 // Multi Output star
 	}
 	go {
-		gencode(block);
+		addCode(block);
 	}
 }

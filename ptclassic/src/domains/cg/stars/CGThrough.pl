@@ -38,9 +38,9 @@ It outputs lines of comments, instead of code.
 	}
 	go {
 	    if (control == TRUE)
-		gencode(trueblock);
+		addCode(trueblock);
 	    else
-		gencode(falseblock);
+		addCode(falseblock);
 	}
 }
 

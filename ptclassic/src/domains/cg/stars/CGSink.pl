@@ -22,7 +22,7 @@ It outputs lines of comments, instead of code.
 // Line 2 code from CGSink
 	}
 	go {
-		gencode(blockname);
+		addCode(blockname);
 	}
 }
 
