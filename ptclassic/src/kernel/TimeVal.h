@@ -39,13 +39,10 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #include <sys/time.h>
 
-class TimeVal : private timeval
+class TimeVal : public timeval
 {
-friend class Clock;
-
 public:
     TimeVal();
-    TimeVal(long sec, long usec);
     TimeVal(double);
     operator double() const;
 
@@ -54,12 +51,11 @@ public:
     TimeVal& operator +=(const TimeVal&);
     TimeVal& operator -=(const TimeVal&);
 
+    int operator >(const TimeVal&) const;
+    int operator <(const TimeVal&) const;
+
 private:
     void normalize();
-
-    // Sleep using current time value as delay.
-    // Return TRUE if pause was required (non-negative delay).
-    int sleep() const;
 };
 
 #endif

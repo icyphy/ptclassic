@@ -34,34 +34,16 @@ static const char file_id[] = "$RCSfile$";
 #endif
 
 #include "TimeVal.h"
-#include "type.h"
-#include <signal.h>
-#include <sys/types.h>
-
-#if defined(hppa)
-extern "C" int select(unsigned int width, int* read, int* write, int*
-		      except, const struct timeval *timeout);
-#else
-extern "C" int select(int width, fd_set* read, fd_set* write, fd_set* except,
-			const timeval* timeout);
-#endif
 
 TimeVal::TimeVal()
 {
     tv_sec = tv_usec = 0;
 }
 
-TimeVal::TimeVal(long sec, long usec)
-{
-    tv_sec = sec;
-    tv_usec = usec;
-    normalize();
-}
-
 TimeVal::TimeVal(double seconds)
 {
-    tv_sec = long(seconds);
-    tv_usec = long(1.0e6 * (seconds - (double)tv_sec));
+    tv_sec = seconds;
+    tv_usec = 1.0e6 * (seconds - (double)tv_sec);
     normalize();
 }
 
@@ -72,7 +54,7 @@ void TimeVal::normalize()
 	tv_sec--;
 	tv_usec += 1000000;
     }
-    while (tv_usec > 1000000)
+    while (tv_usec >= 1000000)
     {
 	tv_sec++;
 	tv_usec -= 1000000;
@@ -86,9 +68,11 @@ TimeVal::operator double() const
 
 TimeVal TimeVal::operator+(const TimeVal& t) const
 {
-    long sec = tv_sec + t.tv_sec;
-    long usec = tv_usec + t.tv_usec;
-    return TimeVal(sec,usec);
+    TimeVal x;
+    x.tv_sec = tv_sec + t.tv_sec;
+    x.tv_usec = tv_usec + t.tv_usec;
+    x.normalize();
+    return x;
 }
 
 TimeVal& TimeVal::operator+=(const TimeVal& t)
@@ -101,9 +85,11 @@ TimeVal& TimeVal::operator+=(const TimeVal& t)
 
 TimeVal TimeVal::operator-(const TimeVal& t) const
 {
-    long sec = tv_sec - t.tv_sec;
-    long usec = tv_usec - t.tv_usec;
-    return TimeVal(sec, usec);
+    TimeVal x;
+    x.tv_sec = tv_sec - t.tv_sec;
+    x.tv_usec = tv_usec - t.tv_usec;
+    x.normalize();
+    return x;
 }
 
 TimeVal& TimeVal::operator-=(const TimeVal& t)
@@ -114,14 +100,12 @@ TimeVal& TimeVal::operator-=(const TimeVal& t)
     return *this;
 }
 
-// Return TRUE if a pause was required (non-negative delay).
-int TimeVal::sleep() const
+int TimeVal::operator>(const TimeVal& t) const
 {
-    // sleep only if the delay is non-negative.
-    if (tv_sec >= 0 && tv_usec >= 0)
-    {
-	select(0, NULL, NULL, NULL, this);
-	return TRUE;
-    }
-    else return FALSE;
+    return timercmp(this, &t, >);
+}
+
+int TimeVal::operator<(const TimeVal& t) const
+{
+    return timercmp(this, &t, <);
 }
