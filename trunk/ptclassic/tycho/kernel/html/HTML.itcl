@@ -432,6 +432,7 @@ body ::tycho::HTML::appletViewer {} {
 # Go back to the previous view, popping it off the stack.
 #
 body ::tycho::HTML::back {} {
+    puts [$stack contents]
     set ref [$stack pop]
     if {$ref == {}} {return}
     set filename [lindex $ref 0]
@@ -528,6 +529,9 @@ body ::tycho::HTML::hyperJump {filename {point {}} {push 1}} {
                 if $push {
                     $stack push [list $file [currentPoint]]
                 }
+
+                configure -directory [file dirname $filename]
+                configure -file $filename
                 toolbar clear location
                 toolbar insert location $filename
                 # Reset the insertion cursor to the origin, or else we will
@@ -622,8 +626,7 @@ body ::tycho::HTML::insertData {data} {
 # Insert the contents of the the directory 'dirname' into the html
 # widget.  We use this if the user visits a directory that does not
 # have a index.html file so that the user can see the contents of the
-# directory.  If the optional argument dirname is {}, then we generate
-# a table of contents of the current directory
+# directory.
 #
 body ::tycho::HTML::insertDirectoryContents {dirname} {
     clear
@@ -635,21 +638,21 @@ body ::tycho::HTML::insertDirectoryContents {dirname} {
     # so that we can align the text properly.
     set spaceString "                   "
 
-    set files [lsort [glob -nocomplain $dirname/*]]
-    foreach file $files {
+    set dirFiles [lsort [glob -nocomplain $dirname/*]]
+    foreach dirFile $dirFiles {
         # If the filename is over 20 chars long, truncate it and add ...
-        set shortName [file tail $file]
-        if [file isdirectory $shortName] {
+        set shortName [file tail $dirFile]
+        if [file isdirectory $dirFile] {
             # FIXME Unixism?  We are adding a / here, what about mac and windows
             set shortName "$shortName/"
         }
         if {[string length $shortName] > 20} {
             set shortName "[string range $shortName 0 16]..."
         }
-        if [catch {file stat $file stat} msg] {
+        if [catch {file stat $dirFile stat} msg] {
             set toc [format \
                     "%s<br><A HREF=\"%s\">%s</A>%s  Couldn`t stat\n" \
-                    $toc $file \
+                    $toc $dirFile \
                     $shortName \
                     [string range $spaceString \
                     1 [expr {20 - [string length $shortName]}]] \
@@ -657,7 +660,7 @@ body ::tycho::HTML::insertDirectoryContents {dirname} {
         } else {
             set toc [format \
                     "%s<br><A HREF=\"%s\">%s</A>%s %6s %s\n" \
-                    $toc $file \
+                    $toc $dirFile \
                     $shortName \
                     [string range $spaceString \
                     1 [expr {20 - [string length $shortName]}]] \
