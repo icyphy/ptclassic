@@ -16,7 +16,7 @@ $Id$
 **************************************************************************/
 #include "Histogram.h"
 #include "Display.h"
-#include <builtin.h>
+#include <minmax.h>
 #include "miscFuncs.h"
 
 void intVec::resize(int newSize) {
