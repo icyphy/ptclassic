@@ -1,6 +1,6 @@
-# Makefile for Ptolemy Tycho system, java/tycho/doc/usersGuides dir.
+# Makefile for Ptolemy DE/Java interface de/java/java/doc/internals directory.
 #
-# Version: @(#)makefile	1.7 03/27/97
+# Version: $Id$
 # Author: Christopher Hylands
 #
 # Copyright (c) 1997 The Regents of the University of California.
@@ -29,11 +29,9 @@
 # 						COPYRIGHTENDKEY
 ##########################################################################
 
-# Root of Tycho directory
-ROOT =		../../../..
-
+ROOT =		../../../../../../..
 # True source directory
-VPATH =		$(ROOT)/java/tycho/doc/userGuides
+VPATH =		$(ROOT)/src/domains/de/java/java/doc/internals
 
 # Get configuration info
 CONFIG =	$(ROOT)/mk/tycho.mk
@@ -49,12 +47,7 @@ DIRS =
 
 EXTRA_SRCS =	\
 	index.html \
-	javadebug.html \
-	tcljava.html \
-	tcljavant.html \
-	tychojava.html \
-	tksteal.html \
-	typn.html
+	ptjava.html
 
 # We don't include common.mk since we don't use the compiler here
 include $(ROOT)/mk/no-compile.mk
