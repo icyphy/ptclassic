@@ -26,6 +26,10 @@
 # 						PT_COPYRIGHT_VERSION_2
 # 						COPYRIGHTENDKEY
 
+# This file is used by tkoct, which is an expermental Tk/Octtools
+# interface written by Kennard White.  See src/octtools/tkoct
+# in the other.src tar file.
+
 #
 # The technology root dir, if not specified, is handled by
 # tapGetDefaultRoot(), which uses "$OCTTOOLS/tech"
