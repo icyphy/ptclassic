@@ -47,10 +47,17 @@ This Star uses the GNU library <Uniform.h>.
 	ccinclude { <ACG.h>, <Uniform.h>, <Normal.h>, <NegExp.h> }
 
 	protected {
+		Random *randomGen;
 		double random;
 	}
 	code {
 		extern ACG* gen;
+	}
+	constructor {
+		randomGen = NULL;
+	}
+	destructor {
+		delete randomGen;
 	}
 
 	setup {
@@ -60,7 +67,7 @@ This Star uses the GNU library <Uniform.h>.
 		double mOru = double(meanORupper);	// mean or upper
 		double vOrl = double(varianceORlower);	// variance or lower
 
-		Random *randomGen;
+		delete randomGen;
 		switch (c) {
 			case 'u' :
 			case 'U' : randomGen = new Uniform(vOrl, mOru, gen);
@@ -75,11 +82,11 @@ This Star uses the GNU library <Uniform.h>.
 			  Error::abortRun(*this, "unknown distribution.");
 			  break;
 		}			
+	}
 
-		// generate a random number
-		random = (*randomGen)();
-		
-		delete randomGen;
+	begin {
+	  // generate a random number
+	  random = (*randomGen)();
 	}
 
         go {
