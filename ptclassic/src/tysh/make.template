@@ -49,7 +49,7 @@ include $(CONFIG)
 -include override.mk
 
 # Directory containing utilities for BarGraph and XYPlot
-PTKDIR = $(ROOT)/src/ptklib
+PTKDIR = 	$(ROOT)/src/ptklib
 
 INCL = 		-I$(KERNDIR) -I$(PTCL_INCDIR) \
 		-I$(TCL_INCDIR) -I$(TK_INCDIR) $(X11_INCSPEC) -I$(PTKDIR) \
@@ -57,7 +57,7 @@ INCL = 		-I$(KERNDIR) -I$(PTCL_INCDIR) \
 		-I$(ROOT)/src/compat/ptolemy
 
 # For development period, disable optimization
-OPTIMIZER=
+OPTIMIZER =
 
 # Sources
 SRCS = \
@@ -96,28 +96,28 @@ LIB =		libtycho.$(LIBSUFFIX)
 
 ifndef BASENAME
 ifndef PIGI
-	ALLBINARIES=1
-	BASENAME=tysh
+	ALLBINARIES =	1
+	BASENAME =	tysh
+	PIGI =		tysh
 endif
 endif
 
 
-TK = 1
+TK = 		1
 
-ADD_OBJS=version.$(PIGI).o
+PT_DEPEND += 	$(LIBDIR)/$(LIB)
 
-PT_DEPEND += $(LIBDIR)/$(LIB)
+PIGI_OBJS += 	-ltycho version.c
 
-PIGI_OBJS += -ltycho version.$(PIGI).o
-
-INSTALL += $(LIBDIR)/$(LIB)
+INSTALL += 	$(LIBDIR)/$(LIB)
  
+
+all:	makefile $(LIB) $(PIGI) $(PIGI).ptiny $(PIGI).ptrim
+
 include $(ROOT)/mk/ptbin.mk
 
 # include common definitions, rules
 include $(ROOT)/mk/common.mk
-
-all:	makefile $(LIB) $(PIGI)
 
 # Don't add anything after the next line; makedepend will zap it.
 # DO NOT DELETE THIS LINE -- make depend depends on it.
