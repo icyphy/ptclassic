@@ -90,6 +90,9 @@ class ::tycho::EditGraph {
     # Redo the most recent command
     method redo {}
 
+    # Run as a Ptolemy Universe
+    method runPtolemy {}
+
     # Update the layout model
     method updateLayout {}
 
@@ -253,7 +256,7 @@ body ::tycho::EditGraph::constructor {args} {
     bind $slate <Meta-Key-r> "$this redo"
 
     # Make a more pronounced highlight
-    $slate configure -highlightcolor azure2 -highlightwidth 4
+    $slate configure -highlightcolor azure1 -highlightwidth 8
 
     # Enable selection with button 1; shift-click toggles
     $slate selector bind click vertex -button 1
@@ -289,7 +292,7 @@ body ::tycho::EditGraph::constructor {args} {
     set dropper [$slate interactor DragDropper]
     $dropper bind output
     $dropper configure \
-	    -halo 4 \
+	    -halo 6 \
 	    -targettags input \
 	    -activatecommand "$this newclick %1 %2 %3" \
 	    -dragcommand "$this newdrag %1 %2 %3" \
@@ -466,6 +469,41 @@ body ::tycho::EditGraph::notify {method args} {
 body ::tycho::EditGraph::redo {} {
     eval $itk_option(-layout) redo
     eval $itk_option(-graph) redo
+}
+
+########################################################################
+#### runPtolemy
+#
+# Run the graph as a Ptolemy universe
+#
+body ::tycho::EditGraph::runPtolemy {} {
+    set graph $itk_option(-graph)
+    set layout $itk_option(-layout)
+
+    # Create a new universe
+    set universe [::tycho::autoName .universe]
+    ::ptolemy::Universe $universe {}
+
+    # Create blocks
+    foreach vertex [$graph vertices] {
+	puts "$universe addBlock $vertex [$layout itemcget $vertex -label]"
+	$universe addBlock $vertex [$layout itemcget $vertex -label]
+    }
+
+    # Create edges
+    foreach {v0 k0 v1 k1} [$graph edges] {
+puts "$universe connect $universe.$v0.$k0 $universe.$v1.$k1"
+	$universe connect $universe.$v0.$k0 $universe.$v1.$k1
+    }
+
+    # Ask the user how long to run
+    foreach {_ iterations} \
+	    [::tycho::query Answer {{line n {Number of Iterations} 100}}] {}
+
+    puts $iterations
+
+    $universe run $iterations
+    $universe wrapup
 }
 
 ########################################################################
@@ -968,4 +1006,7 @@ body ::tycho::EditGraph::initializeMenubar {} {
 		    -command "::tycho::post \[\[$this cget -layout\] describe\]"
     $myMenubar command {Show graph} Devel \
             -command "::tycho::post \[\[$this cget -graph\] describe\]"
+
+    $myMenubar command {Run Ptolemy} Devel \
+            -command "$this runPtolemy"
 }
