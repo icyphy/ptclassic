@@ -446,3 +446,7 @@ inline int getpagesize() { return 4096;}
    || read (fd, availMem, OBJ_READ_SIZE) < OBJ_READ_SIZE)
 #define OBJ_SIZE (size_t)(h2.tsize + h2.dsize + h2.bsize)
 #endif
+
+#ifdef PTAIX_XLC
+extern "C" int getpagesize(void);
+#endif
