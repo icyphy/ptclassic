@@ -1,0 +1,64 @@
+# Makefile for Ptolemy CG56 DSP stars
+# $Id$
+#
+# If this file's name is "make.template" and there is no makefile in
+# this directory, do
+#	cp make.template makefile
+#	chmod +w makefile
+#	make depend
+# This will add the dependencies to the makefile.
+
+ROOT = ../../../../..
+VPATH = $(ROOT)/src/domains/cg56/dsp/stars
+
+# get configuration info
+CONFIG=$(ROOT)/config-$(ARCH).mk
+include $(CONFIG)
+
+CG56DIR = $(ROOT)/src/domains/cg56/kernel
+# CGDIR is the directory containing CG domain support
+CGDIR = $(ROOT)/src/domains/cg/kernel
+SDFDIR = $(ROOT)/src/domains/sdf/kernel
+
+INCL = -I$(CG56DIR) -I$(CGDIR) -I$(SDFDIR) -I$(KERNDIR)
+
+# source files for all stars, using preprocessor
+PL_SRCS= \
+ CG56Allpass.pl \
+ CG56Biquad.pl \
+ CG56BiquadDSPlay.pl \
+ CG56Comb.pl \
+ CG56FIR.pl \
+ CG56LMS.pl \
+ CG56LMSGanged.pl \
+ CG56RaisedCos.pl
+
+# The .cc files
+SRCS=$(PL_SRCS:.pl=.cc)
+
+# object files for all stars
+OBJS= $(SRCS:.cc=.o)
+
+# header files for all stars
+HDRS= $(SRCS:.cc=.h)
+
+all:		$(SRCS) makefile $(OBJS)
+
+STAR_MK=cg56dspstars
+DOMAIN=CG56DSP
+DOMAIN_2=CG56
+EXTRA_SRCS= $(STAR_MK).mk $(PL_SRCS)
+
+# nothing to install -- use it where it lies
+install:	all
+		@echo Installation complete.
+
+LIB=none	# required by common.mk
+
+
+# include common definitions, rules
+include $(ROOT)/common.mk
+
+# Don't add anything after the next line; makedepend will zap it.
+# DO NOT DELETE THIS LINE -- make depend depends on it.
+
