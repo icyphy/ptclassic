@@ -15,9 +15,6 @@ This file contains definitions of DDF-specific PortHole classes.
 #define _DDFConnect_h 1
 #include "Connect.h"
 
-#define grabData beforeGo
-#define sendData afterGo
-
         //////////////////////////////////////////
         // class DDFPortHole
         //////////////////////////////////////////
