@@ -20,7 +20,7 @@ ptlang:	ptlang.o
 
 ptlang.o:	ptlang.c
 
-ptlang.c:	ptlang.y
+$(VPATH)/ptlang.c:	ptlang.y
 		cd $(VPATH); yacc ptlang.y; mv y.tab.c ptlang.c
 
 install:	$(BINDIR)/ptlang
