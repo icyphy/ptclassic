@@ -15,6 +15,10 @@ features of HTML 2.0.
 There is currently no support in Tycho for
 <a name=HTTP>HTTP</a> hyperlink references, so you cannot
 within Tycho directly read documents on the internet.
+If Tycho encounters a HTML reference
+that it does not understand, then Tycho with ask the user if they want 
+to start up <CODE>Netscape</CODE>. (The Macintosh does not support
+<CODE>exec</CODE>, so this will not work on the Mac).
 A <a href="../../../lib/html_library/html/sample.html">sample document</a>
 illustrates the HTML tags that are supported.
 <p>
@@ -60,10 +64,10 @@ delete object [$h displayer windowName]
 <a href="../../../doc/index.html">Tycho Home Page</a><br>
 <p>
 <HR>
-Copyright &#169 %Q%, The Regents of the University of California.
+Copyright &#169 1996, The Regents of the University of California.
 All rights reserved.
 <br>
-Last updated: %D%,
+Last updated: $Date$,
 comments to: <author>eal@eecs.berkeley.edu</author>
 </body>
 </html>

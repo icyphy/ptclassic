@@ -14,25 +14,27 @@ For example,
 .m addButton pushme -text {Push Me} -command {::tycho::post thanks}
 wm deiconify .m
 </pre></tcl>
-We have created a widget named ".m" and inserted into it a button
-named "pushme".  The
-<a name="addButton method">addButton</a> method is defined in the class
-Dialog.  The button is bound to the command "::tycho::post thanks".
+We have created a widget named <CODE>.m</CODE> and inserted into it a button
+named <CODE>pushme</CODE>.  The
+<a name="addButton method"><CODE>addButton</a></CODE></a> method is
+defined in the class dialog.  The button is bound to the command 
+<CODE>::tycho::post thanks</CODE>.
 This class is derived from
 <a href="toplevel.html">TopLevel</a>, so you can center it
 on the screen, freeze the window size, etc.
 <p>
 You can mark the button as a
-<a name="default method">default</a> button with the following command:
+<a name="default method"><CODE>default</CODE></a>
+button with the following command:
 <tcl><pre>
 .m default pushme
 </pre></tcl>
 This changes the appearance of the button, and has the side effect
-of binding the Return key so that invokes the button.  Try placing
-the mouse in the window and hitting Return.
+of binding the <CODE>Return</CODE> key so that invokes the button.  Try placing
+the mouse in the window and hitting <CODE>Return</CODE>.
 <p>
 You can also directly invoke a button from a script using the
-<a name="invoke method">invoke method</a>:
+<a name="invoke method"><CODE>invoke</CODE> method</a>:
 <tcl><pre>
 .m invoke pushme
 </pre></tcl>
@@ -44,22 +46,19 @@ into the message window:
 <tcl><pre>
 .m configure -bitmap questhead
 </pre></tcl>
-The value, "<a name="questhead bitmap">questhead</a>",
+The value, "<a name="questhead bitmap"><CODE>questhead</CODE></a>",
 is the name of a built-in bitmap.
 Other particularly useful ones are
-"<a name="error bitmap">error</a>",
-"<a name="info bitmap">info</a>",
-"<a name="question bitmap">question</a>",
-"<a name="hourglass bitmap">hourglass</a>", and
-"<a name="warning bitmap">warning</a>".
-As with any option, we could have specified the -bitmap option
+<a name="error bitmap"><CODE>error</CODE></a>,
+<a name="info bitmap"><CODE>info</CODE></a>",
+<a name="question bitmap"><CODE>question</CODE></a>,
+<a name="hourglass bitmap"><CODE>hourglass</CODE></a>, and
+<a name="warning bitmap"><CODE>warning</CODE></a>.
+As with any option, we could have specified the <CODE>-bitmap</CODE> option
 in the original command creating the widget.
 <p>
-You can also insert an
-<a name=image>
-image
-</a>
-created with the "<a name="image create command">image create</a>"
+You can also insert an<a name=image>image</a>
+created with the "<a name="image create command"><CODE>image create</CODE></a>"
 command, using the Tk <a name="photo widget">photo widget</a>.
 <tcl><pre>
 image create photo ptgif -file $TYCHO/kernel/img/tychologo.gif
@@ -76,7 +75,7 @@ creation of
 and non-modal dialog boxes.  Each of them takes the
 name of a class (which must be derived from Dialog), an instance
 name, and optional set of arguments, and creates an instance of the class.
-The <a name="new procedure"><em>new</em> procedure</a> creates a non-modal
+The <a name="new procedure"><CODE>new</CODE> procedure</a> creates a non-modal
 dialog:
 <tcl><pre>
 ::tycho::Dialog::new Message .y -text &#92
@@ -93,10 +92,10 @@ be destroyed.
 <a href="../../../doc/index.html">Tycho Home Page</a><br>
 <p>
 <HR>
-Copyright &#169 %Q%, The Regents of the University of California.
+Copyright &#169 1996, The Regents of the University of California.
 All rights reserved.
 <br>
-Last updated: %D%,
+Last updated: $Date$,
 comments to: <author>eal@eecs.berkeley.edu</author>
 </body>
 </html>

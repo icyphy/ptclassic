@@ -27,8 +27,9 @@ labeled "Yes" and "No".  For example:
     -yescommand {::tycho::inform {You said yes!}} &#92
     -nocommand {::tycho::inform {Then how did you click on the No button?}}
 </pre></tcl>
-The options <a name="yescommand option"><i>-yescommand</i></a> and
-<a name="nocommand option"><i>-nocommand</i></a> specify scripts to be executed
+The options <a name="yescommand option"><CODE>-yescommand</CODE></a> and
+<a name="nocommand option"><CODE>-nocommand</CODE></a>
+specify scripts to be executed
 in response to these buttons.  The default scripts simply destroy
 the window and return 0 or 1, but the return value is lost.
 To get the return value, you must make the dialog modal using
@@ -47,7 +48,8 @@ if [::tycho::Dialog::wait .z] {
 <p>
 There is a bit of a technicality with using this capability.
 Suppose you wish to create a dialog box that returns the strings
-"yes" or "no" instead of 0 or 1.  The -yescommand and -nocommand
+"yes" or "no" instead of 0 or 1.  The <CODE>-yescommand</CODE> and
+<CODE>-nocommand</CODE>
 options specify Tcl scripts, and it is difficult to get a Tcl
 script to return a value.  You could use the "set" command as
 follows:
@@ -57,9 +59,9 @@ follows:
          -nocommand {set y {no}}
 ::tycho::Dialog::wait .z
 </pre></tcl>
-But this not good coding style.  The variable "y" gets set
+But this not good coding style.  The variable "<CODE>y</CODE>" gets set
 at the global scope, clobbering any previous value the user might
-have unwisely stored in y.  A simple workaround is to use the
+have unwisely stored in <CODE>y</CODE>.  A simple workaround is to use the
 Tcl <a name="format command"><code>format</code></a> command,
 as follows:
 <tcl><pre>
@@ -76,15 +78,16 @@ as follows:
 The <code>YesNoCancel</code> class is like the
 <code>YesNoQuery</code> class, but there is one
 more button labeled "Cancel" and one more option
-<a name="cancelcommand option"><i>-cancelcommand</i></a>.
+<a name="cancelcommand option"><CODE>-cancelcommand</CODE></a>.
 To see an example, execute this:
 <tcl><pre>
 ::tycho::YesNoCancel .z -text {Are you awake?}
 ::tycho::Dialog::wait .z
 </pre></tcl>
-By default, the cancel button returns -1, unless you specify
-something different withe the <i>-cancelcommand</i> option.
-Similarly, by default, the Yes button returns 1 and the No button 0.
+By default, the cancel button returns <CODE>-1</CODE>, unless you specify
+something different withe the <CODE>-cancelcommand</CODE> option.
+Similarly, by default, the Yes button returns <CODE>1</CODE>
+and the No button <CODE>0</CODE>.
 
 <p>
 <h2><a name="Query class">Query Class</a></h2>
@@ -98,8 +101,8 @@ procedures, which provide simpler interfaces.
 You can also create instances of it directly.
 <p>
 The actions taken in response to the OK and Cancel buttons
-are given by the <i><a name="okcommand option">-okcommand</a></i> and
-<i><a name="cancelcommand option">-cancelcommand</a></i> options.
+are given by the <a name="okcommand option"><CODE>-okcommand</CODE></a> and
+<a name="cancelcommand option"><CODE>-cancelcommand</CODE></a> options.
 By default, both buttons destroy the object.  In addition, if you use the class
 as a modal dialog using <code>wait</code>, then
 the OK button returns the user responses as a list and the
@@ -133,7 +136,7 @@ For example,
 </pre></tcl>
 <p>
 Notice that it was no longer necessary to specify a
-<i>-okcommand</i> option.
+<CODE>-okcommand</CODE> option.
 <p>
 The list returned by the <code><a name="get method">get</a></code>
 method has the form {tag value tag value ...}. This form can be used to
@@ -165,7 +168,8 @@ An <code>Edit</code> widget is used, providing
 an emacs-like text editor.
 Note that the OK button
 is no longer triggered by &lt;Return&gt;.  It can now be triggered by
-&lt;Meta-Return&gt;.  This is because in a multi-line entry box, &lt;Return&gt;
+<CODE>Meta-Return</CODE>.
+This is because in a multi-line entry box, <CODE>Return</CODE>
 moves the insertion cursor to a new line.
 <p>
 The <code><a name="radio method">radio</a></code> method
@@ -180,13 +184,13 @@ then just recreate it),
 The arguments are a name for the bank of buttons, a label,
 the list of possible values, and the default selection.
 <p>
-In simple queries, the Tab key moves the focus
+In simple queries, the <CODE>Tab</CODE> key moves the focus
 from one query entry to the next.
 When there are multi-line queries in a <code>Query</code> object,
-then instead of Tab, Control-Tab moves the insertion
-cursor from query to query.  Within a radio button, either Tab or
-Control-Tab moves the focus
-from button to button.  The Space key selects the current button.
+then instead of <CODE>Tab</CODE>, <CODE>C-Tab</CODE> moves the insertion
+cursor from query to query.  Within a radio button, either <CODE></CODE> or
+<CODE>C-Tab</CODE> moves the focus
+from button to button.  The <CODE>Space</CODE> key selects the current button.
 <p>
 It is also possible to have queries that are mediated by some other
 widget.  For example,
@@ -222,8 +226,8 @@ pop-up menu as soon as it appears.
 In all of the above examples, we have first created the <code>Query</code>
 object, and then added queries to it by invoking its methods.
 Alternatively, the
-<i><a name="queries option">-queries option</a></i> specifies the initial
-list of entry boxes that will appear in the window, and can be used
+<a name="queries option"><CODE>-queries</CODE> option</a> specifies the 
+initial list of entry boxes that will appear in the window, and can be used
 to create an entire dialog all at once.
 The value of this option should be a list of queries, where each
 query is a list beginning with a type keyword.
@@ -277,7 +281,7 @@ Here is an example that creates one of each of the types of queries:
     -cancelcommand {::tycho::inform "You canceled"}
 </pre></tcl>
 <p>
-The <code><a name="disable query">disable</a></code> method
+The <a name="disable query"><code>disable</code></a> method
 disables a query.  For instance,
 <tcl><pre>
 .z disable first
@@ -299,7 +303,7 @@ method may also specify a particular tag.
 ::tycho::inform [.z get second]
 </pre></tcl>
 <p>
-The <a name="clear query">clear method</a>
+The <a name="clear query"><CODE>clear</CODE> method</a>
 clears all entries (or a single entry, if
 a tag argument is given).
 <tcl><pre>
@@ -308,7 +312,7 @@ a tag argument is given).
 In the case of radio button and mediated entries, "clear" means
 to reset to the default value.
 <p>
-The <a name="insert query">insert method</a>
+The <a name="insert query"><CODE>insert</CODE> method</a>
 inserts a string into the specified entry.
 <tcl><pre>
 .z insert second {An inserted string. }
@@ -318,7 +322,8 @@ You may delete this window by clicking on the OK button.
 <p>
 The class is derived from <a href="dialog.html">Dialog</a>,
 so it has the
-options -text, -bitmap, and -title, which control the text
+options <CODE>-text</CODE>, <CODE>-bitmap</CODE>,
+and <CODE>-title</CODE>, which control the text
 of the query, a bitmap left of the query, and a window manager title.
 For example,
 <tcl><pre>
@@ -332,7 +337,8 @@ For example,
     -cancelcommand {::tycho::inform "You canceled"}
 </pre></tcl>
 <p>
-The order of the -bitmap and -text options relative to the -queries
+The order of the <CODE>-bitmap</CODE> and <CODE>-text</CODE> options
+relative to the <CODE>-queries</CODE>
 option is important.  In most circumstances, you will want them first.
 <p>
 You also have access to the "new" method of the base class.
@@ -349,12 +355,13 @@ Consider the example:
 ::tycho::FileBrowser .f -command "::tycho::inform"
 wm deiconify .f
 </pre></tcl>
-The <a name="command option">-command option</a>
+The <a name="command option"><CODE>-command</CODE> option</a>
 specifies a command to execute once the user
 has selected a file name.  The file name is appended as an argument
 to the command before the command is executed.  Thus, in this example,
-if you select a file named "foo" in directory /users/bar/, then
-the command that is executed will be "::tycho::inform /users/bar/foo".
+if you select a file named "foo" in directory <CODE>/users/bar/</CODE>, then
+the command that is executed will be 
+<CODE>::tycho::inform /users/bar/foo</CODE>.
 Refer to the <a href="../usersGuides/FileBrowserHelp.html">user-level documentation</a>
 for further information about the file browser.
 <p>
@@ -371,8 +378,8 @@ Consider the example:
 ::tycho::ColorBrowser .f -command "::tycho::inform"
 wm deiconify .f
 </pre></tcl>
-The <a name="command option, color browser">-command option</a> again
-specifies a command to execute once the user
+The <a name="command option, color browser"><CODE>-command</CODE> option</a>
+again specifies a command to execute once the user
 has selected a color name, as above.
 Refer to the <a href="../usersGuides/ColorBrowserHelp.html">user-level
 documentation</a>
@@ -393,10 +400,10 @@ as done above.
 <a href="../../../doc/index.html">Tycho Home Page</a><br>
 <p>
 <HR>
-Copyright &#169 %Q%, The Regents of the University of California.
+Copyright &#169 1996, The Regents of the University of California.
 All rights reserved.
 <br>
-Last updated: %D%,
+Last updated: $Date$,
 comments to: <author>eal@eecs.berkeley.edu</author>
 </body>
 </html>

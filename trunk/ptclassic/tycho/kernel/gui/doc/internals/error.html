@@ -23,28 +23,28 @@ Thus, if I trigger an error as follows:
 <tcl><pre>
 error {Error message}
 </pre></tcl>
+
 Tcl believes that an error occurred trying to run the Tcl script
-embedded in this text.  If you click on the "Stack Trace" button
-that appears in error message box,
-you can verify that the error occurred within a call of the form
-"uplevel #0 $cmd".  This is, in fact, the statement that executes
-embedded Tcl code in this document.  The Tcl code you just executed
-triggered an error.
-The <a name="stack trace">stack trace</a>
-generally reflects information about the most recent
-error that generated a stack trace.  Thus, if you invoke the "tkerror"
-script directly the stack trace will be
-fairly meaningless, if there is one at all.  The correct way to
-signal an error within your own scripts by calling <code>error</code>, not
-<code>tkerror</code>.
+embedded in this text.  If you click on the <CODE>Stack Trace</CODE>
+button that appears in error message box, you can verify that the
+error occurred within a call of the form <CODE>uplevel #0 $cmd</CODE>.
+This is, in fact, the statement that executes embedded Tcl code in
+this document.  The Tcl code you just executed triggered an error.
+The <a name="stack trace">stack trace</a> generally reflects
+information about the most recent error that generated a stack trace.
+Thus, if you invoke the <CODE>tkerror</CODE> script directly the stack
+trace will be fairly meaningless, if there is one at all.  The correct
+way to signal an error within your own scripts by calling
+<code>error</code>, not <code>tkerror</code>.
+
 <p>
 <a href="../../../doc/index.html">Tycho Home Page</a><br>
 <p>
 <HR>
-Copyright &#169 %Q%, The Regents of the University of California.
+Copyright &#169 1996, The Regents of the University of California.
 All rights reserved.
 <br>
-Last updated: %D%,
+Last updated: $Date$,
 comments to: <author>eal@eecs.berkeley.edu</author>
 </body>
 </html>
