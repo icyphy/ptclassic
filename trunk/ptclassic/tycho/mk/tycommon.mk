@@ -403,7 +403,7 @@ jstest_jsimple:
 	$(MAKE) AUXCLASSPATH=:$(JSCLASSPATH) test_jsimple
 	@echo "To view code coverage results, run javascope or jsreport"
 	@echo "To get a summary, run jsreport -dbsummary" 
-`# If necessary, instrument the classes, then rebuild, then run the tests
+# If necessary, instrument the classes, then rebuild, then run the tests
 jsall: jsoriginal
 	$(MAKE) clean
 	$(MAKE) jsbuild
