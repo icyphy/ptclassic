@@ -30,7 +30,7 @@ static void copyActualStates(const Block& src, Block& dest) {
 	const State* srcStatePtr;
 	State *destStatePtr;
 	while ((srcStatePtr = nexts++) != 0 && (destStatePtr = nextd++) != 0)
-		destStatePtr->setValue(
+		destStatePtr->setInitValue(
 			hashstring(srcStatePtr->currentValue()));
 }
 

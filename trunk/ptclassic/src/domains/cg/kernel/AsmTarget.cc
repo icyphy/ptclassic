@@ -49,7 +49,7 @@ void AsmTarget :: initStates() {
 		"localhost", savestring(hostDes), 
 		A_NONSETTABLE|A_NONCONSTANT));
 	// change default value of destDirectory
-	destDirectory.setValue("~/DSPcode");
+	destDirectory.setInitValue("~/DSPcode");
 }
 
 void AsmTarget :: setup() {
