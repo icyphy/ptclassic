@@ -22,7 +22,8 @@ $Id$
 int
 AsmTarget::setup(Galaxy& g) {
 // clear the memory
-	mem.reset();
+	if (mem == 0) return FALSE;
+	mem->reset();
 // initialize proc ptrs and create schedule
 	if (!Target::setup(g)) return FALSE;
 	GalStarIter nextStar(g);
@@ -33,7 +34,7 @@ AsmTarget::setup(Galaxy& g) {
 	while ((s = (AsmStar*)nextStar++) != 0) {
 		allocReq(*s);
 	}
-	if (!mem.performAllocation()) return FALSE;
+	if (!mem->performAllocation()) return FALSE;
 // do all initCode methods.
 	nextStar.reset();
 	while ((s = (AsmStar*)nextStar++) != 0)
@@ -44,27 +45,27 @@ AsmTarget::setup(Galaxy& g) {
 // request memory for all structures in a star
 int
 AsmTarget::allocReq(AsmStar& star) {
-	int sflag = TRUE;
-	int pflag = TRUE;
-// first, allocate for portholes.
+// first, allocate for portholes.  We only allocate memory for input ports;
+// output ports share the same buffer as the input port they are connected to.
 	AsmStarPortIter nextPort(star);
 	AsmPortHole* p;
-	while ((p = nextPort++) != 0)
-		pflag = pflag && mem.allocReq(*p);
+	while ((p = nextPort++) != 0) {
+		if (p->isItOutput()) continue;
+		if (!mem->allocReq(*p)) {
+			Error::abortRun(*p,
+			  "memory allocation failed for porthole buffer");
+			return FALSE;
+		}
+	}
 	BlockStateIter nextState(star);
 	State* s;
-	while ((s = nextState++) != 0)
-		sflag = sflag && mem.allocReq(*s);
-	if(!sflag) {
-		Error::abortRun(
-	   	    "Cannot find memory for States in ", star.readName());
-		return FALSE;
-	} else if(!pflag) {
-		Error::abortRun(
-	   	    "Cannot find memory for PortHoles in ", star.readName());
-		return FALSE;
-	} else {
-		return TRUE;
+	while ((s = nextState++) != 0) {
+		if (!mem->allocReq(*s)) {
+			Error::abortRun(*s,
+			      "memory allocation failed for state buffer");
+			return FALSE;
+		}
 	}
+	return TRUE;
 }
 
