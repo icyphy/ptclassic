@@ -325,7 +325,7 @@ class ::tycho::Edit {
 
 #########################################################################
 #### -scrollbar option configuration
-# Spefify whether the widget should have a scrollbar (0 or 1).
+# Specify whether the widget should have a scrollbar (0 or 1).
 # 
 configbody ::tycho::Edit::scrollbar {
 

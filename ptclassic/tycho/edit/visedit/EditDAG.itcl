@@ -444,7 +444,7 @@ body ::tycho::EditDAG::addArc {} {
 # Add a new child node to the currently selected node. If there is no
 # currently selected node, issue a message instructing the user to
 # select a node. Otherwise, query the user for the name and contents.
-# If there is more than one currenly selected node, make the new node
+# If there is more than one currently selected node, make the new node
 # a child of both.
 #
 body ::tycho::EditDAG::addChild {} {
