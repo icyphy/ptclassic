@@ -28,17 +28,23 @@ Date of last revision:
 // This is the effective constructor for making an expanded graph 
 // Returns TRUE if graph is okay, else returns FALSE
 
-int ParGraph::createMe(Galaxy& galaxy) {
+int ParGraph::createMe(Galaxy& galaxy, int selfLoopFlag) {
 
 	nodePairs.initialize();
 	myGal = &galaxy;
 
-	if (ExpandedGraph::createMe(galaxy) == 0) {
+	if (ExpandedGraph::createMe(galaxy, selfLoopFlag) == 0) {
 		Error::abortRun("Cannot create expanded graph");
 		return FALSE;
 	}
 	if (logstrm)
 		*logstrm << "Created expanded graph successfully\n";
+
+	// reset the busy flags
+	EGIter niter(*this);
+	EGNode* n;
+	while ((n = niter++) != 0)
+		n->resetVisit();
 
 	if (initializeGraph() == 0) {
 		Error::abortRun("Cannot initialize precedence graph");
@@ -48,6 +54,20 @@ int ParGraph::createMe(Galaxy& galaxy) {
 }
 
 int ParGraph :: initializeGraph() { return TRUE; }
+
+			//////////////////////
+			///  findRunnable  ///
+			//////////////////////
+
+void ParGraph :: findRunnableNodes() {
+	// reset the runnable node list.
+	runnableNodes.initialize();
+
+	EGSourceIter nxtSrc(*this);
+	ParNode* src;
+	while ((src = (ParNode*) nxtSrc++) != 0)
+		sortedInsert(runnableNodes,src,1); // sort the runnable nodes.
+}
 
 			///////////////////
 			///  SetNodeSL  ///
@@ -144,11 +164,46 @@ void ParGraph :: removeArcsWithDelay() {
 
 		while((q = preciter++)!=0)
 			if (q->delay() > 0) {
-				q->removeMyArc();
+				q->hideMe();
 				ParNode* p = (ParNode*) q->farEndNode();
 				LOG_NEW; NodePair* pair = new NodePair(p, node);
 				nodePairs.put(pair);
 			}
+	}
+}
+
+			////////////////////////////
+			///  restoreHiddenGates  ///
+			////////////////////////////
+
+// restore the removed arcs with delays.
+void ParGraph :: restoreHiddenGates() {
+	EGIter Nodeiter(*this);
+	EGNode* node;
+	while((node = Nodeiter++) != 0) {
+		EGGateLinkIter hidden(node->hiddenGates);
+		EGGate* g;
+		while ((g = hidden++) != 0) {
+			g->getLink()->removeMeFromList();
+			if (g->isItInput()) {
+				node->ancestors.insertGate(g,0);
+			} else {
+				node->descendants.insertGate(g,0);
+			}
+		}
+	}
+}
+
+			///////////////////
+			///  replenish  ///
+			///////////////////
+// Replenishes the tempAncs and tempDescs for each node in the DCGraph.
+
+void ParGraph::replenish(int flag) {
+	EGIter Noditer(*this);  // Attach iterator to the ParGraph
+	ParNode *nodep;
+	while ((nodep = (ParNode*) Noditer++) != 0) {
+		nodep->copyAncDesc(this, flag);
 	}
 }
 
@@ -167,4 +222,11 @@ int ParGraph :: pairDistance() {
 	return distance;
 }
 
-ParGraph :: ~ParGraph() {}
+ParGraph :: ~ParGraph() {
+	ListIter nextPair(nodePairs);
+	NodePair* p;
+
+	while((p = (NodePair*) nextPair++) != 0) {
+		LOG_DEL; delete p;
+	}
+}

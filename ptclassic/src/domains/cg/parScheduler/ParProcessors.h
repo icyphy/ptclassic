@@ -22,6 +22,8 @@ Date of last revision:
 #include "IntArray.h"
 #include "BaseMultiTarget.h"
 
+class ParGraph;
+
 /////////////////////////
 // class ParProcessors //
 /////////////////////////
@@ -34,7 +36,7 @@ public:
 	// constructor
 	ParProcessors(int, BaseMultiTarget*);
 
-	virtual ~ParProcessors()  {}
+	virtual ~ParProcessors();
 
 	// return size
 	int size()	{ return numProcs; }
@@ -52,8 +54,16 @@ public:
 	// initialize arrays
 	void initialize();
 
+	// list scheduling after processor assignment is done.
+	// return the makespan.
+	int listSchedule(ParGraph* graph);
+
 	// display
 	StringList display(NamedObj* gal);
+
+	// create sub galaxies for each processor: code generation.
+	void createSubGals();
+	StringList displaySubUnivs();
 
 protected:
 	// number of processors.
@@ -68,12 +78,30 @@ protected:
 	// processor indices
 	IntArray pId;
 
+	// A list of communication nodes
+	EGNodeList SCommNodes;
+
+	// The number of interprocessor communications in the schedule.
+	int commCount;
+
+	// makes send and receive nodes for IPC.
+	void findCommNodes(ParGraph*, EGNodeList& );
+
+	// create comm nodes
+	virtual ParNode* createCommNode(int i);
+
+	// remove comm nodes
+	void removeCommNodes();
+
 	// sort the processor ids with available times if they are not unused
 	// processors. All unused processors are appended after the processors
 	// that are available at the specified limit and before the busy
 	// processors at that time.
 	void sortWithAvailTime(int);
 
+	// Check whether the user want to assign all invocations of a star
+	// into the same processor or not.
+	int OSOPreq() { return mtarget->getOSOPreq(); }
 };
 
 #endif
