@@ -96,6 +96,8 @@ configure: $(GNU_OBJ)
 	-(cd $(GNU_OBJ)/gcc/objc; ln -s $(GNU_SRC)/gcc/objc/*.h .)
 	-(cd $(GNU_OBJ)/gcc/objc; ln -s $(GNU_SRC)/gcc/objc/*.m .)
 	-(cd $(GNU_OBJ)/gcc/cp; ln -s $(GNU_SRC)/gcc/cp/*.c .)
+	# gcc-2.7.0 needs this for make bootstrap
+	-(cd $(GNU_OBJ)/gcc/cp; ln -s $(GNU_SRC)/gcc/cp/*.h .)
 	-(cd $(GNU_OBJ)/librx; ln -s $(GNU_SRC)/librx/*.c .)
 	-(cd $(GNU_OBJ)/libstdc++; ln -s $(GNU_SRC)/libstdc++/*.cc .)
 	-(cd $(GNU_OBJ)/libstdc++/stl; ln -s $(GNU_SRC)/libstdc++/stl/*.cc .)
@@ -198,6 +200,8 @@ hp_configure: $(GNU_OBJ)
 	-(cd $(GNU_OBJ)/gcc/objc; ln -s $(HP_GNU_SRC)/gcc/objc/*.h .)
 	-(cd $(GNU_OBJ)/gcc/objc; ln -s $(HP_GNU_SRC)/gcc/objc/*.m .)
 	-(cd $(GNU_OBJ)/gcc/cp; ln -s $(HP_GNU_SRC)/gcc/cp/*.c .)
+	# gcc-2.7.0 needs this for make bootstrap
+	-(cd $(GNU_OBJ)/gcc/cp; ln -s $(HP_GNU_SRC)/gcc/cp/*.h .)
 	# Building libg++ requires as to bin in gcc so -B arg will work
 	-(cd $(GNU_OBJ)/gcc; ln -s ../gas/as.new as)
 	-(cd $(GNU_OBJ)/librx; ln -s $(HP_GNU_SRC)/librx/*.c .)
