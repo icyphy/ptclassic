@@ -65,6 +65,14 @@ protected:
 	IntState compile;
 	IntState report;
 	
+	// Return the condition indicating if system clock generator is needed.
+	// For synthesis, we don't want a system clock.
+	/*virtual*/ int systemClock() { return FALSE; }
+
+	// Method called by comm stars to place important code into structure.
+        // For synthesis, we define it as null.
+	/*virtual*/ void registerComm(int, int, int, const char*) {};
+
 private:
 
 };
