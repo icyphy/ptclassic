@@ -38,6 +38,7 @@ at every level.
 #endif
 
 #include "GalIter.h"
+#include "ConstIters.h"
 
 // This private class is a stack of GalTopBlockIter iterators.
 
@@ -55,8 +56,6 @@ GalAllBlockIter::GalAllBlockIter(Galaxy& g) {
 	stack = 0;
 	LOG_NEW; thisLevelIter = new GalTopBlockIter(g);
 }
-
-GalStarIter::GalStarIter(Galaxy& g) : GalAllBlockIter(g) {}
 
 // The reset method pops up to the top level, then resets the top iterator
 void GalAllBlockIter::reset() {
@@ -102,6 +101,67 @@ Block* GalAllBlockIter::next() {
 	return b;
 }
 
+class CIterContext {
+	friend CGalAllBlockIter;
+
+	CGalTopBlockIter* iter;
+	CIterContext* link;
+	CIterContext(CGalTopBlockIter* ii,CIterContext* l)
+		: iter(ii), link(l) {}
+};
+
+// Constructor.  Clear stack, create an iterator for this level.
+CGalAllBlockIter::CGalAllBlockIter(const Galaxy& g) {
+	stack = 0;
+	LOG_NEW; thisLevelIter = new CGalTopBlockIter(g);
+}
+
+// The reset method pops up to the top level, then resets the top iterator
+void CGalAllBlockIter::reset() {
+	while (stack) pop();
+	thisLevelIter->reset();
+}
+
+// Destructor.
+CGalAllBlockIter::~CGalAllBlockIter() {
+	reset();
+	LOG_DEL; delete thisLevelIter;
+}
+
+// push current iterator onto stack, enter a new galaxy g.
+inline void CGalAllBlockIter::push(const Galaxy& g) {
+	LOG_NEW; stack = new CIterContext(thisLevelIter, stack);
+	LOG_NEW; thisLevelIter = new CGalTopBlockIter(g);
+}
+
+// pop an iterator off of the stack.
+void CGalAllBlockIter::pop() {
+	if (stack == 0) return;
+	CIterContext* t = stack;
+	LOG_DEL; delete thisLevelIter;
+	thisLevelIter = t->iter;
+	stack = t->link;
+	LOG_DEL; delete t;
+}
+
+// This method returns the next block.
+const Block* CGalAllBlockIter::next() {
+	const Block* b = thisLevelIter->next();
+	while (!b) {
+		// current level exhausted.  Try popping to proceed.
+		// if stack is empty we are done.
+		if (stack == 0) return 0;
+		pop();
+		b = thisLevelIter->next();
+	}
+	// have a block.  If it's a galaxy, we will need to process
+	// it; this is pushed so we'll do it next time.
+	if (!b->isItAtomic()) push (b->asGalaxy());
+	return b;
+}
+
+GalStarIter::GalStarIter(Galaxy& g) : GalAllBlockIter(g) {}
+
 // This method returns the next star.
 Star* GalStarIter::next() {
 	while (1) {
@@ -110,3 +170,16 @@ Star* GalStarIter::next() {
 		if (b->isItAtomic()) return &(b->asStar());
 	}
 }
+
+CGalStarIter::CGalStarIter(const Galaxy& g) : CGalAllBlockIter(g) {}
+
+// This method returns the next star.
+const Star* CGalStarIter::next() {
+	while (1) {
+		const Block* b = CGalAllBlockIter::next();
+		if (!b) return 0;
+		if (b->isItAtomic()) return &(b->asStar());
+	}
+}
+
+

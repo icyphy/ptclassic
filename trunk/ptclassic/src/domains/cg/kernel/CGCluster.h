@@ -76,10 +76,14 @@ public:
     
     /*virtual*/ Cluster* asCluster() { return this; }
     
+    /*virtual*/ const Cluster* asCluster() const { return this; }
+    
     /*virtual*/ int isSDFinContext() const {
 	return isClusterSDFinContext();
     }
 
+    /*virtual*/ int myExecTime();
+    
     // return my domain.  all clusters should redefine this method of block.
     /*virtual*/ const char* domain () const { return myDomain; }
 };

@@ -62,7 +62,22 @@ void CGCluster::setMasterBlock(Block*m,PortHole**newPorts) {
 	setInnerSched(newSched);
     }
 }	    
-	
+
+int CGCluster::myExecTime() {
+    if (isClusterAtomic())
+	return ((DataFlowStar*) Cluster::master)->myExecTime();
+    int execTime = 0;
+    DFClusterStarIter next(*this);
+    DataFlowStar* s;
+    while ((s = next++) != 0) {
+	printf("Star: %s\tExectime: %d\tReps: %d\tTotal: %d\n",
+	       (const char*) s->fullName(),s->myExecTime(),s->reps(),
+	       execTime);
+	execTime += s->myExecTime() * s->reps();
+    }
+    return execTime;
+}
+
 CGCluster::CGCluster(const char* domain):
 CGStar(),DFClusterBase(*this,domain)
 {};

@@ -42,6 +42,8 @@ at every level.
 #include "Star.h"
 
 class IterContext;
+class CGalTopBlockIter;
+class CIterContext;
 
 class GalAllBlockIter {
 public:
@@ -57,6 +59,20 @@ protected:
 	void pop();
 };
 
+class CGalAllBlockIter {
+public:
+	CGalAllBlockIter(const Galaxy& g);
+	~CGalAllBlockIter();
+	const Block* next();
+	const Block* operator++(POSTFIX_OP) { return next();}
+	void reset();
+protected:
+	CGalTopBlockIter *thisLevelIter;
+	CIterContext *stack;
+	void push(const Galaxy&);
+	void pop();
+};
+
 // GalStarIter essentially uses a GalAllBlockIter and skips the
 // internal galaxies, returning only stars.
 
@@ -69,6 +85,18 @@ public:
 
 	// need a public destructor because of private derivation
 	~GalStarIter() {}
+};
+
+
+class CGalStarIter : private CGalAllBlockIter {
+public:
+	CGalStarIter(const Galaxy& g);
+	const Star* next();
+	const Star* operator++(POSTFIX_OP) { return next();}
+	void reset() {	CGalAllBlockIter::reset();}
+
+	// need a public destructor because of private derivation
+	~CGalStarIter() {}
 };
 
 #endif

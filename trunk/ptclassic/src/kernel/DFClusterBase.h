@@ -37,6 +37,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 ********************************************************************/
 
 #include "Cluster.h"
+class DataFlowStar;
 
 class DFClusterBase : public Cluster {
 public:
@@ -51,6 +52,33 @@ public:
     /*virtual*/ int generateSchedule();
 };
 
+class DFClusterStarIter : private ClusterIter {
+public:
+    DFClusterStarIter(Cluster&n):ClusterIter(n) {};
+
+    DataFlowStar* next() {
+	Cluster* cluster = ClusterIter::next();
+	return cluster? (DataFlowStar*) &cluster->star() : NULL ;
+    }
+    
+    DataFlowStar* operator++(POSTFIX_OP) { return next();}
+
+    ClusterIter::reset;
+}; 
+
+class CDFClusterStarIter : private CClusterIter {
+public:
+    CDFClusterStarIter(const Cluster&n):CClusterIter(n) {};
+
+    const DataFlowStar* next() {
+	const Cluster* cluster = CClusterIter::next();
+	return cluster? (DataFlowStar*) &cluster->star() : NULL ;
+    }
+    
+    const DataFlowStar* operator++(POSTFIX_OP) { return next();}
+
+    CClusterIter::reset;
+}; 
 #endif
 
 
