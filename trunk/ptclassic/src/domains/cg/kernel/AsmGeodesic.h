@@ -36,10 +36,10 @@ public:
 	int isA(const char*) const;
 	int bufSize() const;
 	void initDestList() { forkType |= F_SRC; dests.initialize(); }
-	void addDest(AsmGeodesic *d) {
-		d->forkType |= F_DEST;
-		d->src = this;
-		dests.put(d);
+	void addDest(AsmGeodesic &d) {
+		d.forkType |= F_DEST;
+		d.src = this;
+		dests.put(&d);
 	}
 
 	// Constructor
@@ -51,10 +51,13 @@ public:
 	}
 
 	// Return the address assigned to the geodesic.
-	unsigned address() const { return addr;}
+	// if I am a fork destination, my address is that of my source.
+	unsigned address() const;
 
 	// Return a pointer to the memory assigned to the geodesic
-	ProcMemory* memory() const { return mem; }
+	// if I am a fork destination, my memory is that of my source.
+
+	ProcMemory* memory() const;
 	
 private:
 	int internalBufSize() const;
