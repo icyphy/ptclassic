@@ -246,6 +246,7 @@ extern "C" {
 	  code {
 		// expand the pathname and check its existence
 		static InfString lastdirname;
+                int retval = 0;
 		if ( dirname[0] != 0 ) {
 		  const char *expandeddirname = expandPathName(dirname);
 		  char *fulldirname = new char[strlen(expandeddirname) + 1];
@@ -258,6 +259,7 @@ extern "C" {
 				   fulldirname );
 		      lastdirname = fulldirname;
 		    }
+                    retval = 0;
 		  }
 		  else {
 		    char *changeDirCommand = new char[strlen(fulldirname) + 4];
@@ -265,9 +267,11 @@ extern "C" {
 		    strcat(changeDirCommand, fulldirname);
 		    evaluateOneMatlabCommand(changeDirCommand);
 		    delete [] changeDirCommand;
+                    retval = 1;
 		  }
 		  delete [] fulldirname;
 		}
+                return retval;
 	  }
 	}
 
