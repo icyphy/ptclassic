@@ -53,6 +53,10 @@ If no target architectures are defined for the current domain, an
 error message will be issued.
 T}
 .sp 0.5
+edit-seed	#	T{
+To specify the seed of the random number generation.
+T}
+.sp 0.5
 find-name	\0	T{
 Some error messages give the name of the offending instance of a block.
 This command will cause that block to be highlighted, given its name.
