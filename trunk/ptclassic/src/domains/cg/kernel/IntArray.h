@@ -1,7 +1,6 @@
 #ifndef _IntArray_h
 #define _IntArray_h
 #ifdef __GNUG__
-#pragma once
 #pragma interface
 #endif
 
@@ -19,7 +18,7 @@ Array data structure.
 
 *****************************************************************/
 
-#ifdef __GNUG__
+#if defined(__GNUG__) && __GNUG__ == 1
 #define DEL_ARRAY(name,size) LOG_DEL; delete [size] name; delete name
 #else
 #define DEL_ARRAY(name,size) LOG_DEL; delete [] name
