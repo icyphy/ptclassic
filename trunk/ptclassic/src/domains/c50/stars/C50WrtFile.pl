@@ -19,9 +19,6 @@ limitation of liability, and disclaimer of warranty provisions.
 .Id "file output"
 Writes data to a file, for use with the TI DSK320C5x simulator.
 	}
-	execTime {
-		return 2;
-	}
 	input {
 		name {input}
 		type {ANYTYPE}
@@ -56,7 +53,7 @@ Writes data to a file, for use with the TI DSK320C5x simulator.
 	go {
 		addCode(copy);
 	}
+	execTime {
+		return 2;
+	}
 }
-
-
-

@@ -12,9 +12,6 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { C50 nonlinear functions library }
 	explanation {The output is the square of the input.}
-	execTime {
-		return 6;
-	}
 	input {
 		name {input}
 		type {FIX}
@@ -35,7 +32,7 @@ limitation of liability, and disclaimer of warranty provisions.
  	go {
 	 	 addCode(std);
 	}
+	execTime {
+		return 6;
+	}
 }
-
-
-
