@@ -1,5 +1,5 @@
 .\" $Id$
-.NA "prioritized"
+.NA prioritized
 .SD
 This is a high-level simulation of a shared memory
 with prioritized arbitration.

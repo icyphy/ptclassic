@@ -1,5 +1,5 @@
 .\" $Id$
-.NA "ATMPattRecover"
+.NA ATMPattRecover
 .SD
 This demonstration implements a voice-cell recovery technique.
 Cells which have been dropped are replaced by samples determined
