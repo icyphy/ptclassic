@@ -30,4 +30,4 @@
 include $(ROOT)/mk/config-alpha.mk
 
 # Suggested by Frederic Boulanger <Frederic.Boulanger@supelec.fr>
-XV_RAND = "-DfsQ_RANDOM_DECL=extern int random fsQ_proto((void))"
+XV_RAND = "-DfsQ_RANDOM_DECL=\"extern int random fsQ_proto((void))\""
