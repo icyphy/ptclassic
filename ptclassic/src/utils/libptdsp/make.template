@@ -66,7 +66,8 @@ LIB_HDRS = \
  ptdspRGBYUVConversion.h \
  ptdspHistogram.h \
  ptdspExtendedGCD.h \
- ptdspSmithForm.h
+ ptdspSmithForm.h \
+ ptdspSinc.h
 
 HDRS = ptdspcephes.h $(LIB_HDRS)
 
