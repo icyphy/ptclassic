@@ -31,6 +31,7 @@ static char SccsId[]="$Id$";
 #include "oct.h"
 #include "oh.h"
 #include "list.h"
+#include "tap_int.h"
 
 struct boxId {
     octId id;
