@@ -17,9 +17,10 @@ CONFIG=$(ROOT)/config-$(ARCH).mk
 include $(CONFIG)
 
 SDFKERNEL = $(ROOT)/src/domains/sdf/kernel
+LOOPKERNEL = $(ROOT)/src/domains/sdf/loopScheduler
 CGKERNEL = $(ROOT)/src/domains/cg/kernel
 
-INCL =-I$(SDFKERNEL) -I$(KERNDIR) -I$(CGKERNEL)
+INCL =-I$(SDFKERNEL) -I$(LOOPKERNEL) -I$(KERNDIR) -I$(CGKERNEL)
 
 OBJS = $(LIBSRCS:.cc=.o)
 LIB = libcompileSDF.a
