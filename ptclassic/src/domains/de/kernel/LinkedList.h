@@ -44,8 +44,7 @@ deallocating memory for the objects, etc.
         general. In particular, an arbitrary member can be
         removed (regardless of the position in the list) and
         the Links can be directly accessed in an efficient
-        manner. The LinkedList class does not have an
-        associated iterator.
+        manner. 
 
 **************************************************************************/
 
@@ -61,6 +60,7 @@ deallocating memory for the objects, etc.
 
 class Link {
 	friend class LinkedList;
+	friend class LinkedListIter;
 protected:
 	Link *next,*previous; 
 	Pointer e; 
@@ -74,6 +74,7 @@ protected:
 
 class LinkedList
 {
+	friend class LinkedListIter;
 public:
 	// Destructor
 	~LinkedList()  { initialize(); }
@@ -144,6 +145,84 @@ private:
         Link *lastNode;
 	int dimen;
 };
+
+
+        ///////////////////////////////////
+        // class LinkedListIter
+        ///////////////////////////////////
+
+// LinkedListIter steps sequentially through a LinkedList.  Warning: if
+// the list is modified "out from under" the LinkedListIter, bad things may
+// happen if next() is called, though reset() will be safe.
+
+class LinkedListIter {
+public:
+        // constructor: attach to a LinkedList
+        inline LinkedListIter(const LinkedList& l) : list(&l) { reset(); }
+
+        // reset to the beginning of a list
+        void reset();
+
+        // next and operator++ are synonyms.  Return the next element,
+        // return 0 if there are no more.
+        // This routine has been re-implemented and optimized for speed
+        // because of its heavy usage.  The if-structure is organized
+        // so that necessary ifs are executed, but for cases where only
+        // a few ifs are needed, the minimum number of ifs is done for
+        // the most common cases, with rarer cases taking decreasing
+        // priority in the if-structure.
+        inline Pointer next() {
+          if (startAtHead) {
+            // Starting at the head of the list.  Use list->lastNode to 
+	    // find the head of the list.  If list->lastNode is NULL, 
+	    // the list is empty.
+            startAtHead = FALSE;
+            if (list->lastNode) {
+              ref = list->lastNode->next;
+              return ref->e;
+            }
+            // The list is empty, no entries:  passing the end of the list.
+            else {
+              ref = 0;
+              return ref;
+            }
+          }
+          else {
+            // Check to see if we're not at the end of the list.
+            if (ref != list->lastNode) {
+              // Check to see if ref is not NULL:  end of list not yet passed.
+              if (ref) {
+                ref = ref->next;
+                return ref->e;
+              }
+              // ref is NULL:  end of list was already passed.
+              else {
+                return ref;
+              }
+            }
+            // Passing the end of the list, no more entries.
+            else {
+              ref = 0;
+              return ref;
+            }
+          }
+        }
+
+        inline Pointer operator++ (POSTFIX_OP) { return next();}
+
+        // attach the LinkedListIter to a different object
+        void reconnect(const LinkedList&);
+
+        // remove the currently pointed to ref and update the
+        // the ref pointer - if next hasn't been called, the lastNode
+        // will be removed
+        void remove();
+private:
+        const LinkedList* list;
+        Link *ref;
+        int startAtHead;
+};
+
 
 
 #endif
