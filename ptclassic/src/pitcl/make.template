@@ -52,9 +52,16 @@ include $(CONFIG)
 
 -include override.mk
 
-ifndef PTCL
-	PTCL =	ptcl
+ifndef BASENAME
+ifndef PIGI
+	ALLBINARIES = 1
+	BASENAME = ptcl
+	PIGI = ptcl
 endif
+endif
+
+# $PTOLEMY/mk/ptbin.mk checks $(PTCL)
+PTCL = 1
 
 INCL = 		-I$(KERNDIR) -I$(ITCL_INCDIR) -I$(TCL_INCDIR) \
 		$(PTCOMPAT_INCSPEC) $(MATLAB_INCSPEC) $(MATLABIFC_INCSPEC) \
@@ -85,21 +92,15 @@ else
 	INSTALL = $(LIBDIR)/$(LIB)
 endif
 
-ifndef BASENAME
-ifndef PIGI
-	ALLBINARIES=1
-	BASENAME=ptcl
-endif
-endif
-
 PT_DEPEND += $(NON_LIB_SRCS:.cc=.o)
 
 PIGI_OBJS += $(NON_LIB_SRCS:.cc=.o) 
 
 
- 
 # ptbin.mk has the default rule that creates a binary and the all: rule
 include $(ROOT)/mk/ptbin.mk
+
+all: $(PIGI) $(PIGI).ptiny $(PIGI).ptrim
 
 # include common definitions, rules
 include $(ROOT)/mk/common.mk
