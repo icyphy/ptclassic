@@ -105,13 +105,6 @@ int Target::galaxySetup() {
     return FALSE;
   }
 
-  const char* domname = gal->domain();
-  Domain* dom = Domain::named(domname);
-  if(!dom) {
-    Error::abortRun(*gal, "Cannot figure out the domain of the galaxy");
-    return FALSE;
-  }
-
   return galaxy()->setTarget(this);
 }
 	   
@@ -128,6 +121,11 @@ int Target :: support(Star* star) {
     if (!supportFlag && galaxy()) {
 	supportFlag = (strcmp(galaxy()->domain(),star->domain()) == 0);
 	Domain* dom = Domain::of(*galaxy());
+	if(!dom) {
+	    Error::abortRun(*galaxy(),
+			    "Cannot figure out the domain of the galaxy");
+	    return FALSE;
+	}
 	StringListIter subdomains(dom->subDomains);
 	const char* sub;
 	while (!supportFlag && ((sub = subdomains++) != 0))
