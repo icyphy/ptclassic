@@ -1755,27 +1755,32 @@ body ::tycho::IDoc::formatExpl {class item type} {
 # Initialize the menu bar.  Adds entries specific to this class.
 #
 body ::tycho::IDoc::initializeMenubar {menubar} {
-    $menubar delete "Compare To..."
-    $menubar delete "Insert..."
-    $menubar delete "Save"
-    $menubar delete "SaveAs..."
-    $menubar delete "Evaluate"
-    $menubar delete "Revision Control..."
+    $menubar delete compareto
+    $menubar delete insert
+    $menubar delete save
+    $menubar delete saveas
+    $menubar delete evaluate
+    $menubar delete revisioncontrol
     
-    $menubar addMenu Format -after Window -underline 0
+    $menubar addMenu special -label Special -after window -underline 0
     # Add font size control
-    $menubar command "Bigger Font" Format -underline 0\
+    $menubar command biggerfont special \
+            -label "Bigger Font" -underline 0\
             -accelerator "C-+" -command "$this upSize"
         
-    $menubar command "Smaller Font" Format -underline 0\
+    $menubar command smallerfont special \
+            -label "Smaller Font" -underline 0\
             -accelerator "C--" -command "$this downSize"
     
-    $menubar addMenu Special -after Format -underline 0
+    $menubar separator specialsep1 special
+
     # Add a way to get the text description.
-    $menubar command Describe Special \
+    $menubar command describe special \
+            -label Describe \
             -underline 0 -command "::tycho::inform \[$this describe\]"
     
-    $menubar command Inherit Special \
+    $menubar command inherit special \
+            -label Inherit \
             -underline 0 -command "$this inheritAll"
     
     # FIXME: add in when generalized place is working in displayer
