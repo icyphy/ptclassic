@@ -36,7 +36,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #pragma implementation
 #endif
 
-#include "Cluster.h"
 #include "CGTarget.h"
 #include "CGStar.h"
 #include "CGPortHole.h"
@@ -53,6 +52,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "SimControl.h"
 #include "KnownBlock.h"
 #include "Tokenizer.h"
+#include "ProfileTimer.h"
 #include <time.h>
 
 extern const char* CODE = "code";
@@ -89,7 +89,7 @@ CGTarget::CGTarget(const char* name,const char* starclass,
 	    "Directory to write to"));
 	addState(filePrefix.setState("file", this, "",
 	    "Prefix for file names."));
-	addState(loopingLevel.setState("Looping Level",this,"0",
+	addState(loopingLevel.setState("Looping Level",this,"1",
 		"Specify whether to use loop scheduler and in what level."));
 	addState(displayFlag.setState("display?", this, "YES",
 	    "Enable displaying of code."));
@@ -99,6 +99,9 @@ CGTarget::CGTarget(const char* name,const char* starclass,
 	    "Enable loading of code."));
 	addState(runFlag.setState("run?", this, "YES",
 	    "Enable running of code."));
+	addState(writeScheduleFlag.setState
+		 ("write schedule?", this,"NO",
+		  "Write the resultant schedule to a file."));
 
 	/* Hide parameters by making them nonsettable.
 	   Derived Targets can re-enable those that are appropriate.
@@ -210,6 +213,20 @@ void CGTarget::setup() {
 	}
 }
 
+/*virtual*/ int CGTarget::schedulerSetup() {
+    ProfileTimer schedulingTimer;
+    int status = Target::schedulerSetup();
+
+    if (status && int(writeScheduleFlag)) {
+	double schedulingTime =  schedulingTimer.elapsedCPUTime();
+	StringList schedule;
+	schedule << headerComment("") << "\nScheduling time (seconds): "
+		 << schedulingTime << "\n\n" << scheduler()->displaySchedule();
+	writeFile(schedule,".sched",displayFlag);
+    }
+    return status;
+}    
+
 void CGTarget::childInit() {
 	// initialize state
 	initState();
@@ -313,6 +330,7 @@ void CGTarget :: mainLoopCode() {
 	compileRun((SDFScheduler*) scheduler());
 	if (inWormHole()) allWormOutputCode(); 
 	endIteration(iterations,0);
+	if (haltRequested()) return;
 }
 
 int CGTarget :: insertGalaxyCode(Galaxy* g, SDFScheduler* s) {
@@ -616,8 +634,8 @@ Block* CGTarget::spliceStar(PortHole* p, const char* name,
 
 	// initialize the new star.  Name it and add it to the galaxy.
 	// using size of splice list in name forces unique names.
-	StringList newname("splice-");
-	newname << newb->className() << "-" << spliceList.size();
+	StringList newname("splice_");
+	newname << newb->className() << "_" << spliceList.size();
 
 	// try and resolve which galaxy we should add the splice
 	// block to.  Ideally we want the block added to one of the
@@ -642,20 +660,20 @@ Block* CGTarget::spliceStar(PortHole* p, const char* name,
 
 	newb->initialize();
 
-	// If stars have cluster parents, must add to a cluster
-	DataFlowStar* dfnewb = (DataFlowStar*)newb;
-	DataFlowStar* pfarStar = (DataFlowStar*)pfar->parent();
-	DataFlowStar* pStar = (DataFlowStar*)p->parent();
-	if (pfarStar->parentCluster() && pfar->numXfer() == ip->numXfer()) {
-	    pfarStar->parentCluster()->addSplicedStar(*dfnewb);
-	}
-	else if (pStar->parentCluster() && p->numXfer() == op->numXfer()) {
-	    pStar->parentCluster()->addSplicedStar(*dfnewb);
-	}
-	else if (pStar->parentCluster() || pfarStar->parentCluster()) {
-	    Error::abortRun(*this,"Could not place into a cluster:",
-			    newb->name());
-	}
+// 	// If stars have cluster parents, must add to a cluster
+// 	DataFlowStar* dfnewb = (DataFlowStar*)newb;
+// 	DataFlowStar* pfarStar = (DataFlowStar*)pfar->parent();
+// 	DataFlowStar* pStar = (DataFlowStar*)p->parent();
+// 	if (pfarStar->parentCluster() && pfar->numXfer() == ip->numXfer()) {
+// 	    pfarStar->parentCluster()->addSplicedStar(*dfnewb);
+// 	}
+// 	else if (pStar->parentCluster() && p->numXfer() == op->numXfer()) {
+// 	    pStar->parentCluster()->addSplicedStar(*dfnewb);
+// 	}
+// 	else if (pStar->parentCluster() || pfarStar->parentCluster()) {
+// 	    Error::abortRun(*this,"Could not place into a cluster:",
+// 			    newb->name());
+// 	}
 	
 	// save in the list of spliced stars
 	spliceList.put(newb);
