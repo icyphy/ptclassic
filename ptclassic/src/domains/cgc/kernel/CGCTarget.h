@@ -55,28 +55,21 @@ public:
 	/*virtual*/ int compileCode();
 	/*virtual*/ int runCode();
 
-	/*virtual*/ StringList comment(const char*, const char*,
-	    const char*, const char*);
+	/*virtual*/ StringList comment(const char* text, const char* begin=NULL,
+	    const char* end=NULL, const char* cont=NULL);
 
 	/*virtual*/ void beginIteration(int repetitions, int depth);
 	/*virtual*/ void endIteration(int repetitions, int depth);
 
-	// name the offset-pointer of portholes
-	StringList offsetName(const CGCPortHole* p); 
-
 	// virtual method to generate compiling command
 	virtual StringList compileLine(const char* fName);
-
-	// make public this method
-	StringList correctName(const NamedObj& p) 
-		{return  sanitizedFullName(p); }
 
 	// set the hostMachine name
 	void setHostName(const char* s) { targetHost = s; }
 	const char* hostName() { return (const char*) targetHost; }
 
 	// redefine writeCode: default file is "code.c"
-	void writeCode();
+	/*virtual*/ void writeCode();
 
 	// static buffering option can be set by parent target
 	void wantStaticBuffering() { staticBuffering = TRUE; }
@@ -111,10 +104,6 @@ protected:
 	// "mainClose" is separated because when we insert a galaxy code
 	// by insertGalaxyCode(), we need to put wrapup code at the end
 	// of the body. 
-	// "galStruct" is separated since we need to this
-	// declaration inside a function call if we need to make a function
-	// from a galaxy or a star while global variable is put outside 
-	// of a function.
 	// "commInit" is separated to support recursion construct.
 	// Some wormhole codes are put into several set of processor
 	// groups. Since commInit code is inserted by pairSendReceive()
@@ -122,7 +111,6 @@ protected:
 	// stream.
 
 	CodeStream globalDecls;
-	CodeStream galStruct;
 	CodeStream include;
 	CodeStream mainDecls;
 	CodeStream mainInit;
@@ -143,8 +131,9 @@ protected:
 	// code generation init routine; compute offsets, generate initCode
 	int codeGenInit();
 
-	// Initial stage of code generation.
+	// Stages of code generation.
 	/*virtual*/ void headerCode();
+	/*virtual*/ void trailerCode();
 
 	// Combine all sections of code;
 	/*virtual*/ void frameCode();
@@ -160,12 +149,6 @@ protected:
 	/*virtual*/ void wormInputCode(PortHole&);
 	/*virtual*/ void wormOutputCode(PortHole&);
 
-	// return a name that can be used as C identifier, derived from
-	// the actual name
-	StringList sanitizedFullName(const NamedObj &b) const;
-
-	StringList appendedName(const NamedObj& p, const char* s);
-
 	// states
 	IntState staticBuffering;
 	StringState funcName;
@@ -178,9 +161,10 @@ protected:
 	int galId;
 	int curId;
 
-	// define the data structure of the galaxy and star
-	virtual void galDataStruct(Galaxy& galaxy, int level=0);
-	virtual void starDataStruct(CGCStar* block, int level=0);
+	// Generate declarations and initialization code for
+	// Star PortHoles and States.
+	virtual void declareGalaxy(Galaxy&);
+	virtual void declareStar(CGCStar*);
 
 	// splice copy stars or type conversion stars if necessary.
 	void addSpliceStars();
