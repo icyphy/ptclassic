@@ -157,7 +157,7 @@ defstar {
     startvss << "  system(\"";
     startvss << command << "&";
     startvss << "\");\n";
-    addCode(startvss, "mainInit", "startVSS");
+    addCode(startvss, "mainInit", filePre);
     addCode(genInit);
     
     StringList oneLine;
