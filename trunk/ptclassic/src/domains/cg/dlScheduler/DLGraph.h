@@ -62,9 +62,6 @@ protected:
 	// The sum of unscheduled work
 	int unschedWork;
 
-	// Initialize the graph
-	int initializeGraph();
-
 	// redefine these virtual allocator to allocate DL Nodes.
 	EGNode *newNode(SDFStar*, int);
 };
