@@ -76,6 +76,8 @@ public:
 		return ACSKnownCategory::getCategories();
 	}
 
+	void initCores();
+
 	/* virtual */ int isSDF() const { return TRUE; } // FIXME
 	/* virtual */ void initialize();
 	/* virtual */ void wrapup();

@@ -35,9 +35,9 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #pragma interface
 #endif
 
-#include "PortHole.h"
+#include "DFPortHole.h"
 
-class ACSPortHole : public PortHole
+class ACSPortHole : public DFPortHole
 {
 public:
     // Class identification.
