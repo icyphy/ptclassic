@@ -33,7 +33,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 */
 
 #ifndef _TRANSPORT_H
-#define _TRANSPORT_H "$Id$"
+#define _TRANSPORT_H 
 
 
 #define AM_GetXferAsynch4(request_endpoint, reply_endpoint, source_offset, \
