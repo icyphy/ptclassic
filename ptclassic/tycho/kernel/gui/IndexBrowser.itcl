@@ -210,7 +210,7 @@ body ::tycho::IndexBrowser::hyperJump {filename {point {}}} {
     if { [::tycho::isRelative $filename] && $CWD != {}} {
 	set filename [file join $CWD $filename]
     }
-    ::tycho::TopLevel::hyperJump $filename $point
+    chain $filename $point
 }
 
 #####################################################################
