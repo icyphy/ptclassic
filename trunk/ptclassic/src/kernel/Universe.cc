@@ -1,13 +1,17 @@
+// SCCS version identification
+// $Id$
+// Joseph T. Buck
+//
+// Print out the universe
+
 #include "Universe.h"
 #include "StringList.h"
 
-
-// SCCS version identification
-// $Id$
-
-SDFUniverse :: operator StringList () {
+StringList
+Universe :: print (int recursive) {
 	StringList out;
-	out = "SYNCHRONOUS DATAFLOW UNIVERSE: ";
+	out = type;
+	out += " UNIVERSE: ";
 	out += readFullName ();
 	out += "\n";
 	out += "Descriptor: ";
@@ -15,7 +19,9 @@ SDFUniverse :: operator StringList () {
 	out += "\n";
 	out += "CONTENTS:\n";
 
-	out += StringList(*myTopology);
-
+	if (recursive)
+		out += myTopology->printRecursive();
+	else
+		out += myTopology->printVerbose();
 	return out;
 }
