@@ -32,7 +32,7 @@ PL_SRCS= \
  CG56Biquad.pl \
  CG56BiquadDSPlay.pl \
  CG56Comb.pl \
- CG56FFT.pl \
+ CG56FFTCx.pl \
  CG56FIR.pl \
  CG56LMS.pl \
  CG56LMSGanged.pl \
