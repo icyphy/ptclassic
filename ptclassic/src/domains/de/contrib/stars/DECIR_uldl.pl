@@ -3,7 +3,7 @@ defstar{
     domain { DE }
     derivedfrom { DEcell_list }
     author { A. Wernicke, J. Voigt }
-    version { 1.1 6/22/1997 }
+    version { $Id$ }
     copyright { copyright (c) 1996 - 1997 Dresden University of Technology,
                 Mobile Communications Systems 
     }
@@ -106,7 +106,7 @@ defstar{
         arglist { "(int Lv)" }
         type { int }
 	code {
-            int n, a_flag, im_Bereich[6];
+            int n, a_flag = 0, im_Bereich[6];
             double Z, N;
             const double Faktor= 57.29577951;     
 
@@ -150,8 +150,8 @@ defstar{
 	access { private }
 	type { void }
 	code {
-            int b, s, n, i ,bits, knum, angle_flag, interf_flag, intf_flag, Bedingung1, Bedingung2;
-            float t1, t2, tbg, tnd, ta, te, tj, t_value, I, filter, I_Sum, CIR, I_Sum_jens;
+            int b, s, n, knum, angle_flag, interf_flag, intf_flag, Bedingung1, Bedingung2;
+            float t1, t2, tbg, tnd, ta, te, tj, t_value = 0.0, I, I_Sum, CIR, I_Sum_jens;
 		
             for (b=0; b<cells; b++) {
 		if (zellen[b].user==0) continue;

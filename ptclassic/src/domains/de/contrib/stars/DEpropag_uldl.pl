@@ -3,7 +3,7 @@ defstar {
        	domain { DE }
       	derivedfrom { DEcell_list }
 	author { A. Wernicke }
-	version { 1.0 1/31/1997 }
+	version { $Id$}
 	copyright { copyright (c) 1996 - 1997 Dresden University of Technology,
                     Mobile Communications Systems 
         }
@@ -127,7 +127,7 @@ method {
     code {
 
 	int 	j, m, n;
-	double 	F1, F2, Schritt_m, Kath_x, Kath_y;
+	double 	F1, F2, Kath_x, Kath_y;
 	
 	Mass=100;
 
@@ -1597,7 +1597,7 @@ method {
     code {
 
 	int    i,n,z, Paar;
-	double lambda_m, Loss_dB, Attenuat_dB;
+	double lambda_m, Loss_dB, Attenuat_dB = 0.0;
 
 	lambda_m  = 0.3/(zellen[LC_number].dl_freq);
 
