@@ -157,6 +157,9 @@ class ::tycho::Slate {
     ###################################################################
     ####                         public methods                    ####
 
+    # Manipulate the selection -- low level
+    method _select {option {id {}} {index {}}}
+
     # Align and distribute items
     method align {where args}
 
@@ -254,6 +257,33 @@ body ::tycho::Slate::constructor {args} {
 
     # Create the selection handler
     ::selection handle [::info namespace tail $this] "$this select describe"
+}
+
+#######################################################################
+#### _select
+#
+# Manipulate the selection. For use by the Selector object.
+#
+body ::tycho::Slate::_select {mode {id {}} {index {}}} {
+    switch -exact $mode {
+	"add" {
+	    $canvas select clear
+	    addtag "sel" withtag $id
+	    highlight $id highlight.sel
+	}
+	"clear" {
+	    unhighlight "sel"
+	    dtag "sel"
+	    $canvas select clear
+        }
+	"remove" {
+	    unhighlight $id
+	    dtag $id "sel"
+	}
+        default {
+            error "Invalid mode $mode"
+        }
+    }
 }
 
 #######################################################################
@@ -873,15 +903,6 @@ body ::tycho::Slate::select {mode {id {}} {index {}}} {
 	    dtag $id "sel"
 	    # Update interactor bindings
 	    selector refresh
-	}
-	"_add" {
-	    $canvas select clear
-	    addtag "sel" withtag $id
-	    highlight $id highlight.sel
-	}
-	"_remove" {
-	    unhighlight $id
-	    dtag $id "sel"
 	}
 	"describe" {
 	    set description ""
