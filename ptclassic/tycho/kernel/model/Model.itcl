@@ -307,12 +307,10 @@ class ::tycho::Model {
     # The array of undo commands
     protected variable undoCommands
 
-    #################################################################
-    ####                   private methods                       ####
-    
     # Evaluate code in this object's context
-    private method evalInSpecificContext {args} {eval $args}
+    protected method evalInSpecificContext {args} {eval $args}
 
+    # Debugging only
     method debug {args} {
 	eval $args
     }
@@ -995,8 +993,7 @@ body ::tycho::Model::redo {{distance 1}} {
 	incr count
 
 	# Execute the command.
-	@scope [info class] [list \
-		$this [info class]::evalInSpecificContext \
+	$this evalInSpecificContext \
 		eval $redoCommands($historyMark(current))]
 
 	# Publish if publishable
@@ -1156,9 +1153,8 @@ body ::tycho::Model::undo {{distance 1}} {
     set count 0
     while { $count < $distance } {
         # Execute the command
-        @scope [info class] [list \
-                $this [info class]::evalInSpecificContext \
-                eval $undoCommands($historyMark(current))]
+        $this evalInSpecificContext \
+                eval $undoCommands($historyMark(current))
         
         # Publish if publishable
         if { $_publishable($historyMark(current)) } {
@@ -1368,10 +1364,9 @@ body ::tycho::Model::notifyEvent {event} {
 # for constructing complex commands for the undo and redo history.
 #
 body ::tycho::Model::sequence {args} {
-	set inverse [list sequence]
+    set inverse [list sequence]
     foreach cmd $args {
-    	lappend inverse [@scope [info class] [list \
-                $this [info class]::evalInSpecificContext eval $cmd]]
+        lappend inverse [$this evalInSpecificContext eval $cmd]
     }
     return $inverse
 }

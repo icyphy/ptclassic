@@ -216,11 +216,8 @@ class ::tycho::KeyedDigraph {
     	_toplevelerror key $context [list $vertex $key]
     }
     
-    #################################################################
-    ####                   private methods                       ####
-    
     # Evaluate code in this object's context
-    private method evalInSpecificContext {args} {eval $args}
+    protected method evalInSpecificContext {args} {eval $args}
 }
 
 ########################################################################

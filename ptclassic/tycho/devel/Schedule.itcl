@@ -267,11 +267,8 @@ class ::tycho::Schedule {
     # Return the type of an item
     method type {name}
 
-    #################################################################
-    ####                   private methods                       ####
-    
     # Evaluate code in this object's context
-    private method evalInSpecificContext {args} {eval $args}
+    protected method evalInSpecificContext {args} {eval $args}
 }
 
 ########################################################################
@@ -282,7 +279,7 @@ body ::tycho::Schedule::constructor {args} {
     eval configure $args
 
     # Define the "task" entity
-    defineEntity task \
+    defineEntityType task \
 	    -starttime 0 \
 	    -endtime 0 \
 	    -duration 0 \
@@ -292,18 +289,18 @@ body ::tycho::Schedule::constructor {args} {
 	    -description ""
 
     # Define the "resource" entity
-    defineEntity resource \
+    defineEntityType resource \
 	    -utilization 100 \
 	    -description ""
 
     # Define the "annotation" entity
-    defineEntity annotation \
+    defineEntityType annotation \
     	-valued 1  \
 	    -writtenby "" \
 	    -writetime ""
 
     # Define the "dependency" link
-    defineLink dependency \
+    defineLinkType dependency \
     	-named 1 \
     	-lcount 2 \
 	    -strict yes
