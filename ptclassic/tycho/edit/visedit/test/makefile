@@ -41,7 +41,10 @@ include $(CONFIG)
 
 TCL_SRCS = 	
 
-ITCL_SRCS =	EditForest.itcl createForest.itcl
+ITCL_SRCS = \
+	createForest.itcl \
+	testEditForest.itcl \
+	testFiles.itcl
 
 EXTRA_SRCS =	$(ITCL_SRCS)
 
@@ -51,6 +54,8 @@ MISC_FILES =	sample.fst sample.gfk
 REALCLEAN_STUFF =
 
 tests:: $(ITCL_SRCS) $(MISC_FILES)
+	tycho -e testEditForest.itcl
+	tycho -e testFiles.itcl
 
 # We don't include common.mk since we don't use the compiler here
 include $(ROOT)/mk/no-compile.mk
