@@ -200,6 +200,9 @@ It should check for the lock file.
 <ul>
 <li> When a TclShell is displaying stdout on its last line, typed
 commands are not always interpreted correctly.
+<li> Meta-&lt; is not interpreted correctly: it puts the insertion
+cursor at the top of the shell.  It should only put the view up there.
+It needs to run adjustInsertionCursor.
 </ul>
 
 <h3><a href="$TYCHO/kernel/WelcomeWindow.itcl">WelcomeWindow</a></h3>
