@@ -43,8 +43,9 @@ include $(CONFIG)
 TCL_SRCS = 
   
 ITCL_SRCS = \
+	alltests.itcl all.itcl \
 	sample.itcl \
-	stars.itcl
+	stars.itcl \
 
 EXTRA_SRCS =	$(TCL_SRCS) $(ITCL_SRCS)
 
@@ -63,13 +64,29 @@ MISC_FILES = \
 	stars.itcl \
 	trace.itcl
 
+SIMPLE_TESTS = \
+	dummy.tcl
+
+GRAPHICAL_TESTS = \
+	testSlate.itcl
+
 # make checkjunk should not complain about the OLD directory
 OPTIONAL_FILES = OLD
 
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =
 
-all install: $(MISC_SRCS)
+tests:: test_graphics
+
+# These tests do not require a graphics terminal
+test_simple: $(TCL_SRCS) $(ITCL_SRCS)
+	echo "foreach i [list $(SIMPLE_TESTS)] {puts \$$i; source \$$i}" | \
+		$(ITCLSH)
+
+# These tests require a graphics terminal
+test_graphics: alltests.itcl all.itcl $(TCL_SRCS) $(ITCL_SRCS)
+	tycho -noconsole -e alltests.itcl
+
 
 # We don't include common.mk since we don't use the compiler here
 include $(ROOT)/mk/no-compile.mk
