@@ -43,6 +43,7 @@ TCLTK_OBJ=$(PTOLEMY)/obj.$(ARCH)/tcltk
 
 # Version numbers
 TCL_VERSION =	tcl7.3
+TK_MAJOR_VERSION = 	tk3.6
 TK_VERSION =	tk3.6p1-TkPixmap3.6e
 
 # Location of the tcl source
@@ -126,7 +127,7 @@ clean_tcl:
 #	Need to make a link for tk.h so that we are sure it is installed
 #	Theoretically, GNU make should do the right thing, but . . .
 $(TK_OBJ)/config.status: $(TCLTK_OBJ) $(TK_OBJ) $(TCLTK_OBJ)/$(TCL_VERSION) \
-			$(TK_OBJ)/xpm
+			$(TCLTK_OBJ)/$(TK_MAJOR_VERSION) $(TK_OBJ)/xpm
 	@echo "Configuring tk"
 	(cd $(TK_OBJ); $(TK_SRC)/configure -v --srcdir=$(TK_SRC) --prefix=$(TK_INDEPENDENT_DEST) --exec-prefix=$(TK_DEST) )
 	-(cd $(TK_OBJ); ln -s $(TK_SRC)/tk.h tk.h)
@@ -142,6 +143,10 @@ $(TK_OBJ)/xpm:
 # This link is necessary for the tk build to find libtcl.a
 $(TCLTK_OBJ)/$(TCL_VERSION): $(TCL_OBJ)
 	(cd $(TCLTK_OBJ); ln -s $(TCL_OBJ) $(TCLTK_OBJ)/$(TCL_VERSION))
+
+# This link is necessary for the tk build to find libtk.a
+$(TCLTK_OBJ)/$(TK_MAJOR_VERSION): $(TK_OBJ)
+	(cd $(TCLTK_OBJ); ln -s $(TK_OBJ) $(TCLTK_OBJ)/$(TK_MAJOR_VERSION))
 
 # Build tk
 tk: $(TK_OBJ)/libtk.a 
