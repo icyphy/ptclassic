@@ -16,9 +16,6 @@ GPPFLAGS = -g
 GNU = g++
 GNULIB = /usr/gnu/lib
 GNUINCLUDE = $(GNULIB)/g++-include
-# directory with "genclass" prototypes.  Same as GNUINCLUDE for older
-# libg++ versions, $(GNUINCLUDE)/gen for newer ones.
-GENCLASSDIR = $(GNUINCLUDE)
 # need gcc, not cc, to build gnulib3a
 CC = gcc
 
@@ -48,7 +45,7 @@ LIBCCSRCS=Animate.cc Architecture.cc AutoForkNode.cc \
  InterpUniverse.cc Interpreter.cc Linker.cc KnownBlock.cc NamedObj.cc \
  Packet.cc Particle.cc PriorityQueue.cc Scheduler.cc Star.cc StringList.cc \
  Tokenizer.cc Universe.cc UserOutput.cc Wormhole.cc WormConnect.cc \
- checkConnect.cc expandPath.cc int.Vec.cc \
+ checkConnect.cc expandPath.cc \
  FloatArrayState.cc FloatState.cc IntArrayState.cc IntState.cc \
  KnownState.cc State.cc StringState.cc \
  FloatVecData.cc IntVecData.cc ImageData.cc
@@ -67,7 +64,7 @@ HDRS= Animate.h Architecture.h Attribute.h AutoForkNode.h \
  NamedObj.h Output.h Packet.h Particle.h ParticleQueue.h ParticleStack.h \
  Plasma.h PriorityQueue.h Scheduler.h Star.h StringList.h Tokenizer.h \
  Universe.h UserOutput.h WormConnect.h Wormhole.h \
- dataType.h int.Vec.h miscFuncs.h type.h isa.h \
+ dataType.h miscFuncs.h type.h isa.h \
  ComplexArrayState.h ComplexState.h FloatState.h FloatArrayState.h \
  IntArrayState.h IntState.h KnownState.h State.h StringState.h \
  FloatVecData.h IntVecData.h ImageData.h
@@ -146,9 +143,6 @@ IntArrayState.h IntArrayState.cc : ArrayState.hP ArrayState.ccP
 	mv Int.int.ArrayState.h IntArrayState.h; \
 	sed 's/"IntARRAY/"INTARRAY/' Int.int.ArrayState.cc > IntArrayState.cc; \
 	rm Int.int.ArrayState.cc
-
-int.Vec.h int.Vec.cc : $(GENCLASSDIR)/Vec.hP $(GENCLASSDIR)/Vec.ccP
-	genclass int val Vec
 
 # Don't add anything after the next line; makedepend will zap it.
 # DO NOT DELETE THIS LINE -- make depend depends on it.
