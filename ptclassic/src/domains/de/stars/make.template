@@ -30,16 +30,41 @@ GNUINCLUDE = /usr/gnu/lib/g++-include
 .pl.h:
 	cd $(VPATH); ptlang $< ; mv *.t ../doc/stars
 
-SRCS=DEDelay.pl DEPoisson.pl DESampler.pl DEQueue.pl DEImpulse.pl \
-	DEXMgraph.pl DEXgraph.pl DEBlackHole.pl DEFloatDC.pl DEFloatRamp.pl \
-	DEFork.pl DEPrQueue.pl \
-	DESwitch.pl DEMerge.pl DERouter.pl DEServer.pl \
-	DEClock.pl DEFilter.pl \
-	DEMeasureDelay.pl \
-	DEXhistogram.pl DEPSServer.pl DEDiscard.pl \
-	DENull.pl DEPrinter.pl DERanGen.pl DEStatistics.pl \
-	DEStopTimer.pl DEUDCounter.pl DEGate.pl DEThreshold.pl \
-	DEVarDelay.pl DEVarServer.pl
+SRCS= \
+DEArbitrate.pl \
+DEBlackHole.pl \
+DEClock.pl \
+DEDelay.pl \
+DEDiscard.pl \
+DEFilter.pl \
+DEFloatDC.pl \
+DEFloatRamp.pl \
+DEFork.pl \
+DEGate.pl \
+DEHandShake.pl \
+DEImpulse.pl \
+DEMeasureDelay.pl \
+DEMerge.pl \
+DENull.pl \
+DEPSServer.pl \
+DEPoisson.pl \
+DEPrQueue.pl \
+DEPrinter.pl \
+DEQueue.pl \
+DERanGen.pl \
+DERouter.pl \
+DESampler.pl \
+DEServer.pl \
+DEStatistics.pl \
+DEStopTimer.pl \
+DESwitch.pl \
+DEThreshold.pl \
+DEUDCounter.pl \
+DEVarDelay.pl \
+DEVarServer.pl \
+DEXMgraph.pl \
+DEXgraph.pl \
+DEXhistogram.pl
 
 CCS =	$(SRCS:.pl=.cc)
 
@@ -53,7 +78,7 @@ all:		$(SRCS) $(CCS) makefile $(OBJS)
 install:	all
 		@echo Installation complete.
 
-sources:	make.template $(CCS) $(HDRS)
+sources:	make.template $(CCS) $(HDRS) destars.mk
 
 clean:
 		rm -f *.o core *~ *#
