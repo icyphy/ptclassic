@@ -47,7 +47,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	tkgain = (int) 5*$val(gain)+50;
 	makeScale(".low",
 		  "$starSymbol(scale1)",
-		  "Gain control: $val(nameofStar)",
+		  "Gain control: $val(starName)",
 		  tkgain,
                   $starSymbol(setGain));
 	displaySliderValue(".low", "$starSymbol(scale1)", " $val(gain)");
@@ -62,7 +62,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	  ($val(highFreq) - $val(lowFreq));
 	makeScale(".middle",
 		  "$starSymbol(scale2)",
-		  "Center/Cutoff Freq crtl:$val(nameofStar) ",
+		  "Center/Cutoff Freq crtl:$val(starName) ",
 		  tkcenter,
                   $starSymbol(setcenterFreq));
 	displaySliderValue(".middle", "$starSymbol(scale2)",
@@ -85,7 +85,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	tkband = (int) ($val(bandwidth)-0.01)*100/3.99;
 	makeScale(".high",
 		  "$starSymbol(scale3)",
-		  "Bandwidth control:$val(nameofStar)",
+		  "Bandwidth control:$val(starName)",
 		  tkband,
 		  $starSymbol(setBandwidth));
 	displaySliderValue(".high", "$starSymbol(scale3)",
@@ -105,7 +105,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	  ($val(highFreq) - $val(lowFreq));
 	makeScale(".middle",
 		  "$starSymbol(scale4)",
-		  "Pass Frequency control:$val(nameofStar)",
+		  "Pass Frequency control:$val(starName)",
 		  tkpass,
 		  $starSymbol(setpassFreq));
 	displaySliderValue(".middle", "$starSymbol(scale4)",
