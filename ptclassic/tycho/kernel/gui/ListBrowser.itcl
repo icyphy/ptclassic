@@ -39,8 +39,8 @@
 # the list. Before executing the command, the item selected by the user
 # is appended to the command as an argument. If no -command option is
 # specified, then the default behavior is to return the selected item
-# when the <code>ListBrowser</code> is created by a
-# <code>::tycho::DialogWindow::newModal</code>
+# when the <code>ListBrowser</code> is waited for using
+# <code>::tycho::Dialog::wait</code>
 # procedure.
 # <p>
 # When the user has selected an item, the <code>processItem</code>
@@ -62,10 +62,13 @@
 # It is not case sensitive in its matching.
 #
 class ::tycho::ListBrowser {
-    inherit ::tycho::EntryQuery
+    inherit ::tycho::Query
 
-    # Specify the command to execute on an when one is chosen.
-    itk_option define -command command Command "::tycho::DialogWindow::answer"
+    # Specify the command to execute on an item when one is chosen.
+    itk_option define -command command Command "::tycho::Dialog::answer"
+
+    # Specify the command to execute on an item when one is chosen.
+    itk_option define -default default Default {}
 
     # The list to display
     itk_option define -items items Items {}
@@ -108,6 +111,9 @@ class ::tycho::ListBrowser {
     # Process an item selection.  Return 1 to destroy the window.
     protected method processItem {item}
 
+    # Set the contents of the entry box.
+    protected method setEntry {string}
+
     # Fill the listbox with items.
     protected method updateListbox {}
 
@@ -117,6 +123,16 @@ class ::tycho::ListBrowser {
     private variable closing 0
     private variable scrollposition 0
     private variable uselastpattern 0
+}
+
+#########################################################################
+#### -default option configuration
+# Specify the default entry.
+# 
+configbody ::tycho::ListBrowser::default {
+    if {$itk_option(-default) != {}} {
+        setEntry $itk_option(-default)
+    }
 }
 
 #########################################################################
@@ -135,7 +151,7 @@ body ::tycho::ListBrowser::constructor {args} {
     component hull configure -borderwidth 0
     
     # Entry box for entering items directly.
-    addQuery entry {} {}
+    line entry {} {}
     
     # Frame for listbox for listing items.
     itk_component add listscroll {
@@ -170,9 +186,9 @@ body ::tycho::ListBrowser::constructor {args} {
     }
     pack $itk_component(scroll) -side right -fill y
 
-    # Extra buttonbox above the usual DialogWindow button box.
+    # Extra buttonbox above the usual Dialog button box.
     itk_component add buttons {
-	buttonbox $itk_component(childsite).buttons
+	buttonbox $itk_component(hull).buttons
     } {
 	keep -background -cursor
     }
@@ -189,7 +205,7 @@ body ::tycho::ListBrowser::constructor {args} {
     # Any key breaks a sequence of Tabs
     bind $itk_component(hull) <KeyPress> {%Q breakCompleteSequence}
     bind $itk_component(hull) <Tab> { }
-    bind $itk_component(entry_entry) <Tab> {%Q complete; break}
+    bind $itk_component(tag_entry) <Tab> {%Q complete; break}
 
     # Mouse bindings
     bind $itk_component(listbox) <Double-1> {%Q select [%Q get entry]; break}
@@ -262,8 +278,7 @@ body ::tycho::ListBrowser::breakCompleteSequence {} {
 body ::tycho::ListBrowser::chooseItem {lb ypos} {
     $lb selection clear @0,0 end
     $lb selection set [$lb nearest $ypos]
-    clear entry
-    insert entry [selection get]
+    setEntry [selection get]
 }
 
 ######################################################################
@@ -329,8 +344,7 @@ body ::tycho::ListBrowser::complete {{case 0}} {
     }
     if {$foundtwo == 0} {
 	# Found exactly one match.  Replace the entry contents.
-	clear
-	insert entry [selection get]
+        setEntry [selection get]
     } {
 	# Found more than one.  Alert user that entry is not complete.
 	set uselastpattern 1
@@ -360,8 +374,7 @@ body ::tycho::ListBrowser::complete {{case 0}} {
 #
 body ::tycho::ListBrowser::goto {item} {
     $itk_component(listbox) see $item
-    clear
-    insert entry [$itk_component(listbox) get $item]
+    setEntry [$itk_component(listbox) get $item]
     set idx [$itk_component(listbox) index $item]
     set scrollposition $idx
 }
@@ -386,7 +399,8 @@ body ::tycho::ListBrowser::ok {} {
 
 ######################################################################
 #### select
-# Select the item specified in the argument.
+# Invoke <code>processItem</code> on the item specified in the argument,
+# then self-destruct.
 #
 body ::tycho::ListBrowser::select {name} {
     # This method might be in the middle of being processed already.
@@ -406,7 +420,7 @@ body ::tycho::ListBrowser::select {name} {
         error $msg $saveInfo
     }
     if $complete {
-        # nextWindow not used because focus goes to the new window.
+        nextWindow
         delete object $this
         return
     }
@@ -456,7 +470,7 @@ body ::tycho::ListBrowser::scroll {num what} {
 	error "Unrecognized argument: $what.  \
 		Should be units, pages, or selection"
     }
-    insert entry [$itk_component(listbox) get $scrollposition]
+    setEntry [$itk_component(listbox) get $scrollposition]
 }
 
 
@@ -476,6 +490,17 @@ body ::tycho::ListBrowser::scroll {num what} {
 body ::tycho::ListBrowser::processItem {item} {
     execCommand -command $item
     return 1
+}
+
+######################################################################
+#### setEntry
+# This method clears the current contents of the entry box and replaces
+# them with the string passed as an argument.  Derived classes may redefine
+# this to take further action as well.
+#
+body ::tycho::ListBrowser::setEntry {string} {
+    clear
+    insert entry $string
 }
 
 ######################################################################

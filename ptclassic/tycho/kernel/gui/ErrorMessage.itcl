@@ -43,9 +43,10 @@
 proc ::tkerror {msg} {
     # Handle the blank message case
     if {$msg == ""} {set msg "Tcl reports an error"}
-    ::tycho::DialogWindow::newModal ErrorMessage \
-	    [::tycho::autoName .error] \
-	    -text $msg -bitmap error
+    set nm [::tycho::autoName .error]
+    uplevel #0 [list ::tycho::ErrorMessage $nm \
+	    -text $msg -bitmap error]
+    ::tycho::Dialog::wait $nm
 }
 
 ##########################################################################
@@ -162,8 +163,9 @@ body ::tycho::ErrorMessage::stackTrace {} {
                 -readonly 1
         $nm centerOnScreen
     } {
-	::tycho::warn "No stack trace found"
+	safeEval ::tycho::warn "No stack trace found"
     }
-    nextWindow
+    # NOTE: I'm not sure why this has to be delayed.
+    after 200 "update; $nm focusin"
     delete object $this
 }

@@ -221,9 +221,10 @@ body ::tycho::IndexBrowser::seeFragment {point} {
     if {$match == 1} {
         ok
     } elseif {$match == 0} {
-        ::tycho::warn "No matching entry found in the domain index"
+        safeEval ::tycho::warn "No matching entry found in the domain index"
     } else {
-        ::tycho::warn "Multiple matching entries found in the domain index. \
+        safeEval ::tycho::warn \
+                "Multiple matching entries found in the domain index. \
                 Use <Tab> to scroll through."
     }
 }
@@ -242,7 +243,7 @@ body ::tycho::IndexBrowser::processItem {id} {
     if {$id == {}} {return 0}
 
     if {![info exists entries($id)]} {
-	::tycho::warn "No such item in index: $id"
+	safeEval ::tycho::warn "No such item in index: $id"
 	return 0
     }
 

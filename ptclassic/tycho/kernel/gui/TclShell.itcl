@@ -65,11 +65,12 @@ class ::tycho::TclShell {
     itk_option define -stdout stdout StdOut 0
 
     # Define the color of the result display
-    itk_option define -answerforeground answerForeground AnswerForeground "black"
+    itk_option define -answerforeground answerForeground AnswerForeground \
+            "black"
 
     # Define the color of the prompt
-    itk_option define -promptforeground promptForeground PromptForeground "black"
-
+    itk_option define -promptforeground promptForeground PromptForeground \
+            "black"
 
     ##########################################################################
     ####                         public methods                           ####
@@ -651,7 +652,8 @@ body ::tycho::TclShell::recordCommand {cmd} {
 #
 body ::tycho::TclShell::saveAsFile {filename} {
     if {[file exists $filename]} {
-	if {![::tycho::askuser "File \"$filename\" exists.  Overwrite?"]} {
+	if {![safeEval ::tycho::askuser \
+                "File \"$filename\" exists.  Overwrite?"]} {
 	    error {Did not save file}
 	}
     }

@@ -34,7 +34,7 @@
 # bottom of windows.
 #
 class ::tycho::StatusBar {
-    inherit itk::Widget
+    inherit ::tycho::TWidget
 
     constructor {args} {}
     destructor {}

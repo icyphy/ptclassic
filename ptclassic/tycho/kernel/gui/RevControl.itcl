@@ -43,7 +43,7 @@
 # type, and that this class is derived from <code>RevControl</code>.
 #
 class ::tycho::RevControl {
-    inherit ::tycho::DialogWindow
+    inherit ::tycho::Dialog
 
     constructor {args} {}
     destructor {}
@@ -282,6 +282,7 @@ body ::tycho::RevControl::makeRev {type editorWin editorObj} {
 	    -geometry +0+0 \
 	    -before $editorWin"
     wm deiconify $editorWin.revcontrol
+    after 1 $editorWin.revcontrol focusin
     $editorWin.revcontrol focusin
 }
 
@@ -309,7 +310,7 @@ body ::tycho::RevControl::setup {editorWin editorObj} {
     # for permission to put it under revision control.
     if {$revclass == {}} {
 	set dlg [::tycho::autoName .rev]
-	::tycho::DialogWindow $dlg -text \
+	::tycho::Dialog $dlg -text \
 		"This file is not currently under revision control.\
 		Do you want it placed under revision control?"
 
@@ -318,16 +319,17 @@ body ::tycho::RevControl::setup {editorWin editorObj} {
 	    $dlg addButton $type -text "Yes ($type)" -command \
 		    [code "::tycho::RevControl::makeRev \
                     ::tycho::RevControl$type $editorWin \
-		    $editorObj; delete object $dlg"]
+		    $editorObj; $dlg nextWindow; delete object $dlg"]
 	    if {$default == {}} {
 		$dlg default $type
 		set default $type
 	    }
 	}
-	$dlg addButton no -text "No <Esc>" -command [code "delete object $dlg"]
-	bind $dlg <Escape> [code "delete object $dlg"]
-	$dlg centerOnScreen
-	return $dlg
+	$dlg addButton no -text "No <Esc>" -command \
+                [code "$dlg nextWindow; delete object $dlg"]
+	bind $dlg <Escape> \
+                [code "$dlg nextWindow; delete object $dlg"]
+	::tycho::Dialog::wait $dlg
     } else {
 	::tycho::RevControl::makeRev $revclass $editorWin $editorObj
     }
@@ -412,14 +414,11 @@ body ::tycho::RevControl::getComments {} {
     # If TestSuite is defined, then we are running in the test suite
     global TestSuite
     if { ![info exists TestSuite ]} {
-	set list [::tycho::DialogWindow::newModal EntryQuery \
-		[::tycho::autoName .getcomment] \
-		-queries {{body {Comment:} {} 5}}  \
-		-entrywidth 60]
+        set comments [lindex [::tycho::query {Summarize changes} \
+                {{lines body {} {} 5}} 60] 1]
     } else {
-	set list [list [list body {This is a test suite comment}]]
+	set comments {This is a test suite comment}
     }
-    set comments [lindex [lindex $list 0] 1]
     return [join [split $comments "\n"] "\\\n"]
 }
 

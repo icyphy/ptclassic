@@ -59,7 +59,7 @@ catch {delete class ::tycho::Edit}
 # This widget is designed to be placed within a Displayer window,
 # although it can also be used on its own.
 # To use within a Displayer, the following commands will work:
-# <pre><tcl>
+# <tcl><pre>
 # catch {destroy .d}
 # ::tycho::Displayer .d
 # ::tycho::Edit .d.e
@@ -1323,10 +1323,10 @@ body ::tycho::Edit::getSelection {} {
 # Query the user for line number, then goto it.
 #
 body ::tycho::Edit::gotoLine {} {
-    set number [::tycho::queryinfo "Enter line number:" 1 10]
+    set number [safeEval ::tycho::queryinfo "Enter line number:" 1 10]
     if {$number == {}} {return}
     if {![regexp "^\[1-9\]\[0-9\]*$" $number]} {
-	::tycho::inform "You must enter an integer."
+	safeEval ::tycho::inform "You must enter an integer."
 	return
     }
     seeFragment "line $number"
@@ -1489,7 +1489,7 @@ body ::tycho::Edit::paste {} {
 #
 body ::tycho::Edit::queryFillColumn {} {
     set maxLineLength \
-            [::tycho::queryinfo "Right column for text fill:" \
+            [safeEval ::tycho::queryinfo "Right column for text fill:" \
             [preference get textedit fillColumn] \
             15]
 }
@@ -1499,7 +1499,7 @@ body ::tycho::Edit::queryFillColumn {} {
 # Query the user for a new fill prefix.
 #
 body ::tycho::Edit::queryFillPrefix {} {
-    set fillPrefix [::tycho::queryinfo "Fill prefix:" $fillPrefix 15]
+    set fillPrefix [safeEval ::tycho::queryinfo "Fill prefix:" $fillPrefix 15]
 }
 
 #####################################################################
@@ -1541,7 +1541,7 @@ body ::tycho::Edit::recordMousePos {xpos ypos} {
 # specified string.
 #
 body ::tycho::Edit::replaceAll {tag str} {
-    if [::tycho::askuser "No undo, OK to proceed?"] {
+    if [safeEval ::tycho::askuser "No undo, OK to proceed?"] {
 	set ind 1.0
 	while {[set res \
 		[$itk_component(text) tag nextrange $tag $ind end]] != {}} {
@@ -1697,7 +1697,7 @@ body ::tycho::Edit::selectRange {start stop} {
 body ::tycho::Edit::setFont {} {
     set ifont [cget -textfont]
     set wname [::tycho::autoName $itk_component(hull).font]
-    ::tycho::DialogWindow::new FontManager $wname \
+    ::tycho::Dialog::new FontManager $wname \
 	    -initialfont $ifont \
 	    -okcommand \
 	    "$this configure -textfont \[$wname getCurrentFont\]"
@@ -1775,6 +1775,7 @@ body ::tycho::Edit::textWinName {} {
 # As a side effect, this unselects any selected text.
 #
 body ::tycho::Edit::undo {} {
+    if $readOnly {bell; return}
     $itk_component(text) tag remove sel 1.0 end
     # To be able to redo, copy the state, and reset the undo
     if {$undoInsert} {

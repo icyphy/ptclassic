@@ -36,6 +36,7 @@
 # Data stored on the stack is any arbitrary Tcl string.
 #
 class ::tycho::Stack {
+    inherit ::tycho::Object
 
     constructor {args} {}
 

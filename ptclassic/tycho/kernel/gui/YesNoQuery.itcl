@@ -37,11 +37,24 @@
 # This is done by opening a modal dialog box ("modal" means that nothing
 # further happens in this thread of control until this dialog box is
 # dismissed).
+# <p>
+# This procedure indirectly calls <code>update</code>, a Tk utility
+# that processes pending events, including mouse events. If this
+# procedure is called from within an Itcl object, directly or
+# indirectly, it may be necessary to take precautions to prevent the
+# calling object from being deleted during the call. Because of a
+# defect in at least some versions of Itcl, failure to do so can result
+# in catastrophic failure of the application (a core dump). In Tycho
+# objects, the <code>safeEval</code> method should be used to evaluate
+# this procedure or any method or procedure that in turn calls this
+# procedure. If the procedure is called from the top level or from a
+# Tcl procedure that is not itself called from within an Itcl object,
+# then there is no cause for worry.
 #
 proc ::tycho::askuser {question} {
-    return [::tycho::DialogWindow::newModal YesNoQuery \
-	    [::tycho::autoName .yesno] \
-	    -text $question]
+    set name [autoName .yesno]
+    uplevel #0 [list ::tycho::YesNoQuery $name -text $question]
+    return [::tycho::Dialog::wait $name]
 }
 
 ##########################################################################
@@ -50,20 +63,20 @@ proc ::tycho::askuser {question} {
 # execute in response to the user's answer can be specified using the
 # options "-yescommand" and "-nocommand". The value returned by whichever
 # command is executed can be obtained by creating the dialog box using
-# the procedure <code>newModal</code> rather than directly creating an instance.
+# the procedure <code>wait</code> after creating the instance.
 # This functionality can be accessed more simply through the procedure
 # <code>::tycho::askuser</code>.
 #
 class ::tycho::YesNoQuery {
-    inherit ::tycho::DialogWindow
+    inherit ::tycho::Dialog
 
     # Specify the command to execute on a yes response.
     itk_option define -yescommand yescommand YesCommand \
-	    "::tycho::DialogWindow::answer 1"
+	    "::tycho::Dialog::answer 1"
 
     # Specify the command to execute on a no response
     itk_option define -nocommand nocommand NoCommand \
-	    "::tycho::DialogWindow::answer 0"
+	    "::tycho::Dialog::answer 0"
 
     constructor {args} {}
 }

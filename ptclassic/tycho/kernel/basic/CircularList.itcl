@@ -37,6 +37,7 @@
 # converted to an ordinary Tcl list starting with any specified element.
 #
 class ::tycho::CircularList {
+    inherit ::tycho::Object
 
     constructor {args} {}
 
