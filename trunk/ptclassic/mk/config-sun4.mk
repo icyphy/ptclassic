@@ -45,5 +45,9 @@ PURELINK =	purelink $(COLLECTOR)
 PURIFY =	purelink $(COLLECTOR) purify
 QUANTIFY =	purelink $(COLLECTOR) quantify
 
+# Variable for the Ariel DSP56000 board
 S56DIR =	$(ROOT)/vendors/s56dsp
-MATLABDIR=	/usr/sww/matlab
+
+# Variables for local Matlab installation
+MATLABDIR =	/usr/sww/matlab
+MATLABLIBDIR =	-L$(MATLABDIR)/extern/lib/$(ARCH)
