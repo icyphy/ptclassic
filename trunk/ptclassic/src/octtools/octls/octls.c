@@ -111,17 +111,17 @@ char **argv;
     octObject facet, instance;
     octGenerator gen;
     int count = 0;
-    extern int optind;
+    extern int octoptind;
     extern char *optarg;
 
     if (options(argc, argv) == -1) {
 	exit(1);
     }
 
-    if (argc - optind != 1) {
+    if (argc - octoptind != 1) {
 	optUsage();
     }
-    input_name = argv[optind];
+    input_name = argv[octoptind];
 
     octBegin();
     

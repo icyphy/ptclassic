@@ -132,17 +132,17 @@ int argc;
 char *argv[];
 {
     octObject facet;
-    extern int optind;
+    extern int octoptind;
 
     parseOptions(argc, argv);
 
-    if (argc != optind+2) optUsage();
+    if (argc != octoptind+2) optUsage();
 
     octBegin();
 
     /* get the technology facet directly */
-    Tech = argv[optind+1];
-    tapOpenTechFacet(argv[optind], argv[optind+1], &facet, "r");
+    Tech = argv[octoptind+1];
+    tapOpenTechFacet(argv[octoptind], argv[octoptind+1], &facet, "r");
 
     /* keep the facet open even if tap flushes its caches and closes it */
     facet.contents.facet.mode = "r";

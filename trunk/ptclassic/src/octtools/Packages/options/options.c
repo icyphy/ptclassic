@@ -52,15 +52,11 @@ char OPT_CONT[] = "c";		/* continues description */
 char *optProgName = "unknown program";
 char *optarg;
 
-#if defined(SYSV) || defined(PTLINUX)
-/*
- * rjjt - it seems that SYSV has getopt which uses optind
- * this might only be specific to Solaris 2.x
+/* We name this variable octoptind to avoid conflicts with optind on
+   sol2 and linux
  */
-extern int optind;
-#else
-int optind = 0;
-#endif
+int octoptind = 0;
+
 static char *scanPtr;
 
 
@@ -122,13 +118,13 @@ char *argv[];
     usageProlog[0] = '\0';
 
     if (scanPtr == NIL(char) || *scanPtr == '\0') {
-	if (		optind >= argc ||
-			argv[optind][0] != '-' ||
-			(int)strlen(argv[optind]) < 2 ||
-			strcmp(argv[optind], "--") == 0) {
+	if (		octoptind >= argc ||
+			argv[octoptind][0] != '-' ||
+			(int)strlen(argv[octoptind]) < 2 ||
+			strcmp(argv[octoptind], "--") == 0) {
 	    return(EOF);
 	}
-	scanPtr = &argv[optind++][1];
+	scanPtr = &argv[octoptind++][1];
     }
 
     optChar = *scanPtr++;
@@ -149,7 +145,7 @@ char *argv[];
 		/* OK, it is a regular option. */
 		if (optPtr->argName && optPtr->argName[0] != '\0') {
 		    /* it takes an argumment */
-		    optarg = (*scanPtr == '\0') ? argv[optind++] : scanPtr;
+		    optarg = (*scanPtr == '\0') ? argv[octoptind++] : scanPtr;
 		    if (optarg == NIL(char)) {
 			(void) sprintf(usageProlog,
 				    "%s: option %s requires an argument",
@@ -196,7 +192,7 @@ int rtnBadFlag;
     optAddOptions(options);
     exitBad = ! rtnBadFlag;
 
-    optind = 1;
+    octoptind = 1;
     scanPtr = NIL(char);
 }
 

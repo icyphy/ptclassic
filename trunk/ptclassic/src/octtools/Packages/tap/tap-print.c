@@ -747,20 +747,20 @@ char *argv[];
     int options;
     char *pkg, *msg;
     int code;
-    extern int optind;
+    extern int octoptind;
 
     options = parseOptions(argc, argv);
 
-    if (argc != optind+2) optUsage();
+    if (argc != octoptind+2) optUsage();
 
     octBegin();
 
     /* get the technology facet directly */
-    ERR_IGNORE(tapOpenTechFacet(argv[optind], argv[optind+1], &facet, "r"));
+    ERR_IGNORE(tapOpenTechFacet(argv[octoptind], argv[octoptind+1], &facet, "r"));
     if (errStatus(&pkg, &code, &msg)) {
 	(void) fprintf(stderr,
 		    "can't find facet for ``%s'' technology, viewtype ``%s''\n",
-		    argv[optind], argv[optind+1]);
+		    argv[octoptind], argv[octoptind+1]);
 	(void) fprintf(stderr, "%s\n", msg);
 	exit(1);
     }

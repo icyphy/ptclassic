@@ -1131,7 +1131,7 @@ main( int argc, char **argv) {
 	default:	optUsage();
 	}
     }
-    if ( optind != argc-1 ) {
+    if ( octoptind != argc-1 ) {
 	fprintf(stderr, "%s: You must specify at least one facet.\n",
 	  optProgName);
 	optUsage();
@@ -1152,7 +1152,7 @@ main( int argc, char **argv) {
     if ( designFlags & OTP_DsgnF_Verbose ) {
 	fprintf(stderr,"%s\n",OTP_VERS);
     }
-    if ( otpXlateDesignByName( argv[optind], designFlags) != OCT_OK )
+    if ( otpXlateDesignByName( argv[octoptind], designFlags) != OCT_OK )
 	exit(1);
     exit(0);
 }

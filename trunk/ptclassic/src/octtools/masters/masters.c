@@ -212,7 +212,7 @@ char **argv;
     char* forceFacet = 0;
     int count = 0;		/* Used to prevent infinite looping in replace loop. */
     int subst = 0;		/* Number of substitutions. */
-    extern int optind;
+    extern int octoptind;
     extern char *optarg;
     char filename[PATHNAMESIZE];
     FILE* pipe;
@@ -248,18 +248,18 @@ char **argv;
      */
     octBegin();
 
-    if (optind >= argc) {
+    if (octoptind >= argc) {
 	printf("usage: masters [-v] [-N newpath] [-O oldpath] facet_name(s)\n");
 	printf("\t-v:\tverbose\n");
 	printf("\t-N:\tnew path name (for non-interactive run)\n");
 	printf("\t-O:\told path name (for non-interactive run)\n");
     } else {
-        while (optind < argc) {
+        while (octoptind < argc) {
 	    octObject facet;
 
 	    subst = 0;
 
-	    input_name = argv[optind++];
+	    input_name = argv[octoptind++];
 
 	    /*
 	     * Perform preliminary check for validity of the name

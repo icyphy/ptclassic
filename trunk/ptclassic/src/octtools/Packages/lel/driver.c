@@ -71,16 +71,16 @@ char *argv[];
 	    optUsage();
 	}
     }
-    if (optind != argc-1) {
+    if (octoptind != argc-1) {
 	(void) fprintf(stderr, "%s: no input cell specified\n",
 		       optProgName);
 	optUsage();
     }
     (void) ohUnpackDefaults(&fct, "r", ":physical:contents");
-    if ((ohUnpackFacetName(&fct, argv[optind]) < OCT_OK) ||
+    if ((ohUnpackFacetName(&fct, argv[octoptind]) < OCT_OK) ||
 	(octOpenFacet(&fct) < OCT_OK)) {
 	(void) fprintf(stderr, "%s: cannot open cell `%s':\n  %s\n",
-		       optProgName, argv[optind], octErrorString());
+		       optProgName, argv[octoptind], octErrorString());
 	exit(1);
     }
     print_facet(&fct, 0);
