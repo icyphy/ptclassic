@@ -221,8 +221,8 @@ body ::tycho::EditSTD::editArc {arc} {
     } else {
 
 	set arcLabel [$slate itemcget $edgeInfo($arc,label) -text]
-	set src [$slate itemcget $nodeInfo($edgeInfo($arc,src),label) -text]
-	set dest [$slate itemcget $nodeInfo($edgeInfo($arc,dest),label) -text]
+	set src [$slate itemcget $edgeInfo($arc,src) -text]
+	set dest [$slate itemcget $edgeInfo($arc,dest) -text]
 	set title "Edit $machineType Arc \"$arcLabel\"\nSource state: $src\
 		\nDestination state: $dest"
 
@@ -350,7 +350,7 @@ body ::tycho::EditSTD::editState {node} {
 	raise $w
     } else {
 
-	set nodeLabel [$slate itemcget $nodeInfo($node,label) -text]
+	set nodeLabel [$slate itemcget $node -text]
 	set title "Edit $machineType State \"$nodeLabel\""
 	set labelQuery [list label {Label:} $nodeLabel]
 
@@ -374,11 +374,11 @@ body ::tycho::EditSTD::editState {node} {
 }
 
 body ::tycho::EditSTD::editStateDone {node w} {
-
-    set label [$slate itemcget $nodeInfo($node,label) -text]
+    set label [$slate itemcget $node -text]
     set newLabel [$w get label]
+
     if {$label != $newLabel} {
-	$slate itemconfigure $nodeInfo($node,label) -text $newLabel
+	$slate itemconfigure $node -text $newLabel
 	$this markModified
     }
 
@@ -601,7 +601,7 @@ body ::tycho::EditSTD::ptkCompile {} {
 	# Step through all the nodes in the canvas.
 	# Creating a star for each node : 
 	foreach node [$slate find withtag node] {
-	    set star$node [$slate itemcget $nodeInfo($node,label) -text]
+	    set star$node [$slate itemcget $node -text]
 	    star [set star$node] $machineType
 	}
 
@@ -814,20 +814,21 @@ body ::tycho::EditSTD::saveText {} {
     foreach node [$slate find withtag node] {
 	# Generate code to draw the node as an oval on the canvas.
 	append text "set node$node\
-		\[\$slate create oval [$slate coords $node]\
-		-outline black -fill white -tags node\]\n"
+		\[\$slate create LabelledOval [$slate coords $node]\
+		-outline black -fill white -tags node \
+		-text [list [$slate itemcget $node -text]]\]\n"
 	append text "set nodeInfo(\$node$node,inEdges) \{\}\n"
 	append text "set nodeInfo(\$node$node,outEdges) \{\}\n"
 
 	# Generate code to draw the label.
-	append text "set nodeInfo(\$node$node,label)\
-		\[\$slate create text\
-		[$slate coords $nodeInfo($node,label)] -fill black"
-	set label [$slate itemcget $nodeInfo($node,label) -text]
-	if {$label != {}} {
-	    append text " -text \{$label\}"
-	}
-	append text "\]\n"
+# 	append text "set nodeInfo(\$node$node,label)\
+# 		\[\$slate create text\
+# 		[$slate coords $nodeInfo($node,label)] -fill black"
+# 	set label [$slate itemcget $node -text]
+# 	if {$label != {}} {
+# 	    append text " -text \{$label\}"
+# 	}
+#	append text "\]\n"
 
 	if {$machineType == "Mixed"} {
 	    # Internal machine

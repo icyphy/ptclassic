@@ -420,7 +420,7 @@ body ::tycho::EditBubbleAndArc::bind_BR1 {x y} {
 	    set nodeInfo($node_id,outEdges) {}
 	    # id of the associated text item which displays the label
 	    # of this node at the center
-	    set nodeInfo($node_id,label) [$slate create text \
+	    # set nodeInfo($node_id,label) [$slate create text \
 		    [expr ($oldx+$x)*0.5] [expr ($oldy+$y)*0.5]]
 	    # new node has been created
 	    set create_item {}
@@ -463,9 +463,9 @@ body ::tycho::EditBubbleAndArc::bind_node_B1 {x y} {
 	$slate addtag selected withtag current
 	$slate raise current
 	$this chooseCursorOverNode $x $y
-	$slate itemconfigure $nodeInfo([$slate find withtag current],label) \
+	# $slate itemconfigure $nodeInfo([$slate find withtag current],label) \
 		-fill red
-	$slate raise $nodeInfo([$slate find withtag current],label)
+	# $slate raise $nodeInfo([$slate find withtag current],label)
     }
     set oldx $x
     set oldy $y
@@ -581,8 +581,6 @@ body ::tycho::EditBubbleAndArc::bind_selected_node_B1_Motion {x y} {
 	    set xdelta [expr $x-$oldx]
 	    set ydelta [expr $y-$oldy]
 	    $slate move $node $xdelta $ydelta
-	    # move the label
-	    $slate move $nodeInfo($node,label) $xdelta $ydelta
 	    # move the edges
 	    foreach edge $nodeInfo($node,outEdges) {
 		# move first point of edge
@@ -764,6 +762,7 @@ body ::tycho::EditBubbleAndArc::bind_selarclabel_BR1 {} {
     }
 }
 
+
 ###################################################################
 #### deleteItem
 # Invoked by the Cut command in the Edit menu.
@@ -836,8 +835,6 @@ body ::tycho::EditBubbleAndArc::deleteNode {node} {
     unset nodeInfo($node,outEdges)
     
     # Finally, delete the node itself.
-    $slate delete $nodeInfo($node,label)
-    unset nodeInfo($node,label)
     $slate delete $node
     $this markModified
 }
@@ -877,7 +874,7 @@ body ::tycho::EditBubbleAndArc::deleteArc {arc} {
 body ::tycho::EditBubbleAndArc::mkNode {x y} {
     set oldx $x
     set oldy $y
-    set node_id [$slate create oval $x $y \
+    set node_id [$slate create LabelledOval $x $y \
 	    [expr $x+0.2] [expr $y+0.2] -outline brown -fill white]
 }
 
@@ -975,10 +972,6 @@ body ::tycho::EditBubbleAndArc::resizeNode {tag x1 y1 x2 y2} {
     
     # resize the node
     $slate coords $node $x1 $y1 $x2 $y2
-    
-    # move the node label
-    $slate coords $nodeInfo($node,label) [expr ($x1+$x2)*0.5] \
-	    [expr ($y1+$y2)*0.5]
     
     # move the edges
     foreach edge $nodeInfo($node,outEdges) {
@@ -1224,8 +1217,6 @@ body ::tycho::EditBubbleAndArc::unselect {} {
     if { $sel_item != "" } {
 	if {[lsearch -exact [$slate gettags $sel_item] node] >= 0} {
 	    $slate itemconfigure selected -outline black
-	    $slate itemconfigure $nodeInfo($sel_item,label) \
-		    -fill black
 	} elseif {[lsearch -exact [$slate gettags $sel_item] arc] >= 0} {
 	    $slate itemconfigure selected -fill black
 	    # hide the points
