@@ -47,6 +47,8 @@ BlockInputIter - """"		 input """"
 Also, there are routines to number blocks (as 0,1,2,...), reset flags
 in blocks at specified locations, to count the number of blocks in a galaxy,
 to determine sources, sinks, whether the graph is acyclic,...
+In addition, the function printDot converts a Galaxy to AT&T's "dotty"
+format; more on this is given below.
 
 
 Some terminology: by "marking" or "tagging" a Block (or PortHole), we
@@ -85,6 +87,9 @@ void findSources(Galaxy* g, int flagLoc, SequentialList& sources, Block* deleted
 // for more comments.
 void findSinks(Galaxy* g, int flagLoc, SequentialList& sinks, Block* deletedNode=0);
 
+// An iterator over the parents of a block
+// This iterates "vertically"; ie, the parent of a Block, the parent's parent
+// and so on.
 class BlockParentIter {
 public:
     BlockParentIter(Block& b):first(b) { reset(); }
@@ -179,6 +184,7 @@ public:
     BlockPortIter::remove;
 };
 
+// Find the original port from a alias chain
 // This could be a method of the class generic port
 inline GenericPort& aliasedPort(GenericPort& port) {
     GenericPort* p = &port;
@@ -260,6 +266,7 @@ private:
 // destructor does not delete its ports
 void deleteGalaxy(Galaxy&);
 
+// Return the name for a block
 StringList dotName(Block& b);
 #endif
 
