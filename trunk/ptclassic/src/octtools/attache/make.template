@@ -41,7 +41,7 @@ ROOT	      = ../../..
 VPATH         = $(ROOT)/src/octtools/attache
 
 # get configuration info
-CONFIG=$(ROOT)/mk/config-$(ARCH).mk
+CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
 HDRS		= attache.h \
@@ -80,7 +80,7 @@ attache:	$(OBJS)
 	$(LINKER) $(LINKFLAGS) $(OBJS) \
 		-o attache $(LIBS) -lcurses $(TERMLIB_LIBSPEC) -lm 
 
-DESTBIN = $(OCTTOOLS)/bin.$(ARCH)/attache
+DESTBIN = $(OCTTOOLS)/bin.$(PTARCH)/attache
 
 $(DESTBIN):	attache
 		@echo Installing attache
@@ -90,7 +90,7 @@ $(DESTBIN):	attache
 install: makefile $(DESTBIN) $(BINDIR)/attache
 
 $(BINDIR)/attache:
-	(cd $(BINDIR); rm -f attache; ln -s ../octtools/bin.$(ARCH)/attache .)
+	(cd $(BINDIR); rm -f attache; ln -s ../octtools/bin.$(PTARCH)/attache .)
 
 # "make sources" will do SCCS get on anything where SCCS file is newer.
 sources:	
