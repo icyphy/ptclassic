@@ -9,8 +9,8 @@
 This class provides a text editor specialized for editing
 Itcl source.
 It is automatically invoked whenever you open any file with an
-<a name=".itcl">".itcl" extension</a> or
-<a name=".itk">".itk" extension</a>.
+<a name=".itcl"><CODE>.itcl</CODE> extension</a> or
+<a name=".itk"><CODE>.itk</CODE> extension</a>.
 Itcl is an object-oriented extension to the Tcl language
 that was developed by Michael McLennan of AT&T Bell Labs.
 (Itk is the associated extension to Tk).
@@ -39,8 +39,8 @@ starting in column zero and the class name following it on the same
 line.
 Moreover, the deletion of classes will only work properly if the class
 names are fully qualified with all namespaces (the class names should
-begin with "::").  If this is not the case, then there is no way to tell
-from the syntax of the file what classes are actually being defined
+begin with <CODE>::</CODE>).  If this is not the case, then there is no way
+to tell from the syntax of the file what classes are actually being defined
 (it depends on what namespace the file is evaluated in).
 If the class name is not fully specified, we assume it is defined
 in the global namespace only.
@@ -76,17 +76,17 @@ into the editor.  The Tycho Testing system is documented in
 <A HREF="../../../../doc/coding/testing.html"><CODE>$TYCHO/doc/coding/testing.html</CODE></A>.
  <P>
 
-The <A NAME="Itcl Editor Generate doc"><CODE>Generate doc</CODE> command</A>
-in the "Special" menu asks the user if they would like to save the buffer
-and then runs the <A
-HREF="../../../../lib/tydoc/doc/index.html">Tydoc</A> itcl to
-HTML converter on the file and displays the results.  Tydoc produces an
+The <A NAME="Itcl Editor Generate doc"><CODE>Generate doc</CODE>
+command</A> in the <CODE>Special</CODE> menu asks the user if they
+would like to save the buffer and then runs the
+<A HREF="../../../../lib/tydoc/doc/index.html">Tydoc</A> itcl to HTML
+converter on the file and displays the results.  Tydoc produces an
 HTML file at
 <CODE>doc/codeDoc/</CODE><I>className</I><CODE>.html</CODE>.  The
 <CODE>index.html</CODE> file in <CODE>doc/codeDoc</CODE> is not
 updated by "Generate doc" since we are only passing one file to the
 Tydoc system.  To update <CODE>index.html</CODE>, usually one runs
-<CODE>make itcldocs</CODE>.
+<CODE>make itcldocs</CODE>, or uses the <A HREF="../../../../doc/kernel/usersGuides/BuilderDialogHelp.itcl">BuilderDialog</A>.
 
 
  <P>The <A HREF="Class Diagram, Itcl Editor"><CODE>Class
