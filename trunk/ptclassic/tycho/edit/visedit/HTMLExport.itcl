@@ -129,13 +129,16 @@ body ::tycho::HTMLExport::HTML2DAG {indexfile DAGfile} {
     }
     set DAGfd [open $DAGfile w]
     puts $DAGfd "{configure -canvasheight 600} {configure -canvaswidth 800}"
-    puts $DAGfd "{titleSet title {HTML links for [file dirname $indexfile]}}"
-    puts $DAGfd "{titleSet subtitle {created: [clock format [clock clicks]]}}"
+    puts $DAGfd "{titleSet title {HTML links for \
+           [getTitleFromFile $indexfile]\n\
+            ([::tycho::simplifyPath $indexfile])}}"
+ 
+    puts $DAGfd "{titleSet subtitle {created: [clock format [clock seconds]]}}"
 
     # Don't cd until after the output file is open
     cd [file dirname $indexfile]
     # Generate a DAG, start at depth 0, 
-    puts [HTMLLinks $indexfile 1 0]
+    HTMLLinks $indexfile 1 0
 #    puts $DAGfd "\{add \{[::tycho::expandPath $indexfile]\} \
 #	    \{label \{[::tycho::expandPath $indexfile]\}\} \{\}\}"
 
@@ -145,8 +148,10 @@ body ::tycho::HTMLExport::HTML2DAG {indexfile DAGfile} {
 	if { $title == {} } {
 	    set title [file tail $DAGitem]
 	}
+        # The DAG viewer can't deal with nodes that are named $TYCHO
+        set shortPath [::tycho::simplifyPath $DAGitem]
 	puts $DAGfd "\{add \{$DAGitem\} \{label \{$title\} \
-	    link \{$DAGitem \{\}\}\} \{$DAGlist($DAGitem)\}\}"
+	    link \{$shortPath \{\}\}\} \{$DAGlist($DAGitem)\}\}"
     }
     
     close $DAGfd
@@ -397,4 +402,5 @@ body ::tycho::HTMLExport::addToDAG {HTMLfile link} {
     lappend DAGlist($link) $HTMLfile
     #puts "--$HTMLfile, $DAGlist($link), $link--"
 }
+
 
