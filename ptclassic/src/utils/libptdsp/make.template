@@ -68,3 +68,6 @@ install: makefile $(LIBDIR)/$(LIB)
 lint:	$(LIBCSRCS)
 	lint -u $(INCL) $(LIBCSRCS) > lint
 
+# Don't add anything after the next line; makedepend will zap it.
+# DO NOT DELETE THIS LINE -- make depend depends on it.
+
