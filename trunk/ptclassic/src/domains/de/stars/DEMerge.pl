@@ -38,6 +38,7 @@ defstar {
 		if(p.dataNew) {
 		    Particle& pp = p.get();
 		    output.put(completionTime) = pp;
+		    p.dataNew = FALSE;
 		}
 	   }
 	}
