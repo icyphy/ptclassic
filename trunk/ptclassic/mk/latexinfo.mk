@@ -9,7 +9,7 @@ LATEXINFO= /usr/tools/gnu/src/latexinfo
 TEXINPUTS= .:$(ROOT)/doc/tex:$(LATEXINFO)/styles:$(MORE_TEXINPUTS)
 
 INFO=	-l $(ROOT)/doc/elisp/default.el -l $(LATEXINFO)/.emacs \
-	-l latexinfo -l latexnfo-mde
+	-l latexinfo -l latexinfo-ext -l latexnfo-mde
 
 EMACS= LATEXINFO=$(LATEXINFO) TEXINPUTS=$(TEXINPUTS) emacs-18
 TEX= TEXINPUTS=$(TEXINPUTS) latex
