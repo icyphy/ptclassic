@@ -15,7 +15,6 @@ lpr -P$PRINTER vhdl.ps
 lpr -P$PRINTER cg56.ps
 lpr -P$PRINTER cgc.ps
 lpr -P$PRINTER cg.ps
-lpr -P$PRINTER cp.ps
 lpr -P$PRINTER de.ps
 lpr -P$PRINTER pn.ps
 lpr -P$PRINTER bdf.ps
