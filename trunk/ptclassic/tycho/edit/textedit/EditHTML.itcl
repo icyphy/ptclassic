@@ -63,7 +63,7 @@ class ::tycho::EditHTML {
     method parseNow {start stop}
 
     # Find a name definition.
-    method seePoint {point}
+    method seeFragment {point}
 
     # Returns a list of tags to use when checking the spelling.
     method spellCheckTags {} {return {text}}
@@ -204,7 +204,7 @@ body ::tycho::EditHTML::jump {} {
 	    set filename [lindex $ret 0]
 	    set name [lindex $ret 1]
 	    if {$filename == {}} {
-		seePoint $name
+		seeFragment $name
 	    } {
 		hyperJump $filename $name
 	    }
@@ -282,7 +282,7 @@ body ::tycho::EditHTML::parseNow {start stop} {
 }
 
 #####################################################################
-#### seePoint
+#### seeFragment
 # Find a point within the file, center in the
 # visible part of the text window, and briefly highlight it.
 # The point can have any of three forms:
@@ -294,13 +294,13 @@ body ::tycho::EditHTML::parseNow {start stop} {
 # where in the latter form, <i>name</i> should be a named
 # anchor within the HTML file.
 #
-body ::tycho::EditHTML::seePoint {point} {
+body ::tycho::EditHTML::seeFragment {point} {
     if {([llength $point] == 2 && [lindex $point 0] == {line}) || \
             ([llength $point] == 3 && [lindex $point 0] == {range})} {
-        Edit::seePoint $point
+        Edit::seeFragment $point
     } {
         # Edit the pattern to identify the named anchor.
-        Edit::seePoint "name\[ \t\]*=\[ \t\]*\"?$point\"?"
+        Edit::seeFragment "name\[ \t\]*=\[ \t\]*\"?$point\"?"
     }
 }
 

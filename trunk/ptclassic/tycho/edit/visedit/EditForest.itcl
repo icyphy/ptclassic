@@ -148,7 +148,7 @@ option add *EditForest.vertspacing 1.2 widgetDefault
 # <code>EditForest</code>.  The point may be a string identifying
 # a named anchor in an HTML file, or "{line <i>linenumber</i>}" or
 # "{range <i>start end</i>}" for text files, or any other destination
-# that is understood by the <code>seePoint</code> method of the
+# that is understood by the <code>seeFragment</code> method of the
 # widget that will display the hyperlink.
 # <dt><b>html</b><dd>The <i>value</i> field gives HTML source code that
 # will be rendered and displayed in a message window in response to a
@@ -210,7 +210,7 @@ class ::tycho::EditForest {
 
     # Find the node in the forest identified by "name".
     # FIXME: Implement this.
-    # method seePoint {name}
+    # method seeFragment {name}
 
     ###################################################################
     ####                   protected methods                       ####

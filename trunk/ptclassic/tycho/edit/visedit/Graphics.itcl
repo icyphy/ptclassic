@@ -239,7 +239,7 @@ class ::tycho::Graphics {
 
     # Find the item identified by "name".
     # FIXME: Implement this.
-    # method seePoint {point}
+    # method seeFragment {point}
 
     # Select all selectable objects under the cursor.
     method select {{append 0}}

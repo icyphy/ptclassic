@@ -246,7 +246,7 @@ class ::tycho::EditDAG {
 
     # Find the node in the DAG identified by "name".
     # FIXME: Implement this.
-    # method seePoint {name}
+    # method seeFragment {name}
 
     # Set a new name and contents for the specified node.
     method setNode {oldname newname contents}
