@@ -99,6 +99,31 @@ This code defers the message display until the message
 component is mapped to the screen, ensuring that
 the message wrap-around works correctly.
 
+<p> <h3><a name="deferred redrawing">Deferred redrawing</a></h3>
+
+<p> Widgets that have an expensive redraw should use <code>whenMapped</code>
+to defer their redrawing until the containing window has been
+fully mapped to the screen. For example, the HTML and
+EditDAG widgets do this. The way to do this is to modify the
+<code>insertData</code> method of the widget so that the call to the
+redrawing routine is deferred with <code>whenMapped</code>.
+
+<p>For example, HTML.itcl contains the code:
+
+<pre>
+    whenMapped text "::tycho::safeUpdate $this"
+    whenMapped text [list ::tycho::HTML::render $this $data]
+</pre>
+
+<p>In general, the call to <code>safeUpdate</code> is not
+needed, but (for reasons I don't fully understand) it works
+better for this widget.
+
+<p>The EditDAG widget has a similar call -- in this case,
+the call to <code>safeUpdate</code> is not needed:
+<pre>
+    whenMapped slate "$this redrawGraph"
+</pre>
 
 <p>
 <a href="../index.html">Tycho Home Page</a><br>
