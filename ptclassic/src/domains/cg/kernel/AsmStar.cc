@@ -155,7 +155,7 @@ void AsmStar::gencode(CodeBlock& cb) {
 			// be consolidated, but if they are, the string
 			// becomes null
 			StringList tmp = processMacro(func,id);
-			const char* value = (char*)tmp;
+			const char* value = tmp;
 			if (value == 0 || *value == 0) {
 				value = "ERROR";
 			}
