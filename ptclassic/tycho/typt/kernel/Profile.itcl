@@ -38,6 +38,13 @@
 # used to collect profile information before displaying:
 set ptkProfileString ""
 
+# increment on each use to get unique window names
+set unique 0
+
+###################################################################
+# Destroy a window if it exists
+proc ptkSafeDestroy {win} {if {[winfo exists $win]} {destroy $win}}
+
 ###################################################################
 # Display the contents of the global string ptkDisplayProfile
 #
