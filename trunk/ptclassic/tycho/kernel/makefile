@@ -53,8 +53,8 @@ TCL_SRCS = \
 ITCL_SRCS = \
 	AbstractGraph.itcl \
 	ButtonBox.itcl \
-	Build.itcl \
-	BuildDialog.itcl \
+	Builder.itcl \
+	BuilderDialog.itcl \
 	CircularList.itcl \
 	Class.itcl \
 	ColorBrowser.itcl \
