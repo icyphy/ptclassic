@@ -46,8 +46,12 @@ SDFLOOP=$(ROOT)/src/domains/sdf/loopScheduler
 MATLABDIR := $(shell $(ROOT)/bin/matlabRootDir)
 ifeq ("$MATLABDIR","")
 MATLABDIR= $(ROOT)/src/compat/matlab
+SDF_MATLAB=$(OBJDIR)/domains/sdf/nomatlab/stars
+SDF_MATLAB_SRC=$(ROOT)/src/domains/sdf/nomatlab/stars
 else
 MATLABEXT_LIB = -lsdfmatlabstars -L$(MATLABDIR)/extern/lib/$(MATARCH) -lmat
+SDF_MATLAB=$(OBJDIR)/domains/sdf/matlab/stars
+SDF_MATLAB_SRC=$(ROOT)/src/domains/sdf/matlab/stars
 endif
 
 # Follows the order used by the pigiRpc makefile
@@ -75,7 +79,7 @@ PIGIDIR = $(ROOT)/src/pigilib
 INCL = -I$(KERNDIR) -I$(SDFKERSRC) -I$(SDFLOOP) \
 	-I$(SDFSRC) -I$(SDF_DSP_SRC) -I$(SDF_IMAGE_SRC) \
 	-I$(SDF_ATM_SRC) -I$(SDF_MATRIX_SRC) -I$(SDF_TCLTK_SRC) \
-	-I$(MATLABDIR)/extern/include \
+	-I$(MATLABDIR)/extern/include -I$(SDF_MATLAB_SRC) \
 	-I$(PIGIDIR) -I$(TCL_INCDIR) -I$(TK_INCDIR) $(X11_INCSPEC)
 
 # Rule for compiling with C++ programs
