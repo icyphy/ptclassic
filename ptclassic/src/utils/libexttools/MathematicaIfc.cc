@@ -28,9 +28,11 @@ General base class for an interface to Mathematica via MathLink.
 
 OpenStaticMathLink and CloseStaticMathLink methods are adapted from [1].
 
-The SendToMathLink method is based on a Tcl/Tk interface to Mathematica
-written by John M. Novak of Wolfram Research Inc., but this version
-is an abstraction that does not know with which tool(s) it will interface.
+The SendToMathLink method was at one time based on a Tcl/Tk interface
+to Mathematica written by John M. Novak of Wolfram Research Inc.  Unlike
+the Tcl/Tk interface, this version is an abstraction that does not know
+with which tool(s) it will interface, handles more packets, and is
+more robust to user inputs.
 
 References:
 
@@ -57,6 +59,7 @@ static int mathematicaStarsCount = 0;
 // Status of static connection
 static MLINK gMathLink = 0;
 static MLEnvironment env = 0;
+static InfString inputNameString = "In[1]:= ";
 
 // Open the static connection
 int MathematicaIfc::OpenStaticMathLink(int argc, char **argv) {
@@ -70,7 +73,7 @@ int MathematicaIfc::OpenStaticMathLink(int argc, char **argv) {
     // Initialize the MathLink library, open a link to Mathematica,
     // verify the link, and initialize Mathematica
     if ( (env = MLInitialize(NULL)) == NULL ) {
-        errMsg = "Cannot initialize MathLink.";
+	errMsg = "Cannot initialize MathLink.";
     }
     else if ( (gMathLink = MLOpen(argc, argv)) == NULL ) {
 	errMsg = "Cannot open a MathLink connection to Mathematica.";
@@ -92,7 +95,20 @@ int MathematicaIfc::OpenStaticMathLink(int argc, char **argv) {
 	CloseStaticMathLink();
     }
 
+    SetInputName("In[1]:= ");
+
     return retval;
+}
+
+// Get the last input name string read
+const char* MathematicaIfc::GetInputName() {
+    return inputNameString;
+}
+
+// Set the last input name string read
+const char* MathematicaIfc::SetInputName(const char* name) {
+    inputNameString = name;
+    return inputNameString;
 }
 
 // Close the static connection
@@ -173,10 +189,14 @@ static void printPacketType(int packetType, int currentFlag) {
 #endif
 
 // Constructor
-MathematicaIfc::MathematicaIfc(const char* name, int privateContextFlag) :
-	mathlink(0), environment(0) {
+MathematicaIfc::MathematicaIfc(
+	const char* name, int privateContextFlag,
+	int echoInputFlag, int echoOutputNumFlag) :
+			mathlink(0), environment(0) {
     instanceNumber = mathematicaStarsCount++;
     setContext(name, privateContextFlag);
+    displayInputFlag = echoInputFlag;
+    displayOutputNumFlag = echoOutputNumFlag;
 }
 
 void MathematicaIfc::setContext(const char* name, int flag) {
@@ -192,14 +212,14 @@ void MathematicaIfc::setContext(const char* name, int flag) {
     currContextVariable << "Private`" << context << "currContext";
 
     prolog = currContextVariable;
-    prolog << " = $Context; $Context = " << lastContextVariable;
+    prolog << " = $Context; $Context = " << lastContextVariable << ";";
 
     epilog = lastContextVariable;
-    epilog << " = $Context; $Context = " << currContextVariable;
+    epilog << " = $Context; $Context = " << currContextVariable << ";";
 
     if (flag) {
 	initCode = lastContextVariable;
-	initCode << " = \"" << context << "\"";
+	initCode << " = \"" << context << "\";";
     }
 }
 
@@ -327,126 +347,114 @@ int MathematicaIfc::EvaluatePrivateCommand(MLINK linkp, char* command) {
 // Initialize Mathematica to use X windows for graphics
 int MathematicaIfc::InitXWindows(MLINK linkp) {
     // Initialize X/Motif graphics by having Mathematica evaluate Motif.m
-    return EvaluatePrivateCommand(linkp, "Get[\"Motif.m\"]");
+    return EvaluatePrivateCommand(linkp, "Get[\"Motif.m\"];");
+}
+
+StringList MathematicaIfc::ReadPacketContents(MLINK linkp) {
+    char* returnString = 0;
+    MLGetString(linkp, &returnString);
+    StringList contents = returnString ? returnString : "";
+    MLDisownString(linkp, returnString);
+    MLNewPacket(linkp);
+    return contents;
 }
 
 // SendToMathLink
 // Send a user entered Mathematica command which is sent as
 // a string to the Mathematica kernel.
+// MathLink can respond with a variety of packets in the following order:
+//   InputName
+//   InputName -> OutputName ------------> Text
+//   InputName -> OutputName -> Message -> Text -> ReturnText
+//   InputName -> OutputName --------------------> ReturnText
+//   InputName ---------------> Message -> Text -> Syntax
+// When the Display variables are not set for external display, MathLink
+// can respond to graphics and sounds commands with display packets
+// after the InputName packet.
+//
 int MathematicaIfc::SendToMathLink(MLINK linkp, char* command) {
-  int retval = TRUE;
-  int returnType = ILLEGALPKT;
-  InfString completeReturnString, previousReturnString;
+    int returnType = ILLEGALPKT;
+    InfString completeReturnString, outputString;
 
-  // Return an error if Mathematica is not running
-  if ( ! MathematicaIsRunning() ) {
-    SetErrorString("Mathematica is not running!");
-    return FALSE;
-  }
+    // Set the output buffer to an empty string
+    SetOutputBuffer("");
 
-  if ( command == 0 || *command == 0 ) {
-    SetErrorString("empty Mathematica command.");
-    return FALSE;
-  }
-
-  // Check to see if the link has something to read from it.
-  // If so, skip up to and including the first Input Name Packet we receive
-  if ( MLReady(linkp) ) {
-    if ( ! LoopUntilPacket(linkp, INPUTNAMEPKT, returnType) ) return FALSE;
-  }
-
-  // Put the Mathematica command on the link
-  MLPutFunction(linkp, "EnterTextPacket", 1);
-  MLPutString(linkp, command);
-  MLEndPacket(linkp);
-
-  // Process packets until INPUTNAMEPK, OUTPUTNAMEPKT, SYNTAXPKT, or TEXTPKT
-  ExpectPacket(linkp, FALSE, returnType);
-  while (returnType != INPUTNAMEPKT &&
-         returnType != OUTPUTNAMEPKT &&
-         returnType != SYNTAXPKT &&
-         returnType != TEXTPKT) {
-    char* returnString = 0;
-
-    switch (returnType) {
-      case MESSAGEPKT:
-	MLNewPacket(linkp);
-	MLGetString(linkp, &returnString);
-	if ( previousReturnString.length() != 0 ) {
-	  previousReturnString << "\n";
-	}
-	previousReturnString << returnString;
-	MLDisownString(linkp, returnString);
-	returnString = 0;
-	ExpectPacket(linkp, TRUE, returnType);
-	ExpectPacket(linkp, FALSE, returnType);
-	break;
-
-      case DISPLAYPKT:
-      case DISPLAYENDPKT:
-      default:
-	MLNewPacket(linkp);
-	ExpectPacket(linkp, FALSE, returnType);
-	break;
+    // Return an error if Mathematica is not running
+    if ( ! MathematicaIsRunning() ) {
+      SetErrorString("Mathematica is not running!");
+      return FALSE;
     }
-  }
 
-  // If current packet is INPUTNAMEPKT. Done
-  if (returnType == INPUTNAMEPKT) {
-    completeReturnString = previousReturnString;
-  }
-  else if (returnType == SYNTAXPKT) {
-    char* returnString = 0;
-    // FIXME: shouldn't we use the value of returnString somewhere?
-    MLGetString(linkp, &returnString);
-    completeReturnString = previousReturnString;
-    MLDisownString(linkp, returnString);
-  }
-  else if (returnType == TEXTPKT) {
-    char* returnString = 0;
-    MLGetString(linkp, &returnString);
-    completeReturnString = returnString;
-    MLDisownString(linkp, returnString);
-  }
-  else if (returnType == OUTPUTNAMEPKT) {
-    char* returnString = 0;
-    MLNewPacket(linkp);
-    returnType = MLNextPacket(linkp);
+    // Return on an empty command
+    if ( command == 0 || *command == 0 ) {
+      return FALSE;
+    }
 
-    switch( returnType ) {
-      case RETURNPKT:
-	MLGetString(linkp, &returnString);
-	outputBuffer << returnString;
-	MLDisownString(linkp, returnString);
-	break;
+    // Make a string holding the input number and input command
+    if ( displayInputFlag ) {
+      completeReturnString = GetInputName();
+      completeReturnString << command << "\n";
+    }
 
+    // Put the Mathematica command on the link
+    MLPutFunction(linkp, "EnterTextPacket", 1);
+    MLPutString(linkp, command);
+    MLEndPacket(linkp);
+
+    // While waiting until we receive an InputName, Return, Syntax, or Text
+    // packet, process Message and OutputName packets but ignore Display
+    // packets; this while is necessary because Mathematica outputs a lot
+    // of illegal packets before it puts out valid packets
+    ExpectPacket(linkp, FALSE, returnType);
+    while (returnType != INPUTNAMEPKT &&
+	   returnType != RETURNTEXTPKT &&
+	   returnType != TEXTPKT &&
+	   returnType != SYNTAXPKT) {
+
+      switch(returnType) {
+	case MESSAGEPKT:
+	  // We ignore the contents of the message packet and instead
+	  // use its printed form which is contained in the following
+	  // packet, which is a text packet
+	  MLNewPacket(linkp);
+	  ExpectPacket(linkp, FALSE, returnType);
+	  completeReturnString << ReadPacketContents(linkp) << "\n";
+	  break;
+
+	case OUTPUTNAMEPKT:
+	  outputString = ReadPacketContents(linkp);
+	  outputString << "\n";
+	  break;
+
+	default:
+	  MLNewPacket(linkp);
+	  break;
+      }
+      ExpectPacket(linkp, FALSE, returnType);
+    }
+
+    // Process the final packet
+    switch ( returnType ) {
+      case SYNTAXPKT:
+	outputString.initialize();
+	// fall through
       case RETURNTEXTPKT:
-	MLGetString(linkp, &returnString);
-	if ( previousReturnString.length() == 0 ) {
-	  completeReturnString = returnString;
-	}
-	else {
-	  completeReturnString = previousReturnString;
-	  completeReturnString << "\n" << returnString;
-        }
-	outputBuffer << completeReturnString;
-	MLDisownString(linkp, returnString);
-	break;
-
-      case CALLPKT:
-      case MENUPKT:
-      case INPUTPKT:
-	break;
-
-      default:
-	SetErrorString("Expected Mathematica packets after an OutputName packet were not found.");
-	retval = FALSE;
-	break;
+      case TEXTPKT:
+	completeReturnString << ReadPacketContents(linkp);
     }
-  }
 
-  SetOutputBuffer(completeReturnString);
-  return retval;
+    // Look for the next input name packet
+    if ( returnType != INPUTNAMEPKT ) {
+      while ( MLNextPacket(linkp) != INPUTNAMEPKT ) MLNewPacket(linkp);
+    }
+    SetInputName(ReadPacketContents(linkp));
+
+    if ( displayOutputNumFlag ) {
+      completeReturnString << outputString;
+    }
+    SetOutputBuffer(completeReturnString);
+
+    return TRUE;
 }
 
 
