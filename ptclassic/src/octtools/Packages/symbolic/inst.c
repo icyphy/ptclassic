@@ -686,6 +686,7 @@ symConFunc *confun;		/* Connector function     */
     symSegments(fct, term_1, term_2, 2, pnts, 1, lyr, 1, &width, confun);
 }
 
+#ifdef NEED_OLD_MIN_CONNECT
 static void old_min_connect(fct, term_1, term_2, lyr, box_1, box_2, confun)
 octObject *fct;			/* Facet to modify        */
 octObject *term_1;		/* First actual terminal  */
@@ -725,8 +726,10 @@ symConFunc *confun;		/* Connector function     */
     /* Make segment */
     symSegments(fct, term_1, term_2, 2, pnts, 1, lyr, 1, &width, confun);
 }
+#endif /* NEED_OLD_MIN_CONNECT*/
 
 
+#ifdef NEED_MAX_CONNECT 
 static void max_connect(fct, term_1, term_2, lyr, box_1, box_2, confun)
 octObject *fct;			/* Facet to modify        */
 octObject *term_1;		/* First actual terminal  */
@@ -776,7 +779,7 @@ symConFunc *confun;		/* Connector function     */
     /* Make segment */
     symSegments(fct, term_1, term_2, 4, pnts, 1, lyr, 1, &width, confun);
 }
-
+#endif /*NEED_MAX_CONNECT*/
 
 
 
