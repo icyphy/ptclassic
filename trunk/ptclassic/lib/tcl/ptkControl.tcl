@@ -24,6 +24,7 @@
 # CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 # ENHANCEMENTS, OR MODIFICATIONS.
 #                                                         COPYRIGHTENDKEY
+#
 # The global array ptkRunFlag($name), indexed by the name of the universe,
 # has the following values:
 #	undefined		no active run window, universe not created
@@ -32,18 +33,29 @@
 #	PAUSED			paused run
 #	FINISHED		finished a run
 #	STOP_PENDING		pending stop requested
+#	ABORT			pending abort requested
 
 # Need a dummy value in ptkRunFlag(main) for startup
 set ptkRunFlag(main) IDLE
+
+# The global variable ptkControlPanel is the name of the master control
+# panel window that is currently being used for a run.  This name is therefore
+# available to stars that wish to insert frames into the control panel.
+# It is equal to .run_$octHandle.
 
 #######################################################################
 # Set the ptkRunFlag to IDLE, indicating the run is over, and pop up the
 # GO button.
 #
-proc ptkClearRunFlag { name } {
+proc ptkClearRunFlag { name octHandle } {
     global ptkRunFlag
-    set  cntrWindow .run_$name
+    set  cntrWindow .run_$octHandle
     catch {$cntrWindow.panel.go configure -relief raised}
+    catch {$cntrWindow.panel.pause configure -relief raised}
+    if {[info exists ptkStepAction($name)]} {
+	cancelAction $ptkStepAction($name)
+	unset ptkStepAction($name)
+    }
     set ptkRunFlag($name) FINISHED
     return ""
 }
@@ -62,12 +74,14 @@ proc ptkHasRun { name } {
 
 #######################################################################
 # Procedure to run a universe.
-# The argument is the default number of iterations.
 #
 proc ptkRunControl { name octHandle } {
     global ptkRunFlag
-    set w .run_$name
-    if {[info exists ptkRunFlag($name)] && [winfo exists $w]} {
+    global ptkDebug
+    global ptkControlPanel
+    set ptkDebug($name) 0
+    set ptkControlPanel .run_$octHandle
+    if {[info exists ptkRunFlag($name)] && [winfo exists $ptkControlPanel]} {
             ptkImportantMessage .error \
 		"Sorry.  Only one run window for $name at time. "
 	    return
@@ -75,76 +89,159 @@ proc ptkRunControl { name octHandle } {
     # Mark an open window, but with no run yet.
     set ptkRunFlag($name) IDLE
 
-    catch {destroy $w}
-    toplevel $w
-    wm title $w "Run $name"
-    wm iconname $w "Run $name"
+    catch {destroy $ptkControlPanel}
+    toplevel $ptkControlPanel
+    wm title $ptkControlPanel "Run $name"
+    wm iconname $ptkControlPanel "Run $name"
 
     set defNumIter [ptkGetRunLength $octHandle]
 
-    message $w.msg -font -Adobe-times-medium-r-normal--*-180* -width 25c \
+    message $ptkControlPanel.msg \
+	    -font -Adobe-times-medium-r-normal--*-180* -width 25c \
             -text "Control panel for $name" -justify center
 
     # Define the entry that controls the number of iterations
-    frame $w.iter -bd 10
-	label $w.iter.label -text "Number of iterations:"
-        entry $w.iter.entry -relief sunken -width 10 -bg wheat3
-	$w.iter.entry insert @0 $defNumIter
-	pack append $w.iter $w.iter.entry right $w.iter.label left
+    frame $ptkControlPanel.iter -bd 10
+	label $ptkControlPanel.iter.label -text "Number of iterations:"
+        entry $ptkControlPanel.iter.entry -relief sunken -width 10 -bg wheat3
+	$ptkControlPanel.iter.entry insert @0 $defNumIter
+	checkbutton $ptkControlPanel.iter.debug -text "Debug" \
+	    -variable ptkDebug($name) -relief flat \
+	    -command "ptkSetOrClearDebug $name $octHandle"
+	pack append $ptkControlPanel.iter \
+	    $ptkControlPanel.iter.label left \
+	    $ptkControlPanel.iter.entry left \
+	    $ptkControlPanel.iter.debug {right padx 20}
 
     # The following empty frames are created so that they are available
     # to stars to insert custom controls into the control panel.
     # By convention, we tend to use "high" for entries, "middle"
     # for buttons, and "low" for sliders.  The full name for the
-    # frame is .run_${name}.$position, where $name is the name of the
+    # frame is .run_${octHandle}.$position, where $name is the name of the
     # universe, and $position is "high", "middle", or "low".
-    frame $w.high -bd 10
-    frame $w.middle -bd 10
-    frame $w.low -bd 10
+    frame $ptkControlPanel.high -bd 10
+    frame $ptkControlPanel.middle -bd 10
+    frame $ptkControlPanel.low -bd 10
 
     # Define the panel of control buttons
-    frame $w.panel -bd 10
-	button $w.panel.go -text " GO <Return> " \
-	    -command "ptkGo $name $octHandle"
+    frame $ptkControlPanel.panel -bd 10
+	button $ptkControlPanel.panel.go -text " GO <Return> " \
+	    -command "ptkGo $name $octHandle" -width 14
 		
-	button $w.panel.pause -text "PAUSE <Space>" -command "ptkPause $name"
-	button $w.panel.stop -text "STOP <Escape>" -command "ptkStop $name"
-	pack append $w.panel \
-	    $w.panel.go {left expand fill} \
-	    $w.panel.pause {left expand fill} \
-	    $w.panel.stop {right expand fill}
+	button $ptkControlPanel.panel.pause -text "PAUSE <Space>" \
+		-command "ptkPause $name $octHandle" -width 14
+	button $ptkControlPanel.panel.stop -text "STOP <Escape>" \
+		-command "ptkStop $name" -width 14
+	pack append $ptkControlPanel.panel \
+	    $ptkControlPanel.panel.go {left expand fill expand} \
+	    $ptkControlPanel.panel.pause {left expand fill expand} \
+	    $ptkControlPanel.panel.stop {right expand fill expand}
 
-    button $w.dismiss -text "DISMISS" -command \
-	"ptkRunControlDel $name $w $octHandle $defNumIter"
+    # The debug panel will be filled with buttons when debugging is
+    # turned on.  It starts out off always.
+    frame $ptkControlPanel.debug -bd 10 
 
-    pack append $w \
-	$w.msg {top fill expand} \
-	$w.iter top \
-	$w.panel top \
-	$w.high top \
-	$w.middle top \
-	$w.low top \
-	$w.dismiss {top fill expand}
+    # Animation is off by default
+    # Note that since pre and post actions are global, there is no point
+    # in associating the universe name with the ptkAnimation flag.
+    global ptkAnimationFlag
+    set ptkAnimationFlag 0
+    ptkAnimation 0
 
-    wm geometry $w +400+400
-    set prevFocus [focus]
-    focus $w
-    wm protocol $w WM_DELETE_WINDOW \
-	"ptkRunControlDel $name $w $octHandle $defNumIter"
+    button $ptkControlPanel.dismiss -text "DISMISS" -command \
+	"ptkRunControlDel $name $ptkControlPanel $octHandle $defNumIter"
+
+    pack append $ptkControlPanel \
+	$ptkControlPanel.msg {top fill expand} \
+	$ptkControlPanel.iter top \
+	$ptkControlPanel.panel top \
+	$ptkControlPanel.debug top \
+	$ptkControlPanel.high top \
+	$ptkControlPanel.middle top \
+	$ptkControlPanel.low top \
+	$ptkControlPanel.dismiss {top fill expand}
+
+    wm geometry $ptkControlPanel +400+400
+    focus $ptkControlPanel
+    wm protocol $ptkControlPanel WM_DELETE_WINDOW \
+	"ptkRunControlDel $name $ptkControlPanel $octHandle $defNumIter"
 
     set olduniverse [curuniverse]
     newuniverse $name
     ptkCompile $octHandle
     curuniverse $olduniverse
 
-    bind $w.iter.entry <Return> \
+    bind $ptkControlPanel.iter.entry <Return> \
 		"ptkGo $name $octHandle"
-    bind $w.iter.entry <Escape> "ptkStop $name"
-    bind $w.iter.entry <space> "ptkPause $name"
-    bind $w <Return> "ptkGo $name $octHandle"
-    bind $w <space> "ptkPause $name"
-    bind $w <Escape> "ptkStop $name"
-    bind $w <Control-d> "ptkRunControlDel $name $w $octHandle $defNumIter"
+    bind $ptkControlPanel.iter.entry <Escape> "ptkStop $name"
+    bind $ptkControlPanel.iter.entry <space> "ptkPause $name $octHandle"
+    bind $ptkControlPanel <Return> "ptkGo $name $octHandle"
+    bind $ptkControlPanel <space> "ptkPause $name $octHandle"
+    bind $ptkControlPanel <Escape> "ptkStop $name"
+    bind $ptkControlPanel <Control-d> \
+	"ptkRunControlDel $name $ptkControlPanel $octHandle $defNumIter"
+}
+
+#######################################################################
+# Procedure to open or close the debug section of the control panel
+#
+proc ptkSetOrClearDebug { name octHandle } {
+    global ptkDebug
+    set w .run_$octHandle
+    if {$ptkDebug($name)} {
+	# Turning debug on.  Create control panel
+	frame $w.debug.eph
+	button $w.debug.eph.step -text "STEP" \
+		-command "ptkStep $name $octHandle" -width 14
+	button $w.debug.eph.abort -text "ABORT" -command "ptkAbort $name" \
+		-width 14
+	# Animation is off by default
+	# Note that since pre and post actions are global, there is no point
+	# in associating the universe name with the ptkAnimation flag.
+	global ptkAnimationFlag
+	set ptkAnimationFlag 0
+	ptkAnimation 0
+	checkbutton $w.debug.eph.anim -text "Animation" \
+	    -variable ptkAnimationFlag -relief flat -width 12 \
+	    -command {ptkAnimation $ptkAnimationFlag}
+	pack append $w.debug.eph \
+	    $w.debug.eph.step {left fill expand} \
+	    $w.debug.eph.abort {left fill expand} \
+	    $w.debug.eph.anim {left fill expand}
+	pack append $w.debug $w.debug.eph left
+    } {
+	# Turning debug off.  Destroy control panel.
+	catch {destroy $w.debug.eph}
+    }
+}
+
+
+#######################################################################
+# Procedure to turn on or off animation
+#
+proc ptkAnimation { on} {
+    global ptkAnimationAction
+    if [info exists ptkAnimationAction] {
+ 	cancelAction $ptkAnimationAction
+ 	unset ptkAnimationAction
+    }
+    if {$on} {
+	set ptkAnimationAction \
+	    [registerAction pre "ptkHighlightStar"]
+    } {
+	ptkClearHighlights
+    }
+}
+
+#######################################################################
+# Procedure to light up a star.
+# A one second delay is inserted to make this more useful when running
+# open loop.
+#
+proc ptkHighlightStar { star } {
+    ptkClearHighlights
+    ptkHighlight $star
+    after 250
 }
 
 #######################################################################
@@ -156,9 +253,7 @@ proc ptkRunControlDel { name window octHandle defNumIter} {
 	# Assume the window has been deleted already and ignore command
 	return
     }
-    if {$ptkRunFlag($name) == {ACTIVE} || \
-	    $ptkRunFlag($name) == {PAUSED} || \
-	    $ptkRunFlag($name) == {STOP_PENDING} } {
+    if [regexp {^ACTIVE$|^PAUSED$|^STOP_PENDING$|^ABORT$} $ptkRunFlag($name)] {
 	ptkImportantMessage .message {System is still running.  Please stop it.}
 	return
     }
@@ -168,11 +263,11 @@ proc ptkRunControlDel { name window octHandle defNumIter} {
          ptkSetRunLength $octHandle [$window.iter.entry get]
     }
     deluniverse $name
-    destroy $window
+    catch {destroy $window}
 }
 
 #######################################################################
-# procedure to stop a run
+# basic procedure to stop a run
 proc ptkStop { name } {
     global ptkRunFlag
     if {![info exists ptkRunFlag($name)]} {
@@ -182,33 +277,70 @@ proc ptkStop { name } {
     # Ignore if the named system is not running or paused
     if {$ptkRunFlag($name) != {ACTIVE} && \
 	$ptkRunFlag($name) != {PAUSED}} return
+    halt
     # Note that the following set will release the ptkPause proc
     set ptkRunFlag($name) STOP_PENDING
-    halt
-    # Finish processing the run command
-    update
-    set cntrWindow .run_$name
-    catch {$cntrWindow.panel.go configure -relief raised}
-    catch {$cntrWindow.panel.pause configure -relief raised}
-    if {[catch {wrapup} msg] == 1} {
-	ptkClearRunFlag $name
-	error $msg
+}
+
+#######################################################################
+# procedure to stop a run without running wrapup
+proc ptkAbort { name } {
+    global ptkRunFlag
+    if {![info exists ptkRunFlag($name)]} {
+	# Assume the window has been deleted already and ignore command
+	return
     }
-    ptkClearRunFlag $name
+    # Ignore if the named system is not running or paused
+    if {$ptkRunFlag($name) != {ACTIVE} && \
+	$ptkRunFlag($name) != {PAUSED}} return
+    halt
+    # Note that the following set will release the ptkPause proc
+    set ptkRunFlag($name) ABORT
 }
 
 #######################################################################
 # procedure to pause a run
-proc ptkPause { name } {
+proc ptkPause { name octHandle } {
     global ptkRunFlag
     #Ignore the command if the system is not running
     if {![info exists ptkRunFlag($name)] || \
     	$ptkRunFlag($name) != {ACTIVE}} return
-    set cntrWindow .run_$name
+    set cntrWindow .run_$octHandle
     catch {$cntrWindow.panel.go configure -relief raised}
     catch {$cntrWindow.panel.pause configure -relief sunken}
     set ptkRunFlag($name) PAUSED
     tkwait variable ptkRunFlag($name)
+}
+
+#######################################################################
+# procedure to single step (execute one star)
+proc ptkStep { name octHandle } {
+    # Ignore command if universe is ACTIVE or a stop or abort is pending
+    global ptkRunFlag
+    if {[info exists ptkRunFlag($name)] && \
+        [regexp {^ACTIVE$|^STOP_PENDING$|^ABORT$} $ptkRunFlag($name)]} {
+            return
+    }
+    global ptkStepAction
+    if {![info exists ptkStepAction($name)]} {
+    	set ptkStepAction($name) \
+	    [registerAction post "ptkStepTrap $name $octHandle"]
+    }
+    ptkGo $name $octHandle
+}
+
+#######################################################################
+# procedure invoked after a star executes in single step mode.
+# If the star is an auto-fork, then we skip it, on the theory that its
+# invocation is not interesting.
+proc ptkStepTrap { name octHandle star } {
+    if {[string first "auto-fork" $star] >= 0} return
+    global ptkStepAction
+    if {[info exists ptkStepAction($name)]} {
+	cancelAction $ptkStepAction($name)
+	unset ptkStepAction($name)
+    }
+    ptkPause $name $octHandle
 }
 
 #######################################################################
@@ -218,16 +350,17 @@ proc ptkGo {name octHandle} {
     # For now, we allow only one run at a time.
     set univ [curuniverse]
     if {[info exists ptkRunFlag($univ)] && \
-        ($ptkRunFlag($univ) == {ACTIVE} || \
-	 ($univ != $name && $ptkRunFlag($univ) == {PAUSED} ) || \
-	 $ptkRunFlag($univ) == {STOP_PENDING})} {
-        ptkImportantMessage .error \
-		"Sorry.  Only one run at time. "
-	return
+	[regexp {^ACTIVE$|^STOP_PENDING$|^ABORT$} $ptkRunFlag($univ)] || \
+	($univ != $name && $ptkRunFlag($univ) == {PAUSED}) } {
+            ptkImportantMessage .error "Sorry.  Only one run at time. "
+	    return
     }
-    set  cntrWindow .run_$name
-    catch {$cntrWindow.panel.go configure -relief sunken}
-    catch {$cntrWindow.panel.pause configure -relief raised}
+    global ptkControlPanel
+    set ptkControlPanel .run_$octHandle
+    catch {$ptkControlPanel.panel.go configure -relief sunken}
+    catch {$ptkControlPanel.panel.pause configure -relief raised}
+    # So that error highlighting, etc. works
+    if {$univ != $name} {ptkSetHighlightFacet $octHandle}
     if {[info exists ptkRunFlag($name)] && \
     	$ptkRunFlag($name) == {PAUSED}} {
 	    # Setting of ptkRunFlag should
@@ -241,13 +374,13 @@ proc ptkGo {name octHandle} {
     if {[catch {
         curuniverse $name
         ptkCompile $octHandle
-        set w .run_$name
+        set w .run_$octHandle
         set numIter [$w.iter.entry get]
         run $numIter
-	wrapup
-	ptkClearRunFlag $name
+	if {$ptkRunFlag($name) != {ABORT}} {wrapup}
+	ptkClearRunFlag $name $octHandle
     } msg] == 1} {
-	ptkClearRunFlag $name
+	ptkClearRunFlag $name $octHandle
 	error $msg
     }
 }
