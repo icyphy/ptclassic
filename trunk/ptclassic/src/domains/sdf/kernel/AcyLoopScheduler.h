@@ -147,7 +147,8 @@ public:
 	int checkTopsort();
 
 	// Set the buffer sizes after schedule has been computed
-	void fixBufferSizes(int i, int j);
+	// return TRUE if no errors
+	int fixBufferSizes(int i, int j);
 
 	// A hack to do a pre-pass on all the spliced-in stars
 	int clusterSplicedStars(AcyCluster*);
@@ -168,8 +169,8 @@ public:
 	void printStarNumbers();
 
 protected:
-	// create the nodelist
-	void createNodelist(Galaxy& gal);
+	// create the nodelist; TRUE if no errors
+	int createNodelist(Galaxy& gal);
 
 	// generate top-sort using RPMC
 	int RPMC(AcyCluster* gr);
@@ -190,8 +191,8 @@ protected:
 	// Create the incMatrix and delMatrix
 	void createIncidenceMatrix(Galaxy& gal);
 
-	// Create reachMatrix
-	void createReachabilityMatrix(Galaxy& gal);
+	// Create reachMatrix, returns TRUE if successfull
+	int createReachabilityMatrix(Galaxy& gal);
 
 	// This is used by <code>createReachabilityMatrix</code>
 	int visitSuccessors(Block* s, int flagLoc);
