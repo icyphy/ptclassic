@@ -252,8 +252,12 @@ body ::tycho::EditSearch::change {} {
 	$editWindow replaceAll $changeto
     } {
 	# Change only one
-	$editWindow deleteRange sel.first sel.last
-	$editWindow insertString insert $changeto
+	if {[$editWindow getSelection] != {}} {
+	    $editWindow deleteRange sel.first sel.last
+	    $editWindow insertString insert $changeto
+	} {
+	    error "No selection to change"
+	}
     }
     set lastChangeString $changeto
 }

@@ -529,7 +529,7 @@ body ::tycho::File::constructor {args} {
 #
 body ::tycho::File::destructor {} {
     
-    if {$modified} {
+    if {[info exists modified] && $modified} {
 	set title [file tail $file]
 
 	set response [DialogWindow::newModal YesNoCancel .z \

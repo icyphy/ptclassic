@@ -120,7 +120,7 @@ body ::tycho::HTML::constructor {args} {
 	global TYCHO
 	button $itk_component(acc).back \
 		-text Back \
-		-bitmap @$TYCHO/tycho/kernel/back.xbm \
+		-bitmap @$TYCHO/kernel/back.xbm \
 		-command "$itk_component(text) back"
     } {
 	keep -background -font -activebackground -cursor \
