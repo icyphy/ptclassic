@@ -82,7 +82,7 @@ proc ::tycho::slate {pathName args} {
 #######################################################################
 #### Slate
 #
-# The slate is a widget based on the Tk canbas that support "complex"
+# The slate is a widget based on the Tk canvas that support "complex"
 # items, each of which can contain many "simple" canvas items.
 # All methods of the Slate can manipulate either simple or
 # complex items more-or-less transparently.
