@@ -1,12 +1,19 @@
 <!--  $Id$ -->
 <html>
 <head>
-<title>Tydoc Bugs</title>
+<title>Tydoc/IDoc Bugs</title>
 </head>
 <body bgcolor="#faf0e6">
 <H1>Bugs</H1>
-<MENU>
+<HR>
+Contents: <A HREF="#Tydoc Bugs">Tydoc Bugs</A>
+ - <A HREF ="#Tydoc RFE">Tydoc RFE</A>
+ - <A HREF="#IDoc Bugs">IDoc Bugs</A>
+ - <A HREF ="#IDoc RFE">IDoc RFE</A>
+<HR>
 
+<H2><A NAME = "Tydoc Bugs"> Tydoc Bugs </A></H2>
+<MENU>
 	<LI> This (legal) variable declaration:
 	<pre>
 	    protected common twoPi [expr 2.0*$pi]
@@ -75,7 +82,7 @@
 
 </MENU>
 
-<H2>Requests For Enhancements (RFEs)</H2>
+<H2><A NAME = "Tydoc RFE">Tydoc Requests For Enhancements (RFEs)</A></H2>
 <MENU>
 
 	<LI> Tydoc is slow.  
@@ -95,6 +102,22 @@
 	<LI> <CODE>tydoc</CODE> should be able to gather more information
 	from the body of an ensemble.
 </MENU>
+
+<H2><A NAME = "IDoc Bugs">IDoc Bugs</A></H2>
+<MENU>
+	<LI> Class model can not handle variables and methods of the same name.
+	<LI> Inheritance information is not shown.
+	<LI> Constructor/Destructor are not shown.
+	<LI> Frame resizing is <i>strange</i>.
+	<LI> Related class constructs...hmm. Show in class viewer?
+	<LI> Tcl files.
+</MENU>
+<H2><A NAME = "IDoc RFE">IDoc Requests For Enhancements (RFEs)</A></H2>
+<MENU>
+	<LI> A specific preference for the HTML background (and other stuff)
+	would be nice.
+</MENU>
+
 <HR>
 Copyright &#169 1996-%Q%, The Regents of the University of California.
 All rights reserved.
