@@ -54,12 +54,12 @@ StringList checkConnect (Galaxy& g) {
 	// iterate over every star
 	while ((s = next++) != 0) {
 		// error if no portholes
-		if (s->numberPorts() == 0) {
-			msg += s->fullName();
-			msg += " has no portholes\n";
-			Error::mark(*s);
-			break;
-		}
+// 		if (s->numberPorts() == 0) {
+// 			msg += s->fullName();
+// 			msg += " has no portholes\n";
+// 			Error::mark(*s);
+// 			break;
+// 		}
 		// error if any porthole is disconnected
 		BlockPortIter nextp(*s);
 		PortHole* p;
