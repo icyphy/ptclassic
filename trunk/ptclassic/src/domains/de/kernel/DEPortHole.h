@@ -134,7 +134,7 @@ public:
 
 	// constructor and destructor
 	InDEPort() : complete(TRUE), triggerList(0), beforeP(0), inQue(0) {}
-	~InDEPort() { INC_LOG_DEL; delete inQue; }
+	~InDEPort();
 };
 
 	////////////////////////////////////////////
@@ -205,6 +205,9 @@ public:
 
 	// constructor
 	MultiInDEPort() : complete(TRUE), triggerList(0), beforeP(0) {}
+
+	// destructor
+	~MultiInDEPort();
 };
  
  
