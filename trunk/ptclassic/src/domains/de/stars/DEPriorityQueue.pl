@@ -145,10 +145,12 @@ Maximum total number of particles. If <0, capacity is infinite.
 		inData.before(demand);
 	}
 	start {
-		queue.initialize();
+		emptyQueue();
 		infinite = (int(capacity) < 0);
 	}
-
+	destructor {
+		emptyQueue();
+	}
 	go {
 	    completionTime = arrivalTime;
 
@@ -198,5 +200,16 @@ Maximum total number of particles. If <0, capacity is infinite.
 
 	    // output the queue size
 	    size.put(completionTime) << queue.length();
+	}
+	// this method empties the queue, returning any Particles to their
+	// pools.
+	method {
+		name { emptyQueue }
+		code {
+			while (queue.length() > 0) {
+				Particle* p = (Particle*) queue.getFirstElem();
+				p->die();
+			}
+		}
 	}
 }
