@@ -32,6 +32,11 @@ static void free_resource();
 static params *resolve_entry();
 static int strihash();
 
+static int do_color();
+static int do_font();
+static int do_style();
+static int do_bool();
+
 #define DEF_INT		"0"
 #define DEF_STR		""
 #define DEF_FONT	"fixed"
@@ -294,7 +299,7 @@ XFontStruct **font_info;	/* Returned font information */
 
     /* First attempt to interpret as font family/size */
     (void) strcpy(name_copy, name);
-    if (font_size = strchr(name_copy, '-')) {
+    if ( (font_size = strchr(name_copy, '-')) ) {
 	*font_size = '\0';
 	font_family = name_copy;
 	font_size++;
@@ -309,7 +314,8 @@ XFontStruct **font_info;	/* Returned font information */
 	    
 	    /* Load first one that you can */
 	    for (i = 0;  i < font_count;  i++) {
-		if (*font_info = XLoadQueryFont(param_disp, font_list[i])) {
+		if ( (*font_info = XLoadQueryFont(param_disp,
+						  font_list[i])) ) {
 		    break;
 		}
 	    }
