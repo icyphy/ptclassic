@@ -1,8 +1,8 @@
 # Makefile for Ptolemy utilities.
 
 # Version Identification:
-# $Id$
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# @(#)Makefile	1.8	10/17/95
+# Copyright (c) 1990-1995 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -41,9 +41,9 @@ MAKEVARS =	\
 		"ARCH=$(ARCH)" 
 
 all install clean realclean sources depend checkjunk sccsinfo:
-	 @for x in $(DIRS); do \
-	 	cd $$x ; \
+	@for x in $(DIRS); do \
+		cd $$x ; \
 		echo making $@ in filters/$$x ; \
 		$(MAKE) $(MFLAGS) $(MAKEVARS) VPATH=../../../src/utils/$$x $@ ;\
-	  	cd .. ; \
-	 done
+		cd .. ; \
+	done
