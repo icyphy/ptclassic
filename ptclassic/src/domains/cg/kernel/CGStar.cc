@@ -414,8 +414,8 @@ int CGStar :: maxComm() {
 	BlockPortIter next(*this);
 	for(int i = numberPorts(); i > 0; i--) {
 		PortHole* p = next++;
-		if (p->isItInput() && max < p->numberTokens)
-				max = p->numberTokens;
+		if (p->isItInput() && max < p->numXfer())
+				max = p->numXfer();
 	}
 
 	// processor 1 to 2, "max" sample, both sending plus receiving.

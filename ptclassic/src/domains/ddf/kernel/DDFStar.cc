@@ -58,7 +58,7 @@ void DDFStar :: initialize() {
 		BlockPortIter nextp(*this);
 		for (int i = numberPorts(); i > 0; i--) {
 			DDFPortHole& dp = *(DDFPortHole*) nextp++;
-			int nTok = dp.imagePort->numberTokens;
+			int nTok = dp.imagePort->numXfer();
 			if (nTok > 1)
 				dp.setDDFParams(nTok);
 		}

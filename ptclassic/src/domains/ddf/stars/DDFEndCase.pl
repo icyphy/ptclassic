@@ -58,7 +58,7 @@ limitation of liability, and disclaimer of warranty provisions.
 			Error::abortRun (*this, "control value out of range");
 			return;
 		}
-		if (p->numTokens() >= p->numberTokens) {
+		if (p->numTokens() >= p->numXfer()) {
 			p->receiveData();
 			output%0 = (*p)%0;
 			output.sendData();

@@ -114,13 +114,13 @@ int MultiInCGPort :: isItInput () const { return TRUE;}
 int MultiOutCGPort :: isItOutput () const { return TRUE;}
 
 PortHole& MultiInCGPort :: newPort () {
-	LOG_NEW; PortHole& p = *new InCGPort;
-	p.numberTokens = numberTokens;
+	LOG_NEW; CGPortHole& p = *new InCGPort;
+	p.setSDFParams(numberTokens,numberTokens-1);
 	return installPort(p);
 }
 
 PortHole& MultiOutCGPort :: newPort () {
-	LOG_NEW; PortHole& p = *new OutCGPort;
-	p.numberTokens = numberTokens;
+	LOG_NEW; CGPortHole& p = *new OutCGPort;
+	p.setSDFParams(numberTokens,numberTokens-1);
 	return installPort(p);
 }

@@ -195,21 +195,21 @@ int AsmTarget::modifyGalaxy() {
 				if (p->parentReps() == 0) continue;
 				boundaryFlag = 1;
 				if (p->isItOutput()) {
-					nread = p->numberTokens * 
+					nread = p->numXfer() * 
 						p->parentReps();
-					nwrite = p->far()->numberTokens;
+					nwrite = p->far()->numXfer();
 				} else {
-					nread = p->far()->numberTokens;
-					nwrite = p->numberTokens * 
+					nread = p->far()->numXfer();
+					nwrite = p->numXfer() * 
 						p->parentReps();
 				}
 				if (nread == nwrite) continue;
 			} else if (p->isItOutput() || 
-			    p->numberTokens == p->far()->numberTokens) {
+			    p->numXfer() == p->far()->numXfer()) {
 				continue;
 			} else {
-				nread = p->numberTokens;
-				nwrite = p->far()->numberTokens;
+				nread = p->numXfer();
+				nwrite = p->far()->numXfer();
 			}
 
 			// we have a rate conversion.

@@ -417,7 +417,7 @@ int SDFScheduler :: reptArc (PortHole& nearPort, PortHole& farPort){
 
 	// compute what the far star repetitions property should be.
 
-	Fraction factor(nearPort.numberTokens,farPort.numberTokens);
+	Fraction factor(nearPort.numXfer(),farPort.numXfer());
 	farStarShouldBe = nearStarRepetitions * factor;
 
 	// Simplify the fraction

@@ -322,15 +322,15 @@ void CGCStar :: updateOffsets() {
 	BlockPortIter next(*this);
 	CGCPortHole* p;
 	while ((p = (CGCPortHole*) next++) != 0) {
-		if ((p->bufSize() > 1) && (p->staticBuf() == FALSE)) {
-			if (p->numberTokens == p->bufSize()) continue;
+		int bs = p->bufSize();
+		if (bs > 1 && p->staticBuf() == FALSE) {
+			int nx = p->numXfer();
+			if (nx == bs) continue;
 			StringList pname = t->offsetName(p);
 			code2 << "\t" << pname << " += ";
-			code2 << p->numberTokens << ";\n\tif (";
-			code2 << pname << " >= ";
-			code2 << p->bufSize() << ")\n\t\t";
-			code2 << pname << " -= ";
-			code2 << p->bufSize() << ";\n";
+			code2 << nx << ";\n\tif (" << pname << " >= ";
+			code2 << bs << ")\n\t\t";
+			code2 << pname << " -= " << bs << ";\n";
 		}
 	}
 	code2 << "\t}\n";

@@ -43,14 +43,14 @@ int MultiInCG56Port :: isItInput() const { return TRUE; }
 int MultiOutCG56Port :: isItOutput() const { return TRUE; }
 
 PortHole& MultiInCG56Port :: newPort () {
-        LOG_NEW; PortHole& p = *new InCG56Port;
-        p.numberTokens = numberTokens;
+        LOG_NEW; CG56PortHole& p = *new InCG56Port;
+	p.setSDFParams(numberTokens,numberTokens-1);
         return installPort(p);
 }
 
 PortHole& MultiOutCG56Port :: newPort () {
-	LOG_NEW; OutCG56Port* p = new OutCG56Port;
-        p->numberTokens = numberTokens;
-	forkProcessing(*p);
-        return installPort(*p);
+	LOG_NEW; OutCG56Port& p = *new OutCG56Port;
+	p.setSDFParams(numberTokens,numberTokens-1);
+	forkProcessing(p);
+        return installPort(p);
 }

@@ -124,8 +124,8 @@ int MultiInAsmPort :: isItInput() const {return TRUE; }
 int MultiOutAsmPort :: isItOutput() const {return TRUE; }
 
 PortHole& MultiInAsmPort :: newPort () {
-	LOG_NEW; PortHole& p = *new InAsmPort;
-	p.numberTokens = numberTokens;
+	LOG_NEW; InAsmPort& p = *new InAsmPort;
+	p.setSDFParams(numberTokens,numberTokens-1);
 	return installPort(p);
 }
 
@@ -133,7 +133,7 @@ PortHole& MultiInAsmPort :: newPort () {
 // added to a fork star.
 PortHole& MultiOutAsmPort :: newPort () {
 	LOG_NEW; OutAsmPort& p = *new OutAsmPort;
-	p.numberTokens = numberTokens;
+	p.setSDFParams(numberTokens,numberTokens-1);
 	forkProcessing(p);
 	return installPort(p);
 }

@@ -56,15 +56,15 @@ int MultiInSDFPort :: isItInput () const { return TRUE;}
 int MultiOutSDFPort :: isItOutput () const { return TRUE;}
 
 PortHole& MultiInSDFPort :: newPort () {
-	LOG_NEW; PortHole& p = *new InSDFPort;
-	p.numberTokens = numberTokens;
+	LOG_NEW; SDFPortHole& p = *new InSDFPort;
+	p.setSDFParams(numberTokens,numberTokens-1);
 	return installPort(p);
 }
  
  
 PortHole& MultiOutSDFPort :: newPort () {
-	LOG_NEW; PortHole& p = *new OutSDFPort;
-	p.numberTokens = numberTokens;
+	LOG_NEW; SDFPortHole& p = *new OutSDFPort;
+	p.setSDFParams(numberTokens,numberTokens-1);
 	return installPort(p);
 }
 
