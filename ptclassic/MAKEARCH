@@ -89,6 +89,13 @@ cd sdf/expgraph
 ln -s ../../../../src/domains/sdf/expgraph/{make.template,makefile} .
 cd ../..
 
+#special case: sdf/image
+mkdir sdf/image
+cd sdf/image
+ln -s ../../../../src/domains/sdf/image/{make.template,makefile} .
+cd ../..
+
+
 # This is for the makefile
 cd ../..
 touch obj.$ARCH
