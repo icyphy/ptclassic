@@ -1,7 +1,9 @@
 .\" $Id$
 .NA dft
 .SD
-Compute a discrete Fourier transform of a finite signal using the FFT star.
+Compute a discrete Fourier transform of a finite signal using the
+.c FFT
+star.
 The magnitude and phase (unwrapped) are plotted.
 .DE
 .LO "$PTOLEMY/src/domains/sdf/utilities"
@@ -38,7 +40,7 @@ Without this multiplication, DC would be at the left, and the sampling
 frequency at the right.
 With it, the output plot is centered at DC (frequency 0.0), and ranges
 from $-pi$ to $pi$.
-The proper labeling of the x axis is achieved by using the
+The proper labeling of the $x$-axis is achieved by using the
 .c Ramp
 star to generate the X input of the
 .c XYgraph

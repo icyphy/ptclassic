@@ -1,8 +1,11 @@
 .\" $Id$
 .NA tkShowValues
 .SD
-Demonstrate TkShowValues and TkText by displaying the ASCII
-form of two ramp sequences.
+Demonstrate the
+.c TkShowValues
+and
+.c TkText
+stars by displaying the ASCII form of two ramp sequences.
 .DE
 .LO "$PTOLEMY/src/domains/sdf/demo"
 .DM SDF Universe

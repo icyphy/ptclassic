@@ -16,7 +16,8 @@ The implementation begins with a complex FFT.
 The output of the
 .c FFTCx
 star is multiplied by the pre-computed FFT of the impulse response of the
-FIR filter.
+.c FIR
+filter.
 The
 .c overlapAdd
 galaxy then uses the 
@@ -27,7 +28,7 @@ star to implement the overlapping.
 .Ie "overlap and add convolution"
 .Ie "FFT"
 .SA
-FFTCx,
 Chop,
+FFTCx,
 FIR.
 .ES

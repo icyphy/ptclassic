@@ -1,5 +1,5 @@
 .\" $Id$
-.NA "downSample"
+.NA downSample
 .SD
 Convert from the digital audio tape sampling rate (48 kHz) to the
 compact disc sampling rate (44.1 kHz).

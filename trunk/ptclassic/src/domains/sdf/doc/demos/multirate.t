@@ -2,7 +2,9 @@
 .NA multirate
 .SD
 Upsample a sinusoidal signal by a ratio of 5/2 using a
-polyphase lowpass interpolating FIR filter.
+polyphase lowpass interpolating
+.c FIR
+filter.
 .DE
 .LO "$PTOLEMY/src/domains/sdf/demo"
 .DM SDF Universe

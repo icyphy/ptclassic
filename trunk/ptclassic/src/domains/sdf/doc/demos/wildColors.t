@@ -1,7 +1,9 @@
 .\" $Id$
 .NA wildColors
 .SD
-Demonstrate TkBarGraph by creating a bar graph that simulataneously
+Demonstrate the
+.c TkBarGraph
+star by creating a bar graph that simulataneously
 displays 12 random sequences.
 .DE
 .LO "$PTOLEMY/src/domains/sdf/demo"

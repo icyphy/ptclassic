@@ -1,9 +1,10 @@
 .\" $Id$
 .NA tclScript
 .SD
-Demonstrate TclScript by generating two interactive
-X window follies that consist of circles that move
-in a playing field.
+Demonstrate the
+.c TclScript
+star by generating two interactive X window follies that consist of
+circles that move in a playing field.
 .DE
 .LO "$PTOLEMY/src/domains/sdf/demo"
 .DM SDF Universe

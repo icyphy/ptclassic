@@ -12,7 +12,9 @@ transfer function.
 .Ie "filter design, lattice"
 .Ie "lattice filter design"
 This demo generates the impulse response of an all-pole
-(auto-regressive, AR) filter using an FIR filter in a feedback loop,
+(autoregressive, AR) filter using an
+.c FIR
+filter in a feedback loop,
 and the uses the Levinson-Durbin algorithm to design a lattice
 .Ir "Levinson-Durbin algorithm"
 filter with the same transfer function and the inverse transfer function.

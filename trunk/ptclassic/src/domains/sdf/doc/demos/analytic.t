@@ -1,7 +1,9 @@
 .\" $Id$
 .NA analytic
 .SD
-This system uses a ComplexFIR filter to reduce the sample
+This system uses a
+.c ComplexFIR
+filter to reduce the sample
 rate of a sinusoid by a factor of 8/5, and at the same
 time produce a complex approximately analytic signal
 (one that has no negative frequency components).

@@ -58,6 +58,6 @@ modify the \fIsize\fR and \fIorder\fR parameters of the first
 .c ComplexFFT
 star, and the \fIsize\fR parameter of the second.
 .SA
-WaveForm,
-ComplexFFT.
+ComplexFFT,
+WaveForm.
 .ES

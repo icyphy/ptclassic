@@ -2,7 +2,7 @@
 .NA lattice
 .SD
 Demonstrate the use of lattice filters to synthesize an
-auto-regressive (AR) random process.
+autoregressive (AR) random process.
 .DE
 .LO "$PTOLEMY/src/domains/sdf/demo"
 .DM SDF Universe
@@ -13,7 +13,7 @@ auto-regressive (AR) random process.
 .Ie "filter, whitening"
 .Ie "lattice filter"
 .Ie "filter, lattice"
-This demo generates an auto-regressive (AR) random process by filtering
+This demo generates an autoregressive (AR) random process by filtering
 Gaussian white noise with an all-pole filter with transfer function
 .EQ
 H(z) ~=~ 1 over { 1 ~-~ 2 z sup -1 ~+~ 1.91z sup -2 ~-~ 0.91z sup -3 ~+~
@@ -22,7 +22,9 @@ H(z) ~=~ 1 over { 1 ~-~ 2 z sup -1 ~+~ 1.91z sup -2 ~-~ 0.91z sup -3 ~+~
 .Ie "all-pole filter"
 .Ie "filter, all-pole"
 The filter is implemented two ways.
-First, it is impmented with an FIR filter in a feedback loop.
+First, it is impmented with an
+.c FIR
+filter in a feedback loop.
 Then, in parallel, it is implemented with a recursive lattice filter,
 using the
 .c RLattice
