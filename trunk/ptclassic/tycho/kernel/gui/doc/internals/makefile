@@ -46,7 +46,6 @@ EXTRA_SRCS =	\
 	dialogclasses.html \
 	dialogs.html \
 	dialogwindow.html \
-	dismiss.html \
 	edit.html \
 	error.html \
 	file.html \
