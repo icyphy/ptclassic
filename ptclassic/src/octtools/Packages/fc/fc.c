@@ -38,7 +38,7 @@ static char SccsId[]="$Id$";
 #include "utility.h"
 #include "errtrap.h"
 #include <sys/types.h>
-#if defined(aiws) || defined(_IBMR2)
+#if defined(aiws) || defined(_IBMR2) || defined(SYSV)
 #include <dirent.h>
 #else
 #include <sys/dir.h>
@@ -204,7 +204,7 @@ int *span;			/* Number of common chars */
 {
     DIR *wdir;
     char *lcomp, *dir;
-#if defined(aiws) || defined(_IBMR2)
+#if defined(aiws) || defined(_IBMR2) || defined(SYSV)
     struct dirent *de;
 #else
     struct direct *de;
@@ -234,7 +234,7 @@ int *span;			/* Number of common chars */
 	    spot = strlen(buf);
 	    buf++;
 	    (void) setpwent();
-	    while (pw = getpwent()) {
+	    while ( (pw = getpwent()) ) {
 		if (prefix(buf, pw->pw_name)) {
 		    uname[0] = FC_TIL;
 		    uname[1] = '\0';
@@ -263,7 +263,7 @@ int *span;			/* Number of common chars */
     }
     if (!(wdir = opendir(dir))) return (char **) 0;
     spot = strlen(lcomp);
-    while (de = readdir(wdir)) {
+    while ( (de = readdir(wdir)) ) {
 	if ((prefix(lcomp, de->d_name)) &&
 	    (*lcomp || (*de->d_name != '.'))) {
 	    add_comp(de->d_name);
