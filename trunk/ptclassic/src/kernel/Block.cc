@@ -149,6 +149,14 @@ Block* Block::clone() const {
 	return 0;
 }
 
+// This one matters only for galaxies... try the plasma type first;
+// if not set, use the defined type.
+
+static DataType trueType(const PortHole* p) {
+	DataType d = p->plasmaType();
+	return d ? d : p->myType();
+}
+
 // Return the names of the ports within the block.  Omit hidden ports.
 int
 Block::portNames (const char** names, const char** types,
@@ -161,7 +169,7 @@ Block::portNames (const char** names, const char** types,
 		const PortHole* p = next++;
 		if (hidden(*p)) continue;
 		*names++ = p->readName();
-		*types++ = p->myType();
+		*types++ = trueType(p);
 		*io++ = p->isItOutput();
 		count++;
 	}
@@ -231,6 +239,8 @@ Galaxy& Block::asGalaxy() {
 void Block::start () {}
 
 void Block::wrapup () {}
+
+const char* Block::readClassName() const { return "Block";}
 
 Block& Block::setBlock(const char* s, Block* parent) {
 	setNameParent (s, parent);
