@@ -31,25 +31,6 @@
 		 		--> DEWormhole  <-- DEStar
 		 		--> ??Wormhole  <-- ??Star
 
-	Basic Wormhole class has the following state (may need more states).
-	FloatState delay : which is the length of simulated execution
-			   time of the wormhole.
-	start() go() wrapup() functions are virtual since they may be
-		redefined in the derived class.
-
-	Let me explain the structure of specific Wormhole using SDFWormhole.
-	1. SDFWormhole class realizes ??inSDF_Wormholes. 
-	2. It has same members as SDFStar since from the outside, wormhole
-	   is indistinguishable from star. The scheduler not user should 
-	   take care of the difference.
-	3. It may redefine some virtual functions to fit to the outside 
-	   world regardless of what is inside.
-	   e.g. go() function now set state "samplingPeriod" of inside
-	   galaxy as well as running the inside-scheduler.
-	4. It may have some states. setBlock() function set defaults for them.
-	   e.g. "iterationPeriod" is necessary to calculate the "delay".
-
-	
 ********************************************************************/
 
 	//////////////////////////////
