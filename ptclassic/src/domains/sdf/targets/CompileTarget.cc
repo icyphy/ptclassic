@@ -28,7 +28,7 @@ public:
 	int run();
 	void wrapup ();
 	Block* clone() const
-		{ LOG_NEW; return &(new CompileTarget)->copyStates(*this);}
+		{ LOG_NEW; return new CompileTarget(*this);}
 
 	// Routines for writing code: schedulers may call these
 	StringList writeFiring(Star& s, int depth);
@@ -462,6 +462,7 @@ StringList CompileTarget::galDef(Galaxy* galaxy,
     return runCode;
 }
 
-static CompileTarget compileTargetProto;
+static CompileTarget compileTargetProto("compile-SDF", "SDFStar",
+	"Generate and compile stanalone C++ code");
 static KnownTarget entry(compileTargetProto,"compile-SDF");
 
