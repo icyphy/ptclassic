@@ -198,6 +198,22 @@ if {![info exists tychoConsoleWindow]} {
 }
 set tychoOpenFiles 0
 
+# Create the global preference set and some global preferences
+preference create global
+preference add global textfont [.tychoFonts defaultFont fixed]
+preference add global textForeground [ptkColor black black] 
+preference add global textBackground [ptkColor antiqueWhite white]
+
+# Create some more preference sets. This must be done here rather than
+# in the classes that subscribe to them because of an
+# auto-loading/inheritance chicken-and-egg.
+# FIXME: want to say "-parent global"
+preference create textedit -parent globalPreferences
+preference create console  -parent texteditPreferences
+preference create command  -parent consolePreferences
+preference create htmlview -parent texteditPreferences
+
+
 # Source ~/.Tycho/tychorc.tcl if it exists.
 set tychostartfile [glob -nocomplain [file join $env(HOME) .Tycho tychorc.tcl]]
 if {$tychostartfile != {} && \
