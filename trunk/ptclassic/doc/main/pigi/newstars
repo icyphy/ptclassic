@@ -4,9 +4,9 @@
 Only the most casual user will get by with the stars provided
 in the Ptolemy palettes.
 New stars are defined using the \*(PT preprocessor language,
-which is described in its section in the manual.  This document
+which is described in its section in the manual.  This Pigi manual
 will not attempt to teach you how to write your own stars; see
-???.
+the Almagest section entitled ``The Ptolemy Preprocessor Language.''
 .pp
 There are two ways to use your own personal star with Ptolemy:
 use the dynamic linking facility, or build your own version
@@ -120,6 +120,6 @@ insures that data will be consistent.
 .pp
 An important note for users of the dynamic linking feature: if you
 modify the code for your dynamically loaded star while Pigi is running,
-the only way to load it at present is to exit Pigi and start again
+the only way to reload it at present is to exit Pigi and start again
 (Pigi cannot yet redefine stars that have been loaded).  This will
 be changed in a future version.
