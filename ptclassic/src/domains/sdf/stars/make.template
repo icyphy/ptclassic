@@ -48,6 +48,7 @@ PL_SRCS= \
  SDFCxToRect.pl \
  SDFDB.pl \
  SDFDeMux.pl \
+ SDFDeScrambler.pl \
  SDFDistributor.pl \
  SDFDownSample.pl \
  SDFExp.pl \
@@ -101,6 +102,7 @@ PL_SRCS= \
  SDFRectToPolar.pl \
  SDFRepeat.pl \
  SDFReverse.pl \
+ SDFScrambler.pl \
  SDFSgn.pl \
  SDFSin.pl \
  SDFSharedMem.pl \
