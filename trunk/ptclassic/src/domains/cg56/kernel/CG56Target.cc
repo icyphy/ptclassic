@@ -32,10 +32,10 @@ void CG56Target :: headerCode () {
 }
 
 void CG56Target :: setup() {
-	Galaxy& g = *galaxy();
-	if (g.stateWithName("ONE") == 0) {
+	Galaxy* g = galaxy();
+	if (g && (g->stateWithName("ONE") == 0)) {
 		LOG_NEW; FixState& ONE = *new FixState;
-		g.addState(ONE.setState("ONE",this,"",
+		g->addState(ONE.setState("ONE",this,"",
 					"Max Fix point value",
 					A_NONSETTABLE|A_CONSTANT));
 		ONE.setInitValue(CG56_ONE);
