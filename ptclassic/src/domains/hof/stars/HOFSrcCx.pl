@@ -1,5 +1,5 @@
 defstar {
-	name { ParSrcCx }
+	name { SrcCx }
 	domain { HOF }
 	derivedFrom { Map }
 	desc {
