@@ -338,7 +338,7 @@ body ::tycho::ResourceHTTP::isopen {} {
 #
 body ::tycho::ResourceHTTP::open {{mode "r"}} {
     set url [path]
-::puts "open: url = $url"
+
     if { $mode != "r" } {
 	error "File $url is not writable"
     }
@@ -514,7 +514,12 @@ body ::tycho::ResourceHTTP::exists {url} {
     while { [::info exists _forwarding($url)] } {
 	set url $_forwarding($url)
     }
-    return $_exists($url)
+    
+    if { [::info exists _exists($url)] } {
+        return $_exists($url)
+    } else {
+        return 0
+    }
 }
 
 #####################################################################
@@ -720,7 +725,8 @@ body ::tycho::ResourceHTTP::httpdone {} {
 	set _statinfo($currentURL) [list \
 		mtime $lastmodified \
 		size $contentlength \
-		type $contenttype]
+		type $contenttype \
+                url $currentURL]
 	debugputs "_statinfo($currentURL) = $_statinfo($currentURL)"
     }
     # To be picky, let's check that the content size is the
@@ -758,7 +764,7 @@ body ::tycho::ResourceHTTP::httpget {url type} {
     # Parse URL into hostname, port, and path
     set currentURL $url
     ::tycho::assign hostname port path [splitURL $url]
-::puts "$hostname $port $path"
+
     # Surfit starts here vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
     if {[catch {socket -async $hostname $port} socketid]} {
 	catch {unset $socketid}
@@ -899,6 +905,8 @@ body ::tycho::ResourceHTTP::httpread {} {
             # This is using unsupported call! This is to make sure that
             # binary (8-bit clean) format is correctly downloaded in a
             # perfect byte-to-byte format.
+
+            # In Tcl8, this should be called "fcopy"
             catch {unsupported0 $socketid $fileid} readsize
             ::seek $fileid -$readsize end
             set line [::read -nonewline $fileid]
