@@ -141,6 +141,7 @@ body ::tycho::MultiPanel::constructor {args} {
     itk_component add canvas {
         canvas $itk_interior.canvas
     } {
+        keep -background -cursor
     }
 
     set myCanvas $itk_component(canvas)
@@ -148,7 +149,7 @@ body ::tycho::MultiPanel::constructor {args} {
     itk_component add mainFrame {
         frame $itk_interior.canvas.frame
     } {
-        keep -background
+        keep -background -cursor
         keep -width
         keep -height
     }
@@ -212,8 +213,11 @@ body ::tycho::MultiPanel::append {element {children} args} {
     # check children
     if {[llength $children] > 1} {
         # put multiple children in a frame
-        set child $myFrame[::tycho::autoName .cframe]
-        frame $child
+        set frametag [::tycho::autoName .cframe]
+        set child $myFrame$frametag
+        itk_component add $frametag {
+            frame $child
+        } {keep -background -cursor}
         foreach childel $children {
             set cname [elementinfo $childel]
             pack $cname -in $child -anchor nw
@@ -228,12 +232,17 @@ body ::tycho::MultiPanel::append {element {children} args} {
     # do this here in case there's an error
     $myList append $element
 
-    set newPanel $myFrame[::tycho::autoName .panel]
+    set paneltag [::tycho::autoName .panel]
+    set newPanel $myFrame$paneltag
  
     if {$children != ""} {
-        eval "::tycho::Subpanel $newPanel -childwidget $child $args"
+        itk_component add $paneltag {
+            eval "::tycho::Subpanel $newPanel -childwidget $child $args" 
+        } {keep -background -cursor}
     } else {
-        eval "::tycho::Subpanel $newPanel $args"
+        itk_component add $paneltag {
+            eval "::tycho::Subpanel $newPanel $args"
+        } {keep -background -cursor}
     }
     pack $newPanel -anchor nw -side top
     
@@ -255,8 +264,11 @@ body ::tycho::MultiPanel::appendlabel {element args} {
     # do this first in case there's an error
     $myList append $element
 
-    set newLabel $myFrame[::tycho::autoName .label]
-    eval "label $newLabel $args"
+    set labeltag [::tycho::autoName .label]
+    set newLabel $myFrame$labeltag
+    itk_component add $labeltag {
+        eval "label $newLabel $args"
+    } {keep -background -cursor}
     pack $newLabel -anchor nw -side top
 
     set myData($element) $newLabel
