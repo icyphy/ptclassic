@@ -81,12 +81,9 @@ int ParGraph::createMe(Galaxy& galaxy, int selfLoopFlag) {
 			/////////////////////////
 
 // This function sets the following properties of the graph:
-// 1) nodeCount : The number of nodes (star invocations) in the graph
-// 2) runnableNodes : A list of the initially runnable DLNodes
-//
-// and the following property for each node in the graph:
 // StaticLevel : The longest path in execution time from the node
 //              to the end of the graph (over all the endnodes).
+// ExecTotal
 
 int ParGraph :: initializeGraph() { 
 	EGSourceIter nxtSrc(*this);
@@ -96,7 +93,6 @@ int ParGraph :: initializeGraph() {
 	removeArcsWithDelay();
 
 	// initialize members
-	nodeCount = 0;
 	ExecTotal = 0;
 
 	// Set the levels for each node
@@ -144,7 +140,7 @@ void ParGraph :: findRunnableNodes() {
 // This function finds and sets the StaticLevel for the given node,
 //    where the StaticLevel is defined as the longest directed path in
 //    execution time from the node to an end node (over all endnodes)
-// StaticLevel, a data member of class DLNode, is initialized
+// StaticLevel, a data member of class ParNode, is initialized
 //    by the constructor to 0 when the node is made.
 
 int ParGraph::SetNodeSL(ParNode* aNodep) {
@@ -177,7 +173,6 @@ int ParGraph::SetNodeSL(ParNode* aNodep) {
 		aNodep->assignSL(level);  // Assign StaticLevel
 
 		// update global parameter.
-		nodeCount++;
 		ExecTotal += aNodep->getExTime();
 	}
 	aNodep->resetVisit();
@@ -223,7 +218,7 @@ void ParGraph::sortedInsert(EGNodeList& nlist, ParNode *node, int flag) {
 // Remove the arcs with delay and record node pairs.
 void ParGraph :: removeArcsWithDelay() {
 
-	EGIter nextNode(*this);         // iterator to the DLGraph.
+	EGIter nextNode(*this);         // iterator to the ParGraph.
 	ParNode* node;
 
 	while ((node = (ParNode*) nextNode++) != 0) {
@@ -265,7 +260,7 @@ void ParGraph :: restoreHiddenGates() {
 			///////////////////
 			///  replenish  ///
 			///////////////////
-// Replenishes the tempAncs and tempDescs for each node in the DCGraph.
+// Replenishes the tempAncs and tempDescs for each node in the ParGraph.
 
 void ParGraph::replenish(int flag) {
 	EGIter Noditer(*this);  // Attach iterator to the ParGraph
