@@ -22,15 +22,15 @@ limitation of liability, and disclaimer of warranty provisions.
     constructor { noInternalState(); }
 
     go { 
-	addCode(startOp);
+	addCode(startOp(input.numberPorts()));
 	int i;
-	for (i=1;i<=input.numberPorts();i++) 
+	for (i=2;i<=input.numberPorts();i++) 
 	    addCode(doOp(i)); 
     }
 
-    codeblock(startOp) {
-	$ref(output).real = 0;
-	$ref(output).imag = 0;
+    codeblock(startOp,"int i") {
+	$ref(output).real = $ref(input#1).real;
+	$ref(output).imag = $ref(input#1).imag;
     }
 
     codeblock(doOp,"int i") {
