@@ -29,6 +29,7 @@ defstar
 	<stdlib.h>,
 	<iostream.h>, 
 	<iomanip.h>, 
+        <sys/types.h>,             
 	"wildforce.h",
 	"wf4errs.h",
 	"wf4api.h",
