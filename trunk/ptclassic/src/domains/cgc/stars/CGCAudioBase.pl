@@ -2,7 +2,9 @@ defstar
 {
     name { PCM }
     domain { CGC }
-    desc { Base class for reading and writing mu-law encoded PCM data. }
+    desc {
+Base class for reading and writing mu-law encoded pulse code modulated data.
+    }
     version { $Id$ }
     author { T. M. Parks }
     copyright {
@@ -12,82 +14,90 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
     }
 
-    state
-    {
+    state {
 	name { fileName }
 	type { string }
 	default { "/dev/audio" }
 	desc { File for PCM data.  If blank, use standard IO. }
     }
 
-    state
-    {
+    state {
 	name { blockSize }
 	type { int }
 	default { 128 }
 	desc { Number of samples to read or write. }
     }
 
-    protected
-    {
+    protected {
 	int standardIO:1;
     }
 
-    setup
-    {
-	standardIO = strcmp(fileName,"") == 0;
+    setup {
+	standardIO = fileName.null();
     }
 
-    codeblock (sharedDeclarations)
-    {
-	int $sharedSymbol(PCM,offset)[8];
-
-	/* Convert from linear to mu-law */
-	int $sharedSymbol(PCM,mulaw)(x)
-	double x;
-	{
-	    double m;
-	    m = (pow(256.0,fabs(x)) - 1.0) / 255.0;
-	    return 4080.0 * m;
-	}
-    }
-
-    codeblock (sharedInit)
-    {
-	/* Initialize PCM offset table. */
-	{
-	    int i;
-	    double x = 0.0;
-	    double dx = 0.125;
-
-	    for(i = 0; i < 8; i++, x += dx)
-	    {
-		$sharedSymbol(PCM,offset)[i] = $sharedSymbol(PCM,mulaw)(x);
-	    }
-	}
-    }
-
-    codeblock (declarations)
-    {
+    codeblock (declarations) {
 	int $starSymbol(file);
 	unsigned char $starSymbol(buf)[$val(blockSize)];
     }
 
-    codeblock (closeFile)
-    {
-	/* Close file. */
-	if (close($starSymbol(file)) != 0)
+    codeblock (noOpen) {
+	/* Use standard input for reading. */
+	$starSymbol(file) = 0;
+    }
+
+    codeblock (openFileForReading) {
+	/* Open file for reading */
+	if (($starSymbol(file) = open("$val(fileName)",O_RDONLY,0666)) == -1)
+	{
+		perror("$val(fileName)");
+		exit(1);
+	}
+    }
+
+    codeblock (openFileForWriting) {
+	/* Open file for writing */
+	if (($starSymbol(file) = open("$val(fileName)",O_WRONLY|O_CREAT,0666)) == -1)
+	{
+		perror("$val(fileName)");
+		exit(1);
+	}
+    }
+
+    codeblock (read) {
+	/* Read a block of data from the file */
+	if (read($starSymbol(file), $starSymbol(buf), $val(blockSize)) != $val(b
+lockSize))
 	{
 	    perror("$val(fileName)");
 	    exit(1);
 	}
     }
 
-    initCode
-    {
+    codeblock (write) {
+	/* Write data to file. */
+	if (write($starSymbol(file), $starSymbol(buf), $val(blockSize)) != $val(
+blockSize))
+	{
+	    perror("$val(fileName)");
+	    exit(1);
+	}
+    }
+
+    codeblock (closeFile) {
+	/* Close file */
+	if (close($starSymbol(file)) != 0) {
+	    perror("$val(fileName)");
+	    exit(1);
+	}
+    }
+
+    initCode {
 	addInclude("<math.h>");
 	addDeclaration(declarations);
-	if (addGlobal(sharedDeclarations, "$sharedSymbol(PCM,PCM)"))
-	    addCode(sharedInit);
+    }
+
+    wrapup {
+	if (!standardIO) addCode(closeFile);
     }
 }
