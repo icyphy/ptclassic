@@ -41,6 +41,9 @@ static char SccsId[]="$Id$";
     OH_ASSERT(octInitGenContents(container, mask, gen));\
     while (octGenerate(gen, obj) == OCT_OK)
 
+/* Forward reference */
+void initFlattenLayers();
+
 static int		layer_id;
 static int		saveFlatLayer();
 static fa_box		*findFlatLayer();
@@ -113,6 +116,7 @@ flattenSubcellLayer(facet, layer, flat_geos, subcell_geos)
 
 static st_table	*flat_table = NIL(st_table);	/* Symbol table of flattened layers. */
 
+void
 initFlattenLayers()
 {
 	if (!flat_table) {
@@ -120,6 +124,7 @@ initFlattenLayers()
 	}
 }
 
+void
 reinitFlattenLayers()
 {
 	static enum st_retval	freeFlatLayer();
