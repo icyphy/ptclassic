@@ -17,59 +17,65 @@ limitation of liability, and disclaimer of warranty provisions.
 	seealso {LMS}
 	location { CGC tcltk library }
 	defstate {
-                name {stepSizeLow}
-                type{float}
-                default {"0.0"}
-                desc { Low end of the step size scale }
-        }
+		name {stepSizeLow}
+		type{float}
+		default {"0.0"}
+		desc { Low end of the step size scale }
+	}
 	defstate {
-                name {stepSizeHigh}
-                type{float}
-                default {"0.1"}
-                desc { High end of the step size scale }
-        }
+		name {stepSizeHigh}
+		type{float}
+		default {"0.1"}
+		desc { High end of the step size scale }
+	}
 	defstate {
-                name {fullScale}
-                type{float}
-                default {"1.0"}
-                desc {Full scale on the tap display}
-        }
+		name {fullScale}
+		type{float}
+		default {"1.0"}
+		desc {Full scale on the tap display}
+		attributes { A_GLOBAL }
+	}
 	defstate {
-                name {geometry}
-                type{string}
-                default { "+500+000" }
-                desc { Specified the location and/or size of the window }
-        }
+		name {geometry}
+		type{string}
+		default { "+500+000" }
+		desc { Specified the location and/or size of the window }
+	}
 	defstate {
-                name {width}
-                type{float}
-                default { 10.0 }
-                desc { Width of the bar chart display, in centimeters }
-        }
+		name {width}
+		type{float}
+		default { 10.0 }
+		desc { Width of the bar chart display, in centimeters }
+	}
 	defstate {
-                name {height}
-                type{float}
-                default { 5.0 }
-                desc { Height of the bar chart display, in centimeters }
-        }
+		name {height}
+		type{float}
+		default { 5.0 }
+		desc { Height of the bar chart display, in centimeters }
+	}
 	defstate {
-                name {identifier}
-                type{string}
-                default {"LMS filter taps"}
-                desc {The string to identify the run-time display.}
-        }
+		name {identifier}
+		type{string}
+		default {"LMS filter taps"}
+		desc {The string to identify the run-time display.}
+	}
 	defstate {
-                name {updateInterval}
-                type{int}
-                default {"10"}
-                desc {Number of invocations between display updates.}
-        }
+		name {updateInterval}
+		type{int}
+		default {"10"}
+		desc {Number of invocations between display updates.}
+	}
+	setup {
+	    taps.setAttributes(A_GLOBAL);
+	    stepSize.setAttributes(A_GLOBAL);
+	    CGCLMS::setup();
+	}
 	initCode {
-            addGlobal("int $starSymbol(invCount);");
-            addGlobal("int $starSymbol(ids)[$val(tapSize)];");
+	    addGlobal("int $starSymbol(invCount);");
+	    addGlobal("int $starSymbol(ids)[$val(tapSize)];");
 
 	    // initialize backup values to equal taps initial values.
-            addGlobal("double $starSymbol(backup)[$val(tapSize)] = { ");
+	    addGlobal("double $starSymbol(backup)[$val(tapSize)] = { ");
 	    StringList initvalues;
 	    for (int i = 0; i < taps.size()-1; i++) {
 		initvalues << taps[i] << ", ";
@@ -87,19 +93,19 @@ limitation of liability, and disclaimer of warranty provisions.
 	    CGCLMS :: go();
 	    addCode(updateDisplay);
 	}
-        codeblock (updateDisplay) {
-            if ($starSymbol(invCount)++ >= $val(updateInterval)) {
-                $starSymbol(invCount) = 0;
-                if(ptkSetBarGraph(interp, w,
+	codeblock (updateDisplay) {
+	    if ($starSymbol(invCount)++ >= $val(updateInterval)) {
+		$starSymbol(invCount) = 0;
+		if(ptkSetBarGraph(interp, w,
 			    "$starSymbol(.bar)",
 			    $ref(taps),
-                            $val(tapSize),
+			    $val(tapSize),
 			    &$ref(fullScale),
 			    $starSymbol(ids)) == 0)
 		    errorReport("Cannot update bar graph.");
-            }
-        }
-        codeblock (makeGraph) {
+	    }
+	}
+	codeblock (makeGraph) {
 	    if(ptkMakeBarGraph(interp, w,
 			"$starSymbol(.bar)",	/* name of top level window */
 			 "$val(identifier)",	/* identifying string */
@@ -111,11 +117,11 @@ limitation of liability, and disclaimer of warranty provisions.
 			 $val(width),		/* width, in cm */
 			 $val(height)) == 0)
 		errorReport("Cannot create bar chart");
-            $starSymbol(invCount) = 0;
+	    $starSymbol(invCount) = 0;
 	    Tcl_CreateCommand(interp, "$starSymbol(.bar)LMSTkCBredraw",
 			$starSymbol(redraw),
 			(ClientData) 0, (void (*)()) NULL);
-        }
+	}
 	codeblock (makeControls) {
 	    makeButton("$starSymbol(.bar).middle",	/* location of button */
 		       "$starSymbol(reset)",		/* name of button */
@@ -125,7 +131,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	    int position;
 	    /* Compute slider position from parameters */
 	    position = 0.5 + 100*($val(stepSize)
-                        - $val(stepSizeLow))/($val(stepSizeHigh)
+			- $val(stepSizeLow))/($val(stepSizeHigh)
 			- $val(stepSizeLow));
 
 	    /* Make a slider for controlling the step size */
@@ -144,7 +150,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	codeblock (copyTaps) {
 	{
 	    int i;
-            for (i=0; i<$val(tapSize); i++) {
+	    for (i=0; i<$val(tapSize); i++) {
 		$starSymbol(backup)[i] = $ref(taps)[i];
 	    }
 	}
@@ -152,61 +158,61 @@ limitation of liability, and disclaimer of warranty provisions.
 	codeblock (procDefs) {
 	    static int
 	    $starSymbol(reset)(dummy, interp, argc, argv)
-                ClientData dummy;                   /* Not used. */
-                Tcl_Interp *interp;                 /* Current interpreter. */
-                int argc;                           /* Number of arguments. */
-                char **argv;                        /* Argument strings. */
-            {
+		ClientData dummy;		   /* Not used. */
+		Tcl_Interp *interp;		 /* Current interpreter. */
+		int argc;			   /* Number of arguments. */
+		char **argv;			/* Argument strings. */
+	    {
 		int i;
-                for (i=0; i<$val(tapSize); i++) {
+		for (i=0; i<$val(tapSize); i++) {
 		    $ref(taps)[i] = $starSymbol(backup)[i];
 		}
-                $starSymbol(invCount) = 0;
+		$starSymbol(invCount) = 0;
 		return $starSymbol(redraw) (dummy, interp, argc, argv);
-            }
+	    }
 
 	    static int
 	    $starSymbol(redraw)(dummy, interp, argc, argv)
-                ClientData dummy;                   /* Not used. */
-                Tcl_Interp *interp;                 /* Current interpreter. */
-                int argc;                           /* Number of arguments. */
-                char **argv;                        /* Argument strings. */
-            {
-                if(ptkSetBarGraph(interp, w,
+		ClientData dummy;		   /* Not used. */
+		Tcl_Interp *interp;		 /* Current interpreter. */
+		int argc;			   /* Number of arguments. */
+		char **argv;			/* Argument strings. */
+	    {
+		if(ptkSetBarGraph(interp, w,
 			    "$starSymbol(.bar)",
 			    $ref(taps),
-                            $val(tapSize),
+			    $val(tapSize),
 			    &$ref(fullScale),
 			    $starSymbol(ids)) == 0)
 		    errorReport("Cannot redraw bar graph");
-                return TCL_OK;
+		return TCL_OK;
 	    }
 
 	    static int
 	    $starSymbol(setStep)(dummy, interp, argc, argv)
-                ClientData dummy;                   /* Not used. */
-                Tcl_Interp *interp;                 /* Current interpreter. */
-                int argc;                           /* Number of arguments. */
-                char **argv;                        /* Argument strings. */
-            {
+		ClientData dummy;		   /* Not used. */
+		Tcl_Interp *interp;		 /* Current interpreter. */
+		int argc;			   /* Number of arguments. */
+		char **argv;			/* Argument strings. */
+	    {
 		int position;
 		/* FIX ME: Is the following buffer big enough always? */
-                static char* buf[20];
+		static char* buf[20];
 
 		if(sscanf(argv[1], "%d", &position) != 1) {
 		    errorReport("Invalid value for step size");
-                    return TCL_ERROR;
+		    return TCL_ERROR;
 		}
 		$ref(stepSize) = $val(stepSizeLow)
 		    + ($val(stepSizeHigh) - $val(stepSizeLow))
 		    * (position/100.0);
 
-	        /* set the step size display */
+		/* set the step size display */
 		sprintf(buf, "%.4f", $ref(stepSize));
-	        displaySliderValue("$starSymbol(.bar).low",
-			           "$starSymbol(scale)",
-			           buf);
-                return TCL_OK;
-            }
+		displaySliderValue("$starSymbol(.bar).low",
+				   "$starSymbol(scale)",
+				   buf);
+		return TCL_OK;
+	    }
 	}
 }
