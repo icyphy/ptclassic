@@ -28,7 +28,13 @@ static char SccsId[]="$Id$";
 #include "port.h"
 #include "internal.h"
 #include "fsys.h"
+#include "io.h"
+#include "mark.h"
+#include "oct_utils.h"
+#include "oct_files.h"
+#include "facet_info.h"
 
+int
 octGetFacetInfo(obj, info)
 struct octObject *obj;
 struct octFacetInfo *info;
