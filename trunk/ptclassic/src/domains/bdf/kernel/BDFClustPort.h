@@ -133,6 +133,9 @@ public:
 	// don't like this being public, but...
 	void setNumXfer(int v) { numberTokens = v;}
 private:
+	// test for need to move tokens up through the cluster hierarchy
+	int seeIfMoveupNeeded();
+
 	// the real port
 	DFPortHole& pPort;
 
