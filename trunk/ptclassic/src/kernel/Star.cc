@@ -13,6 +13,7 @@ $Id$
 *******************************************************************/
 #include "Star.h"
 #include "StringList.h"
+#include "GalIter.h"
 #include <ACG.h>
 
 // common random number generator for all Star classes.
@@ -48,4 +49,15 @@ void Star :: fire() { go() ;}
 
 // return myself as a Star.
 Star& Star :: asStar () const { return *this;}
+
+// sets the index values of each star in the galaxy.  Returns the
+// total number of stars.
+int setStarIndices(Galaxy& g) {
+	GalStarIter nextStar(g);
+	Star* s;
+	int cnt = 0;
+	while ((s = nextStar++) != 0)
+		s->indexValue = cnt++;
+	return cnt;
+}
 
