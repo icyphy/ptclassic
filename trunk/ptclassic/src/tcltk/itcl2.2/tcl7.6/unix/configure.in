@@ -637,7 +637,9 @@ case $system in
 	    DL_OBJS="tclLoadDl.o"
 	    DL_LIBS="-ldl"
 	    LD_FLAGS="-rdynamic"
-	    LD_SEARCH_FLAGS=""
+	    # Ptolemy change for RedHat4.1 from Wolfgang Reimer
+	    # LD_SEARCH_FLAGS=""
+ 	    LD_SEARCH_FLAGS='-Wl,-R,${LIB_RUNTIME_DIR}'
 	else
 	    AC_CHECK_HEADER(dld.h, [
 		SHLIB_LD="ld -shared"
