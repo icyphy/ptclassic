@@ -47,7 +47,8 @@ private:
 
 	// Check whether a star depends on previous invocations
 	// of itself, and if so, insert the necessary precedence
-	// links.
+	// links. If enforcedSelfLoop = TRUE, always makes the links.
+	int enforcedSelfLoop;
 	int SelfLoop(SDFStar& s);
 
 	// Set up the invocations which are to form the initial graph.
@@ -103,7 +104,9 @@ public:
 	// The resulting graph will depict the precedence relationships
 	// among the stars in the galaxy.
 	// Return value : nonzero iff a valid expanded graph could be created.
-	int createMe (Galaxy& galaxy);
+	// If the selfLoop is TRUE, make an arc between invocations of a
+	// star regardless of the dependency.
+	virtual int createMe (Galaxy& galaxy, int selfLoopFlag = 0);
 
 	// Initialize the internal data structure.
 	virtual void initialize();
