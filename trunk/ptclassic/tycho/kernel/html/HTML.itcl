@@ -132,13 +132,12 @@ body ::tycho::HTML::constructor {args} {
     pack $itk_component(text) -expand yes -fill both
 
     # A toolbar for frequently used functions.
-    addTool back Back "[winfo command $itk_component(text)] back"
+    addTool back Back "$this component text back"
     # FIXME: need a forward command.
     # FIXME: should the user be allowed to change the home window?
     global ::TYCHO
     addTool home Home \
-	    "[winfo command $itk_component(text)] switchFile \
-	    $TYCHO/doc/index.html"
+	    "$this component text switchFile $TYCHO/doc/index.html"
     addTool reload Reload "$this reload"
     addTool open Open "$this altFile"
     addTool find Find "$itk_component(text) search"
@@ -193,8 +192,7 @@ body ::tycho::HTML::constructor {args} {
 	# Not doing this seems to send the program into an infinite wait.
 	# Note also that "after idle" doesn't work here.  The window
 	# does not get mapped until parsing is complete.
-	after 1 "[winfo command $itk_component(text)] \
-		readFile $itk_option(-file)"
+	after 1 "$this component text readFile $itk_option(-file)"
     }
 
     bind $prefix <Control-x><Key-s> "$this openSource; break"
