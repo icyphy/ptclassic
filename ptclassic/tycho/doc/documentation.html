@@ -50,8 +50,8 @@ for checking their validity.
 <h2><a name="HTML extensions">HTML Extensions</a></h2>
 <p>
 One key extension to HTML provided by Tycho allows <a name="Tcl
-extension to HTML">embedding Tcl scripts into a document</a> in such a
-manner that if the user double clicks on the script, the script will
+extension to HTML">embedding Tcl scripts into a document</a> in a
+manner such that if the user double clicks on the script, the script will
 be executed.  The HTML source for such a script is surrounded by by
 the delimitters <CODE>&lt;tcl&gt;</CODE> and
 <CODE>&lt;/tcl&gt;</CODE>.
@@ -69,7 +69,7 @@ Double clicking on this script will execute it if you are
 viewing the document under Tycho.
 In the above example, the <code>post</code> command returns the name
 of the widget it just created.  By default, this returned value
-is displayed in a popup dialog box.  This can be annoying if the
+is displayed in a pop-up dialog box.  This can be annoying if the
 returned value has no meaning to the reader.  To suppress this,
 use the following syntax:
 <pre>
@@ -108,8 +108,8 @@ instead of using dollar sign references.
 <MENU>
 <LI> HTML viewers other than Tycho do not understand dollar sign references.
 
-<LI> If the Tycho documentation is accessed via a httpd server, from a
-remote system then the dollar sign references will not expand
+<LI> If the Tycho documentation is accessed from a remote system via an httpd 
+server, then the dollar sign references will not expand
 properly.  At UC Berkeley, we make the latest version of Tycho
 available from the Ptolemy website, so remote users can preview Tycho.
 If the documentation contains dollar sign references, then remote users
@@ -120,7 +120,7 @@ then remote users will be able to view the documentation.
 <p>
 <h2><a name="formatting documentation">Formatting Documentation</a></h2>
 
-The Tycho documentation should follow a consistent look and feel.
+The Tycho documentation have a consistent look and feel.
 <DL>
 <DT> Capitalization
 <DD> Emacs, Macintosh, Tcl, Tk, Itcl, Tycho, Unix and Windows 
@@ -187,7 +187,7 @@ The template has the following features:
 
 	<LI> A relative link to <CODE>doc/index.html</CODE>.  This
 	link should not use <CODE>$TYCHO</CODE> so that it can be
-	browsed with a non-tycho html browser.
+	browsed with a non-Tycho HTML browser.
 
 	<LI> The UC Copyright
 
@@ -208,7 +208,7 @@ A documentation directory should have the following elements:
 files in the <CODE>EXTRA_SRCS</CODE> makefile variable.
 
 <LI> A <CODE>index.html</CODE> file contains a properly formatted index
-of all of the html files in the directory.
+of all of the HTML files in the directory.
 </MENU>
 
 In tycho, the <CODE>*.html</CODE> extension means that the file was
@@ -265,7 +265,7 @@ Tycho can also generate <A HREF="tychoClasses.html">Tycho Class Diagrams</A>.
 <h2><a name="tydoc - The Tycho documentation system">
 <code>tydoc</code> - The Tycho documentation system</a></h2>
 The <code>tydoc</code> script, located in <code>$TYCHO/lib/tydoc</code> 
-is used to convert itcl source files to html.  <code>tydoc</code> is 
+is used to convert itcl source files to HTML.  <code>tydoc</code> is 
 <a href="../lib/tydoc/doc/index.html">documented</a> separately.
 <p>
 <H2><a name="user's guides, adding">Adding a User's Guide</a></H2>
@@ -274,7 +274,7 @@ the editor is named <CODE>EditFoo.itcl</CODE>, the the User's Guide
 should be <CODE>doc/usersGuides/EditFooHelp.html</CODE>.  
 If you add a user's guide, follow these steps:
 <OL>
-<LI> Edit <CODE>doc/usersGuides/makefile</CODE> and add the html filename.
+<LI> Edit <CODE>doc/usersGuides/makefile</CODE> and add the HTML filename.
 
 <LI> Edit <CODE>doc/usersGuides/index.html</CODE> and add a link to the file.
 </OL>
@@ -288,11 +288,11 @@ contains the following subdirectories:
 source files.
 </MENU>
 <h2><a name="itcl documentation">Itcl/Java Documentation</a></h2> 
-External html documentation for packages such as Itcl and
+External HTML documentation for packages such as Itcl and
 <A NAME="java documentation">Java</A> can be downloaded and installed 
 in specific locations so that Tycho can find the documentation.
 <H3>Itcl</H3>
-The Itcl2.2 included html documentation in <CODE>itcl2.2/html</CODE>.
+The Itcl2.2 included HTML documentation in <CODE>itcl2.2/html</CODE>.
 
 If you link <A HREF="itclhtml"><CODE>$TYCHO/doc/itclhtml</CODE></A> 
 to the <CODE>itcl2.2/html</CODE> directory, then the links within the docs and 
