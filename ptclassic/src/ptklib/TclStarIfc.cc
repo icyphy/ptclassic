@@ -223,6 +223,7 @@ int TclStarIfc::setup (Block* star,
 	Tcl_SetVar2(ptkInterp, (char*)starID, "numOutputs",
 			(char*)buf, TCL_GLOBAL_ONLY);
 
+	// Add the full name of the star to the $starID array
 	buf = star->fullName();
 	Tcl_SetVar2(ptkInterp, (char*)starID, "fullName",
 			(char*)buf, TCL_GLOBAL_ONLY);
@@ -240,15 +241,10 @@ int TclStarIfc::setup (Block* star,
 			v, TCL_GLOBAL_ONLY);
 	}
 
-	// Add the full name of the star to the $starID array
-	InfString fullname = star->fullName();
-	Tcl_SetVar2(ptkInterp, (char*)starID, "fullName",
-                        (char*)fullname, TCL_GLOBAL_ONLY);
-
 	if (numInputs > 0) {
 		LOG_DEL; delete [] inputNewFlags;
 		LOG_NEW; inputNewFlags = new int[numInputs];
-		// Initialize the outputs
+		// Initialize the inputs
 		for (int i = 0; i < numInputs; i++)
 		  inputNewFlags[i] = FALSE;
 	}
