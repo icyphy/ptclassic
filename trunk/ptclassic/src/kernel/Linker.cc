@@ -63,6 +63,7 @@ to become a permanent part of the system.
 #include "StringList.h"
 #include "pt_fstream.h"
 #include <ctype.h>
+#include <stdio.h>
 #include "paths.h"
 
 // Define DEBUG for dynamic linking debugging
@@ -237,10 +238,12 @@ int Linker::multiLink (int argc, char** argv) {
 		Error::abortRun ("Sorry, incremental linking is not yet ",
 				 "supported on this architecture");
 		return FALSE;
-	}
-	else if (!symTableName) {
-		Error::abortRun ("Incremental linking disabled");
-		return FALSE;
+	}else if (!symTableName) {
+	  Error::abortRun ("Incremental linking disabled");
+	  return FALSE;
+	}else if (argc < 1) {
+	  Error::abortRun ("multiLink called with less than one arg");
+	  return FALSE;
 	}
 	TFile tname;
 	
@@ -505,6 +508,12 @@ Linker::invokeConstructors (const char* objName, void * dlhandle) {
 }
 
 size_t Linker::readInObj(const char* objName) {
+#ifdef USE_DLOPEN
+  char buf[1024];
+  sprintf(buf,"Linker: readInObj(%s) not used on architectures that support dlopen()",objName);
+  Error::abortRun(buf);
+  return (size_t) 0;
+#else
 	STRUCT_DEFS;		// macro, defines sys-dependent header structs
 	size_t size;
 
@@ -550,7 +559,9 @@ size_t Linker::readInObj(const char* objName) {
 
 	close(fd);
 	return size;
+#endif /* USE_DLOPEN */
 }
+
 
 // function to set default options: uses hashstring to manage memory
 void Linker::setDefaultOpts(const char* arg) {
