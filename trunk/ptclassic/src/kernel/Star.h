@@ -8,7 +8,7 @@
 
 
 // SCCS version identification
-// $Id$
+// @(#)Star.h	1.5	1/14/90
 
 /*
 This header includes everything needed by a class implementing

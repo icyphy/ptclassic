@@ -4,7 +4,7 @@
 #include "Connect.h"
 
 // SCCS version identification
-// $Id$
+// @(#)Block.h	1.6	1/14/90
 
 
 class Block

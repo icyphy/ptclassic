@@ -7,9 +7,6 @@
 
 typedef void* Pointer;
 
-// Types of data stored in queues between stars
-enum dataType { NOT_SET, INT, FLOAT, POINTER, STRING };
-
 // The following is also defined in gnu stdio.h, which is included
 // by stream.h
 #ifndef NULL

@@ -3,7 +3,7 @@
 
 
 // SCCS version identification
-// $Id$
+// @(#)StringList.h	1.2	1/14/90
 
 /****************************************************************
 StringList stores a list of char* strings, and can then read
