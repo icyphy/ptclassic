@@ -58,8 +58,7 @@ public:
 
 	int isA(const char*) const;
 
-private:
-
+protected:
 	StringState skeletonMakefile;
 	IntState appendToMakefile;
 };
