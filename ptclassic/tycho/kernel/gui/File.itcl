@@ -171,9 +171,6 @@ proc ::ptkExpandEnvVar { path } {::tycho::expandPath $path}
 # a syntax undertood by <code>seePoint</code>.
 # Derived classes may wish to redefine <code>setReadOnly</code>,
 # for example to disable menu entries.
-# Derived classes may also wish to override <code>reload</code>.
-# For example, the text editors derived from this class overload
-# <code>reload</code> to prevent it from corrupting the clipboard buffer.
 # Finally, most derived classes will want to redefine <code>focusin</code>
 # to give the focus to a key widget.
 #
@@ -833,7 +830,8 @@ body ::tycho::File::print {} {
 # first disables read-only status (if it is set), then replaces the
 # current data with data from the current file, and then sets read-only
 # status based on the permissions of the file. The data is marked
-# unmodified after loading the file. If the file does not exist, then
+# unmodified after loading the file, and the clipboard is restored to
+# its form prior to the reload. If the file does not exist, then
 # the current data is cleared, leaving a blank slate. If the current
 # file exists but is not readable, an error occurs. The actual
 # replacement of the data occurs via the method
@@ -849,6 +847,7 @@ body ::tycho::File::reload {} {
 	    return 
 	}
     }
+    set saveclipboard [::tycho::TychoWidget::getClipboard]
     if [file exists $file] {
         if [file readable $file] {
             configure -readonly 0
@@ -873,6 +872,7 @@ body ::tycho::File::reload {} {
         configure -readonly 0
         clear
     }
+    ::tycho::TychoWidget::setClipboard $saveclipboard
 }
 
 ###################################################################
