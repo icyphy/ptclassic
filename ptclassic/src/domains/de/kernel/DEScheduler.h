@@ -54,8 +54,6 @@ public:
 	// Constructor sets default options
 	DEScheduler () { stopTime = 100.0;}
 
-	// clone
-	Scheduler* clone () { return new DEScheduler; }
 };
 
 #endif

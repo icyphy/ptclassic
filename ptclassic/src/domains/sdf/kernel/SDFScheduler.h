@@ -127,9 +127,6 @@ public:
 	// time units.  (Argh).  Deal with roundoff problems.
 	void setStopTime (float limit) { numIters = int(limit + 0.001);}
 
-	// clone
-	Scheduler* clone() { return new SDFScheduler;}
-
 private:
 	// This is a kludge to help integrate SDFScheduler and
 	// DEScheduler together.  numIters says how many times
