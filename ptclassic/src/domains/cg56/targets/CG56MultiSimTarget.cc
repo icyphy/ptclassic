@@ -38,7 +38,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #include "pt_fstream.h"
 #include "Error.h"
-#include "CGDisplay.h"
+#include "CGUtilities.h"
 #include "CG56MultiSimTarget.h"
 #include "CG56MultiSimSend.h"
 #include "CG56MultiSimReceive.h"
@@ -55,9 +55,6 @@ const char* CG56MultiSimTarget :: auxStarClass() const { return "AnyAsmStar";}
 CG56MultiSimTarget::CG56MultiSimTarget(const char* name,const char* starclass,
 	const char* desc) : CGMultiTarget(name,starclass,desc), sharedMem(0) {
 
-        addState(doCompile.setState("doCompile",this,"NO",
-                "disallow compiling during development stage"));
-
 	// make some states invisible
 	childType.setAttributes(A_NONSETTABLE);
 
@@ -65,6 +62,7 @@ CG56MultiSimTarget::CG56MultiSimTarget(const char* name,const char* starclass,
 	addState(sMemMap.setState("sMemMap",this,"4096-4195",
 		"shared memory map"));
 	destDirectory.setInitValue("~/DSPcode");
+	runFlag.setAttributes(A_NONSETTABLE);
 }
 
 // -----------------------------------------------------------------------------
@@ -128,38 +126,29 @@ void CG56MultiSimTarget :: prepareCodeGen() {
 
 void CG56MultiSimTarget :: addProcessorCode(int i, const char* s) {
 	if (SimControl::haltRequested()) return;
-	StringList code = s;
-	StringList fileName;
-	fileName << (const char*) filePrefix << i << ".asm";
-	char* codeFileName = writeFileName((const char*) fileName);
-	display(code,codeFileName);
-	LOG_DEL; delete codeFileName;
+	if (!cgChild(i)) return;
+
+	cgChild(i)->stateWithName("directory")->setCurrentValue(destDirectory);
+	cgChild(i)->writeCode();
 
 // 	to create the .cmd file
-	StringList fName;
+	StringList fName,cmd;
 	fName << "command" << i << ".cmd";
-	char* cmdFileName = writeFileName((const char*) fName);
-	pt_ofstream cmd(cmdFileName); if (!cmd) return; // failed!
 	cmd << "load " << (const char*) filePrefix << i << "\n";
 	cmd << "go \n";
-	LOG_DEL; delete cmdFileName;
+	rcpWriteFile("localhost",destDirectory,fName,cmd);
 }
 
 // -----------------------------------------------------------------------------
 int CG56MultiSimTarget :: compileCode() {
-	if (int(doCompile) == 0) return TRUE;
-
 	int flag = TRUE;
 	for (int i = 0; i < nChildrenAlloc; i++) {
-		StringList fileName;
-		fileName << (const char*) filePrefix << i << ".asm";
-		char* codeFileName = writeFileName((const char*) fileName);
-
-		StringList assembleCmds;
-		assembleCmds << "asm56000 -A -b -l " << codeFileName;
-		flag = !systemCall(assembleCmds,"Errors in assembly");
+		if (!cgChild(i)) {
+			flag = FALSE;
+			break;
+		}
+		flag = cgChild(i)->compileCode();
 		if (flag == FALSE) break;
-		LOG_DEL; delete codeFileName;
 	}
 	return flag;
 }

@@ -25,7 +25,7 @@ CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
 							COPYRIGHTENDKEY
 
-Programmer: J. Pino
+Programmer: Jose L. Pino
 
 Target for Ariel S-56X DSP board.
 
@@ -42,22 +42,22 @@ Target for Ariel S-56X DSP board.
 #include "IntState.h"
 
 class S56XTarget : public CG56Target {
+public:
+    S56XTarget(const char*,const char*);
+    S56XTarget(const S56XTarget&);
+    /*virtual*/ int compileCode();
+    /*virtual*/ void writeCode();
+    /*virtual*/ int runCode();
+    /*virtual*/ Block* makeNew() const;
+    /*virtual*/ int isA(const char*) const;
+protected:
+    /*virtual*/ void headerCode();
+    /*virtual*/ void trailerCode();
 private:
     void initStates();
     CodeStream aioCmds;
     CodeStream shellCmds;
     StringState monitorProg;
-protected:
-        void headerCode();
-        void trailerCode();
-public:
-	S56XTarget(const char*,const char*);
-	S56XTarget(const S56XTarget&);
-	int compileCode();
-	void writeCode(const char* name);
-	int runCode();
-	Block* makeNew() const;
-	int isA(const char*) const;
 };
 
 #endif
