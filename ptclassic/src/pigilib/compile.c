@@ -346,6 +346,7 @@ octObject *facetPtr;
     /* Iterate over all oct objects, overwriting inst at each iteration */
     /* This one line accounts for most of the memory leaks in pigilib */
     /* but you cannot deallocate inst using FreeOctMembers within while loop */
+    /* FIXME: Memory leak in octGenerate not in pigilib -BLE */
     while (octGenerate(&genInst, &inst) == OCT_OK) {
 	if (IsVemConnector(&inst) || IsIoPort(&inst)) {
 	    /* skip */
@@ -369,7 +370,6 @@ octObject *facetPtr;
 	    }
 	}
 	/* test if it's a sog */
-	/* FIXME: Major memory leak here */
 	/* Do not free inst: it will be read at a later time */
 	else if (!GetOrInitSogParams(&inst, &pList)) {
 	    retval = FALSE;
@@ -480,7 +480,7 @@ int *inN, *outN;
     *inN = 0;				/* Set length of arrays to zero */
     *outN = 0;
 
-    /* FIXME: Memory leak */
+    /* FIXME: Memory leak in octInitGenContentsSpecial not in pigilib */
     (void) octInitGenContentsSpecial(netPtr, OCT_TERM_MASK, &termGen);
     for (i = 0; i < TERMS_MAX; ) {
 	if (octGenerate(&termGen, &term) != OCT_OK) {
