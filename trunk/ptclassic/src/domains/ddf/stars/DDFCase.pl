@@ -16,7 +16,8 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { DDF library }
-	seealso { EndCase, HOFIfElse, HOFIfElseGr }
+	seealso { EndCase, $PTOLEMY/src/domains/hof/stars/HOFIfElse.htm,
+		    $PTOLEMY/src/domains/hof/stars/HOFIfElseGr.htm }
 	input {
 		name { input }
 		type { ANYTYPE }
