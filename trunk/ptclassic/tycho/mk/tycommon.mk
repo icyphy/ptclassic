@@ -317,7 +317,7 @@ $(JARFILE): $(JSRCS) $(JCLASS)
 	@if [ "$(JBEANCLASSES)" != "" ]; then \
 		echo "Creating manifest.tmp"; \
 		rm -f manifest.tmp; \
-		echo ";$(JPACKAGE) $(JVERSION)" > manifest.tmp; \
+		echo "Manifest-Version: 1.0" > manifest.tmp; \
 		set $(JBEANCLASSES); \
 		for x do \
 			echo "Name: $$x" >> manifest.tmp; \
