@@ -49,7 +49,7 @@ char** strParser(const char* string,int& numStr,const char* type) {
     int start = 0;
     int end = 0;
 
-    if (!strcmp(type,"double-quote")) {
+    if (strcmp(type, "double-quote") == 0) {
       int numQuote = 0;
       while (string[start] != '\0') {
 	if (string[start] == '\"') numQuote++;
@@ -58,23 +58,25 @@ char** strParser(const char* string,int& numStr,const char* type) {
       if (numQuote%2 != 0) {
 	Error::abortRun("Cannot parse the string: Unmatched double-quote. ",
 			"Original string: ", string);
-	return NULL;	      
+	return 0;	      
       }
       numStr = numQuote/2;
 
-    } else if (!strcmp(type,"curly-brace")) {
+    }
+    else if (strcmp(type, "curly-brace") == 0) {
       numStr = 0;
       while (string[start] != '\0') {
 	if (string[start] == '{') numStr++;
 	start++;
       }
-    } else {
+    }
+    else {
 	Error::abortRun("Cannot parse the string: Unrecognized delimitter ",
 			"type for strParser. Original string: ", string);
-	return NULL;
+	return 0;
     }
     parsedStr = (char **) new (char *)[numStr];
-    
+
     start = 0;
     end = 0;
     numStr = 0;
@@ -84,45 +86,47 @@ char** strParser(const char* string,int& numStr,const char* type) {
       
       if (string[start] == '\0') break ; // Hit end of string.
       
-      if (!strcmp(type,"double-quote")) {
+      if (strcmp(type, "double-quote") == 0) {
 	// Find the left-side quote.
 	if (string[start] != '\"') {
 	  Error::abortRun("Cannot parse the string: Each string must be ",
 	   "surrounded by a pair of double-quotes. Original string: ", string);
-	  return NULL;
+	  return 0;
 	}
 	start++;
 	end = start;
- 	// Find the right-side quote.
-	while (string[end]!='\"') end++;
 
-      } else if (!strcmp(type,"curly-brace")) {
+ 	// Find the right-side quote.
+	while (string[end] != '\"') end++;
+      }
+      else if (strcmp(type, "curly-brace") == 0) {
 	// Find the left-side curly-brace.
 	if (string[start] != '{') {
 	  Error::abortRun("Cannot parse the string: Each string must be ",
 	    "surrounded by a pair of curly-braces. Original string: ", string);
-	  return NULL;
+	  return 0;
 	}
 	start++;
 	end = start;
+
        	// Find the right-side curly-brace.
-	while (string[end]!='}' && string[end]!='\0' ) end++;
-	
-	if (string[end]=='\0') {
+	while (string[end] != '}' && string[end] != '\0' ) end++;
+
+	if (string[end] == '\0') {
 	  Error::abortRun("Cannot parse the string: Missing right-side ",
 			  "curly-brace. Original string: ", string);
-	  return NULL;
+	  return 0;
 	}
       }
 	
       parsedStr[numStr] = (char *) new char[end-start+1];
-      for (int i = 0; i<end-start; i++) {
+      for (int i = 0; i < end-start; i++) {
 	parsedStr[numStr][i] = string[start+i];
       }
       parsedStr[numStr][i] = '\0'; 
-	
+
       numStr++;
-	
+
       start = end+1;
     }
     return parsedStr;
