@@ -24,7 +24,7 @@
 ##
 if (!($?PTOLEMY)) setenv PTOLEMY ~ptolemy
 if (!($?OCTTOOLS)) setenv OCTTOOLS $PTOLEMY
-set path = ( $PTOLEMY/octtools/bin.$ARCH $path )
+set path = ( $PTOLEMY/octtools/bin.$PTARCH $path )
 set fixedArgs = ( -=T $PTOLEMY/lib/colors -f interface )
 
 
@@ -53,7 +53,7 @@ ToEpsi:
 	exit
 
 ToPrint:
-	if ( $ARCH =~ hppa* ) then
+	if ( $PTARCH =~ hppa* ) then
 		oct2ps $fixedArgs $argv[*]\:schematic | lp -d$PRINTER
 	else
 		oct2ps $fixedArgs $argv[*]\:schematic | lpr -P$PRINTER

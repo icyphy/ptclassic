@@ -3,23 +3,23 @@
 # Author:	T. M. Parks
 # Created:	20 October 1994
 # 
-# Change to the obj.$ARCH directory before invoking make.
+# Change to the obj.$PTARCH directory before invoking make.
 
-# Make sure the $ARCH variable is set.
+# Make sure the $PTARCH variable is set.
 # First check if it is one of the arguments to ptmake
 foreach arg ($argv)
 	if ($arg =~ ARCH=*)  then
-		setenv ARCH `echo $arg|sed -e 's/ARCH=//'`
+		setenv PTARCH `echo $arg|sed -e 's/ARCH=//'`
 		break
 	endif
 end
 
-if (! $?ARCH) then
-	setenv ARCH `ptarch`
-	echo ARCH=$ARCH
+if (! $?PTARCH) then
+	setenv PTARCH `ptarch`
+	echo ARCH=$PTARCH
 endif
 
-# Make sure we are not in the wrong obj.$ARCH directory.
+# Make sure we are not in the wrong obj.$PTARCH directory.
 set obj="s:/obj.[^/]*:/obj.${ARCH}:"
 
 # Make sure we are not in the src directory.

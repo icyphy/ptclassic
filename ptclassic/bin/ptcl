@@ -13,8 +13,8 @@
 #
 
 if ( ! $?PTOLEMY ) setenv PTOLEMY ~ptolemy
-if ( ! $?ARCH ) then
-    setenv ARCH `$PTOLEMY/bin/ptarch`
+if ( ! $?PTARCH ) then
+    setenv PTARCH `$PTOLEMY/bin/ptarch`
 endif
 if ( ! $?USER ) then
     setenv USER $LOGNAME
@@ -23,6 +23,6 @@ endif
 setenv TCL_LIBRARY $PTOLEMY/tcltk/tcl/lib/tcl
 setenv TK_LIBRARY $PTOLEMY/tcltk/tk/lib/tk
 
-set path = ( $PTOLEMY/bin.$ARCH $PTOLEMY/bin $path )
+set path = ( $PTOLEMY/bin.$PTARCH $PTOLEMY/bin $path )
 
-exec $PTOLEMY/bin.$ARCH/ptcl $*
+exec $PTOLEMY/bin.$PTARCH/ptcl $*
