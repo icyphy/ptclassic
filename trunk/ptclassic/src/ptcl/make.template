@@ -96,11 +96,11 @@ DLLDEPS = ..\utils\libexttools\libexttools.lib \
 # functions for pigiRpc, ptcl and tycho, we need to be sure that
 # libpigi, libptcl and libtycho are all static on the hppa.
 ifdef USE_CORE_STATIC_LIBS
-	LIBNONSHARED =		libptcl.a
-	INSTALL = $(LIBDIR)/$(LIBNONSHARED)
+LIBNONSHARED =	libptcl.a
+INSTALL =	$(LIBDIR)/$(LIBNONSHARED)
 else
-	LIB =		libptcl.$(LIBSUFFIX)
-	INSTALL = $(LIBDIR)/$(LIB)
+PTLIB =		libptcl.$(LIBSUFFIX)
+INSTALL =	$(LIBDIR)/$(PTLIB)
 endif
 
 PT_DEPEND += $(NON_LIB_SRCS:.cc=.o) ptclInvokeInterp.o
