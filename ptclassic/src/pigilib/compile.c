@@ -429,28 +429,31 @@ octObject *inTermPtr, *outTermPtr;
 char *initDelayValues, *width;
 {
     octObject inInst, outInst, fTerm;
-    boolean inIsConn, outIsConn;
+    boolean inIsGalPort, outIsGalPort;
 
     ERR_IF2(GetById(&inInst, inTermPtr->contents.term.instanceId) != OCT_OK,
 	octErrorString());
-    inIsConn = IsIoPort(&inInst);
+    inIsGalPort = IsIoPort(&inInst);
     ERR_IF2(GetById(&outInst, outTermPtr->contents.term.instanceId) != OCT_OK,
 	octErrorString());
-    outIsConn = IsIoPort(&outInst);
+    outIsGalPort = IsIoPort(&outInst);
 
-    if (!inIsConn && !outIsConn) {
-	/* 2 sogs connected */
+    if (!inIsGalPort && !outIsGalPort) {
+	/* 2 sogs connected - no Galaxy Ports involved */
 	ERR_IF1(!KcConnect(
 	    outInst.contents.instance.name, outTermPtr->contents.term.name, 
 	    inInst.contents.instance.name, inTermPtr->contents.term.name,
 			   initDelayValues, width)
 	);
-    } else if (*width) {
+	
+      /* if one of the ports is a Galaxy Port, then width may not be defined */
+    } else if ( (width != NULL) && *width ) {
 	ErrAdd("Cannot make a bus connection between a galaxy port and its alias");
 	EssAddObj(&inInst);
 	EssAddObj(&outInst);
 	return (FALSE);
-    } else if (!inIsConn && outIsConn) {
+    } else if (!inIsGalPort && outIsGalPort) {
+	/* Connect an input to a Galaxy Port */
 	if (octGenFirstContainer(outTermPtr, OCT_TERM_MASK, &fTerm)
 	    != OCT_OK) {
 	    ErrAdd("JoinOrdinary: input port has no name");
@@ -459,7 +462,8 @@ char *initDelayValues, *width;
 	}
 	ERR_IF1(!KcAlias(fTerm.contents.term.name,
 	    inInst.contents.instance.name, inTermPtr->contents.term.name));
-    } else if (inIsConn && !outIsConn) {
+    } else if (inIsGalPort && !outIsGalPort) {
+	/* Connect an output to a Galaxy Port */
 	if (octGenFirstContainer(inTermPtr, OCT_TERM_MASK, &fTerm) !=OCT_OK) {
 	    ErrAdd("JoinOrdinary: output port has no name");
 	    EssAddObj(&inInst);
